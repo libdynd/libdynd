@@ -121,13 +121,13 @@ namespace {
     struct groupby_to_value_assign_extra {
         typedef groupby_to_value_assign_extra extra_type;
 
-        ckernel_data_prefix base;
+        ckernel_prefix base;
         // The groupby type
         const groupby_type *src_groupby_tp;
         const char *src_metadata, *dst_metadata;
 
         template<typename UIntType>
-        inline static void single(char *dst, const char *src, ckernel_data_prefix *extra)
+        inline static void single(char *dst, const char *src, ckernel_prefix *extra)
         {
             extra_type *e = reinterpret_cast<extra_type *>(extra);
             const groupby_type *gd = e->src_groupby_tp;
@@ -204,7 +204,7 @@ namespace {
 
             // Loop through both by_values and data_values,
             // copying the data to the right place in the output
-            ckernel_data_prefix *echild = &(e + 1)->base;
+            ckernel_prefix *echild = &(e + 1)->base;
             unary_single_operation_t opchild = echild->get_function<unary_single_operation_t>();
             array_iter<0, 1> iter(data_values_tp, data_values_metadata, data_values_data);
             if (!iter.empty()) {
@@ -221,23 +221,23 @@ namespace {
         }
 
         // Some compilers are finicky about getting single<T> as a function pointer, so this...
-        static void single_uint8(char *dst, const char *src, ckernel_data_prefix *extra) {
+        static void single_uint8(char *dst, const char *src, ckernel_prefix *extra) {
             single<uint8_t>(dst, src, extra);
         }
-        static void single_uint16(char *dst, const char *src, ckernel_data_prefix *extra) {
+        static void single_uint16(char *dst, const char *src, ckernel_prefix *extra) {
             single<uint16_t>(dst, src, extra);
         }
-        static void single_uint32(char *dst, const char *src, ckernel_data_prefix *extra) {
+        static void single_uint32(char *dst, const char *src, ckernel_prefix *extra) {
             single<uint32_t>(dst, src, extra);
         }
 
-        static void destruct(ckernel_data_prefix *extra)
+        static void destruct(ckernel_prefix *extra)
         {
             extra_type *e = reinterpret_cast<extra_type *>(extra);
             if (e->src_groupby_tp != NULL) {
                 base_type_decref(e->src_groupby_tp);
             }
-            ckernel_data_prefix *echild = &(e + 1)->base;
+            ckernel_prefix *echild = &(e + 1)->base;
             if (echild->destructor) {
                 echild->destructor(echild);
             }

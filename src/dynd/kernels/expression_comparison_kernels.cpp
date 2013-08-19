@@ -23,7 +23,7 @@ namespace {
     struct buffered_kernel_extra {
         typedef buffered_kernel_extra extra_type;
 
-        ckernel_data_prefix base;
+        ckernel_prefix base;
         // Offset, from the start of 'base' to the comparison kernel
         size_t cmp_kernel_offset;
         single_buffer buf[2];
@@ -63,9 +63,9 @@ namespace {
             }
 
             // Get and execute the assignment kernel
-            ckernel_data_prefix *echild;
+            ckernel_prefix *echild;
             unary_single_operation_t opchild;
-            echild = reinterpret_cast<ckernel_data_prefix *>(eraw + b.kernel_offset);
+            echild = reinterpret_cast<ckernel_prefix *>(eraw + b.kernel_offset);
             opchild = echild->get_function<unary_single_operation_t>();
             opchild(dst, src, echild);
 
@@ -73,7 +73,7 @@ namespace {
             return dst;
         }
 
-        static int kernel(const char *src0, const char *src1, ckernel_data_prefix *extra)
+        static int kernel(const char *src0, const char *src1, ckernel_prefix *extra)
         {
             char *eraw = reinterpret_cast<char *>(extra);
             extra_type *e = reinterpret_cast<extra_type *>(extra);
@@ -86,9 +86,9 @@ namespace {
                 src1 = e->buffer_operand(e->buf[1], src1);
             }
             // Call the comparison kernel
-            ckernel_data_prefix *echild;
+            ckernel_prefix *echild;
             binary_single_predicate_t opchild;
-            echild = reinterpret_cast<ckernel_data_prefix *>(eraw + e->cmp_kernel_offset);
+            echild = reinterpret_cast<ckernel_prefix *>(eraw + e->cmp_kernel_offset);
             opchild = echild->get_function<binary_single_predicate_t>();
             int result = opchild(src0, src1, echild);
 
@@ -103,11 +103,11 @@ namespace {
             return result;
         }
 
-        static void destruct(ckernel_data_prefix *extra)
+        static void destruct(ckernel_prefix *extra)
         {
             char *eraw = reinterpret_cast<char *>(extra);
             extra_type *e = reinterpret_cast<extra_type *>(extra);
-            ckernel_data_prefix *echild;
+            ckernel_prefix *echild;
 
             for (int i = 0; i < 2; ++i) {
                 single_buffer& b = e->buf[i];
@@ -122,7 +122,7 @@ namespace {
                 }
                 // Destruct the kernel for the buffer
                 if (b.kernel_offset != 0) {
-                    echild = reinterpret_cast<ckernel_data_prefix *>(eraw + b.kernel_offset);
+                    echild = reinterpret_cast<ckernel_prefix *>(eraw + b.kernel_offset);
                     if (echild->destructor) {
                         echild->destructor(echild);
                     }
@@ -131,7 +131,7 @@ namespace {
 
             // Destruct the comparison kernel
             if (e->cmp_kernel_offset != 0) {
-                echild = reinterpret_cast<ckernel_data_prefix *>(eraw + e->cmp_kernel_offset);
+                echild = reinterpret_cast<ckernel_prefix *>(eraw + e->cmp_kernel_offset);
                 if (echild->destructor) {
                     echild->destructor(echild);
                 }

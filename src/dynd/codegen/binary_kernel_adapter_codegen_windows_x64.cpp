@@ -67,6 +67,7 @@ std::string dynd::get_binary_function_adapter_unique_id_string(uint64_t unique_i
     return ss.str();
 }
 
+#if 0
 binary_operation_pair_t dynd::codegen_binary_function_adapter(const memory_block_ptr& exec_memblock, const ndt::type& restype,
                     const ndt::type& arg0type, const ndt::type& arg1type, calling_convention_t DYND_UNUSED(callconv))
 {
@@ -404,5 +405,6 @@ binary_operation_pair_t dynd::codegen_binary_function_adapter(const memory_block
     throw runtime_error("TODO: adapt this code to new structures");
     //return reinterpret_cast<binary_operation_t>(code_begin);
 }
+#endif
 
 #endif // defined(_WIN32) && defined(_M_X64)

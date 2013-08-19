@@ -55,7 +55,7 @@ inline void concat_one_string(
 
 void kernels::string_concatenation_kernel::single(
                 char *dst, const char * const *src,
-                ckernel_data_prefix *extra)
+                ckernel_prefix *extra)
 {
     const extra_type *e = reinterpret_cast<const extra_type *>(extra);
     string_type_data *d = reinterpret_cast<string_type_data *>(dst);
@@ -68,7 +68,7 @@ void kernels::string_concatenation_kernel::single(
 void kernels::string_concatenation_kernel::strided(
                 char *dst, intptr_t dst_stride,
                 const char * const *src, const intptr_t *src_stride,
-                size_t count, ckernel_data_prefix *extra)
+                size_t count, ckernel_prefix *extra)
 {
     const extra_type *e = reinterpret_cast<const extra_type *>(extra);
     size_t nop = e->m_nop;
@@ -110,7 +110,7 @@ void kernels::string_find_kernel::init(const ndt::type* src_tp, const char **src
 
 }
 
-void kernels::string_find_kernel::destruct(ckernel_data_prefix *extra)
+void kernels::string_find_kernel::destruct(ckernel_prefix *extra)
 {
     extra_type *e = reinterpret_cast<extra_type *>(extra);
     base_type_xdecref(e->m_str_type);
@@ -160,7 +160,7 @@ inline void find_one_string(
 
 void kernels::string_find_kernel::single(
                 char *dst, const char * const *src,
-                ckernel_data_prefix *extra)
+                ckernel_prefix *extra)
 {
     const extra_type *e = reinterpret_cast<const extra_type *>(extra);
     string_encoding_t str_encoding = e->m_str_type->get_encoding();
@@ -182,7 +182,7 @@ void kernels::string_find_kernel::single(
 void kernels::string_find_kernel::strided(
                 char *dst, intptr_t dst_stride,
                 const char * const *src, const intptr_t *src_stride,
-                size_t count, ckernel_data_prefix *extra)
+                size_t count, ckernel_prefix *extra)
 {
     const extra_type *e = reinterpret_cast<const extra_type *>(extra);
     string_encoding_t str_encoding = e->m_str_type->get_encoding();

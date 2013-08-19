@@ -99,11 +99,11 @@ size_t dynd::make_builtin_type_comparison_kernel(
                     src1_type_id >= bool_type_id && src1_type_id <= complex_float64_type_id &&
                     comptype >= 0 && comptype <= comparison_type_greater) {
         // No need to reserve more space, the space for a leaf is already there
-        ckernel_data_prefix *result = out->get_at<ckernel_data_prefix>(offset_out);
+        ckernel_prefix *result = out->get_at<ckernel_prefix>(offset_out);
         result->set_function<binary_single_predicate_t>(
                         compare_kernel_table[src0_type_id-bool_type_id]
                                         [src1_type_id-bool_type_id][comptype]);
-        return offset_out + sizeof(ckernel_data_prefix);
+        return offset_out + sizeof(ckernel_prefix);
     } else {
         throw not_comparable_error(ndt::type(src0_type_id), ndt::type(src1_type_id), comptype);
     }

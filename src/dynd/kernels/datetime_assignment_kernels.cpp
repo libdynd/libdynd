@@ -41,7 +41,7 @@ namespace {
     struct string_to_datetime_kernel_extra {
         typedef string_to_datetime_kernel_extra extra_type;
 
-        ckernel_data_prefix base;
+        ckernel_prefix base;
         const datetime_type *dst_datetime_dt;
         const base_string_type *src_string_dt;
         const char *src_metadata;
@@ -49,7 +49,7 @@ namespace {
         datetime::datetime_unit_t unit;
         datetime::datetime_conversion_rule_t casting;
 
-        static void single(char *dst, const char *src, ckernel_data_prefix *extra)
+        static void single(char *dst, const char *src, ckernel_prefix *extra)
         {
             extra_type *e = reinterpret_cast<extra_type *>(extra);
             const string& s = e->src_string_dt->get_utf8_string(e->src_metadata, src, e->errmode);
@@ -58,7 +58,7 @@ namespace {
                                     e->casting);
         }
 
-        static void destruct(ckernel_data_prefix *extra)
+        static void destruct(ckernel_prefix *extra)
         {
             extra_type *e = reinterpret_cast<extra_type *>(extra);
             base_type_xdecref(e->dst_datetime_dt);
@@ -110,14 +110,14 @@ namespace {
     struct datetime_to_string_kernel_extra {
         typedef datetime_to_string_kernel_extra extra_type;
 
-        ckernel_data_prefix base;
+        ckernel_prefix base;
         const base_string_type *dst_string_dt;
         const datetime_type *src_datetime_dt;
         const char *dst_metadata;
         assign_error_mode errmode;
         datetime::datetime_unit_t unit;
 
-        static void single(char *dst, const char *src, ckernel_data_prefix *extra)
+        static void single(char *dst, const char *src, ckernel_prefix *extra)
         {
             extra_type *e = reinterpret_cast<extra_type *>(extra);
             int64_t datetime = *reinterpret_cast<const int64_t *>(src);
@@ -126,7 +126,7 @@ namespace {
                                             e->src_datetime_dt->get_timezone() == tz_abstract));
         }
 
-        static void destruct(ckernel_data_prefix *extra)
+        static void destruct(ckernel_prefix *extra)
         {
             extra_type *e = reinterpret_cast<extra_type *>(extra);
             base_type_xdecref(e->dst_string_dt);

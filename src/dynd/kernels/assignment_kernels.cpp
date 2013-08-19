@@ -14,14 +14,14 @@ namespace {
     template<class T>
     struct aligned_fixed_size_copy_assign_type {
         static void single(char *dst, const char *src,
-                        ckernel_data_prefix *DYND_UNUSED(extra))
+                        ckernel_prefix *DYND_UNUSED(extra))
         {
             *(T *)dst = *(T *)src;
         }
 
         static void strided(char *dst, intptr_t dst_stride,
                         const char *src, intptr_t src_stride,
-                        size_t count, ckernel_data_prefix *DYND_UNUSED(extra))
+                        size_t count, ckernel_prefix *DYND_UNUSED(extra))
         {
             for (size_t i = 0; i != count; ++i,
                             dst += dst_stride, src += src_stride) {
@@ -35,14 +35,14 @@ namespace {
     template<>
     struct aligned_fixed_size_copy_assign<1> {
         static void single(char *dst, const char *src,
-                            ckernel_data_prefix *DYND_UNUSED(extra))
+                            ckernel_prefix *DYND_UNUSED(extra))
         {
             *dst = *src;
         }
 
         static void strided(char *dst, intptr_t dst_stride,
                         const char *src, intptr_t src_stride,
-                        size_t count, ckernel_data_prefix *DYND_UNUSED(extra))
+                        size_t count, ckernel_prefix *DYND_UNUSED(extra))
         {
             for (size_t i = 0; i != count; ++i,
                             dst += dst_stride, src += src_stride) {
@@ -60,14 +60,14 @@ namespace {
     template<int N>
     struct unaligned_fixed_size_copy_assign {
         static void single(char *dst, const char *src,
-                        ckernel_data_prefix *DYND_UNUSED(extra))
+                        ckernel_prefix *DYND_UNUSED(extra))
         {
             memcpy(dst, src, N);
         }
 
         static void strided(char *dst, intptr_t dst_stride,
                         const char *src, intptr_t src_stride,
-                        size_t count, ckernel_data_prefix *DYND_UNUSED(extra))
+                        size_t count, ckernel_prefix *DYND_UNUSED(extra))
         {
             for (size_t i = 0; i != count; ++i,
                             dst += dst_stride, src += src_stride) {
@@ -77,18 +77,18 @@ namespace {
     };
 }
 struct unaligned_copy_single_kernel_extra {
-    ckernel_data_prefix base;
+    ckernel_prefix base;
     size_t data_size;
 };
 static void unaligned_copy_single(char *dst, const char *src,
-                ckernel_data_prefix *extra)
+                ckernel_prefix *extra)
 {
     size_t data_size = reinterpret_cast<unaligned_copy_single_kernel_extra *>(extra)->data_size;
     memcpy(dst, src, data_size);
 }
 static void unaligned_copy_strided(char *dst, intptr_t dst_stride,
                         const char *src, intptr_t src_stride,
-                        size_t count, ckernel_data_prefix *extra)
+                        size_t count, ckernel_prefix *extra)
 {
     size_t data_size = reinterpret_cast<unaligned_copy_single_kernel_extra *>(extra)->data_size;
     for (size_t i = 0; i != count; ++i,
@@ -150,13 +150,13 @@ size_t dynd::make_pod_typed_data_assignment_kernel(
         ss << "make_pod_typed_data_assignment_kernel: unrecognized request " << (int)kernreq;
         throw runtime_error(ss.str());
     }
-    ckernel_data_prefix *result = NULL;
+    ckernel_prefix *result = NULL;
     if (data_size == data_alignment) {
         // Aligned specialization tables
         // No need to reserve more space in the trivial cases, the space for a leaf is already there
         switch (data_size) {
             case 1:
-                result = out->get_at<ckernel_data_prefix>(offset_out);
+                result = out->get_at<ckernel_prefix>(offset_out);
                 if (single) {
                     result->set_function<unary_single_operation_t>(
                                     &aligned_fixed_size_copy_assign<1>::single);
@@ -164,9 +164,9 @@ size_t dynd::make_pod_typed_data_assignment_kernel(
                     result->set_function<unary_strided_operation_t>(
                                     &aligned_fixed_size_copy_assign<1>::strided);
                 }
-                return offset_out + sizeof(ckernel_data_prefix);
+                return offset_out + sizeof(ckernel_prefix);
             case 2:
-                result = out->get_at<ckernel_data_prefix>(offset_out);
+                result = out->get_at<ckernel_prefix>(offset_out);
                 if (single) {
                     result->set_function<unary_single_operation_t>(
                                     &aligned_fixed_size_copy_assign<2>::single);
@@ -174,9 +174,9 @@ size_t dynd::make_pod_typed_data_assignment_kernel(
                     result->set_function<unary_strided_operation_t>(
                                     &aligned_fixed_size_copy_assign<2>::strided);
                 }
-                return offset_out + sizeof(ckernel_data_prefix);
+                return offset_out + sizeof(ckernel_prefix);
             case 4:
-                result = out->get_at<ckernel_data_prefix>(offset_out);
+                result = out->get_at<ckernel_prefix>(offset_out);
                 if (single) {
                     result->set_function<unary_single_operation_t>(
                                     &aligned_fixed_size_copy_assign<4>::single);
@@ -184,9 +184,9 @@ size_t dynd::make_pod_typed_data_assignment_kernel(
                     result->set_function<unary_strided_operation_t>(
                                     &aligned_fixed_size_copy_assign<4>::strided);
                 }
-                return offset_out + sizeof(ckernel_data_prefix);
+                return offset_out + sizeof(ckernel_prefix);
             case 8:
-                result = out->get_at<ckernel_data_prefix>(offset_out);
+                result = out->get_at<ckernel_prefix>(offset_out);
                 if (single) {
                     result->set_function<unary_single_operation_t>(
                                     &aligned_fixed_size_copy_assign<8>::single);
@@ -194,10 +194,10 @@ size_t dynd::make_pod_typed_data_assignment_kernel(
                     result->set_function<unary_strided_operation_t>(
                                     &aligned_fixed_size_copy_assign<8>::strided);
                 }
-                return offset_out + sizeof(ckernel_data_prefix);
+                return offset_out + sizeof(ckernel_prefix);
             default:
                 out->ensure_capacity_leaf(offset_out + sizeof(unaligned_copy_single_kernel_extra));
-                result = out->get_at<ckernel_data_prefix>(offset_out);
+                result = out->get_at<ckernel_prefix>(offset_out);
                 if (single) {
                     result->set_function<unary_single_operation_t>(&unaligned_copy_single);
                 } else {
@@ -210,7 +210,7 @@ size_t dynd::make_pod_typed_data_assignment_kernel(
         // Unaligned specialization tables
         switch (data_size) {
             case 2:
-                result = out->get_at<ckernel_data_prefix>(offset_out);
+                result = out->get_at<ckernel_prefix>(offset_out);
                 if (single) {
                     result->set_function<unary_single_operation_t>(
                                     unaligned_fixed_size_copy_assign<2>::single);
@@ -218,9 +218,9 @@ size_t dynd::make_pod_typed_data_assignment_kernel(
                     result->set_function<unary_strided_operation_t>(
                                     unaligned_fixed_size_copy_assign<2>::strided);
                 }
-                return offset_out + sizeof(ckernel_data_prefix);
+                return offset_out + sizeof(ckernel_prefix);
             case 4:
-                result = out->get_at<ckernel_data_prefix>(offset_out);
+                result = out->get_at<ckernel_prefix>(offset_out);
                 if (single) {
                     result->set_function<unary_single_operation_t>(
                                     unaligned_fixed_size_copy_assign<4>::single);
@@ -228,9 +228,9 @@ size_t dynd::make_pod_typed_data_assignment_kernel(
                     result->set_function<unary_strided_operation_t>(
                                     unaligned_fixed_size_copy_assign<4>::strided);
                 }
-                return offset_out + sizeof(ckernel_data_prefix);
+                return offset_out + sizeof(ckernel_prefix);
             case 8:
-                result = out->get_at<ckernel_data_prefix>(offset_out);
+                result = out->get_at<ckernel_prefix>(offset_out);
                 if (single) {
                     result->set_function<unary_single_operation_t>(
                                     unaligned_fixed_size_copy_assign<8>::single);
@@ -238,12 +238,12 @@ size_t dynd::make_pod_typed_data_assignment_kernel(
                     result->set_function<unary_strided_operation_t>(
                                     unaligned_fixed_size_copy_assign<8>::strided);
                 }
-                return offset_out + sizeof(ckernel_data_prefix);
+                return offset_out + sizeof(ckernel_prefix);
             default:
                 // Subtract the base amount to avoid over-reserving memory in this leaf case
                 out->ensure_capacity(offset_out + sizeof(unaligned_copy_single_kernel_extra) -
-                                sizeof(ckernel_data_prefix));
-                result = out->get_at<ckernel_data_prefix>(offset_out);
+                                sizeof(ckernel_prefix));
+                result = out->get_at<ckernel_prefix>(offset_out);
                 if (single) {
                     result->set_function<unary_single_operation_t>(&unaligned_copy_single);
                 } else {
@@ -315,7 +315,7 @@ namespace {
         static void strided_assign(
                         char *dst, intptr_t dst_stride,
                         const char *src, intptr_t src_stride,
-                        size_t count, ckernel_data_prefix *DYND_UNUSED(extra))
+                        size_t count, ckernel_prefix *DYND_UNUSED(extra))
         {
             for (size_t i = 0; i != count; ++i, dst += dst_stride, src += src_stride) {
                 single_assigner_builtin<dst_type, src_type, errmode>::assign(
@@ -391,7 +391,7 @@ size_t dynd::make_builtin_type_assignment_kernel(
                     src_type_id >= bool_type_id && src_type_id <= complex_float64_type_id &&
                     errmode != assign_error_default) {
         // No need to reserve more space, the space for a leaf is already there
-        ckernel_data_prefix *result = out->get_at<ckernel_data_prefix>(offset_out);
+        ckernel_prefix *result = out->get_at<ckernel_prefix>(offset_out);
         switch (kernreq) {
             case kernel_request_single:
                 result->set_function<unary_single_operation_t>(
@@ -409,7 +409,7 @@ size_t dynd::make_builtin_type_assignment_kernel(
                 throw runtime_error(ss.str());
             }   
         }
-        return offset_out + sizeof(ckernel_data_prefix);
+        return offset_out + sizeof(ckernel_prefix);
     } else {
         stringstream ss;
         ss << "Cannot assign from " << ndt::type(src_type_id) << " to " << ndt::type(dst_type_id);
@@ -419,9 +419,9 @@ size_t dynd::make_builtin_type_assignment_kernel(
 
 static void wrap_single_as_strided_kernel(char *dst, intptr_t dst_stride,
                 const char *src, intptr_t src_stride,
-                size_t count, ckernel_data_prefix *extra)
+                size_t count, ckernel_prefix *extra)
 {
-    ckernel_data_prefix *echild = extra + 1;
+    ckernel_prefix *echild = extra + 1;
     unary_single_operation_t opchild = echild->get_function<unary_single_operation_t>();
     for (size_t i = 0; i != count; ++i,
                     dst += dst_stride, src += src_stride) {
@@ -429,9 +429,9 @@ static void wrap_single_as_strided_kernel(char *dst, intptr_t dst_stride,
     }
 }
 static void simple_wrapper_kernel_destruct(
-                ckernel_data_prefix *extra)
+                ckernel_prefix *extra)
 {
-    ckernel_data_prefix *echild = extra + 1;
+    ckernel_prefix *echild = extra + 1;
     if (echild->destructor) {
         echild->destructor(echild);
     }
@@ -446,11 +446,11 @@ size_t dynd::make_kernreq_to_single_kernel_adapter(
             return offset_out;
         }
         case kernel_request_strided: {
-            out->ensure_capacity(offset_out + sizeof(ckernel_data_prefix));
-            ckernel_data_prefix *e = out->get_at<ckernel_data_prefix>(offset_out);
+            out->ensure_capacity(offset_out + sizeof(ckernel_prefix));
+            ckernel_prefix *e = out->get_at<ckernel_prefix>(offset_out);
             e->set_function<unary_strided_operation_t>(&wrap_single_as_strided_kernel);
             e->destructor = &simple_wrapper_kernel_destruct;
-            return offset_out + sizeof(ckernel_data_prefix);
+            return offset_out + sizeof(ckernel_prefix);
         }
         default: {
             stringstream ss;
@@ -461,19 +461,19 @@ size_t dynd::make_kernreq_to_single_kernel_adapter(
 }
 
 void dynd::strided_assign_kernel_extra::single(char *dst, const char *src,
-                    ckernel_data_prefix *extra)
+                    ckernel_prefix *extra)
 {
     extra_type *e = reinterpret_cast<extra_type *>(extra);
-    ckernel_data_prefix *echild = &(e + 1)->base;
+    ckernel_prefix *echild = &(e + 1)->base;
     unary_strided_operation_t opchild = echild->get_function<unary_strided_operation_t>();
     opchild(dst, e->dst_stride, src, e->src_stride, e->size, echild);
 }
 void dynd::strided_assign_kernel_extra::strided(char *dst, intptr_t dst_stride,
                 const char *src, intptr_t src_stride,
-                size_t count, ckernel_data_prefix *extra)
+                size_t count, ckernel_prefix *extra)
 {
     extra_type *e = reinterpret_cast<extra_type *>(extra);
-    ckernel_data_prefix *echild = &(e + 1)->base;
+    ckernel_prefix *echild = &(e + 1)->base;
     unary_strided_operation_t opchild = echild->get_function<unary_strided_operation_t>();
     intptr_t inner_size = e->size, inner_dst_stride = e->dst_stride,
                     inner_src_stride = e->src_stride;
@@ -484,10 +484,10 @@ void dynd::strided_assign_kernel_extra::strided(char *dst, intptr_t dst_stride,
 }
 
 void dynd::strided_assign_kernel_extra::destruct(
-                ckernel_data_prefix *extra)
+                ckernel_prefix *extra)
 {
     extra_type *e = reinterpret_cast<extra_type *>(extra);
-    ckernel_data_prefix *echild = &(e + 1)->base;
+    ckernel_prefix *echild = &(e + 1)->base;
     if (echild->destructor) {
         echild->destructor(echild);
     }

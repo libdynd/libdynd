@@ -24,7 +24,7 @@ namespace {
     template<class OP>
     struct binary_single_kernel {
         static void func(char *dst, const char * const *src,
-                        ckernel_data_prefix *DYND_UNUSED(extra))
+                        ckernel_prefix *DYND_UNUSED(extra))
         {
             typedef typename OP::type T;
             T s0, s1, r;
@@ -42,7 +42,7 @@ namespace {
     struct binary_strided_kernel {
         static void func(char *dst, intptr_t dst_stride,
                         const char * const *src, const intptr_t *src_stride,
-                        size_t count, ckernel_data_prefix *DYND_UNUSED(extra))
+                        size_t count, ckernel_prefix *DYND_UNUSED(extra))
         {
             typedef typename OP::type T;
             const char *src0 = src[0], *src1 = src[1];
@@ -283,7 +283,7 @@ nd::array nd::operator+(const nd::array& op1, const nd::array& op2)
         }
 
         // The signature is (T, T) -> T, so we don't use the original types
-        return apply_binary_operator<ckernel_data_prefix>(ops, rdt, rdt, rdt, func_ptr, "addition");
+        return apply_binary_operator<ckernel_prefix>(ops, rdt, rdt, rdt, func_ptr, "addition");
     } else if (op1dt.get_kind() == string_kind && op2dt.get_kind() == string_kind) {
         ndt::type rdt = ndt::make_string();
         func_ptr.single = &kernels::string_concatenation_kernel::single;
@@ -314,7 +314,7 @@ nd::array nd::operator-(const nd::array& op1, const nd::array& op2)
     }
 
     nd::array ops[2] = {op1, op2};
-    return apply_binary_operator<ckernel_data_prefix>(ops, rdt, rdt, rdt, func_ptr, "subtraction");
+    return apply_binary_operator<ckernel_prefix>(ops, rdt, rdt, rdt, func_ptr, "subtraction");
 }
 
 nd::array nd::operator*(const nd::array& op1, const nd::array& op2)
@@ -332,7 +332,7 @@ nd::array nd::operator*(const nd::array& op1, const nd::array& op2)
     }
 
     nd::array ops[2] = {op1, op2};
-    return apply_binary_operator<ckernel_data_prefix>(ops, rdt, rdt, rdt, func_ptr, "multiplication");
+    return apply_binary_operator<ckernel_prefix>(ops, rdt, rdt, rdt, func_ptr, "multiplication");
 }
 
 nd::array nd::operator/(const nd::array& op1, const nd::array& op2)
@@ -350,5 +350,5 @@ nd::array nd::operator/(const nd::array& op1, const nd::array& op2)
     }
 
     nd::array ops[2] = {op1, op2};
-    return apply_binary_operator<ckernel_data_prefix>(ops, rdt, rdt, rdt, func_ptr, "division");
+    return apply_binary_operator<ckernel_prefix>(ops, rdt, rdt, rdt, func_ptr, "division");
 }

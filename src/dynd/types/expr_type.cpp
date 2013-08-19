@@ -213,12 +213,12 @@ namespace {
     struct expr_type_offset_applier_extra {
         typedef expr_type_offset_applier_extra<N> extra_type;
 
-        ckernel_data_prefix base;
+        ckernel_prefix base;
         size_t offsets[N];
 
         // Only the single kernel is needed for this one
         static void single(char *dst, const char * const *src,
-                        ckernel_data_prefix *extra)
+                        ckernel_prefix *extra)
         {
             extra_type *e = reinterpret_cast<extra_type *>(extra);
             const size_t *offsets = e->offsets;
@@ -226,15 +226,15 @@ namespace {
             for (int i = 0; i < N; ++i) {
                 src_modified[i] = src[i] + offsets[i];
             }
-            ckernel_data_prefix *echild = &(e + 1)->base;
+            ckernel_prefix *echild = &(e + 1)->base;
             expr_single_operation_t opchild = echild->get_function<expr_single_operation_t>();
             opchild(dst, src_modified, echild);
         }
 
-        static void destruct(ckernel_data_prefix *extra)
+        static void destruct(ckernel_prefix *extra)
         {
             extra_type *e = reinterpret_cast<extra_type *>(extra);
-            ckernel_data_prefix *echild = &(e + 1)->base;
+            ckernel_prefix *echild = &(e + 1)->base;
             if (echild->destructor) {
                 echild->destructor(echild);
             }
@@ -244,13 +244,13 @@ namespace {
     struct expr_type_offset_applier_general_extra {
         typedef expr_type_offset_applier_general_extra extra_type;
 
-        ckernel_data_prefix base;
+        ckernel_prefix base;
         size_t src_count;
         // After this are src_count size_t offsets
 
        // Only the single kernel is needed for this one
         static void single(char *dst, const char * const *src,
-                        ckernel_data_prefix *extra)
+                        ckernel_prefix *extra)
         {
             extra_type *e = reinterpret_cast<extra_type *>(extra);
             size_t src_count = e->src_count;
@@ -259,18 +259,18 @@ namespace {
             for (size_t i = 0; i != src_count; ++i) {
                 src_modified[i] = src[i] + offsets[i];
             }
-            ckernel_data_prefix *echild = reinterpret_cast<ckernel_data_prefix *>(
+            ckernel_prefix *echild = reinterpret_cast<ckernel_prefix *>(
                             reinterpret_cast<char *>(extra) + sizeof(extra_type) +
                             src_count * sizeof(size_t));
             expr_single_operation_t opchild = echild->get_function<expr_single_operation_t>();
             opchild(dst, src_modified.get(), echild);
         }
 
-        static void destruct(ckernel_data_prefix *extra)
+        static void destruct(ckernel_prefix *extra)
         {
             extra_type *e = reinterpret_cast<extra_type *>(extra);
             size_t src_count = e->src_count;
-            ckernel_data_prefix *echild = reinterpret_cast<ckernel_data_prefix *>(
+            ckernel_prefix *echild = reinterpret_cast<ckernel_prefix *>(
                             reinterpret_cast<char *>(extra) + sizeof(extra_type) +
                             src_count * sizeof(size_t));
             if (echild->destructor) {

@@ -21,11 +21,11 @@ class expr_kernel_generator;
 
 typedef void (*expr_single_operation_t)(
                 char *dst, const char * const *src,
-                ckernel_data_prefix *extra);
+                ckernel_prefix *extra);
 typedef void (*expr_strided_operation_t)(
                 char *dst, intptr_t dst_stride,
                 const char * const *src, const intptr_t *src_stride,
-                size_t count, ckernel_data_prefix *extra);
+                size_t count, ckernel_prefix *extra);
 
 struct expr_operation_pair {
     expr_single_operation_t single;

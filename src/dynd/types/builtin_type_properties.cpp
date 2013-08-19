@@ -87,25 +87,25 @@ ndt::type dynd::get_builtin_type_elwise_property_type(
 }
 
 static void get_property_kernel_complex_float32_real(char *dst, const char *src,
-                ckernel_data_prefix *DYND_UNUSED(extra))
+                ckernel_prefix *DYND_UNUSED(extra))
 {
     *reinterpret_cast<uint32_t *>(dst) = reinterpret_cast<const uint32_t *>(src)[0];
 }
 
 static void get_property_kernel_complex_float32_imag(char *dst, const char *src,
-                ckernel_data_prefix *DYND_UNUSED(extra))
+                ckernel_prefix *DYND_UNUSED(extra))
 {
     *reinterpret_cast<uint32_t *>(dst) = reinterpret_cast<const uint32_t *>(src)[1];
 }
 
 static void get_property_kernel_complex_float64_real(char *dst, const char *src,
-                ckernel_data_prefix *DYND_UNUSED(extra))
+                ckernel_prefix *DYND_UNUSED(extra))
 {
     *reinterpret_cast<uint64_t *>(dst) = reinterpret_cast<const uint64_t *>(src)[0];
 }
 
 static void get_property_kernel_complex_float64_imag(char *dst, const char *src,
-                ckernel_data_prefix *DYND_UNUSED(extra))
+                ckernel_prefix *DYND_UNUSED(extra))
 {
     *reinterpret_cast<uint64_t *>(dst) = reinterpret_cast<const uint64_t *>(src)[1];
 }
@@ -121,18 +121,18 @@ size_t dynd::make_builtin_type_elwise_property_getter_kernel(
 {
     offset_out = make_kernreq_to_single_kernel_adapter(
                     out, offset_out, kernreq);
-    ckernel_data_prefix *e = out->get_at<ckernel_data_prefix>(offset_out);
+    ckernel_prefix *e = out->get_at<ckernel_prefix>(offset_out);
     switch (builtin_type_id) {
         case complex_float32_type_id:
             switch (src_elwise_property_index) {
                 case 0:
                     e->set_function<unary_single_operation_t>(
                                     &get_property_kernel_complex_float32_real);
-                    return offset_out + sizeof(ckernel_data_prefix);
+                    return offset_out + sizeof(ckernel_prefix);
                 case 1:
                     e->set_function<unary_single_operation_t>(
                                     &get_property_kernel_complex_float32_imag);
-                    return offset_out + sizeof(ckernel_data_prefix);
+                    return offset_out + sizeof(ckernel_prefix);
                 default:
                     break;
             }
@@ -142,11 +142,11 @@ size_t dynd::make_builtin_type_elwise_property_getter_kernel(
                 case 0:
                     e->set_function<unary_single_operation_t>(
                                     &get_property_kernel_complex_float64_real);
-                    return offset_out + sizeof(ckernel_data_prefix);
+                    return offset_out + sizeof(ckernel_prefix);
                 case 1:
                     e->set_function<unary_single_operation_t>(
                                     &get_property_kernel_complex_float64_imag);
-                    return offset_out + sizeof(ckernel_data_prefix);
+                    return offset_out + sizeof(ckernel_prefix);
                 default:
                     break;
             }

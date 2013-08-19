@@ -21,13 +21,13 @@ namespace {
     struct date_strftime_kernel_extra {
         typedef date_strftime_kernel_extra extra_type;
 
-        ckernel_data_prefix base;
+        ckernel_prefix base;
         size_t format_size;
         const char *format;
         const string_type_metadata *dst_metadata;
 
         static void single_unary(char *dst, const char *src,
-                        ckernel_data_prefix *extra)
+                        ckernel_prefix *extra)
         {
             extra_type *e = reinterpret_cast<extra_type *>(extra);
             const string_type_metadata *dst_md = e->dst_metadata;
@@ -69,7 +69,7 @@ namespace {
 
         static void strided_unary(char *dst, intptr_t dst_stride,
                     const char *src, intptr_t src_stride,
-                    size_t count, ckernel_data_prefix *extra)
+                    size_t count, ckernel_prefix *extra)
         {
             extra_type *e = reinterpret_cast<extra_type *>(extra);
             size_t format_size = e->format_size;
@@ -197,11 +197,11 @@ namespace {
     struct date_replace_kernel_extra {
         typedef date_replace_kernel_extra extra_type;
 
-        ckernel_data_prefix base;
+        ckernel_prefix base;
         int32_t year, month, day;
 
         static void single_unary(char *dst, const char *src,
-                        ckernel_data_prefix *extra)
+                        ckernel_prefix *extra)
         {
             extra_type *e = reinterpret_cast<extra_type *>(extra);
             int32_t year = e->year, month = e->month, day = e->day;
@@ -256,7 +256,7 @@ namespace {
         }
         static void strided_unary(char *dst, intptr_t dst_stride,
                     const char *src, intptr_t src_stride,
-                    size_t count, ckernel_data_prefix *extra)
+                    size_t count, ckernel_prefix *extra)
         {
             for (size_t i = 0; i != count; ++i, dst += dst_stride, src += src_stride) {
                 single_unary(dst, src, extra);

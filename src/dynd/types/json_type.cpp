@@ -177,11 +177,11 @@ namespace {
    struct string_to_json_kernel_extra {
         typedef string_to_json_kernel_extra extra_type;
 
-        ckernel_data_prefix base;
+        ckernel_prefix base;
         const char *dst_metadata;
         bool validate;
 
-        static void single(char *dst, const char *src, ckernel_data_prefix *extra)
+        static void single(char *dst, const char *src, ckernel_prefix *extra)
         {
             extra_type *e = reinterpret_cast<extra_type *>(extra);
             const json_type_metadata *md = reinterpret_cast<const json_type_metadata *>(e->dst_metadata);
@@ -203,10 +203,10 @@ namespace {
             }
         }
 
-        static void destruct(ckernel_data_prefix *extra)
+        static void destruct(ckernel_prefix *extra)
         {
             extra_type *e = reinterpret_cast<extra_type *>(extra);
-            ckernel_data_prefix *echild = &(e + 1)->base;
+            ckernel_prefix *echild = &(e + 1)->base;
             if (echild->destructor) {
                 echild->destructor(echild);
             }

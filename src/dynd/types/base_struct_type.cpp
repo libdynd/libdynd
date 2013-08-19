@@ -81,30 +81,30 @@ namespace {
     struct struct_property_getter_extra {
         typedef struct_property_getter_extra extra_type;
 
-        ckernel_data_prefix base;
+        ckernel_prefix base;
         size_t field_offset;
 
-        static void single(char *dst, const char *src, ckernel_data_prefix *extra)
+        static void single(char *dst, const char *src, ckernel_prefix *extra)
         {
             extra_type *e = reinterpret_cast<extra_type *>(extra);
-            ckernel_data_prefix *echild = &(e + 1)->base;
+            ckernel_prefix *echild = &(e + 1)->base;
             unary_single_operation_t opchild = echild->get_function<unary_single_operation_t>();
             opchild(dst, src + e->field_offset, echild);
         }
         static void strided(char *dst, intptr_t dst_stride,
                         const char *src, intptr_t src_stride,
-                        size_t count, ckernel_data_prefix *extra)
+                        size_t count, ckernel_prefix *extra)
         {
             extra_type *e = reinterpret_cast<extra_type *>(extra);
-            ckernel_data_prefix *echild = &(e + 1)->base;
+            ckernel_prefix *echild = &(e + 1)->base;
             unary_strided_operation_t opchild = echild->get_function<unary_strided_operation_t>();
             opchild(dst, dst_stride, src + e->field_offset, src_stride, count, echild);
         }
 
-        static void destruct(ckernel_data_prefix *extra)
+        static void destruct(ckernel_prefix *extra)
         {
             extra_type *e = reinterpret_cast<extra_type *>(extra);
-            ckernel_data_prefix *echild = &(e + 1)->base;
+            ckernel_prefix *echild = &(e + 1)->base;
             if (echild->destructor) {
                 echild->destructor(echild);
             }

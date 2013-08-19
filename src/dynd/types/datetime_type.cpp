@@ -493,12 +493,12 @@ void datetime_type::get_dynamic_array_functions(const std::pair<std::string, gfu
 
 namespace {
     struct datetime_property_kernel_extra {
-        ckernel_data_prefix base;
+        ckernel_prefix base;
         const datetime_type *datetime_tp;
 
         typedef datetime_property_kernel_extra extra_type;
 
-        static void destruct(ckernel_data_prefix *extra)
+        static void destruct(ckernel_prefix *extra)
         {
             extra_type *e = reinterpret_cast<extra_type *>(extra);
             base_type_xdecref(e->datetime_tp);
@@ -506,19 +506,19 @@ namespace {
     };
 
     void get_property_kernel_struct_single(char *DYND_UNUSED(dst), const char *DYND_UNUSED(src),
-                    ckernel_data_prefix *DYND_UNUSED(extra))
+                    ckernel_prefix *DYND_UNUSED(extra))
     {
         throw runtime_error("TODO: get_property_kernel_struct_single");
     }
 
     void set_property_kernel_struct_single(char *DYND_UNUSED(dst), const char *DYND_UNUSED(src),
-                    ckernel_data_prefix *DYND_UNUSED(extra))
+                    ckernel_prefix *DYND_UNUSED(extra))
     {
         throw runtime_error("TODO: set_property_kernel_struct_single");
     }
 
     void get_property_kernel_date_single(char *dst, const char *src,
-                    ckernel_data_prefix *extra)
+                    ckernel_prefix *extra)
     {
         const datetime_property_kernel_extra *e = reinterpret_cast<datetime_property_kernel_extra *>(extra);
         const datetime_type *dd = e->datetime_tp;
@@ -536,7 +536,7 @@ namespace {
     }
 
     void get_property_kernel_year_single(char *dst, const char *src,
-                    ckernel_data_prefix *extra)
+                    ckernel_prefix *extra)
     {
         const datetime_property_kernel_extra *e = reinterpret_cast<datetime_property_kernel_extra *>(extra);
         const datetime_type *dd = e->datetime_tp;
@@ -552,7 +552,7 @@ namespace {
     }
 
     void get_property_kernel_month_single(char *dst, const char *src,
-                    ckernel_data_prefix *extra)
+                    ckernel_prefix *extra)
     {
         const datetime_property_kernel_extra *e = reinterpret_cast<datetime_property_kernel_extra *>(extra);
         const datetime_type *dd = e->datetime_tp;
@@ -568,7 +568,7 @@ namespace {
     }
 
     void get_property_kernel_day_single(char *dst, const char *src,
-                    ckernel_data_prefix *extra)
+                    ckernel_prefix *extra)
     {
         const datetime_property_kernel_extra *e = reinterpret_cast<datetime_property_kernel_extra *>(extra);
         const datetime_type *dd = e->datetime_tp;
@@ -584,7 +584,7 @@ namespace {
     }
 
     void get_property_kernel_hour_single(char *dst, const char *src,
-                    ckernel_data_prefix *extra)
+                    ckernel_prefix *extra)
     {
         const datetime_property_kernel_extra *e = reinterpret_cast<datetime_property_kernel_extra *>(extra);
         const datetime_type *dd = e->datetime_tp;
@@ -600,7 +600,7 @@ namespace {
     }
 
     void get_property_kernel_minute_single(char *dst, const char *src,
-                    ckernel_data_prefix *extra)
+                    ckernel_prefix *extra)
     {
         const datetime_property_kernel_extra *e = reinterpret_cast<datetime_property_kernel_extra *>(extra);
         const datetime_type *dd = e->datetime_tp;
@@ -616,7 +616,7 @@ namespace {
     }
 
     void get_property_kernel_second_single(char *dst, const char *src,
-                    ckernel_data_prefix *extra)
+                    ckernel_prefix *extra)
     {
         const datetime_property_kernel_extra *e = reinterpret_cast<datetime_property_kernel_extra *>(extra);
         const datetime_type *dd = e->datetime_tp;
@@ -632,7 +632,7 @@ namespace {
     }
 
     void get_property_kernel_usecond_single(char *dst, const char *src,
-                    ckernel_data_prefix *extra)
+                    ckernel_prefix *extra)
     {
         const datetime_property_kernel_extra *e = reinterpret_cast<datetime_property_kernel_extra *>(extra);
         const datetime_type *dd = e->datetime_tp;
@@ -762,11 +762,11 @@ size_t datetime_type::make_elwise_property_setter_kernel(
                 kernel_request_t kernreq, const eval::eval_context *DYND_UNUSED(ectx)) const
 {
     offset_out = make_kernreq_to_single_kernel_adapter(out, offset_out, kernreq);
-    ckernel_data_prefix *e = out->get_at<ckernel_data_prefix>(offset_out);
+    ckernel_prefix *e = out->get_at<ckernel_prefix>(offset_out);
     switch (dst_property_index) {
         case datetimeprop_struct:
             e->set_function<unary_single_operation_t>(&set_property_kernel_struct_single);
-            return offset_out + sizeof(ckernel_data_prefix);
+            return offset_out + sizeof(ckernel_prefix);
         default:
             stringstream ss;
             ss << "dynd date type given an invalid property index" << dst_property_index;

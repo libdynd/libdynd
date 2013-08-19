@@ -24,10 +24,10 @@ namespace {
         const char *m_originptr;
         intptr_t m_stride;
         const binary_single_predicate_t m_less;
-        ckernel_data_prefix *m_extra;
+        ckernel_prefix *m_extra;
     public:
         sorter(const char *originptr, intptr_t stride,
-                        const binary_single_predicate_t less, ckernel_data_prefix *extra) :
+                        const binary_single_predicate_t less, ckernel_prefix *extra) :
             m_originptr(originptr), m_stride(stride), m_less(less), m_extra(extra) {}
         bool operator()(intptr_t i, intptr_t j) const {
             return m_less(m_originptr + i * m_stride, m_originptr + j * m_stride, m_extra) != 0;
@@ -36,9 +36,9 @@ namespace {
 
     class cmp {
         const binary_single_predicate_t m_less;
-        ckernel_data_prefix *m_extra;
+        ckernel_prefix *m_extra;
     public:
-        cmp(const binary_single_predicate_t less, ckernel_data_prefix *extra) :
+        cmp(const binary_single_predicate_t less, ckernel_prefix *extra) :
             m_less(less), m_extra(extra) {}
         bool operator()(const char *a, const char *b) const {
             bool result = m_less(a, b, m_extra) != 0;
@@ -50,14 +50,14 @@ namespace {
     struct categorical_to_other_kernel_extra {
         typedef categorical_to_other_kernel_extra extra_type;
 
-        ckernel_data_prefix base;
+        ckernel_prefix base;
         const categorical_type *src_cat_tp;
 
         template<typename UIntType>
-        inline static void single(char *dst, const char *src, ckernel_data_prefix *extra)
+        inline static void single(char *dst, const char *src, ckernel_prefix *extra)
         {
             extra_type *e = reinterpret_cast<extra_type *>(extra);
-            ckernel_data_prefix *echild = &(e + 1)->base;
+            ckernel_prefix *echild = &(e + 1)->base;
             unary_single_operation_t opchild = echild->get_function<unary_single_operation_t>();
 
             uint32_t value = *reinterpret_cast<const UIntType *>(src);
@@ -66,23 +66,23 @@ namespace {
         }
 
         // Some compilers are finicky about getting single<T> as a function pointer, so this...
-        static void single_uint8(char *dst, const char *src, ckernel_data_prefix *extra) {
+        static void single_uint8(char *dst, const char *src, ckernel_prefix *extra) {
             single<uint8_t>(dst, src, extra);
         }
-        static void single_uint16(char *dst, const char *src, ckernel_data_prefix *extra) {
+        static void single_uint16(char *dst, const char *src, ckernel_prefix *extra) {
             single<uint16_t>(dst, src, extra);
         }
-        static void single_uint32(char *dst, const char *src, ckernel_data_prefix *extra) {
+        static void single_uint32(char *dst, const char *src, ckernel_prefix *extra) {
             single<uint32_t>(dst, src, extra);
         }
 
-        static void destruct(ckernel_data_prefix *extra)
+        static void destruct(ckernel_prefix *extra)
         {
             extra_type *e = reinterpret_cast<extra_type *>(extra);
             if (e->src_cat_tp != NULL) {
                 base_type_decref(e->src_cat_tp);
             }
-            ckernel_data_prefix *echild = &(e + 1)->base;
+            ckernel_prefix *echild = &(e + 1)->base;
             if (echild->destructor) {
                 echild->destructor(echild);
             }
@@ -92,13 +92,13 @@ namespace {
     struct category_to_categorical_kernel_extra {
         typedef category_to_categorical_kernel_extra extra_type;
 
-        ckernel_data_prefix base;
+        ckernel_prefix base;
         const categorical_type *dst_cat_tp;
         const char *src_metadata;
 
         // Assign from an input matching the category type to a categorical type
         template<typename UIntType>
-        inline static void single(char *dst, const char *src, ckernel_data_prefix *extra)
+        inline static void single(char *dst, const char *src, ckernel_prefix *extra)
         {
             extra_type *e = reinterpret_cast<extra_type *>(extra);
             uint32_t src_val = e->dst_cat_tp->get_value_from_category(e->src_metadata, src);
@@ -106,17 +106,17 @@ namespace {
         }
 
         // Some compilers are finicky about getting single<T> as a function pointer, so this...
-        static void single_uint8(char *dst, const char *src, ckernel_data_prefix *extra) {
+        static void single_uint8(char *dst, const char *src, ckernel_prefix *extra) {
             single<uint8_t>(dst, src, extra);
         }
-        static void single_uint16(char *dst, const char *src, ckernel_data_prefix *extra) {
+        static void single_uint16(char *dst, const char *src, ckernel_prefix *extra) {
             single<uint16_t>(dst, src, extra);
         }
-        static void single_uint32(char *dst, const char *src, ckernel_data_prefix *extra) {
+        static void single_uint32(char *dst, const char *src, ckernel_prefix *extra) {
             single<uint32_t>(dst, src, extra);
         }
 
-        static void destruct(ckernel_data_prefix *extra)
+        static void destruct(ckernel_prefix *extra)
         {
             extra_type *e = reinterpret_cast<extra_type *>(extra);
             if (e->dst_cat_tp != NULL) {

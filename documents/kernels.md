@@ -30,13 +30,13 @@ Kernel Basics
 
 A DyND kernel is a block of memory which contains at its start
 a kernel function pointer and a destructor. The class defining
-these members is 'ckernel_data_prefix', and the class which
+these members is 'ckernel_prefix', and the class which
 manages the memory for creating such a kernel is
-'ckernel_builder'. Here's the ckernel_data_prefix structure:
+'ckernel_builder'. Here's the ckernel_prefix structure:
 
 ```cpp
-struct ckernel_data_prefix {
-    typedef void (*destructor_fn_t)(ckernel_data_prefix *);
+struct ckernel_prefix {
+    typedef void (*destructor_fn_t)(ckernel_prefix *);
 
     void *function;
     destructor_fn_t destructor;
@@ -50,7 +50,7 @@ Here's the function prototype:
 ```cpp
 /** Typedef for a unary operation on a single element */
 typedef void (*unary_single_operation_t)(char *dst, const char *src,
-                ckernel_data_prefix *extra);
+                ckernel_prefix *extra);
 ```
 
 The kernel is constructed using full knowledge of the input and
@@ -91,27 +91,27 @@ to provide some more context.
 ```cpp
     /** Typedef for a unary operation on a single element */
     typedef void (*unary_single_operation_t)(char *dst, const char *src,
-                    ckernel_data_prefix *extra);
+                    ckernel_prefix *extra);
     /** Typedef for a unary operation on a strided segment of elements */
     typedef void (*unary_strided_operation_t)(
                     char *dst, intptr_t dst_stride,
                     const char *src, intptr_t src_stride,
-                    size_t count, ckernel_data_prefix *extra);
+                    size_t count, ckernel_prefix *extra);
 
     struct strided_int32_copy_kernel_data {
-        // The first ckernel_data_prefix
+        // The first ckernel_prefix
         unary_single_operation_t main_kernel_func;
         destructor_fn_t main_kernel_destructor;
         // Data for the first kernel
         intptr_t size;
         intptr_t dst_stride, src_stride;
-        // The second ckernel_data_prefix
+        // The second ckernel_prefix
         unary_strided_operation_t child_kernel_func;
         destructor_fn_t child_kernel_destructor;
     };
 
     void main_kernel_func_implementation(char *dst, const char *src,
-                        ckernel_data_prefix *extra)
+                        ckernel_prefix *extra)
     {
         // Cast the kernel data to the right type, then call the child strided
         // kernel with the correct values
@@ -121,7 +121,7 @@ to provide some more context.
     }
 
     void main_kernel_destructor_implementation(
-                    ckernel_data_prefix *extra)
+                    ckernel_prefix *extra)
     {
         // Call the destructor of the nested child kernel
         strided_int32_copy_kernel_data *e = (strided_int32_copy_kernel_data *)extra;
@@ -132,7 +132,7 @@ to provide some more context.
 
     void child_kernel_func_implementation(char *dst, intptr_t dst_stride,
                     const char *src, intptr_t src_stride,
-                    size_t count, ckernel_data_prefix *DYND_UNUSED(extra))
+                    size_t count, ckernel_prefix *DYND_UNUSED(extra))
     {
         for (size_t i = 0; i != count; ++i,
                         dst += dst_stride, src += src_stride) {
@@ -193,7 +193,7 @@ cause the destructor to point at uninitialized memory.
 If a kernel uses a child kernel for part of its operation,
 its destructor must call that child kernel's destructor if
 it is not NULL. What this means is that, before the kernel's
-destructor function pointer is set, memory for the 'ckernel_data_prefix'
+destructor function pointer is set, memory for the 'ckernel_prefix'
 of the child kernel must already be allocated and initialized
 to zero. This is handled automatically by the 'ensure_capacity'
 function of the 'ckernel_builder'.
@@ -201,7 +201,7 @@ function of the 'ckernel_builder'.
 If a kernel is a leaf, i.e. it terminates any hierarchy in the
 chain, it should use the 'ensure_capacity_leaf' function instead
 of 'ensure_capacity', to avoid overallocation of space for a child
-'ckernel_data_prefix'.
+'ckernel_prefix'.
 
 ### Trivial Leaf Kernel Construction Pattern
 
@@ -212,14 +212,14 @@ hypothetical kernel factory for int32.
 
 ```cpp
 static void single_assign(char *dst, const char *src,
-                ckernel_data_prefix *DYND_UNUSED(extra))
+                ckernel_prefix *DYND_UNUSED(extra))
 {
     *(int32_t *)dst = *(const int32_t *)src;
 }
 
 static void strided_assign(char *dst, intptr_t dst_stride,
                         const char *src, intptr_t src_stride,
-                        size_t count, ckernel_data_prefix *DYND_UNUSED(extra))
+                        size_t count, ckernel_prefix *DYND_UNUSED(extra))
 {
     for (size_t i = 0; i != count; ++i,
                     dst += dst_stride, src += src_stride) {
@@ -232,10 +232,10 @@ size_t make_int32_assignment_kernel(
                 kernel_request_t kernreq)
 {
     // No additional space needs to be allocated for this
-    // leaf kernel, because the minimal 'ckernel_data_prefix'
+    // leaf kernel, because the minimal 'ckernel_prefix'
     // is always preallocated by the parent kernel.
-    ckernel_data_prefix *result;
-    result = out->get_at<ckernel_data_prefix>(offset_out);
+    ckernel_prefix *result;
+    result = out->get_at<ckernel_prefix>(offset_out);
 
     // Set the appropriate function based on the type of kernel requested
     switch (kernreq) {
@@ -250,7 +250,7 @@ size_t make_int32_assignment_kernel(
     }
 
     // Return the offset immediately after this kernel's data
-    return offset_out + sizeof(ckernel_data_prefix);
+    return offset_out + sizeof(ckernel_prefix);
 }
 ```
 
@@ -262,16 +262,16 @@ hypothetical kernel factory for unaligned data assignment.
 
 ```cpp
 // This is the data for the kernel. It starts with a
-// ckernel_data_prefix, then has fields for other data.
+// ckernel_prefix, then has fields for other data.
 // Remember, this data must be movable by using a memcpy,
 // which is trivially true in this case.
 struct unaligned_kernel_extra {
-    ckernel_data_prefix base;
+    ckernel_prefix base;
     size_t data_size;
 };
 
 static void single_assign(char *dst, const char *src,
-                ckernel_data_prefix *extra)
+                ckernel_prefix *extra)
 {
     unaligned_kernel_extra *e = reinterpret_cast<unaligned_kernel_extra *>(extra);
     size_t data_size = e->data_size;
@@ -280,7 +280,7 @@ static void single_assign(char *dst, const char *src,
 
 static void strided_assign(char *dst, intptr_t dst_stride,
                         const char *src, intptr_t src_stride,
-                        size_t count, ckernel_data_prefix *extra)
+                        size_t count, ckernel_prefix *extra)
 {
     unaligned_kernel_extra *e = reinterpret_cast<unaligned_kernel_extra *>(extra);
     size_t data_size = e->data_size;
@@ -336,15 +336,15 @@ void create_jit_assignment(const dtype& dst_dt, const char *dst_metadata,
 void jit_free(void *jit_handle);
 
 // This is the data for the kernel. It starts with a
-// ckernel_data_prefix, then has fields for other data.
+// ckernel_prefix, then has fields for other data.
 // Remember, this data must be movable by using a memcpy,
 // which is trivially true in this case.
 struct jit_kernel_extra {
-    ckernel_data_prefix base;
+    ckernel_prefix base;
     void *jit_handle;
 };
 
-static void destruct(ckernel_data_prefix *extra)
+static void destruct(ckernel_prefix *extra)
 {
     jit_kernel_extra *e = reinterpret_cast<jit_kernel_extra *>(extra);
     if (e->jit_handle != NULL) {
@@ -388,27 +388,27 @@ pointer<T1> to T2 can be constructed.
 
 ```cpp
 
-static void destruct(ckernel_data_prefix *extra)
+static void destruct(ckernel_prefix *extra)
 {
-    ckernel_data_prefix *echild = extra + 1;
+    ckernel_prefix *echild = extra + 1;
     if (echild->destructor) {
         echild->destructor(echild);
     }
 }
 
 static void single_assign(char *dst, const char *src,
-                ckernel_data_prefix *extra)
+                ckernel_prefix *extra)
 {
-    ckernel_data_prefix *echild = extra + 1;
+    ckernel_prefix *echild = extra + 1;
     unary_single_operation_t opchild = echild->get_function<unary_single_operation_t>();
     opchild(dst, *(const char **)src, echild);
 }
 
 static void strided_assign(char *dst, intptr_t dst_stride,
                         const char *src, intptr_t src_stride,
-                        size_t count, ckernel_data_prefix *extra)
+                        size_t count, ckernel_prefix *extra)
 {
-    ckernel_data_prefix *echild = extra + 1;
+    ckernel_prefix *echild = extra + 1;
     unary_single_operation_t opchild = echild->get_function<unary_single_operation_t>();
     for (size_t i = 0; i != count; ++i,
                     dst += dst_stride, src += src_stride) {
@@ -422,8 +422,8 @@ size_t make_ptr_assignment_kernel(
                 const dtype& src_target_dt, const char *src_target_metadata,
                 kernel_request_t kernreq)
 {
-    ckernel_data_prefix *result;
-    result = out->get_at<ckernel_data_prefix>(offset_out);
+    ckernel_prefix *result;
+    result = out->get_at<ckernel_prefix>(offset_out);
 
     // Always set the destructor first, so that if things go wrong
     // later, partially constructed resources are freed.
@@ -443,7 +443,7 @@ size_t make_ptr_assignment_kernel(
 
     // Construct the child assignment kernel, and
     // return the offset immediately after the child kernel's data
-    return make_assignment_kernel(out, offset_out + sizeof(ckernel_data_prefix),
+    return make_assignment_kernel(out, offset_out + sizeof(ckernel_prefix),
                     dst_dt, dst_metadata,
                     src_target_dt, src_target_metadata,
                     kernel_request_single,

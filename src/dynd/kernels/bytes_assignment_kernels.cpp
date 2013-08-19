@@ -21,12 +21,12 @@ namespace {
     struct blockref_bytes_kernel_extra {
         typedef blockref_bytes_kernel_extra extra_type;
 
-        ckernel_data_prefix base;
+        ckernel_prefix base;
         size_t dst_alignment, src_alignment;
         const bytes_type_metadata *dst_metadata, *src_metadata;
 
         /** Does a single blockref-string copy */
-        static void single(char *dst, const char *src, ckernel_data_prefix *extra)
+        static void single(char *dst, const char *src, ckernel_prefix *extra)
         {
             extra_type *e = reinterpret_cast<extra_type *>(extra);
             const bytes_type_metadata *dst_md = e->dst_metadata;
@@ -91,14 +91,14 @@ namespace {
     struct fixedbytes_to_blockref_bytes_kernel_extra {
         typedef fixedbytes_to_blockref_bytes_kernel_extra extra_type;
 
-        ckernel_data_prefix base;
+        ckernel_prefix base;
         size_t dst_alignment;
         intptr_t src_data_size;
         size_t src_alignment;
         const bytes_type_metadata *dst_metadata;
 
         /** Does a single fixed-bytes copy */
-        static void single(char *dst, const char *src, ckernel_data_prefix *extra)
+        static void single(char *dst, const char *src, ckernel_prefix *extra)
         {
             extra_type *e = reinterpret_cast<extra_type *>(extra);
             const bytes_type_metadata *dst_md = e->dst_metadata;
