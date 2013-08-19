@@ -9,5 +9,5 @@ for any queries regarding the library.
  * [Developer Guide](developer-guide.md)
  * [NDObject](ndobject.md)
  * [NDObject Low Level Details](ndobject_lowlevel.md)
- * [Kernels](kernels.md)
+ * [CKernels](ckernels.md)
  * [Multi-dimensional Kernels](multidim_kernels.md)

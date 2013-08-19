@@ -1,7 +1,7 @@
 Multi-dimensional DyND Kernels
 ==============================
 
-The [DyND Kernel Documentation](kernels.md) describes
+The [CKernel Documentation](ckernels.md) describes
 the basic memory format of DyND kernels, and how they
 are constructed with kernel factories such as
 'make_assignment_kernel' and 'make_comparison_kernel'.
@@ -157,7 +157,7 @@ kernel gets set to 0, and no dimensions from the source
 dtype are peeled off. The next call is to make_assignment_kernel
 with both the src and dst dtypes equal to 'int32', requesting
 a strided kernel. The resulting kernel is precisely the
-example in the [kernel documentation](kernels.md) with the
+example in the [ckernel documentation](ckernels.md) with the
 struct called strided_int32_copy_kernel_data, where the value
 src_stride has been set to zero.
 

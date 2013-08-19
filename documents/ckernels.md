@@ -1,5 +1,5 @@
-DyND Kernels
-============
+Blaze/DyND CKernels
+===================
 
 The initial versions of DyND began with an iterator approach,
 similar to nditer in NumPy. With the addition of the variable-sized
@@ -30,9 +30,9 @@ Kernel Basics
 
 A DyND kernel is a block of memory which contains at its start
 a kernel function pointer and a destructor. The class defining
-these members is 'ckernel_prefix', and the class which
+these members is `ckernel_prefix`, and the class which
 manages the memory for creating such a kernel is
-'ckernel_builder'. Here's the ckernel_prefix structure:
+`ckernel_builder`. Here's the ckernel_prefix structure:
 
 ```cpp
 struct ckernel_prefix {
