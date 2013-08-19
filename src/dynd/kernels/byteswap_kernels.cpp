@@ -117,7 +117,7 @@ namespace {
 } // anonymous namespace
 
 size_t dynd::make_byteswap_assignment_function(
-                hierarchical_kernel *out, size_t offset_out,
+                ckernel_builder *out, size_t offset_out,
                 intptr_t data_size, intptr_t data_alignment,
                 kernel_request_t kernreq)
 {
@@ -184,7 +184,7 @@ size_t dynd::make_byteswap_assignment_function(
 }
 
 size_t dynd::make_pairwise_byteswap_assignment_function(
-                hierarchical_kernel *out, size_t offset_out,
+                ckernel_builder *out, size_t offset_out,
                 intptr_t data_size, intptr_t data_alignment,
                 kernel_request_t kernreq)
 {

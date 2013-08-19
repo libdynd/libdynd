@@ -38,7 +38,7 @@ typedef int (*binary_single_predicate_t)(const char *src0, const char *src1,
                         ckernel_data_prefix *extra);
 
 /**
- * See the hierarchical_kernel class documentation
+ * See the ckernel_builder class documentation
  * for details about how kernels can be built and
  * used.
  *
@@ -46,10 +46,10 @@ typedef int (*binary_single_predicate_t)(const char *src0, const char *src1,
  * a comparison between one type/metadata value
  * and a different type/metadata value.
  */
-class comparison_ckernel_builder : public hierarchical_kernel {
+class comparison_ckernel_builder : public ckernel_builder {
 public:
     comparison_ckernel_builder()
-        : hierarchical_kernel()
+        : ckernel_builder()
     {
     }
 
@@ -88,7 +88,7 @@ public:
  *           created kernel.
  */
 size_t make_comparison_kernel(
-                hierarchical_kernel *out, size_t offset_out,
+                ckernel_builder *out, size_t offset_out,
                 const ndt::type& src0_dt, const char *src0_metadata,
                 const ndt::type& src1_dt, const char *src1_metadata,
                 comparison_type_t comptype,
@@ -106,7 +106,7 @@ size_t make_comparison_kernel(
  * \param comptype  The type of comparison to do.
  */
 size_t make_builtin_type_comparison_kernel(
-                hierarchical_kernel *out, size_t offset_out,
+                ckernel_builder *out, size_t offset_out,
                 type_id_t src0_type_id, type_id_t src1_type_id,
                 comparison_type_t comptype);
 

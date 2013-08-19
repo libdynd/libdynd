@@ -68,7 +68,7 @@ namespace {
 } // anonymous namespace
 
 size_t dynd::make_string_to_datetime_assignment_kernel(
-                hierarchical_kernel *out, size_t offset_out,
+                ckernel_builder *out, size_t offset_out,
                 const ndt::type& dst_datetime_dt, const char *DYND_UNUSED(dst_metadata),
                 const ndt::type& src_string_dt, const char *src_metadata,
                 kernel_request_t kernreq, assign_error_mode errmode,
@@ -136,7 +136,7 @@ namespace {
 } // anonymous namespace
 
 size_t dynd::make_datetime_to_string_assignment_kernel(
-                hierarchical_kernel *out, size_t offset_out,
+                ckernel_builder *out, size_t offset_out,
                 const ndt::type& dst_string_dt, const char *dst_metadata,
                 const ndt::type& src_datetime_dt, const char *DYND_UNUSED(src_metadata),
                 kernel_request_t kernreq, assign_error_mode errmode,

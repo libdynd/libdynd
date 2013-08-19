@@ -26,14 +26,14 @@ ndt::type get_builtin_type_elwise_property_type(
                 bool& out_readable, bool& out_writable);
 
 size_t make_builtin_type_elwise_property_getter_kernel(
-                hierarchical_kernel *out, size_t offset_out,
+                ckernel_builder *out, size_t offset_out,
                 type_id_t builtin_type_id,
                 const char *dst_metadata,
                 const char *src_metadata, size_t src_elwise_property_index,
                 kernel_request_t kernreq, const eval::eval_context *ectx);
 
 size_t make_builtin_type_elwise_property_setter_kernel(
-                hierarchical_kernel *out, size_t offset_out,
+                ckernel_builder *out, size_t offset_out,
                 type_id_t builtin_type_id,
                 const char *dst_metadata, size_t dst_elwise_property_index,
                 const char *src_metadata,

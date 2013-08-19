@@ -83,8 +83,8 @@ The code which consumes and produces Blaze datashapes is in
 ### Kernels Source
 
 Kernels in DyND are mostly implemented in the 'include/kernels' directory.
-All kernels get built in the hierarchical_kernel class, which is defined in
-'include/kernels/hierarchical_kernels.hpp'. These kernels are intended to be
+All kernels get built in the ckernel_builder class, which is defined in
+'include/kernels/ckernel_builders.hpp'. These kernels are intended to be
 cheap to construct and execute when they are small, but scale to hold
 buffering data and other information when what they are computing is
 quite complex.

@@ -189,7 +189,7 @@ namespace {
     }
 
 size_t dynd::make_fixedstring_comparison_kernel(
-                hierarchical_kernel *out, size_t offset_out,
+                ckernel_builder *out, size_t offset_out,
                 size_t string_size, string_encoding_t encoding,
                 comparison_type_t comptype,
                 const eval::eval_context *DYND_UNUSED(ectx))
@@ -281,7 +281,7 @@ namespace {
     }
 
 size_t dynd::make_string_comparison_kernel(
-                hierarchical_kernel *out, size_t offset_out,
+                ckernel_builder *out, size_t offset_out,
                 string_encoding_t encoding,
                 comparison_type_t comptype,
                 const eval::eval_context *DYND_UNUSED(ectx))
@@ -308,7 +308,7 @@ size_t dynd::make_string_comparison_kernel(
 #undef DYND_STRING_COMPARISON_TABLE_TYPE_LEVEL
 
 size_t dynd::make_general_string_comparison_kernel(
-                hierarchical_kernel *out, size_t offset_out,
+                ckernel_builder *out, size_t offset_out,
                 const ndt::type& src0_dt, const char *src0_metadata,
                 const ndt::type& src1_dt, const char *src1_metadata,
                 comparison_type_t comptype,

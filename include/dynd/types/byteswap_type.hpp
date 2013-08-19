@@ -45,11 +45,11 @@ public:
     ndt::type with_replaced_storage_type(const ndt::type& replacement_type) const;
 
     size_t make_operand_to_value_assignment_kernel(
-                    hierarchical_kernel *out, size_t offset_out,
+                    ckernel_builder *out, size_t offset_out,
                     const char *dst_metadata, const char *src_metadata,
                     kernel_request_t kernreq, const eval::eval_context *ectx) const;
     size_t make_value_to_operand_assignment_kernel(
-                    hierarchical_kernel *out, size_t offset_out,
+                    ckernel_builder *out, size_t offset_out,
                     const char *dst_metadata, const char *src_metadata,
                     kernel_request_t kernreq, const eval::eval_context *ectx) const;
 };

@@ -28,7 +28,7 @@ typedef void (*unary_strided_operation_t)(
                 size_t count, ckernel_data_prefix *extra);
 
 /**
- * See the hierarchical_kernel class documentation
+ * See the ckernel_builder class documentation
  * for details about how ckernels can be built and
  * used.
  *
@@ -37,10 +37,10 @@ typedef void (*unary_strided_operation_t)(
  * a different type/metadata destination, using
  * the `unary_single_operation_t` function prototype.
  */
-class assignment_ckernel_builder : public hierarchical_kernel {
+class assignment_ckernel_builder : public ckernel_builder {
 public:
     assignment_ckernel_builder()
-        : hierarchical_kernel()
+        : ckernel_builder()
     {
     }
 
@@ -80,7 +80,7 @@ public:
  *           created kernel.
  */
 size_t make_assignment_kernel(
-                hierarchical_kernel *out, size_t offset_out,
+                ckernel_builder *out, size_t offset_out,
                 const ndt::type& dst_tp, const char *dst_metadata,
                 const ndt::type& src_tp, const char *src_metadata,
                 kernel_request_t kernreq, assign_error_mode errmode,
@@ -97,7 +97,7 @@ size_t make_assignment_kernel(
  * \param kernreq  What kind of kernel must be placed in 'out'.
  */
 size_t make_pod_typed_data_assignment_kernel(
-                hierarchical_kernel *out, size_t offset_out,
+                ckernel_builder *out, size_t offset_out,
                 size_t data_size, size_t data_alignment,
                 kernel_request_t kernreq);
 
@@ -113,7 +113,7 @@ size_t make_pod_typed_data_assignment_kernel(
  * \param errmode  The error mode to use for assignments.
  */
 size_t make_builtin_type_assignment_kernel(
-                hierarchical_kernel *out, size_t offset_out,
+                ckernel_builder *out, size_t offset_out,
                 type_id_t dst_type_id, type_id_t src_type_id,
                 kernel_request_t kernreq, assign_error_mode errmode);
 
@@ -129,7 +129,7 @@ size_t make_builtin_type_assignment_kernel(
  *      // Proceed to create 'single' kernel...
  */
 size_t make_kernreq_to_single_kernel_adapter(
-                hierarchical_kernel *out, size_t offset_out,
+                ckernel_builder *out, size_t offset_out,
                 kernel_request_t kernreq);
 
 /**

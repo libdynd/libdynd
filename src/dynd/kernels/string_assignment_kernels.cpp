@@ -60,7 +60,7 @@ namespace {
 } // anonymous namespace
 
 size_t dynd::make_fixedstring_assignment_kernel(
-                hierarchical_kernel *out, size_t offset_out,
+                ckernel_builder *out, size_t offset_out,
                 intptr_t dst_data_size, string_encoding_t dst_encoding,
                 intptr_t src_data_size, string_encoding_t src_encoding,
                 kernel_request_t kernreq, assign_error_mode errmode,
@@ -158,7 +158,7 @@ namespace {
 } // anonymous namespace
 
 size_t dynd::make_blockref_string_assignment_kernel(
-                hierarchical_kernel *out, size_t offset_out,
+                ckernel_builder *out, size_t offset_out,
                 const char *dst_metadata, string_encoding_t dst_encoding,
                 const char *src_metadata, string_encoding_t src_encoding,
                 kernel_request_t kernreq, assign_error_mode errmode,
@@ -248,7 +248,7 @@ namespace {
 } // anonymous namespace
 
 size_t dynd::make_fixedstring_to_blockref_string_assignment_kernel(
-                hierarchical_kernel *out, size_t offset_out,
+                ckernel_builder *out, size_t offset_out,
                 const char *dst_metadata, string_encoding_t dst_encoding,
                 intptr_t src_element_size, string_encoding_t src_encoding,
                 kernel_request_t kernreq, assign_error_mode errmode,
@@ -309,7 +309,7 @@ namespace {
 } // anonymous namespace
 
 size_t dynd::make_blockref_string_to_fixedstring_assignment_kernel(
-                hierarchical_kernel *out, size_t offset_out,
+                ckernel_builder *out, size_t offset_out,
                 intptr_t dst_data_size, string_encoding_t dst_encoding,
                 string_encoding_t src_encoding,
                 kernel_request_t kernreq, assign_error_mode errmode,

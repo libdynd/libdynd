@@ -98,7 +98,7 @@ static void unaligned_copy_strided(char *dst, intptr_t dst_stride,
 }
 
 size_t dynd::make_assignment_kernel(
-                hierarchical_kernel *out, size_t offset_out,
+                ckernel_builder *out, size_t offset_out,
                 const ndt::type& dst_tp, const char *dst_metadata,
                 const ndt::type& src_tp, const char *src_metadata,
                 kernel_request_t kernreq, assign_error_mode errmode,
@@ -140,7 +140,7 @@ size_t dynd::make_assignment_kernel(
 }
 
 size_t dynd::make_pod_typed_data_assignment_kernel(
-                hierarchical_kernel *out, size_t offset_out,
+                ckernel_builder *out, size_t offset_out,
                 size_t data_size, size_t data_alignment,
                 kernel_request_t kernreq)
 {
@@ -382,7 +382,7 @@ static unary_strided_operation_t assign_table_strided_kernel[builtin_type_id_cou
 };
 
 size_t dynd::make_builtin_type_assignment_kernel(
-                hierarchical_kernel *out, size_t offset_out,
+                ckernel_builder *out, size_t offset_out,
                 type_id_t dst_type_id, type_id_t src_type_id,
                 kernel_request_t kernreq, assign_error_mode errmode)
 {
@@ -438,7 +438,7 @@ static void simple_wrapper_kernel_destruct(
 }
 
 size_t dynd::make_kernreq_to_single_kernel_adapter(
-                hierarchical_kernel *out, size_t offset_out,
+                ckernel_builder *out, size_t offset_out,
                 kernel_request_t kernreq)
 {
     switch (kernreq) {

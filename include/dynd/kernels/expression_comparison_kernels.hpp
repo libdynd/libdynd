@@ -16,7 +16,7 @@ namespace dynd {
  * expression_kind type.
  */
 size_t make_expression_comparison_kernel(
-                hierarchical_kernel *out, size_t offset_out,
+                ckernel_builder *out, size_t offset_out,
                 const ndt::type& src0_dt, const char *src0_metadata,
                 const ndt::type& src1_dt, const char *src1_metadata,
                 comparison_type_t comptype,

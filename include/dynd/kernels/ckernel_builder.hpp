@@ -98,7 +98,7 @@ inline void free_dynamic_kernel_instance(dynamic_kernel_instance& dki)
  * be relocatable with a memcpy, it must not rely on its
  * own address.
  */
-class hierarchical_kernel {
+class ckernel_builder {
     // Pointer to the kernel function pointers + data
     intptr_t *m_data;
     size_t m_capacity;
@@ -126,13 +126,13 @@ class hierarchical_kernel {
     }
 protected:
 public:
-    hierarchical_kernel() {
+    ckernel_builder() {
         m_data = &m_static_data[0];
         m_capacity = sizeof(m_static_data);
         memset(m_static_data, 0, sizeof(m_static_data));
     }
 
-    ~hierarchical_kernel() {
+    ~ckernel_builder() {
         destroy();
     }
 
@@ -214,16 +214,16 @@ public:
     }
 
     /**
-     * Moves the kernel data held by this hierarchical kernel
+     * Moves the kernel data held by this ckernel builder
      * into the provide dynamic_kernel_instance struct. Ownership
      * is transferred to 'dki'.
      *
-     * Because the kernel size is not tracked by the hierarchical_kernel
+     * Because the kernel size is not tracked by the ckernel_builder
      * object, but rather produced by the factory functions, it
      * is required as a parameter here.
      *
      * \param out  The dynamic_kernel_instance to populate.
-     * \param kernel_size  The size, in bytes, of the hierarchical_kernel.
+     * \param kernel_size  The size, in bytes, of the ckernel_builder.
      */
     void move_into_dki(dynamic_kernel_instance *out, size_t kernel_size) {
         if (using_static_data()) {

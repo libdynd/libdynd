@@ -221,7 +221,7 @@ size_t base_type::iterdata_destruct(iterdata_common *DYND_UNUSED(iterdata), size
 }
 
 size_t base_type::make_assignment_kernel(
-                hierarchical_kernel *DYND_UNUSED(out), size_t DYND_UNUSED(offset_out),
+                ckernel_builder *DYND_UNUSED(out), size_t DYND_UNUSED(offset_out),
                 const ndt::type& dst_tp, const char *DYND_UNUSED(dst_metadata),
                 const ndt::type& src_tp, const char *DYND_UNUSED(src_metadata),
                 kernel_request_t DYND_UNUSED(kernreq), assign_error_mode DYND_UNUSED(errmode),
@@ -238,7 +238,7 @@ size_t base_type::make_assignment_kernel(
 }
 
 size_t base_type::make_comparison_kernel(
-                hierarchical_kernel *DYND_UNUSED(out), size_t DYND_UNUSED(offset_out),
+                ckernel_builder *DYND_UNUSED(out), size_t DYND_UNUSED(offset_out),
                 const ndt::type& src0_dt, const char *DYND_UNUSED(src0_metadata),
                 const ndt::type& src1_dt, const char *DYND_UNUSED(src1_metadata),
                 comparison_type_t DYND_UNUSED(comptype),
@@ -339,7 +339,7 @@ ndt::type base_type::get_elwise_property_type(size_t DYND_UNUSED(elwise_property
 }
 
 size_t base_type::make_elwise_property_getter_kernel(
-                hierarchical_kernel *DYND_UNUSED(out), size_t DYND_UNUSED(offset_out),
+                ckernel_builder *DYND_UNUSED(out), size_t DYND_UNUSED(offset_out),
                 const char *DYND_UNUSED(dst_metadata),
                 const char *DYND_UNUSED(src_metadata),
                 size_t DYND_UNUSED(src_elwise_property_index),
@@ -352,7 +352,7 @@ size_t base_type::make_elwise_property_getter_kernel(
 }
 
 size_t base_type::make_elwise_property_setter_kernel(
-                hierarchical_kernel *DYND_UNUSED(out), size_t DYND_UNUSED(offset_out),
+                ckernel_builder *DYND_UNUSED(out), size_t DYND_UNUSED(offset_out),
                 const char *DYND_UNUSED(dst_metadata),
                 size_t DYND_UNUSED(dst_elwise_property_index),
                 const char *DYND_UNUSED(src_metadata),

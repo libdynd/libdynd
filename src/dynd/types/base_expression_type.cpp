@@ -64,7 +64,7 @@ size_t base_expression_type::get_iterdata_size(size_t DYND_UNUSED(ndim)) const
 }
 
 size_t base_expression_type::make_operand_to_value_assignment_kernel(
-                hierarchical_kernel *DYND_UNUSED(out), size_t DYND_UNUSED(offset_out),
+                ckernel_builder *DYND_UNUSED(out), size_t DYND_UNUSED(offset_out),
                 const char *DYND_UNUSED(dst_metadata), const char *DYND_UNUSED(src_metadata),
                 kernel_request_t DYND_UNUSED(kernreq), const eval::eval_context *DYND_UNUSED(ectx)) const
 {
@@ -74,7 +74,7 @@ size_t base_expression_type::make_operand_to_value_assignment_kernel(
 }
 
 size_t base_expression_type::make_value_to_operand_assignment_kernel(
-                hierarchical_kernel *DYND_UNUSED(out), size_t DYND_UNUSED(offset_out),
+                ckernel_builder *DYND_UNUSED(out), size_t DYND_UNUSED(offset_out),
                 const char *DYND_UNUSED(dst_metadata), const char *DYND_UNUSED(src_metadata),
                 kernel_request_t DYND_UNUSED(kernreq), const eval::eval_context *DYND_UNUSED(ectx)) const
 {
@@ -84,7 +84,7 @@ size_t base_expression_type::make_value_to_operand_assignment_kernel(
 }
 
 size_t base_expression_type::make_assignment_kernel(
-                hierarchical_kernel *out, size_t offset_out,
+                ckernel_builder *out, size_t offset_out,
                 const ndt::type& dst_tp, const char *dst_metadata,
                 const ndt::type& src_tp, const char *src_metadata,
                 kernel_request_t kernreq, assign_error_mode errmode,
@@ -96,7 +96,7 @@ size_t base_expression_type::make_assignment_kernel(
 }
 
 size_t base_expression_type::make_comparison_kernel(
-                hierarchical_kernel *out, size_t offset_out,
+                ckernel_builder *out, size_t offset_out,
                 const ndt::type& src0_dt, const char *src0_metadata,
                 const ndt::type& src1_dt, const char *src1_metadata,
                 comparison_type_t comptype,

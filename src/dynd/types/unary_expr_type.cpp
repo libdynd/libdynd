@@ -103,7 +103,7 @@ bool unary_expr_type::operator==(const base_type& rhs) const
 }
 
 size_t unary_expr_type::make_operand_to_value_assignment_kernel(
-                hierarchical_kernel *out, size_t offset_out,
+                ckernel_builder *out, size_t offset_out,
                 const char *dst_metadata, const char *src_metadata,
                 kernel_request_t kernreq, const eval::eval_context *ectx) const
 {
@@ -118,7 +118,7 @@ size_t unary_expr_type::make_operand_to_value_assignment_kernel(
 }
 
 size_t unary_expr_type::make_value_to_operand_assignment_kernel(
-                hierarchical_kernel *DYND_UNUSED(out), size_t DYND_UNUSED(offset_out),
+                ckernel_builder *DYND_UNUSED(out), size_t DYND_UNUSED(offset_out),
                 const char *DYND_UNUSED(dst_metadata), const char *DYND_UNUSED(src_metadata),
                 kernel_request_t DYND_UNUSED(kernreq), const eval::eval_context *DYND_UNUSED(ectx)) const
 {

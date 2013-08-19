@@ -25,14 +25,14 @@ the kernels might receive a 'temporary space' buffer as another argument.
 Kernel Basics
 -------------
 
-    include/dynd/kernels/hierarchical_kernels.hpp
+    include/dynd/kernels/ckernel_builders.hpp
     include/dynd/kernels/assignment_kernels.hpp
 
 A DyND kernel is a block of memory which contains at its start
 a kernel function pointer and a destructor. The class defining
 these members is 'ckernel_data_prefix', and the class which
 manages the memory for creating such a kernel is
-'hierarchical_kernel'. Here's the ckernel_data_prefix structure:
+'ckernel_builder'. Here's the ckernel_data_prefix structure:
 
 ```cpp
 struct ckernel_data_prefix {
@@ -75,7 +75,7 @@ void default_assign(const dtype& dst_dt, const char *dst_metadata, char *dst_dat
 ```
 
 Note that the 'assignment_kernel' object is a subclass of
-'hierarchical_kernel', which overloads the call operator to
+'ckernel_builder', which overloads the call operator to
 provide a more convenient kernel function call syntax.
 
 ### Assignment Kernel Example
@@ -144,7 +144,7 @@ to provide some more context.
 Constructing Kernels
 --------------------
 
-Kernels are constructed by ensuring the 'hierarchical_kernel'
+Kernels are constructed by ensuring the 'ckernel_builder'
 output object has enough space, building any child kernels,
 and populating the needed kernel data. For efficiency
 and correctness reasons, there are a number of restrictions
@@ -196,7 +196,7 @@ it is not NULL. What this means is that, before the kernel's
 destructor function pointer is set, memory for the 'ckernel_data_prefix'
 of the child kernel must already be allocated and initialized
 to zero. This is handled automatically by the 'ensure_capacity'
-function of the 'hierarchical_kernel'.
+function of the 'ckernel_builder'.
 
 If a kernel is a leaf, i.e. it terminates any hierarchy in the
 chain, it should use the 'ensure_capacity_leaf' function instead
@@ -228,7 +228,7 @@ static void strided_assign(char *dst, intptr_t dst_stride,
 }
 
 size_t make_int32_assignment_kernel(
-                hierarchical_kernel *out, size_t offset_out,
+                ckernel_builder *out, size_t offset_out,
                 kernel_request_t kernreq)
 {
     // No additional space needs to be allocated for this
@@ -291,7 +291,7 @@ static void strided_assign(char *dst, intptr_t dst_stride,
 }
 
 size_t make_unaligned_assignment_kernel(
-                hierarchical_kernel *out, size_t offset_out,
+                ckernel_builder *out, size_t offset_out,
                 size_t data_size,
                 kernel_request_t kernreq)
 {
@@ -353,7 +353,7 @@ static void destruct(ckernel_data_prefix *extra)
 }
 
 size_t make_jit_assignment_kernel(
-                hierarchical_kernel *out, size_t offset_out,
+                ckernel_builder *out, size_t offset_out,
                 const dtype& dst_dt, const char *dst_metadata,
                 const dtype& src_dt, const char *src_metadata,
                 kernel_request_t kernreq)
@@ -417,7 +417,7 @@ static void strided_assign(char *dst, intptr_t dst_stride,
 }
 
 size_t make_ptr_assignment_kernel(
-                hierarchical_kernel *out, size_t offset_out,
+                ckernel_builder *out, size_t offset_out,
                 const dtype& dst_dt, const char *dst_metadata,
                 const dtype& src_target_dt, const char *src_target_metadata,
                 kernel_request_t kernreq)
@@ -460,7 +460,7 @@ allocations at all. There is still the expense of the virtual
 function calls and if/switch statements figuring out the kernel
 to create, but only using stack-allocated memory is possible.
 
-This is handled by a trick inside the 'hierarchical_kernel' class,
+This is handled by a trick inside the 'ckernel_builder' class,
 which handles memory allocation and resizing of the kernel data
 buffer. This class contains a small fixed-size array which is
 used to start. If no kernel factory uses more than this amount

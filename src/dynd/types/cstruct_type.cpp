@@ -319,7 +319,7 @@ bool cstruct_type::is_lossless_assignment(const ndt::type& dst_tp, const ndt::ty
 }
 
 size_t cstruct_type::make_assignment_kernel(
-                hierarchical_kernel *out, size_t offset_out,
+                ckernel_builder *out, size_t offset_out,
                 const ndt::type& dst_tp, const char *dst_metadata,
                 const ndt::type& src_tp, const char *src_metadata,
                 kernel_request_t kernreq, assign_error_mode errmode,
@@ -350,7 +350,7 @@ size_t cstruct_type::make_assignment_kernel(
 }
 
 size_t cstruct_type::make_comparison_kernel(
-                hierarchical_kernel *out, size_t offset_out,
+                ckernel_builder *out, size_t offset_out,
                 const ndt::type& src0_tp, const char *src0_metadata,
                 const ndt::type& src1_tp, const char *src1_metadata,
                 comparison_type_t comptype,

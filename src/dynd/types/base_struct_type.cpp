@@ -113,7 +113,7 @@ namespace {
 } // anonymous namespace
 
 size_t base_struct_type::make_elwise_property_getter_kernel(
-                hierarchical_kernel *out, size_t offset_out,
+                ckernel_builder *out, size_t offset_out,
                 const char *dst_metadata,
                 const char *src_metadata, size_t src_elwise_property_index,
                 kernel_request_t kernreq, const eval::eval_context *ectx) const
@@ -153,7 +153,7 @@ size_t base_struct_type::make_elwise_property_getter_kernel(
 }
 
 size_t base_struct_type::make_elwise_property_setter_kernel(
-                hierarchical_kernel *DYND_UNUSED(out), size_t DYND_UNUSED(offset_out),
+                ckernel_builder *DYND_UNUSED(out), size_t DYND_UNUSED(offset_out),
                 const char *DYND_UNUSED(dst_metadata), size_t dst_elwise_property_index,
                 const char *DYND_UNUSED(src_metadata),
                 kernel_request_t DYND_UNUSED(kernreq), const eval::eval_context *DYND_UNUSED(ectx)) const
