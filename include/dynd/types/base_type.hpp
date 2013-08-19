@@ -29,7 +29,6 @@ namespace ndt {
 } // namespace ndt
 
 class base_type;
-class assignment_kernel;
 
 struct iterdata_common;
 

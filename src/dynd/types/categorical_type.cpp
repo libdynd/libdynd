@@ -173,7 +173,7 @@ static nd::array make_sorted_categories(const set<const char *, cmp>& uniques,
                 const ndt::type& element_tp, const char *metadata)
 {
     nd::array categories = nd::make_strided_array(uniques.size(), element_tp);
-    assignment_kernel k;
+    assignment_ckernel_builder k;
     make_assignment_kernel(&k, 0,
                     element_tp, categories.get_ndo_meta() + sizeof(strided_dim_type_metadata),
                     element_tp, metadata,
@@ -373,7 +373,7 @@ nd::array categorical_type::get_categories() const
     //       so this is simply "return m_categories".
     nd::array categories = nd::make_strided_array(get_category_count(), m_category_tp);
     array_iter<1,0> iter(categories);
-    assignment_kernel k;
+    assignment_ckernel_builder k;
     ::make_assignment_kernel(&k, 0, iter.get_uniform_dtype(), iter.metadata(),
                     m_category_tp, get_category_metadata(),
                     kernel_request_single, assign_error_default, &eval::default_eval_context);

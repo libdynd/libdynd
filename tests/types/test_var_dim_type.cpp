@@ -221,7 +221,7 @@ TEST(VarArrayDType, AccessCStructOfVar) {
 
 TEST(VarArrayDType, AssignKernel) {
     nd::array a, b;
-    assignment_kernel k;
+    assignment_ckernel_builder k;
 
     // Assignment scalar -> uninitialized var array
     a = nd::empty(ndt::make_var_dim(ndt::make_type<int>()));
@@ -335,7 +335,7 @@ TEST(VarArrayDType, AssignKernel) {
 
 TEST(VarArrayDType, AssignVarStridedKernel) {
     nd::array a, b;
-    assignment_kernel k;
+    assignment_ckernel_builder k;
     int vals_int[] = {3,5,7};
 
     // Assignment strided array -> uninitialized var array
@@ -429,7 +429,7 @@ TEST(VarArrayDType, AssignVarStridedKernel) {
 
 TEST(VarArrayDType, AssignVarFixedKernel) {
     nd::array a, b;
-    assignment_kernel k;
+    assignment_ckernel_builder k;
 
     // Assignment fixed array -> uninitialized var array
     a = nd::empty(ndt::make_var_dim(ndt::make_type<int>()));

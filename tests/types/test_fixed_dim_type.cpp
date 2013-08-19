@@ -135,7 +135,7 @@ TEST(FixedDimDType, SimpleIndex) {
 
 TEST(FixedDimDType, AssignKernel_ScalarToFixed) {
     nd::array a, b;
-    assignment_kernel k;
+    assignment_ckernel_builder k;
 
     // Assignment scalar -> fixed array
     a = nd::empty(ndt::make_fixed_dim(3, ndt::make_type<int>()));
@@ -153,7 +153,7 @@ TEST(FixedDimDType, AssignKernel_ScalarToFixed) {
 
 TEST(FixedDimDType, AssignKernel_FixedToFixed) {
     nd::array a, b;
-    assignment_kernel k;
+    assignment_ckernel_builder k;
 
     // Assignment fixed array -> fixed array
     a = nd::empty(ndt::make_fixed_dim(3, ndt::make_type<int>()));
@@ -172,7 +172,7 @@ TEST(FixedDimDType, AssignKernel_FixedToFixed) {
 
 TEST(FixedDimDType, AssignKernel_FixedToScalarError) {
     nd::array a, b;
-    assignment_kernel k;
+    assignment_ckernel_builder k;
 
     // Assignment fixed array -> scalar
     a = 9.0;
@@ -186,7 +186,7 @@ TEST(FixedDimDType, AssignKernel_FixedToScalarError) {
 
 TEST(FixedDimDType, AssignFixedStridedKernel) {
     nd::array a, b;
-    assignment_kernel k;
+    assignment_ckernel_builder k;
     int vals_int[] = {3,5,7};
     int vals_int_single[] = {9};
 

@@ -174,7 +174,7 @@ void dynd::typed_data_copy(const ndt::type& tp,
     if (tp.is_pod()) {
         memcpy(dst_data, src_data, data_size);
     } else {
-        assignment_kernel k;
+        assignment_ckernel_builder k;
         make_assignment_kernel(&k, 0, tp, dst_metadata,
                         tp, src_metadata,
                         kernel_request_single,
@@ -202,7 +202,7 @@ void dynd::typed_data_assign(const ndt::type& dst_tp, const char *dst_metadata, 
         }
     }
 
-    assignment_kernel k;
+    assignment_ckernel_builder k;
     make_assignment_kernel(&k, 0, dst_tp, dst_metadata,
                     src_tp, src_metadata,
                     kernel_request_single,

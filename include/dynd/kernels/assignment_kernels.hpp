@@ -36,9 +36,9 @@ typedef void (*unary_strided_operation_t)(
  * data value from one type/metadata source to
  * a different type/metadata destination.
  */
-class assignment_kernel : public hierarchical_kernel {
+class assignment_ckernel_builder : public hierarchical_kernel {
 public:
-    assignment_kernel()
+    assignment_ckernel_builder()
         : hierarchical_kernel()
     {
     }

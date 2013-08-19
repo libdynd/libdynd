@@ -64,7 +64,7 @@ assignment using this mechanism.
 void default_assign(const dtype& dst_dt, const char *dst_metadata, char *dst_data,
                 const dtype& src_dt, const char *src_metadata, const char *src_data)
 {
-    assignment_kernel k;
+    assignment_ckernel_builder k;
     make_assignment_kernel(&k, 0,
                     dst_dt, dst_metadata,
                     src_dt, src_metadata,
