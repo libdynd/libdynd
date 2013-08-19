@@ -55,10 +55,10 @@ struct ckernel_data_prefix {
  * To free a dynamic kernel instance, one must
  * first call the destructor in the ckernel_data_prefix,
  * then call the free_func to deallocate the memory.
- * The function free_dynamic_kernel_instance is provided
+ * The function free_ckernel_instance is provided
  * here for this purpose.
  */
-struct dynamic_kernel_instance {
+struct ckernel_instance {
     /** Pointer to dynamically allocated kernel data */
     ckernel_data_prefix *kernel;
     /**
@@ -77,14 +77,14 @@ struct dynamic_kernel_instance {
     void (*free_func)(void *);
 };
 
-inline void free_dynamic_kernel_instance(dynamic_kernel_instance& dki)
+inline void free_ckernel_instance(ckernel_instance& cki)
 {
-    if (dki.kernel != NULL) {
-        if (dki.kernel->destructor != NULL) {
-            dki.kernel->destructor(dki.kernel);
+    if (cki.kernel != NULL) {
+        if (cki.kernel->destructor != NULL) {
+            cki.kernel->destructor(cki.kernel);
         }
-        dki.free_func(dki.kernel);
-        dki.kernel = NULL;
+        cki.free_func(cki.kernel);
+        cki.kernel = NULL;
     }
 }
 
@@ -215,17 +215,17 @@ public:
 
     /**
      * Moves the kernel data held by this ckernel builder
-     * into the provide dynamic_kernel_instance struct. Ownership
-     * is transferred to 'dki'.
+     * into the provided ckernel_instance struct. Ownership
+     * is transferred to 'cki'.
      *
      * Because the kernel size is not tracked by the ckernel_builder
      * object, but rather produced by the factory functions, it
      * is required as a parameter here.
      *
-     * \param out  The dynamic_kernel_instance to populate.
+     * \param out  The ckernel_instance to populate.
      * \param kernel_size  The size, in bytes, of the ckernel_builder.
      */
-    void move_into_dki(dynamic_kernel_instance *out, size_t kernel_size) {
+    void move_into_cki(ckernel_instance *out, size_t kernel_size) {
         if (using_static_data()) {
             // Allocate some memory and move the kernel data into it
             out->kernel = reinterpret_cast<ckernel_data_prefix *>(malloc(kernel_size));

@@ -7,7 +7,6 @@
 #define _DYND__UNARY_KERNEL_ADAPTER_CODEGEN_HPP_
 
 #include <dynd/type.hpp>
-#include <dynd/kernels/kernel_instance.hpp>
 #include <dynd/memblock/memory_block.hpp>
 #include <dynd/codegen/calling_conventions.hpp>
 

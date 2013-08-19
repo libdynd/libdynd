@@ -11,7 +11,6 @@
 #include <string>
 
 #include <dynd/type.hpp>
-#include <dynd/kernels/kernel_instance.hpp>
 #include <dynd/codegen/calling_conventions.hpp>
 
 namespace dynd {
@@ -55,12 +54,12 @@ public:
      * binary kernel for it. Reuses the low level generated
      * adapter functions when it can.
      */
-    void codegen_binary_function_adapter(const ndt::type& restype,
-                    const ndt::type& arg0type, const ndt::type& arg1type,
-                    calling_convention_t callconv,
-                    void *function_pointer,
-                    memory_block_data *function_pointer_owner,
-                    kernel_instance<binary_operation_pair_t>& out_kernel);
+//    void codegen_binary_function_adapter(const ndt::type& restype,
+//                    const ndt::type& arg0type, const ndt::type& arg1type,
+//                    calling_convention_t callconv,
+//                    void *function_pointer,
+//                    memory_block_data *function_pointer_owner,
+//                    kernel_instance<binary_operation_pair_t>& out_kernel);
 
 //    void codegen_left_associative_binary_reduce_function_adapter(
 //                    const ndt::type& reduce_type,calling_convention_t callconv,
