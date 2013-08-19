@@ -254,6 +254,7 @@ set(libdynd_SRC
     include/dynd/kernels/bytes_assignment_kernels.hpp
     include/dynd/kernels/byteswap_kernels.hpp
     include/dynd/kernels/ckernel_builder.hpp
+    include/dynd/kernels/ckernel_instance.hpp
     include/dynd/kernels/ckernel_prefix.hpp
     include/dynd/kernels/comparison_kernels.hpp
     include/dynd/kernels/date_assignment_kernels.hpp

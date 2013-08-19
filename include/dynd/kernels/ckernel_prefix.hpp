@@ -6,20 +6,6 @@
 #ifndef _DYND__CKERNEL_PREFIX_HPP_
 #define _DYND__CKERNEL_PREFIX_HPP_
 
-// For this header, we define both a C and a C++
-// interface
-#if !defined(__cplusplus)
-
-struct dynd_ckernel_prefix_ {
-    void *function;
-    void (*destructor)(struct dynd_ckernel_prefix_ *);
-};
-
-typedef void (*dynd_ckernel_destructor_fn_t)(struct dynd_ckernel_prefix_ *);
-typedef struct dynd_ckernel_prefix_ dynd_ckernel_prefix;
-
-#else // if defined(__cplusplus)
-
 #include <dynd/config.hpp>
 
 namespace dynd {
@@ -73,7 +59,5 @@ struct ckernel_prefix {
 };
 
 } // namespace dynd
-
-#endif // defined(__cplusplus)
 
 #endif // _DYND__CKERNEL_PREFIX_HPP_
