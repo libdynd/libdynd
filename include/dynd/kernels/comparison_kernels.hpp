@@ -7,7 +7,7 @@
 #define _DYND__COMPARISON_KERNELS_HPP_
 
 #include <dynd/types/type_id.hpp>
-#include <dynd/kernels/hierarchical_kernels.hpp>
+#include <dynd/kernels/ckernel_builder.hpp>
 #include <dynd/eval/eval_context.hpp>
 
 namespace dynd {
@@ -46,9 +46,9 @@ typedef int (*binary_single_predicate_t)(const char *src0, const char *src1,
  * a comparison between one type/metadata value
  * and a different type/metadata value.
  */
-class comparison_kernel : public hierarchical_kernel {
+class comparison_ckernel_builder : public hierarchical_kernel {
 public:
-    comparison_kernel()
+    comparison_ckernel_builder()
         : hierarchical_kernel()
     {
     }

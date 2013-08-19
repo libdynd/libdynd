@@ -262,7 +262,7 @@ set(libdynd_SRC
     include/dynd/kernels/expr_kernel_generator.hpp
     include/dynd/kernels/expression_assignment_kernels.hpp
     include/dynd/kernels/expression_comparison_kernels.hpp
-    include/dynd/kernels/hierarchical_kernels.hpp
+    include/dynd/kernels/ckernel_builder.hpp
     include/dynd/kernels/kernel_instance.hpp
     include/dynd/kernels/string_assignment_kernels.hpp
     include/dynd/kernels/string_algorithm_kernels.hpp

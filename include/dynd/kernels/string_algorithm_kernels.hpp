@@ -9,7 +9,7 @@
 #define _DYND__STRING_ALGORITHM_KERNELS_HPP_
 
 #include <dynd/kernels/kernel_instance.hpp>
-#include <dynd/kernels/hierarchical_kernels.hpp>
+#include <dynd/kernels/ckernel_builder.hpp>
 #include <dynd/typed_data_assign.hpp>
 #include <dynd/string_encodings.hpp>
 

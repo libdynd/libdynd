@@ -8,7 +8,7 @@
 
 #include <dynd/type.hpp>
 #include <dynd/typed_data_assign.hpp>
-#include <dynd/kernels/hierarchical_kernels.hpp>
+#include <dynd/kernels/ckernel_builder.hpp>
 #include <dynd/eval/eval_context.hpp>
 #include <dynd/typed_data_assign.hpp>
 #include <dynd/types/type_id.hpp>
@@ -29,12 +29,13 @@ typedef void (*unary_strided_operation_t)(
 
 /**
  * See the hierarchical_kernel class documentation
- * for details about how kernels can be built and
+ * for details about how ckernels can be built and
  * used.
  *
- * This kernel type is for kernels which assign one
+ * This kernel type is for ckernels which assign one
  * data value from one type/metadata source to
- * a different type/metadata destination.
+ * a different type/metadata destination, using
+ * the `unary_single_operation_t` function prototype.
  */
 class assignment_ckernel_builder : public hierarchical_kernel {
 public:

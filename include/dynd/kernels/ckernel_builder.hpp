@@ -3,8 +3,8 @@
 // BSD 2-Clause License, see LICENSE.txt
 //
 
-#ifndef _DYND__HIERARCHICAL_KERNELS_HPP_
-#define _DYND__HIERARCHICAL_KERNELS_HPP_
+#ifndef _DYND__CKERNEL_BUILDER_HPP_
+#define _DYND__CKERNEL_BUILDER_HPP_
 
 #include <dynd/config.hpp>
 
@@ -92,7 +92,7 @@ inline void free_dynamic_kernel_instance(dynamic_kernel_instance& dki)
  * Function pointers + data for a hierarchical
  * kernel which operates on type/metadata in
  * some configuration. Individual kernel types
- * are handled by the classes assignment_kernel, etc.
+ * are handled by the classes assignment_ckernel_builder, etc.
  *
  * The data placed in the kernel's data must
  * be relocatable with a memcpy, it must not rely on its
@@ -250,4 +250,4 @@ public:
 
 } // namespace dynd
 
-#endif // _DYND__HIERARCHICAL_KERNELS_HPP_
+#endif // _DYND__CKERNEL_BUILDER_HPP_

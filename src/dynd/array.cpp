@@ -760,7 +760,7 @@ nd::array nd::array::eval_copy(uint32_t access_flags, const eval::eval_context *
 
 bool nd::array::op_sorting_less(const array& rhs) const
 {
-    comparison_kernel k;
+    comparison_ckernel_builder k;
     make_comparison_kernel(&k, 0, get_type(), get_ndo_meta(),
                     rhs.get_type(), rhs.get_ndo_meta(),
                     comparison_type_sorting_less,
@@ -770,7 +770,7 @@ bool nd::array::op_sorting_less(const array& rhs) const
 
 bool nd::array::operator<(const array& rhs) const
 {
-    comparison_kernel k;
+    comparison_ckernel_builder k;
     make_comparison_kernel(&k, 0, get_type(), get_ndo_meta(),
                     rhs.get_type(), rhs.get_ndo_meta(),
                     comparison_type_less,
@@ -780,7 +780,7 @@ bool nd::array::operator<(const array& rhs) const
 
 bool nd::array::operator<=(const array& rhs) const
 {
-    comparison_kernel k;
+    comparison_ckernel_builder k;
     make_comparison_kernel(&k, 0, get_type(), get_ndo_meta(),
                     rhs.get_type(), rhs.get_ndo_meta(),
                     comparison_type_less_equal,
@@ -790,7 +790,7 @@ bool nd::array::operator<=(const array& rhs) const
 
 bool nd::array::operator==(const array& rhs) const
 {
-    comparison_kernel k;
+    comparison_ckernel_builder k;
     make_comparison_kernel(&k, 0, get_type(), get_ndo_meta(),
                     rhs.get_type(), rhs.get_ndo_meta(),
                     comparison_type_equal,
@@ -800,7 +800,7 @@ bool nd::array::operator==(const array& rhs) const
 
 bool nd::array::operator!=(const array& rhs) const
 {
-    comparison_kernel k;
+    comparison_ckernel_builder k;
     make_comparison_kernel(&k, 0, get_type(), get_ndo_meta(),
                     rhs.get_type(), rhs.get_ndo_meta(),
                     comparison_type_not_equal,
@@ -810,7 +810,7 @@ bool nd::array::operator!=(const array& rhs) const
 
 bool nd::array::operator>=(const array& rhs) const
 {
-    comparison_kernel k;
+    comparison_ckernel_builder k;
     make_comparison_kernel(&k, 0, get_type(), get_ndo_meta(),
                     rhs.get_type(), rhs.get_ndo_meta(),
                     comparison_type_greater_equal,
@@ -820,7 +820,7 @@ bool nd::array::operator>=(const array& rhs) const
 
 bool nd::array::operator>(const array& rhs) const
 {
-    comparison_kernel k;
+    comparison_ckernel_builder k;
     make_comparison_kernel(&k, 0, get_type(), get_ndo_meta(),
                     rhs.get_type(), rhs.get_ndo_meta(),
                     comparison_type_greater,
@@ -835,7 +835,7 @@ bool nd::array::equals_exact(const array& rhs) const
     } else if (get_type() != rhs.get_type()) {
         return false;
     } else if (get_ndim() == 0) {
-        comparison_kernel k;
+        comparison_ckernel_builder k;
         make_comparison_kernel(&k, 0,
                         get_type(), get_ndo_meta(),
                         rhs.get_type(), rhs.get_ndo_meta(),
@@ -853,7 +853,7 @@ bool nd::array::equals_exact(const array& rhs) const
         try {
             array_iter<0,2> iter(*this, rhs);
             if (!iter.empty()) {
-                comparison_kernel k;
+                comparison_ckernel_builder k;
                 make_comparison_kernel(&k, 0,
                                 iter.get_uniform_dtype<0>(), iter.metadata<0>(),
                                 iter.get_uniform_dtype<1>(), iter.metadata<1>(),
@@ -1327,7 +1327,7 @@ intptr_t nd::binary_search(const nd::array& n, const char *metadata, const char 
                     memcmp(n_metadata, metadata, element_tp.get_metadata_size()) == 0) {
         // First, a version where the metadata is identical, so we can
         // make do with only a single comparison kernel
-        comparison_kernel k_n_less_d;
+        comparison_ckernel_builder k_n_less_d;
         make_comparison_kernel(&k_n_less_d, 0,
                         element_tp, n_metadata,
                         element_tp, n_metadata,
@@ -1364,7 +1364,7 @@ intptr_t nd::binary_search(const nd::array& n, const char *metadata, const char 
     } else {
         // Second, a version where the metadata are different, so
         // we need to get a kernel for each comparison direction.
-        comparison_kernel k_n_less_d, k_d_less_n;
+        comparison_ckernel_builder k_n_less_d, k_d_less_n;
         make_comparison_kernel(&k_n_less_d, 0,
                         element_tp, n_metadata,
                         element_tp, metadata,

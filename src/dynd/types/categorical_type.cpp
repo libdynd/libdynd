@@ -226,7 +226,7 @@ categorical_type::categorical_type(const nd::array& categories, bool presorted)
         intptr_t categories_stride = reinterpret_cast<const strided_dim_type_metadata *>(categories.get_ndo_meta())->stride;
 
         const char *categories_element_metadata = categories.get_ndo_meta() + sizeof(strided_dim_type_metadata);
-        comparison_kernel k;
+        comparison_ckernel_builder k;
         ::make_comparison_kernel(&k, 0,
                         m_category_tp, categories_element_metadata,
                         m_category_tp, categories_element_metadata,
@@ -549,7 +549,7 @@ ndt::type dynd::ndt::factor_categorical(const nd::array& values)
     nd::array values_eval = values.eval();
     array_iter<0, 1> iter(values_eval);
 
-    comparison_kernel k;
+    comparison_ckernel_builder k;
     ::make_comparison_kernel(&k, 0,
                     iter.get_uniform_dtype(), iter.metadata(),
                     iter.get_uniform_dtype(), iter.metadata(),
