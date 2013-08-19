@@ -24,16 +24,16 @@ namespace {
     struct broadcast_to_var_assign_kernel_extra {
         typedef broadcast_to_var_assign_kernel_extra extra_type;
 
-        kernel_data_prefix base;
+        ckernel_data_prefix base;
         intptr_t dst_target_alignment;
         const var_dim_type_metadata *dst_md;
 
         static void single(char *dst, const char *src,
-                            kernel_data_prefix *extra)
+                            ckernel_data_prefix *extra)
         {
             var_dim_type_data *dst_d = reinterpret_cast<var_dim_type_data *>(dst);
             extra_type *e = reinterpret_cast<extra_type *>(extra);
-            kernel_data_prefix *echild = &(e + 1)->base;
+            ckernel_data_prefix *echild = &(e + 1)->base;
             unary_strided_operation_t opchild = (e + 1)->base.get_function<unary_strided_operation_t>();
             if (dst_d->begin == NULL) {
                 if (e->dst_md->offset != 0) {
@@ -66,10 +66,10 @@ namespace {
             }
         }
 
-        static void destruct(kernel_data_prefix *extra)
+        static void destruct(ckernel_data_prefix *extra)
         {
             extra_type *e = reinterpret_cast<extra_type *>(extra);
-            kernel_data_prefix *echild = &(e + 1)->base;
+            ckernel_data_prefix *echild = &(e + 1)->base;
             if (echild->destructor) {
                 echild->destructor(echild);
             }
@@ -113,17 +113,17 @@ namespace {
     struct var_assign_kernel_extra {
         typedef var_assign_kernel_extra extra_type;
 
-        kernel_data_prefix base;
+        ckernel_data_prefix base;
         intptr_t dst_target_alignment;
         const var_dim_type_metadata *dst_md, *src_md;
 
         static void single(char *dst, const char *src,
-                            kernel_data_prefix *extra)
+                            ckernel_data_prefix *extra)
         {
             var_dim_type_data *dst_d = reinterpret_cast<var_dim_type_data *>(dst);
             const var_dim_type_data *src_d = reinterpret_cast<const var_dim_type_data *>(src);
             extra_type *e = reinterpret_cast<extra_type *>(extra);
-            kernel_data_prefix *echild = &(e + 1)->base;
+            ckernel_data_prefix *echild = &(e + 1)->base;
             unary_strided_operation_t opchild = (e + 1)->base.get_function<unary_strided_operation_t>();
             if (dst_d->begin == NULL) {
                 if (e->dst_md->offset != 0) {
@@ -178,10 +178,10 @@ namespace {
             }
         }
 
-        static void destruct(kernel_data_prefix *extra)
+        static void destruct(ckernel_data_prefix *extra)
         {
             extra_type *e = reinterpret_cast<extra_type *>(extra);
-            kernel_data_prefix *echild = &(e + 1)->base;
+            ckernel_data_prefix *echild = &(e + 1)->base;
             if (echild->destructor) {
                 echild->destructor(echild);
             }
@@ -234,17 +234,17 @@ namespace {
     struct strided_to_var_assign_kernel_extra {
         typedef strided_to_var_assign_kernel_extra extra_type;
 
-        kernel_data_prefix base;
+        ckernel_data_prefix base;
         intptr_t dst_target_alignment;
         const var_dim_type_metadata *dst_md;
         intptr_t src_stride, src_dim_size;
 
         static void single(char *dst, const char *src,
-                            kernel_data_prefix *extra)
+                            ckernel_data_prefix *extra)
         {
             var_dim_type_data *dst_d = reinterpret_cast<var_dim_type_data *>(dst);
             extra_type *e = reinterpret_cast<extra_type *>(extra);
-            kernel_data_prefix *echild = &(e + 1)->base;
+            ckernel_data_prefix *echild = &(e + 1)->base;
             unary_strided_operation_t opchild = (e + 1)->base.get_function<unary_strided_operation_t>();
             if (dst_d->begin == NULL) {
                 if (e->dst_md->offset != 0) {
@@ -289,10 +289,10 @@ namespace {
             }
         }
 
-        static void destruct(kernel_data_prefix *extra)
+        static void destruct(ckernel_data_prefix *extra)
         {
             extra_type *e = reinterpret_cast<extra_type *>(extra);
-            kernel_data_prefix *echild = &(e + 1)->base;
+            ckernel_data_prefix *echild = &(e + 1)->base;
             if (echild->destructor) {
                 echild->destructor(echild);
             }
@@ -359,16 +359,16 @@ namespace {
     struct var_to_strided_assign_kernel_extra {
         typedef var_to_strided_assign_kernel_extra extra_type;
 
-        kernel_data_prefix base;
+        ckernel_data_prefix base;
         intptr_t dst_stride, dst_dim_size;
         const var_dim_type_metadata *src_md;
 
         static void single(char *dst, const char *src,
-                            kernel_data_prefix *extra)
+                            ckernel_data_prefix *extra)
         {
             extra_type *e = reinterpret_cast<extra_type *>(extra);
             const var_dim_type_data *src_d = reinterpret_cast<const var_dim_type_data *>(src);
-            kernel_data_prefix *echild = &(e + 1)->base;
+            ckernel_data_prefix *echild = &(e + 1)->base;
             unary_strided_operation_t opchild = (e + 1)->base.get_function<unary_strided_operation_t>();
             if (src_d->begin == NULL) {
                 throw runtime_error("Cannot assign an uninitialized dynd var array to a strided one");
@@ -388,10 +388,10 @@ namespace {
             opchild(dst, dst_stride, src, src_stride, dst_dim_size, echild);
         }
 
-        static void destruct(kernel_data_prefix *extra)
+        static void destruct(ckernel_data_prefix *extra)
         {
             extra_type *e = reinterpret_cast<extra_type *>(extra);
-            kernel_data_prefix *echild = &(e + 1)->base;
+            ckernel_data_prefix *echild = &(e + 1)->base;
             if (echild->destructor) {
                 echild->destructor(echild);
             }

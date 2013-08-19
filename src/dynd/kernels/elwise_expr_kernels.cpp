@@ -24,25 +24,25 @@ template<int N>
 struct strided_expr_kernel_extra {
     typedef strided_expr_kernel_extra extra_type;
 
-    kernel_data_prefix base;
+    ckernel_data_prefix base;
     intptr_t size;
     intptr_t dst_stride, src_stride[N];
 
     static void single(char *dst, const char * const *src,
-                    kernel_data_prefix *extra)
+                    ckernel_data_prefix *extra)
     {
         extra_type *e = reinterpret_cast<extra_type *>(extra);
-        kernel_data_prefix *echild = &(e + 1)->base;
+        ckernel_data_prefix *echild = &(e + 1)->base;
         expr_strided_operation_t opchild = echild->get_function<expr_strided_operation_t>();
         opchild(dst, e->dst_stride, src, e->src_stride, e->size, echild);
     }
 
     static void strided(char *dst, intptr_t dst_stride,
                     const char * const *src, const intptr_t *src_stride,
-                    size_t count, kernel_data_prefix *extra)
+                    size_t count, ckernel_data_prefix *extra)
     {
         extra_type *e = reinterpret_cast<extra_type *>(extra);
-        kernel_data_prefix *echild = &(e + 1)->base;
+        ckernel_data_prefix *echild = &(e + 1)->base;
         expr_strided_operation_t opchild = echild->get_function<expr_strided_operation_t>();
         intptr_t inner_size = e->size, inner_dst_stride = e->dst_stride;
         const intptr_t *inner_src_stride = e->src_stride;
@@ -57,10 +57,10 @@ struct strided_expr_kernel_extra {
         }
     }
 
-    static void destruct(kernel_data_prefix *extra)
+    static void destruct(ckernel_data_prefix *extra)
     {
         extra_type *e = reinterpret_cast<extra_type *>(extra);
-        kernel_data_prefix *echild = &(e + 1)->base;
+        ckernel_data_prefix *echild = &(e + 1)->base;
         if (echild->destructor) {
             echild->destructor(echild);
         }
@@ -221,16 +221,16 @@ template<int N>
 struct strided_or_var_to_strided_expr_kernel_extra {
     typedef strided_or_var_to_strided_expr_kernel_extra extra_type;
 
-    kernel_data_prefix base;
+    ckernel_data_prefix base;
     intptr_t size;
     intptr_t dst_stride, src_stride[N], src_offset[N];
     bool is_src_var[N];
 
     static void single(char *dst, const char * const *src,
-                    kernel_data_prefix *extra)
+                    ckernel_data_prefix *extra)
     {
         extra_type *e = reinterpret_cast<extra_type *>(extra);
-        kernel_data_prefix *echild = &(e + 1)->base;
+        ckernel_data_prefix *echild = &(e + 1)->base;
         expr_strided_operation_t opchild = echild->get_function<expr_strided_operation_t>();
         // Broadcast all the src 'var' dimensions to dst
         intptr_t dim_size = e->size;
@@ -258,7 +258,7 @@ struct strided_or_var_to_strided_expr_kernel_extra {
 
     static void strided(char *dst, intptr_t dst_stride,
                     const char * const *src, const intptr_t *src_stride,
-                    size_t count, kernel_data_prefix *extra)
+                    size_t count, ckernel_data_prefix *extra)
     {
         const char *src_loop[N];
         memcpy(src_loop, src, sizeof(src_loop));
@@ -271,10 +271,10 @@ struct strided_or_var_to_strided_expr_kernel_extra {
         }
     }
 
-    static void destruct(kernel_data_prefix *extra)
+    static void destruct(ckernel_data_prefix *extra)
     {
         extra_type *e = reinterpret_cast<extra_type *>(extra);
-        kernel_data_prefix *echild = &(e + 1)->base;
+        ckernel_data_prefix *echild = &(e + 1)->base;
         if (echild->destructor) {
             echild->destructor(echild);
         }
@@ -451,17 +451,17 @@ template<int N>
 struct strided_or_var_to_var_expr_kernel_extra {
     typedef strided_or_var_to_var_expr_kernel_extra extra_type;
 
-    kernel_data_prefix base;
+    ckernel_data_prefix base;
     memory_block_data *dst_memblock;
     size_t dst_target_alignment;
     intptr_t dst_stride, dst_offset, src_stride[N], src_offset[N];
     bool is_src_var[N];
 
     static void single(char *dst, const char * const *src,
-                    kernel_data_prefix *extra)
+                    ckernel_data_prefix *extra)
     {
         extra_type *e = reinterpret_cast<extra_type *>(extra);
-        kernel_data_prefix *echild = &(e + 1)->base;
+        ckernel_data_prefix *echild = &(e + 1)->base;
         expr_strided_operation_t opchild = echild->get_function<expr_strided_operation_t>();
         var_dim_type_data *dst_vddd = reinterpret_cast<var_dim_type_data *>(dst);
         char *modified_dst;
@@ -547,7 +547,7 @@ struct strided_or_var_to_var_expr_kernel_extra {
 
     static void strided(char *dst, intptr_t dst_stride,
                     const char * const *src, const intptr_t *src_stride,
-                    size_t count, kernel_data_prefix *extra)
+                    size_t count, ckernel_data_prefix *extra)
     {
         const char *src_loop[N];
         memcpy(src_loop, src, sizeof(src_loop));
@@ -560,10 +560,10 @@ struct strided_or_var_to_var_expr_kernel_extra {
         }
     }
 
-    static void destruct(kernel_data_prefix *extra)
+    static void destruct(ckernel_data_prefix *extra)
     {
         extra_type *e = reinterpret_cast<extra_type *>(extra);
-        kernel_data_prefix *echild = &(e + 1)->base;
+        ckernel_data_prefix *echild = &(e + 1)->base;
         if (echild->destructor) {
             echild->destructor(echild);
         }

@@ -176,9 +176,9 @@ enum {
 };
 
 enum kernel_request_t {
-    /** Kernel function unary_single_operation_t */
+    /** Kernel function unary_single_operation_t or expr_single_operation_t */
     kernel_request_single,
-    /** Kernel function unary_strided_operation_t */
+    /** Kernel function unary_strided_operation_t or expr_strided_operation_t*/
     kernel_request_strided,
     /**
      * Kernel function unary_single_operation_t,

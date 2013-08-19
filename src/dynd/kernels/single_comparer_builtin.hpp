@@ -693,7 +693,7 @@ DYND_FORCE_BIG_TYPE(dynd_float128, dynd_float128);
     template<class src0_type, class src1_type>
     struct single_comparison_builtin {
         inline static int sorting_less(const char *src0, const char *src1,
-                        kernel_data_prefix *DYND_UNUSED(extra))
+                        ckernel_data_prefix *DYND_UNUSED(extra))
         {
             src0_type v0 = *reinterpret_cast<const src0_type *>(src0);
             src1_type v1 = *reinterpret_cast<const src1_type *>(src1);
@@ -704,7 +704,7 @@ DYND_FORCE_BIG_TYPE(dynd_float128, dynd_float128);
                             (sizeof(src0_type) < sizeof(src1_type))>::f(v0, v1);
         }
         inline static int less(const char *src0, const char *src1,
-                        kernel_data_prefix *DYND_UNUSED(extra))
+                        ckernel_data_prefix *DYND_UNUSED(extra))
         {
             src0_type v0 = *reinterpret_cast<const src0_type *>(src0);
             src1_type v1 = *reinterpret_cast<const src1_type *>(src1);
@@ -715,7 +715,7 @@ DYND_FORCE_BIG_TYPE(dynd_float128, dynd_float128);
                             (sizeof(src0_type) < sizeof(src1_type))>::f(v0, v1);
         }
         inline static int less_equal(const char *src0, const char *src1,
-                        kernel_data_prefix *DYND_UNUSED(extra))
+                        ckernel_data_prefix *DYND_UNUSED(extra))
         {
             src0_type v0 = *reinterpret_cast<const src0_type *>(src0);
             src1_type v1 = *reinterpret_cast<const src1_type *>(src1);
@@ -726,7 +726,7 @@ DYND_FORCE_BIG_TYPE(dynd_float128, dynd_float128);
                             (sizeof(src0_type) < sizeof(src1_type))>::f(v0, v1);
         }
         inline static int equal(const char *src0, const char *src1,
-                        kernel_data_prefix *DYND_UNUSED(extra))
+                        ckernel_data_prefix *DYND_UNUSED(extra))
         {
             src0_type v0 = *reinterpret_cast<const src0_type *>(src0);
             src1_type v1 = *reinterpret_cast<const src1_type *>(src1);
@@ -737,7 +737,7 @@ DYND_FORCE_BIG_TYPE(dynd_float128, dynd_float128);
                             (sizeof(src0_type) < sizeof(src1_type))>::f(v0, v1);
         }
         inline static int not_equal(const char *src0, const char *src1,
-                        kernel_data_prefix *DYND_UNUSED(extra))
+                        ckernel_data_prefix *DYND_UNUSED(extra))
         {
             src0_type v0 = *reinterpret_cast<const src0_type *>(src0);
             src1_type v1 = *reinterpret_cast<const src1_type *>(src1);
@@ -748,7 +748,7 @@ DYND_FORCE_BIG_TYPE(dynd_float128, dynd_float128);
                             (sizeof(src0_type) < sizeof(src1_type))>::f(v0, v1);
         }
         inline static int greater_equal(const char *src0, const char *src1,
-                        kernel_data_prefix *DYND_UNUSED(extra))
+                        ckernel_data_prefix *DYND_UNUSED(extra))
         {
             src0_type v0 = *reinterpret_cast<const src0_type *>(src0);
             src1_type v1 = *reinterpret_cast<const src1_type *>(src1);
@@ -759,7 +759,7 @@ DYND_FORCE_BIG_TYPE(dynd_float128, dynd_float128);
                             (sizeof(src0_type) < sizeof(src1_type))>::f(v0, v1);
         }
         inline static int greater(const char *src0, const char *src1,
-                        kernel_data_prefix *DYND_UNUSED(extra))
+                        ckernel_data_prefix *DYND_UNUSED(extra))
         {
             src0_type v0 = *reinterpret_cast<const src0_type *>(src0);
             src1_type v1 = *reinterpret_cast<const src1_type *>(src1);

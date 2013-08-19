@@ -10,13 +10,18 @@
 
 namespace dynd {
 
-struct kernel_data_prefix {
-    typedef void (*destructor_fn_t)(kernel_data_prefix *);
+struct ckernel_data_prefix {
+    typedef void (*destructor_fn_t)(ckernel_data_prefix *);
 
     void *function;
     destructor_fn_t destructor;
 
-    kernel_data_prefix& base() {
+    /**
+     * To help with generic code a bit, structs which
+     * begin with a ckernel_data_prefix can define this
+     * base() function which returns that ckernel_data_prefix.
+     */
+    ckernel_data_prefix& base() {
         return *this;
     }
 
@@ -24,7 +29,7 @@ struct kernel_data_prefix {
      * Call to get the kernel function pointer, whose type
      * must be known by the context.
      *
-     *      kdp->get<unary_single_operation_t>()
+     *      kdp->get_function<unary_single_operation_t>()
      */
     template<typename T>
     T get_function() const {
@@ -48,14 +53,14 @@ struct kernel_data_prefix {
  * no dependencies between them.
  *
  * To free a dynamic kernel instance, one must
- * first call the destructor in the kernel_data_prefix,
+ * first call the destructor in the ckernel_data_prefix,
  * then call the free_func to deallocate the memory.
  * The function free_dynamic_kernel_instance is provided
  * here for this purpose.
  */
 struct dynamic_kernel_instance {
     /** Pointer to dynamically allocated kernel data */
-    kernel_data_prefix *kernel;
+    ckernel_data_prefix *kernel;
     /**
      * How many bytes in the kernel data. Because the
      * kernel data must be movable, one may move the
@@ -107,8 +112,8 @@ class hierarchical_kernel {
 
     inline void destroy() {
         if (m_data != NULL) {
-            kernel_data_prefix *data;
-            data = reinterpret_cast<kernel_data_prefix *>(m_data);
+            ckernel_data_prefix *data;
+            data = reinterpret_cast<ckernel_data_prefix *>(m_data);
             // Destroy whatever was created
             if (data->destructor != NULL) {
                 data->destructor(data);
@@ -151,7 +156,7 @@ public:
      */
     inline void ensure_capacity(size_t requested_capacity) {
         ensure_capacity_leaf(requested_capacity +
-                        sizeof(kernel_data_prefix));
+                        sizeof(ckernel_data_prefix));
     }
 
     /**
@@ -204,8 +209,8 @@ public:
                         reinterpret_cast<char *>(m_data) + offset);
     }
 
-    kernel_data_prefix *get() const {
-        return reinterpret_cast<kernel_data_prefix *>(m_data);
+    ckernel_data_prefix *get() const {
+        return reinterpret_cast<ckernel_data_prefix *>(m_data);
     }
 
     /**
@@ -223,7 +228,7 @@ public:
     void move_into_dki(dynamic_kernel_instance *out, size_t kernel_size) {
         if (using_static_data()) {
             // Allocate some memory and move the kernel data into it
-            out->kernel = reinterpret_cast<kernel_data_prefix *>(malloc(kernel_size));
+            out->kernel = reinterpret_cast<ckernel_data_prefix *>(malloc(kernel_size));
             if (out->kernel == NULL) {
                 out->free_func = NULL;
                 throw std::bad_alloc();
@@ -232,7 +237,7 @@ public:
             memset(m_static_data, 0, sizeof(m_static_data));
         } else {
             // Use the existing kernel data memory
-            out->kernel = reinterpret_cast<kernel_data_prefix *>(m_data);
+            out->kernel = reinterpret_cast<ckernel_data_prefix *>(m_data);
             // Switch this kernel back to an empty static data kernel
             m_data = &m_static_data[0];
             m_capacity = sizeof(m_static_data);

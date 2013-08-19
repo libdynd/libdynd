@@ -20,12 +20,12 @@ namespace dynd {
 
 /** Typedef for a unary operation on a single element */
 typedef void (*unary_single_operation_t)(char *dst, const char *src,
-                kernel_data_prefix *extra);
+                ckernel_data_prefix *extra);
 /** Typedef for a unary operation on a strided segment of elements */
 typedef void (*unary_strided_operation_t)(
                 char *dst, intptr_t dst_stride,
                 const char *src, intptr_t src_stride,
-                size_t count, kernel_data_prefix *extra);
+                size_t count, ckernel_data_prefix *extra);
 
 /**
  * See the hierarchical_kernel class documentation
@@ -49,7 +49,7 @@ public:
 
     /** Calls the function to do the assignment */
     inline void operator()(char *dst, const char *src) {
-        kernel_data_prefix *kdp = get();
+        ckernel_data_prefix *kdp = get();
         unary_single_operation_t fn = kdp->get_function<unary_single_operation_t>();
         fn(dst, src, kdp);
     }
@@ -139,16 +139,16 @@ size_t make_kernreq_to_single_kernel_adapter(
 struct strided_assign_kernel_extra {
     typedef strided_assign_kernel_extra extra_type;
 
-    kernel_data_prefix base;
+    ckernel_data_prefix base;
     intptr_t size;
     intptr_t dst_stride, src_stride;
 
     static void single(char *dst, const char *src,
-                    kernel_data_prefix *extra);
+                    ckernel_data_prefix *extra);
     static void strided(char *dst, intptr_t dst_stride,
                     const char *src, intptr_t src_stride,
-                    size_t count, kernel_data_prefix *extra);
-    static void destruct(kernel_data_prefix *extra);
+                    size_t count, ckernel_data_prefix *extra);
+    static void destruct(ckernel_data_prefix *extra);
 };
 
 } // namespace dynd

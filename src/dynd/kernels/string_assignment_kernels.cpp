@@ -21,14 +21,14 @@ namespace {
     struct fixedstring_assign_kernel_extra {
         typedef fixedstring_assign_kernel_extra extra_type;
 
-        kernel_data_prefix base;
+        ckernel_data_prefix base;
         next_unicode_codepoint_t next_fn;
         append_unicode_codepoint_t append_fn;
         intptr_t dst_data_size, src_data_size;
         bool overflow_check;
 
         static void single(char *dst, const char *src,
-                        kernel_data_prefix *extra)
+                        ckernel_data_prefix *extra)
         {
             extra_type *e = reinterpret_cast<extra_type *>(extra);
             char *dst_end = dst + e->dst_data_size;
@@ -85,14 +85,14 @@ namespace {
     struct blockref_string_assign_kernel_extra {
         typedef blockref_string_assign_kernel_extra extra_type;
 
-        kernel_data_prefix base;
+        ckernel_data_prefix base;
         string_encoding_t dst_encoding, src_encoding;
         next_unicode_codepoint_t next_fn;
         append_unicode_codepoint_t append_fn;
         const string_type_metadata *dst_metadata, *src_metadata;
 
         static void single(char *dst, const char *src,
-                        kernel_data_prefix *extra)
+                        ckernel_data_prefix *extra)
         {
             extra_type *e = reinterpret_cast<extra_type *>(extra);
             const string_type_metadata *dst_md = e->dst_metadata;
@@ -184,7 +184,7 @@ namespace {
     struct fixedstring_to_blockref_string_assign_kernel_extra {
         typedef fixedstring_to_blockref_string_assign_kernel_extra extra_type;
 
-        kernel_data_prefix base;
+        ckernel_data_prefix base;
         string_encoding_t dst_encoding, src_encoding;
         intptr_t src_element_size;
         next_unicode_codepoint_t next_fn;
@@ -192,7 +192,7 @@ namespace {
         const string_type_metadata *dst_metadata;
 
         static void single(char *dst, const char *src,
-                        kernel_data_prefix *extra)
+                        ckernel_data_prefix *extra)
         {
             extra_type *e = reinterpret_cast<extra_type *>(extra);
             const string_type_metadata *dst_md = e->dst_metadata;
@@ -275,14 +275,14 @@ namespace {
     struct blockref_string_to_fixedstring_assign_kernel_extra {
         typedef blockref_string_to_fixedstring_assign_kernel_extra extra_type;
 
-        kernel_data_prefix base;
+        ckernel_data_prefix base;
         next_unicode_codepoint_t next_fn;
         append_unicode_codepoint_t append_fn;
         intptr_t dst_data_size, src_element_size;
         bool overflow_check;
 
         static void single(char *dst, const char *src,
-                        kernel_data_prefix *extra)
+                        ckernel_data_prefix *extra)
         {
             extra_type *e = reinterpret_cast<extra_type *>(extra);
             char *dst_end = dst + e->dst_data_size;

@@ -19,7 +19,7 @@ namespace {
     struct struct_kernel_extra {
         typedef struct_kernel_extra extra_type;
 
-        kernel_data_prefix base;
+        ckernel_data_prefix base;
         size_t field_count;
         // After this, there are 'field_count' of
         // the following in a row
@@ -29,34 +29,34 @@ namespace {
             size_t src_data_offset;
         };
 
-        static void single(char *dst, const char *src, kernel_data_prefix *extra)
+        static void single(char *dst, const char *src, ckernel_data_prefix *extra)
         {
             char *eraw = reinterpret_cast<char *>(extra);
             extra_type *e = reinterpret_cast<extra_type *>(extra);
             const field_items *fi = reinterpret_cast<const field_items *>(e + 1);
             size_t field_count = e->field_count;
-            kernel_data_prefix *echild;
+            ckernel_data_prefix *echild;
             unary_single_operation_t opchild;
 
             for (size_t i = 0; i < field_count; ++i) {
                 const field_items& item = fi[i];
-                echild  = reinterpret_cast<kernel_data_prefix *>(eraw + item.child_kernel_offset);
+                echild  = reinterpret_cast<ckernel_data_prefix *>(eraw + item.child_kernel_offset);
                 opchild = echild->get_function<unary_single_operation_t>();
                 opchild(dst + item.dst_data_offset, src + item.src_data_offset, echild);
             }
         }
 
-        static void destruct(kernel_data_prefix *extra)
+        static void destruct(ckernel_data_prefix *extra)
         {
             char *eraw = reinterpret_cast<char *>(extra);
             extra_type *e = reinterpret_cast<extra_type *>(extra);
-            kernel_data_prefix *echild;
+            ckernel_data_prefix *echild;
             const field_items *fi = reinterpret_cast<const field_items *>(e + 1);
             size_t field_count = e->field_count;
             for (size_t i = 0; i < field_count; ++i) {
                 const field_items& item = fi[i];
                 if (item.child_kernel_offset != 0) {
-                    echild  = reinterpret_cast<kernel_data_prefix *>(eraw + item.child_kernel_offset);
+                    echild  = reinterpret_cast<ckernel_data_prefix *>(eraw + item.child_kernel_offset);
                     if (echild->destructor != NULL) {
                         echild->destructor(echild);
                     }

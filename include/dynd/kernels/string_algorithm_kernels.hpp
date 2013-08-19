@@ -23,13 +23,13 @@ namespace dynd { namespace kernels {
 struct string_concatenation_kernel {
     typedef string_concatenation_kernel extra_type;
 
-    kernel_data_prefix m_base;
+    ckernel_data_prefix m_base;
     // The number of input operands
     size_t m_nop;
     // The kernel borrows this reference from the dst metadata
     memory_block_data *m_dst_blockref;
 
-    kernel_data_prefix& base() {
+    ckernel_data_prefix& base() {
         return m_base;
     }
 
@@ -43,10 +43,10 @@ struct string_concatenation_kernel {
     void init(size_t nop, const char *dst_metadata, const char **src_metadata);
 
     static void single(char *dst, const char * const *src,
-                kernel_data_prefix *extra);
+                ckernel_data_prefix *extra);
     static void strided(char *dst, intptr_t dst_stride,
                 const char * const *src, const intptr_t *src_stride,
-                size_t count, kernel_data_prefix *extra);
+                size_t count, ckernel_data_prefix *extra);
 };
 
 /**
@@ -57,7 +57,7 @@ struct string_concatenation_kernel {
 struct string_find_kernel {
     typedef string_find_kernel extra_type;
 
-    kernel_data_prefix m_base;
+    ckernel_data_prefix m_base;
     // The string type being searched through
     const base_string_type *m_str_type;
     const char *m_str_metadata;
@@ -65,7 +65,7 @@ struct string_find_kernel {
     const base_string_type *m_sub_type;
     const char *m_sub_metadata;
 
-    kernel_data_prefix& base() {
+    ckernel_data_prefix& base() {
         return m_base;
     }
 
@@ -77,13 +77,13 @@ struct string_find_kernel {
      */
     void init(const ndt::type* src_tp, const char **src_metadata);
 
-    static void destruct(kernel_data_prefix *extra);
+    static void destruct(ckernel_data_prefix *extra);
 
     static void single(char *dst, const char * const *src,
-                kernel_data_prefix *extra);
+                ckernel_data_prefix *extra);
     static void strided(char *dst, intptr_t dst_stride,
                 const char * const *src, const intptr_t *src_stride,
-                size_t count, kernel_data_prefix *extra);
+                size_t count, ckernel_data_prefix *extra);
 };
 
 

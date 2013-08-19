@@ -15,7 +15,7 @@ namespace {
     struct buffered_kernel_extra {
         typedef buffered_kernel_extra extra_type;
 
-        kernel_data_prefix base;
+        ckernel_data_prefix base;
         // Offsets, from the start of &base, to the kernels
         // before and after the buffer
         size_t first_kernel_offset, second_kernel_offset;
@@ -67,17 +67,17 @@ namespace {
         }
 
         static void single(char *dst, const char *src,
-                            kernel_data_prefix *extra)
+                            ckernel_data_prefix *extra)
         {
             char *eraw = reinterpret_cast<char *>(extra);
             extra_type *e = reinterpret_cast<extra_type *>(extra);
-            kernel_data_prefix *echild_first, *echild_second;
+            ckernel_data_prefix *echild_first, *echild_second;
             unary_single_operation_t opchild;
             const base_type *buffer_tp = e->buffer_tp;
             char *buffer_metadata = e->buffer_metadata;
             char *buffer_data_ptr = eraw + e->buffer_data_offset;
-            echild_first = reinterpret_cast<kernel_data_prefix *>(eraw + e->first_kernel_offset);
-            echild_second = reinterpret_cast<kernel_data_prefix *>(eraw + e->second_kernel_offset);
+            echild_first = reinterpret_cast<ckernel_data_prefix *>(eraw + e->first_kernel_offset);
+            echild_second = reinterpret_cast<ckernel_data_prefix *>(eraw + e->second_kernel_offset);
 
             // If the type needs it, initialize the buffer data to zero
             if (!is_builtin_type(buffer_tp) && (buffer_tp->get_flags()&type_flag_zeroinit) != 0) {
@@ -96,18 +96,18 @@ namespace {
         }
         static void strided(char *dst, intptr_t dst_stride,
                         const char *src, intptr_t src_stride,
-                        size_t count, kernel_data_prefix *extra)
+                        size_t count, ckernel_data_prefix *extra)
         {
             char *eraw = reinterpret_cast<char *>(extra);
             extra_type *e = reinterpret_cast<extra_type *>(extra);
-            kernel_data_prefix *echild_first, *echild_second;
+            ckernel_data_prefix *echild_first, *echild_second;
             unary_strided_operation_t opchild_first, opchild_second;
             const base_type *buffer_tp = e->buffer_tp;
             char *buffer_metadata = e->buffer_metadata;
             char *buffer_data_ptr = eraw + e->buffer_data_offset;
             size_t buffer_stride = e->buffer_stride;
-            echild_first = reinterpret_cast<kernel_data_prefix *>(eraw + e->first_kernel_offset);
-            echild_second = reinterpret_cast<kernel_data_prefix *>(eraw + e->second_kernel_offset);
+            echild_first = reinterpret_cast<ckernel_data_prefix *>(eraw + e->first_kernel_offset);
+            echild_second = reinterpret_cast<ckernel_data_prefix *>(eraw + e->second_kernel_offset);
 
             opchild_first = echild_first->get_function<unary_strided_operation_t>();
             opchild_second = echild_second->get_function<unary_strided_operation_t>();
@@ -128,7 +128,7 @@ namespace {
                 count -= chunk_size;
             }
         }
-        static void destruct(kernel_data_prefix *extra)
+        static void destruct(ckernel_data_prefix *extra)
         {
             char *eraw = reinterpret_cast<char *>(extra);
             extra_type *e = reinterpret_cast<extra_type *>(extra);
@@ -140,17 +140,17 @@ namespace {
                 buffer_tp.extended()->metadata_destruct(buffer_metadata);
                 free(buffer_metadata);
             }
-            kernel_data_prefix *echild;
+            ckernel_data_prefix *echild;
             // Destruct the first kernel
             if (e->first_kernel_offset != 0) {
-                echild = reinterpret_cast<kernel_data_prefix *>(eraw + e->first_kernel_offset);
+                echild = reinterpret_cast<ckernel_data_prefix *>(eraw + e->first_kernel_offset);
                 if (echild->destructor) {
                     echild->destructor(echild);
                 }
             }
             // Destruct the second kernel
             if (e->second_kernel_offset != 0) {
-                echild = reinterpret_cast<kernel_data_prefix *>(eraw + e->second_kernel_offset);
+                echild = reinterpret_cast<ckernel_data_prefix *>(eraw + e->second_kernel_offset);
                 if (echild->destructor) {
                     echild->destructor(echild);
                 }

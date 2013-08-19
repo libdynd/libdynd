@@ -335,7 +335,7 @@ void date_type::get_dynamic_array_functions(const std::pair<std::string, gfunc::
 
 namespace {
     void get_property_kernel_year_single(char *dst, const char *src,
-                    kernel_data_prefix *DYND_UNUSED(extra))
+                    ckernel_data_prefix *DYND_UNUSED(extra))
     {
         datetime::date_ymd fld;
         datetime::days_to_ymd(*reinterpret_cast<const int32_t *>(src), fld);
@@ -343,7 +343,7 @@ namespace {
     }
 
     void get_property_kernel_month_single(char *dst, const char *src,
-                    kernel_data_prefix *DYND_UNUSED(extra))
+                    ckernel_data_prefix *DYND_UNUSED(extra))
     {
         datetime::date_ymd fld;
         datetime::days_to_ymd(*reinterpret_cast<const int32_t *>(src), fld);
@@ -351,7 +351,7 @@ namespace {
     }
 
     void get_property_kernel_day_single(char *dst, const char *src,
-                    kernel_data_prefix *DYND_UNUSED(extra))
+                    ckernel_data_prefix *DYND_UNUSED(extra))
     {
         datetime::date_ymd fld;
         datetime::days_to_ymd(*reinterpret_cast<const int32_t *>(src), fld);
@@ -359,7 +359,7 @@ namespace {
     }
 
     void get_property_kernel_weekday_single(char *dst, const char *src,
-                    kernel_data_prefix *DYND_UNUSED(extra))
+                    ckernel_data_prefix *DYND_UNUSED(extra))
     {
         datetime::date_val_t days = *reinterpret_cast<const int32_t *>(src);
         // 1970-01-05 is Monday
@@ -371,7 +371,7 @@ namespace {
     }
 
     void get_property_kernel_days_after_1970_int64_single(char *dst, const char *src,
-                    kernel_data_prefix *DYND_UNUSED(extra))
+                    ckernel_data_prefix *DYND_UNUSED(extra))
     {
         datetime::date_val_t days = *reinterpret_cast<const int32_t *>(src);
         if (days == DYND_DATE_NA) {
@@ -382,7 +382,7 @@ namespace {
     }
 
     void set_property_kernel_days_after_1970_int64_single(char *dst, const char *src,
-                    kernel_data_prefix *DYND_UNUSED(extra))
+                    ckernel_data_prefix *DYND_UNUSED(extra))
     {
         int64_t days = *reinterpret_cast<const int64_t *>(src);
         if (days == numeric_limits<int64_t>::min()) {
@@ -393,7 +393,7 @@ namespace {
     }
 
     void get_property_kernel_struct_single(char *dst, const char *src,
-                    kernel_data_prefix *DYND_UNUSED(extra))
+                    ckernel_data_prefix *DYND_UNUSED(extra))
     {
         datetime::date_ymd fld;
         datetime::days_to_ymd(*reinterpret_cast<const int32_t *>(src), fld);
@@ -404,7 +404,7 @@ namespace {
     }
 
     void set_property_kernel_struct_single(char *dst, const char *src,
-                    kernel_data_prefix *DYND_UNUSED(extra))
+                    ckernel_data_prefix *DYND_UNUSED(extra))
     {
         datetime::date_ymd fld;
         const default_date_struct_t *src_struct = reinterpret_cast<const default_date_struct_t *>(src);
@@ -482,26 +482,26 @@ size_t date_type::make_elwise_property_getter_kernel(
                 kernel_request_t kernreq, const eval::eval_context *DYND_UNUSED(ectx)) const
 {
     offset_out = make_kernreq_to_single_kernel_adapter(out, offset_out, kernreq);
-    kernel_data_prefix *e = out->get_at<kernel_data_prefix>(offset_out);
+    ckernel_data_prefix *e = out->get_at<ckernel_data_prefix>(offset_out);
     switch (src_property_index) {
         case dateprop_year:
             e->set_function<unary_single_operation_t>(&get_property_kernel_year_single);
-            return offset_out + sizeof(kernel_data_prefix);
+            return offset_out + sizeof(ckernel_data_prefix);
         case dateprop_month:
             e->set_function<unary_single_operation_t>(&get_property_kernel_month_single);
-            return offset_out + sizeof(kernel_data_prefix);
+            return offset_out + sizeof(ckernel_data_prefix);
         case dateprop_day:
             e->set_function<unary_single_operation_t>(&get_property_kernel_day_single);
-            return offset_out + sizeof(kernel_data_prefix);
+            return offset_out + sizeof(ckernel_data_prefix);
         case dateprop_weekday:
             e->set_function<unary_single_operation_t>(&get_property_kernel_weekday_single);
-            return offset_out + sizeof(kernel_data_prefix);
+            return offset_out + sizeof(ckernel_data_prefix);
         case dateprop_days_after_1970_int64:
             e->set_function<unary_single_operation_t>(&get_property_kernel_days_after_1970_int64_single);
-            return offset_out + sizeof(kernel_data_prefix);
+            return offset_out + sizeof(ckernel_data_prefix);
         case dateprop_struct:
             e->set_function<unary_single_operation_t>(&get_property_kernel_struct_single);
-            return offset_out + sizeof(kernel_data_prefix);
+            return offset_out + sizeof(ckernel_data_prefix);
         default:
             stringstream ss;
             ss << "dynd date type given an invalid property index" << src_property_index;
@@ -516,14 +516,14 @@ size_t date_type::make_elwise_property_setter_kernel(
                 kernel_request_t kernreq, const eval::eval_context *DYND_UNUSED(ectx)) const
 {
     offset_out = make_kernreq_to_single_kernel_adapter(out, offset_out, kernreq);
-    kernel_data_prefix *e = out->get_at<kernel_data_prefix>(offset_out);
+    ckernel_data_prefix *e = out->get_at<ckernel_data_prefix>(offset_out);
     switch (dst_property_index) {
         case dateprop_days_after_1970_int64:
             e->set_function<unary_single_operation_t>(&set_property_kernel_days_after_1970_int64_single);
-            return offset_out + sizeof(kernel_data_prefix);
+            return offset_out + sizeof(ckernel_data_prefix);
         case dateprop_struct:
             e->set_function<unary_single_operation_t>(&set_property_kernel_struct_single);
-            return offset_out + sizeof(kernel_data_prefix);
+            return offset_out + sizeof(ckernel_data_prefix);
         default:
             stringstream ss;
             ss << "dynd date type given an invalid property index" << dst_property_index;

@@ -35,7 +35,7 @@ enum comparison_type_t {
 // The predicate function type uses 'int' instead of 'bool' so
 // that it is a well-specified C function pointer.
 typedef int (*binary_single_predicate_t)(const char *src0, const char *src1,
-                        kernel_data_prefix *extra);
+                        ckernel_data_prefix *extra);
 
 /**
  * See the hierarchical_kernel class documentation
@@ -59,7 +59,7 @@ public:
 
     /** Calls the function to do the comparison */
     inline bool operator()(const char *src0, const char *src1) {
-        kernel_data_prefix *kdp = get();
+        ckernel_data_prefix *kdp = get();
         binary_single_predicate_t fn = kdp->get_function<binary_single_predicate_t>();
         return fn(src0, src1, kdp) != 0;
     }

@@ -186,28 +186,28 @@ a "var to strided" function, and an "int32 to int32" function.
 ```cpp
     /** Typedef for a unary operation on a single element */
     typedef void (*unary_single_operation_t)(char *dst, const char *src,
-                    kernel_data_prefix *extra);
+                    ckernel_data_prefix *extra);
     /** Typedef for a unary operation on a strided segment of elements */
     typedef void (*unary_strided_operation_t)(
                     char *dst, intptr_t dst_stride,
                     const char *src, intptr_t src_stride,
-                    size_t count, kernel_data_prefix *extra);
+                    size_t count, ckernel_data_prefix *extra);
 
     struct var_to_strided_copy_kernel_data {
-        // The first kernel_data_prefix ("strided to strided")
+        // The first ckernel_data_prefix ("strided to strided")
         unary_single_operation_t dim0_kernel_func;
         destructor_fn_t dim0_kernel_destructor;
         // Data for the first kernel
         intptr_t dim0_size;
         intptr_t dim0_dst_stride, dim0_src_stride;
 
-        // The second kernel_data_prefix ("var to strided")
+        // The second ckernel_data_prefix ("var to strided")
         unary_strided_operation_t dim1_kernel_func;
         destructor_fn_t dim1_kernel_destructor;
         intptr_t dim1_dst_stride, dim1_dst_dim_size;
         const var_dim_dtype_metadata *dim1_src_md;
 
-        // The final kernel_data_prefix ("int32 to int32")
+        // The final ckernel_data_prefix ("int32 to int32")
         unary_strided_operation_t scalar_kernel_func;
         destructor_fn_t scalar_kernel_destructor;
     };

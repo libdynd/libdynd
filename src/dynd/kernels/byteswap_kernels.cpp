@@ -16,7 +16,7 @@ namespace {
     template<typename T>
     struct aligned_fixed_size_byteswap {
         static void single(char *dst, const char *src,
-                        kernel_data_prefix *DYND_UNUSED(extra))
+                        ckernel_data_prefix *DYND_UNUSED(extra))
         {
             DYND_ASSERT_ALIGNED(dst, 0, sizeof(T), "type: " << ndt::type(dynd::type_id_of<T>::value));
             DYND_ASSERT_ALIGNED(src, 0, sizeof(T), "type: " << ndt::type(dynd::type_id_of<T>::value));
@@ -24,7 +24,7 @@ namespace {
         }
         static void strided(char *dst, intptr_t dst_stride,
                         const char *src, intptr_t src_stride,
-                        size_t count, kernel_data_prefix *DYND_UNUSED(extra))
+                        size_t count, ckernel_data_prefix *DYND_UNUSED(extra))
         {
             DYND_ASSERT_ALIGNED(dst, dst_stride, sizeof(T), "type: " << ndt::type(dynd::type_id_of<T>::value));
             DYND_ASSERT_ALIGNED(src, src_stride, sizeof(T), "type: " << ndt::type(dynd::type_id_of<T>::value));
@@ -38,7 +38,7 @@ namespace {
     template<typename T>
     struct aligned_fixed_size_pairwise_byteswap_kernel {
         static void single(char *dst, const char *src,
-                        kernel_data_prefix *DYND_UNUSED(extra))
+                        ckernel_data_prefix *DYND_UNUSED(extra))
         {
             DYND_ASSERT_ALIGNED(dst, 0, sizeof(T), "type: " << ndt::type(dynd::type_id_of<T>::value));
             DYND_ASSERT_ALIGNED(src, 0, sizeof(T), "type: " << ndt::type(dynd::type_id_of<T>::value));
@@ -47,7 +47,7 @@ namespace {
         }
         static void strided(char *dst, intptr_t dst_stride,
                         const char *src, intptr_t src_stride,
-                        size_t count, kernel_data_prefix *DYND_UNUSED(extra))
+                        size_t count, ckernel_data_prefix *DYND_UNUSED(extra))
         {
             DYND_ASSERT_ALIGNED(dst, dst_stride, sizeof(T), "type: " << ndt::type(dynd::type_id_of<T>::value));
             DYND_ASSERT_ALIGNED(src, src_stride, sizeof(T), "type: " << ndt::type(dynd::type_id_of<T>::value));
@@ -64,10 +64,10 @@ namespace {
     struct byteswap_single_kernel_extra {
         typedef byteswap_single_kernel_extra extra_type;
 
-        kernel_data_prefix base;
+        ckernel_data_prefix base;
         size_t data_size;
 
-        static void single(char *dst, const char *src, kernel_data_prefix *extra)
+        static void single(char *dst, const char *src, ckernel_data_prefix *extra)
         {
             size_t data_size = reinterpret_cast<extra_type *>(extra)->data_size;
             // Do a different loop for in-place swap versus copying swap,
@@ -88,10 +88,10 @@ namespace {
     struct pairwise_byteswap_single_kernel_extra {
         typedef pairwise_byteswap_single_kernel_extra extra_type;
 
-        kernel_data_prefix base;
+        ckernel_data_prefix base;
         size_t data_size;
 
-        static void single(char *dst, const char *src, kernel_data_prefix *extra)
+        static void single(char *dst, const char *src, ckernel_data_prefix *extra)
         {
             size_t data_size = reinterpret_cast<extra_type *>(extra)->data_size;
             // Do a different loop for in-place swap versus copying swap,
@@ -121,12 +121,12 @@ size_t dynd::make_byteswap_assignment_function(
                 intptr_t data_size, intptr_t data_alignment,
                 kernel_request_t kernreq)
 {
-    kernel_data_prefix *result = NULL;
+    ckernel_data_prefix *result = NULL;
     // This is a leaf kernel, so no need to reserve more space
     if (data_size == data_alignment) {
         switch (data_size) {
         case 2:
-            result = out->get_at<kernel_data_prefix>(offset_out);
+            result = out->get_at<ckernel_data_prefix>(offset_out);
             if (kernreq == kernel_request_single) {
                 result->set_function<unary_single_operation_t>(
                                 &aligned_fixed_size_byteswap<uint16_t>::single);
@@ -138,9 +138,9 @@ size_t dynd::make_byteswap_assignment_function(
                 ss << "make_byteswap_assignment_function: unrecognized request " << (int)kernreq;
                 throw runtime_error(ss.str());
             }
-            return offset_out + sizeof(kernel_data_prefix);
+            return offset_out + sizeof(ckernel_data_prefix);
         case 4:
-            result = out->get_at<kernel_data_prefix>(offset_out);
+            result = out->get_at<ckernel_data_prefix>(offset_out);
             if (kernreq == kernel_request_single) {
                 result->set_function<unary_single_operation_t>(
                                 &aligned_fixed_size_byteswap<uint32_t>::single);
@@ -152,10 +152,10 @@ size_t dynd::make_byteswap_assignment_function(
                 ss << "make_byteswap_assignment_function: unrecognized request " << (int)kernreq;
                 throw runtime_error(ss.str());
             }
-            return offset_out + sizeof(kernel_data_prefix);
+            return offset_out + sizeof(ckernel_data_prefix);
             break;
         case 8:
-            result = out->get_at<kernel_data_prefix>(offset_out);
+            result = out->get_at<ckernel_data_prefix>(offset_out);
             if (kernreq == kernel_request_single) {
                 result->set_function<unary_single_operation_t>(
                                 &aligned_fixed_size_byteswap<uint64_t>::single);
@@ -167,7 +167,7 @@ size_t dynd::make_byteswap_assignment_function(
                 ss << "make_byteswap_assignment_function: unrecognized request " << (int)kernreq;
                 throw runtime_error(ss.str());
             }
-            return offset_out + sizeof(kernel_data_prefix);
+            return offset_out + sizeof(ckernel_data_prefix);
             break;
         default:
             break;
@@ -177,7 +177,7 @@ size_t dynd::make_byteswap_assignment_function(
     // Use an adapter to a single kernel for this case
     offset_out = make_kernreq_to_single_kernel_adapter(out, offset_out, kernreq);
     out->ensure_capacity_leaf(offset_out + sizeof(byteswap_single_kernel_extra));
-    result = out->get_at<kernel_data_prefix>(offset_out);
+    result = out->get_at<ckernel_data_prefix>(offset_out);
     result->set_function<unary_single_operation_t>(&byteswap_single_kernel_extra::single);
     reinterpret_cast<byteswap_single_kernel_extra *>(result)->data_size = data_size;
     return offset_out + sizeof(byteswap_single_kernel_extra);
@@ -188,12 +188,12 @@ size_t dynd::make_pairwise_byteswap_assignment_function(
                 intptr_t data_size, intptr_t data_alignment,
                 kernel_request_t kernreq)
 {
-    kernel_data_prefix *result = NULL;
+    ckernel_data_prefix *result = NULL;
     // This is a leaf kernel, so no need to reserve more space
     if (data_size == data_alignment) {
         switch (data_size) {
         case 4:
-            result = out->get_at<kernel_data_prefix>(offset_out);
+            result = out->get_at<ckernel_data_prefix>(offset_out);
             if (kernreq == kernel_request_single) {
                 result->set_function<unary_single_operation_t>(
                                 &aligned_fixed_size_pairwise_byteswap_kernel<uint16_t>::single);
@@ -205,9 +205,9 @@ size_t dynd::make_pairwise_byteswap_assignment_function(
                 ss << "make_pairwise_byteswap_assignment_function: unrecognized request " << (int)kernreq;
                 throw runtime_error(ss.str());
             }
-            return offset_out + sizeof(kernel_data_prefix);
+            return offset_out + sizeof(ckernel_data_prefix);
         case 8:
-            result = out->get_at<kernel_data_prefix>(offset_out);
+            result = out->get_at<ckernel_data_prefix>(offset_out);
             if (kernreq == kernel_request_single) {
                 result->set_function<unary_single_operation_t>(
                                 &aligned_fixed_size_pairwise_byteswap_kernel<uint32_t>::single);
@@ -219,10 +219,10 @@ size_t dynd::make_pairwise_byteswap_assignment_function(
                 ss << "make_pairwise_byteswap_assignment_function: unrecognized request " << (int)kernreq;
                 throw runtime_error(ss.str());
             }
-            return offset_out + sizeof(kernel_data_prefix);
+            return offset_out + sizeof(ckernel_data_prefix);
             break;
         case 16:
-            result = out->get_at<kernel_data_prefix>(offset_out);
+            result = out->get_at<ckernel_data_prefix>(offset_out);
             if (kernreq == kernel_request_single) {
                 result->set_function<unary_single_operation_t>(
                                 &aligned_fixed_size_pairwise_byteswap_kernel<uint64_t>::single);
@@ -234,7 +234,7 @@ size_t dynd::make_pairwise_byteswap_assignment_function(
                 ss << "make_pairwise_byteswap_assignment_function: unrecognized request " << (int)kernreq;
                 throw runtime_error(ss.str());
             }
-            return offset_out + sizeof(kernel_data_prefix);
+            return offset_out + sizeof(ckernel_data_prefix);
             break;
         default:
             break;
@@ -244,7 +244,7 @@ size_t dynd::make_pairwise_byteswap_assignment_function(
     // Use an adapter to a single kernel for this case
     offset_out = make_kernreq_to_single_kernel_adapter(out, offset_out, kernreq);
     out->ensure_capacity_leaf(offset_out + sizeof(pairwise_byteswap_single_kernel_extra));
-    result = out->get_at<kernel_data_prefix>(offset_out);
+    result = out->get_at<ckernel_data_prefix>(offset_out);
     result->set_function<unary_single_operation_t>(&pairwise_byteswap_single_kernel_extra::single);
     reinterpret_cast<pairwise_byteswap_single_kernel_extra *>(result)->data_size = data_size;
     return offset_out + sizeof(pairwise_byteswap_single_kernel_extra);
