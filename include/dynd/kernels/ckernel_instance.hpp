@@ -24,12 +24,12 @@ namespace dynd {
  * here for this purpose.
  */
 struct ckernel_instance {
-    /** Pointer to dynamically allocated kernel data */
+    /** Pointer to dynamically allocated ckernel */
     ckernel_prefix *kernel;
     /**
-     * How many bytes in the kernel data. Because the
-     * kernel data must be movable, one may move the
-     * data somewhere else, and then free the kernel memory
+     * How many bytes in the ckernel. Because the
+     * ckernel data must be movable, one may move the
+     * data somewhere else, and then free the ckernel memory
      * without calling the kernel destructor.
      *
      * This allows for ckernels which are not complete,
@@ -38,7 +38,11 @@ struct ckernel_instance {
      * it to handle the elements.
      */
     size_t kernel_size;
-    /** Pointer to a function for freeing 'kernel'. */
+    /**
+     * Pointer to a function for freeing the
+     * memory of 'kernel'. Before calling this,
+     * one should first call the ckernel destructor.
+     */
     void (*free_func)(void *);
 };
 
