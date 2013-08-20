@@ -16,6 +16,7 @@
 
 using namespace std;
 
+#if 0
 namespace // nameless
 {
     void* ptr_offset(void* ptr, std::ptrdiff_t offset)
@@ -411,7 +412,6 @@ std::string dynd::get_binary_function_adapter_unique_id_string(uint64_t unique_i
 }
     
     
-#if 0
 namespace // nameless
 {
 // snippets of code to generate the machine code for the adapter
