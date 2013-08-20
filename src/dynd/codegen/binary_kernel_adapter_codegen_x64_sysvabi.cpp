@@ -411,6 +411,7 @@ std::string dynd::get_binary_function_adapter_unique_id_string(uint64_t unique_i
 }
     
     
+#if 0
 namespace // nameless
 {
 // snippets of code to generate the machine code for the adapter
@@ -539,5 +540,6 @@ dynd::binary_operation_pair_t dynd::codegen_binary_function_adapter(const memory
     // releasing memory (it acts as RAII, kind of -- exception safe as well)
     return binary_operation_pair_t();
 }
+#endif // if 0
 
 #endif // DYND_CALL_SYSV_X64
