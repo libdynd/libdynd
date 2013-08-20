@@ -10,6 +10,8 @@
 
 #include <stdexcept>
 
+#if 0
+
 namespace dynd
 {
 
@@ -46,6 +48,7 @@ binary_operation_pair_t codegen_binary_function_adapter(
 }
 
 }
+#endif
 
 #endif
 
