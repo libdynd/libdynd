@@ -226,6 +226,7 @@ set(libdynd_SRC
     src/dynd/kernels/buffered_binary_kernels.cpp
     src/dynd/kernels/bytes_assignment_kernels.cpp
     src/dynd/kernels/byteswap_kernels.cpp
+    src/dynd/kernels/ckernel_deferred.cpp
     src/dynd/kernels/comparison_kernels.cpp
     src/dynd/kernels/date_assignment_kernels.cpp
     src/dynd/kernels/datetime_assignment_kernels.cpp

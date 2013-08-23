@@ -46,6 +46,7 @@ set(tests_SRC
     types/test_tuple_type.cpp
     types/test_var_dim_type.cpp
     gfunc/test_callable.cpp
+    gfunc/test_ckernel_deferred.cpp
     array/test_json_formatter.cpp
     array/test_json_parser.cpp
     array/test_array.cpp

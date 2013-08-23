@@ -8,7 +8,7 @@
 
 #include <dynd/config.hpp>
 #include <dynd/types/base_type.hpp>
-#include <dynd/kernels/ckernel_prefix.hpp>
+#include <dynd/kernels/ckernel_builder.hpp>
 
 namespace dynd {
 
@@ -21,23 +21,24 @@ enum deferred_ckernel_funcproto_t {
 /**
  * Function prototype for instantiating a ckernel from a
  * ckernel_deferred (ckd). To use this function, the
- * caller should first allocate the appropriate
- * amount of memory (ckd->ckernel_size) with the alignment
- * required (sizeof(void *)). When the data types of the kernel
- * require metadata, such as for 'strided' or 'var' dimension types,
- * the metadata must be provided as well.
+ * caller should first allocate a `ckernel_builder` instance,
+ * either from C++ normally or by reserving appropriately aligned/sized
+ * data and calling the C function constructor dynd provides. When the
+ * data types of the kernel require metadata, such as for 'strided'
+ * or 'var' dimension types, the metadata must be provided as well.
  *
  * \param self_data_ptr  This is ckd->data_ptr.
- * \param out_ckernel  This is where the ckernel is placed.
+ * \param out_ckb  A ckernel_builder instance where the kernel is placed.
+ * \param ckb_offset  The offset into the output ckernel_builder `out_ckb`
+ *                    where the kernel should be placed.
  * \param dynd_metadata  An array of dynd metadata pointers,
  *                       corresponding to ckd->data_dynd_types.
  * \param kerntype  Either dynd::kernel_request_single or dynd::kernel_request_strided,
  *                  as required by the caller.
  */
 typedef void (*instantiate_deferred_ckernel_fn_t)(void *self_data_ptr,
-                dynd::ckernel_prefix *out_ckernel,
+                dynd::ckernel_builder *out_ckb, size_t ckb_offset,
                 const char *const* dynd_metadata, uint32_t kerntype);
-
 
 
 /**
@@ -54,8 +55,6 @@ typedef void (*instantiate_deferred_ckernel_fn_t)(void *self_data_ptr,
 struct ckernel_deferred {
     /** A value from the enumeration `deferred_ckernel_funcproto_t`. */
     size_t ckernel_funcproto;
-    /** The size of the ckernel which this object instantiates. */
-    size_t ckernel_size;
     /**
      * The number of types in the data_types array. This is used to
      * determine how many operands there are for the `expr_operation_funcproto`,
@@ -88,8 +87,39 @@ struct ckernel_deferred {
      * freeing any additional resources it might contain.
      */
     void (*free_func)(void *self_data_ptr);
+
+    // Default to all NULL, so the destructor works correctly
+    inline ckernel_deferred()
+        : ckernel_funcproto(0), data_types_size(0), data_dynd_types(0),
+            data_ptr(0), instantiate_func(0), free_func(0)
+    {
+    }
+
+    // If it contains a deferred ckernel, free it
+    inline ~ckernel_deferred()
+    {
+        if (free_func && data_ptr) {
+            free_func(data_ptr);
+        }
+    }
 };
 
+/**
+ * Creates a deferred ckernel which does the assignment from
+ * data of src_tp to dst_tp.
+ *
+ * \param dst_tp  The type of the destination.
+ * \param src_tp  The type of the source.
+ * \param funcproto  The function prototype to generate (must be
+ *                   unary_operation_funcproto or expr_operation_funcproto).
+ * \param errmode  The error mode to use for the assignment.
+ * \param out_ckd  The output `ckernel_deferred` struct to be populated.
+ * \param ectx  The evaluation context.
+ */
+void make_ckernel_deferred_from_assignment(const ndt::type& dst_tp, const ndt::type& src_tp,
+                deferred_ckernel_funcproto_t funcproto,
+                assign_error_mode errmode, ckernel_deferred& out_ckd,
+                const dynd::eval::eval_context *ectx = &dynd::eval::default_eval_context);
 
 } // namespace dynd
 
