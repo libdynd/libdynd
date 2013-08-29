@@ -14,6 +14,7 @@
 #include <dynd/kernels/ckernel_deferred.hpp>
 #include <dynd/kernels/assignment_kernels.hpp>
 #include <dynd/kernels/expr_kernel_generator.hpp>
+#include <dynd/array.hpp>
 
 using namespace std;
 using namespace dynd;
@@ -88,4 +89,44 @@ TEST(CKernelDeferred, AssignmentAsExpr) {
     EXPECT_EQ(123, ints_out[0]);
     EXPECT_EQ(4567, ints_out[1]);
     EXPECT_EQ(891029, ints_out[2]);
+}
+
+TEST(CKernelDeferred, Expr) {
+    ckernel_deferred ckd;
+    // Create a deferred ckernel for adding two ints
+    ndt::type add_ints_type = (nd::array((int)0) + nd::array((int)0)).get_type();
+    make_ckernel_deferred_from_assignment(ndt::make_type<int>(), add_ints_type,
+                    expr_operation_funcproto, assign_error_default, ckd);
+    // Validate that its types, etc are set right
+    ASSERT_EQ(expr_operation_funcproto, ckd.ckernel_funcproto);
+    ASSERT_EQ(3, ckd.data_types_size);
+    ASSERT_EQ(ndt::make_type<int>(), ndt::type(ckd.data_dynd_types[0], true));
+    ASSERT_EQ(ndt::make_type<int>(), ndt::type(ckd.data_dynd_types[1], true));
+    ASSERT_EQ(ndt::make_type<int>(), ndt::type(ckd.data_dynd_types[1], true));
+
+    const char *dynd_metadata[3] = {NULL, NULL, NULL};
+
+    // Instantiate a single ckernel
+    ckernel_builder ckb;
+    ckd.instantiate_func(ckd.data_ptr, &ckb, 0, dynd_metadata, kernel_request_single);
+    int int_out = 0;
+    int int_in1 = 1, int_in2 = 3;
+    int *int_in_ptr[2] = {&int_in1, &int_in2};
+    expr_single_operation_t usngo = ckb.get()->get_function<expr_single_operation_t>();
+    usngo(reinterpret_cast<char *>(&int_out), reinterpret_cast<char **>(int_in_ptr), ckb.get());
+    EXPECT_EQ(4, int_out);
+
+    // Instantiate a strided ckernel
+    ckb.reset();
+    ckd.instantiate_func(ckd.data_ptr, &ckb, 0, dynd_metadata, kernel_request_strided);
+    int ints_out[3] = {0, 0, 0};
+    int ints_in1[3] = {1,2,3}, ints_in2[3] = {5,-210,1234};
+    int *ints_in_ptr[2] = {ints_in1, ints_in2};
+    intptr_t ints_in_strides[2] = {sizeof(int), sizeof(int)};
+    expr_strided_operation_t ustro = ckb.get()->get_function<expr_strided_operation_t>();
+    ustro(reinterpret_cast<char *>(ints_out), sizeof(int),
+                    reinterpret_cast<char **>(ints_in_ptr), ints_in_strides, 3, ckb.get());
+    EXPECT_EQ(6, ints_out[0]);
+    EXPECT_EQ(-208, ints_out[1]);
+    EXPECT_EQ(1237, ints_out[2]);
 }

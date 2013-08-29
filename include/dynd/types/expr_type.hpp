@@ -72,6 +72,10 @@ public:
 
     ndt::type with_replaced_storage_type(const ndt::type& replacement_type) const;
 
+    inline const expr_kernel_generator& get_kgen() const {
+        return *m_kgen;
+    }
+
     size_t make_operand_to_value_assignment_kernel(
                     ckernel_builder *out, size_t offset_out,
                     const char *dst_metadata, const char *src_metadata,
