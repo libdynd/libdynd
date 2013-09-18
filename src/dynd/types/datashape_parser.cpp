@@ -58,11 +58,13 @@ namespace {
             builtin_types["int32"] = ndt::make_type<int32_t>();
             builtin_types["int64"] = ndt::make_type<int64_t>();
             builtin_types["int128"] = ndt::make_type<dynd_int128>();
+            builtin_types["intptr"] = ndt::make_type<intptr_t>();
             builtin_types["uint8"] = ndt::make_type<uint8_t>();
             builtin_types["uint16"] = ndt::make_type<uint16_t>();
             builtin_types["uint32"] = ndt::make_type<uint32_t>();
             builtin_types["uint64"] = ndt::make_type<uint64_t>();
             builtin_types["uint128"] = ndt::make_type<dynd_uint128>();
+            builtin_types["uintptr"] = ndt::make_type<uintptr_t>();
             builtin_types["float16"] = ndt::make_type<dynd_float16>();
             builtin_types["float32"] = ndt::make_type<float>();
             builtin_types["float64"] = ndt::make_type<double>();

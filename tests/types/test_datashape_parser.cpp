@@ -29,11 +29,13 @@ TEST(DataShapeParser, Basic) {
     EXPECT_EQ(ndt::make_type<int32_t>(), type_from_datashape("int32"));
     EXPECT_EQ(ndt::make_type<int64_t>(), type_from_datashape("int64"));
     EXPECT_EQ(ndt::make_type<dynd_int128>(), type_from_datashape("int128"));
+    EXPECT_EQ(ndt::make_type<intptr_t>(), type_from_datashape("intptr"));
     EXPECT_EQ(ndt::make_type<uint8_t>(), type_from_datashape("uint8"));
     EXPECT_EQ(ndt::make_type<uint16_t>(), type_from_datashape("uint16"));
     EXPECT_EQ(ndt::make_type<uint32_t>(), type_from_datashape("uint32"));
     EXPECT_EQ(ndt::make_type<uint64_t>(), type_from_datashape("uint64"));
     EXPECT_EQ(ndt::make_type<dynd_uint128>(), type_from_datashape("uint128"));
+    EXPECT_EQ(ndt::make_type<uintptr_t>(), type_from_datashape("uintptr"));
     EXPECT_EQ(ndt::make_type<dynd_float16>(), type_from_datashape("float16"));
     EXPECT_EQ(ndt::make_type<float>(), type_from_datashape("float32"));
     EXPECT_EQ(ndt::make_type<double>(), type_from_datashape("float64"));
