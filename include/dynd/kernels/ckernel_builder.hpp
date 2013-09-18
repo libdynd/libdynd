@@ -25,7 +25,7 @@ namespace dynd {
 class ckernel_builder {
     // Pointer to the kernel function pointers + data
     intptr_t *m_data;
-    size_t m_capacity;
+    intptr_t m_capacity;
     // When the amount of data is small, this static data is used,
     // otherwise dynamic memory is allocated when it gets too big
     intptr_t m_static_data[16];
@@ -78,7 +78,7 @@ public:
      *       that you're a leaf kernel, use ensure_capacity_leaf
      *       instead.
      */
-    inline void ensure_capacity(size_t requested_capacity) {
+    inline void ensure_capacity(intptr_t requested_capacity) {
         ensure_capacity_leaf(requested_capacity +
                         sizeof(ckernel_prefix));
     }
@@ -89,7 +89,7 @@ public:
      * should only be called during the construction phase
      * of the kernel when constructing a leaf kernel.
      */
-    void ensure_capacity_leaf(size_t requested_capacity);
+    void ensure_capacity_leaf(intptr_t requested_capacity);
 
     /**
      * For use during construction, get's the kernel component
@@ -139,7 +139,7 @@ public:
         out->free_func = free;
     }
 
-    friend int ckernel_builder_ensure_capacity_leaf(void *ckb, size_t requested_capacity);
+    friend int ckernel_builder_ensure_capacity_leaf(void *ckb, intptr_t requested_capacity);
 };
 
 /**
@@ -202,13 +202,13 @@ inline void ckernel_builder_reset(void *ckb)
  *
  * \returns  0 on success, -1 on memory allocation failure.
  */
-inline int ckernel_builder_ensure_capacity_leaf(void *ckb, size_t requested_capacity)
+inline int ckernel_builder_ensure_capacity_leaf(void *ckb, intptr_t requested_capacity)
 {
     ckernel_builder *ckb_ptr = reinterpret_cast<ckernel_builder *>(ckb);
     if (ckb_ptr->m_capacity < requested_capacity) {
         // Grow by a factor of 1.5
         // https://github.com/facebook/folly/blob/master/folly/docs/FBVector.md
-        size_t grown_capacity = ckb_ptr->m_capacity * 3 / 2;
+        intptr_t grown_capacity = ckb_ptr->m_capacity * 3 / 2;
         if (requested_capacity < grown_capacity) {
             requested_capacity = grown_capacity;
         }
@@ -255,13 +255,13 @@ inline int ckernel_builder_ensure_capacity_leaf(void *ckb, size_t requested_capa
  *
  * \returns  0 on success, -1 on memory allocation failure.
  */
-inline int ckernel_builder_ensure_capacity(void *ckb, size_t requested_capacity)
+inline int ckernel_builder_ensure_capacity(void *ckb, intptr_t requested_capacity)
 {
     return ckernel_builder_ensure_capacity_leaf(ckb,
                     requested_capacity + sizeof(ckernel_prefix));
 }
 
-inline void ckernel_builder::ensure_capacity_leaf(size_t requested_capacity)
+inline void ckernel_builder::ensure_capacity_leaf(intptr_t requested_capacity)
 {
     if (ckernel_builder_ensure_capacity_leaf(this, requested_capacity) < 0) {
         throw std::bad_alloc();

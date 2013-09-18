@@ -32,6 +32,12 @@ struct lowlevel_api_t {
     void (*base_type_decref)(const base_type *bd);
     // Get the base_type_members struct from a base type
     const base_type_members *(*get_base_type_members)(const base_type *bd);
+    // constructor, destructor, member functions of ckernel_builder
+    void (*ckernel_builder_construct)(void *ckb);
+    void (*ckernel_builder_destruct)(void *ckb);
+    void (*ckernel_builder_reset)(void *ckb);
+    int (*ckernel_builder_ensure_capacity_leaf)(void *ckb, intptr_t requested_capacity);
+    int (*ckernel_builder_ensure_capacity)(void *ckb, intptr_t requested_capacity);
 };
 
 } // namespace dynd

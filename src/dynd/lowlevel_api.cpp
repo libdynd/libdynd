@@ -23,6 +23,11 @@ namespace {
         &base_type_incref,
         &base_type_decref,
         &get_base_type_members,
+        &ckernel_builder_construct,
+        &ckernel_builder_destruct,
+        &ckernel_builder_reset,
+        &ckernel_builder_ensure_capacity_leaf,
+        &ckernel_builder_ensure_capacity,
     };
 } // anonymous namespace
 
