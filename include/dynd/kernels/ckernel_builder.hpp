@@ -8,7 +8,6 @@
 
 #include <dynd/config.hpp>
 #include <dynd/kernels/ckernel_prefix.hpp>
-#include <dynd/kernels/ckernel_instance.hpp>
 
 namespace dynd {
 
@@ -103,40 +102,6 @@ public:
 
     ckernel_prefix *get() const {
         return reinterpret_cast<ckernel_prefix *>(m_data);
-    }
-
-    /**
-     * Moves the kernel data held by this ckernel builder
-     * into the provided ckernel_instance struct. Ownership
-     * is transferred to 'cki'.
-     *
-     * Because the kernel size is not tracked by the ckernel_builder
-     * object, but rather produced by the factory functions, it
-     * is required as a parameter here.
-     *
-     * \param out  The ckernel_instance to populate.
-     * \param kernel_size  The size, in bytes, of the ckernel_builder.
-     */
-    void move_into_cki(ckernel_instance *out, size_t kernel_size) {
-        if (using_static_data()) {
-            // Allocate some memory and move the kernel data into it
-            out->kernel = reinterpret_cast<ckernel_prefix *>(malloc(kernel_size));
-            if (out->kernel == NULL) {
-                out->free_func = NULL;
-                throw std::bad_alloc();
-            }
-            memcpy(out->kernel, m_data, kernel_size);
-            memset(m_static_data, 0, sizeof(m_static_data));
-        } else {
-            // Use the existing kernel data memory
-            out->kernel = reinterpret_cast<ckernel_prefix *>(m_data);
-            // Switch this kernel back to an empty static data kernel
-            m_data = &m_static_data[0];
-            m_capacity = sizeof(m_static_data);
-            memset(m_static_data, 0, sizeof(m_static_data));
-        }
-        out->kernel_size = kernel_size;
-        out->free_func = free;
     }
 
     friend int ckernel_builder_ensure_capacity_leaf(void *ckb, intptr_t requested_capacity);
