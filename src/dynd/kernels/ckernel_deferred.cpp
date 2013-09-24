@@ -129,7 +129,7 @@ static void instantiate_expr_ckernel(void *self_data_ptr,
     const expr_kernel_generator& kgen = data->expr_type->get_kgen();
     kgen.make_expr_kernel(out_ckb, ckb_offset,
                     ndt::type(data->data_types[0], true), dynd_metadata[0],
-                    data->data_types_size - 1, reinterpret_cast<const ndt::type *>(data->data_types) + 1,
+                    data->data_types_size - 1, reinterpret_cast<const ndt::type *>(data->data_types + 1),
                     const_cast<const char **>(dynd_metadata) + 1, (kernel_request_t)kerntype, &data->ectx);
 }
 
@@ -204,3 +204,4 @@ void dynd::make_ckernel_deferred_from_assignment(const ndt::type& dst_tp, const 
         throw runtime_error(ss.str());
     }
 }
+

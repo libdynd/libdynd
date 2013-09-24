@@ -25,7 +25,7 @@ TEST(CKernelDeferred, Assignment) {
     make_ckernel_deferred_from_assignment(ndt::make_type<int>(), ndt::make_fixedstring(16),
                     unary_operation_funcproto, assign_error_default, ckd);
     // Validate that its types, etc are set right
-    ASSERT_EQ(unary_operation_funcproto, ckd.ckernel_funcproto);
+    ASSERT_EQ(unary_operation_funcproto, (deferred_ckernel_funcproto_t)ckd.ckernel_funcproto);
     ASSERT_EQ(2u, ckd.data_types_size);
     ASSERT_EQ(ndt::make_type<int>(), ndt::type(ckd.data_dynd_types[0], true));
     ASSERT_EQ(ndt::make_fixedstring(16), ndt::type(ckd.data_dynd_types[1], true));
@@ -60,7 +60,7 @@ TEST(CKernelDeferred, AssignmentAsExpr) {
     make_ckernel_deferred_from_assignment(ndt::make_type<int>(), ndt::make_fixedstring(16),
                     expr_operation_funcproto, assign_error_default, ckd);
     // Validate that its types, etc are set right
-    ASSERT_EQ(expr_operation_funcproto, ckd.ckernel_funcproto);
+    ASSERT_EQ(expr_operation_funcproto, (deferred_ckernel_funcproto_t)ckd.ckernel_funcproto);
     ASSERT_EQ(2u, ckd.data_types_size);
     ASSERT_EQ(ndt::make_type<int>(), ndt::type(ckd.data_dynd_types[0], true));
     ASSERT_EQ(ndt::make_fixedstring(16), ndt::type(ckd.data_dynd_types[1], true));
@@ -98,7 +98,7 @@ TEST(CKernelDeferred, Expr) {
     make_ckernel_deferred_from_assignment(ndt::make_type<int>(), add_ints_type,
                     expr_operation_funcproto, assign_error_default, ckd);
     // Validate that its types, etc are set right
-    ASSERT_EQ(expr_operation_funcproto, ckd.ckernel_funcproto);
+    ASSERT_EQ(expr_operation_funcproto, (deferred_ckernel_funcproto_t)ckd.ckernel_funcproto);
     ASSERT_EQ(3u, ckd.data_types_size);
     ASSERT_EQ(ndt::make_type<int>(), ndt::type(ckd.data_dynd_types[0], true));
     ASSERT_EQ(ndt::make_type<int>(), ndt::type(ckd.data_dynd_types[1], true));
@@ -111,9 +111,10 @@ TEST(CKernelDeferred, Expr) {
     ckd.instantiate_func(ckd.data_ptr, &ckb, 0, dynd_metadata, kernel_request_single);
     int int_out = 0;
     int int_in1 = 1, int_in2 = 3;
-    int *int_in_ptr[2] = {&int_in1, &int_in2};
+    char *int_in_ptr[2] = {reinterpret_cast<char *>(&int_in1),
+                        reinterpret_cast<char *>(&int_in2)};
     expr_single_operation_t usngo = ckb.get()->get_function<expr_single_operation_t>();
-    usngo(reinterpret_cast<char *>(&int_out), reinterpret_cast<char **>(int_in_ptr), ckb.get());
+    usngo(reinterpret_cast<char *>(&int_out), int_in_ptr, ckb.get());
     EXPECT_EQ(4, int_out);
 
     // Instantiate a strided ckernel
@@ -121,11 +122,12 @@ TEST(CKernelDeferred, Expr) {
     ckd.instantiate_func(ckd.data_ptr, &ckb, 0, dynd_metadata, kernel_request_strided);
     int ints_out[3] = {0, 0, 0};
     int ints_in1[3] = {1,2,3}, ints_in2[3] = {5,-210,1234};
-    int *ints_in_ptr[2] = {ints_in1, ints_in2};
+    char *ints_in_ptr[2] = {reinterpret_cast<char *>(&ints_in1),
+                        reinterpret_cast<char *>(&ints_in2)};
     intptr_t ints_in_strides[2] = {sizeof(int), sizeof(int)};
     expr_strided_operation_t ustro = ckb.get()->get_function<expr_strided_operation_t>();
     ustro(reinterpret_cast<char *>(ints_out), sizeof(int),
-                    reinterpret_cast<char **>(ints_in_ptr), ints_in_strides, 3, ckb.get());
+                    ints_in_ptr, ints_in_strides, 3, ckb.get());
     EXPECT_EQ(6, ints_out[0]);
     EXPECT_EQ(-208, ints_out[1]);
     EXPECT_EQ(1237, ints_out[2]);
