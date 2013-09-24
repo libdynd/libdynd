@@ -26,7 +26,7 @@ TEST(CKernelDeferred, Assignment) {
                     unary_operation_funcproto, assign_error_default, ckd);
     // Validate that its types, etc are set right
     ASSERT_EQ(unary_operation_funcproto, ckd.ckernel_funcproto);
-    ASSERT_EQ(2, ckd.data_types_size);
+    ASSERT_EQ(2u, ckd.data_types_size);
     ASSERT_EQ(ndt::make_type<int>(), ndt::type(ckd.data_dynd_types[0], true));
     ASSERT_EQ(ndt::make_fixedstring(16), ndt::type(ckd.data_dynd_types[1], true));
 
@@ -61,7 +61,7 @@ TEST(CKernelDeferred, AssignmentAsExpr) {
                     expr_operation_funcproto, assign_error_default, ckd);
     // Validate that its types, etc are set right
     ASSERT_EQ(expr_operation_funcproto, ckd.ckernel_funcproto);
-    ASSERT_EQ(2, ckd.data_types_size);
+    ASSERT_EQ(2u, ckd.data_types_size);
     ASSERT_EQ(ndt::make_type<int>(), ndt::type(ckd.data_dynd_types[0], true));
     ASSERT_EQ(ndt::make_fixedstring(16), ndt::type(ckd.data_dynd_types[1], true));
 
@@ -99,7 +99,7 @@ TEST(CKernelDeferred, Expr) {
                     expr_operation_funcproto, assign_error_default, ckd);
     // Validate that its types, etc are set right
     ASSERT_EQ(expr_operation_funcproto, ckd.ckernel_funcproto);
-    ASSERT_EQ(3, ckd.data_types_size);
+    ASSERT_EQ(3u, ckd.data_types_size);
     ASSERT_EQ(ndt::make_type<int>(), ndt::type(ckd.data_dynd_types[0], true));
     ASSERT_EQ(ndt::make_type<int>(), ndt::type(ckd.data_dynd_types[1], true));
     ASSERT_EQ(ndt::make_type<int>(), ndt::type(ckd.data_dynd_types[1], true));
