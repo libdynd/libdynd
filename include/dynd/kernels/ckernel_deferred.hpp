@@ -36,8 +36,8 @@ enum deferred_ckernel_funcproto_t {
  * \param kerntype  Either dynd::kernel_request_single or dynd::kernel_request_strided,
  *                  as required by the caller.
  */
-typedef void (*instantiate_deferred_ckernel_fn_t)(void *self_data_ptr,
-                dynd::ckernel_builder *out_ckb, size_t ckb_offset,
+typedef intptr_t (*instantiate_deferred_ckernel_fn_t)(void *self_data_ptr,
+                dynd::ckernel_builder *out_ckb, intptr_t ckb_offset,
                 const char *const* dynd_metadata, uint32_t kerntype);
 
 

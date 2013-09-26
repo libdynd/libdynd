@@ -33,13 +33,13 @@ static void delete_unary_assignment_ckernel_deferred_data(void *self_data_ptr)
     delete data;
 }
 
-static void instantiate_unary_assignment_ckernel(void *self_data_ptr,
-                dynd::ckernel_builder *out_ckb, size_t ckb_offset,
+static intptr_t instantiate_unary_assignment_ckernel(void *self_data_ptr,
+                dynd::ckernel_builder *out_ckb, intptr_t ckb_offset,
                 const char *const* dynd_metadata, uint32_t kerntype)
 {
     unary_assignment_ckernel_deferred_data *data =
                     reinterpret_cast<unary_assignment_ckernel_deferred_data *>(self_data_ptr);
-    make_assignment_kernel(out_ckb, ckb_offset,
+    return make_assignment_kernel(out_ckb, ckb_offset,
                     ndt::type(data->data_types[0], true), dynd_metadata[0],
                     ndt::type(data->data_types[1], true), dynd_metadata[1],
                     (kernel_request_t)kerntype, data->errmode, &data->ectx);
@@ -72,8 +72,8 @@ static void unary_as_expr_adapter_strided(
     childop(dst, dst_stride, *src, *src_stride, count, child);
 }
 
-static void instantiate_adapted_expr_assignment_ckernel(void *self_data_ptr,
-                dynd::ckernel_builder *out_ckb, size_t ckb_offset,
+static intptr_t instantiate_adapted_expr_assignment_ckernel(void *self_data_ptr,
+                dynd::ckernel_builder *out_ckb, intptr_t ckb_offset,
                 const char *const* dynd_metadata, uint32_t kerntype)
 {
     unary_assignment_ckernel_deferred_data *data =
@@ -89,7 +89,7 @@ static void instantiate_adapted_expr_assignment_ckernel(void *self_data_ptr,
     } else {
         throw runtime_error("unsupported kernel request in instantiate_expr_assignment_ckernel");
     }
-    make_assignment_kernel(out_ckb, ckb_offset + sizeof(ckernel_prefix),
+    return make_assignment_kernel(out_ckb, ckb_offset + sizeof(ckernel_prefix),
                     ndt::type(data->data_types[0], true), dynd_metadata[0],
                     ndt::type(data->data_types[1], true), dynd_metadata[1],
                     (kernel_request_t)kerntype, data->errmode, &data->ectx);
@@ -120,14 +120,14 @@ static void delete_expr_ckernel_deferred_data(void *self_data_ptr)
     free(data);
 }
 
-static void instantiate_expr_ckernel(void *self_data_ptr,
-                dynd::ckernel_builder *out_ckb, size_t ckb_offset,
+static intptr_t instantiate_expr_ckernel(void *self_data_ptr,
+                dynd::ckernel_builder *out_ckb, intptr_t ckb_offset,
                 const char *const* dynd_metadata, uint32_t kerntype)
 {
     expr_ckernel_deferred_data *data =
                     reinterpret_cast<expr_ckernel_deferred_data *>(self_data_ptr);
     const expr_kernel_generator& kgen = data->expr_type->get_kgen();
-    kgen.make_expr_kernel(out_ckb, ckb_offset,
+    return kgen.make_expr_kernel(out_ckb, ckb_offset,
                     ndt::type(data->data_types[0], true), dynd_metadata[0],
                     data->data_types_size - 1, reinterpret_cast<const ndt::type *>(data->data_types + 1),
                     const_cast<const char **>(dynd_metadata) + 1, (kernel_request_t)kerntype, &data->ectx);
