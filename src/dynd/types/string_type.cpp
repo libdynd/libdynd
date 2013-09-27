@@ -127,7 +127,8 @@ ndt::type string_type::get_canonical_type() const
     return ndt::type(this, true);
 }
 
-void string_type::get_shape(size_t ndim, size_t i, intptr_t *out_shape, const char *DYND_UNUSED(metadata)) const
+void string_type::get_shape(size_t ndim, size_t i, intptr_t *out_shape,
+                const char *DYND_UNUSED(metadata), const char *DYND_UNUSED(data)) const
 {
     out_shape[i] = -1;
     if (i+1 < ndim) {

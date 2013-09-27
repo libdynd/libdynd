@@ -276,15 +276,16 @@ intptr_t ndt::type::get_dim_size(const char *metadata, const char *data) const {
     } else if (get_kind() == struct_kind) {
         return static_cast<const base_struct_type *>(m_extended)->get_field_count();
     } else if (get_ndim() > 0) {
-        size_t ndim = get_ndim();
-        dimvector shape(ndim);
-        m_extended->get_shape(ndim, 0, shape.get(), metadata);
-        return shape[0];
-    } else {
-        std::stringstream ss;
-        ss << "Cannot get the leading dimension size of dynd array with type " << *this;
-        throw std::runtime_error(ss.str());
+        intptr_t dim_size = -1;
+        m_extended->get_shape(1, 0, &dim_size, metadata, data);
+        if (dim_size >= 0) {
+            return dim_size;
+        }
     }
+
+    std::stringstream ss;
+    ss << "Cannot get the leading dimension size of dynd array with type " << *this;
+    throw std::runtime_error(ss.str());
 }
 
 bool ndt::type::data_layout_compatible_with(const ndt::type& rhs) const

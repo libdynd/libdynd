@@ -75,7 +75,7 @@ void groupby_type::print_type(std::ostream& o) const
 }
 
 void groupby_type::get_shape(size_t ndim, size_t i,
-                intptr_t *out_shape, const char *metadata) const
+                intptr_t *out_shape, const char *metadata, const char *DYND_UNUSED(data)) const
 {
     // The first dimension is the groups, the second variable-sized
     out_shape[i] = reinterpret_cast<const categorical_type *>(
@@ -90,7 +90,7 @@ void groupby_type::get_shape(size_t ndim, size_t i,
         ndt::type data_values_tp = m_operand_type.at_single(0, metadata ? &metadata : NULL);
         data_values_tp = data_values_tp.at_single(0, metadata ? &metadata : NULL);
         // Use this to get the rest of the shape
-        data_values_tp.extended()->get_shape(ndim, i + 2, out_shape, metadata);
+        data_values_tp.extended()->get_shape(ndim, i + 2, out_shape, metadata, NULL);
     }
 }
 

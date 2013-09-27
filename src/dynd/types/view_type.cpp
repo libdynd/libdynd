@@ -86,10 +86,11 @@ void view_type::print_type(std::ostream& o) const
 }
 
 void view_type::get_shape(size_t ndim, size_t i,
-                intptr_t *out_shape, const char *DYND_UNUSED(metadata)) const
+                intptr_t *out_shape, const char *DYND_UNUSED(metadata),
+                const char *DYND_UNUSED(data)) const
 {
     if (!m_value_type.is_builtin()) {
-        m_value_type.extended()->get_shape(ndim, i, out_shape, NULL);
+        m_value_type.extended()->get_shape(ndim, i, out_shape, NULL, NULL);
     } else {
         stringstream ss;
         ss << "requested too many dimensions from type " << m_value_type;

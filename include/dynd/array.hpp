@@ -314,7 +314,8 @@ public:
     }
     inline void get_shape(intptr_t *out_shape) const {
         if (!get_ndo()->is_builtin_type() && get_ndo()->m_type->get_ndim() > 0) {
-            get_ndo()->m_type->get_shape(get_ndo()->m_type->get_ndim(), 0, out_shape, get_ndo_meta());
+            get_ndo()->m_type->get_shape(get_ndo()->m_type->get_ndim(), 0, out_shape,
+                            get_ndo_meta(), get_ndo()->m_data_pointer);
         }
     }
 

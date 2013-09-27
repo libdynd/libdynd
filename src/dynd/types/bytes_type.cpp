@@ -74,9 +74,15 @@ ndt::type bytes_type::get_canonical_type() const
 
 
 void bytes_type::get_shape(size_t ndim, size_t i,
-                intptr_t *out_shape, const char *DYND_UNUSED(metadata)) const
+                intptr_t *out_shape, const char *DYND_UNUSED(metadata),
+                const char *data) const
 {
-    out_shape[i] = -1;
+    if (data == NULL) {
+        out_shape[i] = -1;
+    } else {
+        const bytes_type_data *d = reinterpret_cast<const bytes_type_data *>(data);
+        out_shape[i] = d->end - d->begin;
+    }
     if (i+1 < ndim) {
         stringstream ss;
         ss << "requested too many dimensions from type " << ndt::type(this, true);

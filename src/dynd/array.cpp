@@ -1226,7 +1226,7 @@ nd::array nd::eval_raw_copy(const ndt::type& dt, const char *metadata, const cha
     array result;
     if (ndim > 0) {
         dimvector shape(ndim);
-        dt.extended()->get_shape(ndim, 0, shape.get(), metadata);
+        dt.extended()->get_shape(ndim, 0, shape.get(), metadata, data);
         result.set(make_array_memory_block(cdt, ndim, shape.get()));
         // Reorder strides of output strided dimensions in a KEEPORDER fashion
         if (dt.get_type_id() == strided_dim_type_id) {

@@ -104,7 +104,8 @@ static void format_uniform_dim_datashape(std::ostream& o,
         }
         case var_dim_type_id: {
             const var_dim_type *vad = static_cast<const var_dim_type *>(dt.extended());
-            if (data == NULL) {
+            const char *child_data = NULL;
+            if (data == NULL || metadata == NULL) {
                 o << "var, ";
             } else {
                 const var_dim_type_data *d = reinterpret_cast<const var_dim_type_data *>(data);
@@ -112,10 +113,15 @@ static void format_uniform_dim_datashape(std::ostream& o,
                     o << "var, ";
                 } else {
                     o << d->size << ", ";
+                    if (d->size == 1) {
+                        const var_dim_type_metadata *md = reinterpret_cast<const var_dim_type_metadata *>(metadata);
+                        child_data = d->begin + md->offset;
+                    }
                 }
             }
             format_datashape(o, vad->get_element_type(),
-                            metadata ? (metadata + sizeof(var_dim_type_metadata)) : NULL, NULL,
+                            metadata ? (metadata + sizeof(var_dim_type_metadata)) : NULL,
+                            child_data,
                             indent, multiline, identifier);
             break;
         }

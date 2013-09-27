@@ -57,11 +57,12 @@ void convert_type::print_type(std::ostream& o) const
     o << ">";
 }
 
-void convert_type::get_shape(size_t ndim, size_t i, intptr_t *out_shape, const char *metadata) const
+void convert_type::get_shape(size_t ndim, size_t i, intptr_t *out_shape,
+                const char *metadata, const char *DYND_UNUSED(data)) const
 {
     // Get the shape from the operand type
     if (!m_operand_type.is_builtin()) {
-        m_operand_type.extended()->get_shape(ndim, i, out_shape, metadata);
+        m_operand_type.extended()->get_shape(ndim, i, out_shape, metadata, NULL);
     } else {
         stringstream ss;
         ss << "requested too many dimensions from type " << ndt::type(this, true);

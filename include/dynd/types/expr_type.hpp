@@ -64,7 +64,7 @@ public:
                     bool leading_dimension, char **inout_data,
                     memory_block_data **inout_dataref) const;
 
-    void get_shape(size_t ndim, size_t i, intptr_t *out_shape, const char *metadata) const;
+        void get_shape(size_t ndim, size_t i, intptr_t *out_shape, const char *metadata, const char *data) const;
 
     bool is_lossless_assignment(const ndt::type& dst_tp, const ndt::type& src_tp) const;
 

@@ -341,15 +341,29 @@ intptr_t var_dim_type::get_dim_size(const char *DYND_UNUSED(metadata), const cha
     }
 }
 
-void var_dim_type::get_shape(size_t ndim, size_t i, intptr_t *out_shape, const char *metadata) const
+void var_dim_type::get_shape(size_t ndim, size_t i, intptr_t *out_shape,
+                const char *metadata, const char *data) const
 {
-    out_shape[i] = -1;
+    if (metadata == NULL || data == NULL) {
+        out_shape[i] = -1;
+        data = NULL;
+    } else {
+        const var_dim_type_metadata *md = reinterpret_cast<const var_dim_type_metadata *>(metadata);
+        const var_dim_type_data *d = reinterpret_cast<const var_dim_type_data *>(data);
+        out_shape[i] = d->size;
+        if (d->size == 1 && d->begin != NULL) {
+            data = d->begin + md->offset;
+        } else {
+            data = NULL;
+        }
+    }
 
     // Process the later shape values
     if (i+1 < ndim) {
         if (!m_element_tp.is_builtin()) {
             m_element_tp.extended()->get_shape(ndim, i+1, out_shape,
-                            metadata ? (metadata + sizeof(var_dim_type_metadata)) : NULL);
+                            metadata ? (metadata + sizeof(var_dim_type_metadata)) : NULL,
+                            data);
         } else {
             stringstream ss;
             ss << "requested too many dimensions from type " << ndt::type(this, true);

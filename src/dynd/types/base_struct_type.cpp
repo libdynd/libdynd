@@ -15,7 +15,8 @@ using namespace dynd;
 base_struct_type::~base_struct_type() {
 }
 
-void base_struct_type::get_shape(size_t ndim, size_t i, intptr_t *out_shape, const char *metadata) const
+void base_struct_type::get_shape(size_t ndim, size_t i, intptr_t *out_shape,
+                const char *metadata, const char *DYND_UNUSED(data)) const
 {
     out_shape[i] = m_field_count;
     if (i < ndim-1) {
@@ -27,7 +28,8 @@ void base_struct_type::get_shape(size_t ndim, size_t i, intptr_t *out_shape, con
             const ndt::type& ft = field_types[i];
             if (!ft.is_builtin()) {
                 ft.extended()->get_shape(ndim, i+1, tmpshape.get(),
-                                metadata ? (metadata + metadata_offsets[fi]) : NULL);
+                                metadata ? (metadata + metadata_offsets[fi]) : NULL,
+                                NULL);
             } else {
                 stringstream ss;
                 ss << "requested too many dimensions from type " << ft;

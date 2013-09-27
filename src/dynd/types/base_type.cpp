@@ -100,7 +100,8 @@ ndt::type base_type::get_type_at_dimension(char **DYND_UNUSED(inout_metadata), s
 
 void base_type::get_shape(size_t DYND_UNUSED(ndim), size_t DYND_UNUSED(i),
                 intptr_t *DYND_UNUSED(out_shape),
-                const char *DYND_UNUSED(metadata)) const
+                const char *DYND_UNUSED(metadata),
+                const char *DYND_UNUSED(data)) const
 {
     // Default to scalar behavior
     stringstream ss;

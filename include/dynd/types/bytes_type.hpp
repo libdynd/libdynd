@@ -52,7 +52,7 @@ public:
     bool is_unique_data_owner(const char *metadata) const;
     ndt::type get_canonical_type() const;
 
-    void get_shape(size_t ndim, size_t i, intptr_t *out_shape, const char *metadata) const;
+        void get_shape(size_t ndim, size_t i, intptr_t *out_shape, const char *metadata, const char *data) const;
 
     bool is_lossless_assignment(const ndt::type& dst_tp, const ndt::type& src_tp) const;
 

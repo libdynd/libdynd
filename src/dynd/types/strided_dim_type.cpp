@@ -242,20 +242,25 @@ intptr_t strided_dim_type::get_dim_size(const char *metadata, const char *DYND_U
 }
 
 void strided_dim_type::get_shape(size_t ndim, size_t i,
-                intptr_t *out_shape, const char *metadata) const
+                intptr_t *out_shape, const char *metadata, const char *data) const
 {
     if (metadata) {
         const strided_dim_type_metadata *md = reinterpret_cast<const strided_dim_type_metadata *>(metadata);
         out_shape[i] = md->size;
+        if (md->size != 1) {
+            data = NULL;
+        }
     } else {
         out_shape[i] = -1;
+        data = NULL;
     }
 
     // Process the later shape values
     if (i+1 < ndim) {
         if (!m_element_tp.is_builtin()) {
             m_element_tp.extended()->get_shape(ndim, i+1, out_shape,
-                            metadata ? (metadata + sizeof(strided_dim_type_metadata)) : NULL);
+                            metadata ? (metadata + sizeof(strided_dim_type_metadata)) : NULL,
+                            data);
         } else {
             stringstream ss;
             ss << "requested too many dimensions from type " << ndt::type(this, true);

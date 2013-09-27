@@ -147,7 +147,8 @@ intptr_t expr_type::apply_linear_index(size_t nindices, const irange *indices, c
     }
 }
 
-void expr_type::get_shape(size_t ndim, size_t i, intptr_t *out_shape, const char *metadata) const
+void expr_type::get_shape(size_t ndim, size_t i, intptr_t *out_shape,
+                const char *metadata, const char *DYND_UNUSED(data)) const
 {
     size_t undim = get_ndim();
     // Initialize the shape to all ones
@@ -166,7 +167,8 @@ void expr_type::get_shape(size_t ndim, size_t i, intptr_t *out_shape, const char
         size_t field_undim = dt.get_ndim();
         if (field_undim > 0) {
             dt.extended()->get_shape(field_undim, 0, shape.get(),
-                            metadata ? (metadata + metadata_offsets[fi]) : NULL);
+                            metadata ? (metadata + metadata_offsets[fi]) : NULL,
+                            NULL);
             incremental_broadcast(undim, bcast_shape.get(), field_undim, shape.get());
         }
     }
@@ -178,7 +180,7 @@ void expr_type::get_shape(size_t ndim, size_t i, intptr_t *out_shape, const char
     if (ndim - i > undim) {
         const ndt::type& dt = m_value_type.get_dtype();
         if (!dt.is_builtin()) {
-            dt.extended()->get_shape(ndim, i + undim, out_shape, NULL);
+            dt.extended()->get_shape(ndim, i + undim, out_shape, NULL, NULL);
         } else {
             stringstream ss;
             ss << "requested too many dimensions from type " << ndt::type(this, true);

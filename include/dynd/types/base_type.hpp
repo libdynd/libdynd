@@ -333,10 +333,13 @@ public:
      *
      * The 'metadata' may be NULL, in which case -1 should be used when
      * the shape cannot be determined.
+     * The 'data' may be NULL, and only gets fed deeper when an element
+     * is unique (i.e. the dimension size is 1, it's a pointer type, etc).
      *
      * The output must be pre-initialized to have 'ndim' elements.
      */
-    virtual void get_shape(size_t ndim, size_t i, intptr_t *out_shape, const char *metadata) const;
+    virtual void get_shape(size_t ndim, size_t i, intptr_t *out_shape,
+                    const char *metadata, const char *data) const;
 
     /**
      * Retrieves the strides of the type ndobject instance,

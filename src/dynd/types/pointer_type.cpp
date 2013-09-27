@@ -187,11 +187,18 @@ ndt::type pointer_type::get_type_at_dimension(char **inout_metadata, size_t i, s
     }
 }
 
-void pointer_type::get_shape(size_t ndim, size_t i, intptr_t *out_shape, const char *metadata) const
+void pointer_type::get_shape(size_t ndim, size_t i, intptr_t *out_shape,
+                const char *metadata, const char *data) const
 {
     if (!m_target_tp.is_builtin()) {
+        const char *target_data = NULL;
+        if (metadata != NULL && data != NULL) {
+            const pointer_type_metadata *md = reinterpret_cast<const pointer_type_metadata *>(metadata);
+            target_data = *reinterpret_cast<const char * const *>(data) + md->offset;
+        }
         m_target_tp.extended()->get_shape(ndim, i, out_shape,
-                        metadata ? (metadata + sizeof(pointer_type_metadata)) : NULL);
+                        metadata ? (metadata + sizeof(pointer_type_metadata)) : NULL,
+                        target_data);
     } else {
         stringstream ss;
         ss << "requested too many dimensions from type " << m_target_tp;
