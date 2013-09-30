@@ -145,7 +145,8 @@ nd::array nd::make_strided_array_from_data(const ndt::type& uniform_tp, size_t n
     ndt::type array_type = ndt::make_strided_dim(uniform_tp, ndim);
 
     // Allocate the array metadata and data in one memory block
-    memory_block_ptr result = make_array_memory_block(array_type.extended()->get_metadata_size());
+    memory_block_ptr result = make_array_memory_block(
+                    array_type.get_metadata_size());
 
     // Fill in the preamble metadata
     array_preamble *ndo = reinterpret_cast<array_preamble *>(result.get());
@@ -178,7 +179,7 @@ nd::array nd::make_pod_array(const ndt::type& pod_dt, const void *data)
         stringstream ss;
         ss << "Cannot make a dynd array from raw data using non-POD type " << pod_dt;
         throw runtime_error(ss.str());
-    } else if (pod_dt.extended()->get_metadata_size() != 0) {
+    } else if (pod_dt.get_metadata_size() != 0) {
         stringstream ss;
         ss << "Cannot make a dynd array from raw data using type " << pod_dt;
         ss << " because it has non-empty dynd metadata";
