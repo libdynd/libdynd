@@ -470,7 +470,7 @@ public:
      * \param replace_ndim  The number of array dimensions to include in
      *                      the data type which is replaced.
      */
-    type with_replaced_dtype(const type& replacement_tp, size_t replace_ndim = 0) const;
+    type with_replaced_dtype(const type& replacement_tp, intptr_t replace_ndim = 0) const;
 
     /**
      * Returns a modified type with all expression types replaced with

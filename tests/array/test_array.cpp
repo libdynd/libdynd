@@ -245,7 +245,7 @@ TEST(Array, StdVectorConstructor) {
     // Empty vector
     a = v;
     EXPECT_EQ(ndt::make_strided_dim(ndt::make_type<float>()), a.get_type());
-    EXPECT_EQ(1u, a.get_type().get_ndim());
+    EXPECT_EQ(1, a.get_type().get_ndim());
     EXPECT_EQ(1u, a.get_shape().size());
     EXPECT_EQ(0, a.get_shape()[0]);
     EXPECT_EQ(1u, a.get_strides().size());
@@ -257,7 +257,7 @@ TEST(Array, StdVectorConstructor) {
     }
     a = v;
     EXPECT_EQ(ndt::make_strided_dim(ndt::make_type<float>()), a.get_type());
-    EXPECT_EQ(1u, a.get_type().get_ndim());
+    EXPECT_EQ(1, a.get_type().get_ndim());
     EXPECT_EQ(1u, a.get_shape().size());
     EXPECT_EQ(10, a.get_shape()[0]);
     EXPECT_EQ(1u, a.get_strides().size());
@@ -274,7 +274,7 @@ TEST(Array, StdVectorStringConstructor) {
     // Empty vector
     a = v;
     EXPECT_EQ(ndt::make_strided_dim(ndt::make_string(string_encoding_utf_8)), a.get_type());
-    EXPECT_EQ(1u, a.get_type().get_ndim());
+    EXPECT_EQ(1, a.get_type().get_ndim());
     EXPECT_EQ(1u, a.get_shape().size());
     EXPECT_EQ(0, a.get_shape()[0]);
     EXPECT_EQ(1u, a.get_strides().size());
@@ -288,7 +288,7 @@ TEST(Array, StdVectorStringConstructor) {
     v.push_back("testing testing testing testing testing testing testing testing testing");
     a = v;
     EXPECT_EQ(ndt::make_strided_dim(ndt::make_string(string_encoding_utf_8)), a.get_type());
-    EXPECT_EQ(1u, a.get_type().get_ndim());
+    EXPECT_EQ(1, a.get_type().get_ndim());
     EXPECT_EQ(1u, a.get_shape().size());
     EXPECT_EQ(5, a.get_shape()[0]);
     EXPECT_EQ(1u, a.get_strides().size());
@@ -358,7 +358,7 @@ TEST(Array, ConstructorMemoryLayouts) {
         do {
             // Test constructing the array using the perm
             a = nd::make_strided_array(dt, ndim, shape, nd::read_access_flag|nd::write_access_flag, axisperm);
-            EXPECT_EQ(ndim, a.get_strides().size());
+            EXPECT_EQ(ndim, (intptr_t)a.get_strides().size());
             intptr_t s = dt.get_data_size();
             for (intptr_t i = 0; i < ndim; ++i) {
                 EXPECT_EQ(s, a.get_strides()[axisperm[i]]);
@@ -366,13 +366,13 @@ TEST(Array, ConstructorMemoryLayouts) {
             }
             // Test constructing the array using empty_like, which preserves the memory layout
             b = empty_like(a);
-            EXPECT_EQ(ndim, b.get_strides().size());
+            EXPECT_EQ(ndim, (intptr_t)b.get_strides().size());
             for (intptr_t i = 0; i < ndim; ++i) {
                 EXPECT_EQ(a.get_strides()[i], b.get_strides()[i]);
             }
             // Test constructing the array using empty_like with a different type, which preserves the memory layout
             b = empty_like(a, dt2);
-            EXPECT_EQ(ndim, b.get_strides().size());
+            EXPECT_EQ(ndim, (intptr_t)b.get_strides().size());
             for (intptr_t i = 0; i < ndim; ++i) {
                 EXPECT_EQ(2 * a.get_strides()[i], b.get_strides()[i]);
             }
@@ -386,7 +386,7 @@ TEST(Array, ConstructorMemoryLayouts) {
 TEST(Array, InitFromInitializerLists) {
     nd::array a = {1, 2, 3, 4, 5};
     EXPECT_EQ(ndt::make_type<int>(), a.get_dtype());
-    ASSERT_EQ(1u, a.get_ndim());
+    ASSERT_EQ(1, a.get_ndim());
     ASSERT_EQ(5, a.get_shape()[0]);
     EXPECT_EQ((int)sizeof(int), a.get_strides()[0]);
     const int *ptr_i = (const int *)a.get_readonly_originptr();
@@ -398,7 +398,7 @@ TEST(Array, InitFromInitializerLists) {
 
     nd::array b = {{1., 2., 3.}, {4., 5., 6.25}};
     EXPECT_EQ(ndt::make_type<double>(), b.get_dtype());
-    ASSERT_EQ(2u, b.get_ndim());
+    ASSERT_EQ(2, b.get_ndim());
     ASSERT_EQ(2, b.get_shape()[0]);
     ASSERT_EQ(3, b.get_shape()[1]);
     EXPECT_EQ(3*(int)sizeof(double), b.get_strides()[0]);
@@ -414,7 +414,7 @@ TEST(Array, InitFromInitializerLists) {
     // Testing assignment operator with initializer list (and 3D nested list)
     a = {{{1LL, 2LL}, {-1LL, -2LL}}, {{4LL, 5LL}, {6LL, 1LL}}};
     EXPECT_EQ(ndt::make_type<long long>(), a.get_dtype());
-    ASSERT_EQ(3u, a.get_ndim());
+    ASSERT_EQ(3, a.get_ndim());
     ASSERT_EQ(2, a.get_shape()[0]);
     ASSERT_EQ(2, a.get_shape()[1]);
     ASSERT_EQ(2, a.get_shape()[2]);

@@ -241,12 +241,12 @@ ndt::type ndt::type::with_replaced_scalar_types(const ndt::type& scalar_tp, assi
 
 namespace {
     struct replace_dtype_extra {
-        replace_dtype_extra(const ndt::type& replacement_tp, size_t replace_ndim)
+        replace_dtype_extra(const ndt::type& replacement_tp, intptr_t replace_ndim)
             : m_replacement_tp(replacement_tp), m_replace_ndim(replace_ndim)
         {
         }
         const ndt::type& m_replacement_tp;
-        size_t m_replace_ndim;
+        intptr_t m_replace_ndim;
     };
     static void replace_dtype(const ndt::type& tp, void *extra,
                 ndt::type& out_transformed_tp, bool& out_was_transformed)
@@ -261,7 +261,7 @@ namespace {
     }
 } // anonymous namespace
 
-ndt::type ndt::type::with_replaced_dtype(const ndt::type& replacement_tp, size_t replace_ndim) const
+ndt::type ndt::type::with_replaced_dtype(const ndt::type& replacement_tp, intptr_t replace_ndim) const
 {
     ndt::type result;
     bool was_transformed;

@@ -521,7 +521,7 @@ public:
      * \param errmode  Policy for dealing with errors.
      */
     array ucast(const ndt::type& uniform_dt,
-                    size_t replace_ndim = 0,
+                    intptr_t replace_ndim = 0,
                     assign_error_mode errmode = assign_error_default) const;
 
     /**
@@ -529,7 +529,7 @@ public:
      * as the template parameter.
      */
     template<class T>
-    inline array ucast(size_t replace_ndim = 0,
+    inline array ucast(intptr_t replace_ndim = 0,
                     assign_error_mode errmode = assign_error_default) const {
         return ucast(ndt::make_type<T>(), replace_ndim, errmode);
     }
@@ -550,7 +550,7 @@ public:
      * \param replace_ndim  The number of array dimensions to swallow
      *                       into the viewed uniform_dt.
      */
-    array uview(const ndt::type& uniform_dt, size_t replace_ndim) const;
+    array uview(const ndt::type& uniform_dt, intptr_t replace_ndim) const;
 
     /**
      * DEPRECATED
@@ -568,7 +568,7 @@ public:
      * \param replace_ndim  The number of array dimensions to replace
      *                       in addition to the array data type.
      */
-    array replace_dtype(const ndt::type& replacement_tp, size_t replace_ndim = 0) const;
+    array replace_dtype(const ndt::type& replacement_tp, intptr_t replace_ndim = 0) const;
 
     /**
      * Views the array's memory as another type, where such an operation

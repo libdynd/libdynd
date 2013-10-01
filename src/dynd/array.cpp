@@ -887,7 +887,7 @@ namespace {
         }
         const ndt::type& replacement_tp;
         assign_error_mode errmode;
-        size_t replace_ndim;
+        intptr_t replace_ndim;
         bool out_can_view_data;
     };
     static void cast_dtype(const ndt::type& dt, void *extra,
@@ -950,7 +950,7 @@ namespace {
 } // anonymous namespace
 
 nd::array nd::array::ucast(const ndt::type& scalar_tp,
-                size_t replace_ndim,
+                intptr_t replace_ndim,
                 assign_error_mode errmode) const
 {
     // This creates a type which has a convert type for every scalar of different type.
@@ -978,7 +978,7 @@ nd::array nd::array::view(const ndt::type& DYND_UNUSED(dt)) const
     throw runtime_error("TODO: Implement nd::array::view");
 }
 
-nd::array nd::array::uview(const ndt::type& uniform_dt, size_t replace_ndim) const
+nd::array nd::array::uview(const ndt::type& uniform_dt, intptr_t replace_ndim) const
 {
     // Use the view function specifying to replace all dimensions
     return view(get_type().with_replaced_dtype(uniform_dt, replace_ndim));
@@ -986,12 +986,13 @@ nd::array nd::array::uview(const ndt::type& uniform_dt, size_t replace_ndim) con
 
 namespace {
     struct replace_compatible_dtype_extra {
-        replace_compatible_dtype_extra(const ndt::type& tp, size_t replace_ndim_)
+        replace_compatible_dtype_extra(const ndt::type& tp,
+                        intptr_t replace_ndim_)
             : replacement_tp(tp), replace_ndim(replace_ndim_)
         {
         }
         const ndt::type& replacement_tp;
-        size_t replace_ndim;
+        intptr_t replace_ndim;
     };
     static void replace_compatible_dtype(const ndt::type& tp, void *extra,
                 ndt::type& out_transformed_tp, bool& out_was_transformed)
@@ -1018,7 +1019,7 @@ namespace {
     }
 } // anonymous namespace
 
-nd::array nd::array::replace_dtype(const ndt::type& replacement_tp, size_t replace_ndim) const
+nd::array nd::array::replace_dtype(const ndt::type& replacement_tp, intptr_t replace_ndim) const
 {
     // This creates a type which swaps in the new dtype for
     // the existing one. It raises an error if the data layout

@@ -153,7 +153,7 @@ void expr_type::get_shape(intptr_t ndim, intptr_t i, intptr_t *out_shape,
     intptr_t undim = get_ndim();
     // Initialize the shape to all ones
     dimvector bcast_shape(undim);
-    for (size_t j = 0; j != undim; ++j) {
+    for (intptr_t j = 0; j < undim; ++j) {
         bcast_shape[j] = 1;
     }
 
