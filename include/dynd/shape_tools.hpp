@@ -209,7 +209,7 @@ inline bool is_valid_perm(intptr_t size, const int *perm) {
     memset(flags.get(), 0, size);
     for (intptr_t i = 0; i < size; ++i) {
         int v = perm[i];
-        if (static_cast<unsigned int>(v) >= size || flags[v]) {
+        if (static_cast<uintptr_t>(v) >= static_cast<uintptr_t>(size) || flags[v]) {
             return false;
         }
         flags[v] = 1;
