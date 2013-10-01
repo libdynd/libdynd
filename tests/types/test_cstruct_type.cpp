@@ -28,6 +28,21 @@ TEST(CStructDType, Basic) {
     EXPECT_NE(ndt::type("{x: float32}"), ndt::type("{x: int32}"));
 }
 
+TEST(CStructDType, IOStream) {
+    stringstream ss;
+    ndt::type tp;
+
+    tp = ndt::make_cstruct(ndt::make_type<float>(), "x");
+    ss << tp;
+    EXPECT_EQ("{x : float32}", ss.str());
+
+    ss.str(""); ss.clear();
+    tp = ndt::make_cstruct(ndt::make_type<int32_t>(), "x",
+                    ndt::make_type<int16_t>(), "y");
+    ss << tp;
+    EXPECT_EQ("{x : int32; y : int16}", ss.str());
+}
+
 struct align_test_struct {
     char f0;  dynd_bool b_;
     char f1;  int8_t i8_;

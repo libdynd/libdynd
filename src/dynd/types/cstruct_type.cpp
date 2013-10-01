@@ -105,19 +105,20 @@ static bool is_simple_identifier_name(const string& s)
 
 void cstruct_type::print_type(std::ostream& o) const
 {
-    o << "cstruct<";
+    // Use the record datashape syntax
+    o << "{";
     for (size_t i = 0, i_end = m_field_types.size(); i != i_end; ++i) {
-        o << m_field_types[i] << " ";
+        if (i != 0) {
+            o << "; ";
+        }
         if (is_simple_identifier_name(m_field_names[i])) {
             o << m_field_names[i];
         } else {
             print_escaped_utf8_string(o, m_field_names[i]);
         }
-        if (i != i_end - 1) {
-            o << ", ";
-        }
+        o << " : " << m_field_types[i];
     }
-    o << ">";
+    o << "}";
 }
 
 bool cstruct_type::is_expression() const
