@@ -119,7 +119,7 @@ void var_dim_type::process_strided(const char *metadata, const char *data,
     out_dim_size = d->size;
 }
 
-ndt::type var_dim_type::apply_linear_index(size_t nindices, const irange *indices,
+ndt::type var_dim_type::apply_linear_index(intptr_t nindices, const irange *indices,
                 size_t current_i, const ndt::type& root_tp, bool leading_dimension) const
 {
     if (nindices == 0) {
@@ -182,7 +182,7 @@ ndt::type var_dim_type::apply_linear_index(size_t nindices, const irange *indice
     }
 }
 
-intptr_t var_dim_type::apply_linear_index(size_t nindices, const irange *indices, const char *metadata,
+intptr_t var_dim_type::apply_linear_index(intptr_t nindices, const irange *indices, const char *metadata,
                 const ndt::type& result_tp, char *out_metadata,
                 memory_block_data *embedded_reference,
                 size_t current_i, const ndt::type& root_tp,
@@ -320,7 +320,7 @@ ndt::type var_dim_type::at_single(intptr_t i0, const char **inout_metadata, cons
     return m_element_tp;
 }
 
-ndt::type var_dim_type::get_type_at_dimension(char **inout_metadata, size_t i, size_t total_ndim) const
+ndt::type var_dim_type::get_type_at_dimension(char **inout_metadata, intptr_t i, intptr_t total_ndim) const
 {
     if (i == 0) {
         return ndt::type(this, true);
@@ -341,7 +341,7 @@ intptr_t var_dim_type::get_dim_size(const char *DYND_UNUSED(metadata), const cha
     }
 }
 
-void var_dim_type::get_shape(size_t ndim, size_t i, intptr_t *out_shape,
+void var_dim_type::get_shape(intptr_t ndim, intptr_t i, intptr_t *out_shape,
                 const char *metadata, const char *data) const
 {
     if (metadata == NULL || data == NULL) {
@@ -422,7 +422,7 @@ bool var_dim_type::operator==(const base_type& rhs) const
     }
 }
 
-void var_dim_type::metadata_default_construct(char *metadata, size_t ndim, const intptr_t* shape) const
+void var_dim_type::metadata_default_construct(char *metadata, intptr_t ndim, const intptr_t* shape) const
 {
     size_t element_size = m_element_tp.is_builtin() ? m_element_tp.get_data_size()
                     : m_element_tp.extended()->get_default_data_size(ndim-1, shape+1);
@@ -560,17 +560,17 @@ void var_dim_type::metadata_debug_print(const char *metadata, std::ostream& o, c
     }
 }
 
-size_t var_dim_type::get_iterdata_size(size_t DYND_UNUSED(ndim)) const
+size_t var_dim_type::get_iterdata_size(intptr_t DYND_UNUSED(ndim)) const
 {
     throw runtime_error("TODO: implement var_dim_type::get_iterdata_size");
 }
 
-size_t var_dim_type::iterdata_construct(iterdata_common *DYND_UNUSED(iterdata), const char **DYND_UNUSED(inout_metadata), size_t DYND_UNUSED(ndim), const intptr_t* DYND_UNUSED(shape), ndt::type& DYND_UNUSED(out_uniform_tp)) const
+size_t var_dim_type::iterdata_construct(iterdata_common *DYND_UNUSED(iterdata), const char **DYND_UNUSED(inout_metadata), intptr_t DYND_UNUSED(ndim), const intptr_t* DYND_UNUSED(shape), ndt::type& DYND_UNUSED(out_uniform_tp)) const
 {
     throw runtime_error("TODO: implement var_dim_type::iterdata_construct");
 }
 
-size_t var_dim_type::iterdata_destruct(iterdata_common *DYND_UNUSED(iterdata), size_t DYND_UNUSED(ndim)) const
+size_t var_dim_type::iterdata_destruct(iterdata_common *DYND_UNUSED(iterdata), intptr_t DYND_UNUSED(ndim)) const
 {
     throw runtime_error("TODO: implement var_dim_type::iterdata_destruct");
 }

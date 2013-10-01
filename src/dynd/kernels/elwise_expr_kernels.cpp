@@ -75,7 +75,7 @@ static size_t make_elwise_strided_dimension_expr_kernel_for_N(
                 kernel_request_t kernreq, const eval::eval_context *ectx,
                 const expr_kernel_generator *elwise_handler)
 {
-    size_t undim = dst_tp.get_ndim();
+    intptr_t undim = dst_tp.get_ndim();
     const char *dst_child_metadata;
     const char *src_child_metadata[N];
     ndt::type dst_child_dt;
@@ -289,7 +289,7 @@ static size_t make_elwise_strided_or_var_to_strided_dimension_expr_kernel_for_N(
                 kernel_request_t kernreq, const eval::eval_context *ectx,
                 const expr_kernel_generator *elwise_handler)
 {
-    size_t undim = dst_tp.get_ndim();
+    intptr_t undim = dst_tp.get_ndim();
     const char *dst_child_metadata;
     const char *src_child_metadata[N];
     ndt::type dst_child_dt;
@@ -578,7 +578,7 @@ static size_t make_elwise_strided_or_var_to_var_dimension_expr_kernel_for_N(
                 kernel_request_t kernreq, const eval::eval_context *ectx,
                 const expr_kernel_generator *elwise_handler)
 {
-    size_t undim = dst_tp.get_ndim();
+    intptr_t undim = dst_tp.get_ndim();
     const char *dst_child_metadata;
     const char *src_child_metadata[N];
     ndt::type dst_child_dt;

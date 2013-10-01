@@ -74,7 +74,7 @@ void groupby_type::print_type(std::ostream& o) const
     o << ", by=" << get_by_values_type() << ">";
 }
 
-void groupby_type::get_shape(size_t ndim, size_t i,
+void groupby_type::get_shape(intptr_t ndim, intptr_t i,
                 intptr_t *out_shape, const char *metadata, const char *DYND_UNUSED(data)) const
 {
     // The first dimension is the groups, the second variable-sized

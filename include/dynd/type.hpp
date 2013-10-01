@@ -67,8 +67,8 @@ struct iterdata_broadcasting_terminator {
     iterdata_common common;
     char *data;
 };
-char *iterdata_broadcasting_terminator_incr(iterdata_common *iterdata, size_t level);
-char *iterdata_broadcasting_terminator_reset(iterdata_common *iterdata, char *data, size_t level);
+char *iterdata_broadcasting_terminator_incr(iterdata_common *iterdata, intptr_t level);
+char *iterdata_broadcasting_terminator_reset(iterdata_common *iterdata, char *data, intptr_t level);
 
 // Forward declaration of the nd::array
 namespace nd {
@@ -302,7 +302,7 @@ public:
      * Indexes into the type, intended for recursive calls from the extended-type version. See
      * the function in base_type with the same name for more details.
      */
-    type apply_linear_index(size_t nindices, const irange *indices,
+    type apply_linear_index(intptr_t nindices, const irange *indices,
                 size_t current_i, const type& root_tp, bool leading_dimension) const;
 
     /**
@@ -497,7 +497,7 @@ public:
     /**
      * Gets the number of array dimensions in the type.
      */
-    inline size_t get_ndim() const {
+    inline intptr_t get_ndim() const {
         if (is_builtin()) {
             return 0;
         } else {
@@ -527,7 +527,7 @@ public:
 
     intptr_t get_dim_size(const char *metadata, const char *data) const;
 
-    inline type get_type_at_dimension(char **inout_metadata, size_t i, size_t total_ndim = 0) const {
+    inline type get_type_at_dimension(char **inout_metadata, intptr_t i, intptr_t total_ndim = 0) const {
         if (!is_builtin()) {
             return m_extended->get_type_at_dimension(inout_metadata, i, total_ndim);
         } else if (i == 0) {
@@ -549,7 +549,7 @@ public:
     }
 
     /** The size of the data required for uniform iteration */
-    inline size_t get_iterdata_size(size_t ndim) const {
+    inline size_t get_iterdata_size(intptr_t ndim) const {
         if (is_builtin()) {
             return 0;
         } else {
@@ -567,7 +567,7 @@ public:
      * \param out_uniform_type  This is populated with the type of each iterated element
      */
     inline void iterdata_construct(iterdata_common *iterdata, const char **inout_metadata,
-                    size_t ndim, const intptr_t* shape, type& out_uniform_type) const
+                    intptr_t ndim, const intptr_t* shape, type& out_uniform_type) const
     {
         if (!is_builtin()) {
             m_extended->iterdata_construct(iterdata, inout_metadata, ndim, shape, out_uniform_type);
@@ -575,14 +575,14 @@ public:
     }
 
     /** Destructs any references or other state contained in the iterdata */
-    inline void iterdata_destruct(iterdata_common *iterdata, size_t ndim) const
+    inline void iterdata_destruct(iterdata_common *iterdata, intptr_t ndim) const
     {
         if (!is_builtin()) {
             m_extended->iterdata_destruct(iterdata, ndim);
         }
     }
 
-    inline size_t get_broadcasted_iterdata_size(size_t ndim) const {
+    inline size_t get_broadcasted_iterdata_size(intptr_t ndim) const {
         if (is_builtin()) {
             return sizeof(iterdata_broadcasting_terminator);
         } else {
@@ -601,7 +601,7 @@ public:
      * \param out_uniform_tp  This is populated with the type of each iterated element
      */
     inline void broadcasted_iterdata_construct(iterdata_common *iterdata, const char **inout_metadata,
-                    size_t ndim, const intptr_t* shape, type& out_uniform_tp) const
+                    intptr_t ndim, const intptr_t* shape, type& out_uniform_tp) const
     {
         size_t size;
         if (is_builtin()) {
@@ -647,7 +647,7 @@ type make_type()
  * \param shape  The shape of the array type to create.
  * \param dtype  The data type of each array element.
  */
-type make_type(size_t ndim, intptr_t *shape, const ndt::type& dtype);
+type make_type(intptr_t ndim, intptr_t *shape, const ndt::type& dtype);
 
 /**
  * A static array of the builtin types and void.

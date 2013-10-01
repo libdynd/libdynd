@@ -13,12 +13,12 @@
 using namespace std;
 using namespace dynd;
 
-bool dynd::shape_can_broadcast(size_t dst_ndim, const intptr_t *dst_shape,
-                            size_t src_ndim, const intptr_t *src_shape)
+bool dynd::shape_can_broadcast(intptr_t dst_ndim, const intptr_t *dst_shape,
+                            intptr_t src_ndim, const intptr_t *src_shape)
 {
     if (dst_ndim >= src_ndim) {
         dst_shape += (dst_ndim - src_ndim);
-        for (size_t i = 0; i < src_ndim; ++i) {
+        for (intptr_t i = 0; i < src_ndim; ++i) {
             if (src_shape[i] != 1 && src_shape[i] != dst_shape[i]) {
                 return false;
             }
@@ -30,8 +30,8 @@ bool dynd::shape_can_broadcast(size_t dst_ndim, const intptr_t *dst_shape,
     }
 }
 
-void dynd::broadcast_to_shape(size_t dst_ndim, const intptr_t *dst_shape,
-                size_t src_ndim, const intptr_t *src_shape, const intptr_t *src_strides,
+void dynd::broadcast_to_shape(intptr_t dst_ndim, const intptr_t *dst_shape,
+                intptr_t src_ndim, const intptr_t *src_shape, const intptr_t *src_strides,
                 intptr_t *out_strides)
 {
     //cout << "broadcast_to_shape(" << dst_ndim << ", (";
@@ -46,12 +46,12 @@ void dynd::broadcast_to_shape(size_t dst_ndim, const intptr_t *dst_shape,
         throw broadcast_error(dst_ndim, dst_shape, src_ndim, src_shape);
     }
 
-    size_t dimdelta = dst_ndim - src_ndim;
-    for (size_t i = 0; i < dimdelta; ++i) {
+    intptr_t dimdelta = dst_ndim - src_ndim;
+    for (intptr_t i = 0; i < dimdelta; ++i) {
         out_strides[i] = 0;
     }
-    for (size_t i = dimdelta; i < dst_ndim; ++i) {
-        size_t src_i = i - dimdelta;
+    for (intptr_t i = dimdelta; i < dst_ndim; ++i) {
+        intptr_t src_i = i - dimdelta;
         if (src_shape[src_i] == 1) {
             out_strides[i] = 0;
         } else if (src_shape[src_i] == dst_shape[i]) {
@@ -66,13 +66,13 @@ void dynd::broadcast_to_shape(size_t dst_ndim, const intptr_t *dst_shape,
     //cout << "\n";
 }
 
-void dynd::broadcast_input_shapes(size_t ninputs, const nd::array* inputs,
-                        size_t& out_undim, dimvector& out_shape, shortvector<int>& out_axis_perm)
+void dynd::broadcast_input_shapes(intptr_t ninputs, const nd::array* inputs,
+                        intptr_t& out_undim, dimvector& out_shape, shortvector<int>& out_axis_perm)
 {
     // Get the number of broadcast dimensions
-    size_t undim = inputs[0].get_ndim();
-    for (size_t i = 0; i < ninputs; ++i) {
-        size_t candidate_undim = inputs[i].get_ndim();
+    intptr_t undim = inputs[0].get_ndim();
+    for (intptr_t i = 0; i < ninputs; ++i) {
+        intptr_t candidate_undim = inputs[i].get_ndim();
         if (candidate_undim > undim) {
             undim = candidate_undim;
         }
@@ -84,15 +84,15 @@ void dynd::broadcast_input_shapes(size_t ninputs, const nd::array* inputs,
     intptr_t *shape = out_shape.get();
 
     // Fill in the broadcast shape
-    for (size_t k = 0; k < undim; ++k) {
+    for (intptr_t k = 0; k < undim; ++k) {
         shape[k] = 1;
     }
     dimvector tmpshape(undim);
-    for (size_t i = 0; i < ninputs; ++i) {
-        size_t input_undim = inputs[i].get_ndim();
+    for (intptr_t i = 0; i < ninputs; ++i) {
+        intptr_t input_undim = inputs[i].get_ndim();
         inputs[i].get_shape(tmpshape.get());
-        size_t dimdelta = undim - input_undim;
-        for (size_t k = dimdelta; k < undim; ++k) {
+        intptr_t dimdelta = undim - input_undim;
+        for (intptr_t k = dimdelta; k < undim; ++k) {
             intptr_t size = tmpshape[k - dimdelta];
             intptr_t itershape_size = shape[k];
             if (itershape_size == 1) {
@@ -122,7 +122,7 @@ void dynd::broadcast_input_shapes(size_t ninputs, const nd::array* inputs,
     if (undim > 1) {
         int *axis_perm = out_axis_perm.get();
         // TODO: keeporder behavior, currently always C order
-        for (size_t i = 0; i < undim; ++i) {
+        for (intptr_t i = 0; i < undim; ++i) {
             axis_perm[i] = int(undim - i - 1);
         }
     } else if (undim == 1) {
@@ -132,7 +132,7 @@ void dynd::broadcast_input_shapes(size_t ninputs, const nd::array* inputs,
 
 void dynd::create_broadcast_result(const ndt::type& result_inner_tp,
                 const nd::array& op0, const nd::array& op1, const nd::array& op2,
-                nd::array &out, size_t& out_ndim, dimvector& out_shape)
+                nd::array &out, intptr_t& out_ndim, dimvector& out_shape)
 {
     // Get the shape of the result
     shortvector<int> axis_perm;
@@ -143,15 +143,15 @@ void dynd::create_broadcast_result(const ndt::type& result_inner_tp,
                     nd::read_access_flag|nd::write_access_flag, axis_perm.get());
 }
 
-void dynd::incremental_broadcast(size_t out_undim, intptr_t *out_shape,
-                size_t undim, const intptr_t *shape)
+void dynd::incremental_broadcast(intptr_t out_undim, intptr_t *out_shape,
+                intptr_t undim, const intptr_t *shape)
 {
     if (out_undim < undim) {
         throw broadcast_error(out_undim, out_shape, undim, shape);
     }
 
     out_shape += (out_undim - undim);
-    for (size_t i = 0; i < undim; ++i) {
+    for (intptr_t i = 0; i < undim; ++i) {
         intptr_t shape_i = shape[i];
         if (shape_i != 1) {
             if (shape_i == -1) {
@@ -186,7 +186,7 @@ namespace {
 
 } // anonymous namespace
 
-void dynd::strides_to_axis_perm(size_t ndim, const intptr_t *strides, int *out_axis_perm)
+void dynd::strides_to_axis_perm(intptr_t ndim, const intptr_t *strides, int *out_axis_perm)
 {
     switch (ndim) {
         case 0: {
@@ -247,7 +247,7 @@ void dynd::strides_to_axis_perm(size_t ndim, const intptr_t *strides, int *out_a
         }
         default: {
             // Initialize to a reversal perm (i.e. so C-order is a no-op)
-            for (size_t i = 0; i < ndim; ++i) {
+            for (intptr_t i = 0; i < ndim; ++i) {
                 out_axis_perm[i] = int(ndim - i - 1);
             }
             // Sort based on the absolute value of the strides
@@ -257,11 +257,11 @@ void dynd::strides_to_axis_perm(size_t ndim, const intptr_t *strides, int *out_a
     }
 }
 
-void dynd::axis_perm_to_strides(size_t ndim, const int *axis_perm,
+void dynd::axis_perm_to_strides(intptr_t ndim, const int *axis_perm,
                 const intptr_t *shape, intptr_t element_size,
                 intptr_t *out_strides)
 {
-    for (size_t i = 0; i < ndim; ++i) {
+    for (intptr_t i = 0; i < ndim; ++i) {
         int i_perm = axis_perm[i];
         intptr_t dim_size = shape[i_perm];
         out_strides[i_perm] = dim_size > 1 ? element_size : 0;
@@ -300,7 +300,7 @@ static inline void compare_strides(int i, int j, int noperands, const intptr_t *
     }
 }
 
-void dynd::multistrides_to_axis_perm(size_t ndim, int noperands, const intptr_t **operstrides, int *out_axis_perm)
+void dynd::multistrides_to_axis_perm(intptr_t ndim, int noperands, const intptr_t **operstrides, int *out_axis_perm)
 {
     switch (ndim) {
         case 0: {
@@ -328,12 +328,12 @@ void dynd::multistrides_to_axis_perm(size_t ndim, int noperands, const intptr_t 
         }
         default: {
             // Initialize to a reversal perm (i.e. so C-order is a no-op)
-            for (size_t i = 0; i < ndim; ++i) {
+            for (intptr_t i = 0; i < ndim; ++i) {
                 out_axis_perm[i] = int(ndim - i - 1);
             }
             // Here we do a custom stable insertion sort, which avoids a swap when a comparison
             // is ambiguous
-            for (size_t i0 = 1; i0 < ndim; ++i0) {
+            for (intptr_t i0 = 1; i0 < ndim; ++i0) {
                 // 'ipos' is the position where axis_perm[i0] will get inserted
                 ptrdiff_t ipos = i0;
                 int perm_i0 = out_axis_perm[i0];
@@ -368,10 +368,10 @@ void dynd::multistrides_to_axis_perm(size_t ndim, int noperands, const intptr_t 
     }
 }
 
-void dynd::print_shape(std::ostream& o, size_t ndim, const intptr_t *shape)
+void dynd::print_shape(std::ostream& o, intptr_t ndim, const intptr_t *shape)
 {
     o << "(";
-    for (size_t i = 0; i < ndim; ++i) {
+    for (intptr_t i = 0; i < ndim; ++i) {
         intptr_t size = shape[i];
         if (size >= 0) {
             o << size;
@@ -385,7 +385,7 @@ void dynd::print_shape(std::ostream& o, size_t ndim, const intptr_t *shape)
     o << ")";
 }
 
-void dynd::apply_single_linear_index(const irange& irnge, intptr_t dimension_size, size_t error_i, const ndt::type* error_tp,
+void dynd::apply_single_linear_index(const irange& irnge, intptr_t dimension_size, intptr_t error_i, const ndt::type* error_tp,
         bool& out_remove_dimension, intptr_t& out_start_index, intptr_t& out_index_stride, intptr_t& out_dimension_size)
 {
     intptr_t step = irnge.step();
@@ -400,7 +400,7 @@ void dynd::apply_single_linear_index(const irange& irnge, intptr_t dimension_siz
                 out_dimension_size = 1;
             } else {
                 if (error_tp) {
-                    size_t ndim = error_tp->extended()->get_ndim();
+                    intptr_t ndim = error_tp->extended()->get_ndim();
                     dimvector shape(ndim);
                     error_tp->extended()->get_shape(ndim, 0, shape.get(), NULL, NULL);
                     throw index_out_of_bounds(idx, error_i, ndim, shape.get());
@@ -414,7 +414,7 @@ void dynd::apply_single_linear_index(const irange& irnge, intptr_t dimension_siz
             out_dimension_size = 1;
         } else {
             if (error_tp) {
-                size_t ndim = error_tp->get_ndim();
+                intptr_t ndim = error_tp->get_ndim();
                 dimvector shape(ndim);
                 error_tp->extended()->get_shape(ndim, 0, shape.get(), NULL, NULL);
                 throw index_out_of_bounds(idx, error_i, ndim, shape.get());
@@ -430,7 +430,7 @@ void dynd::apply_single_linear_index(const irange& irnge, intptr_t dimension_siz
                 // Starts with a positive index
             } else {
                 if (error_tp) {
-                    size_t ndim = error_tp->get_ndim();
+                    intptr_t ndim = error_tp->get_ndim();
                     dimvector shape(ndim);
                     error_tp->extended()->get_shape(ndim, 0, shape.get(), NULL, NULL);
                     throw irange_out_of_bounds(irnge, error_i, ndim, shape.get());
@@ -446,7 +446,7 @@ void dynd::apply_single_linear_index(const irange& irnge, intptr_t dimension_siz
             start = 0;
         } else {
             if (error_tp) {
-                size_t ndim = error_tp->get_ndim();
+                intptr_t ndim = error_tp->get_ndim();
                 dimvector shape(ndim);
                 error_tp->extended()->get_shape(ndim, 0, shape.get(), NULL, NULL);
                 throw irange_out_of_bounds(irnge, error_i, ndim, shape.get());
@@ -464,7 +464,7 @@ void dynd::apply_single_linear_index(const irange& irnge, intptr_t dimension_siz
                 end = dimension_size;
             } else {
                 if (error_tp) {
-                    size_t ndim = error_tp->get_ndim();
+                    intptr_t ndim = error_tp->get_ndim();
                     dimvector shape(ndim);
                     error_tp->extended()->get_shape(ndim, 0, shape.get(), NULL, NULL);
                     throw irange_out_of_bounds(irnge, error_i, ndim, shape.get());
@@ -477,7 +477,7 @@ void dynd::apply_single_linear_index(const irange& irnge, intptr_t dimension_siz
             end += dimension_size;
         } else {
             if (error_tp) {
-                size_t ndim = error_tp->get_ndim();
+                intptr_t ndim = error_tp->get_ndim();
                 dimvector shape(ndim);
                 error_tp->extended()->get_shape(ndim, 0, shape.get(), NULL, NULL);
                 throw irange_out_of_bounds(irnge, error_i, ndim, shape.get());
@@ -514,7 +514,7 @@ void dynd::apply_single_linear_index(const irange& irnge, intptr_t dimension_siz
                 // Starts with a positive index
             } else {
                 if (error_tp) {
-                    size_t ndim = error_tp->get_ndim();
+                    intptr_t ndim = error_tp->get_ndim();
                     dimvector shape(ndim);
                     error_tp->extended()->get_shape(ndim, 0, shape.get(), NULL, NULL);
                     throw irange_out_of_bounds(irnge, error_i, ndim, shape.get());
@@ -530,7 +530,7 @@ void dynd::apply_single_linear_index(const irange& irnge, intptr_t dimension_siz
             start = dimension_size - 1;
         } else {
             if (error_tp) {
-                size_t ndim = error_tp->get_ndim();
+                intptr_t ndim = error_tp->get_ndim();
                 dimvector shape(ndim);
                 error_tp->extended()->get_shape(ndim, 0, shape.get(), NULL, NULL);
                 throw irange_out_of_bounds(irnge, error_i, ndim, shape.get());
@@ -548,7 +548,7 @@ void dynd::apply_single_linear_index(const irange& irnge, intptr_t dimension_siz
                 end = -1;
             } else {
                 if (error_tp) {
-                    size_t ndim = error_tp->get_ndim();
+                    intptr_t ndim = error_tp->get_ndim();
                     dimvector shape(ndim);
                     error_tp->extended()->get_shape(ndim, 0, shape.get(), NULL, NULL);
                     throw irange_out_of_bounds(irnge, error_i, ndim, shape.get());
@@ -561,7 +561,7 @@ void dynd::apply_single_linear_index(const irange& irnge, intptr_t dimension_siz
             end += dimension_size;
         } else {
             if (error_tp) {
-                size_t ndim = error_tp->get_ndim();
+                intptr_t ndim = error_tp->get_ndim();
                 dimvector shape(ndim);
                 error_tp->extended()->get_shape(ndim, 0, shape.get(), NULL, NULL);
                 throw irange_out_of_bounds(irnge, error_i, ndim, shape.get());
@@ -593,13 +593,13 @@ void dynd::apply_single_linear_index(const irange& irnge, intptr_t dimension_siz
     }
 }
 
-axis_order_classification_t dynd::classify_strided_axis_order(size_t current_stride,
+axis_order_classification_t dynd::classify_strided_axis_order(intptr_t current_stride,
                 const ndt::type& element_tp, const char *element_metadata)
 {
     switch (element_tp.get_type_id()) {
         case fixed_dim_type_id: {
             const fixed_dim_type *edt = static_cast<const fixed_dim_type *>(element_tp.extended());
-            size_t estride = intptr_abs(edt->get_fixed_stride());
+            intptr_t estride = intptr_abs(edt->get_fixed_stride());
             if (estride != 0) {
                 axis_order_classification_t aoc;
                 // Get the classification from the next dimension onward
@@ -633,7 +633,7 @@ axis_order_classification_t dynd::classify_strided_axis_order(size_t current_str
         case strided_dim_type_id: {
             const strided_dim_type *edt = static_cast<const strided_dim_type *>(element_tp.extended());
             const strided_dim_type_metadata *emd = reinterpret_cast<const strided_dim_type_metadata *>(element_metadata);
-            size_t estride = intptr_abs(emd->stride);
+            intptr_t estride = intptr_abs(emd->stride);
             if (estride != 0) {
                 axis_order_classification_t aoc;
                 // Get the classification from the next dimension onward

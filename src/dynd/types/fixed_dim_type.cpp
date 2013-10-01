@@ -157,7 +157,7 @@ void fixed_dim_type::process_strided(const char *DYND_UNUSED(metadata), const ch
     out_dim_size = m_dim_size;
 }
 
-ndt::type fixed_dim_type::apply_linear_index(size_t nindices, const irange *indices,
+ndt::type fixed_dim_type::apply_linear_index(intptr_t nindices, const irange *indices,
                 size_t current_i, const ndt::type& root_tp, bool leading_dimension) const
 {
     if (nindices == 0) {
@@ -179,7 +179,7 @@ ndt::type fixed_dim_type::apply_linear_index(size_t nindices, const irange *indi
     }
 }
 
-intptr_t fixed_dim_type::apply_linear_index(size_t nindices, const irange *indices, const char *metadata,
+intptr_t fixed_dim_type::apply_linear_index(intptr_t nindices, const irange *indices, const char *metadata,
                 const ndt::type& result_tp, char *out_metadata,
                 memory_block_data *embedded_reference,
                 size_t current_i, const ndt::type& root_tp,
@@ -248,7 +248,7 @@ ndt::type fixed_dim_type::at_single(intptr_t i0,
     return m_element_tp;
 }
 
-ndt::type fixed_dim_type::get_type_at_dimension(char **inout_metadata, size_t i, size_t total_ndim) const
+ndt::type fixed_dim_type::get_type_at_dimension(char **inout_metadata, intptr_t i, intptr_t total_ndim) const
 {
     if (i == 0) {
         return ndt::type(this, true);
@@ -262,7 +262,7 @@ intptr_t fixed_dim_type::get_dim_size(const char *DYND_UNUSED(metadata), const c
     return m_dim_size;
 }
 
-void fixed_dim_type::get_shape(size_t ndim, size_t i, intptr_t *out_shape,
+void fixed_dim_type::get_shape(intptr_t ndim, intptr_t i, intptr_t *out_shape,
             const char *metadata, const char *data) const
 {
     out_shape[i] = m_dim_size;
@@ -334,7 +334,7 @@ bool fixed_dim_type::operator==(const base_type& rhs) const
     }
 }
 
-void fixed_dim_type::metadata_default_construct(char *metadata, size_t ndim, const intptr_t* shape) const
+void fixed_dim_type::metadata_default_construct(char *metadata, intptr_t ndim, const intptr_t* shape) const
 {
     // Validate that the shape is ok
     if (ndim > 0) {
@@ -396,7 +396,7 @@ void fixed_dim_type::metadata_debug_print(const char *metadata, std::ostream& o,
     }
 }
 
-size_t fixed_dim_type::get_iterdata_size(size_t ndim) const
+size_t fixed_dim_type::get_iterdata_size(intptr_t ndim) const
 {
     if (ndim == 0) {
         return 0;
@@ -408,7 +408,7 @@ size_t fixed_dim_type::get_iterdata_size(size_t ndim) const
 }
 
 // Does one iterator increment for this type
-static char *iterdata_incr(iterdata_common *iterdata, size_t level)
+static char *iterdata_incr(iterdata_common *iterdata, intptr_t level)
 {
     fixed_dim_type_iterdata *id = reinterpret_cast<fixed_dim_type_iterdata *>(iterdata);
     if (level == 0) {
@@ -420,7 +420,7 @@ static char *iterdata_incr(iterdata_common *iterdata, size_t level)
     }
 }
 
-static char *iterdata_reset(iterdata_common *iterdata, char *data, size_t ndim)
+static char *iterdata_reset(iterdata_common *iterdata, char *data, intptr_t ndim)
 {
     fixed_dim_type_iterdata *id = reinterpret_cast<fixed_dim_type_iterdata *>(iterdata);
     if (ndim == 1) {
@@ -432,7 +432,7 @@ static char *iterdata_reset(iterdata_common *iterdata, char *data, size_t ndim)
     }
 }
 
-size_t fixed_dim_type::iterdata_construct(iterdata_common *iterdata, const char **inout_metadata, size_t ndim, const intptr_t* shape, ndt::type& out_uniform_tp) const
+size_t fixed_dim_type::iterdata_construct(iterdata_common *iterdata, const char **inout_metadata, intptr_t ndim, const intptr_t* shape, ndt::type& out_uniform_tp) const
 {
     size_t inner_size = 0;
     if (ndim > 1) {
@@ -461,7 +461,7 @@ size_t fixed_dim_type::iterdata_construct(iterdata_common *iterdata, const char 
     return inner_size + sizeof(fixed_dim_type_iterdata);
 }
 
-size_t fixed_dim_type::iterdata_destruct(iterdata_common *iterdata, size_t ndim) const
+size_t fixed_dim_type::iterdata_destruct(iterdata_common *iterdata, intptr_t ndim) const
 {
     size_t inner_size = 0;
     if (ndim > 1) {
@@ -587,7 +587,7 @@ void fixed_dim_type::foreach_leading(char *data, const char *metadata, foreach_f
     }
 }
 
-ndt::type dynd::ndt::make_fixed_dim(size_t ndim, const intptr_t *shape,
+ndt::type dynd::ndt::make_fixed_dim(intptr_t ndim, const intptr_t *shape,
                 const ndt::type& uniform_tp, const int *axis_perm)
 {
     if (axis_perm == NULL) {
@@ -601,7 +601,7 @@ ndt::type dynd::ndt::make_fixed_dim(size_t ndim, const intptr_t *shape,
         // Create strides with the axis permutation
         dimvector strides(ndim);
         intptr_t stride = uniform_tp.get_data_size();
-        for (size_t i = 0; i < ndim; ++i) {
+        for (intptr_t i = 0; i < ndim; ++i) {
             int i_perm = axis_perm[i];
             size_t dim_size = shape[i_perm];
             strides[i_perm] = dim_size > 1 ? stride : 0;

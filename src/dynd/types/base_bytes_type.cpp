@@ -13,7 +13,7 @@ base_bytes_type::~base_bytes_type()
 {
 }
 
-size_t base_bytes_type::get_iterdata_size(size_t DYND_UNUSED(ndim)) const
+size_t base_bytes_type::get_iterdata_size(intptr_t DYND_UNUSED(ndim)) const
 {
     return 0;
 }

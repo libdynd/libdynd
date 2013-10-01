@@ -53,7 +53,7 @@ ndt::type base_type::get_canonical_type() const
     return ndt::type(this, true);
 }
 
-ndt::type base_type::apply_linear_index(size_t nindices, const irange *DYND_UNUSED(indices),
+ndt::type base_type::apply_linear_index(intptr_t nindices, const irange *DYND_UNUSED(indices),
                 size_t current_i, const ndt::type& DYND_UNUSED(root_tp), bool DYND_UNUSED(leading_dimension)) const
 {
     // Default to scalar behavior
@@ -64,7 +64,7 @@ ndt::type base_type::apply_linear_index(size_t nindices, const irange *DYND_UNUS
     }
 }
 
-intptr_t base_type::apply_linear_index(size_t nindices, const irange *DYND_UNUSED(indices), const char *metadata,
+intptr_t base_type::apply_linear_index(intptr_t nindices, const irange *DYND_UNUSED(indices), const char *metadata,
                 const ndt::type& DYND_UNUSED(result_tp), char *out_metadata,
                 memory_block_data *embedded_reference,
                 size_t current_i, const ndt::type& DYND_UNUSED(root_tp),
@@ -88,7 +88,7 @@ ndt::type base_type::at_single(intptr_t DYND_UNUSED(i0), const char **DYND_UNUSE
     throw too_many_indices(ndt::type(this, true), 1, 0);
 }
 
-ndt::type base_type::get_type_at_dimension(char **DYND_UNUSED(inout_metadata), size_t i, size_t total_ndim) const
+ndt::type base_type::get_type_at_dimension(char **DYND_UNUSED(inout_metadata), intptr_t i, intptr_t total_ndim) const
 {
     // Default to heterogeneous dimension/scalar behavior
     if (i == 0) {
@@ -98,7 +98,7 @@ ndt::type base_type::get_type_at_dimension(char **DYND_UNUSED(inout_metadata), s
     }
 }
 
-void base_type::get_shape(size_t DYND_UNUSED(ndim), size_t DYND_UNUSED(i),
+void base_type::get_shape(intptr_t DYND_UNUSED(ndim), intptr_t DYND_UNUSED(i),
                 intptr_t *DYND_UNUSED(out_shape),
                 const char *DYND_UNUSED(metadata),
                 const char *DYND_UNUSED(data)) const
@@ -131,7 +131,7 @@ bool base_type::is_lossless_assignment(const ndt::type& dst_tp,
     return dst_tp == src_tp;
 }
 
-size_t base_type::get_default_data_size(size_t DYND_UNUSED(ndim),
+size_t base_type::get_default_data_size(intptr_t DYND_UNUSED(ndim),
                 const intptr_t *DYND_UNUSED(shape)) const
 {
     return get_data_size();
@@ -139,7 +139,7 @@ size_t base_type::get_default_data_size(size_t DYND_UNUSED(ndim),
 
 // TODO: Make this a pure virtual function eventually
 void base_type::metadata_default_construct(char *DYND_UNUSED(metadata),
-                size_t DYND_UNUSED(ndim),
+                intptr_t DYND_UNUSED(ndim),
                 const intptr_t* DYND_UNUSED(shape)) const
 {
     stringstream ss;
@@ -199,7 +199,7 @@ void base_type::data_destruct_strided(const char *DYND_UNUSED(metadata),
     throw runtime_error(ss.str());
 }
 
-size_t base_type::get_iterdata_size(size_t DYND_UNUSED(ndim)) const
+size_t base_type::get_iterdata_size(intptr_t DYND_UNUSED(ndim)) const
 {
     stringstream ss;
     ss << "get_iterdata_size: dynd type " << ndt::type(this, true) << " is not uniformly iterable";
@@ -207,14 +207,14 @@ size_t base_type::get_iterdata_size(size_t DYND_UNUSED(ndim)) const
 }
 
 size_t base_type::iterdata_construct(iterdata_common *DYND_UNUSED(iterdata), const char **DYND_UNUSED(inout_metadata),
-                size_t DYND_UNUSED(ndim), const intptr_t* DYND_UNUSED(shape), ndt::type& DYND_UNUSED(out_uniform_tp)) const
+                intptr_t DYND_UNUSED(ndim), const intptr_t* DYND_UNUSED(shape), ndt::type& DYND_UNUSED(out_uniform_tp)) const
 {
     stringstream ss;
     ss << "iterdata_default_construct: dynd type " << ndt::type(this, true) << " is not uniformly iterable";
     throw std::runtime_error(ss.str());
 }
 
-size_t base_type::iterdata_destruct(iterdata_common *DYND_UNUSED(iterdata), size_t DYND_UNUSED(ndim)) const
+size_t base_type::iterdata_destruct(iterdata_common *DYND_UNUSED(iterdata), intptr_t DYND_UNUSED(ndim)) const
 {
     stringstream ss;
     ss << "iterdata_destruct: dynd type " << ndt::type(this, true) << " is not uniformly iterable";

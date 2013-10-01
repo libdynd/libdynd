@@ -346,11 +346,11 @@ TEST(Array, ConstructorMemoryLayouts) {
     EXPECT_EQ(0, b.get_strides()[2]);
 
     // Test all permutations of memory layouts from 1 through 6 dimensions
-    for (size_t ndim = 1; ndim <= 6; ++ndim) {
+    for (intptr_t ndim = 1; ndim <= 6; ++ndim) {
         // Go through all the permutations on ndim elements
         // to check every memory layout
         intptr_t num_elements = 1;
-        for (size_t i = 0; i < ndim; ++i) {
+        for (intptr_t i = 0; i < ndim; ++i) {
             shape[i] = i + 2;
             axisperm[i] = int(i);
             num_elements *= shape[ i];
@@ -360,20 +360,20 @@ TEST(Array, ConstructorMemoryLayouts) {
             a = nd::make_strided_array(dt, ndim, shape, nd::read_access_flag|nd::write_access_flag, axisperm);
             EXPECT_EQ(ndim, a.get_strides().size());
             intptr_t s = dt.get_data_size();
-            for (size_t i = 0; i < ndim; ++i) {
+            for (intptr_t i = 0; i < ndim; ++i) {
                 EXPECT_EQ(s, a.get_strides()[axisperm[i]]);
                 s *= shape[axisperm[i]];
             }
             // Test constructing the array using empty_like, which preserves the memory layout
             b = empty_like(a);
             EXPECT_EQ(ndim, b.get_strides().size());
-            for (size_t i = 0; i < ndim; ++i) {
+            for (intptr_t i = 0; i < ndim; ++i) {
                 EXPECT_EQ(a.get_strides()[i], b.get_strides()[i]);
             }
             // Test constructing the array using empty_like with a different type, which preserves the memory layout
             b = empty_like(a, dt2);
             EXPECT_EQ(ndim, b.get_strides().size());
-            for (size_t i = 0; i < ndim; ++i) {
+            for (intptr_t i = 0; i < ndim; ++i) {
                 EXPECT_EQ(2 * a.get_strides()[i], b.get_strides()[i]);
             }
             //cout << "perm " << axisperm[0] << " " << axisperm[1] << " " << axisperm[2] << "\n";

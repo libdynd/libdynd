@@ -52,7 +52,7 @@ make_immutable_builtin_scalar_array(const T& value)
     return result;
 }
 
-nd::array nd::make_strided_array(const ndt::type& uniform_tp, size_t ndim, const intptr_t *shape,
+nd::array nd::make_strided_array(const ndt::type& uniform_tp, intptr_t ndim, const intptr_t *shape,
                 int64_t access_flags, const int *axis_perm)
 {
     // Create the type of the result
@@ -111,7 +111,7 @@ nd::array nd::make_strided_array(const ndt::type& uniform_tp, size_t ndim, const
                 stride *= dim_size;
             }
         } else {
-            for (size_t i = 0; i < ndim; ++i) {
+            for (intptr_t i = 0; i < ndim; ++i) {
                 int i_perm = axis_perm[i];
                 intptr_t dim_size = shape[i_perm];
                 meta[i_perm].stride = dim_size > 1 ? stride : 0;
@@ -132,7 +132,7 @@ nd::array nd::make_strided_array(const ndt::type& uniform_tp, size_t ndim, const
     return array(result);
 }
 
-nd::array nd::make_strided_array_from_data(const ndt::type& uniform_tp, size_t ndim, const intptr_t *shape,
+nd::array nd::make_strided_array_from_data(const ndt::type& uniform_tp, intptr_t ndim, const intptr_t *shape,
                 const intptr_t *strides, int64_t access_flags, char *data_ptr,
                 const memory_block_ptr& data_reference, char **out_uniform_metadata)
 {
@@ -158,7 +158,7 @@ nd::array nd::make_strided_array_from_data(const ndt::type& uniform_tp, size_t n
 
     // Fill in the array metadata with the shape and strides
     strided_dim_type_metadata *meta = reinterpret_cast<strided_dim_type_metadata *>(ndo + 1);
-    for (size_t i = 0; i < ndim; ++i) {
+    for (intptr_t i = 0; i < ndim; ++i) {
         intptr_t dim_size = shape[i];
         meta[i].stride = dim_size > 1 ? strides[i] : 0;
         meta[i].size = dim_size;
@@ -514,7 +514,7 @@ nd::array nd::array::storage() const
     }
 }
 
-nd::array nd::array::at_array(size_t nindices, const irange *indices, bool collapse_leading) const
+nd::array nd::array::at_array(intptr_t nindices, const irange *indices, bool collapse_leading) const
 {
     if (is_scalar()) {
         if (nindices != 0) {
@@ -894,7 +894,7 @@ namespace {
                 ndt::type& out_transformed_tp, bool& out_was_transformed)
     {
         cast_dtype_extra *e = reinterpret_cast<cast_dtype_extra *>(extra);
-        size_t replace_ndim = e->replace_ndim;
+        intptr_t replace_ndim = e->replace_ndim;
         if (dt.get_ndim() > replace_ndim) {
             dt.extended()->transform_child_types(&cast_dtype, extra, out_transformed_tp, out_was_transformed);
         } else {

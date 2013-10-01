@@ -127,7 +127,7 @@ ndt::type string_type::get_canonical_type() const
     return ndt::type(this, true);
 }
 
-void string_type::get_shape(size_t ndim, size_t i, intptr_t *out_shape,
+void string_type::get_shape(intptr_t ndim, intptr_t i, intptr_t *out_shape,
                 const char *DYND_UNUSED(metadata), const char *DYND_UNUSED(data)) const
 {
     out_shape[i] = -1;
@@ -159,7 +159,7 @@ bool string_type::operator==(const base_type& rhs) const
     }
 }
 
-void string_type::metadata_default_construct(char *metadata, size_t DYND_UNUSED(ndim), const intptr_t* DYND_UNUSED(shape)) const
+void string_type::metadata_default_construct(char *metadata, intptr_t DYND_UNUSED(ndim), const intptr_t* DYND_UNUSED(shape)) const
 {
     // Simply allocate a POD memory block
     string_type_metadata *md = reinterpret_cast<string_type_metadata *>(metadata);

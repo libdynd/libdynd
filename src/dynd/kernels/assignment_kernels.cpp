@@ -438,19 +438,19 @@ static void simple_wrapper_kernel_destruct(
 }
 
 size_t dynd::make_kernreq_to_single_kernel_adapter(
-                ckernel_builder *out, size_t offset_out,
+                ckernel_builder *out_ckb, size_t ckb_offset,
                 kernel_request_t kernreq)
 {
     switch (kernreq) {
         case kernel_request_single: {
-            return offset_out;
+            return ckb_offset;
         }
         case kernel_request_strided: {
-            out->ensure_capacity(offset_out + sizeof(ckernel_prefix));
-            ckernel_prefix *e = out->get_at<ckernel_prefix>(offset_out);
+            out_ckb->ensure_capacity(ckb_offset + sizeof(ckernel_prefix));
+            ckernel_prefix *e = out_ckb->get_at<ckernel_prefix>(ckb_offset);
             e->set_function<unary_strided_operation_t>(&wrap_single_as_strided_kernel);
             e->destructor = &simple_wrapper_kernel_destruct;
-            return offset_out + sizeof(ckernel_prefix);
+            return ckb_offset + sizeof(ckernel_prefix);
         }
         default: {
             stringstream ss;

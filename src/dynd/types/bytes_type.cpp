@@ -73,7 +73,7 @@ ndt::type bytes_type::get_canonical_type() const
 }
 
 
-void bytes_type::get_shape(size_t ndim, size_t i,
+void bytes_type::get_shape(intptr_t ndim, intptr_t i,
                 intptr_t *out_shape, const char *DYND_UNUSED(metadata),
                 const char *data) const
 {
@@ -154,7 +154,7 @@ bool bytes_type::operator==(const base_type& rhs) const
     }
 }
 
-void bytes_type::metadata_default_construct(char *metadata, size_t DYND_UNUSED(ndim), const intptr_t* DYND_UNUSED(shape)) const
+void bytes_type::metadata_default_construct(char *metadata, intptr_t DYND_UNUSED(ndim), const intptr_t* DYND_UNUSED(shape)) const
 {
     // Simply allocate a POD memory block
     bytes_type_metadata *md = reinterpret_cast<bytes_type_metadata *>(metadata);

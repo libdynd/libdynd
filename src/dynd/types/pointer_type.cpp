@@ -94,7 +94,7 @@ ndt::type pointer_type::get_canonical_type() const
     return m_target_tp;
 }
 
-ndt::type pointer_type::apply_linear_index(size_t nindices, const irange *indices,
+ndt::type pointer_type::apply_linear_index(intptr_t nindices, const irange *indices,
                 size_t current_i, const ndt::type& root_tp, bool leading_dimension) const
 {
     if (nindices == 0) {
@@ -117,7 +117,7 @@ ndt::type pointer_type::apply_linear_index(size_t nindices, const irange *indice
     }
 }
 
-intptr_t pointer_type::apply_linear_index(size_t nindices, const irange *indices, const char *metadata,
+intptr_t pointer_type::apply_linear_index(intptr_t nindices, const irange *indices, const char *metadata,
                 const ndt::type& result_tp, char *out_metadata,
                 memory_block_data *embedded_reference,
                 size_t current_i, const ndt::type& root_tp,
@@ -177,7 +177,7 @@ ndt::type pointer_type::at_single(intptr_t i0, const char **inout_metadata, cons
     return m_target_tp.at_single(i0, inout_metadata, inout_data);
 }
 
-ndt::type pointer_type::get_type_at_dimension(char **inout_metadata, size_t i, size_t total_ndim) const
+ndt::type pointer_type::get_type_at_dimension(char **inout_metadata, intptr_t i, intptr_t total_ndim) const
 {
     if (i == 0) {
         return ndt::type(this, true);
@@ -187,7 +187,7 @@ ndt::type pointer_type::get_type_at_dimension(char **inout_metadata, size_t i, s
     }
 }
 
-void pointer_type::get_shape(size_t ndim, size_t i, intptr_t *out_shape,
+void pointer_type::get_shape(intptr_t ndim, intptr_t i, intptr_t *out_shape,
                 const char *metadata, const char *data) const
 {
     if (!m_target_tp.is_builtin()) {
@@ -243,7 +243,7 @@ ndt::type pointer_type::with_replaced_storage_type(const ndt::type& /*replacemen
     throw runtime_error("TODO: implement pointer_type::with_replaced_storage_type");
 }
 
-void pointer_type::metadata_default_construct(char *metadata, size_t ndim, const intptr_t* shape) const
+void pointer_type::metadata_default_construct(char *metadata, intptr_t ndim, const intptr_t* shape) const
 {
     // Simply allocate a POD memory block
     // TODO: Will need a different kind of memory block if the data isn't POD.

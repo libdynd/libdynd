@@ -57,7 +57,7 @@ void convert_type::print_type(std::ostream& o) const
     o << ">";
 }
 
-void convert_type::get_shape(size_t ndim, size_t i, intptr_t *out_shape,
+void convert_type::get_shape(intptr_t ndim, intptr_t i, intptr_t *out_shape,
                 const char *metadata, const char *DYND_UNUSED(data)) const
 {
     // Get the shape from the operand type

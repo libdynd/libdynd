@@ -243,7 +243,7 @@ public:
         return *reinterpret_cast<const ndt::type *>(&get_ndo()->m_type);
     }
 
-    inline size_t get_ndim() const {
+    inline intptr_t get_ndim() const {
         if (get_ndo()->is_builtin_type()) {
             return 0;
         } else {
@@ -462,7 +462,7 @@ public:
      *                          use true, if you want to write values, typically
      *                          use false.
      */
-    array at_array(size_t nindices, const irange *indices,
+    array at_array(intptr_t nindices, const irange *indices,
                     bool collapse_leading = true) const;
 
     /**
@@ -734,7 +734,7 @@ public:
 };
 
 /** Makes a strided array with uninitialized data. If axis_perm is NULL, it is C-order */
-array make_strided_array(const ndt::type& uniform_dtype, size_t ndim, const intptr_t *shape,
+array make_strided_array(const ndt::type& uniform_dtype, intptr_t ndim, const intptr_t *shape,
                 int64_t access_flags = read_access_flag|write_access_flag, const int *axis_perm = NULL);
 
 /**
@@ -754,7 +754,7 @@ array make_strided_array(const ndt::type& uniform_dtype, size_t ndim, const intp
  *
  * \returns  The created array.
  */
-array make_strided_array_from_data(const ndt::type& uniform_dtype, size_t ndim, const intptr_t *shape,
+array make_strided_array_from_data(const ndt::type& uniform_dtype, intptr_t ndim, const intptr_t *shape,
                 const intptr_t *strides, int64_t access_flags, char *data_ptr,
                 const memory_block_ptr& data_reference, char **out_uniform_metadata = NULL);
 

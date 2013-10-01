@@ -51,7 +51,7 @@ public:
      */
     virtual intptr_t get_field_index(const std::string& field_name) const = 0;
 
-    void get_shape(size_t ndim, size_t i, intptr_t *out_shape,
+    void get_shape(intptr_t ndim, intptr_t i, intptr_t *out_shape,
                     const char *metadata, const char *data) const;
 
     size_t get_elwise_property_index(const std::string& property_name) const;

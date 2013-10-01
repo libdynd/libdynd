@@ -26,7 +26,7 @@ ndt::type base_expression_type::get_canonical_type() const
     return get_value_type();
 }
 
-void base_expression_type::metadata_default_construct(char *metadata, size_t ndim, const intptr_t* shape) const
+void base_expression_type::metadata_default_construct(char *metadata, intptr_t ndim, const intptr_t* shape) const
 {
     const ndt::type& dt = get_operand_type();
     if (!dt.is_builtin()) {
@@ -58,7 +58,7 @@ void base_expression_type::metadata_debug_print(const char *metadata, std::ostre
     }
 }
 
-size_t base_expression_type::get_iterdata_size(size_t DYND_UNUSED(ndim)) const
+size_t base_expression_type::get_iterdata_size(intptr_t DYND_UNUSED(ndim)) const
 {
     return 0;
 }

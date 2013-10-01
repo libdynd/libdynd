@@ -45,9 +45,9 @@ public:
 
     void print_type(std::ostream& o) const;
 
-    ndt::type apply_linear_index(size_t nindices, const irange *indices,
+    ndt::type apply_linear_index(intptr_t nindices, const irange *indices,
                 size_t current_i, const ndt::type& root_tp, bool leading_dimension) const;
-    intptr_t apply_linear_index(size_t nindices, const irange *indices, const char *metadata,
+    intptr_t apply_linear_index(intptr_t nindices, const irange *indices, const char *metadata,
                     const ndt::type& result_tp, char *out_metadata,
                     memory_block_data *embedded_reference,
                     size_t current_i, const ndt::type& root_tp,

@@ -61,14 +61,14 @@ public:
     ndt::type get_canonical_type() const;
 
     // Expression types use the values from their operand type.
-    void metadata_default_construct(char *metadata, size_t ndim, const intptr_t* shape) const;
+    void metadata_default_construct(char *metadata, intptr_t ndim, const intptr_t* shape) const;
     void metadata_copy_construct(char *dst_metadata, const char *src_metadata, memory_block_data *embedded_reference) const;
     void metadata_destruct(char *metadata) const;
     void metadata_debug_print(const char *metadata, std::ostream& o, const std::string& indent) const;
 
     // Expression types stop the iterdata chain
     // TODO: Maybe it should be more flexible?
-    size_t get_iterdata_size(size_t ndim) const;
+    size_t get_iterdata_size(intptr_t ndim) const;
 
     /** Makes a kernel which converts from (operand_type().value_type()) to (value_type()) */
     virtual size_t make_operand_to_value_assignment_kernel(

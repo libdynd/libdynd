@@ -70,7 +70,7 @@ memory_block_ptr make_array_memory_block(size_t metadata_size, size_t extra_size
  * Creates an ndobject memory block, and default-constructs it for the type
  * and specified shape.
  */
-memory_block_ptr make_array_memory_block(const ndt::type& dt, size_t ndim, const intptr_t *shape);
+memory_block_ptr make_array_memory_block(const ndt::type& dt, intptr_t ndim, const intptr_t *shape);
 
 /**
  * Makes a shallow copy of the ndobject memory block. In the copy, only the

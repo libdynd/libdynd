@@ -24,14 +24,14 @@
 using namespace std;
 using namespace dynd;
 
-char *dynd::iterdata_broadcasting_terminator_incr(iterdata_common *iterdata, size_t DYND_UNUSED(level))
+char *dynd::iterdata_broadcasting_terminator_incr(iterdata_common *iterdata, intptr_t DYND_UNUSED(level))
 {
     // This repeats the same data over and over again, broadcasting additional leftmost dimensions
     iterdata_broadcasting_terminator *id = reinterpret_cast<iterdata_broadcasting_terminator *>(iterdata);
     return id->data;
 }
 
-char *dynd::iterdata_broadcasting_terminator_reset(iterdata_common *iterdata, char *data, size_t DYND_UNUSED(level))
+char *dynd::iterdata_broadcasting_terminator_reset(iterdata_common *iterdata, char *data, intptr_t DYND_UNUSED(level))
 {
     iterdata_broadcasting_terminator *id = reinterpret_cast<iterdata_broadcasting_terminator *>(iterdata);
     id->data = data;
@@ -194,7 +194,7 @@ nd::array ndt::type::p(const std::string& property_name) const
     throw runtime_error(ss.str());
 }
 
-ndt::type ndt::type::apply_linear_index(size_t nindices, const irange *indices,
+ndt::type ndt::type::apply_linear_index(intptr_t nindices, const irange *indices,
                 size_t current_i, const ndt::type& root_tp, bool leading_dimension) const
 {
     if (is_builtin()) {
@@ -420,7 +420,7 @@ std::ostream& dynd::ndt::operator<<(std::ostream& o, const ndt::type& rhs)
     return o;
 }
 
-ndt::type ndt::make_type(size_t ndim, intptr_t *shape, const ndt::type& dtype)
+ndt::type ndt::make_type(intptr_t ndim, intptr_t *shape, const ndt::type& dtype)
 {
     if (ndim > 0) {
         ndt::type result_tp = shape[ndim-1] >= 0

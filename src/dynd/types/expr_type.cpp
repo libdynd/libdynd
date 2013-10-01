@@ -70,11 +70,11 @@ void expr_type::print_type(std::ostream& o) const
     o << ">";
 }
 
-ndt::type expr_type::apply_linear_index(size_t nindices, const irange *indices,
+ndt::type expr_type::apply_linear_index(intptr_t nindices, const irange *indices,
             size_t current_i, const ndt::type& root_tp, bool DYND_UNUSED(leading_dimension)) const
 {
     if (m_kgen->is_elwise()) {
-        size_t undim = get_ndim();
+        intptr_t undim = get_ndim();
         const cstruct_type *fsd = static_cast<const cstruct_type *>(m_operand_type.extended());
         size_t field_count = fsd->get_field_count();
         const ndt::type *field_types = fsd->get_field_types();
@@ -85,7 +85,7 @@ ndt::type expr_type::apply_linear_index(size_t nindices, const irange *indices,
         // Apply the portion of the indexing to each of the src operand types
         for (size_t i = 0; i != field_count; ++i) {
             const ndt::type& dt = field_types[i];
-            size_t field_undim = dt.get_ndim();
+            intptr_t field_undim = dt.get_ndim();
             if (nindices + field_undim <= undim) {
                 result_src_dt[i] = dt;
             } else {
@@ -104,7 +104,7 @@ ndt::type expr_type::apply_linear_index(size_t nindices, const irange *indices,
     }
 }
 
-intptr_t expr_type::apply_linear_index(size_t nindices, const irange *indices, const char *metadata,
+intptr_t expr_type::apply_linear_index(intptr_t nindices, const irange *indices, const char *metadata,
                 const ndt::type& result_tp, char *out_metadata,
                 memory_block_data *embedded_reference,
                 size_t current_i, const ndt::type& root_tp,
@@ -112,7 +112,7 @@ intptr_t expr_type::apply_linear_index(size_t nindices, const irange *indices, c
                 memory_block_data **DYND_UNUSED(inout_dataref)) const
 {
     if (m_kgen->is_elwise()) {
-        size_t undim = get_ndim();
+        intptr_t undim = get_ndim();
         const expr_type *out_ed = static_cast<const expr_type *>(result_tp.extended());
         const cstruct_type *fsd = static_cast<const cstruct_type *>(m_operand_type.extended());
         const cstruct_type *out_fsd = static_cast<const cstruct_type *>(out_ed->m_operand_type.extended());
@@ -124,7 +124,7 @@ intptr_t expr_type::apply_linear_index(size_t nindices, const irange *indices, c
         // Apply the portion of the indexing to each of the src operand types
         for (size_t i = 0; i != field_count; ++i) {
             const pointer_type *pd = static_cast<const pointer_type *>(field_types[i].extended());
-            size_t field_undim = pd->get_ndim();
+            intptr_t field_undim = pd->get_ndim();
             if (nindices + field_undim <= undim) {
                 pd->metadata_copy_construct(out_metadata + out_metadata_offsets[i],
                                 metadata + metadata_offsets[i],
@@ -147,10 +147,10 @@ intptr_t expr_type::apply_linear_index(size_t nindices, const irange *indices, c
     }
 }
 
-void expr_type::get_shape(size_t ndim, size_t i, intptr_t *out_shape,
+void expr_type::get_shape(intptr_t ndim, intptr_t i, intptr_t *out_shape,
                 const char *metadata, const char *DYND_UNUSED(data)) const
 {
-    size_t undim = get_ndim();
+    intptr_t undim = get_ndim();
     // Initialize the shape to all ones
     dimvector bcast_shape(undim);
     for (size_t j = 0; j != undim; ++j) {

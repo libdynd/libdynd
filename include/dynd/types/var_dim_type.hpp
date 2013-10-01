@@ -36,7 +36,7 @@ public:
 
     virtual ~var_dim_type();
 
-    size_t get_default_data_size(size_t DYND_UNUSED(ndim), const intptr_t *DYND_UNUSED(shape)) const {
+    size_t get_default_data_size(intptr_t DYND_UNUSED(ndim), const intptr_t *DYND_UNUSED(shape)) const {
         return sizeof(var_dim_type_data);
     }
 
@@ -60,9 +60,9 @@ public:
                     ndt::type& out_dt, const char *&out_origin,
                     intptr_t& out_stride, intptr_t& out_dim_size) const;
 
-    ndt::type apply_linear_index(size_t nindices, const irange *indices,
+    ndt::type apply_linear_index(intptr_t nindices, const irange *indices,
                 size_t current_i, const ndt::type& root_tp, bool leading_dimension) const;
-    intptr_t apply_linear_index(size_t nindices, const irange *indices, const char *metadata,
+    intptr_t apply_linear_index(intptr_t nindices, const irange *indices, const char *metadata,
                     const ndt::type& result_tp, char *out_metadata,
                     memory_block_data *embedded_reference,
                     size_t current_i, const ndt::type& root_tp,
@@ -70,10 +70,10 @@ public:
                     memory_block_data **inout_dataref) const;
     ndt::type at_single(intptr_t i0, const char **inout_metadata, const char **inout_data) const;
 
-    ndt::type get_type_at_dimension(char **inout_metadata, size_t i, size_t total_ndim = 0) const;
+    ndt::type get_type_at_dimension(char **inout_metadata, intptr_t i, intptr_t total_ndim = 0) const;
 
     intptr_t get_dim_size(const char *metadata, const char *data) const;
-        void get_shape(size_t ndim, size_t i, intptr_t *out_shape, const char *metadata, const char *data) const;
+        void get_shape(intptr_t ndim, intptr_t i, intptr_t *out_shape, const char *metadata, const char *data) const;
     void get_strides(size_t i, intptr_t *out_strides, const char *metadata) const;
 
     axis_order_classification_t classify_axis_order(const char *metadata) const;
@@ -82,7 +82,7 @@ public:
 
     bool operator==(const base_type& rhs) const;
 
-    void metadata_default_construct(char *metadata, size_t ndim, const intptr_t* shape) const;
+    void metadata_default_construct(char *metadata, intptr_t ndim, const intptr_t* shape) const;
     void metadata_copy_construct(char *dst_metadata, const char *src_metadata, memory_block_data *embedded_reference) const;
     void metadata_reset_buffers(char *metadata) const;
     void metadata_finalize_buffers(char *metadata) const;
@@ -91,9 +91,9 @@ public:
     size_t metadata_copy_construct_onedim(char *dst_metadata, const char *src_metadata,
                     memory_block_data *embedded_reference) const;
 
-    size_t get_iterdata_size(size_t ndim) const;
-    size_t iterdata_construct(iterdata_common *iterdata, const char **inout_metadata, size_t ndim, const intptr_t* shape, ndt::type& out_uniform_tp) const;
-    size_t iterdata_destruct(iterdata_common *iterdata, size_t ndim) const;
+    size_t get_iterdata_size(intptr_t ndim) const;
+    size_t iterdata_construct(iterdata_common *iterdata, const char **inout_metadata, intptr_t ndim, const intptr_t* shape, ndt::type& out_uniform_tp) const;
+    size_t iterdata_destruct(iterdata_common *iterdata, intptr_t ndim) const;
 
     size_t make_assignment_kernel(
                     ckernel_builder *out, size_t offset_out,

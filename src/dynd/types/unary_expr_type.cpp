@@ -43,7 +43,7 @@ void unary_expr_type::print_type(std::ostream& o) const
     o << ">";
 }
 
-ndt::type unary_expr_type::apply_linear_index(size_t nindices, const irange *DYND_UNUSED(indices),
+ndt::type unary_expr_type::apply_linear_index(intptr_t nindices, const irange *DYND_UNUSED(indices),
             size_t current_i, const ndt::type& DYND_UNUSED(root_tp), bool DYND_UNUSED(leading_dimension)) const
 {
     if (m_kgen->is_elwise()) {
@@ -58,7 +58,7 @@ ndt::type unary_expr_type::apply_linear_index(size_t nindices, const irange *DYN
     }
 }
 
-intptr_t unary_expr_type::apply_linear_index(size_t nindices, const irange *DYND_UNUSED(indices), const char *metadata,
+intptr_t unary_expr_type::apply_linear_index(intptr_t nindices, const irange *DYND_UNUSED(indices), const char *metadata,
                 const ndt::type& DYND_UNUSED(result_tp), char *out_metadata,
                 memory_block_data *embedded_reference,
                 size_t current_i, const ndt::type& DYND_UNUSED(root_tp),

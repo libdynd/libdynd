@@ -50,7 +50,7 @@ bool type_type::operator==(const base_type& rhs) const
 }
 
 void type_type::metadata_default_construct(char *DYND_UNUSED(metadata),
-                size_t DYND_UNUSED(ndim), const intptr_t* DYND_UNUSED(shape)) const
+                intptr_t DYND_UNUSED(ndim), const intptr_t* DYND_UNUSED(shape)) const
 {
 }
 

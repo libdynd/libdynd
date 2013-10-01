@@ -69,7 +69,7 @@ memory_block_ptr dynd::make_array_memory_block(size_t metadata_size, size_t extr
     return memory_block_ptr(new (result) memory_block_data(1, array_memory_block_type), false);
 }
 
-memory_block_ptr dynd::make_array_memory_block(const ndt::type& dt, size_t ndim, const intptr_t *shape)
+memory_block_ptr dynd::make_array_memory_block(const ndt::type& dt, intptr_t ndim, const intptr_t *shape)
 {
     size_t metadata_size, data_size;
 

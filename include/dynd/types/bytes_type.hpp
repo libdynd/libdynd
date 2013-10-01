@@ -52,13 +52,13 @@ public:
     bool is_unique_data_owner(const char *metadata) const;
     ndt::type get_canonical_type() const;
 
-        void get_shape(size_t ndim, size_t i, intptr_t *out_shape, const char *metadata, const char *data) const;
+        void get_shape(intptr_t ndim, intptr_t i, intptr_t *out_shape, const char *metadata, const char *data) const;
 
     bool is_lossless_assignment(const ndt::type& dst_tp, const ndt::type& src_tp) const;
 
     bool operator==(const base_type& rhs) const;
 
-    void metadata_default_construct(char *metadata, size_t ndim, const intptr_t* shape) const;
+    void metadata_default_construct(char *metadata, intptr_t ndim, const intptr_t* shape) const;
     void metadata_copy_construct(char *dst_metadata, const char *src_metadata, memory_block_data *embedded_reference) const;
     void metadata_reset_buffers(char *metadata) const;
     void metadata_finalize_buffers(char *metadata) const;

@@ -30,7 +30,7 @@ public:
 
     virtual ~struct_type();
 
-    size_t get_default_data_size(size_t ndim, const intptr_t *shape) const;
+    size_t get_default_data_size(intptr_t ndim, const intptr_t *shape) const;
 
     const ndt::type *get_field_types() const {
         return &m_field_types[0];
@@ -68,9 +68,9 @@ public:
                     ndt::type& out_transformed_tp, bool& out_was_transformed) const;
     ndt::type get_canonical_type() const;
 
-    ndt::type apply_linear_index(size_t nindices, const irange *indices,
+    ndt::type apply_linear_index(intptr_t nindices, const irange *indices,
                 size_t current_i, const ndt::type& root_tp, bool leading_dimension) const;
-    intptr_t apply_linear_index(size_t nindices, const irange *indices, const char *metadata,
+    intptr_t apply_linear_index(intptr_t nindices, const irange *indices, const char *metadata,
                     const ndt::type& result_tp, char *out_metadata,
                     memory_block_data *embedded_reference,
                     size_t current_i, const ndt::type& root_tp,
@@ -81,7 +81,7 @@ public:
 
     bool operator==(const base_type& rhs) const;
 
-    void metadata_default_construct(char *metadata, size_t ndim, const intptr_t* shape) const;
+    void metadata_default_construct(char *metadata, intptr_t ndim, const intptr_t* shape) const;
     void metadata_copy_construct(char *dst_metadata, const char *src_metadata, memory_block_data *embedded_reference) const;
     void metadata_reset_buffers(char *metadata) const;
     void metadata_finalize_buffers(char *metadata) const;

@@ -55,16 +55,16 @@ public:
 
     void print_type(std::ostream& o) const;
 
-    ndt::type apply_linear_index(size_t nindices, const irange *indices,
+    ndt::type apply_linear_index(intptr_t nindices, const irange *indices,
                 size_t current_i, const ndt::type& root_tp, bool leading_dimension) const;
-    intptr_t apply_linear_index(size_t nindices, const irange *indices, const char *metadata,
+    intptr_t apply_linear_index(intptr_t nindices, const irange *indices, const char *metadata,
                     const ndt::type& result_tp, char *out_metadata,
                     memory_block_data *embedded_reference,
                     size_t current_i, const ndt::type& root_tp,
                     bool leading_dimension, char **inout_data,
                     memory_block_data **inout_dataref) const;
 
-        void get_shape(size_t ndim, size_t i, intptr_t *out_shape, const char *metadata, const char *data) const;
+        void get_shape(intptr_t ndim, intptr_t i, intptr_t *out_shape, const char *metadata, const char *data) const;
 
     bool is_lossless_assignment(const ndt::type& dst_tp, const ndt::type& src_tp) const;
 

@@ -54,8 +54,8 @@ public:
     /**
      * An exception for when 'src' doesn't broadcast to 'dst'
      */
-    broadcast_error(size_t dst_ndim, const intptr_t *dst_shape,
-                        size_t src_ndim, const intptr_t *src_shape);
+    broadcast_error(intptr_t dst_ndim, const intptr_t *dst_shape,
+                        intptr_t src_ndim, const intptr_t *src_shape);
 
     /**
      * An exception for when 'src' doesn't broadcast to 'dst'
@@ -66,7 +66,7 @@ public:
      * An exception for when a number of input operands can't be broadcast
      * together.
      */
-    broadcast_error(size_t ninputs, const nd::array *inputs);
+    broadcast_error(intptr_t ninputs, const nd::array *inputs);
 
     broadcast_error(const ndt::type& dst_tp, const char *dst_metadata,
                     const ndt::type& src_tp, const char *src_metadata);
@@ -95,7 +95,7 @@ public:
      * An exception for when too many indices are provided in
      * an indexing operation (nindex > ndim).
      */
-    too_many_indices(const ndt::type& dt, size_t nindices, size_t ndim);
+    too_many_indices(const ndt::type& dt, intptr_t nindices, intptr_t ndim);
 
     virtual ~too_many_indices() throw() {
     }
@@ -107,7 +107,7 @@ public:
      * An exception for when 'i' isn't within bounds for
      * the specified axis of the given shape
      */
-    index_out_of_bounds(intptr_t i, size_t axis, size_t ndim, const intptr_t *shape);
+    index_out_of_bounds(intptr_t i, size_t axis, intptr_t ndim, const intptr_t *shape);
     index_out_of_bounds(intptr_t i, size_t axis, const std::vector<intptr_t>& shape);
     index_out_of_bounds(intptr_t i, intptr_t dimension_size);
 
@@ -121,7 +121,7 @@ public:
      * An exception for when 'i' isn't a valid axis
      * for the number of dimensions.
      */
-    axis_out_of_bounds(size_t i, size_t ndim);
+    axis_out_of_bounds(size_t i, intptr_t ndim);
 
     virtual ~axis_out_of_bounds() throw() {
     }
@@ -136,7 +136,7 @@ public:
      * An exception for when 'i' isn't within bounds for
      * the specified axis of the given shape
      */
-    irange_out_of_bounds(const irange& i, size_t axis, size_t ndim, const intptr_t *shape);
+    irange_out_of_bounds(const irange& i, size_t axis, intptr_t ndim, const intptr_t *shape);
     irange_out_of_bounds(const irange& i, size_t axis, const std::vector<intptr_t>& shape);
     irange_out_of_bounds(const irange& i, intptr_t dimension_size);
 

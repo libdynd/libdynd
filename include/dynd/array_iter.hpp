@@ -365,7 +365,7 @@ public:
 template<>
 class array_iter<0, 2> {
     intptr_t m_itersize;
-    size_t m_iter_ndim;
+    intptr_t m_iter_ndim;
     dimvector m_iterindex;
     dimvector m_itershape;
     char *m_data[2];
@@ -386,7 +386,7 @@ public:
             memset(m_iterindex.get(), 0, sizeof(intptr_t) * m_iter_ndim);
             // The op iterdata
             for (int i = 0; i < 2; ++i) {
-                size_t iter_ndim_i = m_array_tp[i].get_ndim();
+                intptr_t iter_ndim_i = m_array_tp[i].get_ndim();
                 size_t iterdata_size = m_array_tp[i].get_broadcasted_iterdata_size(iter_ndim_i);
                 m_iterdata[i] = reinterpret_cast<iterdata_common *>(malloc(iterdata_size));
                 if (!m_iterdata[i]) {
@@ -399,7 +399,7 @@ public:
                 m_data[i] = m_iterdata[i]->reset(m_iterdata[i], ops[i].get_ndo()->m_data_pointer, m_iter_ndim);
             }
 
-            for (size_t i = 0, i_end = m_iter_ndim; i != i_end; ++i) {
+            for (intptr_t i = 0, i_end = m_iter_ndim; i != i_end; ++i) {
                 m_itersize *= m_itershape[i];
             }
         } else {
@@ -470,7 +470,7 @@ public:
 template<>
 class array_iter<1, 3> {
     intptr_t m_itersize;
-    size_t m_iter_ndim[4];
+    intptr_t m_iter_ndim[4];
     dimvector m_iterindex;
     dimvector m_itershape;
     char *m_data[4];
@@ -518,7 +518,7 @@ public:
                 m_data[i] = m_iterdata[i]->reset(m_iterdata[i], ops[i].get_ndo()->m_data_pointer, m_iter_ndim[0]);
             }
 
-            for (size_t i = 0, i_end = m_iter_ndim[0]; i != i_end; ++i) {
+            for (intptr_t i = 0, i_end = m_iter_ndim[0]; i != i_end; ++i) {
                 m_itersize *= m_itershape[i];
             }
         } else {

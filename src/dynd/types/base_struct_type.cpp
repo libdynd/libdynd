@@ -15,7 +15,7 @@ using namespace dynd;
 base_struct_type::~base_struct_type() {
 }
 
-void base_struct_type::get_shape(size_t ndim, size_t i, intptr_t *out_shape,
+void base_struct_type::get_shape(intptr_t ndim, intptr_t i, intptr_t *out_shape,
                 const char *metadata, const char *DYND_UNUSED(data)) const
 {
     out_shape[i] = m_field_count;
@@ -40,7 +40,7 @@ void base_struct_type::get_shape(size_t ndim, size_t i, intptr_t *out_shape,
                 memcpy(out_shape + i + 1, tmpshape.get() + i + 1, (ndim - i - 1) * sizeof(intptr_t));
             } else {
                 // Merge the shape from the rest
-                for (size_t k = i + 1; k <ndim; ++k) {
+                for (intptr_t k = i + 1; k < ndim; ++k) {
                     // If we see different sizes, make the output -1
                     if (out_shape[k] != -1 && out_shape[k] != tmpshape[k]) {
                         out_shape[k] = -1;

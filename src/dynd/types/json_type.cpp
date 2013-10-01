@@ -116,7 +116,7 @@ bool json_type::operator==(const base_type& rhs) const
     }
 }
 
-void json_type::metadata_default_construct(char *metadata, size_t DYND_UNUSED(ndim), const intptr_t* DYND_UNUSED(shape)) const
+void json_type::metadata_default_construct(char *metadata, intptr_t DYND_UNUSED(ndim), const intptr_t* DYND_UNUSED(shape)) const
 {
     // Simply allocate a POD memory block
     json_type_metadata *md = reinterpret_cast<json_type_metadata *>(metadata);

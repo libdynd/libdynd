@@ -40,7 +40,7 @@ public:
 
     bool operator==(const base_type& rhs) const;
 
-    void metadata_default_construct(char *metadata, size_t ndim, const intptr_t* shape) const;
+    void metadata_default_construct(char *metadata, intptr_t ndim, const intptr_t* shape) const;
     void metadata_copy_construct(char *dst_metadata, const char *src_metadata, memory_block_data *embedded_reference) const;
     void metadata_reset_buffers(char *metadata) const;
     void metadata_finalize_buffers(char *metadata) const;

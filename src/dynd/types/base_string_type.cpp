@@ -27,7 +27,7 @@ std::string base_string_type::get_utf8_string(const char *metadata, const char *
     return string_range_as_utf8_string(get_encoding(), begin, end, errmode);
 }
 
-size_t base_string_type::get_iterdata_size(size_t DYND_UNUSED(ndim)) const
+size_t base_string_type::get_iterdata_size(intptr_t DYND_UNUSED(ndim)) const
 {
     return 0;
 }

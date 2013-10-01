@@ -321,7 +321,7 @@ void categorical_type::print_type(std::ostream& o) const
     o << "]>";
 }
 
-void dynd::categorical_type::get_shape(size_t ndim, size_t i, intptr_t *out_shape,
+void dynd::categorical_type::get_shape(intptr_t ndim, intptr_t i, intptr_t *out_shape,
                 const char *DYND_UNUSED(metadata), const char *DYND_UNUSED(data)) const
 {
     const ndt::type& cd = get_category_type();
@@ -520,7 +520,7 @@ bool categorical_type::operator==(const base_type& rhs) const
 }
 
 void categorical_type::metadata_default_construct(char *DYND_UNUSED(metadata),
-                size_t DYND_UNUSED(ndim), const intptr_t* DYND_UNUSED(shape)) const
+                intptr_t DYND_UNUSED(ndim), const intptr_t* DYND_UNUSED(shape)) const
 {
     // Data is stored as uint##, no metadata to process
 }

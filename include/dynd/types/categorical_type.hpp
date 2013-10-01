@@ -45,7 +45,7 @@ public:
 
     void print_type(std::ostream& o) const;
 
-        void get_shape(size_t ndim, size_t i, intptr_t *out_shape, const char *metadata, const char *data) const;
+        void get_shape(intptr_t ndim, intptr_t i, intptr_t *out_shape, const char *metadata, const char *data) const;
 
     size_t get_category_count() const {
         return (size_t)reinterpret_cast<const strided_dim_type_metadata *>(m_categories.get_ndo_meta())->size;
@@ -86,7 +86,7 @@ public:
 
     bool operator==(const base_type& rhs) const;
 
-    void metadata_default_construct(char *metadata, size_t ndim, const intptr_t* shape) const;
+    void metadata_default_construct(char *metadata, intptr_t ndim, const intptr_t* shape) const;
     void metadata_copy_construct(char *dst_metadata, const char *src_metadata, memory_block_data *embedded_reference) const;
     void metadata_destruct(char *metadata) const;
     void metadata_debug_print(const char *metadata, std::ostream& o, const std::string& indent) const;

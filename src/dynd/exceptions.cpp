@@ -22,8 +22,8 @@ broadcast_error::broadcast_error(const std::string& m)
 {
 }
 
-inline string broadcast_error_message(size_t dst_ndim, const intptr_t *dst_shape,
-                    size_t src_ndim, const intptr_t *src_shape)
+inline string broadcast_error_message(intptr_t dst_ndim, const intptr_t *dst_shape,
+                    intptr_t src_ndim, const intptr_t *src_shape)
 {
     stringstream ss;
 
@@ -35,8 +35,8 @@ inline string broadcast_error_message(size_t dst_ndim, const intptr_t *dst_shape
     return ss.str();
 }
 
-broadcast_error::broadcast_error(size_t dst_ndim, const intptr_t *dst_shape,
-                    size_t src_ndim, const intptr_t *src_shape)
+broadcast_error::broadcast_error(intptr_t dst_ndim, const intptr_t *dst_shape,
+                    intptr_t src_ndim, const intptr_t *src_shape)
     : dynd_exception("broadcast error", broadcast_error_message(dst_ndim, dst_shape, src_ndim, src_shape))
 {
 }
@@ -60,13 +60,13 @@ broadcast_error::broadcast_error(const nd::array& dst, const nd::array& src)
 {
 }
 
-inline string broadcast_error_message(size_t ninputs, const nd::array* inputs)
+inline string broadcast_error_message(intptr_t ninputs, const nd::array* inputs)
 {
     stringstream ss;
 
     ss << "cannot broadcast input dynd operands with shapes ";
-    for (size_t i = 0; i < ninputs; ++i) {
-        size_t undim = inputs[i].get_ndim();
+    for (intptr_t i = 0; i < ninputs; ++i) {
+        intptr_t undim = inputs[i].get_ndim();
         dimvector shape(undim);
         inputs[i].get_shape(shape.get());
         print_shape(ss, undim, shape.get());
@@ -78,7 +78,7 @@ inline string broadcast_error_message(size_t ninputs, const nd::array* inputs)
     return ss.str();
 }
 
-broadcast_error::broadcast_error(size_t ninputs, const nd::array *inputs)
+broadcast_error::broadcast_error(intptr_t ninputs, const nd::array *inputs)
     : dynd_exception("broadcast error", broadcast_error_message(ninputs, inputs))
 {
 }
@@ -135,7 +135,7 @@ broadcast_error::broadcast_error(intptr_t dst_size, intptr_t src_size,
 {
 }
 
-inline string too_many_indices_message(const ndt::type& dt, size_t nindices, size_t ndim)
+inline string too_many_indices_message(const ndt::type& dt, intptr_t nindices, intptr_t ndim)
 {
     std::stringstream ss;
 
@@ -145,13 +145,13 @@ inline string too_many_indices_message(const ndt::type& dt, size_t nindices, siz
     return ss.str();
 }
 
-dynd::too_many_indices::too_many_indices(const ndt::type& dt, size_t nindices, size_t ndim)
+dynd::too_many_indices::too_many_indices(const ndt::type& dt, intptr_t nindices, intptr_t ndim)
     : dynd_exception("too many indices", too_many_indices_message(dt, nindices, ndim))
 {
     //cout << "throwing too_many_indices\n";
 }
 
-inline string index_out_of_bounds_message(intptr_t i, size_t axis, size_t ndim, const intptr_t *shape)
+inline string index_out_of_bounds_message(intptr_t i, size_t axis, intptr_t ndim, const intptr_t *shape)
 {
     stringstream ss;
 
@@ -171,7 +171,7 @@ inline string index_out_of_bounds_message(intptr_t i, intptr_t dimension_size)
     return ss.str();
 }
 
-index_out_of_bounds::index_out_of_bounds(intptr_t i, size_t axis, size_t ndim, const intptr_t *shape)
+index_out_of_bounds::index_out_of_bounds(intptr_t i, size_t axis, intptr_t ndim, const intptr_t *shape)
     : dynd_exception("index out of bounds", index_out_of_bounds_message(i, axis, ndim, shape))
 {
 }
@@ -186,7 +186,7 @@ index_out_of_bounds::index_out_of_bounds(intptr_t i, intptr_t dimension_size)
 {
 }
 
-inline string axis_out_of_bounds_message(size_t i, size_t ndim)
+inline string axis_out_of_bounds_message(size_t i, intptr_t ndim)
 {
     stringstream ss;
 
@@ -195,7 +195,7 @@ inline string axis_out_of_bounds_message(size_t i, size_t ndim)
     return ss.str();
 }
 
-dynd::axis_out_of_bounds::axis_out_of_bounds(size_t i, size_t ndim)
+dynd::axis_out_of_bounds::axis_out_of_bounds(size_t i, intptr_t ndim)
     : dynd_exception("axis out of bounds", axis_out_of_bounds_message(i, ndim))
 {
     //cout << "throwing axis_out_of_bounds\n";
@@ -222,7 +222,7 @@ inline void print_slice(std::ostream& o, const irange& i)
     }
 }
 
-inline string irange_out_of_bounds_message(const irange& i, size_t axis, size_t ndim, const intptr_t *shape)
+inline string irange_out_of_bounds_message(const irange& i, size_t axis, intptr_t ndim, const intptr_t *shape)
 {
     stringstream ss;
 
@@ -246,7 +246,7 @@ inline string irange_out_of_bounds_message(const irange& i, intptr_t dimension_s
     return ss.str();
 }
 
-irange_out_of_bounds::irange_out_of_bounds(const irange& i, size_t axis, size_t ndim, const intptr_t *shape)
+irange_out_of_bounds::irange_out_of_bounds(const irange& i, size_t axis, intptr_t ndim, const intptr_t *shape)
     : dynd_exception("irange out of bounds", irange_out_of_bounds_message(i, axis, ndim, shape))
 {
     //cout << "throwing irange_out_of_bounds\n";

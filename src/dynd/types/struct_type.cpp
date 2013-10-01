@@ -58,7 +58,7 @@ intptr_t struct_type::get_field_index(const std::string& field_name) const
     }
 }
 
-size_t struct_type::get_default_data_size(size_t ndim, const intptr_t *shape) const
+size_t struct_type::get_default_data_size(intptr_t ndim, const intptr_t *shape) const
 {
     // Default layout is to match the field order - could reorder the elements for more efficient packing
     size_t s = 0;
@@ -149,7 +149,7 @@ ndt::type struct_type::get_canonical_type() const
     return ndt::type(new struct_type(fields, m_field_names), false);
 }
 
-ndt::type struct_type::apply_linear_index(size_t nindices, const irange *indices,
+ndt::type struct_type::apply_linear_index(intptr_t nindices, const irange *indices,
                 size_t current_i, const ndt::type& root_tp, bool leading_dimension) const
 {
     if (nindices == 0) {
@@ -183,7 +183,7 @@ ndt::type struct_type::apply_linear_index(size_t nindices, const irange *indices
     }
 }
 
-intptr_t struct_type::apply_linear_index(size_t nindices, const irange *indices, const char *metadata,
+intptr_t struct_type::apply_linear_index(intptr_t nindices, const irange *indices, const char *metadata,
                 const ndt::type& result_tp, char *out_metadata,
                 memory_block_data *embedded_reference,
                 size_t current_i, const ndt::type& root_tp,
@@ -272,8 +272,13 @@ size_t struct_type::make_assignment_kernel(
                             dst_tp, dst_metadata,
                             src_tp, src_metadata,
                             kernreq, errmode, ectx);
-        } else {
+        } else if (src_tp.is_builtin()) {
             return make_broadcast_to_struct_assignment_kernel(out_ckb, ckb_offset,
+                            dst_tp, dst_metadata,
+                            src_tp, src_metadata,
+                            kernreq, errmode, ectx);
+        } else {
+            return src_tp.extended()->make_assignment_kernel(out_ckb, ckb_offset,
                             dst_tp, dst_metadata,
                             src_tp, src_metadata,
                             kernreq, errmode, ectx);
@@ -322,7 +327,7 @@ bool struct_type::operator==(const base_type& rhs) const
     }
 }
 
-void struct_type::metadata_default_construct(char *metadata, size_t ndim, const intptr_t* shape) const
+void struct_type::metadata_default_construct(char *metadata, intptr_t ndim, const intptr_t* shape) const
 {
     // Validate that the shape is ok
     if (ndim > 0) {
@@ -475,7 +480,7 @@ static array_preamble *property_get_array_field(const array_preamble *params, vo
     // Get the nd::array 'self' parameter
     nd::array n = nd::array(*(array_preamble **)params->m_data_pointer, true);
     intptr_t i = reinterpret_cast<intptr_t>(extra);
-    size_t undim = n.get_ndim();
+    intptr_t undim = n.get_ndim();
     ndt::type udt = n.get_dtype();
     if (udt.get_kind() == expression_kind) {
         const string *field_names = static_cast<const struct_type *>(

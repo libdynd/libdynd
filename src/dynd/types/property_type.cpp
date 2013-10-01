@@ -106,7 +106,7 @@ void property_type::print_type(std::ostream& o) const
     }
 }
 
-void property_type::get_shape(size_t ndim, size_t i, intptr_t *out_shape,
+void property_type::get_shape(intptr_t ndim, intptr_t i, intptr_t *out_shape,
                 const char *DYND_UNUSED(metadata), const char *DYND_UNUSED(data)) const
 {
     if (!m_value_tp.is_builtin()) {
