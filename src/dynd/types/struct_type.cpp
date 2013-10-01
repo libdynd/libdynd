@@ -255,7 +255,7 @@ bool struct_type::is_lossless_assignment(const ndt::type& dst_tp, const ndt::typ
 }
 
 size_t struct_type::make_assignment_kernel(
-                ckernel_builder *out, size_t offset_out,
+                ckernel_builder *out_ckb, size_t ckb_offset,
                 const ndt::type& dst_tp, const char *dst_metadata,
                 const ndt::type& src_tp, const char *src_metadata,
                 kernel_request_t kernreq, assign_error_mode errmode,
@@ -263,17 +263,17 @@ size_t struct_type::make_assignment_kernel(
 {
     if (this == dst_tp.extended()) {
         if (this == src_tp.extended()) {
-            return make_struct_identical_assignment_kernel(out, offset_out,
+            return make_struct_identical_assignment_kernel(out_ckb, ckb_offset,
                             dst_tp,
                             dst_metadata, src_metadata,
                             kernreq, errmode, ectx);
         } else if (src_tp.get_kind() == struct_kind) {
-            return make_struct_assignment_kernel(out, offset_out,
+            return make_struct_assignment_kernel(out_ckb, ckb_offset,
                             dst_tp, dst_metadata,
                             src_tp, src_metadata,
                             kernreq, errmode, ectx);
-        } else if (!src_tp.is_builtin()) {
-            return src_tp.extended()->make_assignment_kernel(out, offset_out,
+        } else {
+            return make_broadcast_to_struct_assignment_kernel(out_ckb, ckb_offset,
                             dst_tp, dst_metadata,
                             src_tp, src_metadata,
                             kernreq, errmode, ectx);
