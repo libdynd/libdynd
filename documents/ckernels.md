@@ -8,7 +8,7 @@ cleanly to handle broadcasting and other operations on 'var' dimensions
 nicely. The solution was to define a new kernel mechanism, which
 is described here.
 
-See also the [Multi-dimensional kernel documentation](multidim_kernels.md].
+See also the [Multi-dimensional kernel documentation](multidim_kernels.md).
 
 Headers and implementation for kernels are in the 'dynd/kernels'
 subdirectories.
