@@ -18,6 +18,7 @@
 #include <dynd/types/datetime_type.hpp>
 #include <dynd/types/bytes_type.hpp>
 #include <dynd/types/type_type.hpp>
+#include <dynd/types/type_alignment.hpp>
 
 using namespace std;
 using namespace dynd;
@@ -81,6 +82,7 @@ namespace {
             }
             reserved_typenames.insert("string");
             reserved_typenames.insert("datetime");
+            reserved_typenames.insert("unaligned");
         }
     };
     static init_bit builtin_types_initializer;
@@ -374,6 +376,23 @@ static ndt::type parse_datetime_parameters(const char *&begin, const char *end)
     }
 }
 
+static ndt::type parse_unaligned_parameters(const char *&begin, const char *end,
+                map<string, ndt::type>& symtable)
+{
+    if (!parse_token(begin, end, '(')) {
+        throw datashape_parse_error(begin, "expected opening '(' after 'unaligned'");
+    }
+    ndt::type tp = parse_rhs_expression(begin, end, symtable);
+    if (tp.get_type_id() == uninitialized_type_id) {
+        throw datashape_parse_error(begin, "expected a data type");
+    }
+    if (!parse_token(begin, end, ')')) {
+        throw datashape_parse_error(begin, "expected closing ')'");
+    }
+    // TODO catch errors, convert them to datashape_parse_error so the position is shown
+    return ndt::make_unaligned(tp);
+}
+
 // record_item : NAME COLON rhs_expression
 static bool parse_record_item(const char *&begin, const char *end, map<string, ndt::type>& symtable,
                 string& out_field_name, ndt::type& out_field_type)
@@ -434,6 +453,7 @@ static ndt::type parse_record(const char *&begin, const char *end, map<string, n
                     &field_type_list[0], &field_name_list[0]);
 }
 
+/** This is what parses the main datashape grammar, excluding type aliases, etc. */
 static ndt::type parse_rhs_expression(const char *&begin, const char *end, map<string, ndt::type>& symtable)
 {
     ndt::type result;
@@ -479,6 +499,8 @@ static ndt::type parse_rhs_expression(const char *&begin, const char *end, map<s
             result = parse_string_parameters(begin, end);
         } else if (n == "datetime") {
             result = parse_datetime_parameters(begin, end);
+        } else if (n == "unaligned") {
+            result = parse_unaligned_parameters(begin, end, symtable);
         } else {
             map<string, ndt::type>::const_iterator i = builtin_types.find(n);
             if (i != builtin_types.end()) {

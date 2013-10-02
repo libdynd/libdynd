@@ -17,6 +17,7 @@
 #include <dynd/types/string_type.hpp>
 #include <dynd/types/fixedstring_type.hpp>
 #include <dynd/types/json_type.hpp>
+#include <dynd/types/type_alignment.hpp>
 
 using namespace std;
 using namespace dynd;
@@ -96,6 +97,16 @@ TEST(DataShapeParser, StringAtoms) {
                     type_from_datashape("string(10, 'U8')"));
     EXPECT_EQ(ndt::make_fixedstring(1000, string_encoding_utf_16),
                     type_from_datashape("string(1000,'U16')"));
+}
+
+TEST(DataShapeParser, Unaligned) {
+    EXPECT_EQ(ndt::make_strided_dim(ndt::make_type<dynd_bool>()),
+                    type_from_datashape("M, unaligned(bool)"));
+    EXPECT_EQ(ndt::make_strided_dim(ndt::make_unaligned(ndt::make_type<float>()), 2),
+                    type_from_datashape("M, N, unaligned(float32)"));
+    EXPECT_EQ(ndt::make_cstruct(ndt::make_unaligned(ndt::make_type<int32_t>()), "x",
+                                ndt::make_unaligned(ndt::make_type<int64_t>()), "y"),
+                    type_from_datashape("{x : unaligned(int32); y : unaligned(int64)}"));
 }
 
 TEST(DataShapeParser, StridedDim) {
