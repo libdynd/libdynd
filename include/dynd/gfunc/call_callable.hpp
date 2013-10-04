@@ -55,7 +55,7 @@ namespace detail {
     struct callable_argument_setter<ndt::type> {
         static void set(const ndt::type& paramtype, char *DYND_UNUSED(metadata), char *data, const ndt::type& value) {
             if (paramtype.get_type_id() == type_type_id) {
-                reinterpret_cast<type_type_data *>(data)->dt = ndt::type(value).release();
+                reinterpret_cast<type_type_data *>(data)->tp = ndt::type(value).release();
             } else {
                 std::stringstream ss;
                 ss << "cannot pass a dynd type as a parameter to dynd callable parameter of type " << paramtype;

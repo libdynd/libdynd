@@ -12,7 +12,7 @@
 namespace dynd {
 
 struct type_type_data {
-    const base_type *dt;
+    const base_type *tp;
 };
 
 /**

@@ -32,10 +32,10 @@ void type_type::print_data(std::ostream& o,
     const type_type_data *ddd = reinterpret_cast<const type_type_data *>(data);
     // This tests avoids the atomic increment/decrement of
     // always constructing a type object
-    if (is_builtin_type(ddd->dt)) {
-        o << ndt::type(ddd->dt, true);
+    if (is_builtin_type(ddd->tp)) {
+        o << ndt::type(ddd->tp, true);
     } else {
-        ddd->dt->print_type(o);
+        ddd->tp->print_type(o);
     }
 }
 
@@ -73,7 +73,7 @@ void type_type::metadata_destruct(char *DYND_UNUSED(metadata)) const
 
 void type_type::data_destruct(const char *DYND_UNUSED(metadata), char *data) const
 {
-    const base_type *bd = reinterpret_cast<type_type_data *>(data)->dt;
+    const base_type *bd = reinterpret_cast<type_type_data *>(data)->tp;
     if (!is_builtin_type(bd)) {
         base_type_decref(bd);
     }
@@ -83,7 +83,7 @@ void type_type::data_destruct_strided(const char *DYND_UNUSED(metadata), char *d
                 intptr_t stride, size_t count) const
 {
     for (size_t i = 0; i != count; ++i, data += stride) {
-        const base_type *bd = reinterpret_cast<type_type_data *>(data)->dt;
+        const base_type *bd = reinterpret_cast<type_type_data *>(data)->tp;
         if (!is_builtin_type(bd)) {
             base_type_decref(bd);
         }
@@ -94,10 +94,10 @@ static void typed_data_assignment_kernel_single(char *dst, const char *src,
                 ckernel_prefix *DYND_UNUSED(extra))
 {
     // Free the destination reference
-    base_type_xdecref(reinterpret_cast<const type_type_data *>(dst)->dt);
+    base_type_xdecref(reinterpret_cast<const type_type_data *>(dst)->tp);
     // Copy the pointer and count the reference
-    const base_type *bd = reinterpret_cast<const type_type_data *>(src)->dt;
-    reinterpret_cast<type_type_data *>(dst)->dt = bd;
+    const base_type *bd = reinterpret_cast<const type_type_data *>(src)->tp;
+    reinterpret_cast<type_type_data *>(dst)->tp = bd;
     base_type_xincref(bd);
 }
 
@@ -114,7 +114,7 @@ namespace {
         {
             extra_type *e = reinterpret_cast<extra_type *>(extra);
             const string& s = e->src_string_dt->get_utf8_string(e->src_metadata, src, e->errmode);
-            ndt::type(s).swap(reinterpret_cast<type_type_data *>(dst)->dt);
+            ndt::type(s).swap(reinterpret_cast<type_type_data *>(dst)->tp);
         }
 
         static void destruct(ckernel_prefix *extra)
@@ -135,7 +135,7 @@ namespace {
         static void single(char *dst, const char *src, ckernel_prefix *extra)
         {
             extra_type *e = reinterpret_cast<extra_type *>(extra);
-            const base_type *bd = reinterpret_cast<const type_type_data *>(src)->dt;
+            const base_type *bd = reinterpret_cast<const type_type_data *>(src)->tp;
             stringstream ss;
             if (is_builtin_type(bd)) {
                 ss << ndt::type(bd, true);

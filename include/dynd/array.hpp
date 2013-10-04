@@ -618,6 +618,38 @@ array operator-(const array& op0, const array& op1);
 array operator/(const array& op0, const array& op1);
 array operator*(const array& op0, const array& op1);
 
+nd::array array_rw(dynd_bool value);
+nd::array array_rw(bool value);
+nd::array array_rw(signed char value);
+nd::array array_rw(short value);
+nd::array array_rw(int value);
+nd::array array_rw(long value);
+nd::array array_rw(long long value);
+nd::array array_rw(const dynd_int128& value);
+nd::array array_rw(unsigned char value);
+nd::array array_rw(unsigned short value);
+nd::array array_rw(unsigned int value);
+nd::array array_rw(unsigned long value);
+nd::array array_rw(unsigned long long value);
+nd::array array_rw(const dynd_uint128& value);
+nd::array array_rw(dynd_float16 value);
+nd::array array_rw(float value);
+nd::array array_rw(double value);
+nd::array array_rw(const dynd_float128& value);
+nd::array array_rw(std::complex<float> value);
+nd::array array_rw(std::complex<double> value);
+nd::array array_rw(const std::string& value);
+/** Construct a string from a NULL-terminated UTF8 string */
+nd::array array_rw(const char *cstr);
+/** Construct a string from a UTF8 buffer and specified buffer size */
+nd::array array_rw(const char *str, size_t size);
+/**
+ * Constructs a scalar with the 'type' type.
+ * NOTE: Does NOT create a scalar of the provided type,
+ *       use dynd::empty(type) for that!
+ */
+nd::array array_rw(const ndt::type& dt);
+
 /**
  * This is a helper class for dealing with value assignment and collapsing
  * a view-based array into a strided array. Only the array class itself
@@ -764,18 +796,25 @@ array make_pod_array(const ndt::type& pod_dt, const void *data);
 /** Makes an array of 'bytes' type from the data */
 array make_bytes_array(const char *data, size_t len, size_t alignment=1);
 
-array make_string_array(const char *str, size_t len, string_encoding_t encoding);
+array make_string_array(const char *str, size_t len,
+                string_encoding_t encoding, uint64_t access_flags);
 inline array make_ascii_array(const char *str, size_t len) {
-    return make_string_array(str, len, string_encoding_ascii);
+    return make_string_array(str, len,
+                    string_encoding_ascii, nd::default_access_flags);
 }
 inline array make_utf8_array(const char *str, size_t len) {
-    return make_string_array(str, len, string_encoding_utf_8);
+    return make_string_array(str, len,
+                    string_encoding_utf_8, nd::default_access_flags);
 }
 inline array make_utf16_array(const uint16_t *str, size_t len) {
-    return make_string_array(reinterpret_cast<const char *>(str), len * sizeof(uint16_t), string_encoding_utf_16);
+    return make_string_array(reinterpret_cast<const char *>(str),
+                    len * sizeof(uint16_t), string_encoding_utf_16,
+                    nd::default_access_flags);
 }
 inline array make_utf32_array(const uint32_t *str, size_t len) {
-    return make_string_array(reinterpret_cast<const char *>(str), len * sizeof(uint32_t), string_encoding_utf_32);
+    return make_string_array(reinterpret_cast<const char *>(str),
+                    len * sizeof(uint32_t), string_encoding_utf_32,
+                    nd::default_access_flags);
 }
 
 template<int N>
@@ -1012,7 +1051,8 @@ nd::array::array(const T (&rhs)[N])
 template<int N>
 inline nd::array::array(const char (&rhs)[N])
 {
-    make_string_array(rhs, N, string_encoding_utf_8).swap(*this);
+    make_string_array(rhs, N, string_encoding_utf_8,
+                    nd::default_access_flags).swap(*this);
 }
 
 template<int N>
