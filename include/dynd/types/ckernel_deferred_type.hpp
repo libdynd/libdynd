@@ -3,27 +3,26 @@
 // BSD 2-Clause License, see LICENSE.txt
 //
 
-#ifndef _DYND__TYPE_TYPE_HPP_
-#define _DYND__TYPE_TYPE_HPP_
+#ifndef _DYND__CKERNEL_DEFERRED_TYPE_HPP_
+#define _DYND__CKERNEL_DEFERRED_TYPE_HPP_
 
 #include <dynd/type.hpp>
-#include <dynd/typed_data_assign.hpp>
+#include <dynd/kernels/ckernel_deferred.hpp>
 
 namespace dynd {
 
-struct type_type_data {
-    const base_type *tp;
-};
+// The data is defined in ckernel_deferred.hpp
+typedef ckernel_deferred ckernel_deferred_type_data;
 
 /**
- * A dynd type whose nd::array instances themselves contain
- * dynd types.
+ * A dynd type whose nd::array instances contain
+ * deferred_ckernel objects.
  */
-class type_type : public base_type {
+class ckernel_deferred_type : public base_type {
 public:
-    type_type();
+    ckernel_deferred_type();
 
-    virtual ~type_type();
+    virtual ~ckernel_deferred_type();
 
     void print_data(std::ostream& o, const char *metadata, const char *data) const;
 
@@ -50,11 +49,11 @@ public:
 };
 
 namespace ndt {
-    inline ndt::type make_type() {
-        return ndt::type(new type_type(), false);
+    inline ndt::type make_ckernel_deferred() {
+        return ndt::type(new ckernel_deferred_type(), false);
     }
 } // namespace ndt
 
 } // namespace dynd
 
-#endif // _DYND__TYPE_TYPE_HPP_
+#endif // _DYND__CKERNEL_DEFERRED_TYPE_HPP_

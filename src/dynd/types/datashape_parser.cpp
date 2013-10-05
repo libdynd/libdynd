@@ -18,6 +18,7 @@
 #include <dynd/types/datetime_type.hpp>
 #include <dynd/types/bytes_type.hpp>
 #include <dynd/types/type_type.hpp>
+#include <dynd/types/ckernel_deferred_type.hpp>
 #include <dynd/types/type_alignment.hpp>
 
 using namespace std;
@@ -76,6 +77,7 @@ namespace {
             builtin_types["date"] = ndt::make_date();
             builtin_types["bytes"] = ndt::make_bytes(1);
             builtin_types["type"] = ndt::make_type();
+            builtin_types["ckernel_deferred"] = ndt::make_ckernel_deferred();
             for (map<string, ndt::type>::iterator i = builtin_types.begin();
                             i != builtin_types.end(); ++i) {
                 reserved_typenames.insert(i->first);

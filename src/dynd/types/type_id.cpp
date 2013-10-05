@@ -135,6 +135,10 @@ std::ostream& dynd::operator<<(std::ostream& o, type_id_t tid)
             return (o << "unary_expr");
         case groupby_type_id:
             return (o << "groupby");
+        case type_type_id:
+            return (o << "type");
+        case ckernel_deferred_type_id:
+            return (o << "ckernel_deferred");
         default:
             return (o << "(unknown type id " << (int)tid << ")");
     }

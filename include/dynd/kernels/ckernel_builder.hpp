@@ -67,7 +67,7 @@ public:
     }
 
     /**
-     * This function ensures that the kernel's data
+     * This function ensures that the ckernel's data
      * is at least the required number of bytes. It
      * should only be called during the construction phase
      * of the kernel.
@@ -83,7 +83,7 @@ public:
     }
 
     /**
-     * This function ensures that the kernel's data
+     * This function ensures that the ckernel's data
      * is at least the required number of bytes. It
      * should only be called during the construction phase
      * of the kernel when constructing a leaf kernel.
@@ -91,7 +91,7 @@ public:
     void ensure_capacity_leaf(intptr_t requested_capacity);
 
     /**
-     * For use during construction, get's the kernel component
+     * For use during construction, gets the ckernel component
      * at the requested offset.
      */
     template<class T>
