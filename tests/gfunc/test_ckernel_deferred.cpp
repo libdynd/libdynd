@@ -11,9 +11,11 @@
 #include "inc_gtest.hpp"
 
 #include <dynd/types/fixedstring_type.hpp>
+#include <dynd/types/ckernel_deferred_type.hpp>
 #include <dynd/kernels/ckernel_deferred.hpp>
 #include <dynd/kernels/assignment_kernels.hpp>
 #include <dynd/kernels/expr_kernel_generator.hpp>
+#include <dynd/kernels/lift_ckernel_deferred.hpp>
 #include <dynd/array.hpp>
 
 using namespace std;
@@ -131,4 +133,32 @@ TEST(CKernelDeferred, Expr) {
     EXPECT_EQ(6, ints_out[0]);
     EXPECT_EQ(-208, ints_out[1]);
     EXPECT_EQ(1237, ints_out[2]);
+}
+
+
+TEST(CKernelDeferred, LiftUnary) {
+    nd::array ckd_base = nd::empty(ndt::make_ckernel_deferred());
+    // Create a deferred ckernel for converting string to int
+    make_ckernel_deferred_from_assignment(ndt::make_type<int>(), ndt::make_fixedstring(16),
+                    unary_operation_funcproto, assign_error_default,
+                    *reinterpret_cast<ckernel_deferred *>(ckd_base.get_readwrite_originptr()));
+
+    // Lift the kernel to particular fixed dim arrays
+    ckernel_deferred ckd;
+    vector<ndt::type> lifted_types;
+    lifted_types.push_back(ndt::type("3, int32"));
+    lifted_types.push_back(ndt::type("3, string(16)"));
+    lift_ckernel_deferred(&ckd, ckd_base, lifted_types);
+
+    // Test it on some data
+    ckernel_builder ckb;
+    const char *dynd_metadata[2] = {NULL, NULL};
+    ckd.instantiate_func(ckd.data_ptr, &ckb, 0, dynd_metadata, kernel_request_single);
+    int out[3] = {0, 0, 0};
+    char in[3][16] = {"172", "-139", "12345"};
+    unary_single_operation_t usngo = ckb.get()->get_function<unary_single_operation_t>();
+    usngo(reinterpret_cast<char *>(&out), reinterpret_cast<const char *>(in), ckb.get());
+    EXPECT_EQ(172, out[0]);
+    EXPECT_EQ(-139, out[1]);
+    EXPECT_EQ(12345, out[2]);
 }

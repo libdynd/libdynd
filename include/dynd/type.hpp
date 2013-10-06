@@ -419,6 +419,24 @@ public:
      */
     bool data_layout_compatible_with(const type& rhs) const;
 
+    
+    /**
+     * Returns true if the given type is a subarray of this type.
+     * For example, "int" is a subarray of "strided, int". This
+     * relationship may exist for unequal types with the same number
+     * of dimensions, for example "int" is a subarray of "pointer(int)".
+     *
+     * \param subarray_tp  Testing if it is a subarray of 'this'.
+     */
+    inline bool is_type_subarray(const ndt::type& subarray_tp) const
+    {
+        if (is_builtin()) {
+            return *this == subarray_tp;
+        } else {
+            return m_extended->is_type_subarray(subarray_tp);
+        }
+    }
+
     /**
      * Returns true if the type represents a chunk of
      * consecutive memory of raw data.

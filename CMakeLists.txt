@@ -238,6 +238,7 @@ set(libdynd_SRC
     src/dynd/kernels/expr_kernels.cpp
     src/dynd/kernels/expression_assignment_kernels.cpp
     src/dynd/kernels/expression_comparison_kernels.cpp
+    src/dynd/kernels/lift_ckernel_deferred.cpp
     src/dynd/kernels/string_assignment_kernels.cpp
     src/dynd/kernels/string_algorithm_kernels.cpp
     src/dynd/kernels/string_numeric_assignment_kernels.cpp
@@ -268,6 +269,7 @@ set(libdynd_SRC
     include/dynd/kernels/expr_kernel_generator.hpp
     include/dynd/kernels/expression_assignment_kernels.hpp
     include/dynd/kernels/expression_comparison_kernels.hpp
+    include/dynd/kernels/lift_ckernel_deferred.hpp
     include/dynd/kernels/string_assignment_kernels.hpp
     include/dynd/kernels/string_algorithm_kernels.hpp
     include/dynd/kernels/string_numeric_assignment_kernels.hpp

@@ -189,6 +189,16 @@ public:
     }
 
     /**
+     * Returns true if the given type is a subarray of this type.
+     * For example, "int" is a subarray of "strided, int". This
+     * relationship may exist for unequal types with the same number
+     * of dimensions, for example "int" is a subarray of "pointer(int)".
+     *
+     * \param subarray_tp  Testing if it is a subarray of 'this'.
+     */
+    virtual bool is_type_subarray(const ndt::type& subarray_tp) const;
+
+    /**
      * Returns true if the type contains an expression type anywhere within it.
      */
     virtual bool is_expression() const;

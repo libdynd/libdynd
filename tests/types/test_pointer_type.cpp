@@ -14,7 +14,7 @@
 using namespace std;
 using namespace dynd;
 
-TEST(PointerDType, VoidPointer) {
+TEST(PointerType, VoidPointer) {
     ndt::type d;
 
     d = ndt::make_pointer<void>();
@@ -26,7 +26,7 @@ TEST(PointerDType, VoidPointer) {
     EXPECT_FALSE(d.is_expression());
 }
 
-TEST(PointerDType, PointerToBuiltIn) {
+TEST(PointerType, PointerToBuiltIn) {
     ndt::type d;
 
     d = ndt::make_pointer<char>();
@@ -44,3 +44,10 @@ TEST(PointerDType, PointerToBuiltIn) {
     EXPECT_FALSE(d.is_expression());
 }
 
+TEST(PointerType, IsTypeSubarray) {
+    EXPECT_TRUE(ndt::type("pointer(int32)").is_type_subarray(ndt::type("pointer(int32)")));
+    EXPECT_TRUE(ndt::type("strided, 3, pointer(int32)").is_type_subarray(ndt::type("3, pointer(int32)")));
+    EXPECT_TRUE(ndt::type("3, 10, pointer(int32)").is_type_subarray(ndt::type("pointer(int32)")));
+    EXPECT_TRUE(ndt::type("pointer(int32)").is_type_subarray(ndt::make_type<int32_t>()));
+    EXPECT_FALSE(ndt::make_type<int32_t>().is_type_subarray(ndt::type("pointer(int32)")));
+}

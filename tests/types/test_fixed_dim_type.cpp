@@ -251,3 +251,16 @@ TEST(FixedDimDType, AssignFixedStridedKernel) {
     k.reset();
 }
 
+TEST(FixedDimDType, IsTypeSubarray) {
+    EXPECT_TRUE(ndt::type("3, int32").is_type_subarray(ndt::type("3, int32")));
+    EXPECT_TRUE(ndt::type("10, int32").is_type_subarray(ndt::type("10, int32")));
+    EXPECT_TRUE(ndt::type("3, 10, int32").is_type_subarray(ndt::type("10, int32")));
+    EXPECT_TRUE(ndt::type("3, 10, int32").is_type_subarray(ndt::type("int32")));
+    EXPECT_TRUE(ndt::type("5, int32").is_type_subarray(ndt::make_type<int32_t>()));
+    EXPECT_FALSE(ndt::make_type<int32_t>().is_type_subarray(ndt::type("5, int32")));
+    EXPECT_FALSE(ndt::type("10, int32").is_type_subarray(ndt::type("3, 10, int32")));
+    EXPECT_FALSE(ndt::type("3, int32").is_type_subarray(ndt::type("strided, int32")));
+    EXPECT_FALSE(ndt::type("3, int32").is_type_subarray(ndt::type("var, int32")));
+    EXPECT_FALSE(ndt::type("strided, int32").is_type_subarray(ndt::type("3, int32")));
+    EXPECT_FALSE(ndt::type("var, int32").is_type_subarray(ndt::type("3, int32")));
+}

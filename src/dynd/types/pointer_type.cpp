@@ -51,7 +51,7 @@ void pointer_type::print_data(std::ostream& o, const char *metadata, const char 
 
 void pointer_type::print_type(std::ostream& o) const
 {
-    o << "pointer<" << m_target_tp << ">";
+    o << "pointer(" << m_target_tp << ")";
 }
 
 bool pointer_type::is_expression() const

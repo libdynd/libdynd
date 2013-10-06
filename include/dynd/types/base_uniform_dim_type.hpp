@@ -39,6 +39,18 @@ public:
         return m_element_tp;
     }
 
+    inline bool is_type_subarray(const ndt::type& subarray_tp) const {
+        // Uniform dimensions can share one implementation
+        intptr_t this_ndim = get_ndim(), stp_ndim = subarray_tp.get_ndim();
+        if (this_ndim > stp_ndim) {
+            return get_element_type().is_type_subarray(subarray_tp);
+        } else if (this_ndim == stp_ndim) {
+            return (*this) == (*subarray_tp.extended());
+        } else {
+            return false;
+        }
+    }
+
     /**
      * The offset to add to the metadata to get to the
      * element type's metadata.

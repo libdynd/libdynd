@@ -15,6 +15,13 @@ base_type::~base_type()
 {
 }
 
+bool base_type::is_type_subarray(const ndt::type& subarray_tp) const
+{
+    // The default implementation is to check by-value equality.
+    // Dimension or wrapper types should override this.
+    return !subarray_tp.is_builtin() && (*this) == (*subarray_tp.extended());
+}
+
 bool base_type::is_expression() const
 {
     return false;

@@ -58,6 +58,12 @@ public:
 
     void print_type(std::ostream& o) const;
 
+    inline bool is_type_subarray(const ndt::type& subarray_tp) const {
+        // Uniform dimensions can share one implementation
+        return (!subarray_tp.is_builtin() && (*this) == (*subarray_tp.extended())) ||
+                        m_target_tp.is_type_subarray(subarray_tp);
+    }
+
     bool is_expression() const;
     bool is_unique_data_owner(const char *metadata) const;
     void transform_child_types(type_transform_fn_t transform_fn, void *extra,
