@@ -70,7 +70,7 @@ struct ckernel_deferred {
      * This data for this array should be either be static,
      * or contained within the memory of data_ptr.
      */
-    const dynd::base_type * const* data_dynd_types;
+    const ndt::type *data_dynd_types;
     /**
      * A pointer to typically heap-allocated memory for
      * the deferred ckernel. This is the value to be passed

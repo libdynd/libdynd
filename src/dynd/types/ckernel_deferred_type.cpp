@@ -35,7 +35,7 @@ void ckernel_deferred_type::print_data(std::ostream& o,
     o << "<ckernel_deferred at " << (const void *)data;
     o << ", types [";
     for (size_t i = 0; i != ddd->data_types_size; ++i) {
-        o << ndt::type(ddd->data_dynd_types[i], true);
+        o << ddd->data_dynd_types[i];
         if (i != ddd->data_types_size - 1) {
             o << ", ";
         }

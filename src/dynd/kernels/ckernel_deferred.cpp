@@ -19,7 +19,7 @@ namespace {
 // Structure and functions for the unary assignment as a deferred ckernel
 
 struct unary_assignment_ckernel_deferred_data {
-    const dynd::base_type *data_types[2];
+    ndt::type data_types[2];
     assign_error_mode errmode;
     eval::eval_context ectx;
 };
@@ -28,8 +28,6 @@ static void delete_unary_assignment_ckernel_deferred_data(void *self_data_ptr)
 {
     unary_assignment_ckernel_deferred_data *data =
                     reinterpret_cast<unary_assignment_ckernel_deferred_data *>(self_data_ptr);
-    base_type_xdecref(data->data_types[0]);
-    base_type_xdecref(data->data_types[1]);
     delete data;
 }
 
@@ -40,8 +38,8 @@ static intptr_t instantiate_unary_assignment_ckernel(void *self_data_ptr,
     unary_assignment_ckernel_deferred_data *data =
                     reinterpret_cast<unary_assignment_ckernel_deferred_data *>(self_data_ptr);
     return make_assignment_kernel(out_ckb, ckb_offset,
-                    ndt::type(data->data_types[0], true), dynd_metadata[0],
-                    ndt::type(data->data_types[1], true), dynd_metadata[1],
+                    data->data_types[0], dynd_metadata[0],
+                    data->data_types[1], dynd_metadata[1],
                     (kernel_request_t)kerntype, data->errmode, &data->ectx);
 }
 
@@ -90,8 +88,8 @@ static intptr_t instantiate_adapted_expr_assignment_ckernel(void *self_data_ptr,
         throw runtime_error("unsupported kernel request in instantiate_expr_assignment_ckernel");
     }
     return make_assignment_kernel(out_ckb, ckb_offset + sizeof(ckernel_prefix),
-                    ndt::type(data->data_types[0], true), dynd_metadata[0],
-                    ndt::type(data->data_types[1], true), dynd_metadata[1],
+                    data->data_types[0], dynd_metadata[0],
+                    data->data_types[1], dynd_metadata[1],
                     (kernel_request_t)kerntype, data->errmode, &data->ectx);
 }
 
@@ -148,8 +146,8 @@ void dynd::make_ckernel_deferred_from_assignment(const ndt::type& dst_tp, const 
         unary_assignment_ckernel_deferred_data *data = new unary_assignment_ckernel_deferred_data;
         out_ckd.data_ptr = data;
         out_ckd.free_func = &delete_unary_assignment_ckernel_deferred_data;
-        data->data_types[0] = ndt::type(dst_tp).release();
-        data->data_types[1] = ndt::type(src_tp).release();
+        data->data_types[0] = dst_tp;
+        data->data_types[1] = src_tp;
         data->errmode = errmode;
         data->ectx = *ectx;
         out_ckd.instantiate_func = &instantiate_unary_assignment_ckernel;
@@ -183,14 +181,14 @@ void dynd::make_ckernel_deferred_from_assignment(const ndt::type& dst_tp, const 
             out_ckd.instantiate_func = &instantiate_expr_ckernel;
             out_ckd.ckernel_funcproto = expr_operation_funcproto;
             out_ckd.data_types_size = nargs + 1;
-            out_ckd.data_dynd_types = data->data_types;
+            out_ckd.data_dynd_types = reinterpret_cast<ndt::type *>(data->data_types);
         } else {
             // Adapt the assignment to an expr kernel
             unary_assignment_ckernel_deferred_data *data = new unary_assignment_ckernel_deferred_data;
             out_ckd.data_ptr = data;
             out_ckd.free_func = &delete_unary_assignment_ckernel_deferred_data;
-            data->data_types[0] = ndt::type(dst_tp).release();
-            data->data_types[1] = ndt::type(src_tp).release();
+            data->data_types[0] = dst_tp;
+            data->data_types[1] = src_tp;
             data->errmode = errmode;
             data->ectx = *ectx;
             out_ckd.instantiate_func = &instantiate_adapted_expr_assignment_ckernel;
