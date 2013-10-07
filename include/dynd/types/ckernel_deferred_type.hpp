@@ -46,6 +46,10 @@ public:
                     const ndt::type& src_tp, const char *src_metadata,
                     kernel_request_t kernreq, assign_error_mode errmode,
                     const eval::eval_context *ectx) const;
+
+    void get_dynamic_array_properties(
+                    const std::pair<std::string, gfunc::callable> **out_properties,
+                    size_t *out_count) const;
 };
 
 namespace ndt {

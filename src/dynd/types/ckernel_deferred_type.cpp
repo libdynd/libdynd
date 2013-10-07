@@ -10,6 +10,8 @@
 #include <dynd/kernels/assignment_kernels.hpp>
 #include <dynd/gfunc/make_callable.hpp>
 #include <dynd/types/var_dim_type.hpp>
+#include <dynd/types/strided_dim_type.hpp>
+#include <dynd/gfunc/make_callable.hpp>
 
 #include <algorithm>
 
@@ -105,4 +107,31 @@ size_t ckernel_deferred_type::make_assignment_kernel(
     stringstream ss;
     ss << "Cannot assign from " << src_tp << " to " << dst_tp;
     throw runtime_error(ss.str());
+}
+
+///////// properties on the nd::array
+
+static nd::array property_ndo_get_types(const nd::array& n) {
+    if (n.get_type().get_type_id() != ckernel_deferred_type_id) {
+        throw runtime_error("ckernel_deferred property 'types' only works on scalars presently");
+    }
+    const ckernel_deferred *ckd = reinterpret_cast<const ckernel_deferred *>(n.get_readonly_originptr());
+    nd::array result = nd::empty(ckd->data_types_size, ndt::make_strided_dim(ndt::make_type()));
+    ndt::type *out_data = reinterpret_cast<ndt::type *>(result.get_readwrite_originptr());
+    for (intptr_t i = 0; i < ckd->data_types_size; ++i) {
+        out_data[i] = ckd->data_dynd_types[i];
+    }
+    return result;
+}
+
+static pair<string, gfunc::callable> ckernel_deferred_array_properties[] = {
+    pair<string, gfunc::callable>("types", gfunc::make_callable(&property_ndo_get_types, "self"))
+};
+
+void ckernel_deferred_type::get_dynamic_array_properties(
+                const std::pair<std::string, gfunc::callable> **out_properties,
+                size_t *out_count) const
+{
+    *out_properties = ckernel_deferred_array_properties;
+    *out_count = sizeof(ckernel_deferred_array_properties) / sizeof(ckernel_deferred_array_properties[0]);
 }

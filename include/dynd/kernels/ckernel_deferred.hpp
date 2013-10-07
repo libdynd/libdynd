@@ -60,7 +60,7 @@ struct ckernel_deferred {
      * determine how many operands there are for the `expr_operation_funcproto`,
      * for example.
      */
-    size_t data_types_size;
+    intptr_t data_types_size;
     /**
      * An array of dynd types for the kernel's data pointers.
      * Note that the builtin dynd types are stored as
