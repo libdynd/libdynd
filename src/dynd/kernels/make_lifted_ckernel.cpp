@@ -825,7 +825,7 @@ size_t dynd::make_lifted_expr_ckernel(const ckernel_deferred *elwise_handler,
 
     stringstream ss;
     ss << "Cannot process lifted elwise expression from (";
-    for (size_t i = 0; i != src_count; ++i) {
+    for (intptr_t i = 0; i < src_count; ++i) {
         ss << src_tp[i];
         if (i != src_count - 1) {
             ss << ", ";

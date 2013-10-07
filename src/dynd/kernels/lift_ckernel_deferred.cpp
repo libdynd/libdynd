@@ -70,7 +70,7 @@ void dynd::lift_ckernel_deferred(ckernel_deferred *out_ckd,
     }
     // Validate that all the types are subarrays as needed for lifting
     intptr_t ntypes = ckd->data_types_size;
-    if (ntypes != lifted_types.size()) {
+    if (ntypes != (intptr_t)lifted_types.size()) {
         stringstream ss;
         ss << "lift_ckernel_deferred() 'lifted_types' list must have "
            << "the same number of types as the input ckernel_deferred "
