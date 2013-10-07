@@ -49,47 +49,53 @@ namespace {
 
 static ndt::type parse_rhs_expression(const char *&begin, const char *end, map<string, ndt::type>& symtable);
 
-static map<string, ndt::type> builtin_types;
-static set<string> reserved_typenames;
-namespace {
-    struct init_bit {
-        init_bit() {
-            builtin_types["void"] = ndt::make_type<void>();
-            builtin_types["bool"] = ndt::make_type<dynd_bool>();
-            builtin_types["int8"] = ndt::make_type<int8_t>();
-            builtin_types["int16"] = ndt::make_type<int16_t>();
-            builtin_types["int32"] = ndt::make_type<int32_t>();
-            builtin_types["int64"] = ndt::make_type<int64_t>();
-            builtin_types["int128"] = ndt::make_type<dynd_int128>();
-            builtin_types["intptr"] = ndt::make_type<intptr_t>();
-            builtin_types["uint8"] = ndt::make_type<uint8_t>();
-            builtin_types["uint16"] = ndt::make_type<uint16_t>();
-            builtin_types["uint32"] = ndt::make_type<uint32_t>();
-            builtin_types["uint64"] = ndt::make_type<uint64_t>();
-            builtin_types["uint128"] = ndt::make_type<dynd_uint128>();
-            builtin_types["uintptr"] = ndt::make_type<uintptr_t>();
-            builtin_types["float16"] = ndt::make_type<dynd_float16>();
-            builtin_types["float32"] = ndt::make_type<float>();
-            builtin_types["float64"] = ndt::make_type<double>();
-            builtin_types["float128"] = ndt::make_type<dynd_float128>();
-            builtin_types["cfloat32"] = builtin_types["complex64"] = ndt::make_type<complex<float> >();
-            builtin_types["cfloat64"] = builtin_types["complex128"] = ndt::make_type<complex<double> >();
-            builtin_types["json"] = ndt::make_json();
-            builtin_types["date"] = ndt::make_date();
-            builtin_types["bytes"] = ndt::make_bytes(1);
-            builtin_types["type"] = ndt::make_type();
-            builtin_types["ckernel_deferred"] = ndt::make_ckernel_deferred();
-            for (map<string, ndt::type>::iterator i = builtin_types.begin();
-                            i != builtin_types.end(); ++i) {
-                reserved_typenames.insert(i->first);
-            }
-            reserved_typenames.insert("string");
-            reserved_typenames.insert("datetime");
-            reserved_typenames.insert("unaligned");
-            reserved_typenames.insert("pointer");
+static const map<string, ndt::type>& get_builtin_types()
+{
+    static map<string, ndt::type> builtin_types;
+    if (builtin_types.empty()) {
+        builtin_types["void"] = ndt::make_type<void>();
+        builtin_types["bool"] = ndt::make_type<dynd_bool>();
+        builtin_types["int8"] = ndt::make_type<int8_t>();
+        builtin_types["int16"] = ndt::make_type<int16_t>();
+        builtin_types["int32"] = ndt::make_type<int32_t>();
+        builtin_types["int64"] = ndt::make_type<int64_t>();
+        builtin_types["int128"] = ndt::make_type<dynd_int128>();
+        builtin_types["intptr"] = ndt::make_type<intptr_t>();
+        builtin_types["uint8"] = ndt::make_type<uint8_t>();
+        builtin_types["uint16"] = ndt::make_type<uint16_t>();
+        builtin_types["uint32"] = ndt::make_type<uint32_t>();
+        builtin_types["uint64"] = ndt::make_type<uint64_t>();
+        builtin_types["uint128"] = ndt::make_type<dynd_uint128>();
+        builtin_types["uintptr"] = ndt::make_type<uintptr_t>();
+        builtin_types["float16"] = ndt::make_type<dynd_float16>();
+        builtin_types["float32"] = ndt::make_type<float>();
+        builtin_types["float64"] = ndt::make_type<double>();
+        builtin_types["float128"] = ndt::make_type<dynd_float128>();
+        builtin_types["cfloat32"] = builtin_types["complex64"] = ndt::make_type<complex<float> >();
+        builtin_types["cfloat64"] = builtin_types["complex128"] = ndt::make_type<complex<double> >();
+        builtin_types["json"] = ndt::make_json();
+        builtin_types["date"] = ndt::make_date();
+        builtin_types["bytes"] = ndt::make_bytes(1);
+        builtin_types["type"] = ndt::make_type();
+        builtin_types["ckernel_deferred"] = ndt::make_ckernel_deferred();
+    }
+    return builtin_types;
+}
+static const set<string>& get_reserved_typenames()
+{
+    static set<string> reserved_typenames;
+    if (reserved_typenames.empty()) {
+        const map<string, ndt::type>& builtin_types = get_builtin_types();
+        for (map<string, ndt::type>::const_iterator i = builtin_types.begin();
+                        i != builtin_types.end(); ++i) {
+            reserved_typenames.insert(i->first);
         }
-    };
-    static init_bit builtin_types_initializer;
+        reserved_typenames.insert("string");
+        reserved_typenames.insert("datetime");
+        reserved_typenames.insert("unaligned");
+        reserved_typenames.insert("pointer");
+    }
+    return reserved_typenames;
 }
 
 static const char *skip_whitespace(const char *begin, const char *end)
@@ -477,6 +483,7 @@ static ndt::type parse_record(const char *&begin, const char *end, map<string, n
 /** This is what parses the main datashape grammar, excluding type aliases, etc. */
 static ndt::type parse_rhs_expression(const char *&begin, const char *end, map<string, ndt::type>& symtable)
 {
+    const set<string>& reserved_typenames = get_reserved_typenames();
     ndt::type result;
     vector<intptr_t> shape;
     // rhs_expression : ((NAME | NUMBER) COMMA)* (record | NAME LPAREN rhs_expression RPAREN | NAME)
@@ -525,6 +532,7 @@ static ndt::type parse_rhs_expression(const char *&begin, const char *end, map<s
         } else if (n == "pointer") {
             result = parse_pointer_parameters(begin, end, symtable);
         } else {
+            const map<string, ndt::type>& builtin_types = get_builtin_types();
             map<string, ndt::type>::const_iterator i = builtin_types.find(n);
             if (i != builtin_types.end()) {
                 result = i->second;
@@ -569,12 +577,13 @@ static ndt::type parse_stmt(const char *&begin, const char *end, map<string, ndt
     // stmt : TYPE name EQUALS rhs_expression
     // NOTE that this doesn't support parameterized lhs_expression, this is subset of Blaze datashape
     if (parse_token(begin, end, "type")) {
+        const map<string, ndt::type>& builtin_types = get_builtin_types();
         const char *saved_begin = begin;
         string tname = parse_name(begin, end);
         if (tname.empty()) {
             if (skip_whitespace(begin, end) == end) {
                 // If it's only "type" by itself, return the "type" type
-                return builtin_types["type"];
+                return builtin_types.find("type")->second;
             } else {
                 throw datashape_parse_error(begin, "expected an identifier for a type name");
             }
