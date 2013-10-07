@@ -17,10 +17,10 @@ struct lifted_expr_ckernel_deferred_data {
     // Reference to the array containing it
     memory_block_data *child_ckd_arr;
     // Number of types
-    size_t data_types_size;
+    intptr_t data_types_size;
     // The types of the child ckernel and this one
     const ndt::type *child_data_types;
-    const dynd::base_type *data_types[1];
+    ndt::type data_types[1];
 };
 
 static void delete_lifted_expr_ckernel_deferred_data(void *self_data_ptr)
@@ -30,9 +30,9 @@ static void delete_lifted_expr_ckernel_deferred_data(void *self_data_ptr)
     if (data->child_ckd_arr != NULL) {
         memory_block_decref(data->child_ckd_arr);
     }
-    const dynd::base_type **data_types = &data->data_types[0];
-    for (size_t i = 0; i < data->data_types_size; ++i) {
-        base_type_xdecref(data_types[i]);
+    ndt::type *data_types = &data->data_types[0];
+    for (intptr_t i = 0; i < data->data_types_size; ++i) {
+        data_types[i] = ndt::type();
     }
     free(data);
 }
@@ -45,8 +45,7 @@ static intptr_t instantiate_lifted_expr_ckernel_deferred_data(void *self_data_pt
                     reinterpret_cast<lifted_expr_ckernel_deferred_data *>(self_data_ptr);
     return make_lifted_expr_ckernel(data->child_ckd,
                     out_ckb, ckb_offset,
-                    reinterpret_cast<const ndt::type *>(data->data_types),
-                    dynd_metadata,
+                    data->data_types, dynd_metadata,
                     static_cast<dynd::kernel_request_t>(kerntype));
 }
 
@@ -99,14 +98,14 @@ void dynd::lift_ckernel_deferred(ckernel_deferred *out_ckd,
         out_ckd->free_func = &delete_lifted_expr_ckernel_deferred_data;
         out_ckd->data_types_size = ntypes;
         data->data_types_size = ntypes;
-        const dynd::base_type **data_types_arr = &data->data_types[0];
+        ndt::type *data_types_arr = &data->data_types[0];
         for (intptr_t i = 0; i < ntypes; ++i) {
-            data_types_arr[i] = ndt::type(lifted_types[i]).release();
+            data_types_arr[i] = lifted_types[i];
         }
         data->child_ckd = ckd;
         data->child_ckd_arr = ckd_arr.get_memblock().release();
         out_ckd->instantiate_func = &instantiate_lifted_expr_ckernel_deferred_data;
-        out_ckd->data_dynd_types = reinterpret_cast<ndt::type *>(data->data_types);
+        out_ckd->data_dynd_types = &data->data_types[0];
         out_ckd->ckernel_funcproto = expr_operation_funcproto;
     } else {
         stringstream ss;

@@ -101,7 +101,7 @@ struct expr_ckernel_deferred_data {
     eval::eval_context ectx;
     const dynd::expr_type *expr_type;
     size_t data_types_size;
-    const dynd::base_type *data_types[1];
+    ndt::type data_types[1];
 };
 
 static void delete_expr_ckernel_deferred_data(void *self_data_ptr)
@@ -109,9 +109,10 @@ static void delete_expr_ckernel_deferred_data(void *self_data_ptr)
     expr_ckernel_deferred_data *data =
                     reinterpret_cast<expr_ckernel_deferred_data *>(self_data_ptr);
     base_type_xdecref(data->expr_type);
-    const dynd::base_type **data_types = &data->data_types[0];
+    ndt::type *data_types = &data->data_types[0];
     for (size_t i = 0; i < data->data_types_size; ++i) {
-        base_type_xdecref(data_types[i]);
+        // Reset all the types to NULL
+        data_types[i] = ndt::type();
     }
     // Call the destructor and free the memory
     data->~expr_ckernel_deferred_data();
@@ -126,9 +127,10 @@ static intptr_t instantiate_expr_ckernel(void *self_data_ptr,
                     reinterpret_cast<expr_ckernel_deferred_data *>(self_data_ptr);
     const expr_kernel_generator& kgen = data->expr_type->get_kgen();
     return kgen.make_expr_kernel(out_ckb, ckb_offset,
-                    ndt::type(data->data_types[0], true), dynd_metadata[0],
-                    data->data_types_size - 1, reinterpret_cast<const ndt::type *>(data->data_types + 1),
-                    const_cast<const char **>(dynd_metadata) + 1, (kernel_request_t)kerntype, &data->ectx);
+                    data->data_types[0], dynd_metadata[0],
+                    data->data_types_size - 1, &data->data_types[0] + 1,
+                    const_cast<const char **>(dynd_metadata) + 1,
+                    (kernel_request_t)kerntype, &data->ectx);
 }
 
 
@@ -168,12 +170,12 @@ void dynd::make_ckernel_deferred_from_assignment(const ndt::type& dst_tp, const 
             out_ckd.data_ptr = data;
             out_ckd.free_func = &delete_expr_ckernel_deferred_data;
             data->data_types_size = nargs + 1;
-            const dynd::base_type **data_types_arr = &data->data_types[0];
-            data_types_arr[0] = ndt::type(dst_tp).release();
+            ndt::type *data_types_arr = &data->data_types[0];
+            data_types_arr[0] = dst_tp;
             for (intptr_t i = 0; i < nargs; ++i) {
                 // Dereference the pointer type in each field
                 const pointer_type *field_ptr_type = static_cast<const pointer_type *>(operand_types[i].extended());
-                data_types_arr[i+1] = ndt::type(field_ptr_type->get_target_type()).release();
+                data_types_arr[i+1] = field_ptr_type->get_target_type();
             }
             data->expr_type = static_cast<const expr_type *>(ndt::type(etp, true).release());
             data->errmode = errmode;
@@ -181,7 +183,7 @@ void dynd::make_ckernel_deferred_from_assignment(const ndt::type& dst_tp, const 
             out_ckd.instantiate_func = &instantiate_expr_ckernel;
             out_ckd.ckernel_funcproto = expr_operation_funcproto;
             out_ckd.data_types_size = nargs + 1;
-            out_ckd.data_dynd_types = reinterpret_cast<ndt::type *>(data->data_types);
+            out_ckd.data_dynd_types = data->data_types;
         } else {
             // Adapt the assignment to an expr kernel
             unary_assignment_ckernel_deferred_data *data = new unary_assignment_ckernel_deferred_data;
