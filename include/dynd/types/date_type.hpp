@@ -65,8 +65,12 @@ public:
 
     void get_dynamic_type_properties(const std::pair<std::string, gfunc::callable> **out_properties, size_t *out_count) const;
     void get_dynamic_type_functions(const std::pair<std::string, gfunc::callable> **out_functions, size_t *out_count) const;
-    void get_dynamic_array_properties(const std::pair<std::string, gfunc::callable> **out_properties, size_t *out_count) const;
-    void get_dynamic_array_functions(const std::pair<std::string, gfunc::callable> **out_functions, size_t *out_count) const;
+    void get_dynamic_array_properties(
+                    const std::pair<std::string, gfunc::callable> **out_properties,
+                    size_t *out_count) const;
+    void get_dynamic_array_functions(
+                    const std::pair<std::string, gfunc::callable> **out_functions,
+                    size_t *out_count) const;
 
     size_t get_elwise_property_index(const std::string& property_name) const;
     ndt::type get_elwise_property_type(size_t elwise_property_index,

@@ -16,6 +16,7 @@
 #include <dynd/kernels/assignment_kernels.hpp>
 #include <dynd/kernels/expr_kernel_generator.hpp>
 #include <dynd/kernels/lift_ckernel_deferred.hpp>
+#include <dynd/gfunc/call_callable.hpp>
 #include <dynd/array.hpp>
 
 using namespace std;
@@ -328,12 +329,13 @@ TEST(CKernelDeferred, LiftExpr_MultiDimVarToVarDim) {
                     *reinterpret_cast<ckernel_deferred *>(ckd_base.get_readwrite_originptr()));
 
     // Lift the kernel to particular arrays
-    ckernel_deferred ckd;
+    nd::array ckd_lifted = nd::empty(ndt::make_ckernel_deferred());
+    ckernel_deferred *ckd = reinterpret_cast<ckernel_deferred *>(ckd_lifted.get_readwrite_originptr());
     vector<ndt::type> lifted_types;
     lifted_types.push_back(ndt::type("strided, var, int32"));
     lifted_types.push_back(ndt::type("3, var, int32"));
     lifted_types.push_back(ndt::type("strided, int32"));
-    lift_ckernel_deferred(&ckd, ckd_base, lifted_types);
+    lift_ckernel_deferred(ckd, ckd_base, lifted_types);
 
     // Create some compatible values
     nd::array out = nd::empty(3, lifted_types[0]);
@@ -354,9 +356,26 @@ TEST(CKernelDeferred, LiftExpr_MultiDimVarToVarDim) {
     dynd_metadata[2] = in1.get_ndo_meta();
     const char *const in_ptrs[2] = {in0.get_readonly_originptr(), in1.get_readonly_originptr()};
     ckernel_builder ckb;
-    ckd.instantiate_func(ckd.data_ptr, &ckb, 0, dynd_metadata, kernel_request_single);
+    ckd->instantiate_func(ckd->data_ptr, &ckb, 0, dynd_metadata, kernel_request_single);
     expr_single_operation_t usngo = ckb.get()->get_function<expr_single_operation_t>();
     usngo(out.get_readwrite_originptr(), in_ptrs, ckb.get());
+    ASSERT_EQ(3u, out.get_shape()[0]);
+    ASSERT_EQ(3u, out(0).get_shape()[0]);
+    ASSERT_EQ(3u, out(1).get_shape()[0]);
+    ASSERT_EQ(3u, out(2).get_shape()[0]);
+    EXPECT_EQ(3, out(0, 0).as<int>());
+    EXPECT_EQ(6, out(0, 1).as<int>());
+    EXPECT_EQ(13, out(0, 2).as<int>());
+    EXPECT_EQ(6, out(1, 0).as<int>());
+    EXPECT_EQ(8, out(1, 1).as<int>());
+    EXPECT_EQ(14, out(1, 2).as<int>());
+    EXPECT_EQ(1, out(2, 0).as<int>());
+    EXPECT_EQ(14, out(2, 1).as<int>());
+    EXPECT_EQ(12, out(2, 2).as<int>());
+
+    // Do it again with the __call__ function
+    out = nd::empty(3, lifted_types[0]);
+    ckd_lifted.f("__call__", out, in0, in1);
     ASSERT_EQ(3u, out.get_shape()[0]);
     ASSERT_EQ(3u, out(0).get_shape()[0]);
     ASSERT_EQ(3u, out(1).get_shape()[0]);

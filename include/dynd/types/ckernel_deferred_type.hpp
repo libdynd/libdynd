@@ -50,6 +50,9 @@ public:
     void get_dynamic_array_properties(
                     const std::pair<std::string, gfunc::callable> **out_properties,
                     size_t *out_count) const;
+    void get_dynamic_array_functions(
+                    const std::pair<std::string, gfunc::callable> **out_functions,
+                    size_t *out_count) const;
 };
 
 namespace ndt {

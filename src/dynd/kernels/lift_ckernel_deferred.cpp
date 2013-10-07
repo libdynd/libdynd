@@ -107,6 +107,7 @@ void dynd::lift_ckernel_deferred(ckernel_deferred *out_ckd,
         data->child_ckd_arr = ckd_arr.get_memblock().release();
         out_ckd->instantiate_func = &instantiate_lifted_expr_ckernel_deferred_data;
         out_ckd->data_dynd_types = reinterpret_cast<ndt::type *>(data->data_types);
+        out_ckd->ckernel_funcproto = expr_operation_funcproto;
     } else {
         stringstream ss;
         ss << "lift_ckernel_deferred() unrecognized ckernel function"

@@ -12,6 +12,7 @@
 #include <dynd/types/var_dim_type.hpp>
 #include <dynd/types/strided_dim_type.hpp>
 #include <dynd/gfunc/make_callable.hpp>
+#include <dynd/kernels/expr_kernel_generator.hpp>
 
 #include <algorithm>
 
@@ -135,3 +136,91 @@ void ckernel_deferred_type::get_dynamic_array_properties(
     *out_properties = ckernel_deferred_array_properties;
     *out_count = sizeof(ckernel_deferred_array_properties) / sizeof(ckernel_deferred_array_properties[0]);
 }
+
+///////// functions on the nd::array
+
+// Maximum number of args (including out) for now
+// (need to add varargs capability to this calling convention)
+static const int max_args = 6;
+
+static array_preamble *function___call__(const array_preamble *params, void *DYND_UNUSED(extra))
+{
+    // TODO: Remove the const_cast
+    nd::array par(const_cast<array_preamble *>(params), true);
+    const nd::array *par_arrs = reinterpret_cast<const nd::array *>(par.get_readonly_originptr());
+    if (par_arrs[0].get_type().get_type_id() != ckernel_deferred_type_id) {
+        throw runtime_error("ckernel_deferred method '__call__' only works on individual ckernel_deferred instances presently");
+    }
+    // Figure out how many args were provided
+    int nargs;
+    for (nargs = 2; nargs < max_args; ++nargs) {
+        // Stop at the first NULL arg (means it was default)
+        if (par_arrs[nargs+1].get_ndo() == NULL) {
+            break;
+        }
+    }
+
+    const ckernel_deferred *ckd = reinterpret_cast<const ckernel_deferred *>(par_arrs[0].get_readonly_originptr());
+    // Validate the number of arguments
+    if (nargs != ckd->data_types_size) {
+        stringstream ss;
+        ss << "ckernel expected " << (ckd->data_types_size - 1) << " arguments, got " << nargs;
+        throw runtime_error(ss.str());
+    }
+    // Validate that the types match exactly
+    for (int i = 0; i < nargs; ++i) {
+        if (par_arrs[i+1].get_type() != ckd->data_dynd_types[i]) {
+            stringstream ss;
+            ss << "ckernel argument " << i << " expected type (" << ckd->data_dynd_types[i];
+            ss << "), got type (" << par_arrs[i].get_type() << ")";
+            throw runtime_error(ss.str());
+        }
+    }
+    // Instantiate the ckernel
+    ckernel_builder ckb;
+    const char *dynd_metadata[max_args];
+    for (int i = 0; i < nargs; ++i) {
+        dynd_metadata[i] = par_arrs[i+1].get_ndo_meta();
+    }
+    ckd->instantiate_func(ckd->data_ptr,
+                    &ckb, 0,
+                    dynd_metadata, kernel_request_single);
+    // Call the ckernel
+    if (ckd->ckernel_funcproto == unary_operation_funcproto) {
+        throw runtime_error("TODO: unary ckernel call is not implemented");
+    } else if (ckd->ckernel_funcproto == expr_operation_funcproto) {
+        expr_single_operation_t usngo = ckb.get()->get_function<expr_single_operation_t>();
+        const char *in_ptrs[max_args];
+        for (int i = 0; i < nargs - 1; ++i) {
+            in_ptrs[i] = par_arrs[i+2].get_readonly_originptr();
+        }
+        usngo(par_arrs[1].get_readwrite_originptr(), in_ptrs, ckb.get());
+    } else {
+        throw runtime_error("unrecognized ckernel function prototype");
+    }
+    // Return void
+    return nd::empty(ndt::make_type<void>()).release();
+}
+
+static pair<string, gfunc::callable> ckernel_deferred_array_functions[] = {
+    pair<string, gfunc::callable>("__call__", gfunc::callable(
+            ndt::type("{self:pointer(void);out:pointer(void);p0:pointer(void);"
+                       "p1:pointer(void);p2:pointer(void);"
+                       "p3:pointer(void);p4:pointer(void)}"),
+            &function___call__,
+            NULL,
+            3,
+            nd::empty("{self:pointer(void);out:pointer(void);p0:pointer(void);"
+                       "p1:pointer(void);p2:pointer(void);"
+                       "p3:pointer(void);p4:pointer(void)}")
+                    ))
+};
+
+void ckernel_deferred_type::get_dynamic_array_functions(
+                const std::pair<std::string, gfunc::callable> **out_functions,
+                size_t *out_count) const
+{
+    *out_functions = ckernel_deferred_array_functions;
+    *out_count = sizeof(ckernel_deferred_array_functions) / sizeof(ckernel_deferred_array_functions[0]);
+}
+

@@ -325,7 +325,9 @@ static pair<string, gfunc::callable> date_array_functions[] = {
                     numeric_limits<int32_t>::max(), numeric_limits<int32_t>::max(), numeric_limits<int32_t>::max()))
 };
 
-void date_type::get_dynamic_array_functions(const std::pair<std::string, gfunc::callable> **out_functions, size_t *out_count) const
+void date_type::get_dynamic_array_functions(
+                const std::pair<std::string, gfunc::callable> **out_functions,
+                size_t *out_count) const
 {
     *out_functions = date_array_functions;
     *out_count = sizeof(date_array_functions) / sizeof(date_array_functions[0]);
