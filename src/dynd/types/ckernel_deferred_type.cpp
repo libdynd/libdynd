@@ -249,7 +249,7 @@ static array_preamble *function___call__(const array_preamble *params, void *DYN
         if (par_arrs[i+1].get_type() != ckd->data_dynd_types[i]) {
             stringstream ss;
             ss << "ckernel argument " << i << " expected type (" << ckd->data_dynd_types[i];
-            ss << "), got type (" << par_arrs[i].get_type() << ")";
+            ss << "), got type (" << par_arrs[i+1].get_type() << ")";
             throw runtime_error(ss.str());
         }
     }
