@@ -31,19 +31,37 @@ ckernel_deferred_type::~ckernel_deferred_type()
 {
 }
 
+static void print_ckernel_deferred(std::ostream& o, const ckernel_deferred *ckd)
+{
+    if (ckd->instantiate_func == NULL) {
+        o << "<uninitialized ckernel_deferred>";
+    } else {
+        o << "<ckernel_deferred ";
+        if (ckd->ckernel_funcproto == unary_operation_funcproto) {
+            o << "unary ";
+        } else if (ckd->ckernel_funcproto == expr_operation_funcproto) {
+            o << "expr ";
+        } else if (ckd->ckernel_funcproto == binary_predicate_funcproto) {
+            o << "binary_predicate ";
+        } else {
+            o << "<unknown function prototype> ";
+        }
+        o << ", types [";
+        for (intptr_t i = 0; i != ckd->data_types_size; ++i) {
+            o << ckd->data_dynd_types[i];
+            if (i != ckd->data_types_size - 1) {
+                o << ", ";
+            }
+        }
+        o << "]>";
+    }
+}
+
 void ckernel_deferred_type::print_data(std::ostream& o,
                 const char *DYND_UNUSED(metadata), const char *data) const
 {
-    const ckernel_deferred_type_data *ddd = reinterpret_cast<const ckernel_deferred_type_data *>(data);
-    o << "<ckernel_deferred at " << (const void *)data;
-    o << ", types [";
-    for (intptr_t i = 0; i != ddd->data_types_size; ++i) {
-        o << ddd->data_dynd_types[i];
-        if (i != ddd->data_types_size - 1) {
-            o << ", ";
-        }
-    }
-    o << "]>";
+    const ckernel_deferred_type_data *ckd = reinterpret_cast<const ckernel_deferred_type_data *>(data);
+    print_ckernel_deferred(o, ckd);
 }
 
 void ckernel_deferred_type::print_type(std::ostream& o) const
@@ -97,13 +115,72 @@ void ckernel_deferred_type::data_destruct_strided(const char *DYND_UNUSED(metada
     }
 }
 
-size_t ckernel_deferred_type::make_assignment_kernel(
-                ckernel_builder *DYND_UNUSED(out), size_t DYND_UNUSED(offset_out),
-                const ndt::type& dst_tp, const char *DYND_UNUSED(dst_metadata),
-                const ndt::type& src_tp, const char *DYND_UNUSED(src_metadata),
-                kernel_request_t DYND_UNUSED(kernreq), assign_error_mode DYND_UNUSED(errmode),
-                const eval::eval_context *DYND_UNUSED(ectx)) const
+/////////////////////////////////////////
+// date to string assignment
+
+namespace {
+    struct ckernel_deferred_to_string_kernel_extra {
+        typedef ckernel_deferred_to_string_kernel_extra extra_type;
+
+        ckernel_prefix base;
+        const base_string_type *dst_string_dt;
+        const char *dst_metadata;
+        assign_error_mode errmode;
+
+        static void single(char *dst, const char *src, ckernel_prefix *extra)
+        {
+            extra_type *e = reinterpret_cast<extra_type *>(extra);
+            const ckernel_deferred *ckd = reinterpret_cast<const ckernel_deferred *>(src);
+            stringstream ss;
+            print_ckernel_deferred(ss, ckd);
+            e->dst_string_dt->set_utf8_string(e->dst_metadata, dst, e->errmode, ss.str());
+        }
+
+        static void destruct(ckernel_prefix *extra)
+        {
+            extra_type *e = reinterpret_cast<extra_type *>(extra);
+            base_type_xdecref(e->dst_string_dt);
+        }
+    };
+} // anonymous namespace
+
+static intptr_t make_ckernel_deferred_to_string_assignment_kernel(
+                ckernel_builder *out_ckb, size_t ckb_offset,
+                const ndt::type& dst_string_dt, const char *dst_metadata,
+                kernel_request_t kernreq, assign_error_mode errmode,
+                const eval::eval_context *DYND_UNUSED(ectx))
 {
+    ckb_offset = make_kernreq_to_single_kernel_adapter(out_ckb, ckb_offset, kernreq);
+    intptr_t ckb_end_offset = ckb_offset + sizeof(ckernel_deferred_to_string_kernel_extra);
+    out_ckb->ensure_capacity_leaf(ckb_end_offset);
+    ckernel_deferred_to_string_kernel_extra *e =
+                    out_ckb->get_at<ckernel_deferred_to_string_kernel_extra>(ckb_offset);
+    e->base.set_function<unary_single_operation_t>(&ckernel_deferred_to_string_kernel_extra::single);
+    e->base.destructor = &ckernel_deferred_to_string_kernel_extra::destruct;
+    // The kernel data owns a reference to this type
+    e->dst_string_dt = static_cast<const base_string_type *>(ndt::type(dst_string_dt).release());
+    e->dst_metadata = dst_metadata;
+    e->errmode = errmode;
+    return ckb_end_offset;
+}
+
+size_t ckernel_deferred_type::make_assignment_kernel(
+                ckernel_builder *out_ckb, size_t ckb_offset,
+                const ndt::type& dst_tp, const char *dst_metadata,
+                const ndt::type& src_tp, const char *DYND_UNUSED(src_metadata),
+                kernel_request_t kernreq, assign_error_mode errmode,
+                const eval::eval_context *ectx) const
+{
+    if (this == dst_tp.extended()) {
+    } else {
+        if (dst_tp.get_kind() == string_kind) {
+            // Assignment to strings
+            return make_ckernel_deferred_to_string_assignment_kernel(out_ckb, ckb_offset,
+                            dst_tp, dst_metadata,
+                            kernreq, errmode, ectx);
+        }
+    }
+    
     // Nothing can be assigned to/from ckernel_deferred
     stringstream ss;
     ss << "Cannot assign from " << src_tp << " to " << dst_tp;
