@@ -6,6 +6,8 @@
 #ifndef _DYND__CKERNEL_BUILDER_HPP_
 #define _DYND__CKERNEL_BUILDER_HPP_
 
+#include <new>
+
 #include <dynd/config.hpp>
 #include <dynd/kernels/ckernel_prefix.hpp>
 

@@ -5,6 +5,7 @@
 
 #include <dynd/kernels/ckernel_deferred.hpp>
 #include <dynd/kernels/assignment_kernels.hpp>
+#include <dynd/kernels/ckernel_common_functions.hpp>
 #include <dynd/kernels/expr_kernels.hpp>
 #include <dynd/types/expr_type.hpp>
 #include <dynd/types/base_struct_type.hpp>
@@ -43,51 +44,14 @@ static intptr_t instantiate_unary_assignment_ckernel(void *self_data_ptr,
                     (kernel_request_t)kerntype, data->errmode, &data->ectx);
 }
 
-static void destroy_unary_as_expr_adapter(ckernel_prefix *ckp)
-{
-    ckernel_prefix *child = ckp + 1;
-    if (child->destructor != NULL) {
-        child->destructor(child);
-    }
-}
-
-static void unary_as_expr_adapter_single(
-                char *dst, const char * const *src,
-                ckernel_prefix *ckp)
-{
-    ckernel_prefix *child = ckp + 1;
-    unary_single_operation_t childop = child->get_function<unary_single_operation_t>();
-    childop(dst, *src, child);
-}
-
-static void unary_as_expr_adapter_strided(
-                char *dst, intptr_t dst_stride,
-                const char * const *src, const intptr_t *src_stride,
-                size_t count, ckernel_prefix *ckp)
-{
-    ckernel_prefix *child = ckp + 1;
-    unary_strided_operation_t childop = child->get_function<unary_strided_operation_t>();
-    childop(dst, dst_stride, *src, *src_stride, count, child);
-}
-
 static intptr_t instantiate_adapted_expr_assignment_ckernel(void *self_data_ptr,
                 dynd::ckernel_builder *out_ckb, intptr_t ckb_offset,
                 const char *const* dynd_metadata, uint32_t kerntype)
 {
     unary_assignment_ckernel_deferred_data *data =
                     reinterpret_cast<unary_assignment_ckernel_deferred_data *>(self_data_ptr);
-    // Add an adapter kernel which converts the unary kernel to an expr kernel
-    out_ckb->ensure_capacity(ckb_offset + sizeof(ckernel_prefix));
-    ckernel_prefix *ckp = out_ckb->get_at<ckernel_prefix>(ckb_offset);
-    ckp->destructor = &destroy_unary_as_expr_adapter;
-    if (kerntype == kernel_request_single) {
-        ckp->set_function<expr_single_operation_t>(unary_as_expr_adapter_single);
-    } else if (kerntype == kernel_request_strided) {
-        ckp->set_function<expr_strided_operation_t>(unary_as_expr_adapter_strided);
-    } else {
-        throw runtime_error("unsupported kernel request in instantiate_expr_assignment_ckernel");
-    }
-    return make_assignment_kernel(out_ckb, ckb_offset + sizeof(ckernel_prefix),
+    ckb_offset = kernels::wrap_unary_as_expr_ckernel(out_ckb, ckb_offset, (kernel_request_t)kerntype);
+    return make_assignment_kernel(out_ckb, ckb_offset,
                     data->data_types[0], dynd_metadata[0],
                     data->data_types[1], dynd_metadata[1],
                     (kernel_request_t)kerntype, data->errmode, &data->ectx);
