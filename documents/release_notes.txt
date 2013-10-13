@@ -5,6 +5,20 @@ DyND is a C++ library for array programming with a dynamic
 type system. It is currently in a preview state, and nothing
 about the API or the ABI is guaranteed to stay the same.
 
+Version 0.5.0
+-------------
+
+- Make default access when constructing an nd::array from
+  a value be immutable instead of readwrite.
+- Add nd::array_rw(val) constructors to support creating
+  readwrite arrays from a value.
+- Some datashape printing/parsing tweaks, like "unaligned(...)"
+  support, printing the cstruct type using datashape format.
+- Add supporting code for ckernel ABI, including a
+  ckernel_deferred type, code for lifting ckernel_deferred
+  objects to higher dimensions, renaming to more consistent
+  naming schemes.
+
 Version 0.4.2
 -------------
 
