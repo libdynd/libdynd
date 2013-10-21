@@ -6,6 +6,7 @@
 #include <stdexcept>
 #include <vector>
 #include <cstdlib>
+#include <algorithm>
 
 #include <dynd/memblock/zeroinit_memory_block.hpp>
 

@@ -4,6 +4,7 @@
 //
 
 #include <stdexcept>
+#include <algorithm>
 
 #include <dynd/type_promotion.hpp>
 #include <dynd/types/string_type.hpp>

@@ -3,6 +3,8 @@
 // BSD 2-Clause License, see LICENSE.txt
 //
 
+#include <algorithm>
+
 #include <dynd/type.hpp>
 #include <dynd/types/base_expression_type.hpp>
 #include <dynd/kernels/expression_assignment_kernels.hpp>

@@ -4,6 +4,7 @@
 //
 
 #include <vector>
+#include <algorithm>
 
 #include <dynd/types/view_type.hpp>
 #include <dynd/kernels/assignment_kernels.hpp>
