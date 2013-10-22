@@ -69,39 +69,35 @@ memory_block_ptr dynd::make_array_memory_block(size_t metadata_size, size_t extr
     return memory_block_ptr(new (result) memory_block_data(1, array_memory_block_type), false);
 }
 
-memory_block_ptr dynd::make_array_memory_block(const ndt::type& dt, intptr_t ndim, const intptr_t *shape)
+memory_block_ptr dynd::make_array_memory_block(const ndt::type& tp, intptr_t ndim, const intptr_t *shape)
 {
     size_t metadata_size, data_size;
 
-    // Make sure that there are not too many 
-    if (ndim > dt.get_ndim()) {
-        stringstream ss;
-        ss << "Shape provided, ";
-        print_shape(ss, ndim, shape);
-        ss << ", has too many dimensions for type " << dt;
-        throw runtime_error(ss.str());
-    }
-
-    if (dt.is_builtin()) {
+    if (tp.is_builtin()) {
         metadata_size = 0;
-        data_size = dt.get_data_size();
+        data_size = tp.get_data_size();
     } else {
-        metadata_size = dt.extended()->get_metadata_size();
-        data_size = dt.extended()->get_default_data_size(ndim, shape);
+        metadata_size = tp.extended()->get_metadata_size();
+        data_size = tp.extended()->get_default_data_size(ndim, shape);
     }
 
     char *data_ptr = NULL;
-    memory_block_ptr result = make_array_memory_block(metadata_size, data_size, dt.get_data_alignment(), &data_ptr);
+    memory_block_ptr result = make_array_memory_block(metadata_size, data_size, tp.get_data_alignment(), &data_ptr);
 
-    if (dt.get_flags()&type_flag_zeroinit) {
+    if (tp.get_flags()&type_flag_zeroinit) {
         memset(data_ptr, 0, data_size);
     }
 
     array_preamble *preamble = reinterpret_cast<array_preamble *>(result.get());
-    if (dt.is_builtin()) {
-        preamble->m_type = reinterpret_cast<base_type *>(dt.get_type_id());
+    if (tp.is_builtin()) {
+        preamble->m_type = reinterpret_cast<base_type *>(tp.get_type_id());
+        if (ndim != 0) {
+            stringstream ss;
+            ss << "too many dimensions (" << ndim << ") for creating dynd array of type " << tp;
+            throw runtime_error(ss.str());
+        }
     } else {
-        preamble->m_type = ndt::type(dt).release();
+        preamble->m_type = ndt::type(tp).release();
         preamble->m_type->metadata_default_construct(reinterpret_cast<char *>(preamble + 1), ndim, shape);
     }
     preamble->m_data_pointer = data_ptr;
@@ -148,9 +144,9 @@ void dynd::array_memory_block_debug_print(const memory_block_data *memblock, std
 {
     const array_preamble *preamble = reinterpret_cast<const array_preamble *>(memblock);
     if (preamble->m_type != NULL) {
-        ndt::type dt = preamble->is_builtin_type() ? ndt::type(preamble->get_type_id())
+        ndt::type tp = preamble->is_builtin_type() ? ndt::type(preamble->get_type_id())
                         : ndt::type(preamble->m_type, true);
-        o << indent << " type: " << dt << "\n";
+        o << indent << " type: " << tp << "\n";
     } else {
         o << indent << " uninitialized ndobject\n";
     }

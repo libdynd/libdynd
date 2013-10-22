@@ -420,12 +420,12 @@ std::ostream& dynd::ndt::operator<<(std::ostream& o, const ndt::type& rhs)
     return o;
 }
 
-ndt::type ndt::make_type(intptr_t ndim, intptr_t *shape, const ndt::type& dtype)
+ndt::type ndt::make_type(intptr_t ndim, const intptr_t *shape, const ndt::type& dtp)
 {
     if (ndim > 0) {
         ndt::type result_tp = shape[ndim-1] >= 0
-                        ? ndt::make_strided_dim(dtype)
-                        : ndt::make_var_dim(dtype);
+                        ? ndt::make_strided_dim(dtp)
+                        : ndt::make_var_dim(dtp);
         for (intptr_t i = ndim-2; i >= 0; --i) {
             if (shape[i] >= 0) {
                 result_tp = ndt::make_strided_dim(result_tp);
@@ -435,10 +435,29 @@ ndt::type ndt::make_type(intptr_t ndim, intptr_t *shape, const ndt::type& dtype)
         }
         return result_tp;
     } else {
-        return dtype;
+        return dtp;
     }
 }
 
+ndt::type ndt::make_type(intptr_t ndim, const intptr_t *shape, const ndt::type& dtp, bool& out_any_var)
+{
+    if (ndim > 0) {
+        ndt::type result_tp = dtp;
+        for (intptr_t i = ndim - 1; i >= 0; --i) {
+            if (shape[i] >= 0) {
+                result_tp = ndt::make_strided_dim(result_tp);
+            }
+            else {
+                result_tp = ndt::make_var_dim(result_tp);
+                out_any_var = true;
+            }
+        }
+        return result_tp;
+    }
+    else {
+        return dtp;
+    }
+}
 
 template<class T, class Tas>
 static void print_as(std::ostream& o, const char *data)

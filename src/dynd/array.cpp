@@ -52,20 +52,12 @@ make_builtin_scalar_array(const T& value, uint64_t flags)
     return result;
 }
 
-nd::array nd::make_strided_array(const ndt::type& uniform_tp, intptr_t ndim, const intptr_t *shape,
+nd::array nd::make_strided_array(const ndt::type& dtp, intptr_t ndim, const intptr_t *shape,
                 int64_t access_flags, const int *axis_perm)
 {
     // Create the type of the result
-    ndt::type array_tp = uniform_tp;
     bool any_variable_dims = false;
-    for (intptr_t i = ndim-1; i >= 0; --i) {
-        if (shape[i] >= 0) {
-            array_tp = ndt::make_strided_dim(array_tp);
-        } else {
-            array_tp = ndt::make_var_dim(array_tp);
-            any_variable_dims = true;
-        }
-    }
+    ndt::type array_tp = ndt::make_type(ndim, shape, dtp, any_variable_dims);
 
     // Determine the total data size
     size_t data_size;
@@ -78,7 +70,7 @@ nd::array nd::make_strided_array(const ndt::type& uniform_tp, intptr_t ndim, con
     // Allocate the array metadata and data in one memory block
     char *data_ptr = NULL;
     memory_block_ptr result = make_array_memory_block(array_tp.extended()->get_metadata_size(),
-                    data_size, uniform_tp.get_data_alignment(), &data_ptr);
+                    data_size, array_tp.get_data_alignment(), &data_ptr);
 
     if (array_tp.get_flags()&type_flag_zeroinit) {
         memset(data_ptr, 0, data_size);
@@ -95,12 +87,12 @@ nd::array nd::make_strided_array(const ndt::type& uniform_tp, intptr_t ndim, con
         // Fill in the array metadata with strides and sizes
         strided_dim_type_metadata *meta = reinterpret_cast<strided_dim_type_metadata *>(ndo + 1);
         // Use the default construction to handle the uniform_tp's metadata
-        intptr_t stride = uniform_tp.get_data_size();
+        intptr_t stride = dtp.get_data_size();
         if (stride == 0) {
-            stride = uniform_tp.extended()->get_default_data_size(0, NULL);
+            stride = dtp.extended()->get_default_data_size(0, NULL);
         }
-        if (!uniform_tp.is_builtin()) {
-            uniform_tp.extended()->metadata_default_construct(
+        if (!dtp.is_builtin()) {
+            dtp.extended()->metadata_default_construct(
                             reinterpret_cast<char *>(meta + ndim), 0, NULL);
         }
         if (axis_perm == NULL) {

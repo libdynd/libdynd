@@ -665,7 +665,23 @@ type make_type()
  * \param shape  The shape of the array type to create.
  * \param dtype  The data type of each array element.
  */
-type make_type(intptr_t ndim, intptr_t *shape, const ndt::type& dtype);
+type make_type(intptr_t ndim, const intptr_t *shape, const ndt::type& dtype);
+
+/**
+* Constructs an array type from a shape and
+* a data type. Each dimension >= 0 is made
+* using a strided_dim type, and each dimension == -1
+* is made using a var_dim type.
+*
+* \param ndim   The number of dimensions in the shape
+* \param shape  The shape of the array type to create.
+* \param dtype  The data type of each array element.
+* \param out_any_var  This output variable is set to true if any var
+*                     dimension is in the shape. If no var dimension
+*                     is encountered, it is untouched, so the caller
+*                     should initialize it to false.
+*/
+type make_type(intptr_t ndim, const intptr_t *shape, const ndt::type& dtype, bool& out_any_var);
 
 /**
  * A static array of the builtin types and void.
