@@ -23,6 +23,7 @@ enum type_kind_t {
     uint_kind,
     real_kind,
     complex_kind,
+    char_kind,
     // string_kind means subclass of base_string_type
     string_kind,
     bytes_kind,
@@ -79,6 +80,9 @@ enum type_id_t {
     bytes_type_id,
     // A bytes buffer of a fixed size
     fixedbytes_type_id,
+
+    // A single string character
+    char_type_id,
 
     // A variable-sized string type
     string_type_id,

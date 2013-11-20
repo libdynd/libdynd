@@ -21,6 +21,9 @@ enum string_encoding_t {
     string_encoding_utf_16,
     string_encoding_utf_32,
 
+    string_encoding_latin1,
+    // TODO: more codepages here
+
     string_encoding_invalid
 };
 
@@ -56,6 +59,9 @@ inline std::ostream& operator<<(std::ostream& o, string_encoding_t encoding)
             break;
         case string_encoding_utf_32:
             o << "utf-32";
+            break;
+        case string_encoding_latin1:
+            o << "latin1";
             break;
         default:
             o << "unknown string encoding";

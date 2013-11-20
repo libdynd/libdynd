@@ -22,6 +22,16 @@ size_t make_fixedstring_assignment_kernel(
                 const eval::eval_context *ectx);
 
 /**
+ * Makes a kernel which converts a single char from one encoding to another.
+ */
+size_t make_char_assignment_kernel(
+                ckernel_builder *out, size_t offset_out,
+                string_encoding_t dst_encoding,
+                string_encoding_t src_encoding,
+                kernel_request_t kernreq, assign_error_mode errmode,
+                const eval::eval_context *ectx);
+
+/**
  * Makes a kernel which converts blockref strings from one codec to another.
  */
 size_t make_blockref_string_assignment_kernel(
