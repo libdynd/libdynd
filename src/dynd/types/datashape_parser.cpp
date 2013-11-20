@@ -21,6 +21,7 @@
 #include <dynd/types/ckernel_deferred_type.hpp>
 #include <dynd/types/type_alignment.hpp>
 #include <dynd/types/pointer_type.hpp>
+#include <dynd/types/char_type.hpp>
 
 using namespace std;
 using namespace dynd;
@@ -91,6 +92,7 @@ static const set<string>& get_reserved_typenames()
             reserved_typenames.insert(i->first);
         }
         reserved_typenames.insert("string");
+        reserved_typenames.insert("char");
         reserved_typenames.insert("datetime");
         reserved_typenames.insert("unaligned");
         reserved_typenames.insert("pointer");
@@ -333,6 +335,28 @@ static ndt::type parse_string_parameters(const char *&begin, const char *end)
     }
 }
 
+// char_type : char | char[encoding]
+// This is called after 'char' is already matched
+static ndt::type parse_char_parameters(const char *&begin, const char *end)
+{
+    if (parse_token(begin, end, '[')) {
+        const char *saved_begin = begin;
+        string encoding_str = parse_name(begin, end);
+        string_encoding_t encoding;
+        if (!encoding_str.empty()) {
+            encoding = string_to_encoding(saved_begin, encoding_str);
+        } else {
+            throw datashape_parse_error(saved_begin, "expected a string encoding");
+        }
+        if (!parse_token(begin, end, ']')) {
+            throw datashape_parse_error(begin, "expected closing ']'");
+        }
+        return ndt::make_char(encoding);
+    } else {
+        return ndt::make_char();
+    }
+}
+
 // datetime_type : datetime('unit') |
 //               datetime('unit','timezone')
 // This is called after 'datetime' is already matched
@@ -531,6 +555,8 @@ static ndt::type parse_rhs_expression(const char *&begin, const char *end, map<s
             result = parse_unaligned_parameters(begin, end, symtable);
         } else if (n == "pointer") {
             result = parse_pointer_parameters(begin, end, symtable);
+        } else if (n == "char") {
+            result = parse_char_parameters(begin, end);
         } else {
             const map<string, ndt::type>& builtin_types = get_builtin_types();
             map<string, ndt::type>::const_iterator i = builtin_types.find(n);

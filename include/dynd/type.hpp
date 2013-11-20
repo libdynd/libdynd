@@ -642,6 +642,12 @@ public:
      */
     void print_data(std::ostream& o, const char *metadata, const char *data) const;
 
+    inline std::string str() const {
+        std::stringstream ss;
+        ss << *this;
+        return ss.str();
+    }
+
     friend std::ostream& operator<<(std::ostream& o, const type& rhs);
 };
 

@@ -28,6 +28,9 @@ TEST(CharDType, Create) {
     EXPECT_EQ(4u, d.get_data_size());
     EXPECT_EQ(4u, d.get_data_alignment());
     EXPECT_FALSE(d.is_expression());
+    EXPECT_EQ("char", d.str());
+    EXPECT_EQ(ndt::type("char"), d);
+    EXPECT_NE(ndt::type("char[ascii]"), d);
 
     d = ndt::make_char(string_encoding_ascii);
     EXPECT_EQ(char_type_id, d.get_type_id());
@@ -35,6 +38,9 @@ TEST(CharDType, Create) {
     EXPECT_EQ(1u, d.get_data_size());
     EXPECT_EQ(1u, d.get_data_alignment());
     EXPECT_FALSE(d.is_expression());
+    EXPECT_EQ("char[ascii]", d.str());
+    EXPECT_NE(ndt::type("char"), d);
+    EXPECT_EQ(ndt::type("char[ascii]"), d);
 
     d = ndt::make_char(string_encoding_ucs_2);
     EXPECT_EQ(char_type_id, d.get_type_id());
@@ -42,6 +48,9 @@ TEST(CharDType, Create) {
     EXPECT_EQ(2u, d.get_data_size());
     EXPECT_EQ(2u, d.get_data_alignment());
     EXPECT_FALSE(d.is_expression());
+    EXPECT_EQ("char[ucs2]", d.str());
+    EXPECT_NE(ndt::type("char"), d);
+    EXPECT_EQ(ndt::type("char[ucs2]"), d);
 
     d = ndt::make_char(string_encoding_utf_32);
     EXPECT_EQ(char_type_id, d.get_type_id());
@@ -49,6 +58,9 @@ TEST(CharDType, Create) {
     EXPECT_EQ(4u, d.get_data_size());
     EXPECT_EQ(4u, d.get_data_alignment());
     EXPECT_FALSE(d.is_expression());
+    EXPECT_EQ("char", d.str());
+    EXPECT_EQ(ndt::type("char"), d);
+    EXPECT_EQ(ndt::type("char[utf32]"), d);
 }
 
 TEST(CharDType, Assign) {
