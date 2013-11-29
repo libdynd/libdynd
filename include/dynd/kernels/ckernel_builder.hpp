@@ -7,6 +7,7 @@
 #define _DYND__CKERNEL_BUILDER_HPP_
 
 #include <new>
+#include <algorithm>
 
 #include <dynd/config.hpp>
 #include <dynd/kernels/ckernel_prefix.hpp>
@@ -104,6 +105,34 @@ public:
 
     ckernel_prefix *get() const {
         return reinterpret_cast<ckernel_prefix *>(m_data);
+    }
+
+    void swap(ckernel_builder& rhs) {
+        if (using_static_data()) {
+            if (rhs.using_static_data()) {
+                intptr_t tmp_static_data[16];
+                memcpy(tmp_static_data, m_static_data, 16 * sizeof(intptr_t));
+                memcpy(m_static_data, rhs.m_static_data, 16 * sizeof(intptr_t));
+                memcpy(rhs.m_static_data, tmp_static_data, 16 * sizeof(intptr_t));
+            } else {
+                memcpy(rhs.m_static_data, m_static_data, 16 * sizeof(intptr_t));
+                m_data = rhs.m_data;
+                m_capacity = rhs.m_capacity;
+                rhs.m_data = &rhs.m_static_data[0];
+                rhs.m_capacity = 16 * sizeof(intptr_t);
+            }
+        } else {
+            if (rhs.using_static_data()) {
+                memcpy(m_static_data, rhs.m_static_data, 16 * sizeof(intptr_t));
+                rhs.m_data = m_data;
+                rhs.m_capacity = m_capacity;
+                m_data = &m_static_data[0];
+                m_capacity = 16 * sizeof(intptr_t);
+            } else {
+                (std::swap)(m_data, rhs.m_data);
+                (std::swap)(m_capacity, rhs.m_capacity);
+            }
+        }
     }
 
     friend int ckernel_builder_ensure_capacity_leaf(void *ckb, intptr_t requested_capacity);

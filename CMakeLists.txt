@@ -319,6 +319,7 @@ set(libdynd_SRC
     src/dynd/lowlevel_api.cpp
     src/dynd/array.cpp
     src/dynd/array_range.cpp
+    src/dynd/dim_iter.cpp
     src/dynd/shape_tools.cpp
     src/dynd/string_encodings.cpp
     include/dynd/atomic_refcount.hpp
@@ -339,6 +340,7 @@ set(libdynd_SRC
     include/dynd/array.hpp
     include/dynd/array_range.hpp
     include/dynd/array_iter.hpp
+    include/dynd/dim_iter.hpp
     include/dynd/shortvector.hpp
     include/dynd/shape_tools.hpp
     include/dynd/string_encodings.hpp
