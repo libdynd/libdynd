@@ -8,6 +8,7 @@
 
 #include <dynd/types/base_type.hpp>
 #include <dynd/string_encodings.hpp>
+#include <dynd/dim_iter.hpp>
 
 namespace dynd {
 
@@ -41,6 +42,31 @@ public:
                     const std::string& utf8_str) const {
         set_utf8_string(metadata, data, errmode, utf8_str.data(), utf8_str.data() + utf8_str.size());
     }
+
+    /**
+     * Creates a dim_iter for processing a single instance of the string.
+     *
+     * The iterator which is created must be contiguous. The type it is
+     * iterating over will either be "char[encoding]" for fixed-size
+     * encodings, "bytes[1,1]" for utf8 or "bytes[2,2]" for utf16.
+     *
+     * The encoding is included as a parameter so that the string type can
+     * provide a more optimal iterator, e.g. if the underlying data is in
+     * utf8, but the string has a different encoding, a utf8 iterator request
+     * can avoid multiple reencodings.
+     *
+     * \param out_di  The dim_iter to populate. This should point to an
+     *                uninitialized dim_iter.
+     * \param encoding  The encoding the user of the iterator should see.
+     * \param metadata  Array metadata of the string to.
+     * \param data  Data of the string.
+     * \param ref  A reference which holds on to the memory of the string.
+     */
+    virtual void make_string_iter(dim_iter *out_di, string_encoding_t encoding,
+            const char *metadata, const char *data,
+            const memory_block_ptr& ref,
+            intptr_t buffer_max_mem = 65536,
+            const eval::eval_context *ectx = &eval::default_eval_context) = 0;
 
     // String types stop the iterdata chain
     // TODO: Maybe it should be more flexible?

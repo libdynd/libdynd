@@ -13,10 +13,11 @@ namespace dynd {
 
 struct dim_iter;
 
-enum {
+enum dim_iter_flags {
     dim_iter_restartable = 0x001,
-    dim_iter_seekable = 0x002
-} dim_iter_flags;
+    dim_iter_seekable = 0x002,
+    dim_iter_contiguous = 0x004
+};
 
 /**
  * Table of functions for a `dim_iter` instance.
@@ -52,6 +53,7 @@ struct dim_iter {
      * Flags about the iterator.
      *   0x01 : dim_iter_restartable : can call seek(0) on the iterator
      *   0x02 : dim_iter_seekable    : can call seek(N) on the iterator
+     *   0x04 : dim_iter_contiguous  : the stride of the iterator will always be contiguous
      */
     uint64_t flags;
     /** The type of one element */
@@ -119,6 +121,23 @@ void make_buffered_strided_dim_iter(
     const char *data_ptr, intptr_t size, intptr_t stride,
     const memory_block_ptr& ref, intptr_t buffer_max_mem = 65536,
     const eval::eval_context *ectx = &eval::default_eval_context);
+
+/**
+ * Makes an iterator which is empty.
+ *
+ * \param out_di  An uninitialized dim_iter object. The function
+ *                populates it assuming it is filled with garbage.
+ * \param tp  The type of the elements being iterated.
+ * \param meta  The array metadata corresponding to `tp`.
+ */
+inline void make_empty_dim_iter(
+    dim_iter *out_di,
+    const ndt::type& tp,
+    const char *meta)
+{
+    make_strided_dim_iter(out_di, tp, meta,
+        NULL, 0, 0, memory_block_ptr());
+}
 
 } // namespace dynd
 

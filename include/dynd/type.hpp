@@ -111,9 +111,6 @@ private:
         }
     }
 
-    static uint8_t builtin_kinds[builtin_type_id_count];
-    static uint8_t builtin_data_sizes[builtin_type_id_count];
-    static uint8_t builtin_data_alignments[builtin_type_id_count];
 public:
     /** Constructor */
     type()
@@ -379,29 +376,17 @@ public:
 
     /** The 'kind' of the type (int, uint, float, etc) */
     type_kind_t get_kind() const {
-        if (is_builtin()) {
-            return static_cast<type_kind_t>(type::builtin_kinds[reinterpret_cast<intptr_t>(m_extended)]);
-        } else {
-            return m_extended->get_kind();
-        }
+        return get_base_type_kind(m_extended);
     }
 
     /** The alignment of the type */
     inline size_t get_data_alignment() const {
-        if (is_builtin()) {
-            return static_cast<size_t>(type::builtin_data_alignments[reinterpret_cast<intptr_t>(m_extended)]);
-        } else {
-            return m_extended->get_data_alignment();
-        }
+        return get_base_type_alignment(m_extended);
     }
 
     /** The element size of the type */
     inline size_t get_data_size() const {
-        if (is_builtin()) {
-            return static_cast<size_t>(type::builtin_data_sizes[reinterpret_cast<intptr_t>(m_extended)]);
-        } else {
-            return m_extended->get_data_size();
-        }
+        return get_base_type_data_size(m_extended);
     }
 
     inline size_t get_metadata_size() const {

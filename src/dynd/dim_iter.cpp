@@ -70,6 +70,9 @@ void dynd::make_strided_dim_iter(
     out_di->data_elcount = 0;
     out_di->data_stride = stride;
     out_di->flags = dim_iter_restartable | dim_iter_seekable;
+    if (tp.get_data_size() == stride) {
+        out_di->flags |= dim_iter_contiguous;
+    }
     out_di->eltype = ndt::type(tp).release();
     out_di->elmeta = meta;
     // The custom fields are where we place the data needed for seeking
@@ -210,8 +213,11 @@ void dynd::make_buffered_strided_dim_iter(
     out_di->vtable = &buffered_strided_dim_iter_vt;
     out_di->data_ptr = buf.get_readonly_originptr();
     out_di->data_elcount = 0;
-    out_di->data_stride = stride;
+    out_di->data_stride = buffer_stride;
     out_di->flags = dim_iter_restartable | dim_iter_seekable;
+    if (buf.get_dtype().get_data_size() == buffer_stride) {
+        out_di->flags |= dim_iter_contiguous;
+    }
     out_di->eltype = ndt::type(val_tp).release();
     out_di->elmeta = buf.get_ndo_meta() + sizeof(strided_dim_type_metadata);
     // The custom fields are where we place the data needed for seeking

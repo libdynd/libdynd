@@ -9,6 +9,7 @@
 #include <dynd/kernels/string_comparison_kernels.hpp>
 #include <dynd/kernels/string_numeric_assignment_kernels.hpp>
 #include <dynd/types/fixedstring_type.hpp>
+#include <dynd/iter/string_iter.hpp>
 #include <dynd/exceptions.hpp>
 
 #include <algorithm>
@@ -292,4 +293,20 @@ size_t string_type::make_comparison_kernel(
     }
 
     throw not_comparable_error(src0_dt, src1_dt, comptype);
+}
+
+void string_type::make_string_iter(dim_iter *out_di, string_encoding_t encoding,
+            const char *metadata, const char *data,
+            const memory_block_ptr& ref,
+            intptr_t buffer_max_mem,
+            const eval::eval_context *ectx)
+{
+    const string_type_data *d = reinterpret_cast<const string_type_data *>(data);
+    memory_block_ptr dataref = ref;
+    const string_type_metadata *md = reinterpret_cast<const string_type_metadata *>(metadata);
+    if (md->blockref != NULL) {
+        dataref = memory_block_ptr(md->blockref);
+    }
+    iter::make_string_iter(out_di, encoding,
+            m_encoding, d->begin, d->end, dataref, buffer_max_mem, ectx);
 }

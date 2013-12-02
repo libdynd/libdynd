@@ -224,6 +224,9 @@ set(libdynd_SRC
     include/dynd/gfunc/elwise_reduce_gfunc.hpp
     include/dynd/gfunc/make_callable.hpp
     include/dynd/gfunc/serialize.hpp
+	# Iter
+	src/dynd/iter/string_iter.cpp
+	include/dynd/iter/string_iter.hpp
     # Kernels
     src/dynd/kernels/assignment_kernels.cpp
     src/dynd/kernels/var_dim_assignment_kernels.cpp
@@ -362,6 +365,8 @@ source_group("Eval Source" REGULAR_EXPRESSION "src/dynd/eval/.*cpp")
 source_group("Eval Headers" REGULAR_EXPRESSION "include/dynd/eval/.*hpp")
 source_group("GFunc Source" REGULAR_EXPRESSION "src/dynd/gfunc/.*cpp")
 source_group("GFunc Headers" REGULAR_EXPRESSION "include/dynd/gfunc/.*hpp")
+source_group("Iter Source" REGULAR_EXPRESSION "src/dynd/iter/.*cpp")
+source_group("Iter Headers" REGULAR_EXPRESSION "include/dynd/iter/.*hpp")
 source_group("Kernels Source" REGULAR_EXPRESSION "src/dynd/kernels/.*cpp")
 source_group("Kernels Headers" REGULAR_EXPRESSION "include/dynd/kernels/.*hpp")
 source_group("MemBlock Source" REGULAR_EXPRESSION "src/dynd/memblock/.*cpp")

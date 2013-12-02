@@ -53,6 +53,12 @@ public:
                     const ndt::type& src_tp, const char *src_metadata,
                     kernel_request_t kernreq, assign_error_mode errmode,
                     const eval::eval_context *ectx) const;
+
+    void make_string_iter(dim_iter *out_di, string_encoding_t encoding,
+            const char *metadata, const char *data,
+            const memory_block_ptr& ref,
+            intptr_t buffer_max_mem,
+            const eval::eval_context *ectx = &eval::default_eval_context);
 };
 
 namespace ndt {

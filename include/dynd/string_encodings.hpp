@@ -123,6 +123,13 @@ inline void print_escaped_utf8_string(std::ostream& o, const std::string& str) {
 
 void append_utf8_codepoint(uint32_t cp, std::string& out_str);
 
+/**
+ * Returns the char type corresponding to the encoding. For fixed-sized
+ * encodings, this is "char_type[encoding]", and for variable-sized
+ * encodings, this is "bytes[1]" or "bytes[2,2]".
+ */
+ndt::type char_type_of_encoding(string_encoding_t encoding);
+
 } // namespace dynd
 
 #endif // _DYND__STRING_ENCODINGS_HPP_

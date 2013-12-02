@@ -7,6 +7,8 @@
 
 #include <dynd/type.hpp>
 #include <dynd/string_encodings.hpp>
+#include <dynd/types/char_type.hpp>
+#include <dynd/types/fixedbytes_type.hpp>
 
 #include <utf8.h>
 
@@ -497,4 +499,15 @@ void dynd::print_escaped_utf8_string(std::ostream& o, const char *str_begin, con
 void dynd::append_utf8_codepoint(uint32_t cp, std::string& out_str)
 {
     string_append_utf8(cp, out_str);
+}
+
+ndt::type dynd::char_type_of_encoding(string_encoding_t encoding)
+{
+    if (encoding == string_encoding_utf_8) {
+        return ndt::make_fixedbytes(1, 1);
+    } else if (encoding == string_encoding_utf_16) {
+        return ndt::make_fixedbytes(2, 2);
+    } else {
+        return ndt::make_char(encoding);
+    }
 }

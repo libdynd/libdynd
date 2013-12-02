@@ -12,6 +12,7 @@
 #include <dynd/kernels/string_numeric_assignment_kernels.hpp>
 #include <dynd/exceptions.hpp>
 #include <dynd/gfunc/make_callable.hpp>
+#include <dynd/iter/string_iter.hpp>
 
 using namespace std;
 using namespace dynd;
@@ -233,4 +234,17 @@ size_t fixedstring_type::make_comparison_kernel(
     }
 
     throw not_comparable_error(src0_dt, src1_dt, comptype);
+}
+
+void fixedstring_type::make_string_iter(dim_iter *out_di, string_encoding_t encoding,
+            const char *metadata, const char *data,
+            const memory_block_ptr& ref,
+            intptr_t buffer_max_mem,
+            const eval::eval_context *ectx)
+{
+    const char *data_begin;
+    const char *data_end;
+    get_string_range(&data_begin, &data_end, metadata, data);
+    iter::make_string_iter(out_di, encoding,
+            m_encoding, data_begin, data_end, ref, buffer_max_mem, ectx);
 }
