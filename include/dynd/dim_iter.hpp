@@ -25,8 +25,8 @@ enum dim_iter_flags {
 struct dim_iter_vtable {
     /** Destructor */
     void (*destructor)(dim_iter *self);
-    /** Function to advance the iterator */
-    void (*next)(dim_iter *self);
+    /** Function to advance the iterator. Return 1 if elements are availabe, 0 otherwise */
+    int (*next)(dim_iter *self);
     /** Function to seek the iterator to an index */
     void (*seek)(dim_iter *self, intptr_t i);
 };
@@ -67,10 +67,20 @@ struct dim_iter {
      */
     uintptr_t custom[8];
 
-    ~dim_iter() {
+    dim_iter()
+        : vtable(NULL)
+    {
+    }
+
+    inline void destroy() {
         if (vtable) {
             vtable->destructor(this);
+            vtable = NULL;
         }
+    }
+
+    ~dim_iter() {
+        destroy();
     }
 };
 

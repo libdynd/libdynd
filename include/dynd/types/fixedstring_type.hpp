@@ -70,7 +70,7 @@ public:
             const char *metadata, const char *data,
             const memory_block_ptr& ref,
             intptr_t buffer_max_mem,
-            const eval::eval_context *ectx = &eval::default_eval_context);
+            const eval::eval_context *ectx) const;
 };
 
 namespace ndt {

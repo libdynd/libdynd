@@ -240,7 +240,7 @@ void fixedstring_type::make_string_iter(dim_iter *out_di, string_encoding_t enco
             const char *metadata, const char *data,
             const memory_block_ptr& ref,
             intptr_t buffer_max_mem,
-            const eval::eval_context *ectx)
+            const eval::eval_context *ectx) const
 {
     const char *data_begin;
     const char *data_end;

@@ -16,7 +16,7 @@ static void transcode_string_iter_destructor(dim_iter *self)
     // Free the reference of the element type
     base_type_xdecref(self->eltype);
     // Free the temporary buffer
-    void *buf = reinterpret_cast<void *>(self->custom[3]);
+    void *buf = reinterpret_cast<void *>(const_cast<char *>(self->data_ptr));
     if (buf != NULL) {
         free(buf);
     }
@@ -27,10 +27,11 @@ static void transcode_string_iter_destructor(dim_iter *self)
     }
 }
 
-static void transcode_string_iter_next(dim_iter *self)
+static int transcode_string_iter_next(dim_iter *self)
 {
     intptr_t i = static_cast<intptr_t>(self->custom[0]);
     intptr_t size = static_cast<intptr_t>(self->custom[1]);
+    intptr_t charsize = static_cast<intptr_t>(self->custom[3]);
     if (i < size) {
         const char *begin = reinterpret_cast<const char *>(self->custom[2]);
         const char *end = begin + size;
@@ -51,9 +52,12 @@ static void transcode_string_iter_next(dim_iter *self)
         self->custom[0] = begin - reinterpret_cast<const char *>(self->custom[2]);
 
         // Update the buffer range in the iter
-        self->data_elcount = buf_begin - reinterpret_cast<char *>(self->custom[3]);
+        // TODO: Make charsize-specific next functions (for size 1, 2, 4)
+        self->data_elcount = (buf_begin - const_cast<char *>(self->data_ptr)) / charsize;
+        return 1;
     } else {
         self->data_elcount = 0;
+        return 0;
     }
 }
 
@@ -123,9 +127,9 @@ void iter::make_string_iter(
             tmp.val_assign(ndt::make_string(data_encoding),
                 reinterpret_cast<const char *>(&md),
                 reinterpret_cast<const char *>(&d), dynd::assign_error_default, ectx);
-            make_string_iter(out_di, iter_encoding, iter_encoding,
-                                tmp.get_ndo_meta(), tmp.get_readonly_originptr(),
-                                tmp.get_memblock(), buffer_max_mem, ectx);
+            static_cast<const string_type *>(tmp.get_type().extended())->make_string_iter(
+                out_di, iter_encoding, tmp.get_ndo_meta(), tmp.get_readonly_originptr(),
+                tmp.get_data_memblock(), buffer_max_mem, ectx);
             return;
         }
         // Create an iterator which transcodes

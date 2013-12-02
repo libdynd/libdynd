@@ -16,11 +16,12 @@
 #include <dynd/types/convert_type.hpp>
 #include <dynd/json_parser.hpp>
 #include <dynd/gfunc/call_callable.hpp>
+#include <dynd/dim_iter.hpp>
 
 using namespace std;
 using namespace dynd;
 
-TEST(StringDType, Create) {
+TEST(StringType, Create) {
     ndt::type d;
 
     // Strings with various encodings
@@ -56,7 +57,7 @@ TEST(StringDType, Create) {
     EXPECT_EQ(2*sizeof(void *), d.get_data_size());
 }
 
-TEST(StringDType, ArrayCreation) {
+TEST(StringType, ArrayCreation) {
     nd::array a;
 
     // A C-style string literal
@@ -88,7 +89,7 @@ TEST(StringDType, ArrayCreation) {
     EXPECT_EQ("of strings that are various sizes", a(4).as<string>());
 }
 
-TEST(StringDType, Basic) {
+TEST(StringType, Basic) {
     nd::array a, b;
 
     // std::string goes in as a utf8 string
@@ -139,7 +140,7 @@ TEST(StringDType, Basic) {
     EXPECT_EQ(std::string("abcdefg"), b.as<std::string>());
 }
 
-TEST(StringDType, AccessFlags) {
+TEST(StringType, AccessFlags) {
     nd::array a, b;
 
     // Default construction from a string produces an immutable fixedstring
@@ -164,7 +165,7 @@ TEST(StringDType, AccessFlags) {
     EXPECT_EQ(ndt::make_string(string_encoding_utf_16), b.get_type());
 }
 
-TEST(StringDType, Unicode) {
+TEST(StringType, Unicode) {
     static uint32_t utf32_string[] = {
             0x0000,
             0x0001,
@@ -262,7 +263,7 @@ TEST(StringDType, Unicode) {
 }
 
 
-TEST(StringDType, CanonicalDType) {
+TEST(StringType, CanonicalDType) {
     // The canonical type of a string type is the same type
     EXPECT_EQ((ndt::make_string(string_encoding_ascii)),
                 (ndt::make_string(string_encoding_ascii).get_canonical_type()));
@@ -274,7 +275,7 @@ TEST(StringDType, CanonicalDType) {
                 (ndt::make_string(string_encoding_utf_32).get_canonical_type()));
 }
 
-TEST(StringDType, Storage) {
+TEST(StringType, Storage) {
     nd::array a;
 
     a = "testing";
@@ -287,7 +288,7 @@ TEST(StringDType, Storage) {
     EXPECT_EQ(ndt::make_bytes(4), a.storage().get_type());
 }
 
-TEST(StringDType, EncodingSizes) {
+TEST(StringType, EncodingSizes) {
     EXPECT_EQ(1, string_encoding_char_size_table[string_encoding_ascii]);
     EXPECT_EQ(1, string_encoding_char_size_table[string_encoding_utf_8]);
     EXPECT_EQ(2, string_encoding_char_size_table[string_encoding_ucs_2]);
@@ -295,7 +296,7 @@ TEST(StringDType, EncodingSizes) {
     EXPECT_EQ(4, string_encoding_char_size_table[string_encoding_utf_32]);
 }
 
-TEST(StringDType, StringToBool) {
+TEST(StringType, StringToBool) {
     EXPECT_TRUE(nd::array("true").ucast<dynd_bool>().as<bool>());
     EXPECT_TRUE(nd::array(" True").ucast<dynd_bool>().as<bool>());
     EXPECT_TRUE(nd::array("TRUE ").ucast<dynd_bool>().as<bool>());
@@ -329,7 +330,7 @@ TEST(StringDType, StringToBool) {
     EXPECT_TRUE(nd::array(nd::array("flase").ucast<dynd_bool>(0, assign_error_none).eval()).as<bool>());
 }
 
-TEST(StringDType, StringToInteger) {
+TEST(StringType, StringToInteger) {
     // Test the boundary cases of the various integers
     EXPECT_EQ(-128, nd::array("-128").ucast<int8_t>().as<int8_t>());
     EXPECT_EQ(127, nd::array("127").ucast<int8_t>().as<int8_t>());
@@ -372,7 +373,7 @@ TEST(StringDType, StringToInteger) {
     EXPECT_THROW(nd::array("18446744073709551616").ucast<uint64_t>().eval(), runtime_error);
 }
 
-TEST(StringDType, StringToFloat32SpecialValues) {
+TEST(StringType, StringToFloat32SpecialValues) {
     // +NaN with default payload
     EXPECT_EQ(0x7fc00000u, nd::array("NaN").ucast<float>().view_scalars<uint32_t>().as<uint32_t>());
     EXPECT_EQ(0x7fc00000u, nd::array("nan").ucast<float>().view_scalars<uint32_t>().as<uint32_t>());
@@ -393,7 +394,7 @@ TEST(StringDType, StringToFloat32SpecialValues) {
     EXPECT_EQ(0xff800000u, nd::array("-1.#INF").ucast<float>().view_scalars<uint32_t>().as<uint32_t>());
 }
 
-TEST(StringDType, StringToFloat64SpecialValues) {
+TEST(StringType, StringToFloat64SpecialValues) {
     // +NaN with default payload
     EXPECT_EQ(0x7ff8000000000000ULL, nd::array("NaN").ucast<double>().view_scalars<uint64_t>().as<uint64_t>());
     EXPECT_EQ(0x7ff8000000000000ULL, nd::array("nan").ucast<double>().view_scalars<uint64_t>().as<uint64_t>());
@@ -414,13 +415,13 @@ TEST(StringDType, StringToFloat64SpecialValues) {
     EXPECT_EQ(0xfff0000000000000ULL, nd::array("-1.#INF").ucast<double>().view_scalars<uint64_t>().as<uint64_t>());
 }
 
-TEST(StringDType, StringEncodeError) {
+TEST(StringType, StringEncodeError) {
     nd::array a = parse_json("string", "\"\\uc548\\ub155\""), b;
     EXPECT_THROW(a.ucast(ndt::make_string(string_encoding_ascii)).eval(),
                     string_encode_error);
 }
 
-TEST(StringDType, Comparisons) {
+TEST(StringType, Comparisons) {
     nd::array a, b;
 
     // Basic test
@@ -478,7 +479,7 @@ TEST(StringDType, Comparisons) {
     EXPECT_TRUE(b > a);
 }
 
-TEST(StringDType, Concatenation) {
+TEST(StringType, Concatenation) {
     nd::array a, b;
 
     a = "first";
@@ -498,7 +499,7 @@ TEST(StringDType, Concatenation) {
     EXPECT_EQ("twogamma", c(2).as<string>());
 }
 
-TEST(StringDType, Find1) {
+TEST(StringType, Find1) {
     nd::array a, b, c;
 
     const char *a_arr[4] = {"abc", "ababc", "ababab", "abd"};
@@ -514,7 +515,7 @@ TEST(StringDType, Find1) {
     EXPECT_EQ(-1, c(3).as<intptr_t>());
 }
 
-TEST(StringDType, Find2) {
+TEST(StringType, Find2) {
     nd::array a, b, c;
 
     const char *b_arr[6] = {"a", "b", "c", "bc", "d", "cd"};
@@ -530,4 +531,49 @@ TEST(StringDType, Find2) {
     EXPECT_EQ(1, c(3).as<intptr_t>());
     EXPECT_EQ(-1, c(4).as<intptr_t>());
     EXPECT_EQ(-1, c(5).as<intptr_t>());
+}
+
+template<class T>
+static bool ascii_T_compare(const char *x, const T *y, intptr_t count)
+{
+    for (intptr_t i = 0; i < count; ++i) {
+        if (x[i] != y[i]) {
+            return false;
+        }
+    }
+    return true;
+}
+
+TEST(StringType, Iter) {
+    const char *str = "This is a string for testing";
+    nd::array a = str;
+
+    dim_iter it;
+    static_cast<const base_string_type *>(a.get_dtype().extended())->make_string_iter(
+        &it, string_encoding_utf_8, a.get_ndo_meta(), a.get_readonly_originptr(), a.get_data_memblock());
+    // With a short string like this, the entire string will be
+    // provided in one go
+    ASSERT_EQ(1, it.vtable->next(&it));
+    ASSERT_EQ(strlen(str), it.data_elcount);
+    EXPECT_EQ(0, memcmp(str, it.data_ptr, it.data_elcount));
+    it.destroy();
+
+    static_cast<const base_string_type *>(a.get_dtype().extended())->make_string_iter(
+        &it, string_encoding_utf_16, a.get_ndo_meta(), a.get_readonly_originptr(), a.get_data_memblock());
+    // With a short string like this, the entire string will be
+    // provided in one go
+    ASSERT_EQ(1, it.vtable->next(&it));
+    ASSERT_EQ(strlen(str), it.data_elcount);
+    EXPECT_TRUE(ascii_T_compare(str, reinterpret_cast<const uint16_t *>(it.data_ptr), it.data_elcount));
+    it.destroy();
+
+    static_cast<const base_string_type *>(a.get_dtype().extended())->make_string_iter(
+        &it, string_encoding_utf_32, a.get_ndo_meta(), a.get_readonly_originptr(), a.get_data_memblock());
+    // With a short string like this, the entire string will be
+    // provided in one go
+    ASSERT_EQ(1, it.vtable->next(&it));
+    ASSERT_EQ(strlen(str), it.data_elcount);
+    EXPECT_TRUE(ascii_T_compare(str, reinterpret_cast<const uint32_t *>(it.data_ptr), it.data_elcount));
+    it.destroy();
+
 }

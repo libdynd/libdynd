@@ -299,7 +299,7 @@ void string_type::make_string_iter(dim_iter *out_di, string_encoding_t encoding,
             const char *metadata, const char *data,
             const memory_block_ptr& ref,
             intptr_t buffer_max_mem,
-            const eval::eval_context *ectx)
+            const eval::eval_context *ectx) const
 {
     const string_type_data *d = reinterpret_cast<const string_type_data *>(data);
     memory_block_ptr dataref = ref;

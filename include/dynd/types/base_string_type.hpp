@@ -66,7 +66,7 @@ public:
             const char *metadata, const char *data,
             const memory_block_ptr& ref,
             intptr_t buffer_max_mem = 65536,
-            const eval::eval_context *ectx = &eval::default_eval_context) = 0;
+            const eval::eval_context *ectx = &eval::default_eval_context) const = 0;
 
     // String types stop the iterdata chain
     // TODO: Maybe it should be more flexible?

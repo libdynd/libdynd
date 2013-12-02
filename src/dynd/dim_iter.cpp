@@ -25,16 +25,18 @@ static void strided_dim_iter_destructor(dim_iter *self)
     }
 }
 
-static void strided_dim_iter_next(dim_iter *self)
+static int strided_dim_iter_next(dim_iter *self)
 {
     if (self->data_ptr == NULL) {
         // The first time `next` is called, populate the data and size
         self->data_ptr = reinterpret_cast<const char *>(self->custom[0]);
         self->data_elcount = static_cast<intptr_t>(self->custom[1]);
+        return 1;
     } else {
         // In the strided case, there is always just one chunk,
         // so advancing the iterator a second time
         self->data_elcount = 0;
+        return 0;
     }
 }
 
@@ -106,7 +108,7 @@ static void buffered_strided_dim_iter_destructor(dim_iter *self)
     }
 }
 
-static void buffered_strided_dim_iter_next(dim_iter *self)
+static int buffered_strided_dim_iter_next(dim_iter *self)
 {
     intptr_t i = static_cast<intptr_t>(self->custom[0]);
     intptr_t size = static_cast<intptr_t>(self->custom[1]);
@@ -135,8 +137,10 @@ static void buffered_strided_dim_iter_next(dim_iter *self)
             data_ptr + i * stride, stride, bufsize, kdp);
         // Update the dim_iter's size
         self->data_elcount = bufsize;
+        return 1;
     } else {
         self->data_elcount = 0;
+        return 0;
     }
 }
 
