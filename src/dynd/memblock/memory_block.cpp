@@ -10,6 +10,7 @@
 #include <dynd/memblock/executable_memory_block.hpp>
 #include <dynd/memblock/array_memory_block.hpp>
 #include <dynd/memblock/external_memory_block.hpp>
+#include <dynd/memblock/memmap_memory_block.hpp>
 
 using namespace std;
 using namespace dynd;
@@ -51,6 +52,11 @@ void free_array_memory_block(memory_block_data *memblock);
  * This should only be called by the memory_block decref code.
  */
 void free_objectarray_memory_block(memory_block_data *memblock);
+/**
+ * INTERNAL: Frees a memory_block created by make_memmap_memory_block.
+ * This should only be called by the memory_block decref code.
+ */
+void free_memmap_memory_block(memory_block_data *memblock);
 
 
 /**
@@ -99,6 +105,9 @@ void dynd::detail::memory_block_free(memory_block_data *memblock)
         case array_memory_block_type:
             free_array_memory_block(memblock);
             return;
+        case memmap_memory_block_type:
+            free_memmap_memory_block(memblock);
+            return;
     }
 
     stringstream ss;
@@ -129,6 +138,9 @@ std::ostream& dynd::operator<<(std::ostream& o, memory_block_type_t mbt)
             break;
         case array_memory_block_type:
             o << "ndobject";
+            break;
+        case memmap_memory_block_type:
+            o << "memmap";
             break;
         default:
             o << "unknown memory_block_type(" << (int)mbt << ")";
@@ -164,6 +176,9 @@ void dynd::memory_block_debug_print(const memory_block_data *memblock, std::ostr
             case array_memory_block_type:
                 array_memory_block_debug_print(memblock, o, indent);
                 break;
+            case memmap_memory_block_type:
+                memmap_memory_block_debug_print(memblock, o, indent);
+                break;
         }
         o << indent << "------" << endl;
     } else {
@@ -186,6 +201,8 @@ memory_block_pod_allocator_api *dynd::get_memory_block_pod_allocator_api(memory_
             throw runtime_error("Cannot get a POD allocator API from an objectarray_memory_block");
         case executable_memory_block_type:
             throw runtime_error("Cannot get a POD allocator API from an executable_memory_block");
+        case memmap_memory_block_type:
+            throw runtime_error("Cannot get a POD allocator API from a memmap_memory_block");
         default:
             throw runtime_error("unknown memory block type");
     }
@@ -207,6 +224,8 @@ memory_block_objectarray_allocator_api *dynd::get_memory_block_objectarray_alloc
             return &dynd::detail::objectarray_memory_block_allocator_api;
         case executable_memory_block_type:
             throw runtime_error("Cannot get an objectarray allocator API from an executable_memory_block");
+        case memmap_memory_block_type:
+            throw runtime_error("Cannot get an objectarray allocator API from a memmap_memory_block");
         default:
             throw runtime_error("unknown memory block type");
     }

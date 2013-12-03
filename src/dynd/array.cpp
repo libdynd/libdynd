@@ -23,6 +23,7 @@
 #include <dynd/types/groupby_type.hpp>
 #include <dynd/types/categorical_type.hpp>
 #include <dynd/types/builtin_type_properties.hpp>
+#include <dynd/memblock/memmap_memory_block.hpp>
 
 using namespace std;
 using namespace dynd;
@@ -218,7 +219,7 @@ nd::array nd::make_bytes_array(const char *data, size_t len, size_t alignment)
     ndo->m_data_reference = NULL;
     ndo->m_flags = nd::default_access_flags;
     // Set the bytes metadata, telling the system that the bytes data was embedded in the array memory
-    string_type_metadata *ndo_meta = reinterpret_cast<string_type_metadata *>(result.get_ndo_meta());
+    bytes_type_metadata *ndo_meta = reinterpret_cast<bytes_type_metadata *>(result.get_ndo_meta());
     ndo_meta->blockref = NULL;
     return result;
 }
@@ -1436,6 +1437,42 @@ nd::array nd::empty_like(const nd::array& rhs)
         }
         return result;
     }
+}
+
+nd::array nd::memmap(const std::string& filename,
+    intptr_t begin,
+    intptr_t end,
+    uint32_t access)
+{
+    if (access == 0) {
+        access = nd::default_access_flags;
+    }
+
+    char *mm_ptr = NULL;
+    intptr_t mm_size = 0;
+    // Create a memory mapped memblock of the file
+    memory_block_ptr mm = make_memmap_memory_block(
+        filename, access, &mm_ptr, &mm_size, begin, end);
+    // Create a bytes array referring to the data.
+    ndt::type dt = ndt::make_bytes(1);
+    char *data_ptr = 0;
+    nd::array result(make_array_memory_block(dt.extended()->get_metadata_size(),
+                        dt.get_data_size(), dt.get_data_alignment(), &data_ptr));
+    // Set the bytes extents
+    ((char **)data_ptr)[0] = mm_ptr;
+    ((char **)data_ptr)[1] = mm_ptr + mm_size;
+    // Set the array metadata
+    array_preamble *ndo = result.get_ndo();
+    ndo->m_type = dt.release();
+    ndo->m_data_pointer = data_ptr;
+    ndo->m_data_reference = NULL;
+    ndo->m_flags = access;
+    // Set the bytes metadata, telling the system
+    // about the memmapped memblock
+    bytes_type_metadata *ndo_meta =
+        reinterpret_cast<bytes_type_metadata *>(result.get_ndo_meta());
+    ndo_meta->blockref = mm.release();
+    return result;
 }
 
 intptr_t nd::binary_search(const nd::array& n, const char *metadata, const char *data)

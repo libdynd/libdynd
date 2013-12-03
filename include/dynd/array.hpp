@@ -1239,6 +1239,21 @@ array empty_like(const array& rhs, const ndt::type& uniform_dtype);
 array empty_like(const array& rhs);
 
 /**
+ * Memory-maps a file with dynd type 'bytes'.
+ *
+ * \param filename  The name of the file to memory map.
+ * \param begin  If provided, the start of where to memory map. Uses
+ *               Python semantics for out of bounds and negative values.
+ * \param end  If provided, the end of where to memory map. Uses
+ *             Python semantics for out of bounds and negative values.
+ * \param access  The access permissions with which to open the file.
+ */
+array memmap(const std::string& filename,
+    intptr_t begin = 0,
+    intptr_t end = std::numeric_limits<intptr_t>::max(),
+    uint32_t access = default_access_flags);
+
+/**
  * Performs a binary search of the first dimension of the array, which
  * should be sorted. The data/metadata must correspond to the type n.get_type().at(0).
  *

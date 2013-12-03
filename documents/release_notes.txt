@@ -5,6 +5,8 @@ DyND is a C++ library for array programming with a dynamic
 type system. It is currently in a preview state, and nothing
 about the API or the ABI is guaranteed to stay the same.
 
+- Add nd::memmap(filename, ...) to memory map a file as bytes.
+
 Version 0.5.0
 -------------
 

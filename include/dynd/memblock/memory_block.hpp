@@ -32,7 +32,9 @@ enum memory_block_type_t {
      * and the amount of memory needs to grow */
     objectarray_memory_block_type,
     /** For memory used by code generation */
-    executable_memory_block_type
+    executable_memory_block_type,
+    /** Wraps memory mapped files */
+    memmap_memory_block_type
 };
 
 std::ostream& operator<<(std::ostream& o, memory_block_type_t mbt);

@@ -575,5 +575,4 @@ TEST(StringType, Iter) {
     ASSERT_EQ(strlen(str), it.data_elcount);
     EXPECT_TRUE(ascii_T_compare(str, reinterpret_cast<const uint32_t *>(it.data_ptr), it.data_elcount));
     it.destroy();
-
 }

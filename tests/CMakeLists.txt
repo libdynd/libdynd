@@ -57,6 +57,7 @@ set(tests_SRC
     array/test_array_cast.cpp
     array/test_array_compare.cpp
     array/test_array_views.cpp
+	array/test_memmap.cpp
     vm/test_elwise_program.cpp
     test_arithmetic_op.cpp
     test_shape_tools.cpp
