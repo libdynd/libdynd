@@ -175,8 +175,7 @@ namespace {
             // fsync(2) is not enough on OS X - a special, OS X specific
             // fcntl(2) is necessary to force DISKSYNC and get around
             // mmap(2) bug
-            if (fd != -1)
-                (void)fcntl(fd, F_FULLFSYNC);
+            (void)fcntl(m_fd, F_FULLFSYNC);
 #endif
             struct stat st;
             if (fstat(m_fd, &st) == -1) {
