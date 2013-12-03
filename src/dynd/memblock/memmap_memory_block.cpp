@@ -10,8 +10,13 @@
 #include <limits>
 
 #ifdef WIN32
-#define NOMINMAX
-#include <Windows.h>
+# define NOMINMAX
+# include <Windows.h>
+#else
+# include <sys/mman.h>
+# include <sys/stat.h>
+# include <fcntl.h>
+# include <unistd.h>
 #endif
 
 #include <dynd/array.hpp>
@@ -35,6 +40,29 @@ static intptr_t get_file_size(HANDLE hFile)
 }
 #endif
 
+static void clip_begin_end(intptr_t size, intptr_t& begin, intptr_t& end)
+{
+    if (begin < 0) {
+        begin += size;
+        if (begin < 0) {
+            begin = 0;
+        }
+    } else if (begin >= size) {
+        begin = size;
+    }
+    // Handle the end offset
+    if (end < 0) {
+        end += size;
+        if (end <= begin) {
+            end = begin;
+        }
+    } else if (end <= begin) {
+        end = begin;
+    } else if (end >= size) {
+        end = size;
+    }
+}
+
 namespace {
     struct memmap_memory_block {
         /** Every memory block object needs this at the front */
@@ -46,6 +74,8 @@ namespace {
         // Handle to the mapped memory
 #ifdef WIN32
         HANDLE m_hFile, m_hMapFile;
+#else
+        int m_fd;
 #endif
         // Pointer to the mapped memory
         char *m_mapPointer;
@@ -59,6 +89,8 @@ namespace {
             : m_mbd(1, memmap_memory_block_type), m_filename(filename),
                 m_access(access), m_begin(begin), m_end(end)
         {
+            bool readwrite = ((access & nd::write_access_flag) ==
+                              nd::write_access_flag);
 #ifdef WIN32
             // TODO: This function isn't quite exception-safe, use a smart pointer for the handles to fix.
 
@@ -68,7 +100,6 @@ namespace {
             GetSystemInfo(&sysInfo);
             sysGran = sysInfo.dwAllocationGranularity;
 
-            bool readwrite = ((access & nd::write_access_flag) == nd::write_access_flag);
 
             // Open the file using the windows API
             m_hFile = CreateFile(
@@ -78,34 +109,18 @@ namespace {
                 OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, NULL);
             if (m_hFile == NULL) {
                 stringstream ss;
-                ss << "failed to open file \"" << m_filename << "\" for memory mapping";
+                ss << "failed to open file \"" << m_filename
+                   << "\" for memory mapping";
                 throw runtime_error(ss.str());
             }
 
             intptr_t filesize = get_file_size(m_hFile);
-            // Handle the begin offset, following Python semantics of bytes[begin:end]
-            if (begin < 0) {
-                begin += filesize;
-                if (begin < 0) {
-                    begin = 0;
-                }
-            } else if (begin >= filesize) {
-                begin = filesize;
-            }
-            // Handle the end offset
-            if (end < 0) {
-                end += filesize;
-                if (end <= begin) {
-                    end = begin;
-                }
-            } else if (end <= begin) {
-                end = begin;
-            } else if (end >= filesize) {
-                end = filesize;
-            }
+            // Handle the begin offset, following Python
+            // semantics of bytes[begin:end]
+            clip_begin_end(filesize, begin, end);
 
-            // Calculate where to to do the file mapping. It needs to be on a boundary based on the
-            // system allocation granularity
+            // Calculate where to to do the file mapping. It needs to be
+            // on a boundary based on the system allocation granularity
             intptr_t mapbegin = (begin / sysGran) * sysGran;
             m_mapOffset = begin - mapbegin;
             intptr_t mapsize = end - mapbegin;
@@ -147,9 +162,53 @@ namespace {
             *out_pointer = m_mapPointer + m_mapOffset;
             *out_size = end - begin;
 #else // Finished win32 implementation, now posix
-            *out_pointer = NULL;
-            *out_size = 0;
-            throw runtime_error("TODO: implement posix memmap");
+            m_fd = open(m_filename.c_str(),
+                readwrite ? O_RDWR : O_RDONLY);
+            if (m_fd == -1) {
+                stringstream ss;
+                ss << "failed to open file \"" << m_filename
+                   << "\" for memory mapping";
+                throw runtime_error(ss.str());
+            }
+#ifdef __APPLE__
+            // [From the Python mmap code] Issue #11277:
+            // fsync(2) is not enough on OS X - a special, OS X specific
+            // fcntl(2) is necessary to force DISKSYNC and get around
+            // mmap(2) bug
+            if (fd != -1)
+                (void)fcntl(fd, F_FULLFSYNC);
+#endif
+            struct stat st;
+            if (fstat(m_fd, &st) == -1) {
+                stringstream ss;
+                ss << "failed to stat file \"" << m_filename
+                   << "\" for memory mapping";
+                throw runtime_error(ss.str());
+            }
+            intptr_t filesize = st.st_size;
+
+            // Handle the begin offset, following Python
+            // semantics of bytes[begin:end]
+            clip_begin_end(filesize, begin, end);
+
+            intptr_t pageSize = sysconf(_SC_PAGE_SIZE);
+            intptr_t mapbegin = (begin / pageSize) * pageSize;
+            m_mapOffset = begin - mapbegin;
+            intptr_t mapsize = end - mapbegin;
+
+            m_mapPointer = (char *)mmap(NULL, mapsize,
+                PROT_READ|(readwrite ? PROT_WRITE : 0),
+                MAP_SHARED, m_fd, mapbegin);
+            if (m_mapPointer == (char *)MAP_FAILED) {
+                close(m_fd);
+                stringstream ss;
+                ss << "failed to mmap file \"" << m_filename
+                   << "\" for memory mapping";
+                throw runtime_error(ss.str());
+            }
+
+            *out_pointer = m_mapPointer + m_mapOffset;
+            *out_size = end - begin;
 #endif
         }
 
@@ -160,7 +219,9 @@ namespace {
             CloseHandle(m_hMapFile);
             CloseHandle(m_hFile);
 #else
-            throw runtime_error("TODO: implement posix memmap");
+            intptr_t mapsize = m_end - m_begin + m_mapOffset;
+            munmap((void *)m_mapPointer, mapsize);
+            close(m_fd);
 #endif
         }
     };
