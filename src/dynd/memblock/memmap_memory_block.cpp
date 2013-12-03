@@ -118,6 +118,8 @@ namespace {
             // Handle the begin offset, following Python
             // semantics of bytes[begin:end]
             clip_begin_end(filesize, begin, end);
+            m_begin = begin;
+            m_end = end;
 
             // Calculate where to to do the file mapping. It needs to be
             // on a boundary based on the system allocation granularity
@@ -189,6 +191,8 @@ namespace {
             // Handle the begin offset, following Python
             // semantics of bytes[begin:end]
             clip_begin_end(filesize, begin, end);
+            m_begin = begin;
+            m_end = end;
 
             intptr_t pageSize = sysconf(_SC_PAGE_SIZE);
             intptr_t mapbegin = (begin / pageSize) * pageSize;
