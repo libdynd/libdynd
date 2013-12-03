@@ -537,7 +537,7 @@ template<class T>
 static bool ascii_T_compare(const char *x, const T *y, intptr_t count)
 {
     for (intptr_t i = 0; i < count; ++i) {
-        if (x[i] != y[i]) {
+        if ((T)x[i] != y[i]) {
             return false;
         }
     }
@@ -554,7 +554,7 @@ TEST(StringType, Iter) {
     // With a short string like this, the entire string will be
     // provided in one go
     ASSERT_EQ(1, it.vtable->next(&it));
-    ASSERT_EQ(strlen(str), it.data_elcount);
+    ASSERT_EQ((intptr_t)strlen(str), it.data_elcount);
     EXPECT_EQ(0, memcmp(str, it.data_ptr, it.data_elcount));
     it.destroy();
 
@@ -563,7 +563,7 @@ TEST(StringType, Iter) {
     // With a short string like this, the entire string will be
     // provided in one go
     ASSERT_EQ(1, it.vtable->next(&it));
-    ASSERT_EQ(strlen(str), it.data_elcount);
+    ASSERT_EQ((intptr_t)strlen(str), it.data_elcount);
     EXPECT_TRUE(ascii_T_compare(str, reinterpret_cast<const uint16_t *>(it.data_ptr), it.data_elcount));
     it.destroy();
 
@@ -572,7 +572,7 @@ TEST(StringType, Iter) {
     // With a short string like this, the entire string will be
     // provided in one go
     ASSERT_EQ(1, it.vtable->next(&it));
-    ASSERT_EQ(strlen(str), it.data_elcount);
+    ASSERT_EQ((intptr_t)strlen(str), it.data_elcount);
     EXPECT_TRUE(ascii_T_compare(str, reinterpret_cast<const uint32_t *>(it.data_ptr), it.data_elcount));
     it.destroy();
 }

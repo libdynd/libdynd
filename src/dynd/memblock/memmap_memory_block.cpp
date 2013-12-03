@@ -20,6 +20,7 @@
 using namespace std;
 using namespace dynd;
 
+#ifdef WIN32
 static intptr_t get_file_size(HANDLE hFile)
 {
     DWORD fsLow = 0, fsHigh = 0;
@@ -32,6 +33,7 @@ static intptr_t get_file_size(HANDLE hFile)
 #endif
     return static_cast<intptr_t>(fs);
 }
+#endif
 
 namespace {
     struct memmap_memory_block {
@@ -42,7 +44,9 @@ namespace {
         uint32_t m_access;
         intptr_t m_begin, m_end;
         // Handle to the mapped memory
+#ifdef WIN32
         HANDLE m_hFile, m_hMapFile;
+#endif
         // Pointer to the mapped memory
         char *m_mapPointer;
         // Offset to the actual data requested (memory mapping has strict
@@ -143,6 +147,8 @@ namespace {
             *out_pointer = m_mapPointer + m_mapOffset;
             *out_size = end - begin;
 #else // Finished win32 implementation, now posix
+            *out_pointer = NULL;
+            *out_size = 0;
             throw runtime_error("TODO: implement posix memmap");
 #endif
         }
