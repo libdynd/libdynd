@@ -37,3 +37,4 @@ void make_string_iter(
 }} // namespace dynd::iter
 
 #endif // _DYND__STRING_ITER_HPP_
+

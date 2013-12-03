@@ -437,3 +437,4 @@ uint8_t detail::builtin_data_alignments[builtin_type_id_count] = {
         scalar_align_of<complex<double> >::value,
         1
     };
+
