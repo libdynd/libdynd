@@ -895,6 +895,43 @@ void datetime::datetime_fields::add_minutes(int minutes)
     }
 }
 
+bool datetime::datetime_fields::divisible_by_unit(datetime_unit_t unit)
+{
+    switch (unit) {
+        case datetime_unit_unspecified:
+            return true;
+        case datetime_unit_year:
+            return month == 1 && day == 1 && hour == 0 && min == 0 &&
+                sec == 0 && us == 0 && ps == 0 & as == 0;
+        case datetime_unit_month:
+            return day == 1 && hour == 0 && min == 0 &&
+                sec == 0 && us == 0 && ps == 0 & as == 0;
+        case datetime_unit_day:
+            return hour == 0 && min == 0 &&
+                sec == 0 && us == 0 && ps == 0 & as == 0;
+        case datetime_unit_hour:
+            return min == 0 && sec == 0 && us == 0 && ps == 0 & as == 0;
+        case datetime_unit_minute:
+            return sec == 0 && us == 0 && ps == 0 & as == 0;
+        case datetime_unit_second:
+            return us == 0 && ps == 0 & as == 0;
+        case datetime_unit_ms:
+            return (us % 1000) == 0 && ps == 0 & as == 0;
+        case datetime_unit_us:
+            return ps == 0 & as == 0;
+        case datetime_unit_ns:
+            return (ps % 1000) == 0 & as == 0;
+        case datetime_unit_ps:
+            return as == 0;
+        case datetime_unit_fs:
+            return (as % 1000) == 0;
+        case datetime_unit_as:
+            return true;
+        default:
+            return false;
+    }
+}
+
 void datetime::date_to_struct_tm(date_val_t date, datetime_unit_t unit, struct tm& out_tm)
 {
     int32_t days;

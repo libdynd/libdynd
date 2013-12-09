@@ -492,12 +492,15 @@ finish:
     }
 
     /* Check the casting rule */
-    if (unit != datetime_unit_unspecified &&
-                !satisfies_conversion_rule(unit, bestunit, casting)) {
-        std::stringstream ss;
-        ss << "cannot parse \"" << str << "\" as a datetime with unit ";
-        ss << unit << " and " << casting << " casting";
-        throw std::runtime_error(ss.str());
+    if (unit != datetime_unit_unspecified) {
+        // In the abstract time zone case, allow extra zeros at the end
+        if (!(is_abstract && out->divisible_by_unit(unit))
+                && !satisfies_conversion_rule(unit, bestunit, casting)) {
+            std::stringstream ss;
+            ss << "cannot parse \"" << str << "\" as a datetime with unit ";
+            ss << unit << " and " << casting << " casting";
+            throw std::runtime_error(ss.str());
+        }
     }
 
     return;

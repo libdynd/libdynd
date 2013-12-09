@@ -113,6 +113,13 @@ struct datetime_fields {
      * valid range)
      */
     void add_minutes(int minutes);
+
+    /**
+     * Returns true if the datetime is divisible by the
+     * specified unit, e.g. has no non-zero value with a smaller
+     * unit.
+     */
+    bool divisible_by_unit(datetime_unit_t unit);
 };
 
 /**
@@ -205,7 +212,9 @@ inline bool is_leapyear(int64_t year)
 /* Extracts the month number from a 'datetime64[D]' value */
 int days_to_month_number(datetime_val_t days);
 
-bool satisfies_conversion_rule(datetime_unit_t dest, datetime_unit_t src, datetime_conversion_rule_t rule);
+bool satisfies_conversion_rule(
+    datetime_unit_t dest, datetime_unit_t src,
+    datetime_conversion_rule_t rule);
 
 } // namespace datetime
 

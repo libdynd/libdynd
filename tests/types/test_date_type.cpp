@@ -84,6 +84,10 @@ TEST(DateDType, ValueCreation) {
                     nd::array("2000-03-01").ucast(d).view_scalars(di).as<int32_t>());
     EXPECT_EQ((2000 - 1970)*365 + (2000 - 1972)/4 + 366 + 31 + 28 + 21,
                     nd::array("2001-03-22").ucast(d).view_scalars(di).as<int32_t>());
+
+    // Unambiguous date format which has extra empty time attached
+    EXPECT_EQ((2000 - 1970)*365 + (2000 - 1972)/4 + 366 + 31 + 28 + 21,
+                    nd::array("2001-03-22 00:00:00").ucast(d).view_scalars(di).as<int32_t>());
 }
 
 TEST(DateDType, BadInputStrings) {
