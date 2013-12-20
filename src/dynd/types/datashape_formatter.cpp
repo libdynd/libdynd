@@ -157,10 +157,10 @@ static void format_complex_datashape(std::ostream& o, const ndt::type& dt)
 {
     switch (dt.get_type_id()) {
         case complex_float32_type_id:
-            o << "cfloat32";
+            o << "complex[float32]";
             break;
         case complex_float64_type_id:
-            o << "cfloat64";
+            o << "complex[float64]";
             break;
         default: {
             stringstream ss;
