@@ -72,8 +72,8 @@ static const map<string, ndt::type>& get_builtin_types()
         builtin_types["float32"] = ndt::make_type<float>();
         builtin_types["float64"] = ndt::make_type<double>();
         builtin_types["float128"] = ndt::make_type<dynd_float128>();
-        builtin_types["cfloat32"] = builtin_types["complex64"] = ndt::make_type<complex<float> >();
-        builtin_types["cfloat64"] = builtin_types["complex128"] = ndt::make_type<complex<double> >();
+        builtin_types["complex64"] = ndt::make_type<complex<float> >();
+        builtin_types["complex128"] = ndt::make_type<complex<double> >();
         builtin_types["json"] = ndt::make_json();
         builtin_types["date"] = ndt::make_date();
         builtin_types["bytes"] = ndt::make_bytes(1);
@@ -96,6 +96,7 @@ static const set<string>& get_reserved_typenames()
         reserved_typenames.insert("datetime");
         reserved_typenames.insert("unaligned");
         reserved_typenames.insert("pointer");
+        reserved_typenames.insert("complex");
     }
     return reserved_typenames;
 }
@@ -357,6 +358,32 @@ static ndt::type parse_char_parameters(const char *&begin, const char *end)
     }
 }
 
+// complex_type : complex[float_type]
+// This is called after 'complex' is already matched
+static ndt::type parse_complex_parameters(const char *&begin, const char *end,
+                map<string, ndt::type>& symtable)
+{
+    if (parse_token(begin, end, '[')) {
+        const char *saved_begin = begin;
+        ndt::type tp = parse_rhs_expression(begin, end, symtable);
+        if (tp.get_type_id() == uninitialized_type_id) {
+            throw datashape_parse_error(begin, "expected a type parameter");
+        }
+        if (!parse_token(begin, end, ']')) {
+            throw datashape_parse_error(begin, "expected closing ']'");
+        }
+        if (tp.get_type_id() == float32_type_id) {
+            return ndt::make_type<complex<float> >();
+        } else if (tp.get_type_id() == float64_type_id) {
+            return ndt::make_type<complex<double> >();
+        } else {
+            throw datashape_parse_error(saved_begin, "unsupported real type for complex numbers");
+        }
+    } else {
+        throw datashape_parse_error(begin, "expected opening '['");
+    }
+}
+
 // datetime_type : datetime('unit') |
 //               datetime('unit','timezone')
 // This is called after 'datetime' is already matched
@@ -549,6 +576,8 @@ static ndt::type parse_rhs_expression(const char *&begin, const char *end, map<s
             }
         } else if (n == "string") {
             result = parse_string_parameters(begin, end);
+        } else if (n == "complex") {
+            result = parse_complex_parameters(begin, end, symtable);
         } else if (n == "datetime") {
             result = parse_datetime_parameters(begin, end);
         } else if (n == "unaligned") {

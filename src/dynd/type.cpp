@@ -339,10 +339,10 @@ std::ostream& dynd::ndt::operator<<(std::ostream& o, const ndt::type& rhs)
             o << "float128";
             break;
         case complex_float32_type_id:
-            o << "cfloat32";
+            o << "complex[float32]";
             break;
         case complex_float64_type_id:
-            o << "cfloat64";
+            o << "complex[float64]";
             break;
         case void_type_id:
             o << "void";
