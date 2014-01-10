@@ -697,7 +697,8 @@ void ndt::var_dim_element_initialize(const type& tp,
         // Allocate the output array data
         d->begin = allocator->allocate(memblock, count);
         d->size = count;
-    } else if (memblock->m_type == pod_memory_block_type) {
+    } else if (memblock->m_type == pod_memory_block_type ||
+                memblock->m_type == zeroinit_memory_block_type) {
         memory_block_pod_allocator_api *allocator =
                         get_memory_block_pod_allocator_api(memblock);
 
@@ -707,7 +708,11 @@ void ndt::var_dim_element_initialize(const type& tp,
                     vdt->get_target_alignment(), &d->begin, &dst_end);
         d->size = count;
     } else {
-        throw runtime_error("internal error: var_dim metadata has a memblock type that is not writable");
+        stringstream ss;
+        ss << "var_dim_element_initialize internal error: ";
+        ss << "var_dim metadata has memblock type " << (memory_block_type_t)memblock->m_type;
+        ss << " that is not writable";
+        throw runtime_error(ss.str());
     }
 }
 
@@ -736,7 +741,8 @@ void ndt::var_dim_element_resize(const type& tp,
         // Resize the output array data
         d->begin = allocator->resize(memblock, d->begin, count);
         d->size = count;
-    } else if (memblock->m_type == pod_memory_block_type) {
+    } else if (memblock->m_type == pod_memory_block_type ||
+                memblock->m_type == zeroinit_memory_block_type) {
         memory_block_pod_allocator_api *allocator =
                         get_memory_block_pod_allocator_api(memblock);
 
@@ -745,6 +751,10 @@ void ndt::var_dim_element_resize(const type& tp,
         allocator->resize(memblock, count * md->stride, &d->begin, &dst_end);
         d->size = count;
     } else {
-        throw runtime_error("internal error: var_dim metadata has a memblock type that is not writable");
+        stringstream ss;
+        ss << "var_dim_element_resize internal error: ";
+        ss << "var_dim metadata has memblock type " << (memory_block_type_t)memblock->m_type;
+        ss << " that is not writable";
+        throw runtime_error(ss.str());
     }
 }
