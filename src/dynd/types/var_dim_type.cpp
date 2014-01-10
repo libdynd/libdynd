@@ -722,7 +722,7 @@ void ndt::var_dim_element_resize(const type& tp,
     const var_dim_type *vdt = static_cast<const var_dim_type *>(tp.extended());
     const var_dim_type_metadata *md = reinterpret_cast<const var_dim_type_metadata *>(metadata);
     var_dim_type_data *d = reinterpret_cast<var_dim_type_data *>(data);
-    if (d->begin != NULL) {
+    if (d->begin == NULL) {
         throw runtime_error("internal error: var_dim element data must not be NULL to resize");
     }
     // Resize the element
