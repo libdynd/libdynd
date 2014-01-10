@@ -671,3 +671,80 @@ void var_dim_type::get_dynamic_array_functions(const std::pair<std::string, gfun
     *out_functions = m_array_functions.empty() ? NULL : &m_array_functions[0];
     *out_count = (int)m_array_functions.size();
 }
+
+void ndt::var_dim_element_initialize(const type& tp,
+        const char *metadata, char *data, intptr_t count)
+{
+    if (tp.get_type_id() != var_dim_type_id) {
+        stringstream ss;
+        ss << "internal error: expected a var_dim type, not " << tp;
+        throw runtime_error(ss.str());
+    }
+    const var_dim_type *vdt = static_cast<const var_dim_type *>(tp.extended());
+    const var_dim_type_metadata *md = reinterpret_cast<const var_dim_type_metadata *>(metadata);
+    var_dim_type_data *d = reinterpret_cast<var_dim_type_data *>(data);
+    if (d->begin != NULL) {
+        throw runtime_error("internal error: var_dim element data must be NULL to initialize");
+    }
+    // Allocate the element
+    memory_block_data *memblock = md->blockref;
+    if (memblock == NULL) {
+        throw runtime_error("internal error: var_dim metadata has no memblock");
+    } else if (memblock->m_type == objectarray_memory_block_type) {
+        memory_block_objectarray_allocator_api *allocator =
+                        get_memory_block_objectarray_allocator_api(memblock);
+
+        // Allocate the output array data
+        d->begin = allocator->allocate(memblock, count);
+        d->size = count;
+    } else if (memblock->m_type == pod_memory_block_type) {
+        memory_block_pod_allocator_api *allocator =
+                        get_memory_block_pod_allocator_api(memblock);
+
+        // Allocate the output array data
+        char *dst_end = NULL;
+        allocator->allocate(memblock, count * md->stride,
+                    vdt->get_target_alignment(), &d->begin, &dst_end);
+        d->size = count;
+    } else {
+        throw runtime_error("internal error: var_dim metadata has a memblock type that is not writable");
+    }
+}
+
+void ndt::var_dim_element_resize(const type& tp,
+        const char *metadata, char *data, intptr_t count)
+{
+    if (tp.get_type_id() != var_dim_type_id) {
+        stringstream ss;
+        ss << "internal error: expected a var_dim type, not " << tp;
+        throw runtime_error(ss.str());
+    }
+    const var_dim_type *vdt = static_cast<const var_dim_type *>(tp.extended());
+    const var_dim_type_metadata *md = reinterpret_cast<const var_dim_type_metadata *>(metadata);
+    var_dim_type_data *d = reinterpret_cast<var_dim_type_data *>(data);
+    if (d->begin != NULL) {
+        throw runtime_error("internal error: var_dim element data must not be NULL to resize");
+    }
+    // Resize the element
+    memory_block_data *memblock = md->blockref;
+    if (memblock == NULL) {
+        throw runtime_error("internal error: var_dim metadata has no memblock");
+    } else if (memblock->m_type == objectarray_memory_block_type) {
+        memory_block_objectarray_allocator_api *allocator =
+                        get_memory_block_objectarray_allocator_api(memblock);
+
+        // Resize the output array data
+        d->begin = allocator->resize(memblock, d->begin, count);
+        d->size = count;
+    } else if (memblock->m_type == pod_memory_block_type) {
+        memory_block_pod_allocator_api *allocator =
+                        get_memory_block_pod_allocator_api(memblock);
+
+        // Resize the output array data
+        char *dst_end = d->begin + d->size * md->stride;
+        allocator->resize(memblock, count * md->stride, &d->begin, &dst_end);
+        d->size = count;
+    } else {
+        throw runtime_error("internal error: var_dim metadata has a memblock type that is not writable");
+    }
+}

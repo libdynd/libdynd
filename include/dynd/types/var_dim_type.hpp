@@ -116,9 +116,40 @@ public:
 };
 
 namespace ndt {
-    inline ndt::type make_var_dim(const ndt::type& element_tp) {
-        return ndt::type(new var_dim_type(element_tp), false);
+    inline type make_var_dim(const type& element_tp) {
+        return type(new var_dim_type(element_tp), false);
     }
+
+    /**
+     * A helper function for reserving initial space in a var dim element.
+     * This requires that the element being created (at `data`) is NULL, and
+     * it allocates `count` elements to start of the var element.
+     *
+     * \param tp  This must be a var_dim type.
+     * \param metadata  Array metadata for `tp`.
+     * \param data  Array data for the `tp`, `metadata` pair, this
+     *              is written to.
+     * \param count  The number of elements to start off with.
+     */
+    void var_dim_element_initialize(const type& tp,
+            const char *metadata, char *data, intptr_t count);
+
+    /**
+     * A helper function for resizing the allocated space in a var dim
+     * element. This requires that the element being resized (at `data`)
+     * was previously initialized, and no other element has been
+     * initialized in the meantime. The element's `begin` pointer and
+     * `size` count must not have been modified since the last
+     * initialize/resize operation.
+     *
+     * \param tp  This must be a var_dim type.
+     * \param metadata  Array metadata for `tp`.
+     * \param data  Array data for the `tp`, `metadata` pair, this
+     *              is written to.
+     * \param count  The number of elements to resize to.
+     */
+    void var_dim_element_resize(const type& tp,
+            const char *metadata, char *data, intptr_t count);
 } // namespace ndt
 
 } // namespace dynd
