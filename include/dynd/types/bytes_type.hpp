@@ -48,11 +48,13 @@ public:
     void print_type(std::ostream& o) const;
 
     void get_bytes_range(const char **out_begin, const char**out_end, const char *metadata, const char *data) const;
+    void set_bytes_data(const char *metadata, char *data, assign_error_mode errmode,
+                    const char* bytes_begin, const char *bytes_end) const;
 
     bool is_unique_data_owner(const char *metadata) const;
     ndt::type get_canonical_type() const;
 
-        void get_shape(intptr_t ndim, intptr_t i, intptr_t *out_shape, const char *metadata, const char *data) const;
+    void get_shape(intptr_t ndim, intptr_t i, intptr_t *out_shape, const char *metadata, const char *data) const;
 
     bool is_lossless_assignment(const ndt::type& dst_tp, const ndt::type& src_tp) const;
 

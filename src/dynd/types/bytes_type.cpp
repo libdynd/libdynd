@@ -38,6 +38,27 @@ void bytes_type::get_bytes_range(const char **out_begin, const char**out_end,
     *out_end = reinterpret_cast<const bytes_type_data *>(data)->end;
 }
 
+void bytes_type::set_bytes_data(const char *metadata, char *data, assign_error_mode errmode,
+                const char* bytes_begin, const char *bytes_end) const
+{
+    const bytes_type_metadata *md = reinterpret_cast<const bytes_type_metadata *>(metadata);
+    if (md->blockref == NULL ||
+                md->blockref->m_type != pod_memory_block_type) {
+        throw runtime_error("assigning to a bytes data element requires that it have a pod memory block");
+    }
+    bytes_type_data *d = reinterpret_cast<bytes_type_data *>(data);
+    if (d->begin != NULL) {
+        throw runtime_error("assigning to a bytes data element requires that it be initialized to NULL");
+    }
+    memory_block_pod_allocator_api *allocator =
+                    get_memory_block_pod_allocator_api(md->blockref);
+
+    // Allocate the output array data, then copy it
+    allocator->allocate(md->blockref, bytes_end - bytes_begin,
+                get_target_alignment(), &d->begin, &d->end);
+    memcpy(d->begin, bytes_begin, bytes_end - bytes_begin);
+}
+
 void bytes_type::print_data(std::ostream& o, const char *DYND_UNUSED(metadata), const char *data) const
 {
     const char *begin = reinterpret_cast<const char * const *>(data)[0];
