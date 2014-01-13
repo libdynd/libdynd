@@ -136,11 +136,10 @@ namespace ndt {
 
     /**
      * A helper function for resizing the allocated space in a var dim
-     * element. This requires that the element being resized (at `data`)
-     * was previously initialized, and no other element has been
-     * initialized in the meantime. The element's `begin` pointer and
+     * element. The element's `begin` pointer and
      * `size` count must not have been modified since the last
-     * initialize/resize operation.
+     * initialize/resize operation. If the element has not been
+     * initialized previously, it is initialized to the requested count.
      *
      * \param tp  This must be a var_dim type.
      * \param metadata  Array metadata for `tp`.

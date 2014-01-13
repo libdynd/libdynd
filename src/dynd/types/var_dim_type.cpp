@@ -728,7 +728,9 @@ void ndt::var_dim_element_resize(const type& tp,
     const var_dim_type_metadata *md = reinterpret_cast<const var_dim_type_metadata *>(metadata);
     var_dim_type_data *d = reinterpret_cast<var_dim_type_data *>(data);
     if (d->begin == NULL) {
-        throw runtime_error("internal error: var_dim element data must not be NULL to resize");
+        // Allow resize to do the initialization as well
+        var_dim_element_initialize(tp, metadata, data, count);
+        return;
     }
     // Resize the element
     memory_block_data *memblock = md->blockref;
