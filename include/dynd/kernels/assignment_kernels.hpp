@@ -49,10 +49,41 @@ public:
     }
 
     /** Calls the function to do the assignment */
-    inline void operator()(char *dst, const char *src) {
+    inline void operator()(char *dst, const char *src) const {
         ckernel_prefix *kdp = get();
         unary_single_operation_t fn = kdp->get_function<unary_single_operation_t>();
         fn(dst, src, kdp);
+    }
+};
+
+/**
+ * See the ckernel_builder class documentation
+ * for details about how ckernels can be built and
+ * used.
+ *
+ * This kernel type is for ckernels which assign a
+ * strided sequence of data values from one
+ * type/metadata source to a different type/metadata
+ * destination, using the `unary_strided_operation_t`
+ * function prototype.
+ */
+class assignment_strided_ckernel_builder : public ckernel_builder {
+public:
+    assignment_strided_ckernel_builder()
+        : ckernel_builder()
+    {
+    }
+
+    inline unary_strided_operation_t get_function() const {
+        return get()->get_function<unary_strided_operation_t>();
+    }
+
+    /** Calls the function to do the assignment */
+    inline void operator()(char *dst, intptr_t dst_stride,
+                const char *src, intptr_t src_stride, size_t count) const {
+        ckernel_prefix *kdp = get();
+        unary_strided_operation_t fn = kdp->get_function<unary_strided_operation_t>();
+        fn(dst, dst_stride, src, src_stride, count, kdp);
     }
 };
 
