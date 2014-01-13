@@ -724,7 +724,6 @@ void ndt::var_dim_element_resize(const type& tp,
         ss << "internal error: expected a var_dim type, not " << tp;
         throw runtime_error(ss.str());
     }
-    const var_dim_type *vdt = static_cast<const var_dim_type *>(tp.extended());
     const var_dim_type_metadata *md = reinterpret_cast<const var_dim_type_metadata *>(metadata);
     var_dim_type_data *d = reinterpret_cast<var_dim_type_data *>(data);
     if (d->begin == NULL) {

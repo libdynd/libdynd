@@ -48,7 +48,7 @@ public:
     void print_type(std::ostream& o) const;
 
     void get_bytes_range(const char **out_begin, const char**out_end, const char *metadata, const char *data) const;
-    void set_bytes_data(const char *metadata, char *data, assign_error_mode errmode,
+    void set_bytes_data(const char *metadata, char *data,
                     const char* bytes_begin, const char *bytes_end) const;
 
     bool is_unique_data_owner(const char *metadata) const;

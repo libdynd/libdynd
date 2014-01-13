@@ -38,7 +38,7 @@ void bytes_type::get_bytes_range(const char **out_begin, const char**out_end,
     *out_end = reinterpret_cast<const bytes_type_data *>(data)->end;
 }
 
-void bytes_type::set_bytes_data(const char *metadata, char *data, assign_error_mode errmode,
+void bytes_type::set_bytes_data(const char *metadata, char *data,
                 const char* bytes_begin, const char *bytes_end) const
 {
     const bytes_type_metadata *md = reinterpret_cast<const bytes_type_metadata *>(metadata);
