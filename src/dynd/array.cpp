@@ -1336,7 +1336,7 @@ std::ostream& nd::operator<<(std::ostream& o, const array& rhs)
         } else {
             v.get_ndo()->m_type->print_data(o, v.get_ndo_meta(), v.get_ndo()->m_data_pointer);
         }
-        o << ", " << rhs.get_type() << ")";
+        o << ", type=\"" << rhs.get_type() << "\")";
     } else {
         o << "array()";
     }

@@ -262,31 +262,31 @@ TEST(Array, IntScalarConstructor) {
     EXPECT_TRUE(a.is_scalar());
     EXPECT_EQ(ndt::make_type<int>(), a.get_type());
     ss.str(""); ss << a;
-    EXPECT_EQ("array(3, int32)", ss.str());
+    EXPECT_EQ("array(3, type=\"int32\")", ss.str());
 
     a = (int8_t)1;
     EXPECT_TRUE(a.is_scalar());
     EXPECT_EQ(ndt::make_type<int8_t>(), a.get_type());
     ss.str(""); ss << a;
-    EXPECT_EQ("array(1, int8)", ss.str());
+    EXPECT_EQ("array(1, type=\"int8\")", ss.str());
 
     a = (int16_t)2;
     EXPECT_TRUE(a.is_scalar());
     EXPECT_EQ(ndt::make_type<int16_t>(), a.get_type());
     ss.str(""); ss << a;
-    EXPECT_EQ("array(2, int16)", ss.str());
+    EXPECT_EQ("array(2, type=\"int16\")", ss.str());
 
     a = (int32_t)3;
     EXPECT_TRUE(a.is_scalar());
     EXPECT_EQ(ndt::make_type<int32_t>(), a.get_type());
     ss.str(""); ss << a;
-    EXPECT_EQ("array(3, int32)", ss.str());
+    EXPECT_EQ("array(3, type=\"int32\")", ss.str());
 
     a = (int64_t)4;
     EXPECT_TRUE(a.is_scalar());
     EXPECT_EQ(ndt::make_type<int64_t>(), a.get_type());
     ss.str(""); ss << a;
-    EXPECT_EQ("array(4, int64)", ss.str());
+    EXPECT_EQ("array(4, type=\"int64\")", ss.str());
 }
 
 TEST(Array, UIntScalarConstructor) {
@@ -296,25 +296,25 @@ TEST(Array, UIntScalarConstructor) {
     EXPECT_TRUE(a.is_scalar());
     EXPECT_EQ(ndt::make_type<uint8_t>(), a.get_type());
     ss.str(""); ss << a;
-    EXPECT_EQ("array(5, uint8)", ss.str());
+    EXPECT_EQ("array(5, type=\"uint8\")", ss.str());
 
     a = (uint16_t)6;
     EXPECT_TRUE(a.is_scalar());
     EXPECT_EQ(ndt::make_type<uint16_t>(), a.get_type());
     ss.str(""); ss << a;
-    EXPECT_EQ("array(6, uint16)", ss.str());
+    EXPECT_EQ("array(6, type=\"uint16\")", ss.str());
 
     a = (uint32_t)7;
     EXPECT_TRUE(a.is_scalar());
     EXPECT_EQ(ndt::make_type<uint32_t>(), a.get_type());
     ss.str(""); ss << a;
-    EXPECT_EQ("array(7, uint32)", ss.str());
+    EXPECT_EQ("array(7, type=\"uint32\")", ss.str());
 
     a = (uint64_t)8;
     EXPECT_TRUE(a.is_scalar());
     EXPECT_EQ(ndt::make_type<uint64_t>(), a.get_type());
     ss.str(""); ss << a;
-    EXPECT_EQ("array(8, uint64)", ss.str());
+    EXPECT_EQ("array(8, type=\"uint64\")", ss.str());
 }
 
 TEST(Array, FloatScalarConstructor) {
@@ -324,13 +324,13 @@ TEST(Array, FloatScalarConstructor) {
     EXPECT_TRUE(a.is_scalar());
     EXPECT_EQ(ndt::make_type<float>(), a.get_type());
     ss.str(""); ss << a;
-    EXPECT_EQ("array(3.25, float32)", ss.str());
+    EXPECT_EQ("array(3.25, type=\"float32\")", ss.str());
 
     a = 3.5;
     EXPECT_TRUE(a.is_scalar());
     EXPECT_EQ(ndt::make_type<double>(), a.get_type());
     ss.str(""); ss << a;
-    EXPECT_EQ("array(3.5, float64)", ss.str());
+    EXPECT_EQ("array(3.5, type=\"float64\")", ss.str());
 
     a = complex<float>(3.14f, 1.0f);
     EXPECT_TRUE(a.is_scalar());

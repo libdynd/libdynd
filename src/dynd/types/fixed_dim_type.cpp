@@ -88,13 +88,15 @@ void fixed_dim_type::print_data(std::ostream& o, const char *metadata, const cha
 
 void fixed_dim_type::print_type(std::ostream& o) const
 {
-    o << "fixed_dim<";
-    o << m_dim_size;
-    if ((size_t)m_stride != m_element_tp.get_data_size()) {
+    if ((size_t)m_stride == m_element_tp.get_data_size()) {
+        o << m_dim_size << ", " << m_element_tp;
+    } else {
+        o << "fixed_dim[";
+        o << m_dim_size;
         o << ", stride=" << m_stride;
+        o << ", " << m_element_tp;
+        o << "]";
     }
-    o << ", " << m_element_tp;
-    o << ">";
 }
 
 bool fixed_dim_type::is_expression() const
