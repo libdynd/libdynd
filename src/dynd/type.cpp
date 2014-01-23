@@ -220,7 +220,7 @@ intptr_t ndt::type::get_dim_size(const char *metadata, const char *data) const {
 
     std::stringstream ss;
     ss << "Cannot get the leading dimension size of dynd array with type " << *this;
-    throw std::runtime_error(ss.str());
+    throw dynd::type_error(ss.str());
 }
 
 bool ndt::type::data_layout_compatible_with(const ndt::type& rhs) const
