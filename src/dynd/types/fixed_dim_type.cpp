@@ -26,7 +26,7 @@ fixed_dim_type::fixed_dim_type(size_t dimension_size, const ndt::type& element_t
         stringstream ss;
         ss << "Cannot create dynd fixed_dim type with element type " << element_tp;
         ss << ", as it does not have a fixed size";
-        throw runtime_error(ss.str());
+        throw dynd::type_error(ss.str());
     }
     m_stride = m_dim_size > 1 ? element_tp.get_data_size() : 0;
     m_members.data_size = m_stride * (m_dim_size-1) + child_element_size;
@@ -47,19 +47,19 @@ fixed_dim_type::fixed_dim_type(size_t dimension_size, const ndt::type& element_t
         stringstream ss;
         ss << "Cannot create dynd fixed_dim type with element type " << element_tp;
         ss << ", as it does not have a fixed size";
-        throw runtime_error(ss.str());
+        throw dynd::type_error(ss.str());
     }
     if (dimension_size <= 1 && stride != 0) {
         stringstream ss;
         ss << "Cannot create dynd fixed_dim type with size " << dimension_size;
         ss << " and stride " << stride << ", as the stride must be zero when the dimension size is 1";
-        throw runtime_error(ss.str());
+        throw dynd::type_error(ss.str());
     }
     if (dimension_size > 1 && stride == 0) {
         stringstream ss;
         ss << "Cannot create dynd fixed_dim type with size " << dimension_size;
         ss << " and stride 0, as the stride must be non-zero when the dimension size is > 1";
-        throw runtime_error(ss.str());
+        throw dynd::type_error(ss.str());
     }
     m_members.data_size = m_stride * (m_dim_size-1) + child_element_size;
     // Propagate the zeroinit flag from the element
@@ -570,14 +570,14 @@ size_t fixed_dim_type::make_assignment_kernel(
         } else {
             stringstream ss;
             ss << "Cannot assign from " << src_tp << " to " << dst_tp;
-            throw runtime_error(ss.str());
+            throw dynd::type_error(ss.str());
         }
     } else if (dst_tp.get_ndim() < src_tp.get_ndim()) {
         throw broadcast_error(dst_tp, dst_metadata, src_tp, src_metadata);
     } else {
         stringstream ss;
         ss << "Cannot assign from " << src_tp << " to " << dst_tp;
-        throw runtime_error(ss.str());
+        throw dynd::type_error(ss.str());
     }
 }
 

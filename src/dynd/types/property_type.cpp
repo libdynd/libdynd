@@ -260,7 +260,7 @@ ndt::type property_type::with_replaced_storage_type(const ndt::type& replacement
             std::stringstream ss;
             ss << "Cannot chain types, because the property's storage type, " << m_operand_tp;
             ss << ", does not match the replacement's value type, " << replacement_type.value_type();
-            throw std::runtime_error(ss.str());
+            throw dynd::type_error(ss.str());
         }
         if (!m_reversed_property) {
             return ndt::type(new property_type(replacement_type, m_property_name), false);

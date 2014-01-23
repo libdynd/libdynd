@@ -145,9 +145,25 @@ public:
 };
 
 /**
+ * An exception for errors related to types.
+ */
+class type_error : public dynd_exception {
+public:
+    type_error(const char *exception_name, const std::string& msg)
+        : dynd_exception(exception_name, msg)
+    {}
+    type_error(const std::string& msg)
+        : dynd_exception("type error", msg)
+    {}
+
+    virtual ~type_error() throw() {
+    }
+};
+
+/**
  * An exception for an invalid type ID.
  */
-class invalid_type_id : public dynd_exception {
+class invalid_type_id : public type_error {
 public:
     invalid_type_id(int type_id);
 

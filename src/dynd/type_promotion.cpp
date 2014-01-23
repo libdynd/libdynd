@@ -26,7 +26,7 @@ static intptr_t min_strlen_for_builtin_kind(type_kind_t kind)
         case complex_kind:
             return 64;
         default:
-            throw runtime_error("cannot get minimum string length for specified kind");
+            throw dynd::type_error("cannot get minimum string length for specified kind");
     }
 }
 */
@@ -180,7 +180,7 @@ ndt::type dynd::promote_types_arithmetic(const ndt::type& tp0, const ndt::type& 
 
         stringstream ss;
         ss << "internal error in built-in dynd type promotion of " << tp0_val << " and " << tp1_val;
-        throw std::runtime_error(ss.str());
+        throw dynd::type_error(ss.str());
     }
 
     // HACK for getting simple string type promotions.
@@ -211,5 +211,5 @@ ndt::type dynd::promote_types_arithmetic(const ndt::type& tp0, const ndt::type& 
 
     stringstream ss;
     ss << "type promotion of " << tp0 << " and " << tp1 << " is not yet supported";
-    throw std::runtime_error(ss.str());
+    throw dynd::type_error(ss.str());
 }

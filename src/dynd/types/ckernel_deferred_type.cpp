@@ -184,7 +184,7 @@ size_t ckernel_deferred_type::make_assignment_kernel(
     // Nothing can be assigned to/from ckernel_deferred
     stringstream ss;
     ss << "Cannot assign from " << src_tp << " to " << dst_tp;
-    throw runtime_error(ss.str());
+    throw dynd::type_error(ss.str());
 }
 
 ///////// properties on the nd::array

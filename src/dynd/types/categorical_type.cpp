@@ -215,11 +215,11 @@ categorical_type::categorical_type(const nd::array& categories, bool presorted)
         // Process the categories array to make sure it's valid
         const ndt::type& cdt = categories.get_type();
         if (cdt.get_type_id() != strided_dim_type_id) {
-            throw runtime_error("categorical_type only supports construction from a strided array of categories");
+            throw dynd::type_error("categorical_type only supports construction from a strided array of categories");
         }
         m_category_tp = categories.get_type().at(0);
         if (!m_category_tp.is_scalar()) {
-            throw runtime_error("categorical_type only supports construction from a 1-dimensional strided array of categories");
+            throw dynd::type_error("categorical_type only supports construction from a 1-dimensional strided array of categories");
         }
 
         category_count = categories.get_dim_size();

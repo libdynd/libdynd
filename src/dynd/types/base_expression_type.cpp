@@ -70,7 +70,7 @@ size_t base_expression_type::make_operand_to_value_assignment_kernel(
 {
     stringstream ss;
     ss << "dynd type " << ndt::type(this, true) << " does not support reading of its values";
-    throw runtime_error(ss.str());
+    throw dynd::type_error(ss.str());
 }
 
 size_t base_expression_type::make_value_to_operand_assignment_kernel(
@@ -80,7 +80,7 @@ size_t base_expression_type::make_value_to_operand_assignment_kernel(
 {
     stringstream ss;
     ss << "dynd type " << ndt::type(this, true) << " does not support writing to its values";
-    throw runtime_error(ss.str());
+    throw dynd::type_error(ss.str());
 }
 
 size_t base_expression_type::make_assignment_kernel(

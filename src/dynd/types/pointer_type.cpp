@@ -34,7 +34,7 @@ pointer_type::pointer_type(const ndt::type& target_tp)
         stringstream ss;
         ss << "A dynd pointer type's target cannot be the expression type ";
         ss << target_tp;
-        throw runtime_error(ss.str());
+        throw dynd::type_error(ss.str());
     }
 }
 

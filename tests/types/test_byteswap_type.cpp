@@ -33,7 +33,7 @@ TEST(ByteswapDType, Create) {
     EXPECT_EQ(d.storage_type(), ndt::make_fixedbytes(16, scalar_align_of<complex<double> >::value));
 
     // Only basic built-in types can be used to make a byteswap type
-    EXPECT_THROW(d = ndt::make_byteswap(ndt::make_convert<int, float>()), runtime_error);
+    EXPECT_THROW(d = ndt::make_byteswap(ndt::make_convert<int, float>()), dynd::type_error);
 }
 
 TEST(ByteswapDType, Basic) {

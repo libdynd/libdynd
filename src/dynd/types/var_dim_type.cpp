@@ -611,7 +611,7 @@ size_t var_dim_type::make_assignment_kernel(
         } else {
             stringstream ss;
             ss << "Cannot assign from " << src_tp << " to " << dst_tp;
-            throw runtime_error(ss.str());
+            throw dynd::type_error(ss.str());
         }
     } else if (dst_tp.get_ndim() < src_tp.get_ndim()) {
         throw broadcast_error(dst_tp, dst_metadata, src_tp, src_metadata);
@@ -626,7 +626,7 @@ size_t var_dim_type::make_assignment_kernel(
         } else {
             stringstream ss;
             ss << "Cannot assign from " << src_tp << " to " << dst_tp;
-            throw runtime_error(ss.str());
+            throw dynd::type_error(ss.str());
         }
     }
 }
@@ -678,7 +678,7 @@ void ndt::var_dim_element_initialize(const type& tp,
     if (tp.get_type_id() != var_dim_type_id) {
         stringstream ss;
         ss << "internal error: expected a var_dim type, not " << tp;
-        throw runtime_error(ss.str());
+        throw dynd::type_error(ss.str());
     }
     const var_dim_type *vdt = static_cast<const var_dim_type *>(tp.extended());
     const var_dim_type_metadata *md = reinterpret_cast<const var_dim_type_metadata *>(metadata);
@@ -722,7 +722,7 @@ void ndt::var_dim_element_resize(const type& tp,
     if (tp.get_type_id() != var_dim_type_id) {
         stringstream ss;
         ss << "internal error: expected a var_dim type, not " << tp;
-        throw runtime_error(ss.str());
+        throw dynd::type_error(ss.str());
     }
     const var_dim_type_metadata *md = reinterpret_cast<const var_dim_type_metadata *>(metadata);
     var_dim_type_data *d = reinterpret_cast<var_dim_type_data *>(data);

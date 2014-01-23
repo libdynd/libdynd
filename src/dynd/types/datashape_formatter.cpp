@@ -148,7 +148,7 @@ static void format_string_datashape(std::ostream& o, const ndt::type& dt)
         default: {
             stringstream ss;
             ss << "unrecognized string dynd type " << dt << " while formatting datashape";
-            throw runtime_error(ss.str());
+            throw dynd::type_error(ss.str());
         }
     }
 }
@@ -165,7 +165,7 @@ static void format_complex_datashape(std::ostream& o, const ndt::type& dt)
         default: {
             stringstream ss;
             ss << "unrecognized string complex type " << dt << " while formatting datashape";
-            throw runtime_error(ss.str());
+            throw dynd::type_error(ss.str());
         }
     }
 }

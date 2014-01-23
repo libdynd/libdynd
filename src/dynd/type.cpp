@@ -519,7 +519,7 @@ void dynd::print_builtin_scalar(type_id_t type_id, std::ostream& o, const char *
         default:
             stringstream ss;
             ss << "printing of dynd builtin type id " << type_id << " isn't supported yet";
-            throw std::runtime_error(ss.str());
+            throw dynd::type_error(ss.str());
     }
 }
 

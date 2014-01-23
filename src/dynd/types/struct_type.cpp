@@ -20,7 +20,7 @@ struct_type::struct_type(const std::vector<ndt::type>& field_types, const std::v
             m_field_types(field_types), m_field_names(field_names), m_metadata_offsets(field_types.size())
 {
     if (field_types.size() != field_names.size()) {
-        throw runtime_error("The field names for a dynd struct types must match the size of the field types");
+        throw dynd::type_error("The field names for a dynd struct types must match the size of the field types");
     }
 
     // Calculate the needed element alignment
@@ -287,7 +287,7 @@ size_t struct_type::make_assignment_kernel(
 
     stringstream ss;
     ss << "Cannot assign from " << src_tp << " to " << dst_tp;
-    throw runtime_error(ss.str());
+    throw dynd::type_error(ss.str());
 }
 
 size_t struct_type::make_comparison_kernel(
@@ -335,7 +335,7 @@ void struct_type::metadata_default_construct(char *metadata, intptr_t ndim, cons
             stringstream ss;
             ss << "Cannot construct dynd object of type " << ndt::type(this, true);
             ss << " with dimension size " << shape[0] << ", the size must be " << m_field_types.size();
-            throw runtime_error(ss.str());
+            throw dynd::type_error(ss.str());
         }
     }
 

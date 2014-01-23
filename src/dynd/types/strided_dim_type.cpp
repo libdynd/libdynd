@@ -571,14 +571,14 @@ size_t strided_dim_type::make_assignment_kernel(
         } else {
             stringstream ss;
             ss << "Cannot assign from " << src_tp << " to " << dst_tp;
-            throw runtime_error(ss.str());
+            throw dynd::type_error(ss.str());
         }
     } else if (dst_tp.get_ndim() < src_tp.get_ndim()) {
         throw broadcast_error(dst_tp, dst_metadata, src_tp, src_metadata);
     } else {
         stringstream ss;
         ss << "Cannot assign from " << src_tp << " to " << dst_tp;
-        throw runtime_error(ss.str());
+        throw dynd::type_error(ss.str());
     }
 }
 

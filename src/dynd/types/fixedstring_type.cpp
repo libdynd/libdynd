@@ -203,7 +203,7 @@ size_t fixedstring_type::make_assignment_kernel(
         } else {
             stringstream ss;
             ss << "Cannot assign from " << src_tp << " to " << dst_tp;
-            throw runtime_error(ss.str());
+            throw dynd::type_error(ss.str());
         }
     }
 }

@@ -171,7 +171,7 @@ size_t char_type::make_assignment_kernel(
 
     stringstream ss;
     ss << "Cannot assign from " << src_tp << " to " << dst_tp;
-    throw runtime_error(ss.str());
+    throw dynd::type_error(ss.str());
 }
 
 size_t char_type::make_comparison_kernel(

@@ -30,7 +30,7 @@ TEST(AlignDType, Create) {
     EXPECT_TRUE(d.is_expression());
 
     // The "type" type is an object type, it should throw in this case
-    EXPECT_THROW(d = make_unaligned(ndt::make_type()), runtime_error);
+    EXPECT_THROW(d = make_unaligned(ndt::make_type()), dynd::type_error);
 }
 
 TEST(AlignDType, Basic) {

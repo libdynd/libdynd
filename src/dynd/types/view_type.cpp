@@ -22,10 +22,10 @@ view_type::view_type(const ndt::type& value_type, const ndt::type& operand_type)
     if (value_type.get_data_size() != operand_type.value_type().get_data_size()) {
         std::stringstream ss;
         ss << "view_type: Cannot view " << operand_type.value_type() << " as " << value_type << " because they have different sizes";
-        throw std::runtime_error(ss.str());
+        throw dynd::type_error(ss.str());
     }
     if (!value_type.is_pod()) {
-        throw std::runtime_error("view_type: Only POD types are supported");
+        throw dynd::type_error("view_type: Only POD types are supported");
     }
 }
 
@@ -131,7 +131,7 @@ ndt::type view_type::with_replaced_storage_type(const ndt::type& replacement_typ
             std::stringstream ss;
             ss << "Cannot chain types, because the view's storage type, " << m_operand_type;
             ss << ", does not match the replacement's value type, " << replacement_type.value_type();
-            throw std::runtime_error(ss.str());
+            throw dynd::type_error(ss.str());
         }
         return ndt::type(new view_type(m_value_type, replacement_type), false);
     }

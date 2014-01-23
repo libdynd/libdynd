@@ -262,7 +262,6 @@ irange_out_of_bounds::irange_out_of_bounds(const irange& i, intptr_t dimension_s
 {
 }
 
-
 inline string invalid_type_id_message(int type_id)
 {
     stringstream ss;
@@ -273,7 +272,7 @@ inline string invalid_type_id_message(int type_id)
 }
 
 invalid_type_id::invalid_type_id(int type_id)
-    : dynd_exception("invalid type id", invalid_type_id_message(type_id))
+    : type_error("invalid type id", invalid_type_id_message(type_id))
 {
     //cout << "throwing invalid_type_id\n";
 }

@@ -18,7 +18,7 @@ byteswap_type::byteswap_type(const ndt::type& value_type)
                     m_operand_type(ndt::make_fixedbytes(value_type.get_data_size(), value_type.get_data_alignment()))
 {
     if (!value_type.is_builtin()) {
-        throw std::runtime_error("byteswap_type: Only built-in types are supported presently");
+        throw dynd::type_error("byteswap_type: Only built-in types are supported presently");
     }
 }
 
@@ -31,7 +31,7 @@ byteswap_type::byteswap_type(const ndt::type& value_type, const ndt::type& opera
     if (operand_type.value_type().get_type_id() != fixedbytes_type_id) {
         std::stringstream ss;
         ss << "byteswap_type: The operand to the type must have a value type of bytes, not " << operand_type.value_type();
-        throw std::runtime_error(ss.str());
+        throw dynd::type_error(ss.str());
     }
     // Automatically realign if needed
     if (operand_type.value_type().get_data_alignment() < value_type.get_data_alignment()) {

@@ -198,7 +198,7 @@ void dynd::typed_data_assign(const ndt::type& dst_tp, const char *dst_metadata, 
         } else {
             stringstream ss;
             ss << "assignment from " << src_tp << " to " << dst_tp << " with default error mode requires an eval_context";
-            throw runtime_error(ss.str());
+            throw dynd::type_error(ss.str());
         }
     }
 

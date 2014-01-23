@@ -62,7 +62,7 @@ TEST(ArrayViews, MultiDimensionalRawMemory) {
     a = values;
 
     // Should throw if the view type is the wrong size
-    EXPECT_THROW(b = a.view_scalars<int16_t>(), runtime_error);
+    EXPECT_THROW(b = a.view_scalars<int16_t>(), dynd::type_error);
 
     b = a.view_scalars<int32_t>();
     EXPECT_EQ(ndt::make_strided_dim(ndt::make_type<int32_t>(), 2), b.get_type());
@@ -89,7 +89,7 @@ TEST(ArrayViews, ExpressionDType) {
     EXPECT_EQ(ndt::make_strided_dim(ndt::make_convert<uint16_t, uint32_t>(), 2), a_u2.get_type());
 
     // Wrong size, so should throw
-    EXPECT_THROW(b = a_u2.view_scalars<int32_t>(), runtime_error);
+    EXPECT_THROW(b = a_u2.view_scalars<int32_t>(), dynd::type_error);
 
     b = a_u2.view_scalars<int16_t>();
     EXPECT_EQ(ndt::make_strided_dim(ndt::make_view(ndt::make_type<int16_t>(), ndt::make_convert<uint16_t, uint32_t>()), 2),

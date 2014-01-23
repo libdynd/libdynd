@@ -23,7 +23,7 @@ convert_type::convert_type(const ndt::type& value_type, const ndt::type& operand
         std::stringstream ss;
         ss << "convert_type: The destination type " << m_value_type;
         ss << " should not be an expression_kind";
-        throw std::runtime_error(ss.str());
+        throw dynd::type_error(ss.str());
     }
 
     // Initialize the kernels

@@ -524,7 +524,7 @@ public:
             ss << "Cannot use " << include_ndim << " array ";
             ss << "dimensions from dynd type " << *this;
             ss << ", it only has " << ndim;
-            throw std::runtime_error(ss.str());
+            throw dynd::type_error(ss.str());
         }
     }
 
