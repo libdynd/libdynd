@@ -749,7 +749,8 @@ struct single_assigner_builtin_base<float, double, real_kind, real_kind, assign_
         }
 #else
         double s = *src;
-        if (s < -std::numeric_limits<float>::max() || s > std::numeric_limits<float>::max()) {
+        if (isfinite(s) && (s < -std::numeric_limits<float>::max() ||
+                            s > std::numeric_limits<float>::max())) {
             std::stringstream ss;
             ss << "overflow while assigning " << ndt::make_type<double>() << " value ";
             ss << *src << " to " << ndt::make_type<float>();
@@ -785,7 +786,8 @@ struct single_assigner_builtin_base<float, double, real_kind, real_kind, assign_
             throw std::overflow_error(ss.str());
         }
 #else
-        if (s < -std::numeric_limits<float>::max() || s > std::numeric_limits<float>::max()) {
+        if (isfinite(s) && (s < -std::numeric_limits<float>::max() ||
+                            s > std::numeric_limits<float>::max())) {
             std::stringstream ss;
             ss << "overflow while assigning " << ndt::make_type<double>() << " value ";
             ss << *src << " to " << ndt::make_type<float>();
@@ -1101,7 +1103,8 @@ struct single_assigner_builtin_base<std::complex<float>, double, complex_kind, r
             throw std::overflow_error(ss.str());
         }
 #else
-        if (s < -std::numeric_limits<float>::max() || s > std::numeric_limits<float>::max()) {
+        if (isfinite(s) && (s < -std::numeric_limits<float>::max() ||
+                            s > std::numeric_limits<float>::max())) {
             std::stringstream ss;
             ss << "overflow while assigning " << ndt::make_type<double>() << " value ";
             ss << s << " to " << ndt::make_type<std::complex<float> >();
@@ -1139,7 +1142,8 @@ struct single_assigner_builtin_base<std::complex<float>, double, complex_kind, r
             throw std::overflow_error(ss.str());
         }
 #else
-        if (s < -std::numeric_limits<float>::max() || s > std::numeric_limits<float>::max()) {
+        if (isfinite(s) && (s < -std::numeric_limits<float>::max() ||
+                            s > std::numeric_limits<float>::max())) {
             std::stringstream ss;
             ss << "overflow while assigning " << ndt::make_type<double>() << " value ";
             ss << s << " to " << ndt::make_type<std::complex<float> >();
