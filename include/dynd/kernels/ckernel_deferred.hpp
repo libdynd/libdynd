@@ -110,13 +110,32 @@ struct ckernel_deferred {
  *
  * \param dst_tp  The type of the destination.
  * \param src_tp  The type of the source.
+ * \param src_prop_tp  If different from src_tp, this is a type whose
  * \param funcproto  The function prototype to generate (must be
  *                   unary_operation_funcproto or expr_operation_funcproto).
  * \param errmode  The error mode to use for the assignment.
  * \param out_ckd  The output `ckernel_deferred` struct to be populated.
  * \param ectx  The evaluation context.
  */
-void make_ckernel_deferred_from_assignment(const ndt::type& dst_tp, const ndt::type& src_tp,
+void make_ckernel_deferred_from_assignment(
+                const ndt::type& dst_tp, const ndt::type& src_tp, const ndt::type& src_prop_tp,
+                deferred_ckernel_funcproto_t funcproto,
+                assign_error_mode errmode, ckernel_deferred& out_ckd,
+                const dynd::eval::eval_context *ectx = &dynd::eval::default_eval_context);
+
+/**
+ * Creates a deferred ckernel which does the assignment from
+ * data of `tp` to its property `propname`
+ *
+ * \param tp  The type of the source.
+ * \param propname  The name of the property.
+ * \param funcproto  The function prototype to generate (must be
+ *                   unary_operation_funcproto or expr_operation_funcproto).
+ * \param errmode  The error mode to use for the assignment.
+ * \param out_ckd  The output `ckernel_deferred` struct to be populated.
+ * \param ectx  The evaluation context.
+ */
+void make_ckernel_deferred_from_property(const ndt::type& tp, const std::string& propname,
                 deferred_ckernel_funcproto_t funcproto,
                 assign_error_mode errmode, ckernel_deferred& out_ckd,
                 const dynd::eval::eval_context *ectx = &dynd::eval::default_eval_context);

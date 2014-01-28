@@ -25,7 +25,8 @@ using namespace dynd;
 TEST(CKernelDeferred, Assignment) {
     ckernel_deferred ckd;
     // Create a deferred ckernel for converting string to int
-    make_ckernel_deferred_from_assignment(ndt::make_type<int>(), ndt::make_fixedstring(16),
+    make_ckernel_deferred_from_assignment(
+                    ndt::make_type<int>(), ndt::make_fixedstring(16), ndt::make_fixedstring(16),
                     unary_operation_funcproto, assign_error_default, ckd);
     // Validate that its types, etc are set right
     ASSERT_EQ(unary_operation_funcproto, (deferred_ckernel_funcproto_t)ckd.ckernel_funcproto);
@@ -60,7 +61,8 @@ TEST(CKernelDeferred, Assignment) {
 TEST(CKernelDeferred, AssignmentAsExpr) {
     ckernel_deferred ckd;
     // Create a deferred ckernel for converting string to int
-    make_ckernel_deferred_from_assignment(ndt::make_type<int>(), ndt::make_fixedstring(16),
+    make_ckernel_deferred_from_assignment(
+                    ndt::make_type<int>(), ndt::make_fixedstring(16), ndt::make_fixedstring(16),
                     expr_operation_funcproto, assign_error_default, ckd);
     // Validate that its types, etc are set right
     ASSERT_EQ(expr_operation_funcproto, (deferred_ckernel_funcproto_t)ckd.ckernel_funcproto);
@@ -98,7 +100,8 @@ TEST(CKernelDeferred, Expr) {
     ckernel_deferred ckd;
     // Create a deferred ckernel for adding two ints
     ndt::type add_ints_type = (nd::array((int)0) + nd::array((int)0)).get_type();
-    make_ckernel_deferred_from_assignment(ndt::make_type<int>(), add_ints_type,
+    make_ckernel_deferred_from_assignment(
+                    ndt::make_type<int>(), add_ints_type, add_ints_type,
                     expr_operation_funcproto, assign_error_default, ckd);
     // Validate that its types, etc are set right
     ASSERT_EQ(expr_operation_funcproto, (deferred_ckernel_funcproto_t)ckd.ckernel_funcproto);
@@ -140,7 +143,8 @@ TEST(CKernelDeferred, Expr) {
 TEST(CKernelDeferred, LiftUnaryExpr_FixedDim) {
     nd::array ckd_base = nd::empty(ndt::make_ckernel_deferred());
     // Create a deferred ckernel for converting string to int
-    make_ckernel_deferred_from_assignment(ndt::make_type<int>(), ndt::make_fixedstring(16),
+    make_ckernel_deferred_from_assignment(
+                    ndt::make_type<int>(), ndt::make_fixedstring(16), ndt::make_fixedstring(16),
                     expr_operation_funcproto, assign_error_default,
                     *reinterpret_cast<ckernel_deferred *>(ckd_base.get_readwrite_originptr()));
 
@@ -168,7 +172,8 @@ TEST(CKernelDeferred, LiftUnaryExpr_FixedDim) {
 TEST(CKernelDeferred, LiftUnaryExpr_StridedDim) {
     nd::array ckd_base = nd::empty(ndt::make_ckernel_deferred());
     // Create a deferred ckernel for converting string to int
-    make_ckernel_deferred_from_assignment(ndt::make_type<int>(), ndt::make_fixedstring(16),
+    make_ckernel_deferred_from_assignment(
+                    ndt::make_type<int>(), ndt::make_fixedstring(16), ndt::make_fixedstring(16),
                     expr_operation_funcproto, assign_error_default,
                     *reinterpret_cast<ckernel_deferred *>(ckd_base.get_readwrite_originptr()));
 
@@ -201,7 +206,8 @@ TEST(CKernelDeferred, LiftUnaryExpr_StridedDim) {
 TEST(CKernelDeferred, LiftUnaryExpr_StridedToVarDim) {
     nd::array ckd_base = nd::empty(ndt::make_ckernel_deferred());
     // Create a deferred ckernel for converting string to int
-    make_ckernel_deferred_from_assignment(ndt::make_type<int>(), ndt::make_fixedstring(16),
+    make_ckernel_deferred_from_assignment(
+                    ndt::make_type<int>(), ndt::make_fixedstring(16), ndt::make_fixedstring(16),
                     expr_operation_funcproto, assign_error_default,
                     *reinterpret_cast<ckernel_deferred *>(ckd_base.get_readwrite_originptr()));
 
@@ -240,7 +246,8 @@ TEST(CKernelDeferred, LiftUnaryExpr_StridedToVarDim) {
 TEST(CKernelDeferred, LiftUnaryExpr_VarToVarDim) {
     nd::array ckd_base = nd::empty(ndt::make_ckernel_deferred());
     // Create a deferred ckernel for converting string to int
-    make_ckernel_deferred_from_assignment(ndt::make_type<int>(), ndt::make_fixedstring(16),
+    make_ckernel_deferred_from_assignment(
+                    ndt::make_type<int>(), ndt::make_fixedstring(16), ndt::make_fixedstring(16),
                     expr_operation_funcproto, assign_error_default,
                     *reinterpret_cast<ckernel_deferred *>(ckd_base.get_readwrite_originptr()));
 
@@ -276,7 +283,8 @@ TEST(CKernelDeferred, LiftUnaryExpr_VarToVarDim) {
 TEST(CKernelDeferred, LiftUnaryExpr_MultiDimVarToVarDim) {
     nd::array ckd_base = nd::empty(ndt::make_ckernel_deferred());
     // Create a deferred ckernel for converting string to int
-    make_ckernel_deferred_from_assignment(ndt::make_type<int>(), ndt::make_fixedstring(16),
+    make_ckernel_deferred_from_assignment(
+                    ndt::make_type<int>(), ndt::make_fixedstring(16), ndt::make_fixedstring(16),
                     expr_operation_funcproto, assign_error_default,
                     *reinterpret_cast<ckernel_deferred *>(ckd_base.get_readwrite_originptr()));
 
@@ -324,7 +332,8 @@ TEST(CKernelDeferred, LiftExpr_MultiDimVarToVarDim) {
     nd::array ckd_base = nd::empty(ndt::make_ckernel_deferred());
     // Create a deferred ckernel for adding two ints
     ndt::type add_ints_type = (nd::array((int32_t)0) + nd::array((int32_t)0)).get_type();
-    make_ckernel_deferred_from_assignment(ndt::make_type<int32_t>(), add_ints_type,
+    make_ckernel_deferred_from_assignment(
+                    ndt::make_type<int32_t>(), add_ints_type, add_ints_type,
                     expr_operation_funcproto, assign_error_default,
                     *reinterpret_cast<ckernel_deferred *>(ckd_base.get_readwrite_originptr()));
 
