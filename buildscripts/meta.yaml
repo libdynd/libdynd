@@ -1,5 +1,9 @@
+package:
+  name: libdynd
+  version: 0.0
+
 source:
-  git_url: git@github.com:ContinuumIO/libdynd.git
+  git_url: https://github.com/ContinuumIO/libdynd.git
   git_tag: master
 
 requirements:
