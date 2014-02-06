@@ -3,11 +3,13 @@ platform:
     - linux-64
     - linux-32
 script:
-    - conda build .
+    - echo "this should also output" 1>&2
+    - conda build . | tee conda.log 2>&1
 
     # Must do this otherwise we don't have controll over the build targets
     - mkdir dist
     - cp `conda build . --output` dist/
 build_targets:
     - dist/*
-
+build_artifacts:
+    - conda.log
