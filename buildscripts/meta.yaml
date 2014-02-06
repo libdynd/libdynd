@@ -1,0 +1,12 @@
+source:
+  git_url: git@github.com:ContinuumIO/libdynd.git
+  git_tag: master
+
+requirements:
+  build:
+    - cmake           [linux]
+
+about:
+  home: https://github.com/ContinuumIO/libdynd
+  license: BSD
+

@@ -1,0 +1,13 @@
+package: libdynd_build_test
+platform:
+    - linux-64
+    - linux-32
+script:
+    - conda build .
+
+    # Must do this otherwise we don't have controll over the build targets
+    - mkdir dist
+    - cp `conda build . --output` dist/
+build_targets:
+    - dist/*
+
