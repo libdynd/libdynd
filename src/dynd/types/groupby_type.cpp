@@ -206,7 +206,7 @@ namespace {
             // copying the data to the right place in the output
             ckernel_prefix *echild = &(e + 1)->base;
             unary_single_operation_t opchild = echild->get_function<unary_single_operation_t>();
-            array_iter<0, 1> iter(data_values_tp, data_values_metadata, data_values_data);
+            array_iter<0, 1> iter(data_values_tp, data_values_metadata, data_values_data, 1);
             if (!iter.empty()) {
                 by_values_ptr = by_values_origin;
                 do {
