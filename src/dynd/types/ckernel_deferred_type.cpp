@@ -50,7 +50,7 @@ static void print_ckernel_deferred(std::ostream& o, const ckernel_deferred *ckd)
         for (intptr_t i = 0; i != ckd->data_types_size; ++i) {
             o << ckd->data_dynd_types[i];
             if (i != ckd->data_types_size - 1) {
-                o << ", ";
+                o << "; ";
             }
         }
         o << "]>";
