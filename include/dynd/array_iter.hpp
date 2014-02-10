@@ -127,10 +127,10 @@ class array_iter<0, 1> {
     iterdata_common *m_iterdata;
     ndt::type m_array_tp, m_uniform_tp;
 
-    inline void init(const ndt::type& tp0, const char *metadata0, const char *data0)
+    inline void init(const ndt::type& tp0, const char *metadata0, const char *data0, size_t ndim)
     {
         m_array_tp = tp0;
-        m_iter_ndim = m_array_tp.get_ndim();
+        m_iter_ndim = ndim ? ndim : m_array_tp.get_ndim();
         m_itersize = 1;
         if (m_iter_ndim != 0) {
             m_iterindex.init(m_iter_ndim);
@@ -159,12 +159,12 @@ class array_iter<0, 1> {
         }
     }
 public:
-    array_iter(const ndt::type& tp0, const char *metadata0, const char *data0) {
-        init(tp0, metadata0, data0);
+    array_iter(const ndt::type& tp0, const char *metadata0, const char *data0, size_t ndim = 0) {
+        init(tp0, metadata0, data0, ndim);
     }
 
     array_iter(const nd::array& op0) {
-        init(op0.get_type(), op0.get_ndo_meta(), op0.get_readonly_originptr());
+        init(op0.get_type(), op0.get_ndo_meta(), op0.get_readonly_originptr(), 0);
     }
 
     ~array_iter() {
