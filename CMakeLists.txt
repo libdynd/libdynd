@@ -6,6 +6,8 @@
 cmake_minimum_required(VERSION 2.6)
 project(libdynd)
 
+find_package(CUDA)
+
 # Only add these options if this is the top level CMakeLists.txt
 if("${CMAKE_SOURCE_DIR}" STREQUAL "${CMAKE_CURRENT_SOURCE_DIR}")
 ################################################
@@ -20,6 +22,16 @@ if("${CMAKE_SOURCE_DIR}" STREQUAL "${CMAKE_CURRENT_SOURCE_DIR}")
         option(DYND_SHARED_LIB
             "Build a libdynd shared library instead of a static library"
             ON)
+    endif()
+# -DDYND_CUDA=ON/OFF, whether to build libdynd with NVIDIA's CUDA
+    if(CUDA_FOUND)
+        option(DYND_CUDA
+            "Build a libdynd library with CUDA"
+            OFF) # While CUDA support is in development, we default to OFF.
+    else()
+        option(DYND_CUDA
+            "Build a libdynd library without CUDA"
+            OFF)
     endif()
 #
 # -DDYND_INSTALL_LIB=ON/OFF, whether to install libdynd into the
@@ -392,7 +404,11 @@ if ((NOT DYND_SHARED_LIB) AND (DYND_INSTALL_LIB))
 endif()
 
 if (DYND_SHARED_LIB)
-    add_library(libdynd SHARED ${libdynd_SRC})
+    if (DYND_CUDA)
+        cuda_add_library(libdynd SHARED ${libdynd_SRC})
+    else()
+        add_library(libdynd SHARED ${libdynd_SRC})
+    endif()
     set_target_properties(libdynd
         PROPERTIES
         # For now, during development, embed the full version string
@@ -401,7 +417,11 @@ if (DYND_SHARED_LIB)
         PREFIX "${CMAKE_SHARED_LIBRARY_PREFIX}"
         )
 else()
-    add_library(libdynd STATIC ${libdynd_SRC})
+    if (DYND_CUDA)
+        cuda_add_library(libdynd STATIC ${libdynd_SRC})
+    else()
+        add_library(libdynd STATIC ${libdynd_SRC})
+    endif()
     set_target_properties(libdynd
         PROPERTIES
         OUTPUT_NAME "dynd"
