@@ -124,6 +124,7 @@ set(libdynd_SRC
     src/dynd/types/base_bytes_type.cpp
     src/dynd/types/base_type.cpp
     src/dynd/types/base_expression_type.cpp
+    src/dynd/types/base_memory_type.cpp
     src/dynd/types/base_string_type.cpp
     src/dynd/types/base_struct_type.cpp
     src/dynd/types/base_uniform_dim_type.cpp
@@ -135,6 +136,8 @@ set(libdynd_SRC
 	src/dynd/types/char_type.cpp
     src/dynd/types/ckernel_deferred_type.cpp
     src/dynd/types/convert_type.cpp
+    src/dynd/types/cuda_host_type.cpp
+    src/dynd/types/cuda_device_type.cpp
     src/dynd/types/datashape_formatter.cpp
     src/dynd/types/datashape_parser.cpp
     src/dynd/types/date_type.cpp
@@ -165,6 +168,7 @@ set(libdynd_SRC
     src/dynd/types/void_pointer_type.cpp
     include/dynd/types/base_bytes_type.hpp
     include/dynd/types/base_type.hpp
+    include/dynd/types/base_memory_type.hpp
     include/dynd/types/base_expression_type.hpp
     include/dynd/types/base_string_type.hpp
     include/dynd/types/base_struct_type.hpp
@@ -177,6 +181,8 @@ set(libdynd_SRC
     include/dynd/types/char_type.hpp
     include/dynd/types/ckernel_deferred_type.hpp
     include/dynd/types/convert_type.hpp
+    include/dynd/types/cuda_host_type.hpp
+    include/dynd/types/cuda_device_type.hpp
     include/dynd/types/datashape_formatter.hpp
     include/dynd/types/datashape_parser.hpp
     include/dynd/types/date_type.hpp

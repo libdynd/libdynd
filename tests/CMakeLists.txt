@@ -25,6 +25,8 @@ set(tests_SRC
     types/test_convert_type.cpp
     types/test_align_type.cpp
     types/test_char_type.cpp
+    types/test_cuda_host_type.cpp
+    types/test_cuda_device_type.cpp
     types/test_datashape_formatter.cpp
     types/test_datashape_parser.cpp
     types/test_date_type.cpp
