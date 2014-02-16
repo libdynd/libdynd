@@ -3,8 +3,14 @@
 // BSD 2-Clause License, see LICENSE.txt
 //
 
+#ifdef DYND_CUDA
+#include <cuda_runtime.h>
+#endif // DYND_CUDA
+
 #include <dynd/memblock/array_memory_block.hpp>
+#include <dynd/types/cuda_host_type.hpp>
 #include <dynd/array.hpp>
+#include <dynd/exceptions.hpp>
 #include <dynd/shape_tools.hpp>
 
 using namespace std;
@@ -34,6 +40,23 @@ void free_array_memory_block(memory_block_data *memblock)
     // Free the reference to the ndobject data
     if (preamble->m_data_reference != NULL) {
         memory_block_decref(preamble->m_data_reference);
+    }
+
+    // Free the ndobject data if it wasn't allocated together with the memory block
+    if (preamble->m_data_reference == NULL &&
+                    !preamble->is_builtin_type()) {
+        switch (preamble->m_type->get_type_id()) {
+#ifdef DYND_CUDA
+            case cuda_host_type_id:
+                throw_if_not_cuda_success(cudaFreeHost(preamble->m_data_pointer));
+                break;
+            case cuda_device_type_id:
+                throw_if_not_cuda_success(cudaFree(preamble->m_data_pointer));
+                break;
+#endif // DYND_CUDA
+            default:
+                break;
+        }
     }
 
     // Finally free the memory block itself
@@ -82,10 +105,35 @@ memory_block_ptr dynd::make_array_memory_block(const ndt::type& tp, intptr_t ndi
     }
 
     char *data_ptr = NULL;
-    memory_block_ptr result = make_array_memory_block(metadata_size, data_size, tp.get_data_alignment(), &data_ptr);
+    memory_block_ptr result;
+    switch (tp.get_type_id()) {
+#ifdef DYND_CUDA
+        case cuda_host_type_id:
+            result = make_array_memory_block(metadata_size);
+            throw_if_not_cuda_success(cudaHostAlloc(&data_ptr, data_size,
+                reinterpret_cast<const cuda_host_type&>(tp).get_cuda_host_flags()));
+            break;
+        case cuda_device_type_id:
+            result = make_array_memory_block(metadata_size);
+            throw_if_not_cuda_success(cudaMalloc(&data_ptr, data_size));
+            break;
+#endif // DYND_CUDA
+        default:
+            result = make_array_memory_block(metadata_size, data_size, tp.get_data_alignment(), &data_ptr);
+            break;
+    }
 
     if (tp.get_flags()&type_flag_zeroinit) {
-        memset(data_ptr, 0, data_size);
+        switch (tp.get_type_id()) {
+#ifdef DYND_CUDA
+            case cuda_device_type_id:
+                throw_if_not_cuda_success(cudaMemset(data_ptr, 0, data_size));
+                break;
+#endif // DYND_CUDA
+            default:
+                memset(data_ptr, 0, data_size);
+                break;
+        }
     }
 
     array_preamble *preamble = reinterpret_cast<array_preamble *>(result.get());
