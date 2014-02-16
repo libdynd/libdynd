@@ -37,6 +37,8 @@ enum type_kind_t {
     // that calculations should look at the value_type for
     // type promotion, etc.
     expression_kind,
+    // For types that specify a memory space
+    memory_kind,
     // For pattern-matching types
     pattern_kind,
     // For use when it becomes possible to register custom types
@@ -108,6 +110,13 @@ enum type_id_t {
     offset_dim_type_id,
     // A variable-sized array dimension type
     var_dim_type_id,
+
+#ifdef DYND_CUDA
+    // A CUDA host memory type
+    cuda_host_type_id,
+    // A CUDA device memory type
+    cuda_device_type_id,
+#endif
 
     // A struct type with variable layout
     struct_type_id,

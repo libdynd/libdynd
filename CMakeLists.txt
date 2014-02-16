@@ -397,6 +397,11 @@ if ((NOT DYND_SHARED_LIB) AND (DYND_INSTALL_LIB))
         )
 endif()
 
+# Add a preprocessor definition if we're building with CUDA
+if (DYND_CUDA)
+    add_definitions(-DDYND_CUDA)
+endif()
+
 if (DYND_SHARED_LIB)
     if (DYND_CUDA)
         cuda_add_library(libdynd SHARED ${libdynd_SRC})
