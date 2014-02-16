@@ -23,16 +23,10 @@ if("${CMAKE_SOURCE_DIR}" STREQUAL "${CMAKE_CURRENT_SOURCE_DIR}")
             "Build a libdynd shared library instead of a static library"
             ON)
     endif()
-# -DDYND_CUDA=ON/OFF, whether to build libdynd with NVIDIA's CUDA
-    if(CUDA_FOUND)
-        option(DYND_CUDA
-            "Build a libdynd library with CUDA"
-            OFF) # While CUDA support is in development, we default to OFF.
-    else()
-        option(DYND_CUDA
-            "Build a libdynd library without CUDA"
-            OFF)
-    endif()
+# -DDYND_CUDA=ON/OFF, whether to build libdynd with or without the CUDA Toolkit
+    option(DYND_CUDA
+        "Build a libdynd library with CUDA"
+        OFF) # While CUDA support is in development, we default to OFF.
 #
 # -DDYND_INSTALL_LIB=ON/OFF, whether to install libdynd into the
 #   CMAKE_INSTALL_PREFIX. Its main purpose is to allow separate
