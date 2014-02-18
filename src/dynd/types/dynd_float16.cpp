@@ -49,9 +49,11 @@ uint16_t dynd::float_to_halfbits(float value, assign_error_mode errmode)
         } else {
             // overflow to signed inf
             if (errmode >= assign_error_overflow) {
+#ifndef __CUDA_ARCH__
                 stringstream ss;
                 ss << "overflow converting float32 " << value << " to float16";
                 throw overflow_error(ss.str());
+#endif
             }
             return (uint16_t) (h_sgn + 0x7c00u);
         }
@@ -64,9 +66,11 @@ uint16_t dynd::float_to_halfbits(float value, assign_error_mode errmode)
         if (f_exp < 0x33000000u) {
             // If f != 0, it underflowed to 0
             if (errmode >= assign_error_inexact && (f&0x7fffffff) != 0) {
+#ifndef __CUDA_ARCH__
                 stringstream ss;
                 ss << "underflow converting float32 " << value << " to float16";
                 throw runtime_error(ss.str());
+#endif
             }
             return h_sgn;
         }
@@ -75,9 +79,11 @@ uint16_t dynd::float_to_halfbits(float value, assign_error_mode errmode)
         f_sig = (0x00800000u + (f&0x007fffffu));
         // If it's not exactly represented, it underflowed
         if (errmode >= assign_error_inexact && (f_sig&(((uint32_t)1 << (126 - f_exp)) - 1)) != 0) {
+#ifndef __CUDA_ARCH__
             stringstream ss;
             ss << "underflow converting float32 " << value << " to float16";
             throw runtime_error(ss.str());
+#endif
         }
         f_sig >>= (113 - f_exp);
         // Handle rounding by adding 1 to the bit beyond dynd_float16 precision
@@ -119,9 +125,11 @@ uint16_t dynd::float_to_halfbits(float value, assign_error_mode errmode)
     // which case the result overflows to a signed inf.
     h_sig += h_exp;
     if (h_sig == 0x7c00u && errmode >= assign_error_overflow) {
+#ifndef __CUDA_ARCH__
         stringstream ss;
         ss << "overflow converting float32 " << value << " to float16";
         throw overflow_error(ss.str());
+#endif
     }
     return h_sgn + h_sig;
 }
@@ -158,9 +166,11 @@ uint16_t dynd::double_to_halfbits(double value, assign_error_mode errmode)
         } else {
             // overflow to signed inf
             if (errmode >= assign_error_overflow) {
+#ifndef __CUDA_ARCH__
                 stringstream ss;
                 ss << "overflow converting float64 " << value << " to float16";
                 throw overflow_error(ss.str());
+#endif
             }
             return h_sgn + 0x7c00u;
         }
@@ -173,9 +183,11 @@ uint16_t dynd::double_to_halfbits(double value, assign_error_mode errmode)
         if (d_exp < 0x3e60000000000000ULL) {
             // If d != 0, it underflowed to 0
             if (errmode >= assign_error_inexact && (d&0x7fffffffffffffffULL) != 0) {
+#ifndef __CUDA_ARCH__
                 stringstream ss;
                 ss << "underflow converting float32 " << value << " to float16";
                 throw runtime_error(ss.str());
+#endif
             }
             return h_sgn;
         }
@@ -184,9 +196,11 @@ uint16_t dynd::double_to_halfbits(double value, assign_error_mode errmode)
         d_sig = (0x0010000000000000ULL + (d&0x000fffffffffffffULL));
         // If it's not exactly represented, it underflowed
         if (errmode >= assign_error_inexact && (d_sig&(((uint64_t)1 << (1051 - d_exp)) - 1)) != 0) {
+#ifndef __CUDA_ARCH__
             stringstream ss;
             ss << "underflow converting float32 " << value << " to float16";
             throw runtime_error(ss.str());
+#endif
         }
         d_sig >>= (1009 - d_exp);
         // Handle rounding by adding 1 to the bit beyond dynd_float16 precision
@@ -229,9 +243,11 @@ uint16_t dynd::double_to_halfbits(double value, assign_error_mode errmode)
     // which case the result overflows to a signed inf.
     h_sig += h_exp;
     if (h_sig == 0x7c00u && errmode >= assign_error_overflow) {
+#ifndef __CUDA_ARCH__
         stringstream ss;
         ss << "overflow converting float64 " << value << " to float16";
         throw overflow_error(ss.str());
+#endif
     }
     return h_sgn + h_sig;
 }

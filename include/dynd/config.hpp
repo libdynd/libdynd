@@ -225,4 +225,6 @@ namespace dynd {
 #endif
 #endif
 
+#include <dynd/cuda_config.hpp>
+
 #endif // _DYND__CONFIG_HPP_

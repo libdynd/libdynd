@@ -389,6 +389,29 @@ source_group("VM Source" REGULAR_EXPRESSION "src/dynd/vm/.*cpp")
 source_group("VM Headers" REGULAR_EXPRESSION "include/dynd/vm/.*hpp")
 source_group("Internal Headers" REGULAR_EXPRESSION "src/dynd/.*hpp")
 
+if (DYND_CUDA)
+    set(libdynd_cuda_SRC
+        src/dynd/types/dynd_float16.cpp
+        src/dynd/types/dynd_float128.cpp
+        src/dynd/types/dynd_int128.cpp
+        src/dynd/types/dynd_uint128.cpp
+        src/dynd/kernels/assignment_kernels.cpp
+        )
+
+    # Replace some source files with their CUDA versions
+    foreach(cuda_SRC ${libdynd_cuda_SRC})
+        list(REMOVE_ITEM libdynd_SRC ${cuda_SRC})
+        string(REPLACE ".cpp" ".cu" cuda_SRC ${cuda_SRC})
+        list(APPEND libdynd_SRC ${cuda_SRC})
+    endforeach()
+
+    # Add a preprocessor definition to indicate we're building with CUDA
+    add_definitions(-DDYND_CUDA)
+
+    # ...
+    set(CUDA_SEPARABLE_COMPILATION ON)
+endif()
+
 if ((NOT DYND_SHARED_LIB) AND (DYND_INSTALL_LIB))
     # If we're making an installable static library,
     # include the sublibraries source directly because
@@ -403,14 +426,9 @@ if ((NOT DYND_SHARED_LIB) AND (DYND_INSTALL_LIB))
         )
 endif()
 
-# Add a preprocessor definition if we're building with CUDA
-if (DYND_CUDA)
-    add_definitions(-DDYND_CUDA)
-endif()
-
 if (DYND_SHARED_LIB)
     if (DYND_CUDA)
-        cuda_add_library(libdynd SHARED ${libdynd_SRC})
+        cuda_add_library(libdynd SHARED ${libdynd_SRC} OPTIONS "-gencode" "arch=compute_20,code=sm_20" "-gencode" "arch=compute_30,code=sm_30" "-Xcompiler" "-fPIC")
     else()
         add_library(libdynd SHARED ${libdynd_SRC})
     endif()

@@ -18,6 +18,8 @@
 #include <dynd/string_encodings.hpp>
 #include <dynd/kernels/comparison_kernels.hpp>
 
+#define DYND_ASSERT_WHAT(what_arg) assert(!what_arg)
+
 namespace dynd {
 
 // Forward declaration of object class, for broadcast_error

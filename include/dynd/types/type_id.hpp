@@ -234,15 +234,15 @@ inline bool is_builtin_type(const base_type *dt) {
 class dynd_bool {
     char m_value;
 public:
-    dynd_bool() : m_value(0) {}
+    DYND_CUDA_HOST_DEVICE_CALLABLE dynd_bool() : m_value(0) {}
 
-    dynd_bool(bool value) : m_value(value) {}
+    DYND_CUDA_HOST_DEVICE_CALLABLE dynd_bool(bool value) : m_value(value) {}
 
     // Special case complex conversion to avoid ambiguous overload
     template<class T>
-    dynd_bool(std::complex<T> value) : m_value(value != std::complex<T>(0)) {}
+    DYND_CUDA_HOST_DEVICE_CALLABLE dynd_bool(std::complex<T> value) : m_value(value != std::complex<T>(0)) {}
 
-    operator bool() const {
+    DYND_CUDA_HOST_DEVICE_CALLABLE operator bool() const {
         return m_value != 0;
     }
 };

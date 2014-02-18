@@ -71,7 +71,9 @@ dynd::dynd_int128::dynd_int128(const dynd_float16& value)
 
 dynd::dynd_int128::dynd_int128(const dynd_float128& DYND_UNUSED(value))
 {
+#ifndef __CUDA_ARCH__
     throw runtime_error("dynd float128 to int128 conversion is not implemented");
+#endif
 }
 
 dynd_int128 dynd::dynd_int128::operator*(uint32_t rhs) const

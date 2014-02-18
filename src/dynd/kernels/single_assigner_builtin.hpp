@@ -11,6 +11,7 @@
 #include <complex>
 #include <limits>
 
+#include <dynd/config.hpp>
 #include <dynd/type.hpp>
 #include <dynd/diagnostics.hpp>
 
@@ -23,13 +24,15 @@ namespace dynd {
 
 template<class dst_type, class src_type, assign_error_mode errmode>
 struct single_assigner_builtin_base_error {
-    static void assign(dst_type *DYND_UNUSED(dst), const src_type *DYND_UNUSED(src), ckernel_prefix *DYND_UNUSED(extra)) {
+    DYND_CUDA_HOST_DEVICE_CALLABLE static void assign(dst_type *DYND_UNUSED(dst), const src_type *DYND_UNUSED(src), ckernel_prefix *DYND_UNUSED(extra)) {
         //DYND_TRACE_ASSIGNMENT(static_cast<float>(*src), float, *src, double);
 
+#ifndef __CUDA_ARCH__
         std::stringstream ss;
         ss << "assignment from " << ndt::make_type<src_type>() << " to " << ndt::make_type<dst_type>();
         ss << "with error mode " << errmode << " is not implemented";
         throw std::runtime_error(ss.str());
+#endif
     }
 };
 
@@ -40,10 +43,12 @@ struct single_assigner_builtin_base : public single_assigner_builtin_base_error<
 template<class dst_type, class src_type, type_kind_t dst_kind, type_kind_t src_kind>
 struct single_assigner_builtin_base<dst_type, src_type, dst_kind, src_kind, assign_error_none>
 {
-    static void assign(dst_type *dst, const src_type *src, ckernel_prefix *DYND_UNUSED(extra)) {
+    DYND_CUDA_HOST_DEVICE_CALLABLE static void assign(dst_type *dst, const src_type *src, ckernel_prefix *DYND_UNUSED(extra)) {
         DYND_TRACE_ASSIGNMENT(static_cast<dst_type>(*src), dst_type, *src, src_type);
 
+#ifndef __CUDA_ARCH__
         *dst = static_cast<dst_type>(*src);
+#endif
     }
 };
 
@@ -51,37 +56,45 @@ struct single_assigner_builtin_base<dst_type, src_type, dst_kind, src_kind, assi
 template<class dst_type, class src_real_type>
 struct single_assigner_builtin_base<dst_type, std::complex<src_real_type>, int_kind, complex_kind, assign_error_none>
 {
-    static void assign(dst_type *dst, const std::complex<src_real_type> *src, ckernel_prefix *DYND_UNUSED(extra)) {
+    DYND_CUDA_HOST_DEVICE_CALLABLE static void assign(dst_type *dst, const std::complex<src_real_type> *src, ckernel_prefix *DYND_UNUSED(extra)) {
         DYND_TRACE_ASSIGNMENT(static_cast<dst_type>(src->real()), dst_type, *src, std::complex<src_real_type>);
 
+#ifndef __CUDA_ARCH__
         *dst = static_cast<dst_type>(src->real());
+#endif
     }
 };
 template<class dst_type, class src_real_type>
 struct single_assigner_builtin_base<dst_type, std::complex<src_real_type>, uint_kind, complex_kind, assign_error_none>
 {
-    static void assign(dst_type *dst, const std::complex<src_real_type> *src, ckernel_prefix *DYND_UNUSED(extra)) {
+    DYND_CUDA_HOST_DEVICE_CALLABLE static void assign(dst_type *dst, const std::complex<src_real_type> *src, ckernel_prefix *DYND_UNUSED(extra)) {
         DYND_TRACE_ASSIGNMENT(static_cast<dst_type>(src->real()), dst_type, *src, std::complex<src_real_type>);
 
+#ifndef __CUDA_ARCH__
         *dst = static_cast<dst_type>(src->real());
+#endif
     }
 };
 template<class src_real_type>
 struct single_assigner_builtin_base<float, std::complex<src_real_type>, real_kind, complex_kind, assign_error_none>
 {
-    static void assign(float *dst, const std::complex<src_real_type> *src, ckernel_prefix *DYND_UNUSED(extra)) {
+    DYND_CUDA_HOST_DEVICE_CALLABLE static void assign(float *dst, const std::complex<src_real_type> *src, ckernel_prefix *DYND_UNUSED(extra)) {
         DYND_TRACE_ASSIGNMENT(static_cast<float>(src->real()), dst_type, *src, std::complex<src_real_type>);
 
+#ifndef __CUDA_ARCH__
         *dst = static_cast<float>(src->real());
+#endif
     }
 };
 template<class src_real_type>
 struct single_assigner_builtin_base<double, std::complex<src_real_type>, real_kind, complex_kind, assign_error_none>
 {
-    static void assign(double *dst, const std::complex<src_real_type> *src, ckernel_prefix *DYND_UNUSED(extra)) {
+    DYND_CUDA_HOST_DEVICE_CALLABLE static void assign(double *dst, const std::complex<src_real_type> *src, ckernel_prefix *DYND_UNUSED(extra)) {
         DYND_TRACE_ASSIGNMENT(static_cast<double>(src->real()), dst_type, *src, std::complex<src_real_type>);
 
+#ifndef __CUDA_ARCH__
         *dst = static_cast<double>(src->real());
+#endif
     }
 };
 
@@ -90,10 +103,12 @@ struct single_assigner_builtin_base<double, std::complex<src_real_type>, real_ki
 template<class src_type, type_kind_t src_kind>
 struct single_assigner_builtin_base<dynd_bool, src_type, bool_kind, src_kind, assign_error_none>
 {
-    static void assign(dynd_bool *dst, const src_type *src, ckernel_prefix *DYND_UNUSED(extra)) {
+    DYND_CUDA_HOST_DEVICE_CALLABLE static void assign(dynd_bool *dst, const src_type *src, ckernel_prefix *DYND_UNUSED(extra)) {
         DYND_TRACE_ASSIGNMENT((bool)(s != src_type(0)), dynd_bool, s, src_type);
 
+#ifndef __CUDA_ARCH__
         *dst = (*src != src_type(0));
+#endif
     }
 };
 
@@ -101,7 +116,8 @@ struct single_assigner_builtin_base<dynd_bool, src_type, bool_kind, src_kind, as
 template<class src_type, type_kind_t src_kind>
 struct single_assigner_builtin_base<dynd_bool, src_type, bool_kind, src_kind, assign_error_overflow>
 {
-    static void assign(dynd_bool *dst, const src_type *src, ckernel_prefix *DYND_UNUSED(extra)) {
+    DYND_CUDA_HOST_DEVICE_CALLABLE static void assign(dynd_bool *dst, const src_type *src, ckernel_prefix *DYND_UNUSED(extra)) {
+#ifndef __CUDA_ARCH__
         src_type s = *src;
 
         DYND_TRACE_ASSIGNMENT((bool)(s != src_type(0)), dynd_bool, s, src_type);
@@ -116,6 +132,7 @@ struct single_assigner_builtin_base<dynd_bool, src_type, bool_kind, src_kind, as
             ss << s << " to " << ndt::make_type<dynd_bool>();
             throw std::overflow_error(ss.str());
         }
+#endif
     }
 };
 
@@ -158,9 +175,10 @@ struct single_assigner_builtin_signed_to_signed_overflow_base
 template<class dst_type, class src_type>
 struct single_assigner_builtin_signed_to_signed_overflow_base<dst_type, src_type, true>
 {
-    static void assign(dst_type *dst, const src_type *src, ckernel_prefix *DYND_UNUSED(extra)) {
+    DYND_CUDA_HOST_DEVICE_CALLABLE static void assign(dst_type *dst, const src_type *src, ckernel_prefix *DYND_UNUSED(extra)) {
         src_type s = *src;
 
+#ifndef __CUDA_ARCH__
         if (s < static_cast<src_type>(std::numeric_limits<dst_type>::min()) ||
                         s > static_cast<src_type>(std::numeric_limits<dst_type>::max())) {
             std::stringstream ss;
@@ -168,6 +186,7 @@ struct single_assigner_builtin_signed_to_signed_overflow_base<dst_type, src_type
             ss << s << " to " << ndt::make_type<dst_type>();
             throw std::overflow_error(ss.str());
         }
+#endif
         *dst = static_cast<dst_type>(s);
     }
 };
@@ -192,7 +211,8 @@ struct single_assigner_builtin_unsigned_to_signed_overflow_base
 template<class dst_type, class src_type>
 struct single_assigner_builtin_unsigned_to_signed_overflow_base<dst_type, src_type, true>
 {
-    static void assign(dst_type *dst, const src_type *src, ckernel_prefix *DYND_UNUSED(extra)) {
+    DYND_CUDA_HOST_DEVICE_CALLABLE static void assign(dst_type *dst, const src_type *src, ckernel_prefix *DYND_UNUSED(extra)) {
+#ifndef __CUDA_ARCH__
         src_type s = *src;
 
         DYND_TRACE_ASSIGNMENT(static_cast<dst_type>(s), dst_type, s, src_type);
@@ -204,6 +224,7 @@ struct single_assigner_builtin_unsigned_to_signed_overflow_base<dst_type, src_ty
             throw std::overflow_error(ss.str());
         }
         *dst = static_cast<dst_type>(s);
+#endif
     }
 };
 template<class dst_type, class src_type>
@@ -223,7 +244,8 @@ struct single_assigner_builtin_base<dst_type, src_type, int_kind, uint_kind, ass
 template<class dst_type, class src_type, bool dst_lt>
 struct single_assigner_builtin_signed_to_unsigned_overflow_base
 {
-    static void assign(dst_type *dst, const src_type *src, ckernel_prefix *DYND_UNUSED(extra)) {
+    DYND_CUDA_HOST_DEVICE_CALLABLE static void assign(dst_type *dst, const src_type *src, ckernel_prefix *DYND_UNUSED(extra)) {
+#ifndef __CUDA_ARCH__
         src_type s = *src;
 
         DYND_TRACE_ASSIGNMENT(static_cast<dst_type>(s), dst_type, s, src_type);
@@ -235,12 +257,14 @@ struct single_assigner_builtin_signed_to_unsigned_overflow_base
             throw std::overflow_error(ss.str());
         }
         *dst = static_cast<dst_type>(s);
+#endif
     }
 };
 template<class dst_type, class src_type>
 struct single_assigner_builtin_signed_to_unsigned_overflow_base<dst_type, src_type, true>
 {
-    static void assign(dst_type *dst, const src_type *src, ckernel_prefix *DYND_UNUSED(extra)) {
+    DYND_CUDA_HOST_DEVICE_CALLABLE static void assign(dst_type *dst, const src_type *src, ckernel_prefix *DYND_UNUSED(extra)) {
+#ifndef __CUDA_ARCH__
         src_type s = *src;
 
         DYND_TRACE_ASSIGNMENT(static_cast<dst_type>(s), dst_type, s, src_type);
@@ -252,6 +276,7 @@ struct single_assigner_builtin_signed_to_unsigned_overflow_base<dst_type, src_ty
             throw std::overflow_error(ss.str());
         }
         *dst = static_cast<dst_type>(s);
+#endif
     }
 };
 template<class dst_type, class src_type>
@@ -276,7 +301,8 @@ struct single_assigner_builtin_unsigned_to_unsigned_overflow_base
 template<class dst_type, class src_type>
 struct single_assigner_builtin_unsigned_to_unsigned_overflow_base<dst_type, src_type, true>
 {
-    static void assign(dst_type *dst, const src_type *src, ckernel_prefix *DYND_UNUSED(extra)) {
+    DYND_CUDA_HOST_DEVICE_CALLABLE static void assign(dst_type *dst, const src_type *src, ckernel_prefix *DYND_UNUSED(extra)) {
+#ifndef __CUDA_ARCH__
         src_type s = *src;
 
         DYND_TRACE_ASSIGNMENT(static_cast<dst_type>(s), dst_type, s, src_type);
@@ -288,6 +314,7 @@ struct single_assigner_builtin_unsigned_to_unsigned_overflow_base<dst_type, src_
             throw std::overflow_error(ss.str());
         }
         *dst = static_cast<dst_type>(s);
+#endif
     }
 };
 
@@ -307,18 +334,20 @@ struct single_assigner_builtin_base<dst_type, src_type, uint_kind, uint_kind, as
 template<class dst_type, class src_type>
 struct single_assigner_builtin_base<dst_type, src_type, real_kind, int_kind, assign_error_inexact>
 {
-    static void assign(dst_type *dst, const src_type *src, ckernel_prefix *DYND_UNUSED(extra)) {
+    DYND_CUDA_HOST_DEVICE_CALLABLE static void assign(dst_type *dst, const src_type *src, ckernel_prefix *DYND_UNUSED(extra)) {
         src_type s = *src;
         dst_type d = static_cast<dst_type>(s);
 
         DYND_TRACE_ASSIGNMENT(d, dst_type, s, src_type);
 
+#ifndef __CUDA_ARCH__
         if (static_cast<src_type>(d) != s) {
             std::stringstream ss;
             ss << "inexact value while assigning " << ndt::make_type<src_type>() << " value ";
             ss << s << " to " << ndt::make_type<dst_type>() << " value " << d;
             throw std::runtime_error(ss.str());
         }
+#endif
         *dst = d;
     }
 };
@@ -335,10 +364,12 @@ struct single_assigner_builtin_base<dst_type, src_type, real_kind, int_kind, ass
 template<class dst_real_type, class src_type>
 struct single_assigner_builtin_base<std::complex<dst_real_type>, src_type, complex_kind, int_kind, assign_error_none>
 {
-    static void assign(std::complex<dst_real_type> *dst, const src_type *src, ckernel_prefix *DYND_UNUSED(extra)) {
+    DYND_CUDA_HOST_DEVICE_CALLABLE static void assign(std::complex<dst_real_type> *dst, const src_type *src, ckernel_prefix *DYND_UNUSED(extra)) {
+#ifndef __CUDA_ARCH__
         DYND_TRACE_ASSIGNMENT(d, std::complex<dst_real_type>, *src, src_type);
 
         *dst = static_cast<dst_real_type>(*src);
+#endif
     }
 };
 
@@ -346,7 +377,8 @@ struct single_assigner_builtin_base<std::complex<dst_real_type>, src_type, compl
 template<class dst_real_type, class src_type>
 struct single_assigner_builtin_base<std::complex<dst_real_type>, src_type, complex_kind, int_kind, assign_error_inexact>
 {
-    static void assign(std::complex<dst_real_type> *dst, const src_type *src, ckernel_prefix *DYND_UNUSED(extra)) {
+    DYND_CUDA_HOST_DEVICE_CALLABLE static void assign(std::complex<dst_real_type> *dst, const src_type *src, ckernel_prefix *DYND_UNUSED(extra)) {
+#ifndef __CUDA_ARCH__
         src_type s = *src;
         dst_real_type d = static_cast<dst_real_type>(s);
 
@@ -359,6 +391,7 @@ struct single_assigner_builtin_base<std::complex<dst_real_type>, src_type, compl
             throw std::runtime_error(ss.str());
         }
         *dst = d;
+#endif
     }
 };
 
@@ -374,7 +407,8 @@ struct single_assigner_builtin_base<std::complex<dst_real_type>, src_type, compl
 template<class dst_type, class src_type>
 struct single_assigner_builtin_base<dst_type, src_type, real_kind, uint_kind, assign_error_inexact>
 {
-    static void assign(dst_type *dst, const src_type *src, ckernel_prefix *DYND_UNUSED(extra)) {
+    DYND_CUDA_HOST_DEVICE_CALLABLE static void assign(dst_type *dst, const src_type *src, ckernel_prefix *DYND_UNUSED(extra)) {
+#ifndef __CUDA_ARCH__
         src_type s = *src;
         dst_type d = static_cast<dst_type>(s);
 
@@ -387,6 +421,7 @@ struct single_assigner_builtin_base<dst_type, src_type, real_kind, uint_kind, as
             throw std::runtime_error(ss.str());
         }
         *dst = d;
+#endif
     }
 };
 
@@ -402,10 +437,12 @@ struct single_assigner_builtin_base<dst_type, src_type, real_kind, uint_kind, as
 template<class dst_real_type, class src_type>
 struct single_assigner_builtin_base<std::complex<dst_real_type>, src_type, complex_kind, uint_kind, assign_error_none>
 {
-    static void assign(std::complex<dst_real_type> *dst, const src_type *src, ckernel_prefix *DYND_UNUSED(extra)) {
+    DYND_CUDA_HOST_DEVICE_CALLABLE static void assign(std::complex<dst_real_type> *dst, const src_type *src, ckernel_prefix *DYND_UNUSED(extra)) {
+#ifndef __CUDA_ARCH__
         DYND_TRACE_ASSIGNMENT(d, std::complex<dst_real_type>, *src, src_type);
 
         *dst = static_cast<dst_real_type>(*src);
+#endif
     }
 };
 
@@ -413,7 +450,8 @@ struct single_assigner_builtin_base<std::complex<dst_real_type>, src_type, compl
 template<class dst_real_type, class src_type>
 struct single_assigner_builtin_base<std::complex<dst_real_type>, src_type, complex_kind, uint_kind, assign_error_inexact>
 {
-    static void assign(std::complex<dst_real_type> *dst, const src_type *src, ckernel_prefix *DYND_UNUSED(extra)) {
+    DYND_CUDA_HOST_DEVICE_CALLABLE static void assign(std::complex<dst_real_type> *dst, const src_type *src, ckernel_prefix *DYND_UNUSED(extra)) {
+#ifndef __CUDA_ARCH__
         src_type s = *src;
         dst_real_type d = static_cast<dst_real_type>(s);
 
@@ -426,6 +464,7 @@ struct single_assigner_builtin_base<std::complex<dst_real_type>, src_type, compl
             throw std::runtime_error(ss.str());
         }
         *dst = d;
+#endif
     }
 };
 
@@ -441,7 +480,8 @@ struct single_assigner_builtin_base<std::complex<dst_real_type>, src_type, compl
 template<class dst_type, class src_type>
 struct single_assigner_builtin_base<dst_type, src_type, int_kind, real_kind, assign_error_overflow>
 {
-    static void assign(dst_type *dst, const src_type *src, ckernel_prefix *DYND_UNUSED(extra)) {
+    DYND_CUDA_HOST_DEVICE_CALLABLE static void assign(dst_type *dst, const src_type *src, ckernel_prefix *DYND_UNUSED(extra)) {
+#ifndef __CUDA_ARCH__
         src_type s = *src;
 
         DYND_TRACE_ASSIGNMENT(static_cast<dst_type>(s), dst_type, s, src_type);
@@ -453,6 +493,7 @@ struct single_assigner_builtin_base<dst_type, src_type, int_kind, real_kind, ass
             throw std::overflow_error(ss.str());
         }
         *dst = static_cast<dst_type>(s);
+#endif
     }
 };
 
@@ -460,7 +501,8 @@ struct single_assigner_builtin_base<dst_type, src_type, int_kind, real_kind, ass
 template<class dst_type, class src_type>
 struct single_assigner_builtin_base<dst_type, src_type, int_kind, real_kind, assign_error_fractional>
 {
-    static void assign(dst_type *dst, const src_type *src, ckernel_prefix *DYND_UNUSED(extra)) {
+    DYND_CUDA_HOST_DEVICE_CALLABLE static void assign(dst_type *dst, const src_type *src, ckernel_prefix *DYND_UNUSED(extra)) {
+#ifndef __CUDA_ARCH__
         src_type s = *src;
 
         DYND_TRACE_ASSIGNMENT(static_cast<dst_type>(s), dst_type, s, src_type);
@@ -479,6 +521,7 @@ struct single_assigner_builtin_base<dst_type, src_type, int_kind, real_kind, ass
             throw std::runtime_error(ss.str());
         }
         *dst = static_cast<dst_type>(s);
+#endif
     }
 };
 
@@ -491,7 +534,8 @@ struct single_assigner_builtin_base<dst_type, src_type, int_kind, real_kind, ass
 template<class dst_type, class src_real_type>
 struct single_assigner_builtin_base<dst_type, std::complex<src_real_type>, int_kind, complex_kind, assign_error_overflow>
 {
-    static void assign(dst_type *dst, const std::complex<src_real_type> *src, ckernel_prefix *DYND_UNUSED(extra)) {
+    DYND_CUDA_HOST_DEVICE_CALLABLE static void assign(dst_type *dst, const std::complex<src_real_type> *src, ckernel_prefix *DYND_UNUSED(extra)) {
+#ifndef __CUDA_ARCH__
         std::complex<src_real_type> s = *src;
 
         DYND_TRACE_ASSIGNMENT(static_cast<dst_type>(s.real()), dst_type, s, std::complex<src_real_type>);
@@ -510,6 +554,7 @@ struct single_assigner_builtin_base<dst_type, std::complex<src_real_type>, int_k
             throw std::overflow_error(ss.str());
         }
         *dst = static_cast<dst_type>(s.real());
+#endif
     }
 };
 
@@ -517,7 +562,8 @@ struct single_assigner_builtin_base<dst_type, std::complex<src_real_type>, int_k
 template<class dst_type, class src_real_type>
 struct single_assigner_builtin_base<dst_type, std::complex<src_real_type>, int_kind, complex_kind, assign_error_fractional>
 {
-    static void assign(dst_type *dst, const std::complex<src_real_type> *src, ckernel_prefix *DYND_UNUSED(extra)) {
+    DYND_CUDA_HOST_DEVICE_CALLABLE static void assign(dst_type *dst, const std::complex<src_real_type> *src, ckernel_prefix *DYND_UNUSED(extra)) {
+#ifndef __CUDA_ARCH__
         std::complex<src_real_type> s = *src;
 
         DYND_TRACE_ASSIGNMENT(static_cast<dst_type>(s.real()), dst_type, s, std::complex<src_real_type>);
@@ -543,6 +589,7 @@ struct single_assigner_builtin_base<dst_type, std::complex<src_real_type>, int_k
             throw std::runtime_error(ss.str());
         }
         *dst = static_cast<dst_type>(s.real());
+#endif
     }
 };
 
@@ -555,7 +602,8 @@ struct single_assigner_builtin_base<dst_type, std::complex<src_real_type>, int_k
 template<class dst_type, class src_type>
 struct single_assigner_builtin_base<dst_type, src_type, uint_kind, real_kind, assign_error_overflow>
 {
-    static void assign(dst_type *dst, const src_type *src, ckernel_prefix *DYND_UNUSED(extra)) {
+    DYND_CUDA_HOST_DEVICE_CALLABLE static void assign(dst_type *dst, const src_type *src, ckernel_prefix *DYND_UNUSED(extra)) {
+#ifndef __CUDA_ARCH__
         src_type s = *src;
 
         DYND_TRACE_ASSIGNMENT(static_cast<dst_type>(s), dst_type, s, src_type);
@@ -567,6 +615,7 @@ struct single_assigner_builtin_base<dst_type, src_type, uint_kind, real_kind, as
             throw std::overflow_error(ss.str());
         }
         *dst = static_cast<dst_type>(s);
+#endif
     }
 };
 
@@ -574,7 +623,8 @@ struct single_assigner_builtin_base<dst_type, src_type, uint_kind, real_kind, as
 template<class dst_type, class src_type>
 struct single_assigner_builtin_base<dst_type, src_type, uint_kind, real_kind, assign_error_fractional>
 {
-    static void assign(dst_type *dst, const src_type *src, ckernel_prefix *DYND_UNUSED(extra)) {
+    DYND_CUDA_HOST_DEVICE_CALLABLE static void assign(dst_type *dst, const src_type *src, ckernel_prefix *DYND_UNUSED(extra)) {
+#ifndef __CUDA_ARCH__
         src_type s = *src;
 
         DYND_TRACE_ASSIGNMENT(static_cast<dst_type>(s), dst_type, s, src_type);
@@ -593,6 +643,7 @@ struct single_assigner_builtin_base<dst_type, src_type, uint_kind, real_kind, as
             throw std::runtime_error(ss.str());
         }
         *dst = static_cast<dst_type>(s);
+#endif
     }
 };
 
@@ -605,7 +656,8 @@ struct single_assigner_builtin_base<dst_type, src_type, uint_kind, real_kind, as
 template<class dst_type, class src_real_type>
 struct single_assigner_builtin_base<dst_type, std::complex<src_real_type>, uint_kind, complex_kind, assign_error_overflow>
 {
-    static void assign(dst_type *dst, const std::complex<src_real_type> *src, ckernel_prefix *DYND_UNUSED(extra)) {
+    DYND_CUDA_HOST_DEVICE_CALLABLE static void assign(dst_type *dst, const std::complex<src_real_type> *src, ckernel_prefix *DYND_UNUSED(extra)) {
+#ifndef __CUDA_ARCH__
         std::complex<src_real_type> s = *src;
 
         DYND_TRACE_ASSIGNMENT(static_cast<dst_type>(s.real()), dst_type, s, std::complex<src_real_type>);
@@ -624,6 +676,7 @@ struct single_assigner_builtin_base<dst_type, std::complex<src_real_type>, uint_
             throw std::overflow_error(ss.str());
         }
         *dst = static_cast<dst_type>(s.real());
+#endif
     }
 };
 
@@ -631,7 +684,8 @@ struct single_assigner_builtin_base<dst_type, std::complex<src_real_type>, uint_
 template<class dst_type, class src_real_type>
 struct single_assigner_builtin_base<dst_type, std::complex<src_real_type>, uint_kind, complex_kind, assign_error_fractional>
 {
-    static void assign(dst_type *dst, const std::complex<src_real_type> *src, ckernel_prefix *DYND_UNUSED(extra)) {
+    DYND_CUDA_HOST_DEVICE_CALLABLE static void assign(dst_type *dst, const std::complex<src_real_type> *src, ckernel_prefix *DYND_UNUSED(extra)) {
+#ifndef __CUDA_ARCH__
         std::complex<src_real_type> s = *src;
 
         DYND_TRACE_ASSIGNMENT(static_cast<dst_type>(s.real()), dst_type, s, std::complex<src_real_type>);
@@ -657,6 +711,7 @@ struct single_assigner_builtin_base<dst_type, std::complex<src_real_type>, uint_
             throw std::runtime_error(ss.str());
         }
         *dst = static_cast<dst_type>(s.real());
+#endif
     }
 };
 
@@ -735,7 +790,8 @@ struct single_assigner_builtin_base<std::complex<double>, std::complex<double>, 
 template<>
 struct single_assigner_builtin_base<float, double, real_kind, real_kind, assign_error_overflow>
 {
-    static void assign(float *dst, const double *src, ckernel_prefix *DYND_UNUSED(extra)) {
+    DYND_CUDA_HOST_DEVICE_CALLABLE static void assign(float *dst, const double *src, ckernel_prefix *DYND_UNUSED(extra)) {
+#ifndef __CUDA_ARCH__
         DYND_TRACE_ASSIGNMENT(static_cast<float>(*src), float, *src, double);
 
 #if defined(DYND_USE_FPSTATUS)
@@ -749,7 +805,7 @@ struct single_assigner_builtin_base<float, double, real_kind, real_kind, assign_
         }
 #else
         double s = *src;
-        if (std::isfinite(s) && (s < -std::numeric_limits<float>::max() ||
+        if (isfinite(s) && (s < -std::numeric_limits<float>::max() ||
                             s > std::numeric_limits<float>::max())) {
             std::stringstream ss;
             ss << "overflow while assigning " << ndt::make_type<double>() << " value ";
@@ -758,6 +814,7 @@ struct single_assigner_builtin_base<float, double, real_kind, real_kind, assign_
         }
         *dst = static_cast<float>(s);
 #endif // DYND_USE_FPSTATUS
+#endif
     }
 };
 
@@ -771,7 +828,8 @@ struct single_assigner_builtin_base<float, double, real_kind, real_kind, assign_
 template<>
 struct single_assigner_builtin_base<float, double, real_kind, real_kind, assign_error_inexact>
 {
-    static void assign(float *dst, const double *src, ckernel_prefix *DYND_UNUSED(extra)) {
+    DYND_CUDA_HOST_DEVICE_CALLABLE static void assign(float *dst, const double *src, ckernel_prefix *DYND_UNUSED(extra)) {
+#ifndef __CUDA_ARCH__
         DYND_TRACE_ASSIGNMENT(static_cast<float>(*src), float, *src, double);
 
         double s = *src;
@@ -786,7 +844,7 @@ struct single_assigner_builtin_base<float, double, real_kind, real_kind, assign_
             throw std::overflow_error(ss.str());
         }
 #else
-        if (std::isfinite(s) && (s < -std::numeric_limits<float>::max() ||
+        if (isfinite(s) && (s < -std::numeric_limits<float>::max() ||
                             s > std::numeric_limits<float>::max())) {
             std::stringstream ss;
             ss << "overflow while assigning " << ndt::make_type<double>() << " value ";
@@ -807,6 +865,7 @@ struct single_assigner_builtin_base<float, double, real_kind, real_kind, assign_
             throw std::runtime_error(ss.str());
         }
         *dst = d;
+#endif
     }
 };
 
@@ -815,7 +874,8 @@ struct single_assigner_builtin_base<float, double, real_kind, real_kind, assign_
 template<>
 struct single_assigner_builtin_base<std::complex<float>, std::complex<double>, complex_kind, complex_kind, assign_error_overflow>
 {
-    static void assign(std::complex<float> *dst, const std::complex<double> *src, ckernel_prefix *DYND_UNUSED(extra)) {
+    DYND_CUDA_HOST_DEVICE_CALLABLE static void assign(std::complex<float> *dst, const std::complex<double> *src, ckernel_prefix *DYND_UNUSED(extra)) {
+#ifndef __CUDA_ARCH__
         DYND_TRACE_ASSIGNMENT(static_cast<std::complex<float> >(*src), std::complex<float>, *src, std::complex<double>);
 
 #if defined(DYND_USE_FPSTATUS)
@@ -838,6 +898,7 @@ struct single_assigner_builtin_base<std::complex<float>, std::complex<double>, c
         }
         *dst = static_cast<std::complex<float> >(s);
 #endif // DYND_USE_FPSTATUS
+#endif
     }
 };
 
@@ -851,7 +912,8 @@ struct single_assigner_builtin_base<std::complex<float>, std::complex<double>, c
 template<>
 struct single_assigner_builtin_base<std::complex<float>, std::complex<double>, complex_kind, complex_kind, assign_error_inexact>
 {
-    static void assign(std::complex<float> *dst, const std::complex<double> *src, ckernel_prefix *DYND_UNUSED(extra)) {
+    DYND_CUDA_HOST_DEVICE_CALLABLE static void assign(std::complex<float> *dst, const std::complex<double> *src, ckernel_prefix *DYND_UNUSED(extra)) {
+#ifndef __CUDA_ARCH__
         DYND_TRACE_ASSIGNMENT(static_cast<std::complex<float> >(*src), std::complex<float>, *src, std::complex<double>);
 
         std::complex<double> s = *src;
@@ -888,6 +950,7 @@ struct single_assigner_builtin_base<std::complex<float>, std::complex<double>, c
             throw std::runtime_error(ss.str());
         }
         *dst = d;
+#endif
     }
 };
 
@@ -895,7 +958,8 @@ struct single_assigner_builtin_base<std::complex<float>, std::complex<double>, c
 template<typename real_type>
 struct single_assigner_builtin_base<real_type, std::complex<real_type>, real_kind, complex_kind, assign_error_overflow>
 {
-    static void assign(real_type *dst, const std::complex<real_type> *src, ckernel_prefix *DYND_UNUSED(extra)) {
+    DYND_CUDA_HOST_DEVICE_CALLABLE static void assign(real_type *dst, const std::complex<real_type> *src, ckernel_prefix *DYND_UNUSED(extra)) {
+#ifndef __CUDA_ARCH__
         std::complex<real_type> s = *src;
 
         DYND_TRACE_ASSIGNMENT(static_cast<float>(s.real()), real_type, s, std::complex<real_type>);
@@ -908,6 +972,7 @@ struct single_assigner_builtin_base<real_type, std::complex<real_type>, real_kin
         }
 
         *dst = s.real();
+#endif
     }
 };
 
@@ -927,20 +992,24 @@ struct single_assigner_builtin_base<real_type, std::complex<real_type>, real_kin
 template<>
 struct single_assigner_builtin_base<std::complex<float>, double, complex_kind, real_kind, assign_error_none>
 {
-    static void assign(std::complex<float> *dst, const double *src, ckernel_prefix *DYND_UNUSED(extra)) {
+    DYND_CUDA_HOST_DEVICE_CALLABLE static void assign(std::complex<float> *dst, const double *src, ckernel_prefix *DYND_UNUSED(extra)) {
+#ifndef __CUDA_ARCH__
         DYND_TRACE_ASSIGNMENT(static_cast<std::complex<float> >(*src), std::complex<float>, *src, double);
 
         *dst = static_cast<float>(*src);
+#endif
     }
 };
 // T -> complex<T>
 template<typename real_type>
 struct single_assigner_builtin_base<std::complex<real_type>, real_type, complex_kind, real_kind, assign_error_none>
 {
-    static void assign(std::complex<real_type> *dst, const real_type *src, ckernel_prefix *DYND_UNUSED(extra)) {
+    DYND_CUDA_HOST_DEVICE_CALLABLE static void assign(std::complex<real_type> *dst, const real_type *src, ckernel_prefix *DYND_UNUSED(extra)) {
+#ifndef __CUDA_ARCH__
         DYND_TRACE_ASSIGNMENT(static_cast<std::complex<real_type> >(*src), std::complex<real_type>, *src, real_type);
 
         *dst = *src;
+#endif
     }
 };
 template<typename real_type, assign_error_mode errmode>
@@ -951,10 +1020,12 @@ struct single_assigner_builtin_base<std::complex<real_type>, real_type, complex_
 template<>
 struct single_assigner_builtin_base<std::complex<double>, float, complex_kind, real_kind, assign_error_none>
 {
-    static void assign(std::complex<double> *dst, const float *src, ckernel_prefix *DYND_UNUSED(extra)) {
+    DYND_CUDA_HOST_DEVICE_CALLABLE static void assign(std::complex<double> *dst, const float *src, ckernel_prefix *DYND_UNUSED(extra)) {
+#ifndef __CUDA_ARCH__
         DYND_TRACE_ASSIGNMENT(static_cast<std::complex<double> >(*src), std::complex<double>, *src, float);
 
         *dst = *src;
+#endif
     }
 };
 template<assign_error_mode errmode>
@@ -965,7 +1036,8 @@ struct single_assigner_builtin_base<std::complex<double>, float, complex_kind, r
 template<>
 struct single_assigner_builtin_base<double, std::complex<float>, real_kind, complex_kind, assign_error_overflow>
 {
-    static void assign(double *dst, const std::complex<float> *src, ckernel_prefix *DYND_UNUSED(extra)) {
+    DYND_CUDA_HOST_DEVICE_CALLABLE static void assign(double *dst, const std::complex<float> *src, ckernel_prefix *DYND_UNUSED(extra)) {
+#ifndef __CUDA_ARCH__
         std::complex<float> s = *src;
 
         DYND_TRACE_ASSIGNMENT(static_cast<double>(s.real()), double, s, std::complex<float>);
@@ -978,6 +1050,7 @@ struct single_assigner_builtin_base<double, std::complex<float>, real_kind, comp
         }
 
         *dst = s.real();
+#endif
     }
 };
 
@@ -995,7 +1068,8 @@ struct single_assigner_builtin_base<double, std::complex<float>, real_kind, comp
 template<>
 struct single_assigner_builtin_base<float, std::complex<double>, real_kind, complex_kind, assign_error_overflow>
 {
-    static void assign(float *dst, const std::complex<double> *src, ckernel_prefix *DYND_UNUSED(extra)) {
+    DYND_CUDA_HOST_DEVICE_CALLABLE static void assign(float *dst, const std::complex<double> *src, ckernel_prefix *DYND_UNUSED(extra)) {
+#ifndef __CUDA_ARCH__
         std::complex<double> s = *src;
         float d;
 
@@ -1028,6 +1102,7 @@ struct single_assigner_builtin_base<float, std::complex<double>, real_kind, comp
 #endif // DYND_USE_FPSTATUS
 
         *dst = d;
+#endif
     }
 };
 
@@ -1040,7 +1115,8 @@ struct single_assigner_builtin_base<float, std::complex<double>, real_kind, comp
 template<>
 struct single_assigner_builtin_base<float, std::complex<double>, real_kind, complex_kind, assign_error_inexact>
 {
-    static void assign(float *dst, const std::complex<double> *src, ckernel_prefix *DYND_UNUSED(extra)) {
+    DYND_CUDA_HOST_DEVICE_CALLABLE static void assign(float *dst, const std::complex<double> *src, ckernel_prefix *DYND_UNUSED(extra)) {
+#ifndef __CUDA_ARCH__
         std::complex<double> s = *src;
         float d;
 
@@ -1080,6 +1156,7 @@ struct single_assigner_builtin_base<float, std::complex<double>, real_kind, comp
         }
 
         *dst = d;
+#endif
     }
 };
 
@@ -1087,7 +1164,8 @@ struct single_assigner_builtin_base<float, std::complex<double>, real_kind, comp
 template<>
 struct single_assigner_builtin_base<std::complex<float>, double, complex_kind, real_kind, assign_error_overflow>
 {
-    static void assign(std::complex<float> *dst, const double *src, ckernel_prefix *DYND_UNUSED(extra)) {
+    DYND_CUDA_HOST_DEVICE_CALLABLE static void assign(std::complex<float> *dst, const double *src, ckernel_prefix *DYND_UNUSED(extra)) {
+#ifndef __CUDA_ARCH__
         double s = *src;
         float d;
 
@@ -1103,7 +1181,7 @@ struct single_assigner_builtin_base<std::complex<float>, double, complex_kind, r
             throw std::overflow_error(ss.str());
         }
 #else
-        if (std::isfinite(s) && (s < -std::numeric_limits<float>::max() ||
+        if (isfinite(s) && (s < -std::numeric_limits<float>::max() ||
                             s > std::numeric_limits<float>::max())) {
             std::stringstream ss;
             ss << "overflow while assigning " << ndt::make_type<double>() << " value ";
@@ -1114,6 +1192,7 @@ struct single_assigner_builtin_base<std::complex<float>, double, complex_kind, r
 #endif // DYND_USE_FPSTATUS
 
         *dst = d;
+#endif
     }
 };
 
@@ -1126,7 +1205,8 @@ struct single_assigner_builtin_base<std::complex<float>, double, complex_kind, r
 template<>
 struct single_assigner_builtin_base<std::complex<float>, double, complex_kind, real_kind, assign_error_inexact>
 {
-    static void assign(std::complex<float> *dst, const double *src, ckernel_prefix *DYND_UNUSED(extra)) {
+    DYND_CUDA_HOST_DEVICE_CALLABLE static void assign(std::complex<float> *dst, const double *src, ckernel_prefix *DYND_UNUSED(extra)) {
+#ifndef __CUDA_ARCH__
         double s = *src;
         float d;
 
@@ -1142,7 +1222,7 @@ struct single_assigner_builtin_base<std::complex<float>, double, complex_kind, r
             throw std::overflow_error(ss.str());
         }
 #else
-        if (std::isfinite(s) && (s < -std::numeric_limits<float>::max() ||
+        if (isfinite(s) && (s < -std::numeric_limits<float>::max() ||
                             s > std::numeric_limits<float>::max())) {
             std::stringstream ss;
             ss << "overflow while assigning " << ndt::make_type<double>() << " value ";
@@ -1160,6 +1240,7 @@ struct single_assigner_builtin_base<std::complex<float>, double, complex_kind, r
         }
 
         *dst = d;
+#endif
     }
 };
 
@@ -1179,7 +1260,7 @@ struct single_assigner_builtin
 template <class same_type, assign_error_mode errmode>
 struct single_assigner_builtin<same_type, same_type, errmode>
 {
-    static void assign(same_type *dst, const same_type *src, ckernel_prefix *DYND_UNUSED(extra)) {
+    DYND_CUDA_HOST_DEVICE_CALLABLE static void assign(same_type *dst, const same_type *src, ckernel_prefix *DYND_UNUSED(extra)) {
         *dst = *src;
     }
 };
