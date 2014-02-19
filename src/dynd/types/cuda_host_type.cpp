@@ -27,7 +27,7 @@ void cuda_host_type::print_data(std::ostream& o, const char *metadata, const cha
 
 void cuda_host_type::print_type(std::ostream& o) const
 {
-    o << "cuda host, " << m_target_tp;
+    o << "cuda_host(" << m_target_tp << ")";
 }
 
 bool cuda_host_type::operator==(const base_type& rhs) const

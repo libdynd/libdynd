@@ -27,7 +27,7 @@ void cuda_device_type::print_data(std::ostream& o, const char *metadata, const c
 
 void cuda_device_type::print_type(std::ostream& o) const
 {
-    o << "cuda device, " << m_target_tp;
+    o << "cuda_device(" << m_target_tp << ")";
 }
 
 bool cuda_device_type::operator==(const base_type& rhs) const
