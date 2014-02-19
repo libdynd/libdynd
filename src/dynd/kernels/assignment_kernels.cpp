@@ -478,7 +478,7 @@ size_t dynd::make_builtin_type_assignment_kernel(
         ckernel_prefix *result = out->get_at<ckernel_prefix>(offset_out);
         switch (kernreq) {
             case kernel_request_single:
-                make_assign_table_single_cuda_device_kernel();
+//                make_assign_table_single_cuda_device_kernel();
                 result->set_function<unary_single_operation_t>(
                                 assign_table_single_kernel[dst_type_id-bool_type_id]
                                                 [src_type_id-bool_type_id][errmode]);

@@ -6,6 +6,8 @@
 #ifndef _DYND__COMPLEX_H__
 #define _DYND__COMPLEX_H__
 
+#include <complex>
+
 #include <dynd/config.hpp>
 #include <dynd/typed_data_assign.hpp>
 
@@ -20,9 +22,12 @@ public:
     typedef float value_type;
     float m_real, m_imag;
 
-    DYND_CUDA_HOST_DEVICE_CALLABLE inline dynd_complex() {}
-    DYND_CUDA_HOST_DEVICE_CALLABLE inline dynd_complex(const float& re, const float& im = 0.0f)
+    DYND_CUDA_HOST_DEVICE_CALLABLE inline dynd_complex(float re = 0.0f, float im = 0.0f)
         : m_real(re), m_imag(im) {}
+
+    template <typename T>
+    DYND_CUDA_HOST_DEVICE_CALLABLE inline dynd_complex(const dynd_complex<T>& rhs)
+        : m_real(rhs.m_real), m_imag(rhs.m_imag) {}
 
     DYND_CUDA_HOST_DEVICE_CALLABLE inline float real() const {
         return m_real;
@@ -52,9 +57,12 @@ public:
     typedef double value_type;
     double m_real, m_imag;
 
-    DYND_CUDA_HOST_DEVICE_CALLABLE inline dynd_complex() {}
-    DYND_CUDA_HOST_DEVICE_CALLABLE inline dynd_complex(const double& re, const double& im = 0.0)
+    DYND_CUDA_HOST_DEVICE_CALLABLE inline dynd_complex(double re = 0.0, double im = 0.0)
         : m_real(re), m_imag(im) {}
+
+    template <typename T>
+    DYND_CUDA_HOST_DEVICE_CALLABLE inline dynd_complex(const dynd_complex<T>& rhs)
+        : m_real(rhs.m_real), m_imag(rhs.m_imag) {}
 
     DYND_CUDA_HOST_DEVICE_CALLABLE inline double real() const {
         return m_real;

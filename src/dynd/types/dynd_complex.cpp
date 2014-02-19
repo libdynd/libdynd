@@ -8,15 +8,14 @@
 using namespace std;
 using namespace dynd;
 
-std::ostream& dynd::operator<<(ostream& out, const dynd_complex<float>& DYND_UNUSED(val))
+std::ostream& dynd::operator<<(ostream& out, const dynd_complex<float>& val)
 {
-
+    out << std::complex<float>(val.real(), val.imag());
     return out;
 }
 
-
-std::ostream& dynd::operator<<(ostream& out, const dynd_complex<double>& DYND_UNUSED(val))
+std::ostream& dynd::operator<<(ostream& out, const dynd_complex<double>& val)
 {
-
+    out << std::complex<double>(val.real(), val.imag());
     return out;
 }

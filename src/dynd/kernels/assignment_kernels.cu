@@ -1,1 +1,1 @@
-assignment_kernels.cpp
+#include "assignment_kernels.cpp"
