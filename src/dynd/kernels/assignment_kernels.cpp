@@ -283,8 +283,8 @@ static unary_single_operation_t assign_table_single_kernel[builtin_type_id_count
         ERROR_MODE_LEVEL(dst_type, float), \
         ERROR_MODE_LEVEL(dst_type, double), \
         ERROR_MODE_LEVEL(dst_type, dynd_float128), \
-        ERROR_MODE_LEVEL(dst_type, complex<float>), \
-        ERROR_MODE_LEVEL(dst_type, complex<double>) \
+        ERROR_MODE_LEVEL(dst_type, dynd_complex<float>), \
+        ERROR_MODE_LEVEL(dst_type, dynd_complex<double>) \
     }
 
     SRC_TYPE_LEVEL(dynd_bool),
@@ -302,8 +302,8 @@ static unary_single_operation_t assign_table_single_kernel[builtin_type_id_count
     SRC_TYPE_LEVEL(float),
     SRC_TYPE_LEVEL(double),
     SRC_TYPE_LEVEL(dynd_float128),
-    SRC_TYPE_LEVEL(complex<float>),
-    SRC_TYPE_LEVEL(complex<double>)
+    SRC_TYPE_LEVEL(dynd_complex<float>),
+    SRC_TYPE_LEVEL(dynd_complex<double>)
 #undef SRC_TYPE_LEVEL
 #undef ERROR_MODE_LEVEL
 #undef SINGLE_OPERATION_PAIR_LEVEL
@@ -355,8 +355,8 @@ static unary_strided_operation_t assign_table_strided_kernel[builtin_type_id_cou
         ERROR_MODE_LEVEL(dst_type, float), \
         ERROR_MODE_LEVEL(dst_type, double), \
         ERROR_MODE_LEVEL(dst_type, dynd_float128), \
-        ERROR_MODE_LEVEL(dst_type, complex<float>), \
-        ERROR_MODE_LEVEL(dst_type, complex<double>) \
+        ERROR_MODE_LEVEL(dst_type, dynd_complex<float>), \
+        ERROR_MODE_LEVEL(dst_type, dynd_complex<double>) \
     }
 
     SRC_TYPE_LEVEL(dynd_bool),
@@ -374,8 +374,8 @@ static unary_strided_operation_t assign_table_strided_kernel[builtin_type_id_cou
     SRC_TYPE_LEVEL(float),
     SRC_TYPE_LEVEL(double),
     SRC_TYPE_LEVEL(dynd_float128),
-    SRC_TYPE_LEVEL(complex<float>),
-    SRC_TYPE_LEVEL(complex<double>)
+    SRC_TYPE_LEVEL(dynd_complex<float>),
+    SRC_TYPE_LEVEL(dynd_complex<double>)
 #undef SRC_TYPE_LEVEL
 #undef ERROR_MODE_LEVEL
 #undef STRIDED_OPERATION_PAIR_LEVEL
@@ -419,9 +419,6 @@ try { \
 
 #define ERROR_MODE_LEVEL(dst_type, src_type) \
         SINGLE_CUDA_DEVICE_OPERATION_PAIR_LEVEL(dst_type, src_type, assign_error_none) \
-        SINGLE_CUDA_DEVICE_OPERATION_PAIR_LEVEL(dst_type, src_type, assign_error_overflow) \
-        SINGLE_CUDA_DEVICE_OPERATION_PAIR_LEVEL(dst_type, src_type, assign_error_fractional) \
-        SINGLE_CUDA_DEVICE_OPERATION_PAIR_LEVEL(dst_type, src_type, assign_error_inexact) \
 
 #define SRC_TYPE_LEVEL(dst_type) \
         ERROR_MODE_LEVEL(dst_type, dynd_bool) \
@@ -439,8 +436,8 @@ try { \
         ERROR_MODE_LEVEL(dst_type, float) \
         ERROR_MODE_LEVEL(dst_type, double) \
         ERROR_MODE_LEVEL(dst_type, dynd_float128) \
-        ERROR_MODE_LEVEL(dst_type, complex<float>) \
-        ERROR_MODE_LEVEL(dst_type, complex<double>) \
+        ERROR_MODE_LEVEL(dst_type, dynd_complex<float>) \
+        ERROR_MODE_LEVEL(dst_type, dynd_complex<double>) \
 
     SRC_TYPE_LEVEL(dynd_bool)
     SRC_TYPE_LEVEL(int8_t)
@@ -457,8 +454,8 @@ try { \
     SRC_TYPE_LEVEL(float)
     SRC_TYPE_LEVEL(double)
     SRC_TYPE_LEVEL(dynd_float128)
-    SRC_TYPE_LEVEL(complex<float>)
-    SRC_TYPE_LEVEL(complex<double>)
+    SRC_TYPE_LEVEL(dynd_complex<float>)
+    SRC_TYPE_LEVEL(dynd_complex<double>)
 #undef SRC_TYPE_LEVEL
 #undef ERROR_MODE_LEVEL
 #undef SINGLE_CUDA_DEVICE_OPERATION_PAIR_LEVEL

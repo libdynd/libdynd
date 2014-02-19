@@ -55,8 +55,8 @@ struct align_test_struct {
     char f8;  uint64_t u64_;
     char f9;  float f32_;
     char f10; double f64_;
-    char f11; complex<float> cf32_;
-    char f12; complex<double> cf64_;
+    char f11; dynd_complex<float> cf32_;
+    char f12; dynd_complex<double> cf64_;
     char f13;
 };
 
@@ -173,7 +173,7 @@ TEST(CStructDType, ReplaceScalarTypes) {
     ndt::type dt, dt2;
 
     // Struct with three fields
-    ndt::type d1 = ndt::make_type<std::complex<double> >();
+    ndt::type d1 = ndt::make_type<dynd_complex<double> >();
     ndt::type d2 = ndt::make_type<int32_t>();
     ndt::type d3 = ndt::make_fixedstring(5, string_encoding_utf_8);
     dt = ndt::make_cstruct(d1, "x", d2, "y", d3, "z");
@@ -189,7 +189,7 @@ TEST(CStructDType, DTypeAt) {
     ndt::type dt, dt2;
 
     // Struct with three fields
-    ndt::type d1 = ndt::make_type<std::complex<double> >();
+    ndt::type d1 = ndt::make_type<dynd_complex<double> >();
     ndt::type d2 = ndt::make_type<int32_t>();
     ndt::type d3 = ndt::make_fixedstring(5, string_encoding_utf_8);
     dt = ndt::make_cstruct(d1, "x", d2, "y", d3, "z");
@@ -205,11 +205,11 @@ TEST(CStructDType, CanonicalDType) {
     ndt::type dt, dt2;
 
     // Struct with three fields
-    ndt::type d1 = ndt::make_convert<std::complex<double>, float>();
+    ndt::type d1 = ndt::make_convert<dynd_complex<double>, float>();
     ndt::type d2 = ndt::make_byteswap<int32_t>();
     ndt::type d3 = ndt::make_fixedstring(5, string_encoding_utf_32);
     dt = ndt::make_cstruct(d1, "x", d2, "y", d3, "z");
-    EXPECT_EQ(ndt::make_cstruct(ndt::make_type<std::complex<double> >(), "x",
+    EXPECT_EQ(ndt::make_cstruct(ndt::make_type<dynd_complex<double> >(), "x",
                                 ndt::make_type<int32_t>(), "y",
                                 d3, "z"),
             dt.get_canonical_type());

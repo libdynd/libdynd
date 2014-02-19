@@ -196,19 +196,19 @@ TEST(ArrayAssign, ScalarAssignment_Uint64_LargeNumbers) {
 
 TEST(ArrayAssign, ScalarAssignment_Complex_Float32) {
     nd::array a;
-    const complex<float> *ptr_cf32;
+    const dynd_complex<float> *ptr_cf32;
 
     // Assignment to a complex float scalar
-    a = nd::empty(ndt::make_type<complex<float> >());
-    ptr_cf32 = (const complex<float> *)a.get_ndo()->m_data_pointer;
+    a = nd::empty(ndt::make_type<dynd_complex<float> >());
+    ptr_cf32 = (const dynd_complex<float> *)a.get_ndo()->m_data_pointer;
     a.val_assign(true);
-    EXPECT_EQ(complex<float>(1), *ptr_cf32);
+    EXPECT_EQ(dynd_complex<float>(1), *ptr_cf32);
     a.val_assign(false);
-    EXPECT_EQ(complex<float>(0), *ptr_cf32);
+    EXPECT_EQ(dynd_complex<float>(0), *ptr_cf32);
     a.val_assign(1/3.0f);
-    EXPECT_EQ(complex<float>(1/3.0f), *ptr_cf32);
+    EXPECT_EQ(dynd_complex<float>(1/3.0f), *ptr_cf32);
     a.val_assign(1/3.0);
-    EXPECT_EQ(complex<float>(float(1/3.0)), *ptr_cf32);
+    EXPECT_EQ(dynd_complex<float>(float(1/3.0)), *ptr_cf32);
     EXPECT_THROW(a.val_assign(1/3.0, assign_error_inexact), runtime_error);
     // Float32 can't represent this integer value exactly
     a.val_assign(33554433);
@@ -216,28 +216,28 @@ TEST(ArrayAssign, ScalarAssignment_Complex_Float32) {
     EXPECT_EQ(0., ptr_cf32->imag());
     EXPECT_THROW(a.val_assign(33554433, assign_error_inexact), runtime_error);
 
-    a.val_assign(complex<float>(1.5f, 2.75f));
-    EXPECT_EQ(complex<float>(1.5f, 2.75f), *ptr_cf32);
-    a.val_assign(complex<double>(1/3.0, -1/7.0));
-    EXPECT_EQ(complex<float>(float(1/3.0), float(-1/7.0)), *ptr_cf32);
-    EXPECT_THROW(a.val_assign(complex<double>(1/3.0, -1/7.0), assign_error_inexact), runtime_error);
+    a.val_assign(dynd_complex<float>(1.5f, 2.75f));
+    EXPECT_EQ(dynd_complex<float>(1.5f, 2.75f), *ptr_cf32);
+    a.val_assign(dynd_complex<double>(1/3.0, -1/7.0));
+    EXPECT_EQ(dynd_complex<float>(float(1/3.0), float(-1/7.0)), *ptr_cf32);
+    EXPECT_THROW(a.val_assign(dynd_complex<double>(1/3.0, -1/7.0), assign_error_inexact), runtime_error);
 }
 
 TEST(ArrayAssign, ScalarAssignment_Complex_Float64) {
     nd::array a;
-    const complex<double> *ptr_cf64;
+    const dynd_complex<double> *ptr_cf64;
 
     // Assignment to a complex float scalar
-    a = nd::empty(ndt::make_type<complex<double> >());
-    ptr_cf64 = (const complex<double> *)a.get_ndo()->m_data_pointer;
+    a = nd::empty(ndt::make_type<dynd_complex<double> >());
+    ptr_cf64 = (const dynd_complex<double> *)a.get_ndo()->m_data_pointer;
     a.val_assign(true);
-    EXPECT_EQ(complex<double>(1), *ptr_cf64);
+    EXPECT_EQ(dynd_complex<double>(1), *ptr_cf64);
     a.val_assign(false);
-    EXPECT_EQ(complex<double>(0), *ptr_cf64);
+    EXPECT_EQ(dynd_complex<double>(0), *ptr_cf64);
     a.val_assign(1/3.0f);
-    EXPECT_EQ(complex<double>(1/3.0f), *ptr_cf64);
+    EXPECT_EQ(dynd_complex<double>(1/3.0f), *ptr_cf64);
     a.val_assign(1/3.0);
-    EXPECT_EQ(complex<double>(1/3.0), *ptr_cf64);
+    EXPECT_EQ(dynd_complex<double>(1/3.0), *ptr_cf64);
     a.val_assign(33554433, assign_error_inexact);
     EXPECT_EQ(33554433., ptr_cf64->real());
     EXPECT_EQ(0., ptr_cf64->imag());
@@ -247,10 +247,10 @@ TEST(ArrayAssign, ScalarAssignment_Complex_Float64) {
     EXPECT_EQ(0, ptr_cf64->imag());
     EXPECT_THROW(a.val_assign(36028797018963969LL, assign_error_inexact), runtime_error);
 
-    a.val_assign(complex<float>(1.5f, 2.75f));
-    EXPECT_EQ(complex<double>(1.5f, 2.75f), *ptr_cf64);
-    a.val_assign(complex<double>(1/3.0, -1/7.0), assign_error_inexact);
-    EXPECT_EQ(complex<double>(1/3.0, -1/7.0), *ptr_cf64);
+    a.val_assign(dynd_complex<float>(1.5f, 2.75f));
+    EXPECT_EQ(dynd_complex<double>(1.5f, 2.75f), *ptr_cf64);
+    a.val_assign(dynd_complex<double>(1/3.0, -1/7.0), assign_error_inexact);
+    EXPECT_EQ(dynd_complex<double>(1/3.0, -1/7.0), *ptr_cf64);
 }
 
 TEST(ArrayAssign, BroadcastAssign) {

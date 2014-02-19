@@ -143,6 +143,7 @@ set(libdynd_SRC
     src/dynd/types/date_type.cpp
     src/dynd/types/datetime_type.cpp
     src/dynd/types/type_type.cpp
+    src/dynd/types/dynd_complex.cpp
     src/dynd/types/dynd_float16.cpp
     src/dynd/types/dynd_float128.cpp
     src/dynd/types/dynd_int128.cpp
@@ -188,6 +189,7 @@ set(libdynd_SRC
     include/dynd/types/date_type.hpp
     include/dynd/types/datetime_type.hpp
     include/dynd/types/type_type.hpp
+    include/dynd/types/dynd_complex.hpp
     include/dynd/types/dynd_float16.hpp
     include/dynd/types/dynd_float128.hpp
     include/dynd/types/dynd_int128.hpp
@@ -391,6 +393,7 @@ source_group("Internal Headers" REGULAR_EXPRESSION "src/dynd/.*hpp")
 
 if (DYND_CUDA)
     set(libdynd_cuda_SRC
+        src/dynd/types/dynd_complex.cpp
         src/dynd/types/dynd_float16.cpp
         src/dynd/types/dynd_float128.cpp
         src/dynd/types/dynd_int128.cpp

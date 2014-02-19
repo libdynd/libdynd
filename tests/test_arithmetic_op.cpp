@@ -237,15 +237,15 @@ TEST(ArithmeticOp, ComplexScalar) {
     a = v0;
 
     // A complex scalar
-    (a + complex<float>(1, 2)).debug_print(cout);
-    c = (a + complex<float>(1, 2)).eval();
-    EXPECT_EQ(complex<float>(2,2), c(0).as<complex<float> >());
-    EXPECT_EQ(complex<float>(3,2), c(1).as<complex<float> >());
-    EXPECT_EQ(complex<float>(4,2), c(2).as<complex<float> >());
-    c = (complex<float>(0, -1) * a).eval();
-    EXPECT_EQ(complex<float>(0,-1), c(0).as<complex<float> >());
-    EXPECT_EQ(complex<float>(0,-2), c(1).as<complex<float> >());
-    EXPECT_EQ(complex<float>(0,-3), c(2).as<complex<float> >());
+    (a + dynd_complex<float>(1, 2)).debug_print(cout);
+    c = (a + dynd_complex<float>(1, 2)).eval();
+    EXPECT_EQ(dynd_complex<float>(2,2), c(0).as<dynd_complex<float> >());
+    EXPECT_EQ(dynd_complex<float>(3,2), c(1).as<dynd_complex<float> >());
+    EXPECT_EQ(dynd_complex<float>(4,2), c(2).as<dynd_complex<float> >());
+    c = (dynd_complex<float>(0, -1) * a).eval();
+    EXPECT_EQ(dynd_complex<float>(0,-1), c(0).as<dynd_complex<float> >());
+    EXPECT_EQ(dynd_complex<float>(0,-2), c(1).as<dynd_complex<float> >());
+    EXPECT_EQ(dynd_complex<float>(0,-3), c(2).as<dynd_complex<float> >());
 }
 
 TEST(ArithmeticOp, MatchingDTypes_View) {

@@ -21,7 +21,7 @@ struct single_assigner_builtin_base<dynd_bool, dynd_float128, bool_kind, real_ki
 template<>
 struct single_assigner_builtin_base<dynd_bool, dynd_float128, bool_kind, real_kind, assign_error_overflow>
 {
-    DYND_CUDA_HOST_DEVICE_CALLABLE static void assign(dynd_bool *dst, const dynd_float128 *src, ckernel_prefix *DYND_UNUSED(extra)) {
+    static void assign(dynd_bool *dst, const dynd_float128 *src, ckernel_prefix *DYND_UNUSED(extra)) {
         // DYND_TRACE_ASSIGNMENT((bool)(s != src_type(0)), dynd_bool, s, src_type);
 
         if ((src->m_hi&0x7fffffffffffffffULL) == 0 && src->m_lo == 0) {
@@ -29,13 +29,11 @@ struct single_assigner_builtin_base<dynd_bool, dynd_float128, bool_kind, real_ki
         } else if (src->m_hi == 0x3fff000000000000ULL && src->m_lo == 0) { // 1.0 in binary128
             *dst = 1;
         } else {
-#ifndef __CUDA_ARCH__
             std::stringstream ss;
             ss << "overflow while assigning " << ndt::make_type<dynd_float128>();
             // TODO: ss << " value " << s;
             ss << " to " << ndt::make_type<dynd_bool>();
             throw std::runtime_error(ss.str());
-#endif
         }
     }
 };

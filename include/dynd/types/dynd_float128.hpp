@@ -7,6 +7,7 @@
 #define _DYND__FLOAT128_H__
 
 #include <dynd/config.hpp>
+#include <dynd/diagnostics.hpp>
 #include <dynd/typed_data_assign.hpp>
 
 #include <iostream>
@@ -55,80 +56,80 @@ public:
     DYND_CUDA_HOST_DEVICE_CALLABLE dynd_float128(const dynd_float16& value);
 
     DYND_CUDA_HOST_DEVICE_CALLABLE operator signed char() const {
-#ifndef __CUDA_ARCH__
-        throw std::runtime_error("float128 conversions are not completed");
+#ifdef DYND_CUDA_DEVICE_ARCH
+        DYND_ASSERT_WHAT("float128 conversions are not completed");
 #else
-        return 0;
+        throw std::runtime_error("float128 conversions are not completed");
 #endif
     }
     DYND_CUDA_HOST_DEVICE_CALLABLE operator unsigned char() const {
-#ifndef __CUDA_ARCH__
-        throw std::runtime_error("float128 conversions are not completed");
+#ifdef DYND_CUDA_DEVICE_ARCH
+        DYND_ASSERT_WHAT("float128 conversions are not completed");
 #else
-        return 0;
+        throw std::runtime_error("float128 conversions are not completed");
 #endif
     }
     DYND_CUDA_HOST_DEVICE_CALLABLE operator short() const {
-#ifndef __CUDA_ARCH__
-        throw std::runtime_error("float128 conversions are not completed");
+#ifdef DYND_CUDA_DEVICE_ARCH
+        DYND_ASSERT_WHAT("float128 conversions are not completed");
 #else
-        return 0;
+        throw std::runtime_error("float128 conversions are not completed");
 #endif
     }
     DYND_CUDA_HOST_DEVICE_CALLABLE operator unsigned short() const {
-#ifndef __CUDA_ARCH__
-        throw std::runtime_error("float128 conversions are not completed");
+#ifdef DYND_CUDA_DEVICE_ARCH
+        DYND_ASSERT_WHAT("float128 conversions are not completed");
 #else
-        return 0;
+        throw std::runtime_error("float128 conversions are not completed");
 #endif
     }
     DYND_CUDA_HOST_DEVICE_CALLABLE operator int() const {
-#ifndef __CUDA_ARCH__
-        throw std::runtime_error("float128 conversions are not completed");
+#ifdef DYND_CUDA_DEVICE_ARCH
+        DYND_ASSERT_WHAT("float128 conversions are not completed");
 #else
-        return 0;
+        throw std::runtime_error("float128 conversions are not completed");
 #endif
     }
     DYND_CUDA_HOST_DEVICE_CALLABLE operator unsigned int() const {
-#ifndef __CUDA_ARCH__
-        throw std::runtime_error("float128 conversions are not completed");
+#ifdef DYND_CUDA_DEVICE_ARCH
+        DYND_ASSERT_WHAT("float128 conversions are not completed");
 #else
-        return 0;
+        throw std::runtime_error("float128 conversions are not completed");
 #endif
     }
     DYND_CUDA_HOST_DEVICE_CALLABLE operator long() const {
-#ifndef __CUDA_ARCH__
-        throw std::runtime_error("float128 conversions are not completed");
+#ifdef DYND_CUDA_DEVICE_ARCH
+        DYND_ASSERT_WHAT("float128 conversions are not completed");
 #else
-        return 0;
+        throw std::runtime_error("float128 conversions are not completed");
 #endif
     }
     DYND_CUDA_HOST_DEVICE_CALLABLE operator unsigned long() const {
-#ifndef __CUDA_ARCH__
-        throw std::runtime_error("float128 conversions are not completed");
+#ifdef DYND_CUDA_DEVICE_ARCH
+        DYND_ASSERT_WHAT("float128 conversions are not completed");
 #else
-        return 0;
+        throw std::runtime_error("float128 conversions are not completed");
 #endif
     }
     DYND_CUDA_HOST_DEVICE_CALLABLE operator long long() const {
-#ifndef __CUDA_ARCH__
-        throw std::runtime_error("float128 conversions are not completed");
+#ifdef DYND_CUDA_DEVICE_ARCH
+        DYND_ASSERT_WHAT("float128 conversions are not completed");
 #else
-        return 0;
+        throw std::runtime_error("float128 conversions are not completed");
 #endif
     }
     DYND_CUDA_HOST_DEVICE_CALLABLE operator unsigned long long() const {
-#ifndef __CUDA_ARCH__
-        throw std::runtime_error("float128 conversions are not completed");
+#ifdef DYND_CUDA_DEVICE_ARCH
+        DYND_ASSERT_WHAT("float128 conversions are not completed");
 #else
-        return 0;
+        throw std::runtime_error("float128 conversions are not completed");
 #endif
     }
     DYND_CUDA_HOST_DEVICE_CALLABLE operator double() const {
-#ifndef __CUDA_ARCH__
-        throw std::runtime_error("float128 conversions are not completed");
+#ifdef DYND_CUDA_DEVICE_ARCH
+        DYND_ASSERT_WHAT("float128 conversions are not completed");
 #else
-        return 0;
+        throw std::runtime_error("float128 conversions are not completed");
 #endif
     }
 

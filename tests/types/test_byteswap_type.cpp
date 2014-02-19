@@ -26,11 +26,11 @@ TEST(ByteswapDType, Create) {
     EXPECT_EQ(d.storage_type(), ndt::make_fixedbytes(4, 4));
     EXPECT_TRUE(d.is_expression());
 
-    d = ndt::make_byteswap<complex<double> >();
+    d = ndt::make_byteswap<dynd_complex<double> >();
     // The value has the native byte-order type
-    EXPECT_EQ(d.value_type(), ndt::make_type<complex<double> >());
+    EXPECT_EQ(d.value_type(), ndt::make_type<dynd_complex<double> >());
     // The storage is the a bytes type with matching storage and alignment
-    EXPECT_EQ(d.storage_type(), ndt::make_fixedbytes(16, scalar_align_of<complex<double> >::value));
+    EXPECT_EQ(d.storage_type(), ndt::make_fixedbytes(16, scalar_align_of<dynd_complex<double> >::value));
 
     // Only basic built-in types can be used to make a byteswap type
     EXPECT_THROW(d = ndt::make_byteswap(ndt::make_convert<int, float>()), dynd::type_error);
@@ -62,12 +62,12 @@ TEST(ByteswapDType, Basic) {
     EXPECT_EQ(3.14159265358979, a.as<double>());
 
     uint32_t value32_pair[2] = {0xDA0F4940, 0xC1B88FD3};
-    a = nd::make_pod_array(ndt::make_byteswap<complex<float> >(), (char *)&value32_pair);
-    EXPECT_EQ(complex<float>(3.1415926f, -1.23456e12f), a.as<complex<float> >());
+    a = nd::make_pod_array(ndt::make_byteswap<dynd_complex<float> >(), (char *)&value32_pair);
+    EXPECT_EQ(dynd_complex<float>(3.1415926f, -1.23456e12f), a.as<dynd_complex<float> >());
 
     int64_t value64_pair[2] = {0x112D4454FB210940LL, 0x002892B01FF771C2LL};
-    a = nd::make_pod_array(ndt::make_byteswap<complex<double> >(), (char *)&value64_pair);
-    EXPECT_EQ(complex<double>(3.14159265358979, -1.2345678912345e12), a.as<complex<double> >());
+    a = nd::make_pod_array(ndt::make_byteswap<dynd_complex<double> >(), (char *)&value64_pair);
+    EXPECT_EQ(dynd_complex<double>(3.14159265358979, -1.2345678912345e12), a.as<dynd_complex<double> >());
 }
 
 TEST(ByteswapDType, CanonicalDType) {

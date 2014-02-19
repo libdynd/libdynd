@@ -105,7 +105,7 @@ TEST(StructDType, ReplaceScalarTypes) {
     ndt::type dt, dt2;
 
     // Struct with three fields
-    ndt::type d1 = ndt::make_type<std::complex<double> >();
+    ndt::type d1 = ndt::make_type<dynd_complex<double> >();
     ndt::type d2 = ndt::make_type<int32_t>();
     ndt::type d3 = ndt::make_fixedstring(5, string_encoding_utf_8);
     dt = ndt::make_struct(d1, "x", d2, "y", d3, "z");
@@ -121,7 +121,7 @@ TEST(StructDType, DTypeAt) {
     ndt::type dt, dt2;
 
     // Struct with three fields
-    ndt::type d1 = ndt::make_type<std::complex<double> >();
+    ndt::type d1 = ndt::make_type<dynd_complex<double> >();
     ndt::type d2 = ndt::make_type<int32_t>();
     ndt::type d3 = ndt::make_fixedstring(5, string_encoding_utf_8);
     dt = ndt::make_struct(d1, "x", d2, "y", d3, "z");
@@ -137,11 +137,11 @@ TEST(StructDType, CanonicalDType) {
     ndt::type dt, dt2;
 
     // Struct with three fields
-    ndt::type d1 = ndt::make_convert<std::complex<double>, float>();
+    ndt::type d1 = ndt::make_convert<dynd_complex<double>, float>();
     ndt::type d2 = ndt::make_byteswap<int32_t>();
     ndt::type d3 = ndt::make_fixedstring(5, string_encoding_utf_32);
     dt = ndt::make_struct(d1, "x", d2, "y", d3, "z");
-    EXPECT_EQ(ndt::make_struct(ndt::make_type<std::complex<double> >(), "x",
+    EXPECT_EQ(ndt::make_struct(ndt::make_type<dynd_complex<double> >(), "x",
                                 ndt::make_type<int32_t>(), "y",
                                 d3, "z"),
             dt.get_canonical_type());
