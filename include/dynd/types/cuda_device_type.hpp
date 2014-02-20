@@ -37,6 +37,13 @@ public:
 
     void data_alloc(char **data, size_t size) const;
     void data_zeroinit(char *data, size_t size) const;
+
+    size_t make_assignment_kernel(
+                    ckernel_builder *out, size_t offset_out,
+                    const ndt::type& dst_tp, const char *dst_metadata,
+                    const ndt::type& src_tp, const char *src_metadata,
+                    kernel_request_t kernreq, assign_error_mode errmode,
+                    const eval::eval_context *ectx) const;
 };
 
 namespace ndt {

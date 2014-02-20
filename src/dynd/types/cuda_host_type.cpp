@@ -6,6 +6,8 @@
 #ifdef DYND_CUDA
 
 #include <dynd/types/cuda_host_type.hpp>
+#include <dynd/types/cuda_device_type.hpp>
+#include <dynd/kernels/assignment_kernels.hpp>
 
 using namespace std;
 using namespace dynd;
@@ -64,6 +66,27 @@ void cuda_host_type::data_alloc(char **data, size_t size) const
 void cuda_host_type::data_zeroinit(char *data, size_t size) const
 {
     memset(data, 0, size);
+}
+
+size_t cuda_host_type::make_assignment_kernel(
+                ckernel_builder *out, size_t offset_out,
+                const ndt::type& dst_tp, const char *dst_metadata,
+                const ndt::type& src_tp, const char *src_metadata,
+                kernel_request_t kernreq, assign_error_mode errmode,
+                const eval::eval_context *ectx) const
+{
+    if (this == dst_tp.extended()) {
+        if (src_tp.get_type_id() == cuda_device_type_id) {
+            return reinterpret_cast<const cuda_device_type*>(src_tp.extended())->make_assignment_kernel(out,
+                offset_out, dst_tp, dst_metadata, src_tp, src_metadata, kernreq, errmode, ectx);
+        }
+
+        return ::make_assignment_kernel(out, offset_out, m_target_tp, dst_metadata + get_metadata_size(),
+            src_tp, src_metadata, kernreq, errmode, ectx);
+    }
+
+    return ::make_assignment_kernel(out, offset_out, dst_tp, dst_metadata,
+        m_target_tp, src_metadata + get_metadata_size(), kernreq, errmode, ectx);
 }
 
 #endif // DYND_CUDA

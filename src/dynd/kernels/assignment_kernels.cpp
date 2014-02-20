@@ -7,6 +7,8 @@
 #include <dynd/kernels/assignment_kernels.hpp>
 #include "single_assigner_builtin.hpp"
 
+#include <stdio.h> // DELETE THIS
+
 using namespace std;
 using namespace dynd;
 
@@ -96,6 +98,26 @@ static void unaligned_copy_strided(char *dst, intptr_t dst_stride,
         memcpy(dst, src, data_size);
     }
 }
+#ifdef DYND_CUDA
+static void unaligned_copy_single_cuda_host_to_device(char *dst, const char *src,
+                ckernel_prefix *extra)
+{
+    size_t data_size = reinterpret_cast<unaligned_copy_single_kernel_extra *>(extra)->data_size;
+    throw_if_not_cuda_success(cudaMemcpy(dst, src, data_size, cudaMemcpyHostToDevice));
+}
+static void unaligned_copy_single_cuda_device_to_host(char *dst, const char *src,
+                ckernel_prefix *extra)
+{
+    size_t data_size = reinterpret_cast<unaligned_copy_single_kernel_extra *>(extra)->data_size;
+    throw_if_not_cuda_success(cudaMemcpy(dst, src, data_size, cudaMemcpyDeviceToHost));
+}
+static void unaligned_copy_single_cuda_device_to_device(char *dst, const char *src,
+                ckernel_prefix *extra)
+{
+    size_t data_size = reinterpret_cast<unaligned_copy_single_kernel_extra *>(extra)->data_size;
+    throw_if_not_cuda_success(cudaMemcpy(dst, src, data_size, cudaMemcpyDeviceToDevice));
+}
+#endif // DYND_CUDA
 
 size_t dynd::make_assignment_kernel(
                 ckernel_builder *out, size_t offset_out,
@@ -145,12 +167,33 @@ size_t dynd::make_pod_typed_data_assignment_kernel(
                 kernel_request_t kernreq)
 {
     bool single = (kernreq == kernel_request_single);
-    if (!single && kernreq != kernel_request_strided) {
+#ifdef DYND_CUDA
+    bool cuda = (kernreq == kernel_request_single_cuda_host_to_device) || (kernreq == kernel_request_single_cuda_device_to_host)
+         || (kernreq == kernel_request_single_cuda_device_to_device);
+#else
+    bool cuda = false;
+#endif // DYND_CUDA
+    if (!single && !cuda && kernreq != kernel_request_strided) {
         stringstream ss;
         ss << "make_pod_typed_data_assignment_kernel: unrecognized request " << (int)kernreq;
         throw runtime_error(ss.str());
     }
     ckernel_prefix *result = NULL;
+#ifdef DYND_CUDA
+    if (cuda) {
+        out->ensure_capacity_leaf(offset_out + sizeof(unaligned_copy_single_kernel_extra));
+        result = out->get_at<ckernel_prefix>(offset_out);
+        if (kernreq == kernel_request_single_cuda_host_to_device) {
+            result->set_function<unary_single_operation_t>(&unaligned_copy_single_cuda_host_to_device);
+        } else if (kernreq == kernel_request_single_cuda_device_to_host) {
+            result->set_function<unary_single_operation_t>(&unaligned_copy_single_cuda_device_to_host);
+        } else if (kernreq == kernel_request_single_cuda_device_to_device) {
+            result->set_function<unary_single_operation_t>(&unaligned_copy_single_cuda_device_to_device);
+        }
+        reinterpret_cast<unaligned_copy_single_kernel_extra *>(result)->data_size = data_size;
+        return offset_out + sizeof(unaligned_copy_single_kernel_extra);
+    }
+#endif // DYND_CUDA
     if (data_size == data_alignment) {
         // Aligned specialization tables
         // No need to reserve more space in the trivial cases, the space for a leaf is already there
@@ -383,85 +426,213 @@ static unary_strided_operation_t assign_table_strided_kernel[builtin_type_id_cou
 
 #ifdef DYND_CUDA
 
-static unary_single_operation_t assign_table_single_cuda_device_kernel[builtin_type_id_count-2][builtin_type_id_count-2][4];
-
-#include <stdio.h>
 #include <cuda_runtime.h>
 
 
 template<class dst_type, class src_type, assign_error_mode errmode>
-__global__ void get_single_cuda_device_assigner_builtin(unary_single_operation_t *ptr) {
-    *ptr = (unary_single_operation_t)&single_assigner_builtin<dst_type, src_type, errmode>::assign;
-}
+struct single_cuda_host_to_device_assigner_builtin {
+    static void assign(dst_type *dst, const src_type *src, ckernel_prefix *extra) {
+        dst_type tmp;
+        single_assigner_builtin<dst_type, src_type, errmode>::assign(&tmp, src, extra);
+        throw_if_not_cuda_success(cudaMemcpy(dst, &tmp, sizeof(dst_type), cudaMemcpyHostToDevice));
+    }
+};
 
-static void make_assign_table_single_cuda_device_kernel() {
-    static bool assign_table_made = false;
 
-    if (assign_table_made) {
-        return;
+static unary_single_operation_t assign_table_single_cuda_host_to_device_kernel[builtin_type_id_count-2][builtin_type_id_count-2][4] =
+{
+#define SINGLE_OPERATION_PAIR_LEVEL(dst_type, src_type, errmode) \
+            (unary_single_operation_t)&single_cuda_host_to_device_assigner_builtin<dst_type, src_type, errmode>::assign
+        
+#define ERROR_MODE_LEVEL(dst_type, src_type) { \
+        SINGLE_OPERATION_PAIR_LEVEL(dst_type, src_type, assign_error_none), \
+        SINGLE_OPERATION_PAIR_LEVEL(dst_type, src_type, assign_error_overflow), \
+        SINGLE_OPERATION_PAIR_LEVEL(dst_type, src_type, assign_error_fractional), \
+        SINGLE_OPERATION_PAIR_LEVEL(dst_type, src_type, assign_error_inexact) \
     }
 
-    printf("DEBUG: called\n");
-
-    unary_single_operation_t *ptr;
-    throw_if_not_cuda_success(cudaMalloc(&ptr, sizeof(unary_single_operation_t)));
-
-#define SINGLE_CUDA_DEVICE_OPERATION_PAIR_LEVEL(dst_type, src_type, errmode) \
-    get_single_cuda_device_assigner_builtin<dst_type, src_type, errmode><<<1, 1>>>(ptr); \
-try { \
-    throw_if_not_cuda_success(); \
-} catch (dynd::cuda_runtime_error &e) { \
-    std::cout << "DEBUG:" << e.what() << std::endl; \
-} \
-    throw_if_not_cuda_success(cudaDeviceSynchronize()); \
-    throw_if_not_cuda_success(cudaMemcpy(&assign_table_single_cuda_device_kernel[dynd::type_id_of<dst_type>::value-bool_type_id] \
-        [dynd::type_id_of<src_type>::value-bool_type_id][errmode], ptr, sizeof(unary_single_operation_t), cudaMemcpyDeviceToHost));
-
-#define ERROR_MODE_LEVEL(dst_type, src_type) \
-        SINGLE_CUDA_DEVICE_OPERATION_PAIR_LEVEL(dst_type, src_type, assign_error_none) \
-
-#define SRC_TYPE_LEVEL(dst_type) \
-        ERROR_MODE_LEVEL(dst_type, dynd_bool) \
-        ERROR_MODE_LEVEL(dst_type, int8_t) \
-        ERROR_MODE_LEVEL(dst_type, int16_t) \
-        ERROR_MODE_LEVEL(dst_type, int32_t) \
-        ERROR_MODE_LEVEL(dst_type, int64_t) \
-        ERROR_MODE_LEVEL(dst_type, dynd_int128) \
-        ERROR_MODE_LEVEL(dst_type, uint8_t) \
-        ERROR_MODE_LEVEL(dst_type, uint16_t) \
-        ERROR_MODE_LEVEL(dst_type, uint32_t) \
-        ERROR_MODE_LEVEL(dst_type, uint64_t) \
-        ERROR_MODE_LEVEL(dst_type, dynd_uint128) \
-        ERROR_MODE_LEVEL(dst_type, dynd_float16) \
-        ERROR_MODE_LEVEL(dst_type, float) \
-        ERROR_MODE_LEVEL(dst_type, double) \
-        ERROR_MODE_LEVEL(dst_type, dynd_float128) \
-        ERROR_MODE_LEVEL(dst_type, dynd_complex<float>) \
+#define SRC_TYPE_LEVEL(dst_type) { \
+        ERROR_MODE_LEVEL(dst_type, dynd_bool), \
+        ERROR_MODE_LEVEL(dst_type, int8_t), \
+        ERROR_MODE_LEVEL(dst_type, int16_t), \
+        ERROR_MODE_LEVEL(dst_type, int32_t), \
+        ERROR_MODE_LEVEL(dst_type, int64_t), \
+        ERROR_MODE_LEVEL(dst_type, dynd_int128), \
+        ERROR_MODE_LEVEL(dst_type, uint8_t), \
+        ERROR_MODE_LEVEL(dst_type, uint16_t), \
+        ERROR_MODE_LEVEL(dst_type, uint32_t), \
+        ERROR_MODE_LEVEL(dst_type, uint64_t), \
+        ERROR_MODE_LEVEL(dst_type, dynd_uint128), \
+        ERROR_MODE_LEVEL(dst_type, dynd_float16), \
+        ERROR_MODE_LEVEL(dst_type, float), \
+        ERROR_MODE_LEVEL(dst_type, double), \
+        ERROR_MODE_LEVEL(dst_type, dynd_float128), \
+        ERROR_MODE_LEVEL(dst_type, dynd_complex<float>), \
         ERROR_MODE_LEVEL(dst_type, dynd_complex<double>) \
+    }
 
-    SRC_TYPE_LEVEL(dynd_bool)
-    SRC_TYPE_LEVEL(int8_t)
-    SRC_TYPE_LEVEL(int16_t)
-    SRC_TYPE_LEVEL(int32_t)
-    SRC_TYPE_LEVEL(int64_t)
-    SRC_TYPE_LEVEL(dynd_int128)
-    SRC_TYPE_LEVEL(uint8_t)
-    SRC_TYPE_LEVEL(uint16_t)
-    SRC_TYPE_LEVEL(uint32_t)
-    SRC_TYPE_LEVEL(uint64_t)
-    SRC_TYPE_LEVEL(dynd_uint128)
-    SRC_TYPE_LEVEL(dynd_float16)
-    SRC_TYPE_LEVEL(float)
-    SRC_TYPE_LEVEL(double)
-    SRC_TYPE_LEVEL(dynd_float128)
-    SRC_TYPE_LEVEL(dynd_complex<float>)
+    SRC_TYPE_LEVEL(dynd_bool),
+    SRC_TYPE_LEVEL(int8_t),
+    SRC_TYPE_LEVEL(int16_t),
+    SRC_TYPE_LEVEL(int32_t),
+    SRC_TYPE_LEVEL(int64_t),
+    SRC_TYPE_LEVEL(dynd_int128),
+    SRC_TYPE_LEVEL(uint8_t),
+    SRC_TYPE_LEVEL(uint16_t),
+    SRC_TYPE_LEVEL(uint32_t),
+    SRC_TYPE_LEVEL(uint64_t),
+    SRC_TYPE_LEVEL(dynd_uint128),
+    SRC_TYPE_LEVEL(dynd_float16),
+    SRC_TYPE_LEVEL(float),
+    SRC_TYPE_LEVEL(double),
+    SRC_TYPE_LEVEL(dynd_float128),
+    SRC_TYPE_LEVEL(dynd_complex<float>),
     SRC_TYPE_LEVEL(dynd_complex<double>)
 #undef SRC_TYPE_LEVEL
 #undef ERROR_MODE_LEVEL
-#undef SINGLE_CUDA_DEVICE_OPERATION_PAIR_LEVEL
+#undef SINGLE_OPERATION_PAIR_LEVEL
+};
 
-    assign_table_made = true;
+template<class dst_type, class src_type, assign_error_mode errmode>
+struct single_cuda_device_to_host_assigner_builtin {
+    static void assign(dst_type *dst, const src_type *src, ckernel_prefix *extra) {
+        src_type tmp;
+        throw_if_not_cuda_success(cudaMemcpy(&tmp, src, sizeof(src_type), cudaMemcpyDeviceToHost));
+        single_assigner_builtin<dst_type, src_type, errmode>::assign(dst, &tmp, extra);
+    }
+};
+
+static unary_single_operation_t assign_table_single_cuda_device_to_host_kernel[builtin_type_id_count-2][builtin_type_id_count-2][4] =
+{
+#define SINGLE_OPERATION_PAIR_LEVEL(dst_type, src_type, errmode) \
+            (unary_single_operation_t)&single_cuda_device_to_host_assigner_builtin<dst_type, src_type, errmode>::assign
+        
+#define ERROR_MODE_LEVEL(dst_type, src_type) { \
+        SINGLE_OPERATION_PAIR_LEVEL(dst_type, src_type, assign_error_none), \
+        SINGLE_OPERATION_PAIR_LEVEL(dst_type, src_type, assign_error_overflow), \
+        SINGLE_OPERATION_PAIR_LEVEL(dst_type, src_type, assign_error_fractional), \
+        SINGLE_OPERATION_PAIR_LEVEL(dst_type, src_type, assign_error_inexact) \
+    }
+
+#define SRC_TYPE_LEVEL(dst_type) { \
+        ERROR_MODE_LEVEL(dst_type, dynd_bool), \
+        ERROR_MODE_LEVEL(dst_type, int8_t), \
+        ERROR_MODE_LEVEL(dst_type, int16_t), \
+        ERROR_MODE_LEVEL(dst_type, int32_t), \
+        ERROR_MODE_LEVEL(dst_type, int64_t), \
+        ERROR_MODE_LEVEL(dst_type, dynd_int128), \
+        ERROR_MODE_LEVEL(dst_type, uint8_t), \
+        ERROR_MODE_LEVEL(dst_type, uint16_t), \
+        ERROR_MODE_LEVEL(dst_type, uint32_t), \
+        ERROR_MODE_LEVEL(dst_type, uint64_t), \
+        ERROR_MODE_LEVEL(dst_type, dynd_uint128), \
+        ERROR_MODE_LEVEL(dst_type, dynd_float16), \
+        ERROR_MODE_LEVEL(dst_type, float), \
+        ERROR_MODE_LEVEL(dst_type, double), \
+        ERROR_MODE_LEVEL(dst_type, dynd_float128), \
+        ERROR_MODE_LEVEL(dst_type, dynd_complex<float>), \
+        ERROR_MODE_LEVEL(dst_type, dynd_complex<double>) \
+    }
+
+    SRC_TYPE_LEVEL(dynd_bool),
+    SRC_TYPE_LEVEL(int8_t),
+    SRC_TYPE_LEVEL(int16_t),
+    SRC_TYPE_LEVEL(int32_t),
+    SRC_TYPE_LEVEL(int64_t),
+    SRC_TYPE_LEVEL(dynd_int128),
+    SRC_TYPE_LEVEL(uint8_t),
+    SRC_TYPE_LEVEL(uint16_t),
+    SRC_TYPE_LEVEL(uint32_t),
+    SRC_TYPE_LEVEL(uint64_t),
+    SRC_TYPE_LEVEL(dynd_uint128),
+    SRC_TYPE_LEVEL(dynd_float16),
+    SRC_TYPE_LEVEL(float),
+    SRC_TYPE_LEVEL(double),
+    SRC_TYPE_LEVEL(dynd_float128),
+    SRC_TYPE_LEVEL(dynd_complex<float>),
+    SRC_TYPE_LEVEL(dynd_complex<double>)
+#undef SRC_TYPE_LEVEL
+#undef ERROR_MODE_LEVEL
+#undef SINGLE_OPERATION_PAIR_LEVEL
+};
+
+template<class dst_type, class src_type>
+__global__ void func(dst_type *dst, src_type *src, ckernel_prefix *extra) {
+    single_assigner_builtin<dst_type, src_type, assign_error_none>::assign(dst, src, extra);
 }
+
+template<class dst_type, class src_type, assign_error_mode errmode>
+struct single_cuda_device_to_device_assigner_builtin {
+    static void assign(dst_type *DYND_UNUSED(dst), const src_type *DYND_UNUSED(src), ckernel_prefix *DYND_UNUSED(extra)) {
+        std::stringstream ss;
+        ss << "assignment from " << ndt::make_type<src_type>() << " on the device to " << ndt::make_type<dst_type>() << " on the device ";
+        ss << "with error mode " << errmode << " is not implemented";
+        throw std::runtime_error(ss.str());
+    }
+};
+
+//template<class dst_type, class src_type>
+//struct single_cuda_device_to_device_assigner_builtin<dst_type, src_type, assign_error_none> {
+  //  static void assign(dst_type *dst, const src_type *src, ckernel_prefix *extra) {
+    //    func<<<1, 1>>>(dst, src, extra);
+    //    throw_if_not_cuda_success();
+  //      throw_if_not_cuda_success(cudaDeviceSynchronize());
+   // }    
+//};
+
+static unary_single_operation_t assign_table_single_cuda_device_to_device_kernel[builtin_type_id_count-2][builtin_type_id_count-2][4] =
+{
+#define SINGLE_OPERATION_PAIR_LEVEL(dst_type, src_type, errmode) \
+            (unary_single_operation_t)&single_cuda_device_to_device_assigner_builtin<dst_type, src_type, errmode>::assign
+        
+#define ERROR_MODE_LEVEL(dst_type, src_type) { \
+        SINGLE_OPERATION_PAIR_LEVEL(dst_type, src_type, assign_error_none), \
+        SINGLE_OPERATION_PAIR_LEVEL(dst_type, src_type, assign_error_overflow), \
+        SINGLE_OPERATION_PAIR_LEVEL(dst_type, src_type, assign_error_fractional), \
+        SINGLE_OPERATION_PAIR_LEVEL(dst_type, src_type, assign_error_inexact) \
+    }
+
+#define SRC_TYPE_LEVEL(dst_type) { \
+        ERROR_MODE_LEVEL(dst_type, dynd_bool), \
+        ERROR_MODE_LEVEL(dst_type, int8_t), \
+        ERROR_MODE_LEVEL(dst_type, int16_t), \
+        ERROR_MODE_LEVEL(dst_type, int32_t), \
+        ERROR_MODE_LEVEL(dst_type, int64_t), \
+        ERROR_MODE_LEVEL(dst_type, dynd_int128), \
+        ERROR_MODE_LEVEL(dst_type, uint8_t), \
+        ERROR_MODE_LEVEL(dst_type, uint16_t), \
+        ERROR_MODE_LEVEL(dst_type, uint32_t), \
+        ERROR_MODE_LEVEL(dst_type, uint64_t), \
+        ERROR_MODE_LEVEL(dst_type, dynd_uint128), \
+        ERROR_MODE_LEVEL(dst_type, dynd_float16), \
+        ERROR_MODE_LEVEL(dst_type, float), \
+        ERROR_MODE_LEVEL(dst_type, double), \
+        ERROR_MODE_LEVEL(dst_type, dynd_float128), \
+        ERROR_MODE_LEVEL(dst_type, dynd_complex<float>), \
+        ERROR_MODE_LEVEL(dst_type, dynd_complex<double>) \
+    }
+
+    SRC_TYPE_LEVEL(dynd_bool),
+    SRC_TYPE_LEVEL(int8_t),
+    SRC_TYPE_LEVEL(int16_t),
+    SRC_TYPE_LEVEL(int32_t),
+    SRC_TYPE_LEVEL(int64_t),
+    SRC_TYPE_LEVEL(dynd_int128),
+    SRC_TYPE_LEVEL(uint8_t),
+    SRC_TYPE_LEVEL(uint16_t),
+    SRC_TYPE_LEVEL(uint32_t),
+    SRC_TYPE_LEVEL(uint64_t),
+    SRC_TYPE_LEVEL(dynd_uint128),
+    SRC_TYPE_LEVEL(dynd_float16),
+    SRC_TYPE_LEVEL(float),
+    SRC_TYPE_LEVEL(double),
+    SRC_TYPE_LEVEL(dynd_float128),
+    SRC_TYPE_LEVEL(dynd_complex<float>),
+    SRC_TYPE_LEVEL(dynd_complex<double>)
+#undef SRC_TYPE_LEVEL
+#undef ERROR_MODE_LEVEL
+#undef SINGLE_OPERATION_PAIR_LEVEL
+};
 
 #endif // DYND_CUDA
 
@@ -478,7 +649,6 @@ size_t dynd::make_builtin_type_assignment_kernel(
         ckernel_prefix *result = out->get_at<ckernel_prefix>(offset_out);
         switch (kernreq) {
             case kernel_request_single:
-//                make_assign_table_single_cuda_device_kernel();
                 result->set_function<unary_single_operation_t>(
                                 assign_table_single_kernel[dst_type_id-bool_type_id]
                                                 [src_type_id-bool_type_id][errmode]);
@@ -488,6 +658,29 @@ size_t dynd::make_builtin_type_assignment_kernel(
                                 assign_table_strided_kernel[dst_type_id-bool_type_id]
                                                 [src_type_id-bool_type_id][errmode]);
                 break;
+#ifdef DYND_CUDA
+            case kernel_request_single_cuda_host_to_device:
+                result->set_function<unary_single_operation_t>(
+                                assign_table_single_cuda_host_to_device_kernel[dst_type_id-bool_type_id]
+                                                [src_type_id-bool_type_id][errmode]);
+                break;
+            case kernel_request_single_cuda_device_to_host:
+                result->set_function<unary_single_operation_t>(
+                                assign_table_single_cuda_device_to_host_kernel[dst_type_id-bool_type_id]
+                                                [src_type_id-bool_type_id][errmode]);
+                break;
+            case kernel_request_single_cuda_device_to_device:
+                result->set_function<unary_single_operation_t>(
+                                assign_table_single_cuda_device_to_device_kernel[dst_type_id-bool_type_id]
+                                                [src_type_id-bool_type_id][errmode]);
+                break;
+            case kernel_request_strided_cuda_host_to_device:
+                break;
+            case kernel_request_strided_cuda_device_to_host:
+                break;
+            case kernel_request_strided_cuda_device_to_device:
+                break;
+#endif // DYND_CUDA
             default: {
                 stringstream ss;
                 ss << "make_builtin_type_assignment_function: unrecognized request " << (int)kernreq;

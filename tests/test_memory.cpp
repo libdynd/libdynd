@@ -15,6 +15,7 @@ template <>
 class Memory<void> : public ::testing::Test {
 public:
     static const bool IsDefaultMemoryType = true;
+    static const type_id_t MemoryTypeID = (type_id_t) 0;
 
     static inline ndt::type MakeMemoryType(const ndt::type& target_tp) {
         return target_tp;
@@ -35,6 +36,10 @@ public:
 
     static inline ndt::type MakeMemoryType(const ndt::type& target_tp, unsigned int cuda_host_flags = cudaHostAllocDefault) {
         return make_cuda_host(target_tp, cuda_host_flags);
+    }
+
+    template <typename T>
+    static inline T ValueAt(T *ptr) {
     }
 };
 
