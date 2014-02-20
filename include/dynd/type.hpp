@@ -457,6 +457,17 @@ public:
     }
 
     /**
+     * Returns true if the type is a memory type.
+     */
+    inline bool is_memory() const {
+        if (is_builtin()) {
+            return false;
+        } else {
+            return m_extended->is_memory();
+        }
+    }
+
+    /**
      * For array types, recursively applies to each child type, and for
      * scalar types converts to the provided one.
      *

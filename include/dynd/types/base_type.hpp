@@ -204,6 +204,11 @@ public:
     virtual bool is_expression() const;
 
     /**
+     * Returns true if the type is a memory type.
+     */
+    virtual bool is_memory() const;
+
+    /**
      * Should return true if there is no additional blockref which might point
      * to data not owned by the metadata. For example, a blockref which points
      * to an 'external' memory block does not own its data uniquely.

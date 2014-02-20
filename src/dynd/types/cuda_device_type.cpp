@@ -55,4 +55,14 @@ void cuda_device_type::metadata_destruct(char *metadata) const
     }
 }
 
+void cuda_device_type::data_alloc(char **data, size_t size) const
+{
+    throw_if_not_cuda_success(cudaMalloc(data, size));
+}
+
+void cuda_device_type::data_zeroinit(char *data, size_t size) const
+{
+    throw_if_not_cuda_success(cudaMemset(data, 0, size));
+}
+
 #endif // DYND_CUDA

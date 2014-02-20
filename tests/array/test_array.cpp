@@ -426,10 +426,10 @@ TEST(Array, StdVectorStringConstructor) {
     }
 }
 
-TEST(Array, AsScalar) {
+TYPED_TEST_P(Array, AsScalar) {
     nd::array a;
 
-    a = nd::empty(ndt::make_type<float>());
+    a = nd::empty(TestFixture::MakeMemoryType(ndt::make_type<float>()));
     a.val_assign(3.14f);
     EXPECT_EQ(3.14f, a.as<float>());
     EXPECT_EQ(3.14f, a.as<double>());
@@ -442,7 +442,7 @@ TEST(Array, AsScalar) {
     EXPECT_THROW(a.as<bool>(assign_error_overflow), runtime_error);
     EXPECT_EQ(true, a.as<bool>(assign_error_none));
 
-    a = nd::empty(ndt::make_type<double>());
+    a = nd::empty(TestFixture::MakeMemoryType(ndt::make_type<double>()));
     a.val_assign(3.141592653589);
     EXPECT_EQ(3.141592653589, a.as<double>());
     EXPECT_THROW(a.as<float>(assign_error_inexact), runtime_error);
@@ -619,7 +619,8 @@ TEST(Array, Storage) {
     EXPECT_EQ(a.get_strides(), b.get_strides());
 }
 
-REGISTER_TYPED_TEST_CASE_P(Array, ScalarConstructor, OneDimConstructor, TwoDimConstructor, ThreeDimConstructor);
+REGISTER_TYPED_TEST_CASE_P(Array, ScalarConstructor, OneDimConstructor, TwoDimConstructor, ThreeDimConstructor,
+    AsScalar);
 
 INSTANTIATE_TYPED_TEST_CASE_P(Default, Array, DefaultMemory);
 #ifdef DYND_CUDA

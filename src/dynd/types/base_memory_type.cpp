@@ -12,6 +12,11 @@ base_memory_type::~base_memory_type()
 {
 }
 
+bool base_memory_type::is_memory() const
+{
+    return true;
+}
+
 ndt::type base_memory_type::get_canonical_type() const
 {
     return m_target_tp;

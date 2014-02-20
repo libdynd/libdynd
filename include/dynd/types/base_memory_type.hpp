@@ -28,9 +28,14 @@ public:
 
     virtual ~base_memory_type();
 
+    bool is_memory() const;
+
     virtual ndt::type get_canonical_type() const;
 
     virtual bool operator==(const base_type& rhs) const;
+
+    virtual void data_alloc(char **data, size_t size) const = 0;
+    virtual void data_zeroinit(char *data, size_t size) const = 0;
 };
 
 } // namespace dynd

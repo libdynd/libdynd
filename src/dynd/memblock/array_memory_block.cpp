@@ -104,45 +104,23 @@ memory_block_ptr dynd::make_array_memory_block(const ndt::type& tp, intptr_t ndi
         data_size = tp.extended()->get_default_data_size(ndim, shape);
     }
 
-    char *data_ptr = NULL;
     memory_block_ptr result;
-    result = make_array_memory_block(metadata_size, data_size, tp.get_data_alignment(), &data_ptr);
-
-    if (tp.get_flags()&type_flag_zeroinit) {
-        memset(data_ptr, 0, data_size);
-    }
-
-/*
-    switch (tp.get_type_id()) {
-#ifdef DYND_CUDA
-        case cuda_host_type_id:
-            result = make_array_memory_block(metadata_size);
-            throw_if_not_cuda_success(cudaHostAlloc(&data_ptr, data_size,
-                reinterpret_cast<const cuda_host_type&>(tp).get_cuda_host_flags()));
-            break;
-        case cuda_device_type_id:
-            result = make_array_memory_block(metadata_size);
-            throw_if_not_cuda_success(cudaMalloc(&data_ptr, data_size));
-            break;
-#endif // DYND_CUDA
-        default:
-            result = make_array_memory_block(metadata_size, data_size, tp.get_data_alignment(), &data_ptr);
-            break;
+    char *data_ptr = NULL;
+    if (tp.is_memory()) {
+        result = make_array_memory_block(metadata_size);
+        reinterpret_cast<const base_memory_type*>(tp.extended())->data_alloc(&data_ptr, data_size);
+    } else {
+        result = make_array_memory_block(metadata_size, data_size, tp.get_data_alignment(), &data_ptr);
     }
 
     if (tp.get_flags()&type_flag_zeroinit) {
-        switch (tp.get_type_id()) {
-#ifdef DYND_CUDA
-            case cuda_device_type_id:
-                throw_if_not_cuda_success(cudaMemset(data_ptr, 0, data_size));
-                break;
-#endif // DYND_CUDA
-            default:
-                memset(data_ptr, 0, data_size);
-                break;
+        if (tp.is_memory()) {
+            reinterpret_cast<const base_memory_type*>(tp.extended())->data_zeroinit(data_ptr, data_size);
         }
-    }*/
-
+        else {
+            memset(data_ptr, 0, data_size);
+        }
+    }
 
     array_preamble *preamble = reinterpret_cast<array_preamble *>(result.get());
     if (tp.is_builtin()) {
