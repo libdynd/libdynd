@@ -9,6 +9,7 @@
 #include <cmath>
 
 #include "inc_gtest.hpp"
+#include "../test_memory.cpp"
 
 #include <dynd/array.hpp>
 #include <dynd/types/strided_dim_type.hpp>
@@ -17,6 +18,12 @@
 
 using namespace std;
 using namespace dynd;
+
+template <typename T>
+class Array : public Memory<T> {
+};
+
+TYPED_TEST_CASE_P(Array);
 
 TEST(Array, NullConstructor) {
     nd::array a;
@@ -127,11 +134,11 @@ TEST(Array, FromValueConstructorRW) {
     EXPECT_EQ(nd::readwrite_access_flags, a.get_access_flags());
 }
 
-TEST(Array, ScalarConstructor) {
+TYPED_TEST_P(Array, ScalarConstructor) {
     nd::array a;
     // Scalar nd::array
-    a = nd::empty(ndt::make_type<float>());
-    EXPECT_EQ(ndt::make_type<float>(), a.get_type());
+    a = nd::empty(TestFixture::MakeMemoryType(ndt::make_type<float>()));
+    EXPECT_EQ(TestFixture::MakeMemoryType(ndt::make_type<float>()), a.get_type());
     EXPECT_EQ(nd::readwrite_access_flags, a.get_access_flags());
     EXPECT_TRUE(a.is_scalar());
     // Constructing an empty array with too many dimensions should raise an error
@@ -593,3 +600,10 @@ TEST(Array, Storage) {
     EXPECT_EQ(a.get_shape(), b.get_shape());
     EXPECT_EQ(a.get_strides(), b.get_strides());
 }
+
+REGISTER_TYPED_TEST_CASE_P(Array, ScalarConstructor);
+
+INSTANTIATE_TYPED_TEST_CASE_P(Default, Array, DefaultMemory);
+#ifdef DYND_CUDA
+INSTANTIATE_TYPED_TEST_CASE_P(CUDA, Array, CUDAMemory);
+#endif // DYND_CUDA
