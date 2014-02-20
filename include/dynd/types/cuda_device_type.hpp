@@ -23,7 +23,10 @@ public:
 
     void print_type(std::ostream& o) const;
 
-    bool operator==(const base_type& rhs) const;
+    void get_shape(intptr_t ndim, intptr_t i, intptr_t *out_shape,
+                    const char *metadata, const char *data) const;
+
+    void get_strides(size_t i, intptr_t *out_strides, const char *metadata) const;
 
     void metadata_default_construct(char *metadata, intptr_t ndim, const intptr_t* shape) const;
 //    void metadata_copy_construct(char *dst_metadata, const char *src_metadata, memory_block_data *embedded_reference) const;

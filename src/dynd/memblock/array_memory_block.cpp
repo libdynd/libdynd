@@ -43,7 +43,7 @@ void free_array_memory_block(memory_block_data *memblock)
     }
 
     // Free the ndobject data if it wasn't allocated together with the memory block
-    if (preamble->m_data_reference == NULL &&
+/*    if (preamble->m_data_reference == NULL &&
                     !preamble->is_builtin_type()) {
         switch (preamble->m_type->get_type_id()) {
 #ifdef DYND_CUDA
@@ -57,7 +57,7 @@ void free_array_memory_block(memory_block_data *memblock)
             default:
                 break;
         }
-    }
+    }*/
 
     // Finally free the memory block itself
     free(reinterpret_cast<void *>(memblock));
@@ -106,6 +106,13 @@ memory_block_ptr dynd::make_array_memory_block(const ndt::type& tp, intptr_t ndi
 
     char *data_ptr = NULL;
     memory_block_ptr result;
+    result = make_array_memory_block(metadata_size, data_size, tp.get_data_alignment(), &data_ptr);
+
+    if (tp.get_flags()&type_flag_zeroinit) {
+        memset(data_ptr, 0, data_size);
+    }
+
+/*
     switch (tp.get_type_id()) {
 #ifdef DYND_CUDA
         case cuda_host_type_id:
@@ -134,7 +141,8 @@ memory_block_ptr dynd::make_array_memory_block(const ndt::type& tp, intptr_t ndi
                 memset(data_ptr, 0, data_size);
                 break;
         }
-    }
+    }*/
+
 
     array_preamble *preamble = reinterpret_cast<array_preamble *>(result.get());
     if (tp.is_builtin()) {

@@ -19,12 +19,18 @@ protected:
     ndt::type m_target_tp;
 public:
     inline base_memory_type(type_id_t type_id, type_kind_t kind, size_t data_size,
-            size_t alignment, flags_type flags, size_t metadata_size, size_t undim = 0)
-        : base_type(type_id, kind, data_size, alignment, flags, metadata_size, undim)
+            size_t alignment, flags_type flags, size_t metadata_size, size_t undim,
+            const ndt::type& target_tp)
+        : base_type(type_id, kind, data_size, alignment, flags, metadata_size, undim),
+        m_target_tp(target_tp)
     {
     }
 
     virtual ~base_memory_type();
+
+    virtual ndt::type get_canonical_type() const;
+
+    virtual bool operator==(const base_type& rhs) const;
 };
 
 } // namespace dynd
