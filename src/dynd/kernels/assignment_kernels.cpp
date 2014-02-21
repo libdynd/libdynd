@@ -426,7 +426,7 @@ static unary_strided_operation_t assign_table_strided_kernel[builtin_type_id_cou
 
 #ifdef DYND_CUDA
 
-#include <cuda_runtime.h>
+
 
 
 template<class dst_type, class src_type, assign_error_mode errmode>
@@ -557,7 +557,7 @@ static unary_single_operation_t assign_table_single_cuda_device_to_host_kernel[b
 };
 
 template<class dst_type, class src_type>
-__global__ void func(dst_type *dst, src_type *src, ckernel_prefix *extra) {
+static DYND_CUDA_GLOBAL_CALLABLE void single_cuda_global_assign_builtin(dst_type *dst, const src_type *src, ckernel_prefix *extra) {
     single_assigner_builtin<dst_type, src_type, assign_error_none>::assign(dst, src, extra);
 }
 
@@ -570,15 +570,13 @@ struct single_cuda_device_to_device_assigner_builtin {
         throw std::runtime_error(ss.str());
     }
 };
-
-//template<class dst_type, class src_type>
-//struct single_cuda_device_to_device_assigner_builtin<dst_type, src_type, assign_error_none> {
-  //  static void assign(dst_type *dst, const src_type *src, ckernel_prefix *extra) {
-    //    func<<<1, 1>>>(dst, src, extra);
-    //    throw_if_not_cuda_success();
-  //      throw_if_not_cuda_success(cudaDeviceSynchronize());
-   // }    
-//};
+template<class dst_type, class src_type>
+struct single_cuda_device_to_device_assigner_builtin<dst_type, src_type, assign_error_none> {
+    static void assign(dst_type *dst, const src_type *src, ckernel_prefix *DYND_UNUSED(extra)) {
+        single_cuda_global_assign_builtin<<<1, 1>>>(dst, src, NULL);
+        throw_if_not_cuda_success(cudaDeviceSynchronize());
+    }
+};
 
 static unary_single_operation_t assign_table_single_cuda_device_to_device_kernel[builtin_type_id_count-2][builtin_type_id_count-2][4] =
 {

@@ -8,9 +8,14 @@
 
 #include <cmath>
 
+#ifdef DYND_CUDA
+#include <cuda_runtime.h>
+#endif // DYND_CUDA
+
 #ifdef __CUDACC__
 #define DYND_CUDA_DEVICE_CALLABLE __device__
 #define DYND_CUDA_HOST_DEVICE_CALLABLE __host__ DYND_CUDA_DEVICE_CALLABLE
+#define DYND_CUDA_GLOBAL_CALLABLE __global__
 #ifdef __CUDA_ARCH__
 #define DYND_CUDA_DEVICE_ARCH
 #else

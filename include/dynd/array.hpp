@@ -589,6 +589,14 @@ public:
     template<class T>
     T as(assign_error_mode errmode = assign_error_default) const;
 
+#ifdef DYND_CUDA
+    array to_host() const;
+
+    array to_cuda_host(unsigned int cuda_host_flags = cudaHostAllocDefault) const;
+
+    array to_cuda_device() const;
+#endif // DYND_CUDA
+
     /** Sorting comparison between two arrays. (Returns a bool, does not broadcast) */
     bool op_sorting_less(const array& rhs) const;
     /** Less than comparison between two arrays. (Returns a bool, does not broadcast) */

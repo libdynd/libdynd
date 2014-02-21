@@ -15,6 +15,8 @@
 #include <dynd/types/fixedbytes_type.hpp>
 #include <dynd/types/type_type.hpp>
 #include <dynd/types/convert_type.hpp>
+#include <dynd/types/cuda_host_type.hpp>
+#include <dynd/types/cuda_device_type.hpp>
 #include <dynd/kernels/assignment_kernels.hpp>
 #include <dynd/kernels/comparison_kernels.hpp>
 #include <dynd/exceptions.hpp>
@@ -881,6 +883,29 @@ nd::array nd::array::eval_copy(uint32_t access_flags, const eval::eval_context *
     result.get_ndo()->m_flags = access_flags;
     return result;
 }
+
+#ifdef DYND_CUDA
+nd::array nd::array::to_host() const
+{
+    array result = empty_like(*this, get_type().get_canonical_type());
+    result.val_assign(*this);
+    return result;
+}
+
+nd::array nd::array::to_cuda_host(unsigned int cuda_host_flags) const
+{
+    array result = empty_like(*this, make_cuda_host(get_type().get_canonical_type(), cuda_host_flags));
+    result.val_assign(*this);
+    return result;
+}
+
+nd::array nd::array::to_cuda_device() const
+{
+    array result = empty_like(*this, make_cuda_device(get_type().get_canonical_type()));
+    result.val_assign(*this);
+    return result;
+}
+#endif
 
 bool nd::array::op_sorting_less(const array& rhs) const
 {
