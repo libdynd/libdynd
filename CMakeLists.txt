@@ -56,8 +56,6 @@ list(APPEND CMAKE_MODULE_PATH
 set(CMAKE_VERBOSE_MAKEFILE 1)
 
 # Embedded libraries
-add_subdirectory(thirdparty/blosc)
-include_directories(thirdparty/blosc/blosc)
 add_subdirectory(thirdparty/datetime)
 include_directories(thirdparty/datetime/include)
 
@@ -217,13 +215,11 @@ set(libdynd_SRC
     src/dynd/gfunc/callable.cpp
     src/dynd/gfunc/elwise_gfunc.cpp
     src/dynd/gfunc/elwise_reduce_gfunc.cpp
-    src/dynd/gfunc/serialize.cpp
     include/dynd/gfunc/callable.hpp
     include/dynd/gfunc/call_callable.hpp
     include/dynd/gfunc/elwise_gfunc.hpp
     include/dynd/gfunc/elwise_reduce_gfunc.hpp
     include/dynd/gfunc/make_callable.hpp
-    include/dynd/gfunc/serialize.hpp
 	# Iter
 	src/dynd/iter/string_iter.cpp
 	include/dynd/iter/string_iter.hpp
@@ -383,11 +379,9 @@ if ((NOT DYND_SHARED_LIB) AND (DYND_INSTALL_LIB))
     # including static libraries in other static libraries
     # is a hassle
     get_directory_property(datetime_SRC DIRECTORY "thirdparty/datetime" DEFINITION datetime_SRC)
-    get_directory_property(blosc_SRC DIRECTORY "thirdparty/blosc" DEFINITION blosc_SRC)
     set(libdynd_SRC
         ${libdynd_SRC}
         ${datetime_SRC}
-        ${blosc_SRC}
         )
 endif()
 
@@ -433,7 +427,6 @@ if (DYND_SHARED_LIB OR (NOT DYND_INSTALL_LIB))
     # link the sublibraries normally
     target_link_libraries(libdynd
         datetime
-        blosc
         )
 endif()
 
