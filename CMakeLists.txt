@@ -431,7 +431,7 @@ endif()
 
 if (DYND_SHARED_LIB)
     if (DYND_CUDA)
-        cuda_add_library(libdynd SHARED ${libdynd_SRC} OPTIONS "-gencode" "arch=compute_20,code=sm_20" "-gencode" "arch=compute_30,code=sm_30" "-Xcompiler" "-fPIC")
+        cuda_add_library(libdynd SHARED ${libdynd_SRC} OPTIONS "-Xcompiler" "-g" "-gencode" "arch=compute_20,code=sm_20" "-gencode" "arch=compute_30,code=sm_30" "-Xcompiler" "-fPIC")
     else()
         add_library(libdynd SHARED ${libdynd_SRC})
     endif()

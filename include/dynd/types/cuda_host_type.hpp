@@ -35,8 +35,18 @@ public:
 
     void get_strides(size_t i, intptr_t *out_strides, const char *metadata) const;
 
+    void transform_child_types(type_transform_fn_t transform_fn, void *extra,
+                    ndt::type& out_transformed_tp, bool& out_was_transformed) const;
+
+    ndt::type apply_linear_index(intptr_t nindices, const irange *indices,
+                size_t current_i, const ndt::type& root_tp, bool leading_dimension) const;
+
+    ndt::type at_single(intptr_t i0, const char **inout_metadata, const char **inout_data) const;
+
+    ndt::type get_type_at_dimension(char **inout_metadata, intptr_t i, intptr_t total_ndim = 0) const;
+
     void metadata_default_construct(char *metadata, intptr_t ndim, const intptr_t* shape) const;
-//    void metadata_copy_construct(char *dst_metadata, const char *src_metadata, memory_block_data *embedded_reference) const;
+    void metadata_copy_construct(char *dst_metadata, const char *src_metadata, memory_block_data *embedded_reference) const;
   //  void metadata_reset_buffers(char *metadata) const;
     //void metadata_finalize_buffers(char *metadata) const;
     void metadata_destruct(char *metadata) const;

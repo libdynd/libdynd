@@ -42,10 +42,35 @@ void cuda_device_type::get_strides(size_t i, intptr_t *out_strides, const char *
     m_target_tp.extended()->get_strides(i, out_strides, metadata);
 }
 
+ndt::type cuda_device_type::apply_linear_index(intptr_t nindices, const irange *indices,
+            size_t current_i, const ndt::type& root_tp, bool leading_dimension) const
+{
+    return make_cuda_device(m_target_tp.extended()->apply_linear_index(nindices, indices,
+        current_i, root_tp, leading_dimension));
+}
+
+ndt::type cuda_device_type::at_single(intptr_t i0, const char **inout_metadata, const char **inout_data) const
+{
+    return make_cuda_device(m_target_tp.extended()->at_single(i0, inout_metadata, inout_data));
+}
+
+ndt::type cuda_device_type::get_type_at_dimension(char **inout_metadata, intptr_t i, intptr_t total_ndim) const
+{
+    return make_cuda_device(m_target_tp.extended()->get_type_at_dimension(inout_metadata, i, total_ndim));
+}
+
 void cuda_device_type::metadata_default_construct(char *metadata, intptr_t ndim, const intptr_t* shape) const
 {
     if (!m_target_tp.is_builtin()) {
         m_target_tp.extended()->metadata_default_construct(metadata, ndim, shape);
+    }
+}
+
+void cuda_device_type::metadata_copy_construct(char *dst_metadata, const char *src_metadata, memory_block_data *embedded_reference) const
+{
+    if (!m_target_tp.is_builtin()) {
+        m_target_tp.extended()->metadata_copy_construct(dst_metadata,
+                        src_metadata, embedded_reference);
     }
 }
 
@@ -65,8 +90,6 @@ void cuda_device_type::data_zeroinit(char *data, size_t size) const
 {
     throw_if_not_cuda_success(cudaMemset(data, 0, size));
 }
-
-#include <stdio.h>
 
 inline cudaMemcpyKind get_cuda_memcpy_kind(const ndt::type& dst_tp, const ndt::type& src_tp) {
     if (dst_tp.get_type_id() == cuda_device_type_id) {
@@ -111,10 +134,35 @@ size_t cuda_device_type::make_assignment_kernel(
     const ndt::type& src_target_tp = src_tp.get_canonical_type();
 
     if (dst_target_tp.data_layout_compatible_with(src_target_tp)) {
-        return ::make_assignment_kernel(out, offset_out,
-                        dst_target_tp, dst_metadata + 0 * dst_tp.get_metadata_size(),
+        if (dst_target_tp.is_builtin()) {
+            return ::make_assignment_kernel(out, offset_out,
+                        dst_target_tp, dst_metadata,
                         src_target_tp, src_metadata,
                         get_single_cuda_kernreq(dst_tp, src_tp), errmode, ectx);
+        } else {
+            return make_pod_typed_data_assignment_kernel(out, offset_out, dst_target_tp.get_data_size(),
+                dst_target_tp.get_data_alignment(), get_single_cuda_kernreq(dst_tp, src_tp));
+        }
+
+//        cout << "compat" << endl;
+
+
+
+//        out->ensure_capacity(offset_out);
+
+/*
+        single_cuda_device_assign_kernel_extra *e = out->get_at<single_cuda_device_assign_kernel_extra>(offset_out);
+        e->base.set_function<unary_single_operation_t>(&single_cuda_device_assign_kernel_extra::single);
+        e->base.destructor = single_cuda_device_assign_kernel_extra::destruct;
+        e->size = dst_target_tp.get_data_size();
+        e->kind = get_cuda_memcpy_kind(dst_tp, src_tp);
+
+        return offset_out + sizeof(single_cuda_device_assign_kernel_extra);*/
+
+//        return ::make_assignment_kernel(out, offset_out,
+  //                      dst_target_tp, dst_metadata,
+    //                    src_target_tp, src_metadata,
+      //                  get_single_cuda_kernreq(dst_tp, src_tp), errmode, ectx);
     }
 
     // the assignment needs a cast first
@@ -122,13 +170,13 @@ size_t cuda_device_type::make_assignment_kernel(
 
     if (this == dst_tp.extended()) {
         return ::make_assignment_kernel(out, offset_out,
-                        dst_target_tp, dst_metadata + 0 * dst_tp.get_metadata_size(),
+                        dst_target_tp, dst_metadata,
                         src_target_tp, src_metadata,
                         get_single_cuda_kernreq(dst_tp, src_tp), errmode, ectx);
     }
 
         return ::make_assignment_kernel(out, offset_out,
-                        dst_target_tp, dst_metadata + 0 * dst_tp.get_metadata_size(),
+                        dst_target_tp, dst_metadata,
                         src_target_tp, src_metadata,
                         get_single_cuda_kernreq(dst_tp, src_tp), errmode, ectx);
 }
