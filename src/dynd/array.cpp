@@ -884,24 +884,38 @@ nd::array nd::array::eval_copy(uint32_t access_flags, const eval::eval_context *
     return result;
 }
 
+#include <stdio.h>
+
 #ifdef DYND_CUDA
 nd::array nd::array::to_host() const
 {
-    array result = empty_like(*this, get_type().get_canonical_type());
+    size_t ndim = get_ndim();
+    dimvector shape(ndim);
+    get_shape(shape.get());
+    array result = nd::array(make_array_memory_block(get_type().get_canonical_type(), ndim, shape.get()));
+
     result.val_assign(*this);
     return result;
 }
 
 nd::array nd::array::to_cuda_host(unsigned int cuda_host_flags) const
 {
-    array result = empty_like(*this, make_cuda_host(get_type().get_canonical_type(), cuda_host_flags));
+    size_t ndim = get_ndim();
+    dimvector shape(ndim);
+    get_shape(shape.get());
+    array result = nd::array(make_array_memory_block(make_cuda_host(get_type().get_canonical_type(), cuda_host_flags), ndim, shape.get()));
+
     result.val_assign(*this);
     return result;
 }
 
 nd::array nd::array::to_cuda_device() const
 {
-    array result = empty_like(*this, make_cuda_device(get_type().get_canonical_type()));
+    size_t ndim = get_ndim();
+    dimvector shape(ndim);
+    get_shape(shape.get());
+    array result = nd::array(make_array_memory_block(make_cuda_device(get_type().get_canonical_type()), ndim, shape.get()));
+
     result.val_assign(*this);
     return result;
 }
