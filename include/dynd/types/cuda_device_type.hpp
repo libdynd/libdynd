@@ -19,34 +19,15 @@ public:
 
     virtual ~cuda_device_type();
 
-    void transform_child_types(type_transform_fn_t transform_fn, void *extra,
-                    ndt::type& out_transformed_type, bool& out_was_transformed) const;
-
-    void print_data(std::ostream& o, const char *metadata, const char *data) const;
-
     void print_type(std::ostream& o) const;
 
-    void get_shape(intptr_t ndim, intptr_t i, intptr_t *out_shape,
-                    const char *metadata, const char *data) const;
-
-    void get_strides(size_t i, intptr_t *out_strides, const char *metadata) const;
-
-    ndt::type apply_linear_index(intptr_t nindices, const irange *indices,
-                size_t current_i, const ndt::type& root_tp, bool leading_dimension) const;
-
-    ndt::type at_single(intptr_t i0, const char **inout_metadata, const char **inout_data) const;
-
-    ndt::type get_type_at_dimension(char **inout_metadata, intptr_t i, intptr_t total_ndim = 0) const;
-
-    void metadata_default_construct(char *metadata, intptr_t ndim, const intptr_t* shape) const;
-    void metadata_copy_construct(char *dst_metadata, const char *src_metadata, memory_block_data *embedded_reference) const;
-  //  void metadata_reset_buffers(char *metadata) const;
-    //void metadata_finalize_buffers(char *metadata) const;
-    void metadata_destruct(char *metadata) const;
-   // void metadata_debug_print(const char *metadata, std::ostream& o, const std::string& indent) const;
+    ndt::type with_replaced_target_type(const ndt::type& target_tp) const;
 
     void data_alloc(char **data, size_t size) const;
     void data_zeroinit(char *data, size_t size) const;
+
+
+
 
     size_t make_assignment_kernel(
                     ckernel_builder *out, size_t offset_out,

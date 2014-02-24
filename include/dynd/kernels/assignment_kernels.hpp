@@ -184,10 +184,26 @@ struct strided_assign_kernel_extra {
 };
 
 #ifdef DYND_CUDA
+kernel_request_t make_kernreq_to_cuda_kernreq(const ndt::type& dst_tp, const ndt::type& src_tp,
+                kernel_request_t kernreq);
+
 size_t make_cuda_builtin_type_assignment_kernel(
                 ckernel_builder *out, size_t offset_out,
                 type_id_t dst_type_id, type_id_t src_type_id,
                 kernel_request_t kernreq, assign_error_mode errmode);
+
+size_t make_cuda_pod_typed_data_assignment_kernel(
+                ckernel_builder *out, size_t offset_out,
+                size_t data_size, size_t data_alignment,
+                kernel_request_t kernreq);
+
+
+size_t make_cuda_assignment_kernel(
+                ckernel_builder *out, size_t offset_out,
+                const ndt::type& dst_tp, const char *dst_metadata,
+                const ndt::type& src_tp, const char *src_metadata,
+                kernel_request_t kernreq, assign_error_mode errmode,
+                const eval::eval_context *ectx);
 #endif
 
 } // namespace dynd

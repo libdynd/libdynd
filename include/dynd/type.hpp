@@ -468,6 +468,17 @@ public:
     }
 
     /**
+     * Returns true if the type is a CUDA memory type.
+     */
+    inline bool is_cuda() const {
+        if (is_builtin()) {
+            return false;
+        } else {
+            return m_extended->is_cuda();
+        }
+    }
+
+    /**
      * For array types, recursively applies to each child type, and for
      * scalar types converts to the provided one.
      *

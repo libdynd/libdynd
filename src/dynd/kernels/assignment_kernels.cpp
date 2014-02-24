@@ -98,6 +98,7 @@ static void unaligned_copy_strided(char *dst, intptr_t dst_stride,
         memcpy(dst, src, data_size);
     }
 }
+
 #ifdef DYND_CUDA
 static void unaligned_copy_single_cuda_host_to_device(char *dst, const char *src,
                 ckernel_prefix *extra)
@@ -105,17 +106,49 @@ static void unaligned_copy_single_cuda_host_to_device(char *dst, const char *src
     size_t data_size = reinterpret_cast<unaligned_copy_single_kernel_extra *>(extra)->data_size;
     throw_if_not_cuda_success(cudaMemcpy(dst, src, data_size, cudaMemcpyHostToDevice));
 }
+static void unaligned_copy_strided_cuda_host_to_device(char *dst, intptr_t dst_stride,
+                        const char *src, intptr_t src_stride,
+                        size_t count, ckernel_prefix *extra)
+{
+    size_t data_size = reinterpret_cast<unaligned_copy_single_kernel_extra *>(extra)->data_size;
+    for (size_t i = 0; i != count; ++i,
+                    dst += dst_stride, src += src_stride) {
+        throw_if_not_cuda_success(cudaMemcpy(dst, src, data_size, cudaMemcpyHostToDevice));
+    }
+}
+
 static void unaligned_copy_single_cuda_device_to_host(char *dst, const char *src,
                 ckernel_prefix *extra)
 {
     size_t data_size = reinterpret_cast<unaligned_copy_single_kernel_extra *>(extra)->data_size;
     throw_if_not_cuda_success(cudaMemcpy(dst, src, data_size, cudaMemcpyDeviceToHost));
 }
+static void unaligned_copy_strided_cuda_device_to_host(char *dst, intptr_t dst_stride,
+                        const char *src, intptr_t src_stride,
+                        size_t count, ckernel_prefix *extra)
+{
+    size_t data_size = reinterpret_cast<unaligned_copy_single_kernel_extra *>(extra)->data_size;
+    for (size_t i = 0; i != count; ++i,
+                    dst += dst_stride, src += src_stride) {
+        throw_if_not_cuda_success(cudaMemcpy(dst, src, data_size, cudaMemcpyDeviceToHost));
+    }
+}
+
 static void unaligned_copy_single_cuda_device_to_device(char *dst, const char *src,
                 ckernel_prefix *extra)
 {
     size_t data_size = reinterpret_cast<unaligned_copy_single_kernel_extra *>(extra)->data_size;
     throw_if_not_cuda_success(cudaMemcpy(dst, src, data_size, cudaMemcpyDeviceToDevice));
+}
+static void unaligned_copy_strided_cuda_device_to_device(char *dst, intptr_t dst_stride,
+                        const char *src, intptr_t src_stride,
+                        size_t count, ckernel_prefix *extra)
+{
+    size_t data_size = reinterpret_cast<unaligned_copy_single_kernel_extra *>(extra)->data_size;
+    for (size_t i = 0; i != count; ++i,
+                    dst += dst_stride, src += src_stride) {
+        throw_if_not_cuda_success(cudaMemcpy(dst, src, data_size, cudaMemcpyDeviceToDevice));
+    }
 }
 #endif // DYND_CUDA
 
@@ -768,3 +801,78 @@ void dynd::strided_assign_kernel_extra::destruct(
         echild->destructor(echild);
     }
 }
+
+#ifdef DYND_CUDA
+
+kernel_request_t dynd::make_kernreq_to_cuda_kernreq(const ndt::type& dst_tp, const ndt::type& src_tp,
+                kernel_request_t kernreq)
+{
+    switch (kernreq) {
+        case kernel_request_single:
+            if (dst_tp.get_type_id() == cuda_device_type_id) {
+                if (src_tp.get_type_id() == cuda_device_type_id) {
+                    return kernel_request_single_cuda_device_to_device;
+                } else {
+                    return kernel_request_single_cuda_host_to_device;
+                }
+            } else {
+                if (src_tp.get_type_id() == cuda_device_type_id) {
+                    return kernel_request_single_cuda_device_to_host;
+                } else {
+                    return kernel_request_single;
+                }
+            }
+        case kernel_request_strided:
+            if (dst_tp.get_type_id() == cuda_device_type_id) {
+                if (src_tp.get_type_id() == cuda_device_type_id) {
+                    return kernel_request_strided_cuda_device_to_device;
+                } else {
+                    return kernel_request_strided_cuda_host_to_device;
+                }
+            } else {
+                if (src_tp.get_type_id() == cuda_device_type_id) {
+                    return kernel_request_strided_cuda_device_to_host;
+                } else {
+                    return kernel_request_strided;
+                }
+            }
+        default:
+            stringstream ss;
+            ss << "make_kernreq_to_cuda_kernreq: unrecognized request " << (int)kernreq;
+            throw runtime_error(ss.str());
+    }
+}
+
+size_t dynd::make_cuda_pod_typed_data_assignment_kernel(
+                ckernel_builder *out, size_t offset_out,
+                size_t data_size, size_t DYND_UNUSED(data_alignment),
+                kernel_request_t kernreq)
+{
+    out->ensure_capacity_leaf(offset_out + sizeof(unaligned_copy_single_kernel_extra));
+    ckernel_prefix *result = out->get_at<ckernel_prefix>(offset_out);
+    switch (kernreq) {
+        case kernel_request_single_cuda_host_to_device:
+            result->set_function<unary_single_operation_t>(&unaligned_copy_single_cuda_host_to_device);
+            break;
+        case kernel_request_single_cuda_device_to_host:
+            result->set_function<unary_single_operation_t>(&unaligned_copy_single_cuda_device_to_host);
+            break;
+        case kernel_request_single_cuda_device_to_device:
+            result->set_function<unary_single_operation_t>(&unaligned_copy_single_cuda_device_to_device);
+            break;
+        case kernel_request_strided_cuda_host_to_device:
+            result->set_function<unary_strided_operation_t>(&unaligned_copy_strided_cuda_host_to_device);
+            break;
+        case kernel_request_strided_cuda_device_to_host:
+            result->set_function<unary_strided_operation_t>(&unaligned_copy_strided_cuda_device_to_host);
+            break;
+        case kernel_request_strided_cuda_device_to_device:
+            result->set_function<unary_strided_operation_t>(&unaligned_copy_strided_cuda_device_to_device);
+            break;
+        default:
+            break;
+    }
+    reinterpret_cast<unaligned_copy_single_kernel_extra *>(result)->data_size = data_size;
+    return offset_out + sizeof(unaligned_copy_single_kernel_extra);
+}
+#endif // DYND_CUDA

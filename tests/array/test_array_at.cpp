@@ -199,7 +199,7 @@ TYPED_TEST_P(ArrayIndex, SteppedOneDimensionalRange) {
 
 TYPED_TEST_P(ArrayIndex, ExceptionsOneDimensionalRange) {
     int i0[] = {1,2,3,4,5,6};
-    nd::array a = i0, b;
+    nd::array a = TestFixture::To(i0), b;
 
     // exceptions for out-of-bounds ranges
     EXPECT_THROW(a(-7 <= irange()), irange_out_of_bounds);
@@ -215,5 +215,5 @@ REGISTER_TYPED_TEST_CASE_P(ArrayIndex, BasicInteger, SimpleOneDimensionalRange,
 
 INSTANTIATE_TYPED_TEST_CASE_P(Default, ArrayIndex, DefaultMemory);
 #ifdef DYND_CUDA
-INSTANTIATE_TYPED_TEST_CASE_P(CUDA, ArrayIndex, cuda_host_type);
+INSTANTIATE_TYPED_TEST_CASE_P(CUDA, ArrayIndex, CUDAMemory);
 #endif // DYND_CUDA
