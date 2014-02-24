@@ -294,59 +294,46 @@ TYPED_TEST_P(ArrayAssign, BroadcastAssign) {
     int v0[4] = {3,4,5,6};
     nd::array b = TestFixture::Second::To(v0);
 
-
-    if (a.get_type().get_type_id() == cuda_host_type_id) {
-        cout << "DEBUG: " << a.get_type() << endl;
-        cout << "DEBUG: " << a.get_type().get_canonical_type() << endl;
-
-// get the canonical_type, replace all the dimensions except the last with the get_type().get_type_at_dimension(second last)
-//        cout << "DEBUG: " << a.get_type().get_canonical_type().with_replaced_dtype(a.get_type().get_type_at_dimension(0));
-//a.get_type().get_canonical_type(), a.get_ndim() - 1) << endl; // a.get_ndim() - 1
-//        cout << "DEBUG: " << (a.get_type().get_canonical_type()).with_replaced_dtype(a.get_type()) << endl;
-//        cout << "DEBUG: " << ndt::make_cuda_host(ndt::make_strided_dim(ndt::make_strided_dim(ndt::make_type<float>()))) << endl;
-   }
-
     // Broadcasts the 4-vector by a factor of 6,
     // converting the type
-//    a.val_assign(b);
-  //  const float *ptr_f = (const float *)a.get_readonly_originptr();
-    //for (int i = 0; i < 6; ++i) {
-//        EXPECT_EQ(3, *ptr_f++);
-//        EXPECT_EQ(3, TestFixture::First::Dereference(ptr_f++));
-//        EXPECT_EQ(4, *ptr_f++);
-  //      EXPECT_EQ(5, *ptr_f++);
-    //    EXPECT_EQ(6, *ptr_f++);
-    //}
+    a.val_assign(b);
+    const float *ptr_f = (const float *)a.get_readonly_originptr();
+    for (int i = 0; i < 6; ++i) {
+        EXPECT_EQ(3, TestFixture::First::Dereference(ptr_f++));
+        EXPECT_EQ(4, TestFixture::First::Dereference(ptr_f++));
+        EXPECT_EQ(5, TestFixture::First::Dereference(ptr_f++));
+        EXPECT_EQ(6, TestFixture::First::Dereference(ptr_f++));
+    }
 
-/*
     float v1[4] = {1.5, 2.5, 1.25, 2.25};
-    b = v1;
+    b = TestFixture::Second::To(v1);
 
     // Broadcasts the 4-vector by a factor of 6,
     // doesn't convert the type
     a.val_assign(b);
     ptr_f = (const float *)a.get_readonly_originptr();
     for (int i = 0; i < 6; ++i) {
-        EXPECT_EQ(1.5, *ptr_f++);
-        EXPECT_EQ(2.5, *ptr_f++);
-        EXPECT_EQ(1.25, *ptr_f++);
-        EXPECT_EQ(2.25, *ptr_f++);
+        EXPECT_EQ(1.5, TestFixture::First::Dereference(ptr_f++));
+        EXPECT_EQ(2.5, TestFixture::First::Dereference(ptr_f++));
+        EXPECT_EQ(1.25, TestFixture::First::Dereference(ptr_f++));
+        EXPECT_EQ(2.25, TestFixture::First::Dereference(ptr_f++));
     }
 
     double v2[3][1] = {{1.5}, {3.125}, {7.5}};
-    b = v2;
+    b = TestFixture::Second::To(v2);
+
     // Broadcasts the (3,1)-array by a factor of 8,
     // converting the type
     a.val_assign(b);
     ptr_f = (const float *)a.get_readonly_originptr();
     for (int i = 0; i < 2; ++i) {
         for (int j = 0; j < 4; ++j)
-            EXPECT_EQ(1.5, *ptr_f++);
+            EXPECT_EQ(1.5, TestFixture::First::Dereference(ptr_f++));
         for (int j = 0; j < 4; ++j)
-            EXPECT_EQ(3.125, *ptr_f++);
+            EXPECT_EQ(3.125, TestFixture::First::Dereference(ptr_f++));
         for (int j = 0; j < 4; ++j)
-            EXPECT_EQ(7.5, *ptr_f++);
-    }*/
+            EXPECT_EQ(7.5, TestFixture::First::Dereference(ptr_f++));
+    }
 }
 
 TEST(ArrayAssign, Casting) {
@@ -524,7 +511,7 @@ REGISTER_TYPED_TEST_CASE_P(ArrayAssign, ScalarAssignment_Bool, ScalarAssignment_
     ScalarAssignment_Float32, ScalarAssignment_Float64, ScalarAssignment_Uint64, ScalarAssignment_Uint64_LargeNumbers,
     ScalarAssignment_Complex_Float32, ScalarAssignment_Complex_Float64, BroadcastAssign);
 
-INSTANTIATE_TYPED_TEST_CASE_P(Default, ArrayAssign, DefaultMemory); // DefaultMemoryPairs
+INSTANTIATE_TYPED_TEST_CASE_P(Default, ArrayAssign, DefaultMemoryPairs);
 #ifdef DYND_CUDA
 INSTANTIATE_TYPED_TEST_CASE_P(CUDA, ArrayAssign, CUDAMemoryPairs);
 #endif // DYND_CUDA

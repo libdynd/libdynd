@@ -183,6 +183,13 @@ struct strided_assign_kernel_extra {
     static void destruct(ckernel_prefix *extra);
 };
 
+#ifdef DYND_CUDA
+size_t make_cuda_builtin_type_assignment_kernel(
+                ckernel_builder *out, size_t offset_out,
+                type_id_t dst_type_id, type_id_t src_type_id,
+                kernel_request_t kernreq, assign_error_mode errmode);
+#endif
+
 } // namespace dynd
 
 #endif // _DYND__ASSIGNMENT_KERNELS_HPP_

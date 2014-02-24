@@ -486,6 +486,8 @@ public:
      */
     type with_replaced_dtype(const type& replacement_tp, intptr_t replace_ndim = 0) const;
 
+    type with_shifted_memory_type() const;
+
     /**
      * Returns a modified type with all expression types replaced with
      * their value types, and types replaced with "standard versions"

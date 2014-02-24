@@ -4,6 +4,7 @@
 //
 
 #include <dynd/type.hpp>
+#include <dynd/types/base_memory_type.hpp>
 #include <dynd/types/base_uniform_dim_type.hpp>
 #include <dynd/types/strided_dim_type.hpp>
 #include <dynd/types/var_dim_type.hpp>
@@ -204,6 +205,27 @@ ndt::type ndt::type::with_replaced_dtype(const ndt::type& replacement_tp, intptr
     replace_dtype(*this, &extra, result, was_transformed);
     return result;
 }
+
+ndt::type ndt::type::with_shifted_memory_type() const
+{
+    const intptr_t shift_ndim = 1;
+
+    if (is_memory()) {
+        const base_memory_type* memory_tp = reinterpret_cast<const base_memory_type*>(m_extended);
+        ndt::type target_tp = memory_tp->get_target_type();
+            return target_tp.with_replaced_dtype(memory_tp->get_type_at_dimension(NULL, shift_ndim), target_tp.get_ndim() - shift_ndim);
+    } else {
+        return *this;
+    }
+}
+
+//        if (target_tp.get_ndim() == 1) {
+  //          cout << "unshifted: " << *this << endl;
+      //      cout << this->get_dtype() << endl;
+    //        cout << "shifted: " << target_tp.with_replaced_dtype(this->get_dtype()) << endl;
+        //    return target_tp.with_replaced_dtype(this->get_dtype());
+       // } else {
+
 
 intptr_t ndt::type::get_dim_size(const char *metadata, const char *data) const {
     if (get_kind() == uniform_dim_kind) {

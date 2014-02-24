@@ -28,17 +28,23 @@ public:
 
     virtual ~base_memory_type();
 
+    ndt::type get_target_type() const {
+        return m_target_tp;
+    }
+
     virtual size_t get_default_data_size(intptr_t ndim, const intptr_t *shape) const;
 
-    void shift();
-
-    virtual bool is_type_subarray(const ndt::type& subarray_tp) const;
-
-    bool is_memory() const;
+    bool is_type_subarray(const ndt::type& subarray_tp) const;
 
     virtual ndt::type get_canonical_type() const;
 
+    bool is_memory() const;
+
     virtual bool is_strided() const;
+
+    virtual void process_strided(const char *metadata, const char *data,
+                    ndt::type& out_dt, const char *&out_origin,
+                    intptr_t& out_stride, intptr_t& out_dim_size) const;
 
     virtual intptr_t apply_linear_index(intptr_t nindices, const irange *indices, const char *metadata,
                     const ndt::type& result_type, char *out_metadata,

@@ -900,28 +900,14 @@ nd::array nd::array::to_host() const
 
 nd::array nd::array::to_cuda_host(unsigned int cuda_host_flags) const
 {
-    array result;
     size_t ndim = get_ndim();
-    if (ndim == 0) {
-        result = nd::empty(make_cuda_host(get_type().get_canonical_type(), cuda_host_flags));
-    } else {
+    dimvector shape(ndim);
+    get_shape(shape.get());
+    array result = nd::array(make_array_memory_block(make_cuda_host(get_type().get_canonical_type(), cuda_host_flags), ndim, shape.get()));
 
-        cout << get_type() << endl;
-  //      cout << get_type().get_canonical_type() << endl;
-
-
-        dimvector shape(ndim);
-        get_shape(shape.get());
-//        result = nd::array(make_array_memory_block(get_type().get_canonical_type(), ndim, shape.get()));
-        result = nd::array(make_array_memory_block(make_cuda_host(get_type().get_canonical_type(), cuda_host_flags), ndim, shape.get()));
-
-        const void *ptr = result.get_ndo()->m_data_pointer;
-        cout << (ptr == NULL) << endl;
-    }
-
-    result.val_assign(*this); // this is the issue
-
+    result.val_assign(*this);
     return result;
+
 }
 
 nd::array nd::array::to_cuda_device() const

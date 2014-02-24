@@ -25,6 +25,19 @@ bool base_memory_type::is_memory() const
     return true;
 }
 
+bool base_memory_type::is_strided() const
+{
+    return m_target_tp.extended()->is_strided();
+}
+
+void base_memory_type::process_strided(const char *metadata, const char *data,
+                ndt::type& out_dt, const char *&out_origin,
+                intptr_t& out_stride, intptr_t& out_dim_size) const
+{
+    return m_target_tp.extended()->process_strided(metadata, data, out_dt, out_origin, out_stride, out_dim_size);
+}
+
+
 bool base_memory_type::is_type_subarray(const ndt::type& subarray_tp) const
 {
     return m_target_tp.extended()->is_type_subarray(subarray_tp);
@@ -33,11 +46,6 @@ bool base_memory_type::is_type_subarray(const ndt::type& subarray_tp) const
 ndt::type base_memory_type::get_canonical_type() const
 {
     return m_target_tp;
-}
-
-bool base_memory_type::is_strided() const
-{
-    return m_target_tp.extended()->is_strided();
 }
 
 intptr_t base_memory_type::apply_linear_index(intptr_t nindices, const irange *indices, const char *metadata,

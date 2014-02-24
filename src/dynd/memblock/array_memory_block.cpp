@@ -105,7 +105,6 @@ memory_block_ptr dynd::make_array_memory_block(const ndt::type& tp, intptr_t ndi
     if (tp.is_memory()) {
         result = make_array_memory_block(metadata_size);
         reinterpret_cast<const base_memory_type*>(tp.extended())->data_alloc(&data_ptr, data_size);
-        cout << data_size << endl;
     } else {
         result = make_array_memory_block(metadata_size, data_size, tp.get_data_alignment(), &data_ptr);
     }
