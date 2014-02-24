@@ -1,0 +1,21 @@
+language: cpp
+
+compiler:
+  - gcc
+  - clang
+
+before_script:
+  - mkdir build
+  - cd build
+  - cmake ..
+
+script:
+  - make
+  - make install
+  - ./tests/test_dynd
+
+notifications:
+  email: false
+  flowdock: b08b3ba4fb86fa48121e90b5f67ccb75
+  on_success: "change"
+  on_failure: "always"
