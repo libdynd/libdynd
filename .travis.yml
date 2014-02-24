@@ -11,8 +11,7 @@ before_script:
 
 script:
   - make
-  - make install
-  - ./tests/test_dynd
+  - ./tests/test_libdynd
 
 notifications:
   email: false
