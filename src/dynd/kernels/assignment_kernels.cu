@@ -384,17 +384,16 @@ static unary_strided_operation_t assign_table_strided_cuda_device_to_device_kern
 #undef STRIDED_OPERATION_PAIR_LEVEL
 };
 
+// This is meant to reflect make_builtin_type_assignment_kernel
 size_t dynd::make_cuda_builtin_type_assignment_kernel(
                 ckernel_builder *out, size_t offset_out,
                 bool dst_device, type_id_t dst_type_id,
                 bool src_device, type_id_t src_type_id,
                 kernel_request_t kernreq, assign_error_mode errmode)
 {
-    // Do a table lookup for the built-in range of dynd types
     if (dst_type_id >= bool_type_id && dst_type_id <= complex_float64_type_id &&
                     src_type_id >= bool_type_id && src_type_id <= complex_float64_type_id &&
                     errmode != assign_error_default) {
-        // No need to reserve more space, the space for a leaf is already there
         ckernel_prefix *result = out->get_at<ckernel_prefix>(offset_out);
         switch (kernreq) {
             case kernel_request_single:
@@ -461,6 +460,7 @@ size_t dynd::make_cuda_builtin_type_assignment_kernel(
     }
 }
 
+// This is meant to reflect make_pod_typed_data_assignment_kernel
 size_t dynd::make_cuda_pod_typed_data_assignment_kernel(
                 ckernel_builder *out, size_t offset_out,
                 bool dst_device, bool src_device,
