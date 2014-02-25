@@ -32,6 +32,7 @@ public:
 
     void data_alloc(char **data, size_t size) const;
     void data_zeroinit(char *data, size_t size) const;
+    void data_free(char *data) const;
 
 
 

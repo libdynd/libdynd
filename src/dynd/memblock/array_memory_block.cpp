@@ -27,6 +27,13 @@ void free_array_memory_block(memory_block_data *memblock)
         preamble->m_type->data_destruct(metadata, preamble->m_data_pointer);
     }
 
+    // Free the ndobject data if it wasn't allocated together with the memory block
+    if (preamble->m_data_reference == NULL &&
+                    !preamble->is_builtin_type() &&
+                    preamble->m_type->get_kind() == memory_kind) {
+        static_cast<const base_memory_type*>(preamble->m_type)->data_free(preamble->m_data_pointer);
+    }
+
     // Free the references contained in the metadata
     if (!preamble->is_builtin_type()) {
         preamble->m_type->metadata_destruct(metadata);
@@ -37,23 +44,6 @@ void free_array_memory_block(memory_block_data *memblock)
     if (preamble->m_data_reference != NULL) {
         memory_block_decref(preamble->m_data_reference);
     }
-
-    // Free the ndobject data if it wasn't allocated together with the memory block
-/*    if (preamble->m_data_reference == NULL &&
-                    !preamble->is_builtin_type()) {
-        switch (preamble->m_type->get_type_id()) {
-#ifdef DYND_CUDA
-            case cuda_host_type_id:
-                throw_if_not_cuda_success(cudaFreeHost(preamble->m_data_pointer));
-                break;
-            case cuda_device_type_id:
-                throw_if_not_cuda_success(cudaFree(preamble->m_data_pointer));
-                break;
-#endif // DYND_CUDA
-            default:
-                break;
-        }
-    }*/
 
     // Finally free the memory block itself
     free(reinterpret_cast<void *>(memblock));
@@ -102,16 +92,16 @@ memory_block_ptr dynd::make_array_memory_block(const ndt::type& tp, intptr_t ndi
 
     memory_block_ptr result;
     char *data_ptr = NULL;
-    if (tp.is_memory()) {
+    if (tp.get_kind() == memory_kind) {
         result = make_array_memory_block(metadata_size);
-        reinterpret_cast<const base_memory_type*>(tp.extended())->data_alloc(&data_ptr, data_size);
+        static_cast<const base_memory_type*>(tp.extended())->data_alloc(&data_ptr, data_size);
     } else {
         result = make_array_memory_block(metadata_size, data_size, tp.get_data_alignment(), &data_ptr);
     }
 
     if (tp.get_flags()&type_flag_zeroinit) {
-        if (tp.is_memory()) {
-            reinterpret_cast<const base_memory_type*>(tp.extended())->data_zeroinit(data_ptr, data_size);
+        if (tp.get_kind() == memory_kind) {
+            static_cast<const base_memory_type*>(tp.extended())->data_zeroinit(data_ptr, data_size);
         }
         else {
             memset(data_ptr, 0, data_size);

@@ -63,6 +63,7 @@ public:
 
     virtual void data_alloc(char **data, size_t size) const = 0;
     virtual void data_zeroinit(char *data, size_t size) const = 0;
+    virtual void data_free(char *data) const = 0;
 
 
 

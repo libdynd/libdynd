@@ -43,6 +43,10 @@ void cuda_host_type::data_zeroinit(char *data, size_t size) const
     memset(data, 0, size);
 }
 
+void cuda_host_type::data_free(char *data) const
+{
+    throw_if_not_cuda_success(cudaFreeHost(data));
+}
 
 
 
