@@ -83,6 +83,14 @@ public:
 
 };
 
+inline const ndt::type& get_target_type(const ndt::type& tp) {
+    if (tp.get_kind() == memory_kind) {
+        return static_cast<const base_memory_type*>(tp.extended())->get_target_type();
+    } else {
+        return tp;
+    }
+}
+
 } // namespace dynd
 
 #endif // _DYND__BASE_MEMORY_TYPE_HPP_

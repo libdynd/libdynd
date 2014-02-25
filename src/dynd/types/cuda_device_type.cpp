@@ -58,7 +58,7 @@ size_t cuda_device_type::make_assignment_kernel(
 //    if (dst_tp.is_pod() && src_tp.is_pod() && dst_tp.get_canonical_type() == src_tp.get_canonical_type()) {
     if (false) {
         return make_pod_typed_data_assignment_kernel(out, offset_out, dst_tp.get_data_size(),
-            dst_tp.get_data_alignment(), make_kernreq_to_cuda_kernreq(dst_tp, src_tp, kernreq));
+            dst_tp.get_data_alignment(), kernreq);
     } else if (this == dst_tp.extended()) {
         const char *shifted_metadata = dst_metadata;
         ndt::type shifted_tp = dst_tp.with_shifted_memory_type();

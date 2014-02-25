@@ -376,14 +376,16 @@ TEST(ArrayAssign, Casting) {
     EXPECT_EQ(-120, b(3).as<int>());
 }
 
-TEST(ArrayAssign, Overflow) {
+TYPED_TEST_P(ArrayAssign, Overflow) {
     int v0[4] = {0,1,2,3};
-    nd::array a = v0;
+    nd::array a = TestFixture::First::To(v0);
 
-    EXPECT_THROW(a.val_assign(1e25, assign_error_overflow), runtime_error);
-    EXPECT_THROW(a.val_assign(1e25f, assign_error_overflow), runtime_error);
-    EXPECT_THROW(a.val_assign(-1e25, assign_error_overflow), runtime_error);
-    EXPECT_THROW(a.val_assign(-1e25f, assign_error_overflow), runtime_error);
+    if (!TestFixture::First::IsTypeID(cuda_device_type_id) && !TestFixture::Second::IsTypeID(cuda_device_type_id)) {
+        EXPECT_THROW(a.val_assign(TestFixture::Second::To(1e25), assign_error_overflow), runtime_error);
+        EXPECT_THROW(a.val_assign(TestFixture::Second::To(1e25f), assign_error_overflow), runtime_error);
+        EXPECT_THROW(a.val_assign(TestFixture::Second::To(-1e25), assign_error_overflow), runtime_error);
+        EXPECT_THROW(a.val_assign(TestFixture::Second::To(-1e25f), assign_error_overflow), runtime_error);
+    }
 }
 
 
@@ -509,7 +511,7 @@ TEST(ArrayAssign, ZeroSizedAssign) {
 
 REGISTER_TYPED_TEST_CASE_P(ArrayAssign, ScalarAssignment_Bool, ScalarAssignment_Int8, ScalarAssignment_UInt16,
     ScalarAssignment_Float32, ScalarAssignment_Float64, ScalarAssignment_Uint64, ScalarAssignment_Uint64_LargeNumbers,
-    ScalarAssignment_Complex_Float32, ScalarAssignment_Complex_Float64, BroadcastAssign);
+    ScalarAssignment_Complex_Float32, ScalarAssignment_Complex_Float64, BroadcastAssign, Overflow);
 
 INSTANTIATE_TYPED_TEST_CASE_P(Default, ArrayAssign, DefaultMemoryPairs);
 #ifdef DYND_CUDA

@@ -211,15 +211,6 @@ enum kernel_request_t {
      * in a simple NumPy fashion.
      */
 //    kernel_request_strided_multistride
-    /** Kernel function unary_single_operation_t,
-     *  but the function resides on the CUDA device.
-     */
-    kernel_request_single_cuda_host_to_device,
-    kernel_request_single_cuda_device_to_host,
-    kernel_request_single_cuda_device_to_device,
-    kernel_request_strided_cuda_host_to_device,
-    kernel_request_strided_cuda_device_to_host,
-    kernel_request_strided_cuda_device_to_device
 };
 
 std::ostream& operator<<(std::ostream& o, type_kind_t kind);
