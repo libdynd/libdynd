@@ -27,16 +27,6 @@ bool base_type::is_expression() const
     return false;
 }
 
-bool base_type::is_memory() const
-{
-    return false;
-}
-
-bool base_type::is_cuda() const
-{
-    return false;
-}
-
 bool base_type::is_strided() const
 {
     return false;

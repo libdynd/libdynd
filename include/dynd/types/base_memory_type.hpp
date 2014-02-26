@@ -9,6 +9,9 @@
 #include <dynd/types/base_type.hpp>
 #include <dynd/type.hpp>
 
+using namespace std;
+using namespace dynd;
+
 namespace dynd {
 
 /**
@@ -25,6 +28,12 @@ public:
         : base_type(type_id, kind, data_size, alignment, flags, metadata_size, undim),
         m_target_tp(target_tp), m_target_metadata_offset(0)
     {
+        if (target_tp.get_kind() == uniform_dim_kind || target_tp.get_kind() == memory_kind
+                    || target_tp.get_kind() == pattern_kind) {
+            stringstream ss;
+            ss << "a memory space cannot be specified for type " << target_tp;
+            throw runtime_error(ss.str());
+        }
     }
 
     virtual ~base_memory_type();
@@ -76,8 +85,6 @@ public:
     virtual size_t get_default_data_size(intptr_t ndim, const intptr_t *shape) const;
 
     bool is_type_subarray(const ndt::type& subarray_tp) const;
-
-    bool is_memory() const;
 
     virtual bool operator==(const base_type& rhs) const;
 

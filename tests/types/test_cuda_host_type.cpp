@@ -22,10 +22,10 @@ TEST(CUDAHostArrayDType, Basic) {
     EXPECT_EQ(memory_kind, d.get_kind());
 }
 
-TEST(CUDAHostArrayDType, ShiftedMemory) {
-    ndt::type d = ndt::make_cuda_host(ndt::make_strided_dim(ndt::make_type<int32_t>()));
-    EXPECT_EQ(ndt::make_strided_dim(ndt::make_cuda_host(ndt::make_type<int32_t>())), d.with_right_shifted_memory_type());
-}
+//TEST(CUDAHostArrayDType, ShiftedMemory) {
+  //  ndt::type d = ndt::make_cuda_host(ndt::make_strided_dim(ndt::make_type<int32_t>()));
+   // EXPECT_EQ(ndt::make_strided_dim(ndt::make_cuda_host(ndt::make_type<int32_t>())), d.with_right_shifted_memory_type());
+//}
 
 
 

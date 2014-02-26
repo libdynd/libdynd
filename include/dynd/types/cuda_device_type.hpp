@@ -27,8 +27,6 @@ public:
     void data_zeroinit(char *data, size_t size) const;
     void data_free(char *data) const;
 
-
-
     size_t make_assignment_kernel(
                     ckernel_builder *out, size_t offset_out,
                     const ndt::type& dst_tp, const char *dst_metadata,

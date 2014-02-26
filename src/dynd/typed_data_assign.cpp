@@ -192,7 +192,7 @@ void dynd::typed_data_assign(const ndt::type& dst_tp, const char *dst_metadata, 
 
     if (errmode == assign_error_default) {
         if (ectx != NULL) {
-            if (dst_tp.get_type_id() == cuda_device_type_id && src_tp.get_type_id() == cuda_device_type_id) {
+            if (dst_tp.get_dtype().get_type_id() == cuda_device_type_id && src_tp.get_dtype().get_type_id() == cuda_device_type_id) {
                 errmode = ectx->default_cuda_device_to_device_assign_error_mode;
             } else {
                 errmode = ectx->default_assign_error_mode;

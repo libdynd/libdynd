@@ -457,28 +457,6 @@ public:
     }
 
     /**
-     * Returns true if the type is a memory type.
-     */
-    inline bool is_memory() const {
-        if (is_builtin()) {
-            return false;
-        } else {
-            return m_extended->is_memory();
-        }
-    }
-
-    /**
-     * Returns true if the type is a CUDA memory type.
-     */
-    inline bool is_cuda() const {
-        if (is_builtin()) {
-            return false;
-        } else {
-            return m_extended->is_cuda();
-        }
-    }
-
-    /**
      * For array types, recursively applies to each child type, and for
      * scalar types converts to the provided one.
      *
@@ -496,12 +474,6 @@ public:
      *                      the data type which is replaced.
      */
     type with_replaced_dtype(const type& replacement_tp, intptr_t replace_ndim = 0) const;
-
-    intptr_t get_dimension_at_memory_type() const;
-
-    type with_left_shifted_memory_type() const;
-
-    type with_right_shifted_memory_type() const;
 
     /**
      * Returns a modified type with all expression types replaced with
@@ -567,7 +539,6 @@ public:
             throw too_many_indices(*this, total_ndim + i, total_ndim);
         }
     }
-
 
     /**
      * Returns a const pointer to the base_type object which

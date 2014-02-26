@@ -157,15 +157,6 @@ size_t dynd::make_assignment_kernel(
                 kernel_request_t kernreq, assign_error_mode errmode,
                 const eval::eval_context *ectx)
 {
-#ifdef DYND_CUDA
-    if (dst_tp.is_memory() || src_tp.is_memory()) {
-        return make_cuda_assignment_kernel(out, offset_out,
-                    dst_tp, dst_metadata,
-                    src_tp, src_metadata,
-                    kernreq, errmode, ectx);
-    }
-#endif // DYND_CUDA
-
     if (errmode == assign_error_default && ectx != NULL) {
         errmode = ectx->default_assign_error_mode;
     }
@@ -499,6 +490,7 @@ static void wrap_single_as_strided_kernel(char *dst, intptr_t dst_stride,
 {
     ckernel_prefix *echild = extra + 1;
     unary_single_operation_t opchild = echild->get_function<unary_single_operation_t>();
+
     for (size_t i = 0; i != count; ++i,
                     dst += dst_stride, src += src_stride) {
         opchild(dst, src, echild);

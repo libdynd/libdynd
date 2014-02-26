@@ -13,6 +13,7 @@ size_t dynd::make_cuda_assignment_kernel(
 {
     if (errmode == assign_error_default && ectx != NULL) {
         if (dst_tp.get_type_id() == cuda_device_type_id && src_tp.get_type_id() == cuda_device_type_id) {
+            cout << "getting default error" << endl;
             errmode = ectx->default_cuda_device_to_device_assign_error_mode;
         } else {
             errmode = ectx->default_assign_error_mode;

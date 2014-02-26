@@ -70,13 +70,24 @@ nd::array nd::make_strided_array(const ndt::type& dtp, intptr_t ndim, const intp
         data_size = array_tp.extended()->get_default_data_size(ndim, shape);
     }
 
-    // Allocate the array metadata and data in one memory block
+    memory_block_ptr result;
     char *data_ptr = NULL;
-    memory_block_ptr result = make_array_memory_block(array_tp.extended()->get_metadata_size(),
+    if (dtp.get_kind() == memory_kind) {
+        result = make_array_memory_block(array_tp.extended()->get_metadata_size());
+        static_cast<const base_memory_type *>(dtp.extended())->data_alloc(&data_ptr, data_size);
+    } else {
+        // Allocate the array metadata and data in one memory block
+        result = make_array_memory_block(array_tp.extended()->get_metadata_size(),
                     data_size, array_tp.get_data_alignment(), &data_ptr);
+    }
 
     if (array_tp.get_flags()&type_flag_zeroinit) {
-        memset(data_ptr, 0, data_size);
+        if (dtp.get_kind() == memory_kind) {
+            static_cast<const base_memory_type *>(dtp.extended())->data_zeroinit(data_ptr, data_size);
+        }
+        else {
+            memset(data_ptr, 0, data_size);
+        }
     }
 
     // Fill in the preamble metadata
@@ -903,7 +914,8 @@ nd::array nd::array::to_cuda_host(unsigned int cuda_host_flags) const
     size_t ndim = get_ndim();
     dimvector shape(ndim);
     get_shape(shape.get());
-    array result = nd::array(make_array_memory_block(make_cuda_host(get_type().get_canonical_type(), cuda_host_flags), ndim, shape.get()));
+    ndt::type tp = get_type().with_replaced_dtype(make_cuda_host(get_dtype().get_canonical_type(), cuda_host_flags));
+    array result = nd::array(make_array_memory_block(tp, ndim, shape.get()));
 
     result.val_assign(*this);
     return result;
@@ -915,7 +927,8 @@ nd::array nd::array::to_cuda_device() const
     size_t ndim = get_ndim();
     dimvector shape(ndim);
     get_shape(shape.get());
-    array result = nd::array(make_array_memory_block(make_cuda_device(get_type().get_canonical_type()), ndim, shape.get()));
+    ndt::type tp = get_type().with_replaced_dtype(make_cuda_device(get_dtype().get_canonical_type()));
+    array result = nd::array(make_array_memory_block(tp, ndim, shape.get()));
 
     result.val_assign(*this);
     return result;

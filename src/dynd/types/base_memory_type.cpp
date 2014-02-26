@@ -39,8 +39,12 @@ ndt::type base_memory_type::get_canonical_type() const
 ndt::type base_memory_type::apply_linear_index(intptr_t nindices, const irange *indices,
                 size_t current_i, const ndt::type& root_tp, bool leading_dimension) const
 {
-    return with_replaced_target_type(m_target_tp.apply_linear_index(nindices, indices,
-                    current_i, root_tp, leading_dimension));
+    if (nindices == 0) {
+        return ndt::type(this, true);
+    } else {
+        return with_replaced_target_type(m_target_tp.apply_linear_index(nindices, indices,
+                        current_i, root_tp, leading_dimension));
+    }
 }
 
 intptr_t base_memory_type::apply_linear_index(intptr_t nindices, const irange *indices, const char *metadata,
@@ -50,8 +54,15 @@ intptr_t base_memory_type::apply_linear_index(intptr_t nindices, const irange *i
                 bool leading_dimension, char **inout_data,
                 memory_block_data **inout_dataref) const
 {
-    return m_target_tp.extended()->apply_linear_index(nindices, indices, metadata + m_target_metadata_offset, result_tp,
-                    out_metadata, embedded_reference, current_i, root_tp, leading_dimension, inout_data, inout_dataref);
+    // Default to scalar behavior
+    if (nindices == 0) {
+        // Copy any metadata verbatim
+        metadata_copy_construct(out_metadata, metadata, embedded_reference);
+        return 0;
+    } else {
+        return m_target_tp.extended()->apply_linear_index(nindices, indices, metadata + m_target_metadata_offset, result_tp,
+                        out_metadata, embedded_reference, current_i, root_tp, leading_dimension, inout_data, inout_dataref);
+    }
 }
 
 ndt::type base_memory_type::at_single(intptr_t i0, const char **inout_metadata, const char **inout_data) const
@@ -62,8 +73,12 @@ ndt::type base_memory_type::at_single(intptr_t i0, const char **inout_metadata, 
 
 ndt::type base_memory_type::get_type_at_dimension(char **inout_metadata, intptr_t i, intptr_t total_ndim) const
 {
-    return with_replaced_target_type(m_target_tp.get_type_at_dimension(inout_metadata ?
-                    inout_metadata + m_target_metadata_offset : NULL, i, total_ndim));
+    if (i == 0) {
+        return ndt::type(this, true);
+    } else {
+        return with_replaced_target_type(m_target_tp.get_type_at_dimension(inout_metadata ?
+                        inout_metadata + m_target_metadata_offset : NULL, i, total_ndim));
+    }
 }
 
 void base_memory_type::get_shape(intptr_t ndim, intptr_t i,
@@ -133,15 +148,10 @@ size_t base_memory_type::get_default_data_size(intptr_t ndim, const intptr_t *sh
     }
 }
 
-bool base_memory_type::is_memory() const
-{
-    return true;
-}
-
-
 bool base_memory_type::is_type_subarray(const ndt::type& subarray_tp) const
 {
-    return m_target_tp.extended()->is_type_subarray(subarray_tp);
+    return !subarray_tp.is_builtin() && (*this) == (*subarray_tp.extended());
+//    return m_target_tp.extended()->is_type_subarray(subarray_tp);
 }
 
 bool base_memory_type::operator==(const base_type& rhs) const
