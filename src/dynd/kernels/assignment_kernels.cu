@@ -21,7 +21,6 @@ size_t dynd::make_cuda_assignment_kernel(
 
     if (get_target_type(dst_tp).is_builtin()) {
         if (get_target_type(src_tp).is_builtin()) {
-            // If the casting can be done losslessly, disable the error check to find faster code paths
             if (errmode != assign_error_none && is_lossless_assignment(dst_tp, src_tp)) {
                 errmode = assign_error_none;
             }

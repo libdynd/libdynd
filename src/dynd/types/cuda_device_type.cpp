@@ -61,13 +61,13 @@ size_t cuda_device_type::make_assignment_kernel(
             dst_tp.get_data_alignment(), kernreq);
     } else if (this == dst_tp.extended()) {
         const char *shifted_metadata = dst_metadata;
-        ndt::type shifted_tp = dst_tp.with_shifted_memory_type();
+        ndt::type shifted_tp = dst_tp.with_right_shifted_memory_type();
         return ::make_assignment_kernel(out, offset_out,
             shifted_tp, shifted_metadata, src_tp, src_metadata,
             kernreq, errmode, ectx);
     } else if (this == src_tp.extended()) {
         const char *shifted_metadata = src_metadata;
-        ndt::type shifted_tp = src_tp.with_shifted_memory_type();
+        ndt::type shifted_tp = src_tp.with_right_shifted_memory_type();
         return ::make_assignment_kernel(out, offset_out,
                 dst_tp, dst_metadata, shifted_tp, shifted_metadata,
                 kernreq, errmode, ectx);

@@ -206,26 +206,56 @@ ndt::type ndt::type::with_replaced_dtype(const ndt::type& replacement_tp, intptr
     return result;
 }
 
-ndt::type ndt::type::with_shifted_memory_type() const
+intptr_t ndt::type::get_dimension_at_memory_type() const
 {
-    const intptr_t shift_ndim = 1;
-
-    if (is_memory()) {
-        const base_memory_type* memory_tp = reinterpret_cast<const base_memory_type*>(m_extended);
-        ndt::type target_tp = memory_tp->get_target_type();
-            return target_tp.with_replaced_dtype(memory_tp->get_type_at_dimension(NULL, shift_ndim), target_tp.get_ndim() - shift_ndim);
-    } else {
-        return *this;
+    if (get_kind() == memory_kind) {
+        return 0;
+    } else if (get_kind() == uniform_dim_kind) {
+        const type &element_tp = static_cast<const base_uniform_dim_type *>(m_extended)->get_element_type();
+        return element_tp.get_dimension_at_memory_type() + 1;
     }
+
+    std::stringstream ss;
+    ss << *this << " does not have a memory type";
+    throw dynd::type_error(ss.str());
 }
 
-//        if (target_tp.get_ndim() == 1) {
-  //          cout << "unshifted: " << *this << endl;
-      //      cout << this->get_dtype() << endl;
-    //        cout << "shifted: " << target_tp.with_replaced_dtype(this->get_dtype()) << endl;
-        //    return target_tp.with_replaced_dtype(this->get_dtype());
-       // } else {
+ndt::type ndt::type::with_left_shifted_memory_type() const
+{
+    intptr_t i = get_dimension_at_memory_type();
+    if (i == 0) {
+        std::stringstream ss;
+        ss << "memory type cannot be shifted to the left";
+        throw dynd::type_error(ss.str());
+    }
 
+    const type &uniform_dim_tp = get_type_at_dimension(NULL, i - 1);
+    const type &memory_tp = static_cast<const base_uniform_dim_type *>(uniform_dim_tp.extended())->get_element_type();
+    const type &target_tp = static_cast<const base_memory_type *>(memory_tp.extended())->get_target_type();
+
+    return with_replaced_dtype(
+                    static_cast<const base_memory_type *>(memory_tp.extended())->with_replaced_target_type(
+                    uniform_dim_tp.with_replaced_dtype(target_tp, target_tp.get_ndim())),
+                    uniform_dim_tp.get_ndim());
+}
+
+ndt::type ndt::type::with_right_shifted_memory_type() const
+{
+    intptr_t i = get_dimension_at_memory_type();
+    if (i == get_ndim()) {
+        std::stringstream ss;
+        ss << "memory type cannot be shifted to the right";
+        throw dynd::type_error(ss.str());
+    }
+
+    const type &memory_tp = get_type_at_dimension(NULL, i);
+    const type &target_tp = static_cast<const base_memory_type*>(memory_tp.extended())->get_target_type();
+
+    return with_replaced_dtype(
+                    target_tp.with_replaced_dtype(
+                    memory_tp.get_type_at_dimension(NULL, 1), target_tp.get_ndim() - 1),
+                    target_tp.get_ndim());
+}
 
 intptr_t ndt::type::get_dim_size(const char *metadata, const char *data) const {
     if (get_kind() == uniform_dim_kind) {

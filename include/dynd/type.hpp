@@ -497,7 +497,11 @@ public:
      */
     type with_replaced_dtype(const type& replacement_tp, intptr_t replace_ndim = 0) const;
 
-    type with_shifted_memory_type() const;
+    intptr_t get_dimension_at_memory_type() const;
+
+    type with_left_shifted_memory_type() const;
+
+    type with_right_shifted_memory_type() const;
 
     /**
      * Returns a modified type with all expression types replaced with
