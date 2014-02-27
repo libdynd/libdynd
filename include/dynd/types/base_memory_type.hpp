@@ -22,11 +22,10 @@ protected:
     ndt::type m_target_tp;
     size_t m_target_metadata_offset;
 public:
-    inline base_memory_type(type_id_t type_id, type_kind_t kind, size_t data_size,
-            size_t alignment, flags_type flags, size_t metadata_size, size_t undim,
-            const ndt::type& target_tp)
-        : base_type(type_id, kind, data_size, alignment, flags, metadata_size, undim),
-        m_target_tp(target_tp), m_target_metadata_offset(0)
+    inline base_memory_type(type_id_t type_id, const ndt::type& target_tp, size_t data_size,
+            size_t alignment, size_t target_metadata_offset, flags_type flags)
+        : base_type(type_id, memory_kind, data_size, alignment, flags, target_metadata_offset + target_tp.get_metadata_size(),
+            target_tp.get_ndim()), m_target_tp(target_tp), m_target_metadata_offset(target_metadata_offset)
     {
         if (target_tp.get_kind() == uniform_dim_kind || target_tp.get_kind() == memory_kind
                     || target_tp.get_kind() == pattern_kind) {
@@ -42,27 +41,22 @@ public:
         return m_target_tp;
     }
 
+    virtual size_t get_default_data_size(intptr_t ndim, const intptr_t *shape) const;
+
     virtual void print_data(std::ostream& o, const char *metadata, const char *data) const;
+
+    virtual bool is_lossless_assignment(const ndt::type& dst_tp, const ndt::type& src_tp) const;
+
+    virtual bool operator==(const base_type& rhs) const;
+
+    inline bool is_type_subarray(const ndt::type& subarray_tp) const {
+        return (!subarray_tp.is_builtin() && (*this) == (*subarray_tp.extended())) ||
+                        m_target_tp.is_type_subarray(subarray_tp);
+    }
 
     virtual void transform_child_types(type_transform_fn_t transform_fn, void *extra,
                     ndt::type& out_transformed_tp, bool& out_was_transformed) const;
-
     virtual ndt::type get_canonical_type() const;
-
-    virtual ndt::type apply_linear_index(intptr_t nindices, const irange *indices,
-                size_t current_i, const ndt::type& root_tp, bool leading_dimension) const;
-    virtual intptr_t apply_linear_index(intptr_t nindices, const irange *indices, const char *metadata,
-                    const ndt::type& result_tp, char *out_metadata,
-                    memory_block_data *embedded_reference,
-                    size_t current_i, const ndt::type& root_tp,
-                    bool leading_dimension, char **inout_data,
-                    memory_block_data **inout_dataref) const;
-    virtual ndt::type at_single(intptr_t i0, const char **inout_metadata, const char **inout_data) const;
-    virtual ndt::type get_type_at_dimension(char **inout_metadata, intptr_t i, intptr_t total_ndim = 0) const;
-
-    virtual void get_shape(intptr_t ndim, intptr_t i, intptr_t *out_shape,
-                    const char *metadata, const char *data) const;
-    virtual void get_strides(size_t i, intptr_t *out_strides, const char *metadata) const;
 
     virtual ndt::type with_replaced_target_type(const ndt::type& target_tp) const = 0;
 
@@ -74,20 +68,9 @@ public:
     virtual void data_zeroinit(char *data, size_t size) const = 0;
     virtual void data_free(char *data) const = 0;
 
-
-
-
-
-
-
-
-
-    virtual size_t get_default_data_size(intptr_t ndim, const intptr_t *shape) const;
-
-    bool is_type_subarray(const ndt::type& subarray_tp) const;
-
-    virtual bool operator==(const base_type& rhs) const;
-
+    virtual void get_dynamic_type_properties(
+                    const std::pair<std::string, gfunc::callable> **out_properties,
+                    size_t *out_count) const;
 };
 
 inline const ndt::type& get_target_type(const ndt::type& tp) {

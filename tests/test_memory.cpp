@@ -1,5 +1,7 @@
 #include "inc_gtest.hpp"
 
+#include <utility>
+
 #include <dynd/array.hpp>
 #include <dynd/type.hpp>
 #include <dynd/types/cuda_host_type.hpp>
@@ -11,14 +13,27 @@ using namespace dynd;
 
 typedef ::testing::internal::None None;
 
-template<typename T>
+/**
+ * This class describes a memory space for testing purposes.
+ *
+ * The idea is that we implement a template specialization for each memory type
+ * to test. The specialization then handles details like the transfer of data back
+ * and forth.
+ *
+ * Since default memory has no memory type, we use the C++ type 'None' from Google Test
+ * to represent it.
+ */
+template <typename T>
 class Memory;
 
-template<typename T>
+/**
+ * This class is a pair of memory spaces, which is needed by some tests.
+ */
+template <typename T>
 class MemoryPair : public ::testing::Test {
 public:
-    typedef Memory<typename T::Head> First;
-    typedef Memory<typename T::Tail::Head> Second;
+    typedef Memory<typename T::first_type> First;
+    typedef Memory<typename T::second_type> Second;
 };
 
 template <>
@@ -39,7 +54,7 @@ public:
         return *ptr;
     }
 
-    static inline nd::array To(nd::array a) {
+    static inline nd::array To(const nd::array& a) {
 #ifdef DYND_CUDA
         return a.to_host();
 #else
@@ -49,7 +64,7 @@ public:
 };
 
 typedef ::testing::Types<None> DefaultMemory;
-typedef ::testing::Types< ::testing::internal::Types2<None, None> > DefaultMemoryPairs;
+typedef ::testing::Types< pair<None, None> > DefaultMemoryPairs;
 
 #ifdef DYND_CUDA
 
@@ -72,7 +87,7 @@ public:
         return *ptr;
     }
 
-    static inline nd::array To(nd::array a, unsigned int cuda_host_flags = cudaHostAllocDefault) {
+    static inline nd::array To(const nd::array& a, unsigned int cuda_host_flags = cudaHostAllocDefault) {
         return a.to_cuda_host(cuda_host_flags);
     }
 };
@@ -98,19 +113,15 @@ public:
         return tmp;
     }
 
-    static inline nd::array To(nd::array a) {
+    static inline nd::array To(const nd::array& a) {
         return a.to_cuda_device();
     }
 };
 
 typedef ::testing::Types<cuda_host_type, cuda_device_type> CUDAMemory;
-typedef ::testing::Types< ::testing::internal::Types2<None, cuda_host_type>,
-    ::testing::internal::Types2<None, cuda_device_type>,
-    ::testing::internal::Types2<cuda_host_type, None>,
-    ::testing::internal::Types2<cuda_device_type, None>,
-    ::testing::internal::Types2<cuda_host_type, cuda_host_type>,
-    ::testing::internal::Types2<cuda_host_type, cuda_device_type>,
-    ::testing::internal::Types2<cuda_device_type, cuda_host_type>,
-    ::testing::internal::Types2<cuda_device_type, cuda_device_type> > CUDAMemoryPairs;
+typedef ::testing::Types< pair<None, cuda_host_type>, pair<None, cuda_device_type>,
+    pair<cuda_host_type, None>, pair<cuda_device_type, None>,
+    pair<cuda_host_type, cuda_host_type>, pair<cuda_host_type, cuda_device_type>,
+    pair<cuda_device_type, cuda_host_type>, pair<cuda_device_type, cuda_device_type> > CUDAMemoryPairs;
 
 #endif // DYND_CUDA

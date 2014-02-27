@@ -11,23 +11,42 @@
 #include "inc_gtest.hpp"
 
 #include <dynd/types/cuda_host_type.hpp>
+#include <dynd/types/cuda_device_type.hpp>
 #include <dynd/types/strided_dim_type.hpp>
+#include <dynd/array.hpp>
 
 using namespace std;
 using namespace dynd;
 
-TEST(CUDAHostArrayDType, Basic) {
+TEST(CUDAHostType, Basic) {
     ndt::type d = ndt::make_cuda_host(ndt::make_type<int32_t>());
     EXPECT_EQ(cuda_host_type_id, d.get_type_id());
     EXPECT_EQ(memory_kind, d.get_kind());
+    EXPECT_EQ(ndt::make_type<int32_t>(), d.p("target_type").as<ndt::type>());
+    EXPECT_FALSE(d.is_expression());
+    EXPECT_EQ((unsigned int)cudaHostAllocDefault, static_cast<const cuda_host_type *>(d.extended())->get_cuda_host_flags());
+
+    // A memory type cannot have an array dimension type as a target
+    EXPECT_THROW(ndt::make_cuda_host(ndt::make_strided_dim(ndt::make_type<int32_t>())), runtime_error);
+
+    d = ndt::make_cuda_host(ndt::make_type<float>(), cudaHostAllocMapped);
+    EXPECT_EQ((unsigned int)cudaHostAllocMapped, static_cast<const cuda_host_type *>(d.extended())->get_cuda_host_flags());
 }
 
-//TEST(CUDAHostArrayDType, ShiftedMemory) {
-  //  ndt::type d = ndt::make_cuda_host(ndt::make_strided_dim(ndt::make_type<int32_t>()));
-   // EXPECT_EQ(ndt::make_strided_dim(ndt::make_cuda_host(ndt::make_type<int32_t>())), d.with_right_shifted_memory_type());
-//}
+TEST(CUDAHostType, BuiltIn) {
+    ndt::type d = ndt::make_cuda_host(ndt::make_type<float>());
+    EXPECT_EQ(cuda_host_type_id, d.get_type_id());
+    EXPECT_EQ(memory_kind, d.get_kind());
+    EXPECT_EQ(sizeof(float), d.get_data_size());
+    // CUDA host type and CUDA device type have the same data alignment
+    EXPECT_EQ(ndt::make_cuda_device(ndt::make_type<float>()).get_data_alignment(), d.get_data_alignment());
+}
 
-
-
+TEST(CUDAHostType, IsTypeSubarray) {
+    EXPECT_TRUE(ndt::make_cuda_host(ndt::make_type<int32_t>()).is_type_subarray(ndt::make_cuda_host(ndt::make_type<int32_t>())));
+    EXPECT_TRUE(ndt::make_cuda_host(ndt::make_type<int32_t>()).is_type_subarray(ndt::make_type<int32_t>()));
+    EXPECT_TRUE(ndt::make_strided_dim(ndt::make_cuda_host(ndt::make_type<int32_t>())).is_type_subarray(ndt::make_type<int32_t>()));
+    EXPECT_FALSE(ndt::make_type<int32_t>().is_type_subarray(ndt::make_cuda_host(ndt::make_type<int32_t>())));
+}
 
 #endif // DYND_CUDA

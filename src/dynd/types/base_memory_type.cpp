@@ -4,6 +4,7 @@
 //
 
 #include <dynd/types/base_memory_type.hpp>
+#include <dynd/gfunc/make_callable.hpp>
 
 using namespace std;
 using namespace dynd;
@@ -12,9 +13,40 @@ base_memory_type::~base_memory_type()
 {
 }
 
+size_t base_memory_type::get_default_data_size(intptr_t ndim, const intptr_t *shape) const {
+    if (m_target_tp.is_builtin()) {
+        return m_target_tp.get_data_size();
+    } else {
+        return m_target_tp.extended()->get_default_data_size(ndim, shape);
+    }
+}
+
 void base_memory_type::print_data(std::ostream& o, const char *metadata, const char *data) const
 {
     m_target_tp.print_data(o, metadata + m_target_metadata_offset, data);
+}
+
+bool base_memory_type::is_lossless_assignment(const ndt::type& dst_tp, const ndt::type& src_tp) const
+{
+    // Default to calling with the target types
+    if (dst_tp.extended() == this) {
+        return ::is_lossless_assignment(m_target_tp, src_tp);
+    } else {
+        return ::is_lossless_assignment(dst_tp, m_target_tp);
+    }
+}
+
+bool base_memory_type::operator==(const base_type& rhs) const
+{
+    // Default to equivalence between the target types
+    if (this == &rhs) {
+        return true;
+    } else if (rhs.get_kind() != memory_kind) {
+        return false;
+    } else {
+        const base_memory_type *dt = static_cast<const base_memory_type*>(&rhs);
+        return m_target_tp == dt->m_target_tp;
+    }
 }
 
 void base_memory_type::transform_child_types(type_transform_fn_t transform_fn, void *extra,
@@ -34,64 +66,6 @@ void base_memory_type::transform_child_types(type_transform_fn_t transform_fn, v
 ndt::type base_memory_type::get_canonical_type() const
 {
     return m_target_tp.get_canonical_type();
-}
-
-ndt::type base_memory_type::apply_linear_index(intptr_t nindices, const irange *indices,
-                size_t current_i, const ndt::type& root_tp, bool leading_dimension) const
-{
-    if (nindices == 0) {
-        return ndt::type(this, true);
-    } else {
-        return with_replaced_target_type(m_target_tp.apply_linear_index(nindices, indices,
-                        current_i, root_tp, leading_dimension));
-    }
-}
-
-intptr_t base_memory_type::apply_linear_index(intptr_t nindices, const irange *indices, const char *metadata,
-                const ndt::type& result_tp, char *out_metadata,
-                memory_block_data *embedded_reference,
-                size_t current_i, const ndt::type& root_tp,
-                bool leading_dimension, char **inout_data,
-                memory_block_data **inout_dataref) const
-{
-    // Default to scalar behavior
-    if (nindices == 0) {
-        // Copy any metadata verbatim
-        metadata_copy_construct(out_metadata, metadata, embedded_reference);
-        return 0;
-    } else {
-        return m_target_tp.extended()->apply_linear_index(nindices, indices, metadata + m_target_metadata_offset, result_tp,
-                        out_metadata, embedded_reference, current_i, root_tp, leading_dimension, inout_data, inout_dataref);
-    }
-}
-
-ndt::type base_memory_type::at_single(intptr_t i0, const char **inout_metadata, const char **inout_data) const
-{
-    return with_replaced_target_type(m_target_tp.at_single(i0, inout_metadata ?
-                    inout_metadata + m_target_metadata_offset : NULL, inout_data));
-}
-
-ndt::type base_memory_type::get_type_at_dimension(char **inout_metadata, intptr_t i, intptr_t total_ndim) const
-{
-    if (i == 0) {
-        return ndt::type(this, true);
-    } else {
-        return with_replaced_target_type(m_target_tp.get_type_at_dimension(inout_metadata ?
-                        inout_metadata + m_target_metadata_offset : NULL, i, total_ndim));
-    }
-}
-
-void base_memory_type::get_shape(intptr_t ndim, intptr_t i,
-                intptr_t *out_shape, const char *metadata, const char *data) const
-{
-    return m_target_tp.extended()->get_shape(ndim, i, out_shape, metadata ?
-                    metadata + m_target_metadata_offset : NULL, data);
-}
-
-void base_memory_type::get_strides(size_t i, intptr_t *out_strides, const char *metadata) const
-{
-    return m_target_tp.extended()->get_strides(i, out_strides, metadata ?
-                    metadata + m_target_metadata_offset : NULL);
 }
 
 void base_memory_type::metadata_default_construct(char *metadata, intptr_t ndim, const intptr_t* shape) const
@@ -116,52 +90,19 @@ void base_memory_type::metadata_destruct(char *metadata) const
     }
 }
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-size_t base_memory_type::get_default_data_size(intptr_t ndim, const intptr_t *shape) const {
-    if (m_target_tp.is_builtin()) {
-        return m_target_tp.get_data_size();
-    } else {
-        return m_target_tp.extended()->get_default_data_size(ndim, shape);
-    }
+static ndt::type property_get_target_type(const ndt::type& tp) {
+    const base_memory_type *md = static_cast<const base_memory_type *>(tp.extended());
+    return md->get_target_type();
 }
 
-bool base_memory_type::is_type_subarray(const ndt::type& subarray_tp) const
-{
-    return !subarray_tp.is_builtin() && (*this) == (*subarray_tp.extended());
-//    return m_target_tp.extended()->is_type_subarray(subarray_tp);
-}
+static pair<string, gfunc::callable> type_properties[] = {
+    pair<string, gfunc::callable>("target_type", gfunc::make_callable(&property_get_target_type, "self"))
+};
 
-bool base_memory_type::operator==(const base_type& rhs) const
+void base_memory_type::get_dynamic_type_properties(
+                const std::pair<std::string, gfunc::callable> **out_properties,
+                size_t *out_count) const
 {
-    if (this == &rhs) {
-        return true;
-    } else if (rhs.get_kind() != memory_kind) {
-        return false;
-    } else {
-        const base_memory_type *dt = static_cast<const base_memory_type*>(&rhs);
-        return m_target_tp == dt->m_target_tp;
-    }
+    *out_properties = type_properties;
+    *out_count = sizeof(type_properties) / sizeof(type_properties[0]);
 }

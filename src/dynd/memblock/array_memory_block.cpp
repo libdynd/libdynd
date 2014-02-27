@@ -27,13 +27,14 @@ void free_array_memory_block(memory_block_data *memblock)
         preamble->m_type->data_destruct(metadata, preamble->m_data_pointer);
     }
 
-/*
     // Free the ndobject data if it wasn't allocated together with the memory block
     if (preamble->m_data_reference == NULL &&
-                    !preamble->is_builtin_type() &&
-                    preamble->m_type->get_kind() == memory_kind) {
-        static_cast<const base_memory_type*>(preamble->m_type)->data_free(preamble->m_data_pointer);
-    }*/
+                    !preamble->is_builtin_type() && !preamble->m_type->is_expression()) {
+        const ndt::type& dtp = preamble->m_type->get_type_at_dimension(NULL, preamble->m_type->get_ndim());
+        if (dtp.get_kind() == memory_kind) {
+            static_cast<const base_memory_type *>(dtp.extended())->data_free(preamble->m_data_pointer);
+        }
+    }
 
     // Free the references contained in the metadata
     if (!preamble->is_builtin_type()) {

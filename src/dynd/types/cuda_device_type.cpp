@@ -12,8 +12,8 @@ using namespace std;
 using namespace dynd;
 
 cuda_device_type::cuda_device_type(const ndt::type& target_tp)
-    : base_memory_type(cuda_device_type_id, memory_kind, target_tp.get_data_size(),
-        target_tp.get_data_alignment(), target_tp.get_flags(), target_tp.get_metadata_size(), target_tp.get_ndim(), target_tp)
+    : base_memory_type(cuda_device_type_id, target_tp, target_tp.get_data_size(),
+        get_cuda_device_data_alignment(target_tp), 0, target_tp.get_flags())
 {
     if (!target_tp.is_builtin()) {
         throw std::runtime_error("only built-in types may be allocated in CUDA device memory");

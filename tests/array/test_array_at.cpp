@@ -6,6 +6,7 @@
 #include <iostream>
 #include <stdexcept>
 #include <cmath>
+
 #include "inc_gtest.hpp"
 #include "../test_memory.cpp"
 
@@ -15,7 +16,7 @@
 using namespace std;
 using namespace dynd;
 
-template<typename T>
+template <typename T>
 class ArrayIndex : public Memory<T> {
 };
 
@@ -208,7 +209,6 @@ TYPED_TEST_P(ArrayIndex, ExceptionsOneDimensionalRange) {
     EXPECT_THROW(a(0,irange()), too_many_indices);
     EXPECT_THROW(a(0)(irange()), too_many_indices);
 }
-
 
 REGISTER_TYPED_TEST_CASE_P(ArrayIndex, BasicInteger, SimpleOneDimensionalRange,
     SteppedOneDimensionalRange, ExceptionsOneDimensionalRange);

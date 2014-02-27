@@ -12,6 +12,7 @@
 
 #include <dynd/type.hpp>
 #include <dynd/types/base_memory_type.hpp>
+#include <dynd/types/cuda_device_type.hpp>
 
 namespace dynd {
 
@@ -28,14 +29,13 @@ public:
 
     void print_type(std::ostream& o) const;
 
+    bool operator==(const base_type& rhs) const;
+
     ndt::type with_replaced_target_type(const ndt::type& target_tp) const;
 
     void data_alloc(char **data, size_t size) const;
     void data_zeroinit(char *data, size_t size) const;
     void data_free(char *data) const;
-
-
-
 
     size_t make_assignment_kernel(
                     ckernel_builder *out, size_t offset_out,
