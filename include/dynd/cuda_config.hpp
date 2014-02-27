@@ -6,26 +6,28 @@
 #ifndef _DYND__CUDA_CONFIG_HPP_
 #define _DYND__CUDA_CONFIG_HPP_
 
+#include <assert.h>
 #include <cmath>
 
 #ifdef DYND_CUDA
 #include <cuda_runtime.h>
 #endif // DYND_CUDA
 
-
 #ifdef __CUDACC__
-#define DYND_CUDA_DEVICE_CALLABLE __device__
-#define DYND_CUDA_HOST_DEVICE_CALLABLE __host__ DYND_CUDA_DEVICE_CALLABLE
-#define DYND_CUDA_GLOBAL_CALLABLE __global__
+
 #ifdef __CUDA_ARCH__
 #define DYND_CUDA_DEVICE_ARCH
 #else
-#define DYND_CUDA_HOST_ARCH 
+#define DYND_CUDA_HOST_ARCH
 #endif
-#else
+
+#define DYND_CUDA_DEVICE_CALLABLE __device__
+#define DYND_CUDA_HOST_DEVICE_CALLABLE __host__ DYND_CUDA_DEVICE_CALLABLE
+#define DYND_CUDA_GLOBAL_CALLABLE __global__
+
+#else // __CUDACC__
 
 #define DYND_CUDA_HOST_ARCH
-
 #define DYND_CUDA_HOST_DEVICE_CALLABLE
 
 namespace dynd {
@@ -36,42 +38,54 @@ inline bool isfinite(T arg) {
 }
 } // namespace dynd
 
-#endif
+#endif // __CUDACC_
 
 #ifdef DYND_CUDA
+
 namespace dynd {
-    template <int grid_dim, int block_dim>
+
+    /**
+     * Configuration of threads in a CUDA kernel, specialized to the number of grid
+     * and block dimensions for efficiency.
+     */
+    template <int grid_ndim, int block_ndim>
     struct cuda_global_config;
 
     template <>
     struct cuda_global_config<1, 1> {
-        size_t grids;
-        size_t blocks;
-        size_t threads;
+        unsigned int grid;
+        unsigned int block;
+        unsigned int threads;
 
         cuda_global_config() {}
 
-        cuda_global_config(int gr, int bl) : grids(gr), blocks(bl), threads(grids * blocks) {}
+        cuda_global_config(unsigned int grid, unsigned int block) : grid(grid), block(block), threads(grid * block) {}
     };
 
-    template <int grid_dim, int block_dim>
-    inline cuda_global_config<grid_dim, block_dim> make_cuda_global_config(size_t count);
+    template <int grid_ndim, int block_ndim>
+    inline cuda_global_config<grid_ndim, block_ndim> make_cuda_global_config(size_t count);
 
     template <>
     inline cuda_global_config<1, 1> make_cuda_global_config(size_t DYND_UNUSED(count)) {
+        // TODO: This should be chosen optimally depending on 'count'. For now, we default to a "good" configuration.
         return cuda_global_config<1, 1>(256, 256);
     }
 
 #ifdef __CUDACC__
-    template <int grid_dim, int block_dim>
-    DYND_CUDA_DEVICE_CALLABLE inline size_t get_cuda_global_thread();
+    /**
+     * Returns the unique index of a thread in a CUDA kernel.
+     */
+    template <int grid_ndim, int block_ndim>
+    DYND_CUDA_DEVICE_CALLABLE inline unsigned int get_cuda_global_thread();
 
     template <>
-    DYND_CUDA_DEVICE_CALLABLE inline size_t get_cuda_global_thread<1, 1>() {
+    DYND_CUDA_DEVICE_CALLABLE inline unsigned int get_cuda_global_thread<1, 1>() {
         return blockIdx.x * blockDim.x + threadIdx.x;
     }
-#endif
+#endif // __CUDACC__
+
 } // namespace dynd
+
 #endif // DYND_CUDA
 
 #endif // _DYND__CUDA_CONFIG_HPP_

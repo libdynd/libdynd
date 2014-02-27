@@ -35,16 +35,16 @@ public:
                     const eval::eval_context *ectx) const;
 };
 
-namespace ndt {
-    inline size_t get_cuda_device_data_alignment(const ndt::type& dtp) {
-        if (dtp.is_builtin()) {
-            return dtp.get_data_size();
-        } else {
-            // TODO: Return the data_size of the largest built-in component
-            throw std::runtime_error("only built-in types may be allocated in CUDA device memory");
-        }
+inline size_t get_cuda_device_data_alignment(const ndt::type& dtp) {
+    if (dtp.is_builtin()) {
+        return dtp.get_data_size();
+    } else {
+        // TODO: Return the data size of the largest built-in component
+        throw std::runtime_error("only built-in types may be allocated in CUDA global memory");
     }
+}
 
+namespace ndt {
     inline ndt::type make_cuda_device(const ndt::type& target_tp) {
         return ndt::type(new cuda_device_type(target_tp), false);
     }

@@ -16,7 +16,7 @@ cuda_device_type::cuda_device_type(const ndt::type& target_tp)
         get_cuda_device_data_alignment(target_tp), 0, target_tp.get_flags())
 {
     if (!target_tp.is_builtin()) {
-        throw std::runtime_error("only built-in types may be allocated in CUDA device memory");
+        throw std::runtime_error("only built-in types may be allocated in CUDA global memory");
     }
 }
 

@@ -28,7 +28,7 @@ struct single_assigner_builtin_base_error {
         //DYND_TRACE_ASSIGNMENT(static_cast<float>(*src), float, *src, double);
 
 #ifdef DYND_CUDA_DEVICE_ARCH
-        DYND_ASSERT_WHAT("assignment is not implemented");
+        DYND_ASSERT_WHAT("assignment is not implemented for CUDA global memory");
 #else
         std::stringstream ss;
         ss << "assignment from " << ndt::make_type<src_type>() << " to " << ndt::make_type<dst_type>();

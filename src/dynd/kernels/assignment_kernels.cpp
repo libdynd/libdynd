@@ -13,13 +13,13 @@ using namespace dynd;
 namespace {
     template<class T>
     struct aligned_fixed_size_copy_assign_type {
-        DYND_CUDA_HOST_DEVICE_CALLABLE static void single(char *dst, const char *src,
+        static void single(char *dst, const char *src,
                         ckernel_prefix *DYND_UNUSED(extra))
         {
             *(T *)dst = *(T *)src;
         }
 
-        DYND_CUDA_HOST_DEVICE_CALLABLE static void strided(char *dst, intptr_t dst_stride,
+        static void strided(char *dst, intptr_t dst_stride,
                         const char *src, intptr_t src_stride,
                         size_t count, ckernel_prefix *DYND_UNUSED(extra))
         {
@@ -34,13 +34,13 @@ namespace {
     struct aligned_fixed_size_copy_assign;
     template<>
     struct aligned_fixed_size_copy_assign<1> {
-        DYND_CUDA_HOST_DEVICE_CALLABLE static void single(char *dst, const char *src,
+        static void single(char *dst, const char *src,
                             ckernel_prefix *DYND_UNUSED(extra))
         {
             *dst = *src;
         }
 
-        DYND_CUDA_HOST_DEVICE_CALLABLE static void strided(char *dst, intptr_t dst_stride,
+        static void strided(char *dst, intptr_t dst_stride,
                         const char *src, intptr_t src_stride,
                         size_t count, ckernel_prefix *DYND_UNUSED(extra))
         {
@@ -59,13 +59,13 @@ namespace {
 
     template<int N>
     struct unaligned_fixed_size_copy_assign {
-        DYND_CUDA_HOST_DEVICE_CALLABLE static void single(char *dst, const char *src,
+        static void single(char *dst, const char *src,
                         ckernel_prefix *DYND_UNUSED(extra))
         {
             memcpy(dst, src, N);
         }
 
-        DYND_CUDA_HOST_DEVICE_CALLABLE static void strided(char *dst, intptr_t dst_stride,
+        static void strided(char *dst, intptr_t dst_stride,
                         const char *src, intptr_t src_stride,
                         size_t count, ckernel_prefix *DYND_UNUSED(extra))
         {
@@ -80,13 +80,13 @@ struct unaligned_copy_single_kernel_extra {
     ckernel_prefix base;
     size_t data_size;
 };
-DYND_CUDA_HOST_DEVICE_CALLABLE static void unaligned_copy_single(char *dst, const char *src,
+static void unaligned_copy_single(char *dst, const char *src,
                 ckernel_prefix *extra)
 {
     size_t data_size = reinterpret_cast<unaligned_copy_single_kernel_extra *>(extra)->data_size;
     memcpy(dst, src, data_size);
 }
-DYND_CUDA_HOST_DEVICE_CALLABLE static void unaligned_copy_strided(char *dst, intptr_t dst_stride,
+static void unaligned_copy_strided(char *dst, intptr_t dst_stride,
                         const char *src, intptr_t src_stride,
                         size_t count, ckernel_prefix *extra)
 {
@@ -96,59 +96,6 @@ DYND_CUDA_HOST_DEVICE_CALLABLE static void unaligned_copy_strided(char *dst, int
         memcpy(dst, src, data_size);
     }
 }
-
-#ifdef DYND_CUDA
-static void unaligned_copy_single_cuda_host_to_device(char *dst, const char *src,
-                ckernel_prefix *extra)
-{
-    size_t data_size = reinterpret_cast<unaligned_copy_single_kernel_extra *>(extra)->data_size;
-    throw_if_not_cuda_success(cudaMemcpy(dst, src, data_size, cudaMemcpyHostToDevice));
-}
-static void unaligned_copy_strided_cuda_host_to_device(char *dst, intptr_t dst_stride,
-                        const char *src, intptr_t src_stride,
-                        size_t count, ckernel_prefix *extra)
-{
-    size_t data_size = reinterpret_cast<unaligned_copy_single_kernel_extra *>(extra)->data_size;
-    for (size_t i = 0; i != count; ++i,
-                    dst += dst_stride, src += src_stride) {
-        throw_if_not_cuda_success(cudaMemcpy(dst, src, data_size, cudaMemcpyHostToDevice));
-    }
-}
-
-static void unaligned_copy_single_cuda_device_to_host(char *dst, const char *src,
-                ckernel_prefix *extra)
-{
-    size_t data_size = reinterpret_cast<unaligned_copy_single_kernel_extra *>(extra)->data_size;
-    throw_if_not_cuda_success(cudaMemcpy(dst, src, data_size, cudaMemcpyDeviceToHost));
-}
-static void unaligned_copy_strided_cuda_device_to_host(char *dst, intptr_t dst_stride,
-                        const char *src, intptr_t src_stride,
-                        size_t count, ckernel_prefix *extra)
-{
-    size_t data_size = reinterpret_cast<unaligned_copy_single_kernel_extra *>(extra)->data_size;
-    for (size_t i = 0; i != count; ++i,
-                    dst += dst_stride, src += src_stride) {
-        throw_if_not_cuda_success(cudaMemcpy(dst, src, data_size, cudaMemcpyDeviceToHost));
-    }
-}
-
-static void unaligned_copy_single_cuda_device_to_device(char *dst, const char *src,
-                ckernel_prefix *extra)
-{
-    size_t data_size = reinterpret_cast<unaligned_copy_single_kernel_extra *>(extra)->data_size;
-    throw_if_not_cuda_success(cudaMemcpy(dst, src, data_size, cudaMemcpyDeviceToDevice));
-}
-static void unaligned_copy_strided_cuda_device_to_device(char *dst, intptr_t dst_stride,
-                        const char *src, intptr_t src_stride,
-                        size_t count, ckernel_prefix *extra)
-{
-    size_t data_size = reinterpret_cast<unaligned_copy_single_kernel_extra *>(extra)->data_size;
-    for (size_t i = 0; i != count; ++i,
-                    dst += dst_stride, src += src_stride) {
-        throw_if_not_cuda_success(cudaMemcpy(dst, src, data_size, cudaMemcpyDeviceToDevice));
-    }
-}
-#endif // DYND_CUDA
 
 size_t dynd::make_assignment_kernel(
                 ckernel_builder *out, size_t offset_out,

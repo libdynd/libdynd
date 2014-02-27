@@ -1,8 +1,71 @@
-#include "assignment_kernels.cpp"
+//
+// Copyright (C) 2011-14 Irwin Zaid, Mark Wiebe, DyND Developers
+// BSD 2-Clause License, see LICENSE.txt
+//
 
 #include <dynd/types/base_memory_type.hpp>
+#include "assignment_kernels.cpp"
 
 #ifdef DYND_CUDA
+
+static void unaligned_copy_single_cuda_host_to_device(char *dst, const char *src,
+                ckernel_prefix *extra)
+{
+    size_t data_size = reinterpret_cast<unaligned_copy_single_kernel_extra *>(extra)->data_size;
+    throw_if_not_cuda_success(cudaMemcpy(dst, src, data_size, cudaMemcpyHostToDevice));
+}
+static void unaligned_copy_strided_cuda_host_to_device(char *dst, intptr_t dst_stride,
+                        const char *src, intptr_t src_stride,
+                        size_t count, ckernel_prefix *extra)
+{
+    size_t data_size = reinterpret_cast<unaligned_copy_single_kernel_extra *>(extra)->data_size;
+    for (size_t i = 0; i != count; ++i,
+                    dst += dst_stride, src += src_stride) {
+        throw_if_not_cuda_success(cudaMemcpy(dst, src, data_size, cudaMemcpyHostToDevice));
+    }
+}
+
+static void unaligned_copy_single_cuda_device_to_host(char *dst, const char *src,
+                ckernel_prefix *extra)
+{
+    size_t data_size = reinterpret_cast<unaligned_copy_single_kernel_extra *>(extra)->data_size;
+    throw_if_not_cuda_success(cudaMemcpy(dst, src, data_size, cudaMemcpyDeviceToHost));
+}
+static void unaligned_copy_strided_cuda_device_to_host(char *dst, intptr_t dst_stride,
+                        const char *src, intptr_t src_stride,
+                        size_t count, ckernel_prefix *extra)
+{
+    size_t data_size = reinterpret_cast<unaligned_copy_single_kernel_extra *>(extra)->data_size;
+    for (size_t i = 0; i != count; ++i,
+                    dst += dst_stride, src += src_stride) {
+        throw_if_not_cuda_success(cudaMemcpy(dst, src, data_size, cudaMemcpyDeviceToHost));
+    }
+}
+
+static void unaligned_copy_single_cuda_device_to_device(char *dst, const char *src,
+                ckernel_prefix *extra)
+{
+    size_t data_size = reinterpret_cast<unaligned_copy_single_kernel_extra *>(extra)->data_size;
+    throw_if_not_cuda_success(cudaMemcpy(dst, src, data_size, cudaMemcpyDeviceToDevice));
+}
+static void unaligned_copy_strided_cuda_device_to_device(char *dst, intptr_t dst_stride,
+                        const char *src, intptr_t src_stride,
+                        size_t count, ckernel_prefix *extra)
+{
+    size_t data_size = reinterpret_cast<unaligned_copy_single_kernel_extra *>(extra)->data_size;
+    for (size_t i = 0; i != count; ++i,
+                    dst += dst_stride, src += src_stride) {
+        throw_if_not_cuda_success(cudaMemcpy(dst, src, data_size, cudaMemcpyDeviceToDevice));
+    }
+}
+
+static const ndt::type& get_target_type(const ndt::type& tp) {
+    if (tp.get_kind() == memory_kind) {
+        return static_cast<const base_memory_type *>(tp.extended())->get_target_type();
+    } else {
+        return tp;
+    }
+}
 
 size_t dynd::make_cuda_assignment_kernel(
                 ckernel_builder *out, size_t offset_out,
@@ -13,7 +76,6 @@ size_t dynd::make_cuda_assignment_kernel(
 {
     if (errmode == assign_error_default && ectx != NULL) {
         if (dst_tp.get_type_id() == cuda_device_type_id && src_tp.get_type_id() == cuda_device_type_id) {
-            cout << "getting default error" << endl;
             errmode = ectx->default_cuda_device_to_device_assign_error_mode;
         } else {
             errmode = ectx->default_assign_error_mode;
@@ -54,7 +116,7 @@ size_t dynd::make_cuda_assignment_kernel(
     }
 }
 
-template <class dst_type, class src_type, assign_error_mode errmode>
+template <typename dst_type, typename src_type, assign_error_mode errmode>
 struct single_cuda_host_to_device_assigner_builtin {
     static void assign(dst_type *dst, const src_type *src, ckernel_prefix *extra) {
         dst_type tmp;
@@ -62,7 +124,7 @@ struct single_cuda_host_to_device_assigner_builtin {
         throw_if_not_cuda_success(cudaMemcpy(dst, &tmp, sizeof(dst_type), cudaMemcpyHostToDevice));
     }
 };
-template <class same_type, assign_error_mode errmode>
+template <typename same_type, assign_error_mode errmode>
 struct single_cuda_host_to_device_assigner_builtin<same_type, same_type, errmode> {
     static void assign(same_type *dst, const same_type *src, ckernel_prefix *DYND_UNUSED(extra)) {
         throw_if_not_cuda_success(cudaMemcpy(dst, src, sizeof(same_type), cudaMemcpyHostToDevice));
@@ -123,8 +185,7 @@ static unary_single_operation_t assign_table_single_cuda_host_to_device_kernel[b
 #undef SINGLE_OPERATION_PAIR_LEVEL
 };
 
-
-template <class dst_type, class src_type, assign_error_mode errmode>
+template <typename dst_type, typename src_type, assign_error_mode errmode>
 struct single_cuda_device_to_host_assigner_builtin {
     static void assign(dst_type *dst, const src_type *src, ckernel_prefix *extra) {
         src_type tmp;
@@ -132,7 +193,7 @@ struct single_cuda_device_to_host_assigner_builtin {
         single_assigner_builtin<dst_type, src_type, errmode>::assign(dst, &tmp, extra);
     }
 };
-template <class same_type, assign_error_mode errmode>
+template <typename same_type, assign_error_mode errmode>
 struct single_cuda_device_to_host_assigner_builtin<same_type, same_type, errmode> {
     static void assign(same_type *dst, const same_type *src, ckernel_prefix *DYND_UNUSED(extra)) {
         throw_if_not_cuda_success(cudaMemcpy(dst, src, sizeof(same_type), cudaMemcpyDeviceToHost));
@@ -193,24 +254,25 @@ static unary_single_operation_t assign_table_single_cuda_device_to_host_kernel[b
 #undef SINGLE_OPERATION_PAIR_LEVEL
 };
 
-template<class dst_type, class src_type>
+template <typename dst_type, typename src_type, assign_error_mode errmode>
 static DYND_CUDA_GLOBAL_CALLABLE void single_cuda_global_assign_builtin(dst_type *dst, const src_type *src, ckernel_prefix *extra) {
-    single_assigner_builtin<dst_type, src_type, assign_error_none>::assign(dst, src, extra);
+    single_assigner_builtin<dst_type, src_type, errmode>::assign(dst, src, extra);
 }
 
-template<class dst_type, class src_type, assign_error_mode errmode>
+template <typename dst_type, typename src_type, assign_error_mode errmode>
 struct single_cuda_device_to_device_assigner_builtin {
     static void assign(dst_type *DYND_UNUSED(dst), const src_type *DYND_UNUSED(src), ckernel_prefix *DYND_UNUSED(extra)) {
         std::stringstream ss;
-        ss << "assignment from " << ndt::make_type<src_type>() << " on the device to " << ndt::make_type<dst_type>() << " on the device ";
+        ss << "assignment from " << ndt::make_type<src_type>() << " in CUDA global memory to ";
+        ss << ndt::make_type<dst_type>() << " in CUDA global memory ";
         ss << "with error mode " << errmode << " is not implemented";
         throw std::runtime_error(ss.str());
     }
 };
-template<class dst_type, class src_type>
+template <typename dst_type, typename src_type>
 struct single_cuda_device_to_device_assigner_builtin<dst_type, src_type, assign_error_none> {
     static void assign(dst_type *dst, const src_type *src, ckernel_prefix *DYND_UNUSED(extra)) {
-        single_cuda_global_assign_builtin<<<1, 1>>>(dst, src, NULL);
+        single_cuda_global_assign_builtin<dst_type, src_type, assign_error_none><<<1, 1>>>(dst, src, NULL);
         throw_if_not_cuda_success(cudaDeviceSynchronize());
     }
 };
@@ -286,16 +348,20 @@ namespace {
     template <typename dst_type, typename src_type, assign_error_mode errmode>
     DYND_CUDA_GLOBAL_CALLABLE void strided_cuda_global_multiple_assign_builtin(char *dst, intptr_t dst_stride,
                     const char *src, intptr_t src_stride,
-                    size_t count, size_t count_div_threads, size_t count_mod_threads, ckernel_prefix *extra)
+                    size_t count_div_threads, size_t count_mod_threads, ckernel_prefix *extra)
     {
         unsigned int thread = get_cuda_global_thread<1, 1>();
 
         if (thread < count_mod_threads) {
-            multiple_assignment_builtin<dst_type, src_type, errmode>::strided_assign(dst + thread * (count_div_threads + 1) * dst_stride, dst_stride,
-                src + thread * (count_div_threads + 1) * src_stride, src_stride, count + 1, extra);
+            multiple_assignment_builtin<dst_type, src_type, errmode>::strided_assign(
+                            dst + thread * (count_div_threads + 1) * dst_stride, dst_stride,
+                            src + thread * (count_div_threads + 1) * src_stride, src_stride,
+                            count_div_threads + 1, extra);
         } else {
-            multiple_assignment_builtin<dst_type, src_type, errmode>::strided_assign(dst + (thread * count_div_threads + count_mod_threads) * dst_stride, dst_stride,
-                src + (thread * count_div_threads + count_mod_threads) * src_stride, src_stride, count, extra);
+            multiple_assignment_builtin<dst_type, src_type, errmode>::strided_assign(
+                            dst + (thread * count_div_threads + count_mod_threads) * dst_stride, dst_stride,
+                            src + (thread * count_div_threads + count_mod_threads) * src_stride, src_stride,
+                            count_div_threads, extra);
         }
     }
 
@@ -306,7 +372,11 @@ namespace {
                         const char *DYND_UNUSED(src), intptr_t DYND_UNUSED(src_stride),
                         size_t DYND_UNUSED(count), ckernel_prefix *DYND_UNUSED(extra))
         {
-            // error
+            std::stringstream ss;
+            ss << "assignment from " << ndt::make_type<src_type>() << " in CUDA global memory to ";
+            ss << ndt::make_type<dst_type>() << " in CUDA global memory ";
+            ss << "with error mode " << errmode << " is not implemented";
+            throw std::runtime_error(ss.str());
         }
     };
     template <typename dst_type, typename src_type>
@@ -314,16 +384,18 @@ namespace {
         static void strided_assign(
                         char *dst, intptr_t dst_stride,
                         const char *src, intptr_t src_stride,
-                        size_t count, ckernel_prefix *extra)
+                        size_t count, ckernel_prefix *DYND_UNUSED(extra))
         {
             cuda_global_config<1, 1> config = make_cuda_global_config<1, 1>(count);
 
             if (count < config.threads) {
-                strided_cuda_global_assign_builtin<dst_type, src_type, assign_error_none><<<config.grids, config.blocks>>>(
-                                dst, dst_stride, src, src_stride, count, extra);
+                strided_cuda_global_assign_builtin<dst_type, src_type, assign_error_none>
+                                <<<config.grid, config.block>>>(dst, dst_stride, src, src_stride,
+                                count, NULL);
             } else {
-                strided_cuda_global_multiple_assign_builtin<dst_type, src_type, assign_error_none><<<config.grids, config.blocks>>>(
-                                dst, dst_stride, src, src_stride, count, count / config.threads, count % config.threads, extra);
+                strided_cuda_global_multiple_assign_builtin<dst_type, src_type, assign_error_none>
+                                <<<config.grid, config.block>>>(dst, dst_stride, src, src_stride,
+                                count / config.threads, count % config.threads, NULL);
             }
             throw_if_not_cuda_success(cudaDeviceSynchronize());
         }
@@ -455,7 +527,14 @@ size_t dynd::make_cuda_builtin_type_assignment_kernel(
         return offset_out + sizeof(ckernel_prefix);
     } else {
         stringstream ss;
-        ss << "Cannot assign from " << ndt::type(src_type_id) << " to " << ndt::type(dst_type_id);
+        ss << "Cannot assign from " << ndt::type(src_type_id);
+        if (src_device) {
+            ss << " in CUDA global memory";
+        }
+        ss << " to " << ndt::type(dst_type_id);
+        if (dst_device) {
+            ss << " in CUDA global memory";
+        }
         throw runtime_error(ss.str());
     }
 }
@@ -475,105 +554,15 @@ size_t dynd::make_cuda_pod_typed_data_assignment_kernel(
     }
     if (dst_device) {
         if (src_device) {
-            ckernel_prefix *result = NULL;
-            if (data_size == data_alignment) {
-                switch (-1) { // data_size
-                    case 1:
-                        result = out->get_at<ckernel_prefix>(offset_out);
-                        if (single) {
-                            result->set_function<unary_single_operation_t>(
-                                            &aligned_fixed_size_copy_assign<1>::single);
-                        } else {
-                            result->set_function<unary_strided_operation_t>(
-                                            &aligned_fixed_size_copy_assign<1>::strided);
-                        }
-                        return offset_out + sizeof(ckernel_prefix);
-                    case 2:
-                        result = out->get_at<ckernel_prefix>(offset_out);
-                        if (single) {
-                            result->set_function<unary_single_operation_t>(
-                                            &aligned_fixed_size_copy_assign<2>::single);
-                        } else {
-                            result->set_function<unary_strided_operation_t>(
-                                            &aligned_fixed_size_copy_assign<2>::strided);
-                        }
-                        return offset_out + sizeof(ckernel_prefix);
-                    case 4:
-                        result = out->get_at<ckernel_prefix>(offset_out);
-                        if (single) {
-                            result->set_function<unary_single_operation_t>(
-                                            &aligned_fixed_size_copy_assign<4>::single);
-                        } else {
-                            result->set_function<unary_strided_operation_t>(
-                                            &aligned_fixed_size_copy_assign<4>::strided);
-                        }
-                        return offset_out + sizeof(ckernel_prefix);
-                    case 8:
-                        result = out->get_at<ckernel_prefix>(offset_out);
-                        if (single) {
-                            result->set_function<unary_single_operation_t>(
-                                            &aligned_fixed_size_copy_assign<8>::single);
-                        } else {
-                            result->set_function<unary_strided_operation_t>(
-                                            &aligned_fixed_size_copy_assign<8>::strided);
-                        }
-                        return offset_out + sizeof(ckernel_prefix);
-                    default:
-                        out->ensure_capacity_leaf(offset_out + sizeof(unaligned_copy_single_kernel_extra));
-                        result = out->get_at<ckernel_prefix>(offset_out);
-                        if (single) {
-                            result->set_function<unary_single_operation_t>(&unaligned_copy_single_cuda_device_to_device);
-                        } else {
-                            result->set_function<unary_strided_operation_t>(&unaligned_copy_strided_cuda_device_to_device);
-                        }
-                        reinterpret_cast<unaligned_copy_single_kernel_extra *>(result)->data_size = data_size;
-                        return offset_out + sizeof(unaligned_copy_single_kernel_extra);
-                }
+            out->ensure_capacity_leaf(offset_out + sizeof(unaligned_copy_single_kernel_extra));
+            ckernel_prefix *result = out->get_at<ckernel_prefix>(offset_out);
+            if (single) {
+                result->set_function<unary_single_operation_t>(&unaligned_copy_single_cuda_device_to_device);
             } else {
-                switch (-1) { // data_size
-                    case 2:
-                        result = out->get_at<ckernel_prefix>(offset_out);
-                        if (single) {
-                            result->set_function<unary_single_operation_t>(
-                                            unaligned_fixed_size_copy_assign<2>::single);
-                        } else {
-                            result->set_function<unary_strided_operation_t>(
-                                            unaligned_fixed_size_copy_assign<2>::strided);
-                        }
-                        return offset_out + sizeof(ckernel_prefix);
-                    case 4:
-                        result = out->get_at<ckernel_prefix>(offset_out);
-                        if (single) {
-                            result->set_function<unary_single_operation_t>(
-                                            unaligned_fixed_size_copy_assign<4>::single);
-                        } else {
-                            result->set_function<unary_strided_operation_t>(
-                                            unaligned_fixed_size_copy_assign<4>::strided);
-                        }
-                        return offset_out + sizeof(ckernel_prefix);
-                    case 8:
-                        result = out->get_at<ckernel_prefix>(offset_out);
-                        if (single) {
-                            result->set_function<unary_single_operation_t>(
-                                            unaligned_fixed_size_copy_assign<8>::single);
-                        } else {
-                            result->set_function<unary_strided_operation_t>(
-                                            unaligned_fixed_size_copy_assign<8>::strided);
-                        }
-                        return offset_out + sizeof(ckernel_prefix);
-                    default:
-                        out->ensure_capacity(offset_out + sizeof(unaligned_copy_single_kernel_extra) -
-                                        sizeof(ckernel_prefix));
-                        result = out->get_at<ckernel_prefix>(offset_out);
-                        if (single) {
-                            result->set_function<unary_single_operation_t>(&unaligned_copy_single_cuda_device_to_device);
-                        } else {
-                            result->set_function<unary_strided_operation_t>(&unaligned_copy_strided_cuda_device_to_device);
-                        }
-                        reinterpret_cast<unaligned_copy_single_kernel_extra *>(result)->data_size = data_size;
-                        return offset_out + sizeof(unaligned_copy_single_kernel_extra);
-                }
+                result->set_function<unary_strided_operation_t>(&unaligned_copy_strided_cuda_device_to_device);
             }
+            reinterpret_cast<unaligned_copy_single_kernel_extra *>(result)->data_size = data_size;
+            return offset_out + sizeof(unaligned_copy_single_kernel_extra);
         } else {
             out->ensure_capacity_leaf(offset_out + sizeof(unaligned_copy_single_kernel_extra));
             ckernel_prefix *result = out->get_at<ckernel_prefix>(offset_out);

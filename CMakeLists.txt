@@ -392,26 +392,30 @@ source_group("VM Headers" REGULAR_EXPRESSION "include/dynd/vm/.*hpp")
 source_group("Internal Headers" REGULAR_EXPRESSION "src/dynd/.*hpp")
 
 if (DYND_CUDA)
-    set(libdynd_cuda_SRC
+    # Replace some source files with their CUDA versions
+    list(REMOVE_ITEM libdynd_SRC
         src/dynd/types/dynd_complex.cpp
         src/dynd/types/dynd_float16.cpp
         src/dynd/types/dynd_float128.cpp
         src/dynd/types/dynd_int128.cpp
         src/dynd/types/dynd_uint128.cpp
         src/dynd/kernels/assignment_kernels.cpp
+        )        
+    list(APPEND libdynd_SRC
+        src/dynd/types/dynd_complex.cu
+        src/dynd/types/dynd_float16.cu
+        src/dynd/types/dynd_float128.cu
+        src/dynd/types/dynd_int128.cu
+        src/dynd/types/dynd_uint128.cu
+        src/dynd/kernels/assignment_kernels.cu
         )
-
-    # Replace some source files with their CUDA versions
-    foreach(cuda_SRC ${libdynd_cuda_SRC})
-        list(REMOVE_ITEM libdynd_SRC ${cuda_SRC})
-        string(REPLACE ".cpp" ".cu" cuda_SRC ${cuda_SRC})
-        list(APPEND libdynd_SRC ${cuda_SRC})
-    endforeach()
 
     # Add a preprocessor definition to indicate we're building with CUDA
     add_definitions(-DDYND_CUDA)
 
-    # ...
+    # Disable warnings about "controlling expression is constant"
+    set(CUDA_NVCC_FLAGS ${CUDA_NVCC_FLAGS};-Xcudafe;--diag_suppress=boolean_controlling_expr_is_constant)
+
     set(CUDA_SEPARABLE_COMPILATION ON)
 endif()
 
@@ -431,7 +435,8 @@ endif()
 
 if (DYND_SHARED_LIB)
     if (DYND_CUDA)
-        cuda_add_library(libdynd SHARED ${libdynd_SRC} OPTIONS "-Xcompiler" "-g" "-gencode" "arch=compute_20,code=sm_20" "-gencode" "arch=compute_30,code=sm_30" "-Xcompiler" "-fPIC")
+        cuda_add_library(libdynd SHARED ${libdynd_SRC}
+            OPTIONS "-gencode" "arch=compute_30,code=sm_30" "-Xcompiler" "-fPIC")
     else()
         add_library(libdynd SHARED ${libdynd_SRC})
     endif()
@@ -444,7 +449,8 @@ if (DYND_SHARED_LIB)
         )
 else()
     if (DYND_CUDA)
-        cuda_add_library(libdynd STATIC ${libdynd_SRC})
+        cuda_add_library(libdynd STATIC ${libdynd_SRC}
+            OPTIONS "-gencode" "arch=compute_30,code=sm_30" "-Xcompiler" "-fPIC")
     else()
         add_library(libdynd STATIC ${libdynd_SRC})
     endif()

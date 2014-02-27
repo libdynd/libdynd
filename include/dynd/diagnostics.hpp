@@ -35,6 +35,7 @@
 #endif
 
 #define DYND_ASSERT_WHAT(what_arg) assert(!what_arg)
+#define DYND_ASSERT_WHAT_RETURN_ZERO(what_arg) assert(!what_arg); return 0
 
 #if DYND_ASSIGNMENT_TRACING && !defined(__CUDA_ARCH__)
 #include <iostream>

@@ -15,6 +15,7 @@
 #include <dynd/types/fixedbytes_type.hpp>
 #include <dynd/types/type_type.hpp>
 #include <dynd/types/convert_type.hpp>
+#include <dynd/types/base_memory_type.hpp>
 #include <dynd/types/cuda_host_type.hpp>
 #include <dynd/types/cuda_device_type.hpp>
 #include <dynd/kernels/assignment_kernels.hpp>
@@ -895,42 +896,44 @@ nd::array nd::array::eval_copy(uint32_t access_flags, const eval::eval_context *
     return result;
 }
 
-#include <stdio.h>
-
 #ifdef DYND_CUDA
 nd::array nd::array::to_host() const
 {
-    size_t ndim = get_ndim();
-    dimvector shape(ndim);
-    get_shape(shape.get());
-    array result = nd::array(make_array_memory_block(get_type().get_canonical_type(), ndim, shape.get()));
+    ndt::type dt = get_type().get_dtype();
+    if (dt.get_kind() == memory_kind) {
+        dt = static_cast<const base_memory_type *>(dt.extended())->get_target_type();
+    }
 
+    array result = empty_like(*this, dt);
     result.val_assign(*this);
+
     return result;
 }
 
 nd::array nd::array::to_cuda_host(unsigned int cuda_host_flags) const
 {
-    size_t ndim = get_ndim();
-    dimvector shape(ndim);
-    get_shape(shape.get());
-    ndt::type tp = get_type().with_replaced_dtype(make_cuda_host(get_dtype().get_canonical_type(), cuda_host_flags));
-    array result = nd::array(make_array_memory_block(tp, ndim, shape.get()));
+    ndt::type dt = get_type().get_dtype();
+    if (dt.get_kind() == memory_kind) {
+        dt = static_cast<const base_memory_type *>(dt.extended())->get_target_type();
+    }
 
+    array result = empty_like(*this, make_cuda_host(dt, cuda_host_flags));
     result.val_assign(*this);
+
     return result;
 
 }
 
 nd::array nd::array::to_cuda_device() const
 {
-    size_t ndim = get_ndim();
-    dimvector shape(ndim);
-    get_shape(shape.get());
-    ndt::type tp = get_type().with_replaced_dtype(make_cuda_device(get_dtype().get_canonical_type()));
-    array result = nd::array(make_array_memory_block(tp, ndim, shape.get()));
+    ndt::type dt = get_type().get_dtype();
+    if (dt.get_kind() == memory_kind) {
+        dt = static_cast<const base_memory_type *>(dt.extended())->get_target_type();
+    }
 
+    array result = empty_like(*this, make_cuda_device(dt));
     result.val_assign(*this);
+
     return result;
 }
 #endif

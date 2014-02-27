@@ -114,7 +114,7 @@ enum type_id_t {
 
     // A CUDA host memory type
     cuda_host_type_id,
-    // A CUDA device memory type
+    // A CUDA device (global) memory type
     cuda_device_type_id,
 
     // A struct type with variable layout
