@@ -97,12 +97,12 @@ public:
     
     /**
      * Modifies metadata allocated using the metadata_default_construct function, to be used
-     * immediately after ndobject construction. Given an input type/metadata, edits the output
+     * immediately after nd::array construction. Given an input type/metadata, edits the output
      * metadata in place to match.
      *
      * \param dst_metadata  The metadata created by metadata_default_construct, which is modified in place
-     * \param src_tp  The type of the input ndobject whose stride ordering is to be matched.
-     * \param src_metadata  The metadata of the input ndobject whose stride ordering is to be matched.
+     * \param src_tp  The type of the input nd::array whose stride ordering is to be matched.
+     * \param src_metadata  The metadata of the input nd::array whose stride ordering is to be matched.
      */
     void reorder_default_constructed_strides(
                     char *dst_metadata,

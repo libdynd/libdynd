@@ -148,6 +148,6 @@ void unary_expr_type::get_dynamic_array_functions(const std::pair<std::string, g
     if (!udt.is_builtin()) {
         udt.extended()->get_dynamic_array_functions(out_functions, out_count);
     } else {
-        //get_builtin_type_dynamic_ndobject_functions(udt.get_type_id(), out_functions, out_count);
+        //get_builtin_type_dynamic_array_functions(udt.get_type_id(), out_functions, out_count);
     }
 }

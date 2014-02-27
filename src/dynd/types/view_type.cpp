@@ -80,9 +80,9 @@ void view_type::print_type(std::ostream& o) const
     // Special case printing of alignment to make it more human-readable
     if (m_value_type.get_data_alignment() != 1 && m_operand_type.get_type_id() == fixedbytes_type_id &&
                     m_operand_type.get_data_alignment() == 1) {
-        o << "unaligned(" << m_value_type << ")";
+        o << "unaligned[" << m_value_type << "]";
     } else {
-        o << "view<as=" << m_value_type << ", original=" << m_operand_type << ">";
+        o << "view[as=" << m_value_type << ", original=" << m_operand_type << "]";
     }
 }
 

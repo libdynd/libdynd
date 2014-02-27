@@ -1,7 +1,7 @@
-NDObject Low Level Details
-==========================
+ND::Array Low Level Details
+===========================
 
-This document describes low level details of DyND ndobjects, and how
+This document describes low level details of DyND nd::arrays, and how
 they might integrate with Numba.
 
 Memory Block
@@ -9,7 +9,7 @@ Memory Block
 
     #include <dynd/memblock/memory_block.hpp>
 
-The memory block is DyND's reference counted object for storing ndobjects
+The memory block is DyND's reference counted object for storing nd::arrays
 and data. It always starts with two 32-bit members, an atomic use count and
 a memory block type.
 
@@ -17,7 +17,7 @@ a memory block type.
         atomic_refcount m_use_count;
         uint32_t m_type;
     };
-    
+
 Two functions are exposed for incref/decref, which perform the atomic increment
 or atomic decrement + free respectively. For integration with Numba, the increment
 and decrement operations should be atomic and ideally inlined, and llvmpy has the method
@@ -79,19 +79,19 @@ might be:
 
 The same logic will apply for variable-sized arrays when they are fully implemented.
 
-NDObject
---------
+ND::Array
+---------
 
-    #include <dynd/ndobject.hpp>
+    #include <dynd/array.hpp>
 
-The NDObject is a specific type of memory block, with its 'type' set to
-the value ndobject_memory_block_type (from dynd/memblock/memory_block.hpp).
-Its primary structure is defined (in dynd/memblock/ndobject_memory_block.hpp)
-by the struct ndobject_preamble. This struct looks like
+The nd::array is a specific type of memory block, with its 'type' set to
+the value array_memory_block_type (from dynd/memblock/memory_block.hpp).
+Its primary structure is defined (in dynd/memblock/array_memory_block.hpp)
+by the struct dynd::array_preamble. This struct looks like
 
-    struct ndobject_preamble {
+    struct array_preamble {
         memory_block_data m_memblockdata;
-        const extended_dtype *m_dtype;
+        const base_type *m_type;
         char *m_data_pointer;
         uint64_t m_flags;
         memory_block_data *m_data_reference;
@@ -99,17 +99,17 @@ by the struct ndobject_preamble. This struct looks like
 
 This struct begins with the standard memory block data (use count and type), then
 has a reference to a dtype, a pointer to the data, and a small bit of metadata that
-exists in all ndobjects, including some flags and a memblock reference for the data.
+exists in all nd::arrays, including some flags and a memblock reference for the data.
 Presently the flags are only used for access control (read, write, and immutable).
 
 Many dtypes require additional metadata, and this is stored in memory immediately after
-the ndobject_preamble. The dtype has a method get_metadata_size() which returns how much
+the dynd::array_preamble. The dtype has a method get_metadata_size() which returns how much
 memory is needed here.
 
-DType
------
+NDT::Type
+---------
 
-    #include <dynd/dtype.hpp>
+    #include <dynd/type.hpp>
 
 DTypes are represented in one of two ways. The most basic types, like the ones
 built into C/C++, are classified as "builtin dtypes", and represented simply by an
@@ -142,31 +142,32 @@ functions in creating such a scheme.
 
 The structure of a simple 1D strided array is as follows, as seen from Python:
 
-    In [9]: a.debug_print()
-    ------ ndobject
-     address: 000000000705A200
+    >>> a = nd.array([1, 2, 3, 4])
+    >>> nd.debug_repr(a)
+    ------ array
+     address: 00000000004DA8C0
      refcount: 1
-     dtype:
-      pointer: 0000000007059480
-      type: strided_array<int32>
+     type:
+      pointer: 000000000050F240
+      type: strided * int32
      metadata:
-      flags: 3 (read_access write_access )
-      dtype-specific metadata:
-       strided_array metadata
+      flags: 5 (read_access immutable )
+      type-specific metadata:
+       strided_dim metadata
         stride: 4
         size: 4
      data:
-       pointer: 000000000705A240
-       reference: 0000000000000000 (embedded in ndobject memory)
+       pointer: 00000000004DA900
+       reference: 0000000000000000 (embedded in array memory)
     ------
 
-    In [10]: a.dtype
-    Out[10]: nd.dtype('strided_array<int32>')
+    >>> nd.type_of(a)
+    ndt.type('strided * int32')
 
-    In [11]: a.dtype[0]
-    Out[11]: nd.dt.int32
+    >>> nd.dtype_of(a)
+    ndt.int32
 
 If you have a raw pointer to this object, you can first check its dtype by inspecting
-it as a pointer to `ndobject_preamble`, whose structure is given above. After checking
-that the type_id of the dtype is `strided_array_type_id`, the dtype can be cast
-to a strided_array_dtype pointer. The method 
+it as a pointer to `dynd::array_preamble`, whose structure is given above. After checking
+that the type_id of the type is `strided_dim_type_id`, the type can be cast
+to a strided_dim_type pointer.

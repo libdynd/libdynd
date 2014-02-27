@@ -17,7 +17,7 @@ void free_array_memory_block(memory_block_data *memblock)
     array_preamble *preamble = reinterpret_cast<array_preamble *>(memblock);
     char *metadata = reinterpret_cast<char *>(preamble + 1);
 
-    // Call the data destructor if necessary (i.e. the ndobject owns
+    // Call the data destructor if necessary (i.e. the nd::array owns
     // the data memory, and the type has a data destructor)
     if (preamble->m_data_reference == NULL &&
                     !preamble->is_builtin_type() &&
@@ -31,7 +31,7 @@ void free_array_memory_block(memory_block_data *memblock)
         base_type_decref(preamble->m_type);
     }
 
-    // Free the reference to the ndobject data
+    // Free the reference to the nd::array data
     if (preamble->m_data_reference != NULL) {
         memory_block_decref(preamble->m_data_reference);
     }
@@ -148,6 +148,6 @@ void dynd::array_memory_block_debug_print(const memory_block_data *memblock, std
                         : ndt::type(preamble->m_type, true);
         o << indent << " type: " << tp << "\n";
     } else {
-        o << indent << " uninitialized ndobject\n";
+        o << indent << " uninitialized nd::array\n";
     }
 }

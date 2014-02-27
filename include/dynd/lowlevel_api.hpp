@@ -20,7 +20,7 @@ namespace dynd {
  */
 struct lowlevel_api_t {
     uintptr_t version;
-    // Reference counting primitives for memory blocks (including ndobjects)
+    // Reference counting primitives for memory blocks (including nd::arrays)
     void (*memory_block_incref)(memory_block_data *mbd);
     void (*memory_block_decref)(memory_block_data *mbd);
     // memory_block_free is *only* exposed for use by code inlining

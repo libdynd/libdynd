@@ -1,4 +1,4 @@
-Multi-dimensional DyND Kernels
+﻿Multi-dimensional DyND Kernels
 ==============================
 
 The [CKernel Documentation](ckernels.md) describes
@@ -81,20 +81,20 @@ Their shapes are respectively (2, VarDim) and (2, 2), so
 the broadcasting occurs as:
 
 ```
-(2, VarDim) # A
-(2,      1) # B
------------
-(2, VarDim) # Result
+(2, var) # A
+(2,   1) # B
+--------
+(2, var) # Result
 ```
 
 Now consider B = [[4, 5], [6, 7]]. Its shape is (2, 2), so
 the broadcasting now occurs as:
 
 ```
-(2, VarDim) # A
-(2,      2) # B
------------
-(2,      2) # Result
+(2, var) # A
+(2,   2) # B
+--------
+(2,   2) # Result
 ```
 
 Assignment Kernels That Broadcast
@@ -112,15 +112,15 @@ scalar to a one-dimensional strided array.
 
 ```python
 >>> from dynd import nd, ndt
->>> a = nd.ndobject([1,2,3])
->>> b = nd.ndobject(4)
->>> a.dtype
-nd.dtype('strided_dim<int32>')
->>> b.dtype
+>>> a = nd.array([1,2,3], access='rw')
+>>> b = nd.array(4)
+>>> nd.type_of(a)
+ndt.type('strided * int32')
+>>> nd.type_of(b)
 ndt.int32
 >>> a[...] = b
 >>> a
-nd.ndobject([4, 4, 4], strided_dim<int32>)
+nd.array([4, 4, 4], type="strided * int32")
 ```
 
 The broadcasting for this, following the notation
@@ -168,15 +168,15 @@ array, doing the broadcasting during the assignment.
 
 ```python
 >>> from dynd import nd, ndt
->>> a = nd.ndobject([[5, 6, 7], [8, 9, 10]])
->>> b = nd.ndobject([[1, 2, 3], [4]])
->>> a.dtype
-nd.dtype('strided_dim<strided_dim<int32>>')
->>> b.dtype
-nd.dtype('strided_dim<var_dim<int32>>')
+>>> a = nd.array([[5, 6, 7], [8, 9, 10]], access='rw')
+>>> b = nd.array([[1, 2, 3], [4]])
+>>> nd.type_of(a)
+ndt.type('strided * strided * int32')
+>>> nd.type_of(b)
+ndt.type('strided * var * int32')
 >>> a[...] = b
 >>> a
-nd.ndobject([[1, 2, 3], [4, 4, 4]], strided_dim<strided_dim<int32>>)
+nd.array([[1, 2, 3], [4, 4, 4]], type="strided * strided * int32")
 ```
 
 The assignment kernel here results in three

@@ -21,7 +21,7 @@ struct groupby_type_data {
 
 /**
  * The groupby type represents a transformation of
- * operand values and by ndobjects into a 2D variable-sized
+ * operand values and by nd::arrays into a 2D variable-sized
  * array whose rows are the groups as specified by a categorical
  * type.
  */

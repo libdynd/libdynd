@@ -119,8 +119,8 @@ std::ostream& dynd::operator<<(std::ostream& o, type_id_t tid)
             return (o << "cstruct");
         case tuple_type_id:
             return (o << "tuple");
-        case ndobject_type_id:
-            return (o << "ndobject");
+        case ndarray_type_id:
+            return (o << "ndarray");
         case convert_type_id:
             return (o << "convert");
         case byteswap_type_id:

@@ -31,7 +31,7 @@ var_dim_type::var_dim_type(const ndt::type& element_tp)
     //       of the elements it allocates is owned by the objectarray_memory_block,
     //       not by the var_dim elements.
 
-    // Copy ndobject properties and functions from the first non-array dimension
+    // Copy nd::array properties and functions from the first non-array dimension
     get_scalar_properties_and_functions(m_array_properties, m_array_functions);
 }
 
