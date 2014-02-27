@@ -108,7 +108,7 @@ void string_type::print_type(std::ostream& o) const {
 
     o << "string";
     if (m_encoding != string_encoding_utf_8) {
-        o << "<'" << m_encoding << "'>";
+        o << "['" << m_encoding << "']";
     }
 }
 

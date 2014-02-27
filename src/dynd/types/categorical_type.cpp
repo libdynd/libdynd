@@ -311,14 +311,14 @@ void categorical_type::print_type(std::ostream& o) const
     size_t category_count = get_category_count();
     const char *metadata = m_categories.get_ndo_meta() + sizeof(strided_dim_type_metadata);
 
-    o << "categorical<" << m_category_tp;
+    o << "categorical[" << m_category_tp;
     o << ", [";
     m_category_tp.print_data(o, metadata, get_category_data_from_value(0));
     for (size_t i = 1; i != category_count; ++i) {
         o << ", ";
         m_category_tp.print_data(o, metadata, get_category_data_from_value((uint32_t)i));
     }
-    o << "]>";
+    o << "]]";
 }
 
 void dynd::categorical_type::get_shape(intptr_t ndim, intptr_t i, intptr_t *out_shape,
