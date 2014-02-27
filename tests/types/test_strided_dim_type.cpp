@@ -130,13 +130,13 @@ TEST(StridedArrayDType, AssignKernel) {
 }
 
 TEST(StridedArrayDType, IsTypeSubarray) {
-    EXPECT_TRUE(ndt::type("strided, int32").is_type_subarray(ndt::type("strided, int32")));
-    EXPECT_TRUE(ndt::type("strided, strided, int32").is_type_subarray(ndt::type("strided, int32")));
-    EXPECT_TRUE(ndt::type("strided, int32").is_type_subarray(ndt::make_type<int32_t>()));
-    EXPECT_FALSE(ndt::make_type<int32_t>().is_type_subarray(ndt::type("strided, int32")));
-    EXPECT_FALSE(ndt::type("strided, int32").is_type_subarray(ndt::type("strided, strided, int32")));
-    EXPECT_FALSE(ndt::type("strided, int32").is_type_subarray(ndt::type("3, int32")));
-    EXPECT_FALSE(ndt::type("strided, int32").is_type_subarray(ndt::type("var, int32")));
-    EXPECT_FALSE(ndt::type("3, int32").is_type_subarray(ndt::type("strided, int32")));
-    EXPECT_FALSE(ndt::type("var, int32").is_type_subarray(ndt::type("strided, int32")));
+    EXPECT_TRUE(ndt::type("strided * int32").is_type_subarray(ndt::type("strided * int32")));
+    EXPECT_TRUE(ndt::type("strided * strided * int32").is_type_subarray(ndt::type("strided * int32")));
+    EXPECT_TRUE(ndt::type("strided * int32").is_type_subarray(ndt::make_type<int32_t>()));
+    EXPECT_FALSE(ndt::make_type<int32_t>().is_type_subarray(ndt::type("strided * int32")));
+    EXPECT_FALSE(ndt::type("strided * int32").is_type_subarray(ndt::type("strided * strided * int32")));
+    EXPECT_FALSE(ndt::type("strided * int32").is_type_subarray(ndt::type("3 * int32")));
+    EXPECT_FALSE(ndt::type("strided * int32").is_type_subarray(ndt::type("var * int32")));
+    EXPECT_FALSE(ndt::type("3 * int32").is_type_subarray(ndt::type("strided * int32")));
+    EXPECT_FALSE(ndt::type("var * int32").is_type_subarray(ndt::type("strided * int32")));
 }

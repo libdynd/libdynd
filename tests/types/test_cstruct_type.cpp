@@ -62,13 +62,13 @@ struct align_test_struct {
 
 TEST(CStructType, Align) {
     ndt::type asdt = ndt::type(
-            "{f0:  int8; b_:    bool;     f1:  int8; i8_:  int8;"
-            " f2:  int8; i16_:  int16;    f3:  int8; i32_: int32;"
-            " f4:  int8; i64_:  int64;    f5:  int8; u8_:  uint8;"
-            " f6:  int8; u16_:  uint16;   f7:  int8; u32_: uint32;"
-            " f8:  int8; u64_:  uint64;   f9:  int8; f32_: float32;"
-            " f10: int8; f64_:  float64;  f11: int8; cf32_: complex[float32];"
-            " f12: int8; cf64_: complex[float64]; f13: int8}");
+            "{f0:  int8, b_:    bool,     f1:  int8, i8_:  int8,"
+            " f2:  int8, i16_:  int16,    f3:  int8, i32_: int32,"
+            " f4:  int8, i64_:  int64,    f5:  int8, u8_:  uint8,"
+            " f6:  int8, u16_:  uint16,   f7:  int8, u32_: uint32,"
+            " f8:  int8, u64_:  uint64,   f9:  int8, f32_: float32,"
+            " f10: int8, f64_:  float64,  f11: int8, cf32_: complex[float32],"
+            " f12: int8, cf64_: complex[float64], f13: int8}");
     EXPECT_EQ(sizeof(align_test_struct), asdt.get_data_size());
     EXPECT_EQ((size_t)scalar_align_of<align_test_struct>::value, asdt.get_data_alignment());
     const cstruct_type *cd = static_cast<const cstruct_type *>(asdt.extended());

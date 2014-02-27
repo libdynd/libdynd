@@ -64,7 +64,7 @@ void strided_dim_type::print_data(std::ostream& o, const char *metadata, const c
 
 void strided_dim_type::print_type(std::ostream& o) const
 {
-    o << "strided, " << m_element_tp;
+    o << "strided * " << m_element_tp;
 }
 
 bool strided_dim_type::is_expression() const

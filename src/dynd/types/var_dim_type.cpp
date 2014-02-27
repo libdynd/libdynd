@@ -58,7 +58,7 @@ void var_dim_type::print_data(std::ostream& o, const char *metadata, const char 
 
 void var_dim_type::print_type(std::ostream& o) const
 {
-    o << "var, " << m_element_tp;
+    o << "var * " << m_element_tp;
 }
 
 bool var_dim_type::is_expression() const
