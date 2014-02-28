@@ -345,6 +345,7 @@ set(libdynd_SRC
     include/dynd/auxiliary_data.hpp
     include/dynd/buffer_storage.hpp
     include/dynd/config.hpp
+    include/dynd/cuda_config.hpp
     include/dynd/cling_all.hpp
     include/dynd/diagnostics.hpp
     include/dynd/type.hpp
@@ -435,8 +436,11 @@ endif()
 
 if (DYND_SHARED_LIB)
     if (DYND_CUDA)
-        cuda_add_library(libdynd SHARED ${libdynd_SRC}
-            OPTIONS "-gencode" "arch=compute_30,code=sm_30" "-Xcompiler" "-fPIC")
+        set(CUDA_OPTIONS "-gencode" "arch=compute_30,code=sm_30")
+        if (NOT WIN32)
+            set(CUDA_OPTIONS ${CUDA_OPTIONS}  "-Xcompiler" "-fPIC")
+        endif()
+        cuda_add_library(libdynd SHARED ${libdynd_SRC} OPTIONS ${CUDA_OPTIONS})
     else()
         add_library(libdynd SHARED ${libdynd_SRC})
     endif()
@@ -449,8 +453,11 @@ if (DYND_SHARED_LIB)
         )
 else()
     if (DYND_CUDA)
-        cuda_add_library(libdynd STATIC ${libdynd_SRC}
-            OPTIONS "-gencode" "arch=compute_30,code=sm_30" "-Xcompiler" "-fPIC")
+        set(CUDA_OPTIONS "-gencode" "arch=compute_30,code=sm_30")
+        if (NOT WIN32)
+            set(CUDA_OPTIONS ${CUDA_OPTIONS}  "-Xcompiler" "-fPIC")
+        endif()
+        cuda_add_library(libdynd STATIC ${libdynd_SRC} OPTIONS ${CUDA_OPTIONS})
     else()
         add_library(libdynd STATIC ${libdynd_SRC})
     endif()
