@@ -8,7 +8,8 @@ project(test_libdynd)
 
 # Disable optimizations so the tests build quicker
 if(WIN32)
-    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /Od")
+    # _VARIADIC_MAX=10 is for VS2012
+    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -D_VARIADIC_MAX=10 /Od")
 else()
     set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -DGTEST_USE_OWN_TR1_TUPLE=1 -O0")
 endif()

@@ -27,7 +27,7 @@ public:
 
     template <typename T>
     DYND_CUDA_HOST_DEVICE_CALLABLE inline dynd_complex(const dynd_complex<T>& rhs)
-        : m_real(rhs.m_real), m_imag(rhs.m_imag) {}
+        : m_real(static_cast<float>(rhs.m_real)), m_imag(static_cast<float>(rhs.m_imag)) {}
 
     DYND_CUDA_HOST_DEVICE_CALLABLE inline float real() const {
         return m_real;
