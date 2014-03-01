@@ -71,7 +71,7 @@ if(WIN32)
     # Treat warnings as errors (-WX does this)
     set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -WX -EHsc")
 else()
-    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -g -fomit-frame-pointer -fstrict-aliasing -fPIC -Wall -Wextra -Werror")
+    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -g -fomit-frame-pointer -fstrict-aliasing -fPIC -Wall -Wextra -Werror -Wno-missing-field-initializers")
     if ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "GNU")
         # The '-fmax-errors' flag was first supported in gcc 4.6
         # Use the c++0x flag only in 4.6 and later
@@ -403,11 +403,6 @@ if (DYND_CUDA)
         src/dynd/kernels/assignment_kernels.cpp
         )        
     list(APPEND libdynd_SRC
-        src/dynd/types/dynd_complex.cu
-        src/dynd/types/dynd_float16.cu
-        src/dynd/types/dynd_float128.cu
-        src/dynd/types/dynd_int128.cu
-        src/dynd/types/dynd_uint128.cu
         src/dynd/kernels/assignment_kernels.cu
         )
 
@@ -417,7 +412,7 @@ if (DYND_CUDA)
     # Disable warnings about "controlling expression is constant"
     set(CUDA_NVCC_FLAGS ${CUDA_NVCC_FLAGS};-Xcudafe;--diag_suppress=boolean_controlling_expr_is_constant)
 
-    set(CUDA_SEPARABLE_COMPILATION ON)
+#    set(CUDA_SEPARABLE_COMPILATION ON)
 endif()
 
 if ((NOT DYND_SHARED_LIB) AND (DYND_INSTALL_LIB))
@@ -436,7 +431,7 @@ endif()
 
 if (DYND_SHARED_LIB)
     if (DYND_CUDA)
-        set(CUDA_OPTIONS "-gencode" "arch=compute_30,code=sm_30")
+        set(CUDA_OPTIONS "-arch=compute_20")
         if (NOT WIN32)
             set(CUDA_OPTIONS ${CUDA_OPTIONS}  "-Xcompiler" "-fPIC")
         endif()
@@ -453,7 +448,7 @@ if (DYND_SHARED_LIB)
         )
 else()
     if (DYND_CUDA)
-        set(CUDA_OPTIONS "-gencode" "arch=compute_30,code=sm_30")
+        set(CUDA_OPTIONS "arch=compute_20")
         if (NOT WIN32)
             set(CUDA_OPTIONS ${CUDA_OPTIONS}  "-Xcompiler" "-fPIC")
         endif()

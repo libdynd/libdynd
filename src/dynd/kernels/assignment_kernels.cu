@@ -6,6 +6,12 @@
 #include <dynd/types/base_memory_type.hpp>
 #include "assignment_kernels.cpp"
 
+#include "../types/dynd_complex.cu"
+#include "../types/dynd_float16.cu"
+#include "../types/dynd_float128.cu"
+#include "../types/dynd_int128.cu"
+#include "../types/dynd_uint128.cu"
+
 #ifdef DYND_CUDA
 
 static void unaligned_copy_single_cuda_host_to_device(char *dst, const char *src,
@@ -254,8 +260,11 @@ static unary_single_operation_t assign_table_single_cuda_device_to_host_kernel[b
 #undef SINGLE_OPERATION_PAIR_LEVEL
 };
 
+#include<cuda.h>
+#include <stdio.h>
+
 template <typename dst_type, typename src_type, assign_error_mode errmode>
-static DYND_CUDA_GLOBAL_CALLABLE void single_cuda_global_assign_builtin(dst_type *dst, const src_type *src, ckernel_prefix *extra) {
+DYND_CUDA_GLOBAL_CALLABLE void single_cuda_global_assign_builtin(dst_type *dst, const src_type *src, ckernel_prefix *extra) {
     single_assigner_builtin<dst_type, src_type, errmode>::assign(dst, src, extra);
 }
 
