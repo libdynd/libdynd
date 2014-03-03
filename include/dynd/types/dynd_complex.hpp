@@ -36,10 +36,6 @@ public:
         return m_imag;
     }
 
-    DYND_CUDA_HOST_DEVICE_CALLABLE inline operator float() const {
-        return m_real;
-    }
-
     DYND_CUDA_HOST_DEVICE_CALLABLE inline bool operator==(const dynd_complex<float>& rhs) const {
         return (real() == rhs.real()) && (imag() == rhs.imag());
     }
@@ -69,10 +65,6 @@ public:
     }
     DYND_CUDA_HOST_DEVICE_CALLABLE inline double imag() const {
         return m_imag;
-    }
-
-    DYND_CUDA_HOST_DEVICE_CALLABLE inline operator double() const {
-        return m_real;
     }
 
     DYND_CUDA_HOST_DEVICE_CALLABLE inline bool operator==(const dynd_complex<double>& rhs) const {
