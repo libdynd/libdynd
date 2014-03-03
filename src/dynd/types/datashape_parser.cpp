@@ -394,7 +394,6 @@ static ndt::type parse_cuda_host_parameters(const char *&begin, const char *end,
                 map<string, ndt::type>& symtable)
 {
     if (parse_token(begin, end, '[')) {
-        const char *saved_begin = begin;
         ndt::type tp = parse_rhs_expression(begin, end, symtable);
         if (tp.get_type_id() == uninitialized_type_id) {
             throw datashape_parse_error(begin, "expected a type parameter");
@@ -414,7 +413,6 @@ static ndt::type parse_cuda_device_parameters(const char *&begin, const char *en
                 map<string, ndt::type>& symtable)
 {
     if (parse_token(begin, end, '[')) {
-        const char *saved_begin = begin;
         ndt::type tp = parse_rhs_expression(begin, end, symtable);
         if (tp.get_type_id() == uninitialized_type_id) {
             throw datashape_parse_error(begin, "expected a type parameter");
