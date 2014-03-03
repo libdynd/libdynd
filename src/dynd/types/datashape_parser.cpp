@@ -401,7 +401,11 @@ static ndt::type parse_cuda_host_parameters(const char *&begin, const char *end,
         if (!parse_token(begin, end, ']')) {
             throw datashape_parse_error(begin, "expected closing ']'");
         }
+#ifdef DYND_CUDA
 		return ndt::make_cuda_host(tp);
+#else
+        throw datashape_parse_error(begin, "type is not available");
+#endif // DYND_CUDA
     } else {
         throw datashape_parse_error(begin, "expected opening '['");
     }
@@ -420,7 +424,11 @@ static ndt::type parse_cuda_device_parameters(const char *&begin, const char *en
         if (!parse_token(begin, end, ']')) {
             throw datashape_parse_error(begin, "expected closing ']'");
         }
+#ifdef DYND_CUDA
 		return ndt::make_cuda_device(tp);
+#else
+        throw datashape_parse_error(begin, "type is not available");
+#endif // DYND_CUDA
     } else {
         throw datashape_parse_error(begin, "expected opening '['");
     }
