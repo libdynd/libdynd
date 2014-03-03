@@ -122,7 +122,7 @@ enum type_id_t {
     // A struct type with fixed layout
     cstruct_type_id,
     tuple_type_id,
-    ndobject_type_id,
+    ndarray_type_id,
 
     // Adapter types
     convert_type_id,
@@ -296,6 +296,9 @@ template <> struct type_id_of<dynd_float128> {enum {value = float128_type_id};};
 template <> struct type_id_of<dynd_complex<float> > {enum {value = complex_float32_type_id};};
 template <> struct type_id_of<dynd_complex<double> > {enum {value = complex_float64_type_id};};
 template <> struct type_id_of<void> {enum {value = void_type_id};};
+// Also allow type_id_of<std::complex<>> as synonyms for type_id_of<dynd_complex<>>
+template <> struct type_id_of<std::complex<float> > {enum {value = complex_float32_type_id};};
+template <> struct type_id_of<std::complex<double> > {enum {value = complex_float64_type_id};};
 
 // Type trait for the kind
 template <typename T> struct dynd_kind_of;
@@ -347,6 +350,9 @@ template <> struct is_dynd_scalar<double> {enum {value = true};};
 template <> struct is_dynd_scalar<dynd_float128> {enum {value = true};};
 template <> struct is_dynd_scalar<dynd_complex<float> > {enum {value = true};};
 template <> struct is_dynd_scalar<dynd_complex<double> > {enum {value = true};};
+// Allow std::complex as scalars equivalent to dynd_complex
+template <> struct is_dynd_scalar<std::complex<float> > {enum {value = true};};
+template <> struct is_dynd_scalar<std::complex<double> > {enum {value = true};};
 
 // Metaprogram for determining scalar alignment
 template <typename T> struct scalar_align_of {

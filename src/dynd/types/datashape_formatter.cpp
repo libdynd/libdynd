@@ -55,9 +55,9 @@ static void format_struct_datashape(std::ostream& o, const ndt::type& dt, const 
                         data ? (data + data_offsets[i]) : NULL,
                         multiline ? (indent + "  ") : indent, multiline, identifier);
         if (multiline) {
-            o << ";\n";
+            o << ",\n";
         } else if (i != field_count - 1) {
-            o << "; ";
+            o << ", ";
         }
     }
     o << indent << "}";
@@ -74,7 +74,7 @@ static void format_uniform_dim_datashape(std::ostream& o,
                 // If metadata is provided, use the actual dimension size
                 const strided_dim_type_metadata *md =
                                 reinterpret_cast<const strided_dim_type_metadata *>(metadata);
-                o << md->size << ", ";
+                o << md->size << " * ";
                 // Allow data to keep going only if the dimension size is 1
                 if (md->size != 1) {
                     data = NULL;
@@ -85,7 +85,7 @@ static void format_uniform_dim_datashape(std::ostream& o,
             } else {
                 // If no metadata, use a symbol
                 format_identifier_string(o, identifier);
-                o << ", ";
+                o << " * ";
                 format_datashape(o, sad->get_element_type(), NULL, NULL,
                                 indent, multiline, identifier);
             }
@@ -94,7 +94,7 @@ static void format_uniform_dim_datashape(std::ostream& o,
         case fixed_dim_type_id: {
             const fixed_dim_type *fad = static_cast<const fixed_dim_type *>(dt.extended());
             size_t dim_size = fad->get_fixed_dim_size();
-            o << dim_size << ", ";
+            o << dim_size << " * ";
             // Allow data to keep going only if the dimension size is 1
             if (dim_size != 1) {
                 data = NULL;
@@ -106,13 +106,13 @@ static void format_uniform_dim_datashape(std::ostream& o,
             const var_dim_type *vad = static_cast<const var_dim_type *>(dt.extended());
             const char *child_data = NULL;
             if (data == NULL || metadata == NULL) {
-                o << "var, ";
+                o << "var * ";
             } else {
                 const var_dim_type_data *d = reinterpret_cast<const var_dim_type_data *>(data);
                 if (d->begin == NULL) {
-                    o << "var, ";
+                    o << "var * ";
                 } else {
-                    o << d->size << ", ";
+                    o << d->size << " * ";
                     if (d->size == 1) {
                         const var_dim_type_metadata *md = reinterpret_cast<const var_dim_type_metadata *>(metadata);
                         child_data = d->begin + md->offset;

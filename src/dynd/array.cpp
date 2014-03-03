@@ -386,6 +386,14 @@ nd::array::array(dynd_complex<double> value)
     : m_memblock(make_builtin_scalar_array(value, nd::default_access_flags))
 {
 }
+nd::array::array(std::complex<float> value)
+    : m_memblock(make_builtin_scalar_array(value, nd::default_access_flags))
+{
+}
+nd::array::array(std::complex<double> value)
+    : m_memblock(make_builtin_scalar_array(value, nd::default_access_flags))
+{
+}
 nd::array::array(const std::string& value)
 {
     array temp = make_string_array(value.c_str(), value.size(),
@@ -508,6 +516,16 @@ nd::array nd::array_rw(dynd_complex<float> value)
                     nd::readwrite_access_flags));
 }
 nd::array nd::array_rw(dynd_complex<double> value)
+{
+    return nd::array(make_builtin_scalar_array(value,
+                    nd::readwrite_access_flags));
+}
+nd::array nd::array_rw(std::complex<float> value)
+{
+    return nd::array(make_builtin_scalar_array(value,
+                    nd::readwrite_access_flags));
+}
+nd::array nd::array_rw(std::complex<double> value)
 {
     return nd::array(make_builtin_scalar_array(value,
                     nd::readwrite_access_flags));

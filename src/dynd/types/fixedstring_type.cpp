@@ -126,11 +126,11 @@ void fixedstring_type::print_data(std::ostream& o, const char *DYND_UNUSED(metad
 
 void fixedstring_type::print_type(std::ostream& o) const
 {
-    o << "string<" << m_stringsize;
+    o << "string[" << m_stringsize;
     if (m_encoding != string_encoding_utf_8) {
         o << ",'" << m_encoding << "'";
     }
-    o << ">";
+    o << "]";
 }
 
 ndt::type fixedstring_type::get_canonical_type() const

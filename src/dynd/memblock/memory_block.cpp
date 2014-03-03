@@ -137,7 +137,7 @@ std::ostream& dynd::operator<<(std::ostream& o, memory_block_type_t mbt)
             o << "executable";
             break;
         case array_memory_block_type:
-            o << "ndobject";
+            o << "array";
             break;
         case memmap_memory_block_type:
             o << "memmap";

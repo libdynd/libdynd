@@ -25,6 +25,7 @@ TEST(CUDAHostType, Basic) {
     EXPECT_EQ(ndt::make_type<int32_t>(), d.p("target_type").as<ndt::type>());
     EXPECT_FALSE(d.is_expression());
     EXPECT_EQ((unsigned int)cudaHostAllocDefault, static_cast<const cuda_host_type *>(d.extended())->get_cuda_host_flags());
+	EXPECT_EQ(d, ndt::type("cuda_host[int32]"));
 
     // A memory type cannot have an array dimension type as a target
     EXPECT_THROW(ndt::make_cuda_host(ndt::make_strided_dim(ndt::make_type<int32_t>())), runtime_error);
@@ -40,6 +41,7 @@ TEST(CUDAHostType, BuiltIn) {
     EXPECT_EQ(sizeof(float), d.get_data_size());
     // CUDA host type and CUDA device type have the same data alignment
     EXPECT_EQ(ndt::make_cuda_device(ndt::make_type<float>()).get_data_alignment(), d.get_data_alignment());
+	EXPECT_EQ(d, ndt::type("cuda_host[float32]"));
 }
 
 TEST(CUDAHostType, IsTypeSubarray) {

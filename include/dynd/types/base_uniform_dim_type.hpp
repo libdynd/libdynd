@@ -71,15 +71,15 @@ public:
     virtual intptr_t get_dim_size(const char *metadata = NULL, const char *data = NULL) const = 0;
 
     /**
-     * Constructs the ndobject metadata for one dimension of this type, leaving
+     * Constructs the nd::array metadata for one dimension of this type, leaving
      * the metadata for deeper dimensions uninitialized. Returns the size of
      * the metadata that was copied.
      *
      * \param dst_metadata  The new metadata memory which is constructed.
      * \param src_metadata   Existing metadata memory from which to copy.
      * \param embedded_reference  For references which are NULL, add this reference in the output.
-     *                            A NULL means the data was embedded in the original ndobject, so
-     *                            when putting it in a new ndobject, need to hold a reference to
+     *                            A NULL means the data was embedded in the original nd::array, so
+     *                            when putting it in a new nd::array, need to hold a reference to
      *                            that memory.
      */
     virtual size_t metadata_copy_construct_onedim(char *dst_metadata, const char *src_metadata,

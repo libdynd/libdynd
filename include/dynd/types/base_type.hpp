@@ -263,7 +263,7 @@ public:
                 size_t current_i, const ndt::type& root_tp, bool leading_dimension) const;
 
     /**
-     * Indexes into an ndobject using the provided linear index, and a type and freshly allocated output
+     * Indexes into an nd::array using the provided linear index, and a type and freshly allocated output
      * set to point to the same base data reference.
      *
      * \param nindices     The number of elements in the 'indices' array. This is shrunk by one for each recursive call.
@@ -273,8 +273,8 @@ public:
      * \param out_metadata The metadata of the output array. The output data should all be references to the data
      *                     of the input array, so there is no out_data parameter.
      * \param embedded_reference  For references which are NULL, add this reference in the output.
-     *                            A NULL means the data was embedded in the original ndobject, so
-     *                            when putting it in a new ndobject, need to hold a reference to
+     *                            A NULL means the data was embedded in the original nd::array, so
+     *                            when putting it in a new nd::array, need to hold a reference to
      *                            that memory.
      * \param current_i    The current index position. Used for error messages.
      * \param root_tp      The data type in the first call, before any recursion.
@@ -337,7 +337,7 @@ public:
     virtual ndt::type get_type_at_dimension(char **inout_metadata, intptr_t i, intptr_t total_ndim = 0) const;
 
     /**
-     * Retrieves the shape of the type ndobject instance,
+     * Retrieves the shape of the type nd::array instance,
      * populating up to 'ndim' elements of out_shape. For dimensions with
      * variable or unknown shape, -1 is returned.
      *
@@ -352,7 +352,7 @@ public:
                     const char *metadata, const char *data) const;
 
     /**
-     * Retrieves the strides of the type ndobject instance,
+     * Retrieves the strides of the type nd::array instance,
      * expanding the vector as needed. For dimensions where
      * there is not a simple stride (e.g. a tuple/struct type),
      * 0 is returned and the caller should handle this.
@@ -374,29 +374,29 @@ public:
 
     virtual bool operator==(const base_type& rhs) const = 0;
 
-    /** The size of the ndobject metadata for this type */
+    /** The size of the nd::array metadata for this type */
     inline size_t get_metadata_size() const {
         return m_members.metadata_size;
     }
     /**
-     * Constructs the ndobject metadata for this type, prepared for writing.
+     * Constructs the nd::array metadata for this type, prepared for writing.
      * The element size of the result must match that from get_default_data_size().
      */
     virtual void metadata_default_construct(char *metadata, intptr_t ndim, const intptr_t* shape) const;
     /**
-     * Constructs the ndobject metadata for this type, copying everything exactly from
+     * Constructs the nd::array metadata for this type, copying everything exactly from
      * input metadata for the same type.
      *
      * \param dst_metadata  The new metadata memory which is constructed.
      * \param src_metadata   Existing metadata memory from which to copy.
      * \param embedded_reference  For references which are NULL, add this reference in the output.
-     *                            A NULL means the data was embedded in the original ndobject, so
-     *                            when putting it in a new ndobject, need to hold a reference to
+     *                            A NULL means the data was embedded in the original nd::array, so
+     *                            when putting it in a new nd::array, need to hold a reference to
      *                            that memory.
      */
     virtual void metadata_copy_construct(char *dst_metadata, const char *src_metadata,
                     memory_block_data *embedded_reference) const;
-    /** Destructs any references or other state contained in the ndobjects' metdata */
+    /** Destructs any references or other state contained in the nd::arrays' metdata */
     virtual void metadata_destruct(char *metadata) const;
     /**
      * When metadata is used for temporary buffers of a type,
@@ -484,8 +484,8 @@ public:
      * dimension. For array dimensions, the type provided is the same each call, but for
      * heterogeneous dimensions it changes.
      *
-     * \param data  The ndobject data.
-     * \param metadata  The ndobject metadata.
+     * \param data  The nd::array data.
+     * \param metadata  The nd::array metadata.
      * \param callback  Callback function called for each subelement.
      * \param callback_data  Data provided to the callback function.
      */
@@ -507,7 +507,7 @@ public:
                     size_t *out_count) const;
 
     /**
-     * Additional dynamic properties exposed by any ndobject of this type as gfunc::callable.
+     * Additional dynamic properties exposed by any nd::array of this type as gfunc::callable.
      *
      * \note Array types copy these properties from the first non-array data type, so such properties must
      *       be able to handle the case where they are the first non-array data type in an array type, not
@@ -518,7 +518,7 @@ public:
                     size_t *out_count) const;
 
     /**
-     * Additional dynamic functions exposed by any ndobject of this type as gfunc::callable.
+     * Additional dynamic functions exposed by any nd::array of this type as gfunc::callable.
      *
      * \note Array types copy these functions from the first non-array data type, so such properties must
      *       be able to handle the case where they are the first non-array data type in an array type, not

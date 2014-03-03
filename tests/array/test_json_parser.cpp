@@ -272,7 +272,7 @@ TEST(JSONParser, JSONDType) {
     EXPECT_EQ("{\"a\":3.14}", n.as<string>());
 
     // Parsing JSON with a piece of it being a json string
-    n = parse_json("{a: json; b: int32; c: string}",
+    n = parse_json("{a: json, b: int32, c: string}",
                     "{\"c\": \"testing string\", \"a\": [3.1, {\"X\":2}, [1,2]], \"b\":12}");
     EXPECT_EQ(ndt::make_cstruct(ndt::make_json(), "a", ndt::make_type<int32_t>(), "b", ndt::make_string(), "c"),
                     n.get_type());

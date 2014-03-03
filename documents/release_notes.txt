@@ -5,6 +5,16 @@ DyND is a C++ library for array programming with a dynamic
 type system. It is currently in a preview state, and nothing
 about the API or the ABI is guaranteed to stay the same.
 
+Version 0.6.1
+-------------
+
+- Tweak how some of the dimension types are printed.
+- Add a dynd::type_error exception for type-specific errors.
+- Some inf and nan-related fixes.
+- Add .conj property to the complex type.
+- Add a function which returns a ckernel_deferred from a property.
+- Fix a segfault bug from groupby on a multidimensional input.
+
 Version 0.6.0
 -------------
 

@@ -24,7 +24,6 @@ class fixed_dim_type : public base_uniform_dim_type {
     size_t m_dim_size;
     std::vector<std::pair<std::string, gfunc::callable> > m_array_properties, m_array_functions;
 
-    void create_ndobject_properties();
 public:
     fixed_dim_type(size_t dimension_size, const ndt::type& element_tp);
     fixed_dim_type(size_t dimension_size, const ndt::type& element_tp, intptr_t stride);

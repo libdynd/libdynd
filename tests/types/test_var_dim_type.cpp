@@ -41,7 +41,7 @@ TEST(VarArrayDType, Shape) {
 }
 
 TEST(VarArrayDType, DTypeSubscriptSimpleSingle) {
-    nd::array n = parse_json("var, int32", "[2,4,6,8]");
+    nd::array n = parse_json("var * int32", "[2,4,6,8]");
 
     // Indexing collapses the leading dimension to just the int
     EXPECT_EQ(ndt::make_type<int>(), n(0).get_type());
@@ -60,7 +60,7 @@ TEST(VarArrayDType, DTypeSubscriptSimpleSingle) {
 }
 
 TEST(VarArrayDType, DTypeSubscriptSimpleSlice) {
-    nd::array n = parse_json("var, int32", "[2,4,6,8]");
+    nd::array n = parse_json("var * int32", "[2,4,6,8]");
 
     // Slicing collapses the leading dimension to a strided array
     EXPECT_EQ(ndt::make_strided_dim(ndt::make_type<int>()), n(irange()).get_type());
@@ -89,13 +89,13 @@ TEST(VarArrayDType, DTypeSubscriptSimpleSlice) {
 }
 
 TEST(VarArrayDType, DTypeSubscriptNested) {
-    nd::array n = parse_json("var, var, int32",
+    nd::array n = parse_json("var * var * int32",
                     "[[2,4,6,8], [1,3,5,7,9], [], [-1,-2,-3]]");
 
     // Indexing with a zero-sized index does not convert the leading dim from var to strided
-    EXPECT_EQ(ndt::type("var, var, int32"), n.at_array(0, NULL).get_type());
+    EXPECT_EQ(ndt::type("var * var * int32"), n.at_array(0, NULL).get_type());
     // Indexing with a single index does not convert the next dim from var to strided
-    EXPECT_EQ(ndt::type("var, int32"), n(0).get_type());
+    EXPECT_EQ(ndt::type("var * int32"), n(0).get_type());
     EXPECT_EQ(ndt::type("int32"), n(0,0).get_type());
 
     // Validate the shapes after one level of indexing
@@ -144,13 +144,13 @@ TEST(VarArrayDType, DTypeSubscriptNested) {
 }
 
 TEST(VarArrayDType, DTypeSubscriptFixedVarNested) {
-    nd::array n = parse_json("4, var, int32",
+    nd::array n = parse_json("4 * var * int32",
                     "[[2,4,6,8], [1,3,5,7,9], [], [-1,-2,-3]]");
 
-    EXPECT_EQ(ndt::type("4, var, int32"), n.get_type());
-    EXPECT_EQ(ndt::type("var, int32"), n(0).get_type());
-    EXPECT_EQ(ndt::type("var, int32"), n.get_type().at(0));
-    EXPECT_EQ(ndt::type("var, int32"), n.get_type().at_single(0));
+    EXPECT_EQ(ndt::type("4 * var * int32"), n.get_type());
+    EXPECT_EQ(ndt::type("var * int32"), n(0).get_type());
+    EXPECT_EQ(ndt::type("var * int32"), n.get_type().at(0));
+    EXPECT_EQ(ndt::type("var * int32"), n.get_type().at_single(0));
 
     // Validate the shapes after one level of indexing
     EXPECT_EQ(4, n(0, irange()).get_shape()[0]);
@@ -161,13 +161,13 @@ TEST(VarArrayDType, DTypeSubscriptFixedVarNested) {
 
 
 TEST(VarArrayDType, DTypeSubscriptStridedVarNested) {
-    nd::array n = parse_json("var, var, int32",
+    nd::array n = parse_json("var * var * int32",
                     "[[2,4,6,8], [1,3,5,7,9], [], [-1,-2,-3]]");
     // By indexing with a no-op slice, switch the var dim to strided
     n = n(irange());
 
-    EXPECT_EQ(ndt::type("M, var, int32"), n.get_type());
-    EXPECT_EQ(ndt::type("var, int32"), n(0).get_type());
+    EXPECT_EQ(ndt::type("M * var * int32"), n.get_type());
+    EXPECT_EQ(ndt::type("var * int32"), n(0).get_type());
 
     // Validate the shapes after one level of indexing
     EXPECT_EQ(4, n(0, irange()).get_shape()[0]);
@@ -177,34 +177,34 @@ TEST(VarArrayDType, DTypeSubscriptStridedVarNested) {
 }
 
 TEST(VarArrayDType, DTypeSubscriptFixedVarStruct) {
-    nd::array n = parse_json("2, var, {first_name: string; last_name: string; "
-                    "gender: string(1); pictured: bool;}",
+    nd::array n = parse_json("2 * var * {first_name: string, last_name: string, "
+                    "gender: string[1], pictured: bool,}",
                     "[[{\"first_name\":\"Frank\",\"last_name\":\"Abrams\",\"gender\":\"M\",\"pictured\":true}],"
                     "[{\"first_name\":\"Melissa\",\"last_name\":\"Philips\",\"gender\":\"F\",\"pictured\":false}]]");
 
     nd::array nlastname = n(irange(), irange(), 1);
-    EXPECT_EQ(ndt::type("M, var, string"), nlastname.get_type());
+    EXPECT_EQ(ndt::type("M * var * string"), nlastname.get_type());
     EXPECT_EQ("Abrams", nlastname(0,0).as<string>());
     EXPECT_EQ("Philips", nlastname(1,0).as<string>());
 
     nd::array ngender = n.p("gender");
-    EXPECT_EQ(ndt::type("M, var, string(1)"), ngender.get_type());
+    EXPECT_EQ(ndt::type("M * var * string[1]"), ngender.get_type());
     EXPECT_EQ("M", ngender(0,0).as<string>());
     EXPECT_EQ("F", ngender(1,0).as<string>());
 }
 
 TEST(VarArrayDType, AccessCStructOfVar) {
     // A slightly complicated case of property access/indexing
-    nd::array n = parse_json("var, {a: int32; b: var, int32}",
+    nd::array n = parse_json("var * {a: int32, b: var * int32}",
                     "[{\"a\":10, \"b\":[1,2,3,4,5]},"
                     " {\"a\":20, \"b\":[7,8,9]}]");
 
-    EXPECT_EQ(ndt::type("var, {a: int32; b: var, int32}"), n.get_type());
+    EXPECT_EQ(ndt::type("var * {a: int32, b: var * int32}"), n.get_type());
 
     // In the property access, the first dimension will simplify to strided,
     // but the second shouldn't
     nd::array n2 = n.p("b");
-    EXPECT_EQ(ndt::type("M, var, int32"), n2.get_type());
+    EXPECT_EQ(ndt::type("M * var * int32"), n2.get_type());
     ASSERT_EQ(5, n2(0, irange()).get_shape()[0]);
     ASSERT_EQ(3, n2(1, irange()).get_shape()[0]);
 
@@ -252,7 +252,7 @@ TEST(VarArrayDType, AssignKernel) {
 
     // Assignment initialized var array -> uninitialized var array
     a = nd::empty(ndt::make_var_dim(ndt::make_type<int>()));
-    b = parse_json("var, int32", "[3, 5, 7]");
+    b = parse_json("var * int32", "[3, 5, 7]");
     EXPECT_EQ(var_dim_type_id, a.get_type().get_type_id());
     EXPECT_EQ(var_dim_type_id, b.get_type().get_type_id());
     make_assignment_kernel(&k, 0, a.get_type(), a.get_ndo_meta(),
@@ -268,7 +268,7 @@ TEST(VarArrayDType, AssignKernel) {
     // Assignment initialized var array -> initialized var array
     a = nd::empty(ndt::make_var_dim(ndt::make_type<int>()));
     parse_json(a, "[0, 0, 0]");
-    b = parse_json("var, int32", "[3, 5, 7]");
+    b = parse_json("var * int32", "[3, 5, 7]");
     EXPECT_EQ(var_dim_type_id, a.get_type().get_type_id());
     EXPECT_EQ(var_dim_type_id, b.get_type().get_type_id());
     make_assignment_kernel(&k, 0, a.get_type(), a.get_ndo_meta(),
@@ -284,7 +284,7 @@ TEST(VarArrayDType, AssignKernel) {
     // Broadcasting assignment initialized var array -> initialized var array
     a = nd::empty(ndt::make_var_dim(ndt::make_type<int>()));
     parse_json(a, "[0, 0, 0]");
-    b = parse_json("var, int32", "[9]");
+    b = parse_json("var * int32", "[9]");
     EXPECT_EQ(var_dim_type_id, a.get_type().get_type_id());
     EXPECT_EQ(var_dim_type_id, b.get_type().get_type_id());
     make_assignment_kernel(&k, 0, a.get_type(), a.get_ndo_meta(),
@@ -311,7 +311,7 @@ TEST(VarArrayDType, AssignKernel) {
 
     // Error assignment var array -> scalar
     a = 9.0;
-    b = parse_json("var, int32", "[3, 5, 7]");
+    b = parse_json("var * int32", "[3, 5, 7]");
     EXPECT_EQ(var_dim_type_id, b.get_type().get_type_id());
     EXPECT_THROW(make_assignment_kernel(&k, 0, a.get_type(), a.get_ndo_meta(),
                     b.get_type(), b.get_ndo_meta(),
@@ -321,7 +321,7 @@ TEST(VarArrayDType, AssignKernel) {
     // Error assignment initialized var array -> initialized var array
     a = nd::empty(ndt::make_var_dim(ndt::make_type<int>()));
     parse_json(a, "[0, 0, 0]");
-    b = parse_json("var, int32", "[9, 2]");
+    b = parse_json("var * int32", "[9, 2]");
     EXPECT_EQ(var_dim_type_id, a.get_type().get_type_id());
     EXPECT_EQ(var_dim_type_id, b.get_type().get_type_id());
     make_assignment_kernel(&k, 0, a.get_type(), a.get_ndo_meta(),
@@ -386,7 +386,7 @@ TEST(VarArrayDType, AssignVarStridedKernel) {
     // Assignment initialized var array -> strided array
     a = nd::make_strided_array(3, ndt::make_type<int>());
     a.vals() = 0;
-    b = parse_json("var, int32", "[3, 5, 7]");
+    b = parse_json("var * int32", "[3, 5, 7]");
     EXPECT_EQ(strided_dim_type_id, a.get_type().get_type_id());
     EXPECT_EQ(var_dim_type_id, b.get_type().get_type_id());
     make_assignment_kernel(&k, 0, a.get_type(), a.get_ndo_meta(),
@@ -401,7 +401,7 @@ TEST(VarArrayDType, AssignVarStridedKernel) {
     // Error assignment initialized var array -> strided array
     a = nd::make_strided_array(3, ndt::make_type<int>());
     a.vals() = 0;
-    b = parse_json("var, int32", "[3, 5, 7, 9]");
+    b = parse_json("var * int32", "[3, 5, 7, 9]");
     EXPECT_EQ(strided_dim_type_id, a.get_type().get_type_id());
     EXPECT_EQ(var_dim_type_id, b.get_type().get_type_id());
     make_assignment_kernel(&k, 0, a.get_type(), a.get_ndo_meta(),
@@ -433,7 +433,7 @@ TEST(VarArrayDType, AssignVarFixedKernel) {
 
     // Assignment fixed array -> uninitialized var array
     a = nd::empty(ndt::make_var_dim(ndt::make_type<int>()));
-    b = parse_json("3, int32", "[3, 5, 7]");
+    b = parse_json("3 * int32", "[3, 5, 7]");
     EXPECT_EQ(var_dim_type_id, a.get_type().get_type_id());
     EXPECT_EQ(fixed_dim_type_id, b.get_type().get_type_id());
     make_assignment_kernel(&k, 0, a.get_type(), a.get_ndo_meta(),
@@ -449,7 +449,7 @@ TEST(VarArrayDType, AssignVarFixedKernel) {
     // Assignment fixed array -> initialized var array
     a = nd::empty(ndt::make_var_dim(ndt::make_type<int>()));
     parse_json(a, "[0, 0, 0]");
-    b = parse_json("3, int32", "[3, 5, 7]");
+    b = parse_json("3 * int32", "[3, 5, 7]");
     EXPECT_EQ(var_dim_type_id, a.get_type().get_type_id());
     EXPECT_EQ(fixed_dim_type_id, b.get_type().get_type_id());
     make_assignment_kernel(&k, 0, a.get_type(), a.get_ndo_meta(),
@@ -465,7 +465,7 @@ TEST(VarArrayDType, AssignVarFixedKernel) {
     // Error assignment fixed array -> initialized var array
     a = nd::empty(ndt::make_var_dim(ndt::make_type<int>()));
     parse_json(a, "[0, 0, 0, 0]");
-    b = parse_json("3, int32", "[3, 5, 7]");
+    b = parse_json("3 * int32", "[3, 5, 7]");
     EXPECT_EQ(var_dim_type_id, a.get_type().get_type_id());
     EXPECT_EQ(fixed_dim_type_id, b.get_type().get_type_id());
     make_assignment_kernel(&k, 0, a.get_type(), a.get_ndo_meta(),
@@ -479,7 +479,7 @@ TEST(VarArrayDType, AssignVarFixedKernel) {
     // Assignment initialized var array -> fixed array
     a = nd::empty(ndt::make_fixed_dim(3, ndt::make_type<int>()));
     a.vals() = 0;
-    b = parse_json("var, int32", "[3, 5, 7]");
+    b = parse_json("var * int32", "[3, 5, 7]");
     EXPECT_EQ(fixed_dim_type_id, a.get_type().get_type_id());
     EXPECT_EQ(var_dim_type_id, b.get_type().get_type_id());
     make_assignment_kernel(&k, 0, a.get_type(), a.get_ndo_meta(),
@@ -494,7 +494,7 @@ TEST(VarArrayDType, AssignVarFixedKernel) {
     // Error assignment initialized var array -> fixed array
     a = nd::empty(ndt::make_fixed_dim(3, ndt::make_type<int>()));
     a.vals() = 0;
-    b = parse_json("var, int32", "[3, 5, 7, 9]");
+    b = parse_json("var * int32", "[3, 5, 7, 9]");
     EXPECT_EQ(fixed_dim_type_id, a.get_type().get_type_id());
     EXPECT_EQ(var_dim_type_id, b.get_type().get_type_id());
     make_assignment_kernel(&k, 0, a.get_type(), a.get_ndo_meta(),
@@ -521,14 +521,14 @@ TEST(VarArrayDType, AssignVarFixedKernel) {
 }
 
 TEST(VarDimDType, IsTypeSubarray) {
-    EXPECT_TRUE(ndt::type("var, int32").is_type_subarray(ndt::type("var, int32")));
-    EXPECT_TRUE(ndt::type("3, var, int32").is_type_subarray(ndt::type("var, int32")));
-    EXPECT_TRUE(ndt::type("var, var, int32").is_type_subarray(ndt::type("int32")));
-    EXPECT_TRUE(ndt::type("var, int32").is_type_subarray(ndt::make_type<int32_t>()));
-    EXPECT_FALSE(ndt::make_type<int32_t>().is_type_subarray(ndt::type("var, int32")));
-    EXPECT_FALSE(ndt::type("var, int32").is_type_subarray(ndt::type("var, var, int32")));
-    EXPECT_FALSE(ndt::type("var, int32").is_type_subarray(ndt::type("strided, int32")));
-    EXPECT_FALSE(ndt::type("var, int32").is_type_subarray(ndt::type("3, int32")));
-    EXPECT_FALSE(ndt::type("strided, int32").is_type_subarray(ndt::type("var, int32")));
-    EXPECT_FALSE(ndt::type("3, int32").is_type_subarray(ndt::type("var, int32")));
+    EXPECT_TRUE(ndt::type("var * int32").is_type_subarray(ndt::type("var * int32")));
+    EXPECT_TRUE(ndt::type("3 * var * int32").is_type_subarray(ndt::type("var * int32")));
+    EXPECT_TRUE(ndt::type("var * var * int32").is_type_subarray(ndt::type("int32")));
+    EXPECT_TRUE(ndt::type("var * int32").is_type_subarray(ndt::make_type<int32_t>()));
+    EXPECT_FALSE(ndt::make_type<int32_t>().is_type_subarray(ndt::type("var * int32")));
+    EXPECT_FALSE(ndt::type("var * int32").is_type_subarray(ndt::type("var * var * int32")));
+    EXPECT_FALSE(ndt::type("var * int32").is_type_subarray(ndt::type("strided * int32")));
+    EXPECT_FALSE(ndt::type("var * int32").is_type_subarray(ndt::type("3 * int32")));
+    EXPECT_FALSE(ndt::type("strided * int32").is_type_subarray(ndt::type("var * int32")));
+    EXPECT_FALSE(ndt::type("3 * int32").is_type_subarray(ndt::type("var * int32")));
 }

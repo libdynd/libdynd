@@ -21,7 +21,7 @@ strided_dim_type::strided_dim_type(const ndt::type& element_tp)
 {
     // Propagate the operand flags from the element
     m_members.flags |= (element_tp.get_flags()&type_flags_operand_inherited);
-    // Copy ndobject properties and functions from the first non-array dimension
+    // Copy nd::array properties and functions from the first non-array dimension
     get_scalar_properties_and_functions(m_array_properties, m_array_functions);
 }
 
@@ -64,7 +64,7 @@ void strided_dim_type::print_data(std::ostream& o, const char *metadata, const c
 
 void strided_dim_type::print_type(std::ostream& o) const
 {
-    o << "strided, " << m_element_tp;
+    o << "strided * " << m_element_tp;
 }
 
 bool strided_dim_type::is_expression() const

@@ -60,101 +60,101 @@ TEST(DataShapeParser, StringAtoms) {
                     type_from_datashape("string"));
     // String with encoding
     EXPECT_EQ(ndt::make_string(string_encoding_ascii),
-                    type_from_datashape("string('A')"));
+                    type_from_datashape("string['A']"));
     EXPECT_EQ(ndt::make_string(string_encoding_ascii),
-                    type_from_datashape("string('ascii')"));
+                    type_from_datashape("string['ascii']"));
     EXPECT_EQ(ndt::make_string(string_encoding_utf_8),
-                    type_from_datashape("string('U8')"));
+                    type_from_datashape("string['U8']"));
     EXPECT_EQ(ndt::make_string(string_encoding_utf_8),
-                    type_from_datashape("string('utf8')"));
+                    type_from_datashape("string['utf8']"));
     EXPECT_EQ(ndt::make_string(string_encoding_utf_8),
-                    type_from_datashape("string('utf-8')"));
+                    type_from_datashape("string['utf-8']"));
     EXPECT_EQ(ndt::make_string(string_encoding_utf_16),
-                    type_from_datashape("string('U16')"));
+                    type_from_datashape("string['U16']"));
     EXPECT_EQ(ndt::make_string(string_encoding_utf_16),
-                    type_from_datashape("string('utf16')"));
+                    type_from_datashape("string['utf16']"));
     EXPECT_EQ(ndt::make_string(string_encoding_utf_16),
-                    type_from_datashape("string('utf-16')"));
+                    type_from_datashape("string['utf-16']"));
     EXPECT_EQ(ndt::make_string(string_encoding_utf_32),
-                    type_from_datashape("string('U32')"));
+                    type_from_datashape("string['U32']"));
     EXPECT_EQ(ndt::make_string(string_encoding_utf_32),
-                    type_from_datashape("string('utf32')"));
+                    type_from_datashape("string['utf32']"));
     EXPECT_EQ(ndt::make_string(string_encoding_utf_32),
-                    type_from_datashape("string('utf-32')"));
+                    type_from_datashape("string['utf-32']"));
     EXPECT_EQ(ndt::make_string(string_encoding_ucs_2),
-                    type_from_datashape("string('ucs2')"));
+                    type_from_datashape("string['ucs2']"));
     EXPECT_EQ(ndt::make_string(string_encoding_ucs_2),
-                    type_from_datashape("string('ucs-2')"));
+                    type_from_datashape("string['ucs-2']"));
     // String with size
     EXPECT_EQ(ndt::make_fixedstring(1, string_encoding_utf_8),
-                    type_from_datashape("string(1)"));
+                    type_from_datashape("string[1]"));
     EXPECT_EQ(ndt::make_fixedstring(100, string_encoding_utf_8),
-                    type_from_datashape("string(100)"));
+                    type_from_datashape("string[100]"));
     // String with size and encoding
     EXPECT_EQ(ndt::make_fixedstring(1, string_encoding_ascii),
-                    type_from_datashape("string(1, 'A')"));
+                    type_from_datashape("string[1, 'A']"));
     EXPECT_EQ(ndt::make_fixedstring(10, string_encoding_utf_8),
-                    type_from_datashape("string(10, 'U8')"));
+                    type_from_datashape("string[10, 'U8']"));
     EXPECT_EQ(ndt::make_fixedstring(1000, string_encoding_utf_16),
-                    type_from_datashape("string(1000,'U16')"));
+                    type_from_datashape("string[1000,'U16']"));
 }
 
 TEST(DataShapeParser, Unaligned) {
     EXPECT_EQ(ndt::make_strided_dim(ndt::make_type<dynd_bool>()),
-                    type_from_datashape("M, unaligned(bool)"));
+                    type_from_datashape("M * unaligned[bool]"));
     EXPECT_EQ(ndt::make_strided_dim(ndt::make_unaligned(ndt::make_type<float>()), 2),
-                    type_from_datashape("M, N, unaligned(float32)"));
+                    type_from_datashape("M * N * unaligned[float32]"));
     EXPECT_EQ(ndt::make_cstruct(ndt::make_unaligned(ndt::make_type<int32_t>()), "x",
                                 ndt::make_unaligned(ndt::make_type<int64_t>()), "y"),
-                    type_from_datashape("{x : unaligned(int32); y : unaligned(int64)}"));
+                    type_from_datashape("{x : unaligned[int32], y : unaligned[int64]}"));
 }
 
 TEST(DataShapeParser, StridedDim) {
     EXPECT_EQ(ndt::make_strided_dim(ndt::make_type<dynd_bool>()),
-                    type_from_datashape("M, bool"));
+                    type_from_datashape("M * bool"));
     EXPECT_EQ(ndt::make_strided_dim(ndt::make_type<float>(), 2),
-                    type_from_datashape("M, N, float32"));
+                    type_from_datashape("M * N * float32"));
 }
 
 TEST(DataShapeParser, FixedDim) {
-    EXPECT_EQ(ndt::make_fixed_dim(3, ndt::make_type<dynd_bool>()), type_from_datashape("3, bool"));
+    EXPECT_EQ(ndt::make_fixed_dim(3, ndt::make_type<dynd_bool>()), type_from_datashape("3 * bool"));
     EXPECT_EQ(ndt::make_fixed_dim(4, ndt::make_fixed_dim(3, ndt::make_type<float>())),
-                    type_from_datashape("4, 3, float32"));
+                    type_from_datashape("4 * 3 * float32"));
 }
 
 TEST(DataShapeParser, VarDim) {
-    EXPECT_EQ(ndt::make_var_dim(ndt::make_type<dynd_bool>()), type_from_datashape("var, bool"));
+    EXPECT_EQ(ndt::make_var_dim(ndt::make_type<dynd_bool>()), type_from_datashape("var * bool"));
     EXPECT_EQ(ndt::make_var_dim(ndt::make_var_dim(ndt::make_type<float>())),
-                    type_from_datashape("var, var, float32"));
+                    type_from_datashape("var * var * float32"));
 }
 
 TEST(DataShapeParser, StridedFixedDim) {
     EXPECT_EQ(ndt::make_strided_dim(ndt::make_fixed_dim(3, ndt::make_type<float>())),
-                    type_from_datashape("M, 3, float32"));
+                    type_from_datashape("M * 3 * float32"));
 }
 
 TEST(DataShapeParser, StridedVarFixedDim) {
     EXPECT_EQ(ndt::make_strided_dim(ndt::make_var_dim(ndt::make_fixed_dim(3, ndt::make_type<float>()))),
-                    type_from_datashape("M, var, 3, float32"));
+                    type_from_datashape("M * var * 3 * float32"));
 }
 
 TEST(DataShapeParser, RecordOneField) {
     EXPECT_EQ(ndt::make_cstruct(ndt::make_type<float>(), "val"),
                     type_from_datashape("{ val : float32 }"));
     EXPECT_EQ(ndt::make_cstruct(ndt::make_type<float>(), "val"),
-                    type_from_datashape("{ val : float32 ; }"));
+                    type_from_datashape("{ val : float32 , }"));
 }
 
 TEST(DataShapeParser, RecordTwoFields) {
     EXPECT_EQ(ndt::make_cstruct(ndt::make_type<float>(), "val", ndt::make_type<int64_t>(), "id"),
                     type_from_datashape("{\n"
-                        "    val: float32;\n"
+                        "    val: float32,\n"
                         "    id: int64\n"
                         "}\n"));
     EXPECT_EQ(ndt::make_cstruct(ndt::make_type<float>(), "val", ndt::make_type<int64_t>(), "id"),
                     type_from_datashape("{\n"
-                        "    val: float32;\n"
-                        "    id: int64;\n"
+                        "    val: float32,\n"
+                        "    id: int64,\n"
                         "}\n"));
 }
 
@@ -176,18 +176,18 @@ TEST(DataShapeParser, ErrorBasic) {
         EXPECT_TRUE(msg.find("unexpected token") != string::npos);
     }
     try {
-        type_from_datashape("3, int32, float64");
+        type_from_datashape("3 * int32 * float64");
         EXPECT_TRUE(false);
     } catch (const runtime_error& e) {
         string msg = e.what();
-        EXPECT_TRUE(msg.find("line 1, column 4") != string::npos);
+        EXPECT_TRUE(msg.find("line 1, column 5") != string::npos);
         EXPECT_TRUE(msg.find("only free variables") != string::npos);
     }
 }
 
 TEST(DataShapeParser, ErrorString) {
     try {
-        type_from_datashape("string(");
+        type_from_datashape("string[");
         EXPECT_TRUE(false);
     } catch (const runtime_error& e) {
         string msg = e.what();
@@ -195,7 +195,7 @@ TEST(DataShapeParser, ErrorString) {
         EXPECT_TRUE(msg.find("expected a size integer or string encoding") != string::npos);
     }
     try {
-        type_from_datashape("string(0)");
+        type_from_datashape("string[0]");
         EXPECT_TRUE(false);
     } catch (const runtime_error& e) {
         string msg = e.what();
@@ -203,7 +203,7 @@ TEST(DataShapeParser, ErrorString) {
         EXPECT_TRUE(msg.find("string size cannot be zero") != string::npos);
     }
     try {
-        type_from_datashape("string('badencoding')");
+        type_from_datashape("string['badencoding']");
         EXPECT_TRUE(false);
     } catch (const runtime_error& e) {
         string msg = e.what();
@@ -211,23 +211,23 @@ TEST(DataShapeParser, ErrorString) {
         EXPECT_TRUE(msg.find("unrecognized string encoding") != string::npos);
     }
     try {
-        type_from_datashape("string('U8',)");
+        type_from_datashape("string['U8',]");
         EXPECT_TRUE(false);
     } catch (const runtime_error& e) {
         string msg = e.what();
         EXPECT_TRUE(msg.find("line 1, column 12") != string::npos);
-        EXPECT_TRUE(msg.find("expected closing ')'") != string::npos);
+        EXPECT_TRUE(msg.find("expected closing ']'") != string::npos);
     }
     try {
-        type_from_datashape("string(3,'U8',10)");
+        type_from_datashape("string[3,'U8',10]");
         EXPECT_TRUE(false);
     } catch (const runtime_error& e) {
         string msg = e.what();
         EXPECT_TRUE(msg.find("line 1, column 14") != string::npos);
-        EXPECT_TRUE(msg.find("expected closing ')'") != string::npos);
+        EXPECT_TRUE(msg.find("expected closing ']'") != string::npos);
     }
     try {
-        type_from_datashape("string(3,3)");
+        type_from_datashape("string[3,3]");
         EXPECT_TRUE(false);
     } catch (const runtime_error& e) {
         string msg = e.what();
@@ -256,12 +256,12 @@ TEST(DataShapeParser, ErrorRecord) {
     } catch (const runtime_error& e) {
         string msg = e.what();
         EXPECT_TRUE(msg.find("line 2, column 13") != string::npos);
-        EXPECT_TRUE(msg.find("expected ';' or '}'") != string::npos);
+        EXPECT_TRUE(msg.find("expected ',' or '}'") != string::npos);
     }
     try {
         type_from_datashape("{\n"
-            "   id: int64;\n"
-            "   name: string;\n"
+            "   id: int64,\n"
+            "   name: string,\n"
             "   amount: invalidtype;\n"
             "}\n");
         EXPECT_TRUE(false);
@@ -272,9 +272,9 @@ TEST(DataShapeParser, ErrorRecord) {
     }
     try {
         type_from_datashape("{\n"
-            "   id: int64;\n"
-            "   name: string;\n"
-            "   amount: %;\n"
+            "   id: int64,\n"
+            "   name: string,\n"
+            "   amount: %,\n"
             "}\n");
         EXPECT_TRUE(false);
     } catch (const runtime_error& e) {
@@ -284,9 +284,9 @@ TEST(DataShapeParser, ErrorRecord) {
     }
     try {
         type_from_datashape("{\n"
-            "   id: int64;\n"
-            "   name: string;\n"
-            "   amount+ float32;\n"
+            "   id: int64,\n"
+            "   name: string,\n"
+            "   amount+ float32,\n"
             "}\n");
         EXPECT_TRUE(false);
     } catch (const runtime_error& e) {
@@ -296,14 +296,14 @@ TEST(DataShapeParser, ErrorRecord) {
     }
     try {
         type_from_datashape("{\n"
-            "   id: int64;\n"
-            "   name: (3, string;\n"
-            "   amount: float32;\n"
+            "   id: int64,\n"
+            "   name: (3 * string,\n"
+            "   amount: float32,\n"
             "}\n");
         EXPECT_TRUE(false);
     } catch (const runtime_error& e) {
         string msg = e.what();
-        EXPECT_TRUE(msg.find("line 3, column 20") != string::npos);
+        EXPECT_TRUE(msg.find("line 3, column 21") != string::npos);
         EXPECT_TRUE(msg.find("expected closing ')'") != string::npos);
     }
 }
@@ -312,7 +312,7 @@ TEST(DataShapeParser, ErrorTypeAlias) {
     try {
         type_from_datashape("\n"
             "type MyInt = int32\n"
-            "MyInt, int32\n");
+            "MyInt * int32\n");
         EXPECT_TRUE(false);
     } catch (const runtime_error& e) {
         string msg = e.what();
@@ -342,7 +342,7 @@ TEST(DataShapeParser, ErrorTypeAlias) {
     try {
         type_from_datashape("\n"
             "type MyInt = &\n"
-            "2, MyInt\n");
+            "2 * MyInt\n");
         EXPECT_TRUE(false);
     } catch (const runtime_error& e) {
         string msg = e.what();
@@ -352,7 +352,7 @@ TEST(DataShapeParser, ErrorTypeAlias) {
     try {
         type_from_datashape("\n"
             "type int32 = int64\n"
-            "2, int32\n");
+            "2 * int32\n");
         EXPECT_TRUE(false);
     } catch (const runtime_error& e) {
         string msg = e.what();
@@ -363,7 +363,7 @@ TEST(DataShapeParser, ErrorTypeAlias) {
         type_from_datashape("\n"
             "type MyInt = int64\n"
             "type MyInt = int32\n"
-            "2, MyInt\n");
+            "2 * MyInt\n");
         EXPECT_TRUE(false);
     } catch (const runtime_error& e) {
         string msg = e.what();
@@ -375,84 +375,84 @@ TEST(DataShapeParser, ErrorTypeAlias) {
 TEST(DataShapeParser, KivaLoanDataShape) {
     const char *klds =
         "type KivaLoan = {\n"
-        "    id: int64;\n"
-        "    name: string;\n"
+        "    id: int64,\n"
+        "    name: string,\n"
         "    description: {\n"
-        "        languages: var, string(2);\n"
-        "    #    texts: map(string(2), string);\n"
-        "    };\n"
-        "    status: string; # LoanStatusType;\n"
-        "    funded_amount: float64;\n"
-        "    #basket_amount: Option(float64);\n"
-        "    paid_amount: float64;\n"
+        "        languages: var * string[2],\n"
+        "    #    texts: map(string[2], string),\n"
+        "    },\n"
+        "    status: string, # LoanStatusType,\n"
+        "    funded_amount: float64,\n"
+        "    #basket_amount: Option(float64),\n"
+        "    paid_amount: float64,\n"
         "    image: {\n"
-        "        id: int64;\n"
-        "        template_id: int64;\n"
-        "    };\n"
+        "        id: int64,\n"
+        "        template_id: int64,\n"
+        "    },\n"
         "    #video: Option({\n"
-        "    #    id: int64;\n"
-        "    #    youtube_id: string;\n"
-        "    #});\n"
-        "    activity: string;\n"
-        "    sector: string;\n"
-        "    use: string;\n"
+        "    #    id: int64,\n"
+        "    #    youtube_id: string,\n"
+        "    #}),\n"
+        "    activity: string,\n"
+        "    sector: string,\n"
+        "    use: string,\n"
         "    # For 'delinquent', saw values \"null\" and \"true\" in brief search, map null -> false on import?\n"
-        "    delinquent: bool;\n"
+        "    delinquent: bool,\n"
         "    location: {\n"
-        "        country_code: string(2);\n"
-        "        country: string;\n"
-        "        town: string;\n"
+        "        country_code: string[2],\n"
+        "        country: string,\n"
+        "        town: string,\n"
         "        geo: {\n"
-        "            level: string; # GeoLevelType\n"
-        "            pairs: string; # latlong\n"
-        "            type: string; # GeoTypeType\n"
+        "            level: string, # GeoLevelType\n"
+        "            pairs: string, # latlong\n"
+        "            type: string, # GeoTypeType\n"
         "        }\n"
-        "    };\n"
-        "    partner_id: int64;\n"
-        "    #posted_date: datetime<seconds>;\n"
-        "    #planned_expiration_date: Option(datetime<seconds>);\n"
-        "    loan_amount: float64;\n"
-        "    #currency_exchange_loss_amount: Option(float64);\n"
-        "    borrowers: var, {\n"
-        "        first_name: string;\n"
-        "        last_name: string;\n"
-        "        gender: string(2); # GenderType\n"
-        "        pictured: bool;\n"
-        "    };\n"
+        "    },\n"
+        "    partner_id: int64,\n"
+        "    #posted_date: datetime<seconds>,\n"
+        "    #planned_expiration_date: Option(datetime<seconds>),\n"
+        "    loan_amount: float64,\n"
+        "    #currency_exchange_loss_amount: Option(float64),\n"
+        "    borrowers: var * {\n"
+        "        first_name: string,\n"
+        "        last_name: string,\n"
+        "        gender: string[2], # GenderType\n"
+        "        pictured: bool,\n"
+        "    },\n"
         "    terms: {\n"
-        "    #    disbursal_date: datetime<seconds>;\n"
-        "    #    disbursal_currency: Option(string);\n"
-        "        disbursal_amount: float64;\n"
-        "        loan_amount: float64;\n"
-        "        local_payments: var, {\n"
-        "    #        due_date: datetime<seconds>;\n"
-        "            amount: float64;\n"
-        "        };\n"
-        "        scheduled_payments: var, {\n"
-        "    #        due_date: datetime<seconds>;\n"
-        "            amount: float64;\n"
-        "        };\n"
+        "    #    disbursal_date: datetime<seconds>,\n"
+        "    #    disbursal_currency: Option(string),\n"
+        "        disbursal_amount: float64,\n"
+        "        loan_amount: float64,\n"
+        "        local_payments: var * {\n"
+        "    #        due_date: datetime<seconds>,\n"
+        "            amount: float64,\n"
+        "        },\n"
+        "        scheduled_payments: var * {\n"
+        "    #        due_date: datetime<seconds>,\n"
+        "            amount: float64,\n"
+        "        },\n"
         "        loss_liability: {\n"
-        "    #        nonpayment: Categorical(string, [\"lender\", \"partner\"]);\n"
-        "            currency_exchange: string;\n"
-        "    #        currency_exchange_coverage_rate: Option(float64);\n"
+        "    #        nonpayment: Categorical(string, [\"lender\", \"partner\"]),\n"
+        "            currency_exchange: string,\n"
+        "    #        currency_exchange_coverage_rate: Option(float64),\n"
         "        }\n"
-        "    };\n"
-        "    payments: var, {\n"
-        "        amount: float64;\n"
-        "        local_amount: float64;\n"
-        "    #    processed_date: datetime<seconds>;\n"
-        "    #    settlement_date: datetime<seconds>;\n"
-        "        rounded_local_amount: float64;\n"
-        "        currency_exchange_loss_amount: float64;\n"
-        "        payment_id: int64;\n"
-        "        comment: string;\n"
-        "    };\n"
-        "    #funded_date: datetime<seconds>;\n"
-        "    #paid_date: datetime<seconds>;\n"
+        "    },\n"
+        "    payments: var * {\n"
+        "        amount: float64,\n"
+        "        local_amount: float64,\n"
+        "    #    processed_date: datetime<seconds>,\n"
+        "    #    settlement_date: datetime<seconds>,\n"
+        "        rounded_local_amount: float64,\n"
+        "        currency_exchange_loss_amount: float64,\n"
+        "        payment_id: int64,\n"
+        "        comment: string,\n"
+        "    },\n"
+        "    #funded_date: datetime<seconds>,\n"
+        "    #paid_date: datetime<seconds>,\n"
         "    journal_totals: {\n"
-        "        entries: int64;\n"
-        "        bulkEntries: int64;\n"
+        "        entries: int64,\n"
+        "        bulkEntries: int64,\n"
         "    }\n"
         "}\n";
     ndt::type d = type_from_datashape(klds);
