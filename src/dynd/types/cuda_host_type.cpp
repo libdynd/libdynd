@@ -24,7 +24,7 @@ cuda_host_type::~cuda_host_type()
 
 void cuda_host_type::print_type(std::ostream& o) const
 {
-    o << "cuda_host(" << m_storage_tp << ")";
+    o << "cuda_host[" << m_storage_tp << "]";
 }
 
 bool cuda_host_type::operator==(const base_type& rhs) const

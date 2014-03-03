@@ -26,7 +26,7 @@ cuda_device_type::~cuda_device_type()
 
 void cuda_device_type::print_type(std::ostream& o) const
 {
-    o << "cuda_device(" << m_storage_tp << ")";
+    o << "cuda_device[" << m_storage_tp << "]";
 }
 
 bool cuda_device_type::operator==(const base_type& rhs) const
