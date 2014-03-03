@@ -43,7 +43,44 @@ public:
     DYND_CUDA_HOST_DEVICE_CALLABLE inline bool operator!=(const dynd_complex<float>& rhs) const {
         return !operator==(rhs);
     }
+
+    DYND_CUDA_HOST_DEVICE_CALLABLE inline dynd_complex<float> operator+(const dynd_complex<float>& rhs) const {
+        return dynd_complex<float>(m_real + rhs.m_real, m_imag + rhs.m_imag);
+    }
+
+    DYND_CUDA_HOST_DEVICE_CALLABLE inline dynd_complex<float> operator-(const dynd_complex<float>& rhs) const {
+        return dynd_complex<float>(m_real - rhs.m_real, m_imag - rhs.m_imag);
+    }
+
+    DYND_CUDA_HOST_DEVICE_CALLABLE inline dynd_complex<float> operator*(const dynd_complex<float>& rhs) const {
+        return dynd_complex<float>(m_real * rhs.m_real - m_imag * rhs.m_imag,
+                                    m_real * rhs.m_imag + rhs.m_real * m_imag);
+    }
+
+    DYND_CUDA_HOST_DEVICE_CALLABLE inline dynd_complex<float> operator*(float rhs) const {
+        return dynd_complex<float>(m_real * rhs, m_imag * rhs);
+    }
+
+    DYND_CUDA_HOST_DEVICE_CALLABLE inline dynd_complex<float> operator/(const dynd_complex<float>& rhs) const {
+        float denom = rhs.m_real * rhs.m_real + rhs.m_imag + rhs.m_imag;
+        return dynd_complex<float>((m_real * rhs.m_real + m_imag * rhs.m_imag) / denom,
+                                    (rhs.m_real * m_imag - m_real * rhs.m_imag) / denom);
+    }
+
+    DYND_CUDA_HOST_DEVICE_CALLABLE inline dynd_complex<float> operator/(float rhs) const {
+        return dynd_complex<float>(m_real / rhs, m_imag / rhs);
+    }
 };
+
+inline dynd_complex<float> operator*(float lhs, const dynd_complex<float>& rhs) {
+    return dynd_complex<float>(lhs * rhs.m_real, lhs * rhs.m_imag);
+}
+
+inline dynd_complex<float> operator/(float lhs, const dynd_complex<float>& rhs) {
+    float denom = rhs.m_real * rhs.m_real + rhs.m_imag + rhs.m_imag;
+    return dynd_complex<float>((lhs * rhs.m_real) / denom,
+                                (- lhs * rhs.m_imag) / denom);
+}
 
 std::ostream& operator<<(std::ostream& out, const dynd_complex<float>& val);
 
@@ -74,7 +111,44 @@ public:
     DYND_CUDA_HOST_DEVICE_CALLABLE inline bool operator!=(const dynd_complex<double>& rhs) const {
         return !operator==(rhs);
     }
+
+    DYND_CUDA_HOST_DEVICE_CALLABLE inline dynd_complex<double> operator+(const dynd_complex<double>& rhs) const {
+        return dynd_complex<double>(m_real + rhs.m_real, m_imag + rhs.m_imag);
+    }
+
+    DYND_CUDA_HOST_DEVICE_CALLABLE inline dynd_complex<double> operator-(const dynd_complex<double>& rhs) const {
+        return dynd_complex<double>(m_real - rhs.m_real, m_imag - rhs.m_imag);
+    }
+
+    DYND_CUDA_HOST_DEVICE_CALLABLE inline dynd_complex<double> operator*(const dynd_complex<double>& rhs) const {
+        return dynd_complex<double>(m_real * rhs.m_real - m_imag * rhs.m_imag,
+                                    m_real * rhs.m_imag + rhs.m_real * m_imag);
+    }
+
+    DYND_CUDA_HOST_DEVICE_CALLABLE inline dynd_complex<double> operator*(double rhs) const {
+        return dynd_complex<double>(m_real * rhs, m_imag * rhs);
+    }
+
+    DYND_CUDA_HOST_DEVICE_CALLABLE inline dynd_complex<double> operator/(const dynd_complex<double>& rhs) const {
+        double denom = rhs.m_real * rhs.m_real + rhs.m_imag + rhs.m_imag;
+        return dynd_complex<double>((m_real * rhs.m_real + m_imag * rhs.m_imag) / denom,
+                                    (rhs.m_real * m_imag - m_real * rhs.m_imag) / denom);
+    }
+
+    DYND_CUDA_HOST_DEVICE_CALLABLE inline dynd_complex<double> operator/(double rhs) const {
+        return dynd_complex<double>(m_real / rhs, m_imag / rhs);
+    }
 };
+
+inline dynd_complex<double> operator*(double lhs, const dynd_complex<double>& rhs) {
+    return dynd_complex<double>(lhs * rhs.m_real, lhs * rhs.m_imag);
+}
+
+inline dynd_complex<double> operator/(double lhs, const dynd_complex<double>& rhs) {
+    double denom = rhs.m_real * rhs.m_real + rhs.m_imag + rhs.m_imag;
+    return dynd_complex<double>((lhs * rhs.m_real) / denom,
+                                (- lhs * rhs.m_imag) / denom);
+}
 
 std::ostream& operator<<(std::ostream& out, const dynd_complex<double>& val);
 
