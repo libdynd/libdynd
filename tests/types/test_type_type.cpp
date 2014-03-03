@@ -96,7 +96,7 @@ TEST(DTypeDType, StridedArrayRefCount) {
     EXPECT_EQ(1, d.extended()->get_use_count());
 
     // 2D Strided Array
-    a = nd::empty(3, 3, ndt::type("M, N, type"));
+    a = nd::empty(3, 3, ndt::type("M * N * type"));
     EXPECT_EQ(strided_dim_type_id, a.get_type().get_type_id());
     EXPECT_EQ(1, d.extended()->get_use_count());
     a.vals() = d;
@@ -143,7 +143,7 @@ TEST(DTypeDType, FixedArrayRefCount) {
     EXPECT_EQ(1, d.extended()->get_use_count());
 
     // 2D Fixed Array
-    a = nd::empty(ndt::type("3, 3, type"));
+    a = nd::empty(ndt::type("3 * 3 * type"));
     EXPECT_EQ(fixed_dim_type_id, a.get_type().get_type_id());
     EXPECT_EQ(1, d.extended()->get_use_count());
     a.vals() = d;
@@ -176,7 +176,7 @@ TEST(DTypeDType, VarArrayRefCount) {
     EXPECT_EQ((uint32_t)objectarray_memory_block_type,
                     reinterpret_cast<const var_dim_type_metadata *>(
                         a.get_ndo_meta())->blockref->m_type);
-    a.vals() = nd::empty("10, type");
+    a.vals() = nd::empty("10 * type");
     EXPECT_EQ(1, d.extended()->get_use_count());
     a.vals() = d;
     EXPECT_EQ(11, d.extended()->get_use_count());
@@ -195,9 +195,9 @@ TEST(DTypeDType, VarArrayRefCount) {
 
     // 2D Strided + Var Array
     a = nd::empty(3, ndt::make_strided_dim(ndt::make_var_dim(ndt::make_type())));
-    a.vals_at(0) = nd::empty("2, type");
-    a.vals_at(1) = nd::empty("3, type");
-    a.vals_at(2) = nd::empty("4, type");
+    a.vals_at(0) = nd::empty("2 * type");
+    a.vals_at(1) = nd::empty("3 * type");
+    a.vals_at(2) = nd::empty("4 * type");
     EXPECT_EQ(1, d.extended()->get_use_count());
     a.vals() = d;
     EXPECT_EQ(10, d.extended()->get_use_count());
@@ -224,7 +224,7 @@ TEST(DTypeDType, CStructRefCount) {
     d = ndt::make_strided_dim(ndt::make_type<int>());
 
     // Single CStruct Instance
-    a = nd::empty("{dt: type; more: {a: int32; b: type}; other: string}");
+    a = nd::empty("{dt: type, more: {a: int32, b: type}, other: string}");
     EXPECT_EQ(cstruct_type_id, a.get_type().get_type_id());
     EXPECT_EQ(1, d.extended()->get_use_count());
     a.p("dt").vals() = d;
@@ -246,7 +246,7 @@ TEST(DTypeDType, CStructRefCount) {
     EXPECT_EQ(1, d.extended()->get_use_count());
 
     // Array of CStruct Instance
-    a = nd::empty(10, "M, {dt: type; more: {a: int32; b: type}; other: string}");
+    a = nd::empty(10, "M * {dt: type, more: {a: int32, b: type}, other: string}");
     EXPECT_EQ(cstruct_type_id, a(0).get_type().get_type_id());
     EXPECT_EQ(1, d.extended()->get_use_count());
     a.p("dt").vals() = d;
@@ -274,7 +274,7 @@ TEST(DTypeDType, StructRefCount) {
     d = ndt::make_strided_dim(ndt::make_type<int>());
 
     // Single CStruct Instance
-    a = nd::empty("{dt: type; more: {a: int32; b: type}; other: string}")(0 <= irange() < 2);
+    a = nd::empty("{dt: type, more: {a: int32, b: type}, other: string}")(0 <= irange() < 2);
     EXPECT_EQ(struct_type_id, a.get_type().get_type_id());
     EXPECT_EQ(1, d.extended()->get_use_count());
     a.p("dt").vals() = d;
@@ -296,7 +296,7 @@ TEST(DTypeDType, StructRefCount) {
     EXPECT_EQ(1, d.extended()->get_use_count());
 
     // Array of Struct Instance
-    a = nd::empty(10, "M, {dt: type; more: {a: int32; b: type}; other: string}")(irange(), 0 <= irange() < 2);
+    a = nd::empty(10, "M * {dt: type, more: {a: int32, b: type}, other: string}")(irange(), 0 <= irange() < 2);
     EXPECT_EQ(struct_type_id, a(0).get_type().get_type_id());
     EXPECT_EQ(1, d.extended()->get_use_count());
     a.p("dt").vals() = d;

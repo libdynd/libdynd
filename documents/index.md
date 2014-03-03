@@ -7,7 +7,7 @@ be out of date in places. Please email <mwiebe@continuum.io>
 for any queries regarding the library.
 
  * [Developer Guide](developer-guide.md)
- * [NDObject](ndobject.md)
- * [NDObject Low Level Details](ndobject_lowlevel.md)
+ * [ND::Array](ndarray.md)
+ * [ND::Array Low Level Details](ndarray_lowlevel.md)
  * [CKernels](ckernels.md)
  * [Multi-dimensional Kernels](multidim_kernels.md)

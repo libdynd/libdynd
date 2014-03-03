@@ -20,9 +20,9 @@ namespace dynd {
 void validate_json(const char *json_begin, const char *json_end);
 
 /**
- * This function parses the JSON, encoded as UTF-8, into an ndobject
+ * This function parses the JSON, encoded as UTF-8, into an nd::array
  * of the specified type. This parser works directly from JSON to the
- * ndobject representation, interpreting the data as the requested type
+ * nd::array representation, interpreting the data as the requested type
  * on the fly.
  *
  * The type must have a fixed data size, so every dimension must be

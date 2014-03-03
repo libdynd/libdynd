@@ -50,11 +50,11 @@ void convert_type::print_data(std::ostream& DYND_UNUSED(o), const char *DYND_UNU
 
 void convert_type::print_type(std::ostream& o) const
 {
-    o << "convert<to=" << m_value_type << ", from=" << m_operand_type;
+    o << "convert[to=" << m_value_type << ", from=" << m_operand_type;
     if (m_errmode != assign_error_default) {
         o << ", errmode=" << m_errmode;
     }
-    o << ">";
+    o << "]";
 }
 
 void convert_type::get_shape(intptr_t ndim, intptr_t i, intptr_t *out_shape,

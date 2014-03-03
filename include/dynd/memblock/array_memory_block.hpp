@@ -3,8 +3,8 @@
 // BSD 2-Clause License, see LICENSE.txt
 //
 
-#ifndef _DYND__NDOBJECT_MEMORY_BLOCK_HPP_
-#define _DYND__NDOBJECT_MEMORY_BLOCK_HPP_
+#ifndef _DYND__ARRAY_MEMORY_BLOCK_HPP_
+#define _DYND__ARRAY_MEMORY_BLOCK_HPP_
 
 #include <iostream>
 #include <string>
@@ -15,7 +15,7 @@
 namespace dynd {
 
 /**
- * This structure is the start of any ndobject metadata. The
+ * This structure is the start of any nd::array metadata. The
  * metadata after this structure is determined by the m_type
  * object.
  */
@@ -51,14 +51,14 @@ struct array_preamble {
 };
 
 /**
- * Creates a memory block for holding an ndobject (i.e. a container for ndobject metadata)
+ * Creates a memory block for holding an nd::array (i.e. a container for nd::array metadata)
  *
  * The created object is uninitialized.
  */
 memory_block_ptr make_array_memory_block(size_t metadata_size);
 
 /**
- * Creates a memory block for holding an ndobject (i.e. a container for ndobject metadata),
+ * Creates a memory block for holding an nd::array (i.e. a container for nd::array metadata),
  * as well as storage for embedding additional POD storage such as the array data.
  *
  * The created object is uninitialized.
@@ -67,15 +67,15 @@ memory_block_ptr make_array_memory_block(size_t metadata_size, size_t extra_size
                     size_t extra_alignment, char **out_extra_ptr);
 
 /**
- * Creates an ndobject memory block, and default-constructs it for the type
+ * Creates an nd::array memory block, and default-constructs it for the type
  * and specified shape.
  */
 memory_block_ptr make_array_memory_block(const ndt::type& dt, intptr_t ndim, const intptr_t *shape);
 
 /**
- * Makes a shallow copy of the ndobject memory block. In the copy, only the
- * ndobject metadata is duplicated, all the references are the same. Any NULL
- * references are swapped to point at the original ndobject memory block, as they
+ * Makes a shallow copy of the nd::array memory block. In the copy, only the
+ * nd::array metadata is duplicated, all the references are the same. Any NULL
+ * references are swapped to point at the original nd::array memory block, as they
  * are a signal that the data was embedded in the same memory allocation.
  */
 memory_block_ptr shallow_copy_array_memory_block(const memory_block_ptr& ndo);
@@ -84,4 +84,4 @@ void array_memory_block_debug_print(const memory_block_data *memblock, std::ostr
 
 } // namespace dynd
 
-#endif // _DYND__NDOBJECT_MEMORY_BLOCK_HPP_
+#endif // _DYND__ARRAY_MEMORY_BLOCK_HPP_

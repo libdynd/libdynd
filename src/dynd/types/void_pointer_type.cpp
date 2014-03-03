@@ -21,7 +21,7 @@ void void_pointer_type::print_data(std::ostream& o, const char *DYND_UNUSED(meta
 
 void void_pointer_type::print_type(std::ostream& o) const {
 
-    o << "pointer(void)";
+    o << "pointer[void]";
 }
 
 bool void_pointer_type::is_lossless_assignment(const ndt::type& DYND_UNUSED(dst_tp), const ndt::type& DYND_UNUSED(src_tp)) const

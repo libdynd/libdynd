@@ -285,15 +285,15 @@ static array_preamble *function___call__(const array_preamble *params, void *DYN
 
 static pair<string, gfunc::callable> ckernel_deferred_array_functions[] = {
     pair<string, gfunc::callable>("__call__", gfunc::callable(
-            ndt::type("{self:pointer(void);out:pointer(void);p0:pointer(void);"
-                       "p1:pointer(void);p2:pointer(void);"
-                       "p3:pointer(void);p4:pointer(void)}"),
+            ndt::type("{self:pointer[void],out:pointer[void],p0:pointer[void],"
+                       "p1:pointer[void],p2:pointer[void],"
+                       "p3:pointer[void],p4:pointer[void]}"),
             &function___call__,
             NULL,
             3,
-            nd::empty("{self:pointer(void);out:pointer(void);p0:pointer(void);"
-                       "p1:pointer(void);p2:pointer(void);"
-                       "p3:pointer(void);p4:pointer(void)}")
+            nd::empty("{self:pointer[void],out:pointer[void],p0:pointer[void],"
+                       "p1:pointer[void],p2:pointer[void],"
+                       "p3:pointer[void],p4:pointer[void]}")
                     ))
 };
 

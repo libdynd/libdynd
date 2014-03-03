@@ -1,14 +1,14 @@
-The DyND NDObject
-=================
+﻿The DyND ND::Array
+==================
 
-The DyND ndobject is a multidimensional data storage container, inspired
+The DyND nd::array is a multidimensional data storage container, inspired
 by the NumPy ndarray and based on the Blaze datashape system. Like NumPy,
 it supports strided multidimensional arrays of data with a uniform
 data type, but has the ability to store ragged arrays and data types
 with variable-sized data.
 
-NDObject Structure
-------------------
+ND::Array Structure
+-------------------
 
 The inspiration for the data structure is to break apart the NumPy
 ndarray into three components, a data type, some metadata like strides
@@ -34,19 +34,19 @@ and shape, and the data. Here's how this looks in NumPy:
     >>> a.data
     <read-write buffer for 0x00000000028131B0, size 24, offset 0 at 0x00000000031F0FB8>
 
-In the DyND ndobject's Python exposure, the same data is:
+In the DyND nd::array's Python exposure, the same data is:
 
-    >>> a = nd.ndobject([[1,2,3],[4,5,6]])
-    >>> print(a.debug_repr())
-    ------ ndobject
-     address: 00000000062090F0
+    >>> a = nd.array([[1,2,3],[4,5,6]])
+    >>> nd.debug_repr(a)
+    ------ array
+     address: 00000000004566A0
      refcount: 1
-     dtype:
-      pointer: 0000000006209060
-      type: strided_dim<strided_dim<int32>>
+     type:
+      pointer: 0000000000463410
+      type: strided * strided * int32
      metadata:
-      flags: 3 (read_access write_access )
-      dtype-specific metadata:
+      flags: 5 (read_access immutable )
+      type-specific metadata:
        strided_dim metadata
         stride: 12
         size: 2
@@ -54,17 +54,18 @@ In the DyND ndobject's Python exposure, the same data is:
          stride: 4
          size: 3
      data:
-       pointer: 0000000006209140
-       reference: 0000000000000000 (embedded in ndobject memory)
+       pointer: 00000000004566F0
+       reference: 0000000000000000 (embedded in array memory)
     ------
 
+
 Some things that were metadata in NumPy ndarrays have become part of
-the dtype in DyND ndobjects. The fact that this is a two-dimensional
+the dtype in DyND nd::arrays. The fact that this is a two-dimensional
 strided array is encoded in the DyND dtype. One way to think of this
 dtype is that it is a strided array of strided int32 arrays.
 
-In the debug printout of the ndobject, there is first some metadata
-about the ndobject, currently only access permission flags. The
+In the debug printout of the nd::array, there is first some metadata
+about the nd::array, currently only access permission flags. The
 dtype-specific metadata is determined by the structure of the dtype.
 In this case, each strided_array part of the dtype owns some metadata
 memory which contains its stride and dimension size. The int32 doesn't
@@ -72,20 +73,20 @@ require any additional metadata.
 
 The data consists of a pointer to the memory containing the array elements,
 and a reference to a memory block which holds the data
-for the ndobject. In this case, the data has been embedded within
-the same memory allocation as the ndobject metadata.
+for the nd::array. In this case, the data has been embedded within
+the same memory allocation as the nd::array metadata.
 
 Memory Blocks
 -------------
 
-Data for ndobjects is stored in memory blocks, which are low level
+Data for nd::arrays is stored in memory blocks, which are low level
 reference counted objects containing allocated memory or a
 handle/reference from some other system. For example, when a NumPy ndarray
-is converted into an ndobject, a PyObject pointer and a version of
+is converted into an nd::array, a PyObject pointer and a version of
 Py_DECREF which grabs the GIL is held by the memory block.
 
 The memory block itself doesn't know where within it the data an
-ndobject needs is, so whereever ndobjects need memory block references,
+nd::array needs is, so whereever nd::arrays need memory block references,
 they also need a raw data pointer.
 
 ### Indexing Example
@@ -93,55 +94,55 @@ they also need a raw data pointer.
 Here's a small example showing the result of a simple
 indexing operation.
 
-    >>> a = nd.ndobject([1,2,3])
-    >>> print(a.debug_repr())
-    ------ ndobject
-     address: 000000000415C730
+    >>> a = nd.array([1,2,3])
+    >>> nd.debug_repr(a)
+    ------ array
+     address: 000000000043F5B0
      refcount: 1
-     dtype:
-      pointer: 0000000006209160
-      type: strided_dim<int32>
+     type:
+      pointer: 000000000048FA80
+      type: strided * int32
      metadata:
-      flags: 3 (read_access write_access )
-      dtype-specific metadata:
+      flags: 5 (read_access immutable )
+      type-specific metadata:
        strided_dim metadata
         stride: 4
         size: 3
      data:
-       pointer: 000000000415C770
-       reference: 0000000000000000 (embedded in ndobject memory)
+       pointer: 000000000043F5F0
+       reference: 0000000000000000 (embedded in array memory)
     ------
 
-    >>> print(a[1].debug_repr())
-    ------ ndobject
-     address: 000000000415AA10
+    >>> nd.debug_repr(a[1])
+    ------ array
+     address: 0000000000461460
      refcount: 1
-     dtype:
+     type:
       pointer: 0000000000000004
       type: int32
      metadata:
-      flags: 3 (read_access write_access )
+      flags: 5 (read_access immutable )
      data:
-       pointer: 000000000415C774
-       reference: 000000000415C730
-        ------ memory_block at 000000000415C730
+       pointer: 000000000043F5F4
+       reference: 000000000043F5B0
+        ------ memory_block at 000000000043F5B0
          reference count: 2
-         type: ndobject
-         dtype: strided_dim<int32>
+         type: ndarray
+         type: strided * int32
         ------
     ------
 
 In the printout of a[1], the first thing to note is the
 dtype pointer, it's just the value 4. This is because
 for a small number of builtin dtypes, their dtype representation
-in the ndobject is just a type id.
+in the nd::array is just a type id.
 
 Compare the pointer and reference of a[1] with that of a.
 The pointer is 4 greater, as expected for indexing element 1 with
-a stride of 4. The reference is the same as the ndobject a's
+a stride of 4. The reference is the same as the nd::array a's
 address, which you can see at the top of the printout. That's because
-the array data was embedded in the ndobject's memory, so a reference
-to that ndobject gets substituted for NULL while indexing.
+the array data was embedded in the nd::array's memory, so a reference
+to that nd::array gets substituted for NULL while indexing.
 
 ### NumPy Example
 
@@ -150,40 +151,40 @@ more interesting, we cause the memory of the array to be unaligned.
 
     >>> mem = np.zeros(9, dtype='i1')
     >>> a = mem[1:].view(dtype='i4')
-    >>> b = nd.ndobject(a)
-    >>> print(b.debug_repr())
-    ------ ndobject
-     address: 0000000006208500
+    >>> b = nd.view(a)
+    >>> nd.debug_repr(b)
+    ------ array
+     address: 000000000048CD50
      refcount: 1
-     dtype:
-      pointer: 0000000006208FD0
-      type: strided_dim<unaligned<int32>>
+     type:
+      pointer: 0000000000474D90
+      type: strided * unaligned[int32]
      metadata:
       flags: 3 (read_access write_access )
-      dtype-specific metadata:
+      type-specific metadata:
        strided_dim metadata
         stride: 4
         size: 2
      data:
-       pointer: 0000000003699541
-       reference: 00000000041586B0
-        ------ memory_block at 00000000041586B0
+       pointer: 000000000404FC61
+       reference: 000000000043A790
+        ------ memory_block at 000000000043A790
          reference count: 1
          type: external
-         object void pointer: 000000000479B450
-         free function: 000007FEEC181988
+         object void pointer: 0000000003F9C610
+         free function: 000007FEE582251D
         ------
     ------
 
-Because the data isn't aligned, the ndobject can't have a straight
-int32 dtype. The solution is to make an unaligned<int32>
+Because the data isn't aligned, the nd::array3 can't have a straight
+int32 dtype. The solution is to make an unaligned[int32]
 dtype, which has alignment 1 instead of alignment 4 like int32.
 
 The data reference is an external memory block here. The "object void pointer"
 is a pointer to the PyObject*, and the "free function" is a function which wraps
 Py_DECREF in some code to ensure the GIL is being held. Unfortunately, this means
 that freeing this object will be more expensive than normal, but there isn't really
-another option that permits ndobjects to be used safely across multiple threads.
+another option that permits nd::arrays to be used safely across multiple threads.
 For memory blocks themselves, an atomic increment/decrement is used to provide this
 thread safety.
 
@@ -193,61 +194,60 @@ The default string dtype for dynd is parameterized by its encoding and is
 variable-length.  This is handled by having a memory block reference in the
 string's metadata, and the primary string data itself being a pair of pointers
 to the beginning and one past the end of the string. For an example, here's
-how a single Python string converts to an ndobject:
+how a single Python string converts to an nd::array:
 
-    >>> a = nd.ndobject("This is a string")
-    >>> print(a.debug_repr())
-    ------ ndobject
-     address: 0000000006208550
+    >>> a = nd.array("This is a string")
+    >>> nd.debug_repr(a)
+    ------ array
+     address: 00000000004DA8C0
      refcount: 1
-     dtype:
-      pointer: 000000000415AA50
-      type: string<'ascii'>
+     type:
+      pointer: 0000000000508EA0
+      type: string
      metadata:
       flags: 5 (read_access immutable )
-      dtype-specific metadata:
+      type-specific metadata:
        string metadata
-        ------ memory_block at 00000000041586D0
-         reference count: 1
-         type: external
-         object void pointer: 000000000494F3E8
-         free function: 000007FEEC181988
-        ------
+        ------ NULL memory block
      data:
-       pointer: 0000000006208588
-       reference: 0000000000000000 (embedded in ndobject memory)
+       pointer: 00000000004DA8F8
+       reference: 0000000000000000 (embedded in array memory)
     ------
 
-What you will notice here is that the ndobject is pointing directly at the
-Python string data, and has been flagged as immutable, just like Python
-strings are. For comparison, let's do an array of unicode strings (these
-examples are in Python 2.7).
+What you will notice here is that the memory block inside of the
+string metadata is NULL, as is the data reference at the nd::array
+level. This is because a larger amount of memory was allocated for
+the nd::array, and the space at the end was used for the string,
+to minimize the number of memory allocations. Both of the NULL
+memory block references indicate this.
 
-    >>> a = nd.ndobject([u"This", u"is", u"unicode."])
-    >>> print(a.debug_repr())
-    ------ ndobject
-     address: 00000000062090F0
+Let's do this also for an array of strings::
+
+    >>> a = nd.array([u"This", u"is", u"unicode."])
+    >>> nd.debug_repr(a)
+    ------ array
+     address: 000000000050F1C0
      refcount: 1
-     dtype:
-      pointer: 0000000006209060
-      type: strided_dim<string<'ucs-2'>>
+     type:
+      pointer: 00000000004ED810
+      type: strided * string
      metadata:
-      flags: 3 (read_access write_access )
-      dtype-specific metadata:
+      flags: 5 (read_access immutable )
+      type-specific metadata:
        strided_dim metadata
         stride: 16
         size: 3
         string metadata
-         ------ memory_block at 00000000062085A0
+         ------ memory_block at 000000000050C530
           reference count: 1
           type: pod
-          finalized: 28
+          finalized: 14
          ------
      data:
-       pointer: 0000000006209138
-       reference: 0000000000000000 (embedded in ndobject memory)
+       pointer: 000000000050F208
+       reference: 0000000000000000 (embedded in array memory)
     ------
 
-In this case it made a copy of the strings, into a POD (plain old data)
-buffer instead of pointing at the original string.
-
+In this case the nd::array's reference is still NULL, indicating its
+memory is combined with the nd::array, but the string data itself
+is in a separate memory block.

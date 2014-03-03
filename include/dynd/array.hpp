@@ -1169,7 +1169,7 @@ array empty(const ndt::type& tp);
  * specified as a string. This is a shortcut for expressions
  * like
  *
- *      array a = nd::empty("10, int32");
+ *      array a = nd::empty("10 * int32");
  */
 template<int N>
 inline array empty(const char (&dshape)[N]) {
@@ -1188,7 +1188,7 @@ array empty(intptr_t dim0, const ndt::type& tp);
  * specified as a string. This is a shortcut for expressions
  * like
  *
- *      array a = nd::empty(10, "M, int32");
+ *      array a = nd::empty(10, "M * int32");
  */
 template<int N>
 inline array empty(intptr_t dim0, const char (&dshape)[N]) {
@@ -1207,7 +1207,7 @@ array empty(intptr_t dim0, intptr_t dim1, const ndt::type& tp);
  * specified as a string. This is a shortcut for expressions
  * like
  *
- *      array a = nd::empty(10, 10, "M, N, int32");
+ *      array a = nd::empty(10, 10, "M * N * int32");
  */
 template<int N>
 inline array empty(intptr_t dim0, intptr_t dim1, const char (&dshape)[N]) {
@@ -1226,7 +1226,7 @@ array empty(intptr_t dim0, intptr_t dim1, intptr_t dim2, const ndt::type& tp);
  * specified as a string. This is a shortcut for expressions
  * like
  *
- *      array a = nd::empty(10, 10, 10, "M, N, R, int32");
+ *      array a = nd::empty(10, 10, 10, "M * N * R * int32");
  */
 template<int N>
 inline array empty(intptr_t dim0, intptr_t dim1, intptr_t dim2, const char (&dshape)[N]) {
