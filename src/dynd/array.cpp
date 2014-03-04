@@ -1405,12 +1405,12 @@ std::ostream& nd::operator<<(std::ostream& o, const array& rhs)
     if (!rhs.is_empty()) {
         o << "array(";
         array v = rhs.eval();
-        if (v.get_ndo()->m_type->get_flags() & type_flag_host_inaccessible) {
-            v = v.to_host();
-        }
         if (v.get_ndo()->is_builtin_type()) {
             print_builtin_scalar(v.get_ndo()->get_builtin_type_id(), o, v.get_ndo()->m_data_pointer);
         } else {
+            if (v.get_ndo()->m_type->get_flags() & type_flag_not_host_readable) {
+                v = v.to_host();
+            }
             v.get_ndo()->m_type->print_data(o, v.get_ndo_meta(), v.get_ndo()->m_data_pointer);
         }
         o << ", type=\"" << rhs.get_type() << "\")";
