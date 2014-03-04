@@ -69,7 +69,7 @@ TEST(JSONFormatter, JSON) {
 }
 
 TEST(JSONFormatter, Struct) {
-    nd::array n = parse_json("{ a: int32; b: string; c: json }",
+    nd::array n = parse_json("{ a: int32, b: string, c: json }",
                     "{ \"b\": \"testing\",  \"a\":    100,\n"
                     "\"c\": [   {\"first\":true, \"second\":3}, null,\n \"test\"]  }");
     EXPECT_EQ("{\"a\":100,\"b\":\"testing\","
@@ -84,10 +84,10 @@ TEST(JSONFormatter, UniformDim) {
     n = vals;
     EXPECT_EQ("[3.5,-1.25,4.75]", format_json(n).as<string>());
     // Variable-sized dimension
-    n = parse_json("var, string", "[\"testing\", \"one\", \"two\"] ");
+    n = parse_json("var * string", "[\"testing\", \"one\", \"two\"] ");
     EXPECT_EQ("[\"testing\",\"one\",\"two\"]", format_json(n).as<string>());
     // Fixed dimension
-    n = parse_json("3, string", "[\"testing\", \"one\", \"two\"] ");
+    n = parse_json("3 * string", "[\"testing\", \"one\", \"two\"] ");
     EXPECT_EQ("[\"testing\",\"one\",\"two\"]", format_json(n).as<string>());
 }
 

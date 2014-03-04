@@ -47,51 +47,51 @@ TEST(DateTimeDType, CreateFromString) {
     ndt::type d;
     const datetime_type *dd;
 
-    d = ndt::type("datetime('hour')");
+    d = ndt::type("datetime['hour']");
     ASSERT_EQ(datetime_type_id, d.get_type_id());
     dd = static_cast<const datetime_type *>(d.extended());
     EXPECT_EQ(datetime_unit_hour, dd->get_unit());
     EXPECT_EQ(tz_abstract, dd->get_timezone());
 
-    d = ndt::type("datetime('min')");
+    d = ndt::type("datetime['min']");
     ASSERT_EQ(datetime_type_id, d.get_type_id());
     dd = static_cast<const datetime_type *>(d.extended());
     EXPECT_EQ(datetime_unit_minute, dd->get_unit());
     EXPECT_EQ(tz_abstract, dd->get_timezone());
 
-    d = ndt::type("datetime('sec')");
+    d = ndt::type("datetime['sec']");
     ASSERT_EQ(datetime_type_id, d.get_type_id());
     dd = static_cast<const datetime_type *>(d.extended());
     EXPECT_EQ(datetime_unit_second, dd->get_unit());
     EXPECT_EQ(tz_abstract, dd->get_timezone());
 
-    d = ndt::type("datetime('msec')");
+    d = ndt::type("datetime['msec']");
     ASSERT_EQ(datetime_type_id, d.get_type_id());
     dd = static_cast<const datetime_type *>(d.extended());
     EXPECT_EQ(datetime_unit_msecond, dd->get_unit());
     EXPECT_EQ(tz_abstract, dd->get_timezone());
 
-    d = ndt::type("datetime('usec')");
+    d = ndt::type("datetime['usec']");
     ASSERT_EQ(datetime_type_id, d.get_type_id());
     dd = static_cast<const datetime_type *>(d.extended());
     EXPECT_EQ(datetime_unit_usecond, dd->get_unit());
     EXPECT_EQ(tz_abstract, dd->get_timezone());
 
-    d = ndt::type("datetime('nsec')");
+    d = ndt::type("datetime['nsec']");
     ASSERT_EQ(datetime_type_id, d.get_type_id());
     dd = static_cast<const datetime_type *>(d.extended());
     EXPECT_EQ(datetime_unit_nsecond, dd->get_unit());
     EXPECT_EQ(tz_abstract, dd->get_timezone());
 
     // Explicit abstract timezone
-    d = ndt::type("datetime('hour', 'abstract')");
+    d = ndt::type("datetime['hour', 'abstract']");
     ASSERT_EQ(datetime_type_id, d.get_type_id());
     dd = static_cast<const datetime_type *>(d.extended());
     EXPECT_EQ(datetime_unit_hour, dd->get_unit());
     EXPECT_EQ(tz_abstract, dd->get_timezone());
 
     // UTC timezone
-    d = ndt::type("datetime('hour', 'UTC')");
+    d = ndt::type("datetime['hour', 'UTC']");
     ASSERT_EQ(datetime_type_id, d.get_type_id());
     dd = static_cast<const datetime_type *>(d.extended());
     EXPECT_EQ(datetime_unit_hour, dd->get_unit());
@@ -135,40 +135,40 @@ TEST(DateTimeDType, ValueCreationUTCMinutes) {
 
 TEST(DateTimeDType, ConvertToString) {
     EXPECT_EQ("2013-02-16T12",
-                    nd::array("2013-02-16T12").cast(ndt::type("datetime('hour')")).as<string>());
+                    nd::array("2013-02-16T12").cast(ndt::type("datetime['hour']")).as<string>());
     EXPECT_EQ("2013-02-16T12Z",
-                    nd::array("2013-02-16T12Z").cast(ndt::type("datetime('hour','UTC')")).as<string>());
+                    nd::array("2013-02-16T12Z").cast(ndt::type("datetime['hour','UTC']")).as<string>());
 
     EXPECT_EQ("2013-02-16T12:13",
-                    nd::array("2013-02-16T12:13").cast(ndt::type("datetime('min')")).as<string>());
+                    nd::array("2013-02-16T12:13").cast(ndt::type("datetime['min']")).as<string>());
     EXPECT_EQ("2013-02-16T12:13Z",
-                    nd::array("2013-02-16T12:13Z").cast(ndt::type("datetime('min','UTC')")).as<string>());
+                    nd::array("2013-02-16T12:13Z").cast(ndt::type("datetime['min','UTC']")).as<string>());
 
     EXPECT_EQ("2013-02-16T12:13:19",
-                    nd::array("2013-02-16T12:13:19").cast(ndt::type("datetime('sec')")).as<string>());
+                    nd::array("2013-02-16T12:13:19").cast(ndt::type("datetime['sec']")).as<string>());
     EXPECT_EQ("2013-02-16T12:13:19Z",
-                    nd::array("2013-02-16T12:13:19Z").cast(ndt::type("datetime('sec','UTC')")).as<string>());
+                    nd::array("2013-02-16T12:13:19Z").cast(ndt::type("datetime['sec','UTC']")).as<string>());
 
     EXPECT_EQ("2013-02-16T12:13:19.012",
-                    nd::array("2013-02-16T12:13:19.012").cast(ndt::type("datetime('msec')")).as<string>());
+                    nd::array("2013-02-16T12:13:19.012").cast(ndt::type("datetime['msec']")).as<string>());
     EXPECT_EQ("2013-02-16T12:13:19.012Z",
-                    nd::array("2013-02-16T12:13:19.012Z").cast(ndt::type("datetime('msec','UTC')")).as<string>());
+                    nd::array("2013-02-16T12:13:19.012Z").cast(ndt::type("datetime['msec','UTC']")).as<string>());
 
     EXPECT_EQ("2013-02-16T12:13:19.012345",
-                    nd::array("2013-02-16T12:13:19.012345").cast(ndt::type("datetime('usec')")).as<string>());
+                    nd::array("2013-02-16T12:13:19.012345").cast(ndt::type("datetime['usec']")).as<string>());
     EXPECT_EQ("2013-02-16T12:13:19.012345Z",
-                    nd::array("2013-02-16T12:13:19.012345Z").cast(ndt::type("datetime('usec','UTC')")).as<string>());
+                    nd::array("2013-02-16T12:13:19.012345Z").cast(ndt::type("datetime['usec','UTC']")).as<string>());
 
     EXPECT_EQ("2013-02-16T12:13:19.012345678",
-                    nd::array("2013-02-16T12:13:19.012345678").cast(ndt::type("datetime('nsec')")).as<string>());
+                    nd::array("2013-02-16T12:13:19.012345678").cast(ndt::type("datetime['nsec']")).as<string>());
     EXPECT_EQ("2013-02-16T12:13:19.012345678Z",
-                    nd::array("2013-02-16T12:13:19.012345678Z").cast(ndt::type("datetime('nsec','UTC')")).as<string>());
+                    nd::array("2013-02-16T12:13:19.012345678Z").cast(ndt::type("datetime['nsec','UTC']")).as<string>());
 }
 
 TEST(DateTimeDType, Properties) {
     nd::array n;
 
-    n = nd::array("1963-02-28T16:12:14.123654").cast(ndt::type("datetime('usec')")).eval();
+    n = nd::array("1963-02-28T16:12:14.123654").cast(ndt::type("datetime['usec']")).eval();
     EXPECT_EQ(1963, n.p("year").as<int32_t>());
     EXPECT_EQ(2, n.p("month").as<int32_t>());
     EXPECT_EQ(28, n.p("day").as<int32_t>());

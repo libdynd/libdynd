@@ -108,7 +108,7 @@ TEST(FixedDimDType, Basic) {
 }
 
 TEST(FixedDimDType, SimpleIndex) {
-    nd::array a = parse_json("2, 3, int16", "[[1, 2, 3], [4, 5, 6]]");
+    nd::array a = parse_json("2 * 3 * int16", "[[1, 2, 3], [4, 5, 6]]");
     ASSERT_EQ(ndt::make_fixed_dim(2,
                     ndt::make_fixed_dim(3, ndt::make_type<int16_t>())),
                 a.get_type());
@@ -158,7 +158,7 @@ TEST(FixedDimDType, AssignKernel_FixedToFixed) {
     // Assignment fixed array -> fixed array
     a = nd::empty(ndt::make_fixed_dim(3, ndt::make_type<int>()));
     a.vals() = 0;
-    b = parse_json("3, int32", "[3, 5, 7]");
+    b = parse_json("3 * int32", "[3, 5, 7]");
     EXPECT_EQ(fixed_dim_type_id, a.get_type().get_type_id());
     EXPECT_EQ(fixed_dim_type_id, b.get_type().get_type_id());
     make_assignment_kernel(&k, 0, a.get_type(), a.get_ndo_meta(),
@@ -176,7 +176,7 @@ TEST(FixedDimDType, AssignKernel_FixedToScalarError) {
 
     // Assignment fixed array -> scalar
     a = 9.0;
-    b = parse_json("3, int32", "[3, 5, 7]");
+    b = parse_json("3 * int32", "[3, 5, 7]");
     EXPECT_EQ(fixed_dim_type_id, b.get_type().get_type_id());
     EXPECT_THROW(make_assignment_kernel(&k, 0, a.get_type(), a.get_ndo_meta(),
                     b.get_type(), b.get_ndo_meta(),
@@ -223,7 +223,7 @@ TEST(FixedDimDType, AssignFixedStridedKernel) {
     // Assignment fixed array -> strided array
     a = nd::make_strided_array(3, ndt::make_type<float>());
     a.vals() = 0;
-    b = parse_json("3, int32", "[3, 5, 7]");
+    b = parse_json("3 * int32", "[3, 5, 7]");
     EXPECT_EQ(strided_dim_type_id, a.get_type().get_type_id());
     EXPECT_EQ(fixed_dim_type_id, b.get_type().get_type_id());
     make_assignment_kernel(&k, 0, a.get_type(), a.get_ndo_meta(),
@@ -238,7 +238,7 @@ TEST(FixedDimDType, AssignFixedStridedKernel) {
     // Broadcasting assignment fixed array -> strided array
     a = nd::make_strided_array(3, ndt::make_type<float>());
     a.vals() = 0;
-    b = parse_json("1, int32", "[9]");
+    b = parse_json("1 * int32", "[9]");
     EXPECT_EQ(strided_dim_type_id, a.get_type().get_type_id());
     EXPECT_EQ(fixed_dim_type_id, b.get_type().get_type_id());
     make_assignment_kernel(&k, 0, a.get_type(), a.get_ndo_meta(),
@@ -252,15 +252,15 @@ TEST(FixedDimDType, AssignFixedStridedKernel) {
 }
 
 TEST(FixedDimDType, IsTypeSubarray) {
-    EXPECT_TRUE(ndt::type("3, int32").is_type_subarray(ndt::type("3, int32")));
-    EXPECT_TRUE(ndt::type("10, int32").is_type_subarray(ndt::type("10, int32")));
-    EXPECT_TRUE(ndt::type("3, 10, int32").is_type_subarray(ndt::type("10, int32")));
-    EXPECT_TRUE(ndt::type("3, 10, int32").is_type_subarray(ndt::type("int32")));
-    EXPECT_TRUE(ndt::type("5, int32").is_type_subarray(ndt::make_type<int32_t>()));
-    EXPECT_FALSE(ndt::make_type<int32_t>().is_type_subarray(ndt::type("5, int32")));
-    EXPECT_FALSE(ndt::type("10, int32").is_type_subarray(ndt::type("3, 10, int32")));
-    EXPECT_FALSE(ndt::type("3, int32").is_type_subarray(ndt::type("strided, int32")));
-    EXPECT_FALSE(ndt::type("3, int32").is_type_subarray(ndt::type("var, int32")));
-    EXPECT_FALSE(ndt::type("strided, int32").is_type_subarray(ndt::type("3, int32")));
-    EXPECT_FALSE(ndt::type("var, int32").is_type_subarray(ndt::type("3, int32")));
+    EXPECT_TRUE(ndt::type("3 * int32").is_type_subarray(ndt::type("3 * int32")));
+    EXPECT_TRUE(ndt::type("10 * int32").is_type_subarray(ndt::type("10 * int32")));
+    EXPECT_TRUE(ndt::type("3 * 10 * int32").is_type_subarray(ndt::type("10 * int32")));
+    EXPECT_TRUE(ndt::type("3 * 10 * int32").is_type_subarray(ndt::type("int32")));
+    EXPECT_TRUE(ndt::type("5 * int32").is_type_subarray(ndt::make_type<int32_t>()));
+    EXPECT_FALSE(ndt::make_type<int32_t>().is_type_subarray(ndt::type("5 * int32")));
+    EXPECT_FALSE(ndt::type("10 * int32").is_type_subarray(ndt::type("3 * 10 * int32")));
+    EXPECT_FALSE(ndt::type("3 * int32").is_type_subarray(ndt::type("strided * int32")));
+    EXPECT_FALSE(ndt::type("3 * int32").is_type_subarray(ndt::type("var * int32")));
+    EXPECT_FALSE(ndt::type("strided * int32").is_type_subarray(ndt::type("3 * int32")));
+    EXPECT_FALSE(ndt::type("var * int32").is_type_subarray(ndt::type("3 * int32")));
 }

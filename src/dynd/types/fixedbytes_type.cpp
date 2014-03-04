@@ -56,7 +56,7 @@ void fixedbytes_type::print_data(std::ostream& o, const char *DYND_UNUSED(metada
 
 void fixedbytes_type::print_type(std::ostream& o) const
 {
-    o << "fixedbytes<" << get_data_size() << "," << get_data_alignment() << ">";
+    o << "fixedbytes[" << get_data_size() << "," << get_data_alignment() << "]";
 }
 
 bool fixedbytes_type::is_lossless_assignment(const ndt::type& dst_tp, const ndt::type& src_tp) const

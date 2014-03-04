@@ -61,7 +61,7 @@ the 'src/*' directory corresponding to 'include/*'.
 ### Main Source
 
 In the 'include/dynd' directory, the files implementing the main DyND
-objects are 'dtype.hpp' and 'ndobject.hpp'. The file 'config.hpp'
+objects are 'dtype.hpp' and 'array.hpp'. The file 'config.hpp'
 has some per-compiler logic to enable/disable various C++11 features,
 define some common macros, and declare the version number strings.
 
@@ -113,17 +113,17 @@ current state is the 'nd.elwise_map' function in the Python exposure.
 
 ### Memory Blocks Source
 
-Dynamic ndobject data in DyND is stored in memory blocks, which are
+Dynamic nd::array data in DyND is stored in memory blocks, which are
 in the 'include/memblock' directory. The base class is defined in
 'include/memblock/memory_block.hpp', and the different memory blocks
 serve the needs of various dtypes.
 
-The ndobject_memory_block is what ndobjects are. The file
-'include/ndobject.hpp' defines an object which contains an
-ndobject_memory_block and defines operations on it. One optimization
-supported by the ndobject memory block is that data for the
-ndobject can be embedded in the same memory as the ndobject.
-In this case, the ndobject's data reference is NULL, to avoid
+The array_memory_block is what nd::arrays are. The file
+'include/array.hpp' defines an object which contains an
+array_memory_block and defines operations on it. One optimization
+supported by the nd::array memory block is that data for the
+nd::array can be embedded in the same memory as the nd::array.
+In this case, the nd::array's data reference is NULL, to avoid
 a circular reference.
 
 The fixed_size_pod_memory_block is very simple, for dtypes that are
@@ -131,7 +131,7 @@ of a fixed size and alignment.
 
 The pod_memory_block provides a simple memory allocator that doles
 out chunks of memory sequentially for variable-sized dtypes. Due to
-the way ndobject uses views, similar to NumPy, once some memory has
+the way nd::array uses views, similar to NumPy, once some memory has
 been allocated within the pod memory block, it cannot be deallocated
 until the whole memory block is freed. A small exception is for temporary
 buffers, and a 'reset' operation is provided to support that use case.
@@ -142,9 +142,9 @@ the memory it allocates to zero before returning it.
 The external_memory_block is for holding on to data owned by a system
 external to DyND. For example, DyND can directly map onto the string
 data of Python's immutable strings, by using this type of memory block
-and flagging the ndobject as immutable.
+and flagging the nd::array as immutable.
 
 ### GFunc Source
 
 GFuncs in DyND provide a mechanism for dynamic function calls, using
-DyND ndobjects as the parameter passing mechanism.
+DyND nd::arrays as the parameter passing mechanism.

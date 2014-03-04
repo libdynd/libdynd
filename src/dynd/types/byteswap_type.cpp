@@ -51,11 +51,11 @@ void byteswap_type::print_data(std::ostream& DYND_UNUSED(o), const char *DYND_UN
 
 void byteswap_type::print_type(std::ostream& o) const
 {
-    o << "byteswap<" << m_value_type;
+    o << "byteswap[" << m_value_type;
     if (m_operand_type.get_type_id() != fixedbytes_type_id) {
         o << ", " << m_operand_type;
     }
-    o << ">";
+    o << "]";
 }
 
 bool byteswap_type::is_lossless_assignment(const ndt::type& dst_tp, const ndt::type& src_tp) const

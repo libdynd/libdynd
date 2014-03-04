@@ -114,7 +114,7 @@ enum type_id_t {
     // A struct type with fixed layout
     cstruct_type_id,
     tuple_type_id,
-    ndobject_type_id,
+    ndarray_type_id,
 
     // Adapter types
     convert_type_id,

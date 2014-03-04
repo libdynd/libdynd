@@ -248,7 +248,7 @@ void datetime_type::print_data(std::ostream& o,
 
 void datetime_type::print_type(std::ostream& o) const
 {
-    o << "datetime<unit=" << m_unit << ",tz=";
+    o << "datetime[unit=" << m_unit << ",tz=";
     switch (m_timezone) {
         case tz_abstract:
             o << "abstract";
@@ -260,7 +260,7 @@ void datetime_type::print_type(std::ostream& o) const
             o << "(invalid " << (int32_t)m_timezone << ")";
             break;
     }
-    o << ">";
+    o << "]";
 }
 
 bool datetime_type::is_lossless_assignment(const ndt::type& dst_tp, const ndt::type& src_tp) const
