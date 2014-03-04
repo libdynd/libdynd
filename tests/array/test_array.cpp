@@ -9,7 +9,7 @@
 #include <cmath>
 
 #include "inc_gtest.hpp"
-#include "../test_memory.cpp"
+#include "../test_memory.hpp"
 
 #include <dynd/array.hpp>
 #include <dynd/types/strided_dim_type.hpp>

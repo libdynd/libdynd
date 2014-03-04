@@ -8,7 +8,7 @@
 #include <cmath>
 
 #include "inc_gtest.hpp"
-#include "../test_memory.cpp"
+#include "../test_memory.hpp"
 
 #include <dynd/array.hpp>
 #include <dynd/types/convert_type.hpp>
