@@ -159,7 +159,9 @@ enum type_flags_t {
     type_flag_blockref = 0x00000004,
     // Memory of this type must be destroyed,
     // e.g. it might hold a reference count or similar state
-    type_flag_destructor = 0x00000008
+    type_flag_destructor = 0x00000008,
+    // Memory of this type is not directly accessible from the host
+    type_flag_host_inaccessible = 0x00000010,
 };
 
 enum axis_order_classification_t {
@@ -183,7 +185,8 @@ enum {
     type_flags_operand_inherited =
                     type_flag_zeroinit|
                     type_flag_blockref|
-                    type_flag_destructor,
+                    type_flag_destructor|
+                    type_flag_host_inaccessible,
     // These are the flags expression types should inherit
     // from their value type
     type_flags_value_inherited =

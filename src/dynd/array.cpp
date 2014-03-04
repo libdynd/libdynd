@@ -914,7 +914,6 @@ nd::array nd::array::eval_copy(uint32_t access_flags, const eval::eval_context *
     return result;
 }
 
-#ifdef DYND_CUDA
 nd::array nd::array::to_host() const
 {
     ndt::type dt = get_type().get_dtype();
@@ -928,6 +927,7 @@ nd::array nd::array::to_host() const
     return result;
 }
 
+#ifdef DYND_CUDA
 nd::array nd::array::to_cuda_host(unsigned int cuda_host_flags) const
 {
     ndt::type dt = get_type().get_dtype();
@@ -1405,6 +1405,9 @@ std::ostream& nd::operator<<(std::ostream& o, const array& rhs)
     if (!rhs.is_empty()) {
         o << "array(";
         array v = rhs.eval();
+        if (v.get_ndo()->m_type->get_flags() & type_flag_host_inaccessible) {
+            v = v.to_host();
+        }
         if (v.get_ndo()->is_builtin_type()) {
             print_builtin_scalar(v.get_ndo()->get_builtin_type_id(), o, v.get_ndo()->m_data_pointer);
         } else {

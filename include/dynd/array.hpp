@@ -591,10 +591,10 @@ public:
     template<class T>
     T as(assign_error_mode errmode = assign_error_default) const;
 
-#ifdef DYND_CUDA
     /** Returns a copy of this array in default memory. */
     array to_host() const;
 
+#ifdef DYND_CUDA
     /** Returns a copy of this array in CUDA host memory. */
     array to_cuda_host(unsigned int cuda_host_flags = cudaHostAllocDefault) const;
 
