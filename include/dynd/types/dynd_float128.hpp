@@ -57,77 +57,77 @@ public:
 
     DYND_CUDA_HOST_DEVICE operator signed char() const {
 #ifdef DYND_CUDA_DEVICE_ARCH
-        DYND_ASSERT_WHAT_RETURN_ZERO("float128 conversions are not completed");
+        DYND_TRIGGER_ASSERT_RETURN_ZERO("float128 conversions are not completed");
 #else
         throw std::runtime_error("float128 conversions are not completed");
 #endif
     }
     DYND_CUDA_HOST_DEVICE operator unsigned char() const {
 #ifdef DYND_CUDA_DEVICE_ARCH
-        DYND_ASSERT_WHAT_RETURN_ZERO("float128 conversions are not completed");
+        DYND_TRIGGER_ASSERT_RETURN_ZERO("float128 conversions are not completed");
 #else
         throw std::runtime_error("float128 conversions are not completed");
 #endif
     }
     DYND_CUDA_HOST_DEVICE operator short() const {
 #ifdef DYND_CUDA_DEVICE_ARCH
-        DYND_ASSERT_WHAT_RETURN_ZERO("float128 conversions are not completed");
+        DYND_TRIGGER_ASSERT_RETURN_ZERO("float128 conversions are not completed");
 #else
         throw std::runtime_error("float128 conversions are not completed");
 #endif
     }
     DYND_CUDA_HOST_DEVICE operator unsigned short() const {
 #ifdef DYND_CUDA_DEVICE_ARCH
-        DYND_ASSERT_WHAT_RETURN_ZERO("float128 conversions are not completed");
+        DYND_TRIGGER_ASSERT_RETURN_ZERO("float128 conversions are not completed");
 #else
         throw std::runtime_error("float128 conversions are not completed");
 #endif
     }
     DYND_CUDA_HOST_DEVICE operator int() const {
 #ifdef DYND_CUDA_DEVICE_ARCH
-        DYND_ASSERT_WHAT_RETURN_ZERO("float128 conversions are not completed");
+        DYND_TRIGGER_ASSERT_RETURN_ZERO("float128 conversions are not completed");
 #else
         throw std::runtime_error("float128 conversions are not completed");
 #endif
     }
     DYND_CUDA_HOST_DEVICE operator unsigned int() const {
 #ifdef DYND_CUDA_DEVICE_ARCH
-        DYND_ASSERT_WHAT_RETURN_ZERO("float128 conversions are not completed");
+        DYND_TRIGGER_ASSERT_RETURN_ZERO("float128 conversions are not completed");
 #else
         throw std::runtime_error("float128 conversions are not completed");
 #endif
     }
     DYND_CUDA_HOST_DEVICE operator long() const {
 #ifdef DYND_CUDA_DEVICE_ARCH
-        DYND_ASSERT_WHAT_RETURN_ZERO("float128 conversions are not completed");
+        DYND_TRIGGER_ASSERT_RETURN_ZERO("float128 conversions are not completed");
 #else
         throw std::runtime_error("float128 conversions are not completed");
 #endif
     }
     DYND_CUDA_HOST_DEVICE operator unsigned long() const {
 #ifdef DYND_CUDA_DEVICE_ARCH
-        DYND_ASSERT_WHAT_RETURN_ZERO("float128 conversions are not completed");
+        DYND_TRIGGER_ASSERT_RETURN_ZERO("float128 conversions are not completed");
 #else
         throw std::runtime_error("float128 conversions are not completed");
 #endif
     }
     DYND_CUDA_HOST_DEVICE operator long long() const {
 #ifdef DYND_CUDA_DEVICE_ARCH
-        DYND_ASSERT_WHAT_RETURN_ZERO("float128 conversions are not completed");
+        DYND_TRIGGER_ASSERT_RETURN_ZERO("float128 conversions are not completed");
 #else
         throw std::runtime_error("float128 conversions are not completed");
 #endif
     }
     DYND_CUDA_HOST_DEVICE operator unsigned long long() const {
 #ifdef DYND_CUDA_DEVICE_ARCH
-        DYND_ASSERT_WHAT_RETURN_ZERO("float128 conversions are not completed");
+        DYND_TRIGGER_ASSERT_RETURN_ZERO("float128 conversions are not completed");
 #else
         throw std::runtime_error("float128 conversions are not completed");
 #endif
     }
     DYND_CUDA_HOST_DEVICE operator double() const {
 #ifdef DYND_CUDA_DEVICE_ARCH
-        DYND_ASSERT_WHAT_RETURN_ZERO("float128 conversions are not completed");
+        DYND_TRIGGER_ASSERT_RETURN_ZERO("float128 conversions are not completed");
 #else
         throw std::runtime_error("float128 conversions are not completed");
 #endif

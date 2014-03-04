@@ -59,7 +59,8 @@ namespace dynd {
 
         cuda_global_config() {}
 
-        cuda_global_config(unsigned int grid, unsigned int block) : grid(grid), block(block), threads(grid * block) {}
+        cuda_global_config(unsigned int grid, unsigned int block)
+            : grid(grid), block(block), threads(grid * block) {}
     };
 
     template <int grid_ndim, int block_ndim>
