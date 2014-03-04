@@ -19,7 +19,7 @@ namespace dynd {
 class cuda_host_type : public base_memory_type {
     unsigned int m_cuda_host_flags;
 public:
-    cuda_host_type(const ndt::type& target_tp, unsigned int cuda_host_flags = cudaHostAllocDefault);
+    cuda_host_type(const ndt::type& storage_tp, unsigned int cuda_host_flags = cudaHostAllocDefault);
 
     virtual ~cuda_host_type();
 
@@ -31,7 +31,7 @@ public:
 
     bool operator==(const base_type& rhs) const;
 
-    ndt::type with_replaced_target_type(const ndt::type& target_tp) const;
+    ndt::type with_replaced_storage_type(const ndt::type& storage_tp) const;
 
     void data_alloc(char **data, size_t size) const;
     void data_zeroinit(char *data, size_t size) const;
@@ -46,8 +46,8 @@ public:
 };
 
 namespace ndt {
-    inline ndt::type make_cuda_host(const ndt::type& target_tp, unsigned int cuda_host_flags = cudaHostAllocDefault) {
-        return ndt::type(new cuda_host_type(target_tp, cuda_host_flags), false);
+    inline ndt::type make_cuda_host(const ndt::type& storage_tp, unsigned int cuda_host_flags = cudaHostAllocDefault) {
+        return ndt::type(new cuda_host_type(storage_tp, cuda_host_flags), false);
     }
 } // namespace ndt
 

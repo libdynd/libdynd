@@ -22,12 +22,12 @@ TEST(CUDAHostType, Basic) {
     ndt::type d = ndt::make_cuda_host(ndt::make_type<int32_t>());
     EXPECT_EQ(cuda_host_type_id, d.get_type_id());
     EXPECT_EQ(memory_kind, d.get_kind());
-    EXPECT_EQ(ndt::make_type<int32_t>(), d.p("target_type").as<ndt::type>());
+    EXPECT_EQ(ndt::make_type<int32_t>(), d.p("storage_type").as<ndt::type>());
     EXPECT_FALSE(d.is_expression());
     EXPECT_EQ((unsigned int)cudaHostAllocDefault, static_cast<const cuda_host_type *>(d.extended())->get_cuda_host_flags());
 	EXPECT_EQ(d, ndt::type("cuda_host[int32]"));
 
-    // A memory type cannot have an array dimension type as a target
+    // A memory type cannot have an array dimension type as storage
     EXPECT_THROW(ndt::make_cuda_host(ndt::make_strided_dim(ndt::make_type<int32_t>())), runtime_error);
 
     d = ndt::make_cuda_host(ndt::make_type<float>(), cudaHostAllocMapped);

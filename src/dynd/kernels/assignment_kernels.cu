@@ -65,9 +65,9 @@ static void unaligned_copy_strided_cuda_device_to_device(char *dst, intptr_t dst
     }
 }
 
-static const ndt::type& get_target_type(const ndt::type& tp) {
+static const ndt::type& get_storage_type(const ndt::type& tp) {
     if (tp.get_kind() == memory_kind) {
-        return static_cast<const base_memory_type *>(tp.extended())->get_target_type();
+        return static_cast<const base_memory_type *>(tp.extended())->get_storage_type();
     } else {
         return tp;
     }
@@ -88,13 +88,13 @@ size_t dynd::make_cuda_assignment_kernel(
         }
     }
 
-    if (get_target_type(dst_tp).is_builtin()) {
-        if (get_target_type(src_tp).is_builtin()) {
+    if (get_storage_type(dst_tp).is_builtin()) {
+        if (get_storage_type(src_tp).is_builtin()) {
             if (errmode != assign_error_none && is_lossless_assignment(dst_tp, src_tp)) {
                 errmode = assign_error_none;
             }
 
-            if (get_target_type(dst_tp).extended() == get_target_type(src_tp).extended()) {
+            if (get_storage_type(dst_tp).extended() == get_storage_type(src_tp).extended()) {
                 return make_cuda_pod_typed_data_assignment_kernel(out, offset_out,
                                 dst_tp.get_type_id() == cuda_device_type_id,
                                 src_tp.get_type_id() == cuda_device_type_id,
@@ -103,9 +103,9 @@ size_t dynd::make_cuda_assignment_kernel(
             } else {
                 return make_cuda_builtin_type_assignment_kernel(out, offset_out,
                                 dst_tp.get_type_id() == cuda_device_type_id,
-                                get_target_type(dst_tp).get_type_id(),
+                                get_storage_type(dst_tp).get_type_id(),
                                 src_tp.get_type_id() == cuda_device_type_id,
-                                get_target_type(src_tp).get_type_id(),
+                                get_storage_type(src_tp).get_type_id(),
                                 kernreq, errmode);
             }
         } else {

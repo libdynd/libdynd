@@ -23,11 +23,11 @@ TEST(CUDADeviceType, Basic) {
     ndt::type d = ndt::make_cuda_device(ndt::make_type<int32_t>());
     EXPECT_EQ(cuda_device_type_id, d.get_type_id());
     EXPECT_EQ(memory_kind, d.get_kind());
-    EXPECT_EQ(ndt::make_type<int32_t>(), d.p("target_type").as<ndt::type>());
+    EXPECT_EQ(ndt::make_type<int32_t>(), d.p("storage_type").as<ndt::type>());
     EXPECT_FALSE(d.is_expression());
 	EXPECT_EQ(d, ndt::type("cuda_device[int32]"));
 
-    // A memory type cannot have an array dimension type as a target
+    // A memory type cannot have an array dimension type as storage
     EXPECT_THROW(ndt::make_cuda_device(ndt::make_strided_dim(ndt::make_type<int32_t>())), runtime_error);
 
     // Only built-in types can be allocated in CUDA global memory

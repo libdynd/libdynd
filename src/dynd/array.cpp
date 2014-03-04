@@ -918,7 +918,7 @@ nd::array nd::array::to_host() const
 {
     ndt::type dt = get_type().get_dtype();
     if (dt.get_kind() == memory_kind) {
-        dt = static_cast<const base_memory_type *>(dt.extended())->get_target_type();
+        dt = static_cast<const base_memory_type *>(dt.extended())->get_storage_type();
     }
 
     array result = empty_like(*this, dt);
@@ -932,7 +932,7 @@ nd::array nd::array::to_cuda_host(unsigned int cuda_host_flags) const
 {
     ndt::type dt = get_type().get_dtype();
     if (dt.get_kind() == memory_kind) {
-        dt = static_cast<const base_memory_type *>(dt.extended())->get_target_type();
+        dt = static_cast<const base_memory_type *>(dt.extended())->get_storage_type();
     }
 
     array result = empty_like(*this, make_cuda_host(dt, cuda_host_flags));
@@ -946,7 +946,7 @@ nd::array nd::array::to_cuda_device() const
 {
     ndt::type dt = get_type().get_dtype();
     if (dt.get_kind() == memory_kind) {
-        dt = static_cast<const base_memory_type *>(dt.extended())->get_target_type();
+        dt = static_cast<const base_memory_type *>(dt.extended())->get_storage_type();
     }
 
     array result = empty_like(*this, make_cuda_device(dt));

@@ -11,9 +11,9 @@
 using namespace std;
 using namespace dynd;
 
-cuda_host_type::cuda_host_type(const ndt::type& target_tp, unsigned int cuda_host_flags)
-    : base_memory_type(cuda_host_type_id, target_tp, target_tp.get_data_size(),
-        get_cuda_device_data_alignment(target_tp), 0, target_tp.get_flags()),
+cuda_host_type::cuda_host_type(const ndt::type& storage_tp, unsigned int cuda_host_flags)
+    : base_memory_type(cuda_host_type_id, storage_tp, storage_tp.get_data_size(),
+        get_cuda_device_data_alignment(storage_tp), 0, storage_tp.get_flags()),
         m_cuda_host_flags(cuda_host_flags)
 {
 }
@@ -24,7 +24,7 @@ cuda_host_type::~cuda_host_type()
 
 void cuda_host_type::print_type(std::ostream& o) const
 {
-    o << "cuda_host(" << m_target_tp << ")";
+    o << "cuda_host(" << m_storage_tp << ")";
 }
 
 bool cuda_host_type::operator==(const base_type& rhs) const
@@ -35,13 +35,13 @@ bool cuda_host_type::operator==(const base_type& rhs) const
         return false;
     } else {
         const cuda_host_type *dt = static_cast<const cuda_host_type*>(&rhs);
-        return m_target_tp == dt->m_target_tp && m_cuda_host_flags == dt->get_cuda_host_flags();
+        return m_storage_tp == dt->m_storage_tp && m_cuda_host_flags == dt->get_cuda_host_flags();
     }
 }
 
-ndt::type cuda_host_type::with_replaced_target_type(const ndt::type& target_tp) const
+ndt::type cuda_host_type::with_replaced_storage_type(const ndt::type& storage_tp) const
 {
-    return make_cuda_host(target_tp, m_cuda_host_flags);
+    return make_cuda_host(storage_tp, m_cuda_host_flags);
 }
 
 void cuda_host_type::data_alloc(char **data, size_t size) const

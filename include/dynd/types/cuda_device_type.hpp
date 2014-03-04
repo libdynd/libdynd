@@ -15,13 +15,15 @@ namespace dynd {
 
 class cuda_device_type : public base_memory_type {
 public:
-    cuda_device_type(const ndt::type& target_tp);
+    cuda_device_type(const ndt::type& storage_tp);
 
     virtual ~cuda_device_type();
 
     void print_type(std::ostream& o) const;
 
-    ndt::type with_replaced_target_type(const ndt::type& target_tp) const;
+    bool operator==(const base_type& rhs) const;
+
+    ndt::type with_replaced_storage_type(const ndt::type& storage_tp) const;
 
     void data_alloc(char **data, size_t size) const;
     void data_zeroinit(char *data, size_t size) const;
@@ -45,8 +47,8 @@ inline size_t get_cuda_device_data_alignment(const ndt::type& dtp) {
 }
 
 namespace ndt {
-    inline ndt::type make_cuda_device(const ndt::type& target_tp) {
-        return ndt::type(new cuda_device_type(target_tp), false);
+    inline ndt::type make_cuda_device(const ndt::type& storage_tp) {
+        return ndt::type(new cuda_device_type(storage_tp), false);
     }
 } // namespace ndt
 

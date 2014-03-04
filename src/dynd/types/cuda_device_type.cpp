@@ -11,11 +11,11 @@
 using namespace std;
 using namespace dynd;
 
-cuda_device_type::cuda_device_type(const ndt::type& target_tp)
-    : base_memory_type(cuda_device_type_id, target_tp, target_tp.get_data_size(),
-        get_cuda_device_data_alignment(target_tp), 0, target_tp.get_flags() | type_flag_not_host_readable)
+cuda_device_type::cuda_device_type(const ndt::type& storage_tp)
+    : base_memory_type(cuda_device_type_id, storage_tp, storage_tp.get_data_size(),
+        get_cuda_device_data_alignment(storage_tp), 0, storage_tp.get_flags() | type_flag_not_host_readable)
 {
-    if (!target_tp.is_builtin()) {
+    if (!storage_tp.is_builtin()) {
         throw std::runtime_error("only built-in types may be allocated in CUDA global memory");
     }
 }
@@ -26,12 +26,24 @@ cuda_device_type::~cuda_device_type()
 
 void cuda_device_type::print_type(std::ostream& o) const
 {
-    o << "cuda_device(" << m_target_tp << ")";
+    o << "cuda_device(" << m_storage_tp << ")";
 }
 
-ndt::type cuda_device_type::with_replaced_target_type(const ndt::type& target_tp) const
+bool cuda_device_type::operator==(const base_type& rhs) const
 {
-    return make_cuda_device(target_tp);
+    if (this == &rhs) {
+        return true;
+    } else if (rhs.get_type_id() != cuda_device_type_id) {
+        return false;
+    } else {
+        const cuda_device_type *dt = static_cast<const cuda_device_type*>(&rhs);
+        return m_storage_tp == dt->m_storage_tp;
+    }
+}
+
+ndt::type cuda_device_type::with_replaced_storage_type(const ndt::type& storage_tp) const
+{
+    return make_cuda_device(storage_tp);
 }
 
 void cuda_device_type::data_alloc(char **data, size_t size) const
