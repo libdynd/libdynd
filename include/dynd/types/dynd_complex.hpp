@@ -22,52 +22,52 @@ public:
     typedef float value_type;
     float m_real, m_imag;
 
-    DYND_CUDA_HOST_DEVICE_CALLABLE inline dynd_complex(float re = 0.0f, float im = 0.0f)
+    DYND_CUDA_HOST_DEVICE inline dynd_complex(float re = 0.0f, float im = 0.0f)
         : m_real(re), m_imag(im) {}
 
     template <typename T>
-    DYND_CUDA_HOST_DEVICE_CALLABLE inline dynd_complex(const dynd_complex<T>& rhs)
+    DYND_CUDA_HOST_DEVICE inline dynd_complex(const dynd_complex<T>& rhs)
         : m_real(static_cast<float>(rhs.m_real)), m_imag(static_cast<float>(rhs.m_imag)) {}
 
-    DYND_CUDA_HOST_DEVICE_CALLABLE inline float real() const {
+    DYND_CUDA_HOST_DEVICE inline float real() const {
         return m_real;
     }
-    DYND_CUDA_HOST_DEVICE_CALLABLE inline float imag() const {
+    DYND_CUDA_HOST_DEVICE inline float imag() const {
         return m_imag;
     }
 
-    DYND_CUDA_HOST_DEVICE_CALLABLE inline bool operator==(const dynd_complex<float>& rhs) const {
+    DYND_CUDA_HOST_DEVICE inline bool operator==(const dynd_complex<float>& rhs) const {
         return (real() == rhs.real()) && (imag() == rhs.imag());
     }
 
-    DYND_CUDA_HOST_DEVICE_CALLABLE inline bool operator!=(const dynd_complex<float>& rhs) const {
+    DYND_CUDA_HOST_DEVICE inline bool operator!=(const dynd_complex<float>& rhs) const {
         return !operator==(rhs);
     }
 
-    DYND_CUDA_HOST_DEVICE_CALLABLE inline dynd_complex<float> operator+(const dynd_complex<float>& rhs) const {
+    DYND_CUDA_HOST_DEVICE inline dynd_complex<float> operator+(const dynd_complex<float>& rhs) const {
         return dynd_complex<float>(m_real + rhs.m_real, m_imag + rhs.m_imag);
     }
 
-    DYND_CUDA_HOST_DEVICE_CALLABLE inline dynd_complex<float> operator-(const dynd_complex<float>& rhs) const {
+    DYND_CUDA_HOST_DEVICE inline dynd_complex<float> operator-(const dynd_complex<float>& rhs) const {
         return dynd_complex<float>(m_real - rhs.m_real, m_imag - rhs.m_imag);
     }
 
-    DYND_CUDA_HOST_DEVICE_CALLABLE inline dynd_complex<float> operator*(const dynd_complex<float>& rhs) const {
+    DYND_CUDA_HOST_DEVICE inline dynd_complex<float> operator*(const dynd_complex<float>& rhs) const {
         return dynd_complex<float>(m_real * rhs.m_real - m_imag * rhs.m_imag,
                                     m_real * rhs.m_imag + rhs.m_real * m_imag);
     }
 
-    DYND_CUDA_HOST_DEVICE_CALLABLE inline dynd_complex<float> operator*(float rhs) const {
+    DYND_CUDA_HOST_DEVICE inline dynd_complex<float> operator*(float rhs) const {
         return dynd_complex<float>(m_real * rhs, m_imag * rhs);
     }
 
-    DYND_CUDA_HOST_DEVICE_CALLABLE inline dynd_complex<float> operator/(const dynd_complex<float>& rhs) const {
+    DYND_CUDA_HOST_DEVICE inline dynd_complex<float> operator/(const dynd_complex<float>& rhs) const {
         float denom = rhs.m_real * rhs.m_real + rhs.m_imag + rhs.m_imag;
         return dynd_complex<float>((m_real * rhs.m_real + m_imag * rhs.m_imag) / denom,
                                     (rhs.m_real * m_imag - m_real * rhs.m_imag) / denom);
     }
 
-    DYND_CUDA_HOST_DEVICE_CALLABLE inline dynd_complex<float> operator/(float rhs) const {
+    DYND_CUDA_HOST_DEVICE inline dynd_complex<float> operator/(float rhs) const {
         return dynd_complex<float>(m_real / rhs, m_imag / rhs);
     }
 };
@@ -90,52 +90,52 @@ public:
     typedef double value_type;
     double m_real, m_imag;
 
-    DYND_CUDA_HOST_DEVICE_CALLABLE inline dynd_complex(double re = 0.0, double im = 0.0)
+    DYND_CUDA_HOST_DEVICE inline dynd_complex(double re = 0.0, double im = 0.0)
         : m_real(re), m_imag(im) {}
 
     template <typename T>
-    DYND_CUDA_HOST_DEVICE_CALLABLE inline dynd_complex(const dynd_complex<T>& rhs)
+    DYND_CUDA_HOST_DEVICE inline dynd_complex(const dynd_complex<T>& rhs)
         : m_real(rhs.m_real), m_imag(rhs.m_imag) {}
 
-    DYND_CUDA_HOST_DEVICE_CALLABLE inline double real() const {
+    DYND_CUDA_HOST_DEVICE inline double real() const {
         return m_real;
     }
-    DYND_CUDA_HOST_DEVICE_CALLABLE inline double imag() const {
+    DYND_CUDA_HOST_DEVICE inline double imag() const {
         return m_imag;
     }
 
-    DYND_CUDA_HOST_DEVICE_CALLABLE inline bool operator==(const dynd_complex<double>& rhs) const {
+    DYND_CUDA_HOST_DEVICE inline bool operator==(const dynd_complex<double>& rhs) const {
         return (real() == rhs.real()) && (imag() == rhs.imag());
     }
 
-    DYND_CUDA_HOST_DEVICE_CALLABLE inline bool operator!=(const dynd_complex<double>& rhs) const {
+    DYND_CUDA_HOST_DEVICE inline bool operator!=(const dynd_complex<double>& rhs) const {
         return !operator==(rhs);
     }
 
-    DYND_CUDA_HOST_DEVICE_CALLABLE inline dynd_complex<double> operator+(const dynd_complex<double>& rhs) const {
+    DYND_CUDA_HOST_DEVICE inline dynd_complex<double> operator+(const dynd_complex<double>& rhs) const {
         return dynd_complex<double>(m_real + rhs.m_real, m_imag + rhs.m_imag);
     }
 
-    DYND_CUDA_HOST_DEVICE_CALLABLE inline dynd_complex<double> operator-(const dynd_complex<double>& rhs) const {
+    DYND_CUDA_HOST_DEVICE inline dynd_complex<double> operator-(const dynd_complex<double>& rhs) const {
         return dynd_complex<double>(m_real - rhs.m_real, m_imag - rhs.m_imag);
     }
 
-    DYND_CUDA_HOST_DEVICE_CALLABLE inline dynd_complex<double> operator*(const dynd_complex<double>& rhs) const {
+    DYND_CUDA_HOST_DEVICE inline dynd_complex<double> operator*(const dynd_complex<double>& rhs) const {
         return dynd_complex<double>(m_real * rhs.m_real - m_imag * rhs.m_imag,
                                     m_real * rhs.m_imag + rhs.m_real * m_imag);
     }
 
-    DYND_CUDA_HOST_DEVICE_CALLABLE inline dynd_complex<double> operator*(double rhs) const {
+    DYND_CUDA_HOST_DEVICE inline dynd_complex<double> operator*(double rhs) const {
         return dynd_complex<double>(m_real * rhs, m_imag * rhs);
     }
 
-    DYND_CUDA_HOST_DEVICE_CALLABLE inline dynd_complex<double> operator/(const dynd_complex<double>& rhs) const {
+    DYND_CUDA_HOST_DEVICE inline dynd_complex<double> operator/(const dynd_complex<double>& rhs) const {
         double denom = rhs.m_real * rhs.m_real + rhs.m_imag + rhs.m_imag;
         return dynd_complex<double>((m_real * rhs.m_real + m_imag * rhs.m_imag) / denom,
                                     (rhs.m_real * m_imag - m_real * rhs.m_imag) / denom);
     }
 
-    DYND_CUDA_HOST_DEVICE_CALLABLE inline dynd_complex<double> operator/(double rhs) const {
+    DYND_CUDA_HOST_DEVICE inline dynd_complex<double> operator/(double rhs) const {
         return dynd_complex<double>(m_real / rhs, m_imag / rhs);
     }
 };

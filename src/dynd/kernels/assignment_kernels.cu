@@ -261,7 +261,7 @@ static unary_single_operation_t assign_table_single_cuda_device_to_host_kernel[b
 };
 
 template <typename dst_type, typename src_type, assign_error_mode errmode>
-DYND_CUDA_GLOBAL_CALLABLE void single_cuda_global_assign_builtin(dst_type *dst, const src_type *src, ckernel_prefix *extra) {
+DYND_CUDA_GLOBAL void single_cuda_global_assign_builtin(dst_type *dst, const src_type *src, ckernel_prefix *extra) {
     single_assigner_builtin<dst_type, src_type, errmode>::assign(dst, src, extra);
 }
 
@@ -339,7 +339,7 @@ static unary_single_operation_t assign_table_single_cuda_device_to_device_kernel
 
 namespace {
     template <typename dst_type, typename src_type, assign_error_mode errmode>
-    DYND_CUDA_GLOBAL_CALLABLE void strided_cuda_global_assign_builtin(char *dst, intptr_t dst_stride,
+    DYND_CUDA_GLOBAL void strided_cuda_global_assign_builtin(char *dst, intptr_t dst_stride,
                     const char *src, intptr_t src_stride,
                     size_t count, ckernel_prefix *extra)
     {
@@ -352,7 +352,7 @@ namespace {
         }
     }
     template <typename dst_type, typename src_type, assign_error_mode errmode>
-    DYND_CUDA_GLOBAL_CALLABLE void strided_cuda_global_multiple_assign_builtin(char *dst, intptr_t dst_stride,
+    DYND_CUDA_GLOBAL void strided_cuda_global_multiple_assign_builtin(char *dst, intptr_t dst_stride,
                     const char *src, intptr_t src_stride,
                     size_t count_div_threads, size_t count_mod_threads, ckernel_prefix *extra)
     {

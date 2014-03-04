@@ -14,7 +14,7 @@ using namespace std;
 using namespace dynd;
 
 namespace {
-    DYND_CUDA_HOST_DEVICE_CALLABLE inline uint8_t leading_zerobits(uint8_t value) {
+    DYND_CUDA_HOST_DEVICE inline uint8_t leading_zerobits(uint8_t value) {
         return (value&0xf0u) ?
                     ((value&0xc0u) ? ((value&0x80u) ? 0u : 1u)
                                    : ((value&0x20u) ? 2u : 3u))
@@ -23,17 +23,17 @@ namespace {
                                    : ((value&0x02u) ? 6u : 7u));
     }
 
-    DYND_CUDA_HOST_DEVICE_CALLABLE inline uint8_t leading_zerobits(uint16_t value) {
+    DYND_CUDA_HOST_DEVICE inline uint8_t leading_zerobits(uint16_t value) {
         return (value&0xff00u) ? (leading_zerobits((uint8_t)(value >> 8)))
                               : (leading_zerobits((uint8_t)value) + 8u);
     }
 
-    DYND_CUDA_HOST_DEVICE_CALLABLE inline uint8_t leading_zerobits(uint32_t value) {
+    DYND_CUDA_HOST_DEVICE inline uint8_t leading_zerobits(uint32_t value) {
         return (value&0xffff0000u) ? (leading_zerobits((uint16_t)(value >> 16)))
                               : (leading_zerobits((uint16_t)value) + 16u);
     }
 
-    DYND_CUDA_HOST_DEVICE_CALLABLE inline uint8_t leading_zerobits(uint64_t value) {
+    DYND_CUDA_HOST_DEVICE inline uint8_t leading_zerobits(uint64_t value) {
         return (value&0xffffffff00000000ULL)
                             ? (leading_zerobits((uint32_t)(value >> 32)))
                             : (leading_zerobits((uint32_t)value) + 32u);

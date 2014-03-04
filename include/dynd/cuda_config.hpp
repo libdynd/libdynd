@@ -13,22 +13,22 @@
 #include <cuda_runtime.h>
 #endif // DYND_CUDA
 
-#ifdef __CUDACC__
+#ifdef __CUDACC__ // We are compiling with NVIDIA's nvcc
 
-#ifdef __CUDA_ARCH__
+#ifdef __CUDA_ARCH__ // We are compiling for the device
 #define DYND_CUDA_DEVICE_ARCH
-#else
+#else // We are compiling for the host
 #define DYND_CUDA_HOST_ARCH
-#endif
+#endif // __CUDA_ARCH__
 
-#define DYND_CUDA_DEVICE_CALLABLE __device__
-#define DYND_CUDA_HOST_DEVICE_CALLABLE __host__ DYND_CUDA_DEVICE_CALLABLE
-#define DYND_CUDA_GLOBAL_CALLABLE __global__
+#define DYND_CUDA_DEVICE __device__ // A variable that resides on, or a function that is compiled for, the device
+#define DYND_CUDA_HOST_DEVICE __host__ DYND_CUDA_DEVICE // A function that is compiled for both the host and the device
+#define DYND_CUDA_GLOBAL __global__ // A function that is a CUDA kernel
 
-#else // __CUDACC__
+#else // We are not compiling with NVIDIA's nvcc
 
 #define DYND_CUDA_HOST_ARCH
-#define DYND_CUDA_HOST_DEVICE_CALLABLE
+#define DYND_CUDA_HOST_DEVICE
 
 namespace dynd {
 // Prevent isfinite from nvcc clashing with isfinite from cmath
@@ -76,10 +76,10 @@ namespace dynd {
      * Returns the unique index of a thread in a CUDA kernel.
      */
     template <int grid_ndim, int block_ndim>
-    DYND_CUDA_DEVICE_CALLABLE inline unsigned int get_cuda_global_thread();
+    DYND_CUDA_DEVICE inline unsigned int get_cuda_global_thread();
 
     template <>
-    DYND_CUDA_DEVICE_CALLABLE inline unsigned int get_cuda_global_thread<1, 1>() {
+    DYND_CUDA_DEVICE inline unsigned int get_cuda_global_thread<1, 1>() {
         return blockIdx.x * blockDim.x + threadIdx.x;
     }
 #endif // __CUDACC__

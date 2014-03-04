@@ -326,7 +326,7 @@ namespace {
     };
     template<typename dst_type, typename src_type>
     struct multiple_assignment_builtin<dst_type, src_type, assign_error_none> {
-         DYND_CUDA_HOST_DEVICE_CALLABLE static void strided_assign(
+         DYND_CUDA_HOST_DEVICE static void strided_assign(
                         char *dst, intptr_t dst_stride,
                         const char *src, intptr_t src_stride,
                         size_t count, ckernel_prefix *DYND_UNUSED(extra))
