@@ -21,7 +21,7 @@ TEST(ComplexDType, Create) {
     EXPECT_EQ(complex_float32_type_id, d.get_type_id());
     EXPECT_EQ(complex_kind, d.get_kind());
     EXPECT_EQ(8u, d.get_data_size());
-    EXPECT_EQ(alignment_of<float>::value, d.get_data_alignment());
+    EXPECT_EQ((size_t)scalar_align_of<float>::value, d.get_data_alignment());
     EXPECT_FALSE(d.is_expression());
     EXPECT_EQ("complex[float32]", d.str());
     // Roundtripping through a string
@@ -32,7 +32,7 @@ TEST(ComplexDType, Create) {
     EXPECT_EQ(complex_float64_type_id, d.get_type_id());
     EXPECT_EQ(complex_kind, d.get_kind());
     EXPECT_EQ(16u, d.get_data_size());
-    EXPECT_EQ(alignment_of<double>::value, d.get_data_alignment());
+    EXPECT_EQ((size_t)scalar_align_of<double>::value, d.get_data_alignment());
     EXPECT_FALSE(d.is_expression());
     EXPECT_EQ("complex[float64]", d.str());
     // Roundtripping through a string
