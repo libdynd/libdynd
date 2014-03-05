@@ -509,12 +509,16 @@ TEST(ArrayAssign, ZeroSizedAssign) {
     a.vals() = b;
 }
 
+#if !(defined(_WIN32) && !defined(_M_X64)) // TODO: How to mark as expected failures in googletest?
 REGISTER_TYPED_TEST_CASE_P(ArrayAssign, ScalarAssignment_Bool, ScalarAssignment_Int8, ScalarAssignment_UInt16,
     ScalarAssignment_Float32, ScalarAssignment_Float64, ScalarAssignment_Uint64,
-#if !(defined(_WIN32) && !defined(_M_X64)) // TODO: How to mark as expected failures in googletest?
-    ScalarAssignment_Uint64_LargeNumbers,
-#endif
+    ScalarAssignment_Uint64_LargeNumbers, // This one is excluded on 32-bit windows
     ScalarAssignment_Complex_Float32, ScalarAssignment_Complex_Float64, BroadcastAssign, Overflow);
+#else
+REGISTER_TYPED_TEST_CASE_P(ArrayAssign, ScalarAssignment_Bool, ScalarAssignment_Int8, ScalarAssignment_UInt16,
+    ScalarAssignment_Float32, ScalarAssignment_Float64, ScalarAssignment_Uint64,
+    ScalarAssignment_Complex_Float32, ScalarAssignment_Complex_Float64, BroadcastAssign, Overflow);
+#endif
 
 INSTANTIATE_TYPED_TEST_CASE_P(Default, ArrayAssign, DefaultMemoryPairs);
 #ifdef DYND_CUDA
