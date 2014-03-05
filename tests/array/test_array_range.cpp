@@ -70,7 +70,7 @@ TEST(ArrayLinspace, Basic) {
 
 	a = nd::linspace(0, 3, 4);
     EXPECT_EQ(ndt::type("strided * float64"), a.get_type());
-    EXPECT_EQ(4u, a.get_shape()[0]);
+    EXPECT_EQ(4, a.get_shape()[0]);
     EXPECT_EQ(0, a(0).as<double>());
     EXPECT_EQ(1, a(1).as<double>());
     EXPECT_EQ(2, a(2).as<double>());
@@ -78,7 +78,7 @@ TEST(ArrayLinspace, Basic) {
 
 	a = nd::linspace(0, 2, 5);
     EXPECT_EQ(ndt::type("strided * float64"), a.get_type());
-    EXPECT_EQ(5u, a.get_shape()[0]);
+    EXPECT_EQ(5, a.get_shape()[0]);
     EXPECT_EQ(0, a(0).as<double>());
     EXPECT_EQ(0.5, a(1).as<double>());
     EXPECT_EQ(1, a(2).as<double>());
@@ -87,21 +87,21 @@ TEST(ArrayLinspace, Basic) {
 
 	a = nd::linspace(0.f, 1.f, 3);
     EXPECT_EQ(ndt::type("strided * float32"), a.get_type());
-    EXPECT_EQ(3u, a.get_shape()[0]);
+    EXPECT_EQ(3, a.get_shape()[0]);
     EXPECT_EQ(0.f, a(0).as<float>());
     EXPECT_EQ(0.5f, a(1).as<float>());
     EXPECT_EQ(1.f, a(2).as<float>());
 
 	a = nd::linspace(complex<float>(0.f, 0.f), complex<float>(0.f, 1.f), 3);
     EXPECT_EQ(ndt::type("strided * complex[float32]"), a.get_type());
-    EXPECT_EQ(3u, a.get_shape()[0]);
+    EXPECT_EQ(3, a.get_shape()[0]);
     EXPECT_EQ(complex<float>(0.f, 0.f), a(0).as<complex<float> >());
     EXPECT_EQ(complex<float>(0.f, 0.5f), a(1).as<complex<float> >());
     EXPECT_EQ(complex<float>(0.f, 1.f), a(2).as<complex<float> >());
 
 	a = nd::linspace(complex<double>(1.f, 0.f), complex<double>(0.f, 1.f), 3);
     EXPECT_EQ(ndt::type("strided * complex[float64]"), a.get_type());
-    EXPECT_EQ(3u, a.get_shape()[0]);
+    EXPECT_EQ(3, a.get_shape()[0]);
     EXPECT_EQ(complex<double>(1., 0.), a(0).as<complex<double> >());
     EXPECT_EQ(complex<double>(0.5, 0.5), a(1).as<complex<double> >());
     EXPECT_EQ(complex<double>(0., 1.), a(2).as<complex<double> >());
