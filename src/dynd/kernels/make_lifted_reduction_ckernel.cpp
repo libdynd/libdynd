@@ -49,11 +49,12 @@ struct ckernel_reduction_prefix {
 };
 
 /**
+ * STRIDED INITIAL REDUCTION DIMENSION
  * This ckernel handles one dimension of the reduction processing,
  * where:
  *  - It's a reduction dimension, so dst_stride is zero.
  *  - It's an initial dimension, there are additional dimensions
- *    being processed after this one.
+ *    being processed by its child kernels.
  *  - The source data is strided.
  *
  * Requirements:
@@ -110,7 +111,6 @@ struct strided_initial_reduction_kernel_extra {
             for (intptr_t i = 1; i < (intptr_t)count; ++i) {
                 opchild_followup_call(dst, 0, src, inner_src_stride,
                         inner_size, &echild->base());
-                dst += dst_stride;
                 src += src_stride;
             }
         } else {
@@ -155,6 +155,7 @@ struct strided_initial_reduction_kernel_extra {
 };
 
 /**
+ * STRIDED INITIAL BROADCAST DIMENSION
  * This ckernel handles one dimension of the reduction processing,
  * where:
  *  - It's a broadcast dimension, so dst_stride is not zero.
@@ -195,8 +196,8 @@ struct strided_initial_broadcast_kernel_extra {
     {
         extra_type *e = reinterpret_cast<extra_type *>(extra);
         ckernel_reduction_prefix *echild = &(e + 1)->ckpbase;
-        unary_strided_operation_t opchild_followup_call = echild->get_followup_call_function();
         unary_strided_operation_t opchild_first_call = echild->get_first_call_function<unary_strided_operation_t>();
+        unary_strided_operation_t opchild_followup_call = echild->get_followup_call_function();
         intptr_t inner_size = e->size;
         intptr_t inner_dst_stride = e->dst_stride;
         intptr_t inner_src_stride = e->src_stride;
@@ -250,6 +251,7 @@ struct strided_initial_broadcast_kernel_extra {
 };
 
 /**
+ * STRIDED INNER REDUCTION DIMENSION
  * This ckernel handles one dimension of the reduction processing,
  * where:
  *  - It's a reduction dimension, so dst_stride is zero.
@@ -257,8 +259,8 @@ struct strided_initial_broadcast_kernel_extra {
  *  - The source data is strided.
  *
  * Requirements:
- *  - The child reduction kernel must be *strided*.
  *  - The child destination initialization kernel must be *single*.
+ *  - The child reduction kernel must be *strided*.
  * 
  */
 struct strided_inner_reduction_kernel_extra {
@@ -278,17 +280,17 @@ struct strided_inner_reduction_kernel_extra {
                     ckernel_prefix *extra)
     {
         extra_type *e = reinterpret_cast<extra_type *>(extra);
-        ckernel_prefix *echild = &(e + 1)->base();
+        ckernel_prefix *echild_reduce = &(e + 1)->base();
         ckernel_prefix *echild_dst_init = reinterpret_cast<ckernel_prefix *>(
                             reinterpret_cast<char *>(extra) + e->dst_init_kernel_offset);
         // The first call to initialize the "dst" value
-        unary_strided_operation_t opchild = echild->get_function<unary_strided_operation_t>();
         unary_single_operation_t opchild_dst_init = echild_dst_init->get_function<unary_single_operation_t>();
+        unary_strided_operation_t opchild_reduce = echild_reduce->get_function<unary_strided_operation_t>();
         opchild_dst_init(dst, src, echild_dst_init);
         if (e->size > 1) {
             // All the followup calls to accumulate at the "dst" address
-            opchild(dst, 0, src + e->src_stride, e->src_stride,
-                    e->size - 1, &echild->base());
+            opchild_reduce(dst, 0, src + e->src_stride, e->src_stride,
+                    e->size - 1, &echild_reduce->base());
         }
     }
 
@@ -297,24 +299,24 @@ struct strided_inner_reduction_kernel_extra {
                     size_t count, ckernel_prefix *extra)
     {
         extra_type *e = reinterpret_cast<extra_type *>(extra);
-        ckernel_prefix *echild = &(e + 1)->base();
+        ckernel_prefix *echild_reduce = &(e + 1)->base();
         ckernel_prefix *echild_dst_init = reinterpret_cast<ckernel_prefix *>(
                             reinterpret_cast<char *>(extra) + e->dst_init_kernel_offset);
-        unary_strided_operation_t opchild = echild->get_function<unary_strided_operation_t>();
         unary_single_operation_t opchild_dst_init = echild_dst_init->get_function<unary_single_operation_t>();
+        unary_strided_operation_t opchild_reduce = echild_reduce->get_function<unary_strided_operation_t>();
         intptr_t inner_size = e->size;
         intptr_t inner_src_stride = e->src_stride;
         if (dst_stride == 0) {
             // With a zero stride, we initialize "dst" once, then do many accumulations
             opchild_dst_init(dst, src, echild_dst_init);
             if (inner_size > 1) {
-                opchild(dst, 0, src + inner_src_stride, inner_src_stride,
-                        inner_size - 1, &echild->base());
+                opchild_reduce(dst, 0, src + inner_src_stride, inner_src_stride,
+                        inner_size - 1, &echild_reduce->base());
             }
             src += src_stride;
             for (intptr_t i = 1; i < (intptr_t)count; ++i) {
-                opchild(dst, 0, src, inner_src_stride,
-                        inner_size, &echild->base());
+                opchild_reduce(dst, 0, src, inner_src_stride,
+                        inner_size, &echild_reduce->base());
                 dst += dst_stride;
                 src += src_stride;
             }
@@ -324,9 +326,9 @@ struct strided_inner_reduction_kernel_extra {
             for (size_t i = 0; i != count; ++i) {
                 opchild_dst_init(dst, src, echild_dst_init);
                 if (inner_size > 1) {
-                    opchild(dst, 0,
+                    opchild_reduce(dst, 0,
                             src + inner_src_stride, inner_src_stride,
-                            inner_size - 1, &echild->base());
+                            inner_size - 1, &echild_reduce->base());
                 }
                 dst += dst_stride;
                 src += src_stride;
@@ -339,13 +341,13 @@ struct strided_inner_reduction_kernel_extra {
                     size_t count, ckernel_prefix *extra)
     {
         extra_type *e = reinterpret_cast<extra_type *>(extra);
-        ckernel_prefix *echild = &(e + 1)->base();
+        ckernel_prefix *echild_reduce = &(e + 1)->base();
         // No initialization, all reduction
-        unary_strided_operation_t opchild = echild->get_function<unary_strided_operation_t>();
+        unary_strided_operation_t opchild_reduce = echild_reduce->get_function<unary_strided_operation_t>();
         intptr_t inner_size = e->size;
         intptr_t inner_src_stride = e->src_stride;
         for (size_t i = 0; i != count; ++i) {
-            opchild(dst, 0, src, inner_src_stride, inner_size, &echild->base());
+            opchild_reduce(dst, 0, src, inner_src_stride, inner_size, &echild_reduce->base());
             dst += dst_stride;
             src += src_stride;
         }
@@ -371,6 +373,7 @@ struct strided_inner_reduction_kernel_extra {
 };
 
 /**
+ * STRIDED INNER BROADCAST DIMENSION
  * This ckernel handles one dimension of the reduction processing,
  * where:
  *  - It's a broadcast dimension, so dst_stride is not zero.
@@ -412,11 +415,11 @@ struct strided_inner_broadcast_kernel_extra {
                     size_t count, ckernel_prefix *extra)
     {
         extra_type *e = reinterpret_cast<extra_type *>(extra);
-        ckernel_prefix *echild = &(e + 1)->base();
+        ckernel_prefix *echild_reduce = &(e + 1)->base();
         ckernel_prefix *echild_dst_init = reinterpret_cast<ckernel_prefix *>(
                             reinterpret_cast<char *>(extra) + e->dst_init_kernel_offset);
-        unary_strided_operation_t opchild = echild->get_function<unary_strided_operation_t>();
         unary_strided_operation_t opchild_dst_init = echild_dst_init->get_function<unary_strided_operation_t>();
+        unary_strided_operation_t opchild_reduce = echild_reduce->get_function<unary_strided_operation_t>();
         intptr_t inner_size = e->size;
         intptr_t inner_src_stride = e->src_stride;
         if (dst_stride == 0) {
@@ -425,8 +428,8 @@ struct strided_inner_broadcast_kernel_extra {
             dst += dst_stride;
             src += src_stride;
             for (intptr_t i = 1; i < (intptr_t)count; ++i) {
-                opchild(dst, 0, src, inner_src_stride,
-                        inner_size, &echild->base());
+                opchild_reduce(dst, 0, src, inner_src_stride,
+                        inner_size, &echild_reduce->base());
                 dst += dst_stride;
                 src += src_stride;
             }
@@ -446,13 +449,13 @@ struct strided_inner_broadcast_kernel_extra {
                     size_t count, ckernel_prefix *extra)
     {
         extra_type *e = reinterpret_cast<extra_type *>(extra);
-        ckernel_prefix *echild = &(e + 1)->base();
+        ckernel_prefix *echild_reduce = &(e + 1)->base();
         // No initialization, all reduction
-        unary_strided_operation_t opchild = echild->get_function<unary_strided_operation_t>();
+        unary_strided_operation_t opchild_reduce = echild_reduce->get_function<unary_strided_operation_t>();
         intptr_t inner_size = e->size;
         intptr_t inner_src_stride = e->src_stride;
         for (size_t i = 0; i != count; ++i) {
-            opchild(dst, 0, src, inner_src_stride, inner_size, &echild->base());
+            opchild_reduce(dst, 0, src, inner_src_stride, inner_size, &echild_reduce->base());
             dst += dst_stride;
             src += src_stride;
         }
