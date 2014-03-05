@@ -112,11 +112,6 @@ enum type_id_t {
     // A variable-sized array dimension type
     var_dim_type_id,
 
-    // A CUDA host memory type
-    cuda_host_type_id,
-    // A CUDA device (global) memory type
-    cuda_device_type_id,
-
     // A struct type with variable layout
     struct_type_id,
     // A struct type with fixed layout
@@ -128,6 +123,11 @@ enum type_id_t {
     convert_type_id,
     byteswap_type_id,
     view_type_id,
+
+    // A CUDA host memory type
+    cuda_host_type_id,
+    // A CUDA device (global) memory type
+    cuda_device_type_id,
 
     // A type for property access
     property_type_id,
