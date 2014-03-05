@@ -476,6 +476,8 @@ static ndt::type parse_cuda_host_parameters(const char *&begin, const char *end,
         }
 		return ndt::make_cuda_host(tp);
 #else
+        // Silence the unused parameter warning
+        symtable.empty();
         throw datashape_parse_error(begin, "cuda_host type is not available");
 #endif // DYND_CUDA
     } else {
@@ -499,6 +501,8 @@ static ndt::type parse_cuda_device_parameters(const char *&begin, const char *en
         }
 		return ndt::make_cuda_device(tp);
 #else
+        // Silence the unused parameter warning
+        symtable.empty();
         throw datashape_parse_error(begin, "cuda_device type is not available");
 #endif // DYND_CUDA
     } else {
