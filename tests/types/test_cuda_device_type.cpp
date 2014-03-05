@@ -26,6 +26,8 @@ TEST(CUDADeviceType, Basic) {
     EXPECT_EQ(ndt::make_type<int32_t>(), d.p("storage_type").as<ndt::type>());
     EXPECT_FALSE(d.is_expression());
 	EXPECT_EQ(d, ndt::type("cuda_device[int32]"));
+    // Roundtripping through a string
+    EXPECT_EQ(d, ndt::type(d.str()));
 
     // A memory type cannot have an array dimension type as storage
     EXPECT_THROW(ndt::make_cuda_device(ndt::make_strided_dim(ndt::make_type<int32_t>())), runtime_error);

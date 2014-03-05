@@ -39,6 +39,8 @@ TEST(FixedDimDType, Create) {
     fad = static_cast<const fixed_dim_type *>(d.extended());
     EXPECT_EQ(4, fad->get_fixed_stride());
     EXPECT_EQ(3u, fad->get_fixed_dim_size());
+    // Roundtripping through a string
+    EXPECT_EQ(d, ndt::type(d.str()));
 
     d = ndt::make_fixed_dim(1, ndt::make_type<int32_t>());
     EXPECT_EQ(fixed_dim_type_id, d.get_type_id());
@@ -49,6 +51,8 @@ TEST(FixedDimDType, Create) {
     fad = static_cast<const fixed_dim_type *>(d.extended());
     EXPECT_EQ(0, fad->get_fixed_stride());
     EXPECT_EQ(1u, fad->get_fixed_dim_size());
+    // Roundtripping through a string
+    EXPECT_EQ(d, ndt::type(d.str()));
 }
 
 TEST(FixedDimDType, CreateCOrder) {

@@ -19,20 +19,20 @@ fixedbytes_type::fixedbytes_type(intptr_t data_size, intptr_t data_alignment)
 {
     if (data_alignment > data_size) {
         std::stringstream ss;
-        ss << "Cannot make a fixedbytes<" << data_size << ",";
-        ss << data_alignment << "> type, its alignment is greater than its size";
+        ss << "Cannot make a bytes[" << data_size << ", align=";
+        ss << data_alignment << "] type, its alignment is greater than its size";
         throw std::runtime_error(ss.str());
     }
     if (data_alignment != 1 && data_alignment != 2 && data_alignment != 4 && data_alignment != 8 && data_alignment != 16) {
         std::stringstream ss;
-        ss << "Cannot make a fixedbytes<" << data_size << ",";
-        ss << data_alignment << "> type, its alignment is not a small power of two";
+        ss << "Cannot make a bytes[" << data_size << ", align=";
+        ss << data_alignment << "] type, its alignment is not a small power of two";
         throw std::runtime_error(ss.str());
     }
     if ((data_size&(data_alignment-1)) != 0) {
         std::stringstream ss;
-        ss << "Cannot make a fixedbytes<" << data_size << ",";
-        ss<< data_alignment << "> type, its alignment does not divide into its element size";
+        ss << "Cannot make a fixedbytes[" << data_size << ", align=";
+        ss<< data_alignment << "] type, its alignment does not divide into its element size";
         throw std::runtime_error(ss.str());
     }
 }
@@ -56,7 +56,12 @@ void fixedbytes_type::print_data(std::ostream& o, const char *DYND_UNUSED(metada
 
 void fixedbytes_type::print_type(std::ostream& o) const
 {
-    o << "fixedbytes[" << get_data_size() << "," << get_data_alignment() << "]";
+    o << "bytes[" << get_data_size();
+    size_t alignment = get_data_alignment();
+    if (alignment != 1) {
+        o << ", align=" << get_data_alignment();
+    }
+    o << "]";
 }
 
 bool fixedbytes_type::is_lossless_assignment(const ndt::type& dst_tp, const ndt::type& src_tp) const

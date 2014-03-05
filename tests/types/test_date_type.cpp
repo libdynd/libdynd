@@ -30,6 +30,8 @@ TEST(DateDType, Create) {
     EXPECT_EQ(4u, d.get_data_size());
     EXPECT_EQ(4u, d.get_data_alignment());
     EXPECT_EQ(ndt::make_date(), ndt::make_date());
+    // Roundtripping through a string
+    EXPECT_EQ(d, ndt::type(d.str()));
 }
 
 TEST(DateDType, ValueCreation) {

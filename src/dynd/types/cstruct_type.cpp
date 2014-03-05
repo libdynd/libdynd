@@ -109,7 +109,7 @@ void cstruct_type::print_type(std::ostream& o) const
     o << "{";
     for (size_t i = 0, i_end = m_field_types.size(); i != i_end; ++i) {
         if (i != 0) {
-            o << "; ";
+            o << ", ";
         }
         if (is_simple_identifier_name(m_field_names[i])) {
             o << m_field_names[i];

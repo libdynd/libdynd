@@ -73,7 +73,7 @@ void bytes_type::print_type(std::ostream& o) const
 {
     o << "bytes";
     if (m_alignment != 1) {
-        o << "<align=" << m_alignment << ">";
+        o << "[align=" << m_alignment << "]";
     }
 }
 

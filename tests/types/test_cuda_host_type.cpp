@@ -26,6 +26,8 @@ TEST(CUDAHostType, Basic) {
     EXPECT_FALSE(d.is_expression());
     EXPECT_EQ((unsigned int)cudaHostAllocDefault, static_cast<const cuda_host_type *>(d.extended())->get_cuda_host_flags());
 	EXPECT_EQ(d, ndt::type("cuda_host[int32]"));
+    // Roundtripping through a string
+    EXPECT_EQ(d, ndt::type(d.str()));
 
     // A memory type cannot have an array dimension type as storage
     EXPECT_THROW(ndt::make_cuda_host(ndt::make_strided_dim(ndt::make_type<int32_t>())), runtime_error);

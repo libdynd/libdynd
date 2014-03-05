@@ -28,6 +28,8 @@ TEST(AlignDType, Create) {
     // The alignment of the type is 1
     EXPECT_EQ(1u, d.get_data_alignment());
     EXPECT_TRUE(d.is_expression());
+    // Roundtripping through a string
+    EXPECT_EQ(d, ndt::type(d.str()));
 
     // The "type" type is an object type, it should throw in this case
     EXPECT_THROW(d = make_unaligned(ndt::make_type()), dynd::type_error);
@@ -60,10 +62,13 @@ TEST(AlignDType, Basic) {
 TEST(AlignDType, Chained) {
     // The unaligned type can give back an expression type as the value type,
     // make sure that is handled properly at the type object level.
-    ndt::type dt = make_unaligned(ndt::make_byteswap<int>());
-    EXPECT_EQ(ndt::make_byteswap(ndt::make_type<int>(), ndt::make_view(ndt::make_fixedbytes(4, 4), ndt::make_fixedbytes(4, 1))), dt);
-    EXPECT_EQ(ndt::make_fixedbytes(4, 1), dt.storage_type());
-    EXPECT_EQ(ndt::make_type<int>(), dt.value_type());
+    ndt::type d = make_unaligned(ndt::make_byteswap<int>());
+    EXPECT_EQ(ndt::make_byteswap(ndt::make_type<int>(),
+                                 ndt::make_view(ndt::make_fixedbytes(4, 4),
+                                                ndt::make_fixedbytes(4, 1))),
+              d);
+    EXPECT_EQ(ndt::make_fixedbytes(4, 1), d.storage_type());
+    EXPECT_EQ(ndt::make_type<int>(), d.value_type());
 }
 
 TEST(AlignDType, CanonicalDType) {

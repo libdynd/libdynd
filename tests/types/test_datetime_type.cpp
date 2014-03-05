@@ -35,12 +35,16 @@ TEST(DateTimeDType, Create) {
     EXPECT_EQ(d, ndt::make_datetime(datetime_unit_minute, tz_abstract));
     EXPECT_EQ(datetime_unit_minute, dd->get_unit());
     EXPECT_EQ(tz_abstract, dd->get_timezone());
+    // Roundtripping through a string
+    EXPECT_EQ(d, ndt::type(d.str()));
 
     d = ndt::make_datetime(datetime_unit_msecond, tz_utc);
     dd = static_cast<const datetime_type *>(d.extended());
     EXPECT_EQ(d, ndt::make_datetime(datetime_unit_msecond, tz_utc));
     EXPECT_EQ(datetime_unit_msecond, dd->get_unit());
     EXPECT_EQ(tz_utc, dd->get_timezone());
+    // Roundtripping through a string
+    EXPECT_EQ(d, ndt::type(d.str()));
 }
 
 TEST(DateTimeDType, CreateFromString) {
@@ -52,50 +56,66 @@ TEST(DateTimeDType, CreateFromString) {
     dd = static_cast<const datetime_type *>(d.extended());
     EXPECT_EQ(datetime_unit_hour, dd->get_unit());
     EXPECT_EQ(tz_abstract, dd->get_timezone());
+    // Roundtripping through a string
+    EXPECT_EQ(d, ndt::type(d.str()));
 
     d = ndt::type("datetime['min']");
     ASSERT_EQ(datetime_type_id, d.get_type_id());
     dd = static_cast<const datetime_type *>(d.extended());
     EXPECT_EQ(datetime_unit_minute, dd->get_unit());
     EXPECT_EQ(tz_abstract, dd->get_timezone());
+    // Roundtripping through a string
+    EXPECT_EQ(d, ndt::type(d.str()));
 
     d = ndt::type("datetime['sec']");
     ASSERT_EQ(datetime_type_id, d.get_type_id());
     dd = static_cast<const datetime_type *>(d.extended());
     EXPECT_EQ(datetime_unit_second, dd->get_unit());
     EXPECT_EQ(tz_abstract, dd->get_timezone());
+    // Roundtripping through a string
+    EXPECT_EQ(d, ndt::type(d.str()));
 
     d = ndt::type("datetime['msec']");
     ASSERT_EQ(datetime_type_id, d.get_type_id());
     dd = static_cast<const datetime_type *>(d.extended());
     EXPECT_EQ(datetime_unit_msecond, dd->get_unit());
     EXPECT_EQ(tz_abstract, dd->get_timezone());
+    // Roundtripping through a string
+    EXPECT_EQ(d, ndt::type(d.str()));
 
     d = ndt::type("datetime['usec']");
     ASSERT_EQ(datetime_type_id, d.get_type_id());
     dd = static_cast<const datetime_type *>(d.extended());
     EXPECT_EQ(datetime_unit_usecond, dd->get_unit());
     EXPECT_EQ(tz_abstract, dd->get_timezone());
+    // Roundtripping through a string
+    EXPECT_EQ(d, ndt::type(d.str()));
 
     d = ndt::type("datetime['nsec']");
     ASSERT_EQ(datetime_type_id, d.get_type_id());
     dd = static_cast<const datetime_type *>(d.extended());
     EXPECT_EQ(datetime_unit_nsecond, dd->get_unit());
     EXPECT_EQ(tz_abstract, dd->get_timezone());
+    // Roundtripping through a string
+    EXPECT_EQ(d, ndt::type(d.str()));
 
     // Explicit abstract timezone
-    d = ndt::type("datetime['hour', 'abstract']");
+    d = ndt::type("datetime['hour', tz='abstract']");
     ASSERT_EQ(datetime_type_id, d.get_type_id());
     dd = static_cast<const datetime_type *>(d.extended());
     EXPECT_EQ(datetime_unit_hour, dd->get_unit());
     EXPECT_EQ(tz_abstract, dd->get_timezone());
+    // Roundtripping through a string
+    EXPECT_EQ(d, ndt::type(d.str()));
 
     // UTC timezone
-    d = ndt::type("datetime['hour', 'UTC']");
+    d = ndt::type("datetime['hour', tz='UTC']");
     ASSERT_EQ(datetime_type_id, d.get_type_id());
     dd = static_cast<const datetime_type *>(d.extended());
     EXPECT_EQ(datetime_unit_hour, dd->get_unit());
     EXPECT_EQ(tz_utc, dd->get_timezone());
+    // Roundtripping through a string
+    EXPECT_EQ(d, ndt::type(d.str()));
 }
 
 TEST(DateTimeDType, ValueCreationAbstractMinutes) {
@@ -137,32 +157,32 @@ TEST(DateTimeDType, ConvertToString) {
     EXPECT_EQ("2013-02-16T12",
                     nd::array("2013-02-16T12").cast(ndt::type("datetime['hour']")).as<string>());
     EXPECT_EQ("2013-02-16T12Z",
-                    nd::array("2013-02-16T12Z").cast(ndt::type("datetime['hour','UTC']")).as<string>());
+                    nd::array("2013-02-16T12Z").cast(ndt::type("datetime['hour', tz='UTC']")).as<string>());
 
     EXPECT_EQ("2013-02-16T12:13",
                     nd::array("2013-02-16T12:13").cast(ndt::type("datetime['min']")).as<string>());
     EXPECT_EQ("2013-02-16T12:13Z",
-                    nd::array("2013-02-16T12:13Z").cast(ndt::type("datetime['min','UTC']")).as<string>());
+                    nd::array("2013-02-16T12:13Z").cast(ndt::type("datetime['min', tz='UTC']")).as<string>());
 
     EXPECT_EQ("2013-02-16T12:13:19",
                     nd::array("2013-02-16T12:13:19").cast(ndt::type("datetime['sec']")).as<string>());
     EXPECT_EQ("2013-02-16T12:13:19Z",
-                    nd::array("2013-02-16T12:13:19Z").cast(ndt::type("datetime['sec','UTC']")).as<string>());
+                    nd::array("2013-02-16T12:13:19Z").cast(ndt::type("datetime['sec', tz='UTC']")).as<string>());
 
     EXPECT_EQ("2013-02-16T12:13:19.012",
                     nd::array("2013-02-16T12:13:19.012").cast(ndt::type("datetime['msec']")).as<string>());
     EXPECT_EQ("2013-02-16T12:13:19.012Z",
-                    nd::array("2013-02-16T12:13:19.012Z").cast(ndt::type("datetime['msec','UTC']")).as<string>());
+                    nd::array("2013-02-16T12:13:19.012Z").cast(ndt::type("datetime['msec', tz='UTC']")).as<string>());
 
     EXPECT_EQ("2013-02-16T12:13:19.012345",
                     nd::array("2013-02-16T12:13:19.012345").cast(ndt::type("datetime['usec']")).as<string>());
     EXPECT_EQ("2013-02-16T12:13:19.012345Z",
-                    nd::array("2013-02-16T12:13:19.012345Z").cast(ndt::type("datetime['usec','UTC']")).as<string>());
+                    nd::array("2013-02-16T12:13:19.012345Z").cast(ndt::type("datetime['usec', tz='UTC']")).as<string>());
 
     EXPECT_EQ("2013-02-16T12:13:19.012345678",
                     nd::array("2013-02-16T12:13:19.012345678").cast(ndt::type("datetime['nsec']")).as<string>());
     EXPECT_EQ("2013-02-16T12:13:19.012345678Z",
-                    nd::array("2013-02-16T12:13:19.012345678Z").cast(ndt::type("datetime['nsec','UTC']")).as<string>());
+                    nd::array("2013-02-16T12:13:19.012345678Z").cast(ndt::type("datetime['nsec', tz='UTC']")).as<string>());
 }
 
 TEST(DateTimeDType, Properties) {

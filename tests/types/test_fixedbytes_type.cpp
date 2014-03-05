@@ -24,6 +24,8 @@ TEST(FixedBytesDType, Create) {
     EXPECT_EQ(1u, d.get_data_alignment());
     EXPECT_EQ(7u, d.get_data_size());
     EXPECT_FALSE(d.is_expression());
+    // Roundtripping through a string
+    EXPECT_EQ(d, ndt::type(d.str()));
 
     // Strings with various encodings and sizes
     d = ndt::make_fixedbytes(12, 4);
@@ -32,6 +34,8 @@ TEST(FixedBytesDType, Create) {
     EXPECT_EQ(4u, d.get_data_alignment());
     EXPECT_EQ(12u, d.get_data_size());
     EXPECT_FALSE(d.is_expression());
+    // Roundtripping through a string
+    EXPECT_EQ(d, ndt::type(d.str()));
 
     // Larger element than data size
     EXPECT_THROW(ndt::make_fixedbytes(1, 2), runtime_error);

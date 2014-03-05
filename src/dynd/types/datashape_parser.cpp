@@ -16,12 +16,14 @@
 #include <dynd/types/json_type.hpp>
 #include <dynd/types/date_type.hpp>
 #include <dynd/types/datetime_type.hpp>
+#include <dynd/types/fixedbytes_type.hpp>
 #include <dynd/types/bytes_type.hpp>
 #include <dynd/types/type_type.hpp>
 #include <dynd/types/ckernel_deferred_type.hpp>
 #include <dynd/types/type_alignment.hpp>
 #include <dynd/types/pointer_type.hpp>
 #include <dynd/types/char_type.hpp>
+#include <dynd/types/byteswap_type.hpp>
 #include <dynd/types/cuda_host_type.hpp>
 #include <dynd/types/cuda_device_type.hpp>
 
@@ -99,6 +101,8 @@ static const set<string>& get_reserved_typenames()
         reserved_typenames.insert("unaligned");
         reserved_typenames.insert("pointer");
         reserved_typenames.insert("complex");
+        reserved_typenames.insert("bytes");
+        reserved_typenames.insert("byteswap");
 		reserved_typenames.insert("cuda_host");
 		reserved_typenames.insert("cuda_device");
     }
@@ -388,6 +392,74 @@ static ndt::type parse_complex_parameters(const char *&begin, const char *end,
     }
 }
 
+// byteswap_type : byteswap[type]
+// This is called after 'byteswap' is already matched
+static ndt::type parse_byteswap_parameters(const char *&begin, const char *end,
+                map<string, ndt::type>& symtable)
+{
+    if (parse_token(begin, end, '[')) {
+        ndt::type tp = parse_rhs_expression(begin, end, symtable);
+        if (tp.get_type_id() == uninitialized_type_id) {
+            throw datashape_parse_error(begin, "expected a type parameter");
+        }
+        if (!parse_token(begin, end, ']')) {
+            throw datashape_parse_error(begin, "expected closing ']'");
+        }
+        return ndt::make_byteswap(tp);
+    } else {
+        throw datashape_parse_error(begin, "expected opening '['");
+    }
+}
+
+// byte_type : bytes[<size>] | bytes[align=<alignment>] | bytes[<size>, align=<alignment>]
+// This is called after 'bytes' is already matched
+static ndt::type parse_bytes_parameters(const char *&begin, const char *end)
+{
+    if (parse_token(begin, end, '[')) {
+        if (parse_token(begin, end, "align")) {
+            // bytes type with an alignment
+            if (!parse_token(begin, end, '=')) {
+                throw datashape_parse_error(begin, "expected an =");
+            }
+            string align_val = parse_number(begin, end);
+            if (align_val.empty()) {
+                throw datashape_parse_error(begin, "expected an integer");
+            }
+            if (!parse_token(begin, end, ']')) {
+                throw datashape_parse_error(begin, "expected closing ']'");
+            }
+            return ndt::make_bytes(atoi(align_val.c_str()));
+        }
+        string size_val = parse_number(begin, end);
+        if (size_val.empty()) {
+            throw datashape_parse_error(begin, "expected 'align' or an integer");
+        }
+        if (parse_token(begin, end, ']')) {
+            // Fixed bytes with just a size parameter
+            return ndt::make_fixedbytes(atoi(size_val.c_str()), 1);
+        }
+        if (!parse_token(begin, end, ',')) {
+            throw datashape_parse_error(begin, "expected closing ']' or another argument");
+        }
+        if (!parse_token(begin, end, "align")) {
+            throw datashape_parse_error(begin, "expected align= parameter");
+        }
+        if (!parse_token(begin, end, '=')) {
+            throw datashape_parse_error(begin, "expected an =");
+        }
+        string align_val = parse_number(begin, end);
+        if (align_val.empty()) {
+            throw datashape_parse_error(begin, "expected an integer");
+        }
+        if (!parse_token(begin, end, ']')) {
+            throw datashape_parse_error(begin, "expected closing ']'");
+        }
+        return ndt::make_fixedbytes(atoi(size_val.c_str()), atoi(align_val.c_str()));
+    } else {
+        return ndt::make_bytes(1);
+    }
+}
+
 // cuda_host_type : cuda_host[storage_type]
 // This is called after 'cuda_host' is already matched
 static ndt::type parse_cuda_host_parameters(const char *&begin, const char *end,
@@ -449,21 +521,27 @@ static ndt::type parse_datetime_parameters(const char *&begin, const char *end)
         }
         if (unit_str == "hour") {
             unit = datetime_unit_hour;
-        } else if (unit_str == "min") {
+        } else if (unit_str == "min" || unit_str == "minute") {
             unit = datetime_unit_minute;
-        } else if (unit_str == "sec") {
+        } else if (unit_str == "sec" || unit_str == "second") {
             unit = datetime_unit_second;
-        } else if (unit_str == "msec") {
+        } else if (unit_str == "msec" || unit_str == "millisecond") {
             unit = datetime_unit_msecond;
-        } else if (unit_str == "usec") {
+        } else if (unit_str == "usec" || unit_str == "microsecond") {
             unit = datetime_unit_usecond;
-        } else if (unit_str == "nsec") {
+        } else if (unit_str == "nsec" || unit_str == "nanosecond") {
             unit = datetime_unit_nsecond;
         } else {
             throw datashape_parse_error(saved_begin, "invalid datetime unit");
         }
         // Parse the timezone
         if (parse_token(begin, end, ',')) {
+            if (!parse_token(begin, end, "tz")) {
+                throw datashape_parse_error(begin, "expected tz= parameter");
+            }
+            if (!parse_token(begin, end, '=')) {
+                throw datashape_parse_error(begin, "expected '='");
+            }
             string timezone_str;
             saved_begin = begin;
             if (!parse_quoted_string(begin, end, timezone_str)) {
@@ -636,6 +714,10 @@ static ndt::type parse_rhs_expression(const char *&begin, const char *end, map<s
             result = parse_pointer_parameters(begin, end, symtable);
         } else if (n == "char") {
             result = parse_char_parameters(begin, end);
+        } else if (n == "byteswap") {
+            result = parse_byteswap_parameters(begin, end, symtable);
+        } else if (n == "bytes") {
+            result = parse_bytes_parameters(begin, end);
         } else if (n == "cuda_host") {
             result = parse_cuda_host_parameters(begin, end, symtable);
         } else if (n == "cuda_device") {

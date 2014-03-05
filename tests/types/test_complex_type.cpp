@@ -14,6 +14,32 @@ using namespace std;
 using namespace dynd;
 
 TEST(ComplexDType, Create) {
+    ndt::type d;
+
+    // complex[float32]
+    d = ndt::make_type<dynd_complex<float> >();
+    EXPECT_EQ(complex_float32_type_id, d.get_type_id());
+    EXPECT_EQ(complex_kind, d.get_kind());
+    EXPECT_EQ(8u, d.get_data_size());
+    EXPECT_EQ(alignment_of<float>::value, d.get_data_alignment());
+    EXPECT_FALSE(d.is_expression());
+    EXPECT_EQ("complex[float32]", d.str());
+    // Roundtripping through a string
+    EXPECT_EQ(d, ndt::type(d.str()));
+
+    // complex[float64]
+    d = ndt::make_type<dynd_complex<double> >();
+    EXPECT_EQ(complex_float64_type_id, d.get_type_id());
+    EXPECT_EQ(complex_kind, d.get_kind());
+    EXPECT_EQ(16u, d.get_data_size());
+    EXPECT_EQ(alignment_of<double>::value, d.get_data_alignment());
+    EXPECT_FALSE(d.is_expression());
+    EXPECT_EQ("complex[float64]", d.str());
+    // Roundtripping through a string
+    EXPECT_EQ(d, ndt::type(d.str()));
+}
+
+TEST(ComplexDType, CreateFromValue) {
     nd::array n;
     
     n = dynd_complex<float>(1.5f, 2.0f);

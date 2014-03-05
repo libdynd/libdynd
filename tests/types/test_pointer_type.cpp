@@ -24,6 +24,8 @@ TEST(PointerType, VoidPointer) {
     EXPECT_EQ(sizeof(void *), d.get_data_alignment());
     EXPECT_NE(0u, d.get_flags()&type_flag_blockref);
     EXPECT_FALSE(d.is_expression());
+    // Roundtripping through a string
+    EXPECT_EQ(d, ndt::type(d.str()));
 }
 
 TEST(PointerType, PointerToBuiltIn) {
@@ -42,6 +44,8 @@ TEST(PointerType, PointerToBuiltIn) {
     // As a special case, the pointer_type says it isn't an expression type,
     // even though it is derived from base_expression_type
     EXPECT_FALSE(d.is_expression());
+    // Roundtripping through a string
+    EXPECT_EQ(d, ndt::type(d.str()));
 }
 
 TEST(PointerType, IsTypeSubarray) {

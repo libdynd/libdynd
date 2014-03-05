@@ -40,7 +40,7 @@ TEST(CStructDType, IOStream) {
     tp = ndt::make_cstruct(ndt::make_type<int32_t>(), "x",
                     ndt::make_type<int16_t>(), "y");
     ss << tp;
-    EXPECT_EQ("{x : int32; y : int16}", ss.str());
+    EXPECT_EQ("{x : int32, y : int16}", ss.str());
 }
 
 struct align_test_struct {
@@ -89,6 +89,8 @@ TEST(CStructType, Align) {
     EXPECT_EQ(ATS_OFFSET(f64), data_offsets[21]);
     EXPECT_EQ(ATS_OFFSET(cf32), data_offsets[23]);
     EXPECT_EQ(ATS_OFFSET(cf64), data_offsets[25]);
+    // Roundtripping through a string
+    EXPECT_EQ(asdt, ndt::type(asdt.str()));
 }
 
 TEST(CStructDType, CreateOneField) {
