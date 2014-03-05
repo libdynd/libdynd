@@ -394,6 +394,7 @@ static ndt::type parse_cuda_host_parameters(const char *&begin, const char *end,
                 map<string, ndt::type>& symtable)
 {
     if (parse_token(begin, end, '[')) {
+#ifdef DYND_CUDA
         ndt::type tp = parse_rhs_expression(begin, end, symtable);
         if (tp.get_type_id() == uninitialized_type_id) {
             throw datashape_parse_error(begin, "expected a type parameter");
@@ -401,10 +402,9 @@ static ndt::type parse_cuda_host_parameters(const char *&begin, const char *end,
         if (!parse_token(begin, end, ']')) {
             throw datashape_parse_error(begin, "expected closing ']'");
         }
-#ifdef DYND_CUDA
 		return ndt::make_cuda_host(tp);
 #else
-        throw datashape_parse_error(begin, "type is not available");
+        throw datashape_parse_error(begin, "cuda_host type is not available");
 #endif // DYND_CUDA
     } else {
         throw datashape_parse_error(begin, "expected opening '['");
@@ -417,6 +417,7 @@ static ndt::type parse_cuda_device_parameters(const char *&begin, const char *en
                 map<string, ndt::type>& symtable)
 {
     if (parse_token(begin, end, '[')) {
+#ifdef DYND_CUDA
         ndt::type tp = parse_rhs_expression(begin, end, symtable);
         if (tp.get_type_id() == uninitialized_type_id) {
             throw datashape_parse_error(begin, "expected a type parameter");
@@ -424,10 +425,9 @@ static ndt::type parse_cuda_device_parameters(const char *&begin, const char *en
         if (!parse_token(begin, end, ']')) {
             throw datashape_parse_error(begin, "expected closing ']'");
         }
-#ifdef DYND_CUDA
 		return ndt::make_cuda_device(tp);
 #else
-        throw datashape_parse_error(begin, "type is not available");
+        throw datashape_parse_error(begin, "cuda_device type is not available");
 #endif // DYND_CUDA
     } else {
         throw datashape_parse_error(begin, "expected opening '['");
