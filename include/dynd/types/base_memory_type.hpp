@@ -16,8 +16,13 @@ namespace dynd {
 
 /**
  * Base class for all types of memory_kind. This indicates a type is not in
- * default memory, meaning it is not allocated with 'malloc'. Users of this
- * class should implement methods that allocate and free data, among other things.
+ * default memory, meaning it may not be readable from the host, but maybe only
+ * on a GPU or similar device. Users of this class should implement methods
+ * that allocate and free data, among other things.
+ *
+ * Contrast this with memory on the host, but allocated by a system outside of
+ * dynd. This memory can be tracked via the object in
+ * memblock/external_memory_block.hpp.
  */
 class base_memory_type : public base_type {
 protected:
