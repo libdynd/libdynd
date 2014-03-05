@@ -322,6 +322,7 @@ set(libdynd_SRC
     include/dynd/vm/register_allocation.hpp
     # Main
     src/dynd/arithmetic_op.cpp
+    src/dynd/config.cpp
     src/dynd/type.cpp
     src/dynd/typed_data_assign.cpp
     src/dynd/type_promotion.cpp
