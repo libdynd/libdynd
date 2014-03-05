@@ -6,6 +6,8 @@
 cmake_minimum_required(VERSION 2.6)
 project(libdynd)
 
+find_package(CUDA)
+
 # Only add these options if this is the top level CMakeLists.txt
 if("${CMAKE_SOURCE_DIR}" STREQUAL "${CMAKE_CURRENT_SOURCE_DIR}")
 ################################################
@@ -21,6 +23,10 @@ if("${CMAKE_SOURCE_DIR}" STREQUAL "${CMAKE_CURRENT_SOURCE_DIR}")
             "Build a libdynd shared library instead of a static library"
             ON)
     endif()
+# -DDYND_CUDA=ON/OFF, whether to build libdynd with or without the CUDA Toolkit
+    option(DYND_CUDA
+        "Build a libdynd library with CUDA"
+        OFF) # While CUDA support is in development, we default to OFF.
 #
 # -DDYND_INSTALL_LIB=ON/OFF, whether to install libdynd into the
 #   CMAKE_INSTALL_PREFIX. Its main purpose is to allow separate
@@ -63,12 +69,11 @@ if(WIN32)
     # Treat warnings as errors (-WX does this)
     set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -WX -EHsc")
 else()
-    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -g -fomit-frame-pointer -fstrict-aliasing -fPIC -Wall -Wextra -Werror")
+    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -g -fomit-frame-pointer -fstrict-aliasing -fPIC -Wall -Wextra -Werror -Wno-missing-field-initializers")
     if ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "GNU")
         # The '-fmax-errors' flag was first supported in gcc 4.6
-        # Use the c++0x flag only in 4.6 and later
         if (NOT "${CMAKE_CXX_COMPILER_VERSION}" VERSION_LESS "4.6")
-            set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++0x -fmax-errors=20")
+            set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fmax-errors=20")
         endif()
     elseif("${CMAKE_CXX_COMPILER_ID}" STREQUAL "Clang")
         set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -ferror-limit=20")
@@ -116,6 +121,7 @@ set(libdynd_SRC
     src/dynd/types/base_bytes_type.cpp
     src/dynd/types/base_type.cpp
     src/dynd/types/base_expression_type.cpp
+    src/dynd/types/base_memory_type.cpp
     src/dynd/types/base_string_type.cpp
     src/dynd/types/base_struct_type.cpp
     src/dynd/types/base_uniform_dim_type.cpp
@@ -127,11 +133,14 @@ set(libdynd_SRC
 	src/dynd/types/char_type.cpp
     src/dynd/types/ckernel_deferred_type.cpp
     src/dynd/types/convert_type.cpp
+    src/dynd/types/cuda_host_type.cpp
+    src/dynd/types/cuda_device_type.cpp
     src/dynd/types/datashape_formatter.cpp
     src/dynd/types/datashape_parser.cpp
     src/dynd/types/date_type.cpp
     src/dynd/types/datetime_type.cpp
     src/dynd/types/type_type.cpp
+    src/dynd/types/dynd_complex.cpp
     src/dynd/types/dynd_float16.cpp
     src/dynd/types/dynd_float128.cpp
     src/dynd/types/dynd_int128.cpp
@@ -157,6 +166,7 @@ set(libdynd_SRC
     src/dynd/types/void_pointer_type.cpp
     include/dynd/types/base_bytes_type.hpp
     include/dynd/types/base_type.hpp
+    include/dynd/types/base_memory_type.hpp
     include/dynd/types/base_expression_type.hpp
     include/dynd/types/base_string_type.hpp
     include/dynd/types/base_struct_type.hpp
@@ -169,11 +179,14 @@ set(libdynd_SRC
     include/dynd/types/char_type.hpp
     include/dynd/types/ckernel_deferred_type.hpp
     include/dynd/types/convert_type.hpp
+    include/dynd/types/cuda_host_type.hpp
+    include/dynd/types/cuda_device_type.hpp
     include/dynd/types/datashape_formatter.hpp
     include/dynd/types/datashape_parser.hpp
     include/dynd/types/date_type.hpp
     include/dynd/types/datetime_type.hpp
     include/dynd/types/type_type.hpp
+    include/dynd/types/dynd_complex.hpp
     include/dynd/types/dynd_float16.hpp
     include/dynd/types/dynd_float128.hpp
     include/dynd/types/dynd_int128.hpp
@@ -309,6 +322,7 @@ set(libdynd_SRC
     include/dynd/vm/register_allocation.hpp
     # Main
     src/dynd/arithmetic_op.cpp
+    src/dynd/config.cpp
     src/dynd/type.cpp
     src/dynd/typed_data_assign.cpp
     src/dynd/type_promotion.cpp
@@ -327,6 +341,7 @@ set(libdynd_SRC
     include/dynd/auxiliary_data.hpp
     include/dynd/buffer_storage.hpp
     include/dynd/config.hpp
+    include/dynd/cuda_config.hpp
     include/dynd/cling_all.hpp
     include/dynd/diagnostics.hpp
     include/dynd/type.hpp
@@ -373,6 +388,29 @@ source_group("VM Source" REGULAR_EXPRESSION "src/dynd/vm/.*cpp")
 source_group("VM Headers" REGULAR_EXPRESSION "include/dynd/vm/.*hpp")
 source_group("Internal Headers" REGULAR_EXPRESSION "src/dynd/.*hpp")
 
+if (DYND_CUDA)
+    # Replace some source files with their CUDA versions
+    list(REMOVE_ITEM libdynd_SRC
+        src/dynd/types/dynd_complex.cpp
+        src/dynd/types/dynd_float16.cpp
+        src/dynd/types/dynd_float128.cpp
+        src/dynd/types/dynd_int128.cpp
+        src/dynd/types/dynd_uint128.cpp
+        src/dynd/kernels/assignment_kernels.cpp
+        )        
+    list(APPEND libdynd_SRC
+        src/dynd/kernels/assignment_kernels.cu
+        )
+
+    # Add a preprocessor definition to indicate we're building with CUDA
+    add_definitions(-DDYND_CUDA)
+
+    # Disable warnings about "controlling expression is constant"
+    set(CUDA_NVCC_FLAGS ${CUDA_NVCC_FLAGS};-Xcudafe;--diag_suppress=boolean_controlling_expr_is_constant)
+
+#    set(CUDA_SEPARABLE_COMPILATION ON)
+endif()
+
 if ((NOT DYND_SHARED_LIB) AND (DYND_INSTALL_LIB))
     # If we're making an installable static library,
     # include the sublibraries source directly because
@@ -386,7 +424,15 @@ if ((NOT DYND_SHARED_LIB) AND (DYND_INSTALL_LIB))
 endif()
 
 if (DYND_SHARED_LIB)
-    add_library(libdynd SHARED ${libdynd_SRC})
+    if (DYND_CUDA)
+        set(CUDA_OPTIONS "-arch=compute_20")
+        if (NOT WIN32)
+            set(CUDA_OPTIONS ${CUDA_OPTIONS}  "-Xcompiler" "-fPIC")
+        endif()
+        cuda_add_library(libdynd SHARED ${libdynd_SRC} OPTIONS ${CUDA_OPTIONS})
+    else()
+        add_library(libdynd SHARED ${libdynd_SRC})
+    endif()
     set_target_properties(libdynd
         PROPERTIES
         # For now, during development, embed the full version string
@@ -395,7 +441,15 @@ if (DYND_SHARED_LIB)
         PREFIX "${CMAKE_SHARED_LIBRARY_PREFIX}"
         )
 else()
-    add_library(libdynd STATIC ${libdynd_SRC})
+    if (DYND_CUDA)
+        set(CUDA_OPTIONS "-arch=compute_20")
+        if (NOT WIN32)
+            set(CUDA_OPTIONS ${CUDA_OPTIONS}  "-Xcompiler" "-fPIC")
+        endif()
+        cuda_add_library(libdynd STATIC ${libdynd_SRC} OPTIONS ${CUDA_OPTIONS})
+    else()
+        add_library(libdynd STATIC ${libdynd_SRC})
+    endif()
     set_target_properties(libdynd
         PROPERTIES
         OUTPUT_NAME "dynd"

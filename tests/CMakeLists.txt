@@ -8,7 +8,8 @@ project(test_libdynd)
 
 # Disable optimizations so the tests build quicker
 if(WIN32)
-    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /Od")
+    # _VARIADIC_MAX=10 is for VS2012
+    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -D_VARIADIC_MAX=10 /Od")
 else()
     set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -DGTEST_USE_OWN_TR1_TUPLE=1 -O0")
 endif()
@@ -25,6 +26,8 @@ set(tests_SRC
     types/test_convert_type.cpp
     types/test_align_type.cpp
     types/test_char_type.cpp
+    types/test_cuda_host_type.cpp
+    types/test_cuda_device_type.cpp
     types/test_datashape_formatter.cpp
     types/test_datashape_parser.cpp
     types/test_date_type.cpp

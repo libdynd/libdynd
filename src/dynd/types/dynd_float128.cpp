@@ -14,7 +14,7 @@ using namespace std;
 using namespace dynd;
 
 namespace {
-    inline uint8_t leading_zerobits(uint8_t value) {
+    DYND_CUDA_HOST_DEVICE inline uint8_t leading_zerobits(uint8_t value) {
         return (value&0xf0u) ?
                     ((value&0xc0u) ? ((value&0x80u) ? 0u : 1u)
                                    : ((value&0x20u) ? 2u : 3u))
@@ -23,17 +23,17 @@ namespace {
                                    : ((value&0x02u) ? 6u : 7u));
     }
 
-    inline uint8_t leading_zerobits(uint16_t value) {
+    DYND_CUDA_HOST_DEVICE inline uint8_t leading_zerobits(uint16_t value) {
         return (value&0xff00u) ? (leading_zerobits((uint8_t)(value >> 8)))
                               : (leading_zerobits((uint8_t)value) + 8u);
     }
 
-    inline uint8_t leading_zerobits(uint32_t value) {
+    DYND_CUDA_HOST_DEVICE inline uint8_t leading_zerobits(uint32_t value) {
         return (value&0xffff0000u) ? (leading_zerobits((uint16_t)(value >> 16)))
                               : (leading_zerobits((uint16_t)value) + 16u);
     }
 
-    inline uint8_t leading_zerobits(uint64_t value) {
+    DYND_CUDA_HOST_DEVICE inline uint8_t leading_zerobits(uint64_t value) {
         return (value&0xffffffff00000000ULL)
                             ? (leading_zerobits((uint32_t)(value >> 32)))
                             : (leading_zerobits((uint32_t)value) + 32u);
@@ -164,12 +164,20 @@ dynd::dynd_float128::dynd_float128(unsigned long long value)
 
 dynd::dynd_float128::dynd_float128(const dynd_int128& DYND_UNUSED(value))
 {
+#ifdef DYND_CUDA_DEVICE_ARCH
+    DYND_TRIGGER_ASSERT("dynd int128 to float128 conversion isn't implemented");
+#else
     throw runtime_error("dynd int128 to float128 conversion isn't implemented");
+#endif
 }
 
 dynd::dynd_float128::dynd_float128(const dynd_uint128& DYND_UNUSED(value))
 {
+#ifdef DYND_CUDA_DEVICE_ARCH
+    DYND_TRIGGER_ASSERT("dynd int128 to float128 conversion isn't implemented");
+#else
     throw runtime_error("dynd uint128 to float128 conversion isn't implemented");
+#endif
 }
 
 dynd::dynd_float128::dynd_float128(const dynd_float16& value)

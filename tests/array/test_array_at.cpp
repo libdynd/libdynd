@@ -6,7 +6,9 @@
 #include <iostream>
 #include <stdexcept>
 #include <cmath>
+
 #include "inc_gtest.hpp"
+#include "../test_memory.hpp"
 
 #include "dynd/array.hpp"
 #include "dynd/exceptions.hpp"
@@ -14,9 +16,15 @@
 using namespace std;
 using namespace dynd;
 
-TEST(ArrayIndex, BasicInteger) {
+template <typename T>
+class ArrayIndex : public Memory<T> {
+};
+
+TYPED_TEST_CASE_P(ArrayIndex);
+
+TYPED_TEST_P(ArrayIndex, BasicInteger) {
     int i0[3][2] = {{1,2},{3,4},{5,6}};
-    nd::array a = i0;
+    nd::array a = TestFixture::To(i0);
     nd::array b, c;
 
     // Indexing in two steps
@@ -57,7 +65,7 @@ TEST(ArrayIndex, BasicInteger) {
     EXPECT_THROW(a(0,0,0), too_many_indices);
 
     int i1[2][2][2] = {{{1,2}, {3,4}}, {{5,6}, {7,8}}};
-    a = i1;
+    a = TestFixture::To(i1);
 
     // Indexing in two steps
     b = a(0,0);
@@ -101,9 +109,9 @@ TEST(ArrayIndex, BasicInteger) {
     EXPECT_THROW(a(0,0,0,0), too_many_indices);
 }
 
-TEST(ArrayIndex, SimpleOneDimensionalRange) {
+TYPED_TEST_P(ArrayIndex, SimpleOneDimensionalRange) {
     int i0[] = {1,2,3,4,5,6};
-    nd::array a = i0, b;
+    nd::array a = TestFixture::To(i0), b;
 
     // full range
     b = a(irange());
@@ -137,9 +145,9 @@ TEST(ArrayIndex, SimpleOneDimensionalRange) {
     EXPECT_EQ(3, b(2).as<int>());
 }
 
-TEST(ArrayIndex, SteppedOneDimensionalRange) {
+TYPED_TEST_P(ArrayIndex, SteppedOneDimensionalRange) {
     int i0[] = {1,2,3,4,5,6};
-    nd::array a = i0, b;
+    nd::array a = TestFixture::To(i0), b;
 
     // different step
     b = a(irange().by(2));
@@ -190,9 +198,9 @@ TEST(ArrayIndex, SteppedOneDimensionalRange) {
     EXPECT_EQ(2, b(2).as<int>());
 }
 
-TEST(ArrayIndex, ExceptionsOneDimensionalRange) {
+TYPED_TEST_P(ArrayIndex, ExceptionsOneDimensionalRange) {
     int i0[] = {1,2,3,4,5,6};
-    nd::array a = i0, b;
+    nd::array a = TestFixture::To(i0), b;
 
     // exceptions for out-of-bounds ranges
     EXPECT_THROW(a(-7 <= irange()), irange_out_of_bounds);
@@ -201,3 +209,11 @@ TEST(ArrayIndex, ExceptionsOneDimensionalRange) {
     EXPECT_THROW(a(0,irange()), too_many_indices);
     EXPECT_THROW(a(0)(irange()), too_many_indices);
 }
+
+REGISTER_TYPED_TEST_CASE_P(ArrayIndex, BasicInteger, SimpleOneDimensionalRange,
+    SteppedOneDimensionalRange, ExceptionsOneDimensionalRange);
+
+INSTANTIATE_TYPED_TEST_CASE_P(Default, ArrayIndex, DefaultMemory);
+#ifdef DYND_CUDA
+INSTANTIATE_TYPED_TEST_CASE_P(CUDA, ArrayIndex, CUDAMemory);
+#endif // DYND_CUDA

@@ -90,7 +90,7 @@ void fixed_dim_type::print_type(std::ostream& o) const
 {
     if ((size_t)m_stride == m_element_tp.get_data_size() ||
                     m_dim_size == 1) {
-        o << m_dim_size << ", " << m_element_tp;
+        o << m_dim_size << " * " << m_element_tp;
     } else {
         o << "fixed_dim[";
         o << m_dim_size;

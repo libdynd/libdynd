@@ -28,9 +28,11 @@ TEST(DTypeDType, Create) {
     EXPECT_EQ(sizeof(const base_type *), d.get_data_alignment());
     EXPECT_EQ(sizeof(const base_type *), d.get_data_size());
     EXPECT_FALSE(d.is_expression());
+    // Roundtripping through a string
+    EXPECT_EQ(d, ndt::type(d.str()));
 }
 
-TEST(DTypeDType, BasicNDobject) {
+TEST(DTypeDType, BasicNDArray) {
     nd::array a;
 
     a = ndt::type("int32");

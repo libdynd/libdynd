@@ -183,6 +183,75 @@ struct strided_assign_kernel_extra {
     static void destruct(ckernel_prefix *extra);
 };
 
+#ifdef DYND_CUDA
+/**
+ * Creates an assignment kernel for one data value from the
+ * src type/metadata to the dst type/metadata. This adds the
+ * kernel at the 'out_offset' position in 'out's data, as part
+ * of a hierarchy matching the dynd type's hierarchy. At least
+ * one of the types should be a CUDA type.
+ *
+ * This function should always be called with this == dst_tp first,
+ * and types which don't support the particular assignment should
+ * then call the corresponding function with this == src_dt.
+ *
+ * \param out  The hierarchical assignment kernel being constructed.
+ * \param offset_out  The offset within 'out'.
+ * \param dst_tp  The destination dynd type.
+ * \param dst_metadata  Metadata for the destination data.
+ * \param src_tp  The source dynd type.
+ * \param src_metadata  Metadata for the source data
+ * \param kernreq  What kind of kernel must be placed in 'out'.
+ * \param errmode  The error mode to use for assignments.
+ * \param ectx  DyND evaluation context.
+ *
+ * \returns  The offset within 'out' immediately after the
+ *           created kernel.
+ */
+size_t make_cuda_assignment_kernel(
+                ckernel_builder *out, size_t offset_out,
+                const ndt::type& dst_tp, const char *dst_metadata,
+                const ndt::type& src_tp, const char *src_metadata,
+                kernel_request_t kernreq, assign_error_mode errmode,
+                const eval::eval_context *ectx);
+
+/**
+ * Creates an assignment kernel when the src and the dst are the same, but
+ * can be in a CUDA memory space, and are POD (plain old data).
+ *
+ * \param out  The hierarchical assignment kernel being constructed.
+ * \param offset_out  The offset within 'out'.
+ * \param dst_device  If the destination data is on the CUDA device, true. Otherwise false.
+ * \param src_device  If the source data is on the CUDA device, true. Otherwise false.
+ * \param data_size  The size of the data being assigned.
+ * \param data_alignment  The alignment of the data being assigned.
+ * \param kernreq  What kind of kernel must be placed in 'out'.
+ */
+size_t make_cuda_pod_typed_data_assignment_kernel(
+                ckernel_builder *out, size_t offset_out,
+                bool dst_device, bool src_device,
+                size_t data_size, size_t data_alignment,
+                kernel_request_t kernreq);
+
+/**
+ * Creates an assignment kernel from the src to the dst built in
+ * type ids. Either the src or the dst can be in a CUDA memory space.
+ *
+ * \param out  The hierarchical assignment kernel being constructed.
+ * \param offset_out  The offset within 'out'.
+ * \param dst_device  If the destination data is on the CUDA device, true. Otherwise false.
+ * \param dst_type_id  The destination dynd type id.
+ * \param src_device  If the source data is on the CUDA device, true. Otherwise false.
+ * \param src_type_id  The source dynd type id.
+ * \param kernreq  What kind of kernel must be placed in 'out'.
+ * \param errmode  The error mode to use for assignments.
+ */
+size_t make_cuda_builtin_type_assignment_kernel(
+                ckernel_builder *out, size_t offset_out,
+                bool dst_device, type_id_t dst_type_id,
+                bool src_device, type_id_t src_type_id,
+                kernel_request_t kernreq, assign_error_mode errmode);
+#endif
 } // namespace dynd
 
 #endif // _DYND__ASSIGNMENT_KERNELS_HPP_

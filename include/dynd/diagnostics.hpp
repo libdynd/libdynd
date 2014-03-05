@@ -34,7 +34,10 @@
 # define DYND_ASSERT_ALIGNED(ptr, stride, alignment, extra_info) {}
 #endif
 
-#if DYND_ASSIGNMENT_TRACING
+#define DYND_TRIGGER_ASSERT(message) assert(!message)
+#define DYND_TRIGGER_ASSERT_RETURN_ZERO(message) assert(!message); return 0
+
+#if DYND_ASSIGNMENT_TRACING && !defined(__CUDA_ARCH__)
 #include <iostream>
 #include <dynd/type.hpp>
 

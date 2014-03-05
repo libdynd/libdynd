@@ -35,8 +35,8 @@ TEST(DataShapeFormatter, ArrayBuiltinAtoms) {
     EXPECT_EQ("float16", format_datashape(nd::array(dynd_float16(0.f, assign_error_none)), "", false));
     EXPECT_EQ("float32", format_datashape(nd::array(0.f), "", false));
     EXPECT_EQ("float64", format_datashape(nd::array(0.), "", false));
-    EXPECT_EQ("complex[float32]", format_datashape(nd::array(complex<float>(0.f)), "", false));
-    EXPECT_EQ("complex[float64]", format_datashape(nd::array(complex<double>(0.)), "", false));
+    EXPECT_EQ("complex[float32]", format_datashape(nd::array(dynd_complex<float>(0.f)), "", false));
+    EXPECT_EQ("complex[float64]", format_datashape(nd::array(dynd_complex<double>(0.)), "", false));
 }
 
 TEST(DataShapeFormatter, DTypeBuiltinAtoms) {
@@ -51,8 +51,8 @@ TEST(DataShapeFormatter, DTypeBuiltinAtoms) {
     EXPECT_EQ("uint64", format_datashape(ndt::make_type<uint64_t>(), "", false));
     EXPECT_EQ("float32", format_datashape(ndt::make_type<float>(), "", false));
     EXPECT_EQ("float64", format_datashape(ndt::make_type<double>(), "", false));
-    EXPECT_EQ("complex[float32]", format_datashape(ndt::make_type<complex<float> >(), "", false));
-    EXPECT_EQ("complex[float64]", format_datashape(ndt::make_type<complex<double> >(), "", false));
+    EXPECT_EQ("complex[float32]", format_datashape(ndt::make_type<dynd_complex<float> >(), "", false));
+    EXPECT_EQ("complex[float64]", format_datashape(ndt::make_type<dynd_complex<double> >(), "", false));
 }
 
 TEST(DataShapeFormatter, ArrayStringAtoms) {

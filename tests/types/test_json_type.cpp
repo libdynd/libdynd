@@ -25,6 +25,8 @@ TEST(JSONDType, Create) {
     EXPECT_EQ(sizeof(void *), d.get_data_alignment());
     EXPECT_EQ(2*sizeof(void *), d.get_data_size());
     EXPECT_FALSE(d.is_expression());
+    // Roundtripping through a string
+    EXPECT_EQ(d, ndt::type(d.str()));
 }
 
 TEST(JSONDType, Validation) {

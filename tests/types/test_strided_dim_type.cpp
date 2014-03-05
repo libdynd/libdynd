@@ -23,6 +23,8 @@ TEST(StridedArrayDType, Basic) {
     ndt::type d = ndt::make_strided_dim(ndt::make_type<int32_t>());
 
     EXPECT_EQ(ndt::make_type<int32_t>(), d.p("element_type").as<ndt::type>());
+    // Roundtripping through a string
+    EXPECT_EQ(d, ndt::type(d.str()));
 }
 
 TEST(StridedArrayDType, ReplaceScalarTypes) {

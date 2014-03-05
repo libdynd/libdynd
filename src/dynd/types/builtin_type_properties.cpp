@@ -15,7 +15,7 @@ static nd::array property_complex_real(const nd::array& n) {
     return n.replace_dtype(ndt::make_property(n.get_dtype(), "real"));
 }
 
-static nd::array property_complex_imag(const nd::array& n) {
+static nd::array property_complex_imag(const nd::array& n) {                        
     return n.replace_dtype(ndt::make_property(n.get_dtype(), "imag"));
 }
 
@@ -144,15 +144,15 @@ static void get_property_kernel_complex_float64_imag(char *dst, const char *src,
 static void get_or_set_property_kernel_complex_float32_conj(char *dst, const char *src,
                 ckernel_prefix *DYND_UNUSED(extra))
 {
-    complex<float> value = *reinterpret_cast<const complex<float> *>(src);
-    *reinterpret_cast<complex<float> *>(dst) = complex<float>(value.real(), -value.imag());
+    dynd_complex<float> value = *reinterpret_cast<const dynd_complex<float> *>(src);
+    *reinterpret_cast<dynd_complex<float> *>(dst) = dynd_complex<float>(value.real(), -value.imag());
 }
 
 static void get_or_set_property_kernel_complex_float64_conj(char *dst, const char *src,
                 ckernel_prefix *DYND_UNUSED(extra))
 {
-    complex<double> value = *reinterpret_cast<const complex<double> *>(src);
-    *reinterpret_cast<complex<double> *>(dst) = complex<double>(value.real(), -value.imag());
+    dynd_complex<double> value = *reinterpret_cast<const dynd_complex<double> *>(src);
+    *reinterpret_cast<dynd_complex<double> *>(dst) = dynd_complex<double>(value.real(), -value.imag());
 }
 
 size_t dynd::make_builtin_type_elwise_property_getter_kernel(

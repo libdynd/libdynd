@@ -416,8 +416,8 @@ DYND_FORCE_BIG_TYPE(dynd_float128, dynd_float128);
     // Complex sorting comparison (lexicographic)
     template<class src0_real_type, class src1_real_type,
                     bool src0_bigger, bool src1_bigger>
-    struct op_sort_lt<complex<src0_real_type>, complex<src1_real_type>, complex_kind, complex_kind, src0_bigger, src1_bigger> {
-        inline static bool f(const complex<src0_real_type>& v0, const complex<src1_real_type>& v1)
+    struct op_sort_lt<dynd_complex<src0_real_type>, dynd_complex<src1_real_type>, complex_kind, complex_kind, src0_bigger, src1_bigger> {
+        inline static bool f(const dynd_complex<src0_real_type>& v0, const dynd_complex<src1_real_type>& v1)
         {
             // Sorts in the order like NumPy, [R + Rj, R + nanj, nan + Rj, nan + nanj]
             if (v0.real() < v1.real()) {
@@ -433,8 +433,8 @@ DYND_FORCE_BIG_TYPE(dynd_float128, dynd_float128);
     };
     template<class src0_type, class src1_real_type, type_kind_t src0_kind,
                     bool src0_bigger, bool src1_bigger>
-    struct op_sort_lt<src0_type, complex<src1_real_type>, src0_kind, complex_kind, src0_bigger, src1_bigger> {
-        inline static bool f(const src0_type& v0, const complex<src1_real_type>& v1)
+    struct op_sort_lt<src0_type, dynd_complex<src1_real_type>, src0_kind, complex_kind, src0_bigger, src1_bigger> {
+        inline static bool f(const src0_type& v0, const dynd_complex<src1_real_type>& v1)
         {
             typedef typename big_type<src0_type,src1_real_type>::type BT;
             return BT(v0) < BT(v1.real()) ||
@@ -443,8 +443,8 @@ DYND_FORCE_BIG_TYPE(dynd_float128, dynd_float128);
     };
     template<class src0_real_type, class src1_type, type_kind_t src1_kind,
                     bool src0_bigger, bool src1_bigger>
-    struct op_sort_lt<complex<src0_real_type>, src1_type, complex_kind, src1_kind, src0_bigger, src1_bigger> {
-        inline static bool f(const complex<src0_real_type>& v0, const src1_type& v1)
+    struct op_sort_lt<dynd_complex<src0_real_type>, src1_type, complex_kind, src1_kind, src0_bigger, src1_bigger> {
+        inline static bool f(const dynd_complex<src0_real_type>& v0, const src1_type& v1)
         {
             typedef typename big_type<src0_real_type,src1_type>::type BT;
             return BT(v0.real()) < BT(v1) ||
@@ -453,8 +453,8 @@ DYND_FORCE_BIG_TYPE(dynd_float128, dynd_float128);
     };
     template<class src0_type, class src1_real_type,
                     bool src0_bigger, bool src1_bigger>
-    struct op_sort_lt<src0_type, complex<src1_real_type>, bool_kind, complex_kind, src0_bigger, src1_bigger> {
-        inline static bool f(const src0_type& v0, const complex<src1_real_type>& v1)
+    struct op_sort_lt<src0_type, dynd_complex<src1_real_type>, bool_kind, complex_kind, src0_bigger, src1_bigger> {
+        inline static bool f(const src0_type& v0, const dynd_complex<src1_real_type>& v1)
         {
             return static_cast<src1_real_type>(v0) < v1.real() ||
                 (static_cast<src1_real_type>(v0) == v1.real() && 0 < v1.imag());
@@ -462,8 +462,8 @@ DYND_FORCE_BIG_TYPE(dynd_float128, dynd_float128);
     };
     template<class src0_real_type, class src1_type,
                     bool src0_bigger, bool src1_bigger>
-    struct op_sort_lt<complex<src0_real_type>, src1_type, complex_kind, bool_kind, src0_bigger, src1_bigger> {
-        inline static bool f(const complex<src0_real_type>& v0, const src1_type& v1)
+    struct op_sort_lt<dynd_complex<src0_real_type>, src1_type, complex_kind, bool_kind, src0_bigger, src1_bigger> {
+        inline static bool f(const dynd_complex<src0_real_type>& v0, const src1_type& v1)
         {
             return v0.real() < static_cast<src0_real_type>(v1) ||
                 (v0.real() == static_cast<src0_real_type>(v1) && v0.imag() < 0);
@@ -473,8 +473,8 @@ DYND_FORCE_BIG_TYPE(dynd_float128, dynd_float128);
     // complex, complex equality
     template<class src0_real_type, class src1_real_type,
                     bool src0_bigger, bool src1_bigger>
-    struct op_eq<complex<src0_real_type>, complex<src1_real_type>, complex_kind, complex_kind, src0_bigger, src1_bigger> {
-        inline static bool f(const complex<src0_real_type>& v0, const complex<src1_real_type>& v1)
+    struct op_eq<dynd_complex<src0_real_type>, dynd_complex<src1_real_type>, complex_kind, complex_kind, src0_bigger, src1_bigger> {
+        inline static bool f(const dynd_complex<src0_real_type>& v0, const dynd_complex<src1_real_type>& v1)
         {
             return v0.real() == v1.real() && v0.imag() == v1.imag();
         }
@@ -483,8 +483,8 @@ DYND_FORCE_BIG_TYPE(dynd_float128, dynd_float128);
     // complex, complex inequality
     template<class src0_real_type, class src1_real_type,
                     bool src0_bigger, bool src1_bigger>
-    struct op_ne<complex<src0_real_type>, complex<src1_real_type>, complex_kind, complex_kind, src0_bigger, src1_bigger> {
-        inline static bool f(const complex<src0_real_type>& v0, const complex<src1_real_type>& v1)
+    struct op_ne<dynd_complex<src0_real_type>, dynd_complex<src1_real_type>, complex_kind, complex_kind, src0_bigger, src1_bigger> {
+        inline static bool f(const dynd_complex<src0_real_type>& v0, const dynd_complex<src1_real_type>& v1)
         {
             return v0.real() != v1.real() || v0.imag() != v1.imag();
         }
@@ -493,8 +493,8 @@ DYND_FORCE_BIG_TYPE(dynd_float128, dynd_float128);
     // int/uint/real, complex equality
     template<class src0_type, class src1_real_type,
                     bool src0_bigger, bool src1_bigger>
-    struct op_eq<src0_type, complex<src1_real_type>, int_kind, complex_kind, src0_bigger, src1_bigger> {
-        inline static bool f(const src0_type& v0, const complex<src1_real_type>& v1)
+    struct op_eq<src0_type, dynd_complex<src1_real_type>, int_kind, complex_kind, src0_bigger, src1_bigger> {
+        inline static bool f(const src0_type& v0, const dynd_complex<src1_real_type>& v1)
         {
             return v1.imag() == 0 && v0 == static_cast<src0_type>(v1.real()) &&
                             static_cast<src1_real_type>(v0) == v1.real();
@@ -502,8 +502,8 @@ DYND_FORCE_BIG_TYPE(dynd_float128, dynd_float128);
     };
     template<class src0_type, class src1_real_type,
                     bool src0_bigger, bool src1_bigger>
-    struct op_eq<src0_type, complex<src1_real_type>, uint_kind, complex_kind, src0_bigger, src1_bigger> {
-        inline static bool f(const src0_type& v0, const complex<src1_real_type>& v1)
+    struct op_eq<src0_type, dynd_complex<src1_real_type>, uint_kind, complex_kind, src0_bigger, src1_bigger> {
+        inline static bool f(const src0_type& v0, const dynd_complex<src1_real_type>& v1)
         {
             return v1.imag() == 0 && v0 == static_cast<src0_type>(v1.real()) &&
                             static_cast<src1_real_type>(v0) == v1.real();
@@ -511,8 +511,8 @@ DYND_FORCE_BIG_TYPE(dynd_float128, dynd_float128);
     };
     template<class src0_type, class src1_real_type,
                     bool src0_bigger, bool src1_bigger>
-    struct op_eq<src0_type, complex<src1_real_type>, real_kind, complex_kind, src0_bigger, src1_bigger> {
-        inline static bool f(const src0_type& v0, const complex<src1_real_type>& v1)
+    struct op_eq<src0_type, dynd_complex<src1_real_type>, real_kind, complex_kind, src0_bigger, src1_bigger> {
+        inline static bool f(const src0_type& v0, const dynd_complex<src1_real_type>& v1)
         {
             typedef typename big_type<src0_type,src1_real_type>::type BT;
             return v1.imag() == 0 && BT(v0) == BT(v1.real());
@@ -522,8 +522,8 @@ DYND_FORCE_BIG_TYPE(dynd_float128, dynd_float128);
     // complex, int/uint/real equality
     template<class src0_real_type, class src1_type,
                     bool src0_bigger, bool src1_bigger>
-    struct op_eq<complex<src0_real_type>, src1_type, complex_kind, int_kind, src0_bigger, src1_bigger> {
-        inline static bool f(const complex<src0_real_type>& v0, const src1_type& v1)
+    struct op_eq<dynd_complex<src0_real_type>, src1_type, complex_kind, int_kind, src0_bigger, src1_bigger> {
+        inline static bool f(const dynd_complex<src0_real_type>& v0, const src1_type& v1)
         {
             return v0.imag() == 0 && v0.real() == static_cast<src0_real_type>(v1) &&
                             static_cast<src1_type>(v0.real()) == v1;
@@ -531,8 +531,8 @@ DYND_FORCE_BIG_TYPE(dynd_float128, dynd_float128);
     };
     template<class src0_real_type, class src1_type,
                     bool src0_bigger, bool src1_bigger>
-    struct op_eq<complex<src0_real_type>, src1_type, complex_kind, uint_kind, src0_bigger, src1_bigger> {
-        inline static bool f(const complex<src0_real_type>& v0, const src1_type& v1)
+    struct op_eq<dynd_complex<src0_real_type>, src1_type, complex_kind, uint_kind, src0_bigger, src1_bigger> {
+        inline static bool f(const dynd_complex<src0_real_type>& v0, const src1_type& v1)
         {
             return v0.imag() == 0 && v0.real() == static_cast<src0_real_type>(v1) &&
                             static_cast<src1_type>(v0.real()) == v1;
@@ -540,8 +540,8 @@ DYND_FORCE_BIG_TYPE(dynd_float128, dynd_float128);
     };
     template<class src0_real_type, class src1_type,
                     bool src0_bigger, bool src1_bigger>
-    struct op_eq<complex<src0_real_type>, src1_type, complex_kind, real_kind, src0_bigger, src1_bigger> {
-        inline static bool f(const complex<src0_real_type>& v0, const src1_type& v1)
+    struct op_eq<dynd_complex<src0_real_type>, src1_type, complex_kind, real_kind, src0_bigger, src1_bigger> {
+        inline static bool f(const dynd_complex<src0_real_type>& v0, const src1_type& v1)
         {
             typedef typename big_type<src0_real_type,src1_type>::type BT;
             return v0.imag() == 0 && BT(v0.real()) == BT(v1);
@@ -551,8 +551,8 @@ DYND_FORCE_BIG_TYPE(dynd_float128, dynd_float128);
     // int/uint/real, complex inequality
     template<class src0_type, class src1_real_type,
                     bool src0_bigger, bool src1_bigger>
-    struct op_ne<src0_type, complex<src1_real_type>, uint_kind, complex_kind, src0_bigger, src1_bigger> {
-        inline static bool f(const src0_type& v0, const complex<src1_real_type>& v1)
+    struct op_ne<src0_type, dynd_complex<src1_real_type>, uint_kind, complex_kind, src0_bigger, src1_bigger> {
+        inline static bool f(const src0_type& v0, const dynd_complex<src1_real_type>& v1)
         {
             return v1.imag() != 0 || v0 != static_cast<src0_type>(v1.real()) ||
                             static_cast<src1_real_type>(v0) != v1.real();
@@ -560,8 +560,8 @@ DYND_FORCE_BIG_TYPE(dynd_float128, dynd_float128);
     };
     template<class src0_type, class src1_real_type,
                     bool src0_bigger, bool src1_bigger>
-    struct op_ne<src0_type, complex<src1_real_type>, int_kind, complex_kind, src0_bigger, src1_bigger> {
-        inline static bool f(const src0_type& v0, const complex<src1_real_type>& v1)
+    struct op_ne<src0_type, dynd_complex<src1_real_type>, int_kind, complex_kind, src0_bigger, src1_bigger> {
+        inline static bool f(const src0_type& v0, const dynd_complex<src1_real_type>& v1)
         {
             return v1.imag() != 0 || v0 == static_cast<src0_type>(v1.real()) ||
                             static_cast<src1_real_type>(v0) != v1.real();
@@ -569,8 +569,8 @@ DYND_FORCE_BIG_TYPE(dynd_float128, dynd_float128);
     };
     template<class src0_type, class src1_real_type,
                     bool src0_bigger, bool src1_bigger>
-    struct op_ne<src0_type, complex<src1_real_type>, real_kind, complex_kind, src0_bigger, src1_bigger> {
-        inline static bool f(const src0_type& v0, const complex<src1_real_type>& v1)
+    struct op_ne<src0_type, dynd_complex<src1_real_type>, real_kind, complex_kind, src0_bigger, src1_bigger> {
+        inline static bool f(const src0_type& v0, const dynd_complex<src1_real_type>& v1)
         {
             typedef typename big_type<src0_type,src1_real_type>::type BT;
             return v1.imag() != 0 || BT(v0) != BT(v1.real());
@@ -580,8 +580,8 @@ DYND_FORCE_BIG_TYPE(dynd_float128, dynd_float128);
     // complex, int/uint/real inequality
     template<class src0_real_type, class src1_type,
                     bool src0_bigger, bool src1_bigger>
-    struct op_ne<complex<src0_real_type>, src1_type, complex_kind, int_kind, src0_bigger, src1_bigger> {
-        inline static bool f(const complex<src0_real_type>& v0, const src1_type& v1)
+    struct op_ne<dynd_complex<src0_real_type>, src1_type, complex_kind, int_kind, src0_bigger, src1_bigger> {
+        inline static bool f(const dynd_complex<src0_real_type>& v0, const src1_type& v1)
         {
             return v0.imag() != 0 || v0.real() != static_cast<src0_real_type>(v1) ||
                             static_cast<src1_type>(v0.real()) != v1;
@@ -589,8 +589,8 @@ DYND_FORCE_BIG_TYPE(dynd_float128, dynd_float128);
     };
     template<class src0_real_type, class src1_type,
                     bool src0_bigger, bool src1_bigger>
-    struct op_ne<complex<src0_real_type>, src1_type, complex_kind, uint_kind, src0_bigger, src1_bigger> {
-        inline static bool f(const complex<src0_real_type>& v0, const src1_type& v1)
+    struct op_ne<dynd_complex<src0_real_type>, src1_type, complex_kind, uint_kind, src0_bigger, src1_bigger> {
+        inline static bool f(const dynd_complex<src0_real_type>& v0, const src1_type& v1)
         {
             return v0.imag() != 0 || v0.real() != static_cast<src0_real_type>(v1) ||
                             static_cast<src1_type>(v0.real()) != v1;
@@ -598,8 +598,8 @@ DYND_FORCE_BIG_TYPE(dynd_float128, dynd_float128);
     };
     template<class src0_real_type, class src1_type,
                     bool src0_bigger, bool src1_bigger>
-    struct op_ne<complex<src0_real_type>, src1_type, complex_kind, real_kind, src0_bigger, src1_bigger> {
-        inline static bool f(const complex<src0_real_type>& v0, const src1_type& v1)
+    struct op_ne<dynd_complex<src0_real_type>, src1_type, complex_kind, real_kind, src0_bigger, src1_bigger> {
+        inline static bool f(const dynd_complex<src0_real_type>& v0, const src1_type& v1)
         {
             typedef typename big_type<src0_real_type,src1_type>::type BT;
             return v0.imag() != 0 || BT(v0.real()) != BT(v1);

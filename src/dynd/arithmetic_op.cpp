@@ -196,8 +196,8 @@ namespace {
     {&binary_single_kernel<operation<float> >::func, &binary_strided_kernel<operation<float> >::func}, \
     {&binary_single_kernel<operation<double> >::func, &binary_strided_kernel<operation<double> >::func}, \
     DYND_FLOAT128_BINARY_OP_PAIR(operation), \
-    {&binary_single_kernel<operation<complex<float> > >::func, &binary_strided_kernel<operation<complex<float> > >::func}, \
-    {&binary_single_kernel<operation<complex<double> > >::func, &binary_strided_kernel<operation<complex<double> > >::func} \
+    {&binary_single_kernel<operation<dynd_complex<float> > >::func, &binary_strided_kernel<operation<dynd_complex<float> > >::func}, \
+    {&binary_single_kernel<operation<dynd_complex<double> > >::func, &binary_strided_kernel<operation<dynd_complex<double> > >::func} \
     }
 
 #define DYND_BUILTIN_DTYPE_BINARY_OP_TABLE_DEFS(operation) \

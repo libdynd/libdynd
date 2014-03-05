@@ -11,6 +11,7 @@
 #include <complex>
 #include <limits>
 
+#include <dynd/config.hpp>
 #include <dynd/type.hpp>
 #include <dynd/diagnostics.hpp>
 
@@ -23,13 +24,17 @@ namespace dynd {
 
 template<class dst_type, class src_type, assign_error_mode errmode>
 struct single_assigner_builtin_base_error {
-    static void assign(dst_type *DYND_UNUSED(dst), const src_type *DYND_UNUSED(src), ckernel_prefix *DYND_UNUSED(extra)) {
+    DYND_CUDA_HOST_DEVICE static void assign(dst_type *DYND_UNUSED(dst), const src_type *DYND_UNUSED(src), ckernel_prefix *DYND_UNUSED(extra)) {
         //DYND_TRACE_ASSIGNMENT(static_cast<float>(*src), float, *src, double);
 
+#ifdef DYND_CUDA_DEVICE_ARCH
+        DYND_TRIGGER_ASSERT("assignment is not implemented for CUDA global memory");
+#else
         std::stringstream ss;
         ss << "assignment from " << ndt::make_type<src_type>() << " to " << ndt::make_type<dst_type>();
         ss << "with error mode " << errmode << " is not implemented";
         throw std::runtime_error(ss.str());
+#endif
     }
 };
 
@@ -40,7 +45,7 @@ struct single_assigner_builtin_base : public single_assigner_builtin_base_error<
 template<class dst_type, class src_type, type_kind_t dst_kind, type_kind_t src_kind>
 struct single_assigner_builtin_base<dst_type, src_type, dst_kind, src_kind, assign_error_none>
 {
-    static void assign(dst_type *dst, const src_type *src, ckernel_prefix *DYND_UNUSED(extra)) {
+    DYND_CUDA_HOST_DEVICE static void assign(dst_type *dst, const src_type *src, ckernel_prefix *DYND_UNUSED(extra)) {
         DYND_TRACE_ASSIGNMENT(static_cast<dst_type>(*src), dst_type, *src, src_type);
 
         *dst = static_cast<dst_type>(*src);
@@ -49,37 +54,37 @@ struct single_assigner_builtin_base<dst_type, src_type, dst_kind, src_kind, assi
 
 // Complex floating point -> non-complex with no error checking
 template<class dst_type, class src_real_type>
-struct single_assigner_builtin_base<dst_type, std::complex<src_real_type>, int_kind, complex_kind, assign_error_none>
+struct single_assigner_builtin_base<dst_type, dynd_complex<src_real_type>, int_kind, complex_kind, assign_error_none>
 {
-    static void assign(dst_type *dst, const std::complex<src_real_type> *src, ckernel_prefix *DYND_UNUSED(extra)) {
-        DYND_TRACE_ASSIGNMENT(static_cast<dst_type>(src->real()), dst_type, *src, std::complex<src_real_type>);
+    DYND_CUDA_HOST_DEVICE static void assign(dst_type *dst, const dynd_complex<src_real_type> *src, ckernel_prefix *DYND_UNUSED(extra)) {
+        DYND_TRACE_ASSIGNMENT(static_cast<dst_type>(src->real()), dst_type, *src, dynd_complex<src_real_type>);
 
         *dst = static_cast<dst_type>(src->real());
     }
 };
 template<class dst_type, class src_real_type>
-struct single_assigner_builtin_base<dst_type, std::complex<src_real_type>, uint_kind, complex_kind, assign_error_none>
+struct single_assigner_builtin_base<dst_type, dynd_complex<src_real_type>, uint_kind, complex_kind, assign_error_none>
 {
-    static void assign(dst_type *dst, const std::complex<src_real_type> *src, ckernel_prefix *DYND_UNUSED(extra)) {
-        DYND_TRACE_ASSIGNMENT(static_cast<dst_type>(src->real()), dst_type, *src, std::complex<src_real_type>);
+    DYND_CUDA_HOST_DEVICE static void assign(dst_type *dst, const dynd_complex<src_real_type> *src, ckernel_prefix *DYND_UNUSED(extra)) {
+        DYND_TRACE_ASSIGNMENT(static_cast<dst_type>(src->real()), dst_type, *src, dynd_complex<src_real_type>);
 
         *dst = static_cast<dst_type>(src->real());
     }
 };
 template<class src_real_type>
-struct single_assigner_builtin_base<float, std::complex<src_real_type>, real_kind, complex_kind, assign_error_none>
+struct single_assigner_builtin_base<float, dynd_complex<src_real_type>, real_kind, complex_kind, assign_error_none>
 {
-    static void assign(float *dst, const std::complex<src_real_type> *src, ckernel_prefix *DYND_UNUSED(extra)) {
-        DYND_TRACE_ASSIGNMENT(static_cast<float>(src->real()), dst_type, *src, std::complex<src_real_type>);
+    DYND_CUDA_HOST_DEVICE static void assign(float *dst, const dynd_complex<src_real_type> *src, ckernel_prefix *DYND_UNUSED(extra)) {
+        DYND_TRACE_ASSIGNMENT(static_cast<float>(src->real()), dst_type, *src, dynd_complex<src_real_type>);
 
         *dst = static_cast<float>(src->real());
     }
 };
 template<class src_real_type>
-struct single_assigner_builtin_base<double, std::complex<src_real_type>, real_kind, complex_kind, assign_error_none>
+struct single_assigner_builtin_base<double, dynd_complex<src_real_type>, real_kind, complex_kind, assign_error_none>
 {
-    static void assign(double *dst, const std::complex<src_real_type> *src, ckernel_prefix *DYND_UNUSED(extra)) {
-        DYND_TRACE_ASSIGNMENT(static_cast<double>(src->real()), dst_type, *src, std::complex<src_real_type>);
+    DYND_CUDA_HOST_DEVICE static void assign(double *dst, const dynd_complex<src_real_type> *src, ckernel_prefix *DYND_UNUSED(extra)) {
+        DYND_TRACE_ASSIGNMENT(static_cast<double>(src->real()), dst_type, *src, dynd_complex<src_real_type>);
 
         *dst = static_cast<double>(src->real());
     }
@@ -90,7 +95,7 @@ struct single_assigner_builtin_base<double, std::complex<src_real_type>, real_ki
 template<class src_type, type_kind_t src_kind>
 struct single_assigner_builtin_base<dynd_bool, src_type, bool_kind, src_kind, assign_error_none>
 {
-    static void assign(dynd_bool *dst, const src_type *src, ckernel_prefix *DYND_UNUSED(extra)) {
+    DYND_CUDA_HOST_DEVICE static void assign(dynd_bool *dst, const src_type *src, ckernel_prefix *DYND_UNUSED(extra)) {
         DYND_TRACE_ASSIGNMENT((bool)(s != src_type(0)), dynd_bool, s, src_type);
 
         *dst = (*src != src_type(0));
@@ -333,10 +338,10 @@ struct single_assigner_builtin_base<dst_type, src_type, real_kind, int_kind, ass
 
 // Signed int -> complex floating point with no checking
 template<class dst_real_type, class src_type>
-struct single_assigner_builtin_base<std::complex<dst_real_type>, src_type, complex_kind, int_kind, assign_error_none>
+struct single_assigner_builtin_base<dynd_complex<dst_real_type>, src_type, complex_kind, int_kind, assign_error_none>
 {
-    static void assign(std::complex<dst_real_type> *dst, const src_type *src, ckernel_prefix *DYND_UNUSED(extra)) {
-        DYND_TRACE_ASSIGNMENT(d, std::complex<dst_real_type>, *src, src_type);
+    DYND_CUDA_HOST_DEVICE static void assign(dynd_complex<dst_real_type> *dst, const src_type *src, ckernel_prefix *DYND_UNUSED(extra)) {
+        DYND_TRACE_ASSIGNMENT(d, dynd_complex<dst_real_type>, *src, src_type);
 
         *dst = static_cast<dst_real_type>(*src);
     }
@@ -344,18 +349,18 @@ struct single_assigner_builtin_base<std::complex<dst_real_type>, src_type, compl
 
 // Signed int -> complex floating point with inexact checking
 template<class dst_real_type, class src_type>
-struct single_assigner_builtin_base<std::complex<dst_real_type>, src_type, complex_kind, int_kind, assign_error_inexact>
+struct single_assigner_builtin_base<dynd_complex<dst_real_type>, src_type, complex_kind, int_kind, assign_error_inexact>
 {
-    static void assign(std::complex<dst_real_type> *dst, const src_type *src, ckernel_prefix *DYND_UNUSED(extra)) {
+    static void assign(dynd_complex<dst_real_type> *dst, const src_type *src, ckernel_prefix *DYND_UNUSED(extra)) {
         src_type s = *src;
         dst_real_type d = static_cast<dst_real_type>(s);
 
-        DYND_TRACE_ASSIGNMENT(d, std::complex<dst_real_type>, s, src_type);
+        DYND_TRACE_ASSIGNMENT(d, dynd_complex<dst_real_type>, s, src_type);
 
         if (static_cast<src_type>(d) != s) {
             std::stringstream ss;
             ss << "inexact value while assigning " << ndt::make_type<src_type>() << " value ";
-            ss << s << " to " << ndt::make_type<std::complex<dst_real_type> >() << " value " << d;
+            ss << s << " to " << ndt::make_type<dynd_complex<dst_real_type> >() << " value " << d;
             throw std::runtime_error(ss.str());
         }
         *dst = d;
@@ -364,11 +369,11 @@ struct single_assigner_builtin_base<std::complex<dst_real_type>, src_type, compl
 
 // Signed int -> complex floating point with other checking
 template<class dst_real_type, class src_type>
-struct single_assigner_builtin_base<std::complex<dst_real_type>, src_type, complex_kind, int_kind, assign_error_overflow>
-    : public single_assigner_builtin_base<std::complex<dst_real_type>, src_type, complex_kind, int_kind, assign_error_none> {};
+struct single_assigner_builtin_base<dynd_complex<dst_real_type>, src_type, complex_kind, int_kind, assign_error_overflow>
+    : public single_assigner_builtin_base<dynd_complex<dst_real_type>, src_type, complex_kind, int_kind, assign_error_none> {};
 template<class dst_real_type, class src_type>
-struct single_assigner_builtin_base<std::complex<dst_real_type>, src_type, complex_kind, int_kind, assign_error_fractional>
-    : public single_assigner_builtin_base<std::complex<dst_real_type>, src_type, complex_kind, int_kind, assign_error_none> {};
+struct single_assigner_builtin_base<dynd_complex<dst_real_type>, src_type, complex_kind, int_kind, assign_error_fractional>
+    : public single_assigner_builtin_base<dynd_complex<dst_real_type>, src_type, complex_kind, int_kind, assign_error_none> {};
 
 // Unsigned int -> floating point with inexact checking
 template<class dst_type, class src_type>
@@ -400,10 +405,10 @@ struct single_assigner_builtin_base<dst_type, src_type, real_kind, uint_kind, as
 
 // Unsigned int -> complex floating point with no checking
 template<class dst_real_type, class src_type>
-struct single_assigner_builtin_base<std::complex<dst_real_type>, src_type, complex_kind, uint_kind, assign_error_none>
+struct single_assigner_builtin_base<dynd_complex<dst_real_type>, src_type, complex_kind, uint_kind, assign_error_none>
 {
-    static void assign(std::complex<dst_real_type> *dst, const src_type *src, ckernel_prefix *DYND_UNUSED(extra)) {
-        DYND_TRACE_ASSIGNMENT(d, std::complex<dst_real_type>, *src, src_type);
+    DYND_CUDA_HOST_DEVICE static void assign(dynd_complex<dst_real_type> *dst, const src_type *src, ckernel_prefix *DYND_UNUSED(extra)) {
+        DYND_TRACE_ASSIGNMENT(d, dynd_complex<dst_real_type>, *src, src_type);
 
         *dst = static_cast<dst_real_type>(*src);
     }
@@ -411,18 +416,18 @@ struct single_assigner_builtin_base<std::complex<dst_real_type>, src_type, compl
 
 // Unsigned int -> complex floating point with inexact checking
 template<class dst_real_type, class src_type>
-struct single_assigner_builtin_base<std::complex<dst_real_type>, src_type, complex_kind, uint_kind, assign_error_inexact>
+struct single_assigner_builtin_base<dynd_complex<dst_real_type>, src_type, complex_kind, uint_kind, assign_error_inexact>
 {
-    static void assign(std::complex<dst_real_type> *dst, const src_type *src, ckernel_prefix *DYND_UNUSED(extra)) {
+    static void assign(dynd_complex<dst_real_type> *dst, const src_type *src, ckernel_prefix *DYND_UNUSED(extra)) {
         src_type s = *src;
         dst_real_type d = static_cast<dst_real_type>(s);
 
-        DYND_TRACE_ASSIGNMENT(d, std::complex<dst_real_type>, s, src_type);
+        DYND_TRACE_ASSIGNMENT(d, dynd_complex<dst_real_type>, s, src_type);
 
         if (static_cast<src_type>(d) != s) {
             std::stringstream ss;
             ss << "inexact value while assigning " << ndt::make_type<src_type>() << " value ";
-            ss << s << " to " << ndt::make_type<std::complex<dst_real_type> >() << " value " << d;
+            ss << s << " to " << ndt::make_type<dynd_complex<dst_real_type> >() << " value " << d;
             throw std::runtime_error(ss.str());
         }
         *dst = d;
@@ -431,11 +436,11 @@ struct single_assigner_builtin_base<std::complex<dst_real_type>, src_type, compl
 
 // Unsigned int -> complex floating point with other checking
 template<class dst_real_type, class src_type>
-struct single_assigner_builtin_base<std::complex<dst_real_type>, src_type, complex_kind, uint_kind, assign_error_overflow>
-    : public single_assigner_builtin_base<std::complex<dst_real_type>, src_type, complex_kind, uint_kind, assign_error_none> {};
+struct single_assigner_builtin_base<dynd_complex<dst_real_type>, src_type, complex_kind, uint_kind, assign_error_overflow>
+    : public single_assigner_builtin_base<dynd_complex<dst_real_type>, src_type, complex_kind, uint_kind, assign_error_none> {};
 template<class dst_real_type, class src_type>
-struct single_assigner_builtin_base<std::complex<dst_real_type>, src_type, complex_kind, uint_kind, assign_error_fractional>
-    : public single_assigner_builtin_base<std::complex<dst_real_type>, src_type, complex_kind, uint_kind, assign_error_none> {};
+struct single_assigner_builtin_base<dynd_complex<dst_real_type>, src_type, complex_kind, uint_kind, assign_error_fractional>
+    : public single_assigner_builtin_base<dynd_complex<dst_real_type>, src_type, complex_kind, uint_kind, assign_error_none> {};
 
 // Floating point -> signed int with overflow checking
 template<class dst_type, class src_type>
@@ -489,23 +494,23 @@ struct single_assigner_builtin_base<dst_type, src_type, int_kind, real_kind, ass
 
 // Complex floating point -> signed int with overflow checking
 template<class dst_type, class src_real_type>
-struct single_assigner_builtin_base<dst_type, std::complex<src_real_type>, int_kind, complex_kind, assign_error_overflow>
+struct single_assigner_builtin_base<dst_type, dynd_complex<src_real_type>, int_kind, complex_kind, assign_error_overflow>
 {
-    static void assign(dst_type *dst, const std::complex<src_real_type> *src, ckernel_prefix *DYND_UNUSED(extra)) {
-        std::complex<src_real_type> s = *src;
+    static void assign(dst_type *dst, const dynd_complex<src_real_type> *src, ckernel_prefix *DYND_UNUSED(extra)) {
+        dynd_complex<src_real_type> s = *src;
 
-        DYND_TRACE_ASSIGNMENT(static_cast<dst_type>(s.real()), dst_type, s, std::complex<src_real_type>);
+        DYND_TRACE_ASSIGNMENT(static_cast<dst_type>(s.real()), dst_type, s, dynd_complex<src_real_type>);
 
         if (s.imag() != 0) {
             std::stringstream ss;
-            ss << "loss of imaginary component while assigning " << ndt::make_type<std::complex<src_real_type> >() << " value ";
+            ss << "loss of imaginary component while assigning " << ndt::make_type<dynd_complex<src_real_type> >() << " value ";
             ss << s << " to " << ndt::make_type<dst_type>();
             throw std::runtime_error(ss.str());
         }
 
         if (s.real() < std::numeric_limits<dst_type>::min() || std::numeric_limits<dst_type>::max() < s.real()) {
             std::stringstream ss;
-            ss << "overflow while assigning " << ndt::make_type<std::complex<src_real_type> >() << " value ";
+            ss << "overflow while assigning " << ndt::make_type<dynd_complex<src_real_type> >() << " value ";
             ss << s << " to " << ndt::make_type<dst_type>();
             throw std::overflow_error(ss.str());
         }
@@ -515,30 +520,30 @@ struct single_assigner_builtin_base<dst_type, std::complex<src_real_type>, int_k
 
 // Complex floating point -> signed int with fractional checking
 template<class dst_type, class src_real_type>
-struct single_assigner_builtin_base<dst_type, std::complex<src_real_type>, int_kind, complex_kind, assign_error_fractional>
+struct single_assigner_builtin_base<dst_type, dynd_complex<src_real_type>, int_kind, complex_kind, assign_error_fractional>
 {
-    static void assign(dst_type *dst, const std::complex<src_real_type> *src, ckernel_prefix *DYND_UNUSED(extra)) {
-        std::complex<src_real_type> s = *src;
+    static void assign(dst_type *dst, const dynd_complex<src_real_type> *src, ckernel_prefix *DYND_UNUSED(extra)) {
+        dynd_complex<src_real_type> s = *src;
 
-        DYND_TRACE_ASSIGNMENT(static_cast<dst_type>(s.real()), dst_type, s, std::complex<src_real_type>);
+        DYND_TRACE_ASSIGNMENT(static_cast<dst_type>(s.real()), dst_type, s, dynd_complex<src_real_type>);
 
         if (s.imag() != 0) {
             std::stringstream ss;
-            ss << "loss of imaginary component while assigning " << ndt::make_type<std::complex<src_real_type> >() << " value ";
+            ss << "loss of imaginary component while assigning " << ndt::make_type<dynd_complex<src_real_type> >() << " value ";
             ss << s << " to " << ndt::make_type<dst_type>();
             throw std::runtime_error(ss.str());
         }
 
         if (s.real() < std::numeric_limits<dst_type>::min() || std::numeric_limits<dst_type>::max() < s.real()) {
             std::stringstream ss;
-            ss << "overflow while assigning " << ndt::make_type<std::complex<src_real_type> >() << " value ";
+            ss << "overflow while assigning " << ndt::make_type<dynd_complex<src_real_type> >() << " value ";
             ss << s << " to " << ndt::make_type<dst_type>();
             throw std::overflow_error(ss.str());
         }
 
         if (std::floor(s.real()) != s.real()) {
             std::stringstream ss;
-            ss << "fractional part lost while assigning " << ndt::make_type<std::complex<src_real_type> >() << " value ";
+            ss << "fractional part lost while assigning " << ndt::make_type<dynd_complex<src_real_type> >() << " value ";
             ss << s << " to " << ndt::make_type<dst_type>();
             throw std::runtime_error(ss.str());
         }
@@ -548,8 +553,8 @@ struct single_assigner_builtin_base<dst_type, std::complex<src_real_type>, int_k
 
 // Complex floating point -> signed int with other checking
 template<class dst_type, class src_real_type>
-struct single_assigner_builtin_base<dst_type, std::complex<src_real_type>, int_kind, complex_kind, assign_error_inexact>
-    : public single_assigner_builtin_base<dst_type, std::complex<src_real_type>, int_kind, complex_kind, assign_error_fractional> {};
+struct single_assigner_builtin_base<dst_type, dynd_complex<src_real_type>, int_kind, complex_kind, assign_error_inexact>
+    : public single_assigner_builtin_base<dst_type, dynd_complex<src_real_type>, int_kind, complex_kind, assign_error_fractional> {};
 
 // Floating point -> unsigned int with overflow checking
 template<class dst_type, class src_type>
@@ -603,23 +608,23 @@ struct single_assigner_builtin_base<dst_type, src_type, uint_kind, real_kind, as
 
 // Complex floating point -> unsigned int with overflow checking
 template<class dst_type, class src_real_type>
-struct single_assigner_builtin_base<dst_type, std::complex<src_real_type>, uint_kind, complex_kind, assign_error_overflow>
+struct single_assigner_builtin_base<dst_type, dynd_complex<src_real_type>, uint_kind, complex_kind, assign_error_overflow>
 {
-    static void assign(dst_type *dst, const std::complex<src_real_type> *src, ckernel_prefix *DYND_UNUSED(extra)) {
-        std::complex<src_real_type> s = *src;
+    static void assign(dst_type *dst, const dynd_complex<src_real_type> *src, ckernel_prefix *DYND_UNUSED(extra)) {
+        dynd_complex<src_real_type> s = *src;
 
-        DYND_TRACE_ASSIGNMENT(static_cast<dst_type>(s.real()), dst_type, s, std::complex<src_real_type>);
+        DYND_TRACE_ASSIGNMENT(static_cast<dst_type>(s.real()), dst_type, s, dynd_complex<src_real_type>);
 
         if (s.imag() != 0) {
             std::stringstream ss;
-            ss << "loss of imaginary component while assigning " << ndt::make_type<std::complex<src_real_type> >() << " value ";
+            ss << "loss of imaginary component while assigning " << ndt::make_type<dynd_complex<src_real_type> >() << " value ";
             ss << s << " to " << ndt::make_type<dst_type>();
             throw std::runtime_error(ss.str());
         }
 
         if (s.real() < 0 || std::numeric_limits<dst_type>::max() < s.real()) {
             std::stringstream ss;
-            ss << "overflow while assigning " << ndt::make_type<std::complex<src_real_type> >() << " value ";
+            ss << "overflow while assigning " << ndt::make_type<dynd_complex<src_real_type> >() << " value ";
             ss << s << " to " << ndt::make_type<dst_type>();
             throw std::overflow_error(ss.str());
         }
@@ -629,30 +634,30 @@ struct single_assigner_builtin_base<dst_type, std::complex<src_real_type>, uint_
 
 // Complex floating point -> unsigned int with fractional checking
 template<class dst_type, class src_real_type>
-struct single_assigner_builtin_base<dst_type, std::complex<src_real_type>, uint_kind, complex_kind, assign_error_fractional>
+struct single_assigner_builtin_base<dst_type, dynd_complex<src_real_type>, uint_kind, complex_kind, assign_error_fractional>
 {
-    static void assign(dst_type *dst, const std::complex<src_real_type> *src, ckernel_prefix *DYND_UNUSED(extra)) {
-        std::complex<src_real_type> s = *src;
+    static void assign(dst_type *dst, const dynd_complex<src_real_type> *src, ckernel_prefix *DYND_UNUSED(extra)) {
+        dynd_complex<src_real_type> s = *src;
 
-        DYND_TRACE_ASSIGNMENT(static_cast<dst_type>(s.real()), dst_type, s, std::complex<src_real_type>);
+        DYND_TRACE_ASSIGNMENT(static_cast<dst_type>(s.real()), dst_type, s, dynd_complex<src_real_type>);
 
         if (s.imag() != 0) {
             std::stringstream ss;
-            ss << "loss of imaginary component while assigning " << ndt::make_type<std::complex<src_real_type> >() << " value ";
+            ss << "loss of imaginary component while assigning " << ndt::make_type<dynd_complex<src_real_type> >() << " value ";
             ss << s << " to " << ndt::make_type<dst_type>();
             throw std::runtime_error(ss.str());
         }
 
         if (s.real() < 0 || std::numeric_limits<dst_type>::max() < s.real()) {
             std::stringstream ss;
-            ss << "overflow while assigning " << ndt::make_type<std::complex<src_real_type> >() << " value ";
+            ss << "overflow while assigning " << ndt::make_type<dynd_complex<src_real_type> >() << " value ";
             ss << s << " to " << ndt::make_type<dst_type>();
             throw std::overflow_error(ss.str());
         }
 
         if (std::floor(s.real()) != s.real()) {
             std::stringstream ss;
-            ss << "fractional part lost while assigning " << ndt::make_type<std::complex<src_real_type> >() << " value ";
+            ss << "fractional part lost while assigning " << ndt::make_type<dynd_complex<src_real_type> >() << " value ";
             ss << s << " to " << ndt::make_type<dst_type>();
             throw std::runtime_error(ss.str());
         }
@@ -662,8 +667,8 @@ struct single_assigner_builtin_base<dst_type, std::complex<src_real_type>, uint_
 
 // Complex floating point -> unsigned int with other checking
 template<class dst_type, class src_real_type>
-struct single_assigner_builtin_base<dst_type, std::complex<src_real_type>, uint_kind, complex_kind, assign_error_inexact>
-    : public single_assigner_builtin_base<dst_type, std::complex<src_real_type>, uint_kind, complex_kind, assign_error_fractional> {};
+struct single_assigner_builtin_base<dst_type, dynd_complex<src_real_type>, uint_kind, complex_kind, assign_error_inexact>
+    : public single_assigner_builtin_base<dst_type, dynd_complex<src_real_type>, uint_kind, complex_kind, assign_error_fractional> {};
 
 // float -> float with no checking
 template<>
@@ -678,14 +683,14 @@ struct single_assigner_builtin_base<float, float, real_kind, real_kind, assign_e
 
 // complex<float> -> complex<float> with no checking
 template<>
-struct single_assigner_builtin_base<std::complex<float>, std::complex<float>, complex_kind, complex_kind, assign_error_overflow>
-    : public single_assigner_builtin_base<std::complex<float>, std::complex<float>, complex_kind, complex_kind, assign_error_none> {};
+struct single_assigner_builtin_base<dynd_complex<float>, dynd_complex<float>, complex_kind, complex_kind, assign_error_overflow>
+    : public single_assigner_builtin_base<dynd_complex<float>, dynd_complex<float>, complex_kind, complex_kind, assign_error_none> {};
 template<>
-struct single_assigner_builtin_base<std::complex<float>, std::complex<float>, complex_kind, complex_kind, assign_error_fractional>
-    : public single_assigner_builtin_base<std::complex<float>, std::complex<float>, complex_kind, complex_kind, assign_error_none> {};
+struct single_assigner_builtin_base<dynd_complex<float>, dynd_complex<float>, complex_kind, complex_kind, assign_error_fractional>
+    : public single_assigner_builtin_base<dynd_complex<float>, dynd_complex<float>, complex_kind, complex_kind, assign_error_none> {};
 template<>
-struct single_assigner_builtin_base<std::complex<float>, std::complex<float>, complex_kind, complex_kind, assign_error_inexact>
-    : public single_assigner_builtin_base<std::complex<float>, std::complex<float>, complex_kind, complex_kind, assign_error_none> {};
+struct single_assigner_builtin_base<dynd_complex<float>, dynd_complex<float>, complex_kind, complex_kind, assign_error_inexact>
+    : public single_assigner_builtin_base<dynd_complex<float>, dynd_complex<float>, complex_kind, complex_kind, assign_error_none> {};
 
 // float -> double with no checking
 template<>
@@ -700,14 +705,14 @@ struct single_assigner_builtin_base<double, float, real_kind, real_kind, assign_
 
 // complex<float> -> complex<double> with no checking
 template<>
-struct single_assigner_builtin_base<std::complex<double>, std::complex<float>, complex_kind, complex_kind, assign_error_overflow>
-    : public single_assigner_builtin_base<std::complex<double>, std::complex<float>, complex_kind, complex_kind, assign_error_none> {};
+struct single_assigner_builtin_base<dynd_complex<double>, dynd_complex<float>, complex_kind, complex_kind, assign_error_overflow>
+    : public single_assigner_builtin_base<dynd_complex<double>, dynd_complex<float>, complex_kind, complex_kind, assign_error_none> {};
 template<>
-struct single_assigner_builtin_base<std::complex<double>, std::complex<float>, complex_kind, complex_kind, assign_error_fractional>
-    : public single_assigner_builtin_base<std::complex<double>, std::complex<float>, complex_kind, complex_kind, assign_error_none> {};
+struct single_assigner_builtin_base<dynd_complex<double>, dynd_complex<float>, complex_kind, complex_kind, assign_error_fractional>
+    : public single_assigner_builtin_base<dynd_complex<double>, dynd_complex<float>, complex_kind, complex_kind, assign_error_none> {};
 template<>
-struct single_assigner_builtin_base<std::complex<double>, std::complex<float>, complex_kind, complex_kind, assign_error_inexact>
-    : public single_assigner_builtin_base<std::complex<double>, std::complex<float>, complex_kind, complex_kind, assign_error_none> {};
+struct single_assigner_builtin_base<dynd_complex<double>, dynd_complex<float>, complex_kind, complex_kind, assign_error_inexact>
+    : public single_assigner_builtin_base<dynd_complex<double>, dynd_complex<float>, complex_kind, complex_kind, assign_error_none> {};
 
 // double -> double with no checking
 template<>
@@ -722,14 +727,14 @@ struct single_assigner_builtin_base<double, double, real_kind, real_kind, assign
 
 // complex<double> -> complex<double> with no checking
 template<>
-struct single_assigner_builtin_base<std::complex<double>, std::complex<double>, complex_kind, complex_kind, assign_error_overflow>
-    : public single_assigner_builtin_base<std::complex<double>, std::complex<double>, complex_kind, complex_kind, assign_error_none> {};
+struct single_assigner_builtin_base<dynd_complex<double>, dynd_complex<double>, complex_kind, complex_kind, assign_error_overflow>
+    : public single_assigner_builtin_base<dynd_complex<double>, dynd_complex<double>, complex_kind, complex_kind, assign_error_none> {};
 template<>
-struct single_assigner_builtin_base<std::complex<double>, std::complex<double>, complex_kind, complex_kind, assign_error_fractional>
-    : public single_assigner_builtin_base<std::complex<double>, std::complex<double>, complex_kind, complex_kind, assign_error_none> {};
+struct single_assigner_builtin_base<dynd_complex<double>, dynd_complex<double>, complex_kind, complex_kind, assign_error_fractional>
+    : public single_assigner_builtin_base<dynd_complex<double>, dynd_complex<double>, complex_kind, complex_kind, assign_error_none> {};
 template<>
-struct single_assigner_builtin_base<std::complex<double>, std::complex<double>, complex_kind, complex_kind, assign_error_inexact>
-    : public single_assigner_builtin_base<std::complex<double>, std::complex<double>, complex_kind, complex_kind, assign_error_none> {};
+struct single_assigner_builtin_base<dynd_complex<double>, dynd_complex<double>, complex_kind, complex_kind, assign_error_inexact>
+    : public single_assigner_builtin_base<dynd_complex<double>, dynd_complex<double>, complex_kind, complex_kind, assign_error_none> {};
 
 // double -> float with overflow checking
 template<>
@@ -749,7 +754,7 @@ struct single_assigner_builtin_base<float, double, real_kind, real_kind, assign_
         }
 #else
         double s = *src;
-        if (std::isfinite(s) && (s < -std::numeric_limits<float>::max() ||
+        if (isfinite(s) && (s < -std::numeric_limits<float>::max() ||
                             s > std::numeric_limits<float>::max())) {
             std::stringstream ss;
             ss << "overflow while assigning " << ndt::make_type<double>() << " value ";
@@ -786,7 +791,7 @@ struct single_assigner_builtin_base<float, double, real_kind, real_kind, assign_
             throw std::overflow_error(ss.str());
         }
 #else
-        if (std::isfinite(s) && (s < -std::numeric_limits<float>::max() ||
+        if (isfinite(s) && (s < -std::numeric_limits<float>::max() ||
                             s > std::numeric_limits<float>::max())) {
             std::stringstream ss;
             ss << "overflow while assigning " << ndt::make_type<double>() << " value ";
@@ -813,68 +818,68 @@ struct single_assigner_builtin_base<float, double, real_kind, real_kind, assign_
 
 // complex<double> -> complex<float> with overflow checking
 template<>
-struct single_assigner_builtin_base<std::complex<float>, std::complex<double>, complex_kind, complex_kind, assign_error_overflow>
+struct single_assigner_builtin_base<dynd_complex<float>, dynd_complex<double>, complex_kind, complex_kind, assign_error_overflow>
 {
-    static void assign(std::complex<float> *dst, const std::complex<double> *src, ckernel_prefix *DYND_UNUSED(extra)) {
-        DYND_TRACE_ASSIGNMENT(static_cast<std::complex<float> >(*src), std::complex<float>, *src, std::complex<double>);
+    static void assign(dynd_complex<float> *dst, const dynd_complex<double> *src, ckernel_prefix *DYND_UNUSED(extra)) {
+        DYND_TRACE_ASSIGNMENT(static_cast<dynd_complex<float> >(*src), dynd_complex<float>, *src, dynd_complex<double>);
 
 #if defined(DYND_USE_FPSTATUS)
         clear_fp_status();
-        *dst = static_cast<std::complex<float> >(*src);
+        *dst = static_cast<dynd_complex<float> >(*src);
         if (is_overflow_fp_status()) {
             std::stringstream ss;
-            ss << "overflow while assigning " << ndt::make_type<std::complex<double> >() << " value ";
-            ss << *src << " to " << ndt::make_type<std::complex<float> >();
+            ss << "overflow while assigning " << ndt::make_type<dynd_complex<double> >() << " value ";
+            ss << *src << " to " << ndt::make_type<dynd_complex<float> >();
             throw std::overflow_error(ss.str());
         }
 #else
-        std::complex<double>(s) = *src;
+        dynd_complex<double>(s) = *src;
         if (s.real() < -std::numeric_limits<float>::max() || s.real() > std::numeric_limits<float>::max() ||
                     s.imag() < -std::numeric_limits<float>::max() || s.imag() > std::numeric_limits<float>::max()) {
             std::stringstream ss;
-            ss << "overflow while assigning " << ndt::make_type<std::complex<double> >() << " value ";
-            ss << *src << " to " << ndt::make_type<std::complex<float> >();
+            ss << "overflow while assigning " << ndt::make_type<dynd_complex<double> >() << " value ";
+            ss << *src << " to " << ndt::make_type<dynd_complex<float> >();
             throw std::overflow_error(ss.str());
         }
-        *dst = static_cast<std::complex<float> >(s);
+        *dst = static_cast<dynd_complex<float> >(s);
 #endif // DYND_USE_FPSTATUS
     }
 };
 
 // complex<double> -> complex<float> with fractional checking
 template<>
-struct single_assigner_builtin_base<std::complex<float>, std::complex<double>, complex_kind, complex_kind, assign_error_fractional>
-    : public single_assigner_builtin_base<std::complex<float>, std::complex<double>, complex_kind, complex_kind, assign_error_overflow> {};
+struct single_assigner_builtin_base<dynd_complex<float>, dynd_complex<double>, complex_kind, complex_kind, assign_error_fractional>
+    : public single_assigner_builtin_base<dynd_complex<float>, dynd_complex<double>, complex_kind, complex_kind, assign_error_overflow> {};
 
 
 // complex<double> -> complex<float> with inexact checking
 template<>
-struct single_assigner_builtin_base<std::complex<float>, std::complex<double>, complex_kind, complex_kind, assign_error_inexact>
+struct single_assigner_builtin_base<dynd_complex<float>, dynd_complex<double>, complex_kind, complex_kind, assign_error_inexact>
 {
-    static void assign(std::complex<float> *dst, const std::complex<double> *src, ckernel_prefix *DYND_UNUSED(extra)) {
-        DYND_TRACE_ASSIGNMENT(static_cast<std::complex<float> >(*src), std::complex<float>, *src, std::complex<double>);
+    static void assign(dynd_complex<float> *dst, const dynd_complex<double> *src, ckernel_prefix *DYND_UNUSED(extra)) {
+        DYND_TRACE_ASSIGNMENT(static_cast<dynd_complex<float> >(*src), dynd_complex<float>, *src, dynd_complex<double>);
 
-        std::complex<double> s = *src;
-        std::complex<float> d;
+        dynd_complex<double> s = *src;
+        dynd_complex<float> d;
 
 #if defined(DYND_USE_FPSTATUS)
         clear_fp_status();
-        d = static_cast<std::complex<float> >(s);
+        d = static_cast<dynd_complex<float> >(s);
         if (is_overflow_fp_status()) {
             std::stringstream ss;
-            ss << "overflow while assigning " << ndt::make_type<std::complex<double> >() << " value ";
-            ss << *src << " to " << ndt::make_type<std::complex<float> >();
+            ss << "overflow while assigning " << ndt::make_type<dynd_complex<double> >() << " value ";
+            ss << *src << " to " << ndt::make_type<dynd_complex<float> >();
             throw std::overflow_error(ss.str());
         }
 #else
         if (s.real() < -std::numeric_limits<float>::max() || s.real() > std::numeric_limits<float>::max() ||
                     s.imag() < -std::numeric_limits<float>::max() || s.imag() > std::numeric_limits<float>::max()) {
             std::stringstream ss;
-            ss << "overflow while assigning " << ndt::make_type<std::complex<double> >() << " value ";
-            ss << *src << " to " << ndt::make_type<std::complex<float> >();
+            ss << "overflow while assigning " << ndt::make_type<dynd_complex<double> >() << " value ";
+            ss << *src << " to " << ndt::make_type<dynd_complex<float> >();
             throw std::overflow_error(ss.str());
         }
-        d = static_cast<std::complex<float> >(s);
+        d = static_cast<dynd_complex<float> >(s);
 #endif // DYND_USE_FPSTATUS
 
         // The inexact status didn't work as it should have, so converting back to double and comparing
@@ -883,8 +888,8 @@ struct single_assigner_builtin_base<std::complex<float>, std::complex<double>, c
         //}
         if (d.real() != s.real() || d.imag() != s.imag()) {
             std::stringstream ss;
-            ss << "inexact precision loss while assigning " << ndt::make_type<std::complex<double> >() << " value ";
-            ss << *src << " to " << ndt::make_type<std::complex<float> >();
+            ss << "inexact precision loss while assigning " << ndt::make_type<dynd_complex<double> >() << " value ";
+            ss << *src << " to " << ndt::make_type<dynd_complex<float> >();
             throw std::runtime_error(ss.str());
         }
         *dst = d;
@@ -893,16 +898,16 @@ struct single_assigner_builtin_base<std::complex<float>, std::complex<double>, c
 
 // complex<T> -> T with overflow checking
 template<typename real_type>
-struct single_assigner_builtin_base<real_type, std::complex<real_type>, real_kind, complex_kind, assign_error_overflow>
+struct single_assigner_builtin_base<real_type, dynd_complex<real_type>, real_kind, complex_kind, assign_error_overflow>
 {
-    static void assign(real_type *dst, const std::complex<real_type> *src, ckernel_prefix *DYND_UNUSED(extra)) {
-        std::complex<real_type> s = *src;
+    static void assign(real_type *dst, const dynd_complex<real_type> *src, ckernel_prefix *DYND_UNUSED(extra)) {
+        dynd_complex<real_type> s = *src;
 
-        DYND_TRACE_ASSIGNMENT(static_cast<float>(s.real()), real_type, s, std::complex<real_type>);
+        DYND_TRACE_ASSIGNMENT(static_cast<float>(s.real()), real_type, s, dynd_complex<real_type>);
 
         if (s.imag() != 0) {
             std::stringstream ss;
-            ss << "loss of imaginary component while assigning " << ndt::make_type<std::complex<real_type> >() << " value ";
+            ss << "loss of imaginary component while assigning " << ndt::make_type<dynd_complex<real_type> >() << " value ";
             ss << *src << " to " << ndt::make_type<real_type>();
             throw std::runtime_error(ss.str());
         }
@@ -913,66 +918,66 @@ struct single_assigner_builtin_base<real_type, std::complex<real_type>, real_kin
 
 // complex<T> -> T with fractional checking
 template<typename real_type>
-struct single_assigner_builtin_base<real_type, std::complex<real_type>, real_kind, complex_kind, assign_error_fractional>
-    : public single_assigner_builtin_base<real_type, std::complex<real_type>, real_kind, complex_kind, assign_error_overflow> {};
+struct single_assigner_builtin_base<real_type, dynd_complex<real_type>, real_kind, complex_kind, assign_error_fractional>
+    : public single_assigner_builtin_base<real_type, dynd_complex<real_type>, real_kind, complex_kind, assign_error_overflow> {};
 
 // complex<T> -> T with inexact checking
 template<typename real_type>
-struct single_assigner_builtin_base<real_type, std::complex<real_type>, real_kind, complex_kind, assign_error_inexact>
-    : public single_assigner_builtin_base<real_type, std::complex<real_type>, real_kind, complex_kind, assign_error_overflow> {};
+struct single_assigner_builtin_base<real_type, dynd_complex<real_type>, real_kind, complex_kind, assign_error_inexact>
+    : public single_assigner_builtin_base<real_type, dynd_complex<real_type>, real_kind, complex_kind, assign_error_overflow> {};
 
 
 
 // double -> complex<float>
 template<>
-struct single_assigner_builtin_base<std::complex<float>, double, complex_kind, real_kind, assign_error_none>
+struct single_assigner_builtin_base<dynd_complex<float>, double, complex_kind, real_kind, assign_error_none>
 {
-    static void assign(std::complex<float> *dst, const double *src, ckernel_prefix *DYND_UNUSED(extra)) {
-        DYND_TRACE_ASSIGNMENT(static_cast<std::complex<float> >(*src), std::complex<float>, *src, double);
+    DYND_CUDA_HOST_DEVICE static void assign(dynd_complex<float> *dst, const double *src, ckernel_prefix *DYND_UNUSED(extra)) {
+        DYND_TRACE_ASSIGNMENT(static_cast<dynd_complex<float> >(*src), dynd_complex<float>, *src, double);
 
         *dst = static_cast<float>(*src);
     }
 };
 // T -> complex<T>
 template<typename real_type>
-struct single_assigner_builtin_base<std::complex<real_type>, real_type, complex_kind, real_kind, assign_error_none>
+struct single_assigner_builtin_base<dynd_complex<real_type>, real_type, complex_kind, real_kind, assign_error_none>
 {
-    static void assign(std::complex<real_type> *dst, const real_type *src, ckernel_prefix *DYND_UNUSED(extra)) {
-        DYND_TRACE_ASSIGNMENT(static_cast<std::complex<real_type> >(*src), std::complex<real_type>, *src, real_type);
+    DYND_CUDA_HOST_DEVICE static void assign(dynd_complex<real_type> *dst, const real_type *src, ckernel_prefix *DYND_UNUSED(extra)) {
+        DYND_TRACE_ASSIGNMENT(static_cast<dynd_complex<real_type> >(*src), dynd_complex<real_type>, *src, real_type);
 
         *dst = *src;
     }
 };
 template<typename real_type, assign_error_mode errmode>
-struct single_assigner_builtin_base<std::complex<real_type>, real_type, complex_kind, real_kind, errmode>
-    : public single_assigner_builtin_base<std::complex<real_type>, real_type, complex_kind, real_kind, assign_error_none> {};
+struct single_assigner_builtin_base<dynd_complex<real_type>, real_type, complex_kind, real_kind, errmode>
+    : public single_assigner_builtin_base<dynd_complex<real_type>, real_type, complex_kind, real_kind, assign_error_none> {};
 
 // float -> complex<double>
 template<>
-struct single_assigner_builtin_base<std::complex<double>, float, complex_kind, real_kind, assign_error_none>
+struct single_assigner_builtin_base<dynd_complex<double>, float, complex_kind, real_kind, assign_error_none>
 {
-    static void assign(std::complex<double> *dst, const float *src, ckernel_prefix *DYND_UNUSED(extra)) {
-        DYND_TRACE_ASSIGNMENT(static_cast<std::complex<double> >(*src), std::complex<double>, *src, float);
+    DYND_CUDA_HOST_DEVICE static void assign(dynd_complex<double> *dst, const float *src, ckernel_prefix *DYND_UNUSED(extra)) {
+        DYND_TRACE_ASSIGNMENT(static_cast<dynd_complex<double> >(*src), dynd_complex<double>, *src, float);
 
         *dst = *src;
     }
 };
 template<assign_error_mode errmode>
-struct single_assigner_builtin_base<std::complex<double>, float, complex_kind, real_kind, errmode>
-    : public single_assigner_builtin_base<std::complex<double>, float, complex_kind, real_kind, assign_error_none> {};
+struct single_assigner_builtin_base<dynd_complex<double>, float, complex_kind, real_kind, errmode>
+    : public single_assigner_builtin_base<dynd_complex<double>, float, complex_kind, real_kind, assign_error_none> {};
 
 // complex<float> -> double with overflow checking
 template<>
-struct single_assigner_builtin_base<double, std::complex<float>, real_kind, complex_kind, assign_error_overflow>
+struct single_assigner_builtin_base<double, dynd_complex<float>, real_kind, complex_kind, assign_error_overflow>
 {
-    static void assign(double *dst, const std::complex<float> *src, ckernel_prefix *DYND_UNUSED(extra)) {
-        std::complex<float> s = *src;
+    static void assign(double *dst, const dynd_complex<float> *src, ckernel_prefix *DYND_UNUSED(extra)) {
+        dynd_complex<float> s = *src;
 
-        DYND_TRACE_ASSIGNMENT(static_cast<double>(s.real()), double, s, std::complex<float>);
+        DYND_TRACE_ASSIGNMENT(static_cast<double>(s.real()), double, s, dynd_complex<float>);
 
         if (s.imag() != 0) {
             std::stringstream ss;
-            ss << "loss of imaginary component while assigning " << ndt::make_type<std::complex<float> >() << " value ";
+            ss << "loss of imaginary component while assigning " << ndt::make_type<dynd_complex<float> >() << " value ";
             ss << *src << " to " << ndt::make_type<double>();
             throw std::runtime_error(ss.str());
         }
@@ -983,27 +988,27 @@ struct single_assigner_builtin_base<double, std::complex<float>, real_kind, comp
 
 // complex<float> -> double with fractional checking
 template<>
-struct single_assigner_builtin_base<double, std::complex<float>, real_kind, complex_kind, assign_error_fractional>
-    : public single_assigner_builtin_base<double, std::complex<float>, real_kind, complex_kind, assign_error_overflow> {};
+struct single_assigner_builtin_base<double, dynd_complex<float>, real_kind, complex_kind, assign_error_fractional>
+    : public single_assigner_builtin_base<double, dynd_complex<float>, real_kind, complex_kind, assign_error_overflow> {};
 
 // complex<float> -> double with inexact checking
 template<>
-struct single_assigner_builtin_base<double, std::complex<float>, real_kind, complex_kind, assign_error_inexact>
-    : public single_assigner_builtin_base<double, std::complex<float>, real_kind, complex_kind, assign_error_overflow> {};
+struct single_assigner_builtin_base<double, dynd_complex<float>, real_kind, complex_kind, assign_error_inexact>
+    : public single_assigner_builtin_base<double, dynd_complex<float>, real_kind, complex_kind, assign_error_overflow> {};
 
 // complex<double> -> float with overflow checking
 template<>
-struct single_assigner_builtin_base<float, std::complex<double>, real_kind, complex_kind, assign_error_overflow>
+struct single_assigner_builtin_base<float, dynd_complex<double>, real_kind, complex_kind, assign_error_overflow>
 {
-    static void assign(float *dst, const std::complex<double> *src, ckernel_prefix *DYND_UNUSED(extra)) {
-        std::complex<double> s = *src;
+    static void assign(float *dst, const dynd_complex<double> *src, ckernel_prefix *DYND_UNUSED(extra)) {
+        dynd_complex<double> s = *src;
         float d;
 
-        DYND_TRACE_ASSIGNMENT(static_cast<float>(s.real()), float, s, std::complex<double>);
+        DYND_TRACE_ASSIGNMENT(static_cast<float>(s.real()), float, s, dynd_complex<double>);
 
         if (s.imag() != 0) {
             std::stringstream ss;
-            ss << "loss of imaginary component while assigning " << ndt::make_type<std::complex<double> >() << " value ";
+            ss << "loss of imaginary component while assigning " << ndt::make_type<dynd_complex<double> >() << " value ";
             ss << *src << " to " << ndt::make_type<float>();
             throw std::runtime_error(ss.str());
         }
@@ -1013,14 +1018,14 @@ struct single_assigner_builtin_base<float, std::complex<double>, real_kind, comp
         d = static_cast<float>(s.real());
         if (is_overflow_fp_status()) {
             std::stringstream ss;
-            ss << "overflow while assigning " << ndt::make_type<std::complex<double> >() << " value ";
+            ss << "overflow while assigning " << ndt::make_type<dynd_complex<double> >() << " value ";
             ss << *src << " to " << ndt::make_type<float>();
             throw std::overflow_error(ss.str());
         }
 #else
         if (s.real() < -std::numeric_limits<float>::max() || s.real() > std::numeric_limits<float>::max()) {
             std::stringstream ss;
-            ss << "overflow while assigning " << ndt::make_type<std::complex<double> >() << " value ";
+            ss << "overflow while assigning " << ndt::make_type<dynd_complex<double> >() << " value ";
             ss << *src << " to " << ndt::make_type<float>();
             throw std::overflow_error(ss.str());
         }
@@ -1033,22 +1038,22 @@ struct single_assigner_builtin_base<float, std::complex<double>, real_kind, comp
 
 // complex<double> -> float with fractional checking
 template<>
-struct single_assigner_builtin_base<float, std::complex<double>, real_kind, complex_kind, assign_error_fractional>
-    : public single_assigner_builtin_base<float, std::complex<double>, real_kind, complex_kind, assign_error_overflow> {};
+struct single_assigner_builtin_base<float, dynd_complex<double>, real_kind, complex_kind, assign_error_fractional>
+    : public single_assigner_builtin_base<float, dynd_complex<double>, real_kind, complex_kind, assign_error_overflow> {};
 
 // complex<double> -> float with inexact checking
 template<>
-struct single_assigner_builtin_base<float, std::complex<double>, real_kind, complex_kind, assign_error_inexact>
+struct single_assigner_builtin_base<float, dynd_complex<double>, real_kind, complex_kind, assign_error_inexact>
 {
-    static void assign(float *dst, const std::complex<double> *src, ckernel_prefix *DYND_UNUSED(extra)) {
-        std::complex<double> s = *src;
+    static void assign(float *dst, const dynd_complex<double> *src, ckernel_prefix *DYND_UNUSED(extra)) {
+        dynd_complex<double> s = *src;
         float d;
 
-        DYND_TRACE_ASSIGNMENT(static_cast<float>(s.real()), float, s, std::complex<double>);
+        DYND_TRACE_ASSIGNMENT(static_cast<float>(s.real()), float, s, dynd_complex<double>);
 
         if (s.imag() != 0) {
             std::stringstream ss;
-            ss << "loss of imaginary component while assigning " << ndt::make_type<std::complex<double> >() << " value ";
+            ss << "loss of imaginary component while assigning " << ndt::make_type<dynd_complex<double> >() << " value ";
             ss << *src << " to " << ndt::make_type<float>();
             throw std::runtime_error(ss.str());
         }
@@ -1058,14 +1063,14 @@ struct single_assigner_builtin_base<float, std::complex<double>, real_kind, comp
         d = static_cast<float>(s.real());
         if (is_overflow_fp_status()) {
             std::stringstream ss;
-            ss << "overflow while assigning " << ndt::make_type<std::complex<double> >() << " value ";
+            ss << "overflow while assigning " << ndt::make_type<dynd_complex<double> >() << " value ";
             ss << s << " to " << ndt::make_type<float>();
             throw std::overflow_error(ss.str());
         }
 #else
         if (s.real() < -std::numeric_limits<float>::max() || s.real() > std::numeric_limits<float>::max()) {
             std::stringstream ss;
-            ss << "overflow while assigning " << ndt::make_type<std::complex<double> >() << " value ";
+            ss << "overflow while assigning " << ndt::make_type<dynd_complex<double> >() << " value ";
             ss << s << " to " << ndt::make_type<float>();
             throw std::overflow_error(ss.str());
         }
@@ -1074,7 +1079,7 @@ struct single_assigner_builtin_base<float, std::complex<double>, real_kind, comp
 
         if (d != s.real()) {
             std::stringstream ss;
-            ss << "inexact precision loss while assigning " << ndt::make_type<std::complex<double> >() << " value ";
+            ss << "inexact precision loss while assigning " << ndt::make_type<dynd_complex<double> >() << " value ";
             ss << *src << " to " << ndt::make_type<float>();
             throw std::runtime_error(ss.str());
         }
@@ -1085,13 +1090,13 @@ struct single_assigner_builtin_base<float, std::complex<double>, real_kind, comp
 
 // double -> complex<float> with overflow checking
 template<>
-struct single_assigner_builtin_base<std::complex<float>, double, complex_kind, real_kind, assign_error_overflow>
+struct single_assigner_builtin_base<dynd_complex<float>, double, complex_kind, real_kind, assign_error_overflow>
 {
-    static void assign(std::complex<float> *dst, const double *src, ckernel_prefix *DYND_UNUSED(extra)) {
+    static void assign(dynd_complex<float> *dst, const double *src, ckernel_prefix *DYND_UNUSED(extra)) {
         double s = *src;
         float d;
 
-        DYND_TRACE_ASSIGNMENT(static_cast<std::complex<float> >(s), std::complex<float>, s, double);
+        DYND_TRACE_ASSIGNMENT(static_cast<dynd_complex<float> >(s), dynd_complex<float>, s, double);
 
 #if defined(DYND_USE_FPSTATUS)
         clear_fp_status();
@@ -1099,15 +1104,15 @@ struct single_assigner_builtin_base<std::complex<float>, double, complex_kind, r
         if (is_overflow_fp_status()) {
             std::stringstream ss;
             ss << "overflow while assigning " << ndt::make_type<double>() << " value ";
-            ss << s << " to " << ndt::make_type<std::complex<float> >();
+            ss << s << " to " << ndt::make_type<dynd_complex<float> >();
             throw std::overflow_error(ss.str());
         }
 #else
-        if (std::isfinite(s) && (s < -std::numeric_limits<float>::max() ||
+        if (isfinite(s) && (s < -std::numeric_limits<float>::max() ||
                             s > std::numeric_limits<float>::max())) {
             std::stringstream ss;
             ss << "overflow while assigning " << ndt::make_type<double>() << " value ";
-            ss << s << " to " << ndt::make_type<std::complex<float> >();
+            ss << s << " to " << ndt::make_type<dynd_complex<float> >();
             throw std::overflow_error(ss.str());
         }
         d = static_cast<float>(s);
@@ -1119,18 +1124,18 @@ struct single_assigner_builtin_base<std::complex<float>, double, complex_kind, r
 
 // double -> complex<float> with fractional checking
 template<>
-struct single_assigner_builtin_base<std::complex<float>, double, complex_kind, real_kind, assign_error_fractional>
-    : public single_assigner_builtin_base<std::complex<float>, double, complex_kind, real_kind, assign_error_overflow> {};
+struct single_assigner_builtin_base<dynd_complex<float>, double, complex_kind, real_kind, assign_error_fractional>
+    : public single_assigner_builtin_base<dynd_complex<float>, double, complex_kind, real_kind, assign_error_overflow> {};
 
 // double -> complex<float> with inexact checking
 template<>
-struct single_assigner_builtin_base<std::complex<float>, double, complex_kind, real_kind, assign_error_inexact>
+struct single_assigner_builtin_base<dynd_complex<float>, double, complex_kind, real_kind, assign_error_inexact>
 {
-    static void assign(std::complex<float> *dst, const double *src, ckernel_prefix *DYND_UNUSED(extra)) {
+    static void assign(dynd_complex<float> *dst, const double *src, ckernel_prefix *DYND_UNUSED(extra)) {
         double s = *src;
         float d;
 
-        DYND_TRACE_ASSIGNMENT(static_cast<std::complex<float> >(s), std::complex<float>, s, double);
+        DYND_TRACE_ASSIGNMENT(static_cast<dynd_complex<float> >(s), dynd_complex<float>, s, double);
 
 #if defined(DYND_USE_FPSTATUS)
         clear_fp_status();
@@ -1138,15 +1143,15 @@ struct single_assigner_builtin_base<std::complex<float>, double, complex_kind, r
         if (is_overflow_fp_status()) {
             std::stringstream ss;
             ss << "overflow while assigning " << ndt::make_type<double>() << " value ";
-            ss << s << " to " << ndt::make_type<std::complex<float> >();
+            ss << s << " to " << ndt::make_type<dynd_complex<float> >();
             throw std::overflow_error(ss.str());
         }
 #else
-        if (std::isfinite(s) && (s < -std::numeric_limits<float>::max() ||
+        if (isfinite(s) && (s < -std::numeric_limits<float>::max() ||
                             s > std::numeric_limits<float>::max())) {
             std::stringstream ss;
             ss << "overflow while assigning " << ndt::make_type<double>() << " value ";
-            ss << s << " to " << ndt::make_type<std::complex<float> >();
+            ss << s << " to " << ndt::make_type<dynd_complex<float> >();
             throw std::overflow_error(ss.str());
         }
         d = static_cast<float>(s);
@@ -1155,7 +1160,7 @@ struct single_assigner_builtin_base<std::complex<float>, double, complex_kind, r
         if (d != s) {
             std::stringstream ss;
             ss << "inexact precision loss while assigning " << ndt::make_type<double>() << " value ";
-            ss << s << " to " << ndt::make_type<std::complex<float> >();
+            ss << s << " to " << ndt::make_type<dynd_complex<float> >();
             throw std::runtime_error(ss.str());
         }
 
@@ -1179,7 +1184,7 @@ struct single_assigner_builtin
 template <class same_type, assign_error_mode errmode>
 struct single_assigner_builtin<same_type, same_type, errmode>
 {
-    static void assign(same_type *dst, const same_type *src, ckernel_prefix *DYND_UNUSED(extra)) {
+    DYND_CUDA_HOST_DEVICE static void assign(same_type *dst, const same_type *src, ckernel_prefix *DYND_UNUSED(extra)) {
         *dst = *src;
     }
 };

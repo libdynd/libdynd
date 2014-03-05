@@ -41,10 +41,10 @@ TEST(DataShapeParser, Basic) {
     EXPECT_EQ(ndt::make_type<float>(), type_from_datashape("float32"));
     EXPECT_EQ(ndt::make_type<double>(), type_from_datashape("float64"));
     EXPECT_EQ(ndt::make_type<dynd_float128>(), type_from_datashape("float128"));
-    EXPECT_EQ(ndt::make_type<complex<float> >(), type_from_datashape("complex64"));
-    EXPECT_EQ(ndt::make_type<complex<double> >(), type_from_datashape("complex128"));
-    EXPECT_EQ(ndt::make_type<complex<float> >(), type_from_datashape("complex[float32]"));
-    EXPECT_EQ(ndt::make_type<complex<double> >(), type_from_datashape("complex[float64]"));
+    EXPECT_EQ(ndt::make_type<dynd_complex<float> >(), type_from_datashape("complex64"));
+    EXPECT_EQ(ndt::make_type<dynd_complex<double> >(), type_from_datashape("complex128"));
+    EXPECT_EQ(ndt::make_type<dynd_complex<float> >(), type_from_datashape("complex[float32]"));
+    EXPECT_EQ(ndt::make_type<dynd_complex<double> >(), type_from_datashape("complex[float64]"));
     EXPECT_EQ(ndt::make_json(), type_from_datashape("json"));
     EXPECT_EQ(ndt::make_date(), type_from_datashape("date"));
 }

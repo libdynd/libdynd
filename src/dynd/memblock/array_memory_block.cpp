@@ -4,7 +4,9 @@
 //
 
 #include <dynd/memblock/array_memory_block.hpp>
+#include <dynd/types/base_memory_type.hpp>
 #include <dynd/array.hpp>
+#include <dynd/exceptions.hpp>
 #include <dynd/shape_tools.hpp>
 
 using namespace std;
@@ -23,6 +25,16 @@ void free_array_memory_block(memory_block_data *memblock)
                     !preamble->is_builtin_type() &&
                     (preamble->m_type->get_flags()&type_flag_destructor) != 0) {
         preamble->m_type->data_destruct(metadata, preamble->m_data_pointer);
+    }
+
+    // Free the ndobject data if it wasn't allocated together with the memory block
+    if (preamble->m_data_reference == NULL &&
+                    !preamble->is_builtin_type() &&
+                    !preamble->m_type->is_expression()) {
+        const ndt::type& dtp = preamble->m_type->get_type_at_dimension(NULL, preamble->m_type->get_ndim());
+        if (dtp.get_kind() == memory_kind) {
+            static_cast<const base_memory_type *>(dtp.extended())->data_free(preamble->m_data_pointer);
+        }
     }
 
     // Free the references contained in the metadata
@@ -71,8 +83,9 @@ memory_block_ptr dynd::make_array_memory_block(size_t metadata_size, size_t extr
 
 memory_block_ptr dynd::make_array_memory_block(const ndt::type& tp, intptr_t ndim, const intptr_t *shape)
 {
-    size_t metadata_size, data_size;
+    const ndt::type& dtp = tp.get_dtype();
 
+    size_t metadata_size, data_size;
     if (tp.is_builtin()) {
         metadata_size = 0;
         data_size = tp.get_data_size();
@@ -81,11 +94,22 @@ memory_block_ptr dynd::make_array_memory_block(const ndt::type& tp, intptr_t ndi
         data_size = tp.extended()->get_default_data_size(ndim, shape);
     }
 
+    memory_block_ptr result;
     char *data_ptr = NULL;
-    memory_block_ptr result = make_array_memory_block(metadata_size, data_size, tp.get_data_alignment(), &data_ptr);
+    if (dtp.get_kind() == memory_kind) {
+        result = make_array_memory_block(metadata_size);
+        static_cast<const base_memory_type*>(dtp.extended())->data_alloc(&data_ptr, data_size);
+    } else {
+        result = make_array_memory_block(metadata_size, data_size, tp.get_data_alignment(), &data_ptr);
+    }
 
     if (tp.get_flags()&type_flag_zeroinit) {
-        memset(data_ptr, 0, data_size);
+        if (dtp.get_kind() == memory_kind) {
+            static_cast<const base_memory_type*>(dtp.extended())->data_zeroinit(data_ptr, data_size);
+        }
+        else {
+            memset(data_ptr, 0, data_size);
+        }
     }
 
     array_preamble *preamble = reinterpret_cast<array_preamble *>(result.get());

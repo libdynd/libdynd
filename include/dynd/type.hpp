@@ -540,7 +540,6 @@ public:
         }
     }
 
-
     /**
      * Returns a const pointer to the base_type object which
      * contains information about the type, or NULL if no extended

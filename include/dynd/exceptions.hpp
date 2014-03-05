@@ -10,6 +10,10 @@
 #include <stdexcept>
 #include <vector>
 
+#ifdef DYND_CUDA
+#include <cuda_runtime.h>
+#endif // DYND_CUDA
+
 #include <dynd/irange.hpp>
 #include <dynd/string_encodings.hpp>
 #include <dynd/kernels/comparison_kernels.hpp>
@@ -226,6 +230,25 @@ public:
     virtual ~not_comparable_error() throw() {
     }
 };
+
+#ifdef DYND_CUDA
+
+/**
+ * An exception for errors from the CUDA runtime.
+ */
+class cuda_runtime_error : public std::runtime_error {
+    cudaError_t m_error;
+public:
+    cuda_runtime_error(cudaError_t error);
+};
+
+inline void throw_if_not_cuda_success(cudaError_t error = cudaPeekAtLastError()) {
+    if (error != cudaSuccess) {
+        throw cuda_runtime_error(error);
+    }
+}
+
+#endif // DYND_CUDA
 
 } // namespace dynd
 

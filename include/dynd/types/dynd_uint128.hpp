@@ -31,172 +31,172 @@ public:
 #else
     uint64_t m_lo, m_hi;
 #endif
-    inline dynd_uint128() {}
-    inline dynd_uint128(uint64_t hi, uint64_t lo)
+    DYND_CUDA_HOST_DEVICE inline dynd_uint128() {}
+    DYND_CUDA_HOST_DEVICE inline dynd_uint128(uint64_t hi, uint64_t lo)
         : m_lo(lo), m_hi(hi) {}
 
-    inline dynd_uint128(char value)
+    DYND_CUDA_HOST_DEVICE inline dynd_uint128(char value)
         : m_lo(value), m_hi(0ULL) {}
-    inline dynd_uint128(signed char value)
+    DYND_CUDA_HOST_DEVICE inline dynd_uint128(signed char value)
         : m_lo(value), m_hi(0ULL) {}
-    inline dynd_uint128(unsigned char value)
+    DYND_CUDA_HOST_DEVICE inline dynd_uint128(unsigned char value)
         : m_lo(value), m_hi(0ULL) {}
-    inline dynd_uint128(short value)
+    DYND_CUDA_HOST_DEVICE inline dynd_uint128(short value)
         : m_lo(value), m_hi(0ULL) {}
-    inline dynd_uint128(unsigned short value)
+    DYND_CUDA_HOST_DEVICE inline dynd_uint128(unsigned short value)
         : m_lo(value), m_hi(0ULL) {}
-    inline dynd_uint128(int value)
+    DYND_CUDA_HOST_DEVICE inline dynd_uint128(int value)
         : m_lo(value), m_hi(0ULL) {}
-    inline dynd_uint128(unsigned int value)
+    DYND_CUDA_HOST_DEVICE inline dynd_uint128(unsigned int value)
         : m_lo(value), m_hi(0ULL) {}
-    inline dynd_uint128(long value)
+    DYND_CUDA_HOST_DEVICE inline dynd_uint128(long value)
         : m_lo(value), m_hi(0ULL) {}
-    inline dynd_uint128(unsigned long value)
+    DYND_CUDA_HOST_DEVICE inline dynd_uint128(unsigned long value)
         : m_lo(value), m_hi(0ULL) {}
-    inline dynd_uint128(long long value)
+    DYND_CUDA_HOST_DEVICE inline dynd_uint128(long long value)
         : m_lo(value), m_hi(0ULL) {}
-    inline dynd_uint128(unsigned long long value)
+    DYND_CUDA_HOST_DEVICE inline dynd_uint128(unsigned long long value)
         : m_lo(value), m_hi(0ULL) {}
-    dynd_uint128(float value);
-    dynd_uint128(double value);
-    dynd_uint128(const dynd_int128& value);
-    dynd_uint128(const dynd_float16& value);
-    dynd_uint128(const dynd_float128& value);
+    DYND_CUDA_HOST_DEVICE dynd_uint128(float value);
+    DYND_CUDA_HOST_DEVICE dynd_uint128(double value);
+    DYND_CUDA_HOST_DEVICE dynd_uint128(const dynd_int128& value);
+    DYND_CUDA_HOST_DEVICE dynd_uint128(const dynd_float16& value);
+    DYND_CUDA_HOST_DEVICE dynd_uint128(const dynd_float128& value);
 
-    inline bool operator==(const dynd_uint128& rhs) const {
+    DYND_CUDA_HOST_DEVICE inline bool operator==(const dynd_uint128& rhs) const {
         return m_hi == rhs.m_hi && m_lo == rhs.m_lo;
     }
 
-    inline bool operator==(uint64_t rhs) const {
+    DYND_CUDA_HOST_DEVICE inline bool operator==(uint64_t rhs) const {
         return m_hi == 0 && m_lo == rhs;
     }
 
-    inline bool operator!=(const dynd_uint128& rhs) const {
+    DYND_CUDA_HOST_DEVICE inline bool operator!=(const dynd_uint128& rhs) const {
         return m_hi != rhs.m_hi || m_lo != rhs.m_lo;
     }
 
-    inline bool operator!=(uint64_t rhs) const {
+    DYND_CUDA_HOST_DEVICE inline bool operator!=(uint64_t rhs) const {
         return m_hi != 0 || m_lo != rhs;
     }
 
-    inline bool operator<(float rhs) const {
+    DYND_CUDA_HOST_DEVICE inline bool operator<(float rhs) const {
         return double(*this) < rhs;
     }
 
-    inline bool operator<(double rhs) const {
+    DYND_CUDA_HOST_DEVICE inline bool operator<(double rhs) const {
         return double(*this) < rhs;
     }
 
-    inline bool operator<(const dynd_uint128& rhs) const {
+    DYND_CUDA_HOST_DEVICE inline bool operator<(const dynd_uint128& rhs) const {
         return m_hi < rhs.m_hi ||
                         (m_hi == rhs.m_hi && m_lo < rhs.m_lo);
     }
 
-    inline bool operator<=(const dynd_uint128& rhs) const {
+    DYND_CUDA_HOST_DEVICE inline bool operator<=(const dynd_uint128& rhs) const {
         return m_hi < rhs.m_hi ||
                         (m_hi == rhs.m_hi && m_lo <= rhs.m_lo);
     }
 
-    inline bool operator>(const dynd_uint128& rhs) const {
+    DYND_CUDA_HOST_DEVICE inline bool operator>(const dynd_uint128& rhs) const {
         return rhs.operator<(*this);
     }
 
-    inline bool operator>=(const dynd_uint128& rhs) const {
+    DYND_CUDA_HOST_DEVICE inline bool operator>=(const dynd_uint128& rhs) const {
         return rhs.operator<=(*this);
     }
 
-    inline dynd_uint128 operator+(const dynd_uint128& rhs) const {
+    DYND_CUDA_HOST_DEVICE inline dynd_uint128 operator+(const dynd_uint128& rhs) const {
         uint64_t lo = m_lo + rhs.m_lo;
         return dynd_uint128(m_hi + rhs.m_hi + (lo < m_lo), lo);
     }
 
-    inline dynd_uint128 operator-(const dynd_uint128& rhs) const {
+    DYND_CUDA_HOST_DEVICE inline dynd_uint128 operator-(const dynd_uint128& rhs) const {
         uint64_t lo = m_lo + ~rhs.m_lo + 1;
         return dynd_uint128(m_hi + ~rhs.m_hi + (lo < m_lo), lo);
     }
 
-    dynd_uint128 operator*(uint32_t rhs) const;
-    dynd_uint128 operator/(uint32_t rhs) const;
+    DYND_CUDA_HOST_DEVICE dynd_uint128 operator*(uint32_t rhs) const;
+    DYND_CUDA_HOST_DEVICE dynd_uint128 operator/(uint32_t rhs) const;
 
-    void divrem(uint32_t rhs, uint32_t& out_rem);
+    DYND_CUDA_HOST_DEVICE void divrem(uint32_t rhs, uint32_t& out_rem);
 
-    operator float() const {
+    DYND_CUDA_HOST_DEVICE operator float() const {
         return m_lo + m_hi * 18446744073709551616.f;
     }
 
-    operator double() const {
+    DYND_CUDA_HOST_DEVICE operator double() const {
         return m_lo + m_hi * 18446744073709551616.0;
     }
 
-    operator char() const {
+    DYND_CUDA_HOST_DEVICE operator char() const {
         return (char)m_lo;
     }
-    operator signed char() const {
+    DYND_CUDA_HOST_DEVICE operator signed char() const {
         return (signed char)m_lo;
     }
-    operator unsigned char() const {
+    DYND_CUDA_HOST_DEVICE operator unsigned char() const {
         return (unsigned char)m_lo;
     }
-    operator short() const {
+    DYND_CUDA_HOST_DEVICE operator short() const {
         return (short)m_lo;
     }
-    operator unsigned short() const {
+    DYND_CUDA_HOST_DEVICE operator unsigned short() const {
         return (unsigned short)m_lo;
     }
-    operator int() const {
+    DYND_CUDA_HOST_DEVICE operator int() const {
         return (int)m_lo;
     }
-    operator unsigned int() const {
+    DYND_CUDA_HOST_DEVICE operator unsigned int() const {
         return (unsigned int)m_lo;
     }
-    operator long() const {
+    DYND_CUDA_HOST_DEVICE operator long() const {
         return (long)m_lo;
     }
-    operator unsigned long() const {
+    DYND_CUDA_HOST_DEVICE operator unsigned long() const {
         return (unsigned long)m_lo;
     }
-    operator long long() const {
+    DYND_CUDA_HOST_DEVICE operator long long() const {
         return (long long)m_lo;
     }
-    operator unsigned long long() const {
+    DYND_CUDA_HOST_DEVICE operator unsigned long long() const {
         return (unsigned long long)m_lo;
     }
 };
 
-inline bool operator<(float lhs, const dynd_uint128& rhs) {
+DYND_CUDA_HOST_DEVICE inline bool operator<(float lhs, const dynd_uint128& rhs) {
     return lhs < double(rhs);
 }
-inline bool operator<(double lhs, const dynd_uint128& rhs) {
+DYND_CUDA_HOST_DEVICE inline bool operator<(double lhs, const dynd_uint128& rhs) {
     return lhs < double(rhs);
 }
-inline bool operator<(signed char lhs, const dynd_uint128& rhs) {
+DYND_CUDA_HOST_DEVICE inline bool operator<(signed char lhs, const dynd_uint128& rhs) {
     return lhs < 0 || dynd_uint128(lhs) < rhs;
 }
-inline bool operator<(unsigned char lhs, const dynd_uint128& rhs) {
+DYND_CUDA_HOST_DEVICE inline bool operator<(unsigned char lhs, const dynd_uint128& rhs) {
     return dynd_uint128(lhs) < rhs;
 }
-inline bool operator<(short lhs, const dynd_uint128& rhs) {
+DYND_CUDA_HOST_DEVICE inline bool operator<(short lhs, const dynd_uint128& rhs) {
     return lhs < 0 || dynd_uint128(lhs) < rhs;
 }
-inline bool operator<(unsigned short lhs, const dynd_uint128& rhs) {
+DYND_CUDA_HOST_DEVICE inline bool operator<(unsigned short lhs, const dynd_uint128& rhs) {
     return dynd_uint128(lhs) < rhs;
 }
-inline bool operator<(int lhs, const dynd_uint128& rhs) {
+DYND_CUDA_HOST_DEVICE inline bool operator<(int lhs, const dynd_uint128& rhs) {
     return lhs < 0 || dynd_uint128(lhs) < rhs;
 }
-inline bool operator<(unsigned int lhs, const dynd_uint128& rhs) {
+DYND_CUDA_HOST_DEVICE inline bool operator<(unsigned int lhs, const dynd_uint128& rhs) {
     return dynd_uint128(lhs) < rhs;
 }
-inline bool operator<(long lhs, const dynd_uint128& rhs) {
+DYND_CUDA_HOST_DEVICE inline bool operator<(long lhs, const dynd_uint128& rhs) {
     return lhs < 0 || dynd_uint128(lhs) < rhs;
 }
-inline bool operator<(unsigned long lhs, const dynd_uint128& rhs) {
+DYND_CUDA_HOST_DEVICE inline bool operator<(unsigned long lhs, const dynd_uint128& rhs) {
     return dynd_uint128(lhs) < rhs;
 }
-inline bool operator<(long long lhs, const dynd_uint128& rhs) {
+DYND_CUDA_HOST_DEVICE inline bool operator<(long long lhs, const dynd_uint128& rhs) {
     return lhs < 0 || dynd_uint128(lhs) < rhs;
 }
-inline bool operator<(unsigned long long lhs, const dynd_uint128& rhs) {
+DYND_CUDA_HOST_DEVICE inline bool operator<(unsigned long long lhs, const dynd_uint128& rhs) {
     return dynd_uint128(lhs) < rhs;
 }
 

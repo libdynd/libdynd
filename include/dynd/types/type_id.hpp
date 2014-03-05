@@ -14,6 +14,7 @@
 #include <dynd/types/dynd_uint128.hpp>
 #include <dynd/types/dynd_float16.hpp>
 #include <dynd/types/dynd_float128.hpp>
+#include <dynd/types/dynd_complex.hpp>
 
 namespace dynd {
 
@@ -37,6 +38,8 @@ enum type_kind_t {
     // that calculations should look at the value_type for
     // type promotion, etc.
     expression_kind,
+    // For types that specify a memory space
+    memory_kind,
     // For pattern-matching types
     pattern_kind,
     // For use when it becomes possible to register custom types
@@ -121,6 +124,11 @@ enum type_id_t {
     byteswap_type_id,
     view_type_id,
 
+    // A CUDA host memory type
+    cuda_host_type_id,
+    // A CUDA device (global) memory type
+    cuda_device_type_id,
+
     // A type for property access
     property_type_id,
 
@@ -151,7 +159,9 @@ enum type_flags_t {
     type_flag_blockref = 0x00000004,
     // Memory of this type must be destroyed,
     // e.g. it might hold a reference count or similar state
-    type_flag_destructor = 0x00000008
+    type_flag_destructor = 0x00000008,
+    // Memory of this type is not readable directly from the host
+    type_flag_not_host_readable = 0x00000010,
 };
 
 enum axis_order_classification_t {
@@ -175,7 +185,8 @@ enum {
     type_flags_operand_inherited =
                     type_flag_zeroinit|
                     type_flag_blockref|
-                    type_flag_destructor,
+                    type_flag_destructor |
+                    type_flag_not_host_readable,
     // These are the flags expression types should inherit
     // from their value type
     type_flags_value_inherited =
@@ -225,15 +236,15 @@ inline bool is_builtin_type(const base_type *dt) {
 class dynd_bool {
     char m_value;
 public:
-    dynd_bool() : m_value(0) {}
+    DYND_CUDA_HOST_DEVICE dynd_bool() : m_value(0) {}
 
-    dynd_bool(bool value) : m_value(value) {}
+    DYND_CUDA_HOST_DEVICE dynd_bool(bool value) : m_value(value) {}
 
     // Special case complex conversion to avoid ambiguous overload
     template<class T>
-    dynd_bool(std::complex<T> value) : m_value(value != std::complex<T>(0)) {}
+    DYND_CUDA_HOST_DEVICE dynd_bool(dynd_complex<T> value) : m_value(value != dynd_complex<T>(0)) {}
 
-    operator bool() const {
+    DYND_CUDA_HOST_DEVICE operator bool() const {
         return m_value != 0;
     }
 };
@@ -285,9 +296,12 @@ template <> struct type_id_of<dynd_float16> {enum {value = float16_type_id};};
 template <> struct type_id_of<float> {enum {value = float32_type_id};};
 template <> struct type_id_of<double> {enum {value = float64_type_id};};
 template <> struct type_id_of<dynd_float128> {enum {value = float128_type_id};};
+template <> struct type_id_of<dynd_complex<float> > {enum {value = complex_float32_type_id};};
+template <> struct type_id_of<dynd_complex<double> > {enum {value = complex_float64_type_id};};
+template <> struct type_id_of<void> {enum {value = void_type_id};};
+// Also allow type_id_of<std::complex<>> as synonyms for type_id_of<dynd_complex<>>
 template <> struct type_id_of<std::complex<float> > {enum {value = complex_float32_type_id};};
 template <> struct type_id_of<std::complex<double> > {enum {value = complex_float64_type_id};};
-template <> struct type_id_of<void> {enum {value = void_type_id};};
 
 // Type trait for the kind
 template <typename T> struct dynd_kind_of;
@@ -314,7 +328,7 @@ template <> struct dynd_kind_of<dynd_float16> {static const type_kind_t value = 
 template <> struct dynd_kind_of<float> {static const type_kind_t value = real_kind;};
 template <> struct dynd_kind_of<double> {static const type_kind_t value = real_kind;};
 template <> struct dynd_kind_of<dynd_float128> {static const type_kind_t value = real_kind;};
-template <typename T> struct dynd_kind_of<std::complex<T> > {static const type_kind_t value = complex_kind;};
+template <typename T> struct dynd_kind_of<dynd_complex<T> > {static const type_kind_t value = complex_kind;};
 
 // Metaprogram for determining if a type is a valid C++ scalar
 // of a particular type.
@@ -337,6 +351,9 @@ template <> struct is_dynd_scalar<dynd_float16> {enum {value = true};};
 template <> struct is_dynd_scalar<float> {enum {value = true};};
 template <> struct is_dynd_scalar<double> {enum {value = true};};
 template <> struct is_dynd_scalar<dynd_float128> {enum {value = true};};
+template <> struct is_dynd_scalar<dynd_complex<float> > {enum {value = true};};
+template <> struct is_dynd_scalar<dynd_complex<double> > {enum {value = true};};
+// Allow std::complex as scalars equivalent to dynd_complex
 template <> struct is_dynd_scalar<std::complex<float> > {enum {value = true};};
 template <> struct is_dynd_scalar<std::complex<double> > {enum {value = true};};
 

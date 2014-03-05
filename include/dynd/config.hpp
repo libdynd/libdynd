@@ -225,4 +225,15 @@ namespace dynd {
 #endif
 #endif
 
+namespace dynd {
+    /**
+     * A function which can be used at runtime to identify whether
+     * the build of dynd being linked against was built with CUDA
+     * support enabled.
+     */
+    bool built_with_cuda();
+} // namespace dynd
+
+#include <dynd/cuda_config.hpp>
+
 #endif // _DYND__CONFIG_HPP_

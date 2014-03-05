@@ -124,7 +124,6 @@ size_t dynd::make_assignment_kernel(
                                 dst_tp.get_type_id(), src_tp.get_type_id(),
                                 kernreq, errmode);
             }
-
         } else {
             return src_tp.extended()->make_assignment_kernel(out, offset_out,
                             dst_tp, dst_metadata,
@@ -283,8 +282,8 @@ static unary_single_operation_t assign_table_single_kernel[builtin_type_id_count
         ERROR_MODE_LEVEL(dst_type, float), \
         ERROR_MODE_LEVEL(dst_type, double), \
         ERROR_MODE_LEVEL(dst_type, dynd_float128), \
-        ERROR_MODE_LEVEL(dst_type, complex<float>), \
-        ERROR_MODE_LEVEL(dst_type, complex<double>) \
+        ERROR_MODE_LEVEL(dst_type, dynd_complex<float>), \
+        ERROR_MODE_LEVEL(dst_type, dynd_complex<double>) \
     }
 
     SRC_TYPE_LEVEL(dynd_bool),
@@ -302,8 +301,8 @@ static unary_single_operation_t assign_table_single_kernel[builtin_type_id_count
     SRC_TYPE_LEVEL(float),
     SRC_TYPE_LEVEL(double),
     SRC_TYPE_LEVEL(dynd_float128),
-    SRC_TYPE_LEVEL(complex<float>),
-    SRC_TYPE_LEVEL(complex<double>)
+    SRC_TYPE_LEVEL(dynd_complex<float>),
+    SRC_TYPE_LEVEL(dynd_complex<double>)
 #undef SRC_TYPE_LEVEL
 #undef ERROR_MODE_LEVEL
 #undef SINGLE_OPERATION_PAIR_LEVEL
@@ -319,6 +318,21 @@ namespace {
         {
             for (size_t i = 0; i != count; ++i, dst += dst_stride, src += src_stride) {
                 single_assigner_builtin<dst_type, src_type, errmode>::assign(
+                                reinterpret_cast<dst_type *>(dst),
+                                reinterpret_cast<const src_type *>(src),
+                                NULL);
+            }
+        }
+    };
+    template<typename dst_type, typename src_type>
+    struct multiple_assignment_builtin<dst_type, src_type, assign_error_none> {
+         DYND_CUDA_HOST_DEVICE static void strided_assign(
+                        char *dst, intptr_t dst_stride,
+                        const char *src, intptr_t src_stride,
+                        size_t count, ckernel_prefix *DYND_UNUSED(extra))
+        {
+            for (size_t i = 0; i != count; ++i, dst += dst_stride, src += src_stride) {
+                single_assigner_builtin<dst_type, src_type, assign_error_none>::assign(
                                 reinterpret_cast<dst_type *>(dst),
                                 reinterpret_cast<const src_type *>(src),
                                 NULL);
@@ -355,8 +369,8 @@ static unary_strided_operation_t assign_table_strided_kernel[builtin_type_id_cou
         ERROR_MODE_LEVEL(dst_type, float), \
         ERROR_MODE_LEVEL(dst_type, double), \
         ERROR_MODE_LEVEL(dst_type, dynd_float128), \
-        ERROR_MODE_LEVEL(dst_type, complex<float>), \
-        ERROR_MODE_LEVEL(dst_type, complex<double>) \
+        ERROR_MODE_LEVEL(dst_type, dynd_complex<float>), \
+        ERROR_MODE_LEVEL(dst_type, dynd_complex<double>) \
     }
 
     SRC_TYPE_LEVEL(dynd_bool),
@@ -374,8 +388,8 @@ static unary_strided_operation_t assign_table_strided_kernel[builtin_type_id_cou
     SRC_TYPE_LEVEL(float),
     SRC_TYPE_LEVEL(double),
     SRC_TYPE_LEVEL(dynd_float128),
-    SRC_TYPE_LEVEL(complex<float>),
-    SRC_TYPE_LEVEL(complex<double>)
+    SRC_TYPE_LEVEL(dynd_complex<float>),
+    SRC_TYPE_LEVEL(dynd_complex<double>)
 #undef SRC_TYPE_LEVEL
 #undef ERROR_MODE_LEVEL
 #undef STRIDED_OPERATION_PAIR_LEVEL
@@ -423,6 +437,7 @@ static void wrap_single_as_strided_kernel(char *dst, intptr_t dst_stride,
 {
     ckernel_prefix *echild = extra + 1;
     unary_single_operation_t opchild = echild->get_function<unary_single_operation_t>();
+
     for (size_t i = 0; i != count; ++i,
                     dst += dst_stride, src += src_stride) {
         opchild(dst, src, echild);

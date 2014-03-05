@@ -86,6 +86,8 @@ public:
     array(float value);
     array(double value);
     array(const dynd_float128& value);
+    array(dynd_complex<float> value);
+    array(dynd_complex<double> value);
     array(std::complex<float> value);
     array(std::complex<double> value);
     array(const std::string& value);
@@ -589,6 +591,17 @@ public:
     template<class T>
     T as(assign_error_mode errmode = assign_error_default) const;
 
+    /** Returns a copy of this array in default memory. */
+    array to_host() const;
+
+#ifdef DYND_CUDA
+    /** Returns a copy of this array in CUDA host memory. */
+    array to_cuda_host(unsigned int cuda_host_flags = cudaHostAllocDefault) const;
+
+    /** Returns a copy of this array in CUDA global memory. */
+    array to_cuda_device() const;
+#endif // DYND_CUDA
+
     /** Sorting comparison between two arrays. (Returns a bool, does not broadcast) */
     bool op_sorting_less(const array& rhs) const;
     /** Less than comparison between two arrays. (Returns a bool, does not broadcast) */
@@ -636,6 +649,8 @@ nd::array array_rw(dynd_float16 value);
 nd::array array_rw(float value);
 nd::array array_rw(double value);
 nd::array array_rw(const dynd_float128& value);
+nd::array array_rw(dynd_complex<float> value);
+nd::array array_rw(dynd_complex<double> value);
 nd::array array_rw(std::complex<float> value);
 nd::array array_rw(std::complex<double> value);
 nd::array array_rw(const std::string& value);

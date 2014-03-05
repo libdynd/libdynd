@@ -352,3 +352,17 @@ not_comparable_error::not_comparable_error(const ndt::type& lhs, const ndt::type
                     not_comparable_error_message(lhs, rhs, comptype))
 {
 }
+
+#ifdef DYND_CUDA
+
+inline string cuda_runtime_error_message(cudaError_t error)
+{
+    return cudaGetErrorString(error);
+}
+
+cuda_runtime_error::cuda_runtime_error(cudaError_t error)
+    : std::runtime_error(cuda_runtime_error_message(error)), m_error(error)
+{
+}
+
+#endif // DYND_CUDA

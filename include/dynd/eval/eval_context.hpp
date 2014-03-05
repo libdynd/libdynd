@@ -13,9 +13,11 @@ namespace dynd { namespace eval {
 
 struct eval_context {
     assign_error_mode default_assign_error_mode;
+    assign_error_mode default_cuda_device_to_device_assign_error_mode;
 
     DYND_CONSTEXPR eval_context()
-        : default_assign_error_mode(assign_error_fractional)
+        : default_assign_error_mode(assign_error_fractional),
+            default_cuda_device_to_device_assign_error_mode(assign_error_none)
     {
     }
 };

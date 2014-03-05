@@ -15,6 +15,9 @@
 #include <dynd/types/fixedbytes_type.hpp>
 #include <dynd/types/type_type.hpp>
 #include <dynd/types/convert_type.hpp>
+#include <dynd/types/base_memory_type.hpp>
+#include <dynd/types/cuda_host_type.hpp>
+#include <dynd/types/cuda_device_type.hpp>
 #include <dynd/kernels/assignment_kernels.hpp>
 #include <dynd/kernels/comparison_kernels.hpp>
 #include <dynd/exceptions.hpp>
@@ -68,13 +71,24 @@ nd::array nd::make_strided_array(const ndt::type& dtp, intptr_t ndim, const intp
         data_size = array_tp.extended()->get_default_data_size(ndim, shape);
     }
 
-    // Allocate the array metadata and data in one memory block
+    memory_block_ptr result;
     char *data_ptr = NULL;
-    memory_block_ptr result = make_array_memory_block(array_tp.extended()->get_metadata_size(),
+    if (dtp.get_kind() == memory_kind) {
+        result = make_array_memory_block(array_tp.extended()->get_metadata_size());
+        static_cast<const base_memory_type *>(dtp.extended())->data_alloc(&data_ptr, data_size);
+    } else {
+        // Allocate the array metadata and data in one memory block
+        result = make_array_memory_block(array_tp.extended()->get_metadata_size(),
                     data_size, array_tp.get_data_alignment(), &data_ptr);
+    }
 
     if (array_tp.get_flags()&type_flag_zeroinit) {
-        memset(data_ptr, 0, data_size);
+        if (dtp.get_kind() == memory_kind) {
+            static_cast<const base_memory_type *>(dtp.extended())->data_zeroinit(data_ptr, data_size);
+        }
+        else {
+            memset(data_ptr, 0, data_size);
+        }
     }
 
     // Fill in the preamble metadata
@@ -364,6 +378,14 @@ nd::array::array(const dynd_float128& value)
     : m_memblock(make_builtin_scalar_array(value, nd::default_access_flags))
 {
 }
+nd::array::array(dynd_complex<float> value)
+    : m_memblock(make_builtin_scalar_array(value, nd::default_access_flags))
+{
+}
+nd::array::array(dynd_complex<double> value)
+    : m_memblock(make_builtin_scalar_array(value, nd::default_access_flags))
+{
+}
 nd::array::array(std::complex<float> value)
     : m_memblock(make_builtin_scalar_array(value, nd::default_access_flags))
 {
@@ -484,6 +506,16 @@ nd::array nd::array_rw(double value)
                     nd::readwrite_access_flags));
 }
 nd::array nd::array_rw(const dynd_float128& value)
+{
+    return nd::array(make_builtin_scalar_array(value,
+                    nd::readwrite_access_flags));
+}
+nd::array nd::array_rw(dynd_complex<float> value)
+{
+    return nd::array(make_builtin_scalar_array(value,
+                    nd::readwrite_access_flags));
+}
+nd::array nd::array_rw(dynd_complex<double> value)
 {
     return nd::array(make_builtin_scalar_array(value,
                     nd::readwrite_access_flags));
@@ -881,6 +913,48 @@ nd::array nd::array::eval_copy(uint32_t access_flags, const eval::eval_context *
     result.get_ndo()->m_flags = access_flags;
     return result;
 }
+
+nd::array nd::array::to_host() const
+{
+    ndt::type dt = get_type().get_dtype();
+    if (dt.get_kind() == memory_kind) {
+        dt = static_cast<const base_memory_type *>(dt.extended())->get_storage_type();
+    }
+
+    array result = empty_like(*this, dt);
+    result.val_assign(*this);
+
+    return result;
+}
+
+#ifdef DYND_CUDA
+nd::array nd::array::to_cuda_host(unsigned int cuda_host_flags) const
+{
+    ndt::type dt = get_type().get_dtype();
+    if (dt.get_kind() == memory_kind) {
+        dt = static_cast<const base_memory_type *>(dt.extended())->get_storage_type();
+    }
+
+    array result = empty_like(*this, make_cuda_host(dt, cuda_host_flags));
+    result.val_assign(*this);
+
+    return result;
+
+}
+
+nd::array nd::array::to_cuda_device() const
+{
+    ndt::type dt = get_type().get_dtype();
+    if (dt.get_kind() == memory_kind) {
+        dt = static_cast<const base_memory_type *>(dt.extended())->get_storage_type();
+    }
+
+    array result = empty_like(*this, make_cuda_device(dt));
+    result.val_assign(*this);
+
+    return result;
+}
+#endif
 
 bool nd::array::op_sorting_less(const array& rhs) const
 {
@@ -1334,6 +1408,9 @@ std::ostream& nd::operator<<(std::ostream& o, const array& rhs)
         if (v.get_ndo()->is_builtin_type()) {
             print_builtin_scalar(v.get_ndo()->get_builtin_type_id(), o, v.get_ndo()->m_data_pointer);
         } else {
+            if (v.get_ndo()->m_type->get_flags() & type_flag_not_host_readable) {
+                v = v.to_host();
+            }
             v.get_ndo()->m_type->print_data(o, v.get_ndo_meta(), v.get_ndo()->m_data_pointer);
         }
         o << ", type=\"" << rhs.get_type() << "\")";

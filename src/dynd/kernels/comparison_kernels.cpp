@@ -64,8 +64,8 @@ static binary_single_predicate_t compare_kernel_table[builtin_type_id_count-2][b
         INNER_LEVEL(src0_type, float), \
         INNER_LEVEL(src0_type, double), \
         INNER_LEVEL(src0_type, dynd_float128), \
-        INNER_LEVEL(src0_type, complex<float>), \
-        INNER_LEVEL(src0_type, complex<double>) \
+        INNER_LEVEL(src0_type, dynd_complex<float>), \
+        INNER_LEVEL(src0_type, dynd_complex<double>) \
     }
 
     SRC0_TYPE_LEVEL(dynd_bool),
@@ -83,8 +83,8 @@ static binary_single_predicate_t compare_kernel_table[builtin_type_id_count-2][b
     SRC0_TYPE_LEVEL(float),
     SRC0_TYPE_LEVEL(double),
     SRC0_TYPE_LEVEL(dynd_float128),
-    SRC0_TYPE_LEVEL(complex<float>),
-    SRC0_TYPE_LEVEL(complex<double>)
+    SRC0_TYPE_LEVEL(dynd_complex<float>),
+    SRC0_TYPE_LEVEL(dynd_complex<double>)
 #undef SRC0_TYPE_LEVEL
 #undef INNER_LEVEL
 };
