@@ -757,6 +757,16 @@ size_t dynd::make_lifted_reduction_ckernel(
     const ndt::type& src_el_tp = elwise_reduction->data_dynd_types[1];
     ndt::type dst_tp = lifted_types[0], src_tp = lifted_types[1];
 
+    // Count the number of dimensions being reduced
+    intptr_t reducedim_count = 0;
+    for (intptr_t i = 0; i < reduction_ndim; ++i) {
+        reducedim_count += reduction_dimflags[i];
+    }
+    if (reducedim_count == 0) {
+        throw runtime_error("make_lifted_reduction_ckernel: no dimensions were flagged for reduction");
+    }
+
+    // This is the number of dimensions being processed by the reduction
     if (reduction_ndim != src_tp.get_ndim() - src_el_tp.get_ndim()) {
         stringstream ss;
         ss << "make_lifted_reduction_ckernel: wrong number of reduction dimensions, ";
@@ -764,29 +774,106 @@ size_t dynd::make_lifted_reduction_ckernel(
         ss << (src_tp.get_ndim() - src_el_tp.get_ndim());
         throw runtime_error(ss.str());
     }
+    // Determine whether reduced dimensions are being kept or not
+    bool keep_dims;
+    if (reduction_ndim == dst_tp.get_ndim() - dst_el_tp.get_ndim()) {
+        keep_dims = true;
+    } else if (reduction_ndim - reducedim_count == dst_tp.get_ndim() - dst_el_tp.get_ndim()) {
+        keep_dims = false;
+    } else {
+        stringstream ss;
+        ss << "make_lifted_reduction_ckernel: The number of dimensions flagged for reduction, ";
+        ss << reducedim_count << ", is not consistent with the destination type";
+        throw runtime_error(ss.str());
+    }
 
     const char *dst_meta = dynd_metadata[0];
     const char *src_meta = dynd_metadata[1];
     for (intptr_t i = 0; i < reduction_ndim; ++i) {
         intptr_t dst_stride, dst_size, src_stride, src_size;
-        switch (dst_tp.get_type_id()) {
+        // Get the striding parameters for the source dimension
+        switch (src_tp.get_type_id()) {
             case fixed_dim_type_id: {
-                const fixed_dim_type *fdt = static_cast<const fixed_dim_type *>(dst_tp.extended());
-                dst_stride = fdt->get_fixed_stride();
-                dst_size = fdt->get_fixed_dim_size();
-                dst_tp = fdt->get_element_type();
+                const fixed_dim_type *fdt = static_cast<const fixed_dim_type *>(src_tp.extended());
+                src_stride = fdt->get_fixed_stride();
+                src_size = fdt->get_fixed_dim_size();
+                src_tp = fdt->get_element_type();
                 break;
             }
             case strided_dim_type_id: {
-                const strided_dim_type_metadata *md = reinterpret_cast<const strided_dim_type_metadata *>(dst_meta);
-                dst_stride = md->stride;
-                dst_size = md->size;
+                const strided_dim_type_metadata *md = reinterpret_cast<const strided_dim_type_metadata *>(src_meta);
+                src_stride = md->stride;
+                src_size = md->size;
                 break;
             }
             default: {
                 stringstream ss;
-                ss << "make_lifted_reduction_ckernel: type " << dst_tp << " not supported as destination";
-                throw runtime_error(ss.str());
+                ss << "make_lifted_reduction_ckernel: type " << src_tp << " not supported as source";
+                throw type_error(ss.str());
+            }
+        }
+        if (reduction_dimflags[i]) {
+            // This dimension is being reduced
+            if (keep_dims) {
+                // If the dimensions are being kept, the output should be a
+                // a strided dimension of size one
+                switch (dst_tp.get_type_id) {
+                    case fixed_dim_type_id: {
+                        const fixed_dim_type *fdt = static_cast<const fixed_dim_type *>(dst_tp.extended());
+                        if (fdt->get_fixed_dim_size() != 1 || fdt->get_fixed_stride() != 0) {
+                            stringstream ss;
+                            ss << "make_lifted_reduction_ckernel: destination of a reduction dimension ";
+                            ss << "must have size 1, not " << dst_tp;
+                            throw type_error(ss.str());
+                        }
+                        dst_tp = fdt->get_element_type();
+                        break;
+                    }
+                    case strided_dim_type_id: {
+                        const strided_dim_type_metadata *md = reinterpret_cast<const strided_dim_type_metadata *>(dst_meta);
+                        const strided_dim_type *sdt = static_cast<const strided_dim_type *>(dst_tp.extended());
+                        if (md->size != 1 || md->stride != 0) {
+                            stringstream ss;
+                            ss << "make_lifted_reduction_ckernel: destination of a reduction dimension ";
+                            ss << "must have size 1, not size" << md->size << "/stride " << md->stride;
+                            ss << " in type " << dst_tp;
+                            throw type_error(ss.str());
+                        }
+                        dst_tp = sdt->get_element_type();
+                        break;
+                    }
+                    default: {
+                        stringstream ss;
+                        ss << "make_lifted_reduction_ckernel: type " << dst_tp;
+                        ss << " not supported the destination of a dimension being reduced";
+                        throw type_error(ss.str());
+                    }
+                }
+            }
+            dst_stride = 0;
+            dst_size = 1;
+        } else {
+            switch (dst_tp.get_type_id()) {
+                case fixed_dim_type_id: {
+                    const fixed_dim_type *fdt = static_cast<const fixed_dim_type *>(dst_tp.extended());
+                    dst_stride = fdt->get_fixed_stride();
+                    dst_size = fdt->get_fixed_dim_size();
+                    dst_tp = fdt->get_element_type();
+                    break;
+                }
+                case strided_dim_type_id: {
+                    const strided_dim_type_metadata *md = reinterpret_cast<const strided_dim_type_metadata *>(dst_meta);
+                    const strided_dim_type *sdt = static_cast<const strided_dim_type *>(dst_tp.extended());
+                    dst_stride = md->stride;
+                    dst_size = md->size;
+                    dst_tp = sdt->get_element_type();
+                    break;
+                }
+                default: {
+                    stringstream ss;
+                    ss << "make_lifted_reduction_ckernel: type " << dst_tp << " not supported as destination";
+                    throw type_error(ss.str());
+                }
             }
         }
     }
