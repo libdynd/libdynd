@@ -817,7 +817,7 @@ size_t dynd::make_lifted_reduction_ckernel(
             if (keep_dims) {
                 // If the dimensions are being kept, the output should be a
                 // a strided dimension of size one
-                switch (dst_tp.get_type_id) {
+                switch (dst_tp.get_type_id()) {
                     case fixed_dim_type_id: {
                         const fixed_dim_type *fdt = static_cast<const fixed_dim_type *>(dst_tp.extended());
                         if (fdt->get_fixed_dim_size() != 1 || fdt->get_fixed_stride() != 0) {
@@ -850,9 +850,27 @@ size_t dynd::make_lifted_reduction_ckernel(
                     }
                 }
             }
-            dst_stride = 0;
-            dst_size = 1;
+            if (i < reduction_ndim - 1) {
+                // An initial dimension being reduced
+                ckb_offset = make_strided_initial_reduction_dimension_kernel(
+                                        out_ckb, ckb_offset,
+                                        src_stride, src_size,
+                                        kernreq);
+                // The next request should be single, as that's the kind of
+                // ckernel the 'first_call' should be in this case
+                kernreq = kernel_request_single;
+            } else {
+                // The innermost dimension being reduced
+                return make_strided_inner_reduction_dimension_kernel(
+                                        elwise_reduction, dst_initialization,
+                                        out_ckb, ckb_offset,
+                                        src_stride, src_size,
+                                        dst_tp, dst_meta,
+                                        src_tp, src_meta,
+                                        kernreq);
+            }
         } else {
+            // This dimension is being broadcast, not reduced
             switch (dst_tp.get_type_id()) {
                 case fixed_dim_type_id: {
                     const fixed_dim_type *fdt = static_cast<const fixed_dim_type *>(dst_tp.extended());
@@ -875,7 +893,35 @@ size_t dynd::make_lifted_reduction_ckernel(
                     throw type_error(ss.str());
                 }
             }
+            if (dst_size != src_size) {
+                stringstream ss;
+                ss << "make_lifted_reduction_ckernel: the dst dimension size " << dst_size;
+                ss << " must equal the src dimension size " << src_size << " for broadcast dimensions";
+                throw runtime_error(ss.str());
+            }
+            if (i < reduction_ndim - 1) {
+                // An initial dimension being reduced
+                ckb_offset = make_strided_initial_broadcast_dimension_kernel(
+                                        out_ckb, ckb_offset,
+                                        dst_stride, src_stride, src_size,
+                                        kernreq);
+                // The next request should be single, as that's the kind of
+                // ckernel the 'first_call' should be in this case
+                kernreq = kernel_request_single;
+            } else {
+                // The innermost dimension being reduced
+                return make_strided_inner_reduction_dimension_kernel(
+                                        elwise_reduction, dst_initialization,
+                                        out_ckb, ckb_offset,
+                                        src_stride, src_size,
+                                        dst_tp, dst_meta,
+                                        src_tp, src_meta,
+                                        kernreq);
+            }
         }
     }
+
+    throw runtime_error("make_lifted_reduction_ckernel: internal error, "
+                        "should have returned in the loop");
 }
  
