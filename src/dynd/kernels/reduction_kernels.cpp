@@ -8,6 +8,28 @@
 using namespace std;
 using namespace dynd;
 
+static ndt::type builtin_type_pairs[builtin_type_id_count][2] = {
+    {ndt::type((type_id_t)0), ndt::type((type_id_t)0)},
+    {ndt::type((type_id_t)1), ndt::type((type_id_t)1)},
+    {ndt::type((type_id_t)2), ndt::type((type_id_t)2)},
+    {ndt::type((type_id_t)3), ndt::type((type_id_t)3)},
+    {ndt::type((type_id_t)4), ndt::type((type_id_t)4)},
+    {ndt::type((type_id_t)5), ndt::type((type_id_t)5)},
+    {ndt::type((type_id_t)6), ndt::type((type_id_t)6)},
+    {ndt::type((type_id_t)7), ndt::type((type_id_t)7)},
+    {ndt::type((type_id_t)8), ndt::type((type_id_t)8)},
+    {ndt::type((type_id_t)9), ndt::type((type_id_t)9)},
+    {ndt::type((type_id_t)10), ndt::type((type_id_t)10)},
+    {ndt::type((type_id_t)11), ndt::type((type_id_t)11)},
+    {ndt::type((type_id_t)12), ndt::type((type_id_t)12)},
+    {ndt::type((type_id_t)13), ndt::type((type_id_t)13)},
+    {ndt::type((type_id_t)14), ndt::type((type_id_t)14)},
+    {ndt::type((type_id_t)15), ndt::type((type_id_t)15)},
+    {ndt::type((type_id_t)16), ndt::type((type_id_t)16)},
+    {ndt::type((type_id_t)17), ndt::type((type_id_t)17)},
+    {ndt::type((type_id_t)18), ndt::type((type_id_t)18)},
+};
+
 namespace {
     template<class T, class Accum>
     struct sum_reduction {
@@ -32,7 +54,7 @@ namespace {
 } // anonymous namespace
 
 
-intptr_t dynd::kernels::make_builtin_sum_reduction_ckernel(
+intptr_t kernels::make_builtin_sum_reduction_ckernel(
                 dynd::ckernel_builder *out_ckb, intptr_t ckb_offset,
                 type_id_t tid,
                 kernel_request_t kerntype)
@@ -99,4 +121,30 @@ intptr_t dynd::kernels::make_builtin_sum_reduction_ckernel(
     }
 
     return ckb_offset + sizeof(ckernel_prefix);
+}
+
+static intptr_t instantiate_builtin_sum_reduction_ckernel_deferred(void *self_data_ptr,
+                dynd::ckernel_builder *out_ckb, intptr_t ckb_offset,
+                const char *const* DYND_UNUSED(dynd_metadata), uint32_t kerntype)
+{
+    type_id_t tid = static_cast<type_id_t>(reinterpret_cast<uintptr_t>(self_data_ptr));
+    return kernels::make_builtin_sum_reduction_ckernel(out_ckb, ckb_offset, tid, (kernel_request_t)kerntype);
+}
+
+void kernels::make_builtin_sum_reduction_ckernel_deferred(
+                ckernel_deferred *out_ckd,
+                type_id_t tid)
+{
+    if (tid < 0 || tid >= builtin_type_id_count) {
+        stringstream ss;
+        ss << "make_builtin_sum_reduction_ckernel: data type ";
+        ss << ndt::type(tid) << " is not supported";
+        throw type_error(ss.str());
+    }
+    out_ckd->ckernel_funcproto = unary_operation_funcproto;
+    out_ckd->data_types_size = 2;
+    out_ckd->data_dynd_types = builtin_type_pairs[tid];
+    out_ckd->data_ptr = reinterpret_cast<void *>(tid);
+    out_ckd->instantiate_func = &instantiate_builtin_sum_reduction_ckernel_deferred;
+    out_ckd->free_func = NULL;
 }
