@@ -910,9 +910,9 @@ size_t dynd::make_lifted_reduction_ckernel(
                                         out_ckb, ckb_offset,
                                         dst_stride, src_stride, src_size,
                                         kernreq);
-                // The next request should be single, as that's the kind of
+                // The next request should be strided, as that's the kind of
                 // ckernel the 'first_call' should be in this case
-                kernreq = kernel_request_single;
+                kernreq = kernel_request_strided;
             } else {
                 // The innermost dimension being reduced
                 return make_strided_inner_reduction_dimension_kernel(
