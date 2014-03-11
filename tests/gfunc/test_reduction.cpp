@@ -14,6 +14,7 @@
 #include <dynd/kernels/reduction_kernels.hpp>
 #include <dynd/types/ckernel_deferred_type.hpp>
 #include <dynd/kernels/lift_reduction_ckernel_deferred.hpp>
+#include <dynd/json_parser.hpp>
 
 using namespace std;
 using namespace dynd;
@@ -95,6 +96,7 @@ TEST(Reduction, BuiltinSum_Lift1D) {
     kernels::make_builtin_sum_reduction_ckernel_deferred(
                     reinterpret_cast<ckernel_deferred *>(reduction_kernel.get_readwrite_originptr()),
                     float32_type_id);
+
     // Lift it to a one-dimensional strided float32 reduction ckernel_deferred
     ckernel_deferred ckd;
     std::vector<ndt::type> lifted_types;
@@ -118,7 +120,7 @@ TEST(Reduction, BuiltinSum_Lift1D) {
 
     // Call it on the data
     ckb(b.get_readwrite_originptr(), a.get_readonly_originptr());
-    EXPECT_EQ(b.as<float>(), vals0[0] + vals0[1] + vals0[2] + vals0[3] + vals0[4]);
+    EXPECT_EQ(vals0[0] + vals0[1] + vals0[2] + vals0[3] + vals0[4], b.as<float>());
 
     // Instantiate it again with some different data
     ckb.reset();
@@ -130,5 +132,54 @@ TEST(Reduction, BuiltinSum_Lift1D) {
 
     // Call it on the data
     ckb(b.get_readwrite_originptr(), a.get_readonly_originptr());
-    EXPECT_EQ(b.as<float>(), vals1[0]);
+    EXPECT_EQ(vals1[0], b.as<float>());
+}
+
+TEST(Reduction, BuiltinSum_Lift2D_StridedStrided_ReduceReduce) {
+    // Start with a float32 reduction ckernel_deferred
+    nd::array reduction_kernel = nd::empty(ndt::make_ckernel_deferred());
+    kernels::make_builtin_sum_reduction_ckernel_deferred(
+                    reinterpret_cast<ckernel_deferred *>(reduction_kernel.get_readwrite_originptr()),
+                    float32_type_id);
+
+    // Lift it to a two-dimensional strided float32 reduction ckernel_deferred
+    ckernel_deferred ckd;
+    std::vector<ndt::type> lifted_types;
+    lifted_types.push_back(ndt::type("float32"));
+    lifted_types.push_back(ndt::type("strided * strided * float32"));
+    bool reduction_dimflags[2] = {true, true};
+    lift_reduction_ckernel_deferred(&ckd, reduction_kernel, nd::array(),
+                    lifted_types, 2, reduction_dimflags, true, true, nd::array());
+
+    // Set up some data for the test reduction
+    nd::array a = parse_json("2 * 3 * float32",
+            "[[1.5, 2, 7], [-2.25, 7, 2.125]]");
+    // Slice the array so it is "strided * strided * float32" instead of fixed dims
+    a = a(irange(), irange());
+    ASSERT_EQ(lifted_types[1], a.get_type());
+    nd::array b = nd::empty(ndt::make_type<float>());
+    ASSERT_EQ(lifted_types[0], b.get_type());
+
+    // Instantiate the lifted ckernel
+    assignment_ckernel_builder ckb;
+    const char *dynd_metadata[2] = {b.get_ndo_meta(), a.get_ndo_meta()};
+    ckd.instantiate_func(ckd.data_ptr, &ckb, 0, dynd_metadata, kernel_request_single);
+
+    // Call it on the data
+    ckb(b.get_readwrite_originptr(), a.get_readonly_originptr());
+    EXPECT_EQ(1.5f + 2.f + 7.f - 2.25f + 7.f + 2.125f, b.as<float>());
+
+    // Instantiate it again with some different data
+    ckb.reset();
+    a = parse_json("1 * 2 * float32",
+            "[[1.5, -2]]");
+    // Slice the array so it is "strided * strided * float32" instead of fixed dims
+    a = a(irange(), irange());
+    dynd_metadata[0] = b.get_ndo_meta();
+    dynd_metadata[1] = a.get_ndo_meta();
+    ckd.instantiate_func(ckd.data_ptr, &ckb, 0, dynd_metadata, kernel_request_single);
+
+    // Call it on the data
+    ckb(b.get_readwrite_originptr(), a.get_readonly_originptr());
+    EXPECT_EQ(1.5f - 2.f, b.as<float>());
 }
