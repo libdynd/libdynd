@@ -801,9 +801,11 @@ size_t dynd::make_lifted_reduction_ckernel(
                 break;
             }
             case strided_dim_type_id: {
+                const strided_dim_type *sdt = static_cast<const strided_dim_type *>(src_tp.extended());
                 const strided_dim_type_metadata *md = reinterpret_cast<const strided_dim_type_metadata *>(src_meta);
                 src_stride = md->stride;
                 src_size = md->size;
+                src_tp = sdt->get_element_type();
                 break;
             }
             default: {

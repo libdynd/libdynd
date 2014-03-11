@@ -56,7 +56,7 @@ static intptr_t instantiate_lifted_reduction_ckernel_deferred_data(void *self_da
 
 } // anonymous namespace
 
-void lift_reduction_ckernel_deferred(ckernel_deferred *out_ckd,
+void dynd::lift_reduction_ckernel_deferred(ckernel_deferred *out_ckd,
                 const nd::array& elwise_reduction_arr,
                 const nd::array& dst_initialization_arr,
                 const std::vector<ndt::type>& lifted_types,
@@ -121,14 +121,16 @@ void lift_reduction_ckernel_deferred(ckernel_deferred *out_ckd,
     if (!reduction_identity.is_empty()) {
         self->reduction_identity = reduction_identity.eval_immutable();
     }
-    self->ref_elwise_reduction = elwise_reduction_arr.get_data_memblock();
-    self->ref_dst_initialization = dst_initialization_arr.get_data_memblock();
+    self->ref_elwise_reduction = elwise_reduction_arr.get_memblock();
+    self->ref_dst_initialization = dst_initialization_arr.get_memblock();
+    self->data_types[0] = lifted_types[0];
+    self->data_types[1] = lifted_types[1];
     self->child_data_types = elwise_reduction->data_dynd_types;
     self->reduction_ndim = reduction_ndim;
     self->associative = associative;
     self->commutative = commutative;
     self->reduction_dimflags.init(reduction_ndim);
-    memset(self->reduction_dimflags.get(), 0, sizeof(bool) * reduction_ndim);
+    memcpy(self->reduction_dimflags.get(), reduction_dimflags, sizeof(bool) * reduction_ndim);
 
     out_ckd->instantiate_func = &instantiate_lifted_reduction_ckernel_deferred_data;
     out_ckd->data_dynd_types = &self->data_types[0];

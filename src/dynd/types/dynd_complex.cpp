@@ -8,11 +8,12 @@
 using namespace std;
 using namespace dynd;
 
-std::ostream& dynd::operator<<(ostream& out, const dynd_complex<float>& DYND_UNUSED(val))
+std::ostream& dynd::operator<<(ostream& out, const dynd_complex<float>& val)
 {
-    return (out << "<complex printing unimplemented>");}
+    return (out << "(" << val.m_real << " + " << val.m_imag << "j)");
+}
 
-std::ostream& dynd::operator<<(ostream& out, const dynd_complex<double>& DYND_UNUSED(val))
+std::ostream& dynd::operator<<(ostream& out, const dynd_complex<double>& val)
 {
-    return (out << "<complex printing unimplemented>");
+    return (out << "(" << val.m_real << " + " << val.m_imag << "j)");
 }
