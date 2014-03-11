@@ -136,7 +136,7 @@ intptr_t kernels::wrap_binary_as_unary_reduction_ckernel(
             ckp->set_function<unary_strided_operation_t>(&binary_as_unary_left_associative_reduction_adapter_strided_ckernel);
         }
     } else {
-        throw runtime_error("unsupported kernel request in instantiate_expr_assignment_ckernel");
+        throw runtime_error("unsupported kernel request in wrap_binary_as_unary_reduction_ckernel");
     }
     return ckb_child_offset;
 }
