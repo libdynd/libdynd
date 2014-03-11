@@ -105,8 +105,8 @@ TEST(Reduction, BuiltinSum_Lift1D) {
                     lifted_types, 1, reduction_dimflags, true, true, nd::array());
 
     // Set up some data for the test reduction
-    float vals[5] = {1.5, -22., 3.75, 1.125, -3.375};
-    nd::array a = vals;
+    float vals0[5] = {1.5, -22., 3.75, 1.125, -3.375};
+    nd::array a = vals0;
     ASSERT_EQ(lifted_types[1], a.get_type());
     nd::array b = nd::empty(ndt::make_type<float>());
     ASSERT_EQ(lifted_types[0], b.get_type());
@@ -118,5 +118,17 @@ TEST(Reduction, BuiltinSum_Lift1D) {
 
     // Call it on the data
     ckb(b.get_readwrite_originptr(), a.get_readonly_originptr());
-    EXPECT_EQ(b.as<float>(), vals[0] + vals[1] + vals[2] + vals[3] + vals[4]);
+    EXPECT_EQ(b.as<float>(), vals0[0] + vals0[1] + vals0[2] + vals0[3] + vals0[4]);
+
+    // Instantiate it again with some different data
+    ckb.reset();
+    float vals1[1] = {3.75f};
+    a = vals1;
+    dynd_metadata[0] = b.get_ndo_meta();
+    dynd_metadata[1] = a.get_ndo_meta();
+    ckd.instantiate_func(ckd.data_ptr, &ckb, 0, dynd_metadata, kernel_request_single);
+
+    // Call it on the data
+    ckb(b.get_readwrite_originptr(), a.get_readonly_originptr());
+    EXPECT_EQ(b.as<float>(), vals1[0]);
 }
