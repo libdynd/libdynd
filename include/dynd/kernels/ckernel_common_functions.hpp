@@ -47,6 +47,25 @@ intptr_t wrap_unary_as_expr_ckernel(
                 dynd::ckernel_builder *out_ckb, intptr_t ckb_offset,
                 kernel_request_t kerntype);
 
+/**
+ * Adds an adapter ckernel which wraps a child binary expr ckernel
+ * as a unary reduction ckernel. The three types of the binary
+ * expr kernel must all be equal.
+ *
+ * \param out_ckb  The ckernel_builder into which the kernel adapter is placed.
+ * \param ckb_offset  The offset within the ckernel_builder at which to place the adapter.
+ * \param right_associative  If true, the reduction is to be evaluated right to left,
+ *                           (x0 * (x1 * (x2 * x3))), if false, the reduction is to be
+ *                           evaluted left to right (((x0 * x1) * x2) * x3).
+ * \param kerntype  The type of kernel to produce (single or strided).
+ *
+ * \returns  The ckb_offset where the child ckernel should be placed.
+ */
+intptr_t wrap_binary_as_unary_reduction_ckernel(
+                dynd::ckernel_builder *out_ckb, intptr_t ckb_offset,
+                bool right_associative,
+                kernel_request_t kerntype);
+
 } // namespace kernels
 
 } // namespace dynd
