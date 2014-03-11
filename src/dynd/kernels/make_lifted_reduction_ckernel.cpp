@@ -402,7 +402,6 @@ struct strided_inner_broadcast_kernel_extra {
                     ckernel_prefix *extra)
     {
         extra_type *e = reinterpret_cast<extra_type *>(extra);
-        ckernel_prefix *echild = &(e + 1)->base();
         ckernel_prefix *echild_dst_init = reinterpret_cast<ckernel_prefix *>(
                             reinterpret_cast<char *>(extra) + e->dst_init_kernel_offset);
         // All we do is initialize the dst values
@@ -453,9 +452,10 @@ struct strided_inner_broadcast_kernel_extra {
         // No initialization, all reduction
         unary_strided_operation_t opchild_reduce = echild_reduce->get_function<unary_strided_operation_t>();
         intptr_t inner_size = e->size;
+        intptr_t inner_dst_stride = e->dst_stride;
         intptr_t inner_src_stride = e->src_stride;
         for (size_t i = 0; i != count; ++i) {
-            opchild_reduce(dst, 0, src, inner_src_stride, inner_size, &echild_reduce->base());
+            opchild_reduce(dst, inner_dst_stride, src, inner_src_stride, inner_size, &echild_reduce->base());
             dst += dst_stride;
             src += src_stride;
         }
@@ -726,10 +726,10 @@ static size_t make_strided_inner_broadcast_dimension_kernel(
     e->dst_init_kernel_offset = ckb_end - ckb_offset;
     if (dst_initialization != NULL) {
         ckb_end = dst_initialization->instantiate_func(dst_initialization->data_ptr,
-                        out_ckb, ckb_end, child_ckernel_meta, kernel_request_single);
+                        out_ckb, ckb_end, child_ckernel_meta, kernel_request_strided);
     } else {
         ckb_end = make_assignment_kernel(out_ckb, ckb_end,
-                        dst_tp, dst_meta, src_tp, src_meta, kernel_request_single,
+                        dst_tp, dst_meta, src_tp, src_meta, kernel_request_strided,
                         assign_error_default, &eval::default_eval_context);
     }
 
@@ -744,8 +744,8 @@ size_t dynd::make_lifted_reduction_ckernel(
                 const char *const* dynd_metadata,
                 intptr_t reduction_ndim,
                 const bool *reduction_dimflags,
-                bool associative,
-                bool commutative,
+                bool DYND_UNUSED(associative), // TODO: Use these
+                bool DYND_UNUSED(commutative),
                 const nd::array& reduction_identity,
                 dynd::kernel_request_t kernreq)
 {
@@ -905,7 +905,7 @@ size_t dynd::make_lifted_reduction_ckernel(
                 throw runtime_error(ss.str());
             }
             if (i < reduction_ndim - 1) {
-                // An initial dimension being reduced
+                // An initial dimension being broadcast
                 ckb_offset = make_strided_initial_broadcast_dimension_kernel(
                                         out_ckb, ckb_offset,
                                         dst_stride, src_stride, src_size,
@@ -914,11 +914,11 @@ size_t dynd::make_lifted_reduction_ckernel(
                 // ckernel the 'first_call' should be in this case
                 kernreq = kernel_request_strided;
             } else {
-                // The innermost dimension being reduced
-                return make_strided_inner_reduction_dimension_kernel(
+                // The innermost dimension being broadcast
+                return make_strided_inner_broadcast_dimension_kernel(
                                         elwise_reduction, dst_initialization,
                                         out_ckb, ckb_offset,
-                                        src_stride, src_size,
+                                        dst_stride, src_stride, src_size,
                                         dst_tp, dst_meta,
                                         src_tp, src_meta,
                                         kernreq);

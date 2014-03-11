@@ -43,12 +43,20 @@ namespace {
                         const char *src, intptr_t src_stride,
                         size_t count, ckernel_prefix *DYND_UNUSED(ckp))
         {
-            Accum s = 0;
-            for (size_t i = 0; i < count; ++i) {
-                s = s + *reinterpret_cast<const T *>(src);
-                src += src_stride;
+            if (dst_stride == 0) {
+                Accum s = 0;
+                for (size_t i = 0; i < count; ++i) {
+                    s = s + *reinterpret_cast<const T *>(src);
+                    src += src_stride;
+                }
+                *reinterpret_cast<T *>(dst) = static_cast<T>(*reinterpret_cast<const T *>(dst) + s);
+            } else {
+                for (size_t i = 0; i < count; ++i) {
+                    *reinterpret_cast<T *>(dst) = *reinterpret_cast<T *>(dst) + *reinterpret_cast<const T *>(src);
+                    dst += dst_stride;
+                    src += src_stride;
+                }
             }
-            *reinterpret_cast<T *>(dst) = static_cast<T>(*reinterpret_cast<const T *>(dst) + s);
         }
     };
 } // anonymous namespace
