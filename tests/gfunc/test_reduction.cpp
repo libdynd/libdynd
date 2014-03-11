@@ -236,3 +236,58 @@ TEST(Reduction, BuiltinSum_Lift2D_StridedStrided_BroadcastReduce) {
     ASSERT_EQ(1, b.get_shape()[0]);
     EXPECT_EQ(1.5f - 2.f, b(0).as<float>());
 }
+
+TEST(Reduction, BuiltinSum_Lift2D_StridedStrided_ReduceBroadcast) {
+    // Start with a float32 reduction ckernel_deferred
+    nd::array reduction_kernel = nd::empty(ndt::make_ckernel_deferred());
+    kernels::make_builtin_sum_reduction_ckernel_deferred(
+                    reinterpret_cast<ckernel_deferred *>(reduction_kernel.get_readwrite_originptr()),
+                    float32_type_id);
+
+    // Lift it to a two-dimensional strided float32 reduction ckernel_deferred
+    ckernel_deferred ckd;
+    std::vector<ndt::type> lifted_types;
+    lifted_types.push_back(ndt::type("strided * float32"));
+    lifted_types.push_back(ndt::type("strided * strided * float32"));
+    bool reduction_dimflags[2] = {true, false};
+    lift_reduction_ckernel_deferred(&ckd, reduction_kernel, nd::array(),
+                    lifted_types, 2, reduction_dimflags, true, true, nd::array());
+
+    // Set up some data for the test reduction
+    nd::array a = parse_json("2 * 3 * float32",
+            "[[1.5, 2, 7], [-2.25, 7, 2.125]]");
+    // Slice the array so it is "strided * strided * float32" instead of fixed dims
+    a = a(irange(), irange());
+    ASSERT_EQ(lifted_types[1], a.get_type());
+    nd::array b = nd::empty(3, ndt::type("strided * float32"));
+    ASSERT_EQ(lifted_types[0], b.get_type());
+
+    // Instantiate the lifted ckernel
+    assignment_ckernel_builder ckb;
+    const char *dynd_metadata[2] = {b.get_ndo_meta(), a.get_ndo_meta()};
+    ckd.instantiate_func(ckd.data_ptr, &ckb, 0, dynd_metadata, kernel_request_single);
+
+    // Call it on the data
+    ckb(b.get_readwrite_originptr(), a.get_readonly_originptr());
+    ASSERT_EQ(3, b.get_shape()[0]);
+    EXPECT_EQ(1.5f - 2.25f, b(0).as<float>());
+    EXPECT_EQ(2.f + 7.f, b(1).as<float>());
+    EXPECT_EQ(7.f + 2.125f, b(2).as<float>());
+
+    // Instantiate it again with some different data
+    ckb.reset();
+    a = parse_json("1 * 2 * float32",
+            "[[1.5, -2]]");
+    // Slice the array so it is "strided * strided * float32" instead of fixed dims
+    a = a(irange(), irange());
+    b = nd::empty(2, ndt::type("strided * float32"));
+    dynd_metadata[0] = b.get_ndo_meta();
+    dynd_metadata[1] = a.get_ndo_meta();
+    ckd.instantiate_func(ckd.data_ptr, &ckb, 0, dynd_metadata, kernel_request_single);
+
+    // Call it on the data
+    ckb(b.get_readwrite_originptr(), a.get_readonly_originptr());
+    ASSERT_EQ(2, b.get_shape()[0]);
+    EXPECT_EQ(1.5f, b(0).as<float>());
+    EXPECT_EQ(-2.f, b(1).as<float>());
+}
