@@ -806,6 +806,7 @@ size_t dynd::make_lifted_reduction_ckernel(
                 src_stride = md->stride;
                 src_size = md->size;
                 src_tp = sdt->get_element_type();
+                src_meta += sizeof(strided_dim_type_metadata);
                 break;
             }
             default: {
@@ -842,6 +843,7 @@ size_t dynd::make_lifted_reduction_ckernel(
                             throw type_error(ss.str());
                         }
                         dst_tp = sdt->get_element_type();
+                        dst_meta += sizeof(strided_dim_type_metadata);
                         break;
                     }
                     default: {
@@ -887,6 +889,7 @@ size_t dynd::make_lifted_reduction_ckernel(
                     dst_stride = md->stride;
                     dst_size = md->size;
                     dst_tp = sdt->get_element_type();
+                    dst_meta += sizeof(strided_dim_type_metadata);
                     break;
                 }
                 default: {
