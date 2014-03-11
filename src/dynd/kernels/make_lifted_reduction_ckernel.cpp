@@ -232,9 +232,10 @@ struct strided_initial_broadcast_kernel_extra {
         ckernel_reduction_prefix *echild = &(e + 1)->ckpbase;
         unary_strided_operation_t opchild_followup_call = echild->get_followup_call_function();
         intptr_t inner_size = e->size;
+        intptr_t inner_dst_stride = e->dst_stride;
         intptr_t inner_src_stride = e->src_stride;
         for (size_t i = 0; i != count; ++i) {
-            opchild_followup_call(dst, 0, src, inner_src_stride, inner_size, &echild->base());
+            opchild_followup_call(dst, inner_dst_stride, src, inner_src_stride, inner_size, &echild->base());
             dst += dst_stride;
             src += src_stride;
         }
