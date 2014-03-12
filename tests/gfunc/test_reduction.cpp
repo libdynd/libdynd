@@ -44,6 +44,7 @@ TEST(Reduction, BuiltinSum_Kernel) {
     EXPECT_EQ(-19999999987, s64);
 
     // float32
+    ckb.reset();
     kernels::make_builtin_sum_reduction_ckernel(&ckb, 0, float32_type_id, kernel_request_single);
     float sf32 = 0, af32[3] = {1.25f, -2.5f, 12.125f};
     ckb((char *)&sf32, (char *)&af32[0]);
@@ -65,6 +66,7 @@ TEST(Reduction, BuiltinSum_Kernel) {
     EXPECT_EQ(10.875, sf64);
 
     // complex[float32]
+    ckb.reset();
     kernels::make_builtin_sum_reduction_ckernel(&ckb, 0, complex_float32_type_id, kernel_request_single);
     dynd_complex<float> scf32 = 0, acf32[3] = {dynd_complex<float>(1.25f, -2.125f),
                                              dynd_complex<float>(-2.5f, 1.0f),
