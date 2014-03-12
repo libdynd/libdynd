@@ -9,6 +9,7 @@
 #include <dynd/types/fixed_dim_type.hpp>
 #include <dynd/types/var_dim_type.hpp>
 #include <dynd/kernels/expr_kernel_generator.hpp>
+#include <dynd/kernels/ckernel_common_functions.hpp>
 
 using namespace std;
 using namespace dynd;
@@ -562,6 +563,7 @@ static size_t make_strided_inner_reduction_dimension_kernel(
             intptr_t src_stride, intptr_t src_size,
             const ndt::type& dst_tp, const char *dst_meta,
             const ndt::type& src_tp, const char *src_meta,
+            bool right_associative,
             kernel_request_t kernreq)
 {
     intptr_t ckb_end = ckb_offset + sizeof(strided_inner_reduction_kernel_extra);
@@ -585,10 +587,12 @@ static size_t make_strided_inner_reduction_dimension_kernel(
     e->size = src_size;
     // Validate that the provided deferred_ckernels are unary operations,
     // and have the correct types
-    if (elwise_reduction->ckernel_funcproto != unary_operation_funcproto) {
+    if (elwise_reduction->ckernel_funcproto != unary_operation_funcproto &&
+                (elwise_reduction->ckernel_funcproto == expr_operation_funcproto &&
+                 elwise_reduction->data_types_size != 3)) {
         stringstream ss;
         ss << "make_lifted_reduction_ckernel: elwise reduction ckernel ";
-        ss << "funcproto must be unary, not " << elwise_reduction->ckernel_funcproto;
+        ss << "funcproto must be unary or a binary expr with all equal types";
         throw runtime_error(ss.str());
     }
     if (elwise_reduction->data_dynd_types[0] != dst_tp) {
@@ -628,8 +632,14 @@ static size_t make_strided_inner_reduction_dimension_kernel(
         }
     }
     const char *child_ckernel_meta[2] = {dst_meta, src_meta};
+    if (elwise_reduction->ckernel_funcproto == expr_operation_funcproto) {
+        ckb_end = kernels::wrap_binary_as_unary_reduction_ckernel(
+                        out_ckb, ckb_end, right_associative, kernel_request_strided);
+    }
     ckb_end = elwise_reduction->instantiate_func(elwise_reduction->data_ptr,
                     out_ckb, ckb_end, child_ckernel_meta, kernel_request_strided);
+    // Need to retrieve 'e' again because it may have moved
+    e = out_ckb->get_at<strided_inner_reduction_kernel_extra>(ckb_offset);
     e->dst_init_kernel_offset = ckb_end - ckb_offset;
     if (dst_initialization != NULL) {
         ckb_end = dst_initialization->instantiate_func(dst_initialization->data_ptr,
@@ -655,6 +665,7 @@ static size_t make_strided_inner_broadcast_dimension_kernel(
             intptr_t dst_stride, intptr_t src_stride, intptr_t src_size,
             const ndt::type& dst_tp, const char *dst_meta,
             const ndt::type& src_tp, const char *src_meta,
+            bool right_associative,
             kernel_request_t kernreq)
 {
     intptr_t ckb_end = ckb_offset + sizeof(strided_inner_broadcast_kernel_extra);
@@ -679,10 +690,12 @@ static size_t make_strided_inner_broadcast_dimension_kernel(
     e->size = src_size;
     // Validate that the provided deferred_ckernels are unary operations,
     // and have the correct types
-    if (elwise_reduction->ckernel_funcproto != unary_operation_funcproto) {
+    if (elwise_reduction->ckernel_funcproto != unary_operation_funcproto &&
+                (elwise_reduction->ckernel_funcproto == expr_operation_funcproto &&
+                 elwise_reduction->data_types_size != 3)) {
         stringstream ss;
         ss << "make_lifted_reduction_ckernel: elwise reduction ckernel ";
-        ss << "funcproto must be unary, not " << elwise_reduction->ckernel_funcproto;
+        ss << "funcproto must be unary or a binary expr with all equal types";
         throw runtime_error(ss.str());
     }
     if (elwise_reduction->data_dynd_types[0] != dst_tp) {
@@ -722,8 +735,14 @@ static size_t make_strided_inner_broadcast_dimension_kernel(
         }
     }
     const char *child_ckernel_meta[2] = {dst_meta, src_meta};
+    if (elwise_reduction->ckernel_funcproto == expr_operation_funcproto) {
+        ckb_end = kernels::wrap_binary_as_unary_reduction_ckernel(
+                        out_ckb, ckb_end, right_associative, kernel_request_strided);
+    }
     ckb_end = elwise_reduction->instantiate_func(elwise_reduction->data_ptr,
                     out_ckb, ckb_end, child_ckernel_meta, kernel_request_strided);
+    // Need to retrieve 'e' again because it may have moved
+    e = out_ckb->get_at<strided_inner_broadcast_kernel_extra>(ckb_offset);
     e->dst_init_kernel_offset = ckb_end - ckb_offset;
     if (dst_initialization != NULL) {
         ckb_end = dst_initialization->instantiate_func(dst_initialization->data_ptr,
@@ -768,7 +787,7 @@ size_t dynd::make_lifted_reduction_ckernel(
         throw runtime_error("make_lifted_reduction_ckernel: no dimensions were flagged for reduction");
     }
 
-    if (reducedim_count == 1 && !(associative && commutative)) {
+    if (!(reducedim_count == 1 || (associative && commutative))) {
         throw runtime_error("make_lifted_reduction_ckernel: for reducing along multiple dimensions,"
                             " the reduction function must be both associative and commutative");
     }
@@ -881,6 +900,7 @@ size_t dynd::make_lifted_reduction_ckernel(
                                         src_stride, src_size,
                                         dst_tp, dst_meta,
                                         src_tp, src_meta,
+                                        right_associative,
                                         kernreq);
             }
         } else {
@@ -931,6 +951,7 @@ size_t dynd::make_lifted_reduction_ckernel(
                                         dst_stride, src_stride, src_size,
                                         dst_tp, dst_meta,
                                         src_tp, src_meta,
+                                        right_associative,
                                         kernreq);
             }
         }

@@ -87,9 +87,13 @@ void dynd::lift_reduction_ckernel_deferred(ckernel_deferred *out_ckd,
         throw runtime_error("lift_reduction_ckernel_deferred: 'elwise_reduction' must contain a"
                         " non-null ckernel_deferred object");
     }
-    if (elwise_reduction->ckernel_funcproto != unary_operation_funcproto) {
+    if (elwise_reduction->ckernel_funcproto != unary_operation_funcproto &&
+                    !(elwise_reduction->ckernel_funcproto == expr_operation_funcproto &&
+                      elwise_reduction->data_types_size == 3 &&
+                      elwise_reduction->data_dynd_types[0] == elwise_reduction->data_dynd_types[1] &&
+                      elwise_reduction->data_dynd_types[1] == elwise_reduction->data_dynd_types[2])) {
         throw runtime_error("lift_reduction_ckernel_deferred: 'elwise_reduction' must contain a"
-                        " unary operation ckernel");
+                        " unary operation ckernel or a binary expr ckernel with all equal types");
     }
 
     // Validate the input dst_initialization ckernel_deferred
