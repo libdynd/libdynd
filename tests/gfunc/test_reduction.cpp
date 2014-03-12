@@ -102,9 +102,9 @@ TEST(Reduction, BuiltinSum_Lift1D) {
     // Lift it to a one-dimensional strided float32 reduction ckernel_deferred
     ckernel_deferred ckd;
     bool reduction_dimflags[1] = {true};
-    lift_reduction_ckernel_deferred(&ckd, reduction_kernel, nd::array(),
-                    ndt::type("strided * float32"), false,
-                    1, reduction_dimflags, true, true, nd::array());
+    lift_reduction_ckernel_deferred(&ckd, reduction_kernel,
+                    ndt::type("strided * float32"), nd::array(), false,
+                    1, reduction_dimflags, true, true, false, nd::array());
 
     // Set up some data for the test reduction
     float vals0[5] = {1.5, -22., 3.75, 1.125, -3.375};
@@ -145,9 +145,9 @@ TEST(Reduction, BuiltinSum_Lift2D_StridedStrided_ReduceReduce) {
     // Lift it to a two-dimensional strided float32 reduction ckernel_deferred
     ckernel_deferred ckd;
     bool reduction_dimflags[2] = {true, true};
-    lift_reduction_ckernel_deferred(&ckd, reduction_kernel, nd::array(),
-                    ndt::type("strided * strided * float32"), false,
-                    2, reduction_dimflags, true, true, nd::array());
+    lift_reduction_ckernel_deferred(&ckd, reduction_kernel,
+                    ndt::type("strided * strided * float32"), nd::array(), false,
+                    2, reduction_dimflags, true, true, false, nd::array());
 
     // Set up some data for the test reduction
     nd::array a = parse_json("2 * 3 * float32",
@@ -192,9 +192,9 @@ TEST(Reduction, BuiltinSum_Lift2D_StridedStrided_ReduceReduce_KeepDim) {
     // Lift it to a two-dimensional strided float32 reduction ckernel_deferred
     ckernel_deferred ckd;
     bool reduction_dimflags[2] = {true, true};
-    lift_reduction_ckernel_deferred(&ckd, reduction_kernel, nd::array(),
-                    ndt::type("strided * strided * float32"), true,
-                    2, reduction_dimflags, true, true, nd::array());
+    lift_reduction_ckernel_deferred(&ckd, reduction_kernel,
+                    ndt::type("strided * strided * float32"), nd::array(), true,
+                    2, reduction_dimflags, true, true, false, nd::array());
 
     // Set up some data for the test reduction
     nd::array a = parse_json("2 * 3 * float32",
@@ -225,9 +225,9 @@ TEST(Reduction, BuiltinSum_Lift2D_StridedStrided_BroadcastReduce) {
     // Lift it to a two-dimensional strided float32 reduction ckernel_deferred
     ckernel_deferred ckd;
     bool reduction_dimflags[2] = {false, true};
-    lift_reduction_ckernel_deferred(&ckd, reduction_kernel, nd::array(),
-                    ndt::type("strided * strided * float32"), false,
-                    2, reduction_dimflags, true, true, nd::array());
+    lift_reduction_ckernel_deferred(&ckd, reduction_kernel,
+                    ndt::type("strided * strided * float32"), nd::array(), false,
+                    2, reduction_dimflags, true, true, false, nd::array());
 
     // Set up some data for the test reduction
     nd::array a = parse_json("2 * 3 * float32",
@@ -276,9 +276,9 @@ TEST(Reduction, BuiltinSum_Lift2D_StridedStrided_BroadcastReduce_KeepDim) {
     // Lift it to a two-dimensional strided float32 reduction ckernel_deferred
     ckernel_deferred ckd;
     bool reduction_dimflags[2] = {false, true};
-    lift_reduction_ckernel_deferred(&ckd, reduction_kernel, nd::array(),
-                    ndt::type("strided * strided * float32"), true,
-                    2, reduction_dimflags, true, true, nd::array());
+    lift_reduction_ckernel_deferred(&ckd, reduction_kernel,
+                    ndt::type("strided * strided * float32"), nd::array(), true,
+                    2, reduction_dimflags, true, true, false, nd::array());
 
     // Set up some data for the test reduction
     nd::array a = parse_json("2 * 3 * float32",
@@ -311,9 +311,9 @@ TEST(Reduction, BuiltinSum_Lift2D_StridedStrided_ReduceBroadcast) {
     // Lift it to a two-dimensional strided float32 reduction ckernel_deferred
     ckernel_deferred ckd;
     bool reduction_dimflags[2] = {true, false};
-    lift_reduction_ckernel_deferred(&ckd, reduction_kernel, nd::array(),
-                    ndt::type("strided * strided * float32"), false,
-                    2, reduction_dimflags, true, true, nd::array());
+    lift_reduction_ckernel_deferred(&ckd, reduction_kernel,
+                    ndt::type("strided * strided * float32"), nd::array(), false,
+                    2, reduction_dimflags, true, true, false, nd::array());
 
     // Set up some data for the test reduction
     nd::array a = parse_json("2 * 3 * float32",
@@ -364,9 +364,9 @@ TEST(Reduction, BuiltinSum_Lift2D_StridedStrided_ReduceBroadcast_KeepDim) {
     // Lift it to a two-dimensional strided float32 reduction ckernel_deferred
     ckernel_deferred ckd;
     bool reduction_dimflags[2] = {true, false};
-    lift_reduction_ckernel_deferred(&ckd, reduction_kernel, nd::array(),
-                    ndt::type("strided * strided * float32"), true,
-                    2, reduction_dimflags, true, true, nd::array());
+    lift_reduction_ckernel_deferred(&ckd, reduction_kernel,
+                    ndt::type("strided * strided * float32"), nd::array(), true,
+                    2, reduction_dimflags, true, true, false, nd::array());
 
     // Set up some data for the test reduction
     nd::array a = parse_json("2 * 3 * float32",
@@ -400,9 +400,9 @@ TEST(Reduction, BuiltinSum_Lift3D_StridedStridedStrided_ReduceReduceReduce) {
     // Lift it to a three-dimensional strided float32 reduction ckernel_deferred
     ckernel_deferred ckd;
     bool reduction_dimflags[3] = {true, true, true};
-    lift_reduction_ckernel_deferred(&ckd, reduction_kernel, nd::array(),
-                    ndt::type("strided * strided * strided * float32"), false,
-                    3, reduction_dimflags, true, true, nd::array());
+    lift_reduction_ckernel_deferred(&ckd, reduction_kernel,
+                    ndt::type("strided * strided * strided * float32"), nd::array(), false,
+                    3, reduction_dimflags, true, true, false, nd::array());
 
     // Set up some data for the test reduction
     nd::array a = parse_json("2 * 3 * 2 * float32",
@@ -435,9 +435,9 @@ TEST(Reduction, BuiltinSum_Lift3D_StridedStridedStrided_BroadcastReduceReduce) {
     // Lift it to a three-dimensional strided float32 reduction ckernel_deferred
     ckernel_deferred ckd;
     bool reduction_dimflags[3] = {false, true, true};
-    lift_reduction_ckernel_deferred(&ckd, reduction_kernel, nd::array(),
-                    ndt::type("strided * strided * strided * float32"), false,
-                    3, reduction_dimflags, true, true, nd::array());
+    lift_reduction_ckernel_deferred(&ckd, reduction_kernel,
+                    ndt::type("strided * strided * strided * float32"), nd::array(), false,
+                    3, reduction_dimflags, true, true, false, nd::array());
 
     // Set up some data for the test reduction
     nd::array a = parse_json("2 * 3 * 2 * float32",
@@ -472,9 +472,9 @@ TEST(Reduction, BuiltinSum_Lift3D_StridedStridedStrided_ReduceBroadcastReduce) {
     // Lift it to a three-dimensional strided float32 reduction ckernel_deferred
     ckernel_deferred ckd;
     bool reduction_dimflags[3] = {true, false, true};
-    lift_reduction_ckernel_deferred(&ckd, reduction_kernel, nd::array(),
-                    ndt::type("strided * strided * strided * float32"), false,
-                    3, reduction_dimflags, true, true, nd::array());
+    lift_reduction_ckernel_deferred(&ckd, reduction_kernel,
+                    ndt::type("strided * strided * strided * float32"), nd::array(), false,
+                    3, reduction_dimflags, true, true, false, nd::array());
 
     // Set up some data for the test reduction
     nd::array a = parse_json("2 * 3 * 2 * float32",

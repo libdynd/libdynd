@@ -32,6 +32,8 @@ namespace dynd {
  *                            can typically be derived from an "axis=" parameter.
  * \param associative  Whether we can assume the reduction kernel is associative.
  * \param commutative  Whether we can assume the reduction kernel is commutative.
+ * \param right_associative  If true, the reduction is to be evaluated right to left instead
+ *                           of left to right.
  * \param reduction_identity  Either a NULL array if there is no identity, or
  *                            a value that the output can be initialized to at the start.
  * \param kernreq  Either dynd::kernel_request_single or dynd::kernel_request_strided,
@@ -47,6 +49,7 @@ size_t make_lifted_reduction_ckernel(
                 const bool *reduction_dimflags,
                 bool associative,
                 bool commutative,
+                bool right_associative,
                 const nd::array& reduction_identity,
                 dynd::kernel_request_t kernreq);
 

@@ -745,8 +745,9 @@ size_t dynd::make_lifted_reduction_ckernel(
                 const char *const* dynd_metadata,
                 intptr_t reduction_ndim,
                 const bool *reduction_dimflags,
-                bool DYND_UNUSED(associative), // TODO: Use these
-                bool DYND_UNUSED(commutative),
+                bool associative,
+                bool commutative,
+                bool right_associative,
                 const nd::array& reduction_identity,
                 dynd::kernel_request_t kernreq)
 {
@@ -765,6 +766,14 @@ size_t dynd::make_lifted_reduction_ckernel(
     }
     if (reducedim_count == 0) {
         throw runtime_error("make_lifted_reduction_ckernel: no dimensions were flagged for reduction");
+    }
+
+    if (reducedim_count == 1 && !(associative && commutative)) {
+        throw runtime_error("make_lifted_reduction_ckernel: for reducing along multiple dimensions,"
+                            " the reduction function must be both associative and commutative");
+    }
+    if (right_associative) {
+        throw runtime_error("make_lifted_reduction_ckernel: right_associative is not yet supported");
     }
 
     // This is the number of dimensions being processed by the reduction

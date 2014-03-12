@@ -27,7 +27,7 @@ struct lifted_reduction_ckernel_deferred_data {
     const ndt::type *child_data_types;
     ndt::type data_types[2];
     intptr_t reduction_ndim;
-    bool associative, commutative;
+    bool associative, commutative, right_associative;
     shortvector<bool> reduction_dimflags;
 };
 
@@ -53,7 +53,7 @@ static intptr_t instantiate_lifted_reduction_ckernel_deferred_data(void *self_da
                     self->reduction_ndim,
                     self->reduction_dimflags.get(),
                     self->associative, self->commutative,
-                    self->reduction_identity,
+                    self->right_associative, self->reduction_identity,
                     static_cast<dynd::kernel_request_t>(kerntype));
 }
 
@@ -61,13 +61,14 @@ static intptr_t instantiate_lifted_reduction_ckernel_deferred_data(void *self_da
 
 void dynd::lift_reduction_ckernel_deferred(ckernel_deferred *out_ckd,
                 const nd::array& elwise_reduction_arr,
-                const nd::array& dst_initialization_arr,
                 const ndt::type& lifted_arr_type,
+                const nd::array& dst_initialization_arr,
                 bool keepdims,
                 intptr_t reduction_ndim,
                 const bool *reduction_dimflags,
                 bool associative,
                 bool commutative,
+                bool right_associative,
                 const nd::array& reduction_identity)
 {
     // Validate the input elwise_reduction ckernel_deferred
@@ -156,6 +157,7 @@ void dynd::lift_reduction_ckernel_deferred(ckernel_deferred *out_ckd,
     self->reduction_ndim = reduction_ndim;
     self->associative = associative;
     self->commutative = commutative;
+    self->right_associative = right_associative;
     self->reduction_dimflags.init(reduction_ndim);
     memcpy(self->reduction_dimflags.get(), reduction_dimflags, sizeof(bool) * reduction_ndim);
 
@@ -163,10 +165,3 @@ void dynd::lift_reduction_ckernel_deferred(ckernel_deferred *out_ckd,
     out_ckd->data_dynd_types = &self->data_types[0];
     out_ckd->ckernel_funcproto = unary_operation_funcproto;
 }
-
-    // The types of the child ckernel and this one
-    const ndt::type *child_data_types;
-    ndt::type data_types[2];
-    intptr_t reduction_ndim;
-    bool associative, commutative;
-    shortvector<bool> reduction_dimflags;
