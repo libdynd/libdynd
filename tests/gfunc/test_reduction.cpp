@@ -101,19 +101,17 @@ TEST(Reduction, BuiltinSum_Lift1D) {
 
     // Lift it to a one-dimensional strided float32 reduction ckernel_deferred
     ckernel_deferred ckd;
-    std::vector<ndt::type> lifted_types;
-    lifted_types.push_back(ndt::type("float32"));
-    lifted_types.push_back(ndt::type("strided * float32"));
     bool reduction_dimflags[1] = {true};
     lift_reduction_ckernel_deferred(&ckd, reduction_kernel, nd::array(),
-                    lifted_types, 1, reduction_dimflags, true, true, nd::array());
+                    ndt::type("strided * float32"), false,
+                    1, reduction_dimflags, true, true, nd::array());
 
     // Set up some data for the test reduction
     float vals0[5] = {1.5, -22., 3.75, 1.125, -3.375};
     nd::array a = vals0;
-    ASSERT_EQ(lifted_types[1], a.get_type());
+    ASSERT_EQ(ckd.data_dynd_types[1], a.get_type());
     nd::array b = nd::empty(ndt::make_type<float>());
-    ASSERT_EQ(lifted_types[0], b.get_type());
+    ASSERT_EQ(ckd.data_dynd_types[0], b.get_type());
 
     // Instantiate the lifted ckernel
     assignment_ckernel_builder ckb;
@@ -146,21 +144,19 @@ TEST(Reduction, BuiltinSum_Lift2D_StridedStrided_ReduceReduce) {
 
     // Lift it to a two-dimensional strided float32 reduction ckernel_deferred
     ckernel_deferred ckd;
-    std::vector<ndt::type> lifted_types;
-    lifted_types.push_back(ndt::type("float32"));
-    lifted_types.push_back(ndt::type("strided * strided * float32"));
     bool reduction_dimflags[2] = {true, true};
     lift_reduction_ckernel_deferred(&ckd, reduction_kernel, nd::array(),
-                    lifted_types, 2, reduction_dimflags, true, true, nd::array());
+                    ndt::type("strided * strided * float32"), false,
+                    2, reduction_dimflags, true, true, nd::array());
 
     // Set up some data for the test reduction
     nd::array a = parse_json("2 * 3 * float32",
             "[[1.5, 2, 7], [-2.25, 7, 2.125]]");
     // Slice the array so it is "strided * strided * float32" instead of fixed dims
     a = a(irange(), irange());
-    ASSERT_EQ(lifted_types[1], a.get_type());
+    ASSERT_EQ(ckd.data_dynd_types[1], a.get_type());
     nd::array b = nd::empty(ndt::make_type<float>());
-    ASSERT_EQ(lifted_types[0], b.get_type());
+    ASSERT_EQ(ckd.data_dynd_types[0], b.get_type());
 
     // Instantiate the lifted ckernel
     assignment_ckernel_builder ckb;
@@ -195,21 +191,19 @@ TEST(Reduction, BuiltinSum_Lift2D_StridedStrided_ReduceReduce_KeepDim) {
 
     // Lift it to a two-dimensional strided float32 reduction ckernel_deferred
     ckernel_deferred ckd;
-    std::vector<ndt::type> lifted_types;
-    lifted_types.push_back(ndt::type("strided * strided * float32"));
-    lifted_types.push_back(ndt::type("strided * strided * float32"));
     bool reduction_dimflags[2] = {true, true};
     lift_reduction_ckernel_deferred(&ckd, reduction_kernel, nd::array(),
-                    lifted_types, 2, reduction_dimflags, true, true, nd::array());
+                    ndt::type("strided * strided * float32"), true,
+                    2, reduction_dimflags, true, true, nd::array());
 
     // Set up some data for the test reduction
     nd::array a = parse_json("2 * 3 * float32",
             "[[1.5, 2, 7], [-2.25, 7, 2.125]]");
     // Slice the array so it is "strided * strided * float32" instead of fixed dims
     a = a(irange(), irange());
-    ASSERT_EQ(lifted_types[1], a.get_type());
+    ASSERT_EQ(ckd.data_dynd_types[1], a.get_type());
     nd::array b = nd::empty(1, 1, ndt::type("strided * strided * float32"));
-    ASSERT_EQ(lifted_types[0], b.get_type());
+    ASSERT_EQ(ckd.data_dynd_types[0], b.get_type());
 
     // Instantiate the lifted ckernel
     assignment_ckernel_builder ckb;
@@ -230,21 +224,19 @@ TEST(Reduction, BuiltinSum_Lift2D_StridedStrided_BroadcastReduce) {
 
     // Lift it to a two-dimensional strided float32 reduction ckernel_deferred
     ckernel_deferred ckd;
-    std::vector<ndt::type> lifted_types;
-    lifted_types.push_back(ndt::type("strided * float32"));
-    lifted_types.push_back(ndt::type("strided * strided * float32"));
     bool reduction_dimflags[2] = {false, true};
     lift_reduction_ckernel_deferred(&ckd, reduction_kernel, nd::array(),
-                    lifted_types, 2, reduction_dimflags, true, true, nd::array());
+                    ndt::type("strided * strided * float32"), false,
+                    2, reduction_dimflags, true, true, nd::array());
 
     // Set up some data for the test reduction
     nd::array a = parse_json("2 * 3 * float32",
             "[[1.5, 2, 7], [-2.25, 7, 2.125]]");
     // Slice the array so it is "strided * strided * float32" instead of fixed dims
     a = a(irange(), irange());
-    ASSERT_EQ(lifted_types[1], a.get_type());
+    ASSERT_EQ(ckd.data_dynd_types[1], a.get_type());
     nd::array b = nd::empty(2, ndt::type("strided * float32"));
-    ASSERT_EQ(lifted_types[0], b.get_type());
+    ASSERT_EQ(ckd.data_dynd_types[0], b.get_type());
 
     // Instantiate the lifted ckernel
     assignment_ckernel_builder ckb;
@@ -283,21 +275,19 @@ TEST(Reduction, BuiltinSum_Lift2D_StridedStrided_BroadcastReduce_KeepDim) {
 
     // Lift it to a two-dimensional strided float32 reduction ckernel_deferred
     ckernel_deferred ckd;
-    std::vector<ndt::type> lifted_types;
-    lifted_types.push_back(ndt::type("strided * strided * float32"));
-    lifted_types.push_back(ndt::type("strided * strided * float32"));
     bool reduction_dimflags[2] = {false, true};
     lift_reduction_ckernel_deferred(&ckd, reduction_kernel, nd::array(),
-                    lifted_types, 2, reduction_dimflags, true, true, nd::array());
+                    ndt::type("strided * strided * float32"), true,
+                    2, reduction_dimflags, true, true, nd::array());
 
     // Set up some data for the test reduction
     nd::array a = parse_json("2 * 3 * float32",
             "[[1.5, 2, 7], [-2.25, 7, 2.125]]");
     // Slice the array so it is "strided * strided * float32" instead of fixed dims
     a = a(irange(), irange());
-    ASSERT_EQ(lifted_types[1], a.get_type());
+    ASSERT_EQ(ckd.data_dynd_types[1], a.get_type());
     nd::array b = nd::empty(2, 1, ndt::type("strided * strided * float32"));
-    ASSERT_EQ(lifted_types[0], b.get_type());
+    ASSERT_EQ(ckd.data_dynd_types[0], b.get_type());
 
     // Instantiate the lifted ckernel
     assignment_ckernel_builder ckb;
@@ -320,21 +310,19 @@ TEST(Reduction, BuiltinSum_Lift2D_StridedStrided_ReduceBroadcast) {
 
     // Lift it to a two-dimensional strided float32 reduction ckernel_deferred
     ckernel_deferred ckd;
-    std::vector<ndt::type> lifted_types;
-    lifted_types.push_back(ndt::type("strided * float32"));
-    lifted_types.push_back(ndt::type("strided * strided * float32"));
     bool reduction_dimflags[2] = {true, false};
     lift_reduction_ckernel_deferred(&ckd, reduction_kernel, nd::array(),
-                    lifted_types, 2, reduction_dimflags, true, true, nd::array());
+                    ndt::type("strided * strided * float32"), false,
+                    2, reduction_dimflags, true, true, nd::array());
 
     // Set up some data for the test reduction
     nd::array a = parse_json("2 * 3 * float32",
             "[[1.5, 2, 7], [-2.25, 7, 2.125]]");
     // Slice the array so it is "strided * strided * float32" instead of fixed dims
     a = a(irange(), irange());
-    ASSERT_EQ(lifted_types[1], a.get_type());
+    ASSERT_EQ(ckd.data_dynd_types[1], a.get_type());
     nd::array b = nd::empty(3, ndt::type("strided * float32"));
-    ASSERT_EQ(lifted_types[0], b.get_type());
+    ASSERT_EQ(ckd.data_dynd_types[0], b.get_type());
 
     // Instantiate the lifted ckernel
     assignment_ckernel_builder ckb;
@@ -375,21 +363,19 @@ TEST(Reduction, BuiltinSum_Lift2D_StridedStrided_ReduceBroadcast_KeepDim) {
 
     // Lift it to a two-dimensional strided float32 reduction ckernel_deferred
     ckernel_deferred ckd;
-    std::vector<ndt::type> lifted_types;
-    lifted_types.push_back(ndt::type("strided * strided * float32"));
-    lifted_types.push_back(ndt::type("strided * strided * float32"));
     bool reduction_dimflags[2] = {true, false};
     lift_reduction_ckernel_deferred(&ckd, reduction_kernel, nd::array(),
-                    lifted_types, 2, reduction_dimflags, true, true, nd::array());
+                    ndt::type("strided * strided * float32"), true,
+                    2, reduction_dimflags, true, true, nd::array());
 
     // Set up some data for the test reduction
     nd::array a = parse_json("2 * 3 * float32",
             "[[1.5, 2, 7], [-2.25, 7, 2.125]]");
     // Slice the array so it is "strided * strided * float32" instead of fixed dims
     a = a(irange(), irange());
-    ASSERT_EQ(lifted_types[1], a.get_type());
+    ASSERT_EQ(ckd.data_dynd_types[1], a.get_type());
     nd::array b = nd::empty(1, 3, ndt::type("strided * strided * float32"));
-    ASSERT_EQ(lifted_types[0], b.get_type());
+    ASSERT_EQ(ckd.data_dynd_types[0], b.get_type());
 
     // Instantiate the lifted ckernel
     assignment_ckernel_builder ckb;
@@ -413,21 +399,19 @@ TEST(Reduction, BuiltinSum_Lift3D_StridedStridedStrided_ReduceReduceReduce) {
 
     // Lift it to a three-dimensional strided float32 reduction ckernel_deferred
     ckernel_deferred ckd;
-    std::vector<ndt::type> lifted_types;
-    lifted_types.push_back(ndt::type("float32"));
-    lifted_types.push_back(ndt::type("strided * strided * strided * float32"));
     bool reduction_dimflags[3] = {true, true, true};
     lift_reduction_ckernel_deferred(&ckd, reduction_kernel, nd::array(),
-                    lifted_types, 3, reduction_dimflags, true, true, nd::array());
+                    ndt::type("strided * strided * strided * float32"), false,
+                    3, reduction_dimflags, true, true, nd::array());
 
     // Set up some data for the test reduction
     nd::array a = parse_json("2 * 3 * 2 * float32",
             "[[[1.5, -2.375], [2, 1.25], [7, -0.5]], [[-2.25, 1], [7, 0], [2.125, 0.25]]]");
     // Slice the array so it is "strided * strided * strided * float32" instead of fixed dims
     a = a(irange(), irange(), irange());
-    ASSERT_EQ(lifted_types[1], a.get_type());
+    ASSERT_EQ(ckd.data_dynd_types[1], a.get_type());
     nd::array b = nd::empty(ndt::type("float32"));
-    ASSERT_EQ(lifted_types[0], b.get_type());
+    ASSERT_EQ(ckd.data_dynd_types[0], b.get_type());
 
     // Instantiate the lifted ckernel
     assignment_ckernel_builder ckb;
@@ -450,21 +434,19 @@ TEST(Reduction, BuiltinSum_Lift3D_StridedStridedStrided_BroadcastReduceReduce) {
 
     // Lift it to a three-dimensional strided float32 reduction ckernel_deferred
     ckernel_deferred ckd;
-    std::vector<ndt::type> lifted_types;
-    lifted_types.push_back(ndt::type("strided * float32"));
-    lifted_types.push_back(ndt::type("strided * strided * strided * float32"));
     bool reduction_dimflags[3] = {false, true, true};
     lift_reduction_ckernel_deferred(&ckd, reduction_kernel, nd::array(),
-                    lifted_types, 3, reduction_dimflags, true, true, nd::array());
+                    ndt::type("strided * strided * strided * float32"), false,
+                    3, reduction_dimflags, true, true, nd::array());
 
     // Set up some data for the test reduction
     nd::array a = parse_json("2 * 3 * 2 * float32",
             "[[[1.5, -2.375], [2, 1.25], [7, -0.5]], [[-2.25, 1], [7, 0], [2.125, 0.25]]]");
     // Slice the array so it is "strided * strided * strided * float32" instead of fixed dims
     a = a(irange(), irange(), irange());
-    ASSERT_EQ(lifted_types[1], a.get_type());
+    ASSERT_EQ(ckd.data_dynd_types[1], a.get_type());
     nd::array b = nd::empty(2, ndt::type("strided * float32"));
-    ASSERT_EQ(lifted_types[0], b.get_type());
+    ASSERT_EQ(ckd.data_dynd_types[0], b.get_type());
 
     // Instantiate the lifted ckernel
     assignment_ckernel_builder ckb;
@@ -489,21 +471,19 @@ TEST(Reduction, BuiltinSum_Lift3D_StridedStridedStrided_ReduceBroadcastReduce) {
 
     // Lift it to a three-dimensional strided float32 reduction ckernel_deferred
     ckernel_deferred ckd;
-    std::vector<ndt::type> lifted_types;
-    lifted_types.push_back(ndt::type("strided * float32"));
-    lifted_types.push_back(ndt::type("strided * strided * strided * float32"));
     bool reduction_dimflags[3] = {true, false, true};
     lift_reduction_ckernel_deferred(&ckd, reduction_kernel, nd::array(),
-                    lifted_types, 3, reduction_dimflags, true, true, nd::array());
+                    ndt::type("strided * strided * strided * float32"), false,
+                    3, reduction_dimflags, true, true, nd::array());
 
     // Set up some data for the test reduction
     nd::array a = parse_json("2 * 3 * 2 * float32",
             "[[[1.5, -2.375], [2, 1.25], [7, -0.5]], [[-2.25, 1], [7, 0], [2.125, 0.25]]]");
     // Slice the array so it is "strided * strided * strided * float32" instead of fixed dims
     a = a(irange(), irange(), irange());
-    ASSERT_EQ(lifted_types[1], a.get_type());
+    ASSERT_EQ(ckd.data_dynd_types[1], a.get_type());
     nd::array b = nd::empty(3, ndt::type("strided * float32"));
-    ASSERT_EQ(lifted_types[0], b.get_type());
+    ASSERT_EQ(ckd.data_dynd_types[0], b.get_type());
 
     // Instantiate the lifted ckernel
     assignment_ckernel_builder ckb;

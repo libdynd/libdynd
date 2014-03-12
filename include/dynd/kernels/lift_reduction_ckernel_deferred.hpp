@@ -25,8 +25,9 @@ namespace dynd {
  *                            input value. If it is NULL, either the value in
  *                            `reduction_identity` is used, or a copy operation
  *                            is used if that is NULL.
- * \param lifted_types  The types to lift the ckernel to. The output ckernel
- *                      is for these types.
+ * \param lifted_arr_type  The type the input should be lifted to.
+ * \param keepdims  If true, the output type should keep reduced dimensions as
+ *                  size one, otherwise they are eliminated.
  * \param reduction_ndim  The number of dimensions being lifted. This should
  *                        be equal to the number of dimensions added in
  *                        `lifted_types` over what is in `elwise_reduction`.
@@ -42,7 +43,8 @@ namespace dynd {
 void lift_reduction_ckernel_deferred(ckernel_deferred *out_ckd,
                 const nd::array& elwise_reduction,
                 const nd::array& dst_initialization,
-                const std::vector<ndt::type>& lifted_types,
+                const ndt::type& lifted_arr_type,
+                bool keepdims,
                 intptr_t reduction_ndim,
                 const bool *reduction_dimflags,
                 bool associative,

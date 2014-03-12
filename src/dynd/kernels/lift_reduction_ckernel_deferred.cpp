@@ -5,6 +5,9 @@
 
 #include <dynd/kernels/lift_reduction_ckernel_deferred.hpp>
 #include <dynd/kernels/make_lifted_reduction_ckernel.hpp>
+#include <dynd/types/strided_dim_type.hpp>
+#include <dynd/types/fixed_dim_type.hpp>
+#include <dynd/types/var_dim_type.hpp>
 
 using namespace std;
 using namespace dynd;
@@ -59,7 +62,8 @@ static intptr_t instantiate_lifted_reduction_ckernel_deferred_data(void *self_da
 void dynd::lift_reduction_ckernel_deferred(ckernel_deferred *out_ckd,
                 const nd::array& elwise_reduction_arr,
                 const nd::array& dst_initialization_arr,
-                const std::vector<ndt::type>& lifted_types,
+                const ndt::type& lifted_arr_type,
+                bool keepdims,
                 intptr_t reduction_ndim,
                 const bool *reduction_dimflags,
                 bool associative,
@@ -108,10 +112,6 @@ void dynd::lift_reduction_ckernel_deferred(ckernel_deferred *out_ckd,
         }
     }
 
-    if (lifted_types.size() != 2) {
-        throw runtime_error("lift_reduction_ckernel_deferred: 'lifted_types' must have size 2");
-    }
-
     lifted_reduction_ckernel_deferred_data *self = new lifted_reduction_ckernel_deferred_data;
     out_ckd->data_ptr = self;
     out_ckd->free_func = &delete_lifted_reduction_ckernel_deferred_data;
@@ -123,8 +123,35 @@ void dynd::lift_reduction_ckernel_deferred(ckernel_deferred *out_ckd,
     }
     self->ref_elwise_reduction = elwise_reduction_arr.get_memblock();
     self->ref_dst_initialization = dst_initialization_arr.get_memblock();
-    self->data_types[0] = lifted_types[0];
-    self->data_types[1] = lifted_types[1];
+
+    // Figure out the result type
+    ndt::type lifted_dst_type = elwise_reduction->data_dynd_types[0];
+    for (intptr_t i = reduction_ndim - 1; i >= 0; --i) {
+        if (reduction_dimflags[i]) {
+            if (keepdims) {
+                lifted_dst_type = ndt::make_strided_dim(lifted_dst_type);
+            }
+        } else {
+            ndt::type subtype = lifted_arr_type.get_type_at_dimension(NULL, i);
+            switch (subtype.get_type_id()) {
+                case strided_dim_type_id:
+                case fixed_dim_type_id:
+                    lifted_dst_type = ndt::make_strided_dim(lifted_dst_type);
+                    break;
+                case var_dim_type_id:
+                    lifted_dst_type = ndt::make_var_dim(lifted_dst_type);
+                    break;
+                default: {
+                    stringstream ss;
+                    ss << "lift_reduction_ckernel_deferred: don't know how to process ";
+                    ss << "dimension of type " << subtype;
+                    throw type_error(ss.str());
+                }
+            }
+        }
+    }
+    self->data_types[0] = lifted_dst_type;
+    self->data_types[1] = lifted_arr_type;
     self->child_data_types = elwise_reduction->data_dynd_types;
     self->reduction_ndim = reduction_ndim;
     self->associative = associative;
