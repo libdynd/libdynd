@@ -268,7 +268,8 @@ static array_preamble *function___call__(const array_preamble *params, void *DYN
                     dynd_metadata, kernel_request_single);
     // Call the ckernel
     if (ckd->ckernel_funcproto == unary_operation_funcproto) {
-        throw runtime_error("TODO: unary ckernel call is not implemented");
+        unary_single_operation_t usngo = ckb.get()->get_function<unary_single_operation_t>();
+        usngo(par_arrs[0].get_readwrite_originptr(), par_arrs[1].get_readonly_originptr(), ckb.get());
     } else if (ckd->ckernel_funcproto == expr_operation_funcproto) {
         expr_single_operation_t usngo = ckb.get()->get_function<expr_single_operation_t>();
         const char *in_ptrs[max_args];

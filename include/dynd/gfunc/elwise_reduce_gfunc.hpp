@@ -56,7 +56,7 @@ public:
 class elwise_reduce {
     std::string m_name;
     /**
-     * This is a deque instead of a vector, because we are targetting C++98
+     * This is a deque instead of a vector, because we are targeting C++98
      * and so cannot rely on C++11 move semantics.
      */
     std::deque<elwise_reduce_kernel> m_kernels;

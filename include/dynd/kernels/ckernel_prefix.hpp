@@ -33,7 +33,7 @@ struct ckernel_prefix {
      * begin with a ckernel_prefix can define this
      * base() function which returns that ckernel_prefix.
      */
-    ckernel_prefix& base() {
+    inline ckernel_prefix& base() {
         return *this;
     }
 
@@ -44,17 +44,17 @@ struct ckernel_prefix {
      *      kdp->get_function<unary_single_operation_t>()
      */
     template<typename T>
-    T get_function() const {
+    inline T get_function() const {
         return reinterpret_cast<T>(function);
     }
 
     template<typename T>
-    void set_function(T fnptr) {
+    inline void set_function(T fnptr) {
         function = reinterpret_cast<void *>(fnptr);
     }
 
     template<typename T, typename U, typename V>
-    void init(const T&, const U&, const V&) {
+    inline void init(const T&, const U&, const V&) {
     }
 };
 
