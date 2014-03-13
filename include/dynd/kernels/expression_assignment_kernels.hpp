@@ -25,4 +25,3 @@ size_t make_expression_assignment_kernel(
 } // namespace dynd
 
 #endif // _DYND__EXPRESSION_ASSIGNMENT_KERNELS_HPP_
-
