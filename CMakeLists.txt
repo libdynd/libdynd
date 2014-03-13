@@ -115,6 +115,8 @@ string(REPLACE "-" ";" DYND_VERSION "${DYND_VERSION}")
 list(GET DYND_VERSION 0 "${DYND_VERSION}")
 
 set(libdynd_SRC
+    # Preprocessor
+    include/dynd/pp/token.hpp
     # CodeGen
     src/dynd/codegen/unary_kernel_adapter_codegen_windows_x64.cpp
     src/dynd/codegen/unary_kernel_adapter_codegen_x64_sysvabi.cpp
@@ -448,6 +450,13 @@ if ((NOT DYND_SHARED_LIB) AND (DYND_INSTALL_LIB))
         ${datetime_SRC}
         )
 endif()
+
+
+execute_process(COMMAND ${CMAKE_COMMAND} -E make_directory ${CMAKE_CURRENT_BINARY_DIR}/include/dynd/pp)
+ADD_EXECUTABLE(gen include/dynd/pp/gen.cpp)
+ADD_CUSTOM_COMMAND(OUTPUT gen.hpp COMMAND gen 255 ${CMAKE_CURRENT_BINARY_DIR}/include/dynd/pp)
+ADD_CUSTOM_TARGET(pp ALL DEPENDS gen.hpp)
+include_directories(${CMAKE_CURRENT_BINARY_DIR}/include)
 
 if (DYND_SHARED_LIB)
     if (DYND_CUDA)

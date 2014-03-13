@@ -15,6 +15,7 @@ else()
 endif()
 
 set(tests_SRC
+    pp/test_pp.cpp
     codegen/test_codegen_cache.cpp
     codegen/test_unary_kernel_adapter.cpp
     codegen/test_binary_kernel_adapter.cpp
