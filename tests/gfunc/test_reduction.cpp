@@ -39,9 +39,9 @@ TEST(Reduction, BuiltinSum_Kernel) {
     ckb((char *)&s64, (char *)&a64[0]);
     EXPECT_EQ(1, s64);
     ckb((char *)&s64, (char *)&a64[1]);
-    EXPECT_EQ(-19999999999, s64);
+    EXPECT_EQ(-19999999999LL, s64);
     ckb((char *)&s64, (char *)&a64[2]);
-    EXPECT_EQ(-19999999987, s64);
+    EXPECT_EQ(-19999999987LL, s64);
 
     // float32
     ckb.reset();
