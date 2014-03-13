@@ -35,7 +35,7 @@ TEST(Reduction, BuiltinSum_Kernel) {
     // int64
     ckb.reset();
     kernels::make_builtin_sum_reduction_ckernel(&ckb, 0, int64_type_id, kernel_request_single);
-    int64_t s64 = 0, a64[3] = {1, -20000000000, 12};
+    int64_t s64 = 0, a64[3] = {1, -20000000000LL, 12};
     ckb((char *)&s64, (char *)&a64[0]);
     EXPECT_EQ(1, s64);
     ckb((char *)&s64, (char *)&a64[1]);
