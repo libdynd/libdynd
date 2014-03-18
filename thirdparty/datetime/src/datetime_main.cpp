@@ -62,6 +62,9 @@ std::ostream& datetime::operator<<(std::ostream& o, datetime_unit_t unit)
         case datetime_unit_as:
             o << "as";
             break;
+        case datetime_unit_autodetect:
+            o << "<autodetect>";
+            break;
         default:
             o << "<invalid " << (int)unit << ">";
             break;        

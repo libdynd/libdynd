@@ -21,7 +21,9 @@ enum datetime_unit_t {
     datetime_unit_ns,
     datetime_unit_ps,
     datetime_unit_fs,
-    datetime_unit_as
+    datetime_unit_as,
+    // Not a normal unit, special flag for some functions
+    datetime_unit_autodetect
 };
 
 enum datetime_conversion_rule_t {

@@ -110,7 +110,7 @@ inline datetime_val_t parse_iso_8601_datetime(const std::string& str, datetime_u
  * the number of year digits is >= 4 instead of strictly 4.
  *
  * 'unit' restricts the output to that unit. Set 'unit' to
- * datetime_unit_unspecified to auto-detect a unit after which
+ * datetime_unit_autodetect to auto-detect a unit after which
  * all the values are zero.
  *
  * If 'is_abstract' is true, produces a string with no 'Z' or

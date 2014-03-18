@@ -664,7 +664,7 @@ size_t datetime::make_iso_8601_datetime(const datetime_fields *dts, char *outstr
     }
 
     /* Automatically detect a good unit */
-    if (unit == -1) {
+    if (unit == datetime_unit_autodetect) {
         unit = lossless_unit_from_datetime_fields(dts);
         /*
          * If there's a timezone, use at least minutes precision,
