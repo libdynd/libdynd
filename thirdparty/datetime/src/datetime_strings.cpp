@@ -722,8 +722,6 @@ size_t datetime::make_iso_8601_datetime(const datetime_fields *dts, char *outstr
     tmplen = _snprintf_s(substr, sublen, sublen, "%04I64d", dts->year);
 #elif defined(_MSC_VER)
     tmplen = _snprintf(substr, sublen, "%04I64d", dts->year);
-#elif defined(__APPLE__) || defined(__FreeBSD__)
-    tmplen = snprintf(substr, sublen, "%04Ld", dts->year);
 #else
     tmplen = snprintf(substr, sublen, "%04lld", dts->year);
 #endif
