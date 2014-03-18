@@ -32,8 +32,6 @@ int dynd::string_encoding_char_size_table[6] = {
 };
 
 namespace {
-    // The unicode byte order marker
-    const uint32_t UNICODE_BOM_CODEPOINT = 0xFEFF;
     // The substitute code point when things are invalid
     const uint32_t ERROR_SUBSTITUTE_CODEPOINT = (uint32_t)'?';
 
