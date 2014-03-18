@@ -45,11 +45,6 @@ static inline size_t align_up(size_t value, size_t alignment)
     return ((value + alignment - 1) / alignment) * alignment;
 }
 
-static inline size_t align_down(size_t value, size_t alignment)
-{
-    return value % alignment;
-}
-
 ////////////////////////////////////////////////////////////////////////////////
 namespace {
 
