@@ -21,6 +21,9 @@ bindings, which are a good way to get a taste of the library from
 a high level perspective. See
 [the Python bindings github site](https://github.com/ContinuumIO/dynd-python).
 
+To discuss the development of this library, subscribe to the
+[LibDyND Development List](https://groups.google.com/forum/#!forum/libdynd-dev).
+
 Building
 ========
 
