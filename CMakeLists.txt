@@ -343,6 +343,7 @@ set(libdynd_SRC
     src/dynd/dim_iter.cpp
     src/dynd/shape_tools.cpp
     src/dynd/string_encodings.cpp
+    src/dynd/view.cpp
     include/dynd/atomic_refcount.hpp
     include/dynd/auxiliary_data.hpp
     include/dynd/buffer_storage.hpp
@@ -367,6 +368,7 @@ set(libdynd_SRC
     include/dynd/shortvector.hpp
     include/dynd/shape_tools.hpp
     include/dynd/string_encodings.hpp
+    include/dynd/view.hpp
     )
 
 include_directories(
