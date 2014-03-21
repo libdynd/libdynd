@@ -5,7 +5,7 @@
 
 #if 0 // TODO reenable
 
-#include <dynd/platform_definitions.h>
+#include <dynd/platform_definitions.hpp>
 #include <complex>
 #include <iostream>
 #include <stdexcept>

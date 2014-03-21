@@ -4,7 +4,7 @@
 //
 
 
-#include <dynd/platform_definitions.h>
+#include <dynd/platform_definitions.hpp>
 
 #if !defined(DYND_CALL_SYSV_X64) && !defined(DYND_CALL_MSFT_X32) && !defined (DYND_CALL_MSFT_X64)
 

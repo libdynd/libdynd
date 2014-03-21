@@ -5,7 +5,7 @@
 
 #include <cassert>
 
-#include <dynd/platform_definitions.h>
+#include <dynd/platform_definitions.hpp>
 
 #if defined(DYND_CALL_SYSV_X64)
 

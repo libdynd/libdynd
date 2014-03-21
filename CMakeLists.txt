@@ -363,10 +363,10 @@ set(libdynd_SRC
     include/dynd/array_range.hpp
     include/dynd/array_iter.hpp
     include/dynd/dim_iter.hpp
+    include/dynd/platform_definitions.hpp
     include/dynd/shortvector.hpp
     include/dynd/shape_tools.hpp
     include/dynd/string_encodings.hpp
-    include/dynd/platform_definitions.h
     )
 
 include_directories(

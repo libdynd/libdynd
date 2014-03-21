@@ -4,7 +4,7 @@
 //
 
 
-#include <dynd/platform_definitions.h>
+#include <dynd/platform_definitions.hpp>
 
 #if 0 // (temporarily disabled) defined(DYND_CALL_SYSV_X64)
 

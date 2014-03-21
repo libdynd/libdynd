@@ -3,7 +3,7 @@
 // BSD 2-Clause License, see LICENSE.txt
 //
 
-#include <dynd/platform_definitions.h>
+#include <dynd/platform_definitions.hpp>
 
 #if !defined(DYND_CALL_MSFT_X64) && !defined(DYND_CALL_MSFT_X32) && !defined(DYND_CALL_SYSV_X64)
 #include <dynd/codegen/binary_kernel_adapter_codegen.hpp>

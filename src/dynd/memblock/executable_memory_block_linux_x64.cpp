@@ -10,7 +10,7 @@
 //#define ENABLE_LOGGING
 
 
-#include <dynd/platform_definitions.h>
+#include <dynd/platform_definitions.hpp>
 #if defined(DYND_OS_LINUX)
 
 #include <dynd/memblock/executable_memory_block.hpp>

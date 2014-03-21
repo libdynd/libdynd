@@ -3,7 +3,7 @@
 // BSD 2-Clause License, see LICENSE.txt
 //
 
-#include <dynd/platform_definitions.h>
+#include <dynd/platform_definitions.hpp>
 
 #include <complex>
 #include <iostream>
