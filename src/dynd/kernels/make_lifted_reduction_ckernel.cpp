@@ -846,6 +846,14 @@ size_t dynd::make_lifted_reduction_ckernel(
         }
         if (reduction_dimflags[i]) {
             // This dimension is being reduced
+            if (src_size == 0 && reduction_identity.is_empty()) {
+                // If the size of the src is 0, a reduction identity is required to get a value
+                stringstream ss;
+                ss << "cannot reduce a zero-sized dimension (dimension ";
+                ss << (i + 1) << " of " << lifted_types[1] << ") because the operation";
+                ss << " has no identity";
+                throw invalid_argument(ss.str());
+            }
             if (keep_dims) {
                 // If the dimensions are being kept, the output should be a
                 // a strided dimension of size one
