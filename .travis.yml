@@ -13,7 +13,7 @@ before_script:
 script:
   - make
   - ./tests/test_libdynd
-  - valgrind --tool=memcheck --leak-check=yes --show-reachable=yes ./tests/test_libdynd
+  - valgrind --tool=memcheck --leak-check=yes --show-reachable=yes --error-exitcode=123 ./tests/test_libdynd
 
 notifications:
   email: false
