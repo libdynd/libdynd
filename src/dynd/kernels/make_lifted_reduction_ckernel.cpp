@@ -549,6 +549,32 @@ static size_t make_strided_initial_broadcast_dimension_kernel(
     return ckb_end;
 }
 
+static void check_dst_initialization(const ckernel_deferred *dst_initialization,
+                                     const ndt::type &dst_tp,
+                                     const ndt::type &src_tp)
+{
+    if (dst_initialization->ckernel_funcproto != unary_operation_funcproto) {
+        stringstream ss;
+        ss << "make_lifted_reduction_ckernel: dst initialization ckernel ";
+        ss << "funcproto must be unary, not " << dst_initialization->ckernel_funcproto;
+        throw runtime_error(ss.str());
+    }
+    if (dst_initialization->data_dynd_types[0] != dst_tp) {
+        stringstream ss;
+        ss << "make_lifted_reduction_ckernel: dst initialization ckernel ";
+        ss << "dst type is " << dst_initialization->data_dynd_types[0];
+        ss << ", expected " << dst_tp;
+        throw type_error(ss.str());
+    }
+    if (dst_initialization->data_dynd_types[1] != src_tp) {
+        stringstream ss;
+        ss << "make_lifted_reduction_ckernel: dst initialization ckernel ";
+        ss << "src type is " << dst_initialization->data_dynd_types[0];
+        ss << ", expected " << src_tp;
+        throw type_error(ss.str());
+    }
+}
+
 /**
  * Adds a ckernel layer for processing one dimension of the reduction.
  * This is for a strided dimension which is being reduced, and is
@@ -557,14 +583,11 @@ static size_t make_strided_initial_broadcast_dimension_kernel(
  * If dst_initialization is NULL, an assignment kernel is used.
  */
 static size_t make_strided_inner_reduction_dimension_kernel(
-            const ckernel_deferred *elwise_reduction,
-            const ckernel_deferred *dst_initialization,
-            ckernel_builder *out_ckb, size_t ckb_offset,
-            intptr_t src_stride, intptr_t src_size,
-            const ndt::type& dst_tp, const char *dst_meta,
-            const ndt::type& src_tp, const char *src_meta,
-            bool right_associative,
-            kernel_request_t kernreq)
+    const ckernel_deferred *elwise_reduction,
+    const ckernel_deferred *dst_initialization, ckernel_builder *out_ckb,
+    size_t ckb_offset, intptr_t src_stride, intptr_t src_size,
+    const ndt::type &dst_tp, const char *dst_meta, const ndt::type &src_tp,
+    const char *src_meta, bool right_associative, kernel_request_t kernreq)
 {
     intptr_t ckb_end = ckb_offset + sizeof(strided_inner_reduction_kernel_extra);
     out_ckb->ensure_capacity(ckb_end);
@@ -610,26 +633,7 @@ static size_t make_strided_inner_reduction_dimension_kernel(
         throw type_error(ss.str());
     }
     if (dst_initialization != NULL) {
-        if (dst_initialization->ckernel_funcproto != unary_operation_funcproto) {
-            stringstream ss;
-            ss << "make_lifted_reduction_ckernel: dst initialization ckernel ";
-            ss << "funcproto must be unary, not " << dst_initialization->ckernel_funcproto;
-            throw runtime_error(ss.str());
-        }
-        if (dst_initialization->data_dynd_types[0] != dst_tp) {
-            stringstream ss;
-            ss << "make_lifted_reduction_ckernel: dst initialization ckernel ";
-            ss << "dst type is " << dst_initialization->data_dynd_types[0];
-            ss << ", expected " << dst_tp;
-            throw type_error(ss.str());
-        }
-        if (dst_initialization->data_dynd_types[1] != src_tp) {
-            stringstream ss;
-            ss << "make_lifted_reduction_ckernel: dst initialization ckernel ";
-            ss << "src type is " << dst_initialization->data_dynd_types[0];
-            ss << ", expected " << src_tp;
-            throw type_error(ss.str());
-        }
+        check_dst_initialization(dst_initialization, dst_tp, src_tp);
     }
     const char *child_ckernel_meta[2] = {dst_meta, src_meta};
     if (elwise_reduction->ckernel_funcproto == expr_operation_funcproto) {
@@ -713,26 +717,7 @@ static size_t make_strided_inner_broadcast_dimension_kernel(
         throw type_error(ss.str());
     }
     if (dst_initialization != NULL) {
-        if (dst_initialization->ckernel_funcproto != unary_operation_funcproto) {
-            stringstream ss;
-            ss << "make_lifted_reduction_ckernel: dst initialization ckernel ";
-            ss << "funcproto must be unary, not " << dst_initialization->ckernel_funcproto;
-            throw runtime_error(ss.str());
-        }
-        if (dst_initialization->data_dynd_types[0] != dst_tp) {
-            stringstream ss;
-            ss << "make_lifted_reduction_ckernel: dst initialization ckernel ";
-            ss << "dst type is " << dst_initialization->data_dynd_types[0];
-            ss << ", expected " << dst_tp;
-            throw type_error(ss.str());
-        }
-        if (dst_initialization->data_dynd_types[1] != src_tp) {
-            stringstream ss;
-            ss << "make_lifted_reduction_ckernel: dst initialization ckernel ";
-            ss << "src type is " << dst_initialization->data_dynd_types[0];
-            ss << ", expected " << src_tp;
-            throw type_error(ss.str());
-        }
+        check_dst_initialization(dst_initialization, dst_tp, src_tp);
     }
     const char *child_ckernel_meta[2] = {dst_meta, src_meta};
     if (elwise_reduction->ckernel_funcproto == expr_operation_funcproto) {
@@ -784,6 +769,21 @@ size_t dynd::make_lifted_reduction_ckernel(
         reducedim_count += reduction_dimflags[i];
     }
     if (reducedim_count == 0) {
+        if (reduction_ndim == 0) {
+            // If there are no dimensions to reduce, it's
+            // just a dst_initialization operation, so create
+            // that ckernel directly
+            if (dst_initialization != NULL) {
+                return dst_initialization->instantiate_func(
+                    dst_initialization->data_ptr, out_ckb, ckb_offset,
+                    dynd_metadata, kernreq);
+            } else {
+                return make_assignment_kernel(
+                    out_ckb, ckb_offset, dst_tp, dynd_metadata[0], src_tp,
+                    dynd_metadata[1], kernreq, assign_error_default,
+                    &eval::default_eval_context);
+            }
+        }
         throw runtime_error("make_lifted_reduction_ckernel: no dimensions were flagged for reduction");
     }
 
