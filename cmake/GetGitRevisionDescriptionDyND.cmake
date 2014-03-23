@@ -100,7 +100,7 @@ function(git_describe _dir _var)
 	#endif()
 
     #message(STATUS "Hash found: ${hash}")
-	message(STATUS "Arguments to execute_process: ${ARGN}")
+	message(STATUS "Arguments to ${GIT_EXECUTABLE}: ${ARGN}")
 
 	execute_process(COMMAND
 		"${GIT_EXECUTABLE}"
