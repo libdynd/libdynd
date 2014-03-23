@@ -3,8 +3,8 @@
 // BSD 2-Clause License, see LICENSE.txt
 //
 
-#ifndef _DYND__NDOBJECT_HPP_
-#define _DYND__NDOBJECT_HPP_
+#ifndef _DYND__ARRAY_HPP_
+#define _DYND__ARRAY_HPP_
 
 #include <iostream> // FOR DEBUG
 #include <stdexcept>
@@ -1292,4 +1292,4 @@ array combine_into_struct(size_t field_count, const std::string *field_names,
 
 }} // namespace dynd::nd
 
-#endif // _DYND__NDOBJECT_HPP_
+#endif // _DYND__ARRAY_HPP_

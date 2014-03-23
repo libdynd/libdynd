@@ -4,6 +4,7 @@
 //
 
 #include <dynd/array.hpp>
+#include <dynd/view.hpp>
 #include <dynd/types/ckernel_deferred_type.hpp>
 #include <dynd/memblock/pod_memory_block.hpp>
 #include <dynd/kernels/string_assignment_kernels.hpp>
@@ -230,17 +231,19 @@ static array_preamble *function___call__(const array_preamble *params, void *DYN
     }
     // Figure out how many args were provided
     int nargs;
+    nd::array args[max_args];
     for (nargs = 1; nargs < max_args; ++nargs) {
         // Stop at the first NULL arg (means it was default)
         if (par_arrs[nargs].get_ndo() == NULL) {
             break;
+        } else {
+            args[nargs-1] = par_arrs[nargs];
         }
     }
 
     const ckernel_deferred *ckd = reinterpret_cast<const ckernel_deferred *>(par_arrs[0].get_readonly_originptr());
 
     nargs -= 1;
-    par_arrs += 1;
 
     // Validate the number of arguments
     if (nargs != ckd->data_types_size) {
@@ -248,20 +251,23 @@ static array_preamble *function___call__(const array_preamble *params, void *DYN
         ss << "ckernel expected " << ckd->data_types_size << " arguments, got " << nargs;
         throw runtime_error(ss.str());
     }
-    // Validate that the types match exactly
+    // Validate that the types match exactly, attempting to take a view when they don't
     for (int i = 0; i < nargs; ++i) {
-        if (par_arrs[i].get_type() != ckd->data_dynd_types[i]) {
+        try {
+            args[i] = nd::view(args[i], ckd->data_dynd_types[i]);
+        } catch(const type_error&) {
+            // Make a type error with a more specific message
             stringstream ss;
             ss << "ckernel argument " << i << " expected type (" << ckd->data_dynd_types[i];
-            ss << "), got type (" << par_arrs[i+1].get_type() << ")";
-            throw runtime_error(ss.str());
+            ss << "), got type (" << args[i].get_type() << ")";
+            throw type_error(ss.str());
         }
     }
     // Instantiate the ckernel
     ckernel_builder ckb;
     const char *dynd_metadata[max_args];
     for (int i = 0; i < nargs; ++i) {
-        dynd_metadata[i] = par_arrs[i].get_ndo_meta();
+        dynd_metadata[i] = args[i].get_ndo_meta();
     }
     ckd->instantiate_func(ckd->data_ptr,
                     &ckb, 0,
@@ -269,14 +275,14 @@ static array_preamble *function___call__(const array_preamble *params, void *DYN
     // Call the ckernel
     if (ckd->ckernel_funcproto == unary_operation_funcproto) {
         unary_single_operation_t usngo = ckb.get()->get_function<unary_single_operation_t>();
-        usngo(par_arrs[0].get_readwrite_originptr(), par_arrs[1].get_readonly_originptr(), ckb.get());
+        usngo(args[0].get_readwrite_originptr(), args[1].get_readonly_originptr(), ckb.get());
     } else if (ckd->ckernel_funcproto == expr_operation_funcproto) {
         expr_single_operation_t usngo = ckb.get()->get_function<expr_single_operation_t>();
         const char *in_ptrs[max_args];
         for (int i = 0; i < nargs - 1; ++i) {
-            in_ptrs[i] = par_arrs[i+1].get_readonly_originptr();
+            in_ptrs[i] = args[i+1].get_readonly_originptr();
         }
-        usngo(par_arrs[0].get_readwrite_originptr(), in_ptrs, ckb.get());
+        usngo(args[0].get_readwrite_originptr(), in_ptrs, ckb.get());
     } else {
         throw runtime_error("unrecognized ckernel function prototype");
     }
