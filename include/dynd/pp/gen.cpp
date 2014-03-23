@@ -62,7 +62,7 @@ int main(int argc, char **argv) {
 
     fout << endl;
 
-    fout << "#define DYND_PP_ARG_MAX(";
+    fout << "#define DYND_PP_AT_INT_MAX(";
     for (int i = 0; i <= pp_int_max; i++) {
         fout << "A" << i << argsep(i);
     }
@@ -70,19 +70,21 @@ int main(int argc, char **argv) {
 
     fout << endl;
 
-    fout << "#define DYND_PP_LEN_NONZERO(...) DYND_PP_ARG_MAX(__VA_ARGS__" << argsep(true);
+    fout << "#define DYND_PP_LEN_NONZERO(...) DYND_PP__LEN_NONZERO((__VA_ARGS__" << argsep(true);
     for (int i = 0; i < pp_int_max; i++) {
         fout << pp_int_max - i << argsep(i);
     }
-    fout << 0 << ")" << endl;
+    fout << 0 << "))" << endl;
+    fout << "#define DYND_PP__LEN_NONZERO(PARENTHESIZED) DYND_PP_AT_INT_MAX PARENTHESIZED" << endl;
 
     fout << endl;
 
-    fout << "#define DYND_PP_HAS_COMMA(...) DYND_PP_ARG_MAX(__VA_ARGS__" << argsep(true);
+    fout << "#define DYND_PP_HAS_COMMA(...) DYND_PP__HAS_COMMA((__VA_ARGS__" << argsep(true);
     for (int i = 0; i <= pp_int_max - 2; i++) {
         fout << 1 << argsep(i);
     }
-    fout << 0 << argsep(false) << 0 << ")" << endl;
+    fout << 0 << argsep(false) << 0 << "))" << endl;
+    fout << "#define DYND_PP__HAS_COMMA(PARENTHESIZED) DYND_PP_AT_INT_MAX PARENTHESIZED" << endl;
 
     fout << endl;
 

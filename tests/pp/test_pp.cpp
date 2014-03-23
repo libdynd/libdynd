@@ -11,9 +11,6 @@
 
 using namespace std;
 
-TEST(PP, Simple) {
-}
-
 TEST(PPList, IsEmpty) {
     EXPECT_TRUE(DYND_PP_IS_EMPTY());
 
@@ -29,7 +26,6 @@ TEST(PPList, Len) {
     EXPECT_EQ(DYND_PP_LEN(A), 1);
     EXPECT_EQ(DYND_PP_LEN(A, B), 2);
     EXPECT_EQ(DYND_PP_LEN(A, B, C, D, E, F, G), 7);
-//    EXPECT_EQ(DYND_PP_LEN(DYND_PP_INTS), DYND_PP_INT_MAX + 1);
 
     EXPECT_EQ(DYND_PP_LEN(,), 2);
     EXPECT_EQ(DYND_PP_LEN(,,,,,,), 7);
@@ -60,7 +56,6 @@ TEST(PPLogical, Or) {
     EXPECT_TRUE(DYND_PP_OR(1, 0));
     EXPECT_TRUE(DYND_PP_OR(1, 1));
 }
-
 
 TEST(PP, If) {
     EXPECT_FALSE(DYND_PP_IS_EMPTY(DYND_PP_IF(1)(A)));
