@@ -35,8 +35,7 @@ static void delete_lifted_reduction_ckernel_deferred_data(void *self_data_ptr)
 {
     lifted_reduction_ckernel_deferred_data *self =
                     reinterpret_cast<lifted_reduction_ckernel_deferred_data *>(self_data_ptr);
-    self->~lifted_reduction_ckernel_deferred_data();
-    free(self);
+    delete self;
 }
 
 static intptr_t instantiate_lifted_reduction_ckernel_deferred_data(void *self_data_ptr,

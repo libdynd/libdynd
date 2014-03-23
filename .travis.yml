@@ -5,6 +5,7 @@ compiler:
   - clang
 
 before_script:
+  - sudo apt-get -qq install valgrind
   - mkdir build
   - cd build
   - cmake ..
@@ -12,6 +13,7 @@ before_script:
 script:
   - make
   - ./tests/test_libdynd
+  - valgrind --tool=memcheck --leak-check=yes --show-reachable=yes --error-exitcode=123 ./tests/test_libdynd
 
 notifications:
   email: false
