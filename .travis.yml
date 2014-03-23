@@ -11,7 +11,7 @@ before_script:
 
 script:
   - make
-  - ./tests/test_libdynd
+  - valgrind --tool=memcheck --leak-check=yes --show-reachable=yes --track-origins ./tests/test_libdynd
 
 notifications:
   email: false
