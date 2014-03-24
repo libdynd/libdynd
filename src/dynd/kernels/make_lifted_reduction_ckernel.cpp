@@ -273,6 +273,9 @@ struct strided_inner_reduction_kernel_extra {
     intptr_t size;
     intptr_t src_stride;
     size_t dst_init_kernel_offset;
+    // For the case with a reduction identity
+    const char *ident_data;
+    memory_block_data *ident_ref;
 
     inline ckernel_prefix& base() {
         return ckpbase.base();
@@ -284,21 +287,41 @@ struct strided_inner_reduction_kernel_extra {
         extra_type *e = reinterpret_cast<extra_type *>(extra);
         ckernel_prefix *echild_reduce = &(e + 1)->base();
         ckernel_prefix *echild_dst_init = reinterpret_cast<ckernel_prefix *>(
-                            reinterpret_cast<char *>(extra) + e->dst_init_kernel_offset);
+            reinterpret_cast<char *>(extra) + e->dst_init_kernel_offset);
         // The first call to initialize the "dst" value
-        unary_single_operation_t opchild_dst_init = echild_dst_init->get_function<unary_single_operation_t>();
-        unary_strided_operation_t opchild_reduce = echild_reduce->get_function<unary_strided_operation_t>();
+        unary_single_operation_t opchild_dst_init =
+            echild_dst_init->get_function<unary_single_operation_t>();
+        unary_strided_operation_t opchild_reduce =
+            echild_reduce->get_function<unary_strided_operation_t>();
         opchild_dst_init(dst, src, echild_dst_init);
         if (e->size > 1) {
             // All the followup calls to accumulate at the "dst" address
             opchild_reduce(dst, 0, src + e->src_stride, e->src_stride,
-                    e->size - 1, &echild_reduce->base());
+                           e->size - 1, &echild_reduce->base());
         }
     }
 
-    static void strided_first(char *dst, intptr_t dst_stride,
-                    const char *src, intptr_t src_stride,
-                    size_t count, ckernel_prefix *extra)
+    static void single_first_with_ident(char *dst, const char *src,
+                    ckernel_prefix *extra)
+    {
+        extra_type *e = reinterpret_cast<extra_type *>(extra);
+        ckernel_prefix *echild_reduce = &(e + 1)->base();
+        ckernel_prefix *echild_ident = reinterpret_cast<ckernel_prefix *>(
+            reinterpret_cast<char *>(extra) + e->dst_init_kernel_offset);
+        // The first call to initialize the "dst" value
+        unary_single_operation_t opchild_ident =
+            echild_ident->get_function<unary_single_operation_t>();
+        unary_strided_operation_t opchild_reduce =
+            echild_reduce->get_function<unary_strided_operation_t>();
+        opchild_ident(dst, e->ident_data, echild_ident);
+        // All the followup calls to accumulate at the "dst" address
+        opchild_reduce(dst, 0, src, e->src_stride, e->size,
+                       &echild_reduce->base());
+    }
+
+    static void strided_first(char *dst, intptr_t dst_stride, const char *src,
+                              intptr_t src_stride, size_t count,
+                              ckernel_prefix *extra)
     {
         extra_type *e = reinterpret_cast<extra_type *>(extra);
         ckernel_prefix *echild_reduce = &(e + 1)->base();
@@ -338,6 +361,41 @@ struct strided_inner_reduction_kernel_extra {
         }
     }
 
+    static void strided_first_with_ident(char *dst, intptr_t dst_stride,
+                                         const char *src, intptr_t src_stride,
+                                         size_t count, ckernel_prefix *extra)
+    {
+        extra_type *e = reinterpret_cast<extra_type *>(extra);
+        ckernel_prefix *echild_reduce = &(e + 1)->base();
+        ckernel_prefix *echild_ident = reinterpret_cast<ckernel_prefix *>(
+                            reinterpret_cast<char *>(extra) + e->dst_init_kernel_offset);
+        unary_single_operation_t opchild_ident = echild_ident->get_function<unary_single_operation_t>();
+        unary_strided_operation_t opchild_reduce = echild_reduce->get_function<unary_strided_operation_t>();
+        const char *ident_data = e->ident_data;
+        intptr_t inner_size = e->size;
+        intptr_t inner_src_stride = e->src_stride;
+        if (dst_stride == 0) {
+            // With a zero stride, we initialize "dst" once, then do many accumulations
+            opchild_ident(dst, ident_data, echild_ident);
+            for (intptr_t i = 0; i < (intptr_t)count; ++i) {
+                opchild_reduce(dst, 0, src, inner_src_stride, inner_size,
+                               &echild_reduce->base());
+                dst += dst_stride;
+                src += src_stride;
+            }
+        } else {
+            // With a non-zero stride, each iteration of the outer loop has to
+            // initialize then reduce
+            for (size_t i = 0; i != count; ++i) {
+                opchild_ident(dst, ident_data, echild_ident);
+                opchild_reduce(dst, 0, src, inner_src_stride, inner_size,
+                               &echild_reduce->base());
+                dst += dst_stride;
+                src += src_stride;
+            }
+        }
+    }
+
     static void strided_followup(char *dst, intptr_t dst_stride,
                     const char *src, intptr_t src_stride,
                     size_t count, ckernel_prefix *extra)
@@ -358,6 +416,9 @@ struct strided_inner_reduction_kernel_extra {
     static void destruct(ckernel_prefix *extra)
     {
         extra_type *e = reinterpret_cast<extra_type *>(extra);
+        if (e->ident_ref != NULL) {
+            memory_block_decref(e->ident_ref);
+        }
         // The reduction kernel
         ckernel_prefix *echild = &(e + 1)->base();
         if (echild->destructor) {
@@ -395,50 +456,105 @@ struct strided_inner_broadcast_kernel_extra {
     intptr_t size;
     intptr_t dst_stride, src_stride;
     size_t dst_init_kernel_offset;
+    // For the case with a reduction identity
+    const char *ident_data;
+    memory_block_data *ident_ref;
 
     inline ckernel_prefix& base() {
         return ckpbase.base();
     }
 
-    static void single_first(char *dst, const char *src,
-                    ckernel_prefix *extra)
+    static void single_first(char *dst, const char *src, ckernel_prefix *extra)
     {
         extra_type *e = reinterpret_cast<extra_type *>(extra);
         ckernel_prefix *echild_dst_init = reinterpret_cast<ckernel_prefix *>(
                             reinterpret_cast<char *>(extra) + e->dst_init_kernel_offset);
-        // All we do is initialize the dst values
         unary_strided_operation_t opchild_dst_init = echild_dst_init->get_function<unary_strided_operation_t>();
+        // All we do is initialize the dst values
         opchild_dst_init(dst, e->dst_stride, src, e->src_stride, e->size, echild_dst_init);
     }
 
-    static void strided_first(char *dst, intptr_t dst_stride,
-                    const char *src, intptr_t src_stride,
-                    size_t count, ckernel_prefix *extra)
+    static void single_first_with_ident(char *dst, const char *src,
+                                        ckernel_prefix *extra)
     {
         extra_type *e = reinterpret_cast<extra_type *>(extra);
+        ckernel_prefix *echild_ident = reinterpret_cast<ckernel_prefix *>(
+                            reinterpret_cast<char *>(extra) + e->dst_init_kernel_offset);
         ckernel_prefix *echild_reduce = &(e + 1)->base();
+        unary_strided_operation_t opchild_ident = echild_ident->get_function<unary_strided_operation_t>();
+        unary_strided_operation_t opchild_reduce = echild_reduce->get_function<unary_strided_operation_t>();
+        // First initialize the dst values (TODO: Do we want to do initialize/reduce in
+        // blocks instead of just one then the other?)
+        opchild_ident(dst, e->dst_stride, e->ident_data, 0, e->size, echild_ident);
+        // Then do the accumulation
+        opchild_reduce(dst, e->dst_stride, src, e->src_stride, e->size, echild_reduce);
+    }
+
+    static void strided_first(char *dst, intptr_t dst_stride, const char *src,
+                              intptr_t src_stride, size_t count,
+                              ckernel_prefix *extra)
+    {
+        extra_type *e = reinterpret_cast<extra_type *>(extra);
         ckernel_prefix *echild_dst_init = reinterpret_cast<ckernel_prefix *>(
                             reinterpret_cast<char *>(extra) + e->dst_init_kernel_offset);
+        ckernel_prefix *echild_reduce = &(e + 1)->base();
         unary_strided_operation_t opchild_dst_init = echild_dst_init->get_function<unary_strided_operation_t>();
         unary_strided_operation_t opchild_reduce = echild_reduce->get_function<unary_strided_operation_t>();
         intptr_t inner_size = e->size;
+        intptr_t inner_dst_stride = e->dst_stride;
         intptr_t inner_src_stride = e->src_stride;
         if (dst_stride == 0) {
             // With a zero stride, we initialize "dst" once, then do many accumulations
-            opchild_dst_init(dst, e->dst_stride, src, e->src_stride, e->size, echild_dst_init);
+            opchild_dst_init(dst, inner_dst_stride, src, inner_src_stride,
+                             inner_size, echild_dst_init);
             dst += dst_stride;
             src += src_stride;
             for (intptr_t i = 1; i < (intptr_t)count; ++i) {
-                opchild_reduce(dst, 0, src, inner_src_stride,
+                opchild_reduce(dst, inner_dst_stride, src, inner_src_stride,
                         inner_size, &echild_reduce->base());
-                dst += dst_stride;
                 src += src_stride;
             }
         } else {
             // With a non-zero stride, every iteration is an initialization
             for (size_t i = 0; i != count; ++i) {
-                opchild_dst_init(dst, e->dst_stride, src, e->src_stride,
+                opchild_dst_init(dst, inner_dst_stride, src, inner_src_stride,
                             e->size, echild_dst_init);
+                dst += dst_stride;
+                src += src_stride;
+            }
+        }
+    }
+
+    static void strided_first_with_ident(char *dst, intptr_t dst_stride,
+                                         const char *src, intptr_t src_stride,
+                                         size_t count, ckernel_prefix *extra)
+    {
+        extra_type *e = reinterpret_cast<extra_type *>(extra);
+        ckernel_prefix *echild_ident = reinterpret_cast<ckernel_prefix *>(
+                            reinterpret_cast<char *>(extra) + e->dst_init_kernel_offset);
+        ckernel_prefix *echild_reduce = &(e + 1)->base();
+        unary_strided_operation_t opchild_ident = echild_ident->get_function<unary_strided_operation_t>();
+        unary_strided_operation_t opchild_reduce = echild_reduce->get_function<unary_strided_operation_t>();
+        intptr_t inner_size = e->size;
+        intptr_t inner_dst_stride = e->dst_stride;
+        intptr_t inner_src_stride = e->src_stride;
+        if (dst_stride == 0) {
+            // With a zero stride, we initialize "dst" once, then do many
+            // accumulations
+            opchild_ident(dst, inner_dst_stride, e->ident_data, 0, e->size,
+                          echild_ident);
+            for (intptr_t i = 0; i < (intptr_t)count; ++i) {
+                opchild_reduce(dst, inner_dst_stride, src, inner_src_stride,
+                               inner_size, &echild_reduce->base());
+                src += src_stride;
+            }
+        } else {
+            // With a non-zero stride, every iteration is an initialization
+            for (size_t i = 0; i != count; ++i) {
+                opchild_ident(dst, inner_dst_stride, e->ident_data, 0,
+                              inner_size, echild_ident);
+                opchild_reduce(dst, inner_dst_stride, src, inner_src_stride,
+                               inner_size, echild_reduce);
                 dst += dst_stride;
                 src += src_stride;
             }
@@ -466,6 +582,9 @@ struct strided_inner_broadcast_kernel_extra {
     static void destruct(ckernel_prefix *extra)
     {
         extra_type *e = reinterpret_cast<extra_type *>(extra);
+        if (e->ident_ref != NULL) {
+            memory_block_decref(e->ident_ref);
+        }
         // The reduction kernel
         ckernel_prefix *echild = &(e + 1)->base();
         if (echild->destructor) {
@@ -587,21 +706,52 @@ static size_t make_strided_inner_reduction_dimension_kernel(
     const ckernel_deferred *dst_initialization, ckernel_builder *out_ckb,
     size_t ckb_offset, intptr_t src_stride, intptr_t src_size,
     const ndt::type &dst_tp, const char *dst_meta, const ndt::type &src_tp,
-    const char *src_meta, bool right_associative, kernel_request_t kernreq)
+    const char *src_meta, bool right_associative,
+    const nd::array &reduction_identity, kernel_request_t kernreq,
+    const eval::eval_context *ectx)
 {
     intptr_t ckb_end = ckb_offset + sizeof(strided_inner_reduction_kernel_extra);
     out_ckb->ensure_capacity(ckb_end);
     strided_inner_reduction_kernel_extra *e = out_ckb->get_at<strided_inner_reduction_kernel_extra>(ckb_offset);
     e->base().destructor = &strided_inner_reduction_kernel_extra::destruct;
-    // Get the function pointer for the first_call
-    if (kernreq == kernel_request_single) {
-        e->ckpbase.set_first_call_function(&strided_inner_reduction_kernel_extra::single_first);
-    } else if (kernreq == kernel_request_strided) {
-        e->ckpbase.set_first_call_function(&strided_inner_reduction_kernel_extra::strided_first);
+    // Cannot have both a dst_initialization kernel and a reduction identity
+    if (dst_initialization != NULL && !reduction_identity.is_empty()) {
+        throw invalid_argument("make_lifted_reduction_ckernel: cannot specify"
+            " both a dst_initialization kernel and a reduction_identity");
+    }
+    if (reduction_identity.is_empty()) {
+        // Get the function pointer for the first_call, for the case with
+        // no reduction identity
+        if (kernreq == kernel_request_single) {
+            e->ckpbase.set_first_call_function(&strided_inner_reduction_kernel_extra::single_first);
+        } else if (kernreq == kernel_request_strided) {
+            e->ckpbase.set_first_call_function(&strided_inner_reduction_kernel_extra::strided_first);
+        } else {
+            stringstream ss;
+            ss << "make_lifted_reduction_ckernel: unrecognized request " << (int)kernreq;
+            throw runtime_error(ss.str());
+        }
     } else {
-        stringstream ss;
-        ss << "make_lifted_reduction_ckernel: unrecognized request " << (int)kernreq;
-        throw runtime_error(ss.str());
+        // Get the function pointer for the first_call, for the case with
+        // a reduction identity
+        if (kernreq == kernel_request_single) {
+            e->ckpbase.set_first_call_function(&strided_inner_reduction_kernel_extra::single_first_with_ident);
+        } else if (kernreq == kernel_request_strided) {
+            e->ckpbase.set_first_call_function(&strided_inner_reduction_kernel_extra::strided_first_with_ident);
+        } else {
+            stringstream ss;
+            ss << "make_lifted_reduction_ckernel: unrecognized request " << (int)kernreq;
+            throw runtime_error(ss.str());
+        }
+        if (reduction_identity.get_type() != dst_tp) {
+            stringstream ss;
+            ss << "make_lifted_reduction_ckernel: reduction identity type ";
+            ss << reduction_identity.get_type() << " does not match dst type ";
+            ss << dst_tp;
+            throw runtime_error(ss.str());
+        }
+        e->ident_data = reduction_identity.get_readonly_originptr();
+        e->ident_ref = reduction_identity.get_memblock().release();
     }
     // The function pointer for followup accumulation calls
     e->ckpbase.set_followup_call_function(&strided_inner_reduction_kernel_extra::strided_followup);
@@ -642,16 +792,24 @@ static size_t make_strided_inner_reduction_dimension_kernel(
     }
     ckb_end = elwise_reduction->instantiate_func(elwise_reduction->data_ptr,
                     out_ckb, ckb_end, child_ckernel_meta, kernel_request_strided);
+    // Make sure there's capacity for the next ckernel
+    out_ckb->ensure_capacity(ckb_end);
     // Need to retrieve 'e' again because it may have moved
     e = out_ckb->get_at<strided_inner_reduction_kernel_extra>(ckb_offset);
     e->dst_init_kernel_offset = ckb_end - ckb_offset;
     if (dst_initialization != NULL) {
-        ckb_end = dst_initialization->instantiate_func(dst_initialization->data_ptr,
-                        out_ckb, ckb_end, child_ckernel_meta, kernel_request_single);
+        ckb_end = dst_initialization->instantiate_func(
+            dst_initialization->data_ptr, out_ckb, ckb_end, child_ckernel_meta,
+            kernel_request_single);
+    } else if (reduction_identity.is_empty()) {
+        ckb_end = make_assignment_kernel(
+            out_ckb, ckb_end, dst_tp, dst_meta, src_tp, src_meta,
+            kernel_request_single, assign_error_default, ectx);
     } else {
-        ckb_end = make_assignment_kernel(out_ckb, ckb_end,
-                        dst_tp, dst_meta, src_tp, src_meta, kernel_request_single,
-                        assign_error_default, &eval::default_eval_context);
+        ckb_end = make_assignment_kernel(
+            out_ckb, ckb_end, dst_tp, dst_meta, reduction_identity.get_type(),
+            reduction_identity.get_ndo_meta(), kernel_request_single,
+            assign_error_default, ectx);
     }
 
     return ckb_end;
@@ -663,28 +821,56 @@ static size_t make_strided_inner_reduction_dimension_kernel(
  * the final dimension before the accumulation operation.
  */
 static size_t make_strided_inner_broadcast_dimension_kernel(
-            const ckernel_deferred *elwise_reduction,
-            const ckernel_deferred *dst_initialization,
-            ckernel_builder *out_ckb, size_t ckb_offset,
-            intptr_t dst_stride, intptr_t src_stride, intptr_t src_size,
-            const ndt::type& dst_tp, const char *dst_meta,
-            const ndt::type& src_tp, const char *src_meta,
-            bool right_associative,
-            kernel_request_t kernreq)
+    const ckernel_deferred *elwise_reduction,
+    const ckernel_deferred *dst_initialization, ckernel_builder *out_ckb,
+    size_t ckb_offset, intptr_t dst_stride, intptr_t src_stride,
+    intptr_t src_size, const ndt::type &dst_tp, const char *dst_meta,
+    const ndt::type &src_tp, const char *src_meta,
+    bool right_associative, const nd::array &reduction_identity,
+    kernel_request_t kernreq, const eval::eval_context *ectx)
 {
     intptr_t ckb_end = ckb_offset + sizeof(strided_inner_broadcast_kernel_extra);
     out_ckb->ensure_capacity(ckb_end);
     strided_inner_broadcast_kernel_extra *e = out_ckb->get_at<strided_inner_broadcast_kernel_extra>(ckb_offset);
     e->base().destructor = &strided_inner_broadcast_kernel_extra::destruct;
-    // Get the function pointer for the first_call
-    if (kernreq == kernel_request_single) {
-        e->ckpbase.set_first_call_function(&strided_inner_broadcast_kernel_extra::single_first);
-    } else if (kernreq == kernel_request_strided) {
-        e->ckpbase.set_first_call_function(&strided_inner_broadcast_kernel_extra::strided_first);
+    // Cannot have both a dst_initialization kernel and a reduction identity
+    if (dst_initialization != NULL && !reduction_identity.is_empty()) {
+        throw invalid_argument("make_lifted_reduction_ckernel: cannot specify"
+            " both a dst_initialization kernel and a reduction_identity");
+    }
+    if (reduction_identity.is_empty()) {
+        // Get the function pointer for the first_call, for the case with
+        // no reduction identity
+        if (kernreq == kernel_request_single) {
+            e->ckpbase.set_first_call_function(&strided_inner_broadcast_kernel_extra::single_first);
+        } else if (kernreq == kernel_request_strided) {
+            e->ckpbase.set_first_call_function(&strided_inner_broadcast_kernel_extra::strided_first);
+        } else {
+            stringstream ss;
+            ss << "make_lifted_reduction_ckernel: unrecognized request " << (int)kernreq;
+            throw runtime_error(ss.str());
+        }
     } else {
-        stringstream ss;
-        ss << "make_lifted_reduction_ckernel: unrecognized request " << (int)kernreq;
-        throw runtime_error(ss.str());
+        // Get the function pointer for the first_call, for the case with
+        // a reduction identity
+        if (kernreq == kernel_request_single) {
+            e->ckpbase.set_first_call_function(&strided_inner_broadcast_kernel_extra::single_first_with_ident);
+        } else if (kernreq == kernel_request_strided) {
+            e->ckpbase.set_first_call_function(&strided_inner_broadcast_kernel_extra::strided_first_with_ident);
+        } else {
+            stringstream ss;
+            ss << "make_lifted_reduction_ckernel: unrecognized request " << (int)kernreq;
+            throw runtime_error(ss.str());
+        }
+        if (reduction_identity.get_type() != dst_tp) {
+            stringstream ss;
+            ss << "make_lifted_reduction_ckernel: reduction identity type ";
+            ss << reduction_identity.get_type() << " does not match dst type ";
+            ss << dst_tp;
+            throw runtime_error(ss.str());
+        }
+        e->ident_data = reduction_identity.get_readonly_originptr();
+        e->ident_ref = reduction_identity.get_memblock().release();
     }
     // The function pointer for followup accumulation calls
     e->ckpbase.set_followup_call_function(&strided_inner_broadcast_kernel_extra::strided_followup);
@@ -726,16 +912,24 @@ static size_t make_strided_inner_broadcast_dimension_kernel(
     }
     ckb_end = elwise_reduction->instantiate_func(elwise_reduction->data_ptr,
                     out_ckb, ckb_end, child_ckernel_meta, kernel_request_strided);
+    // Make sure there's capacity for the next ckernel
+    out_ckb->ensure_capacity(ckb_end);
     // Need to retrieve 'e' again because it may have moved
     e = out_ckb->get_at<strided_inner_broadcast_kernel_extra>(ckb_offset);
     e->dst_init_kernel_offset = ckb_end - ckb_offset;
     if (dst_initialization != NULL) {
-        ckb_end = dst_initialization->instantiate_func(dst_initialization->data_ptr,
-                        out_ckb, ckb_end, child_ckernel_meta, kernel_request_strided);
+        ckb_end = dst_initialization->instantiate_func(
+            dst_initialization->data_ptr, out_ckb, ckb_end, child_ckernel_meta,
+            kernel_request_strided);
+    } else if (reduction_identity.is_empty()) {
+        ckb_end = make_assignment_kernel(
+            out_ckb, ckb_end, dst_tp, dst_meta, src_tp, src_meta,
+            kernel_request_strided, assign_error_default, ectx);
     } else {
-        ckb_end = make_assignment_kernel(out_ckb, ckb_end,
-                        dst_tp, dst_meta, src_tp, src_meta, kernel_request_strided,
-                        assign_error_default, &eval::default_eval_context);
+        ckb_end = make_assignment_kernel(
+            out_ckb, ckb_end, dst_tp, dst_meta, reduction_identity.get_type(),
+            reduction_identity.get_ndo_meta(), kernel_request_strided,
+            assign_error_default, ectx);
     }
 
     return ckb_end;
@@ -753,15 +947,14 @@ size_t dynd::make_lifted_reduction_ckernel(
                 bool commutative,
                 bool right_associative,
                 const nd::array& reduction_identity,
-                dynd::kernel_request_t kernreq)
+                dynd::kernel_request_t kernreq,
+                const eval::eval_context *ectx)
 {
-    if (!reduction_identity.is_empty()) {
-        throw runtime_error("TODO: implement reduction_identity");
-    }
-
     const ndt::type& dst_el_tp = elwise_reduction->data_dynd_types[0];
     const ndt::type& src_el_tp = elwise_reduction->data_dynd_types[1];
     ndt::type dst_tp = lifted_types[0], src_tp = lifted_types[1];
+    const char *dst_meta = dynd_metadata[0];
+    const char *src_meta = dynd_metadata[1];
 
     // Count the number of dimensions being reduced
     intptr_t reducedim_count = 0;
@@ -777,11 +970,17 @@ size_t dynd::make_lifted_reduction_ckernel(
                 return dst_initialization->instantiate_func(
                     dst_initialization->data_ptr, out_ckb, ckb_offset,
                     dynd_metadata, kernreq);
-            } else {
+            } else if (reduction_identity.is_empty()) {
                 return make_assignment_kernel(
                     out_ckb, ckb_offset, dst_tp, dynd_metadata[0], src_tp,
-                    dynd_metadata[1], kernreq, assign_error_default,
-                    &eval::default_eval_context);
+                    dynd_metadata[1], kernreq, assign_error_default, ectx);
+            } else {
+                // Create the kernel which copies the identity and then
+                // does one reduction
+                return make_strided_inner_reduction_dimension_kernel(
+                    elwise_reduction, dst_initialization, out_ckb, ckb_offset,
+                    0, 1, dst_tp, dst_meta, src_tp, src_meta, right_associative,
+                    reduction_identity, kernreq, ectx);
             }
         }
         throw runtime_error("make_lifted_reduction_ckernel: no dimensions were flagged for reduction");
@@ -816,8 +1015,6 @@ size_t dynd::make_lifted_reduction_ckernel(
         throw runtime_error(ss.str());
     }
 
-    const char *dst_meta = dynd_metadata[0];
-    const char *src_meta = dynd_metadata[1];
     for (intptr_t i = 0; i < reduction_ndim; ++i) {
         intptr_t dst_stride, dst_size, src_stride, src_size;
         // Get the striding parameters for the source dimension
@@ -849,8 +1046,8 @@ size_t dynd::make_lifted_reduction_ckernel(
             if (src_size == 0 && reduction_identity.is_empty()) {
                 // If the size of the src is 0, a reduction identity is required to get a value
                 stringstream ss;
-                ss << "cannot reduce a zero-sized dimension (dimension ";
-                ss << (i + 1) << " of " << lifted_types[1] << ") because the operation";
+                ss << "cannot reduce a zero-sized dimension (axis ";
+                ss << i << " of " << lifted_types[1] << ") because the operation";
                 ss << " has no identity";
                 throw invalid_argument(ss.str());
             }
@@ -903,13 +1100,9 @@ size_t dynd::make_lifted_reduction_ckernel(
             } else {
                 // The innermost dimension being reduced
                 return make_strided_inner_reduction_dimension_kernel(
-                                        elwise_reduction, dst_initialization,
-                                        out_ckb, ckb_offset,
-                                        src_stride, src_size,
-                                        dst_tp, dst_meta,
-                                        src_tp, src_meta,
-                                        right_associative,
-                                        kernreq);
+                    elwise_reduction, dst_initialization, out_ckb, ckb_offset,
+                    src_stride, src_size, dst_tp, dst_meta, src_tp, src_meta,
+                    right_associative, reduction_identity, kernreq, ectx);
             }
         } else {
             // This dimension is being broadcast, not reduced
@@ -954,13 +1147,10 @@ size_t dynd::make_lifted_reduction_ckernel(
             } else {
                 // The innermost dimension being broadcast
                 return make_strided_inner_broadcast_dimension_kernel(
-                                        elwise_reduction, dst_initialization,
-                                        out_ckb, ckb_offset,
-                                        dst_stride, src_stride, src_size,
-                                        dst_tp, dst_meta,
-                                        src_tp, src_meta,
-                                        right_associative,
-                                        kernreq);
+                    elwise_reduction, dst_initialization, out_ckb, ckb_offset,
+                    dst_stride, src_stride, src_size, dst_tp, dst_meta, src_tp,
+                    src_meta, right_associative, reduction_identity, kernreq,
+                    ectx);
             }
         }
     }
