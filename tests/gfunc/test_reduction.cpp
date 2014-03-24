@@ -92,6 +92,36 @@ TEST(Reduction, BuiltinSum_Kernel) {
     EXPECT_EQ(dynd_complex<double>(10.875, 12343.875), scf64);
 }
 
+TEST(Reduction, BuiltinSum_Lift0D) {
+    // Start with a float32 reduction ckernel_deferred
+    nd::array reduction_kernel = nd::empty(ndt::make_ckernel_deferred());
+    kernels::make_builtin_sum_reduction_ckernel_deferred(
+                    reinterpret_cast<ckernel_deferred *>(reduction_kernel.get_readwrite_originptr()),
+                    float32_type_id);
+
+    // Lift it to a zero-dimensional reduction ckernel_deferred (basically a no-op)
+    ckernel_deferred ckd;
+    bool reduction_dimflags[1] = {false};
+    lift_reduction_ckernel_deferred(&ckd, reduction_kernel,
+                    ndt::type("float32"), nd::array(), false,
+                    0, reduction_dimflags, true, true, false, nd::array());
+
+    // Set up some data for the test reduction
+    nd::array a = 1.25f;
+    ASSERT_EQ(ckd.data_dynd_types[1], a.get_type());
+    nd::array b = nd::empty(ndt::make_type<float>());
+    ASSERT_EQ(ckd.data_dynd_types[0], b.get_type());
+
+    // Instantiate the lifted ckernel
+    assignment_ckernel_builder ckb;
+    const char *dynd_metadata[2] = {b.get_ndo_meta(), a.get_ndo_meta()};
+    ckd.instantiate_func(ckd.data_ptr, &ckb, 0, dynd_metadata, kernel_request_single);
+
+    // Call it on the data
+    ckb(b.get_readwrite_originptr(), a.get_readonly_originptr());
+    EXPECT_EQ(1.25f, b.as<float>());
+}
+
 TEST(Reduction, BuiltinSum_Lift1D) {
     // Start with a float32 reduction ckernel_deferred
     nd::array reduction_kernel = nd::empty(ndt::make_ckernel_deferred());
