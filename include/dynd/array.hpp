@@ -235,6 +235,10 @@ public:
         return get_ndo()->m_flags & (immutable_access_flag | read_access_flag | write_access_flag);
     }
 
+    inline bool is_immutable() const {
+        return (get_ndo()->m_flags & immutable_access_flag) != 0;
+    }
+
     /** Returns true if the object is a scalar */
     inline bool is_scalar() const {
         return get_type().is_scalar();

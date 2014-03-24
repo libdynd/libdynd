@@ -123,7 +123,14 @@ void dynd::lift_reduction_ckernel_deferred(ckernel_deferred *out_ckd,
     self->child_elwise_reduction = elwise_reduction;
     self->child_dst_initialization = dst_initialization;
     if (!reduction_identity.is_empty()) {
-        self->reduction_identity = reduction_identity.eval_immutable();
+        if (reduction_identity.is_immutable() &&
+                reduction_identity.get_type() == elwise_reduction->data_dynd_types[0]) {
+            self->reduction_identity = reduction_identity;
+        } else {
+            self->reduction_identity = nd::empty(elwise_reduction->data_dynd_types[0]);
+            self->reduction_identity.vals() = reduction_identity;
+            self->reduction_identity.flag_as_immutable();
+        }
     }
     self->ref_elwise_reduction = elwise_reduction_arr.get_memblock();
     self->ref_dst_initialization = dst_initialization_arr.get_memblock();
