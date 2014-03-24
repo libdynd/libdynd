@@ -137,7 +137,8 @@ int main(int argc, char **argv) {
 
     fout << endl;
 
-    fout << "#define DYND_PP_MAP(MAC, SEP, ...) DYND_PP_CAT_2(DYND_PP_MAP_, DYND_PP_LEN(__VA_ARGS__))(MAC, SEP, __VA_ARGS__)" << endl;
+    fout << "#define DYND_PP_MAP(MAC, SEP, ...) DYND_PP__MAP(DYND_PP_LEN(__VA_ARGS__), (MAC, SEP, __VA_ARGS__))" << endl;
+    fout << "#define DYND_PP__MAP(COUNT, PARENTHESIZED) DYND_PP_CAT_2(DYND_PP_MAP_, COUNT) PARENTHESIZED" << endl;
     fout << "#define DYND_PP_MAP_0(MAC, SEP)" << endl;
     fout << "#define DYND_PP_MAP_1(MAC, SEP, A0) MAC(A0)" << endl;
     for (int i = 2; i < pp_int_max; i++) {
