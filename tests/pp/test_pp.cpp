@@ -5,35 +5,26 @@
 
 #include "inc_gtest.hpp"
 
+#include <dynd/pp/arithmetic.hpp>
+#include <dynd/pp/comparision.hpp>
 #include <dynd/pp/if.hpp>
 #include <dynd/pp/list.hpp>
 #include <dynd/pp/logical.hpp>
 
+//#include "C:\Users\Irwin\Repositories\libdynd\include\dynd\pp\arithmetic.hpp"
+//#include "C:\Users\Irwin\Repositories\libdynd\include\dynd\pp\comparision.hpp"
+
 using namespace std;
 
-TEST(PPList, IsEmpty) {
-    EXPECT_TRUE(DYND_PP_IS_EMPTY());
-
-    EXPECT_FALSE(DYND_PP_IS_EMPTY(,));
-    EXPECT_FALSE(DYND_PP_IS_EMPTY(A));
-    EXPECT_FALSE(DYND_PP_IS_EMPTY(A, B));
-    EXPECT_FALSE(DYND_PP_IS_EMPTY(A, B, C, D, E, F, G));
+TEST(PP, Cat) {
+    EXPECT_EQ(DYND_PP_CAT(1, 2, 3), 123);
+    EXPECT_EQ(DYND_PP_CAT(1, 2, 3, 4), 1234);
 }
 
-TEST(PPList, Len) {
-    EXPECT_EQ(DYND_PP_LEN(), 0);
+TEST(PP, Comparision) {
+    EXPECT_TRUE(DYND_PP_EQ(0, 0));
 
-    EXPECT_EQ(DYND_PP_LEN(A), 1);
-    EXPECT_EQ(DYND_PP_LEN(A, B), 2);
-    EXPECT_EQ(DYND_PP_LEN(A, B, C, D, E, F, G), 7);
-
-    EXPECT_EQ(DYND_PP_LEN(,), 2);
-    EXPECT_EQ(DYND_PP_LEN(,,,,,,), 7);
-}
-
-TEST(PPList, Map) {
-    EXPECT_EQ(DYND_PP_MAP(DYND_PP_ID, (+), 0, 1, 2, 3, 4, 5, 6), 21);
-//    EXPECT_EQ(DYND_PP_MAP(DYND_PP_INC, (+), 0, 1, 2, 3, 4, 5, 6), 28);
+//    EXPECT_TRUE(DYND_PP_LT(0, 1));
 }
 
 TEST(PPLogical, Bool) {
@@ -60,6 +51,31 @@ TEST(PPLogical, Or) {
     EXPECT_TRUE(DYND_PP_OR(0, 1));
     EXPECT_TRUE(DYND_PP_OR(1, 0));
     EXPECT_TRUE(DYND_PP_OR(1, 1));
+}
+
+TEST(PP, Arithmetic) {
+    EXPECT_EQ(DYND_PP_INC(0), 1);
+    EXPECT_EQ(DYND_PP_INC(6), 7);
+    EXPECT_EQ(DYND_PP_INC(DYND_PP_DEC(DYND_PP_INT_MAX)), DYND_PP_INT_MAX);
+
+    EXPECT_EQ(DYND_PP_DEC(1), 0);
+    EXPECT_EQ(DYND_PP_DEC(7), 6);
+    EXPECT_EQ(DYND_PP_DEC(DYND_PP_INT_MAX), DYND_PP_INT_MAX - 1);
+
+    EXPECT_EQ(DYND_PP_ADD(0, 0), 0);
+    EXPECT_EQ(DYND_PP_ADD(0, 1), 1);
+    EXPECT_EQ(DYND_PP_ADD(1, 0), 1);
+    EXPECT_EQ(DYND_PP_ADD(4, 2), 6);
+    EXPECT_EQ(DYND_PP_ADD(3, 4), 7);
+    EXPECT_EQ(DYND_PP_ADD(4, 3), 7);
+    EXPECT_EQ(DYND_PP_ADD(0, DYND_PP_INT_MAX), DYND_PP_INT_MAX);
+    EXPECT_EQ(DYND_PP_ADD(DYND_PP_INT_MAX, 0), DYND_PP_INT_MAX);
+
+    EXPECT_EQ(DYND_PP_SUB(0, 0), 0);
+    EXPECT_EQ(DYND_PP_SUB(1, 0), 1);
+    EXPECT_EQ(DYND_PP_SUB(4, 2), 2);
+    EXPECT_EQ(DYND_PP_SUB(4, 3), 1);
+    EXPECT_EQ(DYND_PP_SUB(DYND_PP_INT_MAX, 0), DYND_PP_INT_MAX);
 }
 
 TEST(PP, If) {

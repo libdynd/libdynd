@@ -7,8 +7,11 @@
 #define _DYND__LOGICAL_HPP_
 
 #include <dynd/pp/gen.hpp>
-#include <dynd/pp/comparision.hpp>
-#include <dynd/pp/token.hpp>
+//#include <dynd/pp/comparision.hpp>
+//#include <dynd/pp/token.hpp>
+
+#include "C:\Users\Irwin\Repositories\libdynd\include\dynd\pp\comparision.hpp"
+#include "C:\Users\Irwin\Repositories\libdynd\include\dynd\pp\token.hpp"
 
 #define DYND_PP_BOOL(A) DYND_PP_CAT_2(DYND_PP_BOOL_, DYND_PP_EQ(A, 0))
 #define DYND_PP_BOOL_0 1

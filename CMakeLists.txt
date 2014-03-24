@@ -454,7 +454,7 @@ endif()
 
 execute_process(COMMAND ${CMAKE_COMMAND} -E make_directory ${CMAKE_CURRENT_BINARY_DIR}/include/dynd/pp)
 ADD_EXECUTABLE(gen include/dynd/pp/gen.cpp)
-ADD_CUSTOM_COMMAND(OUTPUT gen.hpp COMMAND gen 64 ${CMAKE_CURRENT_BINARY_DIR}/include/dynd/pp)
+ADD_CUSTOM_COMMAND(OUTPUT gen.hpp COMMAND gen 7 ${CMAKE_CURRENT_BINARY_DIR}/include/dynd/pp)
 ADD_CUSTOM_TARGET(pp ALL DEPENDS gen.hpp)
 include_directories(${CMAKE_CURRENT_BINARY_DIR}/include)
 

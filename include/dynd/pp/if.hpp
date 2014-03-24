@@ -7,8 +7,11 @@
 #define _DYND__IF_HPP_
 
 #include <dynd/pp/gen.hpp>
-#include <dynd/pp/logical.hpp>
-#include <dynd/pp/token.hpp>
+//#include <dynd/pp/logical.hpp>
+//#include <dynd/pp/token.hpp>
+
+#include "C:\Users\Irwin\Repositories\libdynd\include\dynd\pp\logical.hpp"
+#include "C:\Users\Irwin\Repositories\libdynd\include\dynd\pp\token.hpp"
 
 #define DYND_PP_IF(CONDITION) DYND_PP_CAT_2(DYND_PP_IF_, DYND_PP_BOOL(CONDITION))
 #define DYND_PP_IF_0(...)

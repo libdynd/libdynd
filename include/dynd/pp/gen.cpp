@@ -88,31 +88,59 @@ int main(int argc, char **argv) {
 
     fout << endl;
 
-    fout << "#define DYND_PP_AT_INT_MAX(" << args("A", pp_int_max + 1) << ", ...) A" << pp_int_max << endl;
+    fout << "#define DYND_PP_ZEROS_" << pp_int_max << " ";
+    for (int i = 0; i < pp_int_max - 1; i++) {
+        fout << 0 << argsep(i);
+    }
+    fout << 0 << endl;
 
     fout << endl;
 
-    fout << "#define DYND_PP_LEN_NONZERO(...) DYND_PP__LEN_NONZERO((__VA_ARGS__" << argsep(true);
-    for (int i = 0; i < pp_int_max; i++) {
-        fout << pp_int_max - i << argsep(i);
+    fout << "#define DYND_PP_ONES_" << pp_int_max << " ";
+    for (int i = 0; i < pp_int_max - 1; i++) {
+        fout << 1 << argsep(i);
+    }
+    fout << 1 << endl;
+
+    fout << endl;
+
+    fout << "#define DYND_PP_NULL(...)" << endl;
+    fout << "#define DYND_PP_ID(...) __VA_ARGS__" << endl;
+
+    fout << endl;
+
+    fout << "#define DYND_PP_APPLY(MAC, A) MAC A" << endl;
+
+    fout << endl;
+
+    fout << "#define DYND_PP_GET_" << pp_int_max + 1 << "(" << args("A", pp_int_max + 2) << ", ...) A" << pp_int_max + 1 << endl;
+
+    fout << endl;
+
+    fout << "#define DYND_PP_LEN_NONZERO(...) DYND_PP_APPLY(DYND_PP_GET_" << pp_int_max + 1 << ", (DYND_PP_ID(__VA_ARGS__)" << argsep(true);
+    for (int i = 0; i <= pp_int_max; i++) {
+        fout << pp_int_max + 1 - i << argsep(i);
     }
     fout << 0 << "))" << endl;
-    fout << "#define DYND_PP__LEN_NONZERO(PARENTHESIZED) DYND_PP_AT_INT_MAX PARENTHESIZED" << endl;
+
 
     fout << endl;
 
-    fout << "#define DYND_PP_HAS_COMMA(...) DYND_PP__HAS_COMMA((__VA_ARGS__" << argsep(true);
-    for (int i = 0; i <= pp_int_max - 2; i++) {
+    fout << "#define DYND_PP_HAS_COMMA(...) DYND_PP_APPLY(DYND_PP_GET_" << pp_int_max + 1 << ", (__VA_ARGS__" << argsep(true);
+    for (int i = 0; i < pp_int_max; i++) {
         fout << 1 << argsep(i);
     }
     fout << 0 << argsep(false) << 0 << "))" << endl;
-    fout << "#define DYND_PP__HAS_COMMA(PARENTHESIZED) DYND_PP_AT_INT_MAX PARENTHESIZED" << endl;
 
     fout << endl;
 
-    for (int i = 8; i <= pp_int_max; i++) {
-        fout << "#define DYND_PP_CAT_" << i << "(A0" << argsep(false) << args("A", 1, i) << ") DYND_PP_CAT_2(A0"
-            << argsep(false) << "DYND_PP_CAT_" << i - 1 << "(" << args("A", 1, i) << "))" << endl;
+    fout << "#define DYND_PP_CAT_2(A, B) DYND_PP__CAT_2(A, B)" << endl;
+    fout << "#define DYND_PP__CAT_2(A, B) DYND_PP___CAT_2(A, B)" << endl;
+    fout << "#define DYND_PP___CAT_2(A, B) DYND_PP____CAT_2(A, B)" << endl;
+    fout << "#define DYND_PP____CAT_2(A, B) A ## B" << endl;
+    for (int i = 3; i <= pp_int_max; i++) {
+        fout << "#define DYND_PP_CAT_" << i << "(HEAD" << argsep(false) << "...) DYND_PP_CAT_2(HEAD";
+        fout << argsep(false) << "DYND_PP_CAT_" << i - 1 << "(__VA_ARGS__))" << endl;
     }
 
     fout << endl;
@@ -137,13 +165,59 @@ int main(int argc, char **argv) {
 
     fout << endl;
 
-    fout << "#define DYND_PP_MAP(MAC, SEP, ...) DYND_PP__MAP(DYND_PP_LEN(__VA_ARGS__), (MAC, SEP, __VA_ARGS__))" << endl;
-    fout << "#define DYND_PP__MAP(COUNT, PARENTHESIZED) DYND_PP_CAT_2(DYND_PP_MAP_, COUNT) PARENTHESIZED" << endl;
+    fout << "#define DYND_PP_SLICE_FROM(INDEX, ...) DYND_PP_ID(DYND_PP_CAT_2(DYND_PP_SLICE_FROM_, INDEX)(__VA_ARGS__))" << endl;
+    fout << "#define DYND_PP_SLICE_FROM_0(...) __VA_ARGS__" << endl;
+    fout << "#define DYND_PP_SLICE_FROM_1(HEAD, ...) __VA_ARGS__" << endl;
+    for (int i = 2; i <= pp_int_max; i++) {
+        fout << "#define DYND_PP_SLICE_FROM_" << i << "(HEAD, ...) DYND_PP_ID(DYND_PP_SLICE_FROM_" << i - 1 << "(__VA_ARGS__))" << endl;
+    }
+
+    fout << endl;
+
+    fout << "#define DYND_PP_SLICE_TO(INDEX" << argsep(false) << "...) DYND_PP_ID(DYND_PP_CAT_2(DYND_PP_SLICE_TO_";
+    fout << argsep(false) << "INDEX)(__VA_ARGS__))" << endl;
+    fout << "#define DYND_PP_SLICE_TO_0(...)" << endl;
+    fout << "#define DYND_PP_SLICE_TO_1(HEAD" << argsep(false) << "...) HEAD" << endl;
+    for (int i = 2; i <= pp_int_max; i++) {
+        fout << "#define DYND_PP_SLICE_TO_" << i << "(HEAD" << argsep(false) << "...) HEAD";
+        fout << argsep(false) << "DYND_PP_ID(DYND_PP_SLICE_TO_" << i - 1 << "(__VA_ARGS__))" << endl;
+    }
+
+    fout << endl;
+
+    fout << "#define DYND_PP_REPEAT(TOK, COUNT) DYND_PP_CAT_2(DYND_PP_REPEAT_, COUNT)(TOK)" << endl;
+    fout << "#define DYND_PP_REPEAT_0(TOK)" << endl;
+    fout << "#define DYND_PP_REPEAT_1(TOK) TOK" << endl;
+    fout << "#define DYND_PP_REPEAT_2(TOK) TOK, TOK" << endl;
+    for (int i = 3; i < pp_int_max; i++) {
+        fout << "#define DYND_PP_REPEAT_" << i << "(TOK) TOK, DYND_PP_REPEAT_" << i - 1 << "(TOK)" << endl;
+    }
+
+    fout << endl;
+
+    fout << "#define DYND_PP_MAP(MAC, SEP, ...) DYND_PP_ID(DYND_PP_CAT_2(DYND_PP_MAP_, DYND_PP_LEN(__VA_ARGS__))(MAC, SEP, __VA_ARGS__))" << endl;
     fout << "#define DYND_PP_MAP_0(MAC, SEP)" << endl;
-    fout << "#define DYND_PP_MAP_1(MAC, SEP, A0) MAC(A0)" << endl;
+    fout << "#define DYND_PP_MAP_1(MAC, SEP, HEAD) MAC(HEAD)" << endl;
     for (int i = 2; i < pp_int_max; i++) {
-        fout << "#define DYND_PP_MAP_" << i << "(MAC, SEP, " << args("A", i) << ") MAC(A0) DYND_PP_ID SEP DYND_PP_MAP_";
-        fout << i - 1 << "(MAC, SEP, " << args("A", 1, i) << ")" << endl;
+        fout << "#define DYND_PP_MAP_" << i << "(MAC, SEP, HEAD, ...) MAC(HEAD) DYND_PP_ID SEP DYND_PP_ID(DYND_PP_MAP_";
+        fout << i - 1 << "(MAC, SEP, __VA_ARGS__))" << endl;
+    }
+
+    fout << endl;
+
+    fout << "#define DYND_PP_REDUCE(MAC, ...) DYND_PP_APPLY(DYND_PP_CAT_2(DYND_PP_REDUCE_, DYND_PP_LEN(__VA_ARGS__)), (MAC, __VA_ARGS__))" << endl;
+    fout << "#define DYND_PP_REDUCE_2(MAC, FIRST, SECOND) MAC(FIRST, SECOND)" << endl;
+    for (int i = 3; i < pp_int_max; i++) {
+        fout << "#define DYND_PP_REDUCE_" << i << "(MAC, FIRST, SECOND, ...) DYND_PP_ID(DYND_PP_REDUCE_" << i - 1 << "(MAC, MAC(FIRST, SECOND), __VA_ARGS__))" << endl;
+    }
+
+    fout << endl;
+
+    fout << "#define DYND_PP_ZIP(A, B) DYND_PP_CAT_2(DYND_PP_ZIP_, DYND_PP_LEN A)(A, B)" << endl;
+    fout << "#define DYND_PP_ZIP_1(A, B) (DYND_PP_FIRST A, DYND_PP_FIRST B)" << endl;
+    for (int i = 2; i < pp_int_max; i++) {
+        fout << "#define DYND_PP_ZIP_" << i << "(A, B) (DYND_PP_FIRST A, DYND_PP_FIRST B), DYND_PP_ZIP_" << i - 1;
+        fout << "((DYND_PP_SLICE_FROM(1, DYND_PP_ID A)), (DYND_PP_SLICE_FROM(1, DYND_PP_ID B)))" << endl;
     }
 
     fout << endl;
