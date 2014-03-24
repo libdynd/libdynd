@@ -31,6 +31,11 @@ TEST(PPList, Len) {
     EXPECT_EQ(DYND_PP_LEN(,,,,,,), 7);
 }
 
+TEST(PPList, Map) {
+    EXPECT_EQ(DYND_PP_MAP(DYND_PP_ID, (+), 0, 1, 2, 3, 4, 5, 6), 21);
+    EXPECT_EQ(DYND_PP_MAP(DYND_PP_INC, (+), 0, 1, 2, 3, 4, 5, 6), 28);
+}
+
 TEST(PPLogical, Bool) {
     EXPECT_TRUE(DYND_PP_BOOL(3));
     EXPECT_TRUE(DYND_PP_BOOL(DYND_PP_INT_MAX));
