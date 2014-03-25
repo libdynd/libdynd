@@ -219,11 +219,11 @@ int main(int argc, char **argv) {
 
     fout << endl;
 
-    fout << "#define DYND_PP_ZIP(A, B) DYND_PP_CAT_2(DYND_PP_ZIP_, DYND_PP_LEN A)(A, B)" << endl;
-    fout << "#define DYND_PP_ZIP_1(A, B) (DYND_PP_FIRST A, DYND_PP_FIRST B)" << endl;
+    fout << "#define DYND_PP_ELEMENTWISE(MAC, A, B) DYND_PP_CAT_2(DYND_PP_ELEMENTWISE_, DYND_PP_LEN A)(MAC, A, B)" << endl;
+    fout << "#define DYND_PP_ELEMENTWISE_1(MAC, A, B) MAC(DYND_PP_FIRST A, DYND_PP_FIRST B)" << endl;
     for (int i = 2; i <= pp_len_max; i++) {
-        fout << "#define DYND_PP_ZIP_" << i << "(A, B) (DYND_PP_FIRST A, DYND_PP_FIRST B), DYND_PP_ZIP_" << i - 1;
-        fout << "((DYND_PP_SLICE_FROM(1, DYND_PP_ID A)), (DYND_PP_SLICE_FROM(1, DYND_PP_ID B)))" << endl;
+        fout << "#define DYND_PP_ELEMENTWISE_" << i << "(MAC, A, B) MAC(DYND_PP_FIRST A, DYND_PP_FIRST B), DYND_PP_ELEMENTWISE_" << i - 1;
+        fout << "(MAC, (DYND_PP_SLICE_FROM(1, DYND_PP_ID A)), (DYND_PP_SLICE_FROM(1, DYND_PP_ID B)))" << endl;
     }
 
     fout << endl;

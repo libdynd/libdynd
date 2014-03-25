@@ -56,6 +56,8 @@ TEST(PPList, AllEq) {
 //    EXPECT_FALSE(DYND_PP_ALL_EQ((0, 1), (6, 2, 0, 7, 3, 4, 1, 5)));
 }
 
+
+
 TEST(PPList, Range) {
 //    EXPECT_TRUE(DYND_PP_ALL_EQ((DYND_PP_RANGE(0)), ()));
     EXPECT_TRUE(DYND_PP_ALL_EQ((DYND_PP_RANGE(1)), (0)));
@@ -140,7 +142,9 @@ TEST(PPList, Last) {
 
 TEST(PPList, All) {
     EXPECT_TRUE(DYND_PP_ALL(1, 2, 3));
+    EXPECT_TRUE(DYND_PP_ALL(DYND_PP_MAP(DYND_PP_INC, (,), 1, 2, 3)));
 }
+
 
 TEST(PPList, Map) {
     EXPECT_TRUE(DYND_PP_ALL_EQ((DYND_PP_MAP(DYND_PP_ID, (,), 0)), (0)));
