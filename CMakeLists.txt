@@ -116,7 +116,11 @@ list(GET DYND_VERSION 0 "${DYND_VERSION}")
 
 set(libdynd_SRC
     # Preprocessor
-    include/dynd/pp/token.hpp
+    include/dynd/pp/arithmetic.hpp
+    include/dynd/pp/comparision.hpp
+    include/dynd/pp/if.hpp
+    include/dynd/pp/list.hpp
+    include/dynd/pp/logical.hpp
     # CodeGen
     src/dynd/codegen/unary_kernel_adapter_codegen_windows_x64.cpp
     src/dynd/codegen/unary_kernel_adapter_codegen_x64_sysvabi.cpp
