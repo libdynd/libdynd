@@ -5,8 +5,8 @@
 
 #include "inc_gtest.hpp"
 
-#include <dynd/pp/list.hpp>
 #include <dynd/pp/if.hpp>
+#include <dynd/pp/token.hpp>
 
 using namespace std;
 

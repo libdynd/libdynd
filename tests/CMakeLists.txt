@@ -20,6 +20,7 @@ set(tests_SRC
     pp/test_pp_if.cpp
     pp/test_pp_list.cpp
     pp/test_pp_logical.cpp
+    pp/test_pp_token.cpp
     codegen/test_codegen_cache.cpp
     codegen/test_unary_kernel_adapter.cpp
     codegen/test_binary_kernel_adapter.cpp
