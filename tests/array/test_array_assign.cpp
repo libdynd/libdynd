@@ -28,33 +28,39 @@ TYPED_TEST_P(ArrayAssign, ScalarAssignment_Bool) {
 
     // assignment to a bool scalar
     a = nd::empty(TestFixture::First::MakeType(ndt::make_type<dynd_bool>()));
-    const dynd_bool *ptr_b = (const dynd_bool *)a.get_ndo()->m_data_pointer;
+    const dynd_bool *ptr_a = (const dynd_bool *)a.get_ndo()->m_data_pointer;
     a.val_assign(TestFixture::Second::To(true));
-    EXPECT_TRUE(TestFixture::First::Dereference(ptr_b));
+    EXPECT_TRUE(TestFixture::First::Dereference(ptr_a));
     a.val_assign(TestFixture::Second::To(false));
-    EXPECT_FALSE(TestFixture::First::Dereference(ptr_b));
+    EXPECT_FALSE(TestFixture::First::Dereference(ptr_a));
     a.val_assign(TestFixture::Second::To(1));
-    EXPECT_TRUE(TestFixture::First::Dereference(ptr_b));
+    EXPECT_TRUE(TestFixture::First::Dereference(ptr_a));
     a.val_assign(TestFixture::Second::To(0));
-    EXPECT_FALSE(TestFixture::First::Dereference(ptr_b));
+    EXPECT_FALSE(TestFixture::First::Dereference(ptr_a));
     a.val_assign(TestFixture::Second::To(1.0));
-    EXPECT_TRUE(TestFixture::First::Dereference(ptr_b));
+    EXPECT_TRUE(TestFixture::First::Dereference(ptr_a));
     a.val_assign(TestFixture::Second::To(0.0));
-    EXPECT_FALSE(TestFixture::First::Dereference(ptr_b));
+    EXPECT_FALSE(TestFixture::First::Dereference(ptr_a));
     a.val_assign(TestFixture::Second::To(1.5), assign_error_none);
-    EXPECT_TRUE(TestFixture::First::Dereference(ptr_b));
+    EXPECT_TRUE(TestFixture::First::Dereference(ptr_a));
     a.val_assign(TestFixture::Second::To(-3.5f), assign_error_none);
-    EXPECT_TRUE(TestFixture::First::Dereference(ptr_b));
+    EXPECT_TRUE(TestFixture::First::Dereference(ptr_a));
     a.val_assign(TestFixture::Second::To(22), assign_error_none);
-    EXPECT_TRUE(TestFixture::First::Dereference(ptr_b));
-    if (!TestFixture::First::IsTypeID(cuda_device_type_id) && !TestFixture::Second::IsTypeID(cuda_device_type_id)) {
-        EXPECT_THROW(a.val_assign(TestFixture::Second::To(2)), runtime_error);
-        EXPECT_THROW(a.val_assign(TestFixture::Second::To(-1)), runtime_error);
-        EXPECT_THROW(a.val_assign(TestFixture::Second::To(1.5)), runtime_error);
-        EXPECT_THROW(a.val_assign(TestFixture::Second::To(1.5), assign_error_overflow), runtime_error);
-        EXPECT_THROW(a.val_assign(TestFixture::Second::To(1.5), assign_error_fractional), runtime_error);
-        EXPECT_THROW(a.val_assign(TestFixture::Second::To(1.5), assign_error_inexact), runtime_error);
-    }
+    EXPECT_TRUE(TestFixture::First::Dereference(ptr_a));
+    // As a special rule, any conversion to bool is defined as x != 0
+    // even in the more strict assignment error modes
+    a.val_assign(TestFixture::Second::To(2));
+    EXPECT_TRUE(TestFixture::First::Dereference(ptr_a));
+    a.val_assign(TestFixture::Second::To(-1));
+    EXPECT_TRUE(TestFixture::First::Dereference(ptr_a));
+    a.val_assign(TestFixture::Second::To(1.5));
+    EXPECT_TRUE(TestFixture::First::Dereference(ptr_a));
+    a.val_assign(TestFixture::Second::To(1.5), assign_error_overflow);
+    EXPECT_TRUE(TestFixture::First::Dereference(ptr_a));
+    a.val_assign(TestFixture::Second::To(1.5), assign_error_fractional);
+    EXPECT_TRUE(TestFixture::First::Dereference(ptr_a));
+    a.val_assign(TestFixture::Second::To(1.5), assign_error_inexact);
+    EXPECT_TRUE(TestFixture::First::Dereference(ptr_a));
 }
 
 TYPED_TEST_P(ArrayAssign, ScalarAssignment_Int8) {

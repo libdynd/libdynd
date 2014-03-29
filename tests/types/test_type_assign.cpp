@@ -191,7 +191,7 @@ TEST(DTypeAssign, FixedSizeTests_Int8) {
 #define ONE_TEST(tid, v, m) \
             typed_data_assign(ndt::type(tid), NULL, (char *)&v, s_dt, NULL, s_ptr); \
             EXPECT_EQ(m, v)
-    EXPECT_THROW(typed_data_assign(ndt::type(bool_type_id), NULL, (char *)&v_b, s_dt, NULL, s_ptr), runtime_error);
+    ONE_TEST(bool_type_id, v_b, true);
     ONE_TEST(int16_type_id, v_i16, 127);
     ONE_TEST(int32_type_id, v_i32, 127);
     ONE_TEST(int64_type_id, v_i64, 127);
@@ -205,14 +205,17 @@ TEST(DTypeAssign, FixedSizeTests_Int8) {
     ONE_TEST(complex_float64_type_id, v_cf64, dynd_complex<double>(127));
 #undef ONE_TEST
 
-    // Test int8 -> bool variants
+    // As a special rule, conversion of int8 -> bool always means (value != 0)
     v_i8 = -33;
-    EXPECT_THROW(typed_data_assign(ndt::type(bool_type_id), NULL, (char *)&v_b, s_dt, NULL, s_ptr), runtime_error);
+    typed_data_assign(ndt::type(bool_type_id), NULL, (char *)&v_b, s_dt, NULL, s_ptr);
+    EXPECT_TRUE(v_b);
     v_i8 = -1;
-    EXPECT_THROW(typed_data_assign(ndt::type(bool_type_id), NULL, (char *)&v_b, s_dt, NULL, s_ptr), runtime_error);
+    typed_data_assign(ndt::type(bool_type_id), NULL, (char *)&v_b, s_dt, NULL, s_ptr);
+    EXPECT_TRUE(v_b);
     EXPECT_THROW(typed_data_assign(ndt::type(uint8_type_id), NULL, (char *)&v_u8, s_dt, NULL, s_ptr), runtime_error);
     v_i8 = 2;
-    EXPECT_THROW(typed_data_assign(ndt::type(bool_type_id), NULL, (char *)&v_b, s_dt, NULL, s_ptr), runtime_error);
+    typed_data_assign(ndt::type(bool_type_id), NULL, (char *)&v_b, s_dt, NULL, s_ptr);
+    EXPECT_TRUE(v_b);
     v_i8 = 0;
     typed_data_assign(ndt::type(bool_type_id), NULL, (char *)&v_b, s_dt, NULL, s_ptr);
     EXPECT_FALSE(v_b);
@@ -250,7 +253,7 @@ TEST(DTypeAssign, FixedSizeTests_Float64) {
 //            EXPECT_THROW(typed_data_assign(ndt::type(tid), (char *)&v, s_dt, s_ptr, assign_error_overflow), runtime_error);
 //            EXPECT_THROW(typed_data_assign(ndt::type(tid), (char *)&v, s_dt, s_ptr, assign_error_fractional), runtime_error);
 //            EXPECT_THROW(typed_data_assign(ndt::type(tid), (char *)&v, s_dt, s_ptr, assign_error_inexact), runtime_error)
-    ONE_TEST_THROW(bool_type_id, v_b);
+    ONE_TEST(bool_type_id, v_b, true);
     ONE_TEST_THROW(int8_type_id, v_i8);
     ONE_TEST_THROW(int16_type_id, v_i16);
     ONE_TEST_THROW(int32_type_id, v_i32);
@@ -381,7 +384,7 @@ TEST(DTypeAssign, FixedSizeTests_Complex_Float32) {
 //            EXPECT_THROW(typed_data_assign(ndt::type(tid), &v, s_dt, s_ptr, assign_error_overflow), runtime_error);
 //            EXPECT_THROW(typed_data_assign(ndt::type(tid), &v, s_dt, s_ptr, assign_error_fractional), runtime_error);
 //            EXPECT_THROW(typed_data_assign(ndt::type(tid), &v, s_dt, s_ptr, assign_error_inexact), runtime_error)
-    ONE_TEST_THROW(bool_type_id, v_b);
+    ONE_TEST(bool_type_id, v_b, true);
     ONE_TEST(int8_type_id, v_i8, 2);
     ONE_TEST(int16_type_id, v_i16, 2);
     ONE_TEST(int32_type_id, v_i32, 2);
@@ -407,7 +410,7 @@ TEST(DTypeAssign, FixedSizeTests_Complex_Float32) {
 //            EXPECT_THROW(typed_data_assign(ndt::type(tid), &v, s_dt, s_ptr, assign_error_overflow), runtime_error);
 //            EXPECT_THROW(typed_data_assign(ndt::type(tid), &v, s_dt, s_ptr, assign_error_fractional), runtime_error);
 //            EXPECT_THROW(typed_data_assign(ndt::type(tid), &v, s_dt, s_ptr, assign_error_inexact), runtime_error)
-    ONE_TEST_THROW(bool_type_id, v_b);
+    ONE_TEST(bool_type_id, v_b, true);
     ONE_TEST(int8_type_id, v_i8, -1);
     ONE_TEST(int16_type_id, v_i16, -1);
     ONE_TEST(int32_type_id, v_i32, -1);
@@ -433,7 +436,7 @@ TEST(DTypeAssign, FixedSizeTests_Complex_Float32) {
 //            EXPECT_THROW(typed_data_assign(ndt::type(tid), &v, s_dt, s_ptr, assign_error_overflow), runtime_error);
 //            EXPECT_THROW(typed_data_assign(ndt::type(tid), &v, s_dt, s_ptr, assign_error_fractional), runtime_error);
 //            EXPECT_THROW(typed_data_assign(ndt::type(tid), &v, s_dt, s_ptr, assign_error_inexact), runtime_error)
-    ONE_TEST_THROW(bool_type_id, v_b);
+    ONE_TEST(bool_type_id, v_b, true);
     ONE_TEST_THROW(int8_type_id, v_i8);
     ONE_TEST_THROW(int16_type_id, v_i16);
     ONE_TEST_THROW(int32_type_id, v_i32);
@@ -459,7 +462,7 @@ TEST(DTypeAssign, FixedSizeTests_Complex_Float32) {
 //            EXPECT_THROW(typed_data_assign(ndt::type(tid), &v, s_dt, s_ptr, assign_error_overflow), runtime_error);
 //            EXPECT_THROW(typed_data_assign(ndt::type(tid), &v, s_dt, s_ptr, assign_error_fractional), runtime_error);
 //            EXPECT_THROW(typed_data_assign(ndt::type(tid), &v, s_dt, s_ptr, assign_error_inexact), runtime_error)
-    ONE_TEST_THROW(bool_type_id, v_b);
+    ONE_TEST(bool_type_id, v_b, true);
     ONE_TEST_THROW(int8_type_id, v_i8);
     ONE_TEST_THROW(int16_type_id, v_i16);
     ONE_TEST_THROW(int32_type_id, v_i32);
@@ -485,7 +488,7 @@ TEST(DTypeAssign, FixedSizeTests_Complex_Float32) {
 //            EXPECT_THROW(typed_data_assign(ndt::type(tid), &v, s_dt, s_ptr, assign_error_overflow), runtime_error);
 //            EXPECT_THROW(typed_data_assign(ndt::type(tid), &v, s_dt, s_ptr, assign_error_fractional), runtime_error);
 //            EXPECT_THROW(typed_data_assign(ndt::type(tid), &v, s_dt, s_ptr, assign_error_inexact), runtime_error)
-    ONE_TEST_THROW(bool_type_id, v_b);
+    ONE_TEST(bool_type_id, v_b, true);
     ONE_TEST_THROW(int8_type_id, v_i8);
     ONE_TEST_THROW(int16_type_id, v_i16);
     ONE_TEST_THROW(int32_type_id, v_i32);
@@ -576,7 +579,7 @@ TEST(DTypeAssign, FixedSizeTests_Complex_Float64) {
 //            EXPECT_THROW(typed_data_assign(ndt::type(tid), (char *)&v, s_dt, s_ptr, assign_error_overflow), runtime_error);
 //            EXPECT_THROW(typed_data_assign(ndt::type(tid), (char *)&v, s_dt, s_ptr, assign_error_fractional), runtime_error);
 //            EXPECT_THROW(typed_data_assign(ndt::type(tid), (char *)&v, s_dt, s_ptr, assign_error_inexact), runtime_error)
-    ONE_TEST_THROW(bool_type_id, v_b);
+    ONE_TEST(bool_type_id, v_b, true);
     ONE_TEST(int8_type_id, v_i8, 2);
     ONE_TEST(int16_type_id, v_i16, 2);
     ONE_TEST(int32_type_id, v_i32, 2);
@@ -602,7 +605,7 @@ TEST(DTypeAssign, FixedSizeTests_Complex_Float64) {
 //            EXPECT_THROW(typed_data_assign(ndt::type(tid), (char *)&v, s_dt, s_ptr, assign_error_overflow), runtime_error);
 //            EXPECT_THROW(typed_data_assign(ndt::type(tid), (char *)&v, s_dt, s_ptr, assign_error_fractional), runtime_error);
 //            EXPECT_THROW(typed_data_assign(ndt::type(tid), (char *)&v, s_dt, s_ptr, assign_error_inexact), runtime_error)
-    ONE_TEST_THROW(bool_type_id, v_b);
+    ONE_TEST(bool_type_id, v_b, true);
     ONE_TEST(int8_type_id, v_i8, -1);
     ONE_TEST(int16_type_id, v_i16, -1);
     ONE_TEST(int32_type_id, v_i32, -1);
@@ -628,7 +631,7 @@ TEST(DTypeAssign, FixedSizeTests_Complex_Float64) {
 //            EXPECT_THROW(typed_data_assign(ndt::type(tid), (char *)&v, s_dt, s_ptr, assign_error_overflow), runtime_error);
 //            EXPECT_THROW(typed_data_assign(ndt::type(tid), (char *)&v, s_dt, s_ptr, assign_error_fractional), runtime_error);
 //            EXPECT_THROW(typed_data_assign(ndt::type(tid), (char *)&v, s_dt, s_ptr, assign_error_inexact), runtime_error)
-    ONE_TEST_THROW(bool_type_id, v_b);
+    ONE_TEST(bool_type_id, v_b, true);
     ONE_TEST_THROW(int8_type_id, v_i8);
     ONE_TEST_THROW(int16_type_id, v_i16);
     ONE_TEST_THROW(int32_type_id, v_i32);
@@ -654,7 +657,7 @@ TEST(DTypeAssign, FixedSizeTests_Complex_Float64) {
 //            EXPECT_THROW(typed_data_assign(ndt::type(tid), (char *)&v, s_dt, s_ptr, assign_error_overflow), runtime_error);
 //            EXPECT_THROW(typed_data_assign(ndt::type(tid), (char *)&v, s_dt, s_ptr, assign_error_fractional), runtime_error);
 //            EXPECT_THROW(typed_data_assign(ndt::type(tid), (char *)&v, s_dt, s_ptr, assign_error_inexact), runtime_error)
-    ONE_TEST_THROW(bool_type_id, v_b);
+    ONE_TEST(bool_type_id, v_b, true);
     ONE_TEST_THROW(int8_type_id, v_i8);
     ONE_TEST_THROW(int16_type_id, v_i16);
     ONE_TEST_THROW(int32_type_id, v_i32);
@@ -680,7 +683,7 @@ TEST(DTypeAssign, FixedSizeTests_Complex_Float64) {
 //            EXPECT_THROW(typed_data_assign(ndt::type(tid), (char *)&v, s_dt, s_ptr, assign_error_overflow), runtime_error);
 //            EXPECT_THROW(typed_data_assign(ndt::type(tid), (char *)&v, s_dt, s_ptr, assign_error_fractional), runtime_error);
 //            EXPECT_THROW(typed_data_assign(ndt::type(tid), (char *)&v, s_dt, s_ptr, assign_error_inexact), runtime_error)
-    ONE_TEST_THROW(bool_type_id, v_b);
+    ONE_TEST(bool_type_id, v_b, true);
     ONE_TEST_THROW(int8_type_id, v_i8);
     ONE_TEST_THROW(int16_type_id, v_i16);
     ONE_TEST_THROW(int32_type_id, v_i32);

@@ -91,7 +91,7 @@ struct single_assigner_builtin_base<double, dynd_complex<src_real_type>, real_ki
 };
 
 
-// Anything -> boolean with no checking
+// Anything -> boolean always means (Anything != 0), does not do overflow, etc checking
 template<class src_type, type_kind_t src_kind>
 struct single_assigner_builtin_base<dynd_bool, src_type, bool_kind, src_kind, assign_error_none>
 {
@@ -101,36 +101,16 @@ struct single_assigner_builtin_base<dynd_bool, src_type, bool_kind, src_kind, as
         *dst = (*src != src_type(0));
     }
 };
-
-// Anything -> boolean with overflow checking
 template<class src_type, type_kind_t src_kind>
 struct single_assigner_builtin_base<dynd_bool, src_type, bool_kind, src_kind, assign_error_overflow>
-{
-    static void assign(dynd_bool *dst, const src_type *src, ckernel_prefix *DYND_UNUSED(extra)) {
-        src_type s = *src;
-
-        DYND_TRACE_ASSIGNMENT((bool)(s != src_type(0)), dynd_bool, s, src_type);
-
-        if (s == src_type(0)) {
-            *dst = false;
-        } else if (s == src_type(1)) {
-            *dst = true;
-        } else {
-            std::stringstream ss;
-            ss << "overflow while assigning " << ndt::make_type<src_type>() << " value ";
-            ss << s << " to " << ndt::make_type<dynd_bool>();
-            throw std::overflow_error(ss.str());
-        }
-    }
-};
-
-// Anything -> boolean with other error checking
+    : public single_assigner_builtin_base<dynd_bool, src_type, bool_kind, src_kind, assign_error_none> {};
 template<class src_type, type_kind_t src_kind>
 struct single_assigner_builtin_base<dynd_bool, src_type, bool_kind, src_kind, assign_error_fractional>
-    : public single_assigner_builtin_base<dynd_bool, src_type, bool_kind, src_kind, assign_error_overflow> {};
+    : public single_assigner_builtin_base<dynd_bool, src_type, bool_kind, src_kind, assign_error_none> {};
 template<class src_type, type_kind_t src_kind>
 struct single_assigner_builtin_base<dynd_bool, src_type, bool_kind, src_kind, assign_error_inexact>
-    : public single_assigner_builtin_base<dynd_bool, src_type, bool_kind, src_kind, assign_error_overflow> {};
+    : public single_assigner_builtin_base<dynd_bool, src_type, bool_kind, src_kind, assign_error_none> {};
+
 
 // Boolean -> anything with other error checking
 template<class dst_type, type_kind_t dst_kind>
