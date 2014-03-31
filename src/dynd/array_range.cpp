@@ -128,7 +128,7 @@ nd::array dynd::nd::range(const ndt::type& scalar_tp, const void *beginval, cons
 
     stringstream ss;
     ss << "dynd nd::range doesn't support type " << scalar_tp;
-    throw runtime_error(ss.str());
+    throw type_error(ss.str());
 }
 
 static void linspace_specialization(float start, float stop, intptr_t count, nd::array& result)

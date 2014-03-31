@@ -98,7 +98,7 @@ inline datetime_val_t parse_iso_8601_datetime(const std::string& str, datetime_u
     bool out_missing = false;
     parse_iso_8601_datetime(str.c_str(), str.length(), unit, is_abstract, casting,
                     &fld, NULL, &out_missing);
-    return fld.as_datetime_val(unit);
+    return fld.as_ticks();
 }
 
 /*
@@ -136,7 +136,7 @@ std::string make_iso_8601_datetime(const datetime_fields *dtf,
 inline std::string make_iso_8601_datetime(datetime_val_t datetime, datetime_unit_t unit, bool is_abstract) {
     datetime_fields dtf;
     dtf.set_from_datetime_val(datetime, unit);
-    return make_iso_8601_datetime(&dtf, unit, is_abstract);
+    return make_iso_8601_datetime(&dtf, datetime::datetime_unit_autodetect, is_abstract);
 }
 
 inline std::string make_iso_8601_date(date_val_t date, datetime_unit_t unit = datetime_unit_day) {

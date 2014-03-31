@@ -336,46 +336,19 @@ void datetime::parse_iso_8601_datetime(const char *str, size_t len,
         goto parse_timezone;
     }
 
-    /* PARSE THE PICOSECONDS (0 to 6 digits) */
+    /* PARSE THE TICKS (1 digits) */
     numdigits = 0;
-    for (i = 0; i < 6; ++i) {
-        out->ps *= 10;
-        if (sublen > 0 && isdigit(*substr)) {
-            out->ps += (*substr - '0');
+    for (i = 0; i < 1; ++i) {
+        out->tick *= 10;
+        if (sublen > 0  && isdigit(*substr)) {
+            out->tick += (*substr - '0');
             ++substr;
             --sublen;
             ++numdigits;
         }
     }
 
-    if (sublen == 0 || !isdigit(*substr)) {
-        if (numdigits > 3) {
-            bestunit = datetime_unit_ps;
-        }
-        else {
-            bestunit = datetime_unit_ns;
-        }
-        goto parse_timezone;
-    }
-
-    /* PARSE THE ATTOSECONDS (0 to 6 digits) */
-    numdigits = 0;
-    for (i = 0; i < 6; ++i) {
-        out->as *= 10;
-        if (sublen > 0 && isdigit(*substr)) {
-            out->as += (*substr - '0');
-            ++substr;
-            --sublen;
-            ++numdigits;
-        }
-    }
-
-    if (numdigits > 3) {
-        bestunit = datetime_unit_as;
-    }
-    else {
-        bestunit = datetime_unit_fs;
-    }
+    bestunit = datetime_unit_tick;
 
 parse_timezone:
     if (sublen == 0) {
@@ -526,14 +499,9 @@ int datetime::get_datetime_iso_8601_strlen(datetime_unit_t unit, bool is_abstrac
     }
 
     switch (unit) {
-        case datetime_unit_as:
-            len += 3;  /* "###" */
-        case datetime_unit_fs:
-            len += 3;  /* "###" */
-        case datetime_unit_ps:
-            len += 3;  /* "###" */
-        case datetime_unit_ns:
-            len += 3;  /* "###" */
+        case datetime_unit_autodetect:
+        case datetime_unit_tick:
+            len += 1;  /* "#" */
         case datetime_unit_us:
             len += 3;  /* "###" */
         case datetime_unit_ms:
@@ -576,17 +544,8 @@ int datetime::get_datetime_iso_8601_strlen(datetime_unit_t unit, bool is_abstrac
  */
 static datetime_unit_t lossless_unit_from_datetime_fields(const datetime_fields *dts)
 {
-    if (dts->as % 1000 != 0) {
-        return datetime_unit_as;
-    }
-    else if (dts->as != 0) {
-        return datetime_unit_fs;
-    }
-    else if (dts->ps % 1000 != 0) {
-        return datetime_unit_ps;
-    }
-    else if (dts->ps != 0) {
-        return datetime_unit_ns;
+    if (dts->tick != 0) {
+        return datetime_unit_tick;
     }
     else if (dts->us % 1000 != 0) {
         return datetime_unit_us;
@@ -667,15 +626,10 @@ size_t datetime::make_iso_8601_datetime(const datetime_fields *dts, char *outstr
     if (unit == datetime_unit_autodetect) {
         unit = lossless_unit_from_datetime_fields(dts);
         /*
-         * If there's a timezone, use at least minutes precision,
-         * and never split up hours and minutes by default
+         * Use at least minutes
          */
-        if ((unit < datetime_unit_minute && !is_abstract) || unit == datetime_unit_hour) {
+        if (unit < datetime_unit_minute) {
             unit = datetime_unit_minute;
-        }
-        /* Don't split up dates by default */
-        else if (unit < datetime_unit_day) {
-            unit = datetime_unit_day;
         }
     }
     /*
@@ -897,84 +851,13 @@ size_t datetime::make_iso_8601_datetime(const datetime_fields *dts, char *outstr
         goto add_time_zone;
     }
 
-    /* NANOSECOND */
+    /* TICK */
     if (sublen < 1 ) {
         goto string_too_short;
     }
-    substr[0] = (char)((dts->ps / 100000) % 10 + '0');
-    if (sublen < 2 ) {
-        goto string_too_short;
-    }
-    substr[1] = (char)((dts->ps / 10000) % 10 + '0');
-    if (sublen < 3 ) {
-        goto string_too_short;
-    }
-    substr[2] = (char)((dts->ps / 1000) % 10 + '0');
-    substr += 3;
-    sublen -= 3;
-
-    /* Stop if the unit is nanoseconds */
-    if (unit == datetime_unit_ns) {
-        goto add_time_zone;
-    }
-
-    /* PICOSECOND */
-    if (sublen < 1 ) {
-        goto string_too_short;
-    }
-    substr[0] = (char)((dts->ps / 100) % 10 + '0');
-    if (sublen < 2 ) {
-        goto string_too_short;
-    }
-    substr[1] = (char)((dts->ps / 10) % 10 + '0');
-    if (sublen < 3 ) {
-        goto string_too_short;
-    }
-    substr[2] = (char)(dts->ps % 10 + '0');
-    substr += 3;
-    sublen -= 3;
-
-    /* Stop if the unit is picoseconds */
-    if (unit == datetime_unit_ps) {
-        goto add_time_zone;
-    }
-
-    /* FEMTOSECOND */
-    if (sublen < 1 ) {
-        goto string_too_short;
-    }
-    substr[0] = (char)((dts->as / 100000) % 10 + '0');
-    if (sublen < 2 ) {
-        goto string_too_short;
-    }
-    substr[1] = (char)((dts->as / 10000) % 10 + '0');
-    if (sublen < 3 ) {
-        goto string_too_short;
-    }
-    substr[2] = (char)((dts->as / 1000) % 10 + '0');
-    substr += 3;
-    sublen -= 3;
-
-    /* Stop if the unit is femtoseconds */
-    if (unit == datetime_unit_fs) {
-        goto add_time_zone;
-    }
-
-    /* ATTOSECOND */
-    if (sublen < 1 ) {
-        goto string_too_short;
-    }
-    substr[0] = (char)((dts->as / 100) % 10 + '0');
-    if (sublen < 2 ) {
-        goto string_too_short;
-    }
-    substr[1] = (char)((dts->as / 10) % 10 + '0');
-    if (sublen < 3 ) {
-        goto string_too_short;
-    }
-    substr[2] = (char)(dts->as % 10 + '0');
-    substr += 3;
-    sublen -= 3;
+    substr[0] = (char)(dts->tick % 10 + '0');
+    substr += 1;
+    sublen -= 1;
 
 add_time_zone:
     if (!is_abstract) {

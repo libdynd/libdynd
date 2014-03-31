@@ -18,10 +18,7 @@ enum datetime_unit_t {
     datetime_unit_second,
     datetime_unit_ms,
     datetime_unit_us,
-    datetime_unit_ns,
-    datetime_unit_ps,
-    datetime_unit_fs,
-    datetime_unit_as,
+    datetime_unit_tick,
     // Not a normal unit, special flag for some functions
     datetime_unit_autodetect
 };
@@ -52,23 +49,20 @@ struct date_ymd {
  */
 struct datetime_fields {
     int64_t year;
-    int32_t month, day, hour, min, sec, us, ps, as;
+    int32_t month, day, hour, min, sec, us, tick;
 
     datetime_fields()
         : year(0), month(0), day(0), hour(0),
-          min(0), sec(0), us(0), ps(0), as(0)
+          min(0), sec(0), us(0), tick(0)
     {
     }
 
     /*
-     * Converts a datetime from a datetimestruct to a datetime based
-     * on some metadata. The date is assumed to be valid.
-     *
-     * \param unit  The datetime unit to use.
+     * Converts a datetime from a datetimestruct to a ticks value.
      *
      * Throws an exception on error.
      */
-    datetime_val_t as_datetime_val(datetime_unit_t unit) const;
+    datetime_val_t as_ticks() const;
 
     /*
      * Converts a datetime from a datetimestruct to a date based

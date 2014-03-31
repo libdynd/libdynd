@@ -9,6 +9,7 @@
 #include <algorithm>
 
 #include <dynd/types/datetime_type.hpp>
+#include <dynd/types/date_util.hpp>
 #include <dynd/types/property_type.hpp>
 #include <dynd/types/cstruct_type.hpp>
 #include <dynd/types/string_type.hpp>
@@ -27,98 +28,10 @@
 using namespace std;
 using namespace dynd;
 
-std::ostream& dynd::operator<<(std::ostream& o, datetime_unit_t unit)
-{
-    switch (unit) {
-        case datetime_unit_hour:
-            return (o << "hour");
-        case datetime_unit_minute:
-            return (o << "minute");
-        case datetime_unit_second:
-            return (o << "second");
-        case datetime_unit_msecond:
-            return (o << "msec");
-        case datetime_unit_usecond:
-            return (o << "usec");
-        case datetime_unit_nsecond:
-            return (o << "nsec");
-    }
-    stringstream ss;
-    ss << "invalid datetime unit " << (int32_t)unit << " provided to ";
-    ss << "datetime dynd type constructor";
-    throw runtime_error(ss.str());
-}
-
-namespace {
-    static ndt::type datetime_default_structs[6] = {
-        ndt::make_cstruct(
-            ndt::make_type<int32_t>(), "year", ndt::make_type<int16_t>(), "month",
-            ndt::make_type<int16_t>(), "day", ndt::make_type<int16_t>(), "hour"),
-        ndt::make_cstruct(
-            ndt::make_type<int32_t>(), "year", ndt::make_type<int16_t>(), "month",
-            ndt::make_type<int16_t>(), "day", ndt::make_type<int16_t>(), "hour",
-            ndt::make_type<int16_t>(), "min"),
-        ndt::make_cstruct(
-            ndt::make_type<int32_t>(), "year", ndt::make_type<int16_t>(), "month",
-            ndt::make_type<int16_t>(), "day", ndt::make_type<int16_t>(), "hour",
-            ndt::make_type<int16_t>(), "min", ndt::make_type<int16_t>(), "sec"),
-        ndt::make_cstruct(
-            ndt::make_type<int32_t>(), "year", ndt::make_type<int16_t>(), "month",
-            ndt::make_type<int16_t>(), "day", ndt::make_type<int16_t>(), "hour",
-            ndt::make_type<int16_t>(), "min", ndt::make_type<int16_t>(), "sec",
-            ndt::make_type<int16_t>(), "msec"),
-        ndt::make_cstruct(
-            ndt::make_type<int32_t>(), "year", ndt::make_type<int16_t>(), "month",
-            ndt::make_type<int16_t>(), "day", ndt::make_type<int16_t>(), "hour",
-            ndt::make_type<int16_t>(), "min", ndt::make_type<int16_t>(), "sec",
-            ndt::make_type<int32_t>(), "usec"),
-        ndt::make_cstruct(
-            ndt::make_type<int32_t>(), "year", ndt::make_type<int16_t>(), "month",
-            ndt::make_type<int16_t>(), "day", ndt::make_type<int16_t>(), "hour",
-            ndt::make_type<int16_t>(), "min", ndt::make_type<int16_t>(), "sec",
-            ndt::make_type<int32_t>(), "nsec")
-    };
-    /**
-     * Returns a reference to a static struct for the given
-     * datetime unit.
-     */
-    const ndt::type& get_default_struct_type(datetime_unit_t unit) {
-        if ((int32_t)unit >= 0 && (int32_t)unit < 6) {
-            return datetime_default_structs[unit];
-        } else {
-            stringstream ss;
-            ss << "invalid datetime unit " << (int32_t)unit << " provided to ";
-            ss << "datetime dynd type constructor";
-            throw runtime_error(ss.str());
-        }
-    }
-
-    static datetime::datetime_unit_t dynd_unit_to_datetime_unit(datetime_unit_t unit) {
-        switch (unit) {
-            case datetime_unit_hour:
-                return datetime::datetime_unit_hour;
-            case datetime_unit_minute:
-                return datetime::datetime_unit_minute;
-            case datetime_unit_second:
-                return datetime::datetime_unit_second;
-            case datetime_unit_msecond:
-                return datetime::datetime_unit_ms;
-            case datetime_unit_usecond:
-                return datetime::datetime_unit_us;
-            case datetime_unit_nsecond:
-                return datetime::datetime_unit_ns;
-        }
-        stringstream ss;
-        ss << "invalid datetime unit " << (int32_t)unit << " provided to ";
-        ss << "datetime dynd type constructor";
-        throw runtime_error(ss.str());
-    }
-} // anonymous namespace
-
-datetime_type::datetime_type(datetime_unit_t unit, datetime_tz_t timezone)
-    : base_type(datetime_type_id, datetime_kind, 8, scalar_align_of<int64_t>::value, type_flag_scalar, 0, 0),
-        m_default_struct_type(::get_default_struct_type(unit)), m_unit(unit),
-        m_timezone(timezone)
+datetime_type::datetime_type(datetime_tz_t timezone)
+    : base_type(datetime_type_id, datetime_kind, 8,
+                scalar_align_of<int64_t>::value, type_flag_scalar, 0, 0),
+      m_timezone(timezone)
 {
 }
 
@@ -129,10 +42,10 @@ datetime_type::~datetime_type()
 void datetime_type::set_cal(const char *DYND_UNUSED(metadata), char *data,
                 assign_error_mode errmode,
                 int32_t year, int32_t month, int32_t day,
-                int32_t hour, int32_t min, int32_t sec, int32_t nsec) const
+                int32_t hour, int32_t minute, int32_t second, int32_t tick) const
 {
     if (errmode != assign_error_none) {
-        if (!datetime::is_valid_ymd(year, month, day)) {
+        if (!date_ymd::is_valid(year, month, day)) {
             stringstream ss;
             ss << "invalid input year/month/day " << year << "/" << month << "/" << day;
             throw runtime_error(ss.str());
@@ -142,60 +55,33 @@ void datetime_type::set_cal(const char *DYND_UNUSED(metadata), char *data,
             ss << "invalid input hour " << hour << " for " << ndt::type(this, true);
             throw runtime_error(ss.str());
         }
-        if (min < 0 || min >= 60 || (min != 0 && m_unit < datetime_unit_minute)) {
+        if (minute < 0 || minute >= 60) {
             stringstream ss;
-            ss << "invalid input minute " << min << " for " << ndt::type(this, true);
+            ss << "invalid input minute " << minute << " for " << ndt::type(this, true);
             throw runtime_error(ss.str());
         }
-        if (sec < 0 || sec >= 60 || (sec != 0 && m_unit < datetime_unit_second)) {
+        if (second < 0 || second >= 60) {
             stringstream ss;
-            ss << "invalid input second " << sec << " for " << ndt::type(this, true);
+            ss << "invalid input second " << second << " for " << ndt::type(this, true);
             throw runtime_error(ss.str());
         }
-        if (nsec < 0 || nsec >= 1000000000) {
+        if (tick < 0 || tick >= 1000000000) {
             stringstream ss;
-            ss << "invalid input nanosecond " << nsec << " for " << ndt::type(this, true);
+            ss << "invalid input tick (100*nanosecond) " << tick << " for " << ndt::type(this, true);
             throw runtime_error(ss.str());
         }
     }
 
-    int64_t result = datetime::ymd_to_days(year, month, day) * 24 + hour;
-    if (m_unit >= datetime_unit_minute) {
-        result = result * 60 + min;
-        if (m_unit >= datetime_unit_second) {
-            result = result * 60 + sec;
-            if (m_unit >= datetime_unit_msecond) {
-                int64_t frac;
-                switch (m_unit) {
-                    case datetime_unit_msecond:
-                        frac = nsec / 1000000;
-                        if (errmode != assign_error_none && frac * 1000000 != nsec) {
-                            stringstream ss;
-                            ss << "invalid input nanosecond " << nsec << " for " << ndt::type(this, true);
-                            throw runtime_error(ss.str());
-                        }
-                        result = result * 1000 + frac;
-                        break;
-                    case datetime_unit_usecond:
-                        frac = nsec / 1000;
-                        if (errmode != assign_error_none && frac * 1000 != nsec) {
-                            stringstream ss;
-                            ss << "invalid input nanosecond " << nsec << " for " << ndt::type(this, true);
-                            throw runtime_error(ss.str());
-                        }
-                        result = result * 1000000 + frac;
-                        break;
-                    case datetime_unit_nsecond:
-                        result = result * 1000000000 + nsec;
-                        break;
-                    default:
-                        break;
-                }
-            }
-        }
-    }
+    datetime_struct dts;
+    dts.ymd.year = year;
+    dts.ymd.month = month;
+    dts.ymd.day = day;
+    dts.hour = hour;
+    dts.minute = minute;
+    dts.second = second;
+    dts.tick = tick;
 
-    *reinterpret_cast<int64_t *>(data) = result;
+    *reinterpret_cast<int64_t *>(data) = dts.to_ticks();
 }
 
 void datetime_type::set_utf8_string(const char *DYND_UNUSED(metadata),
@@ -213,26 +99,24 @@ void datetime_type::set_utf8_string(const char *DYND_UNUSED(metadata),
     }
     // TODO: Parsing adjustments/error handling based on the timezone
     *reinterpret_cast<int64_t *>(data) = datetime::parse_iso_8601_datetime(
-                            utf8_str, dynd_unit_to_datetime_unit(m_unit),
+                            utf8_str, datetime::datetime_unit_tick,
                             m_timezone == tz_abstract, casting);
 }
 
 
 void datetime_type::get_cal(const char *DYND_UNUSED(metadata), const char *data,
                 int32_t &out_year, int32_t &out_month, int32_t &out_day,
-                int32_t &out_hour, int32_t &out_min, int32_t &out_sec, int32_t &out_nsec) const
+                int32_t &out_hour, int32_t &out_min, int32_t &out_sec, int32_t &out_tick) const
 {
-    datetime::datetime_fields fields;
-    fields.set_from_datetime_val(*reinterpret_cast<const int64_t *>(data),
-                    dynd_unit_to_datetime_unit(m_unit));
-    out_year = (int32_t)fields.year;
-    out_month = fields.month;
-    out_day = fields.day;
-    out_hour = fields.hour;
-    out_min = fields.min;
-    out_sec = fields.sec;
-    // TODO: Adjust the datetime library to make this more efficient.
-    out_nsec = fields.us * 1000 + fields.ps / 1000;
+    datetime_struct dts;
+    dts.set_from_ticks(*reinterpret_cast<const int64_t *>(data));
+    out_year = dts.ymd.year;
+    out_month = dts.ymd.month;
+    out_day = dts.ymd.day;
+    out_hour = dts.hour;
+    out_min = dts.minute;
+    out_sec = dts.second;
+    out_tick = dts.tick;
 }
 
 void datetime_type::print_data(std::ostream& o,
@@ -240,27 +124,29 @@ void datetime_type::print_data(std::ostream& o,
 {
     datetime::datetime_fields fields;
     fields.set_from_datetime_val(*reinterpret_cast<const int64_t *>(data),
-                    dynd_unit_to_datetime_unit(m_unit));
+                    datetime::datetime_unit_tick);
     // TODO: Handle distiction between printing abstract and UTC units
     o << datetime::make_iso_8601_datetime(&fields,
-                    dynd_unit_to_datetime_unit(m_unit), m_timezone == tz_abstract);
+                                          datetime::datetime_unit_autodetect,
+                                          m_timezone == tz_abstract);
 }
 
 void datetime_type::print_type(std::ostream& o) const
 {
-    o << "datetime['" << m_unit << "', tz='";
-    switch (m_timezone) {
-        case tz_abstract:
-            o << "abstract";
-            break;
-        case tz_utc:
-            o << "utc";
-            break;
-        default:
-            o << "(invalid " << (int32_t)m_timezone << ")";
-            break;
+    if (m_timezone == tz_abstract) {
+        o << "datetime";
+    } else {
+        o << "datetime[tz='";
+        switch (m_timezone) {
+            case tz_utc:
+                o << "UTC";
+                break;
+            default:
+                o << "(invalid " << (int32_t)m_timezone << ")";
+                break;
+        }
+        o << "']";
     }
-    o << "']";
 }
 
 bool datetime_type::is_lossless_assignment(const ndt::type& dst_tp, const ndt::type& src_tp) const
@@ -288,7 +174,7 @@ bool datetime_type::operator==(const base_type& rhs) const
     } else {
         const datetime_type& r = static_cast<const datetime_type &>(rhs);
         // TODO: When "other" timezone data is supported, need to compare them too
-        return m_unit == r.m_unit && m_timezone == r.m_timezone;
+        return m_timezone == r.m_timezone;
     }
 }
 
@@ -442,8 +328,8 @@ static nd::array property_ndo_get_second(const nd::array& n) {
     return n.replace_dtype(ndt::make_property(n.get_dtype(), "second"));
 }
 
-static nd::array property_ndo_get_microsecond(const nd::array& n) {
-    return n.replace_dtype(ndt::make_property(n.get_dtype(), "microsecond"));
+static nd::array property_ndo_get_tick(const nd::array& n) {
+    return n.replace_dtype(ndt::make_property(n.get_dtype(), "tick"));
 }
 
 static pair<string, gfunc::callable> date_array_properties[] = {
@@ -454,7 +340,7 @@ static pair<string, gfunc::callable> date_array_properties[] = {
     pair<string, gfunc::callable>("hour", gfunc::make_callable(&property_ndo_get_hour, "self")),
     pair<string, gfunc::callable>("minute", gfunc::make_callable(&property_ndo_get_minute, "self")),
     pair<string, gfunc::callable>("second", gfunc::make_callable(&property_ndo_get_second, "self")),
-    pair<string, gfunc::callable>("microsecond", gfunc::make_callable(&property_ndo_get_microsecond, "self")),
+    pair<string, gfunc::callable>("tick", gfunc::make_callable(&property_ndo_get_tick, "self")),
 };
 
 void datetime_type::get_dynamic_array_properties(const std::pair<std::string, gfunc::callable> **out_properties, size_t *out_count) const
@@ -524,12 +410,9 @@ namespace {
         const datetime_type *dd = e->datetime_tp;
         datetime_tz_t tz = dd->get_timezone();
         if (tz == tz_utc || tz == tz_abstract) {
-            // TODO: This conversion could be *much* faster by figuring out the correct division
-            //       factor and doing that divide instead of converting to/from a struct
-            datetime::datetime_fields df;
-            df.set_from_datetime_val(*reinterpret_cast<const int64_t *>(src),
-                            dynd_unit_to_datetime_unit(dd->get_unit()));
-            *reinterpret_cast<int32_t *>(dst) = datetime::ymd_to_days((int32_t)df.year, df.month, df.day);
+            *reinterpret_cast<int32_t *>(dst) =
+                static_cast<int32_t>(*reinterpret_cast<const int64_t *>(src) /
+                                     (24 * 60 * 60 * 10000000LL));
         } else {
             throw runtime_error("datetime date property only implemented for UTC and abstract timezones");
         }
@@ -542,10 +425,9 @@ namespace {
         const datetime_type *dd = e->datetime_tp;
         datetime_tz_t tz = dd->get_timezone();
         if (tz == tz_utc || tz == tz_abstract) {
-            datetime::datetime_fields df;
-            df.set_from_datetime_val(*reinterpret_cast<const int64_t *>(src),
-                            dynd_unit_to_datetime_unit(dd->get_unit()));
-            *reinterpret_cast<int32_t *>(dst) = (int32_t)df.year;
+            date_ymd ymd;
+            ymd.set_from_ticks(*reinterpret_cast<const int64_t *>(src));
+            *reinterpret_cast<int32_t *>(dst) = ymd.year;
         } else {
             throw runtime_error("datetime property access only implemented for UTC and abstract timezones");
         }
@@ -558,10 +440,9 @@ namespace {
         const datetime_type *dd = e->datetime_tp;
         datetime_tz_t tz = dd->get_timezone();
         if (tz == tz_utc || tz == tz_abstract) {
-            datetime::datetime_fields df;
-            df.set_from_datetime_val(*reinterpret_cast<const int64_t *>(src),
-                            dynd_unit_to_datetime_unit(dd->get_unit()));
-            *reinterpret_cast<int32_t *>(dst) = df.month;
+            date_ymd ymd;
+            ymd.set_from_ticks(*reinterpret_cast<const int64_t *>(src));
+            *reinterpret_cast<int32_t *>(dst) = ymd.month;
         } else {
             throw runtime_error("datetime property access only implemented for UTC and abstract timezones");
         }
@@ -574,10 +455,9 @@ namespace {
         const datetime_type *dd = e->datetime_tp;
         datetime_tz_t tz = dd->get_timezone();
         if (tz == tz_utc || tz == tz_abstract) {
-            datetime::datetime_fields df;
-            df.set_from_datetime_val(*reinterpret_cast<const int64_t *>(src),
-                            dynd_unit_to_datetime_unit(dd->get_unit()));
-            *reinterpret_cast<int32_t *>(dst) = df.day;
+            date_ymd ymd;
+            ymd.set_from_ticks(*reinterpret_cast<const int64_t *>(src));
+            *reinterpret_cast<int32_t *>(dst) = ymd.day;
         } else {
             throw runtime_error("datetime property access only implemented for UTC and abstract timezones");
         }
@@ -590,10 +470,13 @@ namespace {
         const datetime_type *dd = e->datetime_tp;
         datetime_tz_t tz = dd->get_timezone();
         if (tz == tz_utc || tz == tz_abstract) {
-            datetime::datetime_fields df;
-            df.set_from_datetime_val(*reinterpret_cast<const int64_t *>(src),
-                            dynd_unit_to_datetime_unit(dd->get_unit()));
-            *reinterpret_cast<int32_t *>(dst) = df.hour;
+            int64_t hour =
+                *reinterpret_cast<const int64_t *>(src) % DYND_TICKS_PER_DAY;
+            if (hour < 0) {
+                hour += DYND_TICKS_PER_DAY;
+            }
+            hour /= DYND_TICKS_PER_HOUR;
+            *reinterpret_cast<int32_t *>(dst) = static_cast<int32_t>(hour);
         } else {
             throw runtime_error("datetime property access only implemented for UTC and abstract timezones");
         }
@@ -606,10 +489,13 @@ namespace {
         const datetime_type *dd = e->datetime_tp;
         datetime_tz_t tz = dd->get_timezone();
         if (tz == tz_utc || tz == tz_abstract) {
-            datetime::datetime_fields df;
-            df.set_from_datetime_val(*reinterpret_cast<const int64_t *>(src),
-                            dynd_unit_to_datetime_unit(dd->get_unit()));
-            *reinterpret_cast<int32_t *>(dst) = df.min;
+            int64_t minute =
+                *reinterpret_cast<const int64_t *>(src) % DYND_TICKS_PER_HOUR;
+            if (minute < 0) {
+                minute += DYND_TICKS_PER_HOUR;
+            }
+            minute /= DYND_TICKS_PER_MINUTE;
+            *reinterpret_cast<int32_t *>(dst) = static_cast<int32_t>(minute);
         } else {
             throw runtime_error("datetime property access only implemented for UTC and abstract timezones");
         }
@@ -622,26 +508,30 @@ namespace {
         const datetime_type *dd = e->datetime_tp;
         datetime_tz_t tz = dd->get_timezone();
         if (tz == tz_utc || tz == tz_abstract) {
-            datetime::datetime_fields df;
-            df.set_from_datetime_val(*reinterpret_cast<const int64_t *>(src),
-                            dynd_unit_to_datetime_unit(dd->get_unit()));
-            *reinterpret_cast<int32_t *>(dst) = df.sec;
+            int64_t second =
+                *reinterpret_cast<const int64_t *>(src) % DYND_TICKS_PER_MINUTE;
+            if (second < 0) {
+                second += DYND_TICKS_PER_MINUTE;
+            }
+            second /= DYND_TICKS_PER_SECOND;
+            *reinterpret_cast<int32_t *>(dst) = static_cast<int32_t>(second);
         } else {
             throw runtime_error("datetime property access only implemented for UTC and abstract timezones");
         }
     }
 
-    void get_property_kernel_usecond_single(char *dst, const char *src,
+    void get_property_kernel_tick_single(char *dst, const char *src,
                     ckernel_prefix *extra)
     {
         const datetime_property_kernel_extra *e = reinterpret_cast<datetime_property_kernel_extra *>(extra);
         const datetime_type *dd = e->datetime_tp;
         datetime_tz_t tz = dd->get_timezone();
         if (tz == tz_utc || tz == tz_abstract) {
-            datetime::datetime_fields df;
-            df.set_from_datetime_val(*reinterpret_cast<const int64_t *>(src),
-                            dynd_unit_to_datetime_unit(dd->get_unit()));
-            *reinterpret_cast<int32_t *>(dst) = df.us;
+            int64_t tick = *reinterpret_cast<const int64_t *>(src) % 10000000LL;
+            if (tick < 0) {
+                tick += 10000000LL;
+            }
+            *reinterpret_cast<int32_t *>(dst) = static_cast<int32_t>(tick);
         } else {
             throw runtime_error("datetime property access only implemented for UTC and abstract timezones");
         }
@@ -658,7 +548,7 @@ namespace {
         datetimeprop_hour,
         datetimeprop_minute,
         datetimeprop_second,
-        datetimeprop_microsecond,
+        datetimeprop_tick,
     };
 }
 
@@ -681,8 +571,8 @@ size_t datetime_type::get_elwise_property_index(const std::string& property_name
         return datetimeprop_minute;
     } else if (property_name == "second") {
         return datetimeprop_second;
-    } else if (property_name == "microsecond") {
-        return datetimeprop_microsecond;
+    } else if (property_name == "tick") {
+        return datetimeprop_tick;
     } else {
         stringstream ss;
         ss << "dynd type " << ndt::type(this, true) << " does not have a kernel for property " << property_name;
@@ -697,7 +587,7 @@ ndt::type datetime_type::get_elwise_property_type(size_t property_index,
         case datetimeprop_struct:
             out_readable = true;
             out_writable = true;
-            return get_default_struct_type();
+            return datetime_struct::type();
         case datetimeprop_date:
             out_readable = true;
             out_writable = false;
@@ -742,8 +632,8 @@ size_t datetime_type::make_elwise_property_getter_kernel(
         case datetimeprop_second:
             e->base.set_function<unary_single_operation_t>(&get_property_kernel_second_single);
             break;
-        case datetimeprop_microsecond:
-            e->base.set_function<unary_single_operation_t>(&get_property_kernel_usecond_single);
+        case datetimeprop_tick:
+            e->base.set_function<unary_single_operation_t>(&get_property_kernel_tick_single);
             break;
         default:
             stringstream ss;

@@ -14,6 +14,8 @@
 
 #define DYND_DATE_NA (std::numeric_limits<int32_t>::min())
 
+#define DYND_TICKS_PER_DAY (24LL * 60LL * 60LL * 10000000LL)
+
 namespace dynd {
 
 namespace ndt {
@@ -134,6 +136,22 @@ struct date_ymd {
         }
     }
 
+    /**
+     * Sets the year/month/day from the ticks-based date, throwing
+     * away the time portion.
+     */
+    inline void set_from_ticks(int64_t ticks) {
+        if (ticks >= 0) {
+            set_from_days(static_cast<int32_t>(ticks / DYND_TICKS_PER_DAY));
+        } else {
+            set_from_days(static_cast<int32_t>(
+                (ticks - (DYND_TICKS_PER_DAY - 1)) / DYND_TICKS_PER_DAY));
+        }
+    }
+
+    /**
+     * Returns the current date in the local time zone.
+     */
     static date_ymd get_current_local_date();
 
     /**

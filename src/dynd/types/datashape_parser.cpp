@@ -516,56 +516,35 @@ static ndt::type parse_cuda_device_parameters(const char *&begin, const char *en
 static ndt::type parse_datetime_parameters(const char *&begin, const char *end)
 {
     if (parse_token(begin, end, '[')) {
-        datetime_unit_t unit;
         datetime_tz_t timezone = tz_abstract;
         string unit_str;
         const char *saved_begin = begin;
-        if (!parse_quoted_string(begin, end, unit_str)) {
-            throw datashape_parse_error(begin, "expected a datetime unit string");
-        }
-        if (unit_str == "hour") {
-            unit = datetime_unit_hour;
-        } else if (unit_str == "min" || unit_str == "minute") {
-            unit = datetime_unit_minute;
-        } else if (unit_str == "sec" || unit_str == "second") {
-            unit = datetime_unit_second;
-        } else if (unit_str == "msec" || unit_str == "millisecond") {
-            unit = datetime_unit_msecond;
-        } else if (unit_str == "usec" || unit_str == "microsecond") {
-            unit = datetime_unit_usecond;
-        } else if (unit_str == "nsec" || unit_str == "nanosecond") {
-            unit = datetime_unit_nsecond;
-        } else {
-            throw datashape_parse_error(saved_begin, "invalid datetime unit");
-        }
         // Parse the timezone
-        if (parse_token(begin, end, ',')) {
-            if (!parse_token(begin, end, "tz")) {
-                throw datashape_parse_error(begin, "expected tz= parameter");
-            }
-            if (!parse_token(begin, end, '=')) {
-                throw datashape_parse_error(begin, "expected '='");
-            }
-            string timezone_str;
-            saved_begin = begin;
-            if (!parse_quoted_string(begin, end, timezone_str)) {
-                throw datashape_parse_error(begin, "expected a datetime timezone string");
-            }
-            if (timezone_str == "abstract") {
-                timezone = tz_abstract;
-            } else if (timezone_str == "UTC" || timezone_str == "utc") {
-                timezone = tz_utc;
-            } else {
-                throw datashape_parse_error(saved_begin, "invalid datetime timezone");
-            }
+        if (!parse_token(begin, end, "tz")) {
+            throw datashape_parse_error(begin, "expected tz= parameter");
+        }
+        if (!parse_token(begin, end, '=')) {
+            throw datashape_parse_error(begin, "expected '='");
+        }
+        string timezone_str;
+        saved_begin = begin;
+        if (!parse_quoted_string(begin, end, timezone_str)) {
+            throw datashape_parse_error(begin, "expected a datetime timezone string");
+        }
+        if (timezone_str == "abstract") {
+            timezone = tz_abstract;
+        } else if (timezone_str == "UTC") {
+            timezone = tz_utc;
+        } else {
+            throw datashape_parse_error(saved_begin, "invalid datetime timezone");
         }
         if (!parse_token(begin, end, ']')) {
             throw datashape_parse_error(begin, "expected closing ']'");
         }
          
-        return ndt::make_datetime(unit, timezone);
+        return ndt::make_datetime(timezone);
     } else {
-        throw datashape_parse_error(begin, "expected datetime parameters opening '['");
+        return ndt::make_datetime(tz_abstract);
     }
 }
 

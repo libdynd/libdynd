@@ -50,17 +50,8 @@ std::ostream& datetime::operator<<(std::ostream& o, datetime_unit_t unit)
         case datetime_unit_us:
             o << "us";
             break;
-        case datetime_unit_ns:
-            o << "ns";
-            break;
-        case datetime_unit_ps:
-            o << "ps";
-            break;
-        case datetime_unit_fs:
-            o << "fs";
-            break;
-        case datetime_unit_as:
-            o << "as";
+        case datetime_unit_tick:
+            o << "tick";
             break;
         case datetime_unit_autodetect:
             o << "<autodetect>";
@@ -487,92 +478,21 @@ void datetime::datetime_fields::fill_from_days(datetime_val_t days)
     }
 }
 
-datetime_val_t datetime::datetime_fields::as_datetime_val(datetime_unit_t unit) const
+datetime_val_t datetime::datetime_fields::as_ticks() const
 {
     /* If the datetimestruct is NaT, return NaT */
     if (this->year == DATETIME_DATETIME_NAT) {
         return DATETIME_DATETIME_NAT;
     }
 
-    if (unit == datetime_unit_year) {
-        /* Truncate to the year */
-        return this->year - 1970;
-    }
-    else if (unit == datetime_unit_month) {
-        /* Truncate to the month */
-        return 12 * (this->year - 1970) + (this->month - 1);
-    }
-    else {
-        /* Otherwise calculate the number of days to start */
-        datetime_val_t days = this->as_days();
+    datetime_val_t days = this->as_days();
 
-        switch (unit) {
-            case datetime_unit_week:
-                /* Truncate to weeks */
-                return (days >= 0) ? (days / 7) : ((days - 6) / 7);
-            case datetime_unit_day:
-                return days;
-            case datetime_unit_hour:
-                return days * 24 +
-                      this->hour;
-            case datetime_unit_minute:
-                return (days * 24 +
-                      this->hour) * 60 +
-                      this->min;
-            case datetime_unit_second:
-                return ((days * 24 +
-                      this->hour) * 60 +
-                      this->min) * 60 +
-                      this->sec;
-            case datetime_unit_ms:
-                return (((days * 24 +
-                      this->hour) * 60 +
-                      this->min) * 60 +
-                      this->sec) * 1000 +
-                      this->us / 1000;
-            case datetime_unit_us:
-                return (((days * 24 +
-                      this->hour) * 60 +
-                      this->min) * 60 +
-                      this->sec) * 1000000 +
-                      this->us;
-            case datetime_unit_ns:
-                return ((((days * 24 +
-                      this->hour) * 60 +
-                      this->min) * 60 +
-                      this->sec) * 1000000 +
-                      this->us) * 1000 +
-                      this->ps / 1000;
-            case datetime_unit_ps:
-                return ((((days * 24 +
-                      this->hour) * 60 +
-                      this->min) * 60 +
-                      this->sec) * 1000000 +
-                      this->us) * 1000000 +
-                      this->ps;
-            case datetime_unit_fs:
-                /* only 2.6 hours */
-                return (((((days * 24 +
-                      this->hour) * 60 +
-                      this->min) * 60 +
-                      this->sec) * 1000000 +
-                      this->us) * 1000000 +
-                      this->ps) * 1000 +
-                      this->as / 1000;
-            case datetime_unit_as:
-                /* only 9.2 secs */
-                return (((((days * 24 +
-                      this->hour) * 60 +
-                      this->min) * 60 +
-                      this->sec) * 1000000 +
-                      this->us) * 1000000 +
-                      this->ps) * 1000000 +
-                      this->as;
-            default:
-                throw std::runtime_error(
-                        "datetime metadata with corrupt unit value");
-        }
-    }
+    return ((((days * 24LL +
+            this->hour) * 60LL +
+            this->min) * 60LL +
+            this->sec) * 1000000LL +
+            this->us) * 10LL +
+            this->tick;
 }
 
 date_val_t datetime::datetime_fields::as_date_val(datetime_unit_t unit) const
@@ -733,8 +653,8 @@ void datetime::datetime_fields::set_from_datetime_val(datetime_val_t val, dateti
             this->us = (int)(val % 1000000LL);
             break;
 
-        case datetime_unit_ns:
-            perday = 24LL * 60LL * 60LL * 1000LL * 1000LL * 1000LL;
+        case datetime_unit_tick:
+            perday = 24LL * 60LL * 60LL * 1000LL * 1000LL * 10LL;
 
             if (val >= 0) {
                 this->fill_from_days(val / perday);
@@ -744,85 +664,15 @@ void datetime::datetime_fields::set_from_datetime_val(datetime_val_t val, dateti
                 this->fill_from_days((val - (perday-1)) / perday);
                 val = (perday-1) + (val + 1) % perday;
             }
-            this->hour = (int)(val / (60*60*1000000000LL));
-            this->min = (int)((val / (60*1000000000LL)) % 60);
-            this->sec = (int)((val / 1000000000LL) % 60);
-            this->us = (int)((val / 1000LL) % 1000000LL);
-            this->ps = (int)((val % 1000LL) * 1000);
-            break;
-
-        case datetime_unit_ps:
-            perday = 24LL * 60 * 60 * 1000 * 1000 * 1000 * 1000;
-
-            if (val >= 0) {
-                this->fill_from_days(val / perday);
-                val = val % perday;
-            }
-            else {
-                this->fill_from_days((val - (perday-1)) / perday);
-                val = (perday-1) + (val + 1) % perday;
-            }
-            this->hour = (int)(val / (60*60*1000000000000LL));
-            this->min = (int)((val / (60*1000000000000LL)) % 60);
-            this->sec = (int)((val / 1000000000000LL) % 60);
-            this->us = (int)((val / 1000000LL) % 1000000LL);
-            this->ps = (int)(val % 1000000LL);
-            break;
-
-        case datetime_unit_fs:
-            /* entire range is only +- 2.6 hours */
-            if (val >= 0) {
-                this->hour = (int)(val / (60*60*1000000000000000LL));
-                this->min = (int)((val / (60*1000000000000000LL)) % 60);
-                this->sec = (int)((val / 1000000000000000LL) % 60);
-                this->us = (int)((val / 1000000000LL) % 1000000LL);
-                this->ps = (int)((val / 1000LL) % 1000000LL);
-                this->as = (int)((val % 1000LL) * 1000);
-            }
-            else {
-                datetime_val_t minutes;
-
-                minutes = val / (60*1000000000000000LL);
-                val = val % (60*1000000000000000LL);
-                if (val < 0) {
-                    val += (60*1000000000000000LL);
-                    --minutes;
-                }
-                /* Offset the negative minutes */
-                this->add_minutes((int)minutes);
-                this->sec = (int)((val / 1000000000000000LL) % 60);
-                this->us = (int)((val / 1000000000LL) % 1000000LL);
-                this->ps = (int)((val / 1000LL) % 1000000LL);
-                this->as = (int)((val % 1000LL) * 1000);
-            }
-            break;
-
-        case datetime_unit_as:
-            /* entire range is only +- 9.2 seconds */
-            if (val >= 0) {
-                this->sec = (int)((val / 1000000000000000000LL) % 60);
-                this->us = (int)((val / 1000000000000LL) % 1000000LL);
-                this->ps = (int)((val / 1000000LL) % 1000000LL);
-                this->as = (int)(val % 1000000LL);
-            }
-            else {
-                datetime_val_t seconds;
-
-                seconds = val / 1000000000000000000LL;
-                val = val % 1000000000000000000LL;
-                if (val < 0) {
-                    val += 1000000000000000000LL;
-                    --seconds;
-                }
-                /* Offset the negative seconds */
-                this->add_seconds((int)seconds);
-                this->us = (int)((val / 1000000000000LL) % 1000000LL);
-                this->ps = (int)((val / 1000000LL) % 1000000LL);
-                this->as = (int)(val % 1000000LL);
-            }
+            this->hour = (int)(val / (60*60*10000000LL));
+            this->min = (int)((val / (60*10000000LL)) % 60);
+            this->sec = (int)((val / 10000000LL) % 60);
+            this->us = (int)((val / 10LL) % 1000000LL);
+            this->tick = (int)(val % 10LL);
             break;
 
         default:
+            cout << "corrupt unit " << unit << endl;
             throw std::runtime_error(
                         "datetime metadata is corrupted with invalid "
                         "base unit");
@@ -905,30 +755,24 @@ bool datetime::datetime_fields::divisible_by_unit(datetime_unit_t unit)
             return true;
         case datetime_unit_year:
             return month == 1 && day == 1 && hour == 0 && min == 0 &&
-                sec == 0 && us == 0 && ps == 0 && as == 0;
+                sec == 0 && us == 0 && tick == 0;
         case datetime_unit_month:
             return day == 1 && hour == 0 && min == 0 &&
-                sec == 0 && us == 0 && ps == 0 && as == 0;
+                sec == 0 && us == 0 && tick == 0;
         case datetime_unit_day:
             return hour == 0 && min == 0 &&
-                sec == 0 && us == 0 && ps == 0 && as == 0;
+                sec == 0 && us == 0 && tick == 0;
         case datetime_unit_hour:
-            return min == 0 && sec == 0 && us == 0 && ps == 0 && as == 0;
+            return min == 0 && sec == 0 && us == 0 && tick == 0;
         case datetime_unit_minute:
-            return sec == 0 && us == 0 && ps == 0 && as == 0;
+            return sec == 0 && us == 0 && tick == 0;
         case datetime_unit_second:
-            return us == 0 && ps == 0 && as == 0;
+            return us == 0 && tick == 0;
         case datetime_unit_ms:
-            return (us % 1000) == 0 && ps == 0 && as == 0;
+            return (us % 1000) == 0 && tick == 0;
         case datetime_unit_us:
-            return ps == 0 && as == 0;
-        case datetime_unit_ns:
-            return (ps % 1000) == 0 && as == 0;
-        case datetime_unit_ps:
-            return as == 0;
-        case datetime_unit_fs:
-            return (as % 1000) == 0;
-        case datetime_unit_as:
+            return tick == 0;
+        case datetime_unit_tick:
             return true;
         default:
             return false;
