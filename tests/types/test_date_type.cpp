@@ -10,6 +10,7 @@
 
 #include <dynd/array.hpp>
 #include <dynd/types/date_type.hpp>
+#include <dynd/types/date_util.hpp>
 #include <dynd/types/property_type.hpp>
 #include <dynd/types/strided_dim_type.hpp>
 #include <dynd/types/fixedstring_type.hpp>
@@ -198,9 +199,9 @@ TEST(DateDType, ToStructFunction) {
     EXPECT_EQ(ndt::make_property(d, "struct"),
                     b.get_type());
     b = b.eval();
-    EXPECT_EQ(ndt::make_cstruct(ndt::make_type<int32_t>(), "year",
-                        ndt::make_type<int16_t>(), "month",
-                        ndt::make_type<int16_t>(), "day"),
+    EXPECT_EQ(ndt::make_cstruct(ndt::make_type<int16_t>(), "year",
+                        ndt::make_type<int8_t>(), "month",
+                        ndt::make_type<int8_t>(), "day"),
                     b.get_type());
     EXPECT_EQ(1955, b.p("year").as<int32_t>());
     EXPECT_EQ(3, b.p("month").as<int32_t>());
@@ -420,4 +421,250 @@ TEST(DateDType, NumPyCompatibleProperty) {
     EXPECT_EQ(1855, a(0).as<int64_t>());
     a_date(0).vals() = "NA";
     EXPECT_EQ(numeric_limits<int64_t>::min(), a(0).as<int64_t>());
+}
+
+TEST(DateYMD, LeapYear) {
+    EXPECT_TRUE(date_ymd::is_leap_year(1600));
+    EXPECT_FALSE(date_ymd::is_leap_year(1700));
+    EXPECT_FALSE(date_ymd::is_leap_year(1800));
+    EXPECT_FALSE(date_ymd::is_leap_year(1900));
+    EXPECT_TRUE(date_ymd::is_leap_year(2000));
+    EXPECT_FALSE(date_ymd::is_leap_year(2001));
+    EXPECT_FALSE(date_ymd::is_leap_year(2002));
+    EXPECT_FALSE(date_ymd::is_leap_year(2003));
+    EXPECT_TRUE(date_ymd::is_leap_year(2004));
+}
+
+TEST(DateYMD, ToDays) {
+    date_ymd d;
+
+    // Some extreme edge cases
+    d.year = -29200; d.month = 2; d.day = 29;
+    EXPECT_EQ(-11384550, d.to_days());
+    d.year = 32000; d.month = 1; d.day = 31;
+    EXPECT_EQ(10968262, d.to_days());
+    d.year = -1234; d.month = 1; d.day = 1;
+    EXPECT_EQ(-1170237, d.to_days());
+    d.year = -1; d.month = 12; d.day = 31;
+    EXPECT_EQ(-719529, d.to_days());
+    d.year = 0; d.month = 1; d.day = 1;
+    EXPECT_EQ(-719528, d.to_days());
+    d.year = 0; d.month = 12; d.day = 31;
+    EXPECT_EQ(-719163, d.to_days());
+    d.year = 1; d.month = 1; d.day = 1;
+    EXPECT_EQ(-719162, d.to_days());
+
+    // Values around the 1970 epoch
+    d.year = 1969; d.month = 12; d.day = 31;
+    EXPECT_EQ(-1, d.to_days());
+    d.year = 1970; d.month = 1; d.day = 1;
+    EXPECT_EQ(0, d.to_days());
+    d.year = 1970; d.month = 1; d.day = 2;
+    EXPECT_EQ(1, d.to_days());
+
+    // Values around Feb 29 1968 (leap year prior to 1970)
+    d.year = 1968; d.month = 2; d.day = 28;
+    EXPECT_EQ(-673, d.to_days());
+    d.year = 1968; d.month = 2; d.day = 29;
+    EXPECT_EQ(-672, d.to_days());
+    d.year = 1968; d.month = 3; d.day = 1;
+    EXPECT_EQ(-671, d.to_days());
+
+    // Values areound Feb 29, 1972 (leap year after 1970)
+    d.year = 1972; d.month = 2; d.day = 28;
+    EXPECT_EQ(788, d.to_days());
+    d.year = 1972; d.month = 2; d.day = 29;
+    EXPECT_EQ(789, d.to_days());
+    d.year = 1972; d.month = 3; d.day = 1;
+    EXPECT_EQ(790, d.to_days());
+
+    // Values around Feb 28 1900 (special non-leap year prior to 1970)
+    d.year = 1900; d.month = 2; d.day = 27;
+    EXPECT_EQ(-25510, d.to_days());
+    d.year = 1900; d.month = 2; d.day = 28;
+    EXPECT_EQ(-25509, d.to_days());
+    d.year = 1900; d.month = 3; d.day = 1;
+    EXPECT_EQ(-25508, d.to_days());
+
+    // Values around Feb 29 1600 (special leap year prior to 1970)
+    d.year = 1600; d.month = 2; d.day = 28;
+    EXPECT_EQ(-135082, d.to_days());
+    d.year = 1600; d.month = 2; d.day = 29;
+    EXPECT_EQ(-135081, d.to_days());
+    d.year = 1600; d.month = 3; d.day = 1;
+    EXPECT_EQ(-135080, d.to_days());
+
+    // Values around Feb 29 2000 (special leap year after 1970)
+    d.year = 2000; d.month = 2; d.day = 28;
+    EXPECT_EQ(11015, d.to_days());
+    d.year = 2000; d.month = 2; d.day = 29;
+    EXPECT_EQ(11016, d.to_days());
+    d.year = 2000; d.month = 3; d.day = 1;
+    EXPECT_EQ(11017, d.to_days());
+
+    // Values around Feb 28 2100 (special non-leap year after 1970)
+    d.year = 2100; d.month = 2; d.day = 27;
+    EXPECT_EQ(47539, d.to_days());
+    d.year = 2100; d.month = 2; d.day = 28;
+    EXPECT_EQ(47540, d.to_days());
+    d.year = 2100; d.month = 3; d.day = 1;
+    EXPECT_EQ(47541, d.to_days());
+
+    // The last of every month of a non-leap year
+    d.year = 1979; d.month = 1; d.day = 31;
+    EXPECT_EQ(3317, d.to_days());
+    d.year = 1979; d.month = 2; d.day = 28;
+    EXPECT_EQ(3345, d.to_days());
+    d.year = 1979; d.month = 3; d.day = 31;
+    EXPECT_EQ(3376, d.to_days());
+    d.year = 1979; d.month = 4; d.day = 30;
+    EXPECT_EQ(3406, d.to_days());
+    d.year = 1979; d.month = 5; d.day = 31;
+    EXPECT_EQ(3437, d.to_days());
+    d.year = 1979; d.month = 6; d.day = 30;
+    EXPECT_EQ(3467, d.to_days());
+    d.year = 1979; d.month = 7; d.day = 31;
+    EXPECT_EQ(3498, d.to_days());
+    d.year = 1979; d.month = 8; d.day = 31;
+    EXPECT_EQ(3529, d.to_days());
+    d.year = 1979; d.month = 9; d.day = 30;
+    EXPECT_EQ(3559, d.to_days());
+    d.year = 1979; d.month = 10; d.day = 31;
+    EXPECT_EQ(3590, d.to_days());
+    d.year = 1979; d.month = 11; d.day = 30;
+    EXPECT_EQ(3620, d.to_days());
+    d.year = 1979; d.month = 12; d.day = 31;
+    EXPECT_EQ(3651, d.to_days());
+}
+
+TEST(DateYMD, SetFromDays) {
+    date_ymd d;
+
+    // Some extreme edge cases
+    d.set_from_days(-11384550);
+    EXPECT_EQ(-29200, d.year);
+    EXPECT_EQ(2, d.month);
+    EXPECT_EQ(29, d.day);
+    d.set_from_days(10968262);
+    EXPECT_EQ(32000, d.year);
+    EXPECT_EQ(1, d.month);
+    EXPECT_EQ(31, d.day);
+    d.set_from_days(-1170237);
+    EXPECT_EQ(-1234, d.year);
+    EXPECT_EQ(1, d.month);
+    EXPECT_EQ(1, d.day);
+    d.set_from_days(-719529);
+    EXPECT_EQ(-1, d.year);
+    EXPECT_EQ(12, d.month);
+    EXPECT_EQ(31, d.day);
+    d.set_from_days(-719528);
+    EXPECT_EQ(0, d.year);
+    EXPECT_EQ(1, d.month);
+    EXPECT_EQ(1, d.day);
+    d.set_from_days(-719163);
+    EXPECT_EQ(0, d.year);
+    EXPECT_EQ(12, d.month);
+    EXPECT_EQ(31, d.day);
+    d.set_from_days(-719162);
+    EXPECT_EQ(1, d.year);
+    EXPECT_EQ(1, d.month);
+    EXPECT_EQ(1, d.day);
+
+    // Values around the 1970 epoch
+    d.set_from_days(-1);
+    EXPECT_EQ(1969, d.year);
+    EXPECT_EQ(12, d.month);
+    EXPECT_EQ(31, d.day);
+    d.set_from_days(0);
+    EXPECT_EQ(1970, d.year);
+    EXPECT_EQ(1, d.month);
+    EXPECT_EQ(1, d.day);
+    d.set_from_days(1);
+    EXPECT_EQ(1970, d.year);
+    EXPECT_EQ(1, d.month);
+    EXPECT_EQ(2, d.day);
+
+    // Values around Feb 29 1968 (leap year prior to 1970)
+    d.set_from_days(-673);
+    EXPECT_EQ(1968, d.year);
+    EXPECT_EQ(2, d.month);
+    EXPECT_EQ(28, d.day);
+    d.set_from_days(-672);
+    EXPECT_EQ(1968, d.year);
+    EXPECT_EQ(2, d.month);
+    EXPECT_EQ(29, d.day);
+    d.set_from_days(-671);
+    EXPECT_EQ(1968, d.year);
+    EXPECT_EQ(3, d.month);
+    EXPECT_EQ(1, d.day);
+
+    // Values areound Feb 29, 1972 (leap year after 1970)
+    d.set_from_days(788);
+    EXPECT_EQ(1972, d.year);
+    EXPECT_EQ(2, d.month);
+    EXPECT_EQ(28, d.day);
+    d.set_from_days(789);
+    EXPECT_EQ(1972, d.year);
+    EXPECT_EQ(2, d.month);
+    EXPECT_EQ(29, d.day);
+    d.set_from_days(790);
+    EXPECT_EQ(1972, d.year);
+    EXPECT_EQ(3, d.month);
+    EXPECT_EQ(1, d.day);
+
+    // Values around Feb 28 1900 (special non-leap year prior to 1970)
+    d.set_from_days(-25510);
+    EXPECT_EQ(1900, d.year);
+    EXPECT_EQ(2, d.month);
+    EXPECT_EQ(27, d.day);
+    d.set_from_days(-25509);
+    EXPECT_EQ(1900, d.year);
+    EXPECT_EQ(2, d.month);
+    EXPECT_EQ(28, d.day);
+    d.set_from_days(-25508);
+    EXPECT_EQ(1900, d.year);
+    EXPECT_EQ(3, d.month);
+    EXPECT_EQ(1, d.day);
+
+    // Values around Feb 29 1600 (special leap year prior to 1970)
+    d.set_from_days(-135082);
+    EXPECT_EQ(1600, d.year);
+    EXPECT_EQ(2, d.month);
+    EXPECT_EQ(28, d.day);
+    d.set_from_days(-135081);
+    EXPECT_EQ(1600, d.year);
+    EXPECT_EQ(2, d.month);
+    EXPECT_EQ(29, d.day);
+    d.set_from_days(-135080);
+    EXPECT_EQ(1600, d.year);
+    EXPECT_EQ(3, d.month);
+    EXPECT_EQ(1, d.day);
+
+    // Values around Feb 29 2000 (special leap year after 1970)
+    d.set_from_days(11015);
+    EXPECT_EQ(2000, d.year);
+    EXPECT_EQ(2, d.month);
+    EXPECT_EQ(28, d.day);
+    d.set_from_days(11016);
+    EXPECT_EQ(2000, d.year);
+    EXPECT_EQ(2, d.month);
+    EXPECT_EQ(29, d.day);
+    d.set_from_days(11017);
+    EXPECT_EQ(2000, d.year);
+    EXPECT_EQ(3, d.month);
+    EXPECT_EQ(1, d.day);
+
+    // Values around Feb 28 2100 (special non-leap year after 1970)
+    d.set_from_days(47539);
+    EXPECT_EQ(2100, d.year);
+    EXPECT_EQ(2, d.month);
+    EXPECT_EQ(27, d.day);
+    d.set_from_days(47540);
+    EXPECT_EQ(2100, d.year);
+    EXPECT_EQ(2, d.month);
+    EXPECT_EQ(28, d.day);
+    d.set_from_days(47541);
+    EXPECT_EQ(2100, d.year);
+    EXPECT_EQ(3, d.month);
+    EXPECT_EQ(1, d.day);
 }
