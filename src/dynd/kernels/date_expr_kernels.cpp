@@ -14,6 +14,20 @@
 using namespace std;
 using namespace dynd;
 
+static void ymd_to_struct_tm(struct tm &stm, int days, const date_ymd &ymd)
+{
+    memset(&stm, 0, sizeof(struct tm));
+    stm.tm_year = ymd.year - 1900;
+    stm.tm_yday = ymd.get_day_of_year();
+    stm.tm_mon = ymd.month - 1;
+    stm.tm_mday = ymd.day;
+    // 1970-01-04 is Sunday
+    stm.tm_wday = (int)((days - 3) % 7);
+    if (stm.tm_wday < 0) {
+        stm.tm_wday += 7;
+    }
+}
+
 /////////////////////////////////////////
 // strftime kernel
 
@@ -35,7 +49,9 @@ namespace {
             struct tm tm_val;
             int32_t date = *reinterpret_cast<const int32_t *>(src);
             // Convert the date to a 'struct tm'
-            datetime::date_to_struct_tm(date, datetime::datetime_unit_day, tm_val);
+            date_ymd ymd;
+            ymd.set_from_days(date);
+            ymd_to_struct_tm(tm_val, date, ymd);
 #ifdef _MSC_VER
             // Given an invalid format string strftime will abort unless an invalid
             // parameter handler is installed.
@@ -88,7 +104,9 @@ namespace {
                 string_type_data *dst_d = reinterpret_cast<string_type_data *>(dst);
                 int32_t date = *reinterpret_cast<const int32_t *>(src);
                 // Convert the date to a 'struct tm'
-                datetime::date_to_struct_tm(date, datetime::datetime_unit_day, tm_val);
+                date_ymd ymd;
+                ymd.set_from_days(date);
+                ymd_to_struct_tm(tm_val, date, ymd);
 
                 // Call strftime, growing the string buffer if needed so it fits
                 size_t str_size = format_size + 16;
@@ -208,8 +226,8 @@ namespace {
 
             int32_t date = *reinterpret_cast<const int32_t *>(src);
             // Convert the date to YMD form
-            datetime::date_ymd ymd;
-            datetime::days_to_ymd(date, ymd);
+            date_ymd ymd;
+            ymd.set_from_days(date);
 
             // Replace the values as requested
             if (year != numeric_limits<int32_t>::max()) {
@@ -230,7 +248,7 @@ namespace {
                 }
                 // If the day isn't also being replaced, make sure the resulting date is valid
                 if (day == numeric_limits<int32_t>::max()) {
-                    if (!datetime::is_valid_ymd(ymd)) {
+                    if (!ymd.is_valid()) {
                         stringstream ss;
                         ss << "invalid replace resulting year/month/day " << year << "/" << month << "/" << day;
                         throw runtime_error(ss.str());
@@ -238,7 +256,7 @@ namespace {
                 }
             }
             if (day != numeric_limits<int32_t>::max()) {
-                int month_size = datetime::get_month_size(ymd.year, ymd.month);
+                int month_size = ymd.get_month_length();
                 if (1 <= day && day <= month_size) {
                     ymd.day = day;
                 } else if (-month_size <= day && day <= -1) {
@@ -252,7 +270,7 @@ namespace {
                 }
             }
 
-            *reinterpret_cast<int32_t *>(dst) = datetime::ymd_to_days(ymd);
+            *reinterpret_cast<int32_t *>(dst) = ymd.to_days();
         }
         static void strided_unary(char *dst, intptr_t dst_stride,
                     const char *src, intptr_t src_stride,

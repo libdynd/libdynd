@@ -34,6 +34,14 @@ struct date_ymd {
         return year % 4 == 0 && (year % 100 != 0 || year % 400 == 0);
     }
 
+    static inline int get_month_length(int year, int month) {
+        if (month >= 1 && month <= 12) {
+            return month_lengths[is_leap_year(year)][month - 1];
+        } else {
+            return 0;
+        }
+    }
+
     static inline bool is_valid(int year, int month, int day) {
         if (month < 1 || month > 12) {
             return false;
@@ -53,6 +61,18 @@ struct date_ymd {
         return month == -128;
     }
 
+    /**
+     * Gets the length of the month this date is
+     * in. Returns 0 for an invalid date.
+     */
+    inline int get_month_length() const {
+        return get_month_length(year, month);
+    }
+
+    /**
+     * Gets the 0-based day of the week, where
+     * 0 is Monday, 6 is Sunday.
+     */
     inline int get_weekday() const {
         int days = to_days();
         // January 5, 1970 is Monday
@@ -61,6 +81,19 @@ struct date_ymd {
             weekday += 7;
         }
         return weekday;
+    }
+
+    /**
+     * Gets the 0-based day of the year,
+     * values 0-365, but returns -1 for an invalid
+     * date.
+     */
+    inline int get_day_of_year() const {
+        if (is_valid(year, month, day)) {
+            return month_starts[is_leap_year(year)][month-1] + day - 1;
+        } else {
+            return -1;
+        }
     }
 
     /**

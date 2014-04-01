@@ -22,7 +22,6 @@ namespace {
         const base_string_type *src_string_dt;
         const char *src_metadata;
         assign_error_mode errmode;
-        datetime::datetime_conversion_rule_t casting;
 
         static void single(char *dst, const char *src, ckernel_prefix *extra)
         {
@@ -67,14 +66,6 @@ size_t dynd::make_string_to_date_assignment_kernel(
     e->src_string_dt = static_cast<const base_string_type *>(ndt::type(src_string_dt).release());
     e->src_metadata = src_metadata;
     e->errmode = errmode;
-    switch (errmode) {
-        case assign_error_fractional:
-        case assign_error_inexact:
-            e->casting = datetime::datetime_conversion_strict;
-            break;
-        default:
-            e->casting = datetime::datetime_conversion_relaxed;
-    }
     return offset_out + sizeof(string_to_date_kernel_extra);
 }
 
