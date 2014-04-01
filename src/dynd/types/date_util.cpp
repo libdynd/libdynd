@@ -147,9 +147,17 @@ void date_ymd::set_from_str(const std::string& s)
     }
 }
 
-void date_ymd::set_from_str(const std::string& DYND_UNUSED(s), bool DYND_UNUSED(monthfirst))
+void date_ymd::set_from_str(const std::string& s, bool monthfirst)
 {
-    throw runtime_error("TODO: date_ymd::set_from_str");
+    if (!string_to_date(s.data(), s.data() + s.size(), *this,
+                        monthfirst ? date_parser_ambiguous_monthfirst
+                                   : date_parser_ambiguous_dayfirst)) {
+        stringstream ss;
+        ss << "Unable to parse ";
+        print_escaped_utf8_string(ss, s);
+        ss << " as a date";
+        throw invalid_argument(ss.str());
+    }
 }
 
 date_ymd date_ymd::get_current_local_date()

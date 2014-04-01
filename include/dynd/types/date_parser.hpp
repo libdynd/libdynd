@@ -12,6 +12,15 @@ namespace dynd {
 
 struct date_ymd;
 
+enum date_parser_ambiguous_t {
+    // Don't allow dates like 01/02/2003
+    date_parser_ambiguous_disallow,
+    // 01/02/2003 means February 1, 2003
+    date_parser_ambiguous_dayfirst,
+    // 01/02/2003 means January 2, 2003
+    date_parser_ambiguous_monthfirst
+};
+
 /**
  * Parses a date. Accepts a wide variety of inputs, but rejects ambiguous
  * formats like MM/DD/YY vs DD/MM/YY. Skips whitespace at the beginning/end,
@@ -22,10 +31,13 @@ struct date_ymd;
  * \param begin  The start of the buffer to parse.
  * \param end  One past the last character of the buffer to parse.
  * \param out_ymd  The date to fill.
+ * \param ambig  How to handle the 01/02/2003 ambiguity. Defaults to disallow,
+ *                   can also be dayfirst or monthfirst.
  *
  * \returns  True if the parse is successful, false otherwise.
  */
-bool string_to_date(const char *begin, const char *end, date_ymd& out_ymd);
+bool string_to_date(const char *begin, const char *end, date_ymd &out_ymd,
+                    date_parser_ambiguous_t ambig=date_parser_ambiguous_disallow);
 
 /**
  * Parses a date. Accepts a wide variety of inputs, but rejects ambiguous
@@ -37,12 +49,12 @@ bool string_to_date(const char *begin, const char *end, date_ymd& out_ymd);
  * \param end  The end of a range of UTF-8 characters.
  * \param out_ymd  If true is returned, this has been filled with the parsed
  *                 date.
+ * \param ambig  How to handle the 01/02/2003 ambiguity.
  *
  * \returns  True if a date was parsed successfully, false otherwise.
  */
-bool parse_date(const char *&begin, const char *end, date_ymd& out_ymd);
-
-
+bool parse_date(const char *&begin, const char *end, date_ymd &out_ymd,
+                date_parser_ambiguous_t ambig);
 
 } // namespace dynd
 

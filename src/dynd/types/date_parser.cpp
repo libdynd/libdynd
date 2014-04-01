@@ -328,7 +328,6 @@ static bool parse_md_str_month(const char *&begin, const char *end, char sep, in
 
 // YYYYsMMsDD, YYYYsMMMsDD for separator character 's', where MM is
 // numbers and MMM is a string.
-// Returns true on success
 static bool parse_ymd_sep_date(const char *&begin, const char *end, char sep,
                                date_ymd &out_ymd)
 {
@@ -347,6 +346,98 @@ static bool parse_ymd_sep_date(const char *&begin, const char *end, char sep,
             begin = saved_begin;
             return false;
         }
+    }
+    // Validate and return the date
+    if (!date_ymd::is_valid(year, month, day)) {
+        begin = saved_begin;
+        return false;
+    }
+    out_ymd.year = year;
+    out_ymd.month = month;
+    out_ymd.day = day;
+    return true;
+}
+
+// MMsDDsYYYY for separator character 's'
+static bool parse_mdy_ambig_sep_date(const char *&begin, const char *end, char sep,
+                               date_ymd &out_ymd)
+{
+    const char *saved_begin = begin;
+    // MM
+    int month;
+    if (!parse_2digit_int(begin, end, month)) {
+        begin = saved_begin;
+        return false;
+    }
+    // sDD
+    if (!parse_token_no_ws(begin, end, sep)) {
+        begin = saved_begin;
+        return false;
+    }
+    int day;
+    if (!parse_2digit_int(begin, end, day)) {
+        begin = saved_begin;
+        return false;
+    }
+    // sYYYY
+    if (!parse_token_no_ws(begin, end, sep)) {
+        begin = saved_begin;
+        return false;
+    }
+    int year;
+    if (!parse_4digit_int(begin, end, year)) {
+        begin = saved_begin;
+        return false;
+    } else if (begin < end && isdigit(begin[0])) {
+        // Don't match if the next character is another digit
+        begin = saved_begin;
+        return false;
+    }
+    // Validate and return the date
+    if (!date_ymd::is_valid(year, month, day)) {
+        begin = saved_begin;
+        return false;
+    }
+    out_ymd.year = year;
+    out_ymd.month = month;
+    out_ymd.day = day;
+    return true;
+}
+
+// DDsMMsYYYY for separator character 's'
+static bool parse_dmy_ambig_sep_date(const char *&begin, const char *end, char sep,
+                               date_ymd &out_ymd)
+{
+    const char *saved_begin = begin;
+    // DD
+    int day;
+    if (!parse_2digit_int(begin, end, day)) {
+        begin = saved_begin;
+        return false;
+    }
+    // sMM
+    if (!parse_token_no_ws(begin, end, sep)) {
+        begin = saved_begin;
+        return false;
+    }
+    int month;
+    if (!parse_2digit_int(begin, end, month)) {
+        begin = saved_begin;
+        return false;
+    }
+    // sYYYY
+    if (!parse_token_no_ws(begin, end, sep)) {
+        begin = saved_begin;
+        return false;
+    }
+    int year;
+    if (!parse_4digit_int(begin, end, year)) {
+        begin = saved_begin;
+        return false;
+    } else if (begin < end && isdigit(begin[0])) {
+        // Don't match if the next character is another digit
+        begin = saved_begin;
+        return false;
     }
     // Validate and return the date
     if (!date_ymd::is_valid(year, month, day)) {
@@ -551,7 +642,8 @@ static void skip_midnight_time(const char *&begin, const char *end)
     return;
 }
 
-bool dynd::parse_date(const char *&begin, const char *end, date_ymd& out_ymd)
+bool dynd::parse_date(const char *&begin, const char *end, date_ymd& out_ymd,
+                date_parser_ambiguous_t ambig)
 {
     int weekday;
     if (parse_str_weekday(begin, end, weekday)) {
@@ -564,22 +656,29 @@ bool dynd::parse_date(const char *&begin, const char *end, date_ymd& out_ymd)
 
     if (parse_iso8601_dashes_date(begin, end, out_ymd)) {
         // 1979-03-22, +001979-03-22, -005999-01-01
-    } else if (parse_ymd_sep_date(begin, end, '/', out_ymd)) {
-        // 1979/03/22 or 1979/Mar/22
-    } else if (parse_ymd_sep_date(begin, end, '-', out_ymd)) {
-        // 1979-03-22 or 1979-Mar-22
-    } else if (parse_ymd_sep_date(begin, end, '.', out_ymd)) {
+    } else if (parse_ymd_sep_date(begin, end, '/', out_ymd) ||
+               parse_ymd_sep_date(begin, end, '-', out_ymd) ||
+               parse_ymd_sep_date(begin, end, '.', out_ymd)) {
+        // 1979/03/22 or 1979/Mar/22, 1979-03-22 or 1979-Mar-22
         // 1979.03.22 or 1979.Mar.22
-    } else if (parse_dmy_str_month_sep_date(begin, end, '/', out_ymd)) {
-        // 22/Mar/1979
-    } else if (parse_dmy_str_month_sep_date(begin, end, '-', out_ymd)) {
-        // 22/Mar/1979
-    } else if (parse_dmy_str_month_sep_date(begin, end, '.', out_ymd)) {
-        // 22.Mar.1979
+    } else if (parse_dmy_str_month_sep_date(begin, end, '/', out_ymd) ||
+               parse_dmy_str_month_sep_date(begin, end, '-', out_ymd) ||
+               parse_dmy_str_month_sep_date(begin, end, '.', out_ymd)) {
+        // 22/Mar/1979, 22-Mar-1979, 22.Mar.1979
     } else if (parse_dmy_str_month_sep_date(begin, end, ' ', out_ymd)) {
         // 22 Mar 1979
     } else if (parse_mdy_long_format_date(begin, end, out_ymd)) {
         // March 22, 1979
+    } else if (ambig == date_parser_ambiguous_monthfirst &&
+               (parse_mdy_ambig_sep_date(begin, end, '/', out_ymd) ||
+                parse_mdy_ambig_sep_date(begin, end, '-', out_ymd) ||
+                parse_mdy_ambig_sep_date(begin, end, '.', out_ymd))) {
+        // 03/22/1979, 03-22-1979, 03.22.1979
+    } else if (ambig == date_parser_ambiguous_dayfirst &&
+               (parse_dmy_ambig_sep_date(begin, end, '/', out_ymd) ||
+                parse_dmy_ambig_sep_date(begin, end, '-', out_ymd) ||
+                parse_dmy_ambig_sep_date(begin, end, '.', out_ymd))) {
+        // 22/03/1979, 22-03-1979, 22.03.1979
     } else {
         return false;
     }
@@ -594,11 +693,12 @@ bool dynd::parse_date(const char *&begin, const char *end, date_ymd& out_ymd)
     return true;
 }
 
-bool dynd::string_to_date(const char *begin, const char *end, date_ymd& out_ymd)
+bool dynd::string_to_date(const char *begin, const char *end, date_ymd& out_ymd,
+                date_parser_ambiguous_t ambig)
 {
     date_ymd ymd;
     begin = skip_whitespace(begin, end);
-    if (!parse_date(begin, end, ymd)) {
+    if (!parse_date(begin, end, ymd, ambig)) {
         return false;
     }
     // Either a "T" or whitespace may separate a date and a time
