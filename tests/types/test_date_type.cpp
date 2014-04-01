@@ -784,6 +784,14 @@ TEST(DateYMD, SetFromStr) {
     EXPECT_EQ(d.year, 1919);
     EXPECT_EQ(d.month, 6);
     EXPECT_EQ(d.day, 5);
+    d.set_from_str("Fri, Jun 6, 1919");
+    EXPECT_EQ(d.year, 1919);
+    EXPECT_EQ(d.month, 6);
+    EXPECT_EQ(d.day, 6);
+    d.set_from_str("Saturday, Jun 7, 1919");
+    EXPECT_EQ(d.year, 1919);
+    EXPECT_EQ(d.month, 6);
+    EXPECT_EQ(d.day, 7);
     d.set_from_str("  June  05,\t1919 ");
     EXPECT_EQ(d.year, 1919);
     EXPECT_EQ(d.month, 6);
@@ -792,6 +800,10 @@ TEST(DateYMD, SetFromStr) {
     EXPECT_EQ(d.year, 3022);
     EXPECT_EQ(d.month, 7);
     EXPECT_EQ(d.day, 16);
+    d.set_from_str("Monday, 01-Aug-2011");
+    EXPECT_EQ(d.year, 2011);
+    EXPECT_EQ(d.month, 8);
+    EXPECT_EQ(d.day, 1);
 
     // Parsing a datetime with the time == midnight is ok too, and
     // ignores the time zone
@@ -827,6 +839,16 @@ TEST(DateYMD, SetFromStr) {
     EXPECT_EQ(d.year, 1925);
     EXPECT_EQ(d.month, 12);
     EXPECT_EQ(d.day, 30);
+
+    // RFC2822 date syntax
+    d.set_from_str( "Mon, 25 Dec 1995 00:00:00 GMT");
+    EXPECT_EQ(d.year, 1995);
+    EXPECT_EQ(d.month, 12);
+    EXPECT_EQ(d.day, 25);
+    d.set_from_str( "Tue, 26 Dec 1995 00:00:00 +0430");
+    EXPECT_EQ(d.year, 1995);
+    EXPECT_EQ(d.month, 12);
+    EXPECT_EQ(d.day, 26);
 }
 
 TEST(DateYMD, SetFromStr_Errors) {

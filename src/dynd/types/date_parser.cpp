@@ -181,26 +181,36 @@ static bool parse_6digit_int(const char *&begin, const char *end, int &out_val)
 }
 
 namespace {
-    struct named_month {
+    struct named_value {
         const char *name;
-        int month;
-        DYND_CONSTEXPR named_month(const char *name_, int month_)
-            : name(name_), month(month_) {}
+        int value;
+        DYND_CONSTEXPR named_value(const char *name_, int value_)
+            : name(name_), value(value_) {}
     };
-    static named_month named_month_table[] = {
-        named_month("jan", 1), named_month("january", 1),
-        named_month("feb", 2), named_month("february", 2),
-        named_month("mar", 3), named_month("march", 3),
-        named_month("apr", 4), named_month("april", 4),
-        named_month("may", 5),
-        named_month("jun", 6), named_month("june", 6),
-        named_month("jul", 7), named_month("july", 7),
-        named_month("aug", 8), named_month("august", 8),
-        named_month("sep", 9), named_month("sept", 9),
-        named_month("september", 9),
-        named_month("oct", 10), named_month("october", 10),
-        named_month("nov", 11), named_month("november", 11),
-        named_month("dec", 12), named_month("december", 12),
+    static named_value named_month_table[] = {
+        named_value("jan", 1), named_value("january", 1),
+        named_value("feb", 2), named_value("february", 2),
+        named_value("mar", 3), named_value("march", 3),
+        named_value("apr", 4), named_value("april", 4),
+        named_value("may", 5),
+        named_value("jun", 6), named_value("june", 6),
+        named_value("jul", 7), named_value("july", 7),
+        named_value("aug", 8), named_value("august", 8),
+        named_value("sep", 9), named_value("sept", 9),
+        named_value("september", 9),
+        named_value("oct", 10), named_value("october", 10),
+        named_value("nov", 11), named_value("november", 11),
+        named_value("dec", 12), named_value("december", 12),
+    };
+
+    static named_value named_weekday_table[] = {
+        named_value("mon", 0), named_value("monday", 0),
+        named_value("tue", 1), named_value("tuesday", 1),
+        named_value("wed", 2), named_value("wednesday", 2),
+        named_value("thu", 3), named_value("thursday", 3),
+        named_value("fri", 4), named_value("friday", 4),
+        named_value("sat", 5), named_value("saturday", 5),
+        named_value("sun", 6), named_value("sunday", 6),
     };
 } // anonymous namespace
 
@@ -221,7 +231,32 @@ static bool parse_str_month(const char *&begin, const char *end, int &out_month)
     for (size_t i = 0;
          i != sizeof(named_month_table) / sizeof(named_month_table[0]); ++i) {
         if (s == named_month_table[i].name) {
-            out_month = named_month_table[i].month;
+            out_month = named_month_table[i].value;
+            return true;
+        }
+    }
+    begin = saved_begin;
+    return false;
+}
+
+// Parses a string weekday
+static bool parse_str_weekday(const char *&begin, const char *end, int &out_weekday)
+{
+    const char *saved_begin = begin;
+    const char *strbegin, *strend;
+    if (!parse_alpha_name_no_ws(begin, end, strbegin, strend)) {
+        return false;
+    }
+    string s(strbegin, strend);
+    // Make it lower case
+    for (size_t i = 0; i != s.size(); ++i) {
+        s[i] = tolower(s[i]);
+    }
+    // Search through the named weekday table for a matching weekday name
+    for (size_t i = 0;
+         i != sizeof(named_weekday_table) / sizeof(named_weekday_table[0]); ++i) {
+        if (s == named_weekday_table[i].name) {
+            out_weekday = named_weekday_table[i].value;
             return true;
         }
     }
@@ -459,7 +494,10 @@ static bool parse_mdy_long_format_date(const char *&begin, const char *end, date
 // Skips Z, +####, -####, +##, -##, +##:##, -##:##
 static void skip_timezone(const char *&begin, const char *end)
 {
+    begin = skip_whitespace(begin, end);
     if (parse_token_no_ws(begin, end, 'Z')) {
+        return;
+    } else if (parse_token_no_ws(begin, end, "GMT")) {
         return;
     } else {
         if (!parse_token_no_ws(begin, end, '+')) {
@@ -515,33 +553,45 @@ static void skip_midnight_time(const char *&begin, const char *end)
 
 bool dynd::parse_date(const char *&begin, const char *end, date_ymd& out_ymd)
 {
+    int weekday;
+    if (parse_str_weekday(begin, end, weekday)) {
+        // Optional comma and whitespace after the weekday
+        parse_token(begin, end, ',');
+        begin = skip_whitespace(begin, end);
+    } else {
+        weekday = -1;
+    }
+
     if (parse_iso8601_dashes_date(begin, end, out_ymd)) {
         // 1979-03-22, +001979-03-22, -005999-01-01
-        return true;
     } else if (parse_ymd_sep_date(begin, end, '/', out_ymd)) {
         // 1979/03/22 or 1979/Mar/22
-        return true;
     } else if (parse_ymd_sep_date(begin, end, '-', out_ymd)) {
         // 1979-03-22 or 1979-Mar-22
-        return true;
     } else if (parse_ymd_sep_date(begin, end, '.', out_ymd)) {
         // 1979.03.22 or 1979.Mar.22
-        return true;
     } else if (parse_dmy_str_month_sep_date(begin, end, '/', out_ymd)) {
         // 22/Mar/1979
-        return true;
     } else if (parse_dmy_str_month_sep_date(begin, end, '-', out_ymd)) {
         // 22/Mar/1979
-        return true;
     } else if (parse_dmy_str_month_sep_date(begin, end, '.', out_ymd)) {
         // 22.Mar.1979
-        return true;
+    } else if (parse_dmy_str_month_sep_date(begin, end, ' ', out_ymd)) {
+        // 22 Mar 1979
     } else if (parse_mdy_long_format_date(begin, end, out_ymd)) {
         // March 22, 1979
-        return true;
     } else {
         return false;
     }
+
+    // If there was a weekday, validate it
+    if (weekday >= 0) {
+        if (out_ymd.get_weekday() != weekday) {
+            return false;
+        }
+    }
+
+    return true;
 }
 
 bool dynd::string_to_date(const char *begin, const char *end, date_ymd& out_ymd)

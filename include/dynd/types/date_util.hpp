@@ -53,6 +53,16 @@ struct date_ymd {
         return month == -128;
     }
 
+    inline int get_weekday() const {
+        int days = to_days();
+        // January 5, 1970 is Monday
+        int weekday = (days - 4) % 7;
+        if (weekday < 0) {
+            weekday += 7;
+        }
+        return weekday;
+    }
+
     /**
      * Converts the ymd into a days offset from January 1, 1970.
      */
