@@ -97,40 +97,40 @@ TEST(DateDType, BadInputStrings) {
     ndt::type d = ndt::make_date();
 
     // Arbitrary bad string
-    EXPECT_THROW(nd::array("badvalue").ucast(d).eval(), runtime_error);
+    EXPECT_THROW(nd::array("badvalue").ucast(d).eval(), invalid_argument);
     // Character after year must be '-'
-    EXPECT_THROW(nd::array("1980X").ucast(d).eval(), runtime_error);
+    EXPECT_THROW(nd::array("1980X").ucast(d).eval(), invalid_argument);
     // Cannot have trailing '-'
-    EXPECT_THROW(nd::array("1980-").ucast(d).eval(), runtime_error);
+    EXPECT_THROW(nd::array("1980-").ucast(d).eval(), invalid_argument);
     // Month must be in range [1,12]
-    EXPECT_THROW(nd::array("1980-00").ucast(d).eval(), runtime_error);
-    EXPECT_THROW(nd::array("1980-13").ucast(d).eval(), runtime_error);
+    EXPECT_THROW(nd::array("1980-00").ucast(d).eval(), invalid_argument);
+    EXPECT_THROW(nd::array("1980-13").ucast(d).eval(), invalid_argument);
     // Month must have two digits
-    EXPECT_THROW(nd::array("1980-1").ucast(d).eval(), runtime_error);
-    EXPECT_THROW(nd::array("1980-1-02").ucast(d).eval(), runtime_error);
+    EXPECT_THROW(nd::array("1980-1").ucast(d).eval(), invalid_argument);
+    EXPECT_THROW(nd::array("1980-1-02").ucast(d).eval(), invalid_argument);
     // 'Mor' is not a valid month
-    EXPECT_THROW(nd::array("1980-Mor").ucast(d).eval(), runtime_error);
+    EXPECT_THROW(nd::array("1980-Mor").ucast(d).eval(), invalid_argument);
     // Cannot have trailing '-'
-    EXPECT_THROW(nd::array("1980-01-").ucast(d).eval(), runtime_error);
+    EXPECT_THROW(nd::array("1980-01-").ucast(d).eval(), invalid_argument);
     // Day must be in range [1,len(month)]
-    EXPECT_THROW(nd::array("1980-01-0").ucast(d).eval(), runtime_error);
-    EXPECT_THROW(nd::array("1980-01-00").ucast(d).eval(), runtime_error);
-    EXPECT_THROW(nd::array("1980-01-32").ucast(d).eval(), runtime_error);
-    EXPECT_THROW(nd::array("1979-02-29").ucast(d).eval(), runtime_error);
-    EXPECT_THROW(nd::array("1980-02-30").ucast(d).eval(), runtime_error);
-    EXPECT_THROW(nd::array("1980-03-32").ucast(d).eval(), runtime_error);
-    EXPECT_THROW(nd::array("1980-04-31").ucast(d).eval(), runtime_error);
-    EXPECT_THROW(nd::array("1980-05-32").ucast(d).eval(), runtime_error);
-    EXPECT_THROW(nd::array("1980-06-31").ucast(d).eval(), runtime_error);
-    EXPECT_THROW(nd::array("1980-07-32").ucast(d).eval(), runtime_error);
-    EXPECT_THROW(nd::array("1980-08-32").ucast(d).eval(), runtime_error);
-    EXPECT_THROW(nd::array("1980-09-31").ucast(d).eval(), runtime_error);
-    EXPECT_THROW(nd::array("1980-10-32").ucast(d).eval(), runtime_error);
-    EXPECT_THROW(nd::array("1980-11-31").ucast(d).eval(), runtime_error);
-    EXPECT_THROW(nd::array("1980-12-32").ucast(d).eval(), runtime_error);
+    EXPECT_THROW(nd::array("1980-01-0").ucast(d).eval(), invalid_argument);
+    EXPECT_THROW(nd::array("1980-01-00").ucast(d).eval(), invalid_argument);
+    EXPECT_THROW(nd::array("1980-01-32").ucast(d).eval(), invalid_argument);
+    EXPECT_THROW(nd::array("1979-02-29").ucast(d).eval(), invalid_argument);
+    EXPECT_THROW(nd::array("1980-02-30").ucast(d).eval(), invalid_argument);
+    EXPECT_THROW(nd::array("1980-03-32").ucast(d).eval(), invalid_argument);
+    EXPECT_THROW(nd::array("1980-04-31").ucast(d).eval(), invalid_argument);
+    EXPECT_THROW(nd::array("1980-05-32").ucast(d).eval(), invalid_argument);
+    EXPECT_THROW(nd::array("1980-06-31").ucast(d).eval(), invalid_argument);
+    EXPECT_THROW(nd::array("1980-07-32").ucast(d).eval(), invalid_argument);
+    EXPECT_THROW(nd::array("1980-08-32").ucast(d).eval(), invalid_argument);
+    EXPECT_THROW(nd::array("1980-09-31").ucast(d).eval(), invalid_argument);
+    EXPECT_THROW(nd::array("1980-10-32").ucast(d).eval(), invalid_argument);
+    EXPECT_THROW(nd::array("1980-11-31").ucast(d).eval(), invalid_argument);
+    EXPECT_THROW(nd::array("1980-12-32").ucast(d).eval(), invalid_argument);
     // Cannot have trailing characters
-    EXPECT_THROW(nd::array("1980-02-03%").ucast(d).eval(), runtime_error);
-    EXPECT_THROW(nd::array("1980-02-03 q").ucast(d).eval(), runtime_error);
+    EXPECT_THROW(nd::array("1980-02-03%").ucast(d).eval(), invalid_argument);
+    EXPECT_THROW(nd::array("1980-02-03 q").ucast(d).eval(), invalid_argument);
 }
 
 TEST(DateDType, DateProperties) {
@@ -667,4 +667,176 @@ TEST(DateYMD, SetFromDays) {
     EXPECT_EQ(2100, d.year);
     EXPECT_EQ(3, d.month);
     EXPECT_EQ(1, d.day);
+}
+
+TEST(DateYMD, ToStr) {
+    date_ymd d;
+
+    d.year = 2000; d.month = 10; d.day = 5;
+    EXPECT_EQ("2000-10-05", d.to_str());
+    d.year = 1973; d.month = 12; d.day = 26;
+    EXPECT_EQ("1973-12-26", d.to_str());
+    d.year = 1; d.month = 1; d.day = 1;
+    EXPECT_EQ("0001-01-01", d.to_str());
+    d.year = 0; d.month = 12; d.day = 31;
+    EXPECT_EQ("+000000-12-31", d.to_str());
+    d.year = 9999; d.month = 12; d.day = 31;
+    EXPECT_EQ("9999-12-31", d.to_str());
+    d.year = 10000; d.month = 1; d.day = 1;
+    EXPECT_EQ("+010000-01-01", d.to_str());
+    d.year = 25386; d.month = 3; d.day = 19;
+    EXPECT_EQ("+025386-03-19", d.to_str());
+    d.year = -25386; d.month = 3; d.day = 19;
+    EXPECT_EQ("-025386-03-19", d.to_str());
+}
+
+TEST(DateYMD, SetFromStr) {
+    date_ymd d;
+
+    // ISO 8601 date strings
+    d.set_from_str("1925-12-30");
+    EXPECT_EQ(d.year, 1925);
+    EXPECT_EQ(d.month, 12);
+    EXPECT_EQ(d.day, 30);
+    d.set_from_str("9999-12-31");
+    EXPECT_EQ(d.year, 9999);
+    EXPECT_EQ(d.month, 12);
+    EXPECT_EQ(d.day, 31);
+    d.set_from_str(" \t  0001-01-01    ");
+    EXPECT_EQ(d.year, 1);
+    EXPECT_EQ(d.month, 1);
+    EXPECT_EQ(d.day, 1);
+    d.set_from_str("+000000-06-02");
+    EXPECT_EQ(d.year, 0);
+    EXPECT_EQ(d.month, 6);
+    EXPECT_EQ(d.day, 2);
+    d.set_from_str("-025000-03-12");
+    EXPECT_EQ(d.year, -25000);
+    EXPECT_EQ(d.month, 3);
+    EXPECT_EQ(d.day, 12);
+    d.set_from_str("+025000-03-12");
+    EXPECT_EQ(d.year, 25000);
+    EXPECT_EQ(d.month, 3);
+    EXPECT_EQ(d.day, 12);
+
+    // year-month-day with a string month
+    d.set_from_str("1993-OCT-12");
+    EXPECT_EQ(d.year, 1993);
+    EXPECT_EQ(d.month, 10);
+    EXPECT_EQ(d.day, 12);
+    d.set_from_str("1422-Jan-22");
+    EXPECT_EQ(d.year, 1422);
+    EXPECT_EQ(d.month, 1);
+    EXPECT_EQ(d.day, 22);
+    d.set_from_str("2000-feb-29");
+    EXPECT_EQ(d.year, 2000);
+    EXPECT_EQ(d.month, 2);
+    EXPECT_EQ(d.day, 29);
+    d.set_from_str("2014-december-25");
+    EXPECT_EQ(d.year, 2014);
+    EXPECT_EQ(d.month, 12);
+    EXPECT_EQ(d.day, 25);
+
+    // day-month-year with a string month
+    d.set_from_str("12-October-1993");
+    EXPECT_EQ(d.year, 1993);
+    EXPECT_EQ(d.month, 10);
+    EXPECT_EQ(d.day, 12);
+    d.set_from_str("22-january-1422");
+    EXPECT_EQ(d.year, 1422);
+    EXPECT_EQ(d.month, 1);
+    EXPECT_EQ(d.day, 22);
+    d.set_from_str("29-Feb-2000");
+    EXPECT_EQ(d.year, 2000);
+    EXPECT_EQ(d.month, 2);
+    EXPECT_EQ(d.day, 29);
+    d.set_from_str("25-DEC-2014");
+    EXPECT_EQ(d.year, 2014);
+    EXPECT_EQ(d.month, 12);
+    EXPECT_EQ(d.day, 25);
+
+    // Some variations
+    d.set_from_str("2012/11/13");
+    EXPECT_EQ(d.year, 2012);
+    EXPECT_EQ(d.month, 11);
+    EXPECT_EQ(d.day, 13);
+    d.set_from_str("2015.08.13");
+    EXPECT_EQ(d.year, 2015);
+    EXPECT_EQ(d.month, 8);
+    EXPECT_EQ(d.day, 13);
+    d.set_from_str("1990/MAY/13");
+    EXPECT_EQ(d.year, 1990);
+    EXPECT_EQ(d.month, 5);
+    EXPECT_EQ(d.day, 13);
+    d.set_from_str("2015.Nov.13");
+    EXPECT_EQ(d.year, 2015);
+    EXPECT_EQ(d.month, 11);
+    EXPECT_EQ(d.day, 13);
+    d.set_from_str("13/apr/1490");
+    EXPECT_EQ(d.year, 1490);
+    EXPECT_EQ(d.month, 4);
+    EXPECT_EQ(d.day, 13);
+    d.set_from_str("13.April.2020");
+    EXPECT_EQ(d.year, 2020);
+    EXPECT_EQ(d.month, 4);
+    EXPECT_EQ(d.day, 13);
+    d.set_from_str("Jun 5, 1919");
+    EXPECT_EQ(d.year, 1919);
+    EXPECT_EQ(d.month, 6);
+    EXPECT_EQ(d.day, 5);
+    d.set_from_str("  June  05,\t1919 ");
+    EXPECT_EQ(d.year, 1919);
+    EXPECT_EQ(d.month, 6);
+    EXPECT_EQ(d.day, 5);
+    d.set_from_str("  jul  16,\t3022 ");
+    EXPECT_EQ(d.year, 3022);
+    EXPECT_EQ(d.month, 7);
+    EXPECT_EQ(d.day, 16);
+
+    // Parsing a datetime with the time == midnight is ok too, and
+    // ignores the time zone
+    d.set_from_str("1925-12-30T00");
+    EXPECT_EQ(d.year, 1925);
+    EXPECT_EQ(d.month, 12);
+    EXPECT_EQ(d.day, 30);
+    d.set_from_str("1925-12-30T00Z");
+    EXPECT_EQ(d.year, 1925);
+    EXPECT_EQ(d.month, 12);
+    EXPECT_EQ(d.day, 30);
+    d.set_from_str("1925-12-30T00:00");
+    EXPECT_EQ(d.year, 1925);
+    EXPECT_EQ(d.month, 12);
+    EXPECT_EQ(d.day, 30);
+    d.set_from_str("1925-12-30T00:00+05");
+    EXPECT_EQ(d.year, 1925);
+    EXPECT_EQ(d.month, 12);
+    EXPECT_EQ(d.day, 30);
+    d.set_from_str("1925-12-30T00:00:00");
+    EXPECT_EQ(d.year, 1925);
+    EXPECT_EQ(d.month, 12);
+    EXPECT_EQ(d.day, 30);
+    d.set_from_str("1925-12-30 00:00:00-0600");
+    EXPECT_EQ(d.year, 1925);
+    EXPECT_EQ(d.month, 12);
+    EXPECT_EQ(d.day, 30);
+    d.set_from_str("1925-12-30T00:00:00.0");
+    EXPECT_EQ(d.year, 1925);
+    EXPECT_EQ(d.month, 12);
+    EXPECT_EQ(d.day, 30);
+    d.set_from_str("1925-12-30T00:00:00.00+10:30");
+    EXPECT_EQ(d.year, 1925);
+    EXPECT_EQ(d.month, 12);
+    EXPECT_EQ(d.day, 30);
+}
+
+TEST(DateYMD, SetFromStr_Errors) {
+    date_ymd d;
+    
+    EXPECT_THROW(d.set_from_str("123-01-01"), invalid_argument);
+    EXPECT_THROW(d.set_from_str("2000-01-01X"), invalid_argument);
+    EXPECT_THROW(d.set_from_str("2000-02-30"), invalid_argument);
+    EXPECT_THROW(d.set_from_str("2001-02-29"), invalid_argument);
+    EXPECT_THROW(d.set_from_str("2012-01/01"), invalid_argument);
+    EXPECT_THROW(d.set_from_str("2012-rec-01"), invalid_argument);
+    EXPECT_THROW(d.set_from_str("Banuary 5, 1992"), invalid_argument);
 }

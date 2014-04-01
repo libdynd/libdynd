@@ -50,20 +50,17 @@ void date_type::set_ymd(const char *DYND_UNUSED(metadata), char *data,
 }
 
 void date_type::set_utf8_string(const char *DYND_UNUSED(metadata),
-                char *data, assign_error_mode errmode, const std::string& utf8_str) const
+                char *data, assign_error_mode DYND_UNUSED(errmode), const std::string& utf8_str) const
 {
-    datetime::datetime_conversion_rule_t casting;
-    switch (errmode) {
-        case assign_error_fractional:
-        case assign_error_inexact:
-            casting = datetime::datetime_conversion_strict;
-            break;
-        default:
-            casting = datetime::datetime_conversion_relaxed;
-            break;
+    date_ymd ymd;
+    // TODO: Use errmode to adjust strictness of the parsing
+    // TODO: properly distinguish "date" and "option[date]" with respect to NA support
+    if (utf8_str == "NA") {
+        ymd.set_to_na();
+    } else {
+        ymd.set_from_str(utf8_str);
     }
-    *reinterpret_cast<int32_t *>(data) = datetime::parse_iso_8601_date(
-                            utf8_str, datetime::datetime_unit_day, casting);
+    *reinterpret_cast<int32_t *>(data) = ymd.to_days();
 }
 
 
@@ -76,8 +73,9 @@ date_ymd date_type::get_ymd(const char *DYND_UNUSED(metadata), const char *data)
 
 void date_type::print_data(std::ostream& o, const char *DYND_UNUSED(metadata), const char *data) const
 {
-    int32_t value = *reinterpret_cast<const int32_t *>(data);
-    o << datetime::make_iso_8601_date(value, datetime::datetime_unit_day);
+    date_ymd ymd;
+    ymd.set_from_days(*reinterpret_cast<const int32_t *>(data));
+    o << ymd.to_str();
 }
 
 void date_type::print_type(std::ostream& o) const
