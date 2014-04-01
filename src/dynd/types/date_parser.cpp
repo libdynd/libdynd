@@ -214,54 +214,48 @@ namespace {
     };
 } // anonymous namespace
 
-// Parses a string month
-static bool parse_str_month(const char *&begin, const char *end, int &out_month)
+template <int N>
+static bool parse_str_named_value(const char *&begin, const char *end,
+                                  named_value (&nvt)[N], int &out_value)
 {
     const char *saved_begin = begin;
     const char *strbegin, *strend;
     if (!parse_alpha_name_no_ws(begin, end, strbegin, strend)) {
         return false;
     }
-    string s(strbegin, strend);
-    // Make it lower case
-    for (size_t i = 0; i != s.size(); ++i) {
-        s[i] = tolower(s[i]);
-    }
-    // Search through the named month table for a matching month name
-    for (size_t i = 0;
-         i != sizeof(named_month_table) / sizeof(named_month_table[0]); ++i) {
-        if (s == named_month_table[i].name) {
-            out_month = named_month_table[i].value;
-            return true;
+    int strfirstchar = tolower(*strbegin);
+    // Search through the named value table for a matching string
+    for (int i = 0; i < N; ++i) {
+        const char *name = nvt[i].name;
+        // Compare the first character
+        if (*name++ == strfirstchar) {
+            const char *strptr = strbegin + 1;
+            // Compare the rest of the characters
+            while (*name != '\0' && strptr < strend &&
+                   *name == tolower(*strptr)) {
+                ++name; ++strptr;
+            }
+            if (*name == '\0' && strptr == strend) {
+                out_value = nvt[i].value;
+                return true;
+            }
         }
     }
+
     begin = saved_begin;
     return false;
 }
 
-// Parses a string weekday
-static bool parse_str_weekday(const char *&begin, const char *end, int &out_weekday)
+// Parses a string month
+static inline bool parse_str_month(const char *&begin, const char *end, int &out_month)
 {
-    const char *saved_begin = begin;
-    const char *strbegin, *strend;
-    if (!parse_alpha_name_no_ws(begin, end, strbegin, strend)) {
-        return false;
-    }
-    string s(strbegin, strend);
-    // Make it lower case
-    for (size_t i = 0; i != s.size(); ++i) {
-        s[i] = tolower(s[i]);
-    }
-    // Search through the named weekday table for a matching weekday name
-    for (size_t i = 0;
-         i != sizeof(named_weekday_table) / sizeof(named_weekday_table[0]); ++i) {
-        if (s == named_weekday_table[i].name) {
-            out_weekday = named_weekday_table[i].value;
-            return true;
-        }
-    }
-    begin = saved_begin;
-    return false;
+    return parse_str_named_value(begin, end, named_month_table, out_month);
+}
+
+// Parses a string weekday
+static inline bool parse_str_weekday(const char *&begin, const char *end, int &out_weekday)
+{
+    return parse_str_named_value(begin, end, named_weekday_table, out_weekday);
 }
 
 // sMMsDD for separator character 's'
