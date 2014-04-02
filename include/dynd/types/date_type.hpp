@@ -7,9 +7,6 @@
 #define _DYND__DATE_TYPE_HPP_
 
 #include <dynd/type.hpp>
-#include <dynd/typed_data_assign.hpp>
-#include <dynd/types/view_type.hpp>
-#include <dynd/string_encodings.hpp>
 #include <dynd/types/date_util.hpp>
 
 namespace dynd {
@@ -19,9 +16,6 @@ public:
     date_type();
 
     virtual ~date_type();
-
-    // A static instance of a struct type used by default for a date
-    static const ndt::type default_struct_type;
 
     void set_ymd(const char *metadata, char *data, assign_error_mode errmode,
                     int32_t year, int32_t month, int32_t day) const;

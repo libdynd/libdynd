@@ -6,7 +6,6 @@
 #include <dynd/kernels/date_assignment_kernels.hpp>
 #include <dynd/kernels/assignment_kernels.hpp>
 #include <dynd/types/cstruct_type.hpp>
-#include <datetime_strings.h>
 
 using namespace std;
 using namespace dynd;
@@ -86,7 +85,11 @@ namespace {
             extra_type *e = reinterpret_cast<extra_type *>(extra);
             date_ymd ymd;
             ymd.set_from_days(*reinterpret_cast<const int32_t *>(src));
-            e->dst_string_dt->set_utf8_string(e->dst_metadata, dst, e->errmode, ymd.to_str());
+            string s = ymd.to_str();
+            if (s.empty()) {
+                s = "NA";
+            }
+            e->dst_string_dt->set_utf8_string(e->dst_metadata, dst, e->errmode, s);
         }
 
         static void destruct(ckernel_prefix *extra)

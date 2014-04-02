@@ -181,6 +181,8 @@ set(libdynd_SRC
     src/dynd/types/strided_dim_type.cpp
     src/dynd/types/string_type.cpp
     src/dynd/types/struct_type.cpp
+    src/dynd/types/time_type.cpp
+    src/dynd/types/time_util.cpp
     src/dynd/types/tuple_type.cpp
     src/dynd/types/type_id.cpp
     src/dynd/types/unary_expr_type.cpp
@@ -231,6 +233,8 @@ set(libdynd_SRC
     include/dynd/types/string_type.hpp
     include/dynd/types/struct_type.hpp
     include/dynd/types/cstruct_type.hpp
+    include/dynd/types/time_type.hpp
+    include/dynd/types/time_util.hpp
     include/dynd/types/tuple_type.hpp
     include/dynd/types/type_id.hpp
     include/dynd/types/unary_expr_type.hpp
@@ -290,6 +294,7 @@ set(libdynd_SRC
     src/dynd/kernels/string_comparison_kernels.cpp
     src/dynd/kernels/struct_assignment_kernels.cpp
     src/dynd/kernels/struct_comparison_kernels.cpp
+    src/dynd/kernels/time_assignment_kernels.cpp
     src/dynd/kernels/kernels_for_disassembly.cpp
     src/dynd/kernels/single_assigner_builtin.hpp
     src/dynd/kernels/single_assigner_builtin_int128.hpp
@@ -326,6 +331,7 @@ set(libdynd_SRC
     include/dynd/kernels/string_comparison_kernels.hpp
     include/dynd/kernels/struct_assignment_kernels.hpp
     include/dynd/kernels/struct_comparison_kernels.hpp
+    include/dynd/kernels/time_assignment_kernels.hpp
     # MemBlock
     src/dynd/memblock/memory_block.cpp
     src/dynd/memblock/executable_memory_block_windows_x64.cpp

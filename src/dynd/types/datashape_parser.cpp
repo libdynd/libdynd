@@ -15,6 +15,7 @@
 #include <dynd/types/fixedstring_type.hpp>
 #include <dynd/types/json_type.hpp>
 #include <dynd/types/date_type.hpp>
+#include <dynd/types/time_type.hpp>
 #include <dynd/types/datetime_type.hpp>
 #include <dynd/types/fixedbytes_type.hpp>
 #include <dynd/types/bytes_type.hpp>
@@ -80,6 +81,8 @@ static const map<string, ndt::type>& get_builtin_types()
         builtin_types["complex128"] = ndt::make_type<dynd_complex<double> >();
         builtin_types["json"] = ndt::make_json();
         builtin_types["date"] = ndt::make_date();
+        builtin_types["time"] = ndt::make_time(tz_abstract);
+        builtin_types["datetime"] = ndt::make_datetime(tz_abstract);
         builtin_types["bytes"] = ndt::make_bytes(1);
         builtin_types["type"] = ndt::make_type();
         builtin_types["ckernel_deferred"] = ndt::make_ckernel_deferred();
@@ -97,6 +100,7 @@ static const set<string>& get_reserved_typenames()
         }
         reserved_typenames.insert("string");
         reserved_typenames.insert("char");
+        reserved_typenames.insert("time");
         reserved_typenames.insert("datetime");
         reserved_typenames.insert("unaligned");
         reserved_typenames.insert("pointer");
@@ -510,8 +514,7 @@ static ndt::type parse_cuda_device_parameters(const char *&begin, const char *en
     }
 }
 
-// datetime_type : datetime['unit'] |
-//               datetime['unit','timezone']
+// datetime_type : datetime[tz='timezone']
 // This is called after 'datetime' is already matched
 static ndt::type parse_datetime_parameters(const char *&begin, const char *end)
 {
@@ -529,14 +532,14 @@ static ndt::type parse_datetime_parameters(const char *&begin, const char *end)
         string timezone_str;
         saved_begin = begin;
         if (!parse_quoted_string(begin, end, timezone_str)) {
-            throw datashape_parse_error(begin, "expected a datetime timezone string");
+            throw datashape_parse_error(begin, "expected a time zone string");
         }
         if (timezone_str == "abstract") {
             timezone = tz_abstract;
         } else if (timezone_str == "UTC") {
             timezone = tz_utc;
         } else {
-            throw datashape_parse_error(saved_begin, "invalid datetime timezone");
+            throw datashape_parse_error(saved_begin, "invalid time zone");
         }
         if (!parse_token(begin, end, ']')) {
             throw datashape_parse_error(begin, "expected closing ']'");
@@ -545,6 +548,43 @@ static ndt::type parse_datetime_parameters(const char *&begin, const char *end)
         return ndt::make_datetime(timezone);
     } else {
         return ndt::make_datetime(tz_abstract);
+    }
+}
+
+// time_type : time[tz='timezone']
+// This is called after 'datetime' is already matched
+static ndt::type parse_time_parameters(const char *&begin, const char *end)
+{
+    if (parse_token(begin, end, '[')) {
+        datetime_tz_t timezone = tz_abstract;
+        string unit_str;
+        const char *saved_begin = begin;
+        // Parse the timezone
+        if (!parse_token(begin, end, "tz")) {
+            throw datashape_parse_error(begin, "expected tz= parameter");
+        }
+        if (!parse_token(begin, end, '=')) {
+            throw datashape_parse_error(begin, "expected '='");
+        }
+        string timezone_str;
+        saved_begin = begin;
+        if (!parse_quoted_string(begin, end, timezone_str)) {
+            throw datashape_parse_error(begin, "expected a time zone string");
+        }
+        if (timezone_str == "abstract") {
+            timezone = tz_abstract;
+        } else if (timezone_str == "UTC") {
+            timezone = tz_utc;
+        } else {
+            throw datashape_parse_error(saved_begin, "invalid time zone");
+        }
+        if (!parse_token(begin, end, ']')) {
+            throw datashape_parse_error(begin, "expected closing ']'");
+        }
+         
+        return ndt::make_time(timezone);
+    } else {
+        return ndt::make_time(tz_abstract);
     }
 }
 
@@ -691,6 +731,8 @@ static ndt::type parse_rhs_expression(const char *&begin, const char *end, map<s
             result = parse_complex_parameters(begin, end, symtable);
         } else if (n == "datetime") {
             result = parse_datetime_parameters(begin, end);
+        } else if (n == "time") {
+            result = parse_time_parameters(begin, end);
         } else if (n == "unaligned") {
             result = parse_unaligned_parameters(begin, end, symtable);
         } else if (n == "pointer") {

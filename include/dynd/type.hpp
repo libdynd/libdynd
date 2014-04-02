@@ -116,7 +116,10 @@ public:
     type()
         : m_extended(reinterpret_cast<const base_type *>(uninitialized_type_id))
     {}
-    /** Constructor from an base_type. This claims ownership of the 'extended' reference by default, be careful! */
+    /**
+     * Constructor from an base_type. This claims ownership of the 'extended'
+     * reference if incref is false, be careful!
+     */
     inline explicit type(const base_type *extended, bool incref)
         : m_extended(extended)
     {

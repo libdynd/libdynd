@@ -109,7 +109,7 @@ struct date_ymd {
     }
 
     /**
-     * Converts the ymd into an ISO 8601 string, or "NA" if it
+     * Converts the ymd into an ISO 8601 string, or "" if it
      * is invalid. For years from 0001 to 9999, uses "####-##-##",
      * and for years outside that range uses "-######-##-##" or
      * "+######-##-##".
@@ -117,7 +117,7 @@ struct date_ymd {
     static std::string to_str(int year, int month, int day);
 
     /**
-     * Converts the ymd into an ISO 8601 string, or "NA" if it
+     * Converts the ymd into an ISO 8601 string, or "" if it
      * is invalid. For years from 0001 to 9999, uses "####-##-##",
      * and for years outside that range uses "-######-##-##" or
      * "+######-##-##".
