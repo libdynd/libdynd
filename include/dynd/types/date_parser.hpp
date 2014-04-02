@@ -28,7 +28,7 @@ enum date_parser_ambiguous_t {
  * date, and is midnight, it will match successfully, ignoring any time zone
  * information.
  *
- * \param begin  The start of the buffer to parse.
+ * \param begin  The start of the UTF-8 buffer to parse.
  * \param end  One past the last character of the buffer to parse.
  * \param out_ymd  The date to fill.
  * \param ambig  How to handle the 01/02/2003 ambiguity. Defaults to disallow,
