@@ -417,6 +417,7 @@ source_group("Kernels Source" REGULAR_EXPRESSION "src/dynd/kernels/.*cpp")
 source_group("Kernels Headers" REGULAR_EXPRESSION "include/dynd/kernels/.*hpp")
 source_group("MemBlock Source" REGULAR_EXPRESSION "src/dynd/memblock/.*cpp")
 source_group("MemBlock Headers" REGULAR_EXPRESSION "include/dynd/memblock/.*hpp")
+source_group("PP Headers" REGULAR_EXPRESSION "include/dynd/pp/.*hpp")
 source_group("VM Source" REGULAR_EXPRESSION "src/dynd/vm/.*cpp")
 source_group("VM Headers" REGULAR_EXPRESSION "include/dynd/vm/.*hpp")
 source_group("Internal Headers" REGULAR_EXPRESSION "src/dynd/.*hpp")
@@ -456,13 +457,6 @@ if ((NOT DYND_SHARED_LIB) AND (DYND_INSTALL_LIB))
         )
 endif()
 
-
-execute_process(COMMAND ${CMAKE_COMMAND} -E make_directory ${CMAKE_CURRENT_BINARY_DIR}/include/dynd/pp)
-ADD_EXECUTABLE(gen include/dynd/pp/gen.cpp)
-ADD_CUSTOM_COMMAND(OUTPUT gen.hpp COMMAND gen 8 3 ${CMAKE_CURRENT_BINARY_DIR}/include/dynd/pp)
-ADD_CUSTOM_TARGET(pp ALL DEPENDS gen.hpp)
-include_directories(${CMAKE_CURRENT_BINARY_DIR}/include)
-
 if (DYND_SHARED_LIB)
     if (DYND_CUDA)
         set(CUDA_OPTIONS "-arch=compute_20")
@@ -496,6 +490,16 @@ else()
         PREFIX "${CMAKE_STATIC_LIBRARY_PREFIX}"
         )
 endif()
+
+# Special build targets that generate part of the library
+execute_process(COMMAND ${CMAKE_COMMAND} -E make_directory ${CMAKE_CURRENT_BINARY_DIR}/include/dynd/pp)
+add_executable(ppgen include/dynd/pp/gen.cpp)
+add_custom_command(OUTPUT gen.hpp COMMAND ppgen 8 3 ${CMAKE_CURRENT_BINARY_DIR}/include/dynd/pp)
+add_custom_target(ppgen_run ALL DEPENDS gen.hpp)
+# Make libdynd depend on ppgen to make sure gen.hpp is there when it builds
+add_dependencies(libdynd ppgen)
+
+include_directories(${CMAKE_CURRENT_BINARY_DIR}/include)
 
 if(WIN32)
     set_target_properties(libdynd
