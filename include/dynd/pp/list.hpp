@@ -3,8 +3,8 @@
 // BSD 2-Clause License, see LICENSE.txt
 //
 
-#ifndef _DYND__LIST_HPP_
-#define _DYND__LIST_HPP_
+#ifndef _DYND__PP_LIST_HPP_
+#define _DYND__PP_LIST_HPP_
 
 #include <dynd/pp/comparision.hpp>
 #include <dynd/pp/gen.hpp>
@@ -12,21 +12,35 @@
 #include <dynd/pp/logical.hpp>
 #include <dynd/pp/token.hpp>
 
-#define DYND_PP_IS_EMPTY(A) DYND_PP_IS_NULL(DYND_PP_ID A)
+/**
+ * Expands to A without its enclosing parentheses.
+ */
+#define DYND_PP_FLATTEN(A) DYND_PP_ID A
 
+/**
+ * Expands to 1 if A is a pair of parentheses enclosing whitespace. Otherwise 0.
+ */
+#define DYND_PP_IS_EMPTY(A) DYND_PP_IS_NULL(DYND_PP_FLATTEN(A))
+
+/**
+ * Expands to the first token in A if A is not empty. Otherwise expands to whitespace.
+ */
 #define DYND_PP_FIRST(A) DYND_PP_IF_ELSE(DYND_PP_IS_EMPTY(A))(DYND_PP_FIRST_IF_EMPTY)(DYND_PP_FIRST_IF_NOT_EMPTY)(A)
 #define DYND_PP_FIRST_IF_EMPTY(A)
 #define DYND_PP_FIRST_IF_NOT_EMPTY(A) DYND_PP__FIRST_IF_NOT_EMPTY(DYND_PP_ID A)
 #define DYND_PP__FIRST_IF_NOT_EMPTY(...) DYND_PP_ID(DYND_PP___FIRST_IF_NOT_EMPTY(__VA_ARGS__))
 #define DYND_PP___FIRST_IF_NOT_EMPTY(A0, ...) A0
 
-#define DYND_PP_REST(A) DYND_PP_IF_ELSE(DYND_PP_IS_EMPTY(A))(DYND_PP_REST_IF_EMPTY)(DYND_PP_REST_IF_NOT_EMPTY)(A)
-#define DYND_PP_REST_IF_EMPTY(A) ()
-#define DYND_PP_REST_IF_NOT_EMPTY(A) DYND_PP__REST_IF_NOT_EMPTY(DYND_PP_ID A)
-#define DYND_PP__REST_IF_NOT_EMPTY(...) DYND_PP_ID(DYND_PP___REST_IF_NOT_EMPTY(__VA_ARGS__))
-#define DYND_PP___REST_IF_NOT_EMPTY(A0, ...) (__VA_ARGS__)
+/**
+ * Expands to A without its first token if A is not empty. Otherwise expands to ().
+ */
+#define DYND_PP_POP_FIRST(A) DYND_PP_IF_ELSE(DYND_PP_IS_EMPTY(A))(DYND_PP_POP_FIRST_IF_EMPTY)(DYND_PP_POP_FIRST_IF_NOT_EMPTY)(A)
+#define DYND_PP_POP_FIRST_IF_EMPTY(A) ()
+#define DYND_PP_POP_FIRST_IF_NOT_EMPTY(A) DYND_PP__POP_FIRST_IF_NOT_EMPTY(DYND_PP_ID A)
+#define DYND_PP__POP_FIRST_IF_NOT_EMPTY(...) DYND_PP_ID(DYND_PP___POP_FIRST_IF_NOT_EMPTY(__VA_ARGS__))
+#define DYND_PP___POP_FIRST_IF_NOT_EMPTY(A0, ...) (__VA_ARGS__)
 
-#define DYND_PP_POP_FIRST DYND_PP_REST
+#define DYND_PP_REST DYND_PP_POP_FIRST
 
 #define DYND_PP_MERGE(A, B) DYND_PP_IF_ELSE(DYND_PP_LEN(A))(DYND_PP_IF_ELSE(DYND_PP_LEN(B))((DYND_PP_ID A, \
     DYND_PP_ID B))(A))(DYND_PP_IF_ELSE(DYND_PP_LEN(B))(B)(()))
@@ -59,9 +73,6 @@
 //#define DYND_PP_RANGE_1(STOP) DYND_PP_RANGE_2(0, STOP)
 //#define DYND_PP_RANGE_2(START, STOP) DYND_PP_RANGE_3(START, STOP, 1)
 //#define DYND_PP_RANGE_3(START, STOP, STEP) DYND_PP_SLICE(START, STOP, STEP, DYND_PP_INTS)
-
-#define DYND_PP_ZEROS(COUNT) DYND_PP_PASTE(DYND_PP_ZEROS_, COUNT)
-#define DYND_PP_ONES(COUNT) DYND_PP_PASTE(DYND_PP_ONES_, COUNT)
 
 #define DYND_PP_ALL(A) DYND_PP_IF_ELSE(DYND_PP_EQ(DYND_PP_LEN(A), 1))( \
     DYND_PP_BOOL(DYND_PP_FIRST(A)))(DYND_PP_REDUCE(DYND_PP_AND, A))

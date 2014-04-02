@@ -3,8 +3,8 @@
 // BSD 2-Clause License, see LICENSE.txt
 //
 
-#ifndef _DYND__TOKEN_HPP_
-#define _DYND__TOKEN_HPP_
+#ifndef _DYND__PP_TOKEN_HPP_
+#define _DYND__PP_TOKEN_HPP_
 
 #include <dynd/pp/gen.hpp>
 
@@ -21,6 +21,9 @@
 
 #define DYND_PP_ID(...) __VA_ARGS__
 
+/*
+ * Expands to 1 if __VA_ARGS__ is whitespace. Otherwise 0.
+ */
 #define DYND_PP_IS_NULL(...) DYND_PP__IS_NULL(DYND_PP_HAS_COMMA(__VA_ARGS__), \
     DYND_PP_HAS_COMMA(DYND_PP_TO_COMMA __VA_ARGS__), DYND_PP_HAS_COMMA(__VA_ARGS__ ()), \
     DYND_PP_HAS_COMMA(DYND_PP_TO_COMMA __VA_ARGS__ ()))

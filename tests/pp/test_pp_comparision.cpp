@@ -9,7 +9,7 @@
 
 using namespace std;
 
-TEST(PPComparision, Lt) {
+TEST(PPComparision, LessThan) {
     EXPECT_FALSE(DYND_PP_LT(0, 0));
 
     EXPECT_TRUE(DYND_PP_LT(0, 1));
@@ -34,7 +34,7 @@ TEST(PPComparision, Lt) {
     EXPECT_FALSE(DYND_PP_LT(DYND_PP_LEN_MAX, DYND_PP_LEN_MAX));
 }
 
-TEST(PPComparision, Le) {
+TEST(PPComparision, LessEqual) {
     EXPECT_TRUE(DYND_PP_LE(0, 0));
 
     EXPECT_TRUE(DYND_PP_LE(0, 1));
@@ -59,7 +59,7 @@ TEST(PPComparision, Le) {
     EXPECT_TRUE(DYND_PP_LE(DYND_PP_LEN_MAX, DYND_PP_LEN_MAX));
 }
 
-TEST(PPComparision, Eq) {
+TEST(PPComparision, Equal) {
     EXPECT_TRUE(DYND_PP_EQ(0, 0));
 
     EXPECT_FALSE(DYND_PP_EQ(0, 1));
@@ -195,7 +195,7 @@ TEST(PPComparision, Eq) {
     EXPECT_FALSE(DYND_PP_EQ(abc, abc));
 }
 
-TEST(PPComparision, Ne) {
+TEST(PPComparision, NotEqual) {
     EXPECT_FALSE(DYND_PP_NE(0, 0));
 
     EXPECT_TRUE(DYND_PP_NE(0, 1));
@@ -331,7 +331,7 @@ TEST(PPComparision, Ne) {
     EXPECT_TRUE(DYND_PP_NE(abc, abc));
 }
 
-TEST(PPComparision, Ge) {
+TEST(PPComparision, GreaterEqual) {
     EXPECT_TRUE(DYND_PP_GE(0, 0));
 
     EXPECT_FALSE(DYND_PP_GE(0, 1));
@@ -356,7 +356,7 @@ TEST(PPComparision, Ge) {
     EXPECT_TRUE(DYND_PP_GE(DYND_PP_LEN_MAX, DYND_PP_LEN_MAX));
 }
 
-TEST(PPComparision, Gt) {
+TEST(PPComparision, GreaterThan) {
     EXPECT_FALSE(DYND_PP_GT(0, 0));
 
     EXPECT_FALSE(DYND_PP_GT(0, 1));

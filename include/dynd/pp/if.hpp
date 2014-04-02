@@ -3,8 +3,8 @@
 // BSD 2-Clause License, see LICENSE.txt
 //
 
-#ifndef _DYND__IF_HPP_
-#define _DYND__IF_HPP_
+#ifndef _DYND__PP_IF_HPP_
+#define _DYND__PP_IF_HPP_
 
 #include <dynd/pp/logical.hpp>
 #include <dynd/pp/token.hpp>

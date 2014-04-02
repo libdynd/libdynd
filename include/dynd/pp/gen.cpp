@@ -5,10 +5,8 @@
 
 #include <cstdlib>
 #include <fstream>
-#include <sstream>
 #include <stdexcept>
 #include <string>
-#include <map>
 
 using namespace std;
 
@@ -25,30 +23,6 @@ inline string argsep(int i, int args_per_line = 8) {
     return argsep((i + 1) % args_per_line == 0);
 }
 
-string args(const string& prefix, int start, int stop) {
-    typedef pair<string, pair<int, int> > key_type;
-    typedef string value_type;
-
-    static map<key_type, value_type> lookup;
-
-    key_type key(prefix, make_pair(start, stop));
-    map<key_type, value_type>::iterator it = lookup.find(key);
-    if (it != lookup.end()) {
-        return it->second;
-    } else {
-        ostringstream oss;
-        for (int i = start; i < stop - 1; i++) {
-            oss << prefix << i << argsep(i);
-        }
-        oss << prefix << stop - 1;
-        return lookup[key] = oss.str();
-    }
-}
-
-string args(const string& prefix, int stop) {
-    return args(prefix, 0, stop);
-}
-
 int main(int argc, char **argv) {
     const int pp_len_max = atoi(argv[1]);
     const int pp__len_max = 2 * pp_len_max;
@@ -58,8 +32,8 @@ int main(int argc, char **argv) {
 
     const int pp_int_max = pp_len_max - 1;
 
-    const int pp_depth_max = atoi(argv[2]);
-    if (pp_depth_max < 3) {
+    const int pp_dep_max = atoi(argv[2]);
+    if (pp_dep_max < 3) {
         throw runtime_error("the maximum macro depth cannot be less than 3");
     }
 
@@ -79,13 +53,17 @@ int main(int argc, char **argv) {
 
     fout << endl;
 
-    fout << "#ifndef _DYND__GEN_HPP_" << endl;
-    fout << "#define _DYND__GEN_HPP_" << endl;
+    fout << "#ifndef _DYND__PP_GEN_HPP_" << endl;
+    fout << "#define _DYND__PP_GEN_HPP_" << endl;
 
     fout << endl;
 
-    fout << "#define DYND_PP_INT_MAX " << pp_int_max << endl;
-    fout << "#define DYND_PP_LEN_MAX " << pp_len_max << endl;
+    fout << "#define DYND_PP_INT_MAX " << pp_int_max << endl; // delete this
+
+    fout << "#define DYND_PP_LEN_MAX " << pp_len_max;
+    fout << " // The maximum list length that is fully supported" << endl;
+    fout << "#define DYND_PP_DEP_MAX " << pp_dep_max;
+    fout << " // The maximum macro depth that is fully supported" << endl;
 
     fout << endl;
 
@@ -97,33 +75,21 @@ int main(int argc, char **argv) {
 
     fout << endl;
 
-    fout << "#define DYND_PP_ZEROS_0 ()" << endl;
-    for (int i = 1; i <= pp_len_max; i++) {
-        fout << "#define DYND_PP_ZEROS_" << i << " (";
-        for (int j = 0; j < i - 1; j++) {
-            fout << 0 << argsep(j);
-        }
-        fout << 0 << ")" << endl;
-    }
-
-    fout << endl;
-
-    fout << "#define DYND_PP_ONES_0 ()" << endl;
-    for (int i = 1; i <= pp_len_max; i++) {
-        fout << "#define DYND_PP_ONES_" << i << " (";
-        for (int j = 0; j < i - 1; j++) {
-            fout << 1 << argsep(j);
-        }
-        fout << 1 << ")" << endl;
-    }
-
-    fout << endl;
-
+    fout << "/**" << endl;
+    fout << " * Expands to whatever is at 2 * DYND_PP_LEN_MAX in __VA_ARGS__." << endl;
+    fout << " */" << endl;
     fout << "#define DYND_PP_GET_ARG_" << pp__len_max << "(...) DYND_PP_ID(DYND_PP__GET_ARG_" << pp__len_max << "(__VA_ARGS__))" << endl;
-    fout << "#define DYND_PP__GET_ARG_" << pp__len_max << "(" << args("A", pp__len_max + 1) << ", ...) A" << pp__len_max << endl;
+    fout << "#define DYND_PP__GET_ARG_" << pp__len_max << "(";
+    for (int i = 0; i < pp__len_max + 1; i++) {
+        fout << "A" << i << argsep(i);
+    }
+    fout << "...) A" << pp__len_max << endl;
 
     fout << endl;
 
+    fout << "/**" << endl;
+    fout << " * Expands to 1 if __VA_ARGS__ has a comma. Otherwise 0." << endl;
+    fout << " */" << endl;
     fout << "#define DYND_PP_HAS_COMMA(...) DYND_PP_ID(DYND_PP__HAS_COMMA(__VA_ARGS__))" << endl;
     fout << "#define DYND_PP__HAS_COMMA(...) DYND_PP_GET_ARG_" << pp__len_max << "(__VA_ARGS__" << argsep(true);
     for (int i = 0; i < pp__len_max - 1; i++) {
@@ -133,6 +99,9 @@ int main(int argc, char **argv) {
 
     fout << endl;
 
+    fout << "/**" << endl;
+    fout << " * Expands to the length of A. A has to be a list with at most 2 * DYND_PP_LEN_MAX tokens." << endl;
+    fout << " */" << endl;
     fout << "#define DYND_PP_LEN(A) DYND_PP_IF_ELSE(DYND_PP_IS_EMPTY(A))(DYND_PP_LEN_IF_EMPTY)(DYND_PP_LEN_IF_NOT_EMPTY)(A)" << endl;
     fout << "#define DYND_PP_LEN_IF_EMPTY(A) 0" << endl;
     fout << "#define DYND_PP_LEN_IF_NOT_EMPTY(A) DYND_PP_GET_ARG_" << pp__len_max << "(DYND_PP_ID A" << argsep(true);
@@ -143,6 +112,9 @@ int main(int argc, char **argv) {
 
     fout << endl;
 
+    fout << "/**" << endl;
+    fout << " * Increments A. A has to be an integer between 0 and DYND_PP_LEN_MAX - 1 inclusively." << endl;
+    fout << " */" << endl;
     fout << "#define DYND_PP_INC(A) DYND_PP_PASTE(DYND_PP_INC_, A)" << endl;
     for (int i = 0; i < pp_len_max; i++) {
         fout << "#define DYND_PP_INC_" << i << " " << i + 1 << endl;
@@ -150,6 +122,9 @@ int main(int argc, char **argv) {
 
     fout << endl;
 
+    fout << "/**" << endl;
+    fout << " * Decrements A. A has to be an integer between 1 and DYND_PP_LEN_MAX inclusively." << endl;
+    fout << " */" << endl;
     fout << "#define DYND_PP_DEC(A) DYND_PP_PASTE(DYND_PP_DEC_, A)" << endl;
     for (int i = 1; i <= pp_len_max; i++) {
         fout << "#define DYND_PP_DEC_" << i << " " << i - 1 << endl;
@@ -208,6 +183,36 @@ int main(int argc, char **argv) {
 
     fout << endl;
 
+    fout << "/**" << endl;
+    fout << " * Expands to a list filled with 0. N has to be an integer between 0 and DYND_PP_LEN_MAX inclusively." << endl;
+    fout << " */" << endl;
+    fout << "#define DYND_PP_ZEROS(N) DYND_PP_PASTE(DYND_PP_ZEROS_, N)" << endl;
+    fout << "#define DYND_PP_ZEROS_0 ()" << endl;
+    for (int i = 1; i <= pp_len_max; i++) {
+        fout << "#define DYND_PP_ZEROS_" << i << " (";
+        for (int j = 0; j < i - 1; j++) {
+            fout << 0 << argsep(j);
+        }
+        fout << 0 << ")" << endl;
+    }
+
+    fout << endl;
+
+    fout << "/**" << endl;
+    fout << " * Expands to a list filled with 1. N has to be an integer between 0 and DYND_PP_LEN_MAX inclusively." << endl;
+    fout << " */" << endl;
+    fout << "#define DYND_PP_ONES(N) DYND_PP_PASTE(DYND_PP_ONES_, N)" << endl;
+    fout << "#define DYND_PP_ONES_0 ()" << endl;
+    for (int i = 1; i <= pp_len_max; i++) {
+        fout << "#define DYND_PP_ONES_" << i << " (";
+        for (int j = 0; j < i - 1; j++) {
+            fout << 1 << argsep(j);
+        }
+        fout << 1 << ")" << endl;
+    }
+
+    fout << endl;
+
     fout << "#define DYND_PP_REPEAT(TOK, COUNT) DYND_PP_PASTE(DYND_PP_REPEAT_, COUNT)(TOK)" << endl;
     fout << "#define DYND_PP_REPEAT_0(TOK)" << endl;
     fout << "#define DYND_PP_REPEAT_1(TOK) TOK" << endl;
@@ -219,7 +224,7 @@ int main(int argc, char **argv) {
 
     fout << "#define DYND_PP_MAP DYND_PP_NESTED_MAP(0)" << endl;
     fout << "#define DYND_PP_NESTED_MAP(DEPTH) DYND_PP_PASTE(DYND_PP_NESTED_MAP_, DEPTH)" << endl;
-    for (int depth = 0; depth <= pp_depth_max; depth++) {
+    for (int depth = 0; depth <= pp_dep_max; depth++) {
         fout << "#define DYND_PP_NESTED_MAP_" << depth << "(MAC, SEP, A) ";
         fout << "DYND_PP_PASTE(DYND_PP_NESTED_MAP_" << depth << "_ , DYND_PP_LEN(A))(MAC, SEP, A)" << endl;
         fout << "#define DYND_PP_NESTED_MAP_" << depth << "_" << "0(MAC, SEP, A)" << endl;
@@ -235,7 +240,7 @@ int main(int argc, char **argv) {
 
     fout << "#define DYND_PP_REDUCE DYND_PP_NESTED_REDUCE(0)" << endl;
     fout << "#define DYND_PP_NESTED_REDUCE(DEPTH) DYND_PP_PASTE(DYND_PP_NESTED_REDUCE_, DEPTH)" << endl;
-    for (int depth = 0; depth <= pp_depth_max; depth++) {
+    for (int depth = 0; depth <= pp_dep_max; depth++) {
         fout << "#define DYND_PP_NESTED_REDUCE_" << depth << "(MAC, A) DYND_PP_PASTE(DYND_PP_NESTED_REDUCE_" << depth << "_, DYND_PP_LEN(A))(MAC, A)" << endl;
         fout << "#define DYND_PP_NESTED_REDUCE_" << depth << "_2(MAC, A) MAC(DYND_PP_FIRST(A), DYND_PP_FIRST(DYND_PP_POP_FIRST(A)))" << endl;
         for (int len = 3; len <= pp_len_max; len++) {
