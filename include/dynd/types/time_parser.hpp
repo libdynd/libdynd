@@ -27,13 +27,13 @@ bool string_to_time(const char *begin, const char *end, time_hmst &out_hmst);
  * Parses a time
  *
  * \param begin  The start of a range of UTF-8 characters. This is modified
- *               to point immediately after the parsed date if true is returned.
+ *               to point immediately after the parsed time if true is returned.
  * \param end  The end of a range of UTF-8 characters.
  * \param out_hmst  The time to fill.
  *
- * \returns  True if a date was parsed successfully, false otherwise.
+ * \returns  True if a time was parsed successfully, false otherwise.
  */
-bool parse_date(const char *&begin, const char *end, time_hmst &out_hmst);
+bool parse_time(const char *&begin, const char *end, time_hmst &out_hmst);
 
 } // namespace dynd
 

@@ -13,6 +13,52 @@
 namespace dynd { namespace parse {
 
 /**
+ * A helper class to save/restore the state
+ * of 'begin' during parsing.
+ *
+ * Example:
+ *    bool parse_ABCs(const char *&begin, const char *end)
+ *    {
+ *        saved_begin_state sbs(begin);
+ *        for (int c = 'A'; c <= 'Z' && begin < end; ++c) {
+ *            if (*begin++ != c) {
+ *                // the saved_begin_state will restore begin
+ *                return sbs.fail();
+ *            }
+ *        }
+ *        return sbs.succeed();
+ *    }
+ */
+class saved_begin_state {
+    const char *&m_begin;
+    const char *m_saved_begin;
+    bool m_succeeded;
+
+    // Non-copyable
+    saved_begin_state(const saved_begin_state&);
+    saved_begin_state& operator=(const saved_begin_state&);
+public:
+    explicit saved_begin_state(const char *&begin)
+        : m_begin(begin), m_saved_begin(begin), m_succeeded(false) {}
+
+    ~saved_begin_state() {
+        if (!m_succeeded) {
+            // Restore begin if not success
+            m_begin = m_saved_begin;
+        }
+    }
+
+    inline bool succeed() {
+        m_succeeded = true;
+        return true;
+    }
+
+    inline bool fail() {
+        return false;
+    }
+};
+
+/**
  * Modifies `begin` to skip past any whitespace.
  *
  * Example:

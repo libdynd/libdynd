@@ -78,30 +78,25 @@ static inline bool parse_str_weekday(const char *&begin, const char *end, int &o
 static bool parse_md(const char *&begin, const char *end, char sep, int &out_month,
               int &out_day)
 {
-    const char *saved_begin = begin;
+    saved_begin_state sbs(begin);
     // sMM
     if (!parse_token_no_ws(begin, end, sep)) {
-        begin = saved_begin;
-        return false;
+        return sbs.fail();
     }
     if (!parse_2digit_int_no_ws(begin, end, out_month)) {
-        begin = saved_begin;
-        return false;
+        return sbs.fail();
     }
     // sDD
     if (!parse_token_no_ws(begin, end, sep)) {
-        begin = saved_begin;
-        return false;
+        return sbs.fail();
     }
     if (!parse_2digit_int_no_ws(begin, end, out_day)) {
-        begin = saved_begin;
-        return false;
+        return sbs.fail();
     } else if (begin < end && isdigit(begin[0])) {
         // Don't match if the next character is another digit
-        begin = saved_begin;
-        return false;
+        return sbs.fail();
     }
-    return true;
+    return sbs.succeed();
 }
 
 // sMMMsDD for separator character 's' and string-based month
@@ -109,30 +104,25 @@ static bool parse_md(const char *&begin, const char *end, char sep, int &out_mon
 static bool parse_md_str_month(const char *&begin, const char *end, char sep, int &out_month,
               int &out_day)
 {
-    const char *saved_begin = begin;
+    saved_begin_state sbs(begin);
     // sMMM
     if (!parse_token_no_ws(begin, end, sep)) {
-        begin = saved_begin;
-        return false;
+        return sbs.fail();
     }
     if (!parse_str_month(begin, end, out_month)) {
-        begin = saved_begin;
-        return false;
+        return sbs.fail();
     }
     // sDD
     if (!parse_token_no_ws(begin, end, sep)) {
-        begin = saved_begin;
-        return false;
+        return sbs.fail();
     }
     if (!parse_2digit_int_no_ws(begin, end, out_day)) {
-        begin = saved_begin;
-        return false;
+        return sbs.fail();
     } else if (begin < end && isdigit(begin[0])) {
         // Don't match if the next character is another digit
-        begin = saved_begin;
-        return false;
+        return sbs.fail();
     }
-    return true;
+    return sbs.succeed();
 }
 
 // YYYYsMMsDD, YYYYsMMMsDD for separator character 's', where MM is
@@ -140,123 +130,106 @@ static bool parse_md_str_month(const char *&begin, const char *end, char sep, in
 static bool parse_ymd_sep_date(const char *&begin, const char *end, char sep,
                                date_ymd &out_ymd)
 {
-    const char *saved_begin = begin;
+    saved_begin_state sbs(begin);
     // YYYY
     int year;
     if (!parse_4digit_int_no_ws(begin, end, year)) {
-        begin = saved_begin;
-        return false;
+        return sbs.fail();
     }
     // sMMsDD
     int month, day;
     if (!parse_md(begin, end, sep, month, day)) {
         // sMMMsDD with a string month
         if (!parse_md_str_month(begin, end, sep, month, day)) {
-            begin = saved_begin;
-            return false;
+            return sbs.fail();
         }
     }
     // Validate and return the date
     if (!date_ymd::is_valid(year, month, day)) {
-        begin = saved_begin;
-        return false;
+        return sbs.fail();
     }
     out_ymd.year = year;
     out_ymd.month = month;
     out_ymd.day = day;
-    return true;
+    return sbs.succeed();
 }
 
 // MMsDDsYYYY for separator character 's'
 static bool parse_mdy_ambig_sep_date(const char *&begin, const char *end, char sep,
                                date_ymd &out_ymd)
 {
-    const char *saved_begin = begin;
+    saved_begin_state sbs(begin);
     // MM
     int month;
     if (!parse_2digit_int_no_ws(begin, end, month)) {
-        begin = saved_begin;
-        return false;
+        return sbs.fail();
     }
     // sDD
     if (!parse_token_no_ws(begin, end, sep)) {
-        begin = saved_begin;
-        return false;
+        return sbs.fail();
     }
     int day;
     if (!parse_2digit_int_no_ws(begin, end, day)) {
-        begin = saved_begin;
-        return false;
+        return sbs.fail();
     }
     // sYYYY
     if (!parse_token_no_ws(begin, end, sep)) {
-        begin = saved_begin;
-        return false;
+        return sbs.fail();
     }
     int year;
     if (!parse_4digit_int_no_ws(begin, end, year)) {
-        begin = saved_begin;
-        return false;
+        return sbs.fail();
     } else if (begin < end && isdigit(begin[0])) {
         // Don't match if the next character is another digit
-        begin = saved_begin;
-        return false;
+        return sbs.fail();
     }
     // Validate and return the date
     if (!date_ymd::is_valid(year, month, day)) {
-        begin = saved_begin;
-        return false;
+        return sbs.fail();
     }
     out_ymd.year = year;
     out_ymd.month = month;
     out_ymd.day = day;
-    return true;
+    return sbs.succeed();
 }
 
 // DDsMMsYYYY for separator character 's'
 static bool parse_dmy_ambig_sep_date(const char *&begin, const char *end, char sep,
                                date_ymd &out_ymd)
 {
-    const char *saved_begin = begin;
+    saved_begin_state sbs(begin);
     // DD
     int day;
     if (!parse_2digit_int_no_ws(begin, end, day)) {
-        begin = saved_begin;
-        return false;
+        return sbs.fail();
     }
     // sMM
     if (!parse_token_no_ws(begin, end, sep)) {
-        begin = saved_begin;
-        return false;
+        return sbs.fail();
     }
     int month;
     if (!parse_2digit_int_no_ws(begin, end, month)) {
-        begin = saved_begin;
-        return false;
+        return sbs.fail();
     }
     // sYYYY
     if (!parse_token_no_ws(begin, end, sep)) {
-        begin = saved_begin;
-        return false;
+        return sbs.fail();
     }
     int year;
     if (!parse_4digit_int_no_ws(begin, end, year)) {
-        begin = saved_begin;
-        return false;
+        return sbs.fail();
     } else if (begin < end && isdigit(begin[0])) {
         // Don't match if the next character is another digit
-        begin = saved_begin;
-        return false;
+        return sbs.fail();
     }
     // Validate and return the date
     if (!date_ymd::is_valid(year, month, day)) {
-        begin = saved_begin;
-        return false;
+        return sbs.fail();
     }
     out_ymd.year = year;
     out_ymd.month = month;
     out_ymd.day = day;
-    return true;
+    return sbs.succeed();
 }
 
 // DDsMMMsYYYY for separator character 's', where MM is
@@ -265,46 +238,39 @@ static bool parse_dmy_ambig_sep_date(const char *&begin, const char *end, char s
 static bool parse_dmy_str_month_sep_date(const char *&begin, const char *end,
                                          char sep, date_ymd &out_ymd)
 {
-    const char *saved_begin = begin;
+    saved_begin_state sbs(begin);
     // DD
     int day;
     if (!parse_2digit_int_no_ws(begin, end, day)) {
-        begin = saved_begin;
-        return false;
+        return sbs.fail();
     }
     // sMMM string month
     if (!parse_token_no_ws(begin, end, sep)) {
-        begin = saved_begin;
-        return false;
+        return sbs.fail();
     }
     int month;
     if (!parse_str_month(begin, end, month)) {
-        begin = saved_begin;
-        return false;
+        return sbs.fail();
     }
     // sYYYY
     if (!parse_token_no_ws(begin, end, sep)) {
-        begin = saved_begin;
-        return false;
+        return sbs.fail();
     }
     int year;
     if (!parse_4digit_int_no_ws(begin, end, year)) {
-        begin = saved_begin;
-        return false;
+        return sbs.fail();
     } else if (begin < end && isdigit(begin[0])) {
         // Don't match if the next character is another digit
-        begin = saved_begin;
-        return false;
+        return sbs.fail();
     }
     // Validate and return the date
     if (!date_ymd::is_valid(year, month, day)) {
-        begin = saved_begin;
-        return false;
+        return sbs.fail();
     }
     out_ymd.year = year;
     out_ymd.month = month;
     out_ymd.day = day;
-    return true;
+    return sbs.succeed();
 }
 
 // YYYY-MM-DD, +YYYYYY-MM-DD, or -YYYYYY-MM-DD
@@ -312,83 +278,71 @@ static bool parse_dmy_str_month_sep_date(const char *&begin, const char *end,
 static bool parse_iso8601_dashes_date(const char *&begin, const char *end,
                                         date_ymd &out_ymd)
 {
-    const char *saved_begin = begin;
+    saved_begin_state sbs(begin);
     // YYYY, +YYYYYY, or -YYYYYY
     int year;
     if (parse_token_no_ws(begin, end, '-')) {
         if (!parse_6digit_int_no_ws(begin, end, year)) {
-            begin = saved_begin;
-            return false;
+            return sbs.fail();
         }
         year = -year;
     } else if (parse_token_no_ws(begin, end, '+')) {
         if (!parse_6digit_int_no_ws(begin, end, year)) {
-            begin = saved_begin;
-            return false;
+            return sbs.fail();
         }
     } else {
         if (!parse_4digit_int_no_ws(begin, end, year)) {
-            begin = saved_begin;
-            return false;
+            return sbs.fail();
         }
     }
     // -MM-DD
     int month, day;
     if (!parse_md(begin, end, '-', month, day)) {
-        begin = saved_begin;
-        return false;
+        return sbs.fail();
     }
     // Validate and return the date
     if (!date_ymd::is_valid(year, month, day)) {
-        begin = saved_begin;
-        return false;
+        return sbs.fail();
     }
     out_ymd.year = year;
     out_ymd.month = month;
     out_ymd.day = day;
-    return true;
+    return sbs.succeed();
 }
 
 static bool parse_mdy_long_format_date(const char *&begin, const char *end, date_ymd& out_ymd)
 {
-    const char *saved_begin = begin;
+    saved_begin_state sbs(begin);
     int month;
     if (!parse_str_month(begin, end, month)) {
-        begin = saved_begin;
-        return false;
+        return sbs.fail();
     }
     if (!skip_required_whitespace(begin, end)) {
-        begin = saved_begin;
-        return false;
+        return sbs.fail();
     }
     int day;
     if (!parse_1or2digit_int_no_ws(begin, end, day)) {
-        begin = saved_begin;
-        return false;
+        return sbs.fail();
     }
     if (!parse_token(begin, end, ',')) {
-        begin = saved_begin;
-        return false;
+        return sbs.fail();
     }
     skip_whitespace(begin, end);
     int year;
     if (!parse_4digit_int_no_ws(begin, end, year)) {
-        begin = saved_begin;
-        return false;
+        return sbs.fail();
     } else if (begin < end && isdigit(begin[0])) {
         // Don't match if the next character is another digit
-        begin = saved_begin;
-        return false;
+        return sbs.fail();
     }
     // Validate and return the date
     if (!date_ymd::is_valid(year, month, day)) {
-        begin = saved_begin;
-        return false;
+        return sbs.fail();
     }
     out_ymd.year = year;
     out_ymd.month = month;
     out_ymd.day = day;
-    return true;
+    return sbs.succeed();
 }
 
 // Skips Z, +####, -####, +##, -##, +##:##, -##:##

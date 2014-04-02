@@ -6,6 +6,7 @@
 #include <time.h>
 
 #include <dynd/types/time_util.hpp>
+#include <dynd/types/time_parser.hpp>
 #include <dynd/types/date_util.hpp>
 #include <dynd/types/cstruct_type.hpp>
 
@@ -41,7 +42,7 @@ std::string time_hmst::to_str(int hour, int minute, int second, int tick)
             s[7] = '0' + (second % 10);
             if (tick != 0) {
                 s[8] = '.';
-                int i = 9, divisor = 10000000;
+                int i = 9, divisor = 1000000;
                 while (tick != 0) {
                     s[i] = '0' + (tick / divisor);
                     tick = tick % divisor;
@@ -75,7 +76,13 @@ void time_hmst::set_from_ticks(int64_t ticks)
 
 void time_hmst::set_from_str(const std::string& s)
 {
-    throw runtime_error("TODO: time_hmst::set_from_str");
+    if (!string_to_time(s.data(), s.data() + s.size(), *this)) {
+        stringstream ss;
+        ss << "Unable to parse ";
+        print_escaped_utf8_string(ss, s);
+        ss << " as a time";
+        throw invalid_argument(ss.str());
+    }
 }
 
 time_hmst time_hmst::get_current_local_time()
