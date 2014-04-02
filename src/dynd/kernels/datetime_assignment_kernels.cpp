@@ -12,28 +12,6 @@
 using namespace std;
 using namespace dynd;
 
-static datetime::datetime_unit_t dynd_unit_to_datetime_unit(datetime_unit_t unit) {
-    switch (unit) {
-        case datetime_unit_hour:
-            return datetime::datetime_unit_hour;
-        case datetime_unit_minute:
-            return datetime::datetime_unit_minute;
-        case datetime_unit_second:
-            return datetime::datetime_unit_second;
-        case datetime_unit_msecond:
-            return datetime::datetime_unit_ms;
-        case datetime_unit_usecond:
-            return datetime::datetime_unit_us;
-        case datetime_unit_nsecond:
-            return datetime::datetime_unit_ns;
-    }
-    stringstream ss;
-    ss << "invalid datetime unit " << (int32_t)unit << " provided to ";
-    ss << "datetime dynd type constructor";
-    throw runtime_error(ss.str());
-}
-
-
 /////////////////////////////////////////
 // string to datetime assignment
 
@@ -46,14 +24,13 @@ namespace {
         const base_string_type *src_string_dt;
         const char *src_metadata;
         assign_error_mode errmode;
-        datetime::datetime_unit_t unit;
         datetime::datetime_conversion_rule_t casting;
 
         static void single(char *dst, const char *src, ckernel_prefix *extra)
         {
             extra_type *e = reinterpret_cast<extra_type *>(extra);
             const string& s = e->src_string_dt->get_utf8_string(e->src_metadata, src, e->errmode);
-            *reinterpret_cast<int64_t *>(dst) = datetime::parse_iso_8601_datetime(s, e->unit,
+            *reinterpret_cast<int64_t *>(dst) = datetime::parse_iso_8601_datetime(s, datetime::datetime_unit_tick,
                                     e->dst_datetime_dt->get_timezone() == tz_abstract,
                                     e->casting);
         }
@@ -91,7 +68,6 @@ size_t dynd::make_string_to_datetime_assignment_kernel(
     e->src_string_dt = static_cast<const base_string_type *>(ndt::type(src_string_dt).release());
     e->src_metadata = src_metadata;
     e->errmode = errmode;
-    e->unit = dynd_unit_to_datetime_unit(e->dst_datetime_dt->get_unit());
     switch (errmode) {
         case assign_error_fractional:
         case assign_error_inexact:
@@ -115,14 +91,13 @@ namespace {
         const datetime_type *src_datetime_dt;
         const char *dst_metadata;
         assign_error_mode errmode;
-        datetime::datetime_unit_t unit;
 
         static void single(char *dst, const char *src, ckernel_prefix *extra)
         {
             extra_type *e = reinterpret_cast<extra_type *>(extra);
             int64_t datetime = *reinterpret_cast<const int64_t *>(src);
             e->dst_string_dt->set_utf8_string(e->dst_metadata, dst, e->errmode,
-                            datetime::make_iso_8601_datetime(datetime, e->unit,
+                            datetime::make_iso_8601_datetime(datetime, datetime::datetime_unit_tick,
                                             e->src_datetime_dt->get_timezone() == tz_abstract));
         }
 
@@ -158,7 +133,6 @@ size_t dynd::make_datetime_to_string_assignment_kernel(
     // The kernel data owns a reference to this type
     e->src_datetime_dt = static_cast<const datetime_type *>(ndt::type(src_datetime_dt).release());
     e->dst_metadata = dst_metadata;
-    e->unit = dynd_unit_to_datetime_unit(e->src_datetime_dt->get_unit());
     e->errmode = errmode;
     return offset_out + sizeof(datetime_to_string_kernel_extra);
 }

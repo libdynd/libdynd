@@ -149,8 +149,11 @@ set(libdynd_SRC
     src/dynd/types/cuda_device_type.cpp
     src/dynd/types/datashape_formatter.cpp
     src/dynd/types/datashape_parser.cpp
+    src/dynd/types/date_parser.cpp
     src/dynd/types/date_type.cpp
+    src/dynd/types/date_util.cpp
     src/dynd/types/datetime_type.cpp
+    src/dynd/types/datetime_util.cpp
     src/dynd/types/type_type.cpp
     src/dynd/types/dynd_complex.cpp
     src/dynd/types/dynd_float16.cpp
@@ -195,8 +198,11 @@ set(libdynd_SRC
     include/dynd/types/cuda_device_type.hpp
     include/dynd/types/datashape_formatter.hpp
     include/dynd/types/datashape_parser.hpp
+    include/dynd/types/date_parser.hpp
     include/dynd/types/date_type.hpp
+    include/dynd/types/date_util.hpp
     include/dynd/types/datetime_type.hpp
+    include/dynd/types/datetime_util.hpp
     include/dynd/types/type_type.hpp
     include/dynd/types/dynd_complex.hpp
     include/dynd/types/dynd_float16.hpp

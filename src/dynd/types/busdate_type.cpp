@@ -52,8 +52,9 @@ void dynd::busdate_type::print_holidays(std::ostream& /*o*/) const
 
 void dynd::busdate_type::print_data(std::ostream& o, const char *DYND_UNUSED(metadata), const char *data) const
 {
-    int32_t value = *reinterpret_cast<const int32_t *>(data);
-    o << datetime::make_iso_8601_date(value, datetime::datetime_unit_day);
+    date_ymd ymd;
+    ymd.set_from_days(*reinterpret_cast<const int32_t *>(data));
+    o << ymd.to_str();
 }
 
 void dynd::busdate_type::print_type(std::ostream& o) const

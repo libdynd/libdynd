@@ -28,8 +28,14 @@ namespace {
         {
             extra_type *e = reinterpret_cast<extra_type *>(extra);
             const string& s = e->src_string_dt->get_utf8_string(e->src_metadata, src, e->errmode);
-            *reinterpret_cast<int32_t *>(dst) = datetime::parse_iso_8601_date(s,
-                                    datetime::datetime_unit_day, e->casting);
+            date_ymd ymd;
+            // TODO: properly distinguish "date" and "option[date]" with respect to NA support
+            if (s == "NA") {
+                ymd.set_to_na();
+            } else {
+                ymd.set_from_str(s);
+            }
+            *reinterpret_cast<int32_t *>(dst) = ymd.to_days();
         }
 
         static void destruct(ckernel_prefix *extra)
@@ -87,9 +93,9 @@ namespace {
         static void single(char *dst, const char *src, ckernel_prefix *extra)
         {
             extra_type *e = reinterpret_cast<extra_type *>(extra);
-            int32_t date = *reinterpret_cast<const int32_t *>(src);
-            e->dst_string_dt->set_utf8_string(e->dst_metadata, dst, e->errmode,
-                            datetime::make_iso_8601_date(date, datetime::datetime_unit_day));
+            date_ymd ymd;
+            ymd.set_from_days(*reinterpret_cast<const int32_t *>(src));
+            e->dst_string_dt->set_utf8_string(e->dst_metadata, dst, e->errmode, ymd.to_str());
         }
 
         static void destruct(ckernel_prefix *extra)

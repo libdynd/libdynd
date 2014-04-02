@@ -28,7 +28,8 @@ using namespace std;
 using namespace dynd;
 
 date_type::date_type()
-    : base_type(date_type_id, datetime_kind, 4, scalar_align_of<int32_t>::value, type_flag_scalar, 0, 0)
+    : base_type(date_type_id, datetime_kind, 4, scalar_align_of<int32_t>::value,
+                type_flag_scalar, 0, 0)
 {
 }
 
@@ -36,64 +37,45 @@ date_type::~date_type()
 {
 }
 
-const ndt::type date_type::default_struct_type =
-        ndt::make_cstruct(
-            ndt::make_type<int32_t>(), "year",
-            ndt::make_type<int16_t>(), "month",
-            ndt::make_type<int16_t>(), "day");
-namespace {
-    struct default_date_struct_t {
-        int32_t year;
-        int16_t month;
-        int16_t day;
-    };
-}
-
-
 void date_type::set_ymd(const char *DYND_UNUSED(metadata), char *data,
                 assign_error_mode errmode, int32_t year, int32_t month, int32_t day) const
 {
-    if (errmode != assign_error_none && !datetime::is_valid_ymd(year, month, day)) {
+    if (errmode != assign_error_none && !date_ymd::is_valid(year, month, day)) {
         stringstream ss;
         ss << "invalid input year/month/day " << year << "/" << month << "/" << day;
         throw runtime_error(ss.str());
     }
 
-    *reinterpret_cast<int32_t *>(data) = datetime::ymd_to_days(year, month, day);
+    *reinterpret_cast<int32_t *>(data) = date_ymd::to_days(year, month, day);
 }
 
 void date_type::set_utf8_string(const char *DYND_UNUSED(metadata),
-                char *data, assign_error_mode errmode, const std::string& utf8_str) const
+                char *data, assign_error_mode DYND_UNUSED(errmode), const std::string& utf8_str) const
 {
-    datetime::datetime_conversion_rule_t casting;
-    switch (errmode) {
-        case assign_error_fractional:
-        case assign_error_inexact:
-            casting = datetime::datetime_conversion_strict;
-            break;
-        default:
-            casting = datetime::datetime_conversion_relaxed;
-            break;
+    date_ymd ymd;
+    // TODO: Use errmode to adjust strictness of the parsing
+    // TODO: properly distinguish "date" and "option[date]" with respect to NA support
+    if (utf8_str == "NA") {
+        ymd.set_to_na();
+    } else {
+        ymd.set_from_str(utf8_str);
     }
-    *reinterpret_cast<int32_t *>(data) = datetime::parse_iso_8601_date(
-                            utf8_str, datetime::datetime_unit_day, casting);
+    *reinterpret_cast<int32_t *>(data) = ymd.to_days();
 }
 
 
-void date_type::get_ymd(const char *DYND_UNUSED(metadata), const char *data,
-                int32_t &out_year, int32_t &out_month, int32_t &out_day) const
+date_ymd date_type::get_ymd(const char *DYND_UNUSED(metadata), const char *data) const
 {
-    datetime::date_ymd ymd;
-    datetime::days_to_ymd(*reinterpret_cast<const int32_t *>(data), ymd);
-    out_year = ymd.year;
-    out_month = ymd.month;
-    out_day = ymd.day;
+    date_ymd ymd;
+    ymd.set_from_days(*reinterpret_cast<const int32_t *>(data));
+    return ymd;
 }
 
 void date_type::print_data(std::ostream& o, const char *DYND_UNUSED(metadata), const char *data) const
 {
-    int32_t value = *reinterpret_cast<const int32_t *>(data);
-    o << datetime::make_iso_8601_date(value, datetime::datetime_unit_day);
+    date_ymd ymd;
+    ymd.set_from_days(*reinterpret_cast<const int32_t *>(data));
+    o << ymd.to_str();
 }
 
 void date_type::print_type(std::ostream& o) const
@@ -214,10 +196,9 @@ void date_type::get_dynamic_type_properties(const std::pair<std::string, gfunc::
 ///////// functions on the type
 
 static nd::array function_type_today(const ndt::type& dt) {
-    datetime::date_ymd ymd;
-    datetime::fill_current_local_date(&ymd);
+    date_ymd ymd = date_ymd::get_current_local_date();
     nd::array result = nd::empty(dt);
-    *reinterpret_cast<int32_t *>(result.get_readwrite_originptr()) = datetime::ymd_to_days(ymd);
+    *reinterpret_cast<int32_t *>(result.get_readwrite_originptr()) = ymd.to_days();
     // Make the result immutable (we own the only reference to the data at this point)
     result.flag_as_immutable();
     return result;
@@ -234,17 +215,17 @@ static nd::array function_type_construct(const ndt::type& DYND_UNUSED(dt),
 
     array_iter<1,3> iter(ndt::make_date(), result, year_as_int, month_as_int, day_as_int);
     if (!iter.empty()) {
-        datetime::date_ymd ymd;
+        date_ymd ymd;
         do {
             ymd.year = *reinterpret_cast<const int32_t *>(iter.data<1>());
             ymd.month = *reinterpret_cast<const int32_t *>(iter.data<2>());
             ymd.day = *reinterpret_cast<const int32_t *>(iter.data<3>());
-            if (!datetime::is_valid_ymd(ymd)) {
+            if (!ymd.is_valid()) {
                 stringstream ss;
                 ss << "invalid year/month/day " << ymd.year << "/" << ymd.month << "/" << ymd.day;
                 throw runtime_error(ss.str());
             }
-            *reinterpret_cast<int32_t *>(iter.data<0>()) = datetime::ymd_to_days(ymd);
+            *reinterpret_cast<int32_t *>(iter.data<0>()) = ymd.to_days();
         } while (iter.next());
     }
 
@@ -339,31 +320,31 @@ namespace {
     void get_property_kernel_year_single(char *dst, const char *src,
                     ckernel_prefix *DYND_UNUSED(extra))
     {
-        datetime::date_ymd fld;
-        datetime::days_to_ymd(*reinterpret_cast<const int32_t *>(src), fld);
-        *reinterpret_cast<int32_t *>(dst) = fld.year;
+        date_ymd ymd;
+        ymd.set_from_days(*reinterpret_cast<const int32_t *>(src));
+        *reinterpret_cast<int32_t *>(dst) = ymd.year;
     }
 
     void get_property_kernel_month_single(char *dst, const char *src,
                     ckernel_prefix *DYND_UNUSED(extra))
     {
-        datetime::date_ymd fld;
-        datetime::days_to_ymd(*reinterpret_cast<const int32_t *>(src), fld);
-        *reinterpret_cast<int32_t *>(dst) = fld.month;
+        date_ymd ymd;
+        ymd.set_from_days(*reinterpret_cast<const int32_t *>(src));
+        *reinterpret_cast<int32_t *>(dst) = ymd.month;
     }
 
     void get_property_kernel_day_single(char *dst, const char *src,
                     ckernel_prefix *DYND_UNUSED(extra))
     {
-        datetime::date_ymd fld;
-        datetime::days_to_ymd(*reinterpret_cast<const int32_t *>(src), fld);
-        *reinterpret_cast<int32_t *>(dst) = fld.day;
+        date_ymd ymd;
+        ymd.set_from_days(*reinterpret_cast<const int32_t *>(src));
+        *reinterpret_cast<int32_t *>(dst) = ymd.day;
     }
 
     void get_property_kernel_weekday_single(char *dst, const char *src,
                     ckernel_prefix *DYND_UNUSED(extra))
     {
-        datetime::date_val_t days = *reinterpret_cast<const int32_t *>(src);
+        int32_t days = *reinterpret_cast<const int32_t *>(src);
         // 1970-01-05 is Monday
         int weekday = (int)((days - 4) % 7);
         if (weekday < 0) {
@@ -375,7 +356,7 @@ namespace {
     void get_property_kernel_days_after_1970_int64_single(char *dst, const char *src,
                     ckernel_prefix *DYND_UNUSED(extra))
     {
-        datetime::date_val_t days = *reinterpret_cast<const int32_t *>(src);
+        int32_t days = *reinterpret_cast<const int32_t *>(src);
         if (days == DYND_DATE_NA) {
             *reinterpret_cast<int64_t *>(dst) = numeric_limits<int64_t>::min();
         } else {
@@ -390,30 +371,22 @@ namespace {
         if (days == numeric_limits<int64_t>::min()) {
             *reinterpret_cast<int32_t *>(dst) = DYND_DATE_NA;
         } else {
-            *reinterpret_cast<int32_t *>(dst) = static_cast<datetime::date_val_t>(days);
+            *reinterpret_cast<int32_t *>(dst) = static_cast<int32_t>(days);
         }
     }
 
     void get_property_kernel_struct_single(char *dst, const char *src,
                     ckernel_prefix *DYND_UNUSED(extra))
     {
-        datetime::date_ymd fld;
-        datetime::days_to_ymd(*reinterpret_cast<const int32_t *>(src), fld);
-        default_date_struct_t *dst_struct = reinterpret_cast<default_date_struct_t *>(dst);
-        dst_struct->year = fld.year;
-        dst_struct->month = static_cast<int8_t>(fld.month);
-        dst_struct->day = static_cast<int8_t>(fld.day);
+        date_ymd *dst_struct = reinterpret_cast<date_ymd *>(dst);
+        dst_struct->set_from_days(*reinterpret_cast<const int32_t *>(src));
     }
 
     void set_property_kernel_struct_single(char *dst, const char *src,
                     ckernel_prefix *DYND_UNUSED(extra))
     {
-        datetime::date_ymd fld;
-        const default_date_struct_t *src_struct = reinterpret_cast<const default_date_struct_t *>(src);
-        fld.year = src_struct->year;
-        fld.month = src_struct->month;
-        fld.day = src_struct->day;
-        *reinterpret_cast<int32_t *>(dst) = datetime::ymd_to_days(fld);
+        const date_ymd *src_struct = reinterpret_cast<const date_ymd *>(src);
+        *reinterpret_cast<int32_t *>(dst) = src_struct->to_days();
     }
 } // anonymous namespace
 
@@ -469,7 +442,7 @@ ndt::type date_type::get_elwise_property_type(size_t property_index,
         case dateprop_struct:
             out_readable = true;
             out_writable = true;
-            return date_type::default_struct_type;
+            return date_ymd::type();
         default:
             out_readable = false;
             out_writable = false;

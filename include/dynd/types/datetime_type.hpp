@@ -10,10 +10,9 @@
 #include <dynd/typed_data_assign.hpp>
 #include <dynd/types/view_type.hpp>
 #include <dynd/string_encodings.hpp>
+#include <dynd/types/datetime_util.hpp>
 
 namespace dynd {
-
-#define DYND_DATETIME_NA (std::numeric_limits<int64_t>::min())
 
 enum datetime_tz_t {
     // The abstract time zone is disconnected from a real physical
@@ -42,37 +41,25 @@ enum datetime_unit_t {
 std::ostream& operator<<(std::ostream& o, datetime_unit_t unit);
 
 class datetime_type : public base_type {
-    // A const reference to the struct type used by default for this datetime
-    const ndt::type& m_default_struct_type;
-
-    datetime_unit_t m_unit;
     datetime_tz_t m_timezone;
 
 public:
-    datetime_type(datetime_unit_t unit, datetime_tz_t timezone);
+    datetime_type(datetime_tz_t timezone);
 
     virtual ~datetime_type();
-
-    inline datetime_unit_t get_unit() const {
-        return m_unit;
-    }
 
     inline datetime_tz_t get_timezone() const {
         return m_timezone;
     }
 
-    inline const ndt::type& get_default_struct_type() const {
-        return m_default_struct_type;
-    }
-
     void set_cal(const char *metadata, char *data, assign_error_mode errmode,
                     int32_t year, int32_t month, int32_t day,
-                    int32_t hour, int32_t min=0, int32_t sec=0, int32_t nsec=0) const;
+                    int32_t hour, int32_t min=0, int32_t sec=0, int32_t tick=0) const;
     void set_utf8_string(const char *metadata, char *data, assign_error_mode errmode, const std::string& utf8_str) const;
 
     void get_cal(const char *metadata, const char *data,
                     int32_t &out_year, int32_t &out_month, int32_t &out_day,
-                    int32_t &out_hour, int32_t &out_min, int32_t &out_sec, int32_t &out_nsec) const;
+                    int32_t &out_hour, int32_t &out_min, int32_t &out_sec, int32_t &out_tick) const;
 
     void print_data(std::ostream& o, const char *metadata, const char *data) const;
 
@@ -119,8 +106,8 @@ public:
 };
 
 namespace ndt {
-    inline ndt::type make_datetime(datetime_unit_t unit, datetime_tz_t timezone) {
-        return ndt::type(new datetime_type(unit, timezone), false);
+    inline ndt::type make_datetime(datetime_tz_t timezone) {
+        return ndt::type(new datetime_type(timezone), false);
     }
 } // namespace ndt
 

@@ -10,11 +10,9 @@
 #include <dynd/typed_data_assign.hpp>
 #include <dynd/types/view_type.hpp>
 #include <dynd/string_encodings.hpp>
+#include <dynd/types/date_util.hpp>
 
 namespace dynd {
-
-#define DYND_DATE_NA (std::numeric_limits<int32_t>::min())
-
 
 class date_type : public base_type {
 public:
@@ -29,8 +27,7 @@ public:
                     int32_t year, int32_t month, int32_t day) const;
     void set_utf8_string(const char *metadata, char *data, assign_error_mode errmode, const std::string& utf8_str) const;
 
-    void get_ymd(const char *metadata, const char *data,
-                    int32_t &out_year, int32_t &out_month, int32_t &out_day) const;
+    date_ymd get_ymd(const char *metadata, const char *data) const;
 
     void print_data(std::ostream& o, const char *metadata, const char *data) const;
 
