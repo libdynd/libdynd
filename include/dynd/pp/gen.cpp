@@ -51,6 +51,7 @@ string args(const string& prefix, int stop) {
 
 int main(int argc, char **argv) {
     const int pp_len_max = atoi(argv[1]);
+    const int pp__len_max = 2 * pp_len_max;
     if (pp_len_max < 8) {
         throw runtime_error("the maximum list length cannot be less than 8");
     }
@@ -96,39 +97,47 @@ int main(int argc, char **argv) {
 
     fout << endl;
 
-    fout << "#define DYND_PP_ZEROS_" << pp_len_max << " (";
-    for (int i = 0; i < pp_int_max; i++) {
-        fout << 0 << argsep(i);
+    fout << "#define DYND_PP_ZEROS_0 ()" << endl;
+    for (int i = 1; i <= pp_len_max; i++) {
+        fout << "#define DYND_PP_ZEROS_" << i << " (";
+        for (int j = 0; j < i - 1; j++) {
+            fout << 0 << argsep(j);
+        }
+        fout << 0 << ")" << endl;
     }
-    fout << 0 << ")" << endl;
-
-    fout << "#define DYND_PP_ONES_" << pp_len_max << " (";
-    for (int i = 0; i < pp_int_max; i++) {
-        fout << 1 << argsep(i);
-    }
-    fout << 1 << ")" << endl;
 
     fout << endl;
 
-    fout << "#define DYND_PP_GET_ARG_" << pp_len_max << "(...) DYND_PP_ID(DYND_PP__GET_ARG_" << pp_len_max << "(__VA_ARGS__))" << endl;
-    fout << "#define DYND_PP__GET_ARG_" << pp_len_max << "(" << args("A", pp_len_max + 1) << ", ...) A" << pp_len_max << endl;
+    fout << "#define DYND_PP_ONES_0 ()" << endl;
+    for (int i = 1; i <= pp_len_max; i++) {
+        fout << "#define DYND_PP_ONES_" << i << " (";
+        for (int j = 0; j < i - 1; j++) {
+            fout << 1 << argsep(j);
+        }
+        fout << 1 << ")" << endl;
+    }
+
+    fout << endl;
+
+    fout << "#define DYND_PP_GET_ARG_" << pp__len_max << "(...) DYND_PP_ID(DYND_PP__GET_ARG_" << pp__len_max << "(__VA_ARGS__))" << endl;
+    fout << "#define DYND_PP__GET_ARG_" << pp__len_max << "(" << args("A", pp__len_max + 1) << ", ...) A" << pp__len_max << endl;
 
     fout << endl;
 
     fout << "#define DYND_PP_HAS_COMMA(...) DYND_PP_ID(DYND_PP__HAS_COMMA(__VA_ARGS__))" << endl;
-    fout << "#define DYND_PP__HAS_COMMA(...) DYND_PP_GET_ARG_" << pp_len_max << "(__VA_ARGS__" << argsep(true);
-    for (int i = 0; i < pp_int_max; i++) {
+    fout << "#define DYND_PP__HAS_COMMA(...) DYND_PP_GET_ARG_" << pp__len_max << "(__VA_ARGS__" << argsep(true);
+    for (int i = 0; i < pp__len_max - 1; i++) {
         fout << 1 << argsep(i);
     }
-    fout << 0 << argsep(false) << 0 << ")" << endl;
+    fout << 0 << argsep(pp__len_max - 1) << 0 << ")" << endl;
 
     fout << endl;
 
     fout << "#define DYND_PP_LEN(A) DYND_PP_IF_ELSE(DYND_PP_IS_EMPTY(A))(DYND_PP_LEN_IF_EMPTY)(DYND_PP_LEN_IF_NOT_EMPTY)(A)" << endl;
     fout << "#define DYND_PP_LEN_IF_EMPTY(A) 0" << endl;
-    fout << "#define DYND_PP_LEN_IF_NOT_EMPTY(A) DYND_PP_GET_ARG_" << pp_len_max << "(DYND_PP_ID A" << argsep(true);
-    for (int i = 0; i < pp_int_max; i++) {
-        fout << pp_len_max - i << argsep(i);
+    fout << "#define DYND_PP_LEN_IF_NOT_EMPTY(A) DYND_PP_GET_ARG_" << pp__len_max << "(DYND_PP_ID A" << argsep(true);
+    for (int i = 0; i < pp__len_max - 1; i++) {
+        fout << pp__len_max - i << argsep(i);
     }
     fout << 1 << ")" << endl;
 

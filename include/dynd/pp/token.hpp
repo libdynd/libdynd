@@ -13,6 +13,10 @@
 #define DYND_PP___PASTE(A, B) A ## B
 
 #define DYND_PP_TO_NULL(...)
+
+#define DYND_PP_TO_ZERO(...) 0
+#define DYND_PP_TO_ONE(...) 1
+
 #define DYND_PP_TO_COMMA(...) ,
 
 #define DYND_PP_ID(...) __VA_ARGS__
