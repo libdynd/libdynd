@@ -68,6 +68,7 @@ TEST(TimeDType, ValueCreationAbstract) {
     ndt::type d = ndt::make_time(tz_abstract), di = ndt::make_type<int64_t>();
 
     EXPECT_EQ(0, nd::array("00:00").ucast(d).view_scalars(di).as<int64_t>());
+    EXPECT_EQ(0, nd::array("12:00 am").ucast(d).view_scalars(di).as<int64_t>());
     EXPECT_EQ(12 * DYND_TICKS_PER_HOUR + 30 * DYND_TICKS_PER_MINUTE,
               nd::array("12:30").ucast(d).view_scalars(di).as<int64_t>());
     EXPECT_EQ(12 * DYND_TICKS_PER_HOUR + 34 * DYND_TICKS_PER_MINUTE +
@@ -83,6 +84,10 @@ TEST(TimeDType, ValueCreationAbstract) {
 TEST(TimeDType, ConvertToString) {
     EXPECT_EQ("00:00",
               nd::array("00:00:00.000").cast(ndt::type("time")).as<string>());
+    EXPECT_EQ("00:00",
+              nd::array("12:00:00.000 AM").cast(ndt::type("time")).as<string>());
+    EXPECT_EQ("12:00",
+              nd::array("12:00:00.000 PM").cast(ndt::type("time")).as<string>());
     EXPECT_EQ("23:59:59.9999999",
               nd::array("23:59:59.9999999").cast(ndt::type("time")).as<string>());
     EXPECT_EQ("00:00:01",
@@ -110,4 +115,50 @@ TEST(TimeDType, Properties) {
     EXPECT_EQ(56, n.p("second").as<int32_t>());
     EXPECT_EQ(789012, n.p("microsecond").as<int32_t>());
     EXPECT_EQ(7890123, n.p("tick").as<int32_t>());
+}
+
+TEST(TimeHMST, SetFromStr) {
+    time_hmst hmst;
+
+    hmst.set_from_str("00:00");
+    EXPECT_EQ(0, hmst.hour);
+    EXPECT_EQ(0, hmst.minute);
+    EXPECT_EQ(0, hmst.second);
+    EXPECT_EQ(0, hmst.tick);
+    hmst.set_from_str("12:29p");
+    EXPECT_EQ(12, hmst.hour);
+    EXPECT_EQ(29, hmst.minute);
+    EXPECT_EQ(0, hmst.second);
+    EXPECT_EQ(0, hmst.tick);
+    hmst.set_from_str("12:14:22a.m.");
+    EXPECT_EQ(0, hmst.hour);
+    EXPECT_EQ(14, hmst.minute);
+    EXPECT_EQ(22, hmst.second);
+    EXPECT_EQ(0, hmst.tick);
+    hmst.set_from_str("3:30 pm");
+    EXPECT_EQ(15, hmst.hour);
+    EXPECT_EQ(30, hmst.minute);
+    EXPECT_EQ(0, hmst.second);
+    EXPECT_EQ(0, hmst.tick);
+    hmst.set_from_str("12:34:56.7");
+    EXPECT_EQ(12, hmst.hour);
+    EXPECT_EQ(34, hmst.minute);
+    EXPECT_EQ(56, hmst.second);
+    EXPECT_EQ(700 * DYND_TICKS_PER_MILLISECOND, hmst.tick);
+    hmst.set_from_str("12:34:56.789012345678901234 AM");
+    EXPECT_EQ(0, hmst.hour);
+    EXPECT_EQ(34, hmst.minute);
+    EXPECT_EQ(56, hmst.second);
+    EXPECT_EQ(7890123, hmst.tick);
+}
+
+TEST(TimeHMST, SetFromStr_Errors) {
+    time_hmst hmst;
+
+    EXPECT_THROW(hmst.set_from_str("00"), invalid_argument);
+    EXPECT_THROW(hmst.set_from_str("00:00 AM"), invalid_argument);
+    EXPECT_THROW(hmst.set_from_str("13:00 PM"), invalid_argument);
+    EXPECT_THROW(hmst.set_from_str("13:"), invalid_argument);
+    EXPECT_THROW(hmst.set_from_str("08:00:"), invalid_argument);
+    EXPECT_THROW(hmst.set_from_str("08:00:00."), invalid_argument);
 }

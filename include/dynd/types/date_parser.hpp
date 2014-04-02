@@ -39,22 +39,26 @@ enum date_parser_ambiguous_t {
 bool string_to_date(const char *begin, const char *end, date_ymd &out_ymd,
                     date_parser_ambiguous_t ambig=date_parser_ambiguous_disallow);
 
-/**
- * Parses a date. Accepts a wide variety of inputs, but rejects ambiguous
- * formats like MM/DD/YY vs DD/MM/YY. This function does not parse after
- * the date is matched, so can be used when parsing date and time together.
- *
- * \param begin  The start of a range of UTF-8 characters. This is modified
- *               to point immediately after the parsed date if true is returned.
- * \param end  The end of a range of UTF-8 characters.
- * \param out_ymd  If true is returned, this has been filled with the parsed
- *                 date.
- * \param ambig  How to handle the 01/02/2003 ambiguity.
- *
- * \returns  True if a date was parsed successfully, false otherwise.
- */
-bool parse_date(const char *&begin, const char *end, date_ymd &out_ymd,
-                date_parser_ambiguous_t ambig);
+namespace parse {
+
+    /**
+     * Parses a date. Accepts a wide variety of inputs, but rejects ambiguous
+     * formats like MM/DD/YY vs DD/MM/YY. This function does not parse after
+     * the date is matched, so can be used when parsing date and time together.
+     *
+     * \param begin  The start of a range of UTF-8 characters. This is modified
+     *               to point immediately after the parsed date if true is returned.
+     * \param end  The end of a range of UTF-8 characters.
+     * \param out_ymd  If true is returned, this has been filled with the parsed
+     *                 date.
+     * \param ambig  How to handle the 01/02/2003 ambiguity.
+     *
+     * \returns  True if a date was parsed successfully, false otherwise.
+     */
+    bool parse_date(const char *&begin, const char *end, date_ymd &out_ymd,
+                    date_parser_ambiguous_t ambig);
+
+} // namespace parse
 
 } // namespace dynd
 

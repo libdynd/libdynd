@@ -24,7 +24,7 @@ time_type::~time_type()
 {
 }
 
-void time_type::set_time(const char *metadata, char *data,
+void time_type::set_time(const char *DYND_UNUSED(metadata), char *data,
                          assign_error_mode errmode, int32_t hour,
                          int32_t minute, int32_t second, int32_t tick) const
 {

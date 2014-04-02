@@ -855,10 +855,18 @@ TEST(DateYMD, SetFromStr) {
     EXPECT_EQ(d.year, 2003);
     EXPECT_EQ(d.month, 1);
     EXPECT_EQ(d.day, 2);
+    d.set_from_str("2/3/2004", true);
+    EXPECT_EQ(d.year, 2004);
+    EXPECT_EQ(d.month, 2);
+    EXPECT_EQ(d.day, 3);
     d.set_from_str("01-02-2004", false);
     EXPECT_EQ(d.year, 2004);
     EXPECT_EQ(d.month, 2);
     EXPECT_EQ(d.day, 1);
+    d.set_from_str("2-3-2005", false);
+    EXPECT_EQ(d.year, 2005);
+    EXPECT_EQ(d.month, 3);
+    EXPECT_EQ(d.day, 2);
 }
 
 TEST(DateYMD, SetFromStr_Errors) {

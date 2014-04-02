@@ -161,7 +161,7 @@ static bool parse_mdy_ambig_sep_date(const char *&begin, const char *end, char s
     saved_begin_state sbs(begin);
     // MM
     int month;
-    if (!parse_2digit_int_no_ws(begin, end, month)) {
+    if (!parse_1or2digit_int_no_ws(begin, end, month)) {
         return sbs.fail();
     }
     // sDD
@@ -169,7 +169,7 @@ static bool parse_mdy_ambig_sep_date(const char *&begin, const char *end, char s
         return sbs.fail();
     }
     int day;
-    if (!parse_2digit_int_no_ws(begin, end, day)) {
+    if (!parse_1or2digit_int_no_ws(begin, end, day)) {
         return sbs.fail();
     }
     // sYYYY
@@ -200,7 +200,7 @@ static bool parse_dmy_ambig_sep_date(const char *&begin, const char *end, char s
     saved_begin_state sbs(begin);
     // DD
     int day;
-    if (!parse_2digit_int_no_ws(begin, end, day)) {
+    if (!parse_1or2digit_int_no_ws(begin, end, day)) {
         return sbs.fail();
     }
     // sMM
@@ -208,7 +208,7 @@ static bool parse_dmy_ambig_sep_date(const char *&begin, const char *end, char s
         return sbs.fail();
     }
     int month;
-    if (!parse_2digit_int_no_ws(begin, end, month)) {
+    if (!parse_1or2digit_int_no_ws(begin, end, month)) {
         return sbs.fail();
     }
     // sYYYY
@@ -405,7 +405,7 @@ static void skip_midnight_time(const char *&begin, const char *end)
     return;
 }
 
-bool dynd::parse_date(const char *&begin, const char *end, date_ymd& out_ymd,
+bool parse::parse_date(const char *&begin, const char *end, date_ymd& out_ymd,
                 date_parser_ambiguous_t ambig)
 {
     int weekday;
