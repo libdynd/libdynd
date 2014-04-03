@@ -96,7 +96,7 @@ private:
 
     /**
      * Validates that the given type ID is a proper ID and casts to
-     * an base_type pointer if it is. Throws
+     * a base_type pointer if it is. Throws
      * an exception if not.
      *
      * \param type_id  The type id to validate.
@@ -117,7 +117,7 @@ public:
         : m_extended(reinterpret_cast<const base_type *>(uninitialized_type_id))
     {}
     /**
-     * Constructor from an base_type. This claims ownership of the 'extended'
+     * Constructor from a base_type. This claims ownership of the 'extended'
      * reference if incref is false, be careful!
      */
     inline explicit type(const base_type *extended, bool incref)

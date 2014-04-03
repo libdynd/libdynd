@@ -36,7 +36,7 @@ struct time_hmst {
     static inline bool is_valid(int hour, int minute, int second, int tick) {
         return hour >= 0 && hour < 24 && minute >= 0 && minute < 60 &&
                second >= 0 && second <= 60 && // leap second can == 60
-               tick >= 0 && tick < 10000000;
+               tick >= 0 && tick < DYND_TICKS_PER_SECOND;
     }
 
     inline bool is_valid() const {
