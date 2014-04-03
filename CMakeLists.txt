@@ -122,6 +122,7 @@ set(libdynd_SRC
     include/dynd/pp/list.hpp
     include/dynd/pp/logical.hpp
     include/dynd/pp/token.hpp
+    ${CMAKE_CURRENT_BINARY_DIR}/include/dynd/pp/gen.hpp
     # CodeGen
     src/dynd/codegen/unary_kernel_adapter_codegen_windows_x64.cpp
     src/dynd/codegen/unary_kernel_adapter_codegen_x64_sysvabi.cpp
@@ -494,10 +495,12 @@ endif()
 # Special build targets that generate part of the library
 execute_process(COMMAND ${CMAKE_COMMAND} -E make_directory ${CMAKE_CURRENT_BINARY_DIR}/include/dynd/pp)
 add_executable(ppgen include/dynd/pp/gen.cpp)
-add_custom_command(OUTPUT gen.hpp COMMAND ppgen 8 3 ${CMAKE_CURRENT_BINARY_DIR}/include/dynd/pp)
-add_custom_target(ppgen_run ALL DEPENDS include/dynd/pp/gen.cpp CMakeLists.txt)
+add_custom_command(OUTPUT ${CMAKE_CURRENT_BINARY_DIR}/include/dynd/pp/gen.hpp
+        DEPENDS include/dynd/pp/gen.cpp
+        COMMAND ppgen 8 3 ${CMAKE_CURRENT_BINARY_DIR}/include/dynd/pp)
 # Make libdynd depend on ppgen_run to make sure gen.hpp is there when it builds
-add_dependencies(libdynd ppgen_run)
+set_source_files_properties(${CMAKE_CURRENT_BINARY_DIR}/include/dynd/pp/gen.hpp PROPERTIES GENERATED true)
+add_dependencies(libdynd ppgen)
 
 include_directories(${CMAKE_CURRENT_BINARY_DIR}/include)
 
