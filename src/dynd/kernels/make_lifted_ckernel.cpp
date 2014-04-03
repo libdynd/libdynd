@@ -823,6 +823,22 @@ size_t dynd::make_lifted_expr_ckernel(const ckernel_deferred *elwise_handler,
             break;
     }
 
+    // Check if no lifting is required
+    if (dst_tp == elwise_handler->data_dynd_types[0]) {
+        intptr_t i = 0;
+        for (; i < src_count; ++i) {
+            if (src_tp[i] != elwise_handler->data_dynd_types[i+1]) {
+                break;
+            }
+        }
+        if (i == src_count) {
+            // All the types matched, call the elementwise instantiate directly
+            return elwise_handler->instantiate_func(elwise_handler->data_ptr,
+                            out_ckb, ckb_offset,
+                            dynd_metadata, kernreq);
+        }
+    }
+
     stringstream ss;
     ss << "Cannot process lifted elwise expression from (";
     for (intptr_t i = 0; i < src_count; ++i) {

@@ -74,11 +74,11 @@ nd::array nd::make_strided_array(const ndt::type& dtp, intptr_t ndim, const intp
     memory_block_ptr result;
     char *data_ptr = NULL;
     if (dtp.get_kind() == memory_kind) {
-        result = make_array_memory_block(array_tp.extended()->get_metadata_size());
+        result = make_array_memory_block(array_tp.get_metadata_size());
         static_cast<const base_memory_type *>(dtp.extended())->data_alloc(&data_ptr, data_size);
     } else {
         // Allocate the array metadata and data in one memory block
-        result = make_array_memory_block(array_tp.extended()->get_metadata_size(),
+        result = make_array_memory_block(array_tp.get_metadata_size(),
                     data_size, array_tp.get_data_alignment(), &data_ptr);
     }
 
