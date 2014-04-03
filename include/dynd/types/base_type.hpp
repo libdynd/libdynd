@@ -96,7 +96,7 @@ struct base_type_members {
 /**
  * This is the virtual base class for defining new types which are not so basic
  * that we want them in the small list of builtin types. This is a reference
- * counted class, and is immutable, so once an base_type instance is constructed,
+ * counted class, and is immutable, so once a base_type instance is constructed,
  * it should never be modified.
  *
  * Typically, the base_type is used by manipulating a type instance, which acts

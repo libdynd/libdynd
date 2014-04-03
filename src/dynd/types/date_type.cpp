@@ -63,7 +63,6 @@ void date_type::set_utf8_string(const char *DYND_UNUSED(metadata),
     *reinterpret_cast<int32_t *>(data) = ymd.to_days();
 }
 
-
 date_ymd date_type::get_ymd(const char *DYND_UNUSED(metadata), const char *data) const
 {
     date_ymd ymd;
@@ -75,7 +74,12 @@ void date_type::print_data(std::ostream& o, const char *DYND_UNUSED(metadata), c
 {
     date_ymd ymd;
     ymd.set_from_days(*reinterpret_cast<const int32_t *>(data));
-    o << ymd.to_str();
+    string s = ymd.to_str();
+    if (s.empty()) {
+        o << "NA";
+    } else {
+        o << s;
+    }
 }
 
 void date_type::print_type(std::ostream& o) const

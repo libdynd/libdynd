@@ -49,42 +49,42 @@ int32_t date_ymd::to_days(int year, int month, int day)
 std::string date_ymd::to_str(int year, int month, int day)
 {
     string s;
-    if (!is_valid(year, month, day)) {
-        s = "NA";
-    } else if (year >= 1 && year <= 9999) {
-        // ISO 8601 date
-        s.resize(10);
-        s[0] = '0' + (year / 1000);
-        s[1] = '0' + ((year / 100) % 10);
-        s[2] = '0' + ((year / 10) % 10);
-        s[3] = '0' + (year % 10);
-        s[4] = '-';
-        s[5] = '0' + (month / 10);
-        s[6] = '0' + (month % 10);
-        s[7] = '-';
-        s[8] = '0' + (day / 10);
-        s[9] = '0' + (day % 10);
-    } else {
-        // Expanded ISO 8601 date, using +/- 6 digit year
-        s.resize(13);
-        if (year >= 0) {
-            s[0] = '+';
+    if (is_valid(year, month, day)) {
+         if (year >= 1 && year <= 9999) {
+            // ISO 8601 date
+            s.resize(10);
+            s[0] = '0' + (year / 1000);
+            s[1] = '0' + ((year / 100) % 10);
+            s[2] = '0' + ((year / 10) % 10);
+            s[3] = '0' + (year % 10);
+            s[4] = '-';
+            s[5] = '0' + (month / 10);
+            s[6] = '0' + (month % 10);
+            s[7] = '-';
+            s[8] = '0' + (day / 10);
+            s[9] = '0' + (day % 10);
         } else {
-            s[0] = '-';
-            year = -year;
+            // Expanded ISO 8601 date, using +/- 6 digit year
+            s.resize(13);
+            if (year >= 0) {
+                s[0] = '+';
+            } else {
+                s[0] = '-';
+                year = -year;
+            }
+            s[1] = '0' + (year / 100000);
+            s[2] = '0' + ((year / 10000) % 10);
+            s[3] = '0' + ((year / 1000) % 10);
+            s[4] = '0' + ((year / 100) % 10);
+            s[5] = '0' + ((year / 10) % 10);
+            s[6] = '0' + (year % 10);
+            s[7] = '-';
+            s[8] = '0' + (month / 10);
+            s[9] = '0' + (month % 10);
+            s[10] = '-';
+            s[11] = '0' + (day / 10);
+            s[12] = '0' + (day % 10);
         }
-        s[1] = '0' + (year / 100000);
-        s[2] = '0' + ((year / 10000) % 10);
-        s[3] = '0' + ((year / 1000) % 10);
-        s[4] = '0' + ((year / 100) % 10);
-        s[5] = '0' + ((year / 10) % 10);
-        s[6] = '0' + (year % 10);
-        s[7] = '-';
-        s[8] = '0' + (month / 10);
-        s[9] = '0' + (month % 10);
-        s[10] = '-';
-        s[11] = '0' + (day / 10);
-        s[12] = '0' + (day % 10);
     }
     return s;
 }
@@ -147,9 +147,17 @@ void date_ymd::set_from_str(const std::string& s)
     }
 }
 
-void date_ymd::set_from_str(const std::string& DYND_UNUSED(s), bool DYND_UNUSED(monthfirst))
+void date_ymd::set_from_str(const std::string& s, bool monthfirst)
 {
-    throw runtime_error("TODO: date_ymd::set_from_str");
+    if (!string_to_date(s.data(), s.data() + s.size(), *this,
+                        monthfirst ? date_parser_ambiguous_monthfirst
+                                   : date_parser_ambiguous_dayfirst)) {
+        stringstream ss;
+        ss << "Unable to parse ";
+        print_escaped_utf8_string(ss, s);
+        ss << " as a date";
+        throw invalid_argument(ss.str());
+    }
 }
 
 date_ymd date_ymd::get_current_local_date()

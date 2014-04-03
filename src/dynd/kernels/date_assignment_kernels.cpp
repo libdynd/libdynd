@@ -6,7 +6,6 @@
 #include <dynd/kernels/date_assignment_kernels.hpp>
 #include <dynd/kernels/assignment_kernels.hpp>
 #include <dynd/types/cstruct_type.hpp>
-#include <datetime_strings.h>
 
 using namespace std;
 using namespace dynd;
@@ -22,7 +21,6 @@ namespace {
         const base_string_type *src_string_dt;
         const char *src_metadata;
         assign_error_mode errmode;
-        datetime::datetime_conversion_rule_t casting;
 
         static void single(char *dst, const char *src, ckernel_prefix *extra)
         {
@@ -67,14 +65,6 @@ size_t dynd::make_string_to_date_assignment_kernel(
     e->src_string_dt = static_cast<const base_string_type *>(ndt::type(src_string_dt).release());
     e->src_metadata = src_metadata;
     e->errmode = errmode;
-    switch (errmode) {
-        case assign_error_fractional:
-        case assign_error_inexact:
-            e->casting = datetime::datetime_conversion_strict;
-            break;
-        default:
-            e->casting = datetime::datetime_conversion_relaxed;
-    }
     return offset_out + sizeof(string_to_date_kernel_extra);
 }
 
@@ -95,7 +85,11 @@ namespace {
             extra_type *e = reinterpret_cast<extra_type *>(extra);
             date_ymd ymd;
             ymd.set_from_days(*reinterpret_cast<const int32_t *>(src));
-            e->dst_string_dt->set_utf8_string(e->dst_metadata, dst, e->errmode, ymd.to_str());
+            string s = ymd.to_str();
+            if (s.empty()) {
+                s = "NA";
+            }
+            e->dst_string_dt->set_utf8_string(e->dst_metadata, dst, e->errmode, s);
         }
 
         static void destruct(ckernel_prefix *extra)

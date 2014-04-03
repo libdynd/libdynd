@@ -96,6 +96,8 @@ enum type_id_t {
     categorical_type_id,
     // A 32-bit date type
     date_type_id,
+    // A 64-bit time type
+    time_type_id,
     // A 64-bit datetime type
     datetime_type_id,
     // A 32-bit date type limited to business days

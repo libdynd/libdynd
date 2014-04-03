@@ -76,10 +76,10 @@ void datetime_type::set_cal(const char *DYND_UNUSED(metadata), char *data,
     dts.ymd.year = year;
     dts.ymd.month = month;
     dts.ymd.day = day;
-    dts.hour = hour;
-    dts.minute = minute;
-    dts.second = second;
-    dts.tick = tick;
+    dts.hmst.hour = hour;
+    dts.hmst.minute = minute;
+    dts.hmst.second = second;
+    dts.hmst.tick = tick;
 
     *reinterpret_cast<int64_t *>(data) = dts.to_ticks();
 }
@@ -113,10 +113,10 @@ void datetime_type::get_cal(const char *DYND_UNUSED(metadata), const char *data,
     out_year = dts.ymd.year;
     out_month = dts.ymd.month;
     out_day = dts.ymd.day;
-    out_hour = dts.hour;
-    out_min = dts.minute;
-    out_sec = dts.second;
-    out_tick = dts.tick;
+    out_hour = dts.hmst.hour;
+    out_min = dts.hmst.minute;
+    out_sec = dts.hmst.second;
+    out_tick = dts.hmst.tick;
 }
 
 void datetime_type::print_data(std::ostream& o,
@@ -155,7 +155,7 @@ bool datetime_type::is_lossless_assignment(const ndt::type& dst_tp, const ndt::t
         if (src_tp.extended() == this) {
             return true;
         } else if (src_tp.get_type_id() == date_type_id) {
-            // There is only one possibility for the date type (TODO: timezones!)
+            // There is only one possibility for the datetime type (TODO: timezones!)
             return true;
         } else {
             return false;

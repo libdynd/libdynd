@@ -8,31 +8,33 @@
 
 #include <dynd/config.hpp>
 #include <dynd/types/date_util.hpp>
+#include <dynd/types/time_util.hpp>
 
 #define DYND_DATETIME_NA (std::numeric_limits<int64_t>::min())
 
-#define DYND_TICKS_PER_MICROSECOND (10LL)
-#define DYND_TICKS_PER_MILLISECOND (10000LL)
-#define DYND_TICKS_PER_SECOND (10000000LL)
-#define DYND_TICKS_PER_MINUTE (60LL * 10000000LL)
-#define DYND_TICKS_PER_HOUR (60LL * 60LL * 10000000LL)
-// DYND_TICKS_PER_DAY is defined in date_util.hpp
-
 namespace dynd {
+
+enum datetime_tz_t {
+    // The abstract time zone is disconnected from a real physical
+    // time. It is a time based on an abstract calendar.
+    tz_abstract,
+    // The UTC time zone. This cannot represent added leap seconds,
+    // as it is based on the POSIX approach.
+    tz_utc,
+    // TODO: A "time zone" based on TAI atomic clock time. This can represent
+    // the leap seconds UTC cannot, but converting to/from UTC is not
+    // lossless.
+    //tz_tai,
+    // TODO: other time zones based on a time zone database
+    // tz_other
+};
 
 struct datetime_struct {
     date_ymd ymd;
-    int8_t hour;
-    int8_t minute;
-    int8_t second;
-    int32_t tick;
+    time_hmst hmst;
 
     inline bool is_valid() const {
-        return ymd.is_valid() &&
-            hour >= 0 && hour < 24 &&
-            minute >= 0 && minute < 60 &&
-            second >= 0 && second <= 60 &&  // leap second can == 60
-            tick >= 0 && tick < 10000000;
+        return ymd.is_valid() && hmst.is_valid();
     }
 
     inline bool is_na() const {
@@ -40,20 +42,23 @@ struct datetime_struct {
     }
 
     int64_t to_ticks() const {
-        return (((((ymd.to_days() * 24LL) + hour) * 60LL + minute) * 60LL +
-                 second) * 10000000LL) + tick;
+        return ymd.to_days() * DYND_TICKS_PER_DAY + hmst.to_ticks();
     }
 
     void set_from_ticks(int64_t ticks) {
-        tick = ticks % 10000000LL;
-        ticks = ticks / 10000000LL;
-        second = ticks % 60;
-        ticks = ticks / 60;
-        minute = ticks % 60;
-        ticks = ticks / 60;
-        hour = ticks % 24;
-        ticks = ticks / 24;
-        ymd.set_from_days(static_cast<int32_t>(ticks));
+        int32_t days;
+        if (ticks >= 0) {
+            days = static_cast<int32_t>(ticks / DYND_TICKS_PER_DAY);
+            ticks = ticks % DYND_TICKS_PER_DAY;
+        } else {
+            days = static_cast<int32_t>((ticks - (DYND_TICKS_PER_DAY - 1)) / DYND_TICKS_PER_DAY);
+            ticks = ticks % DYND_TICKS_PER_DAY;
+            if (ticks < 0) {
+                ticks += DYND_TICKS_PER_DAY;
+            }
+        }
+        ymd.set_from_days(days);
+        hmst.set_from_ticks(ticks);
     }
 
     /**

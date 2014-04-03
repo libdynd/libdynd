@@ -54,7 +54,12 @@ void dynd::busdate_type::print_data(std::ostream& o, const char *DYND_UNUSED(met
 {
     date_ymd ymd;
     ymd.set_from_days(*reinterpret_cast<const int32_t *>(data));
-    o << ymd.to_str();
+    string s = ymd.to_str();
+    if (s.empty()) {
+        o << "NA";
+    } else {
+        o << s;
+    }
 }
 
 void dynd::busdate_type::print_type(std::ostream& o) const

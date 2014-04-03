@@ -101,6 +101,8 @@ std::ostream& dynd::operator<<(std::ostream& o, type_id_t tid)
             return (o << "categorical");
         case date_type_id:
             return (o << "date");
+        case time_type_id:
+            return (o << "time");
         case datetime_type_id:
             return (o << "datetime");
         case busdate_type_id:

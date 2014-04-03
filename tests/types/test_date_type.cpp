@@ -849,6 +849,24 @@ TEST(DateYMD, SetFromStr) {
     EXPECT_EQ(d.year, 1995);
     EXPECT_EQ(d.month, 12);
     EXPECT_EQ(d.day, 26);
+
+    // Ambiguous formats with monthfirst flag
+    d.set_from_str("01-02-2003", true);
+    EXPECT_EQ(d.year, 2003);
+    EXPECT_EQ(d.month, 1);
+    EXPECT_EQ(d.day, 2);
+    d.set_from_str("2/3/2004", true);
+    EXPECT_EQ(d.year, 2004);
+    EXPECT_EQ(d.month, 2);
+    EXPECT_EQ(d.day, 3);
+    d.set_from_str("01-02-2004", false);
+    EXPECT_EQ(d.year, 2004);
+    EXPECT_EQ(d.month, 2);
+    EXPECT_EQ(d.day, 1);
+    d.set_from_str("2-3-2005", false);
+    EXPECT_EQ(d.year, 2005);
+    EXPECT_EQ(d.month, 3);
+    EXPECT_EQ(d.day, 2);
 }
 
 TEST(DateYMD, SetFromStr_Errors) {
@@ -861,4 +879,18 @@ TEST(DateYMD, SetFromStr_Errors) {
     EXPECT_THROW(d.set_from_str("2012-01/01"), invalid_argument);
     EXPECT_THROW(d.set_from_str("2012-rec-01"), invalid_argument);
     EXPECT_THROW(d.set_from_str("Banuary 5, 1992"), invalid_argument);
+    // Ambiguous formats
+    EXPECT_THROW(d.set_from_str("01-02-03"), invalid_argument);
+    EXPECT_THROW(d.set_from_str("01/02/03"), invalid_argument);
+    EXPECT_THROW(d.set_from_str("01.02.03"), invalid_argument);
+    EXPECT_THROW(d.set_from_str("01-02-2003"), invalid_argument);
+    EXPECT_THROW(d.set_from_str("01/02/2003"), invalid_argument);
+    EXPECT_THROW(d.set_from_str("01.02.2003"), invalid_argument);
+    // Rejecting the ambiguous format, even if the value can resolve the date
+    EXPECT_THROW(d.set_from_str("01-14-2003"), invalid_argument);
+    EXPECT_THROW(d.set_from_str("01/14/2003"), invalid_argument);
+    EXPECT_THROW(d.set_from_str("01.14.2003"), invalid_argument);
+    EXPECT_THROW(d.set_from_str("14-02-2003"), invalid_argument);
+    EXPECT_THROW(d.set_from_str("14/02/2003"), invalid_argument);
+    EXPECT_THROW(d.set_from_str("14.02.2003"), invalid_argument);
 }

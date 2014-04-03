@@ -181,6 +181,9 @@ set(libdynd_SRC
     src/dynd/types/strided_dim_type.cpp
     src/dynd/types/string_type.cpp
     src/dynd/types/struct_type.cpp
+    src/dynd/types/time_parser.cpp
+    src/dynd/types/time_type.cpp
+    src/dynd/types/time_util.cpp
     src/dynd/types/tuple_type.cpp
     src/dynd/types/type_id.cpp
     src/dynd/types/unary_expr_type.cpp
@@ -231,6 +234,9 @@ set(libdynd_SRC
     include/dynd/types/string_type.hpp
     include/dynd/types/struct_type.hpp
     include/dynd/types/cstruct_type.hpp
+    include/dynd/types/time_parser.hpp
+    include/dynd/types/time_type.hpp
+    include/dynd/types/time_util.hpp
     include/dynd/types/tuple_type.hpp
     include/dynd/types/type_id.hpp
     include/dynd/types/unary_expr_type.hpp
@@ -290,6 +296,7 @@ set(libdynd_SRC
     src/dynd/kernels/string_comparison_kernels.cpp
     src/dynd/kernels/struct_assignment_kernels.cpp
     src/dynd/kernels/struct_comparison_kernels.cpp
+    src/dynd/kernels/time_assignment_kernels.cpp
     src/dynd/kernels/kernels_for_disassembly.cpp
     src/dynd/kernels/single_assigner_builtin.hpp
     src/dynd/kernels/single_assigner_builtin_int128.hpp
@@ -326,6 +333,7 @@ set(libdynd_SRC
     include/dynd/kernels/string_comparison_kernels.hpp
     include/dynd/kernels/struct_assignment_kernels.hpp
     include/dynd/kernels/struct_comparison_kernels.hpp
+    include/dynd/kernels/time_assignment_kernels.hpp
     # MemBlock
     src/dynd/memblock/memory_block.cpp
     src/dynd/memblock/executable_memory_block_windows_x64.cpp
@@ -354,6 +362,8 @@ set(libdynd_SRC
     include/dynd/vm/register_allocation.hpp
     # Main
     src/dynd/arithmetic_op.cpp
+    src/dynd/array.cpp
+    src/dynd/array_range.cpp
     src/dynd/config.cpp
     src/dynd/type.cpp
     src/dynd/typed_data_assign.cpp
@@ -364,12 +374,14 @@ set(libdynd_SRC
     src/dynd/json_formatter.cpp
     src/dynd/json_parser.cpp
     src/dynd/lowlevel_api.cpp
-    src/dynd/array.cpp
-    src/dynd/array_range.cpp
+    src/dynd/parser_util.cpp
     src/dynd/dim_iter.cpp
     src/dynd/shape_tools.cpp
     src/dynd/string_encodings.cpp
     src/dynd/view.cpp
+    include/dynd/array.hpp
+    include/dynd/array_range.hpp
+    include/dynd/array_iter.hpp
     include/dynd/atomic_refcount.hpp
     include/dynd/auxiliary_data.hpp
     include/dynd/buffer_storage.hpp
@@ -377,6 +389,7 @@ set(libdynd_SRC
     include/dynd/cuda_config.hpp
     include/dynd/cling_all.hpp
     include/dynd/diagnostics.hpp
+    include/dynd/dim_iter.hpp
     include/dynd/type.hpp
     include/dynd/typed_data_assign.hpp
     include/dynd/type_promotion.hpp
@@ -386,10 +399,7 @@ set(libdynd_SRC
     include/dynd/json_parser.hpp
     include/dynd/irange.hpp
     include/dynd/lowlevel_api.hpp
-    include/dynd/array.hpp
-    include/dynd/array_range.hpp
-    include/dynd/array_iter.hpp
-    include/dynd/dim_iter.hpp
+    include/dynd/parser_util.hpp
     include/dynd/platform_definitions.hpp
     include/dynd/shortvector.hpp
     include/dynd/shape_tools.hpp

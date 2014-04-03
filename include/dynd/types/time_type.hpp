@@ -3,48 +3,34 @@
 // BSD 2-Clause License, see LICENSE.txt
 //
 
-#ifndef _DYND__DATETIME_TYPE_HPP_
-#define _DYND__DATETIME_TYPE_HPP_
+#ifndef _DYND__TIME_TYPE_HPP_
+#define _DYND__TIME_TYPE_HPP_
 
 #include <dynd/type.hpp>
-#include <dynd/typed_data_assign.hpp>
-#include <dynd/types/view_type.hpp>
-#include <dynd/string_encodings.hpp>
 #include <dynd/types/datetime_util.hpp>
 
 namespace dynd {
 
-enum datetime_unit_t {
-    datetime_unit_hour,
-    datetime_unit_minute,
-    datetime_unit_second,
-    datetime_unit_msecond,
-    datetime_unit_usecond,
-    datetime_unit_nsecond
-};
-
-std::ostream& operator<<(std::ostream& o, datetime_unit_t unit);
-
-class datetime_type : public base_type {
+class time_type : public base_type {
     datetime_tz_t m_timezone;
 
 public:
-    datetime_type(datetime_tz_t timezone);
+    time_type(datetime_tz_t timezone);
 
-    virtual ~datetime_type();
+    virtual ~time_type();
 
     inline datetime_tz_t get_timezone() const {
         return m_timezone;
     }
 
-    void set_cal(const char *metadata, char *data, assign_error_mode errmode,
-                    int32_t year, int32_t month, int32_t day,
-                    int32_t hour, int32_t min=0, int32_t sec=0, int32_t tick=0) const;
-    void set_utf8_string(const char *metadata, char *data, assign_error_mode errmode, const std::string& utf8_str) const;
+    void set_time(const char *metadata, char *data, assign_error_mode errmode,
+                  int32_t hour, int32_t minute, int32_t second,
+                  int32_t tick) const;
+    void set_utf8_string(const char *metadata, char *data,
+                         assign_error_mode errmode,
+                         const std::string &utf8_str) const;
 
-    void get_cal(const char *metadata, const char *data,
-                    int32_t &out_year, int32_t &out_month, int32_t &out_day,
-                    int32_t &out_hour, int32_t &out_min, int32_t &out_sec, int32_t &out_tick) const;
+    time_hmst get_time(const char *metadata, const char *data) const;
 
     void print_data(std::ostream& o, const char *metadata, const char *data) const;
 
@@ -70,10 +56,21 @@ public:
                     kernel_request_t kernreq, assign_error_mode errmode,
                     const eval::eval_context *ectx) const;
 
+    size_t make_comparison_kernel(
+                    ckernel_builder *out, size_t offset_out,
+                    const ndt::type& src0_dt, const char *src0_metadata,
+                    const ndt::type& src1_dt, const char *src1_metadata,
+                    comparison_type_t comptype,
+                    const eval::eval_context *ectx) const;
+
     void get_dynamic_type_properties(const std::pair<std::string, gfunc::callable> **out_properties, size_t *out_count) const;
     void get_dynamic_type_functions(const std::pair<std::string, gfunc::callable> **out_functions, size_t *out_count) const;
-    void get_dynamic_array_properties(const std::pair<std::string, gfunc::callable> **out_properties, size_t *out_count) const;
-    void get_dynamic_array_functions(const std::pair<std::string, gfunc::callable> **out_functions, size_t *out_count) const;
+    void get_dynamic_array_properties(
+                    const std::pair<std::string, gfunc::callable> **out_properties,
+                    size_t *out_count) const;
+    void get_dynamic_array_functions(
+                    const std::pair<std::string, gfunc::callable> **out_functions,
+                    size_t *out_count) const;
 
     size_t get_elwise_property_index(const std::string& property_name) const;
     ndt::type get_elwise_property_type(size_t elwise_property_index,
@@ -91,11 +88,11 @@ public:
 };
 
 namespace ndt {
-    inline ndt::type make_datetime(datetime_tz_t timezone) {
-        return ndt::type(new datetime_type(timezone), false);
+    inline ndt::type make_time(datetime_tz_t timezone) {
+        return ndt::type(new time_type(timezone), false);
     }
 } // namespace ndt
 
 } // namespace dynd
 
-#endif // _DYND__DATETIME_TYPE_HPP_
+#endif // _DYND__TIME_TYPE_HPP_
