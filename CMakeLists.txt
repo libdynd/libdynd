@@ -115,6 +115,13 @@ string(REPLACE "-" ";" DYND_VERSION "${DYND_VERSION}")
 list(GET DYND_VERSION 0 "${DYND_VERSION}")
 
 set(libdynd_SRC
+    # Preprocessor
+    include/dynd/pp/arithmetic.hpp
+    include/dynd/pp/comparision.hpp
+    include/dynd/pp/if.hpp
+    include/dynd/pp/list.hpp
+    include/dynd/pp/logical.hpp
+    include/dynd/pp/token.hpp
     # CodeGen
     src/dynd/codegen/unary_kernel_adapter_codegen_windows_x64.cpp
     src/dynd/codegen/unary_kernel_adapter_codegen_x64_sysvabi.cpp
@@ -410,6 +417,7 @@ source_group("Kernels Source" REGULAR_EXPRESSION "src/dynd/kernels/.*cpp")
 source_group("Kernels Headers" REGULAR_EXPRESSION "include/dynd/kernels/.*hpp")
 source_group("MemBlock Source" REGULAR_EXPRESSION "src/dynd/memblock/.*cpp")
 source_group("MemBlock Headers" REGULAR_EXPRESSION "include/dynd/memblock/.*hpp")
+source_group("PP Headers" REGULAR_EXPRESSION "include/dynd/pp/.*hpp")
 source_group("VM Source" REGULAR_EXPRESSION "src/dynd/vm/.*cpp")
 source_group("VM Headers" REGULAR_EXPRESSION "include/dynd/vm/.*hpp")
 source_group("Internal Headers" REGULAR_EXPRESSION "src/dynd/.*hpp")
@@ -482,6 +490,16 @@ else()
         PREFIX "${CMAKE_STATIC_LIBRARY_PREFIX}"
         )
 endif()
+
+# Special build targets that generate part of the library
+execute_process(COMMAND ${CMAKE_COMMAND} -E make_directory ${CMAKE_CURRENT_BINARY_DIR}/include/dynd/pp)
+add_executable(ppgen include/dynd/pp/gen.cpp)
+add_custom_command(OUTPUT gen.hpp COMMAND ppgen 8 3 ${CMAKE_CURRENT_BINARY_DIR}/include/dynd/pp)
+add_custom_target(ppgen_run ALL DEPENDS gen.hpp)
+# Make libdynd depend on ppgen to make sure gen.hpp is there when it builds
+add_dependencies(libdynd ppgen)
+
+include_directories(${CMAKE_CURRENT_BINARY_DIR}/include)
 
 if(WIN32)
     set_target_properties(libdynd
