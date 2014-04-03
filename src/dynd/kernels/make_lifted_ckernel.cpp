@@ -138,7 +138,7 @@ static size_t make_elwise_strided_dimension_expr_kernel_for_N(
             e->src_stride[i] = src_md->stride;
             child_metadata[i + 1] = src_metadata[i] + sizeof(strided_dim_type_metadata);
             child_tp[i + 1] = sdd->get_element_type();
-        } else {
+        } else if (src_tp[i].get_type_id() == fixed_dim_type_id) {
             const fixed_dim_type *fdd = static_cast<const fixed_dim_type *>(src_tp[i].extended());
             // Check for a broadcasting error
             if (fdd->get_fixed_dim_size() != 1 && (size_t)e->size != fdd->get_fixed_dim_size()) {
@@ -149,6 +149,11 @@ static size_t make_elwise_strided_dimension_expr_kernel_for_N(
             e->src_stride[i] = fdd->get_fixed_stride();
             child_metadata[i + 1] = src_metadata[i];
             child_tp[i + 1] = fdd->get_element_type();
+        } else {
+            stringstream ss;
+            ss << "make_elwise_strided_dimension_expr_kernel: expected strided "
+                  "or fixed dim, got " << src_tp[i];
+            throw runtime_error(ss.str());
         }
     }
     // If any of the types don't match, continue broadcasting the dimensions
@@ -764,6 +769,23 @@ size_t dynd::make_lifted_expr_ckernel(const ckernel_deferred *elwise_handler,
     intptr_t src_count = elwise_handler->data_types_size - 1;
     const char *dst_metadata = *dynd_metadata;
     const char *const*src_metadata = dynd_metadata + 1;
+
+    // Check if no lifting is required
+    if (dst_tp == elwise_handler->data_dynd_types[0]) {
+        intptr_t i = 0;
+        for (; i < src_count; ++i) {
+            if (src_tp[i] != elwise_handler->data_dynd_types[i+1]) {
+                break;
+            }
+        }
+        if (i == src_count) {
+            // All the types matched, call the elementwise instantiate directly
+            return elwise_handler->instantiate_func(elwise_handler->data_ptr,
+                            out_ckb, ckb_offset,
+                            dynd_metadata, kernreq);
+        }
+    }
+
     // Do a pass through the src types to classify them
     bool src_all_strided = true, src_all_strided_or_var = true;
     for (intptr_t i = 0; i < src_count; ++i) {
@@ -821,22 +843,6 @@ size_t dynd::make_lifted_expr_ckernel(const ckernel_deferred *elwise_handler,
             break;
         default:
             break;
-    }
-
-    // Check if no lifting is required
-    if (dst_tp == elwise_handler->data_dynd_types[0]) {
-        intptr_t i = 0;
-        for (; i < src_count; ++i) {
-            if (src_tp[i] != elwise_handler->data_dynd_types[i+1]) {
-                break;
-            }
-        }
-        if (i == src_count) {
-            // All the types matched, call the elementwise instantiate directly
-            return elwise_handler->instantiate_func(elwise_handler->data_ptr,
-                            out_ckb, ckb_offset,
-                            dynd_metadata, kernreq);
-        }
     }
 
     stringstream ss;
