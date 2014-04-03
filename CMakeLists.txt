@@ -495,7 +495,7 @@ endif()
 execute_process(COMMAND ${CMAKE_COMMAND} -E make_directory ${CMAKE_CURRENT_BINARY_DIR}/include/dynd/pp)
 add_executable(ppgen include/dynd/pp/gen.cpp)
 add_custom_command(OUTPUT gen.hpp COMMAND ppgen 8 3 ${CMAKE_CURRENT_BINARY_DIR}/include/dynd/pp)
-add_custom_target(ppgen_run ALL DEPENDS gen.hpp)
+add_custom_target(ppgen_run ALL DEPENDS include/dynd/pp/gen.cpp CMakeLists.txt)
 # Make libdynd depend on ppgen to make sure gen.hpp is there when it builds
 add_dependencies(libdynd ppgen)
 
