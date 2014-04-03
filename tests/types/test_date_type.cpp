@@ -867,6 +867,29 @@ TEST(DateYMD, SetFromStr) {
     EXPECT_EQ(d.year, 2005);
     EXPECT_EQ(d.month, 3);
     EXPECT_EQ(d.day, 2);
+
+    // Two digit years, resolved with a sliding window starting 70 years ago
+    d.set_from_str("01-02-99", true);
+    EXPECT_EQ(d.year, 1999);
+    EXPECT_EQ(d.month, 1);
+    EXPECT_EQ(d.day, 2);
+    d.set_from_str("01/dec/99", true);
+    EXPECT_EQ(d.year, 1999);
+    EXPECT_EQ(d.month, 12);
+    EXPECT_EQ(d.day, 1);
+    d.set_from_str("2-MAR-03", true);
+    EXPECT_EQ(d.year, 2003);
+    EXPECT_EQ(d.month, 3);
+    EXPECT_EQ(d.day, 2);
+    d.set_from_str("January 10, 98");
+    EXPECT_EQ(d.year, 1998);
+    EXPECT_EQ(d.month, 1);
+    EXPECT_EQ(d.day, 10);
+    d.set_from_str("12.4.03", false);
+    EXPECT_EQ(d.year, 2003);
+    EXPECT_EQ(d.month, 4);
+    EXPECT_EQ(d.day, 12);
+
 }
 
 TEST(DateYMD, SetFromStr_Errors) {
@@ -893,4 +916,39 @@ TEST(DateYMD, SetFromStr_Errors) {
     EXPECT_THROW(d.set_from_str("14-02-2003"), invalid_argument);
     EXPECT_THROW(d.set_from_str("14/02/2003"), invalid_argument);
     EXPECT_THROW(d.set_from_str("14.02.2003"), invalid_argument);
+    // Rejecting two digit years if set to disallow
+    EXPECT_THROW(d.set_from_str("01-02-99", true, false), invalid_argument);
+    EXPECT_THROW(d.set_from_str("01-Feb-99", false, false), invalid_argument);
+}
+
+TEST(DateYMD, TwoDigitYear_FixedWindow) {
+    EXPECT_EQ(1944, date_ymd::resolve_2digit_year_fixed_window(44, 1929));
+    EXPECT_EQ(2000, date_ymd::resolve_2digit_year_fixed_window(0, 1929));
+
+    // Just before/after the window boundary
+    EXPECT_EQ(1929, date_ymd::resolve_2digit_year_fixed_window(29, 1929));
+    EXPECT_EQ(2028, date_ymd::resolve_2digit_year_fixed_window(28, 1929));
+
+    // End/beginning of the century
+    EXPECT_EQ(1999, date_ymd::resolve_2digit_year_fixed_window(99, 1929));
+    EXPECT_EQ(2000, date_ymd::resolve_2digit_year_fixed_window(0, 1929));
+
+    // Window starting on a century boundary
+    EXPECT_EQ(1200, date_ymd::resolve_2digit_year_fixed_window(0, 1200));
+    EXPECT_EQ(1299, date_ymd::resolve_2digit_year_fixed_window(99, 1200));
+}
+
+TEST(DateYMD, TwoDigitYear_SlidingWindow) {
+    // NOTE: These tests should start to fail in the year 2030,
+    //       and will need to be updated then.
+
+    // Sliding window starting 70 years ago
+    EXPECT_EQ(1960, date_ymd::resolve_2digit_year_sliding_window(60, 70));
+    EXPECT_EQ(1999, date_ymd::resolve_2digit_year_sliding_window(99, 70));
+    EXPECT_EQ(2043, date_ymd::resolve_2digit_year_sliding_window(43, 70));
+
+    // Sliding window starting 20 years ago
+    EXPECT_EQ(2010, date_ymd::resolve_2digit_year_sliding_window(10, 20));
+    EXPECT_EQ(2050, date_ymd::resolve_2digit_year_sliding_window(50, 20));
+    EXPECT_EQ(2093, date_ymd::resolve_2digit_year_sliding_window(93, 20));
 }

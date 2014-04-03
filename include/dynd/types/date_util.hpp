@@ -15,6 +15,7 @@
 #define DYND_DATE_NA (std::numeric_limits<int32_t>::min())
 
 #define DYND_TICKS_PER_DAY (24LL * 60LL * 60LL * 10000000LL)
+#define DYND_SECONDS_PER_DAY (24LL * 60LL * 60LL)
 
 namespace dynd {
 
@@ -155,6 +156,8 @@ struct date_ymd {
     /**
      * Sets the year/month/day from a string. Accepts a wide variety of
      * inputs, but rejects ambiguous formats like MM/DD/YY vs DD/MM/YY.
+     * Two digit years are handled with a sliding window starting 70 years
+     * ago.
      *
      * \param s  Date string.
      */
@@ -167,8 +170,42 @@ struct date_ymd {
      *
      * \param s  Date string.
      * \param monthfirst  If true, expect MM/DD/YY, otherwise expect DD/MM/YY.
+     * \param allow_2digit_year  If true, uses a sliding window starting 70 years ago
+     *                           to resolve two digit years.  Defaults to true.
      */
-    void set_from_str(const std::string& s, bool monthfirst);
+    void set_from_str(const std::string &s, bool monthfirst,
+                      bool allow_2digit_year = true);
+
+    /**
+     * When a year is a two digit year that should be resolved as a four
+     * digit year, this function provides the resolution
+     * using a fixed window strategy. The window is from `year_start` to
+     * 100 years later.
+     *
+     * \param year  The year to apply the fixed window to.
+     * \param year_start  The year at which the window starts.
+     *
+     * \returns  The adjusted year.
+     */
+    static int resolve_2digit_year_fixed_window(int year, int year_start);
+
+    /**
+     * When a year is a two digit year that should be resolved as a four
+     * digit year, this function provides the resolution
+     * using a sliding window strategy. The window is from
+     * the current year with `years_ago` years subtracted from it, and is
+     * one century long.
+     *
+     * This function simply retrieves the current year, and calls the variant
+     * with selectable `year_start`.
+     *
+     * \param year  The year to apply the sliding window to.
+     * \param years_ago  The number of years before the current date for the
+     *                   start of the window. Defaults to a 70 years.
+     *
+     * \returns  The adjusted year.
+     */
+    static int resolve_2digit_year_sliding_window(int year, int years_ago=70);
 
     /**
      * Returns the current date in the local time zone.

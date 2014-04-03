@@ -33,11 +33,15 @@ enum date_parser_ambiguous_t {
  * \param out_ymd  The date to fill.
  * \param ambig  How to handle the 01/02/2003 ambiguity. Defaults to disallow,
  *                   can also be dayfirst or monthfirst.
+ * \param allow_2digit_year  If true, allows 2 digit years resolved with a sliding
+ *                           window starting 70 years ago. Defaults to true.
  *
  * \returns  True if the parse is successful, false otherwise.
  */
-bool string_to_date(const char *begin, const char *end, date_ymd &out_ymd,
-                    date_parser_ambiguous_t ambig=date_parser_ambiguous_disallow);
+bool
+string_to_date(const char *begin, const char *end, date_ymd &out_ymd,
+               date_parser_ambiguous_t ambig = date_parser_ambiguous_disallow,
+               bool allow_2digit_year = true);
 
 namespace parse {
 
@@ -52,11 +56,13 @@ namespace parse {
      * \param out_ymd  If true is returned, this has been filled with the parsed
      *                 date.
      * \param ambig  How to handle the 01/02/2003 ambiguity.
+     * \param allow_2digit_year  If true, allows 2 digit years resolved with a sliding
+     *                           window starting 70 years ago.
      *
      * \returns  True if a date was parsed successfully, false otherwise.
      */
     bool parse_date(const char *&begin, const char *end, date_ymd &out_ymd,
-                    date_parser_ambiguous_t ambig);
+                    date_parser_ambiguous_t ambig, bool allow_2digit_year);
 
 } // namespace parse
 
