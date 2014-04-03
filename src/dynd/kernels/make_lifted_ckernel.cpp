@@ -81,7 +81,7 @@ static size_t make_elwise_strided_dimension_expr_kernel_for_N(
                 kernel_request_t kernreq,
                 const ckernel_deferred *elwise_handler)
 {
-    intptr_t undim = dst_tp.get_ndim();
+    intptr_t undim = dst_tp.get_ndim() - elwise_handler->data_dynd_types[0].get_ndim();
     const char *child_metadata[N+1];
     ndt::type child_tp[N+1];
     intptr_t ckb_child_offset = ckb_offset + sizeof(strided_expr_kernel_extra<N>);
@@ -120,7 +120,7 @@ static size_t make_elwise_strided_dimension_expr_kernel_for_N(
     }
     for (int i = 0; i < N; ++i) {
         // The src[i] strided parameters
-        if (src_tp[i].get_ndim() < undim) {
+        if (src_tp[i].get_ndim() - elwise_handler->data_dynd_types[i+1].get_ndim() < undim) {
             // This src value is getting broadcasted
             e->src_stride[i] = 0;
             child_metadata[i + 1] = src_metadata[i];
@@ -301,7 +301,7 @@ static size_t make_elwise_strided_or_var_to_strided_dimension_expr_kernel_for_N(
                 kernel_request_t kernreq,
                 const ckernel_deferred *elwise_handler)
 {
-    intptr_t undim = dst_tp.get_ndim();
+    intptr_t undim = dst_tp.get_ndim() - elwise_handler->data_dynd_types[0].get_ndim();
     const char *child_metadata[N+1];
     ndt::type child_tp[N+1];
     intptr_t ckb_child_offset = ckb_offset + sizeof(strided_or_var_to_strided_expr_kernel_extra<N>);
@@ -341,7 +341,7 @@ static size_t make_elwise_strided_or_var_to_strided_dimension_expr_kernel_for_N(
     }
     for (int i = 0; i < N; ++i) {
         // The src[i] strided parameters
-        if (src_tp[i].get_ndim() < undim) {
+        if (src_tp[i].get_ndim() - elwise_handler->data_dynd_types[i+1].get_ndim() < undim) {
             // This src value is getting broadcasted
             e->src_stride[i] = 0;
             e->src_offset[i] = 0;
@@ -610,7 +610,7 @@ static size_t make_elwise_strided_or_var_to_var_dimension_expr_kernel_for_N(
                 kernel_request_t kernreq,
                 const ckernel_deferred *elwise_handler)
 {
-    intptr_t undim = dst_tp.get_ndim();
+    intptr_t undim = dst_tp.get_ndim() - elwise_handler->data_dynd_types[0].get_ndim();
     const char *child_metadata[N+1];
     ndt::type child_tp[N+1];
     intptr_t ckb_child_offset = ckb_offset + sizeof(strided_or_var_to_var_expr_kernel_extra<N>);
@@ -647,7 +647,7 @@ static size_t make_elwise_strided_or_var_to_var_dimension_expr_kernel_for_N(
 
     for (int i = 0; i < N; ++i) {
         // The src[i] strided parameters
-        if (src_tp[i].get_ndim() < undim) {
+        if (src_tp[i].get_ndim() - elwise_handler->data_dynd_types[i+1].get_ndim() < undim) {
             // This src value is getting broadcasted
             e->src_stride[i] = 0;
             e->src_offset[i] = 0;
