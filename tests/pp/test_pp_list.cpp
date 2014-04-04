@@ -256,47 +256,47 @@ TEST(PPList, Del) {
 }
 
 TEST(PPList, Map) {
-    EXPECT_TRUE(DYND_PP_IS_NULL(DYND_PP_MAP(DYND_PP_ID, (,), ())));
-    EXPECT_TRUE(DYND_PP_IS_NULL(DYND_PP_MAP(DYND_PP_INC, (;), ())));
+    EXPECT_TRUE(DYND_PP_IS_NULL(DYND_PP_OLD_MAP(DYND_PP_ID, (,), ())));
+    EXPECT_TRUE(DYND_PP_IS_NULL(DYND_PP_OLD_MAP(DYND_PP_INC, (;), ())));
 
-    EXPECT_TRUE(DYND_PP_ALL_EQ((DYND_PP_MAP(DYND_PP_ID, (,), (0))), (0)));
+    EXPECT_TRUE(DYND_PP_ALL_EQ((DYND_PP_OLD_MAP(DYND_PP_ID, (,), (0))), (0)));
 
-    EXPECT_TRUE(DYND_PP_ALL_EQ((DYND_PP_MAP(DYND_PP_ID, (,), (A, B))), (A, B)));
+    EXPECT_TRUE(DYND_PP_ALL_EQ((DYND_PP_OLD_MAP(DYND_PP_ID, (,), (A, B))), (A, B)));
 
 #define MAC(A) DYND_PP_CAT((x, A, y))
 #define DYND_PP_xAy_EQ_xAy
 #define DYND_PP_xBy_EQ_xBy
-    EXPECT_TRUE(DYND_PP_ALL_EQ((DYND_PP_MAP(MAC, (,), (A, B))), (xAy, xBy)));
+    EXPECT_TRUE(DYND_PP_ALL_EQ((DYND_PP_OLD_MAP(MAC, (,), (A, B))), (xAy, xBy)));
 #undef MAC
 #undef DYND_PP_xAy_EQ_xAy
 #undef DYND_PP_xBy_EQ_xBy
 
-    EXPECT_TRUE(DYND_PP_ALL_EQ((DYND_PP_MAP(DYND_PP_ID, (,), (0, 1))), (0, 1)));
+    EXPECT_TRUE(DYND_PP_ALL_EQ((DYND_PP_OLD_MAP(DYND_PP_ID, (,), (0, 1))), (0, 1)));
 
 #define MAC(A) DYND_PP_REDUCE(DYND_PP_ADD, DYND_PP_RANGE(A))
-    EXPECT_TRUE(DYND_PP_ALL_EQ((DYND_PP_MAP(MAC, (,), (2, 3, 4))), (1, 3, 6)));
+    EXPECT_TRUE(DYND_PP_ALL_EQ((DYND_PP_OLD_MAP(MAC, (,), (2, 3, 4))), (1, 3, 6)));
 #undef MAC
 
-    EXPECT_TRUE(DYND_PP_IS_NULL(DYND_PP_MAP(DYND_PP_TO_NULL, (), (C, A, F, H, B, E, G, D))));
-    EXPECT_TRUE(DYND_PP_ALL_EQ((DYND_PP_MAP(DYND_PP_ID, (,), (C, A, F, H, B, E, G, D))),
+    EXPECT_TRUE(DYND_PP_IS_NULL(DYND_PP_OLD_MAP(DYND_PP_TO_NULL, (), (C, A, F, H, B, E, G, D))));
+    EXPECT_TRUE(DYND_PP_ALL_EQ((DYND_PP_OLD_MAP(DYND_PP_ID, (,), (C, A, F, H, B, E, G, D))),
         (C, A, F, H, B, E, G, D)));
 
-    EXPECT_TRUE(DYND_PP_ALL_EQ((DYND_PP_MAP(DYND_PP_DEC, (,), (5, 1, 4, 3, 7, 1, 2, 6))),
+    EXPECT_TRUE(DYND_PP_ALL_EQ((DYND_PP_OLD_MAP(DYND_PP_DEC, (,), (5, 1, 4, 3, 7, 1, 2, 6))),
         (4, 0, 3, 2, 6, 0, 1, 5)));
-    EXPECT_TRUE(DYND_PP_MAP(DYND_PP_NOT, (||), (0, 1, 2, 3, 4, 5, 6, 7)));
-    EXPECT_FALSE(DYND_PP_MAP(DYND_PP_NOT, (&&), (1, 1, 2, 3, 4, 5, 6, 7)));
-    EXPECT_EQ(DYND_PP_MAP(DYND_PP_ID, (+), (0, 1, 2, 3, 4, 5, 6, 7)), 28);
-    EXPECT_EQ(DYND_PP_MAP(DYND_PP_INC, (+), (0, 1, 2, 3, 4, 5, 6, 7)), 36);
+    EXPECT_TRUE(DYND_PP_OLD_MAP(DYND_PP_NOT, (||), (0, 1, 2, 3, 4, 5, 6, 7)));
+    EXPECT_FALSE(DYND_PP_OLD_MAP(DYND_PP_NOT, (&&), (1, 1, 2, 3, 4, 5, 6, 7)));
+    EXPECT_EQ(DYND_PP_OLD_MAP(DYND_PP_ID, (+), (0, 1, 2, 3, 4, 5, 6, 7)), 28);
+    EXPECT_EQ(DYND_PP_OLD_MAP(DYND_PP_INC, (+), (0, 1, 2, 3, 4, 5, 6, 7)), 36);
 
-    EXPECT_TRUE(DYND_PP_ALL_EQ((DYND_PP_MAP(DYND_PP_ID, (,), DYND_PP_RANGE(DYND_PP_LEN_MAX))),
+    EXPECT_TRUE(DYND_PP_ALL_EQ((DYND_PP_OLD_MAP(DYND_PP_ID, (,), DYND_PP_RANGE(DYND_PP_LEN_MAX))),
         DYND_PP_RANGE(DYND_PP_LEN_MAX)));
 
 #define MAC(A) (1 << A)
-    EXPECT_EQ(DYND_PP_MAP(MAC, (+), DYND_PP_RANGE(DYND_PP_LEN_MAX)), MAC(DYND_PP_LEN_MAX) - 1);
+    EXPECT_EQ(DYND_PP_OLD_MAP(MAC, (+), DYND_PP_RANGE(DYND_PP_LEN_MAX)), MAC(DYND_PP_LEN_MAX) - 1);
 #undef MAC
 
-#define MAC(A) DYND_PP_NESTED_MAP(1)(DYND_PP_INC, (+), DYND_PP_RANGE(DYND_PP_INC(A)))
-    int a[] = {DYND_PP_MAP(MAC, (,), DYND_PP_RANGE(DYND_PP_LEN_MAX))};
+#define MAC(A) DYND_PP_NESTED_OLD_MAP(1)(DYND_PP_INC, (+), DYND_PP_RANGE(DYND_PP_INC(A)))
+    int a[] = {DYND_PP_OLD_MAP(MAC, (,), DYND_PP_RANGE(DYND_PP_LEN_MAX))};
     EXPECT_EQ(a[0], 1);
     for (int i = 1; i < DYND_PP_LEN_MAX; i++) {
         EXPECT_EQ(a[i], a[i - 1] + i + 1);
