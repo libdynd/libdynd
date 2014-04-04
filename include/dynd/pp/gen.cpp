@@ -222,21 +222,34 @@ int main(int argc, char **argv) {
 
     fout << endl;
 
-    fout << "#define DYND_PP_MAP DYND_PP_NESTED_MAP(0)" << endl;
-    fout << "#define DYND_PP_NESTED_MAP(DEPTH) DYND_PP_PASTE(DYND_PP_NESTED_MAP_, DEPTH)" << endl;
+    fout << "#define DYND_PP_MAP DYND_PP_MAP_0" << endl;
     for (int depth = 0; depth <= pp_dep_max; depth++) {
-        fout << "#define DYND_PP_NESTED_MAP_" << depth << "(MAC, SEP, A) ";
-        fout << "DYND_PP_PASTE(DYND_PP_NESTED_MAP_" << depth << "_ , DYND_PP_LEN(A))(MAC, SEP, A)" << endl;
-        fout << "#define DYND_PP_NESTED_MAP_" << depth << "_" << "0(MAC, SEP, A)" << endl;
-        fout << "#define DYND_PP_NESTED_MAP_" << depth << "_" << "1(MAC, SEP, A) MAC(DYND_PP_FIRST(A))" << endl;
+        fout << "#define DYND_PP_MAP_" << depth << "(MAC, A) ";
+        fout << "DYND_PP_PASTE(DYND_PP_MAP_" << depth << "_ , DYND_PP_LEN(A))(MAC, A)" << endl;
+        fout << "#define DYND_PP_MAP_" << depth << "_" << "0(MAC, A)" << endl;
+        fout << "#define DYND_PP_MAP_" << depth << "_" << "1(MAC, A) (MAC(DYND_PP_FIRST(A)))" << endl;
         for (int len = 2; len <= pp_len_max; len++) {
-            fout << "#define DYND_PP_NESTED_MAP_" << depth << "_" << len << "(MAC, SEP, A) ";
-            fout << "MAC(DYND_PP_FIRST(A)) DYND_PP_ID SEP DYND_PP_NESTED_MAP_";
-            fout << depth << "_" << len - 1 << "(MAC, SEP, DYND_PP_POP_FIRST(A))" << endl;
+            fout << "#define DYND_PP_MAP_" << depth << "_" << len << "(MAC, A) ";
+            fout << "DYND_PP_PREPEND(MAC(DYND_PP_FIRST(A)), DYND_PP_MAP_";
+            fout << depth << "_" << len - 1 << "(MAC, DYND_PP_POP_FIRST(A)))" << endl;
         }
     }
 
     fout << endl;
+
+    fout << "#define DYND_PP_OLD_MAP DYND_PP_NESTED_OLD_MAP(0)" << endl;
+    fout << "#define DYND_PP_NESTED_OLD_MAP(DEPTH) DYND_PP_PASTE(DYND_PP_NESTED_OLD_MAP_, DEPTH)" << endl;
+    for (int depth = 0; depth <= pp_dep_max; depth++) {
+        fout << "#define DYND_PP_NESTED_OLD_MAP_" << depth << "(MAC, SEP, A) ";
+        fout << "DYND_PP_PASTE(DYND_PP_NESTED_OLD_MAP_" << depth << "_ , DYND_PP_LEN(A))(MAC, SEP, A)" << endl;
+        fout << "#define DYND_PP_NESTED_OLD_MAP_" << depth << "_" << "0(MAC, SEP, A)" << endl;
+        fout << "#define DYND_PP_NESTED_OLD_MAP_" << depth << "_" << "1(MAC, SEP, A) MAC(DYND_PP_FIRST(A))" << endl;
+        for (int len = 2; len <= pp_len_max; len++) {
+            fout << "#define DYND_PP_NESTED_OLD_MAP_" << depth << "_" << len << "(MAC, SEP, A) ";
+            fout << "MAC(DYND_PP_FIRST(A)) DYND_PP_ID SEP DYND_PP_NESTED_OLD_MAP_";
+            fout << depth << "_" << len - 1 << "(MAC, SEP, DYND_PP_POP_FIRST(A))" << endl;
+        }
+    }
 
     fout << "#define DYND_PP_REDUCE DYND_PP_NESTED_REDUCE(0)" << endl;
     fout << "#define DYND_PP_NESTED_REDUCE(DEPTH) DYND_PP_PASTE(DYND_PP_NESTED_REDUCE_, DEPTH)" << endl;
@@ -257,6 +270,30 @@ int main(int argc, char **argv) {
     for (int i = 2; i <= pp_len_max; i++) {
         fout << "#define DYND_PP_ELEMENTWISE_" << i << "(MAC, A, B) DYND_PP_PREPEND(MAC(DYND_PP_FIRST(A), DYND_PP_FIRST(B)), DYND_PP_ELEMENTWISE_" << i - 1;
         fout << "(MAC, DYND_PP_POP_FIRST(A), DYND_PP_POP_FIRST(B)))" << endl;
+    }
+
+    fout << endl;
+
+    fout << "#define DYND_PP_ARRAY_DIMS(A) DYND_PP_PASTE(DYND_PP_ARRAY_DIMS_, DYND_PP_LEN(A))(DYND_PP_ID(A))" << endl;
+    fout << "#define DYND_PP_ARRAY_DIMS_1(A) [DYND_PP_FIRST(A)]" << endl;
+    for (int i = 2; i <= pp_len_max; i++) {
+        fout << "#define DYND_PP_ARRAY_DIMS_" << i << "(A) [DYND_PP_FIRST(A)]";
+        fout << "DYND_PP_ARRAY_DIMS_" << i - 1 << "(DYND_PP_POP_FIRST(A))" << endl;
+    }
+
+    fout << endl;
+
+    fout << "#define DYND_PP_JOIN DYND_PP_JOIN_0" << endl;
+    for (int depth = 0; depth <= pp_dep_max; depth++) {
+        fout << "#define DYND_PP_JOIN_" << depth << "(SEP, A) ";
+        fout << "DYND_PP_PASTE(DYND_PP_JOIN_" << depth << "_ , DYND_PP_LEN(A))(SEP, A)" << endl;
+        fout << "#define DYND_PP_JOIN_" << depth << "_" << "0(SEP, A)" << endl;
+        fout << "#define DYND_PP_JOIN_" << depth << "_" << "1(SEP, A) DYND_PP_FIRST(A)" << endl;
+        for (int len = 2; len <= pp_len_max; len++) {
+            fout << "#define DYND_PP_JOIN_" << depth << "_" << len << "(SEP, A) ";
+            fout << "DYND_PP_FIRST(A) DYND_PP_ID SEP DYND_PP_JOIN_";
+            fout << depth << "_" << len - 1 << "(SEP, DYND_PP_POP_FIRST(A))" << endl;
+        }
     }
 
     fout << endl;

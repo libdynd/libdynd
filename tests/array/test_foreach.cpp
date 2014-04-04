@@ -44,9 +44,15 @@ TEST(ArrayViews, IntFunc) {
 
 void vecintfunc(int (&out)[2], int x, int y)
 {
-    cout << "called with x " << x << ", y " << y << endl;
     out[0] = y;
     out[1] = x;
+}
+
+void vecintfunc2(int (&out)[3], int x, int y, int z)
+{
+    out[0] = y;
+    out[1] = x;
+    out[2] = z;
 }
 
 TEST(ArrayViews, VecIntFunc) {
@@ -69,6 +75,18 @@ TEST(ArrayViews, VecIntFunc) {
         for (int j = 0; j < 3; ++j) {
             EXPECT_EQ(bval0[j], c(i,j,0).as<int>());
             EXPECT_EQ(aval0[i][j], c(i,j,1).as<int>());
+        }
+    }
+
+    c = nd::foreach(a, b, b, vecintfunc2);
+    EXPECT_EQ(ndt::type("strided * strided * 3 * int32"), c.get_type());
+    ASSERT_EQ(2, c.get_shape()[0]);
+    ASSERT_EQ(3, c.get_shape()[1]);
+    for (int i = 0; i < 2; ++i) {
+        for (int j = 0; j < 3; ++j) {
+            EXPECT_EQ(bval0[j], c(i,j,0).as<int>());
+            EXPECT_EQ(aval0[i][j], c(i,j,1).as<int>());
+            EXPECT_EQ(bval0[j], c(i,j,2).as<int>());
         }
     }
 }
