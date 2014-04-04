@@ -15,7 +15,69 @@ using namespace std;
 using namespace dynd;
 using namespace dynd::parse;
 
-bool parse::parse_datetime(const char *&begin, const char *end,
+// Fri Dec 19 15:10:11 1997, Fri 19 Dec 15:10:11 1997
+static bool parse_postgres_datetime(const char *&begin, const char *end,
+                                    datetime_struct &out_dt)
+{
+    saved_begin_state sbs(begin);
+
+    // "Fri "
+    int weekday;
+    if (!parse_str_weekday_no_ws(begin, end, weekday)) {
+        return sbs.fail();
+    }
+    if (!skip_required_whitespace(begin, end)) {
+        return sbs.fail();
+    }
+    // "Dec 19 " or "19 Dec "
+    int month, day;
+    if (parse_1or2digit_int_no_ws(begin, end, day)) {
+        if (!skip_required_whitespace(begin, end)) {
+            return sbs.fail();
+        }
+        if (!parse_str_month_no_ws(begin, end, month)) {
+            return sbs.fail();
+        }
+    } else if (parse_str_month_no_ws(begin, end, month)) {
+        if (!skip_required_whitespace(begin, end)) {
+            return sbs.fail();
+        }
+        if (!parse_1or2digit_int_no_ws(begin, end, day)) {
+            return sbs.fail();
+        }
+    } else {
+        return sbs.fail();
+    }
+    if (!skip_required_whitespace(begin, end)) {
+        return sbs.fail();
+    }
+    // "15:10:11 "
+    if (!parse_time(begin, end, out_dt.hmst)) {
+        return sbs.fail();
+    }
+    if (!skip_required_whitespace(begin, end)) {
+        return sbs.fail();
+    }
+    // "1997"
+    int year;
+    if (!parse_4digit_int_no_ws(begin, end, year)) {
+        return sbs.fail();
+    }
+    if (date_ymd::is_valid(year, month, day)) {
+        out_dt.ymd.year = year;
+        out_dt.ymd.month = month;
+        out_dt.ymd.day = day;
+        if (out_dt.ymd.get_weekday() != weekday) {
+            return sbs.fail();
+        }
+        return sbs.succeed();
+    } else {
+        return sbs.fail();
+    }
+}
+
+// <date> T <time>, <date>:<time>, <date> <time>
+static bool parse_date_time_datetime(const char *&begin, const char *end,
                            datetime_struct &out_dt,
                            date_parser_ambiguous_t ambig,
                            bool allow_2digit_year)
@@ -25,8 +87,11 @@ bool parse::parse_datetime(const char *&begin, const char *end,
     if (!parse_date(begin, end, out_dt.ymd, ambig, allow_2digit_year)) {
         return sbs.fail();
     }
-    // Either a "T" or whitespace may separate a date and a time
-    if (!parse_token_no_ws(begin, end, 'T') &&
+    // "T", ":', or whitespace may separate a date and a time
+    if (parse_token(begin, end, 'T')) {
+        // Allow whitespace around the T
+        skip_whitespace(begin, end);
+    } else if (!parse_token_no_ws(begin, end, ':') &&
             !skip_required_whitespace(begin, end)) {
         return sbs.fail();
     }
@@ -59,6 +124,21 @@ bool parse::parse_datetime(const char *&begin, const char *end,
         }
     }
     return sbs.succeed();
+}
+
+bool parse::parse_datetime(const char *&begin, const char *end,
+                           datetime_struct &out_dt,
+                           date_parser_ambiguous_t ambig,
+                           bool allow_2digit_year)
+{
+    if (parse_date_time_datetime(begin, end, out_dt, ambig, allow_2digit_year)) {
+        // <date>T<time>, <date> <time>
+    } else if (parse_postgres_datetime(begin, end, out_dt)) {
+        // Fri Dec 19 15:10:11 1997, Fri 19 Dec 15:10:11 1997
+    } else {
+        return false;
+    }
+    return true;
 }
 
 bool dynd::string_to_datetime(const char *begin, const char *end,

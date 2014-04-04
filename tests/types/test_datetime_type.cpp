@@ -147,3 +147,26 @@ TEST(DateTimeDType, Properties) {
     EXPECT_EQ(14, n.p("second").as<int32_t>());
     EXPECT_EQ(1236540, n.p("tick").as<int32_t>());
 }
+
+TEST(DateTimeStruct, FromToString) {
+    datetime_struct dts;
+
+    dts.set_from_str("1991-02-03 04:05:06");
+    EXPECT_EQ("1991-02-03T04:05:06", dts.to_str());
+    dts.set_from_str("11/12/1822 06:47:26.00", true);
+    EXPECT_EQ("1822-11-12T06:47:26", dts.to_str());
+    dts.set_from_str("Fri Dec 19 15:10:11 1997");
+    EXPECT_EQ("1997-12-19T15:10:11", dts.to_str());
+    dts.set_from_str("Friday, November 11, 2005 17:56:21");
+    EXPECT_EQ("2005-11-11T17:56:21", dts.to_str());
+    dts.set_from_str("1982-2-20 5:02:00");
+    EXPECT_EQ("1982-02-20T05:02", dts.to_str());
+    dts.set_from_str("15MAR1985:14:15:22");
+    EXPECT_EQ("1985-03-15T14:15:22", dts.to_str());
+    dts.set_from_str("20030331 05:59:59.9");
+    EXPECT_EQ("2003-03-31T05:59:59.9", dts.to_str());
+    dts.set_from_str("Jul  6 2030  5:55PM");
+    EXPECT_EQ("2030-07-06T17:55", dts.to_str());
+    dts.set_from_str("1994-10-20 T 11:15");
+    EXPECT_EQ("1994-10-20T11:15", dts.to_str());
+}

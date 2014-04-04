@@ -230,7 +230,7 @@ void datetime_type::get_dynamic_type_properties(const std::pair<std::string, gfu
 
 ///////// functions on the type
 
-static nd::array function_type_now(const ndt::type& dt) {
+static nd::array function_type_now(const ndt::type& DYND_UNUSED(dt)) {
     throw runtime_error("TODO: implement datetime.now function");
     //datetime_struct dts;
     //fill_current_local_datetime(&fields);

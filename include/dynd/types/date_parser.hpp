@@ -77,6 +77,41 @@ namespace parse {
     bool parse_iso8601_dashes_date(const char *&begin, const char *end,
                                    date_ymd &out_ymd);
 
+    /**
+     * Parses a string month: Jan == 1, Dec == 12.
+     *
+     * \param begin  The start of a range of UTF-8 characters. This is modified
+     *               to point immediately after the parsed value if true is returned.
+     * \param end  The end of a range of UTF-8 characters.
+     * \param out_month  If true is returned, this has been filled with the parsed
+     *                   month.
+     */
+    bool parse_str_month_no_ws(const char *&begin, const char *end, int &out_month);
+
+    /**
+     * Parses a string month: Jan == 1, Dec == 12. Accepts a period after month
+     * abbreviations like "Jan.".
+     *
+     * \param begin  The start of a range of UTF-8 characters. This is modified
+     *               to point immediately after the parsed value if true is returned.
+     * \param end  The end of a range of UTF-8 characters.
+     * \param out_month  If true is returned, this has been filled with the parsed
+     *                   month.
+     */
+    bool parse_str_month_punct_no_ws(const char *&begin, const char *end, int &out_month);
+
+    /**
+     * Parses a string weekday: Mon == 0, Sun == 6.
+     *
+     * \param begin  The start of a range of UTF-8 characters. This is modified
+     *               to point immediately after the parsed value if true is returned.
+     * \param end  The end of a range of UTF-8 characters.
+     * \param out_weekday  If true is returned, this has been filled with the parsed
+     *                   weekday.
+     */
+    bool parse_str_weekday_no_ws(const char *&begin, const char *end,
+                           int &out_weekday);
+
 } // namespace parse
 
 } // namespace dynd

@@ -105,9 +105,9 @@ TEST(DateDType, BadInputStrings) {
     // Month must be in range [1,12]
     EXPECT_THROW(nd::array("1980-00").ucast(d).eval(), invalid_argument);
     EXPECT_THROW(nd::array("1980-13").ucast(d).eval(), invalid_argument);
-    // Month must have two digits
+    // Month must have one or two digits
     EXPECT_THROW(nd::array("1980-1").ucast(d).eval(), invalid_argument);
-    EXPECT_THROW(nd::array("1980-1-02").ucast(d).eval(), invalid_argument);
+    EXPECT_THROW(nd::array("1980-1-023").ucast(d).eval(), invalid_argument);
     // 'Mor' is not a valid month
     EXPECT_THROW(nd::array("1980-Mor").ucast(d).eval(), invalid_argument);
     // Cannot have trailing '-'
@@ -718,6 +718,8 @@ TEST(DateYMD, SetFromStr) {
     EXPECT_EQ(d.year, 25000);
     EXPECT_EQ(d.month, 3);
     EXPECT_EQ(d.day, 12);
+    d.set_from_str("20081231");
+    EXPECT_EQ("2008-12-31", d.to_str());
 
     // year-month-day with a string month
     d.set_from_str("1993-OCT-12");
@@ -797,13 +799,21 @@ TEST(DateYMD, SetFromStr) {
     EXPECT_EQ(d.month, 6);
     EXPECT_EQ(d.day, 5);
     d.set_from_str("  jul  16,\t3022 ");
-    EXPECT_EQ(d.year, 3022);
-    EXPECT_EQ(d.month, 7);
-    EXPECT_EQ(d.day, 16);
+    EXPECT_EQ("3022-07-16", d.to_str());
     d.set_from_str("Monday, 01-Aug-2011");
-    EXPECT_EQ(d.year, 2011);
-    EXPECT_EQ(d.month, 8);
-    EXPECT_EQ(d.day, 1);
+    EXPECT_EQ("2011-08-01", d.to_str());
+    d.set_from_str("1982-2-20");
+    EXPECT_EQ("1982-02-20", d.to_str());
+    d.set_from_str("1982-2-3");
+    EXPECT_EQ("1982-02-03", d.to_str());
+    d.set_from_str("29Apr2002");
+    EXPECT_EQ("2002-04-29", d.to_str());
+    d.set_from_str("01SEP1990");
+    EXPECT_EQ("1990-09-01", d.to_str());
+    d.set_from_str("Jan. 2, 1960");
+    EXPECT_EQ("1960-01-02", d.to_str());
+    d.set_from_str("Jun 1,2008");
+    EXPECT_EQ("2008-06-01", d.to_str());
 
     // Parsing a datetime with the time == midnight is ok too, and
     // ignores the time zone
