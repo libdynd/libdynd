@@ -64,6 +64,19 @@ namespace parse {
     bool parse_date(const char *&begin, const char *end, date_ymd &out_ymd,
                     date_parser_ambiguous_t ambig, bool allow_2digit_year);
 
+    /**
+     * Parses a date in ISO 8601 dashes form like YYYY-MM-DD, +YYYYYY-MM-DD, or
+     * -YYYYYY-MM-DD.
+     *
+     * \param begin  The start of a range of UTF-8 characters. This is modified
+     *               to point immediately after the parsed date if true is returned.
+     * \param end  The end of a range of UTF-8 characters.
+     * \param out_ymd  If true is returned, this has been filled with the parsed
+     *                 date.
+     */
+    bool parse_iso8601_dashes_date(const char *&begin, const char *end,
+                                   date_ymd &out_ymd);
+
 } // namespace parse
 
 } // namespace dynd

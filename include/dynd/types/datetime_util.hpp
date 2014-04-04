@@ -42,24 +42,60 @@ struct datetime_struct {
     }
 
     int64_t to_ticks() const {
-        return ymd.to_days() * DYND_TICKS_PER_DAY + hmst.to_ticks();
+        if (is_valid()) {
+            return ymd.to_days() * DYND_TICKS_PER_DAY + hmst.to_ticks();
+        } else {
+            return DYND_DATETIME_NA;
+        }
     }
 
+    std::string to_str() const;
+
     void set_from_ticks(int64_t ticks) {
-        int32_t days;
-        if (ticks >= 0) {
-            days = static_cast<int32_t>(ticks / DYND_TICKS_PER_DAY);
-            ticks = ticks % DYND_TICKS_PER_DAY;
-        } else {
-            days = static_cast<int32_t>((ticks - (DYND_TICKS_PER_DAY - 1)) / DYND_TICKS_PER_DAY);
-            ticks = ticks % DYND_TICKS_PER_DAY;
-            if (ticks < 0) {
-                ticks += DYND_TICKS_PER_DAY;
+        if (ticks != DYND_DATETIME_NA) {
+            int32_t days;
+            if (ticks >= 0) {
+                days = static_cast<int32_t>(ticks / DYND_TICKS_PER_DAY);
+                ticks = ticks % DYND_TICKS_PER_DAY;
+            } else {
+                days = static_cast<int32_t>((ticks - (DYND_TICKS_PER_DAY - 1)) / DYND_TICKS_PER_DAY);
+                ticks = ticks % DYND_TICKS_PER_DAY;
+                if (ticks < 0) {
+                    ticks += DYND_TICKS_PER_DAY;
+                }
             }
+            ymd.set_from_days(days);
+            hmst.set_from_ticks(ticks);
+        } else {
+            set_to_na();
         }
-        ymd.set_from_days(days);
-        hmst.set_from_ticks(ticks);
     }
+
+    void set_to_na() {
+        ymd.set_to_na();
+    }
+
+    /**
+     * Sets the datetime from a string, which is a date followed by a time.
+     * Two digit years are handled with a sliding window starting 70 years
+     * ago.
+     *
+     * \param s  Datetime string.
+     */
+    void set_from_str(const std::string& s);
+
+    /**
+     * Sets the datetime from a string. Accepts a wide variety of
+     * inputs, and interprets ambiguous formats like MM/DD/YY vs DD/MM/YY
+     * using the monthfirst parameter.
+     *
+     * \param s  Datetime string.
+     * \param monthfirst  If true, expect MM/DD/YY, otherwise expect DD/MM/YY.
+     * \param allow_2digit_year  If true, uses a sliding window starting 70 years ago
+     *                           to resolve two digit years.  Defaults to true.
+     */
+    void set_from_str(const std::string &s, bool monthfirst,
+                      bool allow_2digit_year = true);
 
     /**
      * Returns an ndt::type corresponding to the datetime_struct structure.

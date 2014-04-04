@@ -153,6 +153,7 @@ struct date_ymd {
     inline void set_to_na() {
         month = -128;
     }
+
     /**
      * Sets the year/month/day from a string. Accepts a wide variety of
      * inputs, but rejects ambiguous formats like MM/DD/YY vs DD/MM/YY.

@@ -30,9 +30,14 @@ namespace {
         {
             extra_type *e = reinterpret_cast<extra_type *>(extra);
             const string& s = e->src_string_dt->get_utf8_string(e->src_metadata, src, e->errmode);
-            *reinterpret_cast<int64_t *>(dst) = datetime::parse_iso_8601_datetime(s, datetime::datetime_unit_tick,
-                                    e->dst_datetime_dt->get_timezone() == tz_abstract,
-                                    e->casting);
+            datetime_struct dts;
+            // TODO: properly distinguish "date" and "option[date]" with respect to NA support
+            if (s == "NA") {
+                dts.set_to_na();
+            } else {
+                dts.set_from_str(s);
+            }
+            *reinterpret_cast<int64_t *>(dst) = dts.to_ticks();
         }
 
         static void destruct(ckernel_prefix *extra)
@@ -95,10 +100,13 @@ namespace {
         static void single(char *dst, const char *src, ckernel_prefix *extra)
         {
             extra_type *e = reinterpret_cast<extra_type *>(extra);
-            int64_t datetime = *reinterpret_cast<const int64_t *>(src);
-            e->dst_string_dt->set_utf8_string(e->dst_metadata, dst, e->errmode,
-                            datetime::make_iso_8601_datetime(datetime, datetime::datetime_unit_tick,
-                                            e->src_datetime_dt->get_timezone() == tz_abstract));
+            datetime_struct dts;
+            dts.set_from_ticks(*reinterpret_cast<const int64_t *>(src));
+            string s = dts.to_str();
+            if (s.empty()) {
+                s = "NA";
+            }
+            e->dst_string_dt->set_utf8_string(e->dst_metadata, dst, e->errmode, s);
         }
 
         static void destruct(ckernel_prefix *extra)

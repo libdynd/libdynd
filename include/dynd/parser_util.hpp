@@ -56,6 +56,10 @@ public:
     inline bool fail() {
         return false;
     }
+
+    inline const char *saved_begin() const {
+        return m_saved_begin;
+    }
 };
 
 /**

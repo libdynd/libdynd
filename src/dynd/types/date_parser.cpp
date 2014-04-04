@@ -306,7 +306,7 @@ static bool parse_dmy_str_month_sep_date(const char *&begin, const char *end,
 
 // YYYY-MM-DD, +YYYYYY-MM-DD, or -YYYYYY-MM-DD
 // Returns true on success
-static bool parse_iso8601_dashes_date(const char *&begin, const char *end,
+bool parse::parse_iso8601_dashes_date(const char *&begin, const char *end,
                                         date_ymd &out_ymd)
 {
     saved_begin_state sbs(begin);
