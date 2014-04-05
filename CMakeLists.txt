@@ -117,10 +117,11 @@ list(GET DYND_VERSION 0 "${DYND_VERSION}")
 set(libdynd_SRC
     # Preprocessor
     include/dynd/pp/arithmetic.hpp
-    include/dynd/pp/comparision.hpp
+    include/dynd/pp/comparison.hpp
     include/dynd/pp/if.hpp
     include/dynd/pp/list.hpp
     include/dynd/pp/logical.hpp
+    include/dynd/pp/meta.hpp
     include/dynd/pp/token.hpp
     ${CMAKE_CURRENT_BINARY_DIR}/include/dynd/pp/gen.hpp
     # CodeGen

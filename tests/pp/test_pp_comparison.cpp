@@ -5,7 +5,7 @@
 
 #include "inc_gtest.hpp"
 
-#include <dynd/pp/comparision.hpp>
+#include <dynd/pp/comparison.hpp>
 
 using namespace std;
 

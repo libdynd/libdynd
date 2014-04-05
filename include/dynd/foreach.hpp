@@ -14,6 +14,7 @@
 #include <dynd/kernels/expr_kernel_generator.hpp>
 #include <dynd/shape_tools.hpp>
 #include <dynd/pp/list.hpp>
+#include <dynd/pp/meta.hpp>
 
 #include <dynd/types/strided_dim_type.hpp>
 #include <dynd/types/fixed_dim_type.hpp>
@@ -22,54 +23,58 @@
 
 using namespace std;
 
-#define SRC_TYPE T
+
 #define RES_TYPE R
 
-#define REINTERPRET_CAST_SRC(I) *reinterpret_cast<const DYND_PP_PASTE(SRC_TYPE, I) *>(src[I])
+#define SRC_TYPE(INDEX) DYND_PP_PASTE(T, INDEX)
+#define SRC_TYPES(STOP) DYND_PP_MAP_2(SRC_TYPE, DYND_PP_RANGE(STOP))
+
+#define SRC_AT(INDEX) DYND_PP_META_AT(src, INDEX)
+#define SRC_ATS(STOP) DYND_PP_MAP_2(SRC_AT, DYND_PP_RANGE(STOP))
+
+#define SRC_PTR(INDEX) DYND_PP_PASTE(src, INDEX)
+#define SRC_PTRS(STOP) DYND_PP_MAP_2(SRC_PTR, DYND_PP_RANGE(STOP))
+
+#define SRC_ARRAY(INDEX) DYND_PP_PASTE(a, INDEX)
+#define SRC_ARRAYS(STOP) DYND_PP_MAP_2(SRC_ARRAY, DYND_PP_RANGE(STOP))
+
+
+
+
+
+
+#define DEREFERENCE(PTR) *PTR
+
+#define REINTERPRET_CAST(TYPE, VAR) reinterpret_cast<TYPE>(VAR)
+
+
+
+//#define DEREFERENCE_REINTERPRET_CAST(TYPE, VAR) DEREFERENCE(REINTERPRET_CAST(TYPE, VAR))
+
+
+
+#define REINTERPRET_CAST_SRC(I) *reinterpret_cast<const SRC_TYPE(I) *>(src[I])
 #define DECL_ASGN_SRC(I) const char *DYND_PP_PASTE(src, I) = src[I]
 
 
 #define RES_TYPE R
 #define DECL_RES_TYPE typename RES_TYPE
 
-#define SRC_TYPE_X(I) DYND_PP_PASTE(T, I)
-#define DECL_SRC_TYPE(INDEX) typename SRC_TYPE_X(INDEX)
-
-#define SRC_TYPES(STOP) DYND_PP_FLATTEN(DYND_PP_MAP_2(SRC_TYPE_X, DYND_PP_RANGE(STOP)))
-#define DECL_SRC_TYPES(STOP) DYND_PP_FLATTEN(DYND_PP_MAP_1(DECL_SRC_TYPE, DYND_PP_RANGE(STOP)))
+#define FLAT_SRC_TYPES(STOP) DYND_PP_FLATTEN(DYND_PP_MAP_2(SRC_TYPE, DYND_PP_RANGE(STOP)))
 
 
-#define FIXED_DIM(INDEX) DYND_PP_PASTE(N, INDEX)
-#define DECL_FIXED_DIM(INDEX) int FIXED_DIM(INDEX)
-
-#define FIXED_DIMS(STOP) DYND_PP_FLATTEN(DYND_PP_MAP_2(FIXED_DIM, DYND_PP_RANGE(STOP)))
-#define DECL_FIXED_DIMS(STOP) DYND_PP_FLATTEN(DYND_PP_MAP_2(DECL_FIXED_DIM, DYND_PP_RANGE(STOP)))
-
-
-#define ARRAY_DIMS(STOP) DYND_PP_ARRAY_DIMS((FIXED_DIMS(STOP)))
-
-#define FIXED_DIMS_AS_ARRAY_DIMS(STOP) DYND_PP_ARRAY_DIMS((FIXED_DIMS(STOP)))
-
-#define SRC_ARRAY(I) DYND_PP_PASTE(a, I)
-#define SRC_ARRAYS(STOP) DYND_PP_FLATTEN(DYND_PP_MAP_1(SRC_ARRAY, DYND_PP_RANGE(STOP)))
 
 
 
 //#define SRC_ARRAY(I, METH, ) SRC_ARRAY(I).METH()
 
-#define SRC_ARRAY_GET_TYPE(I) SRC_ARRAY(I).get_type()
-#define SRC_ARRAY_GET_NDO_META(I) SRC_ARRAY(I).get_ndo_meta()
-#define SRC_ARRAY_GET_READONLY_ORIGINPTR(I) SRC_ARRAY(I).get_readonly_originptr()
-
-#define REINTERPRET_CAST_SRC(I) *reinterpret_cast<const DYND_PP_PASTE(SRC_TYPE, I) *>(src[I])
+#define REINTERPRET_CAST_SRC(I) *reinterpret_cast<const SRC_TYPE(I) *>(src[I])
 #define REINTERPRET_CAST_SRCS(STOP) DYND_PP_FLATTEN(DYND_PP_MAP_1(REINTERPRET_CAST_SRC, DYND_PP_RANGE(STOP)))
 
 #define SRC(INDEX) DYND_PP_PASTE(src, INDEX)
 #define SRCS(STOP) DYND_PP_MAP_1(SRC, DYND_PP_RANGE(STOP))
 
 
-
-#define MAP_SRC_TYPES(MAC, SEP, STOP) DYND_PP_JOIN_1(SEP, DYND_PP_MAP_1(MAC, (SRC_TYPES(STOP))))
 
 
 
@@ -78,17 +83,14 @@ using namespace std;
 #define DECL_ASGN_SRC_STRIDE(INDEX) intptr_t DYND_PP_PASTE(DYND_PP_PASTE(src, INDEX), _stride) = src_stride[INDEX]
 #define DECL_ASGN_SRC_STRIDES(STOP) DYND_PP_JOIN_1((;), DYND_PP_MAP_1(DECL_ASGN_SRC_STRIDE, DYND_PP_RANGE(STOP)))
 
-#define REINTERPRET_CAST_DECLED_SRC(INDEX) *reinterpret_cast<const DYND_PP_PASTE(SRC_TYPE, INDEX) *>(SRC(INDEX))
+#define REINTERPRET_CAST_DECLED_SRC(INDEX) *reinterpret_cast<const SRC_TYPE(INDEX) *>(SRC(INDEX))
 #define REINTERPRET_CAST_DECLED_SRCS(STOP) DYND_PP_FLATTEN(DYND_PP_MAP_1(REINTERPRET_CAST_DECLED_SRC, DYND_PP_RANGE(STOP)))
 
 #define DECLED_SRC_ADD_SRC_STRIDE(INDEX) SRC(INDEX) += DYND_PP_PASTE(SRC(INDEX), _stride)
 #define DECLED_SRCS_ADD_SRC_STRIDE(STOP) DYND_PP_FLATTEN(DYND_PP_MAP_1(DECLED_SRC_ADD_SRC_STRIDE, DYND_PP_RANGE(STOP)))
 
-#define MAKE_TYPE_SRC_TYPE(INDEX) ndt::make_type<SRC_TYPE_X(INDEX)>()
+#define MAKE_TYPE_SRC_TYPE(INDEX) ndt::make_type<SRC_TYPE(INDEX)>()
 #define MAKE_TYPE_SRC_TYPES(STOP) DYND_PP_JOIN_1((,), DYND_PP_MAP_1(MAKE_TYPE_SRC_TYPE, DYND_PP_RANGE(STOP)))
-
-#define DECL_SRC_ARRAY(INDEX) const nd::array& SRC_ARRAY(INDEX)
-#define DECL_SRC_ARRAYS(STOP) DYND_PP_JOIN_1((,), DYND_PP_MAP_1(DECL_SRC_ARRAY, DYND_PP_RANGE(STOP)))
 
 #define INCREMENTAL_BROADCAST_SRC_ARRAY(INDEX) size_t DYND_PP_PASTE(ndim_, SRC_ARRAY(INDEX)) = SRC_ARRAY(INDEX).get_ndim(); \
     if (DYND_PP_PASTE(ndim_, SRC_ARRAY(INDEX)) > 0) { \
@@ -117,12 +119,15 @@ using namespace std;
 //            throw type_error(ss.str()); \
 //        }
 
-#define ELWISE(STRIDED_NDIM, FIXED_NDIM) \
+
+#define CONST_PTR(TYPE) const TYPE *
+
+#define ELWISE(STRIDED_NDIM) \
     namespace detail { \
-    template<DECL_RES_TYPE, DECL_FIXED_DIMS(FIXED_NDIM), DECL_SRC_TYPES(STRIDED_NDIM)> \
-    struct foreach_ckernel_instantiator<void (*)(RES_TYPE (&)FIXED_DIMS_AS_ARRAY_DIMS(FIXED_NDIM), SRC_TYPES(STRIDED_NDIM))> { \
+    template<DYND_PP_META_TYPENAME(RES_TYPE), DYND_PP_JOIN_MAP_1(DYND_PP_META_TYPENAME, (,), SRC_TYPES(STRIDED_NDIM))> \
+    struct foreach_ckernel_instantiator<void (*)(RES_TYPE &, DYND_PP_JOIN_1((,), SRC_TYPES(STRIDED_NDIM)))> { \
         typedef foreach_ckernel_instantiator extra_type; \
-        typedef void (*func_type)(RES_TYPE (&)FIXED_DIMS_AS_ARRAY_DIMS(FIXED_NDIM), SRC_TYPES(STRIDED_NDIM)); \
+        typedef void (*func_type)(RES_TYPE &, DYND_PP_JOIN_1((,), SRC_TYPES(STRIDED_NDIM))); \
 \
         ckernel_prefix base; \
         func_type func; \
@@ -131,7 +136,7 @@ using namespace std;
                            ckernel_prefix *ckp) \
         { \
             extra_type *e = reinterpret_cast<extra_type *>(ckp); \
-            e->func(*reinterpret_cast<RES_TYPE (*)FIXED_DIMS_AS_ARRAY_DIMS(FIXED_NDIM)>(dst), \
+            e->func(*reinterpret_cast<RES_TYPE*>(dst), \
                     REINTERPRET_CAST_SRCS(STRIDED_NDIM)); \
         } \
 \
@@ -141,10 +146,11 @@ using namespace std;
         { \
             extra_type *e = reinterpret_cast<extra_type *>(ckp); \
             func_type func = e->func; \
-            DECL_ASGN_SRCS(STRIDED_NDIM); \
+            DYND_PP_JOIN_OUTER(DYND_PP_META_DECL, (;), \
+                (const char *), DYND_PP_ELWISE(DYND_PP_META_EQ, SRC_PTRS(STRIDED_NDIM), SRC_ATS(STRIDED_NDIM))); \
             DECL_ASGN_SRC_STRIDES(STRIDED_NDIM); \
             for (size_t i = 0; i < count; ++i) { \
-                func(*reinterpret_cast<RES_TYPE (*)FIXED_DIMS_AS_ARRAY_DIMS(FIXED_NDIM)>(dst), \
+                func(*reinterpret_cast<RES_TYPE*>(dst), \
                     REINTERPRET_CAST_DECLED_SRCS(STRIDED_NDIM)); \
                 dst += dst_stride; \
                 DECLED_SRCS_ADD_SRC_STRIDE(STRIDED_NDIM); \
@@ -170,22 +176,24 @@ using namespace std;
     }; \
     } \
 \
-    template<DECL_RES_TYPE, DECL_FIXED_DIMS(FIXED_NDIM), DECL_SRC_TYPES(STRIDED_NDIM)> \
-    inline nd::array foreach(DECL_SRC_ARRAYS(STRIDED_NDIM), \
-        void (*func)(RES_TYPE (&)FIXED_DIMS_AS_ARRAY_DIMS(FIXED_NDIM), SRC_TYPES(STRIDED_NDIM))) \
+    template<DYND_PP_META_TYPENAME(RES_TYPE), DYND_PP_JOIN_MAP_1(DYND_PP_META_TYPENAME, (,), SRC_TYPES(STRIDED_NDIM))> \
+    inline nd::array foreach(DYND_PP_JOIN_OUTER(DYND_PP_META_DECL, (,), (const nd::array&), SRC_ARRAYS(STRIDED_NDIM)), \
+        void (*func)(RES_TYPE&, DYND_PP_JOIN_1((,), SRC_TYPES(STRIDED_NDIM)))) \
     { \
-        intptr_t fixed_shape[FIXED_NDIM] = {FIXED_DIMS(FIXED_NDIM)}; \
+        const int fixed_ndim = detail::ndim_from_array<RES_TYPE>::value; \
+        intptr_t fixed_shape[fixed_ndim]; \
+        detail::fill_shape<RES_TYPE>::fill(fixed_shape); \
 \
         ckernel_deferred ckd; \
         ckd.ckernel_funcproto = expr_operation_funcproto; \
         ckd.data_types_size = DYND_PP_INC(STRIDED_NDIM); \
         ndt::type data_dynd_types[DYND_PP_INC(STRIDED_NDIM)] \
-            = {ndt::make_fixed_dim(FIXED_NDIM, fixed_shape, ndt::make_type<RES_TYPE>(), NULL), \
+            = {ndt::make_fixed_dim(fixed_ndim, fixed_shape, ndt::make_type<typename detail::uniform_type_from_array<RES_TYPE>::type>(), NULL), \
             MAKE_TYPE_SRC_TYPES(STRIDED_NDIM)}; \
         ckd.data_dynd_types = data_dynd_types; \
         ckd.data_ptr = reinterpret_cast<void *>(func); \
-        ckd.instantiate_func = &detail::foreach_ckernel_instantiator<void (*)(RES_TYPE (&)FIXED_DIMS_AS_ARRAY_DIMS(FIXED_NDIM), \
-            SRC_TYPES(STRIDED_NDIM))>::instantiate; \
+        ckd.instantiate_func = &detail::foreach_ckernel_instantiator<void (*)(RES_TYPE&, \
+            FLAT_SRC_TYPES(STRIDED_NDIM))>::instantiate; \
         ckd.free_func = NULL; \
 \
         size_t ndim = DYND_PP_PASTE(MAX_NDIM_, DYND_PP_NE(STRIDED_NDIM, 1))(SRC_ARRAYS_GET_NDIM(STRIDED_NDIM)); \
@@ -199,15 +207,15 @@ using namespace std;
 \
         ckernel_builder ckb; \
         ndt::type lifted_types[DYND_PP_INC(STRIDED_NDIM)] = {result.get_type(), \
-            DYND_PP_FLATTEN(DYND_PP_MAP_1(SRC_ARRAY_GET_TYPE, DYND_PP_RANGE(STRIDED_NDIM)))}; \
+            DYND_PP_JOIN_OUTER(DYND_PP_META_DOT_CALL, (,), SRC_ARRAYS(STRIDED_NDIM), (get_type))}; \
         const char *dynd_metadata[DYND_PP_INC(STRIDED_NDIM)] = {result.get_ndo_meta(), \
-            DYND_PP_FLATTEN(DYND_PP_MAP_1(SRC_ARRAY_GET_NDO_META, DYND_PP_RANGE(STRIDED_NDIM)))}; \
+            DYND_PP_JOIN_OUTER(DYND_PP_META_DOT_CALL, (,), SRC_ARRAYS(STRIDED_NDIM), (get_ndo_meta))}; \
         make_lifted_expr_ckernel(&ckd, &ckb, 0, \
                             lifted_types, dynd_metadata, kernel_request_single); \
 \
         ckernel_prefix *ckprefix = ckb.get(); \
         expr_single_operation_t op = ckprefix->get_function<expr_single_operation_t>(); \
-        const char *src[STRIDED_NDIM] = {DYND_PP_FLATTEN(DYND_PP_MAP_1(SRC_ARRAY_GET_READONLY_ORIGINPTR, DYND_PP_RANGE(STRIDED_NDIM)))}; \
+        const char *src[STRIDED_NDIM] = {DYND_PP_JOIN_OUTER(DYND_PP_META_DOT_CALL, (,), SRC_ARRAYS(STRIDED_NDIM), (get_readonly_originptr))}; \
         op(result.get_readwrite_originptr(), src, ckprefix); \
 \
         return result; \
@@ -334,7 +342,7 @@ struct foreach_ckernel_instantiator<R (T::*)(A0, A1)> {
 
 } // namespace detail
 
-DYND_PP_JOIN_OUTER(ELWISE, (), DYND_PP_RANGE(1, 4), DYND_PP_RANGE(1, 4))
+DYND_PP_JOIN_MAP(ELWISE, (), DYND_PP_RANGE(1, 4))
 
 template<typename R, typename T0, typename T1>
 inline nd::array foreach(const nd::array& a, const nd::array& b, R (*func)(T0, T1))
@@ -477,5 +485,19 @@ inline nd::array foreach(const nd::array& a, const nd::array& b, T obj)
 }
 
 }} // namespace dynd::nd
+
+//DYND_PP_FLATTEN(DYND_PP_MAP_1(SRC_ARRAY_GET_TYPE, DYND_PP_RANGE(3)))
+
+
+//REINTERPRET_CAST_SRCS(4)
+
+//DYND_PP_JOIN_MAP_1(DEREFERENCE, (,), DYND_PP_ELEMENTWISE(REINTERPRET_CAST, DYND_PP_MAP(CONST_PTR, SRC_TYPES(4)), DYND_PP_OUTER(AT, (src), DYND_PP_RANGE(4))))
+
+
+//DECL_ASGN_SRCS(4)
+
+//#define MAC(x, y) X + Y
+
+//SRC_PTRS(4)
 
 #endif // _DYND__FOREACH_HPP_
