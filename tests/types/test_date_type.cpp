@@ -817,89 +817,60 @@ TEST(DateYMD, SetFromStr) {
 
     // Parsing a datetime with the time == midnight is ok too, and
     // ignores the time zone
-    d.set_from_str("1925-12-30T00");
-    EXPECT_EQ(d.year, 1925);
-    EXPECT_EQ(d.month, 12);
-    EXPECT_EQ(d.day, 30);
-    d.set_from_str("1925-12-30T00Z");
-    EXPECT_EQ(d.year, 1925);
-    EXPECT_EQ(d.month, 12);
-    EXPECT_EQ(d.day, 30);
-    d.set_from_str("1925-12-30T00:00");
-    EXPECT_EQ(d.year, 1925);
-    EXPECT_EQ(d.month, 12);
-    EXPECT_EQ(d.day, 30);
-    d.set_from_str("1925-12-30T00:00+05");
-    EXPECT_EQ(d.year, 1925);
-    EXPECT_EQ(d.month, 12);
-    EXPECT_EQ(d.day, 30);
-    d.set_from_str("1925-12-30T00:00:00");
-    EXPECT_EQ(d.year, 1925);
-    EXPECT_EQ(d.month, 12);
-    EXPECT_EQ(d.day, 30);
-    d.set_from_str("1925-12-30 00:00:00-0600");
-    EXPECT_EQ(d.year, 1925);
-    EXPECT_EQ(d.month, 12);
-    EXPECT_EQ(d.day, 30);
-    d.set_from_str("1925-12-30T00:00:00.0");
-    EXPECT_EQ(d.year, 1925);
-    EXPECT_EQ(d.month, 12);
-    EXPECT_EQ(d.day, 30);
+    d.set_from_str("1918-05-23T00");
+    EXPECT_EQ("1918-05-23", d.to_str());
+    d.set_from_str("1919-06-24T00Z");
+    EXPECT_EQ("1919-06-24", d.to_str());
+    d.set_from_str("1920-07-25T00:00");
+    EXPECT_EQ("1920-07-25", d.to_str());
+    d.set_from_str("1921-08-26T00:00+05");
+    EXPECT_EQ("1921-08-26", d.to_str());
+    d.set_from_str("1922-09-27T00:00:00");
+    EXPECT_EQ("1922-09-27", d.to_str());
+    d.set_from_str("1923-10-28 00:00:00-0600");
+    EXPECT_EQ("1923-10-28", d.to_str());
+    d.set_from_str("1924-11-29T00:00:00.0");
+    EXPECT_EQ("1924-11-29", d.to_str());
     d.set_from_str("1925-12-30T00:00:00.00+10:30");
-    EXPECT_EQ(d.year, 1925);
-    EXPECT_EQ(d.month, 12);
-    EXPECT_EQ(d.day, 30);
+    EXPECT_EQ("1925-12-30", d.to_str());
 
     // RFC2822 date syntax
     d.set_from_str( "Mon, 25 Dec 1995 00:00:00 GMT");
-    EXPECT_EQ(d.year, 1995);
-    EXPECT_EQ(d.month, 12);
-    EXPECT_EQ(d.day, 25);
+    EXPECT_EQ("1995-12-25", d.to_str());
     d.set_from_str( "Tue, 26 Dec 1995 00:00:00 +0430");
-    EXPECT_EQ(d.year, 1995);
-    EXPECT_EQ(d.month, 12);
-    EXPECT_EQ(d.day, 26);
+    EXPECT_EQ("1995-12-26", d.to_str());
 
-    // Ambiguous formats with monthfirst flag
-    d.set_from_str("01-02-2003", true);
-    EXPECT_EQ(d.year, 2003);
-    EXPECT_EQ(d.month, 1);
-    EXPECT_EQ(d.day, 2);
-    d.set_from_str("2/3/2004", true);
-    EXPECT_EQ(d.year, 2004);
-    EXPECT_EQ(d.month, 2);
-    EXPECT_EQ(d.day, 3);
-    d.set_from_str("01-02-2004", false);
-    EXPECT_EQ(d.year, 2004);
-    EXPECT_EQ(d.month, 2);
-    EXPECT_EQ(d.day, 1);
-    d.set_from_str("2-3-2005", false);
-    EXPECT_EQ(d.year, 2005);
-    EXPECT_EQ(d.month, 3);
-    EXPECT_EQ(d.day, 2);
+    // Ambiguous formats with MDY order
+    d.set_from_str("01-02-2003", date_parse_mdy);
+    EXPECT_EQ("2003-01-02", d.to_str());
+    d.set_from_str("2/3/2004", date_parse_mdy);
+    EXPECT_EQ("2004-02-03", d.to_str());
+
+    // Ambiguous formats with DMY order
+    d.set_from_str("01-02-2004", date_parse_dmy);
+    EXPECT_EQ("2004-02-01", d.to_str());
+    d.set_from_str("2-3-2005", date_parse_dmy);
+    EXPECT_EQ("2005-03-02", d.to_str());
 
     // Two digit years, resolved with a sliding window starting 70 years ago
-    d.set_from_str("01-02-99", true);
-    EXPECT_EQ(d.year, 1999);
-    EXPECT_EQ(d.month, 1);
-    EXPECT_EQ(d.day, 2);
-    d.set_from_str("01/dec/99", true);
-    EXPECT_EQ(d.year, 1999);
-    EXPECT_EQ(d.month, 12);
-    EXPECT_EQ(d.day, 1);
-    d.set_from_str("2-MAR-03", true);
-    EXPECT_EQ(d.year, 2003);
-    EXPECT_EQ(d.month, 3);
-    EXPECT_EQ(d.day, 2);
+    d.set_from_str("01-02-03", date_parse_mdy);
+    EXPECT_EQ("2003-01-02", d.to_str());
+    d.set_from_str("01-02-03", date_parse_dmy);
+    EXPECT_EQ("2003-02-01", d.to_str());
+    d.set_from_str("01-02-03", date_parse_ymd);
+    EXPECT_EQ("2001-02-03", d.to_str());
+    d.set_from_str("01-02-99", date_parse_mdy);
+    EXPECT_EQ("1999-01-02", d.to_str());
+    d.set_from_str("01/dec/99", date_parse_mdy);
+    EXPECT_EQ("1999-12-01", d.to_str());
+    d.set_from_str("2-MAR-03", date_parse_mdy);
+    EXPECT_EQ("2003-03-02", d.to_str());
+    d.set_from_str("02-MAR-4", date_parse_ymd);
+    EXPECT_EQ("2002-03-04", d.to_str());
     d.set_from_str("January 10, 98");
-    EXPECT_EQ(d.year, 1998);
-    EXPECT_EQ(d.month, 1);
-    EXPECT_EQ(d.day, 10);
-    d.set_from_str("12.4.03", false);
-    EXPECT_EQ(d.year, 2003);
-    EXPECT_EQ(d.month, 4);
-    EXPECT_EQ(d.day, 12);
-
+    EXPECT_EQ("1998-01-10", d.to_str());
+    d.set_from_str("12.4.03", date_parse_dmy);
+    EXPECT_EQ("2003-04-12", d.to_str());
 }
 
 TEST(DateYMD, SetFromStr_Errors) {
@@ -927,25 +898,35 @@ TEST(DateYMD, SetFromStr_Errors) {
     EXPECT_THROW(d.set_from_str("14/02/2003"), invalid_argument);
     EXPECT_THROW(d.set_from_str("14.02.2003"), invalid_argument);
     // Rejecting two digit years if set to disallow
-    EXPECT_THROW(d.set_from_str("01-02-99", true, false), invalid_argument);
-    EXPECT_THROW(d.set_from_str("01-Feb-99", false, false), invalid_argument);
+    EXPECT_THROW(d.set_from_str("01-02-99", date_parse_mdy, 0), invalid_argument);
+    EXPECT_THROW(d.set_from_str("01-02-99", date_parse_dmy, 0), invalid_argument);
+    EXPECT_THROW(d.set_from_str("99-02-01", date_parse_ymd, 0), invalid_argument);
+    EXPECT_THROW(d.set_from_str("01-Feb-99", date_parse_dmy, 0), invalid_argument);
 }
 
 TEST(DateYMD, TwoDigitYear_FixedWindow) {
     EXPECT_EQ(1944, date_ymd::resolve_2digit_year_fixed_window(44, 1929));
+    EXPECT_EQ(1944, date_ymd::resolve_2digit_year(44, 1929));
     EXPECT_EQ(2000, date_ymd::resolve_2digit_year_fixed_window(0, 1929));
+    EXPECT_EQ(2000, date_ymd::resolve_2digit_year(0, 1929));
 
     // Just before/after the window boundary
     EXPECT_EQ(1929, date_ymd::resolve_2digit_year_fixed_window(29, 1929));
+    EXPECT_EQ(1929, date_ymd::resolve_2digit_year(29, 1929));
     EXPECT_EQ(2028, date_ymd::resolve_2digit_year_fixed_window(28, 1929));
+    EXPECT_EQ(2028, date_ymd::resolve_2digit_year(28, 1929));
 
     // End/beginning of the century
     EXPECT_EQ(1999, date_ymd::resolve_2digit_year_fixed_window(99, 1929));
+    EXPECT_EQ(1999, date_ymd::resolve_2digit_year(99, 1929));
     EXPECT_EQ(2000, date_ymd::resolve_2digit_year_fixed_window(0, 1929));
+    EXPECT_EQ(2000, date_ymd::resolve_2digit_year(0, 1929));
 
     // Window starting on a century boundary
     EXPECT_EQ(1200, date_ymd::resolve_2digit_year_fixed_window(0, 1200));
+    EXPECT_EQ(1200, date_ymd::resolve_2digit_year(0, 1200));
     EXPECT_EQ(1299, date_ymd::resolve_2digit_year_fixed_window(99, 1200));
+    EXPECT_EQ(1299, date_ymd::resolve_2digit_year(99, 1200));
 }
 
 TEST(DateYMD, TwoDigitYear_SlidingWindow) {
@@ -954,11 +935,17 @@ TEST(DateYMD, TwoDigitYear_SlidingWindow) {
 
     // Sliding window starting 70 years ago
     EXPECT_EQ(1960, date_ymd::resolve_2digit_year_sliding_window(60, 70));
+    EXPECT_EQ(1960, date_ymd::resolve_2digit_year(60, 70));
     EXPECT_EQ(1999, date_ymd::resolve_2digit_year_sliding_window(99, 70));
+    EXPECT_EQ(1999, date_ymd::resolve_2digit_year(99, 70));
     EXPECT_EQ(2043, date_ymd::resolve_2digit_year_sliding_window(43, 70));
+    EXPECT_EQ(2043, date_ymd::resolve_2digit_year(43, 70));
 
     // Sliding window starting 20 years ago
     EXPECT_EQ(2010, date_ymd::resolve_2digit_year_sliding_window(10, 20));
+    EXPECT_EQ(2010, date_ymd::resolve_2digit_year(10, 20));
     EXPECT_EQ(2050, date_ymd::resolve_2digit_year_sliding_window(50, 20));
+    EXPECT_EQ(2050, date_ymd::resolve_2digit_year(50, 20));
     EXPECT_EQ(2093, date_ymd::resolve_2digit_year_sliding_window(93, 20));
+    EXPECT_EQ(2093, date_ymd::resolve_2digit_year(93, 20));
 }

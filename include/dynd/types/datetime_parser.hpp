@@ -19,17 +19,20 @@ struct datetime_struct;
  * \param begin  The start of the UTF-8 buffer to parse.
  * \param end  One past the last character of the buffer to parse.
  * \param out_dt  The datetime to fill.
- * \param ambig  How to handle the 01/02/2003 ambiguity. Defaults to disallow,
- *                   can also be dayfirst or monthfirst.
- * \param allow_2digit_year  If true, allows 2 digit years resolved with a sliding
- *                           window starting 70 years ago. Defaults to true.
+ * \param ambig  Order to use for ambiguous cases like "01/02/03"
+ *               or "01/02/1995".
+ * \param century_window  Number describing how to handle dates with
+ *                        two digit years. Values 1 to 99 mean to use
+ *                        a sliding window starting that many years back.
+ *                        Values 1000 and higher mean to use a fixed window
+ *                        starting at the year given. The value 0 means to
+ *                        disallow two digit years.
  *
  * \returns  True if the parse is successful, false otherwise.
  */
-bool string_to_datetime(
-    const char *begin, const char *end, datetime_struct &out_dt,
-    date_parser_ambiguous_t ambig = date_parser_ambiguous_disallow,
-    bool allow_2digit_year = true);
+bool string_to_datetime(const char *begin, const char *end,
+                        datetime_struct &out_dt, date_parse_order_t ambig,
+                        int century_window);
 
 namespace parse {
 
@@ -40,15 +43,20 @@ namespace parse {
      *               to point immediately after the parsed datetime if true is returned.
      * \param end  The end of a range of UTF-8 characters.
      * \param out_dt  The datetime to fill.
-     * \param ambig  How to handle the 01/02/2003 ambiguity.
-     * \param allow_2digit_year  If true, allows 2 digit years resolved with a sliding
-     *                           window starting 70 years ago.
+     * \param ambig  Order to use for ambiguous cases like "01/02/03"
+     *               or "01/02/1995".
+     * \param century_window  Number describing how to handle dates with
+     *                        two digit years. Values 1 to 99 mean to use
+     *                        a sliding window starting that many years back.
+     *                        Values 1000 and higher mean to use a fixed window
+     *                        starting at the year given. The value 0 means to
+     *                        disallow two digit years.
      *
      * \returns  True if a datetime was parsed successfully, false otherwise.
      */
     bool parse_datetime(const char *&begin, const char *end,
-                        datetime_struct &out_dt, date_parser_ambiguous_t ambig,
-                        bool allow_2digit_year);
+                        datetime_struct &out_dt, date_parse_order_t ambig,
+                        int century_window);
 
 } // namespace parse
 

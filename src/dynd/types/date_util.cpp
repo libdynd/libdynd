@@ -136,24 +136,12 @@ void date_ymd::set_from_days(int32_t days)
     }
 }
 
-void date_ymd::set_from_str(const std::string& s)
-{
-    if (!string_to_date(s.data(), s.data() + s.size(), *this)) {
-        stringstream ss;
-        ss << "Unable to parse ";
-        print_escaped_utf8_string(ss, s);
-        ss << " as a date";
-        throw invalid_argument(ss.str());
-    }
-}
-
-void date_ymd::set_from_str(const std::string &s, bool monthfirst,
-                            bool allow_2digit_year)
+void date_ymd::set_from_str(const std::string &s,
+                      date_parse_order_t ambig,
+                      int century_window)
 {
     if (!string_to_date(s.data(), s.data() + s.size(), *this,
-                        monthfirst ? date_parser_ambiguous_monthfirst
-                                   : date_parser_ambiguous_dayfirst,
-                        allow_2digit_year)) {
+                        ambig, century_window)) {
         stringstream ss;
         ss << "Unable to parse ";
         print_escaped_utf8_string(ss, s);
@@ -198,6 +186,23 @@ int date_ymd::resolve_2digit_year_sliding_window(int year, int years_ago)
     // Use it to resolve the 2 digit year with the sliding window
     return resolve_2digit_year_fixed_window(year, current_date.year - years_ago);
 }
+
+int date_ymd::resolve_2digit_year(int year, int century_window)
+{
+    if (century_window >= 1 && century_window <= 99) {
+        return date_ymd::resolve_2digit_year_sliding_window(year,
+                                                            century_window);
+    } else if (century_window >= 1000) {
+        return date_ymd::resolve_2digit_year_fixed_window(year, century_window);
+    } else {
+        stringstream ss;
+        ss << "invalid century_window value " << century_window
+           << ", must be 1-99 for a sliding window, or >= 1000 for a fixed "
+              "window";
+        throw invalid_argument(ss.str());
+    }
+}
+
 
 date_ymd date_ymd::get_current_local_date()
 {

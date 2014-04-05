@@ -153,7 +153,7 @@ TEST(DateTimeStruct, FromToString) {
 
     dts.set_from_str("1991-02-03 04:05:06");
     EXPECT_EQ("1991-02-03T04:05:06", dts.to_str());
-    dts.set_from_str("11/12/1822 06:47:26.00", true);
+    dts.set_from_str("11/12/1822 06:47:26.00", date_parse_mdy);
     EXPECT_EQ("1822-11-12T06:47:26", dts.to_str());
     dts.set_from_str("Fri Dec 19 15:10:11 1997");
     EXPECT_EQ("1997-12-19T15:10:11", dts.to_str());

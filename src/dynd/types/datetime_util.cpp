@@ -21,26 +21,11 @@ std::string datetime_struct::to_str() const
     }
 }
 
-
-
-void datetime_struct::set_from_str(const std::string& s)
+void datetime_struct::set_from_str(const std::string &s,
+                                   date_parse_order_t ambig, int century_window)
 {
-    if (!string_to_datetime(s.data(), s.data() + s.size(), *this)) {
-        stringstream ss;
-        ss << "Unable to parse ";
-        print_escaped_utf8_string(ss, s);
-        ss << " as a datetime";
-        throw invalid_argument(ss.str());
-    }
-}
-
-void datetime_struct::set_from_str(const std::string &s, bool monthfirst,
-                            bool allow_2digit_year)
-{
-    if (!string_to_datetime(s.data(), s.data() + s.size(), *this,
-                        monthfirst ? date_parser_ambiguous_monthfirst
-                                   : date_parser_ambiguous_dayfirst,
-                        allow_2digit_year)) {
+    if (!string_to_datetime(s.data(), s.data() + s.size(), *this, ambig,
+                            century_window)) {
         stringstream ss;
         ss << "Unable to parse ";
         print_escaped_utf8_string(ss, s);

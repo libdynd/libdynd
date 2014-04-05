@@ -76,26 +76,23 @@ struct datetime_struct {
     }
 
     /**
-     * Sets the datetime from a string, which is a date followed by a time.
-     * Two digit years are handled with a sliding window starting 70 years
-     * ago.
-     *
-     * \param s  Datetime string.
-     */
-    void set_from_str(const std::string& s);
-
-    /**
      * Sets the datetime from a string. Accepts a wide variety of
      * inputs, and interprets ambiguous formats like MM/DD/YY vs DD/MM/YY
      * using the monthfirst parameter.
      *
      * \param s  Datetime string.
-     * \param monthfirst  If true, expect MM/DD/YY, otherwise expect DD/MM/YY.
-     * \param allow_2digit_year  If true, uses a sliding window starting 70 years ago
-     *                           to resolve two digit years.  Defaults to true.
+     * \param ambig  Order to use for ambiguous cases like "01/02/03"
+     *               or "01/02/1995".
+     * \param century_window  Number describing how to handle dates with
+     *                        two digit years. Values 1 to 99 mean to use
+     *                        a sliding window starting that many years back.
+     *                        Values 1000 and higher mean to use a fixed window
+     *                        starting at the year given. The value 0 means to
+     *                        disallow two digit years.
      */
-    void set_from_str(const std::string &s, bool monthfirst,
-                      bool allow_2digit_year = true);
+    void set_from_str(const std::string &s,
+                      date_parse_order_t ambig = date_parse_no_ambig,
+                      int century_window = 70);
 
     /**
      * Returns an ndt::type corresponding to the datetime_struct structure.

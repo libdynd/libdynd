@@ -78,13 +78,13 @@ static bool parse_postgres_datetime(const char *&begin, const char *end,
 
 // <date> T <time>, <date>:<time>, <date> <time>
 static bool parse_date_time_datetime(const char *&begin, const char *end,
-                           datetime_struct &out_dt,
-                           date_parser_ambiguous_t ambig,
-                           bool allow_2digit_year)
+                                     datetime_struct &out_dt,
+                                     date_parse_order_t ambig,
+                                     int century_window)
 {
     saved_begin_state sbs(begin);
 
-    if (!parse_date(begin, end, out_dt.ymd, ambig, allow_2digit_year)) {
+    if (!parse_date(begin, end, out_dt.ymd, ambig, century_window)) {
         return sbs.fail();
     }
     // "T", ":', or whitespace may separate a date and a time
@@ -127,11 +127,10 @@ static bool parse_date_time_datetime(const char *&begin, const char *end,
 }
 
 bool parse::parse_datetime(const char *&begin, const char *end,
-                           datetime_struct &out_dt,
-                           date_parser_ambiguous_t ambig,
-                           bool allow_2digit_year)
+                           datetime_struct &out_dt, date_parse_order_t ambig,
+                           int century_window)
 {
-    if (parse_date_time_datetime(begin, end, out_dt, ambig, allow_2digit_year)) {
+    if (parse_date_time_datetime(begin, end, out_dt, ambig, century_window)) {
         // <date>T<time>, <date> <time>
     } else if (parse_postgres_datetime(begin, end, out_dt)) {
         // Fri Dec 19 15:10:11 1997, Fri 19 Dec 15:10:11 1997
@@ -142,13 +141,12 @@ bool parse::parse_datetime(const char *&begin, const char *end,
 }
 
 bool dynd::string_to_datetime(const char *begin, const char *end,
-                              datetime_struct &out_dt,
-                              date_parser_ambiguous_t ambig,
-                              bool allow_2digit_year)
+                              datetime_struct &out_dt, date_parse_order_t ambig,
+                              int century_window)
 {
     datetime_struct dt;
     skip_whitespace(begin, end);
-    if (!parse_datetime(begin, end, dt, ambig, allow_2digit_year)) {
+    if (!parse_datetime(begin, end, dt, ambig, century_window)) {
         return false;
     }
     skip_whitespace(begin, end);

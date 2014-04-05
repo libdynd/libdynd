@@ -140,7 +140,7 @@ static bool parse_md_str_month(const char *&begin, const char *end, char sep, in
     if (!parse_token_no_ws(begin, end, sep)) {
         return sbs.fail();
     }
-    if (!parse_2digit_int_no_ws(begin, end, out_day)) {
+    if (!parse_1or2digit_int_no_ws(begin, end, out_day)) {
         return sbs.fail();
     } else if (begin < end && isdigit(begin[0])) {
         // Don't match if the next character is another digit
@@ -149,16 +149,26 @@ static bool parse_md_str_month(const char *&begin, const char *end, char sep, in
     return sbs.succeed();
 }
 
-// YYYYsMMsDD, YYYYsMMMsDD for separator character 's', where MM is
-// numbers and MMM is a string.
+// 1979s03s22, 1979sMARs22
+// and if ambig is YMD, also accept 79s03s22, 79sMARs22
+// for separator character 's', where MM is numbers and MMM is a string.
 static bool parse_ymd_sep_date(const char *&begin, const char *end, char sep,
-                               date_ymd &out_ymd)
+                               date_ymd &out_ymd, date_parse_order_t ambig,
+                               int century_window)
 {
     saved_begin_state sbs(begin);
     // YYYY
     int year;
     if (!parse_4digit_int_no_ws(begin, end, year)) {
-        return sbs.fail();
+        if (century_window != 0 && ambig == date_parse_ymd) {
+            // Accept 79s03s22 as well in this case
+            if (!parse_2digit_int_no_ws(begin, end, year)) {
+                return sbs.fail();
+            }
+            year = date_ymd::resolve_2digit_year(year, century_window);
+        } else {
+            return sbs.fail();
+        }
     }
     // sMMsDD
     int month, day;
@@ -180,7 +190,7 @@ static bool parse_ymd_sep_date(const char *&begin, const char *end, char sep,
 
 // MMsDDsYYYY for separator character 's'
 static bool parse_mdy_ambig_sep_date(const char *&begin, const char *end, char sep,
-                               date_ymd &out_ymd, bool allow_2digit_year)
+                               date_ymd &out_ymd, int century_window)
 {
     saved_begin_state sbs(begin);
     // MM
@@ -202,14 +212,14 @@ static bool parse_mdy_ambig_sep_date(const char *&begin, const char *end, char s
     }
     int year;
     if (!parse_4digit_int_no_ws(begin, end, year)) {
-        if (allow_2digit_year) {
+        if (century_window != 0) {
             if (!parse_2digit_int_no_ws(begin, end, year)) {
                 return sbs.fail();
             } else if (begin < end && isdigit(begin[0])) {
                 // Don't match if the next character is another digit
                 return sbs.fail();
             }
-            year = date_ymd::resolve_2digit_year_sliding_window(year);
+            year = date_ymd::resolve_2digit_year(year, century_window);
         } else {
             return sbs.fail();
         }
@@ -229,7 +239,7 @@ static bool parse_mdy_ambig_sep_date(const char *&begin, const char *end, char s
 
 // DDsMMsYYYY for separator character 's'
 static bool parse_dmy_ambig_sep_date(const char *&begin, const char *end, char sep,
-                               date_ymd &out_ymd, bool allow_2digit_year)
+                               date_ymd &out_ymd, int century_window)
 {
     saved_begin_state sbs(begin);
     // DD
@@ -251,14 +261,14 @@ static bool parse_dmy_ambig_sep_date(const char *&begin, const char *end, char s
     }
     int year;
     if (!parse_4digit_int_no_ws(begin, end, year)) {
-        if (allow_2digit_year) {
+        if (century_window != 0) {
             if (!parse_2digit_int_no_ws(begin, end, year)) {
                 return sbs.fail();
             } else if (begin < end && isdigit(begin[0])) {
                 // Don't match if the next character is another digit
                 return sbs.fail();
             }
-            year = date_ymd::resolve_2digit_year_sliding_window(year);
+            year = date_ymd::resolve_2digit_year(year, century_window);
         } else {
             return sbs.fail();
         }
@@ -276,12 +286,15 @@ static bool parse_dmy_ambig_sep_date(const char *&begin, const char *end, char s
     return sbs.succeed();
 }
 
-// DDsMMMsYYYY for separator character 's', where MM is
-// numbers and MMM is a string.
-// Returns true on success
+// DDsMMMsYYYY
+// if ambig is DMY or MDY, also accept DDsMMMsYY (because the month
+// is a string we can unambiguously interpret both to mean "year at the end")
+// for separator character 's', where MM is numbers and MMM is a string.
+
 static bool parse_dmy_str_month_sep_date(const char *&begin, const char *end,
                                          char sep, date_ymd &out_ymd,
-                                         bool allow_2digit_year)
+                                         date_parse_order_t ambig,
+                                         int century_window)
 {
     saved_begin_state sbs(begin);
     // DD
@@ -303,14 +316,15 @@ static bool parse_dmy_str_month_sep_date(const char *&begin, const char *end,
     }
     int year;
     if (!parse_4digit_int_no_ws(begin, end, year)) {
-        if (allow_2digit_year) {
+        if (century_window &&
+                (ambig == date_parse_dmy || ambig == date_parse_mdy)) {
             if (!parse_2digit_int_no_ws(begin, end, year)) {
                 return sbs.fail();
             } else if (begin < end && isdigit(begin[0])) {
                 // Don't match if the next character is another digit
                 return sbs.fail();
             }
-            year = date_ymd::resolve_2digit_year_sliding_window(year);
+            year = date_ymd::resolve_2digit_year(year, century_window);
         } else {
             return sbs.fail();
         }
@@ -328,11 +342,14 @@ static bool parse_dmy_str_month_sep_date(const char *&begin, const char *end,
     return sbs.succeed();
 }
 
-// DDsMMMsYYYY for arbitrary amount of whitespace 's', where MMM is
-// a string month.
+// DDsMMMsYYYY
+// if ambig is DMY or MDY, also accept DDsMMMsYY (because the month
+// is a string we can unambiguously interpret both to mean "year at the end")
+// for arbitrary amount of whitespace 's', where MMM is a string month.
 static bool parse_dmy_str_month_ws_date(const char *&begin, const char *end,
                                         date_ymd &out_ymd,
-                                        bool allow_2digit_year)
+                                        date_parse_order_t ambig,
+                                        int century_window)
 {
     saved_begin_state sbs(begin);
     // DD
@@ -350,14 +367,15 @@ static bool parse_dmy_str_month_ws_date(const char *&begin, const char *end,
     skip_whitespace(begin, end);
     int year;
     if (!parse_4digit_int_no_ws(begin, end, year)) {
-        if (allow_2digit_year) {
+        if (century_window &&
+                (ambig == date_parse_dmy || ambig == date_parse_mdy)) {
             if (!parse_2digit_int_no_ws(begin, end, year)) {
                 return sbs.fail();
             } else if (begin < end && isdigit(begin[0])) {
                 // Don't match if the next character is another digit
                 return sbs.fail();
             }
-            year = date_ymd::resolve_2digit_year_sliding_window(year);
+            year = date_ymd::resolve_2digit_year(year, century_window);
         } else {
             return sbs.fail();
         }
@@ -447,7 +465,7 @@ static bool parse_iso8601_nodashes_date(const char *&begin, const char *end,
 
 static bool parse_mdy_long_format_date(const char *&begin, const char *end,
                                        date_ymd &out_ymd,
-                                       bool allow_2digit_year)
+                                       int century_window)
 {
     saved_begin_state sbs(begin);
     int month;
@@ -466,14 +484,14 @@ static bool parse_mdy_long_format_date(const char *&begin, const char *end,
     skip_whitespace(begin, end);
     int year;
     if (!parse_4digit_int_no_ws(begin, end, year)) {
-        if (allow_2digit_year) {
+        if (century_window != 0) {
             if (!parse_2digit_int_no_ws(begin, end, year)) {
                 return sbs.fail();
             } else if (begin < end && isdigit(begin[0])) {
                 // Don't match if the next character is another digit
                 return sbs.fail();
             }
-            year = date_ymd::resolve_2digit_year_sliding_window(year);
+            year = date_ymd::resolve_2digit_year(year, century_window);
         } else {
             return sbs.fail();
         }
@@ -551,8 +569,8 @@ static void skip_midnight_time(const char *&begin, const char *end)
     return;
 }
 
-bool parse::parse_date(const char *&begin, const char *end, date_ymd& out_ymd,
-                date_parser_ambiguous_t ambig, bool allow_2digit_year)
+bool parse::parse_date(const char *&begin, const char *end, date_ymd &out_ymd,
+                       date_parse_order_t ambig, int century_window)
 {
     int weekday;
     if (parse_str_weekday_no_ws(begin, end, weekday)) {
@@ -567,39 +585,42 @@ bool parse::parse_date(const char *&begin, const char *end, date_ymd& out_ymd,
             parse_iso8601_nodashes_date(begin, end, out_ymd)) {
         // 1979-03-22, +001979-03-22, -005999-01-01
         // 19790322
-    } else if (parse_ymd_sep_date(begin, end, '/', out_ymd) ||
-               parse_ymd_sep_date(begin, end, '-', out_ymd) ||
-               parse_ymd_sep_date(begin, end, '.', out_ymd)) {
+    } else if (parse_ymd_sep_date(begin, end, '/', out_ymd, ambig,
+                                  century_window) ||
+               parse_ymd_sep_date(begin, end, '-', out_ymd, ambig,
+                                  century_window) ||
+               parse_ymd_sep_date(begin, end, '.', out_ymd, ambig,
+                                  century_window)) {
         // 1979/03/22 or 1979/Mar/22, 1979-03-22 or 1979-Mar-22
         // 1979.03.22 or 1979.Mar.22
-    } else if (parse_dmy_str_month_sep_date(begin, end, '/', out_ymd,
-                                            allow_2digit_year) ||
-               parse_dmy_str_month_sep_date(begin, end, '-', out_ymd,
-                                            allow_2digit_year) ||
-               parse_dmy_str_month_sep_date(begin, end, '.', out_ymd,
-                                            allow_2digit_year)) {
+    } else if (parse_dmy_str_month_sep_date(begin, end, '/', out_ymd, ambig,
+                                            century_window) ||
+               parse_dmy_str_month_sep_date(begin, end, '-', out_ymd, ambig,
+                                            century_window) ||
+               parse_dmy_str_month_sep_date(begin, end, '.', out_ymd, ambig,
+                                            century_window)) {
         // 22/Mar/1979, 22-Mar-1979, 22.Mar.1979
-    } else if (parse_dmy_str_month_ws_date(begin, end, out_ymd,
-                                           allow_2digit_year)) {
+    } else if (parse_dmy_str_month_ws_date(begin, end, out_ymd, ambig,
+                                            century_window)) {
         // 22 Mar 1979
     } else if (parse_mdy_long_format_date(begin, end, out_ymd,
-                                          allow_2digit_year)) {
+                                          century_window)) {
         // March 22, 1979
-    } else if (ambig == date_parser_ambiguous_monthfirst &&
+    } else if (ambig == date_parse_mdy &&
                (parse_mdy_ambig_sep_date(begin, end, '/', out_ymd,
-                                         allow_2digit_year) ||
+                                         century_window) ||
                 parse_mdy_ambig_sep_date(begin, end, '-', out_ymd,
-                                         allow_2digit_year) ||
+                                         century_window) ||
                 parse_mdy_ambig_sep_date(begin, end, '.', out_ymd,
-                                         allow_2digit_year))) {
+                                         century_window))) {
         // 03/22/1979, 03-22-1979, 03.22.1979
-    } else if (ambig == date_parser_ambiguous_dayfirst &&
+    } else if (ambig == date_parse_dmy &&
                (parse_dmy_ambig_sep_date(begin, end, '/', out_ymd,
-                                         allow_2digit_year) ||
+                                         century_window) ||
                 parse_dmy_ambig_sep_date(begin, end, '-', out_ymd,
-                                         allow_2digit_year) ||
+                                         century_window) ||
                 parse_dmy_ambig_sep_date(begin, end, '.', out_ymd,
-                                         allow_2digit_year))) {
+                                         century_window))) {
         // 22/03/1979, 22-03-1979, 22.03.1979
     } else {
         return false;
@@ -615,12 +636,12 @@ bool parse::parse_date(const char *&begin, const char *end, date_ymd& out_ymd,
     return true;
 }
 
-bool dynd::string_to_date(const char *begin, const char *end, date_ymd& out_ymd,
-                date_parser_ambiguous_t ambig, bool allow_2digit_year)
+bool dynd::string_to_date(const char *begin, const char *end, date_ymd &out_ymd,
+                          date_parse_order_t ambig, int century_window)
 {
     date_ymd ymd;
     skip_whitespace(begin, end);
-    if (!parse_date(begin, end, ymd, ambig, allow_2digit_year)) {
+    if (!parse_date(begin, end, ymd, ambig, century_window)) {
         return false;
     }
     // Either a "T" or whitespace may separate a date and a time

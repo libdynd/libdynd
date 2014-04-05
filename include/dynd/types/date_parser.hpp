@@ -11,15 +11,7 @@
 namespace dynd {
 
 struct date_ymd;
-
-enum date_parser_ambiguous_t {
-    // Don't allow dates like 01/02/2003
-    date_parser_ambiguous_disallow,
-    // 01/02/2003 means February 1, 2003
-    date_parser_ambiguous_dayfirst,
-    // 01/02/2003 means January 2, 2003
-    date_parser_ambiguous_monthfirst
-};
+enum date_parse_order_t;
 
 /**
  * Parses a date. Accepts a wide variety of inputs, but rejects ambiguous
@@ -31,17 +23,19 @@ enum date_parser_ambiguous_t {
  * \param begin  The start of the UTF-8 buffer to parse.
  * \param end  One past the last character of the buffer to parse.
  * \param out_ymd  The date to fill.
- * \param ambig  How to handle the 01/02/2003 ambiguity. Defaults to disallow,
- *                   can also be dayfirst or monthfirst.
- * \param allow_2digit_year  If true, allows 2 digit years resolved with a sliding
- *                           window starting 70 years ago. Defaults to true.
+ * \param ambig  Order to use for ambiguous cases like "01/02/03"
+ *               or "01/02/1995".
+ * \param century_window  Number describing how to handle dates with
+ *                        two digit years. Values 1 to 99 mean to use
+ *                        a sliding window starting that many years back.
+ *                        Values 1000 and higher mean to use a fixed window
+ *                        starting at the year given. The value 0 means to
+ *                        disallow two digit years.
  *
  * \returns  True if the parse is successful, false otherwise.
  */
-bool
-string_to_date(const char *begin, const char *end, date_ymd &out_ymd,
-               date_parser_ambiguous_t ambig = date_parser_ambiguous_disallow,
-               bool allow_2digit_year = true);
+bool string_to_date(const char *begin, const char *end, date_ymd &out_ymd,
+                    date_parse_order_t ambig, int century_window);
 
 namespace parse {
 
@@ -55,14 +49,19 @@ namespace parse {
      * \param end  The end of a range of UTF-8 characters.
      * \param out_ymd  If true is returned, this has been filled with the parsed
      *                 date.
-     * \param ambig  How to handle the 01/02/2003 ambiguity.
-     * \param allow_2digit_year  If true, allows 2 digit years resolved with a sliding
-     *                           window starting 70 years ago.
+     * \param ambig  Order to use for ambiguous cases like "01/02/03"
+     *               or "01/02/1995".
+     * \param century_window  Number describing how to handle dates with
+     *                        two digit years. Values 1 to 99 mean to use
+     *                        a sliding window starting that many years back.
+     *                        Values 1000 and higher mean to use a fixed window
+     *                        starting at the year given. The value 0 means to
+     *                        disallow two digit years.
      *
      * \returns  True if a date was parsed successfully, false otherwise.
      */
     bool parse_date(const char *&begin, const char *end, date_ymd &out_ymd,
-                    date_parser_ambiguous_t ambig, bool allow_2digit_year);
+                    date_parse_order_t ambig, int century_window);
 
     /**
      * Parses a date in ISO 8601 dashes form like YYYY-MM-DD, +YYYYYY-MM-DD, or

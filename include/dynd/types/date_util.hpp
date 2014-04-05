@@ -23,6 +23,17 @@ namespace ndt {
     class type;
 } // namespace ndt
 
+/**
+ * An enumeration for describing how to interpret ambiguous
+ * dates such as "01/02/03" or "01/02/1995".
+ */
+enum date_parse_order_t {
+    date_parse_no_ambig,
+    date_parse_ymd,
+    date_parse_mdy,
+    date_parse_dmy
+};
+
 struct date_ymd {
     int16_t year;
     int8_t month;
@@ -156,26 +167,23 @@ struct date_ymd {
 
     /**
      * Sets the year/month/day from a string. Accepts a wide variety of
-     * inputs, but rejects ambiguous formats like MM/DD/YY vs DD/MM/YY.
-     * Two digit years are handled with a sliding window starting 70 years
-     * ago.
+     * inputs, but by default rejects ambiguous formats like MM/DD/YY vs
+     * DD/MM/YY. Two digit years are handled with a sliding window
+     * starting 70 years ago by default.
      *
      * \param s  Date string.
+     * \param ambig  Order to use for ambiguous cases like "01/02/03"
+     *               or "01/02/1995".
+     * \param century_window  Number describing how to handle dates with
+     *                        two digit years. Values 1 to 99 mean to use
+     *                        a sliding window starting that many years back.
+     *                        Values 1000 and higher mean to use a fixed window
+     *                        starting at the year given. The value 0 means to
+     *                        disallow two digit years.
      */
-    void set_from_str(const std::string& s);
-
-    /**
-     * Sets the year/month/day from a string. Accepts a wide variety of
-     * inputs, and interprets ambiguous formats like MM/DD/YY vs DD/MM/YY
-     * using the monthfirst parameter.
-     *
-     * \param s  Date string.
-     * \param monthfirst  If true, expect MM/DD/YY, otherwise expect DD/MM/YY.
-     * \param allow_2digit_year  If true, uses a sliding window starting 70 years ago
-     *                           to resolve two digit years.  Defaults to true.
-     */
-    void set_from_str(const std::string &s, bool monthfirst,
-                      bool allow_2digit_year = true);
+    void set_from_str(const std::string &s,
+                      date_parse_order_t ambig = date_parse_no_ambig,
+                      int century_window = 70);
 
     /**
      * When a year is a two digit year that should be resolved as a four
@@ -202,11 +210,27 @@ struct date_ymd {
      *
      * \param year  The year to apply the sliding window to.
      * \param years_ago  The number of years before the current date for the
-     *                   start of the window. Defaults to a 70 years.
+     *                   start of the window.
      *
      * \returns  The adjusted year.
      */
-    static int resolve_2digit_year_sliding_window(int year, int years_ago=70);
+    static int resolve_2digit_year_sliding_window(int year, int years_ago);
+
+    /**
+     * This function resolves a two digit year, choosing between a sliding
+     * or fixed window approach based on the parameter value.
+     *
+     * \param year  The year to apply the century selection to.
+     * \param century_window  Number describing how to handle dates with
+     *                        two digit years. Values 1 to 99 mean to use
+     *                        a sliding window starting that many years back.
+     *                        Values 1000 and higher mean to use a fixed window
+     *                        starting at the year given. The value 0 means to
+     *                        disallow two digit years.
+     *
+     * \returns  The adjusted year.
+     */
+    static int resolve_2digit_year(int year, int century_window);
 
     /**
      * Returns the current date in the local time zone.
