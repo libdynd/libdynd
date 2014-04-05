@@ -125,3 +125,61 @@ TEST(ArrayViews, IntMemFunc) {
     EXPECT_EQ(8, c(1,1).as<int>());
     EXPECT_EQ(6, c(1,2).as<int>());
 }
+
+void two_dim_res_one_arg_func(double (&res)[2][2], double x) {
+    res[0][0] = cos(x);
+    res[0][1] = -sin(x);
+    res[1][0] = sin(x);
+    res[1][1] = cos(x);
+}
+
+TEST(ArrayViews, FixedDimResOneArgFunc) {
+    double x = M_PI / 8;
+    nd::array a = x, c;
+
+    c = nd::foreach(a, two_dim_res_one_arg_func);
+    EXPECT_EQ(ndt::type("2 * 2 * float64"), c.get_type());
+    EXPECT_EQ(cos(x), c(0, 0).as<double>());
+    EXPECT_EQ(-sin(x), c(0, 1).as<double>());
+    EXPECT_EQ(sin(x), c(1, 0).as<double>());
+    EXPECT_EQ(cos(x), c(1, 1).as<double>());
+}
+
+
+void one_dim_res_two_arg_func(int (&res)[1], int x, int y)
+{
+    res[0] = max(x, y);
+}
+
+void two_dim_res_two_arg_func(int (&res)[2], int x, int y)
+{
+    res[0] = y;
+    res[1] = x;
+}
+
+TEST(ArrayViews, FixedDimResTwoArgFunc) {
+    nd::array a = 10, b = 20, c;
+
+    c = nd::foreach(a, b, one_dim_res_two_arg_func);
+    EXPECT_EQ(20, c(0).as<int>());
+
+    c = nd::foreach(a, b, two_dim_res_two_arg_func);
+    EXPECT_EQ(20, c(0).as<int>());
+    EXPECT_EQ(10, c(1).as<int>());
+
+    int aval0[2][3] = {{0, 1, 2}, {5, 6, 7}};
+    int bval0[3] = {5, 2, 4};
+    a = aval0;
+    b = bval0;
+    c = nd::foreach(a, b, two_dim_res_two_arg_func);
+
+    EXPECT_EQ(ndt::type("strided * strided * 2 * int32"), c.get_type());
+    ASSERT_EQ(2, c.get_shape()[0]);
+    ASSERT_EQ(3, c.get_shape()[1]);
+    for (int i = 0; i < 2; ++i) {
+        for (int j = 0; j < 3; ++j) {
+            EXPECT_EQ(bval0[j], c(i,j,0).as<int>());
+            EXPECT_EQ(aval0[i][j], c(i,j,1).as<int>());
+        }
+    }
+}
