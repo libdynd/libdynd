@@ -18,6 +18,8 @@
 #include <dynd/types/strided_dim_type.hpp>
 #include <dynd/types/fixed_dim_type.hpp>
 
+#include <dynd/pp/list.hpp>
+
 using namespace std;
 
 #define SRC_TYPE T
@@ -102,21 +104,18 @@ using namespace std;
 #define MAX_NDIM_0(A) A
 #define MAX_NDIM_1(A) DYND_PP_REDUCE(max, (A))
 
-/*
-        if (a0.get_dtype() != ndt::make_type<T0>()) { \
-            stringstream ss; \
-            ss << "initial prototype of foreach doesn't implicitly cast "; \
-            ss << a0.get_dtype() << " to " << ndt::make_type<T0>(); \
-            throw type_error(ss.str()); \
-        } \
-        if (a1.get_dtype() != ndt::make_type<T1>()) { \
-            stringstream ss; \
-            ss << "initial prototype of foreach doesn't implicitly cast "; \
-            ss << a1.get_dtype() << " to " << ndt::make_type<T1>(); \
-            throw type_error(ss.str()); \
-        } \
-
-*/
+//        if (a0.get_dtype() != ndt::make_type<T0>()) { \
+//            stringstream ss; \
+//            ss << "initial prototype of foreach doesn't implicitly cast "; \
+//            ss << a0.get_dtype() << " to " << ndt::make_type<T0>(); \
+//            throw type_error(ss.str()); \
+//        } \
+//        if (a1.get_dtype() != ndt::make_type<T1>()) { \
+//            stringstream ss; \
+//            ss << "initial prototype of foreach doesn't implicitly cast "; \
+//            ss << a1.get_dtype() << " to " << ndt::make_type<T1>(); \
+//            throw type_error(ss.str()); \
+//        } \
 
 #define ELWISE(STRIDED_NDIM, FIXED_NDIM) \
     namespace detail { \
@@ -335,6 +334,7 @@ struct foreach_ckernel_instantiator<R (T::*)(A0, A1)> {
 
 } // namespace detail
 
+DYND_PP_JOIN_OUTER(ELWISE, (), DYND_PP_RANGE(1, 4), DYND_PP_RANGE(1, 4))
 
 template<typename R, typename T0, typename T1>
 inline nd::array foreach(const nd::array& a, const nd::array& b, R (*func)(T0, T1))
@@ -400,7 +400,7 @@ inline nd::array foreach(const nd::array& a, const nd::array& b, R (*func)(T0, T
     return result;
 }
 
-DYND_PP_OUTER(ELWISE, (), DYND_PP_RANGE(1, 4), DYND_PP_RANGE(1, 4))
+//DYND_PP_OUTER(ELWISE, (), DYND_PP_RANGE(1, 4), DYND_PP_RANGE(1, 4))
 
 
 template<typename T, typename R, typename A0, typename A1>
