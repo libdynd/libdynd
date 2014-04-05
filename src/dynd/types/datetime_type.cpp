@@ -85,12 +85,15 @@ void datetime_type::set_cal(const char *DYND_UNUSED(metadata), char *data,
 }
 
 void datetime_type::set_utf8_string(const char *DYND_UNUSED(metadata),
-                char *data, assign_error_mode DYND_UNUSED(errmode), const std::string& utf8_str) const
+                                    char *data,
+                                    assign_error_mode DYND_UNUSED(errmode),
+                                    const std::string &utf8_str,
+                                    const eval::eval_context *ectx) const
 {
     // TODO: Use errmode to adjust strictness
     // TODO: Parsing adjustments/error handling based on the timezone
     datetime_struct dts;
-    dts.set_from_str(utf8_str);
+    dts.set_from_str(utf8_str, ectx->date_parse_order, ectx->century_window);
     *reinterpret_cast<int64_t *>(data) = dts.to_ticks();
 }
 

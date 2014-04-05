@@ -8,16 +8,22 @@
 
 #include <dynd/config.hpp>
 #include <dynd/typed_data_assign.hpp>
+#include <dynd/types/date_util.hpp>
 
 namespace dynd { namespace eval {
 
 struct eval_context {
     assign_error_mode default_assign_error_mode;
     assign_error_mode default_cuda_device_to_device_assign_error_mode;
+    // Controls assumed parse order of ambiguous date strings
+    date_parse_order_t date_parse_order;
+    // Controls century selection of 2 digit years in date strings
+    int century_window;
 
     DYND_CONSTEXPR eval_context()
         : default_assign_error_mode(assign_error_fractional),
-            default_cuda_device_to_device_assign_error_mode(assign_error_none)
+          default_cuda_device_to_device_assign_error_mode(assign_error_none),
+          date_parse_order(date_parse_no_ambig), century_window(70)
     {
     }
 };
