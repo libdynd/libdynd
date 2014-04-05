@@ -16,7 +16,7 @@ endif()
 
 set(tests_SRC
     pp/test_pp_arithmetic.cpp
-    pp/test_pp_comparision.cpp
+    pp/test_pp_comparison.cpp
     pp/test_pp_if.cpp
     pp/test_pp_list.cpp
     pp/test_pp_logical.cpp

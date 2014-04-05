@@ -145,7 +145,6 @@ TEST(ArrayViews, FixedDimResOneArgFunc) {
     EXPECT_EQ(cos(x), c(1, 1).as<double>());
 }
 
-
 void one_dim_res_two_arg_func(int (&res)[1], int x, int y)
 {
     res[0] = max(x, y);

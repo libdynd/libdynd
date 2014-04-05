@@ -6,7 +6,7 @@
 #ifndef _DYND__PP_LOGICAL_HPP_
 #define _DYND__PP_LOGICAL_HPP_
 
-#include <dynd/pp/comparision.hpp>
+#include <dynd/pp/comparison.hpp>
 #include <dynd/pp/token.hpp>
 
 #define DYND_PP_BOOL(A) DYND_PP_PASTE(DYND_PP_BOOL_, DYND_PP_EQ(A, 0))
