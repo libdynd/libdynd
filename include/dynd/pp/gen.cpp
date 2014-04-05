@@ -3,10 +3,12 @@
 // BSD 2-Clause License, see LICENSE.txt
 //
 
+#include <cmath>
 #include <cstdlib>
 #include <fstream>
 #include <stdexcept>
 #include <string>
+#include <iostream>
 
 using namespace std;
 
@@ -22,6 +24,18 @@ inline string argsep(bool newline)
 inline string argsep(int i, int args_per_line = 8) {
     return argsep((i + 1) % args_per_line == 0);
 }
+
+int next(int *idx, int len_max) {
+    int dim = 0;
+    while (idx[dim] == len_max - 1) {
+        idx[dim] = 0;
+        ++dim;
+    }
+    ++idx[dim];
+
+    return dim;
+}
+
 
 int main(int argc, char **argv) {
     const int pp_len_max = atoi(argv[1]);
@@ -270,6 +284,99 @@ int main(int argc, char **argv) {
     for (int i = 2; i <= pp_len_max; i++) {
         fout << "#define DYND_PP_ELEMENTWISE_" << i << "(MAC, A, B) DYND_PP_PREPEND(MAC(DYND_PP_FIRST(A), DYND_PP_FIRST(B)), DYND_PP_ELEMENTWISE_" << i - 1;
         fout << "(MAC, DYND_PP_POP_FIRST(A), DYND_PP_POP_FIRST(B)))" << endl;
+    }
+
+    fout << endl;
+
+    fout << "#define DYND_PP_OUTER(...) DYND_PP_ID(DYND_PP__OUTER(__VA_ARGS__))" << endl;
+    fout << "#define DYND_PP__OUTER(...) DYND_PP_PASTE(DYND_PP_OUTER_, DYND_PP_DEC(DYND_PP_DEC(DYND_PP_LEN((__VA_ARGS__)))))(__VA_ARGS__)" << endl;
+    for (int dep = 2; dep <= pp_dep_max; dep++) {
+        fout << "#define DYND_PP_OUTER_" << dep << "(MAC, SEP, ";
+        for (int i = 0; i < dep - 1; i++) {
+            fout << "A" << i << argsep(i);
+        }
+        fout << "A" << dep - 1 << ") DYND_PP_CAT((DYND_PP_OUTER_, ";
+        for (int i = 0; i < dep - 1; i++) {
+            fout << "DYND_PP_LEN(A" << i << "), _, ";
+        }
+        fout << "DYND_PP_LEN(A" << dep - 1 << ")))(MAC, SEP, ";
+/*
+        for (int i = dep - 1; i > 0; i--) {
+            fout << "DYND_PP_LEN(A" << i << "), _, ";
+        }
+        fout << "DYND_PP_LEN(A" << 0 << ")))(MAC, SEP, ";
+*/
+        for (int i = 0; i < dep - 1; i++) {
+            fout << "A" << i << argsep(i);
+        }
+        fout << "A" << dep - 1 << ")" << endl;
+        int idx[pp_dep_max];
+        std::fill(idx, idx + dep, 0);
+        fout << "#define DYND_PP_OUTER";
+        for (int i = 0; i < dep; i++) {
+            fout << "_1";
+        }
+        fout << "(MAC, SEP, ";
+        for (int i = 0; i < dep - 1; i++) {
+            fout << "A" << i << argsep(i);
+        }
+        fout << "A" << dep - 1 << ") MAC(";
+        for (int i = 0; i < dep - 1; i++) {
+            fout << "DYND_PP_FIRST(A" << i << ")" << argsep(i);
+        }
+        fout << "DYND_PP_FIRST(A" << dep - 1 << "))" << endl;
+        for (int cnt = pow((double) pp_len_max, dep) - 1; cnt > 0; cnt--) {
+            int jdx[pp_dep_max];
+            std::copy(idx, idx + pp_dep_max, jdx);
+            int dim = next(idx, pp_len_max);
+            fout << "#define DYND_PP_OUTER";
+            for (int i = dep - 1; i >= 0; i--) {
+                fout << "_" << idx[i] + 1;
+            }
+            fout << "(MAC, SEP, ";
+            for (int i = 0; i < dep - 1; i++) {
+                fout << "A" << i << argsep(i);
+            }
+            fout << "A" << dep - 1 << ") MAC(";
+            for (int i = 0; i < dep - 1; i++) {
+                fout << "DYND_PP_FIRST(A" << i << ")" << argsep(i);
+            }
+            fout << "DYND_PP_FIRST(A" << dep - 1 << "))";
+            fout << " DYND_PP_ID SEP ";
+            if (dim > 0) {
+                fout << "DYND_PP_CAT((";
+            }
+            fout << "DYND_PP_OUTER";
+/*
+            for (int i = dep - 1; i >= dim; i--) {
+                fout << "_" << jdx[i] + 1;
+            }
+            for (int i = dim - 1; i >= 0; i--) {
+                fout << ", _, " << "DYND_PP_LEN(A" << i << ")";
+            }
+*/
+            for (int i = dep - 1; i >= dim; i--) {
+                fout << "_" << jdx[i] + 1;
+            }
+            for (int i = dim - 1; i >= 0; i--) {
+                fout << ", _, " << "DYND_PP_LEN(A" << dep - i - 1 << ")";
+            }
+
+            if (dim > 0) {
+                fout << "))";
+            }
+            fout << "(MAC, SEP";
+            dim = dep - dim;
+            for (int i = 0; i < dim - 1; i++) {
+                fout << argsep(i) << "A" << i;
+            }
+            for (int i = dim - 1; i < dep; i++) {
+                fout << argsep(i) << "DYND_PP_APPEND(DYND_PP_FIRST(A" << i << "), DYND_PP_POP_FIRST(A" << i << "))";
+            }
+            fout << ")";
+            fout << endl;
+
+        }
     }
 
     fout << endl;
