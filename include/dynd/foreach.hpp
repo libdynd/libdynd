@@ -491,4 +491,10 @@ inline nd::array foreach(const nd::array& a, const nd::array& b, T obj)
 
 
 
+
+
+
+DYND_PP_OUTER(FOREACHX, (), (1, 2, 3), (1, 2, 3))
+
+
 #endif // _DYND__FOREACH_HPP_
