@@ -288,14 +288,18 @@ int main(int argc, char **argv) {
 
     fout << endl;
 
-    fout << "#define DYND_PP_OUTER(...) DYND_PP_ID(DYND_PP__OUTER(__VA_ARGS__))" << endl;
-    fout << "#define DYND_PP__OUTER(...) DYND_PP_PASTE(DYND_PP_OUTER_, DYND_PP_DEC(DYND_PP_DEC(DYND_PP_LEN((__VA_ARGS__)))))(__VA_ARGS__)" << endl;
+    fout << "#define DYND_PP_OUTER(MAC, A0, A1) (DYND_PP_JOIN_OUTER(MAC, (,), A0, A1))" << endl;
+
+    fout << endl;
+
+    fout << "#define DYND_PP_JOIN_OUTER(...) DYND_PP_ID(DYND_PP__JOIN_OUTER(__VA_ARGS__))" << endl;
+    fout << "#define DYND_PP__JOIN_OUTER(...) DYND_PP_ID(DYND_PP_PASTE(DYND_PP__JOIN_OUTER_, DYND_PP_DEC(DYND_PP_DEC(DYND_PP_LEN((__VA_ARGS__)))))(__VA_ARGS__))" << endl;
     for (int dep = 2; dep <= pp_dep_max; dep++) {
-        fout << "#define DYND_PP_OUTER_" << dep << "(MAC, SEP, ";
+        fout << "#define DYND_PP__JOIN_OUTER_" << dep << "(MAC, SEP, ";
         for (int i = 0; i < dep - 1; i++) {
             fout << "A" << i << argsep(i);
         }
-        fout << "A" << dep - 1 << ") DYND_PP_CAT((DYND_PP_OUTER_, ";
+        fout << "A" << dep - 1 << ") DYND_PP_CAT((DYND_PP__JOIN_OUTER_, ";
         for (int i = 0; i < dep - 1; i++) {
             fout << "DYND_PP_LEN(A" << i << "), _, ";
         }
@@ -310,9 +314,9 @@ int main(int argc, char **argv) {
             fout << "A" << i << argsep(i);
         }
         fout << "A" << dep - 1 << ")" << endl;
-        int idx[pp_dep_max];
+        int *idx = new int[pp_dep_max];
         std::fill(idx, idx + dep, 0);
-        fout << "#define DYND_PP_OUTER";
+        fout << "#define DYND_PP__JOIN_OUTER";
         for (int i = 0; i < dep; i++) {
             fout << "_1";
         }
@@ -325,11 +329,13 @@ int main(int argc, char **argv) {
             fout << "DYND_PP_FIRST(A" << i << ")" << argsep(i);
         }
         fout << "DYND_PP_FIRST(A" << dep - 1 << "))" << endl;
-        for (int cnt = pow((double) pp_len_max, dep) - 1; cnt > 0; cnt--) {
-            int jdx[pp_dep_max];
-            std::copy(idx, idx + pp_dep_max, jdx);
+        for (int cnt = (int) pow((double) pp_len_max, dep) - 1; cnt > 0; cnt--) {
+            int *jdx = new int[pp_dep_max];
+            for (int i = 0; i < pp_dep_max; i++) {
+                jdx[i] = idx[i];
+            }
             int dim = next(idx, pp_len_max);
-            fout << "#define DYND_PP_OUTER";
+            fout << "#define DYND_PP__JOIN_OUTER";
             for (int i = dep - 1; i >= 0; i--) {
                 fout << "_" << idx[i] + 1;
             }
@@ -346,7 +352,7 @@ int main(int argc, char **argv) {
             if (dim > 0) {
                 fout << "DYND_PP_CAT((";
             }
-            fout << "DYND_PP_OUTER";
+            fout << "DYND_PP__JOIN_OUTER";
 /*
             for (int i = dep - 1; i >= dim; i--) {
                 fout << "_" << jdx[i] + 1;

@@ -42,6 +42,12 @@ TEST(ArrayViews, IntFunc) {
     EXPECT_EQ(6, c(1,2).as<int>());
 }
 
+void vecintfunc1(int (&out)[1], int x, int y, int z)
+{
+    out[0] = x + y + z;
+}
+
+
 void vecintfunc(int (&out)[2], int x, int y)
 {
     out[0] = y;
