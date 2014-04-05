@@ -6,6 +6,7 @@
 #ifndef _DYND__PP_LIST_HPP_
 #define _DYND__PP_LIST_HPP_
 
+#include <dynd/pp/arithmetic.hpp>
 #include <dynd/pp/comparision.hpp>
 #include <dynd/pp/gen.hpp>
 #include <dynd/pp/if.hpp>

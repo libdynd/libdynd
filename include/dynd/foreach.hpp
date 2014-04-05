@@ -118,7 +118,7 @@ using namespace std;
 
 */
 
-#define FOREACH(STRIDED_NDIM, FIXED_NDIM) \
+#define ELWISE(STRIDED_NDIM, FIXED_NDIM) \
     namespace detail { \
     template<DECL_RES_TYPE, DECL_FIXED_DIMS(FIXED_NDIM), DECL_SRC_TYPES(STRIDED_NDIM)> \
     struct foreach_ckernel_instantiator<void (*)(RES_TYPE (&)FIXED_DIMS_AS_ARRAY_DIMS(FIXED_NDIM), SRC_TYPES(STRIDED_NDIM))> { \
@@ -400,15 +400,7 @@ inline nd::array foreach(const nd::array& a, const nd::array& b, R (*func)(T0, T
     return result;
 }
 
-
-FOREACH(1, 1)
-FOREACH(1, 2)
-FOREACH(2, 1)
-FOREACH(2, 2)
-FOREACH(2, 3)
-FOREACH(3, 1)
-FOREACH(3, 2)
-FOREACH(3, 3)
+DYND_PP_OUTER(ELWISE, (), DYND_PP_RANGE(1, 4), DYND_PP_RANGE(1, 4))
 
 
 template<typename T, typename R, typename A0, typename A1>
@@ -485,16 +477,5 @@ inline nd::array foreach(const nd::array& a, const nd::array& b, T obj)
 }
 
 }} // namespace dynd::nd
-
-//#define F(A) FOREACH(DYND_PP_FIRST(A), DYND_PP_FIRST(DYND_PP_POP_FIRST(A)))
-//DYND_PP_MAP(F, ((2, 1), (3, 1)))
-
-
-
-
-
-
-DYND_PP_OUTER(FOREACHX, (), (1, 2, 3), (1, 2, 3))
-
 
 #endif // _DYND__FOREACH_HPP_
