@@ -262,6 +262,7 @@ int main(int argc, char **argv) {
     fout << "#define DYND_PP_NESTED_REDUCE(DEPTH) DYND_PP_PASTE(DYND_PP_NESTED_REDUCE_, DEPTH)" << endl;
     for (int depth = 0; depth <= pp_dep_max; depth++) {
         fout << "#define DYND_PP_NESTED_REDUCE_" << depth << "(MAC, A) DYND_PP_PASTE(DYND_PP_NESTED_REDUCE_" << depth << "_, DYND_PP_LEN(A))(MAC, A)" << endl;
+        fout << "#define DYND_PP_NESTED_REDUCE_" << depth << "_1(MAC, A) DYND_PP_FIRST(A)" << endl;
         fout << "#define DYND_PP_NESTED_REDUCE_" << depth << "_2(MAC, A) MAC(DYND_PP_FIRST(A), DYND_PP_FIRST(DYND_PP_POP_FIRST(A)))" << endl;
         for (int len = 3; len <= pp_len_max; len++) {
             fout << "#define DYND_PP_NESTED_REDUCE_" << depth << "_" << len << "(MAC, A) ";
@@ -374,7 +375,11 @@ int main(int argc, char **argv) {
                 fout << argsep(i) << "A" << i;
             }
             for (int i = dim - 1; i < dep; i++) {
-                fout << argsep(i) << "DYND_PP_APPEND(DYND_PP_FIRST(A" << i << "), DYND_PP_POP_FIRST(A" << i << "))";
+                if (idx[dep - i - 1] + 1 == 1) {
+                    fout << argsep(i) << "A" << i; 
+                } else {
+                    fout << argsep(i) << "DYND_PP_APPEND(DYND_PP_FIRST(A" << i << "), DYND_PP_POP_FIRST(A" << i << "))";
+                }
             }
             fout << ")";
             fout << endl;
