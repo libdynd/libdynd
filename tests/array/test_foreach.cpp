@@ -20,6 +20,11 @@ int intfunc(int x, int y)
     return 2 * (x - y);
 }
 
+void intfunc_other(int &out, int x, int y)
+{
+    out = 2 * (x - y);
+}
+
 TEST(ArrayViews, IntFunc) {
     nd::array a = 10, b = 20, c;
 
@@ -31,6 +36,25 @@ TEST(ArrayViews, IntFunc) {
     a = aval0;
     b = bval0;
     c = nd::foreach(a, b, intfunc);
+    EXPECT_EQ(ndt::type("strided * strided * int32"), c.get_type());
+    ASSERT_EQ(2, c.get_shape()[0]);
+    ASSERT_EQ(3, c.get_shape()[1]);
+    EXPECT_EQ(-10, c(0,0).as<int>());
+    EXPECT_EQ(-2, c(0,1).as<int>());
+    EXPECT_EQ(-4, c(0,2).as<int>());
+    EXPECT_EQ(0, c(1,0).as<int>());
+    EXPECT_EQ(8, c(1,1).as<int>());
+    EXPECT_EQ(6, c(1,2).as<int>());
+
+    a = 10;
+    b = 20;
+
+    c = nd::foreach(a, b, intfunc_other);
+    EXPECT_EQ(-20, c.as<int>());
+
+    a = aval0;
+    b = bval0;
+    c = nd::foreach(a, b, intfunc_other);
     EXPECT_EQ(ndt::type("strided * strided * int32"), c.get_type());
     ASSERT_EQ(2, c.get_shape()[0]);
     ASSERT_EQ(3, c.get_shape()[1]);
@@ -134,7 +158,7 @@ void two_dim_res_one_arg_func(double (&res)[2][2], double x) {
 }
 
 TEST(ArrayViews, FixedDimResOneArgFunc) {
-    double x = M_PI / 8;
+    double x = 3.14 / 8;
     nd::array a = x, c;
 
     c = nd::foreach(a, two_dim_res_one_arg_func);
