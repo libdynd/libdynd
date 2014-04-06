@@ -23,17 +23,17 @@
 
 using namespace std;
 
-//        if (a0.get_dtype() != ndt::make_type<T0>()) { \
-//            stringstream ss; \
-//            ss << "initial prototype of foreach doesn't implicitly cast "; \
-//            ss << a0.get_dtype() << " to " << ndt::make_type<T0>(); \
-//            throw type_error(ss.str()); \
-//        } \
-//        if (a1.get_dtype() != ndt::make_type<T1>()) { \
-//            stringstream ss; \
-//            ss << "initial prototype of foreach doesn't implicitly cast "; \
-//            ss << a1.get_dtype() << " to " << ndt::make_type<T1>(); \
-//            throw type_error(ss.str()); \
+//        if (a0.get_dtype() != ndt::make_type<T0>()) {
+//            stringstream ss;
+//            ss << "initial prototype of foreach doesn't implicitly cast ";
+//            ss << a0.get_dtype() << " to " << ndt::make_type<T0>();
+//            throw type_error(ss.str());
+//        }
+//        if (a1.get_dtype() != ndt::make_type<T1>()) {
+//            stringstream ss;
+//            ss << "initial prototype of foreach doesn't implicitly cast ";
+//            ss << a1.get_dtype() << " to " << ndt::make_type<T1>();
+//            throw type_error(ss.str());
 //        }
 
 
