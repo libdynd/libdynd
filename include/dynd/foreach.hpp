@@ -152,7 +152,7 @@ void incremental_broadcast_input_shapes(intptr_t ninputs, const nd::array** inpu
         out_undim = max(inputs[j]->get_ndim(), out_undim);
     }
     out_shape.init(out_undim);
-    for (size_t j = 0; j != out_undim; ++j) {
+    for (intptr_t j = 0; j != out_undim; ++j) {
         out_shape[j] = 1;
     }
 
