@@ -49,8 +49,10 @@ void date_type::set_ymd(const char *DYND_UNUSED(metadata), char *data,
     *reinterpret_cast<int32_t *>(data) = date_ymd::to_days(year, month, day);
 }
 
-void date_type::set_utf8_string(const char *DYND_UNUSED(metadata),
-                char *data, assign_error_mode DYND_UNUSED(errmode), const std::string& utf8_str) const
+void date_type::set_utf8_string(const char *DYND_UNUSED(metadata), char *data,
+                                assign_error_mode DYND_UNUSED(errmode),
+                                const std::string &utf8_str,
+                                const eval::eval_context *ectx) const
 {
     date_ymd ymd;
     // TODO: Use errmode to adjust strictness of the parsing
@@ -58,7 +60,7 @@ void date_type::set_utf8_string(const char *DYND_UNUSED(metadata),
     if (utf8_str == "NA") {
         ymd.set_to_na();
     } else {
-        ymd.set_from_str(utf8_str);
+        ymd.set_from_str(utf8_str, ectx->date_parse_order, ectx->century_window);
     }
     *reinterpret_cast<int32_t *>(data) = ymd.to_days();
 }

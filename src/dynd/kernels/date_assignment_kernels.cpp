@@ -21,6 +21,8 @@ namespace {
         const base_string_type *src_string_dt;
         const char *src_metadata;
         assign_error_mode errmode;
+        date_parse_order_t date_parse_order;
+        int century_window;
 
         static void single(char *dst, const char *src, ckernel_prefix *extra)
         {
@@ -31,7 +33,7 @@ namespace {
             if (s == "NA") {
                 ymd.set_to_na();
             } else {
-                ymd.set_from_str(s);
+                ymd.set_from_str(s, e->date_parse_order, e->century_window);
             }
             *reinterpret_cast<int32_t *>(dst) = ymd.to_days();
         }
@@ -48,7 +50,7 @@ size_t dynd::make_string_to_date_assignment_kernel(
                 ckernel_builder *out, size_t offset_out,
                 const ndt::type& src_string_dt, const char *src_metadata,
                 kernel_request_t kernreq, assign_error_mode errmode,
-                const eval::eval_context *DYND_UNUSED(ectx))
+                const eval::eval_context *ectx)
 {
     if (src_string_dt.get_kind() != string_kind) {
         stringstream ss;
@@ -65,6 +67,8 @@ size_t dynd::make_string_to_date_assignment_kernel(
     e->src_string_dt = static_cast<const base_string_type *>(ndt::type(src_string_dt).release());
     e->src_metadata = src_metadata;
     e->errmode = errmode;
+    e->date_parse_order = ectx->date_parse_order;
+    e->century_window = ectx->century_window;
     return offset_out + sizeof(string_to_date_kernel_extra);
 }
 

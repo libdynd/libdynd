@@ -160,6 +160,7 @@ set(libdynd_SRC
     src/dynd/types/date_parser.cpp
     src/dynd/types/date_type.cpp
     src/dynd/types/date_util.cpp
+    src/dynd/types/datetime_parser.cpp
     src/dynd/types/datetime_type.cpp
     src/dynd/types/datetime_util.cpp
     src/dynd/types/type_type.cpp
@@ -212,6 +213,7 @@ set(libdynd_SRC
     include/dynd/types/date_parser.hpp
     include/dynd/types/date_type.hpp
     include/dynd/types/date_util.hpp
+    include/dynd/types/datetime_parser.hpp
     include/dynd/types/datetime_type.hpp
     include/dynd/types/datetime_util.hpp
     include/dynd/types/type_type.hpp

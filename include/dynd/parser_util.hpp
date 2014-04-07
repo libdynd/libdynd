@@ -56,6 +56,10 @@ public:
     inline bool fail() {
         return false;
     }
+
+    inline const char *saved_begin() const {
+        return m_saved_begin;
+    }
 };
 
 /**
@@ -135,11 +139,13 @@ inline bool parse_token(const char *&begin, const char *end,
  */
 inline bool parse_token(const char *&begin, const char *end, char token)
 {
+    const char *saved_begin = begin;
     skip_whitespace(begin, end);
     if (1 <= end - begin && *begin == token) {
         ++begin;
         return true;
     } else {
+        begin = saved_begin;
         return false;
     }
 }
@@ -317,7 +323,7 @@ struct named_value {
  *     }
  */
 template <int N>
-bool parse_ci_alpha_str_named_value_no_ws(const char *&begin, const char *end,
+inline bool parse_ci_alpha_str_named_value_no_ws(const char *&begin, const char *end,
                                   named_value (&nvt)[N], int &out_value)
 {
     // TODO: Could specialize two implementations based on the size of N,

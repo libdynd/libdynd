@@ -22,6 +22,22 @@ const int date_ymd::month_starts[2][13] = {
     {0, 31, 60, 91, 121, 152, 182, 213, 244, 274, 305, 335, 366}
 };
 
+std::ostream& dynd::operator<<(std::ostream& o, date_parse_order_t date_order)
+{
+    switch (date_order) {
+    case date_parse_no_ambig:
+        return (o << "NoAmbig");
+    case date_parse_ymd:
+        return (o << "YMD");
+    case date_parse_mdy:
+        return (o << "MDY");
+    case date_parse_dmy:
+        return (o << "DMY");
+    default:
+        return (o << "<invalid dateorder " << (int)date_order << ">");
+    }
+}
+
 int32_t date_ymd::to_days(int year, int month, int day)
 {
     if (is_valid(year, month, day)) {
@@ -136,9 +152,12 @@ void date_ymd::set_from_days(int32_t days)
     }
 }
 
-void date_ymd::set_from_str(const std::string& s)
+void date_ymd::set_from_str(const std::string &s,
+                      date_parse_order_t ambig,
+                      int century_window)
 {
-    if (!string_to_date(s.data(), s.data() + s.size(), *this)) {
+    if (!string_to_date(s.data(), s.data() + s.size(), *this,
+                        ambig, century_window)) {
         stringstream ss;
         ss << "Unable to parse ";
         print_escaped_utf8_string(ss, s);
@@ -147,18 +166,59 @@ void date_ymd::set_from_str(const std::string& s)
     }
 }
 
-void date_ymd::set_from_str(const std::string& s, bool monthfirst)
+int date_ymd::resolve_2digit_year_fixed_window(int year, int year_start)
 {
-    if (!string_to_date(s.data(), s.data() + s.size(), *this,
-                        monthfirst ? date_parser_ambiguous_monthfirst
-                                   : date_parser_ambiguous_dayfirst)) {
+    int century_start = (year_start / 100) * 100;
+    int year_start_in_century = year_start - century_start;
+
+    if (year >= year_start_in_century) {
+        return century_start + year;
+    } else{
+        return century_start + 100 + year;
+    }
+}
+
+int date_ymd::resolve_2digit_year_sliding_window(int year, int years_ago)
+{
+    // Get the current date from the system
+    int32_t current_date_days;
+#if defined(_MSC_VER)
+    __time64_t rawtime;
+    _time64(&rawtime);
+#else
+    time_t rawtime;
+    time(&rawtime);
+#endif
+    if (rawtime >= 0) {
+        current_date_days =
+            static_cast<int32_t>(rawtime / DYND_SECONDS_PER_DAY);
+    } else {
+        current_date_days = static_cast<int32_t>(
+            (rawtime - (DYND_SECONDS_PER_DAY - 1)) / DYND_SECONDS_PER_DAY);
+    }
+    date_ymd current_date;
+    current_date.set_from_days(current_date_days);
+
+    // Use it to resolve the 2 digit year with the sliding window
+    return resolve_2digit_year_fixed_window(year, current_date.year - years_ago);
+}
+
+int date_ymd::resolve_2digit_year(int year, int century_window)
+{
+    if (century_window >= 1 && century_window <= 99) {
+        return date_ymd::resolve_2digit_year_sliding_window(year,
+                                                            century_window);
+    } else if (century_window >= 1000) {
+        return date_ymd::resolve_2digit_year_fixed_window(year, century_window);
+    } else {
         stringstream ss;
-        ss << "Unable to parse ";
-        print_escaped_utf8_string(ss, s);
-        ss << " as a date";
+        ss << "invalid century_window value " << century_window
+           << ", must be 1-99 for a sliding window, or >= 1000 for a fixed "
+              "window";
         throw invalid_argument(ss.str());
     }
 }
+
 
 date_ymd date_ymd::get_current_local_date()
 {

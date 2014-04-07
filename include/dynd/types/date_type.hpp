@@ -19,7 +19,10 @@ public:
 
     void set_ymd(const char *metadata, char *data, assign_error_mode errmode,
                     int32_t year, int32_t month, int32_t day) const;
-    void set_utf8_string(const char *metadata, char *data, assign_error_mode errmode, const std::string& utf8_str) const;
+    void set_utf8_string(const char *metadata, char *data,
+                         assign_error_mode errmode,
+                         const std::string &utf8_str,
+                         const eval::eval_context *ectx) const;
 
     date_ymd get_ymd(const char *metadata, const char *data) const;
 

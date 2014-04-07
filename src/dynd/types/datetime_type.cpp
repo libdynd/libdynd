@@ -85,24 +85,17 @@ void datetime_type::set_cal(const char *DYND_UNUSED(metadata), char *data,
 }
 
 void datetime_type::set_utf8_string(const char *DYND_UNUSED(metadata),
-                char *data, assign_error_mode errmode, const std::string& utf8_str) const
+                                    char *data,
+                                    assign_error_mode DYND_UNUSED(errmode),
+                                    const std::string &utf8_str,
+                                    const eval::eval_context *ectx) const
 {
-    datetime::datetime_conversion_rule_t casting;
-    switch (errmode) {
-        case assign_error_fractional:
-        case assign_error_inexact:
-            casting = datetime::datetime_conversion_strict;
-            break;
-        default:
-            casting = datetime::datetime_conversion_relaxed;
-            break;
-    }
+    // TODO: Use errmode to adjust strictness
     // TODO: Parsing adjustments/error handling based on the timezone
-    *reinterpret_cast<int64_t *>(data) = datetime::parse_iso_8601_datetime(
-                            utf8_str, datetime::datetime_unit_tick,
-                            m_timezone == tz_abstract, casting);
+    datetime_struct dts;
+    dts.set_from_str(utf8_str, ectx->date_parse_order, ectx->century_window);
+    *reinterpret_cast<int64_t *>(data) = dts.to_ticks();
 }
-
 
 void datetime_type::get_cal(const char *DYND_UNUSED(metadata), const char *data,
                 int32_t &out_year, int32_t &out_month, int32_t &out_day,
@@ -122,13 +115,10 @@ void datetime_type::get_cal(const char *DYND_UNUSED(metadata), const char *data,
 void datetime_type::print_data(std::ostream& o,
                 const char *DYND_UNUSED(metadata), const char *data) const
 {
-    datetime::datetime_fields fields;
-    fields.set_from_datetime_val(*reinterpret_cast<const int64_t *>(data),
-                    datetime::datetime_unit_tick);
+    datetime_struct dts;
+    dts.set_from_ticks(*reinterpret_cast<const int64_t *>(data));
     // TODO: Handle distiction between printing abstract and UTC units
-    o << datetime::make_iso_8601_datetime(&fields,
-                                          datetime::datetime_unit_autodetect,
-                                          m_timezone == tz_abstract);
+    o << dts.to_str();
 }
 
 void datetime_type::print_type(std::ostream& o) const
@@ -243,15 +233,15 @@ void datetime_type::get_dynamic_type_properties(const std::pair<std::string, gfu
 
 ///////// functions on the type
 
-static nd::array function_type_now(const ndt::type& dt) {
+static nd::array function_type_now(const ndt::type& DYND_UNUSED(dt)) {
     throw runtime_error("TODO: implement datetime.now function");
-    datetime::datetime_fields fields;
-    //datetime::fill_current_local_datetime(&fields);
-    nd::array result = nd::empty(dt);
-    //*reinterpret_cast<int32_t *>(result.get_readwrite_originptr()) = datetime::ymd_to_days(ymd);
+    //datetime_struct dts;
+    //fill_current_local_datetime(&fields);
+    //nd::array result = nd::empty(dt);
+    //*reinterpret_cast<int64_t *>(result.get_readwrite_originptr()) = dt.to_ticks();
     // Make the result immutable (we own the only reference to the data at this point)
-    result.flag_as_immutable();
-    return result;
+    //result.flag_as_immutable();
+    //return result;
 }
 
 static nd::array function_type_construct(const ndt::type& DYND_UNUSED(dt),
@@ -269,17 +259,17 @@ static nd::array function_type_construct(const ndt::type& DYND_UNUSED(dt),
 
     array_iter<1,3> iter(ndt::make_datetime(), result, year_as_int, month_as_int, day_as_int);
     if (!iter.empty()) {
-        datetime::date_ymd ymd;
+        datetime_struct dts;
         do {
             ymd.year = *reinterpret_cast<const int32_t *>(iter.data<1>());
             ymd.month = *reinterpret_cast<const int32_t *>(iter.data<2>());
             ymd.day = *reinterpret_cast<const int32_t *>(iter.data<3>());
-            if (!datetime::is_valid_ymd(ymd)) {
+            if (!ymd.is_valid()) {
                 stringstream ss;
                 ss << "invalid year/month/day " << ymd.year << "/" << ymd.month << "/" << ymd.day;
                 throw runtime_error(ss.str());
             }
-            *reinterpret_cast<int32_t *>(iter.data<0>()) = datetime::ymd_to_days(ymd);
+            *reinterpret_cast<int64_t *>(iter.data<0>()) = dts.to_ticks();
         } while (iter.next());
     }
 

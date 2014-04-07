@@ -105,7 +105,7 @@ size_t dynd::make_assignment_kernel(
                 const eval::eval_context *ectx)
 {
     if (errmode == assign_error_default && ectx != NULL) {
-        errmode = ectx->default_assign_error_mode;
+        errmode = ectx->default_errmode;
     }
 
     if (dst_tp.is_builtin()) {

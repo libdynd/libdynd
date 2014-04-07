@@ -42,24 +42,57 @@ struct datetime_struct {
     }
 
     int64_t to_ticks() const {
-        return ymd.to_days() * DYND_TICKS_PER_DAY + hmst.to_ticks();
+        if (is_valid()) {
+            return ymd.to_days() * DYND_TICKS_PER_DAY + hmst.to_ticks();
+        } else {
+            return DYND_DATETIME_NA;
+        }
     }
 
+    std::string to_str() const;
+
     void set_from_ticks(int64_t ticks) {
-        int32_t days;
-        if (ticks >= 0) {
-            days = static_cast<int32_t>(ticks / DYND_TICKS_PER_DAY);
-            ticks = ticks % DYND_TICKS_PER_DAY;
-        } else {
-            days = static_cast<int32_t>((ticks - (DYND_TICKS_PER_DAY - 1)) / DYND_TICKS_PER_DAY);
-            ticks = ticks % DYND_TICKS_PER_DAY;
-            if (ticks < 0) {
-                ticks += DYND_TICKS_PER_DAY;
+        if (ticks != DYND_DATETIME_NA) {
+            int32_t days;
+            if (ticks >= 0) {
+                days = static_cast<int32_t>(ticks / DYND_TICKS_PER_DAY);
+                ticks = ticks % DYND_TICKS_PER_DAY;
+            } else {
+                days = static_cast<int32_t>((ticks - (DYND_TICKS_PER_DAY - 1)) / DYND_TICKS_PER_DAY);
+                ticks = ticks % DYND_TICKS_PER_DAY;
+                if (ticks < 0) {
+                    ticks += DYND_TICKS_PER_DAY;
+                }
             }
+            ymd.set_from_days(days);
+            hmst.set_from_ticks(ticks);
+        } else {
+            set_to_na();
         }
-        ymd.set_from_days(days);
-        hmst.set_from_ticks(ticks);
     }
+
+    void set_to_na() {
+        ymd.set_to_na();
+    }
+
+    /**
+     * Sets the datetime from a string. Accepts a wide variety of
+     * inputs, and interprets ambiguous formats like MM/DD/YY vs DD/MM/YY
+     * using the monthfirst parameter.
+     *
+     * \param s  Datetime string.
+     * \param ambig  Order to use for ambiguous cases like "01/02/03"
+     *               or "01/02/1995".
+     * \param century_window  Number describing how to handle dates with
+     *                        two digit years. Values 1 to 99 mean to use
+     *                        a sliding window starting that many years back.
+     *                        Values 1000 and higher mean to use a fixed window
+     *                        starting at the year given. The value 0 means to
+     *                        disallow two digit years.
+     */
+    void set_from_str(const std::string &s,
+                      date_parse_order_t ambig = date_parse_no_ambig,
+                      int century_window = 70);
 
     /**
      * Returns an ndt::type corresponding to the datetime_struct structure.

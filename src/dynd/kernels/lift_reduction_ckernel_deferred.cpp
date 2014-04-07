@@ -38,9 +38,10 @@ static void delete_lifted_reduction_ckernel_deferred_data(void *self_data_ptr)
     delete self;
 }
 
-static intptr_t instantiate_lifted_reduction_ckernel_deferred_data(void *self_data_ptr,
-                dynd::ckernel_builder *out_ckb, intptr_t ckb_offset,
-                const char *const* dynd_metadata, uint32_t kerntype)
+static intptr_t instantiate_lifted_reduction_ckernel_deferred_data(
+    void *self_data_ptr, dynd::ckernel_builder *out_ckb, intptr_t ckb_offset,
+    const char *const *dynd_metadata, uint32_t kerntype,
+    const eval::eval_context *ectx)
 {
     lifted_reduction_ckernel_deferred_data *self =
                     reinterpret_cast<lifted_reduction_ckernel_deferred_data *>(self_data_ptr);
@@ -53,7 +54,8 @@ static intptr_t instantiate_lifted_reduction_ckernel_deferred_data(void *self_da
                     self->reduction_dimflags.get(),
                     self->associative, self->commutative,
                     self->right_associative, self->reduction_identity,
-                    static_cast<dynd::kernel_request_t>(kerntype));
+                    static_cast<dynd::kernel_request_t>(kerntype),
+                    ectx);
 }
 
 } // anonymous namespace

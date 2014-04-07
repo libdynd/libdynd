@@ -7,19 +7,9 @@
 #define _DYND__DATE_PARSER_HPP_
 
 #include <dynd/config.hpp>
+#include <dynd/types/date_util.hpp>
 
 namespace dynd {
-
-struct date_ymd;
-
-enum date_parser_ambiguous_t {
-    // Don't allow dates like 01/02/2003
-    date_parser_ambiguous_disallow,
-    // 01/02/2003 means February 1, 2003
-    date_parser_ambiguous_dayfirst,
-    // 01/02/2003 means January 2, 2003
-    date_parser_ambiguous_monthfirst
-};
 
 /**
  * Parses a date. Accepts a wide variety of inputs, but rejects ambiguous
@@ -31,13 +21,19 @@ enum date_parser_ambiguous_t {
  * \param begin  The start of the UTF-8 buffer to parse.
  * \param end  One past the last character of the buffer to parse.
  * \param out_ymd  The date to fill.
- * \param ambig  How to handle the 01/02/2003 ambiguity. Defaults to disallow,
- *                   can also be dayfirst or monthfirst.
+ * \param ambig  Order to use for ambiguous cases like "01/02/03"
+ *               or "01/02/1995".
+ * \param century_window  Number describing how to handle dates with
+ *                        two digit years. Values 1 to 99 mean to use
+ *                        a sliding window starting that many years back.
+ *                        Values 1000 and higher mean to use a fixed window
+ *                        starting at the year given. The value 0 means to
+ *                        disallow two digit years.
  *
  * \returns  True if the parse is successful, false otherwise.
  */
 bool string_to_date(const char *begin, const char *end, date_ymd &out_ymd,
-                    date_parser_ambiguous_t ambig=date_parser_ambiguous_disallow);
+                    date_parse_order_t ambig, int century_window);
 
 namespace parse {
 
@@ -51,12 +47,67 @@ namespace parse {
      * \param end  The end of a range of UTF-8 characters.
      * \param out_ymd  If true is returned, this has been filled with the parsed
      *                 date.
-     * \param ambig  How to handle the 01/02/2003 ambiguity.
+     * \param ambig  Order to use for ambiguous cases like "01/02/03"
+     *               or "01/02/1995".
+     * \param century_window  Number describing how to handle dates with
+     *                        two digit years. Values 1 to 99 mean to use
+     *                        a sliding window starting that many years back.
+     *                        Values 1000 and higher mean to use a fixed window
+     *                        starting at the year given. The value 0 means to
+     *                        disallow two digit years.
      *
      * \returns  True if a date was parsed successfully, false otherwise.
      */
     bool parse_date(const char *&begin, const char *end, date_ymd &out_ymd,
-                    date_parser_ambiguous_t ambig);
+                    date_parse_order_t ambig, int century_window);
+
+    /**
+     * Parses a date in ISO 8601 dashes form like YYYY-MM-DD, +YYYYYY-MM-DD, or
+     * -YYYYYY-MM-DD.
+     *
+     * \param begin  The start of a range of UTF-8 characters. This is modified
+     *               to point immediately after the parsed date if true is returned.
+     * \param end  The end of a range of UTF-8 characters.
+     * \param out_ymd  If true is returned, this has been filled with the parsed
+     *                 date.
+     */
+    bool parse_iso8601_dashes_date(const char *&begin, const char *end,
+                                   date_ymd &out_ymd);
+
+    /**
+     * Parses a string month: Jan == 1, Dec == 12.
+     *
+     * \param begin  The start of a range of UTF-8 characters. This is modified
+     *               to point immediately after the parsed value if true is returned.
+     * \param end  The end of a range of UTF-8 characters.
+     * \param out_month  If true is returned, this has been filled with the parsed
+     *                   month.
+     */
+    bool parse_str_month_no_ws(const char *&begin, const char *end, int &out_month);
+
+    /**
+     * Parses a string month: Jan == 1, Dec == 12. Accepts a period after month
+     * abbreviations like "Jan.".
+     *
+     * \param begin  The start of a range of UTF-8 characters. This is modified
+     *               to point immediately after the parsed value if true is returned.
+     * \param end  The end of a range of UTF-8 characters.
+     * \param out_month  If true is returned, this has been filled with the parsed
+     *                   month.
+     */
+    bool parse_str_month_punct_no_ws(const char *&begin, const char *end, int &out_month);
+
+    /**
+     * Parses a string weekday: Mon == 0, Sun == 6.
+     *
+     * \param begin  The start of a range of UTF-8 characters. This is modified
+     *               to point immediately after the parsed value if true is returned.
+     * \param end  The end of a range of UTF-8 characters.
+     * \param out_weekday  If true is returned, this has been filled with the parsed
+     *                   weekday.
+     */
+    bool parse_str_weekday_no_ws(const char *&begin, const char *end,
+                           int &out_weekday);
 
 } // namespace parse
 

@@ -26,12 +26,15 @@ namespace dynd {
  * \param dynd_metadata  Array metadata corresponding to the lifted_types.
  * \param kernreq  Either dynd::kernel_request_single or dynd::kernel_request_strided,
  *                  as required by the caller.
+ * \param ectx  The evaluation context.
  */
 size_t make_lifted_expr_ckernel(const ckernel_deferred *elwise_handler,
-                dynd::ckernel_builder *out_ckb, intptr_t ckb_offset,
-                const ndt::type *lifted_types,
-                const char *const* dynd_metadata,
-                dynd::kernel_request_t kernreq);
+                                dynd::ckernel_builder *out_ckb,
+                                intptr_t ckb_offset,
+                                const ndt::type *lifted_types,
+                                const char *const *dynd_metadata,
+                                dynd::kernel_request_t kernreq,
+                                const eval::eval_context *ectx);
 
 } // namespace dynd
 
