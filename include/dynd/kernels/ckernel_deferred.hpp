@@ -7,6 +7,7 @@
 #define _DYND__CKERNEL_DEFERRED_HPP_
 
 #include <dynd/config.hpp>
+#include <dynd/eval/eval_context.hpp>
 #include <dynd/types/base_type.hpp>
 #include <dynd/kernels/ckernel_builder.hpp>
 
@@ -35,10 +36,12 @@ enum deferred_ckernel_funcproto_t {
  *                       corresponding to ckd->data_dynd_types.
  * \param kerntype  Either dynd::kernel_request_single or dynd::kernel_request_strided,
  *                  as required by the caller.
+ * \param ectx  The evaluation context.
  */
 typedef intptr_t (*instantiate_deferred_ckernel_fn_t)(void *self_data_ptr,
                 dynd::ckernel_builder *out_ckb, intptr_t ckb_offset,
-                const char *const* dynd_metadata, uint32_t kerntype);
+                const char *const* dynd_metadata, uint32_t kerntype,
+                const eval::eval_context *ectx);
 
 
 /**
@@ -115,13 +118,11 @@ struct ckernel_deferred {
  *                   unary_operation_funcproto or expr_operation_funcproto).
  * \param errmode  The error mode to use for the assignment.
  * \param out_ckd  The output `ckernel_deferred` struct to be populated.
- * \param ectx  The evaluation context.
  */
 void make_ckernel_deferred_from_assignment(
                 const ndt::type& dst_tp, const ndt::type& src_tp, const ndt::type& src_prop_tp,
                 deferred_ckernel_funcproto_t funcproto,
-                assign_error_mode errmode, ckernel_deferred& out_ckd,
-                const dynd::eval::eval_context *ectx = &dynd::eval::default_eval_context);
+                assign_error_mode errmode, ckernel_deferred& out_ckd);
 
 /**
  * Creates a deferred ckernel which does the assignment from
@@ -133,12 +134,10 @@ void make_ckernel_deferred_from_assignment(
  *                   unary_operation_funcproto or expr_operation_funcproto).
  * \param errmode  The error mode to use for the assignment.
  * \param out_ckd  The output `ckernel_deferred` struct to be populated.
- * \param ectx  The evaluation context.
  */
 void make_ckernel_deferred_from_property(const ndt::type& tp, const std::string& propname,
                 deferred_ckernel_funcproto_t funcproto,
-                assign_error_mode errmode, ckernel_deferred& out_ckd,
-                const dynd::eval::eval_context *ectx = &dynd::eval::default_eval_context);
+                assign_error_mode errmode, ckernel_deferred& out_ckd);
 
 } // namespace dynd
 

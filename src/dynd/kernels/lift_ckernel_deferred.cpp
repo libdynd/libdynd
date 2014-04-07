@@ -37,16 +37,18 @@ static void delete_lifted_expr_ckernel_deferred_data(void *self_data_ptr)
     free(data);
 }
 
-static intptr_t instantiate_lifted_expr_ckernel_deferred_data(void *self_data_ptr,
-                dynd::ckernel_builder *out_ckb, intptr_t ckb_offset,
-                const char *const* dynd_metadata, uint32_t kerntype)
+static intptr_t instantiate_lifted_expr_ckernel_deferred_data(
+    void *self_data_ptr, dynd::ckernel_builder *out_ckb, intptr_t ckb_offset,
+    const char *const *dynd_metadata, uint32_t kerntype,
+    const eval::eval_context *ectx)
 {
     lifted_expr_ckernel_deferred_data *data =
                     reinterpret_cast<lifted_expr_ckernel_deferred_data *>(self_data_ptr);
     return make_lifted_expr_ckernel(data->child_ckd,
                     out_ckb, ckb_offset,
                     data->data_types, dynd_metadata,
-                    static_cast<dynd::kernel_request_t>(kerntype));
+                    static_cast<dynd::kernel_request_t>(kerntype),
+                    ectx);
 }
 
 } // anonymous namespace

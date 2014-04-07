@@ -269,9 +269,8 @@ static array_preamble *function___call__(const array_preamble *params, void *DYN
     for (int i = 0; i < nargs; ++i) {
         dynd_metadata[i] = args[i].get_ndo_meta();
     }
-    ckd->instantiate_func(ckd->data_ptr,
-                    &ckb, 0,
-                    dynd_metadata, kernel_request_single);
+    ckd->instantiate_func(ckd->data_ptr, &ckb, 0, dynd_metadata,
+                          kernel_request_single, &eval::default_eval_context);
     // Call the ckernel
     if (ckd->ckernel_funcproto == unary_operation_funcproto) {
         unary_single_operation_t usngo = ckb.get()->get_function<unary_single_operation_t>();

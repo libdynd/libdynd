@@ -159,9 +159,9 @@ void iter::make_string_iter(
         out_di->custom[3] = charsize; // size of char in the input data
         out_di->custom[4] = reinterpret_cast<uintptr_t>(buf) + bufsize * charsize; // buffer end
         out_di->custom[5] = reinterpret_cast<uintptr_t>(
-            get_next_unicode_codepoint_function(data_encoding, ectx->default_assign_error_mode));
+            get_next_unicode_codepoint_function(data_encoding, ectx->default_errmode));
         out_di->custom[6] = reinterpret_cast<uintptr_t>(
-            get_append_unicode_codepoint_function(iter_encoding, ectx->default_assign_error_mode));
+            get_append_unicode_codepoint_function(iter_encoding, ectx->default_errmode));
         if (ref.get() != NULL) {
             memory_block_incref(ref.get());
             out_di->custom[7] = reinterpret_cast<uintptr_t>(ref.get());

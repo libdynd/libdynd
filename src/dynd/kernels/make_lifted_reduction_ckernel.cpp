@@ -790,8 +790,9 @@ static size_t make_strided_inner_reduction_dimension_kernel(
         ckb_end = kernels::wrap_binary_as_unary_reduction_ckernel(
                         out_ckb, ckb_end, right_associative, kernel_request_strided);
     }
-    ckb_end = elwise_reduction->instantiate_func(elwise_reduction->data_ptr,
-                    out_ckb, ckb_end, child_ckernel_meta, kernel_request_strided);
+    ckb_end = elwise_reduction->instantiate_func(
+        elwise_reduction->data_ptr, out_ckb, ckb_end, child_ckernel_meta,
+        kernel_request_strided, ectx);
     // Make sure there's capacity for the next ckernel
     out_ckb->ensure_capacity(ckb_end);
     // Need to retrieve 'e' again because it may have moved
@@ -800,7 +801,7 @@ static size_t make_strided_inner_reduction_dimension_kernel(
     if (dst_initialization != NULL) {
         ckb_end = dst_initialization->instantiate_func(
             dst_initialization->data_ptr, out_ckb, ckb_end, child_ckernel_meta,
-            kernel_request_single);
+            kernel_request_single, ectx);
     } else if (reduction_identity.is_empty()) {
         ckb_end = make_assignment_kernel(
             out_ckb, ckb_end, dst_tp, dst_meta, src_tp, src_meta,
@@ -910,8 +911,9 @@ static size_t make_strided_inner_broadcast_dimension_kernel(
         ckb_end = kernels::wrap_binary_as_unary_reduction_ckernel(
                         out_ckb, ckb_end, right_associative, kernel_request_strided);
     }
-    ckb_end = elwise_reduction->instantiate_func(elwise_reduction->data_ptr,
-                    out_ckb, ckb_end, child_ckernel_meta, kernel_request_strided);
+    ckb_end = elwise_reduction->instantiate_func(
+        elwise_reduction->data_ptr, out_ckb, ckb_end, child_ckernel_meta,
+        kernel_request_strided, ectx);
     // Make sure there's capacity for the next ckernel
     out_ckb->ensure_capacity(ckb_end);
     // Need to retrieve 'e' again because it may have moved
@@ -920,7 +922,7 @@ static size_t make_strided_inner_broadcast_dimension_kernel(
     if (dst_initialization != NULL) {
         ckb_end = dst_initialization->instantiate_func(
             dst_initialization->data_ptr, out_ckb, ckb_end, child_ckernel_meta,
-            kernel_request_strided);
+            kernel_request_strided, ectx);
     } else if (reduction_identity.is_empty()) {
         ckb_end = make_assignment_kernel(
             out_ckb, ckb_end, dst_tp, dst_meta, src_tp, src_meta,
@@ -969,7 +971,7 @@ size_t dynd::make_lifted_reduction_ckernel(
             if (dst_initialization != NULL) {
                 return dst_initialization->instantiate_func(
                     dst_initialization->data_ptr, out_ckb, ckb_offset,
-                    dynd_metadata, kernreq);
+                    dynd_metadata, kernreq, ectx);
             } else if (reduction_identity.is_empty()) {
                 return make_assignment_kernel(
                     out_ckb, ckb_offset, dst_tp, dynd_metadata[0], src_tp,

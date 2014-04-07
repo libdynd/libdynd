@@ -23,7 +23,6 @@ namespace {
 struct unary_assignment_ckernel_deferred_data {
     ndt::type data_types[3];
     assign_error_mode errmode;
-    eval::eval_context ectx;
 };
 
 static void delete_unary_assignment_ckernel_deferred_data(void *self_data_ptr)
@@ -33,21 +32,23 @@ static void delete_unary_assignment_ckernel_deferred_data(void *self_data_ptr)
     delete data;
 }
 
-static intptr_t instantiate_unary_assignment_ckernel(void *self_data_ptr,
-                dynd::ckernel_builder *out_ckb, intptr_t ckb_offset,
-                const char *const* dynd_metadata, uint32_t kerntype)
+static intptr_t instantiate_unary_assignment_ckernel(
+    void *self_data_ptr, dynd::ckernel_builder *out_ckb, intptr_t ckb_offset,
+    const char *const *dynd_metadata, uint32_t kerntype,
+    const eval::eval_context *ectx)
 {
     unary_assignment_ckernel_deferred_data *data =
                     reinterpret_cast<unary_assignment_ckernel_deferred_data *>(self_data_ptr);
     return make_assignment_kernel(out_ckb, ckb_offset,
                     data->data_types[0], dynd_metadata[0],
                     data->data_types[2], dynd_metadata[1],
-                    (kernel_request_t)kerntype, data->errmode, &data->ectx);
+                    (kernel_request_t)kerntype, data->errmode, ectx);
 }
 
-static intptr_t instantiate_adapted_expr_assignment_ckernel(void *self_data_ptr,
-                dynd::ckernel_builder *out_ckb, intptr_t ckb_offset,
-                const char *const* dynd_metadata, uint32_t kerntype)
+static intptr_t instantiate_adapted_expr_assignment_ckernel(
+    void *self_data_ptr, dynd::ckernel_builder *out_ckb, intptr_t ckb_offset,
+    const char *const *dynd_metadata, uint32_t kerntype,
+    const eval::eval_context *ectx)
 {
     unary_assignment_ckernel_deferred_data *data =
                     reinterpret_cast<unary_assignment_ckernel_deferred_data *>(self_data_ptr);
@@ -55,7 +56,7 @@ static intptr_t instantiate_adapted_expr_assignment_ckernel(void *self_data_ptr,
     return make_assignment_kernel(out_ckb, ckb_offset,
                     data->data_types[0], dynd_metadata[0],
                     data->data_types[2], dynd_metadata[1],
-                    (kernel_request_t)kerntype, data->errmode, &data->ectx);
+                    (kernel_request_t)kerntype, data->errmode, ectx);
 }
 
 ////////////////////////////////////////////////////////////////
@@ -63,7 +64,6 @@ static intptr_t instantiate_adapted_expr_assignment_ckernel(void *self_data_ptr,
 
 struct expr_ckernel_deferred_data {
     assign_error_mode errmode;
-    eval::eval_context ectx;
     const dynd::expr_type *expr_type;
     size_t data_types_size;
     ndt::type data_types[1];
@@ -84,9 +84,10 @@ static void delete_expr_ckernel_deferred_data(void *self_data_ptr)
     free(data);
 }
 
-static intptr_t instantiate_expr_ckernel(void *self_data_ptr,
-                dynd::ckernel_builder *out_ckb, intptr_t ckb_offset,
-                const char *const* dynd_metadata, uint32_t kerntype)
+static intptr_t
+instantiate_expr_ckernel(void *self_data_ptr, dynd::ckernel_builder *out_ckb,
+                         intptr_t ckb_offset, const char *const *dynd_metadata,
+                         uint32_t kerntype, const eval::eval_context *ectx)
 {
     expr_ckernel_deferred_data *data =
                     reinterpret_cast<expr_ckernel_deferred_data *>(self_data_ptr);
@@ -95,7 +96,7 @@ static intptr_t instantiate_expr_ckernel(void *self_data_ptr,
                     data->data_types[0], dynd_metadata[0],
                     data->data_types_size - 1, &data->data_types[0] + 1,
                     const_cast<const char **>(dynd_metadata) + 1,
-                    (kernel_request_t)kerntype, &data->ectx);
+                    (kernel_request_t)kerntype, ectx);
 }
 
 
@@ -105,8 +106,7 @@ static intptr_t instantiate_expr_ckernel(void *self_data_ptr,
 void dynd::make_ckernel_deferred_from_assignment(
                 const ndt::type& dst_tp, const ndt::type& src_tp, const ndt::type& src_expr_tp,
                 deferred_ckernel_funcproto_t funcproto,
-                assign_error_mode errmode, ckernel_deferred& out_ckd,
-                const dynd::eval::eval_context *ectx)
+                assign_error_mode errmode, ckernel_deferred& out_ckd)
 {
     if (src_tp.operand_type() != src_expr_tp.operand_type()) {
         stringstream ss;
@@ -125,7 +125,6 @@ void dynd::make_ckernel_deferred_from_assignment(
         data->data_types[1] = src_tp;
         data->data_types[2] = src_expr_tp;
         data->errmode = errmode;
-        data->ectx = *ectx;
         out_ckd.instantiate_func = &instantiate_unary_assignment_ckernel;
         out_ckd.ckernel_funcproto = unary_operation_funcproto;
         out_ckd.data_types_size = 2;
@@ -153,7 +152,6 @@ void dynd::make_ckernel_deferred_from_assignment(
             }
             data->expr_type = static_cast<const expr_type *>(ndt::type(etp, true).release());
             data->errmode = errmode;
-            data->ectx = *ectx;
             out_ckd.instantiate_func = &instantiate_expr_ckernel;
             out_ckd.ckernel_funcproto = expr_operation_funcproto;
             out_ckd.data_types_size = nargs + 1;
@@ -167,7 +165,6 @@ void dynd::make_ckernel_deferred_from_assignment(
             data->data_types[1] = src_tp;
             data->data_types[2] = src_expr_tp;
             data->errmode = errmode;
-            data->ectx = *ectx;
             out_ckd.instantiate_func = &instantiate_adapted_expr_assignment_ckernel;
             out_ckd.ckernel_funcproto = expr_operation_funcproto;
             out_ckd.data_types_size = 2;
@@ -183,10 +180,9 @@ void dynd::make_ckernel_deferred_from_assignment(
 
 void dynd::make_ckernel_deferred_from_property(const ndt::type& tp, const std::string& propname,
                 deferred_ckernel_funcproto_t funcproto,
-                assign_error_mode errmode, ckernel_deferred& out_ckd,
-                const dynd::eval::eval_context *ectx)
+                assign_error_mode errmode, ckernel_deferred& out_ckd)
 {
     ndt::type prop_tp = ndt::make_property(tp, propname);
     ndt::type dst_tp = prop_tp.value_type();
-    make_ckernel_deferred_from_assignment(dst_tp, tp, prop_tp, funcproto, errmode, out_ckd, ectx);
+    make_ckernel_deferred_from_assignment(dst_tp, tp, prop_tp, funcproto, errmode, out_ckd);
 }

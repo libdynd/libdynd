@@ -34,6 +34,8 @@ enum date_parse_order_t {
     date_parse_dmy
 };
 
+std::ostream& operator<<(std::ostream& o, date_parse_order_t date_order);
+
 struct date_ymd {
     int16_t year;
     int8_t month;

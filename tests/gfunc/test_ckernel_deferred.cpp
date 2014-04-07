@@ -38,7 +38,8 @@ TEST(CKernelDeferred, Assignment) {
 
     // Instantiate a single ckernel
     ckernel_builder ckb;
-    ckd.instantiate_func(ckd.data_ptr, &ckb, 0, dynd_metadata, kernel_request_single);
+    ckd.instantiate_func(ckd.data_ptr, &ckb, 0, dynd_metadata,
+                         kernel_request_single, &eval::default_eval_context);
     int int_out = 0;
     char str_in[16] = "3251";
     unary_single_operation_t usngo = ckb.get()->get_function<unary_single_operation_t>();
@@ -47,7 +48,8 @@ TEST(CKernelDeferred, Assignment) {
 
     // Instantiate a strided ckernel
     ckb.reset();
-    ckd.instantiate_func(ckd.data_ptr, &ckb, 0, dynd_metadata, kernel_request_strided);
+    ckd.instantiate_func(ckd.data_ptr, &ckb, 0, dynd_metadata,
+                         kernel_request_strided, &eval::default_eval_context);
     int ints_out[3] = {0, 0, 0};
     char strs_in[3][16] = {"123", "4567", "891029"};
     unary_strided_operation_t ustro = ckb.get()->get_function<unary_strided_operation_t>();
@@ -74,7 +76,8 @@ TEST(CKernelDeferred, AssignmentAsExpr) {
 
     // Instantiate a single ckernel
     ckernel_builder ckb;
-    ckd.instantiate_func(ckd.data_ptr, &ckb, 0, dynd_metadata, kernel_request_single);
+    ckd.instantiate_func(ckd.data_ptr, &ckb, 0, dynd_metadata,
+                         kernel_request_single, &eval::default_eval_context);
     int int_out = 0;
     char str_in[16] = "3251";
     char *str_in_ptr = str_in;
@@ -84,7 +87,8 @@ TEST(CKernelDeferred, AssignmentAsExpr) {
 
     // Instantiate a strided ckernel
     ckb.reset();
-    ckd.instantiate_func(ckd.data_ptr, &ckb, 0, dynd_metadata, kernel_request_strided);
+    ckd.instantiate_func(ckd.data_ptr, &ckb, 0, dynd_metadata,
+                         kernel_request_strided, &eval::default_eval_context);
     int ints_out[3] = {0, 0, 0};
     char strs_in[3][16] = {"123", "4567", "891029"};
     char *strs_in_ptr = strs_in[0];
@@ -114,7 +118,8 @@ TEST(CKernelDeferred, Expr) {
 
     // Instantiate a single ckernel
     ckernel_builder ckb;
-    ckd.instantiate_func(ckd.data_ptr, &ckb, 0, dynd_metadata, kernel_request_single);
+    ckd.instantiate_func(ckd.data_ptr, &ckb, 0, dynd_metadata,
+                         kernel_request_single, &eval::default_eval_context);
     int int_out = 0;
     int int_in1 = 1, int_in2 = 3;
     char *int_in_ptr[2] = {reinterpret_cast<char *>(&int_in1),
@@ -125,7 +130,8 @@ TEST(CKernelDeferred, Expr) {
 
     // Instantiate a strided ckernel
     ckb.reset();
-    ckd.instantiate_func(ckd.data_ptr, &ckb, 0, dynd_metadata, kernel_request_strided);
+    ckd.instantiate_func(ckd.data_ptr, &ckb, 0, dynd_metadata,
+                         kernel_request_strided, &eval::default_eval_context);
     int ints_out[3] = {0, 0, 0};
     int ints_in1[3] = {1,2,3}, ints_in2[3] = {5,-210,1234};
     char *ints_in_ptr[2] = {reinterpret_cast<char *>(&ints_in1),
@@ -158,7 +164,8 @@ TEST(CKernelDeferred, LiftUnaryExpr_FixedDim) {
     // Test it on some data
     ckernel_builder ckb;
     const char *dynd_metadata[2] = {NULL, NULL};
-    ckd.instantiate_func(ckd.data_ptr, &ckb, 0, dynd_metadata, kernel_request_single);
+    ckd.instantiate_func(ckd.data_ptr, &ckb, 0, dynd_metadata,
+                         kernel_request_single, &eval::default_eval_context);
     int out[3] = {0, 0, 0};
     char in[3][16] = {"172", "-139", "12345"};
     const char *in_ptr = reinterpret_cast<const char *>(in);
@@ -195,7 +202,8 @@ TEST(CKernelDeferred, LiftUnaryExpr_StridedDim) {
     const char *dynd_metadata[2] = {NULL, NULL};
     dynd_metadata[0] = out.get_ndo_meta();
     dynd_metadata[1] = in.get_ndo_meta();
-    ckd.instantiate_func(ckd.data_ptr, &ckb, 0, dynd_metadata, kernel_request_single);
+    ckd.instantiate_func(ckd.data_ptr, &ckb, 0, dynd_metadata,
+                         kernel_request_single, &eval::default_eval_context);
     expr_single_operation_t usngo = ckb.get()->get_function<expr_single_operation_t>();
     usngo(out.get_readwrite_originptr(), &in_ptr, ckb.get());
     EXPECT_EQ(172, out(0).as<int>());
@@ -231,7 +239,8 @@ TEST(CKernelDeferred, LiftUnaryExpr_StridedToVarDim) {
     const char *dynd_metadata[2] = {NULL, NULL};
     dynd_metadata[0] = out.get_ndo_meta();
     dynd_metadata[1] = in.get_ndo_meta();
-    ckd.instantiate_func(ckd.data_ptr, &ckb, 0, dynd_metadata, kernel_request_single);
+    ckd.instantiate_func(ckd.data_ptr, &ckb, 0, dynd_metadata,
+                         kernel_request_single, &eval::default_eval_context);
     expr_single_operation_t usngo = ckb.get()->get_function<expr_single_operation_t>();
     usngo(out.get_readwrite_originptr(), &in_ptr, ckb.get());
     EXPECT_EQ(5, out.get_shape()[0]);
@@ -268,7 +277,8 @@ TEST(CKernelDeferred, LiftUnaryExpr_VarToVarDim) {
     const char *dynd_metadata[2] = {NULL, NULL};
     dynd_metadata[0] = out.get_ndo_meta();
     dynd_metadata[1] = in.get_ndo_meta();
-    ckd.instantiate_func(ckd.data_ptr, &ckb, 0, dynd_metadata, kernel_request_single);
+    ckd.instantiate_func(ckd.data_ptr, &ckb, 0, dynd_metadata,
+                         kernel_request_single, &eval::default_eval_context);
     expr_single_operation_t usngo = ckb.get()->get_function<expr_single_operation_t>();
     usngo(out.get_readwrite_originptr(), &in_ptr, ckb.get());
     EXPECT_EQ(5, out.get_shape()[0]);
@@ -310,7 +320,8 @@ TEST(CKernelDeferred, LiftUnaryExpr_MultiDimVarToVarDim) {
     dynd_metadata[0] = out.get_ndo_meta();
     dynd_metadata[1] = in.get_ndo_meta();
     ckernel_builder ckb;
-    ckd.instantiate_func(ckd.data_ptr, &ckb, 0, dynd_metadata, kernel_request_single);
+    ckd.instantiate_func(ckd.data_ptr, &ckb, 0, dynd_metadata,
+                         kernel_request_single, &eval::default_eval_context);
     expr_single_operation_t usngo = ckb.get()->get_function<expr_single_operation_t>();
     usngo(out.get_readwrite_originptr(), &in_ptr, ckb.get());
     ASSERT_EQ(3, out.get_shape()[0]);
@@ -365,7 +376,8 @@ TEST(CKernelDeferred, LiftExpr_MultiDimVarToVarDim) {
     dynd_metadata[2] = in1.get_ndo_meta();
     const char *const in_ptrs[2] = {in0.get_readonly_originptr(), in1.get_readonly_originptr()};
     ckernel_builder ckb;
-    ckd->instantiate_func(ckd->data_ptr, &ckb, 0, dynd_metadata, kernel_request_single);
+    ckd->instantiate_func(ckd->data_ptr, &ckb, 0, dynd_metadata,
+                          kernel_request_single, &eval::default_eval_context);
     expr_single_operation_t usngo = ckb.get()->get_function<expr_single_operation_t>();
     usngo(out.get_readwrite_originptr(), in_ptrs, ckb.get());
     ASSERT_EQ(3, out.get_shape()[0]);

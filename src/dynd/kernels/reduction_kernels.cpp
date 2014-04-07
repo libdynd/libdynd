@@ -131,9 +131,10 @@ intptr_t kernels::make_builtin_sum_reduction_ckernel(
     return ckb_offset + sizeof(ckernel_prefix);
 }
 
-static intptr_t instantiate_builtin_sum_reduction_ckernel_deferred(void *self_data_ptr,
-                dynd::ckernel_builder *out_ckb, intptr_t ckb_offset,
-                const char *const* DYND_UNUSED(dynd_metadata), uint32_t kerntype)
+static intptr_t instantiate_builtin_sum_reduction_ckernel_deferred(
+    void *self_data_ptr, dynd::ckernel_builder *out_ckb, intptr_t ckb_offset,
+    const char *const *DYND_UNUSED(dynd_metadata), uint32_t kerntype,
+    const eval::eval_context *DYND_UNUSED(ectx))
 {
     type_id_t tid = static_cast<type_id_t>(reinterpret_cast<uintptr_t>(self_data_ptr));
     return kernels::make_builtin_sum_reduction_ckernel(out_ckb, ckb_offset, tid, (kernel_request_t)kerntype);

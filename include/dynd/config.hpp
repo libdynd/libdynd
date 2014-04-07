@@ -85,6 +85,11 @@ inline bool DYND_ISNAN(long double x) {
 #  define DYND_USE_BOOST_SHARED_PTR
 # endif
 
+#if _MSC_VER >= 1700
+// MSVC 2012 and later have the <atomic> header
+#define DYND_USE_STD_ATOMIC
+#endif
+
 // No DYND_CONSTEXPR yet, define it as nothing
 #  define DYND_CONSTEXPR
 

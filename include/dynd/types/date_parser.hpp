@@ -7,11 +7,9 @@
 #define _DYND__DATE_PARSER_HPP_
 
 #include <dynd/config.hpp>
+#include <dynd/types/date_util.hpp>
 
 namespace dynd {
-
-struct date_ymd;
-enum date_parse_order_t;
 
 /**
  * Parses a date. Accepts a wide variety of inputs, but rejects ambiguous

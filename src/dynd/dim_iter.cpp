@@ -200,7 +200,7 @@ void dynd::make_buffered_strided_dim_iter(
         buf.get_ndo_meta() + sizeof(strided_dim_type_metadata),
         mem_tp, mem_meta,
         kernel_request_strided,
-        ectx->default_assign_error_mode, ectx);
+        ectx->default_errmode, ectx);
 
     if (buffer_elcount == size) {
         // If the buffer is big enough for all the data, just make a copy and

@@ -22,6 +22,22 @@ const int date_ymd::month_starts[2][13] = {
     {0, 31, 60, 91, 121, 152, 182, 213, 244, 274, 305, 335, 366}
 };
 
+std::ostream& dynd::operator<<(std::ostream& o, date_parse_order_t date_order)
+{
+    switch (date_order) {
+    case date_parse_no_ambig:
+        return (o << "NoAmbig");
+    case date_parse_ymd:
+        return (o << "YMD");
+    case date_parse_mdy:
+        return (o << "MDY");
+    case date_parse_dmy:
+        return (o << "DMY");
+    default:
+        return (o << "<invalid dateorder " << (int)date_order << ">");
+    }
+}
+
 int32_t date_ymd::to_days(int year, int month, int day)
 {
     if (is_valid(year, month, day)) {
