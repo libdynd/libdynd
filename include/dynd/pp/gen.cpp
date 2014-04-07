@@ -12,6 +12,8 @@
 #include <iostream>
 #include <map>
 
+#include <algorithm>
+
 using namespace std;
 
 inline string argsep(bool newline)
@@ -32,6 +34,10 @@ inline string id(const string name) {
     return name;
 }
 
+inline string one(const string) {
+    return "1";
+}
+
 string pp_first(const string name) {
     ostringstream oss;
     oss << "DYND_PP_FIRST(" << name << ")";
@@ -44,18 +50,94 @@ string pp_pop_first(const string name) {
     return oss.str();
 }
 
+string pp_len(const string name) {
+    ostringstream oss;
+    oss << "DYND_PP_LEN(" << name << ")";
+    return oss.str();
+}
+
+string pp_inc_len(const string name) {
+    ostringstream oss;
+    oss << "DYND_PP_INC(DYND_PP_LEN(" << name << "))";
+    return oss.str();
+}
+
+string pp_dec_len(const string name) {
+    ostringstream oss;
+    oss << "DYND_PP_DEC(DYND_PP_LEN(" << name << "))";
+    return oss.str();
+}
+
+string pp_shuffle(const string name) {
+    ostringstream oss;
+    oss << "DYND_PP_APPEND(DYND_PP_FIRST(" << name << "), DYND_PP_POP_FIRST(" << name << "))";
+    return oss.str();
+}
+
 string cat(const string &name, int i) {
     ostringstream oss;
     oss << name << i;
     return oss.str();
 }
 
-string args(const string& prefix, string (*func)(const string), const string &sep, int start, int stop, int step) {
+
+string repeat(const string& prefix, string (*func)(const string), const string &sep, int start, int stop, int step) {
     ostringstream oss;
     for (int i = start; i < stop - 1; i += step) {
-        oss << (*func)(cat(prefix, i)) << sep;
+        oss << (*func)(prefix) << sep;
     }
-    oss << (*func)(cat(prefix, stop - 1));
+    oss << (*func)(prefix);
+    return oss.str();
+}
+
+string arg(const string& prefix, int value) {
+    ostringstream oss;
+    oss << prefix << value;
+    return oss.str();
+}
+
+string args(const string& prefix, string (*func)(const string), const string &sep, int start, int stop, int step) {
+    ostringstream oss;
+    if (start < stop) {
+        oss << (*func)(cat(prefix, start));
+    }
+    for (int i = start + step; i < stop; i += step) {
+        oss << sep << (*func)(cat(prefix, i));
+    }
+    return oss.str();
+}
+
+template <typename iter>
+string args(const string& prefix, string (*func)(const string), const string &sep, iter first, iter last) {
+    ostringstream oss;    
+    if (first != last) {
+        oss << (*func)(cat(prefix, *first));
+    }
+    first++;
+    while (first != last) {
+        oss << sep << (*func)(cat(prefix, *first));
+        ++first;
+    }
+    return oss.str();
+}
+
+template <typename T>
+string args(const string& prefix, string (*func)(const string), const string &sep, T *flags, int start, int stop, int step) {
+    ostringstream oss;
+    if (start < stop) {
+        if (flags[start]) {
+            oss << (*func)(cat(prefix, start));
+        } else {
+            oss << cat(prefix, start);
+        }
+    }
+    for (int i = start + step; i < stop; i += step) {
+        if (flags[i]) {
+            oss << sep << (*func)(cat(prefix, i));
+        } else {
+            oss << sep << cat(prefix, i);
+        }
+    }
     return oss.str();
 }
 
@@ -67,21 +149,65 @@ string args(const string& prefix, int stop) {
     return args(prefix, &id, ", ", 0, stop, 1);
 }
 
+string args(const string& prefix, const string sep, int stop) {
+    return args(prefix, &id, sep, 0, stop, 1);
+}
+
+template <typename iter>
+string args(const string& prefix, iter first, iter last) {
+    return args(prefix, &id, ", ", first, last);
+}
+
+template <typename iter>
+string args(const string& prefix, const string sep, iter first, iter last) {
+    return args(prefix, &id, sep, first, last);
+}
+
+string repeat(const string& prefix, int stop) {
+    return repeat(prefix, &id, ", ", 0, stop, 1);
+}
+
+string repeat(const string& prefix, const string sep, int stop) {
+    return repeat(prefix, &id, sep, 0, stop, 1);
+}
+
+string args(const string& prefix, const string sep, int start, int stop, int step) {
+    return args(prefix, &id, sep, start, stop, step);
+}
+
+string args(const string& prefix, string (*func)(const string), const string sep, int stop) {
+    return args(prefix, func, sep, 0, stop, 1);
+}
+
+string args(const string& prefix, string (*func)(const string), const string sep, int start, int stop) {
+    return args(prefix, func, sep, start, stop, 1);
+}
+
 string args(const string& prefix, string (*func)(const string), int stop) {
     return args(prefix, func, ", ", 0, stop, 1);
 }
 
+template <typename T>
+string args(const string& prefix, string (*func)(const string), const string sep, T *flags, int start, int stop) {
+    return args(prefix, func, sep, flags, start, stop, 1);
+}
 
 
-int next(int *idx, int len_max) {
-    int dim = 0;
-    while (idx[dim] == len_max - 1) {
-        idx[dim] = 0;
-        ++dim;
+
+
+int next(int *curr, int len_max, int ndim) {
+    const int val_max = len_max - 1;
+
+    int idx = 0;
+    reverse(curr, curr + ndim);
+    while (curr[idx] == val_max) {
+        curr[idx] = 0;
+        ++idx;
     }
-    ++idx[dim];
+    ++curr[idx];
+    reverse(curr, curr + ndim);
 
-    return dim;
+    return idx;
 }
 
 
@@ -102,6 +228,11 @@ int main(int argc, char **argv) {
     }
 
     const int pp_ary_max = 3;
+
+    int *range = new int[pp_ary_max];
+    for (int i = 0; i < pp_ary_max; i++) {
+        range[i] = i;
+    }
 
     string filename("gen.hpp");
 
@@ -388,115 +519,61 @@ int main(int argc, char **argv) {
 
     fout << endl;
 
-/*
-    fout << "#define DYND_PP_JOIN_ELWISE(MAC, SEP, A, B) DYND_PP_PASTE(DYND_PP_JOIN_ELWISE_, DYND_PP_LEN(A))(MAC, SEP, A, B)" << endl;
-    fout << "#define DYND_PP_JOIN_ELWISE_1(MAC, SEP, A, B) MAC(DYND_PP_FIRST(A), DYND_PP_FIRST(B))" << endl;
-    for (int i = 2; i <= pp_len_max; i++) {
-        fout << "#define DYND_PP_JOIN_ELWISE_" << i << "(MAC, SEP, A, B) MAC(DYND_PP_FIRST(A), DYND_PP_FIRST(B)) DYND_PP_ID SEP DYND_PP_JOIN_ELWISE_" << i - 1;
-        fout << "(MAC, SEP, DYND_PP_POP_FIRST(A), DYND_PP_POP_FIRST(B))" << endl;
+    fout << "#define DYND_PP_OUTER DYND_PP_OUTER_0" << endl;
+    for (int dep = 0; dep < pp_dep_max; dep++) {
+        fout << "#define DYND_PP_OUTER_" << dep << "(...) ";
+        fout << "DYND_PP_ID(DYND_PP__OUTER_" << dep << "(__VA_ARGS__))" << endl;
+        fout << "#define DYND_PP__OUTER_" << dep << "(...) ";
+        fout << "DYND_PP_ID(DYND_PP_PASTE(DYND_PP__OUTER_" << dep << "_, DYND_PP_DEC(DYND_PP_LEN((__VA_ARGS__))))(__VA_ARGS__))" << endl;
+        for (int ary = 2; ary <= pp_ary_max; ary++) {
+            fout << "#define DYND_PP__OUTER_" << dep << "_" << ary << "(MAC, " << args("A", ary) << ")";
+            fout << " ";
+            fout << "(DYND_PP__JOIN_OUTER_" << dep << "_" << ary << "(MAC, (,), " << args("A", ary) << "))";
+            fout << endl;
+        }
     }
 
     fout << endl;
-*/
 
-    fout << "#define DYND_PP_OUTER(MAC, A0, A1) (DYND_PP_JOIN_OUTER(MAC, (,), A0, A1))" << endl;
-
-    fout << endl;
-
-    fout << "#define DYND_PP_JOIN_OUTER(...) DYND_PP_ID(DYND_PP__JOIN_OUTER(__VA_ARGS__))" << endl;
-    fout << "#define DYND_PP__JOIN_OUTER(...) DYND_PP_ID(DYND_PP_PASTE(DYND_PP__JOIN_OUTER_, DYND_PP_DEC(DYND_PP_DEC(DYND_PP_LEN((__VA_ARGS__)))))(__VA_ARGS__))" << endl;
-    for (int dep = 2; dep <= pp_dep_max; dep++) {
-        fout << "#define DYND_PP__JOIN_OUTER_" << dep << "(MAC, SEP, ";
-        for (int i = 0; i < dep - 1; i++) {
-            fout << "A" << i << argsep(i);
-        }
-        fout << "A" << dep - 1 << ") DYND_PP_CAT((DYND_PP__JOIN_OUTER_, ";
-        for (int i = 0; i < dep - 1; i++) {
-            fout << "DYND_PP_LEN(A" << i << "), _, ";
-        }
-        fout << "DYND_PP_LEN(A" << dep - 1 << ")))(MAC, SEP, ";
-/*
-        for (int i = dep - 1; i > 0; i--) {
-            fout << "DYND_PP_LEN(A" << i << "), _, ";
-        }
-        fout << "DYND_PP_LEN(A" << 0 << ")))(MAC, SEP, ";
-*/
-        for (int i = 0; i < dep - 1; i++) {
-            fout << "A" << i << argsep(i);
-        }
-        fout << "A" << dep - 1 << ")" << endl;
-        int *idx = new int[pp_dep_max];
-        std::fill(idx, idx + dep, 0);
-        fout << "#define DYND_PP__JOIN_OUTER";
-        for (int i = 0; i < dep; i++) {
-            fout << "_1";
-        }
-        fout << "(MAC, SEP, ";
-        for (int i = 0; i < dep - 1; i++) {
-            fout << "A" << i << argsep(i);
-        }
-        fout << "A" << dep - 1 << ") MAC(";
-        for (int i = 0; i < dep - 1; i++) {
-            fout << "DYND_PP_FIRST(A" << i << ")" << argsep(i);
-        }
-        fout << "DYND_PP_FIRST(A" << dep - 1 << "))" << endl;
-        for (int cnt = (int) pow((double) pp_len_max, dep) - 1; cnt > 0; cnt--) {
-            int *jdx = new int[pp_dep_max];
-            for (int i = 0; i < pp_dep_max; i++) {
-                jdx[i] = idx[i];
-            }
-            int dim = next(idx, pp_len_max);
-            fout << "#define DYND_PP__JOIN_OUTER";
-            for (int i = dep - 1; i >= 0; i--) {
-                fout << "_" << idx[i] + 1;
-            }
-            fout << "(MAC, SEP, ";
-            for (int i = 0; i < dep - 1; i++) {
-                fout << "A" << i << argsep(i);
-            }
-            fout << "A" << dep - 1 << ") MAC(";
-            for (int i = 0; i < dep - 1; i++) {
-                fout << "DYND_PP_FIRST(A" << i << ")" << argsep(i);
-            }
-            fout << "DYND_PP_FIRST(A" << dep - 1 << "))";
-            fout << " DYND_PP_ID SEP ";
-            if (dim > 0) {
-                fout << "DYND_PP_CAT((";
-            }
-            fout << "DYND_PP__JOIN_OUTER";
-/*
-            for (int i = dep - 1; i >= dim; i--) {
-                fout << "_" << jdx[i] + 1;
-            }
-            for (int i = dim - 1; i >= 0; i--) {
-                fout << ", _, " << "DYND_PP_LEN(A" << i << ")";
-            }
-*/
-            for (int i = dep - 1; i >= dim; i--) {
-                fout << "_" << jdx[i] + 1;
-            }
-            for (int i = dim - 1; i >= 0; i--) {
-                fout << ", _, " << "DYND_PP_LEN(A" << dep - i - 1 << ")";
-            }
-
-            if (dim > 0) {
-                fout << "))";
-            }
-            fout << "(MAC, SEP";
-            dim = dep - dim;
-            for (int i = 0; i < dim - 1; i++) {
-                fout << argsep(i) << "A" << i;
-            }
-            for (int i = dim - 1; i < dep; i++) {
-                if (idx[dep - i - 1] + 1 == 1) {
-                    fout << argsep(i) << "A" << i; 
-                } else {
-                    fout << argsep(i) << "DYND_PP_APPEND(DYND_PP_FIRST(A" << i << "), DYND_PP_POP_FIRST(A" << i << "))";
+    fout << "#define DYND_PP_JOIN_OUTER DYND_PP_JOIN_OUTER_0" << endl;
+    for (int dep = 0; dep < pp_dep_max; dep++) {
+        fout << "#define DYND_PP_JOIN_OUTER_" << dep << "(...)";
+        fout << " ";
+        fout << "DYND_PP_ID(DYND_PP__JOIN_OUTER_" << dep << "(__VA_ARGS__))" << endl;
+        fout << "#define DYND_PP__JOIN_OUTER_" << dep << "(...)";
+        fout << " ";
+        fout << "DYND_PP_ID(DYND_PP_PASTE(DYND_PP__JOIN_OUTER_" << dep << "_, ";
+        fout << "DYND_PP_DEC(DYND_PP_DEC(DYND_PP_LEN((__VA_ARGS__)))))(__VA_ARGS__))" << endl;
+        for (int ary = 2; ary <= pp_ary_max; ary++) {
+            fout << "#define DYND_PP__JOIN_OUTER_" << dep << "_" << ary << "(MAC, SEP, " << args("A", ary) << ")";
+            fout << " DYND_PP_CAT((DYND_PP__JOIN_OUTER_" << dep << "_" << ary << "_, " << args("A", pp_dec_len, ", _, ", ary) << "))(MAC, SEP, " << args("A", ary) << ")" << endl;
+            fout << "#define DYND_PP__JOIN_OUTER_" << dep << "_" << ary << "_" << repeat("0", "_", ary);
+            fout << "(MAC, SEP, " << args("A", ary) << ") MAC(" << args("A", pp_first, ary) << ")" << endl;
+            int *curr = new int[ary];
+            fill(curr, curr + ary, 0);
+            for (int cnt = (int) pow((double) pp_len_max, ary) - 1; cnt > 0; cnt--) {
+                int *prev = new int[ary];
+                copy(curr, curr + ary, prev);
+                int idx = next(curr, pp_len_max, ary);
+                fout << "#define DYND_PP__JOIN_OUTER_" << dep << "_" << ary << "_" << args("", "_", curr, curr + ary);
+                fout << "(MAC, SEP, " << args("A", ary) << ") MAC(" << args("A", &pp_first, ary) << ")";
+                fout << " DYND_PP_ID SEP ";
+                if (idx > 0) {
+                    fout << "DYND_PP_CAT((";
                 }
+                fout << "DYND_PP__JOIN_OUTER_" << dep << "_" << ary << "_" << args("", "_", prev, prev + ary - idx);
+                if (idx > 0) {
+                    fout << ", _, ";
+                }
+                fout << args("A", &pp_dec_len, ", _, ", ary - idx, ary);
+                if (idx > 0) {
+                    fout << "))";
+                }
+                fout << "(MAC, SEP" << args(", A", "", ary - idx - 1);
+                fout << ", " << args("A", &pp_shuffle, ", ", curr, ary - idx - 1, ary) << ")" << endl;
+                delete prev;
             }
-            fout << ")";
-            fout << endl;
-
+            delete curr;
         }
     }
 
