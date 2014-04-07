@@ -23,9 +23,9 @@ using namespace std;
 #define ELWISE(NSRC) \
     namespace detail { \
     template<typename R, DYND_PP_JOIN_MAP_1(DYND_PP_META_TYPENAME, (,), DYND_PP_META_NAME_RANGE(A, NSRC))> \
-    struct foreach_ckernel_instantiator<void (*)(R &, DYND_PP_JOIN_1((,), DYND_PP_META_NAME_RANGE(A, NSRC)))> { \
+    struct foreach_ckernel_instantiator<void (*)(R &, DYND_PP_JOIN_MAP_1(DYND_PP_META_AS_REF, (,), DYND_PP_META_NAME_RANGE(A, NSRC)))> { \
         typedef foreach_ckernel_instantiator extra_type; \
-        typedef void (*func_type)(R &, DYND_PP_JOIN_1((,), DYND_PP_META_NAME_RANGE(A, NSRC))); \
+        typedef void (*func_type)(R &, DYND_PP_JOIN_MAP_1(DYND_PP_META_AS_REF, (,), DYND_PP_META_NAME_RANGE(A, NSRC))); \
 \
         ckernel_prefix base; \
         func_type func; \
@@ -82,28 +82,17 @@ using namespace std;
 \
     template<typename R, DYND_PP_JOIN_MAP_1(DYND_PP_META_TYPENAME, (,), DYND_PP_META_NAME_RANGE(A, NSRC))> \
     inline nd::array foreach(DYND_PP_JOIN_OUTER(DYND_PP_META_DECL, (,), (const nd::array&), DYND_PP_META_NAME_RANGE(a, NSRC)), \
-        void (*func)(R&, DYND_PP_JOIN_1((,), DYND_PP_META_NAME_RANGE(A, NSRC)))) \
+        void (*func)(R&, DYND_PP_JOIN_MAP_1(DYND_PP_META_AS_REF, (,), DYND_PP_META_NAME_RANGE(A, NSRC)))) \
     { \
         const nd::array *srcs[NSRC] = {DYND_PP_JOIN_MAP_1(DYND_PP_META_ADDRESS, (,), DYND_PP_META_NAME_RANGE(a, NSRC))}; \
 \
-        const intptr_t res_fixed_ndim = detail::ndim_from_array<R>::value; \
-        typedef typename detail::uniform_type_from_array<R>::type res_uniform_type; \
-        ndt::type res_data_dynd_type; \
-        if (res_fixed_ndim > 0) { \
-            intptr_t res_fixed_shape[res_fixed_ndim + 1]; \
-            detail::fill_shape<R>::fill(res_fixed_shape); \
-            res_data_dynd_type = ndt::make_fixed_dim(res_fixed_ndim, res_fixed_shape, ndt::make_type<res_uniform_type>(), NULL); \
-        } else { \
-            res_data_dynd_type = ndt::make_type<res_uniform_type>(); \
-        } \
+        ndt::type data_dynd_types[DYND_PP_INC(NSRC)] = {ndt::fixed_dim_from_array<R>::make(), DYND_PP_JOIN_ELWISE_1(DYND_PP_META_SCOPE_CALL, (,), \
+            DYND_PP_OUTER(DYND_PP_META_TEMPLATE, (ndt::fixed_dim_from_array), DYND_PP_META_NAME_RANGE(A, NSRC)), DYND_PP_REPEAT(make, NSRC))}; \
 \
         intptr_t res_strided_ndim; \
         dimvector res_strided_shape; \
         incremental_broadcast_input_shapes(NSRC, srcs, res_strided_ndim, res_strided_shape); \
-        nd::array result = nd::make_strided_array(res_data_dynd_type, res_strided_ndim, res_strided_shape.get()); \
-\
-        ndt::type data_dynd_types[DYND_PP_INC(NSRC)] = {res_data_dynd_type, DYND_PP_JOIN_MAP_1(DYND_PP_META_CALL, (,), \
-            DYND_PP_OUTER(DYND_PP_META_TEMPLATE, (ndt::make_type), DYND_PP_META_NAME_RANGE(A, NSRC)))}; \
+        nd::array result = nd::make_strided_array(data_dynd_types[0], res_strided_ndim, res_strided_shape.get()); \
 \
         ckernel_deferred ckd; \
         ckd.ckernel_funcproto = expr_operation_funcproto; \
@@ -441,6 +430,5 @@ inline nd::array foreach(const nd::array& a, const nd::array& b, T obj)
 }
 
 }} // namespace dynd::nd
-
 
 #endif // _DYND__FOREACH_HPP_

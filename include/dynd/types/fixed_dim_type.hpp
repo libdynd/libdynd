@@ -10,6 +10,7 @@
 #include <dynd/typed_data_assign.hpp>
 #include <dynd/types/view_type.hpp>
 #include <dynd/types/base_uniform_dim_type.hpp>
+#include <dynd/array.hpp>
 
 namespace dynd {
 
@@ -125,6 +126,25 @@ namespace ndt {
     }
 
     ndt::type make_fixed_dim(intptr_t ndim, const intptr_t *shape, const ndt::type& uniform_tp, const int *axis_perm);
+
+    template<class T> struct fixed_dim_from_array {
+        typedef T uniform_type;
+        static const int ndim = 0;
+
+        static ndt::type make() {
+            return ndt::make_type<uniform_type>();
+        }
+    };
+    template<class T, int N> struct fixed_dim_from_array<T[N]> {
+        typedef typename nd::detail::uniform_type_from_array<T[N]>::type uniform_type;
+        static const int ndim = nd::detail::ndim_from_array<T[N]>::value;
+
+        static ndt::type make() {
+            intptr_t shape[ndim];
+            nd::detail::fill_shape<T[N]>::fill(shape);
+            return ndt::make_fixed_dim(ndim, shape, ndt::make_type<uniform_type>(), NULL);
+        }
+    };
 } // namespace ndt
 
 } // namespace dynd
