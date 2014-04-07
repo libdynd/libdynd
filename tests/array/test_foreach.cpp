@@ -15,7 +15,7 @@
 using namespace std;
 using namespace dynd;
 
-int intfunc(int x, int y)
+int intfunc(int x, const int &y)
 {
     return 2 * (x - y);
 }
@@ -169,7 +169,7 @@ TEST(ArrayViews, FixedDimResOneArgFunc) {
     EXPECT_EQ(cos(x), c(1, 1).as<double>());
 }
 
-void one_dim_res_two_arg_func(int (&res)[1], int x, int y)
+void one_dim_res_two_arg_func(int (&res)[1], const int x, int &y)
 {
     res[0] = max(x, y);
 }

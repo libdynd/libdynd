@@ -27,34 +27,38 @@ using namespace std;
         typedef foreach_ckernel_instantiator extra_type; \
         typedef void (*func_type)(R &, DYND_PP_JOIN_MAP_1(DYND_PP_META_AS_REF, (,), DYND_PP_META_NAME_RANGE(A, NSRC))); \
 \
+        DYND_PP_JOIN_ELWISE_1(DYND_PP_META_TYPEDEF_TYPENAME, (;), DYND_PP_OUTER_1(DYND_PP_META_SCOPE, \
+            DYND_PP_OUTER_1(DYND_PP_META_TEMPLATE, (remove_ref), DYND_PP_META_NAME_RANGE(A, NSRC)), (type)), \
+            DYND_PP_META_NAME_RANGE(U, NSRC)); \
+\
         ckernel_prefix base; \
         func_type func; \
 \
-        static void single(char *dst, const char * const *src, \
+        static void single(char *dst, char * const *src, \
                            ckernel_prefix *ckp) \
         { \
             extra_type *e = reinterpret_cast<extra_type *>(ckp); \
             e->func(*reinterpret_cast<R*>(dst), DYND_PP_JOIN_MAP_1(DYND_PP_META_DEREFERENCE, (,), \
                     DYND_PP_ELWISE_1(DYND_PP_META_REINTERPRET_CAST, \
-                    DYND_PP_MAP_1(DYND_PP_META_AS_CONST_PTR, \
-                    DYND_PP_META_NAME_RANGE(A, NSRC)), DYND_PP_META_AT_RANGE(src, NSRC)))); \
+                    DYND_PP_MAP_1(DYND_PP_META_AS_PTR, \
+                    DYND_PP_META_NAME_RANGE(U, NSRC)), DYND_PP_META_AT_RANGE(src, NSRC)))); \
         } \
 \
         static void strided(char *dst, intptr_t dst_stride, \
-                            const char * const *src, const intptr_t *src_stride, \
+                            char * const *src, const intptr_t *src_stride, \
                             size_t count, ckernel_prefix *ckp) \
         { \
             extra_type *e = reinterpret_cast<extra_type *>(ckp); \
             func_type func = e->func; \
-            DYND_PP_JOIN_ELWISE_1(DYND_PP_META_DECL_EQ, (;), DYND_PP_REPEAT_1(const char *, NSRC), \
+            DYND_PP_JOIN_ELWISE_1(DYND_PP_META_DECL_EQ, (;), DYND_PP_REPEAT_1(char *, NSRC), \
                 DYND_PP_META_NAME_RANGE(src, NSRC), DYND_PP_META_AT_RANGE(src, NSRC)); \
             DYND_PP_JOIN_ELWISE_1(DYND_PP_META_DECL_EQ, (;), DYND_PP_REPEAT_1(intptr_t, NSRC), \
                 DYND_PP_META_NAME_RANGE(src_stride, NSRC), DYND_PP_META_AT_RANGE(src_stride, NSRC)); \
             for (size_t i = 0; i < count; ++i) { \
                 func(*reinterpret_cast<R*>(dst), DYND_PP_JOIN_MAP_1(DYND_PP_META_DEREFERENCE, (,), \
                     DYND_PP_ELWISE_1(DYND_PP_META_REINTERPRET_CAST, \
-                    DYND_PP_MAP_1(DYND_PP_META_AS_CONST_PTR, \
-                    DYND_PP_META_NAME_RANGE(A, NSRC)), DYND_PP_META_NAME_RANGE(src, NSRC)))); \
+                    DYND_PP_MAP_1(DYND_PP_META_AS_PTR, \
+                    DYND_PP_META_NAME_RANGE(U, NSRC)), DYND_PP_META_NAME_RANGE(src, NSRC)))); \
                 dst += dst_stride; \
                 DYND_PP_JOIN_ELWISE_1(DYND_PP_META_ADD_EQ, (;), \
                     DYND_PP_META_NAME_RANGE(src, NSRC), DYND_PP_META_NAME_RANGE(src_stride, NSRC)); \
@@ -84,10 +88,15 @@ using namespace std;
     inline nd::array foreach(DYND_PP_JOIN_OUTER(DYND_PP_META_DECL, (,), (const nd::array&), DYND_PP_META_NAME_RANGE(a, NSRC)), \
         void (*func)(R&, DYND_PP_JOIN_MAP_1(DYND_PP_META_AS_REF, (,), DYND_PP_META_NAME_RANGE(A, NSRC)))) \
     { \
+        DYND_PP_JOIN_ELWISE_1(DYND_PP_META_TYPEDEF_TYPENAME, (;), DYND_PP_OUTER_1(DYND_PP_META_SCOPE, \
+            DYND_PP_OUTER_1(DYND_PP_META_TEMPLATE, (remove_ref), DYND_PP_META_NAME_RANGE(A, NSRC)), (type)), \
+            DYND_PP_META_NAME_RANGE(U, NSRC)); \
+\
         const nd::array *srcs[NSRC] = {DYND_PP_JOIN_MAP_1(DYND_PP_META_ADDRESS, (,), DYND_PP_META_NAME_RANGE(a, NSRC))}; \
 \
         ndt::type data_dynd_types[DYND_PP_INC(NSRC)] = {ndt::fixed_dim_from_array<R>::make(), DYND_PP_JOIN_ELWISE_1(DYND_PP_META_SCOPE_CALL, (,), \
-            DYND_PP_OUTER(DYND_PP_META_TEMPLATE, (ndt::fixed_dim_from_array), DYND_PP_META_NAME_RANGE(A, NSRC)), DYND_PP_REPEAT(make, NSRC))}; \
+            DYND_PP_OUTER(DYND_PP_META_TEMPLATE, (ndt::fixed_dim_from_array), \
+            DYND_PP_META_NAME_RANGE(U, NSRC)), DYND_PP_REPEAT(make, NSRC))}; \
 \
         intptr_t res_strided_ndim; \
         dimvector res_strided_shape; \
@@ -99,7 +108,7 @@ using namespace std;
         ckd.data_types_size = DYND_PP_INC(NSRC); \
         ckd.data_dynd_types = data_dynd_types; \
         ckd.data_ptr = reinterpret_cast<void *>(func); \
-        ckd.instantiate_func = &detail::foreach_ckernel_instantiator<void (*)(R&, \
+        ckd.instantiate_func = &detail::foreach_ckernel_instantiator<void (*)(R &, \
             DYND_PP_JOIN_1((,), DYND_PP_META_NAME_RANGE(A, NSRC)))>::instantiate; \
         ckd.free_func = NULL; \
 \
@@ -141,6 +150,14 @@ void incremental_broadcast_input_shapes(intptr_t ninputs, const nd::array** inpu
 }
 }
 
+template<class T> struct remove_ref {
+    typedef T type;
+};
+
+template<class T> struct remove_ref<T&> {
+    typedef typename remove_ref<T>::type type;
+};
+
 namespace dynd { namespace nd {
 
 namespace detail {
@@ -157,28 +174,31 @@ struct foreach_ckernel_instantiator<R (*)(T0, T1)> {
     ckernel_prefix base;
     R (*func)(T0, T1);
 
-    static void single(char *dst, const char * const *src,
+    typedef typename remove_ref<T0>::type U0;
+    typedef typename remove_ref<T0>::type U1;
+
+    static void single(char *dst, char * const *src,
                        ckernel_prefix *ckp)
     {
         extra_type *e = reinterpret_cast<extra_type *>(ckp);
         *reinterpret_cast<R *>(dst) = e->func(
-                            *reinterpret_cast<const T0 *>(src[0]),
-                            *reinterpret_cast<const T1 *>(src[1]));
+                            *reinterpret_cast<U0 *>(src[0]),
+                            *reinterpret_cast<U1 *>(src[1]));
     }
 
     static void strided(char *dst, intptr_t dst_stride,
-                        const char * const *src, const intptr_t *src_stride,
+                        char * const *src, const intptr_t *src_stride,
                         size_t count, ckernel_prefix *ckp)
     {
         extra_type *e = reinterpret_cast<extra_type *>(ckp);
         R (*func)(T0, T1);
         func = e->func;
-        const char *src0 = src[0], *src1 = src[1];
+        char *src0 = src[0], *src1 = src[1];
         intptr_t src0_stride = src_stride[0], src1_stride = src_stride[1];
         for (size_t i = 0; i < count; ++i) {
             *reinterpret_cast<R *>(dst) = func(
-                                *reinterpret_cast<const T0 *>(src0),
-                                *reinterpret_cast<const T1 *>(src1));
+                                *reinterpret_cast<U0 *>(src0),
+                                *reinterpret_cast<U1 *>(src1));
             dst += dst_stride;
             src0 += src0_stride;
             src1 += src1_stride;
@@ -284,25 +304,30 @@ DYND_PP_JOIN_MAP(ELWISE, (), DYND_PP_RANGE(1, 4))
 template<typename R, typename T0, typename T1>
 inline nd::array foreach(const nd::array& a, const nd::array& b, R (*func)(T0, T1))
 {
+    typedef typename remove_ref<T0>::type U0;
+    typedef typename remove_ref<T0>::type U1;
+
     // No casting for now
-    if (a.get_dtype() != ndt::make_type<T0>()) {
+/*
+    if (a.get_dtype() != ndt::make_type<U0>()) {
         stringstream ss;
         ss << "initial prototype of foreach doesn't implicitly cast ";
-        ss << a.get_dtype() << " to " << ndt::make_type<T0>();
+        ss << a.get_dtype() << " to " << ndt::make_type<U0>();
         throw type_error(ss.str());
     }
-    if (b.get_dtype() != ndt::make_type<T1>()) {
+    if (b.get_dtype() != ndt::make_type<U1>()) {
         stringstream ss;
         ss << "initial prototype of foreach doesn't implicitly cast ";
-        ss << b.get_dtype() << " to " << ndt::make_type<T1>();
+        ss << b.get_dtype() << " to " << ndt::make_type<U1>();
         throw type_error(ss.str());
     }
+*/
 
     // Create a static ckernel_deferred out of the function
     ckernel_deferred ckd;
     ckd.ckernel_funcproto = expr_operation_funcproto;
     ckd.data_types_size = 3;
-    ndt::type data_dynd_types[3] = {ndt::make_type<R>(), ndt::make_type<T0>(), ndt::make_type<T1>()};
+    ndt::type data_dynd_types[3] = {ndt::make_type<R>(), ndt::make_type<U0>(), ndt::make_type<U1>()};
     ckd.data_dynd_types = data_dynd_types;
     ckd.data_ptr = reinterpret_cast<void *>(func);
     ckd.instantiate_func = &detail::foreach_ckernel_instantiator<R (*)(T0, T1)>::instantiate;
@@ -430,5 +455,15 @@ inline nd::array foreach(const nd::array& a, const nd::array& b, T obj)
 }
 
 }} // namespace dynd::nd
+
+/*
+        ndt::type data_dynd_types[DYND_PP_INC(NSRC)] = {ndt::fixed_dim_from_array<R>::make(), DYND_PP_JOIN_ELWISE_1(DYND_PP_META_SCOPE_CALL, (,), \
+            DYND_PP_OUTER(DYND_PP_META_TEMPLATE, (ndt::fixed_dim_from_array), \
+            DYND_PP_OUTER(DYND_PP_META_SCOPE, \
+            DYND_PP_OUTER(DYND_PP_META_TEMPLATE, (remove_ref), DYND_PP_META_NAME_RANGE(A, NSRC)), (type))), DYND_PP_REPEAT(make, NSRC))}; \
+
+*/
+
+//DYND_PP_JOIN_ELWISE(DYND_PP_META_TYPEDEF_TYPENAME, 
 
 #endif // _DYND__FOREACH_HPP_

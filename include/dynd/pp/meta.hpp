@@ -32,7 +32,7 @@
 
 #define DYND_PP_META_TYPENAME(TYPE) typename TYPE
 
-#define DYND_PP_META_TEMPLATE(TEMP, ARGS) TEMP<ARGS>
+#define DYND_PP_META_TEMPLATE(TEMP, ARGS) TEMP< ARGS >
 
 #define DYND_PP_META_STATIC_CAST(TYPE, VAR) static_cast<TYPE>(VAR)
 #define DYND_PP_META_REINTERPRET_CAST(TYPE, VAR) reinterpret_cast<TYPE>(VAR)
@@ -44,6 +44,10 @@
 
 
 #define DYND_PP_META_AS_REF(NAME) NAME // TODO: Reenable this with &
+#define DYND_PP_META_AS_PTR(TOKEN) TOKEN *
 #define DYND_PP_META_AS_CONST_PTR(TOKEN) const TOKEN *
+
+#define DYND_PP_META_TYPEDEF(TYPE, NAME) typedef TYPE NAME
+#define DYND_PP_META_TYPEDEF_TYPENAME(TYPE, NAME) typedef typename TYPE NAME
 
 #endif
