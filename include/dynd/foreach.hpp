@@ -52,9 +52,9 @@ using namespace std;
         { \
             extra_type *e = reinterpret_cast<extra_type *>(ckp); \
             func_type func = e->func; \
-            DYND_PP_JOIN_ELWISE_1(DYND_PP_META_DECL_EQ, (;), DYND_PP_REPEAT_1(char *, NSRC), \
+            DYND_PP_JOIN_ELWISE_1(DYND_PP_META_DECL_ASGN, (;), DYND_PP_REPEAT_1(char *, NSRC), \
                 DYND_PP_META_NAME_RANGE(src, NSRC), DYND_PP_META_AT_RANGE(src, NSRC)); \
-            DYND_PP_JOIN_ELWISE_1(DYND_PP_META_DECL_EQ, (;), DYND_PP_REPEAT_1(intptr_t, NSRC), \
+            DYND_PP_JOIN_ELWISE_1(DYND_PP_META_DECL_ASGN, (;), DYND_PP_REPEAT_1(intptr_t, NSRC), \
                 DYND_PP_META_NAME_RANGE(src_stride, NSRC), DYND_PP_META_AT_RANGE(src_stride, NSRC)); \
             for (size_t i = 0; i < count; ++i) { \
                 func(*reinterpret_cast<R*>(dst), DYND_PP_JOIN_MAP_1(DYND_PP_META_DEREFERENCE, (,), \
