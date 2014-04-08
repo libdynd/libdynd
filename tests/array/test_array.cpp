@@ -37,50 +37,50 @@ TEST(Array, FromValueConstructor) {
     // Bool
     a = nd::array(true);
     EXPECT_EQ(ndt::make_type<dynd_bool>(), a.get_type());
-    EXPECT_EQ(nd::default_access_flags, a.get_access_flags());
+    EXPECT_EQ((uint32_t)nd::default_access_flags, a.get_access_flags());
     a = nd::array(dynd_bool(true));
     EXPECT_EQ(ndt::make_type<dynd_bool>(), a.get_type());
-    EXPECT_EQ(nd::default_access_flags, a.get_access_flags());
+    EXPECT_EQ((uint32_t)nd::default_access_flags, a.get_access_flags());
     // Signed int
     a = nd::array((int8_t)1);
     EXPECT_EQ(ndt::make_type<int8_t>(), a.get_type());
-    EXPECT_EQ(nd::default_access_flags, a.get_access_flags());
+    EXPECT_EQ((uint32_t)nd::default_access_flags, a.get_access_flags());
     a = nd::array((int16_t)1);
     EXPECT_EQ(ndt::make_type<int16_t>(), a.get_type());
-    EXPECT_EQ(nd::default_access_flags, a.get_access_flags());
+    EXPECT_EQ((uint32_t)nd::default_access_flags, a.get_access_flags());
     a = nd::array((int32_t)1);
     EXPECT_EQ(ndt::make_type<int32_t>(), a.get_type());
-    EXPECT_EQ(nd::default_access_flags, a.get_access_flags());
+    EXPECT_EQ((uint32_t)nd::default_access_flags, a.get_access_flags());
     a = nd::array((int64_t)1);
     EXPECT_EQ(ndt::make_type<int64_t>(), a.get_type());
-    EXPECT_EQ(nd::default_access_flags, a.get_access_flags());
+    EXPECT_EQ((uint32_t)nd::default_access_flags, a.get_access_flags());
     // Unsigned int
     a = nd::array((uint8_t)1);
     EXPECT_EQ(ndt::make_type<uint8_t>(), a.get_type());
-    EXPECT_EQ(nd::default_access_flags, a.get_access_flags());
+    EXPECT_EQ((uint32_t)nd::default_access_flags, a.get_access_flags());
     a = nd::array((uint16_t)1);
     EXPECT_EQ(ndt::make_type<uint16_t>(), a.get_type());
-    EXPECT_EQ(nd::default_access_flags, a.get_access_flags());
+    EXPECT_EQ((uint32_t)nd::default_access_flags, a.get_access_flags());
     a = nd::array((uint32_t)1);
     EXPECT_EQ(ndt::make_type<uint32_t>(), a.get_type());
-    EXPECT_EQ(nd::default_access_flags, a.get_access_flags());
+    EXPECT_EQ((uint32_t)nd::default_access_flags, a.get_access_flags());
     a = nd::array((uint64_t)1);
     EXPECT_EQ(ndt::make_type<uint64_t>(), a.get_type());
-    EXPECT_EQ(nd::default_access_flags, a.get_access_flags());
+    EXPECT_EQ((uint32_t)nd::default_access_flags, a.get_access_flags());
     // Floating point
     a = nd::array(1.0f);
     EXPECT_EQ(ndt::make_type<float>(), a.get_type());
-    EXPECT_EQ(nd::default_access_flags, a.get_access_flags());
+    EXPECT_EQ((uint32_t)nd::default_access_flags, a.get_access_flags());
     a = nd::array(1.0);
     EXPECT_EQ(ndt::make_type<double>(), a.get_type());
-    EXPECT_EQ(nd::default_access_flags, a.get_access_flags());
+    EXPECT_EQ((uint32_t)nd::default_access_flags, a.get_access_flags());
     // Complex
     a = nd::array(dynd_complex<float>(1,1));
     EXPECT_EQ(ndt::make_type<dynd_complex<float> >(), a.get_type());
-    EXPECT_EQ(nd::default_access_flags, a.get_access_flags());
+    EXPECT_EQ((uint32_t)nd::default_access_flags, a.get_access_flags());
     a = nd::array(dynd_complex<double>(1,1));
     EXPECT_EQ(ndt::make_type<dynd_complex<double> >(), a.get_type());
-    EXPECT_EQ(nd::default_access_flags, a.get_access_flags());
+    EXPECT_EQ((uint32_t)nd::default_access_flags, a.get_access_flags());
 }
 
 TEST(Array, FromValueConstructorRW) {
