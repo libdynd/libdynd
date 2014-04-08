@@ -21,8 +21,52 @@
 using namespace std;
 
 
-// Need to implement elwise broadcast
-#define ELWISE(NSRC) \
+// elwise_broadcast should be in namespace dynd
+#define ELWISE_BROADCAST(NSRC) \
+    template<DYND_PP_JOIN_MAP_1(DYND_PP_META_TYPENAME, (,), DYND_PP_META_NAME_RANGE(A, NSRC))> \
+    void elwise_broadcast(DYND_PP_JOIN_OUTER_1(DYND_PP_META_DECL, (,), \
+                (const nd::array &), DYND_PP_META_NAME_RANGE(a, NSRC)), \
+        intptr_t& out_ndim, dynd::dimvector& out_shape) { \
+\
+        DYND_PP_IF_ELSE(DYND_PP_EQ(NSRC, 1)) \
+        ( \
+            out_ndim = a0.get_ndim() - detail::ndim_from_array<A0>::value; \
+            a0.get_shape(out_shape.get()); \
+        ) \
+        ( \
+            DYND_PP_JOIN_ELWISE_1(DYND_PP_META_ASGN, (;), \
+                DYND_PP_OUTER_1(DYND_PP_META_DECL, (intptr_t), \
+                    DYND_PP_META_NAME_RANGE(ndim, NSRC)), \
+                DYND_PP_ELWISE_1(DYND_PP_META_SUB, \
+                    DYND_PP_OUTER_1(DYND_PP_META_DOT_CALL, \
+                        DYND_PP_META_NAME_RANGE(a, NSRC), (get_ndim)), \
+                    DYND_PP_OUTER_1(DYND_PP_META_TEMPLATE_SCOPE, \
+                        (detail::ndim_from_array), DYND_PP_META_NAME_RANGE(A, NSRC), (value)))); \
+\
+            out_ndim = ndim0; \
+            DYND_PP_JOIN_OUTER_1(DYND_PP_META_ASGN, (;), (out_ndim), \
+                DYND_PP_OUTER_1(DYND_PP_META_CALL_WITH, (max), \
+                    DYND_PP_META_NAME_RANGE(ndim, 1, NSRC), (out_ndim))); \
+\
+            out_shape.init(out_ndim); \
+            for (intptr_t j = 0; j != out_ndim; ++j) { \
+                out_shape[j] = 1; \
+            } \
+\
+            dimvector tmp_shape(out_ndim); \
+            DYND_PP_JOIN_ELWISE_1(DYND_PP_META_IF, (), \
+                DYND_PP_OUTER_1(DYND_PP_META_GT, \
+                    DYND_PP_META_NAME_RANGE(ndim, NSRC), (0)), \
+                DYND_PP_ELWISE_1(DYND_PP_META_SEMI, \
+                    DYND_PP_OUTER_1(DYND_PP_META_DOT_CALL, \
+                        DYND_PP_META_NAME_RANGE(a, NSRC), (get_shape), (tmp_shape.get())), \
+                    DYND_PP_OUTER_1(DYND_PP_META_ADJACENT, \
+                        (incremental_broadcast), DYND_PP_OUTER_1(DYND_PP_LIFT, \
+                            (out_ndim), (out_shape.get()), DYND_PP_META_NAME_RANGE(ndim, NSRC), (tmp_shape.get()))))) \
+        ) \
+    }
+
+#define ELWISE_IMPL(NSRC) \
     namespace detail { \
     template<typename R, DYND_PP_JOIN_MAP_1(DYND_PP_META_TYPENAME, (,), DYND_PP_META_NAME_RANGE(A, NSRC))> \
     struct foreach_ckernel_instantiator<void (*)(R &, DYND_PP_JOIN_MAP_1(DYND_PP_META_AS_REF, (,), DYND_PP_META_NAME_RANGE(A, NSRC)))> { \
@@ -131,6 +175,10 @@ using namespace std;
 \
         return result; \
     }
+
+#define ELWISE(NSRC) \
+    ELWISE_BROADCAST(NSRC) \
+    ELWISE_IMPL(NSRC)
 
 namespace dynd {
 void incremental_broadcast_input_shapes(intptr_t ninputs, const nd::array** inputs,
@@ -470,7 +518,5 @@ inline nd::array foreach(const nd::array& a, const nd::array& b, T obj)
             DYND_PP_OUTER(DYND_PP_META_TEMPLATE, (remove_ref), DYND_PP_META_NAME_RANGE(A, NSRC)), (type))), DYND_PP_REPEAT(make, NSRC))}; \
 
 */
-
-//DYND_PP_JOIN_ELWISE(DYND_PP_META_TYPEDEF_TYPENAME, 
 
 #endif // _DYND__FOREACH_HPP_

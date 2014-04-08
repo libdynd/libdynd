@@ -62,4 +62,14 @@
 #define DYND_PP_META_TYPEDEF(TYPE, NAME) typedef TYPE NAME
 #define DYND_PP_META_TYPEDEF_TYPENAME(TYPE, NAME) typedef typename TYPE NAME
 
+#define DYND_PP_META_CALL_WITH_1(FUNC, A) FUNC(A)
+#define DYND_PP_META_CALL_WITH(FUNC, A, B) FUNC(A, B)
+
+#define DYND_PP_LIFT(...) (__VA_ARGS__)
+#define DYND_PP_META_SEMICOLON(...) __VA_ARGS__;
+
+#define DYND_PP_META_SEMI(A, B) A; B;
+
+#define DYND_PP_META_ADJACENT(X, Y) DYND_PP_ID(X)DYND_PP_ID(Y)
+
 #endif

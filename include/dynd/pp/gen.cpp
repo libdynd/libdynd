@@ -227,7 +227,7 @@ int main(int argc, char **argv) {
         throw runtime_error("the maximum macro depth cannot be less than 3");
     }
 
-    const int pp_ary_max = 3;
+    const int pp_ary_max = 4;
 
     int *range = new int[pp_ary_max];
     for (int i = 0; i < pp_ary_max; i++) {
