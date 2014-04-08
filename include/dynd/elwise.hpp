@@ -3,8 +3,8 @@
 // BSD 2-Clause License, see LICENSE.txt
 //
 
-#ifndef _DYND__FOREACH_HPP_
-#define _DYND__FOREACH_HPP_
+#ifndef _DYND__ELWISE_HPP_
+#define _DYND__ELWISE_HPP_
 
 #include <utility>
 
@@ -495,4 +495,4 @@ inline nd::array elwise(T obj, const nd::array& a, const nd::array& b)
 
 }} // namespace dynd::nd
 
-#endif // _DYND__FOREACH_HPP_
+#endif // _DYND__ELWISE_HPP_
