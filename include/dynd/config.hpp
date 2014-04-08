@@ -9,9 +9,13 @@
 #include <cstdlib>
 
 #ifdef __clang__
-#if __has_feature(cxx_rvalue_references)
-#  define DYND_RVALUE_REFS
-#endif
+// It appears that on OSX, one can have a configuration with
+// clang that supports rvalue references but no implementation
+// of std::move, and there doesn't seem to be a way to detect
+// this. :P
+//#if __has_feature(cxx_rvalue_references)
+//#  define DYND_RVALUE_REFS
+//#endif
 
 #if __has_feature(cxx_generalized_initializers) && \
     __has_include(<initializer_list>)
