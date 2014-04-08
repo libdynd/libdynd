@@ -274,8 +274,8 @@ DYND_PP_JOIN_MAP(ELWISE_BROADCAST, (), DYND_PP_RANGE(1, DYND_PP_INC(DYND_ELWISE_
 
 #define ELWISE_FUNC_REF_RES(NSRC) \
     template<typename R, DYND_PP_JOIN_MAP_1(DYND_PP_META_TYPENAME, (,), DYND_PP_META_NAME_RANGE(A, NSRC))> \
-    inline nd::array elwise(DYND_PP_JOIN_OUTER(DYND_PP_META_DECL, (,), (const nd::array&), DYND_PP_META_NAME_RANGE(a, NSRC)), \
-        void (*func)(R&, DYND_PP_JOIN_MAP_1(DYND_PP_META_AS_REF, (,), DYND_PP_META_NAME_RANGE(A, NSRC))), \
+    inline nd::array elwise(void (*func)(R&, DYND_PP_JOIN_MAP_1(DYND_PP_META_AS_REF, (,), DYND_PP_META_NAME_RANGE(A, NSRC))), \
+        DYND_PP_JOIN_OUTER(DYND_PP_META_DECL, (,), (const nd::array&), DYND_PP_META_NAME_RANGE(a, NSRC)), \
         const eval::eval_context *ectx = &eval::default_eval_context) \
     { \
         DYND_PP_JOIN_ELWISE_1(DYND_PP_META_TYPEDEF_TYPENAME, (;), DYND_PP_OUTER_1(DYND_PP_META_SCOPE, \
@@ -339,7 +339,7 @@ DYND_PP_JOIN_MAP(ELWISE, (), DYND_PP_RANGE(1, DYND_PP_INC(DYND_ELWISE_MAX)))
 
 
 template<typename R, typename T0, typename T1>
-inline nd::array elwise(const nd::array& a, const nd::array& b, R (*func)(T0, T1),
+inline nd::array elwise(R (*func)(T0, T1), const nd::array& a, const nd::array& b,
     const eval::eval_context *ectx = &eval::default_eval_context)
 {
     typedef typename remove_reference<T0>::type U0;
@@ -420,7 +420,7 @@ inline nd::array elwise(const nd::array& a, const nd::array& b, R (*func)(T0, T1
 
 
 template<typename T, typename R, typename A0, typename A1>
-inline nd::array elwise(const nd::array& a, const nd::array& b, T& obj, R (T::*func)(A0, A1),
+inline nd::array elwise(T& obj, R (T::*func)(A0, A1), const nd::array& a, const nd::array& b,
     const eval::eval_context *ectx = &eval::default_eval_context)
 {
     // No casting for now
@@ -488,9 +488,9 @@ inline nd::array elwise(const nd::array& a, const nd::array& b, T& obj, R (T::*f
 }
 
 template<typename T>
-inline nd::array elwise(const nd::array& a, const nd::array& b, T obj)
+inline nd::array elwise(T obj, const nd::array& a, const nd::array& b)
 {
-    return elwise(a, b, obj, &T::operator ());
+    return elwise(obj, &T::operator (), a, b);
 }
 
 }} // namespace dynd::nd

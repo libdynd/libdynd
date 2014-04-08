@@ -16,10 +16,15 @@ using namespace std;
 using namespace dynd;
 
 
-void func(int &res, int (&x)[3])
-{
+
+
+void func(int &res, int (&x)[3]) {
     res = x[0] + x[1] + x[2];
 }
+
+//void func(int &res, int (&x)[3], int (&y)[3]) {
+  //  res = x[0] * y[0] + x[1] * y[1] + x[2] * y[2];
+//}
 
 
 TEST(ArrayViews, FixedFunc) {
@@ -29,7 +34,7 @@ TEST(ArrayViews, FixedFunc) {
     a = nd::empty(ndt::make_fixed_dim(3, ndt::make_type<int>()));
     a.vals() = vals;
 
-    b = nd::elwise(a, func);
+    b = nd::elwise(func, a);
     EXPECT_EQ(ndt::type("int32"), b.get_type());
     EXPECT_EQ(12, b.as<int>());
 }
@@ -48,14 +53,14 @@ void intfunc_other(int &out, int x, int y)
 TEST(ArrayViews, IntFunc) {
     nd::array a = 10, b = 20, c;
 
-    c = nd::elwise(a, b, intfunc);
+    c = nd::elwise(intfunc, a, b);
     EXPECT_EQ(-20, c.as<int>());
 
     int aval0[2][3] = {{0, 1, 2}, {5, 6, 7}};
     int bval0[3] = {5, 2, 4};
     a = aval0;
     b = bval0;
-    c = nd::elwise(a, b, intfunc);
+    c = nd::elwise(intfunc, a, b);
     EXPECT_EQ(ndt::type("strided * strided * int32"), c.get_type());
     ASSERT_EQ(2, c.get_shape()[0]);
     ASSERT_EQ(3, c.get_shape()[1]);
@@ -69,12 +74,12 @@ TEST(ArrayViews, IntFunc) {
     a = 10;
     b = 20;
 
-    c = nd::elwise(a, b, intfunc_other);
+    c = nd::elwise(intfunc_other, a, b);
     EXPECT_EQ(-20, c.as<int>());
 
     a = aval0;
     b = bval0;
-    c = nd::elwise(a, b, intfunc_other);
+    c = nd::elwise(intfunc_other, a, b);
     EXPECT_EQ(ndt::type("strided * strided * int32"), c.get_type());
     ASSERT_EQ(2, c.get_shape()[0]);
     ASSERT_EQ(3, c.get_shape()[1]);
@@ -110,7 +115,7 @@ void vecintfunc2(int (&out)[3], int x, int y, int z)
 TEST(ArrayViews, VecIntFunc) {
     nd::array a = 10, b = 20, c;
 
-    c = nd::elwise(a, b, vecintfunc);
+    c = nd::elwise(vecintfunc, a, b);
     EXPECT_EQ(20, c(0).as<int>());
     EXPECT_EQ(10, c(1).as<int>());
 
@@ -118,7 +123,7 @@ TEST(ArrayViews, VecIntFunc) {
     int bval0[3] = {5, 2, 4};
     a = aval0;
     b = bval0;
-    c = nd::elwise(a, b, vecintfunc);
+    c = nd::elwise(vecintfunc, a, b);
 
     EXPECT_EQ(ndt::type("strided * strided * 2 * int32"), c.get_type());
     ASSERT_EQ(2, c.get_shape()[0]);
@@ -130,7 +135,7 @@ TEST(ArrayViews, VecIntFunc) {
         }
     }
 
-    c = nd::elwise(a, b, b, vecintfunc2);
+    c = nd::elwise(vecintfunc2, a, b, b);
     EXPECT_EQ(ndt::type("strided * strided * 3 * int32"), c.get_type());
     ASSERT_EQ(2, c.get_shape()[0]);
     ASSERT_EQ(3, c.get_shape()[1]);
@@ -153,14 +158,14 @@ public:
 TEST(ArrayViews, IntMemFunc) {
     nd::array a = 10, b = 20, c;
 
-    c = nd::elwise(a, b, IntMemFuncWrapper());
+    c = nd::elwise(IntMemFuncWrapper(), a, b);
     EXPECT_EQ(-20, c.as<int>());
 
     int aval0[2][3] = {{0, 1, 2}, {5, 6, 7}};
     int bval0[3] = {5, 2, 4};
     a = aval0;
     b = bval0;
-    c = nd::elwise(a, b, IntMemFuncWrapper());
+    c = nd::elwise(IntMemFuncWrapper(), a, b);
     EXPECT_EQ(ndt::type("strided * strided * int32"), c.get_type());
     ASSERT_EQ(2, c.get_shape()[0]);
     ASSERT_EQ(3, c.get_shape()[1]);
@@ -183,7 +188,7 @@ TEST(ArrayViews, FixedDimResOneArgFunc) {
     double x = 3.14 / 8;
     nd::array a = x, c;
 
-    c = nd::elwise(a, two_dim_res_one_arg_func);
+    c = nd::elwise(two_dim_res_one_arg_func, a);
     EXPECT_EQ(ndt::type("2 * 2 * float64"), c.get_type());
     EXPECT_EQ(cos(x), c(0, 0).as<double>());
     EXPECT_EQ(-sin(x), c(0, 1).as<double>());
@@ -205,10 +210,10 @@ void two_dim_res_two_arg_func(int (&res)[2], int x, int y)
 TEST(ArrayViews, FixedDimResTwoArgFunc) {
     nd::array a = 10, b = 20, c;
 
-    c = nd::elwise(a, b, one_dim_res_two_arg_func);
+    c = nd::elwise(one_dim_res_two_arg_func, a, b);
     EXPECT_EQ(20, c(0).as<int>());
 
-    c = nd::elwise(a, b, two_dim_res_two_arg_func);
+    c = nd::elwise(two_dim_res_two_arg_func, a, b);
     EXPECT_EQ(20, c(0).as<int>());
     EXPECT_EQ(10, c(1).as<int>());
 
@@ -216,7 +221,7 @@ TEST(ArrayViews, FixedDimResTwoArgFunc) {
     int bval0[3] = {5, 2, 4};
     a = aval0;
     b = bval0;
-    c = nd::elwise(a, b, two_dim_res_two_arg_func);
+    c = nd::elwise(two_dim_res_two_arg_func, a, b);
 
     EXPECT_EQ(ndt::type("strided * strided * 2 * int32"), c.get_type());
     ASSERT_EQ(2, c.get_shape()[0]);
