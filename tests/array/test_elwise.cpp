@@ -64,7 +64,7 @@ void func_ref_res_7(int (&res)[3][3], int(&x)[3][3], int(&y)[3][3]) {
 TEST(ArrayViews, IntFuncRefRes) {
     nd::array res, a, b;
 
-    a = 10;
+    a = 10.0;
     b = 20;
 
     res = nd::elwise(func_ref_res_0, a, b);

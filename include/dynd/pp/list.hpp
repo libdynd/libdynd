@@ -18,6 +18,8 @@
  */
 #define DYND_PP_FLATTEN(A) DYND_PP_ID A
 
+#define DYND_PP_LIFT(...) (__VA_ARGS__)
+
 /**
  * Expands to 1 if A is a pair of parentheses enclosing whitespace. Otherwise 0.
  */

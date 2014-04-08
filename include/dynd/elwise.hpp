@@ -31,9 +31,9 @@ struct elwise_ckernel_instantiator;
 
 #define ELWISE_CKERNEL_INSTANTIATOR_FUNC_REF_RES(NSRC) \
     template<typename R, DYND_PP_JOIN_MAP_1(DYND_PP_META_TYPENAME, (,), DYND_PP_META_NAME_RANGE(A, NSRC))> \
-    struct elwise_ckernel_instantiator<void (*)(R &, DYND_PP_JOIN_MAP_1(DYND_PP_META_AS_REF, (,), DYND_PP_META_NAME_RANGE(A, NSRC)))> { \
+    struct elwise_ckernel_instantiator<void (*)(R &, DYND_PP_JOIN_1((,), DYND_PP_META_NAME_RANGE(A, NSRC)))> { \
         typedef elwise_ckernel_instantiator extra_type; \
-        typedef void (*func_type)(R &, DYND_PP_JOIN_MAP_1(DYND_PP_META_AS_REF, (,), DYND_PP_META_NAME_RANGE(A, NSRC))); \
+        typedef void (*func_type)(R &, DYND_PP_JOIN_1((,), DYND_PP_META_NAME_RANGE(A, NSRC))); \
 \
         DYND_PP_JOIN_ELWISE_1(DYND_PP_META_TYPEDEF_TYPENAME, (;), DYND_PP_OUTER_1(DYND_PP_META_SCOPE, \
             DYND_PP_OUTER_1(DYND_PP_META_TEMPLATE, (remove_reference), DYND_PP_META_NAME_RANGE(A, NSRC)), (type)), \
@@ -245,7 +245,7 @@ struct elwise_ckernel_instantiator<R (T::*)(A0, A1)> {
 \
             out_ndim = ndim0; \
             DYND_PP_JOIN_OUTER_1(DYND_PP_META_ASGN, (;), (out_ndim), \
-                DYND_PP_OUTER_1(DYND_PP_META_CALL_WITH, (max), \
+                DYND_PP_OUTER_1(DYND_PP_META_CALL, (max), \
                     DYND_PP_META_NAME_RANGE(ndim, 1, NSRC), (out_ndim))); \
 \
             out_shape.init(out_ndim); \
@@ -274,7 +274,7 @@ DYND_PP_JOIN_MAP(ELWISE_BROADCAST, (), DYND_PP_RANGE(1, DYND_PP_INC(DYND_ELWISE_
 
 #define ELWISE_FUNC_REF_RES(NSRC) \
     template<typename R, DYND_PP_JOIN_MAP_1(DYND_PP_META_TYPENAME, (,), DYND_PP_META_NAME_RANGE(A, NSRC))> \
-    inline nd::array elwise(void (*func)(R&, DYND_PP_JOIN_MAP_1(DYND_PP_META_AS_REF, (,), DYND_PP_META_NAME_RANGE(A, NSRC))), \
+    inline nd::array elwise(void (*func)(R&, DYND_PP_JOIN_1((,), DYND_PP_META_NAME_RANGE(A, NSRC))), \
         DYND_PP_JOIN_OUTER(DYND_PP_META_DECL, (,), (const nd::array&), DYND_PP_META_NAME_RANGE(a, NSRC)), \
         const eval::eval_context *ectx = &eval::default_eval_context) \
     { \
