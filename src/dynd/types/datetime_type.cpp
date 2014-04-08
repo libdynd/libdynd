@@ -9,6 +9,7 @@
 #include <algorithm>
 
 #include <dynd/types/datetime_type.hpp>
+#include <dynd/types/time_type.hpp>
 #include <dynd/types/date_util.hpp>
 #include <dynd/types/property_type.hpp>
 #include <dynd/types/cstruct_type.hpp>
@@ -318,6 +319,10 @@ static nd::array property_ndo_get_second(const nd::array& n) {
     return n.replace_dtype(ndt::make_property(n.get_dtype(), "second"));
 }
 
+static nd::array property_ndo_get_microsecond(const nd::array& n) {
+    return n.replace_dtype(ndt::make_property(n.get_dtype(), "microsecond"));
+}
+
 static nd::array property_ndo_get_tick(const nd::array& n) {
     return n.replace_dtype(ndt::make_property(n.get_dtype(), "tick"));
 }
@@ -330,6 +335,7 @@ static pair<string, gfunc::callable> date_array_properties[] = {
     pair<string, gfunc::callable>("hour", gfunc::make_callable(&property_ndo_get_hour, "self")),
     pair<string, gfunc::callable>("minute", gfunc::make_callable(&property_ndo_get_minute, "self")),
     pair<string, gfunc::callable>("second", gfunc::make_callable(&property_ndo_get_second, "self")),
+    pair<string, gfunc::callable>("microsecond", gfunc::make_callable(&property_ndo_get_microsecond, "self")),
     pair<string, gfunc::callable>("tick", gfunc::make_callable(&property_ndo_get_tick, "self")),
 };
 
@@ -400,11 +406,33 @@ namespace {
         const datetime_type *dd = e->datetime_tp;
         datetime_tz_t tz = dd->get_timezone();
         if (tz == tz_utc || tz == tz_abstract) {
-            *reinterpret_cast<int32_t *>(dst) =
-                static_cast<int32_t>(*reinterpret_cast<const int64_t *>(src) /
-                                     (24 * 60 * 60 * 10000000LL));
+            int64_t days = *reinterpret_cast<const int64_t *>(src);
+            if (days < 0) {
+                days -= (DYND_TICKS_PER_DAY - 1);
+            }
+            days /= DYND_TICKS_PER_DAY;
+
+            *reinterpret_cast<int32_t *>(dst) = static_cast<int32_t>(days);
         } else {
             throw runtime_error("datetime date property only implemented for UTC and abstract timezones");
+        }
+    }
+
+    void get_property_kernel_time_single(char *dst, const char *src,
+                    ckernel_prefix *extra)
+    {
+        const datetime_property_kernel_extra *e = reinterpret_cast<datetime_property_kernel_extra *>(extra);
+        const datetime_type *dd = e->datetime_tp;
+        datetime_tz_t tz = dd->get_timezone();
+        if (tz == tz_utc || tz == tz_abstract) {
+            int64_t ticks = *reinterpret_cast<const int64_t *>(src);
+            ticks %= DYND_TICKS_PER_DAY;
+            if (ticks < 0) {
+                ticks += DYND_TICKS_PER_DAY;
+            }
+            *reinterpret_cast<int64_t *>(dst) = ticks;
+        } else {
+            throw runtime_error("datetime time property only implemented for UTC and abstract timezones");
         }
     }
 
@@ -510,8 +538,27 @@ namespace {
         }
     }
 
-    void get_property_kernel_tick_single(char *dst, const char *src,
+    void get_property_kernel_microsecond_single(char *dst, const char *src,
                     ckernel_prefix *extra)
+    {
+        const datetime_property_kernel_extra *e = reinterpret_cast<datetime_property_kernel_extra *>(extra);
+        const datetime_type *dd = e->datetime_tp;
+        datetime_tz_t tz = dd->get_timezone();
+        if (tz == tz_utc || tz == tz_abstract) {
+            int64_t microsecond =
+                *reinterpret_cast<const int64_t *>(src) % DYND_TICKS_PER_SECOND;
+            if (microsecond < 0) {
+                microsecond += DYND_TICKS_PER_SECOND;
+            }
+            microsecond /= DYND_TICKS_PER_MICROSECOND;
+            *reinterpret_cast<int32_t *>(dst) = static_cast<int32_t>(microsecond);
+        } else {
+            throw runtime_error("datetime property access only implemented for UTC and abstract timezones");
+        }
+    }
+
+    void get_property_kernel_tick_single(char *dst, const char *src,
+                                         ckernel_prefix *extra)
     {
         const datetime_property_kernel_extra *e = reinterpret_cast<datetime_property_kernel_extra *>(extra);
         const datetime_type *dd = e->datetime_tp;
@@ -526,19 +573,130 @@ namespace {
             throw runtime_error("datetime property access only implemented for UTC and abstract timezones");
         }
     }
+
+    void get_property_kernel_hours_after_1970_single(char *dst, const char *src,
+                                                     ckernel_prefix *DYND_UNUSED(extra))
+    {
+        int64_t ticks = *reinterpret_cast<const int64_t *>(src);
+        if (ticks < 0) {
+            ticks -= DYND_TICKS_PER_HOUR - 1;
+        }
+        *reinterpret_cast<int64_t *>(dst) = ticks / DYND_TICKS_PER_HOUR;
+    }
+
+    void set_property_kernel_hours_after_1970_single(char *dst, const char *src,
+                                                     ckernel_prefix *DYND_UNUSED(extra))
+    {
+        int64_t hours = *reinterpret_cast<const int64_t *>(src);
+        *reinterpret_cast<int64_t *>(dst) = hours * DYND_TICKS_PER_HOUR;
+    }
+
+    void get_property_kernel_minutes_after_1970_single(char *dst, const char *src,
+                                                     ckernel_prefix *DYND_UNUSED(extra))
+    {
+        int64_t ticks = *reinterpret_cast<const int64_t *>(src);
+        if (ticks < 0) {
+            ticks -= DYND_TICKS_PER_MINUTE - 1;
+        }
+        *reinterpret_cast<int64_t *>(dst) = ticks / DYND_TICKS_PER_MINUTE;
+    }
+
+    void set_property_kernel_minutes_after_1970_single(char *dst, const char *src,
+                                                     ckernel_prefix *DYND_UNUSED(extra))
+    {
+        int64_t minutes = *reinterpret_cast<const int64_t *>(src);
+        *reinterpret_cast<int64_t *>(dst) = minutes * DYND_TICKS_PER_MINUTE;
+    }
+
+    void get_property_kernel_seconds_after_1970_single(char *dst, const char *src,
+                                                     ckernel_prefix *DYND_UNUSED(extra))
+    {
+        int64_t ticks = *reinterpret_cast<const int64_t *>(src);
+        if (ticks < 0) {
+            ticks -= DYND_TICKS_PER_SECOND - 1;
+        }
+        *reinterpret_cast<int64_t *>(dst) = ticks / DYND_TICKS_PER_SECOND;
+    }
+
+    void set_property_kernel_seconds_after_1970_single(char *dst, const char *src,
+                                                     ckernel_prefix *DYND_UNUSED(extra))
+    {
+        int64_t seconds = *reinterpret_cast<const int64_t *>(src);
+        *reinterpret_cast<int64_t *>(dst) = seconds * DYND_TICKS_PER_SECOND;
+    }
+
+    void get_property_kernel_milliseconds_after_1970_single(char *dst, const char *src,
+                                                     ckernel_prefix *DYND_UNUSED(extra))
+    {
+        int64_t ticks = *reinterpret_cast<const int64_t *>(src);
+        if (ticks < 0) {
+            ticks -= DYND_TICKS_PER_MILLISECOND - 1;
+        }
+        *reinterpret_cast<int64_t *>(dst) = ticks / DYND_TICKS_PER_MILLISECOND;
+    }
+
+    void set_property_kernel_milliseconds_after_1970_single(char *dst, const char *src,
+                                                     ckernel_prefix *DYND_UNUSED(extra))
+    {
+        int64_t milliseconds = *reinterpret_cast<const int64_t *>(src);
+        *reinterpret_cast<int64_t *>(dst) = milliseconds * DYND_TICKS_PER_MILLISECOND;
+    }
+
+    void get_property_kernel_microseconds_after_1970_single(char *dst, const char *src,
+                                                     ckernel_prefix *DYND_UNUSED(extra))
+    {
+        int64_t ticks = *reinterpret_cast<const int64_t *>(src);
+        if (ticks < 0) {
+            ticks -= DYND_TICKS_PER_MICROSECOND - 1;
+        }
+        *reinterpret_cast<int64_t *>(dst) = ticks / DYND_TICKS_PER_MICROSECOND;
+    }
+
+    void set_property_kernel_microseconds_after_1970_single(char *dst, const char *src,
+                                                     ckernel_prefix *DYND_UNUSED(extra))
+    {
+        int64_t microseconds = *reinterpret_cast<const int64_t *>(src);
+        *reinterpret_cast<int64_t *>(dst) = microseconds * DYND_TICKS_PER_MICROSECOND;
+    }
+
+    void get_property_kernel_nanoseconds_after_1970_single(char *dst, const char *src,
+                                                     ckernel_prefix *DYND_UNUSED(extra))
+    {
+        int64_t ticks = *reinterpret_cast<const int64_t *>(src);
+        *reinterpret_cast<int64_t *>(dst) = ticks * DYND_NANOSECONDS_PER_TICK;
+    }
+
+    void set_property_kernel_nanoseconds_after_1970_single(char *dst, const char *src,
+                                                     ckernel_prefix *DYND_UNUSED(extra))
+    {
+        int64_t nanoseconds = *reinterpret_cast<const int64_t *>(src);
+        if (nanoseconds < 0) {
+            nanoseconds -= DYND_NANOSECONDS_PER_TICK - 1;
+        }
+        *reinterpret_cast<int64_t *>(dst) = nanoseconds / DYND_NANOSECONDS_PER_TICK;
+    }
 } // anonymous namespace
 
 namespace {
     enum date_properties_t {
         datetimeprop_struct,
         datetimeprop_date,
+        datetimeprop_time,
         datetimeprop_year,
         datetimeprop_month,
         datetimeprop_day,
         datetimeprop_hour,
         datetimeprop_minute,
         datetimeprop_second,
+        datetimeprop_microsecond,
         datetimeprop_tick,
+        // These provide numpy interop
+        datetimeprop_hours_after_1970,
+        datetimeprop_minutes_after_1970,
+        datetimeprop_seconds_after_1970,
+        datetimeprop_milliseconds_after_1970,
+        datetimeprop_microseconds_after_1970,
+        datetimeprop_nanoseconds_after_1970,
     };
 }
 
@@ -549,6 +707,8 @@ size_t datetime_type::get_elwise_property_index(const std::string& property_name
         return datetimeprop_struct;
     } else if (property_name == "date") {
         return datetimeprop_date;
+    } else if (property_name == "time") {
+        return datetimeprop_time;
     } else if (property_name == "year") {
         return datetimeprop_year;
     } else if (property_name == "month") {
@@ -561,8 +721,22 @@ size_t datetime_type::get_elwise_property_index(const std::string& property_name
         return datetimeprop_minute;
     } else if (property_name == "second") {
         return datetimeprop_second;
+    } else if (property_name == "microsecond") {
+        return datetimeprop_microsecond;
     } else if (property_name == "tick") {
         return datetimeprop_tick;
+    } else if (property_name == "hours_after_1970") {
+        return datetimeprop_hours_after_1970;
+    } else if (property_name == "minutes_after_1970") {
+        return datetimeprop_minutes_after_1970;
+    } else if (property_name == "seconds_after_1970") {
+        return datetimeprop_seconds_after_1970;
+    } else if (property_name == "milliseconds_after_1970") {
+        return datetimeprop_milliseconds_after_1970;
+    } else if (property_name == "microseconds_after_1970") {
+        return datetimeprop_microseconds_after_1970;
+    } else if (property_name == "nanoseconds_after_1970") {
+        return datetimeprop_nanoseconds_after_1970;
     } else {
         stringstream ss;
         ss << "dynd type " << ndt::type(this, true) << " does not have a kernel for property " << property_name;
@@ -582,6 +756,19 @@ ndt::type datetime_type::get_elwise_property_type(size_t property_index,
             out_readable = true;
             out_writable = false;
             return ndt::make_date();
+        case datetimeprop_time:
+            out_readable = true;
+            out_writable = false;
+            return ndt::make_time(m_timezone);
+        case datetimeprop_hours_after_1970:
+        case datetimeprop_minutes_after_1970:
+        case datetimeprop_seconds_after_1970:
+        case datetimeprop_milliseconds_after_1970:
+        case datetimeprop_microseconds_after_1970:
+        case datetimeprop_nanoseconds_after_1970:
+            out_readable = true;
+            out_writable = true;
+            return ndt::make_type<int64_t>();
         default:
             out_readable = true;
             out_writable = false;
@@ -598,37 +785,79 @@ size_t datetime_type::make_elwise_property_getter_kernel(
     offset_out = make_kernreq_to_single_kernel_adapter(out, offset_out, kernreq);
     datetime_property_kernel_extra *e = out->get_at<datetime_property_kernel_extra>(offset_out);
     switch (src_property_index) {
-        case datetimeprop_struct:
-            e->base.set_function<unary_single_operation_t>(&get_property_kernel_struct_single);
-            break;
-        case datetimeprop_date:
-            e->base.set_function<unary_single_operation_t>(&get_property_kernel_date_single);
-            break;
-        case datetimeprop_year:
-            e->base.set_function<unary_single_operation_t>(&get_property_kernel_year_single);
-            break;
-        case datetimeprop_month:
-            e->base.set_function<unary_single_operation_t>(&get_property_kernel_month_single);
-            break;
-        case datetimeprop_day:
-            e->base.set_function<unary_single_operation_t>(&get_property_kernel_day_single);
-            break;
-        case datetimeprop_hour:
-            e->base.set_function<unary_single_operation_t>(&get_property_kernel_hour_single);
-            break;
-        case datetimeprop_minute:
-            e->base.set_function<unary_single_operation_t>(&get_property_kernel_minute_single);
-            break;
-        case datetimeprop_second:
-            e->base.set_function<unary_single_operation_t>(&get_property_kernel_second_single);
-            break;
-        case datetimeprop_tick:
-            e->base.set_function<unary_single_operation_t>(&get_property_kernel_tick_single);
-            break;
-        default:
-            stringstream ss;
-            ss << "dynd date type given an invalid property index" << src_property_index;
-            throw runtime_error(ss.str());
+    case datetimeprop_struct:
+        e->base.set_function<unary_single_operation_t>(
+            &get_property_kernel_struct_single);
+        break;
+    case datetimeprop_date:
+        e->base.set_function<unary_single_operation_t>(
+            &get_property_kernel_date_single);
+        break;
+    case datetimeprop_time:
+        e->base.set_function<unary_single_operation_t>(
+            &get_property_kernel_time_single);
+        break;
+    case datetimeprop_year:
+        e->base.set_function<unary_single_operation_t>(
+            &get_property_kernel_year_single);
+        break;
+    case datetimeprop_month:
+        e->base.set_function<unary_single_operation_t>(
+            &get_property_kernel_month_single);
+        break;
+    case datetimeprop_day:
+        e->base.set_function<unary_single_operation_t>(
+            &get_property_kernel_day_single);
+        break;
+    case datetimeprop_hour:
+        e->base.set_function<unary_single_operation_t>(
+            &get_property_kernel_hour_single);
+        break;
+    case datetimeprop_minute:
+        e->base.set_function<unary_single_operation_t>(
+            &get_property_kernel_minute_single);
+        break;
+    case datetimeprop_second:
+        e->base.set_function<unary_single_operation_t>(
+            &get_property_kernel_second_single);
+        break;
+    case datetimeprop_microsecond:
+        e->base.set_function<unary_single_operation_t>(
+            &get_property_kernel_microsecond_single);
+        break;
+    case datetimeprop_tick:
+        e->base.set_function<unary_single_operation_t>(
+            &get_property_kernel_tick_single);
+        break;
+    case datetimeprop_hours_after_1970:
+        e->base.set_function<unary_single_operation_t>(
+            &get_property_kernel_hours_after_1970_single);
+        break;
+    case datetimeprop_minutes_after_1970:
+        e->base.set_function<unary_single_operation_t>(
+            &get_property_kernel_minutes_after_1970_single);
+        break;
+    case datetimeprop_seconds_after_1970:
+        e->base.set_function<unary_single_operation_t>(
+            &get_property_kernel_seconds_after_1970_single);
+        break;
+    case datetimeprop_milliseconds_after_1970:
+        e->base.set_function<unary_single_operation_t>(
+            &get_property_kernel_milliseconds_after_1970_single);
+        break;
+    case datetimeprop_microseconds_after_1970:
+        e->base.set_function<unary_single_operation_t>(
+            &get_property_kernel_microseconds_after_1970_single);
+        break;
+    case datetimeprop_nanoseconds_after_1970:
+        e->base.set_function<unary_single_operation_t>(
+            &get_property_kernel_nanoseconds_after_1970_single);
+        break;
+    default:
+        stringstream ss;
+        ss << "dynd datetime type given an invalid property index"
+           << src_property_index;
+        throw runtime_error(ss.str());
     }
     e->base.destructor = &datetime_property_kernel_extra::destruct;
     e->datetime_tp = static_cast<const datetime_type *>(ndt::type(this, true).release());
@@ -642,15 +871,44 @@ size_t datetime_type::make_elwise_property_setter_kernel(
                 kernel_request_t kernreq, const eval::eval_context *DYND_UNUSED(ectx)) const
 {
     offset_out = make_kernreq_to_single_kernel_adapter(out, offset_out, kernreq);
-    ckernel_prefix *e = out->get_at<ckernel_prefix>(offset_out);
+    datetime_property_kernel_extra *e = out->get_at<datetime_property_kernel_extra>(offset_out);
     switch (dst_property_index) {
-        case datetimeprop_struct:
-            e->set_function<unary_single_operation_t>(&set_property_kernel_struct_single);
-            return offset_out + sizeof(ckernel_prefix);
-        default:
-            stringstream ss;
-            ss << "dynd date type given an invalid property index" << dst_property_index;
-            throw runtime_error(ss.str());
+    case datetimeprop_struct:
+        e->base.set_function<unary_single_operation_t>(
+            &set_property_kernel_struct_single);
+        break;
+    case datetimeprop_hours_after_1970:
+        e->base.set_function<unary_single_operation_t>(
+            &set_property_kernel_hours_after_1970_single);
+        break;
+    case datetimeprop_minutes_after_1970:
+        e->base.set_function<unary_single_operation_t>(
+            &set_property_kernel_minutes_after_1970_single);
+        break;
+    case datetimeprop_seconds_after_1970:
+        e->base.set_function<unary_single_operation_t>(
+            &set_property_kernel_seconds_after_1970_single);
+        break;
+    case datetimeprop_milliseconds_after_1970:
+        e->base.set_function<unary_single_operation_t>(
+            &set_property_kernel_milliseconds_after_1970_single);
+        break;
+    case datetimeprop_microseconds_after_1970:
+        e->base.set_function<unary_single_operation_t>(
+            &set_property_kernel_microseconds_after_1970_single);
+        break;
+    case datetimeprop_nanoseconds_after_1970:
+        e->base.set_function<unary_single_operation_t>(
+            &set_property_kernel_nanoseconds_after_1970_single);
+        break;
+    default:
+        stringstream ss;
+        ss << "dynd datetime type given an invalid property index"
+           << dst_property_index;
+        throw runtime_error(ss.str());
     }
+    e->base.destructor = &datetime_property_kernel_extra::destruct;
+    e->datetime_tp = static_cast<const datetime_type *>(ndt::type(this, true).release());
+    return offset_out + sizeof(datetime_property_kernel_extra);
 }
 

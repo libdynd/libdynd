@@ -14,6 +14,8 @@
 
 #define DYND_TIME_NA (std::numeric_limits<int64_t>::min())
 
+#define DYND_NANOSECONDS_PER_TICK (100LL)
+
 #define DYND_TICKS_PER_MICROSECOND (10LL)
 #define DYND_TICKS_PER_MILLISECOND (10000LL)
 #define DYND_TICKS_PER_SECOND (10000000LL)
