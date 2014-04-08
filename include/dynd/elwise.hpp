@@ -20,52 +20,16 @@
 
 using namespace std;
 
-#define ELWISE_BROADCAST(NSRC) \
-    template<DYND_PP_JOIN_MAP_1(DYND_PP_META_TYPENAME, (,), DYND_PP_META_NAME_RANGE(A, NSRC))> \
-    void elwise_broadcast(DYND_PP_JOIN_OUTER_1(DYND_PP_META_DECL, (,), \
-                (const nd::array &), DYND_PP_META_NAME_RANGE(a, NSRC)), \
-        intptr_t& out_ndim, dynd::dimvector& out_shape) { \
-\
-        DYND_PP_IF_ELSE(DYND_PP_EQ(NSRC, 1)) \
-        ( \
-            out_ndim = a0.get_ndim() - detail::ndim_from_array<A0>::value; \
-            a0.get_shape(out_shape.get()); \
-        ) \
-        ( \
-            DYND_PP_JOIN_ELWISE_1(DYND_PP_META_ASGN, (;), \
-                DYND_PP_OUTER_1(DYND_PP_META_DECL, (intptr_t), \
-                    DYND_PP_META_NAME_RANGE(ndim, NSRC)), \
-                DYND_PP_ELWISE_1(DYND_PP_META_SUB, \
-                    DYND_PP_OUTER_1(DYND_PP_META_DOT_CALL, \
-                        DYND_PP_META_NAME_RANGE(a, NSRC), (get_ndim)), \
-                    DYND_PP_OUTER_1(DYND_PP_META_TEMPLATE_SCOPE, \
-                        (detail::ndim_from_array), DYND_PP_META_NAME_RANGE(A, NSRC), (value)))); \
-\
-            out_ndim = ndim0; \
-            DYND_PP_JOIN_OUTER_1(DYND_PP_META_ASGN, (;), (out_ndim), \
-                DYND_PP_OUTER_1(DYND_PP_META_CALL_WITH, (max), \
-                    DYND_PP_META_NAME_RANGE(ndim, 1, NSRC), (out_ndim))); \
-\
-            out_shape.init(out_ndim); \
-            for (intptr_t j = 0; j != out_ndim; ++j) { \
-                out_shape[j] = 1; \
-            } \
-\
-            dimvector tmp_shape(out_ndim); \
-            DYND_PP_JOIN_ELWISE_1(DYND_PP_META_IF, (), \
-                DYND_PP_OUTER_1(DYND_PP_META_GT, \
-                    DYND_PP_META_NAME_RANGE(ndim, NSRC), (0)), \
-                DYND_PP_ELWISE_1(DYND_PP_META_SEMI, \
-                    DYND_PP_OUTER_1(DYND_PP_META_DOT_CALL, \
-                        DYND_PP_META_NAME_RANGE(a, NSRC), (get_shape), (tmp_shape.get())), \
-                    DYND_PP_OUTER_1(DYND_PP_META_ADJACENT, \
-                        (incremental_broadcast), DYND_PP_OUTER_1(DYND_PP_LIFT, \
-                            (out_ndim), (out_shape.get()), DYND_PP_META_NAME_RANGE(ndim, NSRC), (tmp_shape.get()))))) \
-        ) \
-    }
+namespace dynd { namespace nd {
 
-#define ELWISE_IMPL(NSRC) \
-    namespace detail { \
+namespace detail {
+
+template<class FuncProto>
+struct elwise_ckernel_instantiator;
+
+#define ELWISE_CKERNEL_INSTANTIATOR_FUNC_RET_RES(NSRC)
+
+#define ELWISE_CKERNEL_INSTANTIATOR_FUNC_REF_RES(NSRC) \
     template<typename R, DYND_PP_JOIN_MAP_1(DYND_PP_META_TYPENAME, (,), DYND_PP_META_NAME_RANGE(A, NSRC))> \
     struct elwise_ckernel_instantiator<void (*)(R &, DYND_PP_JOIN_MAP_1(DYND_PP_META_AS_REF, (,), DYND_PP_META_NAME_RANGE(A, NSRC)))> { \
         typedef elwise_ckernel_instantiator extra_type; \
@@ -127,75 +91,18 @@ using namespace std;
             return ckb_offset + sizeof(extra_type); \
         } \
     }; \
-    } \
-\
-    template<typename R, DYND_PP_JOIN_MAP_1(DYND_PP_META_TYPENAME, (,), DYND_PP_META_NAME_RANGE(A, NSRC))> \
-    inline nd::array elwise(DYND_PP_JOIN_OUTER(DYND_PP_META_DECL, (,), (const nd::array&), DYND_PP_META_NAME_RANGE(a, NSRC)), \
-        void (*func)(R&, DYND_PP_JOIN_MAP_1(DYND_PP_META_AS_REF, (,), DYND_PP_META_NAME_RANGE(A, NSRC))), \
-        const eval::eval_context *ectx = &eval::default_eval_context) \
-    { \
-        DYND_PP_JOIN_ELWISE_1(DYND_PP_META_TYPEDEF_TYPENAME, (;), DYND_PP_OUTER_1(DYND_PP_META_SCOPE, \
-            DYND_PP_OUTER_1(DYND_PP_META_TEMPLATE, (remove_reference), DYND_PP_META_NAME_RANGE(A, NSRC)), (type)), \
-            DYND_PP_META_NAME_RANGE(U, NSRC)); \
-\
-        ndt::type data_dynd_types[DYND_PP_INC(NSRC)] = {ndt::fixed_dim_from_array<R>::make(), DYND_PP_JOIN_ELWISE_1(DYND_PP_META_SCOPE_CALL, (,), \
-            DYND_PP_OUTER(DYND_PP_META_TEMPLATE, (ndt::fixed_dim_from_array), \
-            DYND_PP_META_NAME_RANGE(U, NSRC)), DYND_PP_REPEAT(make, NSRC))}; \
-\
-        DYND_PP_JOIN_ELWISE_1(DYND_PP_META_ASGN, (;), \
-            DYND_PP_OUTER_1(DYND_PP_META_DECL, \
-                (const nd::array), DYND_PP_META_NAME_RANGE(acast, NSRC)), \
-            DYND_PP_OUTER_1(DYND_PP_META_DOT_CALL, \
-                DYND_PP_ELWISE_1(DYND_PP_META_DOT, \
-                    DYND_PP_META_NAME_RANGE(a, NSRC), \
-                        DYND_PP_OUTER_1(DYND_PP_META_CALL, \
-                            (ucast), DYND_PP_OUTER_1(DYND_PP_META_DOT_CALL, \
-                                DYND_PP_META_AT_RANGE(data_dynd_types, 1, DYND_PP_INC(NSRC)), (get_dtype)))), (eval))); \
-\
-        intptr_t res_strided_ndim; \
-        dimvector res_strided_shape; \
-        elwise_broadcast<DYND_PP_JOIN_1((,), DYND_PP_META_NAME_RANGE(U, NSRC))> \
-            (DYND_PP_JOIN_1((,), DYND_PP_META_NAME_RANGE(acast, NSRC)), res_strided_ndim, res_strided_shape); \
-        nd::array result = nd::make_strided_array(data_dynd_types[0], res_strided_ndim, res_strided_shape.get()); \
-\
-        ckernel_deferred ckd; \
-        ckd.ckernel_funcproto = expr_operation_funcproto; \
-        ckd.data_types_size = DYND_PP_INC(NSRC); \
-        ckd.data_dynd_types = data_dynd_types; \
-        ckd.data_ptr = reinterpret_cast<void *>(func); \
-        ckd.instantiate_func = &detail::elwise_ckernel_instantiator<void (*)(R &, \
-            DYND_PP_JOIN_1((,), DYND_PP_META_NAME_RANGE(A, NSRC)))>::instantiate; \
-        ckd.free_func = NULL; \
-\
-        ckernel_builder ckb; \
-        ndt::type lifted_types[DYND_PP_INC(NSRC)] = {result.get_type(), \
-            DYND_PP_JOIN_OUTER(DYND_PP_META_DOT_CALL, (,), DYND_PP_META_NAME_RANGE(acast, NSRC), (get_type))}; \
-        const char *dynd_metadata[DYND_PP_INC(NSRC)] = {result.get_ndo_meta(), \
-            DYND_PP_JOIN_OUTER(DYND_PP_META_DOT_CALL, (,), DYND_PP_META_NAME_RANGE(acast, NSRC), (get_ndo_meta))}; \
-        make_lifted_expr_ckernel(&ckd, &ckb, 0, \
-                            lifted_types, dynd_metadata, kernel_request_single, ectx); \
-\
-        ckernel_prefix *ckprefix = ckb.get(); \
-        expr_single_operation_t op = ckprefix->get_function<expr_single_operation_t>(); \
-        const char *src[NSRC] = {DYND_PP_JOIN_OUTER(DYND_PP_META_DOT_CALL, (,), DYND_PP_META_NAME_RANGE(acast, NSRC), (get_readonly_originptr))}; \
-        op(result.get_readwrite_originptr(), src, ckprefix); \
-\
-        return result; \
-    }
 
-#define ELWISE(NSRC) \
-    ELWISE_BROADCAST(NSRC) \
-    ELWISE_IMPL(NSRC)
+#define ELWISE_CKERNEL_INSTANTIATOR(NSRC) \
+    ELWISE_CKERNEL_INSTANTIATOR_FUNC_RET_RES(NSRC) \
+    ELWISE_CKERNEL_INSTANTIATOR_FUNC_REF_RES(NSRC)
 
-namespace dynd { namespace nd {
+DYND_PP_JOIN_MAP(ELWISE_CKERNEL_INSTANTIATOR, (), DYND_PP_RANGE(1, DYND_PP_INC(DYND_ELWISE_MAX)))
 
-namespace detail {
+#undef ELWISE_CKERNEL_INSTANTIATOR
+#undef ELWISE_CKERNEL_INSTANTIATOR_FUNC_REF_RET
+#undef ELWISE_CKERNEL_INSTANTIATOR_FUNC_REF_RES
 
-
-
-template<class FuncProto>
-struct elwise_ckernel_instantiator;
-
+// Remove this
 template<typename R, typename T0, typename T1>
 struct elwise_ckernel_instantiator<R (*)(T0, T1)> {
     typedef elwise_ckernel_instantiator extra_type;
@@ -254,6 +161,7 @@ struct elwise_ckernel_instantiator<R (*)(T0, T1)> {
     }
 };
 
+// Remove this
 template<typename T, typename R, typename A0, typename A1>
 struct elwise_ckernel_instantiator<R (T::*)(A0, A1)> {
     typedef elwise_ckernel_instantiator extra_type;
@@ -312,24 +220,122 @@ struct elwise_ckernel_instantiator<R (T::*)(A0, A1)> {
     }
 };
 
-} // namespace detail
+}; // namespace detail
+
+#define ELWISE_BROADCAST(NSRC) \
+    template<DYND_PP_JOIN_MAP_1(DYND_PP_META_TYPENAME, (,), DYND_PP_META_NAME_RANGE(A, NSRC))> \
+    void elwise_broadcast(DYND_PP_JOIN_OUTER_1(DYND_PP_META_DECL, (,), \
+                (const nd::array &), DYND_PP_META_NAME_RANGE(a, NSRC)), \
+        intptr_t& out_ndim, dynd::dimvector& out_shape) { \
+\
+        DYND_PP_IF_ELSE(DYND_PP_EQ(NSRC, 1)) \
+        ( \
+            out_ndim = a0.get_ndim() - detail::ndim_from_array<A0>::value; \
+            a0.get_shape(out_shape.get()); \
+        ) \
+        ( \
+            DYND_PP_JOIN_ELWISE_1(DYND_PP_META_ASGN, (;), \
+                DYND_PP_OUTER_1(DYND_PP_META_DECL, (intptr_t), \
+                    DYND_PP_META_NAME_RANGE(ndim, NSRC)), \
+                DYND_PP_ELWISE_1(DYND_PP_META_SUB, \
+                    DYND_PP_OUTER_1(DYND_PP_META_DOT_CALL, \
+                        DYND_PP_META_NAME_RANGE(a, NSRC), (get_ndim)), \
+                    DYND_PP_OUTER_1(DYND_PP_META_TEMPLATE_SCOPE, \
+                        (detail::ndim_from_array), DYND_PP_META_NAME_RANGE(A, NSRC), (value)))); \
+\
+            out_ndim = ndim0; \
+            DYND_PP_JOIN_OUTER_1(DYND_PP_META_ASGN, (;), (out_ndim), \
+                DYND_PP_OUTER_1(DYND_PP_META_CALL_WITH, (max), \
+                    DYND_PP_META_NAME_RANGE(ndim, 1, NSRC), (out_ndim))); \
+\
+            out_shape.init(out_ndim); \
+            for (intptr_t j = 0; j != out_ndim; ++j) { \
+                out_shape[j] = 1; \
+            } \
+\
+            dimvector tmp_shape(out_ndim); \
+            DYND_PP_JOIN_ELWISE_1(DYND_PP_META_IF, (), \
+                DYND_PP_OUTER_1(DYND_PP_META_GT, \
+                    DYND_PP_META_NAME_RANGE(ndim, NSRC), (0)), \
+                DYND_PP_ELWISE_1(DYND_PP_META_SEMI, \
+                    DYND_PP_OUTER_1(DYND_PP_META_DOT_CALL, \
+                        DYND_PP_META_NAME_RANGE(a, NSRC), (get_shape), (tmp_shape.get())), \
+                    DYND_PP_OUTER_1(DYND_PP_META_ADJACENT, \
+                        (incremental_broadcast), DYND_PP_OUTER_1(DYND_PP_LIFT, \
+                            (out_ndim), (out_shape.get()), DYND_PP_META_NAME_RANGE(ndim, NSRC), (tmp_shape.get()))))) \
+        ) \
+    }
+
+DYND_PP_JOIN_MAP(ELWISE_BROADCAST, (), DYND_PP_RANGE(1, DYND_PP_INC(DYND_ELWISE_MAX)))
+
+#undef ELWISE_BROADCAST
+
+#define ELWISE_FUNC_RET_RES(NSRC)
+
+#define ELWISE_FUNC_REF_RES(NSRC) \
+    template<typename R, DYND_PP_JOIN_MAP_1(DYND_PP_META_TYPENAME, (,), DYND_PP_META_NAME_RANGE(A, NSRC))> \
+    inline nd::array elwise(DYND_PP_JOIN_OUTER(DYND_PP_META_DECL, (,), (const nd::array&), DYND_PP_META_NAME_RANGE(a, NSRC)), \
+        void (*func)(R&, DYND_PP_JOIN_MAP_1(DYND_PP_META_AS_REF, (,), DYND_PP_META_NAME_RANGE(A, NSRC))), \
+        const eval::eval_context *ectx = &eval::default_eval_context) \
+    { \
+        DYND_PP_JOIN_ELWISE_1(DYND_PP_META_TYPEDEF_TYPENAME, (;), DYND_PP_OUTER_1(DYND_PP_META_SCOPE, \
+            DYND_PP_OUTER_1(DYND_PP_META_TEMPLATE, (remove_reference), DYND_PP_META_NAME_RANGE(A, NSRC)), (type)), \
+            DYND_PP_META_NAME_RANGE(U, NSRC)); \
+\
+        ndt::type data_dynd_types[DYND_PP_INC(NSRC)] = {ndt::fixed_dim_from_array<R>::make(), DYND_PP_JOIN_ELWISE_1(DYND_PP_META_SCOPE_CALL, (,), \
+            DYND_PP_OUTER(DYND_PP_META_TEMPLATE, (ndt::fixed_dim_from_array), \
+            DYND_PP_META_NAME_RANGE(U, NSRC)), DYND_PP_REPEAT(make, NSRC))}; \
+\
+        DYND_PP_JOIN_ELWISE_1(DYND_PP_META_ASGN, (;), \
+            DYND_PP_OUTER_1(DYND_PP_META_DECL, \
+                (const nd::array), DYND_PP_META_NAME_RANGE(acast, NSRC)), \
+            DYND_PP_OUTER_1(DYND_PP_META_DOT_CALL, \
+                DYND_PP_ELWISE_1(DYND_PP_META_DOT, \
+                    DYND_PP_META_NAME_RANGE(a, NSRC), \
+                        DYND_PP_OUTER_1(DYND_PP_META_CALL, \
+                            (ucast), DYND_PP_OUTER_1(DYND_PP_META_DOT_CALL, \
+                                DYND_PP_META_AT_RANGE(data_dynd_types, 1, DYND_PP_INC(NSRC)), (get_dtype)))), (eval))); \
+\
+        intptr_t res_strided_ndim; \
+        dimvector res_strided_shape; \
+        elwise_broadcast<DYND_PP_JOIN_1((,), DYND_PP_META_NAME_RANGE(U, NSRC))> \
+            (DYND_PP_JOIN_1((,), DYND_PP_META_NAME_RANGE(acast, NSRC)), res_strided_ndim, res_strided_shape); \
+        nd::array result = nd::make_strided_array(data_dynd_types[0], res_strided_ndim, res_strided_shape.get()); \
+\
+        ckernel_deferred ckd; \
+        ckd.ckernel_funcproto = expr_operation_funcproto; \
+        ckd.data_types_size = DYND_PP_INC(NSRC); \
+        ckd.data_dynd_types = data_dynd_types; \
+        ckd.data_ptr = reinterpret_cast<void *>(func); \
+        ckd.instantiate_func = &detail::elwise_ckernel_instantiator<void (*)(R &, \
+            DYND_PP_JOIN_1((,), DYND_PP_META_NAME_RANGE(A, NSRC)))>::instantiate; \
+        ckd.free_func = NULL; \
+\
+        ckernel_builder ckb; \
+        ndt::type lifted_types[DYND_PP_INC(NSRC)] = {result.get_type(), \
+            DYND_PP_JOIN_OUTER(DYND_PP_META_DOT_CALL, (,), DYND_PP_META_NAME_RANGE(acast, NSRC), (get_type))}; \
+        const char *dynd_metadata[DYND_PP_INC(NSRC)] = {result.get_ndo_meta(), \
+            DYND_PP_JOIN_OUTER(DYND_PP_META_DOT_CALL, (,), DYND_PP_META_NAME_RANGE(acast, NSRC), (get_ndo_meta))}; \
+        make_lifted_expr_ckernel(&ckd, &ckb, 0, \
+                            lifted_types, dynd_metadata, kernel_request_single, ectx); \
+\
+        ckernel_prefix *ckprefix = ckb.get(); \
+        expr_single_operation_t op = ckprefix->get_function<expr_single_operation_t>(); \
+        const char *src[NSRC] = {DYND_PP_JOIN_OUTER(DYND_PP_META_DOT_CALL, (,), DYND_PP_META_NAME_RANGE(acast, NSRC), (get_readonly_originptr))}; \
+        op(result.get_readwrite_originptr(), src, ckprefix); \
+\
+        return result; \
+    }
+
+#define ELWISE(NSRC) \
+    ELWISE_FUNC_RET_RES(NSRC) \
+    ELWISE_FUNC_REF_RES(NSRC)
 
 DYND_PP_JOIN_MAP(ELWISE, (), DYND_PP_RANGE(1, DYND_PP_INC(DYND_ELWISE_MAX)))
 
-
-//        if (a0.get_dtype() != ndt::make_type<T0>()) {
-//            stringstream ss;
-//            ss << "initial prototype of elwise doesn't implicitly cast ";
-//            ss << a0.get_dtype() << " to " << ndt::make_type<T0>();
-//            throw type_error(ss.str());
-//        }
-//        if (a1.get_dtype() != ndt::make_type<T1>()) {
-//            stringstream ss;
-//            ss << "initial prototype of elwise doesn't implicitly cast ";
-//            ss << a1.get_dtype() << " to " << ndt::make_type<T1>();
-//            throw type_error(ss.str());
-//        }
-
+#undef ELWISE
+#undef ELWISE_FUNC_RET_RES
+#undef ELWISE_FUNC_REF_RES
 
 
 template<typename R, typename T0, typename T1>
@@ -488,13 +494,5 @@ inline nd::array elwise(const nd::array& a, const nd::array& b, T obj)
 }
 
 }} // namespace dynd::nd
-
-/*
-        ndt::type data_dynd_types[DYND_PP_INC(NSRC)] = {ndt::fixed_dim_from_array<R>::make(), DYND_PP_JOIN_ELWISE_1(DYND_PP_META_SCOPE_CALL, (,), \
-            DYND_PP_OUTER(DYND_PP_META_TEMPLATE, (ndt::fixed_dim_from_array), \
-            DYND_PP_OUTER(DYND_PP_META_SCOPE, \
-            DYND_PP_OUTER(DYND_PP_META_TEMPLATE, (remove_reference), DYND_PP_META_NAME_RANGE(A, NSRC)), (type))), DYND_PP_REPEAT(make, NSRC))}; \
-
-*/
 
 #endif // _DYND__FOREACH_HPP_
