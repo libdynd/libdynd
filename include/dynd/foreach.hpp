@@ -69,7 +69,8 @@ using namespace std;
 \
         static intptr_t instantiate(void *self_data_ptr, \
                     dynd::ckernel_builder *out_ckb, intptr_t ckb_offset, \
-                    const char *const* DYND_UNUSED(dynd_metadata), uint32_t kerntype) \
+                    const char *const* DYND_UNUSED(dynd_metadata), uint32_t kerntype, \
+                    const eval::eval_context *DYND_UNUSED(ectx)) \
         { \
             extra_type *e = out_ckb->get_at<extra_type>(ckb_offset); \
             if (kerntype == kernel_request_single) { \
@@ -88,7 +89,8 @@ using namespace std;
 \
     template<typename R, DYND_PP_JOIN_MAP_1(DYND_PP_META_TYPENAME, (,), DYND_PP_META_NAME_RANGE(A, NSRC))> \
     inline nd::array foreach(DYND_PP_JOIN_OUTER(DYND_PP_META_DECL, (,), (const nd::array&), DYND_PP_META_NAME_RANGE(a, NSRC)), \
-        void (*func)(R&, DYND_PP_JOIN_MAP_1(DYND_PP_META_AS_REF, (,), DYND_PP_META_NAME_RANGE(A, NSRC)))) \
+        void (*func)(R&, DYND_PP_JOIN_MAP_1(DYND_PP_META_AS_REF, (,), DYND_PP_META_NAME_RANGE(A, NSRC))), \
+        const eval::eval_context *ectx = &eval::default_eval_context) \
     { \
         DYND_PP_JOIN_ELWISE_1(DYND_PP_META_TYPEDEF_TYPENAME, (;), DYND_PP_OUTER_1(DYND_PP_META_SCOPE, \
             DYND_PP_OUTER_1(DYND_PP_META_TEMPLATE, (remove_ref), DYND_PP_META_NAME_RANGE(A, NSRC)), (type)), \
@@ -120,7 +122,7 @@ using namespace std;
         const char *dynd_metadata[DYND_PP_INC(NSRC)] = {result.get_ndo_meta(), \
             DYND_PP_JOIN_OUTER(DYND_PP_META_DOT_CALL, (,), DYND_PP_META_NAME_RANGE(a, NSRC), (get_ndo_meta))}; \
         make_lifted_expr_ckernel(&ckd, &ckb, 0, \
-                            lifted_types, dynd_metadata, kernel_request_single); \
+                            lifted_types, dynd_metadata, kernel_request_single, ectx); \
 \
         ckernel_prefix *ckprefix = ckb.get(); \
         expr_single_operation_t op = ckprefix->get_function<expr_single_operation_t>(); \
@@ -209,7 +211,8 @@ struct foreach_ckernel_instantiator<R (*)(T0, T1)> {
 
     static intptr_t instantiate(void *self_data_ptr,
                 dynd::ckernel_builder *out_ckb, intptr_t ckb_offset,
-                const char *const* DYND_UNUSED(dynd_metadata), uint32_t kerntype)
+                const char *const* DYND_UNUSED(dynd_metadata), uint32_t kerntype,
+                const eval::eval_context *DYND_UNUSED(ectx))
     {
         extra_type *e = out_ckb->get_at<extra_type>(ckb_offset);
         if (kerntype == kernel_request_single) {
@@ -264,7 +267,8 @@ struct foreach_ckernel_instantiator<R (T::*)(A0, A1)> {
 
     static intptr_t instantiate(void *self_data_ptr,
                 dynd::ckernel_builder *out_ckb, intptr_t ckb_offset,
-                const char *const* DYND_UNUSED(dynd_metadata), uint32_t kerntype)
+                const char *const* DYND_UNUSED(dynd_metadata), uint32_t kerntype,
+                const eval::eval_context *DYND_UNUSED(ectx))
     {
         extra_type *e = out_ckb->get_at<extra_type>(ckb_offset);
         if (kerntype == kernel_request_single) {
@@ -285,7 +289,7 @@ struct foreach_ckernel_instantiator<R (T::*)(A0, A1)> {
 
 } // namespace detail
 
-//DYND_PP_JOIN_MAP(ELWISE, (), DYND_PP_RANGE(1, 4))
+DYND_PP_JOIN_MAP(ELWISE, (), DYND_PP_RANGE(1, 4))
 
 
 //        if (a0.get_dtype() != ndt::make_type<T0>()) {
@@ -304,7 +308,8 @@ struct foreach_ckernel_instantiator<R (T::*)(A0, A1)> {
 
 
 template<typename R, typename T0, typename T1>
-inline nd::array foreach(const nd::array& a, const nd::array& b, R (*func)(T0, T1))
+inline nd::array foreach(const nd::array& a, const nd::array& b, R (*func)(T0, T1),
+    const eval::eval_context *ectx = &eval::default_eval_context)
 {
     typedef typename remove_ref<T0>::type U0;
     typedef typename remove_ref<T0>::type U1;
@@ -370,7 +375,7 @@ inline nd::array foreach(const nd::array& a, const nd::array& b, R (*func)(T0, T
     ckernel_builder ckb;
     ndt::type lifted_types[3] = {result.get_type(), a.get_type(), b.get_type()};
     const char *dynd_metadata[3] = {result.get_ndo_meta(), a.get_ndo_meta(), b.get_ndo_meta()};
-    make_lifted_expr_ckernel(&ckd, &ckb, 0, lifted_types, dynd_metadata, kernel_request_single);
+    make_lifted_expr_ckernel(&ckd, &ckb, 0, lifted_types, dynd_metadata, kernel_request_single, ectx);
 
     // Call the ckernel to do the operation
     ckernel_prefix *ckprefix = ckb.get();
@@ -383,7 +388,8 @@ inline nd::array foreach(const nd::array& a, const nd::array& b, R (*func)(T0, T
 
 
 template<typename T, typename R, typename A0, typename A1>
-inline nd::array foreach(const nd::array& a, const nd::array& b, T& obj, R (T::*func)(A0, A1))
+inline nd::array foreach(const nd::array& a, const nd::array& b, T& obj, R (T::*func)(A0, A1),
+    const eval::eval_context *ectx = &eval::default_eval_context)
 {
     // No casting for now
     if (a.get_dtype() != ndt::make_type<A0>()) {
@@ -438,7 +444,7 @@ inline nd::array foreach(const nd::array& a, const nd::array& b, T& obj, R (T::*
     ndt::type lifted_types[3] = {result.get_type(), a.get_type(), b.get_type()};
     const char *dynd_metadata[3] = {result.get_ndo_meta(), a.get_ndo_meta(), b.get_ndo_meta()};
     make_lifted_expr_ckernel(&ckd, &ckb, 0,
-                        lifted_types, dynd_metadata, kernel_request_single);
+                        lifted_types, dynd_metadata, kernel_request_single, ectx);
 
     // Call the ckernel to do the operation
     ckernel_prefix *ckprefix = ckb.get();
