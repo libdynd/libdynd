@@ -73,7 +73,7 @@ using namespace std;
         typedef void (*func_type)(R &, DYND_PP_JOIN_MAP_1(DYND_PP_META_AS_REF, (,), DYND_PP_META_NAME_RANGE(A, NSRC))); \
 \
         DYND_PP_JOIN_ELWISE_1(DYND_PP_META_TYPEDEF_TYPENAME, (;), DYND_PP_OUTER_1(DYND_PP_META_SCOPE, \
-            DYND_PP_OUTER_1(DYND_PP_META_TEMPLATE, (remove_ref), DYND_PP_META_NAME_RANGE(A, NSRC)), (type)), \
+            DYND_PP_OUTER_1(DYND_PP_META_TEMPLATE, (remove_reference), DYND_PP_META_NAME_RANGE(A, NSRC)), (type)), \
             DYND_PP_META_NAME_RANGE(U, NSRC)); \
 \
         ckernel_prefix base; \
@@ -136,7 +136,7 @@ using namespace std;
         const eval::eval_context *ectx = &eval::default_eval_context) \
     { \
         DYND_PP_JOIN_ELWISE_1(DYND_PP_META_TYPEDEF_TYPENAME, (;), DYND_PP_OUTER_1(DYND_PP_META_SCOPE, \
-            DYND_PP_OUTER_1(DYND_PP_META_TEMPLATE, (remove_ref), DYND_PP_META_NAME_RANGE(A, NSRC)), (type)), \
+            DYND_PP_OUTER_1(DYND_PP_META_TEMPLATE, (remove_reference), DYND_PP_META_NAME_RANGE(A, NSRC)), (type)), \
             DYND_PP_META_NAME_RANGE(U, NSRC)); \
 \
         ndt::type data_dynd_types[DYND_PP_INC(NSRC)] = {ndt::fixed_dim_from_array<R>::make(), DYND_PP_JOIN_ELWISE_1(DYND_PP_META_SCOPE_CALL, (,), \
@@ -188,36 +188,6 @@ using namespace std;
     ELWISE_BROADCAST(NSRC) \
     ELWISE_IMPL(NSRC)
 
-namespace dynd {
-void incremental_broadcast_input_shapes(intptr_t ninputs, const nd::array** inputs,
-                intptr_t &out_undim, dimvector& out_shape, bool include_scalars = false) {
-    out_undim = inputs[0]->get_ndim();
-    for (int j = 1; j < ninputs; j++) {
-        out_undim = max(inputs[j]->get_ndim(), out_undim);
-    }
-    out_shape.init(out_undim);
-    for (intptr_t j = 0; j != out_undim; ++j) {
-        out_shape[j] = 1;
-    }
-
-    dimvector tmp_shape(out_undim);
-    for (int j = 0; j < ninputs; j++) {
-        if (include_scalars || inputs[j]->get_ndim() > 0) {
-            inputs[j]->get_shape(tmp_shape.get());
-            incremental_broadcast(out_undim, out_shape.get(), inputs[j]->get_ndim(), tmp_shape.get());
-        }
-    }
-}
-}
-
-template<class T> struct remove_ref {
-    typedef T type;
-};
-
-template<class T> struct remove_ref<T&> {
-    typedef typename remove_ref<T>::type type;
-};
-
 namespace dynd { namespace nd {
 
 namespace detail {
@@ -234,8 +204,8 @@ struct foreach_ckernel_instantiator<R (*)(T0, T1)> {
     ckernel_prefix base;
     R (*func)(T0, T1);
 
-    typedef typename remove_ref<T0>::type U0;
-    typedef typename remove_ref<T0>::type U1;
+    typedef typename remove_reference<T0>::type U0;
+    typedef typename remove_reference<T0>::type U1;
 
     static void single(char *dst, char * const *src,
                        ckernel_prefix *ckp)
@@ -367,8 +337,8 @@ template<typename R, typename T0, typename T1>
 inline nd::array foreach(const nd::array& a, const nd::array& b, R (*func)(T0, T1),
     const eval::eval_context *ectx = &eval::default_eval_context)
 {
-    typedef typename remove_ref<T0>::type U0;
-    typedef typename remove_ref<T0>::type U1;
+    typedef typename remove_reference<T0>::type U0;
+    typedef typename remove_reference<T0>::type U1;
 
     const nd::array ac = a.ucast<U0>().eval();
     const nd::array bc = b.ucast<U1>().eval();
@@ -524,7 +494,7 @@ inline nd::array foreach(const nd::array& a, const nd::array& b, T obj)
         ndt::type data_dynd_types[DYND_PP_INC(NSRC)] = {ndt::fixed_dim_from_array<R>::make(), DYND_PP_JOIN_ELWISE_1(DYND_PP_META_SCOPE_CALL, (,), \
             DYND_PP_OUTER(DYND_PP_META_TEMPLATE, (ndt::fixed_dim_from_array), \
             DYND_PP_OUTER(DYND_PP_META_SCOPE, \
-            DYND_PP_OUTER(DYND_PP_META_TEMPLATE, (remove_ref), DYND_PP_META_NAME_RANGE(A, NSRC)), (type))), DYND_PP_REPEAT(make, NSRC))}; \
+            DYND_PP_OUTER(DYND_PP_META_TEMPLATE, (remove_reference), DYND_PP_META_NAME_RANGE(A, NSRC)), (type))), DYND_PP_REPEAT(make, NSRC))}; \
 
 */
 

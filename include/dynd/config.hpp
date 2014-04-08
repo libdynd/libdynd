@@ -164,15 +164,22 @@ inline void DYND_MEMCPY(char *dst, const char *src, intptr_t count)
 #include <type_traits>
 namespace dynd {
     using std::tr1::enable_if;
+    using std::tr1::remove_reference;
 }
 #else
-// enable_if is a small template, so we just replicate it here
+// enable_if and remove_reference are small templates, so we just replicate them here
 namespace dynd {
 	template<bool B, class T = void>
 	struct enable_if {};
  
 	template<class T>
 	struct enable_if<true, T> { typedef T type; };
+
+    template<class T>
+    struct remove_reference { typedef T type; };
+
+    template<class T>
+    struct remove_reference<T&> { typedef T type; };
 }
 #endif
 
