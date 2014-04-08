@@ -9,12 +9,23 @@
 #include <cstdlib>
 
 #ifdef __clang__
+#ifndef __has_extension
+  #define __has_extension __has_feature // Compatibility with pre-3.0 compilers.
+#endif
 
-//#  define DYND_RVALUE_REFS
-//#  define DYND_INIT_LIST
+#if __has_extension(cxx_rvalue_references)
+#  define DYND_RVALUE_REFS
+#endif
 
-// TODO: versions with constexpr
+#if __has_feature(cxx_generalized_initializers)
+#  define DYND_INIT_LIST
+#endif
+
+#if __has_feature(cxx_constexpr)
 #  define DYND_CONSTEXPR constexpr
+#else
+#  define DYND_CONSTEXPR
+#endif
 
 # define DYND_USE_STDINT
 
