@@ -13,7 +13,8 @@
 #  define DYND_RVALUE_REFS
 #endif
 
-#if __has_feature(cxx_generalized_initializers)
+#if __has_feature(cxx_generalized_initializers) && \
+    __has_include(<initializer_list>)
 #  define DYND_INIT_LIST
 #endif
 
