@@ -15,6 +15,7 @@
 using namespace std;
 using namespace dynd;
 
+/*
 int intfunc(int x, const int &y)
 {
     return 2 * (x - y);
@@ -205,4 +206,4 @@ TEST(ArrayViews, FixedDimResTwoArgFunc) {
             EXPECT_EQ(aval0[i][j], c(i,j,1).as<int>());
         }
     }
-}
+}*/

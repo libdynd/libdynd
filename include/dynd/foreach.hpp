@@ -285,7 +285,7 @@ struct foreach_ckernel_instantiator<R (T::*)(A0, A1)> {
 
 } // namespace detail
 
-DYND_PP_JOIN_MAP(ELWISE, (), DYND_PP_RANGE(1, 4))
+//DYND_PP_JOIN_MAP(ELWISE, (), DYND_PP_RANGE(1, 4))
 
 
 //        if (a0.get_dtype() != ndt::make_type<T0>()) {
