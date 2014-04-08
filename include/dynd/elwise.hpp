@@ -260,9 +260,9 @@ struct elwise_ckernel_instantiator<R (T::*)(A0, A1)> {
                 DYND_PP_ELWISE_1(DYND_PP_META_SEMI, \
                     DYND_PP_OUTER_1(DYND_PP_META_DOT_CALL, \
                         DYND_PP_META_NAME_RANGE(a, NSRC), (get_shape), (tmp_shape.get())), \
-                    DYND_PP_OUTER_1(DYND_PP_META_ADJACENT, \
-                        (incremental_broadcast), DYND_PP_OUTER_1(DYND_PP_LIFT, \
-                            (out_ndim), (out_shape.get()), DYND_PP_META_NAME_RANGE(ndim, NSRC), (tmp_shape.get()))))) \
+                            DYND_PP_OUTER_1(DYND_PP_META_FLAT_CALL, \
+                                (incremental_broadcast), DYND_PP_OUTER_1(DYND_PP_APPEND, (tmp_shape.get()), DYND_PP_OUTER_1(DYND_PP_APPEND, \
+                                DYND_PP_META_NAME_RANGE(ndim, NSRC), ((out_ndim, out_shape.get()))))))) \
         ) \
     }
 
