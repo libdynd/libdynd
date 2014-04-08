@@ -68,7 +68,7 @@ set(tests_SRC
     array/test_array_cast.cpp
     array/test_array_compare.cpp
     array/test_array_views.cpp
-    array/test_foreach.cpp
+    array/test_elwise.cpp
 	array/test_memmap.cpp
     array/test_view.cpp
     vm/test_elwise_program.cpp

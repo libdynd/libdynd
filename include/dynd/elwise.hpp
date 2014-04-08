@@ -20,7 +20,6 @@
 
 using namespace std;
 
-// elwise_broadcast should be in namespace dynd
 #define ELWISE_BROADCAST(NSRC) \
     template<DYND_PP_JOIN_MAP_1(DYND_PP_META_TYPENAME, (,), DYND_PP_META_NAME_RANGE(A, NSRC))> \
     void elwise_broadcast(DYND_PP_JOIN_OUTER_1(DYND_PP_META_DECL, (,), \
@@ -68,8 +67,8 @@ using namespace std;
 #define ELWISE_IMPL(NSRC) \
     namespace detail { \
     template<typename R, DYND_PP_JOIN_MAP_1(DYND_PP_META_TYPENAME, (,), DYND_PP_META_NAME_RANGE(A, NSRC))> \
-    struct foreach_ckernel_instantiator<void (*)(R &, DYND_PP_JOIN_MAP_1(DYND_PP_META_AS_REF, (,), DYND_PP_META_NAME_RANGE(A, NSRC)))> { \
-        typedef foreach_ckernel_instantiator extra_type; \
+    struct elwise_ckernel_instantiator<void (*)(R &, DYND_PP_JOIN_MAP_1(DYND_PP_META_AS_REF, (,), DYND_PP_META_NAME_RANGE(A, NSRC)))> { \
+        typedef elwise_ckernel_instantiator extra_type; \
         typedef void (*func_type)(R &, DYND_PP_JOIN_MAP_1(DYND_PP_META_AS_REF, (,), DYND_PP_META_NAME_RANGE(A, NSRC))); \
 \
         DYND_PP_JOIN_ELWISE_1(DYND_PP_META_TYPEDEF_TYPENAME, (;), DYND_PP_OUTER_1(DYND_PP_META_SCOPE, \
@@ -121,7 +120,7 @@ using namespace std;
             } else if (kerntype == kernel_request_strided) { \
                 e->base.set_function(&extra_type::strided); \
             } else { \
-                throw runtime_error("unsupported kernel request in foreach"); \
+                throw runtime_error("unsupported kernel request in elwise"); \
             } \
             e->func = reinterpret_cast<func_type>(self_data_ptr); \
 \
@@ -131,7 +130,7 @@ using namespace std;
     } \
 \
     template<typename R, DYND_PP_JOIN_MAP_1(DYND_PP_META_TYPENAME, (,), DYND_PP_META_NAME_RANGE(A, NSRC))> \
-    inline nd::array foreach(DYND_PP_JOIN_OUTER(DYND_PP_META_DECL, (,), (const nd::array&), DYND_PP_META_NAME_RANGE(a, NSRC)), \
+    inline nd::array elwise(DYND_PP_JOIN_OUTER(DYND_PP_META_DECL, (,), (const nd::array&), DYND_PP_META_NAME_RANGE(a, NSRC)), \
         void (*func)(R&, DYND_PP_JOIN_MAP_1(DYND_PP_META_AS_REF, (,), DYND_PP_META_NAME_RANGE(A, NSRC))), \
         const eval::eval_context *ectx = &eval::default_eval_context) \
     { \
@@ -164,7 +163,7 @@ using namespace std;
         ckd.data_types_size = DYND_PP_INC(NSRC); \
         ckd.data_dynd_types = data_dynd_types; \
         ckd.data_ptr = reinterpret_cast<void *>(func); \
-        ckd.instantiate_func = &detail::foreach_ckernel_instantiator<void (*)(R &, \
+        ckd.instantiate_func = &detail::elwise_ckernel_instantiator<void (*)(R &, \
             DYND_PP_JOIN_1((,), DYND_PP_META_NAME_RANGE(A, NSRC)))>::instantiate; \
         ckd.free_func = NULL; \
 \
@@ -195,11 +194,11 @@ namespace detail {
 
 
 template<class FuncProto>
-struct foreach_ckernel_instantiator;
+struct elwise_ckernel_instantiator;
 
 template<typename R, typename T0, typename T1>
-struct foreach_ckernel_instantiator<R (*)(T0, T1)> {
-    typedef foreach_ckernel_instantiator extra_type;
+struct elwise_ckernel_instantiator<R (*)(T0, T1)> {
+    typedef elwise_ckernel_instantiator extra_type;
 
     ckernel_prefix base;
     R (*func)(T0, T1);
@@ -246,7 +245,7 @@ struct foreach_ckernel_instantiator<R (*)(T0, T1)> {
         } else if (kerntype == kernel_request_strided) {
             e->base.set_function(&extra_type::strided);
         } else {
-            throw runtime_error("unsupported kernel request in foreach");
+            throw runtime_error("unsupported kernel request in elwise");
         }
         e->func = reinterpret_cast<R (*)(T0, T1)>(self_data_ptr);
         // No need for a destructor function in this ckernel
@@ -256,8 +255,8 @@ struct foreach_ckernel_instantiator<R (*)(T0, T1)> {
 };
 
 template<typename T, typename R, typename A0, typename A1>
-struct foreach_ckernel_instantiator<R (T::*)(A0, A1)> {
-    typedef foreach_ckernel_instantiator extra_type;
+struct elwise_ckernel_instantiator<R (T::*)(A0, A1)> {
+    typedef elwise_ckernel_instantiator extra_type;
 
     ckernel_prefix base;
     T *obj;
@@ -302,7 +301,7 @@ struct foreach_ckernel_instantiator<R (T::*)(A0, A1)> {
         } else if (kerntype == kernel_request_strided) {
             e->base.set_function(&extra_type::strided);
         } else {
-            throw runtime_error("unsupported kernel request in foreach");
+            throw runtime_error("unsupported kernel request in elwise");
         }
         std::pair<T *, R (T::*)(A0, A1)> *pr = reinterpret_cast<std::pair<T *, R (T::*)(A0, A1)> *>(self_data_ptr);
         e->obj = pr->first;
@@ -320,13 +319,13 @@ DYND_PP_JOIN_MAP(ELWISE, (), DYND_PP_RANGE(1, DYND_PP_INC(DYND_ELWISE_MAX)))
 
 //        if (a0.get_dtype() != ndt::make_type<T0>()) {
 //            stringstream ss;
-//            ss << "initial prototype of foreach doesn't implicitly cast ";
+//            ss << "initial prototype of elwise doesn't implicitly cast ";
 //            ss << a0.get_dtype() << " to " << ndt::make_type<T0>();
 //            throw type_error(ss.str());
 //        }
 //        if (a1.get_dtype() != ndt::make_type<T1>()) {
 //            stringstream ss;
-//            ss << "initial prototype of foreach doesn't implicitly cast ";
+//            ss << "initial prototype of elwise doesn't implicitly cast ";
 //            ss << a1.get_dtype() << " to " << ndt::make_type<T1>();
 //            throw type_error(ss.str());
 //        }
@@ -334,7 +333,7 @@ DYND_PP_JOIN_MAP(ELWISE, (), DYND_PP_RANGE(1, DYND_PP_INC(DYND_ELWISE_MAX)))
 
 
 template<typename R, typename T0, typename T1>
-inline nd::array foreach(const nd::array& a, const nd::array& b, R (*func)(T0, T1),
+inline nd::array elwise(const nd::array& a, const nd::array& b, R (*func)(T0, T1),
     const eval::eval_context *ectx = &eval::default_eval_context)
 {
     typedef typename remove_reference<T0>::type U0;
@@ -347,13 +346,13 @@ inline nd::array foreach(const nd::array& a, const nd::array& b, R (*func)(T0, T
 /*
     if (a.get_dtype() != ndt::make_type<U0>()) {
         stringstream ss;
-        ss << "initial prototype of foreach doesn't implicitly cast ";
+        ss << "initial prototype of elwise doesn't implicitly cast ";
         ss << a.get_dtype() << " to " << ndt::make_type<U0>();
         throw type_error(ss.str());
     }
     if (b.get_dtype() != ndt::make_type<U1>()) {
         stringstream ss;
-        ss << "initial prototype of foreach doesn't implicitly cast ";
+        ss << "initial prototype of elwise doesn't implicitly cast ";
         ss << b.get_dtype() << " to " << ndt::make_type<U1>();
         throw type_error(ss.str());
     }
@@ -366,7 +365,7 @@ inline nd::array foreach(const nd::array& a, const nd::array& b, R (*func)(T0, T
     ndt::type data_dynd_types[3] = {ndt::make_type<R>(), ndt::make_type<U0>(), ndt::make_type<U1>()};
     ckd.data_dynd_types = data_dynd_types;
     ckd.data_ptr = reinterpret_cast<void *>(func);
-    ckd.instantiate_func = &detail::foreach_ckernel_instantiator<R (*)(T0, T1)>::instantiate;
+    ckd.instantiate_func = &detail::elwise_ckernel_instantiator<R (*)(T0, T1)>::instantiate;
     ckd.free_func = NULL;
 
     intptr_t ndim;
@@ -415,19 +414,19 @@ inline nd::array foreach(const nd::array& a, const nd::array& b, R (*func)(T0, T
 
 
 template<typename T, typename R, typename A0, typename A1>
-inline nd::array foreach(const nd::array& a, const nd::array& b, T& obj, R (T::*func)(A0, A1),
+inline nd::array elwise(const nd::array& a, const nd::array& b, T& obj, R (T::*func)(A0, A1),
     const eval::eval_context *ectx = &eval::default_eval_context)
 {
     // No casting for now
     if (a.get_dtype() != ndt::make_type<A0>()) {
         stringstream ss;
-        ss << "initial prototype of foreach doesn't implicitly cast ";
+        ss << "initial prototype of elwise doesn't implicitly cast ";
         ss << a.get_dtype() << " to " << ndt::make_type<A0>();
         throw type_error(ss.str());
     }
     if (b.get_dtype() != ndt::make_type<A1>()) {
         stringstream ss;
-        ss << "initial prototype of foreach doesn't implicitly cast ";
+        ss << "initial prototype of elwise doesn't implicitly cast ";
         ss << b.get_dtype() << " to " << ndt::make_type<A1>();
         throw type_error(ss.str());
     }
@@ -442,7 +441,7 @@ inline nd::array foreach(const nd::array& a, const nd::array& b, T& obj, R (T::*
     ndt::type data_dynd_types[3] = {ndt::make_type<R>(), ndt::make_type<A0>(), ndt::make_type<A1>()};
     ckd.data_dynd_types = data_dynd_types;
     ckd.data_ptr = reinterpret_cast<void *>(&pr);
-    ckd.instantiate_func = &detail::foreach_ckernel_instantiator<R (T::*)(A0, A1)>::instantiate;
+    ckd.instantiate_func = &detail::elwise_ckernel_instantiator<R (T::*)(A0, A1)>::instantiate;
     ckd.free_func = NULL;
 
     // Get the broadcasted shape
@@ -483,9 +482,9 @@ inline nd::array foreach(const nd::array& a, const nd::array& b, T& obj, R (T::*
 }
 
 template<typename T>
-inline nd::array foreach(const nd::array& a, const nd::array& b, T obj)
+inline nd::array elwise(const nd::array& a, const nd::array& b, T obj)
 {
-    return foreach(a, b, obj, &T::operator ());
+    return elwise(a, b, obj, &T::operator ());
 }
 
 }} // namespace dynd::nd
