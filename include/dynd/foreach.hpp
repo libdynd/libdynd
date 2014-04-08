@@ -20,6 +20,8 @@
 
 using namespace std;
 
+
+// Need to implement elwise broadcast
 #define ELWISE(NSRC) \
     namespace detail { \
     template<typename R, DYND_PP_JOIN_MAP_1(DYND_PP_META_TYPENAME, (,), DYND_PP_META_NAME_RANGE(A, NSRC))> \
