@@ -9,6 +9,7 @@
 #include <algorithm>
 
 #include <dynd/types/datetime_type.hpp>
+#include <dynd/types/time_type.hpp>
 #include <dynd/types/date_util.hpp>
 #include <dynd/types/property_type.hpp>
 #include <dynd/types/cstruct_type.hpp>
@@ -318,6 +319,10 @@ static nd::array property_ndo_get_second(const nd::array& n) {
     return n.replace_dtype(ndt::make_property(n.get_dtype(), "second"));
 }
 
+static nd::array property_ndo_get_microsecond(const nd::array& n) {
+    return n.replace_dtype(ndt::make_property(n.get_dtype(), "microsecond"));
+}
+
 static nd::array property_ndo_get_tick(const nd::array& n) {
     return n.replace_dtype(ndt::make_property(n.get_dtype(), "tick"));
 }
@@ -330,6 +335,7 @@ static pair<string, gfunc::callable> date_array_properties[] = {
     pair<string, gfunc::callable>("hour", gfunc::make_callable(&property_ndo_get_hour, "self")),
     pair<string, gfunc::callable>("minute", gfunc::make_callable(&property_ndo_get_minute, "self")),
     pair<string, gfunc::callable>("second", gfunc::make_callable(&property_ndo_get_second, "self")),
+    pair<string, gfunc::callable>("microsecond", gfunc::make_callable(&property_ndo_get_microsecond, "self")),
     pair<string, gfunc::callable>("tick", gfunc::make_callable(&property_ndo_get_tick, "self")),
 };
 
@@ -400,11 +406,33 @@ namespace {
         const datetime_type *dd = e->datetime_tp;
         datetime_tz_t tz = dd->get_timezone();
         if (tz == tz_utc || tz == tz_abstract) {
-            *reinterpret_cast<int32_t *>(dst) =
-                static_cast<int32_t>(*reinterpret_cast<const int64_t *>(src) /
-                                     (24 * 60 * 60 * 10000000LL));
+            int64_t days = *reinterpret_cast<const int64_t *>(src);
+            if (days < 0) {
+                days -= (DYND_TICKS_PER_DAY - 1);
+            }
+            days /= DYND_TICKS_PER_DAY;
+
+            *reinterpret_cast<int32_t *>(dst) = static_cast<int32_t>(days);
         } else {
             throw runtime_error("datetime date property only implemented for UTC and abstract timezones");
+        }
+    }
+
+    void get_property_kernel_time_single(char *dst, const char *src,
+                    ckernel_prefix *extra)
+    {
+        const datetime_property_kernel_extra *e = reinterpret_cast<datetime_property_kernel_extra *>(extra);
+        const datetime_type *dd = e->datetime_tp;
+        datetime_tz_t tz = dd->get_timezone();
+        if (tz == tz_utc || tz == tz_abstract) {
+            int64_t ticks = *reinterpret_cast<const int64_t *>(src);
+            ticks %= DYND_TICKS_PER_DAY;
+            if (ticks < 0) {
+                ticks += DYND_TICKS_PER_DAY;
+            }
+            *reinterpret_cast<int64_t *>(dst) = ticks;
+        } else {
+            throw runtime_error("datetime time property only implemented for UTC and abstract timezones");
         }
     }
 
@@ -505,6 +533,25 @@ namespace {
             }
             second /= DYND_TICKS_PER_SECOND;
             *reinterpret_cast<int32_t *>(dst) = static_cast<int32_t>(second);
+        } else {
+            throw runtime_error("datetime property access only implemented for UTC and abstract timezones");
+        }
+    }
+
+    void get_property_kernel_microsecond_single(char *dst, const char *src,
+                    ckernel_prefix *extra)
+    {
+        const datetime_property_kernel_extra *e = reinterpret_cast<datetime_property_kernel_extra *>(extra);
+        const datetime_type *dd = e->datetime_tp;
+        datetime_tz_t tz = dd->get_timezone();
+        if (tz == tz_utc || tz == tz_abstract) {
+            int64_t microsecond =
+                *reinterpret_cast<const int64_t *>(src) % DYND_TICKS_PER_SECOND;
+            if (microsecond < 0) {
+                microsecond += DYND_TICKS_PER_SECOND;
+            }
+            microsecond /= DYND_TICKS_PER_MICROSECOND;
+            *reinterpret_cast<int32_t *>(dst) = static_cast<int32_t>(microsecond);
         } else {
             throw runtime_error("datetime property access only implemented for UTC and abstract timezones");
         }
@@ -634,12 +681,14 @@ namespace {
     enum date_properties_t {
         datetimeprop_struct,
         datetimeprop_date,
+        datetimeprop_time,
         datetimeprop_year,
         datetimeprop_month,
         datetimeprop_day,
         datetimeprop_hour,
         datetimeprop_minute,
         datetimeprop_second,
+        datetimeprop_microsecond,
         datetimeprop_tick,
         // These provide numpy interop
         datetimeprop_hours_after_1970,
@@ -658,6 +707,8 @@ size_t datetime_type::get_elwise_property_index(const std::string& property_name
         return datetimeprop_struct;
     } else if (property_name == "date") {
         return datetimeprop_date;
+    } else if (property_name == "time") {
+        return datetimeprop_time;
     } else if (property_name == "year") {
         return datetimeprop_year;
     } else if (property_name == "month") {
@@ -670,6 +721,8 @@ size_t datetime_type::get_elwise_property_index(const std::string& property_name
         return datetimeprop_minute;
     } else if (property_name == "second") {
         return datetimeprop_second;
+    } else if (property_name == "microsecond") {
+        return datetimeprop_microsecond;
     } else if (property_name == "tick") {
         return datetimeprop_tick;
     } else if (property_name == "hours_after_1970") {
@@ -703,6 +756,10 @@ ndt::type datetime_type::get_elwise_property_type(size_t property_index,
             out_readable = true;
             out_writable = false;
             return ndt::make_date();
+        case datetimeprop_time:
+            out_readable = true;
+            out_writable = false;
+            return ndt::make_time(m_timezone);
         case datetimeprop_hours_after_1970:
         case datetimeprop_minutes_after_1970:
         case datetimeprop_seconds_after_1970:
@@ -736,6 +793,10 @@ size_t datetime_type::make_elwise_property_getter_kernel(
         e->base.set_function<unary_single_operation_t>(
             &get_property_kernel_date_single);
         break;
+    case datetimeprop_time:
+        e->base.set_function<unary_single_operation_t>(
+            &get_property_kernel_time_single);
+        break;
     case datetimeprop_year:
         e->base.set_function<unary_single_operation_t>(
             &get_property_kernel_year_single);
@@ -759,6 +820,10 @@ size_t datetime_type::make_elwise_property_getter_kernel(
     case datetimeprop_second:
         e->base.set_function<unary_single_operation_t>(
             &get_property_kernel_second_single);
+        break;
+    case datetimeprop_microsecond:
+        e->base.set_function<unary_single_operation_t>(
+            &get_property_kernel_microsecond_single);
         break;
     case datetimeprop_tick:
         e->base.set_function<unary_single_operation_t>(
