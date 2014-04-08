@@ -553,7 +553,10 @@ int main(int argc, char **argv) {
             fill(curr, curr + ary, 0);
             for (int cnt = (int) pow((double) pp_len_max, ary) - 1; cnt > 0; cnt--) {
                 int *prev = new int[ary];
-                copy(curr, curr + ary, prev);
+                for (int i = 0; i < ary; i++) {
+                    prev[i] = curr[i];
+                }
+//                copy(curr, curr + ary, prev);
                 int idx = next(curr, pp_len_max, ary);
                 fout << "#define DYND_PP__JOIN_OUTER_" << dep << "_" << ary << "_" << args("", "_", curr, curr + ary);
                 fout << "(MAC, SEP, " << args("A", ary) << ") MAC(" << args("A", &pp_first, ary) << ")";

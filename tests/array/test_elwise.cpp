@@ -42,11 +42,11 @@ void func_ref_res_5(int (&res)[3], int(&x)[3][3], int(&y)[3]) {
     res[2] = x[2][0] * y[0] + x[2][1] * y[1] + x[2][2] * y[2];
 }
 
-void func_ref_res_6(int (&res)[2][2], int x) {
-    res[0][0] = cos(x);
-    res[0][1] = -sin(x);
-    res[1][0] = sin(x);
-    res[1][1] = cos(x);
+void func_ref_res_6(double (&res)[2][2], int x) {
+    res[0][0] = cos((double) x);
+    res[0][1] = -sin((double) x);
+    res[1][0] = sin((double) x);
+    res[1][1] = cos((double) x);
 }
 
 void func_ref_res_7(int (&res)[3][3], int(&x)[3][3], int(&y)[3][3]) {
@@ -78,12 +78,11 @@ TEST(ArrayViews, IntFuncRefRes) {
     a = 1;
 
     res = nd::elwise(func_ref_res_6, a);
-    EXPECT_EQ(ndt::type("2 * 2 * int32"), res.get_type());
-    cout << "DEBUG: " << res << endl;
-    EXPECT_EQ((int) cos(1), res(0,0).as<int>());
-    EXPECT_EQ((int) -sin(1), res(0,1).as<int>());
-    EXPECT_EQ((int) sin(1), res(1,0).as<int>());
-    EXPECT_EQ((int) cos(1), res(1,1).as<int>());
+    EXPECT_EQ(ndt::type("2 * 2 * float64"), res.get_type());
+    EXPECT_EQ(cos((double) 1), res(0,0).as<double>());
+    EXPECT_EQ(-sin((double) 1), res(0,1).as<double>());
+    EXPECT_EQ(sin((double) 1), res(1,0).as<double>());
+    EXPECT_EQ(cos((double) 1), res(1,1).as<double>());
 
     int aval_0[2][3] = {{0, 1, 2}, {5, 6, 7}};
     int bval_0[3] = {5, 2, 4};
