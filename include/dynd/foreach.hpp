@@ -20,7 +20,6 @@
 
 using namespace std;
 
-
 // elwise_broadcast should be in namespace dynd
 #define ELWISE_BROADCAST(NSRC) \
     template<DYND_PP_JOIN_MAP_1(DYND_PP_META_TYPENAME, (,), DYND_PP_META_NAME_RANGE(A, NSRC))> \
@@ -140,15 +139,24 @@ using namespace std;
             DYND_PP_OUTER_1(DYND_PP_META_TEMPLATE, (remove_ref), DYND_PP_META_NAME_RANGE(A, NSRC)), (type)), \
             DYND_PP_META_NAME_RANGE(U, NSRC)); \
 \
-        const nd::array *srcs[NSRC] = {DYND_PP_JOIN_MAP_1(DYND_PP_META_ADDRESS, (,), DYND_PP_META_NAME_RANGE(a, NSRC))}; \
-\
         ndt::type data_dynd_types[DYND_PP_INC(NSRC)] = {ndt::fixed_dim_from_array<R>::make(), DYND_PP_JOIN_ELWISE_1(DYND_PP_META_SCOPE_CALL, (,), \
             DYND_PP_OUTER(DYND_PP_META_TEMPLATE, (ndt::fixed_dim_from_array), \
             DYND_PP_META_NAME_RANGE(U, NSRC)), DYND_PP_REPEAT(make, NSRC))}; \
 \
+        DYND_PP_JOIN_ELWISE_1(DYND_PP_META_ASGN, (;), \
+            DYND_PP_OUTER_1(DYND_PP_META_DECL, \
+                (const nd::array), DYND_PP_META_NAME_RANGE(acast, NSRC)), \
+            DYND_PP_OUTER_1(DYND_PP_META_DOT_CALL, \
+                DYND_PP_ELWISE_1(DYND_PP_META_DOT, \
+                    DYND_PP_META_NAME_RANGE(a, NSRC), \
+                        DYND_PP_OUTER_1(DYND_PP_META_CALL, \
+                            (ucast), DYND_PP_OUTER_1(DYND_PP_META_DOT_CALL, \
+                                DYND_PP_META_AT_RANGE(data_dynd_types, 1, DYND_PP_INC(NSRC)), (get_dtype)))), (eval))); \
+\
         intptr_t res_strided_ndim; \
         dimvector res_strided_shape; \
-        incremental_broadcast_input_shapes(NSRC, srcs, res_strided_ndim, res_strided_shape); \
+        elwise_broadcast<DYND_PP_JOIN_1((,), DYND_PP_META_NAME_RANGE(U, NSRC))> \
+            (DYND_PP_JOIN_1((,), DYND_PP_META_NAME_RANGE(acast, NSRC)), res_strided_ndim, res_strided_shape); \
         nd::array result = nd::make_strided_array(data_dynd_types[0], res_strided_ndim, res_strided_shape.get()); \
 \
         ckernel_deferred ckd; \
@@ -162,15 +170,15 @@ using namespace std;
 \
         ckernel_builder ckb; \
         ndt::type lifted_types[DYND_PP_INC(NSRC)] = {result.get_type(), \
-            DYND_PP_JOIN_OUTER(DYND_PP_META_DOT_CALL, (,), DYND_PP_META_NAME_RANGE(a, NSRC), (get_type))}; \
+            DYND_PP_JOIN_OUTER(DYND_PP_META_DOT_CALL, (,), DYND_PP_META_NAME_RANGE(acast, NSRC), (get_type))}; \
         const char *dynd_metadata[DYND_PP_INC(NSRC)] = {result.get_ndo_meta(), \
-            DYND_PP_JOIN_OUTER(DYND_PP_META_DOT_CALL, (,), DYND_PP_META_NAME_RANGE(a, NSRC), (get_ndo_meta))}; \
+            DYND_PP_JOIN_OUTER(DYND_PP_META_DOT_CALL, (,), DYND_PP_META_NAME_RANGE(acast, NSRC), (get_ndo_meta))}; \
         make_lifted_expr_ckernel(&ckd, &ckb, 0, \
                             lifted_types, dynd_metadata, kernel_request_single, ectx); \
 \
         ckernel_prefix *ckprefix = ckb.get(); \
         expr_single_operation_t op = ckprefix->get_function<expr_single_operation_t>(); \
-        const char *src[NSRC] = {DYND_PP_JOIN_OUTER(DYND_PP_META_DOT_CALL, (,), DYND_PP_META_NAME_RANGE(a, NSRC), (get_readonly_originptr))}; \
+        const char *src[NSRC] = {DYND_PP_JOIN_OUTER(DYND_PP_META_DOT_CALL, (,), DYND_PP_META_NAME_RANGE(acast, NSRC), (get_readonly_originptr))}; \
         op(result.get_readwrite_originptr(), src, ckprefix); \
 \
         return result; \
@@ -362,6 +370,9 @@ inline nd::array foreach(const nd::array& a, const nd::array& b, R (*func)(T0, T
     typedef typename remove_ref<T0>::type U0;
     typedef typename remove_ref<T0>::type U1;
 
+    const nd::array ac = a.ucast<U0>().eval();
+    const nd::array bc = b.ucast<U1>().eval();
+
     // No casting for now
 /*
     if (a.get_dtype() != ndt::make_type<U0>()) {
@@ -388,11 +399,9 @@ inline nd::array foreach(const nd::array& a, const nd::array& b, R (*func)(T0, T
     ckd.instantiate_func = &detail::foreach_ckernel_instantiator<R (*)(T0, T1)>::instantiate;
     ckd.free_func = NULL;
 
-    const nd::array *inputs[2] = {&a, &b};
-
     intptr_t ndim;
     dimvector result_shape;
-    incremental_broadcast_input_shapes(2, inputs, ndim, result_shape, false);
+    elwise_broadcast<T0, T1>(ac, bc, ndim, result_shape);
 
 //void incremental_broadcast_input_shapes(intptr_t ninputs, const nd::array* inputs,
   //              intptr_t &out_undim, dimvector& out_shape, bool flag = false)
@@ -421,14 +430,14 @@ inline nd::array foreach(const nd::array& a, const nd::array& b, R (*func)(T0, T
 
     // Lift the ckernel_deferred to a ckernel which handles the dimensions
     ckernel_builder ckb;
-    ndt::type lifted_types[3] = {result.get_type(), a.get_type(), b.get_type()};
-    const char *dynd_metadata[3] = {result.get_ndo_meta(), a.get_ndo_meta(), b.get_ndo_meta()};
+    ndt::type lifted_types[3] = {result.get_type(), ac.get_type(), bc.get_type()};
+    const char *dynd_metadata[3] = {result.get_ndo_meta(), ac.get_ndo_meta(), bc.get_ndo_meta()};
     make_lifted_expr_ckernel(&ckd, &ckb, 0, lifted_types, dynd_metadata, kernel_request_single, ectx);
 
     // Call the ckernel to do the operation
     ckernel_prefix *ckprefix = ckb.get();
     expr_single_operation_t op = ckprefix->get_function<expr_single_operation_t>();
-    const char *src[2] = {a.get_readonly_originptr(), b.get_readonly_originptr()};
+    const char *src[2] = {ac.get_readonly_originptr(), bc.get_readonly_originptr()};
     op(result.get_readwrite_originptr(), src, ckprefix);
 
     return result;

@@ -15,7 +15,26 @@
 using namespace std;
 using namespace dynd;
 
-int intfunc(int x, const int &y)
+
+void func(int &res, int (&x)[3])
+{
+    res = x[0] + x[1] + x[2];
+}
+
+
+TEST(ArrayViews, FixedFunc) {
+    nd::array a, b;
+
+    int vals[3] = {2, 4, 6};
+    a = nd::empty(ndt::make_fixed_dim(3, ndt::make_type<int>()));
+    a.vals() = vals;
+
+    b = nd::foreach(a, func);
+    EXPECT_EQ(ndt::type("int32"), b.get_type());
+    EXPECT_EQ(12, b.as<int>());
+}
+
+int intfunc(int &x, int &y)
 {
     return 2 * (x - y);
 }
@@ -24,6 +43,7 @@ void intfunc_other(int &out, int x, int y)
 {
     out = 2 * (x - y);
 }
+
 
 TEST(ArrayViews, IntFunc) {
     nd::array a = 10, b = 20, c;
@@ -65,6 +85,8 @@ TEST(ArrayViews, IntFunc) {
     EXPECT_EQ(8, c(1,1).as<int>());
     EXPECT_EQ(6, c(1,2).as<int>());
 }
+
+
 
 void vecintfunc1(int (&out)[1], int x, int y, int z)
 {
