@@ -128,6 +128,7 @@ public:
 
 // If RValue References are supported
 #ifdef DYND_RVALUE_REFS
+#  include <utility>
 #  define DYND_MOVE(x) (std::move(x))
 #else
 #  define DYND_MOVE(x) (x)
