@@ -9,11 +9,7 @@
 #include <cstdlib>
 
 #ifdef __clang__
-#ifndef __has_extension
-  #define __has_extension __has_feature // Compatibility with pre-3.0 compilers.
-#endif
-
-#if __has_extension(cxx_rvalue_references)
+#if __has_feature(cxx_rvalue_references)
 #  define DYND_RVALUE_REFS
 #endif
 
