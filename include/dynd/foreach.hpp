@@ -370,8 +370,7 @@ inline nd::array foreach(const nd::array& a, const nd::array& b, R (*func)(T0, T
     ckernel_builder ckb;
     ndt::type lifted_types[3] = {result.get_type(), a.get_type(), b.get_type()};
     const char *dynd_metadata[3] = {result.get_ndo_meta(), a.get_ndo_meta(), b.get_ndo_meta()};
-    make_lifted_expr_ckernel(&ckd, &ckb, 0,
-                        lifted_types, dynd_metadata, kernel_request_single);
+    make_lifted_expr_ckernel(&ckd, &ckb, 0, lifted_types, dynd_metadata, kernel_request_single);
 
     // Call the ckernel to do the operation
     ckernel_prefix *ckprefix = ckb.get();
