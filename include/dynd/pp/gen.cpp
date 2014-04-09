@@ -90,12 +90,6 @@ string repeat(const string& prefix, string (*func)(const string), const string &
     return oss.str();
 }
 
-string arg(const string& prefix, int value) {
-    ostringstream oss;
-    oss << prefix << value;
-    return oss.str();
-}
-
 string args(const string& prefix, string (*func)(const string), const string &sep, int start, int stop, int step) {
     ostringstream oss;
     if (start < stop) {
@@ -120,30 +114,6 @@ string args(const string& prefix, string (*func)(const string), const string &se
     }
     return oss.str();
 }
-
-template <typename T>
-string args(const string& prefix, string (*func)(const string), const string &sep, T *flags, int start, int stop, int step) {
-    ostringstream oss;
-    if (start < stop) {
-        if (flags[start]) {
-            oss << (*func)(cat(prefix, start));
-        } else {
-            oss << cat(prefix, start);
-        }
-    }
-    for (int i = start + step; i < stop; i += step) {
-        if (flags[i]) {
-            oss << sep << (*func)(cat(prefix, i));
-        } else {
-            oss << sep << cat(prefix, i);
-        }
-    }
-    return oss.str();
-}
-
-//string args(const string& prefix, int start, int stop) {
-//    return args(prefix, &id, ", ", start, stop, 1);
-//}
 
 string args(const string& prefix, int stop) {
     return args(prefix, &id, ", ", 0, stop, 1);
@@ -192,9 +162,6 @@ string args(const string& prefix, string (*func)(const string), const string sep
     return args(prefix, func, sep, flags, start, stop, 1);
 }
 
-
-
-
 int next(int *curr, int len_max, int ndim) {
     const int val_max = len_max - 1;
 
@@ -212,6 +179,17 @@ int next(int *curr, int len_max, int ndim) {
 
 
 
+template <typename Iter>
+std::string join(std::string const& sep, Iter begin, Iter end) {
+    std::ostringstream oss;
+    if (begin != end) {
+        oss << *begin++;
+    }
+    while (begin != end) {
+        oss << sep << *begin++;
+    }
+    return oss.str();
+}
 
 int main(int argc, char **argv) {
     const int pp_len_max = atoi(argv[1]);
@@ -564,7 +542,7 @@ int main(int argc, char **argv) {
                 if (idx > 0) {
                     fout << "DYND_PP_CAT((";
                 }
-                fout << "DYND_PP__JOIN_OUTER_" << dep << "_" << ary << "_" << args("", "_", prev, prev + ary - idx);
+                fout << "DYND_PP__JOIN_OUTER_" << dep << "_" << ary << "_" << join("_", prev, prev + ary - idx);
                 if (idx > 0) {
                     fout << ", _, ";
                 }
