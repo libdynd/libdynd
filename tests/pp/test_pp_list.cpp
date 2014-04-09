@@ -507,7 +507,7 @@ TEST(PPList, Any) {
     EXPECT_TRUE(DYND_PP_ANY(DYND_PP_PREPEND(1, DYND_PP_RANGE(1, DYND_PP_LEN_MAX))));
 }
 
-//TEST(PPList, Outer) {
-//    EXPECT_TRUE(DYND_PP_ALL_EQ(DYND_PP_OUTER(DYND_PP_AND, (0, 1), (0, 1)),
-  //      (0, 0, 0, 1)));
-//}
+TEST(PPList, Outer) {
+    EXPECT_TRUE(DYND_PP_ALL_EQ(DYND_PP_OUTER(DYND_PP_AND, (0, 1), (0, 1)),
+        (0, 0, 0, 1)));
+}
