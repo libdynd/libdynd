@@ -8,6 +8,12 @@ project(libdynd)
 
 find_package(CUDA)
 
+# -DDYND_ELWISE_MAX, the maximum number of arguments that the elwise function
+#   in libdynd will support
+SET(DYND_ELWISE_MAX 7 CACHE STRING
+    "Build a libdynd library with an elwise function that supports the specified maximum number of arguments")
+# TODO: Check that the preprocessor can handle this number
+
 # Only add these options if this is the top level CMakeLists.txt
 if("${CMAKE_SOURCE_DIR}" STREQUAL "${CMAKE_CURRENT_SOURCE_DIR}")
 ################################################
@@ -27,11 +33,6 @@ if("${CMAKE_SOURCE_DIR}" STREQUAL "${CMAKE_CURRENT_SOURCE_DIR}")
     option(DYND_CUDA
         "Build a libdynd library with CUDA"
         OFF) # While CUDA support is in development, we default to OFF.
-# -DDYND_ELWISE_MAX, the maximum number of arguments that the elwise function
-#   in libdynd will support
-    SET(DYND_ELWISE_MAX 7 CACHE BOOL
-        "Build a libdynd library with an elwise function that supports
-         the specified maximum number of arguments") # TODO: Check that the preprocessor can handle this number
 #
 # -DDYND_INSTALL_LIB=ON/OFF, whether to install libdynd into the
 #   CMAKE_INSTALL_PREFIX. Its main purpose is to allow separate
