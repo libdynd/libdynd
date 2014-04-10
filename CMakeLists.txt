@@ -411,7 +411,6 @@ set(libdynd_SRC
     include/dynd/parser_util.hpp
     include/dynd/platform_definitions.hpp
     include/dynd/elwise.hpp
-    include/dynd/outer.hpp
     include/dynd/shortvector.hpp
     include/dynd/shape_tools.hpp
     include/dynd/string_encodings.hpp

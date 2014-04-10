@@ -15,6 +15,7 @@
 #include <dynd/shape_tools.hpp>
 #include <dynd/types/strided_dim_type.hpp>
 #include <dynd/types/fixed_dim_type.hpp>
+
 #include <dynd/pp/list.hpp>
 #include <dynd/pp/meta.hpp>
 
@@ -42,30 +43,30 @@ struct elwise_ckernel_instantiator;
         ckernel_prefix base; \
         func_type func; \
 \
-        static void single(char *dst, char * const *src, \
+        static void single(char *dst, const char * const *src, \
                            ckernel_prefix *ckp) \
         { \
             extra_type *e = reinterpret_cast<extra_type *>(ckp); \
             e->func(*reinterpret_cast<R*>(dst), DYND_PP_JOIN_MAP_1(DYND_PP_META_DEREFERENCE, (,), \
                     DYND_PP_ELWISE_1(DYND_PP_META_REINTERPRET_CAST, \
-                    DYND_PP_MAP_1(DYND_PP_META_AS_PTR, \
+                    DYND_PP_MAP_1(DYND_PP_META_AS_CONST_PTR, \
                     DYND_PP_META_NAME_RANGE(U, NSRC)), DYND_PP_META_AT_RANGE(src, NSRC)))); \
         } \
 \
         static void strided(char *dst, intptr_t dst_stride, \
-                            char * const *src, const intptr_t *src_stride, \
+                            const char * const *src, const intptr_t *src_stride, \
                             size_t count, ckernel_prefix *ckp) \
         { \
             extra_type *e = reinterpret_cast<extra_type *>(ckp); \
             func_type func = e->func; \
-            DYND_PP_JOIN_ELWISE_1(DYND_PP_META_DECL_ASGN, (;), DYND_PP_REPEAT_1(char *, NSRC), \
+            DYND_PP_JOIN_ELWISE_1(DYND_PP_META_DECL_ASGN, (;), DYND_PP_REPEAT_1(const char *, NSRC), \
                 DYND_PP_META_NAME_RANGE(src, NSRC), DYND_PP_META_AT_RANGE(src, NSRC)); \
             DYND_PP_JOIN_ELWISE_1(DYND_PP_META_DECL_ASGN, (;), DYND_PP_REPEAT_1(intptr_t, NSRC), \
                 DYND_PP_META_NAME_RANGE(src_stride, NSRC), DYND_PP_META_AT_RANGE(src_stride, NSRC)); \
             for (size_t i = 0; i < count; ++i) { \
                 func(*reinterpret_cast<R*>(dst), DYND_PP_JOIN_MAP_1(DYND_PP_META_DEREFERENCE, (,), \
                     DYND_PP_ELWISE_1(DYND_PP_META_REINTERPRET_CAST, \
-                    DYND_PP_MAP_1(DYND_PP_META_AS_PTR, \
+                    DYND_PP_MAP_1(DYND_PP_META_AS_CONST_PTR, \
                     DYND_PP_META_NAME_RANGE(U, NSRC)), DYND_PP_META_NAME_RANGE(src, NSRC)))); \
                 dst += dst_stride; \
                 DYND_PP_JOIN_ELWISE_1(DYND_PP_META_ADD_EQ, (;), \
@@ -275,11 +276,29 @@ DYND_PP_JOIN_MAP(ELWISE_BROADCAST, (), DYND_PP_RANGE(1, DYND_PP_INC(DYND_ELWISE_
 #define ELWISE_FUNC_REF_RES(NSRC) \
     template<typename R, DYND_PP_JOIN_MAP_1(DYND_PP_META_TYPENAME, (,), DYND_PP_META_NAME_RANGE(A, NSRC))> \
     inline nd::array elwise(void (*func)(R&, DYND_PP_JOIN_1((,), DYND_PP_META_NAME_RANGE(A, NSRC))), \
-        DYND_PP_JOIN_OUTER(DYND_PP_META_DECL, (,), (const nd::array&), DYND_PP_META_NAME_RANGE(a, NSRC)), \
+        DYND_PP_JOIN_OUTER_1(DYND_PP_META_DECL, (,), (const nd::array&), DYND_PP_META_NAME_RANGE(a, NSRC)), \
         const eval::eval_context *ectx = &eval::default_eval_context) \
     { \
-        DYND_PP_JOIN_ELWISE_1(DYND_PP_META_TYPEDEF_TYPENAME, (;), DYND_PP_OUTER_1(DYND_PP_META_SCOPE, \
-            DYND_PP_OUTER_1(DYND_PP_META_TEMPLATE, (remove_reference), DYND_PP_META_NAME_RANGE(A, NSRC)), (type)), \
+        static_assert(!is_const<R>::value, "the reference result must not be const"); \
+        DYND_PP_JOIN_OUTER_1(DYND_PP_META_STATIC_ASSERT, (;), \
+            DYND_PP_ELWISE_1(DYND_PP_META_OR, \
+                DYND_PP_MAP_1(DYND_PP_META_NOT, \
+                    DYND_PP_OUTER_1(DYND_PP_META_TEMPLATE_SCOPE, \
+                        (is_reference), DYND_PP_META_NAME_RANGE(A, NSRC), (value))), \
+                DYND_PP_ELWISE_1(DYND_PP_META_PARENTHESIZED_AND, \
+                    DYND_PP_OUTER_1(DYND_PP_META_TEMPLATE_SCOPE, \
+                        (is_reference), DYND_PP_META_NAME_RANGE(A, NSRC), (value)), \
+                    DYND_PP_OUTER_1(DYND_PP_META_TEMPLATE_SCOPE, (is_const), \
+                        DYND_PP_OUTER_1(DYND_PP_META_TYPENAME_TEMPLATE_SCOPE, \
+                            (remove_reference), DYND_PP_META_NAME_RANGE(A, NSRC), (type)), \
+                        (value)))), \
+            ("all reference arguments must be const")); \
+\
+        DYND_PP_JOIN_ELWISE_1(DYND_PP_META_TYPEDEF_TYPENAME, (;), \
+            DYND_PP_OUTER_1(DYND_PP_META_SCOPE, \
+                DYND_PP_OUTER_1(DYND_PP_META_TEMPLATE, \
+                    (remove_reference), DYND_PP_META_NAME_RANGE(A, NSRC)), \
+                (type)), \
             DYND_PP_META_NAME_RANGE(U, NSRC)); \
 \
         ndt::type data_dynd_types[DYND_PP_INC(NSRC)] = {ndt::fixed_dim_from_array<R>::make(), DYND_PP_JOIN_ELWISE_1(DYND_PP_META_SCOPE_CALL, (,), \
@@ -327,15 +346,29 @@ DYND_PP_JOIN_MAP(ELWISE_BROADCAST, (), DYND_PP_RANGE(1, DYND_PP_INC(DYND_ELWISE_
         return result; \
     }
 
+#define ELWISE_METH_RET_RES(NSRC)
+
+#define ELWISE_METH_REF_RES(NSRC)
+
+#define ELWISE_OBJ_RET_RES(NSRC)
+
+#define ELWISE_OBJ_REF_RES(NSRC)
+
 #define ELWISE(NSRC) \
     ELWISE_FUNC_RET_RES(NSRC) \
-    ELWISE_FUNC_REF_RES(NSRC)
+    ELWISE_FUNC_REF_RES(NSRC) \
+    ELWISE_METH_RET_RES(NSRC) \
+    ELWISE_METH_REF_RES(NSRC) \
+    ELWISE_OBJ_RET_RES(NSRC) \
+    ELWISE_OBJ_REF_RES(NSRC)
 
 DYND_PP_JOIN_MAP(ELWISE, (), DYND_PP_RANGE(1, DYND_PP_INC(DYND_ELWISE_MAX)))
 
 #undef ELWISE
 #undef ELWISE_FUNC_RET_RES
-#undef ELWISE_FUNC_REF_RES
+//#undef ELWISE_FUNC_REF_RES
+#undef ELWISE_METH_RET_RES
+#undef ELWISE_METH_REF_RES
 
 
 template<typename R, typename T0, typename T1>

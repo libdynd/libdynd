@@ -19,15 +19,15 @@ void func_ref_res_0(int &res, int x, int y) {
     res = 2 * (x - y);
 }
 
-void func_ref_res_1(int &res, int (&x)[3]) {
+void func_ref_res_1(int &res, const int (&x)[3]) {
     res = x[0] + x[1] + x[2];
 }
 
-void func_ref_res_2(int &res, int (&x)[3], int (&y)[3]) {
+void func_ref_res_2(int &res, const int (&x)[3], const int (&y)[3]) {
     res = x[0] * y[0] + x[1] * y[1] + x[2] * y[2];
 }
 
-void func_ref_res_3(int &res, int(&x)[2][3]) {
+void func_ref_res_3(int &res, const int(&x)[2][3]) {
     res = x[0][0] + x[0][1] + x[1][2];
 }
 
@@ -36,7 +36,7 @@ void func_ref_res_4(int (&res)[2], int x, int y) {
     res[1] = x;
 }
 
-void func_ref_res_5(int (&res)[3], int(&x)[3][3], int(&y)[3]) {
+void func_ref_res_5(int (&res)[3], const int(&x)[3][3], const int(&y)[3]) {
     res[0] = x[0][0] * y[0] + x[0][1] * y[1] + x[0][2] * y[2];
     res[1] = x[1][0] * y[0] + x[1][1] * y[1] + x[1][2] * y[2];
     res[2] = x[2][0] * y[0] + x[2][1] * y[1] + x[2][2] * y[2];
@@ -49,7 +49,7 @@ void func_ref_res_6(double (&res)[2][2], int x) {
     res[1][1] = cos((double) x);
 }
 
-void func_ref_res_7(int (&res)[3][3], int(&x)[3][3], int(&y)[3][3]) {
+void func_ref_res_7(int (&res)[3][3], const int(&x)[3][3], const int(&y)[3][3]) {
     res[0][0] = x[0][0] * y[0][0] + x[0][1] * y[1][0] + x[0][2] * y[2][0];
     res[0][1] = x[0][0] * y[0][1] + x[0][1] * y[1][1] + x[0][2] * y[2][1];
     res[0][2] = x[0][0] * y[0][2] + x[0][1] * y[1][2] + x[0][2] * y[2][2];
