@@ -299,11 +299,11 @@ DYND_PP_JOIN_MAP(ELWISE_BROADCAST, (), DYND_PP_RANGE(1, DYND_PP_INC(DYND_ELWISE_
                 DYND_PP_OUTER_1(DYND_PP_META_TEMPLATE, \
                     (remove_reference), DYND_PP_META_NAME_RANGE(A, NSRC)), \
                 (type)), \
-            DYND_PP_META_NAME_RANGE(U, NSRC)); \
+            DYND_PP_META_NAME_RANGE(D, NSRC)); \
 \
         ndt::type data_dynd_types[DYND_PP_INC(NSRC)] = {ndt::fixed_dim_from_array<R>::make(), DYND_PP_JOIN_ELWISE_1(DYND_PP_META_SCOPE_CALL, (,), \
             DYND_PP_OUTER(DYND_PP_META_TEMPLATE, (ndt::fixed_dim_from_array), \
-            DYND_PP_META_NAME_RANGE(U, NSRC)), DYND_PP_REPEAT(make, NSRC))}; \
+            DYND_PP_META_NAME_RANGE(D, NSRC)), DYND_PP_REPEAT(make, NSRC))}; \
 \
         DYND_PP_JOIN_ELWISE_1(DYND_PP_META_ASGN, (;), \
             DYND_PP_OUTER_1(DYND_PP_META_DECL, \
@@ -317,7 +317,7 @@ DYND_PP_JOIN_MAP(ELWISE_BROADCAST, (), DYND_PP_RANGE(1, DYND_PP_INC(DYND_ELWISE_
 \
         intptr_t res_strided_ndim; \
         dimvector res_strided_shape; \
-        elwise_broadcast<DYND_PP_JOIN_1((,), DYND_PP_META_NAME_RANGE(U, NSRC))> \
+        elwise_broadcast<DYND_PP_JOIN_1((,), DYND_PP_META_NAME_RANGE(D, NSRC))> \
             (DYND_PP_JOIN_1((,), DYND_PP_META_NAME_RANGE(acast, NSRC)), res_strided_ndim, res_strided_shape); \
         nd::array result = nd::make_strided_array(data_dynd_types[0], res_strided_ndim, res_strided_shape.get()); \
 \

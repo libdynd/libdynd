@@ -190,9 +190,6 @@ namespace dynd {
     struct is_reference<T&> { static const bool value = true; };
 
     template<class T>
-    struct is_reference<T&&> { static const bool value = true; };
-
-    template<class T>
     struct remove_reference { typedef T type; };
 
     template<class T>
