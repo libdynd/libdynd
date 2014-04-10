@@ -37,8 +37,8 @@ struct elwise_ckernel_instantiator;
 \
         typedef void (*func_type)(R &, DYND_PP_JOIN_1((,), DYND_PP_META_NAME_RANGE(A, NSRC))); \
         DYND_PP_JOIN_ELWISE_1(DYND_PP_META_TYPEDEF_TYPENAME, (;), \
-            DYND_PP_OUTER_1(DYND_PP_META_TEMPLATE_SCOPE, (remove_const), \
-                DYND_PP_OUTER_1(DYND_PP_META_TYPENAME_TEMPLATE_SCOPE, \
+            DYND_PP_OUTER_1(DYND_PP_META_TEMPLATE_INSTANTIATION_SCOPE, (remove_const), \
+                DYND_PP_OUTER_1(DYND_PP_META_TYPENAME_TEMPLATE_INSTANTIATION_SCOPE, \
                     (remove_reference), DYND_PP_META_NAME_RANGE(A, NSRC), (type)), \
                 (type)), \
             DYND_PP_META_NAME_RANGE(D, NSRC)); \
@@ -74,7 +74,7 @@ struct elwise_ckernel_instantiator;
                             DYND_PP_META_NAME_RANGE(D, NSRC)), \
                         DYND_PP_META_NAME_RANGE(src, NSRC)))); \
                 dst += dst_stride; \
-                DYND_PP_JOIN_ELWISE_1(DYND_PP_META_ADD_EQ, (;), \
+                DYND_PP_JOIN_ELWISE_1(DYND_PP_META_ADD_ASGN, (;), \
                     DYND_PP_META_NAME_RANGE(src, NSRC), DYND_PP_META_NAME_RANGE(src_stride, NSRC)); \
             } \
         } \
@@ -241,7 +241,7 @@ struct elwise_ckernel_instantiator<R (T::*)(A0, A1)> {
                 DYND_PP_ELWISE_1(DYND_PP_META_SUB, \
                     DYND_PP_OUTER_1(DYND_PP_META_DOT_CALL, \
                         DYND_PP_META_NAME_RANGE(a, NSRC), (get_ndim)), \
-                    DYND_PP_OUTER_1(DYND_PP_META_TEMPLATE_SCOPE, \
+                    DYND_PP_OUTER_1(DYND_PP_META_TEMPLATE_INSTANTIATION_SCOPE, \
                         (detail::ndim_from_array), DYND_PP_META_NAME_RANGE(D, NSRC), (value)))); \
 \
             out_ndim = ndim0; \
@@ -285,26 +285,26 @@ DYND_PP_JOIN_MAP(ELWISE_BROADCAST, (), DYND_PP_RANGE(1, DYND_PP_INC(DYND_ELWISE_
         DYND_PP_JOIN_OUTER_1(DYND_PP_META_STATIC_ASSERT, (;), \
             DYND_PP_ELWISE_1(DYND_PP_META_OR, \
                 DYND_PP_MAP_1(DYND_PP_META_NOT, \
-                    DYND_PP_OUTER_1(DYND_PP_META_TEMPLATE_SCOPE, \
+                    DYND_PP_OUTER_1(DYND_PP_META_TEMPLATE_INSTANTIATION_SCOPE, \
                         (is_reference), DYND_PP_META_NAME_RANGE(A, NSRC), (value))), \
                 DYND_PP_ELWISE_1(DYND_PP_META_PARENTHESIZED_AND, \
-                    DYND_PP_OUTER_1(DYND_PP_META_TEMPLATE_SCOPE, \
+                    DYND_PP_OUTER_1(DYND_PP_META_TEMPLATE_INSTANTIATION_SCOPE, \
                         (is_reference), DYND_PP_META_NAME_RANGE(A, NSRC), (value)), \
-                    DYND_PP_OUTER_1(DYND_PP_META_TEMPLATE_SCOPE, (is_const), \
-                        DYND_PP_OUTER_1(DYND_PP_META_TYPENAME_TEMPLATE_SCOPE, \
+                    DYND_PP_OUTER_1(DYND_PP_META_TEMPLATE_INSTANTIATION_SCOPE, (is_const), \
+                        DYND_PP_OUTER_1(DYND_PP_META_TYPENAME_TEMPLATE_INSTANTIATION_SCOPE, \
                             (remove_reference), DYND_PP_META_NAME_RANGE(A, NSRC), (type)), \
                         (value)))), \
             ("all reference arguments must be const")); \
 \
         DYND_PP_JOIN_ELWISE_1(DYND_PP_META_TYPEDEF_TYPENAME, (;), \
-            DYND_PP_OUTER_1(DYND_PP_META_TEMPLATE_SCOPE, (remove_const), \
-                DYND_PP_OUTER_1(DYND_PP_META_TYPENAME_TEMPLATE_SCOPE, \
+            DYND_PP_OUTER_1(DYND_PP_META_TEMPLATE_INSTANTIATION_SCOPE, (remove_const), \
+                DYND_PP_OUTER_1(DYND_PP_META_TYPENAME_TEMPLATE_INSTANTIATION_SCOPE, \
                     (remove_reference), DYND_PP_META_NAME_RANGE(A, NSRC), (type)), \
                 (type)), \
             DYND_PP_META_NAME_RANGE(D, NSRC)); \
 \
         ndt::type data_dynd_types[DYND_PP_INC(NSRC)] = {ndt::fixed_dim_from_array<R>::make(), DYND_PP_JOIN_ELWISE_1(DYND_PP_META_SCOPE_CALL, (,), \
-            DYND_PP_OUTER(DYND_PP_META_TEMPLATE, (ndt::fixed_dim_from_array), \
+            DYND_PP_OUTER(DYND_PP_META_TEMPLATE_INSTANTIATION, (ndt::fixed_dim_from_array), \
             DYND_PP_META_NAME_RANGE(D, NSRC)), DYND_PP_REPEAT(make, NSRC))}; \
 \
         DYND_PP_JOIN_ELWISE_1(DYND_PP_META_ASGN, (;), \
