@@ -173,7 +173,7 @@ TEST(ArrayViews, IntFuncRefRes) {
     Everything below here is outdated.
 */
 
-int intfunc(int &x, int &y)
+int intfunc(const int &x, const int &y)
 {
     return 2 * (x - y);
 }
@@ -227,7 +227,7 @@ TEST(ArrayViews, IntFunc) {
 
 class IntMemFuncWrapper {
 public:
-    int operator ()(int x, int y) {
+    int operator ()(int x, int y) const {
         return 2 * (x - y);
     }
 };
