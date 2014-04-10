@@ -166,10 +166,10 @@ inline void DYND_MEMCPY(char *dst, const char *src, intptr_t count)
 #define DYND_MEMCPY(dst, src, count) std::memcpy(dst, src, count)
 #endif
 
+// This static_assert fails at compile-time when expected, but with a more general message
 #ifndef DYND_STATIC_ASSERT
-// This static_assert fails at compile-time when expected, but without a message
 #define DYND_STATIC_ASSERT
-#define static_assert(value, message) typedef int static_assertion[value ? 1 : -1]
+#define static_assert(value, message) do { enum { dynd_static_assertion = 1 / (value) }; } while (0)
 #endif
 
 #ifdef DYND_USE_TR1_ENABLE_IF
