@@ -177,6 +177,7 @@ inline void DYND_MEMCPY(char *dst, const char *src, intptr_t count)
 namespace dynd {
     using std::tr1::enable_if;
     using std::tr1::is_const;
+    using std::tr1::remove_const;
     using std::tr1::is_reference;
     using std::tr1::remove_reference;
 }
@@ -196,16 +197,32 @@ namespace dynd {
     struct is_const<const T> { static const bool value = true; };
 
     template<class T>
+    struct remove_const { typedef T type; };
+
+    template<class T>
+    struct remove_const<const T> { typedef T type; };
+
+    template<class T>
     struct is_reference { static const bool value = false; };
 
     template<class T>
     struct is_reference<T&> { static const bool value = true; };
+
+#ifdef DYND_RVALUE_REFS
+    template<class T>
+    struct is_reference<T&&> { static const bool value = true; };
+#endif
 
     template<class T>
     struct remove_reference { typedef T type; };
 
     template<class T>
     struct remove_reference<T&> { typedef T type; };
+
+#ifdef DYND_RVALUE_REFS
+    template<class T>
+    struct remove_reference<T&&> { typedef T type; };
+#endif
 }
 #endif
 
