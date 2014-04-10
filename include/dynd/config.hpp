@@ -28,6 +28,10 @@
 #  define DYND_CONSTEXPR
 #endif
 
+#if __has_feature(cxx_static_assert)
+#  define DYND_STATIC_ASSERT
+#endif
+
 # define DYND_USE_STDINT
 
 #include <cmath>
@@ -59,6 +63,8 @@ inline bool DYND_ISNAN(long double x) {
 // Use rvalue references on gcc >= 4.7
 #  define DYND_RVALUE_REFS
 #  define DYND_ISNAN(x) (std::isnan(x))
+// Use static_assert on gcc >= 4.7
+#  define DYND_STATIC_ASSERT
 #else
 // Don't use constexpr on gcc < 4.7
 #  define DYND_CONSTEXPR
@@ -158,6 +164,12 @@ inline void DYND_MEMCPY(char *dst, const char *src, intptr_t count)
 #else
 #include <cstring>
 #define DYND_MEMCPY(dst, src, count) std::memcpy(dst, src, count)
+#endif
+
+#ifndef DYND_STATIC_ASSERT
+// This static_assert fails at compile-time when expected, but without a message
+#define DYND_STATIC_ASSERT
+#define static_assert(value, message) typedef int static_assertion[value ? 1 : -1]
 #endif
 
 #ifdef DYND_USE_TR1_ENABLE_IF
