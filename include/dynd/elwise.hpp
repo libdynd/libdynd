@@ -595,7 +595,7 @@ DYND_PP_JOIN_MAP(CALL_CKERNEL_INSTANTIATORS, (), DYND_PP_RANGE(1, DYND_PP_INC(DY
         DYND_PP_JOIN_OUTER_1(DYND_PP_META_DECL, (,), (const nd::array&), DYND_PP_META_NAME_RANGE(a, NSRC)), \
         const eval::eval_context *ectx = &eval::default_eval_context) \
     { \
-        static_assert(!is_const<R>::value, "the reference result must not be const"); \
+        DYND_STATIC_ASSERT(!is_const<R>::value, "the reference result must not be const"); \
         DYND_PP_JOIN_OUTER_1(DYND_PP_META_STATIC_ASSERT, (;), \
             DYND_PP_ELWISE_1(DYND_PP_META_OR, \
                 DYND_PP_MAP_1(DYND_PP_META_NOT, \
@@ -680,7 +680,7 @@ DYND_PP_JOIN_MAP(FUNCS, (), DYND_PP_RANGE(1, DYND_PP_INC(DYND_ELWISE_MAX)))
         DYND_PP_JOIN_OUTER_1(DYND_PP_META_DECL, (,), (const nd::array&), DYND_PP_META_NAME_RANGE(a, NSRC)), \
         const eval::eval_context *ectx = &eval::default_eval_context) \
     { \
-        static_assert(!is_const<R>::value, "the reference result must not be const"); \
+        DYND_STATIC_ASSERT(!is_const<R>::value, "the reference result must not be const"); \
         DYND_PP_JOIN_OUTER_1(DYND_PP_META_STATIC_ASSERT, (;), \
             DYND_PP_ELWISE_1(DYND_PP_META_OR, \
                 DYND_PP_MAP_1(DYND_PP_META_NOT, \
@@ -757,7 +757,7 @@ DYND_PP_JOIN_MAP(FUNCS, (), DYND_PP_RANGE(1, DYND_PP_INC(DYND_ELWISE_MAX)))
         DYND_PP_JOIN_OUTER_1(DYND_PP_META_DECL, (,), (const nd::array&), DYND_PP_META_NAME_RANGE(a, NSRC)), \
         const eval::eval_context *ectx = &eval::default_eval_context) \
     { \
-        static_assert(!is_const<R>::value, "the reference result must not be const"); \
+        DYND_STATIC_ASSERT(!is_const<R>::value, "the reference result must not be const"); \
         DYND_PP_JOIN_OUTER_1(DYND_PP_META_STATIC_ASSERT, (;), \
             DYND_PP_ELWISE_1(DYND_PP_META_OR, \
                 DYND_PP_MAP_1(DYND_PP_META_NOT, \
@@ -844,7 +844,7 @@ DYND_PP_JOIN_MAP(METHS, (), DYND_PP_RANGE(1, DYND_PP_INC(DYND_ELWISE_MAX)))
         DYND_PP_JOIN_OUTER_1(DYND_PP_META_DECL, (,), (const nd::array&), DYND_PP_META_NAME_RANGE(a, NSRC)), \
         const eval::eval_context *ectx = &eval::default_eval_context) \
     { \
-        static_assert(!is_const<R>::value, "the reference result must not be const"); \
+        DYND_STATIC_ASSERT(!is_const<R>::value, "the reference result must not be const"); \
         DYND_PP_JOIN_OUTER_1(DYND_PP_META_STATIC_ASSERT, (;), \
             DYND_PP_ELWISE_1(DYND_PP_META_OR, \
                 DYND_PP_MAP_1(DYND_PP_META_NOT, \
@@ -919,7 +919,7 @@ DYND_PP_JOIN_MAP(METHS, (), DYND_PP_RANGE(1, DYND_PP_INC(DYND_ELWISE_MAX)))
         DYND_PP_JOIN_OUTER_1(DYND_PP_META_DECL, (,), (const nd::array&), DYND_PP_META_NAME_RANGE(a, NSRC)), \
         const eval::eval_context *ectx = &eval::default_eval_context) \
     { \
-        static_assert(!is_const<R>::value, "the reference result must not be const"); \
+        DYND_STATIC_ASSERT(!is_const<R>::value, "the reference result must not be const"); \
         DYND_PP_JOIN_OUTER_1(DYND_PP_META_STATIC_ASSERT, (;), \
             DYND_PP_ELWISE_1(DYND_PP_META_OR, \
                 DYND_PP_MAP_1(DYND_PP_META_NOT, \

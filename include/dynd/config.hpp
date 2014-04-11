@@ -29,7 +29,7 @@
 #endif
 
 #if __has_feature(cxx_static_assert)
-#  define DYND_STATIC_ASSERT
+#  define DYND_STATIC_ASSERT(value, message) static_assert(value, message)
 #endif
 
 # define DYND_USE_STDINT
@@ -64,7 +64,7 @@ inline bool DYND_ISNAN(long double x) {
 #  define DYND_RVALUE_REFS
 #  define DYND_ISNAN(x) (std::isnan(x))
 // Use static_assert on gcc >= 4.7
-#  define DYND_STATIC_ASSERT
+#  define DYND_STATIC_ASSERT(value, message) static_assert(value, message)
 #else
 // Don't use constexpr on gcc < 4.7
 #  define DYND_CONSTEXPR
@@ -94,17 +94,17 @@ inline bool DYND_ISNAN(long double x) {
 # define DYND_USE_FPSTATUS
 
 # if _MSC_VER >= 1600
-// Use enable_if from std::tr1
+// MSVC 2010 and later
 #  define DYND_USE_TR1_ENABLE_IF
-// Use rvalue refs
 #  define DYND_RVALUE_REFS
 #  define DYND_USE_STDINT
+#  define DYND_STATIC_ASSERT(value, message) static_assert(value, message)
 # else
 #  define DYND_USE_BOOST_SHARED_PTR
 # endif
 
 #if _MSC_VER >= 1700
-// MSVC 2012 and later have the <atomic> header
+// MSVC 2012 and later
 #define DYND_USE_STD_ATOMIC
 #endif
 
@@ -168,8 +168,7 @@ inline void DYND_MEMCPY(char *dst, const char *src, intptr_t count)
 
 // This static_assert fails at compile-time when expected, but with a more general message
 #ifndef DYND_STATIC_ASSERT
-#define DYND_STATIC_ASSERT
-#define static_assert(value, message) do { enum { dynd_static_assertion = 1 / (value) }; } while (0)
+#define DYND_STATIC_ASSERT(value, message) do { enum { dynd_static_assertion = 1 / static_cast<int>(static_cast<bool>(value)) }; } while (0)
 #endif
 
 #ifdef DYND_USE_TR1_ENABLE_IF

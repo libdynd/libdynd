@@ -24,7 +24,7 @@ TYPED_TEST_CASE_P(Elwise);
 
 template <typename T>
 int func0(T x, const T &y) {
-    return 2 * (x - y);
+    return static_cast<int>(2 * (x - y));
 }
 template <typename T>
 T func1(const T (&x)[3]) {
@@ -32,7 +32,7 @@ T func1(const T (&x)[3]) {
 }
 template <typename T>
 T func2(const T (&x)[3], const float (&y)[3]) {
-    return x[0] * y[0] + x[1] * y[1] + x[2] * y[2];
+    return static_cast<T>(x[0] * y[0] + x[1] * y[1] + x[2] * y[2]);
 }
 template <typename T>
 T func3(const T (&x)[2][3]) {
