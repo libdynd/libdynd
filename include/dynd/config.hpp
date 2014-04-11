@@ -93,15 +93,11 @@ inline bool DYND_ISNAN(long double x) {
 // is #pragma fenv_access(on), which works.
 # define DYND_USE_FPSTATUS
 
-# if _MSC_VER >= 1600
 // MSVC 2010 and later
-#  define DYND_USE_TR1_ENABLE_IF
-#  define DYND_RVALUE_REFS
-#  define DYND_USE_STDINT
-#  define DYND_STATIC_ASSERT(value, message) static_assert(value, message)
-# else
-#  define DYND_USE_BOOST_SHARED_PTR
-# endif
+# define DYND_USE_TR1_ENABLE_IF
+# define DYND_RVALUE_REFS
+# define DYND_USE_STDINT
+# define DYND_STATIC_ASSERT(value, message) static_assert(value, message)
 
 #if _MSC_VER >= 1700
 // MSVC 2012 and later
