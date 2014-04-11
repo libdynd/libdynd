@@ -168,7 +168,7 @@ inline void DYND_MEMCPY(char *dst, const char *src, intptr_t count)
 
 // This static_assert fails at compile-time when expected, but with a more general message
 #ifndef DYND_STATIC_ASSERT
-#define DYND_STATIC_ASSERT(value, message) do { enum { dynd_static_assertion = 1 / static_cast<int>(static_cast<bool>(value)) }; } while (0)
+#define DYND_STATIC_ASSERT(value, message) do { enum { dynd_static_assertion = 1 / (int)(value) }; } while (0)
 #endif
 
 #ifdef DYND_USE_TR1_ENABLE_IF
@@ -190,10 +190,10 @@ namespace dynd {
 	struct enable_if<true, T> { typedef T type; };
 
     template<class T>
-    struct is_const { static const bool value = false; };
+    struct is_const { enum { value = 0 }; };
 
     template<class T>
-    struct is_const<const T> { static const bool value = true; };
+    struct is_const<const T> { enum { value = 1 }; };
 
     template<class T>
     struct remove_const { typedef T type; };
@@ -202,14 +202,14 @@ namespace dynd {
     struct remove_const<const T> { typedef T type; };
 
     template<class T>
-    struct is_reference { static const bool value = false; };
+    struct is_reference { enum { value = 0 }; };
 
     template<class T>
-    struct is_reference<T&> { static const bool value = true; };
+    struct is_reference<T&> { enum { value = 1 }; };
 
 #ifdef DYND_RVALUE_REFS
     template<class T>
-    struct is_reference<T&&> { static const bool value = true; };
+    struct is_reference<T&&> { enum { value = 1 }; };
 #endif
 
     template<class T>

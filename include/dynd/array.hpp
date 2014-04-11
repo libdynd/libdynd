@@ -1026,18 +1026,18 @@ dynd::nd::array::array(std::initializer_list<std::initializer_list<std::initiali
 namespace detail {
     template<class T> struct uniform_type_from_array {
         typedef T type;
-        static const size_t element_size = sizeof(T);
-        static const int type_id = type_id_of<T>::value;
+        enum { element_size = sizeof(T) };
+        enum { type_id = type_id_of<T>::value };
     };
     template<class T, int N> struct uniform_type_from_array<T[N]> {
         typedef typename uniform_type_from_array<T>::type type;
-        static const size_t element_size = uniform_type_from_array<T>::element_size;
-        static const int type_id = uniform_type_from_array<T>::type_id;
+        enum { element_size = uniform_type_from_array<T>::element_size };
+        enum { type_id = uniform_type_from_array<T>::type_id };
     };
 
-    template<class T> struct ndim_from_array {static const int value = 0;};
+    template<class T> struct ndim_from_array { enum { value = 0 }; };
     template<class T, int N> struct ndim_from_array<T[N]> {
-        static const int value = ndim_from_array<T>::value + 1;
+        enum { value = ndim_from_array<T>::value + 1 };
     };
 
     template<class T> struct fill_shape {
