@@ -841,7 +841,7 @@ DYND_PP_JOIN_MAP(OBJ_FUNCS, (), DYND_PP_RANGE(1, DYND_PP_INC(DYND_ELWISE_MAX)))
 
 #define OBJ_RET_RES(NSRC) \
     template<typename T, typename R, DYND_PP_JOIN_MAP_1(DYND_PP_META_TYPENAME, (,), DYND_PP_META_NAME_RANGE(A, NSRC))> \
-    inline nd::array elwise_from_callable_(const T& obj, R (T::*)(DYND_PP_JOIN_1((,), DYND_PP_META_NAME_RANGE(A, NSRC))) const, \
+    inline nd::array elwise_from_callable(const T& obj, R (T::*)(DYND_PP_JOIN_1((,), DYND_PP_META_NAME_RANGE(A, NSRC))) const, \
         DYND_PP_JOIN_OUTER_1(DYND_PP_META_DECL, (,), (const nd::array&), DYND_PP_META_NAME_RANGE(a, NSRC)), \
         const eval::eval_context *ectx = &eval::default_eval_context) \
     { \
