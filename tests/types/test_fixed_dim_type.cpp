@@ -268,3 +268,23 @@ TEST(FixedDimDType, IsTypeSubarray) {
     EXPECT_FALSE(ndt::type("strided * int32").is_type_subarray(ndt::type("3 * int32")));
     EXPECT_FALSE(ndt::type("var * int32").is_type_subarray(ndt::type("3 * int32")));
 }
+
+TEST(FixedDimDType, FromCArray) {
+    EXPECT_EQ(ndt::fixed_dim_from_array<int>::make(), ndt::type("int32"));
+    EXPECT_EQ(ndt::fixed_dim_from_array<int[1]>::make(), ndt::type("1 * int32"));
+    EXPECT_EQ(ndt::fixed_dim_from_array<int[2]>::make(), ndt::type("2 * int32"));
+    EXPECT_EQ(ndt::fixed_dim_from_array<int[3]>::make(), ndt::type("3 * int32"));
+    EXPECT_EQ(ndt::fixed_dim_from_array<int[2][1]>::make(), ndt::type("2 * 1 * int32"));
+    EXPECT_EQ(ndt::fixed_dim_from_array<int[1][2]>::make(), ndt::type("1 * 2 * int32"));
+    EXPECT_EQ(ndt::fixed_dim_from_array<int[3][3]>::make(), ndt::type("3 * 3 * int32"));
+    EXPECT_EQ(ndt::fixed_dim_from_array<int[3][5][8][10]>::make(), ndt::type("3 * 5 * 8 * 10 * int32"));
+
+    EXPECT_EQ(ndt::fixed_dim_from_array<float>::make(), ndt::type("float32"));
+    EXPECT_EQ(ndt::fixed_dim_from_array<float[1]>::make(), ndt::type("1 * float32"));
+    EXPECT_EQ(ndt::fixed_dim_from_array<float[2]>::make(), ndt::type("2 * float32"));
+    EXPECT_EQ(ndt::fixed_dim_from_array<float[3]>::make(), ndt::type("3 * float32"));
+    EXPECT_EQ(ndt::fixed_dim_from_array<float[2][1]>::make(), ndt::type("2 * 1 * float32"));
+    EXPECT_EQ(ndt::fixed_dim_from_array<float[1][2]>::make(), ndt::type("1 * 2 * float32"));
+    EXPECT_EQ(ndt::fixed_dim_from_array<float[3][3]>::make(), ndt::type("3 * 3 * float32"));
+    EXPECT_EQ(ndt::fixed_dim_from_array<float[3][5][8][10]>::make(), ndt::type("3 * 5 * 8 * 10 * float32"));
+}

@@ -3,8 +3,8 @@
 // BSD 2-Clause License, see LICENSE.txt
 //
 
-#ifndef _DYND__PP_COMPARISION_HPP_
-#define _DYND__PP_COMPARISION_HPP_
+#ifndef _DYND__PP_COMPARISON_HPP_
+#define _DYND__PP_COMPARISON_HPP_
 
 #include <dynd/pp/gen.hpp>
 #include <dynd/pp/list.hpp>

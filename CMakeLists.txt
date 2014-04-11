@@ -8,6 +8,12 @@ project(libdynd)
 
 find_package(CUDA)
 
+# -DDYND_ELWISE_MAX, the maximum number of arguments that the elwise function
+#   in libdynd will support
+SET(DYND_ELWISE_MAX 7 CACHE STRING
+    "Build a libdynd library with an elwise function that supports the specified maximum number of arguments")
+# TODO: Check that the preprocessor can handle this number
+
 # Only add these options if this is the top level CMakeLists.txt
 if("${CMAKE_SOURCE_DIR}" STREQUAL "${CMAKE_CURRENT_SOURCE_DIR}")
 ################################################
@@ -117,10 +123,11 @@ list(GET DYND_VERSION 0 "${DYND_VERSION}")
 set(libdynd_SRC
     # Preprocessor
     include/dynd/pp/arithmetic.hpp
-    include/dynd/pp/comparision.hpp
+    include/dynd/pp/comparison.hpp
     include/dynd/pp/if.hpp
     include/dynd/pp/list.hpp
     include/dynd/pp/logical.hpp
+    include/dynd/pp/meta.hpp
     include/dynd/pp/token.hpp
     ${CMAKE_CURRENT_BINARY_DIR}/include/dynd/pp/gen.hpp
     # CodeGen
@@ -403,6 +410,7 @@ set(libdynd_SRC
     include/dynd/lowlevel_api.hpp
     include/dynd/parser_util.hpp
     include/dynd/platform_definitions.hpp
+    include/dynd/elwise.hpp
     include/dynd/shortvector.hpp
     include/dynd/shape_tools.hpp
     include/dynd/string_encodings.hpp
@@ -457,6 +465,9 @@ if (DYND_CUDA)
 
 #    set(CUDA_SEPARABLE_COMPILATION ON)
 endif()
+
+# Add a preprocessor definition for the maximum number of arguments that elwise will support
+add_definitions(-DDYND_ELWISE_MAX=${DYND_ELWISE_MAX})
 
 if ((NOT DYND_SHARED_LIB) AND (DYND_INSTALL_LIB))
     # If we're making an installable static library,

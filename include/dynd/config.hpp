@@ -28,6 +28,10 @@
 #  define DYND_CONSTEXPR
 #endif
 
+#if __has_feature(cxx_static_assert)
+#  define DYND_STATIC_ASSERT
+#endif
+
 # define DYND_USE_STDINT
 
 #include <cmath>
@@ -59,6 +63,8 @@ inline bool DYND_ISNAN(long double x) {
 // Use rvalue references on gcc >= 4.7
 #  define DYND_RVALUE_REFS
 #  define DYND_ISNAN(x) (std::isnan(x))
+// Use static_assert on gcc >= 4.7
+#  define DYND_STATIC_ASSERT
 #else
 // Don't use constexpr on gcc < 4.7
 #  define DYND_CONSTEXPR
@@ -160,19 +166,63 @@ inline void DYND_MEMCPY(char *dst, const char *src, intptr_t count)
 #define DYND_MEMCPY(dst, src, count) std::memcpy(dst, src, count)
 #endif
 
+// This static_assert fails at compile-time when expected, but with a more general message
+#ifndef DYND_STATIC_ASSERT
+#define DYND_STATIC_ASSERT
+#define static_assert(value, message) do { enum { dynd_static_assertion = 1 / (value) }; } while (0)
+#endif
+
 #ifdef DYND_USE_TR1_ENABLE_IF
 #include <type_traits>
 namespace dynd {
     using std::tr1::enable_if;
+    using std::tr1::is_const;
+    using std::tr1::remove_const;
+    using std::tr1::is_reference;
+    using std::tr1::remove_reference;
 }
 #else
-// enable_if is a small template, so we just replicate it here
+// These are small templates, so we just replicate them here
 namespace dynd {
 	template<bool B, class T = void>
 	struct enable_if {};
  
 	template<class T>
 	struct enable_if<true, T> { typedef T type; };
+
+    template<class T>
+    struct is_const { static const bool value = false; };
+
+    template<class T>
+    struct is_const<const T> { static const bool value = true; };
+
+    template<class T>
+    struct remove_const { typedef T type; };
+
+    template<class T>
+    struct remove_const<const T> { typedef T type; };
+
+    template<class T>
+    struct is_reference { static const bool value = false; };
+
+    template<class T>
+    struct is_reference<T&> { static const bool value = true; };
+
+#ifdef DYND_RVALUE_REFS
+    template<class T>
+    struct is_reference<T&&> { static const bool value = true; };
+#endif
+
+    template<class T>
+    struct remove_reference { typedef T type; };
+
+    template<class T>
+    struct remove_reference<T&> { typedef T type; };
+
+#ifdef DYND_RVALUE_REFS
+    template<class T>
+    struct remove_reference<T&&> { typedef T type; };
+#endif
 }
 #endif
 

@@ -16,7 +16,7 @@ endif()
 
 set(tests_SRC
     pp/test_pp_arithmetic.cpp
-    pp/test_pp_comparision.cpp
+    pp/test_pp_comparison.cpp
     pp/test_pp_if.cpp
     pp/test_pp_list.cpp
     pp/test_pp_logical.cpp
@@ -68,7 +68,8 @@ set(tests_SRC
     array/test_array_cast.cpp
     array/test_array_compare.cpp
     array/test_array_views.cpp
-	array/test_memmap.cpp
+    array/test_elwise.cpp
+    array/test_memmap.cpp
     array/test_view.cpp
     vm/test_elwise_program.cpp
     test_arithmetic_op.cpp
