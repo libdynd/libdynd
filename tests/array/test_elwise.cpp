@@ -705,6 +705,32 @@ TYPED_TEST_P(Elwise, CallRefRes) {
     }
 }
 
+#ifdef DYND_CXX_LAMBDAS
+TEST(ElWise, LambdaFunc) {
+    nd::array a, b, res;
+
+    a = 100;
+    b = 1.5;
+    res = nd::elwise([](int x, double y) {
+        return (float)(x + y);
+    }, a, b);
+    EXPECT_EQ(ndt::make_type<float>(), res.get_type());
+    EXPECT_EQ(101.5f, res.as<float>());
+
+    double a_val[3] = {1.5, 2.0, 3.125};
+    a = a_val;
+    b = 3.25;
+    res = nd::elwise([](double x, double y, int z) {
+        return x * z + y;
+    }, a, b, 10);
+    EXPECT_EQ(ndt::type("strided * float64"), res.get_type());
+    ASSERT_EQ(3, res.get_shape()[0]);
+    EXPECT_EQ(18.25, res(0).as<double>());
+    EXPECT_EQ(23.25, res(1).as<double>());
+    EXPECT_EQ(34.5, res(2).as<double>());
+}
+#endif
+
 typedef ::testing::Types<int, float, long, double> types;
 
 REGISTER_TYPED_TEST_CASE_P(Elwise, FuncRetRes, FuncRefRes, MethRetRes, MethRefRes, CallRetRes, CallRefRes);

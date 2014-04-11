@@ -32,6 +32,10 @@
 #  define DYND_STATIC_ASSERT(value, message) static_assert(value, message)
 #endif
 
+#if __has_feature(cxx_lambdas)
+#  define DYND_CXX_LAMBDAS
+#endif
+
 # define DYND_USE_STDINT
 
 #include <cmath>
@@ -98,6 +102,7 @@ inline bool DYND_ISNAN(long double x) {
 # define DYND_RVALUE_REFS
 # define DYND_USE_STDINT
 # define DYND_STATIC_ASSERT(value, message) static_assert(value, message)
+# define DYND_CXX_LAMBDAS
 
 #if _MSC_VER >= 1700
 // MSVC 2012 and later
