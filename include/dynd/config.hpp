@@ -36,8 +36,6 @@
 #  define DYND_CXX_LAMBDAS
 #endif
 
-# define DYND_USE_STDINT
-
 #include <cmath>
 
 // Ran into some weird issues with
@@ -55,8 +53,6 @@ inline bool DYND_ISNAN(long double x) {
 }
 
 #elif defined(__GNUC__)
-
-# define DYND_USE_STDINT
 
 #if __GNUC__ > 4 || \
               (__GNUC__ == 4 && (__GNUC_MINOR__ >= 7))
@@ -100,7 +96,6 @@ inline bool DYND_ISNAN(long double x) {
 // MSVC 2010 and later
 # define DYND_USE_TR1_ENABLE_IF
 # define DYND_RVALUE_REFS
-# define DYND_USE_STDINT
 # define DYND_STATIC_ASSERT(value, message) static_assert(value, message)
 # define DYND_CXX_LAMBDAS
 
@@ -261,20 +256,7 @@ namespace dynd {
  */
 #define DYND_UNUSED(x)
 
-#ifdef DYND_USE_STDINT
 #include <stdint.h>
-#else
-typedef signed char      int8_t;
-typedef short            int16_t;
-typedef int              int32_t;
-typedef __int64          int64_t;
-typedef ptrdiff_t        intptr_t;
-typedef unsigned char    uint8_t;
-typedef unsigned short   uint16_t;
-typedef unsigned int     uint32_t;
-typedef unsigned __int64 uint64_t;
-typedef size_t           uintptr_t;
-#endif
 
 namespace dynd {
     // These are defined in git_version.cpp, generated from
