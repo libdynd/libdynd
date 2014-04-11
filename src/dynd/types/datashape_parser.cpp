@@ -64,6 +64,7 @@ static const map<string, ndt::type>& get_builtin_types()
         builtin_types["int8"] = ndt::make_type<int8_t>();
         builtin_types["int16"] = ndt::make_type<int16_t>();
         builtin_types["int32"] = ndt::make_type<int32_t>();
+        builtin_types["int"] = ndt::make_type<int32_t>();
         builtin_types["int64"] = ndt::make_type<int64_t>();
         builtin_types["int128"] = ndt::make_type<dynd_int128>();
         builtin_types["intptr"] = ndt::make_type<intptr_t>();
@@ -76,9 +77,11 @@ static const map<string, ndt::type>& get_builtin_types()
         builtin_types["float16"] = ndt::make_type<dynd_float16>();
         builtin_types["float32"] = ndt::make_type<float>();
         builtin_types["float64"] = ndt::make_type<double>();
+        builtin_types["real"] = ndt::make_type<double>();
         builtin_types["float128"] = ndt::make_type<dynd_float128>();
         builtin_types["complex64"] = ndt::make_type<dynd_complex<float> >();
         builtin_types["complex128"] = ndt::make_type<dynd_complex<double> >();
+        builtin_types["complex"] = ndt::make_type<dynd_complex<double> >();
         builtin_types["json"] = ndt::make_json();
         builtin_types["date"] = ndt::make_date();
         builtin_types["time"] = ndt::make_time(tz_abstract);
@@ -392,7 +395,8 @@ static ndt::type parse_complex_parameters(const char *&begin, const char *end,
             throw datashape_parse_error(saved_begin, "unsupported real type for complex numbers");
         }
     } else {
-        throw datashape_parse_error(begin, "expected opening '['");
+        // Default to complex[double] if no parameters are provided
+        return ndt::make_type<dynd_complex<double> >();
     }
 }
 
