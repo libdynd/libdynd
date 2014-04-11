@@ -15,7 +15,6 @@
 #include <dynd/shape_tools.hpp>
 #include <dynd/types/strided_dim_type.hpp>
 #include <dynd/types/fixed_dim_type.hpp>
-
 #include <dynd/pp/list.hpp>
 #include <dynd/pp/meta.hpp>
 
@@ -215,7 +214,7 @@ DYND_PP_JOIN_MAP(FUNC_CKERNEL_INSTANTIATORS, (), DYND_PP_RANGE(1, DYND_PP_INC(DY
 #undef FUNC_REF_RES_CKERNEL_INSTANTIATOR
 #undef FUNC_RET_RES_CKERNEL_INSTANTIATOR
 
-#define OBJ_FUNC_RET_RES_CKERNEL_INSTANTIATOR(NSRC) \
+#define METH_RET_RES_CKERNEL_INSTANTIATOR(NSRC) \
     template<typename T, typename R, DYND_PP_JOIN_MAP_1(DYND_PP_META_TYPENAME, (,), DYND_PP_META_NAME_RANGE(A, NSRC))> \
     struct elwise_ckernel_instantiator<R (T::*)(DYND_PP_JOIN_1((,), DYND_PP_META_NAME_RANGE(A, NSRC))) const> { \
         typedef elwise_ckernel_instantiator extra_type; \
@@ -286,7 +285,7 @@ DYND_PP_JOIN_MAP(FUNC_CKERNEL_INSTANTIATORS, (), DYND_PP_RANGE(1, DYND_PP_INC(DY
             return ckb_offset + sizeof(extra_type); \
         } \
     };
-#define OBJ_FUNC_REF_RES_CKERNEL_INSTANTIATOR(NSRC) \
+#define METH_REF_RES_CKERNEL_INSTANTIATOR(NSRC) \
     template<typename T, typename R, DYND_PP_JOIN_MAP_1(DYND_PP_META_TYPENAME, (,), DYND_PP_META_NAME_RANGE(A, NSRC))> \
     struct elwise_ckernel_instantiator<void (T::*)(R &, DYND_PP_JOIN_1((,), DYND_PP_META_NAME_RANGE(A, NSRC))) const> { \
         typedef elwise_ckernel_instantiator extra_type; \
@@ -357,20 +356,20 @@ DYND_PP_JOIN_MAP(FUNC_CKERNEL_INSTANTIATORS, (), DYND_PP_RANGE(1, DYND_PP_INC(DY
             return ckb_offset + sizeof(extra_type); \
         } \
     };
-#define OBJ_FUNC_CKERNEL_INSTANTIATORS(NSRC) \
-    OBJ_FUNC_RET_RES_CKERNEL_INSTANTIATOR(NSRC) \
-    OBJ_FUNC_REF_RES_CKERNEL_INSTANTIATOR(NSRC)
+#define METH_CKERNEL_INSTANTIATORS(NSRC) \
+    METH_RET_RES_CKERNEL_INSTANTIATOR(NSRC) \
+    METH_REF_RES_CKERNEL_INSTANTIATOR(NSRC)
 
-DYND_PP_JOIN_MAP(OBJ_FUNC_CKERNEL_INSTANTIATORS, (), DYND_PP_RANGE(1, DYND_PP_INC(DYND_ELWISE_MAX)))
+DYND_PP_JOIN_MAP(METH_CKERNEL_INSTANTIATORS, (), DYND_PP_RANGE(1, DYND_PP_INC(DYND_ELWISE_MAX)))
 
-#undef OBJ_FUNC_CKERNEL_INSTANTIATORS
-#undef OBJ_FUNC_REF_RES_CKERNEL_INSTANTIATOR
-#undef OBJ_FUNC_RET_RES_CKERNEL_INSTANTIATOR
+#undef METH_CKERNEL_INSTANTIATORS
+#undef METH_REF_RES_CKERNEL_INSTANTIATOR
+#undef METH_RET_RES_CKERNEL_INSTANTIATOR
 
 template<class FuncProto>
 struct elwise_from_callable_ckernel_instantiator;
 
-#define OBJ_RET_RES_CKERNEL_INSTANTIATOR(NSRC) \
+#define CALL_RET_RES_CKERNEL_INSTANTIATOR(NSRC) \
     template<typename T, typename R, DYND_PP_JOIN_MAP_1(DYND_PP_META_TYPENAME, (,), DYND_PP_META_NAME_RANGE(A, NSRC))> \
     struct elwise_from_callable_ckernel_instantiator<R (T::*)(DYND_PP_JOIN_1((,), DYND_PP_META_NAME_RANGE(A, NSRC))) const> { \
         typedef elwise_from_callable_ckernel_instantiator extra_type; \
@@ -437,7 +436,7 @@ struct elwise_from_callable_ckernel_instantiator;
             return ckb_offset + sizeof(extra_type); \
         } \
     };
-#define OBJ_REF_RES_CKERNEL_INSTANTIATOR(NSRC) \
+#define CALL_REF_RES_CKERNEL_INSTANTIATOR(NSRC) \
     template<typename T, typename R, DYND_PP_JOIN_MAP_1(DYND_PP_META_TYPENAME, (,), DYND_PP_META_NAME_RANGE(A, NSRC))> \
     struct elwise_from_callable_ckernel_instantiator<void (T::*)(R &, DYND_PP_JOIN_1((,), DYND_PP_META_NAME_RANGE(A, NSRC))) const> { \
         typedef elwise_from_callable_ckernel_instantiator extra_type; \
@@ -504,15 +503,15 @@ struct elwise_from_callable_ckernel_instantiator;
             return ckb_offset + sizeof(extra_type); \
         } \
     };
-#define OBJ_CKERNEL_INSTANTIATORS(NSRC) \
-    OBJ_RET_RES_CKERNEL_INSTANTIATOR(NSRC) \
-    OBJ_REF_RES_CKERNEL_INSTANTIATOR(NSRC)
+#define CALL_CKERNEL_INSTANTIATORS(NSRC) \
+    CALL_RET_RES_CKERNEL_INSTANTIATOR(NSRC) \
+    CALL_REF_RES_CKERNEL_INSTANTIATOR(NSRC)
 
-DYND_PP_JOIN_MAP(OBJ_CKERNEL_INSTANTIATORS, (), DYND_PP_RANGE(1, DYND_PP_INC(DYND_ELWISE_MAX)))
+DYND_PP_JOIN_MAP(CALL_CKERNEL_INSTANTIATORS, (), DYND_PP_RANGE(1, DYND_PP_INC(DYND_ELWISE_MAX)))
 
-#undef OBJ_CKERNEL_INSTANTIATORS
-#undef OBJ_REF_RES_CKERNEL_INSTANTIATOR
-#undef OBJ_RET_RES_CKERNEL_INSTANTIATOR
+#undef CALL_CKERNEL_INSTANTIATORS
+#undef CALL_REF_RES_CKERNEL_INSTANTIATOR
+#undef CALL_RET_RES_CKERNEL_INSTANTIATOR
 
 }; // namespace detail
 
@@ -675,7 +674,7 @@ DYND_PP_JOIN_MAP(FUNCS, (), DYND_PP_RANGE(1, DYND_PP_INC(DYND_ELWISE_MAX)))
 #undef FUNC_REF_RES
 #undef FUNC_RET_RES
 
-#define OBJ_FUNC_RET_RES(NSRC) \
+#define METH_RET_RES(NSRC) \
     template<typename T, typename R, DYND_PP_JOIN_MAP_1(DYND_PP_META_TYPENAME, (,), DYND_PP_META_NAME_RANGE(A, NSRC))> \
     inline nd::array elwise(const T& obj, R (T::*func)(DYND_PP_JOIN_1((,), DYND_PP_META_NAME_RANGE(A, NSRC))) const, \
         DYND_PP_JOIN_OUTER_1(DYND_PP_META_DECL, (,), (const nd::array&), DYND_PP_META_NAME_RANGE(a, NSRC)), \
@@ -752,7 +751,7 @@ DYND_PP_JOIN_MAP(FUNCS, (), DYND_PP_RANGE(1, DYND_PP_INC(DYND_ELWISE_MAX)))
 \
         return res; \
     }
-#define OBJ_FUNC_REF_RES(NSRC) \
+#define METH_REF_RES(NSRC) \
     template<typename T, typename R, DYND_PP_JOIN_MAP_1(DYND_PP_META_TYPENAME, (,), DYND_PP_META_NAME_RANGE(A, NSRC))> \
     inline nd::array elwise(const T& obj, void (T::*func)(R&, DYND_PP_JOIN_1((,), DYND_PP_META_NAME_RANGE(A, NSRC))) const, \
         DYND_PP_JOIN_OUTER_1(DYND_PP_META_DECL, (,), (const nd::array&), DYND_PP_META_NAME_RANGE(a, NSRC)), \
@@ -829,17 +828,17 @@ DYND_PP_JOIN_MAP(FUNCS, (), DYND_PP_RANGE(1, DYND_PP_INC(DYND_ELWISE_MAX)))
 \
         return res; \
     }
-#define OBJ_FUNCS(NSRC) \
-    OBJ_FUNC_RET_RES(NSRC) \
-    OBJ_FUNC_REF_RES(NSRC)
+#define METHS(NSRC) \
+    METH_RET_RES(NSRC) \
+    METH_REF_RES(NSRC)
 
-DYND_PP_JOIN_MAP(OBJ_FUNCS, (), DYND_PP_RANGE(1, DYND_PP_INC(DYND_ELWISE_MAX)))
+DYND_PP_JOIN_MAP(METHS, (), DYND_PP_RANGE(1, DYND_PP_INC(DYND_ELWISE_MAX)))
 
-#undef OBJ_FUNCS
-#undef OBJ_FUNCS_REF_RES
-#undef OBJ_FUNCS_RET_RES
+#undef METHS
+#undef METHS_REF_RES
+#undef METHS_RET_RES
 
-#define OBJ_RET_RES(NSRC) \
+#define CALL_RET_RES(NSRC) \
     template<typename T, typename R, DYND_PP_JOIN_MAP_1(DYND_PP_META_TYPENAME, (,), DYND_PP_META_NAME_RANGE(A, NSRC))> \
     inline nd::array elwise_from_callable(const T& obj, R (T::*)(DYND_PP_JOIN_1((,), DYND_PP_META_NAME_RANGE(A, NSRC))) const, \
         DYND_PP_JOIN_OUTER_1(DYND_PP_META_DECL, (,), (const nd::array&), DYND_PP_META_NAME_RANGE(a, NSRC)), \
@@ -914,7 +913,7 @@ DYND_PP_JOIN_MAP(OBJ_FUNCS, (), DYND_PP_RANGE(1, DYND_PP_INC(DYND_ELWISE_MAX)))
 \
         return res; \
     }
-#define OBJ_REF_RES(NSRC) \
+#define CALL_REF_RES(NSRC) \
     template<typename T, typename R, DYND_PP_JOIN_MAP_1(DYND_PP_META_TYPENAME, (,), DYND_PP_META_NAME_RANGE(A, NSRC))> \
     inline nd::array elwise_from_callable(const T& obj, void (T::*)(R&, DYND_PP_JOIN_1((,), DYND_PP_META_NAME_RANGE(A, NSRC))) const, \
         DYND_PP_JOIN_OUTER_1(DYND_PP_META_DECL, (,), (const nd::array&), DYND_PP_META_NAME_RANGE(a, NSRC)), \
@@ -989,23 +988,20 @@ DYND_PP_JOIN_MAP(OBJ_FUNCS, (), DYND_PP_RANGE(1, DYND_PP_INC(DYND_ELWISE_MAX)))
 \
         return res; \
     }
-#define OBJ_RES(NSRC) \
+#define CALLS(NSRC) \
     template<typename T> \
     inline nd::array elwise(const T &obj, DYND_PP_JOIN_OUTER_1(DYND_PP_META_DECL, (,), \
         (const nd::array&), DYND_PP_META_NAME_RANGE(a, NSRC)), const eval::eval_context *ectx = &eval::default_eval_context) { \
         return elwise_from_callable(obj, &T::operator (), DYND_PP_JOIN_1((,), DYND_PP_META_NAME_RANGE(a, NSRC)), ectx); \
-    }
-#define OBJS(NSRC) \
-    OBJ_RET_RES(NSRC) \
-    OBJ_REF_RES(NSRC) \
-    OBJ_RES(NSRC)
+    } \
+    CALL_RET_RES(NSRC) \
+    CALL_REF_RES(NSRC) \
 
-DYND_PP_JOIN_MAP(OBJS, (), DYND_PP_RANGE(1, DYND_PP_INC(DYND_ELWISE_MAX)))
+DYND_PP_JOIN_MAP(CALLS, (), DYND_PP_RANGE(1, DYND_PP_INC(DYND_ELWISE_MAX)))
 
-#undef OBJS
-#undef OBJ_RES
-#undef OBJ_REF_RES
-#undef OBJ_RET_RES
+#undef CALLS
+#undef CALL_REF_RES
+#undef CALL_RET_RES
 
 }} // namespace dynd::nd
 
