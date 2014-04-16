@@ -17,7 +17,7 @@ using namespace dynd;
 #define EXPECT_COMPLEX_DOUBLE_EQ(a, b) EXPECT_DOUBLE_EQ(a.real(), b.real()); \
     EXPECT_DOUBLE_EQ(a.imag(), b.imag())
 
-TEST(Complex, Exp) {
+TEST(Complex, Math) {
     dynd_complex<double> z;
 
     z = dynd_complex<double>(0.0, 0.0);
