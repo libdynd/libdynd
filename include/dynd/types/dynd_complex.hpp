@@ -40,6 +40,9 @@ public:
         return m_imag;
     }
 
+    template <typename T>
+    inline T as() const;
+
     DYND_CUDA_HOST_DEVICE inline bool operator==(const dynd_complex<float>& rhs) const {
         return (real() == rhs.real()) && (imag() == rhs.imag());
     }
@@ -75,6 +78,16 @@ public:
         return dynd_complex<float>(m_real / rhs, m_imag / rhs);
     }
 };
+
+template <>
+inline std::complex<float> dynd_complex<float>::as<std::complex<float> >() const {
+    return std::complex<float>(m_real, m_imag);
+}
+
+template <>
+inline std::complex<double> dynd_complex<float>::as<std::complex<double> >() const {
+    return std::complex<double>(m_real, m_imag);
+}
 
 inline dynd_complex<float> operator*(float lhs, const dynd_complex<float>& rhs) {
     return dynd_complex<float>(lhs * rhs.m_real, lhs * rhs.m_imag);
@@ -112,6 +125,9 @@ public:
         return m_imag;
     }
 
+    template <typename T>
+    inline T as() const;
+
     DYND_CUDA_HOST_DEVICE inline bool operator==(const dynd_complex<double>& rhs) const {
         return (real() == rhs.real()) && (imag() == rhs.imag());
     }
@@ -147,6 +163,16 @@ public:
         return dynd_complex<double>(m_real / rhs, m_imag / rhs);
     }
 };
+
+template <>
+inline std::complex<float> dynd_complex<double>::as<std::complex<float> >() const {
+    return std::complex<float>(m_real, m_imag);
+}
+
+template <>
+inline std::complex<double> dynd_complex<double>::as<std::complex<double> >() const {
+    return std::complex<double>(m_real, m_imag);
+}
 
 inline dynd_complex<double> operator*(double lhs, const dynd_complex<double>& rhs) {
     return dynd_complex<double>(lhs * rhs.m_real, lhs * rhs.m_imag);
