@@ -29,6 +29,10 @@ public:
     DYND_CUDA_HOST_DEVICE inline dynd_complex(const dynd_complex<T>& rhs)
         : m_real(static_cast<float>(rhs.m_real)), m_imag(static_cast<float>(rhs.m_imag)) {}
 
+    template <typename T>
+    inline dynd_complex(const std::complex<T>& rhs)
+        : m_real(rhs.real()), m_imag(rhs.imag()) {}
+
     DYND_CUDA_HOST_DEVICE inline float real() const {
         return m_real;
     }
@@ -96,6 +100,10 @@ public:
     template <typename T>
     DYND_CUDA_HOST_DEVICE inline dynd_complex(const dynd_complex<T>& rhs)
         : m_real(rhs.m_real), m_imag(rhs.m_imag) {}
+
+    template <typename T>
+    inline dynd_complex(const std::complex<T>& rhs)
+        : m_real(rhs.real()), m_imag(rhs.imag()) {}
 
     DYND_CUDA_HOST_DEVICE inline double real() const {
         return m_real;
