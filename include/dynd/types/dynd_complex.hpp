@@ -8,6 +8,7 @@
 
 #include <cmath>
 #include <complex>
+#include <limits>
 
 #include <dynd/config.hpp>
 #include <dynd/typed_data_assign.hpp>
