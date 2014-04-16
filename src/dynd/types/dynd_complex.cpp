@@ -8,12 +8,10 @@
 using namespace std;
 using namespace dynd;
 
-std::ostream& dynd::operator<<(ostream& out, const dynd_complex<float>& val)
-{
+std::ostream& dynd::operator<<(ostream& out, const dynd_complex<float>& val) {
     return (out << "(" << val.m_real << " + " << val.m_imag << "j)");
 }
 
-std::ostream& dynd::operator<<(ostream& out, const dynd_complex<double>& val)
-{
+std::ostream& dynd::operator<<(ostream& out, const dynd_complex<double>& val) {
     return (out << "(" << val.m_real << " + " << val.m_imag << "j)");
 }
