@@ -41,8 +41,8 @@ public:
         return m_imag;
     }
 
-    template <typename T>
-    inline T as() const;
+    template <template <typename> class T>
+    inline T<float> as() const;
 
     DYND_CUDA_HOST_DEVICE inline bool operator==(const dynd_complex<float>& rhs) const {
         return (real() == rhs.real()) && (imag() == rhs.imag());
@@ -81,6 +81,12 @@ public:
 };
 
 template <>
+inline std::complex<float> dynd_complex<float>::as<std::complex>() const {
+    return std::complex<float>(m_real, m_imag);
+}
+
+/*
+template <>
 inline std::complex<float> dynd_complex<float>::as<std::complex<float> >() const {
     return std::complex<float>(m_real, m_imag);
 }
@@ -89,6 +95,7 @@ template <>
 inline std::complex<double> dynd_complex<float>::as<std::complex<double> >() const {
     return std::complex<double>(m_real, m_imag);
 }
+*/
 
 inline dynd_complex<float> operator*(float lhs, const dynd_complex<float>& rhs) {
     return dynd_complex<float>(lhs * rhs.m_real, lhs * rhs.m_imag);
@@ -126,8 +133,11 @@ public:
         return m_imag;
     }
 
-    template <typename T>
-    inline T as() const;
+//    template <typename T>
+  //  inline T as() const;
+
+    template <template <typename> class T>
+    inline T<double> as() const;
 
     DYND_CUDA_HOST_DEVICE inline bool operator==(const dynd_complex<double>& rhs) const {
         return (real() == rhs.real()) && (imag() == rhs.imag());
@@ -166,12 +176,7 @@ public:
 };
 
 template <>
-inline std::complex<float> dynd_complex<double>::as<std::complex<float> >() const {
-    return std::complex<float>(m_real, m_imag);
-}
-
-template <>
-inline std::complex<double> dynd_complex<double>::as<std::complex<double> >() const {
+inline std::complex<double> dynd_complex<double>::as<std::complex>() const {
     return std::complex<double>(m_real, m_imag);
 }
 
@@ -204,7 +209,7 @@ inline dynd_complex<T> exp(const dynd_complex<T> &z) {
     dynd_complex<T> ret;
 
     if (std::isfinite(r)) {
-        x = exp(r);
+        x = std::exp(r);
 
         c = cos(i);
         s = sin(i);
@@ -237,7 +242,7 @@ inline dynd_complex<T> exp(const dynd_complex<T> &z) {
             }
         } else {
             if (std::isfinite(i)) {
-                x = exp(r);
+                x = std::exp(r);
                 c = cos(i);
                 s = sin(i);
 
@@ -254,7 +259,7 @@ inline dynd_complex<T> exp(const dynd_complex<T> &z) {
 
 template <typename T>
 dynd_complex<T> log(dynd_complex<T> z) {
-    return dynd_complex<T>(log(abs(z)), arg(z));
+    return dynd_complex<T>(std::log(abs(z)), arg(z));
 }
 
 template <typename T>
@@ -327,15 +332,23 @@ dynd_complex<T> pow(dynd_complex<T> x, dynd_complex<T> y) {
 }
 
 template <typename T>
+dynd_complex<T> pow(dynd_complex<T> x, T y) {
+    dynd_complex<T> b = log(x);
+    T br = b.real(), bi = b.imag();
+
+    return exp(dynd_complex<T>(br * y, bi * y));
+}
+
+template <typename T>
 dynd_complex<T> cos(dynd_complex<T> z) {
     T x = z.real(), y = z.imag();
-    return dynd_complex<T>(cos(x) * cosh(y), -(sin(x) * sinh(y)));
+    return dynd_complex<T>(std::cos(x) * std::cosh(y), -(std::sin(x) * std::sinh(y)));
 }
 
 template <typename T>
 dynd_complex<T> sin(dynd_complex<T> z) {
     T x = z.real(), y = z.imag();
-    return dynd_complex<T>(sin(x) * cosh(y), cos(x) * sinh(y));
+    return dynd_complex<T>(std::sin(x) * std::cosh(y), std::cos(x) * std::sinh(y));
 }
 
 } // namespace dynd
