@@ -34,8 +34,7 @@ namespace dynd {
 // Prevent isfinite from nvcc clashing with isfinite from cmath
 template <typename T>
 inline bool isfinite(T arg) {
-    using namespace std;
-    return (isfinite)(arg);
+    return (std::isfinite)(arg);
 }
 } // namespace dynd
 
