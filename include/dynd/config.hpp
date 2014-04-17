@@ -7,6 +7,8 @@
 #define _DYND__CONFIG_HPP_
 
 #include <cstdlib>
+#include <cstdint>
+#include <limits>
 
 #ifdef __clang__
 // It appears that on OSX, one can have a configuration with
@@ -85,6 +87,8 @@ inline bool DYND_ISNAN(long double x) {
 
 #elif defined(_MSC_VER)
 
+#include <float.h>
+
 // If set, uses the FP status registers.
 // On some compilers, there is no proper
 // way to tell the compiler that these are
@@ -98,6 +102,31 @@ inline bool DYND_ISNAN(long double x) {
 # define DYND_RVALUE_REFS
 # define DYND_STATIC_ASSERT(value, message) static_assert(value, message)
 # define DYND_CXX_LAMBDAS
+
+#if _MSC_VER < 1700
+// Older than MSVC 2012
+inline bool isfinite(double x) {
+    return _finite(x) != 0;
+}
+inline bool isnan(double x) {
+    return _isnan(x) != 0;
+}
+inline bool isinf(double x) {
+    return x == std::numeric_limits<double>::infinity() ||
+           x == -std::numeric_limits<double>::infinity();
+}
+inline double copysign(double num, double sign) {
+    return _copysign(num, sign);
+}
+inline int signbit(double x) {
+    union {
+        double d;
+        uint64_t u;
+    } val;
+    val.d = x;
+    return (val.u & 0x8000000000000000ULL) ? 1 : 0;
+}
+#endif
 
 #if _MSC_VER >= 1700
 // MSVC 2012 and later
@@ -255,8 +284,6 @@ namespace dynd {
  * warnings for them.
  */
 #define DYND_UNUSED(x)
-
-#include <stdint.h>
 
 namespace dynd {
     // These are defined in git_version.cpp, generated from

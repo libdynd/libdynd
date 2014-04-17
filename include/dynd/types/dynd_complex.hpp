@@ -182,44 +182,48 @@ T arg(dynd_complex<T> z) {
 
 template <typename T>
 inline dynd_complex<T> exp(const dynd_complex<T> &z) {
+    using namespace std;
     T x, c, s;
     T r = z.real(), i = z.imag();
     dynd_complex<T> ret;
 
-    if (std::isfinite(r)) {
+    if (isfinite(r)) {
         x = std::exp(r);
 
         c = std::cos(i);
         s = std::sin(i);
 
-        if (std::isfinite(i)) {
+        if (isfinite(i)) {
             ret = dynd_complex<T>(x * c, x * s);
         } else {
-            ret = dynd_complex<T>(NAN, copysign(NAN, i));
+            ret = dynd_complex<T>(
+                std::numeric_limits<T>::quiet_NaN(),
+                copysign(std::numeric_limits<T>::quiet_NaN(), i));
         }
-    } else if (std::isnan(r)) {
+    } else if (isnan(r)) {
         // r is nan
         if (i == 0) {
             ret = dynd_complex<T>(r, 0);
         } else {
-            ret = dynd_complex<T>(r, copysign(NAN, i));
+            ret = dynd_complex<T>(
+                r, copysign(std::numeric_limits<T>::quiet_NaN(), i));
         }
     } else {
         // r is +- inf
         if (r > 0) {
             if (i == 0) {
                 ret = dynd_complex<T>(r, i);
-            } else if (std::isfinite(i)) {
+            } else if (isfinite(i)) {
                 c = std::cos(i);
                 s = std::sin(i);
 
                 ret = dynd_complex<T>(r * c, r * s);
             } else {
                 // x = +inf, y = +-inf | nan
-                ret = dynd_complex<T>(r, NAN);
+                ret = dynd_complex<T>(r, std::numeric_limits<T>::quiet_NaN());
             }
         } else {
-            if (std::isfinite(i)) {
+            if (isfinite(i)) {
                 x = std::exp(r);
                 c = std::cos(i);
                 s = std::sin(i);
@@ -242,8 +246,10 @@ dynd_complex<T> log(dynd_complex<T> z) {
 
 template <typename T>
 inline dynd_complex<T> sqrt(const dynd_complex<T> &z) {
+    using namespace std;
     // We risk spurious overflow for components >= DBL_MAX / (1 + sqrt(2))
-    const T thresh = std::numeric_limits<T>::max() / (1 + std::sqrt(2));
+    const T thresh =
+        std::numeric_limits<T>::max() / (1 + ::sqrt(static_cast<T>(2)));
 
     dynd_complex<T> result;
     T a = z.real(), b = z.imag();
@@ -254,19 +260,19 @@ inline dynd_complex<T> sqrt(const dynd_complex<T> &z) {
     if (a == 0 && b == 0) {
         return dynd_complex<T>(0, b);
     }
-    if (std::isinf(b)) {
+    if (isinf(b)) {
         return dynd_complex<T>(std::numeric_limits<T>::infinity(), b);
     }
-    if (std::isnan(a)) {
+    if (isnan(a)) {
         t = (b - b) / (b - b); // raise invalid if b is not a NaN
         return dynd_complex<T>(a, t); // return NaN + NaN i
     }
-    if (std::isinf(a)) {
+    if (isinf(a)) {
          // csqrt(inf + NaN i) = inf + NaN i
          // csqrt(inf + y i) = inf + 0 i
          // csqrt(-inf + NaN i) = NaN +- inf i
          // csqrt(-inf + y i) = 0 + inf i
-        if (std::signbit(a)) {
+        if (signbit(a)) {
             return dynd_complex<T>(std::fabs(b - b), copysign(a, b));
         } else {
             return dynd_complex<T>(a, copysign(b - b, b));
