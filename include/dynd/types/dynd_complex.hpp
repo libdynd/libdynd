@@ -42,12 +42,6 @@ public:
         return m_imag;
     }
 
-    template <typename T>
-    inline T as() const;
-
-    template <template <typename> class T>
-    inline T<float> as() const;
-
     DYND_CUDA_HOST_DEVICE inline bool operator==(const dynd_complex<float>& rhs) const {
         return (real() == rhs.real()) && (imag() == rhs.imag());
     }
@@ -82,22 +76,11 @@ public:
     DYND_CUDA_HOST_DEVICE inline dynd_complex<float> operator/(float rhs) const {
         return dynd_complex<float>(m_real / rhs, m_imag / rhs);
     }
+
+    inline operator std::complex<float>() const {
+        return std::complex<float>(m_real, m_imag);
+    }
 };
-
-template <>
-inline std::complex<float> dynd_complex<float>::as<std::complex<float> >() const {
-    return std::complex<float>(m_real, m_imag);
-}
-
-template <>
-inline std::complex<double> dynd_complex<float>::as<std::complex<double> >() const {
-    return std::complex<double>(m_real, m_imag);
-}
-
-template <>
-inline std::complex<float> dynd_complex<float>::as<std::complex>() const {
-    return std::complex<float>(m_real, m_imag);
-}
 
 inline dynd_complex<float> operator*(float lhs, const dynd_complex<float>& rhs) {
     return dynd_complex<float>(lhs * rhs.m_real, lhs * rhs.m_imag);
@@ -135,12 +118,6 @@ public:
         return m_imag;
     }
 
-    template <typename T>
-    inline T as() const;
-
-    template <template <typename> class T>
-    inline T<double> as() const;
-
     DYND_CUDA_HOST_DEVICE inline bool operator==(const dynd_complex<double>& rhs) const {
         return (real() == rhs.real()) && (imag() == rhs.imag());
     }
@@ -175,22 +152,11 @@ public:
     DYND_CUDA_HOST_DEVICE inline dynd_complex<double> operator/(double rhs) const {
         return dynd_complex<double>(m_real / rhs, m_imag / rhs);
     }
+
+    inline operator std::complex<double>() const {
+        return std::complex<double>(m_real, m_imag);
+    }
 };
-
-template <>
-inline std::complex<float> dynd_complex<double>::as<std::complex<float> >() const {
-    return std::complex<float>(m_real, m_imag);
-}
-
-template <>
-inline std::complex<double> dynd_complex<double>::as<std::complex<double> >() const {
-    return std::complex<double>(m_real, m_imag);
-}
-
-template <>
-inline std::complex<double> dynd_complex<double>::as<std::complex>() const {
-    return std::complex<double>(m_real, m_imag);
-}
 
 inline dynd_complex<double> operator*(double lhs, const dynd_complex<double>& rhs) {
     return dynd_complex<double>(lhs * rhs.m_real, lhs * rhs.m_imag);
@@ -223,8 +189,8 @@ inline dynd_complex<T> exp(const dynd_complex<T> &z) {
     if (std::isfinite(r)) {
         x = std::exp(r);
 
-        c = cos(i);
-        s = sin(i);
+        c = std::cos(i);
+        s = std::sin(i);
 
         if (std::isfinite(i)) {
             ret = dynd_complex<T>(x * c, x * s);
@@ -244,8 +210,8 @@ inline dynd_complex<T> exp(const dynd_complex<T> &z) {
             if (i == 0) {
                 ret = dynd_complex<T>(r, i);
             } else if (std::isfinite(i)) {
-                c = cos(i);
-                s = sin(i);
+                c = std::cos(i);
+                s = std::sin(i);
 
                 ret = dynd_complex<T>(r * c, r * s);
             } else {
@@ -255,8 +221,8 @@ inline dynd_complex<T> exp(const dynd_complex<T> &z) {
         } else {
             if (std::isfinite(i)) {
                 x = std::exp(r);
-                c = cos(i);
-                s = sin(i);
+                c = std::cos(i);
+                s = std::sin(i);
 
                 ret = dynd_complex<T>(x * c, x * s);
             } else {
@@ -276,7 +242,8 @@ dynd_complex<T> log(dynd_complex<T> z) {
 
 template <typename T>
 inline dynd_complex<T> sqrt(const dynd_complex<T> &z) {
-    const T thresh = std::numeric_limits<T>::max() / (1 + std::sqrt(2)); // We risk spurious overflow for components >= DBL_MAX / (1 + sqrt(2))
+    // We risk spurious overflow for components >= DBL_MAX / (1 + sqrt(2))
+    const T thresh = std::numeric_limits<T>::max() / (1 + std::sqrt(2));
 
     dynd_complex<T> result;
     T a = z.real(), b = z.imag();
