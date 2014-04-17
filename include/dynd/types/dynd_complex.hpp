@@ -181,7 +181,7 @@ T arg(dynd_complex<T> z) {
 }
 
 template <typename T>
-inline dynd_complex<T> exp(const dynd_complex<T> &z) {
+inline dynd_complex<T> exp(dynd_complex<T> z) {
     using namespace std;
     T x, c, s;
     T r = z.real(), i = z.imag();
@@ -200,7 +200,7 @@ inline dynd_complex<T> exp(const dynd_complex<T> &z) {
                 std::numeric_limits<T>::quiet_NaN(),
                 copysign(std::numeric_limits<T>::quiet_NaN(), i));
         }
-    } else if (isnan(r)) {
+    } else if (std::isnan(r)) {
         // r is nan
         if (i == 0) {
             ret = dynd_complex<T>(r, 0);
@@ -245,7 +245,7 @@ dynd_complex<T> log(dynd_complex<T> z) {
 }
 
 template <typename T>
-inline dynd_complex<T> sqrt(const dynd_complex<T> &z) {
+inline dynd_complex<T> sqrt(dynd_complex<T> z) {
     using namespace std;
     // We risk spurious overflow for components >= DBL_MAX / (1 + sqrt(2))
     const T thresh =
@@ -260,14 +260,14 @@ inline dynd_complex<T> sqrt(const dynd_complex<T> &z) {
     if (a == 0 && b == 0) {
         return dynd_complex<T>(0, b);
     }
-    if (isinf(b)) {
+    if (std::isinf(b)) {
         return dynd_complex<T>(std::numeric_limits<T>::infinity(), b);
     }
-    if (isnan(a)) {
+    if (std::isnan(a)) {
         t = (b - b) / (b - b); // raise invalid if b is not a NaN
         return dynd_complex<T>(a, t); // return NaN + NaN i
     }
-    if (isinf(a)) {
+    if (std::isinf(a)) {
          // csqrt(inf + NaN i) = inf + NaN i
          // csqrt(inf + y i) = inf + 0 i
          // csqrt(-inf + NaN i) = NaN +- inf i
