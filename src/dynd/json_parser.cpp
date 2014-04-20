@@ -7,7 +7,7 @@
 #include <dynd/types/base_bytes_type.hpp>
 #include <dynd/types/string_type.hpp>
 #include <dynd/types/json_type.hpp>
-#include <dynd/types/fixed_dim_type.hpp>
+#include <dynd/types/cfixed_dim_type.hpp>
 #include <dynd/types/var_dim_type.hpp>
 #include <dynd/types/cstruct_type.hpp>
 #include <dynd/types/date_type.hpp>
@@ -339,10 +339,10 @@ static void skip_json_value(const char *&begin, const char *end)
     }
 }
 
-static void parse_fixed_dim_json(const ndt::type& tp, const char *metadata, char *out_data,
+static void parse_cfixed_dim_json(const ndt::type& tp, const char *metadata, char *out_data,
                 const char *&begin, const char *end, const eval::eval_context *ectx)
 {
-    const fixed_dim_type *fad = static_cast<const fixed_dim_type *>(tp.extended());
+    const cfixed_dim_type *fad = static_cast<const cfixed_dim_type *>(tp.extended());
     intptr_t size = fad->get_fixed_dim_size();
     intptr_t stride = fad->get_fixed_stride();
 
@@ -581,8 +581,8 @@ static void parse_uniform_dim_json(const ndt::type& tp, const char *metadata, ch
                 const char *&begin, const char *end, const eval::eval_context *ectx)
 {
     switch (tp.get_type_id()) {
-        case fixed_dim_type_id:
-            parse_fixed_dim_json(tp, metadata, out_data, begin, end, ectx);
+        case cfixed_dim_type_id:
+            parse_cfixed_dim_json(tp, metadata, out_data, begin, end, ectx);
             break;
         case var_dim_type_id:
             parse_var_dim_json(tp, metadata, out_data, begin, end, ectx);

@@ -45,7 +45,7 @@ set(tests_SRC
     types/test_type_casting.cpp
     types/test_type_promotion.cpp
     types/test_fixedbytes_type.cpp
-    types/test_fixed_dim_type.cpp
+    types/test_cfixed_dim_type.cpp
     types/test_fixedstring_type.cpp
     types/test_cstruct_type.cpp
     types/test_groupby_type.cpp

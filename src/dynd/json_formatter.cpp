@@ -9,7 +9,7 @@
 #include <dynd/types/date_type.hpp>
 #include <dynd/types/base_struct_type.hpp>
 #include <dynd/types/strided_dim_type.hpp>
-#include <dynd/types/fixed_dim_type.hpp>
+#include <dynd/types/cfixed_dim_type.hpp>
 #include <dynd/types/var_dim_type.hpp>
 
 using namespace std;
@@ -233,8 +233,8 @@ static void format_json_uniform_dim(output_data& out, const ndt::type& dt, const
             }
             break;
         }
-        case fixed_dim_type_id: {
-            const fixed_dim_type *fad = static_cast<const fixed_dim_type *>(dt.extended());
+        case cfixed_dim_type_id: {
+            const cfixed_dim_type *fad = static_cast<const cfixed_dim_type *>(dt.extended());
             ndt::type element_tp = fad->get_element_type();
             intptr_t size = (intptr_t)fad->get_fixed_dim_size(), stride = fad->get_fixed_stride();
             for (intptr_t i = 0; i < size; ++i) {

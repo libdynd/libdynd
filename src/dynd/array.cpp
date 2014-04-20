@@ -7,7 +7,7 @@
 #include <dynd/array_iter.hpp>
 #include <dynd/types/strided_dim_type.hpp>
 #include <dynd/types/var_dim_type.hpp>
-#include <dynd/types/fixed_dim_type.hpp>
+#include <dynd/types/cfixed_dim_type.hpp>
 #include <dynd/types/type_alignment.hpp>
 #include <dynd/types/view_type.hpp>
 #include <dynd/types/string_type.hpp>
@@ -1102,9 +1102,9 @@ namespace {
                     bool can_keep_dim = false;
                     ndt::type child_dt, child_replacement_tp;
                     switch (dt.get_type_id()) {
-                        case fixed_dim_type_id: {
-                            const fixed_dim_type *dt_fdd = static_cast<const fixed_dim_type *>(dt.extended());
-                            const fixed_dim_type *r_fdd = static_cast<const fixed_dim_type *>(e->replacement_tp.extended());
+                        case cfixed_dim_type_id: {
+                            const cfixed_dim_type *dt_fdd = static_cast<const cfixed_dim_type *>(dt.extended());
+                            const cfixed_dim_type *r_fdd = static_cast<const cfixed_dim_type *>(e->replacement_tp.extended());
                             if (dt_fdd->get_fixed_dim_size() == r_fdd->get_fixed_dim_size() &&
                                     dt_fdd->get_fixed_stride() == r_fdd->get_fixed_stride()) {
                                 can_keep_dim = true;

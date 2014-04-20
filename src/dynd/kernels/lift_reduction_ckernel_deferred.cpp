@@ -6,7 +6,7 @@
 #include <dynd/kernels/lift_reduction_ckernel_deferred.hpp>
 #include <dynd/kernels/make_lifted_reduction_ckernel.hpp>
 #include <dynd/types/strided_dim_type.hpp>
-#include <dynd/types/fixed_dim_type.hpp>
+#include <dynd/types/cfixed_dim_type.hpp>
 #include <dynd/types/var_dim_type.hpp>
 
 using namespace std;
@@ -148,7 +148,7 @@ void dynd::lift_reduction_ckernel_deferred(ckernel_deferred *out_ckd,
             ndt::type subtype = lifted_arr_type.get_type_at_dimension(NULL, i);
             switch (subtype.get_type_id()) {
                 case strided_dim_type_id:
-                case fixed_dim_type_id:
+                case cfixed_dim_type_id:
                     lifted_dst_type = ndt::make_strided_dim(lifted_dst_type);
                     break;
                 case var_dim_type_id:

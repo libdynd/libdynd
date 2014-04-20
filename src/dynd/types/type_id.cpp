@@ -111,7 +111,7 @@ std::ostream& dynd::operator<<(std::ostream& o, type_id_t tid)
             return (o << "json");
         case strided_dim_type_id:
             return (o << "strided_dim");
-        case fixed_dim_type_id:
+        case cfixed_dim_type_id:
             return (o << "fixed_dim");
         case var_dim_type_id:
             return (o << "var_dim");

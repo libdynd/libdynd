@@ -5,7 +5,7 @@
 
 #include <dynd/types/var_dim_type.hpp>
 #include <dynd/types/strided_dim_type.hpp>
-#include <dynd/types/fixed_dim_type.hpp>
+#include <dynd/types/cfixed_dim_type.hpp>
 #include <dynd/types/type_alignment.hpp>
 #include <dynd/types/pointer_type.hpp>
 #include <dynd/memblock/pod_memory_block.hpp>
@@ -596,7 +596,7 @@ size_t var_dim_type::make_assignment_kernel(
                             src_tp, src_metadata,
                             kernreq, errmode, ectx);
         } else if (src_tp.get_type_id() == strided_dim_type_id ||
-                        src_tp.get_type_id() == fixed_dim_type_id) {
+                        src_tp.get_type_id() == cfixed_dim_type_id) {
             // strided_dim to var_dim
             return make_strided_to_var_dim_assignment_kernel(out, offset_out,
                             dst_tp, dst_metadata,
@@ -617,7 +617,7 @@ size_t var_dim_type::make_assignment_kernel(
         throw broadcast_error(dst_tp, dst_metadata, src_tp, src_metadata);
     } else {
         if (dst_tp.get_type_id() == strided_dim_type_id ||
-                        dst_tp.get_type_id() == fixed_dim_type_id) {
+                        dst_tp.get_type_id() == cfixed_dim_type_id) {
             // var_dim to strided_dim
             return make_var_to_strided_dim_assignment_kernel(out, offset_out,
                             dst_tp, dst_metadata,

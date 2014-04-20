@@ -257,13 +257,13 @@ bool ndt::type::data_layout_compatible_with(const ndt::type& rhs) const
                 default:
                     return false;
             }
-        case fixed_dim_type_id:
+        case cfixed_dim_type_id:
             // For fixed dimensions, it's data layout compatible if
             // the shape and strides match, and the element is data
             // layout compatible.
-            if (rhs.get_type_id() == fixed_dim_type_id) {
-                const fixed_dim_type *fdd = static_cast<const fixed_dim_type *>(extended());
-                const fixed_dim_type *rhs_fdd = static_cast<const fixed_dim_type *>(rhs.extended());
+            if (rhs.get_type_id() == cfixed_dim_type_id) {
+                const cfixed_dim_type *fdd = static_cast<const cfixed_dim_type *>(extended());
+                const cfixed_dim_type *rhs_fdd = static_cast<const cfixed_dim_type *>(rhs.extended());
                 return fdd->get_fixed_dim_size() == rhs_fdd->get_fixed_dim_size() &&
                     fdd->get_fixed_stride() == rhs_fdd->get_fixed_stride() &&
                     fdd->get_element_type().data_layout_compatible_with(

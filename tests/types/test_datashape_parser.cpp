@@ -10,7 +10,7 @@
 
 #include <dynd/types/datashape_parser.hpp>
 #include <dynd/types/strided_dim_type.hpp>
-#include <dynd/types/fixed_dim_type.hpp>
+#include <dynd/types/cfixed_dim_type.hpp>
 #include <dynd/types/var_dim_type.hpp>
 #include <dynd/types/cstruct_type.hpp>
 #include <dynd/types/struct_type.hpp>
@@ -125,8 +125,8 @@ TEST(DataShapeParser, StridedDim) {
 }
 
 TEST(DataShapeParser, FixedDim) {
-    EXPECT_EQ(ndt::make_fixed_dim(3, ndt::make_type<dynd_bool>()), type_from_datashape("3 * bool"));
-    EXPECT_EQ(ndt::make_fixed_dim(4, ndt::make_fixed_dim(3, ndt::make_type<float>())),
+    EXPECT_EQ(ndt::make_cfixed_dim(3, ndt::make_type<dynd_bool>()), type_from_datashape("3 * bool"));
+    EXPECT_EQ(ndt::make_cfixed_dim(4, ndt::make_cfixed_dim(3, ndt::make_type<float>())),
                     type_from_datashape("4 * 3 * float32"));
 }
 
@@ -137,12 +137,12 @@ TEST(DataShapeParser, VarDim) {
 }
 
 TEST(DataShapeParser, StridedFixedDim) {
-    EXPECT_EQ(ndt::make_strided_dim(ndt::make_fixed_dim(3, ndt::make_type<float>())),
+    EXPECT_EQ(ndt::make_strided_dim(ndt::make_cfixed_dim(3, ndt::make_type<float>())),
                     type_from_datashape("M * 3 * float32"));
 }
 
 TEST(DataShapeParser, StridedVarFixedDim) {
-    EXPECT_EQ(ndt::make_strided_dim(ndt::make_var_dim(ndt::make_fixed_dim(3, ndt::make_type<float>()))),
+    EXPECT_EQ(ndt::make_strided_dim(ndt::make_var_dim(ndt::make_cfixed_dim(3, ndt::make_type<float>()))),
                     type_from_datashape("M * var * 3 * float32"));
 }
 

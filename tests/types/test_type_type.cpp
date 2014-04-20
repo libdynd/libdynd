@@ -11,7 +11,7 @@
 #include <dynd/array.hpp>
 #include <dynd/types/type_type.hpp>
 #include <dynd/types/strided_dim_type.hpp>
-#include <dynd/types/fixed_dim_type.hpp>
+#include <dynd/types/cfixed_dim_type.hpp>
 #include <dynd/types/var_dim_type.hpp>
 
 using namespace std;
@@ -127,7 +127,7 @@ TEST(DTypeDType, FixedArrayRefCount) {
     d = ndt::make_strided_dim(ndt::make_type<int>());
 
     // 1D Fixed Array
-    a = nd::empty(ndt::make_fixed_dim(10, ndt::make_type()));
+    a = nd::empty(ndt::make_cfixed_dim(10, ndt::make_type()));
     EXPECT_EQ(1, d.extended()->get_use_count());
     a.vals() = d;
     EXPECT_EQ(11, d.extended()->get_use_count());
@@ -146,7 +146,7 @@ TEST(DTypeDType, FixedArrayRefCount) {
 
     // 2D Fixed Array
     a = nd::empty(ndt::type("3 * 3 * type"));
-    EXPECT_EQ(fixed_dim_type_id, a.get_type().get_type_id());
+    EXPECT_EQ(cfixed_dim_type_id, a.get_type().get_type_id());
     EXPECT_EQ(1, d.extended()->get_use_count());
     a.vals() = d;
     EXPECT_EQ(10, d.extended()->get_use_count());

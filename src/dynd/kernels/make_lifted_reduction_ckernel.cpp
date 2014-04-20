@@ -6,7 +6,7 @@
 #include <dynd/kernels/make_lifted_reduction_ckernel.hpp>
 #include <dynd/kernels/ckernel_builder.hpp>
 #include <dynd/types/strided_dim_type.hpp>
-#include <dynd/types/fixed_dim_type.hpp>
+#include <dynd/types/cfixed_dim_type.hpp>
 #include <dynd/types/var_dim_type.hpp>
 #include <dynd/kernels/expr_kernel_generator.hpp>
 #include <dynd/kernels/ckernel_common_functions.hpp>
@@ -1021,8 +1021,8 @@ size_t dynd::make_lifted_reduction_ckernel(
         intptr_t dst_stride, dst_size, src_stride, src_size;
         // Get the striding parameters for the source dimension
         switch (src_tp.get_type_id()) {
-            case fixed_dim_type_id: {
-                const fixed_dim_type *fdt = static_cast<const fixed_dim_type *>(src_tp.extended());
+            case cfixed_dim_type_id: {
+                const cfixed_dim_type *fdt = static_cast<const cfixed_dim_type *>(src_tp.extended());
                 src_stride = fdt->get_fixed_stride();
                 src_size = fdt->get_fixed_dim_size();
                 src_tp = fdt->get_element_type();
@@ -1057,8 +1057,8 @@ size_t dynd::make_lifted_reduction_ckernel(
                 // If the dimensions are being kept, the output should be a
                 // a strided dimension of size one
                 switch (dst_tp.get_type_id()) {
-                    case fixed_dim_type_id: {
-                        const fixed_dim_type *fdt = static_cast<const fixed_dim_type *>(dst_tp.extended());
+                    case cfixed_dim_type_id: {
+                        const cfixed_dim_type *fdt = static_cast<const cfixed_dim_type *>(dst_tp.extended());
                         if (fdt->get_fixed_dim_size() != 1 || fdt->get_fixed_stride() != 0) {
                             stringstream ss;
                             ss << "make_lifted_reduction_ckernel: destination of a reduction dimension ";
@@ -1109,8 +1109,8 @@ size_t dynd::make_lifted_reduction_ckernel(
         } else {
             // This dimension is being broadcast, not reduced
             switch (dst_tp.get_type_id()) {
-                case fixed_dim_type_id: {
-                    const fixed_dim_type *fdt = static_cast<const fixed_dim_type *>(dst_tp.extended());
+                case cfixed_dim_type_id: {
+                    const cfixed_dim_type *fdt = static_cast<const cfixed_dim_type *>(dst_tp.extended());
                     dst_stride = fdt->get_fixed_stride();
                     dst_size = fdt->get_fixed_dim_size();
                     dst_tp = fdt->get_element_type();

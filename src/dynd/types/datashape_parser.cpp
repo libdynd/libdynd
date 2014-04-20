@@ -9,7 +9,7 @@
 #include <dynd/types/datashape_parser.hpp>
 #include <dynd/types/strided_dim_type.hpp>
 #include <dynd/types/var_dim_type.hpp>
-#include <dynd/types/fixed_dim_type.hpp>
+#include <dynd/types/cfixed_dim_type.hpp>
 #include <dynd/types/cstruct_type.hpp>
 #include <dynd/types/struct_type.hpp>
 #include <dynd/types/string_type.hpp>
@@ -288,6 +288,57 @@ static bool parse_quoted_string(const char *&begin, const char *end, string& out
         } else {
             return true;
         }
+    }
+}
+
+// cfixed_type : cfixed[N] * rhs_expression
+// cfixed_type : cfixed[N, stride=M] * rhs_expression
+static ndt::type parse_cfixed_dim_parameters(const char *&begin,
+                                             const char *end,
+                                             map<string, ndt::type> &symtable)
+{
+    if (parse_token(begin, end, '[')) {
+        const char *saved_begin = begin;
+        string dim_size_str = parse_number(begin, end);
+        intptr_t dim_size;
+        intptr_t stride = numeric_limits<intptr_t>::min();
+        if (!dim_size_str.empty()) {
+            dim_size = atoll(dim_size_str.c_str());
+            if (dim_size < 0) {
+                throw datashape_parse_error(saved_begin, "dim size cannot be negative");
+            }
+            if (parse_token(begin, end, ',')) {
+                saved_begin = begin;
+                if (!parse_token(begin, end, "stride")) {
+                    throw datashape_parse_error(begin, "expected keyword parameter 'stride'");
+                }
+                // bytes type with an alignment
+                if (!parse_token(begin, end, '=')) {
+                    throw datashape_parse_error(begin, "expected an =");
+                }
+                string stride_str = parse_number(begin, end);
+                stride = atoll(stride_str.c_str());
+            }
+            if (!parse_token(begin, end, ']')) {
+                throw datashape_parse_error(begin, "expected closing ']'");
+            }
+            if (!parse_token(begin, end, '*')) {
+                throw datashape_parse_error(begin, "expected dimension separator '*'");
+            }
+            ndt::type element_tp = parse_rhs_expression(begin, end, symtable);
+            if (element_tp.get_type_id() == uninitialized_type_id) {
+                throw datashape_parse_error(begin, "expected element type");
+            }
+            if (stride == numeric_limits<intptr_t>::min()) {
+                return ndt::make_cfixed_dim(dim_size, element_tp);
+            } else {
+                return ndt::make_cfixed_dim(dim_size, element_tp, stride);
+            }
+        } else {
+            throw datashape_parse_error(saved_begin, "expected dimension size");
+        }
+    } else {
+        throw datashape_parse_error(begin, "expected opening '['");
     }
 }
 
@@ -763,6 +814,8 @@ static ndt::type parse_rhs_expression(const char *&begin, const char *end, map<s
             result = parse_cuda_host_parameters(begin, end, symtable);
         } else if (n == "cuda_device") {
             result = parse_cuda_device_parameters(begin, end, symtable);
+        } else if (n == "cfixed") {
+            result = parse_cfixed_dim_parameters(begin, end, symtable);
         } else {
             const map<string, ndt::type>& builtin_types = get_builtin_types();
             map<string, ndt::type>::const_iterator i = builtin_types.find(n);
@@ -796,7 +849,7 @@ static ndt::type parse_rhs_expression(const char *&begin, const char *end, map<s
                 } else if (shape[i] == -1) {
                     result = ndt::make_var_dim(result);
                 } else {
-                    result = ndt::make_fixed_dim(shape[i], result);
+                    result = ndt::make_cfixed_dim(shape[i], result);
                 }
             }
         }

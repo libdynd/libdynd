@@ -14,7 +14,7 @@
 #include <dynd/kernels/expr_kernel_generator.hpp>
 #include <dynd/shape_tools.hpp>
 #include <dynd/types/strided_dim_type.hpp>
-#include <dynd/types/fixed_dim_type.hpp>
+#include <dynd/types/cfixed_dim_type.hpp>
 #include <dynd/pp/list.hpp>
 #include <dynd/pp/meta.hpp>
 
@@ -543,8 +543,8 @@ DYND_PP_JOIN_MAP(CALL_CKERNEL_INSTANTIATORS, (), DYND_PP_RANGE(1, DYND_PP_INC(DY
                 (type)), \
             DYND_PP_META_NAME_RANGE(D, NSRC)); \
 \
-        ndt::type data_dynd_types[NSRC + 1] = {ndt::fixed_dim_from_array<R>::make(), DYND_PP_JOIN_ELWISE_1(DYND_PP_META_SCOPE_CALL, (,), \
-            DYND_PP_OUTER(DYND_PP_META_TEMPLATE_INSTANTIATION, (ndt::fixed_dim_from_array), \
+        ndt::type data_dynd_types[NSRC + 1] = {ndt::cfixed_dim_from_array<R>::make(), DYND_PP_JOIN_ELWISE_1(DYND_PP_META_SCOPE_CALL, (,), \
+            DYND_PP_OUTER(DYND_PP_META_TEMPLATE_INSTANTIATION, (ndt::cfixed_dim_from_array), \
             DYND_PP_META_NAME_RANGE(D, NSRC)), DYND_PP_REPEAT(make, NSRC))}; \
 \
         DYND_PP_JOIN_ELWISE_1(DYND_PP_META_ASGN, (;), \
@@ -618,8 +618,8 @@ DYND_PP_JOIN_MAP(CALL_CKERNEL_INSTANTIATORS, (), DYND_PP_RANGE(1, DYND_PP_INC(DY
                 (type)), \
             DYND_PP_META_NAME_RANGE(D, NSRC)); \
 \
-        ndt::type data_dynd_types[NSRC + 1] = {ndt::fixed_dim_from_array<R>::make(), DYND_PP_JOIN_ELWISE_1(DYND_PP_META_SCOPE_CALL, (,), \
-            DYND_PP_OUTER(DYND_PP_META_TEMPLATE_INSTANTIATION, (ndt::fixed_dim_from_array), \
+        ndt::type data_dynd_types[NSRC + 1] = {ndt::cfixed_dim_from_array<R>::make(), DYND_PP_JOIN_ELWISE_1(DYND_PP_META_SCOPE_CALL, (,), \
+            DYND_PP_OUTER(DYND_PP_META_TEMPLATE_INSTANTIATION, (ndt::cfixed_dim_from_array), \
             DYND_PP_META_NAME_RANGE(D, NSRC)), DYND_PP_REPEAT(make, NSRC))}; \
 \
         DYND_PP_JOIN_ELWISE_1(DYND_PP_META_ASGN, (;), \
@@ -703,8 +703,8 @@ DYND_PP_JOIN_MAP(FUNCS, (), DYND_PP_RANGE(1, DYND_PP_INC(DYND_ELWISE_MAX)))
                 (type)), \
             DYND_PP_META_NAME_RANGE(D, NSRC)); \
 \
-        ndt::type data_dynd_types[NSRC + 1] = {ndt::fixed_dim_from_array<R>::make(), DYND_PP_JOIN_ELWISE_1(DYND_PP_META_SCOPE_CALL, (,), \
-            DYND_PP_OUTER(DYND_PP_META_TEMPLATE_INSTANTIATION, (ndt::fixed_dim_from_array), \
+        ndt::type data_dynd_types[NSRC + 1] = {ndt::cfixed_dim_from_array<R>::make(), DYND_PP_JOIN_ELWISE_1(DYND_PP_META_SCOPE_CALL, (,), \
+            DYND_PP_OUTER(DYND_PP_META_TEMPLATE_INSTANTIATION, (ndt::cfixed_dim_from_array), \
             DYND_PP_META_NAME_RANGE(D, NSRC)), DYND_PP_REPEAT(make, NSRC))}; \
 \
         DYND_PP_JOIN_ELWISE_1(DYND_PP_META_ASGN, (;), \
@@ -780,8 +780,8 @@ DYND_PP_JOIN_MAP(FUNCS, (), DYND_PP_RANGE(1, DYND_PP_INC(DYND_ELWISE_MAX)))
                 (type)), \
             DYND_PP_META_NAME_RANGE(D, NSRC)); \
 \
-        ndt::type data_dynd_types[NSRC + 1] = {ndt::fixed_dim_from_array<R>::make(), DYND_PP_JOIN_ELWISE_1(DYND_PP_META_SCOPE_CALL, (,), \
-            DYND_PP_OUTER(DYND_PP_META_TEMPLATE_INSTANTIATION, (ndt::fixed_dim_from_array), \
+        ndt::type data_dynd_types[NSRC + 1] = {ndt::cfixed_dim_from_array<R>::make(), DYND_PP_JOIN_ELWISE_1(DYND_PP_META_SCOPE_CALL, (,), \
+            DYND_PP_OUTER(DYND_PP_META_TEMPLATE_INSTANTIATION, (ndt::cfixed_dim_from_array), \
             DYND_PP_META_NAME_RANGE(D, NSRC)), DYND_PP_REPEAT(make, NSRC))}; \
 \
         DYND_PP_JOIN_ELWISE_1(DYND_PP_META_ASGN, (;), \
@@ -867,8 +867,8 @@ DYND_PP_JOIN_MAP(METHS, (), DYND_PP_RANGE(1, DYND_PP_INC(DYND_ELWISE_MAX)))
                 (type)), \
             DYND_PP_META_NAME_RANGE(D, NSRC)); \
 \
-        ndt::type data_dynd_types[NSRC + 1] = {ndt::fixed_dim_from_array<R>::make(), DYND_PP_JOIN_ELWISE_1(DYND_PP_META_SCOPE_CALL, (,), \
-            DYND_PP_OUTER(DYND_PP_META_TEMPLATE_INSTANTIATION, (ndt::fixed_dim_from_array), \
+        ndt::type data_dynd_types[NSRC + 1] = {ndt::cfixed_dim_from_array<R>::make(), DYND_PP_JOIN_ELWISE_1(DYND_PP_META_SCOPE_CALL, (,), \
+            DYND_PP_OUTER(DYND_PP_META_TEMPLATE_INSTANTIATION, (ndt::cfixed_dim_from_array), \
             DYND_PP_META_NAME_RANGE(D, NSRC)), DYND_PP_REPEAT(make, NSRC))}; \
 \
         DYND_PP_JOIN_ELWISE_1(DYND_PP_META_ASGN, (;), \
@@ -942,8 +942,8 @@ DYND_PP_JOIN_MAP(METHS, (), DYND_PP_RANGE(1, DYND_PP_INC(DYND_ELWISE_MAX)))
                 (type)), \
             DYND_PP_META_NAME_RANGE(D, NSRC)); \
 \
-        ndt::type data_dynd_types[NSRC + 1] = {ndt::fixed_dim_from_array<R>::make(), DYND_PP_JOIN_ELWISE_1(DYND_PP_META_SCOPE_CALL, (,), \
-            DYND_PP_OUTER(DYND_PP_META_TEMPLATE_INSTANTIATION, (ndt::fixed_dim_from_array), \
+        ndt::type data_dynd_types[NSRC + 1] = {ndt::cfixed_dim_from_array<R>::make(), DYND_PP_JOIN_ELWISE_1(DYND_PP_META_SCOPE_CALL, (,), \
+            DYND_PP_OUTER(DYND_PP_META_TEMPLATE_INSTANTIATION, (ndt::cfixed_dim_from_array), \
             DYND_PP_META_NAME_RANGE(D, NSRC)), DYND_PP_REPEAT(make, NSRC))}; \
 \
         DYND_PP_JOIN_ELWISE_1(DYND_PP_META_ASGN, (;), \

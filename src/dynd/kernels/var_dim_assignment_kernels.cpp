@@ -12,7 +12,7 @@
 #include <dynd/kernels/var_dim_assignment_kernels.hpp>
 #include <dynd/types/var_dim_type.hpp>
 #include <dynd/types/strided_dim_type.hpp>
-#include <dynd/types/fixed_dim_type.hpp>
+#include <dynd/types/cfixed_dim_type.hpp>
 
 using namespace std;
 using namespace dynd;
@@ -334,8 +334,8 @@ size_t dynd::make_strided_to_var_dim_assignment_kernel(
         e->src_dim_size = src_md->size;
         src_element_tp = src_sad->get_element_type();
         src_element_metadata = src_metadata + sizeof(strided_dim_type_metadata);
-    } else if (src_strided_dim_tp.get_type_id() == fixed_dim_type_id) {
-        const fixed_dim_type *src_fad = static_cast<const fixed_dim_type *>(src_strided_dim_tp.extended());
+    } else if (src_strided_dim_tp.get_type_id() == cfixed_dim_type_id) {
+        const cfixed_dim_type *src_fad = static_cast<const cfixed_dim_type *>(src_strided_dim_tp.extended());
         e->src_stride = src_fad->get_fixed_stride();
         e->src_dim_size = src_fad->get_fixed_dim_size();
         src_element_tp = src_fad->get_element_type();
@@ -431,8 +431,8 @@ size_t dynd::make_var_to_strided_dim_assignment_kernel(
         e->dst_dim_size = dst_md->size;
         dst_element_tp = dst_sad->get_element_type();
         dst_element_metadata = dst_metadata + sizeof(strided_dim_type_metadata);
-    } else if (dst_strided_dim_tp.get_type_id() == fixed_dim_type_id) {
-        const fixed_dim_type *dst_fad = static_cast<const fixed_dim_type *>(dst_strided_dim_tp.extended());
+    } else if (dst_strided_dim_tp.get_type_id() == cfixed_dim_type_id) {
+        const cfixed_dim_type *dst_fad = static_cast<const cfixed_dim_type *>(dst_strided_dim_tp.extended());
         e->dst_stride = dst_fad->get_fixed_stride();
         e->dst_dim_size = dst_fad->get_fixed_dim_size();
         dst_element_tp = dst_fad->get_element_type();

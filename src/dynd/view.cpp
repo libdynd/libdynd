@@ -5,7 +5,7 @@
 
 #include <dynd/view.hpp>
 #include <dynd/types/strided_dim_type.hpp>
-#include <dynd/types/fixed_dim_type.hpp>
+#include <dynd/types/cfixed_dim_type.hpp>
 
 using namespace std;
 using namespace dynd;
@@ -52,9 +52,9 @@ static bool try_view(const ndt::type &tp, const char *metadata,
                 return false;
             }
         }
-        case fixed_dim_type_id: { // strided as fixed
-            const fixed_dim_type *view_fdt =
-                static_cast<const fixed_dim_type *>(view_tp.extended());
+        case cfixed_dim_type_id: { // strided as fixed
+            const cfixed_dim_type *view_fdt =
+                static_cast<const cfixed_dim_type *>(view_tp.extended());
             // The size and stride must match exactly in this case
             if (md->size != (intptr_t)view_fdt->get_fixed_dim_size() ||
                     md->stride != view_fdt->get_fixed_stride()) {
@@ -69,13 +69,13 @@ static bool try_view(const ndt::type &tp, const char *metadata,
             return false;
         }
     }
-    case fixed_dim_type_id: {
-        const fixed_dim_type *fdt =
-            static_cast<const fixed_dim_type *>(tp.extended());
+    case cfixed_dim_type_id: {
+        const cfixed_dim_type *fdt =
+            static_cast<const cfixed_dim_type *>(tp.extended());
         switch (view_tp.get_type_id()) {
-        case fixed_dim_type_id: { // fixed as fixed
-            const fixed_dim_type *view_fdt =
-                static_cast<const fixed_dim_type *>(view_tp.extended());
+        case cfixed_dim_type_id: { // fixed as fixed
+            const cfixed_dim_type *view_fdt =
+                static_cast<const cfixed_dim_type *>(view_tp.extended());
             // The size and stride must match exactly in this case
             if (fdt->get_fixed_dim_size() != view_fdt->get_fixed_dim_size() ||
                     fdt->get_fixed_stride() != view_fdt->get_fixed_stride()) {

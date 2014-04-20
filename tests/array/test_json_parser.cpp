@@ -12,7 +12,7 @@
 
 #include <dynd/json_parser.hpp>
 #include <dynd/types/var_dim_type.hpp>
-#include <dynd/types/fixed_dim_type.hpp>
+#include <dynd/types/cfixed_dim_type.hpp>
 #include <dynd/types/cstruct_type.hpp>
 #include <dynd/types/struct_type.hpp>
 #include <dynd/types/date_type.hpp>
@@ -123,9 +123,9 @@ TEST(JSONParser, ListBools) {
     EXPECT_FALSE(n(2).as<bool>());
     EXPECT_FALSE(n(3).as<bool>());
 
-    n = parse_json(ndt::make_fixed_dim(4, ndt::make_type<dynd_bool>()),
+    n = parse_json(ndt::make_cfixed_dim(4, ndt::make_type<dynd_bool>()),
                     "  [true, true, false, null]  ");
-    EXPECT_EQ(ndt::make_fixed_dim(4, ndt::make_type<dynd_bool>()), n.get_type());
+    EXPECT_EQ(ndt::make_cfixed_dim(4, ndt::make_type<dynd_bool>()), n.get_type());
     EXPECT_TRUE(n(0).as<bool>());
     EXPECT_TRUE(n(1).as<bool>());
     EXPECT_FALSE(n(2).as<bool>());
@@ -134,13 +134,13 @@ TEST(JSONParser, ListBools) {
     EXPECT_THROW(parse_json(ndt::make_var_dim(ndt::make_type<dynd_bool>()),
                     "[true, true, false, null] 3.5"),
                     runtime_error);
-    EXPECT_THROW(parse_json(ndt::make_fixed_dim(4, ndt::make_type<dynd_bool>()),
+    EXPECT_THROW(parse_json(ndt::make_cfixed_dim(4, ndt::make_type<dynd_bool>()),
                     "[true, true, false, null] 3.5"),
                     runtime_error);
-    EXPECT_THROW(parse_json(ndt::make_fixed_dim(3, ndt::make_type<dynd_bool>()),
+    EXPECT_THROW(parse_json(ndt::make_cfixed_dim(3, ndt::make_type<dynd_bool>()),
                     "[true, true, false, null]"),
                     runtime_error);
-    EXPECT_THROW(parse_json(ndt::make_fixed_dim(5, ndt::make_type<dynd_bool>()),
+    EXPECT_THROW(parse_json(ndt::make_cfixed_dim(5, ndt::make_type<dynd_bool>()),
                     "[true, true, false, null]"),
                     runtime_error);
 }
@@ -148,9 +148,9 @@ TEST(JSONParser, ListBools) {
 TEST(JSONParser, NestedListInts) {
     nd::array n;
 
-    n = parse_json(ndt::make_fixed_dim(3, ndt::make_var_dim(ndt::make_type<int>())),
+    n = parse_json(ndt::make_cfixed_dim(3, ndt::make_var_dim(ndt::make_type<int>())),
                     "  [[1,2,3], [4,5], [6,7,-10,1000] ]  ");
-    EXPECT_EQ(ndt::make_fixed_dim(3, ndt::make_var_dim(ndt::make_type<int>())), n.get_type());
+    EXPECT_EQ(ndt::make_cfixed_dim(3, ndt::make_var_dim(ndt::make_type<int>())), n.get_type());
     EXPECT_EQ(1, n(0,0).as<int>());
     EXPECT_EQ(2, n(0,1).as<int>());
     EXPECT_EQ(3, n(0,2).as<int>());
@@ -161,9 +161,9 @@ TEST(JSONParser, NestedListInts) {
     EXPECT_EQ(-10, n(2,2).as<int>());
     EXPECT_EQ(1000, n(2,3).as<int>());
 
-    n = parse_json(ndt::make_var_dim(ndt::make_fixed_dim(3, ndt::make_type<int>())),
+    n = parse_json(ndt::make_var_dim(ndt::make_cfixed_dim(3, ndt::make_type<int>())),
                     "  [[1,2,3], [4,5,2] ]  ");
-    EXPECT_EQ(ndt::make_var_dim(ndt::make_fixed_dim(3, ndt::make_type<int>())), n.get_type());
+    EXPECT_EQ(ndt::make_var_dim(ndt::make_cfixed_dim(3, ndt::make_type<int>())), n.get_type());
     EXPECT_EQ(1, n(0,0).as<int>());
     EXPECT_EQ(2, n(0,1).as<int>());
     EXPECT_EQ(3, n(0,2).as<int>());
@@ -203,7 +203,7 @@ TEST(JSONParser, Struct) {
 
 TEST(JSONParser, NestedStruct) {
     nd::array n;
-    ndt::type sdt = ndt::make_cstruct(ndt::make_fixed_dim(3, ndt::make_type<float>()), "position",
+    ndt::type sdt = ndt::make_cstruct(ndt::make_cfixed_dim(3, ndt::make_type<float>()), "position",
                     ndt::make_type<double>(), "amount",
                     ndt::make_cstruct(ndt::make_string(), "name", ndt::make_date(), "when"), "data");
 
@@ -235,7 +235,7 @@ TEST(JSONParser, NestedStruct) {
 
 TEST(JSONParser, ListOfStruct) {
     nd::array n;
-    ndt::type sdt = ndt::make_var_dim(ndt::make_cstruct(ndt::make_fixed_dim(3, ndt::make_type<float>()), "position",
+    ndt::type sdt = ndt::make_var_dim(ndt::make_cstruct(ndt::make_cfixed_dim(3, ndt::make_type<float>()), "position",
                     ndt::make_type<double>(), "amount",
                     ndt::make_cstruct(ndt::make_string(), "name", ndt::make_date(), "when"), "data"));
 

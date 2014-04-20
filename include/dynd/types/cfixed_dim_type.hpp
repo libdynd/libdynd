@@ -14,22 +14,22 @@
 
 namespace dynd {
 
-struct fixed_dim_type_iterdata {
+struct cfixed_dim_type_iterdata {
     iterdata_common common;
     char *data;
     intptr_t stride;
 };
 
-class fixed_dim_type : public base_uniform_dim_type {
+class cfixed_dim_type : public base_uniform_dim_type {
     intptr_t m_stride;
     size_t m_dim_size;
     std::vector<std::pair<std::string, gfunc::callable> > m_array_properties, m_array_functions;
 
 public:
-    fixed_dim_type(size_t dimension_size, const ndt::type& element_tp);
-    fixed_dim_type(size_t dimension_size, const ndt::type& element_tp, intptr_t stride);
+    cfixed_dim_type(size_t dimension_size, const ndt::type& element_tp);
+    cfixed_dim_type(size_t dimension_size, const ndt::type& element_tp, intptr_t stride);
 
-    virtual ~fixed_dim_type();
+    virtual ~cfixed_dim_type();
 
     size_t get_default_data_size(intptr_t DYND_UNUSED(ndim), const intptr_t *DYND_UNUSED(shape)) const {
         return get_data_size();
@@ -117,24 +117,25 @@ public:
 };
 
 namespace ndt {
-    inline ndt::type make_fixed_dim(size_t size, const ndt::type& element_tp) {
-        return ndt::type(new fixed_dim_type(size, element_tp), false);
+    inline ndt::type make_cfixed_dim(size_t size, const ndt::type& element_tp) {
+        return ndt::type(new cfixed_dim_type(size, element_tp), false);
     }
 
-    inline ndt::type make_fixed_dim(size_t size, const ndt::type& element_tp, intptr_t stride) {
-        return ndt::type(new fixed_dim_type(size, element_tp, stride), false);
+    inline ndt::type make_cfixed_dim(size_t size, const ndt::type& element_tp, intptr_t stride) {
+        return ndt::type(new cfixed_dim_type(size, element_tp, stride), false);
     }
 
-    ndt::type make_fixed_dim(intptr_t ndim, const intptr_t *shape, const ndt::type& uniform_tp, const int *axis_perm);
+    ndt::type make_cfixed_dim(intptr_t ndim, const intptr_t *shape,
+                              const ndt::type &dtp, const int *axis_perm);
 
-    template<class T> struct fixed_dim_from_array {
+    template<class T> struct cfixed_dim_from_array {
         static ndt::type make() {
             return ndt::make_type<T>();
         }
     };
-    template<class T, int N> struct fixed_dim_from_array<T[N]> {
+    template<class T, int N> struct cfixed_dim_from_array<T[N]> {
         static ndt::type make() {
-            return ndt::make_fixed_dim(N, ndt::fixed_dim_from_array<T>::make());
+            return ndt::make_cfixed_dim(N, ndt::cfixed_dim_from_array<T>::make());
         }
     };
 } // namespace ndt

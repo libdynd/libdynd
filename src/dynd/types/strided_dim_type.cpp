@@ -4,7 +4,7 @@
 //
 
 #include <dynd/types/strided_dim_type.hpp>
-#include <dynd/types/fixed_dim_type.hpp>
+#include <dynd/types/cfixed_dim_type.hpp>
 #include <dynd/types/type_alignment.hpp>
 #include <dynd/shape_tools.hpp>
 #include <dynd/exceptions.hpp>
@@ -545,9 +545,9 @@ size_t strided_dim_type::make_assignment_kernel(
                             m_element_tp, dst_metadata + sizeof(strided_dim_type_metadata),
                             src_sad->get_element_type(), src_metadata + sizeof(strided_dim_type_metadata),
                             kernel_request_strided, errmode, ectx);
-        } else if (src_tp.get_type_id() == fixed_dim_type_id) {
+        } else if (src_tp.get_type_id() == cfixed_dim_type_id) {
             // fixed_array -> strided_dim
-            const fixed_dim_type *src_fad = static_cast<const fixed_dim_type *>(src_tp.extended());
+            const cfixed_dim_type *src_fad = static_cast<const cfixed_dim_type *>(src_tp.extended());
             intptr_t src_size = src_fad->get_fixed_dim_size();
             // Check for a broadcasting error
             if (src_size != 1 && dst_md->size != src_size) {
@@ -632,8 +632,8 @@ void strided_dim_type::reorder_default_constructed_strides(char *dst_metadata,
     for (size_t i = 0; i < ndim; ++i) {
         intptr_t stride;
         switch (last_src_tp.get_type_id()) {
-            case fixed_dim_type_id: {
-                const fixed_dim_type *fdd = static_cast<const fixed_dim_type *>(last_src_tp.extended());
+            case cfixed_dim_type_id: {
+                const cfixed_dim_type *fdd = static_cast<const cfixed_dim_type *>(last_src_tp.extended());
                 stride = fdd->get_fixed_stride();
                 last_src_tp = fdd->get_element_type();
                 break;

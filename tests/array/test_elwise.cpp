@@ -66,7 +66,7 @@ TYPED_TEST_P(Elwise, FuncRetRes) {
 
     TypeParam vals1[2][3] = {{0, 1, 2}, {3, 4, 5}};
 
-    a = nd::empty(ndt::make_fixed_dim(3, ndt::make_type<TypeParam>()));
+    a = nd::empty(ndt::make_cfixed_dim(3, ndt::make_type<TypeParam>()));
 
     a.vals() = vals1[0];
     res = nd::elwise(static_cast<TypeParam (*)(const TypeParam(&)[3])>(&func1), a);
@@ -78,7 +78,7 @@ TYPED_TEST_P(Elwise, FuncRetRes) {
     EXPECT_EQ(ndt::make_type<TypeParam>(), res.get_type());
     EXPECT_EQ(12, res.as<TypeParam>());
 
-    b = nd::empty(ndt::make_fixed_dim(3, ndt::make_type<TypeParam>()));
+    b = nd::empty(ndt::make_cfixed_dim(3, ndt::make_type<TypeParam>()));
 
     a.vals() = vals1[0];
     b.vals() = vals1[1];
@@ -86,7 +86,7 @@ TYPED_TEST_P(Elwise, FuncRetRes) {
     EXPECT_EQ(ndt::make_type<TypeParam>(), res.get_type());
     EXPECT_EQ(14, res.as<TypeParam>());
 
-    a = nd::empty(ndt::fixed_dim_from_array<TypeParam[2][3]>::make());
+    a = nd::empty(ndt::cfixed_dim_from_array<TypeParam[2][3]>::make());
 
     a.vals() = vals1;
     res = nd::elwise(static_cast<TypeParam (*)(const TypeParam(&)[2][3])>(&func3), a);
@@ -151,7 +151,7 @@ TYPED_TEST_P(Elwise, FuncRefRes) {
     EXPECT_EQ(-20, res.as<int>());
 
     res = nd::elwise(func4<TypeParam>, a, b);
-    EXPECT_EQ(ndt::make_fixed_dim(2, ndt::make_type<TypeParam>()), res.get_type());
+    EXPECT_EQ(ndt::make_cfixed_dim(2, ndt::make_type<TypeParam>()), res.get_type());
     EXPECT_EQ(20, res(0).as<TypeParam>());
     EXPECT_EQ(10, res(1).as<TypeParam>());
 
@@ -181,7 +181,7 @@ TYPED_TEST_P(Elwise, FuncRefRes) {
     EXPECT_EQ(6, res(1, 2).as<int>());
 
     res = nd::elwise(func4<TypeParam>, a, b);
-    EXPECT_EQ(ndt::make_strided_dim(ndt::make_strided_dim(ndt::make_fixed_dim(2, ndt::make_type<TypeParam>()))), res.get_type());
+    EXPECT_EQ(ndt::make_strided_dim(ndt::make_strided_dim(ndt::make_cfixed_dim(2, ndt::make_type<TypeParam>()))), res.get_type());
     ASSERT_EQ(2, res.get_shape()[0]);
     ASSERT_EQ(3, res.get_shape()[1]);
     for (int i = 0; i < 2; ++i) {
@@ -193,7 +193,7 @@ TYPED_TEST_P(Elwise, FuncRefRes) {
 
     TypeParam vals1[2][3] = {{0, 1, 2}, {3, 4, 5}};
 
-    a = nd::empty(ndt::make_fixed_dim(3, ndt::make_type<TypeParam>()));
+    a = nd::empty(ndt::make_cfixed_dim(3, ndt::make_type<TypeParam>()));
 
     a.vals() = vals1[0];
     res = nd::elwise(static_cast<void (*)(TypeParam &, const TypeParam(&)[3])>(&func1), a);
@@ -205,7 +205,7 @@ TYPED_TEST_P(Elwise, FuncRefRes) {
     EXPECT_EQ(ndt::make_type<TypeParam>(), res.get_type());
     EXPECT_EQ(12, res.as<TypeParam>());
 
-    b = nd::empty(ndt::make_fixed_dim(3, ndt::make_type<TypeParam>()));
+    b = nd::empty(ndt::make_cfixed_dim(3, ndt::make_type<TypeParam>()));
 
     a.vals() = vals1[0];
     b.vals() = vals1[1];
@@ -213,7 +213,7 @@ TYPED_TEST_P(Elwise, FuncRefRes) {
     EXPECT_EQ(ndt::make_type<TypeParam>(), res.get_type());
     EXPECT_EQ(14, res.as<TypeParam>());
 
-    a = nd::empty(ndt::fixed_dim_from_array<TypeParam[2][3]>::make());
+    a = nd::empty(ndt::cfixed_dim_from_array<TypeParam[2][3]>::make());
 
     a.vals() = vals1;
     res = nd::elwise(static_cast<void (*)(TypeParam &, const TypeParam(&)[2][3])>(&func3), a);
@@ -225,12 +225,12 @@ TYPED_TEST_P(Elwise, FuncRefRes) {
         {2, (TypeParam) -1.7023, 0}};
     TypeParam bvals2[3] = {33, 7, 53401};
 
-    a = nd::empty(ndt::fixed_dim_from_array<TypeParam[3][3]>::make());
+    a = nd::empty(ndt::cfixed_dim_from_array<TypeParam[3][3]>::make());
 
     a.vals() = avals2;
     b.vals() = bvals2;
     res = nd::elwise(func5<TypeParam>, a, b);
-    EXPECT_EQ(ndt::make_fixed_dim(3, ndt::make_type<TypeParam>()), res.get_type());
+    EXPECT_EQ(ndt::make_cfixed_dim(3, ndt::make_type<TypeParam>()), res.get_type());
     for (int i = 0; i < 3; ++i) {
             EXPECT_EQ(res(i), avals2[i][0] * bvals2[0] + avals2[i][1] * bvals2[1]
                 + avals2[i][2] * bvals2[2]);
@@ -244,7 +244,7 @@ TYPED_TEST_P(Elwise, FuncRefRes) {
 
     b.vals() = bvals_3;
     res = nd::elwise(func7<TypeParam>, a, b);
-    EXPECT_EQ(ndt::make_fixed_dim(3, ndt::make_fixed_dim(3, ndt::make_type<TypeParam>())), res.get_type());
+    EXPECT_EQ(ndt::make_cfixed_dim(3, ndt::make_cfixed_dim(3, ndt::make_type<TypeParam>())), res.get_type());
     for (int i = 0; i < 3; ++i) {
         for (int j = 0; j < 3; ++j) {
             EXPECT_EQ(res(i, j), avals2[i][0] * bvals_3[0][j] + avals2[i][1] * bvals_3[1][j]
@@ -309,7 +309,7 @@ TYPED_TEST_P(Elwise, MethRetRes) {
 
     TypeParam vals1[2][3] = {{0, 1, 2}, {3, 4, 5}};
 
-    a = nd::empty(ndt::make_fixed_dim(3, ndt::make_type<TypeParam>()));
+    a = nd::empty(ndt::make_cfixed_dim(3, ndt::make_type<TypeParam>()));
 
     a.vals() = vals1[0];
     res = nd::elwise(FuncWrapper1(&func1), &FuncWrapper1::meth, a);
@@ -321,7 +321,7 @@ TYPED_TEST_P(Elwise, MethRetRes) {
     EXPECT_EQ(ndt::make_type<TypeParam>(), res.get_type());
     EXPECT_EQ(12, res.as<TypeParam>());
 
-    b = nd::empty(ndt::make_fixed_dim(3, ndt::make_type<TypeParam>()));
+    b = nd::empty(ndt::make_cfixed_dim(3, ndt::make_type<TypeParam>()));
 
     a.vals() = vals1[0];
     b.vals() = vals1[1];
@@ -329,7 +329,7 @@ TYPED_TEST_P(Elwise, MethRetRes) {
     EXPECT_EQ(ndt::make_type<TypeParam>(), res.get_type());
     EXPECT_EQ(14, res.as<TypeParam>());
 
-    a = nd::empty(ndt::fixed_dim_from_array<TypeParam[2][3]>::make());
+    a = nd::empty(ndt::cfixed_dim_from_array<TypeParam[2][3]>::make());
 
     a.vals() = vals1;
     res = nd::elwise(FuncWrapper3(&func3), &FuncWrapper3::meth, a);
@@ -377,7 +377,7 @@ TYPED_TEST_P(Elwise, MethRefRes) {
     EXPECT_EQ(-20, res.as<int>());
 
     res = nd::elwise(FuncWrapper4(&func4), &FuncWrapper4::meth, a, b);
-    EXPECT_EQ(ndt::make_fixed_dim(2, ndt::make_type<TypeParam>()), res.get_type());
+    EXPECT_EQ(ndt::make_cfixed_dim(2, ndt::make_type<TypeParam>()), res.get_type());
     EXPECT_EQ(20, res(0).as<TypeParam>());
     EXPECT_EQ(10, res(1).as<TypeParam>());
 
@@ -407,7 +407,7 @@ TYPED_TEST_P(Elwise, MethRefRes) {
     EXPECT_EQ(6, res(1, 2).as<int>());
 
     res = nd::elwise(FuncWrapper4(&func4), &FuncWrapper4::meth, a, b);
-    EXPECT_EQ(ndt::make_strided_dim(ndt::make_strided_dim(ndt::make_fixed_dim(2, ndt::make_type<TypeParam>()))), res.get_type());
+    EXPECT_EQ(ndt::make_strided_dim(ndt::make_strided_dim(ndt::make_cfixed_dim(2, ndt::make_type<TypeParam>()))), res.get_type());
     ASSERT_EQ(2, res.get_shape()[0]);
     ASSERT_EQ(3, res.get_shape()[1]);
     for (int i = 0; i < 2; ++i) {
@@ -419,7 +419,7 @@ TYPED_TEST_P(Elwise, MethRefRes) {
 
     TypeParam vals1[2][3] = {{0, 1, 2}, {3, 4, 5}};
 
-    a = nd::empty(ndt::make_fixed_dim(3, ndt::make_type<TypeParam>()));
+    a = nd::empty(ndt::make_cfixed_dim(3, ndt::make_type<TypeParam>()));
 
     a.vals() = vals1[0];
     res = nd::elwise(FuncWrapper1(&func1), &FuncWrapper1::meth, a);
@@ -431,7 +431,7 @@ TYPED_TEST_P(Elwise, MethRefRes) {
     EXPECT_EQ(ndt::make_type<TypeParam>(), res.get_type());
     EXPECT_EQ(12, res.as<TypeParam>());
 
-    b = nd::empty(ndt::make_fixed_dim(3, ndt::make_type<TypeParam>()));
+    b = nd::empty(ndt::make_cfixed_dim(3, ndt::make_type<TypeParam>()));
 
     a.vals() = vals1[0];
     b.vals() = vals1[1];
@@ -439,7 +439,7 @@ TYPED_TEST_P(Elwise, MethRefRes) {
     EXPECT_EQ(ndt::make_type<TypeParam>(), res.get_type());
     EXPECT_EQ(14, res.as<TypeParam>());
 
-    a = nd::empty(ndt::fixed_dim_from_array<TypeParam[2][3]>::make());
+    a = nd::empty(ndt::cfixed_dim_from_array<TypeParam[2][3]>::make());
 
     a.vals() = vals1;
     res = nd::elwise(FuncWrapper3(&func3), &FuncWrapper3::meth, a);
@@ -451,12 +451,12 @@ TYPED_TEST_P(Elwise, MethRefRes) {
         {2, (TypeParam) -1.7023, 0}};
     TypeParam bvals2[3] = {33, 7, 53401};
 
-    a = nd::empty(ndt::fixed_dim_from_array<TypeParam[3][3]>::make());
+    a = nd::empty(ndt::cfixed_dim_from_array<TypeParam[3][3]>::make());
 
     a.vals() = avals2;
     b.vals() = bvals2;
     res = nd::elwise(FuncWrapper5(&func5), &FuncWrapper5::meth, a, b);
-    EXPECT_EQ(ndt::make_fixed_dim(3, ndt::make_type<TypeParam>()), res.get_type());
+    EXPECT_EQ(ndt::make_cfixed_dim(3, ndt::make_type<TypeParam>()), res.get_type());
     for (int i = 0; i < 3; ++i) {
             EXPECT_EQ(res(i), avals2[i][0] * bvals2[0] + avals2[i][1] * bvals2[1]
                 + avals2[i][2] * bvals2[2]);
@@ -470,7 +470,7 @@ TYPED_TEST_P(Elwise, MethRefRes) {
 
     b.vals() = bvals_3;
     res = nd::elwise(FuncWrapper7(&func7), &FuncWrapper7::meth, a, b);
-    EXPECT_EQ(ndt::make_fixed_dim(3, ndt::make_fixed_dim(3, ndt::make_type<TypeParam>())), res.get_type());
+    EXPECT_EQ(ndt::make_cfixed_dim(3, ndt::make_cfixed_dim(3, ndt::make_type<TypeParam>())), res.get_type());
     for (int i = 0; i < 3; ++i) {
         for (int j = 0; j < 3; ++j) {
             EXPECT_EQ(res(i, j), avals2[i][0] * bvals_3[0][j] + avals2[i][1] * bvals_3[1][j]
@@ -535,7 +535,7 @@ TYPED_TEST_P(Elwise, CallRetRes) {
 
     TypeParam vals1[2][3] = {{0, 1, 2}, {3, 4, 5}};
 
-    a = nd::empty(ndt::make_fixed_dim(3, ndt::make_type<TypeParam>()));
+    a = nd::empty(ndt::make_cfixed_dim(3, ndt::make_type<TypeParam>()));
 
     a.vals() = vals1[0];
     res = nd::elwise(Callable1(&func1), a);
@@ -547,7 +547,7 @@ TYPED_TEST_P(Elwise, CallRetRes) {
     EXPECT_EQ(ndt::make_type<TypeParam>(), res.get_type());
     EXPECT_EQ(12, res.as<TypeParam>());
 
-    b = nd::empty(ndt::make_fixed_dim(3, ndt::make_type<TypeParam>()));
+    b = nd::empty(ndt::make_cfixed_dim(3, ndt::make_type<TypeParam>()));
 
     a.vals() = vals1[0];
     b.vals() = vals1[1];
@@ -555,7 +555,7 @@ TYPED_TEST_P(Elwise, CallRetRes) {
     EXPECT_EQ(ndt::make_type<TypeParam>(), res.get_type());
     EXPECT_EQ(14, res.as<TypeParam>());
 
-    a = nd::empty(ndt::fixed_dim_from_array<TypeParam[2][3]>::make());
+    a = nd::empty(ndt::cfixed_dim_from_array<TypeParam[2][3]>::make());
 
     a.vals() = vals1;
     res = nd::elwise(Callable3(&func3), a);
@@ -603,7 +603,7 @@ TYPED_TEST_P(Elwise, CallRefRes) {
     EXPECT_EQ(-20, res.as<int>());
 
     res = nd::elwise(Callable4(&func4), a, b);
-    EXPECT_EQ(ndt::make_fixed_dim(2, ndt::make_type<TypeParam>()), res.get_type());
+    EXPECT_EQ(ndt::make_cfixed_dim(2, ndt::make_type<TypeParam>()), res.get_type());
     EXPECT_EQ(20, res(0).as<TypeParam>());
     EXPECT_EQ(10, res(1).as<TypeParam>());
 
@@ -633,7 +633,7 @@ TYPED_TEST_P(Elwise, CallRefRes) {
     EXPECT_EQ(6, res(1, 2).as<int>());
 
     res = nd::elwise(Callable4(&func4), a, b);
-    EXPECT_EQ(ndt::make_strided_dim(ndt::make_strided_dim(ndt::make_fixed_dim(2, ndt::make_type<TypeParam>()))), res.get_type());
+    EXPECT_EQ(ndt::make_strided_dim(ndt::make_strided_dim(ndt::make_cfixed_dim(2, ndt::make_type<TypeParam>()))), res.get_type());
     ASSERT_EQ(2, res.get_shape()[0]);
     ASSERT_EQ(3, res.get_shape()[1]);
     for (int i = 0; i < 2; ++i) {
@@ -645,7 +645,7 @@ TYPED_TEST_P(Elwise, CallRefRes) {
 
     TypeParam vals1[2][3] = {{0, 1, 2}, {3, 4, 5}};
 
-    a = nd::empty(ndt::make_fixed_dim(3, ndt::make_type<TypeParam>()));
+    a = nd::empty(ndt::make_cfixed_dim(3, ndt::make_type<TypeParam>()));
 
     a.vals() = vals1[0];
     res = nd::elwise(Callable1(&func1), a);
@@ -657,7 +657,7 @@ TYPED_TEST_P(Elwise, CallRefRes) {
     EXPECT_EQ(ndt::make_type<TypeParam>(), res.get_type());
     EXPECT_EQ(12, res.as<TypeParam>());
 
-    b = nd::empty(ndt::make_fixed_dim(3, ndt::make_type<TypeParam>()));
+    b = nd::empty(ndt::make_cfixed_dim(3, ndt::make_type<TypeParam>()));
 
     a.vals() = vals1[0];
     b.vals() = vals1[1];
@@ -665,7 +665,7 @@ TYPED_TEST_P(Elwise, CallRefRes) {
     EXPECT_EQ(ndt::make_type<TypeParam>(), res.get_type());
     EXPECT_EQ(14, res.as<TypeParam>());
 
-    a = nd::empty(ndt::fixed_dim_from_array<TypeParam[2][3]>::make());
+    a = nd::empty(ndt::cfixed_dim_from_array<TypeParam[2][3]>::make());
 
     a.vals() = vals1;
     res = nd::elwise(Callable3(&func3), a);
@@ -677,12 +677,12 @@ TYPED_TEST_P(Elwise, CallRefRes) {
         {2, (TypeParam) -1.7023, 0}};
     TypeParam bvals2[3] = {33, 7, 53401};
 
-    a = nd::empty(ndt::fixed_dim_from_array<TypeParam[3][3]>::make());
+    a = nd::empty(ndt::cfixed_dim_from_array<TypeParam[3][3]>::make());
 
     a.vals() = avals2;
     b.vals() = bvals2;
     res = nd::elwise(Callable5(&func5), a, b);
-    EXPECT_EQ(ndt::make_fixed_dim(3, ndt::make_type<TypeParam>()), res.get_type());
+    EXPECT_EQ(ndt::make_cfixed_dim(3, ndt::make_type<TypeParam>()), res.get_type());
     for (int i = 0; i < 3; ++i) {
             EXPECT_EQ(res(i), avals2[i][0] * bvals2[0] + avals2[i][1] * bvals2[1]
                 + avals2[i][2] * bvals2[2]);
@@ -696,7 +696,7 @@ TYPED_TEST_P(Elwise, CallRefRes) {
 
     b.vals() = bvals_3;
     res = nd::elwise(Callable7(&func7), a, b);
-    EXPECT_EQ(ndt::make_fixed_dim(3, ndt::make_fixed_dim(3, ndt::make_type<TypeParam>())), res.get_type());
+    EXPECT_EQ(ndt::make_cfixed_dim(3, ndt::make_cfixed_dim(3, ndt::make_type<TypeParam>())), res.get_type());
     for (int i = 0; i < 3; ++i) {
         for (int j = 0; j < 3; ++j) {
             EXPECT_EQ(res(i, j), avals2[i][0] * bvals_3[0][j] + avals2[i][1] * bvals_3[1][j]
