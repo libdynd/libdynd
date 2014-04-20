@@ -14,6 +14,7 @@
 #include <dynd/types/var_dim_type.hpp>
 #include <dynd/types/fixed_dim_type.hpp>
 #include <dynd/types/cstruct_type.hpp>
+#include <dynd/types/struct_type.hpp>
 #include <dynd/types/date_type.hpp>
 #include <dynd/types/string_type.hpp>
 #include <dynd/types/json_type.hpp>
@@ -274,7 +275,7 @@ TEST(JSONParser, JSONDType) {
     // Parsing JSON with a piece of it being a json string
     n = parse_json("{a: json, b: int32, c: string}",
                     "{\"c\": \"testing string\", \"a\": [3.1, {\"X\":2}, [1,2]], \"b\":12}");
-    EXPECT_EQ(ndt::make_cstruct(ndt::make_json(), "a", ndt::make_type<int32_t>(), "b", ndt::make_string(), "c"),
+    EXPECT_EQ(ndt::make_struct(ndt::make_json(), "a", ndt::make_type<int32_t>(), "b", ndt::make_string(), "c"),
                     n.get_type());
     EXPECT_EQ("[3.1, {\"X\":2}, [1,2]]", n(0).as<string>());
     EXPECT_EQ(12, n(1).as<int>());

@@ -15,18 +15,17 @@
 using namespace std;
 using namespace dynd;
 
-struct_type::struct_type(const std::vector<ndt::type>& field_types, const std::vector<std::string>& field_names)
-    : base_struct_type(struct_type_id, 0, 1, field_types.size(), type_flag_none, 0),
-            m_field_types(field_types), m_field_names(field_names), m_metadata_offsets(field_types.size())
+struct_type::struct_type(size_t field_count, const ndt::type *field_types,
+                         const std::string *field_names)
+    : base_struct_type(struct_type_id, 0, 1, field_count, type_flag_none, 0),
+      m_field_types(field_types, field_types + field_count),
+      m_field_names(field_names, field_names + field_count),
+      m_metadata_offsets(field_count)
 {
-    if (field_types.size() != field_names.size()) {
-        throw dynd::type_error("The field names for a dynd struct types must match the size of the field types");
-    }
-
     // Calculate the needed element alignment
-    size_t metadata_offset = field_types.size() * sizeof(size_t);
+    size_t metadata_offset = field_count * sizeof(size_t);
     m_members.data_alignment = 1;
-    for (size_t i = 0, i_end = field_types.size(); i != i_end; ++i) {
+    for (size_t i = 0, i_end = field_count; i != i_end; ++i) {
         size_t field_alignment = field_types[i].get_data_alignment();
         // Accumulate the biggest field alignment as the type alignment
         if (field_alignment > m_members.data_alignment) {
@@ -88,16 +87,42 @@ void struct_type::print_data(std::ostream& o, const char *metadata, const char *
     o << "]";
 }
 
+static bool is_simple_identifier_name(const string& s)
+{
+    if (s.empty()) {
+        return false;
+    } else {
+        char c = s[0];
+        if (!(('a' <= c && c <= 'z') || ('A' <= c && c <= 'Z') || c == '_')) {
+            return false;
+        }
+        for (size_t i = 1, i_end = s.size(); i < i_end; ++i) {
+            c = s[i];
+            if (!(('0' <= c && c <= '9') || ('a' <= c && c <= 'z')
+                            || ('A' <= c && c <= 'Z') || c == '_')) {
+                return false;
+            }
+        }
+        return true;
+    }
+}
+
 void struct_type::print_type(std::ostream& o) const
 {
-    o << "struct<";
+    // Use the record datashape syntax
+    o << "{";
     for (size_t i = 0, i_end = m_field_types.size(); i != i_end; ++i) {
-        o << m_field_types[i] << " " << m_field_names[i];
-        if (i != i_end - 1) {
+        if (i != 0) {
             o << ", ";
         }
+        if (is_simple_identifier_name(m_field_names[i])) {
+            o << m_field_names[i];
+        } else {
+            print_escaped_utf8_string(o, m_field_names[i]);
+        }
+        o << " : " << m_field_types[i];
     }
-    o << ">";
+    o << "}";
 }
 
 bool struct_type::is_expression() const
@@ -131,7 +156,10 @@ void struct_type::transform_child_types(type_transform_fn_t transform_fn, void *
         transform_fn(m_field_types[i], extra, tmp_field_types[i], was_transformed);
     }
     if (was_transformed) {
-        out_transformed_tp = ndt::type(new struct_type(tmp_field_types, m_field_names), false);
+        out_transformed_tp = ndt::make_struct(
+            tmp_field_types.size(),
+            tmp_field_types.empty() ? NULL : &tmp_field_types[0],
+            m_field_names.empty() ? NULL : &m_field_names[0]);
         out_was_transformed = true;
     } else {
         out_transformed_tp = ndt::type(this, true);
@@ -146,7 +174,8 @@ ndt::type struct_type::get_canonical_type() const
         fields[i] = m_field_types[i].get_canonical_type();
     }
 
-    return ndt::type(new struct_type(fields, m_field_names), false);
+    return ndt::make_struct(fields.size(), fields.empty() ? NULL : &fields[0],
+                            m_field_names.empty() ? NULL : &m_field_names[0]);
 }
 
 ndt::type struct_type::apply_linear_index(intptr_t nindices, const irange *indices,
@@ -178,7 +207,10 @@ ndt::type struct_type::apply_linear_index(intptr_t nindices, const irange *indic
                 field_names[i] = m_field_names[idx];
             }
 
-            return ndt::type(new struct_type(field_types, field_names), false);
+            return ndt::make_struct(
+                field_types.size(),
+                field_types.empty() ? NULL : &field_types[0],
+                field_names.empty() ? NULL : &field_names[0]);
         }
     }
 }

@@ -756,17 +756,11 @@ nd::array dynd::parse_json(const ndt::type &tp, const char *json_begin,
                            const char *json_end, const eval::eval_context *ectx)
 {
     nd::array result;
-    if (tp.get_data_size() != 0) {
-        result = nd::empty(tp);
-        parse_json(result, json_begin, json_end, ectx);
-        if (!tp.is_builtin()) {
-            tp.extended()->metadata_finalize_buffers(result.get_ndo_meta());
-        }
-        result.flag_as_immutable();
-        return result;
-    } else {
-        stringstream ss;
-        ss << "The dynd type provided to parse_json, " << tp << ", cannot be used because it requires additional shape information";
-        throw runtime_error(ss.str());
+    result = nd::empty(tp);
+    parse_json(result, json_begin, json_end, ectx);
+    if (!tp.is_builtin()) {
+        tp.extended()->metadata_finalize_buffers(result.get_ndo_meta());
     }
+    result.flag_as_immutable();
+    return result;
 }

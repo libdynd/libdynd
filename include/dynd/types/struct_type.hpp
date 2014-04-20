@@ -26,7 +26,8 @@ class struct_type : public base_struct_type {
     // Used as the parameters type for the nd::array properties callables
     static ndt::type array_parameters_type;
 public:
-    struct_type(const std::vector<ndt::type>& fields, const std::vector<std::string>& field_names);
+    struct_type(size_t field_count, const ndt::type *field_types,
+                const std::string *field_names);
 
     virtual ~struct_type();
 
@@ -110,45 +111,129 @@ public:
 }; // class struct_type
 
 namespace ndt {
-    /** Makes a struct type with the specified fields, using the standard layout */
-    inline ndt::type make_struct(const std::vector<ndt::type>& fields, const std::vector<std::string>& field_names) {
-        return ndt::type(new struct_type(fields, field_names), false);
+    /** Makes a struct type with the specified fields */
+    inline ndt::type make_struct(size_t field_count, const ndt::type *field_types,
+                    const std::string *field_names) {
+        return ndt::type(new struct_type(field_count, field_types, field_names), false);
     }
 
-    /** Makes a struct type with the specified fields, using the standard layout */
+
+    /** Makes a struct type with the specified fields */
     inline ndt::type make_struct(const ndt::type& tp0, const std::string& name0)
     {
-        std::vector<ndt::type> fields;
-        std::vector<std::string> field_names;
-        fields.push_back(tp0);
-        field_names.push_back(name0);
-        return make_struct(fields, field_names);
+        return ndt::make_struct(1, &tp0, &name0);
     }
 
-    /** Makes a struct type with the specified fields, using the standard layout */
+    /** Makes a struct type with the specified fields */
     inline ndt::type make_struct(const ndt::type& tp0, const std::string& name0, const ndt::type& tp1, const std::string& name1)
     {
-        std::vector<ndt::type> fields;
-        std::vector<std::string> field_names;
-        fields.push_back(tp0);
-        fields.push_back(tp1);
-        field_names.push_back(name0);
-        field_names.push_back(name1);
-        return make_struct(fields, field_names);
+        ndt::type field_types[2];
+        std::string field_names[2];
+        field_types[0] = tp0;
+        field_types[1] = tp1;
+        field_names[0] = name0;
+        field_names[1] = name1;
+        return ndt::make_struct(2, field_types, field_names);
     }
 
-    /** Makes a struct type with the specified fields, using the standard layout */
+    /** Makes a struct type with the specified fields */
     inline ndt::type make_struct(const ndt::type& tp0, const std::string& name0, const ndt::type& tp1, const std::string& name1, const ndt::type& tp2, const std::string& name2)
     {
-        std::vector<ndt::type> fields;
-        std::vector<std::string> field_names;
-        fields.push_back(tp0);
-        fields.push_back(tp1);
-        fields.push_back(tp2);
-        field_names.push_back(name0);
-        field_names.push_back(name1);
-        field_names.push_back(name2);
-        return make_struct(fields, field_names);
+        ndt::type field_types[3];
+        std::string field_names[3];
+        field_types[0] = tp0;
+        field_types[1] = tp1;
+        field_types[2] = tp2;
+        field_names[0] = name0;
+        field_names[1] = name1;
+        field_names[2] = name2;
+        return ndt::make_struct(3, field_types, field_names);
+    }
+
+    /** Makes a struct type with the specified fields */
+    inline ndt::type make_struct(const ndt::type& tp0, const std::string& name0,
+                    const ndt::type& tp1, const std::string& name1, const ndt::type& tp2, const std::string& name2,
+                    const ndt::type& tp3, const std::string& name3)
+    {
+        ndt::type field_types[4];
+        std::string field_names[4];
+        field_types[0] = tp0;
+        field_types[1] = tp1;
+        field_types[2] = tp2;
+        field_types[3] = tp3;
+        field_names[0] = name0;
+        field_names[1] = name1;
+        field_names[2] = name2;
+        field_names[3] = name3;
+        return ndt::make_struct(4, field_types, field_names);
+    }
+
+    /** Makes a struct type with the specified fields */
+    inline ndt::type make_struct(const ndt::type& tp0, const std::string& name0,
+                    const ndt::type& tp1, const std::string& name1, const ndt::type& tp2, const std::string& name2,
+                    const ndt::type& tp3, const std::string& name3, const ndt::type& tp4, const std::string& name4)
+    {
+        ndt::type field_types[5];
+        std::string field_names[5];
+        field_types[0] = tp0;
+        field_types[1] = tp1;
+        field_types[2] = tp2;
+        field_types[3] = tp3;
+        field_types[4] = tp4;
+        field_names[0] = name0;
+        field_names[1] = name1;
+        field_names[2] = name2;
+        field_names[3] = name3;
+        field_names[4] = name4;
+        return ndt::make_struct(5, field_types, field_names);
+    }
+
+    /** Makes a struct type with the specified fields */
+    inline ndt::type make_struct(const ndt::type& tp0, const std::string& name0,
+                    const ndt::type& tp1, const std::string& name1, const ndt::type& tp2, const std::string& name2,
+                    const ndt::type& tp3, const std::string& name3, const ndt::type& tp4, const std::string& name4,
+                    const ndt::type& tp5, const std::string& name5)
+    {
+        ndt::type field_types[6];
+        std::string field_names[6];
+        field_types[0] = tp0;
+        field_types[1] = tp1;
+        field_types[2] = tp2;
+        field_types[3] = tp3;
+        field_types[4] = tp4;
+        field_types[5] = tp5;
+        field_names[0] = name0;
+        field_names[1] = name1;
+        field_names[2] = name2;
+        field_names[3] = name3;
+        field_names[4] = name4;
+        field_names[5] = name5;
+        return ndt::make_struct(6, field_types, field_names);
+    }
+
+    /** Makes a struct type with the specified fields */
+    inline ndt::type make_struct(const ndt::type& tp0, const std::string& name0,
+                    const ndt::type& tp1, const std::string& name1, const ndt::type& tp2, const std::string& name2,
+                    const ndt::type& tp3, const std::string& name3, const ndt::type& tp4, const std::string& name4,
+                    const ndt::type& tp5, const std::string& name5, const ndt::type& tp6, const std::string& name6)
+    {
+        ndt::type field_types[7];
+        std::string field_names[7];
+        field_types[0] = tp0;
+        field_types[1] = tp1;
+        field_types[2] = tp2;
+        field_types[3] = tp3;
+        field_types[4] = tp4;
+        field_types[5] = tp5;
+        field_types[6] = tp6;
+        field_names[0] = name0;
+        field_names[1] = name1;
+        field_names[2] = name2;
+        field_names[3] = name3;
+        field_names[4] = name4;
+        field_names[5] = name5;
+        field_names[6] = name6;
+        return ndt::make_struct(7, field_types, field_names);
     }
 } // namespace ndt
 

@@ -11,6 +11,7 @@
 #include <dynd/types/var_dim_type.hpp>
 #include <dynd/types/fixed_dim_type.hpp>
 #include <dynd/types/cstruct_type.hpp>
+#include <dynd/types/struct_type.hpp>
 #include <dynd/types/string_type.hpp>
 #include <dynd/types/fixedstring_type.hpp>
 #include <dynd/types/json_type.hpp>
@@ -627,7 +628,7 @@ static ndt::type parse_pointer_parameters(const char *&begin, const char *end,
 }
 
 // record_item : NAME COLON rhs_expression
-static bool parse_record_item(const char *&begin, const char *end, map<string, ndt::type>& symtable,
+static bool parse_struct_item(const char *&begin, const char *end, map<string, ndt::type>& symtable,
                 string& out_field_name, ndt::type& out_field_type)
 {
     out_field_name = parse_name(begin, end);
@@ -652,19 +653,25 @@ static bool parse_record_item(const char *&begin, const char *end, map<string, n
     return true;
 }
 
-// record : LBRACE record_item record_item* RBRACE
-static ndt::type parse_record(const char *&begin, const char *end, map<string, ndt::type>& symtable)
+// struct : LBRACE record_item record_item* RBRACE
+// cstruct : 'c{' record_item record_item* RBRACE
+static ndt::type parse_struct(const char *&begin, const char *end, map<string, ndt::type>& symtable)
 {
     vector<string> field_name_list;
     vector<ndt::type> field_type_list;
     string field_name;
     ndt::type field_type;
+    bool cprefixed = false;
 
     if (!parse_token(begin, end, '{')) {
-        return ndt::type(uninitialized_type_id);
+        if (parse_token(begin, end, "c{")) {
+            cprefixed = true;
+        } else {
+            return ndt::type(uninitialized_type_id);
+        }
     }
     for (;;) {
-        if (parse_record_item(begin, end, symtable, field_name, field_type)) {
+        if (parse_struct_item(begin, end, symtable, field_name, field_type)) {
             field_name_list.push_back(field_name);
             field_type_list.push_back(field_type);
         } else {
@@ -682,8 +689,13 @@ static ndt::type parse_record(const char *&begin, const char *end, map<string, n
         }
     }
 
-    return ndt::make_cstruct(field_type_list.size(),
-                    &field_type_list[0], &field_name_list[0]);
+    if (cprefixed) {
+        return ndt::make_cstruct(field_type_list.size(), &field_type_list[0],
+                                 &field_name_list[0]);
+    } else {
+        return ndt::make_struct(field_type_list.size(), &field_type_list[0],
+                                 &field_name_list[0]);
+    }
 }
 
 /** This is what parses the main datashape grammar, excluding type aliases, etc. */
@@ -717,8 +729,8 @@ static ndt::type parse_rhs_expression(const char *&begin, const char *end, map<s
             }
         }
     }
-    // record
-    result = parse_record(begin, end, symtable);
+    // struct
+    result = parse_struct(begin, end, symtable);
     if (result.get_type_id() == uninitialized_type_id) {
         const char *begin_saved = begin;
         // NAME

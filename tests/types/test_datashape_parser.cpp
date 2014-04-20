@@ -13,6 +13,7 @@
 #include <dynd/types/fixed_dim_type.hpp>
 #include <dynd/types/var_dim_type.hpp>
 #include <dynd/types/cstruct_type.hpp>
+#include <dynd/types/struct_type.hpp>
 #include <dynd/types/date_type.hpp>
 #include <dynd/types/string_type.hpp>
 #include <dynd/types/fixedstring_type.hpp>
@@ -108,9 +109,12 @@ TEST(DataShapeParser, Unaligned) {
                     type_from_datashape("M * unaligned[bool]"));
     EXPECT_EQ(ndt::make_strided_dim(ndt::make_unaligned(ndt::make_type<float>()), 2),
                     type_from_datashape("M * N * unaligned[float32]"));
-    EXPECT_EQ(ndt::make_cstruct(ndt::make_unaligned(ndt::make_type<int32_t>()), "x",
+    EXPECT_EQ(ndt::make_struct(ndt::make_unaligned(ndt::make_type<int32_t>()), "x",
                                 ndt::make_unaligned(ndt::make_type<int64_t>()), "y"),
                     type_from_datashape("{x : unaligned[int32], y : unaligned[int64]}"));
+    EXPECT_EQ(ndt::make_cstruct(ndt::make_unaligned(ndt::make_type<int32_t>()), "x",
+                                ndt::make_unaligned(ndt::make_type<int64_t>()), "y"),
+                    type_from_datashape("c{x : unaligned[int32], y : unaligned[int64]}"));
 }
 
 TEST(DataShapeParser, StridedDim) {
@@ -143,20 +147,34 @@ TEST(DataShapeParser, StridedVarFixedDim) {
 }
 
 TEST(DataShapeParser, RecordOneField) {
-    EXPECT_EQ(ndt::make_cstruct(ndt::make_type<float>(), "val"),
+    EXPECT_EQ(ndt::make_struct(ndt::make_type<float>(), "val"),
                     type_from_datashape("{ val : float32 }"));
-    EXPECT_EQ(ndt::make_cstruct(ndt::make_type<float>(), "val"),
+    EXPECT_EQ(ndt::make_struct(ndt::make_type<float>(), "val"),
                     type_from_datashape("{ val : float32 , }"));
+    EXPECT_EQ(ndt::make_cstruct(ndt::make_type<float>(), "val"),
+                    type_from_datashape("c{ val : float32 }"));
+    EXPECT_EQ(ndt::make_cstruct(ndt::make_type<float>(), "val"),
+                    type_from_datashape("c{ val : float32 , }"));
 }
 
 TEST(DataShapeParser, RecordTwoFields) {
-    EXPECT_EQ(ndt::make_cstruct(ndt::make_type<float>(), "val", ndt::make_type<int64_t>(), "id"),
+    EXPECT_EQ(ndt::make_struct(ndt::make_type<float>(), "val", ndt::make_type<int64_t>(), "id"),
                     type_from_datashape("{\n"
                         "    val: float32,\n"
                         "    id: int64\n"
                         "}\n"));
-    EXPECT_EQ(ndt::make_cstruct(ndt::make_type<float>(), "val", ndt::make_type<int64_t>(), "id"),
+    EXPECT_EQ(ndt::make_struct(ndt::make_type<float>(), "val", ndt::make_type<int64_t>(), "id"),
                     type_from_datashape("{\n"
+                        "    val: float32,\n"
+                        "    id: int64,\n"
+                        "}\n"));
+    EXPECT_EQ(ndt::make_cstruct(ndt::make_type<float>(), "val", ndt::make_type<int64_t>(), "id"),
+                    type_from_datashape("c{\n"
+                        "    val: float32,\n"
+                        "    id: int64\n"
+                        "}\n"));
+    EXPECT_EQ(ndt::make_cstruct(ndt::make_type<float>(), "val", ndt::make_type<int64_t>(), "id"),
+                    type_from_datashape("c{\n"
                         "    val: float32,\n"
                         "    id: int64,\n"
                         "}\n"));
@@ -460,5 +478,5 @@ TEST(DataShapeParser, KivaLoanDataShape) {
         "    }\n"
         "}\n";
     ndt::type d = type_from_datashape(klds);
-    EXPECT_EQ(cstruct_type_id, d.get_type_id());
+    EXPECT_EQ(struct_type_id, d.get_type_id());
 }

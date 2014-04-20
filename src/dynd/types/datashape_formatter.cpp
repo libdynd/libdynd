@@ -29,8 +29,10 @@ static void format_identifier_string(std::ostream& o, int &identifier)
     ++identifier;
 }
 
-static void format_struct_datashape(std::ostream& o, const ndt::type& dt, const char *metadata, const char *data,
-                const std::string& indent, bool multiline, int &identifier)
+static void format_struct_datashape(std::ostream &o, const ndt::type &dt,
+                                    const char *metadata, const char *data,
+                                    const std::string &indent, bool multiline,
+                                    int &identifier)
 {
     // The data requires metadata
     if (metadata == NULL) {

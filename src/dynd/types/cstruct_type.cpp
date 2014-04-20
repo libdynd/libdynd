@@ -105,8 +105,8 @@ static bool is_simple_identifier_name(const string& s)
 
 void cstruct_type::print_type(std::ostream& o) const
 {
-    // Use the record datashape syntax
-    o << "{";
+    // Use the record datashape syntax prefixed with a "c"
+    o << "c{";
     for (size_t i = 0, i_end = m_field_types.size(); i != i_end; ++i) {
         if (i != 0) {
             o << ", ";
@@ -162,10 +162,11 @@ void cstruct_type::transform_child_types(type_transform_fn_t transform_fn, void 
     }
     if (was_any_transformed) {
         if (!switch_to_struct) {
-            out_transformed_tp = ndt::type(new cstruct_type(
-                            tmp_field_types.size(), &tmp_field_types[0], &m_field_names[0]), false);
+            out_transformed_tp = ndt::make_cstruct(tmp_field_types.size(), &tmp_field_types[0],
+                                 &m_field_names[0]);
         } else {
-            out_transformed_tp = ndt::type(new struct_type(tmp_field_types, m_field_names), false);
+            out_transformed_tp = ndt::make_struct(tmp_field_types.size(), &tmp_field_types[0],
+                                &m_field_names[0]);
         }
         out_was_transformed = true;
     } else {
@@ -181,7 +182,7 @@ ndt::type cstruct_type::get_canonical_type() const
         field_types[i] = m_field_types[i].get_canonical_type();
     }
 
-    return ndt::type(new cstruct_type(m_field_types.size(), &field_types[0], &m_field_names[0]), false);
+    return ndt::make_cstruct(m_field_types.size(), &field_types[0], &m_field_names[0]);
 }
 
 ndt::type cstruct_type::apply_linear_index(intptr_t nindices, const irange *indices,
@@ -213,7 +214,9 @@ ndt::type cstruct_type::apply_linear_index(intptr_t nindices, const irange *indi
                 field_names[i] = m_field_names[idx];
             }
             // Return a struct type, because the offsets are now not in standard form anymore
-            return ndt::type(new struct_type(field_types, field_names), false);
+            return ndt::make_struct(field_types.size(),
+                                field_types.empty() ? NULL : &field_types[0],
+                                field_names.empty() ? NULL : &field_names[0]);
         }
     }
 }
