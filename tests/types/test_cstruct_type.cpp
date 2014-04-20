@@ -211,7 +211,7 @@ TEST(CStructType, CanonicalType) {
     ndt::type d2 = ndt::make_byteswap<int32_t>();
     ndt::type d3 = ndt::make_fixedstring(5, string_encoding_utf_32);
     dt = ndt::make_cstruct(d1, "x", d2, "y", d3, "z");
-    EXPECT_EQ(ndt::make_cstruct(ndt::make_type<dynd_complex<double> >(), "x",
+    EXPECT_EQ(ndt::make_struct(ndt::make_type<dynd_complex<double> >(), "x",
                                 ndt::make_type<int32_t>(), "y",
                                 d3, "z"),
             dt.get_canonical_type());

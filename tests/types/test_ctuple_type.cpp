@@ -16,34 +16,40 @@
 using namespace std;
 using namespace dynd;
 
-TEST(TupleType, CreateSimple) {
+TEST(CTupleType, CreateSimple) {
     ndt::type tp;
-    const tuple_type *tt;
+    const ctuple_type *tt;
 
     // Tuple with one field
-    tp = ndt::make_tuple(ndt::make_type<int32_t>());
-    EXPECT_EQ(tuple_type_id, tp.get_type_id());
-    EXPECT_EQ(0u, tp.get_data_size());
+    tp = ndt::make_ctuple(ndt::make_type<int32_t>());
+    EXPECT_EQ(ctuple_type_id, tp.get_type_id());
+    EXPECT_EQ(4u, tp.get_data_size());
     EXPECT_EQ(4u, tp.get_data_alignment());
-    EXPECT_FALSE(tp.is_pod());
+    EXPECT_TRUE(tp.is_pod());
     EXPECT_EQ(0u, (tp.get_flags()&(type_flag_blockref|type_flag_destructor)));
-    tt = static_cast<const tuple_type *>(tp.extended());
+    tt = static_cast<const ctuple_type *>(tp.extended());
     ASSERT_EQ(1u, tt->get_field_count());
     EXPECT_EQ(ndt::make_type<int32_t>(), tt->get_field_types()[0]);
+    EXPECT_EQ(0u, tt->get_data_offsets()[0]);
+    EXPECT_EQ(0u, tt->get_metadata_offsets()[0]);
     // Roundtripping through a string
     EXPECT_EQ(tp, ndt::type(tp.str()));
 
     // Tuple with two fields
-    tp = ndt::make_tuple(ndt::make_type<int16_t>(), ndt::make_type<double>());
-    EXPECT_EQ(tuple_type_id, tp.get_type_id());
-    EXPECT_EQ(0u, tp.get_data_size());
-    EXPECT_EQ((size_t)scalar_align_of<double>::value, tp.get_data_alignment());
-    EXPECT_FALSE(tp.is_pod());
+    tp = ndt::make_ctuple(ndt::make_type<int16_t>(), ndt::make_type<int32_t>());
+    EXPECT_EQ(ctuple_type_id, tp.get_type_id());
+    EXPECT_EQ(8u, tp.get_data_size());
+    EXPECT_EQ(4u, tp.get_data_alignment());
+    EXPECT_TRUE(tp.is_pod());
     EXPECT_EQ(0u, (tp.get_flags()&(type_flag_blockref|type_flag_destructor)));
-    tt = static_cast<const tuple_type *>(tp.extended());
+    tt = static_cast<const ctuple_type *>(tp.extended());
     ASSERT_EQ(2u, tt->get_field_count());
     EXPECT_EQ(ndt::make_type<int16_t>(), tt->get_field_types()[0]);
-    EXPECT_EQ(ndt::make_type<double>(), tt->get_field_types()[1]);
+    EXPECT_EQ(ndt::make_type<int32_t>(), tt->get_field_types()[1]);
+    EXPECT_EQ(0u, tt->get_data_offsets()[0]);
+    EXPECT_EQ(4u, tt->get_data_offsets()[1]);
+    EXPECT_EQ(0u, tt->get_metadata_offsets()[0]);
+    EXPECT_EQ(0u, tt->get_metadata_offsets()[1]);
     // Roundtripping through a string
     EXPECT_EQ(tp, ndt::type(tp.str()));
 }

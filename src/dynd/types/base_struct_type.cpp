@@ -15,42 +15,6 @@ using namespace dynd;
 base_struct_type::~base_struct_type() {
 }
 
-void base_struct_type::get_shape(intptr_t ndim, intptr_t i, intptr_t *out_shape,
-                const char *metadata, const char *DYND_UNUSED(data)) const
-{
-    out_shape[i] = m_field_count;
-    if (i < ndim-1) {
-        const ndt::type *field_types = get_field_types();
-        const size_t *metadata_offsets = get_metadata_offsets();
-        dimvector tmpshape(ndim);
-        // Accumulate the shape from all the field shapes
-        for (size_t fi = 0; fi != m_field_count; ++fi) {
-            const ndt::type& ft = field_types[i];
-            if (!ft.is_builtin()) {
-                ft.extended()->get_shape(ndim, i+1, tmpshape.get(),
-                                metadata ? (metadata + metadata_offsets[fi]) : NULL,
-                                NULL);
-            } else {
-                stringstream ss;
-                ss << "requested too many dimensions from type " << ft;
-                throw runtime_error(ss.str());
-            }
-            if (fi == 0) {
-                // Copy the shape from the first field
-                memcpy(out_shape + i + 1, tmpshape.get() + i + 1, (ndim - i - 1) * sizeof(intptr_t));
-            } else {
-                // Merge the shape from the rest
-                for (intptr_t k = i + 1; k < ndim; ++k) {
-                    // If we see different sizes, make the output -1
-                    if (out_shape[k] != -1 && out_shape[k] != tmpshape[k]) {
-                        out_shape[k] = -1;
-                    }
-                }
-            }
-        }
-    }
-}
-
 size_t base_struct_type::get_elwise_property_index(const std::string& property_name) const
 {
     size_t field_count = get_field_count();
@@ -166,46 +130,4 @@ size_t base_struct_type::make_elwise_property_setter_kernel(
     ss << " given an invalid property index" << dst_elwise_property_index;
     throw runtime_error(ss.str());
 }
-
-void base_struct_type::data_destruct(const char *metadata, char *data) const
-{
-    const ndt::type *field_types = get_field_types();
-    const size_t *metadata_offsets = get_metadata_offsets();
-    const size_t *data_offsets = get_data_offsets(metadata);
-    size_t field_count = get_field_count();
-    for (size_t i = 0; i != field_count; ++i) {
-        const ndt::type& dt = field_types[i];
-        if (dt.get_flags()&type_flag_destructor) {
-            dt.extended()->data_destruct(
-                            metadata + metadata_offsets[i],
-                            data + data_offsets[i]);
-        }
-    }
-}
-
-void base_struct_type::data_destruct_strided(const char *metadata, char *data,
-                intptr_t stride, size_t count) const
-{
-    const ndt::type *field_types = get_field_types();
-    const size_t *metadata_offsets = get_metadata_offsets();
-    const size_t *data_offsets = get_data_offsets(metadata);
-    size_t field_count = get_field_count();
-    // Destruct all the fields a chunk at a time, in an
-    // attempt to have some kind of locality
-    while (count > 0) {
-        size_t chunk_size = min(count, DYND_BUFFER_CHUNK_SIZE);
-        for (size_t i = 0; i != field_count; ++i) {
-            const ndt::type& dt = field_types[i];
-            if (dt.get_flags()&type_flag_destructor) {
-                dt.extended()->data_destruct_strided(
-                                metadata + metadata_offsets[i],
-                                data + data_offsets[i],
-                                stride, chunk_size);
-            }
-        }
-        data += stride * chunk_size;
-        count -= chunk_size;
-    }
-}
-
 

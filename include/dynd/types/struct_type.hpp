@@ -31,8 +31,6 @@ public:
 
     virtual ~struct_type();
 
-    size_t get_default_data_size(intptr_t ndim, const intptr_t *shape) const;
-
     const ndt::type *get_field_types() const {
         return &m_field_types[0];
     }

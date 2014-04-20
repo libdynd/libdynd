@@ -12,6 +12,8 @@
 #include <dynd/types/cfixed_dim_type.hpp>
 #include <dynd/types/cstruct_type.hpp>
 #include <dynd/types/struct_type.hpp>
+#include <dynd/types/ctuple_type.hpp>
+#include <dynd/types/tuple_type.hpp>
 #include <dynd/types/string_type.hpp>
 #include <dynd/types/fixedstring_type.hpp>
 #include <dynd/types/json_type.hpp>
@@ -749,6 +751,46 @@ static ndt::type parse_struct(const char *&begin, const char *end, map<string, n
     }
 }
 
+// tuple : LPAREN tuple_item tuple_item* RPAREN
+// ctuple : 'c(' tuple_item tuple_item* RPAREN
+static ndt::type parse_tuple(const char *&begin, const char *end, map<string, ndt::type>& symtable)
+{
+    vector<ndt::type> field_type_list;
+    bool cprefixed = false;
+
+    if (!parse_token(begin, end, '(')) {
+        if (parse_token(begin, end, "c(")) {
+            cprefixed = true;
+        } else {
+            return ndt::type(uninitialized_type_id);
+        }
+    }
+    for (;;) {
+        ndt::type tp = parse_rhs_expression(begin, end, symtable);
+        if (tp.get_type_id() != uninitialized_type_id) {
+            field_type_list.push_back(tp);
+        } else {
+            throw datashape_parse_error(begin, "expected a type");
+        }
+        
+        if (parse_token(begin, end, ',')) {
+            if (!field_type_list.empty() && parse_token(begin, end, ')')) {
+                break;
+            }
+        } else if (parse_token(begin, end, ')')) {
+            break;
+        } else {
+            throw datashape_parse_error(begin, "expected ',' or ')'");
+        }
+    }
+
+    if (cprefixed) {
+        return ndt::make_ctuple(field_type_list.size(), &field_type_list[0]);
+    } else {
+        return ndt::make_tuple(field_type_list.size(), &field_type_list[0]);
+    }
+}
+
 /** This is what parses the main datashape grammar, excluding type aliases, etc. */
 static ndt::type parse_rhs_expression(const char *&begin, const char *end, map<string, ndt::type>& symtable)
 {
@@ -782,6 +824,10 @@ static ndt::type parse_rhs_expression(const char *&begin, const char *end, map<s
     }
     // struct
     result = parse_struct(begin, end, symtable);
+    // tuple
+    if (result.get_type_id() == uninitialized_type_id) {
+        result = parse_tuple(begin, end, symtable);
+    }
     if (result.get_type_id() == uninitialized_type_id) {
         const char *begin_saved = begin;
         // NAME

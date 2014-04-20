@@ -34,6 +34,8 @@ enum type_kind_t {
     uniform_dim_kind,
     // For struct_type_id and cstruct_type_id
     struct_kind,
+    // For tuple_type_id and ctuple_type_id
+    tuple_kind,
     // For types whose value_type != the type, signals
     // that calculations should look at the value_type for
     // type promotion, etc.
@@ -118,7 +120,11 @@ enum type_id_t {
     struct_type_id,
     // A struct type with fixed layout
     cstruct_type_id,
+    // A tuple type with variable layout
     tuple_type_id,
+    // A tuple type with fixed layout
+    ctuple_type_id,
+
     ndarray_type_id,
 
     // Adapter types

@@ -57,23 +57,6 @@ intptr_t struct_type::get_field_index(const std::string& field_name) const
     }
 }
 
-size_t struct_type::get_default_data_size(intptr_t ndim, const intptr_t *shape) const
-{
-    // Default layout is to match the field order - could reorder the elements for more efficient packing
-    size_t s = 0;
-    for (size_t i = 0, i_end = m_field_types.size(); i != i_end; ++i) {
-        s = inc_to_alignment(s, m_field_types[i].get_data_alignment());
-        if (!m_field_types[i].is_builtin()) {
-            s += m_field_types[i].extended()->get_default_data_size(ndim, shape);
-        } else {
-            s += m_field_types[i].get_data_size();
-        }
-    }
-    s = inc_to_alignment(s, m_members.data_alignment);
-    return s;
-}
-
-
 void struct_type::print_data(std::ostream& o, const char *metadata, const char *data) const
 {
     const size_t *offsets = reinterpret_cast<const size_t *>(metadata);
