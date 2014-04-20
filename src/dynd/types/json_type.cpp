@@ -245,14 +245,14 @@ size_t json_type::make_assignment_kernel(
                                     out, offset_out + sizeof(string_to_json_kernel_extra),
                                     dst_metadata, string_encoding_utf_8,
                                     src_metadata,
-                                    static_cast<const base_string_type *>(src_tp.extended())->get_encoding(),
+                                    src_tp.tcast<base_string_type>()->get_encoding(),
                                     kernel_request_single, errmode, ectx);
                 } else {
                     return make_fixedstring_to_blockref_string_assignment_kernel(
                                     out, offset_out + sizeof(string_to_json_kernel_extra),
                                     dst_metadata, string_encoding_utf_8,
                                     src_tp.get_data_size(),
-                                    static_cast<const base_string_type *>(src_tp.extended())->get_encoding(),
+                                    src_tp.tcast<base_string_type>()->get_encoding(),
                                     kernel_request_single, errmode, ectx);
                 }
             }

@@ -169,7 +169,7 @@ size_t dynd::make_expression_assignment_kernel(
                 const eval::eval_context *ectx)
 {
     if (dst_tp.get_kind() == expression_kind) {
-        const base_expression_type *dst_bed = static_cast<const base_expression_type *>(dst_tp.extended());
+        const base_expression_type *dst_bed = dst_tp.tcast<base_expression_type>();
         if (src_tp == dst_bed->get_value_type()) {
             // In this case, it's just a chain of value -> operand on the dst side
             const ndt::type& opdt = dst_bed->get_operand_type();
@@ -240,7 +240,7 @@ size_t dynd::make_expression_assignment_kernel(
                             kernreq, errmode, ectx);
         }
     } else {
-        const base_expression_type *src_bed = static_cast<const base_expression_type *>(src_tp.extended());
+        const base_expression_type *src_bed = src_tp.tcast<base_expression_type>();
         if (dst_tp == src_bed->get_value_type()) {
             // In this case, it's just a chain of operand -> value on the src side
             const ndt::type& opdt = src_bed->get_operand_type();

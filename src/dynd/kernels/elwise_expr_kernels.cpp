@@ -100,7 +100,7 @@ static size_t make_elwise_strided_dimension_expr_kernel_for_N(
     e->base.destructor = strided_expr_kernel_extra<N>::destruct;
     // The dst strided parameters
     if (dst_tp.get_type_id() == strided_dim_type_id) {
-        const strided_dim_type *sdd = static_cast<const strided_dim_type *>(dst_tp.extended());
+        const strided_dim_type *sdd = dst_tp.tcast<strided_dim_type>();
         const strided_dim_type_metadata *dst_md =
                         reinterpret_cast<const strided_dim_type_metadata *>(dst_metadata);
         e->size = dst_md->size;
@@ -108,7 +108,7 @@ static size_t make_elwise_strided_dimension_expr_kernel_for_N(
         dst_child_metadata = dst_metadata + sizeof(strided_dim_type_metadata);
         dst_child_dt = sdd->get_element_type();
     } else {
-        const cfixed_dim_type *fdd = static_cast<const cfixed_dim_type *>(dst_tp.extended());
+        const cfixed_dim_type *fdd = dst_tp.tcast<cfixed_dim_type>();
         e->size = fdd->get_fixed_dim_size();
         e->dst_stride = fdd->get_fixed_stride();
         dst_child_metadata = dst_metadata;
@@ -315,7 +315,7 @@ static size_t make_elwise_strided_or_var_to_strided_dimension_expr_kernel_for_N(
     e->base.destructor = strided_or_var_to_strided_expr_kernel_extra<N>::destruct;
     // The dst strided parameters
     if (dst_tp.get_type_id() == strided_dim_type_id) {
-        const strided_dim_type *sdd = static_cast<const strided_dim_type *>(dst_tp.extended());
+        const strided_dim_type *sdd = dst_tp.tcast<strided_dim_type>();
         const strided_dim_type_metadata *dst_md =
                         reinterpret_cast<const strided_dim_type_metadata *>(dst_metadata);
         e->size = dst_md->size;
@@ -323,7 +323,7 @@ static size_t make_elwise_strided_or_var_to_strided_dimension_expr_kernel_for_N(
         dst_child_metadata = dst_metadata + sizeof(strided_dim_type_metadata);
         dst_child_dt = sdd->get_element_type();
     } else {
-        const cfixed_dim_type *fdd = static_cast<const cfixed_dim_type *>(dst_tp.extended());
+        const cfixed_dim_type *fdd = dst_tp.tcast<cfixed_dim_type>();
         e->size = fdd->get_fixed_dim_size();
         e->dst_stride = fdd->get_fixed_stride();
         dst_child_metadata = dst_metadata;
@@ -605,7 +605,7 @@ static size_t make_elwise_strided_or_var_to_var_dimension_expr_kernel_for_N(
     }
     e->base.destructor = strided_or_var_to_var_expr_kernel_extra<N>::destruct;
     // The dst var parameters
-    const var_dim_type *dst_vdd = static_cast<const var_dim_type *>(dst_tp.extended());
+    const var_dim_type *dst_vdd = dst_tp.tcast<var_dim_type>();
     const var_dim_type_metadata *dst_md =
                     reinterpret_cast<const var_dim_type_metadata *>(dst_metadata);
     e->dst_memblock = dst_md->blockref;

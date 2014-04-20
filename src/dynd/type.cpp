@@ -263,7 +263,7 @@ bool ndt::type::data_layout_compatible_with(const ndt::type& rhs) const
             // layout compatible.
             if (rhs.get_type_id() == cfixed_dim_type_id) {
                 const cfixed_dim_type *fdd = static_cast<const cfixed_dim_type *>(extended());
-                const cfixed_dim_type *rhs_fdd = static_cast<const cfixed_dim_type *>(rhs.extended());
+                const cfixed_dim_type *rhs_fdd = rhs.tcast<cfixed_dim_type>();
                 return fdd->get_fixed_dim_size() == rhs_fdd->get_fixed_dim_size() &&
                     fdd->get_fixed_stride() == rhs_fdd->get_fixed_stride() &&
                     fdd->get_element_type().data_layout_compatible_with(
@@ -276,7 +276,7 @@ bool ndt::type::data_layout_compatible_with(const ndt::type& rhs) const
             // compatible if the element is
             if (rhs.get_type_id() == get_type_id()) {
                 const base_uniform_dim_type *budd = static_cast<const base_uniform_dim_type *>(extended());
-                const base_uniform_dim_type *rhs_budd = static_cast<const base_uniform_dim_type *>(rhs.extended());
+                const base_uniform_dim_type *rhs_budd = rhs.tcast<base_uniform_dim_type>();
                 return budd->get_element_type().data_layout_compatible_with(
                                     rhs_budd->get_element_type());
             }

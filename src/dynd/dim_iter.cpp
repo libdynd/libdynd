@@ -190,7 +190,7 @@ void dynd::make_buffered_strided_dim_iter(
     nd::array buf = nd::array(make_array_memory_block(ndt::make_strided_dim(val_tp), buffer_ndim, buffer_shape.get()));
     if (buffer_ndim > 2 && val_tp.get_type_id() == strided_dim_type_id) {
         // Reorder the strides to preserve F-order if it's a strided array
-        static_cast<const strided_dim_type *>(val_tp.extended())->reorder_default_constructed_strides(
+        val_tp.tcast<strided_dim_type>()->reorder_default_constructed_strides(
                             buf.get_ndo_meta() + sizeof(strided_dim_type_metadata), mem_tp, mem_meta);
     }
     intptr_t buffer_stride = reinterpret_cast<const strided_dim_type_metadata *>(buf.get_ndo_meta())->stride;

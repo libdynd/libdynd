@@ -248,7 +248,7 @@ intptr_t var_dim_type::apply_linear_index(intptr_t nindices, const irange *indic
                     if (m_element_tp.is_builtin()) {
                         return 0;
                     } else {
-                        const strided_dim_type *sad = static_cast<const strided_dim_type *>(result_tp.extended());
+                        const strided_dim_type *sad = result_tp.tcast<strided_dim_type>();
                         return m_element_tp.extended()->apply_linear_index(
                                         nindices - 1, indices + 1,
                                         metadata + sizeof(var_dim_type_metadata),
@@ -267,7 +267,7 @@ intptr_t var_dim_type::apply_linear_index(intptr_t nindices, const irange *indic
                 memory_block_incref(out_md->blockref);
                 out_md->offset = indices->start() * md->stride;
                 if (!m_element_tp.is_builtin()) {
-                    const pointer_type *result_etp = static_cast<const pointer_type *>(result_tp.extended());
+                    const pointer_type *result_etp = result_tp.tcast<pointer_type>();
                     out_md->offset += m_element_tp.extended()->apply_linear_index(
                                     nindices - 1, indices + 1,
                                     metadata + sizeof(var_dim_type_metadata),
@@ -284,7 +284,7 @@ intptr_t var_dim_type::apply_linear_index(intptr_t nindices, const irange *indic
                 out_md->stride = md->stride;
                 out_md->offset = md->offset;
                 if (!m_element_tp.is_builtin()) {
-                    const var_dim_type *vad = static_cast<const var_dim_type *>(result_tp.extended());
+                    const var_dim_type *vad = result_tp.tcast<var_dim_type>();
                     out_md->offset += m_element_tp.extended()->apply_linear_index(
                                     nindices - 1, indices + 1,
                                     metadata + sizeof(var_dim_type_metadata),
@@ -644,7 +644,7 @@ void var_dim_type::foreach_leading(char *data, const char *metadata, foreach_fn_
 }
 
 static ndt::type get_element_type(const ndt::type& dt) {
-    const strided_dim_type *d = static_cast<const strided_dim_type *>(dt.extended());
+    const strided_dim_type *d = dt.tcast<strided_dim_type>();
     return d->get_element_type();
 }
 
@@ -680,7 +680,7 @@ void ndt::var_dim_element_initialize(const type& tp,
         ss << "internal error: expected a var_dim type, not " << tp;
         throw dynd::type_error(ss.str());
     }
-    const var_dim_type *vdt = static_cast<const var_dim_type *>(tp.extended());
+    const var_dim_type *vdt = tp.tcast<var_dim_type>();
     const var_dim_type_metadata *md = reinterpret_cast<const var_dim_type_metadata *>(metadata);
     var_dim_type_data *d = reinterpret_cast<var_dim_type_data *>(data);
     if (d->begin != NULL) {

@@ -213,7 +213,7 @@ intptr_t tuple_type::apply_linear_index(intptr_t nindices, const irange *indices
             }
             return offset;
         } else {
-            const tuple_type *result_e_dt = static_cast<const tuple_type *>(result_tp.extended());
+            const tuple_type *result_e_dt = result_tp.tcast<tuple_type>();
             for (intptr_t i = 0; i < dimension_size; ++i) {
                 intptr_t idx = start_index + i * index_stride;
                 out_offsets[i] = offsets[idx];
@@ -437,13 +437,13 @@ void tuple_type::foreach_leading(char *data, const char *metadata, foreach_fn_t 
 }
 
 static nd::array property_get_field_types(const ndt::type& dt) {
-    const tuple_type *d = static_cast<const tuple_type *>(dt.extended());
+    const tuple_type *d = dt.tcast<tuple_type>();
     // TODO: This property should be an immutable nd::array, which we would just return.
     return nd::array(d->get_field_types_vector());
 }
 
 static nd::array property_get_metadata_offsets(const ndt::type& dt) {
-    const tuple_type *d = static_cast<const tuple_type *>(dt.extended());
+    const tuple_type *d = dt.tcast<tuple_type>();
     // TODO: This property could be an immutable nd::array, which we would just return.
     return nd::array(d->get_metadata_offsets_vector());
 }

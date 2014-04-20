@@ -71,7 +71,7 @@ TEST(CStructType, Align) {
             " f12: int8, cf64_: complex[float64], f13: int8}");
     EXPECT_EQ(sizeof(align_test_struct), asdt.get_data_size());
     EXPECT_EQ((size_t)scalar_align_of<align_test_struct>::value, asdt.get_data_alignment());
-    const cstruct_type *cd = static_cast<const cstruct_type *>(asdt.extended());
+    const cstruct_type *cd = asdt.tcast<cstruct_type>();
     const size_t *data_offsets = cd->get_data_offsets();
     align_test_struct ats;
 #define ATS_OFFSET(field) (reinterpret_cast<size_t>(&ats.field##_) - \
@@ -104,7 +104,7 @@ TEST(CStructType, CreateOneField) {
     EXPECT_EQ(4u, dt.extended()->get_default_data_size(0, NULL));
     EXPECT_EQ(ndt::make_type<int32_t>().get_data_alignment(), dt.get_data_alignment());
     EXPECT_TRUE(dt.is_pod());
-    tdt = static_cast<const cstruct_type *>(dt.extended());
+    tdt = dt.tcast<cstruct_type>();
     EXPECT_EQ(1u, tdt->get_field_count());
     EXPECT_EQ(ndt::make_type<int32_t>(), tdt->get_field_types()[0]);
     EXPECT_EQ(0u, tdt->get_data_offsets_vector()[0]);
@@ -127,7 +127,7 @@ TEST(CStructType, CreateTwoField) {
     EXPECT_EQ(sizeof(two_field_struct), dt.extended()->get_default_data_size(0, NULL));
     EXPECT_EQ(ndt::make_type<int64_t>().get_data_alignment(), dt.get_data_alignment());
     EXPECT_TRUE(dt.is_pod());
-    tdt = static_cast<const cstruct_type *>(dt.extended());
+    tdt = dt.tcast<cstruct_type>();
     EXPECT_EQ(2u, tdt->get_field_count());
     EXPECT_EQ(ndt::make_type<int64_t>(), tdt->get_field_types()[0]);
     EXPECT_EQ(ndt::make_type<int32_t>(), tdt->get_field_types()[1]);
@@ -157,7 +157,7 @@ TEST(CStructType, CreateThreeField) {
     EXPECT_EQ(sizeof(three_field_struct), dt.extended()->get_default_data_size(0, NULL));
     EXPECT_EQ(d1.get_data_alignment(), dt.get_data_alignment());
     EXPECT_TRUE(dt.is_pod());
-    tdt = static_cast<const cstruct_type *>(dt.extended());
+    tdt = dt.tcast<cstruct_type>();
     EXPECT_EQ(3u, tdt->get_field_count());
     EXPECT_EQ(ndt::make_type<int64_t>(), tdt->get_field_types()[0]);
     EXPECT_EQ(ndt::make_type<int32_t>(), tdt->get_field_types()[1]);

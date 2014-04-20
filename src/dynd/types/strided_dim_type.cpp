@@ -192,7 +192,7 @@ intptr_t strided_dim_type::apply_linear_index(intptr_t nindices, const irange *i
             out_md->stride = md->stride * index_stride;
             out_md->size = dimension_size;
             if (!m_element_tp.is_builtin()) {
-                const strided_dim_type *result_etp = static_cast<const strided_dim_type *>(result_tp.extended());
+                const strided_dim_type *result_etp = result_tp.tcast<strided_dim_type>();
                 offset += m_element_tp.extended()->apply_linear_index(nindices - 1, indices + 1,
                                 metadata + sizeof(strided_dim_type_metadata),
                                 result_etp->m_element_tp, out_metadata + sizeof(strided_dim_type_metadata),
@@ -529,7 +529,7 @@ size_t strided_dim_type::make_assignment_kernel(
                             kernel_request_strided, errmode, ectx);
         } else if (src_tp.get_type_id() == strided_dim_type_id) {
             // strided_dim -> strided_dim
-            const strided_dim_type *src_sad = static_cast<const strided_dim_type *>(src_tp.extended());
+            const strided_dim_type *src_sad = src_tp.tcast<strided_dim_type>();
             const strided_dim_type_metadata *src_md =
                         reinterpret_cast<const strided_dim_type_metadata *>(src_metadata);
             // Check for a broadcasting error
@@ -547,7 +547,7 @@ size_t strided_dim_type::make_assignment_kernel(
                             kernel_request_strided, errmode, ectx);
         } else if (src_tp.get_type_id() == cfixed_dim_type_id) {
             // fixed_array -> strided_dim
-            const cfixed_dim_type *src_fad = static_cast<const cfixed_dim_type *>(src_tp.extended());
+            const cfixed_dim_type *src_fad = src_tp.tcast<cfixed_dim_type>();
             intptr_t src_size = src_fad->get_fixed_dim_size();
             // Check for a broadcasting error
             if (src_size != 1 && dst_md->size != src_size) {
@@ -605,7 +605,7 @@ void strided_dim_type::reorder_default_constructed_strides(char *dst_metadata,
         // do the reordering starting from where they match, to
         // follow the broadcasting rules.
         if (m_element_tp.get_type_id() == strided_dim_type_id) {
-            const strided_dim_type *sdd = static_cast<const strided_dim_type *>(m_element_tp.extended());
+            const strided_dim_type *sdd = m_element_tp.tcast<strided_dim_type>();
             sdd->reorder_default_constructed_strides(
                             dst_metadata + sizeof(strided_dim_type_metadata),
                             src_tp, src_metadata);
@@ -620,7 +620,7 @@ void strided_dim_type::reorder_default_constructed_strides(char *dst_metadata,
     ndt::type last_dt = m_element_tp;
     do {
         ++ndim;
-        last_dt = static_cast<const strided_dim_type *>(last_dt.extended())->get_element_type();
+        last_dt = last_dt.tcast<strided_dim_type>()->get_element_type();
     } while (last_dt.get_type_id() == strided_dim_type_id);
 
     dimvector strides(ndim);
@@ -633,13 +633,13 @@ void strided_dim_type::reorder_default_constructed_strides(char *dst_metadata,
         intptr_t stride;
         switch (last_src_tp.get_type_id()) {
             case cfixed_dim_type_id: {
-                const cfixed_dim_type *fdd = static_cast<const cfixed_dim_type *>(last_src_tp.extended());
+                const cfixed_dim_type *fdd = last_src_tp.tcast<cfixed_dim_type>();
                 stride = fdd->get_fixed_stride();
                 last_src_tp = fdd->get_element_type();
                 break;
             }
             case strided_dim_type_id: {
-                const strided_dim_type *sdd = static_cast<const strided_dim_type *>(last_src_tp.extended());
+                const strided_dim_type *sdd = last_src_tp.tcast<strided_dim_type>();
                 const strided_dim_type_metadata *md = reinterpret_cast<const strided_dim_type_metadata *>(src_metadata);
                 stride = md->stride;
                 last_src_tp = sdd->get_element_type();
@@ -718,7 +718,7 @@ void strided_dim_type::reorder_default_constructed_strides(char *dst_metadata,
 }
 
 static ndt::type get_element_type(const ndt::type& dt) {
-    const strided_dim_type *d = static_cast<const strided_dim_type *>(dt.extended());
+    const strided_dim_type *d = dt.tcast<strided_dim_type>();
     return d->get_element_type();
 }
 

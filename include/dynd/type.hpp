@@ -182,6 +182,17 @@ public:
     }
 
     /**
+     * Casts to the specified <x>_type class using static_cast.
+     * This does not validate the type id to make sure this is
+     * a valid cast, the caller MUST check this itself.
+     */
+    template<class TTYPE>
+    inline const TTYPE *tcast() const {
+        // TODO: In debug mode, assert the type id
+        return static_cast<const TTYPE *>(m_extended);
+    }
+
+    /**
      * The type class operates as a smart pointer for dynamically
      * allocated base_type instances, with raw storage of type id
      * for the built-in types. This function gives away the held

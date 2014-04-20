@@ -31,13 +31,13 @@ static bool try_view(const ndt::type &tp, const char *metadata,
     switch (tp.get_type_id()) {
     case strided_dim_type_id: {
         const strided_dim_type *sdt =
-            static_cast<const strided_dim_type *>(tp.extended());
+            tp.tcast<strided_dim_type>();
         const strided_dim_type_metadata *md =
             reinterpret_cast<const strided_dim_type_metadata *>(metadata);
         switch (view_tp.get_type_id()) {
         case strided_dim_type_id: { // strided as strided
             const strided_dim_type *view_sdt =
-                static_cast<const strided_dim_type *>(view_tp.extended());
+                view_tp.tcast<strided_dim_type>();
             strided_dim_type_metadata *view_md =
                 reinterpret_cast<strided_dim_type_metadata *>(view_metadata);
             if (try_view(sdt->get_element_type(),
@@ -54,7 +54,7 @@ static bool try_view(const ndt::type &tp, const char *metadata,
         }
         case cfixed_dim_type_id: { // strided as fixed
             const cfixed_dim_type *view_fdt =
-                static_cast<const cfixed_dim_type *>(view_tp.extended());
+                view_tp.tcast<cfixed_dim_type>();
             // The size and stride must match exactly in this case
             if (md->size != (intptr_t)view_fdt->get_fixed_dim_size() ||
                     md->stride != view_fdt->get_fixed_stride()) {
@@ -71,11 +71,11 @@ static bool try_view(const ndt::type &tp, const char *metadata,
     }
     case cfixed_dim_type_id: {
         const cfixed_dim_type *fdt =
-            static_cast<const cfixed_dim_type *>(tp.extended());
+            tp.tcast<cfixed_dim_type>();
         switch (view_tp.get_type_id()) {
         case cfixed_dim_type_id: { // fixed as fixed
             const cfixed_dim_type *view_fdt =
-                static_cast<const cfixed_dim_type *>(view_tp.extended());
+                view_tp.tcast<cfixed_dim_type>();
             // The size and stride must match exactly in this case
             if (fdt->get_fixed_dim_size() != view_fdt->get_fixed_dim_size() ||
                     fdt->get_fixed_stride() != view_fdt->get_fixed_stride()) {
@@ -87,7 +87,7 @@ static bool try_view(const ndt::type &tp, const char *metadata,
         }
         case strided_dim_type_id: { // fixed as strided
             const strided_dim_type *view_sdt =
-                static_cast<const strided_dim_type *>(view_tp.extended());
+                view_tp.tcast<strided_dim_type>();
             strided_dim_type_metadata *view_md =
                 reinterpret_cast<strided_dim_type_metadata *>(view_metadata);
             if (try_view(fdt->get_element_type(), metadata,

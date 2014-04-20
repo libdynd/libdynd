@@ -222,7 +222,7 @@ intptr_t cfixed_dim_type::apply_linear_index(intptr_t nindices, const irange *in
             out_md->stride = m_stride * index_stride;
             out_md->size = dimension_size;
             if (!m_element_tp.is_builtin()) {
-                const strided_dim_type *result_etp = static_cast<const strided_dim_type *>(result_tp.extended());
+                const strided_dim_type *result_etp = result_tp.tcast<strided_dim_type>();
                 offset += m_element_tp.extended()->apply_linear_index(nindices - 1, indices + 1,
                                 metadata,
                                 result_etp->get_element_type(),
@@ -524,7 +524,7 @@ size_t cfixed_dim_type::make_assignment_kernel(
                             kernel_request_strided, errmode, ectx);
         } else if (src_tp.get_type_id() == cfixed_dim_type_id) {
             // fixed_array -> strided_dim
-            const cfixed_dim_type *src_fad = static_cast<const cfixed_dim_type *>(src_tp.extended());
+            const cfixed_dim_type *src_fad = src_tp.tcast<cfixed_dim_type>();
             intptr_t src_size = src_fad->get_fixed_dim_size();
             intptr_t dst_size = get_fixed_dim_size();
             // Check for a broadcasting error
@@ -542,7 +542,7 @@ size_t cfixed_dim_type::make_assignment_kernel(
                             kernel_request_strided, errmode, ectx);
         } else if (src_tp.get_type_id() == strided_dim_type_id) {
             // strided_dim -> strided_dim
-            const strided_dim_type *src_sad = static_cast<const strided_dim_type *>(src_tp.extended());
+            const strided_dim_type *src_sad = src_tp.tcast<strided_dim_type>();
             const strided_dim_type_metadata *src_md =
                         reinterpret_cast<const strided_dim_type_metadata *>(src_metadata);
             intptr_t dst_size = get_fixed_dim_size();
@@ -617,17 +617,17 @@ ndt::type dynd::ndt::make_cfixed_dim(intptr_t ndim, const intptr_t *shape,
 }
 
 static size_t get_fixed_dim_size(const ndt::type& dt) {
-    const cfixed_dim_type *d = static_cast<const cfixed_dim_type *>(dt.extended());
+    const cfixed_dim_type *d = dt.tcast<cfixed_dim_type>();
     return d->get_fixed_dim_size();
 }
 
 static intptr_t get_fixed_dim_stride(const ndt::type& dt) {
-    const cfixed_dim_type *d = static_cast<const cfixed_dim_type *>(dt.extended());
+    const cfixed_dim_type *d = dt.tcast<cfixed_dim_type>();
     return d->get_fixed_stride();
 }
 
 static ndt::type get_element_type(const ndt::type& dt) {
-    const cfixed_dim_type *d = static_cast<const cfixed_dim_type *>(dt.extended());
+    const cfixed_dim_type *d = dt.tcast<cfixed_dim_type>();
     return d->get_element_type();
 }
 

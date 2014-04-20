@@ -119,20 +119,20 @@ size_t char_type::make_assignment_kernel(
         switch (src_tp.get_type_id()) {
             case char_type_id: {
                 // Use the fixedstring assignment to do this conversion
-                const char_type *src_fs = static_cast<const char_type *>(src_tp.extended());
+                const char_type *src_fs = src_tp.tcast<char_type>();
                 return make_fixedstring_assignment_kernel(out, offset_out,
                                 get_data_size(), m_encoding, src_fs->get_data_size(), src_fs->m_encoding,
                                 kernreq, errmode, ectx);
             }
             case fixedstring_type_id: {
                 // Use the fixedstring assignment to do this conversion
-                const base_string_type *src_fs = static_cast<const base_string_type *>(src_tp.extended());
+                const base_string_type *src_fs = src_tp.tcast<base_string_type>();
                 return make_fixedstring_assignment_kernel(out, offset_out,
                                 get_data_size(), m_encoding, src_fs->get_data_size(), src_fs->get_encoding(),
                                 kernreq, errmode, ectx);
             }
             case string_type_id: {
-                const base_string_type *src_fs = static_cast<const base_string_type *>(src_tp.extended());
+                const base_string_type *src_fs = src_tp.tcast<base_string_type>();
                 return make_blockref_string_to_fixedstring_assignment_kernel(out, offset_out,
                                 get_data_size(), m_encoding, src_fs->get_encoding(),
                                 kernreq, errmode, ectx);
@@ -152,13 +152,13 @@ size_t char_type::make_assignment_kernel(
         switch (dst_tp.get_type_id()) {
             case fixedstring_type_id: {
                 // Use the fixedstring assignment to do this conversion
-                const base_string_type *dst_fs = static_cast<const base_string_type *>(dst_tp.extended());
+                const base_string_type *dst_fs = dst_tp.tcast<base_string_type>();
                 return make_fixedstring_assignment_kernel(out, offset_out,
                                 dst_fs->get_data_size(), dst_fs->get_encoding(), get_data_size(), m_encoding, 
                                 kernreq, errmode, ectx);
             }
             case string_type_id: {
-                const base_string_type *dst_fs = static_cast<const base_string_type *>(dst_tp.extended());
+                const base_string_type *dst_fs = dst_tp.tcast<base_string_type>();
                 return make_fixedstring_to_blockref_string_assignment_kernel(out, offset_out,
                                 dst_metadata, dst_fs->get_encoding(), get_data_size(), m_encoding,
                                 kernreq, errmode, ectx);

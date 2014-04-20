@@ -69,7 +69,7 @@ namespace detail {
         static void set(const ndt::type& paramtype, char *metadata, char *data, const char (&value)[N]) {
             // Setting from a known-sized character string array
             if (paramtype.get_type_id() == string_type_id &&
-                    static_cast<const string_type *>(paramtype.extended())->get_encoding() == string_encoding_utf_8) {
+                    paramtype.tcast<string_type>()->get_encoding() == string_encoding_utf_8) {
                 reinterpret_cast<string_type_data*>(data)->begin = const_cast<char *>(value);
                 reinterpret_cast<string_type_data*>(data)->end = const_cast<char *>(value + N - 1);
             } else {
@@ -85,7 +85,7 @@ namespace detail {
 
 inline nd::array callable::call() const
 {
-    const cstruct_type *fsdt = static_cast<const cstruct_type *>(m_parameters_type.extended());
+    const cstruct_type *fsdt = m_parameters_type.tcast<cstruct_type>();
     size_t parameter_count = fsdt->get_field_count();
     nd::array params = nd::empty(m_parameters_type);
     if (parameter_count != 0) {
@@ -112,7 +112,7 @@ inline nd::array callable::call() const
 template<class T>
 inline nd::array callable::call(const T& p0) const
 {
-    const cstruct_type *fsdt = static_cast<const cstruct_type *>(m_parameters_type.extended());
+    const cstruct_type *fsdt = m_parameters_type.tcast<cstruct_type>();
     size_t parameter_count = fsdt->get_field_count();
     nd::array params = nd::empty(m_parameters_type);
     if (parameter_count != 1) {
@@ -143,7 +143,7 @@ inline nd::array callable::call(const T& p0) const
 template<class T0, class T1>
 inline nd::array callable::call(const T0& p0, const T1& p1) const
 {
-    const cstruct_type *fsdt = static_cast<const cstruct_type *>(m_parameters_type.extended());
+    const cstruct_type *fsdt = m_parameters_type.tcast<cstruct_type>();
     size_t parameter_count = fsdt->get_field_count();
     nd::array params = nd::empty(m_parameters_type);
     if (fsdt->get_field_count() != 2) {
@@ -178,7 +178,7 @@ inline nd::array callable::call(const T0& p0, const T1& p1) const
 template<class T0, class T1, class T2>
 inline nd::array callable::call(const T0& p0, const T1& p1, const T2& p2) const
 {
-    const cstruct_type *fsdt = static_cast<const cstruct_type *>(m_parameters_type.extended());
+    const cstruct_type *fsdt = m_parameters_type.tcast<cstruct_type>();
     size_t parameter_count = fsdt->get_field_count();
     nd::array params = nd::empty(m_parameters_type);
     if (fsdt->get_field_count() != 3) {
@@ -217,7 +217,7 @@ inline nd::array callable::call(const T0& p0, const T1& p1, const T2& p2) const
 template<class T0, class T1, class T2, class T3>
 inline nd::array callable::call(const T0& p0, const T1& p1, const T2& p2, const T3& p3) const
 {
-    const cstruct_type *fsdt = static_cast<const cstruct_type *>(m_parameters_type.extended());
+    const cstruct_type *fsdt = m_parameters_type.tcast<cstruct_type>();
     size_t parameter_count = fsdt->get_field_count();
     nd::array params = nd::empty(m_parameters_type);
     if (fsdt->get_field_count() != 4) {
@@ -260,7 +260,7 @@ inline nd::array callable::call(const T0& p0, const T1& p1, const T2& p2, const 
 template<class T0, class T1, class T2, class T3, class T4>
 inline nd::array callable::call(const T0& p0, const T1& p1, const T2& p2, const T3& p3, const T4& p4) const
 {
-    const cstruct_type *fsdt = static_cast<const cstruct_type *>(m_parameters_type.extended());
+    const cstruct_type *fsdt = m_parameters_type.tcast<cstruct_type>();
     size_t parameter_count = fsdt->get_field_count();
     nd::array params = nd::empty(m_parameters_type);
     if (fsdt->get_field_count() != 5) {

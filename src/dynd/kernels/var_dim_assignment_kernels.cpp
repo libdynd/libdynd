@@ -89,7 +89,7 @@ size_t dynd::make_broadcast_to_var_dim_assignment_kernel(
         ss << "make_broadcast_to_blockref_array_assignment_kernel: provided destination type " << dst_var_dim_tp << " is not a var_dim";
         throw runtime_error(ss.str());
     }
-    const var_dim_type *dst_vad = static_cast<const var_dim_type *>(dst_var_dim_tp.extended());
+    const var_dim_type *dst_vad = dst_var_dim_tp.tcast<var_dim_type>();
 
     offset_out = make_kernreq_to_single_kernel_adapter(out, offset_out, kernreq);
     out->ensure_capacity(offset_out + sizeof(broadcast_to_var_assign_kernel_extra));
@@ -206,8 +206,8 @@ size_t dynd::make_var_dim_assignment_kernel(
         ss << "make_broadcast_to_blockref_array_assignment_kernel: provided source type " << src_var_dim_tp << " is not a var_dim";
         throw runtime_error(ss.str());
     }
-    const var_dim_type *dst_vad = static_cast<const var_dim_type *>(dst_var_dim_tp.extended());
-    const var_dim_type *src_vad = static_cast<const var_dim_type *>(src_var_dim_tp.extended());
+    const var_dim_type *dst_vad = dst_var_dim_tp.tcast<var_dim_type>();
+    const var_dim_type *src_vad = src_var_dim_tp.tcast<var_dim_type>();
 
     offset_out = make_kernreq_to_single_kernel_adapter(out, offset_out, kernreq);
     out->ensure_capacity(offset_out + sizeof(var_assign_kernel_extra));
@@ -312,7 +312,7 @@ size_t dynd::make_strided_to_var_dim_assignment_kernel(
         ss << "make_strided_to_var_dim_assignment_kernel: provided destination type " << dst_var_dim_tp << " is not a var_dim";
         throw runtime_error(ss.str());
     }
-    const var_dim_type *dst_vad = static_cast<const var_dim_type *>(dst_var_dim_tp.extended());
+    const var_dim_type *dst_vad = dst_var_dim_tp.tcast<var_dim_type>();
 
     offset_out = make_kernreq_to_single_kernel_adapter(out, offset_out, kernreq);
     out->ensure_capacity(offset_out + sizeof(strided_to_var_assign_kernel_extra));
@@ -327,7 +327,7 @@ size_t dynd::make_strided_to_var_dim_assignment_kernel(
     ndt::type src_element_tp;
     const char *src_element_metadata;
     if (src_strided_dim_tp.get_type_id() == strided_dim_type_id) {
-        const strided_dim_type *src_sad = static_cast<const strided_dim_type *>(src_strided_dim_tp.extended());
+        const strided_dim_type *src_sad = src_strided_dim_tp.tcast<strided_dim_type>();
         const strided_dim_type_metadata *src_md =
                         reinterpret_cast<const strided_dim_type_metadata *>(src_metadata);
         e->src_stride = src_md->stride;
@@ -335,7 +335,7 @@ size_t dynd::make_strided_to_var_dim_assignment_kernel(
         src_element_tp = src_sad->get_element_type();
         src_element_metadata = src_metadata + sizeof(strided_dim_type_metadata);
     } else if (src_strided_dim_tp.get_type_id() == cfixed_dim_type_id) {
-        const cfixed_dim_type *src_fad = static_cast<const cfixed_dim_type *>(src_strided_dim_tp.extended());
+        const cfixed_dim_type *src_fad = src_strided_dim_tp.tcast<cfixed_dim_type>();
         e->src_stride = src_fad->get_fixed_stride();
         e->src_dim_size = src_fad->get_fixed_dim_size();
         src_element_tp = src_fad->get_element_type();
@@ -411,7 +411,7 @@ size_t dynd::make_var_to_strided_dim_assignment_kernel(
         ss << "make_var_to_strided_dim_assignment_kernel: provided source type " << src_var_dim_tp << " is not a var_dim";
         throw runtime_error(ss.str());
     }
-    const var_dim_type *src_vad = static_cast<const var_dim_type *>(src_var_dim_tp.extended());
+    const var_dim_type *src_vad = src_var_dim_tp.tcast<var_dim_type>();
 
     offset_out = make_kernreq_to_single_kernel_adapter(out, offset_out, kernreq);
     out->ensure_capacity(offset_out + sizeof(var_to_strided_assign_kernel_extra));
@@ -424,7 +424,7 @@ size_t dynd::make_var_to_strided_dim_assignment_kernel(
     ndt::type dst_element_tp;
     const char *dst_element_metadata;
     if (dst_strided_dim_tp.get_type_id() == strided_dim_type_id) {
-        const strided_dim_type *dst_sad = static_cast<const strided_dim_type *>(dst_strided_dim_tp.extended());
+        const strided_dim_type *dst_sad = dst_strided_dim_tp.tcast<strided_dim_type>();
         const strided_dim_type_metadata *dst_md =
                         reinterpret_cast<const strided_dim_type_metadata *>(dst_metadata);
         e->dst_stride = dst_md->stride;
@@ -432,7 +432,7 @@ size_t dynd::make_var_to_strided_dim_assignment_kernel(
         dst_element_tp = dst_sad->get_element_type();
         dst_element_metadata = dst_metadata + sizeof(strided_dim_type_metadata);
     } else if (dst_strided_dim_tp.get_type_id() == cfixed_dim_type_id) {
-        const cfixed_dim_type *dst_fad = static_cast<const cfixed_dim_type *>(dst_strided_dim_tp.extended());
+        const cfixed_dim_type *dst_fad = dst_strided_dim_tp.tcast<cfixed_dim_type>();
         e->dst_stride = dst_fad->get_fixed_stride();
         e->dst_dim_size = dst_fad->get_fixed_dim_size();
         dst_element_tp = dst_fad->get_element_type();

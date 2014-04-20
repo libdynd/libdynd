@@ -24,7 +24,7 @@ TEST(CUDAHostType, Basic) {
     EXPECT_EQ(memory_kind, d.get_kind());
     EXPECT_EQ(ndt::make_type<int32_t>(), d.p("storage_type").as<ndt::type>());
     EXPECT_FALSE(d.is_expression());
-    EXPECT_EQ((unsigned int)cudaHostAllocDefault, static_cast<const cuda_host_type *>(d.extended())->get_cuda_host_flags());
+    EXPECT_EQ((unsigned int)cudaHostAllocDefault, d.tcast<cuda_host_type>()->get_cuda_host_flags());
 	EXPECT_EQ(d, ndt::type("cuda_host[int32]"));
     // Roundtripping through a string
     EXPECT_EQ(d, ndt::type(d.str()));
@@ -33,7 +33,7 @@ TEST(CUDAHostType, Basic) {
     EXPECT_THROW(ndt::make_cuda_host(ndt::make_strided_dim(ndt::make_type<int32_t>())), runtime_error);
 
     d = ndt::make_cuda_host(ndt::make_type<float>(), cudaHostAllocMapped);
-    EXPECT_EQ((unsigned int)cudaHostAllocMapped, static_cast<const cuda_host_type *>(d.extended())->get_cuda_host_flags());
+    EXPECT_EQ((unsigned int)cudaHostAllocMapped, d.tcast<cuda_host_type>()->get_cuda_host_flags());
 }
 
 TEST(CUDAHostType, BuiltIn) {

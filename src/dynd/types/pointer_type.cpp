@@ -150,7 +150,7 @@ intptr_t pointer_type::apply_linear_index(intptr_t nindices, const irange *indic
         memory_block_incref(out_md->blockref);
         out_md->offset = md->offset;
         if (!m_target_tp.is_builtin()) {
-            const pointer_type *pdt = static_cast<const pointer_type *>(result_tp.extended());
+            const pointer_type *pdt = result_tp.tcast<pointer_type>();
             // The indexing may cause a change to the metadata offset
             out_md->offset += m_target_tp.extended()->apply_linear_index(nindices, indices,
                             metadata + sizeof(pointer_type_metadata),
@@ -313,7 +313,7 @@ void pointer_type::metadata_debug_print(const char *metadata, std::ostream& o, c
 }
 
 static ndt::type property_get_target_type(const ndt::type& tp) {
-    const pointer_type *pd = static_cast<const pointer_type *>(tp.extended());
+    const pointer_type *pd = tp.tcast<pointer_type>();
     return pd->get_target_type();
 }
 

@@ -27,7 +27,7 @@ TEST(CTupleType, CreateSimple) {
     EXPECT_EQ(4u, tp.get_data_alignment());
     EXPECT_TRUE(tp.is_pod());
     EXPECT_EQ(0u, (tp.get_flags()&(type_flag_blockref|type_flag_destructor)));
-    tt = static_cast<const ctuple_type *>(tp.extended());
+    tt = tp.tcast<ctuple_type>();
     ASSERT_EQ(1u, tt->get_field_count());
     EXPECT_EQ(ndt::make_type<int32_t>(), tt->get_field_types()[0]);
     EXPECT_EQ(0u, tt->get_data_offsets()[0]);
@@ -42,7 +42,7 @@ TEST(CTupleType, CreateSimple) {
     EXPECT_EQ(4u, tp.get_data_alignment());
     EXPECT_TRUE(tp.is_pod());
     EXPECT_EQ(0u, (tp.get_flags()&(type_flag_blockref|type_flag_destructor)));
-    tt = static_cast<const ctuple_type *>(tp.extended());
+    tt = tp.tcast<ctuple_type>();
     ASSERT_EQ(2u, tt->get_field_count());
     EXPECT_EQ(ndt::make_type<int16_t>(), tt->get_field_types()[0]);
     EXPECT_EQ(ndt::make_type<int32_t>(), tt->get_field_types()[1]);

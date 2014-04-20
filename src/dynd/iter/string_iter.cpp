@@ -127,9 +127,10 @@ void iter::make_string_iter(
             tmp.val_assign(ndt::make_string(data_encoding),
                 reinterpret_cast<const char *>(&md),
                 reinterpret_cast<const char *>(&d), dynd::assign_error_default, ectx);
-            static_cast<const string_type *>(tmp.get_type().extended())->make_string_iter(
-                out_di, iter_encoding, tmp.get_ndo_meta(), tmp.get_readonly_originptr(),
-                tmp.get_data_memblock(), buffer_max_mem, ectx);
+            tmp.get_type().tcast<string_type>()->make_string_iter(
+                out_di, iter_encoding, tmp.get_ndo_meta(),
+                tmp.get_readonly_originptr(), tmp.get_data_memblock(),
+                buffer_max_mem, ectx);
             return;
         }
         // Create an iterator which transcodes

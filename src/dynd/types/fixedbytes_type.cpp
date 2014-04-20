@@ -102,7 +102,7 @@ size_t fixedbytes_type::make_assignment_kernel(
     if (this == dst_tp.extended()) {
         switch (src_tp.get_type_id()) {
             case fixedbytes_type_id: {
-                const fixedbytes_type *src_fs = static_cast<const fixedbytes_type *>(src_tp.extended());
+                const fixedbytes_type *src_fs = src_tp.tcast<fixedbytes_type>();
                 if (get_data_size() != src_fs->get_data_size()) {
                     throw runtime_error("cannot assign to a fixedbytes type of a different size");
                 }

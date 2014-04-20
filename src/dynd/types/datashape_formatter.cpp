@@ -38,7 +38,7 @@ static void format_struct_datashape(std::ostream &o, const ndt::type &dt,
     if (metadata == NULL) {
         data = NULL;
     }
-    const base_struct_type *bsd = static_cast<const base_struct_type *>(dt.extended());
+    const base_struct_type *bsd = dt.tcast<base_struct_type>();
     size_t field_count = bsd->get_field_count();
     const string *field_names = bsd->get_field_names();
     const ndt::type *field_types = bsd->get_field_types();
@@ -71,7 +71,7 @@ static void format_uniform_dim_datashape(std::ostream& o,
 {
     switch (dt.get_type_id()) {
         case strided_dim_type_id: {
-            const strided_dim_type *sad = static_cast<const strided_dim_type *>(dt.extended());
+            const strided_dim_type *sad = dt.tcast<strided_dim_type>();
             if (metadata) {
                 // If metadata is provided, use the actual dimension size
                 const strided_dim_type_metadata *md =
@@ -94,7 +94,7 @@ static void format_uniform_dim_datashape(std::ostream& o,
             break;
         }
         case cfixed_dim_type_id: {
-            const cfixed_dim_type *fad = static_cast<const cfixed_dim_type *>(dt.extended());
+            const cfixed_dim_type *fad = dt.tcast<cfixed_dim_type>();
             size_t dim_size = fad->get_fixed_dim_size();
             o << dim_size << " * ";
             // Allow data to keep going only if the dimension size is 1
@@ -105,7 +105,7 @@ static void format_uniform_dim_datashape(std::ostream& o,
             break;
         }
         case var_dim_type_id: {
-            const var_dim_type *vad = static_cast<const var_dim_type *>(dt.extended());
+            const var_dim_type *vad = dt.tcast<var_dim_type>();
             const char *child_data = NULL;
             if (data == NULL || metadata == NULL) {
                 o << "var * ";

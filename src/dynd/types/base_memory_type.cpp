@@ -78,7 +78,7 @@ void base_memory_type::metadata_destruct(char *metadata) const
 }
 
 static ndt::type property_get_storage_type(const ndt::type& tp) {
-    const base_memory_type *md = static_cast<const base_memory_type *>(tp.extended());
+    const base_memory_type *md = tp.tcast<base_memory_type>();
     return md->get_storage_type();
 }
 

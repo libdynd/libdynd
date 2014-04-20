@@ -40,7 +40,7 @@ groupby_type::groupby_type(const ndt::type& data_values_tp,
     m_operand_type = ndt::make_cstruct(ndt::make_pointer(data_values_tp), "data",
                     ndt::make_pointer(by_values_tp), "by");
     m_members.metadata_size = m_operand_type.get_metadata_size();
-    const categorical_type *cd = static_cast<const categorical_type *>(m_groups_type.extended());
+    const categorical_type *cd = m_groups_type.tcast<categorical_type>();
     m_value_type = ndt::make_cfixed_dim(cd->get_category_count(),
                     ndt::make_var_dim(data_values_tp.at_single(0)));
     m_members.flags = inherited_flags(m_value_type.get_flags(), m_operand_type.get_flags());
@@ -136,7 +136,7 @@ namespace {
             ndt::type data_values_tp = gd->get_operand_type();
             const char *data_values_metadata = e->src_metadata, *data_values_data = src;
             data_values_tp = data_values_tp.extended()->at_single(0, &data_values_metadata, &data_values_data);
-            data_values_tp = static_cast<const pointer_type *>(data_values_tp.extended())->get_target_type();
+            data_values_tp = data_values_tp.tcast<pointer_type>()->get_target_type();
             data_values_metadata += sizeof(pointer_type_metadata);
             data_values_data = *reinterpret_cast<const char * const *>(data_values_data);
 
@@ -144,7 +144,7 @@ namespace {
             ndt::type by_values_tp = gd->get_operand_type();
             const char *by_values_metadata = e->src_metadata, *by_values_data = src;
             by_values_tp = by_values_tp.extended()->at_single(1, &by_values_metadata, &by_values_data);
-            by_values_tp = static_cast<const pointer_type *>(by_values_tp.extended())->get_target_type();
+            by_values_tp = by_values_tp.tcast<pointer_type>()->get_target_type();
             by_values_metadata += sizeof(pointer_type_metadata);
             by_values_data = *reinterpret_cast<const char * const *>(by_values_data);
 
@@ -164,7 +164,7 @@ namespace {
                             by_values_tp, by_values_origin, by_values_stride, by_values_size);
 
             const ndt::type& result_tp = gd->get_value_type();
-            const cfixed_dim_type *fad = static_cast<const cfixed_dim_type *>(result_tp.extended());
+            const cfixed_dim_type *fad = result_tp.tcast<cfixed_dim_type>();
             intptr_t fad_stride = fad->get_fixed_stride();
             const var_dim_type *vad = static_cast<const var_dim_type *>(fad->get_element_type().extended());
             const var_dim_type_metadata *vad_md = reinterpret_cast<const var_dim_type_metadata *>(e->dst_metadata);
@@ -253,7 +253,7 @@ size_t groupby_type::make_operand_to_value_assignment_kernel(
     offset_out = make_kernreq_to_single_kernel_adapter(out, offset_out, kernreq);
     out->ensure_capacity(offset_out + sizeof(groupby_to_value_assign_extra));
     groupby_to_value_assign_extra *e = out->get_at<groupby_to_value_assign_extra>(offset_out);
-    const categorical_type *cd = static_cast<const categorical_type *>(m_groups_type.extended());
+    const categorical_type *cd = m_groups_type.tcast<categorical_type>();
     switch (cd->get_storage_type().get_type_id()) {
         case uint8_type_id:
             e->base.set_function<unary_single_operation_t>(&groupby_to_value_assign_extra::single_uint8);
@@ -277,14 +277,14 @@ size_t groupby_type::make_operand_to_value_assignment_kernel(
     // The following is the setup for copying a single 'data' value to the output
     // The destination element type and metadata
     const ndt::type& dst_element_tp = static_cast<const var_dim_type *>(
-                    static_cast<const cfixed_dim_type *>(m_value_type.extended())->get_element_type().extended()
+                    m_value_type.tcast<cfixed_dim_type>()->get_element_type().extended()
                     )->get_element_type();
     const char *dst_element_metadata = dst_metadata + 0 + sizeof(var_dim_type_metadata);
     // Get source element type and metadata
     ndt::type src_element_tp = m_operand_type;
     const char *src_element_metadata = e->src_metadata;
     src_element_tp = src_element_tp.extended()->at_single(0, &src_element_metadata, NULL);
-    src_element_tp = static_cast<const pointer_type *>(src_element_tp.extended())->get_target_type();
+    src_element_tp = src_element_tp.tcast<pointer_type>()->get_target_type();
     src_element_metadata += sizeof(pointer_type_metadata);
     src_element_tp = src_element_tp.extended()->at_single(0, &src_element_metadata, NULL);
 
@@ -314,7 +314,7 @@ static nd::array property_ndo_get_groups(const nd::array& n) {
     while (d.get_type_id() != groupby_type_id) {
         d = d.at_single(0);
     }
-    const groupby_type *gd = static_cast<const groupby_type *>(d.extended());
+    const groupby_type *gd = d.tcast<groupby_type>();
     return gd->get_groups_type().p("categories");
 }
 

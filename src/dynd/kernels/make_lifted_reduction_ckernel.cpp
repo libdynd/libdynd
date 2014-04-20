@@ -1022,14 +1022,14 @@ size_t dynd::make_lifted_reduction_ckernel(
         // Get the striding parameters for the source dimension
         switch (src_tp.get_type_id()) {
             case cfixed_dim_type_id: {
-                const cfixed_dim_type *fdt = static_cast<const cfixed_dim_type *>(src_tp.extended());
+                const cfixed_dim_type *fdt = src_tp.tcast<cfixed_dim_type>();
                 src_stride = fdt->get_fixed_stride();
                 src_size = fdt->get_fixed_dim_size();
                 src_tp = fdt->get_element_type();
                 break;
             }
             case strided_dim_type_id: {
-                const strided_dim_type *sdt = static_cast<const strided_dim_type *>(src_tp.extended());
+                const strided_dim_type *sdt = src_tp.tcast<strided_dim_type>();
                 const strided_dim_type_metadata *md = reinterpret_cast<const strided_dim_type_metadata *>(src_meta);
                 src_stride = md->stride;
                 src_size = md->size;
@@ -1058,7 +1058,7 @@ size_t dynd::make_lifted_reduction_ckernel(
                 // a strided dimension of size one
                 switch (dst_tp.get_type_id()) {
                     case cfixed_dim_type_id: {
-                        const cfixed_dim_type *fdt = static_cast<const cfixed_dim_type *>(dst_tp.extended());
+                        const cfixed_dim_type *fdt = dst_tp.tcast<cfixed_dim_type>();
                         if (fdt->get_fixed_dim_size() != 1 || fdt->get_fixed_stride() != 0) {
                             stringstream ss;
                             ss << "make_lifted_reduction_ckernel: destination of a reduction dimension ";
@@ -1070,7 +1070,7 @@ size_t dynd::make_lifted_reduction_ckernel(
                     }
                     case strided_dim_type_id: {
                         const strided_dim_type_metadata *md = reinterpret_cast<const strided_dim_type_metadata *>(dst_meta);
-                        const strided_dim_type *sdt = static_cast<const strided_dim_type *>(dst_tp.extended());
+                        const strided_dim_type *sdt = dst_tp.tcast<strided_dim_type>();
                         if (md->size != 1 || md->stride != 0) {
                             stringstream ss;
                             ss << "make_lifted_reduction_ckernel: destination of a reduction dimension ";
@@ -1110,7 +1110,7 @@ size_t dynd::make_lifted_reduction_ckernel(
             // This dimension is being broadcast, not reduced
             switch (dst_tp.get_type_id()) {
                 case cfixed_dim_type_id: {
-                    const cfixed_dim_type *fdt = static_cast<const cfixed_dim_type *>(dst_tp.extended());
+                    const cfixed_dim_type *fdt = dst_tp.tcast<cfixed_dim_type>();
                     dst_stride = fdt->get_fixed_stride();
                     dst_size = fdt->get_fixed_dim_size();
                     dst_tp = fdt->get_element_type();
@@ -1118,7 +1118,7 @@ size_t dynd::make_lifted_reduction_ckernel(
                 }
                 case strided_dim_type_id: {
                     const strided_dim_type_metadata *md = reinterpret_cast<const strided_dim_type_metadata *>(dst_meta);
-                    const strided_dim_type *sdt = static_cast<const strided_dim_type *>(dst_tp.extended());
+                    const strided_dim_type *sdt = dst_tp.tcast<strided_dim_type>();
                     dst_stride = md->stride;
                     dst_size = md->size;
                     dst_tp = sdt->get_element_type();

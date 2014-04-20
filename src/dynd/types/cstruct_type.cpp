@@ -275,7 +275,7 @@ intptr_t cstruct_type::apply_linear_index(intptr_t nindices, const irange *indic
             return 0;
         } else {
             intptr_t *out_offsets = reinterpret_cast<intptr_t *>(out_metadata);
-            const struct_type *result_etp = static_cast<const struct_type *>(result_tp.extended());
+            const struct_type *result_etp = result_tp.tcast<struct_type>();
             for (intptr_t i = 0; i < dimension_size; ++i) {
                 intptr_t idx = start_index + i * index_stride;
                 out_offsets[i] = m_data_offsets[idx];
@@ -497,25 +497,25 @@ void cstruct_type::foreach_leading(char *data, const char *metadata, foreach_fn_
 ///////// properties on the type
 
 static nd::array property_get_field_names(const ndt::type& dt) {
-    const cstruct_type *d = static_cast<const cstruct_type *>(dt.extended());
+    const cstruct_type *d = dt.tcast<cstruct_type>();
     // TODO: This property should be an immutable nd::array, which we would just return.
     return nd::array(d->get_field_names_vector());
 }
 
 static nd::array property_get_field_types(const ndt::type& dt) {
-    const cstruct_type *d = static_cast<const cstruct_type *>(dt.extended());
+    const cstruct_type *d = dt.tcast<cstruct_type>();
     // TODO: This property should be an immutable nd::array, which we would just return.
     return nd::array(d->get_field_types_vector());
 }
 
 static nd::array property_get_data_offsets(const ndt::type& dt) {
-    const cstruct_type *d = static_cast<const cstruct_type *>(dt.extended());
+    const cstruct_type *d = dt.tcast<cstruct_type>();
     // TODO: This property should be an immutable nd::array, which we would just return.
     return nd::array(d->get_data_offsets_vector());
 }
 
 static nd::array property_get_metadata_offsets(const ndt::type& dt) {
-    const cstruct_type *d = static_cast<const cstruct_type *>(dt.extended());
+    const cstruct_type *d = dt.tcast<cstruct_type>();
     // TODO: This property should be an immutable nd::array, which we would just return.
     return nd::array(d->get_metadata_offsets_vector());
 }
