@@ -564,6 +564,23 @@ public:
         return m_extended;
     }
 
+    /**
+     * If the type is a strided dimension type, where the dimension has a fixed size
+     * and the data is at addresses `dst`, `dst + stride`, etc, this extracts those
+     * values and returns true.
+     *
+     * \param metadata  The array metadata for the type.
+     * \param out_size  Is filled with the size of the dimension.
+     * \param out_stride  Is filled with the stride.
+     * \param out_el_tp  Is filled with the element type.
+     * \param out_el_metadata  Is filled with the array metadata of the element type.
+     *
+     * \returns  True if it is a strided array type, false otherwise.
+     */
+    bool get_as_strided_dim(const char *metadata, intptr_t &out_size,
+                            intptr_t &out_stride, ndt::type &out_el_tp,
+                            const char *&out_el_metadata) const;
+
     /** The size of the data required for uniform iteration */
     inline size_t get_iterdata_size(intptr_t ndim) const {
         if (is_builtin()) {
