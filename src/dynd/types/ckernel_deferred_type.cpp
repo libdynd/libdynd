@@ -229,6 +229,7 @@ static array_preamble *function___call__(const array_preamble *params, void *DYN
     if (par_arrs[0].get_type().get_type_id() != ckernel_deferred_type_id) {
         throw runtime_error("ckernel_deferred method '__call__' only works on individual ckernel_deferred instances presently");
     }
+
     // Figure out how many args were provided
     int nargs;
     nd::array args[max_args];

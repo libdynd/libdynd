@@ -96,29 +96,6 @@ static const map<string, ndt::type>& get_builtin_types()
     }
     return builtin_types;
 }
-static const set<string>& get_reserved_typenames()
-{
-    static set<string> reserved_typenames;
-    if (reserved_typenames.empty()) {
-        const map<string, ndt::type>& builtin_types = get_builtin_types();
-        for (map<string, ndt::type>::const_iterator i = builtin_types.begin();
-                        i != builtin_types.end(); ++i) {
-            reserved_typenames.insert(i->first);
-        }
-        reserved_typenames.insert("string");
-        reserved_typenames.insert("char");
-        reserved_typenames.insert("time");
-        reserved_typenames.insert("datetime");
-        reserved_typenames.insert("unaligned");
-        reserved_typenames.insert("pointer");
-        reserved_typenames.insert("complex");
-        reserved_typenames.insert("bytes");
-        reserved_typenames.insert("byteswap");
-		reserved_typenames.insert("cuda_host");
-		reserved_typenames.insert("cuda_device");
-    }
-    return reserved_typenames;
-}
 
 static const char *skip_whitespace(const char *begin, const char *end)
 {
@@ -822,7 +799,6 @@ static ndt::type parse_tuple(const char *&begin, const char *end, map<string, nd
 /** This is what parses the main datashape grammar, excluding type aliases, etc. */
 static ndt::type parse_rhs_expression(const char *&begin, const char *end, map<string, ndt::type>& symtable)
 {
-    const set<string>& reserved_typenames = get_reserved_typenames();
     ndt::type result;
     vector<intptr_t> shape;
     // rhs_expression : ((NAME | NUMBER) ASTERISK)* (record | NAME LPAREN rhs_expression RPAREN | NAME)

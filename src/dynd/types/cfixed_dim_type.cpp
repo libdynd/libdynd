@@ -518,7 +518,7 @@ size_t cfixed_dim_type::make_assignment_kernel(
                                              src_el_metadata)) {
 
             // Check for a broadcasting error
-            if (src_size != 1 && m_dim_size != src_size) {
+            if (src_size != 1 && (intptr_t)m_dim_size != src_size) {
                 throw broadcast_error(dst_tp, dst_metadata, src_tp, src_metadata);
             }
 

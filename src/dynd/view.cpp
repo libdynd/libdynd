@@ -133,7 +133,7 @@ static bool try_view(const ndt::type &tp, const char *metadata,
             const cfixed_dim_type *view_fdt =
                 view_tp.tcast<cfixed_dim_type>();
             // The size and stride must match exactly in this case
-            if (fdt->get_fixed_dim_size() != (intptr_t)view_fdt->get_fixed_dim_size() ||
+            if (fdt->get_fixed_dim_size() != view_fdt->get_fixed_dim_size() ||
                     md->stride != view_fdt->get_fixed_stride()) {
                 return false;
             }

@@ -116,14 +116,14 @@ static size_t make_elwise_strided_dimension_expr_kernel_for_N(
             e->src_stride[i] = 0;
             child_metadata[i + 1] = src_metadata[i];
             child_tp[i + 1] = src_tp[i];
-        } else if (!src_tp[0].get_as_strided_dim(
+        } else if (src_tp[i].get_as_strided_dim(
                        src_metadata[i], src_size, e->src_stride[i],
                        child_tp[i + 1], child_metadata[i + 1])) {
             // Check for a broadcasting error
             if (src_size != 1 && e->size != src_size) {
                 throw broadcast_error(dst_tp, dst_metadata, src_tp[i], src_metadata[i]);
             }
-            
+        } else {
             stringstream ss;
             ss << "make_elwise_strided_dimension_expr_kernel: expected strided "
                   "or fixed dim, got " << src_tp[i];

@@ -55,29 +55,9 @@ void tuple_type::print_data(std::ostream& o, const char *metadata, const char *d
     o << "]";
 }
 
-static bool is_simple_identifier_name(const string& s)
-{
-    if (s.empty()) {
-        return false;
-    } else {
-        char c = s[0];
-        if (!(('a' <= c && c <= 'z') || ('A' <= c && c <= 'Z') || c == '_')) {
-            return false;
-        }
-        for (size_t i = 1, i_end = s.size(); i < i_end; ++i) {
-            c = s[i];
-            if (!(('0' <= c && c <= '9') || ('a' <= c && c <= 'z')
-                            || ('A' <= c && c <= 'Z') || c == '_')) {
-                return false;
-            }
-        }
-        return true;
-    }
-}
-
 void tuple_type::print_type(std::ostream& o) const
 {
-    // Use the record datashape syntax
+    // Use the tuple datashape syntax
     o << "(";
     for (size_t i = 0, i_end = m_field_types.size(); i != i_end; ++i) {
         if (i != 0) {
@@ -245,11 +225,11 @@ bool tuple_type::is_lossless_assignment(const ndt::type& dst_tp, const ndt::type
 }
 
 size_t tuple_type::make_assignment_kernel(
-                ckernel_builder *out_ckb, size_t ckb_offset,
-                const ndt::type& dst_tp, const char *dst_metadata,
-                const ndt::type& src_tp, const char *src_metadata,
-                kernel_request_t kernreq, assign_error_mode errmode,
-                const eval::eval_context *ectx) const
+                ckernel_builder *DYND_UNUSED(out_ckb), size_t DYND_UNUSED(ckb_offset),
+                const ndt::type& dst_tp, const char *DYND_UNUSED(dst_metadata),
+                const ndt::type& src_tp, const char *DYND_UNUSED(src_metadata),
+                kernel_request_t DYND_UNUSED(kernreq), assign_error_mode DYND_UNUSED(errmode),
+                const eval::eval_context *DYND_UNUSED(ectx)) const
 {
     /*
     if (this == dst_tp.extended()) {
@@ -283,11 +263,11 @@ size_t tuple_type::make_assignment_kernel(
 }
 
 size_t tuple_type::make_comparison_kernel(
-                ckernel_builder *out, size_t offset_out,
-                const ndt::type& src0_dt, const char *src0_metadata,
-                const ndt::type& src1_dt, const char *src1_metadata,
+                ckernel_builder *DYND_UNUSED(out), size_t DYND_UNUSED(offset_out),
+                const ndt::type& src0_tp, const char *DYND_UNUSED(src0_metadata),
+                const ndt::type& src1_tp, const char *DYND_UNUSED(src1_metadata),
                 comparison_type_t comptype,
-                const eval::eval_context *ectx) const
+                const eval::eval_context *DYND_UNUSED(ectx)) const
 {
     /*
     if (this == src0_dt.extended()) {
@@ -304,7 +284,7 @@ size_t tuple_type::make_comparison_kernel(
     }
     */
 
-    throw not_comparable_error(src0_dt, src1_dt, comptype);
+    throw not_comparable_error(src0_tp, src1_tp, comptype);
 }
 
 bool tuple_type::operator==(const base_type& rhs) const

@@ -308,7 +308,7 @@ bool fixed_dim_type::operator==(const base_type& rhs) const
 void fixed_dim_type::metadata_default_construct(char *metadata, intptr_t ndim, const intptr_t* shape) const
 {
     // Validate that the shape is ok
-    if (ndim > 0 && shape[0] >= 0 && shape[0] != m_dim_size) {
+    if (ndim > 0 && shape[0] >= 0 && shape[0] != (intptr_t)m_dim_size) {
         stringstream ss;
         ss << "the fixed_dim type requires a shape match (provided ";
         ss << shape[0] << ", required " << m_dim_size;
@@ -317,7 +317,7 @@ void fixed_dim_type::metadata_default_construct(char *metadata, intptr_t ndim, c
     size_t element_size = m_element_tp.is_builtin()
                               ? m_element_tp.get_data_size()
                               : m_element_tp.extended()->get_default_data_size(
-                                    std::max(ndim - 1, 0LL), shape + 1);
+                                    std::max(ndim - 1, (intptr_t)0), shape + 1);
 
     fixed_dim_type_metadata *md =
         reinterpret_cast<fixed_dim_type_metadata *>(metadata);
@@ -511,7 +511,7 @@ size_t fixed_dim_type::make_assignment_kernel(
                                              self->m_src_stride, src_el_tp,
                                              src_el_metadata)) {
             // Check for a broadcasting error
-            if (src_size != 1 && m_dim_size != src_size) {
+            if (src_size != 1 && (intptr_t)m_dim_size != src_size) {
                 throw broadcast_error(dst_tp, dst_metadata, src_tp, src_metadata);
             }
 

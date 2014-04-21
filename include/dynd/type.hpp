@@ -403,6 +403,19 @@ public:
         return get_base_type_data_size(m_extended);
     }
 
+    /** The element size of the type when default-constructed */
+    inline size_t get_default_data_size(intptr_t ndim, const intptr_t *shape)
+        const
+    {
+        if (is_builtin_type(m_extended)) {
+            return static_cast<intptr_t>(
+                detail::builtin_data_sizes
+                    [reinterpret_cast<uintptr_t>(m_extended)]);
+        } else {
+            return m_extended->get_default_data_size(ndim, shape);
+        }
+    }
+
     inline size_t get_metadata_size() const {
         if (is_builtin()) {
             return 0;
