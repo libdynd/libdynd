@@ -11,12 +11,9 @@ using namespace std;
 using namespace dynd;
 
 
-void kernels::destroy_trivial_parent_ckernel(ckernel_prefix *ckp)
+void kernels::destroy_trivial_parent_ckernel(ckernel_prefix *self)
 {
-    ckernel_prefix *child = ckp + 1;
-    if (child->destructor != NULL) {
-        child->destructor(child);
-    }
+    self->destroy_child_ckernel(sizeof(ckernel_prefix));
 }
 
 void kernels::unary_as_expr_adapter_single_ckernel(

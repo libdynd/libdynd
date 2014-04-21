@@ -231,16 +231,13 @@ namespace {
             single<uint32_t>(dst, src, extra);
         }
 
-        static void destruct(ckernel_prefix *extra)
+        static void destruct(ckernel_prefix *self)
         {
-            extra_type *e = reinterpret_cast<extra_type *>(extra);
+            extra_type *e = reinterpret_cast<extra_type *>(self);
             if (e->src_groupby_tp != NULL) {
                 base_type_decref(e->src_groupby_tp);
             }
-            ckernel_prefix *echild = &(e + 1)->base;
-            if (echild->destructor) {
-                echild->destructor(echild);
-            }
+            self->destroy_child_ckernel(sizeof(extra_type));
         }
     };
 } // anonymous namespace

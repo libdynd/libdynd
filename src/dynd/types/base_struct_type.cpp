@@ -67,13 +67,9 @@ namespace {
             opchild(dst, dst_stride, src + e->field_offset, src_stride, count, echild);
         }
 
-        static void destruct(ckernel_prefix *extra)
+        static void destruct(ckernel_prefix *self)
         {
-            extra_type *e = reinterpret_cast<extra_type *>(extra);
-            ckernel_prefix *echild = &(e + 1)->base;
-            if (echild->destructor) {
-                echild->destructor(echild);
-            }
+            self->destroy_child_ckernel(sizeof(extra_type));
         }
     };
 } // anonymous namespace

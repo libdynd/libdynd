@@ -233,13 +233,9 @@ namespace {
             opchild(dst, src_modified, echild);
         }
 
-        static void destruct(ckernel_prefix *extra)
+        static void destruct(ckernel_prefix *self)
         {
-            extra_type *e = reinterpret_cast<extra_type *>(extra);
-            ckernel_prefix *echild = &(e + 1)->base;
-            if (echild->destructor) {
-                echild->destructor(echild);
-            }
+            self->destroy_child_ckernel(sizeof(extra_type));
         }
     };
 
@@ -268,16 +264,10 @@ namespace {
             opchild(dst, src_modified.get(), echild);
         }
 
-        static void destruct(ckernel_prefix *extra)
+        static void destruct(ckernel_prefix *self)
         {
-            extra_type *e = reinterpret_cast<extra_type *>(extra);
-            size_t src_count = e->src_count;
-            ckernel_prefix *echild = reinterpret_cast<ckernel_prefix *>(
-                            reinterpret_cast<char *>(extra) + sizeof(extra_type) +
-                            src_count * sizeof(size_t));
-            if (echild->destructor) {
-                echild->destructor(echild);
-            }
+            extra_type *e = reinterpret_cast<extra_type *>(self);
+            self->destroy_child_ckernel(sizeof(extra_type) + e->src_count * sizeof(size_t));
         }
     };
 } // anonymous namespace

@@ -103,11 +103,9 @@ namespace {
             return result;
         }
 
-        static void destruct(ckernel_prefix *extra)
+        static void destruct(ckernel_prefix *self)
         {
-            char *eraw = reinterpret_cast<char *>(extra);
-            extra_type *e = reinterpret_cast<extra_type *>(extra);
-            ckernel_prefix *echild;
+            extra_type *e = reinterpret_cast<extra_type *>(self);
 
             for (int i = 0; i < 2; ++i) {
                 single_buffer& b = e->buf[i];
@@ -121,21 +119,11 @@ namespace {
                     free(metadata);
                 }
                 // Destruct the kernel for the buffer
-                if (b.kernel_offset != 0) {
-                    echild = reinterpret_cast<ckernel_prefix *>(eraw + b.kernel_offset);
-                    if (echild->destructor) {
-                        echild->destructor(echild);
-                    }
-                }
+                self->destroy_child_ckernel(b.kernel_offset);
             }
 
             // Destruct the comparison kernel
-            if (e->cmp_kernel_offset != 0) {
-                echild = reinterpret_cast<ckernel_prefix *>(eraw + e->cmp_kernel_offset);
-                if (echild->destructor) {
-                    echild->destructor(echild);
-                }
-            }
+            self->destroy_child_ckernel(e->cmp_kernel_offset);
         }
     };
 } // anonymous namespace

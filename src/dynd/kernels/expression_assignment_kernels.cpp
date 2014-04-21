@@ -130,10 +130,9 @@ namespace {
                 count -= chunk_size;
             }
         }
-        static void destruct(ckernel_prefix *extra)
+        static void destruct(ckernel_prefix *self)
         {
-            char *eraw = reinterpret_cast<char *>(extra);
-            extra_type *e = reinterpret_cast<extra_type *>(extra);
+            extra_type *e = reinterpret_cast<extra_type *>(self);
             // Steal the buffer_tp reference count into a type
             ndt::type buffer_tp(e->buffer_tp, false);
             char *buffer_metadata = e->buffer_metadata;
@@ -142,21 +141,9 @@ namespace {
                 buffer_tp.extended()->metadata_destruct(buffer_metadata);
                 free(buffer_metadata);
             }
-            ckernel_prefix *echild;
-            // Destruct the first kernel
-            if (e->first_kernel_offset != 0) {
-                echild = reinterpret_cast<ckernel_prefix *>(eraw + e->first_kernel_offset);
-                if (echild->destructor) {
-                    echild->destructor(echild);
-                }
-            }
-            // Destruct the second kernel
-            if (e->second_kernel_offset != 0) {
-                echild = reinterpret_cast<ckernel_prefix *>(eraw + e->second_kernel_offset);
-                if (echild->destructor) {
-                    echild->destructor(echild);
-                }
-            }
+            // Destruct the child kernels
+            self->destroy_child_ckernel(e->first_kernel_offset);
+            self->destroy_child_ckernel(e->second_kernel_offset);
         }
     };
 } // anonymous namespace

@@ -14,117 +14,91 @@ using namespace dynd;
 // string to date assignment
 
 namespace {
-    struct string_to_date_kernel_extra {
-        typedef string_to_date_kernel_extra extra_type;
+    struct string_to_date_ck : public kernels::assignment_ck<string_to_date_ck> {
+        ndt::type m_src_string_tp;
+        const char *m_src_metadata;
+        assign_error_mode m_errmode;
+        date_parse_order_t m_date_parse_order;
+        int m_century_window;
 
-        ckernel_prefix base;
-        const base_string_type *src_string_dt;
-        const char *src_metadata;
-        assign_error_mode errmode;
-        date_parse_order_t date_parse_order;
-        int century_window;
-
-        static void single(char *dst, const char *src, ckernel_prefix *extra)
+        inline void single(char *dst, const char *src)
         {
-            extra_type *e = reinterpret_cast<extra_type *>(extra);
-            const string& s = e->src_string_dt->get_utf8_string(e->src_metadata, src, e->errmode);
+            const base_string_type *bst = static_cast<const base_string_type *>(m_src_string_tp.extended());
+            const string& s = bst->get_utf8_string(m_src_metadata, src, m_errmode);
             date_ymd ymd;
             // TODO: properly distinguish "date" and "option[date]" with respect to NA support
             if (s == "NA") {
                 ymd.set_to_na();
             } else {
-                ymd.set_from_str(s, e->date_parse_order, e->century_window);
+                ymd.set_from_str(s, m_date_parse_order, m_century_window);
             }
             *reinterpret_cast<int32_t *>(dst) = ymd.to_days();
-        }
-
-        static void destruct(ckernel_prefix *extra)
-        {
-            extra_type *e = reinterpret_cast<extra_type *>(extra);
-            base_type_xdecref(e->src_string_dt);
         }
     };
 } // anonymous namespace
 
 size_t dynd::make_string_to_date_assignment_kernel(
-                ckernel_builder *out, size_t offset_out,
-                const ndt::type& src_string_dt, const char *src_metadata,
+                ckernel_builder *out_ckb, size_t ckb_offset,
+                const ndt::type& src_string_tp, const char *src_metadata,
                 kernel_request_t kernreq, assign_error_mode errmode,
                 const eval::eval_context *ectx)
 {
-    if (src_string_dt.get_kind() != string_kind) {
+    typedef string_to_date_ck self_type;
+    if (src_string_tp.get_kind() != string_kind) {
         stringstream ss;
-        ss << "make_string_to_date_assignment_kernel: source type " << src_string_dt << " is not a string type";
+        ss << "make_string_to_date_assignment_kernel: source type " << src_string_tp << " is not a string type";
         throw runtime_error(ss.str());
     }
 
-    offset_out = make_kernreq_to_single_kernel_adapter(out, offset_out, kernreq);
-    out->ensure_capacity(offset_out + sizeof(string_to_date_kernel_extra));
-    string_to_date_kernel_extra *e = out->get_at<string_to_date_kernel_extra>(offset_out);
-    e->base.set_function<unary_single_operation_t>(&string_to_date_kernel_extra::single);
-    e->base.destructor = &string_to_date_kernel_extra::destruct;
-    // The kernel data owns a reference to this type
-    e->src_string_dt = static_cast<const base_string_type *>(ndt::type(src_string_dt).release());
-    e->src_metadata = src_metadata;
-    e->errmode = errmode;
-    e->date_parse_order = ectx->date_parse_order;
-    e->century_window = ectx->century_window;
-    return offset_out + sizeof(string_to_date_kernel_extra);
+    self_type *self = self_type::create_leaf(out_ckb, ckb_offset, kernreq);
+    self->m_src_string_tp = src_string_tp;
+    self->m_src_metadata = src_metadata;
+    self->m_errmode = errmode;
+    self->m_date_parse_order = ectx->date_parse_order;
+    self->m_century_window = ectx->century_window;
+    return ckb_offset + sizeof(self_type);
 }
 
 /////////////////////////////////////////
 // date to string assignment
 
 namespace {
-    struct date_to_string_kernel_extra {
-        typedef date_to_string_kernel_extra extra_type;
+    struct date_to_string_ck : public kernels::assignment_ck<date_to_string_ck> {
+        ndt::type m_dst_string_tp;
+        const char *m_dst_metadata;
+        assign_error_mode m_errmode;
 
-        ckernel_prefix base;
-        const base_string_type *dst_string_dt;
-        const char *dst_metadata;
-        assign_error_mode errmode;
-
-        static void single(char *dst, const char *src, ckernel_prefix *extra)
+        inline void single(char *dst, const char *src)
         {
-            extra_type *e = reinterpret_cast<extra_type *>(extra);
             date_ymd ymd;
             ymd.set_from_days(*reinterpret_cast<const int32_t *>(src));
             string s = ymd.to_str();
             if (s.empty()) {
                 s = "NA";
             }
-            e->dst_string_dt->set_utf8_string(e->dst_metadata, dst, e->errmode, s);
-        }
-
-        static void destruct(ckernel_prefix *extra)
-        {
-            extra_type *e = reinterpret_cast<extra_type *>(extra);
-            base_type_xdecref(e->dst_string_dt);
+            const base_string_type *bst = static_cast<const base_string_type *>(m_dst_string_tp.extended());
+            bst->set_utf8_string(m_dst_metadata, dst, m_errmode, s);
         }
     };
 } // anonymous namespace
 
 size_t dynd::make_date_to_string_assignment_kernel(
-                ckernel_builder *out, size_t offset_out,
-                const ndt::type& dst_string_dt, const char *dst_metadata,
+                ckernel_builder *out_ckb, size_t ckb_offset,
+                const ndt::type& dst_string_tp, const char *dst_metadata,
                 kernel_request_t kernreq, assign_error_mode errmode,
                 const eval::eval_context *DYND_UNUSED(ectx))
 {
-    if (dst_string_dt.get_kind() != string_kind) {
+    typedef date_to_string_ck self_type;
+    if (dst_string_tp.get_kind() != string_kind) {
         stringstream ss;
-        ss << "get_date_to_string_assignment_kernel: dest type " << dst_string_dt << " is not a string type";
+        ss << "get_date_to_string_assignment_kernel: dest type " << dst_string_tp << " is not a string type";
         throw runtime_error(ss.str());
     }
 
-    offset_out = make_kernreq_to_single_kernel_adapter(out, offset_out, kernreq);
-    out->ensure_capacity(offset_out + sizeof(date_to_string_kernel_extra));
-    date_to_string_kernel_extra *e = out->get_at<date_to_string_kernel_extra>(offset_out);
-    e->base.set_function<unary_single_operation_t>(&date_to_string_kernel_extra::single);
-    e->base.destructor = &date_to_string_kernel_extra::destruct;
-    // The kernel data owns a reference to this type
-    e->dst_string_dt = static_cast<const base_string_type *>(ndt::type(dst_string_dt).release());
-    e->dst_metadata = dst_metadata;
-    e->errmode = errmode;
-    return offset_out + sizeof(date_to_string_kernel_extra);
+    self_type *self = self_type::create_leaf(out_ckb, ckb_offset, kernreq);
+    self->m_dst_string_tp = dst_string_tp;
+    self->m_dst_metadata = dst_metadata;
+    self->m_errmode = errmode;
+    return ckb_offset + sizeof(self_type);
 }
 

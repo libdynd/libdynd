@@ -61,13 +61,9 @@ struct strided_expr_kernel_extra {
         }
     }
 
-    static void destruct(ckernel_prefix *extra)
+    static void destruct(ckernel_prefix *self)
     {
-        extra_type *e = reinterpret_cast<extra_type *>(extra);
-        ckernel_prefix *echild = &(e + 1)->base;
-        if (echild->destructor) {
-            echild->destructor(echild);
-        }
+        self->destroy_child_ckernel(sizeof(extra_type));
     }
 };
 
@@ -279,13 +275,9 @@ struct strided_or_var_to_strided_expr_kernel_extra {
         }
     }
 
-    static void destruct(ckernel_prefix *extra)
+    static void destruct(ckernel_prefix *self)
     {
-        extra_type *e = reinterpret_cast<extra_type *>(extra);
-        ckernel_prefix *echild = &(e + 1)->base;
-        if (echild->destructor) {
-            echild->destructor(echild);
-        }
+        self->destroy_child_ckernel(sizeof(extra_type));
     }
 };
 
@@ -572,13 +564,9 @@ struct strided_or_var_to_var_expr_kernel_extra {
         }
     }
 
-    static void destruct(ckernel_prefix *extra)
+    static void destruct(ckernel_prefix *self)
     {
-        extra_type *e = reinterpret_cast<extra_type *>(extra);
-        ckernel_prefix *echild = &(e + 1)->base;
-        if (echild->destructor) {
-            echild->destructor(echild);
-        }
+        self->destroy_child_ckernel(sizeof(extra_type));
     }
 };
 

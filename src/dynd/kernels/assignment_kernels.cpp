@@ -443,13 +443,9 @@ static void wrap_single_as_strided_kernel(char *dst, intptr_t dst_stride,
         opchild(dst, src, echild);
     }
 }
-static void simple_wrapper_kernel_destruct(
-                ckernel_prefix *extra)
+static void simple_wrapper_kernel_destruct(ckernel_prefix *self)
 {
-    ckernel_prefix *echild = extra + 1;
-    if (echild->destructor) {
-        echild->destructor(echild);
-    }
+    self->destroy_child_ckernel(sizeof(ckernel_prefix));
 }
 
 size_t dynd::make_kernreq_to_single_kernel_adapter(
@@ -498,12 +494,7 @@ void dynd::strided_assign_kernel_extra::strided(char *dst, intptr_t dst_stride,
     }
 }
 
-void dynd::strided_assign_kernel_extra::destruct(
-                ckernel_prefix *extra)
+void dynd::strided_assign_kernel_extra::destruct(ckernel_prefix *self)
 {
-    extra_type *e = reinterpret_cast<extra_type *>(extra);
-    ckernel_prefix *echild = &(e + 1)->base;
-    if (echild->destructor) {
-        echild->destructor(echild);
-    }
+    self->destroy_child_ckernel(sizeof(extra_type));
 }

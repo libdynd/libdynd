@@ -46,21 +46,14 @@ namespace {
             }
         }
 
-        static void destruct(ckernel_prefix *extra)
+        static void destruct(ckernel_prefix *self)
         {
-            char *eraw = reinterpret_cast<char *>(extra);
-            extra_type *e = reinterpret_cast<extra_type *>(extra);
-            ckernel_prefix *echild;
+            extra_type *e = reinterpret_cast<extra_type *>(self);
             const field_items *fi = reinterpret_cast<const field_items *>(e + 1);
             size_t field_count = e->field_count;
             for (size_t i = 0; i < field_count; ++i) {
                 const field_items& item = fi[i];
-                if (item.child_kernel_offset != 0) {
-                    echild  = reinterpret_cast<ckernel_prefix *>(eraw + item.child_kernel_offset);
-                    if (echild->destructor != NULL) {
-                        echild->destructor(echild);
-                    }
-                }
+                self->destroy_child_ckernel(item.child_kernel_offset);
             }
         }
     };

@@ -145,13 +145,9 @@ struct strided_initial_reduction_kernel_extra {
         }
     }
 
-    static void destruct(ckernel_prefix *extra)
+    static void destruct(ckernel_prefix *self)
     {
-        extra_type *e = reinterpret_cast<extra_type *>(extra);
-        ckernel_prefix *echild = &(e + 1)->base();
-        if (echild->destructor) {
-            echild->destructor(echild);
-        }
+        self->destroy_child_ckernel(sizeof(extra_type));
     }
 };
 
@@ -242,13 +238,9 @@ struct strided_initial_broadcast_kernel_extra {
         }
     }
 
-    static void destruct(ckernel_prefix *extra)
+    static void destruct(ckernel_prefix *self)
     {
-        extra_type *e = reinterpret_cast<extra_type *>(extra);
-        ckernel_prefix *echild = &(e + 1)->base();
-        if (echild->destructor) {
-            echild->destructor(echild);
-        }
+        self->destroy_child_ckernel(sizeof(extra_type));
     }
 };
 
@@ -413,25 +405,16 @@ struct strided_inner_reduction_kernel_extra {
         }
     }
 
-    static void destruct(ckernel_prefix *extra)
+    static void destruct(ckernel_prefix *self)
     {
-        extra_type *e = reinterpret_cast<extra_type *>(extra);
+        extra_type *e = reinterpret_cast<extra_type *>(self);
         if (e->ident_ref != NULL) {
             memory_block_decref(e->ident_ref);
         }
         // The reduction kernel
-        ckernel_prefix *echild = &(e + 1)->base();
-        if (echild->destructor) {
-            echild->destructor(echild);
-        }
+        self->destroy_child_ckernel(sizeof(extra_type));
         // The destination initialization kernel
-        if (e->dst_init_kernel_offset != 0) {
-            echild = reinterpret_cast<ckernel_prefix *>(
-                        reinterpret_cast<char *>(extra) + e->dst_init_kernel_offset);
-            if (echild->destructor) {
-                echild->destructor(echild);
-            }
-        }
+        self->destroy_child_ckernel(e->dst_init_kernel_offset);
     }
 };
 
@@ -579,25 +562,16 @@ struct strided_inner_broadcast_kernel_extra {
         }
     }
 
-    static void destruct(ckernel_prefix *extra)
+    static void destruct(ckernel_prefix *self)
     {
-        extra_type *e = reinterpret_cast<extra_type *>(extra);
+        extra_type *e = reinterpret_cast<extra_type *>(self);
         if (e->ident_ref != NULL) {
             memory_block_decref(e->ident_ref);
         }
         // The reduction kernel
-        ckernel_prefix *echild = &(e + 1)->base();
-        if (echild->destructor) {
-            echild->destructor(echild);
-        }
+        self->destroy_child_ckernel(sizeof(extra_type));
         // The destination initialization kernel
-        if (e->dst_init_kernel_offset != 0) {
-            echild = reinterpret_cast<ckernel_prefix *>(
-                        reinterpret_cast<char *>(extra) + e->dst_init_kernel_offset);
-            if (echild->destructor) {
-                echild->destructor(echild);
-            }
-        }
+        self->destroy_child_ckernel(e->dst_init_kernel_offset);
     }
 };
 

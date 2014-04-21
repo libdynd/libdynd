@@ -677,7 +677,7 @@ size_t datetime::make_iso_8601_datetime(const datetime_fields *dts, char *outstr
 #elif defined(_MSC_VER)
     tmplen = _snprintf(substr, sublen, "%04I64d", dts->year);
 #else
-    tmplen = snprintf(substr, sublen, "%04lld", dts->year);
+    tmplen = snprintf(substr, sublen, "%04lld", (long long)dts->year);
 #endif
     /* If it ran out of space or there isn't space for the NULL terminator */
     if (tmplen < 0 || tmplen > sublen) {
