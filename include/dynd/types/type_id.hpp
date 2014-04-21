@@ -110,6 +110,8 @@ enum type_id_t {
     // A strided array dimension type (like NumPy)
     strided_dim_type_id,
     // A fixed-sized array dimension type
+    fixed_dim_type_id,
+    // A fixed-sized, fixed-stride array dimension type
     cfixed_dim_type_id,
     // A dimension made up of offsets
     offset_dim_type_id,

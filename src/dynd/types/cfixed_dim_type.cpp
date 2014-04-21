@@ -617,18 +617,15 @@ ndt::type dynd::ndt::make_cfixed_dim(intptr_t ndim, const intptr_t *shape,
 }
 
 static size_t get_fixed_dim_size(const ndt::type& dt) {
-    const cfixed_dim_type *d = dt.tcast<cfixed_dim_type>();
-    return d->get_fixed_dim_size();
+    return  dt.tcast<cfixed_dim_type>()->get_fixed_dim_size();
 }
 
 static intptr_t get_fixed_dim_stride(const ndt::type& dt) {
-    const cfixed_dim_type *d = dt.tcast<cfixed_dim_type>();
-    return d->get_fixed_stride();
+    return dt.tcast<cfixed_dim_type>()->get_fixed_stride();
 }
 
 static ndt::type get_element_type(const ndt::type& dt) {
-    const cfixed_dim_type *d = dt.tcast<cfixed_dim_type>();
-    return d->get_element_type();
+    return dt.tcast<cfixed_dim_type>()->get_element_type();
 }
 
 static pair<string, gfunc::callable> cfixed_dim_type_properties[] = {

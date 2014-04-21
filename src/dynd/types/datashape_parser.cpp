@@ -9,6 +9,7 @@
 #include <dynd/types/datashape_parser.hpp>
 #include <dynd/types/strided_dim_type.hpp>
 #include <dynd/types/var_dim_type.hpp>
+#include <dynd/types/fixed_dim_type.hpp>
 #include <dynd/types/cfixed_dim_type.hpp>
 #include <dynd/types/cstruct_type.hpp>
 #include <dynd/types/struct_type.hpp>
@@ -290,6 +291,33 @@ static bool parse_quoted_string(const char *&begin, const char *end, string& out
         } else {
             return true;
         }
+    }
+}
+
+// fixed_type : cfixed[N] * rhs_expression
+static ndt::type parse_fixed_dim_parameters(const char *&begin, const char *end,
+                                            map<string, ndt::type> &symtable)
+{
+    if (parse_token(begin, end, '[')) {
+        const char *saved_begin = begin;
+        string dim_size_str = parse_number(begin, end);
+        if (dim_size_str.empty()) {
+            throw datashape_parse_error(saved_begin, "expected dimension size");
+        }
+        intptr_t dim_size = atoll(dim_size_str.c_str());
+        if (!parse_token(begin, end, ']')) {
+            throw datashape_parse_error(begin, "expected closing ']'");
+        }
+        if (!parse_token(begin, end, '*')) {
+            throw datashape_parse_error(begin, "expected dimension separator '*'");
+        }
+        ndt::type element_tp = parse_rhs_expression(begin, end, symtable);
+        if (element_tp.get_type_id() == uninitialized_type_id) {
+            throw datashape_parse_error(begin, "expected element type");
+        }
+        return ndt::make_fixed_dim(dim_size, element_tp);
+    } else {
+        throw datashape_parse_error(begin, "expected opening '['");
     }
 }
 
@@ -862,6 +890,8 @@ static ndt::type parse_rhs_expression(const char *&begin, const char *end, map<s
             result = parse_cuda_device_parameters(begin, end, symtable);
         } else if (n == "cfixed") {
             result = parse_cfixed_dim_parameters(begin, end, symtable);
+        } else if (n == "fixed") {
+            result = parse_fixed_dim_parameters(begin, end, symtable);
         } else {
             const map<string, ndt::type>& builtin_types = get_builtin_types();
             map<string, ndt::type>::const_iterator i = builtin_types.find(n);

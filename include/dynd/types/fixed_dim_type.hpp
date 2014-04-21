@@ -3,8 +3,8 @@
 // BSD 2-Clause License, see LICENSE.txt
 //
 
-#ifndef _DYND__STRIDED_DIM_TYPE_HPP_
-#define _DYND__STRIDED_DIM_TYPE_HPP_
+#ifndef _DYND__FIXED_DIM_TYPE_HPP_
+#define _DYND__FIXED_DIM_TYPE_HPP_
 
 #include <dynd/type.hpp>
 #include <dynd/types/base_uniform_dim_type.hpp>
@@ -13,25 +13,29 @@
 
 namespace dynd {
 
-struct strided_dim_type_metadata {
-    intptr_t size;
+struct fixed_dim_type_metadata {
     intptr_t stride;
 };
 
-struct strided_dim_type_iterdata {
+struct fixed_dim_type_iterdata {
     iterdata_common common;
     char *data;
     intptr_t stride;
 };
 
-class strided_dim_type : public base_uniform_dim_type {
+class fixed_dim_type : public base_uniform_dim_type {
+    size_t m_dim_size;
     std::vector<std::pair<std::string, gfunc::callable> > m_array_properties, m_array_functions;
 public:
-    strided_dim_type(const ndt::type& element_tp);
+    fixed_dim_type(size_t dim_size, const ndt::type& element_tp);
 
-    virtual ~strided_dim_type();
+    virtual ~fixed_dim_type();
 
     size_t get_default_data_size(intptr_t ndim, const intptr_t *shape) const;
+
+    inline size_t get_fixed_dim_size() const {
+        return m_dim_size;
+    }
 
     void print_data(std::ostream& o, const char *metadata, const char *data) const;
 
@@ -120,19 +124,15 @@ public:
 };
 
 namespace ndt {
-    inline ndt::type make_strided_dim(const ndt::type& element_tp) {
-        return ndt::type(new strided_dim_type(element_tp), false);
+    inline ndt::type make_fixed_dim(size_t dim_size, const ndt::type& element_tp) {
+        return ndt::type(new fixed_dim_type(dim_size, element_tp), false);
     }
 
-    inline ndt::type make_strided_dim(const ndt::type& uniform_tp, intptr_t ndim) {
-        ndt::type result = uniform_tp;
-        for (intptr_t i = 0; i < ndim; ++i) {
-            result = make_strided_dim(result);
-        }
-        return result;
-    }
+    ndt::type make_fixed_dim(intptr_t ndim, const intptr_t *shape,
+                              const ndt::type &dtp);
+
 } // namespace ndt
 
 } // namespace dynd
 
-#endif // _DYND__STRIDED_DIM_TYPE_HPP_
+#endif // _DYND__FIXED_DIM_TYPE_HPP_

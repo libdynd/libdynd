@@ -26,20 +26,20 @@ class cfixed_dim_type : public base_uniform_dim_type {
     std::vector<std::pair<std::string, gfunc::callable> > m_array_properties, m_array_functions;
 
 public:
-    cfixed_dim_type(size_t dimension_size, const ndt::type& element_tp);
-    cfixed_dim_type(size_t dimension_size, const ndt::type& element_tp, intptr_t stride);
+    cfixed_dim_type(size_t dim_size, const ndt::type& element_tp);
+    cfixed_dim_type(size_t dim_size, const ndt::type& element_tp, intptr_t stride);
 
     virtual ~cfixed_dim_type();
 
-    size_t get_default_data_size(intptr_t DYND_UNUSED(ndim), const intptr_t *DYND_UNUSED(shape)) const {
+    inline size_t get_default_data_size(intptr_t DYND_UNUSED(ndim), const intptr_t *DYND_UNUSED(shape)) const {
         return get_data_size();
     }
 
-    intptr_t get_fixed_stride() const {
+    inline intptr_t get_fixed_stride() const {
         return m_stride;
     }
 
-    size_t get_fixed_dim_size() const {
+    inline size_t get_fixed_dim_size() const {
         return m_dim_size;
     }
 

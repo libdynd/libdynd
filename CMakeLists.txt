@@ -185,6 +185,7 @@ set(libdynd_SRC
     src/dynd/types/dynd_int128.cpp
     src/dynd/types/dynd_uint128.cpp
     src/dynd/types/expr_type.cpp
+    src/dynd/types/fixed_dim_type.cpp
     src/dynd/types/property_type.cpp
     src/dynd/types/type_alignment.cpp
     src/dynd/types/fixedbytes_type.cpp
@@ -239,6 +240,7 @@ set(libdynd_SRC
     include/dynd/types/dynd_int128.hpp
     include/dynd/types/dynd_uint128.hpp
     include/dynd/types/expr_type.hpp
+    include/dynd/types/fixed_dim_type.hpp
     include/dynd/types/property_type.hpp
     include/dynd/types/type_alignment.hpp
     include/dynd/types/cfixed_dim_type.hpp
