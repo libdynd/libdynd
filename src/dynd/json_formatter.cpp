@@ -9,6 +9,7 @@
 #include <dynd/types/date_type.hpp>
 #include <dynd/types/base_struct_type.hpp>
 #include <dynd/types/strided_dim_type.hpp>
+#include <dynd/types/fixed_dim_type.hpp>
 #include <dynd/types/cfixed_dim_type.hpp>
 #include <dynd/types/var_dim_type.hpp>
 
@@ -227,6 +228,23 @@ static void format_json_uniform_dim(output_data& out, const ndt::type& dt, const
             metadata += sizeof(strided_dim_type_metadata);
             for (intptr_t i = 0; i < size; ++i) {
                 ::format_json(out, element_tp, metadata, data + i * stride);
+                if (i != size - 1) {
+                    out.write(',');
+                }
+            }
+            break;
+        }
+        case fixed_dim_type_id: {
+            const fixed_dim_type *fad = dt.tcast<fixed_dim_type>();
+            const fixed_dim_type_metadata *md =
+                reinterpret_cast<const fixed_dim_type_metadata *>(metadata);
+            ndt::type element_tp = fad->get_element_type();
+            intptr_t size = (intptr_t)fad->get_fixed_dim_size(),
+                     stride = md->stride;
+            for (intptr_t i = 0; i < size; ++i) {
+                ::format_json(out, element_tp,
+                              metadata + sizeof(fixed_dim_type_metadata),
+                              data + i * stride);
                 if (i != size - 1) {
                     out.write(',');
                 }

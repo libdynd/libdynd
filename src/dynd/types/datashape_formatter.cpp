@@ -6,6 +6,7 @@
 #include <dynd/types/datashape_formatter.hpp>
 #include <dynd/types/base_struct_type.hpp>
 #include <dynd/types/strided_dim_type.hpp>
+#include <dynd/types/fixed_dim_type.hpp>
 #include <dynd/types/cfixed_dim_type.hpp>
 #include <dynd/types/var_dim_type.hpp>
 #include <dynd/types/string_type.hpp>
@@ -91,6 +92,17 @@ static void format_uniform_dim_datashape(std::ostream& o,
                 format_datashape(o, sad->get_element_type(), NULL, NULL,
                                 indent, multiline, identifier);
             }
+            break;
+        }
+        case fixed_dim_type_id: {
+            const fixed_dim_type *fad = dt.tcast<fixed_dim_type>();
+            size_t dim_size = fad->get_fixed_dim_size();
+            o << dim_size << " * ";
+            // Allow data to keep going only if the dimension size is 1
+            if (dim_size != 1) {
+                data = NULL;
+            }
+            format_datashape(o, fad->get_element_type(), metadata, data, indent, multiline, identifier);
             break;
         }
         case cfixed_dim_type_id: {

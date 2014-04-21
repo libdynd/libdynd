@@ -6,6 +6,7 @@
 #include <dynd/type.hpp>
 #include <dynd/types/base_uniform_dim_type.hpp>
 #include <dynd/types/strided_dim_type.hpp>
+#include <dynd/types/fixed_dim_type.hpp>
 #include <dynd/types/var_dim_type.hpp>
 #include <dynd/exceptions.hpp>
 #include <dynd/typed_data_assign.hpp>
@@ -230,18 +231,26 @@ bool ndt::type::get_as_strided_dim(const char *metadata, intptr_t &out_size,
 {
     type_id_t tid = get_type_id();
     switch (tid) {
-    case fixed_dim_type_id: {
-        const fixed_dim_type *fdt =
-            static_cast<const fixed_dim_type *>(m_extended);
+    case cfixed_dim_type_id: {
+        const cfixed_dim_type *fdt = tcast<cfixed_dim_type>();
         out_size = fdt->get_fixed_dim_size();
         out_stride = fdt->get_fixed_stride();
         out_el_tp = fdt->get_element_type();
         out_el_metadata = metadata;
         return true;
     }
+    case fixed_dim_type_id: {
+        const fixed_dim_type *fdt = tcast<fixed_dim_type>();
+        const fixed_dim_type_metadata *m =
+            reinterpret_cast<const fixed_dim_type_metadata *>(metadata);
+        out_size = fdt->get_fixed_dim_size();
+        out_stride = m->stride;
+        out_el_tp = fdt->get_element_type();
+        out_el_metadata = metadata + sizeof(fixed_dim_type_metadata);
+        return true;
+    }
     case strided_dim_type_id: {
-        const strided_dim_type *fdt =
-            static_cast<const strided_dim_type *>(m_extended);
+        const strided_dim_type *fdt = tcast<strided_dim_type>();
         const strided_dim_type_metadata *m =
             reinterpret_cast<const strided_dim_type_metadata *>(metadata);
         out_size = m->size;

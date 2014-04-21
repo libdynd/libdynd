@@ -840,13 +840,15 @@ static ndt::type parse_rhs_expression(const char *&begin, const char *end, map<s
             } else if (n == "var") {
                 // Use -1 to signal a variable-length dimension
                 shape.push_back(-1);
-            } else if (reserved_typenames.find(n) == reserved_typenames.end() &&
-                            symtable.find(n) == symtable.end()) {
-                // Use -2 to signal a free dimension
+            } else if (n == "strided") {
+                // Use -2 to signal a strided dimension
                 shape.push_back(-2);
+            } else if (isupper(n[0])) {
+                throw datashape_parse_error(skip_whitespace(saved_begin, end),
+                                "type vars are not supported in dynd yet");
             } else {
                 throw datashape_parse_error(skip_whitespace(saved_begin, end),
-                                "only free variables can be used for datashape dimensions");
+                                "unrecognized dimension type");
             }
         }
     }
@@ -925,7 +927,7 @@ static ndt::type parse_rhs_expression(const char *&begin, const char *end, map<s
                 } else if (shape[i] == -1) {
                     result = ndt::make_var_dim(result);
                 } else {
-                    result = ndt::make_cfixed_dim(shape[i], result);
+                    result = ndt::make_fixed_dim(shape[i], result);
                 }
             }
         }

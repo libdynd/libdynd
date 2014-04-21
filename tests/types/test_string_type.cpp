@@ -502,7 +502,7 @@ TEST(StringType, Concatenation) {
     a = a_arr;
     b = b_arr;
     nd::array c = (a + b).eval();
-    ASSERT_EQ(ndt::type("M * string"), c.get_type());
+    ASSERT_EQ(ndt::type("strided * string"), c.get_type());
     EXPECT_EQ(3, c.get_dim_size());
     EXPECT_EQ("testingalpha", c(0).as<string>());
     EXPECT_EQ("onebeta", c(1).as<string>());

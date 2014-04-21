@@ -37,7 +37,8 @@ size_t make_var_dim_assignment_kernel(
 size_t make_strided_to_var_dim_assignment_kernel(
                 ckernel_builder *out, size_t offset_out,
                 const ndt::type& dst_var_dim_dt, const char *dst_metadata,
-                const ndt::type& src_strided_dim_dt, const char *src_metadata,
+                intptr_t src_dim_size, intptr_t src_stride,
+                const ndt::type& src_el_tp, const char *src_el_metadata,
                 kernel_request_t kernreq, assign_error_mode errmode,
                 const eval::eval_context *ectx);
 

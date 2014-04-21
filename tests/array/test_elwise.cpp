@@ -158,7 +158,7 @@ TYPED_TEST_P(Elwise, FuncRefRes) {
     a = 1;
 
     res = nd::elwise(func6<TypeParam>, a);
-    EXPECT_EQ(ndt::type("2 * 2 * float64"), res.get_type());
+    EXPECT_EQ(ndt::type("cfixed[2] * cfixed[2] * float64"), res.get_type());
     EXPECT_EQ(cos((double) 1), res(0,0).as<double>());
     EXPECT_EQ(-sin((double) 1), res(0,1).as<double>());
     EXPECT_EQ(sin((double) 1), res(1,0).as<double>());
@@ -384,7 +384,7 @@ TYPED_TEST_P(Elwise, MethRefRes) {
     a = 1;
 
     res = nd::elwise(FuncWrapper6(&func6), &FuncWrapper6::meth, a);
-    EXPECT_EQ(ndt::type("2 * 2 * float64"), res.get_type());
+    EXPECT_EQ(ndt::type("cfixed[2] * cfixed[2] * float64"), res.get_type());
     EXPECT_EQ(cos((double) 1), res(0,0).as<double>());
     EXPECT_EQ(-sin((double) 1), res(0,1).as<double>());
     EXPECT_EQ(sin((double) 1), res(1,0).as<double>());
@@ -610,7 +610,7 @@ TYPED_TEST_P(Elwise, CallRefRes) {
     a = 1;
 
     res = nd::elwise(Callable6(&func6), a);
-    EXPECT_EQ(ndt::type("2 * 2 * float64"), res.get_type());
+    EXPECT_EQ(ndt::type("cfixed[2] * cfixed[2] * float64"), res.get_type());
     EXPECT_EQ(cos((double) 1), res(0,0).as<double>());
     EXPECT_EQ(-sin((double) 1), res(0,1).as<double>());
     EXPECT_EQ(sin((double) 1), res(1,0).as<double>());

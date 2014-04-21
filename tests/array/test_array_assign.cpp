@@ -499,7 +499,7 @@ TEST(ArrayAssign, ChainedCastingReadWrite) {
 }
 
 TEST(ArrayAssign, ZeroSizedAssign) {
-    nd::array a = nd::empty(0, "M * float64"), b = nd::empty(0, "M * float32");
+    nd::array a = nd::empty(0, "strided * float64"), b = nd::empty(0, "strided * float32");
     EXPECT_EQ(1u, a.get_shape().size());
     EXPECT_EQ(0, a.get_shape()[0]);
     // Should be able to assign zero-sized array to zero-sized array
@@ -511,7 +511,7 @@ TEST(ArrayAssign, ZeroSizedAssign) {
     EXPECT_EQ(0, a.get_dim_size());
     // With a struct
     a = nd::empty("var * {a:int32, b:string}");
-    b = nd::empty(0, "M * {a:int32, b:string}");
+    b = nd::empty(0, "strided * {a:int32, b:string}");
     a.vals() = b;
 }
 

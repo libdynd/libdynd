@@ -98,54 +98,32 @@ static size_t make_elwise_strided_dimension_expr_kernel_for_N(
         }
     }
     e->base.destructor = strided_expr_kernel_extra<N>::destruct;
-    // The dst strided parameters
-    if (dst_tp.get_type_id() == strided_dim_type_id) {
-        const strided_dim_type *sdd = dst_tp.tcast<strided_dim_type>();
-        const strided_dim_type_metadata *dst_md =
-                        reinterpret_cast<const strided_dim_type_metadata *>(dst_metadata);
-        e->size = dst_md->size;
-        e->dst_stride = dst_md->stride;
-        child_metadata[0] = dst_metadata + sizeof(strided_dim_type_metadata);
-        child_tp[0] = sdd->get_element_type();
-    } else {
-        const cfixed_dim_type *fdd = dst_tp.tcast<cfixed_dim_type>();
-        e->size = fdd->get_fixed_dim_size();
-        e->dst_stride = fdd->get_fixed_stride();
-        child_metadata[0] = dst_metadata;
-        child_tp[0] = fdd->get_element_type();
+    if (!dst_tp.get_as_strided_dim(dst_metadata, e->size, e->dst_stride,
+                                   child_tp[0], child_metadata[0])) {
+        stringstream ss;
+        ss << "make_elwise_strided_dimension_expr_kernel: error processing "
+              "type " << dst_tp << " as strided";
+        throw type_error(ss.str());
     }
+
     for (int i = 0; i < N; ++i) {
+        intptr_t src_size;
         // The src[i] strided parameters
-        if (src_tp[i].get_ndim() - elwise_handler->data_dynd_types[i+1].get_ndim() < undim) {
+        if (src_tp[i].get_ndim() -
+                    elwise_handler->data_dynd_types[i + 1].get_ndim() <
+                undim) {
             // This src value is getting broadcasted
             e->src_stride[i] = 0;
             child_metadata[i + 1] = src_metadata[i];
             child_tp[i + 1] = src_tp[i];
-        } else if (src_tp[i].get_type_id() == strided_dim_type_id) {
-            const strided_dim_type *sdd = static_cast<const strided_dim_type *>(src_tp[i].extended());
-            const strided_dim_type_metadata *src_md =
-                            reinterpret_cast<const strided_dim_type_metadata *>(src_metadata[i]);
+        } else if (!src_tp[0].get_as_strided_dim(
+                       src_metadata[i], src_size, e->src_stride[i],
+                       child_tp[i + 1], child_metadata[i + 1])) {
             // Check for a broadcasting error
-            if (src_md->size != 1 && e->size != src_md->size) {
+            if (src_size != 1 && e->size != src_size) {
                 throw broadcast_error(dst_tp, dst_metadata, src_tp[i], src_metadata[i]);
             }
-            // In DyND, the src stride is required to be zero for size-one dimensions,
-            // so we don't have to check the size here.
-            e->src_stride[i] = src_md->stride;
-            child_metadata[i + 1] = src_metadata[i] + sizeof(strided_dim_type_metadata);
-            child_tp[i + 1] = sdd->get_element_type();
-        } else if (src_tp[i].get_type_id() == cfixed_dim_type_id) {
-            const cfixed_dim_type *fdd = static_cast<const cfixed_dim_type *>(src_tp[i].extended());
-            // Check for a broadcasting error
-            if (fdd->get_fixed_dim_size() != 1 && (size_t)e->size != fdd->get_fixed_dim_size()) {
-                throw broadcast_error(dst_tp, dst_metadata, src_tp[i], src_metadata[i]);
-            }
-            // In DyND, the src stride is required to be zero for size-one dimensions,
-            // so we don't have to check the size here.
-            e->src_stride[i] = fdd->get_fixed_stride();
-            child_metadata[i + 1] = src_metadata[i];
-            child_tp[i + 1] = fdd->get_element_type();
-        } else {
+            
             stringstream ss;
             ss << "make_elwise_strided_dimension_expr_kernel: expected strided "
                   "or fixed dim, got " << src_tp[i];
@@ -313,23 +291,16 @@ static size_t make_elwise_strided_or_var_to_strided_dimension_expr_kernel_for_N(
         }
     }
     e->base.destructor = strided_or_var_to_strided_expr_kernel_extra<N>::destruct;
-    // The dst strided parameters
-    if (dst_tp.get_type_id() == strided_dim_type_id) {
-        const strided_dim_type *sdd = dst_tp.tcast<strided_dim_type>();
-        const strided_dim_type_metadata *dst_md =
-                        reinterpret_cast<const strided_dim_type_metadata *>(dst_metadata);
-        e->size = dst_md->size;
-        e->dst_stride = dst_md->stride;
-        child_metadata[0] = dst_metadata + sizeof(strided_dim_type_metadata);
-        child_tp[0] = sdd->get_element_type();
-    } else {
-        const cfixed_dim_type *fdd = dst_tp.tcast<cfixed_dim_type>();
-        e->size = fdd->get_fixed_dim_size();
-        e->dst_stride = fdd->get_fixed_stride();
-        child_metadata[0] = dst_metadata;
-        child_tp[0] = fdd->get_element_type();
+    if (!dst_tp.get_as_strided_dim(dst_metadata, e->size, e->dst_stride,
+                                   child_tp[0], child_metadata[0])) {
+        stringstream ss;
+        ss << "make_elwise_strided_dimension_expr_kernel: error processing "
+              "type " << dst_tp << " as strided";
+        throw type_error(ss.str());
     }
+
     for (int i = 0; i < N; ++i) {
+        intptr_t src_size;
         // The src[i] strided parameters
         if (src_tp[i].get_ndim() - elwise_handler->data_dynd_types[i+1].get_ndim() < undim) {
             // This src value is getting broadcasted
@@ -338,34 +309,15 @@ static size_t make_elwise_strided_or_var_to_strided_dimension_expr_kernel_for_N(
             e->is_src_var[i] = false;
             child_metadata[i + 1] = src_metadata[i];
             child_tp[i + 1] = src_tp[i];
-        } else if (src_tp[i].get_type_id() == strided_dim_type_id) {
-            const strided_dim_type *sdd = static_cast<const strided_dim_type *>(src_tp[i].extended());
-            const strided_dim_type_metadata *src_md =
-                            reinterpret_cast<const strided_dim_type_metadata *>(src_metadata[i]);
+        } else if (src_tp[i].get_as_strided_dim(
+                       src_metadata[i], src_size, e->src_stride[i],
+                       child_tp[i + 1], child_metadata[i + 1])) {
             // Check for a broadcasting error
-            if (src_md->size != 1 && e->size != src_md->size) {
+            if (src_size != 1 && e->size != src_size) {
                 throw broadcast_error(dst_tp, dst_metadata, src_tp[i], src_metadata[i]);
             }
-            // In DyND, the src stride is required to be zero for size-one dimensions,
-            // so we don't have to check the size here.
-            e->src_stride[i] = src_md->stride;
             e->src_offset[i] = 0;
             e->is_src_var[i] = false;
-            child_metadata[i + 1] = src_metadata[i] + sizeof(strided_dim_type_metadata);
-            child_tp[i + 1] = sdd->get_element_type();
-        } else if (src_tp[i].get_type_id() == cfixed_dim_type_id) {
-            const cfixed_dim_type *fdd = static_cast<const cfixed_dim_type *>(src_tp[i].extended());
-            // Check for a broadcasting error
-            if (fdd->get_fixed_dim_size() != 1 && (size_t)e->size != fdd->get_fixed_dim_size()) {
-                throw broadcast_error(dst_tp, dst_metadata, src_tp[i], src_metadata[i]);
-            }
-            // In DyND, the src stride is required to be zero for size-one dimensions,
-            // so we don't have to check the size here.
-            e->src_stride[i] = fdd->get_fixed_stride();
-            e->src_offset[i] = 0;
-            e->is_src_var[i] = false;
-            child_metadata[i + 1] = src_metadata[i];
-            child_tp[i + 1] = fdd->get_element_type();
         } else {
             const var_dim_type *vdd = static_cast<const var_dim_type *>(src_tp[i].extended());
             const var_dim_type_metadata *src_md =
@@ -625,28 +577,11 @@ static size_t make_elwise_strided_or_var_to_var_dimension_expr_kernel_for_N(
             e->is_src_var[i] = false;
             child_metadata[i + 1] = src_metadata[i];
             child_tp[i + 1] = src_tp[i];
-        } else if (src_tp[i].get_type_id() == strided_dim_type_id) {
-            const strided_dim_type *sdd = static_cast<const strided_dim_type *>(src_tp[i].extended());
-            const strided_dim_type_metadata *src_md =
-                            reinterpret_cast<const strided_dim_type_metadata *>(src_metadata[i]);
-            // In DyND, the src stride is required to be zero for size-one dimensions,
-            // so we don't have to check the size here.
-            e->src_stride[i] = src_md->stride;
+        } else if (src_tp[i].get_as_strided_dim(
+                       src_metadata[i], e->src_size[i], e->src_stride[i],
+                       child_tp[i + 1], child_metadata[i + 1])) {
             e->src_offset[i] = 0;
-            e->src_size[i] = src_md->size;
             e->is_src_var[i] = false;
-            child_metadata[i + 1] = src_metadata[i] + sizeof(strided_dim_type_metadata);
-            child_tp[i + 1] = sdd->get_element_type();
-        } else if (src_tp[i].get_type_id() == cfixed_dim_type_id) {
-            const cfixed_dim_type *fdd = static_cast<const cfixed_dim_type *>(src_tp[i].extended());
-            // In DyND, the src stride is required to be zero for size-one dimensions,
-            // so we don't have to check the size here.
-            e->src_stride[i] = fdd->get_fixed_stride();
-            e->src_offset[i] = 0;
-            e->src_size[i] = fdd->get_fixed_dim_size();
-            e->is_src_var[i] = false;
-            child_metadata[i + 1] = src_metadata[i];
-            child_tp[i + 1] = fdd->get_element_type();
         } else {
             const var_dim_type *vdd = static_cast<const var_dim_type *>(src_tp[i].extended());
             const var_dim_type_metadata *src_md =
@@ -755,6 +690,7 @@ size_t dynd::make_lifted_expr_ckernel(const ckernel_deferred *elwise_handler,
     for (intptr_t i = 0; i < src_count; ++i) {
         switch (src_tp[i].get_type_id()) {
             case strided_dim_type_id:
+            case fixed_dim_type_id:
             case cfixed_dim_type_id:
                 break;
             case var_dim_type_id:
@@ -774,6 +710,7 @@ size_t dynd::make_lifted_expr_ckernel(const ckernel_deferred *elwise_handler,
     // destination type
     switch (dst_tp.get_type_id()) {
         case strided_dim_type_id:
+        case fixed_dim_type_id:
         case cfixed_dim_type_id:
             if (src_all_strided) {
                 return make_elwise_strided_dimension_expr_kernel(

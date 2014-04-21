@@ -18,7 +18,7 @@
 using namespace std;
 using namespace dynd;
 
-TEST(FixedDimDType, Create) {
+TEST(CFixedDimType, Create) {
     ndt::type d;
     const cfixed_dim_type *fad;
 
@@ -68,7 +68,7 @@ TEST(FixedDimDType, Create) {
     EXPECT_EQ(d, ndt::type(d.str()));
 }
 
-TEST(FixedDimDType, CreateCOrder) {
+TEST(CFixedDimType, CreateCOrder) {
     intptr_t shape[3] = {2, 3, 4};
     ndt::type d = ndt::make_cfixed_dim(3, shape, ndt::make_type<int16_t>(), NULL);
     EXPECT_EQ(cfixed_dim_type_id, d.get_type_id());
@@ -84,7 +84,7 @@ TEST(FixedDimDType, CreateCOrder) {
     EXPECT_EQ(2, static_cast<const cfixed_dim_type *>(d.at(0,0).extended())->get_fixed_stride());
 }
 
-TEST(FixedDimDType, CreateFOrder) {
+TEST(CFixedDimType, CreateFOrder) {
     int axis_perm[3] = {0, 1, 2};
     intptr_t shape[3] = {2, 3, 4};
     ndt::type d = ndt::make_cfixed_dim(3, shape, ndt::make_type<int16_t>(), axis_perm);
@@ -102,7 +102,7 @@ TEST(FixedDimDType, CreateFOrder) {
     EXPECT_EQ(12, static_cast<const cfixed_dim_type *>(d.at(0,0).extended())->get_fixed_stride());
 }
 
-TEST(FixedDimDType, Basic) {
+TEST(CFixedDimType, Basic) {
     nd::array a;
     float vals[3] = {1.5f, 2.5f, -1.5f};
 
@@ -124,7 +124,7 @@ TEST(FixedDimDType, Basic) {
     EXPECT_THROW(a(3), index_out_of_bounds);
 }
 
-TEST(FixedDimDType, SimpleIndex) {
+TEST(CFixedDimType, SimpleIndex) {
     nd::array a = parse_json("cfixed[2] * cfixed[3] * int16", "[[1, 2, 3], [4, 5, 6]]");
     ASSERT_EQ(ndt::make_cfixed_dim(2,
                     ndt::make_cfixed_dim(3, ndt::make_type<int16_t>())),
@@ -150,7 +150,7 @@ TEST(FixedDimDType, SimpleIndex) {
     EXPECT_THROW(a(-3), index_out_of_bounds);
 }
 
-TEST(FixedDimDType, AssignKernel_ScalarToFixed) {
+TEST(CFixedDimType, AssignKernel_ScalarToFixed) {
     nd::array a, b;
     assignment_ckernel_builder k;
 
@@ -168,7 +168,7 @@ TEST(FixedDimDType, AssignKernel_ScalarToFixed) {
     EXPECT_EQ(9, a(2).as<int>());
 }
 
-TEST(FixedDimDType, AssignKernel_FixedToFixed) {
+TEST(CFixedDimType, AssignKernel_FixedToFixed) {
     nd::array a, b;
     assignment_ckernel_builder k;
 
@@ -187,7 +187,7 @@ TEST(FixedDimDType, AssignKernel_FixedToFixed) {
     EXPECT_EQ(7, a(2).as<int>());
 }
 
-TEST(FixedDimDType, AssignKernel_FixedToScalarError) {
+TEST(CFixedDimType, AssignKernel_FixedToScalarError) {
     nd::array a, b;
     assignment_ckernel_builder k;
 
@@ -201,7 +201,7 @@ TEST(FixedDimDType, AssignKernel_FixedToScalarError) {
                 broadcast_error);
 }
 
-TEST(FixedDimDType, AssignFixedStridedKernel) {
+TEST(CFixedDimType, AssignFixedStridedKernel) {
     nd::array a, b;
     assignment_ckernel_builder k;
     int vals_int[] = {3,5,7};
@@ -268,7 +268,7 @@ TEST(FixedDimDType, AssignFixedStridedKernel) {
     k.reset();
 }
 
-TEST(FixedDimDType, IsTypeSubarray) {
+TEST(CFixedDimType, IsTypeSubarray) {
     EXPECT_TRUE(ndt::type("cfixed[3] * int32")
                     .is_type_subarray(ndt::type("cfixed[3] * int32")));
     EXPECT_TRUE(ndt::type("cfixed[10] * int32")
@@ -293,7 +293,7 @@ TEST(FixedDimDType, IsTypeSubarray) {
                      .is_type_subarray(ndt::type("cfixed[3] * int32")));
 }
 
-TEST(FixedDimDType, FromCArray) {
+TEST(CFixedDimType, FromCArray) {
     EXPECT_EQ(ndt::cfixed_dim_from_array<int>::make(), ndt::type("int32"));
     EXPECT_EQ(ndt::cfixed_dim_from_array<int[1]>::make(),
               ndt::type("cfixed[1] * int32"));

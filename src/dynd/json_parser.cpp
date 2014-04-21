@@ -7,6 +7,7 @@
 #include <dynd/types/base_bytes_type.hpp>
 #include <dynd/types/string_type.hpp>
 #include <dynd/types/json_type.hpp>
+#include <dynd/types/fixed_dim_type.hpp>
 #include <dynd/types/cfixed_dim_type.hpp>
 #include <dynd/types/var_dim_type.hpp>
 #include <dynd/types/cstruct_type.hpp>
@@ -339,6 +340,28 @@ static void skip_json_value(const char *&begin, const char *end)
     }
 }
 
+static void parse_fixed_dim_json(const ndt::type& tp, const char *metadata, char *out_data,
+                const char *&begin, const char *end, const eval::eval_context *ectx)
+{
+    const fixed_dim_type *fad = tp.tcast<fixed_dim_type>();
+    const fixed_dim_type_metadata *md = reinterpret_cast<const fixed_dim_type_metadata *>(metadata);
+    intptr_t size = fad->get_fixed_dim_size();
+    intptr_t stride = md->stride;
+
+    if (!parse_token(begin, end, "[")) {
+        throw json_parse_error(begin, "expected list starting with '['", tp);
+    }
+    for (intptr_t i = 0; i < size; ++i) {
+        parse_json(fad->get_element_type(), metadata + sizeof(fixed_dim_type_metadata), out_data + i * stride, begin, end, ectx);
+        if (i < size-1 && !parse_token(begin, end, ",")) {
+            throw json_parse_error(begin, "array is too short, expected ',' list item separator", tp);
+        }
+    }
+    if (!parse_token(begin, end, "]")) {
+        throw json_parse_error(begin, "array is too long, expected list terminator ']'", tp);
+    }
+}
+
 static void parse_cfixed_dim_json(const ndt::type& tp, const char *metadata, char *out_data,
                 const char *&begin, const char *end, const eval::eval_context *ectx)
 {
@@ -581,6 +604,9 @@ static void parse_uniform_dim_json(const ndt::type& tp, const char *metadata, ch
                 const char *&begin, const char *end, const eval::eval_context *ectx)
 {
     switch (tp.get_type_id()) {
+        case fixed_dim_type_id:
+            parse_fixed_dim_json(tp, metadata, out_data, begin, end, ectx);
+            break;
         case cfixed_dim_type_id:
             parse_cfixed_dim_json(tp, metadata, out_data, begin, end, ectx);
             break;

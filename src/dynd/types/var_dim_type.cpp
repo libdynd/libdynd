@@ -583,6 +583,10 @@ size_t var_dim_type::make_assignment_kernel(
                 const eval::eval_context *ectx) const
 {
     if (this == dst_tp.extended()) {
+        intptr_t src_size, src_stride;
+        ndt::type src_el_tp;
+        const char *src_el_metadata;
+
         if (src_tp.get_ndim() < dst_tp.get_ndim()) {
             // If the src has fewer dimensions, broadcast it across this one
             return make_broadcast_to_var_dim_assignment_kernel(out, offset_out,
@@ -595,12 +599,14 @@ size_t var_dim_type::make_assignment_kernel(
                             dst_tp, dst_metadata,
                             src_tp, src_metadata,
                             kernreq, errmode, ectx);
-        } else if (src_tp.get_type_id() == strided_dim_type_id ||
-                        src_tp.get_type_id() == cfixed_dim_type_id) {
+        } else if (src_tp.get_as_strided_dim(src_metadata, src_size,
+                                             src_stride, src_el_tp,
+                                             src_el_metadata)) {
             // strided_dim to var_dim
             return make_strided_to_var_dim_assignment_kernel(out, offset_out,
                             dst_tp, dst_metadata,
-                            src_tp, src_metadata,
+                            src_size, src_stride,
+                            src_el_tp, src_el_metadata,
                             kernreq, errmode, ectx);
         } else if (!src_tp.is_builtin()) {
             // Give the src type a chance to make a kernel

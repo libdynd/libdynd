@@ -98,7 +98,7 @@ TEST(DTypeDType, StridedArrayRefCount) {
     EXPECT_EQ(1, d.extended()->get_use_count());
 
     // 2D Strided Array
-    a = nd::empty(3, 3, ndt::type("M * N * type"));
+    a = nd::empty(3, 3, ndt::type("strided * strided * type"));
     EXPECT_EQ(strided_dim_type_id, a.get_type().get_type_id());
     EXPECT_EQ(1, d.extended()->get_use_count());
     a.vals() = d;
@@ -146,7 +146,7 @@ TEST(DTypeDType, FixedArrayRefCount) {
 
     // 2D Fixed Array
     a = nd::empty(ndt::type("3 * 3 * type"));
-    EXPECT_EQ(cfixed_dim_type_id, a.get_type().get_type_id());
+    EXPECT_EQ(fixed_dim_type_id, a.get_type().get_type_id());
     EXPECT_EQ(1, d.extended()->get_use_count());
     a.vals() = d;
     EXPECT_EQ(10, d.extended()->get_use_count());

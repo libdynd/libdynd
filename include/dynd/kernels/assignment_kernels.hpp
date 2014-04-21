@@ -301,25 +301,43 @@ size_t make_kernreq_to_single_kernel_adapter(
                 ckernel_builder *out, size_t offset_out,
                 kernel_request_t kernreq);
 
+namespace kernels {
 /**
  * Generic assignment kernel + destructor for a strided dimension.
  * This requires that the child kernel be created with the
  * kernel_request_strided type of kernel.
  */
-struct strided_assign_kernel_extra {
-    typedef strided_assign_kernel_extra extra_type;
+struct strided_assign_ck : public kernels::assignment_ck<strided_assign_ck> {
+    intptr_t m_size;
+    intptr_t m_dst_stride, m_src_stride;
 
-    ckernel_prefix base;
-    intptr_t size;
-    intptr_t dst_stride, src_stride;
+    inline void single(char *dst, const char *src)
+    {
+        ckernel_prefix *child = get_child_ckernel();
+        unary_strided_operation_t child_fn = child->get_function<unary_strided_operation_t>();
+        child_fn(dst, m_dst_stride, src, m_src_stride,m_size, child);
+    }
 
-    static void single(char *dst, const char *src,
-                    ckernel_prefix *extra);
-    static void strided(char *dst, intptr_t dst_stride,
-                    const char *src, intptr_t src_stride,
-                    size_t count, ckernel_prefix *extra);
-    static void destruct(ckernel_prefix *extra);
+    inline void strided(char *dst, intptr_t dst_stride, const char *src,
+                        intptr_t src_stride, size_t count)
+    {
+        ckernel_prefix *child = get_child_ckernel();
+        unary_strided_operation_t child_fn = child->get_function<unary_strided_operation_t>();
+        intptr_t inner_size = m_size, inner_dst_stride = m_dst_stride,
+                 inner_src_stride = m_src_stride;
+        for (size_t i = 0; i != count;
+             ++i, dst += dst_stride, src += src_stride) {
+            child_fn(dst, inner_dst_stride, src, inner_src_stride, inner_size, child);
+        }
+    }
+
+    inline void destruct_children() {
+        // Destroy the child ckernel
+        get_child_ckernel()->destroy();
+    }
 };
+
+} // namespace kernels
 
 #ifdef DYND_CUDA
 /**

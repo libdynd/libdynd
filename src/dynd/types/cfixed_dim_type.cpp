@@ -490,78 +490,44 @@ void cfixed_dim_type::data_destruct_strided(const char *metadata, char *data,
 }
 
 size_t cfixed_dim_type::make_assignment_kernel(
-                ckernel_builder *out, size_t offset_out,
+                ckernel_builder *out_ckb, size_t ckb_offset,
                 const ndt::type& dst_tp, const char *dst_metadata,
                 const ndt::type& src_tp, const char *src_metadata,
                 kernel_request_t kernreq, assign_error_mode errmode,
                 const eval::eval_context *ectx) const
 {
     if (this == dst_tp.extended()) {
-        out->ensure_capacity(offset_out + sizeof(strided_assign_kernel_extra));
-        strided_assign_kernel_extra *e = out->get_at<strided_assign_kernel_extra>(offset_out);
-        switch (kernreq) {
-            case kernel_request_single:
-                e->base.set_function<unary_single_operation_t>(&strided_assign_kernel_extra::single);
-                break;
-            case kernel_request_strided:
-                e->base.set_function<unary_strided_operation_t>(&strided_assign_kernel_extra::strided);
-                break;
-            default: {
-                stringstream ss;
-                ss << "strided_dim_type::make_assignment_kernel: unrecognized request " << (int)kernreq;
-                throw runtime_error(ss.str());
-            }
-        }
-        e->base.destructor = strided_assign_kernel_extra::destruct;
+        kernels::strided_assign_ck *self =
+            kernels::strided_assign_ck::create(out_ckb, ckb_offset, kernreq);
+        intptr_t ckb_end = ckb_offset + sizeof(kernels::strided_assign_ck);
+        self->m_size = m_dim_size;
+        self->m_dst_stride = m_stride;
+
+        intptr_t src_size;
+        ndt::type src_el_tp;
+        const char *src_el_metadata;
+
         if (src_tp.get_ndim() < dst_tp.get_ndim()) {
             // If the src has fewer dimensions, broadcast it across this one
-            e->size = get_fixed_dim_size();
-            e->dst_stride = get_fixed_stride();
-            e->src_stride = 0;
-            return ::make_assignment_kernel(out, offset_out + sizeof(strided_assign_kernel_extra),
-                            m_element_tp, dst_metadata,
-                            src_tp, src_metadata,
-                            kernel_request_strided, errmode, ectx);
-        } else if (src_tp.get_type_id() == cfixed_dim_type_id) {
-            // fixed_array -> strided_dim
-            const cfixed_dim_type *src_fad = src_tp.tcast<cfixed_dim_type>();
-            intptr_t src_size = src_fad->get_fixed_dim_size();
-            intptr_t dst_size = get_fixed_dim_size();
+            self->m_src_stride = 0;
+            return ::make_assignment_kernel(
+                out_ckb, ckb_end, m_element_tp, dst_metadata, src_tp,
+                src_metadata, kernel_request_strided, errmode, ectx);
+        } else if (src_tp.get_as_strided_dim(src_metadata, src_size,
+                                             self->m_src_stride, src_el_tp,
+                                             src_el_metadata)) {
+
             // Check for a broadcasting error
-            if (src_size != 1 && dst_size != src_size) {
+            if (src_size != 1 && m_dim_size != src_size) {
                 throw broadcast_error(dst_tp, dst_metadata, src_tp, src_metadata);
             }
-            e->size = dst_size;
-            e->dst_stride = get_fixed_stride();
-            // In DyND, the src stride is required to be zero for size-one dimensions,
-            // so we don't have to check the size here.
-            e->src_stride = src_fad->get_fixed_stride();
-            return ::make_assignment_kernel(out, offset_out + sizeof(strided_assign_kernel_extra),
-                            m_element_tp, dst_metadata,
-                            src_fad->get_element_type(), src_metadata,
-                            kernel_request_strided, errmode, ectx);
-        } else if (src_tp.get_type_id() == strided_dim_type_id) {
-            // strided_dim -> strided_dim
-            const strided_dim_type *src_sad = src_tp.tcast<strided_dim_type>();
-            const strided_dim_type_metadata *src_md =
-                        reinterpret_cast<const strided_dim_type_metadata *>(src_metadata);
-            intptr_t dst_size = get_fixed_dim_size();
-            // Check for a broadcasting error
-            if (src_md->size != 1 && dst_size != src_md->size) {
-                throw broadcast_error(dst_tp, dst_metadata, src_tp, src_metadata);
-            }
-            e->size = dst_size;
-            e->dst_stride = get_fixed_stride();
-            // In DyND, the src stride is required to be zero for size-one dimensions,
-            // so we don't have to check the size here.
-            e->src_stride = src_md->stride;
-            return ::make_assignment_kernel(out, offset_out + sizeof(strided_assign_kernel_extra),
-                            m_element_tp, dst_metadata,
-                            src_sad->get_element_type(), src_metadata + sizeof(strided_dim_type_metadata),
-                            kernel_request_strided, errmode, ectx);
+
+            return ::make_assignment_kernel(
+                out_ckb, ckb_end, m_element_tp, dst_metadata, src_el_tp,
+                src_el_metadata, kernel_request_strided, errmode, ectx);
         } else if (!src_tp.is_builtin()) {
             // Give the src type a chance to make a kernel
-            return src_tp.extended()->make_assignment_kernel(out, offset_out,
+            return src_tp.extended()->make_assignment_kernel(out_ckb, ckb_offset,
                             dst_tp, dst_metadata,
                             src_tp, src_metadata,
                             kernreq, errmode, ectx);

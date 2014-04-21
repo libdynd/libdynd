@@ -112,7 +112,7 @@ TEST(ArithmeticOp, VarToStridedBroadcast) {
 
     // VarDim in the first operand
     c = (a + b).eval();
-    ASSERT_EQ(ndt::type("M * N * int32"), c.get_type());
+    ASSERT_EQ(ndt::type("strided * strided * int32"), c.get_type());
     ASSERT_EQ(2, c.get_shape()[0]);
     ASSERT_EQ(3, c.get_shape()[1]);
     EXPECT_EQ(6, c(0,0).as<int>());
@@ -124,7 +124,7 @@ TEST(ArithmeticOp, VarToStridedBroadcast) {
 
     // VarDim in the second operand
     c = (b - a).eval();
-    ASSERT_EQ(ndt::type("M * N * int32"), c.get_type());
+    ASSERT_EQ(ndt::type("strided * strided * int32"), c.get_type());
     ASSERT_EQ(2, c.get_shape()[0]);
     ASSERT_EQ(3, c.get_shape()[1]);
     EXPECT_EQ(4, c(0,0).as<int>());
@@ -145,7 +145,7 @@ TEST(ArithmeticOp, VarToVarBroadcast) {
 
     // VarDim in both operands, produces VarDim
     c = (a + b).eval();
-    ASSERT_EQ(ndt::type("M * var * int32"), c.get_type());
+    ASSERT_EQ(ndt::type("strided * var * int32"), c.get_type());
     ASSERT_EQ(2, c.get_shape()[0]);
     EXPECT_EQ(6, c(0,0).as<int>());
     EXPECT_EQ(7, c(0,1).as<int>());
@@ -159,7 +159,7 @@ TEST(ArithmeticOp, VarToVarBroadcast) {
                     "[[5], [6]]");
 
     // VarDim in first operand, strided of size 1 in the second
-    ASSERT_EQ(ndt::type("M * var * int32"), c.get_type());
+    ASSERT_EQ(ndt::type("strided * var * int32"), c.get_type());
     c = (a + b).eval();
     ASSERT_EQ(2, c.get_shape()[0]);
     EXPECT_EQ(6, c(0,0).as<int>());
@@ -169,7 +169,7 @@ TEST(ArithmeticOp, VarToVarBroadcast) {
 
     // Strided of size 1 in the first operand, VarDim in second
     c = (b - a).eval();
-    ASSERT_EQ(ndt::type("M * var * int32"), c.get_type());
+    ASSERT_EQ(ndt::type("strided * var * int32"), c.get_type());
     ASSERT_EQ(2, c.get_shape()[0]);
     EXPECT_EQ(4, c(0,0).as<int>());
     EXPECT_EQ(3, c(0,1).as<int>());
