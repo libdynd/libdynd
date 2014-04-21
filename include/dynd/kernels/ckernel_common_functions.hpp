@@ -38,6 +38,16 @@ void unary_as_expr_adapter_strided_ckernel(
                 size_t count, ckernel_prefix *ckp);
 
 /**
+ * Makes a ckernel that ignores the src values, and writes
+ * constant values to the output.
+ *
+ */
+size_t make_constant_value_assignment_ckernel(
+    ckernel_builder *out_ckb, intptr_t ckb_offset, const ndt::type &dst_tp,
+    const char *dst_metadata, const nd::array &constant,
+    kernel_request_t kerntype, const eval::eval_context *ectx);
+
+/**
  * Adds an adapter ckernel which wraps a child unary ckernel
  * as an expr ckernel.
  *
