@@ -105,6 +105,7 @@ inline bool DYND_ISNAN(long double x) {
 
 #if _MSC_VER < 1700
 // Older than MSVC 2012
+#define DYND_ATOLL(x) (_atoi64(x))
 namespace std {
     inline bool isfinite(double x) {
         return _finite(x) != 0;
@@ -169,6 +170,10 @@ public:
 #  define DYND_MOVE(x) (std::move(x))
 #else
 #  define DYND_MOVE(x) (x)
+#endif
+
+#ifndef DYND_ATOLL
+#define DYND_ATOLL(x) (atoll(x))
 #endif
 
 // If Initializer Lists are supported

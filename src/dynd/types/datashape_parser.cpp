@@ -281,7 +281,7 @@ static ndt::type parse_fixed_dim_parameters(const char *&begin, const char *end,
         if (dim_size_str.empty()) {
             throw datashape_parse_error(saved_begin, "expected dimension size");
         }
-        intptr_t dim_size = atoll(dim_size_str.c_str());
+        intptr_t dim_size = DYND_ATOLL(dim_size_str.c_str());
         if (!parse_token(begin, end, ']')) {
             throw datashape_parse_error(begin, "expected closing ']'");
         }
@@ -310,7 +310,7 @@ static ndt::type parse_cfixed_dim_parameters(const char *&begin,
         intptr_t dim_size;
         intptr_t stride = numeric_limits<intptr_t>::min();
         if (!dim_size_str.empty()) {
-            dim_size = atoll(dim_size_str.c_str());
+            dim_size = DYND_ATOLL(dim_size_str.c_str());
             if (dim_size < 0) {
                 throw datashape_parse_error(saved_begin, "dim size cannot be negative");
             }
@@ -324,7 +324,7 @@ static ndt::type parse_cfixed_dim_parameters(const char *&begin,
                     throw datashape_parse_error(begin, "expected an =");
                 }
                 string stride_str = parse_number(begin, end);
-                stride = atoll(stride_str.c_str());
+                stride = DYND_ATOLL(stride_str.c_str());
             }
             if (!parse_token(begin, end, ']')) {
                 throw datashape_parse_error(begin, "expected closing ']'");
