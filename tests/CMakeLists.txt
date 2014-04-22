@@ -61,8 +61,6 @@ set(tests_SRC
     gfunc/test_callable.cpp
     gfunc/test_ckernel_deferred.cpp
     gfunc/test_reduction.cpp
-    array/test_json_formatter.cpp
-    array/test_json_parser.cpp
     array/test_array.cpp
     array/test_array_range.cpp
     array/test_array_assign.cpp
@@ -70,7 +68,10 @@ set(tests_SRC
     array/test_array_cast.cpp
     array/test_array_compare.cpp
     array/test_array_views.cpp
+    array/test_arrmeta_holder.cpp
     array/test_elwise.cpp
+    array/test_json_formatter.cpp
+    array/test_json_parser.cpp
     array/test_memmap.cpp
     array/test_view.cpp
     vm/test_elwise_program.cpp

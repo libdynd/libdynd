@@ -402,6 +402,7 @@ set(libdynd_SRC
     include/dynd/array.hpp
     include/dynd/array_range.hpp
     include/dynd/array_iter.hpp
+    include/dynd/arrmeta_holder.hpp
     include/dynd/atomic_refcount.hpp
     include/dynd/auxiliary_data.hpp
     include/dynd/buffer_storage.hpp
