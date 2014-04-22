@@ -32,12 +32,14 @@ set(tests_SRC
     types/test_convert_type.cpp
     types/test_align_type.cpp
     types/test_char_type.cpp
+    types/test_ctuple_type.cpp
     types/test_cuda_host_type.cpp
     types/test_cuda_device_type.cpp
     types/test_datashape_formatter.cpp
     types/test_datashape_parser.cpp
     types/test_date_type.cpp
     types/test_datetime_type.cpp
+    types/test_fixed_dim_type.cpp
     types/test_time_type.cpp
     types/test_type.cpp
     types/test_type_type.cpp
@@ -45,7 +47,7 @@ set(tests_SRC
     types/test_type_casting.cpp
     types/test_type_promotion.cpp
     types/test_fixedbytes_type.cpp
-    types/test_fixed_dim_type.cpp
+    types/test_cfixed_dim_type.cpp
     types/test_fixedstring_type.cpp
     types/test_cstruct_type.cpp
     types/test_groupby_type.cpp
@@ -59,8 +61,6 @@ set(tests_SRC
     gfunc/test_callable.cpp
     gfunc/test_ckernel_deferred.cpp
     gfunc/test_reduction.cpp
-    array/test_json_formatter.cpp
-    array/test_json_parser.cpp
     array/test_array.cpp
     array/test_array_range.cpp
     array/test_array_assign.cpp
@@ -68,7 +68,10 @@ set(tests_SRC
     array/test_array_cast.cpp
     array/test_array_compare.cpp
     array/test_array_views.cpp
+    array/test_arrmeta_holder.cpp
     array/test_elwise.cpp
+    array/test_json_formatter.cpp
+    array/test_json_parser.cpp
     array/test_memmap.cpp
     array/test_view.cpp
     vm/test_elwise_program.cpp

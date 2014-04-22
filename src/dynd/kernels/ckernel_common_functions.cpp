@@ -3,6 +3,7 @@
 // BSD 2-Clause License, see LICENSE.txt
 //
 
+#include <dynd/array.hpp>
 #include <dynd/kernels/ckernel_common_functions.hpp>
 #include <dynd/kernels/assignment_kernels.hpp>
 #include <dynd/kernels/expr_kernel_generator.hpp>
@@ -11,12 +12,9 @@ using namespace std;
 using namespace dynd;
 
 
-void kernels::destroy_trivial_parent_ckernel(ckernel_prefix *ckp)
+void kernels::destroy_trivial_parent_ckernel(ckernel_prefix *self)
 {
-    ckernel_prefix *child = ckp + 1;
-    if (child->destructor != NULL) {
-        child->destructor(child);
-    }
+    self->destroy_child_ckernel(sizeof(ckernel_prefix));
 }
 
 void kernels::unary_as_expr_adapter_single_ckernel(
@@ -37,6 +35,55 @@ void kernels::unary_as_expr_adapter_strided_ckernel(
     unary_strided_operation_t childop = child->get_function<unary_strided_operation_t>();
     childop(dst, dst_stride, *src, *src_stride, count, child);
 }
+
+namespace {
+    struct constant_value_assignment_ck : public kernels::assignment_ck<constant_value_assignment_ck> {
+        // Pointer to the array inside of `constant`
+        const char *m_constant_data;
+        // Reference which owns the constant value to assign
+        nd::array m_constant;
+
+        inline void single(char *dst, const char *DYND_UNUSED(src))
+        {
+            ckernel_prefix *child = get_child_ckernel();
+            unary_single_operation_t child_fn = child->get_function<unary_single_operation_t>();
+            child_fn(dst, m_constant_data, child);
+        }
+
+        inline void strided(char *dst, intptr_t dst_stride, const char *DYND_UNUSED(src),
+                            intptr_t DYND_UNUSED(src_stride), size_t count)
+        {
+            ckernel_prefix *child = get_child_ckernel();
+            unary_strided_operation_t child_fn = child->get_function<unary_strided_operation_t>();
+            child_fn(dst, dst_stride, m_constant_data, 0, count, child);
+        }
+
+        inline void destruct_children()
+        {
+            // Destroy the child ckernel
+            get_child_ckernel()->destroy();
+        }
+    };
+} // anonymous namespace
+
+size_t kernels::make_constant_value_assignment_ckernel(
+    ckernel_builder *out_ckb, intptr_t ckb_offset, const ndt::type &dst_tp,
+    const char *dst_metadata, const nd::array &constant,
+    kernel_request_t kernreq, const eval::eval_context *ectx)
+{
+    typedef constant_value_assignment_ck self_type;
+    // Initialize the ckernel
+    self_type *self = self_type::create(out_ckb, ckb_offset, kernreq);
+    // Store the constant data
+    self->m_constant = constant.cast(dst_tp).eval_immutable(ectx);
+    self->m_constant_data = self->m_constant.get_readonly_originptr();
+    // Create the child assignment ckernel
+    return make_assignment_kernel(
+        out_ckb, ckb_offset + sizeof(self_type), dst_tp, dst_metadata,
+        self->m_constant.get_type(), self->m_constant.get_ndo_meta(), kernreq,
+        assign_error_default, ectx);
+}
+
 
 intptr_t kernels::wrap_unary_as_expr_ckernel(
                 dynd::ckernel_builder *out_ckb, intptr_t ckb_offset,

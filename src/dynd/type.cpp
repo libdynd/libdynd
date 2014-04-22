@@ -6,6 +6,7 @@
 #include <dynd/type.hpp>
 #include <dynd/types/base_uniform_dim_type.hpp>
 #include <dynd/types/strided_dim_type.hpp>
+#include <dynd/types/fixed_dim_type.hpp>
 #include <dynd/types/var_dim_type.hpp>
 #include <dynd/exceptions.hpp>
 #include <dynd/typed_data_assign.hpp>
@@ -205,7 +206,8 @@ ndt::type ndt::type::with_replaced_dtype(const ndt::type& replacement_tp, intptr
     return result;
 }
 
-intptr_t ndt::type::get_dim_size(const char *metadata, const char *data) const {
+intptr_t ndt::type::get_dim_size(const char *metadata, const char *data) const
+{
     if (get_kind() == uniform_dim_kind) {
         return static_cast<const base_uniform_dim_type *>(m_extended)->get_dim_size(metadata, data);
     } else if (get_kind() == struct_kind) {
@@ -221,6 +223,45 @@ intptr_t ndt::type::get_dim_size(const char *metadata, const char *data) const {
     std::stringstream ss;
     ss << "Cannot get the leading dimension size of dynd array with type " << *this;
     throw dynd::type_error(ss.str());
+}
+
+bool ndt::type::get_as_strided_dim(const char *metadata, intptr_t &out_size,
+                                   intptr_t &out_stride, ndt::type &out_el_tp,
+                                   const char *&out_el_metadata) const
+{
+    type_id_t tid = get_type_id();
+    switch (tid) {
+    case cfixed_dim_type_id: {
+        const cfixed_dim_type *fdt = tcast<cfixed_dim_type>();
+        out_size = fdt->get_fixed_dim_size();
+        out_stride = fdt->get_fixed_stride();
+        out_el_tp = fdt->get_element_type();
+        out_el_metadata = metadata;
+        return true;
+    }
+    case fixed_dim_type_id: {
+        const fixed_dim_type *fdt = tcast<fixed_dim_type>();
+        const fixed_dim_type_metadata *m =
+            reinterpret_cast<const fixed_dim_type_metadata *>(metadata);
+        out_size = fdt->get_fixed_dim_size();
+        out_stride = m->stride;
+        out_el_tp = fdt->get_element_type();
+        out_el_metadata = metadata + sizeof(fixed_dim_type_metadata);
+        return true;
+    }
+    case strided_dim_type_id: {
+        const strided_dim_type *fdt = tcast<strided_dim_type>();
+        const strided_dim_type_metadata *m =
+            reinterpret_cast<const strided_dim_type_metadata *>(metadata);
+        out_size = m->size;
+        out_stride = m->stride;
+        out_el_tp = fdt->get_element_type();
+        out_el_metadata = metadata + sizeof(strided_dim_type_metadata);
+        return true;
+    }
+    default:
+        return false;
+    }
 }
 
 bool ndt::type::data_layout_compatible_with(const ndt::type& rhs) const
@@ -257,13 +298,13 @@ bool ndt::type::data_layout_compatible_with(const ndt::type& rhs) const
                 default:
                     return false;
             }
-        case fixed_dim_type_id:
+        case cfixed_dim_type_id:
             // For fixed dimensions, it's data layout compatible if
             // the shape and strides match, and the element is data
             // layout compatible.
-            if (rhs.get_type_id() == fixed_dim_type_id) {
-                const fixed_dim_type *fdd = static_cast<const fixed_dim_type *>(extended());
-                const fixed_dim_type *rhs_fdd = static_cast<const fixed_dim_type *>(rhs.extended());
+            if (rhs.get_type_id() == cfixed_dim_type_id) {
+                const cfixed_dim_type *fdd = static_cast<const cfixed_dim_type *>(extended());
+                const cfixed_dim_type *rhs_fdd = rhs.tcast<cfixed_dim_type>();
                 return fdd->get_fixed_dim_size() == rhs_fdd->get_fixed_dim_size() &&
                     fdd->get_fixed_stride() == rhs_fdd->get_fixed_stride() &&
                     fdd->get_element_type().data_layout_compatible_with(
@@ -276,7 +317,7 @@ bool ndt::type::data_layout_compatible_with(const ndt::type& rhs) const
             // compatible if the element is
             if (rhs.get_type_id() == get_type_id()) {
                 const base_uniform_dim_type *budd = static_cast<const base_uniform_dim_type *>(extended());
-                const base_uniform_dim_type *rhs_budd = static_cast<const base_uniform_dim_type *>(rhs.extended());
+                const base_uniform_dim_type *rhs_budd = rhs.tcast<base_uniform_dim_type>();
                 return budd->get_element_type().data_layout_compatible_with(
                                     rhs_budd->get_element_type());
             }

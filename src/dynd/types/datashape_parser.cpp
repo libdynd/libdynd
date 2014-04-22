@@ -10,7 +10,11 @@
 #include <dynd/types/strided_dim_type.hpp>
 #include <dynd/types/var_dim_type.hpp>
 #include <dynd/types/fixed_dim_type.hpp>
+#include <dynd/types/cfixed_dim_type.hpp>
 #include <dynd/types/cstruct_type.hpp>
+#include <dynd/types/struct_type.hpp>
+#include <dynd/types/ctuple_type.hpp>
+#include <dynd/types/tuple_type.hpp>
 #include <dynd/types/string_type.hpp>
 #include <dynd/types/fixedstring_type.hpp>
 #include <dynd/types/json_type.hpp>
@@ -91,29 +95,6 @@ static const map<string, ndt::type>& get_builtin_types()
         builtin_types["ckernel_deferred"] = ndt::make_ckernel_deferred();
     }
     return builtin_types;
-}
-static const set<string>& get_reserved_typenames()
-{
-    static set<string> reserved_typenames;
-    if (reserved_typenames.empty()) {
-        const map<string, ndt::type>& builtin_types = get_builtin_types();
-        for (map<string, ndt::type>::const_iterator i = builtin_types.begin();
-                        i != builtin_types.end(); ++i) {
-            reserved_typenames.insert(i->first);
-        }
-        reserved_typenames.insert("string");
-        reserved_typenames.insert("char");
-        reserved_typenames.insert("time");
-        reserved_typenames.insert("datetime");
-        reserved_typenames.insert("unaligned");
-        reserved_typenames.insert("pointer");
-        reserved_typenames.insert("complex");
-        reserved_typenames.insert("bytes");
-        reserved_typenames.insert("byteswap");
-		reserved_typenames.insert("cuda_host");
-		reserved_typenames.insert("cuda_device");
-    }
-    return reserved_typenames;
 }
 
 static const char *skip_whitespace(const char *begin, const char *end)
@@ -287,6 +268,84 @@ static bool parse_quoted_string(const char *&begin, const char *end, string& out
         } else {
             return true;
         }
+    }
+}
+
+// fixed_type : cfixed[N] * rhs_expression
+static ndt::type parse_fixed_dim_parameters(const char *&begin, const char *end,
+                                            map<string, ndt::type> &symtable)
+{
+    if (parse_token(begin, end, '[')) {
+        const char *saved_begin = begin;
+        string dim_size_str = parse_number(begin, end);
+        if (dim_size_str.empty()) {
+            throw datashape_parse_error(saved_begin, "expected dimension size");
+        }
+        intptr_t dim_size = atoll(dim_size_str.c_str());
+        if (!parse_token(begin, end, ']')) {
+            throw datashape_parse_error(begin, "expected closing ']'");
+        }
+        if (!parse_token(begin, end, '*')) {
+            throw datashape_parse_error(begin, "expected dimension separator '*'");
+        }
+        ndt::type element_tp = parse_rhs_expression(begin, end, symtable);
+        if (element_tp.get_type_id() == uninitialized_type_id) {
+            throw datashape_parse_error(begin, "expected element type");
+        }
+        return ndt::make_fixed_dim(dim_size, element_tp);
+    } else {
+        throw datashape_parse_error(begin, "expected opening '['");
+    }
+}
+
+// cfixed_type : cfixed[N] * rhs_expression
+// cfixed_type : cfixed[N, stride=M] * rhs_expression
+static ndt::type parse_cfixed_dim_parameters(const char *&begin,
+                                             const char *end,
+                                             map<string, ndt::type> &symtable)
+{
+    if (parse_token(begin, end, '[')) {
+        const char *saved_begin = begin;
+        string dim_size_str = parse_number(begin, end);
+        intptr_t dim_size;
+        intptr_t stride = numeric_limits<intptr_t>::min();
+        if (!dim_size_str.empty()) {
+            dim_size = atoll(dim_size_str.c_str());
+            if (dim_size < 0) {
+                throw datashape_parse_error(saved_begin, "dim size cannot be negative");
+            }
+            if (parse_token(begin, end, ',')) {
+                saved_begin = begin;
+                if (!parse_token(begin, end, "stride")) {
+                    throw datashape_parse_error(begin, "expected keyword parameter 'stride'");
+                }
+                // bytes type with an alignment
+                if (!parse_token(begin, end, '=')) {
+                    throw datashape_parse_error(begin, "expected an =");
+                }
+                string stride_str = parse_number(begin, end);
+                stride = atoll(stride_str.c_str());
+            }
+            if (!parse_token(begin, end, ']')) {
+                throw datashape_parse_error(begin, "expected closing ']'");
+            }
+            if (!parse_token(begin, end, '*')) {
+                throw datashape_parse_error(begin, "expected dimension separator '*'");
+            }
+            ndt::type element_tp = parse_rhs_expression(begin, end, symtable);
+            if (element_tp.get_type_id() == uninitialized_type_id) {
+                throw datashape_parse_error(begin, "expected element type");
+            }
+            if (stride == numeric_limits<intptr_t>::min()) {
+                return ndt::make_cfixed_dim(dim_size, element_tp);
+            } else {
+                return ndt::make_cfixed_dim(dim_size, element_tp, stride);
+            }
+        } else {
+            throw datashape_parse_error(saved_begin, "expected dimension size");
+        }
+    } else {
+        throw datashape_parse_error(begin, "expected opening '['");
     }
 }
 
@@ -627,7 +686,7 @@ static ndt::type parse_pointer_parameters(const char *&begin, const char *end,
 }
 
 // record_item : NAME COLON rhs_expression
-static bool parse_record_item(const char *&begin, const char *end, map<string, ndt::type>& symtable,
+static bool parse_struct_item(const char *&begin, const char *end, map<string, ndt::type>& symtable,
                 string& out_field_name, ndt::type& out_field_type)
 {
     out_field_name = parse_name(begin, end);
@@ -652,19 +711,25 @@ static bool parse_record_item(const char *&begin, const char *end, map<string, n
     return true;
 }
 
-// record : LBRACE record_item record_item* RBRACE
-static ndt::type parse_record(const char *&begin, const char *end, map<string, ndt::type>& symtable)
+// struct : LBRACE record_item record_item* RBRACE
+// cstruct : 'c{' record_item record_item* RBRACE
+static ndt::type parse_struct(const char *&begin, const char *end, map<string, ndt::type>& symtable)
 {
     vector<string> field_name_list;
     vector<ndt::type> field_type_list;
     string field_name;
     ndt::type field_type;
+    bool cprefixed = false;
 
     if (!parse_token(begin, end, '{')) {
-        return ndt::type(uninitialized_type_id);
+        if (parse_token(begin, end, "c{")) {
+            cprefixed = true;
+        } else {
+            return ndt::type(uninitialized_type_id);
+        }
     }
     for (;;) {
-        if (parse_record_item(begin, end, symtable, field_name, field_type)) {
+        if (parse_struct_item(begin, end, symtable, field_name, field_type)) {
             field_name_list.push_back(field_name);
             field_type_list.push_back(field_type);
         } else {
@@ -682,14 +747,58 @@ static ndt::type parse_record(const char *&begin, const char *end, map<string, n
         }
     }
 
-    return ndt::make_cstruct(field_type_list.size(),
-                    &field_type_list[0], &field_name_list[0]);
+    if (cprefixed) {
+        return ndt::make_cstruct(field_type_list.size(), &field_type_list[0],
+                                 &field_name_list[0]);
+    } else {
+        return ndt::make_struct(field_type_list.size(), &field_type_list[0],
+                                 &field_name_list[0]);
+    }
+}
+
+// tuple : LPAREN tuple_item tuple_item* RPAREN
+// ctuple : 'c(' tuple_item tuple_item* RPAREN
+static ndt::type parse_tuple(const char *&begin, const char *end, map<string, ndt::type>& symtable)
+{
+    vector<ndt::type> field_type_list;
+    bool cprefixed = false;
+
+    if (!parse_token(begin, end, '(')) {
+        if (parse_token(begin, end, "c(")) {
+            cprefixed = true;
+        } else {
+            return ndt::type(uninitialized_type_id);
+        }
+    }
+    for (;;) {
+        ndt::type tp = parse_rhs_expression(begin, end, symtable);
+        if (tp.get_type_id() != uninitialized_type_id) {
+            field_type_list.push_back(tp);
+        } else {
+            throw datashape_parse_error(begin, "expected a type");
+        }
+        
+        if (parse_token(begin, end, ',')) {
+            if (!field_type_list.empty() && parse_token(begin, end, ')')) {
+                break;
+            }
+        } else if (parse_token(begin, end, ')')) {
+            break;
+        } else {
+            throw datashape_parse_error(begin, "expected ',' or ')'");
+        }
+    }
+
+    if (cprefixed) {
+        return ndt::make_ctuple(field_type_list.size(), &field_type_list[0]);
+    } else {
+        return ndt::make_tuple(field_type_list.size(), &field_type_list[0]);
+    }
 }
 
 /** This is what parses the main datashape grammar, excluding type aliases, etc. */
 static ndt::type parse_rhs_expression(const char *&begin, const char *end, map<string, ndt::type>& symtable)
 {
-    const set<string>& reserved_typenames = get_reserved_typenames();
     ndt::type result;
     vector<intptr_t> shape;
     // rhs_expression : ((NAME | NUMBER) ASTERISK)* (record | NAME LPAREN rhs_expression RPAREN | NAME)
@@ -707,18 +816,24 @@ static ndt::type parse_rhs_expression(const char *&begin, const char *end, map<s
             } else if (n == "var") {
                 // Use -1 to signal a variable-length dimension
                 shape.push_back(-1);
-            } else if (reserved_typenames.find(n) == reserved_typenames.end() &&
-                            symtable.find(n) == symtable.end()) {
-                // Use -2 to signal a free dimension
+            } else if (n == "strided") {
+                // Use -2 to signal a strided dimension
                 shape.push_back(-2);
+            } else if (isupper(n[0])) {
+                throw datashape_parse_error(skip_whitespace(saved_begin, end),
+                                "type vars are not supported in dynd yet");
             } else {
                 throw datashape_parse_error(skip_whitespace(saved_begin, end),
-                                "only free variables can be used for datashape dimensions");
+                                "unrecognized dimension type");
             }
         }
     }
-    // record
-    result = parse_record(begin, end, symtable);
+    // struct
+    result = parse_struct(begin, end, symtable);
+    // tuple
+    if (result.get_type_id() == uninitialized_type_id) {
+        result = parse_tuple(begin, end, symtable);
+    }
     if (result.get_type_id() == uninitialized_type_id) {
         const char *begin_saved = begin;
         // NAME
@@ -751,6 +866,10 @@ static ndt::type parse_rhs_expression(const char *&begin, const char *end, map<s
             result = parse_cuda_host_parameters(begin, end, symtable);
         } else if (n == "cuda_device") {
             result = parse_cuda_device_parameters(begin, end, symtable);
+        } else if (n == "cfixed") {
+            result = parse_cfixed_dim_parameters(begin, end, symtable);
+        } else if (n == "fixed") {
+            result = parse_fixed_dim_parameters(begin, end, symtable);
         } else {
             const map<string, ndt::type>& builtin_types = get_builtin_types();
             map<string, ndt::type>::const_iterator i = builtin_types.find(n);

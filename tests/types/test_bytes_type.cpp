@@ -27,7 +27,7 @@ TEST(BytesDType, Create) {
     EXPECT_EQ(bytes_kind, d.get_kind());
     EXPECT_EQ(sizeof(void *), d.get_data_alignment());
     EXPECT_EQ(2*sizeof(void *), d.get_data_size());
-    EXPECT_EQ(1u, static_cast<const bytes_type *>(d.extended())->get_target_alignment());
+    EXPECT_EQ(1u, d.tcast<bytes_type>()->get_target_alignment());
     EXPECT_EQ(1u, d.p("target_alignment").as<size_t>());
     EXPECT_FALSE(d.is_expression());
     // Roundtripping through a string
@@ -38,7 +38,7 @@ TEST(BytesDType, Create) {
     EXPECT_EQ(bytes_kind, d.get_kind());
     EXPECT_EQ(sizeof(void *), d.get_data_alignment());
     EXPECT_EQ(2*sizeof(void *), d.get_data_size());
-    EXPECT_EQ(2u, static_cast<const bytes_type *>(d.extended())->get_target_alignment());
+    EXPECT_EQ(2u, d.tcast<bytes_type>()->get_target_alignment());
     EXPECT_EQ(2u, d.p("target_alignment").as<size_t>());
     // Roundtripping through a string
     EXPECT_EQ(d, ndt::type(d.str()));
@@ -48,7 +48,7 @@ TEST(BytesDType, Create) {
     EXPECT_EQ(bytes_kind, d.get_kind());
     EXPECT_EQ(sizeof(void *), d.get_data_alignment());
     EXPECT_EQ(2*sizeof(void *), d.get_data_size());
-    EXPECT_EQ(4u, static_cast<const bytes_type *>(d.extended())->get_target_alignment());
+    EXPECT_EQ(4u, d.tcast<bytes_type>()->get_target_alignment());
     EXPECT_EQ(4u, d.p("target_alignment").as<size_t>());
     // Roundtripping through a string
     EXPECT_EQ(d, ndt::type(d.str()));
@@ -58,7 +58,7 @@ TEST(BytesDType, Create) {
     EXPECT_EQ(bytes_kind, d.get_kind());
     EXPECT_EQ(sizeof(void *), d.get_data_alignment());
     EXPECT_EQ(2*sizeof(void *), d.get_data_size());
-    EXPECT_EQ(8u, static_cast<const bytes_type *>(d.extended())->get_target_alignment());
+    EXPECT_EQ(8u, d.tcast<bytes_type>()->get_target_alignment());
     EXPECT_EQ(8u, d.p("target_alignment").as<size_t>());
     // Roundtripping through a string
     EXPECT_EQ(d, ndt::type(d.str()));
@@ -67,7 +67,7 @@ TEST(BytesDType, Create) {
     EXPECT_EQ(bytes_type_id, d.get_type_id());
     EXPECT_EQ(bytes_kind, d.get_kind());
     EXPECT_EQ(sizeof(void *), d.get_data_alignment());
-    EXPECT_EQ(16u, static_cast<const bytes_type *>(d.extended())->get_target_alignment());
+    EXPECT_EQ(16u, d.tcast<bytes_type>()->get_target_alignment());
     EXPECT_EQ(16u, d.p("target_alignment").as<size_t>());
     // Roundtripping through a string
     EXPECT_EQ(d, ndt::type(d.str()));

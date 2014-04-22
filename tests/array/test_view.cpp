@@ -56,6 +56,23 @@ TEST(View, FixedToStrided) {
     EXPECT_EQ(a.get_strides(), b.get_strides());
 }
 
+TEST(View, CFixedToStrided) {
+    nd::array a = nd::empty("cfixed[5] * cfixed[3] * int32");
+    nd::array b;
+
+    b = nd::view(a, ndt::type("strided * cfixed[3] * int32"));
+    EXPECT_EQ(ndt::type("strided * cfixed[3] * int32"), b.get_type());
+    EXPECT_EQ(a.get_readonly_originptr(), b.get_readonly_originptr());
+    EXPECT_EQ(a.get_shape(), b.get_shape());
+    EXPECT_EQ(a.get_strides(), b.get_strides());
+
+    b = nd::view(a, ndt::type("strided * strided * int32"));
+    EXPECT_EQ(ndt::type("strided * strided * int32"), b.get_type());
+    EXPECT_EQ(a.get_readonly_originptr(), b.get_readonly_originptr());
+    EXPECT_EQ(a.get_shape(), b.get_shape());
+    EXPECT_EQ(a.get_strides(), b.get_strides());
+}
+
 TEST(View, StridedToFixed) {
     nd::array a = nd::empty("5 * 3 * int32");
     nd::array b;
@@ -72,6 +89,27 @@ TEST(View, StridedToFixed) {
 
     b = nd::view(a, ndt::type("5 * 3 * int32"));
     EXPECT_EQ(ndt::type("5 * 3 * int32"), b.get_type());
+    EXPECT_EQ(a.get_readonly_originptr(), b.get_readonly_originptr());
+    EXPECT_EQ(a.get_shape(), b.get_shape());
+    EXPECT_EQ(a.get_strides(), b.get_strides());
+}
+
+TEST(View, StridedToCFixed) {
+    nd::array a = nd::empty("cfixed[5] * cfixed[3] * int32");
+    nd::array b;
+
+    // Make them strided dimensions
+    a = a(irange(), irange());
+    EXPECT_EQ(ndt::type("strided * strided * int32"), a.get_type());
+
+    b = nd::view(a, ndt::type("strided * cfixed[3] * int32"));
+    EXPECT_EQ(ndt::type("strided * cfixed[3] * int32"), b.get_type());
+    EXPECT_EQ(a.get_readonly_originptr(), b.get_readonly_originptr());
+    EXPECT_EQ(a.get_shape(), b.get_shape());
+    EXPECT_EQ(a.get_strides(), b.get_strides());
+
+    b = nd::view(a, ndt::type("cfixed[5] * cfixed[3] * int32"));
+    EXPECT_EQ(ndt::type("cfixed[5] * cfixed[3] * int32"), b.get_type());
     EXPECT_EQ(a.get_readonly_originptr(), b.get_readonly_originptr());
     EXPECT_EQ(a.get_shape(), b.get_shape());
     EXPECT_EQ(a.get_strides(), b.get_strides());

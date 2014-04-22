@@ -51,18 +51,13 @@ namespace {
             return false;
         }
 
-        static void destruct(ckernel_prefix *extra)
+        static void destruct(ckernel_prefix *self)
         {
-            char *eraw = reinterpret_cast<char *>(extra);
-            extra_type *e = reinterpret_cast<extra_type *>(extra);
+            extra_type *e = reinterpret_cast<extra_type *>(self);
             const size_t *kernel_offsets = reinterpret_cast<const size_t *>(e + 1);
             size_t field_count = e->field_count;
-            ckernel_prefix *echild;
             for (size_t i = 0; i != field_count; ++i) {
-                echild = reinterpret_cast<ckernel_prefix *>(eraw + kernel_offsets[i]);
-                if (echild->destructor) {
-                    echild->destructor(echild);
-                }
+                self->destroy_child_ckernel(kernel_offsets[i]);
             }
         }
     };
@@ -109,18 +104,13 @@ namespace {
             return false;
         }
 
-        static void destruct(ckernel_prefix *extra)
+        static void destruct(ckernel_prefix *self)
         {
-            char *eraw = reinterpret_cast<char *>(extra);
-            extra_type *e = reinterpret_cast<extra_type *>(extra);
+            extra_type *e = reinterpret_cast<extra_type *>(self);
             const size_t *kernel_offsets = reinterpret_cast<const size_t *>(e + 1);
             size_t field_count = e->field_count;
-            ckernel_prefix *echild;
             for (size_t i = 0; i != 2 * field_count; ++i) {
-                echild = reinterpret_cast<ckernel_prefix *>(eraw + kernel_offsets[i]);
-                if (echild->destructor) {
-                    echild->destructor(echild);
-                }
+                self->destroy_child_ckernel(kernel_offsets[i]);
             }
         }
     };
@@ -180,18 +170,13 @@ namespace {
             return false;
         }
 
-        static void destruct(ckernel_prefix *extra)
+        static void destruct(ckernel_prefix *self)
         {
-            char *eraw = reinterpret_cast<char *>(extra);
-            extra_type *e = reinterpret_cast<extra_type *>(extra);
+            extra_type *e = reinterpret_cast<extra_type *>(self);
             const size_t *kernel_offsets = reinterpret_cast<const size_t *>(e + 1);
             size_t field_count = e->field_count;
-            ckernel_prefix *echild;
             for (size_t i = 0; i != field_count; ++i) {
-                echild = reinterpret_cast<ckernel_prefix *>(eraw + kernel_offsets[i]);
-                if (echild->destructor) {
-                    echild->destructor(echild);
-                }
+                self->destroy_child_ckernel(kernel_offsets[i]);
             }
         }
     };
@@ -204,7 +189,7 @@ size_t dynd::make_struct_comparison_kernel(
                 comparison_type_t comptype,
                 const eval::eval_context *ectx)
 {
-    const base_struct_type *bsd = static_cast<const base_struct_type *>(src_tp.extended());
+    const base_struct_type *bsd = src_tp.tcast<base_struct_type>();
     size_t field_count = bsd->get_field_count();
     if (comptype == comparison_type_sorting_less) {
         if (src0_metadata == src1_metadata ||

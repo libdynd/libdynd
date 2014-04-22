@@ -5,7 +5,7 @@
 
 #include <dynd/types/var_dim_type.hpp>
 #include <dynd/types/strided_dim_type.hpp>
-#include <dynd/types/fixed_dim_type.hpp>
+#include <dynd/types/cfixed_dim_type.hpp>
 #include <dynd/types/type_alignment.hpp>
 #include <dynd/types/pointer_type.hpp>
 #include <dynd/memblock/pod_memory_block.hpp>
@@ -248,7 +248,7 @@ intptr_t var_dim_type::apply_linear_index(intptr_t nindices, const irange *indic
                     if (m_element_tp.is_builtin()) {
                         return 0;
                     } else {
-                        const strided_dim_type *sad = static_cast<const strided_dim_type *>(result_tp.extended());
+                        const strided_dim_type *sad = result_tp.tcast<strided_dim_type>();
                         return m_element_tp.extended()->apply_linear_index(
                                         nindices - 1, indices + 1,
                                         metadata + sizeof(var_dim_type_metadata),
@@ -267,7 +267,7 @@ intptr_t var_dim_type::apply_linear_index(intptr_t nindices, const irange *indic
                 memory_block_incref(out_md->blockref);
                 out_md->offset = indices->start() * md->stride;
                 if (!m_element_tp.is_builtin()) {
-                    const pointer_type *result_etp = static_cast<const pointer_type *>(result_tp.extended());
+                    const pointer_type *result_etp = result_tp.tcast<pointer_type>();
                     out_md->offset += m_element_tp.extended()->apply_linear_index(
                                     nindices - 1, indices + 1,
                                     metadata + sizeof(var_dim_type_metadata),
@@ -284,7 +284,7 @@ intptr_t var_dim_type::apply_linear_index(intptr_t nindices, const irange *indic
                 out_md->stride = md->stride;
                 out_md->offset = md->offset;
                 if (!m_element_tp.is_builtin()) {
-                    const var_dim_type *vad = static_cast<const var_dim_type *>(result_tp.extended());
+                    const var_dim_type *vad = result_tp.tcast<var_dim_type>();
                     out_md->offset += m_element_tp.extended()->apply_linear_index(
                                     nindices - 1, indices + 1,
                                     metadata + sizeof(var_dim_type_metadata),
@@ -583,6 +583,10 @@ size_t var_dim_type::make_assignment_kernel(
                 const eval::eval_context *ectx) const
 {
     if (this == dst_tp.extended()) {
+        intptr_t src_size, src_stride;
+        ndt::type src_el_tp;
+        const char *src_el_metadata;
+
         if (src_tp.get_ndim() < dst_tp.get_ndim()) {
             // If the src has fewer dimensions, broadcast it across this one
             return make_broadcast_to_var_dim_assignment_kernel(out, offset_out,
@@ -595,12 +599,14 @@ size_t var_dim_type::make_assignment_kernel(
                             dst_tp, dst_metadata,
                             src_tp, src_metadata,
                             kernreq, errmode, ectx);
-        } else if (src_tp.get_type_id() == strided_dim_type_id ||
-                        src_tp.get_type_id() == fixed_dim_type_id) {
+        } else if (src_tp.get_as_strided_dim(src_metadata, src_size,
+                                             src_stride, src_el_tp,
+                                             src_el_metadata)) {
             // strided_dim to var_dim
             return make_strided_to_var_dim_assignment_kernel(out, offset_out,
                             dst_tp, dst_metadata,
-                            src_tp, src_metadata,
+                            src_size, src_stride,
+                            src_el_tp, src_el_metadata,
                             kernreq, errmode, ectx);
         } else if (!src_tp.is_builtin()) {
             // Give the src type a chance to make a kernel
@@ -617,7 +623,7 @@ size_t var_dim_type::make_assignment_kernel(
         throw broadcast_error(dst_tp, dst_metadata, src_tp, src_metadata);
     } else {
         if (dst_tp.get_type_id() == strided_dim_type_id ||
-                        dst_tp.get_type_id() == fixed_dim_type_id) {
+                        dst_tp.get_type_id() == cfixed_dim_type_id) {
             // var_dim to strided_dim
             return make_var_to_strided_dim_assignment_kernel(out, offset_out,
                             dst_tp, dst_metadata,
@@ -644,7 +650,7 @@ void var_dim_type::foreach_leading(char *data, const char *metadata, foreach_fn_
 }
 
 static ndt::type get_element_type(const ndt::type& dt) {
-    const strided_dim_type *d = static_cast<const strided_dim_type *>(dt.extended());
+    const strided_dim_type *d = dt.tcast<strided_dim_type>();
     return d->get_element_type();
 }
 
@@ -680,11 +686,16 @@ void ndt::var_dim_element_initialize(const type& tp,
         ss << "internal error: expected a var_dim type, not " << tp;
         throw dynd::type_error(ss.str());
     }
-    const var_dim_type *vdt = static_cast<const var_dim_type *>(tp.extended());
+    const var_dim_type *vdt = tp.tcast<var_dim_type>();
     const var_dim_type_metadata *md = reinterpret_cast<const var_dim_type_metadata *>(metadata);
     var_dim_type_data *d = reinterpret_cast<var_dim_type_data *>(data);
     if (d->begin != NULL) {
-        throw runtime_error("internal error: var_dim element data must be NULL to initialize");
+        throw runtime_error(
+            "internal error: var_dim element data must be NULL to initialize");
+    }
+    if (md->offset != 0) {
+        throw runtime_error("internal error: var_dim metadata offset must be "
+                            "zero to initialize");
     }
     // Allocate the element
     memory_block_data *memblock = md->blockref;

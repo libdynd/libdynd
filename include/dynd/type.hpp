@@ -182,6 +182,17 @@ public:
     }
 
     /**
+     * Casts to the specified <x>_type class using static_cast.
+     * This does not validate the type id to make sure this is
+     * a valid cast, the caller MUST check this itself.
+     */
+    template<class TTYPE>
+    inline const TTYPE *tcast() const {
+        // TODO: In debug mode, assert the type id
+        return static_cast<const TTYPE *>(m_extended);
+    }
+
+    /**
      * The type class operates as a smart pointer for dynamically
      * allocated base_type instances, with raw storage of type id
      * for the built-in types. This function gives away the held
@@ -392,6 +403,19 @@ public:
         return get_base_type_data_size(m_extended);
     }
 
+    /** The element size of the type when default-constructed */
+    inline size_t get_default_data_size(intptr_t ndim, const intptr_t *shape)
+        const
+    {
+        if (is_builtin_type(m_extended)) {
+            return static_cast<intptr_t>(
+                detail::builtin_data_sizes
+                    [reinterpret_cast<uintptr_t>(m_extended)]);
+        } else {
+            return m_extended->get_default_data_size(ndim, shape);
+        }
+    }
+
     inline size_t get_metadata_size() const {
         if (is_builtin()) {
             return 0;
@@ -552,6 +576,23 @@ public:
     inline const base_type* extended() const {
         return m_extended;
     }
+
+    /**
+     * If the type is a strided dimension type, where the dimension has a fixed size
+     * and the data is at addresses `dst`, `dst + stride`, etc, this extracts those
+     * values and returns true.
+     *
+     * \param metadata  The array metadata for the type.
+     * \param out_size  Is filled with the size of the dimension.
+     * \param out_stride  Is filled with the stride.
+     * \param out_el_tp  Is filled with the element type.
+     * \param out_el_metadata  Is filled with the array metadata of the element type.
+     *
+     * \returns  True if it is a strided array type, false otherwise.
+     */
+    bool get_as_strided_dim(const char *metadata, intptr_t &out_size,
+                            intptr_t &out_stride, ndt::type &out_el_tp,
+                            const char *&out_el_metadata) const;
 
     /** The size of the data required for uniform iteration */
     inline size_t get_iterdata_size(intptr_t ndim) const {

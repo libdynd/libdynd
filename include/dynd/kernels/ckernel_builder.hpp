@@ -38,15 +38,12 @@ class ckernel_builder {
 
     inline void destroy() {
         if (m_data != NULL) {
-            ckernel_prefix *data;
-            data = reinterpret_cast<ckernel_prefix *>(m_data);
+            ckernel_prefix *self = reinterpret_cast<ckernel_prefix *>(m_data);
             // Destroy whatever was created
-            if (data->destructor != NULL) {
-                data->destructor(data);
-            }
+            self->destroy();
             if (!using_static_data()) {
                 // Free the memory
-                free(data);
+                free(self);
             }
         }
     }

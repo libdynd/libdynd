@@ -8,7 +8,7 @@
 #include <dynd/shape_tools.hpp>
 #include <dynd/exceptions.hpp>
 #include <dynd/types/strided_dim_type.hpp>
-#include <dynd/types/fixed_dim_type.hpp>
+#include <dynd/types/cfixed_dim_type.hpp>
 
 using namespace std;
 using namespace dynd;
@@ -597,8 +597,8 @@ axis_order_classification_t dynd::classify_strided_axis_order(intptr_t current_s
                 const ndt::type& element_tp, const char *element_metadata)
 {
     switch (element_tp.get_type_id()) {
-        case fixed_dim_type_id: {
-            const fixed_dim_type *edt = static_cast<const fixed_dim_type *>(element_tp.extended());
+        case cfixed_dim_type_id: {
+            const cfixed_dim_type *edt = element_tp.tcast<cfixed_dim_type>();
             intptr_t estride = intptr_abs(edt->get_fixed_stride());
             if (estride != 0) {
                 axis_order_classification_t aoc;
@@ -631,7 +631,7 @@ axis_order_classification_t dynd::classify_strided_axis_order(intptr_t current_s
             }
         }
         case strided_dim_type_id: {
-            const strided_dim_type *edt = static_cast<const strided_dim_type *>(element_tp.extended());
+            const strided_dim_type *edt = element_tp.tcast<strided_dim_type>();
             const strided_dim_type_metadata *emd = reinterpret_cast<const strided_dim_type_metadata *>(element_metadata);
             intptr_t estride = intptr_abs(emd->stride);
             if (estride != 0) {

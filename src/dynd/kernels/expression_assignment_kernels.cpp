@@ -130,10 +130,9 @@ namespace {
                 count -= chunk_size;
             }
         }
-        static void destruct(ckernel_prefix *extra)
+        static void destruct(ckernel_prefix *self)
         {
-            char *eraw = reinterpret_cast<char *>(extra);
-            extra_type *e = reinterpret_cast<extra_type *>(extra);
+            extra_type *e = reinterpret_cast<extra_type *>(self);
             // Steal the buffer_tp reference count into a type
             ndt::type buffer_tp(e->buffer_tp, false);
             char *buffer_metadata = e->buffer_metadata;
@@ -142,21 +141,9 @@ namespace {
                 buffer_tp.extended()->metadata_destruct(buffer_metadata);
                 free(buffer_metadata);
             }
-            ckernel_prefix *echild;
-            // Destruct the first kernel
-            if (e->first_kernel_offset != 0) {
-                echild = reinterpret_cast<ckernel_prefix *>(eraw + e->first_kernel_offset);
-                if (echild->destructor) {
-                    echild->destructor(echild);
-                }
-            }
-            // Destruct the second kernel
-            if (e->second_kernel_offset != 0) {
-                echild = reinterpret_cast<ckernel_prefix *>(eraw + e->second_kernel_offset);
-                if (echild->destructor) {
-                    echild->destructor(echild);
-                }
-            }
+            // Destruct the child kernels
+            self->destroy_child_ckernel(e->first_kernel_offset);
+            self->destroy_child_ckernel(e->second_kernel_offset);
         }
     };
 } // anonymous namespace
@@ -169,7 +156,7 @@ size_t dynd::make_expression_assignment_kernel(
                 const eval::eval_context *ectx)
 {
     if (dst_tp.get_kind() == expression_kind) {
-        const base_expression_type *dst_bed = static_cast<const base_expression_type *>(dst_tp.extended());
+        const base_expression_type *dst_bed = dst_tp.tcast<base_expression_type>();
         if (src_tp == dst_bed->get_value_type()) {
             // In this case, it's just a chain of value -> operand on the dst side
             const ndt::type& opdt = dst_bed->get_operand_type();
@@ -240,7 +227,7 @@ size_t dynd::make_expression_assignment_kernel(
                             kernreq, errmode, ectx);
         }
     } else {
-        const base_expression_type *src_bed = static_cast<const base_expression_type *>(src_tp.extended());
+        const base_expression_type *src_bed = src_tp.tcast<base_expression_type>();
         if (dst_tp == src_bed->get_value_type()) {
             // In this case, it's just a chain of operand -> value on the src side
             const ndt::type& opdt = src_bed->get_operand_type();

@@ -18,23 +18,18 @@ using namespace dynd;
 // fixedstring to fixedstring assignment
 
 namespace {
-    struct fixedstring_assign_kernel_extra {
-        typedef fixedstring_assign_kernel_extra extra_type;
+    struct fixedstring_assign_ck : public kernels::assignment_ck<fixedstring_assign_ck> {
+        next_unicode_codepoint_t m_next_fn;
+        append_unicode_codepoint_t m_append_fn;
+        intptr_t m_dst_data_size, m_src_data_size;
+        bool m_overflow_check;
 
-        ckernel_prefix base;
-        next_unicode_codepoint_t next_fn;
-        append_unicode_codepoint_t append_fn;
-        intptr_t dst_data_size, src_data_size;
-        bool overflow_check;
-
-        static void single(char *dst, const char *src,
-                        ckernel_prefix *extra)
+        inline void single(char *dst, const char *src)
         {
-            extra_type *e = reinterpret_cast<extra_type *>(extra);
-            char *dst_end = dst + e->dst_data_size;
-            const char *src_end = src + e->src_data_size;
-            next_unicode_codepoint_t next_fn = e->next_fn;
-            append_unicode_codepoint_t append_fn = e->append_fn;
+            char *dst_end = dst + m_dst_data_size;
+            const char *src_end = src + m_src_data_size;
+            next_unicode_codepoint_t next_fn = m_next_fn;
+            append_unicode_codepoint_t append_fn = m_append_fn;
             uint32_t cp = 0;
 
             while (src < src_end && dst < dst_end) {
@@ -49,7 +44,7 @@ namespace {
                 }
             }
             if (src < src_end) {
-                if (e->overflow_check) {
+                if (m_overflow_check) {
                     throw std::runtime_error("Input string is too large to convert to destination fixed-size string");
                 }
             } else if (dst < dst_end) {
@@ -60,47 +55,40 @@ namespace {
 } // anonymous namespace
 
 size_t dynd::make_fixedstring_assignment_kernel(
-                ckernel_builder *out, size_t offset_out,
+                ckernel_builder *out_ckb, size_t ckb_offset,
                 intptr_t dst_data_size, string_encoding_t dst_encoding,
                 intptr_t src_data_size, string_encoding_t src_encoding,
                 kernel_request_t kernreq, assign_error_mode errmode,
                 const eval::eval_context *DYND_UNUSED(ectx))
 {
-    offset_out = make_kernreq_to_single_kernel_adapter(out, offset_out, kernreq);
-    out->ensure_capacity_leaf(offset_out + sizeof(fixedstring_assign_kernel_extra));
-    fixedstring_assign_kernel_extra *e = out->get_at<fixedstring_assign_kernel_extra>(offset_out);
-    e->base.set_function<unary_single_operation_t>(&fixedstring_assign_kernel_extra::single);
-    e->next_fn = get_next_unicode_codepoint_function(src_encoding, errmode);
-    e->append_fn = get_append_unicode_codepoint_function(dst_encoding, errmode);
-    e->dst_data_size = dst_data_size;
-    e->src_data_size = src_data_size;
-    e->overflow_check = (errmode != assign_error_none);
-    return offset_out + sizeof(fixedstring_assign_kernel_extra);
+    typedef fixedstring_assign_ck self_type;
+    self_type *self = self_type::create_leaf(out_ckb, ckb_offset, kernreq);
+    self->m_next_fn = get_next_unicode_codepoint_function(src_encoding, errmode);
+    self->m_append_fn = get_append_unicode_codepoint_function(dst_encoding, errmode);
+    self->m_dst_data_size = dst_data_size;
+    self->m_src_data_size = src_data_size;
+    self->m_overflow_check = (errmode != assign_error_none);
+    return ckb_offset + sizeof(self_type);
 }
 
 /////////////////////////////////////////
 // blockref string to blockref string assignment
 
 namespace {
-    struct blockref_string_assign_kernel_extra {
-        typedef blockref_string_assign_kernel_extra extra_type;
+    struct blockref_string_assign_ck : public kernels::assignment_ck<blockref_string_assign_ck> {
+        string_encoding_t m_dst_encoding, m_src_encoding;
+        next_unicode_codepoint_t m_next_fn;
+        append_unicode_codepoint_t m_append_fn;
+        const string_type_metadata *m_dst_metadata, *m_src_metadata;
 
-        ckernel_prefix base;
-        string_encoding_t dst_encoding, src_encoding;
-        next_unicode_codepoint_t next_fn;
-        append_unicode_codepoint_t append_fn;
-        const string_type_metadata *dst_metadata, *src_metadata;
-
-        static void single(char *dst, const char *src,
-                        ckernel_prefix *extra)
+        inline void single(char *dst, const char *src)
         {
-            extra_type *e = reinterpret_cast<extra_type *>(extra);
-            const string_type_metadata *dst_md = e->dst_metadata;
-            const string_type_metadata *src_md = e->src_metadata;
+            const string_type_metadata *dst_md = m_dst_metadata;
+            const string_type_metadata *src_md = m_src_metadata;
             string_type_data *dst_d = reinterpret_cast<string_type_data *>(dst);
             const string_type_data *src_d = reinterpret_cast<const string_type_data *>(src);
-            intptr_t src_charsize = string_encoding_char_size_table[e->src_encoding];
-            intptr_t dst_charsize = string_encoding_char_size_table[e->dst_encoding];
+            intptr_t src_charsize = string_encoding_char_size_table[m_src_encoding];
+            intptr_t dst_charsize = string_encoding_char_size_table[m_dst_encoding];
 
             if (dst_d->begin != NULL) {
                 throw runtime_error("Cannot assign to an already initialized dynd string");
@@ -115,8 +103,8 @@ namespace {
                 char *dst_begin = NULL, *dst_current, *dst_end = NULL;
                 const char *src_begin = src_d->begin;
                 const char *src_end = src_d->end;
-                next_unicode_codepoint_t next_fn = e->next_fn;
-                append_unicode_codepoint_t append_fn = e->append_fn;
+                next_unicode_codepoint_t next_fn = m_next_fn;
+                append_unicode_codepoint_t append_fn = m_append_fn;
                 uint32_t cp;
 
                 memory_block_pod_allocator_api *allocator = get_memory_block_pod_allocator_api(dst_md->blockref);
@@ -147,7 +135,7 @@ namespace {
                 // Set the output
                 dst_d->begin = dst_begin;
                 dst_d->end = dst_end;
-            } else if (e->dst_encoding == e->src_encoding) {
+            } else if (m_dst_encoding == m_src_encoding) {
                 // Copy the pointers from the source string
                 *dst_d = *src_d;
             } else {
@@ -158,47 +146,40 @@ namespace {
 } // anonymous namespace
 
 size_t dynd::make_blockref_string_assignment_kernel(
-                ckernel_builder *out, size_t offset_out,
+                ckernel_builder *out_ckb, size_t ckb_offset,
                 const char *dst_metadata, string_encoding_t dst_encoding,
                 const char *src_metadata, string_encoding_t src_encoding,
                 kernel_request_t kernreq, assign_error_mode errmode,
                 const eval::eval_context *DYND_UNUSED(ectx))
 {
-    offset_out = make_kernreq_to_single_kernel_adapter(out, offset_out, kernreq);
-    out->ensure_capacity_leaf(offset_out + sizeof(blockref_string_assign_kernel_extra));
-    blockref_string_assign_kernel_extra *e = out->get_at<blockref_string_assign_kernel_extra>(offset_out);
-    e->base.set_function<unary_single_operation_t>(&blockref_string_assign_kernel_extra::single);
-    e->dst_encoding = dst_encoding;
-    e->src_encoding = src_encoding;
-    e->next_fn = get_next_unicode_codepoint_function(src_encoding, errmode);
-    e->append_fn = get_append_unicode_codepoint_function(dst_encoding, errmode);
-    e->dst_metadata = reinterpret_cast<const string_type_metadata *>(dst_metadata);
-    e->src_metadata = reinterpret_cast<const string_type_metadata *>(src_metadata);
-    return offset_out + sizeof(blockref_string_assign_kernel_extra);
+    typedef blockref_string_assign_ck self_type;
+    self_type *self = self_type::create_leaf(out_ckb, ckb_offset, kernreq);
+    self->m_dst_encoding = dst_encoding;
+    self->m_src_encoding = src_encoding;
+    self->m_next_fn = get_next_unicode_codepoint_function(src_encoding, errmode);
+    self->m_append_fn = get_append_unicode_codepoint_function(dst_encoding, errmode);
+    self->m_dst_metadata = reinterpret_cast<const string_type_metadata *>(dst_metadata);
+    self->m_src_metadata = reinterpret_cast<const string_type_metadata *>(src_metadata);
+    return ckb_offset + sizeof(self_type);
 }
 
 /////////////////////////////////////////
 // fixedstring to blockref string assignment
 
 namespace {
-    struct fixedstring_to_blockref_string_assign_kernel_extra {
-        typedef fixedstring_to_blockref_string_assign_kernel_extra extra_type;
+    struct fixedstring_to_blockref_string_assign_ck : public kernels::assignment_ck<fixedstring_to_blockref_string_assign_ck> {
+        string_encoding_t m_dst_encoding, m_src_encoding;
+        intptr_t m_src_element_size;
+        next_unicode_codepoint_t m_next_fn;
+        append_unicode_codepoint_t m_append_fn;
+        const string_type_metadata *m_dst_metadata;
 
-        ckernel_prefix base;
-        string_encoding_t dst_encoding, src_encoding;
-        intptr_t src_element_size;
-        next_unicode_codepoint_t next_fn;
-        append_unicode_codepoint_t append_fn;
-        const string_type_metadata *dst_metadata;
-
-        static void single(char *dst, const char *src,
-                        ckernel_prefix *extra)
+        inline void single(char *dst, const char *src)
         {
-            extra_type *e = reinterpret_cast<extra_type *>(extra);
-            const string_type_metadata *dst_md = e->dst_metadata;
+            const string_type_metadata *dst_md = m_dst_metadata;
             string_type_data *dst_d = reinterpret_cast<string_type_data *>(dst);
-            intptr_t src_charsize = string_encoding_char_size_table[e->src_encoding];
-            intptr_t dst_charsize = string_encoding_char_size_table[e->dst_encoding];
+            intptr_t src_charsize = string_encoding_char_size_table[m_src_encoding];
+            intptr_t dst_charsize = string_encoding_char_size_table[m_dst_encoding];
 
             if (dst_d->begin != NULL) {
                 throw runtime_error("Cannot assign to an already initialized dynd string");
@@ -206,9 +187,9 @@ namespace {
 
             char *dst_begin = NULL, *dst_current, *dst_end = NULL;
             const char *src_begin = src;
-            const char *src_end = src + e->src_element_size;
-            next_unicode_codepoint_t next_fn = e->next_fn;
-            append_unicode_codepoint_t append_fn = e->append_fn;
+            const char *src_end = src + m_src_element_size;
+            next_unicode_codepoint_t next_fn = m_next_fn;
+            append_unicode_codepoint_t append_fn = m_append_fn;
             uint32_t cp;
 
             memory_block_pod_allocator_api *allocator = get_memory_block_pod_allocator_api(dst_md->blockref);
@@ -248,49 +229,41 @@ namespace {
 } // anonymous namespace
 
 size_t dynd::make_fixedstring_to_blockref_string_assignment_kernel(
-                ckernel_builder *out, size_t offset_out,
+                ckernel_builder *out_ckb, size_t ckb_offset,
                 const char *dst_metadata, string_encoding_t dst_encoding,
                 intptr_t src_element_size, string_encoding_t src_encoding,
                 kernel_request_t kernreq, assign_error_mode errmode,
                 const eval::eval_context *DYND_UNUSED(ectx))
 {
-    offset_out = make_kernreq_to_single_kernel_adapter(out, offset_out, kernreq);
-    out->ensure_capacity_leaf(offset_out + sizeof(blockref_string_assign_kernel_extra));
-    fixedstring_to_blockref_string_assign_kernel_extra *e =
-                    out->get_at<fixedstring_to_blockref_string_assign_kernel_extra>(offset_out);
-    e->base.set_function<unary_single_operation_t>(&fixedstring_to_blockref_string_assign_kernel_extra::single);
-    e->dst_encoding = dst_encoding;
-    e->src_encoding = src_encoding;
-    e->src_element_size = src_element_size;
-    e->next_fn = get_next_unicode_codepoint_function(src_encoding, errmode);
-    e->append_fn = get_append_unicode_codepoint_function(dst_encoding, errmode);
-    e->dst_metadata = reinterpret_cast<const string_type_metadata *>(dst_metadata);
-    return offset_out + sizeof(blockref_string_assign_kernel_extra);
+    typedef fixedstring_to_blockref_string_assign_ck self_type;
+    self_type *self = self_type::create_leaf(out_ckb, ckb_offset, kernreq);
+    self->m_dst_encoding = dst_encoding;
+    self->m_src_encoding = src_encoding;
+    self->m_src_element_size = src_element_size;
+    self->m_next_fn = get_next_unicode_codepoint_function(src_encoding, errmode);
+    self->m_append_fn = get_append_unicode_codepoint_function(dst_encoding, errmode);
+    self->m_dst_metadata = reinterpret_cast<const string_type_metadata *>(dst_metadata);
+    return ckb_offset + sizeof(self_type);
 }
 
 /////////////////////////////////////////
 // blockref string to fixedstring assignment
 
 namespace {
-    struct blockref_string_to_fixedstring_assign_kernel_extra {
-        typedef blockref_string_to_fixedstring_assign_kernel_extra extra_type;
+    struct blockref_string_to_fixedstring_assign_ck : public kernels::assignment_ck<blockref_string_to_fixedstring_assign_ck> {
+        next_unicode_codepoint_t m_next_fn;
+        append_unicode_codepoint_t m_append_fn;
+        intptr_t m_dst_data_size, m_src_element_size;
+        bool m_overflow_check;
 
-        ckernel_prefix base;
-        next_unicode_codepoint_t next_fn;
-        append_unicode_codepoint_t append_fn;
-        intptr_t dst_data_size, src_element_size;
-        bool overflow_check;
-
-        static void single(char *dst, const char *src,
-                        ckernel_prefix *extra)
+        inline void single(char *dst, const char *src)
         {
-            extra_type *e = reinterpret_cast<extra_type *>(extra);
-            char *dst_end = dst + e->dst_data_size;
+            char *dst_end = dst + m_dst_data_size;
             const string_type_data *src_d = reinterpret_cast<const string_type_data *>(src);
             const char *src_begin = src_d->begin;
             const char *src_end = src_d->end;
-            next_unicode_codepoint_t next_fn = e->next_fn;
-            append_unicode_codepoint_t append_fn = e->append_fn;
+            next_unicode_codepoint_t next_fn = m_next_fn;
+            append_unicode_codepoint_t append_fn = m_append_fn;
             uint32_t cp;
 
             while (src_begin < src_end && dst < dst_end) {
@@ -298,7 +271,7 @@ namespace {
                 append_fn(cp, dst, dst_end);
             }
             if (src_begin < src_end) {
-                if (e->overflow_check) {
+                if (m_overflow_check) {
                     throw std::runtime_error("Input string is too large to convert to destination fixed-size string");
                 }
             } else if (dst < dst_end) {
@@ -309,19 +282,17 @@ namespace {
 } // anonymous namespace
 
 size_t dynd::make_blockref_string_to_fixedstring_assignment_kernel(
-                ckernel_builder *out, size_t offset_out,
+                ckernel_builder *out_ckb, size_t ckb_offset,
                 intptr_t dst_data_size, string_encoding_t dst_encoding,
                 string_encoding_t src_encoding,
                 kernel_request_t kernreq, assign_error_mode errmode,
                 const eval::eval_context *DYND_UNUSED(ectx))
 {
-    offset_out = make_kernreq_to_single_kernel_adapter(out, offset_out, kernreq);
-    out->ensure_capacity_leaf(offset_out + sizeof(blockref_string_to_fixedstring_assign_kernel_extra));
-    blockref_string_to_fixedstring_assign_kernel_extra *e = out->get_at<blockref_string_to_fixedstring_assign_kernel_extra>(offset_out);
-    e->base.set_function<unary_single_operation_t>(&blockref_string_to_fixedstring_assign_kernel_extra::single);
-    e->next_fn = get_next_unicode_codepoint_function(src_encoding, errmode);
-    e->append_fn = get_append_unicode_codepoint_function(dst_encoding, errmode);
-    e->dst_data_size = dst_data_size;
-    e->overflow_check = (errmode != assign_error_none);
-    return offset_out + sizeof(blockref_string_to_fixedstring_assign_kernel_extra);
+    typedef blockref_string_to_fixedstring_assign_ck self_type;
+    self_type *self = self_type::create_leaf(out_ckb, ckb_offset, kernreq);
+    self->m_next_fn = get_next_unicode_codepoint_function(src_encoding, errmode);
+    self->m_append_fn = get_append_unicode_codepoint_function(dst_encoding, errmode);
+    self->m_dst_data_size = dst_data_size;
+    self->m_overflow_check = (errmode != assign_error_none);
+    return ckb_offset + sizeof(self_type);
 }

@@ -266,6 +266,13 @@ nd::array apply_binary_operator(const nd::array *ops,
     return result;
 }
 
+namespace {
+    struct ckernel_prefix_with_init : public ckernel_prefix {
+        template<class R, class S, class T>
+        inline void init(R, S, T) {}
+    };
+} // anonymous namespace
+
 nd::array nd::operator+(const nd::array& op1, const nd::array& op2)
 {
     nd::array ops[2] = {op1, op2};
@@ -283,7 +290,7 @@ nd::array nd::operator+(const nd::array& op1, const nd::array& op2)
         }
 
         // The signature is (T, T) -> T, so we don't use the original types
-        return apply_binary_operator<ckernel_prefix>(ops, rdt, rdt, rdt, func_ptr, "addition");
+        return apply_binary_operator<ckernel_prefix_with_init>(ops, rdt, rdt, rdt, func_ptr, "addition");
     } else if (op1dt.get_kind() == string_kind && op2dt.get_kind() == string_kind) {
         ndt::type rdt = ndt::make_string();
         func_ptr.single = &kernels::string_concatenation_kernel::single;
@@ -314,7 +321,7 @@ nd::array nd::operator-(const nd::array& op1, const nd::array& op2)
     }
 
     nd::array ops[2] = {op1, op2};
-    return apply_binary_operator<ckernel_prefix>(ops, rdt, rdt, rdt, func_ptr, "subtraction");
+    return apply_binary_operator<ckernel_prefix_with_init>(ops, rdt, rdt, rdt, func_ptr, "subtraction");
 }
 
 nd::array nd::operator*(const nd::array& op1, const nd::array& op2)
@@ -332,7 +339,7 @@ nd::array nd::operator*(const nd::array& op1, const nd::array& op2)
     }
 
     nd::array ops[2] = {op1, op2};
-    return apply_binary_operator<ckernel_prefix>(ops, rdt, rdt, rdt, func_ptr, "multiplication");
+    return apply_binary_operator<ckernel_prefix_with_init>(ops, rdt, rdt, rdt, func_ptr, "multiplication");
 }
 
 nd::array nd::operator/(const nd::array& op1, const nd::array& op2)
@@ -350,5 +357,5 @@ nd::array nd::operator/(const nd::array& op1, const nd::array& op2)
     }
 
     nd::array ops[2] = {op1, op2};
-    return apply_binary_operator<ckernel_prefix>(ops, rdt, rdt, rdt, func_ptr, "division");
+    return apply_binary_operator<ckernel_prefix_with_init>(ops, rdt, rdt, rdt, func_ptr, "division");
 }

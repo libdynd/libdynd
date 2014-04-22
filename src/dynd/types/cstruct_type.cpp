@@ -105,8 +105,8 @@ static bool is_simple_identifier_name(const string& s)
 
 void cstruct_type::print_type(std::ostream& o) const
 {
-    // Use the record datashape syntax
-    o << "{";
+    // Use the record datashape syntax prefixed with a "c"
+    o << "c{";
     for (size_t i = 0, i_end = m_field_types.size(); i != i_end; ++i) {
         if (i != 0) {
             o << ", ";
@@ -162,10 +162,11 @@ void cstruct_type::transform_child_types(type_transform_fn_t transform_fn, void 
     }
     if (was_any_transformed) {
         if (!switch_to_struct) {
-            out_transformed_tp = ndt::type(new cstruct_type(
-                            tmp_field_types.size(), &tmp_field_types[0], &m_field_names[0]), false);
+            out_transformed_tp = ndt::make_cstruct(tmp_field_types.size(), &tmp_field_types[0],
+                                 &m_field_names[0]);
         } else {
-            out_transformed_tp = ndt::type(new struct_type(tmp_field_types, m_field_names), false);
+            out_transformed_tp = ndt::make_struct(tmp_field_types.size(), &tmp_field_types[0],
+                                &m_field_names[0]);
         }
         out_was_transformed = true;
     } else {
@@ -181,7 +182,7 @@ ndt::type cstruct_type::get_canonical_type() const
         field_types[i] = m_field_types[i].get_canonical_type();
     }
 
-    return ndt::type(new cstruct_type(m_field_types.size(), &field_types[0], &m_field_names[0]), false);
+    return ndt::make_struct(m_field_types.size(), &field_types[0], &m_field_names[0]);
 }
 
 ndt::type cstruct_type::apply_linear_index(intptr_t nindices, const irange *indices,
@@ -213,7 +214,9 @@ ndt::type cstruct_type::apply_linear_index(intptr_t nindices, const irange *indi
                 field_names[i] = m_field_names[idx];
             }
             // Return a struct type, because the offsets are now not in standard form anymore
-            return ndt::type(new struct_type(field_types, field_names), false);
+            return ndt::make_struct(field_types.size(),
+                                field_types.empty() ? NULL : &field_types[0],
+                                field_names.empty() ? NULL : &field_names[0]);
         }
     }
 }
@@ -272,7 +275,7 @@ intptr_t cstruct_type::apply_linear_index(intptr_t nindices, const irange *indic
             return 0;
         } else {
             intptr_t *out_offsets = reinterpret_cast<intptr_t *>(out_metadata);
-            const struct_type *result_etp = static_cast<const struct_type *>(result_tp.extended());
+            const struct_type *result_etp = result_tp.tcast<struct_type>();
             for (intptr_t i = 0; i < dimension_size; ++i) {
                 intptr_t idx = start_index + i * index_stride;
                 out_offsets[i] = m_data_offsets[idx];
@@ -494,25 +497,25 @@ void cstruct_type::foreach_leading(char *data, const char *metadata, foreach_fn_
 ///////// properties on the type
 
 static nd::array property_get_field_names(const ndt::type& dt) {
-    const cstruct_type *d = static_cast<const cstruct_type *>(dt.extended());
+    const cstruct_type *d = dt.tcast<cstruct_type>();
     // TODO: This property should be an immutable nd::array, which we would just return.
     return nd::array(d->get_field_names_vector());
 }
 
 static nd::array property_get_field_types(const ndt::type& dt) {
-    const cstruct_type *d = static_cast<const cstruct_type *>(dt.extended());
+    const cstruct_type *d = dt.tcast<cstruct_type>();
     // TODO: This property should be an immutable nd::array, which we would just return.
     return nd::array(d->get_field_types_vector());
 }
 
 static nd::array property_get_data_offsets(const ndt::type& dt) {
-    const cstruct_type *d = static_cast<const cstruct_type *>(dt.extended());
+    const cstruct_type *d = dt.tcast<cstruct_type>();
     // TODO: This property should be an immutable nd::array, which we would just return.
     return nd::array(d->get_data_offsets_vector());
 }
 
 static nd::array property_get_metadata_offsets(const ndt::type& dt) {
-    const cstruct_type *d = static_cast<const cstruct_type *>(dt.extended());
+    const cstruct_type *d = dt.tcast<cstruct_type>();
     // TODO: This property should be an immutable nd::array, which we would just return.
     return nd::array(d->get_metadata_offsets_vector());
 }

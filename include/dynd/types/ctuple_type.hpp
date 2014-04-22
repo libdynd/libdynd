@@ -3,52 +3,28 @@
 // BSD 2-Clause License, see LICENSE.txt
 //
 
-#ifndef _DYND__CSTRUCT_TYPE_HPP_
-#define _DYND__CSTRUCT_TYPE_HPP_
+#ifndef _DYND__CTUPLE_TYPE_HPP_
+#define _DYND__CTUPLE_TYPE_HPP_
 
 #include <vector>
 #include <string>
 
 #include <dynd/type.hpp>
-#include <dynd/types/base_struct_type.hpp>
+#include <dynd/types/base_tuple_type.hpp>
 #include <dynd/memblock/memory_block.hpp>
 
 namespace dynd {
 
-/**
- * This defines a C-style structure type, which follows
- * C rules for the field layout. For the various builtin
- * types, a cstruct type should have a layout which matches
- * the equivalent in C/C++. This type works together with
- * the struct type, whose field layout is defined in the
- * metadata and hence supports viewing existing structs
- * with reordered and missing fields.
- *
- * Note that DyND doesn't support bitfields,
- * for example, so there isn't a way to match 100% of all
- * C structs.
- */
-class cstruct_type : public base_struct_type {
+class ctuple_type : public base_tuple_type {
     std::vector<ndt::type> m_field_types;
-    std::vector<std::string> m_field_names;
     std::vector<size_t> m_data_offsets;
     std::vector<size_t> m_metadata_offsets;
     std::vector<std::pair<std::string, gfunc::callable> > m_array_properties;
 
-    void create_array_properties();
-
-    // Special constructor to break the property parameter cycle in
-    // create_array_properties
-    cstruct_type(int, int);
 public:
-    cstruct_type(size_t field_count, const ndt::type *field_types,
-                    const std::string *field_names);
+    ctuple_type(size_t field_count, const ndt::type *field_types);
 
-    virtual ~cstruct_type();
-
-    size_t get_default_data_size(intptr_t DYND_UNUSED(ndim), const intptr_t *DYND_UNUSED(shape)) const {
-        return get_data_size();
-    }
+    virtual ~ctuple_type();
 
     const ndt::type *get_field_types() const {
         return &m_field_types[0];
@@ -57,16 +33,6 @@ public:
     const std::vector<ndt::type> get_field_types_vector() const {
         return m_field_types;
     }
-
-    const std::string *get_field_names() const {
-        return &m_field_names[0];
-    }
-
-    const std::vector<std::string>& get_field_names_vector() const {
-        return m_field_names;
-    }
-
-    intptr_t get_field_index(const std::string& field_name) const;
 
     const size_t *get_data_offsets(const char *DYND_UNUSED(metadata)) const {
         return &m_data_offsets[0];
@@ -138,119 +104,89 @@ public:
     void get_dynamic_type_properties(
                     const std::pair<std::string, gfunc::callable> **out_properties,
                     size_t *out_count) const;
-    void get_dynamic_array_properties(
-                    const std::pair<std::string, gfunc::callable> **out_properties,
-                    size_t *out_count) const;
-}; // class cstruct_type
+}; // class ctuple_type
 
 namespace ndt {
-    /** Makes a struct type with the specified fields */
-    inline ndt::type make_cstruct(size_t field_count, const ndt::type *field_types,
-                    const std::string *field_names) {
-        return ndt::type(new cstruct_type(field_count, field_types, field_names), false);
+    /** Makes a ctuple type with the specified types */
+    inline ndt::type make_ctuple(size_t field_count, const ndt::type *field_types) {
+        return ndt::type(new ctuple_type(field_count, field_types), false);
     }
 
-    /** Makes a struct type with the specified fields */
-    inline ndt::type make_cstruct(const ndt::type& tp0, const std::string& name0)
+    /** Makes a ctuple type with the specified types */
+    inline ndt::type make_ctuple(const ndt::type& tp0)
     {
-        return ndt::make_cstruct(1, &tp0, &name0);
+        return ndt::make_ctuple(1, &tp0);
     }
 
-    /** Makes a struct type with the specified fields */
-    inline ndt::type make_cstruct(const ndt::type& tp0, const std::string& name0, const ndt::type& tp1, const std::string& name1)
+    /** Makes a ctuple type with the specified types */
+    inline ndt::type make_ctuple(const ndt::type& tp0, const ndt::type& tp1)
     {
         ndt::type field_types[2];
-        std::string field_names[2];
         field_types[0] = tp0;
         field_types[1] = tp1;
-        field_names[0] = name0;
-        field_names[1] = name1;
-        return ndt::make_cstruct(2, field_types, field_names);
+        return ndt::make_ctuple(2, field_types);
     }
 
-    /** Makes a struct type with the specified fields */
-    inline ndt::type make_cstruct(const ndt::type& tp0, const std::string& name0, const ndt::type& tp1, const std::string& name1, const ndt::type& tp2, const std::string& name2)
+    /** Makes a ctuple type with the specified types */
+    inline ndt::type make_ctuple(const ndt::type& tp0, const ndt::type& tp1, const ndt::type& tp2)
     {
         ndt::type field_types[3];
-        std::string field_names[3];
         field_types[0] = tp0;
         field_types[1] = tp1;
         field_types[2] = tp2;
-        field_names[0] = name0;
-        field_names[1] = name1;
-        field_names[2] = name2;
-        return ndt::make_cstruct(3, field_types, field_names);
+        return ndt::make_ctuple(3, field_types);
     }
 
-    /** Makes a struct type with the specified fields */
-    inline ndt::type make_cstruct(const ndt::type& tp0, const std::string& name0,
-                    const ndt::type& tp1, const std::string& name1, const ndt::type& tp2, const std::string& name2,
-                    const ndt::type& tp3, const std::string& name3)
+    /** Makes a ctuple type with the specified types */
+    inline ndt::type make_ctuple(const ndt::type& tp0,
+                    const ndt::type& tp1, const ndt::type& tp2,
+                    const ndt::type& tp3)
     {
         ndt::type field_types[4];
-        std::string field_names[4];
         field_types[0] = tp0;
         field_types[1] = tp1;
         field_types[2] = tp2;
         field_types[3] = tp3;
-        field_names[0] = name0;
-        field_names[1] = name1;
-        field_names[2] = name2;
-        field_names[3] = name3;
-        return ndt::make_cstruct(4, field_types, field_names);
+        return ndt::make_ctuple(4, field_types);
     }
 
-    /** Makes a struct type with the specified fields */
-    inline ndt::type make_cstruct(const ndt::type& tp0, const std::string& name0,
-                    const ndt::type& tp1, const std::string& name1, const ndt::type& tp2, const std::string& name2,
-                    const ndt::type& tp3, const std::string& name3, const ndt::type& tp4, const std::string& name4)
+    /** Makes a ctuple type with the specified types */
+    inline ndt::type make_ctuple(const ndt::type& tp0,
+                    const ndt::type& tp1, const ndt::type& tp2,
+                    const ndt::type& tp3, const ndt::type& tp4)
     {
         ndt::type field_types[5];
-        std::string field_names[5];
         field_types[0] = tp0;
         field_types[1] = tp1;
         field_types[2] = tp2;
         field_types[3] = tp3;
         field_types[4] = tp4;
-        field_names[0] = name0;
-        field_names[1] = name1;
-        field_names[2] = name2;
-        field_names[3] = name3;
-        field_names[4] = name4;
-        return ndt::make_cstruct(5, field_types, field_names);
+        return ndt::make_ctuple(5, field_types);
     }
 
-    /** Makes a struct type with the specified fields */
-    inline ndt::type make_cstruct(const ndt::type& tp0, const std::string& name0,
-                    const ndt::type& tp1, const std::string& name1, const ndt::type& tp2, const std::string& name2,
-                    const ndt::type& tp3, const std::string& name3, const ndt::type& tp4, const std::string& name4,
-                    const ndt::type& tp5, const std::string& name5)
+    /** Makes a ctuple type with the specified types */
+    inline ndt::type make_ctuple(const ndt::type& tp0,
+                    const ndt::type& tp1, const ndt::type& tp2,
+                    const ndt::type& tp3, const ndt::type& tp4,
+                    const ndt::type& tp5)
     {
         ndt::type field_types[6];
-        std::string field_names[6];
         field_types[0] = tp0;
         field_types[1] = tp1;
         field_types[2] = tp2;
         field_types[3] = tp3;
         field_types[4] = tp4;
         field_types[5] = tp5;
-        field_names[0] = name0;
-        field_names[1] = name1;
-        field_names[2] = name2;
-        field_names[3] = name3;
-        field_names[4] = name4;
-        field_names[5] = name5;
-        return ndt::make_cstruct(6, field_types, field_names);
+        return ndt::make_ctuple(6, field_types);
     }
 
-    /** Makes a struct type with the specified fields */
-    inline ndt::type make_cstruct(const ndt::type& tp0, const std::string& name0,
-                    const ndt::type& tp1, const std::string& name1, const ndt::type& tp2, const std::string& name2,
-                    const ndt::type& tp3, const std::string& name3, const ndt::type& tp4, const std::string& name4,
-                    const ndt::type& tp5, const std::string& name5, const ndt::type& tp6, const std::string& name6)
+    /** Makes a ctuple type with the specified types */
+    inline ndt::type make_ctuple(const ndt::type& tp0,
+                    const ndt::type& tp1, const ndt::type& tp2,
+                    const ndt::type& tp3, const ndt::type& tp4,
+                    const ndt::type& tp5, const ndt::type& tp6)
     {
         ndt::type field_types[7];
-        std::string field_names[7];
         field_types[0] = tp0;
         field_types[1] = tp1;
         field_types[2] = tp2;
@@ -258,32 +194,25 @@ namespace ndt {
         field_types[4] = tp4;
         field_types[5] = tp5;
         field_types[6] = tp6;
-        field_names[0] = name0;
-        field_names[1] = name1;
-        field_names[2] = name2;
-        field_names[3] = name3;
-        field_names[4] = name4;
-        field_names[5] = name5;
-        field_names[6] = name6;
-        return ndt::make_cstruct(7, field_types, field_names);
+        return ndt::make_ctuple(7, field_types);
     }
 
     /**
-     * \brief Checks whether a set of offsets can be used for cstruct.
+     * \brief Checks whether a set of offsets can be used for ctuple.
      *
-     * Because cstruct does not support customizable offset (use struct for
+     * Because ctuple does not support customizable offset (use tuple for
      * that), this function can be used to check that offsets are compatible with
-     * cstruct.
+     * ctuple.
      *
      * \param field_count  The number of array entries in `field_types` and `field_offsets`
      * \param field_types  An array of the field types.
      * \param field_offsets  The offsets corresponding to the types.
-     * \param total_size  The total size of the struct in bytes.
+     * \param total_size  The total size of the tuple in bytes.
      *
-     * \returns  True if constructing a cstruct with the same types and field offsets will
+     * \returns  True if constructing a ctuple with the same types and field offsets will
      *           produce the provided offsets.
      */
-    inline bool is_cstruct_compatible_offsets(size_t field_count,
+    inline bool is_ctuple_compatible_offsets(size_t field_count,
                     const ndt::type *field_types, const size_t *field_offsets, size_t total_size)
     {
         size_t offset = 0, max_alignment = 1;
@@ -305,4 +234,4 @@ namespace ndt {
 
 } // namespace dynd
 
-#endif // _DYND__CSTRUCT_TYPE_HPP_
+#endif // _DYND__CTUPLE_TYPE_HPP_

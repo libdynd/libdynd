@@ -29,7 +29,7 @@ TEST(TimeDType, Create) {
 
     d = ndt::make_time(tz_abstract);
     ASSERT_EQ(time_type_id, d.get_type_id());
-    tt = static_cast<const time_type *>(d.extended());
+    tt = d.tcast<time_type>();
     EXPECT_EQ(8u, d.get_data_size());
     EXPECT_EQ((size_t)scalar_align_of<int64_t>::value, d.get_data_alignment());
     EXPECT_EQ(ndt::make_time(tz_abstract), d);
@@ -38,7 +38,7 @@ TEST(TimeDType, Create) {
     EXPECT_EQ(d, ndt::type(d.str()));
 
     d = ndt::make_time(tz_utc);
-    tt = static_cast<const time_type *>(d.extended());
+    tt = d.tcast<time_type>();
     EXPECT_EQ(ndt::make_time(tz_utc), d);
     EXPECT_EQ(tz_utc, tt->get_timezone());
     // Roundtripping through a string
@@ -51,14 +51,14 @@ TEST(TimeDType, CreateFromString) {
 
     d = ndt::type("time");
     ASSERT_EQ(time_type_id, d.get_type_id());
-    tt = static_cast<const time_type *>(d.extended());
+    tt = d.tcast<time_type>();
     EXPECT_EQ(tz_abstract, tt->get_timezone());
     // Roundtripping through a string
     EXPECT_EQ(d, ndt::type(d.str()));
 
     d = ndt::type("time[tz='UTC']");
     ASSERT_EQ(time_type_id, d.get_type_id());
-    tt = static_cast<const time_type *>(d.extended());
+    tt = d.tcast<time_type>();
     EXPECT_EQ(tz_utc, tt->get_timezone());
     // Roundtripping through a string
     EXPECT_EQ(d, ndt::type(d.str()));

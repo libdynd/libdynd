@@ -11,8 +11,10 @@
 #include <dynd/types/datashape_parser.hpp>
 #include <dynd/types/strided_dim_type.hpp>
 #include <dynd/types/fixed_dim_type.hpp>
+#include <dynd/types/cfixed_dim_type.hpp>
 #include <dynd/types/var_dim_type.hpp>
 #include <dynd/types/cstruct_type.hpp>
+#include <dynd/types/struct_type.hpp>
 #include <dynd/types/date_type.hpp>
 #include <dynd/types/string_type.hpp>
 #include <dynd/types/fixedstring_type.hpp>
@@ -105,25 +107,40 @@ TEST(DataShapeParser, StringAtoms) {
 
 TEST(DataShapeParser, Unaligned) {
     EXPECT_EQ(ndt::make_strided_dim(ndt::make_type<dynd_bool>()),
-                    type_from_datashape("M * unaligned[bool]"));
+                    type_from_datashape("strided * unaligned[bool]"));
     EXPECT_EQ(ndt::make_strided_dim(ndt::make_unaligned(ndt::make_type<float>()), 2),
-                    type_from_datashape("M * N * unaligned[float32]"));
-    EXPECT_EQ(ndt::make_cstruct(ndt::make_unaligned(ndt::make_type<int32_t>()), "x",
+                    type_from_datashape("strided * strided * unaligned[float32]"));
+    EXPECT_EQ(ndt::make_struct(ndt::make_unaligned(ndt::make_type<int32_t>()), "x",
                                 ndt::make_unaligned(ndt::make_type<int64_t>()), "y"),
                     type_from_datashape("{x : unaligned[int32], y : unaligned[int64]}"));
+    EXPECT_EQ(ndt::make_cstruct(ndt::make_unaligned(ndt::make_type<int32_t>()), "x",
+                                ndt::make_unaligned(ndt::make_type<int64_t>()), "y"),
+                    type_from_datashape("c{x : unaligned[int32], y : unaligned[int64]}"));
 }
 
 TEST(DataShapeParser, StridedDim) {
     EXPECT_EQ(ndt::make_strided_dim(ndt::make_type<dynd_bool>()),
-                    type_from_datashape("M * bool"));
+                    type_from_datashape("strided * bool"));
     EXPECT_EQ(ndt::make_strided_dim(ndt::make_type<float>(), 2),
-                    type_from_datashape("M * N * float32"));
+                    type_from_datashape("strided * strided * float32"));
 }
 
 TEST(DataShapeParser, FixedDim) {
-    EXPECT_EQ(ndt::make_fixed_dim(3, ndt::make_type<dynd_bool>()), type_from_datashape("3 * bool"));
-    EXPECT_EQ(ndt::make_fixed_dim(4, ndt::make_fixed_dim(3, ndt::make_type<float>())),
-                    type_from_datashape("4 * 3 * float32"));
+    EXPECT_EQ(ndt::make_fixed_dim(3, ndt::make_type<dynd_bool>()),
+              type_from_datashape("3 * bool"));
+    EXPECT_EQ(ndt::make_fixed_dim(3, ndt::make_type<dynd_bool>()),
+              type_from_datashape("fixed[3] * bool"));
+    EXPECT_EQ(ndt::make_fixed_dim(
+                  4, ndt::make_fixed_dim(3, ndt::make_type<float>())),
+              type_from_datashape("4 * 3 * float32"));
+}
+
+TEST(DataShapeParser, CFixedDim) {
+    EXPECT_EQ(ndt::make_cfixed_dim(3, ndt::make_type<dynd_bool>()),
+              type_from_datashape("cfixed[3] * bool"));
+    EXPECT_EQ(ndt::make_cfixed_dim(
+                  4, ndt::make_cfixed_dim(3, ndt::make_type<float>())),
+              type_from_datashape("cfixed[4] * cfixed[3] * float32"));
 }
 
 TEST(DataShapeParser, VarDim) {
@@ -134,29 +151,45 @@ TEST(DataShapeParser, VarDim) {
 
 TEST(DataShapeParser, StridedFixedDim) {
     EXPECT_EQ(ndt::make_strided_dim(ndt::make_fixed_dim(3, ndt::make_type<float>())),
-                    type_from_datashape("M * 3 * float32"));
+                    type_from_datashape("strided * 3 * float32"));
+    EXPECT_EQ(ndt::make_fixed_dim(3, ndt::make_strided_dim(ndt::make_type<float>())),
+                    type_from_datashape("3 * strided * float32"));
 }
 
 TEST(DataShapeParser, StridedVarFixedDim) {
     EXPECT_EQ(ndt::make_strided_dim(ndt::make_var_dim(ndt::make_fixed_dim(3, ndt::make_type<float>()))),
-                    type_from_datashape("M * var * 3 * float32"));
+                    type_from_datashape("strided * var * 3 * float32"));
 }
 
 TEST(DataShapeParser, RecordOneField) {
-    EXPECT_EQ(ndt::make_cstruct(ndt::make_type<float>(), "val"),
+    EXPECT_EQ(ndt::make_struct(ndt::make_type<float>(), "val"),
                     type_from_datashape("{ val : float32 }"));
-    EXPECT_EQ(ndt::make_cstruct(ndt::make_type<float>(), "val"),
+    EXPECT_EQ(ndt::make_struct(ndt::make_type<float>(), "val"),
                     type_from_datashape("{ val : float32 , }"));
+    EXPECT_EQ(ndt::make_cstruct(ndt::make_type<float>(), "val"),
+                    type_from_datashape("c{ val : float32 }"));
+    EXPECT_EQ(ndt::make_cstruct(ndt::make_type<float>(), "val"),
+                    type_from_datashape("c{ val : float32 , }"));
 }
 
 TEST(DataShapeParser, RecordTwoFields) {
-    EXPECT_EQ(ndt::make_cstruct(ndt::make_type<float>(), "val", ndt::make_type<int64_t>(), "id"),
+    EXPECT_EQ(ndt::make_struct(ndt::make_type<float>(), "val", ndt::make_type<int64_t>(), "id"),
                     type_from_datashape("{\n"
                         "    val: float32,\n"
                         "    id: int64\n"
                         "}\n"));
-    EXPECT_EQ(ndt::make_cstruct(ndt::make_type<float>(), "val", ndt::make_type<int64_t>(), "id"),
+    EXPECT_EQ(ndt::make_struct(ndt::make_type<float>(), "val", ndt::make_type<int64_t>(), "id"),
                     type_from_datashape("{\n"
+                        "    val: float32,\n"
+                        "    id: int64,\n"
+                        "}\n"));
+    EXPECT_EQ(ndt::make_cstruct(ndt::make_type<float>(), "val", ndt::make_type<int64_t>(), "id"),
+                    type_from_datashape("c{\n"
+                        "    val: float32,\n"
+                        "    id: int64\n"
+                        "}\n"));
+    EXPECT_EQ(ndt::make_cstruct(ndt::make_type<float>(), "val", ndt::make_type<int64_t>(), "id"),
+                    type_from_datashape("c{\n"
                         "    val: float32,\n"
                         "    id: int64,\n"
                         "}\n"));
@@ -185,7 +218,7 @@ TEST(DataShapeParser, ErrorBasic) {
     } catch (const runtime_error& e) {
         string msg = e.what();
         EXPECT_TRUE(msg.find("line 1, column 5") != string::npos);
-        EXPECT_TRUE(msg.find("only free variables") != string::npos);
+        EXPECT_TRUE(msg.find("unrecognized dimension type") != string::npos);
     }
 }
 
@@ -321,7 +354,7 @@ TEST(DataShapeParser, ErrorTypeAlias) {
     } catch (const runtime_error& e) {
         string msg = e.what();
         EXPECT_TRUE(msg.find("line 3, column 1") != string::npos);
-        EXPECT_TRUE(msg.find("only free variables") != string::npos);
+        EXPECT_TRUE(msg.find("type vars are not supported") != string::npos);
     }
     try {
         type_from_datashape("\n"
@@ -460,5 +493,5 @@ TEST(DataShapeParser, KivaLoanDataShape) {
         "    }\n"
         "}\n";
     ndt::type d = type_from_datashape(klds);
-    EXPECT_EQ(cstruct_type_id, d.get_type_id());
+    EXPECT_EQ(struct_type_id, d.get_type_id());
 }

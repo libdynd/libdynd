@@ -75,7 +75,7 @@ namespace ndt {
         } else {
             // When the value type has an expression_kind, we need to chain things together
             // so that the view operation happens just at the primitive level.
-            return static_cast<const base_expression_type *>(value_type.extended())->with_replaced_storage_type(
+            return value_type.tcast<base_expression_type>()->with_replaced_storage_type(
                 ndt::type(new view_type(value_type.storage_type(), operand_type), false));
         }
     }

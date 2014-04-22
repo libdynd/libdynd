@@ -226,7 +226,7 @@ void bytes_type::metadata_debug_print(const char *metadata, std::ostream& o, con
 }
 
 static size_t property_get_target_alignment(const ndt::type& dt) {
-    const bytes_type *pd = static_cast<const bytes_type *>(dt.extended());
+    const bytes_type *pd = dt.tcast<bytes_type>();
     return pd->get_target_alignment();
 }
 

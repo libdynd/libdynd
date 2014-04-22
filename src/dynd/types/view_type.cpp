@@ -125,7 +125,7 @@ ndt::type view_type::with_replaced_storage_type(const ndt::type& replacement_typ
 {
     if (m_operand_type.get_kind() == expression_kind) {
         return ndt::type(new view_type(m_value_type,
-                        static_cast<const base_expression_type *>(m_operand_type.extended())->with_replaced_storage_type(replacement_type)), false);
+                        m_operand_type.tcast<base_expression_type>()->with_replaced_storage_type(replacement_type)), false);
     } else {
         if (m_operand_type != replacement_type.value_type()) {
             std::stringstream ss;

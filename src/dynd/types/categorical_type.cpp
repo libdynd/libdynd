@@ -76,16 +76,13 @@ namespace {
             single<uint32_t>(dst, src, extra);
         }
 
-        static void destruct(ckernel_prefix *extra)
+        static void destruct(ckernel_prefix *self)
         {
-            extra_type *e = reinterpret_cast<extra_type *>(extra);
+            extra_type *e = reinterpret_cast<extra_type *>(self);
             if (e->src_cat_tp != NULL) {
                 base_type_decref(e->src_cat_tp);
             }
-            ckernel_prefix *echild = &(e + 1)->base;
-            if (echild->destructor) {
-                echild->destructor(echild);
-            }
+            self->destroy_child_ckernel(sizeof(extra_type));
         }
     };
 
@@ -576,7 +573,7 @@ ndt::type dynd::ndt::factor_categorical(const nd::array& values)
 
 static nd::array property_ndo_get_ints(const nd::array& n) {
     ndt::type udt = n.get_dtype().value_type();
-    const categorical_type *cd = static_cast<const categorical_type *>(udt.extended());
+    const categorical_type *cd = udt.tcast<categorical_type>();
     return n.view_scalars(cd->get_storage_type());
 }
 
@@ -594,17 +591,17 @@ void categorical_type::get_dynamic_array_properties(
 }
 
 static nd::array property_type_get_categories(const ndt::type& d) {
-    const categorical_type *cd = static_cast<const categorical_type *>(d.extended());
+    const categorical_type *cd = d.tcast<categorical_type>();
     return cd->get_categories();
 }
 
 static ndt::type property_type_get_storage_type(const ndt::type& d) {
-    const categorical_type *cd = static_cast<const categorical_type *>(d.extended());
+    const categorical_type *cd = d.tcast<categorical_type>();
     return cd->get_storage_type();
 }
 
 static ndt::type property_type_get_category_type(const ndt::type& d) {
-    const categorical_type *cd = static_cast<const categorical_type *>(d.extended());
+    const categorical_type *cd = d.tcast<categorical_type>();
     return cd->get_category_type();
 }
 

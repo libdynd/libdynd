@@ -7,7 +7,7 @@
 #include <dynd/array_iter.hpp>
 #include <dynd/types/strided_dim_type.hpp>
 #include <dynd/types/var_dim_type.hpp>
-#include <dynd/types/fixed_dim_type.hpp>
+#include <dynd/types/cfixed_dim_type.hpp>
 #include <dynd/types/type_alignment.hpp>
 #include <dynd/types/view_type.hpp>
 #include <dynd/types/string_type.hpp>
@@ -75,7 +75,7 @@ nd::array nd::make_strided_array(const ndt::type& dtp, intptr_t ndim, const intp
     char *data_ptr = NULL;
     if (dtp.get_kind() == memory_kind) {
         result = make_array_memory_block(array_tp.get_metadata_size());
-        static_cast<const base_memory_type *>(dtp.extended())->data_alloc(&data_ptr, data_size);
+        dtp.tcast<base_memory_type>()->data_alloc(&data_ptr, data_size);
     } else {
         // Allocate the array metadata and data in one memory block
         result = make_array_memory_block(array_tp.get_metadata_size(),
@@ -84,7 +84,7 @@ nd::array nd::make_strided_array(const ndt::type& dtp, intptr_t ndim, const intp
 
     if (array_tp.get_flags()&type_flag_zeroinit) {
         if (dtp.get_kind() == memory_kind) {
-            static_cast<const base_memory_type *>(dtp.extended())->data_zeroinit(data_ptr, data_size);
+            dtp.tcast<base_memory_type>()->data_zeroinit(data_ptr, data_size);
         }
         else {
             memset(data_ptr, 0, data_size);
@@ -918,7 +918,7 @@ nd::array nd::array::to_host() const
 {
     ndt::type dt = get_type().get_dtype();
     if (dt.get_kind() == memory_kind) {
-        dt = static_cast<const base_memory_type *>(dt.extended())->get_storage_type();
+        dt = dt.tcast<base_memory_type>()->get_storage_type();
     }
 
     array result = empty_like(*this, dt);
@@ -932,7 +932,7 @@ nd::array nd::array::to_cuda_host(unsigned int cuda_host_flags) const
 {
     ndt::type dt = get_type().get_dtype();
     if (dt.get_kind() == memory_kind) {
-        dt = static_cast<const base_memory_type *>(dt.extended())->get_storage_type();
+        dt = dt.tcast<base_memory_type>()->get_storage_type();
     }
 
     array result = empty_like(*this, make_cuda_host(dt, cuda_host_flags));
@@ -946,7 +946,7 @@ nd::array nd::array::to_cuda_device() const
 {
     ndt::type dt = get_type().get_dtype();
     if (dt.get_kind() == memory_kind) {
-        dt = static_cast<const base_memory_type *>(dt.extended())->get_storage_type();
+        dt = dt.tcast<base_memory_type>()->get_storage_type();
     }
 
     array result = empty_like(*this, make_cuda_device(dt));
@@ -1102,9 +1102,9 @@ namespace {
                     bool can_keep_dim = false;
                     ndt::type child_dt, child_replacement_tp;
                     switch (dt.get_type_id()) {
-                        case fixed_dim_type_id: {
-                            const fixed_dim_type *dt_fdd = static_cast<const fixed_dim_type *>(dt.extended());
-                            const fixed_dim_type *r_fdd = static_cast<const fixed_dim_type *>(e->replacement_tp.extended());
+                        case cfixed_dim_type_id: {
+                            const cfixed_dim_type *dt_fdd = dt.tcast<cfixed_dim_type>();
+                            const cfixed_dim_type *r_fdd = static_cast<const cfixed_dim_type *>(e->replacement_tp.extended());
                             if (dt_fdd->get_fixed_dim_size() == r_fdd->get_fixed_dim_size() &&
                                     dt_fdd->get_fixed_stride() == r_fdd->get_fixed_stride()) {
                                 can_keep_dim = true;
@@ -1116,7 +1116,7 @@ namespace {
                         case strided_dim_type_id:
                         case var_dim_type_id: {
                             const base_uniform_dim_type *dt_budd =
-                                            static_cast<const base_uniform_dim_type *>(dt.extended());
+                                            dt.tcast<base_uniform_dim_type>();
                             const base_uniform_dim_type *r_budd =
                                             static_cast<const base_uniform_dim_type *>(e->replacement_tp.extended());
                             can_keep_dim = true;
@@ -1287,7 +1287,7 @@ nd::array nd::array::view_scalars(const ndt::type& scalar_tp) const
     // First check if we're dealing with a simple one dimensional block of memory we can reinterpret
     // at will.
     if (uniform_ndim == 1 && array_type.get_type_id() == strided_dim_type_id) {
-        const strided_dim_type *sad = static_cast<const strided_dim_type *>(array_type.extended());
+        const strided_dim_type *sad = array_type.tcast<strided_dim_type>();
         const strided_dim_type_metadata *md = reinterpret_cast<const strided_dim_type_metadata *>(get_ndo_meta());
         const ndt::type& edt = sad->get_element_type();
         if (edt.is_pod() && (intptr_t)edt.get_data_size() == md->stride &&
@@ -1678,7 +1678,7 @@ nd::array nd::groupby(const nd::array& data_values, const nd::array& by_values, 
     array by_values_as_groups = by_values.ucast(groups_final);
 
     ndt::type gbdt = ndt::make_groupby(data_values.get_type(), by_values_as_groups.get_type());
-    const groupby_type *gbdt_ext = static_cast<const groupby_type *>(gbdt.extended());
+    const groupby_type *gbdt_ext = gbdt.tcast<groupby_type>();
     char *data_ptr = NULL;
 
     array result(make_array_memory_block(gbdt.extended()->get_metadata_size(),
@@ -1738,7 +1738,7 @@ nd::array nd::combine_into_struct(size_t field_count, const std::string *field_n
     }
 
     ndt::type result_type = ndt::make_cstruct(field_count, &field_types[0], field_names);
-    const cstruct_type *fsd = static_cast<const cstruct_type *>(result_type.extended());
+    const cstruct_type *fsd = result_type.tcast<cstruct_type>();
     char *data_ptr = NULL;
 
     array result(make_array_memory_block(fsd->get_metadata_size(),
@@ -1789,7 +1789,7 @@ static array follow_array_pointers(const array& n)
     uint64_t flags = n.get_ndo()->m_flags;
     while (dt.get_type_id() == pointer_type_id) {
         const pointer_type_metadata *md = reinterpret_cast<const pointer_type_metadata *>(metadata);
-        const pointer_type *pd = static_cast<const pointer_type *>(dt.extended());
+        const pointer_type *pd = dt.tcast<pointer_type>();
         dt = pd->get_target_type();
         metadata += sizeof(pointer_type_metadata);
         data = *reinterpret_cast<char **>(data) + md->offset;

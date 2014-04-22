@@ -3,35 +3,41 @@
 // BSD 2-Clause License, see LICENSE.txt
 //
 
-#ifndef _DYND__FIXED_DIM_TYPE_HPP_
-#define _DYND__FIXED_DIM_TYPE_HPP_
+#ifndef _DYND__FIXEDARRAY_TYPE_HPP_
+#define _DYND__FIXEDARRAY_TYPE_HPP_
 
 #include <dynd/type.hpp>
-#include <dynd/types/base_uniform_dim_type.hpp>
 #include <dynd/typed_data_assign.hpp>
 #include <dynd/types/view_type.hpp>
+#include <dynd/types/base_uniform_dim_type.hpp>
+#include <dynd/array.hpp>
 
 namespace dynd {
 
-struct fixed_dim_type_metadata {
-    intptr_t stride;
-};
-
-struct fixed_dim_type_iterdata {
+struct cfixed_dim_type_iterdata {
     iterdata_common common;
     char *data;
     intptr_t stride;
 };
 
-class fixed_dim_type : public base_uniform_dim_type {
+class cfixed_dim_type : public base_uniform_dim_type {
+    intptr_t m_stride;
     size_t m_dim_size;
     std::vector<std::pair<std::string, gfunc::callable> > m_array_properties, m_array_functions;
+
 public:
-    fixed_dim_type(size_t dim_size, const ndt::type& element_tp);
+    cfixed_dim_type(size_t dim_size, const ndt::type& element_tp);
+    cfixed_dim_type(size_t dim_size, const ndt::type& element_tp, intptr_t stride);
 
-    virtual ~fixed_dim_type();
+    virtual ~cfixed_dim_type();
 
-    size_t get_default_data_size(intptr_t ndim, const intptr_t *shape) const;
+    inline size_t get_default_data_size(intptr_t DYND_UNUSED(ndim), const intptr_t *DYND_UNUSED(shape)) const {
+        return get_data_size();
+    }
+
+    inline intptr_t get_fixed_stride() const {
+        return m_stride;
+    }
 
     inline size_t get_fixed_dim_size() const {
         return m_dim_size;
@@ -99,19 +105,6 @@ public:
 
     void foreach_leading(char *data, const char *metadata, foreach_fn_t callback, void *callback_data) const;
     
-    /**
-     * Modifies metadata allocated using the metadata_default_construct function, to be used
-     * immediately after nd::array construction. Given an input type/metadata, edits the output
-     * metadata in place to match.
-     *
-     * \param dst_metadata  The metadata created by metadata_default_construct, which is modified in place
-     * \param src_tp  The type of the input nd::array whose stride ordering is to be matched.
-     * \param src_metadata  The metadata of the input nd::array whose stride ordering is to be matched.
-     */
-    void reorder_default_constructed_strides(
-                    char *dst_metadata,
-                    const ndt::type& src_tp, const char *src_metadata) const;
-
     void get_dynamic_type_properties(
                     const std::pair<std::string, gfunc::callable> **out_properties,
                     size_t *out_count) const;
@@ -124,15 +117,29 @@ public:
 };
 
 namespace ndt {
-    inline ndt::type make_fixed_dim(size_t dim_size, const ndt::type& element_tp) {
-        return ndt::type(new fixed_dim_type(dim_size, element_tp), false);
+    inline ndt::type make_cfixed_dim(size_t size, const ndt::type& element_tp) {
+        return ndt::type(new cfixed_dim_type(size, element_tp), false);
     }
 
-    ndt::type make_fixed_dim(intptr_t ndim, const intptr_t *shape,
-                              const ndt::type &dtp);
+    inline ndt::type make_cfixed_dim(size_t size, const ndt::type& element_tp, intptr_t stride) {
+        return ndt::type(new cfixed_dim_type(size, element_tp, stride), false);
+    }
 
+    ndt::type make_cfixed_dim(intptr_t ndim, const intptr_t *shape,
+                              const ndt::type &dtp, const int *axis_perm);
+
+    template<class T> struct cfixed_dim_from_array {
+        static ndt::type make() {
+            return ndt::make_type<T>();
+        }
+    };
+    template<class T, int N> struct cfixed_dim_from_array<T[N]> {
+        static ndt::type make() {
+            return ndt::make_cfixed_dim(N, ndt::cfixed_dim_from_array<T>::make());
+        }
+    };
 } // namespace ndt
 
 } // namespace dynd
 
-#endif // _DYND__FIXED_DIM_TYPE_HPP_
+#endif // _DYND__FIXEDARRAY_TYPE_HPP_

@@ -53,8 +53,35 @@ struct ckernel_prefix {
         function = reinterpret_cast<void *>(fnptr);
     }
 
-    template<typename T, typename U, typename V>
-    inline void init(const T&, const U&, const V&) {
+    /**
+     * Calls the destructor of the ckernel if it is
+     * non-NULL.
+     */
+    inline void destroy() {
+        if (destructor != NULL) {
+            destructor(this);
+        }
+    }
+
+    /**
+     * Returns the pointer to a child ckernel at the provided
+     * offset.
+     */
+    inline ckernel_prefix *get_child_ckernel(size_t offset) {
+        return reinterpret_cast<ckernel_prefix *>(
+            reinterpret_cast<char *>(this) + offset);
+    }
+
+    /**
+     * If the provided offset is non-zero, destroys
+     * a ckernel at the given offset from `this`.
+     */
+    inline void destroy_child_ckernel(size_t offset) {
+        if (offset != 0) {
+            ckernel_prefix *child = reinterpret_cast<ckernel_prefix *>(
+                reinterpret_cast<char *>(this) + offset);
+            child->destroy();
+        }
     }
 };
 

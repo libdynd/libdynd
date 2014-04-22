@@ -318,9 +318,9 @@ static double five_parameters(float (&x)[3], uint16_t a1, uint32_t a2, uint64_t 
 TEST(GFuncCallable, FiveParameters) {
     // Create the callable
     gfunc::callable c = gfunc::make_callable(&five_parameters, "x", "a1", "a2", "a3", "y");
-    EXPECT_EQ(ndt::make_cstruct(ndt::make_fixed_dim(3, ndt::make_type<float>()), "x", ndt::make_type<uint16_t>(), "a1",
+    EXPECT_EQ(ndt::make_cstruct(ndt::make_cfixed_dim(3, ndt::make_type<float>()), "x", ndt::make_type<uint16_t>(), "a1",
                     ndt::make_type<uint32_t>(), "a2", ndt::make_type<uint64_t>(), "a3",
-                    ndt::make_fixed_dim(3, ndt::make_type<double>()), "y"),
+                    ndt::make_cfixed_dim(3, ndt::make_type<double>()), "y"),
             c.get_parameters_type());
 
     // Call it and see that it gave what we want

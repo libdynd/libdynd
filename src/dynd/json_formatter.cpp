@@ -10,6 +10,7 @@
 #include <dynd/types/base_struct_type.hpp>
 #include <dynd/types/strided_dim_type.hpp>
 #include <dynd/types/fixed_dim_type.hpp>
+#include <dynd/types/cfixed_dim_type.hpp>
 #include <dynd/types/var_dim_type.hpp>
 
 using namespace std;
@@ -167,7 +168,7 @@ static void format_json_string(output_data& out, const ndt::type& dt, const char
         const json_type_data *d = reinterpret_cast<const json_type_data *>(data);
         out.write(d->begin, d->end);
     } else {
-        const base_string_type *bsd = static_cast<const base_string_type *>(dt.extended());
+        const base_string_type *bsd = dt.tcast<base_string_type>();
         string_encoding_t encoding = bsd->get_encoding();
         const char *begin = NULL, *end = NULL;
         bsd->get_string_range(&begin, &end, metadata, data);
@@ -195,7 +196,7 @@ static void format_json_datetime(output_data& out, const ndt::type& dt, const ch
 
 static void format_json_struct(output_data& out, const ndt::type& dt, const char *metadata, const char *data)
 {
-    const base_struct_type *bsd = static_cast<const base_struct_type *>(dt.extended());
+    const base_struct_type *bsd = dt.tcast<base_struct_type>();
     size_t field_count = bsd->get_field_count();
     const string *field_names = bsd->get_field_names();
     const ndt::type *field_types = bsd->get_field_types();
@@ -220,7 +221,7 @@ static void format_json_uniform_dim(output_data& out, const ndt::type& dt, const
     out.write('[');
     switch (dt.get_type_id()) {
         case strided_dim_type_id: {
-            const strided_dim_type *sad = static_cast<const strided_dim_type *>(dt.extended());
+            const strided_dim_type *sad = dt.tcast<strided_dim_type>();
             const strided_dim_type_metadata *md = reinterpret_cast<const strided_dim_type_metadata *>(metadata);
             ndt::type element_tp = sad->get_element_type();
             intptr_t size = md->size, stride = md->stride;
@@ -234,7 +235,24 @@ static void format_json_uniform_dim(output_data& out, const ndt::type& dt, const
             break;
         }
         case fixed_dim_type_id: {
-            const fixed_dim_type *fad = static_cast<const fixed_dim_type *>(dt.extended());
+            const fixed_dim_type *fad = dt.tcast<fixed_dim_type>();
+            const fixed_dim_type_metadata *md =
+                reinterpret_cast<const fixed_dim_type_metadata *>(metadata);
+            ndt::type element_tp = fad->get_element_type();
+            intptr_t size = (intptr_t)fad->get_fixed_dim_size(),
+                     stride = md->stride;
+            for (intptr_t i = 0; i < size; ++i) {
+                ::format_json(out, element_tp,
+                              metadata + sizeof(fixed_dim_type_metadata),
+                              data + i * stride);
+                if (i != size - 1) {
+                    out.write(',');
+                }
+            }
+            break;
+        }
+        case cfixed_dim_type_id: {
+            const cfixed_dim_type *fad = dt.tcast<cfixed_dim_type>();
             ndt::type element_tp = fad->get_element_type();
             intptr_t size = (intptr_t)fad->get_fixed_dim_size(), stride = fad->get_fixed_stride();
             for (intptr_t i = 0; i < size; ++i) {
@@ -246,7 +264,7 @@ static void format_json_uniform_dim(output_data& out, const ndt::type& dt, const
             break;
         }
         case var_dim_type_id: {
-            const var_dim_type *vad = static_cast<const var_dim_type *>(dt.extended());
+            const var_dim_type *vad = dt.tcast<var_dim_type>();
             const var_dim_type_metadata *md = reinterpret_cast<const var_dim_type_metadata *>(metadata);
             const var_dim_type_data *d = reinterpret_cast<const var_dim_type_data *>(data);
             ndt::type element_tp = vad->get_element_type();

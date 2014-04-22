@@ -157,8 +157,8 @@ TEST(CKernelDeferred, LiftUnaryExpr_FixedDim) {
     // Lift the kernel to particular fixed dim arrays
     ckernel_deferred ckd;
     vector<ndt::type> lifted_types;
-    lifted_types.push_back(ndt::type("3 * int32"));
-    lifted_types.push_back(ndt::type("3 * string[16]"));
+    lifted_types.push_back(ndt::type("cfixed[3] * int32"));
+    lifted_types.push_back(ndt::type("cfixed[3] * string[16]"));
     lift_ckernel_deferred(&ckd, ckd_base, lifted_types);
 
     // Test it on some data

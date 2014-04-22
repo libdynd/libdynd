@@ -33,7 +33,7 @@ size_t base_string_type::get_iterdata_size(intptr_t DYND_UNUSED(ndim)) const
 }
 
 static string get_extended_string_encoding(const ndt::type& dt) {
-    const base_string_type *d = static_cast<const base_string_type *>(dt.extended());
+    const base_string_type *d = dt.tcast<base_string_type>();
     stringstream ss;
     ss << d->get_encoding();
     return ss.str();

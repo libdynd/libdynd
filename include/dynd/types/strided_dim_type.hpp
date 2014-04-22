@@ -3,8 +3,8 @@
 // BSD 2-Clause License, see LICENSE.txt
 //
 
-#ifndef _DYND__STRIDED_ARRAY_TYPE_HPP_
-#define _DYND__STRIDED_ARRAY_TYPE_HPP_
+#ifndef _DYND__STRIDED_DIM_TYPE_HPP_
+#define _DYND__STRIDED_DIM_TYPE_HPP_
 
 #include <dynd/type.hpp>
 #include <dynd/types/base_uniform_dim_type.hpp>
@@ -135,4 +135,4 @@ namespace ndt {
 
 } // namespace dynd
 
-#endif // _DYND__STRIDED_ARRAY_TYPE_HPP_
+#endif // _DYND__STRIDED_DIM_TYPE_HPP_

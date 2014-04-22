@@ -8,6 +8,7 @@
 #include <dynd/types/string_type.hpp>
 #include <dynd/types/json_type.hpp>
 #include <dynd/types/fixed_dim_type.hpp>
+#include <dynd/types/cfixed_dim_type.hpp>
 #include <dynd/types/var_dim_type.hpp>
 #include <dynd/types/cstruct_type.hpp>
 #include <dynd/types/date_type.hpp>
@@ -45,7 +46,7 @@ static void json_as_buffer(const nd::array& json, nd::array& out_tmp_ref, const 
     ndt::type json_type = json.get_type().value_type();
     switch (json_type.get_kind()) {
         case string_kind: {
-            const base_string_type *sdt = static_cast<const base_string_type *>(json_type.extended());
+            const base_string_type *sdt = json_type.tcast<base_string_type>();
             switch (sdt->get_encoding()) {
                 case string_encoding_ascii:
                 case string_encoding_utf_8:
@@ -68,7 +69,7 @@ static void json_as_buffer(const nd::array& json, nd::array& out_tmp_ref, const 
         }
         case bytes_kind: {
             out_tmp_ref = json.eval();
-            const base_bytes_type *bdt = static_cast<const base_bytes_type *>(json_type.extended());
+            const base_bytes_type *bdt = json_type.tcast<base_bytes_type>();
             bdt->get_bytes_range(&begin, &end,
                             out_tmp_ref.get_ndo_meta(), out_tmp_ref.get_readonly_originptr());
             break;
@@ -342,7 +343,29 @@ static void skip_json_value(const char *&begin, const char *end)
 static void parse_fixed_dim_json(const ndt::type& tp, const char *metadata, char *out_data,
                 const char *&begin, const char *end, const eval::eval_context *ectx)
 {
-    const fixed_dim_type *fad = static_cast<const fixed_dim_type *>(tp.extended());
+    const fixed_dim_type *fad = tp.tcast<fixed_dim_type>();
+    const fixed_dim_type_metadata *md = reinterpret_cast<const fixed_dim_type_metadata *>(metadata);
+    intptr_t size = fad->get_fixed_dim_size();
+    intptr_t stride = md->stride;
+
+    if (!parse_token(begin, end, "[")) {
+        throw json_parse_error(begin, "expected list starting with '['", tp);
+    }
+    for (intptr_t i = 0; i < size; ++i) {
+        parse_json(fad->get_element_type(), metadata + sizeof(fixed_dim_type_metadata), out_data + i * stride, begin, end, ectx);
+        if (i < size-1 && !parse_token(begin, end, ",")) {
+            throw json_parse_error(begin, "array is too short, expected ',' list item separator", tp);
+        }
+    }
+    if (!parse_token(begin, end, "]")) {
+        throw json_parse_error(begin, "array is too long, expected list terminator ']'", tp);
+    }
+}
+
+static void parse_cfixed_dim_json(const ndt::type& tp, const char *metadata, char *out_data,
+                const char *&begin, const char *end, const eval::eval_context *ectx)
+{
+    const cfixed_dim_type *fad = tp.tcast<cfixed_dim_type>();
     intptr_t size = fad->get_fixed_dim_size();
     intptr_t stride = fad->get_fixed_stride();
 
@@ -363,7 +386,7 @@ static void parse_fixed_dim_json(const ndt::type& tp, const char *metadata, char
 static void parse_var_dim_json(const ndt::type& tp, const char *metadata, char *out_data,
                 const char *&begin, const char *end, const eval::eval_context *ectx)
 {
-    const var_dim_type *vad = static_cast<const var_dim_type *>(tp.extended());
+    const var_dim_type *vad = tp.tcast<var_dim_type>();
     const var_dim_type_metadata *md = reinterpret_cast<const var_dim_type_metadata *>(metadata);
     intptr_t stride = md->stride;
     const ndt::type& element_tp = vad->get_element_type();
@@ -408,7 +431,7 @@ static void parse_var_dim_json(const ndt::type& tp, const char *metadata, char *
 static void parse_struct_json(const ndt::type& tp, const char *metadata, char *out_data,
                 const char *&begin, const char *end, const eval::eval_context *ectx)
 {
-    const base_struct_type *fsd = static_cast<const base_struct_type *>(tp.extended());
+    const base_struct_type *fsd = tp.tcast<base_struct_type>();
     size_t field_count = fsd->get_field_count();
     const string *field_names = fsd->get_field_names();
     const ndt::type *field_types = fsd->get_field_types();
@@ -535,7 +558,7 @@ static void parse_jsonstring_json(const ndt::type& tp, const char *metadata, cha
 {
     const char *saved_begin = skip_whitespace(begin, end);
     skip_json_value(begin, end);
-    const base_string_type *bsd = static_cast<const base_string_type *>(tp.extended());
+    const base_string_type *bsd = tp.tcast<base_string_type>();
     // The skipped JSON value gets copied verbatim into the json string
     bsd->set_utf8_string(metadata, out_data, assign_error_none,
             saved_begin, begin);
@@ -547,7 +570,7 @@ static void parse_string_json(const ndt::type& tp, const char *metadata, char *o
     const char *saved_begin = begin;
     string val;
     if (parse_json_string(begin, end, val)) {
-        const base_string_type *bsd = static_cast<const base_string_type *>(tp.extended());
+        const base_string_type *bsd = tp.tcast<base_string_type>();
         try {
             bsd->set_utf8_string(metadata, out_data, assign_error_fractional, val);
         } catch (const std::exception& e) {
@@ -565,7 +588,7 @@ static void parse_datetime_json(const ndt::type& tp, const char *metadata, char 
     string val;
     if (parse_json_string(begin, end, val)) {
         if (tp.get_type_id() == date_type_id) {
-            const date_type *dd = static_cast<const date_type *>(tp.extended());
+            const date_type *dd = tp.tcast<date_type>();
             try {
                 dd->set_utf8_string(metadata, out_data, assign_error_fractional, val, ectx);
             } catch (const std::exception& e) {
@@ -583,6 +606,9 @@ static void parse_uniform_dim_json(const ndt::type& tp, const char *metadata, ch
     switch (tp.get_type_id()) {
         case fixed_dim_type_id:
             parse_fixed_dim_json(tp, metadata, out_data, begin, end, ectx);
+            break;
+        case cfixed_dim_type_id:
+            parse_cfixed_dim_json(tp, metadata, out_data, begin, end, ectx);
             break;
         case var_dim_type_id:
             parse_var_dim_json(tp, metadata, out_data, begin, end, ectx);
@@ -756,17 +782,11 @@ nd::array dynd::parse_json(const ndt::type &tp, const char *json_begin,
                            const char *json_end, const eval::eval_context *ectx)
 {
     nd::array result;
-    if (tp.get_data_size() != 0) {
-        result = nd::empty(tp);
-        parse_json(result, json_begin, json_end, ectx);
-        if (!tp.is_builtin()) {
-            tp.extended()->metadata_finalize_buffers(result.get_ndo_meta());
-        }
-        result.flag_as_immutable();
-        return result;
-    } else {
-        stringstream ss;
-        ss << "The dynd type provided to parse_json, " << tp << ", cannot be used because it requires additional shape information";
-        throw runtime_error(ss.str());
+    result = nd::empty(tp);
+    parse_json(result, json_begin, json_end, ectx);
+    if (!tp.is_builtin()) {
+        tp.extended()->metadata_finalize_buffers(result.get_ndo_meta());
     }
+    result.flag_as_immutable();
+    return result;
 }
