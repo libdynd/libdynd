@@ -54,8 +54,8 @@ static intptr_t instantiate_lifted_expr_ckernel_deferred_data(
 } // anonymous namespace
 
 void dynd::lift_ckernel_deferred(ckernel_deferred *out_ckd,
-                const nd::array& ckd_arr,
-                const std::vector<ndt::type>& lifted_types)
+                                 const nd::array &ckd_arr,
+                                 const std::vector<ndt::type> &lifted_types)
 {
     // Validate the input ckernel_deferred
     if (ckd_arr.get_type().get_type_id() != ckernel_deferred_type_id) {

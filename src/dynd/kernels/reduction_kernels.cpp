@@ -4,6 +4,10 @@
 //
 
 #include <dynd/kernels/reduction_kernels.hpp>
+#include <dynd/array.hpp>
+#include <dynd/types/ckernel_deferred_type.hpp>
+#include <dynd/types/strided_dim_type.hpp>
+#include <dynd/kernels/lift_reduction_ckernel_deferred.hpp>
 
 using namespace std;
 using namespace dynd;
@@ -156,4 +160,19 @@ void kernels::make_builtin_sum_reduction_ckernel_deferred(
     out_ckd->data_ptr = reinterpret_cast<void *>(tid);
     out_ckd->instantiate_func = &instantiate_builtin_sum_reduction_ckernel_deferred;
     out_ckd->free_func = NULL;
+}
+
+nd::array kernels::make_builtin_sum1d_ckernel_deferred(type_id_t tid)
+{
+    nd::array sum_ew = nd::empty(ndt::make_ckernel_deferred());
+    kernels::make_builtin_sum_reduction_ckernel_deferred(
+        reinterpret_cast<ckernel_deferred *>(sum_ew.get_readwrite_originptr()),
+        tid);
+    nd::array sum_1d = nd::empty(ndt::make_ckernel_deferred());
+    bool reduction_dimflags[1] = {true};
+    lift_reduction_ckernel_deferred(
+        reinterpret_cast<ckernel_deferred *>(sum_1d.get_readwrite_originptr()),
+        sum_ew, ndt::make_strided_dim(ndt::type(tid)), nd::array(), false, 1,
+        reduction_dimflags, true, true, false, 0);
+    return sum_1d;
 }

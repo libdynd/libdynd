@@ -61,6 +61,7 @@ set(tests_SRC
     gfunc/test_callable.cpp
     gfunc/test_ckernel_deferred.cpp
     gfunc/test_reduction.cpp
+    gfunc/test_rolling.cpp
     array/test_array.cpp
     array/test_array_range.cpp
     array/test_array_assign.cpp

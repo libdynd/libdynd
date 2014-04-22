@@ -6,7 +6,9 @@
 #include <dynd/kernels/assignment_kernels.hpp>
 #include <dynd/kernels/rolling_ckernel_deferred.hpp>
 #include <dynd/kernels/ckernel_common_functions.hpp>
+#include <dynd/types/strided_dim_type.hpp>
 #include <dynd/types/var_dim_type.hpp>
+#include <dynd/arrmeta_holder.hpp>
 
 using namespace std;
 using namespace dynd;
@@ -16,6 +18,7 @@ struct strided_rolling_ck : public kernels::assignment_ck<strided_rolling_ck> {
     intptr_t m_window_size;
     intptr_t m_dim_size, m_dst_stride, m_src_stride;
     size_t m_window_op_offset;
+    arrmeta_holder m_src_winop_meta;
 
     inline void single(char *dst, const char *src)
     {
@@ -24,7 +27,7 @@ struct strided_rolling_ck : public kernels::assignment_ck<strided_rolling_ck> {
         unary_strided_operation_t nachild_fn =
                      nachild->get_function<unary_strided_operation_t>();
         unary_strided_operation_t wopchild_fn =
-                     nachild->get_function<unary_strided_operation_t>();
+                     wopchild->get_function<unary_strided_operation_t>();
         // Fill in NA/NaN at the beginning
         if (m_dim_size > 0) {
             nachild_fn(dst, m_dst_stride, NULL, 0,
@@ -61,7 +64,7 @@ struct var_rolling_ck : public kernels::assignment_ck<strided_rolling_ck> {
         unary_strided_operation_t nachild_fn =
                      nachild->get_function<unary_strided_operation_t>();
         unary_strided_operation_t wopchild_fn =
-                     nachild->get_function<unary_strided_operation_t>();
+                     wopchild->get_function<unary_strided_operation_t>();
         // Get pointers to the src and dst data
         var_dim_type_data *dst_dat = reinterpret_cast<var_dim_type_data *>(dst);
         intptr_t dst_stride =
@@ -101,12 +104,15 @@ struct rolling_ckernel_deferred_data {
     // Pointer to the child ckernel_deferred
     const ckernel_deferred *window_op_ckd;
     // Reference to the array containing it
-    memory_block_data *window_op_ckd_arr;
-    // The types of the child ckernel and this one
-    const ndt::type *window_op_data_types;
+    nd::array window_op_ckd_arr;
+    // The types of the ckernel
     ndt::type data_types[2];
 };
 
+
+static void free_rolling_ckernel_deferred_data(void *data_ptr) {
+    delete reinterpret_cast<rolling_ckernel_deferred_data *>(data_ptr);
+}
 } // anonymous namespace
 
 
@@ -157,12 +163,96 @@ instantiate_strided(void *self_data_ptr, dynd::ckernel_builder *ckb,
     self = ckb->get_at<self_type>(ckb_offset);
     // Create the window op child ckernel
     self->m_window_op_offset = ckb_end;
-    ckd_data->window_op_ckd->instantiate_func(ckd_data->window_op_ckd->data_ptr, ckb, ckb_end, )
+    if (dst_el_tp != ckd_data->window_op_ckd->data_dynd_types[0]) {
+        stringstream ss;
+        ss << "rolling window ckernel: unexpected window op dest type "
+           << ckd_data->window_op_ckd->data_dynd_types[0] << ", expected type "
+           << dst_el_tp;
+        throw type_error(ss.str());
+    }
+    // We construct array metadata for the window op ckernel to use,
+    // without actually creating an nd::array to hold it.
+    arrmeta_holder(ndt::make_strided_dim(src_el_tp))
+        .swap(self->m_src_winop_meta);
+    if (self->m_src_winop_meta.get_type() != ckd_data->window_op_ckd->data_dynd_types[1]) {
+        stringstream ss;
+        ss << "rolling window ckernel: unexpected window op source type "
+           << ckd_data->window_op_ckd->data_dynd_types[1] << ", expected type "
+           << self->m_src_winop_meta.get_type();
+        throw type_error(ss.str());
+    }
+    self->m_src_winop_meta.get_at<strided_dim_type_metadata>(0)->size =
+        self->m_window_size;
+    self->m_src_winop_meta.get_at<strided_dim_type_metadata>(0)->stride =
+        self->m_src_stride;
+    if (src_el_tp.get_metadata_size() > 0) {
+        src_el_tp.extended()->metadata_copy_construct(
+            self->m_src_winop_meta.get() + sizeof(strided_dim_type_metadata),
+            src_el_meta, NULL);
+    }
+    const char *window_op_meta[2] = {dst_el_meta, self->m_src_winop_meta.get()};
+
+    // Allow expr ckernels as well as unary via an adapter
+    if (ckd_data->window_op_ckd->ckernel_funcproto != unary_operation_funcproto) {
+        if (ckd_data->window_op_ckd->ckernel_funcproto == expr_operation_funcproto) {
+            ckb_end = kernels::wrap_expr_as_unary_ckernel(
+                ckb, ckb_end, kernel_request_strided);
+        } else {
+            stringstream ss;
+            ss << "rolling window ckernel: invalid funcproto "
+               << (deferred_ckernel_funcproto_t)
+                  ckd_data->window_op_ckd->ckernel_funcproto
+               << " in window_op ckernel";
+            throw runtime_error(ss.str());
+        }
+    }
+    return ckd_data->window_op_ckd->instantiate_func(
+        ckd_data->window_op_ckd->data_ptr, ckb, ckb_end, window_op_meta,
+        kernel_request_strided, ectx);
 }
 
-void make_rolling_ckernel_deferred(ckernel_deferred *out_ckd,
-                                   const ndt::type &dst_tp,
-                                   const ndt::type &src_tp,
-                                   const nd::array &window_op, int window_size)
+void dynd::make_rolling_ckernel_deferred(ckernel_deferred *out_ckd,
+                                         const ndt::type &dst_tp,
+                                         const ndt::type &src_tp,
+                                         const nd::array &window_op,
+                                         int window_size)
 {
+    // Validate the input ckernel_deferred
+    if (window_op.get_type().get_type_id() != ckernel_deferred_type_id) {
+        stringstream ss;
+        ss << "make_rolling_ckernel_deferred() 'window_op' must have type "
+           << "ckernel_deferred, not " << window_op.get_type();
+        throw runtime_error(ss.str());
+    }
+    const ckernel_deferred *window_op_ckd =
+        reinterpret_cast<const ckernel_deferred *>(
+            window_op.get_readonly_originptr());
+    if (window_op_ckd->instantiate_func == NULL) {
+        throw runtime_error("make_rolling_ckernel_deferred() 'window_op' must contain "
+                            "a non-null ckernel_deferred object");
+    }
+    if (window_op_ckd->data_types_size != 2) {
+        throw runtime_error("make_rolling_ckernel_deferred() 'window_op' must contain "
+                            "a unary ckernel_deferred object");
+    }
+
+    // Create the data for the ckernel_deferred
+    rolling_ckernel_deferred_data *data = new rolling_ckernel_deferred_data;
+    out_ckd->data_ptr = data;
+    out_ckd->free_func = &free_rolling_ckernel_deferred_data;
+    out_ckd->ckernel_funcproto = unary_operation_funcproto;
+    out_ckd->data_dynd_types = data->data_types;
+    out_ckd->data_types_size = 2;
+    if (dst_tp.get_type_id() == var_dim_type_id && src_tp.get_type_id() == var_dim_type_id) {
+        //out_ckd->instantiate_func = &instantiate_var;
+        delete data;
+        throw runtime_error("TODO: rolling ckernel var");
+    } else {
+        out_ckd->instantiate_func = &instantiate_strided;
+    }
+    data->window_size = window_size;
+    data->window_op_ckd = window_op_ckd;
+    data->window_op_ckd_arr = window_op;
+    data->data_types[0] = dst_tp;
+    data->data_types[1] = src_tp;
 }
