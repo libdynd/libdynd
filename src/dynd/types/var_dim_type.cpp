@@ -690,7 +690,12 @@ void ndt::var_dim_element_initialize(const type& tp,
     const var_dim_type_metadata *md = reinterpret_cast<const var_dim_type_metadata *>(metadata);
     var_dim_type_data *d = reinterpret_cast<var_dim_type_data *>(data);
     if (d->begin != NULL) {
-        throw runtime_error("internal error: var_dim element data must be NULL to initialize");
+        throw runtime_error(
+            "internal error: var_dim element data must be NULL to initialize");
+    }
+    if (md->offset != 0) {
+        throw runtime_error("internal error: var_dim metadata offset must be "
+                            "zero to initialize");
     }
     // Allocate the element
     memory_block_data *memblock = md->blockref;
