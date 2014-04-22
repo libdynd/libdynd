@@ -31,8 +31,15 @@ void make_builtin_sum_reduction_ckernel_deferred(
 
 /**
  * Makes a 1D sum ckernel_deferred.
+ * (strided * <tid>) -> <tid>
  */
 nd::array make_builtin_sum1d_ckernel_deferred(type_id_t tid);
+
+/**
+ * Makes a 1D mean ckernel_deferred.
+ * (strided * <tid>) -> <tid>
+ */
+nd::array make_builtin_mean1d_ckernel_deferred(type_id_t tid, intptr_t minp);
 
 }} // namespace dynd::kernels
 

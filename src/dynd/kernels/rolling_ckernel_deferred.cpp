@@ -215,7 +215,7 @@ void dynd::make_rolling_ckernel_deferred(ckernel_deferred *out_ckd,
                                          const ndt::type &dst_tp,
                                          const ndt::type &src_tp,
                                          const nd::array &window_op,
-                                         int window_size)
+                                         intptr_t window_size)
 {
     // Validate the input ckernel_deferred
     if (window_op.get_type().get_type_id() != ckernel_deferred_type_id) {
