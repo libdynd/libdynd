@@ -156,6 +156,7 @@ enum type_id_t {
     // The number of built-in, atomic types (including uninitialized and void)
     builtin_type_id_count = 19
 };
+#define DYND_BUILTIN_TYPE_ID_COUNT 19
 
 enum type_flags_t {
     // A symbolic name instead of just "0"

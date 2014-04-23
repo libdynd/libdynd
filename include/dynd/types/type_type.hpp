@@ -50,9 +50,7 @@ public:
 };
 
 namespace ndt {
-    inline ndt::type make_type() {
-        return ndt::type(new type_type(), false);
-    }
+    ndt::type make_type();
 } // namespace ndt
 
 } // namespace dynd

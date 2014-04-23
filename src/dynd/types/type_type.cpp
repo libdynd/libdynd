@@ -206,3 +206,13 @@ size_t type_type::make_assignment_kernel(
     ss << "Cannot assign from " << src_tp << " to " << dst_tp;
     throw dynd::type_error(ss.str());
 }
+
+ndt::type ndt::make_type()
+{
+    // Static instance of type_type, which has a reference count > 0 for the
+    // lifetime of the program. This static construction is inside a
+    // function to ensure correct creation order during startup.
+    static type_type stt;
+    const ndt::type static_instance(&stt, true);
+    return static_instance;
+}
