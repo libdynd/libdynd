@@ -4,6 +4,13 @@ Expression ckernels accept multiple input
 memory addresses as an input, and write to a
 single memory address, with no state
 shared between multiple calls of the ckernel.
+
+A simple example of this is an addition ckernel,
+with a signature like "(int32, int32) -> int32".
+This ckernel would expect the ``src`` and ``src_stride``
+parameters to be arrays of size two, and all the
+data pointers to point to ``int32_t`` values.
+
 The function pointer for such a ckernel
 looks like this:
 
