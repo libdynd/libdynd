@@ -1,5 +1,4 @@
-Blaze/DyND CKernels
-===================
+﻿# Blaze/DyND CKernels
 
 The initial versions of DyND began with an iterator approach,
 similar to nditer in NumPy. With the addition of the variable-sized
@@ -8,7 +7,11 @@ cleanly to handle broadcasting and other operations on 'var' dimensions
 nicely. The solution was to define a new kernel mechanism, which
 is described here.
 
-See also the [Multi-dimensional kernel documentation](multidim_kernels.md).
+* [Assignment CKernels](assign_ckernels.md)
+* [Expression CKernels](expr_ckernels.md)
+* [Comparison CKernels](compare_ckernels.md)
+* [Accumulator CKernels](accum_ckernels.md)
+* [Multi-dimensional kernel documentation](multidim_kernels.md)
 
 Headers and implementation for kernels are in the 'dynd/kernels'
 subdirectories.
@@ -22,8 +25,8 @@ for chaining the execution of other kernels. Supporting this properly
 will likely require a significant change to the interface, for example
 the kernels might receive a 'temporary space' buffer as another argument.
 
-Kernel Basics
--------------
+CKernel Basics
+--------------
 
     include/dynd/kernels/ckernel_builders.hpp
     include/dynd/kernels/assignment_kernels.hpp

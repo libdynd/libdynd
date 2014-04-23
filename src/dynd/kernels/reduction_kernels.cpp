@@ -4,6 +4,10 @@
 //
 
 #include <dynd/kernels/reduction_kernels.hpp>
+#include <dynd/array.hpp>
+#include <dynd/types/ckernel_deferred_type.hpp>
+#include <dynd/types/strided_dim_type.hpp>
+#include <dynd/kernels/lift_reduction_ckernel_deferred.hpp>
 
 using namespace std;
 using namespace dynd;
@@ -156,4 +160,104 @@ void kernels::make_builtin_sum_reduction_ckernel_deferred(
     out_ckd->data_ptr = reinterpret_cast<void *>(tid);
     out_ckd->instantiate_func = &instantiate_builtin_sum_reduction_ckernel_deferred;
     out_ckd->free_func = NULL;
+}
+
+nd::array kernels::make_builtin_sum1d_ckernel_deferred(type_id_t tid)
+{
+    nd::array sum_ew = nd::empty(ndt::make_ckernel_deferred());
+    kernels::make_builtin_sum_reduction_ckernel_deferred(
+        reinterpret_cast<ckernel_deferred *>(sum_ew.get_readwrite_originptr()),
+        tid);
+    nd::array sum_1d = nd::empty(ndt::make_ckernel_deferred());
+    bool reduction_dimflags[1] = {true};
+    lift_reduction_ckernel_deferred(
+        reinterpret_cast<ckernel_deferred *>(sum_1d.get_readwrite_originptr()),
+        sum_ew, ndt::make_strided_dim(ndt::type(tid)), nd::array(), false, 1,
+        reduction_dimflags, true, true, false, 0);
+    return sum_1d;
+}
+
+namespace {
+    struct double_mean1d_ck : public kernels::assignment_ck<double_mean1d_ck> {
+        intptr_t m_minp;
+        intptr_t m_src_dim_size, m_src_stride;
+
+        inline void single(char *dst, const char *src)
+        {
+            intptr_t minp = m_minp, countp = 0;
+            intptr_t src_dim_size = m_src_dim_size, src_stride = m_src_stride;
+            double result = 0;
+            for (intptr_t i = 0; i < src_dim_size; ++i) {
+                double v = *reinterpret_cast<const double *>(src);
+                if (!DYND_ISNAN(v)) {
+                    result += v;
+                    ++countp;
+                }
+                src += src_stride;
+            }
+            if (countp >= minp) {
+                *reinterpret_cast<double *>(dst) = result / countp;
+            } else {
+                *reinterpret_cast<double *>(dst) = numeric_limits<double>::quiet_NaN();
+            }
+        }
+    };
+
+    struct mean1d_ckernel_deferred_data {
+        ndt::type data_types[2];
+        intptr_t minp;
+
+        static void free(void *data_ptr) {
+            delete reinterpret_cast<mean1d_ckernel_deferred_data *>(data_ptr);
+        }
+
+        static intptr_t instantiate(
+            void *self_data_ptr, dynd::ckernel_builder *ckb,
+            intptr_t ckb_offset, const char *const *dynd_metadata,
+            uint32_t kernreq, const eval::eval_context *DYND_UNUSED(ectx))
+        {
+            typedef double_mean1d_ck self_type;
+            mean1d_ckernel_deferred_data *data =
+                reinterpret_cast<mean1d_ckernel_deferred_data *>(self_data_ptr);
+            self_type *self = self_type::create_leaf(ckb, ckb_offset,
+                                                     (kernel_request_t)kernreq);
+            const strided_dim_type_metadata *src_md =
+                reinterpret_cast<const strided_dim_type_metadata *>(
+                    dynd_metadata[1]);
+            self->m_minp = data->minp;
+            if (self->m_minp <= 0) {
+                if (self->m_minp <= -src_md->size) {
+                    throw invalid_argument("minp parameter is too large of a negative number");
+                }
+                self->m_minp += src_md->size;
+            }
+            self->m_src_dim_size = src_md->size;
+            self->m_src_stride = src_md->stride;
+            return ckb_offset + sizeof(self_type);
+        }
+    };
+} // anonymous namespace
+
+nd::array kernels::make_builtin_mean1d_ckernel_deferred(type_id_t tid, intptr_t minp)
+{
+    if (tid != float64_type_id) {
+        stringstream ss;
+        ss << "make_builtin_mean1d_ckernel_deferred: data type ";
+        ss << ndt::type(tid) << " is not supported";
+        throw type_error(ss.str());
+    }
+    nd::array mean1d = nd::empty(ndt::make_ckernel_deferred());
+    ckernel_deferred *out_ckd =
+        reinterpret_cast<ckernel_deferred *>(mean1d.get_readwrite_originptr());
+    out_ckd->ckernel_funcproto = unary_operation_funcproto;
+    out_ckd->data_types_size = 2;
+    mean1d_ckernel_deferred_data *data = new mean1d_ckernel_deferred_data;
+    data->data_types[0] = ndt::make_type<double>();
+    data->data_types[1] = ndt::make_strided_dim(ndt::make_type<double>());
+    data->minp = minp;
+    out_ckd->data_dynd_types = data->data_types;
+    out_ckd->data_ptr = data;
+    out_ckd->instantiate_func = &mean1d_ckernel_deferred_data::instantiate;
+    out_ckd->free_func = &mean1d_ckernel_deferred_data::free;
+    return mean1d;
 }

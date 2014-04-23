@@ -38,6 +38,25 @@ void unary_as_expr_adapter_strided_ckernel(
                 size_t count, ckernel_prefix *ckp);
 
 /**
+ * A unary single ckernel function which adapts a child
+ * expr single ckernel. The child expr single ckernel
+ * must itself be unary as well.
+ */
+void expr_as_unary_adapter_single_ckernel(
+                char *dst, const char *src,
+                ckernel_prefix *ckp);
+
+/**
+ * A unary strided ckernel function which adapts a child
+ * expr strided ckernel. The child expr single ckernel
+ * must itself be unary as well.
+ */
+void expr_as_unary_adapter_strided_ckernel(
+                char *dst, intptr_t dst_stride,
+                const char *src, intptr_t src_stride,
+                size_t count, ckernel_prefix *ckp);
+
+/**
  * Makes a ckernel that ignores the src values, and writes
  * constant values to the output.
  *
@@ -53,9 +72,20 @@ size_t make_constant_value_assignment_ckernel(
  *
  * \returns  The ckb_offset where the child ckernel should be placed.
  */
-intptr_t wrap_unary_as_expr_ckernel(
-                dynd::ckernel_builder *out_ckb, intptr_t ckb_offset,
-                kernel_request_t kerntype);
+intptr_t wrap_unary_as_expr_ckernel(dynd::ckernel_builder *out_ckb,
+                                    intptr_t ckb_offset,
+                                    kernel_request_t kerntype);
+
+/**
+ * Adds an adapter ckernel which wraps a child expr ckernel
+ * as a unary ckernel. The child expr single ckernel
+ * must itself be unary as well.
+ *
+ * \returns  The ckb_offset where the child ckernel should be placed.
+ */
+intptr_t wrap_expr_as_unary_ckernel(dynd::ckernel_builder *ckb,
+                                    intptr_t ckb_offset,
+                                    kernel_request_t kerntype);
 
 /**
  * Adds an adapter ckernel which wraps a child binary expr ckernel

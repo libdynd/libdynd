@@ -310,6 +310,7 @@ set(libdynd_SRC
     src/dynd/kernels/make_lifted_ckernel.cpp
     src/dynd/kernels/make_lifted_reduction_ckernel.cpp
     src/dynd/kernels/reduction_kernels.cpp
+    src/dynd/kernels/rolling_ckernel_deferred.cpp
     src/dynd/kernels/string_assignment_kernels.cpp
     src/dynd/kernels/string_algorithm_kernels.cpp
     src/dynd/kernels/string_numeric_assignment_kernels.cpp
@@ -347,6 +348,7 @@ set(libdynd_SRC
     include/dynd/kernels/make_lifted_ckernel.hpp
     include/dynd/kernels/make_lifted_reduction_ckernel.hpp
     include/dynd/kernels/reduction_kernels.hpp
+    include/dynd/kernels/rolling_ckernel_deferred.hpp
     include/dynd/kernels/string_assignment_kernels.hpp
     include/dynd/kernels/string_algorithm_kernels.hpp
     include/dynd/kernels/string_numeric_assignment_kernels.hpp
