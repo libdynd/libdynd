@@ -11,6 +11,8 @@
 #include "inc_gtest.hpp"
 #include "../test_memory.hpp"
 
+#include <dynd/types/bytes_type.hpp>
+#include <dynd/types/var_dim_type.hpp>
 #include <dynd/json_parser.hpp>
 #include <dynd/view.hpp>
 
@@ -135,4 +137,65 @@ TEST(View, Errors) {
     EXPECT_THROW(nd::view(a, ndt::type("6 * 3 * int32")), type_error);
     // DType mismatches
     EXPECT_THROW(nd::view(a, ndt::type("5 * 3 * uint32")), type_error);
+}
+
+TEST(View, AsBytes) {
+    nd::array a, b;
+    const bytes_type_metadata *btd_meta;
+    const bytes_type_data *btd;
+
+    // View a scalar as bytes
+    a = (int32_t)100;
+    b = nd::view(a, ndt::make_bytes(4));
+    ASSERT_EQ(b.get_type(), ndt::make_bytes(4));
+    // Confirm the bytes metadata points to the right data reference
+    btd_meta = reinterpret_cast<const bytes_type_metadata *>(b.get_ndo_meta());
+    EXPECT_EQ(btd_meta->blockref, a.get_data_memblock().get());
+    // Confirm it's pointing to the right memory with the right size
+    btd = reinterpret_cast<const bytes_type_data *>(b.get_readonly_originptr());
+    EXPECT_EQ(a.get_readonly_originptr(), btd->begin);
+    EXPECT_EQ(4, btd->end - btd->begin);
+
+    // View a 1D array as bytes
+    double a_data[2] = {1, 2};
+    a = a_data;
+    b = nd::view(a, ndt::make_bytes(1));
+    ASSERT_EQ(b.get_type(), ndt::make_bytes(1));
+    // Confirm the bytes metadata points to the right data reference
+    btd_meta = reinterpret_cast<const bytes_type_metadata *>(b.get_ndo_meta());
+    EXPECT_EQ(btd_meta->blockref, a.get_data_memblock().get());
+    // Confirm it's pointing to the right memory with the right size
+    btd = reinterpret_cast<const bytes_type_data *>(b.get_readonly_originptr());
+    EXPECT_EQ(a.get_readonly_originptr(), btd->begin);
+    EXPECT_EQ(2*8, btd->end - btd->begin);
+
+    // View a 2D array as bytes
+    double a_data2[2][3] = {{1, 2, 3}, {1, 2, 5}};
+    a = a_data2;
+    b = nd::view(a, ndt::make_bytes(2));
+    ASSERT_EQ(b.get_type(), ndt::make_bytes(2));
+    // Confirm the bytes metadata points to the right data reference
+    btd_meta = reinterpret_cast<const bytes_type_metadata *>(b.get_ndo_meta());
+    EXPECT_EQ(btd_meta->blockref, a.get_data_memblock().get());
+    // Confirm it's pointing to the right memory with the right size
+    btd = reinterpret_cast<const bytes_type_data *>(b.get_readonly_originptr());
+    EXPECT_EQ(a.get_readonly_originptr(), btd->begin);
+    EXPECT_EQ(2*3*8, btd->end - btd->begin);
+    EXPECT_THROW(nd::view(a(irange(), irange(0, 2)), ndt::make_bytes(1)), type_error);
+
+    // View an array with var outer dimension
+    a = parse_json("var * 2 * int16", "[[1, 2], [3, 4], [5, 6]]");
+    b = nd::view(a, ndt::make_bytes(1));
+    ASSERT_EQ(b.get_type(), ndt::make_bytes(1));
+    // Confirm the bytes metadata points to the right data reference
+    btd_meta = reinterpret_cast<const bytes_type_metadata *>(b.get_ndo_meta());
+    const var_dim_type_metadata *vdt_meta =
+        reinterpret_cast<const var_dim_type_metadata *>(a.get_ndo_meta());
+    EXPECT_EQ(btd_meta->blockref, vdt_meta->blockref);
+    // Confirm it's pointing to the right memory with the right size
+    const var_dim_type_data *vdt_data =
+        reinterpret_cast<const var_dim_type_data *>(a.get_readonly_originptr());
+    btd = reinterpret_cast<const bytes_type_data *>(b.get_readonly_originptr());
+    EXPECT_EQ(vdt_data->begin, btd->begin);
+    EXPECT_EQ(2*3*2, btd->end - btd->begin);
 }
