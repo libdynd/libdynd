@@ -334,7 +334,7 @@ static void refine_bytes_view(memory_block_ptr &data_ref, char *&data_ptr,
             data_dim_size = data_tp_size;
             data_stride = 1;
             return;
-        } else if (data_tp_size == data_stride) {
+        } else if ((intptr_t)data_tp_size == data_stride) {
             data_tp = ndt::type();
             data_dim_size *= data_tp_size;
             data_stride = 1;
@@ -394,6 +394,80 @@ static nd::array view_as_bytes(const nd::array& arr, const ndt::type& tp)
     return result;
 }
 
+static nd::array view_from_bytes(const nd::array &arr, const ndt::type &tp)
+{
+    if (tp.get_flags() & (type_flag_blockref | type_flag_destructor |
+                          type_flag_not_host_readable)) {
+        // Bytes cannot be viewed as blockref types, types which require
+        // destruction, or types not on host memory.
+        return nd::array();
+    }
+
+    const bytes_type_metadata *bytes_meta =
+        reinterpret_cast<const bytes_type_metadata *>(arr.get_ndo_meta());
+    bytes_type_data *bytes_d =
+        reinterpret_cast<bytes_type_data *>(arr.get_ndo()->m_data_pointer);
+    memory_block_ptr data_ref;
+    if (bytes_meta->blockref != NULL) {
+        data_ref = bytes_meta->blockref;
+    } else {
+        data_ref = arr.get_data_memblock();
+    }
+    char *data_ptr = bytes_d->begin;
+    intptr_t data_size = bytes_d->end - data_ptr;
+
+    size_t tp_data_size = tp.get_data_size();
+    if (tp_data_size > 0) {
+        // If the data type has a single chunk of POD memory, it's ok
+        if ((intptr_t)tp_data_size == data_size &&
+                offset_is_aligned(reinterpret_cast<size_t>(data_ptr),
+                                  tp.get_data_alignment())) {
+            // Allocate a result array to attempt the view in it
+            nd::array result(make_array_memory_block(tp.get_metadata_size()));
+            // Initialize the fields
+            result.get_ndo()->m_data_pointer = data_ptr;
+            result.get_ndo()->m_data_reference = data_ref.release();
+            result.get_ndo()->m_type = ndt::type(tp).release();
+            result.get_ndo()->m_flags = arr.get_ndo()->m_flags;
+            if (tp.get_metadata_size() > 0) {
+                tp.extended()->metadata_default_construct(result.get_ndo_meta(),
+                                                          0, NULL);
+            }
+            return result;
+        }
+    } else if (tp.get_type_id() == strided_dim_type_id) {
+        ndt::type el_tp = tp.tcast<strided_dim_type>()->get_element_type();
+        size_t el_data_size = el_tp.get_data_size();
+        // If the element type has a single chunk of POD memory, and
+        // it divides into the memory size, it's ok
+        if (data_size % (intptr_t)el_data_size == 0 &&
+                offset_is_aligned(reinterpret_cast<size_t>(data_ptr),
+                                  tp.get_data_alignment())) {
+            // Allocate a result array to attempt the view in it
+            nd::array result(make_array_memory_block(tp.get_metadata_size()));
+            // Initialize the fields
+            result.get_ndo()->m_data_pointer = data_ptr;
+            result.get_ndo()->m_data_reference = data_ref.release();
+            result.get_ndo()->m_type = ndt::type(tp).release();
+            result.get_ndo()->m_flags = arr.get_ndo()->m_flags;
+            if (el_tp.get_metadata_size() > 0) {
+                el_tp.extended()->metadata_default_construct(
+                    result.get_ndo_meta() + sizeof(strided_dim_type_metadata),
+                    0, NULL);
+            }
+            strided_dim_type_metadata *strided_meta =
+                reinterpret_cast<strided_dim_type_metadata *>(
+                    result.get_ndo_meta());
+            strided_meta->size = data_size / el_data_size;
+            strided_meta->stride = el_data_size;
+            return result;
+        }
+    }
+
+    // No view could be produced
+    return nd::array();
+}
+
 nd::array nd::view(const nd::array& arr, const ndt::type& tp)
 {
     if (arr.get_type() == tp) {
@@ -405,7 +479,12 @@ nd::array nd::view(const nd::array& arr, const ndt::type& tp)
         if (!result.is_empty()) {
             return result;
         }
-        // Otherwise fall through to error message
+    } else if (arr.get_type().get_type_id() == bytes_type_id) {
+        // If it's a request to view raw bytes as something else
+        nd::array result = view_from_bytes(arr, tp);
+        if (!result.is_empty()) {
+            return result;
+        }
     } else if (arr.get_ndim() == tp.get_ndim()) {
         // Allocate a result array to attempt the view in it
         nd::array result(make_array_memory_block(tp.get_metadata_size()));

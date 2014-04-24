@@ -199,3 +199,39 @@ TEST(View, AsBytes) {
     EXPECT_EQ(vdt_data->begin, btd->begin);
     EXPECT_EQ(2*3*2, btd->end - btd->begin);
 }
+
+TEST(View, FromBytes) {
+    nd::array a, b;
+    const bytes_type_metadata *btd_meta;
+    const bytes_type_data *btd;
+
+    double x = 3.25;
+    a = nd::make_bytes_array(reinterpret_cast<const char *>(&x), sizeof(x), 8);
+    ASSERT_EQ(ndt::make_bytes(8), a.get_type());
+    b = nd::view(a, ndt::make_type<double>());
+    EXPECT_EQ(3.25, b.as<double>());
+    btd_meta = reinterpret_cast<const bytes_type_metadata *>(a.get_ndo_meta());
+    btd = reinterpret_cast<const bytes_type_data *>(a.get_readonly_originptr());
+    if (btd_meta->blockref != NULL) {
+        EXPECT_EQ(btd_meta->blockref, b.get_ndo()->m_data_reference);
+    } else {
+        EXPECT_EQ(a.get_data_memblock().get(), b.get_ndo()->m_data_reference);
+    }
+    EXPECT_EQ(btd->begin, b.get_readonly_originptr());
+
+    float y[3] = {1.f, 2.5f, -1.25f};
+    a = nd::make_bytes_array(reinterpret_cast<const char *>(&y), sizeof(y), 4);
+    ASSERT_EQ(ndt::make_bytes(4), a.get_type());
+    b = nd::view(a, ndt::type("strided * float32"));
+    EXPECT_EQ(1.f, b(0).as<float>());
+    EXPECT_EQ(2.5f, b(1).as<float>());
+    EXPECT_EQ(-1.25f, b(2).as<float>());
+    btd_meta = reinterpret_cast<const bytes_type_metadata *>(a.get_ndo_meta());
+    btd = reinterpret_cast<const bytes_type_data *>(a.get_readonly_originptr());
+    if (btd_meta->blockref != NULL) {
+        EXPECT_EQ(btd_meta->blockref, b.get_ndo()->m_data_reference);
+    } else {
+        EXPECT_EQ(a.get_data_memblock().get(), b.get_ndo()->m_data_reference);
+    }
+    EXPECT_EQ(btd->begin, b.get_readonly_originptr());
+}
