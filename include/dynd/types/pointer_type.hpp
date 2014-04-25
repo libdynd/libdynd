@@ -32,7 +32,6 @@ struct pointer_type_metadata {
 
 class pointer_type : public base_expression_type {
     ndt::type m_target_tp;
-    static ndt::type m_void_pointer_type;
 
 public:
     pointer_type(const ndt::type& target_tp);
@@ -42,13 +41,7 @@ public:
     const ndt::type& get_value_type() const {
         return m_target_tp.value_type();
     }
-    const ndt::type& get_operand_type() const {
-        if (m_target_tp.get_type_id() == pointer_type_id) {
-            return m_target_tp;
-        } else {
-            return m_void_pointer_type;
-        }
-    }
+    const ndt::type& get_operand_type() const;
 
     const ndt::type& get_target_type() const {
         return m_target_tp;
@@ -105,16 +98,10 @@ public:
 };
 
 namespace ndt {
-    inline ndt::type make_pointer(const ndt::type& target_tp) {
-        if (target_tp.get_type_id() != void_type_id) {
-            return ndt::type(new pointer_type(target_tp), false);
-        } else {
-            return ndt::type(new void_pointer_type(), false);
-        }
-    }
+    ndt::type make_pointer(const ndt::type& target_tp);
 
     template<typename Tnative>
-    ndt::type make_pointer() {
+    inline ndt::type make_pointer() {
         return make_pointer(ndt::make_type<Tnative>());
     }
 } // namespace ndt

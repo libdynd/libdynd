@@ -254,9 +254,8 @@ nd::array apply_binary_operator(const nd::array *ops,
     ndt::type result_vdt = ndt::make_type(ndim, result_shape.get(), rdt);
 
     // Create the result
-    string field_names[2] = {"arg0", "arg1"};
     nd::array ops_as_dt[2] = {ops[0].ucast(op1dt), ops[1].ucast(op2dt)};
-    nd::array result = combine_into_struct(2, field_names, ops_as_dt);
+    nd::array result = combine_into_tuple(2, ops_as_dt);
     // Because the expr type's operand is the result's type,
     // we can swap it in as the type
     ndt::type edt = ndt::make_expr(result_vdt,

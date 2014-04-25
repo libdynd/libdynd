@@ -142,7 +142,7 @@ ndt::type ctuple_type::get_canonical_type() const
         field_types[i] = m_field_types[i].get_canonical_type();
     }
 
-    return ndt::make_tuple(m_field_types.size(), &field_types[0]);
+    return ndt::make_ctuple(m_field_types.size(), &field_types[0]);
 }
 
 ndt::type ctuple_type::apply_linear_index(intptr_t nindices, const irange *indices,

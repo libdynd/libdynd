@@ -120,16 +120,18 @@ public:
 };
 
 namespace ndt {
-    inline ndt::type make_strided_dim(const ndt::type& element_tp) {
-        return ndt::type(new strided_dim_type(element_tp), false);
-    }
+    ndt::type make_strided_dim(const ndt::type& element_tp);
 
     inline ndt::type make_strided_dim(const ndt::type& uniform_tp, intptr_t ndim) {
-        ndt::type result = uniform_tp;
-        for (intptr_t i = 0; i < ndim; ++i) {
-            result = make_strided_dim(result);
+        if (ndim > 0) {
+            ndt::type result = make_strided_dim(uniform_tp);
+            for (intptr_t i = 1; i < ndim; ++i) {
+                result = make_strided_dim(result);
+            }
+            return result;
+        } else {
+            return uniform_tp;
         }
-        return result;
     }
 } // namespace ndt
 

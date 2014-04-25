@@ -8,6 +8,7 @@
 #include <dynd/types/strided_dim_type.hpp>
 #include <dynd/types/var_dim_type.hpp>
 #include <dynd/types/cfixed_dim_type.hpp>
+#include <dynd/types/ctuple_type.hpp>
 #include <dynd/types/type_alignment.hpp>
 #include <dynd/types/view_type.hpp>
 #include <dynd/types/string_type.hpp>
@@ -1723,8 +1724,7 @@ nd::array nd::groupby(const nd::array& data_values, const nd::array& by_values, 
     return result;
 }
 
-nd::array nd::combine_into_struct(size_t field_count, const std::string *field_names,
-                    const array *field_values)
+nd::array nd::combine_into_tuple(size_t field_count, const array *field_values)
 {
     // Make the pointer types
     vector<ndt::type> field_types(field_count);
@@ -1737,8 +1737,8 @@ nd::array nd::combine_into_struct(size_t field_count, const std::string *field_n
         flags &= field_values[i].get_flags();
     }
 
-    ndt::type result_type = ndt::make_cstruct(field_count, &field_types[0], field_names);
-    const cstruct_type *fsd = result_type.tcast<cstruct_type>();
+    ndt::type result_type = ndt::make_ctuple(field_count, &field_types[0]);
+    const ctuple_type *fsd = result_type.tcast<ctuple_type>();
     char *data_ptr = NULL;
 
     array result(make_array_memory_block(fsd->get_metadata_size(),

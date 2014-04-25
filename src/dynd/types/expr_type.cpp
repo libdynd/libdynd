@@ -5,7 +5,7 @@
 
 #include <dynd/types/expr_type.hpp>
 #include <dynd/shortvector.hpp>
-#include <dynd/types/cstruct_type.hpp>
+#include <dynd/types/ctuple_type.hpp>
 #include <dynd/types/builtin_type_properties.hpp>
 #include <dynd/shape_tools.hpp>
 
@@ -21,13 +21,13 @@ expr_type::expr_type(const ndt::type& value_type, const ndt::type& operand_type,
                     m_value_type(value_type), m_operand_type(operand_type),
                     m_kgen(kgen)
 {
-    if (operand_type.get_type_id() != cstruct_type_id) {
+    if (operand_type.get_type_id() != ctuple_type_id) {
         stringstream ss;
-        ss << "expr_type can only be constructed with a cstruct as its operand, given ";
+        ss << "expr_type can only be constructed with a ctuple as its operand, given ";
         ss << operand_type;
         throw runtime_error(ss.str());
     }
-    const cstruct_type *fsd = operand_type.tcast<cstruct_type>();
+    const ctuple_type *fsd = operand_type.tcast<ctuple_type>();
     size_t field_count = fsd->get_field_count();
     if (field_count == 1) {
         throw runtime_error("expr_type is for 2 or more operands, use unary_expr_type for 1 operand");
@@ -56,7 +56,7 @@ void expr_type::print_data(std::ostream& DYND_UNUSED(o),
 
 void expr_type::print_type(std::ostream& o) const
 {
-    const cstruct_type *fsd = m_operand_type.tcast<cstruct_type>();
+    const ctuple_type *fsd = m_operand_type.tcast<ctuple_type>();
     size_t field_count = fsd->get_field_count();
     const ndt::type *field_types = fsd->get_field_types();
     o << "expr<";
@@ -75,7 +75,7 @@ ndt::type expr_type::apply_linear_index(intptr_t nindices, const irange *indices
 {
     if (m_kgen->is_elwise()) {
         intptr_t undim = get_ndim();
-        const cstruct_type *fsd = m_operand_type.tcast<cstruct_type>();
+        const ctuple_type *fsd = m_operand_type.tcast<ctuple_type>();
         size_t field_count = fsd->get_field_count();
         const ndt::type *field_types = fsd->get_field_types();
 
@@ -95,8 +95,7 @@ ndt::type expr_type::apply_linear_index(intptr_t nindices, const irange *indices
                                                 current_i, root_tp, false);
             }
         }
-        ndt::type result_operand_type = ndt::make_cstruct(field_count, &result_src_dt[0],
-                        fsd->get_field_names());
+        ndt::type result_operand_type = ndt::make_ctuple(field_count, &result_src_dt[0]);
         expr_kernel_generator_incref(m_kgen);
         return ndt::make_expr(result_value_dt, result_operand_type, m_kgen);
     } else {
@@ -114,8 +113,8 @@ intptr_t expr_type::apply_linear_index(intptr_t nindices, const irange *indices,
     if (m_kgen->is_elwise()) {
         intptr_t undim = get_ndim();
         const expr_type *out_ed = result_tp.tcast<expr_type>();
-        const cstruct_type *fsd = m_operand_type.tcast<cstruct_type>();
-        const cstruct_type *out_fsd = static_cast<const cstruct_type *>(out_ed->m_operand_type.extended());
+        const ctuple_type *fsd = m_operand_type.tcast<ctuple_type>();
+        const ctuple_type *out_fsd = static_cast<const ctuple_type *>(out_ed->m_operand_type.extended());
         const size_t *metadata_offsets = fsd->get_metadata_offsets();
         const size_t *out_metadata_offsets = out_fsd->get_metadata_offsets();
         size_t field_count = fsd->get_field_count();
@@ -159,7 +158,7 @@ void expr_type::get_shape(intptr_t ndim, intptr_t i, intptr_t *out_shape,
 
     // Get each operand shape, and broadcast them together
     dimvector shape(undim);
-    const cstruct_type *fsd = m_operand_type.tcast<cstruct_type>();
+    const ctuple_type *fsd = m_operand_type.tcast<ctuple_type>();
     const size_t *metadata_offsets = fsd->get_metadata_offsets();
     size_t field_count = fsd->get_field_count();
     for (size_t fi = 0; fi != field_count; ++fi) {
@@ -324,7 +323,7 @@ size_t expr_type::make_operand_to_value_assignment_kernel(
                 const char *dst_metadata, const char *src_metadata,
                 kernel_request_t kernreq, const eval::eval_context *ectx) const
 {
-    const cstruct_type *fsd = m_operand_type.tcast<cstruct_type>();
+    const ctuple_type *fsd = m_operand_type.tcast<ctuple_type>();
 
     offset_out = make_kernreq_to_single_kernel_adapter(out, offset_out, kernreq);
     size_t input_count = fsd->get_field_count();

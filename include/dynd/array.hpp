@@ -1284,16 +1284,13 @@ array groupby(const array& data_values, const array& by,
                 const ndt::type& groups = ndt::type());
 
 /**
- * Creates a cstruct array with the given field names and
+ * Creates a ctuple nd::array with the given field names and
  * pointers to the provided field values.
  *
  * \param  field_count  The number of fields.
- * \param  field_names  The names of the fields.
  * \param  field_values  The values of the fields.
  */
-array combine_into_struct(size_t field_count, const std::string *field_names,
-                    const array *field_values);
-
+array combine_into_tuple(size_t field_count, const array *field_values);
 }} // namespace dynd::nd
 
 #endif // _DYND__ARRAY_HPP_

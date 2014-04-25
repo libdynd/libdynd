@@ -58,4 +58,3 @@ size_t void_pointer_type::make_assignment_kernel(
     ss << "Cannot assign from " << src_tp << " to " << dst_tp;
     throw dynd::type_error(ss.str());
 }
-

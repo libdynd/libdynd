@@ -182,7 +182,7 @@ ndt::type cstruct_type::get_canonical_type() const
         field_types[i] = m_field_types[i].get_canonical_type();
     }
 
-    return ndt::make_struct(m_field_types.size(), &field_types[0], &m_field_names[0]);
+    return ndt::make_cstruct(m_field_types.size(), &field_types[0], &m_field_names[0]);
 }
 
 ndt::type cstruct_type::apply_linear_index(intptr_t nindices, const irange *indices,

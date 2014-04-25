@@ -143,8 +143,7 @@ static nd::array array_function_find(const nd::array& self, const nd::array& sub
     ndt::type result_vdt = ndt::make_type(ndim, result_shape.get(), rdt);
 
     // Create the result
-    string field_names[2] = {"arg0", "arg1"};
-    nd::array result = combine_into_struct(2, field_names, ops);
+    nd::array result = combine_into_tuple(2, ops);
     expr_operation_pair expr_ops;
     expr_ops.single = &kernels::string_find_kernel::single;
     expr_ops.strided = &kernels::string_find_kernel::strided;

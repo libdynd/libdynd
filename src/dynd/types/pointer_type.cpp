@@ -9,15 +9,12 @@
 #include <dynd/kernels/string_assignment_kernels.hpp>
 #include <dynd/kernels/assignment_kernels.hpp>
 #include <dynd/gfunc/make_callable.hpp>
+#include <dynd/pp/list.hpp>
 
 #include <algorithm>
 
 using namespace std;
 using namespace dynd;
-
-// Static instance of a void pointer to use as the storage of pointer types
-ndt::type pointer_type::m_void_pointer_type(new void_pointer_type(), false);
-
 
 pointer_type::pointer_type(const ndt::type& target_tp)
     : base_expression_type(pointer_type_id, expression_kind, sizeof(void *),
@@ -80,7 +77,7 @@ void pointer_type::transform_child_types(type_transform_fn_t transform_fn, void 
     bool was_transformed = false;
     transform_fn(m_target_tp, extra, tmp_tp, was_transformed);
     if (was_transformed) {
-        out_transformed_tp = ndt::type(new pointer_type(tmp_tp), false);
+        out_transformed_tp = ndt::make_pointer(tmp_tp);
         out_was_transformed = true;
     } else {
         out_transformed_tp = ndt::type(this, true);
@@ -93,6 +90,18 @@ ndt::type pointer_type::get_canonical_type() const
     // The canonical version doesn't include the pointer
     return m_target_tp;
 }
+
+const ndt::type& pointer_type::get_operand_type() const
+{
+    static ndt::type vpt = ndt::make_pointer<void>();
+
+    if (m_target_tp.get_type_id() == pointer_type_id) {
+        return m_target_tp;
+    } else {
+        return vpt;
+    }
+}
+
 
 ndt::type pointer_type::apply_linear_index(intptr_t nindices, const irange *indices,
                 size_t current_i, const ndt::type& root_tp, bool leading_dimension) const
@@ -112,7 +121,7 @@ ndt::type pointer_type::apply_linear_index(intptr_t nindices, const irange *indi
         } else if (dt == m_target_tp) {
             return ndt::type(this, true);
         } else {
-            return ndt::type(new pointer_type(dt), false);
+            return ndt::make_pointer(dt);
         }
     }
 }
@@ -329,3 +338,83 @@ void pointer_type::get_dynamic_type_properties(
     *out_count = sizeof(type_properties) / sizeof(type_properties[0]);
 }
 
+namespace {
+    // TODO: use the PP meta stuff, but DYND_PP_LEN_MAX is set to 8 right now, would need to be 19
+    struct static_pointer {
+        pointer_type bt1;
+        pointer_type bt2;
+        pointer_type bt3;
+        pointer_type bt4;
+        pointer_type bt5;
+        pointer_type bt6;
+        pointer_type bt7;
+        pointer_type bt8;
+        pointer_type bt9;
+        pointer_type bt10;
+        pointer_type bt11;
+        pointer_type bt12;
+        pointer_type bt13;
+        pointer_type bt14;
+        pointer_type bt15;
+        pointer_type bt16;
+        pointer_type bt17;
+        void_pointer_type bt18;
+
+        ndt::type static_builtins_instance[builtin_type_id_count];
+
+        static_pointer()
+            : bt1(ndt::type((type_id_t)1)),
+              bt2(ndt::type((type_id_t)2)),
+              bt3(ndt::type((type_id_t)3)),
+              bt4(ndt::type((type_id_t)4)),
+              bt5(ndt::type((type_id_t)5)),
+              bt6(ndt::type((type_id_t)6)),
+              bt7(ndt::type((type_id_t)7)),
+              bt8(ndt::type((type_id_t)8)),
+              bt9(ndt::type((type_id_t)9)),
+              bt10(ndt::type((type_id_t)10)),
+              bt11(ndt::type((type_id_t)11)),
+              bt12(ndt::type((type_id_t)12)),
+              bt13(ndt::type((type_id_t)13)),
+              bt14(ndt::type((type_id_t)14)),
+              bt15(ndt::type((type_id_t)15)),
+              bt16(ndt::type((type_id_t)16)),
+              bt17(ndt::type((type_id_t)17)),
+              bt18()
+        {
+            static_builtins_instance[1] = ndt::type(&bt1, true);
+            static_builtins_instance[2] = ndt::type(&bt2, true);
+            static_builtins_instance[3] = ndt::type(&bt3, true);
+            static_builtins_instance[4] = ndt::type(&bt4, true);
+            static_builtins_instance[5] = ndt::type(&bt5, true);
+            static_builtins_instance[6] = ndt::type(&bt6, true);
+            static_builtins_instance[7] = ndt::type(&bt7, true);
+            static_builtins_instance[8] = ndt::type(&bt8, true);
+            static_builtins_instance[9] = ndt::type(&bt9, true);
+            static_builtins_instance[10] = ndt::type(&bt10, true);
+            static_builtins_instance[11] = ndt::type(&bt11, true);
+            static_builtins_instance[12] = ndt::type(&bt12, true);
+            static_builtins_instance[13] = ndt::type(&bt13, true);
+            static_builtins_instance[14] = ndt::type(&bt14, true);
+            static_builtins_instance[15] = ndt::type(&bt15, true);
+            static_builtins_instance[16] = ndt::type(&bt16, true);
+            static_builtins_instance[17] = ndt::type(&bt17, true);
+            static_builtins_instance[18] = ndt::type(&bt18, true);
+        }
+    };
+} // anonymous namespace
+
+ndt::type ndt::make_pointer(const ndt::type& target_tp)
+{
+    // Static instance of strided_dim_type, which have a reference
+    // count > 0 for the lifetime of the program. This static
+    // construction is inside a function to ensure correct creation
+    // order during startup.
+    static static_pointer sp;
+
+    if (target_tp.is_builtin()) {
+        return sp.static_builtins_instance[target_tp.get_type_id()];
+    } else {
+        return ndt::type(new pointer_type(target_tp), false);
+    }
+}
