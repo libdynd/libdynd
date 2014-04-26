@@ -317,6 +317,7 @@ set(libdynd_SRC
     src/dynd/kernels/string_comparison_kernels.cpp
     src/dynd/kernels/struct_assignment_kernels.cpp
     src/dynd/kernels/struct_comparison_kernels.cpp
+    src/dynd/kernels/take_ckernel_deferred.cpp
     src/dynd/kernels/time_assignment_kernels.cpp
     src/dynd/kernels/kernels_for_disassembly.cpp
     src/dynd/kernels/single_assigner_builtin.hpp
@@ -355,6 +356,7 @@ set(libdynd_SRC
     include/dynd/kernels/string_comparison_kernels.hpp
     include/dynd/kernels/struct_assignment_kernels.hpp
     include/dynd/kernels/struct_comparison_kernels.hpp
+    include/dynd/kernels/take_ckernel_deferred.hpp
     include/dynd/kernels/time_assignment_kernels.hpp
     # MemBlock
     src/dynd/memblock/memory_block.cpp

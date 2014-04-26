@@ -11,6 +11,7 @@
 #include <dynd/types/type_id.hpp>
 #include <dynd/kernels/assignment_kernels.hpp>
 #include <dynd/eval/eval_context.hpp>
+#include <dynd/kernels/expr_kernels.hpp>
 
 namespace dynd {
 
@@ -18,14 +19,6 @@ namespace ndt {
     class type;
 } // namespace ndt
 class expr_kernel_generator;
-
-typedef void (*expr_single_operation_t)(
-                char *dst, const char * const *src,
-                ckernel_prefix *extra);
-typedef void (*expr_strided_operation_t)(
-                char *dst, intptr_t dst_stride,
-                const char * const *src, const intptr_t *src_stride,
-                size_t count, ckernel_prefix *extra);
 
 struct expr_operation_pair {
     expr_single_operation_t single;
