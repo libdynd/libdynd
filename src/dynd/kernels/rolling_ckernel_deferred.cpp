@@ -35,8 +35,9 @@ struct strided_rolling_ck : public kernels::assignment_ck<strided_rolling_ck> {
         }
         // Use stride trickery to do this as one strided call
         if (m_dim_size >= m_window_size) {
-            wopchild_fn(dst + m_dst_stride * (m_window_size - 1), m_dst_stride, src,
-                        m_src_stride, m_dim_size - m_window_size + 1, wopchild);
+            wopchild_fn(dst + m_dst_stride * (m_window_size - 1), m_dst_stride,
+                        src, m_src_stride, m_dim_size - m_window_size + 1,
+                        wopchild);
         }
     }
 
