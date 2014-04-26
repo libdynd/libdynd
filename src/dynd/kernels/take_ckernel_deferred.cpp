@@ -41,12 +41,12 @@ struct masked_take_ck : public kernels::expr_ck<masked_take_ck, 2> {
         intptr_t i = 0;
         while (i < dim_size) {
             // Run of false
-            for (; *mask == 0 && i < dim_size;
+            for (; i < dim_size && *mask == 0;
                  src0 += src0_stride, mask += mask_stride, ++i) {
             }
             // Run of true
             intptr_t i_saved = i;
-            for (; *mask != 0 && i < dim_size; mask += mask_stride, ++i) {
+            for (; i < dim_size && *mask != 0; mask += mask_stride, ++i) {
             }
             // Copy the run of true
             if (i > i_saved) {
