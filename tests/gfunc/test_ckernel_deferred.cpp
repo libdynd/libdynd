@@ -429,4 +429,15 @@ TEST(CKernelDeferred, Take) {
     EXPECT_EQ(2, c(0).as<int>());
     EXPECT_EQ(4, c(1).as<int>());
     EXPECT_EQ(5, c(2).as<int>());
+
+    intptr_t bvals2[4] = {3, 0, -1, 4};
+    b = bvals2;
+
+    c = nd::empty("4 * int");
+    take = kernels::make_take_ckernel_deferred(c.get_type(), a.get_type(), b.get_type());
+    take.f("__call__", c, a, b);
+    EXPECT_EQ(4, c(0).as<int>());
+    EXPECT_EQ(1, c(1).as<int>());
+    EXPECT_EQ(5, c(2).as<int>());
+    EXPECT_EQ(5, c(3).as<int>());
 }

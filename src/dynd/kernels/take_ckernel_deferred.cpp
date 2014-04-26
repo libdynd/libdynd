@@ -6,11 +6,16 @@
 #include <dynd/kernels/take_ckernel_deferred.hpp>
 #include <dynd/kernels/assignment_kernels.hpp>
 #include <dynd/types/var_dim_type.hpp>
+#include <dynd/shape_tools.hpp>
 
 using namespace std;
 using namespace dynd;
 
 namespace {
+/**
+ * CKernel which does a masked take operation. The child ckernel
+ * should be a strided unary operation.
+ */
 struct masked_take_ck : public kernels::expr_ck<masked_take_ck, 2> {
     ndt::type m_dst_tp;
     const char *m_dst_meta;
@@ -64,6 +69,42 @@ struct masked_take_ck : public kernels::expr_ck<masked_take_ck, 2> {
     }
 };
 
+/**
+ * CKernel which does an indexed take operation. The child ckernel
+ * should be a single unary operation.
+ */
+struct indexed_take_ck : public kernels::expr_ck<indexed_take_ck, 2> {
+    intptr_t m_dst_dim_size, m_dst_stride, m_index_stride;
+    intptr_t m_src0_dim_size, m_src0_stride;
+
+    inline void single(char *dst, const char * const *src)
+    {
+        ckernel_prefix *child = get_child_ckernel();
+        unary_single_operation_t child_fn =
+                     child->get_function<unary_single_operation_t>();
+        const char *src0 = src[0];
+        const char *index = src[1];
+        intptr_t dst_dim_size = m_dst_dim_size, src0_dim_size = m_src0_dim_size,
+                 dst_stride = m_dst_stride, src0_stride = m_src0_stride,
+                 index_stride = m_index_stride;
+        for (intptr_t i = 0; i < dst_dim_size; ++i) {
+            intptr_t ix = *reinterpret_cast<const intptr_t *>(index);
+            // Handle Python-style negative index, bounds checking
+            ix = apply_single_index(ix, src0_dim_size, NULL);
+            // Copy one element at a time
+            child_fn(dst, src0 + ix * src0_stride, child);
+            dst += dst_stride;
+            index += index_stride;
+        }
+    }
+
+    inline void destruct_children()
+    {
+        // The child copy ckernel
+        get_child_ckernel()->destroy();
+    }
+};
+
 struct take_ckernel_deferred_data {
     // The types of the ckernel
     ndt::type data_types[3];
@@ -89,7 +130,7 @@ instantiate_masked_take(void *self_data_ptr, dynd::ckernel_builder *ckb,
 
     if (ckd_data->data_types[0].get_type_id() != var_dim_type_id) {
         stringstream ss;
-        ss << "take ckernel: could not process type " << ckd_data->data_types[0];
+        ss << "masked take ckernel: could not process type " << ckd_data->data_types[0];
         ss << " as a var dimension";
         throw type_error(ss.str());
     }
@@ -105,7 +146,7 @@ instantiate_masked_take(void *self_data_ptr, dynd::ckernel_builder *ckb,
             dynd_metadata[1], src0_dim_size, self->m_src0_stride, src0_el_tp,
             src0_el_meta)) {
         stringstream ss;
-        ss << "take ckernel: could not process type " << ckd_data->data_types[1];
+        ss << "masked take ckernel: could not process type " << ckd_data->data_types[1];
         ss << " as a strided dimension";
         throw type_error(ss.str());
     }
@@ -113,20 +154,20 @@ instantiate_masked_take(void *self_data_ptr, dynd::ckernel_builder *ckb,
             dynd_metadata[2], mask_dim_size, self->m_mask_stride, mask_el_tp,
             mask_el_meta)) {
         stringstream ss;
-        ss << "take ckernel: could not process type " << ckd_data->data_types[2];
+        ss << "masked take ckernel: could not process type " << ckd_data->data_types[2];
         ss << " as a strided dimension";
         throw type_error(ss.str());
     }
     if (src0_dim_size != mask_dim_size) {
         stringstream ss;
-        ss << "take ckernel: source data and mask have different sizes, ";
+        ss << "masked take ckernel: source data and mask have different sizes, ";
         ss << src0_dim_size << " and " << mask_dim_size;
         throw invalid_argument(ss.str());
     }
     self->m_dim_size = src0_dim_size;
     if (mask_el_tp.get_type_id() != bool_type_id) {
         stringstream ss;
-        ss << "take ckernel: mask type should be bool, not ";
+        ss << "masked take ckernel: mask type should be bool, not ";
         ss << mask_el_tp;
         throw type_error(ss.str());
     }
@@ -135,6 +176,68 @@ instantiate_masked_take(void *self_data_ptr, dynd::ckernel_builder *ckb,
     return make_assignment_kernel(
         ckb, ckb_end, dst_el_tp, dst_el_meta, src0_el_tp, src0_el_meta,
         kernel_request_strided, assign_error_default, ectx);
+}
+
+
+static intptr_t
+instantiate_indexed_take(void *self_data_ptr, dynd::ckernel_builder *ckb,
+            intptr_t ckb_offset, const char *const *dynd_metadata,
+            uint32_t kernreq, const eval::eval_context *ectx)
+{
+    typedef indexed_take_ck self_type;
+
+    self_type *self = self_type::create(ckb, ckb_offset, (kernel_request_t)kernreq);
+    intptr_t ckb_end = ckb_offset + sizeof(self_type);
+    take_ckernel_deferred_data *ckd_data =
+        reinterpret_cast<take_ckernel_deferred_data *>(self_data_ptr);
+
+    ndt::type dst_el_tp;
+    const char *dst_el_meta;
+    if (!ckd_data->data_types[0].get_as_strided_dim(
+            dynd_metadata[0], self->m_dst_dim_size, self->m_dst_stride,
+            dst_el_tp, dst_el_meta)) {
+        stringstream ss;
+        ss << "indexed take ckernel: could not process type " << ckd_data->data_types[0];
+        ss << " as a strided dimension";
+        throw type_error(ss.str());
+    }
+
+    intptr_t index_dim_size;
+    ndt::type src0_el_tp, index_el_tp;
+    const char *src0_el_meta, *index_el_meta;
+    if (!ckd_data->data_types[1].get_as_strided_dim(
+            dynd_metadata[1], self->m_src0_dim_size, self->m_src0_stride,
+            src0_el_tp, src0_el_meta)) {
+        stringstream ss;
+        ss << "indexed take ckernel: could not process type " << ckd_data->data_types[1];
+        ss << " as a strided dimension";
+        throw type_error(ss.str());
+    }
+    if (!ckd_data->data_types[2].get_as_strided_dim(
+            dynd_metadata[2], index_dim_size, self->m_index_stride, index_el_tp,
+            index_el_meta)) {
+        stringstream ss;
+        ss << "take ckernel: could not process type " << ckd_data->data_types[2];
+        ss << " as a strided dimension";
+        throw type_error(ss.str());
+    }
+    if (self->m_dst_dim_size != index_dim_size) {
+        stringstream ss;
+        ss << "indexed take ckernel: index data and dest have different sizes, ";
+        ss << index_dim_size << " and " << self->m_dst_dim_size;
+        throw invalid_argument(ss.str());
+    }
+    if (index_el_tp.get_type_id() != (type_id_t)type_id_of<intptr_t>::value) {
+        stringstream ss;
+        ss << "indexed take ckernel: index type should be intptr, not ";
+        ss << index_el_tp;
+        throw type_error(ss.str());
+    }
+
+    // Create the child element assignment ckernel
+    return make_assignment_kernel(
+        ckb, ckb_end, dst_el_tp, dst_el_meta, src0_el_tp, src0_el_meta,
+        kernel_request_single, assign_error_default, ectx);
 }
 
 
@@ -150,7 +253,16 @@ void kernels::make_take_ckernel_deferred(ckernel_deferred *out_ckd,
     out_ckd->ckernel_funcproto = expr_operation_funcproto;
     out_ckd->data_dynd_types = data->data_types;
     out_ckd->data_types_size = 3;
-    out_ckd->instantiate_func = &instantiate_masked_take;
+    switch (mask_tp.get_type_at_dimension(NULL, 1).get_type_id()) {
+        case bool_type_id:
+            out_ckd->instantiate_func = &instantiate_masked_take;
+            break;
+        case (type_id_t)type_id_of<intptr_t>::value:
+            out_ckd->instantiate_func = &instantiate_indexed_take;
+            break;
+        default:
+            throw invalid_argument("take requires either a boolean mask or an index array");
+    }
     data->data_types[0] = dst_tp;
     data->data_types[1] = src_tp;
     data->data_types[2] = mask_tp;
