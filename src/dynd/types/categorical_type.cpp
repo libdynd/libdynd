@@ -295,7 +295,8 @@ void categorical_type::print_data(std::ostream& o, const char *metadata, const c
             throw runtime_error("internal error in categorical_type::print_data");
     }
     if (value < m_value_to_category_index.size()) {
-        m_category_tp.print_data(o, metadata, get_category_data_from_value(value));
+        m_category_tp.print_data(o, get_category_metadata(),
+                                 get_category_data_from_value(value));
     }
     else {
         o << "UNK"; // TODO better outpout?
