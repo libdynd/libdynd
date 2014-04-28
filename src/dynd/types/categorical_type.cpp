@@ -278,7 +278,7 @@ categorical_type::categorical_type(const nd::array& categories, bool presorted)
     m_members.data_alignment = (uint8_t)m_storage_type.get_data_alignment();
 }
 
-void categorical_type::print_data(std::ostream& o, const char *metadata, const char *data) const
+void categorical_type::print_data(std::ostream& o, const char *DYND_UNUSED(metadata), const char *data) const
 {
     uint32_t value;
     switch (m_storage_type.get_type_id()) {
