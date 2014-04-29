@@ -87,7 +87,9 @@ TEST(VarArrayDType, DTypeSubscriptSimpleSlice) {
     EXPECT_EQ(6, n(2).as<int>());
     EXPECT_EQ(8, n(3).as<int>());
 
-    EXPECT_THROW(n(2 <= irange() <= 4), irange_out_of_bounds);
+    EXPECT_EQ(2, n(2 <= irange() < 4).get_shape()[0]);
+    EXPECT_EQ(6, n(2 <= irange() < 4)(0).as<int>());
+    EXPECT_EQ(8, n(2 <= irange() < 4)(1).as<int>());
 }
 
 TEST(VarArrayDType, DTypeSubscriptNested) {
