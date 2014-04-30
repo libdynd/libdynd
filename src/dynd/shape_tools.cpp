@@ -441,36 +441,20 @@ void dynd::apply_single_linear_index(const irange& irnge, intptr_t dimension_siz
         } else if (start >= -dimension_size) {
             // Starts with Python style negative index
             start += dimension_size;
-        } else if (start == std::numeric_limits<intptr_t>::min()) {
-            // Signal for "from the beginning"
-            start = 0;
         } else {
-            if (error_tp) {
-                intptr_t ndim = error_tp->get_ndim();
-                dimvector shape(ndim);
-                error_tp->extended()->get_shape(ndim, 0, shape.get(), NULL, NULL);
-                throw irange_out_of_bounds(irnge, error_i, ndim, shape.get());
-            } else {
-                throw irange_out_of_bounds(irnge, dimension_size);
-            }
+            // Signal for "from the beginning" whenever the index
+            // is more negative
+            start = 0;
         }
 
         intptr_t end = irnge.finish();
         if (end >= 0) {
             if (end <= dimension_size) {
                 // Ends with a positive index, or the end of the array
-            } else if (end == std::numeric_limits<intptr_t>::max()) {
-                // Signal for "until the end"
-                end = dimension_size;
             } else {
-                if (error_tp) {
-                    intptr_t ndim = error_tp->get_ndim();
-                    dimvector shape(ndim);
-                    error_tp->extended()->get_shape(ndim, 0, shape.get(), NULL, NULL);
-                    throw irange_out_of_bounds(irnge, error_i, ndim, shape.get());
-                } else {
-                    throw irange_out_of_bounds(irnge, dimension_size);
-                }
+                // Any end value greater or equal to the dimension size
+                // signals to slice to the end
+                end = dimension_size;
             }
         } else if (end >= -dimension_size) {
             // Ends with a Python style negative index
@@ -560,14 +544,9 @@ void dynd::apply_single_linear_index(const irange& irnge, intptr_t dimension_siz
             // Ends with a Python style negative index
             end += dimension_size;
         } else {
-            if (error_tp) {
-                intptr_t ndim = error_tp->get_ndim();
-                dimvector shape(ndim);
-                error_tp->extended()->get_shape(ndim, 0, shape.get(), NULL, NULL);
-                throw irange_out_of_bounds(irnge, error_i, ndim, shape.get());
-            } else {
-                throw irange_out_of_bounds(irnge, dimension_size);
-            }
+            // If the value is too negative, -1 means to go all the
+            // way to the beginning (with the negative step)
+            end = -1;
         }
 
         intptr_t size = start - end;
