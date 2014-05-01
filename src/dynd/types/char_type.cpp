@@ -64,7 +64,7 @@ void char_type::print_type(std::ostream& o) const {
 
     o << "char";
     if (m_encoding != string_encoding_utf_32) {
-        o << "[" << m_encoding << "]";
+        o << "['" << m_encoding << "']";
     }
 }
 

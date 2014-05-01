@@ -10,28 +10,53 @@
 
 using namespace std;
 using namespace dynd;
- 
-// [a-zA-Z]+
-bool parse::parse_alpha_name_no_ws(const char *&begin, const char *end,
-                                   const char *&out_strbegin,
-                                   const char *&out_strend)
+
+// [a-zA-Z_][a-zA-Z0-9_]*
+bool parse::parse_name_no_ws(const char *&rbegin, const char *end,
+                             const char *&out_strbegin, const char *&out_strend)
 {
-    const char *pos = begin;
-    if (pos == end) {
+    const char *begin = rbegin;
+    if (begin == end) {
         return false;
     }
-    if (('a' <= *pos && *pos <= 'z') || ('A' <= *pos && *pos <= 'Z')) {
-        ++pos;
+    if (('a' <= *begin && *begin <= 'z') || ('A' <= *begin && *begin <= 'Z') ||
+            *begin == '_') {
+        ++begin;
     } else {
         return false;
     }
-    while (pos < end &&
-           (('a' <= *pos && *pos <= 'z') || ('A' <= *pos && *pos <= 'Z'))) {
-        ++pos;
+    while (begin < end && (('a' <= *begin && *begin <= 'z') ||
+                           ('A' <= *begin && *begin <= 'Z') ||
+                           ('0' <= *begin && *begin <= '9') || *begin == '_')) {
+        ++begin;
     }
-    out_strbegin = begin;
-    out_strend = pos;
-    begin = pos;
+    out_strbegin = rbegin;
+    out_strend = begin;
+    rbegin = begin;
+    return true;
+}
+ 
+// [a-zA-Z]+
+bool parse::parse_alpha_name_no_ws(const char *&rbegin, const char *end,
+                                   const char *&out_strbegin,
+                                   const char *&out_strend)
+{
+    const char *begin = rbegin;
+    if (begin == end) {
+        return false;
+    }
+    if (('a' <= *begin && *begin <= 'z') || ('A' <= *begin && *begin <= 'Z')) {
+        ++begin;
+    } else {
+        return false;
+    }
+    while (begin < end && (('a' <= *begin && *begin <= 'z') ||
+                           ('A' <= *begin && *begin <= 'Z'))) {
+        ++begin;
+    }
+    out_strbegin = rbegin;
+    out_strend = begin;
+    rbegin = begin;
     return true;
 }
 
