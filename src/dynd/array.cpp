@@ -220,9 +220,9 @@ nd::array nd::make_bytes_array(const char *data, size_t len, size_t alignment)
     char *data_ptr = NULL, *bytes_data_ptr;
     ndt::type dt = ndt::make_bytes(alignment);
     nd::array result(make_array_memory_block(dt.extended()->get_metadata_size(),
-                        dt.get_data_size() + len, dt.get_data_alignment(), &data_ptr));
+                        dt.get_data_size() + len + alignment - 1, dt.get_data_alignment(), &data_ptr));
     // Set the string extents
-    bytes_data_ptr = data_ptr + dt.get_data_size();
+    bytes_data_ptr = inc_to_alignment(data_ptr + dt.get_data_size(), alignment);
     ((char **)data_ptr)[0] = bytes_data_ptr;
     ((char **)data_ptr)[1] = bytes_data_ptr + len;
     // Copy the string data

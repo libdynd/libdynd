@@ -85,3 +85,14 @@ TEST(BytesDType, Assign) {
     EXPECT_EQ(c.get_type(), ndt::make_string());
     EXPECT_EQ("testing", c.as<string>());
 }
+
+TEST(BytesDType, Alignment) {
+    nd::array a;
+    const bytes_type_data *btd;
+
+    int64_t data[2] = {1, 2};
+    a = nd::make_bytes_array(reinterpret_cast<const char *>(&data[0]), sizeof(data), 16);
+    EXPECT_EQ(ndt::type("bytes[align=16]"), a.get_type());
+    btd = reinterpret_cast<const bytes_type_data *>(a.get_readonly_originptr());
+    EXPECT_TRUE(offset_is_aligned(reinterpret_cast<size_t>(btd->begin), 16));
+}
