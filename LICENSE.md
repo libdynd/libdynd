@@ -1,6 +1,13 @@
+﻿LibDyND Developers:
+
+ * Mark Wiebe
+ * Continuum Analytics
+ * Irwin Zaid
+ * Damien Garaud
+
 The BSD 2-Clause License
 
-    Copyright (C) 2011-12, Dynamic NDArray Developers
+    Copyright (C) 2011-14, LibDyND Developers
     All rights reserved.
 
     Redistribution and use in source and binary forms, with or without
@@ -26,11 +33,6 @@ The BSD 2-Clause License
     THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
     (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
     OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
-
-Dynamic NDArray Developers list:
-
- * Mark Wiebe
- * Continuum Analytics
 
 
 Portions have been taken from NumPy, under the following license:

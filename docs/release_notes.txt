@@ -5,6 +5,49 @@ DyND is a C++ library for array programming with a dynamic
 type system. It is currently in a preview state, and nothing
 about the API or the ABI is guaranteed to stay the same.
 
+Version 0.6.2
+-------------
+
+Commits by author since last release:
+
+   178  Mark Wiebe
+   123  Irwin Zaid
+     2  Damien Garaud
+
+- Add basic CUDA support via new memory_kind and cuda memory types.
+  This support includes copying to/from arrays in CUDA memory.
+- Replace use of std::complex with new dynd_complex class which can
+  be compiled by CUDA.
+- Convert type system to updated datashape grammar. For example
+  a 1D int32 array is now "strided * int32" instead of "strided, int32".
+- Code for lifting scalar accumulation ckernels to multidimensional
+  reductions.
+- Add nd::view function which can switch between strided/fixed dimensions,
+  view bytes as POD data, and POD data as bytes.
+- Add .travis.yml testing of github development, including running the
+  tests through valgrind.
+- Change the preliminary date/datetime code to a new design, eliminating
+  the multiple unit selection, and including a parser which accepts more
+  general inputs than just ISO 8601 format. There are now date, time, and
+  datetime types, and the evaluation context includes options for how
+  to deal with two-digit years and YMD vs MDY vs DMY ordering.
+- Add a preprocessor metaprogramming library in the 'pp' subdirectory.
+- Add an nd::foreach function which runs a C++ functor (e.g. a C++11
+  lambda function) elementwise across provided nd::arrays. This uses
+  the preprocessor metaprogramming to generate variants with different
+  numbers of nd::array arguments.
+- Removed MSVC 2008 as a supported compiler on Windows, MSVC 2010
+  or later is required now.
+- Add function ndt::type::tcast<>() to simplify code casting to specific
+  type objects.
+- Rename previous fixed_dim type to cfixed_dim, and introduce a new
+  fixed_dim which behaves like the fixed[N] defined in datashape.
+  The naming cfixed[N] vs fixed[N] is not ideal, would be nice to find
+  a convention for the fixed-layout types (cfixed_dim, cstruct, ctuple)
+  vs the variable-layout types (fixed_dim, struct, tuple).
+- Code for creating ckernels to do simple windowed function evaluation.
+- Change slicing behavior with out-of-bounds indices to match Python.
+
 Version 0.6.1
 -------------
 
