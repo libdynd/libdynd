@@ -34,7 +34,7 @@ to build the library.
 Documentation
 =============
 
-[Documentation Index](documents/index.md)
+[Documentation Index](docs/index.md)
 
 Running The Tests
 =================
