@@ -94,7 +94,8 @@ void datetime_type::set_utf8_string(const char *DYND_UNUSED(metadata),
     // TODO: Use errmode to adjust strictness
     // TODO: Parsing adjustments/error handling based on the timezone
     datetime_struct dts;
-    dts.set_from_str(utf8_str, ectx->date_parse_order, ectx->century_window);
+    dts.set_from_str(utf8_str, ectx->date_parse_order, ectx->century_window,
+                     ectx->default_errmode);
     *reinterpret_cast<int64_t *>(data) = dts.to_ticks();
 }
 

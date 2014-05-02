@@ -12,6 +12,7 @@
 #include <dynd/types/var_dim_type.hpp>
 #include <dynd/types/cstruct_type.hpp>
 #include <dynd/types/date_type.hpp>
+#include <dynd/types/datetime_type.hpp>
 #include <dynd/kernels/string_numeric_assignment_kernels.hpp>
 
 using namespace std;
@@ -594,6 +595,17 @@ static void parse_datetime_json(const ndt::type& tp, const char *metadata, char 
             } catch (const std::exception& e) {
                 throw json_parse_error(skip_whitespace(saved_begin, begin), e.what(), tp);
             }
+        } else if (tp.get_type_id() == datetime_type_id) {
+            const datetime_type *dt = tp.tcast<datetime_type>();
+            try {
+                dt->set_utf8_string(metadata, out_data, assign_error_fractional, val, ectx);
+            } catch (const std::exception& e) {
+                throw json_parse_error(skip_whitespace(saved_begin, begin), e.what(), tp);
+            }
+        } else {
+            stringstream ss;
+            ss << "nd::parse_json: unexpected type " << tp;
+            throw type_error(ss.str());
         }
     } else {
         throw json_parse_error(begin, "expected a string", tp);

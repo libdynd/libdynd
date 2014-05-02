@@ -142,7 +142,7 @@ bool parse::parse_datetime(const char *&begin, const char *end,
 
 bool dynd::string_to_datetime(const char *begin, const char *end,
                               datetime_struct &out_dt, date_parse_order_t ambig,
-                              int century_window)
+                              int century_window, assign_error_mode errmode)
 {
     datetime_struct dt;
     skip_whitespace(begin, end);
@@ -150,7 +150,7 @@ bool dynd::string_to_datetime(const char *begin, const char *end,
         return false;
     }
     skip_whitespace(begin, end);
-    if (begin == end) {
+    if (begin == end || errmode == assign_error_none) {
         out_dt = dt;
         return true;
     } else {

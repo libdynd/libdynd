@@ -8,6 +8,7 @@
 
 #include <dynd/config.hpp>
 #include <dynd/types/date_parser.hpp>
+#include <dynd/typed_data_assign.hpp>
 
 namespace dynd {
 
@@ -32,7 +33,7 @@ struct datetime_struct;
  */
 bool string_to_datetime(const char *begin, const char *end,
                         datetime_struct &out_dt, date_parse_order_t ambig,
-                        int century_window);
+                        int century_window, assign_error_mode errmode);
 
 namespace parse {
 

@@ -9,6 +9,7 @@
 #include <dynd/config.hpp>
 #include <dynd/types/date_util.hpp>
 #include <dynd/types/time_util.hpp>
+#include <dynd/typed_data_assign.hpp>
 
 #define DYND_DATETIME_NA (std::numeric_limits<int64_t>::min())
 
@@ -89,10 +90,14 @@ struct datetime_struct {
      *                        Values 1000 and higher mean to use a fixed window
      *                        starting at the year given. The value 0 means to
      *                        disallow two digit years.
+     * \param errmode  The error mode to use for how strict to be when converting
+     *                 values. In mode assign_error_none, tries to do a "best interpretation"
+     *                 conversion.
      */
     void set_from_str(const std::string &s,
                       date_parse_order_t ambig = date_parse_no_ambig,
-                      int century_window = 70);
+                      int century_window = 70,
+                      assign_error_mode errmode = assign_error_fractional);
 
     /**
      * Returns an ndt::type corresponding to the datetime_struct structure.
