@@ -759,7 +759,7 @@ void dynd::validate_json(const char *json_begin, const char *json_end)
         ss << "Error validating JSON at line " << line << ", column " << column << "\n";
         ss << "Message: " << e.get_message() << "\n";
         print_json_parse_error_marker(ss, line_prev, line_cur, line, column);
-        throw runtime_error(ss.str());
+        throw invalid_argument(ss.str());
     }
 }
 
@@ -786,7 +786,7 @@ void dynd::parse_json(nd::array &out, const char *json_begin,
         }
         ss << "Message: " << e.get_message() << "\n";
         print_json_parse_error_marker(ss, line_prev, line_cur, line, column);
-        throw runtime_error(ss.str());
+        throw invalid_argument(ss.str());
     }
 }
 
