@@ -35,7 +35,7 @@ TEST(JSONParser, BuiltinsFromBool) {
     EXPECT_EQ(ndt::make_type<dynd_bool>(), n.get_type());
     EXPECT_FALSE(n.as<bool>());
 
-    EXPECT_THROW(parse_json(ndt::make_type<dynd_bool>(), "flase"), runtime_error);
+    EXPECT_THROW(parse_json(ndt::make_type<dynd_bool>(), "flase"), invalid_argument);
 }
 
 TEST(JSONParser, BuiltinsFromInteger) {
@@ -109,7 +109,7 @@ TEST(JSONParser, String) {
     EXPECT_EQ(ndt::make_string(string_encoding_utf_16), n.get_type());
     EXPECT_EQ(" \" \\ / \b \f \n \r \t   ", n.as<string>());
 
-    EXPECT_THROW(parse_json(ndt::make_string(string_encoding_utf_8), "false"), runtime_error);
+    EXPECT_THROW(parse_json(ndt::make_string(string_encoding_utf_8), "false"), invalid_argument);
 }
 
 TEST(JSONParser, ListBools) {
@@ -133,16 +133,16 @@ TEST(JSONParser, ListBools) {
 
     EXPECT_THROW(parse_json(ndt::make_var_dim(ndt::make_type<dynd_bool>()),
                     "[true, true, false, null] 3.5"),
-                    runtime_error);
+                    invalid_argument);
     EXPECT_THROW(parse_json(ndt::make_cfixed_dim(4, ndt::make_type<dynd_bool>()),
                     "[true, true, false, null] 3.5"),
-                    runtime_error);
+                    invalid_argument);
     EXPECT_THROW(parse_json(ndt::make_cfixed_dim(3, ndt::make_type<dynd_bool>()),
                     "[true, true, false, null]"),
-                    runtime_error);
+                    invalid_argument);
     EXPECT_THROW(parse_json(ndt::make_cfixed_dim(5, ndt::make_type<dynd_bool>()),
                     "[true, true, false, null]"),
-                    runtime_error);
+                    invalid_argument);
 }
 
 TEST(JSONParser, NestedListInts) {
@@ -198,7 +198,7 @@ TEST(JSONParser, Struct) {
     // Every field must be populated, though
     EXPECT_THROW(parse_json(sdt, "{\"amount\":3.75,\"discarded\":[1,2,3],"
                     " \"when\":\"2012-09-19\",\"name\":\"Jean\"}"),
-                    runtime_error);
+                    invalid_argument);
 }
 
 TEST(JSONParser, NestedStruct) {
@@ -220,17 +220,17 @@ TEST(JSONParser, NestedStruct) {
     // Too many entries in "position"
     EXPECT_THROW(parse_json(sdt, "{\"data\":{\"name\":\"Harvey\", \"when\":\"1970-02-13\"}, "
                     "\"amount\": 10.5, \"position\": [1.5,3.5,1.0,1e10] }"),
-                    runtime_error);
+                    invalid_argument);
 
     // Too few entries in "position"
     EXPECT_THROW(parse_json(sdt, "{\"data\":{\"name\":\"Harvey\", \"when\":\"1970-02-13\"}, "
                     "\"amount\": 10.5, \"position\": [1.0,1e10] }"),
-                    runtime_error);
+                    invalid_argument);
 
     // Missing field "when"
     EXPECT_THROW(parse_json(sdt, "{\"data\":{\"name\":\"Harvey\", \"when2\":\"1970-02-13\"}, "
                     "\"amount\": 10.5, \"position\": [3.5,1.0,1e10] }"),
-                    runtime_error);
+                    invalid_argument);
 }
 
 TEST(JSONParser, ListOfStruct) {
@@ -261,7 +261,7 @@ TEST(JSONParser, ListOfStruct) {
                     "\"amount\": 10.5, \"position\": [3.5,1.0,1e10] },\n"
                     "{\"position\":[1,2,3], \"amount\": 3.125#,\n"
                     "\"data\":{ \"when\":\"2013-12-25\", \"name\":\"Frank\"}}]"),
-                    runtime_error);
+                    invalid_argument);
 }
 
 TEST(JSONParser, JSONDType) {
