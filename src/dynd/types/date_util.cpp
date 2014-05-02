@@ -152,12 +152,11 @@ void date_ymd::set_from_days(int32_t days)
     }
 }
 
-void date_ymd::set_from_str(const std::string &s,
-                      date_parse_order_t ambig,
-                      int century_window)
+void date_ymd::set_from_str(const std::string &s, date_parse_order_t ambig,
+                            int century_window, assign_error_mode errmode)
 {
     if (!string_to_date(s.data(), s.data() + s.size(), *this,
-                        ambig, century_window)) {
+                        ambig, century_window, errmode)) {
         stringstream ss;
         ss << "Unable to parse ";
         print_escaped_utf8_string(ss, s);

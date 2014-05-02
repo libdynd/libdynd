@@ -33,7 +33,8 @@ namespace dynd {
  * \returns  True if the parse is successful, false otherwise.
  */
 bool string_to_date(const char *begin, const char *end, date_ymd &out_ymd,
-                    date_parse_order_t ambig, int century_window);
+                    date_parse_order_t ambig, int century_window,
+                    assign_error_mode errmode);
 
 namespace parse {
 

@@ -60,7 +60,8 @@ void date_type::set_utf8_string(const char *DYND_UNUSED(metadata), char *data,
     if (utf8_str == "NA") {
         ymd.set_to_na();
     } else {
-        ymd.set_from_str(utf8_str, ectx->date_parse_order, ectx->century_window);
+        ymd.set_from_str(utf8_str, ectx->date_parse_order, ectx->century_window,
+                         ectx->default_errmode);
     }
     *reinterpret_cast<int32_t *>(data) = ymd.to_days();
 }

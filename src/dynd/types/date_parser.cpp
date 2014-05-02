@@ -637,12 +637,19 @@ bool parse::parse_date(const char *&begin, const char *end, date_ymd &out_ymd,
 }
 
 bool dynd::string_to_date(const char *begin, const char *end, date_ymd &out_ymd,
-                          date_parse_order_t ambig, int century_window)
+                          date_parse_order_t ambig, int century_window,
+                          assign_error_mode errmode)
 {
     date_ymd ymd;
     skip_whitespace(begin, end);
     if (!parse_date(begin, end, ymd, ambig, century_window)) {
         return false;
+    }
+    if (errmode == assign_error_none) {
+        // If the assignment error mode is "none", just take
+        // what we got no matter what comes next.
+        out_ymd = ymd;
+        return true;
     }
     // Either a "T" or whitespace may separate a date and a time
     if (parse_token_no_ws(begin, end, 'T')) {

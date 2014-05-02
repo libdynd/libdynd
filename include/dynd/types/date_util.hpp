@@ -11,6 +11,7 @@
 #include <iostream>
 
 #include <dynd/config.hpp>
+#include <dynd/typed_data_assign.hpp>
 
 #define DYND_DATE_NA (std::numeric_limits<int32_t>::min())
 
@@ -185,7 +186,8 @@ struct date_ymd {
      */
     void set_from_str(const std::string &s,
                       date_parse_order_t ambig = date_parse_no_ambig,
-                      int century_window = 70);
+                      int century_window = 70,
+                      assign_error_mode errmode = assign_error_fractional);
 
     /**
      * When a year is a two digit year that should be resolved as a four
