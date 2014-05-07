@@ -15,6 +15,23 @@ using namespace dynd;
 base_struct_type::~base_struct_type() {
 }
 
+intptr_t base_struct_type::get_field_index(const char *field_index_begin,
+                                           const char *field_index_end) const
+{
+    size_t size = field_index_end - field_index_begin;
+    size_t field_count = get_field_count();
+    const string *field_names = get_field_names();
+    for (size_t i = 0; i != field_count; ++i) {
+        if (field_names[i].size() == size) {
+            if (memcmp(field_names[i].data(), field_index_begin, size) == 0) {
+                return i;
+            }
+        }
+    }
+
+    return -1;
+}
+
 size_t base_struct_type::get_elwise_property_index(const std::string& property_name) const
 {
     size_t field_count = get_field_count();

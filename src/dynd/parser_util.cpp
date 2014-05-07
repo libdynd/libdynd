@@ -6,6 +6,7 @@
 #include <string>
 
 #include <dynd/parser_util.hpp>
+#include <dynd/string_encodings.hpp>
 
 using namespace std;
 using namespace dynd;
@@ -32,6 +33,128 @@ bool parse::parse_alpha_name_no_ws(const char *&begin, const char *end,
     out_strend = pos;
     begin = pos;
     return true;
+}
+
+bool parse::parse_doublequote_string_no_ws(const char *&rbegin, const char *end,
+                                           const char *&out_strbegin,
+                                           const char *&out_strend,
+                                           bool &out_escaped)
+{
+    bool escaped = false;
+    const char *begin = rbegin;
+    if (!parse_token_no_ws(begin, end, '\"')) {
+        return false;
+    }
+    for (;;) {
+        if (begin == end) {
+            throw parse::parse_error(rbegin, "string has no ending quote");
+        }
+        char c = *begin++;
+        if (c == '\\') {
+            escaped = true;
+            if (begin == end) {
+                throw parse::parse_error(rbegin, "string has no ending quote");
+            }
+            c = *begin++;
+            switch (c) {
+                case '"':
+                case '\\':
+                case '/':
+                case 'b':
+                case 'f':
+                case 'n':
+                case 'r':
+                case 't':
+                    break;
+                case 'u': {
+                    if (end - begin < 4) {
+                        throw parse::parse_error(begin-2, "invalid unicode escape sequence in string");
+                    }
+                    for (int i = 0; i < 4; ++i) {
+                        char c = *begin++;
+                        if (!(('0' <= c && c <= '9') ||
+                              ('A' <= c && c <= 'F') ||
+                              ('a' <= c && c <= 'f'))) {
+                            throw parse::parse_error(
+                                begin - 1,
+                                "invalid unicode escape sequence in string");
+                        }
+                    }
+                    break;
+                }
+                default:
+                    throw parse::parse_error(begin-2, "invalid escape sequence in string");
+            }
+        } else if (c == '"') {
+            out_strbegin = rbegin + 1;
+            out_strend = begin - 1;
+            out_escaped = escaped;
+            rbegin = begin;
+            return true;
+        }
+    }
+}
+
+void parse::unescape_string(const char *strbegin, const char *strend,
+                     std::string &out)
+{
+    out.resize(0);
+    while (strbegin < strend) {
+        char c = *strbegin++;
+        if (c == '\\') {
+            if (strbegin == strend) {
+                return;
+            }
+            c = *strbegin++;
+            switch (c) {
+                case '"':
+                case '\\':
+                case '/':
+                    out += c;
+                    break;
+                case 'b':
+                    out += '\b';
+                    break;
+                case 'f':
+                    out += '\f';
+                    break;
+                case 'n':
+                    out += '\n';
+                    break;
+                case 'r':
+                    out += '\r';
+                    break;
+                case 't':
+                    out += '\t';
+                    break;
+                case 'u': {
+                    if (strend - strbegin < 4) {
+                        return;
+                    }
+                    uint32_t cp = 0;
+                    for (int i = 0; i < 4; ++i) {
+                        char c = *strbegin++;
+                        cp *= 16;
+                        if ('0' <= c && c <= '9') {
+                            cp += c - '0';
+                        } else if ('A' <= c && c <= 'F') {
+                            cp += c - 'A' + 10;
+                        } else if ('a' <= c && c <= 'f') {
+                            cp += c - 'a' + 10;
+                        } else {
+                            cp = '?';
+                        }
+                    }
+                    append_utf8_codepoint(cp, out);
+                    break;
+                }
+                default:
+                    out += '?';
+            }
+        } else {
+            out += c;
+        }
+    }
 }
 
 // [0-9][0-9]
