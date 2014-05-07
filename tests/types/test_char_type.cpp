@@ -30,7 +30,7 @@ TEST(CharDType, Create) {
     EXPECT_FALSE(d.is_expression());
     EXPECT_EQ("char", d.str());
     EXPECT_EQ(ndt::type("char"), d);
-    EXPECT_NE(ndt::type("char[ascii]"), d);
+    EXPECT_NE(ndt::type("char['ascii']"), d);
     // Roundtripping through a string
     EXPECT_EQ(d, ndt::type(d.str()));
 
@@ -40,9 +40,9 @@ TEST(CharDType, Create) {
     EXPECT_EQ(1u, d.get_data_size());
     EXPECT_EQ(1u, d.get_data_alignment());
     EXPECT_FALSE(d.is_expression());
-    EXPECT_EQ("char[ascii]", d.str());
+    EXPECT_EQ("char['ascii']", d.str());
     EXPECT_NE(ndt::type("char"), d);
-    EXPECT_EQ(ndt::type("char[ascii]"), d);
+    EXPECT_EQ(ndt::type("char['ascii']"), d);
     // Roundtripping through a string
     EXPECT_EQ(d, ndt::type(d.str()));
 
@@ -52,9 +52,9 @@ TEST(CharDType, Create) {
     EXPECT_EQ(2u, d.get_data_size());
     EXPECT_EQ(2u, d.get_data_alignment());
     EXPECT_FALSE(d.is_expression());
-    EXPECT_EQ("char[ucs2]", d.str());
+    EXPECT_EQ("char['ucs2']", d.str());
     EXPECT_NE(ndt::type("char"), d);
-    EXPECT_EQ(ndt::type("char[ucs2]"), d);
+    EXPECT_EQ(ndt::type("char['ucs2']"), d);
     // Roundtripping through a string
     EXPECT_EQ(d, ndt::type(d.str()));
 
@@ -66,7 +66,7 @@ TEST(CharDType, Create) {
     EXPECT_FALSE(d.is_expression());
     EXPECT_EQ("char", d.str());
     EXPECT_EQ(ndt::type("char"), d);
-    EXPECT_EQ(ndt::type("char[utf32]"), d);
+    EXPECT_EQ(ndt::type("char['utf32']"), d);
     // Roundtripping through a string
     EXPECT_EQ(d, ndt::type(d.str()));
 }

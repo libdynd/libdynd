@@ -85,15 +85,44 @@ public:
  * Example:
  *     skip_whitespace(begin, end);
  */
-inline void skip_whitespace(const char *&begin, const char *end)
+inline void skip_whitespace(const char *&rbegin, const char *end)
 {
+    const char *begin = rbegin;
     while (begin < end && isspace(*begin)) {
         ++begin;
     }
+    rbegin = begin;
 }
 
 /**
- * Modifies `begin` to skip past any whitespace. Returns false
+ * Modifies `begin` to skip past any whitespace and comments starting with #.
+ *
+ * Example:
+ *     skip_whitespace(begin, end);
+ */
+inline void skip_whitespace_and_pound_comments(const char *&rbegin, const char *end)
+{
+    const char *begin = rbegin;
+    while (begin < end && isspace(*begin)) {
+        ++begin;
+    }
+
+    // Comments
+    if (begin < end && *begin == '#') {
+        const char *line_end = (const char *)memchr(begin, '\n', end - begin);
+        if (line_end == NULL) {
+            begin = end;
+        } else {
+            begin = line_end + 1;
+            skip_whitespace_and_pound_comments(begin, end);
+        }
+    }
+
+    rbegin = begin;
+}
+
+/**
+ * Modifies `rbegin` to skip past any whitespace. Returns false
  * if no whitespace was found to skip.
  *
  * Example:
@@ -101,13 +130,15 @@ inline void skip_whitespace(const char *&begin, const char *end)
  *         // Do something if there was no whitespace
  *     }
  */
-inline bool skip_required_whitespace(const char *&begin, const char *end)
+inline bool skip_required_whitespace(const char *&rbegin, const char *end)
 {
+    const char *begin = rbegin;
     if (begin < end && isspace(*begin)) {
         ++begin;
         while (begin < end && isspace(*begin)) {
             ++begin;
         }
+        rbegin = begin;
         return true;
     } else {
         return false;
@@ -116,7 +147,7 @@ inline bool skip_required_whitespace(const char *&begin, const char *end)
 
 /**
  * Skips whitespace, then matches the provided literal string token. On success,
- * returns true and modifies `begin` to point after the token. If the token is a
+ * returns true and modifies `rbegin` to point after the token. If the token is a
  * single character, use the other `parse_token` function which accepts
  * a char.
  *
@@ -129,13 +160,14 @@ inline bool skip_required_whitespace(const char *&begin, const char *end)
  *     }
  */
 template <int N>
-inline bool parse_token(const char *&begin, const char *end,
+inline bool parse_token(const char *&rbegin, const char *end,
                         const char (&token)[N])
 {
+    const char *begin = rbegin;
     skip_whitespace(begin, end);
     if (N - 1 <= end - begin &&
             memcmp(begin, token, N - 1) == 0) {
-        begin += N-1;
+        rbegin = begin + N - 1;
         return true;
     } else {
         return false;
@@ -144,7 +176,7 @@ inline bool parse_token(const char *&begin, const char *end,
 
 /**
  * Skips whitespace, then matches the provided literal character token. On
- * success, returns true and modifies `begin` to point after the token.
+ * success, returns true and modifies `rbegin` to point after the token.
  *
  * Example:
  *     // Match the token "*"
@@ -154,22 +186,21 @@ inline bool parse_token(const char *&begin, const char *end,
  *         // No * token found
  *     }
  */
-inline bool parse_token(const char *&begin, const char *end, char token)
+inline bool parse_token(const char *&rbegin, const char *end, char token)
 {
-    const char *saved_begin = begin;
+    const char *begin = rbegin;
     skip_whitespace(begin, end);
     if (1 <= end - begin && *begin == token) {
-        ++begin;
+        rbegin = begin + 1;
         return true;
     } else {
-        begin = saved_begin;
         return false;
     }
 }
 
 /**
  * Without skipping whitespace, matches the provided literal string token. On
- * success, returns true and modifies `begin` to point after the token. If the
+ * success, returns true and modifies `rbegin` to point after the token. If the
  * token is a single character, use the other `parse_token_no_ws` function which
  * accepts a char.
  *
@@ -182,11 +213,12 @@ inline bool parse_token(const char *&begin, const char *end, char token)
  *     }
  */
 template <int N>
-inline bool parse_token_no_ws(const char *&begin, const char *end,
+inline bool parse_token_no_ws(const char *&rbegin, const char *end,
                               const char (&token)[N])
 {
-    if (N-1 <= end - begin && memcmp(begin, token, N-1) == 0) {
-        begin += + N-1;
+    const char *begin = rbegin;
+    if (N - 1 <= end - begin && memcmp(begin, token, N - 1) == 0) {
+        rbegin = begin + N - 1;
         return true;
     } else {
         return false;
@@ -195,7 +227,7 @@ inline bool parse_token_no_ws(const char *&begin, const char *end,
 
 /**
  * Without skipping whitespace, matches the provided literal character token. On
- * success, returns true and modifies `begin` to point after the token.
+ * success, returns true and modifies `rbegin` to point after the token.
  *
  * Example:
  *     // Match the token "*"
@@ -205,15 +237,34 @@ inline bool parse_token_no_ws(const char *&begin, const char *end,
  *         // No * token found
  *     }
  */
-inline bool parse_token_no_ws(const char *&begin, const char *end, char token)
+inline bool parse_token_no_ws(const char *&rbegin, const char *end, char token)
 {
+    const char *begin = rbegin;
     if (1 <= end - begin && *begin == token) {
-        ++begin;
+        rbegin = begin + 1;
         return true;
     } else {
         return false;
     }
 }
+
+/**
+ * Without skipping whitespace, parses a name matching
+ * the regex "[a-zA-Z_][a-zA-Z0-9_]*".
+ * Returns true if there is a match, setting `out_strbegin`
+ * and `out_strend` to the character range which was matched.
+ *
+ * Example:
+ *     // Match a name
+ *     const char *strbegin, *strend;
+ *     if (parse_name_no_ws(begin, end, strbegin, strend)) {
+ *         // Match buffer range [strbegin, strend) as needed
+ *     } else {
+ *         // Non-alphabetic character is next
+ *     }
+ */
+bool parse_name_no_ws(const char *&rbegin, const char *end,
+                      const char *&out_strbegin, const char *&out_strend);
 
 /**
  * Without skipping whitespace, parses a name containing only
@@ -268,6 +319,62 @@ void unescape_string(const char *strbegin, const char *strend,
                      std::string &out);
 
 /**
+ * Does an exact comparison of a byte range to a string literal.
+ */
+template <int N>
+inline bool compare_range_to_literal(const char *begin, const char *end,
+                        const char (&token)[N])
+{
+    return (end - begin) == N - 1 &&
+        !memcmp(begin, token, N - 1);
+}
+
+/**
+ * Without skipping whitespace, parses an unsigned integer.
+ *
+ * Example:
+ *     // Match a two digit month
+ *     const char *match_begin, *match_end;
+ *     if (parse_unsigned_int_no_ws(begin, end, match_begin, match_end) {
+ *         // Convert to int, process
+ *     } else {
+ *         // Couldn't match unsigned integer
+ *     }
+ */
+inline bool parse_unsigned_int_no_ws(const char *&rbegin, const char *end,
+                                     const char *&out_strbegin,
+                                     const char *&out_strend)
+{
+    const char *begin = rbegin;
+    if (begin < end) {
+        if ('1' <= *begin && *begin <= '9') {
+            ++begin;
+            while (begin < end && ('0' <= *begin && *begin <= '9')) {
+                ++begin;
+            }
+            out_strbegin = rbegin;
+            out_strend = begin;
+            rbegin = begin;
+            return true;
+        } else if (*begin == '0') {
+            if (begin + 1 < end && ('0' <= *(begin + 1) && *(begin + 1) <= '9')) {
+                // Don't match leading zeros
+                return false;
+            } else {
+                out_strbegin = begin;
+                out_strend = begin + 1;
+                rbegin = begin + 1;
+                return true;
+            }
+        } else {
+            return false;
+        }
+    } else {
+        return false;
+    }
+}
+
+/**
  * Without skipping whitespace, parses an integer with exactly two digits.
  * A leading zero is accepted.
  *
@@ -280,7 +387,7 @@ void unescape_string(const char *strbegin, const char *strend,
  *         // Couldn't match month as an integer
  *     }
  */
-bool parse_2digit_int_no_ws(const char *&begin, const char *end, int &out_val);
+bool parse_2digit_int_no_ws(const char *&rbegin, const char *end, int &out_val);
 
 /**
  * Without skipping whitespace, parses an integer with one or two digits.
@@ -296,7 +403,7 @@ bool parse_2digit_int_no_ws(const char *&begin, const char *end, int &out_val);
  *         // Couldn't match day
  *     }
  */
-bool parse_1or2digit_int_no_ws(const char *&begin, const char *end, int &out_val);
+bool parse_1or2digit_int_no_ws(const char *&rbegin, const char *end, int &out_val);
 
 /**
  * Without skipping whitespace, parses an integer with exactly four digits.
@@ -311,8 +418,7 @@ bool parse_1or2digit_int_no_ws(const char *&begin, const char *end, int &out_val
  *         // Couldn't match year
  *     }
  */
-bool parse_4digit_int_no_ws(const char *&begin, const char *end,
-                                   int &out_val);
+bool parse_4digit_int_no_ws(const char *&rbegin, const char *end, int &out_val);
 
 /**
  * Without skipping whitespace, parses an integer with exactly six digits.
@@ -327,8 +433,7 @@ bool parse_4digit_int_no_ws(const char *&begin, const char *end,
  *         // Couldn't match year
  *     }
  */
-bool parse_6digit_int_no_ws(const char *&begin, const char *end,
-                                   int &out_val);
+bool parse_6digit_int_no_ws(const char *&rbegin, const char *end, int &out_val);
 
 /**
  * A helper class for matching a bunch of names and getting an integer.
@@ -373,13 +478,13 @@ struct named_value {
  *     }
  */
 template <int N>
-inline bool parse_ci_alpha_str_named_value_no_ws(const char *&begin, const char *end,
+inline bool parse_ci_alpha_str_named_value_no_ws(const char *&rbegin, const char *end,
                                   named_value (&nvt)[N], int &out_value)
 {
     // TODO: Could specialize two implementations based on the size of N,
     //       for small N do a linear search, big N do a binary search.
 
-    const char *saved_begin = begin;
+    const char *begin = rbegin;
     const char *strbegin, *strend;
     if (!parse_alpha_name_no_ws(begin, end, strbegin, strend)) {
         return false;
@@ -398,12 +503,12 @@ inline bool parse_ci_alpha_str_named_value_no_ws(const char *&begin, const char 
             }
             if (*name == '\0' && strptr == strend) {
                 out_value = nvt[i].value;
+                rbegin = begin;
                 return true;
             }
         }
     }
 
-    begin = saved_begin;
     return false;
 }
 
