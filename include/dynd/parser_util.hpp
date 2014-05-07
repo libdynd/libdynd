@@ -7,6 +7,7 @@
 #define _DYND__PARSER_UTIL_HPP_
 
 #include <string>
+#include <stdexcept>
 
 #include <dynd/config.hpp>
 
@@ -59,6 +60,22 @@ public:
 
     inline const char *saved_begin() const {
         return m_saved_begin;
+    }
+};
+
+/**
+ * An error message thrown when a parse error is encountered.
+ */
+class parse_error : public std::invalid_argument {
+    const char *m_position;
+public:
+    parse_error(const char *position, const std::string& message)
+        : std::invalid_argument(message), m_position(position) {
+    }
+    virtual ~parse_error() throw () {
+    }
+    const char *get_position() const {
+        return m_position;
     }
 };
 
@@ -213,9 +230,42 @@ inline bool parse_token_no_ws(const char *&begin, const char *end, char token)
  *         // Non-alphabetic character is next
  *     }
  */
-bool parse_alpha_name_no_ws(const char *&begin, const char *end,
+bool parse_alpha_name_no_ws(const char *&rbegin, const char *end,
                             const char *&out_strbegin, const char *&out_strend);
 
+/**
+ * Without skipping whitespace, parses a double-quoted string.
+ * Returns the part matched inside the double quotes in the output
+ * string range, also setting the output flag if any escapes were in
+ * the string, requiring processing to remove the escapes.
+ *
+ * Example:
+ *     // Match a double-quoted string
+ *     const char *strbegin, *strend;
+ *     bool escaped;
+ *     if (parse_doublequote_string_no_ws(begin, end, strbegin, strend, escaped)) {
+ *         if (!escaped) {
+ *             // Use the matched string bytes directly
+ *         } else {
+ *             string result;
+ *             unescape_string(strbegin, strend, result);
+ *             // Use result
+ *         }
+ *     } else {
+ *         // Was not a double-quoted string
+ *     }
+ */
+bool parse_doublequote_string_no_ws(const char *&rbegin, const char *end,
+                                    const char *&out_strbegin,
+                                    const char *&out_strend, bool &out_escaped);
+
+/**
+ * Unescapes the string provided in the byte range into the
+ * output string as UTF-8. Typically used with the
+ * ``parse_doublequote_string_no_ws`` function.
+ */
+void unescape_string(const char *strbegin, const char *strend,
+                     std::string &out);
 
 /**
  * Without skipping whitespace, parses an integer with exactly two digits.

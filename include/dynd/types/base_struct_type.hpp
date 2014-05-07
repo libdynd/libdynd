@@ -43,6 +43,8 @@ public:
      *           of the given name.
      */
     virtual intptr_t get_field_index(const std::string& field_name) const = 0;
+    intptr_t get_field_index(const char *field_index_begin,
+                             const char *field_index_end) const;
 
     size_t get_elwise_property_index(const std::string& property_name) const;
     ndt::type get_elwise_property_type(size_t elwise_property_index,
