@@ -120,7 +120,7 @@ static void raise_string_cast_overflow_error(const ndt::type& dst_tp, const ndt:
     ss << "overflow converting string ";
     string_tp.print_data(ss, metadata, data);
     ss << " to " << dst_tp;
-    throw runtime_error(ss.str());
+    throw overflow_error(ss.str());
 }
 
 static void string_to_bool_single(char *dst, const char *src,
@@ -156,6 +156,35 @@ static uint64_t parse_uint64_noerror(const std::string& s)
         char c = s[pos];
         if ('0' <= c && c <= '9') {
             result = (result * 10) + (c - '0');
+        } else if (c == 'e' || c == 'E') {
+            // Accept "1e5", "1e+5" integers with a positive exponent,
+            // a subset of floating point syntax. Note that "1.2e1"
+            // is not accepted as the value 12 by this code.
+            ++pos;
+            if (pos < end && s[pos] == '+') {
+                ++pos;
+            }
+            if (pos < end) {
+                int exponent = 0;
+                // Accept any number of zeros followed by at most
+                // two digits. Anything greater would overflow.
+                while (pos < end && s[pos] == '0') {
+                    ++pos;
+                }
+                if (pos < end && '0' <= s[pos] && s[pos] <= '9') {
+                    exponent = s[pos++] - '0';
+                }
+                if (pos < end && '0' <= s[pos] && s[pos] <= '9') {
+                    exponent = (10 * exponent) + (s[pos++] - '0');
+                }
+                if (pos == end) {
+                    // Apply the exponent in a naive way
+                    for (int i = 0; i < exponent; ++i) {
+                        result = result * 10;
+                    }
+                }
+            }
+            break;
         } else {
             break;
         }
@@ -176,6 +205,51 @@ static uint64_t parse_uint64(const std::string& s, bool& out_overflow, bool& out
                 out_overflow = true;
             }
         } else {
+            if (c == '.') {
+                // Accept ".", ".0" with trailing decimal zeros as well
+                ++pos;
+                while (pos < end && s[pos] == '0') {
+                    ++pos;
+                }
+                if (pos == end) {
+                    break;
+                }
+            } else if (c == 'e' || c == 'E') {
+                // Accept "1e5", "1e+5" integers with a positive exponent,
+                // a subset of floating point syntax. Note that "1.2e1"
+                // is not accepted as the value 12 by this code.
+                ++pos;
+                if (pos < end && s[pos] == '+') {
+                    ++pos;
+                }
+                if (pos < end) {
+                    int exponent = 0;
+                    // Accept any number of zeros followed by at most
+                    // two digits. Anything greater would overflow.
+                    while (pos < end && s[pos] == '0') {
+                        ++pos;
+                    }
+                    if (pos < end && '0' <= s[pos] && s[pos] <= '9') {
+                        exponent = s[pos++] - '0';
+                    }
+                    if (pos < end && '0' <= s[pos] && s[pos] <= '9') {
+                        exponent = (10 * exponent) + (s[pos++] - '0');
+                    }
+                    if (pos == end) {
+                        prev_result = result;
+                        // Apply the exponent in a naive way, but with
+                        // overflow checking
+                        for (int i = 0; i < exponent; ++i) {
+                            result = result * 10;
+                            if (result < prev_result) {
+                                out_overflow = true;
+                            }
+                            prev_result = result;
+                        }
+                        return result;
+                    }
+                }
+            }
             out_badparse = true;
             break;
         }

@@ -1242,6 +1242,16 @@ inline array empty(intptr_t dim0, intptr_t dim1, intptr_t dim2, const char (&dsh
 }
 
 /**
+ * Constructs an uninitialized array of the given C++ type.
+ *
+ *      array a = nd::empty<double>();
+ */
+template<typename T>
+inline array empty() {
+    return empty(ndt::make_type<T>());
+}
+
+/**
  * Constructs an array with the same shape and memory layout
  * of the one given, but replacing the
  *

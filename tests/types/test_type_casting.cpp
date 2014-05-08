@@ -9,6 +9,7 @@
 
 #include <dynd/typed_data_assign.hpp>
 #include <dynd/types/fixedstring_type.hpp>
+#include <dynd/array.hpp>
 
 using namespace std;
 using namespace dynd;
@@ -170,3 +171,73 @@ TEST(DTypeCasting, IsLosslessAssignment) {
     EXPECT_FALSE(is_lossless_assignment(ndt::type(float64_type_id), ndt::type(complex_float64_type_id)));
 }
 
+
+TEST(DTypeCasting, StringToInt32) {
+    nd::array a = nd::empty<int>();
+
+    // Test the limits of string to int conversion
+    a.vals() = "2147483647";
+    EXPECT_EQ(2147483647, a.as<int>());
+    a.vals() = "-2147483648";
+    EXPECT_EQ(-2147483647 - 1, a.as<int>());
+    EXPECT_THROW(a.vals() = "2147483648", overflow_error);
+    EXPECT_THROW(a.vals() = "-2147483649", overflow_error);
+
+    // Trailing ".0" is permitted
+    a.vals() = "1234.";
+    EXPECT_EQ(1234, a.as<int>());
+    a.vals() = "2345.0";
+    EXPECT_EQ(2345, a.as<int>());
+    a.vals() = "3456.00000";
+    EXPECT_EQ(3456, a.as<int>());
+
+    // Simple "1e5" positive exponent cases are permitted
+    a.vals() = "1e5";
+    EXPECT_EQ(100000, a.as<int>());
+    a.vals() = "1e9";
+    EXPECT_EQ(1000000000, a.as<int>());
+    a.vals() = "2e9";
+    EXPECT_EQ(2000000000, a.as<int>());
+    a.vals() = "-21e8";
+    EXPECT_EQ(-2100000000, a.as<int>());
+    EXPECT_THROW(a.vals() = "3e9", overflow_error);
+}
+
+TEST(DTypeCasting, StringToInt64) {
+    nd::array a = nd::empty<int64_t>();
+
+    // Test the limits of string to int conversion
+    a.vals() = "9223372036854775807";
+    EXPECT_EQ(9223372036854775807LL, a.as<int64_t>());
+    a.vals() = "-9223372036854775808";
+    EXPECT_EQ(-9223372036854775807LL - 1LL, a.as<int64_t>());
+    EXPECT_THROW(a.vals() = "9223372036854775808", overflow_error);
+    EXPECT_THROW(a.vals() = "-9223372036854775809", overflow_error);
+
+    // Simple "1e5" positive exponent cases are permitted
+    a.vals() = "1e18";
+    EXPECT_EQ(1000000000000000000LL, a.as<int64_t>());
+    a.vals() = "922e16";
+    EXPECT_EQ(9220000000000000000LL, a.as<int64_t>());
+    EXPECT_THROW(a.vals() = "1e19", overflow_error);
+}
+
+TEST(DTypeCasting, StringToUInt64) {
+    nd::array a = nd::empty<uint64_t>();
+
+    // Test the limits of string to int conversion
+    a.vals() = "0";
+    EXPECT_EQ(0u, a.as<uint64_t>());
+    a.vals() = "18446744073709551615";
+    EXPECT_EQ(18446744073709551615ULL, a.as<uint64_t>());
+    EXPECT_THROW(a.vals() = "18446744073709551616", overflow_error);
+    EXPECT_THROW(a.vals() = "-1", overflow_error);
+
+    // Simple "1e5" positive exponent cases are permitted
+    a.vals() = "1e19";
+    EXPECT_EQ(10000000000000000000ULL, a.as<uint64_t>());
+    a.vals() = "1844e15";
+    EXPECT_EQ(1844000000000000000ULL, a.as<uint64_t>());
+    EXPECT_THROW(a.vals() = "1845e20", overflow_error);
+    EXPECT_THROW(a.vals() = "1e20", overflow_error);
+}
