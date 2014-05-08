@@ -33,7 +33,7 @@ class base_type;
 struct iterdata_common;
 
 /** This is the callback function type used by the base_type::foreach function */
-typedef void (*foreach_fn_t)(const ndt::type &dt, char *data, const char *metadata, void *callback_data);
+typedef void (*foreach_fn_t)(const ndt::type &dt, const char *metadata, char *data, void *callback_data);
 
 /**
  * This is the iteration increment function used by iterdata. It increments the
@@ -484,12 +484,12 @@ public:
      * dimension. For array dimensions, the type provided is the same each call, but for
      * heterogeneous dimensions it changes.
      *
+     * \param metadata  The arrmeta.
      * \param data  The nd::array data.
-     * \param metadata  The nd::array metadata.
      * \param callback  Callback function called for each subelement.
      * \param callback_data  Data provided to the callback function.
      */
-    virtual void foreach_leading(char *data, const char *metadata,
+    virtual void foreach_leading(const char *metadata, char *data,
                     foreach_fn_t callback, void *callback_data) const;
 
     /**

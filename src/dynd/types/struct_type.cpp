@@ -446,14 +446,16 @@ void struct_type::metadata_debug_print(const char *metadata, std::ostream& o, co
     }
 }
 
-void struct_type::foreach_leading(char *data, const char *metadata, foreach_fn_t callback, void *callback_data) const
+void struct_type::foreach_leading(const char *metadata, char *data,
+                                  foreach_fn_t callback, void *callback_data)
+    const
 {
     if (!m_field_types.empty()) {
         const size_t *offsets = reinterpret_cast<const size_t *>(metadata);
         const ndt::type *fields = &m_field_types[0];
         const size_t *metadata_offsets = &m_metadata_offsets[0];
         for (intptr_t i = 0, i_end = m_field_types.size(); i < i_end; ++i) {
-            callback(fields[i], data + offsets[i], metadata + metadata_offsets[i], callback_data);
+            callback(fields[i], metadata + metadata_offsets[i], data + offsets[i], callback_data);
         }
     }
 }

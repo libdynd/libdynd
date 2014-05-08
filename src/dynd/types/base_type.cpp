@@ -262,8 +262,10 @@ size_t base_type::make_comparison_kernel(
     throw std::runtime_error(ss.str());
 }
 
-void base_type::foreach_leading(char *DYND_UNUSED(data), const char *DYND_UNUSED(metadata),
-                foreach_fn_t DYND_UNUSED(callback), void *DYND_UNUSED(callback_data)) const
+void base_type::foreach_leading(const char *DYND_UNUSED(metadata),
+                                char *DYND_UNUSED(data),
+                                foreach_fn_t DYND_UNUSED(callback),
+                                void *DYND_UNUSED(callback_data)) const
 {
     // Default to scalar behavior
     stringstream ss;

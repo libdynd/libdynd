@@ -535,13 +535,15 @@ size_t fixed_dim_type::make_assignment_kernel(
     throw dynd::type_error(ss.str());
 }
 
-void fixed_dim_type::foreach_leading(char *data, const char *metadata, foreach_fn_t callback, void *callback_data) const
+void fixed_dim_type::foreach_leading(const char *metadata, char *data,
+                                     foreach_fn_t callback, void *callback_data)
+    const
 {
     const fixed_dim_type_metadata *md = reinterpret_cast<const fixed_dim_type_metadata *>(metadata);
     const char *child_metadata = metadata + sizeof(fixed_dim_type_metadata);
     intptr_t stride = md->stride;
     for (intptr_t i = 0, i_end = m_dim_size; i < i_end; ++i, data += stride) {
-        callback(m_element_tp, data, child_metadata, callback_data);
+        callback(m_element_tp, child_metadata, data, callback_data);
     }
 }
 

@@ -545,11 +545,13 @@ size_t cfixed_dim_type::make_assignment_kernel(
     }
 }
 
-void cfixed_dim_type::foreach_leading(char *data, const char *metadata, foreach_fn_t callback, void *callback_data) const
+void cfixed_dim_type::foreach_leading(const char *metadata, char *data,
+                                      foreach_fn_t callback,
+                                      void *callback_data) const
 {
     intptr_t stride = m_stride;
     for (intptr_t i = 0, i_end = m_dim_size; i < i_end; ++i, data += stride) {
-        callback(m_element_tp, data, metadata, callback_data);
+        callback(m_element_tp, metadata, data, callback_data);
     }
 }
 
