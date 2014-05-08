@@ -221,8 +221,8 @@ intptr_t ndt::type::get_dim_size(const char *metadata, const char *data) const
     }
 
     std::stringstream ss;
-    ss << "Cannot get the leading dimension size of dynd array with type " << *this;
-    throw dynd::type_error(ss.str());
+    ss << "Scalar dynd array of type " << *this << " has no length";
+    throw std::invalid_argument(ss.str());
 }
 
 bool ndt::type::get_as_strided_dim(const char *metadata, intptr_t &out_size,
