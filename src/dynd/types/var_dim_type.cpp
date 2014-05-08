@@ -637,7 +637,9 @@ size_t var_dim_type::make_assignment_kernel(
     }
 }
 
-void var_dim_type::foreach_leading(char *data, const char *metadata, foreach_fn_t callback, void *callback_data) const
+void var_dim_type::foreach_leading(const char *metadata, char *data,
+                                   foreach_fn_t callback, void *callback_data)
+    const
 {
     const var_dim_type_metadata *md = reinterpret_cast<const var_dim_type_metadata *>(metadata);
     const char *child_metadata = metadata + sizeof(var_dim_type_metadata);
@@ -645,7 +647,7 @@ void var_dim_type::foreach_leading(char *data, const char *metadata, foreach_fn_
     data = d->begin + md->offset;
     intptr_t stride = md->stride;
     for (intptr_t i = 0, i_end = d->size; i < i_end; ++i, data += stride) {
-        callback(m_element_tp, data, child_metadata, callback_data);
+        callback(m_element_tp, child_metadata, data, callback_data);
     }
 }
 

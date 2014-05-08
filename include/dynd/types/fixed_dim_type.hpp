@@ -97,8 +97,9 @@ public:
                     kernel_request_t kernreq, assign_error_mode errmode,
                     const eval::eval_context *ectx) const;
 
-    void foreach_leading(char *data, const char *metadata, foreach_fn_t callback, void *callback_data) const;
-    
+    void foreach_leading(const char *metadata, char *data,
+                         foreach_fn_t callback, void *callback_data) const;
+
     /**
      * Modifies metadata allocated using the metadata_default_construct function, to be used
      * immediately after nd::array construction. Given an input type/metadata, edits the output

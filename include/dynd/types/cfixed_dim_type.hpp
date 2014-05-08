@@ -103,8 +103,9 @@ public:
                     kernel_request_t kernreq, assign_error_mode errmode,
                     const eval::eval_context *ectx) const;
 
-    void foreach_leading(char *data, const char *metadata, foreach_fn_t callback, void *callback_data) const;
-    
+    void foreach_leading(const char *metadata, char *data,
+                         foreach_fn_t callback, void *callback_data) const;
+
     void get_dynamic_type_properties(
                     const std::pair<std::string, gfunc::callable> **out_properties,
                     size_t *out_count) const;
