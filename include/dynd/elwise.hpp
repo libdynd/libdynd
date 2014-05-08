@@ -576,8 +576,8 @@ DYND_PP_JOIN_MAP(CALL_CKERNEL_INSTANTIATORS, (), DYND_PP_RANGE(1, DYND_PP_INC(DY
         ckernel_builder ckb; \
         ndt::type lifted_types[NSRC + 1] = {res.get_type(), DYND_PP_JOIN_OUTER_1(DYND_PP_META_DOT_CALL, (,), \
             DYND_PP_META_NAME_RANGE(acast, NSRC), (get_type))}; \
-        const char *dynd_metadata[NSRC + 1] = {res.get_ndo_meta(), DYND_PP_JOIN_OUTER_1(DYND_PP_META_DOT_CALL, (,), \
-            DYND_PP_META_NAME_RANGE(acast, NSRC), (get_ndo_meta))}; \
+        const char *dynd_metadata[NSRC + 1] = {res.get_arrmeta(), DYND_PP_JOIN_OUTER_1(DYND_PP_META_DOT_CALL, (,), \
+            DYND_PP_META_NAME_RANGE(acast, NSRC), (get_arrmeta))}; \
         make_lifted_expr_ckernel(&ckd, &ckb, 0, \
                             lifted_types, dynd_metadata, kernel_request_single, ectx); \
 \
@@ -651,8 +651,8 @@ DYND_PP_JOIN_MAP(CALL_CKERNEL_INSTANTIATORS, (), DYND_PP_RANGE(1, DYND_PP_INC(DY
         ckernel_builder ckb; \
         ndt::type lifted_types[NSRC + 1] = {res.get_type(), DYND_PP_JOIN_OUTER_1(DYND_PP_META_DOT_CALL, (,), \
             DYND_PP_META_NAME_RANGE(acast, NSRC), (get_type))}; \
-        const char *dynd_metadata[NSRC + 1] = {res.get_ndo_meta(), DYND_PP_JOIN_OUTER_1(DYND_PP_META_DOT_CALL, (,), \
-            DYND_PP_META_NAME_RANGE(acast, NSRC), (get_ndo_meta))}; \
+        const char *dynd_metadata[NSRC + 1] = {res.get_arrmeta(), DYND_PP_JOIN_OUTER_1(DYND_PP_META_DOT_CALL, (,), \
+            DYND_PP_META_NAME_RANGE(acast, NSRC), (get_arrmeta))}; \
         make_lifted_expr_ckernel(&ckd, &ckb, 0, \
                             lifted_types, dynd_metadata, kernel_request_single, ectx); \
 \
@@ -738,8 +738,8 @@ DYND_PP_JOIN_MAP(FUNCS, (), DYND_PP_RANGE(1, DYND_PP_INC(DYND_ELWISE_MAX)))
         ckernel_builder ckb; \
         ndt::type lifted_types[NSRC + 1] = {res.get_type(), DYND_PP_JOIN_OUTER_1(DYND_PP_META_DOT_CALL, (,), \
             DYND_PP_META_NAME_RANGE(acast, NSRC), (get_type))}; \
-        const char *dynd_metadata[NSRC + 1] = {res.get_ndo_meta(), DYND_PP_JOIN_OUTER_1(DYND_PP_META_DOT_CALL, (,), \
-            DYND_PP_META_NAME_RANGE(acast, NSRC), (get_ndo_meta))}; \
+        const char *dynd_metadata[NSRC + 1] = {res.get_arrmeta(), DYND_PP_JOIN_OUTER_1(DYND_PP_META_DOT_CALL, (,), \
+            DYND_PP_META_NAME_RANGE(acast, NSRC), (get_arrmeta))}; \
         make_lifted_expr_ckernel(&ckd, &ckb, 0, \
                             lifted_types, dynd_metadata, kernel_request_single, ectx); \
 \
@@ -815,8 +815,8 @@ DYND_PP_JOIN_MAP(FUNCS, (), DYND_PP_RANGE(1, DYND_PP_INC(DYND_ELWISE_MAX)))
         ckernel_builder ckb; \
         ndt::type lifted_types[NSRC + 1] = {res.get_type(), DYND_PP_JOIN_OUTER_1(DYND_PP_META_DOT_CALL, (,), \
             DYND_PP_META_NAME_RANGE(acast, NSRC), (get_type))}; \
-        const char *dynd_metadata[NSRC + 1] = {res.get_ndo_meta(), DYND_PP_JOIN_OUTER_1(DYND_PP_META_DOT_CALL, (,), \
-            DYND_PP_META_NAME_RANGE(acast, NSRC), (get_ndo_meta))}; \
+        const char *dynd_metadata[NSRC + 1] = {res.get_arrmeta(), DYND_PP_JOIN_OUTER_1(DYND_PP_META_DOT_CALL, (,), \
+            DYND_PP_META_NAME_RANGE(acast, NSRC), (get_arrmeta))}; \
         make_lifted_expr_ckernel(&ckd, &ckb, 0, \
                             lifted_types, dynd_metadata, kernel_request_single, ectx); \
 \
@@ -900,8 +900,8 @@ DYND_PP_JOIN_MAP(METHS, (), DYND_PP_RANGE(1, DYND_PP_INC(DYND_ELWISE_MAX)))
         ckernel_builder ckb; \
         ndt::type lifted_types[NSRC + 1] = {res.get_type(), DYND_PP_JOIN_OUTER_1(DYND_PP_META_DOT_CALL, (,), \
             DYND_PP_META_NAME_RANGE(acast, NSRC), (get_type))}; \
-        const char *dynd_metadata[NSRC + 1] = {res.get_ndo_meta(), DYND_PP_JOIN_OUTER_1(DYND_PP_META_DOT_CALL, (,), \
-            DYND_PP_META_NAME_RANGE(acast, NSRC), (get_ndo_meta))}; \
+        const char *dynd_metadata[NSRC + 1] = {res.get_arrmeta(), DYND_PP_JOIN_OUTER_1(DYND_PP_META_DOT_CALL, (,), \
+            DYND_PP_META_NAME_RANGE(acast, NSRC), (get_arrmeta))}; \
         make_lifted_expr_ckernel(&ckd, &ckb, 0, \
                             lifted_types, dynd_metadata, kernel_request_single, ectx); \
 \
@@ -975,8 +975,8 @@ DYND_PP_JOIN_MAP(METHS, (), DYND_PP_RANGE(1, DYND_PP_INC(DYND_ELWISE_MAX)))
         ckernel_builder ckb; \
         ndt::type lifted_types[NSRC + 1] = {res.get_type(), DYND_PP_JOIN_OUTER_1(DYND_PP_META_DOT_CALL, (,), \
             DYND_PP_META_NAME_RANGE(acast, NSRC), (get_type))}; \
-        const char *dynd_metadata[NSRC + 1] = {res.get_ndo_meta(), DYND_PP_JOIN_OUTER_1(DYND_PP_META_DOT_CALL, (,), \
-            DYND_PP_META_NAME_RANGE(acast, NSRC), (get_ndo_meta))}; \
+        const char *dynd_metadata[NSRC + 1] = {res.get_arrmeta(), DYND_PP_JOIN_OUTER_1(DYND_PP_META_DOT_CALL, (,), \
+            DYND_PP_META_NAME_RANGE(acast, NSRC), (get_arrmeta))}; \
         make_lifted_expr_ckernel(&ckd, &ckb, 0, \
                             lifted_types, dynd_metadata, kernel_request_single, ectx); \
 \

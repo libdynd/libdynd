@@ -32,6 +32,7 @@
 #include <dynd/types/byteswap_type.hpp>
 #include <dynd/types/cuda_host_type.hpp>
 #include <dynd/types/cuda_device_type.hpp>
+#include <dynd/types/ndarrayarg_type.hpp>
 
 using namespace std;
 using namespace dynd;
@@ -94,6 +95,7 @@ static const map<string, ndt::type>& get_builtin_types()
         builtin_types["bytes"] = ndt::make_bytes(1);
         builtin_types["type"] = ndt::make_type();
         builtin_types["ckernel_deferred"] = ndt::make_ckernel_deferred();
+        builtin_types["ndarrayarg"] = ndt::make_ndarrayarg();
     }
     return builtin_types;
 }

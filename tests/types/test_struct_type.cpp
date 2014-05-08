@@ -366,12 +366,12 @@ TEST(StructType, SingleCompareDifferentMetadata) {
     EXPECT_EQ(a.get_type(), b.get_type());
     const struct_type *a_sdt = static_cast<const struct_type *>(a.get_type().extended());
     const struct_type *b_sdt = static_cast<const struct_type *>(b.get_type().extended());
-    EXPECT_NE(a_sdt->get_data_offsets(a.get_ndo_meta())[0],
-                    b_sdt->get_data_offsets(b.get_ndo_meta())[0]);
-    EXPECT_NE(a_sdt->get_data_offsets(a.get_ndo_meta())[1],
-                    b_sdt->get_data_offsets(b.get_ndo_meta())[1]);
-    EXPECT_NE(a_sdt->get_data_offsets(a.get_ndo_meta())[2],
-                    b_sdt->get_data_offsets(b.get_ndo_meta())[2]);
+    EXPECT_NE(a_sdt->get_data_offsets(a.get_arrmeta())[0],
+                    b_sdt->get_data_offsets(b.get_arrmeta())[0]);
+    EXPECT_NE(a_sdt->get_data_offsets(a.get_arrmeta())[1],
+                    b_sdt->get_data_offsets(b.get_arrmeta())[1]);
+    EXPECT_NE(a_sdt->get_data_offsets(a.get_arrmeta())[2],
+                    b_sdt->get_data_offsets(b.get_arrmeta())[2]);
 
     // Test lexicographic sorting
 

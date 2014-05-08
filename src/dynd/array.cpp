@@ -234,7 +234,7 @@ nd::array nd::make_bytes_array(const char *data, size_t len, size_t alignment)
     ndo->m_data_reference = NULL;
     ndo->m_flags = nd::default_access_flags;
     // Set the bytes metadata, telling the system that the bytes data was embedded in the array memory
-    bytes_type_metadata *ndo_meta = reinterpret_cast<bytes_type_metadata *>(result.get_ndo_meta());
+    bytes_type_metadata *ndo_meta = reinterpret_cast<bytes_type_metadata *>(result.get_arrmeta());
     ndo_meta->blockref = NULL;
     return result;
 }
@@ -260,7 +260,7 @@ nd::array nd::make_string_array(const char *str, size_t len,
     ndo->m_data_reference = NULL;
     ndo->m_flags = access_flags;
     // Set the string metadata, telling the system that the string data was embedded in the array memory
-    string_type_metadata *ndo_meta = reinterpret_cast<string_type_metadata *>(result.get_ndo_meta());
+    string_type_metadata *ndo_meta = reinterpret_cast<string_type_metadata *>(result.get_arrmeta());
     ndo_meta->blockref = NULL;
     return result;
 }
@@ -270,7 +270,7 @@ nd::array nd::make_utf8_array_array(const char **cstr_array, size_t array_size)
     ndt::type dt = ndt::make_string(string_encoding_utf_8);
     nd::array result = nd::make_strided_array(array_size, dt);
     // Get the allocator for the output string type
-    const string_type_metadata *md = reinterpret_cast<const string_type_metadata *>(result.get_ndo_meta() + sizeof(strided_dim_type_metadata));
+    const string_type_metadata *md = reinterpret_cast<const string_type_metadata *>(result.get_arrmeta() + sizeof(strided_dim_type_metadata));
     memory_block_data *dst_memblock = md->blockref;
     memory_block_pod_allocator_api *allocator = get_memory_block_pod_allocator_api(dst_memblock);
     char **out_data = reinterpret_cast<char **>(result.get_ndo()->m_data_pointer);
@@ -571,7 +571,7 @@ nd::array nd::detail::make_from_vec<ndt::type>::make(const std::vector<ndt::type
     preamble->m_flags = read_access_flag | immutable_access_flag;
     // The metadata for the strided and string parts of the type
     strided_dim_type_metadata *sa_md = reinterpret_cast<strided_dim_type_metadata *>(
-                                            result.get_ndo_meta());
+                                            result.get_arrmeta());
     sa_md->size = vec.size();
     sa_md->stride = vec.empty() ? 0 : sizeof(type_type_data);
     // The data
@@ -606,7 +606,7 @@ nd::array nd::detail::make_from_vec<std::string>::make(const std::vector<std::st
     preamble->m_flags = read_access_flag | immutable_access_flag;
     // The metadata for the strided and string parts of the type
     strided_dim_type_metadata *sa_md = reinterpret_cast<strided_dim_type_metadata *>(
-                                            result.get_ndo_meta());
+                                            result.get_arrmeta());
     sa_md->size = vec.size();
     sa_md->stride = vec.empty() ? 0 : sizeof(string_type_data);
     string_type_metadata *s_md = reinterpret_cast<string_type_metadata *>(sa_md + 1);
@@ -699,7 +699,7 @@ nd::array nd::array::at_array(intptr_t nindices, const irange *indices, bool col
         }
         memory_block_incref(result.get_ndo()->m_data_reference);
         intptr_t offset = get_ndo()->m_type->apply_linear_index(nindices, indices,
-                        get_ndo_meta(), dt, result.get_ndo_meta(),
+                        get_arrmeta(), dt, result.get_arrmeta(),
                         m_memblock.get(), 0, this_dt,
                         collapse_leading,
                         &result.get_ndo()->m_data_pointer, &result.get_ndo()->m_data_reference);
@@ -717,15 +717,15 @@ void nd::array::val_assign(const array& rhs, assign_error_mode errmode,
         throw runtime_error("tried to read from a dynd array that is not readable");
     }
 
-    typed_data_assign(get_type(), get_ndo_meta(), get_readwrite_originptr(),
-                    rhs.get_type(), rhs.get_ndo_meta(), rhs.get_readonly_originptr(),
+    typed_data_assign(get_type(), get_arrmeta(), get_readwrite_originptr(),
+                    rhs.get_type(), rhs.get_arrmeta(), rhs.get_readonly_originptr(),
                     errmode, ectx);
 }
 
 void nd::array::val_assign(const ndt::type& rhs_dt, const char *rhs_metadata, const char *rhs_data,
                     assign_error_mode errmode, const eval::eval_context *ectx) const
 {
-    typed_data_assign(get_type(), get_ndo_meta(), get_readwrite_originptr(),
+    typed_data_assign(get_type(), get_arrmeta(), get_readwrite_originptr(),
                     rhs_dt, rhs_metadata, rhs_data,
                     errmode, ectx);
 }
@@ -750,14 +750,14 @@ void nd::array::flag_as_immutable()
         // other than a memblock owning its data, such as an external memblock.
         ok = false;
     } else if (!get_ndo()->is_builtin_type() &&
-            !get_ndo()->m_type->is_unique_data_owner(get_ndo_meta())) {
+            !get_ndo()->m_type->is_unique_data_owner(get_arrmeta())) {
         ok = false;
     }
 
     if (ok) {
         // Finalize any allocated data in the metadata
         if (!is_builtin_type(get_ndo()->m_type)) {
-            get_ndo()->m_type->metadata_finalize_buffers(get_ndo_meta());
+            get_ndo()->m_type->metadata_finalize_buffers(get_arrmeta());
         }
         // Clear the write flag, and set the immutable flag
         get_ndo()->m_flags = (get_ndo()->m_flags&~(uint64_t)write_access_flag)|immutable_access_flag;
@@ -855,7 +855,7 @@ nd::array nd::array::eval(const eval::eval_context *ectx) const
             // Reorder strides of output strided dimensions in a KEEPORDER fashion
             static_cast<const strided_dim_type *>(
                             dt.extended())->reorder_default_constructed_strides(
-                                            result.get_ndo_meta(), get_type(), get_ndo_meta());
+                                            result.get_arrmeta(), get_type(), get_arrmeta());
         }
         result.val_assign(*this, assign_error_default, ectx);
         return result;
@@ -879,7 +879,7 @@ nd::array nd::array::eval_immutable(const eval::eval_context *ectx) const
             // Reorder strides of output strided dimensions in a KEEPORDER fashion
             static_cast<const strided_dim_type *>(
                             dt.extended())->reorder_default_constructed_strides(
-                                            result.get_ndo_meta(), get_type(), get_ndo_meta());
+                                            result.get_arrmeta(), get_type(), get_arrmeta());
         }
         result.val_assign(*this, assign_error_default, ectx);
         result.get_ndo()->m_flags = immutable_access_flag|read_access_flag;
@@ -899,8 +899,8 @@ nd::array nd::array::eval_copy(uint32_t access_flags, const eval::eval_context *
         // Reorder strides of output strided dimensions in a KEEPORDER fashion
         static_cast<const strided_dim_type *>(
                         dt.extended())->reorder_default_constructed_strides(
-                                        result.get_ndo_meta(),
-                                        get_type(), get_ndo_meta());
+                                        result.get_arrmeta(),
+                                        get_type(), get_arrmeta());
     }
     result.val_assign(*this, assign_error_default, ectx);
     // If the access_flags are 0, use the defaults
@@ -960,8 +960,8 @@ nd::array nd::array::to_cuda_device() const
 bool nd::array::op_sorting_less(const array& rhs) const
 {
     comparison_ckernel_builder k;
-    make_comparison_kernel(&k, 0, get_type(), get_ndo_meta(),
-                    rhs.get_type(), rhs.get_ndo_meta(),
+    make_comparison_kernel(&k, 0, get_type(), get_arrmeta(),
+                    rhs.get_type(), rhs.get_arrmeta(),
                     comparison_type_sorting_less,
                     &eval::default_eval_context);
     return k(get_readonly_originptr(), rhs.get_readonly_originptr());
@@ -970,8 +970,8 @@ bool nd::array::op_sorting_less(const array& rhs) const
 bool nd::array::operator<(const array& rhs) const
 {
     comparison_ckernel_builder k;
-    make_comparison_kernel(&k, 0, get_type(), get_ndo_meta(),
-                    rhs.get_type(), rhs.get_ndo_meta(),
+    make_comparison_kernel(&k, 0, get_type(), get_arrmeta(),
+                    rhs.get_type(), rhs.get_arrmeta(),
                     comparison_type_less,
                     &eval::default_eval_context);
     return k(get_readonly_originptr(), rhs.get_readonly_originptr());
@@ -980,8 +980,8 @@ bool nd::array::operator<(const array& rhs) const
 bool nd::array::operator<=(const array& rhs) const
 {
     comparison_ckernel_builder k;
-    make_comparison_kernel(&k, 0, get_type(), get_ndo_meta(),
-                    rhs.get_type(), rhs.get_ndo_meta(),
+    make_comparison_kernel(&k, 0, get_type(), get_arrmeta(),
+                    rhs.get_type(), rhs.get_arrmeta(),
                     comparison_type_less_equal,
                     &eval::default_eval_context);
     return k(get_readonly_originptr(), rhs.get_readonly_originptr());
@@ -990,8 +990,8 @@ bool nd::array::operator<=(const array& rhs) const
 bool nd::array::operator==(const array& rhs) const
 {
     comparison_ckernel_builder k;
-    make_comparison_kernel(&k, 0, get_type(), get_ndo_meta(),
-                    rhs.get_type(), rhs.get_ndo_meta(),
+    make_comparison_kernel(&k, 0, get_type(), get_arrmeta(),
+                    rhs.get_type(), rhs.get_arrmeta(),
                     comparison_type_equal,
                     &eval::default_eval_context);
     return k(get_readonly_originptr(), rhs.get_readonly_originptr());
@@ -1000,8 +1000,8 @@ bool nd::array::operator==(const array& rhs) const
 bool nd::array::operator!=(const array& rhs) const
 {
     comparison_ckernel_builder k;
-    make_comparison_kernel(&k, 0, get_type(), get_ndo_meta(),
-                    rhs.get_type(), rhs.get_ndo_meta(),
+    make_comparison_kernel(&k, 0, get_type(), get_arrmeta(),
+                    rhs.get_type(), rhs.get_arrmeta(),
                     comparison_type_not_equal,
                     &eval::default_eval_context);
     return k(get_readonly_originptr(), rhs.get_readonly_originptr());
@@ -1010,8 +1010,8 @@ bool nd::array::operator!=(const array& rhs) const
 bool nd::array::operator>=(const array& rhs) const
 {
     comparison_ckernel_builder k;
-    make_comparison_kernel(&k, 0, get_type(), get_ndo_meta(),
-                    rhs.get_type(), rhs.get_ndo_meta(),
+    make_comparison_kernel(&k, 0, get_type(), get_arrmeta(),
+                    rhs.get_type(), rhs.get_arrmeta(),
                     comparison_type_greater_equal,
                     &eval::default_eval_context);
     return k(get_readonly_originptr(), rhs.get_readonly_originptr());
@@ -1020,8 +1020,8 @@ bool nd::array::operator>=(const array& rhs) const
 bool nd::array::operator>(const array& rhs) const
 {
     comparison_ckernel_builder k;
-    make_comparison_kernel(&k, 0, get_type(), get_ndo_meta(),
-                    rhs.get_type(), rhs.get_ndo_meta(),
+    make_comparison_kernel(&k, 0, get_type(), get_arrmeta(),
+                    rhs.get_type(), rhs.get_arrmeta(),
                     comparison_type_greater,
                     &eval::default_eval_context);
     return k(get_readonly_originptr(), rhs.get_readonly_originptr());
@@ -1036,8 +1036,8 @@ bool nd::array::equals_exact(const array& rhs) const
     } else if (get_ndim() == 0) {
         comparison_ckernel_builder k;
         make_comparison_kernel(&k, 0,
-                        get_type(), get_ndo_meta(),
-                        rhs.get_type(), rhs.get_ndo_meta(),
+                        get_type(), get_arrmeta(),
+                        rhs.get_type(), rhs.get_arrmeta(),
                         comparison_type_equal, &eval::default_eval_context);
         return k(get_readonly_originptr(), rhs.get_readonly_originptr());
     } else {
@@ -1289,7 +1289,7 @@ nd::array nd::array::view_scalars(const ndt::type& scalar_tp) const
     // at will.
     if (uniform_ndim == 1 && array_type.get_type_id() == strided_dim_type_id) {
         const strided_dim_type *sad = array_type.tcast<strided_dim_type>();
-        const strided_dim_type_metadata *md = reinterpret_cast<const strided_dim_type_metadata *>(get_ndo_meta());
+        const strided_dim_type_metadata *md = reinterpret_cast<const strided_dim_type_metadata *>(get_arrmeta());
         const ndt::type& edt = sad->get_element_type();
         if (edt.is_pod() && (intptr_t)edt.get_data_size() == md->stride &&
                     sad->get_element_type().get_kind() != expression_kind) {
@@ -1322,7 +1322,7 @@ nd::array nd::array::view_scalars(const ndt::type& scalar_tp) const
             result.get_ndo()->m_type = result_tp.release();
             result.get_ndo()->m_flags = get_ndo()->m_flags;
             // The result has one strided ndarray field
-            strided_dim_type_metadata *result_md = reinterpret_cast<strided_dim_type_metadata *>(result.get_ndo_meta());
+            strided_dim_type_metadata *result_md = reinterpret_cast<strided_dim_type_metadata *>(result.get_arrmeta());
             result_md->size = nbytes / scalar_tp.get_data_size();
             result_md->stride = scalar_tp.get_data_size();
             return result;
@@ -1348,7 +1348,7 @@ std::string nd::detail::array_as_string(const nd::array& lhs, assign_error_mode 
     }
     const base_string_type *esd =
                     static_cast<const base_string_type *>(temp.get_type().extended());
-    return esd->get_utf8_string(temp.get_ndo_meta(), temp.get_ndo()->m_data_pointer, errmode);
+    return esd->get_utf8_string(temp.get_arrmeta(), temp.get_ndo()->m_data_pointer, errmode);
 }
 
 ndt::type nd::detail::array_as_type(const nd::array& lhs, assign_error_mode errmode)
@@ -1382,7 +1382,7 @@ void nd::array::debug_print(std::ostream& o, const std::string& indent) const
         o << ")\n";
         if (!ndo->is_builtin_type()) {
             o << "  type-specific metadata:\n";
-            ndo->m_type->metadata_debug_print(get_ndo_meta(), o, indent + "   ");
+            ndo->m_type->metadata_debug_print(get_arrmeta(), o, indent + "   ");
         }
         o << " data:\n";
         o << "   pointer: " << (void *)ndo->m_data_pointer << "\n";
@@ -1412,7 +1412,7 @@ std::ostream& nd::operator<<(std::ostream& o, const array& rhs)
             if (v.get_ndo()->m_type->get_flags() & type_flag_not_host_readable) {
                 v = v.to_host();
             }
-            v.get_ndo()->m_type->print_data(o, v.get_ndo_meta(), v.get_ndo()->m_data_pointer);
+            v.get_ndo()->m_type->print_data(o, v.get_arrmeta(), v.get_ndo()->m_data_pointer);
         }
         o << ", type=\"" << rhs.get_type() << "\")";
     } else {
@@ -1434,14 +1434,14 @@ nd::array nd::eval_raw_copy(const ndt::type& dt, const char *metadata, const cha
         // Reorder strides of output strided dimensions in a KEEPORDER fashion
         if (dt.get_type_id() == strided_dim_type_id) {
             static_cast<const strided_dim_type *>(
-                        cdt.extended())->reorder_default_constructed_strides(result.get_ndo_meta(),
+                        cdt.extended())->reorder_default_constructed_strides(result.get_arrmeta(),
                                     dt, metadata);
         }
     } else {
         result.set(make_array_memory_block(cdt, 0, NULL));
     }
 
-    typed_data_assign(cdt, result.get_ndo_meta(), result.get_readwrite_originptr(),
+    typed_data_assign(cdt, result.get_arrmeta(), result.get_readwrite_originptr(),
                     dt, metadata, data,
                     assign_error_default, &eval::default_eval_context);
 
@@ -1483,8 +1483,8 @@ nd::array nd::empty_like(const nd::array& rhs, const ndt::type& uniform_tp)
         if (result.get_type().get_type_id() == strided_dim_type_id) {
             static_cast<const strided_dim_type *>(
                         result.get_type().extended())->reorder_default_constructed_strides(
-                                        result.get_ndo_meta(),
-                                        rhs.get_type(), rhs.get_ndo_meta());
+                                        result.get_arrmeta(),
+                                        rhs.get_type(), rhs.get_arrmeta());
         }
         return result;
     }
@@ -1510,8 +1510,8 @@ nd::array nd::empty_like(const nd::array& rhs)
         if (result.get_type().get_type_id() == strided_dim_type_id) {
             static_cast<const strided_dim_type *>(
                         result.get_type().extended())->reorder_default_constructed_strides(
-                                        result.get_ndo_meta(),
-                                        rhs.get_type(), rhs.get_ndo_meta());
+                                        result.get_arrmeta(),
+                                        rhs.get_type(), rhs.get_arrmeta());
         }
         return result;
     }
@@ -1548,7 +1548,7 @@ nd::array nd::memmap(const std::string& filename,
     // Set the bytes metadata, telling the system
     // about the memmapped memblock
     bytes_type_metadata *ndo_meta =
-        reinterpret_cast<bytes_type_metadata *>(result.get_ndo_meta());
+        reinterpret_cast<bytes_type_metadata *>(result.get_arrmeta());
     ndo_meta->blockref = mm.release();
     return result;
 }
@@ -1560,7 +1560,7 @@ intptr_t nd::binary_search(const nd::array& n, const char *metadata, const char 
         ss << "cannot do a dynd binary_search on array with type " << n.get_type() << " without a leading array dimension";
         throw runtime_error(ss.str());
     }
-    const char *n_metadata = n.get_ndo_meta();
+    const char *n_metadata = n.get_arrmeta();
     ndt::type element_tp = n.get_type().at_single(0, &n_metadata);
     if (element_tp.get_metadata_size() == 0 || n_metadata == metadata ||
                     memcmp(n_metadata, metadata, element_tp.get_metadata_size()) == 0) {
@@ -1581,7 +1581,7 @@ intptr_t nd::binary_search(const nd::array& n, const char *metadata, const char 
         }
 
         const char *n_data = n.get_readonly_originptr();
-        intptr_t n_stride = reinterpret_cast<const strided_dim_type_metadata *>(n.get_ndo_meta())->stride;
+        intptr_t n_stride = reinterpret_cast<const strided_dim_type_metadata *>(n.get_arrmeta())->stride;
         intptr_t first = 0, last = n.get_dim_size();
         while (first < last) {
             intptr_t trial = first + (last - first) / 2;
@@ -1623,7 +1623,7 @@ intptr_t nd::binary_search(const nd::array& n, const char *metadata, const char 
         }
 
         const char *n_data = n.get_readonly_originptr();
-        intptr_t n_stride = reinterpret_cast<const strided_dim_type_metadata *>(n.get_ndo_meta())->stride;
+        intptr_t n_stride = reinterpret_cast<const strided_dim_type_metadata *>(n.get_arrmeta())->stride;
         intptr_t first = 0, last = n.get_dim_size();
         while (first < last) {
             intptr_t trial = first + (last - first) / 2;
@@ -1687,24 +1687,24 @@ nd::array nd::groupby(const nd::array& data_values, const nd::array& by_values, 
 
     // Set the metadata for the data values
     pointer_type_metadata *pmeta;
-    pmeta = gbdt_ext->get_data_values_pointer_metadata(result.get_ndo_meta());
+    pmeta = gbdt_ext->get_data_values_pointer_metadata(result.get_arrmeta());
     pmeta->offset = 0;
     pmeta->blockref = data_values.get_ndo()->m_data_reference
                     ? data_values.get_ndo()->m_data_reference
                     : &data_values.get_ndo()->m_memblockdata;
     memory_block_incref(pmeta->blockref);
     data_values.get_type().extended()->metadata_copy_construct(reinterpret_cast<char *>(pmeta + 1),
-                    data_values.get_ndo_meta(), &data_values.get_ndo()->m_memblockdata);
+                    data_values.get_arrmeta(), &data_values.get_ndo()->m_memblockdata);
 
     // Set the metadata for the by values
-    pmeta = gbdt_ext->get_by_values_pointer_metadata(result.get_ndo_meta());
+    pmeta = gbdt_ext->get_by_values_pointer_metadata(result.get_arrmeta());
     pmeta->offset = 0;
     pmeta->blockref = by_values_as_groups.get_ndo()->m_data_reference
                     ? by_values_as_groups.get_ndo()->m_data_reference
                     : &by_values_as_groups.get_ndo()->m_memblockdata;
     memory_block_incref(pmeta->blockref);
     by_values_as_groups.get_type().extended()->metadata_copy_construct(reinterpret_cast<char *>(pmeta + 1),
-                    by_values_as_groups.get_ndo_meta(), &by_values_as_groups.get_ndo()->m_memblockdata);
+                    by_values_as_groups.get_arrmeta(), &by_values_as_groups.get_ndo()->m_memblockdata);
 
     // Set the pointers to the data and by values data
     groupby_type_data *groupby_data_ptr = reinterpret_cast<groupby_type_data *>(data_ptr);
@@ -1754,7 +1754,7 @@ nd::array nd::combine_into_tuple(size_t field_count, const array *field_values)
     const size_t *metadata_offsets = fsd->get_metadata_offsets();
     for (size_t i = 0; i != field_count; ++i) {
         pointer_type_metadata *pmeta;
-        pmeta = reinterpret_cast<pointer_type_metadata *>(result.get_ndo_meta() + metadata_offsets[i]);
+        pmeta = reinterpret_cast<pointer_type_metadata *>(result.get_arrmeta() + metadata_offsets[i]);
         pmeta->offset = 0;
         pmeta->blockref = field_values[i].get_ndo()->m_data_reference
                         ? field_values[i].get_ndo()->m_data_reference
@@ -1765,7 +1765,7 @@ nd::array nd::combine_into_tuple(size_t field_count, const array *field_values)
         if (field_dt.get_metadata_size() > 0) {
             field_dt.extended()->metadata_copy_construct(
                             reinterpret_cast<char *>(pmeta + 1),
-                            field_values[i].get_ndo_meta(),
+                            field_values[i].get_arrmeta(),
                             &field_values[i].get_ndo()->m_memblockdata);
         }
     }
@@ -1783,7 +1783,7 @@ static array follow_array_pointers(const array& n)
 {
     // Follow the pointers to eliminate them
     ndt::type dt = n.get_type();
-    const char *metadata = n.get_ndo_meta();
+    const char *metadata = n.get_arrmeta();
     char *data = n.get_ndo()->m_data_pointer;
     memory_block_data *dataref = NULL;
     uint64_t flags = n.get_ndo()->m_flags;
@@ -1798,7 +1798,7 @@ static array follow_array_pointers(const array& n)
     // Create an array without the pointers
     array result(make_array_memory_block(dt.is_builtin() ? 0 : dt.extended()->get_metadata_size()));
     if (!dt.is_builtin()) {
-        dt.extended()->metadata_copy_construct(result.get_ndo_meta(), metadata, &n.get_ndo()->m_memblockdata);
+        dt.extended()->metadata_copy_construct(result.get_arrmeta(), metadata, &n.get_ndo()->m_memblockdata);
     }
     result.get_ndo()->m_type = dt.release();
     result.get_ndo()->m_data_pointer = data;

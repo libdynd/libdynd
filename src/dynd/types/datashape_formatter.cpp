@@ -222,7 +222,7 @@ string dynd::format_datashape(const nd::array& n,
     stringstream ss;
     ss << prefix;
     int identifier = 0;
-    ::format_datashape(ss, n.get_type(), n.get_ndo_meta(),
+    ::format_datashape(ss, n.get_type(), n.get_arrmeta(),
                     n.get_readonly_originptr(), "", multiline, identifier);
     return ss.str();
 }

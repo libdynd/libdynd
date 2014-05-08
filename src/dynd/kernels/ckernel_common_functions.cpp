@@ -99,7 +99,7 @@ size_t kernels::make_constant_value_assignment_ckernel(
     // Create the child assignment ckernel
     return make_assignment_kernel(
         out_ckb, ckb_offset + sizeof(self_type), dst_tp, dst_metadata,
-        self->m_constant.get_type(), self->m_constant.get_ndo_meta(), kernreq,
+        self->m_constant.get_type(), self->m_constant.get_arrmeta(), kernreq,
         assign_error_default, ectx);
 }
 

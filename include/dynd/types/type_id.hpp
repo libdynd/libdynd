@@ -36,6 +36,8 @@ enum type_kind_t {
     struct_kind,
     // For tuple_type_id and ctuple_type_id
     tuple_kind,
+    // For types whose value itself is dynamically typed
+    dynamic_kind,
     // For types whose value_type != the type, signals
     // that calculations should look at the value_type for
     // type promotion, etc.
@@ -127,7 +129,7 @@ enum type_id_t {
     // A tuple type with fixed layout
     ctuple_type_id,
 
-    ndarray_type_id,
+    ndarrayarg_type_id,
 
     // Adapter types
     convert_type_id,

@@ -205,13 +205,13 @@ public:
     }
 
     /** Low level access to the array metadata */
-    inline const char *get_ndo_meta() const {
-        return reinterpret_cast<const char *>(get_ndo() + 1);
+    inline const char *get_arrmeta() const {
+        return get_ndo()->get_arrmeta();
     }
 
     /** Low level access to the array metadata */
-    inline char *get_ndo_meta() {
-        return reinterpret_cast<char *>(get_ndo() + 1);
+    inline char *get_arrmeta() {
+        return get_ndo()->get_arrmeta();
     }
 
     /** Returns true if the array is NULL */
@@ -321,7 +321,7 @@ public:
     inline void get_shape(intptr_t *out_shape) const {
         if (!get_ndo()->is_builtin_type() && get_ndo()->m_type->get_ndim() > 0) {
             get_ndo()->m_type->get_shape(get_ndo()->m_type->get_ndim(), 0, out_shape,
-                            get_ndo_meta(), get_ndo()->m_data_pointer);
+                            get_arrmeta(), get_ndo()->m_data_pointer);
         }
     }
 
@@ -329,7 +329,7 @@ public:
      * Returns the size of the leading (leftmost) dimension.
      */
     inline intptr_t get_dim_size() const {
-        return get_type().get_dim_size(get_ndo_meta(), get_ndo()->m_data_pointer);
+        return get_type().get_dim_size(get_arrmeta(), get_ndo()->m_data_pointer);
     }
 
     std::vector<intptr_t> get_strides() const {
@@ -339,7 +339,7 @@ public:
     }
     inline void get_strides(intptr_t *out_strides) const {
         if (!get_ndo()->is_builtin_type()) {
-            get_ndo()->m_type->get_strides(0, out_strides, get_ndo_meta());
+            get_ndo()->m_type->get_strides(0, out_strides, get_arrmeta());
         }
     }
 
@@ -1124,7 +1124,7 @@ namespace detail {
                 throw std::runtime_error("can only convert arrays with 0 dimensions to scalars");
             }
             typed_data_assign(ndt::make_type<T>(), NULL, (char *)&result,
-                        lhs.get_type(), lhs.get_ndo_meta(), lhs.get_ndo()->m_data_pointer, errmode);
+                        lhs.get_type(), lhs.get_arrmeta(), lhs.get_ndo()->m_data_pointer, errmode);
             return result;
         }
     };

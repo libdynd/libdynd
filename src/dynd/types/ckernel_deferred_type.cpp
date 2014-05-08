@@ -268,7 +268,7 @@ static array_preamble *function___call__(const array_preamble *params, void *DYN
     ckernel_builder ckb;
     const char *dynd_metadata[max_args];
     for (int i = 0; i < nargs; ++i) {
-        dynd_metadata[i] = args[i].get_ndo_meta();
+        dynd_metadata[i] = args[i].get_arrmeta();
     }
     ckd->instantiate_func(ckd->data_ptr, &ckb, 0, dynd_metadata,
                           kernel_request_single, &eval::default_eval_context);

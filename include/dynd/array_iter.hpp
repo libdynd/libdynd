@@ -68,7 +68,7 @@ class array_iter<1, 0> {
     }
 public:
     array_iter(const nd::array& op0) {
-        init(op0.get_type(), op0.get_ndo_meta(), op0.get_readwrite_originptr());
+        init(op0.get_type(), op0.get_arrmeta(), op0.get_readwrite_originptr());
     }
 
     ~array_iter() {
@@ -164,7 +164,7 @@ public:
     }
 
     array_iter(const nd::array& op0) {
-        init(op0.get_type(), op0.get_ndo_meta(), op0.get_readonly_originptr(), 0);
+        init(op0.get_type(), op0.get_arrmeta(), op0.get_readonly_originptr(), 0);
     }
 
     ~array_iter() {
@@ -294,8 +294,8 @@ public:
         init(tp0, metadata0, data0, tp1, metadata1, data1);
     }
     array_iter(const nd::array& op0, const nd::array& op1) {
-        init(op0.get_type(), op0.get_ndo_meta(), op0.get_readwrite_originptr(),
-                        op1.get_type(), op1.get_ndo_meta(), op1.get_readonly_originptr());
+        init(op0.get_type(), op0.get_arrmeta(), op0.get_readwrite_originptr(),
+                        op1.get_type(), op1.get_arrmeta(), op1.get_readonly_originptr());
     }
 
     ~array_iter() {
@@ -392,7 +392,7 @@ public:
                 if (!m_iterdata[i]) {
                     throw std::bad_alloc();
                 }
-                m_metadata[i] = ops[i].get_ndo_meta();
+                m_metadata[i] = ops[i].get_arrmeta();
                 m_array_tp[i].broadcasted_iterdata_construct(m_iterdata[i],
                                 &m_metadata[i], iter_ndim_i,
                                 m_itershape.get() + (m_iter_ndim - iter_ndim_i), m_uniform_tp[i]);
@@ -407,7 +407,7 @@ public:
                 m_iterdata[i] = NULL;
                 m_uniform_tp[i] = m_array_tp[i];
                 m_data[i] = ops[i].get_ndo()->m_data_pointer;
-                m_metadata[i] = ops[i].get_ndo_meta();
+                m_metadata[i] = ops[i].get_arrmeta();
             }
         }
     }
@@ -500,7 +500,7 @@ public:
             if (!m_iterdata[0]) {
                 throw std::bad_alloc();
             }
-            m_metadata[0] = out_op0.get_ndo_meta();
+            m_metadata[0] = out_op0.get_arrmeta();
             m_array_tp[0].iterdata_construct(m_iterdata[0],
                             &m_metadata[0], m_iter_ndim[0], m_itershape.get(), m_uniform_tp[0]);
             m_data[0] = m_iterdata[0]->reset(m_iterdata[0], out_op0.get_readwrite_originptr(), m_iter_ndim[0]);
@@ -511,7 +511,7 @@ public:
                 if (!m_iterdata[i]) {
                     throw std::bad_alloc();
                 }
-                m_metadata[i] = ops[i].get_ndo_meta();
+                m_metadata[i] = ops[i].get_arrmeta();
                 m_array_tp[i].broadcasted_iterdata_construct(m_iterdata[i],
                                 &m_metadata[i], m_iter_ndim[i],
                                 m_itershape.get() + (m_iter_ndim[0] - m_iter_ndim[i]), m_uniform_tp[i]);
@@ -526,7 +526,7 @@ public:
                 m_iterdata[i] = NULL;
                 m_uniform_tp[i] = m_array_tp[i];
                 m_data[i] = ops[i].get_ndo()->m_data_pointer;
-                m_metadata[i] = ops[i].get_ndo_meta();
+                m_metadata[i] = ops[i].get_arrmeta();
             }
         }
     }

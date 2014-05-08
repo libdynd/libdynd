@@ -153,7 +153,7 @@ namespace {
             if (by_values_tp.is_expression() || !by_values_tp.extended()->is_strided()) {
                 by_values_tmp = nd::eval_raw_copy(by_values_tp, by_values_metadata, by_values_data);
                 by_values_tp = by_values_tmp.get_type();
-                by_values_metadata = by_values_tmp.get_ndo_meta();
+                by_values_metadata = by_values_tmp.get_arrmeta();
                 by_values_data = by_values_tmp.get_readonly_originptr();
             }
 

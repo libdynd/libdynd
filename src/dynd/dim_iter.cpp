@@ -117,10 +117,10 @@ static int buffered_strided_dim_iter_next(dim_iter *self)
         if (!buf.get_type().is_builtin()) {
             // For types with block references, need to reset the buffers each time
             // we fill buf with data.
-            buf.get_type().extended()->metadata_reset_buffers(buf.get_ndo_meta());
+            buf.get_type().extended()->metadata_reset_buffers(buf.get_arrmeta());
         }
         // Figure out how many elements we will buffer
-        intptr_t bufsize = reinterpret_cast<const strided_dim_type_metadata *>(buf.get_ndo_meta())->size;
+        intptr_t bufsize = reinterpret_cast<const strided_dim_type_metadata *>(buf.get_arrmeta())->size;
         if (i + bufsize > size) {
             bufsize = size - i;
         }
@@ -191,13 +191,13 @@ void dynd::make_buffered_strided_dim_iter(
     if (buffer_ndim > 2 && val_tp.get_type_id() == strided_dim_type_id) {
         // Reorder the strides to preserve F-order if it's a strided array
         val_tp.tcast<strided_dim_type>()->reorder_default_constructed_strides(
-                            buf.get_ndo_meta() + sizeof(strided_dim_type_metadata), mem_tp, mem_meta);
+                            buf.get_arrmeta() + sizeof(strided_dim_type_metadata), mem_tp, mem_meta);
     }
-    intptr_t buffer_stride = reinterpret_cast<const strided_dim_type_metadata *>(buf.get_ndo_meta())->stride;
+    intptr_t buffer_stride = reinterpret_cast<const strided_dim_type_metadata *>(buf.get_arrmeta())->stride;
     // Make the ckernel that copies data to the buffer
     ckernel_builder k;
     make_assignment_kernel(&k, 0, val_tp,
-        buf.get_ndo_meta() + sizeof(strided_dim_type_metadata),
+        buf.get_arrmeta() + sizeof(strided_dim_type_metadata),
         mem_tp, mem_meta,
         kernel_request_strided,
         ectx->default_errmode, ectx);
@@ -210,7 +210,7 @@ void dynd::make_buffered_strided_dim_iter(
         fn(buf.get_readwrite_originptr(),
             buffer_stride, data_ptr, stride, size, kdp);
         make_strided_dim_iter(out_di, val_tp,
-            buf.get_ndo_meta() + sizeof(strided_dim_type_metadata),
+            buf.get_arrmeta() + sizeof(strided_dim_type_metadata),
             buf.get_readonly_originptr(), size, buffer_stride, buf.get_memblock());
         return;
     }
@@ -223,7 +223,7 @@ void dynd::make_buffered_strided_dim_iter(
         out_di->flags |= dim_iter_contiguous;
     }
     out_di->eltype = ndt::type(val_tp).release();
-    out_di->elmeta = buf.get_ndo_meta() + sizeof(strided_dim_type_metadata);
+    out_di->elmeta = buf.get_arrmeta() + sizeof(strided_dim_type_metadata);
     // The custom fields are where we place the data needed for seeking
     // and the reference object.
     out_di->custom[0] = 0; // The next index to buffer

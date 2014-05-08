@@ -201,8 +201,8 @@ TEST(CKernelDeferred, LiftUnaryExpr_StridedDim) {
     in(2).vals() = "12345";
     const char *in_ptr = in.get_readonly_originptr();
     const char *dynd_metadata[2] = {NULL, NULL};
-    dynd_metadata[0] = out.get_ndo_meta();
-    dynd_metadata[1] = in.get_ndo_meta();
+    dynd_metadata[0] = out.get_arrmeta();
+    dynd_metadata[1] = in.get_arrmeta();
     ckd.instantiate_func(ckd.data_ptr, &ckb, 0, dynd_metadata,
                          kernel_request_single, &eval::default_eval_context);
     expr_single_operation_t usngo = ckb.get()->get_function<expr_single_operation_t>();
@@ -238,8 +238,8 @@ TEST(CKernelDeferred, LiftUnaryExpr_StridedToVarDim) {
     in(4).vals() = "284";
     const char *in_ptr = in.get_readonly_originptr();
     const char *dynd_metadata[2] = {NULL, NULL};
-    dynd_metadata[0] = out.get_ndo_meta();
-    dynd_metadata[1] = in.get_ndo_meta();
+    dynd_metadata[0] = out.get_arrmeta();
+    dynd_metadata[1] = in.get_arrmeta();
     ckd.instantiate_func(ckd.data_ptr, &ckb, 0, dynd_metadata,
                          kernel_request_single, &eval::default_eval_context);
     expr_single_operation_t usngo = ckb.get()->get_function<expr_single_operation_t>();
@@ -276,8 +276,8 @@ TEST(CKernelDeferred, LiftUnaryExpr_VarToVarDim) {
     in.vals() = in_vals;
     const char *in_ptr = in.get_readonly_originptr();
     const char *dynd_metadata[2] = {NULL, NULL};
-    dynd_metadata[0] = out.get_ndo_meta();
-    dynd_metadata[1] = in.get_ndo_meta();
+    dynd_metadata[0] = out.get_arrmeta();
+    dynd_metadata[1] = in.get_arrmeta();
     ckd.instantiate_func(ckd.data_ptr, &ckb, 0, dynd_metadata,
                          kernel_request_single, &eval::default_eval_context);
     expr_single_operation_t usngo = ckb.get()->get_function<expr_single_operation_t>();
@@ -318,8 +318,8 @@ TEST(CKernelDeferred, LiftUnaryExpr_MultiDimVarToVarDim) {
 
     const char *in_ptr = in.get_readonly_originptr();
     const char *dynd_metadata[2] = {NULL, NULL};
-    dynd_metadata[0] = out.get_ndo_meta();
-    dynd_metadata[1] = in.get_ndo_meta();
+    dynd_metadata[0] = out.get_arrmeta();
+    dynd_metadata[1] = in.get_arrmeta();
     ckernel_builder ckb;
     ckd.instantiate_func(ckd.data_ptr, &ckb, 0, dynd_metadata,
                          kernel_request_single, &eval::default_eval_context);
@@ -372,9 +372,9 @@ TEST(CKernelDeferred, LiftExpr_MultiDimVarToVarDim) {
     in1.vals() = in1_vals;
 
     const char *dynd_metadata[3] = {NULL, NULL, NULL};
-    dynd_metadata[0] = out.get_ndo_meta();
-    dynd_metadata[1] = in0.get_ndo_meta();
-    dynd_metadata[2] = in1.get_ndo_meta();
+    dynd_metadata[0] = out.get_arrmeta();
+    dynd_metadata[1] = in0.get_arrmeta();
+    dynd_metadata[2] = in1.get_arrmeta();
     const char *const in_ptrs[2] = {in0.get_readonly_originptr(), in1.get_readonly_originptr()};
     ckernel_builder ckb;
     ckd->instantiate_func(ckd->data_ptr, &ckb, 0, dynd_metadata,
