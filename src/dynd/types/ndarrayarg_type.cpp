@@ -4,6 +4,7 @@
 //
 
 #include <dynd/types/ndarrayarg_type.hpp>
+#include <dynd/kernels/assignment_kernels.hpp>
 
 using namespace std;
 using namespace dynd;
@@ -49,14 +50,33 @@ bool ndarrayarg_type::operator==(const base_type& rhs) const
     return rhs.get_type_id() == ndarrayarg_type_id;
 }
 
+namespace {
+    struct ndarrayarg_assign_ck : public kernels::assignment_ck<ndarrayarg_assign_ck> {
+        inline void single(char *dst, const char *src)
+        {
+            if (*reinterpret_cast<void *const *>(src) == NULL) {
+                *reinterpret_cast<void **>(dst) = NULL;
+            } else {
+                throw invalid_argument(
+                    "Cannot make a copy of a non-NULL dynd ndarrayarg value");
+            }
+        }
+    };
+} // anonymous namespace
+
 size_t ndarrayarg_type::make_assignment_kernel(
-    ckernel_builder *DYND_UNUSED(ckb), size_t DYND_UNUSED(ckb_offset),
+    ckernel_builder *ckb, size_t ckb_offset,
     const ndt::type &dst_tp, const char *DYND_UNUSED(dst_metadata),
     const ndt::type &src_tp, const char *DYND_UNUSED(src_metadata),
-    kernel_request_t DYND_UNUSED(kernreq),
+    kernel_request_t kernreq,
     assign_error_mode DYND_UNUSED(errmode),
     const eval::eval_context *DYND_UNUSED(ectx)) const
 {
+    if (this == dst_tp.extended() && src_tp.get_type_id() == ndarrayarg_type_id) {
+        ndarrayarg_assign_ck::create_leaf(ckb, ckb_offset, kernreq);
+        return ckb_offset + sizeof(ndarrayarg_assign_ck);
+    }
+
     stringstream ss;
     ss << "Cannot assign from " << src_tp << " to " << dst_tp;
     throw dynd::type_error(ss.str());

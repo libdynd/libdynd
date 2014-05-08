@@ -42,8 +42,7 @@ namespace detail {
     template<>
     struct callable_argument_setter<nd::array> {
         static void set(const ndt::type& paramtype, char *metadata, char *data, const nd::array& value) {
-            if (paramtype.get_type_id() == void_pointer_type_id) {
-                // TODO: switch to a better mechanism for passing nd::array references
+            if (paramtype.get_type_id() == ndarrayarg_type_id) {
                 *reinterpret_cast<const array_preamble **>(data) = value.get_ndo();
             } else {
                 typed_data_assign(paramtype, metadata, data, value.get_type(), value.get_arrmeta(), value.get_ndo()->m_data_pointer);

@@ -490,7 +490,7 @@ void struct_type::get_dynamic_type_properties(const std::pair<std::string, gfunc
     *out_count = sizeof(type_properties) / sizeof(type_properties[0]);
 }
 
-ndt::type struct_type::array_parameters_type = ndt::make_cstruct(ndt::type(new void_pointer_type, false), "self");
+ndt::type struct_type::array_parameters_type = ndt::make_cstruct(ndt::make_ndarrayarg(), "self");
 
 static array_preamble *property_get_array_field(const array_preamble *params, void *extra)
 {
