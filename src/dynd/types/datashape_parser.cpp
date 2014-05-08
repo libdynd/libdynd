@@ -402,6 +402,7 @@ static ndt::type parse_char_parameters(const char *&rbegin, const char *end)
         if (!encoding_str.empty()) {
             encoding = string_to_encoding(saved_begin, encoding_str);
         } else {
+            throw datashape_parse_error(begin, "expected string encoding");
         }
         if (!parse_token_ds(begin, end, ']')) {
             throw datashape_parse_error(begin, "expected closing ']'");
