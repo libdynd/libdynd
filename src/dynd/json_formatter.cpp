@@ -146,7 +146,9 @@ static void print_escaped_unicode_codepoint(output_data& out, uint32_t cp, appen
     */
 }
 
-static void format_json_encoded_string(output_data& out, const char *begin, const char *end, string_encoding_t encoding)
+static void format_json_encoded_string(output_data &out, const char *begin,
+                                       const char *end,
+                                       string_encoding_t encoding)
 {
     uint32_t cp;
     next_unicode_codepoint_t next_fn;
@@ -161,22 +163,32 @@ static void format_json_encoded_string(output_data& out, const char *begin, cons
     out.write('\"');
 }
 
-static void format_json_string(output_data& out, const ndt::type& dt, const char *metadata, const char *data)
+static void format_json_string(output_data &out, const ndt::type &dt,
+                               const char *metadata, const char *data)
+{
+    const base_string_type *bsd = dt.tcast<base_string_type>();
+    string_encoding_t encoding = bsd->get_encoding();
+    const char *begin = NULL, *end = NULL;
+    bsd->get_string_range(&begin, &end, metadata, data);
+    format_json_encoded_string(out, begin, end, encoding);
+}
+
+static void format_json_dynamic(output_data &out, const ndt::type &dt,
+                                const char *DYND_UNUSED(metadata), const char *data)
 {
     if (dt.get_type_id() == json_type_id) {
         // Copy the JSON data directly
         const json_type_data *d = reinterpret_cast<const json_type_data *>(data);
         out.write(d->begin, d->end);
     } else {
-        const base_string_type *bsd = dt.tcast<base_string_type>();
-        string_encoding_t encoding = bsd->get_encoding();
-        const char *begin = NULL, *end = NULL;
-        bsd->get_string_range(&begin, &end, metadata, data);
-        format_json_encoded_string(out, begin, end, encoding);
+        stringstream ss;
+        ss << "Formatting dynd type " << dt << " as JSON is not implemented yet";
+        throw runtime_error(ss.str());
     }
 }
 
-static void format_json_datetime(output_data& out, const ndt::type& dt, const char *metadata, const char *data)
+static void format_json_datetime(output_data &out, const ndt::type &dt,
+                                 const char *metadata, const char *data)
 {
     switch (dt.get_type_id()) {
         case date_type_id: {
@@ -308,6 +320,9 @@ static void format_json(output_data& out, const ndt::type& dt, const char *metad
             break;
         case struct_kind:
             format_json_struct(out, dt, metadata, data);
+            break;
+        case dynamic_kind:
+            format_json_dynamic(out, dt, metadata, data);
             break;
         case uniform_dim_kind:
             format_json_uniform_dim(out, dt, metadata, data);

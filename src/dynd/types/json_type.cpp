@@ -19,10 +19,13 @@ using namespace std;
 using namespace dynd;
 
 json_type::json_type()
-    : base_string_type(json_type_id, sizeof(json_type_data),
-                    sizeof(const char *), type_flag_scalar|type_flag_zeroinit|type_flag_blockref,
-                    sizeof(json_type_metadata))
+    : base_string_type(
+          json_type_id, sizeof(json_type_data), sizeof(const char *),
+          type_flag_scalar | type_flag_zeroinit | type_flag_blockref,
+          sizeof(json_type_metadata))
 {
+    // While stored as a string, JSON data can hold many types of data
+    m_members.kind = dynamic_kind;
 }
 
 json_type::~json_type()
@@ -272,6 +275,16 @@ size_t json_type::make_assignment_kernel(
                             dst_tp.get_type_id(),
                             src_tp, src_metadata,
                             kernreq, errmode, ectx);
+        } else if(dst_tp.get_type_id() == string_type_id) {
+           return make_blockref_string_assignment_kernel(out, offset_out,
+                            dst_metadata, dst_tp.tcast<base_string_type>()->get_encoding(),
+                            src_metadata, string_encoding_utf_8,
+                            kernreq, errmode, ectx);
+        } else if(dst_tp.get_type_id() == fixedstring_type_id) {
+            return make_blockref_string_to_fixedstring_assignment_kernel(
+                out, offset_out, dst_tp.get_data_size(),
+                dst_tp.tcast<base_string_type>()->get_encoding(),
+                string_encoding_utf_8, kernreq, errmode, ectx);
         } else {
             stringstream ss;
             ss << "Cannot assign from " << src_tp << " to " << dst_tp;

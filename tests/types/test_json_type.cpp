@@ -21,7 +21,7 @@ TEST(JSONDType, Create) {
     // Strings with various encodings
     d = ndt::make_json();
     EXPECT_EQ(json_type_id, d.get_type_id());
-    EXPECT_EQ(string_kind, d.get_kind());
+    EXPECT_EQ(dynamic_kind, d.get_kind());
     EXPECT_EQ(sizeof(void *), d.get_data_alignment());
     EXPECT_EQ(2*sizeof(void *), d.get_data_size());
     EXPECT_FALSE(d.is_expression());

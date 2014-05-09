@@ -220,7 +220,7 @@ static int compress_builtin_type_id[builtin_type_id_count] = {
                 5, // uint128
                 -1, 6, 7, // float16, ..., float64
                 8, // float128
-                9, 10, // complex<float32>, complex<float64>
+                9, 10, // complex[float32], complex[float64]
                 -1};
 
 template<class KD>
