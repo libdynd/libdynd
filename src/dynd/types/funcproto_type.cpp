@@ -11,7 +11,7 @@ using namespace dynd;
 
 funcproto_type::funcproto_type(size_t param_count, const ndt::type *param_types,
                                const ndt::type &return_type)
-    : base_type(funcproto_type_id, pattern_kind, 0, 1, type_flag_none, 0, 0),
+    : base_type(funcproto_type_id, symbolic_kind, 0, 1, type_flag_none, 0, 0),
       m_param_types(param_types, param_types + param_count),
       m_return_type(return_type)
 {

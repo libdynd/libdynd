@@ -36,7 +36,7 @@ public:
             storage_tp.get_ndim()), m_storage_tp(storage_tp), m_storage_metadata_offset(storage_metadata_offset)
     {
         if (storage_tp.get_kind() == uniform_dim_kind || storage_tp.get_kind() == memory_kind
-                    || storage_tp.get_kind() == pattern_kind) {
+                    || storage_tp.get_kind() == symbolic_kind) {
             stringstream ss;
             ss << "a memory space cannot be specified for type " << storage_tp;
             throw runtime_error(ss.str());

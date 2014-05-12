@@ -44,8 +44,9 @@ enum type_kind_t {
     expression_kind,
     // For types that specify a memory space
     memory_kind,
-    // For pattern-matching types
-    pattern_kind,
+    // For types containing type vars, or function prototypes that can't be
+    // instantiated
+    symbolic_kind,
     // For use when it becomes possible to register custom types
     custom_kind
 };

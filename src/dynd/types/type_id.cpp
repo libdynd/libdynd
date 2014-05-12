@@ -39,8 +39,8 @@ std::ostream& dynd::operator<<(std::ostream& o, type_kind_t kind)
             return (o << "dynamic");
         case expression_kind:
             return (o << "expression");
-        case pattern_kind:
-            return (o << "pattern");
+        case symbolic_kind:
+            return (o << "symbolic");
         case custom_kind:
             return (o << "custom");
         default:
