@@ -35,6 +35,7 @@
 #include <dynd/types/ndarrayarg_type.hpp>
 #include <dynd/types/funcproto_type.hpp>
 #include <dynd/types/typevar_type.hpp>
+#include <dynd/types/typevar_dim_type.hpp>
 
 using namespace std;
 using namespace dynd;
@@ -853,9 +854,12 @@ static ndt::type parse_rhs_expression(const char *&rbegin, const char *end, map<
                 // Use -2 to signal a strided dimension
                 shape.push_back(-2);
             } else if (isupper(n[0])) {
-                parse::skip_whitespace_and_pound_comments(saved_begin, end);
-                throw datashape_parse_error(
-                    saved_begin, "type vars are not supported in dynd yet");
+                ndt::type element_type = parse_rhs_expression(begin, end, symtable);
+                if (element_type.get_type_id() == uninitialized_type_id) {
+                    throw datashape_parse_error(begin, "expected a dynd type");
+                }
+                rbegin = begin;
+                return ndt::make_typevar_dim(n, element_type);
             } else {
                 parse::skip_whitespace_and_pound_comments(saved_begin, end);
                 throw datashape_parse_error(saved_begin,

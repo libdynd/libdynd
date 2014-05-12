@@ -158,6 +158,7 @@ enum type_id_t {
 
     // Cannot be instantiated, is a type variable
     typevar_type_id,
+    typevar_dim_type_id,
 
     // Cannot be instantiated, just holds a function prototype
     funcproto_type_id,

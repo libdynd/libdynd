@@ -3,14 +3,15 @@
 // BSD 2-Clause License, see LICENSE.txt
 //
 
-#include <dynd/types/typevar_type.hpp>
+#include <dynd/types/typevar_dim_type.hpp>
 #include <dynd/gfunc/make_callable.hpp>
 
 using namespace std;
 using namespace dynd;
 
-typevar_type::typevar_type(const nd::array& name)
-    : base_type(typevar_type_id, symbolic_kind, 0, 1, type_flag_none, 0, 0),
+typevar_dim_type::typevar_dim_type(const nd::array &name,
+                                   const ndt::type &element_type)
+    : base_uniform_dim_type(typevar_dim_type_id, element_type, 0, 1, 0, type_flag_none),
       m_name(name)
 {
     if (!(m_name.is_immutable() &&
@@ -58,20 +59,20 @@ typevar_type::typevar_type(const nd::array& name)
     }
 }
 
-void typevar_type::print_data(std::ostream &DYND_UNUSED(o),
+void typevar_dim_type::print_data(std::ostream &DYND_UNUSED(o),
                                 const char *DYND_UNUSED(metadata),
                                 const char *DYND_UNUSED(data)) const
 {
     throw type_error("Cannot store data of typevar type");
 }
 
-void typevar_type::print_type(std::ostream& o) const
+void typevar_dim_type::print_type(std::ostream& o) const
 {
     // Type variables are barewords starting with a capital letter
-    o << m_name.as<string>();
+    o << m_name.as<string>() << " * " << get_element_type();
 }
 
-ndt::type typevar_type::apply_linear_index(
+ndt::type typevar_dim_type::apply_linear_index(
     intptr_t DYND_UNUSED(nindices), const irange *DYND_UNUSED(indices),
     size_t DYND_UNUSED(current_i), const ndt::type &DYND_UNUSED(root_tp),
     bool DYND_UNUSED(leading_dimension)) const
@@ -79,7 +80,7 @@ ndt::type typevar_type::apply_linear_index(
     throw type_error("Cannot store data of typevar type");
 }
 
-intptr_t typevar_type::apply_linear_index(
+intptr_t typevar_dim_type::apply_linear_index(
     intptr_t DYND_UNUSED(nindices), const irange *DYND_UNUSED(indices),
     const char *DYND_UNUSED(metadata), const ndt::type &DYND_UNUSED(result_tp),
     char *DYND_UNUSED(out_metadata), memory_block_data *DYND_UNUSED(embedded_reference), size_t DYND_UNUSED(current_i),
@@ -89,12 +90,18 @@ intptr_t typevar_type::apply_linear_index(
     throw type_error("Cannot store data of typevar type");
 }
 
-bool typevar_type::is_lossless_assignment(const ndt::type& dst_tp, const ndt::type& src_tp) const
+intptr_t typevar_dim_type::get_dim_size(const char *DYND_UNUSED(metadata),
+                                        const char *DYND_UNUSED(data)) const
+{
+    return -1;
+}
+
+bool typevar_dim_type::is_lossless_assignment(const ndt::type& dst_tp, const ndt::type& src_tp) const
 {
     if (dst_tp.extended() == this) {
         if (src_tp.extended() == this) {
             return true;
-        } else if (src_tp.get_type_id() == typevar_type_id) {
+        } else if (src_tp.get_type_id() == typevar_dim_type_id) {
             return *dst_tp.extended() == *src_tp.extended();
         }
     }
@@ -102,46 +109,64 @@ bool typevar_type::is_lossless_assignment(const ndt::type& dst_tp, const ndt::ty
     return false;
 }
 
-bool typevar_type::operator==(const base_type& rhs) const
+bool typevar_dim_type::operator==(const base_type& rhs) const
 {
     if (this == &rhs) {
         return true;
-    } else if (rhs.get_type_id() != typevar_type_id) {
+    } else if (rhs.get_type_id() != typevar_dim_type_id) {
         return false;
     } else {
-        const typevar_type *tvt = static_cast<const typevar_type *>(&rhs);
-        return m_name.equals_exact(tvt->m_name);
+        const typevar_dim_type *tvt =
+            static_cast<const typevar_dim_type *>(&rhs);
+        return m_name.equals_exact(tvt->m_name) &&
+               m_element_tp == tvt->m_element_tp;
     }
 }
 
-void typevar_type::metadata_default_construct(
+void typevar_dim_type::metadata_default_construct(
     char *DYND_UNUSED(metadata), intptr_t DYND_UNUSED(ndim),
     const intptr_t *DYND_UNUSED(shape)) const
 {
     throw type_error("Cannot store data of typevar type");
 }
 
-void typevar_type::metadata_copy_construct(
+void typevar_dim_type::metadata_copy_construct(
     char *DYND_UNUSED(dst_metadata), const char *DYND_UNUSED(src_metadata),
     memory_block_data *DYND_UNUSED(embedded_reference)) const
 {
     throw type_error("Cannot store data of typevar type");
 }
 
-void typevar_type::metadata_destruct(char *DYND_UNUSED(metadata)) const
+size_t typevar_dim_type::metadata_copy_construct_onedim(
+    char *DYND_UNUSED(dst_metadata), const char *DYND_UNUSED(src_metadata),
+    memory_block_data *DYND_UNUSED(embedded_reference)) const
+{
+    throw type_error("Cannot store data of typevar type");
+}
+
+void typevar_dim_type::metadata_destruct(char *DYND_UNUSED(metadata)) const
 {
     throw type_error("Cannot store data of typevar type");
 }
 
 static nd::array property_get_name(const ndt::type& tp) {
-    return tp.tcast<typevar_type>()->get_name();
+    return tp.tcast<typevar_dim_type>()->get_name();
+}
+
+static ndt::type property_get_element_type(const ndt::type& dt) {
+    return dt.tcast<typevar_dim_type>()->get_element_type();
 }
 
 static pair<string, gfunc::callable> type_properties[] = {
-    pair<string, gfunc::callable>("name", gfunc::make_callable(&property_get_name, "self")),
-};
+    pair<string, gfunc::callable>(
+        "name", gfunc::make_callable(&property_get_name, "self")),
+    pair<string, gfunc::callable>(
+        "element_type",
+        gfunc::make_callable(&property_get_element_type, "self")), };
 
-void typevar_type::get_dynamic_type_properties(const std::pair<std::string, gfunc::callable> **out_properties, size_t *out_count) const
+void typevar_dim_type::get_dynamic_type_properties(
+    const std::pair<std::string, gfunc::callable> **out_properties,
+    size_t *out_count) const
 {
     *out_properties = type_properties;
     *out_count = sizeof(type_properties) / sizeof(type_properties[0]);

@@ -689,8 +689,7 @@ void strided_dim_type::reorder_default_constructed_strides(char *dst_metadata,
 }
 
 static ndt::type get_element_type(const ndt::type& dt) {
-    const strided_dim_type *d = dt.tcast<strided_dim_type>();
-    return d->get_element_type();
+    return dt.tcast<strided_dim_type>()->get_element_type();
 }
 
 static pair<string, gfunc::callable> strided_dim_type_properties[] = {
