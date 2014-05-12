@@ -33,6 +33,10 @@ std::ostream& dynd::operator<<(std::ostream& o, type_kind_t kind)
             return (o << "uniform_dim");
         case struct_kind:
             return (o << "struct");
+        case tuple_kind:
+            return (o << "tuple");
+        case dynamic_kind:
+            return (o << "dynamic");
         case expression_kind:
             return (o << "expression");
         case pattern_kind:

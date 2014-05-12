@@ -606,10 +606,10 @@ static void parse_json(const ndt::type& tp, const char *metadata, char *out_data
     switch (tp.get_kind()) {
         case uniform_dim_kind:
             parse_uniform_dim_json(tp, metadata, out_data, json_begin, json_end, ectx);
-            break;
+            return;
         case struct_kind:
             parse_struct_json(tp, metadata, out_data, json_begin, json_end, ectx);
-            break;
+            return;
         case bool_kind:
             parse_bool_json(tp, metadata, out_data, json_begin, json_end);
             return;
@@ -624,23 +624,26 @@ static void parse_json(const ndt::type& tp, const char *metadata, char *out_data
             parse_complex_json(tp, metadata, out_data, json_begin, json_end);
             return;
         case string_kind:
-            if (tp.get_type_id() == json_type_id) {
-                // The json type is a special string type that contains JSON directly
-                // Copy the JSON verbatim in this case.
-                parse_jsonstring_json(tp, metadata, out_data, json_begin, json_end);
-            } else {
-                parse_string_json(tp, metadata, out_data, json_begin, json_end);
-            }
+            parse_string_json(tp, metadata, out_data, json_begin, json_end);
             return;
         case datetime_kind:
             parse_datetime_json(tp, metadata, out_data, json_begin, json_end, ectx);
             return;
-        default: {
-            stringstream ss;
-            ss << "parse_json: unsupported dynd type " << tp;
-            throw runtime_error(ss.str());
-        }
+        case dynamic_kind:
+            if (tp.get_type_id() == json_type_id) {
+                // The json type is a special string type that contains JSON directly
+                // Copy the JSON verbatim in this case.
+                parse_jsonstring_json(tp, metadata, out_data, json_begin, json_end);
+                return;
+            }
+            break;
+        default:
+            break;
     }
+
+    stringstream ss;
+    ss << "parse_json: unsupported dynd type " << tp;
+    throw runtime_error(ss.str());
 }
 
 /**
