@@ -9,6 +9,7 @@
 #include "inc_gtest.hpp"
 
 #include <dynd/type.hpp>
+#include <dynd/types/ndarrayarg_type.hpp>
 
 using namespace std;
 using namespace dynd;
@@ -151,3 +152,14 @@ TEST(DType, BasicConstructor) {
     EXPECT_EQ(d, ndt::type(d.str()));
 }
 
+TEST(DType, NDArrayArg) {
+    // Minimal test of the ndarrayarg type
+    ndt::type d = ndt::make_ndarrayarg();
+    EXPECT_EQ(ndarrayarg_type_id, d.get_type_id());
+    EXPECT_EQ(dynamic_kind, d.get_kind());
+    EXPECT_EQ((size_t)scalar_align_of<void *>::value, d.get_data_alignment());
+    EXPECT_EQ(sizeof(void *), d.get_data_size());
+    EXPECT_FALSE(d.is_builtin());
+    // Roundtripping through a string
+    EXPECT_EQ(d, ndt::type(d.str()));
+}

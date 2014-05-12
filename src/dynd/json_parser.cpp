@@ -47,7 +47,7 @@ static void json_as_buffer(const nd::array& json, nd::array& out_tmp_ref, const 
                     out_tmp_ref = json.eval();
                     // The data is already UTF-8, so use the buffer directly
                     sdt->get_string_range(&begin, &end,
-                                    out_tmp_ref.get_ndo_meta(), out_tmp_ref.get_readonly_originptr());
+                                    out_tmp_ref.get_arrmeta(), out_tmp_ref.get_readonly_originptr());
                     break;
                 default: {
                     // The data needs to be converted to UTF-8 before parsing
@@ -55,7 +55,7 @@ static void json_as_buffer(const nd::array& json, nd::array& out_tmp_ref, const 
                     out_tmp_ref = json.ucast(utf8_tp).eval();
                     sdt = static_cast<const base_string_type *>(utf8_tp.extended());
                     sdt->get_string_range(&begin, &end,
-                                    out_tmp_ref.get_ndo_meta(), out_tmp_ref.get_readonly_originptr());
+                                    out_tmp_ref.get_arrmeta(), out_tmp_ref.get_readonly_originptr());
                     break;
                 }
             }
@@ -65,7 +65,7 @@ static void json_as_buffer(const nd::array& json, nd::array& out_tmp_ref, const 
             out_tmp_ref = json.eval();
             const base_bytes_type *bdt = json_type.tcast<base_bytes_type>();
             bdt->get_bytes_range(&begin, &end,
-                            out_tmp_ref.get_ndo_meta(), out_tmp_ref.get_readonly_originptr());
+                            out_tmp_ref.get_arrmeta(), out_tmp_ref.get_readonly_originptr());
             break;
         }
         default: {
@@ -736,7 +736,7 @@ void dynd::parse_json(nd::array &out, const char *json_begin,
     try {
         const char *begin = json_begin, *end = json_end;
         ndt::type tp = out.get_type();
-        ::parse_json(tp, out.get_ndo_meta(), out.get_readwrite_originptr(), begin, end, ectx);
+        ::parse_json(tp, out.get_arrmeta(), out.get_readwrite_originptr(), begin, end, ectx);
         begin = skip_whitespace(begin, end);
         if (begin != end) {
             throw json_parse_error(begin, "unexpected trailing JSON text", tp);
@@ -772,7 +772,7 @@ nd::array dynd::parse_json(const ndt::type &tp, const char *json_begin,
     result = nd::empty(tp);
     parse_json(result, json_begin, json_end, ectx);
     if (!tp.is_builtin()) {
-        tp.extended()->metadata_finalize_buffers(result.get_ndo_meta());
+        tp.extended()->metadata_finalize_buffers(result.get_arrmeta());
     }
     result.flag_as_immutable();
     return result;

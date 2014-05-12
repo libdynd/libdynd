@@ -193,6 +193,7 @@ set(libdynd_SRC
     src/dynd/types/cstruct_type.cpp
     src/dynd/types/groupby_type.cpp
     src/dynd/types/json_type.cpp
+    src/dynd/types/ndarrayarg_type.cpp
     src/dynd/types/pointer_type.cpp
     src/dynd/types/strided_dim_type.cpp
     src/dynd/types/string_type.cpp
@@ -249,6 +250,7 @@ set(libdynd_SRC
     include/dynd/types/cstruct_type.hpp
     include/dynd/types/groupby_type.hpp
     include/dynd/types/json_type.hpp
+    include/dynd/types/ndarrayarg_type.hpp
     include/dynd/types/pointer_type.hpp
     include/dynd/types/strided_dim_type.hpp
     include/dynd/types/string_type.hpp

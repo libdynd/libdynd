@@ -268,7 +268,7 @@ static array_preamble *function___call__(const array_preamble *params, void *DYN
     ckernel_builder ckb;
     const char *dynd_metadata[max_args];
     for (int i = 0; i < nargs; ++i) {
-        dynd_metadata[i] = args[i].get_ndo_meta();
+        dynd_metadata[i] = args[i].get_arrmeta();
     }
     ckd->instantiate_func(ckd->data_ptr, &ckb, 0, dynd_metadata,
                           kernel_request_single, &eval::default_eval_context);
@@ -292,15 +292,15 @@ static array_preamble *function___call__(const array_preamble *params, void *DYN
 
 static pair<string, gfunc::callable> ckernel_deferred_array_functions[] = {
     pair<string, gfunc::callable>("__call__", gfunc::callable(
-            ndt::type("c{self:pointer[void],out:pointer[void],p0:pointer[void],"
-                       "p1:pointer[void],p2:pointer[void],"
-                       "p3:pointer[void],p4:pointer[void]}"),
+            ndt::type("c{self:ndarrayarg,out:ndarrayarg,p0:ndarrayarg,"
+                       "p1:ndarrayarg,p2:ndarrayarg,"
+                       "p3:ndarrayarg,p4:ndarrayarg}"),
             &function___call__,
             NULL,
             3,
-            nd::empty("c{self:pointer[void],out:pointer[void],p0:pointer[void],"
-                       "p1:pointer[void],p2:pointer[void],"
-                       "p3:pointer[void],p4:pointer[void]}")
+            nd::empty("c{self:ndarrayarg,out:ndarrayarg,p0:ndarrayarg,"
+                       "p1:ndarrayarg,p2:ndarrayarg,"
+                       "p3:ndarrayarg,p4:ndarrayarg}")
                     ))
 };
 

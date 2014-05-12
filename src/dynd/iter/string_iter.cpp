@@ -128,7 +128,7 @@ void iter::make_string_iter(
                 reinterpret_cast<const char *>(&md),
                 reinterpret_cast<const char *>(&d), dynd::assign_error_default, ectx);
             tmp.get_type().tcast<string_type>()->make_string_iter(
-                out_di, iter_encoding, tmp.get_ndo_meta(),
+                out_di, iter_encoding, tmp.get_arrmeta(),
                 tmp.get_readonly_originptr(), tmp.get_data_memblock(),
                 buffer_max_mem, ectx);
             return;

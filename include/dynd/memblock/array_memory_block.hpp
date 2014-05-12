@@ -48,6 +48,16 @@ struct array_preamble {
             return m_type->get_type_id();
         }
     }
+
+    /** Return a pointer to the arrmeta, immediately after the preamble */
+    inline char *get_arrmeta() {
+        return reinterpret_cast<char *>(this + 1);
+    }
+
+    /** Return a pointer to the arrmeta, immediately after the preamble */
+    inline const char *get_arrmeta() const {
+        return reinterpret_cast<const char *>(this + 1);
+    }
 };
 
 /**

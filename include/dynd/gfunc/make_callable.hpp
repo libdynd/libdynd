@@ -9,7 +9,7 @@
 #include <dynd/gfunc/callable.hpp>
 #include <dynd/types/cstruct_type.hpp>
 #include <dynd/types/cfixed_dim_type.hpp>
-#include <dynd/types/void_pointer_type.hpp>
+#include <dynd/types/ndarrayarg_type.hpp>
 #include <dynd/types/string_type.hpp>
 #include <dynd/types/type_type.hpp>
 
@@ -114,11 +114,10 @@ template <typename T> struct make_parameter_type<const T> : public make_paramete
 template <typename T, int N> struct make_parameter_type<T[N]> {inline static ndt::type make() {
         return ndt::make_cfixed_dim(N, ndt::make_type<T>());
     }};
-// Use void* to pass nd::array as a parameter, correctness currently will
-// rely on using them in the right context. To pass these properly will require
-// dynd to grow the ability to manage object memory.
+// Use ndarrayarg to pass nd::array as a parameter. This is a borrowed reference
+// to an nd::array owned by the caller.
 template <> struct make_parameter_type<nd::array> {inline static ndt::type make() {
-        return ndt::type(new void_pointer_type, false);
+        return ndt::make_ndarrayarg();
     }};
 template <> struct make_parameter_type<ndt::type> {inline static ndt::type make() {
         return ndt::make_type();

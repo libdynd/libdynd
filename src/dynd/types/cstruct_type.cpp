@@ -541,9 +541,9 @@ void cstruct_type::get_dynamic_type_properties(const std::pair<std::string, gfun
 cstruct_type::cstruct_type(int, int)
     : base_struct_type(cstruct_type_id, 0, 1, 1, type_flag_none, 0)
 {
-    // Equivalent to ndt::make_cstruct(ndt::type(new void_pointer_type, false), "self");
+    // Equivalent to ndt::make_cstruct(ndt::make_ndarrayarg(), "self");
     // but hardcoded to break the dependency of cstruct_type::array_parameters_type
-    m_field_types.push_back(ndt::type(new void_pointer_type, 0));
+    m_field_types.push_back(ndt::make_ndarrayarg());
     m_field_names.push_back("self");
     m_data_offsets.push_back(0);
     m_metadata_offsets.push_back(0);

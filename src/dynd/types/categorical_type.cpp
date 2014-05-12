@@ -172,18 +172,18 @@ static nd::array make_sorted_categories(const set<const char *, cmp>& uniques,
     nd::array categories = nd::make_strided_array(uniques.size(), element_tp);
     assignment_ckernel_builder k;
     make_assignment_kernel(&k, 0,
-                    element_tp, categories.get_ndo_meta() + sizeof(strided_dim_type_metadata),
+                    element_tp, categories.get_arrmeta() + sizeof(strided_dim_type_metadata),
                     element_tp, metadata,
                     kernel_request_single, assign_error_default,
                     &eval::default_eval_context);
 
-    intptr_t stride = reinterpret_cast<const strided_dim_type_metadata *>(categories.get_ndo_meta())->stride;
+    intptr_t stride = reinterpret_cast<const strided_dim_type_metadata *>(categories.get_arrmeta())->stride;
     char *dst_ptr = categories.get_readwrite_originptr();
     for (set<const char *, cmp>::const_iterator it = uniques.begin(); it != uniques.end(); ++it) {
         k(dst_ptr, *it);
         dst_ptr += stride;
     }
-    categories.get_type().extended()->metadata_finalize_buffers(categories.get_ndo_meta());
+    categories.get_type().extended()->metadata_finalize_buffers(categories.get_arrmeta());
     categories.flag_as_immutable();
 
     return categories;
@@ -220,9 +220,9 @@ categorical_type::categorical_type(const nd::array& categories, bool presorted)
         }
 
         category_count = categories.get_dim_size();
-        intptr_t categories_stride = reinterpret_cast<const strided_dim_type_metadata *>(categories.get_ndo_meta())->stride;
+        intptr_t categories_stride = reinterpret_cast<const strided_dim_type_metadata *>(categories.get_arrmeta())->stride;
 
-        const char *categories_element_metadata = categories.get_ndo_meta() + sizeof(strided_dim_type_metadata);
+        const char *categories_element_metadata = categories.get_arrmeta() + sizeof(strided_dim_type_metadata);
         comparison_ckernel_builder k;
         ::make_comparison_kernel(&k, 0,
                         m_category_tp, categories_element_metadata,
@@ -307,7 +307,7 @@ void categorical_type::print_data(std::ostream& o, const char *DYND_UNUSED(metad
 void categorical_type::print_type(std::ostream& o) const
 {
     size_t category_count = get_category_count();
-    const char *metadata = m_categories.get_ndo_meta() + sizeof(strided_dim_type_metadata);
+    const char *metadata = m_categories.get_arrmeta() + sizeof(strided_dim_type_metadata);
 
     o << "categorical[" << m_category_tp;
     o << ", [";
@@ -350,18 +350,18 @@ uint32_t categorical_type::get_value_from_category(const nd::array& category) co
 {
     if (category.get_type() == m_category_tp) {
         // If the type is right, get the category value directly
-        return get_value_from_category(category.get_ndo_meta(), category.get_readonly_originptr());
+        return get_value_from_category(category.get_arrmeta(), category.get_readonly_originptr());
     } else {
         // Otherwise convert to the correct type, then get the category value
         nd::array c = nd::empty(m_category_tp);
         c.val_assign(category);
-        return get_value_from_category(c.get_ndo_meta(), c.get_readonly_originptr());
+        return get_value_from_category(c.get_arrmeta(), c.get_readonly_originptr());
     }
 }
 
 const char *categorical_type::get_category_metadata() const
 {
-    const char *metadata = m_categories.get_ndo_meta();
+    const char *metadata = m_categories.get_arrmeta();
     m_categories.get_type().extended()->at_single(0, &metadata, NULL);
     return metadata;
 }

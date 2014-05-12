@@ -42,11 +42,10 @@ namespace detail {
     template<>
     struct callable_argument_setter<nd::array> {
         static void set(const ndt::type& paramtype, char *metadata, char *data, const nd::array& value) {
-            if (paramtype.get_type_id() == void_pointer_type_id) {
-                // TODO: switch to a better mechanism for passing nd::array references
+            if (paramtype.get_type_id() == ndarrayarg_type_id) {
                 *reinterpret_cast<const array_preamble **>(data) = value.get_ndo();
             } else {
-                typed_data_assign(paramtype, metadata, data, value.get_type(), value.get_ndo_meta(), value.get_ndo()->m_data_pointer);
+                typed_data_assign(paramtype, metadata, data, value.get_type(), value.get_arrmeta(), value.get_ndo()->m_data_pointer);
             }
         }
     };
@@ -95,9 +94,9 @@ inline nd::array callable::call() const
                 size_t metadata_offset = fsdt->get_metadata_offsets()[i];
                 size_t data_offset = fsdt->get_data_offsets_vector()[i];
                 typed_data_copy(fsdt->get_field_types()[i],
-                                params.get_ndo_meta() + metadata_offset,
+                                params.get_arrmeta() + metadata_offset,
                                 params.get_ndo()->m_data_pointer + data_offset,
-                                m_default_parameters.get_ndo_meta() + metadata_offset,
+                                m_default_parameters.get_arrmeta() + metadata_offset,
                                 m_default_parameters.get_ndo()->m_data_pointer + data_offset);
             }
         } else {
@@ -122,9 +121,9 @@ inline nd::array callable::call(const T& p0) const
                 size_t metadata_offset = fsdt->get_metadata_offsets()[i];
                 size_t data_offset = fsdt->get_data_offsets_vector()[i];
                 typed_data_copy(fsdt->get_field_types()[i],
-                                params.get_ndo_meta() + metadata_offset,
+                                params.get_arrmeta() + metadata_offset,
                                 params.get_ndo()->m_data_pointer + data_offset,
-                                m_default_parameters.get_ndo_meta() + metadata_offset,
+                                m_default_parameters.get_arrmeta() + metadata_offset,
                                 m_default_parameters.get_ndo()->m_data_pointer + data_offset);
             }
         } else {
@@ -134,7 +133,7 @@ inline nd::array callable::call(const T& p0) const
         }
     }
     detail::callable_argument_setter<T>::set(fsdt->get_field_types()[0],
-                    params.get_ndo_meta() + fsdt->get_metadata_offsets()[0],
+                    params.get_arrmeta() + fsdt->get_metadata_offsets()[0],
                     params.get_ndo()->m_data_pointer + fsdt->get_data_offsets_vector()[0],
                     p0);
     return call_generic(params);
@@ -153,9 +152,9 @@ inline nd::array callable::call(const T0& p0, const T1& p1) const
                 size_t metadata_offset = fsdt->get_metadata_offsets()[i];
                 size_t data_offset = fsdt->get_data_offsets_vector()[i];
                 typed_data_copy(fsdt->get_field_types()[i],
-                                params.get_ndo_meta() + metadata_offset,
+                                params.get_arrmeta() + metadata_offset,
                                 params.get_ndo()->m_data_pointer + data_offset,
-                                m_default_parameters.get_ndo_meta() + metadata_offset,
+                                m_default_parameters.get_arrmeta() + metadata_offset,
                                 m_default_parameters.get_ndo()->m_data_pointer + data_offset);
             }
         } else {
@@ -165,11 +164,11 @@ inline nd::array callable::call(const T0& p0, const T1& p1) const
         }
     }
     detail::callable_argument_setter<T0>::set(fsdt->get_field_types()[0],
-                    params.get_ndo_meta() + fsdt->get_metadata_offsets()[0],
+                    params.get_arrmeta() + fsdt->get_metadata_offsets()[0],
                     params.get_ndo()->m_data_pointer + fsdt->get_data_offsets_vector()[0],
                     p0);
     detail::callable_argument_setter<T1>::set(fsdt->get_field_types()[1],
-                    params.get_ndo_meta() + fsdt->get_metadata_offsets()[1],
+                    params.get_arrmeta() + fsdt->get_metadata_offsets()[1],
                     params.get_ndo()->m_data_pointer + fsdt->get_data_offsets_vector()[1],
                     p1);
     return call_generic(params);
@@ -188,9 +187,9 @@ inline nd::array callable::call(const T0& p0, const T1& p1, const T2& p2) const
                 size_t metadata_offset = fsdt->get_metadata_offsets()[i];
                 size_t data_offset = fsdt->get_data_offsets_vector()[i];
                 typed_data_copy(fsdt->get_field_types()[i],
-                                params.get_ndo_meta() + metadata_offset,
+                                params.get_arrmeta() + metadata_offset,
                                 params.get_ndo()->m_data_pointer + data_offset,
-                                m_default_parameters.get_ndo_meta() + metadata_offset,
+                                m_default_parameters.get_arrmeta() + metadata_offset,
                                 m_default_parameters.get_ndo()->m_data_pointer + data_offset);
             }
         } else {
@@ -200,15 +199,15 @@ inline nd::array callable::call(const T0& p0, const T1& p1, const T2& p2) const
         }
     }
     detail::callable_argument_setter<T0>::set(fsdt->get_field_types()[0],
-                    params.get_ndo_meta() + fsdt->get_metadata_offsets()[0],
+                    params.get_arrmeta() + fsdt->get_metadata_offsets()[0],
                     params.get_ndo()->m_data_pointer + fsdt->get_data_offsets_vector()[0],
                     p0);
     detail::callable_argument_setter<T1>::set(fsdt->get_field_types()[1],
-                    params.get_ndo_meta() + fsdt->get_metadata_offsets()[1],
+                    params.get_arrmeta() + fsdt->get_metadata_offsets()[1],
                     params.get_ndo()->m_data_pointer + fsdt->get_data_offsets_vector()[1],
                     p1);
     detail::callable_argument_setter<T2>::set(fsdt->get_field_types()[2],
-                    params.get_ndo_meta() + fsdt->get_metadata_offsets()[2],
+                    params.get_arrmeta() + fsdt->get_metadata_offsets()[2],
                     params.get_ndo()->m_data_pointer + fsdt->get_data_offsets_vector()[2],
                     p2);
     return call_generic(params);
@@ -227,9 +226,9 @@ inline nd::array callable::call(const T0& p0, const T1& p1, const T2& p2, const 
                 size_t metadata_offset = fsdt->get_metadata_offsets()[i];
                 size_t data_offset = fsdt->get_data_offsets_vector()[i];
                 typed_data_copy(fsdt->get_field_types()[i],
-                                params.get_ndo_meta() + metadata_offset,
+                                params.get_arrmeta() + metadata_offset,
                                 params.get_ndo()->m_data_pointer + data_offset,
-                                m_default_parameters.get_ndo_meta() + metadata_offset,
+                                m_default_parameters.get_arrmeta() + metadata_offset,
                                 m_default_parameters.get_ndo()->m_data_pointer + data_offset);
             }
         } else {
@@ -239,19 +238,19 @@ inline nd::array callable::call(const T0& p0, const T1& p1, const T2& p2, const 
         }
     }
     detail::callable_argument_setter<T0>::set(fsdt->get_field_types()[0],
-                    params.get_ndo_meta() + fsdt->get_metadata_offsets()[0],
+                    params.get_arrmeta() + fsdt->get_metadata_offsets()[0],
                     params.get_ndo()->m_data_pointer + fsdt->get_data_offsets_vector()[0],
                     p0);
     detail::callable_argument_setter<T1>::set(fsdt->get_field_types()[1],
-                    params.get_ndo_meta() + fsdt->get_metadata_offsets()[1],
+                    params.get_arrmeta() + fsdt->get_metadata_offsets()[1],
                     params.get_ndo()->m_data_pointer + fsdt->get_data_offsets_vector()[1],
                     p1);
     detail::callable_argument_setter<T2>::set(fsdt->get_field_types()[2],
-                    params.get_ndo_meta() + fsdt->get_metadata_offsets()[2],
+                    params.get_arrmeta() + fsdt->get_metadata_offsets()[2],
                     params.get_ndo()->m_data_pointer + fsdt->get_data_offsets_vector()[2],
                     p2);
     detail::callable_argument_setter<T3>::set(fsdt->get_field_types()[3],
-                    params.get_ndo_meta() + fsdt->get_metadata_offsets()[3],
+                    params.get_arrmeta() + fsdt->get_metadata_offsets()[3],
                     params.get_ndo()->m_data_pointer + fsdt->get_data_offsets_vector()[3],
                     p3);
     return call_generic(params);
@@ -270,9 +269,9 @@ inline nd::array callable::call(const T0& p0, const T1& p1, const T2& p2, const 
                 size_t metadata_offset = fsdt->get_metadata_offsets()[i];
                 size_t data_offset = fsdt->get_data_offsets_vector()[i];
                 typed_data_copy(fsdt->get_field_types()[i],
-                                params.get_ndo_meta() + metadata_offset,
+                                params.get_arrmeta() + metadata_offset,
                                 params.get_ndo()->m_data_pointer + data_offset,
-                                m_default_parameters.get_ndo_meta() + metadata_offset,
+                                m_default_parameters.get_arrmeta() + metadata_offset,
                                 m_default_parameters.get_ndo()->m_data_pointer + data_offset);
             }
         } else {
@@ -282,23 +281,23 @@ inline nd::array callable::call(const T0& p0, const T1& p1, const T2& p2, const 
         }
     }
     detail::callable_argument_setter<T0>::set(fsdt->get_field_types()[0],
-                    params.get_ndo_meta() + fsdt->get_metadata_offsets()[0],
+                    params.get_arrmeta() + fsdt->get_metadata_offsets()[0],
                     params.get_ndo()->m_data_pointer + fsdt->get_data_offsets_vector()[0],
                     p0);
     detail::callable_argument_setter<T1>::set(fsdt->get_field_types()[1],
-                    params.get_ndo_meta() + fsdt->get_metadata_offsets()[1],
+                    params.get_arrmeta() + fsdt->get_metadata_offsets()[1],
                     params.get_ndo()->m_data_pointer + fsdt->get_data_offsets_vector()[1],
                     p1);
     detail::callable_argument_setter<T2>::set(fsdt->get_field_types()[2],
-                    params.get_ndo_meta() + fsdt->get_metadata_offsets()[2],
+                    params.get_arrmeta() + fsdt->get_metadata_offsets()[2],
                     params.get_ndo()->m_data_pointer + fsdt->get_data_offsets_vector()[2],
                     p2);
     detail::callable_argument_setter<T3>::set(fsdt->get_field_types()[3],
-                    params.get_ndo_meta() + fsdt->get_metadata_offsets()[3],
+                    params.get_arrmeta() + fsdt->get_metadata_offsets()[3],
                     params.get_ndo()->m_data_pointer + fsdt->get_data_offsets_vector()[3],
                     p3);
     detail::callable_argument_setter<T4>::set(fsdt->get_field_types()[4],
-                    params.get_ndo_meta() + fsdt->get_metadata_offsets()[4],
+                    params.get_arrmeta() + fsdt->get_metadata_offsets()[4],
                     params.get_ndo()->m_data_pointer + fsdt->get_data_offsets_vector()[4],
                     p4);
     return call_generic(params);

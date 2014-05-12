@@ -358,7 +358,7 @@ static nd::array view_as_bytes(const nd::array& arr, const ndt::type& tp)
     memory_block_ptr data_ref = arr.get_data_memblock();
     char *data_ptr = arr.get_ndo()->m_data_pointer;
     ndt::type data_tp = arr.get_type();
-    const char *data_meta = arr.get_ndo_meta();
+    const char *data_meta = arr.get_arrmeta();
     intptr_t data_dim_size = -1, data_stride = 0;
     // Repeatedly refine the data
     while (data_tp.get_type_id() != uninitialized_type_id) {
@@ -389,7 +389,7 @@ static nd::array view_as_bytes(const nd::array& arr, const ndt::type& tp)
     ndo->m_flags = arr.get_flags();
     // Set the bytes metadata
     bytes_type_metadata *ndo_meta =
-        reinterpret_cast<bytes_type_metadata *>(result.get_ndo_meta());
+        reinterpret_cast<bytes_type_metadata *>(result.get_arrmeta());
     ndo_meta->blockref = data_ref.release();
     return result;
 }
@@ -404,7 +404,7 @@ static nd::array view_from_bytes(const nd::array &arr, const ndt::type &tp)
     }
 
     const bytes_type_metadata *bytes_meta =
-        reinterpret_cast<const bytes_type_metadata *>(arr.get_ndo_meta());
+        reinterpret_cast<const bytes_type_metadata *>(arr.get_arrmeta());
     bytes_type_data *bytes_d =
         reinterpret_cast<bytes_type_data *>(arr.get_ndo()->m_data_pointer);
     memory_block_ptr data_ref;
@@ -430,7 +430,7 @@ static nd::array view_from_bytes(const nd::array &arr, const ndt::type &tp)
             result.get_ndo()->m_type = ndt::type(tp).release();
             result.get_ndo()->m_flags = arr.get_ndo()->m_flags;
             if (tp.get_metadata_size() > 0) {
-                tp.extended()->metadata_default_construct(result.get_ndo_meta(),
+                tp.extended()->metadata_default_construct(result.get_arrmeta(),
                                                           0, NULL);
             }
             return result;
@@ -452,12 +452,12 @@ static nd::array view_from_bytes(const nd::array &arr, const ndt::type &tp)
             result.get_ndo()->m_flags = arr.get_ndo()->m_flags;
             if (el_tp.get_metadata_size() > 0) {
                 el_tp.extended()->metadata_default_construct(
-                    result.get_ndo_meta() + sizeof(strided_dim_type_metadata),
+                    result.get_arrmeta() + sizeof(strided_dim_type_metadata),
                     0, NULL);
             }
             strided_dim_type_metadata *strided_meta =
                 reinterpret_cast<strided_dim_type_metadata *>(
-                    result.get_ndo_meta());
+                    result.get_arrmeta());
             strided_meta->size = data_size / el_data_size;
             strided_meta->stride = el_data_size;
             return result;
@@ -500,8 +500,8 @@ nd::array nd::view(const nd::array& arr, const ndt::type& tp)
         result.get_ndo()->m_type = ndt::type(tp).release();
         result.get_ndo()->m_flags = arr.get_ndo()->m_flags;
         // Now try to copy the metadata as a view
-        if (try_view(arr.get_type(), arr.get_ndo_meta(), tp,
-                     result.get_ndo_meta(), arr.get_memblock().get())) {
+        if (try_view(arr.get_type(), arr.get_arrmeta(), tp,
+                     result.get_arrmeta(), arr.get_memblock().get())) {
             // If it succeeded, return it
             return result;
         }

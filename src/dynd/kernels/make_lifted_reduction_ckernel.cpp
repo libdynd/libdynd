@@ -783,7 +783,7 @@ static size_t make_strided_inner_reduction_dimension_kernel(
     } else {
         ckb_end = make_assignment_kernel(
             out_ckb, ckb_end, dst_tp, dst_meta, reduction_identity.get_type(),
-            reduction_identity.get_ndo_meta(), kernel_request_single,
+            reduction_identity.get_arrmeta(), kernel_request_single,
             assign_error_default, ectx);
     }
 
@@ -904,7 +904,7 @@ static size_t make_strided_inner_broadcast_dimension_kernel(
     } else {
         ckb_end = make_assignment_kernel(
             out_ckb, ckb_end, dst_tp, dst_meta, reduction_identity.get_type(),
-            reduction_identity.get_ndo_meta(), kernel_request_strided,
+            reduction_identity.get_arrmeta(), kernel_request_strided,
             assign_error_default, ectx);
     }
 

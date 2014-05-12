@@ -560,7 +560,7 @@ TEST(StringType, Iter) {
 
     dim_iter it;
     static_cast<const base_string_type *>(a.get_dtype().extended())->make_string_iter(
-        &it, string_encoding_utf_8, a.get_ndo_meta(), a.get_readonly_originptr(), a.get_data_memblock());
+        &it, string_encoding_utf_8, a.get_arrmeta(), a.get_readonly_originptr(), a.get_data_memblock());
     // With a short string like this, the entire string will be
     // provided in one go
     ASSERT_EQ(1, it.vtable->next(&it));
@@ -569,7 +569,7 @@ TEST(StringType, Iter) {
     it.destroy();
 
     static_cast<const base_string_type *>(a.get_dtype().extended())->make_string_iter(
-        &it, string_encoding_utf_16, a.get_ndo_meta(), a.get_readonly_originptr(), a.get_data_memblock());
+        &it, string_encoding_utf_16, a.get_arrmeta(), a.get_readonly_originptr(), a.get_data_memblock());
     // With a short string like this, the entire string will be
     // provided in one go
     ASSERT_EQ(1, it.vtable->next(&it));
@@ -578,7 +578,7 @@ TEST(StringType, Iter) {
     it.destroy();
 
     static_cast<const base_string_type *>(a.get_dtype().extended())->make_string_iter(
-        &it, string_encoding_utf_32, a.get_ndo_meta(), a.get_readonly_originptr(), a.get_data_memblock());
+        &it, string_encoding_utf_32, a.get_arrmeta(), a.get_readonly_originptr(), a.get_data_memblock());
     // With a short string like this, the entire string will be
     // provided in one go
     ASSERT_EQ(1, it.vtable->next(&it));
