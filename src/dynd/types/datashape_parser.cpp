@@ -36,6 +36,7 @@
 #include <dynd/types/funcproto_type.hpp>
 #include <dynd/types/typevar_type.hpp>
 #include <dynd/types/typevar_dim_type.hpp>
+#include <dynd/types/ellipsis_dim_type.hpp>
 
 using namespace std;
 using namespace dynd;
@@ -840,8 +841,35 @@ static ndt::type parse_rhs_expression(const char *&rbegin, const char *end, map<
         const char *saved_begin = begin;
         string n = parse_name_or_number(begin, end); // NAME | NUMBER
         if (n.empty()) {
+            if (parse_token_ds(begin, end, "...")) { // ELLIPSIS
+                // An unnamed ellipsis dim
+                if (parse_token_ds(begin, end, '*')) { // ASTERISK
+                    ndt::type element_type = parse_rhs_expression(begin, end, symtable);
+                    if (element_type.get_type_id() == uninitialized_type_id) {
+                        throw datashape_parse_error(begin, "expected a dynd type");
+                    }
+                    rbegin = begin;
+                    return ndt::make_ellipsis_dim(element_type);
+                } else {
+                    throw datashape_parse_error(begin, "expected a '*'");
+                }
+            }
             break;
         } else if (!parse_token_ds(begin, end, '*')) { // ASTERISK
+            if (parse_token_ds(begin, end, "...")) { // ELLIPSIS
+                // A named ellipsis dim
+                if (parse_token_ds(begin, end, '*')) { // ASTERISK
+                    // An unnamed ellipsis dim
+                    ndt::type element_type = parse_rhs_expression(begin, end, symtable);
+                    if (element_type.get_type_id() == uninitialized_type_id) {
+                        throw datashape_parse_error(begin, "expected a dynd type");
+                    }
+                    rbegin = begin;
+                    return ndt::make_ellipsis_dim(n, element_type);
+                } else {
+                    throw datashape_parse_error(begin, "expected a '*'");
+                }
+            }
             begin = saved_begin;
             break;
         } else {

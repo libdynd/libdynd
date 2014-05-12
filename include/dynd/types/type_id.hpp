@@ -156,12 +156,11 @@ enum type_id_t {
     // Instances of this type are deferred ckernel objects
     ckernel_deferred_type_id,
 
-    // Cannot be instantiated, is a type variable
+    // Symbolic types
+    funcproto_type_id,
     typevar_type_id,
     typevar_dim_type_id,
-
-    // Cannot be instantiated, just holds a function prototype
-    funcproto_type_id,
+    ellipsis_dim_type_id,
 
     // The number of built-in, atomic types (including uninitialized and void)
     builtin_type_id_count = 19

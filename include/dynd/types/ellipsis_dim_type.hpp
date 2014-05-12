@@ -3,8 +3,8 @@
 // BSD 2-Clause License, see LICENSE.txt
 //
 
-#ifndef _DYND__TYPEVAR_DIM_TYPE_HPP_
-#define _DYND__TYPEVAR_DIM_TYPE_HPP_
+#ifndef _DYND__ELLIPSIS_DIM_TYPE_HPP_
+#define _DYND__ELLIPSIS_DIM_TYPE_HPP_
 
 #include <vector>
 #include <string>
@@ -14,23 +14,23 @@
 
 namespace dynd {
 
-class typevar_dim_type : public base_uniform_dim_type {
+class ellipsis_dim_type : public base_uniform_dim_type {
     // TODO: Make some types which always hold a particular type,
     //       eg. nd::string
-    // m_name is always an immutable array of type "string"
+    // m_name is either NULL or an immutable array of type "string"
     nd::array m_name;
 
 public:
-    typevar_dim_type(const nd::array &name, const ndt::type &element_type);
+    ellipsis_dim_type(const nd::array &name, const ndt::type &element_type);
 
-    virtual ~typevar_dim_type() {}
+    virtual ~ellipsis_dim_type() {}
 
     inline const nd::array& get_name() const {
         return m_name;
     }
 
     inline std::string get_name_str() const {
-        return m_name.as<std::string>();
+        return m_name.is_empty() ? "" : m_name.as<std::string>();
     }
 
     void print_data(std::ostream& o, const char *metadata, const char *data) const;
@@ -64,17 +64,24 @@ public:
     void get_dynamic_type_properties(
         const std::pair<std::string, gfunc::callable> **out_properties,
         size_t *out_count) const;
-}; // class typevar_dim_type
+}; // class ellipsis_dim_type
 
 namespace ndt {
-    /** Makes a typevar type with the specified name and element type */
-    inline ndt::type make_typevar_dim(const nd::array &name,
+    /** Makes an ellipsis type with the specified name and element type */
+    inline ndt::type make_ellipsis_dim(const nd::array &name,
                                   const ndt::type &element_type)
     {
-        return ndt::type(new typevar_dim_type(name, element_type), false);
+        return ndt::type(new ellipsis_dim_type(name, element_type), false);
+    }
+
+    /** Make an unnamed ellipsis type */
+    inline ndt::type make_ellipsis_dim(const ndt::type &element_type)
+    {
+        return ndt::type(new ellipsis_dim_type(nd::array(), element_type),
+                         false);
     }
 } // namespace ndt
 
 } // namespace dynd
 
-#endif // _DYND__TYPEVAR_DIM_TYPE_HPP_
+#endif // _DYND__ELLIPSIS_DIM_TYPE_HPP_
