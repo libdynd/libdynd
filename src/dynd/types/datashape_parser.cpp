@@ -34,6 +34,7 @@
 #include <dynd/types/cuda_device_type.hpp>
 #include <dynd/types/ndarrayarg_type.hpp>
 #include <dynd/types/funcproto_type.hpp>
+#include <dynd/types/typevar_type.hpp>
 
 using namespace std;
 using namespace dynd;
@@ -905,6 +906,8 @@ static ndt::type parse_rhs_expression(const char *&rbegin, const char *end, map<
             result = parse_cfixed_dim_parameters(begin, end, symtable);
         } else if (parse::compare_range_to_literal(n_begin, n_end, "fixed")) {
             result = parse_fixed_dim_parameters(begin, end, symtable);
+        } else if (isupper(*n_begin)) {
+            result = ndt::make_typevar(n_begin, n_end);
         } else {
             string n(n_begin, n_end);
             const map<string, ndt::type>& builtin_types = get_builtin_types();

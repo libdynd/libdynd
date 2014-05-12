@@ -156,6 +156,9 @@ enum type_id_t {
     // Instances of this type are deferred ckernel objects
     ckernel_deferred_type_id,
 
+    // Cannot be instantiated, is a type variable
+    typevar_type_id,
+
     // Cannot be instantiated, just holds a function prototype
     funcproto_type_id,
 

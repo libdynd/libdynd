@@ -47,6 +47,7 @@ set(tests_SRC
     types/test_type_assign.cpp
     types/test_type_casting.cpp
     types/test_type_promotion.cpp
+    types/test_typevar_type.cpp
     types/test_fixedbytes_type.cpp
     types/test_cfixed_dim_type.cpp
     types/test_fixedstring_type.cpp

@@ -204,6 +204,7 @@ set(libdynd_SRC
     src/dynd/types/time_util.cpp
     src/dynd/types/tuple_type.cpp
     src/dynd/types/type_id.cpp
+    src/dynd/types/typevar_type.cpp
     src/dynd/types/unary_expr_type.cpp
     src/dynd/types/var_dim_type.cpp
     src/dynd/types/view_type.cpp
@@ -263,6 +264,7 @@ set(libdynd_SRC
     include/dynd/types/time_util.hpp
     include/dynd/types/tuple_type.hpp
     include/dynd/types/type_id.hpp
+    include/dynd/types/typevar_type.hpp
     include/dynd/types/unary_expr_type.hpp
     include/dynd/types/var_dim_type.hpp
     include/dynd/types/view_type.hpp

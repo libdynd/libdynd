@@ -69,7 +69,7 @@ public:
     void get_dynamic_type_properties(
         const std::pair<std::string, gfunc::callable> **out_properties,
         size_t *out_count) const;
-}; // class tuple_type
+}; // class typevar_type
 
 namespace ndt {
     /** Makes a funcproto type with the specified types */
@@ -130,4 +130,3 @@ namespace ndt {
 } // namespace dynd
 
 #endif // _DYND__FUNCPROTO_TYPE_HPP_
- 
