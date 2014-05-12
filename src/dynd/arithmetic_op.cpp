@@ -289,7 +289,8 @@ nd::array nd::operator+(const nd::array& op1, const nd::array& op2)
         }
 
         // The signature is (T, T) -> T, so we don't use the original types
-        return apply_binary_operator<ckernel_prefix_with_init>(ops, rdt, rdt, rdt, func_ptr, "addition");
+        return apply_binary_operator<ckernel_prefix_with_init>(
+            ops, rdt, rdt, rdt, func_ptr, "addition");
     } else if (op1dt.get_kind() == string_kind && op2dt.get_kind() == string_kind) {
         ndt::type rdt = ndt::make_string();
         func_ptr.single = &kernels::string_concatenation_kernel::single;

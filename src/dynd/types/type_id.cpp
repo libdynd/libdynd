@@ -149,6 +149,8 @@ std::ostream& dynd::operator<<(std::ostream& o, type_id_t tid)
             return (o << "type");
         case ckernel_deferred_type_id:
             return (o << "ckernel_deferred");
+        case funcproto_type_id:
+            return (o << "funcproto");
         default:
             return (o << "(unknown type id " << (int)tid << ")");
     }

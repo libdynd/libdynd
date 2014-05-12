@@ -40,6 +40,7 @@ set(tests_SRC
     types/test_date_type.cpp
     types/test_datetime_type.cpp
     types/test_fixed_dim_type.cpp
+    types/test_funcproto_type.cpp
     types/test_time_type.cpp
     types/test_type.cpp
     types/test_type_type.cpp

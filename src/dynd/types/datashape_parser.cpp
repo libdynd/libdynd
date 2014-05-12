@@ -33,6 +33,7 @@
 #include <dynd/types/cuda_host_type.hpp>
 #include <dynd/types/cuda_device_type.hpp>
 #include <dynd/types/ndarrayarg_type.hpp>
+#include <dynd/types/funcproto_type.hpp>
 
 using namespace std;
 using namespace dynd;
@@ -773,7 +774,8 @@ static ndt::type parse_struct(const char *&rbegin, const char *end,
 
 // tuple : LPAREN tuple_item tuple_item* RPAREN
 // ctuple : 'c(' tuple_item tuple_item* RPAREN
-static ndt::type parse_tuple(const char *&rbegin, const char *end, map<string, ndt::type>& symtable)
+// funcproto : tuple -> type
+static ndt::type parse_tuple_or_funcproto(const char *&rbegin, const char *end, map<string, ndt::type>& symtable)
 {
     const char *begin = rbegin;
     vector<ndt::type> field_type_list;
@@ -806,11 +808,22 @@ static ndt::type parse_tuple(const char *&rbegin, const char *end, map<string, n
         }
     }
 
-    rbegin = begin;
     if (cprefixed) {
+        rbegin = begin;
         return ndt::make_ctuple(field_type_list.size(), &field_type_list[0]);
     } else {
-        return ndt::make_tuple(field_type_list.size(), &field_type_list[0]);
+        // It might be a function prototype, check for the "->" token
+        if (!parse_token_ds(begin, end, "->")) {
+            rbegin = begin;
+            return ndt::make_tuple(field_type_list.size(), &field_type_list[0]);
+        }
+
+        ndt::type return_type = parse_rhs_expression(begin, end, symtable);
+        if (return_type.get_type_id() == uninitialized_type_id) {
+            throw datashape_parse_error(begin, "expected function prototype return type");
+        }
+        rbegin = begin;
+        return ndt::make_funcproto(field_type_list.size(), &field_type_list[0], return_type);
     }
 }
 
@@ -851,9 +864,9 @@ static ndt::type parse_rhs_expression(const char *&rbegin, const char *end, map<
     }
     // struct
     result = parse_struct(begin, end, symtable);
-    // tuple
+    // tuple or funcproto
     if (result.get_type_id() == uninitialized_type_id) {
-        result = parse_tuple(begin, end, symtable);
+        result = parse_tuple_or_funcproto(begin, end, symtable);
     }
     if (result.get_type_id() == uninitialized_type_id) {
         const char *begin_saved = begin;
