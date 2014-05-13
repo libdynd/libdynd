@@ -3,7 +3,7 @@
 // BSD 2-Clause License, see LICENSE.txt
 //
 
-#include <dynd/gfunc/callable.hpp>
+#include <dynd/func/callable.hpp>
 #include <dynd/types/strided_dim_type.hpp>
 
 using namespace std;

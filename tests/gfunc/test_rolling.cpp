@@ -15,7 +15,7 @@
 #include <dynd/kernels/reduction_kernels.hpp>
 #include <dynd/types/ckernel_deferred_type.hpp>
 #include <dynd/kernels/lift_reduction_ckernel_deferred.hpp>
-#include <dynd/gfunc/call_callable.hpp>
+#include <dynd/func/call_callable.hpp>
 
 using namespace std;
 using namespace dynd;

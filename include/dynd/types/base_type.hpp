@@ -18,7 +18,7 @@
 
 namespace dynd {
 
-// Forward definition from dynd/gfunc/callable.hpp
+// Forward definition from dynd/func/callable.hpp
 namespace gfunc {
     class callable;
 };

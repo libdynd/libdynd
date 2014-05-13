@@ -6,7 +6,7 @@
 #ifndef _DYND__MAKE_CALLABLE_HPP_
 #define _DYND__MAKE_CALLABLE_HPP_
 
-#include <dynd/gfunc/callable.hpp>
+#include <dynd/func/callable.hpp>
 #include <dynd/types/cstruct_type.hpp>
 #include <dynd/types/cfixed_dim_type.hpp>
 #include <dynd/types/ndarrayarg_type.hpp>

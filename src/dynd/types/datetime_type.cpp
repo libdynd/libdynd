@@ -20,7 +20,7 @@
 #include <dynd/kernels/string_assignment_kernels.hpp>
 #include <dynd/kernels/assignment_kernels.hpp>
 #include <dynd/exceptions.hpp>
-#include <dynd/gfunc/make_callable.hpp>
+#include <dynd/func/make_callable.hpp>
 #include <dynd/array_iter.hpp>
 
 #include <datetime_strings.h>

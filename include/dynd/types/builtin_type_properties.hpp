@@ -7,7 +7,7 @@
 #define _DYND__BUILTIN_DTYPE_PROPERTIES_HPP_
 
 #include <dynd/types/type_id.hpp>
-#include <dynd/gfunc/callable.hpp>
+#include <dynd/func/callable.hpp>
 
 namespace dynd {
 

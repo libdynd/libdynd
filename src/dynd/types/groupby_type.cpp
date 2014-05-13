@@ -13,7 +13,7 @@
 #include <dynd/types/var_dim_type.hpp>
 #include <dynd/types/categorical_type.hpp>
 #include <dynd/array_iter.hpp>
-#include <dynd/gfunc/make_callable.hpp>
+#include <dynd/func/make_callable.hpp>
 
 using namespace std;
 using namespace dynd;

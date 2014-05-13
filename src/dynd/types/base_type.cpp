@@ -4,7 +4,7 @@
 //
 
 #include <dynd/type.hpp>
-#include <dynd/gfunc/callable.hpp>
+#include <dynd/func/callable.hpp>
 #include <dynd/types/builtin_type_properties.hpp>
 
 using namespace std;

@@ -8,7 +8,7 @@
 #include <dynd/kernels/bytes_assignment_kernels.hpp>
 #include <dynd/types/fixedbytes_type.hpp>
 #include <dynd/exceptions.hpp>
-#include <dynd/gfunc/make_callable.hpp>
+#include <dynd/func/make_callable.hpp>
 
 #include <algorithm>
 

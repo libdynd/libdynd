@@ -22,8 +22,8 @@
 #include <dynd/kernels/assignment_kernels.hpp>
 #include <dynd/kernels/comparison_kernels.hpp>
 #include <dynd/exceptions.hpp>
-#include <dynd/gfunc/callable.hpp>
-#include <dynd/gfunc/call_callable.hpp>
+#include <dynd/func/callable.hpp>
+#include <dynd/func/call_callable.hpp>
 #include <dynd/types/groupby_type.hpp>
 #include <dynd/types/categorical_type.hpp>
 #include <dynd/types/builtin_type_properties.hpp>

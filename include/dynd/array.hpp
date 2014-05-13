@@ -376,22 +376,22 @@ public:
      */
     const gfunc::callable& find_dynamic_function(const char *function_name) const;
 
-    /** Calls the dynamic function - #include <dynd/gfunc/call_callable.hpp> to use it */
+    /** Calls the dynamic function - #include <dynd/func/call_callable.hpp> to use it */
     array f(const char *function_name);
 
-    /** Calls the dynamic function - #include <dynd/gfunc/call_callable.hpp> to use it */
+    /** Calls the dynamic function - #include <dynd/func/call_callable.hpp> to use it */
     template<class T0>
     array f(const char *function_name, const T0& p0);
 
-    /** Calls the dynamic function - #include <dynd/gfunc/call_callable.hpp> to use it */
+    /** Calls the dynamic function - #include <dynd/func/call_callable.hpp> to use it */
     template<class T0, class T1>
     array f(const char *function_name, const T0& p0, const T1& p1);
 
-    /** Calls the dynamic function - #include <dynd/gfunc/call_callable.hpp> to use it */
+    /** Calls the dynamic function - #include <dynd/func/call_callable.hpp> to use it */
     template<class T0, class T1, class T2>
     array f(const char *function_name, const T0& p0, const T1& p1, const T2& p2);
 
-    /** Calls the dynamic function - #include <dynd/gfunc/call_callable.hpp> to use it */
+    /** Calls the dynamic function - #include <dynd/func/call_callable.hpp> to use it */
     template<class T0, class T1, class T2, class T3>
     array f(const char *function_name, const T0& p0, const T1& p1, const T2& p2, const T3& p3);
 
