@@ -25,13 +25,15 @@ set(tests_SRC
     codegen/test_unary_kernel_adapter.cpp
     codegen/test_binary_kernel_adapter.cpp
 #    codegen/assembly_samples/asm_tests.cpp
+    types/test_align_type.cpp
     types/test_bytes_type.cpp
     types/test_byteswap_type.cpp
     types/test_categorical_type.cpp
     types/test_complex_type.cpp
     types/test_convert_type.cpp
-    types/test_align_type.cpp
+    types/test_cfixed_dim_type.cpp
     types/test_char_type.cpp
+    types/test_cstruct_type.cpp
     types/test_ctuple_type.cpp
     types/test_cuda_host_type.cpp
     types/test_cuda_device_type.cpp
@@ -40,23 +42,22 @@ set(tests_SRC
     types/test_date_type.cpp
     types/test_datetime_type.cpp
     types/test_fixed_dim_type.cpp
-    types/test_time_type.cpp
-    types/test_type.cpp
-    types/test_type_type.cpp
-    types/test_type_assign.cpp
-    types/test_type_casting.cpp
-    types/test_type_promotion.cpp
     types/test_fixedbytes_type.cpp
-    types/test_cfixed_dim_type.cpp
     types/test_fixedstring_type.cpp
-    types/test_cstruct_type.cpp
     types/test_groupby_type.cpp
     types/test_json_type.cpp
     types/test_pointer_type.cpp
     types/test_strided_dim_type.cpp
     types/test_string_type.cpp
     types/test_struct_type.cpp
+    types/test_symbolic_types.cpp
+    types/test_time_type.cpp
     types/test_tuple_type.cpp
+    types/test_type.cpp
+    types/test_type_type.cpp
+    types/test_type_assign.cpp
+    types/test_type_casting.cpp
+    types/test_type_promotion.cpp
     types/test_var_dim_type.cpp
     gfunc/test_callable.cpp
     gfunc/test_ckernel_deferred.cpp

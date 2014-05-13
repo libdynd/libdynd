@@ -39,8 +39,8 @@ std::ostream& dynd::operator<<(std::ostream& o, type_kind_t kind)
             return (o << "dynamic");
         case expression_kind:
             return (o << "expression");
-        case pattern_kind:
-            return (o << "pattern");
+        case symbolic_kind:
+            return (o << "symbolic");
         case custom_kind:
             return (o << "custom");
         default:
@@ -149,6 +149,14 @@ std::ostream& dynd::operator<<(std::ostream& o, type_id_t tid)
             return (o << "type");
         case ckernel_deferred_type_id:
             return (o << "ckernel_deferred");
+        case funcproto_type_id:
+            return (o << "funcproto");
+        case typevar_type_id:
+            return (o << "typevar");
+        case typevar_dim_type_id:
+            return (o << "typevar_dim");
+        case ellipsis_dim_type_id:
+            return (o << "ellipsis_dim");
         default:
             return (o << "(unknown type id " << (int)tid << ")");
     }

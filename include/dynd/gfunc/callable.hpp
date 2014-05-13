@@ -43,7 +43,7 @@ public:
             m_default_parameters(default_parameters)
 
     {
-        if (!m_default_parameters.is_empty()) {
+        if (!m_default_parameters.is_null()) {
             // Make sure the default parameter values have the correct type
             if (m_default_parameters.get_type() != m_parameters_type) {
                 throw std::invalid_argument("dynd callable's default arguments have a different type than the parameters");
@@ -58,7 +58,7 @@ public:
     inline void set(const ndt::type& parameters_tp, callable_function_t function, void *extra = NULL,
                     int first_default_parameter = std::numeric_limits<int>::max(), const nd::array& default_parameters = nd::array())
     {
-        if (!default_parameters.is_empty()) {
+        if (!default_parameters.is_null()) {
             // Make sure the default parameter values have the correct type
             if (default_parameters.get_type() != parameters_tp) {
                 throw std::invalid_argument("dynd callable's default arguments have a different type than the parameters");

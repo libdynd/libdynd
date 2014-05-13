@@ -348,16 +348,6 @@ TEST(DataShapeParser, ErrorRecord) {
 TEST(DataShapeParser, ErrorTypeAlias) {
     try {
         type_from_datashape("\n"
-            "type MyInt = int32\n"
-            "MyInt * int32\n");
-        EXPECT_TRUE(false);
-    } catch (const runtime_error& e) {
-        string msg = e.what();
-        EXPECT_TRUE(msg.find("line 3, column 1") != string::npos);
-        EXPECT_TRUE(msg.find("type vars are not supported") != string::npos);
-    }
-    try {
-        type_from_datashape("\n"
             "type 33 = int32\n"
             "2, int32\n");
         EXPECT_TRUE(false);

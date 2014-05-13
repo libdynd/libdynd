@@ -52,7 +52,7 @@ bool dynd::is_lossless_assignment(const ndt::type& dst_tp, const ndt::type& src_
 {
     if (dst_tp.is_builtin() && src_tp.is_builtin()) {
         switch (src_tp.get_kind()) {
-            case pattern_kind: // TODO: raise an error?
+            case symbolic_kind: // TODO: raise an error?
                 return true;
             case bool_kind:
                 switch (dst_tp.get_kind()) {

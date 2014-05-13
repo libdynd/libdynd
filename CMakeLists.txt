@@ -3,7 +3,8 @@
 # BSD 2-Clause License, see LICENSE.txt
 #
 
-cmake_minimum_required(VERSION 2.6)
+# Travis-CI has 2.8.7, 2.8.11 or higher is recommended
+cmake_minimum_required(VERSION 2.8.7)
 project(libdynd)
 
 find_package(CUDA)
@@ -178,6 +179,8 @@ set(libdynd_SRC
     src/dynd/types/datetime_parser.cpp
     src/dynd/types/datetime_type.cpp
     src/dynd/types/datetime_util.cpp
+    src/dynd/types/ellipsis_dim_type.cpp
+    src/dynd/types/funcproto_type.cpp
     src/dynd/types/type_type.cpp
     src/dynd/types/dynd_complex.cpp
     src/dynd/types/dynd_float16.cpp
@@ -203,6 +206,8 @@ set(libdynd_SRC
     src/dynd/types/time_util.cpp
     src/dynd/types/tuple_type.cpp
     src/dynd/types/type_id.cpp
+    src/dynd/types/typevar_dim_type.cpp
+    src/dynd/types/typevar_type.cpp
     src/dynd/types/unary_expr_type.cpp
     src/dynd/types/var_dim_type.cpp
     src/dynd/types/view_type.cpp
@@ -234,6 +239,8 @@ set(libdynd_SRC
     include/dynd/types/datetime_parser.hpp
     include/dynd/types/datetime_type.hpp
     include/dynd/types/datetime_util.hpp
+    include/dynd/types/ellipsis_dim_type.hpp
+    include/dynd/types/funcproto_type.hpp
     include/dynd/types/type_type.hpp
     include/dynd/types/dynd_complex.hpp
     include/dynd/types/dynd_float16.hpp
@@ -261,6 +268,8 @@ set(libdynd_SRC
     include/dynd/types/time_util.hpp
     include/dynd/types/tuple_type.hpp
     include/dynd/types/type_id.hpp
+    include/dynd/types/typevar_dim_type.hpp
+    include/dynd/types/typevar_type.hpp
     include/dynd/types/unary_expr_type.hpp
     include/dynd/types/var_dim_type.hpp
     include/dynd/types/view_type.hpp
@@ -391,6 +400,7 @@ set(libdynd_SRC
     src/dynd/array.cpp
     src/dynd/array_range.cpp
     src/dynd/config.cpp
+    src/dynd/dim_iter.cpp
     src/dynd/type.cpp
     src/dynd/typed_data_assign.cpp
     src/dynd/type_promotion.cpp
@@ -401,8 +411,8 @@ set(libdynd_SRC
     src/dynd/json_parser.cpp
     src/dynd/lowlevel_api.cpp
     src/dynd/parser_util.cpp
-    src/dynd/dim_iter.cpp
     src/dynd/shape_tools.cpp
+    src/dynd/string.cpp
     src/dynd/string_encodings.cpp
     src/dynd/view.cpp
     include/dynd/array.hpp
@@ -431,6 +441,7 @@ set(libdynd_SRC
     include/dynd/elwise.hpp
     include/dynd/shortvector.hpp
     include/dynd/shape_tools.hpp
+    include/dynd/string.hpp
     include/dynd/string_encodings.hpp
     include/dynd/view.hpp
     )
