@@ -17,8 +17,8 @@ namespace {
 
 struct lifted_reduction_ckernel_deferred_data {
     // Pointer to the child ckernel_deferred
-    const ckernel_deferred *child_elwise_reduction;
-    const ckernel_deferred *child_dst_initialization;
+    const arrfunc *child_elwise_reduction;
+    const arrfunc *child_dst_initialization;
     nd::array reduction_identity;
     // Reference to the memory blocks owning them
     memory_block_ptr ref_elwise_reduction;
@@ -60,7 +60,7 @@ static intptr_t instantiate_lifted_reduction_ckernel_deferred_data(
 
 } // anonymous namespace
 
-void dynd::lift_reduction_ckernel_deferred(ckernel_deferred *out_ckd,
+void dynd::lift_reduction_ckernel_deferred(arrfunc *out_ckd,
                 const nd::array& elwise_reduction_arr,
                 const ndt::type& lifted_arr_type,
                 const nd::array& dst_initialization_arr,
@@ -82,11 +82,11 @@ void dynd::lift_reduction_ckernel_deferred(ckernel_deferred *out_ckd,
            << "ckernel_deferred, not " << elwise_reduction_arr.get_type();
         throw runtime_error(ss.str());
     }
-    const ckernel_deferred *elwise_reduction =
-                reinterpret_cast<const ckernel_deferred *>(elwise_reduction_arr.get_readonly_originptr());
+    const arrfunc *elwise_reduction =
+                reinterpret_cast<const arrfunc *>(elwise_reduction_arr.get_readonly_originptr());
     if (elwise_reduction->instantiate_func == NULL) {
         throw runtime_error("lift_reduction_ckernel_deferred: 'elwise_reduction' must contain a"
-                        " non-null ckernel_deferred object");
+                        " non-null arrfunc object");
     }
     if (elwise_reduction->ckernel_funcproto != unary_operation_funcproto &&
                     !(elwise_reduction->ckernel_funcproto == expr_operation_funcproto &&
@@ -98,7 +98,7 @@ void dynd::lift_reduction_ckernel_deferred(ckernel_deferred *out_ckd,
     }
 
     // Validate the input dst_initialization ckernel_deferred
-    const ckernel_deferred *dst_initialization = NULL;
+    const arrfunc *dst_initialization = NULL;
     if (!dst_initialization_arr.is_null()) {
         if (dst_initialization_arr.get_type().get_type_id() != arrfunc_type_id) {
             stringstream ss;
@@ -107,10 +107,10 @@ void dynd::lift_reduction_ckernel_deferred(ckernel_deferred *out_ckd,
             throw runtime_error(ss.str());
         }
         dst_initialization =
-                reinterpret_cast<const ckernel_deferred *>(dst_initialization_arr.get_readonly_originptr());
+                reinterpret_cast<const arrfunc *>(dst_initialization_arr.get_readonly_originptr());
         if (dst_initialization->instantiate_func == NULL) {
             throw runtime_error("lift_reduction_ckernel_deferred: 'dst_initialization' must contain a"
-                            " non-null ckernel_deferred object");
+                            " non-null arrfunc object");
         }
         if (dst_initialization->ckernel_funcproto != unary_operation_funcproto) {
             throw runtime_error("lift_reduction_ckernel_deferred: 'dst_initialization' must contain a"

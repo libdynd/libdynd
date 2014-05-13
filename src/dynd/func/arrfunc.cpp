@@ -103,19 +103,19 @@ instantiate_expr_ckernel(void *self_data_ptr, dynd::ckernel_builder *out_ckb,
 
 } // anonymous namespace
 
-void dynd::make_ckernel_deferred_from_assignment(
+void dynd::make_arrfunc_from_assignment(
                 const ndt::type& dst_tp, const ndt::type& src_tp, const ndt::type& src_expr_tp,
-                deferred_ckernel_funcproto_t funcproto,
-                assign_error_mode errmode, ckernel_deferred& out_ckd)
+                arrfunc_proto_t funcproto,
+                assign_error_mode errmode, arrfunc& out_ckd)
 {
     if (src_tp.operand_type() != src_expr_tp.operand_type()) {
         stringstream ss;
-        ss << "make_ckernel_deferred_from_assignment: src_tp " << src_tp;
+        ss << "make_arrfunc_from_assignment: src_tp " << src_tp;
         ss << " and src_expr_tp " << src_expr_tp;
         ss << " must have matching operand types";
         throw type_error(ss.str());
     }
-    memset(&out_ckd, 0, sizeof(ckernel_deferred));
+    memset(&out_ckd, 0, sizeof(arrfunc));
     if (funcproto == unary_operation_funcproto) {
         // Since a unary operation was requested, it's a straightforward unary assignment ckernel
         unary_assignment_ckernel_deferred_data *data = new unary_assignment_ckernel_deferred_data;
@@ -178,11 +178,11 @@ void dynd::make_ckernel_deferred_from_assignment(
 }
 
 
-void dynd::make_ckernel_deferred_from_property(const ndt::type& tp, const std::string& propname,
-                deferred_ckernel_funcproto_t funcproto,
-                assign_error_mode errmode, ckernel_deferred& out_ckd)
+void dynd::make_arrfunc_from_property(const ndt::type& tp, const std::string& propname,
+                arrfunc_proto_t funcproto,
+                assign_error_mode errmode, arrfunc& out_ckd)
 {
     ndt::type prop_tp = ndt::make_property(tp, propname);
     ndt::type dst_tp = prop_tp.value_type();
-    make_ckernel_deferred_from_assignment(dst_tp, tp, prop_tp, funcproto, errmode, out_ckd);
+    make_arrfunc_from_assignment(dst_tp, tp, prop_tp, funcproto, errmode, out_ckd);
 }

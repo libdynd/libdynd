@@ -145,7 +145,7 @@ static intptr_t instantiate_builtin_sum_reduction_ckernel_deferred(
 }
 
 void kernels::make_builtin_sum_reduction_ckernel_deferred(
-                ckernel_deferred *out_ckd,
+                arrfunc *out_ckd,
                 type_id_t tid)
 {
     if (tid < 0 || tid >= builtin_type_id_count) {
@@ -164,14 +164,14 @@ void kernels::make_builtin_sum_reduction_ckernel_deferred(
 
 nd::array kernels::make_builtin_sum1d_ckernel_deferred(type_id_t tid)
 {
-    nd::array sum_ew = nd::empty(ndt::make_ckernel_deferred());
+    nd::array sum_ew = nd::empty(ndt::make_arrfunc());
     kernels::make_builtin_sum_reduction_ckernel_deferred(
-        reinterpret_cast<ckernel_deferred *>(sum_ew.get_readwrite_originptr()),
+        reinterpret_cast<arrfunc *>(sum_ew.get_readwrite_originptr()),
         tid);
-    nd::array sum_1d = nd::empty(ndt::make_ckernel_deferred());
+    nd::array sum_1d = nd::empty(ndt::make_arrfunc());
     bool reduction_dimflags[1] = {true};
     lift_reduction_ckernel_deferred(
-        reinterpret_cast<ckernel_deferred *>(sum_1d.get_readwrite_originptr()),
+        reinterpret_cast<arrfunc *>(sum_1d.get_readwrite_originptr()),
         sum_ew, ndt::make_strided_dim(ndt::type(tid)), nd::array(), false, 1,
         reduction_dimflags, true, true, false, 0);
     return sum_1d;
@@ -246,9 +246,9 @@ nd::array kernels::make_builtin_mean1d_ckernel_deferred(type_id_t tid, intptr_t 
         ss << ndt::type(tid) << " is not supported";
         throw type_error(ss.str());
     }
-    nd::array mean1d = nd::empty(ndt::make_ckernel_deferred());
-    ckernel_deferred *out_ckd =
-        reinterpret_cast<ckernel_deferred *>(mean1d.get_readwrite_originptr());
+    nd::array mean1d = nd::empty(ndt::make_arrfunc());
+    arrfunc *out_ckd =
+        reinterpret_cast<arrfunc *>(mean1d.get_readwrite_originptr());
     out_ckd->ckernel_funcproto = unary_operation_funcproto;
     out_ckd->data_types_size = 2;
     mean1d_ckernel_deferred_data *data = new mean1d_ckernel_deferred_data;

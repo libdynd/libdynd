@@ -16,12 +16,12 @@ namespace dynd {
  * Lifts the provided ckernel, broadcasting it as necessary to execute
  * across the additional dimensions in the ``lifted_types`` array.
  *
- * \param out_ckd  The output ckernel_deferred which is filled.
- * \param elwise_reduction  The ckernel_deferred to be lifted. This must
+ * \param out_ckd  The output arrfunc which is filled.
+ * \param elwise_reduction  The arrfunc to be lifted. This must
  *                          be a unary operation, which modifies the output
  *                          in place.
  * \param lifted_arr_type  The type the input should be lifted to.
- * \param dst_initialization  Either a NULL nd::array, or a ckernel_deferred
+ * \param dst_initialization  Either a NULL nd::array, or a arrfunc
  *                            which initializes an accumulator value from an
  *                            input value. If it is NULL, either the value in
  *                            `reduction_identity` is used, or a copy operation
@@ -44,7 +44,7 @@ namespace dynd {
  * \param reduction_identity  If not a NULL nd::array, this is the identity
  *                            value for the accumulator.
  */
-void lift_reduction_ckernel_deferred(ckernel_deferred *out_ckd,
+void lift_reduction_ckernel_deferred(arrfunc *out_ckd,
                 const nd::array& elwise_reduction,
                 const ndt::type& lifted_arr_type,
                 const nd::array& dst_initialization,

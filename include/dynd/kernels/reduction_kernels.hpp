@@ -22,12 +22,11 @@ intptr_t make_builtin_sum_reduction_ckernel(
                 kernel_request_t kerntype);
 
 /**
- * Makes a unary reduction ckernel_deferred for the requested
+ * Makes a unary reduction arrfunc for the requested
  * type id.
  */
-void make_builtin_sum_reduction_ckernel_deferred(
-                ckernel_deferred *out_ckd,
-                type_id_t tid);
+void make_builtin_sum_reduction_ckernel_deferred(arrfunc *out_ckd,
+                                                 type_id_t tid);
 
 /**
  * Makes a 1D sum ckernel_deferred.

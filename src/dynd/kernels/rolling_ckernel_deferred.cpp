@@ -103,7 +103,7 @@ struct var_rolling_ck : public kernels::assignment_ck<strided_rolling_ck> {
 struct rolling_ckernel_deferred_data {
     intptr_t window_size;
     // Pointer to the child ckernel_deferred
-    const ckernel_deferred *window_op_ckd;
+    const arrfunc *window_op_ckd;
     // Reference to the array containing it
     nd::array window_op_ckd_arr;
     // The types of the ckernel
@@ -201,7 +201,7 @@ instantiate_strided(void *self_data_ptr, dynd::ckernel_builder *ckb,
         } else {
             stringstream ss;
             ss << "rolling window ckernel: invalid funcproto "
-               << (deferred_ckernel_funcproto_t)
+               << (arrfunc_proto_t)
                   ckd_data->window_op_ckd->ckernel_funcproto
                << " in window_op ckernel";
             throw runtime_error(ss.str());
@@ -212,7 +212,7 @@ instantiate_strided(void *self_data_ptr, dynd::ckernel_builder *ckb,
         kernel_request_strided, ectx);
 }
 
-void dynd::make_rolling_ckernel_deferred(ckernel_deferred *out_ckd,
+void dynd::make_rolling_ckernel_deferred(arrfunc *out_ckd,
                                          const ndt::type &dst_tp,
                                          const ndt::type &src_tp,
                                          const nd::array &window_op,
@@ -225,16 +225,16 @@ void dynd::make_rolling_ckernel_deferred(ckernel_deferred *out_ckd,
            << "ckernel_deferred, not " << window_op.get_type();
         throw runtime_error(ss.str());
     }
-    const ckernel_deferred *window_op_ckd =
-        reinterpret_cast<const ckernel_deferred *>(
+    const arrfunc *window_op_ckd =
+        reinterpret_cast<const arrfunc *>(
             window_op.get_readonly_originptr());
     if (window_op_ckd->instantiate_func == NULL) {
         throw runtime_error("make_rolling_ckernel_deferred() 'window_op' must contain "
-                            "a non-null ckernel_deferred object");
+                            "a non-null arrfunc object");
     }
     if (window_op_ckd->data_types_size != 2) {
         throw runtime_error("make_rolling_ckernel_deferred() 'window_op' must contain "
-                            "a unary ckernel_deferred object");
+                            "a unary arrfunc object");
     }
 
     // Create the data for the ckernel_deferred

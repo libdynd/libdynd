@@ -32,7 +32,7 @@ arrfunc_type::~arrfunc_type()
 {
 }
 
-static void print_ckernel_deferred(std::ostream& o, const ckernel_deferred *ckd)
+static void print_ckernel_deferred(std::ostream& o, const arrfunc *ckd)
 {
     if (ckd->instantiate_func == NULL) {
         o << "<uninitialized ckernel_deferred>";
@@ -131,7 +131,7 @@ namespace {
         static void single(char *dst, const char *src, ckernel_prefix *extra)
         {
             extra_type *e = reinterpret_cast<extra_type *>(extra);
-            const ckernel_deferred *ckd = reinterpret_cast<const ckernel_deferred *>(src);
+            const arrfunc *ckd = reinterpret_cast<const arrfunc *>(src);
             stringstream ss;
             print_ckernel_deferred(ss, ckd);
             e->dst_string_dt->set_utf8_string(e->dst_metadata, dst, e->errmode, ss.str());
@@ -145,7 +145,7 @@ namespace {
     };
 } // anonymous namespace
 
-static intptr_t make_ckernel_deferred_to_string_assignment_kernel(
+static intptr_t make_arrfunc_to_string_assignment_kernel(
                 ckernel_builder *out_ckb, size_t ckb_offset,
                 const ndt::type& dst_string_dt, const char *dst_metadata,
                 kernel_request_t kernreq, assign_error_mode errmode,
@@ -176,7 +176,7 @@ size_t arrfunc_type::make_assignment_kernel(
     } else {
         if (dst_tp.get_kind() == string_kind) {
             // Assignment to strings
-            return make_ckernel_deferred_to_string_assignment_kernel(out_ckb, ckb_offset,
+            return make_arrfunc_to_string_assignment_kernel(out_ckb, ckb_offset,
                             dst_tp, dst_metadata,
                             kernreq, errmode, ectx);
         }
@@ -194,7 +194,7 @@ static nd::array property_ndo_get_types(const nd::array& n) {
     if (n.get_type().get_type_id() != arrfunc_type_id) {
         throw runtime_error("ckernel_deferred property 'types' only works on scalars presently");
     }
-    const ckernel_deferred *ckd = reinterpret_cast<const ckernel_deferred *>(n.get_readonly_originptr());
+    const arrfunc *ckd = reinterpret_cast<const arrfunc *>(n.get_readonly_originptr());
     nd::array result = nd::empty(ckd->data_types_size, ndt::make_strided_dim(ndt::make_type()));
     ndt::type *out_data = reinterpret_cast<ndt::type *>(result.get_readwrite_originptr());
     for (intptr_t i = 0; i < ckd->data_types_size; ++i) {
@@ -227,7 +227,7 @@ static array_preamble *function___call__(const array_preamble *params, void *DYN
     nd::array par(const_cast<array_preamble *>(params), true);
     const nd::array *par_arrs = reinterpret_cast<const nd::array *>(par.get_readonly_originptr());
     if (par_arrs[0].get_type().get_type_id() != arrfunc_type_id) {
-        throw runtime_error("ckernel_deferred method '__call__' only works on individual ckernel_deferred instances presently");
+        throw runtime_error("arrfunc method '__call__' only works on individual arrfunc instances presently");
     }
 
     // Figure out how many args were provided
@@ -242,7 +242,7 @@ static array_preamble *function___call__(const array_preamble *params, void *DYN
         }
     }
 
-    const ckernel_deferred *ckd = reinterpret_cast<const ckernel_deferred *>(par_arrs[0].get_readonly_originptr());
+    const arrfunc *ckd = reinterpret_cast<const arrfunc *>(par_arrs[0].get_readonly_originptr());
 
     nargs -= 1;
 

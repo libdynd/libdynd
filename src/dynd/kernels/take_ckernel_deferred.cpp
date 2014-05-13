@@ -241,7 +241,7 @@ instantiate_indexed_take(void *self_data_ptr, dynd::ckernel_builder *ckb,
 }
 
 
-void kernels::make_take_ckernel_deferred(ckernel_deferred *out_ckd,
+void kernels::make_take_ckernel_deferred(arrfunc *out_ckd,
                                 const ndt::type &dst_tp,
                                 const ndt::type &src_tp,
                                 const ndt::type &mask_tp)

@@ -12,7 +12,7 @@
 namespace dynd {
 
 // The data is defined in ckernel_deferred.hpp
-typedef ckernel_deferred arrfunc_type_data;
+typedef arrfunc arrfunc_type_data;
 
 /**
  * A dynd type whose nd::array instances contain
@@ -56,7 +56,7 @@ public:
 };
 
 namespace ndt {
-    inline ndt::type make_ckernel_deferred() {
+    inline ndt::type make_arrfunc() {
         return ndt::type(new arrfunc_type(), false);
     }
 } // namespace ndt

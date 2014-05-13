@@ -642,7 +642,7 @@ static size_t make_strided_initial_broadcast_dimension_kernel(
     return ckb_end;
 }
 
-static void check_dst_initialization(const ckernel_deferred *dst_initialization,
+static void check_dst_initialization(const arrfunc *dst_initialization,
                                      const ndt::type &dst_tp,
                                      const ndt::type &src_tp)
 {
@@ -676,8 +676,8 @@ static void check_dst_initialization(const ckernel_deferred *dst_initialization,
  * If dst_initialization is NULL, an assignment kernel is used.
  */
 static size_t make_strided_inner_reduction_dimension_kernel(
-    const ckernel_deferred *elwise_reduction,
-    const ckernel_deferred *dst_initialization, ckernel_builder *out_ckb,
+    const arrfunc *elwise_reduction,
+    const arrfunc *dst_initialization, ckernel_builder *out_ckb,
     size_t ckb_offset, intptr_t src_stride, intptr_t src_size,
     const ndt::type &dst_tp, const char *dst_meta, const ndt::type &src_tp,
     const char *src_meta, bool right_associative,
@@ -796,8 +796,8 @@ static size_t make_strided_inner_reduction_dimension_kernel(
  * the final dimension before the accumulation operation.
  */
 static size_t make_strided_inner_broadcast_dimension_kernel(
-    const ckernel_deferred *elwise_reduction,
-    const ckernel_deferred *dst_initialization, ckernel_builder *out_ckb,
+    const arrfunc *elwise_reduction,
+    const arrfunc *dst_initialization, ckernel_builder *out_ckb,
     size_t ckb_offset, intptr_t dst_stride, intptr_t src_stride,
     intptr_t src_size, const ndt::type &dst_tp, const char *dst_meta,
     const ndt::type &src_tp, const char *src_meta,
@@ -912,8 +912,8 @@ static size_t make_strided_inner_broadcast_dimension_kernel(
 }
 
 size_t dynd::make_lifted_reduction_ckernel(
-                const ckernel_deferred *elwise_reduction,
-                const ckernel_deferred *dst_initialization,
+                const arrfunc *elwise_reduction,
+                const arrfunc *dst_initialization,
                 dynd::ckernel_builder *out_ckb, intptr_t ckb_offset,
                 const ndt::type *lifted_types,
                 const char *const* dynd_metadata,

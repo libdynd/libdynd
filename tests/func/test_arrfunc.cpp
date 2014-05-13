@@ -24,22 +24,22 @@ using namespace std;
 using namespace dynd;
 
 TEST(CKernelDeferred, Assignment) {
-    ckernel_deferred ckd;
+    arrfunc af;
     // Create a deferred ckernel for converting string to int
-    make_ckernel_deferred_from_assignment(
+    make_arrfunc_from_assignment(
                     ndt::make_type<int>(), ndt::make_fixedstring(16), ndt::make_fixedstring(16),
-                    unary_operation_funcproto, assign_error_default, ckd);
+                    unary_operation_funcproto, assign_error_default, af);
     // Validate that its types, etc are set right
-    ASSERT_EQ(unary_operation_funcproto, (deferred_ckernel_funcproto_t)ckd.ckernel_funcproto);
-    ASSERT_EQ(2, ckd.data_types_size);
-    ASSERT_EQ(ndt::make_type<int>(), ckd.data_dynd_types[0]);
-    ASSERT_EQ(ndt::make_fixedstring(16), ckd.data_dynd_types[1]);
+    ASSERT_EQ(unary_operation_funcproto, (arrfunc_proto_t)af.ckernel_funcproto);
+    ASSERT_EQ(2, af.data_types_size);
+    ASSERT_EQ(ndt::make_type<int>(), af.data_dynd_types[0]);
+    ASSERT_EQ(ndt::make_fixedstring(16), af.data_dynd_types[1]);
 
     const char *dynd_metadata[2] = {NULL, NULL};
 
     // Instantiate a single ckernel
     ckernel_builder ckb;
-    ckd.instantiate_func(ckd.data_ptr, &ckb, 0, dynd_metadata,
+    af.instantiate_func(af.data_ptr, &ckb, 0, dynd_metadata,
                          kernel_request_single, &eval::default_eval_context);
     int int_out = 0;
     char str_in[16] = "3251";
@@ -49,7 +49,7 @@ TEST(CKernelDeferred, Assignment) {
 
     // Instantiate a strided ckernel
     ckb.reset();
-    ckd.instantiate_func(ckd.data_ptr, &ckb, 0, dynd_metadata,
+    af.instantiate_func(af.data_ptr, &ckb, 0, dynd_metadata,
                          kernel_request_strided, &eval::default_eval_context);
     int ints_out[3] = {0, 0, 0};
     char strs_in[3][16] = {"123", "4567", "891029"};
@@ -62,22 +62,22 @@ TEST(CKernelDeferred, Assignment) {
 
 
 TEST(CKernelDeferred, AssignmentAsExpr) {
-    ckernel_deferred ckd;
+    arrfunc af;
     // Create a deferred ckernel for converting string to int
-    make_ckernel_deferred_from_assignment(
+    make_arrfunc_from_assignment(
                     ndt::make_type<int>(), ndt::make_fixedstring(16), ndt::make_fixedstring(16),
-                    expr_operation_funcproto, assign_error_default, ckd);
+                    expr_operation_funcproto, assign_error_default, af);
     // Validate that its types, etc are set right
-    ASSERT_EQ(expr_operation_funcproto, (deferred_ckernel_funcproto_t)ckd.ckernel_funcproto);
-    ASSERT_EQ(2, ckd.data_types_size);
-    ASSERT_EQ(ndt::make_type<int>(), ckd.data_dynd_types[0]);
-    ASSERT_EQ(ndt::make_fixedstring(16), ckd.data_dynd_types[1]);
+    ASSERT_EQ(expr_operation_funcproto, (arrfunc_proto_t)af.ckernel_funcproto);
+    ASSERT_EQ(2, af.data_types_size);
+    ASSERT_EQ(ndt::make_type<int>(), af.data_dynd_types[0]);
+    ASSERT_EQ(ndt::make_fixedstring(16), af.data_dynd_types[1]);
 
     const char *dynd_metadata[2] = {NULL, NULL};
 
     // Instantiate a single ckernel
     ckernel_builder ckb;
-    ckd.instantiate_func(ckd.data_ptr, &ckb, 0, dynd_metadata,
+    af.instantiate_func(af.data_ptr, &ckb, 0, dynd_metadata,
                          kernel_request_single, &eval::default_eval_context);
     int int_out = 0;
     char str_in[16] = "3251";
@@ -88,7 +88,7 @@ TEST(CKernelDeferred, AssignmentAsExpr) {
 
     // Instantiate a strided ckernel
     ckb.reset();
-    ckd.instantiate_func(ckd.data_ptr, &ckb, 0, dynd_metadata,
+    af.instantiate_func(af.data_ptr, &ckb, 0, dynd_metadata,
                          kernel_request_strided, &eval::default_eval_context);
     int ints_out[3] = {0, 0, 0};
     char strs_in[3][16] = {"123", "4567", "891029"};
@@ -102,24 +102,24 @@ TEST(CKernelDeferred, AssignmentAsExpr) {
 }
 
 TEST(CKernelDeferred, Expr) {
-    ckernel_deferred ckd;
+    arrfunc af;
     // Create a deferred ckernel for adding two ints
     ndt::type add_ints_type = (nd::array((int)0) + nd::array((int)0)).get_type();
-    make_ckernel_deferred_from_assignment(
+    make_arrfunc_from_assignment(
                     ndt::make_type<int>(), add_ints_type, add_ints_type,
-                    expr_operation_funcproto, assign_error_default, ckd);
+                    expr_operation_funcproto, assign_error_default, af);
     // Validate that its types, etc are set right
-    ASSERT_EQ(expr_operation_funcproto, (deferred_ckernel_funcproto_t)ckd.ckernel_funcproto);
-    ASSERT_EQ(3, ckd.data_types_size);
-    ASSERT_EQ(ndt::make_type<int>(), ckd.data_dynd_types[0]);
-    ASSERT_EQ(ndt::make_type<int>(), ckd.data_dynd_types[1]);
-    ASSERT_EQ(ndt::make_type<int>(), ckd.data_dynd_types[2]);
+    ASSERT_EQ(expr_operation_funcproto, (arrfunc_proto_t)af.ckernel_funcproto);
+    ASSERT_EQ(3, af.data_types_size);
+    ASSERT_EQ(ndt::make_type<int>(), af.data_dynd_types[0]);
+    ASSERT_EQ(ndt::make_type<int>(), af.data_dynd_types[1]);
+    ASSERT_EQ(ndt::make_type<int>(), af.data_dynd_types[2]);
 
     const char *dynd_metadata[3] = {NULL, NULL, NULL};
 
     // Instantiate a single ckernel
     ckernel_builder ckb;
-    ckd.instantiate_func(ckd.data_ptr, &ckb, 0, dynd_metadata,
+    af.instantiate_func(af.data_ptr, &ckb, 0, dynd_metadata,
                          kernel_request_single, &eval::default_eval_context);
     int int_out = 0;
     int int_in1 = 1, int_in2 = 3;
@@ -131,7 +131,7 @@ TEST(CKernelDeferred, Expr) {
 
     // Instantiate a strided ckernel
     ckb.reset();
-    ckd.instantiate_func(ckd.data_ptr, &ckb, 0, dynd_metadata,
+    af.instantiate_func(af.data_ptr, &ckb, 0, dynd_metadata,
                          kernel_request_strided, &eval::default_eval_context);
     int ints_out[3] = {0, 0, 0};
     int ints_in1[3] = {1,2,3}, ints_in2[3] = {5,-210,1234};
@@ -148,24 +148,24 @@ TEST(CKernelDeferred, Expr) {
 
 
 TEST(CKernelDeferred, LiftUnaryExpr_FixedDim) {
-    nd::array ckd_base = nd::empty(ndt::make_ckernel_deferred());
+    nd::array ckd_base = nd::empty(ndt::make_arrfunc());
     // Create a deferred ckernel for converting string to int
-    make_ckernel_deferred_from_assignment(
+    make_arrfunc_from_assignment(
                     ndt::make_type<int>(), ndt::make_fixedstring(16), ndt::make_fixedstring(16),
                     expr_operation_funcproto, assign_error_default,
-                    *reinterpret_cast<ckernel_deferred *>(ckd_base.get_readwrite_originptr()));
+                    *reinterpret_cast<arrfunc *>(ckd_base.get_readwrite_originptr()));
 
     // Lift the kernel to particular fixed dim arrays
-    ckernel_deferred ckd;
+    arrfunc af;
     vector<ndt::type> lifted_types;
     lifted_types.push_back(ndt::type("cfixed[3] * int32"));
     lifted_types.push_back(ndt::type("cfixed[3] * string[16]"));
-    lift_ckernel_deferred(&ckd, ckd_base, lifted_types);
+    lift_ckernel_deferred(&af, ckd_base, lifted_types);
 
     // Test it on some data
     ckernel_builder ckb;
     const char *dynd_metadata[2] = {NULL, NULL};
-    ckd.instantiate_func(ckd.data_ptr, &ckb, 0, dynd_metadata,
+    af.instantiate_func(af.data_ptr, &ckb, 0, dynd_metadata,
                          kernel_request_single, &eval::default_eval_context);
     int out[3] = {0, 0, 0};
     char in[3][16] = {"172", "-139", "12345"};
@@ -178,19 +178,19 @@ TEST(CKernelDeferred, LiftUnaryExpr_FixedDim) {
 }
 
 TEST(CKernelDeferred, LiftUnaryExpr_StridedDim) {
-    nd::array ckd_base = nd::empty(ndt::make_ckernel_deferred());
+    nd::array ckd_base = nd::empty(ndt::make_arrfunc());
     // Create a deferred ckernel for converting string to int
-    make_ckernel_deferred_from_assignment(
+    make_arrfunc_from_assignment(
                     ndt::make_type<int>(), ndt::make_fixedstring(16), ndt::make_fixedstring(16),
                     expr_operation_funcproto, assign_error_default,
-                    *reinterpret_cast<ckernel_deferred *>(ckd_base.get_readwrite_originptr()));
+                    *reinterpret_cast<arrfunc *>(ckd_base.get_readwrite_originptr()));
 
     // Lift the kernel to particular fixed dim arrays
-    ckernel_deferred ckd;
+    arrfunc af;
     vector<ndt::type> lifted_types;
     lifted_types.push_back(ndt::type("strided * int32"));
     lifted_types.push_back(ndt::type("strided * string[16]"));
-    lift_ckernel_deferred(&ckd, ckd_base, lifted_types);
+    lift_ckernel_deferred(&af, ckd_base, lifted_types);
 
     // Test it on some data
     ckernel_builder ckb;
@@ -203,7 +203,7 @@ TEST(CKernelDeferred, LiftUnaryExpr_StridedDim) {
     const char *dynd_metadata[2] = {NULL, NULL};
     dynd_metadata[0] = out.get_arrmeta();
     dynd_metadata[1] = in.get_arrmeta();
-    ckd.instantiate_func(ckd.data_ptr, &ckb, 0, dynd_metadata,
+    af.instantiate_func(af.data_ptr, &ckb, 0, dynd_metadata,
                          kernel_request_single, &eval::default_eval_context);
     expr_single_operation_t usngo = ckb.get()->get_function<expr_single_operation_t>();
     usngo(out.get_readwrite_originptr(), &in_ptr, ckb.get());
@@ -213,19 +213,19 @@ TEST(CKernelDeferred, LiftUnaryExpr_StridedDim) {
 }
 
 TEST(CKernelDeferred, LiftUnaryExpr_StridedToVarDim) {
-    nd::array ckd_base = nd::empty(ndt::make_ckernel_deferred());
+    nd::array ckd_base = nd::empty(ndt::make_arrfunc());
     // Create a deferred ckernel for converting string to int
-    make_ckernel_deferred_from_assignment(
+    make_arrfunc_from_assignment(
                     ndt::make_type<int>(), ndt::make_fixedstring(16), ndt::make_fixedstring(16),
                     expr_operation_funcproto, assign_error_default,
-                    *reinterpret_cast<ckernel_deferred *>(ckd_base.get_readwrite_originptr()));
+                    *reinterpret_cast<arrfunc *>(ckd_base.get_readwrite_originptr()));
 
     // Lift the kernel to particular fixed dim arrays
-    ckernel_deferred ckd;
+    arrfunc af;
     vector<ndt::type> lifted_types;
     lifted_types.push_back(ndt::type("var * int32"));
     lifted_types.push_back(ndt::type("strided * string[16]"));
-    lift_ckernel_deferred(&ckd, ckd_base, lifted_types);
+    lift_ckernel_deferred(&af, ckd_base, lifted_types);
 
     // Test it on some data
     ckernel_builder ckb;
@@ -240,7 +240,7 @@ TEST(CKernelDeferred, LiftUnaryExpr_StridedToVarDim) {
     const char *dynd_metadata[2] = {NULL, NULL};
     dynd_metadata[0] = out.get_arrmeta();
     dynd_metadata[1] = in.get_arrmeta();
-    ckd.instantiate_func(ckd.data_ptr, &ckb, 0, dynd_metadata,
+    af.instantiate_func(af.data_ptr, &ckb, 0, dynd_metadata,
                          kernel_request_single, &eval::default_eval_context);
     expr_single_operation_t usngo = ckb.get()->get_function<expr_single_operation_t>();
     usngo(out.get_readwrite_originptr(), &in_ptr, ckb.get());
@@ -254,19 +254,19 @@ TEST(CKernelDeferred, LiftUnaryExpr_StridedToVarDim) {
 
 
 TEST(CKernelDeferred, LiftUnaryExpr_VarToVarDim) {
-    nd::array ckd_base = nd::empty(ndt::make_ckernel_deferred());
+    nd::array ckd_base = nd::empty(ndt::make_arrfunc());
     // Create a deferred ckernel for converting string to int
-    make_ckernel_deferred_from_assignment(
+    make_arrfunc_from_assignment(
                     ndt::make_type<int>(), ndt::make_fixedstring(16), ndt::make_fixedstring(16),
                     expr_operation_funcproto, assign_error_default,
-                    *reinterpret_cast<ckernel_deferred *>(ckd_base.get_readwrite_originptr()));
+                    *reinterpret_cast<arrfunc *>(ckd_base.get_readwrite_originptr()));
 
     // Lift the kernel to particular fixed dim arrays
-    ckernel_deferred ckd;
+    arrfunc af;
     vector<ndt::type> lifted_types;
     lifted_types.push_back(ndt::type("var * int32"));
     lifted_types.push_back(ndt::type("var * string[16]"));
-    lift_ckernel_deferred(&ckd, ckd_base, lifted_types);
+    lift_ckernel_deferred(&af, ckd_base, lifted_types);
 
     // Test it on some data
     ckernel_builder ckb;
@@ -278,7 +278,7 @@ TEST(CKernelDeferred, LiftUnaryExpr_VarToVarDim) {
     const char *dynd_metadata[2] = {NULL, NULL};
     dynd_metadata[0] = out.get_arrmeta();
     dynd_metadata[1] = in.get_arrmeta();
-    ckd.instantiate_func(ckd.data_ptr, &ckb, 0, dynd_metadata,
+    af.instantiate_func(af.data_ptr, &ckb, 0, dynd_metadata,
                          kernel_request_single, &eval::default_eval_context);
     expr_single_operation_t usngo = ckb.get()->get_function<expr_single_operation_t>();
     usngo(out.get_readwrite_originptr(), &in_ptr, ckb.get());
@@ -292,19 +292,19 @@ TEST(CKernelDeferred, LiftUnaryExpr_VarToVarDim) {
 
 
 TEST(CKernelDeferred, LiftUnaryExpr_MultiDimVarToVarDim) {
-    nd::array ckd_base = nd::empty(ndt::make_ckernel_deferred());
+    nd::array ckd_base = nd::empty(ndt::make_arrfunc());
     // Create a deferred ckernel for converting string to int
-    make_ckernel_deferred_from_assignment(
+    make_arrfunc_from_assignment(
                     ndt::make_type<int>(), ndt::make_fixedstring(16), ndt::make_fixedstring(16),
                     expr_operation_funcproto, assign_error_default,
-                    *reinterpret_cast<ckernel_deferred *>(ckd_base.get_readwrite_originptr()));
+                    *reinterpret_cast<arrfunc *>(ckd_base.get_readwrite_originptr()));
 
     // Lift the kernel to particular arrays
-    ckernel_deferred ckd;
+    arrfunc af;
     vector<ndt::type> lifted_types;
     lifted_types.push_back(ndt::type("strided * var * int32"));
     lifted_types.push_back(ndt::type("3 * var * string[16]"));
-    lift_ckernel_deferred(&ckd, ckd_base, lifted_types);
+    lift_ckernel_deferred(&af, ckd_base, lifted_types);
 
     // Test it on some data
     nd::array in = nd::empty(ndt::type("3 * var * string[16]"));
@@ -321,7 +321,7 @@ TEST(CKernelDeferred, LiftUnaryExpr_MultiDimVarToVarDim) {
     dynd_metadata[0] = out.get_arrmeta();
     dynd_metadata[1] = in.get_arrmeta();
     ckernel_builder ckb;
-    ckd.instantiate_func(ckd.data_ptr, &ckb, 0, dynd_metadata,
+    af.instantiate_func(af.data_ptr, &ckb, 0, dynd_metadata,
                          kernel_request_single, &eval::default_eval_context);
     expr_single_operation_t usngo = ckb.get()->get_function<expr_single_operation_t>();
     usngo(out.get_readwrite_originptr(), &in_ptr, ckb.get());
@@ -341,22 +341,22 @@ TEST(CKernelDeferred, LiftUnaryExpr_MultiDimVarToVarDim) {
 }
 
 TEST(CKernelDeferred, LiftExpr_MultiDimVarToVarDim) {
-    nd::array ckd_base = nd::empty(ndt::make_ckernel_deferred());
+    nd::array ckd_base = nd::empty(ndt::make_arrfunc());
     // Create a deferred ckernel for adding two ints
     ndt::type add_ints_type = (nd::array((int32_t)0) + nd::array((int32_t)0)).get_type();
-    make_ckernel_deferred_from_assignment(
+    make_arrfunc_from_assignment(
                     ndt::make_type<int32_t>(), add_ints_type, add_ints_type,
                     expr_operation_funcproto, assign_error_default,
-                    *reinterpret_cast<ckernel_deferred *>(ckd_base.get_readwrite_originptr()));
+                    *reinterpret_cast<arrfunc *>(ckd_base.get_readwrite_originptr()));
 
     // Lift the kernel to particular arrays
-    nd::array ckd_lifted = nd::empty(ndt::make_ckernel_deferred());
-    ckernel_deferred *ckd = reinterpret_cast<ckernel_deferred *>(ckd_lifted.get_readwrite_originptr());
+    nd::array ckd_lifted = nd::empty(ndt::make_arrfunc());
+    arrfunc *af = reinterpret_cast<arrfunc *>(ckd_lifted.get_readwrite_originptr());
     vector<ndt::type> lifted_types;
     lifted_types.push_back(ndt::type("strided * var * int32"));
     lifted_types.push_back(ndt::type("3 * var * int32"));
     lifted_types.push_back(ndt::type("strided * int32"));
-    lift_ckernel_deferred(ckd, ckd_base, lifted_types);
+    lift_ckernel_deferred(af, ckd_base, lifted_types);
 
     // Create some compatible values
     nd::array out = nd::empty(3, lifted_types[0]);
@@ -377,7 +377,7 @@ TEST(CKernelDeferred, LiftExpr_MultiDimVarToVarDim) {
     dynd_metadata[2] = in1.get_arrmeta();
     const char *const in_ptrs[2] = {in0.get_readonly_originptr(), in1.get_readonly_originptr()};
     ckernel_builder ckb;
-    ckd->instantiate_func(ckd->data_ptr, &ckb, 0, dynd_metadata,
+    af->instantiate_func(af->data_ptr, &ckb, 0, dynd_metadata,
                           kernel_request_single, &eval::default_eval_context);
     expr_single_operation_t usngo = ckb.get()->get_function<expr_single_operation_t>();
     usngo(out.get_readwrite_originptr(), in_ptrs, ckb.get());

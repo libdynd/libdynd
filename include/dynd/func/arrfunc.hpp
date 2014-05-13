@@ -3,8 +3,8 @@
 // BSD 2-Clause License, see LICENSE.txt
 //
 
-#ifndef _DYND__CKERNEL_DEFERRED_HPP_
-#define _DYND__CKERNEL_DEFERRED_HPP_
+#ifndef _DYND__ARRFUNC_HPP_
+#define _DYND__ARRFUNC_HPP_
 
 #include <dynd/config.hpp>
 #include <dynd/eval/eval_context.hpp>
@@ -13,15 +13,15 @@
 
 namespace dynd {
 
-enum deferred_ckernel_funcproto_t {
+enum arrfunc_proto_t {
     unary_operation_funcproto,
     expr_operation_funcproto,
     binary_predicate_funcproto
 };
 
 /**
- * Function prototype for instantiating a ckernel from a
- * ckernel_deferred (ckd). To use this function, the
+ * Function prototype for instantiating a ckernel from an
+ * arrfunc. To use this function, the
  * caller should first allocate a `ckernel_builder` instance,
  * either from C++ normally or by reserving appropriately aligned/sized
  * data and calling the C function constructor dynd provides. When the
@@ -38,7 +38,7 @@ enum deferred_ckernel_funcproto_t {
  *                  as required by the caller.
  * \param ectx  The evaluation context.
  */
-typedef intptr_t (*instantiate_deferred_ckernel_fn_t)(void *self_data_ptr,
+typedef intptr_t (*instantiate_arrfunc_t)(void *self_data_ptr,
                 dynd::ckernel_builder *out_ckb, intptr_t ckb_offset,
                 const char *const* dynd_metadata, uint32_t kerntype,
                 const eval::eval_context *ectx);
@@ -55,8 +55,8 @@ typedef intptr_t (*instantiate_deferred_ckernel_fn_t)(void *self_data_ptr,
  * operation and a strided operation, or constructing
  * with different array metadata.
  */
-struct ckernel_deferred {
-    /** A value from the enumeration `deferred_ckernel_funcproto_t`. */
+struct arrfunc {
+    /** A value from the enumeration `arrfunc_proto_t`. */
     size_t ckernel_funcproto;
     /**
      * The number of types in the data_types array. This is used to
@@ -84,7 +84,7 @@ struct ckernel_deferred {
      * The function which instantiates a ckernel. See the documentation
      * for the function typedef for more details.
      */
-    instantiate_deferred_ckernel_fn_t instantiate_func;
+    instantiate_arrfunc_t instantiate_func;
     /**
      * A function which deallocates the memory behind data_ptr after
      * freeing any additional resources it might contain.
@@ -92,14 +92,14 @@ struct ckernel_deferred {
     void (*free_func)(void *self_data_ptr);
 
     // Default to all NULL, so the destructor works correctly
-    inline ckernel_deferred()
+    inline arrfunc()
         : ckernel_funcproto(0), data_types_size(0), data_dynd_types(0),
             data_ptr(0), instantiate_func(0), free_func(0)
     {
     }
 
-    // If it contains a deferred ckernel, free it
-    inline ~ckernel_deferred()
+    // If it contains an arrfunc, free it
+    inline ~arrfunc()
     {
         if (free_func && data_ptr) {
             free_func(data_ptr);
@@ -119,10 +119,10 @@ struct ckernel_deferred {
  * \param errmode  The error mode to use for the assignment.
  * \param out_ckd  The output `ckernel_deferred` struct to be populated.
  */
-void make_ckernel_deferred_from_assignment(
+void make_arrfunc_from_assignment(
                 const ndt::type& dst_tp, const ndt::type& src_tp, const ndt::type& src_prop_tp,
-                deferred_ckernel_funcproto_t funcproto,
-                assign_error_mode errmode, ckernel_deferred& out_ckd);
+                arrfunc_proto_t funcproto,
+                assign_error_mode errmode, arrfunc& out_ckd);
 
 /**
  * Creates a deferred ckernel which does the assignment from
@@ -135,10 +135,10 @@ void make_ckernel_deferred_from_assignment(
  * \param errmode  The error mode to use for the assignment.
  * \param out_ckd  The output `ckernel_deferred` struct to be populated.
  */
-void make_ckernel_deferred_from_property(const ndt::type& tp, const std::string& propname,
-                deferred_ckernel_funcproto_t funcproto,
-                assign_error_mode errmode, ckernel_deferred& out_ckd);
+void make_arrfunc_from_property(const ndt::type& tp, const std::string& propname,
+                arrfunc_proto_t funcproto,
+                assign_error_mode errmode, arrfunc& out_ckd);
 
 } // namespace dynd
 
-#endif // _DYND__CKERNEL_DEFERRED_HPP_
+#endif // _DYND__ARRFUNC_HPP_

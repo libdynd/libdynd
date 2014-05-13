@@ -16,12 +16,12 @@ namespace dynd {
  * Lifts the provided ckernel, broadcasting it as necessary to execute
  * across the additional dimensions in the ``lifted_types`` array.
  *
- * \param out_ckd  The output ckernel_deferred which is filled.
- * \param ckd  The ckernel_deferred to be lifted.
- * \param lifted_types  The types to lift the ckernel to. The output ckernel
+ * \param out_ckd  The output arrfunc which is filled.
+ * \param ckd  The arrfunc to be lifted.
+ * \param lifted_types  The types to lift the arrfunc to. The output arrfunc
  *                      is for these types.
  */
-void lift_ckernel_deferred(ckernel_deferred *out_ckd,
+void lift_ckernel_deferred(arrfunc *out_ckd,
                 const nd::array& ckd,
                 const std::vector<ndt::type>& lifted_types);
 

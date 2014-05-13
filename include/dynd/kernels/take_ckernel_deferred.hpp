@@ -18,12 +18,12 @@ namespace dynd { namespace kernels {
  * Create a deferred ckernel which applies a given window_op in a
  * rolling window fashion.
  *
- * \param out_ckd  The output ckernel_deferred which is filled.
+ * \param out_ckd  The output arrfunc which is filled.
  * \param dst_tp  The destination type for the resulting ckernel_deferred.
  * \param src_tp  The source type for the resulting ckernel_deferred.
  * \param window_size  The size of the rolling window.
  */
-void make_take_ckernel_deferred(ckernel_deferred *out_ckd,
+void make_take_ckernel_deferred(arrfunc *out_ckd,
                                 const ndt::type &dst_tp,
                                 const ndt::type &src_tp,
                                 const ndt::type &mask_tp);
@@ -32,9 +32,9 @@ inline nd::array make_take_ckernel_deferred(const ndt::type &dst_tp,
                                             const ndt::type &src_tp,
                                             const ndt::type &mask_tp)
 {
-    nd::array ckd = nd::empty(ndt::make_ckernel_deferred());
+    nd::array ckd = nd::empty(ndt::make_arrfunc());
     make_take_ckernel_deferred(
-        reinterpret_cast<ckernel_deferred *>(ckd.get_readwrite_originptr()),
+        reinterpret_cast<arrfunc *>(ckd.get_readwrite_originptr()),
         dst_tp, src_tp, mask_tp);
     return ckd;
 }
