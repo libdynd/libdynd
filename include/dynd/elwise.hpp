@@ -9,7 +9,7 @@
 #include <utility>
 
 #include <dynd/array.hpp>
-#include <dynd/kernels/ckernel_deferred.hpp>
+#include <dynd/func/arrfunc.hpp>
 #include <dynd/kernels/make_lifted_ckernel.hpp>
 #include <dynd/kernels/expr_kernel_generator.hpp>
 #include <dynd/shape_tools.hpp>

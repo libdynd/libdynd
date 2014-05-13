@@ -76,7 +76,7 @@ void dynd::lift_reduction_ckernel_deferred(ckernel_deferred *out_ckd,
     if (elwise_reduction_arr.is_null()) {
         throw runtime_error("lift_reduction_ckernel_deferred: 'elwise_reduction' may not be empty");
     }
-    if (elwise_reduction_arr.get_type().get_type_id() != ckernel_deferred_type_id) {
+    if (elwise_reduction_arr.get_type().get_type_id() != arrfunc_type_id) {
         stringstream ss;
         ss << "lift_reduction_ckernel_deferred: 'elwise_reduction' must have type "
            << "ckernel_deferred, not " << elwise_reduction_arr.get_type();
@@ -100,7 +100,7 @@ void dynd::lift_reduction_ckernel_deferred(ckernel_deferred *out_ckd,
     // Validate the input dst_initialization ckernel_deferred
     const ckernel_deferred *dst_initialization = NULL;
     if (!dst_initialization_arr.is_null()) {
-        if (dst_initialization_arr.get_type().get_type_id() != ckernel_deferred_type_id) {
+        if (dst_initialization_arr.get_type().get_type_id() != arrfunc_type_id) {
             stringstream ss;
             ss << "lift_reduction_ckernel_deferred: 'dst_initialization' must have type "
                << "ckernel_deferred, not " << dst_initialization_arr.get_type();

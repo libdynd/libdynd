@@ -5,7 +5,7 @@
 
 #include <dynd/kernels/reduction_kernels.hpp>
 #include <dynd/array.hpp>
-#include <dynd/types/ckernel_deferred_type.hpp>
+#include <dynd/types/arrfunc_type.hpp>
 #include <dynd/types/strided_dim_type.hpp>
 #include <dynd/kernels/lift_reduction_ckernel_deferred.hpp>
 

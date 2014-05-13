@@ -154,7 +154,7 @@ enum type_id_t {
     type_type_id,
 
     // Instances of this type are deferred ckernel objects
-    ckernel_deferred_type_id,
+    arrfunc_type_id,
 
     // Symbolic types
     funcproto_type_id,

@@ -7,22 +7,22 @@
 #define _DYND__CKERNEL_DEFERRED_TYPE_HPP_
 
 #include <dynd/type.hpp>
-#include <dynd/kernels/ckernel_deferred.hpp>
+#include <dynd/func/arrfunc.hpp>
 
 namespace dynd {
 
 // The data is defined in ckernel_deferred.hpp
-typedef ckernel_deferred ckernel_deferred_type_data;
+typedef ckernel_deferred arrfunc_type_data;
 
 /**
  * A dynd type whose nd::array instances contain
  * deferred_ckernel objects.
  */
-class ckernel_deferred_type : public base_type {
+class arrfunc_type : public base_type {
 public:
-    ckernel_deferred_type();
+    arrfunc_type();
 
-    virtual ~ckernel_deferred_type();
+    virtual ~arrfunc_type();
 
     void print_data(std::ostream& o, const char *metadata, const char *data) const;
 
@@ -57,7 +57,7 @@ public:
 
 namespace ndt {
     inline ndt::type make_ckernel_deferred() {
-        return ndt::type(new ckernel_deferred_type(), false);
+        return ndt::type(new arrfunc_type(), false);
     }
 } // namespace ndt
 

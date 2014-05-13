@@ -5,7 +5,7 @@
 
 #include <dynd/array.hpp>
 #include <dynd/view.hpp>
-#include <dynd/types/ckernel_deferred_type.hpp>
+#include <dynd/types/arrfunc_type.hpp>
 #include <dynd/memblock/pod_memory_block.hpp>
 #include <dynd/kernels/string_assignment_kernels.hpp>
 #include <dynd/kernels/assignment_kernels.hpp>
@@ -20,15 +20,15 @@
 using namespace std;
 using namespace dynd;
 
-ckernel_deferred_type::ckernel_deferred_type()
-    : base_type(ckernel_deferred_type_id, custom_kind, sizeof(ckernel_deferred_type_data),
+arrfunc_type::arrfunc_type()
+    : base_type(arrfunc_type_id, custom_kind, sizeof(arrfunc_type_data),
                     sizeof(void *),
                     type_flag_scalar|type_flag_zeroinit|type_flag_destructor,
                     0, 0)
 {
 }
 
-ckernel_deferred_type::~ckernel_deferred_type()
+arrfunc_type::~arrfunc_type()
 {
 }
 
@@ -58,58 +58,58 @@ static void print_ckernel_deferred(std::ostream& o, const ckernel_deferred *ckd)
     }
 }
 
-void ckernel_deferred_type::print_data(std::ostream& o,
+void arrfunc_type::print_data(std::ostream& o,
                 const char *DYND_UNUSED(metadata), const char *data) const
 {
-    const ckernel_deferred_type_data *ckd = reinterpret_cast<const ckernel_deferred_type_data *>(data);
+    const arrfunc_type_data *ckd = reinterpret_cast<const arrfunc_type_data *>(data);
     print_ckernel_deferred(o, ckd);
 }
 
-void ckernel_deferred_type::print_type(std::ostream& o) const
+void arrfunc_type::print_type(std::ostream& o) const
 {
     o << "ckernel_deferred";
 }
 
-bool ckernel_deferred_type::operator==(const base_type& rhs) const
+bool arrfunc_type::operator==(const base_type& rhs) const
 {
-    return this == &rhs || rhs.get_type_id() == ckernel_deferred_type_id;
+    return this == &rhs || rhs.get_type_id() == arrfunc_type_id;
 }
 
-void ckernel_deferred_type::metadata_default_construct(char *DYND_UNUSED(metadata),
+void arrfunc_type::metadata_default_construct(char *DYND_UNUSED(metadata),
                 intptr_t DYND_UNUSED(ndim), const intptr_t* DYND_UNUSED(shape)) const
 {
 }
 
-void ckernel_deferred_type::metadata_copy_construct(char *DYND_UNUSED(dst_metadata),
+void arrfunc_type::metadata_copy_construct(char *DYND_UNUSED(dst_metadata),
                 const char *DYND_UNUSED(src_metadata), memory_block_data *DYND_UNUSED(embedded_reference)) const
 {
 }
 
-void ckernel_deferred_type::metadata_reset_buffers(char *DYND_UNUSED(metadata)) const
+void arrfunc_type::metadata_reset_buffers(char *DYND_UNUSED(metadata)) const
 {
 }
 
-void ckernel_deferred_type::metadata_finalize_buffers(char *DYND_UNUSED(metadata)) const
+void arrfunc_type::metadata_finalize_buffers(char *DYND_UNUSED(metadata)) const
 {
 }
 
-void ckernel_deferred_type::metadata_destruct(char *DYND_UNUSED(metadata)) const
+void arrfunc_type::metadata_destruct(char *DYND_UNUSED(metadata)) const
 {
 }
 
-void ckernel_deferred_type::data_destruct(const char *DYND_UNUSED(metadata), char *data) const
+void arrfunc_type::data_destruct(const char *DYND_UNUSED(metadata), char *data) const
 {
-    const ckernel_deferred_type_data *d = reinterpret_cast<ckernel_deferred_type_data *>(data);
+    const arrfunc_type_data *d = reinterpret_cast<arrfunc_type_data *>(data);
     if (d->data_ptr != NULL && d->free_func != NULL) {
         d->free_func(d->data_ptr);
     }
 }
 
-void ckernel_deferred_type::data_destruct_strided(const char *DYND_UNUSED(metadata), char *data,
+void arrfunc_type::data_destruct_strided(const char *DYND_UNUSED(metadata), char *data,
                 intptr_t stride, size_t count) const
 {
     for (size_t i = 0; i != count; ++i, data += stride) {
-        const ckernel_deferred_type_data *d = reinterpret_cast<ckernel_deferred_type_data *>(data);
+        const arrfunc_type_data *d = reinterpret_cast<arrfunc_type_data *>(data);
         if (d->data_ptr != NULL && d->free_func != NULL) {
             d->free_func(d->data_ptr);
         }
@@ -165,7 +165,7 @@ static intptr_t make_ckernel_deferred_to_string_assignment_kernel(
     return ckb_end_offset;
 }
 
-size_t ckernel_deferred_type::make_assignment_kernel(
+size_t arrfunc_type::make_assignment_kernel(
                 ckernel_builder *out_ckb, size_t ckb_offset,
                 const ndt::type& dst_tp, const char *dst_metadata,
                 const ndt::type& src_tp, const char *DYND_UNUSED(src_metadata),
@@ -191,7 +191,7 @@ size_t ckernel_deferred_type::make_assignment_kernel(
 ///////// properties on the nd::array
 
 static nd::array property_ndo_get_types(const nd::array& n) {
-    if (n.get_type().get_type_id() != ckernel_deferred_type_id) {
+    if (n.get_type().get_type_id() != arrfunc_type_id) {
         throw runtime_error("ckernel_deferred property 'types' only works on scalars presently");
     }
     const ckernel_deferred *ckd = reinterpret_cast<const ckernel_deferred *>(n.get_readonly_originptr());
@@ -207,7 +207,7 @@ static pair<string, gfunc::callable> ckernel_deferred_array_properties[] = {
     pair<string, gfunc::callable>("types", gfunc::make_callable(&property_ndo_get_types, "self"))
 };
 
-void ckernel_deferred_type::get_dynamic_array_properties(
+void arrfunc_type::get_dynamic_array_properties(
                 const std::pair<std::string, gfunc::callable> **out_properties,
                 size_t *out_count) const
 {
@@ -226,7 +226,7 @@ static array_preamble *function___call__(const array_preamble *params, void *DYN
     // TODO: Remove the const_cast
     nd::array par(const_cast<array_preamble *>(params), true);
     const nd::array *par_arrs = reinterpret_cast<const nd::array *>(par.get_readonly_originptr());
-    if (par_arrs[0].get_type().get_type_id() != ckernel_deferred_type_id) {
+    if (par_arrs[0].get_type().get_type_id() != arrfunc_type_id) {
         throw runtime_error("ckernel_deferred method '__call__' only works on individual ckernel_deferred instances presently");
     }
 
@@ -304,7 +304,7 @@ static pair<string, gfunc::callable> ckernel_deferred_array_functions[] = {
                     ))
 };
 
-void ckernel_deferred_type::get_dynamic_array_functions(
+void arrfunc_type::get_dynamic_array_functions(
                 const std::pair<std::string, gfunc::callable> **out_functions,
                 size_t *out_count) const
 {

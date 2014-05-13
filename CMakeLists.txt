@@ -166,7 +166,7 @@ set(libdynd_SRC
     src/dynd/types/categorical_type.cpp
     src/dynd/types/cfixed_dim_type.cpp
 	src/dynd/types/char_type.cpp
-    src/dynd/types/ckernel_deferred_type.cpp
+    src/dynd/types/arrfunc_type.cpp
     src/dynd/types/convert_type.cpp
     src/dynd/types/ctuple_type.cpp
     src/dynd/types/cuda_host_type.cpp
@@ -226,7 +226,7 @@ set(libdynd_SRC
     include/dynd/types/byteswap_type.hpp
     include/dynd/types/categorical_type.hpp
     include/dynd/types/char_type.hpp
-    include/dynd/types/ckernel_deferred_type.hpp
+    include/dynd/types/arrfunc_type.hpp
     include/dynd/types/convert_type.hpp
     include/dynd/types/ctuple_type.hpp
     include/dynd/types/cuda_host_type.hpp
@@ -288,9 +288,11 @@ set(libdynd_SRC
     include/dynd/eval/groupby_elwise_reduce_eval.hpp
     include/dynd/eval/unary_elwise_eval.hpp
     # Func
+    src/dynd/func/arrfunc.cpp
     src/dynd/func/callable.cpp
     src/dynd/func/elwise_gfunc.cpp
     src/dynd/func/elwise_reduce_gfunc.cpp
+    include/dynd/func/arrfunc.hpp
     include/dynd/func/callable.hpp
     include/dynd/func/call_callable.hpp
     include/dynd/func/elwise_gfunc.hpp
@@ -306,7 +308,6 @@ set(libdynd_SRC
     src/dynd/kernels/bytes_assignment_kernels.cpp
     src/dynd/kernels/byteswap_kernels.cpp
     src/dynd/kernels/ckernel_common_functions.cpp
-    src/dynd/kernels/ckernel_deferred.cpp
     src/dynd/kernels/comparison_kernels.cpp
     src/dynd/kernels/date_assignment_kernels.cpp
     src/dynd/kernels/datetime_assignment_kernels.cpp
@@ -344,7 +345,6 @@ set(libdynd_SRC
     include/dynd/kernels/byteswap_kernels.hpp
     include/dynd/kernels/ckernel_builder.hpp
     include/dynd/kernels/ckernel_common_functions.hpp
-    include/dynd/kernels/ckernel_deferred.hpp
     include/dynd/kernels/ckernel_prefix.hpp
     include/dynd/kernels/comparison_kernels.hpp
     include/dynd/kernels/date_assignment_kernels.hpp

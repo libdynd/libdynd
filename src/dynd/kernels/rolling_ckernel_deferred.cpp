@@ -219,7 +219,7 @@ void dynd::make_rolling_ckernel_deferred(ckernel_deferred *out_ckd,
                                          intptr_t window_size)
 {
     // Validate the input ckernel_deferred
-    if (window_op.get_type().get_type_id() != ckernel_deferred_type_id) {
+    if (window_op.get_type().get_type_id() != arrfunc_type_id) {
         stringstream ss;
         ss << "make_rolling_ckernel_deferred() 'window_op' must have type "
            << "ckernel_deferred, not " << window_op.get_type();

@@ -8,8 +8,8 @@
 
 #include <dynd/config.hpp>
 #include <dynd/array.hpp>
-#include <dynd/kernels/ckernel_deferred.hpp>
-#include <dynd/types/ckernel_deferred_type.hpp>
+#include <dynd/func/arrfunc.hpp>
+#include <dynd/types/arrfunc_type.hpp>
 
 namespace dynd {
 

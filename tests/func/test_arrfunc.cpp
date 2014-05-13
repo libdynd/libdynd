@@ -11,8 +11,8 @@
 #include "inc_gtest.hpp"
 
 #include <dynd/types/fixedstring_type.hpp>
-#include <dynd/types/ckernel_deferred_type.hpp>
-#include <dynd/kernels/ckernel_deferred.hpp>
+#include <dynd/types/arrfunc_type.hpp>
+#include <dynd/func/arrfunc.hpp>
 #include <dynd/kernels/assignment_kernels.hpp>
 #include <dynd/kernels/expr_kernel_generator.hpp>
 #include <dynd/kernels/lift_ckernel_deferred.hpp>
