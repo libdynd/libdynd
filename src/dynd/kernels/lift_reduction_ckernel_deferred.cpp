@@ -73,7 +73,7 @@ void dynd::lift_reduction_ckernel_deferred(ckernel_deferred *out_ckd,
                 const nd::array& reduction_identity)
 {
     // Validate the input elwise_reduction ckernel_deferred
-    if (elwise_reduction_arr.is_empty()) {
+    if (elwise_reduction_arr.is_null()) {
         throw runtime_error("lift_reduction_ckernel_deferred: 'elwise_reduction' may not be empty");
     }
     if (elwise_reduction_arr.get_type().get_type_id() != ckernel_deferred_type_id) {
@@ -99,7 +99,7 @@ void dynd::lift_reduction_ckernel_deferred(ckernel_deferred *out_ckd,
 
     // Validate the input dst_initialization ckernel_deferred
     const ckernel_deferred *dst_initialization = NULL;
-    if (!dst_initialization_arr.is_empty()) {
+    if (!dst_initialization_arr.is_null()) {
         if (dst_initialization_arr.get_type().get_type_id() != ckernel_deferred_type_id) {
             stringstream ss;
             ss << "lift_reduction_ckernel_deferred: 'dst_initialization' must have type "
@@ -124,7 +124,7 @@ void dynd::lift_reduction_ckernel_deferred(ckernel_deferred *out_ckd,
     out_ckd->data_types_size = 2;
     self->child_elwise_reduction = elwise_reduction;
     self->child_dst_initialization = dst_initialization;
-    if (!reduction_identity.is_empty()) {
+    if (!reduction_identity.is_null()) {
         if (reduction_identity.is_immutable() &&
                 reduction_identity.get_type() == elwise_reduction->data_dynd_types[0]) {
             self->reduction_identity = reduction_identity;

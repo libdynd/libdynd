@@ -10,27 +10,26 @@
 #include <string>
 
 #include <dynd/array.hpp>
+#include <dynd/string.hpp>
 #include <dynd/types/base_uniform_dim_type.hpp>
 
 namespace dynd {
 
 class ellipsis_dim_type : public base_uniform_dim_type {
-    // TODO: Make some types which always hold a particular type,
-    //       eg. nd::string
     // m_name is either NULL or an immutable array of type "string"
-    nd::array m_name;
+    nd::string m_name;
 
 public:
-    ellipsis_dim_type(const nd::array &name, const ndt::type &element_type);
+    ellipsis_dim_type(const nd::string &name, const ndt::type &element_type);
 
     virtual ~ellipsis_dim_type() {}
 
-    inline const nd::array& get_name() const {
+    inline const nd::string& get_name() const {
         return m_name;
     }
 
     inline std::string get_name_str() const {
-        return m_name.is_empty() ? "" : m_name.as<std::string>();
+        return m_name.is_null() ? "" : m_name.str();
     }
 
     void print_data(std::ostream& o, const char *metadata, const char *data) const;
@@ -68,7 +67,7 @@ public:
 
 namespace ndt {
     /** Makes an ellipsis type with the specified name and element type */
-    inline ndt::type make_ellipsis_dim(const nd::array &name,
+    inline ndt::type make_ellipsis_dim(const nd::string &name,
                                   const ndt::type &element_type)
     {
         return ndt::type(new ellipsis_dim_type(name, element_type), false);

@@ -1403,7 +1403,7 @@ void nd::array::debug_print(std::ostream& o, const std::string& indent) const
 
 std::ostream& nd::operator<<(std::ostream& o, const array& rhs)
 {
-    if (!rhs.is_empty()) {
+    if (!rhs.is_null()) {
         o << "array(";
         array v = rhs.eval();
         if (v.get_ndo()->is_builtin_type()) {

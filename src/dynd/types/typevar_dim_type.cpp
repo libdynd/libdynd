@@ -4,58 +4,25 @@
 //
 
 #include <dynd/types/typevar_dim_type.hpp>
+#include <dynd/types/typevar_type.hpp>
 #include <dynd/gfunc/make_callable.hpp>
 
 using namespace std;
 using namespace dynd;
 
-typevar_dim_type::typevar_dim_type(const nd::array &name,
+typevar_dim_type::typevar_dim_type(const nd::string &name,
                                    const ndt::type &element_type)
     : base_uniform_dim_type(typevar_dim_type_id, element_type, 0, 1, 0, type_flag_none),
       m_name(name)
 {
-    if (!(m_name.is_immutable() &&
-          m_name.get_type().get_type_id() == string_type_id &&
-          m_name.get_type().tcast<string_type>()->get_encoding() ==
-              string_encoding_utf_8)) {
-        // Make sure name is an immutable utf8 string
-        if (m_name.get_type().value_type().get_kind() == string_kind) {
-            m_name = m_name.ucast(ndt::make_string()).eval_immutable();
-        } else {
-            stringstream ss;
-            ss << "dynd typevar requires a string as the "
-                  "typevar name, got type " << m_name.get_type();
-            throw type_error(ss.str());
-        }
-    }
-    // Make sure name begins with a capital letter, and is an identifier
-    const string_type_data *std =
-        reinterpret_cast<const string_type_data *>(
-            m_name.get_readonly_originptr());
-    const char *begin = std->begin, *end = std->end;
-    if (end - begin == 0) {
-        throw type_error("dynd typevar requires a non-empty name");
-    }
-    if (*begin < 'A' || *begin > 'Z') {
+    if (m_name.is_null()) {
+        throw type_error("dynd typevar name cannot be null");
+    } else if(!is_valid_typevar_name(m_name.begin(), m_name.end())) {
         stringstream ss;
         ss << "dynd typevar name \"";
-        print_escaped_utf8_string(ss, std->begin, end);
-        ss << "\" is invalid, it does not begin with a capital letter";
+        print_escaped_utf8_string(ss, m_name.begin(), m_name.end());
+        ss << "\" is not valid, it must be alphanumeric and begin with a capital";
         throw type_error(ss.str());
-    }
-    ++begin;
-    while (begin < end) {
-        char c = *begin;
-        if ((c < 'a' || c > 'z') && (c < 'A' || c > 'Z') &&
-                (c < '0' || c > '9') && c != '_') {
-            stringstream ss;
-            ss << "dynd typevar name \"";
-            print_escaped_utf8_string(ss, std->begin, end);
-            ss << "\" is invalid, it has a character which is not "
-                    "alphanumeric or underscore";
-            throw type_error(ss.str());
-        }
-        ++begin;
     }
 }
 
@@ -69,7 +36,7 @@ void typevar_dim_type::print_data(std::ostream &DYND_UNUSED(o),
 void typevar_dim_type::print_type(std::ostream& o) const
 {
     // Type variables are barewords starting with a capital letter
-    o << m_name.as<string>() << " * " << get_element_type();
+    o << m_name.str() << " * " << get_element_type();
 }
 
 ndt::type typevar_dim_type::apply_linear_index(
@@ -118,7 +85,7 @@ bool typevar_dim_type::operator==(const base_type& rhs) const
     } else {
         const typevar_dim_type *tvt =
             static_cast<const typevar_dim_type *>(&rhs);
-        return m_name.equals_exact(tvt->m_name) &&
+        return m_name == tvt->m_name &&
                m_element_tp == tvt->m_element_tp;
     }
 }

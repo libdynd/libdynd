@@ -399,6 +399,7 @@ set(libdynd_SRC
     src/dynd/array.cpp
     src/dynd/array_range.cpp
     src/dynd/config.cpp
+    src/dynd/dim_iter.cpp
     src/dynd/type.cpp
     src/dynd/typed_data_assign.cpp
     src/dynd/type_promotion.cpp
@@ -409,8 +410,8 @@ set(libdynd_SRC
     src/dynd/json_parser.cpp
     src/dynd/lowlevel_api.cpp
     src/dynd/parser_util.cpp
-    src/dynd/dim_iter.cpp
     src/dynd/shape_tools.cpp
+    src/dynd/string.cpp
     src/dynd/string_encodings.cpp
     src/dynd/view.cpp
     include/dynd/array.hpp
@@ -439,6 +440,7 @@ set(libdynd_SRC
     include/dynd/elwise.hpp
     include/dynd/shortvector.hpp
     include/dynd/shape_tools.hpp
+    include/dynd/string.hpp
     include/dynd/string_encodings.hpp
     include/dynd/view.hpp
     )

@@ -118,7 +118,7 @@ TEST(SymbolicTypes, CreateEllipsisDim) {
     EXPECT_EQ(1u, tp.get_data_alignment());
     EXPECT_FALSE(tp.is_pod());
     et = tp.tcast<ellipsis_dim_type>();
-    EXPECT_TRUE(et->get_name().is_empty());
+    EXPECT_TRUE(et->get_name().is_null());
     EXPECT_EQ(ndt::make_type<int>(), et->get_element_type());
     // Roundtripping through a string
     EXPECT_EQ(tp, ndt::type(tp.str()));

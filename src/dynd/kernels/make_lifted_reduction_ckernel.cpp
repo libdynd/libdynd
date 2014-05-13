@@ -689,11 +689,11 @@ static size_t make_strided_inner_reduction_dimension_kernel(
     strided_inner_reduction_kernel_extra *e = out_ckb->get_at<strided_inner_reduction_kernel_extra>(ckb_offset);
     e->base().destructor = &strided_inner_reduction_kernel_extra::destruct;
     // Cannot have both a dst_initialization kernel and a reduction identity
-    if (dst_initialization != NULL && !reduction_identity.is_empty()) {
+    if (dst_initialization != NULL && !reduction_identity.is_null()) {
         throw invalid_argument("make_lifted_reduction_ckernel: cannot specify"
             " both a dst_initialization kernel and a reduction_identity");
     }
-    if (reduction_identity.is_empty()) {
+    if (reduction_identity.is_null()) {
         // Get the function pointer for the first_call, for the case with
         // no reduction identity
         if (kernreq == kernel_request_single) {
@@ -776,7 +776,7 @@ static size_t make_strided_inner_reduction_dimension_kernel(
         ckb_end = dst_initialization->instantiate_func(
             dst_initialization->data_ptr, out_ckb, ckb_end, child_ckernel_meta,
             kernel_request_single, ectx);
-    } else if (reduction_identity.is_empty()) {
+    } else if (reduction_identity.is_null()) {
         ckb_end = make_assignment_kernel(
             out_ckb, ckb_end, dst_tp, dst_meta, src_tp, src_meta,
             kernel_request_single, assign_error_default, ectx);
@@ -809,11 +809,11 @@ static size_t make_strided_inner_broadcast_dimension_kernel(
     strided_inner_broadcast_kernel_extra *e = out_ckb->get_at<strided_inner_broadcast_kernel_extra>(ckb_offset);
     e->base().destructor = &strided_inner_broadcast_kernel_extra::destruct;
     // Cannot have both a dst_initialization kernel and a reduction identity
-    if (dst_initialization != NULL && !reduction_identity.is_empty()) {
+    if (dst_initialization != NULL && !reduction_identity.is_null()) {
         throw invalid_argument("make_lifted_reduction_ckernel: cannot specify"
             " both a dst_initialization kernel and a reduction_identity");
     }
-    if (reduction_identity.is_empty()) {
+    if (reduction_identity.is_null()) {
         // Get the function pointer for the first_call, for the case with
         // no reduction identity
         if (kernreq == kernel_request_single) {
@@ -897,7 +897,7 @@ static size_t make_strided_inner_broadcast_dimension_kernel(
         ckb_end = dst_initialization->instantiate_func(
             dst_initialization->data_ptr, out_ckb, ckb_end, child_ckernel_meta,
             kernel_request_strided, ectx);
-    } else if (reduction_identity.is_empty()) {
+    } else if (reduction_identity.is_null()) {
         ckb_end = make_assignment_kernel(
             out_ckb, ckb_end, dst_tp, dst_meta, src_tp, src_meta,
             kernel_request_strided, assign_error_default, ectx);
@@ -946,7 +946,7 @@ size_t dynd::make_lifted_reduction_ckernel(
                 return dst_initialization->instantiate_func(
                     dst_initialization->data_ptr, out_ckb, ckb_offset,
                     dynd_metadata, kernreq, ectx);
-            } else if (reduction_identity.is_empty()) {
+            } else if (reduction_identity.is_null()) {
                 return make_assignment_kernel(
                     out_ckb, ckb_offset, dst_tp, dynd_metadata[0], src_tp,
                     dynd_metadata[1], kernreq, assign_error_default, ectx);
@@ -1001,7 +1001,7 @@ size_t dynd::make_lifted_reduction_ckernel(
         }
         if (reduction_dimflags[i]) {
             // This dimension is being reduced
-            if (src_size == 0 && reduction_identity.is_empty()) {
+            if (src_size == 0 && reduction_identity.is_null()) {
                 // If the size of the src is 0, a reduction identity is required to get a value
                 stringstream ss;
                 ss << "cannot reduce a zero-sized dimension (axis ";

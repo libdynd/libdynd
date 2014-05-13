@@ -23,7 +23,7 @@ dynd::busdate_type::busdate_type(busdate_roll_t roll, const bool *weekmask, cons
     for (int i = 0; i < 7; ++i) {
         m_busdays_in_weekmask += weekmask[i] ? 1 : 0;
     }
-    if (!holidays.is_empty()) {
+    if (!holidays.is_null()) {
         nd::array hol = holidays.ucast(ndt::make_date()).eval_immutable();
         // TODO: Make sure hol is contiguous and one-dimensional
         m_holidays = hol;
@@ -64,7 +64,7 @@ void dynd::busdate_type::print_data(std::ostream& o, const char *DYND_UNUSED(met
 
 void dynd::busdate_type::print_type(std::ostream& o) const
 {
-    if (m_roll == busdate_roll_following && is_default_workweek() && m_holidays.is_empty()) {
+    if (m_roll == busdate_roll_following && is_default_workweek() && m_holidays.is_null()) {
         o << "busdate";
     } else {
         bool comma = false;
@@ -79,7 +79,7 @@ void dynd::busdate_type::print_type(std::ostream& o) const
             print_workweek(o);
             comma = true;
         }
-        if (!m_holidays.is_empty()) {
+        if (!m_holidays.is_null()) {
             if (comma) o << ", ";
             o << "holidays=[";
             print_holidays(o);

@@ -10,26 +10,24 @@
 #include <string>
 
 #include <dynd/array.hpp>
+#include <dynd/string.hpp>
 
 namespace dynd {
 
 class typevar_type : public base_type {
-    // TODO: Make some types which always hold a particular type,
-    //       eg. nd::string
-    // m_name is always an immutable array of type "string"
-    nd::array m_name;
+    nd::string m_name;
 
 public:
-    typevar_type(const nd::array& name);
+    typevar_type(const nd::string& name);
 
     virtual ~typevar_type() {}
 
-    inline const nd::array& get_name() const {
+    inline const nd::string& get_name() const {
         return m_name;
     }
 
     inline std::string get_name_str() const {
-        return m_name.as<std::string>();
+        return m_name.str();
     }
 
     void print_data(std::ostream& o, const char *metadata, const char *data) const;
@@ -60,18 +58,16 @@ public:
 
 namespace ndt {
     /** Makes a typevar type with the specified types */
-    inline ndt::type make_typevar(const nd::array& name)
+    inline ndt::type make_typevar(const nd::string& name)
     {
         return ndt::type(new typevar_type(name), false);
     }
-
-    inline ndt::type make_typevar(const char *begin, const char *end)
-    {
-        return make_typevar(nd::make_string_array(begin, end - begin,
-                                                  string_encoding_utf_8,
-                                                  nd::immutable_access_flag));
-    }
 } // namespace ndt
+
+/**
+ * Checks if the provided string range is a valid typevar name.
+ */
+bool is_valid_typevar_name(const char *begin, const char *end);
 
 } // namespace dynd
 

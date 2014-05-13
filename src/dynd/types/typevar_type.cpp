@@ -9,52 +9,18 @@
 using namespace std;
 using namespace dynd;
 
-typevar_type::typevar_type(const nd::array& name)
+typevar_type::typevar_type(const nd::string& name)
     : base_type(typevar_type_id, symbolic_kind, 0, 1, type_flag_none, 0, 0),
       m_name(name)
 {
-    if (!(m_name.is_immutable() &&
-          m_name.get_type().get_type_id() == string_type_id &&
-          m_name.get_type().tcast<string_type>()->get_encoding() ==
-              string_encoding_utf_8)) {
-        // Make sure name is an immutable utf8 string
-        if (m_name.get_type().value_type().get_kind() == string_kind) {
-            m_name = m_name.ucast(ndt::make_string()).eval_immutable();
-        } else {
-            stringstream ss;
-            ss << "dynd typevar requires a string as the "
-                  "typevar name, got type " << m_name.get_type();
-            throw type_error(ss.str());
-        }
-    }
-    // Make sure name begins with a capital letter, and is an identifier
-    const string_type_data *std =
-        reinterpret_cast<const string_type_data *>(
-            m_name.get_readonly_originptr());
-    const char *begin = std->begin, *end = std->end;
-    if (end - begin == 0) {
-        throw type_error("dynd typevar requires a non-empty name");
-    }
-    if (*begin < 'A' || *begin > 'Z') {
+    if (m_name.is_null()) {
+        throw type_error("dynd typevar name cannot be null");
+    } else if(!is_valid_typevar_name(m_name.begin(), m_name.end())) {
         stringstream ss;
         ss << "dynd typevar name \"";
-        print_escaped_utf8_string(ss, std->begin, end);
-        ss << "\" is invalid, it does not begin with a capital letter";
+        print_escaped_utf8_string(ss, m_name.begin(), m_name.end());
+        ss << "\" is not valid, it must be alphanumeric and begin with a capital";
         throw type_error(ss.str());
-    }
-    ++begin;
-    while (begin < end) {
-        char c = *begin;
-        if ((c < 'a' || c > 'z') && (c < 'A' || c > 'Z') &&
-                (c < '0' || c > '9') && c != '_') {
-            stringstream ss;
-            ss << "dynd typevar name \"";
-            print_escaped_utf8_string(ss, std->begin, end);
-            ss << "\" is invalid, it has a character which is not "
-                    "alphanumeric or underscore";
-            throw type_error(ss.str());
-        }
-        ++begin;
     }
 }
 
@@ -68,7 +34,7 @@ void typevar_type::print_data(std::ostream &DYND_UNUSED(o),
 void typevar_type::print_type(std::ostream& o) const
 {
     // Type variables are barewords starting with a capital letter
-    o << m_name.as<string>();
+    o << m_name.str();
 }
 
 ndt::type typevar_type::apply_linear_index(
@@ -110,7 +76,7 @@ bool typevar_type::operator==(const base_type& rhs) const
         return false;
     } else {
         const typevar_type *tvt = static_cast<const typevar_type *>(&rhs);
-        return m_name.equals_exact(tvt->m_name);
+        return m_name == tvt->m_name;
     }
 }
 
@@ -145,4 +111,25 @@ void typevar_type::get_dynamic_type_properties(const std::pair<std::string, gfun
 {
     *out_properties = type_properties;
     *out_count = sizeof(type_properties) / sizeof(type_properties[0]);
+}
+
+bool dynd::is_valid_typevar_name(const char *begin, const char *end)
+{
+    if (begin != end) {
+        if (*begin < 'A' || *begin > 'Z') {
+            return false;
+        }
+        ++begin;
+        while (begin < end) {
+            char c = *begin;
+            if ((c < 'a' || c > 'z') && (c < 'A' || c > 'Z') &&
+                    (c < '0' || c > '9') && c != '_') {
+                return false;
+            }
+            ++begin;
+        }
+        return true;
+    } else {
+        return false;
+    }
 }

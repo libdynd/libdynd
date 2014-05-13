@@ -476,13 +476,13 @@ nd::array nd::view(const nd::array& arr, const ndt::type& tp)
     } else if (tp.get_type_id() == bytes_type_id) {
         // If it's a request to view the data as raw bytes
         nd::array result = view_as_bytes(arr, tp);
-        if (!result.is_empty()) {
+        if (!result.is_null()) {
             return result;
         }
     } else if (arr.get_type().get_type_id() == bytes_type_id) {
         // If it's a request to view raw bytes as something else
         nd::array result = view_from_bytes(arr, tp);
-        if (!result.is_empty()) {
+        if (!result.is_null()) {
             return result;
         }
     } else if (arr.get_ndim() == tp.get_ndim()) {

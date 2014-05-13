@@ -215,7 +215,7 @@ public:
     }
 
     /** Returns true if the array is NULL */
-    inline bool is_empty() const {
+    inline bool is_null() const {
         return m_memblock.get() == NULL;
     }
 

@@ -939,7 +939,7 @@ static ndt::type parse_rhs_expression(const char *&rbegin, const char *end, map<
         } else if (parse::compare_range_to_literal(n_begin, n_end, "fixed")) {
             result = parse_fixed_dim_parameters(begin, end, symtable);
         } else if (isupper(*n_begin)) {
-            result = ndt::make_typevar(n_begin, n_end);
+            result = ndt::make_typevar(nd::string(n_begin, n_end));
         } else {
             string n(n_begin, n_end);
             const map<string, ndt::type>& builtin_types = get_builtin_types();
