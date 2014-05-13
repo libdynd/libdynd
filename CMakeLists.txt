@@ -292,12 +292,14 @@ set(libdynd_SRC
     src/dynd/func/callable.cpp
     src/dynd/func/elwise_gfunc.cpp
     src/dynd/func/elwise_reduce_gfunc.cpp
+    src/dynd/func/lift_arrfunc.cpp
     include/dynd/func/arrfunc.hpp
     include/dynd/func/callable.hpp
     include/dynd/func/call_callable.hpp
     include/dynd/func/elwise_gfunc.hpp
     include/dynd/func/elwise_reduce_gfunc.hpp
     include/dynd/func/make_callable.hpp
+    include/dynd/func/lift_arrfunc.hpp
 	# Iter
 	src/dynd/iter/string_iter.cpp
 	include/dynd/iter/string_iter.hpp
@@ -317,7 +319,6 @@ set(libdynd_SRC
     src/dynd/kernels/expr_kernels.cpp
     src/dynd/kernels/expression_assignment_kernels.cpp
     src/dynd/kernels/expression_comparison_kernels.cpp
-    src/dynd/kernels/lift_ckernel_deferred.cpp
     src/dynd/kernels/lift_reduction_ckernel_deferred.cpp
     src/dynd/kernels/make_lifted_ckernel.cpp
     src/dynd/kernels/make_lifted_reduction_ckernel.cpp
@@ -355,7 +356,6 @@ set(libdynd_SRC
     include/dynd/kernels/expr_kernel_generator.hpp
     include/dynd/kernels/expression_assignment_kernels.hpp
     include/dynd/kernels/expression_comparison_kernels.hpp
-    include/dynd/kernels/lift_ckernel_deferred.hpp
     include/dynd/kernels/lift_reduction_ckernel_deferred.hpp
     include/dynd/kernels/make_lifted_ckernel.hpp
     include/dynd/kernels/make_lifted_reduction_ckernel.hpp

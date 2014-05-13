@@ -15,7 +15,7 @@
 #include <dynd/func/arrfunc.hpp>
 #include <dynd/kernels/assignment_kernels.hpp>
 #include <dynd/kernels/expr_kernel_generator.hpp>
-#include <dynd/kernels/lift_ckernel_deferred.hpp>
+#include <dynd/func/lift_arrfunc.hpp>
 #include <dynd/kernels/take_ckernel_deferred.hpp>
 #include <dynd/func/call_callable.hpp>
 #include <dynd/array.hpp>
@@ -160,7 +160,7 @@ TEST(CKernelDeferred, LiftUnaryExpr_FixedDim) {
     vector<ndt::type> lifted_types;
     lifted_types.push_back(ndt::type("cfixed[3] * int32"));
     lifted_types.push_back(ndt::type("cfixed[3] * string[16]"));
-    lift_ckernel_deferred(&af, ckd_base, lifted_types);
+    lift_arrfunc(&af, ckd_base, lifted_types);
 
     // Test it on some data
     ckernel_builder ckb;
@@ -190,7 +190,7 @@ TEST(CKernelDeferred, LiftUnaryExpr_StridedDim) {
     vector<ndt::type> lifted_types;
     lifted_types.push_back(ndt::type("strided * int32"));
     lifted_types.push_back(ndt::type("strided * string[16]"));
-    lift_ckernel_deferred(&af, ckd_base, lifted_types);
+    lift_arrfunc(&af, ckd_base, lifted_types);
 
     // Test it on some data
     ckernel_builder ckb;
@@ -225,7 +225,7 @@ TEST(CKernelDeferred, LiftUnaryExpr_StridedToVarDim) {
     vector<ndt::type> lifted_types;
     lifted_types.push_back(ndt::type("var * int32"));
     lifted_types.push_back(ndt::type("strided * string[16]"));
-    lift_ckernel_deferred(&af, ckd_base, lifted_types);
+    lift_arrfunc(&af, ckd_base, lifted_types);
 
     // Test it on some data
     ckernel_builder ckb;
@@ -266,7 +266,7 @@ TEST(CKernelDeferred, LiftUnaryExpr_VarToVarDim) {
     vector<ndt::type> lifted_types;
     lifted_types.push_back(ndt::type("var * int32"));
     lifted_types.push_back(ndt::type("var * string[16]"));
-    lift_ckernel_deferred(&af, ckd_base, lifted_types);
+    lift_arrfunc(&af, ckd_base, lifted_types);
 
     // Test it on some data
     ckernel_builder ckb;
@@ -304,7 +304,7 @@ TEST(CKernelDeferred, LiftUnaryExpr_MultiDimVarToVarDim) {
     vector<ndt::type> lifted_types;
     lifted_types.push_back(ndt::type("strided * var * int32"));
     lifted_types.push_back(ndt::type("3 * var * string[16]"));
-    lift_ckernel_deferred(&af, ckd_base, lifted_types);
+    lift_arrfunc(&af, ckd_base, lifted_types);
 
     // Test it on some data
     nd::array in = nd::empty(ndt::type("3 * var * string[16]"));
@@ -356,7 +356,7 @@ TEST(CKernelDeferred, LiftExpr_MultiDimVarToVarDim) {
     lifted_types.push_back(ndt::type("strided * var * int32"));
     lifted_types.push_back(ndt::type("3 * var * int32"));
     lifted_types.push_back(ndt::type("strided * int32"));
-    lift_ckernel_deferred(af, ckd_base, lifted_types);
+    lift_arrfunc(af, ckd_base, lifted_types);
 
     // Create some compatible values
     nd::array out = nd::empty(3, lifted_types[0]);
