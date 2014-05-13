@@ -3,7 +3,8 @@
 # BSD 2-Clause License, see LICENSE.txt
 #
 
-cmake_minimum_required(VERSION 2.6)
+# Travis-CI has 2.8.7, 2.8.11 or higher is recommended
+cmake_minimum_required(VERSION 2.8.7)
 project(libdynd)
 
 find_package(CUDA)
