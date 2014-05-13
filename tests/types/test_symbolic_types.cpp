@@ -36,6 +36,15 @@ TEST(SymbolicTypes, CreateFuncProto) {
     // Roundtripping through a string
     EXPECT_EQ(tp, ndt::type(tp.str()));
     EXPECT_EQ("(float32, int32, float64) -> int64", tp.str());
+
+    // Dynamic type properties
+    EXPECT_EQ(ndt::make_type<int64_t>(), tp.p("return_type").as<ndt::type>());
+    nd::array ptp = tp.p("param_types");
+    EXPECT_EQ(ndt::type("strided * type"), ptp.get_type());
+    ASSERT_EQ(3u, ptp.get_dim_size());
+    EXPECT_EQ(ndt::make_type<float>(), ptp(0).as<ndt::type>());
+    EXPECT_EQ(ndt::make_type<int32_t>(), ptp(1).as<ndt::type>());
+    EXPECT_EQ(ndt::make_type<double>(), ptp(2).as<ndt::type>());
 }
 
 TEST(SymbolicTypes, CreateTypeVar) {
@@ -53,6 +62,9 @@ TEST(SymbolicTypes, CreateTypeVar) {
     // Roundtripping through a string
     EXPECT_EQ(tp, ndt::type(tp.str()));
     EXPECT_EQ("Blah", tp.str());
+
+    // Dynamic type properties
+    EXPECT_EQ("Blah", tp.p("name").as<std::string>());
 
     // The typevar name must start with a capital
     // and look like an identifier
@@ -79,6 +91,9 @@ TEST(SymbolicTypes, CreateTypeVarDim) {
     // Roundtripping through a string
     EXPECT_EQ(tp, ndt::type(tp.str()));
     EXPECT_EQ("Blah * int32", tp.str());
+
+    // Dynamic type properties
+    EXPECT_EQ("Blah", tp.p("name").as<std::string>());
 
     // The typevar name must start with a capital
     // and look like an identifier
@@ -111,6 +126,9 @@ TEST(SymbolicTypes, CreateEllipsisDim) {
     EXPECT_EQ(tp, ndt::type(tp.str()));
     EXPECT_EQ("Blah... * int32", tp.str());
 
+    // Dynamic type properties
+    EXPECT_EQ("Blah", tp.p("name").as<std::string>());
+
     // Unnamed Ellipsis Dimension
     tp = ndt::make_ellipsis_dim(ndt::make_type<int>());
     EXPECT_EQ(ellipsis_dim_type_id, tp.get_type_id());
@@ -125,6 +143,9 @@ TEST(SymbolicTypes, CreateEllipsisDim) {
     EXPECT_EQ("... * int32", tp.str());
     // Construction from empty string is ok
     EXPECT_EQ(tp, ndt::make_ellipsis_dim("", ndt::make_type<int>()));
+
+    // Dynamic type properties
+    EXPECT_TRUE(tp.p("name").is_null());
 
     // The ellipsis name must start with a capital
     // and look like an identifier
