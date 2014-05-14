@@ -41,7 +41,7 @@ TEST(SymbolicTypes, CreateFuncProto) {
     EXPECT_EQ(ndt::make_type<int64_t>(), tp.p("return_type").as<ndt::type>());
     nd::array ptp = tp.p("param_types");
     EXPECT_EQ(ndt::type("strided * type"), ptp.get_type());
-    ASSERT_EQ(3u, ptp.get_dim_size());
+    ASSERT_EQ(3, ptp.get_dim_size());
     EXPECT_EQ(ndt::make_type<float>(), ptp(0).as<ndt::type>());
     EXPECT_EQ(ndt::make_type<int32_t>(), ptp(1).as<ndt::type>());
     EXPECT_EQ(ndt::make_type<double>(), ptp(2).as<ndt::type>());
