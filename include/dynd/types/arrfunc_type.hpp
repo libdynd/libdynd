@@ -3,20 +3,20 @@
 // BSD 2-Clause License, see LICENSE.txt
 //
 
-#ifndef _DYND__CKERNEL_DEFERRED_TYPE_HPP_
-#define _DYND__CKERNEL_DEFERRED_TYPE_HPP_
+#ifndef _DYND__ARRFUNC_TYPE_HPP_
+#define _DYND__ARRFUNC_TYPE_HPP_
 
 #include <dynd/type.hpp>
 #include <dynd/func/arrfunc.hpp>
 
 namespace dynd {
 
-// The data is defined in ckernel_deferred.hpp
+// The data is defined in arrfunc.hpp
 typedef arrfunc arrfunc_type_data;
 
 /**
  * A dynd type whose nd::array instances contain
- * deferred_ckernel objects.
+ * arrfunc objects.
  */
 class arrfunc_type : public base_type {
 public:
@@ -63,4 +63,4 @@ namespace ndt {
 
 } // namespace dynd
 
-#endif // _DYND__CKERNEL_DEFERRED_TYPE_HPP_
+#endif // _DYND__ARRFUNC_TYPE_HPP_

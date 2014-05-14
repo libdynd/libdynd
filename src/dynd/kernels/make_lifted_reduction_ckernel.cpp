@@ -732,7 +732,7 @@ static size_t make_strided_inner_reduction_dimension_kernel(
     // The striding parameters
     e->src_stride = src_stride;
     e->size = src_size;
-    // Validate that the provided deferred_ckernels are unary operations,
+    // Validate that the provided arrfuncs are unary operations,
     // and have the correct types
     if (elwise_reduction->ckernel_funcproto != unary_operation_funcproto &&
                 (elwise_reduction->ckernel_funcproto == expr_operation_funcproto &&
@@ -853,7 +853,7 @@ static size_t make_strided_inner_broadcast_dimension_kernel(
     e->dst_stride = dst_stride;
     e->src_stride = src_stride;
     e->size = src_size;
-    // Validate that the provided deferred_ckernels are unary operations,
+    // Validate that the provided arrfuncs are unary operations,
     // and have the correct types
     if (elwise_reduction->ckernel_funcproto != unary_operation_funcproto &&
                 (elwise_reduction->ckernel_funcproto == expr_operation_funcproto &&

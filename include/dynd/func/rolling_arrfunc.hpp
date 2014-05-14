@@ -14,7 +14,7 @@
 namespace dynd {
 
 /**
- * Create a deferred ckernel which applies a given window_op in a
+ * Create an arrfunc which applies a given window_op in a
  * rolling window fashion.
  *
  * \param out_af  The output arrfunc which is filled.

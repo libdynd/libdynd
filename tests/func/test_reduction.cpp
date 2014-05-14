@@ -95,7 +95,7 @@ TEST(Reduction, BuiltinSum_Kernel) {
 TEST(Reduction, BuiltinSum_Lift0D_NoIdentity) {
     // Start with a float32 reduction arrfunc
     nd::array reduction_kernel = nd::empty(ndt::make_arrfunc());
-    kernels::make_builtin_sum_reduction_ckernel_deferred(
+    kernels::make_builtin_sum_reduction_arrfunc(
                     reinterpret_cast<arrfunc *>(reduction_kernel.get_readwrite_originptr()),
                     float32_type_id);
 
@@ -126,7 +126,7 @@ TEST(Reduction, BuiltinSum_Lift0D_NoIdentity) {
 TEST(Reduction, BuiltinSum_Lift0D_WithIdentity) {
     // Start with a float32 reduction arrfunc
     nd::array reduction_kernel = nd::empty(ndt::make_arrfunc());
-    kernels::make_builtin_sum_reduction_ckernel_deferred(
+    kernels::make_builtin_sum_reduction_arrfunc(
                     reinterpret_cast<arrfunc *>(reduction_kernel.get_readwrite_originptr()),
                     float32_type_id);
 
@@ -158,7 +158,7 @@ TEST(Reduction, BuiltinSum_Lift0D_WithIdentity) {
 TEST(Reduction, BuiltinSum_Lift1D_NoIdentity) {
     // Start with a float32 reduction arrfunc
     nd::array reduction_kernel = nd::empty(ndt::make_arrfunc());
-    kernels::make_builtin_sum_reduction_ckernel_deferred(
+    kernels::make_builtin_sum_reduction_arrfunc(
                     reinterpret_cast<arrfunc *>(reduction_kernel.get_readwrite_originptr()),
                     float32_type_id);
 
@@ -203,7 +203,7 @@ TEST(Reduction, BuiltinSum_Lift1D_NoIdentity) {
 TEST(Reduction, BuiltinSum_Lift1D_WithIdentity) {
     // Start with a float32 reduction arrfunc
     nd::array reduction_kernel = nd::empty(ndt::make_arrfunc());
-    kernels::make_builtin_sum_reduction_ckernel_deferred(
+    kernels::make_builtin_sum_reduction_arrfunc(
                     reinterpret_cast<arrfunc *>(reduction_kernel.get_readwrite_originptr()),
                     float32_type_id);
 
@@ -236,7 +236,7 @@ TEST(Reduction, BuiltinSum_Lift1D_WithIdentity) {
 TEST(Reduction, BuiltinSum_Lift2D_StridedStrided_ReduceReduce) {
     // Start with a float32 reduction arrfunc
     nd::array reduction_kernel = nd::empty(ndt::make_arrfunc());
-    kernels::make_builtin_sum_reduction_ckernel_deferred(
+    kernels::make_builtin_sum_reduction_arrfunc(
                     reinterpret_cast<arrfunc *>(reduction_kernel.get_readwrite_originptr()),
                     float32_type_id);
 
@@ -285,7 +285,7 @@ TEST(Reduction, BuiltinSum_Lift2D_StridedStrided_ReduceReduce) {
 TEST(Reduction, BuiltinSum_Lift2D_StridedStrided_ReduceReduce_KeepDim) {
     // Start with a float32 reduction arrfunc
     nd::array reduction_kernel = nd::empty(ndt::make_arrfunc());
-    kernels::make_builtin_sum_reduction_ckernel_deferred(
+    kernels::make_builtin_sum_reduction_arrfunc(
                     reinterpret_cast<arrfunc *>(reduction_kernel.get_readwrite_originptr()),
                     float32_type_id);
 
@@ -319,7 +319,7 @@ TEST(Reduction, BuiltinSum_Lift2D_StridedStrided_ReduceReduce_KeepDim) {
 TEST(Reduction, BuiltinSum_Lift2D_StridedStrided_BroadcastReduce) {
     // Start with a float32 reduction arrfunc
     nd::array reduction_kernel = nd::empty(ndt::make_arrfunc());
-    kernels::make_builtin_sum_reduction_ckernel_deferred(
+    kernels::make_builtin_sum_reduction_arrfunc(
                     reinterpret_cast<arrfunc *>(reduction_kernel.get_readwrite_originptr()),
                     float32_type_id);
 
@@ -372,7 +372,7 @@ TEST(Reduction, BuiltinSum_Lift2D_StridedStrided_BroadcastReduce) {
 TEST(Reduction, BuiltinSum_Lift2D_StridedStrided_BroadcastReduce_KeepDim) {
     // Start with a float32 reduction arrfunc
     nd::array reduction_kernel = nd::empty(ndt::make_arrfunc());
-    kernels::make_builtin_sum_reduction_ckernel_deferred(
+    kernels::make_builtin_sum_reduction_arrfunc(
                     reinterpret_cast<arrfunc *>(reduction_kernel.get_readwrite_originptr()),
                     float32_type_id);
 
@@ -408,7 +408,7 @@ TEST(Reduction, BuiltinSum_Lift2D_StridedStrided_BroadcastReduce_KeepDim) {
 TEST(Reduction, BuiltinSum_Lift2D_StridedStrided_ReduceBroadcast) {
     // Start with a float32 reduction arrfunc
     nd::array reduction_kernel = nd::empty(ndt::make_arrfunc());
-    kernels::make_builtin_sum_reduction_ckernel_deferred(
+    kernels::make_builtin_sum_reduction_arrfunc(
                     reinterpret_cast<arrfunc *>(reduction_kernel.get_readwrite_originptr()),
                     float32_type_id);
 
@@ -463,7 +463,7 @@ TEST(Reduction, BuiltinSum_Lift2D_StridedStrided_ReduceBroadcast) {
 TEST(Reduction, BuiltinSum_Lift2D_StridedStrided_ReduceBroadcast_KeepDim) {
     // Start with a float32 reduction arrfunc
     nd::array reduction_kernel = nd::empty(ndt::make_arrfunc());
-    kernels::make_builtin_sum_reduction_ckernel_deferred(
+    kernels::make_builtin_sum_reduction_arrfunc(
                     reinterpret_cast<arrfunc *>(reduction_kernel.get_readwrite_originptr()),
                     float32_type_id);
 
@@ -500,7 +500,7 @@ TEST(Reduction, BuiltinSum_Lift2D_StridedStrided_ReduceBroadcast_KeepDim) {
 TEST(Reduction, BuiltinSum_Lift3D_StridedStridedStrided_ReduceReduceReduce) {
     // Start with a float32 reduction arrfunc
     nd::array reduction_kernel = nd::empty(ndt::make_arrfunc());
-    kernels::make_builtin_sum_reduction_ckernel_deferred(
+    kernels::make_builtin_sum_reduction_arrfunc(
                     reinterpret_cast<arrfunc *>(reduction_kernel.get_readwrite_originptr()),
                     float32_type_id);
 
@@ -536,7 +536,7 @@ TEST(Reduction, BuiltinSum_Lift3D_StridedStridedStrided_ReduceReduceReduce) {
 TEST(Reduction, BuiltinSum_Lift3D_StridedStridedStrided_BroadcastReduceReduce) {
     // Start with a float32 reduction arrfunc
     nd::array reduction_kernel = nd::empty(ndt::make_arrfunc());
-    kernels::make_builtin_sum_reduction_ckernel_deferred(
+    kernels::make_builtin_sum_reduction_arrfunc(
                     reinterpret_cast<arrfunc *>(reduction_kernel.get_readwrite_originptr()),
                     float32_type_id);
 
@@ -574,7 +574,7 @@ TEST(Reduction, BuiltinSum_Lift3D_StridedStridedStrided_BroadcastReduceReduce) {
 TEST(Reduction, BuiltinSum_Lift3D_StridedStridedStrided_ReduceBroadcastReduce) {
     // Start with a float32 reduction arrfunc
     nd::array reduction_kernel = nd::empty(ndt::make_arrfunc());
-    kernels::make_builtin_sum_reduction_ckernel_deferred(
+    kernels::make_builtin_sum_reduction_arrfunc(
                     reinterpret_cast<arrfunc *>(reduction_kernel.get_readwrite_originptr()),
                     float32_type_id);
 

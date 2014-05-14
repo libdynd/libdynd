@@ -28,12 +28,12 @@ enum arrfunc_proto_t {
  * data types of the kernel require metadata, such as for 'strided'
  * or 'var' dimension types, the metadata must be provided as well.
  *
- * \param self_data_ptr  This is ckd->data_ptr.
+ * \param self_data_ptr  This is af->data_ptr.
  * \param out_ckb  A ckernel_builder instance where the kernel is placed.
  * \param ckb_offset  The offset into the output ckernel_builder `out_ckb`
  *                    where the kernel should be placed.
  * \param dynd_metadata  An array of dynd metadata pointers,
- *                       corresponding to ckd->data_dynd_types.
+ *                       corresponding to af->data_dynd_types.
  * \param kerntype  Either dynd::kernel_request_single or dynd::kernel_request_strided,
  *                  as required by the caller.
  * \param ectx  The evaluation context.
@@ -47,10 +47,10 @@ typedef intptr_t (*instantiate_arrfunc_t)(void *self_data_ptr,
 /**
  * This is a struct designed for interoperability at
  * the C ABI level. It contains enough information
- * to pass deferred kernels from one library to another
+ * to pass arrfuncs from one library to another
  * with no dependencies between them.
  *
- * The deferred kernel can produce a ckernel with with a few
+ * The arrfunc can produce a ckernel with with a few
  * variations, like choosing between a single
  * operation and a strided operation, or constructing
  * with different array metadata.
@@ -76,7 +76,7 @@ struct arrfunc {
     const ndt::type *data_dynd_types;
     /**
      * A pointer to typically heap-allocated memory for
-     * the deferred ckernel. This is the value to be passed
+     * the arrfunc. This is the value to be passed
      * in when calling instantiate_func and free_func.
      */
     void *data_ptr;
@@ -108,7 +108,7 @@ struct arrfunc {
 };
 
 /**
- * Creates a deferred ckernel which does the assignment from
+ * Creates an arrfunc which does the assignment from
  * data of src_tp to dst_tp.
  *
  * \param dst_tp  The type of the destination.
@@ -117,15 +117,15 @@ struct arrfunc {
  * \param funcproto  The function prototype to generate (must be
  *                   unary_operation_funcproto or expr_operation_funcproto).
  * \param errmode  The error mode to use for the assignment.
- * \param out_ckd  The output `ckernel_deferred` struct to be populated.
+ * \param out_af  The output `arrfunc` struct to be populated.
  */
 void make_arrfunc_from_assignment(
                 const ndt::type& dst_tp, const ndt::type& src_tp, const ndt::type& src_prop_tp,
                 arrfunc_proto_t funcproto,
-                assign_error_mode errmode, arrfunc& out_ckd);
+                assign_error_mode errmode, arrfunc& out_af);
 
 /**
- * Creates a deferred ckernel which does the assignment from
+ * Creates an arrfunc which does the assignment from
  * data of `tp` to its property `propname`
  *
  * \param tp  The type of the source.
@@ -133,11 +133,11 @@ void make_arrfunc_from_assignment(
  * \param funcproto  The function prototype to generate (must be
  *                   unary_operation_funcproto or expr_operation_funcproto).
  * \param errmode  The error mode to use for the assignment.
- * \param out_ckd  The output `ckernel_deferred` struct to be populated.
+ * \param out_af  The output `arrfunc` struct to be populated.
  */
 void make_arrfunc_from_property(const ndt::type& tp, const std::string& propname,
                 arrfunc_proto_t funcproto,
-                assign_error_mode errmode, arrfunc& out_ckd);
+                assign_error_mode errmode, arrfunc& out_af);
 
 } // namespace dynd
 

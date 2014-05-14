@@ -148,19 +148,19 @@ TEST(ArrFunc, Expr) {
 
 
 TEST(ArrFunc, LiftUnaryExpr_FixedDim) {
-    nd::array ckd_base = nd::empty(ndt::make_arrfunc());
+    nd::array af_base = nd::empty(ndt::make_arrfunc());
     // Create an arrfunc for converting string to int
     make_arrfunc_from_assignment(
                     ndt::make_type<int>(), ndt::make_fixedstring(16), ndt::make_fixedstring(16),
                     expr_operation_funcproto, assign_error_default,
-                    *reinterpret_cast<arrfunc *>(ckd_base.get_readwrite_originptr()));
+                    *reinterpret_cast<arrfunc *>(af_base.get_readwrite_originptr()));
 
     // Lift the kernel to particular fixed dim arrays
     arrfunc af;
     vector<ndt::type> lifted_types;
     lifted_types.push_back(ndt::type("cfixed[3] * int32"));
     lifted_types.push_back(ndt::type("cfixed[3] * string[16]"));
-    lift_arrfunc(&af, ckd_base, lifted_types);
+    lift_arrfunc(&af, af_base, lifted_types);
 
     // Test it on some data
     ckernel_builder ckb;
@@ -178,19 +178,19 @@ TEST(ArrFunc, LiftUnaryExpr_FixedDim) {
 }
 
 TEST(ArrFunc, LiftUnaryExpr_StridedDim) {
-    nd::array ckd_base = nd::empty(ndt::make_arrfunc());
+    nd::array af_base = nd::empty(ndt::make_arrfunc());
     // Create an arrfunc for converting string to int
     make_arrfunc_from_assignment(
                     ndt::make_type<int>(), ndt::make_fixedstring(16), ndt::make_fixedstring(16),
                     expr_operation_funcproto, assign_error_default,
-                    *reinterpret_cast<arrfunc *>(ckd_base.get_readwrite_originptr()));
+                    *reinterpret_cast<arrfunc *>(af_base.get_readwrite_originptr()));
 
     // Lift the kernel to particular fixed dim arrays
     arrfunc af;
     vector<ndt::type> lifted_types;
     lifted_types.push_back(ndt::type("strided * int32"));
     lifted_types.push_back(ndt::type("strided * string[16]"));
-    lift_arrfunc(&af, ckd_base, lifted_types);
+    lift_arrfunc(&af, af_base, lifted_types);
 
     // Test it on some data
     ckernel_builder ckb;
@@ -213,19 +213,19 @@ TEST(ArrFunc, LiftUnaryExpr_StridedDim) {
 }
 
 TEST(ArrFunc, LiftUnaryExpr_StridedToVarDim) {
-    nd::array ckd_base = nd::empty(ndt::make_arrfunc());
+    nd::array af_base = nd::empty(ndt::make_arrfunc());
     // Create an arrfunc for converting string to int
     make_arrfunc_from_assignment(
                     ndt::make_type<int>(), ndt::make_fixedstring(16), ndt::make_fixedstring(16),
                     expr_operation_funcproto, assign_error_default,
-                    *reinterpret_cast<arrfunc *>(ckd_base.get_readwrite_originptr()));
+                    *reinterpret_cast<arrfunc *>(af_base.get_readwrite_originptr()));
 
     // Lift the kernel to particular fixed dim arrays
     arrfunc af;
     vector<ndt::type> lifted_types;
     lifted_types.push_back(ndt::type("var * int32"));
     lifted_types.push_back(ndt::type("strided * string[16]"));
-    lift_arrfunc(&af, ckd_base, lifted_types);
+    lift_arrfunc(&af, af_base, lifted_types);
 
     // Test it on some data
     ckernel_builder ckb;
@@ -254,19 +254,19 @@ TEST(ArrFunc, LiftUnaryExpr_StridedToVarDim) {
 
 
 TEST(ArrFunc, LiftUnaryExpr_VarToVarDim) {
-    nd::array ckd_base = nd::empty(ndt::make_arrfunc());
+    nd::array af_base = nd::empty(ndt::make_arrfunc());
     // Create an arrfunc for converting string to int
     make_arrfunc_from_assignment(
                     ndt::make_type<int>(), ndt::make_fixedstring(16), ndt::make_fixedstring(16),
                     expr_operation_funcproto, assign_error_default,
-                    *reinterpret_cast<arrfunc *>(ckd_base.get_readwrite_originptr()));
+                    *reinterpret_cast<arrfunc *>(af_base.get_readwrite_originptr()));
 
     // Lift the kernel to particular fixed dim arrays
     arrfunc af;
     vector<ndt::type> lifted_types;
     lifted_types.push_back(ndt::type("var * int32"));
     lifted_types.push_back(ndt::type("var * string[16]"));
-    lift_arrfunc(&af, ckd_base, lifted_types);
+    lift_arrfunc(&af, af_base, lifted_types);
 
     // Test it on some data
     ckernel_builder ckb;
@@ -292,19 +292,19 @@ TEST(ArrFunc, LiftUnaryExpr_VarToVarDim) {
 
 
 TEST(ArrFunc, LiftUnaryExpr_MultiDimVarToVarDim) {
-    nd::array ckd_base = nd::empty(ndt::make_arrfunc());
+    nd::array af_base = nd::empty(ndt::make_arrfunc());
     // Create an arrfunc for converting string to int
     make_arrfunc_from_assignment(
                     ndt::make_type<int>(), ndt::make_fixedstring(16), ndt::make_fixedstring(16),
                     expr_operation_funcproto, assign_error_default,
-                    *reinterpret_cast<arrfunc *>(ckd_base.get_readwrite_originptr()));
+                    *reinterpret_cast<arrfunc *>(af_base.get_readwrite_originptr()));
 
     // Lift the kernel to particular arrays
     arrfunc af;
     vector<ndt::type> lifted_types;
     lifted_types.push_back(ndt::type("strided * var * int32"));
     lifted_types.push_back(ndt::type("3 * var * string[16]"));
-    lift_arrfunc(&af, ckd_base, lifted_types);
+    lift_arrfunc(&af, af_base, lifted_types);
 
     // Test it on some data
     nd::array in = nd::empty(ndt::type("3 * var * string[16]"));
@@ -341,22 +341,22 @@ TEST(ArrFunc, LiftUnaryExpr_MultiDimVarToVarDim) {
 }
 
 TEST(ArrFunc, LiftExpr_MultiDimVarToVarDim) {
-    nd::array ckd_base = nd::empty(ndt::make_arrfunc());
+    nd::array af_base = nd::empty(ndt::make_arrfunc());
     // Create an arrfunc for adding two ints
     ndt::type add_ints_type = (nd::array((int32_t)0) + nd::array((int32_t)0)).get_type();
     make_arrfunc_from_assignment(
                     ndt::make_type<int32_t>(), add_ints_type, add_ints_type,
                     expr_operation_funcproto, assign_error_default,
-                    *reinterpret_cast<arrfunc *>(ckd_base.get_readwrite_originptr()));
+                    *reinterpret_cast<arrfunc *>(af_base.get_readwrite_originptr()));
 
     // Lift the kernel to particular arrays
-    nd::array ckd_lifted = nd::empty(ndt::make_arrfunc());
-    arrfunc *af = reinterpret_cast<arrfunc *>(ckd_lifted.get_readwrite_originptr());
+    nd::array af_lifted = nd::empty(ndt::make_arrfunc());
+    arrfunc *af = reinterpret_cast<arrfunc *>(af_lifted.get_readwrite_originptr());
     vector<ndt::type> lifted_types;
     lifted_types.push_back(ndt::type("strided * var * int32"));
     lifted_types.push_back(ndt::type("3 * var * int32"));
     lifted_types.push_back(ndt::type("strided * int32"));
-    lift_arrfunc(af, ckd_base, lifted_types);
+    lift_arrfunc(af, af_base, lifted_types);
 
     // Create some compatible values
     nd::array out = nd::empty(3, lifted_types[0]);
@@ -397,7 +397,7 @@ TEST(ArrFunc, LiftExpr_MultiDimVarToVarDim) {
 
     // Do it again with the __call__ function
     out = nd::empty(3, lifted_types[0]);
-    ckd_lifted.f("__call__", out, in0, in1);
+    af_lifted.f("__call__", out, in0, in1);
     ASSERT_EQ(3, out.get_shape()[0]);
     ASSERT_EQ(3, out(0).get_shape()[0]);
     ASSERT_EQ(3, out(1).get_shape()[0]);

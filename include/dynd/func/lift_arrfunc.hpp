@@ -16,12 +16,12 @@ namespace dynd {
  * Lifts the provided arrfunc, broadcasting it as necessary to execute
  * across the additional dimensions in the ``lifted_types`` array.
  *
- * \param out_ckd  The output arrfunc which is filled.
+ * \param out_af  The output arrfunc which is filled.
  * \param af  The arrfunc to be lifted.
  * \param lifted_types  The types to lift the arrfunc to. The output arrfunc
  *                      is for these types.
  */
-void lift_arrfunc(arrfunc *out_ckd, const nd::array &af,
+void lift_arrfunc(arrfunc *out_af, const nd::array &af,
                   const std::vector<ndt::type> &lifted_types);
 
 } // namespace dynd
