@@ -294,6 +294,8 @@ set(libdynd_SRC
     src/dynd/func/elwise_reduce_gfunc.cpp
     src/dynd/func/lift_arrfunc.cpp
     src/dynd/func/lift_reduction_arrfunc.cpp
+    src/dynd/func/rolling_arrfunc.cpp
+    src/dynd/func/take_arrfunc.cpp
     include/dynd/func/arrfunc.hpp
     include/dynd/func/callable.hpp
     include/dynd/func/call_callable.hpp
@@ -302,6 +304,8 @@ set(libdynd_SRC
     include/dynd/func/make_callable.hpp
     include/dynd/func/lift_arrfunc.hpp
     include/dynd/func/lift_reduction_arrfunc.hpp
+    include/dynd/func/rolling_arrfunc.hpp
+    include/dynd/func/take_arrfunc.hpp
 	# Iter
 	src/dynd/iter/string_iter.cpp
 	include/dynd/iter/string_iter.hpp
@@ -324,14 +328,12 @@ set(libdynd_SRC
     src/dynd/kernels/make_lifted_ckernel.cpp
     src/dynd/kernels/make_lifted_reduction_ckernel.cpp
     src/dynd/kernels/reduction_kernels.cpp
-    src/dynd/kernels/rolling_ckernel_deferred.cpp
     src/dynd/kernels/string_assignment_kernels.cpp
     src/dynd/kernels/string_algorithm_kernels.cpp
     src/dynd/kernels/string_numeric_assignment_kernels.cpp
     src/dynd/kernels/string_comparison_kernels.cpp
     src/dynd/kernels/struct_assignment_kernels.cpp
     src/dynd/kernels/struct_comparison_kernels.cpp
-    src/dynd/kernels/take_ckernel_deferred.cpp
     src/dynd/kernels/time_assignment_kernels.cpp
     src/dynd/kernels/kernels_for_disassembly.cpp
     src/dynd/kernels/single_assigner_builtin.hpp
@@ -360,14 +362,12 @@ set(libdynd_SRC
     include/dynd/kernels/make_lifted_ckernel.hpp
     include/dynd/kernels/make_lifted_reduction_ckernel.hpp
     include/dynd/kernels/reduction_kernels.hpp
-    include/dynd/kernels/rolling_ckernel_deferred.hpp
     include/dynd/kernels/string_assignment_kernels.hpp
     include/dynd/kernels/string_algorithm_kernels.hpp
     include/dynd/kernels/string_numeric_assignment_kernels.hpp
     include/dynd/kernels/string_comparison_kernels.hpp
     include/dynd/kernels/struct_assignment_kernels.hpp
     include/dynd/kernels/struct_comparison_kernels.hpp
-    include/dynd/kernels/take_ckernel_deferred.hpp
     include/dynd/kernels/time_assignment_kernels.hpp
     # MemBlock
     src/dynd/memblock/memory_block.cpp

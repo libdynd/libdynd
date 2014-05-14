@@ -16,16 +16,16 @@
 #include <dynd/kernels/assignment_kernels.hpp>
 #include <dynd/kernels/expr_kernel_generator.hpp>
 #include <dynd/func/lift_arrfunc.hpp>
-#include <dynd/kernels/take_ckernel_deferred.hpp>
+#include <dynd/func/take_arrfunc.hpp>
 #include <dynd/func/call_callable.hpp>
 #include <dynd/array.hpp>
 
 using namespace std;
 using namespace dynd;
 
-TEST(CKernelDeferred, Assignment) {
+TEST(ArrFunc, Assignment) {
     arrfunc af;
-    // Create a deferred ckernel for converting string to int
+    // Create an arrfunc for converting string to int
     make_arrfunc_from_assignment(
                     ndt::make_type<int>(), ndt::make_fixedstring(16), ndt::make_fixedstring(16),
                     unary_operation_funcproto, assign_error_default, af);
@@ -61,9 +61,9 @@ TEST(CKernelDeferred, Assignment) {
 }
 
 
-TEST(CKernelDeferred, AssignmentAsExpr) {
+TEST(ArrFunc, AssignmentAsExpr) {
     arrfunc af;
-    // Create a deferred ckernel for converting string to int
+    // Create an arrfunc for converting string to int
     make_arrfunc_from_assignment(
                     ndt::make_type<int>(), ndt::make_fixedstring(16), ndt::make_fixedstring(16),
                     expr_operation_funcproto, assign_error_default, af);
@@ -101,9 +101,9 @@ TEST(CKernelDeferred, AssignmentAsExpr) {
     EXPECT_EQ(891029, ints_out[2]);
 }
 
-TEST(CKernelDeferred, Expr) {
+TEST(ArrFunc, Expr) {
     arrfunc af;
-    // Create a deferred ckernel for adding two ints
+    // Create an arrfunc for adding two ints
     ndt::type add_ints_type = (nd::array((int)0) + nd::array((int)0)).get_type();
     make_arrfunc_from_assignment(
                     ndt::make_type<int>(), add_ints_type, add_ints_type,
@@ -147,9 +147,9 @@ TEST(CKernelDeferred, Expr) {
 }
 
 
-TEST(CKernelDeferred, LiftUnaryExpr_FixedDim) {
+TEST(ArrFunc, LiftUnaryExpr_FixedDim) {
     nd::array ckd_base = nd::empty(ndt::make_arrfunc());
-    // Create a deferred ckernel for converting string to int
+    // Create an arrfunc for converting string to int
     make_arrfunc_from_assignment(
                     ndt::make_type<int>(), ndt::make_fixedstring(16), ndt::make_fixedstring(16),
                     expr_operation_funcproto, assign_error_default,
@@ -177,9 +177,9 @@ TEST(CKernelDeferred, LiftUnaryExpr_FixedDim) {
     EXPECT_EQ(12345, out[2]);
 }
 
-TEST(CKernelDeferred, LiftUnaryExpr_StridedDim) {
+TEST(ArrFunc, LiftUnaryExpr_StridedDim) {
     nd::array ckd_base = nd::empty(ndt::make_arrfunc());
-    // Create a deferred ckernel for converting string to int
+    // Create an arrfunc for converting string to int
     make_arrfunc_from_assignment(
                     ndt::make_type<int>(), ndt::make_fixedstring(16), ndt::make_fixedstring(16),
                     expr_operation_funcproto, assign_error_default,
@@ -212,9 +212,9 @@ TEST(CKernelDeferred, LiftUnaryExpr_StridedDim) {
     EXPECT_EQ(12345, out(2).as<int>());
 }
 
-TEST(CKernelDeferred, LiftUnaryExpr_StridedToVarDim) {
+TEST(ArrFunc, LiftUnaryExpr_StridedToVarDim) {
     nd::array ckd_base = nd::empty(ndt::make_arrfunc());
-    // Create a deferred ckernel for converting string to int
+    // Create an arrfunc for converting string to int
     make_arrfunc_from_assignment(
                     ndt::make_type<int>(), ndt::make_fixedstring(16), ndt::make_fixedstring(16),
                     expr_operation_funcproto, assign_error_default,
@@ -253,9 +253,9 @@ TEST(CKernelDeferred, LiftUnaryExpr_StridedToVarDim) {
 }
 
 
-TEST(CKernelDeferred, LiftUnaryExpr_VarToVarDim) {
+TEST(ArrFunc, LiftUnaryExpr_VarToVarDim) {
     nd::array ckd_base = nd::empty(ndt::make_arrfunc());
-    // Create a deferred ckernel for converting string to int
+    // Create an arrfunc for converting string to int
     make_arrfunc_from_assignment(
                     ndt::make_type<int>(), ndt::make_fixedstring(16), ndt::make_fixedstring(16),
                     expr_operation_funcproto, assign_error_default,
@@ -291,9 +291,9 @@ TEST(CKernelDeferred, LiftUnaryExpr_VarToVarDim) {
 }
 
 
-TEST(CKernelDeferred, LiftUnaryExpr_MultiDimVarToVarDim) {
+TEST(ArrFunc, LiftUnaryExpr_MultiDimVarToVarDim) {
     nd::array ckd_base = nd::empty(ndt::make_arrfunc());
-    // Create a deferred ckernel for converting string to int
+    // Create an arrfunc for converting string to int
     make_arrfunc_from_assignment(
                     ndt::make_type<int>(), ndt::make_fixedstring(16), ndt::make_fixedstring(16),
                     expr_operation_funcproto, assign_error_default,
@@ -340,9 +340,9 @@ TEST(CKernelDeferred, LiftUnaryExpr_MultiDimVarToVarDim) {
     EXPECT_EQ(4, out(2, 2).as<int>());
 }
 
-TEST(CKernelDeferred, LiftExpr_MultiDimVarToVarDim) {
+TEST(ArrFunc, LiftExpr_MultiDimVarToVarDim) {
     nd::array ckd_base = nd::empty(ndt::make_arrfunc());
-    // Create a deferred ckernel for adding two ints
+    // Create an arrfunc for adding two ints
     ndt::type add_ints_type = (nd::array((int32_t)0) + nd::array((int32_t)0)).get_type();
     make_arrfunc_from_assignment(
                     ndt::make_type<int32_t>(), add_ints_type, add_ints_type,
@@ -413,7 +413,7 @@ TEST(CKernelDeferred, LiftExpr_MultiDimVarToVarDim) {
     EXPECT_EQ(12, out(2, 2).as<int>());
 }
 
-TEST(CKernelDeferred, Take) {
+TEST(ArrFunc, Take) {
     nd::array a, b, c;
     nd::array take;
 
@@ -423,7 +423,7 @@ TEST(CKernelDeferred, Take) {
     b = bvals;
 
     c = nd::empty("var * int");
-    take = kernels::make_take_ckernel_deferred(c.get_type(), a.get_type(), b.get_type());
+    take = kernels::make_take_arrfunc(c.get_type(), a.get_type(), b.get_type());
     take.f("__call__", c, a, b);
     EXPECT_EQ(3, c.get_dim_size());
     EXPECT_EQ(2, c(0).as<int>());
@@ -434,7 +434,7 @@ TEST(CKernelDeferred, Take) {
     b = bvals2;
 
     c = nd::empty("4 * int");
-    take = kernels::make_take_ckernel_deferred(c.get_type(), a.get_type(), b.get_type());
+    take = kernels::make_take_arrfunc(c.get_type(), a.get_type(), b.get_type());
     take.f("__call__", c, a, b);
     EXPECT_EQ(4, c(0).as<int>());
     EXPECT_EQ(1, c(1).as<int>());
