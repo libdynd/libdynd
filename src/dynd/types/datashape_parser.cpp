@@ -25,7 +25,7 @@
 #include <dynd/types/fixedbytes_type.hpp>
 #include <dynd/types/bytes_type.hpp>
 #include <dynd/types/type_type.hpp>
-#include <dynd/types/ckernel_deferred_type.hpp>
+#include <dynd/types/arrfunc_type.hpp>
 #include <dynd/types/type_alignment.hpp>
 #include <dynd/types/pointer_type.hpp>
 #include <dynd/types/char_type.hpp>
@@ -98,7 +98,7 @@ static const map<string, ndt::type>& get_builtin_types()
         builtin_types["datetime"] = ndt::make_datetime(tz_abstract);
         builtin_types["bytes"] = ndt::make_bytes(1);
         builtin_types["type"] = ndt::make_type();
-        builtin_types["ckernel_deferred"] = ndt::make_ckernel_deferred();
+        builtin_types["arrfunc"] = ndt::make_arrfunc();
         builtin_types["ndarrayarg"] = ndt::make_ndarrayarg();
     }
     return builtin_types;

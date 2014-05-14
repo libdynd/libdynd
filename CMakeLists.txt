@@ -166,7 +166,7 @@ set(libdynd_SRC
     src/dynd/types/categorical_type.cpp
     src/dynd/types/cfixed_dim_type.cpp
 	src/dynd/types/char_type.cpp
-    src/dynd/types/ckernel_deferred_type.cpp
+    src/dynd/types/arrfunc_type.cpp
     src/dynd/types/convert_type.cpp
     src/dynd/types/ctuple_type.cpp
     src/dynd/types/cuda_host_type.cpp
@@ -226,7 +226,7 @@ set(libdynd_SRC
     include/dynd/types/byteswap_type.hpp
     include/dynd/types/categorical_type.hpp
     include/dynd/types/char_type.hpp
-    include/dynd/types/ckernel_deferred_type.hpp
+    include/dynd/types/arrfunc_type.hpp
     include/dynd/types/convert_type.hpp
     include/dynd/types/ctuple_type.hpp
     include/dynd/types/cuda_host_type.hpp
@@ -287,15 +287,25 @@ set(libdynd_SRC
     include/dynd/eval/elwise_reduce_eval.hpp
     include/dynd/eval/groupby_elwise_reduce_eval.hpp
     include/dynd/eval/unary_elwise_eval.hpp
-    # GFunc
-    src/dynd/gfunc/callable.cpp
-    src/dynd/gfunc/elwise_gfunc.cpp
-    src/dynd/gfunc/elwise_reduce_gfunc.cpp
-    include/dynd/gfunc/callable.hpp
-    include/dynd/gfunc/call_callable.hpp
-    include/dynd/gfunc/elwise_gfunc.hpp
-    include/dynd/gfunc/elwise_reduce_gfunc.hpp
-    include/dynd/gfunc/make_callable.hpp
+    # Func
+    src/dynd/func/arrfunc.cpp
+    src/dynd/func/callable.cpp
+    src/dynd/func/elwise_gfunc.cpp
+    src/dynd/func/elwise_reduce_gfunc.cpp
+    src/dynd/func/lift_arrfunc.cpp
+    src/dynd/func/lift_reduction_arrfunc.cpp
+    src/dynd/func/rolling_arrfunc.cpp
+    src/dynd/func/take_arrfunc.cpp
+    include/dynd/func/arrfunc.hpp
+    include/dynd/func/callable.hpp
+    include/dynd/func/call_callable.hpp
+    include/dynd/func/elwise_gfunc.hpp
+    include/dynd/func/elwise_reduce_gfunc.hpp
+    include/dynd/func/make_callable.hpp
+    include/dynd/func/lift_arrfunc.hpp
+    include/dynd/func/lift_reduction_arrfunc.hpp
+    include/dynd/func/rolling_arrfunc.hpp
+    include/dynd/func/take_arrfunc.hpp
 	# Iter
 	src/dynd/iter/string_iter.cpp
 	include/dynd/iter/string_iter.hpp
@@ -306,7 +316,6 @@ set(libdynd_SRC
     src/dynd/kernels/bytes_assignment_kernels.cpp
     src/dynd/kernels/byteswap_kernels.cpp
     src/dynd/kernels/ckernel_common_functions.cpp
-    src/dynd/kernels/ckernel_deferred.cpp
     src/dynd/kernels/comparison_kernels.cpp
     src/dynd/kernels/date_assignment_kernels.cpp
     src/dynd/kernels/datetime_assignment_kernels.cpp
@@ -316,19 +325,15 @@ set(libdynd_SRC
     src/dynd/kernels/expr_kernels.cpp
     src/dynd/kernels/expression_assignment_kernels.cpp
     src/dynd/kernels/expression_comparison_kernels.cpp
-    src/dynd/kernels/lift_ckernel_deferred.cpp
-    src/dynd/kernels/lift_reduction_ckernel_deferred.cpp
     src/dynd/kernels/make_lifted_ckernel.cpp
     src/dynd/kernels/make_lifted_reduction_ckernel.cpp
     src/dynd/kernels/reduction_kernels.cpp
-    src/dynd/kernels/rolling_ckernel_deferred.cpp
     src/dynd/kernels/string_assignment_kernels.cpp
     src/dynd/kernels/string_algorithm_kernels.cpp
     src/dynd/kernels/string_numeric_assignment_kernels.cpp
     src/dynd/kernels/string_comparison_kernels.cpp
     src/dynd/kernels/struct_assignment_kernels.cpp
     src/dynd/kernels/struct_comparison_kernels.cpp
-    src/dynd/kernels/take_ckernel_deferred.cpp
     src/dynd/kernels/time_assignment_kernels.cpp
     src/dynd/kernels/kernels_for_disassembly.cpp
     src/dynd/kernels/single_assigner_builtin.hpp
@@ -344,7 +349,6 @@ set(libdynd_SRC
     include/dynd/kernels/byteswap_kernels.hpp
     include/dynd/kernels/ckernel_builder.hpp
     include/dynd/kernels/ckernel_common_functions.hpp
-    include/dynd/kernels/ckernel_deferred.hpp
     include/dynd/kernels/ckernel_prefix.hpp
     include/dynd/kernels/comparison_kernels.hpp
     include/dynd/kernels/date_assignment_kernels.hpp
@@ -355,19 +359,15 @@ set(libdynd_SRC
     include/dynd/kernels/expr_kernel_generator.hpp
     include/dynd/kernels/expression_assignment_kernels.hpp
     include/dynd/kernels/expression_comparison_kernels.hpp
-    include/dynd/kernels/lift_ckernel_deferred.hpp
-    include/dynd/kernels/lift_reduction_ckernel_deferred.hpp
     include/dynd/kernels/make_lifted_ckernel.hpp
     include/dynd/kernels/make_lifted_reduction_ckernel.hpp
     include/dynd/kernels/reduction_kernels.hpp
-    include/dynd/kernels/rolling_ckernel_deferred.hpp
     include/dynd/kernels/string_assignment_kernels.hpp
     include/dynd/kernels/string_algorithm_kernels.hpp
     include/dynd/kernels/string_numeric_assignment_kernels.hpp
     include/dynd/kernels/string_comparison_kernels.hpp
     include/dynd/kernels/struct_assignment_kernels.hpp
     include/dynd/kernels/struct_comparison_kernels.hpp
-    include/dynd/kernels/take_ckernel_deferred.hpp
     include/dynd/kernels/time_assignment_kernels.hpp
     # MemBlock
     src/dynd/memblock/memory_block.cpp
@@ -459,8 +459,8 @@ source_group("Types Source" REGULAR_EXPRESSION "src/dynd/types/.*cpp")
 source_group("Types Headers" REGULAR_EXPRESSION "include/dynd/types/.*hpp")
 source_group("Eval Source" REGULAR_EXPRESSION "src/dynd/eval/.*cpp")
 source_group("Eval Headers" REGULAR_EXPRESSION "include/dynd/eval/.*hpp")
-source_group("GFunc Source" REGULAR_EXPRESSION "src/dynd/gfunc/.*cpp")
-source_group("GFunc Headers" REGULAR_EXPRESSION "include/dynd/gfunc/.*hpp")
+source_group("Func Source" REGULAR_EXPRESSION "src/dynd/func/.*cpp")
+source_group("Func Headers" REGULAR_EXPRESSION "include/dynd/func/.*hpp")
 source_group("Iter Source" REGULAR_EXPRESSION "src/dynd/iter/.*cpp")
 source_group("Iter Headers" REGULAR_EXPRESSION "include/dynd/iter/.*hpp")
 source_group("Kernels Source" REGULAR_EXPRESSION "src/dynd/kernels/.*cpp")

@@ -9,8 +9,8 @@
 #include <dynd/shape_tools.hpp>
 #include <dynd/exceptions.hpp>
 #include <dynd/kernels/assignment_kernels.hpp>
-#include <dynd/gfunc/callable.hpp>
-#include <dynd/gfunc/make_callable.hpp>
+#include <dynd/func/callable.hpp>
+#include <dynd/func/make_callable.hpp>
 
 using namespace std;
 using namespace dynd;

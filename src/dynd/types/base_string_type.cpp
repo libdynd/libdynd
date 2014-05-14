@@ -5,7 +5,7 @@
 
 #include <dynd/type.hpp>
 #include <dynd/shape_tools.hpp>
-#include <dynd/gfunc/make_callable.hpp>
+#include <dynd/func/make_callable.hpp>
 
 #include <dynd/types/expr_type.hpp>
 #include <dynd/kernels/string_algorithm_kernels.hpp>

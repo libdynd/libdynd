@@ -8,7 +8,7 @@
 #include <dynd/types/property_type.hpp>
 #include <dynd/kernels/assignment_kernels.hpp>
 #include <dynd/kernels/time_assignment_kernels.hpp>
-#include <dynd/gfunc/make_callable.hpp>
+#include <dynd/func/make_callable.hpp>
 
 using namespace std;
 using namespace dynd;

@@ -9,7 +9,7 @@
 #include <utility>
 
 #include <dynd/array.hpp>
-#include <dynd/kernels/ckernel_deferred.hpp>
+#include <dynd/func/arrfunc.hpp>
 #include <dynd/kernels/make_lifted_ckernel.hpp>
 #include <dynd/kernels/expr_kernel_generator.hpp>
 #include <dynd/shape_tools.hpp>
@@ -565,20 +565,20 @@ DYND_PP_JOIN_MAP(CALL_CKERNEL_INSTANTIATORS, (), DYND_PP_RANGE(1, DYND_PP_INC(DY
             DYND_PP_META_NAME_RANGE(acast, NSRC)), res_ndim, res_shape); \
         nd::array res = nd::make_strided_array(data_dynd_types[0], res_ndim, res_shape.get()); \
 \
-        ckernel_deferred ckd; \
-        ckd.ckernel_funcproto = expr_operation_funcproto; \
-        ckd.data_types_size = NSRC + 1; \
-        ckd.data_dynd_types = data_dynd_types; \
-        ckd.data_ptr = reinterpret_cast<void *>(func); \
-        ckd.instantiate_func = &detail::elwise_ckernel_instantiator<func_type>::instantiate; \
-        ckd.free_func = NULL; \
+        arrfunc af; \
+        af.ckernel_funcproto = expr_operation_funcproto; \
+        af.data_types_size = NSRC + 1; \
+        af.data_dynd_types = data_dynd_types; \
+        af.data_ptr = reinterpret_cast<void *>(func); \
+        af.instantiate_func = &detail::elwise_ckernel_instantiator<func_type>::instantiate; \
+        af.free_func = NULL; \
 \
         ckernel_builder ckb; \
         ndt::type lifted_types[NSRC + 1] = {res.get_type(), DYND_PP_JOIN_OUTER_1(DYND_PP_META_DOT_CALL, (,), \
             DYND_PP_META_NAME_RANGE(acast, NSRC), (get_type))}; \
         const char *dynd_metadata[NSRC + 1] = {res.get_arrmeta(), DYND_PP_JOIN_OUTER_1(DYND_PP_META_DOT_CALL, (,), \
             DYND_PP_META_NAME_RANGE(acast, NSRC), (get_arrmeta))}; \
-        make_lifted_expr_ckernel(&ckd, &ckb, 0, \
+        make_lifted_expr_ckernel(&af, &ckb, 0, \
                             lifted_types, dynd_metadata, kernel_request_single, ectx); \
 \
         ckernel_prefix *ckprefix = ckb.get(); \
@@ -640,20 +640,20 @@ DYND_PP_JOIN_MAP(CALL_CKERNEL_INSTANTIATORS, (), DYND_PP_RANGE(1, DYND_PP_INC(DY
             DYND_PP_META_NAME_RANGE(acast, NSRC)), res_ndim, res_shape); \
         nd::array res = nd::make_strided_array(data_dynd_types[0], res_ndim, res_shape.get()); \
 \
-        ckernel_deferred ckd; \
-        ckd.ckernel_funcproto = expr_operation_funcproto; \
-        ckd.data_types_size = NSRC + 1; \
-        ckd.data_dynd_types = data_dynd_types; \
-        ckd.data_ptr = reinterpret_cast<void *>(func); \
-        ckd.instantiate_func = &detail::elwise_ckernel_instantiator<func_type>::instantiate; \
-        ckd.free_func = NULL; \
+        arrfunc af; \
+        af.ckernel_funcproto = expr_operation_funcproto; \
+        af.data_types_size = NSRC + 1; \
+        af.data_dynd_types = data_dynd_types; \
+        af.data_ptr = reinterpret_cast<void *>(func); \
+        af.instantiate_func = &detail::elwise_ckernel_instantiator<func_type>::instantiate; \
+        af.free_func = NULL; \
 \
         ckernel_builder ckb; \
         ndt::type lifted_types[NSRC + 1] = {res.get_type(), DYND_PP_JOIN_OUTER_1(DYND_PP_META_DOT_CALL, (,), \
             DYND_PP_META_NAME_RANGE(acast, NSRC), (get_type))}; \
         const char *dynd_metadata[NSRC + 1] = {res.get_arrmeta(), DYND_PP_JOIN_OUTER_1(DYND_PP_META_DOT_CALL, (,), \
             DYND_PP_META_NAME_RANGE(acast, NSRC), (get_arrmeta))}; \
-        make_lifted_expr_ckernel(&ckd, &ckb, 0, \
+        make_lifted_expr_ckernel(&af, &ckb, 0, \
                             lifted_types, dynd_metadata, kernel_request_single, ectx); \
 \
         ckernel_prefix *ckprefix = ckb.get(); \
@@ -727,20 +727,20 @@ DYND_PP_JOIN_MAP(FUNCS, (), DYND_PP_RANGE(1, DYND_PP_INC(DYND_ELWISE_MAX)))
 \
         std::pair<const T *, func_type> obj_func(&obj, func); \
 \
-        ckernel_deferred ckd; \
-        ckd.ckernel_funcproto = expr_operation_funcproto; \
-        ckd.data_types_size = NSRC + 1; \
-        ckd.data_dynd_types = data_dynd_types; \
-        ckd.data_ptr = reinterpret_cast<void *>(&obj_func); \
-        ckd.instantiate_func = &detail::elwise_ckernel_instantiator<func_type>::instantiate; \
-        ckd.free_func = NULL; \
+        arrfunc af; \
+        af.ckernel_funcproto = expr_operation_funcproto; \
+        af.data_types_size = NSRC + 1; \
+        af.data_dynd_types = data_dynd_types; \
+        af.data_ptr = reinterpret_cast<void *>(&obj_func); \
+        af.instantiate_func = &detail::elwise_ckernel_instantiator<func_type>::instantiate; \
+        af.free_func = NULL; \
 \
         ckernel_builder ckb; \
         ndt::type lifted_types[NSRC + 1] = {res.get_type(), DYND_PP_JOIN_OUTER_1(DYND_PP_META_DOT_CALL, (,), \
             DYND_PP_META_NAME_RANGE(acast, NSRC), (get_type))}; \
         const char *dynd_metadata[NSRC + 1] = {res.get_arrmeta(), DYND_PP_JOIN_OUTER_1(DYND_PP_META_DOT_CALL, (,), \
             DYND_PP_META_NAME_RANGE(acast, NSRC), (get_arrmeta))}; \
-        make_lifted_expr_ckernel(&ckd, &ckb, 0, \
+        make_lifted_expr_ckernel(&af, &ckb, 0, \
                             lifted_types, dynd_metadata, kernel_request_single, ectx); \
 \
         ckernel_prefix *ckprefix = ckb.get(); \
@@ -804,20 +804,20 @@ DYND_PP_JOIN_MAP(FUNCS, (), DYND_PP_RANGE(1, DYND_PP_INC(DYND_ELWISE_MAX)))
 \
         std::pair<const T *, func_type> obj_func(&obj, func); \
 \
-        ckernel_deferred ckd; \
-        ckd.ckernel_funcproto = expr_operation_funcproto; \
-        ckd.data_types_size = NSRC + 1; \
-        ckd.data_dynd_types = data_dynd_types; \
-        ckd.data_ptr = reinterpret_cast<void *>(&obj_func); \
-        ckd.instantiate_func = &detail::elwise_ckernel_instantiator<func_type>::instantiate; \
-        ckd.free_func = NULL; \
+        arrfunc af; \
+        af.ckernel_funcproto = expr_operation_funcproto; \
+        af.data_types_size = NSRC + 1; \
+        af.data_dynd_types = data_dynd_types; \
+        af.data_ptr = reinterpret_cast<void *>(&obj_func); \
+        af.instantiate_func = &detail::elwise_ckernel_instantiator<func_type>::instantiate; \
+        af.free_func = NULL; \
 \
         ckernel_builder ckb; \
         ndt::type lifted_types[NSRC + 1] = {res.get_type(), DYND_PP_JOIN_OUTER_1(DYND_PP_META_DOT_CALL, (,), \
             DYND_PP_META_NAME_RANGE(acast, NSRC), (get_type))}; \
         const char *dynd_metadata[NSRC + 1] = {res.get_arrmeta(), DYND_PP_JOIN_OUTER_1(DYND_PP_META_DOT_CALL, (,), \
             DYND_PP_META_NAME_RANGE(acast, NSRC), (get_arrmeta))}; \
-        make_lifted_expr_ckernel(&ckd, &ckb, 0, \
+        make_lifted_expr_ckernel(&af, &ckb, 0, \
                             lifted_types, dynd_metadata, kernel_request_single, ectx); \
 \
         ckernel_prefix *ckprefix = ckb.get(); \
@@ -889,20 +889,20 @@ DYND_PP_JOIN_MAP(METHS, (), DYND_PP_RANGE(1, DYND_PP_INC(DYND_ELWISE_MAX)))
             DYND_PP_META_NAME_RANGE(acast, NSRC)), res_ndim, res_shape); \
         nd::array res = nd::make_strided_array(data_dynd_types[0], res_ndim, res_shape.get()); \
 \
-        ckernel_deferred ckd; \
-        ckd.ckernel_funcproto = expr_operation_funcproto; \
-        ckd.data_types_size = NSRC + 1; \
-        ckd.data_dynd_types = data_dynd_types; \
-        ckd.data_ptr = reinterpret_cast<void *>(const_cast<T *>(&obj)); \
-        ckd.instantiate_func = &detail::elwise_from_callable_ckernel_instantiator<func_type>::instantiate; \
-        ckd.free_func = NULL; \
+        arrfunc af; \
+        af.ckernel_funcproto = expr_operation_funcproto; \
+        af.data_types_size = NSRC + 1; \
+        af.data_dynd_types = data_dynd_types; \
+        af.data_ptr = reinterpret_cast<void *>(const_cast<T *>(&obj)); \
+        af.instantiate_func = &detail::elwise_from_callable_ckernel_instantiator<func_type>::instantiate; \
+        af.free_func = NULL; \
 \
         ckernel_builder ckb; \
         ndt::type lifted_types[NSRC + 1] = {res.get_type(), DYND_PP_JOIN_OUTER_1(DYND_PP_META_DOT_CALL, (,), \
             DYND_PP_META_NAME_RANGE(acast, NSRC), (get_type))}; \
         const char *dynd_metadata[NSRC + 1] = {res.get_arrmeta(), DYND_PP_JOIN_OUTER_1(DYND_PP_META_DOT_CALL, (,), \
             DYND_PP_META_NAME_RANGE(acast, NSRC), (get_arrmeta))}; \
-        make_lifted_expr_ckernel(&ckd, &ckb, 0, \
+        make_lifted_expr_ckernel(&af, &ckb, 0, \
                             lifted_types, dynd_metadata, kernel_request_single, ectx); \
 \
         ckernel_prefix *ckprefix = ckb.get(); \
@@ -964,20 +964,20 @@ DYND_PP_JOIN_MAP(METHS, (), DYND_PP_RANGE(1, DYND_PP_INC(DYND_ELWISE_MAX)))
             DYND_PP_META_NAME_RANGE(acast, NSRC)), res_ndim, res_shape); \
         nd::array res = nd::make_strided_array(data_dynd_types[0], res_ndim, res_shape.get()); \
 \
-        ckernel_deferred ckd; \
-        ckd.ckernel_funcproto = expr_operation_funcproto; \
-        ckd.data_types_size = NSRC + 1; \
-        ckd.data_dynd_types = data_dynd_types; \
-        ckd.data_ptr = reinterpret_cast<void *>(const_cast<T *>(&obj)); \
-        ckd.instantiate_func = &detail::elwise_from_callable_ckernel_instantiator<func_type>::instantiate; \
-        ckd.free_func = NULL; \
+        arrfunc af; \
+        af.ckernel_funcproto = expr_operation_funcproto; \
+        af.data_types_size = NSRC + 1; \
+        af.data_dynd_types = data_dynd_types; \
+        af.data_ptr = reinterpret_cast<void *>(const_cast<T *>(&obj)); \
+        af.instantiate_func = &detail::elwise_from_callable_ckernel_instantiator<func_type>::instantiate; \
+        af.free_func = NULL; \
 \
         ckernel_builder ckb; \
         ndt::type lifted_types[NSRC + 1] = {res.get_type(), DYND_PP_JOIN_OUTER_1(DYND_PP_META_DOT_CALL, (,), \
             DYND_PP_META_NAME_RANGE(acast, NSRC), (get_type))}; \
         const char *dynd_metadata[NSRC + 1] = {res.get_arrmeta(), DYND_PP_JOIN_OUTER_1(DYND_PP_META_DOT_CALL, (,), \
             DYND_PP_META_NAME_RANGE(acast, NSRC), (get_arrmeta))}; \
-        make_lifted_expr_ckernel(&ckd, &ckb, 0, \
+        make_lifted_expr_ckernel(&af, &ckb, 0, \
                             lifted_types, dynd_metadata, kernel_request_single, ectx); \
 \
         ckernel_prefix *ckprefix = ckb.get(); \

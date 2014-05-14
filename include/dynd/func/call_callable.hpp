@@ -6,7 +6,7 @@
 #ifndef _DYND__CALL_CALLABLE_HPP_
 #define _DYND__CALL_CALLABLE_HPP_
 
-#include <dynd/gfunc/callable.hpp>
+#include <dynd/func/callable.hpp>
 #include <dynd/types/cstruct_type.hpp>
 #include <dynd/types/string_type.hpp>
 #include <dynd/types/fixedstring_type.hpp>

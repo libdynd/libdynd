@@ -8,7 +8,7 @@
 
 #include <dynd/config.hpp>
 #include <dynd/array.hpp>
-#include <dynd/kernels/ckernel_deferred.hpp>
+#include <dynd/func/arrfunc.hpp>
 
 namespace dynd {
 
@@ -18,8 +18,8 @@ namespace dynd {
  * This lifts a unary_operation ckernel, which accumulates an individual value
  * or a strided run of values with the possibility of a 0-stride in the output.
  *
- * \param elwise_reduction  The ckernel_deferred being lifted
- * \param dst_initialization  A ckernel_deferred for initializing the
+ * \param elwise_reduction  The arrfunc being lifted
+ * \param dst_initialization  A arrfunc for initializing the
  *                            accumulator values from the source data.
  *                            If this is NULL, an assignment
  *                            kernel is used here.
@@ -47,8 +47,8 @@ namespace dynd {
  * \param ectx  The evaluation context to use.
  */
 size_t make_lifted_reduction_ckernel(
-    const ckernel_deferred *elwise_reduction,
-    const ckernel_deferred *dst_initialization, dynd::ckernel_builder *out_ckb,
+    const arrfunc *elwise_reduction,
+    const arrfunc *dst_initialization, dynd::ckernel_builder *out_ckb,
     intptr_t ckb_offset, const ndt::type *lifted_types,
     const char *const *dynd_metadata, intptr_t reduction_ndim,
     const bool *reduction_dimflags, bool associative, bool commutative,

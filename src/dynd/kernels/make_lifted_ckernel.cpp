@@ -74,7 +74,7 @@ static size_t make_elwise_strided_dimension_expr_kernel_for_N(
     ckernel_builder *out_ckb, size_t ckb_offset, const ndt::type &dst_tp,
     const char *dst_metadata, size_t DYND_UNUSED(src_count),
     const ndt::type *src_tp, const char *const *src_metadata,
-    kernel_request_t kernreq, const ckernel_deferred *elwise_handler,
+    kernel_request_t kernreq, const arrfunc *elwise_handler,
     const eval::eval_context *ectx)
 {
     intptr_t undim = dst_tp.get_ndim() - elwise_handler->data_dynd_types[0].get_ndim();
@@ -148,7 +148,7 @@ inline static size_t make_elwise_strided_dimension_expr_kernel(
     ckernel_builder *out_ckb, size_t ckb_offset, const ndt::type &dst_tp,
     const char *dst_metadata, size_t src_count, const ndt::type *src_tp,
     const char *const *src_metadata, kernel_request_t kernreq,
-    const ckernel_deferred *elwise_handler, const eval::eval_context *ectx)
+    const arrfunc *elwise_handler, const eval::eval_context *ectx)
 {
     switch (src_count) {
         case 1:
@@ -266,7 +266,7 @@ static size_t make_elwise_strided_or_var_to_strided_dimension_expr_kernel_for_N(
     ckernel_builder *out_ckb, size_t ckb_offset, const ndt::type &dst_tp,
     const char *dst_metadata, size_t DYND_UNUSED(src_count),
     const ndt::type *src_tp, const char *const *src_metadata,
-    kernel_request_t kernreq, const ckernel_deferred *elwise_handler,
+    kernel_request_t kernreq, const arrfunc *elwise_handler,
     const eval::eval_context *ectx)
 {
     intptr_t undim = dst_tp.get_ndim() - elwise_handler->data_dynd_types[0].get_ndim();
@@ -347,7 +347,7 @@ static size_t make_elwise_strided_or_var_to_strided_dimension_expr_kernel(
     ckernel_builder *out_ckb, size_t ckb_offset, const ndt::type &dst_tp,
     const char *dst_metadata, size_t src_count, const ndt::type *src_tp,
     const char *const *src_metadata, kernel_request_t kernreq,
-    const ckernel_deferred *elwise_handler, const eval::eval_context *ectx)
+    const arrfunc *elwise_handler, const eval::eval_context *ectx)
 {
     switch (src_count) {
         case 1:
@@ -529,7 +529,7 @@ static size_t make_elwise_strided_or_var_to_var_dimension_expr_kernel_for_N(
     ckernel_builder *out_ckb, size_t ckb_offset, const ndt::type &dst_tp,
     const char *dst_metadata, size_t DYND_UNUSED(src_count),
     const ndt::type *src_tp, const char *const *src_metadata,
-    kernel_request_t kernreq, const ckernel_deferred *elwise_handler,
+    kernel_request_t kernreq, const arrfunc *elwise_handler,
     const eval::eval_context *ectx)
 {
     intptr_t undim = dst_tp.get_ndim() - elwise_handler->data_dynd_types[0].get_ndim();
@@ -611,7 +611,7 @@ static size_t make_elwise_strided_or_var_to_var_dimension_expr_kernel(
     ckernel_builder *out_ckb, size_t ckb_offset, const ndt::type &dst_tp,
     const char *dst_metadata, size_t src_count, const ndt::type *src_tp,
     const char *const *src_metadata, kernel_request_t kernreq,
-    const ckernel_deferred *elwise_handler, const eval::eval_context *ectx)
+    const arrfunc *elwise_handler, const eval::eval_context *ectx)
 {
     switch (src_count) {
         case 1:
@@ -655,7 +655,7 @@ static size_t make_elwise_strided_or_var_to_var_dimension_expr_kernel(
     }
 }
 
-size_t dynd::make_lifted_expr_ckernel(const ckernel_deferred *elwise_handler,
+size_t dynd::make_lifted_expr_ckernel(const arrfunc *elwise_handler,
                                       dynd::ckernel_builder *out_ckb,
                                       intptr_t ckb_offset,
                                       const ndt::type *lifted_types,

@@ -5,9 +5,9 @@
 
 #include <dynd/kernels/reduction_kernels.hpp>
 #include <dynd/array.hpp>
-#include <dynd/types/ckernel_deferred_type.hpp>
+#include <dynd/types/arrfunc_type.hpp>
 #include <dynd/types/strided_dim_type.hpp>
-#include <dynd/kernels/lift_reduction_ckernel_deferred.hpp>
+#include <dynd/func/lift_reduction_arrfunc.hpp>
 
 using namespace std;
 using namespace dynd;
@@ -135,7 +135,7 @@ intptr_t kernels::make_builtin_sum_reduction_ckernel(
     return ckb_offset + sizeof(ckernel_prefix);
 }
 
-static intptr_t instantiate_builtin_sum_reduction_ckernel_deferred(
+static intptr_t instantiate_builtin_sum_reduction_arrfunc(
     void *self_data_ptr, dynd::ckernel_builder *out_ckb, intptr_t ckb_offset,
     const char *const *DYND_UNUSED(dynd_metadata), uint32_t kerntype,
     const eval::eval_context *DYND_UNUSED(ectx))
@@ -144,8 +144,8 @@ static intptr_t instantiate_builtin_sum_reduction_ckernel_deferred(
     return kernels::make_builtin_sum_reduction_ckernel(out_ckb, ckb_offset, tid, (kernel_request_t)kerntype);
 }
 
-void kernels::make_builtin_sum_reduction_ckernel_deferred(
-                ckernel_deferred *out_ckd,
+void kernels::make_builtin_sum_reduction_arrfunc(
+                arrfunc *out_af,
                 type_id_t tid)
 {
     if (tid < 0 || tid >= builtin_type_id_count) {
@@ -154,24 +154,24 @@ void kernels::make_builtin_sum_reduction_ckernel_deferred(
         ss << ndt::type(tid) << " is not supported";
         throw type_error(ss.str());
     }
-    out_ckd->ckernel_funcproto = unary_operation_funcproto;
-    out_ckd->data_types_size = 2;
-    out_ckd->data_dynd_types = builtin_type_pairs[tid];
-    out_ckd->data_ptr = reinterpret_cast<void *>(tid);
-    out_ckd->instantiate_func = &instantiate_builtin_sum_reduction_ckernel_deferred;
-    out_ckd->free_func = NULL;
+    out_af->ckernel_funcproto = unary_operation_funcproto;
+    out_af->data_types_size = 2;
+    out_af->data_dynd_types = builtin_type_pairs[tid];
+    out_af->data_ptr = reinterpret_cast<void *>(tid);
+    out_af->instantiate_func = &instantiate_builtin_sum_reduction_arrfunc;
+    out_af->free_func = NULL;
 }
 
-nd::array kernels::make_builtin_sum1d_ckernel_deferred(type_id_t tid)
+nd::array kernels::make_builtin_sum1d_arrfunc(type_id_t tid)
 {
-    nd::array sum_ew = nd::empty(ndt::make_ckernel_deferred());
-    kernels::make_builtin_sum_reduction_ckernel_deferred(
-        reinterpret_cast<ckernel_deferred *>(sum_ew.get_readwrite_originptr()),
+    nd::array sum_ew = nd::empty(ndt::make_arrfunc());
+    kernels::make_builtin_sum_reduction_arrfunc(
+        reinterpret_cast<arrfunc *>(sum_ew.get_readwrite_originptr()),
         tid);
-    nd::array sum_1d = nd::empty(ndt::make_ckernel_deferred());
+    nd::array sum_1d = nd::empty(ndt::make_arrfunc());
     bool reduction_dimflags[1] = {true};
-    lift_reduction_ckernel_deferred(
-        reinterpret_cast<ckernel_deferred *>(sum_1d.get_readwrite_originptr()),
+    lift_reduction_arrfunc(
+        reinterpret_cast<arrfunc *>(sum_1d.get_readwrite_originptr()),
         sum_ew, ndt::make_strided_dim(ndt::type(tid)), nd::array(), false, 1,
         reduction_dimflags, true, true, false, 0);
     return sum_1d;
@@ -203,12 +203,12 @@ namespace {
         }
     };
 
-    struct mean1d_ckernel_deferred_data {
+    struct mean1d_arrfunc_data {
         ndt::type data_types[2];
         intptr_t minp;
 
         static void free(void *data_ptr) {
-            delete reinterpret_cast<mean1d_ckernel_deferred_data *>(data_ptr);
+            delete reinterpret_cast<mean1d_arrfunc_data *>(data_ptr);
         }
 
         static intptr_t instantiate(
@@ -217,8 +217,8 @@ namespace {
             uint32_t kernreq, const eval::eval_context *DYND_UNUSED(ectx))
         {
             typedef double_mean1d_ck self_type;
-            mean1d_ckernel_deferred_data *data =
-                reinterpret_cast<mean1d_ckernel_deferred_data *>(self_data_ptr);
+            mean1d_arrfunc_data *data =
+                reinterpret_cast<mean1d_arrfunc_data *>(self_data_ptr);
             self_type *self = self_type::create_leaf(ckb, ckb_offset,
                                                      (kernel_request_t)kernreq);
             const strided_dim_type_metadata *src_md =
@@ -238,26 +238,26 @@ namespace {
     };
 } // anonymous namespace
 
-nd::array kernels::make_builtin_mean1d_ckernel_deferred(type_id_t tid, intptr_t minp)
+nd::array kernels::make_builtin_mean1d_arrfunc(type_id_t tid, intptr_t minp)
 {
     if (tid != float64_type_id) {
         stringstream ss;
-        ss << "make_builtin_mean1d_ckernel_deferred: data type ";
+        ss << "make_builtin_mean1d_arrfunc: data type ";
         ss << ndt::type(tid) << " is not supported";
         throw type_error(ss.str());
     }
-    nd::array mean1d = nd::empty(ndt::make_ckernel_deferred());
-    ckernel_deferred *out_ckd =
-        reinterpret_cast<ckernel_deferred *>(mean1d.get_readwrite_originptr());
-    out_ckd->ckernel_funcproto = unary_operation_funcproto;
-    out_ckd->data_types_size = 2;
-    mean1d_ckernel_deferred_data *data = new mean1d_ckernel_deferred_data;
+    nd::array mean1d = nd::empty(ndt::make_arrfunc());
+    arrfunc *out_af =
+        reinterpret_cast<arrfunc *>(mean1d.get_readwrite_originptr());
+    out_af->ckernel_funcproto = unary_operation_funcproto;
+    out_af->data_types_size = 2;
+    mean1d_arrfunc_data *data = new mean1d_arrfunc_data;
     data->data_types[0] = ndt::make_type<double>();
     data->data_types[1] = ndt::make_strided_dim(ndt::make_type<double>());
     data->minp = minp;
-    out_ckd->data_dynd_types = data->data_types;
-    out_ckd->data_ptr = data;
-    out_ckd->instantiate_func = &mean1d_ckernel_deferred_data::instantiate;
-    out_ckd->free_func = &mean1d_ckernel_deferred_data::free;
+    out_af->data_dynd_types = data->data_types;
+    out_af->data_ptr = data;
+    out_af->instantiate_func = &mean1d_arrfunc_data::instantiate;
+    out_af->free_func = &mean1d_arrfunc_data::free;
     return mean1d;
 }

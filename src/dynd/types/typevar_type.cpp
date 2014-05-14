@@ -4,7 +4,7 @@
 //
 
 #include <dynd/types/typevar_type.hpp>
-#include <dynd/gfunc/make_callable.hpp>
+#include <dynd/func/make_callable.hpp>
 
 using namespace std;
 using namespace dynd;

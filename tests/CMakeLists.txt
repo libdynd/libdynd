@@ -59,10 +59,10 @@ set(tests_SRC
     types/test_type_casting.cpp
     types/test_type_promotion.cpp
     types/test_var_dim_type.cpp
-    gfunc/test_callable.cpp
-    gfunc/test_ckernel_deferred.cpp
-    gfunc/test_reduction.cpp
-    gfunc/test_rolling.cpp
+    func/test_callable.cpp
+    func/test_arrfunc.cpp
+    func/test_reduction.cpp
+    func/test_rolling.cpp
     array/test_array.cpp
     array/test_array_range.cpp
     array/test_array_assign.cpp
@@ -93,7 +93,7 @@ source_group("Other Tests" REGULAR_EXPRESSION "\\/test_[^\\/]*\\.cpp$")
 source_group("Array Tests" REGULAR_EXPRESSION "\\/array\\/test_[^\\/]*\\.cpp$")
 source_group("CodeGen Tests" REGULAR_EXPRESSION "\\/codegen\\/test_[^\\/]*\\.cpp$")
 source_group("Types Tests" REGULAR_EXPRESSION "\\/types\\/test_[^\\/]*\\.cpp$")
-source_group("GFunc Tests" REGULAR_EXPRESSION "\\/gfunc\\/test_[^\\/]*\\.cpp$")
+source_group("Func Tests" REGULAR_EXPRESSION "\\/func\\/test_[^\\/]*\\.cpp$")
 source_group("VM Tests" REGULAR_EXPRESSION "\\/vm\\/test_[^\\/]*\\.cpp$")
 
 add_executable(test_libdynd ${tests_SRC})

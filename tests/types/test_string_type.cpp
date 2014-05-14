@@ -15,7 +15,7 @@
 #include <dynd/types/fixedstring_type.hpp>
 #include <dynd/types/convert_type.hpp>
 #include <dynd/json_parser.hpp>
-#include <dynd/gfunc/call_callable.hpp>
+#include <dynd/func/call_callable.hpp>
 #include <dynd/dim_iter.hpp>
 
 using namespace std;

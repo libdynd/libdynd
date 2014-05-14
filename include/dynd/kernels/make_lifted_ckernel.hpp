@@ -8,7 +8,7 @@
 
 #include <dynd/config.hpp>
 #include <dynd/array.hpp>
-#include <dynd/kernels/ckernel_deferred.hpp>
+#include <dynd/func/arrfunc.hpp>
 
 namespace dynd {
 
@@ -18,7 +18,7 @@ namespace dynd {
  *
  * This version is for 'expr' ckernels.
  *
- * \param elwise_handler  The ckernel_deferred being lifted
+ * \param elwise_handler  The arrfunc being lifted
  * \param out_ckb  The ckernel_builder into which to place the ckernel.
  * \param ckb_offset  Where within the ckernel_builder to place the ckernel.
  * \param lifted_types  The types to lift the ckernel to. The output ckernel
@@ -28,7 +28,7 @@ namespace dynd {
  *                  as required by the caller.
  * \param ectx  The evaluation context.
  */
-size_t make_lifted_expr_ckernel(const ckernel_deferred *elwise_handler,
+size_t make_lifted_expr_ckernel(const arrfunc *elwise_handler,
                                 dynd::ckernel_builder *out_ckb,
                                 intptr_t ckb_offset,
                                 const ndt::type *lifted_types,

@@ -13,7 +13,7 @@
 #include <dynd/kernels/comparison_kernels.hpp>
 #include <dynd/types/strided_dim_type.hpp>
 #include <dynd/types/convert_type.hpp>
-#include <dynd/gfunc/make_callable.hpp>
+#include <dynd/func/make_callable.hpp>
 
 using namespace dynd;
 using namespace std;

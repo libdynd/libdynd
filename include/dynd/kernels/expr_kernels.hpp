@@ -6,7 +6,7 @@
 #ifndef _DYND__EXPR_KERNELS_HPP_
 #define _DYND__EXPR_KERNELS_HPP_
 
-#include <dynd/kernels/ckernel_deferred.hpp>
+#include <dynd/func/arrfunc.hpp>
 
 namespace dynd {
 

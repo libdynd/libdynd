@@ -11,19 +11,19 @@
 #include "inc_gtest.hpp"
 
 #include <dynd/array.hpp>
-#include <dynd/kernels/rolling_ckernel_deferred.hpp>
+#include <dynd/func/rolling_arrfunc.hpp>
 #include <dynd/kernels/reduction_kernels.hpp>
-#include <dynd/types/ckernel_deferred_type.hpp>
-#include <dynd/kernels/lift_reduction_ckernel_deferred.hpp>
-#include <dynd/gfunc/call_callable.hpp>
+#include <dynd/types/arrfunc_type.hpp>
+#include <dynd/func/lift_reduction_arrfunc.hpp>
+#include <dynd/func/call_callable.hpp>
 
 using namespace std;
 using namespace dynd;
 
 TEST(Rolling, BuiltinSum_Kernel) {
     nd::array sum_1d =
-        kernels::make_builtin_sum1d_ckernel_deferred(float64_type_id);
-    nd::array rolling_sum = make_rolling_ckernel_deferred(
+        kernels::make_builtin_sum1d_arrfunc(float64_type_id);
+    nd::array rolling_sum = make_rolling_arrfunc(
         ndt::type("strided * float64"), ndt::type("strided * float64"), sum_1d, 4);
 
     double adata[] = {1, 3, 7, 2, 9, 4, -5, 100, 2, -20, 3, 9, 18};
@@ -44,8 +44,8 @@ TEST(Rolling, BuiltinSum_Kernel) {
 
 TEST(Rolling, BuiltinMean_Kernel) {
     nd::array mean_1d =
-        kernels::make_builtin_mean1d_ckernel_deferred(float64_type_id, 0);
-    nd::array rolling_sum = make_rolling_ckernel_deferred(
+        kernels::make_builtin_mean1d_arrfunc(float64_type_id, 0);
+    nd::array rolling_sum = make_rolling_arrfunc(
         ndt::type("strided * float64"), ndt::type("strided * float64"), mean_1d, 4);
 
     double adata[] = {1, 3, 7, 2, 9, 4, -5, 100, 2, -20, 3, 9, 18};

@@ -18,8 +18,8 @@
 #include <dynd/types/convert_type.hpp>
 #include <dynd/types/cstruct_type.hpp>
 #include <dynd/types/struct_type.hpp>
-#include <dynd/gfunc/callable.hpp>
-#include <dynd/gfunc/call_callable.hpp>
+#include <dynd/func/callable.hpp>
+#include <dynd/func/call_callable.hpp>
 
 using namespace std;
 using namespace dynd;

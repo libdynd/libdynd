@@ -3,7 +3,7 @@
 // BSD 2-Clause License, see LICENSE.txt
 //
 
-#include <dynd/kernels/take_ckernel_deferred.hpp>
+#include <dynd/func/take_arrfunc.hpp>
 #include <dynd/kernels/assignment_kernels.hpp>
 #include <dynd/types/var_dim_type.hpp>
 #include <dynd/shape_tools.hpp>
@@ -105,14 +105,14 @@ struct indexed_take_ck : public kernels::expr_ck<indexed_take_ck, 2> {
     }
 };
 
-struct take_ckernel_deferred_data {
+struct take_arrfunc_data {
     // The types of the ckernel
     ndt::type data_types[3];
 };
 
 
-static void free_take_ckernel_deferred_data(void *data_ptr) {
-    delete reinterpret_cast<take_ckernel_deferred_data *>(data_ptr);
+static void free_take_arrfunc_data(void *data_ptr) {
+    delete reinterpret_cast<take_arrfunc_data *>(data_ptr);
 }
 } // anonymous namespace
 
@@ -125,16 +125,16 @@ instantiate_masked_take(void *self_data_ptr, dynd::ckernel_builder *ckb,
 
     self_type *self = self_type::create(ckb, ckb_offset, (kernel_request_t)kernreq);
     intptr_t ckb_end = ckb_offset + sizeof(self_type);
-    take_ckernel_deferred_data *ckd_data =
-        reinterpret_cast<take_ckernel_deferred_data *>(self_data_ptr);
+    take_arrfunc_data *af_data =
+        reinterpret_cast<take_arrfunc_data *>(self_data_ptr);
 
-    if (ckd_data->data_types[0].get_type_id() != var_dim_type_id) {
+    if (af_data->data_types[0].get_type_id() != var_dim_type_id) {
         stringstream ss;
-        ss << "masked take ckernel: could not process type " << ckd_data->data_types[0];
+        ss << "masked take arrfunc: could not process type " << af_data->data_types[0];
         ss << " as a var dimension";
         throw type_error(ss.str());
     }
-    self->m_dst_tp = ckd_data->data_types[0];
+    self->m_dst_tp = af_data->data_types[0];
     self->m_dst_meta = dynd_metadata[0];
     ndt::type dst_el_tp = self->m_dst_tp.tcast<var_dim_type>()->get_element_type();
     const char *dst_el_meta = self->m_dst_meta + sizeof(var_dim_type_metadata);
@@ -142,32 +142,32 @@ instantiate_masked_take(void *self_data_ptr, dynd::ckernel_builder *ckb,
     intptr_t src0_dim_size, mask_dim_size;
     ndt::type src0_el_tp, mask_el_tp;
     const char *src0_el_meta, *mask_el_meta;
-    if (!ckd_data->data_types[1].get_as_strided_dim(
+    if (!af_data->data_types[1].get_as_strided_dim(
             dynd_metadata[1], src0_dim_size, self->m_src0_stride, src0_el_tp,
             src0_el_meta)) {
         stringstream ss;
-        ss << "masked take ckernel: could not process type " << ckd_data->data_types[1];
+        ss << "masked take arrfunc: could not process type " << af_data->data_types[1];
         ss << " as a strided dimension";
         throw type_error(ss.str());
     }
-    if (!ckd_data->data_types[2].get_as_strided_dim(
+    if (!af_data->data_types[2].get_as_strided_dim(
             dynd_metadata[2], mask_dim_size, self->m_mask_stride, mask_el_tp,
             mask_el_meta)) {
         stringstream ss;
-        ss << "masked take ckernel: could not process type " << ckd_data->data_types[2];
+        ss << "masked take arrfunc: could not process type " << af_data->data_types[2];
         ss << " as a strided dimension";
         throw type_error(ss.str());
     }
     if (src0_dim_size != mask_dim_size) {
         stringstream ss;
-        ss << "masked take ckernel: source data and mask have different sizes, ";
+        ss << "masked take arrfunc: source data and mask have different sizes, ";
         ss << src0_dim_size << " and " << mask_dim_size;
         throw invalid_argument(ss.str());
     }
     self->m_dim_size = src0_dim_size;
     if (mask_el_tp.get_type_id() != bool_type_id) {
         stringstream ss;
-        ss << "masked take ckernel: mask type should be bool, not ";
+        ss << "masked take arrfunc: mask type should be bool, not ";
         ss << mask_el_tp;
         throw type_error(ss.str());
     }
@@ -188,16 +188,16 @@ instantiate_indexed_take(void *self_data_ptr, dynd::ckernel_builder *ckb,
 
     self_type *self = self_type::create(ckb, ckb_offset, (kernel_request_t)kernreq);
     intptr_t ckb_end = ckb_offset + sizeof(self_type);
-    take_ckernel_deferred_data *ckd_data =
-        reinterpret_cast<take_ckernel_deferred_data *>(self_data_ptr);
+    take_arrfunc_data *af_data =
+        reinterpret_cast<take_arrfunc_data *>(self_data_ptr);
 
     ndt::type dst_el_tp;
     const char *dst_el_meta;
-    if (!ckd_data->data_types[0].get_as_strided_dim(
+    if (!af_data->data_types[0].get_as_strided_dim(
             dynd_metadata[0], self->m_dst_dim_size, self->m_dst_stride,
             dst_el_tp, dst_el_meta)) {
         stringstream ss;
-        ss << "indexed take ckernel: could not process type " << ckd_data->data_types[0];
+        ss << "indexed take arrfunc: could not process type " << af_data->data_types[0];
         ss << " as a strided dimension";
         throw type_error(ss.str());
     }
@@ -205,31 +205,31 @@ instantiate_indexed_take(void *self_data_ptr, dynd::ckernel_builder *ckb,
     intptr_t index_dim_size;
     ndt::type src0_el_tp, index_el_tp;
     const char *src0_el_meta, *index_el_meta;
-    if (!ckd_data->data_types[1].get_as_strided_dim(
+    if (!af_data->data_types[1].get_as_strided_dim(
             dynd_metadata[1], self->m_src0_dim_size, self->m_src0_stride,
             src0_el_tp, src0_el_meta)) {
         stringstream ss;
-        ss << "indexed take ckernel: could not process type " << ckd_data->data_types[1];
+        ss << "indexed take arrfunc: could not process type " << af_data->data_types[1];
         ss << " as a strided dimension";
         throw type_error(ss.str());
     }
-    if (!ckd_data->data_types[2].get_as_strided_dim(
+    if (!af_data->data_types[2].get_as_strided_dim(
             dynd_metadata[2], index_dim_size, self->m_index_stride, index_el_tp,
             index_el_meta)) {
         stringstream ss;
-        ss << "take ckernel: could not process type " << ckd_data->data_types[2];
+        ss << "take arrfunc: could not process type " << af_data->data_types[2];
         ss << " as a strided dimension";
         throw type_error(ss.str());
     }
     if (self->m_dst_dim_size != index_dim_size) {
         stringstream ss;
-        ss << "indexed take ckernel: index data and dest have different sizes, ";
+        ss << "indexed take arrfunc: index data and dest have different sizes, ";
         ss << index_dim_size << " and " << self->m_dst_dim_size;
         throw invalid_argument(ss.str());
     }
     if (index_el_tp.get_type_id() != (type_id_t)type_id_of<intptr_t>::value) {
         stringstream ss;
-        ss << "indexed take ckernel: index type should be intptr, not ";
+        ss << "indexed take arrfunc: index type should be intptr, not ";
         ss << index_el_tp;
         throw type_error(ss.str());
     }
@@ -241,24 +241,24 @@ instantiate_indexed_take(void *self_data_ptr, dynd::ckernel_builder *ckb,
 }
 
 
-void kernels::make_take_ckernel_deferred(ckernel_deferred *out_ckd,
+void kernels::make_take_arrfunc(arrfunc *out_af,
                                 const ndt::type &dst_tp,
                                 const ndt::type &src_tp,
                                 const ndt::type &mask_tp)
 {
-    // Create the data for the ckernel_deferred
-    take_ckernel_deferred_data *data = new take_ckernel_deferred_data;
-    out_ckd->data_ptr = data;
-    out_ckd->free_func = &free_take_ckernel_deferred_data;
-    out_ckd->ckernel_funcproto = expr_operation_funcproto;
-    out_ckd->data_dynd_types = data->data_types;
-    out_ckd->data_types_size = 3;
+    // Create the data for the arrfunc
+    take_arrfunc_data *data = new take_arrfunc_data;
+    out_af->data_ptr = data;
+    out_af->free_func = &free_take_arrfunc_data;
+    out_af->ckernel_funcproto = expr_operation_funcproto;
+    out_af->data_dynd_types = data->data_types;
+    out_af->data_types_size = 3;
     switch (mask_tp.get_type_at_dimension(NULL, 1).get_type_id()) {
         case bool_type_id:
-            out_ckd->instantiate_func = &instantiate_masked_take;
+            out_af->instantiate_func = &instantiate_masked_take;
             break;
         case (type_id_t)type_id_of<intptr_t>::value:
-            out_ckd->instantiate_func = &instantiate_indexed_take;
+            out_af->instantiate_func = &instantiate_indexed_take;
             break;
         default:
             throw invalid_argument("take requires either a boolean mask or an index array");
