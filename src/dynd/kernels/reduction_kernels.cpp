@@ -7,7 +7,7 @@
 #include <dynd/array.hpp>
 #include <dynd/types/arrfunc_type.hpp>
 #include <dynd/types/strided_dim_type.hpp>
-#include <dynd/kernels/lift_reduction_ckernel_deferred.hpp>
+#include <dynd/func/lift_reduction_arrfunc.hpp>
 
 using namespace std;
 using namespace dynd;
@@ -170,7 +170,7 @@ nd::array kernels::make_builtin_sum1d_ckernel_deferred(type_id_t tid)
         tid);
     nd::array sum_1d = nd::empty(ndt::make_arrfunc());
     bool reduction_dimflags[1] = {true};
-    lift_reduction_ckernel_deferred(
+    lift_reduction_arrfunc(
         reinterpret_cast<arrfunc *>(sum_1d.get_readwrite_originptr()),
         sum_ew, ndt::make_strided_dim(ndt::type(tid)), nd::array(), false, 1,
         reduction_dimflags, true, true, false, 0);

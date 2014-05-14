@@ -14,7 +14,7 @@
 #include <dynd/kernels/rolling_ckernel_deferred.hpp>
 #include <dynd/kernels/reduction_kernels.hpp>
 #include <dynd/types/arrfunc_type.hpp>
-#include <dynd/kernels/lift_reduction_ckernel_deferred.hpp>
+#include <dynd/func/lift_reduction_arrfunc.hpp>
 #include <dynd/func/call_callable.hpp>
 
 using namespace std;

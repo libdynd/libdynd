@@ -13,7 +13,7 @@
 #include <dynd/array.hpp>
 #include <dynd/kernels/reduction_kernels.hpp>
 #include <dynd/types/arrfunc_type.hpp>
-#include <dynd/kernels/lift_reduction_ckernel_deferred.hpp>
+#include <dynd/func/lift_reduction_arrfunc.hpp>
 #include <dynd/json_parser.hpp>
 
 using namespace std;
@@ -102,7 +102,7 @@ TEST(Reduction, BuiltinSum_Lift0D_NoIdentity) {
     // Lift it to a zero-dimensional reduction arrfunc (basically a no-op)
     arrfunc af;
     bool reduction_dimflags[1] = {false};
-    lift_reduction_ckernel_deferred(&af, reduction_kernel,
+    lift_reduction_arrfunc(&af, reduction_kernel,
                     ndt::type("float32"), nd::array(), false,
                     0, reduction_dimflags, true, true, false, nd::array());
 
@@ -134,7 +134,7 @@ TEST(Reduction, BuiltinSum_Lift0D_WithIdentity) {
     // Use 100.f as the "identity" to confirm it's really being used
     arrfunc af;
     bool reduction_dimflags[1] = {false};
-    lift_reduction_ckernel_deferred(&af, reduction_kernel,
+    lift_reduction_arrfunc(&af, reduction_kernel,
                     ndt::type("float32"), nd::array(), false,
                     0, reduction_dimflags, true, true, false, nd::array(100.f));
 
@@ -165,7 +165,7 @@ TEST(Reduction, BuiltinSum_Lift1D_NoIdentity) {
     // Lift it to a one-dimensional strided float32 reduction arrfunc
     arrfunc af;
     bool reduction_dimflags[1] = {true};
-    lift_reduction_ckernel_deferred(&af, reduction_kernel,
+    lift_reduction_arrfunc(&af, reduction_kernel,
                     ndt::type("strided * float32"), nd::array(), false,
                     1, reduction_dimflags, true, true, false, nd::array());
 
@@ -211,7 +211,7 @@ TEST(Reduction, BuiltinSum_Lift1D_WithIdentity) {
     // Use 100.f as the "identity" to confirm it's really being used
     arrfunc af;
     bool reduction_dimflags[1] = {true};
-    lift_reduction_ckernel_deferred(&af, reduction_kernel,
+    lift_reduction_arrfunc(&af, reduction_kernel,
                     ndt::type("strided * float32"), nd::array(), false,
                     1, reduction_dimflags, true, true, false, nd::array(100.f));
 
@@ -243,7 +243,7 @@ TEST(Reduction, BuiltinSum_Lift2D_StridedStrided_ReduceReduce) {
     // Lift it to a two-dimensional strided float32 reduction arrfunc
     arrfunc af;
     bool reduction_dimflags[2] = {true, true};
-    lift_reduction_ckernel_deferred(&af, reduction_kernel,
+    lift_reduction_arrfunc(&af, reduction_kernel,
                     ndt::type("strided * strided * float32"), nd::array(), false,
                     2, reduction_dimflags, true, true, false, nd::array());
 
@@ -292,7 +292,7 @@ TEST(Reduction, BuiltinSum_Lift2D_StridedStrided_ReduceReduce_KeepDim) {
     // Lift it to a two-dimensional strided float32 reduction arrfunc
     arrfunc af;
     bool reduction_dimflags[2] = {true, true};
-    lift_reduction_ckernel_deferred(&af, reduction_kernel,
+    lift_reduction_arrfunc(&af, reduction_kernel,
                     ndt::type("strided * strided * float32"), nd::array(), true,
                     2, reduction_dimflags, true, true, false, nd::array());
 
@@ -326,7 +326,7 @@ TEST(Reduction, BuiltinSum_Lift2D_StridedStrided_BroadcastReduce) {
     // Lift it to a two-dimensional strided float32 reduction arrfunc
     arrfunc af;
     bool reduction_dimflags[2] = {false, true};
-    lift_reduction_ckernel_deferred(&af, reduction_kernel,
+    lift_reduction_arrfunc(&af, reduction_kernel,
                     ndt::type("strided * strided * float32"), nd::array(), false,
                     2, reduction_dimflags, true, true, false, nd::array());
 
@@ -379,7 +379,7 @@ TEST(Reduction, BuiltinSum_Lift2D_StridedStrided_BroadcastReduce_KeepDim) {
     // Lift it to a two-dimensional strided float32 reduction arrfunc
     arrfunc af;
     bool reduction_dimflags[2] = {false, true};
-    lift_reduction_ckernel_deferred(&af, reduction_kernel,
+    lift_reduction_arrfunc(&af, reduction_kernel,
                     ndt::type("strided * strided * float32"), nd::array(), true,
                     2, reduction_dimflags, true, true, false, nd::array());
 
@@ -415,7 +415,7 @@ TEST(Reduction, BuiltinSum_Lift2D_StridedStrided_ReduceBroadcast) {
     // Lift it to a two-dimensional strided float32 reduction arrfunc
     arrfunc af;
     bool reduction_dimflags[2] = {true, false};
-    lift_reduction_ckernel_deferred(&af, reduction_kernel,
+    lift_reduction_arrfunc(&af, reduction_kernel,
                     ndt::type("strided * strided * float32"), nd::array(), false,
                     2, reduction_dimflags, true, true, false, nd::array());
 
@@ -470,7 +470,7 @@ TEST(Reduction, BuiltinSum_Lift2D_StridedStrided_ReduceBroadcast_KeepDim) {
     // Lift it to a two-dimensional strided float32 reduction arrfunc
     arrfunc af;
     bool reduction_dimflags[2] = {true, false};
-    lift_reduction_ckernel_deferred(&af, reduction_kernel,
+    lift_reduction_arrfunc(&af, reduction_kernel,
                     ndt::type("strided * strided * float32"), nd::array(), true,
                     2, reduction_dimflags, true, true, false, nd::array());
 
@@ -507,7 +507,7 @@ TEST(Reduction, BuiltinSum_Lift3D_StridedStridedStrided_ReduceReduceReduce) {
     // Lift it to a three-dimensional strided float32 reduction arrfunc
     arrfunc af;
     bool reduction_dimflags[3] = {true, true, true};
-    lift_reduction_ckernel_deferred(&af, reduction_kernel,
+    lift_reduction_arrfunc(&af, reduction_kernel,
                     ndt::type("strided * strided * strided * float32"), nd::array(), false,
                     3, reduction_dimflags, true, true, false, nd::array());
 
@@ -543,7 +543,7 @@ TEST(Reduction, BuiltinSum_Lift3D_StridedStridedStrided_BroadcastReduceReduce) {
     // Lift it to a three-dimensional strided float32 reduction arrfunc
     arrfunc af;
     bool reduction_dimflags[3] = {false, true, true};
-    lift_reduction_ckernel_deferred(&af, reduction_kernel,
+    lift_reduction_arrfunc(&af, reduction_kernel,
                     ndt::type("strided * strided * strided * float32"), nd::array(), false,
                     3, reduction_dimflags, true, true, false, nd::array());
 
@@ -581,7 +581,7 @@ TEST(Reduction, BuiltinSum_Lift3D_StridedStridedStrided_ReduceBroadcastReduce) {
     // Lift it to a three-dimensional strided float32 reduction arrfunc
     arrfunc af;
     bool reduction_dimflags[3] = {true, false, true};
-    lift_reduction_ckernel_deferred(&af, reduction_kernel,
+    lift_reduction_arrfunc(&af, reduction_kernel,
                     ndt::type("strided * strided * strided * float32"), nd::array(), false,
                     3, reduction_dimflags, true, true, false, nd::array());
 
