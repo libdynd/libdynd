@@ -41,14 +41,14 @@ enum arrfunc_proto_t {
  *                match the patterns.
  * \param src_arrmeta  An array of dynd arrmeta pointers,
  *                     corresponding to the source types.
- * \param kerntype  Either dynd::kernel_request_single or dynd::kernel_request_strided,
+ * \param kernreq  Either dynd::kernel_request_single or dynd::kernel_request_strided,
  *                  as required by the caller.
  * \param ectx  The evaluation context.
  */
 typedef intptr_t (*instantiate_arrfunc_t)(
     void *self_data_ptr, dynd::ckernel_builder *ckb, intptr_t ckb_offset,
     const ndt::type &dst_tp, const char *dst_arrmeta, const ndt::type *src_tp,
-    const char *const *src_arrmeta, uint32_t kerntype,
+    const char *const *src_arrmeta, uint32_t kernreq,
     const eval::eval_context *ectx);
 
 /**

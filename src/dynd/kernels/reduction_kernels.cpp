@@ -69,10 +69,10 @@ namespace {
 intptr_t kernels::make_builtin_sum_reduction_ckernel(
                 dynd::ckernel_builder *out_ckb, intptr_t ckb_offset,
                 type_id_t tid,
-                kernel_request_t kerntype)
+                kernel_request_t kernreq)
 {
     ckernel_prefix *ckp = out_ckb->get_at<ckernel_prefix>(ckb_offset);
-    if (kerntype == kernel_request_single) {
+    if (kernreq == kernel_request_single) {
         switch (tid) {
             case int32_type_id:
                 ckp->set_function<unary_single_operation_t>(&sum_reduction<int32_t, int32_t>::single);
@@ -99,7 +99,7 @@ intptr_t kernels::make_builtin_sum_reduction_ckernel(
                 throw type_error(ss.str());
             }
         }
-    } else if (kerntype == kernel_request_strided) {
+    } else if (kernreq == kernel_request_strided) {
         switch (tid) {
             case int32_type_id:
                 ckp->set_function<unary_strided_operation_t>(&sum_reduction<int32_t, int32_t>::strided);
@@ -139,7 +139,7 @@ static intptr_t instantiate_builtin_sum_reduction_arrfunc(
     void *DYND_UNUSED(self_data_ptr), dynd::ckernel_builder *ckb,
     intptr_t ckb_offset, const ndt::type &dst_tp,
     const char *DYND_UNUSED(dst_arrmeta), const ndt::type *src_tp,
-    const char *const *DYND_UNUSED(src_arrmeta), uint32_t kerntype,
+    const char *const *DYND_UNUSED(src_arrmeta), uint32_t kernreq,
     const eval::eval_context *DYND_UNUSED(ectx))
 {
     if (dst_tp != src_tp[0]) {
@@ -149,7 +149,7 @@ static intptr_t instantiate_builtin_sum_reduction_arrfunc(
         throw type_error(ss.str());
     }
     return kernels::make_builtin_sum_reduction_ckernel(
-        ckb, ckb_offset, dst_tp.get_type_id(), (kernel_request_t)kerntype);
+        ckb, ckb_offset, dst_tp.get_type_id(), (kernel_request_t)kernreq);
 }
 
 void kernels::make_builtin_sum_reduction_arrfunc(

@@ -105,16 +105,16 @@ size_t kernels::make_constant_value_assignment_ckernel(
 
 intptr_t kernels::wrap_unary_as_expr_ckernel(dynd::ckernel_builder *ckb,
                                              intptr_t ckb_offset,
-                                             kernel_request_t kerntype)
+                                             kernel_request_t kernreq)
 {
     // Add an adapter kernel which converts the unary kernel to an expr kernel
     intptr_t ckb_child_offset = ckb_offset + sizeof(ckernel_prefix);
     ckb->ensure_capacity(ckb_child_offset);
     ckernel_prefix *ckp = ckb->get_at<ckernel_prefix>(ckb_offset);
     ckp->destructor = &kernels::destroy_trivial_parent_ckernel;
-    if (kerntype == kernel_request_single) {
+    if (kernreq == kernel_request_single) {
         ckp->set_function<expr_single_operation_t>(&kernels::unary_as_expr_adapter_single_ckernel);
-    } else if (kerntype == kernel_request_strided) {
+    } else if (kernreq == kernel_request_strided) {
         ckp->set_function<expr_strided_operation_t>(&kernels::unary_as_expr_adapter_strided_ckernel);
     } else {
         throw runtime_error("unsupported kernel request in instantiate_expr_assignment_ckernel");
@@ -124,16 +124,16 @@ intptr_t kernels::wrap_unary_as_expr_ckernel(dynd::ckernel_builder *ckb,
 
 intptr_t kernels::wrap_expr_as_unary_ckernel(dynd::ckernel_builder *ckb,
                                              intptr_t ckb_offset,
-                                             kernel_request_t kerntype)
+                                             kernel_request_t kernreq)
 {
     // Add an adapter kernel which converts the expr kernel to a unary kernel
     intptr_t ckb_child_offset = ckb_offset + sizeof(ckernel_prefix);
     ckb->ensure_capacity(ckb_child_offset);
     ckernel_prefix *ckp = ckb->get_at<ckernel_prefix>(ckb_offset);
     ckp->destructor = &kernels::destroy_trivial_parent_ckernel;
-    if (kerntype == kernel_request_single) {
+    if (kernreq == kernel_request_single) {
         ckp->set_function<unary_single_operation_t>(&kernels::expr_as_unary_adapter_single_ckernel);
-    } else if (kerntype == kernel_request_strided) {
+    } else if (kernreq == kernel_request_strided) {
         ckp->set_function<unary_strided_operation_t>(&kernels::expr_as_unary_adapter_strided_ckernel);
     } else {
         throw runtime_error("unsupported kernel request in instantiate_unary_assignment_ckernel");
@@ -200,20 +200,20 @@ static void binary_as_unary_left_associative_reduction_adapter_strided_ckernel(
 intptr_t kernels::wrap_binary_as_unary_reduction_ckernel(
                 dynd::ckernel_builder *out_ckb, intptr_t ckb_offset,
                 bool right_associative,
-                kernel_request_t kerntype)
+                kernel_request_t kernreq)
 {
     // Add an adapter kernel which converts the binary expr kernel to an expr kernel
     intptr_t ckb_child_offset = ckb_offset + sizeof(ckernel_prefix);
     out_ckb->ensure_capacity(ckb_child_offset);
     ckernel_prefix *ckp = out_ckb->get_at<ckernel_prefix>(ckb_offset);
     ckp->destructor = &kernels::destroy_trivial_parent_ckernel;
-    if (kerntype == kernel_request_single) {
+    if (kernreq == kernel_request_single) {
         if (right_associative) {
             ckp->set_function<unary_single_operation_t>(&binary_as_unary_right_associative_reduction_adapter_single_ckernel);
         } else {
             ckp->set_function<unary_single_operation_t>(&binary_as_unary_left_associative_reduction_adapter_single_ckernel);
         }
-    } else if (kerntype == kernel_request_strided) {
+    } else if (kernreq == kernel_request_strided) {
         if (right_associative) {
             ckp->set_function<unary_strided_operation_t>(&binary_as_unary_right_associative_reduction_adapter_strided_ckernel);
         } else {
