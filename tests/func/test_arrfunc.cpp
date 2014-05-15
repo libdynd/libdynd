@@ -35,12 +35,13 @@ TEST(ArrFunc, Assignment) {
     ASSERT_EQ(ndt::make_type<int>(), af.data_dynd_types[0]);
     ASSERT_EQ(ndt::make_fixedstring(16), af.data_dynd_types[1]);
 
-    const char *dynd_metadata[2] = {NULL, NULL};
+    const char *src_arrmeta[1] = {NULL};
 
     // Instantiate a single ckernel
     ckernel_builder ckb;
-    af.instantiate_func(af.data_ptr, &ckb, 0, dynd_metadata,
-                         kernel_request_single, &eval::default_eval_context);
+    af.instantiate_func(af.data_ptr, &ckb, 0, af.data_dynd_types[0], NULL,
+                        af.data_dynd_types + 1, src_arrmeta,
+                        kernel_request_single, &eval::default_eval_context);
     int int_out = 0;
     char str_in[16] = "3251";
     unary_single_operation_t usngo = ckb.get()->get_function<unary_single_operation_t>();
@@ -49,8 +50,9 @@ TEST(ArrFunc, Assignment) {
 
     // Instantiate a strided ckernel
     ckb.reset();
-    af.instantiate_func(af.data_ptr, &ckb, 0, dynd_metadata,
-                         kernel_request_strided, &eval::default_eval_context);
+    af.instantiate_func(af.data_ptr, &ckb, 0, af.data_dynd_types[0], NULL,
+                        af.data_dynd_types + 1, src_arrmeta,
+                        kernel_request_strided, &eval::default_eval_context);
     int ints_out[3] = {0, 0, 0};
     char strs_in[3][16] = {"123", "4567", "891029"};
     unary_strided_operation_t ustro = ckb.get()->get_function<unary_strided_operation_t>();
@@ -73,12 +75,13 @@ TEST(ArrFunc, AssignmentAsExpr) {
     ASSERT_EQ(ndt::make_type<int>(), af.data_dynd_types[0]);
     ASSERT_EQ(ndt::make_fixedstring(16), af.data_dynd_types[1]);
 
-    const char *dynd_metadata[2] = {NULL, NULL};
+    const char *src_arrmeta[1] = {NULL};
 
     // Instantiate a single ckernel
     ckernel_builder ckb;
-    af.instantiate_func(af.data_ptr, &ckb, 0, dynd_metadata,
-                         kernel_request_single, &eval::default_eval_context);
+    af.instantiate_func(af.data_ptr, &ckb, 0, af.data_dynd_types[0], NULL,
+                        af.data_dynd_types + 1, src_arrmeta,
+                        kernel_request_single, &eval::default_eval_context);
     int int_out = 0;
     char str_in[16] = "3251";
     char *str_in_ptr = str_in;
@@ -88,8 +91,9 @@ TEST(ArrFunc, AssignmentAsExpr) {
 
     // Instantiate a strided ckernel
     ckb.reset();
-    af.instantiate_func(af.data_ptr, &ckb, 0, dynd_metadata,
-                         kernel_request_strided, &eval::default_eval_context);
+    af.instantiate_func(af.data_ptr, &ckb, 0, af.data_dynd_types[0], NULL,
+                        af.data_dynd_types + 1, src_arrmeta,
+                        kernel_request_strided, &eval::default_eval_context);
     int ints_out[3] = {0, 0, 0};
     char strs_in[3][16] = {"123", "4567", "891029"};
     char *strs_in_ptr = strs_in[0];
@@ -115,12 +119,13 @@ TEST(ArrFunc, Expr) {
     ASSERT_EQ(ndt::make_type<int>(), af.data_dynd_types[1]);
     ASSERT_EQ(ndt::make_type<int>(), af.data_dynd_types[2]);
 
-    const char *dynd_metadata[3] = {NULL, NULL, NULL};
+    const char *src_arrmeta[2] = {NULL, NULL};
 
     // Instantiate a single ckernel
     ckernel_builder ckb;
-    af.instantiate_func(af.data_ptr, &ckb, 0, dynd_metadata,
-                         kernel_request_single, &eval::default_eval_context);
+    af.instantiate_func(af.data_ptr, &ckb, 0, af.data_dynd_types[0], NULL,
+                        af.data_dynd_types + 1, src_arrmeta,
+                        kernel_request_single, &eval::default_eval_context);
     int int_out = 0;
     int int_in1 = 1, int_in2 = 3;
     char *int_in_ptr[2] = {reinterpret_cast<char *>(&int_in1),
@@ -131,8 +136,9 @@ TEST(ArrFunc, Expr) {
 
     // Instantiate a strided ckernel
     ckb.reset();
-    af.instantiate_func(af.data_ptr, &ckb, 0, dynd_metadata,
-                         kernel_request_strided, &eval::default_eval_context);
+    af.instantiate_func(af.data_ptr, &ckb, 0, af.data_dynd_types[0], NULL,
+                        af.data_dynd_types + 1, src_arrmeta,
+                        kernel_request_strided, &eval::default_eval_context);
     int ints_out[3] = {0, 0, 0};
     int ints_in1[3] = {1,2,3}, ints_in2[3] = {5,-210,1234};
     char *ints_in_ptr[2] = {reinterpret_cast<char *>(&ints_in1),
@@ -164,9 +170,10 @@ TEST(ArrFunc, LiftUnaryExpr_FixedDim) {
 
     // Test it on some data
     ckernel_builder ckb;
-    const char *dynd_metadata[2] = {NULL, NULL};
-    af.instantiate_func(af.data_ptr, &ckb, 0, dynd_metadata,
-                         kernel_request_single, &eval::default_eval_context);
+    const char *src_arrmeta[1] = {NULL};
+    af.instantiate_func(af.data_ptr, &ckb, 0, af.data_dynd_types[0], NULL,
+                        af.data_dynd_types + 1, src_arrmeta,
+                        kernel_request_single, &eval::default_eval_context);
     int out[3] = {0, 0, 0};
     char in[3][16] = {"172", "-139", "12345"};
     const char *in_ptr = reinterpret_cast<const char *>(in);
@@ -200,11 +207,10 @@ TEST(ArrFunc, LiftUnaryExpr_StridedDim) {
     in(1).vals() = "-139";
     in(2).vals() = "12345";
     const char *in_ptr = in.get_readonly_originptr();
-    const char *dynd_metadata[2] = {NULL, NULL};
-    dynd_metadata[0] = out.get_arrmeta();
-    dynd_metadata[1] = in.get_arrmeta();
-    af.instantiate_func(af.data_ptr, &ckb, 0, dynd_metadata,
-                         kernel_request_single, &eval::default_eval_context);
+    const char *src_arrmeta[1] = {in.get_arrmeta()};
+    af.instantiate_func(af.data_ptr, &ckb, 0, af.data_dynd_types[0], out.get_arrmeta(),
+                        af.data_dynd_types + 1, src_arrmeta,
+                        kernel_request_single, &eval::default_eval_context);
     expr_single_operation_t usngo = ckb.get()->get_function<expr_single_operation_t>();
     usngo(out.get_readwrite_originptr(), &in_ptr, ckb.get());
     EXPECT_EQ(172, out(0).as<int>());
@@ -237,11 +243,10 @@ TEST(ArrFunc, LiftUnaryExpr_StridedToVarDim) {
     in(3).vals() = "-1111";
     in(4).vals() = "284";
     const char *in_ptr = in.get_readonly_originptr();
-    const char *dynd_metadata[2] = {NULL, NULL};
-    dynd_metadata[0] = out.get_arrmeta();
-    dynd_metadata[1] = in.get_arrmeta();
-    af.instantiate_func(af.data_ptr, &ckb, 0, dynd_metadata,
-                         kernel_request_single, &eval::default_eval_context);
+    const char *src_arrmeta[1] = {in.get_arrmeta()};
+    af.instantiate_func(af.data_ptr, &ckb, 0, af.data_dynd_types[0],
+                        out.get_arrmeta(), af.data_dynd_types + 1, src_arrmeta,
+                        kernel_request_single, &eval::default_eval_context);
     expr_single_operation_t usngo = ckb.get()->get_function<expr_single_operation_t>();
     usngo(out.get_readwrite_originptr(), &in_ptr, ckb.get());
     EXPECT_EQ(5, out.get_shape()[0]);
@@ -275,11 +280,10 @@ TEST(ArrFunc, LiftUnaryExpr_VarToVarDim) {
     const char *in_vals[] = {"172", "-139", "12345", "-1111", "284"};
     in.vals() = in_vals;
     const char *in_ptr = in.get_readonly_originptr();
-    const char *dynd_metadata[2] = {NULL, NULL};
-    dynd_metadata[0] = out.get_arrmeta();
-    dynd_metadata[1] = in.get_arrmeta();
-    af.instantiate_func(af.data_ptr, &ckb, 0, dynd_metadata,
-                         kernel_request_single, &eval::default_eval_context);
+    const char *src_arrmeta[1] = {in.get_arrmeta()};
+    af.instantiate_func(af.data_ptr, &ckb, 0, af.data_dynd_types[0],
+                        out.get_arrmeta(), af.data_dynd_types + 1, src_arrmeta,
+                        kernel_request_single, &eval::default_eval_context);
     expr_single_operation_t usngo = ckb.get()->get_function<expr_single_operation_t>();
     usngo(out.get_readwrite_originptr(), &in_ptr, ckb.get());
     EXPECT_EQ(5, out.get_shape()[0]);
@@ -317,12 +321,11 @@ TEST(ArrFunc, LiftUnaryExpr_MultiDimVarToVarDim) {
     in(2).vals() = in_vals2;
 
     const char *in_ptr = in.get_readonly_originptr();
-    const char *dynd_metadata[2] = {NULL, NULL};
-    dynd_metadata[0] = out.get_arrmeta();
-    dynd_metadata[1] = in.get_arrmeta();
+    const char *src_arrmeta[1] = {in.get_arrmeta()};
     ckernel_builder ckb;
-    af.instantiate_func(af.data_ptr, &ckb, 0, dynd_metadata,
-                         kernel_request_single, &eval::default_eval_context);
+    af.instantiate_func(af.data_ptr, &ckb, 0, af.data_dynd_types[0],
+                        out.get_arrmeta(), af.data_dynd_types + 1, src_arrmeta,
+                        kernel_request_single, &eval::default_eval_context);
     expr_single_operation_t usngo = ckb.get()->get_function<expr_single_operation_t>();
     usngo(out.get_readwrite_originptr(), &in_ptr, ckb.get());
     ASSERT_EQ(3, out.get_shape()[0]);
@@ -371,14 +374,12 @@ TEST(ArrFunc, LiftExpr_MultiDimVarToVarDim) {
     int32_t in1_vals[] = {2, 4, 10};
     in1.vals() = in1_vals;
 
-    const char *dynd_metadata[3] = {NULL, NULL, NULL};
-    dynd_metadata[0] = out.get_arrmeta();
-    dynd_metadata[1] = in0.get_arrmeta();
-    dynd_metadata[2] = in1.get_arrmeta();
+    const char *src_arrmeta[2] = {in0.get_arrmeta(), in1.get_arrmeta()};
     const char *const in_ptrs[2] = {in0.get_readonly_originptr(), in1.get_readonly_originptr()};
     ckernel_builder ckb;
-    af->instantiate_func(af->data_ptr, &ckb, 0, dynd_metadata,
-                          kernel_request_single, &eval::default_eval_context);
+    af->instantiate_func(af->data_ptr, &ckb, 0, lifted_types[0],
+                         out.get_arrmeta(), &lifted_types[1], src_arrmeta,
+                         kernel_request_single, &eval::default_eval_context);
     expr_single_operation_t usngo = ckb.get()->get_function<expr_single_operation_t>();
     usngo(out.get_readwrite_originptr(), in_ptrs, ckb.get());
     ASSERT_EQ(3, out.get_shape()[0]);

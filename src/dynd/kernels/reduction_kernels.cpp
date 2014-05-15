@@ -136,12 +136,20 @@ intptr_t kernels::make_builtin_sum_reduction_ckernel(
 }
 
 static intptr_t instantiate_builtin_sum_reduction_arrfunc(
-    void *self_data_ptr, dynd::ckernel_builder *out_ckb, intptr_t ckb_offset,
-    const char *const *DYND_UNUSED(dynd_metadata), uint32_t kerntype,
+    void *DYND_UNUSED(self_data_ptr), dynd::ckernel_builder *ckb,
+    intptr_t ckb_offset, const ndt::type &dst_tp,
+    const char *DYND_UNUSED(dst_arrmeta), const ndt::type *src_tp,
+    const char *const *DYND_UNUSED(src_arrmeta), uint32_t kerntype,
     const eval::eval_context *DYND_UNUSED(ectx))
 {
-    type_id_t tid = static_cast<type_id_t>(reinterpret_cast<uintptr_t>(self_data_ptr));
-    return kernels::make_builtin_sum_reduction_ckernel(out_ckb, ckb_offset, tid, (kernel_request_t)kerntype);
+    if (dst_tp != src_tp[0]) {
+        stringstream ss;
+        ss << "dynd sum reduction: the source type, " << src_tp[0]
+           << ", does not match the destination type, " << dst_tp;
+        throw type_error(ss.str());
+    }
+    return kernels::make_builtin_sum_reduction_ckernel(
+        ckb, ckb_offset, dst_tp.get_type_id(), (kernel_request_t)kerntype);
 }
 
 void kernels::make_builtin_sum_reduction_arrfunc(
@@ -211,28 +219,38 @@ namespace {
             delete reinterpret_cast<mean1d_arrfunc_data *>(data_ptr);
         }
 
-        static intptr_t instantiate(
-            void *self_data_ptr, dynd::ckernel_builder *ckb,
-            intptr_t ckb_offset, const char *const *dynd_metadata,
-            uint32_t kernreq, const eval::eval_context *DYND_UNUSED(ectx))
+        static intptr_t
+        instantiate(void *self_data_ptr, dynd::ckernel_builder *ckb,
+                    intptr_t ckb_offset, const ndt::type &dst_tp,
+                    const char *dst_arrmeta, const ndt::type *src_tp,
+                    const char *const *src_arrmeta, uint32_t kernreq,
+                    const eval::eval_context *DYND_UNUSED(ectx))
         {
             typedef double_mean1d_ck self_type;
             mean1d_arrfunc_data *data =
                 reinterpret_cast<mean1d_arrfunc_data *>(self_data_ptr);
             self_type *self = self_type::create_leaf(ckb, ckb_offset,
                                                      (kernel_request_t)kernreq);
-            const strided_dim_type_metadata *src_md =
-                reinterpret_cast<const strided_dim_type_metadata *>(
-                    dynd_metadata[1]);
+            intptr_t src_dim_size, src_stride;
+            ndt::type src_el_tp;
+            const char *src_el_arrmeta;
+            if (!src_tp[0].get_as_strided_dim(src_arrmeta[0], src_dim_size,
+                                              src_stride, src_el_tp,
+                                              src_el_arrmeta)) {
+                stringstream ss;
+                ss << "mean1d: could not process type " << src_tp[0];
+                ss << " as a strided dimension";
+                throw type_error(ss.str());
+            }
             self->m_minp = data->minp;
             if (self->m_minp <= 0) {
-                if (self->m_minp <= -src_md->size) {
+                if (self->m_minp <= -src_dim_size) {
                     throw invalid_argument("minp parameter is too large of a negative number");
                 }
-                self->m_minp += src_md->size;
+                self->m_minp += src_dim_size;
             }
-            self->m_src_dim_size = src_md->size;
-            self->m_src_stride = src_md->stride;
+            self->m_src_dim_size = src_dim_size;
+            self->m_src_stride = src_stride;
             return ckb_offset + sizeof(self_type);
         }
     };

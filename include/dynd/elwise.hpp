@@ -119,15 +119,17 @@ struct elwise_ckernel_instantiator;
             } \
         } \
 \
-        static intptr_t instantiate(void *self_data_ptr, \
-                    dynd::ckernel_builder *out_ckb, intptr_t ckb_offset, \
-                    const char *const* DYND_UNUSED(dynd_metadata), uint32_t kerntype, \
+        static intptr_t instantiate( \
+                    void *self_data_ptr, dynd::ckernel_builder *ckb, \
+                    intptr_t ckb_offset, const ndt::type &DYND_UNUSED(dst_tp), \
+                    const char *DYND_UNUSED(dst_arrmeta), const ndt::type *DYND_UNUSED(src_tp), \
+                    const char *const *DYND_UNUSED(src_arrmeta), uint32_t kernreq, \
                     const eval::eval_context *DYND_UNUSED(ectx)) \
         { \
-            extra_type *e = out_ckb->get_at<extra_type>(ckb_offset); \
-            if (kerntype == kernel_request_single) { \
+            extra_type *e = ckb->get_at<extra_type>(ckb_offset); \
+            if (kernreq == kernel_request_single) { \
                 e->base.set_function(&extra_type::single); \
-            } else if (kerntype == kernel_request_strided) { \
+            } else if (kernreq == kernel_request_strided) { \
                 e->base.set_function(&extra_type::strided); \
             } else { \
                 throw std::runtime_error("unsupported kernel request in elwise"); \
@@ -186,15 +188,17 @@ struct elwise_ckernel_instantiator;
             } \
         } \
 \
-        static intptr_t instantiate(void *self_data_ptr, \
-                    dynd::ckernel_builder *out_ckb, intptr_t ckb_offset, \
-                    const char *const* DYND_UNUSED(dynd_metadata), uint32_t kerntype, \
+        static intptr_t instantiate( \
+                    void *self_data_ptr, dynd::ckernel_builder *ckb, \
+                    intptr_t ckb_offset, const ndt::type &DYND_UNUSED(dst_tp), \
+                    const char *DYND_UNUSED(dst_arrmeta), const ndt::type *DYND_UNUSED(src_tp), \
+                    const char *const *DYND_UNUSED(src_arrmeta), uint32_t kernreq, \
                     const eval::eval_context *DYND_UNUSED(ectx)) \
         { \
-            extra_type *e = out_ckb->get_at<extra_type>(ckb_offset); \
-            if (kerntype == kernel_request_single) { \
+            extra_type *e = ckb->get_at<extra_type>(ckb_offset); \
+            if (kernreq == kernel_request_single) { \
                 e->base.set_function(&extra_type::single); \
-            } else if (kerntype == kernel_request_strided) { \
+            } else if (kernreq == kernel_request_strided) { \
                 e->base.set_function(&extra_type::strided); \
             } else { \
                 throw std::runtime_error("unsupported kernel request in elwise"); \
@@ -265,15 +269,17 @@ DYND_PP_JOIN_MAP(FUNC_CKERNEL_INSTANTIATORS, (), DYND_PP_RANGE(1, DYND_PP_INC(DY
             } \
         } \
 \
-        static intptr_t instantiate(void *self_data_ptr, \
-                    dynd::ckernel_builder *out_ckb, intptr_t ckb_offset, \
-                    const char *const* DYND_UNUSED(dynd_metadata), uint32_t kerntype, \
+        static intptr_t instantiate( \
+                    void *self_data_ptr, dynd::ckernel_builder *ckb, \
+                    intptr_t ckb_offset, const ndt::type &DYND_UNUSED(dst_tp), \
+                    const char *DYND_UNUSED(dst_arrmeta), const ndt::type *DYND_UNUSED(src_tp), \
+                    const char *const *DYND_UNUSED(src_arrmeta), uint32_t kernreq, \
                     const eval::eval_context *DYND_UNUSED(ectx)) \
         { \
-            extra_type *e = out_ckb->get_at<extra_type>(ckb_offset); \
-            if (kerntype == kernel_request_single) { \
+            extra_type *e = ckb->get_at<extra_type>(ckb_offset); \
+            if (kernreq == kernel_request_single) { \
                 e->base.set_function(&extra_type::single); \
-            } else if (kerntype == kernel_request_strided) { \
+            } else if (kernreq == kernel_request_strided) { \
                 e->base.set_function(&extra_type::strided); \
             } else { \
                 throw std::runtime_error("unsupported kernel request in elwise"); \
@@ -336,15 +342,17 @@ DYND_PP_JOIN_MAP(FUNC_CKERNEL_INSTANTIATORS, (), DYND_PP_RANGE(1, DYND_PP_INC(DY
             } \
         } \
 \
-        static intptr_t instantiate(void *self_data_ptr, \
-                    dynd::ckernel_builder *out_ckb, intptr_t ckb_offset, \
-                    const char *const* DYND_UNUSED(dynd_metadata), uint32_t kerntype, \
+        static intptr_t instantiate( \
+                    void *self_data_ptr, dynd::ckernel_builder *ckb, \
+                    intptr_t ckb_offset, const ndt::type &DYND_UNUSED(dst_tp), \
+                    const char *DYND_UNUSED(dst_arrmeta), const ndt::type *DYND_UNUSED(src_tp), \
+                    const char *const *DYND_UNUSED(src_arrmeta), uint32_t kernreq, \
                     const eval::eval_context *DYND_UNUSED(ectx)) \
         { \
-            extra_type *e = out_ckb->get_at<extra_type>(ckb_offset); \
-            if (kerntype == kernel_request_single) { \
+            extra_type *e = ckb->get_at<extra_type>(ckb_offset); \
+            if (kernreq == kernel_request_single) { \
                 e->base.set_function(&extra_type::single); \
-            } else if (kerntype == kernel_request_strided) { \
+            } else if (kernreq == kernel_request_strided) { \
                 e->base.set_function(&extra_type::strided); \
             } else { \
                 throw std::runtime_error("unsupported kernel request in elwise"); \
@@ -418,15 +426,17 @@ struct elwise_from_callable_ckernel_instantiator;
             } \
         } \
 \
-        static intptr_t instantiate(void *self_data_ptr, \
-                    dynd::ckernel_builder *out_ckb, intptr_t ckb_offset, \
-                    const char *const* DYND_UNUSED(dynd_metadata), uint32_t kerntype, \
+        static intptr_t instantiate( \
+                    void *self_data_ptr, dynd::ckernel_builder *ckb, \
+                    intptr_t ckb_offset, const ndt::type &DYND_UNUSED(dst_tp), \
+                    const char *DYND_UNUSED(dst_arrmeta), const ndt::type *DYND_UNUSED(src_tp), \
+                    const char *const *DYND_UNUSED(src_arrmeta), uint32_t kernreq, \
                     const eval::eval_context *DYND_UNUSED(ectx)) \
         { \
-            extra_type *e = out_ckb->get_at<extra_type>(ckb_offset); \
-            if (kerntype == kernel_request_single) { \
+            extra_type *e = ckb->get_at<extra_type>(ckb_offset); \
+            if (kernreq == kernel_request_single) { \
                 e->base.set_function(&extra_type::single); \
-            } else if (kerntype == kernel_request_strided) { \
+            } else if (kernreq == kernel_request_strided) { \
                 e->base.set_function(&extra_type::strided); \
             } else { \
                 throw std::runtime_error("unsupported kernel request in elwise"); \
@@ -485,15 +495,17 @@ struct elwise_from_callable_ckernel_instantiator;
             } \
         } \
 \
-        static intptr_t instantiate(void *self_data_ptr, \
-                    dynd::ckernel_builder *out_ckb, intptr_t ckb_offset, \
-                    const char *const* DYND_UNUSED(dynd_metadata), uint32_t kerntype, \
+        static intptr_t instantiate( \
+                    void *self_data_ptr, dynd::ckernel_builder *ckb, \
+                    intptr_t ckb_offset, const ndt::type &DYND_UNUSED(dst_tp), \
+                    const char *DYND_UNUSED(dst_arrmeta), const ndt::type *DYND_UNUSED(src_tp), \
+                    const char *const *DYND_UNUSED(src_arrmeta), uint32_t kernreq, \
                     const eval::eval_context *DYND_UNUSED(ectx)) \
         { \
-            extra_type *e = out_ckb->get_at<extra_type>(ckb_offset); \
-            if (kerntype == kernel_request_single) { \
+            extra_type *e = ckb->get_at<extra_type>(ckb_offset); \
+            if (kernreq == kernel_request_single) { \
                 e->base.set_function(&extra_type::single); \
-            } else if (kerntype == kernel_request_strided) { \
+            } else if (kernreq == kernel_request_strided) { \
                 e->base.set_function(&extra_type::strided); \
             } else { \
                 throw std::runtime_error("unsupported kernel request in elwise"); \
@@ -579,7 +591,8 @@ DYND_PP_JOIN_MAP(CALL_CKERNEL_INSTANTIATORS, (), DYND_PP_RANGE(1, DYND_PP_INC(DY
         const char *dynd_metadata[NSRC + 1] = {res.get_arrmeta(), DYND_PP_JOIN_OUTER_1(DYND_PP_META_DOT_CALL, (,), \
             DYND_PP_META_NAME_RANGE(acast, NSRC), (get_arrmeta))}; \
         make_lifted_expr_ckernel(&af, &ckb, 0, \
-                            lifted_types, dynd_metadata, kernel_request_single, ectx); \
+                            lifted_types[0], dynd_metadata[0], \
+                            lifted_types + 1, dynd_metadata + 1, kernel_request_single, ectx); \
 \
         ckernel_prefix *ckprefix = ckb.get(); \
         expr_single_operation_t op = ckprefix->get_function<expr_single_operation_t>(); \
@@ -654,7 +667,8 @@ DYND_PP_JOIN_MAP(CALL_CKERNEL_INSTANTIATORS, (), DYND_PP_RANGE(1, DYND_PP_INC(DY
         const char *dynd_metadata[NSRC + 1] = {res.get_arrmeta(), DYND_PP_JOIN_OUTER_1(DYND_PP_META_DOT_CALL, (,), \
             DYND_PP_META_NAME_RANGE(acast, NSRC), (get_arrmeta))}; \
         make_lifted_expr_ckernel(&af, &ckb, 0, \
-                            lifted_types, dynd_metadata, kernel_request_single, ectx); \
+                            lifted_types[0], dynd_metadata[0], \
+                            lifted_types + 1, dynd_metadata + 1, kernel_request_single, ectx); \
 \
         ckernel_prefix *ckprefix = ckb.get(); \
         expr_single_operation_t op = ckprefix->get_function<expr_single_operation_t>(); \
@@ -741,7 +755,8 @@ DYND_PP_JOIN_MAP(FUNCS, (), DYND_PP_RANGE(1, DYND_PP_INC(DYND_ELWISE_MAX)))
         const char *dynd_metadata[NSRC + 1] = {res.get_arrmeta(), DYND_PP_JOIN_OUTER_1(DYND_PP_META_DOT_CALL, (,), \
             DYND_PP_META_NAME_RANGE(acast, NSRC), (get_arrmeta))}; \
         make_lifted_expr_ckernel(&af, &ckb, 0, \
-                            lifted_types, dynd_metadata, kernel_request_single, ectx); \
+                            lifted_types[0], dynd_metadata[0], \
+                            lifted_types + 1, dynd_metadata + 1, kernel_request_single, ectx); \
 \
         ckernel_prefix *ckprefix = ckb.get(); \
         expr_single_operation_t op = ckprefix->get_function<expr_single_operation_t>(); \
@@ -818,7 +833,8 @@ DYND_PP_JOIN_MAP(FUNCS, (), DYND_PP_RANGE(1, DYND_PP_INC(DYND_ELWISE_MAX)))
         const char *dynd_metadata[NSRC + 1] = {res.get_arrmeta(), DYND_PP_JOIN_OUTER_1(DYND_PP_META_DOT_CALL, (,), \
             DYND_PP_META_NAME_RANGE(acast, NSRC), (get_arrmeta))}; \
         make_lifted_expr_ckernel(&af, &ckb, 0, \
-                            lifted_types, dynd_metadata, kernel_request_single, ectx); \
+                            lifted_types[0], dynd_metadata[0], \
+                            lifted_types + 1, dynd_metadata + 1, kernel_request_single, ectx); \
 \
         ckernel_prefix *ckprefix = ckb.get(); \
         expr_single_operation_t op = ckprefix->get_function<expr_single_operation_t>(); \
@@ -903,7 +919,8 @@ DYND_PP_JOIN_MAP(METHS, (), DYND_PP_RANGE(1, DYND_PP_INC(DYND_ELWISE_MAX)))
         const char *dynd_metadata[NSRC + 1] = {res.get_arrmeta(), DYND_PP_JOIN_OUTER_1(DYND_PP_META_DOT_CALL, (,), \
             DYND_PP_META_NAME_RANGE(acast, NSRC), (get_arrmeta))}; \
         make_lifted_expr_ckernel(&af, &ckb, 0, \
-                            lifted_types, dynd_metadata, kernel_request_single, ectx); \
+                            lifted_types[0], dynd_metadata[0], \
+                            lifted_types + 1, dynd_metadata + 1, kernel_request_single, ectx); \
 \
         ckernel_prefix *ckprefix = ckb.get(); \
         expr_single_operation_t op = ckprefix->get_function<expr_single_operation_t>(); \
@@ -978,7 +995,8 @@ DYND_PP_JOIN_MAP(METHS, (), DYND_PP_RANGE(1, DYND_PP_INC(DYND_ELWISE_MAX)))
         const char *dynd_metadata[NSRC + 1] = {res.get_arrmeta(), DYND_PP_JOIN_OUTER_1(DYND_PP_META_DOT_CALL, (,), \
             DYND_PP_META_NAME_RANGE(acast, NSRC), (get_arrmeta))}; \
         make_lifted_expr_ckernel(&af, &ckb, 0, \
-                            lifted_types, dynd_metadata, kernel_request_single, ectx); \
+                            lifted_types[0], dynd_metadata[0], \
+                            lifted_types + 1, dynd_metadata + 1, kernel_request_single, ectx); \
 \
         ckernel_prefix *ckprefix = ckb.get(); \
         expr_single_operation_t op = ckprefix->get_function<expr_single_operation_t>(); \

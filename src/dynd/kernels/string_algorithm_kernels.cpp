@@ -90,7 +90,7 @@ void kernels::string_concatenation_kernel::strided(
 /////////////////////////////////////////////
 // String find kernel
 
-void kernels::string_find_kernel::init(const ndt::type* src_tp, const char **src_metadata)
+void kernels::string_find_kernel::init(const ndt::type* src_tp, const char *const*src_metadata)
 {
     if (src_tp[0].get_kind() != string_kind) {
         stringstream ss;

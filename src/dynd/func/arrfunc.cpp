@@ -33,30 +33,31 @@ static void delete_unary_assignment_arrfunc_data(void *self_data_ptr)
 }
 
 static intptr_t instantiate_unary_assignment_ckernel(
-    void *self_data_ptr, dynd::ckernel_builder *out_ckb, intptr_t ckb_offset,
-    const char *const *dynd_metadata, uint32_t kerntype,
+    void *self_data_ptr, dynd::ckernel_builder *ckb, intptr_t ckb_offset,
+    const ndt::type &dst_tp, const char *dst_arrmeta, const ndt::type *src_tp,
+    const char *const *src_arrmeta, uint32_t kerntype,
     const eval::eval_context *ectx)
 {
     unary_assignment_arrfunc_data *data =
-                    reinterpret_cast<unary_assignment_arrfunc_data *>(self_data_ptr);
-    return make_assignment_kernel(out_ckb, ckb_offset,
-                    data->data_types[0], dynd_metadata[0],
-                    data->data_types[2], dynd_metadata[1],
-                    (kernel_request_t)kerntype, data->errmode, ectx);
+        reinterpret_cast<unary_assignment_arrfunc_data *>(self_data_ptr);
+    return make_assignment_kernel(
+        ckb, ckb_offset, dst_tp, dst_arrmeta, src_tp[0], src_arrmeta[0],
+        (kernel_request_t)kerntype, data->errmode, ectx);
 }
 
 static intptr_t instantiate_adapted_expr_assignment_ckernel(
-    void *self_data_ptr, dynd::ckernel_builder *out_ckb, intptr_t ckb_offset,
-    const char *const *dynd_metadata, uint32_t kerntype,
+    void *self_data_ptr, dynd::ckernel_builder *ckb, intptr_t ckb_offset,
+    const ndt::type &dst_tp, const char *dst_arrmeta, const ndt::type *src_tp,
+    const char *const *src_arrmeta, uint32_t kerntype,
     const eval::eval_context *ectx)
 {
     unary_assignment_arrfunc_data *data =
-                    reinterpret_cast<unary_assignment_arrfunc_data *>(self_data_ptr);
-    ckb_offset = kernels::wrap_unary_as_expr_ckernel(out_ckb, ckb_offset, (kernel_request_t)kerntype);
-    return make_assignment_kernel(out_ckb, ckb_offset,
-                    data->data_types[0], dynd_metadata[0],
-                    data->data_types[2], dynd_metadata[1],
-                    (kernel_request_t)kerntype, data->errmode, ectx);
+        reinterpret_cast<unary_assignment_arrfunc_data *>(self_data_ptr);
+    ckb_offset = kernels::wrap_unary_as_expr_ckernel(
+        ckb, ckb_offset, (kernel_request_t)kerntype);
+    return make_assignment_kernel(
+        ckb, ckb_offset, dst_tp, dst_arrmeta, src_tp[0], src_arrmeta[0],
+        (kernel_request_t)kerntype, data->errmode, ectx);
 }
 
 ////////////////////////////////////////////////////////////////
@@ -85,18 +86,18 @@ static void delete_expr_arrfunc_data(void *self_data_ptr)
 }
 
 static intptr_t
-instantiate_expr_ckernel(void *self_data_ptr, dynd::ckernel_builder *out_ckb,
-                         intptr_t ckb_offset, const char *const *dynd_metadata,
-                         uint32_t kerntype, const eval::eval_context *ectx)
+instantiate_expr_ckernel(void *self_data_ptr, dynd::ckernel_builder *ckb,
+                         intptr_t ckb_offset, const ndt::type &dst_tp,
+                         const char *dst_arrmeta, const ndt::type *src_tp,
+                         const char *const *src_arrmeta, uint32_t kerntype,
+                         const eval::eval_context *ectx)
 {
     expr_arrfunc_data *data =
-                    reinterpret_cast<expr_arrfunc_data *>(self_data_ptr);
-    const expr_kernel_generator& kgen = data->expr_type->get_kgen();
-    return kgen.make_expr_kernel(out_ckb, ckb_offset,
-                    data->data_types[0], dynd_metadata[0],
-                    data->data_types_size - 1, &data->data_types[0] + 1,
-                    const_cast<const char **>(dynd_metadata) + 1,
-                    (kernel_request_t)kerntype, ectx);
+        reinterpret_cast<expr_arrfunc_data *>(self_data_ptr);
+    const expr_kernel_generator &kgen = data->expr_type->get_kgen();
+    return kgen.make_expr_kernel(ckb, ckb_offset, dst_tp, dst_arrmeta,
+                                 data->data_types_size - 1, src_tp, src_arrmeta,
+                                 (kernel_request_t)kerntype, ectx);
 }
 
 

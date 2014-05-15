@@ -148,7 +148,7 @@ public:
     size_t make_expr_kernel(
                 ckernel_builder *out, size_t offset_out,
                 const ndt::type& dst_tp, const char *dst_metadata,
-                size_t src_count, const ndt::type *src_tp, const char **src_metadata,
+                size_t src_count, const ndt::type *src_tp, const char *const*src_metadata,
                 kernel_request_t kernreq, const eval::eval_context *ectx) const
     {
         if (src_count != 1) {
@@ -297,7 +297,7 @@ public:
     size_t make_expr_kernel(
                 ckernel_builder *out, size_t offset_out,
                 const ndt::type& dst_tp, const char *dst_metadata,
-                size_t src_count, const ndt::type *src_tp, const char **src_metadata,
+                size_t src_count, const ndt::type *src_tp, const char *const*src_metadata,
                 kernel_request_t kernreq, const eval::eval_context *ectx) const
     {
         if (src_count != 1) {

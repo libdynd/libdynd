@@ -29,20 +29,27 @@ enum arrfunc_proto_t {
  * or 'var' dimension types, the metadata must be provided as well.
  *
  * \param self_data_ptr  This is af->data_ptr.
- * \param out_ckb  A ckernel_builder instance where the kernel is placed.
+ * \param ckb  A ckernel_builder instance where the kernel is placed.
  * \param ckb_offset  The offset into the output ckernel_builder `out_ckb`
  *                    where the kernel should be placed.
- * \param dynd_metadata  An array of dynd metadata pointers,
- *                       corresponding to af->data_dynd_types.
+ * \param dst_tp  The destination type of the ckernel to generate. This may be
+ *                different from the one in the function prototype, but must
+ *                match its pattern.
+ * \param dst_arrmeta  The destination arrmeta.
+ * \param src_tp  An array of the source types of the ckernel to generate. These may be
+ *                different from the ones in the function prototype, but must
+ *                match the patterns.
+ * \param src_arrmeta  An array of dynd arrmeta pointers,
+ *                     corresponding to the source types.
  * \param kerntype  Either dynd::kernel_request_single or dynd::kernel_request_strided,
  *                  as required by the caller.
  * \param ectx  The evaluation context.
  */
-typedef intptr_t (*instantiate_arrfunc_t)(void *self_data_ptr,
-                dynd::ckernel_builder *out_ckb, intptr_t ckb_offset,
-                const char *const* dynd_metadata, uint32_t kerntype,
-                const eval::eval_context *ectx);
-
+typedef intptr_t (*instantiate_arrfunc_t)(
+    void *self_data_ptr, dynd::ckernel_builder *ckb, intptr_t ckb_offset,
+    const ndt::type &dst_tp, const char *dst_arrmeta, const ndt::type *src_tp,
+    const char *const *src_arrmeta, uint32_t kerntype,
+    const eval::eval_context *ectx);
 
 /**
  * This is a struct designed for interoperability at
