@@ -69,6 +69,7 @@ list(APPEND CMAKE_MODULE_PATH
 set(CMAKE_VERBOSE_MAKEFILE 1)
 
 # Embedded libraries
+add_subdirectory(thirdparty/cephes)
 add_subdirectory(thirdparty/datetime)
 include_directories(thirdparty/datetime/include)
 
@@ -441,6 +442,7 @@ set(libdynd_SRC
     include/dynd/elwise.hpp
     include/dynd/shortvector.hpp
     include/dynd/shape_tools.hpp
+    include/dynd/special.hpp
     include/dynd/string.hpp
     include/dynd/string_encodings.hpp
     include/dynd/view.hpp
@@ -503,9 +505,11 @@ if ((NOT DYND_SHARED_LIB) AND (DYND_INSTALL_LIB))
     # include the sublibraries source directly because
     # including static libraries in other static libraries
     # is a hassle
+    get_directory_property(cephes DIRECTORY "thirdparty/cephes" DEFINITION cephes_SRC)
     get_directory_property(datetime_SRC DIRECTORY "thirdparty/datetime" DEFINITION datetime_SRC)
     set(libdynd_SRC
         ${libdynd_SRC}
+        ${cephes_SRC}
         ${datetime_SRC}
         )
 endif()
@@ -579,6 +583,7 @@ if (DYND_SHARED_LIB OR (NOT DYND_INSTALL_LIB))
     # If we're not making an installable static library,
     # link the sublibraries normally
     target_link_libraries(libdynd
+        cephes
         datetime
         )
 endif()
