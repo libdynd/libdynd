@@ -158,6 +158,7 @@ extern double log1p ( double );
 extern double exmp1 ( double );
 extern double cosm1 ( double x );
 extern double yn ( int, double );
+extern double yv ( int, double );
 extern double zeta ( double x, double q );
 extern double zetac ( double );
 extern int drand ( double *a );

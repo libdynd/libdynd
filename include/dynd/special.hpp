@@ -11,20 +11,36 @@
 
 namespace dynd { 
 
-double bessel_j0(double x) {
+inline double bessel_j0(double x) {
     return cephes::j0(x);
 }
 
-double bessel_j1(double x) {
+inline double bessel_j1(double x) {
     return cephes::j1(x);
 }
 
-double bessel_y0(double x) {
+inline double bessel_j(int n, double x) {
+    return cephes::jn(n, x);
+}
+
+inline double bessel_j(double nu, double x) {
+    return cephes::jv(nu, x);
+}
+
+inline double bessel_y0(double x) {
     return cephes::y0(x);
 }
 
-double bessel_y1(double x) {
+inline double bessel_y1(double x) {
     return cephes::y1(x);
+}
+
+inline double bessel_y(int n, double x) {
+    return cephes::yn(n, x);
+}
+
+inline double bessel_y(double nu, double x) {
+    return cephes::yv(nu, x);
 }
 
 } // namespace dynd

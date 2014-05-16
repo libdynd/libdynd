@@ -4,10 +4,18 @@ project(cephes)
 set(CMAKE_VERBOSE_MAKEFILE 1)
 
 set(cephes_SRC
+    ${CMAKE_CURRENT_SOURCE_DIR}/airy.c
     ${CMAKE_CURRENT_SOURCE_DIR}/const.c
+    ${CMAKE_CURRENT_SOURCE_DIR}/gamma.c
+    ${CMAKE_CURRENT_SOURCE_DIR}/isnan.c
     ${CMAKE_CURRENT_SOURCE_DIR}/j0.c
+    ${CMAKE_CURRENT_SOURCE_DIR}/j1.c
+    ${CMAKE_CURRENT_SOURCE_DIR}/jn.c
+    ${CMAKE_CURRENT_SOURCE_DIR}/jv.c
     ${CMAKE_CURRENT_SOURCE_DIR}/polevl.c
     ${CMAKE_CURRENT_SOURCE_DIR}/mtherr.c
+    ${CMAKE_CURRENT_SOURCE_DIR}/yn.c
+    ${CMAKE_CURRENT_SOURCE_DIR}/struve.c
     ${CMAKE_CURRENT_SOURCE_DIR}/mconf.h
     )
 
