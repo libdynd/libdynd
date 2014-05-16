@@ -22,25 +22,7 @@ base_tuple_type::base_tuple_type(type_id_t type_id,
       m_arrmeta_offsets(nd::empty(
           m_field_count, ndt::make_strided_dim(ndt::make_type<uintptr_t>())))
 {
-    // Ensure that field_types is an immutable array of type "strided * type"
-    if (m_field_types.is_immutable() &&
-        m_field_types.get_type().get_type_id() == strided_dim_type_id &&
-        m_field_types.get_type()
-                .tcast<strided_dim_type>()
-                ->get_element_type()
-                .get_type_id() == type_type_id) {
-        // The array is already fine, leave it be
-    } else if (m_field_types.get_ndim() == 1 &&
-               m_field_types.get_type()
-                       .get_type_at_dimension(NULL, 1)
-                       .value_type()
-                       .get_type_id() == type_type_id) {
-        // Make an immutable copy of the types
-        m_field_types = nd::empty(get_field_count(),
-                                  ndt::make_strided_dim(ndt::make_type()));
-        m_field_types.vals() = field_types;
-        m_field_types.flag_as_immutable();
-    } else {
+    if (!nd::ensure_immutable_contig<ndt::type>(m_field_types)) {
         stringstream ss;
         ss << "dynd tuple type requires an array of types, got an array with "
               "type " << m_field_types.get_type();

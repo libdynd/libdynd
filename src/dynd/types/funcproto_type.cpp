@@ -4,17 +4,26 @@
 //
 
 #include <dynd/types/funcproto_type.hpp>
+#include <dynd/types/strided_dim_type.hpp>
 #include <dynd/func/make_callable.hpp>
 
 using namespace std;
 using namespace dynd;
 
-funcproto_type::funcproto_type(size_t param_count, const ndt::type *param_types,
+funcproto_type::funcproto_type(const nd::array &param_types,
                                const ndt::type &return_type)
     : base_type(funcproto_type_id, symbolic_kind, 0, 1, type_flag_none, 0, 0),
-      m_param_types(param_types, param_types + param_count),
+      m_param_types(param_types),
       m_return_type(return_type)
 {
+    if (!nd::ensure_immutable_contig<ndt::type>(m_param_types)) {
+        stringstream ss;
+        ss << "dynd funcproto param types requires an array of types, got an "
+              "array with type " << m_param_types.get_type();
+        throw invalid_argument(ss.str());
+    }
+    m_param_count = reinterpret_cast<const strided_dim_type_metadata *>(
+                        m_param_types.get_arrmeta())->size;
 }
 
 void funcproto_type::print_data(std::ostream &DYND_UNUSED(o),
@@ -26,13 +35,14 @@ void funcproto_type::print_data(std::ostream &DYND_UNUSED(o),
 
 void funcproto_type::print_type(std::ostream& o) const
 {
+    const ndt::type *param_types = get_param_types_raw();
     // Use the function prototype datashape syntax
     o << "(";
-    for (size_t i = 0, i_end = m_param_types.size(); i != i_end; ++i) {
+    for (size_t i = 0, i_end = m_param_count; i != i_end; ++i) {
         if (i != 0) {
             o << ", ";
         }
-        o << m_param_types[i];
+        o << param_types[i];
     }
     o << ") -> " << m_return_type;
 }
@@ -40,19 +50,18 @@ void funcproto_type::print_type(std::ostream& o) const
 void funcproto_type::transform_child_types(type_transform_fn_t transform_fn, void *extra,
                 ndt::type& out_transformed_tp, bool& out_was_transformed) const
 {
-    std::vector<ndt::type> tmp_param_types(m_param_types.size());
+    const ndt::type *param_types = get_param_types_raw();
+    std::vector<ndt::type> tmp_param_types(m_param_count);
     ndt::type tmp_return_type;
 
     bool was_transformed = false;
-    for (size_t i = 0, i_end = m_param_types.size(); i != i_end; ++i) {
-        transform_fn(m_param_types[i], extra, tmp_param_types[i], was_transformed);
+    for (size_t i = 0, i_end = m_param_count; i != i_end; ++i) {
+        transform_fn(param_types[i], extra, tmp_param_types[i], was_transformed);
     }
     transform_fn(m_return_type, extra, tmp_return_type, was_transformed);
     if (was_transformed) {
-        out_transformed_tp = ndt::make_funcproto(
-            tmp_param_types.size(),
-            tmp_param_types.empty() ? NULL : &tmp_param_types[0],
-            tmp_return_type);
+        out_transformed_tp =
+            ndt::make_funcproto(tmp_param_types, tmp_return_type);
         out_was_transformed = true;
     } else {
         out_transformed_tp = ndt::type(this, true);
@@ -61,17 +70,16 @@ void funcproto_type::transform_child_types(type_transform_fn_t transform_fn, voi
 
 ndt::type funcproto_type::get_canonical_type() const
 {
-    std::vector<ndt::type> param_types(m_param_types.size());
+    const ndt::type *param_types = get_param_types_raw();
+    std::vector<ndt::type> tmp_param_types(m_param_count);
     ndt::type return_type;
 
-    for (size_t i = 0, i_end = m_param_types.size(); i != i_end; ++i) {
-        param_types[i] = m_param_types[i].get_canonical_type();
+    for (size_t i = 0, i_end = m_param_count; i != i_end; ++i) {
+        tmp_param_types[i] = param_types[i].get_canonical_type();
     }
     return_type = m_return_type.get_canonical_type();
 
-    return ndt::make_funcproto(param_types.size(),
-                               param_types.empty() ? NULL : &param_types[0],
-                               return_type);
+    return ndt::make_funcproto(tmp_param_types, return_type);
 }
 
 ndt::type funcproto_type::apply_linear_index(
@@ -135,7 +143,7 @@ bool funcproto_type::operator==(const base_type& rhs) const
         return false;
     } else {
         const funcproto_type *fpt = static_cast<const funcproto_type *>(&rhs);
-        return m_param_types == fpt->m_param_types && m_return_type == fpt->m_return_type;
+        return m_param_types.equals_exact(fpt->m_param_types) && m_return_type == fpt->m_return_type;
     }
 }
 
@@ -159,14 +167,11 @@ void funcproto_type::metadata_destruct(char *DYND_UNUSED(metadata)) const
 }
 
 static nd::array property_get_param_types(const ndt::type& dt) {
-    const funcproto_type *d = dt.tcast<funcproto_type>();
-    // TODO: This property should be an immutable nd::array, which we would just return.
-    return nd::array(d->get_param_types_vector());
+    return dt.tcast<funcproto_type>()->get_param_types();
 }
 
 static nd::array property_get_return_type(const ndt::type& dt) {
-    const funcproto_type *d = dt.tcast<funcproto_type>();
-    return nd::array(d->get_return_type());
+    return dt.tcast<funcproto_type>()->get_return_type();
 }
 
 void funcproto_type::get_dynamic_type_properties(const std::pair<std::string, gfunc::callable> **out_properties, size_t *out_count) const

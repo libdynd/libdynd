@@ -824,7 +824,7 @@ static ndt::type parse_tuple_or_funcproto(const char *&rbegin, const char *end, 
             throw datashape_parse_error(begin, "expected function prototype return type");
         }
         rbegin = begin;
-        return ndt::make_funcproto(field_type_list.size(), &field_type_list[0], return_type);
+        return ndt::make_funcproto(field_type_list, return_type);
     }
 }
 
