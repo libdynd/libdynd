@@ -13,7 +13,7 @@ namespace {
 
 struct lifted_expr_arrfunc_data {
     // Pointer to the child arrfunc
-    const arrfunc *child_af;
+    const arrfunc_type_data *child_af;
     // Reference to the array containing it
     memory_block_data *child_af_arr;
     // Number of types
@@ -55,7 +55,7 @@ static intptr_t instantiate_lifted_expr_arrfunc_data(
 
 } // anonymous namespace
 
-void dynd::lift_arrfunc(arrfunc *out_af, const nd::array &af_arr,
+void dynd::lift_arrfunc(arrfunc_type_data *out_af, const nd::array &af_arr,
                         const std::vector<ndt::type> &lifted_types)
 {
     // Validate the input arrfunc
@@ -65,7 +65,8 @@ void dynd::lift_arrfunc(arrfunc *out_af, const nd::array &af_arr,
            << "arrfunc, not " << af_arr.get_type();
         throw runtime_error(ss.str());
     }
-    const arrfunc *af = reinterpret_cast<const arrfunc *>(af_arr.get_readonly_originptr());
+    const arrfunc_type_data *af = reinterpret_cast<const arrfunc_type_data *>(
+        af_arr.get_readonly_originptr());
     if (af->instantiate_func == NULL) {
         throw runtime_error("lift_arrfunc() 'af' must contain a"
                         " non-null arrfunc object");

@@ -11,9 +11,6 @@
 
 namespace dynd {
 
-// The data is defined in arrfunc.hpp
-typedef arrfunc arrfunc_type_data;
-
 /**
  * A dynd type whose nd::array instances contain
  * arrfunc objects.

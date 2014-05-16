@@ -96,11 +96,11 @@ TEST(Reduction, BuiltinSum_Lift0D_NoIdentity) {
     // Start with a float32 reduction arrfunc
     nd::array reduction_kernel = nd::empty(ndt::make_arrfunc());
     kernels::make_builtin_sum_reduction_arrfunc(
-                    reinterpret_cast<arrfunc *>(reduction_kernel.get_readwrite_originptr()),
+                    reinterpret_cast<arrfunc_type_data *>(reduction_kernel.get_readwrite_originptr()),
                     float32_type_id);
 
     // Lift it to a zero-dimensional reduction arrfunc (basically a no-op)
-    arrfunc af;
+    arrfunc_type_data af;
     bool reduction_dimflags[1] = {false};
     lift_reduction_arrfunc(&af, reduction_kernel,
                     ndt::type("float32"), nd::array(), false,
@@ -129,12 +129,12 @@ TEST(Reduction, BuiltinSum_Lift0D_WithIdentity) {
     // Start with a float32 reduction arrfunc
     nd::array reduction_kernel = nd::empty(ndt::make_arrfunc());
     kernels::make_builtin_sum_reduction_arrfunc(
-                    reinterpret_cast<arrfunc *>(reduction_kernel.get_readwrite_originptr()),
+                    reinterpret_cast<arrfunc_type_data *>(reduction_kernel.get_readwrite_originptr()),
                     float32_type_id);
 
     // Lift it to a zero-dimensional reduction arrfunc (basically a no-op)
     // Use 100.f as the "identity" to confirm it's really being used
-    arrfunc af;
+    arrfunc_type_data af;
     bool reduction_dimflags[1] = {false};
     lift_reduction_arrfunc(&af, reduction_kernel,
                     ndt::type("float32"), nd::array(), false,
@@ -163,11 +163,11 @@ TEST(Reduction, BuiltinSum_Lift1D_NoIdentity) {
     // Start with a float32 reduction arrfunc
     nd::array reduction_kernel = nd::empty(ndt::make_arrfunc());
     kernels::make_builtin_sum_reduction_arrfunc(
-                    reinterpret_cast<arrfunc *>(reduction_kernel.get_readwrite_originptr()),
+                    reinterpret_cast<arrfunc_type_data *>(reduction_kernel.get_readwrite_originptr()),
                     float32_type_id);
 
     // Lift it to a one-dimensional strided float32 reduction arrfunc
-    arrfunc af;
+    arrfunc_type_data af;
     bool reduction_dimflags[1] = {true};
     lift_reduction_arrfunc(&af, reduction_kernel,
                     ndt::type("strided * float32"), nd::array(), false,
@@ -211,12 +211,12 @@ TEST(Reduction, BuiltinSum_Lift1D_WithIdentity) {
     // Start with a float32 reduction arrfunc
     nd::array reduction_kernel = nd::empty(ndt::make_arrfunc());
     kernels::make_builtin_sum_reduction_arrfunc(
-                    reinterpret_cast<arrfunc *>(reduction_kernel.get_readwrite_originptr()),
+                    reinterpret_cast<arrfunc_type_data *>(reduction_kernel.get_readwrite_originptr()),
                     float32_type_id);
 
     // Lift it to a one-dimensional strided float32 reduction arrfunc
     // Use 100.f as the "identity" to confirm it's really being used
-    arrfunc af;
+    arrfunc_type_data af;
     bool reduction_dimflags[1] = {true};
     lift_reduction_arrfunc(&af, reduction_kernel,
                     ndt::type("strided * float32"), nd::array(), false,
@@ -246,11 +246,11 @@ TEST(Reduction, BuiltinSum_Lift2D_StridedStrided_ReduceReduce) {
     // Start with a float32 reduction arrfunc
     nd::array reduction_kernel = nd::empty(ndt::make_arrfunc());
     kernels::make_builtin_sum_reduction_arrfunc(
-                    reinterpret_cast<arrfunc *>(reduction_kernel.get_readwrite_originptr()),
+                    reinterpret_cast<arrfunc_type_data *>(reduction_kernel.get_readwrite_originptr()),
                     float32_type_id);
 
     // Lift it to a two-dimensional strided float32 reduction arrfunc
-    arrfunc af;
+    arrfunc_type_data af;
     bool reduction_dimflags[2] = {true, true};
     lift_reduction_arrfunc(&af, reduction_kernel,
                     ndt::type("strided * strided * float32"), nd::array(), false,
@@ -298,11 +298,11 @@ TEST(Reduction, BuiltinSum_Lift2D_StridedStrided_ReduceReduce_KeepDim) {
     // Start with a float32 reduction arrfunc
     nd::array reduction_kernel = nd::empty(ndt::make_arrfunc());
     kernels::make_builtin_sum_reduction_arrfunc(
-                    reinterpret_cast<arrfunc *>(reduction_kernel.get_readwrite_originptr()),
+                    reinterpret_cast<arrfunc_type_data *>(reduction_kernel.get_readwrite_originptr()),
                     float32_type_id);
 
     // Lift it to a two-dimensional strided float32 reduction arrfunc
-    arrfunc af;
+    arrfunc_type_data af;
     bool reduction_dimflags[2] = {true, true};
     lift_reduction_arrfunc(&af, reduction_kernel,
                     ndt::type("strided * strided * float32"), nd::array(), true,
@@ -334,11 +334,11 @@ TEST(Reduction, BuiltinSum_Lift2D_StridedStrided_BroadcastReduce) {
     // Start with a float32 reduction arrfunc
     nd::array reduction_kernel = nd::empty(ndt::make_arrfunc());
     kernels::make_builtin_sum_reduction_arrfunc(
-                    reinterpret_cast<arrfunc *>(reduction_kernel.get_readwrite_originptr()),
+                    reinterpret_cast<arrfunc_type_data *>(reduction_kernel.get_readwrite_originptr()),
                     float32_type_id);
 
     // Lift it to a two-dimensional strided float32 reduction arrfunc
-    arrfunc af;
+    arrfunc_type_data af;
     bool reduction_dimflags[2] = {false, true};
     lift_reduction_arrfunc(&af, reduction_kernel,
                     ndt::type("strided * strided * float32"), nd::array(), false,
@@ -390,11 +390,11 @@ TEST(Reduction, BuiltinSum_Lift2D_StridedStrided_BroadcastReduce_KeepDim) {
     // Start with a float32 reduction arrfunc
     nd::array reduction_kernel = nd::empty(ndt::make_arrfunc());
     kernels::make_builtin_sum_reduction_arrfunc(
-                    reinterpret_cast<arrfunc *>(reduction_kernel.get_readwrite_originptr()),
+                    reinterpret_cast<arrfunc_type_data *>(reduction_kernel.get_readwrite_originptr()),
                     float32_type_id);
 
     // Lift it to a two-dimensional strided float32 reduction arrfunc
-    arrfunc af;
+    arrfunc_type_data af;
     bool reduction_dimflags[2] = {false, true};
     lift_reduction_arrfunc(&af, reduction_kernel,
                     ndt::type("strided * strided * float32"), nd::array(), true,
@@ -428,11 +428,11 @@ TEST(Reduction, BuiltinSum_Lift2D_StridedStrided_ReduceBroadcast) {
     // Start with a float32 reduction arrfunc
     nd::array reduction_kernel = nd::empty(ndt::make_arrfunc());
     kernels::make_builtin_sum_reduction_arrfunc(
-                    reinterpret_cast<arrfunc *>(reduction_kernel.get_readwrite_originptr()),
+                    reinterpret_cast<arrfunc_type_data *>(reduction_kernel.get_readwrite_originptr()),
                     float32_type_id);
 
     // Lift it to a two-dimensional strided float32 reduction arrfunc
-    arrfunc af;
+    arrfunc_type_data af;
     bool reduction_dimflags[2] = {true, false};
     lift_reduction_arrfunc(&af, reduction_kernel,
                     ndt::type("strided * strided * float32"), nd::array(), false,
@@ -486,11 +486,11 @@ TEST(Reduction, BuiltinSum_Lift2D_StridedStrided_ReduceBroadcast_KeepDim) {
     // Start with a float32 reduction arrfunc
     nd::array reduction_kernel = nd::empty(ndt::make_arrfunc());
     kernels::make_builtin_sum_reduction_arrfunc(
-                    reinterpret_cast<arrfunc *>(reduction_kernel.get_readwrite_originptr()),
+                    reinterpret_cast<arrfunc_type_data *>(reduction_kernel.get_readwrite_originptr()),
                     float32_type_id);
 
     // Lift it to a two-dimensional strided float32 reduction arrfunc
-    arrfunc af;
+    arrfunc_type_data af;
     bool reduction_dimflags[2] = {true, false};
     lift_reduction_arrfunc(&af, reduction_kernel,
                     ndt::type("strided * strided * float32"), nd::array(), true,
@@ -525,11 +525,11 @@ TEST(Reduction, BuiltinSum_Lift3D_StridedStridedStrided_ReduceReduceReduce) {
     // Start with a float32 reduction arrfunc
     nd::array reduction_kernel = nd::empty(ndt::make_arrfunc());
     kernels::make_builtin_sum_reduction_arrfunc(
-                    reinterpret_cast<arrfunc *>(reduction_kernel.get_readwrite_originptr()),
+                    reinterpret_cast<arrfunc_type_data *>(reduction_kernel.get_readwrite_originptr()),
                     float32_type_id);
 
     // Lift it to a three-dimensional strided float32 reduction arrfunc
-    arrfunc af;
+    arrfunc_type_data af;
     bool reduction_dimflags[3] = {true, true, true};
     lift_reduction_arrfunc(&af, reduction_kernel,
                     ndt::type("strided * strided * strided * float32"), nd::array(), false,
@@ -563,11 +563,11 @@ TEST(Reduction, BuiltinSum_Lift3D_StridedStridedStrided_BroadcastReduceReduce) {
     // Start with a float32 reduction arrfunc
     nd::array reduction_kernel = nd::empty(ndt::make_arrfunc());
     kernels::make_builtin_sum_reduction_arrfunc(
-                    reinterpret_cast<arrfunc *>(reduction_kernel.get_readwrite_originptr()),
+                    reinterpret_cast<arrfunc_type_data *>(reduction_kernel.get_readwrite_originptr()),
                     float32_type_id);
 
     // Lift it to a three-dimensional strided float32 reduction arrfunc
-    arrfunc af;
+    arrfunc_type_data af;
     bool reduction_dimflags[3] = {false, true, true};
     lift_reduction_arrfunc(&af, reduction_kernel,
                     ndt::type("strided * strided * strided * float32"), nd::array(), false,
@@ -603,11 +603,11 @@ TEST(Reduction, BuiltinSum_Lift3D_StridedStridedStrided_ReduceBroadcastReduce) {
     // Start with a float32 reduction arrfunc
     nd::array reduction_kernel = nd::empty(ndt::make_arrfunc());
     kernels::make_builtin_sum_reduction_arrfunc(
-                    reinterpret_cast<arrfunc *>(reduction_kernel.get_readwrite_originptr()),
+                    reinterpret_cast<arrfunc_type_data *>(reduction_kernel.get_readwrite_originptr()),
                     float32_type_id);
 
     // Lift it to a three-dimensional strided float32 reduction arrfunc
-    arrfunc af;
+    arrfunc_type_data af;
     bool reduction_dimflags[3] = {true, false, true};
     lift_reduction_arrfunc(&af, reduction_kernel,
                     ndt::type("strided * strided * strided * float32"), nd::array(), false,

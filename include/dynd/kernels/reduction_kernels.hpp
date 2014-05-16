@@ -25,7 +25,8 @@ intptr_t make_builtin_sum_reduction_ckernel(ckernel_builder *out_ckb,
  * Makes a unary reduction arrfunc for the requested
  * type id.
  */
-void make_builtin_sum_reduction_arrfunc(arrfunc *out_af, type_id_t tid);
+void make_builtin_sum_reduction_arrfunc(arrfunc_type_data *out_af,
+                                        type_id_t tid);
 
 /**
  * Makes a 1D sum arrfunc.

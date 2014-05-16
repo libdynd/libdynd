@@ -17,8 +17,8 @@ namespace {
 
 struct lifted_reduction_arrfunc_data {
     // Pointer to the child arrfunc
-    const arrfunc *child_elwise_reduction;
-    const arrfunc *child_dst_initialization;
+    const arrfunc_type_data *child_elwise_reduction;
+    const arrfunc_type_data *child_dst_initialization;
     nd::array reduction_identity;
     // Reference to the memory blocks owning them
     memory_block_ptr ref_elwise_reduction;
@@ -63,7 +63,7 @@ static intptr_t instantiate_lifted_reduction_arrfunc_data(
 
 } // anonymous namespace
 
-void dynd::lift_reduction_arrfunc(arrfunc *out_ar,
+void dynd::lift_reduction_arrfunc(arrfunc_type_data *out_ar,
                 const nd::array& elwise_reduction_arr,
                 const ndt::type& lifted_arr_type,
                 const nd::array& dst_initialization_arr,
@@ -85,8 +85,9 @@ void dynd::lift_reduction_arrfunc(arrfunc *out_ar,
            << "arrfunc, not " << elwise_reduction_arr.get_type();
         throw runtime_error(ss.str());
     }
-    const arrfunc *elwise_reduction =
-                reinterpret_cast<const arrfunc *>(elwise_reduction_arr.get_readonly_originptr());
+    const arrfunc_type_data *elwise_reduction =
+        reinterpret_cast<const arrfunc_type_data *>(
+            elwise_reduction_arr.get_readonly_originptr());
     if (elwise_reduction->instantiate_func == NULL) {
         throw runtime_error("lift_reduction_arrfunc: 'elwise_reduction' must contain a"
                         " non-null arrfunc object");
@@ -101,7 +102,7 @@ void dynd::lift_reduction_arrfunc(arrfunc *out_ar,
     }
 
     // Validate the input dst_initialization arrfunc
-    const arrfunc *dst_initialization = NULL;
+    const arrfunc_type_data *dst_initialization = NULL;
     if (!dst_initialization_arr.is_null()) {
         if (dst_initialization_arr.get_type().get_type_id() != arrfunc_type_id) {
             stringstream ss;
@@ -110,7 +111,7 @@ void dynd::lift_reduction_arrfunc(arrfunc *out_ar,
             throw runtime_error(ss.str());
         }
         dst_initialization =
-                reinterpret_cast<const arrfunc *>(dst_initialization_arr.get_readonly_originptr());
+                reinterpret_cast<const arrfunc_type_data *>(dst_initialization_arr.get_readonly_originptr());
         if (dst_initialization->instantiate_func == NULL) {
             throw runtime_error("lift_reduction_arrfunc: 'dst_initialization' must contain a"
                             " non-null arrfunc object");

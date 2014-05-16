@@ -21,7 +21,7 @@ namespace dynd {
  * \param lifted_types  The types to lift the arrfunc to. The output arrfunc
  *                      is for these types.
  */
-void lift_arrfunc(arrfunc *out_af, const nd::array &af,
+void lift_arrfunc(arrfunc_type_data *out_af, const nd::array &af,
                   const std::vector<ndt::type> &lifted_types);
 
 } // namespace dynd

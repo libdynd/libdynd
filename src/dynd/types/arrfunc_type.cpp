@@ -32,7 +32,7 @@ arrfunc_type::~arrfunc_type()
 {
 }
 
-static void print_arrfunc(std::ostream& o, const arrfunc *af)
+static void print_arrfunc(std::ostream& o, const arrfunc_type_data *af)
 {
     if (af->instantiate_func == NULL) {
         o << "<uninitialized arrfunc>";
@@ -131,7 +131,8 @@ namespace {
         static void single(char *dst, const char *src, ckernel_prefix *extra)
         {
             extra_type *e = reinterpret_cast<extra_type *>(extra);
-            const arrfunc *af = reinterpret_cast<const arrfunc *>(src);
+            const arrfunc_type_data *af =
+                reinterpret_cast<const arrfunc_type_data *>(src);
             stringstream ss;
             print_arrfunc(ss, af);
             e->dst_string_dt->set_utf8_string(e->dst_metadata, dst, e->errmode, ss.str());
@@ -194,7 +195,8 @@ static nd::array property_ndo_get_types(const nd::array& n) {
     if (n.get_type().get_type_id() != arrfunc_type_id) {
         throw runtime_error("arrfunc property 'types' only works on scalars presently");
     }
-    const arrfunc *af = reinterpret_cast<const arrfunc *>(n.get_readonly_originptr());
+    const arrfunc_type_data *af =
+        reinterpret_cast<const arrfunc_type_data *>(n.get_readonly_originptr());
     nd::array result = nd::empty(af->data_types_size, ndt::make_strided_dim(ndt::make_type()));
     ndt::type *out_data = reinterpret_cast<ndt::type *>(result.get_readwrite_originptr());
     for (intptr_t i = 0; i < af->data_types_size; ++i) {
@@ -242,7 +244,8 @@ static array_preamble *function___call__(const array_preamble *params, void *DYN
         }
     }
 
-    const arrfunc *af = reinterpret_cast<const arrfunc *>(par_arrs[0].get_readonly_originptr());
+    const arrfunc_type_data *af = reinterpret_cast<const arrfunc_type_data *>(
+        par_arrs[0].get_readonly_originptr());
 
     nargs -= 1;
 

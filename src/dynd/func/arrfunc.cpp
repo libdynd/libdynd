@@ -107,7 +107,7 @@ instantiate_expr_ckernel(void *self_data_ptr, dynd::ckernel_builder *ckb,
 void dynd::make_arrfunc_from_assignment(
                 const ndt::type& dst_tp, const ndt::type& src_tp, const ndt::type& src_expr_tp,
                 arrfunc_proto_t funcproto,
-                assign_error_mode errmode, arrfunc& out_af)
+                assign_error_mode errmode, arrfunc_type_data &out_af)
 {
     if (src_tp.operand_type() != src_expr_tp.operand_type()) {
         stringstream ss;
@@ -116,7 +116,7 @@ void dynd::make_arrfunc_from_assignment(
         ss << " must have matching operand types";
         throw type_error(ss.str());
     }
-    memset(&out_af, 0, sizeof(arrfunc));
+    memset(&out_af, 0, sizeof(arrfunc_type_data));
     if (funcproto == unary_operation_funcproto) {
         // Since a unary operation was requested, it's a straightforward unary assignment ckernel
         unary_assignment_arrfunc_data *data = new unary_assignment_arrfunc_data;
@@ -181,7 +181,7 @@ void dynd::make_arrfunc_from_assignment(
 
 void dynd::make_arrfunc_from_property(const ndt::type& tp, const std::string& propname,
                 arrfunc_proto_t funcproto,
-                assign_error_mode errmode, arrfunc& out_af)
+                assign_error_mode errmode, arrfunc_type_data &out_af)
 {
     ndt::type prop_tp = ndt::make_property(tp, propname);
     ndt::type dst_tp = prop_tp.value_type();

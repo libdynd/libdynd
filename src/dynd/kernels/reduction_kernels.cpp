@@ -153,7 +153,7 @@ static intptr_t instantiate_builtin_sum_reduction_arrfunc(
 }
 
 void kernels::make_builtin_sum_reduction_arrfunc(
-                arrfunc *out_af,
+                arrfunc_type_data *out_af,
                 type_id_t tid)
 {
     if (tid < 0 || tid >= builtin_type_id_count) {
@@ -174,12 +174,12 @@ nd::array kernels::make_builtin_sum1d_arrfunc(type_id_t tid)
 {
     nd::array sum_ew = nd::empty(ndt::make_arrfunc());
     kernels::make_builtin_sum_reduction_arrfunc(
-        reinterpret_cast<arrfunc *>(sum_ew.get_readwrite_originptr()),
+        reinterpret_cast<arrfunc_type_data *>(sum_ew.get_readwrite_originptr()),
         tid);
     nd::array sum_1d = nd::empty(ndt::make_arrfunc());
     bool reduction_dimflags[1] = {true};
     lift_reduction_arrfunc(
-        reinterpret_cast<arrfunc *>(sum_1d.get_readwrite_originptr()),
+        reinterpret_cast<arrfunc_type_data *>(sum_1d.get_readwrite_originptr()),
         sum_ew, ndt::make_strided_dim(ndt::type(tid)), nd::array(), false, 1,
         reduction_dimflags, true, true, false, 0);
     return sum_1d;
@@ -265,8 +265,8 @@ nd::array kernels::make_builtin_mean1d_arrfunc(type_id_t tid, intptr_t minp)
         throw type_error(ss.str());
     }
     nd::array mean1d = nd::empty(ndt::make_arrfunc());
-    arrfunc *out_af =
-        reinterpret_cast<arrfunc *>(mean1d.get_readwrite_originptr());
+    arrfunc_type_data *out_af =
+        reinterpret_cast<arrfunc_type_data *>(mean1d.get_readwrite_originptr());
     out_af->ckernel_funcproto = unary_operation_funcproto;
     out_af->data_types_size = 2;
     mean1d_arrfunc_data *data = new mean1d_arrfunc_data;

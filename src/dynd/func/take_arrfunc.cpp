@@ -239,8 +239,7 @@ instantiate_indexed_take(void *DYND_UNUSED(self_data_ptr), dynd::ckernel_builder
         kernel_request_single, assign_error_default, ectx);
 }
 
-
-void kernels::make_take_arrfunc(arrfunc *out_af,
+void kernels::make_take_arrfunc(arrfunc_type_data *out_af,
                                 const ndt::type &dst_tp,
                                 const ndt::type &src_tp,
                                 const ndt::type &mask_tp)

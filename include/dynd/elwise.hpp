@@ -577,7 +577,7 @@ DYND_PP_JOIN_MAP(CALL_CKERNEL_INSTANTIATORS, (), DYND_PP_RANGE(1, DYND_PP_INC(DY
             DYND_PP_META_NAME_RANGE(acast, NSRC)), res_ndim, res_shape); \
         nd::array res = nd::make_strided_array(data_dynd_types[0], res_ndim, res_shape.get()); \
 \
-        arrfunc af; \
+        arrfunc_type_data af; \
         af.ckernel_funcproto = expr_operation_funcproto; \
         af.data_types_size = NSRC + 1; \
         af.data_dynd_types = data_dynd_types; \
@@ -653,7 +653,7 @@ DYND_PP_JOIN_MAP(CALL_CKERNEL_INSTANTIATORS, (), DYND_PP_RANGE(1, DYND_PP_INC(DY
             DYND_PP_META_NAME_RANGE(acast, NSRC)), res_ndim, res_shape); \
         nd::array res = nd::make_strided_array(data_dynd_types[0], res_ndim, res_shape.get()); \
 \
-        arrfunc af; \
+        arrfunc_type_data af; \
         af.ckernel_funcproto = expr_operation_funcproto; \
         af.data_types_size = NSRC + 1; \
         af.data_dynd_types = data_dynd_types; \
@@ -741,7 +741,7 @@ DYND_PP_JOIN_MAP(FUNCS, (), DYND_PP_RANGE(1, DYND_PP_INC(DYND_ELWISE_MAX)))
 \
         std::pair<const T *, func_type> obj_func(&obj, func); \
 \
-        arrfunc af; \
+        arrfunc_type_data af; \
         af.ckernel_funcproto = expr_operation_funcproto; \
         af.data_types_size = NSRC + 1; \
         af.data_dynd_types = data_dynd_types; \
@@ -819,7 +819,7 @@ DYND_PP_JOIN_MAP(FUNCS, (), DYND_PP_RANGE(1, DYND_PP_INC(DYND_ELWISE_MAX)))
 \
         std::pair<const T *, func_type> obj_func(&obj, func); \
 \
-        arrfunc af; \
+        arrfunc_type_data af; \
         af.ckernel_funcproto = expr_operation_funcproto; \
         af.data_types_size = NSRC + 1; \
         af.data_dynd_types = data_dynd_types; \
@@ -905,7 +905,7 @@ DYND_PP_JOIN_MAP(METHS, (), DYND_PP_RANGE(1, DYND_PP_INC(DYND_ELWISE_MAX)))
             DYND_PP_META_NAME_RANGE(acast, NSRC)), res_ndim, res_shape); \
         nd::array res = nd::make_strided_array(data_dynd_types[0], res_ndim, res_shape.get()); \
 \
-        arrfunc af; \
+        arrfunc_type_data af; \
         af.ckernel_funcproto = expr_operation_funcproto; \
         af.data_types_size = NSRC + 1; \
         af.data_dynd_types = data_dynd_types; \
@@ -981,7 +981,7 @@ DYND_PP_JOIN_MAP(METHS, (), DYND_PP_RANGE(1, DYND_PP_INC(DYND_ELWISE_MAX)))
             DYND_PP_META_NAME_RANGE(acast, NSRC)), res_ndim, res_shape); \
         nd::array res = nd::make_strided_array(data_dynd_types[0], res_ndim, res_shape.get()); \
 \
-        arrfunc af; \
+        arrfunc_type_data af; \
         af.ckernel_funcproto = expr_operation_funcproto; \
         af.data_types_size = NSRC + 1; \
         af.data_dynd_types = data_dynd_types; \

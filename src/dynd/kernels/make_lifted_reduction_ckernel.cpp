@@ -642,7 +642,7 @@ static size_t make_strided_initial_broadcast_dimension_kernel(
     return ckb_end;
 }
 
-static void check_dst_initialization(const arrfunc *dst_initialization,
+static void check_dst_initialization(const arrfunc_type_data *dst_initialization,
                                      const ndt::type &dst_tp,
                                      const ndt::type &src_tp)
 {
@@ -676,8 +676,8 @@ static void check_dst_initialization(const arrfunc *dst_initialization,
  * If dst_initialization is NULL, an assignment kernel is used.
  */
 static size_t make_strided_inner_reduction_dimension_kernel(
-    const arrfunc *elwise_reduction,
-    const arrfunc *dst_initialization, ckernel_builder *out_ckb,
+    const arrfunc_type_data *elwise_reduction,
+    const arrfunc_type_data *dst_initialization, ckernel_builder *out_ckb,
     size_t ckb_offset, intptr_t src_stride, intptr_t src_size,
     const ndt::type &dst_tp, const char *dst_arrmeta, const ndt::type &src_tp,
     const char *src_arrmeta, bool right_associative,
@@ -801,8 +801,8 @@ static size_t make_strided_inner_reduction_dimension_kernel(
  * the final dimension before the accumulation operation.
  */
 static size_t make_strided_inner_broadcast_dimension_kernel(
-    const arrfunc *elwise_reduction,
-    const arrfunc *dst_initialization, ckernel_builder *out_ckb,
+    const arrfunc_type_data *elwise_reduction,
+    const arrfunc_type_data *dst_initialization, ckernel_builder *out_ckb,
     size_t ckb_offset, intptr_t dst_stride, intptr_t src_stride,
     intptr_t src_size, const ndt::type &dst_tp, const char *dst_arrmeta,
     const ndt::type &src_tp, const char *src_arrmeta,
@@ -922,14 +922,13 @@ static size_t make_strided_inner_broadcast_dimension_kernel(
 }
 
 size_t dynd::make_lifted_reduction_ckernel(
-    const arrfunc *elwise_reduction, const arrfunc *dst_initialization,
-    dynd::ckernel_builder *ckb, intptr_t ckb_offset,
-    const ndt::type &dst_tp, const char *dst_arrmeta, const ndt::type &src_tp,
-    const char *src_arrmeta, intptr_t reduction_ndim,
+    const arrfunc_type_data *elwise_reduction,
+    const arrfunc_type_data *dst_initialization, dynd::ckernel_builder *ckb,
+    intptr_t ckb_offset, const ndt::type &dst_tp, const char *dst_arrmeta,
+    const ndt::type &src_tp, const char *src_arrmeta, intptr_t reduction_ndim,
     const bool *reduction_dimflags, bool associative, bool commutative,
     bool right_associative, const nd::array &reduction_identity,
-    dynd::kernel_request_t kernreq,
-    const eval::eval_context *ectx)
+    dynd::kernel_request_t kernreq, const eval::eval_context *ectx)
 {
     // Count the number of dimensions being reduced
     intptr_t reducedim_count = 0;

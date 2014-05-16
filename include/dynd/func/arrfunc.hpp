@@ -62,7 +62,7 @@ typedef intptr_t (*instantiate_arrfunc_t)(
  * operation and a strided operation, or constructing
  * with different array metadata.
  */
-struct arrfunc {
+struct arrfunc_type_data {
     /** A value from the enumeration `arrfunc_proto_t`. */
     size_t ckernel_funcproto;
     /**
@@ -99,14 +99,14 @@ struct arrfunc {
     void (*free_func)(void *self_data_ptr);
 
     // Default to all NULL, so the destructor works correctly
-    inline arrfunc()
+    inline arrfunc_type_data()
         : ckernel_funcproto(0), data_types_size(0), data_dynd_types(0),
             data_ptr(0), instantiate_func(0), free_func(0)
     {
     }
 
     // If it contains an arrfunc, free it
-    inline ~arrfunc()
+    inline ~arrfunc_type_data()
     {
         if (free_func && data_ptr) {
             free_func(data_ptr);
@@ -129,7 +129,7 @@ struct arrfunc {
 void make_arrfunc_from_assignment(
                 const ndt::type& dst_tp, const ndt::type& src_tp, const ndt::type& src_prop_tp,
                 arrfunc_proto_t funcproto,
-                assign_error_mode errmode, arrfunc& out_af);
+                assign_error_mode errmode, arrfunc_type_data& out_af);
 
 /**
  * Creates an arrfunc which does the assignment from
@@ -144,7 +144,7 @@ void make_arrfunc_from_assignment(
  */
 void make_arrfunc_from_property(const ndt::type& tp, const std::string& propname,
                 arrfunc_proto_t funcproto,
-                assign_error_mode errmode, arrfunc& out_af);
+                assign_error_mode errmode, arrfunc_type_data& out_af);
 
 } // namespace dynd
 

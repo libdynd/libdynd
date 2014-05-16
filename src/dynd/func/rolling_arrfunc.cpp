@@ -103,7 +103,7 @@ struct var_rolling_ck : public kernels::assignment_ck<strided_rolling_ck> {
 struct rolling_arrfunc_data {
     intptr_t window_size;
     // Pointer to the child arrfunc
-    const arrfunc *window_op_af;
+    const arrfunc_type_data *window_op_af;
     // Reference to the array containing it
     nd::array window_op_af_arr;
     // The types of the ckernel
@@ -201,11 +201,11 @@ instantiate_strided(void *self_data_ptr, dynd::ckernel_builder *ckb,
         &src_winop_meta, kernel_request_strided, ectx);
 }
 
-void dynd::make_rolling_arrfunc(arrfunc *out_af,
-                                         const ndt::type &dst_tp,
-                                         const ndt::type &src_tp,
-                                         const nd::array &window_op,
-                                         intptr_t window_size)
+void dynd::make_rolling_arrfunc(arrfunc_type_data *out_af,
+                                const ndt::type &dst_tp,
+                                const ndt::type &src_tp,
+                                const nd::array &window_op,
+                                intptr_t window_size)
 {
     // Validate the input arrfunc
     if (window_op.get_type().get_type_id() != arrfunc_type_id) {
@@ -214,8 +214,8 @@ void dynd::make_rolling_arrfunc(arrfunc *out_af,
            << "arrfunc, not " << window_op.get_type();
         throw runtime_error(ss.str());
     }
-    const arrfunc *window_op_af =
-        reinterpret_cast<const arrfunc *>(
+    const arrfunc_type_data *window_op_af =
+        reinterpret_cast<const arrfunc_type_data *>(
             window_op.get_readonly_originptr());
     if (window_op_af->instantiate_func == NULL) {
         throw runtime_error("make_rolling_arrfunc() 'window_op' must contain "
