@@ -9,7 +9,7 @@
 #include <dynd/array.hpp>
 #include <dynd/cephes.hpp>
 
-namespace dynd { 
+namespace dynd {
 
 inline double bessel_j0(double x) {
     return cephes::j0(x);

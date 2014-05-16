@@ -1,0 +1,333 @@
+	.file	"floor.c"
+	.version	"01.01"
+gcc2_compiled.:
+/* Caution, order of operands is reversed from usual Intel syntax */
+.text
+	.align 16
+.globl ceil
+ceil:
+	pushl %ebp
+	movl %esp,%ebp
+	pushl 12(%ebp)
+	pushl 8(%ebp)
+	call floor
+	fcoml 8(%ebp)
+	fnstsw %ax
+	andb $69,%ah
+	cmpb $1,%ah
+	jne .L252
+	fld1
+	faddp %st,%st(1)
+	.align 4
+.L252:
+	fldz
+	fucom %st(1)
+	fnstsw %ax
+	andb $68,%ah
+	xorb $64,%ah
+	jne .L255
+	fcompl 8(%ebp)
+	fnstsw %ax
+	andb $69,%ah
+	jne .L253
+	fstp %st(0)
+	fldl NEGZERO
+	movl %ebp,%esp
+	popl %ebp
+	ret
+	.align 4
+.L255:
+	fstp %st(0)
+.L253:
+	movl %ebp,%esp
+	popl %ebp
+	ret
+.Lfe1:
+	.size	ceil,.Lfe1-ceil
+
+	.align 16
+.globl floor
+floor:
+	pushl %ebp
+	movl %esp,%ebp
+	subl $4,%esp
+	fstcw -4(%ebp)
+	fwait
+	movw -4(%ebp),%ax
+	andw $0xf3ff,%ax
+	orw $0x400,%ax
+	movw %ax,-2(%ebp)
+	fldcw -2(%ebp)
+	fldl 8(%ebp)
+	frndint
+	fldcw -4(%ebp)
+	leave
+	ret
+.Lfe2:
+	.size	floor,.Lfe2-floor
+
+
+	.align 16
+.globl frexp
+frexp:
+	pushl %ebp
+	movl %esp,%ebp
+	subl $8,%esp
+	pushl %ebx
+	fldl 8(%ebp)
+	movl 16(%ebp),%ebx
+	fldz
+	fucomp %st(1)
+	fnstsw %ax
+	andb $68,%ah
+	xorb $64,%ah
+	jne .L19
+	movl $0,(%ebx)
+	jmp .L27
+	.align 4
+.L19:
+	fstpl -8(%ebp)
+	leal -2(%ebp),%ecx
+	movw -2(%ebp),%ax
+	sarw $4,%ax
+	movl %eax,%edx
+	andl $2047,%edx
+	jne .L21
+	.align 4
+.L23:
+	fldl -8(%ebp)
+	fadd %st(0),%st
+	fstpl -8(%ebp)
+	decl %edx
+	movw (%ecx),%ax
+	sarw $4,%ax
+	andl $2047,%eax
+	je .L23
+	addl %eax,%edx
+	.align 4
+.L21:
+	addl $-1022,%edx
+	movl %edx,(%ebx)
+	andw $32783,(%ecx)
+	orw $16352,(%ecx)
+	fldl -8(%ebp)
+.L27:
+	movl -12(%ebp),%ebx
+	movl %ebp,%esp
+	popl %ebp
+	ret
+.Lfe3:
+	.size	frexp,.Lfe3-frexp
+	.data
+	.align 4
+.LC1:
+	.long 0x0,0x3fe00000
+	.text
+	.align 16
+.globl ldexp
+ldexp:
+	pushl %ebp
+	movl %esp,%ebp
+	subl $8,%esp
+	fldl 8(%ebp)
+	movl 16(%ebp),%edx
+	fldz
+	fucomp %st(1)
+	fnstsw %ax
+	andb $68,%ah
+	xorb $64,%ah
+	jne .L29
+	movl %ebp,%esp
+	popl %ebp
+	ret
+	.align 4
+.L53:
+	fstp %st(1)
+	fstp %st(1)
+	fstp %st(1)
+	movl %ebp,%esp
+	popl %ebp
+	ret
+	.align 4
+.L29:
+	fstl -8(%ebp)
+	leal -2(%ebp),%ecx
+	fld1
+	testw $32752,-2(%ebp)
+	jne .L51
+	fldl .LC1
+	.align 4
+.L32:
+	testl %edx,%edx
+	jle .L33
+	fxch %st(1)
+	fadd %st(0),%st
+	fxch %st(1)
+	decl %edx
+	.align 4
+.L33:
+	testl %edx,%edx
+	jge .L34
+	cmpl $-53,%edx
+	jl .L52
+	fmul %st,%st(1)
+	incl %edx
+.L34:
+	fld %st(2)
+	fmul %st(2),%st
+	fstl -8(%ebp)
+	testl %edx,%edx
+	je .L53
+	fstp %st(0)
+	testw $32752,(%ecx)
+	je .L32
+	fstp %st(0)
+	.align 4
+.L51:
+	fstp %st(0)
+	fstp %st(0)
+	movw (%ecx),%ax
+	andw $32752,%ax
+	sarw $4,%ax
+	cwtl
+	addl %edx,%eax
+	cmpl $2046,%eax
+	jle .L38
+	fldl MAXNUM
+	fadd %st(0),%st
+	movl %ebp,%esp
+	popl %ebp
+	ret
+	.align 4
+.L38:
+	testl %eax,%eax
+	jg .L39
+	cmpl $-53,%eax
+	jge .L40
+	jmp .L49
+	.align 4
+.L52:
+	fstp %st(0)
+	fstp %st(0)
+	fstp %st(0)
+.L49:
+	fldz
+	movl %ebp,%esp
+	popl %ebp
+	ret
+	.align 4
+.L40:
+	andw $32783,(%ecx)
+	orb $16,(%ecx)
+	leal -1(%eax),%eax
+	pushl %eax
+/*	pushl $1073741824 */
+	pushl $1072693248
+	pushl $0
+	call ldexp
+	fmull (%ecx)
+	movl %ebp,%esp
+	popl %ebp
+	ret
+	.align 4
+.L39:
+	andw $32783,(%ecx)
+	andb $7,%ah
+	salw $4,%ax
+	orw %ax,(%ecx)
+	fldl -8(%ebp)
+	movl %ebp,%esp
+	popl %ebp
+	ret
+.Lfe4:
+	.size	ldexp,.Lfe4-ldexp
+	.align 16
+.globl signbit
+signbit:
+	pushl %ebp
+	movl %esp,%ebp
+	movl 12(%ebp),%eax
+	shrl $31,%eax
+	movl %ebp,%esp
+	popl %ebp
+	ret
+.Lfe5:
+	.size	signbit,.Lfe5-signbit
+
+	.align 16
+.globl isnan
+isnan:
+	pushl %ebp
+	movl %esp,%ebp
+	pushl %ebx
+	movl 8(%ebp),%ecx
+	movl 12(%ebp),%ebx
+	movl %ebx,%edx
+	andl $2146435072,%edx
+	cmpl $2146435072,%edx
+	jne .L62
+	testl $1048575,%ebx
+	jne .L63
+	testl %ecx,%ecx
+	je .L62
+.L63:
+	movl $1,%eax
+	jmp .L67
+	.align 4
+.L62:
+	xorl %eax,%eax
+.L67:
+	movl -4(%ebp),%ebx
+	movl %ebp,%esp
+	popl %ebp
+	ret
+.Lfe6:
+	.size	isnan,.Lfe6-isnan
+
+	.align 16
+.globl isfinite
+isfinite:
+	pushl %ebp
+	movl %esp,%ebp
+	movl 12(%ebp),%eax
+	andl $2146435072,%eax
+	cmpl $2146435072,%eax
+	jne .L70
+	xorl %eax,%eax
+	movl %ebp,%esp
+	popl %ebp
+	ret
+	.align 4
+.L70:
+	movl $1,%eax
+	movl %ebp,%esp
+	popl %ebp
+	ret
+.Lfe7:
+	.size	isfinite,.Lfe7-isfinite
+
+	.align	16
+	.globl	fmod
+fmod:
+	fldl	4(%esp)
+	ftst
+	fnstsw	%ax
+	sahf
+	jz	.L82
+	fldl	12(%esp)
+	ftst
+	fnstsw	%ax
+	sahf
+	jz	.L81
+	fxch	%st(1)
+.L80:
+	fprem
+	fnstsw	%ax
+	sahf
+	jpe	.L80
+.L81:
+	fstp	%st(1)
+.L82:
+	ret
+.Lfe8:
+	.size	fmod,.Lfe8-fmod

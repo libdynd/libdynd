@@ -1,0 +1,8 @@
+	.even
+.globl _sqrt
+_sqrt:
+	link a6,#0
+	fmoved a6@(8),fp0
+	fsqrtx fp0,fp0
+	unlk a6
+	rts

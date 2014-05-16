@@ -1,0 +1,12 @@
+acosh.obj airy.obj asin.obj asinh.obj atan.obj atanh.obj bdtr.obj
+beta.obj btdtr.obj cbrt.obj chbevl.obj chdtr.obj clog.obj
+cmplx.obj const.obj cosh.obj dawsn.obj drand.obj ellie.obj ellik.obj
+ellpe.obj ellpj.obj ellpk.obj exp.obj exp10.obj expx2.obj
+exp2.obj expn.obj fabs.obj fac.obj fdtr.obj floor.obj fresnl.obj gamma.obj
+gdtr.obj hyp2f1.obj hyperg.obj i0.obj i1.obj igam.obj igami.obj incbet.obj
+incbi.obj iv.obj j0.obj j1.obj jn.obj jv.obj k0.obj k1.obj kn.obj
+log.obj log2.obj log10.obj mtherr.obj nbdtr.obj ndtr.obj ndtri.obj
+pdtr.obj polevl.obj polmisc.obj polyn.obj pow.obj powi.obj psi.obj
+rgamma.obj round.obj shichi.obj sici.obj sin.obj sindg.obj sinh.obj
+spence.obj sqrt.obj stdtr.obj setpmsvc.obj struve.obj tan.obj
+tandg.obj tanh.obj unity.obj yn.obj zeta.obj zetac.obj isnan.obj

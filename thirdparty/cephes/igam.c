@@ -110,6 +110,52 @@ if( (x <= 0) || ( a <= 0) )
 if( (x < 1.0) || (x < a) )
 	return( 1.0 - igam(a,x) );
 
+#if 0
+/* Asymptotic expansion for large x.
+ *  AMS55 6.5.32
+ * 
+ *                         n
+ *   -           a-1  -x   -   (a-1)(a-2)...(a-k)
+ *  |  (a,x) =  x    e     >   ------------------   +  Remainder
+ *                         -            k
+ *                        k=0         x
+ *
+ */
+if ((a >= 18.0) && (a <= (0.5 * x)))
+  {
+    ax = (a - 1.0) * log(x) - x - lgam(a);
+    if( ax < -MAXLOG )
+      {
+	mtherr( "igamc", UNDERFLOW );
+	return( 0.0 );
+      }
+    if (ax > MAXLOG)
+      {
+	mtherr( "igamc", OVERFLOW );
+	return( MAXNUM );
+      }
+    ax = exp(ax);
+
+    r = a;
+    c = 1.0;
+    ans = 0.0;
+    t = 1.0;
+    do
+      {
+	r -= 1.0;
+	c *= r/x;
+	y = c/(1.0 + ans);
+	if (y > t)
+	  break;
+	ans += c;
+	t = y;
+      }
+    while( y > MACHEP );
+
+    return( (1.0 + ans) * ax );
+  }
+#endif
+
 ax = a * log(x) - x - lgam(a);
 if( ax < -MAXLOG )
 	{

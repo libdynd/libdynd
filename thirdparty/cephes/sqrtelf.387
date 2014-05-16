@@ -1,0 +1,15 @@
+	.file	"sqrt.i"
+gcc2_compiled.:
+	.version	"01.01"
+.text
+	.align 16
+.globl sqrt
+sqrt:
+	pushl %ebp
+	movl %esp,%ebp
+	fldl 8(%ebp)
+	fsqrt
+	leave
+	ret
+.Lfe1:
+	.size	sqrt,.Lfe1-sqrt
