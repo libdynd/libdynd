@@ -208,8 +208,7 @@ size_t dynd::make_struct_comparison_kernel(
             e->field_count = field_count;
             e->src_data_offsets = bsd->get_data_offsets(src0_metadata);
             size_t *field_kernel_offsets;
-            const size_t *metadata_offsets = bsd->get_metadata_offsets();
-            const ndt::type *field_types = bsd->get_field_types();
+            const uintptr_t *arrmeta_offsets = bsd->get_arrmeta_offsets_raw();
             for (size_t i = 0; i != field_count; ++i) {
                 // Reserve space for the child, and save the offset to this
                 // field comparison kernel. Have to re-get
@@ -219,11 +218,11 @@ size_t dynd::make_struct_comparison_kernel(
                 e = out->get_at<struct_compare_sorting_less_matching_metadata_kernel>(offset_out);
                 field_kernel_offsets = reinterpret_cast<size_t *>(e + 1);
                 field_kernel_offsets[i] = field_kernel_offset - offset_out;
-                const char *field_metadata = src0_metadata + metadata_offsets[i];
-                field_kernel_offset = make_comparison_kernel(out, field_kernel_offset,
-                                field_types[i], field_metadata,
-                                field_types[i], field_metadata,
-                                comparison_type_sorting_less, ectx);
+                const char *field_metadata = src0_metadata + arrmeta_offsets[i];
+                const ndt::type &ft = bsd->get_field_type(i);
+                field_kernel_offset = make_comparison_kernel(
+                    out, field_kernel_offset, ft, field_metadata, ft,
+                    field_metadata, comparison_type_sorting_less, ectx);
             }
             return field_kernel_offset;
         } else {
@@ -241,9 +240,9 @@ size_t dynd::make_struct_comparison_kernel(
             e->src0_data_offsets = bsd->get_data_offsets(src0_metadata);
             e->src1_data_offsets = bsd->get_data_offsets(src1_metadata);
             size_t *field_kernel_offsets;
-            const size_t *metadata_offsets = bsd->get_metadata_offsets();
-            const ndt::type *field_types = bsd->get_field_types();
+            const uintptr_t *arrmeta_offsets = bsd->get_arrmeta_offsets_raw();
             for (size_t i = 0; i != field_count; ++i) {
+                const ndt::type &ft = bsd->get_field_type(i);
                 // Reserve space for the child, and save the offset to this
                 // field comparison kernel. Have to re-get
                 // the pointer because creating the field comparison kernel may
@@ -253,8 +252,8 @@ size_t dynd::make_struct_comparison_kernel(
                 field_kernel_offsets = reinterpret_cast<size_t *>(e + 1);
                 field_kernel_offsets[2*i] = field_kernel_offset - offset_out;
                 field_kernel_offset = make_comparison_kernel(out, field_kernel_offset,
-                                field_types[i], src0_metadata + metadata_offsets[i],
-                                field_types[i], src1_metadata + metadata_offsets[i],
+                                ft, src0_metadata + arrmeta_offsets[i],
+                                ft, src1_metadata + arrmeta_offsets[i],
                                 comparison_type_sorting_less, ectx);
                 // Repeat for comparing the other way
                 out->ensure_capacity(field_kernel_offset);
@@ -262,8 +261,8 @@ size_t dynd::make_struct_comparison_kernel(
                 field_kernel_offsets = reinterpret_cast<size_t *>(e + 1);
                 field_kernel_offsets[2*i+1] = field_kernel_offset - offset_out;
                 field_kernel_offset = make_comparison_kernel(out, field_kernel_offset,
-                                field_types[i], src1_metadata + metadata_offsets[i],
-                                field_types[i], src0_metadata + metadata_offsets[i],
+                                ft, src1_metadata + arrmeta_offsets[i],
+                                ft, src0_metadata + arrmeta_offsets[i],
                                 comparison_type_sorting_less, ectx);
             }
             return field_kernel_offset;
@@ -287,9 +286,9 @@ size_t dynd::make_struct_comparison_kernel(
         e->src0_data_offsets = bsd->get_data_offsets(src0_metadata);
         e->src1_data_offsets = bsd->get_data_offsets(src1_metadata);
         size_t *field_kernel_offsets;
-        const size_t *metadata_offsets = bsd->get_metadata_offsets();
-        const ndt::type *field_types = bsd->get_field_types();
+        const uintptr_t *arrmeta_offsets = bsd->get_arrmeta_offsets_raw();
         for (size_t i = 0; i != field_count; ++i) {
+            const ndt::type &ft = bsd->get_field_type(i);
             // Reserve space for the child, and save the offset to this
             // field comparison kernel. Have to re-get
             // the pointer because creating the field comparison kernel may
@@ -298,11 +297,10 @@ size_t dynd::make_struct_comparison_kernel(
             e = out->get_at<struct_compare_equality_kernel>(offset_out);
             field_kernel_offsets = reinterpret_cast<size_t *>(e + 1);
             field_kernel_offsets[i] = field_kernel_offset - offset_out;
-            const char *field_metadata = src0_metadata + metadata_offsets[i];
-            field_kernel_offset = make_comparison_kernel(out, field_kernel_offset,
-                            field_types[i], field_metadata,
-                            field_types[i], field_metadata,
-                            comptype, ectx);
+            const char *field_metadata = src0_metadata + arrmeta_offsets[i];
+            field_kernel_offset = make_comparison_kernel(
+                out, field_kernel_offset, ft, field_metadata, ft,
+                field_metadata, comptype, ectx);
         }
         return field_kernel_offset;
     } else {

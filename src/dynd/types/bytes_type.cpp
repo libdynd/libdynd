@@ -230,14 +230,14 @@ static size_t property_get_target_alignment(const ndt::type& dt) {
     return pd->get_target_alignment();
 }
 
-static pair<string, gfunc::callable> type_properties[] = {
-    pair<string, gfunc::callable>("target_alignment", gfunc::make_callable(&property_get_target_alignment, "self"))
-};
-
 void bytes_type::get_dynamic_type_properties(
                 const std::pair<std::string, gfunc::callable> **out_properties,
                 size_t *out_count) const
 {
+    static pair<string, gfunc::callable> type_properties[] = {
+        pair<string, gfunc::callable>("target_alignment", gfunc::make_callable(&property_get_target_alignment, "self"))
+    };
+
     *out_properties = type_properties;
     *out_count = sizeof(type_properties) / sizeof(type_properties[0]);
 }

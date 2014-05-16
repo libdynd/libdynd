@@ -11,6 +11,7 @@
 
 #include <dynd/type.hpp>
 #include <dynd/types/base_struct_type.hpp>
+#include <dynd/types/type_type.hpp>
 #include <dynd/memblock/memory_block.hpp>
 
 namespace dynd {
@@ -29,10 +30,7 @@ namespace dynd {
  * C structs.
  */
 class cstruct_type : public base_struct_type {
-    std::vector<ndt::type> m_field_types;
-    std::vector<std::string> m_field_names;
-    std::vector<size_t> m_data_offsets;
-    std::vector<size_t> m_metadata_offsets;
+    nd::array m_data_offsets;
     std::vector<std::pair<std::string, gfunc::callable> > m_array_properties;
 
     void create_array_properties();
@@ -41,82 +39,42 @@ class cstruct_type : public base_struct_type {
     // create_array_properties
     cstruct_type(int, int);
 public:
-    cstruct_type(size_t field_count, const ndt::type *field_types,
-                    const std::string *field_names);
-
+    cstruct_type(const nd::array &field_names, const nd::array &field_types);
     virtual ~cstruct_type();
 
     size_t get_default_data_size(intptr_t DYND_UNUSED(ndim), const intptr_t *DYND_UNUSED(shape)) const {
         return get_data_size();
     }
 
-    const ndt::type *get_field_types() const {
-        return &m_field_types[0];
-    }
-
-    const std::vector<ndt::type> get_field_types_vector() const {
-        return m_field_types;
-    }
-
-    const std::string *get_field_names() const {
-        return &m_field_names[0];
-    }
-
-    const std::vector<std::string>& get_field_names_vector() const {
-        return m_field_names;
-    }
-
-    intptr_t get_field_index(const std::string& field_name) const;
-
-    const size_t *get_data_offsets(const char *DYND_UNUSED(metadata)) const {
-        return &m_data_offsets[0];
-    }
-
-    inline const size_t *get_data_offsets() const {
-        return &m_data_offsets[0];
-    }
-
-    const std::vector<size_t>& get_data_offsets_vector() const {
+    inline const nd::array &get_data_offsets() const {
         return m_data_offsets;
     }
 
-    const size_t *get_metadata_offsets() const {
-        return &m_metadata_offsets[0];
+    const uintptr_t *get_data_offsets(const char *DYND_UNUSED(arrmeta)) const {
+        return reinterpret_cast<const uintptr_t *>(
+            m_data_offsets.get_readonly_originptr());
     }
 
-    const std::vector<size_t>& get_metadata_offsets_vector() const {
-        return m_metadata_offsets;
+    inline const uintptr_t *get_data_offsets_raw() const {
+        return reinterpret_cast<const uintptr_t *>(
+            m_data_offsets.get_readonly_originptr());
     }
-
-    void print_data(std::ostream& o, const char *metadata, const char *data) const;
+    inline const uintptr_t& get_data_offset(intptr_t i) const {
+        return get_data_offsets_raw()[i];
+    }
 
     void print_type(std::ostream& o) const;
 
-    bool is_expression() const;
-    bool is_unique_data_owner(const char *metadata) const;
     void transform_child_types(type_transform_fn_t transform_fn, void *extra,
                     ndt::type& out_transformed_tp, bool& out_was_transformed) const;
     ndt::type get_canonical_type() const;
 
-    ndt::type apply_linear_index(intptr_t nindices, const irange *indices,
-                size_t current_i, const ndt::type& root_tp, bool leading_dimension) const;
-    intptr_t apply_linear_index(intptr_t nindices, const irange *indices, const char *metadata,
-                    const ndt::type& result_tp, char *out_metadata,
-                    memory_block_data *embedded_reference,
-                    size_t current_i, const ndt::type& root_tp,
-                    bool leading_dimension, char **inout_data,
-                    memory_block_data **inout_dataref) const;
     ndt::type at_single(intptr_t i0, const char **inout_metadata, const char **inout_data) const;
 
     bool is_lossless_assignment(const ndt::type& dst_tp, const ndt::type& src_tp) const;
 
     bool operator==(const base_type& rhs) const;
 
-    void metadata_default_construct(char *metadata, intptr_t ndim, const intptr_t* shape) const;
-    void metadata_copy_construct(char *dst_metadata, const char *src_metadata, memory_block_data *embedded_reference) const;
-    void metadata_reset_buffers(char *metadata) const;
-    void metadata_finalize_buffers(char *metadata) const;
-    void metadata_destruct(char *metadata) const;
     void metadata_debug_print(const char *metadata, std::ostream& o, const std::string& indent) const;
 
     size_t make_assignment_kernel(
@@ -133,9 +91,6 @@ public:
                     comparison_type_t comptype,
                     const eval::eval_context *ectx) const;
 
-    void foreach_leading(const char *metadata, char *data,
-                         foreach_fn_t callback, void *callback_data) const;
-
     void get_dynamic_type_properties(
                     const std::pair<std::string, gfunc::callable> **out_properties,
                     size_t *out_count) const;
@@ -145,132 +100,138 @@ public:
 }; // class cstruct_type
 
 namespace ndt {
-    /** Makes a struct type with the specified fields */
-    inline ndt::type make_cstruct(size_t field_count, const ndt::type *field_types,
-                    const std::string *field_names) {
-        return ndt::type(new cstruct_type(field_count, field_types, field_names), false);
+    /** Makes a cstruct type with the specified fields */
+    inline ndt::type make_cstruct(const nd::array &field_names,
+                                 const nd::array &field_types)
+    {
+        return ndt::type(new cstruct_type(field_names, field_types), false);
     }
 
-    /** Makes a struct type with the specified fields */
-    inline ndt::type make_cstruct(const ndt::type& tp0, const std::string& name0)
+
+    /** Makes a cstruct type with the specified fields */
+    inline ndt::type make_cstruct(const ndt::type &tp0, const std::string &name0)
     {
-        return ndt::make_cstruct(1, &tp0, &name0);
+        const std::string *names[1] = {&name0};
+        nd::array field_names = nd::make_strided_string_array(names, 1);
+        nd::array field_types = nd::empty(1, ndt::make_strided_dim(ndt::make_type()));
+        unchecked_strided_dim_get_rw<ndt::type>(field_types, 0) = tp0;
+        field_types.flag_as_immutable();
+        return ndt::make_cstruct(field_names, field_types);
     }
 
-    /** Makes a struct type with the specified fields */
-    inline ndt::type make_cstruct(const ndt::type& tp0, const std::string& name0, const ndt::type& tp1, const std::string& name1)
+    /** Makes a cstruct type with the specified fields */
+    inline ndt::type make_cstruct(const ndt::type &tp0, const std::string &name0,
+                                 const ndt::type &tp1, const std::string &name1)
     {
-        ndt::type field_types[2];
-        std::string field_names[2];
-        field_types[0] = tp0;
-        field_types[1] = tp1;
-        field_names[0] = name0;
-        field_names[1] = name1;
-        return ndt::make_cstruct(2, field_types, field_names);
+        const std::string *names[2] = {&name0, &name1};
+        nd::array field_names = nd::make_strided_string_array(names, 2);
+        nd::array field_types = nd::empty(2, ndt::make_strided_dim(ndt::make_type()));
+        unchecked_strided_dim_get_rw<ndt::type>(field_types, 0) = tp0;
+        unchecked_strided_dim_get_rw<ndt::type>(field_types, 1) = tp1;
+        field_types.flag_as_immutable();
+        return ndt::make_cstruct(field_names, field_types);
     }
 
-    /** Makes a struct type with the specified fields */
-    inline ndt::type make_cstruct(const ndt::type& tp0, const std::string& name0, const ndt::type& tp1, const std::string& name1, const ndt::type& tp2, const std::string& name2)
+    /** Makes a cstruct type with the specified fields */
+    inline ndt::type make_cstruct(const ndt::type &tp0, const std::string &name0,
+                                 const ndt::type &tp1, const std::string &name1,
+                                 const ndt::type &tp2, const std::string &name2)
     {
-        ndt::type field_types[3];
-        std::string field_names[3];
-        field_types[0] = tp0;
-        field_types[1] = tp1;
-        field_types[2] = tp2;
-        field_names[0] = name0;
-        field_names[1] = name1;
-        field_names[2] = name2;
-        return ndt::make_cstruct(3, field_types, field_names);
+        const std::string *names[3] = {&name0, &name1, &name2};
+        nd::array field_names = nd::make_strided_string_array(names, 3);
+        nd::array field_types = nd::empty(3, ndt::make_strided_dim(ndt::make_type()));
+        unchecked_strided_dim_get_rw<ndt::type>(field_types, 0) = tp0;
+        unchecked_strided_dim_get_rw<ndt::type>(field_types, 1) = tp1;
+        unchecked_strided_dim_get_rw<ndt::type>(field_types, 2) = tp2;
+        field_types.flag_as_immutable();
+        return ndt::make_cstruct(field_names, field_types);
     }
 
-    /** Makes a struct type with the specified fields */
-    inline ndt::type make_cstruct(const ndt::type& tp0, const std::string& name0,
-                    const ndt::type& tp1, const std::string& name1, const ndt::type& tp2, const std::string& name2,
-                    const ndt::type& tp3, const std::string& name3)
+    /** Makes a cstruct type with the specified fields */
+    inline ndt::type make_cstruct(const ndt::type &tp0, const std::string &name0,
+                                 const ndt::type &tp1, const std::string &name1,
+                                 const ndt::type &tp2, const std::string &name2,
+                                 const ndt::type &tp3, const std::string &name3)
     {
-        ndt::type field_types[4];
-        std::string field_names[4];
-        field_types[0] = tp0;
-        field_types[1] = tp1;
-        field_types[2] = tp2;
-        field_types[3] = tp3;
-        field_names[0] = name0;
-        field_names[1] = name1;
-        field_names[2] = name2;
-        field_names[3] = name3;
-        return ndt::make_cstruct(4, field_types, field_names);
+        const std::string *names[4] = {&name0, &name1, &name2, &name3};
+        nd::array field_names = nd::make_strided_string_array(names, 4);
+        nd::array field_types = nd::empty(4, ndt::make_strided_dim(ndt::make_type()));
+        unchecked_strided_dim_get_rw<ndt::type>(field_types, 0) = tp0;
+        unchecked_strided_dim_get_rw<ndt::type>(field_types, 1) = tp1;
+        unchecked_strided_dim_get_rw<ndt::type>(field_types, 2) = tp2;
+        unchecked_strided_dim_get_rw<ndt::type>(field_types, 3) = tp3;
+        field_types.flag_as_immutable();
+        return ndt::make_cstruct(field_names, field_types);
     }
 
-    /** Makes a struct type with the specified fields */
-    inline ndt::type make_cstruct(const ndt::type& tp0, const std::string& name0,
-                    const ndt::type& tp1, const std::string& name1, const ndt::type& tp2, const std::string& name2,
-                    const ndt::type& tp3, const std::string& name3, const ndt::type& tp4, const std::string& name4)
+    /** Makes a cstruct type with the specified fields */
+    inline ndt::type make_cstruct(const ndt::type &tp0, const std::string &name0,
+                                 const ndt::type &tp1, const std::string &name1,
+                                 const ndt::type &tp2, const std::string &name2,
+                                 const ndt::type &tp3, const std::string &name3,
+                                 const ndt::type &tp4, const std::string &name4)
     {
-        ndt::type field_types[5];
-        std::string field_names[5];
-        field_types[0] = tp0;
-        field_types[1] = tp1;
-        field_types[2] = tp2;
-        field_types[3] = tp3;
-        field_types[4] = tp4;
-        field_names[0] = name0;
-        field_names[1] = name1;
-        field_names[2] = name2;
-        field_names[3] = name3;
-        field_names[4] = name4;
-        return ndt::make_cstruct(5, field_types, field_names);
+        const std::string *names[5] = {&name0, &name1, &name2, &name3, &name4};
+        nd::array field_names = nd::make_strided_string_array(names, 5);
+        nd::array field_types = nd::empty(5, ndt::make_strided_dim(ndt::make_type()));
+        unchecked_strided_dim_get_rw<ndt::type>(field_types, 0) = tp0;
+        unchecked_strided_dim_get_rw<ndt::type>(field_types, 1) = tp1;
+        unchecked_strided_dim_get_rw<ndt::type>(field_types, 2) = tp2;
+        unchecked_strided_dim_get_rw<ndt::type>(field_types, 3) = tp3;
+        unchecked_strided_dim_get_rw<ndt::type>(field_types, 4) = tp4;
+        field_types.flag_as_immutable();
+        return ndt::make_cstruct(field_names, field_types);
     }
 
-    /** Makes a struct type with the specified fields */
-    inline ndt::type make_cstruct(const ndt::type& tp0, const std::string& name0,
-                    const ndt::type& tp1, const std::string& name1, const ndt::type& tp2, const std::string& name2,
-                    const ndt::type& tp3, const std::string& name3, const ndt::type& tp4, const std::string& name4,
-                    const ndt::type& tp5, const std::string& name5)
+    /** Makes a cstruct type with the specified fields */
+    inline ndt::type make_cstruct(const ndt::type &tp0, const std::string &name0,
+                                 const ndt::type &tp1, const std::string &name1,
+                                 const ndt::type &tp2, const std::string &name2,
+                                 const ndt::type &tp3, const std::string &name3,
+                                 const ndt::type &tp4, const std::string &name4,
+                                 const ndt::type &tp5, const std::string &name5)
     {
-        ndt::type field_types[6];
-        std::string field_names[6];
-        field_types[0] = tp0;
-        field_types[1] = tp1;
-        field_types[2] = tp2;
-        field_types[3] = tp3;
-        field_types[4] = tp4;
-        field_types[5] = tp5;
-        field_names[0] = name0;
-        field_names[1] = name1;
-        field_names[2] = name2;
-        field_names[3] = name3;
-        field_names[4] = name4;
-        field_names[5] = name5;
-        return ndt::make_cstruct(6, field_types, field_names);
+        const std::string *names[6] = {&name0, &name1, &name2,
+                                       &name3, &name4, &name5};
+        nd::array field_names = nd::make_strided_string_array(names, 6);
+        nd::array field_types = nd::empty(6, ndt::make_strided_dim(ndt::make_type()));
+        unchecked_strided_dim_get_rw<ndt::type>(field_types, 0) = tp0;
+        unchecked_strided_dim_get_rw<ndt::type>(field_types, 1) = tp1;
+        unchecked_strided_dim_get_rw<ndt::type>(field_types, 2) = tp2;
+        unchecked_strided_dim_get_rw<ndt::type>(field_types, 3) = tp3;
+        unchecked_strided_dim_get_rw<ndt::type>(field_types, 4) = tp4;
+        unchecked_strided_dim_get_rw<ndt::type>(field_types, 5) = tp5;
+        field_types.flag_as_immutable();
+        return ndt::make_cstruct(field_names, field_types);
     }
 
-    /** Makes a struct type with the specified fields */
-    inline ndt::type make_cstruct(const ndt::type& tp0, const std::string& name0,
-                    const ndt::type& tp1, const std::string& name1, const ndt::type& tp2, const std::string& name2,
-                    const ndt::type& tp3, const std::string& name3, const ndt::type& tp4, const std::string& name4,
-                    const ndt::type& tp5, const std::string& name5, const ndt::type& tp6, const std::string& name6)
+    /** Makes a cstruct type with the specified fields */
+    inline ndt::type make_cstruct(const ndt::type &tp0, const std::string &name0,
+                                 const ndt::type &tp1, const std::string &name1,
+                                 const ndt::type &tp2, const std::string &name2,
+                                 const ndt::type &tp3, const std::string &name3,
+                                 const ndt::type &tp4, const std::string &name4,
+                                 const ndt::type &tp5, const std::string &name5,
+                                 const ndt::type &tp6, const std::string &name6)
     {
-        ndt::type field_types[7];
-        std::string field_names[7];
-        field_types[0] = tp0;
-        field_types[1] = tp1;
-        field_types[2] = tp2;
-        field_types[3] = tp3;
-        field_types[4] = tp4;
-        field_types[5] = tp5;
-        field_types[6] = tp6;
-        field_names[0] = name0;
-        field_names[1] = name1;
-        field_names[2] = name2;
-        field_names[3] = name3;
-        field_names[4] = name4;
-        field_names[5] = name5;
-        field_names[6] = name6;
-        return ndt::make_cstruct(7, field_types, field_names);
+        const std::string *names[7] = {&name0, &name1, &name2,
+                                       &name3, &name4, &name5, &name6};
+        nd::array field_names = nd::make_strided_string_array(names, 7);
+        nd::array field_types = nd::empty(7, ndt::make_strided_dim(ndt::make_type()));
+        unchecked_strided_dim_get_rw<ndt::type>(field_types, 0) = tp0;
+        unchecked_strided_dim_get_rw<ndt::type>(field_types, 1) = tp1;
+        unchecked_strided_dim_get_rw<ndt::type>(field_types, 2) = tp2;
+        unchecked_strided_dim_get_rw<ndt::type>(field_types, 3) = tp3;
+        unchecked_strided_dim_get_rw<ndt::type>(field_types, 4) = tp4;
+        unchecked_strided_dim_get_rw<ndt::type>(field_types, 5) = tp5;
+        unchecked_strided_dim_get_rw<ndt::type>(field_types, 6) = tp6;
+        field_types.flag_as_immutable();
+        return ndt::make_cstruct(field_names, field_types);
     }
+
 
     /**
-     * \brief Checks whether a set of offsets can be used for cstruct.
+     * Checks whether a set of offsets can be used for cstruct.
      *
      * Because cstruct does not support customizable offset (use struct for
      * that), this function can be used to check that offsets are compatible with
@@ -285,12 +246,12 @@ namespace ndt {
      *           produce the provided offsets.
      */
     inline bool is_cstruct_compatible_offsets(size_t field_count,
-                    const ndt::type *field_types, const size_t *field_offsets, size_t total_size)
+                    const ndt::type *field_types, const uintptr_t *field_offsets, size_t total_size)
     {
         size_t offset = 0, max_alignment = 1;
         for (size_t i = 0; i != field_count; ++i) {
-            size_t field_data_alignment = field_types[i].get_data_alignment();
-            size_t field_data_size = field_types[i].get_data_size();
+            uintptr_t field_data_alignment = field_types[i].get_data_alignment();
+            uintptr_t field_data_size = field_types[i].get_data_size();
             offset = inc_to_alignment(offset, field_data_alignment);
             if (field_offsets[i] != offset || field_data_size == 0) {
                 return false;
@@ -301,7 +262,6 @@ namespace ndt {
         offset = inc_to_alignment(offset, max_alignment);
         return total_size == offset;
     }
-
 } // namespace ndt
 
 } // namespace dynd

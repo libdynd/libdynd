@@ -169,13 +169,16 @@ static nd::array property_get_return_type(const ndt::type& dt) {
     return nd::array(d->get_return_type());
 }
 
-static pair<string, gfunc::callable> type_properties[] = {
-    pair<string, gfunc::callable>("param_types", gfunc::make_callable(&property_get_param_types, "self")),
-    pair<string, gfunc::callable>("return_type", gfunc::make_callable(&property_get_return_type, "self"))
-};
-
 void funcproto_type::get_dynamic_type_properties(const std::pair<std::string, gfunc::callable> **out_properties, size_t *out_count) const
 {
+    static pair<string, gfunc::callable> type_properties[] = {
+        pair<string, gfunc::callable>(
+            "param_types",
+            gfunc::make_callable(&property_get_param_types, "self")),
+        pair<string, gfunc::callable>(
+            "return_type",
+            gfunc::make_callable(&property_get_return_type, "self"))};
+
     *out_properties = type_properties;
     *out_count = sizeof(type_properties) / sizeof(type_properties[0]);
 }

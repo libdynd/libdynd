@@ -10,6 +10,7 @@
 #include <dynd/types/base_uniform_dim_type.hpp>
 #include <dynd/typed_data_assign.hpp>
 #include <dynd/types/view_type.hpp>
+#include <dynd/func/callable.hpp>
 
 namespace dynd {
 
@@ -25,7 +26,6 @@ struct strided_dim_type_iterdata {
 };
 
 class strided_dim_type : public base_uniform_dim_type {
-    std::vector<std::pair<std::string, gfunc::callable> > m_array_properties, m_array_functions;
 public:
     strided_dim_type(const ndt::type& element_tp);
 
@@ -119,6 +119,33 @@ public:
                     const std::pair<std::string, gfunc::callable> **out_functions,
                     size_t *out_count) const;
 };
+
+/**
+ * Does a value lookup into an array of type "strided * T", without
+ * bounds checking the index ``i`` or validating that ``a`` has the
+ * required type. Use only when these checks have been done externally.
+ */
+template<typename T>
+inline const T& unchecked_strided_dim_get(const nd::array& a, intptr_t i)
+{
+    const strided_dim_type_metadata *md =
+        reinterpret_cast<const strided_dim_type_metadata *>(a.get_arrmeta());
+    return *reinterpret_cast<const T *>(a.get_readonly_originptr() +
+                                        i * md->stride);
+}
+
+/**
+ * Does a writable value lookup into an array of type "strided * T", without
+ * bounds checking the index ``i`` or validating that ``a`` has the
+ * required type. Use only when these checks have been done externally.
+ */
+template<typename T>
+inline T& unchecked_strided_dim_get_rw(const nd::array& a, intptr_t i)
+{
+    const strided_dim_type_metadata *md =
+        reinterpret_cast<const strided_dim_type_metadata *>(a.get_arrmeta());
+    return *reinterpret_cast<T *>(a.get_readwrite_originptr() + i * md->stride);
+}
 
 namespace ndt {
     ndt::type make_strided_dim(const ndt::type& element_tp);

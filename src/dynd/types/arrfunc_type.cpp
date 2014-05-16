@@ -203,14 +203,14 @@ static nd::array property_ndo_get_types(const nd::array& n) {
     return result;
 }
 
-static pair<string, gfunc::callable> arrfunc_array_properties[] = {
-    pair<string, gfunc::callable>("types", gfunc::make_callable(&property_ndo_get_types, "self"))
-};
-
 void arrfunc_type::get_dynamic_array_properties(
                 const std::pair<std::string, gfunc::callable> **out_properties,
                 size_t *out_count) const
 {
+    static pair<string, gfunc::callable> arrfunc_array_properties[] = {
+        pair<string, gfunc::callable>(
+            "types", gfunc::make_callable(&property_ndo_get_types, "self"))};
+
     *out_properties = arrfunc_array_properties;
     *out_count = sizeof(arrfunc_array_properties) / sizeof(arrfunc_array_properties[0]);
 }
@@ -292,24 +292,22 @@ static array_preamble *function___call__(const array_preamble *params, void *DYN
     return nd::empty(ndt::make_type<void>()).release();
 }
 
-static pair<string, gfunc::callable> arrfunc_array_functions[] = {
-    pair<string, gfunc::callable>("__call__", gfunc::callable(
-            ndt::type("c{self:ndarrayarg,out:ndarrayarg,p0:ndarrayarg,"
-                       "p1:ndarrayarg,p2:ndarrayarg,"
-                       "p3:ndarrayarg,p4:ndarrayarg}"),
-            &function___call__,
-            NULL,
-            3,
-            nd::empty("c{self:ndarrayarg,out:ndarrayarg,p0:ndarrayarg,"
-                       "p1:ndarrayarg,p2:ndarrayarg,"
-                       "p3:ndarrayarg,p4:ndarrayarg}")
-                    ))
-};
-
 void arrfunc_type::get_dynamic_array_functions(
                 const std::pair<std::string, gfunc::callable> **out_functions,
                 size_t *out_count) const
 {
+    static pair<string, gfunc::callable> arrfunc_array_functions[] = {
+        pair<string, gfunc::callable>(
+            "__call__",
+            gfunc::callable(
+                ndt::type("c{self:ndarrayarg,out:ndarrayarg,p0:ndarrayarg,"
+                          "p1:ndarrayarg,p2:ndarrayarg,"
+                          "p3:ndarrayarg,p4:ndarrayarg}"),
+                &function___call__, NULL, 3,
+                nd::empty("c{self:ndarrayarg,out:ndarrayarg,p0:ndarrayarg,"
+                          "p1:ndarrayarg,p2:ndarrayarg,"
+                          "p3:ndarrayarg,p4:ndarrayarg}")))};
+
     *out_functions = arrfunc_array_functions;
     *out_count = sizeof(arrfunc_array_functions) / sizeof(arrfunc_array_functions[0]);
 }

@@ -11,6 +11,7 @@
 #include <dynd/kernels/assignment_kernels.hpp>
 #include <dynd/func/callable.hpp>
 #include <dynd/func/make_callable.hpp>
+#include <dynd/types/builtin_type_properties.hpp>
 
 using namespace std;
 using namespace dynd;
@@ -21,35 +22,37 @@ strided_dim_type::strided_dim_type(const ndt::type& element_tp)
 {
     // Propagate the operand flags from the element
     m_members.flags |= (element_tp.get_flags()&type_flags_operand_inherited);
-    // Copy nd::array properties and functions from the first non-array dimension
-    get_scalar_properties_and_functions(m_array_properties, m_array_functions);
 }
 
 strided_dim_type::~strided_dim_type()
 {
 }
 
-size_t strided_dim_type::get_default_data_size(intptr_t ndim, const intptr_t *shape) const
+size_t strided_dim_type::get_default_data_size(intptr_t ndim,
+                                               const intptr_t *shape) const
 {
     if (ndim == 0) {
-        throw std::runtime_error("the strided_dim type requires a shape "
-                        "be specified for default construction");
+        throw std::runtime_error("the strided_dim type requires a shape be "
+                                 "specified for default construction");
     } else if (shape[0] < 0) {
         throw std::runtime_error("the strided_dim type requires a non-negative "
-                        "shape to be specified for default construction");
+                                 "shape to be specified for default "
+                                 "construction");
     }
 
     if (!m_element_tp.is_builtin()) {
-        return shape[0] * m_element_tp.extended()->get_default_data_size(ndim-1, shape+1);
+        return shape[0] * m_element_tp.extended()->get_default_data_size(
+                              ndim - 1, shape + 1);
     } else {
         return shape[0] * m_element_tp.get_data_size();
     }
 }
 
-
-void strided_dim_type::print_data(std::ostream& o, const char *metadata, const char *data) const
+void strided_dim_type::print_data(std::ostream &o, const char *metadata,
+                                  const char *data) const
 {
-    const strided_dim_type_metadata *md = reinterpret_cast<const strided_dim_type_metadata *>(metadata);
+    const strided_dim_type_metadata *md =
+        reinterpret_cast<const strided_dim_type_metadata *>(metadata);
     size_t stride = md->stride;
     metadata += sizeof(strided_dim_type_metadata);
     o << "[";
@@ -77,12 +80,15 @@ bool strided_dim_type::is_unique_data_owner(const char *metadata) const
     if (m_element_tp.is_builtin()) {
         return true;
     } else {
-        return m_element_tp.extended()->is_unique_data_owner(metadata + sizeof(strided_dim_type_metadata));
+        return m_element_tp.extended()->is_unique_data_owner(
+            metadata + sizeof(strided_dim_type_metadata));
     }
 }
 
-void strided_dim_type::transform_child_types(type_transform_fn_t transform_fn, void *extra,
-                ndt::type& out_transformed_tp, bool& out_was_transformed) const
+void strided_dim_type::transform_child_types(type_transform_fn_t transform_fn,
+                                             void *extra,
+                                             ndt::type &out_transformed_tp,
+                                             bool &out_was_transformed) const
 {
     ndt::type tmp_tp;
     bool was_transformed = false;
@@ -98,7 +104,8 @@ void strided_dim_type::transform_child_types(type_transform_fn_t transform_fn, v
 
 ndt::type strided_dim_type::get_canonical_type() const
 {
-    return ndt::type(new strided_dim_type(m_element_tp.get_canonical_type()), false);
+    return ndt::type(new strided_dim_type(m_element_tp.get_canonical_type()),
+                     false);
 }
 
 bool strided_dim_type::is_strided() const
@@ -107,18 +114,24 @@ bool strided_dim_type::is_strided() const
 }
 
 void strided_dim_type::process_strided(const char *metadata, const char *data,
-                ndt::type& out_dt, const char *&out_origin,
-                intptr_t& out_stride, intptr_t& out_dim_size) const
+                                       ndt::type &out_dt,
+                                       const char *&out_origin,
+                                       intptr_t &out_stride,
+                                       intptr_t &out_dim_size) const
 {
-    const strided_dim_type_metadata *md = reinterpret_cast<const strided_dim_type_metadata *>(metadata);
+    const strided_dim_type_metadata *md =
+        reinterpret_cast<const strided_dim_type_metadata *>(metadata);
     out_dt = m_element_tp;
     out_origin = data;
     out_stride = md->stride;
     out_dim_size = md->size;
 }
 
-ndt::type strided_dim_type::apply_linear_index(intptr_t nindices, const irange *indices,
-                size_t current_i, const ndt::type& root_tp, bool leading_dimension) const
+ndt::type strided_dim_type::apply_linear_index(intptr_t nindices,
+                                               const irange *indices,
+                                               size_t current_i,
+                                               const ndt::type &root_tp,
+                                               bool leading_dimension) const
 {
     if (nindices == 0) {
         return ndt::type(this, true);
@@ -126,8 +139,10 @@ ndt::type strided_dim_type::apply_linear_index(intptr_t nindices, const irange *
         if (indices->step() == 0) {
             if (leading_dimension && !m_element_tp.is_builtin()) {
                 // For leading dimensions, need to give the next type a chance
-                // to collapse itself even though indexing doesn't continue further.
-                return m_element_tp.extended()->apply_linear_index(0, NULL, current_i, root_tp, true);
+                // to collapse itself even though indexing doesn't continue
+                // further.
+                return m_element_tp.extended()->apply_linear_index(
+                    0, NULL, current_i, root_tp, true);
             } else {
                 return m_element_tp;
             }
@@ -139,21 +154,25 @@ ndt::type strided_dim_type::apply_linear_index(intptr_t nindices, const irange *
             return m_element_tp.apply_linear_index(nindices-1, indices+1,
                             current_i+1, root_tp, leading_dimension);
         } else {
-            return ndt::type(new strided_dim_type(m_element_tp.apply_linear_index(nindices-1, indices+1,
-                            current_i+1, root_tp, false)), false);
+            return ndt::type(
+                new strided_dim_type(m_element_tp.apply_linear_index(
+                    nindices - 1, indices + 1, current_i + 1, root_tp, false)),
+                false);
         }
     }
 }
 
-intptr_t strided_dim_type::apply_linear_index(intptr_t nindices, const irange *indices, const char *metadata,
-                const ndt::type& result_tp, char *out_metadata,
-                memory_block_data *embedded_reference,
-                size_t current_i, const ndt::type& root_tp,
-                bool leading_dimension, char **inout_data,
-                memory_block_data **inout_dataref) const
+intptr_t strided_dim_type::apply_linear_index(
+    intptr_t nindices, const irange *indices, const char *metadata,
+    const ndt::type &result_tp, char *out_metadata,
+    memory_block_data *embedded_reference, size_t current_i,
+    const ndt::type &root_tp, bool leading_dimension, char **inout_data,
+    memory_block_data **inout_dataref) const
 {
-    const strided_dim_type_metadata *md = reinterpret_cast<const strided_dim_type_metadata *>(metadata);
-    strided_dim_type_metadata *out_md = reinterpret_cast<strided_dim_type_metadata *>(out_metadata);
+    const strided_dim_type_metadata *md =
+        reinterpret_cast<const strided_dim_type_metadata *>(metadata);
+    strided_dim_type_metadata *out_md =
+        reinterpret_cast<strided_dim_type_metadata *>(out_metadata);
     if (nindices == 0) {
         // If there are no more indices, copy the rest verbatim
         metadata_copy_construct(out_metadata, metadata, embedded_reference);
@@ -692,32 +711,44 @@ static ndt::type get_element_type(const ndt::type& dt) {
     return dt.tcast<strided_dim_type>()->get_element_type();
 }
 
-static pair<string, gfunc::callable> strided_dim_type_properties[] = {
-    pair<string, gfunc::callable>("element_type", gfunc::make_callable(&get_element_type, "self"))
-};
-
 void strided_dim_type::get_dynamic_type_properties(
                 const std::pair<std::string, gfunc::callable> **out_properties,
                 size_t *out_count) const
 {
+    static pair<string, gfunc::callable> strided_dim_type_properties[] = {
+        pair<string, gfunc::callable>(
+            "element_type", gfunc::make_callable(&::get_element_type, "self"))};
+
     *out_properties = strided_dim_type_properties;
     *out_count = sizeof(strided_dim_type_properties) / sizeof(strided_dim_type_properties[0]);
 }
 
-void strided_dim_type::get_dynamic_array_properties(const std::pair<std::string, gfunc::callable> **out_properties, size_t *out_count) const
+void strided_dim_type::get_dynamic_array_properties(
+    const std::pair<std::string, gfunc::callable> **out_properties,
+    size_t *out_count) const
 {
-    *out_properties = m_array_properties.empty() ? NULL : &m_array_properties[0];
-    *out_count = (int)m_array_properties.size();
+    if (m_element_tp.is_builtin()) {
+        get_builtin_type_dynamic_array_properties(m_element_tp.get_type_id(),
+                                                  out_properties, out_count);
+    } else {
+        m_element_tp.extended()->get_dynamic_array_properties(out_properties, out_count);
+    }
 }
 
-void strided_dim_type::get_dynamic_array_functions(const std::pair<std::string, gfunc::callable> **out_functions, size_t *out_count) const
+void strided_dim_type::get_dynamic_array_functions(
+    const std::pair<std::string, gfunc::callable> **out_functions,
+    size_t *out_count) const
 {
-    *out_functions = m_array_functions.empty() ? NULL : &m_array_functions[0];
-    *out_count = (int)m_array_functions.size();
+    if (m_element_tp.is_builtin()) {
+        // TODO
+    } else {
+        m_element_tp.extended()->get_dynamic_array_functions(out_functions, out_count);
+    }
 }
 
 namespace {
-    // TODO: use the PP meta stuff, but DYND_PP_LEN_MAX is set to 8 right now, would need to be 19
+    // TODO: use the PP meta stuff, but DYND_PP_LEN_MAX is set to 8 right now,
+    // would need to be 19
     struct static_strided_dims {
         strided_dim_type bt1;
         strided_dim_type bt2;

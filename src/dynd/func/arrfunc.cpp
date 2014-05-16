@@ -134,7 +134,6 @@ void dynd::make_arrfunc_from_assignment(
         if (src_tp.get_type_id() == expr_type_id && (&src_tp == &src_expr_tp)) {
             const expr_type *etp = src_tp.tcast<expr_type>();
             const base_struct_type *operands_type = etp->get_operand_type().tcast<base_struct_type>();
-            const ndt::type *operand_types = operands_type->get_field_types();
             // Expose the expr type's expression
             intptr_t nargs = operands_type->get_field_count();
             size_t sizeof_data_mem = sizeof(expr_arrfunc_data) + sizeof(void *) * nargs;
@@ -148,7 +147,8 @@ void dynd::make_arrfunc_from_assignment(
             data_types_arr[0] = dst_tp;
             for (intptr_t i = 0; i < nargs; ++i) {
                 // Dereference the pointer type in each field
-                const pointer_type *field_ptr_type = operand_types[i].tcast<pointer_type>();
+                const pointer_type *field_ptr_type =
+                    operands_type->get_field_type(i).tcast<pointer_type>();
                 data_types_arr[i+1] = field_ptr_type->get_target_type();
             }
             data->expr_type = static_cast<const expr_type *>(ndt::type(etp, true).release());

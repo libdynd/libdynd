@@ -221,8 +221,8 @@ namespace {
 
         static intptr_t
         instantiate(void *self_data_ptr, dynd::ckernel_builder *ckb,
-                    intptr_t ckb_offset, const ndt::type &dst_tp,
-                    const char *dst_arrmeta, const ndt::type *src_tp,
+                    intptr_t ckb_offset, const ndt::type &DYND_UNUSED(dst_tp),
+                    const char *DYND_UNUSED(dst_arrmeta), const ndt::type *src_tp,
                     const char *const *src_arrmeta, uint32_t kernreq,
                     const eval::eval_context *DYND_UNUSED(ectx))
         {

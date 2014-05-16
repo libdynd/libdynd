@@ -39,12 +39,13 @@ static string get_extended_string_encoding(const ndt::type& dt) {
     return ss.str();
 }
 
-static pair<string, gfunc::callable> base_string_type_properties[] = {
-    pair<string, gfunc::callable>("encoding", gfunc::make_callable(&get_extended_string_encoding, "self"))
-};
-
 void base_string_type::get_dynamic_type_properties(const std::pair<std::string, gfunc::callable> **out_properties, size_t *out_count) const
 {
+    static pair<string, gfunc::callable> base_string_type_properties[] = {
+        pair<string, gfunc::callable>(
+            "encoding",
+            gfunc::make_callable(&get_extended_string_encoding, "self"))};
+
     *out_properties = base_string_type_properties;
     *out_count = sizeof(base_string_type_properties) / sizeof(base_string_type_properties[0]);
 }
@@ -157,14 +158,14 @@ static nd::array array_function_find(const nd::array& self, const nd::array& sub
     return result;
 }
 
-static pair<string, gfunc::callable> base_string_array_functions[] = {
-    pair<string, gfunc::callable>("find", gfunc::make_callable(&array_function_find, "self", "sub"))
-};
-
 void base_string_type::get_dynamic_array_functions(
                 const std::pair<std::string, gfunc::callable> **out_functions,
                 size_t *out_count) const
 {
+    static pair<string, gfunc::callable> base_string_array_functions[] = {
+        pair<string, gfunc::callable>(
+            "find", gfunc::make_callable(&array_function_find, "self", "sub"))};
+
     *out_functions = base_string_array_functions;
     *out_count = sizeof(base_string_array_functions) / sizeof(base_string_array_functions[0]);
 }

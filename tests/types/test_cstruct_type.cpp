@@ -72,7 +72,7 @@ TEST(CStructType, Align) {
     EXPECT_EQ(sizeof(align_test_struct), asdt.get_data_size());
     EXPECT_EQ((size_t)scalar_align_of<align_test_struct>::value, asdt.get_data_alignment());
     const cstruct_type *cd = asdt.tcast<cstruct_type>();
-    const size_t *data_offsets = cd->get_data_offsets();
+    const uintptr_t *data_offsets = cd->get_data_offsets_raw();
     align_test_struct ats;
 #define ATS_OFFSET(field) (reinterpret_cast<size_t>(&ats.field##_) - \
                 reinterpret_cast<size_t>(&ats))
@@ -106,9 +106,9 @@ TEST(CStructType, CreateOneField) {
     EXPECT_TRUE(dt.is_pod());
     tdt = dt.tcast<cstruct_type>();
     EXPECT_EQ(1u, tdt->get_field_count());
-    EXPECT_EQ(ndt::make_type<int32_t>(), tdt->get_field_types()[0]);
-    EXPECT_EQ(0u, tdt->get_data_offsets_vector()[0]);
-    EXPECT_EQ("x", tdt->get_field_names()[0]);
+    EXPECT_EQ(ndt::make_type<int32_t>(), tdt->get_field_type(0));
+    EXPECT_EQ(0u, tdt->get_data_offset(0));
+    EXPECT_EQ("x", tdt->get_field_name(0));
 }
 
 struct two_field_struct {
@@ -129,12 +129,12 @@ TEST(CStructType, CreateTwoField) {
     EXPECT_TRUE(dt.is_pod());
     tdt = dt.tcast<cstruct_type>();
     EXPECT_EQ(2u, tdt->get_field_count());
-    EXPECT_EQ(ndt::make_type<int64_t>(), tdt->get_field_types()[0]);
-    EXPECT_EQ(ndt::make_type<int32_t>(), tdt->get_field_types()[1]);
-    EXPECT_EQ(0u, tdt->get_data_offsets_vector()[0]);
-    EXPECT_EQ(8u, tdt->get_data_offsets_vector()[1]);
-    EXPECT_EQ("a", tdt->get_field_names()[0]);
-    EXPECT_EQ("b", tdt->get_field_names()[1]);
+    EXPECT_EQ(ndt::make_type<int64_t>(), tdt->get_field_type(0));
+    EXPECT_EQ(ndt::make_type<int32_t>(), tdt->get_field_type(1));
+    EXPECT_EQ(0u, tdt->get_data_offset(0));
+    EXPECT_EQ(8u, tdt->get_data_offset(1));
+    EXPECT_EQ("a", tdt->get_field_name(0));
+    EXPECT_EQ("b", tdt->get_field_name(1));
 }
 
 struct three_field_struct {
@@ -159,16 +159,16 @@ TEST(CStructType, CreateThreeField) {
     EXPECT_TRUE(dt.is_pod());
     tdt = dt.tcast<cstruct_type>();
     EXPECT_EQ(3u, tdt->get_field_count());
-    EXPECT_EQ(ndt::make_type<int64_t>(), tdt->get_field_types()[0]);
-    EXPECT_EQ(ndt::make_type<int32_t>(), tdt->get_field_types()[1]);
+    EXPECT_EQ(ndt::make_type<int64_t>(), tdt->get_field_type(0));
+    EXPECT_EQ(ndt::make_type<int32_t>(), tdt->get_field_type(1));
     EXPECT_EQ(ndt::make_fixedstring(5, string_encoding_utf_8),
-                    tdt->get_field_types()[2]);
-    EXPECT_EQ(0u, tdt->get_data_offsets_vector()[0]);
-    EXPECT_EQ(8u, tdt->get_data_offsets_vector()[1]);
-    EXPECT_EQ(12u, tdt->get_data_offsets_vector()[2]);
-    EXPECT_EQ("x", tdt->get_field_names()[0]);
-    EXPECT_EQ("y", tdt->get_field_names()[1]);
-    EXPECT_EQ("z", tdt->get_field_names()[2]);
+                    tdt->get_field_type(2));
+    EXPECT_EQ(0u, tdt->get_data_offset(0));
+    EXPECT_EQ(8u, tdt->get_data_offset(1));
+    EXPECT_EQ(12u, tdt->get_data_offset(2));
+    EXPECT_EQ("x", tdt->get_field_name(0));
+    EXPECT_EQ("y", tdt->get_field_name(1));
+    EXPECT_EQ("z", tdt->get_field_name(2));
 }
 
 TEST(CStructType, ReplaceScalarTypes) {
@@ -228,7 +228,9 @@ TEST(CStructType, IsExpression) {
 }
 
 TEST(CStructType, PropertyAccess) {
-    ndt::type dt = ndt::make_cstruct(ndt::make_type<int>(), "x", ndt::make_type<double>(), "y", ndt::make_type<short>(), "z");
+    ndt::type dt =
+        ndt::make_cstruct(ndt::make_type<int>(), "x", ndt::make_type<double>(),
+                          "y", ndt::make_type<short>(), "z");
     nd::array a = nd::empty(dt);
     a(0).vals() = 3;
     a(1).vals() = 4.25;
@@ -240,7 +242,9 @@ TEST(CStructType, PropertyAccess) {
 }
 
 TEST(CStructType, EqualTypeAssign) {
-    ndt::type dt = ndt::make_cstruct(ndt::make_type<int>(), "x", ndt::make_type<double>(), "y", ndt::make_type<short>(), "z");
+    ndt::type dt =
+        ndt::make_cstruct(ndt::make_type<int>(), "x", ndt::make_type<double>(),
+                          "y", ndt::make_type<short>(), "z");
     nd::array a = nd::make_strided_array(2, dt);
     a(0,0).vals() = 3;
     a(0,1).vals() = 4.25;
@@ -260,7 +264,9 @@ TEST(CStructType, EqualTypeAssign) {
 }
 
 TEST(CStructType, DifferentTypeAssign) {
-    ndt::type dt = ndt::make_cstruct(ndt::make_type<int>(), "x", ndt::make_type<double>(), "y", ndt::make_type<short>(), "z");
+    ndt::type dt =
+        ndt::make_cstruct(ndt::make_type<int>(), "x", ndt::make_type<double>(),
+                          "y", ndt::make_type<short>(), "z");
     nd::array a = nd::make_strided_array(2, dt);
     a(0,0).vals() = 3;
     a(0,1).vals() = 4.25;

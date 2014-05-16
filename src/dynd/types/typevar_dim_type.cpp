@@ -124,17 +124,17 @@ static ndt::type property_get_element_type(const ndt::type& dt) {
     return dt.tcast<typevar_dim_type>()->get_element_type();
 }
 
-static pair<string, gfunc::callable> type_properties[] = {
-    pair<string, gfunc::callable>(
-        "name", gfunc::make_callable(&property_get_name, "self")),
-    pair<string, gfunc::callable>(
-        "element_type",
-        gfunc::make_callable(&property_get_element_type, "self")), };
-
 void typevar_dim_type::get_dynamic_type_properties(
     const std::pair<std::string, gfunc::callable> **out_properties,
     size_t *out_count) const
 {
+    static pair<string, gfunc::callable> type_properties[] = {
+        pair<string, gfunc::callable>(
+            "name", gfunc::make_callable(&property_get_name, "self")),
+        pair<string, gfunc::callable>(
+            "element_type",
+            gfunc::make_callable(&property_get_element_type, "self")), };
+
     *out_properties = type_properties;
     *out_count = sizeof(type_properties) / sizeof(type_properties[0]);
 }

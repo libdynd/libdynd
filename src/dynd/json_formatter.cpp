@@ -210,17 +210,15 @@ static void format_json_struct(output_data& out, const ndt::type& dt, const char
 {
     const base_struct_type *bsd = dt.tcast<base_struct_type>();
     size_t field_count = bsd->get_field_count();
-    const string *field_names = bsd->get_field_names();
-    const ndt::type *field_types = bsd->get_field_types();
     const size_t *data_offsets = bsd->get_data_offsets(metadata);
-    const size_t *metadata_offsets = bsd->get_metadata_offsets();
+    const size_t *arrmeta_offsets = bsd->get_arrmeta_offsets_raw();
 
     out.write('{');
     for (size_t i = 0; i < field_count; ++i) {
-        const string& fname = field_names[i];
-        format_json_encoded_string(out, fname.data(), fname.data() + fname.size(), string_encoding_utf_8);
+        const string_type_data& fname = bsd->get_field_name_raw(i);
+        format_json_encoded_string(out, fname.begin, fname.end, string_encoding_utf_8);
         out.write(':');
-        ::format_json(out, field_types[i], metadata + metadata_offsets[i], data + data_offsets[i]);
+        ::format_json(out, bsd->get_field_type(i), metadata + arrmeta_offsets[i], data + data_offsets[i]);
         if (i != field_count - 1) {
             out.write(',');
         }

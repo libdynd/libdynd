@@ -407,7 +407,7 @@ TEST(DateDType, ReplaceOfConvert) {
 TEST(DateDType, NumPyCompatibleProperty) {
     int64_t vals64[] = {-16730, 0, 11001, numeric_limits<int64_t>::min()};
 
-    nd::array a = vals64;
+    nd::array a = nd::array_rw(vals64);
     nd::array a_date = a.view_scalars(ndt::make_reversed_property(ndt::make_date(),
                     ndt::make_type<int64_t>(), "days_after_1970_int64"));
     // Reading from the 'int64 as date' view

@@ -41,10 +41,8 @@ static void format_struct_datashape(std::ostream &o, const ndt::type &dt,
     }
     const base_struct_type *bsd = dt.tcast<base_struct_type>();
     size_t field_count = bsd->get_field_count();
-    const string *field_names = bsd->get_field_names();
-    const ndt::type *field_types = bsd->get_field_types();
-    const size_t *metadata_offsets = bsd->get_metadata_offsets();
-    const size_t *data_offsets = NULL;
+    const uintptr_t *arrmeta_offsets = bsd->get_arrmeta_offsets_raw();
+    const uintptr_t *data_offsets = NULL;
     if (data != NULL) {
         data_offsets = bsd->get_data_offsets(metadata);
     }
@@ -53,8 +51,8 @@ static void format_struct_datashape(std::ostream &o, const ndt::type &dt,
         if (multiline) {
             o << indent << "  ";
         }
-        o << field_names[i] << ": ";
-        format_datashape(o, field_types[i], metadata ? (metadata + metadata_offsets[i]) : NULL,
+        o << bsd->get_field_name(i) << ": ";
+        format_datashape(o, bsd->get_field_type(i), metadata ? (metadata + arrmeta_offsets[i]) : NULL,
                         data ? (data + data_offsets[i]) : NULL,
                         multiline ? (indent + "  ") : indent, multiline, identifier);
         if (multiline) {

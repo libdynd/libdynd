@@ -23,17 +23,19 @@ static nd::array property_complex_conj(const nd::array& n) {
     return n.replace_dtype(ndt::make_property(n.get_dtype(), "conj"));
 }
 
-static pair<string, gfunc::callable> complex_array_properties[] = {
-    pair<string, gfunc::callable>("real", gfunc::make_callable(&property_complex_real, "self")),
-    pair<string, gfunc::callable>("imag", gfunc::make_callable(&property_complex_imag, "self")),
-    pair<string, gfunc::callable>("conj", gfunc::make_callable(&property_complex_conj, "self")),
-};
-
 void dynd::get_builtin_type_dynamic_array_properties(
                 type_id_t builtin_type_id,
                 const std::pair<std::string, gfunc::callable> **out_properties,
                 size_t *out_count)
 {
+    static pair<string, gfunc::callable> complex_array_properties[] = {
+        pair<string, gfunc::callable>(
+            "real", gfunc::make_callable(&property_complex_real, "self")),
+        pair<string, gfunc::callable>(
+            "imag", gfunc::make_callable(&property_complex_imag, "self")),
+        pair<string, gfunc::callable>(
+            "conj", gfunc::make_callable(&property_complex_conj, "self")) };
+
     switch (builtin_type_id) {
         case complex_float32_type_id:
         case complex_float64_type_id:

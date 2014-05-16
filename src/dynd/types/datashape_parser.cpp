@@ -767,11 +767,9 @@ static ndt::type parse_struct(const char *&rbegin, const char *end,
 
     rbegin = begin;
     if (cprefixed) {
-        return ndt::make_cstruct(field_type_list.size(), &field_type_list[0],
-                                 &field_name_list[0]);
+        return ndt::make_cstruct(field_name_list, field_type_list);
     } else {
-        return ndt::make_struct(field_type_list.size(), &field_type_list[0],
-                                 &field_name_list[0]);
+        return ndt::make_struct(field_name_list, field_type_list);
     }
 }
 
@@ -813,12 +811,12 @@ static ndt::type parse_tuple_or_funcproto(const char *&rbegin, const char *end, 
 
     if (cprefixed) {
         rbegin = begin;
-        return ndt::make_ctuple(field_type_list.size(), &field_type_list[0]);
+        return ndt::make_ctuple(field_type_list);
     } else {
         // It might be a function prototype, check for the "->" token
         if (!parse_token_ds(begin, end, "->")) {
             rbegin = begin;
-            return ndt::make_tuple(field_type_list.size(), &field_type_list[0]);
+            return ndt::make_tuple(field_type_list);
         }
 
         ndt::type return_type = parse_rhs_expression(begin, end, symtable);
