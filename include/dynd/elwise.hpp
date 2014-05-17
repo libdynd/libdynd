@@ -233,13 +233,13 @@ DYND_PP_JOIN_MAP(FUNC_CKERNEL_INSTANTIATORS, (), DYND_PP_RANGE(1, DYND_PP_INC(DY
 \
         ckernel_prefix base; \
         const T *obj; \
-        func_type func; \
+        func_type *func; \
 \
         static void single(char *dst, const char * const *src, \
                            ckernel_prefix *ckp) \
         { \
             extra_type *e = reinterpret_cast<extra_type *>(ckp); \
-            *reinterpret_cast<R*>(dst) = ((e->obj)->*(e->func))(DYND_PP_JOIN_MAP_1(DYND_PP_META_DEREFERENCE, (,), \
+            *reinterpret_cast<R*>(dst) = ((e->obj)->*(*e->func))(DYND_PP_JOIN_MAP_1(DYND_PP_META_DEREFERENCE, (,), \
                 DYND_PP_ELWISE_1(DYND_PP_META_REINTERPRET_CAST, \
                     DYND_PP_MAP_1(DYND_PP_META_MAKE_CONST_PTR, \
                         DYND_PP_META_NAME_RANGE(D, NSRC)), \
@@ -252,7 +252,7 @@ DYND_PP_JOIN_MAP(FUNC_CKERNEL_INSTANTIATORS, (), DYND_PP_RANGE(1, DYND_PP_INC(DY
         { \
             extra_type *e = reinterpret_cast<extra_type *>(ckp); \
             const T *obj = e->obj; \
-            func_type func = e->func; \
+            func_type func = *e->func; \
             DYND_PP_JOIN_ELWISE_1(DYND_PP_META_DECL_ASGN, (;), \
                 DYND_PP_REPEAT_1(const char *, NSRC), DYND_PP_META_NAME_RANGE(src, NSRC), DYND_PP_META_AT_RANGE(src, NSRC)); \
             DYND_PP_JOIN_ELWISE_1(DYND_PP_META_DECL_ASGN, (;), \
@@ -284,7 +284,7 @@ DYND_PP_JOIN_MAP(FUNC_CKERNEL_INSTANTIATORS, (), DYND_PP_RANGE(1, DYND_PP_INC(DY
             } else { \
                 throw std::runtime_error("unsupported kernel request in elwise"); \
             } \
-            std::pair<const T *, func_type> *obj_func = reinterpret_cast<std::pair<const T *, func_type> *>(af_self->data_ptr); \
+            std::pair<const T *, func_type *> *obj_func = reinterpret_cast<std::pair<const T *, func_type *> *>(af_self->data_ptr); \
             e->obj = obj_func->first; \
             e->func = obj_func->second; \
 \
@@ -306,13 +306,13 @@ DYND_PP_JOIN_MAP(FUNC_CKERNEL_INSTANTIATORS, (), DYND_PP_RANGE(1, DYND_PP_INC(DY
 \
         ckernel_prefix base; \
         const T *obj; \
-        func_type func; \
+        func_type *func; \
 \
         static void single(char *dst, const char * const *src, \
                            ckernel_prefix *ckp) \
         { \
             extra_type *e = reinterpret_cast<extra_type *>(ckp); \
-            ((e->obj)->*(e->func))(*reinterpret_cast<R*>(dst), DYND_PP_JOIN_MAP_1(DYND_PP_META_DEREFERENCE, (,), \
+            ((e->obj)->*(*e->func))(*reinterpret_cast<R*>(dst), DYND_PP_JOIN_MAP_1(DYND_PP_META_DEREFERENCE, (,), \
                 DYND_PP_ELWISE_1(DYND_PP_META_REINTERPRET_CAST, \
                     DYND_PP_MAP_1(DYND_PP_META_MAKE_CONST_PTR, \
                         DYND_PP_META_NAME_RANGE(D, NSRC)), \
@@ -325,7 +325,7 @@ DYND_PP_JOIN_MAP(FUNC_CKERNEL_INSTANTIATORS, (), DYND_PP_RANGE(1, DYND_PP_INC(DY
         { \
             extra_type *e = reinterpret_cast<extra_type *>(ckp); \
             const T *obj = e->obj; \
-            func_type func = e->func; \
+            func_type func = *e->func; \
             DYND_PP_JOIN_ELWISE_1(DYND_PP_META_DECL_ASGN, (;), \
                 DYND_PP_REPEAT_1(const char *, NSRC), DYND_PP_META_NAME_RANGE(src, NSRC), DYND_PP_META_AT_RANGE(src, NSRC)); \
             DYND_PP_JOIN_ELWISE_1(DYND_PP_META_DECL_ASGN, (;), \
@@ -357,7 +357,7 @@ DYND_PP_JOIN_MAP(FUNC_CKERNEL_INSTANTIATORS, (), DYND_PP_RANGE(1, DYND_PP_INC(DY
             } else { \
                 throw std::runtime_error("unsupported kernel request in elwise"); \
             } \
-            std::pair<const T *, func_type> *obj_func = reinterpret_cast<std::pair<const T *, func_type> *>(af_self->data_ptr); \
+            std::pair<const T *, func_type *> *obj_func = reinterpret_cast<std::pair<const T *, func_type *> *>(af_self->data_ptr); \
             e->obj = obj_func->first; \
             e->func = obj_func->second; \
 \
@@ -740,7 +740,7 @@ DYND_PP_JOIN_MAP(FUNCS, (), DYND_PP_RANGE(1, DYND_PP_INC(DYND_ELWISE_MAX)))
             DYND_PP_META_NAME_RANGE(acast, NSRC)), res_ndim, res_shape); \
         nd::array res = nd::make_strided_array(dst_tp, res_ndim, res_shape.get()); \
 \
-        std::pair<const T *, func_type> obj_func(&obj, func); \
+        std::pair<const T *, func_type *> obj_func(&obj, &func); \
 \
         arrfunc_type_data af; \
         af.ckernel_funcproto = expr_operation_funcproto; \
@@ -818,12 +818,11 @@ DYND_PP_JOIN_MAP(FUNCS, (), DYND_PP_RANGE(1, DYND_PP_INC(DYND_ELWISE_MAX)))
             DYND_PP_META_NAME_RANGE(acast, NSRC)), res_ndim, res_shape); \
         nd::array res = nd::make_strided_array(dst_tp, res_ndim, res_shape.get()); \
 \
-        std::pair<const T *, func_type> obj_func(&obj, func); \
+        std::pair<const T *, func_type *> obj_func(&obj, &func); \
 \
         arrfunc_type_data af; \
         af.ckernel_funcproto = expr_operation_funcproto; \
-        nd::array src_tp_arr(src_tp); \
-        af.func_proto = ndt::make_funcproto(src_tp_arr, dst_tp); \
+        af.func_proto = ndt::make_funcproto(src_tp, dst_tp); \
         af.data_ptr = reinterpret_cast<void *>(&obj_func); \
         af.instantiate_func = &detail::elwise_ckernel_instantiator<func_type>::instantiate; \
         af.free_func = NULL; \

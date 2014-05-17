@@ -78,7 +78,7 @@ public:
 
 namespace ndt {
     /** Makes a funcproto type with the specified types */
-    inline ndt::type make_funcproto(const nd::array& param_types,
+    inline ndt::type make_funcproto(const nd::array &param_types,
                                     const ndt::type &return_type)
     {
         return ndt::type(
