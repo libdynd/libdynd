@@ -514,8 +514,8 @@ double x;
 /* Bessel function of second kind, order zero  */
 
 /* Rational approximation coefficients YP[], YQ[] are used here.
- * The function computed is  y0(x)  -  2 * log(x) * j0(x) / NPY_PI,
- * whose value at x = 0 is  2 * ( log(0.5) + EUL ) / NPY_PI
+ * The function computed is  y0(x)  -  2 * log(x) * j0(x) / DYND_PI,
+ * whose value at x = 0 is  2 * ( log(0.5) + EUL ) / DYND_PI
  * = 0.073804295108687225.
  */
 
@@ -532,15 +532,15 @@ double x;
     if (x <= 5.0) {
 	if (x == 0.0) {
 	    mtherr("y0", SING);
-	    return -NPY_INFINITY;
+	    return -DYND_INF;
 	}
 	else if (x < 0.0) {
 	    mtherr("y0", DOMAIN);
-	    return NPY_NAN;
+	    return DYND_NAN;
 	}
 	z = x * x;
 	w = polevl(z, YP, 7) / p1evl(z, YQ, 7);
-	w += NPY_2_PI * log(x) * j0(x);
+	w += DYND_2_DIV_PI * log(x) * j0(x);
 	return (w);
     }
 
@@ -548,7 +548,7 @@ double x;
     z = 25.0 / (x * x);
     p = polevl(z, PP, 6) / polevl(z, PQ, 6);
     q = polevl(z, QP, 7) / p1evl(z, QQ, 7);
-    xn = x - NPY_PI_4;
+    xn = x - DYND_PI_DIV_4;
     p = p * sin(xn) + w * q * cos(xn);
     return (p * SQ2OPI / sqrt(x));
 }

@@ -57,11 +57,10 @@
 #include <stdio.h>
 #include "mconf.h"
 
-// #include "sf_error.h"
+#include "sf_error.h"
 
 int merror = 0;
 
-/*
 static sf_error_t conv_to_sf[8] = {
     SF_ERROR_OTHER,
     SF_ERROR_DOMAIN,
@@ -72,7 +71,6 @@ static sf_error_t conv_to_sf[8] = {
     SF_ERROR_LOSS,
     SF_ERROR_SLOW
 };
-*/
 
 int mtherr(char *name, int code)
 {
@@ -90,7 +88,7 @@ int mtherr(char *name, int code)
     if ((code <= 0) || (code >= 8))
 	code = 0;
 
-//    sf_error(name, conv_to_sf[code], NULL);
+    sf_error(name, conv_to_sf[code], NULL);
 
     /* Return to calling
      * program

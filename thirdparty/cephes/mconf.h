@@ -65,6 +65,8 @@
 #ifndef CEPHES_MCONF_H
 #define CEPHES_MCONF_H
 
+#include "../../include/dynd/dynd_math.h"
+
 // #include <Python.h>
 typedef unsigned npy_uint32;
 typedef double npy_double;

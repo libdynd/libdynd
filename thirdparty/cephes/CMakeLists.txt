@@ -13,6 +13,7 @@ set(cephes_SRC
     ${CMAKE_CURRENT_SOURCE_DIR}/jv.c
     ${CMAKE_CURRENT_SOURCE_DIR}/polevl.c
     ${CMAKE_CURRENT_SOURCE_DIR}/mtherr.c
+    ${CMAKE_CURRENT_SOURCE_DIR}/sf_error.c
     ${CMAKE_CURRENT_SOURCE_DIR}/struve.c
     ${CMAKE_CURRENT_SOURCE_DIR}/yn.c
     ${CMAKE_CURRENT_SOURCE_DIR}/mconf.h
