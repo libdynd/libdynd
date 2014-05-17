@@ -1,6 +1,6 @@
-/*							mconf.h
+/*                                                     mconf.h
  *
- *	Common include file for math routines
+ *     Common include file for math routines
  *
  *
  *
@@ -56,39 +56,106 @@
  * may fail on many systems.  Verify that they are supposed
  * to work on your computer.
  */
-/*
-Cephes Math Library Release 2.3:  June, 1995
-Copyright 1984, 1987, 1989, 1995 by Stephen L. Moshier
-*/
 
+/*
+ * Cephes Math Library Release 2.3:  June, 1995
+ * Copyright 1984, 1987, 1989, 1995 by Stephen L. Moshier
+ */
 
-/* Define if the `long double' type works.  */
-#define HAVE_LONG_DOUBLE 1
+#ifndef CEPHES_MCONF_H
+#define CEPHES_MCONF_H
 
-/* Define as the return type of signal handlers (int or void).  */
-#define RETSIGTYPE void
+// #include <Python.h>
+typedef unsigned npy_uint32;
+typedef double npy_double;
 
-/* Define if you have the ANSI C header files.  */
-#define STDC_HEADERS 1
+#define NPY_INLINE inline
 
-/* Define if your processor stores words with the most significant
-   byte first (like Motorola and SPARC, unlike Intel and VAX).  */
-/* #undef WORDS_BIGENDIAN */
+NPY_INLINE static float __npy_inff(void)
+{
+    const union { npy_uint32 __i; float __f;} __bint = {0x7f800000UL};
+    return __bint.__f;
+}
 
-/* Define if floating point words are bigendian.  */
-/* #undef FLOAT_WORDS_BIGENDIAN */
+NPY_INLINE static float __npy_nanf(void)
+{
+    const union { npy_uint32 __i; float __f;} __bint = {0x7fc00000UL};
+    return __bint.__f;
+}
 
-/* The number of bytes in a int.  */
-#define SIZEOF_INT 4
+NPY_INLINE static float __npy_pzerof(void)
+{
+    const union { npy_uint32 __i; float __f;} __bint = {0x00000000UL};
+    return __bint.__f;
+}
 
-/* Define if you have the <string.h> header file.  */
-#define HAVE_STRING_H 1
+NPY_INLINE static float __npy_nzerof(void)
+{
+    const union { npy_uint32 __i; float __f;} __bint = {0x80000000UL};
+    return __bint.__f;
+}
 
-/* Name of package */
-#define PACKAGE "cephes"
+#define npy_isfinite(x) (!isinf(x))
+#define npy_isinf(x) isinf(x)
 
-/* Version number of package */
-#define VERSION "2.7"
+#define NPY_INFINITYF __npy_inff()
+#define NPY_NANF __npy_nanf()
+#define NPY_PZEROF __npy_pzerof()
+#define NPY_NZEROF __npy_nzerof()
+
+#define NPY_INFINITY ((npy_double)NPY_INFINITYF)
+#define NPY_NAN ((npy_double)NPY_NANF)
+#define NPY_PZERO ((npy_double)NPY_PZEROF)
+#define NPY_NZERO ((npy_double)NPY_NZEROF)
+
+#define NPY_INFINITYL ((npy_longdouble)NPY_INFINITYF)
+#define NPY_NANL ((npy_longdouble)NPY_NANF)
+#define NPY_PZEROL ((npy_longdouble)NPY_PZEROF)
+#define NPY_NZEROL ((npy_longdouble)NPY_NZEROF)
+
+#define NPY_E         2.718281828459045235360287471352662498  /* e */
+#define NPY_LOG2E     1.442695040888963407359924681001892137  /* log_2 e */
+#define NPY_LOG10E    0.434294481903251827651128918916605082  /* log_10 e */
+#define NPY_LOGE2     0.693147180559945309417232121458176568  /* log_e 2 */
+#define NPY_LOGE10    2.302585092994045684017991454684364208  /* log_e 10 */
+#define NPY_PI        3.141592653589793238462643383279502884  /* pi */
+#define NPY_PI_2      1.570796326794896619231321691639751442  /* pi/2 */
+#define NPY_PI_4      0.785398163397448309615660845819875721  /* pi/4 */
+#define NPY_1_PI      0.318309886183790671537767526745028724  /* 1/pi */
+#define NPY_2_PI      0.636619772367581343075535053490057448  /* 2/pi */
+#define NPY_EULER     0.577215664901532860606512090082402431  /* Euler constant */
+#define NPY_SQRT2     1.414213562373095048801688724209698079  /* sqrt(2) */
+#define NPY_SQRT1_2   0.707106781186547524400844362104849039  /* 1/sqrt(2) */
+
+#define NPY_Ef        2.718281828459045235360287471352662498F /* e */
+#define NPY_LOG2Ef    1.442695040888963407359924681001892137F /* log_2 e */
+#define NPY_LOG10Ef   0.434294481903251827651128918916605082F /* log_10 e */
+#define NPY_LOGE2f    0.693147180559945309417232121458176568F /* log_e 2 */
+#define NPY_LOGE10f   2.302585092994045684017991454684364208F /* log_e 10 */
+#define NPY_PIf       3.141592653589793238462643383279502884F /* pi */
+#define NPY_PI_2f     1.570796326794896619231321691639751442F /* pi/2 */
+#define NPY_PI_4f     0.785398163397448309615660845819875721F /* pi/4 */
+#define NPY_1_PIf     0.318309886183790671537767526745028724F /* 1/pi */
+#define NPY_2_PIf     0.636619772367581343075535053490057448F /* 2/pi */
+#define NPY_EULERf    0.577215664901532860606512090082402431F /* Euler constan*/
+#define NPY_SQRT2f    1.414213562373095048801688724209698079F /* sqrt(2) */
+
+#define NPY_El        2.718281828459045235360287471352662498L /* e */
+#define NPY_LOG2El    1.442695040888963407359924681001892137L /* log_2 e */
+#define NPY_LOG10El   0.434294481903251827651128918916605082L /* log_10 e */
+#define NPY_LOGE2l    0.693147180559945309417232121458176568L /* log_e 2 */
+#define NPY_LOGE10l   2.302585092994045684017991454684364208L /* log_e 10 */
+#define NPY_PIl       3.141592653589793238462643383279502884L /* pi */
+#define NPY_PI_2l     1.570796326794896619231321691639751442L /* pi/2 */
+#define NPY_PI_4l     0.785398163397448309615660845819875721L /* pi/4 */
+#define NPY_1_PIl     0.318309886183790671537767526745028724L /* 1/pi */
+#define NPY_2_PIl     0.636619772367581343075535053490057448L /* 2/pi */
+#define NPY_EULERl    0.577215664901532860606512090082402431L /* Euler constan*/
+#define NPY_SQRT2l    1.414213562373095048801688724209698079L /* sqrt(2) */
+#define NPY_SQRT1_2l  0.707106781186547524400844362104849039L /* 1/sqrt(2) */
+
+#include "cephes_names.h"
+#include "protos.h"
 
 /* Constant definitions for math error conditions
  */
@@ -99,40 +166,22 @@ Copyright 1984, 1987, 1989, 1995 by Stephen L. Moshier
 #define UNDERFLOW	4	/* underflow range error */
 #define TLOSS		5	/* total loss of precision */
 #define PLOSS		6	/* partial loss of precision */
+#define TOOMANY         7	/* too many iterations */
+#define MAXITER        500
 
 #define EDOM		33
 #define ERANGE		34
-/* Complex numeral.  */
-typedef struct
-	{
-	double r;
-	double i;
-	} cmplx;
 
-#ifdef HAVE_LONG_DOUBLE
 /* Long double complex numeral.  */
-typedef struct
-	{
-	long double r;
-	long double i;
-	} cmplxl;
-#endif
-
+/*
+ * typedef struct
+ * {
+ * long double r;
+ * long double i;
+ * } cmplxl;
+ */
 
 /* Type of computer arithmetic */
-
-/* PDP-11, Pro350, VAX:
- */
-/* #define DEC 1 */
-
-/* Intel IEEE, low order words come first:
- */
-/* #define IBMPC 1 */
-
-/* Motorola IEEE, high order words come first
- * (Sun 680x0 workstation):
- */
-/* #define MIEEE 1 */
 
 /* UNKnown arithmetic, invokes coefficients given in
  * normal decimal format.  Beware of range boundary
@@ -140,14 +189,13 @@ typedef struct
  * roundoff problems in pow.c:
  * (Sun SPARCstation)
  */
+
+/* SciPy note: by defining UNK, we prevent the compiler from
+ * casting integers to floating point numbers.  If the Endianness
+ * is detected incorrectly, this causes problems on some platforms.
+ */
 #define UNK 1
 
-/* If you define UNK, then be sure to set BIGENDIAN properly. */
-#ifdef FLOAT_WORDS_BIGENDIAN
-#define BIGENDIAN 1
-#else
-#define BIGENDIAN 0
-#endif
 /* Define this `volatile' if your compiler thinks
  * that floating point arithmetic obeys the associative
  * and distributive laws.  It will defeat some optimizations
@@ -172,28 +220,16 @@ typedef struct
 /* Define to support tiny denormal numbers, else undefine. */
 #define DENORMAL 1
 
-/* Define to ask for infinity support, else undefine. */
-#define INFINITIES 1
-
-/* Define to ask for support of numbers that are Not-a-Number,
-   else undefine.  This may automatically define INFINITIES in some files. */
-#define NANS 1
-
 /* Define to distinguish between -0.0 and +0.0.  */
 #define MINUSZERO 1
 
 /* Define 1 for ANSI C atan2() function
-   See atan.c and clog.c. */
+ * See atan.c and clog.c. */
 #define ANSIC 1
-
-/* Get ANSI function prototypes, if you want them. */
-#if 1
-/* #ifdef __STDC__ */
-#define ANSIPROT 1
-int mtherr ( char *, int );
-#else
-int mtherr();
-#endif
 
 /* Variable for error reporting.  See mtherr.c.  */
 extern int merror;
+
+#define gamma Gamma
+
+#endif				/* CEPHES_MCONF_H */

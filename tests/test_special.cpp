@@ -21,9 +21,9 @@ double rel_error(double expected, double actual) {
     return fabs(1.0 - actual / expected);
 }
 
-TEST(Special, BesselJ0) {
-#define REL_ERROR_MAX 1E-6
+#define REL_ERROR_MAX 1E-8
 
+TEST(Special, BesselJ0) {
     nd::array vals = bessel_j0_vals();
     intptr_t size = vals.get_shape()[1];
 
@@ -31,13 +31,9 @@ TEST(Special, BesselJ0) {
         EXPECT_GE(REL_ERROR_MAX,
             rel_error(vals(1, i).as<double>(), bessel_j0(vals(0, i).as<double>())));
     }
-
-#undef REL_ERROR_MAX
 }
 
 TEST(Special, BesselJ1) {
-#define REL_ERROR_MAX 1E-6
-
     nd::array vals = bessel_j1_vals();
     intptr_t size = vals.get_shape()[1];
 
@@ -45,13 +41,9 @@ TEST(Special, BesselJ1) {
         EXPECT_GE(REL_ERROR_MAX,
             rel_error(vals(1, i).as<double>(), bessel_j1(vals(0, i).as<double>())));
     }
-
-#undef REL_ERROR_MAX
 }
 
 TEST(Special, BesselJInt) {
-#define REL_ERROR_MAX 1E-3
-
     nd::array vals = bessel_j_vals<int>();
     intptr_t size = vals.get_shape()[1];
 
@@ -59,13 +51,9 @@ TEST(Special, BesselJInt) {
         EXPECT_GE(REL_ERROR_MAX,
             rel_error(vals(2, i).as<double>(), bessel_j(vals(0, i).as<int>(), vals(1, i).as<double>())));
     }
-
-#undef REL_ERROR_MAX
 }
 
 TEST(Special, BesselJDouble) {
-#define REL_ERROR_MAX 1E-6
-
     nd::array vals = bessel_j_vals<double>();
     intptr_t size = vals.get_shape()[1];
 
@@ -73,13 +61,9 @@ TEST(Special, BesselJDouble) {
         EXPECT_GE(REL_ERROR_MAX,
             rel_error(vals(2, i).as<double>(), bessel_j(vals(0, i).as<double>(), vals(1, i).as<double>())));
     }
-
-#undef REL_ERROR_MAX
 }
 
 TEST(Special, BesselY0) {
-#define REL_ERROR_MAX 1E-6
-
     nd::array vals = bessel_y0_vals();
     intptr_t size = vals.get_shape()[1];
 
@@ -87,13 +71,9 @@ TEST(Special, BesselY0) {
         EXPECT_GE(REL_ERROR_MAX,
             rel_error(vals(1, i).as<double>(), bessel_y0(vals(0, i).as<double>())));
     }
-
-#undef REL_ERROR_MAX
 }
 
 TEST(Special, BesselY1) {
-#define REL_ERROR_MAX 1E-6
-
     nd::array vals = bessel_y1_vals();
     intptr_t size = vals.get_shape()[1];
 
@@ -101,13 +81,9 @@ TEST(Special, BesselY1) {
         EXPECT_GE(REL_ERROR_MAX,
             rel_error(vals(1, i).as<double>(), bessel_y1(vals(0, i).as<double>())));
     }
-
-#undef REL_ERROR_MAX
 }
 
 TEST(Special, BesselYInt) {
-#define REL_ERROR_MAX 1E-6
-
     nd::array vals = bessel_y_vals<int>();
     intptr_t size = vals.get_shape()[1];
 
@@ -115,14 +91,9 @@ TEST(Special, BesselYInt) {
         EXPECT_GE(REL_ERROR_MAX,
             rel_error(vals(2, i).as<double>(), bessel_y(vals(0, i).as<int>(), vals(1, i).as<double>())));
     }
-
-#undef REL_ERROR_MAX
 }
 
-/*
 TEST(Special, BesselYDouble) {
-#define REL_ERROR_MAX 1E-3
-
     nd::array vals = bessel_y_vals<double>();
     intptr_t size = vals.get_shape()[1];
 
@@ -130,8 +101,6 @@ TEST(Special, BesselYDouble) {
         EXPECT_GE(REL_ERROR_MAX,
             rel_error(vals(2, i).as<double>(), bessel_y(vals(0, i).as<double>(), vals(1, i).as<double>())));
     }
+}
 
 #undef REL_ERROR_MAX
-}
-*/
-

@@ -1,6 +1,6 @@
-/*							gdtr.c
+/*                                                     gdtr.c
  *
- *	Gamma distribution function
+ *     Gamma distribution function
  *
  *
  *
@@ -14,7 +14,7 @@
  *
  * DESCRIPTION:
  *
- * Returns the integral from zero to x of the gamma probability
+ * Returns the integral from zero to x of the Gamma probability
  * density function:
  *
  *
@@ -26,7 +26,7 @@
  *      | (b)   -
  *               0
  *
- *  The incomplete gamma integral is used, according to the
+ *  The incomplete Gamma integral is used, according to the
  * relation
  *
  * y = igam( b, ax ).
@@ -44,7 +44,7 @@
  */
 /*							gdtrc.c
  *
- *	Complemented gamma distribution function
+ *	Complemented Gamma distribution function
  *
  *
  *
@@ -58,7 +58,7 @@
  *
  * DESCRIPTION:
  *
- * Returns the integral from x to infinity of the gamma
+ * Returns the integral from x to infinity of the Gamma
  * probability density function:
  *
  *
@@ -70,7 +70,7 @@
  *      | (b)   -
  *               x
  *
- *  The incomplete gamma integral is used, according to the
+ *  The incomplete Gamma integral is used, according to the
  * relation
  *
  * y = igamc( b, ax ).
@@ -87,44 +87,49 @@
  *
  */
 
-/*							gdtr()  */
+/*                                                     gdtr()  */
 
 
 /*
-Cephes Math Library Release 2.8:  June, 2000
-Copyright 1984, 1987, 1995, 2000 by Stephen L. Moshier
-*/
+ * Cephes Math Library Release 2.3:  March,1995
+ * Copyright 1984, 1987, 1995 by Stephen L. Moshier
+ */
 
 #include "mconf.h"
-#ifdef ANSIPROT
-extern double igam ( double, double );
-extern double igamc ( double, double );
-#else
-double igam(), igamc();
-#endif
+double gdtri(double, double, double);
 
-double gdtr( a, b, x )
+double gdtr(a, b, x)
 double a, b, x;
 {
 
-if( x < 0.0 )
-	{
-	mtherr( "gdtr", DOMAIN );
-	return( 0.0 );
-	}
-return(  igam( b, a * x )  );
+    if (x < 0.0) {
+	mtherr("gdtr", DOMAIN);
+	return (NPY_NAN);
+    }
+    return (igam(b, a * x));
 }
 
 
-
-double gdtrc( a, b, x )
+double gdtrc(a, b, x)
 double a, b, x;
 {
 
-if( x < 0.0 )
-	{
-	mtherr( "gdtrc", DOMAIN );
-	return( 0.0 );
-	}
-return(  igamc( b, a * x )  );
+    if (x < 0.0) {
+	mtherr("gdtrc", DOMAIN);
+	return (NPY_NAN);
+    }
+    return (igamc(b, a * x));
+}
+
+
+double gdtri(a, b, y)
+double a, b, y;
+{
+
+    if ((y < 0.0) || (y > 1.0) || (a <= 0.0) || (b < 0.0)) {
+	mtherr("gdtri", DOMAIN);
+	return (NPY_NAN);
+    }
+
+    return (igami(b, 1.0 - y) / a);
 }

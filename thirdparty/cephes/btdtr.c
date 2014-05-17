@@ -1,7 +1,7 @@
 
-/*							btdtr.c
+/*                                                     btdtr.c
  *
- *	Beta distribution
+ *     Beta distribution
  *
  *
  *
@@ -42,23 +42,19 @@
  *
  */
 
-/*								btdtr()	*/
+/*                                                             btdtr() */
 
 
 /*
-Cephes Math Library Release 2.8:  June, 2000
-Copyright 1984, 1987, 1995, 2000 by Stephen L. Moshier
-*/
-#include "mconf.h"
-#ifdef ANSIPROT
-extern double incbet ( double, double, double );
-#else
-double incbet();
-#endif
+ * Cephes Math Library Release 2.0:  April, 1987
+ * Copyright 1984, 1987, 1995 by Stephen L. Moshier
+ */
 
-double btdtr( a, b, x )
+#include "mconf.h"
+
+double btdtr(a, b, x)
 double a, b, x;
 {
 
-return( incbet( a, b, x ) );
+    return (incbet(a, b, x));
 }

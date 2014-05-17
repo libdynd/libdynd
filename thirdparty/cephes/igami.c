@@ -1,6 +1,6 @@
-/*							igami()
+/*                                                     igami()
  *
- *      Inverse of complemented incomplete gamma integral
+ *      Inverse of complemented imcomplete Gamma integral
  *
  *
  *
@@ -16,7 +16,6 @@
  *
  *  igamc( a, x ) = p.
  *
- * It is valid in the right-hand tail of the distribution, p < 0.5.
  * Starting with the approximate value
  *
  *         3
@@ -45,147 +44,136 @@
  */
 
 /*
-Cephes Math Library Release 2.8:  June, 2000
-Copyright 1984, 1987, 1995, 2000 by Stephen L. Moshier
-*/
+ * Cephes Math Library Release 2.3:  March, 1995
+ * Copyright 1984, 1987, 1995 by Stephen L. Moshier
+ */
 
 #include "mconf.h"
+#include <stdio.h>
 
-extern double MACHEP, MAXNUM, MAXLOG, MINLOG;
-#ifdef ANSIPROT
-extern double igamc ( double, double );
-extern double ndtri ( double );
-extern double exp ( double );
-extern double fabs ( double );
-extern double log ( double );
-extern double sqrt ( double );
-extern double lgam ( double );
-#else
-double igamc(), ndtri(), exp(), fabs(), log(), sqrt(), lgam();
-#endif
+extern double MACHEP, MAXLOG, MINLOG;
 
-double igami( a, y0 )
+double igami(a, y0)
 double a, y0;
 {
-double x0, x1, x, yl, yh, y, d, lgm, dithresh;
-int i, dir;
+    double x0, x1, x, yl, yh, y, d, lgm, dithresh;
+    int i, dir;
 
- if( y0 > 0.5)
- 	mtherr( "igami", PLOSS );
+    /* bound the solution */
+    x0 = NPY_INFINITY;
+    yl = 0;
+    x1 = 0;
+    yh = 1.0;
+    dithresh = 5.0 * MACHEP;
 
-/* bound the solution */
-x0 = MAXNUM;
-yl = 0;
-x1 = 0;
-yh = 1.0;
-dithresh = 5.0 * MACHEP;
+    if ((y0 < 0.0) || (y0 > 1.0) || (a <= 0)) {
+	mtherr("igami", DOMAIN);
+	return (NPY_NAN);
+    }
 
-/* approximation to inverse function */
-d = 1.0/(9.0*a);
-y = ( 1.0 - d - ndtri(y0) * sqrt(d) );
-x = a * y * y * y;
+    if (y0 == 0.0) {
+	return (NPY_INFINITY);
+    }
 
-lgm = lgam(a);
+    if (y0 == 1.0) {
+	return 0.0;
+    }
 
-for( i=0; i<10; i++ )
-	{
-	if( x > x0 || x < x1 )
-		goto ihalve;
-	y = igamc(a,x);
-	if( y < yl || y > yh )
-		goto ihalve;
-	if( y < y0 )
-		{
-		x0 = x;
-		yl = y;
-		}
-	else
-		{
-		x1 = x;
-		yh = y;
-		}
-/* compute the derivative of the function at this point */
+    /* approximation to inverse function */
+    d = 1.0 / (9.0 * a);
+    y = (1.0 - d - ndtri(y0) * sqrt(d));
+    x = a * y * y * y;
+
+    lgm = lgam(a);
+
+    for (i = 0; i < 10; i++) {
+	if (x > x0 || x < x1)
+	    goto ihalve;
+	y = igamc(a, x);
+	if (y < yl || y > yh)
+	    goto ihalve;
+	if (y < y0) {
+	    x0 = x;
+	    yl = y;
+	}
+	else {
+	    x1 = x;
+	    yh = y;
+	}
+	/* compute the derivative of the function at this point */
 	d = (a - 1.0) * log(x) - x - lgm;
-	if( d < -MAXLOG )
-		goto ihalve;
+	if (d < -MAXLOG)
+	    goto ihalve;
 	d = -exp(d);
-/* compute the step to the next approximation of x */
-	d = (y - y0)/d;
-	if( fabs(d/x) < MACHEP )
-		goto done;
+	/* compute the step to the next approximation of x */
+	d = (y - y0) / d;
+	if (fabs(d / x) < MACHEP)
+	    goto done;
 	x = x - d;
-	}
+    }
 
-/* Resort to interval halving if Newton iteration did not converge. */
-ihalve:
+    /* Resort to interval halving if Newton iteration did not converge. */
+  ihalve:
 
-d = 0.0625;
-if( x0 == MAXNUM )
-	{
-	if( x <= 0.0 )
-		x = 1.0;
-	while( x0 == MAXNUM )
-		{
-		x = (1.0 + d) * x;
-		y = igamc( a, x );
-		if( y < y0 )
-			{
-			x0 = x;
-			yl = y;
-			break;
-			}
-		d = d + d;
-		}
-	}
-d = 0.5;
-dir = 0;
-
-for( i=0; i<400; i++ )
-	{
-	x = x1  +  d * (x0 - x1);
-	y = igamc( a, x );
-	lgm = (x0 - x1)/(x1 + x0);
-	if( fabs(lgm) < dithresh )
-		break;
-	lgm = (y - y0)/y0;
-	if( fabs(lgm) < dithresh )
-		break;
-	if( x <= 0.0 )
-		break;
-	if( y >= y0 )
-		{
-		x1 = x;
-		yh = y;
-		if( dir < 0 )
-			{
-			dir = 0;
-			d = 0.5;
-			}
-		else if( dir > 1 )
-			d = 0.5 * d + 0.5; 
-		else
-			d = (y0 - yl)/(yh - yl);
-		dir += 1;
-		}
-	else
-		{
+    d = 0.0625;
+    if (x0 == NPY_INFINITY) {
+	if (x <= 0.0)
+	    x = 1.0;
+	while (x0 == NPY_INFINITY) {
+	    x = (1.0 + d) * x;
+	    y = igamc(a, x);
+	    if (y < y0) {
 		x0 = x;
 		yl = y;
-		if( dir > 0 )
-			{
-			dir = 0;
-			d = 0.5;
-			}
-		else if( dir < -1 )
-			d = 0.5 * d;
-		else
-			d = (y0 - yl)/(yh - yl);
-		dir -= 1;
-		}
+		break;
+	    }
+	    d = d + d;
 	}
-if( x == 0.0 )
-	mtherr( "igami", UNDERFLOW );
+    }
+    d = 0.5;
+    dir = 0;
 
-done:
-return( x );
+    for (i = 0; i < 400; i++) {
+	x = x1 + d * (x0 - x1);
+	y = igamc(a, x);
+	lgm = (x0 - x1) / (x1 + x0);
+	if (fabs(lgm) < dithresh)
+	    break;
+	lgm = (y - y0) / y0;
+	if (fabs(lgm) < dithresh)
+	    break;
+	if (x <= 0.0)
+	    break;
+	if (y >= y0) {
+	    x1 = x;
+	    yh = y;
+	    if (dir < 0) {
+		dir = 0;
+		d = 0.5;
+	    }
+	    else if (dir > 1)
+		d = 0.5 * d + 0.5;
+	    else
+		d = (y0 - yl) / (yh - yl);
+	    dir += 1;
+	}
+	else {
+	    x0 = x;
+	    yl = y;
+	    if (dir > 0) {
+		dir = 0;
+		d = 0.5;
+	    }
+	    else if (dir < -1)
+		d = 0.5 * d;
+	    else
+		d = (y0 - yl) / (yh - yl);
+	    dir -= 1;
+	}
+    }
+    if (x == 0.0)
+	mtherr("igami", UNDERFLOW);
+
+  done:
+    return (x);
 }

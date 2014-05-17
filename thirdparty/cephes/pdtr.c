@@ -1,6 +1,6 @@
-/*							pdtr.c
+/*                                                     pdtr.c
  *
- *	Poisson distribution
+ *     Poisson distribution
  *
  *
  *
@@ -25,11 +25,11 @@
  *  j=0
  *
  * The terms are not summed directly; instead the incomplete
- * gamma integral is employed, according to the relation
+ * Gamma integral is employed, according to the relation
  *
  * y = pdtr( k, m ) = igamc( k+1, m ).
  *
- * The arguments must both be positive.
+ * The arguments must both be nonnegative.
  *
  *
  *
@@ -38,9 +38,9 @@
  * See igamc().
  *
  */
-/*							pdtrc()
+/*  pdtrc()
  *
- *	Complemented poisson distribution
+ *  Complemented poisson distribution
  *
  *
  *
@@ -65,11 +65,11 @@
  *  j=k+1
  *
  * The terms are not summed directly; instead the incomplete
- * gamma integral is employed, according to the formula
+ * Gamma integral is employed, according to the formula
  *
  * y = pdtrc( k, m ) = igam( k+1, m ).
  *
- * The arguments must both be positive.
+ * The arguments must both be nonnegative.
  *
  *
  *
@@ -78,9 +78,9 @@
  * See igam.c.
  *
  */
-/*							pdtri()
+/*  pdtri()
  *
- *	Inverse Poisson distribution
+ *  Inverse Poisson distribution
  *
  *
  *
@@ -100,7 +100,7 @@
  * from 0 to x of the Poisson density is equal to the
  * given probability y.
  *
- * This is accomplished using the inverse gamma integral
+ * This is accomplished using the inverse Gamma integral
  * function and the relation
  *
  *    m = igami( k+1, y ).
@@ -119,66 +119,61 @@
  *                     k < 0
  *
  */
-
+
 /*
-Cephes Math Library Release 2.8:  June, 2000
-Copyright 1984, 1987, 1995, 2000 by Stephen L. Moshier
-*/
+ * Cephes Math Library Release 2.3:  March, 1995
+ * Copyright 1984, 1987, 1995 by Stephen L. Moshier
+ */
 
 #include "mconf.h"
-#ifdef ANSIPROT
-extern double igam ( double, double );
-extern double igamc ( double, double );
-extern double igami ( double, double );
-#else
-double igam(), igamc(), igami();
-#endif
 
-double pdtrc( k, m )
+double pdtrc(k, m)
 int k;
 double m;
 {
-double v;
+    double v;
 
-if( (k < 0) || (m <= 0.0) )
-	{
-	mtherr( "pdtrc", DOMAIN );
-	return( 0.0 );
-	}
-v = k+1;
-return( igam( v, m ) );
+    if ((k < 0) || (m < 0.0)) {
+        mtherr("pdtrc", DOMAIN);
+        return (NPY_NAN);
+    }
+    if (m == 0.0) {
+        return 0.0;
+    }
+    v = k + 1;
+    return (igam(v, m));
 }
 
 
-
-double pdtr( k, m )
+double pdtr(k, m)
 int k;
 double m;
 {
-double v;
+    double v;
 
-if( (k < 0) || (m <= 0.0) )
-	{
-	mtherr( "pdtr", DOMAIN );
-	return( 0.0 );
-	}
-v = k+1;
-return( igamc( v, m ) );
+    if ((k < 0) || (m < 0.0)) {
+        mtherr("pdtr", DOMAIN);
+        return (NPY_NAN);
+    }
+    if (m == 0.0) {
+        return 1.0;
+    }
+    v = k + 1;
+    return (igamc(v, m));
 }
 
 
-double pdtri( k, y )
+double pdtri(k, y)
 int k;
 double y;
 {
-double v;
+    double v;
 
-if( (k < 0) || (y < 0.0) || (y >= 1.0) )
-	{
-	mtherr( "pdtri", DOMAIN );
-	return( 0.0 );
-	}
-v = k+1;
-v = igami( v, y );
-return( v );
+    if ((k < 0) || (y < 0.0) || (y >= 1.0)) {
+        mtherr("pdtri", DOMAIN);
+        return (NPY_NAN);
+    }
+    v = k + 1;
+    v = igami(v, y);
+    return (v);
 }
