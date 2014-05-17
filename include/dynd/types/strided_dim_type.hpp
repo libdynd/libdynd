@@ -196,7 +196,9 @@ namespace nd {
                     const ndt::type& et = tp.get_type_at_dimension(NULL, 1).value_type();
                     if(et.get_kind() == dynd_kind_of<T>::value) {
                         // It also has the same array kind as requested
-                        nd::array tmp = nd::empty(a.get_dim_size(), ndt::make_strided<T>());
+                        nd::array tmp = nd::empty(
+                            a.get_dim_size(),
+                            ndt::make_strided_dim(ndt::make_type<T>()));
                         tmp.vals() = a;
                         tmp.flag_as_immutable();
                         a.swap(tmp);
@@ -235,7 +237,7 @@ namespace nd {
                     const ndt::type& et = tp.get_type_at_dimension(NULL, 1).value_type();
                     if(et.get_kind() == string_kind) {
                         // It also has the same array kind as requested
-                        nd::array tmp = nd::empty(a.get_dim_size(), ndt::make_strided_dim(ndt::make_string()));
+                        nd::array tmp = nd::empty(a.get_dim_size(), ndt::make_strided_of_string());
                         tmp.vals() = a;
                         tmp.flag_as_immutable();
                         a.swap(tmp);
@@ -273,7 +275,7 @@ namespace nd {
                     const ndt::type& et = tp.get_type_at_dimension(NULL, 1).value_type();
                     if(et.get_type_id() == type_type_id) {
                         // It also has the same array type as requested
-                        nd::array tmp = nd::empty(a.get_dim_size(), ndt::make_strided_dim(ndt::make_type()));
+                        nd::array tmp = nd::empty(a.get_dim_size(), ndt::make_strided_of_type());
                         tmp.vals() = a;
                         tmp.flag_as_immutable();
                         a.swap(tmp);

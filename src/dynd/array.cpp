@@ -621,7 +621,7 @@ nd::array nd::array_rw(const ndt::type& tp)
 
 nd::array nd::detail::make_from_vec<ndt::type>::make(const std::vector<ndt::type>& vec)
 {
-    ndt::type dt = ndt::make_strided_dim(ndt::make_type());
+    ndt::type dt = ndt::make_strided_of_type();
     char *data_ptr = NULL;
     array result(make_array_memory_block(dt.extended()->get_metadata_size(),
                     sizeof(type_type_data) * vec.size(),
@@ -653,7 +653,7 @@ nd::array nd::detail::make_from_vec<std::string>::make(const std::vector<std::st
         total_string_size += vec[i].size();
     }
 
-    ndt::type dt = ndt::make_strided_dim(ndt::make_string(string_encoding_utf_8));
+    ndt::type dt = ndt::make_strided_of_string();
     char *data_ptr = NULL;
     // Make an array memory block which contains both the string pointers and
     // the string data

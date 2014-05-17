@@ -9,6 +9,7 @@
 #include <dynd/config.hpp>
 #include <dynd/eval/eval_context.hpp>
 #include <dynd/types/base_type.hpp>
+#include <dynd/types/funcproto_type.hpp>
 #include <dynd/kernels/ckernel_builder.hpp>
 
 namespace dynd {
@@ -19,6 +20,8 @@ enum arrfunc_proto_t {
     binary_predicate_funcproto
 };
 
+struct arrfunc_type_data;
+
 /**
  * Function prototype for instantiating a ckernel from an
  * arrfunc. To use this function, the
@@ -28,7 +31,7 @@ enum arrfunc_proto_t {
  * data types of the kernel require metadata, such as for 'strided'
  * or 'var' dimension types, the metadata must be provided as well.
  *
- * \param self_data_ptr  This is af->data_ptr.
+ * \param self  This is &af.
  * \param ckb  A ckernel_builder instance where the kernel is placed.
  * \param ckb_offset  The offset into the output ckernel_builder `out_ckb`
  *                    where the kernel should be placed.
@@ -46,9 +49,9 @@ enum arrfunc_proto_t {
  * \param ectx  The evaluation context.
  */
 typedef intptr_t (*instantiate_arrfunc_t)(
-    void *self_data_ptr, dynd::ckernel_builder *ckb, intptr_t ckb_offset,
-    const ndt::type &dst_tp, const char *dst_arrmeta, const ndt::type *src_tp,
-    const char *const *src_arrmeta, uint32_t kernreq,
+    const arrfunc_type_data *self, dynd::ckernel_builder *ckb,
+    intptr_t ckb_offset, const ndt::type &dst_tp, const char *dst_arrmeta,
+    const ndt::type *src_tp, const char *const *src_arrmeta, uint32_t kernreq,
     const eval::eval_context *ectx);
 
 /**
@@ -63,24 +66,10 @@ typedef intptr_t (*instantiate_arrfunc_t)(
  * with different array metadata.
  */
 struct arrfunc_type_data {
+    /** The function prototype of the arrfunc */
+    ndt::type func_proto;
     /** A value from the enumeration `arrfunc_proto_t`. */
     size_t ckernel_funcproto;
-    /**
-     * The number of types in the data_types array. This is used to
-     * determine how many operands there are for the `expr_operation_funcproto`,
-     * for example.
-     */
-    intptr_t data_types_size;
-    /**
-     * An array of dynd types for the kernel's data pointers.
-     * Note that the builtin dynd types are stored as
-     * just the type ID, so cases like bool, int float
-     * can be done very simply.
-     *
-     * This data for this array should be either be static,
-     * or contained within the memory of data_ptr.
-     */
-    const ndt::type *data_dynd_types;
     /**
      * A pointer to typically heap-allocated memory for
      * the arrfunc. This is the value to be passed
@@ -100,7 +89,7 @@ struct arrfunc_type_data {
 
     // Default to all NULL, so the destructor works correctly
     inline arrfunc_type_data()
-        : ckernel_funcproto(0), data_types_size(0), data_dynd_types(0),
+        : func_proto(), ckernel_funcproto(0),
             data_ptr(0), instantiate_func(0), free_func(0)
     {
     }
@@ -111,6 +100,22 @@ struct arrfunc_type_data {
         if (free_func && data_ptr) {
             free_func(data_ptr);
         }
+    }
+
+    inline size_t get_param_count() const {
+        return func_proto.tcast<funcproto_type>()->get_param_count();
+    }
+
+    inline const ndt::type *get_param_types() const {
+        return func_proto.tcast<funcproto_type>()->get_param_types_raw();
+    }
+
+    inline const ndt::type &get_param_type(intptr_t i) const {
+        return get_param_types()[i];
+    }
+
+    inline const ndt::type &get_return_type() const {
+        return func_proto.tcast<funcproto_type>()->get_return_type();
     }
 };
 

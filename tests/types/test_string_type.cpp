@@ -90,7 +90,7 @@ TEST(StringType, ArrayCreation) {
     // An array of UTF8 strings
     const char *i0[5] = {"this", "is", "a", "test", "of strings that are various sizes"};
     a = i0;
-    EXPECT_EQ(ndt::make_strided_dim(ndt::make_string(string_encoding_utf_8)), a.get_type());
+    EXPECT_EQ(ndt::make_strided_of_string(), a.get_type());
     EXPECT_EQ(a.get_shape()[0], 5);
     EXPECT_EQ("this", a(0).as<string>());
     EXPECT_EQ("is", a(1).as<string>());

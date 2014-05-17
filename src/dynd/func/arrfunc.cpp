@@ -33,26 +33,26 @@ static void delete_unary_assignment_arrfunc_data(void *self_data_ptr)
 }
 
 static intptr_t instantiate_unary_assignment_ckernel(
-    void *self_data_ptr, dynd::ckernel_builder *ckb, intptr_t ckb_offset,
+    const arrfunc_type_data *self, dynd::ckernel_builder *ckb, intptr_t ckb_offset,
     const ndt::type &dst_tp, const char *dst_arrmeta, const ndt::type *src_tp,
     const char *const *src_arrmeta, uint32_t kernreq,
     const eval::eval_context *ectx)
 {
     unary_assignment_arrfunc_data *data =
-        reinterpret_cast<unary_assignment_arrfunc_data *>(self_data_ptr);
+        reinterpret_cast<unary_assignment_arrfunc_data *>(self->data_ptr);
     return make_assignment_kernel(
         ckb, ckb_offset, dst_tp, dst_arrmeta, src_tp[0], src_arrmeta[0],
         (kernel_request_t)kernreq, data->errmode, ectx);
 }
 
 static intptr_t instantiate_adapted_expr_assignment_ckernel(
-    void *self_data_ptr, dynd::ckernel_builder *ckb, intptr_t ckb_offset,
+    const arrfunc_type_data *self, dynd::ckernel_builder *ckb, intptr_t ckb_offset,
     const ndt::type &dst_tp, const char *dst_arrmeta, const ndt::type *src_tp,
     const char *const *src_arrmeta, uint32_t kernreq,
     const eval::eval_context *ectx)
 {
     unary_assignment_arrfunc_data *data =
-        reinterpret_cast<unary_assignment_arrfunc_data *>(self_data_ptr);
+        reinterpret_cast<unary_assignment_arrfunc_data *>(self->data_ptr);
     ckb_offset = kernels::wrap_unary_as_expr_ckernel(
         ckb, ckb_offset, (kernel_request_t)kernreq);
     return make_assignment_kernel(
@@ -86,14 +86,14 @@ static void delete_expr_arrfunc_data(void *self_data_ptr)
 }
 
 static intptr_t
-instantiate_expr_ckernel(void *self_data_ptr, dynd::ckernel_builder *ckb,
+instantiate_expr_ckernel(const arrfunc_type_data *self, dynd::ckernel_builder *ckb,
                          intptr_t ckb_offset, const ndt::type &dst_tp,
                          const char *dst_arrmeta, const ndt::type *src_tp,
                          const char *const *src_arrmeta, uint32_t kernreq,
                          const eval::eval_context *ectx)
 {
     expr_arrfunc_data *data =
-        reinterpret_cast<expr_arrfunc_data *>(self_data_ptr);
+        reinterpret_cast<expr_arrfunc_data *>(self->data_ptr);
     const expr_kernel_generator &kgen = data->expr_type->get_kgen();
     return kgen.make_expr_kernel(ckb, ckb_offset, dst_tp, dst_arrmeta,
                                  data->data_types_size - 1, src_tp, src_arrmeta,
@@ -128,8 +128,7 @@ void dynd::make_arrfunc_from_assignment(
         data->errmode = errmode;
         out_af.instantiate_func = &instantiate_unary_assignment_ckernel;
         out_af.ckernel_funcproto = unary_operation_funcproto;
-        out_af.data_types_size = 2;
-        out_af.data_dynd_types = data->data_types;
+        out_af.func_proto = ndt::make_funcproto(src_tp, dst_tp);
     } else if (funcproto == expr_operation_funcproto) {
         if (src_tp.get_type_id() == expr_type_id && (&src_tp == &src_expr_tp)) {
             const expr_type *etp = src_tp.tcast<expr_type>();
@@ -155,8 +154,7 @@ void dynd::make_arrfunc_from_assignment(
             data->errmode = errmode;
             out_af.instantiate_func = &instantiate_expr_ckernel;
             out_af.ckernel_funcproto = expr_operation_funcproto;
-            out_af.data_types_size = nargs + 1;
-            out_af.data_dynd_types = data->data_types;
+            out_af.func_proto = ndt::make_funcproto(nargs, data->data_types + 1, data->data_types[0]);
         } else {
             // Adapt the assignment to an expr kernel
             unary_assignment_arrfunc_data *data = new unary_assignment_arrfunc_data;
@@ -168,8 +166,7 @@ void dynd::make_arrfunc_from_assignment(
             data->errmode = errmode;
             out_af.instantiate_func = &instantiate_adapted_expr_assignment_ckernel;
             out_af.ckernel_funcproto = expr_operation_funcproto;
-            out_af.data_types_size = 2;
-            out_af.data_dynd_types = data->data_types;
+            out_af.func_proto = ndt::make_funcproto(src_tp, dst_tp);
         }
     } else {
         stringstream ss;

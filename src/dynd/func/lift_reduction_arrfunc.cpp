@@ -39,24 +39,24 @@ static void delete_lifted_reduction_arrfunc_data(void *self_data_ptr)
 }
 
 static intptr_t instantiate_lifted_reduction_arrfunc_data(
-    void *self_data_ptr, dynd::ckernel_builder *ckb, intptr_t ckb_offset,
+    const arrfunc_type_data *af_self, dynd::ckernel_builder *ckb, intptr_t ckb_offset,
     const ndt::type &dst_tp, const char *dst_arrmeta, const ndt::type *src_tp,
     const char *const *src_arrmeta, uint32_t kernreq,
     const eval::eval_context *ectx)
 
 {
-    lifted_reduction_arrfunc_data *self =
-                    reinterpret_cast<lifted_reduction_arrfunc_data *>(self_data_ptr);
+    lifted_reduction_arrfunc_data *data =
+                    reinterpret_cast<lifted_reduction_arrfunc_data *>(af_self->data_ptr);
     return make_lifted_reduction_ckernel(
-                    self->child_elwise_reduction,
-                    self->child_dst_initialization,
+                    data->child_elwise_reduction,
+                    data->child_dst_initialization,
                     ckb, ckb_offset,
                     dst_tp, dst_arrmeta,
                     src_tp[0], src_arrmeta[0],
-                    self->reduction_ndim,
-                    self->reduction_dimflags.get(),
-                    self->associative, self->commutative,
-                    self->right_associative, self->reduction_identity,
+                    data->reduction_ndim,
+                    data->reduction_dimflags.get(),
+                    data->associative, data->commutative,
+                    data->right_associative, data->reduction_identity,
                     static_cast<dynd::kernel_request_t>(kernreq),
                     ectx);
 }
@@ -93,12 +93,17 @@ void dynd::lift_reduction_arrfunc(arrfunc_type_data *out_ar,
                         " non-null arrfunc object");
     }
     if (elwise_reduction->ckernel_funcproto != unary_operation_funcproto &&
-                    !(elwise_reduction->ckernel_funcproto == expr_operation_funcproto &&
-                      elwise_reduction->data_types_size == 3 &&
-                      elwise_reduction->data_dynd_types[0] == elwise_reduction->data_dynd_types[1] &&
-                      elwise_reduction->data_dynd_types[1] == elwise_reduction->data_dynd_types[2])) {
-        throw runtime_error("lift_reduction_arrfunc: 'elwise_reduction' must contain a"
-                        " unary operation ckernel or a binary expr ckernel with all equal types");
+            !(elwise_reduction->ckernel_funcproto == expr_operation_funcproto &&
+              elwise_reduction->get_param_count() == 2 &&
+              elwise_reduction->get_param_type(0) ==
+                  elwise_reduction->get_param_type(1) &&
+              elwise_reduction->get_param_type(0) ==
+                  elwise_reduction->get_return_type())) {
+        stringstream ss;
+        ss << "lift_reduction_arrfunc: 'elwise_reduction' must contain a"
+              " unary operation ckernel or a binary expr ckernel with all "
+              "equal types, its prototype is " << elwise_reduction->func_proto;
+        throw invalid_argument(ss.str());
     }
 
     // Validate the input dst_initialization arrfunc
@@ -125,15 +130,14 @@ void dynd::lift_reduction_arrfunc(arrfunc_type_data *out_ar,
     lifted_reduction_arrfunc_data *self = new lifted_reduction_arrfunc_data;
     out_ar->data_ptr = self;
     out_ar->free_func = &delete_lifted_reduction_arrfunc_data;
-    out_ar->data_types_size = 2;
     self->child_elwise_reduction = elwise_reduction;
     self->child_dst_initialization = dst_initialization;
     if (!reduction_identity.is_null()) {
         if (reduction_identity.is_immutable() &&
-                reduction_identity.get_type() == elwise_reduction->data_dynd_types[0]) {
+                reduction_identity.get_type() == elwise_reduction->get_return_type()) {
             self->reduction_identity = reduction_identity;
         } else {
-            self->reduction_identity = nd::empty(elwise_reduction->data_dynd_types[0]);
+            self->reduction_identity = nd::empty(elwise_reduction->get_return_type());
             self->reduction_identity.vals() = reduction_identity;
             self->reduction_identity.flag_as_immutable();
         }
@@ -142,7 +146,7 @@ void dynd::lift_reduction_arrfunc(arrfunc_type_data *out_ar,
     self->ref_dst_initialization = dst_initialization_arr.get_memblock();
 
     // Figure out the result type
-    ndt::type lifted_dst_type = elwise_reduction->data_dynd_types[0];
+    ndt::type lifted_dst_type = elwise_reduction->get_return_type();
     for (intptr_t i = reduction_ndim - 1; i >= 0; --i) {
         if (reduction_dimflags[i]) {
             if (keepdims) {
@@ -169,7 +173,6 @@ void dynd::lift_reduction_arrfunc(arrfunc_type_data *out_ar,
     }
     self->data_types[0] = lifted_dst_type;
     self->data_types[1] = lifted_arr_type;
-    self->child_data_types = elwise_reduction->data_dynd_types;
     self->reduction_ndim = reduction_ndim;
     self->associative = associative;
     self->commutative = commutative;
@@ -178,6 +181,6 @@ void dynd::lift_reduction_arrfunc(arrfunc_type_data *out_ar,
     memcpy(self->reduction_dimflags.get(), reduction_dimflags, sizeof(bool) * reduction_ndim);
 
     out_ar->instantiate_func = &instantiate_lifted_reduction_arrfunc_data;
-    out_ar->data_dynd_types = &self->data_types[0];
+    out_ar->func_proto = ndt::make_funcproto(lifted_arr_type, lifted_dst_type);
     out_ar->ckernel_funcproto = unary_operation_funcproto;
 }

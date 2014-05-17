@@ -62,7 +62,7 @@ void struct_type::transform_child_types(type_transform_fn_t transform_fn, void *
                 ndt::type& out_transformed_tp, bool& out_was_transformed) const
 {
     nd::array tmp_field_types(
-        nd::empty(m_field_count, ndt::make_strided_dim(ndt::make_type())));
+        nd::empty(m_field_count, ndt::make_strided_of_type()));
     ndt::type *tmp_field_types_raw = reinterpret_cast<ndt::type *>(
         tmp_field_types.get_readwrite_originptr());
 
@@ -83,7 +83,7 @@ void struct_type::transform_child_types(type_transform_fn_t transform_fn, void *
 ndt::type struct_type::get_canonical_type() const
 {
     nd::array tmp_field_types(
-        nd::empty(m_field_count, ndt::make_strided_dim(ndt::make_type())));
+        nd::empty(m_field_count, ndt::make_strided_of_type()));
     ndt::type *tmp_field_types_raw = reinterpret_cast<ndt::type *>(
         tmp_field_types.get_readwrite_originptr());
 

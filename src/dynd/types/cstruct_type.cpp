@@ -93,7 +93,7 @@ void cstruct_type::transform_child_types(type_transform_fn_t transform_fn, void 
                 ndt::type& out_transformed_tp, bool& out_was_transformed) const
 {
     nd::array tmp_field_types(
-        nd::empty(m_field_count, ndt::make_strided_dim(ndt::make_type())));
+        nd::empty(m_field_count, ndt::make_strided_of_type()));
     ndt::type *tmp_field_types_raw = reinterpret_cast<ndt::type *>(
         tmp_field_types.get_readwrite_originptr());
 
@@ -127,7 +127,7 @@ void cstruct_type::transform_child_types(type_transform_fn_t transform_fn, void 
 ndt::type cstruct_type::get_canonical_type() const
 {
     nd::array tmp_field_types(
-        nd::empty(m_field_count, ndt::make_strided_dim(ndt::make_type())));
+        nd::empty(m_field_count, ndt::make_strided_of_type()));
     ndt::type *tmp_field_types_raw = reinterpret_cast<ndt::type *>(
         tmp_field_types.get_readwrite_originptr());
 
@@ -305,7 +305,7 @@ static nd::array make_self_names()
 
 static nd::array make_self_types()
 {
-    nd::array result = nd::empty(1, ndt::make_strided_dim(ndt::make_type()));
+    nd::array result = nd::empty(1, ndt::make_strided_of_type());
     unchecked_strided_dim_get_rw<ndt::type>(result, 0) = ndt::make_ndarrayarg();
     result.flag_as_immutable();
     return result;

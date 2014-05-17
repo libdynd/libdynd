@@ -31,16 +31,16 @@ TEST(ArrFunc, Assignment) {
                     unary_operation_funcproto, assign_error_default, af);
     // Validate that its types, etc are set right
     ASSERT_EQ(unary_operation_funcproto, (arrfunc_proto_t)af.ckernel_funcproto);
-    ASSERT_EQ(2, af.data_types_size);
-    ASSERT_EQ(ndt::make_type<int>(), af.data_dynd_types[0]);
-    ASSERT_EQ(ndt::make_fixedstring(16), af.data_dynd_types[1]);
+    ASSERT_EQ(1u, af.get_param_count());
+    ASSERT_EQ(ndt::make_type<int>(), af.get_return_type());
+    ASSERT_EQ(ndt::make_fixedstring(16), af.get_param_type(0));
 
     const char *src_arrmeta[1] = {NULL};
 
     // Instantiate a single ckernel
     ckernel_builder ckb;
-    af.instantiate_func(af.data_ptr, &ckb, 0, af.data_dynd_types[0], NULL,
-                        af.data_dynd_types + 1, src_arrmeta,
+    af.instantiate_func(&af, &ckb, 0, af.get_return_type(), NULL,
+                        af.get_param_types(), src_arrmeta,
                         kernel_request_single, &eval::default_eval_context);
     int int_out = 0;
     char str_in[16] = "3251";
@@ -50,8 +50,8 @@ TEST(ArrFunc, Assignment) {
 
     // Instantiate a strided ckernel
     ckb.reset();
-    af.instantiate_func(af.data_ptr, &ckb, 0, af.data_dynd_types[0], NULL,
-                        af.data_dynd_types + 1, src_arrmeta,
+    af.instantiate_func(&af, &ckb, 0, af.get_return_type(), NULL,
+                        af.get_param_types(), src_arrmeta,
                         kernel_request_strided, &eval::default_eval_context);
     int ints_out[3] = {0, 0, 0};
     char strs_in[3][16] = {"123", "4567", "891029"};
@@ -71,16 +71,16 @@ TEST(ArrFunc, AssignmentAsExpr) {
                     expr_operation_funcproto, assign_error_default, af);
     // Validate that its types, etc are set right
     ASSERT_EQ(expr_operation_funcproto, (arrfunc_proto_t)af.ckernel_funcproto);
-    ASSERT_EQ(2, af.data_types_size);
-    ASSERT_EQ(ndt::make_type<int>(), af.data_dynd_types[0]);
-    ASSERT_EQ(ndt::make_fixedstring(16), af.data_dynd_types[1]);
+    ASSERT_EQ(1u, af.get_param_count());
+    ASSERT_EQ(ndt::make_type<int>(), af.get_return_type());
+    ASSERT_EQ(ndt::make_fixedstring(16), af.get_param_type(0));
 
     const char *src_arrmeta[1] = {NULL};
 
     // Instantiate a single ckernel
     ckernel_builder ckb;
-    af.instantiate_func(af.data_ptr, &ckb, 0, af.data_dynd_types[0], NULL,
-                        af.data_dynd_types + 1, src_arrmeta,
+    af.instantiate_func(&af, &ckb, 0, af.get_return_type(), NULL,
+                        af.get_param_types(), src_arrmeta,
                         kernel_request_single, &eval::default_eval_context);
     int int_out = 0;
     char str_in[16] = "3251";
@@ -91,8 +91,8 @@ TEST(ArrFunc, AssignmentAsExpr) {
 
     // Instantiate a strided ckernel
     ckb.reset();
-    af.instantiate_func(af.data_ptr, &ckb, 0, af.data_dynd_types[0], NULL,
-                        af.data_dynd_types + 1, src_arrmeta,
+    af.instantiate_func(&af, &ckb, 0, af.get_return_type(), NULL,
+                        af.get_param_types(), src_arrmeta,
                         kernel_request_strided, &eval::default_eval_context);
     int ints_out[3] = {0, 0, 0};
     char strs_in[3][16] = {"123", "4567", "891029"};
@@ -114,17 +114,17 @@ TEST(ArrFunc, Expr) {
                     expr_operation_funcproto, assign_error_default, af);
     // Validate that its types, etc are set right
     ASSERT_EQ(expr_operation_funcproto, (arrfunc_proto_t)af.ckernel_funcproto);
-    ASSERT_EQ(3, af.data_types_size);
-    ASSERT_EQ(ndt::make_type<int>(), af.data_dynd_types[0]);
-    ASSERT_EQ(ndt::make_type<int>(), af.data_dynd_types[1]);
-    ASSERT_EQ(ndt::make_type<int>(), af.data_dynd_types[2]);
+    ASSERT_EQ(2u, af.get_param_count());
+    ASSERT_EQ(ndt::make_type<int>(), af.get_return_type());
+    ASSERT_EQ(ndt::make_type<int>(), af.get_param_type(0));
+    ASSERT_EQ(ndt::make_type<int>(), af.get_param_type(1));
 
     const char *src_arrmeta[2] = {NULL, NULL};
 
     // Instantiate a single ckernel
     ckernel_builder ckb;
-    af.instantiate_func(af.data_ptr, &ckb, 0, af.data_dynd_types[0], NULL,
-                        af.data_dynd_types + 1, src_arrmeta,
+    af.instantiate_func(&af, &ckb, 0, af.get_return_type(), NULL,
+                        af.get_param_types(), src_arrmeta,
                         kernel_request_single, &eval::default_eval_context);
     int int_out = 0;
     int int_in1 = 1, int_in2 = 3;
@@ -136,8 +136,8 @@ TEST(ArrFunc, Expr) {
 
     // Instantiate a strided ckernel
     ckb.reset();
-    af.instantiate_func(af.data_ptr, &ckb, 0, af.data_dynd_types[0], NULL,
-                        af.data_dynd_types + 1, src_arrmeta,
+    af.instantiate_func(&af, &ckb, 0, af.get_return_type(), NULL,
+                        af.get_param_types(), src_arrmeta,
                         kernel_request_strided, &eval::default_eval_context);
     int ints_out[3] = {0, 0, 0};
     int ints_in1[3] = {1,2,3}, ints_in2[3] = {5,-210,1234};
@@ -163,16 +163,15 @@ TEST(ArrFunc, LiftUnaryExpr_FixedDim) {
 
     // Lift the kernel to particular fixed dim arrays
     arrfunc_type_data af;
-    vector<ndt::type> lifted_types;
-    lifted_types.push_back(ndt::type("cfixed[3] * int32"));
-    lifted_types.push_back(ndt::type("cfixed[3] * string[16]"));
-    lift_arrfunc(&af, af_base, lifted_types);
+    lift_arrfunc(&af, af_base);
 
     // Test it on some data
+    ndt::type dst_tp("cfixed[3] * int32");
+    ndt::type src_tp("cfixed[3] * string[16]");
     ckernel_builder ckb;
     const char *src_arrmeta[1] = {NULL};
-    af.instantiate_func(af.data_ptr, &ckb, 0, af.data_dynd_types[0], NULL,
-                        af.data_dynd_types + 1, src_arrmeta,
+    af.instantiate_func(&af, &ckb, 0, dst_tp, NULL,
+                        &src_tp, src_arrmeta,
                         kernel_request_single, &eval::default_eval_context);
     int out[3] = {0, 0, 0};
     char in[3][16] = {"172", "-139", "12345"};
@@ -194,22 +193,21 @@ TEST(ArrFunc, LiftUnaryExpr_StridedDim) {
 
     // Lift the kernel to particular fixed dim arrays
     arrfunc_type_data af;
-    vector<ndt::type> lifted_types;
-    lifted_types.push_back(ndt::type("strided * int32"));
-    lifted_types.push_back(ndt::type("strided * string[16]"));
-    lift_arrfunc(&af, af_base, lifted_types);
+    ndt::type dst_tp("strided * int32");
+    ndt::type src_tp("strided * string[16]");
+    lift_arrfunc(&af, af_base);
 
     // Test it on some data
     ckernel_builder ckb;
-    nd::array in = nd::empty(3, ndt::type("strided * string[16]"));
-    nd::array out = nd::empty(3, ndt::type("strided * int32"));
+    nd::array in = nd::empty(3, src_tp);
+    nd::array out = nd::empty(3, dst_tp);
     in(0).vals() = "172";
     in(1).vals() = "-139";
     in(2).vals() = "12345";
     const char *in_ptr = in.get_readonly_originptr();
     const char *src_arrmeta[1] = {in.get_arrmeta()};
-    af.instantiate_func(af.data_ptr, &ckb, 0, af.data_dynd_types[0], out.get_arrmeta(),
-                        af.data_dynd_types + 1, src_arrmeta,
+    af.instantiate_func(&af, &ckb, 0, dst_tp, out.get_arrmeta(),
+                        &src_tp, src_arrmeta,
                         kernel_request_single, &eval::default_eval_context);
     expr_single_operation_t usngo = ckb.get()->get_function<expr_single_operation_t>();
     usngo(out.get_readwrite_originptr(), &in_ptr, ckb.get());
@@ -228,15 +226,14 @@ TEST(ArrFunc, LiftUnaryExpr_StridedToVarDim) {
 
     // Lift the kernel to particular fixed dim arrays
     arrfunc_type_data af;
-    vector<ndt::type> lifted_types;
-    lifted_types.push_back(ndt::type("var * int32"));
-    lifted_types.push_back(ndt::type("strided * string[16]"));
-    lift_arrfunc(&af, af_base, lifted_types);
+    lift_arrfunc(&af, af_base);
 
     // Test it on some data
+    ndt::type dst_tp("var * int32");
+    ndt::type src_tp("strided * string[16]");
     ckernel_builder ckb;
-    nd::array in = nd::empty(5, ndt::type("strided * string[16]"));
-    nd::array out = nd::empty(ndt::type("var * int32"));
+    nd::array in = nd::empty(5, src_tp);
+    nd::array out = nd::empty(dst_tp);
     in(0).vals() = "172";
     in(1).vals() = "-139";
     in(2).vals() = "12345";
@@ -244,8 +241,8 @@ TEST(ArrFunc, LiftUnaryExpr_StridedToVarDim) {
     in(4).vals() = "284";
     const char *in_ptr = in.get_readonly_originptr();
     const char *src_arrmeta[1] = {in.get_arrmeta()};
-    af.instantiate_func(af.data_ptr, &ckb, 0, af.data_dynd_types[0],
-                        out.get_arrmeta(), af.data_dynd_types + 1, src_arrmeta,
+    af.instantiate_func(&af, &ckb, 0, dst_tp,
+                        out.get_arrmeta(), &src_tp, src_arrmeta,
                         kernel_request_single, &eval::default_eval_context);
     expr_single_operation_t usngo = ckb.get()->get_function<expr_single_operation_t>();
     usngo(out.get_readwrite_originptr(), &in_ptr, ckb.get());
@@ -268,10 +265,7 @@ TEST(ArrFunc, LiftUnaryExpr_VarToVarDim) {
 
     // Lift the kernel to particular fixed dim arrays
     arrfunc_type_data af;
-    vector<ndt::type> lifted_types;
-    lifted_types.push_back(ndt::type("var * int32"));
-    lifted_types.push_back(ndt::type("var * string[16]"));
-    lift_arrfunc(&af, af_base, lifted_types);
+    lift_arrfunc(&af, af_base);
 
     // Test it on some data
     ckernel_builder ckb;
@@ -281,8 +275,8 @@ TEST(ArrFunc, LiftUnaryExpr_VarToVarDim) {
     in.vals() = in_vals;
     const char *in_ptr = in.get_readonly_originptr();
     const char *src_arrmeta[1] = {in.get_arrmeta()};
-    af.instantiate_func(af.data_ptr, &ckb, 0, af.data_dynd_types[0],
-                        out.get_arrmeta(), af.data_dynd_types + 1, src_arrmeta,
+    af.instantiate_func(&af, &ckb, 0, out.get_type(),
+                        out.get_arrmeta(), &in.get_type(), src_arrmeta,
                         kernel_request_single, &eval::default_eval_context);
     expr_single_operation_t usngo = ckb.get()->get_function<expr_single_operation_t>();
     usngo(out.get_readwrite_originptr(), &in_ptr, ckb.get());
@@ -305,10 +299,7 @@ TEST(ArrFunc, LiftUnaryExpr_MultiDimVarToVarDim) {
 
     // Lift the kernel to particular arrays
     arrfunc_type_data af;
-    vector<ndt::type> lifted_types;
-    lifted_types.push_back(ndt::type("strided * var * int32"));
-    lifted_types.push_back(ndt::type("3 * var * string[16]"));
-    lift_arrfunc(&af, af_base, lifted_types);
+    lift_arrfunc(&af, af_base);
 
     // Test it on some data
     nd::array in = nd::empty(ndt::type("3 * var * string[16]"));
@@ -323,8 +314,8 @@ TEST(ArrFunc, LiftUnaryExpr_MultiDimVarToVarDim) {
     const char *in_ptr = in.get_readonly_originptr();
     const char *src_arrmeta[1] = {in.get_arrmeta()};
     ckernel_builder ckb;
-    af.instantiate_func(af.data_ptr, &ckb, 0, af.data_dynd_types[0],
-                        out.get_arrmeta(), af.data_dynd_types + 1, src_arrmeta,
+    af.instantiate_func(&af, &ckb, 0, out.get_type(),
+                        out.get_arrmeta(), &in.get_type(), src_arrmeta,
                         kernel_request_single, &eval::default_eval_context);
     expr_single_operation_t usngo = ckb.get()->get_function<expr_single_operation_t>();
     usngo(out.get_readwrite_originptr(), &in_ptr, ckb.get());
@@ -355,16 +346,15 @@ TEST(ArrFunc, LiftExpr_MultiDimVarToVarDim) {
     // Lift the kernel to particular arrays
     nd::array af_lifted = nd::empty(ndt::make_arrfunc());
     arrfunc_type_data *af = reinterpret_cast<arrfunc_type_data *>(af_lifted.get_readwrite_originptr());
-    vector<ndt::type> lifted_types;
-    lifted_types.push_back(ndt::type("strided * var * int32"));
-    lifted_types.push_back(ndt::type("3 * var * int32"));
-    lifted_types.push_back(ndt::type("strided * int32"));
-    lift_arrfunc(af, af_base, lifted_types);
+    ndt::type dst_tp("strided * var * int32");
+    ndt::type src0_tp("3 * var * int32");
+    ndt::type src1_tp("strided * int32");
+    lift_arrfunc(af, af_base);
 
     // Create some compatible values
-    nd::array out = nd::empty(3, lifted_types[0]);
-    nd::array in0 = nd::empty(lifted_types[1]);
-    nd::array in1 = nd::empty(3, lifted_types[2]);
+    nd::array out = nd::empty(3, dst_tp);
+    nd::array in0 = nd::empty(src0_tp);
+    nd::array in1 = nd::empty(3, src1_tp);
     int32_t in0_vals0[] = {1, 2, 3};
     int32_t in0_vals1[] = {4};
     int32_t in0_vals2[] = {-1, 10, 2};
@@ -374,11 +364,12 @@ TEST(ArrFunc, LiftExpr_MultiDimVarToVarDim) {
     int32_t in1_vals[] = {2, 4, 10};
     in1.vals() = in1_vals;
 
+    ndt::type src_tp[2] = {src0_tp, src1_tp};
     const char *src_arrmeta[2] = {in0.get_arrmeta(), in1.get_arrmeta()};
     const char *const in_ptrs[2] = {in0.get_readonly_originptr(), in1.get_readonly_originptr()};
     ckernel_builder ckb;
-    af->instantiate_func(af->data_ptr, &ckb, 0, lifted_types[0],
-                         out.get_arrmeta(), &lifted_types[1], src_arrmeta,
+    af->instantiate_func(af, &ckb, 0, dst_tp,
+                         out.get_arrmeta(), src_tp, src_arrmeta,
                          kernel_request_single, &eval::default_eval_context);
     expr_single_operation_t usngo = ckb.get()->get_function<expr_single_operation_t>();
     usngo(out.get_readwrite_originptr(), in_ptrs, ckb.get());
@@ -397,7 +388,7 @@ TEST(ArrFunc, LiftExpr_MultiDimVarToVarDim) {
     EXPECT_EQ(12, out(2, 2).as<int>());
 
     // Do it again with the __call__ function
-    out = nd::empty(3, lifted_types[0]);
+    out = nd::empty(3, dst_tp);
     af_lifted.f("__call__", out, in0, in1);
     ASSERT_EQ(3, out.get_shape()[0]);
     ASSERT_EQ(3, out(0).get_shape()[0]);

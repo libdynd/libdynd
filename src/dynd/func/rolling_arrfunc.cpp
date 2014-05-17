@@ -106,8 +106,6 @@ struct rolling_arrfunc_data {
     const arrfunc_type_data *window_op_af;
     // Reference to the array containing it
     nd::array window_op_af_arr;
-    // The types of the ckernel
-    ndt::type data_types[2];
 };
 
 
@@ -117,7 +115,7 @@ static void free_rolling_arrfunc_data(void *data_ptr) {
 } // anonymous namespace
 
 static intptr_t
-instantiate_strided(void *self_data_ptr, dynd::ckernel_builder *ckb,
+instantiate_strided(const arrfunc_type_data *af_self, dynd::ckernel_builder *ckb,
                     intptr_t ckb_offset, const ndt::type &dst_tp,
                     const char *dst_arrmeta, const ndt::type *src_tp,
                     const char *const *src_arrmeta, uint32_t kernreq,
@@ -125,7 +123,7 @@ instantiate_strided(void *self_data_ptr, dynd::ckernel_builder *ckb,
 {
     typedef strided_rolling_ck self_type;
     rolling_arrfunc_data *af_data =
-        reinterpret_cast<rolling_arrfunc_data *>(self_data_ptr);
+        reinterpret_cast<rolling_arrfunc_data *>(af_self->data_ptr);
 
     self_type *self = self_type::create(ckb, ckb_offset, (kernel_request_t)kernreq);
     intptr_t ckb_end = ckb_offset + sizeof(self_type);
@@ -196,7 +194,7 @@ instantiate_strided(void *self_data_ptr, dynd::ckernel_builder *ckb,
     }
     const char *src_winop_meta = self->m_src_winop_meta.get();
     return af_data->window_op_af->instantiate_func(
-        af_data->window_op_af->data_ptr, ckb, ckb_end, dst_el_tp,
+        af_data->window_op_af, ckb, ckb_end, dst_el_tp,
         dst_el_arrmeta, &self->m_src_winop_meta.get_type(),
         &src_winop_meta, kernel_request_strided, ectx);
 }
@@ -221,7 +219,7 @@ void dynd::make_rolling_arrfunc(arrfunc_type_data *out_af,
         throw runtime_error("make_rolling_arrfunc() 'window_op' must contain "
                             "a non-null arrfunc object");
     }
-    if (window_op_af->data_types_size != 2) {
+    if (window_op_af->get_param_count() != 1) {
         throw runtime_error("make_rolling_arrfunc() 'window_op' must contain "
                             "a unary arrfunc object");
     }
@@ -231,8 +229,7 @@ void dynd::make_rolling_arrfunc(arrfunc_type_data *out_af,
     out_af->data_ptr = data;
     out_af->free_func = &free_rolling_arrfunc_data;
     out_af->ckernel_funcproto = unary_operation_funcproto;
-    out_af->data_dynd_types = data->data_types;
-    out_af->data_types_size = 2;
+    out_af->func_proto = ndt::make_funcproto(src_tp, dst_tp);
     if (dst_tp.get_type_id() == var_dim_type_id && src_tp.get_type_id() == var_dim_type_id) {
         //out_af->instantiate_func = &instantiate_var;
         delete data;
@@ -243,6 +240,4 @@ void dynd::make_rolling_arrfunc(arrfunc_type_data *out_af,
     data->window_size = window_size;
     data->window_op_af = window_op_af;
     data->window_op_af_arr = window_op;
-    data->data_types[0] = dst_tp;
-    data->data_types[1] = src_tp;
 }

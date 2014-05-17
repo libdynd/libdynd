@@ -12,28 +12,6 @@
 using namespace std;
 using namespace dynd;
 
-static ndt::type builtin_type_pairs[builtin_type_id_count][2] = {
-    {ndt::type((type_id_t)0), ndt::type((type_id_t)0)},
-    {ndt::type((type_id_t)1), ndt::type((type_id_t)1)},
-    {ndt::type((type_id_t)2), ndt::type((type_id_t)2)},
-    {ndt::type((type_id_t)3), ndt::type((type_id_t)3)},
-    {ndt::type((type_id_t)4), ndt::type((type_id_t)4)},
-    {ndt::type((type_id_t)5), ndt::type((type_id_t)5)},
-    {ndt::type((type_id_t)6), ndt::type((type_id_t)6)},
-    {ndt::type((type_id_t)7), ndt::type((type_id_t)7)},
-    {ndt::type((type_id_t)8), ndt::type((type_id_t)8)},
-    {ndt::type((type_id_t)9), ndt::type((type_id_t)9)},
-    {ndt::type((type_id_t)10), ndt::type((type_id_t)10)},
-    {ndt::type((type_id_t)11), ndt::type((type_id_t)11)},
-    {ndt::type((type_id_t)12), ndt::type((type_id_t)12)},
-    {ndt::type((type_id_t)13), ndt::type((type_id_t)13)},
-    {ndt::type((type_id_t)14), ndt::type((type_id_t)14)},
-    {ndt::type((type_id_t)15), ndt::type((type_id_t)15)},
-    {ndt::type((type_id_t)16), ndt::type((type_id_t)16)},
-    {ndt::type((type_id_t)17), ndt::type((type_id_t)17)},
-    {ndt::type((type_id_t)18), ndt::type((type_id_t)18)},
-};
-
 namespace {
     template<class T, class Accum>
     struct sum_reduction {
@@ -136,7 +114,7 @@ intptr_t kernels::make_builtin_sum_reduction_ckernel(
 }
 
 static intptr_t instantiate_builtin_sum_reduction_arrfunc(
-    void *DYND_UNUSED(self_data_ptr), dynd::ckernel_builder *ckb,
+    const arrfunc_type_data *DYND_UNUSED(self_data_ptr), dynd::ckernel_builder *ckb,
     intptr_t ckb_offset, const ndt::type &dst_tp,
     const char *DYND_UNUSED(dst_arrmeta), const ndt::type *src_tp,
     const char *const *DYND_UNUSED(src_arrmeta), uint32_t kernreq,
@@ -163,8 +141,7 @@ void kernels::make_builtin_sum_reduction_arrfunc(
         throw type_error(ss.str());
     }
     out_af->ckernel_funcproto = unary_operation_funcproto;
-    out_af->data_types_size = 2;
-    out_af->data_dynd_types = builtin_type_pairs[tid];
+    out_af->func_proto = ndt::make_funcproto(ndt::type(tid), ndt::type(tid));
     out_af->data_ptr = reinterpret_cast<void *>(tid);
     out_af->instantiate_func = &instantiate_builtin_sum_reduction_arrfunc;
     out_af->free_func = NULL;
@@ -212,7 +189,6 @@ namespace {
     };
 
     struct mean1d_arrfunc_data {
-        ndt::type data_types[2];
         intptr_t minp;
 
         static void free(void *data_ptr) {
@@ -220,7 +196,7 @@ namespace {
         }
 
         static intptr_t
-        instantiate(void *self_data_ptr, dynd::ckernel_builder *ckb,
+        instantiate(const arrfunc_type_data *af_self, dynd::ckernel_builder *ckb,
                     intptr_t ckb_offset, const ndt::type &DYND_UNUSED(dst_tp),
                     const char *DYND_UNUSED(dst_arrmeta), const ndt::type *src_tp,
                     const char *const *src_arrmeta, uint32_t kernreq,
@@ -228,7 +204,7 @@ namespace {
         {
             typedef double_mean1d_ck self_type;
             mean1d_arrfunc_data *data =
-                reinterpret_cast<mean1d_arrfunc_data *>(self_data_ptr);
+                reinterpret_cast<mean1d_arrfunc_data *>(af_self->data_ptr);
             self_type *self = self_type::create_leaf(ckb, ckb_offset,
                                                      (kernel_request_t)kernreq);
             intptr_t src_dim_size, src_stride;
@@ -268,12 +244,11 @@ nd::array kernels::make_builtin_mean1d_arrfunc(type_id_t tid, intptr_t minp)
     arrfunc_type_data *out_af =
         reinterpret_cast<arrfunc_type_data *>(mean1d.get_readwrite_originptr());
     out_af->ckernel_funcproto = unary_operation_funcproto;
-    out_af->data_types_size = 2;
     mean1d_arrfunc_data *data = new mean1d_arrfunc_data;
-    data->data_types[0] = ndt::make_type<double>();
-    data->data_types[1] = ndt::make_strided_dim(ndt::make_type<double>());
     data->minp = minp;
-    out_af->data_dynd_types = data->data_types;
+    out_af->func_proto =
+        ndt::make_funcproto(ndt::make_strided_dim(ndt::make_type<double>()),
+                            ndt::make_type<double>());
     out_af->data_ptr = data;
     out_af->instantiate_func = &mean1d_arrfunc_data::instantiate;
     out_af->free_func = &mean1d_arrfunc_data::free;

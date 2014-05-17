@@ -10,6 +10,7 @@
 #include <string>
 
 #include <dynd/array.hpp>
+#include <dynd/types/strided_dim_type.hpp>
 
 namespace dynd {
 
@@ -84,6 +85,32 @@ namespace ndt {
             new funcproto_type(param_types, return_type), false);
     }
 
+    /** Makes a funcproto type with the specified types */
+    inline ndt::type make_funcproto(size_t param_count,
+                                    const ndt::type *param_types,
+                                    const ndt::type &return_type)
+    {
+        nd::array tmp =
+            nd::empty(param_count, ndt::make_strided_of_type());
+        ndt::type *tmp_vals =
+            reinterpret_cast<ndt::type *>(tmp.get_readwrite_originptr());
+        for (size_t i = 0; i != param_count; ++i) {
+            tmp_vals[i] = param_types[i];
+        }
+        tmp.flag_as_immutable();
+        return ndt::type(
+            new funcproto_type(tmp, return_type), false);
+    }
+
+    /** Makes a unary funcproto type with the specified types */
+    inline ndt::type make_funcproto(const ndt::type& single_param_type,
+                                    const ndt::type &return_type)
+    {
+        ndt::type param_types[1] = {single_param_type};
+        return ndt::type(
+            new funcproto_type(param_types, return_type), false);
+    }
+
     namespace detail {
         template<typename T>
         struct make_func_proto;
@@ -91,7 +118,8 @@ namespace ndt {
         template<typename R>
         struct make_func_proto<R ()> {
             static inline ndt::type make() {
-                nd::type param_types[0];
+                nd::array param_types = nd::empty(0, ndt::make_strided_of_type());
+                param_types.flag_as_immutable();
                 return make_funcproto(param_types, make_type<R>());
             }
         };

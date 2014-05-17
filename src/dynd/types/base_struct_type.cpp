@@ -95,7 +95,7 @@ ndt::type base_struct_type::apply_linear_index(intptr_t nindices,
         } else {
             // Take the subset of the fields in-place
             nd::array tmp_field_types(nd::empty(
-                dimension_size, ndt::make_strided_dim(ndt::make_type())));
+                dimension_size, ndt::make_strided_of_type()));
             ndt::type *tmp_field_types_raw = reinterpret_cast<ndt::type *>(
                 tmp_field_types.get_readwrite_originptr());
 

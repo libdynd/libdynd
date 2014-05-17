@@ -80,7 +80,7 @@ TEST(DTypeDType, StridedArrayRefCount) {
     d = ndt::type("strided * 12 * int");
 
     // 1D Strided Array
-    a = nd::empty(10, ndt::make_strided_dim(ndt::make_type()));
+    a = nd::empty(10, ndt::make_strided_of_type());
     EXPECT_EQ(1, d.extended()->get_use_count());
     a.vals() = d;
     EXPECT_EQ(11, d.extended()->get_use_count());

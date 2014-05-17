@@ -92,9 +92,14 @@ public:
 };
 
 namespace ndt {
-    inline ndt::type make_string(string_encoding_t encoding = string_encoding_utf_8) {
+    /** Returns type "string" */
+    const ndt::type& make_string();
+    /** Returns type "string[<encoding>]" */
+    inline ndt::type make_string(string_encoding_t encoding) {
         return ndt::type(new string_type(encoding), false);
     }
+    /** Returns type "strided * string" */
+    const ndt::type& make_strided_of_string();
 } // namespace ndt
 
 } // namespace dynd

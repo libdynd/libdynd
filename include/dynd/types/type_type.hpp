@@ -57,7 +57,10 @@ public:
 };
 
 namespace ndt {
-    ndt::type make_type();
+    /** Returns type "type" */
+    const ndt::type& make_type();
+    /** Returns type "strided * type" */
+    const ndt::type& make_strided_of_type();
 } // namespace ndt
 
 } // namespace dynd
