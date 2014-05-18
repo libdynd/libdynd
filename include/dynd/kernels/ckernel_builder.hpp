@@ -11,6 +11,7 @@
 
 #include <dynd/config.hpp>
 #include <dynd/kernels/ckernel_prefix.hpp>
+#include <dynd/types/type_id.hpp>
 
 namespace dynd {
 
@@ -260,6 +261,109 @@ inline void ckernel_builder::ensure_capacity_leaf(intptr_t requested_capacity)
         throw std::bad_alloc();
     }
 }
+
+namespace kernels {
+    /**
+     * Some common shared implementation details of a CRTP
+     * (curiously recurring template pattern) base class to help
+     * create ckernels.
+     */
+    template<class CKT>
+    struct general_ck {
+        typedef CKT self_type;
+
+        ckernel_prefix base;
+
+        static self_type *get_self(ckernel_prefix *rawself) {
+            return reinterpret_cast<self_type *>(rawself);
+        }
+
+        static const self_type *get_self(const ckernel_prefix *rawself) {
+            return reinterpret_cast<const self_type *>(rawself);
+        }
+
+        static self_type *get_self(ckernel_builder *ckb, intptr_t ckb_offset) {
+            return ckb->get_at<self_type>(ckb_offset);
+        }
+
+        static inline self_type *create(ckernel_builder *ckb,
+                                             intptr_t ckb_offset,
+                                             kernel_request_t kernreq)
+        {
+            ckb->ensure_capacity(ckb_offset + sizeof(self_type));
+            ckernel_prefix *rawself = ckb->get_at<ckernel_prefix>(ckb_offset);
+            return self_type::init(rawself, kernreq);
+        }
+
+        static inline self_type *create_leaf(ckernel_builder *ckb,
+                                             intptr_t ckb_offset,
+                                             kernel_request_t kernreq)
+        {
+            ckb->ensure_capacity_leaf(ckb_offset + sizeof(self_type));
+            ckernel_prefix *rawself = ckb->get_at<ckernel_prefix>(ckb_offset);
+            return self_type::init(rawself, kernreq);
+        }
+
+        /**
+         * Initializes an instance of this ckernel in-place according to the
+         * kernel request. This calls the constructor in-place, and initializes
+         * the base function and destructor
+         */
+        static inline self_type *init(ckernel_prefix *rawself,
+                                      kernel_request_t kernreq)
+        {
+            // Alignment requirement of the type
+            DYND_STATIC_ASSERT(
+                (size_t)scalar_align_of<self_type>::value ==
+                    (size_t)scalar_align_of<void *>::value,
+                "ckernel types require alignment matching that of pointers");
+
+            // Call the constructor in-place
+            self_type *self = new (rawself) self_type();
+            // Double check that the C++ struct layout is as we expect
+            if (self != get_self(rawself)) {
+                throw std::runtime_error("internal ckernel error: struct layout is not valid");
+            }
+            self->base.destructor = &self_type::destruct;
+            // A child class must implement this to fill in self->base.function
+            self->init_kernfunc(kernreq);
+            return self;
+        }
+
+        /**
+         * The ckernel destructor function, which is placed in
+         * base.destructor.
+         */
+        static void destruct(ckernel_prefix *rawself) {
+            self_type *self = get_self(rawself);
+            // If there are any child kernels, a child class
+            // must implement this to destroy them.
+            self->destruct_children();
+            self->~self_type();
+        }
+
+        /**
+         * Default implementation of destruct_children does nothing.
+         */
+        inline void destruct_children()
+        {
+        }
+
+        /**
+         * Returns the child ckernel immediately following this one.
+         */
+        inline ckernel_prefix *get_child_ckernel() {
+            return get_child_ckernel(sizeof(self_type));
+        }
+
+        /**
+         * Returns the child ckernel at the specified offset.
+         */
+        inline ckernel_prefix *get_child_ckernel(intptr_t offset) {
+            return base.get_child_ckernel(offset);
+        }
+    };
+} // namespace kernels
 
 } // namespace dynd
 
