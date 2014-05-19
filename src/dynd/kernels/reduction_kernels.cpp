@@ -147,18 +147,16 @@ void kernels::make_builtin_sum_reduction_arrfunc(
     out_af->free_func = NULL;
 }
 
-nd::array kernels::make_builtin_sum1d_arrfunc(type_id_t tid)
+nd::arrfunc kernels::make_builtin_sum1d_arrfunc(type_id_t tid)
 {
-    nd::array sum_ew = nd::empty(ndt::make_arrfunc());
-    kernels::make_builtin_sum_reduction_arrfunc(
-        reinterpret_cast<arrfunc_type_data *>(sum_ew.get_readwrite_originptr()),
-        tid);
+    nd::arrfunc sum_ew = kernels::make_builtin_sum_reduction_arrfunc(tid);
     nd::array sum_1d = nd::empty(ndt::make_arrfunc());
     bool reduction_dimflags[1] = {true};
     lift_reduction_arrfunc(
         reinterpret_cast<arrfunc_type_data *>(sum_1d.get_readwrite_originptr()),
         sum_ew, ndt::make_strided_dim(ndt::type(tid)), nd::array(), false, 1,
         reduction_dimflags, true, true, false, 0);
+    sum_1d.flag_as_immutable();
     return sum_1d;
 }
 
@@ -232,7 +230,7 @@ namespace {
     };
 } // anonymous namespace
 
-nd::array kernels::make_builtin_mean1d_arrfunc(type_id_t tid, intptr_t minp)
+nd::arrfunc kernels::make_builtin_mean1d_arrfunc(type_id_t tid, intptr_t minp)
 {
     if (tid != float64_type_id) {
         stringstream ss;
@@ -252,5 +250,6 @@ nd::array kernels::make_builtin_mean1d_arrfunc(type_id_t tid, intptr_t minp)
     out_af->data_ptr = data;
     out_af->instantiate_func = &mean1d_arrfunc_data::instantiate;
     out_af->free_func = &mean1d_arrfunc_data::free;
+    mean1d.flag_as_immutable();
     return mean1d;
 }

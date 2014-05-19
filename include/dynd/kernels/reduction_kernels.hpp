@@ -29,16 +29,30 @@ void make_builtin_sum_reduction_arrfunc(arrfunc_type_data *out_af,
                                         type_id_t tid);
 
 /**
+ * Makes a unary reduction arrfunc for the requested
+ * type id.
+ */
+inline nd::arrfunc make_builtin_sum_reduction_arrfunc(type_id_t tid)
+{
+    nd::array af = nd::empty(ndt::make_arrfunc());
+    make_builtin_sum_reduction_arrfunc(
+        reinterpret_cast<arrfunc_type_data *>(af.get_readwrite_originptr()),
+        tid);
+    af.flag_as_immutable();
+    return af;
+}
+
+/**
  * Makes a 1D sum arrfunc.
  * (strided * <tid>) -> <tid>
  */
-nd::array make_builtin_sum1d_arrfunc(type_id_t tid);
+nd::arrfunc make_builtin_sum1d_arrfunc(type_id_t tid);
 
 /**
  * Makes a 1D mean arrfunc.
  * (strided * <tid>) -> <tid>
  */
-nd::array make_builtin_mean1d_arrfunc(type_id_t tid, intptr_t minp);
+nd::arrfunc make_builtin_mean1d_arrfunc(type_id_t tid, intptr_t minp);
 
 }} // namespace dynd::kernels
 

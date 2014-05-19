@@ -154,12 +154,11 @@ TEST(ArrFunc, Expr) {
 
 
 TEST(ArrFunc, LiftUnaryExpr_FixedDim) {
-    nd::array af_base = nd::empty(ndt::make_arrfunc());
     // Create an arrfunc for converting string to int
-    make_arrfunc_from_assignment(
-                    ndt::make_type<int>(), ndt::make_fixedstring(16), ndt::make_fixedstring(16),
-                    expr_operation_funcproto, assign_error_default,
-                    *reinterpret_cast<arrfunc_type_data *>(af_base.get_readwrite_originptr()));
+    nd::arrfunc af_base = make_arrfunc_from_assignment(
+        ndt::make_type<int>(), ndt::make_fixedstring(16),
+        ndt::make_fixedstring(16), expr_operation_funcproto,
+        assign_error_default);
 
     // Lift the kernel to particular fixed dim arrays
     arrfunc_type_data af;
@@ -184,12 +183,11 @@ TEST(ArrFunc, LiftUnaryExpr_FixedDim) {
 }
 
 TEST(ArrFunc, LiftUnaryExpr_StridedDim) {
-    nd::array af_base = nd::empty(ndt::make_arrfunc());
     // Create an arrfunc for converting string to int
-    make_arrfunc_from_assignment(
-                    ndt::make_type<int>(), ndt::make_fixedstring(16), ndt::make_fixedstring(16),
-                    expr_operation_funcproto, assign_error_default,
-                    *reinterpret_cast<arrfunc_type_data *>(af_base.get_readwrite_originptr()));
+    nd::arrfunc af_base = make_arrfunc_from_assignment(
+        ndt::make_type<int>(), ndt::make_fixedstring(16),
+        ndt::make_fixedstring(16), expr_operation_funcproto,
+        assign_error_default);
 
     // Lift the kernel to particular fixed dim arrays
     arrfunc_type_data af;
@@ -217,12 +215,10 @@ TEST(ArrFunc, LiftUnaryExpr_StridedDim) {
 }
 
 TEST(ArrFunc, LiftUnaryExpr_StridedToVarDim) {
-    nd::array af_base = nd::empty(ndt::make_arrfunc());
     // Create an arrfunc for converting string to int
-    make_arrfunc_from_assignment(
+    nd::arrfunc af_base = make_arrfunc_from_assignment(
                     ndt::make_type<int>(), ndt::make_fixedstring(16), ndt::make_fixedstring(16),
-                    expr_operation_funcproto, assign_error_default,
-                    *reinterpret_cast<arrfunc_type_data *>(af_base.get_readwrite_originptr()));
+                    expr_operation_funcproto, assign_error_default);
 
     // Lift the kernel to particular fixed dim arrays
     arrfunc_type_data af;
@@ -256,12 +252,11 @@ TEST(ArrFunc, LiftUnaryExpr_StridedToVarDim) {
 
 
 TEST(ArrFunc, LiftUnaryExpr_VarToVarDim) {
-    nd::array af_base = nd::empty(ndt::make_arrfunc());
     // Create an arrfunc for converting string to int
-    make_arrfunc_from_assignment(
-                    ndt::make_type<int>(), ndt::make_fixedstring(16), ndt::make_fixedstring(16),
-                    expr_operation_funcproto, assign_error_default,
-                    *reinterpret_cast<arrfunc_type_data *>(af_base.get_readwrite_originptr()));
+    nd::arrfunc af_base = make_arrfunc_from_assignment(
+        ndt::make_type<int>(), ndt::make_fixedstring(16),
+        ndt::make_fixedstring(16), expr_operation_funcproto,
+        assign_error_default);
 
     // Lift the kernel to particular fixed dim arrays
     arrfunc_type_data af;
@@ -290,12 +285,10 @@ TEST(ArrFunc, LiftUnaryExpr_VarToVarDim) {
 
 
 TEST(ArrFunc, LiftUnaryExpr_MultiDimVarToVarDim) {
-    nd::array af_base = nd::empty(ndt::make_arrfunc());
     // Create an arrfunc for converting string to int
-    make_arrfunc_from_assignment(
+    nd::arrfunc af_base = make_arrfunc_from_assignment(
                     ndt::make_type<int>(), ndt::make_fixedstring(16), ndt::make_fixedstring(16),
-                    expr_operation_funcproto, assign_error_default,
-                    *reinterpret_cast<arrfunc_type_data *>(af_base.get_readwrite_originptr()));
+                    expr_operation_funcproto, assign_error_default);
 
     // Lift the kernel to particular arrays
     arrfunc_type_data af;
@@ -335,13 +328,11 @@ TEST(ArrFunc, LiftUnaryExpr_MultiDimVarToVarDim) {
 }
 
 TEST(ArrFunc, LiftExpr_MultiDimVarToVarDim) {
-    nd::array af_base = nd::empty(ndt::make_arrfunc());
     // Create an arrfunc for adding two ints
     ndt::type add_ints_type = (nd::array((int32_t)0) + nd::array((int32_t)0)).get_type();
-    make_arrfunc_from_assignment(
-                    ndt::make_type<int32_t>(), add_ints_type, add_ints_type,
-                    expr_operation_funcproto, assign_error_default,
-                    *reinterpret_cast<arrfunc_type_data *>(af_base.get_readwrite_originptr()));
+    nd::arrfunc af_base = make_arrfunc_from_assignment(
+        ndt::make_type<int32_t>(), add_ints_type, add_ints_type,
+        expr_operation_funcproto, assign_error_default);
 
     // Lift the kernel to particular arrays
     nd::array af_lifted = nd::empty(ndt::make_arrfunc());

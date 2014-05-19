@@ -45,9 +45,9 @@ namespace dynd {
  *                            value for the accumulator.
  */
 void lift_reduction_arrfunc(arrfunc_type_data *out_ar,
-                const nd::array& elwise_reduction,
+                const nd::arrfunc& elwise_reduction,
                 const ndt::type& lifted_arr_type,
-                const nd::array& dst_initialization,
+                const nd::arrfunc& dst_initialization,
                 bool keepdims,
                 intptr_t reduction_ndim,
                 const bool *reduction_dimflags,

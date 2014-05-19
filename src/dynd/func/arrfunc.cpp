@@ -184,3 +184,37 @@ void dynd::make_arrfunc_from_property(const ndt::type& tp, const std::string& pr
     ndt::type dst_tp = prop_tp.value_type();
     make_arrfunc_from_assignment(dst_tp, tp, prop_tp, funcproto, errmode, out_af);
 }
+
+nd::arrfunc::arrfunc(const nd::array &rhs)
+{
+    if (!rhs.is_null()) {
+        if (rhs.get_type().get_type_id() == arrfunc_type_id) {
+            if (rhs.is_immutable()) {
+                const arrfunc_type_data *af =
+                    reinterpret_cast<const arrfunc_type_data *>(
+                        rhs.get_readonly_originptr());
+                if (af->instantiate_func != NULL) {
+                    // It's valid: immutable, arrfunc type, contains an
+                    // instantiate function.
+                    m_value = rhs;
+                } else {
+                    throw invalid_argument("Require a non-empty arrfunc, "
+                                           "provided arrfunc has NULL "
+                                           "instantiate_func");
+                }
+            } else {
+                stringstream ss;
+                ss << "Require an immutable arrfunc, provided arrfunc";
+                rhs.get_type().extended()->print_data(
+                    ss, rhs.get_arrmeta(), rhs.get_readonly_originptr());
+                ss << " is not immutable";
+                throw invalid_argument(ss.str());
+            }
+        } else {
+            stringstream ss;
+            ss << "Cannot implicitly convert nd::array of type "
+               << rhs.get_type().value_type() << " to  arrfunc";
+            throw type_error(ss.str());
+        }
+    }
+}

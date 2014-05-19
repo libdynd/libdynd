@@ -18,7 +18,7 @@ namespace dynd {
  * \param out_af  The output arrfunc which is filled.
  * \param af  The arrfunc to be lifted.
  */
-void lift_arrfunc(arrfunc_type_data *out_af, const nd::array &af);
+void lift_arrfunc(arrfunc_type_data *out_af, const nd::arrfunc &af);
 
 } // namespace dynd
 

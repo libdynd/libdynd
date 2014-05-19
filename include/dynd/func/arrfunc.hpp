@@ -10,6 +10,7 @@
 #include <dynd/eval/eval_context.hpp>
 #include <dynd/types/base_type.hpp>
 #include <dynd/types/funcproto_type.hpp>
+#include <dynd/types/arrfunc_type.hpp>
 #include <dynd/kernels/ckernel_builder.hpp>
 
 namespace dynd {
@@ -119,6 +120,43 @@ struct arrfunc_type_data {
     }
 };
 
+namespace nd {
+/**
+    * Holds a single instance of an arrfunc in an immutable nd::array,
+    * providing some more direct convenient interface.
+    */
+class arrfunc {
+    nd::array m_value;
+public:
+    inline arrfunc() : m_value() {}
+    inline arrfunc(const arrfunc &rhs) : m_value(rhs.m_value) {}
+    /**
+     * Constructor from an nd::array. Validates that the input
+     * has "arrfunc" type and is immutable.
+     */
+    arrfunc(const nd::array& rhs);
+
+    inline arrfunc& operator=(const arrfunc& rhs) {
+        m_value = rhs.m_value;
+        return *this;
+    }
+
+    inline bool is_null() const {
+        return m_value.is_null();
+    }
+
+    inline const arrfunc_type_data *get() const {
+        return !m_value.is_null() ? reinterpret_cast<const arrfunc_type_data *>(
+                                        m_value.get_readonly_originptr())
+                                  : NULL;
+    }
+
+    inline operator nd::array() const {
+        return m_value;
+    }
+};
+} // namespace nd
+
 /**
  * Creates an arrfunc which does the assignment from
  * data of src_tp to dst_tp.
@@ -135,6 +173,18 @@ void make_arrfunc_from_assignment(
                 const ndt::type& dst_tp, const ndt::type& src_tp, const ndt::type& src_prop_tp,
                 arrfunc_proto_t funcproto,
                 assign_error_mode errmode, arrfunc_type_data& out_af);
+
+inline nd::arrfunc make_arrfunc_from_assignment(
+                const ndt::type& dst_tp, const ndt::type& src_tp, const ndt::type& src_prop_tp,
+                arrfunc_proto_t funcproto,
+                assign_error_mode errmode)
+{
+    nd::array af = nd::empty(ndt::make_arrfunc());
+    make_arrfunc_from_assignment(dst_tp, src_tp, src_prop_tp, funcproto, errmode,
+        *reinterpret_cast<arrfunc_type_data *>(af.get_readwrite_originptr()));
+    af.flag_as_immutable();
+    return af;
+}
 
 /**
  * Creates an arrfunc which does the assignment from

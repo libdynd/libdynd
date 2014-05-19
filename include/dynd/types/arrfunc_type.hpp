@@ -7,7 +7,6 @@
 #define _DYND__ARRFUNC_TYPE_HPP_
 
 #include <dynd/type.hpp>
-#include <dynd/func/arrfunc.hpp>
 
 namespace dynd {
 

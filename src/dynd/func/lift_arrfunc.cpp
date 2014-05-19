@@ -12,21 +12,11 @@ using namespace dynd;
 
 namespace {
 
-struct lifted_expr_arrfunc_data {
-    // Pointer to the child arrfunc
-    const arrfunc_type_data *child_af;
-    // Reference to the array containing it
-    memory_block_data *child_af_arr;
-};
-
 static void delete_lifted_expr_arrfunc_data(void *self_data_ptr)
 {
-    lifted_expr_arrfunc_data *data =
-                    reinterpret_cast<lifted_expr_arrfunc_data *>(self_data_ptr);
-    if (data->child_af_arr != NULL) {
-        memory_block_decref(data->child_af_arr);
-    }
-    delete data;
+    memory_block_data *data =
+        reinterpret_cast<memory_block_data *>(self_data_ptr);
+    memory_block_decref(data);
 }
 
 static intptr_t instantiate_lifted_expr_arrfunc_data(
@@ -35,9 +25,11 @@ static intptr_t instantiate_lifted_expr_arrfunc_data(
     const char *const *src_arrmeta, uint32_t kernreq,
     const eval::eval_context *ectx)
 {
-    lifted_expr_arrfunc_data *data =
-                    reinterpret_cast<lifted_expr_arrfunc_data *>(self->data_ptr);
-    return make_lifted_expr_ckernel(data->child_af,
+    const array_preamble *data =
+        reinterpret_cast<const array_preamble *>(self->data_ptr);
+    const arrfunc_type_data *child_af =
+        reinterpret_cast<const arrfunc_type_data *>(data->m_data_pointer);
+    return make_lifted_expr_ckernel(child_af,
                     ckb, ckb_offset,
                     dst_tp, dst_arrmeta,
                     src_tp, src_arrmeta,
@@ -65,37 +57,21 @@ static ndt::type lift_proto(const ndt::type& proto)
         ndt::make_ellipsis_dim(dimsname, p->get_return_type()));
 }
 
-void dynd::lift_arrfunc(arrfunc_type_data *out_af, const nd::array &af_arr)
+void dynd::lift_arrfunc(arrfunc_type_data *out_af, const nd::arrfunc &af)
 {
-    // Validate the input arrfunc
-    if (af_arr.get_type().get_type_id() != arrfunc_type_id) {
-        stringstream ss;
-        ss << "lift_arrfunc() 'af' must have type "
-           << "arrfunc, not " << af_arr.get_type();
-        throw runtime_error(ss.str());
-    }
-    const arrfunc_type_data *af = reinterpret_cast<const arrfunc_type_data *>(
-        af_arr.get_readonly_originptr());
-    if (af->instantiate_func == NULL) {
-        throw runtime_error("lift_arrfunc() 'af' must contain a"
-                            " non-null arrfunc object");
-    }
-
-    if (af->ckernel_funcproto == unary_operation_funcproto) {
+    const arrfunc_type_data *af_ptr = af.get();
+    if (af_ptr->ckernel_funcproto == unary_operation_funcproto) {
         throw runtime_error("lift_arrfunc() for unary operations is not finished");
-    } else if (af->ckernel_funcproto == expr_operation_funcproto) {
-        lifted_expr_arrfunc_data *data = new lifted_expr_arrfunc_data;
-        out_af->data_ptr = data;
+    } else if (af_ptr->ckernel_funcproto == expr_operation_funcproto) {
         out_af->free_func = &delete_lifted_expr_arrfunc_data;
-        data->child_af = af;
-        data->child_af_arr = af_arr.get_memblock().release();
+        out_af->data_ptr = nd::array(af).release();
         out_af->instantiate_func = &instantiate_lifted_expr_arrfunc_data;
         out_af->ckernel_funcproto = expr_operation_funcproto;
-        out_af->func_proto = lift_proto(af->func_proto);
+        out_af->func_proto = lift_proto(af_ptr->func_proto);
     } else {
         stringstream ss;
         ss << "lift_arrfunc() unrecognized ckernel function"
-           << " prototype enum value " << af->ckernel_funcproto;
+           << " prototype enum value " << af_ptr->ckernel_funcproto;
         throw runtime_error(ss.str());
     }
 }
