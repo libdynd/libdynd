@@ -36,15 +36,12 @@ if("${CMAKE_SOURCE_DIR}" STREQUAL "${CMAKE_CURRENT_SOURCE_DIR}")
         OFF) # While CUDA support is in development, we default to OFF.
 #
 # -DDYND_INSTALL_LIB=ON/OFF, whether to install libdynd into the
-#   CMAKE_INSTALL_PREFIX. Its main purpose is to allow separate
-#   building/linking of libdynd by the dynd-python or other projects.
-#   For the make target, use "make install" to do the actual installation.
-#   If this is enabled, specify -DUSE_SEPARATE_LIBDYND to the dynd-python
-#   cmake command indicating to link against a separately built libdynd
-#   instead of trying #   to use one inside the same source tree.
+#   CMAKE_INSTALL_PREFIX. Its main purpose is to allow dynd-python and
+#   libdynd to be built inside the source tree of another project, like
+#   in the libraries/libdynd subdirectory of dynd-python.
     option(DYND_INSTALL_LIB
         "Do installation of the built libdynd library to the CMAKE_INSTALL_PREFIX"
-        OFF)
+        ON)
 # -DUSE_RELATIVE_RPATH=ON/OFF, For OSX, to use the @rpath mechanism
 #   for creating a build will be linked against with a relative path.
 #   Build dynd-python with -DUSE_RELATIVE_PATH=ON as well, and look in
