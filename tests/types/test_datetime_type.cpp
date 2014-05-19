@@ -169,4 +169,12 @@ TEST(DateTimeStruct, FromToString) {
     EXPECT_EQ("2030-07-06T17:55", dts.to_str());
     dts.set_from_str("1994-10-20 T 11:15");
     EXPECT_EQ("1994-10-20T11:15", dts.to_str());
+    dts.set_from_str("201303041438");
+    EXPECT_EQ("2013-03-04T14:38", dts.to_str());
+    dts.set_from_str("20130304143805");
+    EXPECT_EQ("2013-03-04T14:38:05", dts.to_str());
+    dts.set_from_str("20130304143805.");
+    EXPECT_EQ("2013-03-04T14:38:05", dts.to_str());
+    dts.set_from_str("20130304143805.123");
+    EXPECT_EQ("2013-03-04T14:38:05.123", dts.to_str());
 }

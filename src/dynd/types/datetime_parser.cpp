@@ -76,6 +76,86 @@ static bool parse_postgres_datetime(const char *&begin, const char *end,
     }
 }
 
+// 19971219151011
+static bool parse_iso8601_nodashes_datetime(const char *&begin, const char *end,
+                                            datetime_struct &out_dt)
+{
+    saved_begin_state sbs(begin);
+    // YYYY
+    int year;
+    if (!parse_4digit_int_no_ws(begin, end, year)) {
+        return sbs.fail();
+    }
+    // MM
+    int month;
+    if (!parse_2digit_int_no_ws(begin, end, month)) {
+        return sbs.fail();
+    }
+    // DD
+    int day;
+    if (!parse_2digit_int_no_ws(begin, end, day)) {
+        return sbs.fail();
+    }
+    // Validate the date
+    if (!date_ymd::is_valid(year, month, day)) {
+        return sbs.fail();
+    }
+
+    // HH
+    bool done = false;
+    int hour;
+    if (!parse_2digit_int_no_ws(begin, end, hour)) {
+        hour = 0;
+        done = true;
+    }
+    // MM
+    int minute;
+    if (!done && !parse_2digit_int_no_ws(begin, end, minute)) {
+        minute = 0;
+        done = true;
+    }
+    // SS
+    int second;
+    if (!done && !parse_2digit_int_no_ws(begin, end, second)) {
+        second = 0;
+        done = true;
+    }
+    // .SS*
+    int tick = 0;
+    if (!parse_token_no_ws(begin, end, '.')) {
+        done = true;
+    }
+    if (!done && begin < end && isdigit(*begin)) {
+        tick = (*begin - '0');
+        ++begin;
+        for (int i = 1; i < 7; ++i) {
+            tick *= 10;
+            if (begin < end && isdigit(*begin)) {
+                tick += (*begin - '0');
+                ++begin;
+            }
+        }
+        // Swallow any additional decimal digits, truncating to ticks
+        while (begin < end && isdigit(*begin)) {
+            ++begin;
+        }
+    }
+
+    // Validate the time
+    if (!time_hmst::is_valid(hour, minute, second, tick)) {
+        return sbs.fail();
+    }
+
+    out_dt.ymd.year = year;
+    out_dt.ymd.month = month;
+    out_dt.ymd.day = day;
+    out_dt.hmst.hour = hour;
+    out_dt.hmst.minute = minute;
+    out_dt.hmst.second = second;
+    out_dt.hmst.tick = tick;
+    return sbs.succeed();
+}
+
 // <date> T <time>, <date>:<time>, <date> <time>
 static bool parse_date_time_datetime(const char *&begin, const char *end,
                                      datetime_struct &out_dt,
@@ -134,6 +214,8 @@ bool parse::parse_datetime(const char *&begin, const char *end,
         // <date>T<time>, <date> <time>
     } else if (parse_postgres_datetime(begin, end, out_dt)) {
         // Fri Dec 19 15:10:11 1997, Fri 19 Dec 15:10:11 1997
+    } else if (parse_iso8601_nodashes_datetime(begin, end, out_dt)) {
+        // 19971219151011
     } else {
         return false;
     }
