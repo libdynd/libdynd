@@ -358,9 +358,16 @@ static void parse_var_dim_json(const ndt::type& tp, const char *metadata, char *
     out->size = size;
 }
 
-static void parse_struct_json(const ndt::type& tp, const char *metadata, char *out_data,
-                const char *&begin, const char *end, const eval::eval_context *ectx)
+static bool parse_struct_json_from_object(const ndt::type &tp,
+                                          const char *metadata, char *out_data,
+                                          const char *&begin, const char *end,
+                                          const eval::eval_context *ectx)
 {
+    const char *saved_begin = begin;
+    if (!parse_token(begin, end, "{")) {
+        return false;
+    }
+
     const base_struct_type *fsd = tp.tcast<base_struct_type>();
     size_t field_count = fsd->get_field_count();
     const size_t *data_offsets = fsd->get_data_offsets(metadata);
@@ -370,10 +377,6 @@ static void parse_struct_json(const ndt::type& tp, const char *metadata, char *o
     shortvector<bool> populated_fields(field_count);
     memset(populated_fields.get(), 0, sizeof(bool) * field_count);
 
-    const char *saved_begin = begin;
-    if (!parse_token(begin, end, "{")) {
-        throw json_parse_error(begin, "expected object dict starting with '{'", tp);
-    }
     // If it's not an empty object, start the loop parsing the elements
     if (!parse_token(begin, end, "}")) {
         for (;;) {
@@ -421,6 +424,52 @@ static void parse_struct_json(const ndt::type& tp, const char *metadata, char *o
             ss << " as required by the data type";
             throw json_parse_error(skip_whitespace(saved_begin, end), ss.str(), tp);
         }
+    }
+
+    return true;
+}
+
+static bool parse_struct_json_from_list(const ndt::type &tp,
+                                        const char *metadata, char *out_data,
+                                        const char *&begin, const char *end,
+                                        const eval::eval_context *ectx)
+{
+    if (!parse_token(begin, end, "[")) {
+        return false;
+    }
+
+    const base_struct_type *fsd = tp.tcast<base_struct_type>();
+    size_t field_count = fsd->get_field_count();
+    const size_t *data_offsets = fsd->get_data_offsets(metadata);
+    const size_t *arrmeta_offsets = fsd->get_arrmeta_offsets_raw();
+
+    // Loop through all the fields
+    for (size_t i = 0; i != field_count; ++i) {
+        begin = skip_whitespace(begin, end);
+        parse_json(fsd->get_field_type(i), metadata + arrmeta_offsets[i],
+                   out_data + data_offsets[i], begin, end, ectx);
+        if (i != field_count - 1 && !parse_token(begin, end, ",")) {
+            throw json_parse_error(begin, "expected list item separator ','",
+                                   tp);
+        }
+    }
+
+    if (!parse_token(begin, end, "]")) {
+        throw json_parse_error(begin, "expected end of list ']'", tp);
+    }
+
+    return true;
+}
+
+static void parse_struct_json(const ndt::type& tp, const char *metadata, char *out_data,
+                const char *&begin, const char *end, const eval::eval_context *ectx)
+{
+    if (parse_struct_json_from_object(tp, metadata, out_data, begin, end, ectx)) {
+    } else if (parse_struct_json_from_list(tp, metadata, out_data, begin, end, ectx)) {
+    } else {
+        throw json_parse_error(
+            begin, "expected object dict starting with '{' or list with '['",
+            tp);
     }
 }
 
