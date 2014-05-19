@@ -176,7 +176,6 @@ instantiate_strided(const arrfunc_type_data *af_self, dynd::ckernel_builder *ckb
             self->m_src_winop_meta.get() + sizeof(strided_dim_type_metadata),
             src_el_arrmeta, NULL);
     }
-    //const char *window_op_meta[2] = {dst_el_meta, self->m_src_winop_meta.get()};
 
     // Allow expr ckernels as well as unary via an adapter
     if (af_data->window_op_af->ckernel_funcproto != unary_operation_funcproto) {
