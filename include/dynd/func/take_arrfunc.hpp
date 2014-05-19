@@ -23,16 +23,17 @@ namespace dynd { namespace kernels {
  * \param src_tp  The source type for the resulting arrfunc.
  * \param window_size  The size of the rolling window.
  */
-void make_take_arrfunc(arrfunc *out_af, const ndt::type &dst_tp,
-                       const ndt::type &src_tp, const ndt::type &mask_tp);
+void make_take_arrfunc(arrfunc_type_data *out_af, const ndt::type &dst_tp,
+                        const ndt::type &src_tp, const ndt::type &mask_tp);
 
 inline nd::array make_take_arrfunc(const ndt::type &dst_tp,
                                    const ndt::type &src_tp,
                                    const ndt::type &mask_tp)
 {
     nd::array af = nd::empty(ndt::make_arrfunc());
-    make_take_arrfunc(reinterpret_cast<arrfunc *>(af.get_readwrite_originptr()),
-                      dst_tp, src_tp, mask_tp);
+    make_take_arrfunc(
+        reinterpret_cast<arrfunc_type_data *>(af.get_readwrite_originptr()),
+        dst_tp, src_tp, mask_tp);
     return af;
 }
 

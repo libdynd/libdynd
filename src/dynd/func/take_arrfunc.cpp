@@ -104,20 +104,10 @@ struct indexed_take_ck : public kernels::expr_ck<indexed_take_ck, 2> {
         get_child_ckernel()->destroy();
     }
 };
-
-struct take_arrfunc_data {
-    // The types of the ckernel
-    ndt::type data_types[3];
-};
-
-
-static void free_take_arrfunc_data(void *data_ptr) {
-    delete reinterpret_cast<take_arrfunc_data *>(data_ptr);
-}
 } // anonymous namespace
 
 static intptr_t
-instantiate_masked_take(void *DYND_UNUSED(self_data_ptr), dynd::ckernel_builder *ckb,
+instantiate_masked_take(const arrfunc_type_data *DYND_UNUSED(self_data_ptr), dynd::ckernel_builder *ckb,
                         intptr_t ckb_offset, const ndt::type &dst_tp,
                         const char *dst_arrmeta, const ndt::type *src_tp,
                         const char *const *src_arrmeta, uint32_t kernreq,
@@ -179,7 +169,7 @@ instantiate_masked_take(void *DYND_UNUSED(self_data_ptr), dynd::ckernel_builder 
 }
 
 static intptr_t
-instantiate_indexed_take(void *DYND_UNUSED(self_data_ptr), dynd::ckernel_builder *ckb,
+instantiate_indexed_take(const arrfunc_type_data *DYND_UNUSED(self_data_ptr), dynd::ckernel_builder *ckb,
                          intptr_t ckb_offset, const ndt::type &dst_tp,
                          const char *dst_arrmeta, const ndt::type *src_tp,
                          const char *const *src_arrmeta, uint32_t kernreq,
@@ -239,19 +229,17 @@ instantiate_indexed_take(void *DYND_UNUSED(self_data_ptr), dynd::ckernel_builder
         kernel_request_single, assign_error_default, ectx);
 }
 
-
-void kernels::make_take_arrfunc(arrfunc *out_af,
+void kernels::make_take_arrfunc(arrfunc_type_data *out_af,
                                 const ndt::type &dst_tp,
                                 const ndt::type &src_tp,
                                 const ndt::type &mask_tp)
 {
     // Create the data for the arrfunc
-    take_arrfunc_data *data = new take_arrfunc_data;
-    out_af->data_ptr = data;
-    out_af->free_func = &free_take_arrfunc_data;
+    out_af->data_ptr = NULL;
+    out_af->free_func = NULL;
     out_af->ckernel_funcproto = expr_operation_funcproto;
-    out_af->data_dynd_types = data->data_types;
-    out_af->data_types_size = 3;
+    ndt::type param_types[2] = {src_tp, mask_tp};
+    out_af->func_proto = ndt::make_funcproto(param_types, dst_tp);
     switch (mask_tp.get_type_at_dimension(NULL, 1).get_type_id()) {
         case bool_type_id:
             out_af->instantiate_func = &instantiate_masked_take;
@@ -262,7 +250,4 @@ void kernels::make_take_arrfunc(arrfunc *out_af,
         default:
             throw invalid_argument("take requires either a boolean mask or an index array");
     }
-    data->data_types[0] = dst_tp;
-    data->data_types[1] = src_tp;
-    data->data_types[2] = mask_tp;
 }

@@ -5,6 +5,7 @@
 
 #include <dynd/array.hpp>
 #include <dynd/types/type_type.hpp>
+#include <dynd/types/strided_dim_type.hpp>
 #include <dynd/memblock/pod_memory_block.hpp>
 #include <dynd/kernels/string_assignment_kernels.hpp>
 #include <dynd/kernels/assignment_kernels.hpp>
@@ -243,12 +244,19 @@ size_t type_type::make_comparison_kernel(
     throw not_comparable_error(src0_dt, src1_dt, comptype);
 }
 
-ndt::type ndt::make_type()
+const ndt::type& ndt::make_type()
 {
     // Static instance of type_type, which has a reference count > 0 for the
     // lifetime of the program. This static construction is inside a
     // function to ensure correct creation order during startup.
     static type_type stt;
-    const ndt::type static_instance(&stt, true);
+    static const ndt::type static_instance(&stt, true);
+    return static_instance;
+}
+
+const ndt::type& ndt::make_strided_of_type()
+{
+    static strided_dim_type sdt(ndt::make_type());
+    static const ndt::type static_instance(&sdt, true);
     return static_instance;
 }

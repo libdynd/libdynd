@@ -33,26 +33,26 @@ static void delete_unary_assignment_arrfunc_data(void *self_data_ptr)
 }
 
 static intptr_t instantiate_unary_assignment_ckernel(
-    void *self_data_ptr, dynd::ckernel_builder *ckb, intptr_t ckb_offset,
+    const arrfunc_type_data *self, dynd::ckernel_builder *ckb, intptr_t ckb_offset,
     const ndt::type &dst_tp, const char *dst_arrmeta, const ndt::type *src_tp,
     const char *const *src_arrmeta, uint32_t kernreq,
     const eval::eval_context *ectx)
 {
     unary_assignment_arrfunc_data *data =
-        reinterpret_cast<unary_assignment_arrfunc_data *>(self_data_ptr);
+        reinterpret_cast<unary_assignment_arrfunc_data *>(self->data_ptr);
     return make_assignment_kernel(
         ckb, ckb_offset, dst_tp, dst_arrmeta, src_tp[0], src_arrmeta[0],
         (kernel_request_t)kernreq, data->errmode, ectx);
 }
 
 static intptr_t instantiate_adapted_expr_assignment_ckernel(
-    void *self_data_ptr, dynd::ckernel_builder *ckb, intptr_t ckb_offset,
+    const arrfunc_type_data *self, dynd::ckernel_builder *ckb, intptr_t ckb_offset,
     const ndt::type &dst_tp, const char *dst_arrmeta, const ndt::type *src_tp,
     const char *const *src_arrmeta, uint32_t kernreq,
     const eval::eval_context *ectx)
 {
     unary_assignment_arrfunc_data *data =
-        reinterpret_cast<unary_assignment_arrfunc_data *>(self_data_ptr);
+        reinterpret_cast<unary_assignment_arrfunc_data *>(self->data_ptr);
     ckb_offset = kernels::wrap_unary_as_expr_ckernel(
         ckb, ckb_offset, (kernel_request_t)kernreq);
     return make_assignment_kernel(
@@ -86,14 +86,14 @@ static void delete_expr_arrfunc_data(void *self_data_ptr)
 }
 
 static intptr_t
-instantiate_expr_ckernel(void *self_data_ptr, dynd::ckernel_builder *ckb,
+instantiate_expr_ckernel(const arrfunc_type_data *self, dynd::ckernel_builder *ckb,
                          intptr_t ckb_offset, const ndt::type &dst_tp,
                          const char *dst_arrmeta, const ndt::type *src_tp,
                          const char *const *src_arrmeta, uint32_t kernreq,
                          const eval::eval_context *ectx)
 {
     expr_arrfunc_data *data =
-        reinterpret_cast<expr_arrfunc_data *>(self_data_ptr);
+        reinterpret_cast<expr_arrfunc_data *>(self->data_ptr);
     const expr_kernel_generator &kgen = data->expr_type->get_kgen();
     return kgen.make_expr_kernel(ckb, ckb_offset, dst_tp, dst_arrmeta,
                                  data->data_types_size - 1, src_tp, src_arrmeta,
@@ -107,7 +107,7 @@ instantiate_expr_ckernel(void *self_data_ptr, dynd::ckernel_builder *ckb,
 void dynd::make_arrfunc_from_assignment(
                 const ndt::type& dst_tp, const ndt::type& src_tp, const ndt::type& src_expr_tp,
                 arrfunc_proto_t funcproto,
-                assign_error_mode errmode, arrfunc& out_af)
+                assign_error_mode errmode, arrfunc_type_data &out_af)
 {
     if (src_tp.operand_type() != src_expr_tp.operand_type()) {
         stringstream ss;
@@ -116,7 +116,7 @@ void dynd::make_arrfunc_from_assignment(
         ss << " must have matching operand types";
         throw type_error(ss.str());
     }
-    memset(&out_af, 0, sizeof(arrfunc));
+    memset(&out_af, 0, sizeof(arrfunc_type_data));
     if (funcproto == unary_operation_funcproto) {
         // Since a unary operation was requested, it's a straightforward unary assignment ckernel
         unary_assignment_arrfunc_data *data = new unary_assignment_arrfunc_data;
@@ -128,8 +128,7 @@ void dynd::make_arrfunc_from_assignment(
         data->errmode = errmode;
         out_af.instantiate_func = &instantiate_unary_assignment_ckernel;
         out_af.ckernel_funcproto = unary_operation_funcproto;
-        out_af.data_types_size = 2;
-        out_af.data_dynd_types = data->data_types;
+        out_af.func_proto = ndt::make_funcproto(src_tp, dst_tp);
     } else if (funcproto == expr_operation_funcproto) {
         if (src_tp.get_type_id() == expr_type_id && (&src_tp == &src_expr_tp)) {
             const expr_type *etp = src_tp.tcast<expr_type>();
@@ -155,8 +154,7 @@ void dynd::make_arrfunc_from_assignment(
             data->errmode = errmode;
             out_af.instantiate_func = &instantiate_expr_ckernel;
             out_af.ckernel_funcproto = expr_operation_funcproto;
-            out_af.data_types_size = nargs + 1;
-            out_af.data_dynd_types = data->data_types;
+            out_af.func_proto = ndt::make_funcproto(nargs, data->data_types + 1, data->data_types[0]);
         } else {
             // Adapt the assignment to an expr kernel
             unary_assignment_arrfunc_data *data = new unary_assignment_arrfunc_data;
@@ -168,8 +166,7 @@ void dynd::make_arrfunc_from_assignment(
             data->errmode = errmode;
             out_af.instantiate_func = &instantiate_adapted_expr_assignment_ckernel;
             out_af.ckernel_funcproto = expr_operation_funcproto;
-            out_af.data_types_size = 2;
-            out_af.data_dynd_types = data->data_types;
+            out_af.func_proto = ndt::make_funcproto(src_tp, dst_tp);
         }
     } else {
         stringstream ss;
@@ -181,9 +178,43 @@ void dynd::make_arrfunc_from_assignment(
 
 void dynd::make_arrfunc_from_property(const ndt::type& tp, const std::string& propname,
                 arrfunc_proto_t funcproto,
-                assign_error_mode errmode, arrfunc& out_af)
+                assign_error_mode errmode, arrfunc_type_data &out_af)
 {
     ndt::type prop_tp = ndt::make_property(tp, propname);
     ndt::type dst_tp = prop_tp.value_type();
     make_arrfunc_from_assignment(dst_tp, tp, prop_tp, funcproto, errmode, out_af);
+}
+
+nd::arrfunc::arrfunc(const nd::array &rhs)
+{
+    if (!rhs.is_null()) {
+        if (rhs.get_type().get_type_id() == arrfunc_type_id) {
+            if (rhs.is_immutable()) {
+                const arrfunc_type_data *af =
+                    reinterpret_cast<const arrfunc_type_data *>(
+                        rhs.get_readonly_originptr());
+                if (af->instantiate_func != NULL) {
+                    // It's valid: immutable, arrfunc type, contains an
+                    // instantiate function.
+                    m_value = rhs;
+                } else {
+                    throw invalid_argument("Require a non-empty arrfunc, "
+                                           "provided arrfunc has NULL "
+                                           "instantiate_func");
+                }
+            } else {
+                stringstream ss;
+                ss << "Require an immutable arrfunc, provided arrfunc";
+                rhs.get_type().extended()->print_data(
+                    ss, rhs.get_arrmeta(), rhs.get_readonly_originptr());
+                ss << " is not immutable";
+                throw invalid_argument(ss.str());
+            }
+        } else {
+            stringstream ss;
+            ss << "Cannot implicitly convert nd::array of type "
+               << rhs.get_type().value_type() << " to  arrfunc";
+            throw type_error(ss.str());
+        }
+    }
 }

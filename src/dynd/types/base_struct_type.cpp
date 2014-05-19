@@ -22,30 +22,7 @@ base_struct_type::base_struct_type(type_id_t type_id,
     : base_tuple_type(type_id, field_types, flags, variable_layout),
       m_field_names(field_names)
 {
-    // Ensure that field_types is an immutable array of type "strided * string"
-    if (m_field_names.is_immutable() &&
-        m_field_names.get_type().get_type_id() == strided_dim_type_id &&
-        m_field_names.get_type()
-                .tcast<strided_dim_type>()
-                ->get_element_type()
-                .get_type_id() == string_type_id &&
-        m_field_names.get_type()
-                .tcast<strided_dim_type>()
-                ->get_element_type()
-                .tcast<string_type>()
-                ->get_encoding() == string_encoding_utf_8) {
-        // The array is already fine, leave it be
-    } else if (m_field_names.get_ndim() == 1 &&
-               m_field_names.get_type()
-                       .get_type_at_dimension(NULL, 1)
-                       .value_type()
-                       .get_kind() == string_kind) {
-        // Make an immutable copy of the types
-        m_field_names =
-            nd::empty(m_field_count, ndt::make_strided_dim(ndt::make_string()));
-        m_field_names.vals() = field_types;
-        m_field_names.flag_as_immutable();
-    } else {
+    if (!nd::ensure_immutable_contig<nd::string>(m_field_names)) {
         stringstream ss;
         ss << "dynd struct field names requires an array of strings, got an "
               "array with type " << m_field_names.get_type();
@@ -118,7 +95,7 @@ ndt::type base_struct_type::apply_linear_index(intptr_t nindices,
         } else {
             // Take the subset of the fields in-place
             nd::array tmp_field_types(nd::empty(
-                dimension_size, ndt::make_strided_dim(ndt::make_type())));
+                dimension_size, ndt::make_strided_of_type()));
             ndt::type *tmp_field_types_raw = reinterpret_cast<ndt::type *>(
                 tmp_field_types.get_readwrite_originptr());
 

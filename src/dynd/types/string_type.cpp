@@ -9,6 +9,7 @@
 #include <dynd/kernels/string_comparison_kernels.hpp>
 #include <dynd/kernels/string_numeric_assignment_kernels.hpp>
 #include <dynd/types/fixedstring_type.hpp>
+#include <dynd/types/strided_dim_type.hpp>
 #include <dynd/iter/string_iter.hpp>
 #include <dynd/exceptions.hpp>
 
@@ -309,4 +310,21 @@ void string_type::make_string_iter(dim_iter *out_di, string_encoding_t encoding,
     }
     iter::make_string_iter(out_di, encoding,
             m_encoding, d->begin, d->end, dataref, buffer_max_mem, ectx);
+}
+
+const ndt::type& ndt::make_string()
+{
+    // Static instance of type_type, which has a reference count > 0 for the
+    // lifetime of the program. This static construction is inside a
+    // function to ensure correct creation order during startup.
+    static string_type st(string_encoding_utf_8);
+    static const ndt::type static_instance(&st, true);
+    return static_instance;
+}
+
+const ndt::type& ndt::make_strided_of_string()
+{
+    static strided_dim_type sdt(ndt::make_string());
+    static const ndt::type static_instance(&sdt, true);
+    return static_instance;
 }

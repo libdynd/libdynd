@@ -401,7 +401,7 @@ TEST(Array, StdVectorStringConstructor) {
 
     // Empty vector
     a = v;
-    EXPECT_EQ(ndt::make_strided_dim(ndt::make_string(string_encoding_utf_8)), a.get_type());
+    EXPECT_EQ(ndt::make_strided_of_string(), a.get_type());
     EXPECT_EQ(1, a.get_type().get_ndim());
     EXPECT_EQ(1u, a.get_shape().size());
     EXPECT_EQ(0, a.get_shape()[0]);
@@ -415,7 +415,7 @@ TEST(Array, StdVectorStringConstructor) {
     v.push_back("vectors");
     v.push_back("testing testing testing testing testing testing testing testing testing");
     a = v;
-    EXPECT_EQ(ndt::make_strided_dim(ndt::make_string(string_encoding_utf_8)), a.get_type());
+    EXPECT_EQ(ndt::make_strided_of_string(), a.get_type());
     EXPECT_EQ(1, a.get_type().get_ndim());
     EXPECT_EQ(1u, a.get_shape().size());
     EXPECT_EQ(5, a.get_shape()[0]);

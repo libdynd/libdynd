@@ -43,7 +43,7 @@ TEST(GroupByDType, BasicDeduceGroups) {
     const char *by[] = {"beta", "alpha", "beta", "beta", "alpha"};
     nd::array g = nd::groupby(data, by);
     const char *expected_groups[] = {"alpha", "beta"};
-    EXPECT_EQ(ndt::make_groupby(ndt::make_strided_dim(ndt::make_string()),
+    EXPECT_EQ(ndt::make_groupby(ndt::make_strided_of_string(),
                         ndt::make_strided_dim(ndt::make_convert(
                             ndt::make_categorical(expected_groups), ndt::make_string()))),
                     g.get_type());

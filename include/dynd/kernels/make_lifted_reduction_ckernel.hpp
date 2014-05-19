@@ -48,10 +48,10 @@ namespace dynd {
  * \param ectx  The evaluation context to use.
  */
 size_t make_lifted_reduction_ckernel(
-    const arrfunc *elwise_reduction, const arrfunc *dst_initialization,
-    dynd::ckernel_builder *out_ckb, intptr_t ckb_offset,
-    const ndt::type &dst_tp, const char *dst_arrmeta, const ndt::type &src_tp,
-    const char *src_arrmeta, intptr_t reduction_ndim,
+    const arrfunc_type_data *elwise_reduction,
+    const arrfunc_type_data *dst_initialization, dynd::ckernel_builder *out_ckb,
+    intptr_t ckb_offset, const ndt::type &dst_tp, const char *dst_arrmeta,
+    const ndt::type &src_tp, const char *src_arrmeta, intptr_t reduction_ndim,
     const bool *reduction_dimflags, bool associative, bool commutative,
     bool right_associative, const nd::array &reduction_identity,
     dynd::kernel_request_t kernreq,

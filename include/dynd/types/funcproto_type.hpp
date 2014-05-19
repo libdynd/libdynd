@@ -9,31 +9,36 @@
 #include <vector>
 #include <string>
 
-#include <dynd/type.hpp>
-#include <dynd/memblock/memory_block.hpp>
+#include <dynd/array.hpp>
+#include <dynd/types/strided_dim_type.hpp>
 
 namespace dynd {
 
 class funcproto_type : public base_type {
-    std::vector<ndt::type> m_param_types;
+    size_t m_param_count;
+    // This is always a contiguous immutable "strided * type" array
+    nd::array m_param_types;
     ndt::type m_return_type;
 
 public:
-    funcproto_type(size_t param_count, const ndt::type *param_types,
-                 const ndt::type &return_type);
+    funcproto_type(const nd::array &param_types, const ndt::type &return_type);
 
     virtual ~funcproto_type() {}
 
     inline size_t get_param_count() const {
-        return m_param_types.size();
+        return m_param_count;
     }
 
-    inline const ndt::type *get_param_types() const {
-        return &m_param_types[0];
-    }
-
-    inline const std::vector<ndt::type>& get_param_types_vector() const {
+    inline const nd::array& get_param_types() const {
         return m_param_types;
+    }
+
+    inline const ndt::type *get_param_types_raw() const {
+        return reinterpret_cast<const ndt::type *>(
+            m_param_types.get_readonly_originptr());
+    }
+    inline const ndt::type &get_param_type(intptr_t i) const {
+        return get_param_types_raw()[i];
     }
 
     inline const ndt::type& get_return_type() const {
@@ -73,12 +78,37 @@ public:
 
 namespace ndt {
     /** Makes a funcproto type with the specified types */
+    inline ndt::type make_funcproto(const nd::array &param_types,
+                                    const ndt::type &return_type)
+    {
+        return ndt::type(
+            new funcproto_type(param_types, return_type), false);
+    }
+
+    /** Makes a funcproto type with the specified types */
     inline ndt::type make_funcproto(size_t param_count,
                                     const ndt::type *param_types,
                                     const ndt::type &return_type)
     {
+        nd::array tmp =
+            nd::empty(param_count, ndt::make_strided_of_type());
+        ndt::type *tmp_vals =
+            reinterpret_cast<ndt::type *>(tmp.get_readwrite_originptr());
+        for (size_t i = 0; i != param_count; ++i) {
+            tmp_vals[i] = param_types[i];
+        }
+        tmp.flag_as_immutable();
         return ndt::type(
-            new funcproto_type(param_count, param_types, return_type), false);
+            new funcproto_type(tmp, return_type), false);
+    }
+
+    /** Makes a unary funcproto type with the specified types */
+    inline ndt::type make_funcproto(const ndt::type& single_param_type,
+                                    const ndt::type &return_type)
+    {
+        ndt::type param_types[1] = {single_param_type};
+        return ndt::type(
+            new funcproto_type(param_types, return_type), false);
     }
 
     namespace detail {
@@ -88,7 +118,9 @@ namespace ndt {
         template<typename R>
         struct make_func_proto<R ()> {
             static inline ndt::type make() {
-                return make_funcproto(0, NULL, make_type<R>());
+                nd::array param_types = nd::empty(0, ndt::make_strided_of_type());
+                param_types.flag_as_immutable();
+                return make_funcproto(param_types, make_type<R>());
             }
         };
 
@@ -96,7 +128,7 @@ namespace ndt {
         struct make_func_proto<R (T0)> {
             static inline ndt::type make() {
                 ndt::type param_types[1] = {make_type<T0>()};
-                return make_funcproto(1, param_types, make_type<R>());
+                return make_funcproto(param_types, make_type<R>());
             }
         };
 
@@ -104,7 +136,7 @@ namespace ndt {
         struct make_func_proto<R (T0, T1)> {
             static inline ndt::type make() {
                 ndt::type param_types[2] = {make_type<T0>(), make_type<T1>()};
-                return make_funcproto(2, param_types, make_type<R>());
+                return make_funcproto(param_types, make_type<R>());
             }
         };
 
@@ -114,7 +146,7 @@ namespace ndt {
             static inline ndt::type make() {
                 ndt::type param_types[3] = {make_type<T0>(), make_type<T1>(),
                                             make_type<T2>()};
-                return make_funcproto(3, param_types, make_type<R>());
+                return make_funcproto(param_types, make_type<R>());
             }
         };
         // TODO use the pp lib to generate this

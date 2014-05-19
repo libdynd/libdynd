@@ -265,8 +265,8 @@ static void refine_bytes_view(memory_block_ptr &data_ref, char *&data_ptr,
             if (shape[i] != 1) {
                 data_dim_size = shape[i];
                 data_stride = strides[i];
-                ++i;
             }
+            ++i;
         }
         for (; i < ndim; ++i) {
             if (shape[i] != 1) {
