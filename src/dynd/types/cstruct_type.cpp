@@ -17,41 +17,31 @@
 using namespace std;
 using namespace dynd;
 
-cstruct_type::cstruct_type(size_t field_count, const ndt::type *field_types,
-                const std::string *field_names)
-    : base_struct_type(cstruct_type_id, 0, 1, field_count, type_flag_none, 0),
-            m_field_types(field_types, field_types + field_count),
-            m_field_names(field_names, field_names + field_count),
-           m_data_offsets(field_count), m_metadata_offsets(field_count)
+cstruct_type::cstruct_type(const nd::array &field_names, const nd::array &field_types)
+    : base_struct_type(cstruct_type_id, field_names, field_types, type_flag_none, false),
+      m_data_offsets(nd::empty(
+          m_field_count, ndt::make_strided_dim(ndt::make_type<uintptr_t>())))
 {
-    // Calculate all the resulting struct data
-    size_t metadata_offset = 0, data_offset = 0;
-    m_members.data_alignment = 1;
-    for (size_t i = 0; i != field_count; ++i) {
-        size_t field_alignment = field_types[i].get_data_alignment();
-        // Accumulate the biggest field alignment as the type alignment
-        if (field_alignment > m_members.data_alignment) {
-            m_members.data_alignment = (uint8_t)field_alignment;
-        }
-        // Inherit any operand flags from the fields
-        m_members.flags |= (field_types[i].get_flags()&type_flags_operand_inherited);
-        // Calculate the data offsets
-        data_offset = inc_to_alignment(data_offset, field_types[i].get_data_alignment());
-        m_data_offsets[i] = data_offset;
-        size_t field_element_size = field_types[i].get_data_size();
+    uintptr_t *data_offsets = reinterpret_cast<uintptr_t *>(
+        m_data_offsets.get_readwrite_originptr());
+
+    size_t offs = 0;
+    for (size_t i = 0; i < m_field_count; ++i) {
+        const ndt::type& field_tp = get_field_type(i);
+        offs = inc_to_alignment(offs, field_tp.get_data_alignment());
+        data_offsets[i] = offs;
+        size_t field_element_size = field_tp.get_data_size();
         if (field_element_size == 0) {
             stringstream ss;
-            ss << "Cannot create dynd cstruct type with type " << field_types[i];
-            ss << " for field '" << field_names[i] << "', as it does not have a fixed size";
+            ss << "Cannot create dynd ctuple type with type " << field_tp;
+            ss << " for field at index " << i << ", as it does not have a fixed size";
             throw runtime_error(ss.str());
         }
-        data_offset += field_element_size;
-        // Calculate the metadata offsets
-        m_metadata_offsets[i] = metadata_offset;
-        metadata_offset += m_field_types[i].is_builtin() ? 0 : m_field_types[i].extended()->get_metadata_size();
+        offs += field_element_size;
     }
-    m_members.metadata_size = metadata_offset;
-    m_members.data_size = inc_to_alignment(data_offset, m_members.data_alignment);
+    m_members.data_size = inc_to_alignment(offs, m_members.data_alignment);
+
+    m_data_offsets.flag_as_immutable();
 
     create_array_properties();
 }
@@ -60,40 +50,17 @@ cstruct_type::~cstruct_type()
 {
 }
 
-intptr_t cstruct_type::get_field_index(const std::string& field_name) const
+static bool is_simple_identifier_name(const char *begin, const char *end)
 {
-    // TODO: Put a map<> or unordered_map<> in the type to accelerate this lookup
-    vector<string>::const_iterator i = find(m_field_names.begin(), m_field_names.end(), field_name);
-    if (i != m_field_names.end()) {
-        return i - m_field_names.begin();
-    } else {
-        return -1;
-    }
-}
-
-void cstruct_type::print_data(std::ostream& o, const char *metadata, const char *data) const
-{
-    o << "[";
-    for (size_t i = 0, i_end = m_field_types.size(); i != i_end; ++i) {
-        m_field_types[i].print_data(o, metadata + m_metadata_offsets[i], data + m_data_offsets[i]);
-        if (i != i_end - 1) {
-            o << ", ";
-        }
-    }
-    o << "]";
-}
-
-static bool is_simple_identifier_name(const string& s)
-{
-    if (s.empty()) {
+    if (begin == end) {
         return false;
     } else {
-        char c = s[0];
+        char c = *begin++;
         if (!(('a' <= c && c <= 'z') || ('A' <= c && c <= 'Z') || c == '_')) {
             return false;
         }
-        for (size_t i = 1, i_end = s.size(); i < i_end; ++i) {
-            c = s[i];
+        while (begin < end) {
+            c = *begin++;
             if (!(('0' <= c && c <= '9') || ('a' <= c && c <= 'z')
                             || ('A' <= c && c <= 'Z') || c == '_')) {
                 return false;
@@ -107,66 +74,49 @@ void cstruct_type::print_type(std::ostream& o) const
 {
     // Use the record datashape syntax prefixed with a "c"
     o << "c{";
-    for (size_t i = 0, i_end = m_field_types.size(); i != i_end; ++i) {
+    for (size_t i = 0, i_end = m_field_count; i != i_end; ++i) {
         if (i != 0) {
             o << ", ";
         }
-        if (is_simple_identifier_name(m_field_names[i])) {
-            o << m_field_names[i];
+        const string_type_data& fn = get_field_name_raw(i);
+        if (is_simple_identifier_name(fn.begin, fn.end)) {
+            o.write(fn.begin, fn.end - fn.begin);
         } else {
-            print_escaped_utf8_string(o, m_field_names[i]);
+            print_escaped_utf8_string(o, fn.begin, fn.end);
         }
-        o << " : " << m_field_types[i];
+        o << " : " << get_field_type(i);
     }
     o << "}";
-}
-
-bool cstruct_type::is_expression() const
-{
-    for (size_t i = 0, i_end = m_field_types.size(); i != i_end; ++i) {
-        if (m_field_types[i].is_expression()) {
-            return true;
-        }
-    }
-    return false;
-}
-
-bool cstruct_type::is_unique_data_owner(const char *metadata) const
-{
-    for (size_t i = 0, i_end = m_field_types.size(); i != i_end; ++i) {
-        if (!m_field_types[i].is_builtin() &&
-                !m_field_types[i].extended()->is_unique_data_owner(metadata + m_metadata_offsets[i])) {
-            return false;
-        }
-    }
-    return true;
 }
 
 void cstruct_type::transform_child_types(type_transform_fn_t transform_fn, void *extra,
                 ndt::type& out_transformed_tp, bool& out_was_transformed) const
 {
-    std::vector<ndt::type> tmp_field_types(m_field_types.size());
+    nd::array tmp_field_types(
+        nd::empty(m_field_count, ndt::make_strided_dim(ndt::make_type())));
+    ndt::type *tmp_field_types_raw = reinterpret_cast<ndt::type *>(
+        tmp_field_types.get_readwrite_originptr());
 
     bool switch_to_struct = false;
     bool was_any_transformed = false;
-    for (size_t i = 0, i_end = m_field_types.size(); i != i_end; ++i) {
+    for (size_t i = 0, i_end = m_field_count; i != i_end; ++i) {
         bool was_transformed = false;
-        transform_fn(m_field_types[i], extra, tmp_field_types[i], was_transformed);
+        transform_fn(get_field_type(i), extra, tmp_field_types_raw[i],
+                     was_transformed);
         if (was_transformed) {
             // If the type turned into one without fixed size, have to use struct instead of cstruct
-            if (tmp_field_types[i].get_data_size() == 0) {
+            if (tmp_field_types_raw[i].get_data_size() == 0) {
                 switch_to_struct = true;
             }
             was_any_transformed = true;
         }
     }
     if (was_any_transformed) {
+        tmp_field_types.flag_as_immutable();
         if (!switch_to_struct) {
-            out_transformed_tp = ndt::make_cstruct(tmp_field_types.size(), &tmp_field_types[0],
-                                 &m_field_names[0]);
+            out_transformed_tp = ndt::make_cstruct(m_field_names, tmp_field_types);
         } else {
-            out_transformed_tp = ndt::make_struct(tmp_field_types.size(), &tmp_field_types[0],
-                                &m_field_names[0]);
+            out_transformed_tp = ndt::make_struct(m_field_names, tmp_field_types);
         }
         out_was_transformed = true;
     } else {
@@ -176,137 +126,33 @@ void cstruct_type::transform_child_types(type_transform_fn_t transform_fn, void 
 
 ndt::type cstruct_type::get_canonical_type() const
 {
-    std::vector<ndt::type> field_types(m_field_types.size());
+    nd::array tmp_field_types(
+        nd::empty(m_field_count, ndt::make_strided_dim(ndt::make_type())));
+    ndt::type *tmp_field_types_raw = reinterpret_cast<ndt::type *>(
+        tmp_field_types.get_readwrite_originptr());
 
-    for (size_t i = 0, i_end = m_field_types.size(); i != i_end; ++i) {
-        field_types[i] = m_field_types[i].get_canonical_type();
+    for (size_t i = 0, i_end = m_field_count; i != i_end; ++i) {
+        tmp_field_types_raw[i] = get_field_type(i).get_canonical_type();
     }
 
-    return ndt::make_cstruct(m_field_types.size(), &field_types[0], &m_field_names[0]);
-}
-
-ndt::type cstruct_type::apply_linear_index(intptr_t nindices, const irange *indices,
-                size_t current_i, const ndt::type& root_tp, bool leading_dimension) const
-{
-    if (nindices == 0) {
-        return ndt::type(this, true);
-    } else {
-        bool remove_dimension;
-        intptr_t start_index, index_stride, dimension_size;
-        apply_single_linear_index(*indices, m_field_types.size(), current_i, &root_tp,
-                        remove_dimension, start_index, index_stride, dimension_size);
-        if (remove_dimension) {
-            return m_field_types[start_index].apply_linear_index(nindices - 1, indices + 1,
-                            current_i + 1, root_tp, leading_dimension);
-        } else if (nindices == 1 && start_index == 0 && index_stride == 1 &&
-                        (size_t)dimension_size == m_field_types.size()) {
-            // This is a do-nothing index, keep the same type
-            return ndt::type(this, true);
-        } else {
-            // Take the subset of the fixed fields in-place
-            std::vector<ndt::type> field_types(dimension_size);
-            std::vector<std::string> field_names(dimension_size);
-
-            for (intptr_t i = 0; i < dimension_size; ++i) {
-                intptr_t idx = start_index + i * index_stride;
-                field_types[i] = m_field_types[idx].apply_linear_index(nindices-1, indices+1,
-                                current_i+1, root_tp, false);
-                field_names[i] = m_field_names[idx];
-            }
-            // Return a struct type, because the offsets are now not in standard form anymore
-            return ndt::make_struct(field_types.size(),
-                                field_types.empty() ? NULL : &field_types[0],
-                                field_names.empty() ? NULL : &field_names[0]);
-        }
-    }
-}
-
-intptr_t cstruct_type::apply_linear_index(intptr_t nindices, const irange *indices, const char *metadata,
-                const ndt::type& result_tp, char *out_metadata,
-                memory_block_data *embedded_reference,
-                size_t current_i, const ndt::type& root_tp,
-                bool leading_dimension, char **inout_data,
-                memory_block_data **inout_dataref) const
-{
-    if (nindices == 0) {
-        // If there are no more indices, copy the metadata verbatim
-        metadata_copy_construct(out_metadata, metadata, embedded_reference);
-        return 0;
-    } else {
-        bool remove_dimension;
-        intptr_t start_index, index_stride, dimension_size;
-        apply_single_linear_index(*indices, m_field_types.size(), current_i, &root_tp,
-                        remove_dimension, start_index, index_stride, dimension_size);
-        if (remove_dimension) {
-            const ndt::type& dt = m_field_types[start_index];
-            intptr_t offset = m_data_offsets[start_index];
-            if (!dt.is_builtin()) {
-                if (leading_dimension) {
-                    // In the case of a leading dimension, first bake the offset into
-                    // the data pointer, so that it's pointing at the right element
-                    // for the collapsing of leading dimensions to work correctly.
-                    *inout_data += offset;
-                    offset = dt.extended()->apply_linear_index(nindices - 1, indices + 1,
-                                    metadata + m_metadata_offsets[start_index], result_tp,
-                                    out_metadata, embedded_reference, current_i + 1, root_tp,
-                                    true, inout_data, inout_dataref);
-                } else {
-                    offset += dt.extended()->apply_linear_index(nindices - 1, indices + 1,
-                                    metadata + m_metadata_offsets[start_index], result_tp,
-                                    out_metadata, embedded_reference, current_i + 1, root_tp,
-                                    false, NULL, NULL);
-                }
-            }
-            return offset;
-        } else if (result_tp.get_type_id() == cstruct_type_id) {
-            // This was a no-op, so copy everything verbatim
-            for (size_t i = 0, i_end = m_field_types.size(); i != i_end; ++i) {
-                if (!m_field_types[i].is_builtin()) {
-                    if (m_field_types[i].extended()->apply_linear_index(0, NULL,
-                                    metadata + m_metadata_offsets[i], m_field_types[i], out_metadata + m_metadata_offsets[i],
-                                    embedded_reference, current_i + 1, root_tp,
-                                    false, NULL, NULL) != 0) {
-                        stringstream ss;
-                        ss << "Unexpected non-zero offset when applying a NULL index to dynd type " << m_field_types[i];
-                        throw runtime_error(ss.str());
-                    }
-                }
-            }
-            return 0;
-        } else {
-            intptr_t *out_offsets = reinterpret_cast<intptr_t *>(out_metadata);
-            const struct_type *result_etp = result_tp.tcast<struct_type>();
-            for (intptr_t i = 0; i < dimension_size; ++i) {
-                intptr_t idx = start_index + i * index_stride;
-                out_offsets[i] = m_data_offsets[idx];
-                const ndt::type& dt = result_etp->get_field_types()[i];
-                if (!dt.is_builtin()) {
-                    out_offsets[i] += dt.extended()->apply_linear_index(nindices - 1, indices + 1,
-                                    metadata + m_metadata_offsets[idx],
-                                    dt, out_metadata + result_etp->get_metadata_offsets()[i],
-                                    embedded_reference, current_i + 1, root_tp,
-                                    false, NULL, NULL);
-                }
-            }
-            return 0;
-        }
-    }
+    tmp_field_types.flag_as_immutable();
+    return ndt::make_cstruct(m_field_names, tmp_field_types);
 }
 
 ndt::type cstruct_type::at_single(intptr_t i0,
                 const char **inout_metadata, const char **inout_data) const
 {
     // Bounds-checking of the index
-    i0 = apply_single_index(i0, m_field_types.size(), NULL);
+    i0 = apply_single_index(i0, m_field_count, NULL);
     if (inout_metadata) {
         // Modify the metadata
-        *inout_metadata += m_metadata_offsets[i0];
+        *inout_metadata += get_arrmeta_offsets_raw()[i0];
         // If requested, modify the data
         if (inout_data) {
-            *inout_data += m_data_offsets[i0];
+            *inout_data += get_data_offsets_raw()[i0];
         }
     }
-    return m_field_types[i0];
+    return get_field_type(i0);
 }
 
 bool cstruct_type::is_lossless_assignment(const ndt::type& dst_tp, const ndt::type& src_tp) const
@@ -330,7 +176,7 @@ size_t cstruct_type::make_assignment_kernel(
                 const eval::eval_context *ectx) const
 {
     if (this == dst_tp.extended()) {
-        if (this == src_tp.extended()) {
+        if (*this == *src_tp.extended()) {
             return make_struct_identical_assignment_kernel(out_ckb, ckb_offset,
                             dst_tp,
                             dst_metadata, src_metadata,
@@ -390,168 +236,97 @@ bool cstruct_type::operator==(const base_type& rhs) const
     } else {
         const cstruct_type *dt = static_cast<const cstruct_type*>(&rhs);
         return get_data_alignment() == dt->get_data_alignment() &&
-                m_field_types == dt->m_field_types &&
-                m_field_names == dt->m_field_names;
-    }
-}
-
-void cstruct_type::metadata_default_construct(char *metadata, intptr_t ndim, const intptr_t* shape) const
-{
-    // Validate that the shape is ok
-    if (ndim > 0) {
-        if (shape[0] >= 0 && shape[0] != (intptr_t)m_field_types.size()) {
-            stringstream ss;
-            ss << "Cannot construct dynd object of type " << ndt::type(this, true);
-            ss << " with dimension size " << shape[0] << ", the size must be " << m_field_types.size();
-            throw runtime_error(ss.str());
-        }
-    }
-
-    for (size_t i = 0; i < m_field_types.size(); ++i) {
-        const ndt::type& field_dt = m_field_types[i];
-        if (!field_dt.is_builtin()) {
-            try {
-                field_dt.extended()->metadata_default_construct(
-                            metadata + m_metadata_offsets[i], ndim, shape);
-            } catch(...) {
-                // Since we're explicitly controlling the memory, need to manually do the cleanup too
-                for (size_t j = 0; j < i; ++j) {
-                    if (!m_field_types[j].is_builtin()) {
-                        m_field_types[j].extended()->metadata_destruct(metadata + m_metadata_offsets[i]);
-                    }
-                }
-                throw;
-            }
-        }
-    }
-}
-
-void cstruct_type::metadata_copy_construct(char *dst_metadata, const char *src_metadata, memory_block_data *embedded_reference) const
-{
-    // Copy construct all the field's metadata
-    for (size_t i = 0; i < m_field_types.size(); ++i) {
-        const ndt::type& field_dt = m_field_types[i];
-        if (!field_dt.is_builtin()) {
-            field_dt.extended()->metadata_copy_construct(dst_metadata + m_metadata_offsets[i],
-                            src_metadata + m_metadata_offsets[i],
-                            embedded_reference);
-        }
-    }
-}
-
-void cstruct_type::metadata_reset_buffers(char *metadata) const
-{
-    for (size_t i = 0; i < m_field_types.size(); ++i) {
-        const ndt::type& field_dt = m_field_types[i];
-        if (field_dt.get_metadata_size() > 0) {
-            field_dt.extended()->metadata_reset_buffers(metadata + m_metadata_offsets[i]);
-        }
-    }
-}
-
-void cstruct_type::metadata_finalize_buffers(char *metadata) const
-{
-    for (size_t i = 0; i < m_field_types.size(); ++i) {
-        const ndt::type& field_dt = m_field_types[i];
-        if (!field_dt.is_builtin()) {
-            field_dt.extended()->metadata_finalize_buffers(metadata + m_metadata_offsets[i]);
-        }
-    }
-}
-
-void cstruct_type::metadata_destruct(char *metadata) const
-{
-    for (size_t i = 0; i < m_field_types.size(); ++i) {
-        const ndt::type& field_dt = m_field_types[i];
-        if (!field_dt.is_builtin()) {
-            field_dt.extended()->metadata_destruct(metadata + m_metadata_offsets[i]);
-        }
+                m_field_types.equals_exact(dt->m_field_types) &&
+                m_field_names.equals_exact(dt->m_field_names);
     }
 }
 
 void cstruct_type::metadata_debug_print(const char *metadata, std::ostream& o, const std::string& indent) const
 {
-    o << indent << "cstruct metadata\n";
-    for (size_t i = 0; i < m_field_types.size(); ++i) {
-        const ndt::type& field_dt = m_field_types[i];
+    o << indent << "cstruct arrmeta\n";
+    const uintptr_t *arrmeta_offsets = get_arrmeta_offsets_raw();
+    for (size_t i = 0; i < m_field_count; ++i) {
+        const ndt::type& field_dt = get_field_type(i);
         if (!field_dt.is_builtin() && field_dt.extended()->get_metadata_size() > 0) {
             o << indent << " field " << i << " (";
-            print_escaped_utf8_string(o, m_field_names[i]);
+            const string_type_data& fnr = get_field_name_raw(i);
+            o.write(fnr.begin, fnr.end - fnr.begin);
             o << ") metadata:\n";
-            field_dt.extended()->metadata_debug_print(metadata + m_metadata_offsets[i], o, indent + "  ");
-        }
-    }
-}
-
-void cstruct_type::foreach_leading(const char *metadata, char *data,
-                                   foreach_fn_t callback, void *callback_data)
-    const
-{
-    if (!m_field_types.empty()) {
-        const ndt::type *field_types = &m_field_types[0];
-        const size_t *metadata_offsets = &m_metadata_offsets[0];
-        for (intptr_t i = 0, i_end = m_field_types.size(); i < i_end; ++i) {
-            callback(field_types[i], metadata + metadata_offsets[i],
-                     data + m_data_offsets[i], callback_data);
+            field_dt.extended()->metadata_debug_print(metadata + arrmeta_offsets[i], o, indent + "  ");
         }
     }
 }
 
 ///////// properties on the type
 
-static nd::array property_get_field_names(const ndt::type& dt) {
-    const cstruct_type *d = dt.tcast<cstruct_type>();
-    // TODO: This property should be an immutable nd::array, which we would just return.
-    return nd::array(d->get_field_names_vector());
+static nd::array property_get_field_names(const ndt::type& tp) {
+    return tp.tcast<cstruct_type>()->get_field_names();
 }
 
-static nd::array property_get_field_types(const ndt::type& dt) {
-    const cstruct_type *d = dt.tcast<cstruct_type>();
-    // TODO: This property should be an immutable nd::array, which we would just return.
-    return nd::array(d->get_field_types_vector());
+static nd::array property_get_field_types(const ndt::type& tp) {
+    return tp.tcast<cstruct_type>()->get_field_types();
 }
 
-static nd::array property_get_data_offsets(const ndt::type& dt) {
-    const cstruct_type *d = dt.tcast<cstruct_type>();
-    // TODO: This property should be an immutable nd::array, which we would just return.
-    return nd::array(d->get_data_offsets_vector());
+static nd::array property_get_data_offsets(const ndt::type& tp) {
+    return tp.tcast<cstruct_type>()->get_data_offsets();
 }
 
-static nd::array property_get_metadata_offsets(const ndt::type& dt) {
-    const cstruct_type *d = dt.tcast<cstruct_type>();
-    // TODO: This property should be an immutable nd::array, which we would just return.
-    return nd::array(d->get_metadata_offsets_vector());
+static nd::array property_get_arrmeta_offsets(const ndt::type& tp) {
+    return tp.tcast<cstruct_type>()->get_arrmeta_offsets();
 }
-
-static pair<string, gfunc::callable> type_properties[] = {
-    pair<string, gfunc::callable>("field_names", gfunc::make_callable(&property_get_field_names, "self")),
-    pair<string, gfunc::callable>("field_types", gfunc::make_callable(&property_get_field_types, "self")),
-    pair<string, gfunc::callable>("data_offsets", gfunc::make_callable(&property_get_data_offsets, "self")),
-    pair<string, gfunc::callable>("metadata_offsets", gfunc::make_callable(&property_get_metadata_offsets, "self"))
-};
 
 void cstruct_type::get_dynamic_type_properties(const std::pair<std::string, gfunc::callable> **out_properties, size_t *out_count) const
 {
+    static pair<string, gfunc::callable> type_properties[] = {
+        pair<string, gfunc::callable>(
+            "field_names",
+            gfunc::make_callable(&property_get_field_names, "self")),
+        pair<string, gfunc::callable>(
+            "field_types",
+            gfunc::make_callable(&property_get_field_types, "self")),
+        pair<string, gfunc::callable>(
+            "data_offsets",
+            gfunc::make_callable(&property_get_data_offsets, "self")),
+        pair<string, gfunc::callable>(
+            "arrmeta_offsets",
+            gfunc::make_callable(&property_get_arrmeta_offsets, "self"))};
+
     *out_properties = type_properties;
     *out_count = sizeof(type_properties) / sizeof(type_properties[0]);
 }
 
 ///////// properties on the nd::array
 
+static nd::array make_self_names()
+{
+    const char *selfname = "self";
+    return nd::make_strided_string_array(&selfname, 1);
+}
+
+static nd::array make_self_types()
+{
+    nd::array result = nd::empty(1, ndt::make_strided_dim(ndt::make_type()));
+    unchecked_strided_dim_get_rw<ndt::type>(result, 0) = ndt::make_ndarrayarg();
+    result.flag_as_immutable();
+    return result;
+}
+
 cstruct_type::cstruct_type(int, int)
-    : base_struct_type(cstruct_type_id, 0, 1, 1, type_flag_none, 0)
+    : base_struct_type(cstruct_type_id, make_self_names(), make_self_types(),
+                       type_flag_none, false)
 {
     // Equivalent to ndt::make_cstruct(ndt::make_ndarrayarg(), "self");
     // but hardcoded to break the dependency of cstruct_type::array_parameters_type
-    m_field_types.push_back(ndt::make_ndarrayarg());
-    m_field_names.push_back("self");
-    m_data_offsets.push_back(0);
-    m_metadata_offsets.push_back(0);
+    uintptr_t metaoff[1] = {0};
+    m_arrmeta_offsets = nd::array(metaoff);
+    // The data offsets also consist of one zero
+    m_data_offsets = m_arrmeta_offsets;
     // Inherit any operand flags from the fields
-    m_members.flags |= (m_field_types[0].get_flags()&type_flags_operand_inherited);
-    m_members.data_alignment = (uint8_t)m_field_types[0].get_data_alignment();
-    m_members.metadata_size = m_field_types[0].get_metadata_size();
-    m_members.data_size = m_field_types[0].get_data_size();
+    m_members.flags |=
+        (ndt::make_ndarrayarg().get_flags() & type_flags_operand_inherited);
+    m_members.data_alignment = sizeof(void *);
+    m_members.metadata_size = 0;
+    m_members.data_size = sizeof(void *);
     // Leave m_array_properties so there is no reference loop
 }
 
@@ -563,9 +338,10 @@ static array_preamble *property_get_array_field(const array_preamble *params, vo
     intptr_t undim = n.get_ndim();
     ndt::type udt = n.get_dtype();
     if (udt.get_kind() == expression_kind) {
-        const string *field_names = static_cast<const cstruct_type *>(
-                        udt.value_type().extended())->get_field_names();
-        return n.replace_dtype(ndt::make_property(udt, field_names[i], i)).release();
+        string field_name =
+            udt.value_type().tcast<struct_type>()->get_field_name(i);
+        return n.replace_dtype(ndt::make_property(udt, field_name, i))
+            .release();
     } else {
         if (undim == 0) {
             return n(i).release();
@@ -581,10 +357,10 @@ void cstruct_type::create_array_properties()
 {
     ndt::type array_parameters_type(new cstruct_type(0, 0), false);
 
-    m_array_properties.resize(m_field_types.size());
-    for (size_t i = 0, i_end = m_field_types.size(); i != i_end; ++i) {
+    m_array_properties.resize(m_field_count);
+    for (size_t i = 0, i_end = m_field_count; i != i_end; ++i) {
         // TODO: Transform the name into a valid Python symbol?
-        m_array_properties[i].first = m_field_names[i];
+        m_array_properties[i].first = get_field_name(i);
         m_array_properties[i].second.set(array_parameters_type, &property_get_array_field, (void *)i);
     }
 }

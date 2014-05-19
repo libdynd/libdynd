@@ -8,6 +8,7 @@
 
 #include <dynd/types/base_type.hpp>
 #include <dynd/types/base_tuple_type.hpp>
+#include <dynd/types/string_type.hpp>
 
 namespace dynd {
 
@@ -21,18 +22,26 @@ namespace dynd {
  * of the field types, and adds field names to that.
  */
 class base_struct_type : public base_tuple_type {
+protected:
+    nd::array m_field_names;
 public:
-    inline base_struct_type(type_id_t type_id, size_t data_size, size_t alignment,
-                            size_t field_count, flags_type flags,
-                            size_t metadata_size)
-      : base_tuple_type(type_id, struct_kind, data_size, alignment, field_count,
-                        flags, metadata_size)
-    {}
+    base_struct_type(type_id_t type_id, const nd::array &field_names,
+                     const nd::array &field_types, flags_type flags,
+                     bool variable_layout);
 
     virtual ~base_struct_type();
 
     /** The array of the field names */
-    virtual const std::string *get_field_names() const = 0;
+    const nd::array &get_field_names() const {
+        return m_field_names;
+    }
+    const string_type_data& get_field_name_raw(intptr_t i) const {
+        return unchecked_strided_dim_get<string_type_data>(m_field_names, i);
+    }
+    const std::string get_field_name(intptr_t i) const {
+        const string_type_data& std(get_field_name_raw(i));
+        return std::string(std.begin, std.end);
+    }
     /**
      * Gets the field index for the given name. Returns -1 if
      * the struct doesn't have a field of the given name.
@@ -42,9 +51,23 @@ public:
      * \returns  The field index, or -1 if there is not field
      *           of the given name.
      */
-    virtual intptr_t get_field_index(const std::string& field_name) const = 0;
-    intptr_t get_field_index(const char *field_index_begin,
-                             const char *field_index_end) const;
+    inline intptr_t get_field_index(const std::string& field_name) const {
+        return get_field_index(field_name.data(),
+                               field_name.data() + field_name.size());
+    }
+    intptr_t get_field_index(const char *field_name_begin,
+                             const char *field_name_end) const;
+
+    ndt::type apply_linear_index(intptr_t nindices, const irange *indices,
+                                 size_t current_i, const ndt::type &root_tp,
+                                 bool leading_dimension) const;
+    intptr_t apply_linear_index(intptr_t nindices, const irange *indices,
+                                const char *metadata,
+                                const ndt::type &result_tp, char *out_metadata,
+                                memory_block_data *embedded_reference,
+                                size_t current_i, const ndt::type &root_tp,
+                                bool leading_dimension, char **inout_data,
+                                memory_block_data **inout_dataref) const;
 
     size_t get_elwise_property_index(const std::string& property_name) const;
     ndt::type get_elwise_property_type(size_t elwise_property_index,

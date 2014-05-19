@@ -134,14 +134,16 @@ static size_t make_elwise_strided_dimension_expr_kernel_for_N(
     for (intptr_t i = 0; i < N + 1; ++i) {
         if (child_tp[i] != elwise_handler->data_dynd_types[i]) {
             return make_lifted_expr_ckernel(
-                elwise_handler, out_ckb, ckb_child_offset, child_tp,
-                child_metadata, kernel_request_strided, ectx);
+                elwise_handler, out_ckb, ckb_child_offset, child_tp[0],
+                child_metadata[0], child_tp + 1, child_metadata + 1,
+                kernel_request_strided, ectx);
         }
     }
     // All the types matched, so instantiate the elementwise handler
-    return elwise_handler->instantiate_func(elwise_handler->data_ptr, out_ckb,
-                                            ckb_child_offset, child_metadata,
-                                            kernel_request_strided, ectx);
+    return elwise_handler->instantiate_func(
+        elwise_handler->data_ptr, out_ckb, ckb_child_offset, child_tp[0],
+        child_metadata[0], child_tp + 1, child_metadata + 1,
+        kernel_request_strided, ectx);
 }
 
 inline static size_t make_elwise_strided_dimension_expr_kernel(
@@ -333,14 +335,17 @@ static size_t make_elwise_strided_or_var_to_strided_dimension_expr_kernel_for_N(
     for (intptr_t i = 0; i < N + 1; ++i) {
         if (child_tp[i] != elwise_handler->data_dynd_types[i]) {
             return make_lifted_expr_ckernel(
-                elwise_handler, out_ckb, ckb_child_offset, child_tp,
-                child_metadata, kernel_request_strided, ectx);
+                elwise_handler, out_ckb, ckb_child_offset,
+                child_tp[0],
+                child_metadata[0],
+                child_tp + 1, child_metadata + 1, kernel_request_strided, ectx);
         }
     }
     // All the types matched, so instantiate the elementwise handler
-    return elwise_handler->instantiate_func(elwise_handler->data_ptr, out_ckb,
-                                            ckb_child_offset, child_metadata,
-                                            kernel_request_strided, ectx);
+    return elwise_handler->instantiate_func(
+        elwise_handler->data_ptr, out_ckb, ckb_child_offset, child_tp[0],
+        child_metadata[0], child_tp + 1, child_metadata + 1,
+        kernel_request_strided, ectx);
 }
 
 static size_t make_elwise_strided_or_var_to_strided_dimension_expr_kernel(
@@ -597,14 +602,16 @@ static size_t make_elwise_strided_or_var_to_var_dimension_expr_kernel_for_N(
     for (intptr_t i = 0; i < N + 1; ++i) {
         if (child_tp[i] != elwise_handler->data_dynd_types[i]) {
             return make_lifted_expr_ckernel(
-                elwise_handler, out_ckb, ckb_child_offset, child_tp,
-                child_metadata, kernel_request_strided, ectx);
+                elwise_handler, out_ckb, ckb_child_offset, child_tp[0],
+                child_metadata[0], child_tp + 1, child_metadata + 1,
+                kernel_request_strided, ectx);
         }
     }
     // All the types matched, so instantiate the elementwise handler
-    return elwise_handler->instantiate_func(elwise_handler->data_ptr, out_ckb,
-                                            ckb_child_offset, child_metadata,
-                                            kernel_request_strided, ectx);
+    return elwise_handler->instantiate_func(
+        elwise_handler->data_ptr, out_ckb, ckb_child_offset, child_tp[0],
+        child_metadata[0], child_tp + 1, child_metadata + 1,
+        kernel_request_strided, ectx);
 }
 
 static size_t make_elwise_strided_or_var_to_var_dimension_expr_kernel(
@@ -655,19 +662,14 @@ static size_t make_elwise_strided_or_var_to_var_dimension_expr_kernel(
     }
 }
 
-size_t dynd::make_lifted_expr_ckernel(const arrfunc *elwise_handler,
-                                      dynd::ckernel_builder *out_ckb,
-                                      intptr_t ckb_offset,
-                                      const ndt::type *lifted_types,
-                                      const char *const *dynd_metadata,
-                                      dynd::kernel_request_t kernreq,
-                                      const eval::eval_context *ectx)
+size_t dynd::make_lifted_expr_ckernel(
+    const arrfunc *elwise_handler, dynd::ckernel_builder *ckb,
+    intptr_t ckb_offset, const ndt::type &dst_tp, const char *dst_arrmeta,
+    const ndt::type *src_tp, const char *const *src_arrmeta,
+    dynd::kernel_request_t kernreq, const eval::eval_context *ectx)
+
 {
-    const ndt::type& dst_tp = *lifted_types;
-    const ndt::type *src_tp = lifted_types + 1;
     intptr_t src_count = elwise_handler->data_types_size - 1;
-    const char *dst_metadata = *dynd_metadata;
-    const char *const*src_metadata = dynd_metadata + 1;
 
     // Check if no lifting is required
     if (dst_tp == elwise_handler->data_dynd_types[0]) {
@@ -680,8 +682,8 @@ size_t dynd::make_lifted_expr_ckernel(const arrfunc *elwise_handler,
         if (i == src_count) {
             // All the types matched, call the elementwise instantiate directly
             return elwise_handler->instantiate_func(
-                elwise_handler->data_ptr, out_ckb, ckb_offset, dynd_metadata,
-                kernreq, ectx);
+                elwise_handler->data_ptr, ckb, ckb_offset, dst_tp, dst_arrmeta,
+                src_tp, src_arrmeta, kernreq, ectx);
         }
     }
 
@@ -714,12 +716,12 @@ size_t dynd::make_lifted_expr_ckernel(const arrfunc *elwise_handler,
         case cfixed_dim_type_id:
             if (src_all_strided) {
                 return make_elwise_strided_dimension_expr_kernel(
-                    out_ckb, ckb_offset, dst_tp, dst_metadata, src_count,
-                    src_tp, src_metadata, kernreq, elwise_handler, ectx);
+                    ckb, ckb_offset, dst_tp, dst_arrmeta, src_count,
+                    src_tp, src_arrmeta, kernreq, elwise_handler, ectx);
             } else if (src_all_strided_or_var) {
                 return make_elwise_strided_or_var_to_strided_dimension_expr_kernel(
-                    out_ckb, ckb_offset, dst_tp, dst_metadata, src_count,
-                    src_tp, src_metadata, kernreq, elwise_handler, ectx);
+                    ckb, ckb_offset, dst_tp, dst_arrmeta, src_count,
+                    src_tp, src_arrmeta, kernreq, elwise_handler, ectx);
             } else {
                 // TODO
             }
@@ -727,8 +729,8 @@ size_t dynd::make_lifted_expr_ckernel(const arrfunc *elwise_handler,
         case var_dim_type_id:
             if (src_all_strided_or_var) {
                 return make_elwise_strided_or_var_to_var_dimension_expr_kernel(
-                    out_ckb, ckb_offset, dst_tp, dst_metadata, src_count,
-                    src_tp, src_metadata, kernreq, elwise_handler, ectx);
+                    ckb, ckb_offset, dst_tp, dst_arrmeta, src_count,
+                    src_tp, src_arrmeta, kernreq, elwise_handler, ectx);
             } else {
                 // TODO
             }

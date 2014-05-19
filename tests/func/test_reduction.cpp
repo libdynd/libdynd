@@ -114,9 +114,11 @@ TEST(Reduction, BuiltinSum_Lift0D_NoIdentity) {
 
     // Instantiate the lifted ckernel
     assignment_ckernel_builder ckb;
-    const char *dynd_metadata[2] = {b.get_arrmeta(), a.get_arrmeta()};
-    af.instantiate_func(af.data_ptr, &ckb, 0, dynd_metadata,
-                         kernel_request_single, &eval::default_eval_context);
+    const ndt::type src_tp[1] = {a.get_type()};
+    const char *src_arrmeta[1] = {a.get_arrmeta()};
+    af.instantiate_func(af.data_ptr, &ckb, 0, b.get_type(), b.get_arrmeta(),
+                        src_tp, src_arrmeta, kernel_request_single,
+                        &eval::default_eval_context);
 
     // Call it on the data
     ckb(b.get_readwrite_originptr(), a.get_readonly_originptr());
@@ -146,9 +148,11 @@ TEST(Reduction, BuiltinSum_Lift0D_WithIdentity) {
 
     // Instantiate the lifted ckernel
     assignment_ckernel_builder ckb;
-    const char *dynd_metadata[2] = {b.get_arrmeta(), a.get_arrmeta()};
-    af.instantiate_func(af.data_ptr, &ckb, 0, dynd_metadata,
-                         kernel_request_single, &eval::default_eval_context);
+    const ndt::type src_tp[1] = {a.get_type()};
+    const char *src_arrmeta[1] = {a.get_arrmeta()};
+    af.instantiate_func(af.data_ptr, &ckb, 0, b.get_type(), b.get_arrmeta(),
+                        src_tp, src_arrmeta, kernel_request_single,
+                        &eval::default_eval_context);
 
     // Call it on the data
     ckb(b.get_readwrite_originptr(), a.get_readonly_originptr());
@@ -178,9 +182,11 @@ TEST(Reduction, BuiltinSum_Lift1D_NoIdentity) {
 
     // Instantiate the lifted ckernel
     assignment_ckernel_builder ckb;
-    const char *dynd_metadata[2] = {b.get_arrmeta(), a.get_arrmeta()};
-    af.instantiate_func(af.data_ptr, &ckb, 0, dynd_metadata,
-                         kernel_request_single, &eval::default_eval_context);
+    ndt::type src_tp[1] = {a.get_type()};
+    const char *src_arrmeta[1] = {a.get_arrmeta()};
+    af.instantiate_func(af.data_ptr, &ckb, 0, b.get_type(), b.get_arrmeta(),
+                        src_tp, src_arrmeta, kernel_request_single,
+                        &eval::default_eval_context);
 
     // Call it on the data
     ckb(b.get_readwrite_originptr(), a.get_readonly_originptr());
@@ -190,10 +196,11 @@ TEST(Reduction, BuiltinSum_Lift1D_NoIdentity) {
     ckb.reset();
     float vals1[1] = {3.75f};
     a = vals1;
-    dynd_metadata[0] = b.get_arrmeta();
-    dynd_metadata[1] = a.get_arrmeta();
-    af.instantiate_func(af.data_ptr, &ckb, 0, dynd_metadata,
-                         kernel_request_single, &eval::default_eval_context);
+    src_tp[0] = a.get_type();
+    src_arrmeta[0] = a.get_arrmeta();
+    af.instantiate_func(af.data_ptr, &ckb, 0, b.get_type(), b.get_arrmeta(),
+                        src_tp, src_arrmeta, kernel_request_single,
+                        &eval::default_eval_context);
 
     // Call it on the data
     ckb(b.get_readwrite_originptr(), a.get_readonly_originptr());
@@ -224,9 +231,11 @@ TEST(Reduction, BuiltinSum_Lift1D_WithIdentity) {
 
     // Instantiate the lifted ckernel
     assignment_ckernel_builder ckb;
-    const char *dynd_metadata[2] = {b.get_arrmeta(), a.get_arrmeta()};
-    af.instantiate_func(af.data_ptr, &ckb, 0, dynd_metadata,
-                         kernel_request_single, &eval::default_eval_context);
+    ndt::type src_tp[1] = {a.get_type()};
+    const char *src_arrmeta[1] = {a.get_arrmeta()};
+    af.instantiate_func(af.data_ptr, &ckb, 0, b.get_type(), b.get_arrmeta(),
+                        src_tp, src_arrmeta, kernel_request_single,
+                        &eval::default_eval_context);
 
     // Call it on the data
     ckb(b.get_readwrite_originptr(), a.get_readonly_originptr());
@@ -258,9 +267,11 @@ TEST(Reduction, BuiltinSum_Lift2D_StridedStrided_ReduceReduce) {
 
     // Instantiate the lifted ckernel
     assignment_ckernel_builder ckb;
-    const char *dynd_metadata[2] = {b.get_arrmeta(), a.get_arrmeta()};
-    af.instantiate_func(af.data_ptr, &ckb, 0, dynd_metadata,
-                         kernel_request_single, &eval::default_eval_context);
+    ndt::type src_tp[1] = {a.get_type()};
+    const char *src_arrmeta[1] = {a.get_arrmeta()};
+    af.instantiate_func(af.data_ptr, &ckb, 0, b.get_type(), b.get_arrmeta(),
+                        src_tp, src_arrmeta, kernel_request_single,
+                        &eval::default_eval_context);
 
     // Call it on the data
     ckb(b.get_readwrite_originptr(), a.get_readonly_originptr());
@@ -272,10 +283,11 @@ TEST(Reduction, BuiltinSum_Lift2D_StridedStrided_ReduceReduce) {
             "[[1.5, -2]]");
     // Slice the array so it is "strided * strided * float32" instead of fixed dims
     a = a(irange(), irange());
-    dynd_metadata[0] = b.get_arrmeta();
-    dynd_metadata[1] = a.get_arrmeta();
-    af.instantiate_func(af.data_ptr, &ckb, 0, dynd_metadata,
-                         kernel_request_single, &eval::default_eval_context);
+    src_tp[0] = a.get_type();
+    src_arrmeta[0] = a.get_arrmeta();
+    af.instantiate_func(af.data_ptr, &ckb, 0, b.get_type(), b.get_arrmeta(),
+                        src_tp, src_arrmeta, kernel_request_single,
+                        &eval::default_eval_context);
 
     // Call it on the data
     ckb(b.get_readwrite_originptr(), a.get_readonly_originptr());
@@ -307,9 +319,11 @@ TEST(Reduction, BuiltinSum_Lift2D_StridedStrided_ReduceReduce_KeepDim) {
 
     // Instantiate the lifted ckernel
     assignment_ckernel_builder ckb;
-    const char *dynd_metadata[2] = {b.get_arrmeta(), a.get_arrmeta()};
-    af.instantiate_func(af.data_ptr, &ckb, 0, dynd_metadata,
-                         kernel_request_single, &eval::default_eval_context);
+    ndt::type src_tp[1] = {a.get_type()};
+    const char *src_arrmeta[1] = {a.get_arrmeta()};
+    af.instantiate_func(af.data_ptr, &ckb, 0, b.get_type(), b.get_arrmeta(),
+                        src_tp, src_arrmeta, kernel_request_single,
+                        &eval::default_eval_context);
 
     // Call it on the data
     ckb(b.get_readwrite_originptr(), a.get_readonly_originptr());
@@ -341,9 +355,11 @@ TEST(Reduction, BuiltinSum_Lift2D_StridedStrided_BroadcastReduce) {
 
     // Instantiate the lifted ckernel
     assignment_ckernel_builder ckb;
-    const char *dynd_metadata[2] = {b.get_arrmeta(), a.get_arrmeta()};
-    af.instantiate_func(af.data_ptr, &ckb, 0, dynd_metadata,
-                         kernel_request_single, &eval::default_eval_context);
+    ndt::type src_tp[1] = {a.get_type()};
+    const char *src_arrmeta[1] = {a.get_arrmeta()};
+    af.instantiate_func(af.data_ptr, &ckb, 0, b.get_type(), b.get_arrmeta(),
+                        src_tp, src_arrmeta, kernel_request_single,
+                        &eval::default_eval_context);
 
     // Call it on the data
     ckb(b.get_readwrite_originptr(), a.get_readonly_originptr());
@@ -358,10 +374,11 @@ TEST(Reduction, BuiltinSum_Lift2D_StridedStrided_BroadcastReduce) {
     // Slice the array so it is "strided * strided * float32" instead of fixed dims
     a = a(irange(), irange());
     b = nd::empty(1, ndt::type("strided * float32"));
-    dynd_metadata[0] = b.get_arrmeta();
-    dynd_metadata[1] = a.get_arrmeta();
-    af.instantiate_func(af.data_ptr, &ckb, 0, dynd_metadata,
-                         kernel_request_single, &eval::default_eval_context);
+    src_tp[0] = a.get_type();
+    src_arrmeta[0] = a.get_arrmeta();
+    af.instantiate_func(af.data_ptr, &ckb, 0, b.get_type(), b.get_arrmeta(),
+                        src_tp, src_arrmeta, kernel_request_single,
+                        &eval::default_eval_context);
 
     // Call it on the data
     ckb(b.get_readwrite_originptr(), a.get_readonly_originptr());
@@ -394,9 +411,11 @@ TEST(Reduction, BuiltinSum_Lift2D_StridedStrided_BroadcastReduce_KeepDim) {
 
     // Instantiate the lifted ckernel
     assignment_ckernel_builder ckb;
-    const char *dynd_metadata[2] = {b.get_arrmeta(), a.get_arrmeta()};
-    af.instantiate_func(af.data_ptr, &ckb, 0, dynd_metadata,
-                         kernel_request_single, &eval::default_eval_context);
+    const ndt::type src_tp[1] = {a.get_type()};
+    const char *src_arrmeta[1] = {a.get_arrmeta()};
+    af.instantiate_func(af.data_ptr, &ckb, 0, b.get_type(), b.get_arrmeta(),
+                        src_tp, src_arrmeta, kernel_request_single,
+                        &eval::default_eval_context);
 
     // Call it on the data
     ckb(b.get_readwrite_originptr(), a.get_readonly_originptr());
@@ -430,9 +449,11 @@ TEST(Reduction, BuiltinSum_Lift2D_StridedStrided_ReduceBroadcast) {
 
     // Instantiate the lifted ckernel
     assignment_ckernel_builder ckb;
-    const char *dynd_metadata[2] = {b.get_arrmeta(), a.get_arrmeta()};
-    af.instantiate_func(af.data_ptr, &ckb, 0, dynd_metadata,
-                         kernel_request_single, &eval::default_eval_context);
+    ndt::type src_tp[1] = {a.get_type()};
+    const char *src_arrmeta[1] = {a.get_arrmeta()};
+    af.instantiate_func(af.data_ptr, &ckb, 0, b.get_type(), b.get_arrmeta(),
+                        src_tp, src_arrmeta, kernel_request_single,
+                        &eval::default_eval_context);
 
     // Call it on the data
     ckb(b.get_readwrite_originptr(), a.get_readonly_originptr());
@@ -448,10 +469,11 @@ TEST(Reduction, BuiltinSum_Lift2D_StridedStrided_ReduceBroadcast) {
     // Slice the array so it is "strided * strided * float32" instead of fixed dims
     a = a(irange(), irange());
     b = nd::empty(2, ndt::type("strided * float32"));
-    dynd_metadata[0] = b.get_arrmeta();
-    dynd_metadata[1] = a.get_arrmeta();
-    af.instantiate_func(af.data_ptr, &ckb, 0, dynd_metadata,
-                         kernel_request_single, &eval::default_eval_context);
+    src_tp[0] = a.get_type();
+    src_arrmeta[0] = a.get_arrmeta();
+    af.instantiate_func(af.data_ptr, &ckb, 0, b.get_type(), b.get_arrmeta(),
+                        src_tp, src_arrmeta, kernel_request_single,
+                        &eval::default_eval_context);
 
     // Call it on the data
     ckb(b.get_readwrite_originptr(), a.get_readonly_originptr());
@@ -485,9 +507,11 @@ TEST(Reduction, BuiltinSum_Lift2D_StridedStrided_ReduceBroadcast_KeepDim) {
 
     // Instantiate the lifted ckernel
     assignment_ckernel_builder ckb;
-    const char *dynd_metadata[2] = {b.get_arrmeta(), a.get_arrmeta()};
-    af.instantiate_func(af.data_ptr, &ckb, 0, dynd_metadata,
-                         kernel_request_single, &eval::default_eval_context);
+    const ndt::type src_tp[1] = {a.get_type()};
+    const char *src_arrmeta[1] = {a.get_arrmeta()};
+    af.instantiate_func(af.data_ptr, &ckb, 0, b.get_type(), b.get_arrmeta(),
+                        src_tp, src_arrmeta, kernel_request_single,
+                        &eval::default_eval_context);
 
     // Call it on the data
     ckb(b.get_readwrite_originptr(), a.get_readonly_originptr());
@@ -522,9 +546,11 @@ TEST(Reduction, BuiltinSum_Lift3D_StridedStridedStrided_ReduceReduceReduce) {
 
     // Instantiate the lifted ckernel
     assignment_ckernel_builder ckb;
-    const char *dynd_metadata[2] = {b.get_arrmeta(), a.get_arrmeta()};
-    af.instantiate_func(af.data_ptr, &ckb, 0, dynd_metadata,
-                         kernel_request_single, &eval::default_eval_context);
+    const ndt::type src_tp[1] = {a.get_type()};
+    const char *src_arrmeta[1] = {a.get_arrmeta()};
+    af.instantiate_func(af.data_ptr, &ckb, 0, b.get_type(), b.get_arrmeta(),
+                        src_tp, src_arrmeta, kernel_request_single,
+                        &eval::default_eval_context);
 
     // Call it on the data
     ckb(b.get_readwrite_originptr(), a.get_readonly_originptr());
@@ -558,9 +584,11 @@ TEST(Reduction, BuiltinSum_Lift3D_StridedStridedStrided_BroadcastReduceReduce) {
 
     // Instantiate the lifted ckernel
     assignment_ckernel_builder ckb;
-    const char *dynd_metadata[2] = {b.get_arrmeta(), a.get_arrmeta()};
-    af.instantiate_func(af.data_ptr, &ckb, 0, dynd_metadata,
-                         kernel_request_single, &eval::default_eval_context);
+    const ndt::type src_tp[1] = {a.get_type()};
+    const char *src_arrmeta[1] = {a.get_arrmeta()};
+    af.instantiate_func(af.data_ptr, &ckb, 0, b.get_type(), b.get_arrmeta(),
+                        src_tp, src_arrmeta, kernel_request_single,
+                        &eval::default_eval_context);
 
     // Call it on the data
     ckb(b.get_readwrite_originptr(), a.get_readonly_originptr());
@@ -596,9 +624,11 @@ TEST(Reduction, BuiltinSum_Lift3D_StridedStridedStrided_ReduceBroadcastReduce) {
 
     // Instantiate the lifted ckernel
     assignment_ckernel_builder ckb;
-    const char *dynd_metadata[2] = {b.get_arrmeta(), a.get_arrmeta()};
-    af.instantiate_func(af.data_ptr, &ckb, 0, dynd_metadata,
-                         kernel_request_single, &eval::default_eval_context);
+    const ndt::type src_tp[1] = {a.get_type()};
+    const char *src_arrmeta[1] = {a.get_arrmeta()};
+    af.instantiate_func(af.data_ptr, &ckb, 0, b.get_type(), b.get_arrmeta(),
+                        src_tp, src_arrmeta, kernel_request_single,
+                        &eval::default_eval_context);
 
     // Call it on the data
     ckb(b.get_readwrite_originptr(), a.get_readonly_originptr());

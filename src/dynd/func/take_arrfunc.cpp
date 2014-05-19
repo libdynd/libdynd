@@ -117,44 +117,44 @@ static void free_take_arrfunc_data(void *data_ptr) {
 } // anonymous namespace
 
 static intptr_t
-instantiate_masked_take(void *self_data_ptr, dynd::ckernel_builder *ckb,
-            intptr_t ckb_offset, const char *const *dynd_metadata,
-            uint32_t kernreq, const eval::eval_context *ectx)
+instantiate_masked_take(void *DYND_UNUSED(self_data_ptr), dynd::ckernel_builder *ckb,
+                        intptr_t ckb_offset, const ndt::type &dst_tp,
+                        const char *dst_arrmeta, const ndt::type *src_tp,
+                        const char *const *src_arrmeta, uint32_t kernreq,
+                        const eval::eval_context *ectx)
 {
     typedef masked_take_ck self_type;
 
     self_type *self = self_type::create(ckb, ckb_offset, (kernel_request_t)kernreq);
     intptr_t ckb_end = ckb_offset + sizeof(self_type);
-    take_arrfunc_data *af_data =
-        reinterpret_cast<take_arrfunc_data *>(self_data_ptr);
 
-    if (af_data->data_types[0].get_type_id() != var_dim_type_id) {
+    if (dst_tp.get_type_id() != var_dim_type_id) {
         stringstream ss;
-        ss << "masked take arrfunc: could not process type " << af_data->data_types[0];
+        ss << "masked take arrfunc: could not process type " << dst_tp;
         ss << " as a var dimension";
         throw type_error(ss.str());
     }
-    self->m_dst_tp = af_data->data_types[0];
-    self->m_dst_meta = dynd_metadata[0];
+    self->m_dst_tp = dst_tp;
+    self->m_dst_meta = dst_arrmeta;
     ndt::type dst_el_tp = self->m_dst_tp.tcast<var_dim_type>()->get_element_type();
     const char *dst_el_meta = self->m_dst_meta + sizeof(var_dim_type_metadata);
 
     intptr_t src0_dim_size, mask_dim_size;
     ndt::type src0_el_tp, mask_el_tp;
     const char *src0_el_meta, *mask_el_meta;
-    if (!af_data->data_types[1].get_as_strided_dim(
-            dynd_metadata[1], src0_dim_size, self->m_src0_stride, src0_el_tp,
-            src0_el_meta)) {
+    if (!src_tp[0].get_as_strided_dim(src_arrmeta[0], src0_dim_size,
+                                      self->m_src0_stride, src0_el_tp,
+                                      src0_el_meta)) {
         stringstream ss;
-        ss << "masked take arrfunc: could not process type " << af_data->data_types[1];
+        ss << "masked take arrfunc: could not process type " << src_tp[0];
         ss << " as a strided dimension";
         throw type_error(ss.str());
     }
-    if (!af_data->data_types[2].get_as_strided_dim(
-            dynd_metadata[2], mask_dim_size, self->m_mask_stride, mask_el_tp,
-            mask_el_meta)) {
+    if (!src_tp[1].get_as_strided_dim(src_arrmeta[1], mask_dim_size,
+                                      self->m_mask_stride, mask_el_tp,
+                                      mask_el_meta)) {
         stringstream ss;
-        ss << "masked take arrfunc: could not process type " << af_data->data_types[2];
+        ss << "masked take arrfunc: could not process type " << src_tp[1];
         ss << " as a strided dimension";
         throw type_error(ss.str());
     }
@@ -178,26 +178,25 @@ instantiate_masked_take(void *self_data_ptr, dynd::ckernel_builder *ckb,
         kernel_request_strided, assign_error_default, ectx);
 }
 
-
 static intptr_t
-instantiate_indexed_take(void *self_data_ptr, dynd::ckernel_builder *ckb,
-            intptr_t ckb_offset, const char *const *dynd_metadata,
-            uint32_t kernreq, const eval::eval_context *ectx)
+instantiate_indexed_take(void *DYND_UNUSED(self_data_ptr), dynd::ckernel_builder *ckb,
+                         intptr_t ckb_offset, const ndt::type &dst_tp,
+                         const char *dst_arrmeta, const ndt::type *src_tp,
+                         const char *const *src_arrmeta, uint32_t kernreq,
+                         const eval::eval_context *ectx)
 {
     typedef indexed_take_ck self_type;
 
     self_type *self = self_type::create(ckb, ckb_offset, (kernel_request_t)kernreq);
     intptr_t ckb_end = ckb_offset + sizeof(self_type);
-    take_arrfunc_data *af_data =
-        reinterpret_cast<take_arrfunc_data *>(self_data_ptr);
 
     ndt::type dst_el_tp;
     const char *dst_el_meta;
-    if (!af_data->data_types[0].get_as_strided_dim(
-            dynd_metadata[0], self->m_dst_dim_size, self->m_dst_stride,
-            dst_el_tp, dst_el_meta)) {
+    if (!dst_tp.get_as_strided_dim(dst_arrmeta, self->m_dst_dim_size,
+                                   self->m_dst_stride, dst_el_tp,
+                                   dst_el_meta)) {
         stringstream ss;
-        ss << "indexed take arrfunc: could not process type " << af_data->data_types[0];
+        ss << "indexed take arrfunc: could not process type " << dst_tp;
         ss << " as a strided dimension";
         throw type_error(ss.str());
     }
@@ -205,19 +204,19 @@ instantiate_indexed_take(void *self_data_ptr, dynd::ckernel_builder *ckb,
     intptr_t index_dim_size;
     ndt::type src0_el_tp, index_el_tp;
     const char *src0_el_meta, *index_el_meta;
-    if (!af_data->data_types[1].get_as_strided_dim(
-            dynd_metadata[1], self->m_src0_dim_size, self->m_src0_stride,
-            src0_el_tp, src0_el_meta)) {
+    if (!src_tp[0].get_as_strided_dim(src_arrmeta[0], self->m_src0_dim_size,
+                                      self->m_src0_stride, src0_el_tp,
+                                      src0_el_meta)) {
         stringstream ss;
-        ss << "indexed take arrfunc: could not process type " << af_data->data_types[1];
+        ss << "indexed take arrfunc: could not process type " << src_tp[0];
         ss << " as a strided dimension";
         throw type_error(ss.str());
     }
-    if (!af_data->data_types[2].get_as_strided_dim(
-            dynd_metadata[2], index_dim_size, self->m_index_stride, index_el_tp,
-            index_el_meta)) {
+    if (!src_tp[1].get_as_strided_dim(src_arrmeta[1], index_dim_size,
+                                      self->m_index_stride, index_el_tp,
+                                      index_el_meta)) {
         stringstream ss;
-        ss << "take arrfunc: could not process type " << af_data->data_types[2];
+        ss << "take arrfunc: could not process type " << src_tp[1];
         ss << " as a strided dimension";
         throw type_error(ss.str());
     }

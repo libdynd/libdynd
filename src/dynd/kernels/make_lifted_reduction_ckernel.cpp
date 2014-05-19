@@ -679,8 +679,8 @@ static size_t make_strided_inner_reduction_dimension_kernel(
     const arrfunc *elwise_reduction,
     const arrfunc *dst_initialization, ckernel_builder *out_ckb,
     size_t ckb_offset, intptr_t src_stride, intptr_t src_size,
-    const ndt::type &dst_tp, const char *dst_meta, const ndt::type &src_tp,
-    const char *src_meta, bool right_associative,
+    const ndt::type &dst_tp, const char *dst_arrmeta, const ndt::type &src_tp,
+    const char *src_arrmeta, bool right_associative,
     const nd::array &reduction_identity, kernel_request_t kernreq,
     const eval::eval_context *ectx)
 {
@@ -759,14 +759,19 @@ static size_t make_strided_inner_reduction_dimension_kernel(
     if (dst_initialization != NULL) {
         check_dst_initialization(dst_initialization, dst_tp, src_tp);
     }
-    const char *child_ckernel_meta[2] = {dst_meta, src_meta};
     if (elwise_reduction->ckernel_funcproto == expr_operation_funcproto) {
         ckb_end = kernels::wrap_binary_as_unary_reduction_ckernel(
                         out_ckb, ckb_end, right_associative, kernel_request_strided);
+        ndt::type src_tp_doubled[2] = {src_tp, src_tp};
+        const char *src_arrmeta_doubled[2] = {src_arrmeta, src_arrmeta};
+        ckb_end = elwise_reduction->instantiate_func(
+            elwise_reduction->data_ptr, out_ckb, ckb_end, dst_tp, dst_arrmeta,
+            src_tp_doubled, src_arrmeta_doubled, kernel_request_strided, ectx);
+    } else {
+        ckb_end = elwise_reduction->instantiate_func(
+            elwise_reduction->data_ptr, out_ckb, ckb_end, dst_tp, dst_arrmeta,
+            &src_tp, &src_arrmeta, kernel_request_strided, ectx);
     }
-    ckb_end = elwise_reduction->instantiate_func(
-        elwise_reduction->data_ptr, out_ckb, ckb_end, child_ckernel_meta,
-        kernel_request_strided, ectx);
     // Make sure there's capacity for the next ckernel
     out_ckb->ensure_capacity(ckb_end);
     // Need to retrieve 'e' again because it may have moved
@@ -774,17 +779,17 @@ static size_t make_strided_inner_reduction_dimension_kernel(
     e->dst_init_kernel_offset = ckb_end - ckb_offset;
     if (dst_initialization != NULL) {
         ckb_end = dst_initialization->instantiate_func(
-            dst_initialization->data_ptr, out_ckb, ckb_end, child_ckernel_meta,
-            kernel_request_single, ectx);
+            dst_initialization->data_ptr, out_ckb, ckb_end, dst_tp, dst_arrmeta,
+            &src_tp, &src_arrmeta, kernel_request_single, ectx);
     } else if (reduction_identity.is_null()) {
         ckb_end = make_assignment_kernel(
-            out_ckb, ckb_end, dst_tp, dst_meta, src_tp, src_meta,
+            out_ckb, ckb_end, dst_tp, dst_arrmeta, src_tp, src_arrmeta,
             kernel_request_single, assign_error_default, ectx);
     } else {
         ckb_end = make_assignment_kernel(
-            out_ckb, ckb_end, dst_tp, dst_meta, reduction_identity.get_type(),
-            reduction_identity.get_arrmeta(), kernel_request_single,
-            assign_error_default, ectx);
+            out_ckb, ckb_end, dst_tp, dst_arrmeta,
+            reduction_identity.get_type(), reduction_identity.get_arrmeta(),
+            kernel_request_single, assign_error_default, ectx);
     }
 
     return ckb_end;
@@ -799,8 +804,8 @@ static size_t make_strided_inner_broadcast_dimension_kernel(
     const arrfunc *elwise_reduction,
     const arrfunc *dst_initialization, ckernel_builder *out_ckb,
     size_t ckb_offset, intptr_t dst_stride, intptr_t src_stride,
-    intptr_t src_size, const ndt::type &dst_tp, const char *dst_meta,
-    const ndt::type &src_tp, const char *src_meta,
+    intptr_t src_size, const ndt::type &dst_tp, const char *dst_arrmeta,
+    const ndt::type &src_tp, const char *src_arrmeta,
     bool right_associative, const nd::array &reduction_identity,
     kernel_request_t kernreq, const eval::eval_context *ectx)
 {
@@ -880,14 +885,19 @@ static size_t make_strided_inner_broadcast_dimension_kernel(
     if (dst_initialization != NULL) {
         check_dst_initialization(dst_initialization, dst_tp, src_tp);
     }
-    const char *child_ckernel_meta[2] = {dst_meta, src_meta};
     if (elwise_reduction->ckernel_funcproto == expr_operation_funcproto) {
         ckb_end = kernels::wrap_binary_as_unary_reduction_ckernel(
                         out_ckb, ckb_end, right_associative, kernel_request_strided);
+        ndt::type src_tp_doubled[2] = {src_tp, src_tp};
+        const char *src_arrmeta_doubled[2] = {src_arrmeta, src_arrmeta};
+        ckb_end = elwise_reduction->instantiate_func(
+            elwise_reduction->data_ptr, out_ckb, ckb_end, dst_tp, dst_arrmeta,
+            src_tp_doubled, src_arrmeta_doubled, kernel_request_strided, ectx);
+    } else {
+        ckb_end = elwise_reduction->instantiate_func(
+            elwise_reduction->data_ptr, out_ckb, ckb_end, dst_tp, dst_arrmeta,
+            &src_tp, &src_arrmeta, kernel_request_strided, ectx);
     }
-    ckb_end = elwise_reduction->instantiate_func(
-        elwise_reduction->data_ptr, out_ckb, ckb_end, child_ckernel_meta,
-        kernel_request_strided, ectx);
     // Make sure there's capacity for the next ckernel
     out_ckb->ensure_capacity(ckb_end);
     // Need to retrieve 'e' again because it may have moved
@@ -895,43 +905,32 @@ static size_t make_strided_inner_broadcast_dimension_kernel(
     e->dst_init_kernel_offset = ckb_end - ckb_offset;
     if (dst_initialization != NULL) {
         ckb_end = dst_initialization->instantiate_func(
-            dst_initialization->data_ptr, out_ckb, ckb_end, child_ckernel_meta,
-            kernel_request_strided, ectx);
+            dst_initialization->data_ptr, out_ckb, ckb_end, dst_tp, dst_arrmeta,
+            &src_tp, &src_arrmeta, kernel_request_strided, ectx);
     } else if (reduction_identity.is_null()) {
         ckb_end = make_assignment_kernel(
-            out_ckb, ckb_end, dst_tp, dst_meta, src_tp, src_meta,
+            out_ckb, ckb_end, dst_tp, dst_arrmeta, src_tp, src_arrmeta,
             kernel_request_strided, assign_error_default, ectx);
     } else {
         ckb_end = make_assignment_kernel(
-            out_ckb, ckb_end, dst_tp, dst_meta, reduction_identity.get_type(),
-            reduction_identity.get_arrmeta(), kernel_request_strided,
-            assign_error_default, ectx);
+            out_ckb, ckb_end, dst_tp, dst_arrmeta,
+            reduction_identity.get_type(), reduction_identity.get_arrmeta(),
+            kernel_request_strided, assign_error_default, ectx);
     }
 
     return ckb_end;
 }
 
 size_t dynd::make_lifted_reduction_ckernel(
-                const arrfunc *elwise_reduction,
-                const arrfunc *dst_initialization,
-                dynd::ckernel_builder *out_ckb, intptr_t ckb_offset,
-                const ndt::type *lifted_types,
-                const char *const* dynd_metadata,
-                intptr_t reduction_ndim,
-                const bool *reduction_dimflags,
-                bool associative,
-                bool commutative,
-                bool right_associative,
-                const nd::array& reduction_identity,
-                dynd::kernel_request_t kernreq,
-                const eval::eval_context *ectx)
+    const arrfunc *elwise_reduction, const arrfunc *dst_initialization,
+    dynd::ckernel_builder *ckb, intptr_t ckb_offset,
+    const ndt::type &dst_tp, const char *dst_arrmeta, const ndt::type &src_tp,
+    const char *src_arrmeta, intptr_t reduction_ndim,
+    const bool *reduction_dimflags, bool associative, bool commutative,
+    bool right_associative, const nd::array &reduction_identity,
+    dynd::kernel_request_t kernreq,
+    const eval::eval_context *ectx)
 {
-    const ndt::type& dst_el_tp = elwise_reduction->data_dynd_types[0];
-    const ndt::type& src_el_tp = elwise_reduction->data_dynd_types[1];
-    ndt::type dst_tp = lifted_types[0], src_tp = lifted_types[1];
-    const char *dst_meta = dynd_metadata[0];
-    const char *src_meta = dynd_metadata[1];
-
     // Count the number of dimensions being reduced
     intptr_t reducedim_count = 0;
     for (intptr_t i = 0; i < reduction_ndim; ++i) {
@@ -944,18 +943,18 @@ size_t dynd::make_lifted_reduction_ckernel(
             // that ckernel directly
             if (dst_initialization != NULL) {
                 return dst_initialization->instantiate_func(
-                    dst_initialization->data_ptr, out_ckb, ckb_offset,
-                    dynd_metadata, kernreq, ectx);
+                    dst_initialization->data_ptr, ckb, ckb_offset, dst_tp,
+                    dst_arrmeta, &src_tp, &src_arrmeta, kernreq, ectx);
             } else if (reduction_identity.is_null()) {
                 return make_assignment_kernel(
-                    out_ckb, ckb_offset, dst_tp, dynd_metadata[0], src_tp,
-                    dynd_metadata[1], kernreq, assign_error_default, ectx);
+                    ckb, ckb_offset, dst_tp, dst_arrmeta, src_tp,
+                    src_arrmeta, kernreq, assign_error_default, ectx);
             } else {
                 // Create the kernel which copies the identity and then
                 // does one reduction
                 return make_strided_inner_reduction_dimension_kernel(
-                    elwise_reduction, dst_initialization, out_ckb, ckb_offset,
-                    0, 1, dst_tp, dst_meta, src_tp, src_meta, right_associative,
+                    elwise_reduction, dst_initialization, ckb, ckb_offset,
+                    0, 1, dst_tp, dst_arrmeta, src_tp, src_arrmeta, right_associative,
                     reduction_identity, kernreq, ectx);
             }
         }
@@ -969,6 +968,9 @@ size_t dynd::make_lifted_reduction_ckernel(
     if (right_associative) {
         throw runtime_error("make_lifted_reduction_ckernel: right_associative is not yet supported");
     }
+
+    ndt::type dst_el_tp = elwise_reduction->data_dynd_types[0];
+    ndt::type src_el_tp = elwise_reduction->data_dynd_types[1];
 
     // This is the number of dimensions being processed by the reduction
     if (reduction_ndim != src_tp.get_ndim() - src_el_tp.get_ndim()) {
@@ -991,12 +993,14 @@ size_t dynd::make_lifted_reduction_ckernel(
         throw runtime_error(ss.str());
     }
 
+    ndt::type dst_i_tp = dst_tp, src_i_tp = src_tp;
+
     for (intptr_t i = 0; i < reduction_ndim; ++i) {
         intptr_t dst_stride, dst_size, src_stride, src_size;
         // Get the striding parameters for the source dimension
-        if (!src_tp.get_as_strided_dim(src_meta, src_size, src_stride, src_tp, src_meta)) {
+        if (!src_i_tp.get_as_strided_dim(src_arrmeta, src_size, src_stride, src_i_tp, src_arrmeta)) {
             stringstream ss;
-            ss << "make_lifted_reduction_ckernel: type " << src_tp << " not supported as source";
+            ss << "make_lifted_reduction_ckernel: type " << src_i_tp << " not supported as source";
             throw type_error(ss.str());
         }
         if (reduction_dimflags[i]) {
@@ -1005,24 +1009,24 @@ size_t dynd::make_lifted_reduction_ckernel(
                 // If the size of the src is 0, a reduction identity is required to get a value
                 stringstream ss;
                 ss << "cannot reduce a zero-sized dimension (axis ";
-                ss << i << " of " << lifted_types[1] << ") because the operation";
+                ss << i << " of " << src_i_tp << ") because the operation";
                 ss << " has no identity";
                 throw invalid_argument(ss.str());
             }
             if (keep_dims) {
                 // If the dimensions are being kept, the output should be a
                 // a strided dimension of size one
-                if (dst_tp.get_as_strided_dim(dst_meta, dst_size, dst_stride, dst_tp, dst_meta)) {
+                if (dst_i_tp.get_as_strided_dim(dst_arrmeta, dst_size, dst_stride, dst_i_tp, dst_arrmeta)) {
                     if (dst_size != 1 || dst_stride != 0) {
                         stringstream ss;
                         ss << "make_lifted_reduction_ckernel: destination of a reduction dimension ";
                         ss << "must have size 1, not size" << dst_size << "/stride " << dst_stride;
-                        ss << " in type " << dst_tp;
+                        ss << " in type " << dst_i_tp;
                         throw type_error(ss.str());
                     }
                 } else {
                     stringstream ss;
-                    ss << "make_lifted_reduction_ckernel: type " << dst_tp;
+                    ss << "make_lifted_reduction_ckernel: type " << dst_i_tp;
                     ss << " not supported the destination of a dimension being reduced";
                     throw type_error(ss.str());
                 }
@@ -1030,7 +1034,7 @@ size_t dynd::make_lifted_reduction_ckernel(
             if (i < reduction_ndim - 1) {
                 // An initial dimension being reduced
                 ckb_offset = make_strided_initial_reduction_dimension_kernel(
-                                        out_ckb, ckb_offset,
+                                        ckb, ckb_offset,
                                         src_stride, src_size,
                                         kernreq);
                 // The next request should be single, as that's the kind of
@@ -1039,15 +1043,15 @@ size_t dynd::make_lifted_reduction_ckernel(
             } else {
                 // The innermost dimension being reduced
                 return make_strided_inner_reduction_dimension_kernel(
-                    elwise_reduction, dst_initialization, out_ckb, ckb_offset,
-                    src_stride, src_size, dst_tp, dst_meta, src_tp, src_meta,
+                    elwise_reduction, dst_initialization, ckb, ckb_offset,
+                    src_stride, src_size, dst_i_tp, dst_arrmeta, src_i_tp, src_arrmeta,
                     right_associative, reduction_identity, kernreq, ectx);
             }
         } else {
             // This dimension is being broadcast, not reduced
-            if (!dst_tp.get_as_strided_dim(dst_meta, dst_size, dst_stride, dst_tp, dst_meta)) {
+            if (!dst_i_tp.get_as_strided_dim(dst_arrmeta, dst_size, dst_stride, dst_i_tp, dst_arrmeta)) {
                 stringstream ss;
-                ss << "make_lifted_reduction_ckernel: type " << dst_tp << " not supported as destination";
+                ss << "make_lifted_reduction_ckernel: type " << dst_i_tp << " not supported as destination";
                 throw type_error(ss.str());
             }
             if (dst_size != src_size) {
@@ -1059,7 +1063,7 @@ size_t dynd::make_lifted_reduction_ckernel(
             if (i < reduction_ndim - 1) {
                 // An initial dimension being broadcast
                 ckb_offset = make_strided_initial_broadcast_dimension_kernel(
-                                        out_ckb, ckb_offset,
+                                        ckb, ckb_offset,
                                         dst_stride, src_stride, src_size,
                                         kernreq);
                 // The next request should be strided, as that's the kind of
@@ -1068,9 +1072,9 @@ size_t dynd::make_lifted_reduction_ckernel(
             } else {
                 // The innermost dimension being broadcast
                 return make_strided_inner_broadcast_dimension_kernel(
-                    elwise_reduction, dst_initialization, out_ckb, ckb_offset,
-                    dst_stride, src_stride, src_size, dst_tp, dst_meta, src_tp,
-                    src_meta, right_associative, reduction_identity, kernreq,
+                    elwise_reduction, dst_initialization, ckb, ckb_offset,
+                    dst_stride, src_stride, src_size, dst_i_tp, dst_arrmeta, src_i_tp,
+                    src_arrmeta, right_associative, reduction_identity, kernreq,
                     ectx);
             }
         }

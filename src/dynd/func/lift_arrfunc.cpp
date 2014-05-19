@@ -38,16 +38,18 @@ static void delete_lifted_expr_arrfunc_data(void *self_data_ptr)
 }
 
 static intptr_t instantiate_lifted_expr_arrfunc_data(
-    void *self_data_ptr, dynd::ckernel_builder *out_ckb, intptr_t ckb_offset,
-    const char *const *dynd_metadata, uint32_t kerntype,
+    void *self_data_ptr, dynd::ckernel_builder *ckb, intptr_t ckb_offset,
+    const ndt::type &dst_tp, const char *dst_arrmeta, const ndt::type *src_tp,
+    const char *const *src_arrmeta, uint32_t kernreq,
     const eval::eval_context *ectx)
 {
     lifted_expr_arrfunc_data *data =
                     reinterpret_cast<lifted_expr_arrfunc_data *>(self_data_ptr);
     return make_lifted_expr_ckernel(data->child_af,
-                    out_ckb, ckb_offset,
-                    data->data_types, dynd_metadata,
-                    static_cast<dynd::kernel_request_t>(kerntype),
+                    ckb, ckb_offset,
+                    dst_tp, dst_arrmeta,
+                    src_tp, src_arrmeta,
+                    static_cast<dynd::kernel_request_t>(kernreq),
                     ectx);
 }
 

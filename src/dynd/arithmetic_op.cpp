@@ -80,11 +80,13 @@ namespace {
         virtual ~arithmetic_op_kernel_generator() {
         }
 
-        size_t make_expr_kernel(
-                    ckernel_builder *out, size_t offset_out,
-                    const ndt::type& dst_tp, const char *dst_metadata,
-                    size_t src_count, const ndt::type *src_tp, const char **src_metadata,
-                    kernel_request_t kernreq, const eval::eval_context *ectx) const
+        size_t make_expr_kernel(ckernel_builder *out, size_t offset_out,
+                                const ndt::type &dst_tp,
+                                const char *dst_metadata, size_t src_count,
+                                const ndt::type *src_tp,
+                                const char *const *src_metadata,
+                                kernel_request_t kernreq,
+                                const eval::eval_context *ectx) const
         {
             if (src_count != 2) {
                 stringstream ss;
@@ -119,7 +121,7 @@ namespace {
                     throw runtime_error(ss.str());
                 }
             }
-            e->init(2, dst_metadata, src_metadata);
+            e->init(2, dst_metadata, (const char **)src_metadata);
             return offset_out + sizeof(extra_type);
         }
 

@@ -167,4 +167,14 @@ TEST(ComplexDType, Properties) {
     n = dynd_complex<double>(2.5, 3.0);
     EXPECT_EQ(2.5, n.p("real").as<double>());
     EXPECT_EQ(3.0, n.p("imag").as<double>());
+
+    complex<double> avals[3] = {complex<double>(1, 2), complex<double>(-1, 1.5),
+                                complex<double>(3, 21.75)};
+    n = avals;
+    EXPECT_EQ(1., n.p("real")(0).as<double>());
+    EXPECT_EQ(2., n.p("imag")(0).as<double>());
+    EXPECT_EQ(-1., n.p("real")(1).as<double>());
+    EXPECT_EQ(1.5, n.p("imag")(1).as<double>());
+    EXPECT_EQ(3., n.p("real")(2).as<double>());
+    EXPECT_EQ(21.75, n.p("imag")(2).as<double>());
 }

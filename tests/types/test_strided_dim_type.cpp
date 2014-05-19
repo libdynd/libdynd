@@ -94,7 +94,7 @@ TEST(StridedArrayDType, AssignKernel) {
     int vals_int[] = {3,5,7};
 
     // Assignment scalar -> strided array
-    a = vals_int;
+    a = nd::array_rw(vals_int);
     b = 9.0;
     EXPECT_EQ(strided_dim_type_id, a.get_type().get_type_id());
     make_assignment_kernel(&k, 0, a.get_type(), a.get_arrmeta(),

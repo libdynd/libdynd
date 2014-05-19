@@ -207,6 +207,42 @@ size_t type_type::make_assignment_kernel(
     throw dynd::type_error(ss.str());
 }
 
+static int equal_comparison(const char *a, const char *b, ckernel_prefix *DYND_UNUSED(extra)) {
+    const ndt::type *da = reinterpret_cast<const ndt::type *>(a);
+    const ndt::type *db = reinterpret_cast<const ndt::type *>(b);
+    return *da == *db;
+}
+
+static int not_equal_comparison(const char *a, const char *b, ckernel_prefix *DYND_UNUSED(extra)) {
+    const ndt::type *da = reinterpret_cast<const ndt::type *>(a);
+    const ndt::type *db = reinterpret_cast<const ndt::type *>(b);
+    return *da != *db;
+}
+
+size_t type_type::make_comparison_kernel(
+                ckernel_builder *out, size_t offset_out,
+                const ndt::type& src0_dt, const char *DYND_UNUSED(src0_metadata),
+                const ndt::type& src1_dt, const char *DYND_UNUSED(src1_metadata),
+                comparison_type_t comptype,
+                const eval::eval_context *DYND_UNUSED(ectx)) const
+{
+    if (this == src0_dt.extended()) {
+        if (*this == *src1_dt.extended()) {
+            ckernel_prefix *e = out->get_at<ckernel_prefix>(offset_out);
+            if (comptype == comparison_type_equal) {
+                e->set_function<binary_single_predicate_t>(equal_comparison);
+            } else if (comptype == comparison_type_not_equal) {
+                e->set_function<binary_single_predicate_t>(not_equal_comparison);
+            } else {
+                throw not_comparable_error(src0_dt, src1_dt, comptype);
+            }
+            return offset_out + sizeof(ckernel_prefix);
+        }
+    }
+
+    throw not_comparable_error(src0_dt, src1_dt, comptype);
+}
+
 ndt::type ndt::make_type()
 {
     // Static instance of type_type, which has a reference count > 0 for the

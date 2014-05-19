@@ -229,16 +229,21 @@ static nd::array property_ndo_get_tick(const nd::array& n) {
     return n.replace_dtype(ndt::make_property(n.get_dtype(), "tick"));
 }
 
-static pair<string, gfunc::callable> time_array_properties[] = {
-    pair<string, gfunc::callable>("hour", gfunc::make_callable(&property_ndo_get_hour, "self")),
-    pair<string, gfunc::callable>("minute", gfunc::make_callable(&property_ndo_get_minute, "self")),
-    pair<string, gfunc::callable>("second", gfunc::make_callable(&property_ndo_get_second, "self")),
-    pair<string, gfunc::callable>("microsecond", gfunc::make_callable(&property_ndo_get_microsecond, "self")),
-    pair<string, gfunc::callable>("tick", gfunc::make_callable(&property_ndo_get_tick, "self"))
-};
-
 void time_type::get_dynamic_array_properties(const std::pair<std::string, gfunc::callable> **out_properties, size_t *out_count) const
 {
+    static pair<string, gfunc::callable> time_array_properties[] = {
+        pair<string, gfunc::callable>(
+            "hour", gfunc::make_callable(&property_ndo_get_hour, "self")),
+        pair<string, gfunc::callable>(
+            "minute", gfunc::make_callable(&property_ndo_get_minute, "self")),
+        pair<string, gfunc::callable>(
+            "second", gfunc::make_callable(&property_ndo_get_second, "self")),
+        pair<string, gfunc::callable>(
+            "microsecond",
+            gfunc::make_callable(&property_ndo_get_microsecond, "self")),
+        pair<string, gfunc::callable>(
+            "tick", gfunc::make_callable(&property_ndo_get_tick, "self"))};
+
     *out_properties = time_array_properties;
     *out_count = sizeof(time_array_properties) / sizeof(time_array_properties[0]);
 }
@@ -249,14 +254,15 @@ static nd::array function_ndo_to_struct(const nd::array& n) {
     return n.replace_dtype(ndt::make_property(n.get_dtype(), "struct"));
 }
 
-static pair<string, gfunc::callable> time_array_functions[] = {
-    pair<string, gfunc::callable>("to_struct", gfunc::make_callable(&function_ndo_to_struct, "self")),
-};
-
 void time_type::get_dynamic_array_functions(
                 const std::pair<std::string, gfunc::callable> **out_functions,
                 size_t *out_count) const
 {
+    static pair<string, gfunc::callable> time_array_functions[] = {
+        pair<string, gfunc::callable>(
+            "to_struct",
+            gfunc::make_callable(&function_ndo_to_struct, "self")), };
+
     *out_functions = time_array_functions;
     *out_count = sizeof(time_array_functions) / sizeof(time_array_functions[0]);
 }

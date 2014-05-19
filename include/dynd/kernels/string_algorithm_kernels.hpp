@@ -74,7 +74,7 @@ struct string_find_kernel {
      * \param src_tp        The array of two src types.
      * \param src_metadata  The array of two src metadata.
      */
-    void init(const ndt::type* src_tp, const char **src_metadata);
+    void init(const ndt::type* src_tp, const char *const*src_metadata);
 
     static void destruct(ckernel_prefix *extra);
 

@@ -19,7 +19,7 @@ namespace dynd { namespace kernels {
 intptr_t make_builtin_sum_reduction_ckernel(ckernel_builder *out_ckb,
                                             intptr_t ckb_offset,
                                             type_id_t tid,
-                                            kernel_request_t kerntype);
+                                            kernel_request_t kernreq);
 
 /**
  * Makes a unary reduction arrfunc for the requested

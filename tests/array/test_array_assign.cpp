@@ -344,7 +344,7 @@ TYPED_TEST_P(ArrayAssign, BroadcastAssign) {
 
 TEST(ArrayAssign, Casting) {
     float v0[4] = {3.5, 1.0, 0, 1000};
-    nd::array a = v0, b;
+    nd::array a = nd::array_rw(v0), b;
 
     b = a.ucast(ndt::make_type<int>());
     // This triggers the conversion from float to int,
@@ -450,7 +450,7 @@ TEST(ArrayAssign, ChainedCastingRead) {
 
 TEST(ArrayAssign, ChainedCastingWrite) {
     float v0[3] = {0, 0, 0};
-    nd::array a = v0, b;
+    nd::array a = nd::array_rw(v0), b;
 
     b = a.ucast<int>(0, assign_error_inexact);
     b = b.ucast<float>(0, assign_error_overflow);
@@ -474,7 +474,7 @@ TEST(ArrayAssign, ChainedCastingWrite) {
 TEST(ArrayAssign, ChainedCastingReadWrite) {
     float v0[3] = {0.5f, -1000.f, -2.2f};
     int16_t v1[3] = {0, 0, 0};
-    nd::array a = v0, b = v1;
+    nd::array a = nd::array_rw(v0), b = nd::array_rw(v1);
 
     // First test with a single expression in both src and dst
     nd::array aview = a.ucast<double>();

@@ -13,18 +13,7 @@ void ndarrayarg_type::print_data(std::ostream &o,
                                  const char *DYND_UNUSED(metadata),
                                  const char *data) const
 {
-    const memory_block_data *mbd =
-        reinterpret_cast<const memory_block_data *>(data);
-    if (mbd != NULL && mbd->m_type == array_memory_block_type) {
-        const array_preamble *ap =
-            reinterpret_cast<const array_preamble *>(mbd);
-        if (ap->is_builtin_type()) {
-            print_builtin_scalar(ap->get_builtin_type_id(), o,
-                                 ap->m_data_pointer);
-        } else {
-            ap->m_type->print_data(o, ap->get_arrmeta(), ap->m_data_pointer);
-        }
-    }
+    o << *reinterpret_cast<const nd::array *>(data);
 }
 
 void ndarrayarg_type::print_type(std::ostream& o) const

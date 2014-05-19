@@ -363,10 +363,8 @@ static void parse_struct_json(const ndt::type& tp, const char *metadata, char *o
 {
     const base_struct_type *fsd = tp.tcast<base_struct_type>();
     size_t field_count = fsd->get_field_count();
-    const string *field_names = fsd->get_field_names();
-    const ndt::type *field_types = fsd->get_field_types();
     const size_t *data_offsets = fsd->get_data_offsets(metadata);
-    const size_t *metadata_offsets = fsd->get_metadata_offsets();
+    const size_t *arrmeta_offsets = fsd->get_arrmeta_offsets_raw();
 
     // Keep track of which fields we've seen
     shortvector<bool> populated_fields(field_count);
@@ -402,7 +400,7 @@ static void parse_struct_json(const ndt::type& tp, const char *metadata, char *o
                 //       or not. For now, just throw away fields not in the destination.
                 skip_json_value(begin, end);
             } else {
-                parse_json(field_types[i], metadata + metadata_offsets[i],
+                parse_json(fsd->get_field_type(i), metadata + arrmeta_offsets[i],
                            out_data + data_offsets[i], begin, end, ectx);
                 populated_fields[i] = true;
             }
@@ -419,7 +417,7 @@ static void parse_struct_json(const ndt::type& tp, const char *metadata, char *o
         if (!populated_fields[i]) {
             stringstream ss;
             ss << "object dict does not contain the field ";
-            print_escaped_utf8_string(ss, field_names[i]);
+            print_escaped_utf8_string(ss, fsd->get_field_name(i));
             ss << " as required by the data type";
             throw json_parse_error(skip_whitespace(saved_begin, end), ss.str(), tp);
         }

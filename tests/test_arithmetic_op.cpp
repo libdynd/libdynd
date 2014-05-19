@@ -254,8 +254,8 @@ TEST(ArithmeticOp, MatchingDTypes_View) {
     // Two arrays with broadcasting
     int v0[] = {1,2,3};
     int v1[][3] = {{0,1,1}, {2,5,-10}};
-    a = v0;
-    b = v1;
+    a = nd::array_rw(v0);
+    b = nd::array_rw(v1);
 
     c = a + b;
     EXPECT_EQ(1, c(0,0).as<int>());

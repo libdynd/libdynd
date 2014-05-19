@@ -266,16 +266,13 @@ namespace detail {
         }
         static ndt::type make_parameters_type(const char *name0, const char *name1, const char *name2, const char *name3) {
             ndt::type field_types[4];
-            std::string field_names[4];
+            const char *field_names[4] = {name0, name1, name2, name3};
             field_types[0] = make_parameter_type<P0>::make();
             field_types[1] = make_parameter_type<P1>::make();
             field_types[2] = make_parameter_type<P2>::make();
             field_types[3] = make_parameter_type<P3>::make();
-            field_names[0] = name0;
-            field_names[1] = name1;
-            field_names[2] = name2;
-            field_names[3] = name3;
-            return ndt::make_cstruct(4, field_types, field_names);
+            return ndt::make_cstruct(
+                nd::make_strided_string_array(field_names, 4), field_types);
         }
     };
 
@@ -301,18 +298,14 @@ namespace detail {
         static ndt::type make_parameters_type(const char *name0, const char *name1, const char *name2,
                         const char *name3, const char *name4) {
             ndt::type field_types[5];
-            std::string field_names[5];
+            const char *field_names[5] = {name0, name1, name2, name3, name4};
             field_types[0] = make_parameter_type<P0>::make();
             field_types[1] = make_parameter_type<P1>::make();
             field_types[2] = make_parameter_type<P2>::make();
             field_types[3] = make_parameter_type<P3>::make();
             field_types[4] = make_parameter_type<P4>::make();
-            field_names[0] = name0;
-            field_names[1] = name1;
-            field_names[2] = name2;
-            field_names[3] = name3;
-            field_names[4] = name4;
-            return ndt::make_cstruct(5, field_types, field_names);
+            return ndt::make_cstruct(
+                nd::make_strided_string_array(field_names, 5), field_types);
         }
     };
 } // namespace detail
