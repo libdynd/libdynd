@@ -67,8 +67,7 @@ TEST(ArrFunc, Property) {
     arrfunc_type_data af;
     // Create an arrfunc for getting the year from a date
     make_arrfunc_from_property(ndt::make_date(), "year",
-                               unary_operation_funcproto, assign_error_default,
-                               af);
+                               unary_operation_funcproto, af);
     // Validate that its types, etc are set right
     ASSERT_EQ(unary_operation_funcproto, (arrfunc_proto_t)af.ckernel_funcproto);
     ASSERT_EQ(1u, af.get_param_count());

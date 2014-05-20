@@ -219,7 +219,6 @@ void dynd::make_arrfunc_from_assignment(
 void dynd::make_arrfunc_from_property(const ndt::type &tp,
                                       const std::string &propname,
                                       arrfunc_proto_t funcproto,
-                                      assign_error_mode errmode,
                                       arrfunc_type_data &out_af)
 {
     if (tp.get_kind() == expression_kind) {

@@ -195,22 +195,19 @@ inline nd::arrfunc make_arrfunc_from_assignment(const ndt::type &dst_tp,
  * \param propname  The name of the property.
  * \param funcproto  The function prototype to generate (must be
  *                   unary_operation_funcproto or expr_operation_funcproto).
- * \param errmode  The error mode to use for the assignment.
  * \param out_af  The output `arrfunc` struct to be populated.
  */
 void make_arrfunc_from_property(const ndt::type &tp,
                                 const std::string &propname,
                                 arrfunc_proto_t funcproto,
-                                assign_error_mode errmode,
                                 arrfunc_type_data &out_af);
 
 inline nd::arrfunc make_arrfunc_from_property(const ndt::type &tp,
                                               const std::string &propname,
-                                              arrfunc_proto_t funcproto,
-                                              assign_error_mode errmode)
+                                              arrfunc_proto_t funcproto)
 {
     nd::array af = nd::empty(ndt::make_arrfunc());
-    make_arrfunc_from_property(tp, propname, funcproto, errmode,
+    make_arrfunc_from_property(tp, propname, funcproto,
         *reinterpret_cast<arrfunc_type_data *>(af.get_readwrite_originptr()));
     af.flag_as_immutable();
     return af;
