@@ -78,6 +78,25 @@ TEST(Special, LogGamma) {
     }
 }
 
+TEST(Special, Airy) {
+    nd::array vals = airy_vals();
+    intptr_t size = vals.get_dim_size();
+
+    for (int i = 0; i < size; ++i) {
+        double res[2][2];
+        airy(res, vals(i, 0).as<double>());
+
+        EXPECT_GE(REL_ERROR_MAX,
+            rel_error(vals(i, 1, 0, 0).as<double>(), res[0][0]));
+        EXPECT_GE(REL_ERROR_MAX,
+            rel_error(vals(i, 1, 0, 1).as<double>(), res[0][1]));
+        EXPECT_GE(REL_ERROR_MAX,
+            rel_error(vals(i, 1, 1, 0).as<double>(), res[1][0]));
+        EXPECT_GE(REL_ERROR_MAX,
+            rel_error(vals(i, 1, 1, 1).as<double>(), res[1][1]));
+    }
+}
+
 TEST(Special, BesselJ0) {
     nd::array vals = bessel_j0_vals();
     intptr_t size = vals.get_dim_size();
@@ -158,47 +177,24 @@ TEST(Special, StruveH) {
     }
 }
 
-/*
-TEST(Special, RiccatiBesselJ0) {
-    nd::array vals = riccati_bessel_j0_vals();
-    intptr_t size = vals.get_shape()[1];
+TEST(Special, LegendreP) {
+    nd::array vals = legendre_p_vals();
+    intptr_t size = vals.get_dim_size();
 
     for (int i = 0; i < size; ++i) {
         EXPECT_GE(REL_ERROR_MAX,
-            rel_error(vals(1, i).as<double>(), riccati_bessel_j0(vals(0, i).as<double>())));
+            rel_error(vals(i, 2).as<double>(), legendre_p(vals(i, 0).as<int>(), vals(i, 1).as<double>())));
     }
 }
 
-TEST(Special, RiccatiBesselJ1) {
-    nd::array vals = riccati_bessel_j1_vals();
-    intptr_t size = vals.get_shape()[1];
+TEST(Special, AssociatedLegendreP) {
+    nd::array vals = assoc_legendre_p_vals();
+    intptr_t size = vals.get_dim_size();
 
     for (int i = 0; i < size; ++i) {
         EXPECT_GE(REL_ERROR_MAX,
-            rel_error(vals(1, i).as<double>(), riccati_bessel_j1(vals(0, i).as<double>())));
+            rel_error(vals(i, 3).as<double>(), assoc_legendre_p(vals(i, 0).as<int>(), vals(i, 1).as<int>(), vals(i, 2).as<double>())));
     }
 }
-*/
-
-/*
-TEST(Special, Airy) {
-    nd::array vals = airy_vals();
-    intptr_t size = vals.get_shape()[1];
-
-    for (int i = 0; i < size; ++i) {
-        double ai, aip, bi, bip;
-        airy(vals(0, i).as<double>(), ai, aip, bi, bip);
-
-        EXPECT_GE(REL_ERROR_MAX,
-            rel_error(vals(1, i).as<double>(), ai));
-        EXPECT_GE(REL_ERROR_MAX,
-            rel_error(vals(2, i).as<double>(), aip));
-        EXPECT_GE(REL_ERROR_MAX,
-            rel_error(vals(3, i).as<double>(), bi));
-        EXPECT_GE(REL_ERROR_MAX,
-            rel_error(vals(4, i).as<double>(), bip));
-    }
-}
-*/
 
 #undef REL_ERROR_MAX

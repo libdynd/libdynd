@@ -413,6 +413,7 @@ set(libdynd_SRC
     src/dynd/lowlevel_api.cpp
     src/dynd/parser_util.cpp
     src/dynd/shape_tools.cpp
+    src/dynd/special.cpp
     src/dynd/string.cpp
     src/dynd/string_encodings.cpp
     src/dynd/view.cpp

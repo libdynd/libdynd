@@ -63,6 +63,20 @@ inline double lgamma(double x) {
     return cephes::lgam(x);
 }
 
+inline void airy(double (&res)[2][2], double x) {
+    cephes::airy(x, &res[0][0], &res[0][1], &res[1][0], &res[1][1]);
+}
+
+inline void airy_ai(double (&res)[2], double x) {
+    double tmp[2];
+    cephes::airy(x, &res[0], &res[1], &tmp[0], &tmp[1]);
+}
+
+inline void airy_bi(double (&res)[2], double x) {
+    double tmp[2];
+    cephes::airy(x, &tmp[0], &tmp[1], &res[0], &res[1]);
+}
+
 inline double bessel_j0(double x) {
     return cephes::j0(x);
 }
@@ -99,18 +113,13 @@ inline double struve_h(double nu, double x) {
     return cephes::struve(nu, x);
 }
 
+double legendre_p_next(int l, double x, double pls1, double pl);
+double legendre_p(int l, double x);
+
+double assoc_legendre_p_next(int l, int m, double x, double pl, double pls1);
+double assoc_legendre_p(int l, int m, double x);
 
 
-
-
-
-
-
-/*
-inline void airy(double x, double &ai, double &aip, double &bi, double &bip) {
-    cephes::airy(x, &ai, &aip, &bi, &bip);
-}
-*/
 
 /*
 inline double sph_bessel_j(int n, double x) {

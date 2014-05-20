@@ -2,17 +2,23 @@ import mpmath
 
 from mpmath import pi, mpc, mpf, nstr, arange, linspace, sin, sqrt
 
-mpmath.dps = 64
+mpmath.dps = 128
 
-def outer(*args):
-    if (len(args) == 0):
+def outer(*iterables):
+    if (len(iterables) == 0):
         yield ()
     else:
-        for item in iter(args[0]):
-            for items in outer(*args[1:]):
+        for item in iter(iterables[0]):
+            for items in outer(*iterables[1:]):
                 yield (item,) + items
 
 def make_special_vals(name, *args):
+    def nstr2(obj, n):
+        if hasattr(obj, '__iter__'):
+            return '{' + ', '.join(nstr2(val, n) for val in obj) + '}'
+        else:
+            return nstr(obj, n)
+
     def ctype(val):
         cls = type(val)
         if (cls is int):
@@ -21,25 +27,55 @@ def make_special_vals(name, *args):
             return 'double'
         elif ((cls is complex) or (cls is mpc)):
             return 'dynd_complex<double>'
+        else:
+            return '{}[{}]'.format(ctype(val[0]), len(val))
+
+    def dtype(val):
+        cls = type(val)
+        if (cls == int):
+            return 'int'
+        elif ((cls == 'float') or (cls == mpf)):
+            return 'double'
+        else:
+            return dtype(val[0])
+
+        raise Exception('')
+
+    def extents(val):
+        try:
+            return '[{}]'.format(len(val)) + extents(val[0])
+        except TypeError:
+            return ''
 
     def signature(name):
         return 'dynd::nd::array {}()'.format(name)
 
     def static_array(name, vals, n = 15):
-        return '    static {} {}[{}] = {{\n        {}\n    }};'.format(ctype(vals[0]), name, len(vals),
-            ',\n        '.join(nstr(val, n) for val in vals))
+        return '    static {} {}{} = {{\n        {}\n    }};'.format(dtype(vals), name, extents(vals),
+            ',\n        '.join(nstr2(val, n) for val in vals))
+
+    def make_type(iterable):
+        if extents(iterable[0]):
+            return 'dynd::ndt::cfixed_dim_from_array<{}>::make()'.format(dtype(iterable) + extents(iterable[0]))
+        else:
+            return 'dynd::ndt::make_type<{}>()'.format(dtype(iterable))
+
+    def ndarray2(*iterables):
+        return 'dynd::nd::array vals = dynd::nd::make_strided_array({}, dynd::ndt::make_tuple({}));'.format(len(iterables[0]),
+            ', '.join(make_type(iterable) for iterable in iterables))
 
     def ndarray(size, *args):
         return 'dynd::nd::array vals = dynd::nd::make_strided_array({}, dynd::ndt::make_tuple({}));'.format(size,
             ', '.join('dynd::ndt::make_type<{}>()'.format(str(arg)) for arg in args))
 
     ctypes = [ctype(vals[0]) for (fname, vals) in args]
+    iterables = [iterable for (fname, iterable) in args]
 
     code = signature(name) + ' {\n'
     for (name, vals) in args:
         code += static_array(name, vals) + '\n'
     code += '\n'
-    code += '    ' + ndarray(len(vals), *ctypes) + '\n'
+    code += '    ' + ndarray2(*iterables) + '\n'
     for i, (name, vals) in enumerate(args):
         code += '    vals(dynd::irange(), {}).vals() = {};\n'.format(i, name)
 
@@ -92,6 +128,19 @@ def make_lgamma_vals():
     lga = [loggamma(val) for val in x]
 
     return make_special_vals('lgamma_vals', ('x', x), ('lga', lga))
+
+def make_airy_vals():
+    from mpmath import airyai, airybi
+
+    x = linspace(-5, 15, 21)
+    ai = [airyai(val) for val in x]
+    aip = [airyai(val, 1) for val in x]
+    bi = [airybi(val) for val in x]
+    bip = [airybi(val, 1) for val in x]
+
+    aibi = zip(zip(ai, aip), zip(bi, bip))
+
+    return make_special_vals('airy_vals', ('x', x), ('aibi', aibi))
 
 def make_bessel_j0_vals():
     from mpmath import besselj
@@ -170,6 +219,29 @@ def make_struve_h_vals():
 
     return make_special_vals('struve_h_vals', ('nu', nu), ('x', x), ('h', h))
 
+def make_legendre_p_vals():
+    from mpmath import legendre
+
+    l = range(5)
+    x = linspace('-0.99', '0.99', 67)
+
+    l, x = zip(*outer(l, x))
+    p = [legendre(*vals) for vals in zip(l, x)]
+
+    return make_special_vals('legendre_p_vals', ('l', l), ('x', x), ('p', p))
+
+def make_assoc_legendre_p_vals():
+    from mpmath import legenp
+
+    l = range(5)
+    m = range(-4, 5)
+    x = linspace('-0.99', '0.99', 67)
+
+    l, m, x = zip(*(vals for vals in outer(l, m, x) if abs(vals[1]) <= vals[0]))
+    p = [legenp(*vals, zeroprec = 1024) for vals in zip(l, m, x)]
+
+    return make_special_vals('assoc_legendre_p_vals', ('l', l), ('m', m), ('x', x), ('p', p))
+
 outfile = open('special_vals.hpp', 'w')
 
 outfile.write('//\n')
@@ -181,6 +253,7 @@ outfile.write('#ifndef _DYND__SPECIAL_VALS_HPP_\n')
 outfile.write('#define _DYND__SPECIAL_VALS_HPP_\n')
 outfile.write('\n')
 outfile.write('#include <dynd/array.hpp>\n')
+outfile.write('#include <dynd/types/cfixed_dim_type.hpp>\n')
 outfile.write('#include <dynd/types/tuple_type.hpp>\n')
 outfile.write('\n')
 outfile.write(make_factorial_vals())
@@ -192,6 +265,8 @@ outfile.write('\n')
 outfile.write(make_gamma_vals())
 outfile.write('\n')
 outfile.write(make_lgamma_vals())
+outfile.write('\n')
+outfile.write(make_airy_vals())
 outfile.write('\n')
 outfile.write(make_bessel_j0_vals())
 outfile.write('\n')
@@ -208,6 +283,10 @@ outfile.write('\n')
 outfile.write(make_bessel_y_vals())
 outfile.write('\n')
 outfile.write(make_struve_h_vals())
+outfile.write('\n')
+outfile.write(make_legendre_p_vals())
+outfile.write('\n')
+outfile.write(make_assoc_legendre_p_vals())
 outfile.write('\n')
 outfile.write('#endif // _DYND__SPECIAL_VALS_HPP_')
 

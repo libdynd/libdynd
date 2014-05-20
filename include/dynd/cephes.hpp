@@ -8,7 +8,7 @@
 
 namespace dynd {  namespace cephes { extern "C" {
 
-#include "cephes/protos.h"
+#include "../../thirdparty/cephes/protos.h"
 
 }}} // namespace dynd::cephes
 
