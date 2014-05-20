@@ -1,5 +1,5 @@
-#ifndef __SCIPY_SPECIAL_CEPHES
-#define __SCIPY_SPECIAL_CEPHES
+#ifndef _CEPHES__PROTOS_H_
+#define _CEPHES__PROTOS_H_
 
 /* Complex numeral.  */
 typedef struct {
@@ -194,4 +194,5 @@ extern void polcos(double x[], double y[], int nn);
 int polrt(double[], double[], int, cmplx[]);
 
 double yv(double v, double x);
-#endif
+
+#endif // _CEPHES__PROTOS_H_

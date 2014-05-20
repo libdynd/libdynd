@@ -71,7 +71,7 @@
  * The cosecant reflection formula is employed for arguments
  * less than -33.
  *
- * Arguments greater than MAXLGM return NPY_INFINITY and an error
+ * Arguments greater than MAXLGM return INFINITY and an error
  * message.  MAXLGM = 2.035093e36 for DEC
  * arithmetic or 2.556348e305 for IEEE arithmetic.
  *
@@ -287,7 +287,7 @@ static unsigned short SQT[4] = {
 
 int sgngam = 0;
 extern int sgngam;
-extern double MAXLOG;
+extern double MAXLOG, PI;
 static double stirf(double);
 
 /* Gamma function computed by Stirling's formula.
@@ -298,7 +298,7 @@ static double stirf(double x)
     double y, w, v;
 
     if (x >= MAXGAM) {
-	return (NPY_INFINITY);
+	return (INFINITY);
     }
     w = 1.0 / x;
     w = 1.0 + w * polevl(w, STIR, 4);
@@ -322,7 +322,7 @@ double Gamma(double x)
     int i;
 
     sgngam = 1;
-    if (!npy_isfinite(x)) {
+    if (!isfinite(x)) {
 	return x;
     }
     q = fabs(x);
@@ -333,7 +333,7 @@ double Gamma(double x)
 	    if (p == q) {
 	      gamnan:
 		mtherr("Gamma", OVERFLOW);
-		return (NPY_INFINITY);
+		return (INFINITY);
 	    }
 	    i = p;
 	    if ((i & 1) == 0)
@@ -343,12 +343,12 @@ double Gamma(double x)
 		p += 1.0;
 		z = q - p;
 	    }
-	    z = q * sin(NPY_PI * z);
+	    z = q * sin(PI * z);
 	    if (z == 0.0) {
-		return (sgngam * NPY_INFINITY);
+		return (sgngam * INFINITY);
 	    }
 	    z = fabs(z);
-	    z = NPY_PI / (z * stirf(q));
+	    z = PI / (z * stirf(q));
 	}
 	else {
 	    z = stirf(x);
@@ -550,7 +550,7 @@ double lgam(double x)
 
     sgngam = 1;
 
-    if (!npy_isfinite(x))
+    if (!isfinite(x))
 	return x;
 
     if (x < -34.0) {
@@ -560,7 +560,7 @@ double lgam(double x)
 	if (p == q) {
 	  lgsing:
 	    mtherr("lgam", SING);
-	    return (NPY_INFINITY);
+	    return (INFINITY);
 	}
 	i = p;
 	if ((i & 1) == 0)
@@ -572,10 +572,10 @@ double lgam(double x)
 	    p += 1.0;
 	    z = p - q;
 	}
-	z = q * sin(NPY_PI * z);
+	z = q * sin(PI * z);
 	if (z == 0.0)
 	    goto lgsing;
-	/*     z = log(NPY_PI) - log( z ) - w; */
+	/*     z = log(PI) - log( z ) - w; */
 	z = LOGPI - log(z) - w;
 	return (z);
     }
@@ -611,7 +611,7 @@ double lgam(double x)
     }
 
     if (x > MAXLGM) {
-	return (sgngam * NPY_INFINITY);
+	return (sgngam * INFINITY);
     }
 
     q = (x - 0.5) * log(x) - x + LS2PI;

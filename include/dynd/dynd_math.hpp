@@ -50,132 +50,132 @@ template <typename T>
 T dynd_1_div_sqrt_2();
 
 template <>
-float dynd_e<float>() {
+inline float dynd_e<float>() {
     return DYND_EF;
 }
 
 template <>
-float dynd_log2_e<float>() {
+inline float dynd_log2_e<float>() {
     return DYND_LOG2_EF;
 }
 
 template <>
-float dynd_log10_e<float>() {
+inline float dynd_log10_e<float>() {
     return DYND_LOG10_EF;
 }
 
 template <>
-float dynd_log_2<float>() {
+inline float dynd_log_2<float>() {
     return DYND_LOG_2F;
 }
 
 template <>
-float dynd_log_10<float>() {
+inline float dynd_log_10<float>() {
     return DYND_LOG_10F;
 }
 
 template <>
-float dynd_pi<float>() {
+inline float dynd_pi<float>() {
     return DYND_PIF;
 }
 
 template <>
-float dynd_2_mul_pi<float>() {
+inline float dynd_2_mul_pi<float>() {
     return DYND_2F_MUL_PIF;
 }
 
 template <>
-float dynd_pi_div_2<float>() {
+inline float dynd_pi_div_2<float>() {
     return DYND_PIF_DIV_2F;
 }
 
 template <>
-float dynd_pi_div_4<float>() {
+inline float dynd_pi_div_4<float>() {
     return DYND_PIF_DIV_4F;
 }
 
 template <>
-float dynd_1_div_pi<float>() {
+inline float dynd_1_div_pi<float>() {
     return DYND_1F_DIV_PIF;
 }
 
 template <>
-float dynd_2_div_pi<float>() {
+inline float dynd_2_div_pi<float>() {
     return DYND_2F_DIV_PIF;
 }
 
 template <>
-float dynd_sqrt_pi<float>() {
+inline float dynd_sqrt_pi<float>() {
     return DYND_SQRT_PIF;
 }
 
 template <>
-float dynd_1_div_sqrt_2<float>() {
+inline float dynd_1_div_sqrt_2<float>() {
     return DYND_1F_DIV_SQRT_2F;
 }
 
 template <>
-double dynd_e<double>() {
+inline double dynd_e<double>() {
     return DYND_E;
 }
 
 template <>
-double dynd_log2_e<double>() {
+inline double dynd_log2_e<double>() {
     return DYND_LOG2_E;
 }
 
 template <>
-double dynd_log10_e<double>() {
+inline double dynd_log10_e<double>() {
     return DYND_LOG10_E;
 }
 
 template <>
-double dynd_log_2<double>() {
+inline double dynd_log_2<double>() {
     return DYND_LOG_2;
 }
 
 template <>
-double dynd_log_10<double>() {
+inline double dynd_log_10<double>() {
     return DYND_LOG_10;
 }
 
 template <>
-double dynd_pi<double>() {
+inline double dynd_pi<double>() {
     return DYND_PI;
 }
 
 template <>
-double dynd_2_mul_pi<double>() {
+inline double dynd_2_mul_pi<double>() {
     return DYND_2_MUL_PI;
 }
 
 template <>
-double dynd_pi_div_2<double>() {
+inline double dynd_pi_div_2<double>() {
     return DYND_PI_DIV_2;
 }
 
 template <>
-double dynd_pi_div_4<double>() {
+inline double dynd_pi_div_4<double>() {
     return DYND_PI_DIV_4;
 }
 
 template <>
-double dynd_1_div_pi<double>() {
+inline double dynd_1_div_pi<double>() {
     return DYND_1_DIV_PI;
 }
 
 template <>
-double dynd_2_div_pi<double>() {
+inline double dynd_2_div_pi<double>() {
     return DYND_2_DIV_PI;
 }
 
 template <>
-double dynd_sqrt_pi<double>() {
+inline double dynd_sqrt_pi<double>() {
     return DYND_SQRT_PI;
 }
 
 template <>
-double dynd_1_div_sqrt_2<double>() {
+inline double dynd_1_div_sqrt_2<double>() {
     return DYND_1_DIV_SQRT_2;
 }
 

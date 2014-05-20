@@ -54,7 +54,7 @@ double cbrt(double x)
     int e, rem, sign;
     double z;
 
-    if (!npy_isfinite(x))
+    if (!isfinite(x))
 	return x;
     if (x == 0)
 	return (x);

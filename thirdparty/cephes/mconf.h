@@ -62,101 +62,11 @@
  * Copyright 1984, 1987, 1989, 1995 by Stephen L. Moshier
  */
 
-#ifndef CEPHES_MCONF_H
-#define CEPHES_MCONF_H
+#ifndef _CEPHES__MCONF_H_
+#define _CEPHES__MCONF_H_
 
-#include "../../include/dynd/dynd_math.h"
+#include <math.h>
 
-// #include <Python.h>
-typedef unsigned npy_uint32;
-typedef double npy_double;
-
-#define NPY_INLINE inline
-
-NPY_INLINE static float __npy_inff(void)
-{
-    const union { npy_uint32 __i; float __f;} __bint = {0x7f800000UL};
-    return __bint.__f;
-}
-
-NPY_INLINE static float __npy_nanf(void)
-{
-    const union { npy_uint32 __i; float __f;} __bint = {0x7fc00000UL};
-    return __bint.__f;
-}
-
-NPY_INLINE static float __npy_pzerof(void)
-{
-    const union { npy_uint32 __i; float __f;} __bint = {0x00000000UL};
-    return __bint.__f;
-}
-
-NPY_INLINE static float __npy_nzerof(void)
-{
-    const union { npy_uint32 __i; float __f;} __bint = {0x80000000UL};
-    return __bint.__f;
-}
-
-#define npy_isfinite(x) (!isinf(x))
-#define npy_isinf(x) isinf(x)
-
-#define NPY_INFINITYF __npy_inff()
-#define NPY_NANF __npy_nanf()
-#define NPY_PZEROF __npy_pzerof()
-#define NPY_NZEROF __npy_nzerof()
-
-#define NPY_INFINITY ((npy_double)NPY_INFINITYF)
-#define NPY_NAN ((npy_double)NPY_NANF)
-#define NPY_PZERO ((npy_double)NPY_PZEROF)
-#define NPY_NZERO ((npy_double)NPY_NZEROF)
-
-#define NPY_INFINITYL ((npy_longdouble)NPY_INFINITYF)
-#define NPY_NANL ((npy_longdouble)NPY_NANF)
-#define NPY_PZEROL ((npy_longdouble)NPY_PZEROF)
-#define NPY_NZEROL ((npy_longdouble)NPY_NZEROF)
-
-#define NPY_E         2.718281828459045235360287471352662498  /* e */
-#define NPY_LOG2E     1.442695040888963407359924681001892137  /* log_2 e */
-#define NPY_LOG10E    0.434294481903251827651128918916605082  /* log_10 e */
-#define NPY_LOGE2     0.693147180559945309417232121458176568  /* log_e 2 */
-#define NPY_LOGE10    2.302585092994045684017991454684364208  /* log_e 10 */
-#define NPY_PI        3.141592653589793238462643383279502884  /* pi */
-#define NPY_PI_2      1.570796326794896619231321691639751442  /* pi/2 */
-#define NPY_PI_4      0.785398163397448309615660845819875721  /* pi/4 */
-#define NPY_1_PI      0.318309886183790671537767526745028724  /* 1/pi */
-#define NPY_2_PI      0.636619772367581343075535053490057448  /* 2/pi */
-#define NPY_EULER     0.577215664901532860606512090082402431  /* Euler constant */
-#define NPY_SQRT2     1.414213562373095048801688724209698079  /* sqrt(2) */
-#define NPY_SQRT1_2   0.707106781186547524400844362104849039  /* 1/sqrt(2) */
-
-#define NPY_Ef        2.718281828459045235360287471352662498F /* e */
-#define NPY_LOG2Ef    1.442695040888963407359924681001892137F /* log_2 e */
-#define NPY_LOG10Ef   0.434294481903251827651128918916605082F /* log_10 e */
-#define NPY_LOGE2f    0.693147180559945309417232121458176568F /* log_e 2 */
-#define NPY_LOGE10f   2.302585092994045684017991454684364208F /* log_e 10 */
-#define NPY_PIf       3.141592653589793238462643383279502884F /* pi */
-#define NPY_PI_2f     1.570796326794896619231321691639751442F /* pi/2 */
-#define NPY_PI_4f     0.785398163397448309615660845819875721F /* pi/4 */
-#define NPY_1_PIf     0.318309886183790671537767526745028724F /* 1/pi */
-#define NPY_2_PIf     0.636619772367581343075535053490057448F /* 2/pi */
-#define NPY_EULERf    0.577215664901532860606512090082402431F /* Euler constan*/
-#define NPY_SQRT2f    1.414213562373095048801688724209698079F /* sqrt(2) */
-
-#define NPY_El        2.718281828459045235360287471352662498L /* e */
-#define NPY_LOG2El    1.442695040888963407359924681001892137L /* log_2 e */
-#define NPY_LOG10El   0.434294481903251827651128918916605082L /* log_10 e */
-#define NPY_LOGE2l    0.693147180559945309417232121458176568L /* log_e 2 */
-#define NPY_LOGE10l   2.302585092994045684017991454684364208L /* log_e 10 */
-#define NPY_PIl       3.141592653589793238462643383279502884L /* pi */
-#define NPY_PI_2l     1.570796326794896619231321691639751442L /* pi/2 */
-#define NPY_PI_4l     0.785398163397448309615660845819875721L /* pi/4 */
-#define NPY_1_PIl     0.318309886183790671537767526745028724L /* 1/pi */
-#define NPY_2_PIl     0.636619772367581343075535053490057448L /* 2/pi */
-#define NPY_EULERl    0.577215664901532860606512090082402431L /* Euler constan*/
-#define NPY_SQRT2l    1.414213562373095048801688724209698079L /* sqrt(2) */
-#define NPY_SQRT1_2l  0.707106781186547524400844362104849039L /* 1/sqrt(2) */
-
-#include "cephes_names.h"
 #include "protos.h"
 
 /* Constant definitions for math error conditions
@@ -234,4 +144,4 @@ extern int merror;
 
 #define gamma Gamma
 
-#endif				/* CEPHES_MCONF_H */
+#endif // _CEPHES__MCONF_H_

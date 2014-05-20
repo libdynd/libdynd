@@ -463,7 +463,7 @@ static unsigned short DZ2[] = { 0x4048, 0x9bf6, 0x6072, 0xa432 };
 #define Z2 (*(double *)DZ2)
 #endif
 
-extern double THPIO4, SQ2OPI;
+extern double TWOOPI, THPIO4, SQ2OPI;
 
 double j1(x)
 double x;
@@ -499,15 +499,15 @@ double x;
     if (x <= 5.0) {
 	if (x == 0.0) {
 	    mtherr("y1", SING);
-	    return -NPY_INFINITY;
+	    return -INFINITY;
 	}
 	else if (x <= 0.0) {
 	    mtherr("y1", DOMAIN);
-	    return NPY_NAN;
+	    return NAN;
 	}
 	z = x * x;
 	w = x * (polevl(z, YP, 5) / p1evl(z, YQ, 8));
-	w += NPY_2_PI * (j1(x) * log(x) - 1.0 / x);
+	w += TWOOPI * (j1(x) * log(x) - 1.0 / x);
 	return (w);
     }
 

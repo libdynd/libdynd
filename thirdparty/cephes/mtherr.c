@@ -86,7 +86,9 @@ int mtherr(char *name, int code)
      * by the code argument.
      */
     if ((code <= 0) || (code >= 8))
-	code = 0;
+    {
+    	code = 0;
+    }
 
     sf_error(name, conv_to_sf[code], NULL);
 

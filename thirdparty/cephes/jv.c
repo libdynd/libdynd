@@ -100,13 +100,13 @@ double jv(double n, double x)
 
     if ((x < 0.0) && (y != an)) {
 	mtherr("Jv", DOMAIN);
-	y = NPY_NAN;
+	y = NAN;
 	goto done;
     }
 
     if (x == 0 && n < 0 && !nint) {
         mtherr("Jv", OVERFLOW);
-        return NPY_INFINITY / gamma(n + 1);
+        return INFINITY / gamma(n + 1);
     }
 
     y = fabs(x);
@@ -214,7 +214,7 @@ double jv(double n, double x)
 	 */
 	if (n < 0.0) {
 	    mtherr("Jv", TLOSS);
-	    y = NPY_NAN;
+	    y = NAN;
 	    goto done;
 	}
 	t = x / n;
@@ -398,6 +398,7 @@ static double recur(double *n, double x, double *newn, int cancel)
  * AMS55 #9.1.10.
  */
 
+extern double PI;
 extern int sgngam;
 
 static double jvs(double n, double x)
@@ -455,7 +456,7 @@ static double jvs(double n, double x)
 	}
 	if (t > MAXLOG) {
 	    mtherr("Jv", OVERFLOW);
-	    return (NPY_INFINITY);
+	    return (INFINITY);
 	}
 	y = sgngam * exp(t);
     }
@@ -514,8 +515,8 @@ static double hankel(double n, double x)
     }
 
   hank1:
-    u = x - (0.5 * n + 0.25) * NPY_PI;
-    t = sqrt(2.0 / (NPY_PI * x)) * (pp * cos(u) - qq * sin(u));
+    u = x - (0.5 * n + 0.25) * PI;
+    t = sqrt(2.0 / (PI * x)) * (pp * cos(u) - qq * sin(u));
 #if CEPHES_DEBUG
     printf("hank: %.6e\n", t);
 #endif
@@ -681,8 +682,8 @@ static double jnx(double n, double x)
     /* flags to stop when terms get larger */
     doa = 1;
     dob = 1;
-    akl = NPY_INFINITY;
-    bkl = NPY_INFINITY;
+    akl = INFINITY;
+    bkl = INFINITY;
 
     for (k = 0; k <= 3; k++) {
 	tk = 2 * k;
