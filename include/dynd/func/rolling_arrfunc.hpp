@@ -29,7 +29,7 @@ void make_rolling_arrfunc(arrfunc_type_data *out_af, const ndt::type &dst_tp,
                           const ndt::type &src_tp, const nd::array &window_op,
                           intptr_t window_size);
 
-inline nd::array make_rolling_arrfunc(const ndt::type &dst_tp,
+inline nd::arrfunc make_rolling_arrfunc(const ndt::type &dst_tp,
                                       const ndt::type &src_tp,
                                       const nd::array &window_op,
                                       intptr_t window_size)
@@ -38,6 +38,7 @@ inline nd::array make_rolling_arrfunc(const ndt::type &dst_tp,
     make_rolling_arrfunc(
         reinterpret_cast<arrfunc_type_data *>(af.get_readwrite_originptr()),
         dst_tp, src_tp, window_op, window_size);
+    af.flag_as_immutable();
     return af;
 }
 
