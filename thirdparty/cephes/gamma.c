@@ -335,7 +335,7 @@ double Gamma(double x)
 		mtherr("Gamma", OVERFLOW);
 		return (INFINITY);
 	    }
-	    i = p;
+	    i = (int) p;
 	    if ((i & 1) == 0)
 		sgngam = -1;
 	    z = q - p;
@@ -562,7 +562,7 @@ double lgam(double x)
 	    mtherr("lgam", SING);
 	    return (INFINITY);
 	}
-	i = p;
+	i = (int) p;
 	if ((i & 1) == 0)
 	    sgngam = -1;
 	else

@@ -65,21 +65,46 @@
 #ifndef _CEPHES__MCONF_H_
 #define _CEPHES__MCONF_H_
 
+#include <float.h>
 #include <math.h>
 
+#ifdef _MSC_VER
+#define INFINITY (DBL_MAX + DBL_MAX)
+#define NAN (INFINITY - INFINITY)
+#define isfinite _finite
+#define isinf(x) (!_finite(x) && !_isnan(x))
+#endif
+
+#include "cephes_names.h"
 #include "protos.h"
 
 /* Constant definitions for math error conditions
  */
 
+#ifndef DOMAIN
 #define DOMAIN		1	/* argument domain error */
+#endif
+#ifndef SING
 #define SING		2	/* argument singularity */
+#endif
+#ifndef OVERFLOW
 #define OVERFLOW	3	/* overflow range error */
+#endif
+#ifndef UNDERFLOW
 #define UNDERFLOW	4	/* underflow range error */
+#endif
+#ifndef TLOSS
 #define TLOSS		5	/* total loss of precision */
+#endif
+#ifndef PLOSS
 #define PLOSS		6	/* partial loss of precision */
+#endif
+#ifndef TOOMANY
 #define TOOMANY         7	/* too many iterations */
+#endif
+#ifndef MAXITER
 #define MAXITER        500
+#endif
 
 #define EDOM		33
 #define ERANGE		34

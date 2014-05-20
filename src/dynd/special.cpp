@@ -137,7 +137,7 @@ double dynd::assoc_legendre_p(int l, int m, double x) {
         return plm;
     }
 
-    double pls2m, pls1m = factorial2(2 * m - 1) * std::pow(1.0 - x * x, fabs(m) / 2.0);
+    double pls2m, pls1m = factorial2(2 * m - 1) * std::pow(1.0 - x * x, fabs((double) m) / 2.0);
     if (m % 2) {
         pls1m *= -1;
     }
