@@ -1,8 +1,75 @@
 import mpmath
+mpmath.dps = 15
 
-from mpmath import pi, mpc, mpf, nstr, arange, linspace, sin, sqrt
+from mpmath import pi, arange, linspace, mpc, mpf, nstr, sin, sqrt
 
-mpmath.dps = 128
+pdps = 15
+
+def make_special_vals(func_name, *args):
+    def cstr(obj):
+        try:
+            return '{' + ', '.join(cstr(val) for val in obj) + '}'
+        except TypeError:
+            cls = type(obj)
+            if ((cls == complex) or (cls == mpc)):
+                return 'dynd::dynd_complex<double>({}, {})'.format(cstr(obj.real), cstr(obj.imag))
+
+            return nstr(obj, pdps)
+
+    def ctype(obj):
+        cls = type(obj)
+        if (cls == int):
+            return 'int'
+        elif ((cls == float) or (cls == mpf)):
+            return 'double'
+        elif ((cls == complex) or (cls == mpc)):
+            return 'dynd::dynd_complex<double>'
+
+        return ctype(obj[0])
+
+    def dims(obj):
+        try:
+            return '[' + str(len(obj)) + ']' + dims(obj[0])
+        except TypeError:
+            return ''
+
+    def make_type(vals):
+        prefix, suffix = ctype(vals), dims(vals[0])
+        if (suffix == ''):
+            if (prefix[-1] == '>'):
+                prefix += ' '
+
+            return 'dynd::ndt::make_type<{}>()'.format(prefix)
+
+        return 'dynd::ndt::cfixed_dim_from_array<{}>::make()'.format(prefix + suffix)
+
+    def decl_asgn_static_array(name, vals):
+        return 'static {} {}{} = {{\n        {}\n    }};\n'.format(ctype(vals), name, dims(vals),
+            ',\n        '.join(cstr(val) for val in vals))
+
+    def decl_asgn_ndarray(*args):
+        size = len(args[0])
+
+        return 'dynd::nd::array vals = dynd::nd::make_strided_array({}, dynd::ndt::make_tuple({}));\n'.format(size,
+            ', '.join(make_type(vals) for vals in args))
+
+    def asgn_vals(index, name):
+        return 'vals(dynd::irange(), {}).vals() = {};\n'.format(index, name)
+
+    names, iterables = zip(*args)
+
+    func_def = 'dynd::nd::array {}() {{\n'.format(func_name)
+    for name, vals in args:
+        func_def += '    ' + decl_asgn_static_array(name, vals)
+    func_def += '\n'
+    func_def += '    ' + decl_asgn_ndarray(*iterables)
+    for index, name in enumerate(names):
+        func_def += '    ' + asgn_vals(index, name)
+    func_def += '\n'
+    func_def += '    return vals;\n'
+    func_def += '}\n'
+
+    return func_def
 
 def outer(*iterables):
     if (len(iterables) == 0):
@@ -11,81 +78,6 @@ def outer(*iterables):
         for item in iter(iterables[0]):
             for items in outer(*iterables[1:]):
                 yield (item,) + items
-
-def make_special_vals(name, *args):
-    def nstr2(obj, n):
-        if hasattr(obj, '__iter__'):
-            return '{' + ', '.join(nstr2(val, n) for val in obj) + '}'
-        elif ((type(obj) == complex) or (type(obj) == mpc)):
-            return 'dynd::dynd_complex<double>({}, {})'.format(nstr2(obj.real, n), nstr2(obj.imag, n))
-        else:
-            return nstr(obj, n)
-
-    def ctype(val):
-        cls = type(val)
-        if (cls is int):
-            return 'int'
-        elif ((cls is float) or (cls is mpf)):
-            return 'double'
-        elif ((cls is complex) or (cls is mpc)):
-            return 'dynd_complex<double>'
-        else:
-            return '{}[{}]'.format(ctype(val[0]), len(val))
-
-    def dtype(val):
-        cls = type(val)
-        if (cls == int):
-            return 'int'
-        elif ((cls == float) or (cls == mpf)):
-            return 'double'
-        elif ((cls == complex) or (cls == mpc)):
-            return 'dynd::dynd_complex<double> '
-        else:
-            return dtype(val[0])
-
-        raise Exception('')
-
-    def extents(val):
-        try:
-            return '[{}]'.format(len(val)) + extents(val[0])
-        except TypeError:
-            return ''
-
-    def signature(name):
-        return 'dynd::nd::array {}()'.format(name)
-
-    def static_array(name, vals, n = 15):
-        return '    static {} {}{} = {{\n        {}\n    }};'.format(dtype(vals), name, extents(vals),
-            ',\n        '.join(nstr2(val, n) for val in vals))
-
-    def make_type(iterable):
-        if extents(iterable[0]):
-            return 'dynd::ndt::cfixed_dim_from_array<{}>::make()'.format(dtype(iterable) + extents(iterable[0]))
-        else:
-            return 'dynd::ndt::make_type<{}>()'.format(dtype(iterable))
-
-    def ndarray2(*iterables):
-        return 'dynd::nd::array vals = dynd::nd::make_strided_array({}, dynd::ndt::make_tuple({}));'.format(len(iterables[0]),
-            ', '.join(make_type(iterable) for iterable in iterables))
-
-    def ndarray(size, *args):
-        return 'dynd::nd::array vals = dynd::nd::make_strided_array({}, dynd::ndt::make_tuple({}));'.format(size,
-            ', '.join('dynd::ndt::make_type<{}>()'.format(str(arg)) for arg in args))
-
-    ctypes = [ctype(vals[0]) for (fname, vals) in args]
-    iterables = [iterable for (fname, iterable) in args]
-
-    code = signature(name) + ' {\n'
-    for (name, vals) in args:
-        code += static_array(name, vals) + '\n'
-    code += '\n'
-    code += '    ' + ndarray2(*iterables) + '\n'
-    for i, (name, vals) in enumerate(args):
-        code += '    vals(dynd::irange(), {}).vals() = {};\n'.format(i, name)
-
-    code += '\n    return vals;\n}\n'
-
-    return code
 
 def make_factorial_vals():
     from mpmath import fac

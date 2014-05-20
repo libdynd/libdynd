@@ -70152,7 +70152,7 @@ dynd::nd::array hankel_h1_vals() {
         10.0,
         50.0
     };
-    static dynd::dynd_complex<double>  h1[72] = {
+    static dynd::dynd_complex<double> h1[72] = {
         dynd::dynd_complex<double>(0.354450744211401, -1.74856041696188),
         dynd::dynd_complex<double>(0.671396707141803, -0.431098868018376),
         dynd::dynd_complex<double>(0.513016136561828, 0.234785710406248),
@@ -70420,7 +70420,7 @@ dynd::nd::array sph_hankel_h1_vals() {
         10.0,
         50.0
     };
-    static dynd::dynd_complex<double>  h1[90] = {
+    static dynd::dynd_complex<double> h1[90] = {
         dynd::dynd_complex<double>(0.993346653975306, -4.90033288920621),
         dynd::dynd_complex<double>(0.896695113624403, -0.870883386683957),
         dynd::dynd_complex<double>(0.841470984807896, -0.54030230586814),
@@ -70670,7 +70670,7 @@ dynd::nd::array hankel_h2_vals() {
         10.0,
         50.0
     };
-    static dynd::dynd_complex<double>  h2[72] = {
+    static dynd::dynd_complex<double> h2[72] = {
         dynd::dynd_complex<double>(0.354450744211401, 1.74856041696188),
         dynd::dynd_complex<double>(0.671396707141803, 0.431098868018376),
         dynd::dynd_complex<double>(0.513016136561828, -0.234785710406248),
@@ -70938,7 +70938,7 @@ dynd::nd::array sph_hankel_h2_vals() {
         10.0,
         50.0
     };
-    static dynd::dynd_complex<double>  h2[90] = {
+    static dynd::dynd_complex<double> h2[90] = {
         dynd::dynd_complex<double>(0.993346653975306, 4.90033288920621),
         dynd::dynd_complex<double>(0.896695113624403, 0.870883386683957),
         dynd::dynd_complex<double>(0.841470984807896, 0.54030230586814),
