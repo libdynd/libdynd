@@ -98,11 +98,14 @@ void property_type::print_data(std::ostream& DYND_UNUSED(o), const char *DYND_UN
 void property_type::print_type(std::ostream& o) const
 {
     if (!m_reversed_property) {
-        o << "property<name=" << m_property_name << ", operand=" << m_operand_tp << ">";
+        o << "property[name=";
+        print_escaped_utf8_string(o, m_property_name);
+        o << ", operand=" << m_operand_tp << "]";
     } else {
-        o << "property<reversed, name=" << m_property_name;
+        o << "property[reversed, name=";
+        print_escaped_utf8_string(o, m_property_name);
         o << ", value=" << m_value_tp;
-        o << ", operand=" << m_operand_tp << ">";
+        o << ", operand=" << m_operand_tp << "]";
     }
 }
 

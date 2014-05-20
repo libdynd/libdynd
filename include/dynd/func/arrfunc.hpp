@@ -163,24 +163,25 @@ public:
  *
  * \param dst_tp  The type of the destination.
  * \param src_tp  The type of the source.
- * \param src_prop_tp  If different from src_tp, this is a type whose
  * \param funcproto  The function prototype to generate (must be
  *                   unary_operation_funcproto or expr_operation_funcproto).
  * \param errmode  The error mode to use for the assignment.
  * \param out_af  The output `arrfunc` struct to be populated.
  */
-void make_arrfunc_from_assignment(
-                const ndt::type& dst_tp, const ndt::type& src_tp, const ndt::type& src_prop_tp,
-                arrfunc_proto_t funcproto,
-                assign_error_mode errmode, arrfunc_type_data& out_af);
+void make_arrfunc_from_assignment(const ndt::type &dst_tp,
+                                  const ndt::type &src_tp,
+                                  arrfunc_proto_t funcproto,
+                                  assign_error_mode errmode,
+                                  arrfunc_type_data &out_af);
 
-inline nd::arrfunc make_arrfunc_from_assignment(
-                const ndt::type& dst_tp, const ndt::type& src_tp, const ndt::type& src_prop_tp,
-                arrfunc_proto_t funcproto,
-                assign_error_mode errmode)
+inline nd::arrfunc make_arrfunc_from_assignment(const ndt::type &dst_tp,
+                                                const ndt::type &src_tp,
+                                                arrfunc_proto_t funcproto,
+                                                assign_error_mode errmode)
 {
     nd::array af = nd::empty(ndt::make_arrfunc());
-    make_arrfunc_from_assignment(dst_tp, src_tp, src_prop_tp, funcproto, errmode,
+    make_arrfunc_from_assignment(
+        dst_tp, src_tp, funcproto, errmode,
         *reinterpret_cast<arrfunc_type_data *>(af.get_readwrite_originptr()));
     af.flag_as_immutable();
     return af;
@@ -197,9 +198,23 @@ inline nd::arrfunc make_arrfunc_from_assignment(
  * \param errmode  The error mode to use for the assignment.
  * \param out_af  The output `arrfunc` struct to be populated.
  */
-void make_arrfunc_from_property(const ndt::type& tp, const std::string& propname,
-                arrfunc_proto_t funcproto,
-                assign_error_mode errmode, arrfunc_type_data& out_af);
+void make_arrfunc_from_property(const ndt::type &tp,
+                                const std::string &propname,
+                                arrfunc_proto_t funcproto,
+                                assign_error_mode errmode,
+                                arrfunc_type_data &out_af);
+
+inline nd::arrfunc make_arrfunc_from_property(const ndt::type &tp,
+                                              const std::string &propname,
+                                              arrfunc_proto_t funcproto,
+                                              assign_error_mode errmode)
+{
+    nd::array af = nd::empty(ndt::make_arrfunc());
+    make_arrfunc_from_property(tp, propname, funcproto, errmode,
+        *reinterpret_cast<arrfunc_type_data *>(af.get_readwrite_originptr()));
+    af.flag_as_immutable();
+    return af;
+}
 
 } // namespace dynd
 
