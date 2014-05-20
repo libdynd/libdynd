@@ -7,6 +7,76 @@
 
 using namespace dynd;
 
+double dynd::factorial(int n) {
+    if (n < 0) {
+        throw std::runtime_error("n must be a nonnegative integer");
+    }
+
+    double res = 1.0;
+    for (int k = 1; k <= n; ++k) {
+        res *= k;
+    }
+
+    return res;
+}
+
+double dynd::factorial2(int n) {
+    if (n < 0) {
+        throw std::runtime_error("n must be a nonnegative integer");
+    }
+
+    double res = 1.0;
+    for (int k = n; k > 0; k -= 2) {
+        res *= k;
+    }
+
+    return res;
+}
+
+double dynd::factorial_ratio(int m, int n) {
+    if (m < 0 || n < 0) {
+        throw std::runtime_error("m and n must be nonnegative integers");
+    }
+
+    if (m < n) {
+        return 1.0 / factorial_ratio(n, m);
+    }
+
+    double res = 1.0;
+    for (int k = n + 1; k <= m; ++k) {
+        res *= k;
+    }
+
+    return res;
+}
+
+double dynd::sph_bessel_j(double nu, double x) {
+    if (nu == 0) {
+        return sph_bessel_j0(x);
+    }
+
+    if (x == 0.0) {
+        return 0.0;
+    }
+
+    if (x < 1) {
+        double x_div_2 = x / 2.0;
+        double x_sq_div_4 = x_div_2 * x_div_2;
+
+        int k = 0;
+        double term = std::pow(x_div_2, nu) / gamma(nu + 1.5), res = term;
+        do {
+            ++k;
+            term *= -x_sq_div_4 / (k * (k + nu + 0.5));
+            res += term;
+        } while (fabs(std::numeric_limits<double>::epsilon() * res) < fabs(term));
+
+        return std::sqrt(dynd::dynd_pi_div_4<double>()) * res;
+    }
+
+    return std::sqrt(dynd::dynd_pi_div_2<double>() / x) * bessel_j(nu + 0.5, x);
+}
+
 double dynd::legendre_p_next(int l, double x, double pls1, double pl) {
     return ((2 * l + 1) * x * pl - l * pls1) / (l + 1);
 }

@@ -16,6 +16,8 @@ def make_special_vals(name, *args):
     def nstr2(obj, n):
         if hasattr(obj, '__iter__'):
             return '{' + ', '.join(nstr2(val, n) for val in obj) + '}'
+        elif ((type(obj) == complex) or (type(obj) == mpc)):
+            return 'dynd::dynd_complex<double>({}, {})'.format(nstr2(obj.real, n), nstr2(obj.imag, n))
         else:
             return nstr(obj, n)
 
@@ -34,8 +36,10 @@ def make_special_vals(name, *args):
         cls = type(val)
         if (cls == int):
             return 'int'
-        elif ((cls == 'float') or (cls == mpf)):
+        elif ((cls == float) or (cls == mpf)):
             return 'double'
+        elif ((cls == complex) or (cls == mpc)):
+            return 'dynd::dynd_complex<double> '
         else:
             return dtype(val[0])
 
@@ -161,7 +165,8 @@ def make_bessel_j1_vals():
 def make_bessel_j_vals():
     from mpmath import besselj
 
-    nu = [mpf('0.5'), mpf('1.25'), mpf('1.5'), mpf('1.75'), mpf(2), mpf('2.75'), mpf(5), mpf(10), mpf(20)]
+    nu = [mpf('0.5'), mpf('1.25'), mpf('1.5'), mpf('1.75'), mpf(2), mpf('2.75'),
+        mpf(5), mpf(10), mpf(20)]
     x = [mpf('0.2'), mpf(1), mpf(2), mpf('2.5'), mpf(3), mpf(5), mpf(10), mpf(50)]
 
     nu, x = zip(*outer(nu, x))
@@ -169,17 +174,33 @@ def make_bessel_j_vals():
 
     return make_special_vals('bessel_j_vals', ('nu', nu), ('x', x), ('j', j))
 
-def make_sph_bessel_j0_vals():
-    def j0(x):
-        if (x == 0):
+def sphbesselj(nu, x):
+    from mpmath import besselj
+
+    if (x == 0):
+        if (nu == 0):
             return mpf(1)
+        else:
+            return mpf(0)
 
-        return sin(x) / x
+    return sqrt(pi / (2 * x)) * besselj(nu + mpf('0.5'), x)
 
+def make_sph_bessel_j0_vals():
     x = linspace(0, 15, 16)
-    j0 = [j0(val) for val in x]
+    j0 = [sphbesselj(0, val) for val in x]
 
     return make_special_vals('sph_bessel_j0_vals', ('x', x), ('j0', j0))
+
+def make_sph_bessel_j_vals():
+    nu = [mpf(0), mpf('0.5'), mpf('1.25'), mpf('1.5'), mpf('1.75'), mpf(2), mpf('2.75'),
+        mpf(5), mpf(10), mpf(20)]
+    x = [mpf(0), mpf('0.2'), mpf('0.8'), mpf(1), mpf(2), mpf('2.5'), mpf(3), mpf(5),
+        mpf(10), mpf(50)]
+
+    nu, x = zip(*outer(nu, x))
+    j = [sphbesselj(*vals) for vals in zip(nu, x)]
+
+    return make_special_vals('sph_bessel_j_vals', ('nu', nu), ('x', x), ('j', j))
 
 def make_bessel_y0_vals():
     from mpmath import bessely
@@ -207,6 +228,80 @@ def make_bessel_y_vals():
     y = [bessely(*vals) for vals in zip(nu, x)]
 
     return make_special_vals('bessel_y_vals', ('nu', nu), ('x', x), ('y', y))
+
+def sphbessely(nu, x):
+    from mpmath import bessely
+
+    return sqrt(pi / (2 * x)) * bessely(nu + mpf('0.5'), x)
+
+def make_sph_bessel_y0_vals():
+    x = linspace(1, 15, 15)
+    y0 = [sphbessely(0, val) for val in x]
+
+    return make_special_vals('sph_bessel_y0_vals', ('x', x), ('y0', y0))
+
+def make_sph_bessel_y_vals():
+    nu = [mpf(0), mpf('0.5'), mpf('1.25'), mpf('1.5'), mpf('1.75'), mpf(2), mpf('2.75'),
+        mpf(5), mpf(10), mpf(20)]
+    x = [mpf('0.2'), mpf('0.8'), mpf(1), mpf(2), mpf('2.5'), mpf(3), mpf(5),
+        mpf(10), mpf(50)]
+
+    nu, x = zip(*outer(nu, x))
+    y = [sphbessely(*vals) for vals in zip(nu, x)]
+
+    return make_special_vals('sph_bessel_y_vals', ('nu', nu), ('x', x), ('y', y))
+
+def make_hankel_h1_vals():
+    from mpmath import hankel1
+
+    nu = [mpf('0.5'), mpf('1.25'), mpf('1.5'), mpf('1.75'), mpf(2), mpf('2.75'),
+        mpf(5), mpf(10), mpf(20)]
+    x = [mpf('0.2'), mpf(1), mpf(2), mpf('2.5'), mpf(3), mpf(5), mpf(10), mpf(50)]
+
+    nu, x = zip(*outer(nu, x))
+    h1 = [hankel1(*vals) for vals in zip(nu, x)]
+
+    return make_special_vals('hankel_h1_vals', ('nu', nu), ('x', x), ('h1', h1))
+
+def sphhankel1(nu, x):
+    return sphbesselj(nu, x) + mpc(0, 1) * sphbessely(nu, x)
+
+def make_sph_hankel_h1_vals():
+    nu = [mpf(0), mpf('0.5'), mpf('1.25'), mpf('1.5'), mpf('1.75'), mpf(2), mpf('2.75'),
+        mpf(5), mpf(10), mpf(20)]
+    x = [mpf('0.2'), mpf('0.8'), mpf(1), mpf(2), mpf('2.5'), mpf(3), mpf(5),
+        mpf(10), mpf(50)]
+
+    nu, x = zip(*outer(nu, x))
+    h1 = [sphhankel1(*vals) for vals in zip(nu, x)]
+
+    return make_special_vals('sph_hankel_h1_vals', ('nu', nu), ('x', x), ('h1', h1))
+
+def make_hankel_h2_vals():
+    from mpmath import hankel2
+
+    nu = [mpf('0.5'), mpf('1.25'), mpf('1.5'), mpf('1.75'), mpf(2), mpf('2.75'),
+        mpf(5), mpf(10), mpf(20)]
+    x = [mpf('0.2'), mpf(1), mpf(2), mpf('2.5'), mpf(3), mpf(5), mpf(10), mpf(50)]
+
+    nu, x = zip(*outer(nu, x))
+    h2 = [hankel2(*vals) for vals in zip(nu, x)]
+
+    return make_special_vals('hankel_h2_vals', ('nu', nu), ('x', x), ('h2', h2))
+
+def sphhankel2(nu, x):
+    return sphbesselj(nu, x) - mpc(0, 1) * sphbessely(nu, x)
+
+def make_sph_hankel_h2_vals():
+    nu = [mpf(0), mpf('0.5'), mpf('1.25'), mpf('1.5'), mpf('1.75'), mpf(2), mpf('2.75'),
+        mpf(5), mpf(10), mpf(20)]
+    x = [mpf('0.2'), mpf('0.8'), mpf(1), mpf(2), mpf('2.5'), mpf(3), mpf(5),
+        mpf(10), mpf(50)]
+
+    nu, x = zip(*outer(nu, x))
+    h2 = [sphhankel2(*vals) for vals in zip(nu, x)]
+
+    return make_special_vals('sph_hankel_h2_vals', ('nu', nu), ('x', x), ('h2', h2))
 
 def make_struve_h_vals():
     from mpmath import struveh
@@ -276,11 +371,25 @@ outfile.write(make_bessel_j_vals())
 outfile.write('\n')
 outfile.write(make_sph_bessel_j0_vals())
 outfile.write('\n')
+outfile.write(make_sph_bessel_j_vals())
+outfile.write('\n')
 outfile.write(make_bessel_y0_vals())
 outfile.write('\n')
 outfile.write(make_bessel_y1_vals())
 outfile.write('\n')
 outfile.write(make_bessel_y_vals())
+outfile.write('\n')
+outfile.write(make_sph_bessel_y0_vals())
+outfile.write('\n')
+outfile.write(make_sph_bessel_y_vals())
+outfile.write('\n')
+outfile.write(make_hankel_h1_vals())
+outfile.write('\n')
+outfile.write(make_sph_hankel_h1_vals())
+outfile.write('\n')
+outfile.write(make_hankel_h2_vals())
+outfile.write('\n')
+outfile.write(make_sph_hankel_h2_vals())
 outfile.write('\n')
 outfile.write(make_struve_h_vals())
 outfile.write('\n')

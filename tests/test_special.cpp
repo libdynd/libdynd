@@ -7,9 +7,9 @@
 #include <cmath>
 #include <inc_gtest.hpp>
 
-#include <dynd/special.hpp>
-
 #include "special_vals.hpp"
+
+#include <dynd/special.hpp>
 
 using namespace std;
 using namespace dynd;
@@ -20,6 +20,14 @@ double rel_error(double expected, double actual) {
     }
 
     return fabs(1.0 - actual / expected);
+}
+
+double rel_error(dynd_complex<double> expected, dynd_complex<double> actual) {
+    if ((expected == 0.0) && (actual == 0.0)) {
+        return 0.0;
+    }
+
+    return fabs(1.0 - abs(actual) / abs(expected));
 }
 
 #define REL_ERROR_MAX 1E-8
@@ -137,6 +145,16 @@ TEST(Special, SphericalBesselJ0) {
     }
 }
 
+TEST(Special, SphericalBesselJ) {
+    nd::array vals = sph_bessel_j_vals();
+    intptr_t size = vals.get_dim_size();
+
+    for (int i = 0; i < size; ++i) {
+        EXPECT_GE(REL_ERROR_MAX,
+            rel_error(vals(i, 2).as<double>(), sph_bessel_j(vals(i, 0).as<double>(), vals(i, 1).as<double>())));
+    }
+}
+
 TEST(Special, BesselY0) {
     nd::array vals = bessel_y0_vals();
     intptr_t size = vals.get_dim_size();
@@ -164,6 +182,66 @@ TEST(Special, BesselY) {
     for (int i = 0; i < size; ++i) {
         EXPECT_GE(REL_ERROR_MAX,
             rel_error(vals(i, 2).as<double>(), bessel_y(vals(i, 0).as<double>(), vals(i, 1).as<double>())));
+    }
+}
+
+TEST(Special, SphericalBesselY0) {
+    nd::array vals = sph_bessel_y0_vals();
+    intptr_t size = vals.get_dim_size();
+
+    for (int i = 0; i < size; ++i) {
+        EXPECT_GE(REL_ERROR_MAX,
+            rel_error(vals(i, 1).as<double>(), sph_bessel_y0(vals(i, 0).as<double>())));
+    }
+}
+
+TEST(Special, SphericalBesselY) {
+    nd::array vals = sph_bessel_y_vals();
+    intptr_t size = vals.get_dim_size();
+
+    for (int i = 0; i < size; ++i) {
+        EXPECT_GE(REL_ERROR_MAX,
+            rel_error(vals(i, 2).as<double>(), sph_bessel_y(vals(i, 0).as<double>(), vals(i, 1).as<double>())));
+    }
+}
+
+TEST(Special, HankelH1) {
+    nd::array vals = hankel_h1_vals();
+    intptr_t size = vals.get_dim_size();
+
+    for (int i = 0; i < size; ++i) {
+        EXPECT_GE(REL_ERROR_MAX,
+            rel_error(vals(i, 2).as<dynd_complex<double> >(), hankel_h1(vals(i, 0).as<double>(), vals(i, 1).as<double>())));
+    }
+}
+
+TEST(Special, SphericalHankelH1) {
+    nd::array vals = sph_hankel_h1_vals();
+    intptr_t size = vals.get_dim_size();
+
+    for (int i = 0; i < size; ++i) {
+        EXPECT_GE(REL_ERROR_MAX,
+            rel_error(vals(i, 2).as<dynd_complex<double> >(), sph_hankel_h1(vals(i, 0).as<double>(), vals(i, 1).as<double>())));
+    }
+}
+
+TEST(Special, HankelH2) {
+    nd::array vals = hankel_h2_vals();
+    intptr_t size = vals.get_dim_size();
+
+    for (int i = 0; i < size; ++i) {
+        EXPECT_GE(REL_ERROR_MAX,
+            rel_error(vals(i, 2).as<dynd_complex<double> >(), hankel_h2(vals(i, 0).as<double>(), vals(i, 1).as<double>())));
+    }
+}
+
+TEST(Special, SphericalHankelH2) {
+    nd::array vals = sph_hankel_h2_vals();
+    intptr_t size = vals.get_dim_size();
+
+    for (int i = 0; i < size; ++i) {
+        EXPECT_GE(REL_ERROR_MAX,
+            rel_error(vals(i, 2).as<dynd_complex<double> >(), sph_hankel_h2(vals(i, 0).as<double>(), vals(i, 1).as<double>())));
     }
 }
 
