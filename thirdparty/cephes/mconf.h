@@ -71,7 +71,7 @@
 #ifdef _MSC_VER
 #define INFINITY (DBL_MAX + DBL_MAX)
 #define NAN (INFINITY - INFINITY)
-#define isfinite _finite
+#define isfinite(x) _finite(x)
 #define isinf(x) (!_finite(x) && !_isnan(x))
 #endif
 
