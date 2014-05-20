@@ -32,7 +32,7 @@ struct arrfunc_type_data;
  * data types of the kernel require metadata, such as for 'strided'
  * or 'var' dimension types, the metadata must be provided as well.
  *
- * \param self  This is &af.
+ * \param self  The arrfunc.
  * \param ckb  A ckernel_builder instance where the kernel is placed.
  * \param ckb_offset  The offset into the output ckernel_builder `out_ckb`
  *                    where the kernel should be placed.
@@ -48,12 +48,31 @@ struct arrfunc_type_data;
  * \param kernreq  Either dynd::kernel_request_single or dynd::kernel_request_strided,
  *                  as required by the caller.
  * \param ectx  The evaluation context.
+ *
+ * \returns  The offset into ``ckb`` immediately after the instantiated ckernel.
  */
 typedef intptr_t (*instantiate_arrfunc_t)(
     const arrfunc_type_data *self, dynd::ckernel_builder *ckb,
     intptr_t ckb_offset, const ndt::type &dst_tp, const char *dst_arrmeta,
     const ndt::type *src_tp, const char *const *src_arrmeta, uint32_t kernreq,
     const eval::eval_context *ectx);
+
+/**
+ * Resolves the destination type for this arrfunc based on the types
+ * of the source parameters.
+ *
+ * \param self  The arrfunc.
+ * \param out_dst_tp  To be filled with the destination type.
+ * \param src_tp  An array of the source types.
+ * \param throw_on_error  If true, should throw when there's an error, if
+ *                        false, should return 0 when there's an error.
+ *
+ * \returns  True on success, false on error (if throw_on_error was false).
+ */
+typedef int (*arrfunc_resolve_dst_type_t)(const arrfunc_type_data *self,
+                                          ndt::type &out_dst_tp,
+                                          const ndt::type *src_tp,
+                                          int throw_on_error);
 
 /**
  * This is a struct designed for interoperability at
@@ -82,6 +101,7 @@ struct arrfunc_type_data {
      * for the function typedef for more details.
      */
     instantiate_arrfunc_t instantiate_func;
+    arrfunc_resolve_dst_type_t resolve_dst_type;
     /**
      * A function which deallocates the memory behind data_ptr after
      * freeing any additional resources it might contain.
