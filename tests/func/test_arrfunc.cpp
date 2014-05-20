@@ -40,7 +40,7 @@ TEST(ArrFunc, Assignment) {
 
     // Instantiate a single ckernel
     ckernel_builder ckb;
-    af.instantiate_func(&af, &ckb, 0, af.get_return_type(), NULL,
+    af.instantiate(&af, &ckb, 0, af.get_return_type(), NULL,
                         af.get_param_types(), src_arrmeta,
                         kernel_request_single, &eval::default_eval_context);
     int int_out = 0;
@@ -51,7 +51,7 @@ TEST(ArrFunc, Assignment) {
 
     // Instantiate a strided ckernel
     ckb.reset();
-    af.instantiate_func(&af, &ckb, 0, af.get_return_type(), NULL,
+    af.instantiate(&af, &ckb, 0, af.get_return_type(), NULL,
                         af.get_param_types(), src_arrmeta,
                         kernel_request_strided, &eval::default_eval_context);
     int ints_out[3] = {0, 0, 0};
@@ -78,7 +78,7 @@ TEST(ArrFunc, Property) {
 
     // Instantiate a single ckernel
     ckernel_builder ckb;
-    af.instantiate_func(&af, &ckb, 0, af.get_return_type(), NULL,
+    af.instantiate(&af, &ckb, 0, af.get_return_type(), NULL,
                         af.get_param_types(), src_arrmeta,
                         kernel_request_single, &eval::default_eval_context);
     int int_out = 0;
@@ -105,7 +105,7 @@ TEST(ArrFunc, AssignmentAsExpr) {
 
     // Instantiate a single ckernel
     ckernel_builder ckb;
-    af.instantiate_func(&af, &ckb, 0, af.get_return_type(), NULL,
+    af.instantiate(&af, &ckb, 0, af.get_return_type(), NULL,
                         af.get_param_types(), src_arrmeta,
                         kernel_request_single, &eval::default_eval_context);
     int int_out = 0;
@@ -117,7 +117,7 @@ TEST(ArrFunc, AssignmentAsExpr) {
 
     // Instantiate a strided ckernel
     ckb.reset();
-    af.instantiate_func(&af, &ckb, 0, af.get_return_type(), NULL,
+    af.instantiate(&af, &ckb, 0, af.get_return_type(), NULL,
                         af.get_param_types(), src_arrmeta,
                         kernel_request_strided, &eval::default_eval_context);
     int ints_out[3] = {0, 0, 0};
@@ -149,7 +149,7 @@ TEST(ArrFunc, Expr) {
 
     // Instantiate a single ckernel
     ckernel_builder ckb;
-    af.instantiate_func(&af, &ckb, 0, af.get_return_type(), NULL,
+    af.instantiate(&af, &ckb, 0, af.get_return_type(), NULL,
                         af.get_param_types(), src_arrmeta,
                         kernel_request_single, &eval::default_eval_context);
     int int_out = 0;
@@ -162,7 +162,7 @@ TEST(ArrFunc, Expr) {
 
     // Instantiate a strided ckernel
     ckb.reset();
-    af.instantiate_func(&af, &ckb, 0, af.get_return_type(), NULL,
+    af.instantiate(&af, &ckb, 0, af.get_return_type(), NULL,
                         af.get_param_types(), src_arrmeta,
                         kernel_request_strided, &eval::default_eval_context);
     int ints_out[3] = {0, 0, 0};

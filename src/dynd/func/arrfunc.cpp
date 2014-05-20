@@ -172,7 +172,7 @@ void dynd::make_arrfunc_from_assignment(
         // Since a unary operation was requested, it's a straightforward unary assignment ckernel
         out_af.data_ptr = reinterpret_cast<void *>(errmode);
         out_af.free_func = NULL;
-        out_af.instantiate_func = &instantiate_unary_assignment_ckernel;
+        out_af.instantiate = &instantiate_unary_assignment_ckernel;
         out_af.ckernel_funcproto = unary_operation_funcproto;
         out_af.func_proto = ndt::make_funcproto(src_tp, dst_tp);
     } else if (funcproto == expr_operation_funcproto) {
@@ -198,14 +198,14 @@ void dynd::make_arrfunc_from_assignment(
             }
             data->expr_type = static_cast<const expr_type *>(ndt::type(etp, true).release());
             data->errmode = errmode;
-            out_af.instantiate_func = &instantiate_expr_ckernel;
+            out_af.instantiate = &instantiate_expr_ckernel;
             out_af.ckernel_funcproto = expr_operation_funcproto;
             out_af.func_proto = ndt::make_funcproto(nargs, data->data_types + 1, data->data_types[0]);
         } else {
             // Adapt the assignment to an expr kernel
             out_af.data_ptr = reinterpret_cast<void *>(errmode);
             out_af.free_func = NULL;
-            out_af.instantiate_func = &instantiate_adapted_expr_assignment_ckernel;
+            out_af.instantiate = &instantiate_adapted_expr_assignment_ckernel;
             out_af.ckernel_funcproto = expr_operation_funcproto;
             out_af.func_proto = ndt::make_funcproto(src_tp, dst_tp);
         }
@@ -234,10 +234,10 @@ void dynd::make_arrfunc_from_property(const ndt::type &tp,
         const_cast<void *>(reinterpret_cast<const void *>(prop_tp.release()));
     if (funcproto == unary_operation_funcproto) {
         out_af.ckernel_funcproto = unary_operation_funcproto;
-        out_af.instantiate_func = &instantiate_unary_property_ckernel;
+        out_af.instantiate = &instantiate_unary_property_ckernel;
     } else if (funcproto == expr_operation_funcproto) {
         out_af.ckernel_funcproto = expr_operation_funcproto;
-        out_af.instantiate_func = &instantiate_expr_property_ckernel;
+        out_af.instantiate = &instantiate_expr_property_ckernel;
     } else {
         stringstream ss;
         ss << "unrecognized ckernel function prototype enum value " << funcproto;
@@ -253,7 +253,7 @@ nd::arrfunc::arrfunc(const nd::array &rhs)
                 const arrfunc_type_data *af =
                     reinterpret_cast<const arrfunc_type_data *>(
                         rhs.get_readonly_originptr());
-                if (af->instantiate_func != NULL) {
+                if (af->instantiate != NULL) {
                     // It's valid: immutable, arrfunc type, contains an
                     // instantiate function.
                     m_value = rhs;

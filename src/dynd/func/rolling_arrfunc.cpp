@@ -192,7 +192,7 @@ instantiate_strided(const arrfunc_type_data *af_self, dynd::ckernel_builder *ckb
         }
     }
     const char *src_winop_meta = self->m_src_winop_meta.get();
-    return af_data->window_op_af->instantiate_func(
+    return af_data->window_op_af->instantiate(
         af_data->window_op_af, ckb, ckb_end, dst_el_tp,
         dst_el_arrmeta, &self->m_src_winop_meta.get_type(),
         &src_winop_meta, kernel_request_strided, ectx);
@@ -214,7 +214,7 @@ void dynd::make_rolling_arrfunc(arrfunc_type_data *out_af,
     const arrfunc_type_data *window_op_af =
         reinterpret_cast<const arrfunc_type_data *>(
             window_op.get_readonly_originptr());
-    if (window_op_af->instantiate_func == NULL) {
+    if (window_op_af->instantiate == NULL) {
         throw runtime_error("make_rolling_arrfunc() 'window_op' must contain "
                             "a non-null arrfunc object");
     }
@@ -230,11 +230,11 @@ void dynd::make_rolling_arrfunc(arrfunc_type_data *out_af,
     out_af->ckernel_funcproto = unary_operation_funcproto;
     out_af->func_proto = ndt::make_funcproto(src_tp, dst_tp);
     if (dst_tp.get_type_id() == var_dim_type_id && src_tp.get_type_id() == var_dim_type_id) {
-        //out_af->instantiate_func = &instantiate_var;
+        //out_af->instantiate = &instantiate_var;
         delete data;
         throw runtime_error("TODO: rolling ckernel var");
     } else {
-        out_af->instantiate_func = &instantiate_strided;
+        out_af->instantiate = &instantiate_strided;
     }
     data->window_size = window_size;
     data->window_op_af = window_op_af;

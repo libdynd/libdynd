@@ -65,7 +65,7 @@ void dynd::lift_arrfunc(arrfunc_type_data *out_af, const nd::arrfunc &af)
     } else if (af_ptr->ckernel_funcproto == expr_operation_funcproto) {
         out_af->free_func = &delete_lifted_expr_arrfunc_data;
         out_af->data_ptr = nd::array(af).release();
-        out_af->instantiate_func = &instantiate_lifted_expr_arrfunc_data;
+        out_af->instantiate = &instantiate_lifted_expr_arrfunc_data;
         out_af->ckernel_funcproto = expr_operation_funcproto;
         out_af->func_proto = lift_proto(af_ptr->func_proto);
     } else {

@@ -34,7 +34,7 @@ arrfunc_type::~arrfunc_type()
 
 static void print_arrfunc(std::ostream& o, const arrfunc_type_data *af)
 {
-    if (af->instantiate_func == NULL) {
+    if (af->instantiate == NULL) {
         o << "<uninitialized arrfunc>";
     } else {
         o << "<arrfunc ";
@@ -252,7 +252,7 @@ static array_preamble *function___call__(const array_preamble *params, void *DYN
         dynd_metadata[i] = args[i + 1].get_arrmeta();
     }
     ckernel_builder ckb;
-    af->instantiate_func(af, &ckb, 0, args[0].get_type(),
+    af->instantiate(af, &ckb, 0, args[0].get_type(),
                          args[0].get_arrmeta(), src_tp,
                          dynd_metadata, kernel_request_single,
                          &eval::default_eval_context);

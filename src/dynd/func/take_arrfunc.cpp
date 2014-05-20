@@ -242,10 +242,10 @@ void kernels::make_take_arrfunc(arrfunc_type_data *out_af,
     out_af->func_proto = ndt::make_funcproto(param_types, dst_tp);
     switch (mask_tp.get_type_at_dimension(NULL, 1).get_type_id()) {
         case bool_type_id:
-            out_af->instantiate_func = &instantiate_masked_take;
+            out_af->instantiate = &instantiate_masked_take;
             break;
         case (type_id_t)type_id_of<intptr_t>::value:
-            out_af->instantiate_func = &instantiate_indexed_take;
+            out_af->instantiate = &instantiate_indexed_take;
             break;
         default:
             throw invalid_argument("take requires either a boolean mask or an index array");

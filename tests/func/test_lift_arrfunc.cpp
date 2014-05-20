@@ -38,7 +38,7 @@ TEST(LiftArrFunc, UnaryExpr_FixedDim) {
     ndt::type src_tp("cfixed[3] * string[16]");
     ckernel_builder ckb;
     const char *src_arrmeta[1] = {NULL};
-    af.instantiate_func(&af, &ckb, 0, dst_tp, NULL,
+    af.instantiate(&af, &ckb, 0, dst_tp, NULL,
                         &src_tp, src_arrmeta,
                         kernel_request_single, &eval::default_eval_context);
     int out[3] = {0, 0, 0};
@@ -72,7 +72,7 @@ TEST(LiftArrFunc, UnaryExpr_StridedDim) {
     in(2).vals() = "12345";
     const char *in_ptr = in.get_readonly_originptr();
     const char *src_arrmeta[1] = {in.get_arrmeta()};
-    af.instantiate_func(&af, &ckb, 0, dst_tp, out.get_arrmeta(),
+    af.instantiate(&af, &ckb, 0, dst_tp, out.get_arrmeta(),
                         &src_tp, src_arrmeta,
                         kernel_request_single, &eval::default_eval_context);
     expr_single_operation_t usngo = ckb.get()->get_function<expr_single_operation_t>();
@@ -105,7 +105,7 @@ TEST(LiftArrFunc, UnaryExpr_StridedToVarDim) {
     in(4).vals() = "284";
     const char *in_ptr = in.get_readonly_originptr();
     const char *src_arrmeta[1] = {in.get_arrmeta()};
-    af.instantiate_func(&af, &ckb, 0, dst_tp,
+    af.instantiate(&af, &ckb, 0, dst_tp,
                         out.get_arrmeta(), &src_tp, src_arrmeta,
                         kernel_request_single, &eval::default_eval_context);
     expr_single_operation_t usngo = ckb.get()->get_function<expr_single_operation_t>();
@@ -136,7 +136,7 @@ TEST(LiftArrFunc, UnaryExpr_VarToVarDim) {
     in.vals() = in_vals;
     const char *in_ptr = in.get_readonly_originptr();
     const char *src_arrmeta[1] = {in.get_arrmeta()};
-    af.instantiate_func(&af, &ckb, 0, out.get_type(),
+    af.instantiate(&af, &ckb, 0, out.get_type(),
                         out.get_arrmeta(), &in.get_type(), src_arrmeta,
                         kernel_request_single, &eval::default_eval_context);
     expr_single_operation_t usngo = ckb.get()->get_function<expr_single_operation_t>();
@@ -173,7 +173,7 @@ TEST(LiftArrFunc, UnaryExpr_MultiDimVarToVarDim) {
     const char *in_ptr = in.get_readonly_originptr();
     const char *src_arrmeta[1] = {in.get_arrmeta()};
     ckernel_builder ckb;
-    af.instantiate_func(&af, &ckb, 0, out.get_type(),
+    af.instantiate(&af, &ckb, 0, out.get_type(),
                         out.get_arrmeta(), &in.get_type(), src_arrmeta,
                         kernel_request_single, &eval::default_eval_context);
     expr_single_operation_t usngo = ckb.get()->get_function<expr_single_operation_t>();
@@ -225,7 +225,7 @@ TEST(LiftArrFunc, Expr_MultiDimVarToVarDim) {
     const char *src_arrmeta[2] = {in0.get_arrmeta(), in1.get_arrmeta()};
     const char *const in_ptrs[2] = {in0.get_readonly_originptr(), in1.get_readonly_originptr()};
     ckernel_builder ckb;
-    af->instantiate_func(af, &ckb, 0, dst_tp,
+    af->instantiate(af, &ckb, 0, dst_tp,
                          out.get_arrmeta(), src_tp, src_arrmeta,
                          kernel_request_single, &eval::default_eval_context);
     expr_single_operation_t usngo = ckb.get()->get_function<expr_single_operation_t>();

@@ -51,7 +51,7 @@ struct arrfunc_type_data;
  *
  * \returns  The offset into ``ckb`` immediately after the instantiated ckernel.
  */
-typedef intptr_t (*instantiate_arrfunc_t)(
+typedef intptr_t (*arrfunc_instantiate_t)(
     const arrfunc_type_data *self, dynd::ckernel_builder *ckb,
     intptr_t ckb_offset, const ndt::type &dst_tp, const char *dst_arrmeta,
     const ndt::type *src_tp, const char *const *src_arrmeta, uint32_t kernreq,
@@ -100,7 +100,7 @@ struct arrfunc_type_data {
      * The function which instantiates a ckernel. See the documentation
      * for the function typedef for more details.
      */
-    instantiate_arrfunc_t instantiate_func;
+    arrfunc_instantiate_t instantiate;
     arrfunc_resolve_dst_type_t resolve_dst_type;
     /**
      * A function which deallocates the memory behind data_ptr after
@@ -111,7 +111,7 @@ struct arrfunc_type_data {
     // Default to all NULL, so the destructor works correctly
     inline arrfunc_type_data()
         : func_proto(), ckernel_funcproto(0),
-            data_ptr(0), instantiate_func(0), free_func(0)
+            data_ptr(0), instantiate(0), free_func(0)
     {
     }
 
