@@ -27,7 +27,7 @@ TEST(DateTimeDType, Create) {
     ndt::type d;
     const datetime_type *dd;
 
-    d = ndt::make_datetime(tz_abstract);
+    d = ndt::make_datetime();
     ASSERT_EQ(datetime_type_id, d.get_type_id());
     dd = d.tcast<datetime_type>();
     EXPECT_EQ(8u, d.get_data_size());
@@ -65,7 +65,7 @@ TEST(DateTimeDType, CreateFromString) {
 }
 
 TEST(DateTimeDType, ValueCreationAbstract) {
-    ndt::type d = ndt::make_datetime(tz_abstract), di = ndt::make_type<int64_t>();
+    ndt::type d = ndt::make_datetime(), di = ndt::make_type<int64_t>();
 
     EXPECT_EQ((((1600-1970)*365 - (1972-1600)/4 + 3 - 365) * 1440LL + 4 * 60 + 16) * 60 * 10000000LL,
                     nd::array("1599-01-01T04:16").ucast(d).view_scalars(di).as<int64_t>());

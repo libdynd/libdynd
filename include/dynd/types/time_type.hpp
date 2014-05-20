@@ -88,6 +88,9 @@ public:
 };
 
 namespace ndt {
+    /** Returns type "time" (with abstract/naive time zone) */
+    const ndt::type& make_time();
+    /** Returns type "time[tz=<timezone>]" */
     inline ndt::type make_time(datetime_tz_t timezone) {
         return ndt::type(new time_type(timezone), false);
     }
