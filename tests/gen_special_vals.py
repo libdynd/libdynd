@@ -1,7 +1,7 @@
 import mpmath
 mpmath.dps = 15
 
-from mpmath import pi, arange, linspace, mpc, mpf, nstr, sin, sqrt
+from mpmath import pi, linspace, mpc, mpf, nstr, sin, sqrt
 
 pdps = 15
 
