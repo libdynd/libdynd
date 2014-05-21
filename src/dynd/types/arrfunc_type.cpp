@@ -280,7 +280,7 @@ void arrfunc_type::get_dynamic_array_functions(
 {
     static pair<string, gfunc::callable> arrfunc_array_functions[] = {
         pair<string, gfunc::callable>(
-            "__call__",
+            "execute",
             gfunc::callable(
                 ndt::type("c{self:ndarrayarg,out:ndarrayarg,p0:ndarrayarg,"
                           "p1:ndarrayarg,p2:ndarrayarg,"

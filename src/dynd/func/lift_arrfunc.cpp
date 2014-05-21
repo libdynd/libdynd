@@ -52,7 +52,6 @@ static int resolve_lifted_dst_type(const arrfunc_type_data *self,
     // First get the type for the child arrfunc
     ndt::type child_dst_tp;
     if (child_af->resolve_dst_type) {
-        intptr_t child_ndim = child_af->get_return_type().get_ndim();
         std::vector<ndt::type> child_src_tp(param_count);
         for (intptr_t i = 0; i < param_count; ++i) {
             intptr_t child_ndim_i = child_af->get_param_type(i).get_ndim();
@@ -92,7 +91,9 @@ static int resolve_lifted_dst_type(const arrfunc_type_data *self,
                         case fixed_dim_type_id:
                             shape_at_j = tp.tcast<fixed_dim_type>()->get_fixed_dim_size();
                             if (shape_i[j] < 0 || shape_i[j] == 1) {
-                                shape_i[j] = shape_at_j;
+                                if (shape_at_j != 1) {
+                                    shape_i[j] = shape_at_j;
+                                }
                             } else if (shape_i[j] != shape_at_j) {
                                 if (throw_on_error) {
                                     throw broadcast_error(ndim, shape.get(),
@@ -106,7 +107,9 @@ static int resolve_lifted_dst_type(const arrfunc_type_data *self,
                             shape_at_j = tp.tcast<fixed_dim_type>()
                                              ->get_fixed_dim_size();
                             if (shape_i[j] < 0 || shape_i[j] == 1) {
-                                shape_i[j] = shape_at_j;
+                                if (shape_at_j != 1) {
+                                    shape_i[j] = shape_at_j;
+                                }
                             } else if (shape_i[j] != shape_at_j) {
                                 if (throw_on_error) {
                                     throw broadcast_error(ndim, shape.get(),

@@ -77,8 +77,8 @@ TEST(ArrFunc, Assignment_CallInterface) {
     EXPECT_EQ(12345678, b.as<int>());
 
     // Call it with some incompatible arguments
-    EXPECT_THROW(af(12345), invalid_argument);
-    EXPECT_THROW(af(false), invalid_argument);
+    EXPECT_THROW(af(nd::array(12345)), invalid_argument);
+    EXPECT_THROW(af(nd::array(false)), invalid_argument);
 
     // Test with the expr operation prototype
     af = make_arrfunc_from_assignment(ndt::make_type<int>(), ndt::make_string(),
@@ -223,7 +223,7 @@ TEST(ArrFunc, Take) {
 
     c = nd::empty("var * int");
     take = kernels::make_take_arrfunc(c.get_type(), a.get_type(), b.get_type());
-    take.f("__call__", c, a, b);
+    take.f("execute", c, a, b);
     EXPECT_EQ(3, c.get_dim_size());
     EXPECT_EQ(2, c(0).as<int>());
     EXPECT_EQ(4, c(1).as<int>());
@@ -234,7 +234,7 @@ TEST(ArrFunc, Take) {
 
     c = nd::empty("4 * int");
     take = kernels::make_take_arrfunc(c.get_type(), a.get_type(), b.get_type());
-    take.f("__call__", c, a, b);
+    take.f("execute", c, a, b);
     EXPECT_EQ(4, c(0).as<int>());
     EXPECT_EQ(1, c(1).as<int>());
     EXPECT_EQ(5, c(2).as<int>());

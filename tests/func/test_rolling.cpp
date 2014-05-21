@@ -29,7 +29,7 @@ TEST(Rolling, BuiltinSum_Kernel) {
     double adata[] = {1, 3, 7, 2, 9, 4, -5, 100, 2, -20, 3, 9, 18};
     nd::array a = adata;
     nd::array b = nd::empty_like(a);
-    rolling_sum.f("__call__", b, a);
+    rolling_sum.f("execute", b, a);
     for (int i = 0; i < 3; ++i) {
         EXPECT_TRUE(DYND_ISNAN(b(i).as<double>()));
     }
@@ -51,7 +51,7 @@ TEST(Rolling, BuiltinMean_Kernel) {
     double adata[] = {1, 3, 7, 2, 9, 4, -5, 100, 2, -20, 3, 9, 18};
     nd::array a = adata;
     nd::array b = nd::empty_like(a);
-    rolling_sum.f("__call__", b, a);
+    rolling_sum.f("execute", b, a);
     for (int i = 0; i < 3; ++i) {
         EXPECT_TRUE(DYND_ISNAN(b(i).as<double>()));
     }

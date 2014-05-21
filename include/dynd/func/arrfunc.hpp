@@ -221,23 +221,26 @@ public:
 
     /** Implements the general call operator */
     nd::array call(intptr_t arg_count, const nd::array *args,
-                   const eval::eval_context *ectx);
+                   const eval::eval_context *ectx) const;
 
     /** Convenience call operators */
     inline nd::array
     operator()(const eval::eval_context *ectx = &eval::default_eval_context)
+        const
     {
         return call(0, NULL, ectx);
     }
     inline nd::array
     operator()(const nd::array &a0,
                const eval::eval_context *ectx = &eval::default_eval_context)
+        const
     {
         return call(1, &a0, ectx);
     }
     inline nd::array
     operator()(const nd::array &a0, const nd::array &a1,
                const eval::eval_context *ectx = &eval::default_eval_context)
+        const
     {
         nd::array args[2] = {a0, a1};
         return call(2, args, ectx);
@@ -245,6 +248,7 @@ public:
     inline nd::array
     operator()(const nd::array &a0, const nd::array &a1, const nd::array &a2,
                const eval::eval_context *ectx = &eval::default_eval_context)
+        const
     {
         nd::array args[3] = {a0, a1, a2};
         return call(3, args, ectx);

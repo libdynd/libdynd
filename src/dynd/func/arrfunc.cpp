@@ -280,7 +280,8 @@ nd::arrfunc::arrfunc(const nd::array &rhs)
     }
 }
 
-nd::array nd::arrfunc::call(intptr_t arg_count, const nd::array *args, const eval::eval_context *ectx)
+nd::array nd::arrfunc::call(intptr_t arg_count, const nd::array *args,
+                            const eval::eval_context *ectx) const
 {
     const arrfunc_type_data *af = get();
     if (arg_count != (intptr_t)af->get_param_count()) {
