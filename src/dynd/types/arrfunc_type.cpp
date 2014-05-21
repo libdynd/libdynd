@@ -37,7 +37,6 @@ static void print_arrfunc(std::ostream& o, const arrfunc_type_data *af)
     if (af->instantiate == NULL) {
         o << "<uninitialized arrfunc>";
     } else {
-        o << "<arrfunc ";
         if (af->ckernel_funcproto == unary_operation_funcproto) {
             o << "unary ";
         } else if (af->ckernel_funcproto == expr_operation_funcproto) {
@@ -45,11 +44,9 @@ static void print_arrfunc(std::ostream& o, const arrfunc_type_data *af)
         } else if (af->ckernel_funcproto == binary_predicate_funcproto) {
             o << "binary_predicate ";
         } else {
-            o << "<unknown function prototype> ";
+            o << "<unknown ckernel_funcproto> ";
         }
-        o << ", proto ";
         o << af->func_proto;
-        o << "]>";
     }
 }
 
