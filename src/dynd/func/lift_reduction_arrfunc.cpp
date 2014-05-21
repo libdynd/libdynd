@@ -152,7 +152,7 @@ void dynd::lift_reduction_arrfunc(arrfunc_type_data *out_ar,
     self->reduction_dimflags.init(reduction_ndim);
     memcpy(self->reduction_dimflags.get(), reduction_dimflags, sizeof(bool) * reduction_ndim);
 
-    out_ar->instantiate_func = &instantiate_lifted_reduction_arrfunc_data;
+    out_ar->instantiate = &instantiate_lifted_reduction_arrfunc_data;
     out_ar->func_proto = ndt::make_funcproto(lifted_arr_type, lifted_dst_type);
     out_ar->ckernel_funcproto = unary_operation_funcproto;
 }

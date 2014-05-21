@@ -40,7 +40,7 @@ TEST(ArrFunc, Assignment) {
 
     // Instantiate a single ckernel
     ckernel_builder ckb;
-    af.instantiate_func(&af, &ckb, 0, af.get_return_type(), NULL,
+    af.instantiate(&af, &ckb, 0, af.get_return_type(), NULL,
                         af.get_param_types(), src_arrmeta,
                         kernel_request_single, &eval::default_eval_context);
     int int_out = 0;
@@ -51,7 +51,7 @@ TEST(ArrFunc, Assignment) {
 
     // Instantiate a strided ckernel
     ckb.reset();
-    af.instantiate_func(&af, &ckb, 0, af.get_return_type(), NULL,
+    af.instantiate(&af, &ckb, 0, af.get_return_type(), NULL,
                         af.get_param_types(), src_arrmeta,
                         kernel_request_strided, &eval::default_eval_context);
     int ints_out[3] = {0, 0, 0};
@@ -61,6 +61,40 @@ TEST(ArrFunc, Assignment) {
     EXPECT_EQ(123, ints_out[0]);
     EXPECT_EQ(4567, ints_out[1]);
     EXPECT_EQ(891029, ints_out[2]);
+}
+
+TEST(ArrFunc, Assignment_CallInterface) {
+    // Test with the unary operation prototype
+    nd::arrfunc af = make_arrfunc_from_assignment(
+        ndt::make_type<int>(), ndt::make_string(),
+        unary_operation_funcproto, assign_error_default);
+    EXPECT_EQ(unary_operation_funcproto,
+              (arrfunc_proto_t)af.get()->ckernel_funcproto);
+
+    // Call it through the call() interface
+    nd::array b = af("12345678");
+    EXPECT_EQ(ndt::make_type<int>(), b.get_type());
+    EXPECT_EQ(12345678, b.as<int>());
+
+    // Call it with some incompatible arguments
+    EXPECT_THROW(af(12345), invalid_argument);
+    EXPECT_THROW(af(false), invalid_argument);
+
+    // Test with the expr operation prototype
+    af = make_arrfunc_from_assignment(ndt::make_type<int>(), ndt::make_string(),
+                                      expr_operation_funcproto,
+                                      assign_error_default);
+    EXPECT_EQ(expr_operation_funcproto,
+              (arrfunc_proto_t)af.get()->ckernel_funcproto);
+
+    // Call it through the call() interface
+    b = af("12345678");
+    EXPECT_EQ(ndt::make_type<int>(), b.get_type());
+    EXPECT_EQ(12345678, b.as<int>());
+
+    // Call it with some incompatible arguments
+    EXPECT_THROW(af(12345), invalid_argument);
+    EXPECT_THROW(af(false), invalid_argument);
 }
 
 TEST(ArrFunc, Property) {
@@ -78,7 +112,7 @@ TEST(ArrFunc, Property) {
 
     // Instantiate a single ckernel
     ckernel_builder ckb;
-    af.instantiate_func(&af, &ckb, 0, af.get_return_type(), NULL,
+    af.instantiate(&af, &ckb, 0, af.get_return_type(), NULL,
                         af.get_param_types(), src_arrmeta,
                         kernel_request_single, &eval::default_eval_context);
     int int_out = 0;
@@ -105,7 +139,7 @@ TEST(ArrFunc, AssignmentAsExpr) {
 
     // Instantiate a single ckernel
     ckernel_builder ckb;
-    af.instantiate_func(&af, &ckb, 0, af.get_return_type(), NULL,
+    af.instantiate(&af, &ckb, 0, af.get_return_type(), NULL,
                         af.get_param_types(), src_arrmeta,
                         kernel_request_single, &eval::default_eval_context);
     int int_out = 0;
@@ -117,7 +151,7 @@ TEST(ArrFunc, AssignmentAsExpr) {
 
     // Instantiate a strided ckernel
     ckb.reset();
-    af.instantiate_func(&af, &ckb, 0, af.get_return_type(), NULL,
+    af.instantiate(&af, &ckb, 0, af.get_return_type(), NULL,
                         af.get_param_types(), src_arrmeta,
                         kernel_request_strided, &eval::default_eval_context);
     int ints_out[3] = {0, 0, 0};
@@ -149,7 +183,7 @@ TEST(ArrFunc, Expr) {
 
     // Instantiate a single ckernel
     ckernel_builder ckb;
-    af.instantiate_func(&af, &ckb, 0, af.get_return_type(), NULL,
+    af.instantiate(&af, &ckb, 0, af.get_return_type(), NULL,
                         af.get_param_types(), src_arrmeta,
                         kernel_request_single, &eval::default_eval_context);
     int int_out = 0;
@@ -162,7 +196,7 @@ TEST(ArrFunc, Expr) {
 
     // Instantiate a strided ckernel
     ckb.reset();
-    af.instantiate_func(&af, &ckb, 0, af.get_return_type(), NULL,
+    af.instantiate(&af, &ckb, 0, af.get_return_type(), NULL,
                         af.get_param_types(), src_arrmeta,
                         kernel_request_strided, &eval::default_eval_context);
     int ints_out[3] = {0, 0, 0};
@@ -189,7 +223,7 @@ TEST(ArrFunc, Take) {
 
     c = nd::empty("var * int");
     take = kernels::make_take_arrfunc(c.get_type(), a.get_type(), b.get_type());
-    take.f("__call__", c, a, b);
+    take.f("execute", c, a, b);
     EXPECT_EQ(3, c.get_dim_size());
     EXPECT_EQ(2, c(0).as<int>());
     EXPECT_EQ(4, c(1).as<int>());
@@ -200,7 +234,7 @@ TEST(ArrFunc, Take) {
 
     c = nd::empty("4 * int");
     take = kernels::make_take_arrfunc(c.get_type(), a.get_type(), b.get_type());
-    take.f("__call__", c, a, b);
+    take.f("execute", c, a, b);
     EXPECT_EQ(4, c(0).as<int>());
     EXPECT_EQ(1, c(1).as<int>());
     EXPECT_EQ(5, c(2).as<int>());

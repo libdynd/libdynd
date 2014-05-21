@@ -143,7 +143,7 @@ void kernels::make_builtin_sum_reduction_arrfunc(
     out_af->ckernel_funcproto = unary_operation_funcproto;
     out_af->func_proto = ndt::make_funcproto(ndt::type(tid), ndt::type(tid));
     out_af->data_ptr = reinterpret_cast<void *>(tid);
-    out_af->instantiate_func = &instantiate_builtin_sum_reduction_arrfunc;
+    out_af->instantiate = &instantiate_builtin_sum_reduction_arrfunc;
     out_af->free_func = NULL;
 }
 
@@ -248,7 +248,7 @@ nd::arrfunc kernels::make_builtin_mean1d_arrfunc(type_id_t tid, intptr_t minp)
         ndt::make_funcproto(ndt::make_strided_dim(ndt::make_type<double>()),
                             ndt::make_type<double>());
     out_af->data_ptr = data;
-    out_af->instantiate_func = &mean1d_arrfunc_data::instantiate;
+    out_af->instantiate = &mean1d_arrfunc_data::instantiate;
     out_af->free_func = &mean1d_arrfunc_data::free;
     mean1d.flag_as_immutable();
     return mean1d;

@@ -764,11 +764,11 @@ static size_t make_strided_inner_reduction_dimension_kernel(
                         out_ckb, ckb_end, right_associative, kernel_request_strided);
         ndt::type src_tp_doubled[2] = {src_tp, src_tp};
         const char *src_arrmeta_doubled[2] = {src_arrmeta, src_arrmeta};
-        ckb_end = elwise_reduction->instantiate_func(
+        ckb_end = elwise_reduction->instantiate(
             elwise_reduction, out_ckb, ckb_end, dst_tp, dst_arrmeta,
             src_tp_doubled, src_arrmeta_doubled, kernel_request_strided, ectx);
     } else {
-        ckb_end = elwise_reduction->instantiate_func(
+        ckb_end = elwise_reduction->instantiate(
             elwise_reduction, out_ckb, ckb_end, dst_tp, dst_arrmeta,
             &src_tp, &src_arrmeta, kernel_request_strided, ectx);
     }
@@ -778,7 +778,7 @@ static size_t make_strided_inner_reduction_dimension_kernel(
     e = out_ckb->get_at<strided_inner_reduction_kernel_extra>(ckb_offset);
     e->dst_init_kernel_offset = ckb_end - ckb_offset;
     if (dst_initialization != NULL) {
-        ckb_end = dst_initialization->instantiate_func(
+        ckb_end = dst_initialization->instantiate(
             dst_initialization, out_ckb, ckb_end, dst_tp, dst_arrmeta,
             &src_tp, &src_arrmeta, kernel_request_single, ectx);
     } else if (reduction_identity.is_null()) {
@@ -890,11 +890,11 @@ static size_t make_strided_inner_broadcast_dimension_kernel(
                         out_ckb, ckb_end, right_associative, kernel_request_strided);
         ndt::type src_tp_doubled[2] = {src_tp, src_tp};
         const char *src_arrmeta_doubled[2] = {src_arrmeta, src_arrmeta};
-        ckb_end = elwise_reduction->instantiate_func(
+        ckb_end = elwise_reduction->instantiate(
             elwise_reduction, out_ckb, ckb_end, dst_tp, dst_arrmeta,
             src_tp_doubled, src_arrmeta_doubled, kernel_request_strided, ectx);
     } else {
-        ckb_end = elwise_reduction->instantiate_func(
+        ckb_end = elwise_reduction->instantiate(
             elwise_reduction, out_ckb, ckb_end, dst_tp, dst_arrmeta,
             &src_tp, &src_arrmeta, kernel_request_strided, ectx);
     }
@@ -904,7 +904,7 @@ static size_t make_strided_inner_broadcast_dimension_kernel(
     e = out_ckb->get_at<strided_inner_broadcast_kernel_extra>(ckb_offset);
     e->dst_init_kernel_offset = ckb_end - ckb_offset;
     if (dst_initialization != NULL) {
-        ckb_end = dst_initialization->instantiate_func(
+        ckb_end = dst_initialization->instantiate(
             dst_initialization, out_ckb, ckb_end, dst_tp, dst_arrmeta,
             &src_tp, &src_arrmeta, kernel_request_strided, ectx);
     } else if (reduction_identity.is_null()) {
@@ -941,7 +941,7 @@ size_t dynd::make_lifted_reduction_ckernel(
             // just a dst_initialization operation, so create
             // that ckernel directly
             if (dst_initialization != NULL) {
-                return dst_initialization->instantiate_func(
+                return dst_initialization->instantiate(
                     dst_initialization, ckb, ckb_offset, dst_tp,
                     dst_arrmeta, &src_tp, &src_arrmeta, kernreq, ectx);
             } else if (reduction_identity.is_null()) {

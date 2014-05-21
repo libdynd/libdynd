@@ -582,7 +582,7 @@ DYND_PP_JOIN_MAP(CALL_CKERNEL_INSTANTIATORS, (), DYND_PP_RANGE(1, DYND_PP_INC(DY
         af.ckernel_funcproto = expr_operation_funcproto; \
         af.func_proto = ndt::make_funcproto(src_tp, dst_tp); \
         af.data_ptr = reinterpret_cast<void *>(func); \
-        af.instantiate_func = &detail::elwise_ckernel_instantiator<func_type>::instantiate; \
+        af.instantiate = &detail::elwise_ckernel_instantiator<func_type>::instantiate; \
         af.free_func = NULL; \
 \
         ckernel_builder ckb; \
@@ -658,7 +658,7 @@ DYND_PP_JOIN_MAP(CALL_CKERNEL_INSTANTIATORS, (), DYND_PP_RANGE(1, DYND_PP_INC(DY
         af.ckernel_funcproto = expr_operation_funcproto; \
         af.func_proto = ndt::make_funcproto(src_tp, dst_tp); \
         af.data_ptr = reinterpret_cast<void *>(func); \
-        af.instantiate_func = &detail::elwise_ckernel_instantiator<func_type>::instantiate; \
+        af.instantiate = &detail::elwise_ckernel_instantiator<func_type>::instantiate; \
         af.free_func = NULL; \
 \
         ckernel_builder ckb; \
@@ -746,7 +746,7 @@ DYND_PP_JOIN_MAP(FUNCS, (), DYND_PP_RANGE(1, DYND_PP_INC(DYND_ELWISE_MAX)))
         af.ckernel_funcproto = expr_operation_funcproto; \
         af.func_proto = ndt::make_funcproto(src_tp, dst_tp); \
         af.data_ptr = reinterpret_cast<void *>(&obj_func); \
-        af.instantiate_func = &detail::elwise_ckernel_instantiator<func_type>::instantiate; \
+        af.instantiate = &detail::elwise_ckernel_instantiator<func_type>::instantiate; \
         af.free_func = NULL; \
 \
         ckernel_builder ckb; \
@@ -824,7 +824,7 @@ DYND_PP_JOIN_MAP(FUNCS, (), DYND_PP_RANGE(1, DYND_PP_INC(DYND_ELWISE_MAX)))
         af.ckernel_funcproto = expr_operation_funcproto; \
         af.func_proto = ndt::make_funcproto(src_tp, dst_tp); \
         af.data_ptr = reinterpret_cast<void *>(&obj_func); \
-        af.instantiate_func = &detail::elwise_ckernel_instantiator<func_type>::instantiate; \
+        af.instantiate = &detail::elwise_ckernel_instantiator<func_type>::instantiate; \
         af.free_func = NULL; \
 \
         ckernel_builder ckb; \
@@ -910,7 +910,7 @@ DYND_PP_JOIN_MAP(METHS, (), DYND_PP_RANGE(1, DYND_PP_INC(DYND_ELWISE_MAX)))
         af.ckernel_funcproto = expr_operation_funcproto; \
         af.func_proto = ndt::make_funcproto(src_tp, dst_tp); \
         af.data_ptr = reinterpret_cast<void *>(const_cast<T *>(&obj)); \
-        af.instantiate_func = &detail::elwise_from_callable_ckernel_instantiator<func_type>::instantiate; \
+        af.instantiate = &detail::elwise_from_callable_ckernel_instantiator<func_type>::instantiate; \
         af.free_func = NULL; \
 \
         ckernel_builder ckb; \
@@ -986,7 +986,7 @@ DYND_PP_JOIN_MAP(METHS, (), DYND_PP_RANGE(1, DYND_PP_INC(DYND_ELWISE_MAX)))
         af.ckernel_funcproto = expr_operation_funcproto; \
         af.func_proto = ndt::make_funcproto(src_tp, dst_tp); \
         af.data_ptr = reinterpret_cast<void *>(const_cast<T *>(&obj)); \
-        af.instantiate_func = &detail::elwise_from_callable_ckernel_instantiator<func_type>::instantiate; \
+        af.instantiate = &detail::elwise_from_callable_ckernel_instantiator<func_type>::instantiate; \
         af.free_func = NULL; \
 \
         ckernel_builder ckb; \

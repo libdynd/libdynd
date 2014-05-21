@@ -95,7 +95,7 @@ static const map<string, ndt::type>& get_builtin_types()
         builtin_types["json"] = ndt::make_json();
         builtin_types["date"] = ndt::make_date();
         builtin_types["time"] = ndt::make_time(tz_abstract);
-        builtin_types["datetime"] = ndt::make_datetime(tz_abstract);
+        builtin_types["datetime"] = ndt::make_datetime();
         builtin_types["bytes"] = ndt::make_bytes(1);
         builtin_types["type"] = ndt::make_type();
         builtin_types["arrfunc"] = ndt::make_arrfunc();
@@ -613,7 +613,7 @@ static ndt::type parse_datetime_parameters(const char *&rbegin, const char *end)
         rbegin = begin;
         return ndt::make_datetime(timezone);
     } else {
-        return ndt::make_datetime(tz_abstract);
+        return ndt::make_datetime();
     }
 }
 

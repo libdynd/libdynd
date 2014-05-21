@@ -45,7 +45,8 @@ public:
 
     void print_type(std::ostream& o) const;
 
-        void get_shape(intptr_t ndim, intptr_t i, intptr_t *out_shape, const char *metadata, const char *data) const;
+    void get_shape(intptr_t ndim, intptr_t i, intptr_t *out_shape,
+                   const char *metadata, const char *data) const;
 
     size_t get_category_count() const {
         return (size_t)reinterpret_cast<const strided_dim_type_metadata *>(m_categories.get_arrmeta())->size;

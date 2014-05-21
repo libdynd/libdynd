@@ -32,7 +32,7 @@ struct arrfunc_type_data;
  * data types of the kernel require metadata, such as for 'strided'
  * or 'var' dimension types, the metadata must be provided as well.
  *
- * \param self  This is &af.
+ * \param self  The arrfunc.
  * \param ckb  A ckernel_builder instance where the kernel is placed.
  * \param ckb_offset  The offset into the output ckernel_builder `out_ckb`
  *                    where the kernel should be placed.
@@ -48,12 +48,53 @@ struct arrfunc_type_data;
  * \param kernreq  Either dynd::kernel_request_single or dynd::kernel_request_strided,
  *                  as required by the caller.
  * \param ectx  The evaluation context.
+ *
+ * \returns  The offset into ``ckb`` immediately after the instantiated ckernel.
  */
-typedef intptr_t (*instantiate_arrfunc_t)(
+typedef intptr_t (*arrfunc_instantiate_t)(
     const arrfunc_type_data *self, dynd::ckernel_builder *ckb,
     intptr_t ckb_offset, const ndt::type &dst_tp, const char *dst_arrmeta,
     const ndt::type *src_tp, const char *const *src_arrmeta, uint32_t kernreq,
     const eval::eval_context *ectx);
+
+/**
+ * Resolves the destination type for this arrfunc based on the types
+ * of the source parameters.
+ *
+ * \param self  The arrfunc.
+ * \param out_dst_tp  To be filled with the destination type.
+ * \param src_tp  An array of the source types.
+ * \param throw_on_error  If true, should throw when there's an error, if
+ *                        false, should return 0 when there's an error.
+ *
+ * \returns  True on success, false on error (if throw_on_error was false).
+ */
+typedef int (*arrfunc_resolve_dst_type_t)(const arrfunc_type_data *self,
+                                          ndt::type &out_dst_tp,
+                                          const ndt::type *src_tp,
+                                          int throw_on_error);
+
+/**
+ * Returns the shape of the destination array for the provoided inputs
+ * and the destination type (which would typically have been produced
+ * via the ``resolve_dst_type`` call).
+ *
+ * \param self  The arrfunc.
+ * \param out_shape  This is filled with the shape. It must have size
+ *                   ``dst_tp.get_ndim()``.
+ * \param dst_tp  The destination type.
+ * \param src_tp  Array of source types. It must have the length matching
+ *                the number of parameters.
+ * \param src_arrmeta  Array of arrmeta corresponding to the source types.
+ * \param src_data  Array of data corresponding to the source types/arrmetas.
+ *                  This may be an array of NULLs.
+ */
+typedef void (*arrfunc_resolve_dst_shape_t)(const arrfunc_type_data *self,
+                                            intptr_t *out_shape,
+                                            const ndt::type &dst_tp,
+                                            const ndt::type *src_tp,
+                                            const char *const *src_arrmeta,
+                                            const char *const *src_data);
 
 /**
  * This is a struct designed for interoperability at
@@ -81,7 +122,9 @@ struct arrfunc_type_data {
      * The function which instantiates a ckernel. See the documentation
      * for the function typedef for more details.
      */
-    instantiate_arrfunc_t instantiate_func;
+    arrfunc_instantiate_t instantiate;
+    arrfunc_resolve_dst_type_t resolve_dst_type;
+    arrfunc_resolve_dst_shape_t resolve_dst_shape;
     /**
      * A function which deallocates the memory behind data_ptr after
      * freeing any additional resources it might contain.
@@ -91,7 +134,7 @@ struct arrfunc_type_data {
     // Default to all NULL, so the destructor works correctly
     inline arrfunc_type_data()
         : func_proto(), ckernel_funcproto(0),
-            data_ptr(0), instantiate_func(0), free_func(0)
+            data_ptr(0), instantiate(0), free_func(0)
     {
     }
 
@@ -117,6 +160,27 @@ struct arrfunc_type_data {
 
     inline const ndt::type &get_return_type() const {
         return func_proto.tcast<funcproto_type>()->get_return_type();
+    }
+
+    inline ndt::type resolve(const ndt::type *src_tp) const
+    {
+        if (resolve_dst_type != NULL) {
+            ndt::type result;
+            resolve_dst_type(this, result, src_tp, true);
+            return result;
+        } else {
+            size_t param_count = get_param_count();
+            const ndt::type *param_types = get_param_types();
+            for (size_t i = 0; i != param_count; ++i) {
+                if (src_tp[i].value_type() != param_types[i]) {
+                    std::stringstream ss;
+                    ss << "parameter " << (i + 1) << " to arrfunc does not match, ";
+                    ss << "expected " << param_types[i] << ", received " << src_tp[i];
+                    throw std::invalid_argument(ss.str());
+                }
+            }
+            return get_return_type();
+        }
     }
 };
 
@@ -153,6 +217,38 @@ public:
 
     inline operator nd::array() const {
         return m_value;
+    }
+
+    /** Implements the general call operator */
+    nd::array call(intptr_t arg_count, const nd::array *args,
+                   const eval::eval_context *ectx) const;
+
+    /** Convenience call operators */
+    inline nd::array
+    operator()()
+        const
+    {
+        return call(0, NULL, &eval::default_eval_context);
+    }
+    inline nd::array
+    operator()(const nd::array &a0)
+        const
+    {
+        return call(1, &a0, &eval::default_eval_context);
+    }
+    inline nd::array
+    operator()(const nd::array &a0, const nd::array &a1)
+        const
+    {
+        nd::array args[2] = {a0, a1};
+        return call(2, args, &eval::default_eval_context);
+    }
+    inline nd::array
+    operator()(const nd::array &a0, const nd::array &a1, const nd::array &a2)
+        const
+    {
+        nd::array args[3] = {a0, a1, a2};
+        return call(3, args, &eval::default_eval_context);
     }
 };
 } // namespace nd

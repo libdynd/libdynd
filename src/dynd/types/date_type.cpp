@@ -525,3 +525,12 @@ size_t date_type::make_elwise_property_setter_kernel(
     }
 }
 
+const ndt::type& ndt::make_date()
+{
+    // Static instance of the type, which has a reference count > 0 for the
+    // lifetime of the program. This static construction is inside a
+    // function to ensure correct creation order during startup.
+    static date_type dt;
+    static const ndt::type static_instance(&dt, true);
+    return static_instance;
+}

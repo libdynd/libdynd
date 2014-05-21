@@ -927,3 +927,12 @@ size_t datetime_type::make_elwise_property_setter_kernel(
     return offset_out + sizeof(datetime_property_kernel_extra);
 }
 
+const ndt::type& ndt::make_datetime()
+{
+    // Static instance of the type, which has a reference count > 0 for the
+    // lifetime of the program. This static construction is inside a
+    // function to ensure correct creation order during startup.
+    static datetime_type dt(tz_abstract);
+    static const ndt::type static_instance(&dt, true);
+    return static_instance;
+}

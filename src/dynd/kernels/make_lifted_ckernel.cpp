@@ -148,7 +148,7 @@ static size_t make_elwise_strided_dimension_expr_kernel_for_N(
         }
     }
     // All the types matched, so instantiate the elementwise handler
-    return elwise_handler->instantiate_func(
+    return elwise_handler->instantiate(
         elwise_handler, out_ckb, ckb_child_offset, child_dst_tp,
         child_dst_metadata, child_src_tp, child_src_metadata,
         kernel_request_strided, ectx);
@@ -357,7 +357,7 @@ static size_t make_elwise_strided_or_var_to_strided_dimension_expr_kernel_for_N(
         }
     }
     // All the types matched, so instantiate the elementwise handler
-    return elwise_handler->instantiate_func(
+    return elwise_handler->instantiate(
         elwise_handler, out_ckb, ckb_child_offset, child_dst_tp,
         child_dst_metadata, child_src_tp, child_src_metadata,
         kernel_request_strided, ectx);
@@ -631,7 +631,7 @@ static size_t make_elwise_strided_or_var_to_var_dimension_expr_kernel_for_N(
         }
     }
     // All the types matched, so instantiate the elementwise handler
-    return elwise_handler->instantiate_func(
+    return elwise_handler->instantiate(
         elwise_handler, out_ckb, ckb_child_offset, child_dst_tp,
         child_dst_metadata, child_src_tp, child_src_metadata,
         kernel_request_strided, ectx);
@@ -704,7 +704,7 @@ size_t dynd::make_lifted_expr_ckernel(
         }
         if (i == src_count) {
             // All the types matched, call the elementwise instantiate directly
-            return elwise_handler->instantiate_func(
+            return elwise_handler->instantiate(
                 elwise_handler, ckb, ckb_offset, dst_tp, dst_arrmeta, src_tp,
                 src_arrmeta, kernreq, ectx);
         }

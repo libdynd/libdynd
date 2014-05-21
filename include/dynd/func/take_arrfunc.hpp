@@ -26,7 +26,7 @@ namespace dynd { namespace kernels {
 void make_take_arrfunc(arrfunc_type_data *out_af, const ndt::type &dst_tp,
                         const ndt::type &src_tp, const ndt::type &mask_tp);
 
-inline nd::array make_take_arrfunc(const ndt::type &dst_tp,
+inline nd::arrfunc make_take_arrfunc(const ndt::type &dst_tp,
                                    const ndt::type &src_tp,
                                    const ndt::type &mask_tp)
 {
@@ -34,6 +34,7 @@ inline nd::array make_take_arrfunc(const ndt::type &dst_tp,
     make_take_arrfunc(
         reinterpret_cast<arrfunc_type_data *>(af.get_readwrite_originptr()),
         dst_tp, src_tp, mask_tp);
+    af.flag_as_immutable();
     return af;
 }
 
