@@ -23,12 +23,12 @@ using namespace dynd;
 TEST(Rolling, BuiltinSum_Kernel) {
     nd::arrfunc sum_1d =
         kernels::make_builtin_sum1d_arrfunc(float64_type_id);
-    nd::array rolling_sum = make_rolling_arrfunc(sum_1d, 4);
+    nd::arrfunc rolling_sum = make_rolling_arrfunc(sum_1d, 4);
 
     double adata[] = {1, 3, 7, 2, 9, 4, -5, 100, 2, -20, 3, 9, 18};
     nd::array a = adata;
-    nd::array b = nd::empty_like(a);
-    rolling_sum.f("execute", b, a);
+    nd::array b = rolling_sum(a);
+    EXPECT_EQ(ndt::type("strided * real"), b.get_type());
     for (int i = 0; i < 3; ++i) {
         EXPECT_TRUE(DYND_ISNAN(b(i).as<double>()));
     }
@@ -44,12 +44,12 @@ TEST(Rolling, BuiltinSum_Kernel) {
 TEST(Rolling, BuiltinMean_Kernel) {
     nd::arrfunc mean_1d =
         kernels::make_builtin_mean1d_arrfunc(float64_type_id, 0);
-    nd::array rolling_sum = make_rolling_arrfunc(mean_1d, 4);
+    nd::arrfunc rolling_sum = make_rolling_arrfunc(mean_1d, 4);
 
     double adata[] = {1, 3, 7, 2, 9, 4, -5, 100, 2, -20, 3, 9, 18};
     nd::array a = adata;
-    nd::array b = nd::empty_like(a);
-    rolling_sum.f("execute", b, a);
+    nd::array b = rolling_sum(a);
+    EXPECT_EQ(ndt::type("strided * real"), b.get_type());
     for (int i = 0; i < 3; ++i) {
         EXPECT_TRUE(DYND_ISNAN(b(i).as<double>()));
     }

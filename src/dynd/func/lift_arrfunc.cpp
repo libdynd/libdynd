@@ -216,7 +216,6 @@ static void resolve_lifted_dst_shape(const arrfunc_type_data *self,
     }
 }
 
-
 /** Prepends "Dims..." to all the types in the proto */
 static ndt::type lift_proto(const ndt::type& proto)
 {
