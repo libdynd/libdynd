@@ -8,6 +8,7 @@
 #include <dynd/kernels/ckernel_common_functions.hpp>
 #include <dynd/types/strided_dim_type.hpp>
 #include <dynd/types/var_dim_type.hpp>
+#include <dynd/types/typevar_dim_type.hpp>
 #include <dynd/arrmeta_holder.hpp>
 
 using namespace std;
@@ -102,10 +103,8 @@ struct var_rolling_ck : public kernels::assignment_ck<strided_rolling_ck> {
 
 struct rolling_arrfunc_data {
     intptr_t window_size;
-    // Pointer to the child arrfunc
-    const arrfunc_type_data *window_op_af;
-    // Reference to the array containing it
-    nd::array window_op_af_arr;
+    // The window op
+    nd::arrfunc window_op;
 };
 
 
@@ -114,6 +113,7 @@ static void free_rolling_arrfunc_data(void *data_ptr) {
 }
 } // anonymous namespace
 
+// TODO This should handle both strided and var cases
 static intptr_t
 instantiate_strided(const arrfunc_type_data *af_self, dynd::ckernel_builder *ckb,
                     intptr_t ckb_offset, const ndt::type &dst_tp,
@@ -126,6 +126,7 @@ instantiate_strided(const arrfunc_type_data *af_self, dynd::ckernel_builder *ckb
         reinterpret_cast<rolling_arrfunc_data *>(af_self->data_ptr);
 
     self_type *self = self_type::create(ckb, ckb_offset, (kernel_request_t)kernreq);
+    const arrfunc_type_data *window_af = af_data->window_op.get();
     intptr_t ckb_end = ckb_offset + sizeof(self_type);
     ndt::type dst_el_tp, src_el_tp;
     const char *dst_el_arrmeta, *src_el_arrmeta;
@@ -178,65 +179,60 @@ instantiate_strided(const arrfunc_type_data *af_self, dynd::ckernel_builder *ckb
     }
 
     // Allow expr ckernels as well as unary via an adapter
-    if (af_data->window_op_af->ckernel_funcproto != unary_operation_funcproto) {
-        if (af_data->window_op_af->ckernel_funcproto == expr_operation_funcproto) {
+    if (window_af->ckernel_funcproto != unary_operation_funcproto) {
+        if (window_af->ckernel_funcproto == expr_operation_funcproto) {
             ckb_end = kernels::wrap_expr_as_unary_ckernel(
                 ckb, ckb_end, kernel_request_strided);
         } else {
             stringstream ss;
             ss << "rolling window ckernel: invalid funcproto "
-               << (arrfunc_proto_t)
-                  af_data->window_op_af->ckernel_funcproto
+               << (arrfunc_proto_t)window_af->ckernel_funcproto
                << " in window_op ckernel";
             throw runtime_error(ss.str());
         }
     }
     const char *src_winop_meta = self->m_src_winop_meta.get();
-    return af_data->window_op_af->instantiate(
-        af_data->window_op_af, ckb, ckb_end, dst_el_tp,
-        dst_el_arrmeta, &self->m_src_winop_meta.get_type(),
-        &src_winop_meta, kernel_request_strided, ectx);
+    return window_af->instantiate(
+        window_af, ckb, ckb_end, dst_el_tp, dst_el_arrmeta,
+        &self->m_src_winop_meta.get_type(), &src_winop_meta,
+        kernel_request_strided, ectx);
 }
 
 void dynd::make_rolling_arrfunc(arrfunc_type_data *out_af,
-                                const ndt::type &dst_tp,
-                                const ndt::type &src_tp,
-                                const nd::array &window_op,
+                                const nd::arrfunc &window_op,
                                 intptr_t window_size)
 {
     // Validate the input arrfunc
-    if (window_op.get_type().get_type_id() != arrfunc_type_id) {
+    if (window_op.is_null()) {
+        throw invalid_argument("make_rolling_arrfunc() 'window_op' cannot be null");
+    }
+    const arrfunc_type_data *window_af = window_op.get();
+    if (window_af->get_param_count() != 1) {
         stringstream ss;
-        ss << "make_rolling_arrfunc() 'window_op' must have type "
-           << "arrfunc, not " << window_op.get_type();
-        throw runtime_error(ss.str());
+        ss << "To make a rolling window arrfunc, an operation with one "
+              "argument is required, got " << window_af->func_proto;
+        throw invalid_argument(ss.str());
     }
-    const arrfunc_type_data *window_op_af =
-        reinterpret_cast<const arrfunc_type_data *>(
-            window_op.get_readonly_originptr());
-    if (window_op_af->instantiate == NULL) {
-        throw runtime_error("make_rolling_arrfunc() 'window_op' must contain "
-                            "a non-null arrfunc object");
+    const ndt::type &window_src_tp = window_af->get_param_type(0);
+    if (window_src_tp.get_ndim() < 1) {
+        stringstream ss;
+        ss << "To make a rolling window arrfunc, an operation with which "
+              "accepts a dimension is required, got " << window_af->func_proto;
+        throw invalid_argument(ss.str());
     }
-    if (window_op_af->get_param_count() != 1) {
-        throw runtime_error("make_rolling_arrfunc() 'window_op' must contain "
-                            "a unary arrfunc object");
-    }
+
+    nd::string rolldimname("RollDim");
+    ndt::type roll_src_tp = ndt::make_typevar_dim(
+        rolldimname, window_src_tp.get_type_at_dimension(NULL, 1));
+    ndt::type roll_dst_tp = ndt::make_typevar_dim(rolldimname, window_af->get_return_type());
 
     // Create the data for the arrfunc
     rolling_arrfunc_data *data = new rolling_arrfunc_data;
     out_af->data_ptr = data;
     out_af->free_func = &free_rolling_arrfunc_data;
     out_af->ckernel_funcproto = unary_operation_funcproto;
-    out_af->func_proto = ndt::make_funcproto(src_tp, dst_tp);
-    if (dst_tp.get_type_id() == var_dim_type_id && src_tp.get_type_id() == var_dim_type_id) {
-        //out_af->instantiate = &instantiate_var;
-        delete data;
-        throw runtime_error("TODO: rolling ckernel var");
-    } else {
-        out_af->instantiate = &instantiate_strided;
-    }
+    out_af->func_proto = ndt::make_funcproto(roll_src_tp, roll_dst_tp);
+    out_af->instantiate = &instantiate_strided;
     data->window_size = window_size;
-    data->window_op_af = window_op_af;
-    data->window_op_af_arr = window_op;
+    data->window_op = window_op;
 }

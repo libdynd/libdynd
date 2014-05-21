@@ -23,8 +23,7 @@ using namespace dynd;
 TEST(Rolling, BuiltinSum_Kernel) {
     nd::arrfunc sum_1d =
         kernels::make_builtin_sum1d_arrfunc(float64_type_id);
-    nd::array rolling_sum = make_rolling_arrfunc(
-        ndt::type("strided * float64"), ndt::type("strided * float64"), sum_1d, 4);
+    nd::array rolling_sum = make_rolling_arrfunc(sum_1d, 4);
 
     double adata[] = {1, 3, 7, 2, 9, 4, -5, 100, 2, -20, 3, 9, 18};
     nd::array a = adata;
@@ -45,8 +44,7 @@ TEST(Rolling, BuiltinSum_Kernel) {
 TEST(Rolling, BuiltinMean_Kernel) {
     nd::arrfunc mean_1d =
         kernels::make_builtin_mean1d_arrfunc(float64_type_id, 0);
-    nd::array rolling_sum = make_rolling_arrfunc(
-        ndt::type("strided * float64"), ndt::type("strided * float64"), mean_1d, 4);
+    nd::array rolling_sum = make_rolling_arrfunc(mean_1d, 4);
 
     double adata[] = {1, 3, 7, 2, 9, 4, -5, 100, 2, -20, 3, 9, 18};
     nd::array a = adata;
