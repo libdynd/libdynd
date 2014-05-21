@@ -63,6 +63,40 @@ TEST(ArrFunc, Assignment) {
     EXPECT_EQ(891029, ints_out[2]);
 }
 
+TEST(ArrFunc, Assignment_CallInterface) {
+    // Test with the unary operation prototype
+    nd::arrfunc af = make_arrfunc_from_assignment(
+        ndt::make_type<int>(), ndt::make_string(),
+        unary_operation_funcproto, assign_error_default);
+    EXPECT_EQ(unary_operation_funcproto,
+              (arrfunc_proto_t)af.get()->ckernel_funcproto);
+
+    // Call it through the call() interface
+    nd::array b = af("12345678");
+    EXPECT_EQ(ndt::make_type<int>(), b.get_type());
+    EXPECT_EQ(12345678, b.as<int>());
+
+    // Call it with some incompatible arguments
+    EXPECT_THROW(af(12345), invalid_argument);
+    EXPECT_THROW(af(false), invalid_argument);
+
+    // Test with the expr operation prototype
+    af = make_arrfunc_from_assignment(ndt::make_type<int>(), ndt::make_string(),
+                                      expr_operation_funcproto,
+                                      assign_error_default);
+    EXPECT_EQ(expr_operation_funcproto,
+              (arrfunc_proto_t)af.get()->ckernel_funcproto);
+
+    // Call it through the call() interface
+    b = af("12345678");
+    EXPECT_EQ(ndt::make_type<int>(), b.get_type());
+    EXPECT_EQ(12345678, b.as<int>());
+
+    // Call it with some incompatible arguments
+    EXPECT_THROW(af(12345), invalid_argument);
+    EXPECT_THROW(af(false), invalid_argument);
+}
+
 TEST(ArrFunc, Property) {
     arrfunc_type_data af;
     // Create an arrfunc for getting the year from a date

@@ -254,13 +254,14 @@ nd::arrfunc::arrfunc(const nd::array &rhs)
                     reinterpret_cast<const arrfunc_type_data *>(
                         rhs.get_readonly_originptr());
                 if (af->instantiate != NULL) {
-                    // It's valid: immutable, arrfunc type, contains an
+                    // It's valid: immutable, arrfunc type, contains
                     // instantiate function.
                     m_value = rhs;
                 } else {
-                    throw invalid_argument("Require a non-empty arrfunc, "
-                                           "provided arrfunc has NULL "
-                                           "instantiate_func");
+                    throw invalid_argument(
+                        "Require a non-empty arrfunc, "
+                        "provided arrfunc has NULL "
+                        "instantiate function");
                 }
             } else {
                 stringstream ss;
@@ -277,4 +278,66 @@ nd::arrfunc::arrfunc(const nd::array &rhs)
             throw type_error(ss.str());
         }
     }
+}
+
+nd::array nd::arrfunc::call(intptr_t arg_count, const nd::array *args, const eval::eval_context *ectx)
+{
+    const arrfunc_type_data *af = get();
+    if (arg_count != (intptr_t)af->get_param_count()) {
+        stringstream ss;
+        ss << "Wrong number of arguments to arrfunc with prototype ";
+        ss << af->func_proto << ", got " << arg_count << " arguments";
+        throw invalid_argument(ss.str());
+    }
+    std::vector<ndt::type> src_tp(arg_count);
+    for (intptr_t i = 0; i < arg_count; ++i) {
+        src_tp[i] = args[i].get_type();
+    }
+
+    // Resolve the destination type
+    ndt::type dst_tp = af->resolve(arg_count ? &src_tp[0] : NULL);
+
+    std::vector<const char *> src_arrmeta(arg_count);
+    for (intptr_t i = 0; i < arg_count; ++i) {
+        src_arrmeta[i] = args[i].get_arrmeta();
+    }
+    std::vector<const char *> src_data(arg_count);
+    for (intptr_t i = 0; i < arg_count; ++i) {
+        src_data[i] = args[i].get_readonly_originptr();
+    }
+
+
+    // Resolve the destination shape if needed
+    nd::array result;
+    if (dst_tp.get_ndim() > 0 && af->resolve_dst_shape != NULL) {
+        dimvector shape(dst_tp.get_ndim());
+        af->resolve_dst_shape(af, shape.get(), dst_tp, &src_tp[0],
+                              &src_arrmeta[0], &src_data[0]);
+        result = nd::array(
+            make_array_memory_block(dst_tp, dst_tp.get_ndim(), shape.get()));
+    } else {
+        result = nd::empty(dst_tp);
+    }
+
+    // Generate and evaluate the ckernel
+    ckernel_builder ckb;
+    af->instantiate(af, &ckb, 0, dst_tp, result.get_arrmeta(), &src_tp[0],
+                    &src_arrmeta[0], kernel_request_single, ectx);
+    if (af->ckernel_funcproto == expr_operation_funcproto) {
+        expr_single_operation_t fn =
+            ckb.get()->get_function<expr_single_operation_t>();
+        fn(result.get_readwrite_originptr(), &src_data[0], ckb.get());
+    } else if (af->ckernel_funcproto == unary_operation_funcproto) {
+        unary_single_operation_t fn =
+            ckb.get()->get_function<unary_single_operation_t>();
+        fn(result.get_readwrite_originptr(), src_data[0],
+           ckb.get());
+    } else {
+        stringstream ss;
+        ss << "unrecognized arrfunc function prototype ";
+        ss << af->ckernel_funcproto;
+        throw invalid_argument(ss.str());
+    }
+    result.flag_as_immutable();
+    return result;
 }

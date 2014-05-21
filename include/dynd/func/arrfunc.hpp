@@ -75,6 +75,28 @@ typedef int (*arrfunc_resolve_dst_type_t)(const arrfunc_type_data *self,
                                           int throw_on_error);
 
 /**
+ * Returns the shape of the destination array for the provoided inputs
+ * and the destination type (which would typically have been produced
+ * via the ``resolve_dst_type`` call).
+ *
+ * \param self  The arrfunc.
+ * \param out_shape  This is filled with the shape. It must have size
+ *                   ``dst_tp.get_ndim()``.
+ * \param dst_tp  The destination type.
+ * \param src_tp  Array of source types. It must have the length matching
+ *                the number of parameters.
+ * \param src_arrmeta  Array of arrmeta corresponding to the source types.
+ * \param src_data  Array of data corresponding to the source types/arrmetas.
+ *                  This may be an array of NULLs.
+ */
+typedef void (*arrfunc_resolve_dst_shape_t)(const arrfunc_type_data *self,
+                                            intptr_t *out_shape,
+                                            const ndt::type &dst_tp,
+                                            const ndt::type *src_tp,
+                                            const char *const *src_arrmeta,
+                                            const char *const *src_data);
+
+/**
  * This is a struct designed for interoperability at
  * the C ABI level. It contains enough information
  * to pass arrfuncs from one library to another
@@ -102,6 +124,7 @@ struct arrfunc_type_data {
      */
     arrfunc_instantiate_t instantiate;
     arrfunc_resolve_dst_type_t resolve_dst_type;
+    arrfunc_resolve_dst_shape_t resolve_dst_shape;
     /**
      * A function which deallocates the memory behind data_ptr after
      * freeing any additional resources it might contain.
@@ -138,6 +161,27 @@ struct arrfunc_type_data {
     inline const ndt::type &get_return_type() const {
         return func_proto.tcast<funcproto_type>()->get_return_type();
     }
+
+    inline ndt::type resolve(const ndt::type *src_tp) const
+    {
+        if (resolve_dst_type != NULL) {
+            ndt::type result;
+            resolve_dst_type(this, result, src_tp, true);
+            return result;
+        } else {
+            size_t param_count = get_param_count();
+            const ndt::type *param_types = get_param_types();
+            for (size_t i = 0; i != param_count; ++i) {
+                if (src_tp[i].value_type() != param_types[i]) {
+                    std::stringstream ss;
+                    ss << "parameter " << (i + 1) << " to arrfunc does not match, ";
+                    ss << "expected " << param_types[i] << ", received " << src_tp[i];
+                    throw std::invalid_argument(ss.str());
+                }
+            }
+            return get_return_type();
+        }
+    }
 };
 
 namespace nd {
@@ -173,6 +217,37 @@ public:
 
     inline operator nd::array() const {
         return m_value;
+    }
+
+    /** Implements the general call operator */
+    nd::array call(intptr_t arg_count, const nd::array *args,
+                   const eval::eval_context *ectx);
+
+    /** Convenience call operators */
+    inline nd::array
+    operator()(const eval::eval_context *ectx = &eval::default_eval_context)
+    {
+        return call(0, NULL, ectx);
+    }
+    inline nd::array
+    operator()(const nd::array &a0,
+               const eval::eval_context *ectx = &eval::default_eval_context)
+    {
+        return call(1, &a0, ectx);
+    }
+    inline nd::array
+    operator()(const nd::array &a0, const nd::array &a1,
+               const eval::eval_context *ectx = &eval::default_eval_context)
+    {
+        nd::array args[2] = {a0, a1};
+        return call(2, args, ectx);
+    }
+    inline nd::array
+    operator()(const nd::array &a0, const nd::array &a1, const nd::array &a2,
+               const eval::eval_context *ectx = &eval::default_eval_context)
+    {
+        nd::array args[3] = {a0, a1, a2};
+        return call(3, args, ectx);
     }
 };
 } // namespace nd
