@@ -225,33 +225,30 @@ public:
 
     /** Convenience call operators */
     inline nd::array
-    operator()(const eval::eval_context *ectx = &eval::default_eval_context)
+    operator()()
         const
     {
-        return call(0, NULL, ectx);
+        return call(0, NULL, &eval::default_eval_context);
     }
     inline nd::array
-    operator()(const nd::array &a0,
-               const eval::eval_context *ectx = &eval::default_eval_context)
+    operator()(const nd::array &a0)
         const
     {
-        return call(1, &a0, ectx);
+        return call(1, &a0, &eval::default_eval_context);
     }
     inline nd::array
-    operator()(const nd::array &a0, const nd::array &a1,
-               const eval::eval_context *ectx = &eval::default_eval_context)
+    operator()(const nd::array &a0, const nd::array &a1)
         const
     {
         nd::array args[2] = {a0, a1};
-        return call(2, args, ectx);
+        return call(2, args, &eval::default_eval_context);
     }
     inline nd::array
-    operator()(const nd::array &a0, const nd::array &a1, const nd::array &a2,
-               const eval::eval_context *ectx = &eval::default_eval_context)
+    operator()(const nd::array &a0, const nd::array &a1, const nd::array &a2)
         const
     {
         nd::array args[3] = {a0, a1, a2};
-        return call(3, args, ectx);
+        return call(3, args, &eval::default_eval_context);
     }
 };
 } // namespace nd

@@ -77,8 +77,8 @@ TEST(ArrFunc, Assignment_CallInterface) {
     EXPECT_EQ(12345678, b.as<int>());
 
     // Call it with some incompatible arguments
-    EXPECT_THROW(af(nd::array(12345)), invalid_argument);
-    EXPECT_THROW(af(nd::array(false)), invalid_argument);
+    EXPECT_THROW(af(12345), invalid_argument);
+    EXPECT_THROW(af(false), invalid_argument);
 
     // Test with the expr operation prototype
     af = make_arrfunc_from_assignment(ndt::make_type<int>(), ndt::make_string(),
