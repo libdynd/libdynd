@@ -195,7 +195,7 @@ namespace {
 
         static intptr_t
         instantiate(const arrfunc_type_data *af_self, dynd::ckernel_builder *ckb,
-                    intptr_t ckb_offset, const ndt::type &DYND_UNUSED(dst_tp),
+                    intptr_t ckb_offset, const ndt::type &dst_tp,
                     const char *DYND_UNUSED(dst_arrmeta), const ndt::type *src_tp,
                     const char *const *src_arrmeta, uint32_t kernreq,
                     const eval::eval_context *DYND_UNUSED(ectx))
@@ -215,6 +215,13 @@ namespace {
                 ss << "mean1d: could not process type " << src_tp[0];
                 ss << " as a strided dimension";
                 throw type_error(ss.str());
+            }
+            if (src_el_tp.get_type_id() != float64_type_id ||
+                    dst_tp.get_type_id() != float64_type_id) {
+                stringstream ss;
+                ss << "mean1d: input element type and output type must be "
+                      "float64, got " << src_el_tp << " and " << dst_tp;
+                throw invalid_argument(ss.str());
             }
             self->m_minp = data->minp;
             if (self->m_minp <= 0) {
