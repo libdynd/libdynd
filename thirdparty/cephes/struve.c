@@ -270,7 +270,7 @@ double v, x;
     double y, t;
     int n;
 
-    n = v;
+    n = (int)v;
     if (n == v) {
 	y = yn(n, x);
 	return (y);

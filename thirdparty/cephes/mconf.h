@@ -69,10 +69,22 @@
 #include <math.h>
 
 #ifdef _MSC_VER
-#define INFINITY (DBL_MAX + DBL_MAX)
-#define NAN (INFINITY - INFINITY)
-#define isfinite(x) _finite(x)
-#define isinf(x) (!_finite(x) && !_isnan(x))
+# ifndef INFINITY
+#  define INFINITY (DBL_MAX + DBL_MAX)
+# endif
+# ifndef NAN
+#  define NAN (INFINITY - INFINITY)
+# endif
+# if _MSC_VER < 1800
+#  define isfinite(x) _finite(x)
+#  define isinf(x) (!_finite(x) && !_isnan(x))
+# endif
+// Disable C4056: overflow in floating-point constant arithmetic, because
+//                MSVC's definition of INFINITY triggers it.
+# pragma warning(disable : 4056)
+// Disable C4756: overflow in constant arithmetic, because
+//                MSVC's definition of INFINITY triggers it.
+# pragma warning(disable : 4756)
 #endif
 
 #include "rename.h"

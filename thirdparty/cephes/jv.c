@@ -81,7 +81,7 @@ double jv(double n, double x)
     y = floor(an);
     if (y == an) {
 	nint = 1;
-	i = an - 16384.0 * floor(an / 16384.0);
+	i = (int)(an - 16384.0 * floor(an / 16384.0));
 	if (n < 0.0) {
 	    if (i & 1)
 		sign = -sign;
@@ -259,7 +259,7 @@ static double recur(double *n, double x, double *newn, int cancel)
      */
 
     maxiter = 22000;
-    miniter = fabs(x) - fabs(*n);
+    miniter = (int)(fabs(x) - fabs(*n));
     if (miniter < 1)
 	miniter = 1;
 
@@ -423,7 +423,7 @@ static double jvs(double n, double x)
     printf("power series=%.5e ", y);
 #endif
     t = frexp(0.5 * x, &ex);
-    ex = ex * n;
+    ex = (int)(ex * n);
     if ((ex > -1023)
 	&& (ex < 1023)
 	&& (n > 0.0)
