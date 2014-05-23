@@ -13,6 +13,7 @@
 #include <dynd/types/cstruct_type.hpp>
 #include <dynd/types/date_type.hpp>
 #include <dynd/types/datetime_type.hpp>
+#include <dynd/types/time_type.hpp>
 #include <dynd/kernels/string_numeric_assignment_kernels.hpp>
 #include <dynd/parser_util.hpp>
 
@@ -121,70 +122,6 @@ static bool parse_token(const char *&begin, const char *end, const char (&token)
     }
 }
 
-static bool parse_json_number(const char *&begin, const char *end, const char *&out_nbegin, const char *&out_nend)
-{
-    const char *saved_begin = skip_whitespace(begin, end);
-    const char *pos = saved_begin;
-    if (pos == end) {
-        return false;
-    }
-    // Optional minus sign
-    if (*pos == '-') {
-        ++pos;
-    }
-    if (pos == end) {
-        return false;
-    }
-    // Either '0' or a non-zero digit followed by digits
-    if (*pos == '0') {
-        ++pos;
-    } else if ('1' <= *pos && *pos <= '9') {
-        ++pos;
-        while (pos < end && ('0' <= *pos && *pos <= '9')) {
-            ++pos;
-        }
-    } else {
-        return false;
-    }
-    // Optional decimal point, followed by one or more digits
-    if (pos < end && *pos == '.') {
-        if (++pos == end) {
-            return false;
-        }
-        if (!('0' <= *pos && *pos <= '9')) {
-            return false;
-        }
-        ++pos;
-        while (pos < end && ('0' <= *pos && *pos <= '9')) {
-            ++pos;
-        }
-    }
-    // Optional exponent, followed by +/- and some digits
-    if (pos < end && (*pos == 'e' || *pos == 'E')) {
-        if (++pos == end) {
-            return false;
-        }
-        // +/- is optional
-        if (*pos == '+' || *pos == '-') {
-            if (++pos == end) {
-                return false;
-            }
-        }
-        // At least one digit is required
-        if (!('0' <= *pos && *pos <= '9')) {
-            return false;
-        }
-        ++pos;
-        while (pos < end && ('0' <= *pos && *pos <= '9')) {
-            ++pos;
-        }
-    }
-    out_nbegin = saved_begin;
-    out_nend = pos;
-    begin = pos;
-    return true;
-}
-
 static void skip_json_value(const char *&begin, const char *end)
 {
     begin = skip_whitespace(begin, end);
@@ -261,7 +198,7 @@ static void skip_json_value(const char *&begin, const char *end)
         default:
             if (c == '-' || ('0' <= c && c <= '9')) {
                 const char *nbegin = NULL, *nend = NULL;
-                if (!parse_json_number(begin, end, nbegin, nend)) {
+                if (!parse::parse_json_number_no_ws(begin, end, nbegin, nend)) {
                     throw parse::parse_error(begin, "invalid number");
                 }
             } else {
@@ -476,23 +413,34 @@ static void parse_struct_json(const ndt::type& tp, const char *metadata, char *o
 static void parse_bool_json(const ndt::type& tp, const char *metadata, char *out_data,
                 const char *&begin, const char *end)
 {
-    char value;
+    // TODO: allow more general input (strings) with a boolean parsing policy
+    char value = 2;
+    const char *nbegin, *nend;
     if (parse_token(begin, end, "true")) {
-        value = true;
+        value = 1;
     } else if (parse_token(begin, end, "false")) {
-        value = false;
+        value = 0;
     } else if (parse_token(begin, end, "null")) {
         // TODO: error handling policy for NULL in this case
-        value = false;
-    } else {
-        // TODO: allow more general input (strings, integers) with a boolean parsing policy
-        throw json_parse_error(begin, "expected a boolean true or false", tp);
+        value = 0;
+    } else if (parse::parse_json_number_no_ws(begin, end, nbegin, nend)) {
+        if (nend - nbegin == 1) {
+            if (*nbegin == '0') {
+                value = 0;
+            } else if (*nbegin == '1') {
+                value = 1;
+            }
+        }
     }
 
-    if (tp.get_type_id() == bool_type_id) {
-        *out_data = value;
+    if (value != 2) {
+        if (tp.get_type_id() == bool_type_id) {
+            *out_data = value;
+        } else {
+            typed_data_assign(tp, metadata, out_data, ndt::make_type<dynd_bool>(), NULL, &value);
+        }
     } else {
-        typed_data_assign(tp, metadata, out_data, ndt::make_type<dynd_bool>(), NULL, &value);
+        throw json_parse_error(begin, "expected a boolean true or false", tp);
     }
 }
 
@@ -503,7 +451,7 @@ static void parse_dynd_builtin_json(const ndt::type& tp, const char *DYND_UNUSED
     const char *strbegin = NULL, *strend = NULL;
     bool escaped;
     begin = skip_whitespace(begin, end);
-    if (parse_json_number(begin, end, strbegin, strend)) {
+    if (parse::parse_json_number_no_ws(begin, end, strbegin, strend)) {
         try {
             assign_utf8_string_to_builtin(tp.get_type_id(), out_data, strbegin, strend);
         } catch (const std::exception& e) {
@@ -612,6 +560,13 @@ static void parse_datetime_json(const ndt::type& tp, const char *metadata, char 
             const datetime_type *dt = tp.tcast<datetime_type>();
             try {
                 dt->set_utf8_string(metadata, out_data, assign_error_fractional, val, ectx);
+            } catch (const std::exception& e) {
+                throw json_parse_error(skip_whitespace(rbegin, begin), e.what(), tp);
+            }
+        } else if (tp.get_type_id() == time_type_id) {
+            const time_type *tt = tp.tcast<time_type>();
+            try {
+                tt->set_utf8_string(metadata, out_data, assign_error_fractional, val);
             } catch (const std::exception& e) {
                 throw json_parse_error(skip_whitespace(rbegin, begin), e.what(), tp);
             }

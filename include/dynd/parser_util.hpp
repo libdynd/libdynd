@@ -319,6 +319,13 @@ void unescape_string(const char *strbegin, const char *strend,
                      std::string &out);
 
 /**
+ * Without skipping whitespace, parses a range of bytes following
+ * the JSON number grammar, returning its range of bytes.
+ */
+bool parse_json_number_no_ws(const char *&rbegin, const char *end,
+                             const char *&out_nbegin, const char *&out_nend);
+
+/**
  * Does an exact comparison of a byte range to a string literal.
  */
 template <int N>

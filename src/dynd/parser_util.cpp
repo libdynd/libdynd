@@ -182,6 +182,71 @@ void parse::unescape_string(const char *strbegin, const char *strend,
     }
 }
 
+bool parse::parse_json_number_no_ws(const char *&rbegin, const char *end,
+                                    const char *&out_nbegin,
+                                    const char *&out_nend)
+{
+    const char *begin = rbegin;
+    if (begin == end) {
+        return false;
+    }
+    // Optional minus sign
+    if (*begin == '-') {
+        ++begin;
+    }
+    if (begin == end) {
+        return false;
+    }
+    // Either '0' or a non-zero digit followed by digits
+    if (*begin == '0') {
+        ++begin;
+    } else if ('1' <= *begin && *begin <= '9') {
+        ++begin;
+        while (begin < end && ('0' <= *begin && *begin <= '9')) {
+            ++begin;
+        }
+    } else {
+        return false;
+    }
+    // Optional decimal point, followed by one or more digits
+    if (begin < end && *begin == '.') {
+        if (++begin == end) {
+            return false;
+        }
+        if (!('0' <= *begin && *begin <= '9')) {
+            return false;
+        }
+        ++begin;
+        while (begin < end && ('0' <= *begin && *begin <= '9')) {
+            ++begin;
+        }
+    }
+    // Optional exponent, followed by +/- and some digits
+    if (begin < end && (*begin == 'e' || *begin == 'E')) {
+        if (++begin == end) {
+            return false;
+        }
+        // +/- is optional
+        if (*begin == '+' || *begin == '-') {
+            if (++begin == end) {
+                return false;
+            }
+        }
+        // At least one digit is required
+        if (!('0' <= *begin && *begin <= '9')) {
+            return false;
+        }
+        ++begin;
+        while (begin < end && ('0' <= *begin && *begin <= '9')) {
+            ++begin;
+        }
+    }
+    out_nbegin = rbegin;
+    out_nend = begin;
+    rbegin = begin;
+    return true;
+}
+
 // [0-9][0-9]
 bool parse::parse_2digit_int_no_ws(const char *&begin, const char *end,
                                    int &out_val)
