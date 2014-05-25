@@ -475,11 +475,15 @@ static void parse_dynd_builtin_json(const ndt::type& tp, const char *DYND_UNUSED
     rbegin = begin;
 }
 
-static void parse_integer_json(const ndt::type& tp, const char *metadata, char *out_data,
-                const char *&begin, const char *end)
+static void parse_integer_json(const ndt::type& tp, const char *DYND_UNUSED(metadata), char *out_data,
+                const char *&begin, const char *end, assign_error_mode errmode)
 {
-    // TODO: Parsing policy for how to handle integers
-    parse_dynd_builtin_json(tp, metadata, out_data, begin, end);
+    const char *nbegin, *nend;
+    if (parse::parse_json_number_no_ws(begin, end, nbegin, nend)) {
+        parse::string_to_int(out_data, tp.get_type_id(), nbegin, nend, errmode);
+    } else {
+        throw json_parse_error(begin, "expected a number", tp);
+    }
 }
 
 static void parse_real_json(const ndt::type& tp, const char *metadata, char *out_data,
@@ -617,7 +621,15 @@ static void parse_json(const ndt::type& tp, const char *metadata, char *out_data
             return;
         case int_kind:
         case uint_kind:
-            parse_integer_json(tp, metadata, out_data, json_begin, json_end);
+            try {
+                json_begin = skip_whitespace(json_begin, json_end);
+                parse_integer_json(tp, metadata, out_data, json_begin, json_end,
+                                   ectx->default_errmode);
+            } catch(const std::exception& e) {
+                // Transform any exceptions into a parse error that includes
+                // the location of the error
+                throw json_parse_error(json_begin, e.what(), tp);
+            }
             return;
         case real_kind:
             parse_real_json(tp, metadata, out_data, json_begin, json_end);
