@@ -328,58 +328,15 @@ bool parse::parse_6digit_int_no_ws(const char *&begin, const char *end,
     return false;
 }
 
-uint64_t parse::unchecked_string_to_uint64(const char *begin, const char *end)
+template <class T>
+inline static T checked_string_to_uint(const char *begin, const char *end,
+                                       bool &out_overflow, bool &out_badparse)
 {
-    uint64_t result = 0;
+    T result = 0, prev_result = 0;
     while (begin < end) {
         char c = *begin;
         if ('0' <= c && c <= '9') {
-            result = (result * 10) + (c - '0');
-        } else if (c == 'e' || c == 'E') {
-            // Accept "1e5", "1e+5" integers with a positive exponent,
-            // a subset of floating point syntax. Note that "1.2e1"
-            // is not accepted as the value 12 by this code.
-            ++begin;
-            if (begin < end && *begin == '+') {
-                ++begin;
-            }
-            if (begin < end) {
-                int exponent = 0;
-                // Accept any number of zeros followed by at most
-                // two digits. Anything greater would overflow.
-                while (begin < end && *begin == '0') {
-                    ++begin;
-                }
-                if (begin < end && '0' <= *begin && *begin <= '9') {
-                    exponent = *begin++ - '0';
-                }
-                if (begin < end && '0' <= *begin && *begin <= '9') {
-                    exponent = (10 * exponent) + (*begin++ - '0');
-                }
-                if (begin == end) {
-                    // Apply the exponent in a naive way
-                    for (int i = 0; i < exponent; ++i) {
-                        result = result * 10;
-                    }
-                }
-            }
-            break;
-        } else {
-            break;
-        }
-        ++begin;
-    }
-    return result;
-}
-
-uint64_t parse::checked_string_to_uint64(const char *begin, const char *end,
-                                         bool &out_overflow, bool &out_badparse)
-{
-    uint64_t result = 0, prev_result = 0;
-    while (begin < end) {
-        char c = *begin;
-        if ('0' <= c && c <= '9') {
-            result = (result * 10) + (c - '0');
+            result = (result * 10u) + (uint32_t)(c - '0');
             if (result < prev_result) {
                 out_overflow = true;
             }
@@ -419,7 +376,7 @@ uint64_t parse::checked_string_to_uint64(const char *begin, const char *end,
                         // Apply the exponent in a naive way, but with
                         // overflow checking
                         for (int i = 0; i < exponent; ++i) {
-                            result = result * 10;
+                            result = result * 10u;
                             if (result < prev_result) {
                                 out_overflow = true;
                             }
@@ -438,6 +395,73 @@ uint64_t parse::checked_string_to_uint64(const char *begin, const char *end,
     return result;
 }
 
+template <class T>
+inline static T unchecked_string_to_uint(const char *begin, const char *end)
+{
+    T result = 0;
+    while (begin < end) {
+        char c = *begin;
+        if ('0' <= c && c <= '9') {
+            result = (result * 10u) + (uint32_t)(c - '0');
+        } else if (c == 'e' || c == 'E') {
+            // Accept "1e5", "1e+5" integers with a positive exponent,
+            // a subset of floating point syntax. Note that "1.2e1"
+            // is not accepted as the value 12 by this code.
+            ++begin;
+            if (begin < end && *begin == '+') {
+                ++begin;
+            }
+            if (begin < end) {
+                int exponent = 0;
+                // Accept any number of zeros followed by at most
+                // two digits. Anything greater would overflow.
+                while (begin < end && *begin == '0') {
+                    ++begin;
+                }
+                if (begin < end && '0' <= *begin && *begin <= '9') {
+                    exponent = *begin++ - '0';
+                }
+                if (begin < end && '0' <= *begin && *begin <= '9') {
+                    exponent = (10 * exponent) + (*begin++ - '0');
+                }
+                if (begin == end) {
+                    // Apply the exponent in a naive way
+                    for (int i = 0; i < exponent; ++i) {
+                        result = result * 10u;
+                    }
+                }
+            }
+            break;
+        } else {
+            break;
+        }
+        ++begin;
+    }
+    return result;
+}
+
+uint64_t parse::checked_string_to_uint64(const char *begin, const char *end,
+                                         bool &out_overflow, bool &out_badparse)
+{
+    return checked_string_to_uint<uint64_t>(begin, end, out_overflow, out_badparse);
+}
+
+dynd_uint128 parse::checked_string_to_uint128(const char *begin, const char *end,
+                                         bool &out_overflow, bool &out_badparse)
+{
+    return checked_string_to_uint<dynd_uint128>(begin, end, out_overflow, out_badparse);
+}
+
+uint64_t parse::unchecked_string_to_uint64(const char *begin, const char *end)
+{
+    return unchecked_string_to_uint<uint64_t>(begin, end);
+}
+
+dynd_uint128 parse::unchecked_string_to_uint128(const char *begin, const char *end)
+{
+    return unchecked_string_to_uint<dynd_uint128>(begin, end);
+}
+
 namespace {
 template <class T> struct overflow_check;
 template <> struct overflow_check<int8_t> { inline static bool is_overflow(uint64_t value, bool negative) {
@@ -451,6 +475,11 @@ template <> struct overflow_check<int32_t> { inline static bool is_overflow(uint
 }};
 template <> struct overflow_check<int64_t> { inline static bool is_overflow(uint64_t value, bool negative) {
     return (value&~0x7fffffffffffffffULL) != 0 && !(negative && value == 0x8000000000000000ULL);
+}};
+template <> struct overflow_check<dynd_int128> { inline static bool is_overflow(const dynd_uint128 &value, bool negative) {
+        return (value.m_hi & ~0x7fffffffffffffffULL) != 0 &&
+               !(negative && value.m_hi == 0x8000000000000000ULL &&
+                 value.m_lo == 0ULL);
 }};
 template <> struct overflow_check<uint8_t> { inline static bool is_overflow(uint64_t value) {
     return (value&~0xffULL) != 0;
@@ -473,6 +502,18 @@ static inline void assign_signed_int_value(char *out_int, uint64_t uvalue,
         *reinterpret_cast<T *>(out_int) =
             static_cast<T>(negative ? -static_cast<int64_t>(uvalue)
                                     : static_cast<int64_t>(uvalue));
+    }
+}
+
+static inline void assign_signed_int128_value(char *out_int, dynd_uint128 uvalue,
+                                    bool &negative, bool &overflow,
+                                    bool &badparse)
+{
+    overflow = overflow || overflow_check<dynd_int128>::is_overflow(uvalue, negative);
+    if (!overflow && !badparse) {
+        *reinterpret_cast<dynd_int128 *>(out_int) =
+            negative ? -static_cast<dynd_int128>(uvalue)
+                     : static_cast<dynd_int128>(uvalue);
     }
 }
 
@@ -523,8 +564,13 @@ void parse::string_to_int(char *out_int, type_id_t tid, const char *begin,
                 assign_signed_int_value<int64_t>(out_int, uvalue, negative,
                                                 overflow, badparse);
                 break;
-            case int128_type_id:
-                throw runtime_error("TODO: int128");
+            case int128_type_id: {
+                dynd_uint128 buvalue = parse::checked_string_to_uint128(
+                    begin, end, overflow, badparse);
+                assign_signed_int128_value(out_int, buvalue, negative, overflow,
+                                           badparse);
+                break;
+            }
             case uint8_type_id:
                 uvalue = parse::checked_string_to_uint64(begin, end, overflow,
                                                          badparse);
@@ -555,8 +601,16 @@ void parse::string_to_int(char *out_int, type_id_t tid, const char *begin,
                     *reinterpret_cast<uint64_t *>(out_int) = uvalue;
                 }
                 break;
-            case uint128_type_id:
-                throw runtime_error("TODO: uint128");
+            case uint128_type_id: {
+                dynd_uint128 buvalue = parse::checked_string_to_uint128(
+                    begin, end, overflow, badparse);
+                negative = negative && (buvalue != 0);
+                overflow = overflow || negative;
+                if (!overflow && !badparse) {
+                    *reinterpret_cast<dynd_uint128 *>(out_int) = buvalue;
+                }
+                break;
+            }
             default: {
                 stringstream ss;
                 ss << "cannot parse integer as type id " << tid;
@@ -603,8 +657,14 @@ void parse::string_to_int(char *out_int, type_id_t tid, const char *begin,
                     negative ? -static_cast<int64_t>(uvalue)
                              : static_cast<int64_t>(uvalue);
                 break;
-            case int128_type_id:
-                throw runtime_error("TODO: unchecked int128");
+            case int128_type_id: {
+                dynd_uint128 buvalue =
+                    parse::unchecked_string_to_uint128(begin, end);
+                *reinterpret_cast<dynd_int128 *>(out_int) =
+                    negative ? -static_cast<dynd_int128>(buvalue)
+                             : static_cast<dynd_int128>(buvalue);
+                break;
+            }
             case uint8_type_id:
                 uvalue = parse::unchecked_string_to_uint64(begin, end);
                 *reinterpret_cast<uint8_t *>(out_int) =
@@ -624,8 +684,13 @@ void parse::string_to_int(char *out_int, type_id_t tid, const char *begin,
                 uvalue = parse::unchecked_string_to_uint64(begin, end);
                 *reinterpret_cast<uint64_t *>(out_int) = negative ? 0 : uvalue;
                 break;
-            case uint128_type_id:
-                throw runtime_error("TODO: unchecked uint128");
+            case uint128_type_id: {
+                dynd_uint128 buvalue =
+                    parse::unchecked_string_to_uint128(begin, end);
+                *reinterpret_cast<dynd_uint128 *>(out_int) =
+                    negative ? static_cast<dynd_uint128>(0) : buvalue;
+                break;
+            }
             default: {
                 stringstream ss;
                 ss << "cannot parse integer as type id " << tid;

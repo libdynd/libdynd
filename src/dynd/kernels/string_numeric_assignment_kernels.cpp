@@ -173,6 +173,11 @@ template <> struct overflow_check<int32_t> { inline static bool is_overflow(uint
 template <> struct overflow_check<int64_t> { inline static bool is_overflow(uint64_t value, bool negative) {
     return (value&~0x7fffffffffffffffULL) != 0 && !(negative && value == 0x8000000000000000ULL);
 }};
+template <> struct overflow_check<dynd_int128> { inline static bool is_overflow(dynd_uint128 value, bool negative) {
+        return (value.m_hi & ~0x7fffffffffffffffULL) != 0 &&
+               !(negative && value.m_hi == 0x8000000000000000ULL &&
+                 value.m_lo == 0ULL);
+}};
 template <> struct overflow_check<uint8_t> { inline static bool is_overflow(uint64_t value) {
     return (value&~0xffULL) != 0;
 }};
@@ -244,7 +249,7 @@ namespace { template<typename T> struct string_to_uint {
                 raise_string_cast_error(ndt::make_type<T>(),
                                         ndt::type(e->src_string_tp, true),
                                         e->src_metadata, src);
-            } else if (negative || overflow ||
+            } else if (overflow || (negative && value != 0) ||
                        overflow_check<T>::is_overflow(value)) {
                 raise_string_cast_overflow_error(
                     ndt::make_type<T>(), ndt::type(e->src_string_tp, true),
@@ -256,16 +261,72 @@ namespace { template<typename T> struct string_to_uint {
     }
 };}
 
-static void string_to_int128_single(char *DYND_UNUSED(dst), const char *DYND_UNUSED(src),
-                        ckernel_prefix *DYND_UNUSED(extra))
+static void string_to_int128_single(char *dst, const char *src,
+                                    ckernel_prefix *extra)
 {
-    throw std::runtime_error("TODO: implement string_to_int128_single");
+    string_to_builtin_kernel_extra *e = reinterpret_cast<string_to_builtin_kernel_extra *>(extra);
+    string s = e->src_string_tp->get_utf8_string(e->src_metadata, src, e->errmode);
+    trim(s);
+    bool negative = false;
+    if (!s.empty() && s[0] == '-') {
+        s.erase(0, 1);
+        negative = true;
+    }
+    dynd_int128 result;
+    if (e->errmode == assign_error_none) {
+        dynd_uint128 value =
+            parse::unchecked_string_to_uint128(s.data(), s.data() + s.size());
+        result = negative ? static_cast<dynd_int128>(0) : static_cast<dynd_int128>(value);
+    } else {
+        bool overflow = false, badparse = false;
+        dynd_uint128 value = parse::checked_string_to_uint128(
+            s.data(), s.data() + s.size(), overflow, badparse);
+        if (badparse) {
+            raise_string_cast_error(ndt::make_type<dynd_int128>(),
+                                    ndt::type(e->src_string_tp, true),
+                                    e->src_metadata, src);
+        } else if (overflow ||
+                   overflow_check<dynd_int128>::is_overflow(value, negative)) {
+            raise_string_cast_overflow_error(ndt::make_type<dynd_int128>(),
+                                             ndt::type(e->src_string_tp, true),
+                                             e->src_metadata, src);
+        }
+        result = negative ? -static_cast<dynd_int128>(value)
+                          : static_cast<dynd_int128>(value);
+    }
+    *reinterpret_cast<dynd_int128 *>(dst) = result;
 }
 
-static void string_to_uint128_single(char *DYND_UNUSED(dst), const char *DYND_UNUSED(src),
-                        ckernel_prefix *DYND_UNUSED(extra))
+static void string_to_uint128_single(char *dst, const char *src,
+                                     ckernel_prefix *extra)
 {
-    throw std::runtime_error("TODO: implement string_to_uint128_single");
+    string_to_builtin_kernel_extra *e = reinterpret_cast<string_to_builtin_kernel_extra *>(extra);
+    string s = e->src_string_tp->get_utf8_string(e->src_metadata, src, e->errmode);
+    trim(s);
+    bool negative = false;
+    if (!s.empty() && s[0] == '-') {
+        s.erase(0, 1);
+        negative = true;
+    }
+    dynd_int128 result;
+    if (e->errmode == assign_error_none) {
+        result =
+            parse::unchecked_string_to_uint128(s.data(), s.data() + s.size());
+    } else {
+        bool overflow = false, badparse = false;
+        result = parse::checked_string_to_uint128(
+            s.data(), s.data() + s.size(), overflow, badparse);
+        if (badparse) {
+            raise_string_cast_error(ndt::make_type<dynd_int128>(),
+                                    ndt::type(e->src_string_tp, true),
+                                    e->src_metadata, src);
+        } else if (overflow || (negative && result != 0)) {
+            raise_string_cast_overflow_error(ndt::make_type<dynd_uint128>(),
+                                             ndt::type(e->src_string_tp, true),
+                                             e->src_metadata, src);
+        }
+    }
+    *reinterpret_cast<dynd_uint128 *>(dst) = result;
 }
 
 static void string_to_float32_single(char *dst, const char *src,

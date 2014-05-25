@@ -453,9 +453,23 @@ uint64_t checked_string_to_uint64(const char *begin, const char *end,
 
 /**
  * Converts a string containing only an unsigned integer (no leading or
+ * trailing space, etc) into a uint128, setting the output over flow or
+ * bad parse flags if there are problems.
+ */
+dynd_uint128 checked_string_to_uint128(const char *begin, const char *end,
+                                         bool &out_overflow, bool &out_badparse);
+
+/**
+ * Converts a string containing only an unsigned integer (no leading or
  * trailing space, etc) into a uint64, ignoring any problems.
  */
 uint64_t unchecked_string_to_uint64(const char *begin, const char *end);
+
+/**
+ * Converts a string containing only an unsigned integer (no leading or
+ * trailing space, etc) into a uint128, ignoring any problems.
+ */
+dynd_uint128 unchecked_string_to_uint128(const char *begin, const char *end);
 
 /**
  * Converts a string containing an integer (no leading or trailing space)
