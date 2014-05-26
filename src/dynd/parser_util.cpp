@@ -333,6 +333,9 @@ inline static T checked_string_to_uint(const char *begin, const char *end,
                                        bool &out_overflow, bool &out_badparse)
 {
     T result = 0, prev_result = 0;
+    if (begin == end) {
+        out_badparse = true;
+    }
     while (begin < end) {
         char c = *begin;
         if ('0' <= c && c <= '9') {

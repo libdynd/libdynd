@@ -330,9 +330,9 @@ TEST(StringType, StringToBool) {
     EXPECT_FALSE(nd::array("0 ").ucast<dynd_bool>().as<bool>());
 
     // By default, conversion to bool is not permissive
-    EXPECT_THROW(nd::array(nd::array("").ucast<dynd_bool>().eval()), runtime_error);
-    EXPECT_THROW(nd::array(nd::array("2").ucast<dynd_bool>().eval()), runtime_error);
-    EXPECT_THROW(nd::array(nd::array("flase").ucast<dynd_bool>().eval()), runtime_error);
+    EXPECT_THROW(nd::array(nd::array("").ucast<dynd_bool>().eval()), invalid_argument);
+    EXPECT_THROW(nd::array(nd::array("2").ucast<dynd_bool>().eval()), invalid_argument);
+    EXPECT_THROW(nd::array(nd::array("flase").ucast<dynd_bool>().eval()), invalid_argument);
 
     // In "none" mode, it's a bit more permissive
     EXPECT_FALSE(nd::array(nd::array("").ucast<dynd_bool>(0, assign_error_none).eval()).as<bool>());
@@ -381,6 +381,9 @@ TEST(StringType, StringToInteger) {
     EXPECT_EQ(18446744073709551615ULL, nd::array("18446744073709551615").ucast<uint64_t>().as<uint64_t>());
     EXPECT_THROW(nd::array("-1").ucast<uint64_t>().eval(), runtime_error);
     EXPECT_THROW(nd::array("18446744073709551616").ucast<uint64_t>().eval(), runtime_error);
+
+    EXPECT_THROW(nd::array("").ucast<uint64_t>().eval(), invalid_argument);
+    EXPECT_THROW(nd::array("-").ucast<uint64_t>().eval(), invalid_argument);
 }
 
 TEST(StringType, StringToFloat32SpecialValues) {
