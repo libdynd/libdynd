@@ -17,7 +17,7 @@ namespace ndt {
 
 namespace eval {
     struct eval_context;
-    extern const eval_context default_eval_context;
+    extern eval_context default_eval_context;
 } // namespace eval
 
 /**
@@ -61,7 +61,7 @@ void typed_data_copy(const ndt::type& tp, const char *dst_metadata, char *dst_da
  */
 void typed_data_assign(const ndt::type& dst_tp, const char *dst_metadata, char *dst_data,
                 const ndt::type& src_tp, const char *src_metadata, const char *src_data,
-                assign_error_mode errmode = assign_error_fractional,
+                assign_error_mode errmode = assign_error_default,
                 const eval::eval_context *ectx = &eval::default_eval_context);
 
 } // namespace dynd

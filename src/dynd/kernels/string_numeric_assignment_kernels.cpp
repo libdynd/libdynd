@@ -107,13 +107,15 @@ namespace {
 /////////////////////////////////////////
 // builtin to string assignment
 
-static void raise_string_cast_error(const ndt::type& dst_tp, const ndt::type& string_tp, const char *metadata, const char *data)
+static void raise_string_cast_error(const ndt::type &dst_tp,
+                                    const ndt::type &string_tp,
+                                    const char *metadata, const char *data)
 {
     stringstream ss;
     ss << "cannot cast string ";
     string_tp.print_data(ss, metadata, data);
     ss << " to " << dst_tp;
-    throw runtime_error(ss.str());
+    throw invalid_argument(ss.str());
 }
 
 static void raise_string_cast_overflow_error(const ndt::type &dst_tp,
@@ -214,11 +216,17 @@ namespace { template<typename T> struct string_to_int {
             uint64_t value = parse::checked_string_to_uint64(
                 s.data(), s.data() + s.size(), overflow, badparse);
             if (badparse) {
-                raise_string_cast_error(ndt::make_type<T>(), ndt::type(e->src_string_tp, true), e->src_metadata, src);
-            } else if (overflow || overflow_check<T>::is_overflow(value, negative)) {
-                raise_string_cast_overflow_error(ndt::make_type<T>(), ndt::type(e->src_string_tp, true), e->src_metadata, src);
+                raise_string_cast_error(ndt::make_type<T>(),
+                                        ndt::type(e->src_string_tp, true),
+                                        e->src_metadata, src);
+            } else if (overflow ||
+                       overflow_check<T>::is_overflow(value, negative)) {
+                raise_string_cast_overflow_error(
+                    ndt::make_type<T>(), ndt::type(e->src_string_tp, true),
+                    e->src_metadata, src);
             }
-            result = negative ? static_cast<T>(-static_cast<int64_t>(value)) : static_cast<T>(value);
+            result = negative ? static_cast<T>(-static_cast<int64_t>(value))
+                              : static_cast<T>(value);
         }
         *reinterpret_cast<T *>(dst) = result;
     }
@@ -475,7 +483,7 @@ size_t dynd::make_string_to_builtin_assignment_kernel(
                 type_id_t dst_type_id,
                 const ndt::type& src_string_tp, const char *src_metadata,
                 kernel_request_t kernreq, assign_error_mode errmode,
-                const eval::eval_context *DYND_UNUSED(ectx))
+                const eval::eval_context *ectx)
 {
     if (src_string_tp.get_kind() != string_kind) {
         stringstream ss;
@@ -484,14 +492,21 @@ size_t dynd::make_string_to_builtin_assignment_kernel(
     }
 
     if (dst_type_id >= bool_type_id && dst_type_id <= complex_float64_type_id) {
-        offset_out = make_kernreq_to_single_kernel_adapter(out, offset_out, kernreq);
-        out->ensure_capacity_leaf(offset_out + sizeof(string_to_builtin_kernel_extra));
-        string_to_builtin_kernel_extra *e = out->get_at<string_to_builtin_kernel_extra>(offset_out);
-        e->base.set_function<unary_single_operation_t>(static_string_to_builtin_kernels[dst_type_id-bool_type_id]);
+        offset_out =
+            make_kernreq_to_single_kernel_adapter(out, offset_out, kernreq);
+        out->ensure_capacity_leaf(offset_out +
+                                  sizeof(string_to_builtin_kernel_extra));
+        string_to_builtin_kernel_extra *e =
+            out->get_at<string_to_builtin_kernel_extra>(offset_out);
+        e->base.set_function<unary_single_operation_t>(
+            static_string_to_builtin_kernels[dst_type_id - bool_type_id]);
         e->base.destructor = string_to_builtin_kernel_extra::destruct;
         // The kernel data owns this reference
-        e->src_string_tp = static_cast<const base_string_type *>(ndt::type(src_string_tp).release());
-        e->errmode = errmode;
+        e->src_string_tp = static_cast<const base_string_type *>(
+            ndt::type(src_string_tp).release());
+        e->errmode = (errmode == assign_error_default)
+                         ? static_cast<assign_error_mode>(ectx->default_errmode)
+                         : errmode;
         e->src_metadata = src_metadata;
         return offset_out + sizeof(string_to_builtin_kernel_extra);
     } else {
@@ -543,7 +558,7 @@ size_t dynd::make_builtin_to_string_assignment_kernel(
                 const ndt::type& dst_string_tp, const char *dst_metadata,
                 type_id_t src_type_id,
                 kernel_request_t kernreq, assign_error_mode errmode,
-                const eval::eval_context *DYND_UNUSED(ectx))
+                const eval::eval_context *ectx)
 {
     if (dst_string_tp.get_kind() != string_kind) {
         stringstream ss;
@@ -560,7 +575,9 @@ size_t dynd::make_builtin_to_string_assignment_kernel(
         // The kernel data owns this reference
         e->dst_string_tp = static_cast<const base_string_type *>(ndt::type(dst_string_tp).release());
         e->src_type_id = src_type_id;
-        e->errmode = errmode;
+        e->errmode = (errmode == assign_error_default)
+                         ? static_cast<assign_error_mode>(ectx->default_errmode)
+                         : errmode;
         e->dst_metadata = dst_metadata;
         return offset_out + sizeof(builtin_to_string_kernel_extra);
     } else {
@@ -574,7 +591,7 @@ size_t dynd::make_builtin_to_string_assignment_kernel(
 void dynd::assign_utf8_string_to_builtin(type_id_t dst_type_id, char *dst,
                 const char *str_begin, const char *str_end, assign_error_mode errmode)
 {
-    ndt::type dt = ndt::make_string(string_encoding_utf_8);
+    ndt::type dt = ndt::make_string();
     string_type_data d;
     string_type_metadata md;
     d.begin = const_cast<char *>(str_begin);

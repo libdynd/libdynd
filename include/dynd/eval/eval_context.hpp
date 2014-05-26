@@ -49,6 +49,7 @@ struct eval_context {
     }
 
 #ifdef DYND_USE_STD_ATOMIC
+    // Note: the entire eval_context isn't atomic, just its pieces
     DYND_CONSTEXPR eval_context(const eval_context &rhs)
         : default_errmode(rhs.default_errmode.load()),
           default_cuda_device_errmode(rhs.default_cuda_device_errmode.load()),
@@ -56,10 +57,18 @@ struct eval_context {
           century_window(rhs.century_window.load())
     {
     }
+
+    eval_context &operator=(const eval_context &rhs) {
+        default_errmode.store(rhs.default_errmode.load());
+        default_cuda_device_errmode.store(rhs.default_cuda_device_errmode.load());
+        date_parse_order.store(rhs.date_parse_order.load());
+        century_window.store(rhs.century_window.load());
+        return *this;
+    }
 #endif
 };
 
-extern const eval_context default_eval_context;
+extern eval_context default_eval_context;
 
 }} // namespace dynd::eval
 

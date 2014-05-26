@@ -330,9 +330,9 @@ TEST(StringType, StringToBool) {
     EXPECT_FALSE(nd::array("0 ").ucast<dynd_bool>().as<bool>());
 
     // By default, conversion to bool is not permissive
-    EXPECT_THROW(nd::array(nd::array("").ucast<dynd_bool>().eval()), runtime_error);
-    EXPECT_THROW(nd::array(nd::array("2").ucast<dynd_bool>().eval()), runtime_error);
-    EXPECT_THROW(nd::array(nd::array("flase").ucast<dynd_bool>().eval()), runtime_error);
+    EXPECT_THROW(nd::array(nd::array("").ucast<dynd_bool>().eval()), invalid_argument);
+    EXPECT_THROW(nd::array(nd::array("2").ucast<dynd_bool>().eval()), invalid_argument);
+    EXPECT_THROW(nd::array(nd::array("flase").ucast<dynd_bool>().eval()), invalid_argument);
 
     // In "none" mode, it's a bit more permissive
     EXPECT_FALSE(nd::array(nd::array("").ucast<dynd_bool>(0, assign_error_none).eval()).as<bool>());
