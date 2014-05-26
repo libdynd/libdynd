@@ -10,6 +10,7 @@
 #include <stdexcept>
 
 #include <dynd/config.hpp>
+#include <dynd/types/type_id.hpp>
 
 namespace dynd { namespace parse {
 
@@ -319,6 +320,13 @@ void unescape_string(const char *strbegin, const char *strend,
                      std::string &out);
 
 /**
+ * Without skipping whitespace, parses a range of bytes following
+ * the JSON number grammar, returning its range of bytes.
+ */
+bool parse_json_number_no_ws(const char *&rbegin, const char *end,
+                             const char *&out_nbegin, const char *&out_nend);
+
+/**
  * Does an exact comparison of a byte range to a string literal.
  */
 template <int N>
@@ -434,6 +442,42 @@ bool parse_4digit_int_no_ws(const char *&rbegin, const char *end, int &out_val);
  *     }
  */
 bool parse_6digit_int_no_ws(const char *&rbegin, const char *end, int &out_val);
+
+/**
+ * Converts a string containing only an unsigned integer (no leading or
+ * trailing space, etc) into a uint64, setting the output over flow or
+ * bad parse flags if there are problems.
+ */
+uint64_t checked_string_to_uint64(const char *begin, const char *end,
+                                  bool &out_overflow, bool &out_badparse);
+
+/**
+ * Converts a string containing only an unsigned integer (no leading or
+ * trailing space, etc) into a uint128, setting the output over flow or
+ * bad parse flags if there are problems.
+ */
+dynd_uint128 checked_string_to_uint128(const char *begin, const char *end,
+                                         bool &out_overflow, bool &out_badparse);
+
+/**
+ * Converts a string containing only an unsigned integer (no leading or
+ * trailing space, etc) into a uint64, ignoring any problems.
+ */
+uint64_t unchecked_string_to_uint64(const char *begin, const char *end);
+
+/**
+ * Converts a string containing only an unsigned integer (no leading or
+ * trailing space, etc) into a uint128, ignoring any problems.
+ */
+dynd_uint128 unchecked_string_to_uint128(const char *begin, const char *end);
+
+/**
+ * Converts a string containing an integer (no leading or trailing space)
+ * into an integer with the specified type id, using the specified error
+ * mode to handle errors.
+ */
+void string_to_int(char *out_int, type_id_t tid, const char *begin,
+                   const char *end, assign_error_mode errmode);
 
 /**
  * A helper class for matching a bunch of names and getting an integer.

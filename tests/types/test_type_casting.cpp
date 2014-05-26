@@ -14,7 +14,7 @@
 using namespace std;
 using namespace dynd;
 
-TEST(DTypeCasting, IsLosslessAssignment) {
+TEST(TypeCasting, IsLosslessAssignment) {
     // Boolean casting
     EXPECT_TRUE(is_lossless_assignment(ndt::type(bool_type_id), ndt::type(bool_type_id)));
 
@@ -172,7 +172,7 @@ TEST(DTypeCasting, IsLosslessAssignment) {
 }
 
 
-TEST(DTypeCasting, StringToInt32) {
+TEST(TypeCasting, StringToInt32) {
     nd::array a = nd::empty<int>();
 
     // Test the limits of string to int conversion
@@ -203,10 +203,12 @@ TEST(DTypeCasting, StringToInt32) {
     EXPECT_THROW(a.vals() = "3e9", overflow_error);
 }
 
-TEST(DTypeCasting, StringToInt64) {
+TEST(TypeCasting, StringToInt64) {
     nd::array a = nd::empty<int64_t>();
 
     // Test the limits of string to int conversion
+    a.vals() = "-0";
+    EXPECT_EQ(0LL, a.as<int64_t>());
     a.vals() = "9223372036854775807";
     EXPECT_EQ(9223372036854775807LL, a.as<int64_t>());
     a.vals() = "-9223372036854775808";
@@ -222,11 +224,39 @@ TEST(DTypeCasting, StringToInt64) {
     EXPECT_THROW(a.vals() = "1e19", overflow_error);
 }
 
-TEST(DTypeCasting, StringToUInt64) {
+TEST(TypeCasting, StringToInt128) {
+    nd::array a = nd::empty<dynd_int128>();
+
+    // Test the limits of string to int conversion
+    a.vals() = "-0";
+    EXPECT_EQ(0LL, a.as<int64_t>());
+    a.vals() = "-170141183460469231731687303715884105728";
+    EXPECT_EQ(0x8000000000000000ULL, a.as<dynd_int128>().m_hi);
+    EXPECT_EQ(0ULL, a.as<dynd_int128>().m_lo);
+    a.vals() = "170141183460469231731687303715884105727";
+    EXPECT_EQ(0x7fffffffffffffffULL, a.as<dynd_int128>().m_hi);
+    EXPECT_EQ(0xffffffffffffffffULL, a.as<dynd_int128>().m_lo);
+    EXPECT_THROW(a.vals() = "170141183460469231731687303715884105728",
+                 overflow_error);
+    EXPECT_THROW(a.vals() = "-170141183460469231731687303715884105729",
+                 overflow_error);
+
+    // Simple "1e5" positive exponent cases are permitted
+    a.vals() = "1e18";
+    EXPECT_EQ(1000000000000000000LL, a.as<int64_t>());
+    a.vals() = "922e26";
+    EXPECT_EQ(0x129ea0d6fULL, a.as<dynd_int128>().m_hi);
+    EXPECT_EQ(0x287e2f8928000000ULL, a.as<dynd_int128>().m_lo);
+    EXPECT_THROW(a.vals() = "1e40", overflow_error);
+}
+
+TEST(TypeCasting, StringToUInt64) {
     nd::array a = nd::empty<uint64_t>();
 
     // Test the limits of string to int conversion
     a.vals() = "0";
+    EXPECT_EQ(0u, a.as<uint64_t>());
+    a.vals() = "-0";
     EXPECT_EQ(0u, a.as<uint64_t>());
     a.vals() = "18446744073709551615";
     EXPECT_EQ(18446744073709551615ULL, a.as<uint64_t>());

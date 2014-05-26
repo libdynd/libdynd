@@ -11,11 +11,13 @@
 #include <dynd/types/string_type.hpp>
 #include <dynd/diagnostics.hpp>
 #include <dynd/kernels/string_numeric_assignment_kernels.hpp>
+#include <dynd/parser_util.hpp>
 #include "single_assigner_builtin.hpp"
 
 using namespace std;
 using namespace dynd;
 
+// Trim taken from boost string algorithms library
 // Trim taken from boost string algorithms library
 template< typename ForwardIteratorT>
 inline ForwardIteratorT trim_begin( 
@@ -114,7 +116,10 @@ static void raise_string_cast_error(const ndt::type& dst_tp, const ndt::type& st
     throw runtime_error(ss.str());
 }
 
-static void raise_string_cast_overflow_error(const ndt::type& dst_tp, const ndt::type& string_tp, const char *metadata, const char *data)
+static void raise_string_cast_overflow_error(const ndt::type &dst_tp,
+                                             const ndt::type &string_tp,
+                                             const char *metadata,
+                                             const char *data)
 {
     stringstream ss;
     ss << "overflow converting string ";
@@ -124,139 +129,35 @@ static void raise_string_cast_overflow_error(const ndt::type& dst_tp, const ndt:
 }
 
 static void string_to_bool_single(char *dst, const char *src,
-                        ckernel_prefix *extra)
+                                  ckernel_prefix *extra)
 {
-    string_to_builtin_kernel_extra *e = reinterpret_cast<string_to_builtin_kernel_extra *>(extra);
+    string_to_builtin_kernel_extra *e =
+        reinterpret_cast<string_to_builtin_kernel_extra *>(extra);
     // Get the string from the source
-    string s = e->src_string_tp->get_utf8_string(e->src_metadata, src, e->errmode);
+    string s =
+        e->src_string_tp->get_utf8_string(e->src_metadata, src, e->errmode);
     trim(s);
     to_lower(s);
     if (e->errmode == assign_error_none) {
-        if (s.empty() || s == "0" || s == "false" || s == "no" || s == "off" || s == "f" || s == "n") {
+        if (s.empty() || s == "0" || s == "false" || s == "no" || s == "off" ||
+                s == "f" || s == "n") {
             *dst = 0;
         } else {
             *dst = 1;
         }
     } else {
-        if (s == "0" || s == "false" || s == "no" || s == "off" || s == "f" || s == "n") {
+        if (s == "0" || s == "false" || s == "no" || s == "off" || s == "f" ||
+                s == "n") {
             *dst = 0;
-        } else if (s == "1" || s == "true" || s == "yes" || s == "on" || s == "t" || s == "y") {
+        } else if (s == "1" || s == "true" || s == "yes" || s == "on" ||
+                   s == "t" || s == "y") {
             *dst = 1;
         } else {
-            raise_string_cast_error(ndt::make_type<dynd_bool>(), ndt::type(e->src_string_tp, true), e->src_metadata, src);
+            raise_string_cast_error(ndt::make_type<dynd_bool>(),
+                                    ndt::type(e->src_string_tp, true),
+                                    e->src_metadata, src);
         }
     }
-}
-
-static uint64_t parse_uint64_noerror(const std::string& s)
-{
-    uint64_t result = 0;
-    size_t pos = 0, end = s.size();
-    while (pos < end) {
-        char c = s[pos];
-        if ('0' <= c && c <= '9') {
-            result = (result * 10) + (c - '0');
-        } else if (c == 'e' || c == 'E') {
-            // Accept "1e5", "1e+5" integers with a positive exponent,
-            // a subset of floating point syntax. Note that "1.2e1"
-            // is not accepted as the value 12 by this code.
-            ++pos;
-            if (pos < end && s[pos] == '+') {
-                ++pos;
-            }
-            if (pos < end) {
-                int exponent = 0;
-                // Accept any number of zeros followed by at most
-                // two digits. Anything greater would overflow.
-                while (pos < end && s[pos] == '0') {
-                    ++pos;
-                }
-                if (pos < end && '0' <= s[pos] && s[pos] <= '9') {
-                    exponent = s[pos++] - '0';
-                }
-                if (pos < end && '0' <= s[pos] && s[pos] <= '9') {
-                    exponent = (10 * exponent) + (s[pos++] - '0');
-                }
-                if (pos == end) {
-                    // Apply the exponent in a naive way
-                    for (int i = 0; i < exponent; ++i) {
-                        result = result * 10;
-                    }
-                }
-            }
-            break;
-        } else {
-            break;
-        }
-        ++pos;
-    }
-    return result;
-}
-
-static uint64_t parse_uint64(const std::string& s, bool& out_overflow, bool& out_badparse)
-{
-    uint64_t result = 0, prev_result = 0;
-    size_t pos = 0, end = s.size();
-    while (pos < end) {
-        char c = s[pos];
-        if ('0' <= c && c <= '9') {
-            result = (result * 10) + (c - '0');
-            if (result < prev_result) {
-                out_overflow = true;
-            }
-        } else {
-            if (c == '.') {
-                // Accept ".", ".0" with trailing decimal zeros as well
-                ++pos;
-                while (pos < end && s[pos] == '0') {
-                    ++pos;
-                }
-                if (pos == end) {
-                    break;
-                }
-            } else if (c == 'e' || c == 'E') {
-                // Accept "1e5", "1e+5" integers with a positive exponent,
-                // a subset of floating point syntax. Note that "1.2e1"
-                // is not accepted as the value 12 by this code.
-                ++pos;
-                if (pos < end && s[pos] == '+') {
-                    ++pos;
-                }
-                if (pos < end) {
-                    int exponent = 0;
-                    // Accept any number of zeros followed by at most
-                    // two digits. Anything greater would overflow.
-                    while (pos < end && s[pos] == '0') {
-                        ++pos;
-                    }
-                    if (pos < end && '0' <= s[pos] && s[pos] <= '9') {
-                        exponent = s[pos++] - '0';
-                    }
-                    if (pos < end && '0' <= s[pos] && s[pos] <= '9') {
-                        exponent = (10 * exponent) + (s[pos++] - '0');
-                    }
-                    if (pos == end) {
-                        prev_result = result;
-                        // Apply the exponent in a naive way, but with
-                        // overflow checking
-                        for (int i = 0; i < exponent; ++i) {
-                            result = result * 10;
-                            if (result < prev_result) {
-                                out_overflow = true;
-                            }
-                            prev_result = result;
-                        }
-                        return result;
-                    }
-                }
-            }
-            out_badparse = true;
-            break;
-        }
-        ++pos;
-        prev_result = result;
-    }
-    return result;
 }
 
 template <class T> struct overflow_check;
@@ -271,6 +172,11 @@ template <> struct overflow_check<int32_t> { inline static bool is_overflow(uint
 }};
 template <> struct overflow_check<int64_t> { inline static bool is_overflow(uint64_t value, bool negative) {
     return (value&~0x7fffffffffffffffULL) != 0 && !(negative && value == 0x8000000000000000ULL);
+}};
+template <> struct overflow_check<dynd_int128> { inline static bool is_overflow(dynd_uint128 value, bool negative) {
+        return (value.m_hi & ~0x7fffffffffffffffULL) != 0 &&
+               !(negative && value.m_hi == 0x8000000000000000ULL &&
+                 value.m_lo == 0ULL);
 }};
 template <> struct overflow_check<uint8_t> { inline static bool is_overflow(uint64_t value) {
     return (value&~0xffULL) != 0;
@@ -299,11 +205,14 @@ namespace { template<typename T> struct string_to_int {
         }
         T result;
         if (e->errmode == assign_error_none) {
-            uint64_t value = parse_uint64_noerror(s);
-            result = negative ? static_cast<T>(-static_cast<int64_t>(value)) : static_cast<T>(value);
+            uint64_t value = parse::unchecked_string_to_uint64(
+                s.data(), s.data() + s.size());
+            result = negative ? static_cast<T>(-static_cast<int64_t>(value))
+                              : static_cast<T>(value);
         } else {
             bool overflow = false, badparse = false;
-            uint64_t value = parse_uint64(s, overflow, badparse);
+            uint64_t value = parse::checked_string_to_uint64(
+                s.data(), s.data() + s.size(), overflow, badparse);
             if (badparse) {
                 raise_string_cast_error(ndt::make_type<T>(), ndt::type(e->src_string_tp, true), e->src_metadata, src);
             } else if (overflow || overflow_check<T>::is_overflow(value, negative)) {
@@ -329,15 +238,22 @@ namespace { template<typename T> struct string_to_uint {
         }
         T result;
         if (e->errmode == assign_error_none) {
-            uint64_t value = parse_uint64_noerror(s);
+            uint64_t value = parse::unchecked_string_to_uint64(
+                s.data(), s.data() + s.size());
             result = negative ? static_cast<T>(0) : static_cast<T>(value);
         } else {
             bool overflow = false, badparse = false;
-            uint64_t value = parse_uint64(s, overflow, badparse);
+            uint64_t value = parse::checked_string_to_uint64(
+                s.data(), s.data() + s.size(), overflow, badparse);
             if (badparse) {
-                raise_string_cast_error(ndt::make_type<T>(), ndt::type(e->src_string_tp, true), e->src_metadata, src);
-            } else if (negative || overflow || overflow_check<T>::is_overflow(value)) {
-                raise_string_cast_overflow_error(ndt::make_type<T>(), ndt::type(e->src_string_tp, true), e->src_metadata, src);
+                raise_string_cast_error(ndt::make_type<T>(),
+                                        ndt::type(e->src_string_tp, true),
+                                        e->src_metadata, src);
+            } else if (overflow || (negative && value != 0) ||
+                       overflow_check<T>::is_overflow(value)) {
+                raise_string_cast_overflow_error(
+                    ndt::make_type<T>(), ndt::type(e->src_string_tp, true),
+                    e->src_metadata, src);
             }
             result = static_cast<T>(value);
         }
@@ -345,16 +261,72 @@ namespace { template<typename T> struct string_to_uint {
     }
 };}
 
-static void string_to_int128_single(char *DYND_UNUSED(dst), const char *DYND_UNUSED(src),
-                        ckernel_prefix *DYND_UNUSED(extra))
+static void string_to_int128_single(char *dst, const char *src,
+                                    ckernel_prefix *extra)
 {
-    throw std::runtime_error("TODO: implement string_to_int128_single");
+    string_to_builtin_kernel_extra *e = reinterpret_cast<string_to_builtin_kernel_extra *>(extra);
+    string s = e->src_string_tp->get_utf8_string(e->src_metadata, src, e->errmode);
+    trim(s);
+    bool negative = false;
+    if (!s.empty() && s[0] == '-') {
+        s.erase(0, 1);
+        negative = true;
+    }
+    dynd_int128 result;
+    if (e->errmode == assign_error_none) {
+        dynd_uint128 value =
+            parse::unchecked_string_to_uint128(s.data(), s.data() + s.size());
+        result = negative ? static_cast<dynd_int128>(0) : static_cast<dynd_int128>(value);
+    } else {
+        bool overflow = false, badparse = false;
+        dynd_uint128 value = parse::checked_string_to_uint128(
+            s.data(), s.data() + s.size(), overflow, badparse);
+        if (badparse) {
+            raise_string_cast_error(ndt::make_type<dynd_int128>(),
+                                    ndt::type(e->src_string_tp, true),
+                                    e->src_metadata, src);
+        } else if (overflow ||
+                   overflow_check<dynd_int128>::is_overflow(value, negative)) {
+            raise_string_cast_overflow_error(ndt::make_type<dynd_int128>(),
+                                             ndt::type(e->src_string_tp, true),
+                                             e->src_metadata, src);
+        }
+        result = negative ? -static_cast<dynd_int128>(value)
+                          : static_cast<dynd_int128>(value);
+    }
+    *reinterpret_cast<dynd_int128 *>(dst) = result;
 }
 
-static void string_to_uint128_single(char *DYND_UNUSED(dst), const char *DYND_UNUSED(src),
-                        ckernel_prefix *DYND_UNUSED(extra))
+static void string_to_uint128_single(char *dst, const char *src,
+                                     ckernel_prefix *extra)
 {
-    throw std::runtime_error("TODO: implement string_to_uint128_single");
+    string_to_builtin_kernel_extra *e = reinterpret_cast<string_to_builtin_kernel_extra *>(extra);
+    string s = e->src_string_tp->get_utf8_string(e->src_metadata, src, e->errmode);
+    trim(s);
+    bool negative = false;
+    if (!s.empty() && s[0] == '-') {
+        s.erase(0, 1);
+        negative = true;
+    }
+    dynd_int128 result;
+    if (e->errmode == assign_error_none) {
+        result =
+            parse::unchecked_string_to_uint128(s.data(), s.data() + s.size());
+    } else {
+        bool overflow = false, badparse = false;
+        result = parse::checked_string_to_uint128(
+            s.data(), s.data() + s.size(), overflow, badparse);
+        if (badparse) {
+            raise_string_cast_error(ndt::make_type<dynd_int128>(),
+                                    ndt::type(e->src_string_tp, true),
+                                    e->src_metadata, src);
+        } else if (overflow || (negative && result != 0)) {
+            raise_string_cast_overflow_error(ndt::make_type<dynd_uint128>(),
+                                             ndt::type(e->src_string_tp, true),
+                                             e->src_metadata, src);
+        }
+    }
+    *reinterpret_cast<dynd_uint128 *>(dst) = result;
 }
 
 static void string_to_float32_single(char *dst, const char *src,

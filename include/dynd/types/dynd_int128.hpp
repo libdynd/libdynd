@@ -67,8 +67,18 @@ public:
         return m_lo == rhs.m_lo && m_hi == rhs.m_hi;
     }
 
+    DYND_CUDA_HOST_DEVICE inline bool operator==(int rhs) const {
+        return static_cast<int64_t>(m_lo) == static_cast<int64_t>(rhs) &&
+               m_hi == (rhs >= 0 ? 0ULL : 0xffffffffffffffffULL);
+    }
+
     DYND_CUDA_HOST_DEVICE inline bool operator!=(const dynd_int128& rhs) const {
         return m_lo != rhs.m_lo || m_hi != rhs.m_hi;
+    }
+
+    DYND_CUDA_HOST_DEVICE inline bool operator!=(int rhs) const {
+        return static_cast<int64_t>(m_lo) != static_cast<int64_t>(rhs) ||
+               m_hi != (rhs >= 0 ? 0ULL : 0xffffffffffffffffULL);
     }
 
     DYND_CUDA_HOST_DEVICE inline bool operator<(float rhs) const {
@@ -95,6 +105,10 @@ public:
 
     DYND_CUDA_HOST_DEVICE inline bool operator>=(const dynd_int128& rhs) const {
         return rhs.operator<=(*this);
+    }
+
+    DYND_CUDA_HOST_DEVICE inline bool is_negative() const {
+        return (m_hi & 0x8000000000000000ULL) != 0;
     }
 
     DYND_CUDA_HOST_DEVICE inline void negate() {
@@ -178,6 +192,14 @@ public:
         return (unsigned long long)m_lo;
     }
 };
+
+DYND_CUDA_HOST_DEVICE inline bool operator==(int lhs, const dynd_int128& rhs) {
+    return rhs == lhs;
+}
+
+DYND_CUDA_HOST_DEVICE inline bool operator!=(int lhs, const dynd_int128& rhs) {
+    return rhs != lhs;
+}
 
 DYND_CUDA_HOST_DEVICE inline bool operator<(float lhs, const dynd_int128& rhs) {
     return lhs < double(rhs);
