@@ -211,32 +211,3 @@ TEST(ArrFunc, Expr) {
     EXPECT_EQ(-208, ints_out[1]);
     EXPECT_EQ(1237, ints_out[2]);
 }
-
-TEST(ArrFunc, Take) {
-    nd::array a, b, c;
-    nd::array take;
-
-    int avals[5] = {1, 2, 3, 4, 5};
-    dynd_bool bvals[5] = {false, true, false, true, true};
-    a = avals;
-    b = bvals;
-
-    c = nd::empty("var * int");
-    take = kernels::make_take_arrfunc(c.get_type(), a.get_type(), b.get_type());
-    take.f("execute", c, a, b);
-    EXPECT_EQ(3, c.get_dim_size());
-    EXPECT_EQ(2, c(0).as<int>());
-    EXPECT_EQ(4, c(1).as<int>());
-    EXPECT_EQ(5, c(2).as<int>());
-
-    intptr_t bvals2[4] = {3, 0, -1, 4};
-    b = bvals2;
-
-    c = nd::empty("4 * int");
-    take = kernels::make_take_arrfunc(c.get_type(), a.get_type(), b.get_type());
-    take.f("execute", c, a, b);
-    EXPECT_EQ(4, c(0).as<int>());
-    EXPECT_EQ(1, c(1).as<int>());
-    EXPECT_EQ(5, c(2).as<int>());
-    EXPECT_EQ(5, c(3).as<int>());
-}

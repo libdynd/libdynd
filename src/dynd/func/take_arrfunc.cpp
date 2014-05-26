@@ -106,6 +106,62 @@ struct indexed_take_ck : public kernels::expr_ck<indexed_take_ck, 2> {
 };
 } // anonymous namespace
 
+static int resolve_take_dst_type(const arrfunc_type_data *DYND_UNUSED(af_self),
+                                 ndt::type &out_dst_tp, const ndt::type *src_tp,
+                                 int DYND_UNUSED(throw_on_error))
+{
+    ndt::type mask_el_tp = src_tp[1].get_type_at_dimension(NULL, 1);
+    if (mask_el_tp.get_type_id() == bool_type_id) {
+        out_dst_tp = ndt::make_var_dim(
+            src_tp[0].get_type_at_dimension(NULL, 1).get_canonical_type());
+    } else if (mask_el_tp.get_type_id() ==
+               (type_id_t)type_id_of<intptr_t>::value) {
+        if (src_tp[1].get_type_id() == var_dim_type_id) {
+            out_dst_tp = ndt::make_var_dim(
+                src_tp[0].get_type_at_dimension(NULL, 1).get_canonical_type());
+        } else {
+            out_dst_tp = ndt::make_strided_dim(
+                src_tp[0].get_type_at_dimension(NULL, 1).get_canonical_type());
+        }
+    } else {
+        stringstream ss;
+        ss << "take: unsupported type for the index " << mask_el_tp
+           << ", need bool or intptr";
+        throw invalid_argument(ss.str());
+    }
+
+    return 1;
+}
+
+static void resolve_take_dst_shape(const arrfunc_type_data *DYND_UNUSED(af_self),
+                                   intptr_t *out_shape, const ndt::type &dst_tp,
+                                   const ndt::type *src_tp,
+                                   const char *const *src_arrmeta,
+                                   const char *const *src_data)
+{
+    ndt::type mask_el_tp = src_tp[1].get_type_at_dimension(NULL, 1);
+    if (mask_el_tp.get_type_id() == bool_type_id) {
+        out_shape[0] = -1;
+    } else if (mask_el_tp.get_type_id() ==
+               (type_id_t)type_id_of<intptr_t>::value) {
+        src_tp[1].extended()->get_shape(1, 0, out_shape, src_arrmeta[1], src_data[1]);
+    } else {
+        stringstream ss;
+        ss << "take: unsupported type for the index " << mask_el_tp
+           << ", need bool or intptr";
+        throw invalid_argument(ss.str());
+    }
+    if (dst_tp.get_ndim() > 1) {
+        // If the elements themselves have dimensions, also initialize their
+        // shape
+        const char *el_arrmeta = src_arrmeta[0];
+        ndt::type el_tp = src_tp[0].get_type_at_dimension(
+            const_cast<char **>(&el_arrmeta), 1);
+        el_tp.extended()->get_shape(dst_tp.get_ndim() - 1, 0, out_shape + 1,
+                                    el_arrmeta, NULL);
+    }
+}
+
 static intptr_t
 instantiate_masked_take(const arrfunc_type_data *DYND_UNUSED(self_data_ptr), dynd::ckernel_builder *ckb,
                         intptr_t ckb_offset, const ndt::type &dst_tp,
@@ -229,25 +285,44 @@ instantiate_indexed_take(const arrfunc_type_data *DYND_UNUSED(self_data_ptr), dy
         kernel_request_single, assign_error_default, ectx);
 }
 
-void kernels::make_take_arrfunc(arrfunc_type_data *out_af,
-                                const ndt::type &dst_tp,
-                                const ndt::type &src_tp,
-                                const ndt::type &mask_tp)
+static intptr_t
+instantiate_take(const arrfunc_type_data *af_self, dynd::ckernel_builder *ckb,
+                         intptr_t ckb_offset, const ndt::type &dst_tp,
+                         const char *dst_arrmeta, const ndt::type *src_tp,
+                         const char *const *src_arrmeta, uint32_t kernreq,
+                         const eval::eval_context *ectx)
 {
+    ndt::type mask_el_tp = src_tp[1].get_type_at_dimension(NULL, 1);
+    if (mask_el_tp.get_type_id() == bool_type_id) {
+        return instantiate_masked_take(af_self, ckb, ckb_offset, dst_tp,
+                                       dst_arrmeta, src_tp, src_arrmeta,
+                                       kernreq, ectx);
+    } else if (mask_el_tp.get_type_id() ==
+               (type_id_t)type_id_of<intptr_t>::value) {
+        return instantiate_indexed_take(af_self, ckb, ckb_offset, dst_tp,
+                                       dst_arrmeta, src_tp, src_arrmeta,
+                                       kernreq, ectx);
+    } else {
+        stringstream ss;
+        ss << "take: unsupported type for the index " << mask_el_tp
+           << ", need bool or intptr";
+        throw invalid_argument(ss.str());
+    }
+}
+
+void kernels::make_take_arrfunc(arrfunc_type_data *out_af)
+{
+    // Masked take: (M * T, M * bool) -> var * T
+    // Indexed take: (M * T, N * intptr) -> N * T
+    // Combined: (M * T, N * Ix) -> R * T
+    static ndt::type param_types[2] = {ndt::type("M * T"), ndt::type("N * Ix")};
+    static ndt::type func_proto = ndt::make_funcproto(param_types, ndt::type("R * T"));
     // Create the data for the arrfunc
     out_af->data_ptr = NULL;
     out_af->free_func = NULL;
     out_af->ckernel_funcproto = expr_operation_funcproto;
-    ndt::type param_types[2] = {src_tp, mask_tp};
-    out_af->func_proto = ndt::make_funcproto(param_types, dst_tp);
-    switch (mask_tp.get_type_at_dimension(NULL, 1).get_type_id()) {
-        case bool_type_id:
-            out_af->instantiate = &instantiate_masked_take;
-            break;
-        case (type_id_t)type_id_of<intptr_t>::value:
-            out_af->instantiate = &instantiate_indexed_take;
-            break;
-        default:
-            throw invalid_argument("take requires either a boolean mask or an index array");
-    }
+    out_af->func_proto = func_proto;
+    out_af->resolve_dst_type = &resolve_take_dst_type;
+    out_af->resolve_dst_shape = &resolve_take_dst_shape;
+    out_af->instantiate = &instantiate_take;
 }

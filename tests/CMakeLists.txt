@@ -64,6 +64,7 @@ set(tests_SRC
     func/test_lift_arrfunc.cpp
     func/test_reduction.cpp
     func/test_rolling.cpp
+    func/test_take.cpp
     array/test_array.cpp
     array/test_array_range.cpp
     array/test_array_assign.cpp
