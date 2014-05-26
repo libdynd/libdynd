@@ -381,6 +381,9 @@ TEST(StringType, StringToInteger) {
     EXPECT_EQ(18446744073709551615ULL, nd::array("18446744073709551615").ucast<uint64_t>().as<uint64_t>());
     EXPECT_THROW(nd::array("-1").ucast<uint64_t>().eval(), runtime_error);
     EXPECT_THROW(nd::array("18446744073709551616").ucast<uint64_t>().eval(), runtime_error);
+
+    EXPECT_THROW(nd::array("").ucast<uint64_t>().eval(), invalid_argument);
+    EXPECT_THROW(nd::array("-").ucast<uint64_t>().eval(), invalid_argument);
 }
 
 TEST(StringType, StringToFloat32SpecialValues) {
