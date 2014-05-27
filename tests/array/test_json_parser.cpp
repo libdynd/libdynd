@@ -159,6 +159,21 @@ TEST(JSONParser, UnsignedIntegerLimits) {
     EXPECT_THROW(parse_json(ndt::make_type<dynd_uint128>(), "340282366920938463463374607431768211456"), exception);
 }
 
+TEST(JSONParser, IntFromString) {
+    nd::array a;
+
+    a = parse_json(ndt::make_type<int>(), "\"123456\"");
+    EXPECT_EQ(123456, a.as<int>());
+    a = parse_json(ndt::make_type<int>(), "\"-123456\"");
+    EXPECT_EQ(-123456, a.as<int>());
+
+    EXPECT_THROW(parse_json(ndt::make_type<int>(), "\"-12356blarg\""), exception);
+    eval::eval_context ectx_nocheck;
+    ectx_nocheck.default_errmode = assign_error_none;
+    a = parse_json(ndt::make_type<int>(), "\"-12356blarg\"", &ectx_nocheck);
+    EXPECT_EQ(-12356, a.as<int>());
+}
+
 TEST(JSONParser, BuiltinsFromFloat) {
     nd::array n;
 

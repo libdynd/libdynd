@@ -475,15 +475,36 @@ static void parse_dynd_builtin_json(const ndt::type& tp, const char *DYND_UNUSED
     rbegin = begin;
 }
 
-static void parse_integer_json(const ndt::type& tp, const char *DYND_UNUSED(metadata), char *out_data,
-                const char *&begin, const char *end, assign_error_mode errmode)
+static void parse_integer_json(const ndt::type &tp,
+                               const char *DYND_UNUSED(metadata),
+                               char *out_data, const char *&rbegin,
+                               const char *end, assign_error_mode errmode)
 {
+    const char *begin = rbegin;
     const char *nbegin, *nend;
+    bool escaped = false;
     if (parse::parse_json_number_no_ws(begin, end, nbegin, nend)) {
         parse::string_to_int(out_data, tp.get_type_id(), nbegin, nend, errmode);
+    } else if (parse::parse_doublequote_string_no_ws(begin, end, nbegin, nend,
+                                                     escaped)) {
+        // Interpret the data inside the string as an int
+        try {
+            if (!escaped) {
+                parse::string_to_int(out_data, tp.get_type_id(), nbegin, nend,
+                                     errmode);
+            } else {
+                string s;
+                parse::unescape_string(nbegin, nend, s);
+                parse::string_to_int(out_data, tp.get_type_id(), nbegin, nend,
+                                     errmode);
+            }
+        } catch (const std::exception& e) {
+            throw json_parse_error(rbegin, e.what(), tp);
+        }
     } else {
         throw json_parse_error(begin, "expected a number", tp);
     }
+    rbegin = begin;
 }
 
 static void parse_real_json(const ndt::type& tp, const char *metadata, char *out_data,
