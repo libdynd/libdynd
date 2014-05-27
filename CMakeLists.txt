@@ -165,6 +165,7 @@ set(libdynd_SRC
 	src/dynd/types/char_type.cpp
     src/dynd/types/arrfunc_type.cpp
     src/dynd/types/convert_type.cpp
+    src/dynd/types/cstruct_type.cpp
     src/dynd/types/ctuple_type.cpp
     src/dynd/types/cuda_host_type.cpp
     src/dynd/types/cuda_device_type.cpp
@@ -176,25 +177,23 @@ set(libdynd_SRC
     src/dynd/types/datetime_parser.cpp
     src/dynd/types/datetime_type.cpp
     src/dynd/types/datetime_util.cpp
-    src/dynd/types/ellipsis_dim_type.cpp
-    src/dynd/types/funcproto_type.cpp
-    src/dynd/types/type_type.cpp
     src/dynd/types/dynd_complex.cpp
     src/dynd/types/dynd_float16.cpp
     src/dynd/types/dynd_float128.cpp
     src/dynd/types/dynd_int128.cpp
     src/dynd/types/dynd_uint128.cpp
+    src/dynd/types/ellipsis_dim_type.cpp
     src/dynd/types/expr_type.cpp
     src/dynd/types/fixed_dim_type.cpp
-    src/dynd/types/property_type.cpp
-    src/dynd/types/type_alignment.cpp
     src/dynd/types/fixedbytes_type.cpp
     src/dynd/types/fixedstring_type.cpp
-    src/dynd/types/cstruct_type.cpp
+    src/dynd/types/funcproto_type.cpp
     src/dynd/types/groupby_type.cpp
     src/dynd/types/json_type.cpp
     src/dynd/types/ndarrayarg_type.cpp
+    src/dynd/types/option_type.cpp
     src/dynd/types/pointer_type.cpp
+    src/dynd/types/property_type.cpp
     src/dynd/types/strided_dim_type.cpp
     src/dynd/types/string_type.cpp
     src/dynd/types/struct_type.cpp
@@ -202,7 +201,9 @@ set(libdynd_SRC
     src/dynd/types/time_type.cpp
     src/dynd/types/time_util.cpp
     src/dynd/types/tuple_type.cpp
+    src/dynd/types/type_alignment.cpp
     src/dynd/types/type_id.cpp
+    src/dynd/types/type_type.cpp
     src/dynd/types/typevar_dim_type.cpp
     src/dynd/types/typevar_type.cpp
     src/dynd/types/unary_expr_type.cpp
@@ -255,6 +256,7 @@ set(libdynd_SRC
     include/dynd/types/groupby_type.hpp
     include/dynd/types/json_type.hpp
     include/dynd/types/ndarrayarg_type.hpp
+    include/dynd/types/option_type.hpp
     include/dynd/types/pointer_type.hpp
     include/dynd/types/strided_dim_type.hpp
     include/dynd/types/string_type.hpp

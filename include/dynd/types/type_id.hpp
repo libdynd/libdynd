@@ -42,6 +42,8 @@ enum type_kind_t {
     // that calculations should look at the value_type for
     // type promotion, etc.
     expression_kind,
+    // For the option type, whose value may or may not be present
+    option_kind,
     // For types that specify a memory space
     memory_kind,
     // For types containing type vars, or function prototypes that can't be
@@ -130,6 +132,8 @@ enum type_id_t {
     // A tuple type with fixed layout
     ctuple_type_id,
 
+    option_type_id,
+
     ndarrayarg_type_id,
 
     // Adapter types
@@ -172,16 +176,18 @@ enum type_flags_t {
     type_flag_none = 0x00000000,
     // The type should be considered as a scalar
     type_flag_scalar = 0x00000001,
-    // Memory of this type should be zero-initialized
+    // Memory of this type must be zero-initialized
     type_flag_zeroinit = 0x00000002,
+    // Memory of this type must be constructed
+    type_flag_constructor = 0x00000004,
     // Instances of this type point into other memory
     // blocks, e.g. string_type, var_dim_type.
-    type_flag_blockref = 0x00000004,
+    type_flag_blockref = 0x00000008,
     // Memory of this type must be destroyed,
     // e.g. it might hold a reference count or similar state
-    type_flag_destructor = 0x00000008,
+    type_flag_destructor = 0x00000010,
     // Memory of this type is not readable directly from the host
-    type_flag_not_host_readable = 0x00000010,
+    type_flag_not_host_readable = 0x00000020,
 };
 
 enum axis_order_classification_t {
