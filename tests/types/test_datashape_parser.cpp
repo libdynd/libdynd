@@ -19,6 +19,7 @@
 #include <dynd/types/string_type.hpp>
 #include <dynd/types/fixedstring_type.hpp>
 #include <dynd/types/json_type.hpp>
+#include <dynd/types/option_type.hpp>
 #include <dynd/types/type_alignment.hpp>
 
 using namespace std;
@@ -116,6 +117,27 @@ TEST(DataShapeParser, Unaligned) {
     EXPECT_EQ(ndt::make_cstruct(ndt::make_unaligned(ndt::make_type<int32_t>()), "x",
                                 ndt::make_unaligned(ndt::make_type<int64_t>()), "y"),
                     type_from_datashape("c{x : unaligned[int32], y : unaligned[int64]}"));
+}
+
+TEST(DataShapeParser, Option) {
+    EXPECT_EQ(ndt::make_strided_dim(ndt::make_option<dynd_bool>()),
+                    type_from_datashape("strided * option[bool]"));
+    EXPECT_EQ(ndt::make_strided_dim(ndt::make_option<dynd_bool>()),
+                    type_from_datashape("strided * ?bool"));
+    EXPECT_EQ(ndt::make_strided_dim(ndt::make_option(
+                  ndt::make_strided_dim(ndt::make_type<float>()))),
+              type_from_datashape("strided * option[strided * float32]"));
+    EXPECT_EQ(ndt::make_strided_dim(ndt::make_option(
+                  ndt::make_strided_dim(ndt::make_type<float>()))),
+              type_from_datashape("strided * ?strided * float32"));
+    EXPECT_EQ(ndt::make_struct(ndt::make_option(ndt::make_type<int32_t>()), "x",
+                               ndt::make_option(ndt::make_type<int64_t>()),
+                               "y"),
+              type_from_datashape("{x : option[int32], y : option[int64]}"));
+    EXPECT_EQ(
+        ndt::make_cstruct(ndt::make_option(ndt::make_type<int32_t>()), "x",
+                          ndt::make_option(ndt::make_type<int64_t>()), "y"),
+        type_from_datashape("c{x : ?int32, y : ?int64}"));
 }
 
 TEST(DataShapeParser, StridedDim) {

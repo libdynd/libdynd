@@ -46,6 +46,7 @@ set(tests_SRC
     types/test_fixedstring_type.cpp
     types/test_groupby_type.cpp
     types/test_json_type.cpp
+    types/test_option_type.cpp
     types/test_pointer_type.cpp
     types/test_strided_dim_type.cpp
     types/test_string_type.cpp

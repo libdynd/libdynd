@@ -94,8 +94,8 @@ bool option_type::operator==(const base_type& rhs) const
     } else if (rhs.get_type_id() != option_type_id) {
         return false;
     } else {
-        const option_type *dt = static_cast<const option_type*>(&rhs);
-        return m_value_tp == dt->m_value_tp;
+        const option_type *ot = static_cast<const option_type*>(&rhs);
+        return m_value_tp == ot->m_value_tp;
     }
 }
 

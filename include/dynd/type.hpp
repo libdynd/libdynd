@@ -223,6 +223,10 @@ public:
         return !(operator==(rhs));
     }
 
+    inline bool is_null() const {
+        return m_extended == NULL;
+    }
+
     /**
      * Returns true if this type is built in, which
      * means the type id is encoded directly in the m_extended

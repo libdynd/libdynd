@@ -460,6 +460,13 @@ dynd_uint128 checked_string_to_uint128(const char *begin, const char *end,
                                          bool &out_overflow, bool &out_badparse);
 
 /**
+ * Converts a string containing only an integer (no leading or
+ * trailing space, etc) into an intptr_t, raising an exception if
+ * there are problems.
+ */
+intptr_t checked_string_to_intptr(const char *begin, const char *end);
+
+/**
  * Converts a string containing only an unsigned integer (no leading or
  * trailing space, etc) into a uint64, ignoring any problems.
  */

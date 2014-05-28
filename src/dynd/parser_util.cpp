@@ -328,6 +328,36 @@ bool parse::parse_6digit_int_no_ws(const char *&begin, const char *end,
     return false;
 }
 
+namespace {
+template <class T> struct overflow_check;
+template <> struct overflow_check<int8_t> { inline static bool is_overflow(uint64_t value, bool negative) {
+    return (value&~0x7fULL) != 0 && !(negative && value == 0x80ULL);
+}};
+template <> struct overflow_check<int16_t> { inline static bool is_overflow(uint64_t value, bool negative) {
+    return (value&~0x7fffULL) != 0 && !(negative && value == 0x8000ULL);
+}};
+template <> struct overflow_check<int32_t> { inline static bool is_overflow(uint64_t value, bool negative) {
+    return (value&~0x7fffffffULL) != 0 && !(negative && value == 0x80000000ULL);
+}};
+template <> struct overflow_check<int64_t> { inline static bool is_overflow(uint64_t value, bool negative) {
+    return (value&~0x7fffffffffffffffULL) != 0 && !(negative && value == 0x8000000000000000ULL);
+}};
+template <> struct overflow_check<dynd_int128> { inline static bool is_overflow(const dynd_uint128 &value, bool negative) {
+        return (value.m_hi & ~0x7fffffffffffffffULL) != 0 &&
+               !(negative && value.m_hi == 0x8000000000000000ULL &&
+                 value.m_lo == 0ULL);
+}};
+template <> struct overflow_check<uint8_t> { inline static bool is_overflow(uint64_t value) {
+    return (value&~0xffULL) != 0;
+}};
+template <> struct overflow_check<uint16_t> { inline static bool is_overflow(uint64_t value) {
+    return (value&~0xffffULL) != 0;
+}};
+template <> struct overflow_check<uint32_t> { inline static bool is_overflow(uint64_t value) {
+    return (value&~0xffffffffULL) != 0;
+}};
+} // anonymous namespace
+
 template <class T>
 inline static T checked_string_to_uint(const char *begin, const char *end,
                                        bool &out_overflow, bool &out_badparse)
@@ -455,6 +485,33 @@ dynd_uint128 parse::checked_string_to_uint128(const char *begin, const char *end
     return checked_string_to_uint<dynd_uint128>(begin, end, out_overflow, out_badparse);
 }
 
+intptr_t parse::checked_string_to_intptr(const char *begin, const char *end)
+{
+    bool negative = false, overflow = false, badparse = false;
+    if (begin < end && *begin == '-') {
+        negative = true;
+        ++begin;
+    }
+    uint64_t uvalue = checked_string_to_uint64(begin, end, overflow, badparse);
+    if (overflow || overflow_check<intptr_t>::is_overflow(uvalue, negative)) {
+        stringstream ss;
+        ss << "overflow converting string ";
+        ss.write(begin, end-begin);
+        ss << " to intptr";
+        throw overflow_error(ss.str());
+    } else if (badparse) {
+        stringstream ss;
+        ss << "parse error converting string ";
+        ss.write(begin, end-begin);
+        ss << " to intptr";
+        throw invalid_argument(ss.str());
+    } else {
+        return negative ? -static_cast<intptr_t>(uvalue)
+                        : static_cast<intptr_t>(uvalue);
+    }
+}
+
+
 uint64_t parse::unchecked_string_to_uint64(const char *begin, const char *end)
 {
     return unchecked_string_to_uint<uint64_t>(begin, end);
@@ -464,36 +521,6 @@ dynd_uint128 parse::unchecked_string_to_uint128(const char *begin, const char *e
 {
     return unchecked_string_to_uint<dynd_uint128>(begin, end);
 }
-
-namespace {
-template <class T> struct overflow_check;
-template <> struct overflow_check<int8_t> { inline static bool is_overflow(uint64_t value, bool negative) {
-    return (value&~0x7fULL) != 0 && !(negative && value == 0x80ULL);
-}};
-template <> struct overflow_check<int16_t> { inline static bool is_overflow(uint64_t value, bool negative) {
-    return (value&~0x7fffULL) != 0 && !(negative && value == 0x8000ULL);
-}};
-template <> struct overflow_check<int32_t> { inline static bool is_overflow(uint64_t value, bool negative) {
-    return (value&~0x7fffffffULL) != 0 && !(negative && value == 0x80000000ULL);
-}};
-template <> struct overflow_check<int64_t> { inline static bool is_overflow(uint64_t value, bool negative) {
-    return (value&~0x7fffffffffffffffULL) != 0 && !(negative && value == 0x8000000000000000ULL);
-}};
-template <> struct overflow_check<dynd_int128> { inline static bool is_overflow(const dynd_uint128 &value, bool negative) {
-        return (value.m_hi & ~0x7fffffffffffffffULL) != 0 &&
-               !(negative && value.m_hi == 0x8000000000000000ULL &&
-                 value.m_lo == 0ULL);
-}};
-template <> struct overflow_check<uint8_t> { inline static bool is_overflow(uint64_t value) {
-    return (value&~0xffULL) != 0;
-}};
-template <> struct overflow_check<uint16_t> { inline static bool is_overflow(uint64_t value) {
-    return (value&~0xffffULL) != 0;
-}};
-template <> struct overflow_check<uint32_t> { inline static bool is_overflow(uint64_t value) {
-    return (value&~0xffffffffULL) != 0;
-}};
-} // anonymous namespace
 
 template <class T>
 static inline void assign_signed_int_value(char *out_int, uint64_t uvalue,
