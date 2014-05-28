@@ -52,9 +52,7 @@ public:
 };
 
 namespace ndt {
-    inline ndt::type make_arrfunc() {
-        return ndt::type(new arrfunc_type(), false);
-    }
+    const ndt::type &make_arrfunc();
 } // namespace ndt
 
 } // namespace dynd

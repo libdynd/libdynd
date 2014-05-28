@@ -16,11 +16,25 @@ namespace dynd {
 
 class option_type : public base_type {
     ndt::type m_value_tp;
+    /**
+     * An array with type
+     *  c{
+     *      is_avail: arrfunc,  # (option[T]) -> bool
+     *      assign_na: arrfunc, # () -> option[T]
+     *  }
+     * with functions which can classify whether values
+     * are available, and assign the NA (not available)
+     * value.
+     */
+    nd::array m_nafunc;
 
 public:
     option_type(const ndt::type& value_tp);
 
     virtual ~option_type();
+
+    /** Returns the type that m_nafunc has */
+    static const ndt::type &make_nafunc_type();
 
     const ndt::type& get_value_type() const {
         return m_value_tp.value_type();
@@ -41,16 +55,19 @@ public:
 
     bool operator==(const base_type& rhs) const;
 
-    void metadata_default_construct(char *metadata, intptr_t ndim, const intptr_t* shape) const;
-    void metadata_copy_construct(char *dst_metadata, const char *src_metadata, memory_block_data *embedded_reference) const;
+    void metadata_default_construct(char *metadata, intptr_t ndim,
+                                    const intptr_t *shape) const;
+    void metadata_copy_construct(char *dst_metadata, const char *src_metadata,
+                                 memory_block_data *embedded_reference) const;
     void metadata_reset_buffers(char *metadata) const;
     void metadata_finalize_buffers(char *metadata) const;
     void metadata_destruct(char *metadata) const;
-    void metadata_debug_print(const char *metadata, std::ostream& o, const std::string& indent) const;
+    void metadata_debug_print(const char *metadata, std::ostream &o,
+                              const std::string &indent) const;
 
     void get_dynamic_type_properties(
-                    const std::pair<std::string, gfunc::callable> **out_properties,
-                    size_t *out_count) const;
+        const std::pair<std::string, gfunc::callable> **out_properties,
+        size_t *out_count) const;
 };
 
 namespace ndt {

@@ -5,6 +5,7 @@
 
 #include <dynd/array.hpp>
 #include <dynd/types/option_type.hpp>
+#include <dynd/types/arrfunc_type.hpp>
 #include <dynd/memblock/pod_memory_block.hpp>
 #include <dynd/kernels/string_assignment_kernels.hpp>
 #include <dynd/kernels/assignment_kernels.hpp>
@@ -24,14 +25,28 @@ option_type::option_type(const ndt::type& value_tp)
                     value_tp.get_ndim()),
                     m_value_tp(value_tp)
 {
+    if (value_tp.is_builtin()) {
+        
+    }
 
+    stringstream ss;
+    ss << "cannot create type option[" << value_tp << "]";
+    throw type_error(ss.str());
 }
 
 option_type::~option_type()
 {
 }
 
-void option_type::print_data(std::ostream& o, const char *arrmeta, const char *data) const
+const ndt::type &option_type::make_nafunc_type()
+{
+    static ndt::type static_instance = ndt::make_cstruct(
+        ndt::make_arrfunc(), "is_avail", ndt::make_arrfunc(), "assign_na");
+    return static_instance;
+}
+
+void option_type::print_data(std::ostream &o, const char *arrmeta,
+                             const char *data) const
 {
     throw runtime_error("TODO: option_type::print_data");
 }
