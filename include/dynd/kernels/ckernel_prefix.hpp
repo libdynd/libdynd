@@ -8,6 +8,7 @@
 
 #include <iostream>
 #include <sstream>
+#include <stdexcept>
 
 #include <dynd/config.hpp>
 

@@ -14,7 +14,18 @@ using namespace dynd;
 
 namespace {
 
-struct bool_is_avail {
+template<class T>
+struct is_avail;
+
+template<class T>
+struct assign_na;
+
+//////////////////////////////////////
+// option[bool]
+// NA is 2
+
+template<>
+struct is_avail<dynd_bool> {
     static void single(char *dst, const char *src,
                        ckernel_prefix *DYND_UNUSED(self))
     {
@@ -34,11 +45,11 @@ struct bool_is_avail {
     }
 };
 
-struct bool_assign_na {
+template<>
+struct assign_na<dynd_bool> {
     static void single(char *dst, const char *const* DYND_UNUSED(src),
                                 ckernel_prefix *DYND_UNUSED(strided))
     {
-        // NA is 2
         *dst = 2;
     }
 
@@ -48,7 +59,6 @@ struct bool_assign_na {
                                   size_t count,
                                   ckernel_prefix *DYND_UNUSED(strided))
     {
-        // NA is 2
         if (dst_stride == 1) {
             memset(dst, 2, count);
         } else {
@@ -59,11 +69,269 @@ struct bool_assign_na {
     }
 };
 
-struct bool_nafunc {
+//////////////////////////////////////
+// option[T] for signed integer T
+// NA is the smallest negative value
+
+template<class T>
+struct int_is_avail {
+    static void single(char *dst, const char *src,
+                       ckernel_prefix *DYND_UNUSED(self))
+    {
+        *dst = *reinterpret_cast<const T *>(src) != numeric_limits<T>::min();
+    }
+
+    static void strided(char *dst, intptr_t dst_stride, const char *src,
+                        intptr_t src_stride, size_t count,
+                        ckernel_prefix *DYND_UNUSED(self))
+    {
+        for (size_t i = 0; i != count;
+                ++i, dst += dst_stride, src += src_stride) {
+            *dst = *reinterpret_cast<const T *>(src) != numeric_limits<T>::min();
+        }
+    }
+};
+
+template <>
+struct is_avail<int8_t> : public int_is_avail<int8_t> {};
+template <>
+struct is_avail<int16_t> : public int_is_avail<int16_t> {};
+template <>
+struct is_avail<int32_t> : public int_is_avail<int32_t> {};
+template <>
+struct is_avail<int64_t> : public int_is_avail<int64_t> {};
+template <>
+struct is_avail<dynd_int128> : public int_is_avail<dynd_int128> {};
+
+template<class T>
+struct int_assign_na {
+    static void single(char *dst, const char *const* DYND_UNUSED(src),
+                                ckernel_prefix *DYND_UNUSED(strided))
+    {
+        *reinterpret_cast<T *>(dst) = numeric_limits<T>::min();
+    }
+
+    static void strided(char *dst, intptr_t dst_stride,
+                                  const char *const *DYND_UNUSED(src),
+                                  const intptr_t *DYND_UNUSED(src_stride),
+                                  size_t count,
+                                  ckernel_prefix *DYND_UNUSED(strided))
+    {
+        for (size_t i = 0; i != count; ++i, dst += dst_stride) {
+            *reinterpret_cast<T *>(dst) = numeric_limits<T>::min();
+        }
+    }
+};
+
+template <>
+struct assign_na<int8_t> : public int_assign_na<int8_t> {};
+template <>
+struct assign_na<int16_t> : public int_assign_na<int16_t> {};
+template <>
+struct assign_na<int32_t> : public int_assign_na<int32_t> {};
+template <>
+struct assign_na<int64_t> : public int_assign_na<int64_t> {};
+template <>
+struct assign_na<dynd_int128> : public int_assign_na<dynd_int128> {};
+
+//////////////////////////////////////
+// option[float]
+// NA is 0x7f8007a2
+
+template<>
+struct is_avail<float> {
+    static void single(char *dst, const char *src,
+                       ckernel_prefix *DYND_UNUSED(self))
+    {
+        *dst = *reinterpret_cast<const uint32_t *>(src) != DYND_FLOAT32_NA_AS_UINT;
+    }
+
+    static void strided(char *dst, intptr_t dst_stride, const char *src,
+                        intptr_t src_stride, size_t count,
+                        ckernel_prefix *DYND_UNUSED(self))
+    {
+        // Available if the value is 0 or 1
+        for (size_t i = 0; i != count;
+                ++i, dst += dst_stride, src += src_stride) {
+            *dst = *reinterpret_cast<const uint32_t *>(src) != DYND_FLOAT32_NA_AS_UINT;
+        }
+    }
+};
+
+template<>
+struct assign_na<float> {
+    static void single(char *dst, const char *const* DYND_UNUSED(src),
+                                ckernel_prefix *DYND_UNUSED(strided))
+    {
+        *reinterpret_cast<uint32_t *>(dst) = DYND_FLOAT32_NA_AS_UINT;
+    }
+
+    static void strided(char *dst, intptr_t dst_stride,
+                                  const char *const *DYND_UNUSED(src),
+                                  const intptr_t *DYND_UNUSED(src_stride),
+                                  size_t count,
+                                  ckernel_prefix *DYND_UNUSED(strided))
+    {
+        for (size_t i = 0; i != count; ++i, dst += dst_stride) {
+            *reinterpret_cast<uint32_t *>(dst) = DYND_FLOAT32_NA_AS_UINT;
+        }
+    }
+};
+
+//////////////////////////////////////
+// option[double]
+// NA is 0x7ff00000000007a2ULL
+
+template<>
+struct is_avail<double> {
+    static void single(char *dst, const char *src,
+                       ckernel_prefix *DYND_UNUSED(self))
+    {
+        *dst = *reinterpret_cast<const uint64_t *>(src) != DYND_FLOAT64_NA_AS_UINT;
+    }
+
+    static void strided(char *dst, intptr_t dst_stride, const char *src,
+                        intptr_t src_stride, size_t count,
+                        ckernel_prefix *DYND_UNUSED(self))
+    {
+        // Available if the value is 0 or 1
+        for (size_t i = 0; i != count;
+                ++i, dst += dst_stride, src += src_stride) {
+            *dst = *reinterpret_cast<const uint64_t *>(src) != DYND_FLOAT64_NA_AS_UINT;
+        }
+    }
+};
+
+template<>
+struct assign_na<double> {
+    static void single(char *dst, const char *const* DYND_UNUSED(src),
+                                ckernel_prefix *DYND_UNUSED(strided))
+    {
+        *reinterpret_cast<uint64_t *>(dst) = DYND_FLOAT64_NA_AS_UINT;
+    }
+
+    static void strided(char *dst, intptr_t dst_stride,
+                                  const char *const *DYND_UNUSED(src),
+                                  const intptr_t *DYND_UNUSED(src_stride),
+                                  size_t count,
+                                  ckernel_prefix *DYND_UNUSED(strided))
+    {
+        for (size_t i = 0; i != count; ++i, dst += dst_stride) {
+            *reinterpret_cast<uint64_t *>(dst) = DYND_FLOAT64_NA_AS_UINT;
+        }
+    }
+};
+
+//////////////////////////////////////
+// option[complex[float]]
+// NA is two float NAs
+
+template<>
+struct is_avail<dynd_complex<float> > {
+    static void single(char *dst, const char *src,
+                       ckernel_prefix *DYND_UNUSED(self))
+    {
+        *dst = reinterpret_cast<const uint32_t *>(src)[0] !=
+                   DYND_FLOAT32_NA_AS_UINT &&
+               reinterpret_cast<const uint32_t *>(src)[1] !=
+                   DYND_FLOAT32_NA_AS_UINT;
+    }
+
+    static void strided(char *dst, intptr_t dst_stride, const char *src,
+                        intptr_t src_stride, size_t count,
+                        ckernel_prefix *DYND_UNUSED(self))
+    {
+        // Available if the value is 0 or 1
+        for (size_t i = 0; i != count;
+                ++i, dst += dst_stride, src += src_stride) {
+            *dst = reinterpret_cast<const uint32_t *>(src)[0] !=
+                       DYND_FLOAT32_NA_AS_UINT &&
+                   reinterpret_cast<const uint32_t *>(src)[1] !=
+                       DYND_FLOAT32_NA_AS_UINT;
+        }
+    }
+};
+
+template<>
+struct assign_na<dynd_complex<float> > {
+    static void single(char *dst, const char *const* DYND_UNUSED(src),
+                                ckernel_prefix *DYND_UNUSED(strided))
+    {
+        reinterpret_cast<uint32_t *>(dst)[0] = DYND_FLOAT32_NA_AS_UINT;
+        reinterpret_cast<uint32_t *>(dst)[1] = DYND_FLOAT32_NA_AS_UINT;
+    }
+
+    static void strided(char *dst, intptr_t dst_stride,
+                                  const char *const *DYND_UNUSED(src),
+                                  const intptr_t *DYND_UNUSED(src_stride),
+                                  size_t count,
+                                  ckernel_prefix *DYND_UNUSED(strided))
+    {
+        for (size_t i = 0; i != count; ++i, dst += dst_stride) {
+            reinterpret_cast<uint32_t *>(dst)[0] = DYND_FLOAT32_NA_AS_UINT;
+            reinterpret_cast<uint32_t *>(dst)[1] = DYND_FLOAT32_NA_AS_UINT;
+        }
+    }
+};
+
+//////////////////////////////////////
+// option[complex[double]]
+// NA is two double NAs
+
+template<>
+struct is_avail<dynd_complex<double> > {
+    static void single(char *dst, const char *src,
+                       ckernel_prefix *DYND_UNUSED(self))
+    {
+        *dst = reinterpret_cast<const uint64_t *>(src)[0] !=
+                   DYND_FLOAT64_NA_AS_UINT &&
+               reinterpret_cast<const uint64_t *>(src)[1] !=
+                   DYND_FLOAT64_NA_AS_UINT;
+    }
+
+    static void strided(char *dst, intptr_t dst_stride, const char *src,
+                        intptr_t src_stride, size_t count,
+                        ckernel_prefix *DYND_UNUSED(self))
+    {
+        // Available if the value is 0 or 1
+        for (size_t i = 0; i != count;
+                ++i, dst += dst_stride, src += src_stride) {
+            *dst = reinterpret_cast<const uint64_t *>(src)[0] !=
+                       DYND_FLOAT64_NA_AS_UINT &&
+                   reinterpret_cast<const uint64_t *>(src)[1] !=
+                       DYND_FLOAT64_NA_AS_UINT;
+        }
+    }
+};
+
+template<>
+struct assign_na<dynd_complex<double> > {
+    static void single(char *dst, const char *const* DYND_UNUSED(src),
+                                ckernel_prefix *DYND_UNUSED(strided))
+    {
+        reinterpret_cast<uint64_t *>(dst)[0] = DYND_FLOAT64_NA_AS_UINT;
+        reinterpret_cast<uint64_t *>(dst)[1] = DYND_FLOAT64_NA_AS_UINT;
+    }
+
+    static void strided(char *dst, intptr_t dst_stride,
+                                  const char *const *DYND_UNUSED(src),
+                                  const intptr_t *DYND_UNUSED(src_stride),
+                                  size_t count,
+                                  ckernel_prefix *DYND_UNUSED(strided))
+    {
+        for (size_t i = 0; i != count; ++i, dst += dst_stride) {
+            reinterpret_cast<uint64_t *>(dst)[0] = DYND_FLOAT64_NA_AS_UINT;
+            reinterpret_cast<uint64_t *>(dst)[1] = DYND_FLOAT64_NA_AS_UINT;
+        }
+    }
+};
+
+template<typename T>
+struct nafunc {
     arrfunc_type_data is_avail;
     arrfunc_type_data assign_na;
 
-    typedef dynd_bool base_type;
+    typedef T base_type;
 
     static intptr_t instantiate_is_avail(
         const arrfunc_type_data *DYND_UNUSED(self), dynd::ckernel_builder *ckb,
@@ -81,10 +349,12 @@ struct bool_nafunc {
             throw type_error(ss.str());
         }
         if (dst_tp.get_type_id() != bool_type_id) {
-            throw type_error("Expected dst type bool");
+            stringstream ss;
+            ss << "Expected destination type bool, got " << dst_tp;
+            throw type_error(ss.str());
         }
         ckernel_prefix *ckp = ckb->get_at<ckernel_prefix>(ckb_offset);
-        ckp->set_unary_function<bool_is_avail>((kernel_request_t)kernreq);
+        ckp->set_unary_function<::is_avail<T> >((kernel_request_t)kernreq);
         return ckb_offset + sizeof(ckernel_prefix);
     }
 
@@ -120,23 +390,23 @@ struct bool_nafunc {
             throw type_error(ss.str());
         }
         ckernel_prefix *ckp = ckb->get_at<ckernel_prefix>(ckb_offset);
-        ckp->set_expr_function<bool_assign_na>((kernel_request_t)kernreq);
+        ckp->set_expr_function<::assign_na<T> >((kernel_request_t)kernreq);
         return ckb_offset + sizeof(ckernel_prefix);
     }
 
-    bool_nafunc() {
-        // Use a typevar instead of option[bool] to avoid a circular dependency
+    nafunc() {
+        // Use a typevar instead of option[T] to avoid a circular dependency
         is_avail.func_proto =
             ndt::make_funcproto(ndt::make_typevar("T"), ndt::make_type<dynd_bool>());
         is_avail.ckernel_funcproto = unary_operation_funcproto;
         is_avail.data_ptr = NULL;
-        is_avail.instantiate = &bool_nafunc::instantiate_is_avail;
-        is_avail.resolve_dst_type = &bool_nafunc::resolve_is_avail_dst_type;
+        is_avail.instantiate = &nafunc::instantiate_is_avail;
+        is_avail.resolve_dst_type = &nafunc::resolve_is_avail_dst_type;
         assign_na.func_proto =
             ndt::make_funcproto(0, NULL, ndt::make_typevar("T"));
         assign_na.ckernel_funcproto = expr_operation_funcproto;
         assign_na.data_ptr = NULL;
-        assign_na.instantiate = &bool_nafunc::instantiate_assign_na;
+        assign_na.instantiate = &nafunc::instantiate_assign_na;
     }
 
     nd::array get()
@@ -152,12 +422,49 @@ struct bool_nafunc {
 
 const nd::array &kernels::get_option_builtin_nafunc(type_id_t tid)
 {
-    static bool_nafunc bna_data;
+    static nafunc<dynd_bool> bna_data;
     static nd::array bna = bna_data.get();
+    static nafunc<int8_t> i8na_data;
+    static nd::array i8na = i8na_data.get();
+    static nafunc<int16_t> i16na_data;
+    static nd::array i16na = i16na_data.get();
+    static nafunc<int32_t> i32na_data;
+    static nd::array i32na = i32na_data.get();
+    static nafunc<int64_t> i64na_data;
+    static nd::array i64na = i64na_data.get();
+    static nafunc<dynd_int128> i128na_data;
+    static nd::array i128na = i128na_data.get();
+    static nafunc<float> f32na_data;
+    static nd::array f32na = f32na_data.get();
+    static nafunc<double> f64na_data;
+    static nd::array f64na = f64na_data.get();
+    static nafunc<dynd_complex<float> > cf32na_data;
+    static nd::array cf32na = cf32na_data.get();
+    static nafunc<dynd_complex<double> > cf64na_data;
+    static nd::array cf64na = cf64na_data.get();
     static nd::array nullarr;
-    if (tid == bool_type_id) {
+    switch (tid) {
+    case bool_type_id:
         return bna;
-    } else {
+    case int8_type_id:
+        return i8na;
+    case int16_type_id:
+        return i16na;
+    case int32_type_id:
+        return i32na;
+    case int64_type_id:
+        return i64na;
+    case int128_type_id:
+        return i128na;
+    case float32_type_id:
+        return f32na;
+    case float64_type_id:
+        return f64na;
+    case complex_float32_type_id:
+        return cf32na;
+    case complex_float64_type_id:
+        return cf64na;
+    default:
         return nullarr;
     }
 }

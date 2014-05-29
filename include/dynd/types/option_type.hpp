@@ -15,6 +15,14 @@
 
 namespace dynd {
 
+#define DYND_INT8_NA (std::numeric_limits<int8_t>::min())
+#define DYND_INT16_NA (std::numeric_limits<int16_t>::min())
+#define DYND_INT32_NA (std::numeric_limits<int32_t>::min())
+#define DYND_INT64_NA (std::numeric_limits<int64_t>::min())
+#define DYND_INT128_NA (std::numeric_limits<dynd_int128>::min())
+#define DYND_FLOAT32_NA_AS_UINT (0x7f8007a2U)
+#define DYND_FLOAT64_NA_AS_UINT (0x7ff00000000007a2ULL)
+
 class option_type : public base_type {
     ndt::type m_value_tp;
     /**
