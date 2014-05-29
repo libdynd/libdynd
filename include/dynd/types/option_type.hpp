@@ -11,6 +11,7 @@
 #define _DYND__OPTION_TYPE_HPP_
 
 #include <dynd/type.hpp>
+#include <dynd/func/arrfunc.hpp>
 
 namespace dynd {
 
@@ -42,6 +43,17 @@ public:
 
     const nd::array& get_nafunc() const {
         return m_nafunc;
+    }
+
+    const arrfunc_type_data *get_is_avail_arrfunc() const {
+        return reinterpret_cast<const arrfunc_type_data *>(
+            m_nafunc.get_readonly_originptr());
+    }
+
+    const arrfunc_type_data *get_assign_na_arrfunc() const {
+        return reinterpret_cast<const arrfunc_type_data *>(
+                   m_nafunc.get_readonly_originptr()) +
+               1;
     }
 
     void print_data(std::ostream &o, const char *metadata,

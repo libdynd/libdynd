@@ -48,7 +48,25 @@ const ndt::type &option_type::make_nafunc_type()
 void option_type::print_data(std::ostream &o, const char *arrmeta,
                              const char *data) const
 {
-    throw runtime_error("TODO: option_type::print_data");
+    if (!m_nafunc.is_null()) {
+        assignment_ckernel_builder ckb;
+        const arrfunc_type_data *is_avail = get_is_avail_arrfunc();
+        ndt::type src_tp[1] = {ndt::type(this, true)};
+        is_avail->instantiate(is_avail, &ckb, 0, ndt::make_type<dynd_bool>(),
+                              NULL, src_tp, &arrmeta, kernel_request_single,
+                              &eval::default_eval_context);
+        dynd_bool avail;
+        ckb(reinterpret_cast<char *>(&avail), data);
+        if (avail) {
+            m_value_tp.print_data(o, arrmeta, data);
+        } else {
+            o << "NA";
+        }
+    } else {
+        stringstream ss;
+
+        throw type_error(ss.str());
+    }
 }
 
 void option_type::print_type(std::ostream& o) const
