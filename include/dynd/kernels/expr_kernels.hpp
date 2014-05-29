@@ -10,14 +10,6 @@
 
 namespace dynd {
 
-typedef void (*expr_single_operation_t)(
-                char *dst, const char * const *src,
-                ckernel_prefix *extra);
-typedef void (*expr_strided_operation_t)(
-                char *dst, intptr_t dst_stride,
-                const char * const *src, const intptr_t *src_stride,
-                size_t count, ckernel_prefix *extra);
-
 namespace kernels {
     /**
      * A CRTP (curiously recurring template pattern) base class to help

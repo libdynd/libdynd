@@ -478,7 +478,7 @@ nd::array::array(const char *str, size_t size)
 }
 nd::array::array(const ndt::type& tp)
 {
-    array temp = array(make_array_memory_block(ndt::make_type(), 0, NULL));
+    array temp(make_array_memory_block(ndt::make_type(), 0, NULL));
     temp.swap(*this);
     ndt::type(tp).swap(reinterpret_cast<type_type_data *>(get_ndo()->m_data_pointer)->tp);
     get_ndo()->m_flags = nd::default_access_flags;

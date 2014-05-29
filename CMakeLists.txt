@@ -315,6 +315,7 @@ set(libdynd_SRC
     src/dynd/kernels/bytes_assignment_kernels.cpp
     src/dynd/kernels/byteswap_kernels.cpp
     src/dynd/kernels/ckernel_common_functions.cpp
+    src/dynd/kernels/ckernel_prefix.cpp
     src/dynd/kernels/comparison_kernels.cpp
     src/dynd/kernels/date_assignment_kernels.cpp
     src/dynd/kernels/datetime_assignment_kernels.cpp

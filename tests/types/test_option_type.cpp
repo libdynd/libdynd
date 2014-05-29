@@ -29,6 +29,8 @@ TEST(OptionType, Create) {
     // Roundtripping through a string
     EXPECT_EQ(d, ndt::type(d.str()));
     EXPECT_EQ("?int16", d.str());
+    EXPECT_EQ(d, ndt::type("?int16"));
+    EXPECT_EQ(d, ndt::type("option[int16]"));
 
     d = ndt::make_option(ndt::make_string());
     EXPECT_EQ(option_type_id, d.get_type_id());

@@ -121,46 +121,19 @@ size_t dynd::make_byteswap_assignment_function(
         switch (data_size) {
         case 2:
             result = out_ckb->get_at<ckernel_prefix>(ckb_offset);
-            if (kernreq == kernel_request_single) {
-                result->set_function<unary_single_operation_t>(
-                                &aligned_fixed_size_byteswap<uint16_t>::single);
-            } else if (kernreq == kernel_request_strided) {
-                result->set_function<unary_strided_operation_t>(
-                                &aligned_fixed_size_byteswap<uint16_t>::strided);
-            } else {
-                stringstream ss;
-                ss << "make_byteswap_assignment_function: unrecognized request " << (int)kernreq;
-                throw runtime_error(ss.str());
-            }
+            result->set_unary_function<aligned_fixed_size_byteswap<uint16_t> >(
+                kernreq);
             return ckb_offset + sizeof(ckernel_prefix);
         case 4:
             result = out_ckb->get_at<ckernel_prefix>(ckb_offset);
-            if (kernreq == kernel_request_single) {
-                result->set_function<unary_single_operation_t>(
-                                &aligned_fixed_size_byteswap<uint32_t>::single);
-            } else if (kernreq == kernel_request_strided) {
-                result->set_function<unary_strided_operation_t>(
-                                &aligned_fixed_size_byteswap<uint32_t>::strided);
-            } else {
-                stringstream ss;
-                ss << "make_byteswap_assignment_function: unrecognized request " << (int)kernreq;
-                throw runtime_error(ss.str());
-            }
+            result->set_unary_function<aligned_fixed_size_byteswap<uint32_t> >(
+                kernreq);
             return ckb_offset + sizeof(ckernel_prefix);
             break;
         case 8:
             result = out_ckb->get_at<ckernel_prefix>(ckb_offset);
-            if (kernreq == kernel_request_single) {
-                result->set_function<unary_single_operation_t>(
-                                &aligned_fixed_size_byteswap<uint64_t>::single);
-            } else if (kernreq == kernel_request_strided) {
-                result->set_function<unary_strided_operation_t>(
-                                &aligned_fixed_size_byteswap<uint64_t>::strided);
-            } else {
-                stringstream ss;
-                ss << "make_byteswap_assignment_function: unrecognized request " << (int)kernreq;
-                throw runtime_error(ss.str());
-            }
+            result->set_unary_function<aligned_fixed_size_byteswap<uint64_t> >(
+                kernreq);
             return ckb_offset + sizeof(ckernel_prefix);
             break;
         default:
@@ -185,48 +158,22 @@ size_t dynd::make_pairwise_byteswap_assignment_function(
         switch (data_size) {
         case 4:
             result = out_ckb->get_at<ckernel_prefix>(ckb_offset);
-            if (kernreq == kernel_request_single) {
-                result->set_function<unary_single_operation_t>(
-                                &aligned_fixed_size_pairwise_byteswap_kernel<uint16_t>::single);
-            } else if (kernreq == kernel_request_strided) {
-                result->set_function<unary_strided_operation_t>(
-                                &aligned_fixed_size_pairwise_byteswap_kernel<uint16_t>::strided);
-            } else {
-                stringstream ss;
-                ss << "make_pairwise_byteswap_assignment_function: unrecognized request " << (int)kernreq;
-                throw runtime_error(ss.str());
-            }
+            result->set_unary_function<
+                aligned_fixed_size_pairwise_byteswap_kernel<uint16_t> >(
+                kernreq);
             return ckb_offset + sizeof(ckernel_prefix);
         case 8:
             result = out_ckb->get_at<ckernel_prefix>(ckb_offset);
-            if (kernreq == kernel_request_single) {
-                result->set_function<unary_single_operation_t>(
-                                &aligned_fixed_size_pairwise_byteswap_kernel<uint32_t>::single);
-            } else if (kernreq == kernel_request_strided) {
-                result->set_function<unary_strided_operation_t>(
-                                &aligned_fixed_size_pairwise_byteswap_kernel<uint32_t>::strided);
-            } else {
-                stringstream ss;
-                ss << "make_pairwise_byteswap_assignment_function: unrecognized request " << (int)kernreq;
-                throw runtime_error(ss.str());
-            }
+            result->set_unary_function<
+                aligned_fixed_size_pairwise_byteswap_kernel<uint32_t> >(
+                kernreq);
             return ckb_offset + sizeof(ckernel_prefix);
-            break;
         case 16:
             result = out_ckb->get_at<ckernel_prefix>(ckb_offset);
-            if (kernreq == kernel_request_single) {
-                result->set_function<unary_single_operation_t>(
-                                &aligned_fixed_size_pairwise_byteswap_kernel<uint64_t>::single);
-            } else if (kernreq == kernel_request_strided) {
-                result->set_function<unary_strided_operation_t>(
-                                &aligned_fixed_size_pairwise_byteswap_kernel<uint64_t>::strided);
-            } else {
-                stringstream ss;
-                ss << "make_pairwise_byteswap_assignment_function: unrecognized request " << (int)kernreq;
-                throw runtime_error(ss.str());
-            }
+            result->set_unary_function<
+                aligned_fixed_size_pairwise_byteswap_kernel<uint64_t> >(
+                kernreq);
             return ckb_offset + sizeof(ckernel_prefix);
-            break;
         default:
             break;
         }

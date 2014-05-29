@@ -20,14 +20,6 @@
 
 namespace dynd {
 
-/** Typedef for a unary operation on a single element */
-typedef void (*unary_single_operation_t)(char *dst, const char *src,
-                                         ckernel_prefix *self);
-/** Typedef for a unary operation on a strided segment of elements */
-typedef void (*unary_strided_operation_t)(char *dst, intptr_t dst_stride,
-                                          const char *src, intptr_t src_stride,
-                                          size_t count, ckernel_prefix *self);
-
 /**
  * See the ckernel_builder class documentation
  * for details about how ckernels can be built and

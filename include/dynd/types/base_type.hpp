@@ -9,11 +9,11 @@
 #include <vector>
 
 #include <dynd/config.hpp>
+#include <dynd/types/type_id.hpp>
 #include <dynd/atomic_refcount.hpp>
 #include <dynd/irange.hpp>
 #include <dynd/memblock/memory_block.hpp>
 #include <dynd/kernels/comparison_kernels.hpp>
-#include <dynd/types/type_id.hpp>
 #include <dynd/typed_data_assign.hpp>
 
 namespace dynd {

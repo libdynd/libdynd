@@ -205,11 +205,21 @@ static bool try_view(const ndt::type &tp, const char *metadata,
             return false;
         }
         }
-    default: // require equal types otherwise
+    default:
         if (tp == view_tp) {
+            // require equal types otherwise
             if (tp.get_metadata_size() > 0) {
                 tp.extended()->metadata_copy_construct(view_metadata, metadata,
                                                        embedded_reference);
+            }
+            return true;
+        } else if (tp.is_pod() && view_tp.is_pod() &&
+                   tp.get_data_size() == view_tp.get_data_size() &&
+                   tp.get_data_alignment() >= view_tp.get_data_alignment()) {
+            // POD types with matching properties
+            if (view_tp.get_metadata_size() > 0) {
+                view_tp.extended()->metadata_default_construct(view_metadata, 0,
+                                                               NULL);
             }
             return true;
         } else {

@@ -6,6 +6,7 @@
 #include <dynd/array.hpp>
 #include <dynd/types/option_type.hpp>
 #include <dynd/types/arrfunc_type.hpp>
+#include <dynd/kernels/option_kernels.hpp>
 #include <dynd/memblock/pod_memory_block.hpp>
 #include <dynd/kernels/string_assignment_kernels.hpp>
 #include <dynd/kernels/assignment_kernels.hpp>
@@ -26,12 +27,11 @@ option_type::option_type(const ndt::type& value_tp)
                     m_value_tp(value_tp)
 {
     if (value_tp.is_builtin()) {
-        
+        m_nafunc = kernels::get_option_builtin_nafunc(value_tp.get_type_id());
+        if (!m_nafunc.is_null()) {
+            return;
+        }
     }
-
-    stringstream ss;
-    ss << "cannot create type option[" << value_tp << "]";
-    throw type_error(ss.str());
 }
 
 option_type::~option_type()
@@ -117,6 +117,12 @@ bool option_type::operator==(const base_type& rhs) const
 void option_type::metadata_default_construct(char *arrmeta, intptr_t ndim,
                                              const intptr_t *shape) const
 {
+    if (m_nafunc.is_null()) {
+        stringstream ss;
+        ss << "cannot instantiate data with type " << ndt::type(this, true);
+        throw type_error(ss.str());
+    }
+
     if (!m_value_tp.is_builtin()) {
         m_value_tp.extended()->metadata_default_construct(arrmeta, ndim, shape);
     }
@@ -164,6 +170,11 @@ static ndt::type property_get_value_type(const ndt::type& tp) {
     return pd->get_value_type();
 }
 
+static nd::array property_get_nafunc(const ndt::type& tp) {
+    const option_type *pd = tp.tcast<option_type>();
+    return pd->get_nafunc();
+}
+
 void option_type::get_dynamic_type_properties(
                 const std::pair<std::string, gfunc::callable> **out_properties,
                 size_t *out_count) const
@@ -171,89 +182,17 @@ void option_type::get_dynamic_type_properties(
     static pair<string, gfunc::callable> type_properties[] = {
         pair<string, gfunc::callable>(
             "value_type",
-            gfunc::make_callable(&property_get_value_type, "self"))};
+            gfunc::make_callable(&property_get_value_type, "self")),
+        pair<string, gfunc::callable>(
+            "nafunc",
+            gfunc::make_callable(&property_get_nafunc, "self")),
+    };
 
     *out_properties = type_properties;
     *out_count = sizeof(type_properties) / sizeof(type_properties[0]);
 }
 
-namespace {
-    // TODO: use the PP meta stuff, but DYND_PP_LEN_MAX is set to 8 right now, would need to be 19
-    struct static_pointer {
-        option_type bt1;
-        option_type bt2;
-        option_type bt3;
-        option_type bt4;
-        option_type bt5;
-        option_type bt6;
-        option_type bt7;
-        option_type bt8;
-        option_type bt9;
-        option_type bt10;
-        option_type bt11;
-        option_type bt12;
-        option_type bt13;
-        option_type bt14;
-        option_type bt15;
-        option_type bt16;
-        option_type bt17;
-        option_type bt18;
-
-        ndt::type static_builtins_instance[builtin_type_id_count];
-
-        static_pointer()
-            : bt1(ndt::type((type_id_t)1)),
-              bt2(ndt::type((type_id_t)2)),
-              bt3(ndt::type((type_id_t)3)),
-              bt4(ndt::type((type_id_t)4)),
-              bt5(ndt::type((type_id_t)5)),
-              bt6(ndt::type((type_id_t)6)),
-              bt7(ndt::type((type_id_t)7)),
-              bt8(ndt::type((type_id_t)8)),
-              bt9(ndt::type((type_id_t)9)),
-              bt10(ndt::type((type_id_t)10)),
-              bt11(ndt::type((type_id_t)11)),
-              bt12(ndt::type((type_id_t)12)),
-              bt13(ndt::type((type_id_t)13)),
-              bt14(ndt::type((type_id_t)14)),
-              bt15(ndt::type((type_id_t)15)),
-              bt16(ndt::type((type_id_t)16)),
-              bt17(ndt::type((type_id_t)17)),
-              bt18(ndt::type((type_id_t)18))
-        {
-            static_builtins_instance[1] = ndt::type(&bt1, true);
-            static_builtins_instance[2] = ndt::type(&bt2, true);
-            static_builtins_instance[3] = ndt::type(&bt3, true);
-            static_builtins_instance[4] = ndt::type(&bt4, true);
-            static_builtins_instance[5] = ndt::type(&bt5, true);
-            static_builtins_instance[6] = ndt::type(&bt6, true);
-            static_builtins_instance[7] = ndt::type(&bt7, true);
-            static_builtins_instance[8] = ndt::type(&bt8, true);
-            static_builtins_instance[9] = ndt::type(&bt9, true);
-            static_builtins_instance[10] = ndt::type(&bt10, true);
-            static_builtins_instance[11] = ndt::type(&bt11, true);
-            static_builtins_instance[12] = ndt::type(&bt12, true);
-            static_builtins_instance[13] = ndt::type(&bt13, true);
-            static_builtins_instance[14] = ndt::type(&bt14, true);
-            static_builtins_instance[15] = ndt::type(&bt15, true);
-            static_builtins_instance[16] = ndt::type(&bt16, true);
-            static_builtins_instance[17] = ndt::type(&bt17, true);
-            static_builtins_instance[18] = ndt::type(&bt18, true);
-        }
-    };
-} // anonymous namespace
-
 ndt::type ndt::make_option(const ndt::type& value_tp)
 {
-    // Static instances of the type, which have a reference
-    // count > 0 for the lifetime of the program. This static
-    // construction is inside a function to ensure correct creation
-    // order during startup.
-    static static_pointer sp;
-
-    if (value_tp.is_builtin()) {
-        return sp.static_builtins_instance[value_tp.get_type_id()];
-    } else {
-        return ndt::type(new option_type(value_tp), false);
-    }
+    return ndt::type(new option_type(value_tp), false);
 }

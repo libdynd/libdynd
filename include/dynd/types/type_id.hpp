@@ -219,32 +219,8 @@ enum {
                     type_flag_scalar
 };
 
-enum kernel_request_t {
-    /** Kernel function unary_single_operation_t or expr_single_operation_t */
-    kernel_request_single,
-    /** Kernel function unary_strided_operation_t or expr_strided_operation_t*/
-    kernel_request_strided,
-    /**
-     * Kernel function unary_single_operation_t,
-     * but the data in the kernel at position 'offset_out'
-     * is for data that describes the accumulation
-     * of multiple strided dimensions that work
-     * in a simple NumPy fashion.
-     */
-//    kernel_request_single_multistride,
-    /**
-     * Kernel function unary_strided_operation_t,
-     * but the data in the kernel at position 'offset_out'
-     * is for data that describes the accumulation
-     * of multiple strided dimensions that work
-     * in a simple NumPy fashion.
-     */
-//    kernel_request_strided_multistride
-};
-
 std::ostream& operator<<(std::ostream& o, type_kind_t kind);
 std::ostream& operator<<(std::ostream& o, type_id_t tid);
-std::ostream& operator<<(std::ostream& o, kernel_request_t kernreq);
 
 enum {
     /** A mask within which all the built-in type ids are guaranteed to fit */

@@ -112,13 +112,9 @@ intptr_t kernels::wrap_unary_as_expr_ckernel(dynd::ckernel_builder *ckb,
     ckb->ensure_capacity(ckb_child_offset);
     ckernel_prefix *ckp = ckb->get_at<ckernel_prefix>(ckb_offset);
     ckp->destructor = &kernels::destroy_trivial_parent_ckernel;
-    if (kernreq == kernel_request_single) {
-        ckp->set_function<expr_single_operation_t>(&kernels::unary_as_expr_adapter_single_ckernel);
-    } else if (kernreq == kernel_request_strided) {
-        ckp->set_function<expr_strided_operation_t>(&kernels::unary_as_expr_adapter_strided_ckernel);
-    } else {
-        throw runtime_error("unsupported kernel request in instantiate_expr_assignment_ckernel");
-    }
+    ckp->set_expr_function(kernreq,
+                            &kernels::unary_as_expr_adapter_single_ckernel,
+                            &kernels::unary_as_expr_adapter_strided_ckernel);
     return ckb_child_offset;
 }
 
@@ -131,13 +127,9 @@ intptr_t kernels::wrap_expr_as_unary_ckernel(dynd::ckernel_builder *ckb,
     ckb->ensure_capacity(ckb_child_offset);
     ckernel_prefix *ckp = ckb->get_at<ckernel_prefix>(ckb_offset);
     ckp->destructor = &kernels::destroy_trivial_parent_ckernel;
-    if (kernreq == kernel_request_single) {
-        ckp->set_function<unary_single_operation_t>(&kernels::expr_as_unary_adapter_single_ckernel);
-    } else if (kernreq == kernel_request_strided) {
-        ckp->set_function<unary_strided_operation_t>(&kernels::expr_as_unary_adapter_strided_ckernel);
-    } else {
-        throw runtime_error("unsupported kernel request in instantiate_unary_assignment_ckernel");
-    }
+    ckp->set_unary_function(kernreq,
+                            &kernels::expr_as_unary_adapter_single_ckernel,
+                            &kernels::expr_as_unary_adapter_strided_ckernel);
     return ckb_child_offset;
 }
                 
@@ -207,20 +199,16 @@ intptr_t kernels::wrap_binary_as_unary_reduction_ckernel(
     out_ckb->ensure_capacity(ckb_child_offset);
     ckernel_prefix *ckp = out_ckb->get_at<ckernel_prefix>(ckb_offset);
     ckp->destructor = &kernels::destroy_trivial_parent_ckernel;
-    if (kernreq == kernel_request_single) {
-        if (right_associative) {
-            ckp->set_function<unary_single_operation_t>(&binary_as_unary_right_associative_reduction_adapter_single_ckernel);
-        } else {
-            ckp->set_function<unary_single_operation_t>(&binary_as_unary_left_associative_reduction_adapter_single_ckernel);
-        }
-    } else if (kernreq == kernel_request_strided) {
-        if (right_associative) {
-            ckp->set_function<unary_strided_operation_t>(&binary_as_unary_right_associative_reduction_adapter_strided_ckernel);
-        } else {
-            ckp->set_function<unary_strided_operation_t>(&binary_as_unary_left_associative_reduction_adapter_strided_ckernel);
-        }
+    if (right_associative) {
+        ckp->set_unary_function(
+            kernreq,
+            &binary_as_unary_right_associative_reduction_adapter_single_ckernel,
+            &binary_as_unary_right_associative_reduction_adapter_strided_ckernel);
     } else {
-        throw runtime_error("unsupported kernel request in wrap_binary_as_unary_reduction_ckernel");
+        ckp->set_unary_function(
+            kernreq,
+            &binary_as_unary_left_associative_reduction_adapter_single_ckernel,
+            &binary_as_unary_left_associative_reduction_adapter_strided_ckernel);
     }
     return ckb_child_offset;
 }

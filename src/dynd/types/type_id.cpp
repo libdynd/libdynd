@@ -161,15 +161,3 @@ std::ostream& dynd::operator<<(std::ostream& o, type_id_t tid)
             return (o << "(unknown type id " << (int)tid << ")");
     }
 }
-
-std::ostream& dynd::operator<<(std::ostream& o, kernel_request_t kernreq)
-{
-    switch (kernreq) {
-        case kernel_request_single:
-            return (o << "kernel_request_single");
-        case kernel_request_strided:
-            return (o << "kernel_request_strided");
-        default:
-            return (o << "(unknown kernrel request " << (int)kernreq << ")");
-    }
-}

@@ -40,6 +40,10 @@ public:
         return m_value_tp.value_type();
     }
 
+    const nd::array& get_nafunc() const {
+        return m_nafunc;
+    }
+
     void print_data(std::ostream &o, const char *metadata,
                     const char *data) const;
 

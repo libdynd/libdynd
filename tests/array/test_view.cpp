@@ -125,7 +125,7 @@ TEST(View, Errors) {
     EXPECT_THROW(nd::view(a, ndt::type("5 * 2 * int32")), type_error);
     EXPECT_THROW(nd::view(a, ndt::type("6 * 3 * int32")), type_error);
     // DType mismatches
-    EXPECT_THROW(nd::view(a, ndt::type("5 * 3 * uint32")), type_error);
+    EXPECT_THROW(nd::view(a, ndt::type("5 * 3 * uint64")), type_error);
 
     // Also starting from strided dimensions
     a = a(irange(), irange());
@@ -136,7 +136,7 @@ TEST(View, Errors) {
     EXPECT_THROW(nd::view(a, ndt::type("5 * 2 * int32")), type_error);
     EXPECT_THROW(nd::view(a, ndt::type("6 * 3 * int32")), type_error);
     // DType mismatches
-    EXPECT_THROW(nd::view(a, ndt::type("5 * 3 * uint32")), type_error);
+    EXPECT_THROW(nd::view(a, ndt::type("5 * 3 * uint64")), type_error);
 }
 
 TEST(View, AsBytes) {
