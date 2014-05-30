@@ -15,6 +15,7 @@
 
 namespace dynd {
 
+#define DYND_BOOL_NA (2)
 #define DYND_INT8_NA (std::numeric_limits<int8_t>::min())
 #define DYND_INT16_NA (std::numeric_limits<int16_t>::min())
 #define DYND_INT32_NA (std::numeric_limits<int32_t>::min())
@@ -52,6 +53,14 @@ public:
     const nd::array& get_nafunc() const {
         return m_nafunc;
     }
+
+    /** Assigns NA to one value */
+    void assign_na(char *data, const char *arrmeta,
+                   const eval::eval_context *ectx) const;
+
+    /** Returns true if the value is available */
+    bool is_avail(const char *data, const char *arrmeta,
+                  const eval::eval_context *ectx) const;
 
     const arrfunc_type_data *get_is_avail_arrfunc() const {
         return reinterpret_cast<const arrfunc_type_data *>(

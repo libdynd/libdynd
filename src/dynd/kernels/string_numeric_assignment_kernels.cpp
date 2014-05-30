@@ -139,27 +139,7 @@ static void string_to_bool_single(char *dst, const char *src,
     string s =
         e->src_string_tp->get_utf8_string(e->src_metadata, src, e->errmode);
     trim(s);
-    to_lower(s);
-    if (e->errmode == assign_error_none) {
-        if (s.empty() || s == "0" || s == "false" || s == "no" || s == "off" ||
-                s == "f" || s == "n") {
-            *dst = 0;
-        } else {
-            *dst = 1;
-        }
-    } else {
-        if (s == "0" || s == "false" || s == "no" || s == "off" || s == "f" ||
-                s == "n") {
-            *dst = 0;
-        } else if (s == "1" || s == "true" || s == "yes" || s == "on" ||
-                   s == "t" || s == "y") {
-            *dst = 1;
-        } else {
-            raise_string_cast_error(ndt::make_type<dynd_bool>(),
-                                    ndt::type(e->src_string_tp, true),
-                                    e->src_metadata, src);
-        }
-    }
+    parse::string_to_bool(dst, s.data(), s.data() + s.size(), false, e->errmode);
 }
 
 template <class T> struct overflow_check;

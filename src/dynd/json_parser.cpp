@@ -14,6 +14,7 @@
 #include <dynd/types/date_type.hpp>
 #include <dynd/types/datetime_type.hpp>
 #include <dynd/types/time_type.hpp>
+#include <dynd/types/option_type.hpp>
 #include <dynd/kernels/string_numeric_assignment_kernels.hpp>
 #include <dynd/parser_util.hpp>
 
@@ -410,37 +411,64 @@ static void parse_struct_json(const ndt::type& tp, const char *metadata, char *o
     }
 }
 
-static void parse_bool_json(const ndt::type& tp, const char *metadata, char *out_data,
-                const char *&begin, const char *end)
+static void parse_bool_json(const ndt::type &tp, const char *metadata,
+                            char *out_data, const char *&rbegin, const char *end,
+                            bool option, const eval::eval_context *ectx)
 {
-    // TODO: allow more general input (strings) with a boolean parsing policy
-    char value = 2;
+    const char *begin = rbegin;
+    char value = 3;
     const char *nbegin, *nend;
+    bool escaped;
     if (parse_token(begin, end, "true")) {
         value = 1;
     } else if (parse_token(begin, end, "false")) {
         value = 0;
     } else if (parse_token(begin, end, "null")) {
-        // TODO: error handling policy for NULL in this case
-        value = 0;
+        if (option || ectx->default_errmode != assign_error_none) {
+            value = 2;
+        } else {
+            value = 0;
+        }
     } else if (parse::parse_json_number_no_ws(begin, end, nbegin, nend)) {
         if (nend - nbegin == 1) {
             if (*nbegin == '0') {
                 value = 0;
-            } else if (*nbegin == '1') {
+            } else if (*nbegin == '1' ||
+                       ectx->default_errmode == assign_error_none) {
                 value = 1;
             }
         }
+    } else if (parse::parse_doublequote_string_no_ws(begin, end, nbegin, nend,
+                                                     escaped)) {
+        if (!escaped) {
+            parse::string_to_bool(&value, nbegin, nend, option,
+                                  ectx->default_errmode);
+        } else {
+            string s;
+            parse::unescape_string(nbegin, nend, s);
+            parse::string_to_bool(&value, s.data(), s.data() + s.size(),
+                                  option, ectx->default_errmode);
+        }
     }
 
-    if (value != 2) {
+    if (value < 2) {
         if (tp.get_type_id() == bool_type_id) {
             *out_data = value;
         } else {
-            typed_data_assign(tp, metadata, out_data, ndt::make_type<dynd_bool>(), NULL, &value);
+            typed_data_assign(tp, metadata, out_data,
+                              ndt::make_type<dynd_bool>(), NULL, &value);
         }
+        rbegin = begin;
+    } else if (value == 2 && option) {
+        if (!tp.is_expression()) {
+            *out_data = value;
+        } else {
+            typed_data_assign(tp, metadata, out_data,
+                              ndt::make_option<dynd_bool>(), NULL, &value);
+        }
+        rbegin = begin;
     } else {
-        throw json_parse_error(begin, "expected a boolean true or false", tp);
+        throw json_parse_error(rbegin, "expected a boolean true or false", tp);
     }
 }
 
@@ -475,28 +503,31 @@ static void parse_dynd_builtin_json(const ndt::type& tp, const char *DYND_UNUSED
     rbegin = begin;
 }
 
-static void parse_integer_json(const ndt::type &tp,
-                               const char *DYND_UNUSED(metadata),
+static void parse_integer_json(const ndt::type &tp, const char *arrmeta,
                                char *out_data, const char *&rbegin,
-                               const char *end, assign_error_mode errmode)
+                               const char *end, bool option,
+                               const eval::eval_context *ectx)
 {
     const char *begin = rbegin;
     const char *nbegin, *nend;
     bool escaped = false;
-    if (parse::parse_json_number_no_ws(begin, end, nbegin, nend)) {
-        parse::string_to_int(out_data, tp.get_type_id(), nbegin, nend, errmode);
+    if (option && parse::parse_token_no_ws(begin, end, "null")) {
+        tp.tcast<option_type>()->assign_na(out_data, arrmeta, ectx);
+    } else if (parse::parse_json_number_no_ws(begin, end, nbegin, nend)) {
+        parse::string_to_int(out_data, tp.get_type_id(), nbegin, nend,
+                             false, ectx->default_errmode);
     } else if (parse::parse_doublequote_string_no_ws(begin, end, nbegin, nend,
                                                      escaped)) {
         // Interpret the data inside the string as an int
         try {
             if (!escaped) {
                 parse::string_to_int(out_data, tp.get_type_id(), nbegin, nend,
-                                     errmode);
+                                     option, ectx->default_errmode);
             } else {
                 string s;
                 parse::unescape_string(nbegin, nend, s);
                 parse::string_to_int(out_data, tp.get_type_id(), nbegin, nend,
-                                     errmode);
+                                     option, ectx->default_errmode);
             }
         } catch (const std::exception& e) {
             throw json_parse_error(rbegin, e.what(), tp);
@@ -627,9 +658,27 @@ static void parse_uniform_dim_json(const ndt::type& tp, const char *metadata, ch
     }
 }
 
+static void parse_option_json(const ndt::type &tp, const char *metadata,
+                              char *out_data, const char *&begin,
+                              const char *end, const eval::eval_context *ectx)
+{
+    const ndt::type &value_tp = tp.tcast<option_type>()->get_value_type();
+    switch (value_tp.get_kind()) {
+        case bool_kind:
+            parse_bool_json(tp, metadata, out_data, begin, end, true, ectx);
+            return;
+        case int_kind:
+        case uint_kind:
+            begin = skip_whitespace(begin, end);
+            parse_integer_json(value_tp, metadata, out_data, begin, end, true, ectx);
+            return;
+    }
+}
+
 static void parse_json(const ndt::type& tp, const char *metadata, char *out_data,
                 const char *&json_begin, const char *json_end, const eval::eval_context *ectx)
 {
+    json_begin = skip_whitespace(json_begin, json_end);
     switch (tp.get_kind()) {
         case uniform_dim_kind:
             parse_uniform_dim_json(tp, metadata, out_data, json_begin, json_end, ectx);
@@ -638,19 +687,14 @@ static void parse_json(const ndt::type& tp, const char *metadata, char *out_data
             parse_struct_json(tp, metadata, out_data, json_begin, json_end, ectx);
             return;
         case bool_kind:
-            parse_bool_json(tp, metadata, out_data, json_begin, json_end);
+            parse_bool_json(tp, metadata, out_data, json_begin, json_end,
+                            false, ectx);
             return;
         case int_kind:
         case uint_kind:
-            try {
-                json_begin = skip_whitespace(json_begin, json_end);
-                parse_integer_json(tp, metadata, out_data, json_begin, json_end,
-                                   ectx->default_errmode);
-            } catch(const std::exception& e) {
-                // Transform any exceptions into a parse error that includes
-                // the location of the error
-                throw json_parse_error(json_begin, e.what(), tp);
-            }
+            json_begin = skip_whitespace(json_begin, json_end);
+            parse_integer_json(tp, metadata, out_data, json_begin, json_end,
+                               false, ectx);
             return;
         case real_kind:
             parse_real_json(tp, metadata, out_data, json_begin, json_end);
@@ -663,6 +707,9 @@ static void parse_json(const ndt::type& tp, const char *metadata, char *out_data
             return;
         case datetime_kind:
             parse_datetime_json(tp, metadata, out_data, json_begin, json_end, ectx);
+            return;
+        case option_kind:
+            parse_option_json(tp, metadata, out_data, json_begin, json_end, ectx);
             return;
         case dynamic_kind:
             if (tp.get_type_id() == json_type_id) {

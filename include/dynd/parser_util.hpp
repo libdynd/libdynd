@@ -481,10 +481,37 @@ dynd_uint128 unchecked_string_to_uint128(const char *begin, const char *end);
 /**
  * Converts a string containing an integer (no leading or trailing space)
  * into an integer with the specified type id, using the specified error
- * mode to handle errors.
+ * mode to handle errors. If ``option`` is true, writes to option[tid].
+ *
+ * \param out_int  The address of the int or option[int].
+ * \param tid  The type id of the int.
+ * \param begin  The start of the UTF8 string buffer.
+ * \param end  The end of the UTF8 string buffer.
+ * \param option  If true, treat it as option[int] instead of just int.
+ * \param errmode  The error handling mode.
  */
 void string_to_int(char *out_int, type_id_t tid, const char *begin,
-                   const char *end, assign_error_mode errmode);
+                   const char *end, bool option, assign_error_mode errmode);
+
+/**
+ * Converts a string containing an boolean (no leading or trailing space)
+ * into a bool, using the specified error mode to handle errors.
+ * If ``option`` is true, writes to option[bool].
+ *
+ * \param out_bool  The address of the bool or option[bool].
+ * \param begin  The start of the UTF8 string buffer.
+ * \param end  The end of the UTF8 string buffer.
+ * \param option  If true, treat it as option[int] instead of just int.
+ * \param errmode  The error handling mode.
+ */
+void string_to_bool(char *out_bool, const char *begin, const char *end,
+                    bool option, assign_error_mode errmode);
+
+/**
+ * Returns true if the string provided matches an option[T] missing value token,
+ * such as "", "NA", "NULL", "null", "None".
+ */
+bool matches_option_type_na_token(const char *begin, const char *end);
 
 /**
  * A helper class for matching a bunch of names and getting an integer.

@@ -7,6 +7,7 @@
 
 #include <dynd/parser_util.hpp>
 #include <dynd/string_encodings.hpp>
+#include <dynd/types/option_type.hpp>
 
 using namespace std;
 using namespace dynd;
@@ -560,10 +561,37 @@ static inline void assign_unsigned_int_value(char *out_int, uint64_t uvalue,
 }
 
 void parse::string_to_int(char *out_int, type_id_t tid, const char *begin,
-                          const char *end, assign_error_mode errmode)
+                          const char *end, bool option, assign_error_mode errmode)
 {
     uint64_t uvalue;
     bool negative = false, overflow = false, badparse = false;
+
+    if (option && matches_option_type_na_token(begin, end)) {
+        switch(tid) {
+            case int8_type_id:
+                *reinterpret_cast<int8_t *>(out_int) = DYND_INT8_NA;
+                return;
+            case int16_type_id:
+                *reinterpret_cast<int16_t *>(out_int) = DYND_INT16_NA;
+                return;
+            case int32_type_id:
+                *reinterpret_cast<int32_t *>(out_int) = DYND_INT32_NA;
+                return;
+            case int64_type_id:
+                *reinterpret_cast<int64_t *>(out_int) = DYND_INT64_NA;
+                return;
+            case int128_type_id:
+                *reinterpret_cast<dynd_int128 *>(out_int) = DYND_INT128_NA;
+                return;
+            default:
+                break;
+        }
+        stringstream ss;
+        ss << "No NA value has been configured for option["
+           << ndt::type(tid) << "]";
+        throw type_error(ss.str());
+    }
+
     if (begin < end && *begin == '-') {
         negative = true;
         ++begin;
@@ -643,21 +671,29 @@ void parse::string_to_int(char *out_int, type_id_t tid, const char *begin,
             }
             default: {
                 stringstream ss;
-                ss << "cannot parse integer as type id " << tid;
+                ss << "cannot parse integer, got invalid type id " << tid;
                 throw runtime_error(ss.str());
             }
         }
         if (overflow) {
             stringstream ss;
             ss << "overflow converting string ";
-            ss.write(begin, end-begin);
-            ss << " to " << tid;
+            print_escaped_utf8_string(ss, begin, end);
+            ss << " to ";
+            if (option) {
+                ss << "?";
+            }
+            ss << tid;
             throw overflow_error(ss.str());
         } else if (badparse) {
             stringstream ss;
             ss << "parse error converting string ";
-            ss.write(begin, end-begin);
-            ss << " to " << tid;
+            print_escaped_utf8_string(ss, begin, end);
+            ss << " to ";
+            if (option) {
+                ss << "?";
+            }
+            ss << tid;
             throw invalid_argument(ss.str());
         }
     } else {
@@ -723,9 +759,119 @@ void parse::string_to_int(char *out_int, type_id_t tid, const char *begin,
             }
             default: {
                 stringstream ss;
-                ss << "cannot parse integer as type id " << tid;
+                ss << "cannot parse integer, got invalid type id " << tid;
                 throw runtime_error(ss.str());
             }
         }
     }
+}
+
+void parse::string_to_bool(char *out_bool, const char *begin, const char *end,
+                           bool option, assign_error_mode errmode)
+{
+    if (option && matches_option_type_na_token(begin, end)) {
+        *out_bool = DYND_BOOL_NA;
+        return;
+    } else {
+        size_t size = end - begin;
+        if (size == 1) {
+            char c = *begin;
+            if (c == '0' || c == 'n' || c == 'N' || c == 'f' || c == 'F') {
+                *out_bool = 0;
+                return;
+            } else if (errmode == assign_error_none || c == '1' || c == 'y' ||
+                       c == 'Y' || c == 't' || c == 'T') {
+                *out_bool = 1;
+                return;
+            }
+        } else if (size == 4) {
+            if (errmode == assign_error_none) {
+                *out_bool = 1;
+                return;
+            } else if ((begin[0] == 'T' || begin[0] == 't') &&
+                       (begin[1] == 'R' || begin[1] == 'r') &&
+                       (begin[2] == 'U' || begin[2] == 'u') &&
+                       (begin[3] == 'E' || begin[3] == 'e')) {
+                *out_bool = 1;
+                return;
+            }
+        } else if (size == 5) {
+            if ((begin[0] == 'F' || begin[0] == 'f') &&
+                (begin[1] == 'A' || begin[1] == 'a') &&
+                (begin[2] == 'L' || begin[2] == 'l') &&
+                (begin[3] == 'S' || begin[3] == 's') &&
+                (begin[4] == 'E' || begin[4] == 'e')) {
+                *out_bool = 0;
+                return;
+            } else if (errmode == assign_error_none) {
+                *out_bool = 1;
+                return;
+            }
+        } else if (size == 0) {
+            if (errmode == assign_error_none) {
+                *out_bool = 0;
+                return;
+            }
+        } else if (size == 2) {
+            if ((begin[0] == 'N' || begin[0] == 'n') &&
+                (begin[1] == 'O' || begin[1] == 'o')) {
+                *out_bool = 0;
+                return;
+            } else if (errmode == assign_error_none ||
+                       ((begin[0] == 'O' || begin[0] == 'o') &&
+                        (begin[1] == 'N' || begin[1] == 'n'))) {
+                *out_bool = 1;
+                return;
+            }
+        } else if (size == 3) {
+            if ((begin[0] == 'O' || begin[0] == 'o') &&
+                (begin[1] == 'F' || begin[1] == 'f') &&
+                (begin[2] == 'F' || begin[2] == 'f')) {
+                *out_bool = 0;
+                return;
+            } else if (errmode == assign_error_none ||
+                       ((begin[0] == 'Y' || begin[0] == 'y') &&
+                        (begin[1] == 'E' || begin[1] == 'e') &&
+                        (begin[2] == 'S' || begin[2] == 's'))) {
+                *out_bool = 1;
+                return;
+            }
+        }
+    }
+
+    stringstream ss;
+    ss << "cannot cast string ";
+    print_escaped_utf8_string(ss, begin, end);
+    if (option) {
+        ss << " to ?bool";
+    } else {
+        ss << " to bool";
+    }
+    throw invalid_argument(ss.str());
+}
+
+
+bool parse::matches_option_type_na_token(const char *begin, const char *end)
+{
+    size_t size = end - begin;
+    if (size == 0) {
+        return true;
+    } else if (size == 2) {
+        if (begin[0] == 'N' && begin[1] == 'A') {
+            return true;
+        }
+    } else if (size == 4) {
+        if (((begin[0] == 'N' || begin[0] == 'n') &&
+             (begin[1] == 'U' || begin[1] == 'u') &&
+             (begin[2] == 'L' || begin[2] == 'l') &&
+             (begin[3] == 'L' || begin[3] == 'l'))) {
+            return true;
+        }
+        if (begin[0] == 'N' && begin[1] == 'o' && begin[2] == 'n' &&
+                begin[3] == 'e') {
+            return true;
+        }
+    }
+
+    return false;
 }
