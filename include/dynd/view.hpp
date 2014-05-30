@@ -21,6 +21,16 @@ namespace dynd { namespace nd {
  */
 array view(const array& arr, const ndt::type& tp);
 
+/**
+ * Convenience form of nd::view that takes a string
+ * literal instead of an ndt::type.
+ */
+template<int N>
+inline array view(const array& arr, const char (&tp)[N])
+{
+    return view(arr, ndt::type(tp, tp + N - 1));
+}
+
 }} // namespace dynd::nd
 
 #endif // _DYND__VIEW_HPP_

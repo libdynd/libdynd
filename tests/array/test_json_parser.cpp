@@ -10,6 +10,7 @@
 
 #include "inc_gtest.hpp"
 
+#include <dynd/view.hpp>
 #include <dynd/json_parser.hpp>
 #include <dynd/types/var_dim_type.hpp>
 #include <dynd/types/cfixed_dim_type.hpp>
@@ -111,7 +112,7 @@ TEST(JSONParser, BuiltinsFromInteger) {
 }
 
 TEST(JSONParser, OptionInt) {
-    nd::array a, b;
+    nd::array a, b, c;
 
     a = parse_json(ndt::make_option<int8_t>(), "123");
     EXPECT_EQ(ndt::make_option<int8_t>(), a.get_type());
@@ -122,12 +123,29 @@ TEST(JSONParser, OptionInt) {
               *reinterpret_cast<const int8_t *>(a.get_readonly_originptr()));
     EXPECT_THROW(a.as<int8_t>(), overflow_error);
 
-    a = parse_json("9 * ?int", "[null, 3, null, -1000, 1, 3, null, null, null]");
-    EXPECT_EQ(ndt::type("9 * option[int]"), a.get_type());
-    b = nd::empty("9 * int");
+    a = parse_json("9 * ?int32", "[null, 3, null, -1000, 1, 3, null, null, null]");
+    EXPECT_EQ(ndt::type("9 * option[int32]"), a.get_type());
+    b = nd::empty("9 * int32");
     EXPECT_THROW(b.vals() = a, overflow_error);
+    // Assigning from ?int32 to ?int64 should match exactly with parsing to ?int64
     b = nd::empty("9 * ?int64");
     b.vals() = a;
+    c = parse_json("9 * ?int64", "[null, 3, null, -1000, 1, 3, null, null, null]");
+    EXPECT_TRUE(
+        nd::view(b, "9 * int64").equals_exact(nd::view(c, "9 * int64")));
+
+    // Assignment from option[T] to T without any NAs
+    a = parse_json("3 * ?int32", "[1, 2, 3]");
+    b = nd::empty("3 * int32");
+    b.vals() = a;
+    EXPECT_TRUE(b.equals_exact(nd::view(a, "3 * int32")));
+
+    // Assignment from T to option[T]
+    a = parse_json("3 * int32", "[1, 3, 5]");
+    b = nd::empty("3 * ?int32");
+    b.vals() = a;
+    EXPECT_TRUE(nd::view(b, "3 * int32").equals_exact(a));
+
 }
 
 TEST(JSONParser, SignedIntegerLimits) {
