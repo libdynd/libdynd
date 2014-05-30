@@ -133,19 +133,6 @@ TEST(JSONParser, OptionInt) {
     c = parse_json("9 * ?int64", "[null, 3, null, -1000, 1, 3, null, null, null]");
     EXPECT_TRUE(
         nd::view(b, "9 * int64").equals_exact(nd::view(c, "9 * int64")));
-
-    // Assignment from option[T] to T without any NAs
-    a = parse_json("3 * ?int32", "[1, 2, 3]");
-    b = nd::empty("3 * int32");
-    b.vals() = a;
-    EXPECT_TRUE(b.equals_exact(nd::view(a, "3 * int32")));
-
-    // Assignment from T to option[T]
-    a = parse_json("3 * int32", "[1, 3, 5]");
-    b = nd::empty("3 * ?int32");
-    b.vals() = a;
-    EXPECT_TRUE(nd::view(b, "3 * int32").equals_exact(a));
-
 }
 
 TEST(JSONParser, SignedIntegerLimits) {
