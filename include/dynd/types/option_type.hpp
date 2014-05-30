@@ -55,11 +55,11 @@ public:
     }
 
     /** Assigns NA to one value */
-    void assign_na(char *data, const char *arrmeta,
+    void assign_na(const char *arrmeta, char *data,
                    const eval::eval_context *ectx) const;
 
     /** Returns true if the value is available */
-    bool is_avail(const char *data, const char *arrmeta,
+    bool is_avail(const char *arrmeta, const char *data,
                   const eval::eval_context *ectx) const;
 
     const arrfunc_type_data *get_is_avail_arrfunc() const {
@@ -73,30 +73,39 @@ public:
                1;
     }
 
-    void print_data(std::ostream &o, const char *metadata,
+    void print_data(std::ostream &o, const char *arrmeta,
                     const char *data) const;
 
     void print_type(std::ostream& o) const;
 
     bool is_expression() const;
-    bool is_unique_data_owner(const char *metadata) const;
+    bool is_unique_data_owner(const char *arrmeta) const;
     void transform_child_types(type_transform_fn_t transform_fn, void *extra,
-                    ndt::type& out_transformed_tp, bool& out_was_transformed) const;
+                               ndt::type &out_transformed_tp,
+                               bool &out_was_transformed) const;
     ndt::type get_canonical_type() const;
 
-    bool is_lossless_assignment(const ndt::type& dst_tp, const ndt::type& src_tp) const;
+    bool is_lossless_assignment(const ndt::type &dst_tp,
+                                const ndt::type &src_tp) const;
 
     bool operator==(const base_type& rhs) const;
 
-    void metadata_default_construct(char *metadata, intptr_t ndim,
+    void metadata_default_construct(char *arrmeta, intptr_t ndim,
                                     const intptr_t *shape) const;
-    void metadata_copy_construct(char *dst_metadata, const char *src_metadata,
+    void metadata_copy_construct(char *dst_arrmeta, const char *src_arrmeta,
                                  memory_block_data *embedded_reference) const;
-    void metadata_reset_buffers(char *metadata) const;
-    void metadata_finalize_buffers(char *metadata) const;
-    void metadata_destruct(char *metadata) const;
-    void metadata_debug_print(const char *metadata, std::ostream &o,
+    void metadata_reset_buffers(char *arrmeta) const;
+    void metadata_finalize_buffers(char *arrmeta) const;
+    void metadata_destruct(char *arrmeta) const;
+    void metadata_debug_print(const char *arrmeta, std::ostream &o,
                               const std::string &indent) const;
+
+    size_t
+    make_assignment_kernel(ckernel_builder *ckb, size_t ckb_offset,
+                           const ndt::type &dst_tp, const char *dst_arrmeta,
+                           const ndt::type &src_tp, const char *src_arrmeta,
+                           kernel_request_t kernreq, assign_error_mode errmode,
+                           const eval::eval_context *ectx) const;
 
     void get_dynamic_type_properties(
         const std::pair<std::string, gfunc::callable> **out_properties,

@@ -110,6 +110,26 @@ TEST(JSONParser, BuiltinsFromInteger) {
     EXPECT_EQ(0x6d797a91be38f34eULL, n.as<dynd_uint128>().m_lo);
 }
 
+TEST(JSONParser, OptionInt) {
+    nd::array a, b;
+
+    a = parse_json(ndt::make_option<int8_t>(), "123");
+    EXPECT_EQ(ndt::make_option<int8_t>(), a.get_type());
+    EXPECT_EQ(123, a.as<int8_t>());
+    a = parse_json(ndt::make_option<int8_t>(), "null");
+    EXPECT_EQ(ndt::make_option<int8_t>(), a.get_type());
+    EXPECT_EQ(DYND_INT8_NA,
+              *reinterpret_cast<const int8_t *>(a.get_readonly_originptr()));
+    EXPECT_THROW(a.as<int8_t>(), overflow_error);
+
+    a = parse_json("9 * ?int", "[null, 3, null, -1000, 1, 3, null, null, null]");
+    EXPECT_EQ(ndt::type("9 * option[int]"), a.get_type());
+    b = nd::empty("9 * int");
+    EXPECT_THROW(b.vals() = a, overflow_error);
+    b = nd::empty("9 * ?int64");
+    b.vals() = a;
+}
+
 TEST(JSONParser, SignedIntegerLimits) {
     nd::array n;
 

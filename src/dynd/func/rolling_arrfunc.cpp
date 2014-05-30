@@ -44,10 +44,10 @@ struct strided_rolling_ck : public kernels::assignment_ck<strided_rolling_ck> {
 
     inline void destruct_children()
     {
+        // The NA filler
+        get_child_ckernel()->destroy();
         // The window op
         base.destroy_child_ckernel(m_window_op_offset);
-        // The NA filler
-        base.destroy_child_ckernel(sizeof(self_type));
     }
 };
 

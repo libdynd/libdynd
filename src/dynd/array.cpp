@@ -1437,14 +1437,14 @@ void nd::array::debug_print(std::ostream& o, const std::string& indent) const
         o << " type:\n";
         o << "  pointer: " << (void *)ndo->m_type << "\n";
         o << "  type: " << get_type() << "\n";
-        o << " metadata:\n";
+        o << " arrmeta:\n";
         o << "  flags: " << ndo->m_flags << " (";
         if (ndo->m_flags & read_access_flag) o << "read_access ";
         if (ndo->m_flags & write_access_flag) o << "write_access ";
         if (ndo->m_flags & immutable_access_flag) o << "immutable ";
         o << ")\n";
         if (!ndo->is_builtin_type()) {
-            o << "  type-specific metadata:\n";
+            o << "  type-specific arrmeta:\n";
             ndo->m_type->metadata_debug_print(get_arrmeta(), o, indent + "   ");
         }
         o << " data:\n";

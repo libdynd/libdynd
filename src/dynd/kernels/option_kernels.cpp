@@ -328,9 +328,6 @@ struct assign_na<dynd_complex<double> > {
 
 template<typename T>
 struct nafunc {
-    arrfunc_type_data is_avail;
-    arrfunc_type_data assign_na;
-
     typedef T base_type;
 
     static intptr_t instantiate_is_avail(
@@ -354,14 +351,13 @@ struct nafunc {
             throw type_error(ss.str());
         }
         ckernel_prefix *ckp = ckb->get_at<ckernel_prefix>(ckb_offset);
-        ckp->set_unary_function<::is_avail<T> >((kernel_request_t)kernreq);
+        ckp->set_unary_function< ::is_avail<T> >((kernel_request_t)kernreq);
         return ckb_offset + sizeof(ckernel_prefix);
     }
 
-    static int resolve_is_avail_dst_type(const arrfunc_type_data *DYND_UNUSED(self),
-                                  ndt::type &out_dst_tp,
-                                  const ndt::type *DYND_UNUSED(src_tp),
-                                  int DYND_UNUSED(throw_on_error))
+    static int resolve_is_avail_dst_type(
+        const arrfunc_type_data *DYND_UNUSED(self), ndt::type &out_dst_tp,
+        const ndt::type *DYND_UNUSED(src_tp), int DYND_UNUSED(throw_on_error))
     {
         out_dst_tp = ndt::make_type<dynd_bool>();
         return 1;
@@ -370,17 +366,9 @@ struct nafunc {
     static intptr_t instantiate_assign_na(
         const arrfunc_type_data *DYND_UNUSED(self), dynd::ckernel_builder *ckb,
         intptr_t ckb_offset, const ndt::type &dst_tp, const char *DYND_UNUSED(dst_arrmeta),
-        const ndt::type *src_tp, const char *const *DYND_UNUSED(src_arrmeta),
+        const ndt::type *DYND_UNUSED(src_tp), const char *const *DYND_UNUSED(src_arrmeta),
         uint32_t kernreq, const eval::eval_context *DYND_UNUSED(ectx))
     {
-        if (src_tp[0].get_type_id() != option_type_id ||
-                src_tp[0].tcast<option_type>()->get_value_type().get_type_id() !=
-                    (type_id_t)type_id_of<base_type>::value) {
-            stringstream ss;
-            ss << "Expected source type ?" << ndt::make_type<base_type>()
-               << ", got " << src_tp[0];
-            throw type_error(ss.str());
-        }
         if (dst_tp.get_type_id() != option_type_id ||
                 dst_tp.tcast<option_type>()->get_value_type().get_type_id() !=
                     (type_id_t)type_id_of<base_type>::value) {
@@ -390,31 +378,31 @@ struct nafunc {
             throw type_error(ss.str());
         }
         ckernel_prefix *ckp = ckb->get_at<ckernel_prefix>(ckb_offset);
-        ckp->set_expr_function<::assign_na<T> >((kernel_request_t)kernreq);
+        ckp->set_expr_function< ::assign_na<T> >((kernel_request_t)kernreq);
         return ckb_offset + sizeof(ckernel_prefix);
     }
 
-    nafunc() {
-        // Use a typevar instead of option[T] to avoid a circular dependency
-        is_avail.func_proto =
-            ndt::make_funcproto(ndt::make_typevar("T"), ndt::make_type<dynd_bool>());
-        is_avail.ckernel_funcproto = unary_operation_funcproto;
-        is_avail.data_ptr = NULL;
-        is_avail.instantiate = &nafunc::instantiate_is_avail;
-        is_avail.resolve_dst_type = &nafunc::resolve_is_avail_dst_type;
-        assign_na.func_proto =
-            ndt::make_funcproto(0, NULL, ndt::make_typevar("T"));
-        assign_na.ckernel_funcproto = expr_operation_funcproto;
-        assign_na.data_ptr = NULL;
-        assign_na.instantiate = &nafunc::instantiate_assign_na;
-    }
-
-    nd::array get()
+    static nd::array get()
     {
-        nd::array result(make_array_memory_block(option_type::make_nafunc_type(), 0, NULL));
-        result.get_ndo()->m_data_pointer = reinterpret_cast<char *>(this);
-        result.get_ndo()->m_flags = nd::default_access_flags;
-        return result;
+        nd::array naf = nd::empty(option_type::make_nafunc_type());
+        arrfunc_type_data *is_avail =
+            reinterpret_cast<arrfunc_type_data *>(naf.get_ndo()->m_data_pointer);
+        arrfunc_type_data *assign_na = is_avail + 1;
+
+        // Use a typevar instead of option[T] to avoid a circular dependency
+        is_avail->func_proto =
+            ndt::make_funcproto(ndt::make_typevar("T"), ndt::make_type<dynd_bool>());
+        is_avail->ckernel_funcproto = unary_operation_funcproto;
+        is_avail->data_ptr = NULL;
+        is_avail->instantiate = &nafunc::instantiate_is_avail;
+        is_avail->resolve_dst_type = &nafunc::resolve_is_avail_dst_type;
+        assign_na->func_proto =
+            ndt::make_funcproto(0, NULL, ndt::make_typevar("T"));
+        assign_na->ckernel_funcproto = expr_operation_funcproto;
+        assign_na->data_ptr = NULL;
+        assign_na->instantiate = &nafunc::instantiate_assign_na;
+        naf.flag_as_immutable();
+        return naf;
     }
 };
 
@@ -422,26 +410,16 @@ struct nafunc {
 
 const nd::array &kernels::get_option_builtin_nafunc(type_id_t tid)
 {
-    static nafunc<dynd_bool> bna_data;
-    static nd::array bna = bna_data.get();
-    static nafunc<int8_t> i8na_data;
-    static nd::array i8na = i8na_data.get();
-    static nafunc<int16_t> i16na_data;
-    static nd::array i16na = i16na_data.get();
-    static nafunc<int32_t> i32na_data;
-    static nd::array i32na = i32na_data.get();
-    static nafunc<int64_t> i64na_data;
-    static nd::array i64na = i64na_data.get();
-    static nafunc<dynd_int128> i128na_data;
-    static nd::array i128na = i128na_data.get();
-    static nafunc<float> f32na_data;
-    static nd::array f32na = f32na_data.get();
-    static nafunc<double> f64na_data;
-    static nd::array f64na = f64na_data.get();
-    static nafunc<dynd_complex<float> > cf32na_data;
-    static nd::array cf32na = cf32na_data.get();
-    static nafunc<dynd_complex<double> > cf64na_data;
-    static nd::array cf64na = cf64na_data.get();
+    static nd::array bna = nafunc<dynd_bool>::get();
+    static nd::array i8na = nafunc<int8_t>::get();
+    static nd::array i16na = nafunc<int16_t>::get();
+    static nd::array i32na = nafunc<int32_t>::get();
+    static nd::array i64na = nafunc<int64_t>::get();
+    static nd::array i128na = nafunc<dynd_int128>::get();
+    static nd::array f32na = nafunc<float>::get();
+    static nd::array f64na = nafunc<double>::get();
+    static nd::array cf32na = nafunc<dynd_complex<float> >::get();
+    static nd::array cf64na = nafunc<dynd_complex<double> >::get();
     static nd::array nullarr;
     switch (tid) {
     case bool_type_id:

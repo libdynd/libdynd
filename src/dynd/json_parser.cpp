@@ -512,7 +512,7 @@ static void parse_integer_json(const ndt::type &tp, const char *arrmeta,
     const char *nbegin, *nend;
     bool escaped = false;
     if (option && parse::parse_token_no_ws(begin, end, "null")) {
-        tp.tcast<option_type>()->assign_na(out_data, arrmeta, ectx);
+        ndt::make_option(tp).tcast<option_type>()->assign_na(arrmeta, out_data, ectx);
     } else if (parse::parse_json_number_no_ws(begin, end, nbegin, nend)) {
         parse::string_to_int(out_data, tp.get_type_id(), nbegin, nend,
                              false, ectx->default_errmode);
@@ -533,7 +533,7 @@ static void parse_integer_json(const ndt::type &tp, const char *arrmeta,
             throw json_parse_error(rbegin, e.what(), tp);
         }
     } else {
-        throw json_parse_error(begin, "expected a number", tp);
+        throw json_parse_error(rbegin, "expected a number", tp);
     }
     rbegin = begin;
 }
@@ -672,7 +672,13 @@ static void parse_option_json(const ndt::type &tp, const char *metadata,
             begin = skip_whitespace(begin, end);
             parse_integer_json(value_tp, metadata, out_data, begin, end, true, ectx);
             return;
+        default:
+            break;
     }
+
+    stringstream ss;
+    ss << "parse_json: unsupported dynd type " << tp;
+    throw runtime_error(ss.str());
 }
 
 static void parse_json(const ndt::type& tp, const char *metadata, char *out_data,

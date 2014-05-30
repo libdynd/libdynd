@@ -6,6 +6,7 @@
 #include <dynd/array.hpp>
 #include <dynd/types/option_type.hpp>
 #include <dynd/types/arrfunc_type.hpp>
+#include <dynd/kernels/option_assignment_kernels.hpp>
 #include <dynd/kernels/option_kernels.hpp>
 #include <dynd/memblock/pod_memory_block.hpp>
 #include <dynd/kernels/string_assignment_kernels.hpp>
@@ -45,7 +46,7 @@ const ndt::type &option_type::make_nafunc_type()
     return static_instance;
 }
 
-bool option_type::is_avail(const char *data, const char *arrmeta,
+bool option_type::is_avail(const char *arrmeta, const char *data,
                            const eval::eval_context *ectx) const
 {
     if (m_nafunc.is_null()) {
@@ -60,34 +61,34 @@ bool option_type::is_avail(const char *data, const char *arrmeta,
             case bool_type_id:
                 return *reinterpret_cast<const unsigned char *>(data) <= 1;
             case int8_type_id:
-                return *reinterpret_cast<const int8_t *>(data) == DYND_INT8_NA;
+                return *reinterpret_cast<const int8_t *>(data) != DYND_INT8_NA;
             case int16_type_id:
-                return *reinterpret_cast<const int16_t *>(data) ==
+                return *reinterpret_cast<const int16_t *>(data) !=
                        DYND_INT16_NA;
             case int32_type_id:
-                return *reinterpret_cast<const int32_t *>(data) ==
+                return *reinterpret_cast<const int32_t *>(data) !=
                        DYND_INT32_NA;
             case int64_type_id:
-                return *reinterpret_cast<const int64_t *>(data) ==
+                return *reinterpret_cast<const int64_t *>(data) !=
                        DYND_INT64_NA;
             case int128_type_id:
-                return *reinterpret_cast<const dynd_int128 *>(data) ==
+                return *reinterpret_cast<const dynd_int128 *>(data) !=
                        DYND_INT128_NA;
             case float32_type_id:
-                return *reinterpret_cast<const uint32_t *>(data) ==
+                return *reinterpret_cast<const uint32_t *>(data) !=
                        DYND_FLOAT32_NA_AS_UINT;
             case float64_type_id:
-                return *reinterpret_cast<const uint64_t *>(data) ==
+                return *reinterpret_cast<const uint64_t *>(data) !=
                        DYND_FLOAT64_NA_AS_UINT;
             case complex_float32_type_id:
-                return reinterpret_cast<const uint32_t *>(data)[0] ==
-                           DYND_FLOAT32_NA_AS_UINT &&
-                       reinterpret_cast<const uint32_t *>(data)[1] ==
+                return reinterpret_cast<const uint32_t *>(data)[0] !=
+                           DYND_FLOAT32_NA_AS_UINT ||
+                       reinterpret_cast<const uint32_t *>(data)[1] !=
                            DYND_FLOAT32_NA_AS_UINT;
             case complex_float64_type_id:
-                return reinterpret_cast<const uint64_t *>(data)[0] ==
-                           DYND_FLOAT64_NA_AS_UINT &&
-                       reinterpret_cast<const uint64_t *>(data)[1] ==
+                return reinterpret_cast<const uint64_t *>(data)[0] !=
+                           DYND_FLOAT64_NA_AS_UINT ||
+                       reinterpret_cast<const uint64_t *>(data)[1] !=
                            DYND_FLOAT64_NA_AS_UINT;
             default:
                 return false;
@@ -105,7 +106,7 @@ bool option_type::is_avail(const char *data, const char *arrmeta,
     }
 }
 
-void option_type::assign_na(char *data, const char *arrmeta,
+void option_type::assign_na(const char *arrmeta, char *data,
                             const eval::eval_context *ectx) const
 {
     if (m_nafunc.is_null()) {
@@ -165,24 +166,10 @@ void option_type::assign_na(char *data, const char *arrmeta,
 void option_type::print_data(std::ostream &o, const char *arrmeta,
                              const char *data) const
 {
-    if (!m_nafunc.is_null()) {
-        assignment_ckernel_builder ckb;
-        const arrfunc_type_data *is_avail = get_is_avail_arrfunc();
-        ndt::type src_tp[1] = {ndt::type(this, true)};
-        is_avail->instantiate(is_avail, &ckb, 0, ndt::make_type<dynd_bool>(),
-                              NULL, src_tp, &arrmeta, kernel_request_single,
-                              &eval::default_eval_context);
-        dynd_bool avail;
-        ckb(reinterpret_cast<char *>(&avail), data);
-        if (avail) {
-            m_value_tp.print_data(o, arrmeta, data);
-        } else {
-            o << "NA";
-        }
+    if (is_avail(arrmeta, data, &eval::default_eval_context)) {
+        m_value_tp.print_data(o, arrmeta, data);
     } else {
-        stringstream ss;
-
-        throw type_error(ss.str());
+        o << "NA";
     }
 }
 
@@ -299,6 +286,18 @@ void option_type::metadata_debug_print(const char *arrmeta, std::ostream& o, con
         m_value_tp.extended()->metadata_debug_print(arrmeta, o, indent + " ");
     }
 }
+
+size_t option_type::make_assignment_kernel(
+    ckernel_builder *ckb, size_t ckb_offset, const ndt::type &dst_tp,
+    const char *dst_arrmeta, const ndt::type &src_tp, const char *src_arrmeta,
+    kernel_request_t kernreq, assign_error_mode errmode,
+    const eval::eval_context *ectx) const
+{
+    return kernels::make_option_assignment_kernel(
+        ckb, ckb_offset, dst_tp, dst_arrmeta, src_tp, src_arrmeta,
+        kernreq, errmode, ectx);
+}
+
 
 static ndt::type property_get_value_type(const ndt::type& tp) {
     const option_type *pd = tp.tcast<option_type>();
