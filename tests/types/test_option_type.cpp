@@ -51,10 +51,12 @@ TEST(OptionType, OptionIntAssign) {
     nd::array a, b;
 
     // Assignment from option[S] to option[T]
-    a = parse_json("2 * ?int16", "[-10, null]");
-    b = nd::empty("2 * ?int8");
-    b.val_assign(a);
-    EXPECT_JSON_EQ_ARR("[-10, -128]", nd::view(b, "2 * int8"));
+    a = parse_json("2 * ?int8", "[-10, null]");
+    b = nd::empty("2 * ?int16");
+    b.vals() = a;
+    EXPECT_JSON_EQ_ARR("[-10, -32768]", nd::view(b, "2 * int16"));
+    b.val_assign(a, assign_error_none);
+    EXPECT_JSON_EQ_ARR("[-10, -32768]", nd::view(b, "2 * int16"));
 
     // Assignment from option[T] to T without any NAs
     a = parse_json("3 * ?int32", "[1, 2, 3]");
