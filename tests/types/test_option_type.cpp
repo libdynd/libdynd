@@ -7,6 +7,7 @@
 #include <sstream>
 #include <stdexcept>
 #include "inc_gtest.hpp"
+#include "dynd_assertions.hpp"
 
 #include <dynd/array.hpp>
 #include <dynd/view.hpp>
@@ -53,18 +54,17 @@ TEST(OptionType, OptionIntAssign) {
     a = parse_json("2 * ?int16", "[-10, null]");
     b = nd::empty("2 * ?int8");
     b.val_assign(a);
-    EXPECT_TRUE(nd::view(b, "2 * int8")
-                    .equals_exact(parse_json("2 * int8", "[-10, -128]")));
+    EXPECT_JSON_EQ_ARR("[-10, -128]", nd::view(b, "2 * int8"));
 
     // Assignment from option[T] to T without any NAs
     a = parse_json("3 * ?int32", "[1, 2, 3]");
     b = nd::empty("3 * int32");
     b.vals() = a;
-    EXPECT_TRUE(b.equals_exact(nd::view(a, "3 * int32")));
+    EXPECT_ARR_EQ(nd::view(a, "3 * int32"), b);
 
     // Assignment from T to option[T]
     a = parse_json("3 * int32", "[1, 3, 5]");
     b = nd::empty("3 * ?int32");
     b.vals() = a;
-    EXPECT_TRUE(nd::view(b, "3 * int32").equals_exact(a));
+    EXPECT_ARR_EQ(a, nd::view(b, "3 * int32"));
 }

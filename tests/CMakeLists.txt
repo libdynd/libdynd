@@ -15,6 +15,7 @@ else()
 endif()
 
 set(tests_SRC
+    dynd_assertions.hpp
     pp/test_pp_arithmetic.cpp
     pp/test_pp_comparison.cpp
     pp/test_pp_if.cpp
