@@ -453,41 +453,10 @@ static void parse_bool_json(const ndt::type &tp, const char *metadata,
     }
 }
 
-static void parse_dynd_builtin_json(const ndt::type& tp, const char *DYND_UNUSED(metadata), char *out_data,
-                const char *&rbegin, const char *end)
-{
-    const char *begin = rbegin;
-    const char *strbegin = NULL, *strend = NULL;
-    bool escaped;
-    begin = skip_whitespace(begin, end);
-    if (parse::parse_json_number_no_ws(begin, end, strbegin, strend)) {
-        try {
-            assign_utf8_string_to_builtin(tp.get_type_id(), out_data, strbegin, strend);
-        } catch (const std::exception& e) {
-            throw json_parse_error(skip_whitespace(rbegin, begin), e.what(), tp);
-        }
-    } else if (parse::parse_doublequote_string_no_ws(begin, end, strbegin, strend, escaped)) {
-        try {
-            if (!escaped) {
-                assign_utf8_string_to_builtin(tp.get_type_id(), out_data, strbegin, strend);
-            } else {
-                string val;
-                parse::unescape_string(strbegin, strend, val);
-                assign_utf8_string_to_builtin(tp.get_type_id(), out_data, val.data(), val.data() + val.size());
-            }
-        } catch (const std::exception& e) {
-            throw json_parse_error(skip_whitespace(rbegin, begin), e.what(), tp);
-        }
-    } else {
-        throw json_parse_error(begin, "invalid input", tp);
-    }
-    rbegin = begin;
-}
-
-static void parse_integer_json(const ndt::type &tp, const char *arrmeta,
-                               char *out_data, const char *&rbegin,
-                               const char *end, bool option,
-                               const eval::eval_context *ectx)
+static void parse_number_json(const ndt::type &tp, const char *arrmeta,
+                              char *out_data, const char *&rbegin,
+                              const char *end, bool option,
+                              const eval::eval_context *ectx)
 {
     const char *begin = rbegin;
     const char *nbegin, *nend;
@@ -495,19 +464,19 @@ static void parse_integer_json(const ndt::type &tp, const char *arrmeta,
     if (option && parse::parse_token_no_ws(begin, end, "null")) {
         ndt::make_option(tp).tcast<option_type>()->assign_na(arrmeta, out_data, ectx);
     } else if (parse::parse_json_number_no_ws(begin, end, nbegin, nend)) {
-        parse::string_to_int(out_data, tp.get_type_id(), nbegin, nend,
+        parse::string_to_number(out_data, tp.get_type_id(), nbegin, nend,
                              false, ectx->default_errmode);
     } else if (parse::parse_doublequote_string_no_ws(begin, end, nbegin, nend,
                                                      escaped)) {
         // Interpret the data inside the string as an int
         try {
             if (!escaped) {
-                parse::string_to_int(out_data, tp.get_type_id(), nbegin, nend,
+                parse::string_to_number(out_data, tp.get_type_id(), nbegin, nend,
                                      option, ectx->default_errmode);
             } else {
                 string s;
                 parse::unescape_string(nbegin, nend, s);
-                parse::string_to_int(out_data, tp.get_type_id(), nbegin, nend,
+                parse::string_to_number(out_data, tp.get_type_id(), nbegin, nend,
                                      option, ectx->default_errmode);
             }
         } catch (const std::exception& e) {
@@ -517,20 +486,6 @@ static void parse_integer_json(const ndt::type &tp, const char *arrmeta,
         throw json_parse_error(rbegin, "expected a number", tp);
     }
     rbegin = begin;
-}
-
-static void parse_real_json(const ndt::type& tp, const char *metadata, char *out_data,
-                const char *&begin, const char *end)
-{
-    // TODO: Parsing policy for how to handle reals
-    parse_dynd_builtin_json(tp, metadata, out_data, begin, end);
-}
-
-static void parse_complex_json(const ndt::type& tp, const char *metadata, char *out_data,
-                const char *&begin, const char *end)
-{
-    // TODO: Parsing policy for how to handle complex
-    parse_dynd_builtin_json(tp, metadata, out_data, begin, end);
 }
 
 static void parse_jsonstring_json(const ndt::type& tp, const char *metadata, char *out_data,
@@ -643,14 +598,16 @@ static void parse_option_json(const ndt::type &tp, const char *metadata,
                               const char *end, const eval::eval_context *ectx)
 {
     const ndt::type &value_tp = tp.tcast<option_type>()->get_value_type();
+    begin = skip_whitespace(begin, end);
     switch (value_tp.get_kind()) {
         case bool_kind:
             parse_bool_json(tp, metadata, out_data, begin, end, true, ectx);
             return;
         case int_kind:
         case uint_kind:
-            begin = skip_whitespace(begin, end);
-            parse_integer_json(value_tp, metadata, out_data, begin, end, true, ectx);
+        case real_kind:
+        case complex_kind:
+            parse_number_json(value_tp, metadata, out_data, begin, end, true, ectx);
             return;
         default:
             break;
@@ -678,15 +635,11 @@ static void parse_json(const ndt::type& tp, const char *metadata, char *out_data
             return;
         case int_kind:
         case uint_kind:
-            json_begin = skip_whitespace(json_begin, json_end);
-            parse_integer_json(tp, metadata, out_data, json_begin, json_end,
-                               false, ectx);
-            return;
         case real_kind:
-            parse_real_json(tp, metadata, out_data, json_begin, json_end);
-            return;
         case complex_kind:
-            parse_complex_json(tp, metadata, out_data, json_begin, json_end);
+            json_begin = skip_whitespace(json_begin, json_end);
+            parse_number_json(tp, metadata, out_data, json_begin, json_end,
+                               false, ectx);
             return;
         case string_kind:
             parse_string_json(tp, metadata, out_data, json_begin, json_end);

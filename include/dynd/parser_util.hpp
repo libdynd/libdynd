@@ -479,19 +479,26 @@ uint64_t unchecked_string_to_uint64(const char *begin, const char *end);
 dynd_uint128 unchecked_string_to_uint128(const char *begin, const char *end);
 
 /**
- * Converts a string containing an integer (no leading or trailing space)
- * into an integer with the specified type id, using the specified error
- * mode to handle errors. If ``option`` is true, writes to option[tid].
+ * Converts a string containing only a floating point number into
+ * a float64/C double.
+ */
+double checked_string_to_float64(const char *begin, const char *end,
+                                assign_error_mode errmode);
+
+/**
+ * Converts a string containing a number (no leading or trailing space)
+ * into a Num with the specified builtin type id, using the specified error
+ * mode to handle errors. If ``option`` is true, writes to option[Num].
  *
- * \param out_int  The address of the int or option[int].
- * \param tid  The type id of the int.
+ * \param out  The address of the Num or option[Num].
+ * \param tid  The type id of the Num.
  * \param begin  The start of the UTF8 string buffer.
  * \param end  The end of the UTF8 string buffer.
- * \param option  If true, treat it as option[int] instead of just int.
+ * \param option  If true, treat it as option[Num] instead of just Num.
  * \param errmode  The error handling mode.
  */
-void string_to_int(char *out_int, type_id_t tid, const char *begin,
-                   const char *end, bool option, assign_error_mode errmode);
+void string_to_number(char *out, type_id_t tid, const char *begin,
+                      const char *end, bool option, assign_error_mode errmode);
 
 /**
  * Converts a string containing an boolean (no leading or trailing space)

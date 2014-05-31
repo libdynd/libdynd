@@ -324,54 +324,30 @@ static void string_to_float32_single(char *dst, const char *src,
     // Get the string from the source
     string s = e->src_string_tp->get_utf8_string(e->src_metadata, src,e->errmode);
     trim(s);
-    to_lower(s);
-    // Handle special values
-    if (s == "nan" || s == "1.#qnan") {
-        *reinterpret_cast<uint32_t *>(dst) = 0x7fc00000;
-        return;
-    } else if (s == "-nan" || s == "-1.#ind") {
-        *reinterpret_cast<uint32_t *>(dst) = 0xffc00000;
-        return;
-    } else if (s == "inf" || s == "infinity" || s == "1.#inf") {
-        *reinterpret_cast<uint32_t *>(dst) = 0x7f800000;
-        return;
-    } else if (s == "-inf" || s == "-infinity" || s == "-1.#inf") {
-        *reinterpret_cast<uint32_t *>(dst) = 0xff800000;
-        return;
-    } else if (s == "na") {
-        // A 32-bit version of R's special NA NaN
-        *reinterpret_cast<uint32_t *>(dst) = 0x7f8007a2;
-        return;
-    }
-    char *end_ptr;
-    // TODO: use a different parsing code that's guaranteed to round correctly in a cross-platform fashion
-    double value = strtod(s.c_str(), &end_ptr);
-    if (e->errmode != assign_error_none && (size_t)(end_ptr - s.c_str()) != s.size()) {
-        raise_string_cast_error(ndt::make_type<float>(), ndt::type(e->src_string_tp, true), e->src_metadata, src);
-    } else {
-        // Assign double -> float according to the error mode
-        switch (e->errmode) {
-            case assign_error_none:
-                single_assigner_builtin<float, double, assign_error_none>::assign(
-                                reinterpret_cast<float *>(dst), &value, NULL);
-                break;
-            case assign_error_overflow:
-                single_assigner_builtin<float, double, assign_error_overflow>::assign(
-                                reinterpret_cast<float *>(dst), &value, NULL);
-                break;
-            case assign_error_fractional:
-                single_assigner_builtin<float, double, assign_error_fractional>::assign(
-                                reinterpret_cast<float *>(dst), &value, NULL);
-                break;
-            case assign_error_inexact:
-                single_assigner_builtin<float, double, assign_error_inexact>::assign(
-                                reinterpret_cast<float *>(dst), &value, NULL);
-                break;
-            default:
-                single_assigner_builtin<float, double, assign_error_fractional>::assign(
-                                reinterpret_cast<float *>(dst), &value, NULL);
-                break;
-        }
+    double value = parse::checked_string_to_float64(
+        s.data(), s.data() + s.size(), e->errmode);
+    // Assign double -> float according to the error mode
+    switch (e->errmode) {
+        case assign_error_none:
+            single_assigner_builtin<float, double, assign_error_none>::assign(
+                            reinterpret_cast<float *>(dst), &value, NULL);
+            break;
+        case assign_error_overflow:
+            single_assigner_builtin<float, double, assign_error_overflow>::assign(
+                            reinterpret_cast<float *>(dst), &value, NULL);
+            break;
+        case assign_error_fractional:
+            single_assigner_builtin<float, double, assign_error_fractional>::assign(
+                            reinterpret_cast<float *>(dst), &value, NULL);
+            break;
+        case assign_error_inexact:
+            single_assigner_builtin<float, double, assign_error_inexact>::assign(
+                            reinterpret_cast<float *>(dst), &value, NULL);
+            break;
+        default:
+            single_assigner_builtin<float, double, assign_error_fractional>::assign(
+                            reinterpret_cast<float *>(dst), &value, NULL);
+            break;
     }
 }
 
@@ -382,33 +358,9 @@ static void string_to_float64_single(char *dst, const char *src,
     // Get the string from the source
     string s = e->src_string_tp->get_utf8_string(e->src_metadata, src, e->errmode);
     trim(s);
-    to_lower(s);
-    // Handle special values
-    if (s == "nan" || s == "1.#qnan") {
-        *reinterpret_cast<uint64_t *>(dst) = 0x7ff8000000000000ULL;
-        return;
-    } else if (s == "-nan" || s == "-1.#ind") {
-        *reinterpret_cast<uint64_t *>(dst) = 0xfff8000000000000ULL;
-        return;
-    } else if (s == "inf" || s == "infinity" || s == "1.#inf") {
-        *reinterpret_cast<uint64_t *>(dst) = 0x7ff0000000000000ULL;
-        return;
-    } else if (s == "-inf" || s == "-infinity" || s == "-1.#inf") {
-        *reinterpret_cast<uint64_t *>(dst) = 0xfff0000000000000ULL;
-        return;
-    } else if (s == "na") {
-        // R's special NA NaN
-        *reinterpret_cast<uint64_t *>(dst) = 0x7ff00000000007a2ULL;
-        return;
-    }
-    char *end_ptr;
-    // TODO: use a different parsing code that's guaranteed to round correctly in a cross-platform fashion
-    double value = strtod(s.c_str(), &end_ptr);
-    if (e->errmode != assign_error_none && (size_t)(end_ptr - s.c_str()) != s.size()) {
-        raise_string_cast_error(ndt::make_type<double>(), ndt::type(e->src_string_tp, true), e->src_metadata, src);
-    } else {
-        *reinterpret_cast<double *>(dst) = value;
-    }
+    double value = parse::checked_string_to_float64(
+        s.data(), s.data() + s.size(), e->errmode);
+    *reinterpret_cast<double *>(dst) = value;
 }
 
 static void string_to_float16_single(char *dst, const char *src,
