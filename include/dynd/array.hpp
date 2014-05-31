@@ -1350,6 +1350,17 @@ intptr_t binary_search(const array& n, const char *data, const char *metadata);
 array groupby(const array& data_values, const array& by,
                 const ndt::type& groups = ndt::type());
 
+void assign_na(const ndt::type &tp, const char *arrmeta, char *data,
+               const eval::eval_context *ectx);
+
+inline void
+assign_na(array &out,
+          const eval::eval_context *ectx = &eval::default_eval_context)
+{
+    assign_na(out.get_type(), out.get_arrmeta(), out.get_readwrite_originptr(),
+              ectx);
+}
+
 /**
  * Creates a ctuple nd::array with the given field names and
  * pointers to the provided field values.
