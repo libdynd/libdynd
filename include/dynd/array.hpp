@@ -128,6 +128,25 @@ public:
     /** Constructs an array from a 3D initializer list */
     template<class T>
     array(std::initializer_list<std::initializer_list<std::initializer_list<T> > > il);
+
+    /** Assigns an array from a 1D initializer list */
+    template<class T>
+    inline array operator=(std::initializer_list<T> il) {
+        array(il).swap(*this);
+        return *this;
+    }
+    /** Assigns an array from a 2D initializer list */
+    template<class T>
+    inline array operator=(std::initializer_list<std::initializer_list<T> > il) {
+        array(il).swap(*this);
+        return *this;
+    }
+    /** Assigns an array from a 3D initializer list */
+    template<class T>
+    inline array operator=(std::initializer_list<std::initializer_list<std::initializer_list<T> > > il) {
+        array(il).swap(*this);
+        return *this;
+    }
 #endif // DYND_INIT_LIST
 
 
