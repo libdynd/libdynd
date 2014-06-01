@@ -210,11 +210,13 @@ ndt::type dynd::promote_types_arithmetic(const ndt::type& tp0, const ndt::type& 
     }
 
     // type, string -> type
-    if (tp0_val.get_type_id() == type_type_id && tp1_val.get_kind() == string_kind) {
+    if (tp0_val.get_type_id() == type_type_id &&
+            tp1_val.get_kind() == string_kind) {
         return tp0_val;
     }
     // string, type -> type
-    if (tp0_val.get_kind() == string_kind && tp1_val.get_type_id() == type_type_id) {
+    if (tp0_val.get_kind() == string_kind &&
+            tp1_val.get_type_id() == type_type_id) {
         return tp1_val;
     }
 
@@ -226,6 +228,7 @@ ndt::type dynd::promote_types_arithmetic(const ndt::type& tp0, const ndt::type& 
     }
 
     stringstream ss;
-    ss << "type promotion of " << tp0 << " and " << tp1 << " is not yet supported";
+    ss << "type promotion of " << tp0 << " and " << tp1
+       << " is not yet supported";
     throw dynd::type_error(ss.str());
 }
