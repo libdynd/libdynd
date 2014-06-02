@@ -3,20 +3,26 @@ project(cephes)
 
 set(CMAKE_VERBOSE_MAKEFILE 1)
 
+# The ${CMAKE_CURRENT_SOURCE_DIR}/ is required for the static lib builds,
+# where this source is included directly in the libdynd build instead
+# of being linked separately.
 set(cephes_SRC
-    airy.c
-    cbrt.c
-    const.c
-    gamma.c
-    j0.c
-    j1.c
-    jv.c
-    polevl.c
-    mtherr.c
-    sf_error.c
-    struve.c
-    yn.c
-    mconf.h
+    ${CMAKE_CURRENT_SOURCE_DIR}/airy.c
+    ${CMAKE_CURRENT_SOURCE_DIR}/cbrt.c
+    ${CMAKE_CURRENT_SOURCE_DIR}/const.c
+    ${CMAKE_CURRENT_SOURCE_DIR}/gamma.c
+    ${CMAKE_CURRENT_SOURCE_DIR}/j0.c
+    ${CMAKE_CURRENT_SOURCE_DIR}/j1.c
+    ${CMAKE_CURRENT_SOURCE_DIR}/jv.c
+    ${CMAKE_CURRENT_SOURCE_DIR}/polevl.c
+    ${CMAKE_CURRENT_SOURCE_DIR}/mtherr.c
+    ${CMAKE_CURRENT_SOURCE_DIR}/sf_error.c
+    ${CMAKE_CURRENT_SOURCE_DIR}/struve.c
+    ${CMAKE_CURRENT_SOURCE_DIR}/yn.c
+    ${CMAKE_CURRENT_SOURCE_DIR}/mconf.h
+    ${CMAKE_CURRENT_SOURCE_DIR}/protos.h
+    ${CMAKE_CURRENT_SOURCE_DIR}/rename.h
+    ${CMAKE_CURRENT_SOURCE_DIR}/sf_error.h
     )
 
 # Just supporting static library build for now (no .so/.dll yet)
