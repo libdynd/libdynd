@@ -299,6 +299,14 @@ void base_type::get_scalar_properties_and_functions(
     }
 }
 
+nd::array base_type::get_option_nafunc() const
+{
+    // Default to return a NULL nd::array, signalling no
+    // option_type support.
+    return nd::array();
+}
+
+
 void base_type::get_dynamic_type_properties(const std::pair<std::string, gfunc::callable> **out_properties, size_t *out_count) const
 {
     // Default to no properties

@@ -520,6 +520,14 @@ public:
                                  void *callback_data) const;
 
     /**
+     * If a subclass implements this, it should return an nd::array
+     * whose type is option_type::make_nafunc_type(), which contains
+     * basic arrfuncs for is_avail and assign_na. These allow option[T]
+     * to work for the subclass type.
+     */
+    virtual nd::array get_option_nafunc() const;
+
+    /**
      * Additional dynamic properties exposed by the type as gfunc::callable.
      */
     virtual void get_dynamic_type_properties(
