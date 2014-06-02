@@ -8,6 +8,7 @@
 #include <sstream>
 #include <stdexcept>
 #include "inc_gtest.hpp"
+#include "dynd_assertions.hpp"
 
 #include <dynd/array.hpp>
 
@@ -17,8 +18,11 @@ using namespace dynd;
 #define EXPECT_COMPLEX_DOUBLE_EQ(a, b) EXPECT_DOUBLE_EQ(a.real(), b.real()); \
     EXPECT_DOUBLE_EQ(a.imag(), b.imag())
 
+#define REL_ERROR_MAX 4E-15
+
 TEST(Complex, Math) {
     dynd_complex<double> z;
+    typedef std::complex<double> cdbl;
     typedef std::complex<double> cdbl;
 
     z = dynd_complex<double>(0.0, 0.0);
@@ -40,8 +44,10 @@ TEST(Complex, Math) {
     EXPECT_COMPLEX_DOUBLE_EQ(sqrt(z), sqrt(cdbl(z)));
     EXPECT_COMPLEX_DOUBLE_EQ(pow(z, 0.0), pow(cdbl(z), 0.0));
     EXPECT_COMPLEX_DOUBLE_EQ(pow(z, 1.0), pow(cdbl(z), 1.0));
-    EXPECT_COMPLEX_DOUBLE_EQ(pow(z, 2.0), pow(cdbl(z), 2.0));
-    EXPECT_COMPLEX_DOUBLE_EQ(pow(z, 3.0), pow(cdbl(z), 3.0));
+    EXPECT_EQ_RELERR(pow(z, 2.0), dynd_complex<double>(pow(cdbl(z), 2.0)),
+                     REL_ERROR_MAX);
+    EXPECT_EQ_RELERR(pow(z, 3.0), dynd_complex<double>(pow(cdbl(z), 3.0)),
+                     REL_ERROR_MAX);
     EXPECT_COMPLEX_DOUBLE_EQ(pow(z, 7.4), pow(cdbl(z), 7.4));
     EXPECT_COMPLEX_DOUBLE_EQ(pow(z, dynd_complex<double>(0.0, 1.0)), pow(cdbl(z), complex<double>(0.0, 1.0)));
     EXPECT_COMPLEX_DOUBLE_EQ(pow(z, dynd_complex<double>(0.0, -1.0)), pow(cdbl(z), complex<double>(0.0, -1.0)));
@@ -72,10 +78,14 @@ TEST(Complex, Math) {
     EXPECT_COMPLEX_DOUBLE_EQ(pow(z, 1.0), pow(cdbl(z), 1.0));
     EXPECT_COMPLEX_DOUBLE_EQ(pow(z, 2.0), pow(cdbl(z), 2.0));
     EXPECT_COMPLEX_DOUBLE_EQ(pow(z, 3.0), pow(cdbl(z), 3.0));
-    EXPECT_COMPLEX_DOUBLE_EQ(pow(z, 7.4), pow(cdbl(z), 7.4));
+    EXPECT_EQ_RELERR(pow(z, 7.4), dynd_complex<double>(pow(cdbl(z), 7.4)),
+                     REL_ERROR_MAX);
     EXPECT_COMPLEX_DOUBLE_EQ(pow(z, dynd_complex<double>(0.0, 1.0)), pow(cdbl(z), complex<double>(0.0, 1.0)));
     EXPECT_COMPLEX_DOUBLE_EQ(pow(z, dynd_complex<double>(0.0, -1.0)), pow(cdbl(z), complex<double>(0.0, -1.0)));
-    EXPECT_COMPLEX_DOUBLE_EQ(pow(z, dynd_complex<double>(7.4, -6.3)), pow(cdbl(z), complex<double>(7.4, -6.3)));
+    EXPECT_EQ_RELERR(
+        pow(z, dynd_complex<double>(7.4, -6.3)),
+        dynd_complex<double>(pow(cdbl(z), complex<double>(7.4, -6.3))),
+        REL_ERROR_MAX);
 
     // Todo: pow works for both arguments complex, but there is a very small difference in the answers from dynd and std.
     // That's fine, but we need to specify a floating-point tolerance for testing.
