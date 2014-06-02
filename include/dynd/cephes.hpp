@@ -6,11 +6,11 @@
 #ifndef _DYND__CEPHES_HPP_
 #define _DYND__CEPHES_HPP_
 
-namespace dynd {  namespace cephes { extern "C" {
+namespace dynd { extern "C" {
 
 #include "../../thirdparty/cephes/cephes_names.h"
 #include "../../thirdparty/cephes/protos.h"
 
-}}} // namespace dynd::cephes
+}} // namespace dynd::cephes
 
 #endif // _DYND__CEPHES_HPP_
