@@ -170,7 +170,7 @@ template <typename T>
     }
 
     return ::testing::AssertionFailure()
-        << "Expected: rel_error(" << expected << ", " << actual << ") <= " << rel_error_max << endl
+        << "Expected: rel_error(" << expected << ", " << actual << ") <= " << rel_error_max << "\n"
         << "  Actual: " << rel_error_val << " vs " << rel_error_max;
 }
 
