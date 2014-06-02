@@ -8,7 +8,7 @@ cmake_minimum_required(VERSION 2.8.7)
 project(libdynd)
 
 find_package(CUDA)
-
+                                                                                                                              
 # -DDYND_ELWISE_MAX, the maximum number of arguments that the elwise function
 #   in libdynd will support
 SET(DYND_ELWISE_MAX 7 CACHE STRING
@@ -66,6 +66,7 @@ list(APPEND CMAKE_MODULE_PATH
 set(CMAKE_VERBOSE_MAKEFILE 1)
 
 # Embedded libraries
+add_subdirectory(thirdparty/cephes)
 add_subdirectory(thirdparty/datetime)
 include_directories(thirdparty/datetime/include)
 
@@ -162,7 +163,7 @@ set(libdynd_SRC
     src/dynd/types/byteswap_type.cpp
     src/dynd/types/categorical_type.cpp
     src/dynd/types/cfixed_dim_type.cpp
-	src/dynd/types/char_type.cpp
+    src/dynd/types/char_type.cpp
     src/dynd/types/arrfunc_type.cpp
     src/dynd/types/convert_type.cpp
     src/dynd/types/cstruct_type.cpp
@@ -416,6 +417,7 @@ set(libdynd_SRC
     src/dynd/lowlevel_api.cpp
     src/dynd/parser_util.cpp
     src/dynd/shape_tools.cpp
+    src/dynd/special.cpp
     src/dynd/string.cpp
     src/dynd/string_encodings.cpp
     src/dynd/view.cpp
@@ -431,6 +433,7 @@ set(libdynd_SRC
     include/dynd/cling_all.hpp
     include/dynd/diagnostics.hpp
     include/dynd/dim_iter.hpp
+    include/dynd/dynd_math.hpp
     include/dynd/type.hpp
     include/dynd/typed_data_assign.hpp
     include/dynd/type_promotion.hpp
@@ -445,6 +448,7 @@ set(libdynd_SRC
     include/dynd/elwise.hpp
     include/dynd/shortvector.hpp
     include/dynd/shape_tools.hpp
+    include/dynd/special.hpp
     include/dynd/string.hpp
     include/dynd/string_encodings.hpp
     include/dynd/view.hpp
@@ -507,9 +511,11 @@ if ((NOT DYND_SHARED_LIB) AND (DYND_INSTALL_LIB))
     # include the sublibraries source directly because
     # including static libraries in other static libraries
     # is a hassle
+    get_directory_property(cephes DIRECTORY "thirdparty/cephes" DEFINITION cephes_SRC)
     get_directory_property(datetime_SRC DIRECTORY "thirdparty/datetime" DEFINITION datetime_SRC)
     set(libdynd_SRC
         ${libdynd_SRC}
+        ${cephes_SRC}
         ${datetime_SRC}
         )
 endif()
@@ -558,6 +564,10 @@ add_custom_command(OUTPUT ${CMAKE_CURRENT_BINARY_DIR}/include/dynd/pp/gen.hpp
 set_source_files_properties(${CMAKE_CURRENT_BINARY_DIR}/include/dynd/pp/gen.hpp PROPERTIES GENERATED true)
 add_dependencies(libdynd ppgen)
 
+# Copy the headers from cephes that need to be installed with libdynd
+file(COPY thirdparty/cephes/rename.h DESTINATION ${CMAKE_CURRENT_BINARY_DIR}/include/dynd/cephes)
+file(COPY thirdparty/cephes/protos.h DESTINATION ${CMAKE_CURRENT_BINARY_DIR}/include/dynd/cephes)
+
 include_directories(${CMAKE_CURRENT_BINARY_DIR}/include)
 
 if(WIN32)
@@ -583,6 +593,7 @@ if (DYND_SHARED_LIB OR (NOT DYND_INSTALL_LIB))
     # If we're not making an installable static library,
     # link the sublibraries normally
     target_link_libraries(libdynd
+        cephes
         datetime
         )
 endif()
@@ -636,6 +647,7 @@ if (DYND_INSTALL_LIB)
         ARCHIVE DESTINATION lib/static)
     # Install the libdynd headers
     install(DIRECTORY "include/dynd" DESTINATION "${CMAKE_INSTALL_PREFIX}/include")
+    install(DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}/include/dynd" DESTINATION "${CMAKE_INSTALL_PREFIX}/include")
     # Install the libdynd-config script
     if(WIN32)
         install(PROGRAMS "${CMAKE_CURRENT_BINARY_DIR}/libdynd-config.bat"
