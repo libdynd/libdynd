@@ -27,8 +27,9 @@ double rel_error(dynd_complex<double> expected, dynd_complex<double> actual) {
         return 0.0;
     }
 
-    return fabs(1.0 - abs(actual) / abs(expected));
+    return fabs(abs(expected - actual) / abs(expected));
 }
+
 
 #define REL_ERROR_MAX 1E-8
 

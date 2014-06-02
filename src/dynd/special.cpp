@@ -9,7 +9,7 @@ using namespace dynd;
 
 double dynd::factorial(int n) {
     if (n < 0) {
-        throw std::runtime_error("n must be a nonnegative integer");
+        throw std::invalid_argument("factorial: n must be a nonnegative integer");
     }
 
     double res = 1.0;
@@ -22,7 +22,7 @@ double dynd::factorial(int n) {
 
 double dynd::factorial2(int n) {
     if (n < 0) {
-        throw std::runtime_error("n must be a nonnegative integer");
+        throw std::invalid_argument("factorial2: n must be a nonnegative integer");
     }
 
     double res = 1.0;
@@ -35,7 +35,7 @@ double dynd::factorial2(int n) {
 
 double dynd::factorial_ratio(int m, int n) {
     if (m < 0 || n < 0) {
-        throw std::runtime_error("m and n must be nonnegative integers");
+        throw std::invalid_argument("factorial_ratio: m and n must be nonnegative integers");
     }
 
     if (m < n) {
@@ -83,11 +83,11 @@ double dynd::legendre_p_next(int l, double x, double pls1, double pl) {
 
 double dynd::legendre_p(int l, double x) {
     if (l < 0) {
-        throw std::runtime_error("l must be a nonnegative integer");
+        throw std::invalid_argument("legendre_p: l must be a nonnegative integer");
     }
 
     if (fabs(x) > 1) {
-        throw std::runtime_error("fabs(x) must be less than or equal to 1");
+        throw std::invalid_argument("legendre_p: fabs(x) must be less than or equal to 1");
     }
 
     double pls2, pls1 = 1.0;
@@ -113,15 +113,15 @@ double dynd::assoc_legendre_p_next(int l, int m, double x, double pl, double pls
 
 double dynd::assoc_legendre_p(int l, int m, double x) {
     if (l < 0) {
-        throw std::runtime_error("l must be a nonnegative integer");
+        throw std::invalid_argument("assoc_legendre_p: l must be a nonnegative integer");
     }
 
     if (m > l) {
-        throw std::runtime_error("fabs(m) must be less than or equal to l");
+        throw std::invalid_argument("assoc_legendre_p: fabs(m) must be less than or equal to l");
     }
 
     if (fabs(x) > 1) {
-        throw std::runtime_error("fabs(x) must be less than or equal to 1");
+        throw std::invalid_argument("assoc_legendre_p: fabs(x) must be less than or equal to 1");
     }
 
     if (m == 0) {
