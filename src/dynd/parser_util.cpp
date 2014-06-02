@@ -333,16 +333,23 @@ bool parse::parse_6digit_int_no_ws(const char *&begin, const char *end,
 
 namespace {
 template <class T> struct overflow_check;
-template <> struct overflow_check<int8_t> { inline static bool is_overflow(uint64_t value, bool negative) {
+template <> struct overflow_check<signed char> { inline static bool is_overflow(uint64_t value, bool negative) {
     return (value&~0x7fULL) != 0 && !(negative && value == 0x80ULL);
 }};
-template <> struct overflow_check<int16_t> { inline static bool is_overflow(uint64_t value, bool negative) {
+template <> struct overflow_check<short> { inline static bool is_overflow(uint64_t value, bool negative) {
     return (value&~0x7fffULL) != 0 && !(negative && value == 0x8000ULL);
 }};
-template <> struct overflow_check<int32_t> { inline static bool is_overflow(uint64_t value, bool negative) {
+template <> struct overflow_check<int> { inline static bool is_overflow(uint64_t value, bool negative) {
     return (value&~0x7fffffffULL) != 0 && !(negative && value == 0x80000000ULL);
 }};
-template <> struct overflow_check<int64_t> { inline static bool is_overflow(uint64_t value, bool negative) {
+template <> struct overflow_check<long> { inline static bool is_overflow(uint64_t value, bool negative) {
+#if INT_MAX == LONG_MAX
+    return (value&~0x7fffffffULL) != 0 && !(negative && value == 0x80000000ULL);
+#else
+    return (value&~0x7fffffffffffffffULL) != 0 && !(negative && value == 0x8000000000000000ULL);
+#endif
+}};
+template <> struct overflow_check<long long> { inline static bool is_overflow(uint64_t value, bool negative) {
     return (value&~0x7fffffffffffffffULL) != 0 && !(negative && value == 0x8000000000000000ULL);
 }};
 template <> struct overflow_check<dynd_int128> { inline static bool is_overflow(const dynd_uint128 &value, bool negative) {
