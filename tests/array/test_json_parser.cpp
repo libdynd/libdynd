@@ -192,7 +192,7 @@ TEST(JSONParser, UnsignedIntegerLimits) {
     n = parse_json(ndt::make_type<uint32_t>(), "-0");
     EXPECT_EQ(0u, n.as<uint32_t>());
     n = parse_json(ndt::make_type<uint32_t>(), "4294967295");
-    EXPECT_EQ(4294967295, n.as<uint32_t>());
+    EXPECT_EQ(4294967295U, n.as<uint32_t>());
     n = parse_json(ndt::make_type<uint64_t>(), "0");
     EXPECT_EQ(0u, n.as<uint64_t>());
     n = parse_json(ndt::make_type<uint64_t>(), "-0");
