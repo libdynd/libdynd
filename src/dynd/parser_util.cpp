@@ -4,6 +4,7 @@
 //
 
 #include <string>
+#include <climits>
 
 #include <dynd/parser_util.hpp>
 #include <dynd/string_encodings.hpp>
