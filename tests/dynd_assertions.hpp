@@ -141,4 +141,43 @@ CompareDyNDArrayToJSON(const char *expr1, const char *expr2,
   ASSERT_PRED_FORMAT2(CompareDyNDArrayToJSON, \
                       expected, actual)
 
+inline double rel_error(double expected, double actual)
+{
+    if ((expected == 0.0) && (actual == 0.0)) {
+        return 0.0;
+    }
+
+    return fabs(1.0 - actual / expected);
+}
+
+inline double rel_error(dynd::dynd_complex<double> expected,
+                        dynd::dynd_complex<double> actual)
+{
+    if ((expected == 0.0) && (actual == 0.0)) {
+        return 0.0;
+    }
+
+    return fabs(abs(expected - actual) / abs(expected));
+}
+
+template <typename T>
+::testing::AssertionResult AssertRelErrorLE(const char *DYND_UNUSED(expected_expr), const char *DYND_UNUSED(actual_expr),
+    const char *DYND_UNUSED(rel_error_max_expr), T expected, T actual, double rel_error_max) {
+    double rel_error_val = rel_error(expected, actual);
+
+    if (rel_error_val <= rel_error_max) {
+        return ::testing::AssertionSuccess();
+    }
+
+    return ::testing::AssertionFailure()
+        << "Expected: rel_error(" << expected << ", " << actual << ") <= " << rel_error_max << endl
+        << "  Actual: " << rel_error_val << " vs " << rel_error_max;
+}
+
+#define EXPECT_EQ_RELERR(expected, actual, rel_error_max) \
+  ASSERT_PRED_FORMAT3(AssertRelErrorLE, \
+                      expected, actual, rel_error_max)
+
+
+
 #endif // DYND_ASSERTIONS_HPP

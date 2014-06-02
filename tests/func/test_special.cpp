@@ -7,42 +7,13 @@
 #include <cmath>
 #include <inc_gtest.hpp>
 
+#include "dynd_assertions.hpp"
 #include "special_vals.hpp"
 
 #include <dynd/special.hpp>
 
 using namespace std;
 using namespace dynd;
-
-double rel_error(double expected, double actual) {
-    if ((expected == 0.0) && (actual == 0.0)) {
-        return 0.0;
-    }
-
-    return fabs(1.0 - actual / expected);
-}
-
-double rel_error(dynd_complex<double> expected, dynd_complex<double> actual) {
-    if ((expected == 0.0) && (actual == 0.0)) {
-        return 0.0;
-    }
-
-    return fabs(abs(expected - actual) / abs(expected));
-}
-
-template <typename T>
-::testing::AssertionResult AssertRelErrorLE(const char *DYND_UNUSED(expected_expr), const char *DYND_UNUSED(actual_expr),
-    const char *DYND_UNUSED(rel_error_max_expr), T expected, T actual, double rel_error_max) {
-    double rel_error_val = rel_error(expected, actual);
-
-    if (rel_error_val <= rel_error_max) {
-        return ::testing::AssertionSuccess();
-    }
-
-    return ::testing::AssertionFailure()
-        << "Expected: rel_error(" << expected << ", " << actual << ") <= " << rel_error_max << endl
-        << "  Actual: " << rel_error_val << " vs " << rel_error_max;
-}
 
 #define REL_ERROR_MAX 1E-8
 
@@ -51,8 +22,8 @@ TEST(Special, Factorial) {
     intptr_t size = vals.get_dim_size();
 
     for (int i = 0; i < size; ++i) {
-        EXPECT_PRED_FORMAT3(AssertRelErrorLE,
-            vals(i, 1).as<double>(), factorial(vals(i, 0).as<int>()), REL_ERROR_MAX);
+        EXPECT_EQ_RELERR(vals(i, 1).as<double>(),
+                         factorial(vals(i, 0).as<int>()), REL_ERROR_MAX);
     }
 }
 
@@ -61,8 +32,8 @@ TEST(Special, Factorial2) {
     intptr_t size = vals.get_dim_size();
 
     for (int i = 0; i < size; ++i) {
-        EXPECT_PRED_FORMAT3(AssertRelErrorLE,
-            vals(i, 1).as<double>(), factorial2(vals(i, 0).as<int>()), REL_ERROR_MAX);
+        EXPECT_EQ_RELERR(vals(i, 1).as<double>(),
+                         factorial2(vals(i, 0).as<int>()), REL_ERROR_MAX);
     }
 }
 
@@ -71,8 +42,10 @@ TEST(Special, FactorialRatio) {
     intptr_t size = vals.get_dim_size();
 
     for (int i = 0; i < size; ++i) {
-        EXPECT_PRED_FORMAT3(AssertRelErrorLE,
-            vals(i, 2).as<double>(), factorial_ratio(vals(i, 0).as<int>(), vals(i, 1).as<int>()), REL_ERROR_MAX);
+        EXPECT_EQ_RELERR(
+            vals(i, 2).as<double>(),
+            factorial_ratio(vals(i, 0).as<int>(), vals(i, 1).as<int>()),
+            REL_ERROR_MAX);
     }
 }
 
@@ -83,8 +56,8 @@ TEST(Special, Gamma) {
     intptr_t size = vals.get_dim_size();
 
     for (int i = 0; i < size; ++i) {
-        EXPECT_PRED_FORMAT3(AssertRelErrorLE,
-            vals(i, 1).as<double>(), gamma(vals(i, 0).as<double>()), REL_ERROR_MAX);
+        EXPECT_EQ_RELERR(vals(i, 1).as<double>(),
+                         gamma(vals(i, 0).as<double>()), REL_ERROR_MAX);
     }
 }
 
@@ -95,8 +68,8 @@ TEST(Special, LogGamma) {
     intptr_t size = vals.get_dim_size();
 
     for (int i = 0; i < size; ++i) {
-        EXPECT_PRED_FORMAT3(AssertRelErrorLE,
-            vals(i, 1).as<double>(), lgamma(vals(i, 0).as<double>()), REL_ERROR_MAX);
+        EXPECT_EQ_RELERR(vals(i, 1).as<double>(),
+                         lgamma(vals(i, 0).as<double>()), REL_ERROR_MAX);
     }
 }
 
@@ -108,14 +81,14 @@ TEST(Special, Airy) {
         double res[2][2];
         airy(res, vals(i, 0).as<double>());
 
-        EXPECT_PRED_FORMAT3(AssertRelErrorLE,
-            vals(i, 1, 0, 0).as<double>(), res[0][0], REL_ERROR_MAX);
-        EXPECT_PRED_FORMAT3(AssertRelErrorLE,
-            vals(i, 1, 0, 1).as<double>(), res[0][1], REL_ERROR_MAX);
-        EXPECT_PRED_FORMAT3(AssertRelErrorLE,
-            vals(i, 1, 1, 0).as<double>(), res[1][0], REL_ERROR_MAX);
-        EXPECT_PRED_FORMAT3(AssertRelErrorLE,
-            vals(i, 1, 1, 1).as<double>(), res[1][1], REL_ERROR_MAX);
+        EXPECT_EQ_RELERR(vals(i, 1, 0, 0).as<double>(), res[0][0],
+                         REL_ERROR_MAX);
+        EXPECT_EQ_RELERR(vals(i, 1, 0, 1).as<double>(), res[0][1],
+                         REL_ERROR_MAX);
+        EXPECT_EQ_RELERR(vals(i, 1, 1, 0).as<double>(), res[1][0],
+                         REL_ERROR_MAX);
+        EXPECT_EQ_RELERR(vals(i, 1, 1, 1).as<double>(), res[1][1],
+                         REL_ERROR_MAX);
     }
 }
 
@@ -124,8 +97,8 @@ TEST(Special, BesselJ0) {
     intptr_t size = vals.get_dim_size();
 
     for (int i = 0; i < size; ++i) {
-        EXPECT_PRED_FORMAT3(AssertRelErrorLE,
-            vals(i, 1).as<double>(), bessel_j0(vals(i, 0).as<double>()), REL_ERROR_MAX);
+        EXPECT_EQ_RELERR(vals(i, 1).as<double>(),
+                         bessel_j0(vals(i, 0).as<double>()), REL_ERROR_MAX);
     }
 }
 
@@ -134,8 +107,8 @@ TEST(Special, BesselJ1) {
     intptr_t size = vals.get_dim_size();
 
     for (int i = 0; i < size; ++i) {
-        EXPECT_PRED_FORMAT3(AssertRelErrorLE,
-            vals(i, 1).as<double>(), bessel_j1(vals(i, 0).as<double>()), REL_ERROR_MAX);
+        EXPECT_EQ_RELERR(vals(i, 1).as<double>(),
+                         bessel_j1(vals(i, 0).as<double>()), REL_ERROR_MAX);
     }
 }
 
@@ -144,8 +117,10 @@ TEST(Special, BesselJ) {
     intptr_t size = vals.get_dim_size();
 
     for (int i = 0; i < size; ++i) {
-        EXPECT_PRED_FORMAT3(AssertRelErrorLE,
-            vals(i, 2).as<double>(), bessel_j(vals(i, 0).as<double>(), vals(i, 1).as<double>()), REL_ERROR_MAX);
+        EXPECT_EQ_RELERR(
+            vals(i, 2).as<double>(),
+            bessel_j(vals(i, 0).as<double>(), vals(i, 1).as<double>()),
+            REL_ERROR_MAX);
     }
 }
 
@@ -154,8 +129,8 @@ TEST(Special, SphericalBesselJ0) {
     intptr_t size = vals.get_dim_size();
 
     for (int i = 0; i < size; ++i) {
-        EXPECT_PRED_FORMAT3(AssertRelErrorLE,
-            vals(i, 1).as<double>(), sph_bessel_j0(vals(i, 0).as<double>()), REL_ERROR_MAX);
+        EXPECT_EQ_RELERR(vals(i, 1).as<double>(),
+                         sph_bessel_j0(vals(i, 0).as<double>()), REL_ERROR_MAX);
     }
 }
 
@@ -164,8 +139,10 @@ TEST(Special, SphericalBesselJ) {
     intptr_t size = vals.get_dim_size();
 
     for (int i = 0; i < size; ++i) {
-        EXPECT_PRED_FORMAT3(AssertRelErrorLE,
-            vals(i, 2).as<double>(), sph_bessel_j(vals(i, 0).as<double>(), vals(i, 1).as<double>()), REL_ERROR_MAX);
+        EXPECT_EQ_RELERR(
+            vals(i, 2).as<double>(),
+            sph_bessel_j(vals(i, 0).as<double>(), vals(i, 1).as<double>()),
+            REL_ERROR_MAX);
     }
 }
 
@@ -174,8 +151,8 @@ TEST(Special, BesselY0) {
     intptr_t size = vals.get_dim_size();
 
     for (int i = 0; i < size; ++i) {
-        EXPECT_PRED_FORMAT3(AssertRelErrorLE,
-            vals(i, 1).as<double>(), bessel_y0(vals(i, 0).as<double>()), REL_ERROR_MAX);
+        EXPECT_EQ_RELERR(vals(i, 1).as<double>(),
+                         bessel_y0(vals(i, 0).as<double>()), REL_ERROR_MAX);
     }
 }
 
@@ -184,8 +161,8 @@ TEST(Special, BesselY1) {
     intptr_t size = vals.get_dim_size();
 
     for (int i = 0; i < size; ++i) {
-        EXPECT_PRED_FORMAT3(AssertRelErrorLE,
-            vals(i, 1).as<double>(), bessel_y1(vals(i, 0).as<double>()), REL_ERROR_MAX);
+        EXPECT_EQ_RELERR(vals(i, 1).as<double>(),
+                         bessel_y1(vals(i, 0).as<double>()), REL_ERROR_MAX);
     }
 }
 
@@ -194,8 +171,10 @@ TEST(Special, BesselY) {
     intptr_t size = vals.get_dim_size();
 
     for (int i = 0; i < size; ++i) {
-        EXPECT_PRED_FORMAT3(AssertRelErrorLE,
-            vals(i, 2).as<double>(), bessel_y(vals(i, 0).as<double>(), vals(i, 1).as<double>()), REL_ERROR_MAX);
+        EXPECT_EQ_RELERR(
+            vals(i, 2).as<double>(),
+            bessel_y(vals(i, 0).as<double>(), vals(i, 1).as<double>()),
+            REL_ERROR_MAX);
     }
 }
 
@@ -204,8 +183,8 @@ TEST(Special, SphericalBesselY0) {
     intptr_t size = vals.get_dim_size();
 
     for (int i = 0; i < size; ++i) {
-        EXPECT_PRED_FORMAT3(AssertRelErrorLE,
-            vals(i, 1).as<double>(), sph_bessel_y0(vals(i, 0).as<double>()), REL_ERROR_MAX);
+        EXPECT_EQ_RELERR(vals(i, 1).as<double>(),
+                         sph_bessel_y0(vals(i, 0).as<double>()), REL_ERROR_MAX);
     }
 }
 
@@ -214,8 +193,10 @@ TEST(Special, SphericalBesselY) {
     intptr_t size = vals.get_dim_size();
 
     for (int i = 0; i < size; ++i) {
-        EXPECT_PRED_FORMAT3(AssertRelErrorLE,
-            vals(i, 2).as<double>(), sph_bessel_y(vals(i, 0).as<double>(), vals(i, 1).as<double>()), REL_ERROR_MAX);
+        EXPECT_EQ_RELERR(
+            vals(i, 2).as<double>(),
+            sph_bessel_y(vals(i, 0).as<double>(), vals(i, 1).as<double>()),
+            REL_ERROR_MAX);
     }
 }
 
@@ -224,8 +205,10 @@ TEST(Special, HankelH1) {
     intptr_t size = vals.get_dim_size();
 
     for (int i = 0; i < size; ++i) {
-        EXPECT_PRED_FORMAT3(AssertRelErrorLE,
-            vals(i, 2).as<dynd_complex<double> >(), hankel_h1(vals(i, 0).as<double>(), vals(i, 1).as<double>()), REL_ERROR_MAX);
+        EXPECT_EQ_RELERR(
+            vals(i, 2).as<dynd_complex<double> >(),
+            hankel_h1(vals(i, 0).as<double>(), vals(i, 1).as<double>()),
+            REL_ERROR_MAX);
     }
 }
 
@@ -234,8 +217,10 @@ TEST(Special, SphericalHankelH1) {
     intptr_t size = vals.get_dim_size();
 
     for (int i = 0; i < size; ++i) {
-        EXPECT_PRED_FORMAT3(AssertRelErrorLE,
-            vals(i, 2).as<dynd_complex<double> >(), sph_hankel_h1(vals(i, 0).as<double>(), vals(i, 1).as<double>()), REL_ERROR_MAX);
+        EXPECT_EQ_RELERR(
+            vals(i, 2).as<dynd_complex<double> >(),
+            sph_hankel_h1(vals(i, 0).as<double>(), vals(i, 1).as<double>()),
+            REL_ERROR_MAX);
     }
 }
 
@@ -244,8 +229,10 @@ TEST(Special, HankelH2) {
     intptr_t size = vals.get_dim_size();
 
     for (int i = 0; i < size; ++i) {
-        EXPECT_PRED_FORMAT3(AssertRelErrorLE,
-            vals(i, 2).as<dynd_complex<double> >(), hankel_h2(vals(i, 0).as<double>(), vals(i, 1).as<double>()), REL_ERROR_MAX);
+        EXPECT_EQ_RELERR(
+            vals(i, 2).as<dynd_complex<double> >(),
+            hankel_h2(vals(i, 0).as<double>(), vals(i, 1).as<double>()),
+            REL_ERROR_MAX);
     }
 }
 
@@ -254,8 +241,10 @@ TEST(Special, SphericalHankelH2) {
     intptr_t size = vals.get_dim_size();
 
     for (int i = 0; i < size; ++i) {
-        EXPECT_PRED_FORMAT3(AssertRelErrorLE,
-            vals(i, 2).as<dynd_complex<double> >(), sph_hankel_h2(vals(i, 0).as<double>(), vals(i, 1).as<double>()), REL_ERROR_MAX);
+        EXPECT_EQ_RELERR(
+            vals(i, 2).as<dynd_complex<double> >(),
+            sph_hankel_h2(vals(i, 0).as<double>(), vals(i, 1).as<double>()),
+            REL_ERROR_MAX);
     }
 }
 
@@ -264,8 +253,10 @@ TEST(Special, StruveH) {
     intptr_t size = vals.get_dim_size();
 
     for (int i = 0; i < size; ++i) {
-        EXPECT_PRED_FORMAT3(AssertRelErrorLE,
-            vals(i, 2).as<double>(), struve_h(vals(i, 0).as<double>(), vals(i, 1).as<double>()), REL_ERROR_MAX);
+        EXPECT_EQ_RELERR(
+            vals(i, 2).as<double>(),
+            struve_h(vals(i, 0).as<double>(), vals(i, 1).as<double>()),
+            REL_ERROR_MAX);
     }
 }
 
@@ -274,8 +265,10 @@ TEST(Special, LegendreP) {
     intptr_t size = vals.get_dim_size();
 
     for (int i = 0; i < size; ++i) {
-        EXPECT_PRED_FORMAT3(AssertRelErrorLE,
-            vals(i, 2).as<double>(), legendre_p(vals(i, 0).as<int>(), vals(i, 1).as<double>()), REL_ERROR_MAX);
+        EXPECT_EQ_RELERR(
+            vals(i, 2).as<double>(),
+            legendre_p(vals(i, 0).as<int>(), vals(i, 1).as<double>()),
+            REL_ERROR_MAX);
     }
 }
 
@@ -284,8 +277,11 @@ TEST(Special, AssociatedLegendreP) {
     intptr_t size = vals.get_dim_size();
 
     for (int i = 0; i < size; ++i) {
-        EXPECT_PRED_FORMAT3(AssertRelErrorLE,
-            vals(i, 3).as<double>(), assoc_legendre_p(vals(i, 0).as<int>(), vals(i, 1).as<int>(), vals(i, 2).as<double>()), REL_ERROR_MAX);
+        EXPECT_EQ_RELERR(vals(i, 3).as<double>(),
+                         assoc_legendre_p(vals(i, 0).as<int>(),
+                                          vals(i, 1).as<int>(),
+                                          vals(i, 2).as<double>()),
+                         REL_ERROR_MAX);
     }
 }
 
