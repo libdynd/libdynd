@@ -9,6 +9,7 @@
 #include <cmath>
 
 #include "inc_gtest.hpp"
+#include "dynd_assertions.hpp"
 
 #include <dynd/array.hpp>
 #include <dynd/elwise.hpp>
@@ -54,15 +55,8 @@ TYPED_TEST_P(Elwise, FuncRetRes) {
     a = avals0;
     b = bvals0;
     res = nd::elwise(static_cast<int (*)(TypeParam, const TypeParam &)>(&func0), a, b);
-    EXPECT_EQ(ndt::make_strided_dim(ndt::make_strided_dim(ndt::make_type<int>())), res.get_type());
-    ASSERT_EQ(2, res.get_shape()[0]);
-    ASSERT_EQ(3, res.get_shape()[1]);
-    EXPECT_EQ(-10, res(0, 0).as<int>());
-    EXPECT_EQ(-2, res(0, 1).as<int>());
-    EXPECT_EQ(-4, res(0, 2).as<int>());
-    EXPECT_EQ(0, res(1, 0).as<int>());
-    EXPECT_EQ(8, res(1, 1).as<int>());
-    EXPECT_EQ(6, res(1, 2).as<int>());
+    EXPECT_EQ(ndt::type("strided * strided * int"), res.get_type());
+    EXPECT_JSON_EQ_ARR("[[-10,-2,-4], [0,8,6]]", res);
 
     TypeParam vals1[2][3] = {{0, 1, 2}, {3, 4, 5}};
 
@@ -170,15 +164,8 @@ TYPED_TEST_P(Elwise, FuncRefRes) {
     a = avals0;
     b = bvals0;
     res = nd::elwise(static_cast<void (*)(int &, TypeParam, const TypeParam &)>(&func0), a, b);
-    EXPECT_EQ(ndt::make_strided_dim(ndt::make_strided_dim(ndt::make_type<int>())), res.get_type());
-    ASSERT_EQ(2, res.get_shape()[0]);
-    ASSERT_EQ(3, res.get_shape()[1]);
-    EXPECT_EQ(-10, res(0, 0).as<int>());
-    EXPECT_EQ(-2, res(0, 1).as<int>());
-    EXPECT_EQ(-4, res(0, 2).as<int>());
-    EXPECT_EQ(0, res(1, 0).as<int>());
-    EXPECT_EQ(8, res(1, 1).as<int>());
-    EXPECT_EQ(6, res(1, 2).as<int>());
+    EXPECT_EQ(ndt::type("strided * strided * int"), res.get_type());
+    EXPECT_JSON_EQ_ARR("[[-10,-2,-4], [0,8,6]]", res);
 
     res = nd::elwise(func4<TypeParam>, a, b);
     EXPECT_EQ(ndt::make_strided_dim(ndt::make_strided_dim(ndt::make_cfixed_dim(2, ndt::make_type<TypeParam>()))), res.get_type());
@@ -297,15 +284,8 @@ TYPED_TEST_P(Elwise, MethRetRes) {
     a = avals0;
     b = bvals0;
     res = nd::elwise(FuncWrapper0(&func0), &FuncWrapper0::meth, a, b);
-    EXPECT_EQ(ndt::make_strided_dim(ndt::make_strided_dim(ndt::make_type<int>())), res.get_type());
-    ASSERT_EQ(2, res.get_shape()[0]);
-    ASSERT_EQ(3, res.get_shape()[1]);
-    EXPECT_EQ(-10, res(0, 0).as<int>());
-    EXPECT_EQ(-2, res(0, 1).as<int>());
-    EXPECT_EQ(-4, res(0, 2).as<int>());
-    EXPECT_EQ(0, res(1, 0).as<int>());
-    EXPECT_EQ(8, res(1, 1).as<int>());
-    EXPECT_EQ(6, res(1, 2).as<int>());
+    EXPECT_EQ(ndt::type("strided * strided * int"), res.get_type());
+    EXPECT_JSON_EQ_ARR("[[-10,-2,-4], [0,8,6]]", res);
 
     TypeParam vals1[2][3] = {{0, 1, 2}, {3, 4, 5}};
 
@@ -396,15 +376,8 @@ TYPED_TEST_P(Elwise, MethRefRes) {
     a = avals0;
     b = bvals0;
     res = nd::elwise(FuncWrapper0(&func0), &FuncWrapper0::meth, a, b);
-    EXPECT_EQ(ndt::make_strided_dim(ndt::make_strided_dim(ndt::make_type<int>())), res.get_type());
-    ASSERT_EQ(2, res.get_shape()[0]);
-    ASSERT_EQ(3, res.get_shape()[1]);
-    EXPECT_EQ(-10, res(0, 0).as<int>());
-    EXPECT_EQ(-2, res(0, 1).as<int>());
-    EXPECT_EQ(-4, res(0, 2).as<int>());
-    EXPECT_EQ(0, res(1, 0).as<int>());
-    EXPECT_EQ(8, res(1, 1).as<int>());
-    EXPECT_EQ(6, res(1, 2).as<int>());
+    EXPECT_EQ(ndt::type("strided * strided * int"), res.get_type());
+    EXPECT_JSON_EQ_ARR("[[-10,-2,-4], [0,8,6]]", res);
 
     res = nd::elwise(FuncWrapper4(&func4), &FuncWrapper4::meth, a, b);
     EXPECT_EQ(ndt::make_strided_dim(ndt::make_strided_dim(ndt::make_cfixed_dim(2, ndt::make_type<TypeParam>()))), res.get_type());
@@ -523,15 +496,8 @@ TYPED_TEST_P(Elwise, CallRetRes) {
     a = avals0;
     b = bvals0;
     res = nd::elwise(Callable0(&func0), a, b);
-    EXPECT_EQ(ndt::make_strided_dim(ndt::make_strided_dim(ndt::make_type<int>())), res.get_type());
-    ASSERT_EQ(2, res.get_shape()[0]);
-    ASSERT_EQ(3, res.get_shape()[1]);
-    EXPECT_EQ(-10, res(0, 0).as<int>());
-    EXPECT_EQ(-2, res(0, 1).as<int>());
-    EXPECT_EQ(-4, res(0, 2).as<int>());
-    EXPECT_EQ(0, res(1, 0).as<int>());
-    EXPECT_EQ(8, res(1, 1).as<int>());
-    EXPECT_EQ(6, res(1, 2).as<int>());
+    EXPECT_EQ(ndt::type("strided * strided * int"), res.get_type());
+    EXPECT_JSON_EQ_ARR("[[-10,-2,-4], [0,8,6]]", res);
 
     TypeParam vals1[2][3] = {{0, 1, 2}, {3, 4, 5}};
 
@@ -622,15 +588,8 @@ TYPED_TEST_P(Elwise, CallRefRes) {
     a = avals0;
     b = bvals0;
     res = nd::elwise(Callable0(&func0), a, b);
-    EXPECT_EQ(ndt::make_strided_dim(ndt::make_strided_dim(ndt::make_type<int>())), res.get_type());
-    ASSERT_EQ(2, res.get_shape()[0]);
-    ASSERT_EQ(3, res.get_shape()[1]);
-    EXPECT_EQ(-10, res(0, 0).as<int>());
-    EXPECT_EQ(-2, res(0, 1).as<int>());
-    EXPECT_EQ(-4, res(0, 2).as<int>());
-    EXPECT_EQ(0, res(1, 0).as<int>());
-    EXPECT_EQ(8, res(1, 1).as<int>());
-    EXPECT_EQ(6, res(1, 2).as<int>());
+    EXPECT_EQ(ndt::type("strided * strided * int"), res.get_type());
+    EXPECT_JSON_EQ_ARR("[[-10,-2,-4], [0,8,6]]", res);
 
     res = nd::elwise(Callable4(&func4), a, b);
     EXPECT_EQ(ndt::make_strided_dim(ndt::make_strided_dim(ndt::make_cfixed_dim(2, ndt::make_type<TypeParam>()))), res.get_type());
@@ -724,10 +683,7 @@ TEST(ElWise, LambdaFunc) {
         return x * z + y;
     }, a, b, 10);
     EXPECT_EQ(ndt::type("strided * float64"), res.get_type());
-    ASSERT_EQ(3, res.get_shape()[0]);
-    EXPECT_EQ(18.25, res(0).as<double>());
-    EXPECT_EQ(23.25, res(1).as<double>());
-    EXPECT_EQ(34.5, res(2).as<double>());
+    EXPECT_JSON_EQ_ARR("[18.25,23.25,34.5]", res);
 }
 #endif
 

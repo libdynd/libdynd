@@ -36,6 +36,11 @@ public:
     void metadata_reset_buffers(char *metadata) const;
     void metadata_finalize_buffers(char *metadata) const;
     void metadata_destruct(char *metadata) const;
+    void metadata_debug_print(const char *DYND_UNUSED(metadata),
+                              std::ostream &DYND_UNUSED(o),
+                              const std::string &DYND_UNUSED(indent)) const
+    {
+    }
 
     void data_destruct(const char *metadata, char *data) const;
     void data_destruct_strided(const char *metadata, char *data,

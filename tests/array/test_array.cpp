@@ -10,6 +10,7 @@
 
 #include "inc_gtest.hpp"
 #include "../test_memory.hpp"
+#include "dynd_assertions.hpp"
 
 #include <dynd/array.hpp>
 #include <dynd/types/strided_dim_type.hpp>
@@ -568,43 +569,13 @@ TEST(Array, InitFromInitializerLists) {
 TEST(Array, InitFromNestedCArray) {
     int i0[2][3] = {{1,2,3}, {4,5,6}};
     nd::array a = i0;
-    EXPECT_EQ(ndt::make_strided_dim(ndt::make_strided_dim(ndt::make_type<int>())), a.get_type());
-    EXPECT_EQ(2u, a.get_shape().size());
-    EXPECT_EQ(2, a.get_shape()[0]);
-    EXPECT_EQ(3, a.get_shape()[1]);
-    EXPECT_EQ(3*(int)sizeof(int), a.get_strides()[0]);
-    EXPECT_EQ((int)sizeof(int), a.get_strides()[1]);
-    const int *ptr_i = (const int *)a.get_ndo()->m_data_pointer;
-    EXPECT_EQ(1, ptr_i[0]);
-    EXPECT_EQ(2, ptr_i[1]);
-    EXPECT_EQ(3, ptr_i[2]);
-    EXPECT_EQ(4, ptr_i[3]);
-    EXPECT_EQ(5, ptr_i[4]);
-    EXPECT_EQ(6, ptr_i[5]);
+    EXPECT_EQ(ndt::type("strided * strided * int"), a.get_type());
+    EXPECT_JSON_EQ_ARR("[[1,2,3], [4,5,6]]", a);
 
     float i1[2][2][3] = {{{1,2,3}, {1.5f, 2.5f, 3.5f}}, {{-10, 0, -3.1f}, {9,8,7}}};
     a = i1;
-    EXPECT_EQ(ndt::make_strided_dim(ndt::make_strided_dim(ndt::make_strided_dim(ndt::make_type<float>()))), a.get_type());
-    EXPECT_EQ(3u, a.get_shape().size());
-    EXPECT_EQ(2, a.get_shape()[0]);
-    EXPECT_EQ(2, a.get_shape()[1]);
-    EXPECT_EQ(3, a.get_shape()[2]);
-    EXPECT_EQ(6*(int)sizeof(float), a.get_strides()[0]);
-    EXPECT_EQ(3*(int)sizeof(float), a.get_strides()[1]);
-    EXPECT_EQ((int)sizeof(float), a.get_strides()[2]);
-    const float *ptr_f = (float *)a.get_ndo()->m_data_pointer;
-    EXPECT_EQ(1, ptr_f[0]);
-    EXPECT_EQ(2, ptr_f[1]);
-    EXPECT_EQ(3, ptr_f[2]);
-    EXPECT_EQ(1.5, ptr_f[3]);
-    EXPECT_EQ(2.5, ptr_f[4]);
-    EXPECT_EQ(3.5, ptr_f[5]);
-    EXPECT_EQ(-10, ptr_f[6]);
-    EXPECT_EQ(0, ptr_f[7]);
-    EXPECT_EQ(-3.1f, ptr_f[8]);
-    EXPECT_EQ(9, ptr_f[9]);
-    EXPECT_EQ(8, ptr_f[10]);
-    EXPECT_EQ(7, ptr_f[11]);
+    EXPECT_EQ(ndt::type("strided * strided * strided * float32"), a.get_type());
+    EXPECT_JSON_EQ_ARR("[[[1,2,3], [1.5,2.5,3.5]], [[-10,0,-3.1], [9,8,7]]]", a);
 }
 
 TEST(Array, Storage) {

@@ -9,11 +9,11 @@
 #include <vector>
 
 #include <dynd/config.hpp>
+#include <dynd/types/type_id.hpp>
 #include <dynd/atomic_refcount.hpp>
 #include <dynd/irange.hpp>
 #include <dynd/memblock/memory_block.hpp>
 #include <dynd/kernels/comparison_kernels.hpp>
-#include <dynd/types/type_id.hpp>
 #include <dynd/typed_data_assign.hpp>
 
 namespace dynd {
@@ -28,24 +28,32 @@ namespace ndt {
     class type;
 } // namespace ndt
 
+// Forward definition from dynd/array.hpp
+namespace nd {
+    class array;
+} // namsepace nd
+
 class base_type;
 
 struct iterdata_common;
 
 /** This is the callback function type used by the base_type::foreach function */
-typedef void (*foreach_fn_t)(const ndt::type &dt, const char *metadata, char *data, void *callback_data);
+typedef void (*foreach_fn_t)(const ndt::type &dt, const char *metadata,
+                             char *data, void *callback_data);
 
 /**
  * This is the iteration increment function used by iterdata. It increments the
  * iterator at the specified level, resetting all the more inner levels to 0.
  */
-typedef char * (*iterdata_increment_fn_t)(iterdata_common *iterdata, intptr_t level);
+typedef char *(*iterdata_increment_fn_t)(iterdata_common *iterdata,
+                                         intptr_t level);
 /**
  * This is the reset function which is called when an outer dimension
  * increment resets all the lower dimensions to index 0. It returns
  * the data pointer for the next inner level of iteration.
  */
-typedef char * (*iterdata_reset_fn_t)(iterdata_common *iterdata, char *data, intptr_t ndim);
+typedef char *(*iterdata_reset_fn_t)(iterdata_common *iterdata, char *data,
+                                     intptr_t ndim);
 
 /**
  * This is a generic function which applies a transformation to a type.
@@ -57,8 +65,9 @@ typedef char * (*iterdata_reset_fn_t)(iterdata_common *iterdata, char *data, int
  * should place a different type in 'out_transformed_type', then set
  * 'out_was_transformed' to true.
  */
-typedef void (*type_transform_fn_t)(const ndt::type& dt, void *extra,
-                ndt::type& out_transformed_type, bool& out_was_transformed);
+typedef void (*type_transform_fn_t)(const ndt::type &dt, void *extra,
+                                    ndt::type &out_transformed_type,
+                                    bool &out_was_transformed);
 
 // Common preamble of all iterdata instances
 struct iterdata_common {
@@ -81,15 +90,17 @@ struct base_type_members {
     flags_type flags;
     /** The size of one instance of the type, or 0 if there is not one fixed size. */
     size_t data_size;
-    /** The size of a metadata instance for the type. */
+    /** The size of a arrmeta instance for the type. */
     size_t metadata_size;
     /** The number of array dimensions this type has */
     uint8_t undim;
 
     base_type_members(uint16_t type_id_, uint8_t kind_, uint8_t data_alignment_,
-                    flags_type flags_, size_t data_size_, size_t metadata_size_, uint8_t undim_)
-        : type_id(type_id_), kind(kind_), data_alignment(data_alignment_), flags(flags_),
-                data_size(data_size_), metadata_size(metadata_size_), undim(undim_)
+                      flags_type flags_, size_t data_size_,
+                      size_t metadata_size_, uint8_t undim_)
+        : type_id(type_id_), kind(kind_), data_alignment(data_alignment_),
+          flags(flags_), data_size(data_size_), metadata_size(metadata_size_),
+          undim(undim_)
     {}
 };
 
@@ -112,17 +123,22 @@ protected:
 
 protected:
     // Helper function for array dimension types
-    void get_scalar_properties_and_functions(
-                    std::vector<std::pair<std::string, gfunc::callable> >& out_properties,
-                    std::vector<std::pair<std::string, gfunc::callable> >& out_functions) const;
+  void get_scalar_properties_and_functions(
+      std::vector<std::pair<std::string, gfunc::callable> > &out_properties,
+      std::vector<std::pair<std::string, gfunc::callable> > &out_functions)
+      const;
+
 public:
     typedef base_type_members::flags_type flags_type;
 
     /** Starts off the extended type instance with a use count of 1. */
     inline base_type(type_id_t type_id, type_kind_t kind, size_t data_size,
-                    size_t alignment, flags_type flags, size_t metadata_size, size_t undim)
-        : m_use_count(1), m_members(static_cast<uint16_t>(type_id), static_cast<uint8_t>(kind),
-                static_cast<uint8_t>(alignment), flags, data_size, metadata_size, static_cast<uint8_t>(undim))
+                     size_t alignment, flags_type flags, size_t metadata_size,
+                     size_t undim)
+        : m_use_count(1),
+          m_members(static_cast<uint16_t>(type_id), static_cast<uint8_t>(kind),
+                    static_cast<uint8_t>(alignment), flags, data_size,
+                    metadata_size, static_cast<uint8_t>(undim))
     {}
 
     virtual ~base_type();
@@ -220,8 +236,10 @@ public:
      * \param out_was_transformed  Is set to true if a transformation was done,
      *                             is left alone otherwise.
      */
-    virtual void transform_child_types(type_transform_fn_t transform_fn, void *extra,
-                    ndt::type& out_transformed_type, bool& out_was_transformed) const;
+    virtual void transform_child_types(type_transform_fn_t transform_fn,
+                                       void *extra,
+                                       ndt::type &out_transformed_type,
+                                       bool &out_was_transformed) const;
 
     /**
      * Returns a modified type with all expression types replaced with
@@ -243,8 +261,9 @@ public:
      * of the type.
      */
     virtual void process_strided(const char *metadata, const char *data,
-                    ndt::type& out_dt, const char *&out_origin,
-                    intptr_t& out_stride, intptr_t& out_dim_size) const;
+                                 ndt::type &out_dt, const char *&out_origin,
+                                 intptr_t &out_stride,
+                                 intptr_t &out_dim_size) const;
 
     /**
      * Indexes into the type. This function returns the type which results
@@ -259,8 +278,11 @@ public:
      *                           of this is a pointer data throwing away the pointer part, so the result
      *                           doesn't contain that indirection.
      */
-    virtual ndt::type apply_linear_index(intptr_t nindices, const irange *indices,
-                size_t current_i, const ndt::type& root_tp, bool leading_dimension) const;
+    virtual ndt::type apply_linear_index(intptr_t nindices,
+                                         const irange *indices,
+                                         size_t current_i,
+                                         const ndt::type &root_tp,
+                                         bool leading_dimension) const;
 
     /**
      * Indexes into an nd::array using the provided linear index, and a type and freshly allocated output
@@ -298,12 +320,12 @@ public:
      *
      * @return  An offset to apply to the data pointer(s).
      */
-    virtual intptr_t apply_linear_index(intptr_t nindices, const irange *indices, const char *metadata,
-                    const ndt::type& result_type, char *out_metadata,
-                    memory_block_data *embedded_reference,
-                    size_t current_i, const ndt::type& root_tp,
-                    bool leading_dimension, char **inout_data,
-                    memory_block_data **inout_dataref) const;
+    virtual intptr_t apply_linear_index(
+        intptr_t nindices, const irange *indices, const char *metadata,
+        const ndt::type &result_type, char *out_metadata,
+        memory_block_data *embedded_reference, size_t current_i,
+        const ndt::type &root_tp, bool leading_dimension, char **inout_data,
+        memory_block_data **inout_dataref) const;
 
     /**
      * The 'at' function is used for indexing. Indexing one dimension with
@@ -320,7 +342,8 @@ public:
      *
      * \returns  The type that results from the indexing operation.
      */
-    virtual ndt::type at_single(intptr_t i0, const char **inout_metadata, const char **inout_data) const;
+    virtual ndt::type at_single(intptr_t i0, const char **inout_metadata,
+                                const char **inout_data) const;
 
     /**
      * Retrieves the type starting at the requested dimension. This is
@@ -334,7 +357,8 @@ public:
      * \param total_ndim  A count of how many dimensions have been traversed from the
      *                    type start, for producing error messages.
      */
-    virtual ndt::type get_type_at_dimension(char **inout_metadata, intptr_t i, intptr_t total_ndim = 0) const;
+    virtual ndt::type get_type_at_dimension(char **inout_metadata, intptr_t i,
+                                            intptr_t total_ndim = 0) const;
 
     /**
      * Retrieves the shape of the type nd::array instance,
@@ -349,7 +373,7 @@ public:
      * The output must be pre-initialized to have 'ndim' elements.
      */
     virtual void get_shape(intptr_t ndim, intptr_t i, intptr_t *out_shape,
-                    const char *metadata, const char *data) const;
+                           const char *metadata, const char *data) const;
 
     /**
      * Retrieves the strides of the type nd::array instance,
@@ -359,7 +383,8 @@ public:
      *
      * The output must be pre-initialized to have get_ndim() elements.
      */
-    virtual void get_strides(size_t i, intptr_t *out_strides, const char *metadata) const;
+    virtual void get_strides(size_t i, intptr_t *out_strides,
+                             const char *metadata) const;
 
     /**
      * Classifies the order the axes occur in the memory
@@ -434,8 +459,9 @@ public:
      * Constructs the iterdata for processing iteration at this level of the datashape
      */
     virtual size_t iterdata_construct(iterdata_common *iterdata,
-                    const char **inout_metadata, intptr_t ndim,
-                    const intptr_t* shape, ndt::type& out_uniform_tp) const;
+                                      const char **inout_arrmeta,
+                                      intptr_t ndim, const intptr_t *shape,
+                                      ndt::type &out_uniform_tp) const;
     /** Destructs any references or other state contained in the iterdata */
     virtual size_t iterdata_destruct(iterdata_common *iterdata, intptr_t ndim) const;
 
@@ -452,12 +478,12 @@ public:
      * \returns  The offset at the end of 'out' after adding this
      *           kernel.
      */
-    virtual size_t make_assignment_kernel(
-                    ckernel_builder *out, size_t offset_out,
-                    const ndt::type& dst_tp, const char *dst_metadata,
-                    const ndt::type& src_tp, const char *src_metadata,
-                    kernel_request_t kernreq, assign_error_mode errmode,
-                    const eval::eval_context *ectx) const;
+    virtual size_t
+    make_assignment_kernel(ckernel_builder *out, size_t offset_out,
+                           const ndt::type &dst_tp, const char *dst_arrmeta,
+                           const ndt::type &src_tp, const char *src_arrmeta,
+                           kernel_request_t kernreq, assign_error_mode errmode,
+                           const eval::eval_context *ectx) const;
 
     /**
      * Creates a comparison kernel for one data value from one
@@ -474,23 +500,24 @@ public:
      */
     virtual size_t make_comparison_kernel(
                     ckernel_builder *out, size_t offset_out,
-                    const ndt::type& src0_dt, const char *src0_metadata,
-                    const ndt::type& src1_dt, const char *src1_metadata,
+                    const ndt::type& src0_dt, const char *src0_arrmeta,
+                    const ndt::type& src1_dt, const char *src1_arrmeta,
                     comparison_type_t comptype,
                     const eval::eval_context *ectx) const;
 
     /**
-     * Call the callback on each element of the array with given data/metadata along the leading
+     * Call the callback on each element of the array with given data/arrmeta along the leading
      * dimension. For array dimensions, the type provided is the same each call, but for
      * heterogeneous dimensions it changes.
      *
-     * \param metadata  The arrmeta.
+     * \param arrmeta  The arrmeta.
      * \param data  The nd::array data.
      * \param callback  Callback function called for each subelement.
      * \param callback_data  Data provided to the callback function.
      */
-    virtual void foreach_leading(const char *metadata, char *data,
-                    foreach_fn_t callback, void *callback_data) const;
+    virtual void foreach_leading(const char *arrmeta, char *data,
+                                 foreach_fn_t callback,
+                                 void *callback_data) const;
 
     /**
      * Additional dynamic properties exposed by the type as gfunc::callable.
@@ -503,8 +530,8 @@ public:
      * Additional dynamic functions exposed by the type as gfunc::callable.
      */
     virtual void get_dynamic_type_functions(
-                    const std::pair<std::string, gfunc::callable> **out_functions,
-                    size_t *out_count) const;
+        const std::pair<std::string, gfunc::callable> **out_functions,
+        size_t *out_count) const;
 
     /**
      * Additional dynamic properties exposed by any nd::array of this type as gfunc::callable.
@@ -514,19 +541,21 @@ public:
      *       just strictly of the non-array data type.
      */
     virtual void get_dynamic_array_properties(
-                    const std::pair<std::string, gfunc::callable> **out_properties,
-                    size_t *out_count) const;
+        const std::pair<std::string, gfunc::callable> **out_properties,
+        size_t *out_count) const;
 
     /**
-     * Additional dynamic functions exposed by any nd::array of this type as gfunc::callable.
+     * Additional dynamic functions exposed by any nd::array of this type as
+     * gfunc::callable.
      *
-     * \note Array types copy these functions from the first non-array data type, so such properties must
-     *       be able to handle the case where they are the first non-array data type in an array type, not
+     * \note Array types copy these functions from the first non-array data
+     *       type, so such properties must be able to handle the case where
+     *       they are the first non-array data type in an array type, not
      *       just strictly of the non-array data type.
      */
     virtual void get_dynamic_array_functions(
-                    const std::pair<std::string, gfunc::callable> **out_functions,
-                    size_t *out_count) const;
+        const std::pair<std::string, gfunc::callable> **out_functions,
+        size_t *out_count) const;
 
     /**
      * Returns the index for the element-wise property of the given name.
@@ -536,7 +565,8 @@ public:
      * \returns  The index of the property, to be provided to the other elwise_property
      *           functions.
      */
-    virtual size_t get_elwise_property_index(const std::string& property_name) const;
+    virtual size_t
+    get_elwise_property_index(const std::string &property_name) const;
 
     /**
      * Returns the type for the element-wise property of the given index.
@@ -551,7 +581,8 @@ public:
      * \returns  The type of the property.
      */
     virtual ndt::type get_elwise_property_type(size_t elwise_property_index,
-            bool& out_readable, bool& out_writable) const;
+                                               bool &out_readable,
+                                               bool &out_writable) const;
 
     /**
      * Returns a kernel to transform instances of this type into values of the
@@ -565,10 +596,9 @@ public:
      * \param ectx  DyND evaluation context.
      */
     virtual size_t make_elwise_property_getter_kernel(
-                    ckernel_builder *out, size_t offset_out,
-                    const char *dst_metadata,
-                    const char *src_metadata, size_t src_elwise_property_index,
-                    kernel_request_t kernreq, const eval::eval_context *ectx) const;
+        ckernel_builder *out, size_t offset_out, const char *dst_metadata,
+        const char *src_metadata, size_t src_elwise_property_index,
+        kernel_request_t kernreq, const eval::eval_context *ectx) const;
 
     /**
      * Returns a kernel to transform instances of the element-wise property
@@ -579,18 +609,17 @@ public:
      *       setting just the "year" property of a date is not possible
      *       with this mechanism.
      *
-     * \param out  The hierarchical assignment kernel being constructed.
-     * \param offset_out  The offset within 'out'.
+     * \param ckb  The hierarchical assignment kernel being constructed.
+     * \param ckb_offset  The offset within 'ckb'.
      * \param dst_metadata  Metadata for the operand type being written to.
      * \param dst_elwise_property_index  The index of the property, from get_elwise_property_index().
      * \param src_metadata  Metadata for the source property being read from.
      * \param ectx  DyND evaluation contrext.
      */
     virtual size_t make_elwise_property_setter_kernel(
-                    ckernel_builder *out, size_t offset_out,
-                    const char *dst_metadata, size_t dst_elwise_property_index,
-                    const char *src_metadata,
-                    kernel_request_t kernreq, const eval::eval_context *ectx) const;
+        ckernel_builder *ckb, size_t ckb_offset, const char *dst_metadata,
+        size_t dst_elwise_property_index, const char *src_metadata,
+        kernel_request_t kernreq, const eval::eval_context *ectx) const;
 
     friend void base_type_incref(const base_type *ed);
     friend void base_type_decref(const base_type *ed);
@@ -622,7 +651,6 @@ inline void base_type_xincref(const base_type *bd)
  */
 inline void base_type_decref(const base_type *bd)
 {
-    //std::cout << "dynd type " << (void *)ed << " dec: " << ed->m_use_count - 1 << "\t"; ed->print_type(std::cout); std::cout << std::endl;
     if (--bd->m_use_count == 0) {
         delete bd;
     }
@@ -654,7 +682,8 @@ namespace detail {
 inline intptr_t get_base_type_data_size(const base_type *bt)
 {
     if (is_builtin_type(bt)) {
-        return static_cast<intptr_t>(detail::builtin_data_sizes[reinterpret_cast<uintptr_t>(bt)]);
+        return static_cast<intptr_t>(
+            detail::builtin_data_sizes[reinterpret_cast<uintptr_t>(bt)]);
     } else {
         return bt->get_data_size();
     }
@@ -668,7 +697,8 @@ inline intptr_t get_base_type_data_size(const base_type *bt)
 inline type_kind_t get_base_type_kind(const base_type *bt)
 {
     if (is_builtin_type(bt)) {
-        return static_cast<type_kind_t>(detail::builtin_kinds[reinterpret_cast<uintptr_t>(bt)]);
+        return static_cast<type_kind_t>(
+            detail::builtin_kinds[reinterpret_cast<uintptr_t>(bt)]);
     } else {
         return bt->get_kind();
     }
@@ -682,7 +712,8 @@ inline type_kind_t get_base_type_kind(const base_type *bt)
 inline size_t get_base_type_alignment(const base_type *bt)
 {
     if (is_builtin_type(bt)) {
-        return static_cast<size_t>(detail::builtin_data_alignments[reinterpret_cast<uintptr_t>(bt)]);
+        return static_cast<size_t>(
+            detail::builtin_data_alignments[reinterpret_cast<uintptr_t>(bt)]);
     } else {
         return bt->get_data_alignment();
     }

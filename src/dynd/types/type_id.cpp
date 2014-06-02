@@ -39,6 +39,8 @@ std::ostream& dynd::operator<<(std::ostream& o, type_kind_t kind)
             return (o << "dynamic");
         case expression_kind:
             return (o << "expression");
+        case option_kind:
+            return (o << "option");
         case symbolic_kind:
             return (o << "symbolic");
         case custom_kind:
@@ -129,6 +131,8 @@ std::ostream& dynd::operator<<(std::ostream& o, type_id_t tid)
             return (o << "tuple");
         case ctuple_type_id:
             return (o << "ctuple");
+        case option_type_id:
+            return (o << "option");
         case ndarrayarg_type_id:
             return (o << "ndarrayarg");
         case convert_type_id:
@@ -159,17 +163,5 @@ std::ostream& dynd::operator<<(std::ostream& o, type_id_t tid)
             return (o << "ellipsis_dim");
         default:
             return (o << "(unknown type id " << (int)tid << ")");
-    }
-}
-
-std::ostream& dynd::operator<<(std::ostream& o, kernel_request_t kernreq)
-{
-    switch (kernreq) {
-        case kernel_request_single:
-            return (o << "kernel_request_single");
-        case kernel_request_strided:
-            return (o << "kernel_request_strided");
-        default:
-            return (o << "(unknown kernrel request " << (int)kernreq << ")");
     }
 }

@@ -15,6 +15,7 @@ else()
 endif()
 
 set(tests_SRC
+    dynd_assertions.hpp
     pp/test_pp_arithmetic.cpp
     pp/test_pp_comparison.cpp
     pp/test_pp_if.cpp
@@ -46,6 +47,7 @@ set(tests_SRC
     types/test_fixedstring_type.cpp
     types/test_groupby_type.cpp
     types/test_json_type.cpp
+    types/test_option_type.cpp
     types/test_pointer_type.cpp
     types/test_strided_dim_type.cpp
     types/test_string_type.cpp

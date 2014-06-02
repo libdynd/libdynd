@@ -460,6 +460,13 @@ dynd_uint128 checked_string_to_uint128(const char *begin, const char *end,
                                          bool &out_overflow, bool &out_badparse);
 
 /**
+ * Converts a string containing only an integer (no leading or
+ * trailing space, etc) into an intptr_t, raising an exception if
+ * there are problems.
+ */
+intptr_t checked_string_to_intptr(const char *begin, const char *end);
+
+/**
  * Converts a string containing only an unsigned integer (no leading or
  * trailing space, etc) into a uint64, ignoring any problems.
  */
@@ -472,12 +479,46 @@ uint64_t unchecked_string_to_uint64(const char *begin, const char *end);
 dynd_uint128 unchecked_string_to_uint128(const char *begin, const char *end);
 
 /**
- * Converts a string containing an integer (no leading or trailing space)
- * into an integer with the specified type id, using the specified error
- * mode to handle errors.
+ * Converts a string containing only a floating point number into
+ * a float64/C double.
  */
-void string_to_int(char *out_int, type_id_t tid, const char *begin,
-                   const char *end, assign_error_mode errmode);
+double checked_string_to_float64(const char *begin, const char *end,
+                                assign_error_mode errmode);
+
+/**
+ * Converts a string containing a number (no leading or trailing space)
+ * into a Num with the specified builtin type id, using the specified error
+ * mode to handle errors. If ``option`` is true, writes to option[Num].
+ *
+ * \param out  The address of the Num or option[Num].
+ * \param tid  The type id of the Num.
+ * \param begin  The start of the UTF8 string buffer.
+ * \param end  The end of the UTF8 string buffer.
+ * \param option  If true, treat it as option[Num] instead of just Num.
+ * \param errmode  The error handling mode.
+ */
+void string_to_number(char *out, type_id_t tid, const char *begin,
+                      const char *end, bool option, assign_error_mode errmode);
+
+/**
+ * Converts a string containing an boolean (no leading or trailing space)
+ * into a bool, using the specified error mode to handle errors.
+ * If ``option`` is true, writes to option[bool].
+ *
+ * \param out_bool  The address of the bool or option[bool].
+ * \param begin  The start of the UTF8 string buffer.
+ * \param end  The end of the UTF8 string buffer.
+ * \param option  If true, treat it as option[int] instead of just int.
+ * \param errmode  The error handling mode.
+ */
+void string_to_bool(char *out_bool, const char *begin, const char *end,
+                    bool option, assign_error_mode errmode);
+
+/**
+ * Returns true if the string provided matches an option[T] missing value token,
+ * such as "", "NA", "NULL", "null", "None".
+ */
+bool matches_option_type_na_token(const char *begin, const char *end);
 
 /**
  * A helper class for matching a bunch of names and getting an integer.

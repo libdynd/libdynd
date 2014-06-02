@@ -105,9 +105,9 @@ memory_block_ptr dynd::make_array_memory_block(const ndt::type& tp, intptr_t ndi
 
     if (tp.get_flags()&type_flag_zeroinit) {
         if (dtp.get_kind() == memory_kind) {
-            static_cast<const base_memory_type*>(dtp.extended())->data_zeroinit(data_ptr, data_size);
-        }
-        else {
+            static_cast<const base_memory_type *>(dtp.extended())
+                ->data_zeroinit(data_ptr, data_size);
+        } else {
             memset(data_ptr, 0, data_size);
         }
     }
@@ -117,16 +117,19 @@ memory_block_ptr dynd::make_array_memory_block(const ndt::type& tp, intptr_t ndi
         preamble->m_type = reinterpret_cast<base_type *>(tp.get_type_id());
         if (ndim != 0) {
             stringstream ss;
-            ss << "too many dimensions (" << ndim << ") for creating dynd array of type " << tp;
+            ss << "too many dimensions (" << ndim
+               << ") for creating dynd array of type " << tp;
             throw runtime_error(ss.str());
         }
     } else {
         preamble->m_type = ndt::type(tp).release();
-        preamble->m_type->metadata_default_construct(reinterpret_cast<char *>(preamble + 1), ndim, shape);
+        preamble->m_type->metadata_default_construct(
+            reinterpret_cast<char *>(preamble + 1), ndim, shape);
     }
     preamble->m_data_pointer = data_ptr;
     preamble->m_data_reference = NULL;
-    // This is an uninitialized allocation, so should be read/write by default, not immutable
+    // This is an uninitialized allocation, so should be read/write by default,
+    // not immutable
     preamble->m_flags = nd::read_access_flag|nd::write_access_flag;
     return result;
 }

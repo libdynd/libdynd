@@ -14,6 +14,7 @@
 #include <dynd/types/date_type.hpp>
 #include <dynd/types/datetime_type.hpp>
 #include <dynd/types/time_type.hpp>
+#include <dynd/types/option_type.hpp>
 #include <dynd/kernels/string_numeric_assignment_kernels.hpp>
 #include <dynd/parser_util.hpp>
 
@@ -207,41 +208,22 @@ static void skip_json_value(const char *&begin, const char *end)
     }
 }
 
-static void parse_fixed_dim_json(const ndt::type& tp, const char *metadata, char *out_data,
+static void parse_strided_dim_json(const ndt::type& tp, const char *metadata, char *out_data,
                 const char *&begin, const char *end, const eval::eval_context *ectx)
 {
-    const fixed_dim_type *fad = tp.tcast<fixed_dim_type>();
-    const fixed_dim_type_metadata *md = reinterpret_cast<const fixed_dim_type_metadata *>(metadata);
-    intptr_t size = fad->get_fixed_dim_size();
-    intptr_t stride = md->stride;
+    intptr_t dim_size, stride;
+    ndt::type el_tp;
+    const char *el_arrmeta;
+    if (!tp.get_as_strided_dim(metadata, dim_size, stride, el_tp, el_arrmeta)) {
+        throw json_parse_error(begin, "expected a strided dimension", tp);
+    }
 
     if (!parse_token(begin, end, "[")) {
         throw json_parse_error(begin, "expected list starting with '['", tp);
     }
-    for (intptr_t i = 0; i < size; ++i) {
-        parse_json(fad->get_element_type(), metadata + sizeof(fixed_dim_type_metadata), out_data + i * stride, begin, end, ectx);
-        if (i < size-1 && !parse_token(begin, end, ",")) {
-            throw json_parse_error(begin, "array is too short, expected ',' list item separator", tp);
-        }
-    }
-    if (!parse_token(begin, end, "]")) {
-        throw json_parse_error(begin, "array is too long, expected list terminator ']'", tp);
-    }
-}
-
-static void parse_cfixed_dim_json(const ndt::type& tp, const char *metadata, char *out_data,
-                const char *&begin, const char *end, const eval::eval_context *ectx)
-{
-    const cfixed_dim_type *fad = tp.tcast<cfixed_dim_type>();
-    intptr_t size = fad->get_fixed_dim_size();
-    intptr_t stride = fad->get_fixed_stride();
-
-    if (!parse_token(begin, end, "[")) {
-        throw json_parse_error(begin, "expected list starting with '['", tp);
-    }
-    for (intptr_t i = 0; i < size; ++i) {
-        parse_json(fad->get_element_type(), metadata, out_data + i * stride, begin, end, ectx);
-        if (i < size-1 && !parse_token(begin, end, ",")) {
+    for (intptr_t i = 0; i < dim_size; ++i) {
+        parse_json(el_tp, el_arrmeta, out_data + i * stride, begin, end, ectx);
+        if (i < dim_size-1 && !parse_token(begin, end, ",")) {
             throw json_parse_error(begin, "array is too short, expected ',' list item separator", tp);
         }
     }
@@ -410,115 +392,100 @@ static void parse_struct_json(const ndt::type& tp, const char *metadata, char *o
     }
 }
 
-static void parse_bool_json(const ndt::type& tp, const char *metadata, char *out_data,
-                const char *&begin, const char *end)
+static void parse_bool_json(const ndt::type &tp, const char *metadata,
+                            char *out_data, const char *&rbegin, const char *end,
+                            bool option, const eval::eval_context *ectx)
 {
-    // TODO: allow more general input (strings) with a boolean parsing policy
-    char value = 2;
+    const char *begin = rbegin;
+    char value = 3;
     const char *nbegin, *nend;
+    bool escaped;
     if (parse_token(begin, end, "true")) {
         value = 1;
     } else if (parse_token(begin, end, "false")) {
         value = 0;
     } else if (parse_token(begin, end, "null")) {
-        // TODO: error handling policy for NULL in this case
-        value = 0;
+        if (option || ectx->default_errmode != assign_error_none) {
+            value = 2;
+        } else {
+            value = 0;
+        }
     } else if (parse::parse_json_number_no_ws(begin, end, nbegin, nend)) {
         if (nend - nbegin == 1) {
             if (*nbegin == '0') {
                 value = 0;
-            } else if (*nbegin == '1') {
+            } else if (*nbegin == '1' ||
+                       ectx->default_errmode == assign_error_none) {
                 value = 1;
             }
         }
+    } else if (parse::parse_doublequote_string_no_ws(begin, end, nbegin, nend,
+                                                     escaped)) {
+        if (!escaped) {
+            parse::string_to_bool(&value, nbegin, nend, option,
+                                  ectx->default_errmode);
+        } else {
+            string s;
+            parse::unescape_string(nbegin, nend, s);
+            parse::string_to_bool(&value, s.data(), s.data() + s.size(),
+                                  option, ectx->default_errmode);
+        }
     }
 
-    if (value != 2) {
+    if (value < 2) {
         if (tp.get_type_id() == bool_type_id) {
             *out_data = value;
         } else {
-            typed_data_assign(tp, metadata, out_data, ndt::make_type<dynd_bool>(), NULL, &value);
+            typed_data_assign(tp, metadata, out_data,
+                              ndt::make_type<dynd_bool>(), NULL, &value);
         }
+        rbegin = begin;
+    } else if (value == 2 && option) {
+        if (!tp.is_expression()) {
+            *out_data = value;
+        } else {
+            typed_data_assign(tp, metadata, out_data,
+                              ndt::make_option<dynd_bool>(), NULL, &value);
+        }
+        rbegin = begin;
     } else {
-        throw json_parse_error(begin, "expected a boolean true or false", tp);
+        throw json_parse_error(rbegin, "expected a boolean true or false", tp);
     }
 }
 
-static void parse_dynd_builtin_json(const ndt::type& tp, const char *DYND_UNUSED(metadata), char *out_data,
-                const char *&rbegin, const char *end)
-{
-    const char *begin = rbegin;
-    const char *strbegin = NULL, *strend = NULL;
-    bool escaped;
-    begin = skip_whitespace(begin, end);
-    if (parse::parse_json_number_no_ws(begin, end, strbegin, strend)) {
-        try {
-            assign_utf8_string_to_builtin(tp.get_type_id(), out_data, strbegin, strend);
-        } catch (const std::exception& e) {
-            throw json_parse_error(skip_whitespace(rbegin, begin), e.what(), tp);
-        }
-    } else if (parse::parse_doublequote_string_no_ws(begin, end, strbegin, strend, escaped)) {
-        try {
-            if (!escaped) {
-                assign_utf8_string_to_builtin(tp.get_type_id(), out_data, strbegin, strend);
-            } else {
-                string val;
-                parse::unescape_string(strbegin, strend, val);
-                assign_utf8_string_to_builtin(tp.get_type_id(), out_data, val.data(), val.data() + val.size());
-            }
-        } catch (const std::exception& e) {
-            throw json_parse_error(skip_whitespace(rbegin, begin), e.what(), tp);
-        }
-    } else {
-        throw json_parse_error(begin, "invalid input", tp);
-    }
-    rbegin = begin;
-}
-
-static void parse_integer_json(const ndt::type &tp,
-                               const char *DYND_UNUSED(metadata),
-                               char *out_data, const char *&rbegin,
-                               const char *end, assign_error_mode errmode)
+static void parse_number_json(const ndt::type &tp, const char *arrmeta,
+                              char *out_data, const char *&rbegin,
+                              const char *end, bool option,
+                              const eval::eval_context *ectx)
 {
     const char *begin = rbegin;
     const char *nbegin, *nend;
     bool escaped = false;
-    if (parse::parse_json_number_no_ws(begin, end, nbegin, nend)) {
-        parse::string_to_int(out_data, tp.get_type_id(), nbegin, nend, errmode);
+    if (option && parse::parse_token_no_ws(begin, end, "null")) {
+        ndt::make_option(tp).tcast<option_type>()->assign_na(arrmeta, out_data, ectx);
+    } else if (parse::parse_json_number_no_ws(begin, end, nbegin, nend)) {
+        parse::string_to_number(out_data, tp.get_type_id(), nbegin, nend,
+                             false, ectx->default_errmode);
     } else if (parse::parse_doublequote_string_no_ws(begin, end, nbegin, nend,
                                                      escaped)) {
         // Interpret the data inside the string as an int
         try {
             if (!escaped) {
-                parse::string_to_int(out_data, tp.get_type_id(), nbegin, nend,
-                                     errmode);
+                parse::string_to_number(out_data, tp.get_type_id(), nbegin, nend,
+                                     option, ectx->default_errmode);
             } else {
                 string s;
                 parse::unescape_string(nbegin, nend, s);
-                parse::string_to_int(out_data, tp.get_type_id(), nbegin, nend,
-                                     errmode);
+                parse::string_to_number(out_data, tp.get_type_id(), nbegin, nend,
+                                     option, ectx->default_errmode);
             }
         } catch (const std::exception& e) {
             throw json_parse_error(rbegin, e.what(), tp);
         }
     } else {
-        throw json_parse_error(begin, "expected a number", tp);
+        throw json_parse_error(rbegin, "expected a number", tp);
     }
     rbegin = begin;
-}
-
-static void parse_real_json(const ndt::type& tp, const char *metadata, char *out_data,
-                const char *&begin, const char *end)
-{
-    // TODO: Parsing policy for how to handle reals
-    parse_dynd_builtin_json(tp, metadata, out_data, begin, end);
-}
-
-static void parse_complex_json(const ndt::type& tp, const char *metadata, char *out_data,
-                const char *&begin, const char *end)
-{
-    // TODO: Parsing policy for how to handle complex
-    parse_dynd_builtin_json(tp, metadata, out_data, begin, end);
 }
 
 static void parse_jsonstring_json(const ndt::type& tp, const char *metadata, char *out_data,
@@ -611,10 +578,9 @@ static void parse_uniform_dim_json(const ndt::type& tp, const char *metadata, ch
 {
     switch (tp.get_type_id()) {
         case fixed_dim_type_id:
-            parse_fixed_dim_json(tp, metadata, out_data, begin, end, ectx);
-            break;
         case cfixed_dim_type_id:
-            parse_cfixed_dim_json(tp, metadata, out_data, begin, end, ectx);
+        case strided_dim_type_id:
+            parse_strided_dim_json(tp, metadata, out_data, begin, end, ectx);
             break;
         case var_dim_type_id:
             parse_var_dim_json(tp, metadata, out_data, begin, end, ectx);
@@ -627,9 +593,35 @@ static void parse_uniform_dim_json(const ndt::type& tp, const char *metadata, ch
     }
 }
 
+static void parse_option_json(const ndt::type &tp, const char *metadata,
+                              char *out_data, const char *&begin,
+                              const char *end, const eval::eval_context *ectx)
+{
+    const ndt::type &value_tp = tp.tcast<option_type>()->get_value_type();
+    begin = skip_whitespace(begin, end);
+    switch (value_tp.get_kind()) {
+        case bool_kind:
+            parse_bool_json(tp, metadata, out_data, begin, end, true, ectx);
+            return;
+        case int_kind:
+        case uint_kind:
+        case real_kind:
+        case complex_kind:
+            parse_number_json(value_tp, metadata, out_data, begin, end, true, ectx);
+            return;
+        default:
+            break;
+    }
+
+    stringstream ss;
+    ss << "parse_json: unsupported dynd type " << tp;
+    throw runtime_error(ss.str());
+}
+
 static void parse_json(const ndt::type& tp, const char *metadata, char *out_data,
                 const char *&json_begin, const char *json_end, const eval::eval_context *ectx)
 {
+    json_begin = skip_whitespace(json_begin, json_end);
     switch (tp.get_kind()) {
         case uniform_dim_kind:
             parse_uniform_dim_json(tp, metadata, out_data, json_begin, json_end, ectx);
@@ -638,31 +630,25 @@ static void parse_json(const ndt::type& tp, const char *metadata, char *out_data
             parse_struct_json(tp, metadata, out_data, json_begin, json_end, ectx);
             return;
         case bool_kind:
-            parse_bool_json(tp, metadata, out_data, json_begin, json_end);
+            parse_bool_json(tp, metadata, out_data, json_begin, json_end,
+                            false, ectx);
             return;
         case int_kind:
         case uint_kind:
-            try {
-                json_begin = skip_whitespace(json_begin, json_end);
-                parse_integer_json(tp, metadata, out_data, json_begin, json_end,
-                                   ectx->default_errmode);
-            } catch(const std::exception& e) {
-                // Transform any exceptions into a parse error that includes
-                // the location of the error
-                throw json_parse_error(json_begin, e.what(), tp);
-            }
-            return;
         case real_kind:
-            parse_real_json(tp, metadata, out_data, json_begin, json_end);
-            return;
         case complex_kind:
-            parse_complex_json(tp, metadata, out_data, json_begin, json_end);
+            json_begin = skip_whitespace(json_begin, json_end);
+            parse_number_json(tp, metadata, out_data, json_begin, json_end,
+                               false, ectx);
             return;
         case string_kind:
             parse_string_json(tp, metadata, out_data, json_begin, json_end);
             return;
         case datetime_kind:
             parse_datetime_json(tp, metadata, out_data, json_begin, json_end, ectx);
+            return;
+        case option_kind:
+            parse_option_json(tp, metadata, out_data, json_begin, json_end, ectx);
             return;
         case dynamic_kind:
             if (tp.get_type_id() == json_type_id) {

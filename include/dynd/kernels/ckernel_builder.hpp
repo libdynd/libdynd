@@ -133,6 +133,11 @@ public:
         }
     }
 
+    /** For debugging/informational purposes */
+    intptr_t get_capacity() const {
+        return m_capacity;
+    }
+
     friend int ckernel_builder_ensure_capacity_leaf(void *ckb, intptr_t requested_capacity);
 };
 

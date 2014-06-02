@@ -136,6 +136,14 @@ namespace std {
 #define DYND_USE_STD_ATOMIC
 #endif
 
+#if _MSC_VER >= 1800
+// MSVC 2013 and later
+
+// MSVC 2013 doesn't appear to support nested initializer lists
+// https://stackoverflow.com/questions/23965565/how-to-do-nested-initializer-lists-in-visual-c-2013
+//#define DYND_INIT_LIST
+#endif
+
 // No DYND_CONSTEXPR yet, define it as nothing
 #  define DYND_CONSTEXPR
 

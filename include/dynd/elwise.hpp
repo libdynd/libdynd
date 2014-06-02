@@ -127,13 +127,7 @@ struct elwise_ckernel_instantiator;
                     const eval::eval_context *DYND_UNUSED(ectx)) \
         { \
             extra_type *e = ckb->get_at<extra_type>(ckb_offset); \
-            if (kernreq == kernel_request_single) { \
-                e->base.set_function(&extra_type::single); \
-            } else if (kernreq == kernel_request_strided) { \
-                e->base.set_function(&extra_type::strided); \
-            } else { \
-                throw std::runtime_error("unsupported kernel request in elwise"); \
-            } \
+            e->base.template set_expr_function<extra_type>((kernel_request_t)kernreq); \
             e->func = reinterpret_cast<func_type>(af_self->data_ptr); \
 \
             return ckb_offset + sizeof(extra_type); \
@@ -196,13 +190,7 @@ struct elwise_ckernel_instantiator;
                     const eval::eval_context *DYND_UNUSED(ectx)) \
         { \
             extra_type *e = ckb->get_at<extra_type>(ckb_offset); \
-            if (kernreq == kernel_request_single) { \
-                e->base.set_function(&extra_type::single); \
-            } else if (kernreq == kernel_request_strided) { \
-                e->base.set_function(&extra_type::strided); \
-            } else { \
-                throw std::runtime_error("unsupported kernel request in elwise"); \
-            } \
+            e->base.template set_expr_function<extra_type>((kernel_request_t)kernreq); \
             e->func = reinterpret_cast<func_type>(af_self->data_ptr); \
 \
             return ckb_offset + sizeof(extra_type); \
@@ -277,13 +265,7 @@ DYND_PP_JOIN_MAP(FUNC_CKERNEL_INSTANTIATORS, (), DYND_PP_RANGE(1, DYND_PP_INC(DY
                     const eval::eval_context *DYND_UNUSED(ectx)) \
         { \
             extra_type *e = ckb->get_at<extra_type>(ckb_offset); \
-            if (kernreq == kernel_request_single) { \
-                e->base.set_function(&extra_type::single); \
-            } else if (kernreq == kernel_request_strided) { \
-                e->base.set_function(&extra_type::strided); \
-            } else { \
-                throw std::runtime_error("unsupported kernel request in elwise"); \
-            } \
+            e->base.template set_expr_function<extra_type>((kernel_request_t)kernreq); \
             std::pair<const T *, func_type *> *obj_func = reinterpret_cast<std::pair<const T *, func_type *> *>(af_self->data_ptr); \
             e->obj = obj_func->first; \
             e->func = obj_func->second; \
@@ -350,13 +332,7 @@ DYND_PP_JOIN_MAP(FUNC_CKERNEL_INSTANTIATORS, (), DYND_PP_RANGE(1, DYND_PP_INC(DY
                     const eval::eval_context *DYND_UNUSED(ectx)) \
         { \
             extra_type *e = ckb->get_at<extra_type>(ckb_offset); \
-            if (kernreq == kernel_request_single) { \
-                e->base.set_function(&extra_type::single); \
-            } else if (kernreq == kernel_request_strided) { \
-                e->base.set_function(&extra_type::strided); \
-            } else { \
-                throw std::runtime_error("unsupported kernel request in elwise"); \
-            } \
+            e->base.template set_expr_function<extra_type>((kernel_request_t)kernreq); \
             std::pair<const T *, func_type *> *obj_func = reinterpret_cast<std::pair<const T *, func_type *> *>(af_self->data_ptr); \
             e->obj = obj_func->first; \
             e->func = obj_func->second; \
@@ -434,13 +410,7 @@ struct elwise_from_callable_ckernel_instantiator;
                     const eval::eval_context *DYND_UNUSED(ectx)) \
         { \
             extra_type *e = ckb->get_at<extra_type>(ckb_offset); \
-            if (kernreq == kernel_request_single) { \
-                e->base.set_function(&extra_type::single); \
-            } else if (kernreq == kernel_request_strided) { \
-                e->base.set_function(&extra_type::strided); \
-            } else { \
-                throw std::runtime_error("unsupported kernel request in elwise"); \
-            } \
+            e->base.template set_expr_function<extra_type>((kernel_request_t)kernreq); \
             e->obj = reinterpret_cast<const T *>(af_self->data_ptr); \
 \
             return ckb_offset + sizeof(extra_type); \
@@ -503,13 +473,7 @@ struct elwise_from_callable_ckernel_instantiator;
                     const eval::eval_context *DYND_UNUSED(ectx)) \
         { \
             extra_type *e = ckb->get_at<extra_type>(ckb_offset); \
-            if (kernreq == kernel_request_single) { \
-                e->base.set_function(&extra_type::single); \
-            } else if (kernreq == kernel_request_strided) { \
-                e->base.set_function(&extra_type::strided); \
-            } else { \
-                throw std::runtime_error("unsupported kernel request in elwise"); \
-            } \
+            e->base.template set_expr_function<extra_type>((kernel_request_t)kernreq); \
             e->obj = reinterpret_cast<const T *>(af_self->data_ptr); \
 \
             return ckb_offset + sizeof(extra_type); \

@@ -12,6 +12,7 @@
 #include <dynd/types/fixed_dim_type.hpp>
 #include <dynd/types/cfixed_dim_type.hpp>
 #include <dynd/types/var_dim_type.hpp>
+#include <dynd/types/option_type.hpp>
 
 using namespace std;
 using namespace dynd;
@@ -173,6 +174,17 @@ static void format_json_string(output_data &out, const ndt::type &dt,
     format_json_encoded_string(out, begin, end, encoding);
 }
 
+static void format_json_option(output_data &out, const ndt::type &dt,
+                               const char *metadata, const char *data)
+{
+    const option_type *ot = dt.tcast<option_type>();
+    if (ot->is_avail(metadata, data, &eval::default_eval_context)) {
+        format_json(out, ot->get_value_type(), metadata, data);
+    } else {
+        out.write("null");
+    }
+}
+
 static void format_json_dynamic(output_data &out, const ndt::type &dt,
                                 const char *DYND_UNUSED(metadata), const char *data)
 {
@@ -318,6 +330,9 @@ static void format_json(output_data& out, const ndt::type& dt, const char *metad
             break;
         case struct_kind:
             format_json_struct(out, dt, metadata, data);
+            break;
+        case option_kind:
+            format_json_option(out, dt, metadata, data);
             break;
         case dynamic_kind:
             format_json_dynamic(out, dt, metadata, data);

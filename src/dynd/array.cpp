@@ -19,6 +19,7 @@
 #include <dynd/types/base_memory_type.hpp>
 #include <dynd/types/cuda_host_type.hpp>
 #include <dynd/types/cuda_device_type.hpp>
+#include <dynd/types/option_type.hpp>
 #include <dynd/kernels/assignment_kernels.hpp>
 #include <dynd/kernels/comparison_kernels.hpp>
 #include <dynd/exceptions.hpp>
@@ -28,6 +29,7 @@
 #include <dynd/types/categorical_type.hpp>
 #include <dynd/types/builtin_type_properties.hpp>
 #include <dynd/memblock/memmap_memory_block.hpp>
+#include <dynd/kernels/make_lifted_ckernel.hpp>
 
 using namespace std;
 using namespace dynd;
@@ -478,7 +480,7 @@ nd::array::array(const char *str, size_t size)
 }
 nd::array::array(const ndt::type& tp)
 {
-    array temp = array(make_array_memory_block(ndt::make_type(), 0, NULL));
+    array temp(make_array_memory_block(ndt::make_type(), 0, NULL));
     temp.swap(*this);
     ndt::type(tp).swap(reinterpret_cast<type_type_data *>(get_ndo()->m_data_pointer)->tp);
     get_ndo()->m_flags = nd::default_access_flags;
@@ -1437,14 +1439,14 @@ void nd::array::debug_print(std::ostream& o, const std::string& indent) const
         o << " type:\n";
         o << "  pointer: " << (void *)ndo->m_type << "\n";
         o << "  type: " << get_type() << "\n";
-        o << " metadata:\n";
+        o << " arrmeta:\n";
         o << "  flags: " << ndo->m_flags << " (";
         if (ndo->m_flags & read_access_flag) o << "read_access ";
         if (ndo->m_flags & write_access_flag) o << "write_access ";
         if (ndo->m_flags & immutable_access_flag) o << "immutable ";
         o << ")\n";
         if (!ndo->is_builtin_type()) {
-            o << "  type-specific metadata:\n";
+            o << "  type-specific arrmeta:\n";
             ndo->m_type->metadata_debug_print(get_arrmeta(), o, indent + "   ");
         }
         o << " data:\n";
@@ -1786,6 +1788,32 @@ nd::array nd::groupby(const nd::array& data_values, const nd::array& by_values, 
     }
     return result;
 }
+
+void nd::assign_na(const ndt::type &tp, const char *arrmeta, char *data,
+                   const eval::eval_context *ectx)
+{
+    if (tp.get_type_id() == option_type_id) {
+        tp.tcast<option_type>()->assign_na(arrmeta, data, ectx);
+    } else {
+        const ndt::type& dtp = tp.get_dtype().value_type();
+        if (dtp.get_type_id() == option_type_id) {
+            const arrfunc_type_data *af =
+                dtp.tcast<option_type>()->get_assign_na_arrfunc();
+            ckernel_builder ckb;
+            make_lifted_expr_ckernel(af, &ckb, 0, tp, arrmeta, NULL, NULL,
+                                     kernel_request_single, ectx);
+            ckernel_prefix *ckp = ckb.get();
+            expr_single_operation_t ckp_fn =
+                ckp->get_function<expr_single_operation_t>();
+            ckp_fn(data, NULL, ckp);
+        } else {
+            stringstream ss;
+            ss << "Cannot assign missing value token NA to dtype " << dtp;
+            throw invalid_argument(ss.str());
+        }
+    }
+}
+
 
 nd::array nd::combine_into_tuple(size_t field_count, const array *field_values)
 {

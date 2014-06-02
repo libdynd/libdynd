@@ -50,64 +50,35 @@ intptr_t kernels::make_builtin_sum_reduction_ckernel(
                 kernel_request_t kernreq)
 {
     ckernel_prefix *ckp = out_ckb->get_at<ckernel_prefix>(ckb_offset);
-    if (kernreq == kernel_request_single) {
-        switch (tid) {
-            case int32_type_id:
-                ckp->set_function<unary_single_operation_t>(&sum_reduction<int32_t, int32_t>::single);
-                break;
-            case int64_type_id:
-                ckp->set_function<unary_single_operation_t>(&sum_reduction<int64_t, int64_t>::single);
-                break;
-            case float32_type_id:
-                ckp->set_function<unary_single_operation_t>(&sum_reduction<float, double>::single);
-                break;
-            case float64_type_id:
-                ckp->set_function<unary_single_operation_t>(&sum_reduction<double, double>::single);
-                break;
-            case complex_float32_type_id:
-                ckp->set_function<unary_single_operation_t>(&sum_reduction<dynd_complex<float>, dynd_complex<double> >::single);
-                break;
-            case complex_float64_type_id:
-                ckp->set_function<unary_single_operation_t>(&sum_reduction<dynd_complex<double>, dynd_complex<double> >::single);
-                break;
-            default: {
-                stringstream ss;
-                ss << "make_builtin_sum_reduction_ckernel: data type ";
-                ss << ndt::type(tid) << " is not supported";
-                throw type_error(ss.str());
-            }
+    switch (tid) {
+        case int32_type_id:
+            ckp->set_unary_function<sum_reduction<int32_t, int32_t> >(kernreq);
+            break;
+        case int64_type_id:
+            ckp->set_unary_function<sum_reduction<int64_t, int64_t> >(kernreq);
+            break;
+        case float32_type_id:
+            ckp->set_unary_function<sum_reduction<float, double> >(kernreq);
+            break;
+        case float64_type_id:
+            ckp->set_unary_function<sum_reduction<double, double> >(kernreq);
+            break;
+        case complex_float32_type_id:
+            ckp->set_unary_function<
+                sum_reduction<dynd_complex<float>, dynd_complex<float> > >(
+                kernreq);
+            break;
+        case complex_float64_type_id:
+            ckp->set_unary_function<
+                sum_reduction<dynd_complex<double>, dynd_complex<double> > >(
+                kernreq);
+            break;
+        default: {
+            stringstream ss;
+            ss << "make_builtin_sum_reduction_ckernel: data type ";
+            ss << ndt::type(tid) << " is not supported";
+            throw type_error(ss.str());
         }
-    } else if (kernreq == kernel_request_strided) {
-        switch (tid) {
-            case int32_type_id:
-                ckp->set_function<unary_strided_operation_t>(&sum_reduction<int32_t, int32_t>::strided);
-                break;
-            case int64_type_id:
-                ckp->set_function<unary_strided_operation_t>(&sum_reduction<int64_t, int64_t>::strided);
-                break;
-            case float32_type_id:
-                // For float32, use float64 as the accumulator in the strided loop for a touch more accuracy
-                ckp->set_function<unary_strided_operation_t>(&sum_reduction<float, double>::strided);
-                break;
-            case float64_type_id:
-                ckp->set_function<unary_strided_operation_t>(&sum_reduction<double, double>::strided);
-                break;
-            case complex_float32_type_id:
-                // For float32, use float64 as the accumulator in the strided loop for a touch more accuracy
-                ckp->set_function<unary_strided_operation_t>(&sum_reduction<dynd_complex<float>, dynd_complex<double> >::strided);
-                break;
-            case complex_float64_type_id:
-                ckp->set_function<unary_strided_operation_t>(&sum_reduction<dynd_complex<double>, dynd_complex<double> >::strided);
-                break;
-            default: {
-                stringstream ss;
-                ss << "make_builtin_sum_reduction_ckernel: data type ";
-                ss << ndt::type(tid) << " is not supported";
-                throw type_error(ss.str());
-            }
-        }
-    } else {
-        throw runtime_error("unsupported kernel request in make_builtin_sum_reduction_ckernel");
     }
 
     return ckb_offset + sizeof(ckernel_prefix);

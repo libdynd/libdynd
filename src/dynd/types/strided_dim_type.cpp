@@ -815,7 +815,7 @@ namespace {
 
 ndt::type ndt::make_strided_dim(const ndt::type& element_tp)
 {
-    // Static instance of strided_dim_type, which have a reference
+    // Static instances of the types, which have a reference
     // count > 0 for the lifetime of the program. This static
     // construction is inside a function to ensure correct creation
     // order during startup.

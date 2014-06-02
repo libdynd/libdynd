@@ -12,6 +12,8 @@
 #include <dynd/memblock/external_memory_block.hpp>
 #include <dynd/memblock/memmap_memory_block.hpp>
 
+#include <dynd/array.hpp>
+
 using namespace std;
 using namespace dynd;
 

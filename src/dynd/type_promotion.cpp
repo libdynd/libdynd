@@ -8,6 +8,7 @@
 
 #include <dynd/type_promotion.hpp>
 #include <dynd/types/string_type.hpp>
+#include <dynd/types/option_type.hpp>
 
 using namespace std;
 using namespace dynd;
@@ -193,12 +194,29 @@ ndt::type dynd::promote_types_arithmetic(const ndt::type& tp0, const ndt::type& 
         return ndt::make_string();
     }
 
+    // the value underneath the option type promotes
+    if (tp0_val.get_type_id() == option_type_id) {
+        if (tp1_val.get_type_id() == option_type_id) {
+            return ndt::make_option(promote_types_arithmetic(
+                tp0_val.tcast<option_type>()->get_value_type(),
+                tp1_val.tcast<option_type>()->get_value_type()));
+        } else {
+            return ndt::make_option(promote_types_arithmetic(
+                tp0_val.tcast<option_type>()->get_value_type(), tp1_val));
+        }
+    } else if (tp1_val.get_type_id() == option_type_id) {
+        return ndt::make_option(promote_types_arithmetic(
+            tp0_val, tp1_val.tcast<option_type>()->get_value_type()));
+    }
+
     // type, string -> type
-    if (tp0_val.get_type_id() == type_type_id && tp1_val.get_kind() == string_kind) {
+    if (tp0_val.get_type_id() == type_type_id &&
+            tp1_val.get_kind() == string_kind) {
         return tp0_val;
     }
     // string, type -> type
-    if (tp0_val.get_kind() == string_kind && tp1_val.get_type_id() == type_type_id) {
+    if (tp0_val.get_kind() == string_kind &&
+            tp1_val.get_type_id() == type_type_id) {
         return tp1_val;
     }
 
@@ -210,6 +228,7 @@ ndt::type dynd::promote_types_arithmetic(const ndt::type& tp0, const ndt::type& 
     }
 
     stringstream ss;
-    ss << "type promotion of " << tp0 << " and " << tp1 << " is not yet supported";
+    ss << "type promotion of " << tp0 << " and " << tp1
+       << " is not yet supported";
     throw dynd::type_error(ss.str());
 }
