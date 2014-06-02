@@ -119,20 +119,22 @@ struct elwise_ckernel_instantiator;
             } \
         } \
 \
-        static intptr_t instantiate(void *self_data_ptr, \
-                    dynd::ckernel_builder *out_ckb, intptr_t ckb_offset, \
-                    const char *const* DYND_UNUSED(dynd_metadata), uint32_t kerntype, \
+        static intptr_t instantiate( \
+                    const arrfunc_type_data *af_self, dynd::ckernel_builder *ckb, \
+                    intptr_t ckb_offset, const ndt::type &DYND_UNUSED(dst_tp), \
+                    const char *DYND_UNUSED(dst_arrmeta), const ndt::type *DYND_UNUSED(src_tp), \
+                    const char *const *DYND_UNUSED(src_arrmeta), uint32_t kernreq, \
                     const eval::eval_context *DYND_UNUSED(ectx)) \
         { \
-            extra_type *e = out_ckb->get_at<extra_type>(ckb_offset); \
-            if (kerntype == kernel_request_single) { \
+            extra_type *e = ckb->get_at<extra_type>(ckb_offset); \
+            if (kernreq == kernel_request_single) { \
                 e->base.set_function(&extra_type::single); \
-            } else if (kerntype == kernel_request_strided) { \
+            } else if (kernreq == kernel_request_strided) { \
                 e->base.set_function(&extra_type::strided); \
             } else { \
                 throw std::runtime_error("unsupported kernel request in elwise"); \
             } \
-            e->func = reinterpret_cast<func_type>(self_data_ptr); \
+            e->func = reinterpret_cast<func_type>(af_self->data_ptr); \
 \
             return ckb_offset + sizeof(extra_type); \
         } \
@@ -186,20 +188,22 @@ struct elwise_ckernel_instantiator;
             } \
         } \
 \
-        static intptr_t instantiate(void *self_data_ptr, \
-                    dynd::ckernel_builder *out_ckb, intptr_t ckb_offset, \
-                    const char *const* DYND_UNUSED(dynd_metadata), uint32_t kerntype, \
+        static intptr_t instantiate( \
+                    const arrfunc_type_data *af_self, dynd::ckernel_builder *ckb, \
+                    intptr_t ckb_offset, const ndt::type &DYND_UNUSED(dst_tp), \
+                    const char *DYND_UNUSED(dst_arrmeta), const ndt::type *DYND_UNUSED(src_tp), \
+                    const char *const *DYND_UNUSED(src_arrmeta), uint32_t kernreq, \
                     const eval::eval_context *DYND_UNUSED(ectx)) \
         { \
-            extra_type *e = out_ckb->get_at<extra_type>(ckb_offset); \
-            if (kerntype == kernel_request_single) { \
+            extra_type *e = ckb->get_at<extra_type>(ckb_offset); \
+            if (kernreq == kernel_request_single) { \
                 e->base.set_function(&extra_type::single); \
-            } else if (kerntype == kernel_request_strided) { \
+            } else if (kernreq == kernel_request_strided) { \
                 e->base.set_function(&extra_type::strided); \
             } else { \
                 throw std::runtime_error("unsupported kernel request in elwise"); \
             } \
-            e->func = reinterpret_cast<func_type>(self_data_ptr); \
+            e->func = reinterpret_cast<func_type>(af_self->data_ptr); \
 \
             return ckb_offset + sizeof(extra_type); \
         } \
@@ -229,13 +233,13 @@ DYND_PP_JOIN_MAP(FUNC_CKERNEL_INSTANTIATORS, (), DYND_PP_RANGE(1, DYND_PP_INC(DY
 \
         ckernel_prefix base; \
         const T *obj; \
-        func_type func; \
+        func_type *func; \
 \
         static void single(char *dst, const char * const *src, \
                            ckernel_prefix *ckp) \
         { \
             extra_type *e = reinterpret_cast<extra_type *>(ckp); \
-            *reinterpret_cast<R*>(dst) = ((e->obj)->*(e->func))(DYND_PP_JOIN_MAP_1(DYND_PP_META_DEREFERENCE, (,), \
+            *reinterpret_cast<R*>(dst) = ((e->obj)->*(*e->func))(DYND_PP_JOIN_MAP_1(DYND_PP_META_DEREFERENCE, (,), \
                 DYND_PP_ELWISE_1(DYND_PP_META_REINTERPRET_CAST, \
                     DYND_PP_MAP_1(DYND_PP_META_MAKE_CONST_PTR, \
                         DYND_PP_META_NAME_RANGE(D, NSRC)), \
@@ -248,7 +252,7 @@ DYND_PP_JOIN_MAP(FUNC_CKERNEL_INSTANTIATORS, (), DYND_PP_RANGE(1, DYND_PP_INC(DY
         { \
             extra_type *e = reinterpret_cast<extra_type *>(ckp); \
             const T *obj = e->obj; \
-            func_type func = e->func; \
+            func_type func = *e->func; \
             DYND_PP_JOIN_ELWISE_1(DYND_PP_META_DECL_ASGN, (;), \
                 DYND_PP_REPEAT_1(const char *, NSRC), DYND_PP_META_NAME_RANGE(src, NSRC), DYND_PP_META_AT_RANGE(src, NSRC)); \
             DYND_PP_JOIN_ELWISE_1(DYND_PP_META_DECL_ASGN, (;), \
@@ -265,20 +269,22 @@ DYND_PP_JOIN_MAP(FUNC_CKERNEL_INSTANTIATORS, (), DYND_PP_RANGE(1, DYND_PP_INC(DY
             } \
         } \
 \
-        static intptr_t instantiate(void *self_data_ptr, \
-                    dynd::ckernel_builder *out_ckb, intptr_t ckb_offset, \
-                    const char *const* DYND_UNUSED(dynd_metadata), uint32_t kerntype, \
+        static intptr_t instantiate( \
+                    const arrfunc_type_data *af_self, dynd::ckernel_builder *ckb, \
+                    intptr_t ckb_offset, const ndt::type &DYND_UNUSED(dst_tp), \
+                    const char *DYND_UNUSED(dst_arrmeta), const ndt::type *DYND_UNUSED(src_tp), \
+                    const char *const *DYND_UNUSED(src_arrmeta), uint32_t kernreq, \
                     const eval::eval_context *DYND_UNUSED(ectx)) \
         { \
-            extra_type *e = out_ckb->get_at<extra_type>(ckb_offset); \
-            if (kerntype == kernel_request_single) { \
+            extra_type *e = ckb->get_at<extra_type>(ckb_offset); \
+            if (kernreq == kernel_request_single) { \
                 e->base.set_function(&extra_type::single); \
-            } else if (kerntype == kernel_request_strided) { \
+            } else if (kernreq == kernel_request_strided) { \
                 e->base.set_function(&extra_type::strided); \
             } else { \
                 throw std::runtime_error("unsupported kernel request in elwise"); \
             } \
-            std::pair<const T *, func_type> *obj_func = reinterpret_cast<std::pair<const T *, func_type> *>(self_data_ptr); \
+            std::pair<const T *, func_type *> *obj_func = reinterpret_cast<std::pair<const T *, func_type *> *>(af_self->data_ptr); \
             e->obj = obj_func->first; \
             e->func = obj_func->second; \
 \
@@ -300,13 +306,13 @@ DYND_PP_JOIN_MAP(FUNC_CKERNEL_INSTANTIATORS, (), DYND_PP_RANGE(1, DYND_PP_INC(DY
 \
         ckernel_prefix base; \
         const T *obj; \
-        func_type func; \
+        func_type *func; \
 \
         static void single(char *dst, const char * const *src, \
                            ckernel_prefix *ckp) \
         { \
             extra_type *e = reinterpret_cast<extra_type *>(ckp); \
-            ((e->obj)->*(e->func))(*reinterpret_cast<R*>(dst), DYND_PP_JOIN_MAP_1(DYND_PP_META_DEREFERENCE, (,), \
+            ((e->obj)->*(*e->func))(*reinterpret_cast<R*>(dst), DYND_PP_JOIN_MAP_1(DYND_PP_META_DEREFERENCE, (,), \
                 DYND_PP_ELWISE_1(DYND_PP_META_REINTERPRET_CAST, \
                     DYND_PP_MAP_1(DYND_PP_META_MAKE_CONST_PTR, \
                         DYND_PP_META_NAME_RANGE(D, NSRC)), \
@@ -319,7 +325,7 @@ DYND_PP_JOIN_MAP(FUNC_CKERNEL_INSTANTIATORS, (), DYND_PP_RANGE(1, DYND_PP_INC(DY
         { \
             extra_type *e = reinterpret_cast<extra_type *>(ckp); \
             const T *obj = e->obj; \
-            func_type func = e->func; \
+            func_type func = *e->func; \
             DYND_PP_JOIN_ELWISE_1(DYND_PP_META_DECL_ASGN, (;), \
                 DYND_PP_REPEAT_1(const char *, NSRC), DYND_PP_META_NAME_RANGE(src, NSRC), DYND_PP_META_AT_RANGE(src, NSRC)); \
             DYND_PP_JOIN_ELWISE_1(DYND_PP_META_DECL_ASGN, (;), \
@@ -336,20 +342,22 @@ DYND_PP_JOIN_MAP(FUNC_CKERNEL_INSTANTIATORS, (), DYND_PP_RANGE(1, DYND_PP_INC(DY
             } \
         } \
 \
-        static intptr_t instantiate(void *self_data_ptr, \
-                    dynd::ckernel_builder *out_ckb, intptr_t ckb_offset, \
-                    const char *const* DYND_UNUSED(dynd_metadata), uint32_t kerntype, \
+        static intptr_t instantiate( \
+                    const arrfunc_type_data *af_self, dynd::ckernel_builder *ckb, \
+                    intptr_t ckb_offset, const ndt::type &DYND_UNUSED(dst_tp), \
+                    const char *DYND_UNUSED(dst_arrmeta), const ndt::type *DYND_UNUSED(src_tp), \
+                    const char *const *DYND_UNUSED(src_arrmeta), uint32_t kernreq, \
                     const eval::eval_context *DYND_UNUSED(ectx)) \
         { \
-            extra_type *e = out_ckb->get_at<extra_type>(ckb_offset); \
-            if (kerntype == kernel_request_single) { \
+            extra_type *e = ckb->get_at<extra_type>(ckb_offset); \
+            if (kernreq == kernel_request_single) { \
                 e->base.set_function(&extra_type::single); \
-            } else if (kerntype == kernel_request_strided) { \
+            } else if (kernreq == kernel_request_strided) { \
                 e->base.set_function(&extra_type::strided); \
             } else { \
                 throw std::runtime_error("unsupported kernel request in elwise"); \
             } \
-            std::pair<const T *, func_type> *obj_func = reinterpret_cast<std::pair<const T *, func_type> *>(self_data_ptr); \
+            std::pair<const T *, func_type *> *obj_func = reinterpret_cast<std::pair<const T *, func_type *> *>(af_self->data_ptr); \
             e->obj = obj_func->first; \
             e->func = obj_func->second; \
 \
@@ -418,20 +426,22 @@ struct elwise_from_callable_ckernel_instantiator;
             } \
         } \
 \
-        static intptr_t instantiate(void *self_data_ptr, \
-                    dynd::ckernel_builder *out_ckb, intptr_t ckb_offset, \
-                    const char *const* DYND_UNUSED(dynd_metadata), uint32_t kerntype, \
+        static intptr_t instantiate( \
+                    const arrfunc_type_data *af_self, dynd::ckernel_builder *ckb, \
+                    intptr_t ckb_offset, const ndt::type &DYND_UNUSED(dst_tp), \
+                    const char *DYND_UNUSED(dst_arrmeta), const ndt::type *DYND_UNUSED(src_tp), \
+                    const char *const *DYND_UNUSED(src_arrmeta), uint32_t kernreq, \
                     const eval::eval_context *DYND_UNUSED(ectx)) \
         { \
-            extra_type *e = out_ckb->get_at<extra_type>(ckb_offset); \
-            if (kerntype == kernel_request_single) { \
+            extra_type *e = ckb->get_at<extra_type>(ckb_offset); \
+            if (kernreq == kernel_request_single) { \
                 e->base.set_function(&extra_type::single); \
-            } else if (kerntype == kernel_request_strided) { \
+            } else if (kernreq == kernel_request_strided) { \
                 e->base.set_function(&extra_type::strided); \
             } else { \
                 throw std::runtime_error("unsupported kernel request in elwise"); \
             } \
-            e->obj = reinterpret_cast<const T *>(self_data_ptr); \
+            e->obj = reinterpret_cast<const T *>(af_self->data_ptr); \
 \
             return ckb_offset + sizeof(extra_type); \
         } \
@@ -485,20 +495,22 @@ struct elwise_from_callable_ckernel_instantiator;
             } \
         } \
 \
-        static intptr_t instantiate(void *self_data_ptr, \
-                    dynd::ckernel_builder *out_ckb, intptr_t ckb_offset, \
-                    const char *const* DYND_UNUSED(dynd_metadata), uint32_t kerntype, \
+        static intptr_t instantiate( \
+                    const arrfunc_type_data *af_self, dynd::ckernel_builder *ckb, \
+                    intptr_t ckb_offset, const ndt::type &DYND_UNUSED(dst_tp), \
+                    const char *DYND_UNUSED(dst_arrmeta), const ndt::type *DYND_UNUSED(src_tp), \
+                    const char *const *DYND_UNUSED(src_arrmeta), uint32_t kernreq, \
                     const eval::eval_context *DYND_UNUSED(ectx)) \
         { \
-            extra_type *e = out_ckb->get_at<extra_type>(ckb_offset); \
-            if (kerntype == kernel_request_single) { \
+            extra_type *e = ckb->get_at<extra_type>(ckb_offset); \
+            if (kernreq == kernel_request_single) { \
                 e->base.set_function(&extra_type::single); \
-            } else if (kerntype == kernel_request_strided) { \
+            } else if (kernreq == kernel_request_strided) { \
                 e->base.set_function(&extra_type::strided); \
             } else { \
                 throw std::runtime_error("unsupported kernel request in elwise"); \
             } \
-            e->obj = reinterpret_cast<const T *>(self_data_ptr); \
+            e->obj = reinterpret_cast<const T *>(af_self->data_ptr); \
 \
             return ckb_offset + sizeof(extra_type); \
         } \
@@ -543,7 +555,8 @@ DYND_PP_JOIN_MAP(CALL_CKERNEL_INSTANTIATORS, (), DYND_PP_RANGE(1, DYND_PP_INC(DY
                 (type)), \
             DYND_PP_META_NAME_RANGE(D, NSRC)); \
 \
-        ndt::type data_dynd_types[NSRC + 1] = {ndt::cfixed_dim_from_array<R>::make(), DYND_PP_JOIN_ELWISE_1(DYND_PP_META_SCOPE_CALL, (,), \
+        ndt::type dst_tp = ndt::cfixed_dim_from_array<R>::make(); \
+        ndt::type src_tp[NSRC] = {DYND_PP_JOIN_ELWISE_1(DYND_PP_META_SCOPE_CALL, (,), \
             DYND_PP_OUTER(DYND_PP_META_TEMPLATE_INSTANTIATION, (ndt::cfixed_dim_from_array), \
             DYND_PP_META_NAME_RANGE(D, NSRC)), DYND_PP_REPEAT(make, NSRC))}; \
 \
@@ -556,29 +569,29 @@ DYND_PP_JOIN_MAP(CALL_CKERNEL_INSTANTIATORS, (), DYND_PP_RANGE(1, DYND_PP_INC(DY
                         DYND_PP_OUTER_1(DYND_PP_META_CALL, \
                             (ucast), \
                                 DYND_PP_OUTER_1(DYND_PP_META_DOT_CALL, \
-                                    DYND_PP_META_AT_RANGE(data_dynd_types, 1, DYND_PP_INC(NSRC)), (get_dtype)))), \
+                                    DYND_PP_META_AT_RANGE(src_tp, 0, NSRC), (get_dtype)))), \
                 (eval))); \
 \
         intptr_t res_ndim; \
         dimvector res_shape; \
         detail::elwise_broadcast<DYND_PP_JOIN_1((,), DYND_PP_META_NAME_RANGE(D, NSRC))>(DYND_PP_JOIN_1((,), \
             DYND_PP_META_NAME_RANGE(acast, NSRC)), res_ndim, res_shape); \
-        nd::array res = nd::make_strided_array(data_dynd_types[0], res_ndim, res_shape.get()); \
+        nd::array res = nd::make_strided_array(dst_tp, res_ndim, res_shape.get()); \
 \
-        arrfunc af; \
+        arrfunc_type_data af; \
         af.ckernel_funcproto = expr_operation_funcproto; \
-        af.data_types_size = NSRC + 1; \
-        af.data_dynd_types = data_dynd_types; \
+        af.func_proto = ndt::make_funcproto(src_tp, dst_tp); \
         af.data_ptr = reinterpret_cast<void *>(func); \
-        af.instantiate_func = &detail::elwise_ckernel_instantiator<func_type>::instantiate; \
+        af.instantiate = &detail::elwise_ckernel_instantiator<func_type>::instantiate; \
         af.free_func = NULL; \
 \
         ckernel_builder ckb; \
-        ndt::type lifted_types[NSRC + 1] = {res.get_type(), DYND_PP_JOIN_OUTER_1(DYND_PP_META_DOT_CALL, (,), \
+        ndt::type lifted_types[NSRC] = {DYND_PP_JOIN_OUTER_1(DYND_PP_META_DOT_CALL, (,), \
             DYND_PP_META_NAME_RANGE(acast, NSRC), (get_type))}; \
-        const char *dynd_metadata[NSRC + 1] = {res.get_arrmeta(), DYND_PP_JOIN_OUTER_1(DYND_PP_META_DOT_CALL, (,), \
+        const char *dynd_metadata[NSRC] = {DYND_PP_JOIN_OUTER_1(DYND_PP_META_DOT_CALL, (,), \
             DYND_PP_META_NAME_RANGE(acast, NSRC), (get_arrmeta))}; \
         make_lifted_expr_ckernel(&af, &ckb, 0, \
+                            res.get_type(), res.get_arrmeta(), \
                             lifted_types, dynd_metadata, kernel_request_single, ectx); \
 \
         ckernel_prefix *ckprefix = ckb.get(); \
@@ -618,7 +631,8 @@ DYND_PP_JOIN_MAP(CALL_CKERNEL_INSTANTIATORS, (), DYND_PP_RANGE(1, DYND_PP_INC(DY
                 (type)), \
             DYND_PP_META_NAME_RANGE(D, NSRC)); \
 \
-        ndt::type data_dynd_types[NSRC + 1] = {ndt::cfixed_dim_from_array<R>::make(), DYND_PP_JOIN_ELWISE_1(DYND_PP_META_SCOPE_CALL, (,), \
+        ndt::type dst_tp = ndt::cfixed_dim_from_array<R>::make(); \
+        ndt::type src_tp[NSRC] = {DYND_PP_JOIN_ELWISE_1(DYND_PP_META_SCOPE_CALL, (,), \
             DYND_PP_OUTER(DYND_PP_META_TEMPLATE_INSTANTIATION, (ndt::cfixed_dim_from_array), \
             DYND_PP_META_NAME_RANGE(D, NSRC)), DYND_PP_REPEAT(make, NSRC))}; \
 \
@@ -631,29 +645,29 @@ DYND_PP_JOIN_MAP(CALL_CKERNEL_INSTANTIATORS, (), DYND_PP_RANGE(1, DYND_PP_INC(DY
                         DYND_PP_OUTER_1(DYND_PP_META_CALL, \
                             (ucast), \
                                 DYND_PP_OUTER_1(DYND_PP_META_DOT_CALL, \
-                                    DYND_PP_META_AT_RANGE(data_dynd_types, 1, DYND_PP_INC(NSRC)), (get_dtype)))), \
+                                    DYND_PP_META_AT_RANGE(src_tp, 0, NSRC), (get_dtype)))), \
                 (eval))); \
 \
         intptr_t res_ndim; \
         dimvector res_shape; \
         detail::elwise_broadcast<DYND_PP_JOIN_1((,), DYND_PP_META_NAME_RANGE(D, NSRC))>(DYND_PP_JOIN_1((,), \
             DYND_PP_META_NAME_RANGE(acast, NSRC)), res_ndim, res_shape); \
-        nd::array res = nd::make_strided_array(data_dynd_types[0], res_ndim, res_shape.get()); \
+        nd::array res = nd::make_strided_array(dst_tp, res_ndim, res_shape.get()); \
 \
-        arrfunc af; \
+        arrfunc_type_data af; \
         af.ckernel_funcproto = expr_operation_funcproto; \
-        af.data_types_size = NSRC + 1; \
-        af.data_dynd_types = data_dynd_types; \
+        af.func_proto = ndt::make_funcproto(src_tp, dst_tp); \
         af.data_ptr = reinterpret_cast<void *>(func); \
-        af.instantiate_func = &detail::elwise_ckernel_instantiator<func_type>::instantiate; \
+        af.instantiate = &detail::elwise_ckernel_instantiator<func_type>::instantiate; \
         af.free_func = NULL; \
 \
         ckernel_builder ckb; \
-        ndt::type lifted_types[NSRC + 1] = {res.get_type(), DYND_PP_JOIN_OUTER_1(DYND_PP_META_DOT_CALL, (,), \
+        ndt::type lifted_types[NSRC] = {DYND_PP_JOIN_OUTER_1(DYND_PP_META_DOT_CALL, (,), \
             DYND_PP_META_NAME_RANGE(acast, NSRC), (get_type))}; \
-        const char *dynd_metadata[NSRC + 1] = {res.get_arrmeta(), DYND_PP_JOIN_OUTER_1(DYND_PP_META_DOT_CALL, (,), \
+        const char *dynd_metadata[NSRC] = {DYND_PP_JOIN_OUTER_1(DYND_PP_META_DOT_CALL, (,), \
             DYND_PP_META_NAME_RANGE(acast, NSRC), (get_arrmeta))}; \
         make_lifted_expr_ckernel(&af, &ckb, 0, \
+                            res.get_type(), res.get_arrmeta(), \
                             lifted_types, dynd_metadata, kernel_request_single, ectx); \
 \
         ckernel_prefix *ckprefix = ckb.get(); \
@@ -703,7 +717,8 @@ DYND_PP_JOIN_MAP(FUNCS, (), DYND_PP_RANGE(1, DYND_PP_INC(DYND_ELWISE_MAX)))
                 (type)), \
             DYND_PP_META_NAME_RANGE(D, NSRC)); \
 \
-        ndt::type data_dynd_types[NSRC + 1] = {ndt::cfixed_dim_from_array<R>::make(), DYND_PP_JOIN_ELWISE_1(DYND_PP_META_SCOPE_CALL, (,), \
+        ndt::type dst_tp = ndt::cfixed_dim_from_array<R>::make(); \
+        ndt::type src_tp[NSRC] = {DYND_PP_JOIN_ELWISE_1(DYND_PP_META_SCOPE_CALL, (,), \
             DYND_PP_OUTER(DYND_PP_META_TEMPLATE_INSTANTIATION, (ndt::cfixed_dim_from_array), \
             DYND_PP_META_NAME_RANGE(D, NSRC)), DYND_PP_REPEAT(make, NSRC))}; \
 \
@@ -716,31 +731,31 @@ DYND_PP_JOIN_MAP(FUNCS, (), DYND_PP_RANGE(1, DYND_PP_INC(DYND_ELWISE_MAX)))
                         DYND_PP_OUTER_1(DYND_PP_META_CALL, \
                             (ucast), \
                                 DYND_PP_OUTER_1(DYND_PP_META_DOT_CALL, \
-                                    DYND_PP_META_AT_RANGE(data_dynd_types, 1, DYND_PP_INC(NSRC)), (get_dtype)))), \
+                                    DYND_PP_META_AT_RANGE(src_tp, 0, NSRC), (get_dtype)))), \
                 (eval))); \
 \
         intptr_t res_ndim; \
         dimvector res_shape; \
         detail::elwise_broadcast<DYND_PP_JOIN_1((,), DYND_PP_META_NAME_RANGE(D, NSRC))>(DYND_PP_JOIN_1((,), \
             DYND_PP_META_NAME_RANGE(acast, NSRC)), res_ndim, res_shape); \
-        nd::array res = nd::make_strided_array(data_dynd_types[0], res_ndim, res_shape.get()); \
+        nd::array res = nd::make_strided_array(dst_tp, res_ndim, res_shape.get()); \
 \
-        std::pair<const T *, func_type> obj_func(&obj, func); \
+        std::pair<const T *, func_type *> obj_func(&obj, &func); \
 \
-        arrfunc af; \
+        arrfunc_type_data af; \
         af.ckernel_funcproto = expr_operation_funcproto; \
-        af.data_types_size = NSRC + 1; \
-        af.data_dynd_types = data_dynd_types; \
+        af.func_proto = ndt::make_funcproto(src_tp, dst_tp); \
         af.data_ptr = reinterpret_cast<void *>(&obj_func); \
-        af.instantiate_func = &detail::elwise_ckernel_instantiator<func_type>::instantiate; \
+        af.instantiate = &detail::elwise_ckernel_instantiator<func_type>::instantiate; \
         af.free_func = NULL; \
 \
         ckernel_builder ckb; \
-        ndt::type lifted_types[NSRC + 1] = {res.get_type(), DYND_PP_JOIN_OUTER_1(DYND_PP_META_DOT_CALL, (,), \
+        ndt::type lifted_types[NSRC] = {DYND_PP_JOIN_OUTER_1(DYND_PP_META_DOT_CALL, (,), \
             DYND_PP_META_NAME_RANGE(acast, NSRC), (get_type))}; \
-        const char *dynd_metadata[NSRC + 1] = {res.get_arrmeta(), DYND_PP_JOIN_OUTER_1(DYND_PP_META_DOT_CALL, (,), \
+        const char *dynd_metadata[NSRC] = {DYND_PP_JOIN_OUTER_1(DYND_PP_META_DOT_CALL, (,), \
             DYND_PP_META_NAME_RANGE(acast, NSRC), (get_arrmeta))}; \
         make_lifted_expr_ckernel(&af, &ckb, 0, \
+                            res.get_type(), res.get_arrmeta(), \
                             lifted_types, dynd_metadata, kernel_request_single, ectx); \
 \
         ckernel_prefix *ckprefix = ckb.get(); \
@@ -780,7 +795,8 @@ DYND_PP_JOIN_MAP(FUNCS, (), DYND_PP_RANGE(1, DYND_PP_INC(DYND_ELWISE_MAX)))
                 (type)), \
             DYND_PP_META_NAME_RANGE(D, NSRC)); \
 \
-        ndt::type data_dynd_types[NSRC + 1] = {ndt::cfixed_dim_from_array<R>::make(), DYND_PP_JOIN_ELWISE_1(DYND_PP_META_SCOPE_CALL, (,), \
+        ndt::type dst_tp = ndt::cfixed_dim_from_array<R>::make(); \
+        ndt::type src_tp[NSRC] = {DYND_PP_JOIN_ELWISE_1(DYND_PP_META_SCOPE_CALL, (,), \
             DYND_PP_OUTER(DYND_PP_META_TEMPLATE_INSTANTIATION, (ndt::cfixed_dim_from_array), \
             DYND_PP_META_NAME_RANGE(D, NSRC)), DYND_PP_REPEAT(make, NSRC))}; \
 \
@@ -793,31 +809,31 @@ DYND_PP_JOIN_MAP(FUNCS, (), DYND_PP_RANGE(1, DYND_PP_INC(DYND_ELWISE_MAX)))
                         DYND_PP_OUTER_1(DYND_PP_META_CALL, \
                             (ucast), \
                                 DYND_PP_OUTER_1(DYND_PP_META_DOT_CALL, \
-                                    DYND_PP_META_AT_RANGE(data_dynd_types, 1, DYND_PP_INC(NSRC)), (get_dtype)))), \
+                                    DYND_PP_META_AT_RANGE(src_tp, 0, NSRC), (get_dtype)))), \
                 (eval))); \
 \
         intptr_t res_ndim; \
         dimvector res_shape; \
         detail::elwise_broadcast<DYND_PP_JOIN_1((,), DYND_PP_META_NAME_RANGE(D, NSRC))>(DYND_PP_JOIN_1((,), \
             DYND_PP_META_NAME_RANGE(acast, NSRC)), res_ndim, res_shape); \
-        nd::array res = nd::make_strided_array(data_dynd_types[0], res_ndim, res_shape.get()); \
+        nd::array res = nd::make_strided_array(dst_tp, res_ndim, res_shape.get()); \
 \
-        std::pair<const T *, func_type> obj_func(&obj, func); \
+        std::pair<const T *, func_type *> obj_func(&obj, &func); \
 \
-        arrfunc af; \
+        arrfunc_type_data af; \
         af.ckernel_funcproto = expr_operation_funcproto; \
-        af.data_types_size = NSRC + 1; \
-        af.data_dynd_types = data_dynd_types; \
+        af.func_proto = ndt::make_funcproto(src_tp, dst_tp); \
         af.data_ptr = reinterpret_cast<void *>(&obj_func); \
-        af.instantiate_func = &detail::elwise_ckernel_instantiator<func_type>::instantiate; \
+        af.instantiate = &detail::elwise_ckernel_instantiator<func_type>::instantiate; \
         af.free_func = NULL; \
 \
         ckernel_builder ckb; \
-        ndt::type lifted_types[NSRC + 1] = {res.get_type(), DYND_PP_JOIN_OUTER_1(DYND_PP_META_DOT_CALL, (,), \
+        ndt::type lifted_types[NSRC] = {DYND_PP_JOIN_OUTER_1(DYND_PP_META_DOT_CALL, (,), \
             DYND_PP_META_NAME_RANGE(acast, NSRC), (get_type))}; \
-        const char *dynd_metadata[NSRC + 1] = {res.get_arrmeta(), DYND_PP_JOIN_OUTER_1(DYND_PP_META_DOT_CALL, (,), \
+        const char *dynd_metadata[NSRC] = {DYND_PP_JOIN_OUTER_1(DYND_PP_META_DOT_CALL, (,), \
             DYND_PP_META_NAME_RANGE(acast, NSRC), (get_arrmeta))}; \
         make_lifted_expr_ckernel(&af, &ckb, 0, \
+                            res.get_type(), res.get_arrmeta(), \
                             lifted_types, dynd_metadata, kernel_request_single, ectx); \
 \
         ckernel_prefix *ckprefix = ckb.get(); \
@@ -867,7 +883,8 @@ DYND_PP_JOIN_MAP(METHS, (), DYND_PP_RANGE(1, DYND_PP_INC(DYND_ELWISE_MAX)))
                 (type)), \
             DYND_PP_META_NAME_RANGE(D, NSRC)); \
 \
-        ndt::type data_dynd_types[NSRC + 1] = {ndt::cfixed_dim_from_array<R>::make(), DYND_PP_JOIN_ELWISE_1(DYND_PP_META_SCOPE_CALL, (,), \
+        ndt::type dst_tp = ndt::cfixed_dim_from_array<R>::make(); \
+        ndt::type src_tp[NSRC] = {DYND_PP_JOIN_ELWISE_1(DYND_PP_META_SCOPE_CALL, (,), \
             DYND_PP_OUTER(DYND_PP_META_TEMPLATE_INSTANTIATION, (ndt::cfixed_dim_from_array), \
             DYND_PP_META_NAME_RANGE(D, NSRC)), DYND_PP_REPEAT(make, NSRC))}; \
 \
@@ -880,29 +897,29 @@ DYND_PP_JOIN_MAP(METHS, (), DYND_PP_RANGE(1, DYND_PP_INC(DYND_ELWISE_MAX)))
                         DYND_PP_OUTER_1(DYND_PP_META_CALL, \
                             (ucast), \
                                 DYND_PP_OUTER_1(DYND_PP_META_DOT_CALL, \
-                                    DYND_PP_META_AT_RANGE(data_dynd_types, 1, DYND_PP_INC(NSRC)), (get_dtype)))), \
+                                    DYND_PP_META_AT_RANGE(src_tp, 0, NSRC), (get_dtype)))), \
                 (eval))); \
 \
         intptr_t res_ndim; \
         dimvector res_shape; \
         detail::elwise_broadcast<DYND_PP_JOIN_1((,), DYND_PP_META_NAME_RANGE(D, NSRC))>(DYND_PP_JOIN_1((,), \
             DYND_PP_META_NAME_RANGE(acast, NSRC)), res_ndim, res_shape); \
-        nd::array res = nd::make_strided_array(data_dynd_types[0], res_ndim, res_shape.get()); \
+        nd::array res = nd::make_strided_array(dst_tp, res_ndim, res_shape.get()); \
 \
-        arrfunc af; \
+        arrfunc_type_data af; \
         af.ckernel_funcproto = expr_operation_funcproto; \
-        af.data_types_size = NSRC + 1; \
-        af.data_dynd_types = data_dynd_types; \
+        af.func_proto = ndt::make_funcproto(src_tp, dst_tp); \
         af.data_ptr = reinterpret_cast<void *>(const_cast<T *>(&obj)); \
-        af.instantiate_func = &detail::elwise_from_callable_ckernel_instantiator<func_type>::instantiate; \
+        af.instantiate = &detail::elwise_from_callable_ckernel_instantiator<func_type>::instantiate; \
         af.free_func = NULL; \
 \
         ckernel_builder ckb; \
-        ndt::type lifted_types[NSRC + 1] = {res.get_type(), DYND_PP_JOIN_OUTER_1(DYND_PP_META_DOT_CALL, (,), \
+        ndt::type lifted_types[NSRC] = {DYND_PP_JOIN_OUTER_1(DYND_PP_META_DOT_CALL, (,), \
             DYND_PP_META_NAME_RANGE(acast, NSRC), (get_type))}; \
-        const char *dynd_metadata[NSRC + 1] = {res.get_arrmeta(), DYND_PP_JOIN_OUTER_1(DYND_PP_META_DOT_CALL, (,), \
+        const char *dynd_metadata[NSRC] = {DYND_PP_JOIN_OUTER_1(DYND_PP_META_DOT_CALL, (,), \
             DYND_PP_META_NAME_RANGE(acast, NSRC), (get_arrmeta))}; \
         make_lifted_expr_ckernel(&af, &ckb, 0, \
+                            res.get_type(), res.get_arrmeta(), \
                             lifted_types, dynd_metadata, kernel_request_single, ectx); \
 \
         ckernel_prefix *ckprefix = ckb.get(); \
@@ -942,7 +959,8 @@ DYND_PP_JOIN_MAP(METHS, (), DYND_PP_RANGE(1, DYND_PP_INC(DYND_ELWISE_MAX)))
                 (type)), \
             DYND_PP_META_NAME_RANGE(D, NSRC)); \
 \
-        ndt::type data_dynd_types[NSRC + 1] = {ndt::cfixed_dim_from_array<R>::make(), DYND_PP_JOIN_ELWISE_1(DYND_PP_META_SCOPE_CALL, (,), \
+        ndt::type dst_tp = ndt::cfixed_dim_from_array<R>::make(); \
+        ndt::type src_tp[NSRC] = {DYND_PP_JOIN_ELWISE_1(DYND_PP_META_SCOPE_CALL, (,), \
             DYND_PP_OUTER(DYND_PP_META_TEMPLATE_INSTANTIATION, (ndt::cfixed_dim_from_array), \
             DYND_PP_META_NAME_RANGE(D, NSRC)), DYND_PP_REPEAT(make, NSRC))}; \
 \
@@ -955,29 +973,29 @@ DYND_PP_JOIN_MAP(METHS, (), DYND_PP_RANGE(1, DYND_PP_INC(DYND_ELWISE_MAX)))
                         DYND_PP_OUTER_1(DYND_PP_META_CALL, \
                             (ucast), \
                                 DYND_PP_OUTER_1(DYND_PP_META_DOT_CALL, \
-                                    DYND_PP_META_AT_RANGE(data_dynd_types, 1, DYND_PP_INC(NSRC)), (get_dtype)))), \
+                                    DYND_PP_META_AT_RANGE(src_tp, 0, NSRC), (get_dtype)))), \
                 (eval))); \
 \
         intptr_t res_ndim; \
         dimvector res_shape; \
         detail::elwise_broadcast<DYND_PP_JOIN_1((,), DYND_PP_META_NAME_RANGE(D, NSRC))>(DYND_PP_JOIN_1((,), \
             DYND_PP_META_NAME_RANGE(acast, NSRC)), res_ndim, res_shape); \
-        nd::array res = nd::make_strided_array(data_dynd_types[0], res_ndim, res_shape.get()); \
+        nd::array res = nd::make_strided_array(dst_tp, res_ndim, res_shape.get()); \
 \
-        arrfunc af; \
+        arrfunc_type_data af; \
         af.ckernel_funcproto = expr_operation_funcproto; \
-        af.data_types_size = NSRC + 1; \
-        af.data_dynd_types = data_dynd_types; \
+        af.func_proto = ndt::make_funcproto(src_tp, dst_tp); \
         af.data_ptr = reinterpret_cast<void *>(const_cast<T *>(&obj)); \
-        af.instantiate_func = &detail::elwise_from_callable_ckernel_instantiator<func_type>::instantiate; \
+        af.instantiate = &detail::elwise_from_callable_ckernel_instantiator<func_type>::instantiate; \
         af.free_func = NULL; \
 \
         ckernel_builder ckb; \
-        ndt::type lifted_types[NSRC + 1] = {res.get_type(), DYND_PP_JOIN_OUTER_1(DYND_PP_META_DOT_CALL, (,), \
+        ndt::type lifted_types[NSRC] = {DYND_PP_JOIN_OUTER_1(DYND_PP_META_DOT_CALL, (,), \
             DYND_PP_META_NAME_RANGE(acast, NSRC), (get_type))}; \
-        const char *dynd_metadata[NSRC + 1] = {res.get_arrmeta(), DYND_PP_JOIN_OUTER_1(DYND_PP_META_DOT_CALL, (,), \
+        const char *dynd_metadata[NSRC] = {DYND_PP_JOIN_OUTER_1(DYND_PP_META_DOT_CALL, (,), \
             DYND_PP_META_NAME_RANGE(acast, NSRC), (get_arrmeta))}; \
         make_lifted_expr_ckernel(&af, &ckb, 0, \
+                            res.get_type(), res.get_arrmeta(), \
                             lifted_types, dynd_metadata, kernel_request_single, ectx); \
 \
         ckernel_prefix *ckprefix = ckb.get(); \

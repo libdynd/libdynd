@@ -68,7 +68,7 @@ template<int N>
 static size_t make_elwise_strided_dimension_expr_kernel_for_N(
                 ckernel_builder *out, size_t offset_out,
                 const ndt::type& dst_tp, const char *dst_metadata,
-                size_t DYND_UNUSED(src_count), const ndt::type *src_tp, const char **src_metadata,
+                size_t DYND_UNUSED(src_count), const ndt::type *src_tp, const char *const*src_metadata,
                 kernel_request_t kernreq, const eval::eval_context *ectx,
                 const expr_kernel_generator *elwise_handler)
 {
@@ -128,7 +128,7 @@ static size_t make_elwise_strided_dimension_expr_kernel_for_N(
 inline static size_t make_elwise_strided_dimension_expr_kernel(
                 ckernel_builder *out, size_t offset_out,
                 const ndt::type& dst_tp, const char *dst_metadata,
-                size_t src_count, const ndt::type *src_tp, const char **src_metadata,
+                size_t src_count, const ndt::type *src_tp, const char *const*src_metadata,
                 kernel_request_t kernreq, const eval::eval_context *ectx,
                 const expr_kernel_generator *elwise_handler)
 {
@@ -253,7 +253,7 @@ template<int N>
 static size_t make_elwise_strided_or_var_to_strided_dimension_expr_kernel_for_N(
                 ckernel_builder *out, size_t offset_out,
                 const ndt::type& dst_tp, const char *dst_metadata,
-                size_t DYND_UNUSED(src_count), const ndt::type *src_tp, const char **src_metadata,
+                size_t DYND_UNUSED(src_count), const ndt::type *src_tp, const char *const*src_metadata,
                 kernel_request_t kernreq, const eval::eval_context *ectx,
                 const expr_kernel_generator *elwise_handler)
 {
@@ -325,7 +325,7 @@ static size_t make_elwise_strided_or_var_to_strided_dimension_expr_kernel_for_N(
 static size_t make_elwise_strided_or_var_to_strided_dimension_expr_kernel(
                 ckernel_builder *out, size_t offset_out,
                 const ndt::type& dst_tp, const char *dst_metadata,
-                size_t src_count, const ndt::type *src_tp, const char **src_metadata,
+                size_t src_count, const ndt::type *src_tp, const char *const*src_metadata,
                 kernel_request_t kernreq, const eval::eval_context *ectx,
                 const expr_kernel_generator *elwise_handler)
 {
@@ -509,7 +509,7 @@ template<int N>
 static size_t make_elwise_strided_or_var_to_var_dimension_expr_kernel_for_N(
                 ckernel_builder *out, size_t offset_out,
                 const ndt::type& dst_tp, const char *dst_metadata,
-                size_t DYND_UNUSED(src_count), const ndt::type *src_tp, const char **src_metadata,
+                size_t DYND_UNUSED(src_count), const ndt::type *src_tp, const char *const*src_metadata,
                 kernel_request_t kernreq, const eval::eval_context *ectx,
                 const expr_kernel_generator *elwise_handler)
 {
@@ -588,7 +588,7 @@ static size_t make_elwise_strided_or_var_to_var_dimension_expr_kernel_for_N(
 static size_t make_elwise_strided_or_var_to_var_dimension_expr_kernel(
                 ckernel_builder *out, size_t offset_out,
                 const ndt::type& dst_tp, const char *dst_metadata,
-                size_t src_count, const ndt::type *src_tp, const char **src_metadata,
+                size_t src_count, const ndt::type *src_tp, const char *const*src_metadata,
                 kernel_request_t kernreq, const eval::eval_context *ectx,
                 const expr_kernel_generator *elwise_handler)
 {
@@ -642,7 +642,7 @@ static size_t make_elwise_strided_or_var_to_var_dimension_expr_kernel(
 
 size_t dynd::make_elwise_dimension_expr_kernel(ckernel_builder *out, size_t offset_out,
                 const ndt::type& dst_tp, const char *dst_metadata,
-                size_t src_count, const ndt::type *src_tp, const char **src_metadata,
+                size_t src_count, const ndt::type *src_tp, const char *const*src_metadata,
                 kernel_request_t kernreq, const eval::eval_context *ectx,
                 const expr_kernel_generator *elwise_handler)
 {

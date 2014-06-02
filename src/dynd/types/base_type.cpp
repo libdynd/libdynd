@@ -249,17 +249,10 @@ size_t base_type::make_comparison_kernel(
                 ckernel_builder *DYND_UNUSED(out), size_t DYND_UNUSED(offset_out),
                 const ndt::type& src0_dt, const char *DYND_UNUSED(src0_metadata),
                 const ndt::type& src1_dt, const char *DYND_UNUSED(src1_metadata),
-                comparison_type_t DYND_UNUSED(comptype),
+                comparison_type_t comptype,
                 const eval::eval_context *DYND_UNUSED(ectx)) const
 {
-    stringstream ss;
-    ss << "make_comparison_kernel has not been implemented for ";
-    if (this == src0_dt.extended()) {
-        ss << src0_dt;
-    } else {
-        ss << src1_dt;
-    }
-    throw std::runtime_error(ss.str());
+    throw not_comparable_error(src0_dt, src1_dt, comptype);
 }
 
 void base_type::foreach_leading(const char *DYND_UNUSED(metadata),

@@ -121,7 +121,7 @@ std::ostream& dynd::operator<<(ostream& out, const dynd_int128& val)
 {
     if (val < dynd_int128(0)) {
         dynd_int128 tmp = -val;
-        return (out << dynd_uint128(tmp.m_hi, tmp.m_lo));
+        return (out << "-" << dynd_uint128(tmp.m_hi, tmp.m_lo));
     } else {
         return (out << dynd_uint128(val.m_hi, val.m_lo));
     }

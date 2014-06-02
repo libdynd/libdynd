@@ -239,13 +239,16 @@ static nd::array function_type_construct(const ndt::type& DYND_UNUSED(dt),
     return result;
 }
 
-static pair<string, gfunc::callable> date_type_functions[] = {
-    pair<string, gfunc::callable>("today", gfunc::make_callable(&function_type_today, "self")),
-    pair<string, gfunc::callable>("__construct__", gfunc::make_callable(&function_type_construct, "self", "year", "month", "day"))
-};
-
 void date_type::get_dynamic_type_functions(const std::pair<std::string, gfunc::callable> **out_functions, size_t *out_count) const
 {
+    static pair<string, gfunc::callable> date_type_functions[] = {
+        pair<string, gfunc::callable>(
+            "today", gfunc::make_callable(&function_type_today, "self")),
+        pair<string, gfunc::callable>(
+            "__construct__",
+            gfunc::make_callable(&function_type_construct, "self", "year",
+                                 "month", "day"))};
+
     *out_functions = date_type_functions;
     *out_count = sizeof(date_type_functions) / sizeof(date_type_functions[0]);
 }
@@ -264,14 +267,16 @@ static nd::array property_ndo_get_day(const nd::array& n) {
     return n.replace_dtype(ndt::make_property(n.get_dtype(), "day"));
 }
 
-static pair<string, gfunc::callable> date_array_properties[] = {
-    pair<string, gfunc::callable>("year", gfunc::make_callable(&property_ndo_get_year, "self")),
-    pair<string, gfunc::callable>("month", gfunc::make_callable(&property_ndo_get_month, "self")),
-    pair<string, gfunc::callable>("day", gfunc::make_callable(&property_ndo_get_day, "self"))
-};
-
 void date_type::get_dynamic_array_properties(const std::pair<std::string, gfunc::callable> **out_properties, size_t *out_count) const
 {
+    static pair<string, gfunc::callable> date_array_properties[] = {
+        pair<string, gfunc::callable>(
+            "year", gfunc::make_callable(&property_ndo_get_year, "self")),
+        pair<string, gfunc::callable>(
+            "month", gfunc::make_callable(&property_ndo_get_month, "self")),
+        pair<string, gfunc::callable>(
+            "day", gfunc::make_callable(&property_ndo_get_day, "self"))};
+
     *out_properties = date_array_properties;
     *out_count = sizeof(date_array_properties) / sizeof(date_array_properties[0]);
 }
@@ -305,18 +310,25 @@ static nd::array function_ndo_replace(const nd::array& n, int32_t year, int32_t 
                     make_replace_kernelgen(year, month, day)));
 }
 
-static pair<string, gfunc::callable> date_array_functions[] = {
-    pair<string, gfunc::callable>("to_struct", gfunc::make_callable(&function_ndo_to_struct, "self")),
-    pair<string, gfunc::callable>("strftime", gfunc::make_callable(&function_ndo_strftime, "self", "format")),
-    pair<string, gfunc::callable>("weekday", gfunc::make_callable(&function_ndo_weekday, "self")),
-    pair<string, gfunc::callable>("replace", gfunc::make_callable_with_default(&function_ndo_replace, "self", "year", "month", "day",
-                    numeric_limits<int32_t>::max(), numeric_limits<int32_t>::max(), numeric_limits<int32_t>::max()))
-};
-
 void date_type::get_dynamic_array_functions(
                 const std::pair<std::string, gfunc::callable> **out_functions,
                 size_t *out_count) const
 {
+    static pair<string, gfunc::callable> date_array_functions[] = {
+        pair<string, gfunc::callable>(
+            "to_struct", gfunc::make_callable(&function_ndo_to_struct, "self")),
+        pair<string, gfunc::callable>(
+            "strftime",
+            gfunc::make_callable(&function_ndo_strftime, "self", "format")),
+        pair<string, gfunc::callable>(
+            "weekday", gfunc::make_callable(&function_ndo_weekday, "self")),
+        pair<string, gfunc::callable>(
+            "replace",
+            gfunc::make_callable_with_default(
+                &function_ndo_replace, "self", "year", "month", "day",
+                numeric_limits<int32_t>::max(), numeric_limits<int32_t>::max(),
+                numeric_limits<int32_t>::max()))};
+
     *out_functions = date_array_functions;
     *out_count = sizeof(date_array_functions) / sizeof(date_array_functions[0]);
 }
@@ -513,3 +525,12 @@ size_t date_type::make_elwise_property_setter_kernel(
     }
 }
 
+const ndt::type& ndt::make_date()
+{
+    // Static instance of the type, which has a reference count > 0 for the
+    // lifetime of the program. This static construction is inside a
+    // function to ensure correct creation order during startup.
+    static date_type dt;
+    static const ndt::type static_instance(&dt, true);
+    return static_instance;
+}

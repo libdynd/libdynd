@@ -5,113 +5,252 @@
 
 #include <dynd/func/lift_arrfunc.hpp>
 #include <dynd/kernels/make_lifted_ckernel.hpp>
+#include <dynd/types/ellipsis_dim_type.hpp>
+#include <dynd/types/var_dim_type.hpp>
+#include <dynd/types/fixed_dim_type.hpp>
+#include <dynd/types/cfixed_dim_type.hpp>
+#include <dynd/shape_tools.hpp>
 
 using namespace std;
 using namespace dynd;
 
-namespace {
-
-struct lifted_expr_arrfunc_data {
-    // Pointer to the child arrfunc
-    const arrfunc *child_af;
-    // Reference to the array containing it
-    memory_block_data *child_af_arr;
-    // Number of types
-    intptr_t data_types_size;
-    // The types of the child ckernel and this one
-    const ndt::type *child_data_types;
-    ndt::type data_types[1];
-};
-
 static void delete_lifted_expr_arrfunc_data(void *self_data_ptr)
 {
-    lifted_expr_arrfunc_data *data =
-                    reinterpret_cast<lifted_expr_arrfunc_data *>(self_data_ptr);
-    if (data->child_af_arr != NULL) {
-        memory_block_decref(data->child_af_arr);
-    }
-    ndt::type *data_types = &data->data_types[0];
-    for (intptr_t i = 0; i < data->data_types_size; ++i) {
-        data_types[i] = ndt::type();
-    }
-    free(data);
+    memory_block_data *data =
+        reinterpret_cast<memory_block_data *>(self_data_ptr);
+    memory_block_decref(data);
 }
 
 static intptr_t instantiate_lifted_expr_arrfunc_data(
-    void *self_data_ptr, dynd::ckernel_builder *out_ckb, intptr_t ckb_offset,
-    const char *const *dynd_metadata, uint32_t kerntype,
+    const arrfunc_type_data *self, dynd::ckernel_builder *ckb, intptr_t ckb_offset,
+    const ndt::type &dst_tp, const char *dst_arrmeta, const ndt::type *src_tp,
+    const char *const *src_arrmeta, uint32_t kernreq,
     const eval::eval_context *ectx)
 {
-    lifted_expr_arrfunc_data *data =
-                    reinterpret_cast<lifted_expr_arrfunc_data *>(self_data_ptr);
-    return make_lifted_expr_ckernel(data->child_af,
-                    out_ckb, ckb_offset,
-                    data->data_types, dynd_metadata,
-                    static_cast<dynd::kernel_request_t>(kerntype),
+    const array_preamble *data =
+        reinterpret_cast<const array_preamble *>(self->data_ptr);
+    const arrfunc_type_data *child_af =
+        reinterpret_cast<const arrfunc_type_data *>(data->m_data_pointer);
+    return make_lifted_expr_ckernel(child_af,
+                    ckb, ckb_offset,
+                    dst_tp, dst_arrmeta,
+                    src_tp, src_arrmeta,
+                    static_cast<dynd::kernel_request_t>(kernreq),
                     ectx);
 }
 
-} // anonymous namespace
-
-void dynd::lift_arrfunc(arrfunc *out_af, const nd::array &af_arr,
-                        const std::vector<ndt::type> &lifted_types)
+static int resolve_lifted_dst_type(const arrfunc_type_data *self,
+                                   ndt::type &out_dst_tp,
+                                   const ndt::type *src_tp, int throw_on_error)
 {
-    // Validate the input arrfunc
-    if (af_arr.get_type().get_type_id() != arrfunc_type_id) {
-        stringstream ss;
-        ss << "lift_arrfunc() 'af' must have type "
-           << "arrfunc, not " << af_arr.get_type();
-        throw runtime_error(ss.str());
+    intptr_t param_count = self->get_param_count();
+    const array_preamble *data =
+        reinterpret_cast<const array_preamble *>(self->data_ptr);
+    const arrfunc_type_data *child_af =
+        reinterpret_cast<const arrfunc_type_data *>(data->m_data_pointer);
+    intptr_t ndim = 0;
+    // First get the type for the child arrfunc
+    ndt::type child_dst_tp;
+    if (child_af->resolve_dst_type) {
+        std::vector<ndt::type> child_src_tp(param_count);
+        for (intptr_t i = 0; i < param_count; ++i) {
+            intptr_t child_ndim_i = child_af->get_param_type(i).get_ndim();
+            if (child_ndim_i < src_tp[i].get_ndim()) {
+                child_src_tp[i] = src_tp[i].get_dtype(child_ndim_i);
+                ndim = std::max(ndim, src_tp[i].get_ndim() - child_ndim_i);
+            } else {
+                child_src_tp[i] = src_tp[i];
+            }
+        }
+        if (!child_af->resolve_dst_type(child_af, child_dst_tp,
+                                        &child_src_tp[0], throw_on_error)) {
+            return 0;
+        }
+    } else {
+        for (intptr_t i = 0; i < param_count; ++i) {
+            ndim = std::max(ndim, src_tp[i].get_ndim() -
+                                      child_af->get_param_type(i).get_ndim());
+        }
+        child_dst_tp = child_af->get_return_type();
     }
-    const arrfunc *af = reinterpret_cast<const arrfunc *>(af_arr.get_readonly_originptr());
-    if (af->instantiate_func == NULL) {
-        throw runtime_error("lift_arrfunc() 'af' must contain a"
-                        " non-null arrfunc object");
-    }
-    // Validate that all the types are subarrays as needed for lifting
-    intptr_t ntypes = af->data_types_size;
-    if (ntypes != (intptr_t)lifted_types.size()) {
-        stringstream ss;
-        ss << "lift_arrfunc() 'lifted_types' list must have "
-           << "the same number of types as the input arrfunc "
-           << "(" << lifted_types.size() << " vs " << ntypes << ")";
-        throw runtime_error(ss.str());
-    }
-    const ndt::type *af_types = af->data_dynd_types;
-    for (intptr_t i = 0; i < ntypes; ++i) {
-        if (!lifted_types[i].is_type_subarray(af_types[i])) {
-            stringstream ss;
-            ss << "lift_arrfunc() 'lifted_types[" << i << "]' value must "
-               << "have the corresponding input arrfunc type as a subarray "
-               << "(" << af_types[i] << " is not a subarray of " << lifted_types[i] << ")";
-            throw runtime_error(ss.str());
+    // Then build the type for the rest of the dimensions
+    if (ndim > 0) {
+        dimvector shape(ndim), tmp_shape(ndim);;
+        for (intptr_t i = 0; i < ndim; ++i) {
+            shape[i] = -1;
+        }
+        for (intptr_t i = 0; i < param_count; ++i) {
+            intptr_t ndim_i =
+                src_tp[i].get_ndim() - child_af->get_param_type(i).get_ndim();
+            if (ndim_i > 0) {
+                ndt::type tp = src_tp[i];
+                intptr_t *shape_i = shape.get() + (ndim - ndim_i);
+                intptr_t shape_at_j;
+                for (intptr_t j = 0; j < ndim_i; ++j) {
+                    switch (tp.get_type_id()) {
+                        case fixed_dim_type_id:
+                            shape_at_j = tp.tcast<fixed_dim_type>()->get_fixed_dim_size();
+                            if (shape_i[j] < 0 || shape_i[j] == 1) {
+                                if (shape_at_j != 1) {
+                                    shape_i[j] = shape_at_j;
+                                }
+                            } else if (shape_i[j] != shape_at_j) {
+                                if (throw_on_error) {
+                                    throw broadcast_error(ndim, shape.get(),
+                                                          ndim_i, shape_i);
+                                } else {
+                                    return 0;
+                                }
+                            }
+                            break;
+                        case cfixed_dim_type_id:
+                            shape_at_j = tp.tcast<fixed_dim_type>()
+                                             ->get_fixed_dim_size();
+                            if (shape_i[j] < 0 || shape_i[j] == 1) {
+                                if (shape_at_j != 1) {
+                                    shape_i[j] = shape_at_j;
+                                }
+                            } else if (shape_i[j] != shape_at_j) {
+                                if (throw_on_error) {
+                                    throw broadcast_error(ndim, shape.get(),
+                                                          ndim_i, shape_i);
+                                } else {
+                                    return 0;
+                                }
+                            }
+                            break;
+                        case strided_dim_type_id:
+                            if (shape_i[j] < 0) {
+                                shape_i[j] = -2;
+                            }
+                            break;
+                        case var_dim_type_id:
+                            break;
+                        default:
+                            if (throw_on_error) {
+                                throw broadcast_error(ndim, shape.get(), ndim_i,
+                                                      shape_i);
+                            } else {
+                                return 0;
+                            }
+                    }
+                    tp = tp.tcast<base_uniform_dim_type>()->get_element_type();
+                }
+            }
+        }
+        for (intptr_t i = ndim - 1; i >= 0; --i) {
+            if (shape[i] == -2 || (i == 0 && shape[i] == -1)) {
+                child_dst_tp = ndt::make_strided_dim(child_dst_tp);
+            } else if (shape[i] == -1) {
+                child_dst_tp = ndt::make_var_dim(child_dst_tp);
+            } else {
+                child_dst_tp = ndt::make_fixed_dim(shape[i], child_dst_tp);
+            }
         }
     }
+    out_dst_tp = child_dst_tp;
 
-    if (af->ckernel_funcproto == unary_operation_funcproto) {
-        throw runtime_error("lift_arrfunc() for unary operations is not finished");
-    } else if (af->ckernel_funcproto == expr_operation_funcproto) {
-        size_t sizeof_data_mem = sizeof(lifted_expr_arrfunc_data) + (sizeof(void *) * (ntypes - 1));
-        void *data_mem = malloc(sizeof_data_mem);
-        memset(data_mem, 0, sizeof_data_mem);
-        lifted_expr_arrfunc_data *data = reinterpret_cast<lifted_expr_arrfunc_data *>(data_mem);
-        out_af->data_ptr = data;
-        out_af->free_func = &delete_lifted_expr_arrfunc_data;
-        out_af->data_types_size = ntypes;
-        data->data_types_size = ntypes;
-        ndt::type *data_types_arr = &data->data_types[0];
-        for (intptr_t i = 0; i < ntypes; ++i) {
-            data_types_arr[i] = lifted_types[i];
+    return 1;
+}
+
+static void resolve_lifted_dst_shape(const arrfunc_type_data *self,
+                                       intptr_t *out_shape,
+                                       const ndt::type &dst_tp,
+                                       const ndt::type *src_tp,
+                                       const char *const *src_arrmeta,
+                                       const char *const *src_data)
+{
+    intptr_t param_count = self->get_param_count();
+    const array_preamble *data =
+        reinterpret_cast<const array_preamble *>(self->data_ptr);
+    const arrfunc_type_data *child_af =
+        reinterpret_cast<const arrfunc_type_data *>(data->m_data_pointer);
+    intptr_t child_ndim = child_af->get_return_type().get_ndim();
+    intptr_t ndim = dst_tp.get_ndim() - child_ndim;
+    // Broadcast all the src shapes together
+    if (ndim > 0) {
+        dimvector tmp_shape(ndim);
+        for (intptr_t j = 0; j < ndim; ++j) {
+            out_shape[j] = 1;
         }
-        data->child_af = af;
-        data->child_af_arr = af_arr.get_memblock().release();
-        out_af->instantiate_func = &instantiate_lifted_expr_arrfunc_data;
-        out_af->data_dynd_types = &data->data_types[0];
+        for (intptr_t i = 0; i < param_count; ++i) {
+            intptr_t ndim_i =
+                src_tp[i].get_ndim() - child_af->get_param_type(i).get_ndim();
+            if (ndim_i > 0) {
+                src_tp[i].extended()->get_shape(ndim_i, 0, tmp_shape.get(),
+                                                src_arrmeta[i], src_data[i]);
+                incremental_broadcast(ndim, out_shape, ndim_i, tmp_shape.get());
+            }
+        }
+    }
+    if (child_ndim != 0) {
+        if (child_af->resolve_dst_shape != NULL) {
+            // Get the type/arrmeta/data at the needed dimensions for the child
+            // types
+            ndt::type child_dst_tp = dst_tp.get_type_at_dimension(NULL, ndim);
+            std::vector<ndt::type> child_src_tp(param_count);
+            shortvector<const char *> child_src_arrmeta(param_count);
+            shortvector<const char *> child_src_data(param_count);
+            for (intptr_t i = 0; i < param_count; ++i) {
+                intptr_t ndim_i =
+                    src_tp[i].get_ndim() - child_af->get_param_type(i).get_ndim();
+                child_src_tp[i] = src_tp[i];
+                child_src_arrmeta[i] = src_arrmeta[i];
+                child_src_data[i] = src_data[i];
+                if (ndim_i > 0) {
+                    for (intptr_t j = 0; j < ndim_i; ++j) {
+                        child_src_tp[i] = child_src_tp[i].extended()->at_single(
+                            0, &child_src_arrmeta[i], &child_src_data[i]);
+                    }
+                }
+            }
+            child_af->resolve_dst_shape(
+                child_af, out_shape + ndim, child_dst_tp, &child_src_tp[0],
+                child_src_arrmeta.get(), child_src_data.get());
+        } else {
+            // Fill in the rest of the shape with -1 to indicate unspecified
+            for (intptr_t i = ndim; i < ndim + child_ndim; ++i) {
+                out_shape[i] = -1;
+            }
+        }
+    }
+}
+
+/** Prepends "Dims..." to all the types in the proto */
+static ndt::type lift_proto(const ndt::type& proto)
+{
+    const funcproto_type *p = proto.tcast<funcproto_type>();
+    const ndt::type *param_types = p->get_param_types_raw();
+    nd::array out_param_types = nd::empty(
+        p->get_param_count(), ndt::make_strided_of_type());
+    nd::string dimsname("Dims");
+    ndt::type *pt = reinterpret_cast<ndt::type *>(
+        out_param_types.get_readwrite_originptr());
+    for (size_t i = 0, i_end = p->get_param_count(); i != i_end; ++i) {
+        pt[i] = ndt::make_ellipsis_dim(dimsname, param_types[i]);
+    }
+    return ndt::make_funcproto(
+        out_param_types,
+        ndt::make_ellipsis_dim(dimsname, p->get_return_type()));
+}
+
+void dynd::lift_arrfunc(arrfunc_type_data *out_af, const nd::arrfunc &af)
+{
+    const arrfunc_type_data *af_ptr = af.get();
+    if (af_ptr->ckernel_funcproto == unary_operation_funcproto) {
+        throw runtime_error("lift_arrfunc() for unary operations is not finished");
+    } else if (af_ptr->ckernel_funcproto == expr_operation_funcproto) {
+        out_af->free_func = &delete_lifted_expr_arrfunc_data;
+        out_af->data_ptr = nd::array(af).release();
+        out_af->instantiate = &instantiate_lifted_expr_arrfunc_data;
+        out_af->resolve_dst_type = &resolve_lifted_dst_type;
+        out_af->resolve_dst_shape = &resolve_lifted_dst_shape;
         out_af->ckernel_funcproto = expr_operation_funcproto;
+        out_af->func_proto = lift_proto(af_ptr->func_proto);
     } else {
         stringstream ss;
         ss << "lift_arrfunc() unrecognized ckernel function"
-           << " prototype enum value " << af->ckernel_funcproto;
+           << " prototype enum value " << af_ptr->ckernel_funcproto;
         throw runtime_error(ss.str());
     }
 }

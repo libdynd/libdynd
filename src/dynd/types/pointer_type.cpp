@@ -326,14 +326,15 @@ static ndt::type property_get_target_type(const ndt::type& tp) {
     return pd->get_target_type();
 }
 
-static pair<string, gfunc::callable> type_properties[] = {
-    pair<string, gfunc::callable>("target_type", gfunc::make_callable(&property_get_target_type, "self"))
-};
-
 void pointer_type::get_dynamic_type_properties(
                 const std::pair<std::string, gfunc::callable> **out_properties,
                 size_t *out_count) const
 {
+    static pair<string, gfunc::callable> type_properties[] = {
+        pair<string, gfunc::callable>(
+            "target_type",
+            gfunc::make_callable(&property_get_target_type, "self"))};
+
     *out_properties = type_properties;
     *out_count = sizeof(type_properties) / sizeof(type_properties[0]);
 }

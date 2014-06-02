@@ -32,12 +32,12 @@ expr_type::expr_type(const ndt::type& value_type, const ndt::type& operand_type,
     if (field_count == 1) {
         throw runtime_error("expr_type is for 2 or more operands, use unary_expr_type for 1 operand");
     }
-    const ndt::type *field_types = fsd->get_field_types();
     for (size_t i = 0; i != field_count; ++i) {
-        if (field_types[i].get_type_id() != pointer_type_id) {
+        const ndt::type &ft = fsd->get_field_type(i);
+        if (ft.get_type_id() != pointer_type_id) {
             stringstream ss;
             ss << "each field of the expr_type's operand must be a pointer, field " << i;
-            ss << " is " << field_types[i];
+            ss << " is " << ft;
             throw runtime_error(ss.str());
         }
     }
@@ -58,11 +58,11 @@ void expr_type::print_type(std::ostream& o) const
 {
     const ctuple_type *fsd = m_operand_type.tcast<ctuple_type>();
     size_t field_count = fsd->get_field_count();
-    const ndt::type *field_types = fsd->get_field_types();
     o << "expr<";
     o << m_value_type;
     for (size_t i = 0; i != field_count; ++i) {
-        const pointer_type *pd = static_cast<const pointer_type *>(field_types[i].extended());
+        const pointer_type *pd = static_cast<const pointer_type *>(
+            fsd->get_field_type(i).extended());
         o << ", op" << i << "=" << pd->get_target_type();
     }
     o << ", expr=";
@@ -77,14 +77,13 @@ ndt::type expr_type::apply_linear_index(intptr_t nindices, const irange *indices
         intptr_t undim = get_ndim();
         const ctuple_type *fsd = m_operand_type.tcast<ctuple_type>();
         size_t field_count = fsd->get_field_count();
-        const ndt::type *field_types = fsd->get_field_types();
 
         ndt::type result_value_dt = m_value_type.apply_linear_index(nindices, indices,
                         current_i, root_tp, true);
         vector<ndt::type> result_src_dt(field_count);
         // Apply the portion of the indexing to each of the src operand types
         for (size_t i = 0; i != field_count; ++i) {
-            const ndt::type& dt = field_types[i];
+            const ndt::type& dt = fsd->get_field_type(i);
             intptr_t field_undim = dt.get_ndim();
             if (nindices + field_undim <= undim) {
                 result_src_dt[i] = dt;
@@ -95,7 +94,7 @@ ndt::type expr_type::apply_linear_index(intptr_t nindices, const irange *indices
                                                 current_i, root_tp, false);
             }
         }
-        ndt::type result_operand_type = ndt::make_ctuple(field_count, &result_src_dt[0]);
+        ndt::type result_operand_type = ndt::make_ctuple(result_src_dt);
         expr_kernel_generator_incref(m_kgen);
         return ndt::make_expr(result_value_dt, result_operand_type, m_kgen);
     } else {
@@ -115,24 +114,22 @@ intptr_t expr_type::apply_linear_index(intptr_t nindices, const irange *indices,
         const expr_type *out_ed = result_tp.tcast<expr_type>();
         const ctuple_type *fsd = m_operand_type.tcast<ctuple_type>();
         const ctuple_type *out_fsd = static_cast<const ctuple_type *>(out_ed->m_operand_type.extended());
-        const size_t *metadata_offsets = fsd->get_metadata_offsets();
-        const size_t *out_metadata_offsets = out_fsd->get_metadata_offsets();
+        const size_t *arrmeta_offsets = fsd->get_arrmeta_offsets_raw();
+        const size_t *out_arrmeta_offsets = out_fsd->get_arrmeta_offsets_raw();
         size_t field_count = fsd->get_field_count();
-        const ndt::type *field_types = fsd->get_field_types();
-        const ndt::type *out_field_types = out_fsd->get_field_types();
         // Apply the portion of the indexing to each of the src operand types
         for (size_t i = 0; i != field_count; ++i) {
-            const pointer_type *pd = static_cast<const pointer_type *>(field_types[i].extended());
+            const pointer_type *pd = fsd->get_field_type(i).tcast<pointer_type>();
             intptr_t field_undim = pd->get_ndim();
             if (nindices + field_undim <= undim) {
-                pd->metadata_copy_construct(out_metadata + out_metadata_offsets[i],
-                                metadata + metadata_offsets[i],
+                pd->metadata_copy_construct(out_metadata + out_arrmeta_offsets[i],
+                                metadata + arrmeta_offsets[i],
                                 embedded_reference);
             } else {
                 size_t index_offset = undim - field_undim;
                 intptr_t offset = pd->apply_linear_index(nindices - index_offset, indices + index_offset,
-                                metadata + metadata_offsets[i],
-                                out_field_types[i], out_metadata + out_metadata_offsets[i],
+                                metadata + arrmeta_offsets[i],
+                                out_fsd->get_field_type(i), out_metadata + out_arrmeta_offsets[i],
                                 embedded_reference, current_i, root_tp, false, NULL, NULL);
                 if (offset != 0) {
                     throw runtime_error("internal error: expr_type::apply_linear_index"
@@ -159,14 +156,14 @@ void expr_type::get_shape(intptr_t ndim, intptr_t i, intptr_t *out_shape,
     // Get each operand shape, and broadcast them together
     dimvector shape(undim);
     const ctuple_type *fsd = m_operand_type.tcast<ctuple_type>();
-    const size_t *metadata_offsets = fsd->get_metadata_offsets();
+    const uintptr_t *arrmeta_offsets = fsd->get_arrmeta_offsets_raw();
     size_t field_count = fsd->get_field_count();
     for (size_t fi = 0; fi != field_count; ++fi) {
-        const ndt::type& dt = fsd->get_field_types()[fi];
+        const ndt::type& dt = fsd->get_field_type(fi);
         size_t field_undim = dt.get_ndim();
         if (field_undim > 0) {
             dt.extended()->get_shape(field_undim, 0, shape.get(),
-                            metadata ? (metadata + metadata_offsets[fi]) : NULL,
+                            metadata ? (metadata + arrmeta_offsets[fi]) : NULL,
                             NULL);
             incremental_broadcast(undim, bcast_shape.get(), field_undim, shape.get());
         }
@@ -327,19 +324,18 @@ size_t expr_type::make_operand_to_value_assignment_kernel(
 
     offset_out = make_kernreq_to_single_kernel_adapter(out, offset_out, kernreq);
     size_t input_count = fsd->get_field_count();
-    const size_t *metadata_offsets = fsd->get_metadata_offsets();
+    const uintptr_t *arrmeta_offsets = fsd->get_arrmeta_offsets_raw();
     shortvector<const char *> src_metadata_array(input_count);
     dimvector src_data_offsets(input_count);
     bool nonzero_offsets = false;
 
-    const ndt::type *src_ptr_dt = fsd->get_field_types();
     vector<ndt::type> src_dt(input_count);
     for (size_t i = 0; i != input_count; ++i) {
-        const pointer_type *pd = static_cast<const pointer_type *>(src_ptr_dt[i].extended());
+        const pointer_type *pd = static_cast<const pointer_type *>(fsd->get_field_type(i).extended());
         src_dt[i] = pd->get_target_type();
     }
     for (size_t i = 0; i != input_count; ++i) {
-        const char *ptr_metadata = src_metadata + metadata_offsets[i];
+        const char *ptr_metadata = src_metadata + arrmeta_offsets[i];
         intptr_t offset = reinterpret_cast<const pointer_type_metadata *>(ptr_metadata)->offset;
         if (offset != 0) {
             nonzero_offsets = true;

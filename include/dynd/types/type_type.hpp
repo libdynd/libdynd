@@ -47,10 +47,20 @@ public:
                     const ndt::type& src_tp, const char *src_metadata,
                     kernel_request_t kernreq, assign_error_mode errmode,
                     const eval::eval_context *ectx) const;
+
+    size_t make_comparison_kernel(
+                    ckernel_builder *out, size_t offset_out,
+                    const ndt::type& src0_dt, const char *src0_metadata,
+                    const ndt::type& src1_dt, const char *src1_metadata,
+                    comparison_type_t comptype,
+                    const eval::eval_context *ectx) const;
 };
 
 namespace ndt {
-    ndt::type make_type();
+    /** Returns type "type" */
+    const ndt::type& make_type();
+    /** Returns type "strided * type" */
+    const ndt::type& make_strided_of_type();
 } // namespace ndt
 
 } // namespace dynd

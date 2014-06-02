@@ -25,9 +25,10 @@ namespace dynd {
  *                            kernel is used here.
  * \param out_ckb  The ckernel_builder into which to place the ckernel.
  * \param ckb_offset  Where within the ckernel_builder to place the ckernel.
- * \param lifted_types  The types to lift the ckernel to. The output ckernel
- *                      is for these types.
- * \param dynd_metadata  Array metadata corresponding to the lifted_types.
+ * \param dst_tp  The destination type to lift to.
+ * \param dst_arrmeta  The destination arrmeta to lift to.
+ * \param src_tp  The source type to lift to.
+ * \param src_arrmeta  The source arrmeta to lift to.
  * \param reduction_ndim  The number of dimensions being reduced.
  * \param reduction_dimflags  Boolean flags indicating which dimensions to
  *                            reduce. This can typically be derived from an
@@ -47,13 +48,14 @@ namespace dynd {
  * \param ectx  The evaluation context to use.
  */
 size_t make_lifted_reduction_ckernel(
-    const arrfunc *elwise_reduction,
-    const arrfunc *dst_initialization, dynd::ckernel_builder *out_ckb,
-    intptr_t ckb_offset, const ndt::type *lifted_types,
-    const char *const *dynd_metadata, intptr_t reduction_ndim,
+    const arrfunc_type_data *elwise_reduction,
+    const arrfunc_type_data *dst_initialization, dynd::ckernel_builder *out_ckb,
+    intptr_t ckb_offset, const ndt::type &dst_tp, const char *dst_arrmeta,
+    const ndt::type &src_tp, const char *src_arrmeta, intptr_t reduction_ndim,
     const bool *reduction_dimflags, bool associative, bool commutative,
     bool right_associative, const nd::array &reduction_identity,
-    dynd::kernel_request_t kernreq, const eval::eval_context *ectx=&eval::default_eval_context);
+    dynd::kernel_request_t kernreq,
+    const eval::eval_context *ectx = &eval::default_eval_context);
 
 } // namespace dynd
 

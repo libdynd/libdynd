@@ -578,15 +578,14 @@ static nd::array property_ndo_get_ints(const nd::array& n) {
     return n.view_scalars(cd->get_storage_type());
 }
 
-static pair<string, gfunc::callable> categorical_array_properties[] = {
-    pair<string, gfunc::callable>("ints",
-                    gfunc::make_callable(&property_ndo_get_ints, "self"))
-};
-
 void categorical_type::get_dynamic_array_properties(
                 const std::pair<std::string, gfunc::callable> **out_properties,
                 size_t *out_count) const
 {
+    static pair<string, gfunc::callable> categorical_array_properties[] = {
+        pair<string, gfunc::callable>(
+            "ints", gfunc::make_callable(&property_ndo_get_ints, "self"))};
+
     *out_properties = categorical_array_properties;
     *out_count = sizeof(categorical_array_properties) / sizeof(categorical_array_properties[0]);
 }
@@ -606,19 +605,21 @@ static ndt::type property_type_get_category_type(const ndt::type& d) {
     return cd->get_category_type();
 }
 
-static pair<string, gfunc::callable> categorical_type_properties[] = {
-    pair<string, gfunc::callable>("categories",
-                    gfunc::make_callable(&property_type_get_categories, "self")),
-    pair<string, gfunc::callable>("storage_type",
-                    gfunc::make_callable(&property_type_get_storage_type, "self")),
-    pair<string, gfunc::callable>("category_type",
-                    gfunc::make_callable(&property_type_get_category_type, "self"))
-};
-
 void categorical_type::get_dynamic_type_properties(
                 const std::pair<std::string, gfunc::callable> **out_properties,
                 size_t *out_count) const
 {
+    static pair<string, gfunc::callable> categorical_type_properties[] = {
+        pair<string, gfunc::callable>(
+            "categories",
+            gfunc::make_callable(&property_type_get_categories, "self")),
+        pair<string, gfunc::callable>(
+            "storage_type",
+            gfunc::make_callable(&property_type_get_storage_type, "self")),
+        pair<string, gfunc::callable>(
+            "category_type",
+            gfunc::make_callable(&property_type_get_category_type, "self"))};
+
     *out_properties = categorical_type_properties;
     *out_count = sizeof(categorical_type_properties) / sizeof(categorical_type_properties[0]);
 }

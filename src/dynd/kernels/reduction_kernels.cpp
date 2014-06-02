@@ -12,28 +12,6 @@
 using namespace std;
 using namespace dynd;
 
-static ndt::type builtin_type_pairs[builtin_type_id_count][2] = {
-    {ndt::type((type_id_t)0), ndt::type((type_id_t)0)},
-    {ndt::type((type_id_t)1), ndt::type((type_id_t)1)},
-    {ndt::type((type_id_t)2), ndt::type((type_id_t)2)},
-    {ndt::type((type_id_t)3), ndt::type((type_id_t)3)},
-    {ndt::type((type_id_t)4), ndt::type((type_id_t)4)},
-    {ndt::type((type_id_t)5), ndt::type((type_id_t)5)},
-    {ndt::type((type_id_t)6), ndt::type((type_id_t)6)},
-    {ndt::type((type_id_t)7), ndt::type((type_id_t)7)},
-    {ndt::type((type_id_t)8), ndt::type((type_id_t)8)},
-    {ndt::type((type_id_t)9), ndt::type((type_id_t)9)},
-    {ndt::type((type_id_t)10), ndt::type((type_id_t)10)},
-    {ndt::type((type_id_t)11), ndt::type((type_id_t)11)},
-    {ndt::type((type_id_t)12), ndt::type((type_id_t)12)},
-    {ndt::type((type_id_t)13), ndt::type((type_id_t)13)},
-    {ndt::type((type_id_t)14), ndt::type((type_id_t)14)},
-    {ndt::type((type_id_t)15), ndt::type((type_id_t)15)},
-    {ndt::type((type_id_t)16), ndt::type((type_id_t)16)},
-    {ndt::type((type_id_t)17), ndt::type((type_id_t)17)},
-    {ndt::type((type_id_t)18), ndt::type((type_id_t)18)},
-};
-
 namespace {
     template<class T, class Accum>
     struct sum_reduction {
@@ -69,10 +47,10 @@ namespace {
 intptr_t kernels::make_builtin_sum_reduction_ckernel(
                 dynd::ckernel_builder *out_ckb, intptr_t ckb_offset,
                 type_id_t tid,
-                kernel_request_t kerntype)
+                kernel_request_t kernreq)
 {
     ckernel_prefix *ckp = out_ckb->get_at<ckernel_prefix>(ckb_offset);
-    if (kerntype == kernel_request_single) {
+    if (kernreq == kernel_request_single) {
         switch (tid) {
             case int32_type_id:
                 ckp->set_function<unary_single_operation_t>(&sum_reduction<int32_t, int32_t>::single);
@@ -99,7 +77,7 @@ intptr_t kernels::make_builtin_sum_reduction_ckernel(
                 throw type_error(ss.str());
             }
         }
-    } else if (kerntype == kernel_request_strided) {
+    } else if (kernreq == kernel_request_strided) {
         switch (tid) {
             case int32_type_id:
                 ckp->set_function<unary_strided_operation_t>(&sum_reduction<int32_t, int32_t>::strided);
@@ -136,16 +114,24 @@ intptr_t kernels::make_builtin_sum_reduction_ckernel(
 }
 
 static intptr_t instantiate_builtin_sum_reduction_arrfunc(
-    void *self_data_ptr, dynd::ckernel_builder *out_ckb, intptr_t ckb_offset,
-    const char *const *DYND_UNUSED(dynd_metadata), uint32_t kerntype,
+    const arrfunc_type_data *DYND_UNUSED(self_data_ptr), dynd::ckernel_builder *ckb,
+    intptr_t ckb_offset, const ndt::type &dst_tp,
+    const char *DYND_UNUSED(dst_arrmeta), const ndt::type *src_tp,
+    const char *const *DYND_UNUSED(src_arrmeta), uint32_t kernreq,
     const eval::eval_context *DYND_UNUSED(ectx))
 {
-    type_id_t tid = static_cast<type_id_t>(reinterpret_cast<uintptr_t>(self_data_ptr));
-    return kernels::make_builtin_sum_reduction_ckernel(out_ckb, ckb_offset, tid, (kernel_request_t)kerntype);
+    if (dst_tp != src_tp[0]) {
+        stringstream ss;
+        ss << "dynd sum reduction: the source type, " << src_tp[0]
+           << ", does not match the destination type, " << dst_tp;
+        throw type_error(ss.str());
+    }
+    return kernels::make_builtin_sum_reduction_ckernel(
+        ckb, ckb_offset, dst_tp.get_type_id(), (kernel_request_t)kernreq);
 }
 
 void kernels::make_builtin_sum_reduction_arrfunc(
-                arrfunc *out_af,
+                arrfunc_type_data *out_af,
                 type_id_t tid)
 {
     if (tid < 0 || tid >= builtin_type_id_count) {
@@ -155,25 +141,22 @@ void kernels::make_builtin_sum_reduction_arrfunc(
         throw type_error(ss.str());
     }
     out_af->ckernel_funcproto = unary_operation_funcproto;
-    out_af->data_types_size = 2;
-    out_af->data_dynd_types = builtin_type_pairs[tid];
+    out_af->func_proto = ndt::make_funcproto(ndt::type(tid), ndt::type(tid));
     out_af->data_ptr = reinterpret_cast<void *>(tid);
-    out_af->instantiate_func = &instantiate_builtin_sum_reduction_arrfunc;
+    out_af->instantiate = &instantiate_builtin_sum_reduction_arrfunc;
     out_af->free_func = NULL;
 }
 
-nd::array kernels::make_builtin_sum1d_arrfunc(type_id_t tid)
+nd::arrfunc kernels::make_builtin_sum1d_arrfunc(type_id_t tid)
 {
-    nd::array sum_ew = nd::empty(ndt::make_arrfunc());
-    kernels::make_builtin_sum_reduction_arrfunc(
-        reinterpret_cast<arrfunc *>(sum_ew.get_readwrite_originptr()),
-        tid);
+    nd::arrfunc sum_ew = kernels::make_builtin_sum_reduction_arrfunc(tid);
     nd::array sum_1d = nd::empty(ndt::make_arrfunc());
     bool reduction_dimflags[1] = {true};
     lift_reduction_arrfunc(
-        reinterpret_cast<arrfunc *>(sum_1d.get_readwrite_originptr()),
+        reinterpret_cast<arrfunc_type_data *>(sum_1d.get_readwrite_originptr()),
         sum_ew, ndt::make_strided_dim(ndt::type(tid)), nd::array(), false, 1,
         reduction_dimflags, true, true, false, 0);
+    sum_1d.flag_as_immutable();
     return sum_1d;
 }
 
@@ -204,41 +187,57 @@ namespace {
     };
 
     struct mean1d_arrfunc_data {
-        ndt::type data_types[2];
         intptr_t minp;
 
         static void free(void *data_ptr) {
             delete reinterpret_cast<mean1d_arrfunc_data *>(data_ptr);
         }
 
-        static intptr_t instantiate(
-            void *self_data_ptr, dynd::ckernel_builder *ckb,
-            intptr_t ckb_offset, const char *const *dynd_metadata,
-            uint32_t kernreq, const eval::eval_context *DYND_UNUSED(ectx))
+        static intptr_t
+        instantiate(const arrfunc_type_data *af_self, dynd::ckernel_builder *ckb,
+                    intptr_t ckb_offset, const ndt::type &dst_tp,
+                    const char *DYND_UNUSED(dst_arrmeta), const ndt::type *src_tp,
+                    const char *const *src_arrmeta, uint32_t kernreq,
+                    const eval::eval_context *DYND_UNUSED(ectx))
         {
             typedef double_mean1d_ck self_type;
             mean1d_arrfunc_data *data =
-                reinterpret_cast<mean1d_arrfunc_data *>(self_data_ptr);
+                reinterpret_cast<mean1d_arrfunc_data *>(af_self->data_ptr);
             self_type *self = self_type::create_leaf(ckb, ckb_offset,
                                                      (kernel_request_t)kernreq);
-            const strided_dim_type_metadata *src_md =
-                reinterpret_cast<const strided_dim_type_metadata *>(
-                    dynd_metadata[1]);
+            intptr_t src_dim_size, src_stride;
+            ndt::type src_el_tp;
+            const char *src_el_arrmeta;
+            if (!src_tp[0].get_as_strided_dim(src_arrmeta[0], src_dim_size,
+                                              src_stride, src_el_tp,
+                                              src_el_arrmeta)) {
+                stringstream ss;
+                ss << "mean1d: could not process type " << src_tp[0];
+                ss << " as a strided dimension";
+                throw type_error(ss.str());
+            }
+            if (src_el_tp.get_type_id() != float64_type_id ||
+                    dst_tp.get_type_id() != float64_type_id) {
+                stringstream ss;
+                ss << "mean1d: input element type and output type must be "
+                      "float64, got " << src_el_tp << " and " << dst_tp;
+                throw invalid_argument(ss.str());
+            }
             self->m_minp = data->minp;
             if (self->m_minp <= 0) {
-                if (self->m_minp <= -src_md->size) {
+                if (self->m_minp <= -src_dim_size) {
                     throw invalid_argument("minp parameter is too large of a negative number");
                 }
-                self->m_minp += src_md->size;
+                self->m_minp += src_dim_size;
             }
-            self->m_src_dim_size = src_md->size;
-            self->m_src_stride = src_md->stride;
+            self->m_src_dim_size = src_dim_size;
+            self->m_src_stride = src_stride;
             return ckb_offset + sizeof(self_type);
         }
     };
 } // anonymous namespace
 
-nd::array kernels::make_builtin_mean1d_arrfunc(type_id_t tid, intptr_t minp)
+nd::arrfunc kernels::make_builtin_mean1d_arrfunc(type_id_t tid, intptr_t minp)
 {
     if (tid != float64_type_id) {
         stringstream ss;
@@ -247,17 +246,17 @@ nd::array kernels::make_builtin_mean1d_arrfunc(type_id_t tid, intptr_t minp)
         throw type_error(ss.str());
     }
     nd::array mean1d = nd::empty(ndt::make_arrfunc());
-    arrfunc *out_af =
-        reinterpret_cast<arrfunc *>(mean1d.get_readwrite_originptr());
+    arrfunc_type_data *out_af =
+        reinterpret_cast<arrfunc_type_data *>(mean1d.get_readwrite_originptr());
     out_af->ckernel_funcproto = unary_operation_funcproto;
-    out_af->data_types_size = 2;
     mean1d_arrfunc_data *data = new mean1d_arrfunc_data;
-    data->data_types[0] = ndt::make_type<double>();
-    data->data_types[1] = ndt::make_strided_dim(ndt::make_type<double>());
     data->minp = minp;
-    out_af->data_dynd_types = data->data_types;
+    out_af->func_proto =
+        ndt::make_funcproto(ndt::make_strided_dim(ndt::make_type<double>()),
+                            ndt::make_type<double>());
     out_af->data_ptr = data;
-    out_af->instantiate_func = &mean1d_arrfunc_data::instantiate;
+    out_af->instantiate = &mean1d_arrfunc_data::instantiate;
     out_af->free_func = &mean1d_arrfunc_data::free;
+    mean1d.flag_as_immutable();
     return mean1d;
 }

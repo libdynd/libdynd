@@ -596,16 +596,20 @@ static ndt::type get_element_type(const ndt::type& dt) {
     return dt.tcast<cfixed_dim_type>()->get_element_type();
 }
 
-static pair<string, gfunc::callable> cfixed_dim_type_properties[] = {
-    pair<string, gfunc::callable>("fixed_dim_size", gfunc::make_callable(&get_fixed_dim_size, "self")),
-    pair<string, gfunc::callable>("fixed_dim_stride", gfunc::make_callable(&get_fixed_dim_stride, "self")),
-    pair<string, gfunc::callable>("element_type", gfunc::make_callable(&get_element_type, "self"))
-};
-
 void cfixed_dim_type::get_dynamic_type_properties(
                 const std::pair<std::string, gfunc::callable> **out_properties,
                 size_t *out_count) const
 {
+    static pair<string, gfunc::callable> cfixed_dim_type_properties[] = {
+        pair<string, gfunc::callable>(
+            "fixed_dim_size",
+            gfunc::make_callable(&::get_fixed_dim_size, "self")),
+        pair<string, gfunc::callable>(
+            "fixed_dim_stride",
+            gfunc::make_callable(&get_fixed_dim_stride, "self")),
+        pair<string, gfunc::callable>(
+            "element_type", gfunc::make_callable(&::get_element_type, "self"))};
+
     *out_properties = cfixed_dim_type_properties;
     *out_count = sizeof(cfixed_dim_type_properties) / sizeof(cfixed_dim_type_properties[0]);
 }

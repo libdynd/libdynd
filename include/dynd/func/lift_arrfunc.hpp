@@ -13,16 +13,22 @@
 namespace dynd {
 
 /**
- * Lifts the provided arrfunc, broadcasting it as necessary to execute
- * across the additional dimensions in the ``lifted_types`` array.
+ * Lifts the provided arrfunc, so it broadcasts all the arguments.
  *
  * \param out_af  The output arrfunc which is filled.
  * \param af  The arrfunc to be lifted.
- * \param lifted_types  The types to lift the arrfunc to. The output arrfunc
- *                      is for these types.
  */
-void lift_arrfunc(arrfunc *out_af, const nd::array &af,
-                  const std::vector<ndt::type> &lifted_types);
+void lift_arrfunc(arrfunc_type_data *out_af, const nd::arrfunc &af);
+
+inline nd::arrfunc lift_arrfunc(const nd::arrfunc &af)
+{
+    nd::array out_af = nd::empty(ndt::make_arrfunc());
+    lift_arrfunc(
+        reinterpret_cast<arrfunc_type_data *>(out_af.get_readwrite_originptr()),
+        af);
+    out_af.flag_as_immutable();
+    return out_af;
+}
 
 } // namespace dynd
 

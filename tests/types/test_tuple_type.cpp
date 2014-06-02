@@ -29,7 +29,7 @@ TEST(TupleType, CreateSimple) {
     EXPECT_EQ(0u, (tp.get_flags()&(type_flag_blockref|type_flag_destructor)));
     tt = tp.tcast<tuple_type>();
     ASSERT_EQ(1u, tt->get_field_count());
-    EXPECT_EQ(ndt::make_type<int32_t>(), tt->get_field_types()[0]);
+    EXPECT_EQ(ndt::make_type<int32_t>(), tt->get_field_type(0));
     // Roundtripping through a string
     EXPECT_EQ(tp, ndt::type(tp.str()));
 
@@ -42,8 +42,8 @@ TEST(TupleType, CreateSimple) {
     EXPECT_EQ(0u, (tp.get_flags()&(type_flag_blockref|type_flag_destructor)));
     tt = tp.tcast<tuple_type>();
     ASSERT_EQ(2u, tt->get_field_count());
-    EXPECT_EQ(ndt::make_type<int16_t>(), tt->get_field_types()[0]);
-    EXPECT_EQ(ndt::make_type<double>(), tt->get_field_types()[1]);
+    EXPECT_EQ(ndt::make_type<int16_t>(), tt->get_field_type(0));
+    EXPECT_EQ(ndt::make_type<double>(), tt->get_field_type(1));
     // Roundtripping through a string
     EXPECT_EQ(tp, ndt::type(tp.str()));
 }

@@ -200,6 +200,24 @@ TEST(View, AsBytes) {
     EXPECT_EQ(2*3*2, btd->end - btd->begin);
 }
 
+TEST(View, StructAsBytes) {
+    nd::array a, b;
+
+    a = parse_json(
+        "var * c{ix : int64, dt : date, rl : int64, v : float64, vt : "
+        "string[4], st : float64, tr : float64, r : float64}",
+        "[[150, \"2002-06-27\", 391, 10.9307, \"abc\", 10, 2.2799, -10.6904]]");
+    a = a(irange());
+    // View this 1D array of struct as bytes
+    b = nd::view(a, ndt::make_bytes(1));
+    EXPECT_EQ(ndt::make_bytes(1), b.get_type());
+    // View it back as a struct
+    b = nd::view(
+        b, ndt::type("c{ix : int64, dt : date, rl : int64, v : float64, vt : "
+                     "string[4], st : float64, tr : float64, r : float64}"));
+    EXPECT_TRUE(b.equals_exact(a(0)));
+}
+
 TEST(View, FromBytes) {
     nd::array a, b;
     const bytes_type_metadata *btd_meta;

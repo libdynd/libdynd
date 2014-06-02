@@ -95,7 +95,7 @@ static const map<string, ndt::type>& get_builtin_types()
         builtin_types["json"] = ndt::make_json();
         builtin_types["date"] = ndt::make_date();
         builtin_types["time"] = ndt::make_time(tz_abstract);
-        builtin_types["datetime"] = ndt::make_datetime(tz_abstract);
+        builtin_types["datetime"] = ndt::make_datetime();
         builtin_types["bytes"] = ndt::make_bytes(1);
         builtin_types["type"] = ndt::make_type();
         builtin_types["arrfunc"] = ndt::make_arrfunc();
@@ -613,7 +613,7 @@ static ndt::type parse_datetime_parameters(const char *&rbegin, const char *end)
         rbegin = begin;
         return ndt::make_datetime(timezone);
     } else {
-        return ndt::make_datetime(tz_abstract);
+        return ndt::make_datetime();
     }
 }
 
@@ -767,11 +767,9 @@ static ndt::type parse_struct(const char *&rbegin, const char *end,
 
     rbegin = begin;
     if (cprefixed) {
-        return ndt::make_cstruct(field_type_list.size(), &field_type_list[0],
-                                 &field_name_list[0]);
+        return ndt::make_cstruct(field_name_list, field_type_list);
     } else {
-        return ndt::make_struct(field_type_list.size(), &field_type_list[0],
-                                 &field_name_list[0]);
+        return ndt::make_struct(field_name_list, field_type_list);
     }
 }
 
@@ -813,12 +811,12 @@ static ndt::type parse_tuple_or_funcproto(const char *&rbegin, const char *end, 
 
     if (cprefixed) {
         rbegin = begin;
-        return ndt::make_ctuple(field_type_list.size(), &field_type_list[0]);
+        return ndt::make_ctuple(field_type_list);
     } else {
         // It might be a function prototype, check for the "->" token
         if (!parse_token_ds(begin, end, "->")) {
             rbegin = begin;
-            return ndt::make_tuple(field_type_list.size(), &field_type_list[0]);
+            return ndt::make_tuple(field_type_list);
         }
 
         ndt::type return_type = parse_rhs_expression(begin, end, symtable);
@@ -826,7 +824,7 @@ static ndt::type parse_tuple_or_funcproto(const char *&rbegin, const char *end, 
             throw datashape_parse_error(begin, "expected function prototype return type");
         }
         rbegin = begin;
-        return ndt::make_funcproto(field_type_list.size(), &field_type_list[0], return_type);
+        return ndt::make_funcproto(field_type_list, return_type);
     }
 }
 

@@ -14,7 +14,7 @@
 using namespace std;
 using namespace dynd;
 
-TEST(DType, BasicConstructor) {
+TEST(Type, BasicConstructor) {
     ndt::type d;
 
     // Default-constructed type properties
@@ -152,7 +152,7 @@ TEST(DType, BasicConstructor) {
     EXPECT_EQ(d, ndt::type(d.str()));
 }
 
-TEST(DType, NDArrayArg) {
+TEST(Type, NDArrayArg) {
     // Minimal test of the ndarrayarg type
     ndt::type d = ndt::make_ndarrayarg();
     EXPECT_EQ(ndarrayarg_type_id, d.get_type_id());

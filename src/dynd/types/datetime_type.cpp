@@ -279,13 +279,16 @@ static nd::array function_type_construct(const ndt::type& DYND_UNUSED(dt),
     */
 }
 
-static pair<string, gfunc::callable> datetime_type_functions[] = {
-    pair<string, gfunc::callable>("now", gfunc::make_callable(&function_type_now, "self")),
-    pair<string, gfunc::callable>("__construct__", gfunc::make_callable(&function_type_construct, "self", "year", "month", "day"))
-};
-
 void datetime_type::get_dynamic_type_functions(const std::pair<std::string, gfunc::callable> **out_functions, size_t *out_count) const
 {
+    static pair<string, gfunc::callable> datetime_type_functions[] = {
+        pair<string, gfunc::callable>(
+            "now", gfunc::make_callable(&function_type_now, "self")),
+        pair<string, gfunc::callable>(
+            "__construct__",
+            gfunc::make_callable(&function_type_construct, "self", "year",
+                                 "month", "day"))};
+
     *out_functions = datetime_type_functions;
     *out_count = sizeof(datetime_type_functions) / sizeof(datetime_type_functions[0]);
 }
@@ -328,20 +331,29 @@ static nd::array property_ndo_get_tick(const nd::array& n) {
     return n.replace_dtype(ndt::make_property(n.get_dtype(), "tick"));
 }
 
-static pair<string, gfunc::callable> date_array_properties[] = {
-    pair<string, gfunc::callable>("date", gfunc::make_callable(&property_ndo_get_date, "self")),
-    pair<string, gfunc::callable>("year", gfunc::make_callable(&property_ndo_get_year, "self")),
-    pair<string, gfunc::callable>("month", gfunc::make_callable(&property_ndo_get_month, "self")),
-    pair<string, gfunc::callable>("day", gfunc::make_callable(&property_ndo_get_day, "self")),
-    pair<string, gfunc::callable>("hour", gfunc::make_callable(&property_ndo_get_hour, "self")),
-    pair<string, gfunc::callable>("minute", gfunc::make_callable(&property_ndo_get_minute, "self")),
-    pair<string, gfunc::callable>("second", gfunc::make_callable(&property_ndo_get_second, "self")),
-    pair<string, gfunc::callable>("microsecond", gfunc::make_callable(&property_ndo_get_microsecond, "self")),
-    pair<string, gfunc::callable>("tick", gfunc::make_callable(&property_ndo_get_tick, "self")),
-};
-
 void datetime_type::get_dynamic_array_properties(const std::pair<std::string, gfunc::callable> **out_properties, size_t *out_count) const
 {
+    static pair<string, gfunc::callable> date_array_properties[] = {
+        pair<string, gfunc::callable>(
+            "date", gfunc::make_callable(&property_ndo_get_date, "self")),
+        pair<string, gfunc::callable>(
+            "year", gfunc::make_callable(&property_ndo_get_year, "self")),
+        pair<string, gfunc::callable>(
+            "month", gfunc::make_callable(&property_ndo_get_month, "self")),
+        pair<string, gfunc::callable>(
+            "day", gfunc::make_callable(&property_ndo_get_day, "self")),
+        pair<string, gfunc::callable>(
+            "hour", gfunc::make_callable(&property_ndo_get_hour, "self")),
+        pair<string, gfunc::callable>(
+            "minute", gfunc::make_callable(&property_ndo_get_minute, "self")),
+        pair<string, gfunc::callable>(
+            "second", gfunc::make_callable(&property_ndo_get_second, "self")),
+        pair<string, gfunc::callable>(
+            "microsecond",
+            gfunc::make_callable(&property_ndo_get_microsecond, "self")),
+        pair<string, gfunc::callable>(
+            "tick", gfunc::make_callable(&property_ndo_get_tick, "self")), };
+
     *out_properties = date_array_properties;
     *out_count = sizeof(date_array_properties) / sizeof(date_array_properties[0]);
 }
@@ -361,13 +373,15 @@ static nd::array function_ndo_strftime(const nd::array& n, const std::string& fo
                     make_strftime_kernelgen(format)));
 }
 
-static pair<string, gfunc::callable> date_array_functions[] = {
-    pair<string, gfunc::callable>("to_struct", gfunc::make_callable(&function_ndo_to_struct, "self")),
-    pair<string, gfunc::callable>("strftime", gfunc::make_callable(&function_ndo_strftime, "self", "format")),
-};
-
 void datetime_type::get_dynamic_array_functions(const std::pair<std::string, gfunc::callable> **out_functions, size_t *out_count) const
 {
+    static pair<string, gfunc::callable> date_array_functions[] = {
+        pair<string, gfunc::callable>(
+            "to_struct", gfunc::make_callable(&function_ndo_to_struct, "self")),
+        pair<string, gfunc::callable>(
+            "strftime",
+            gfunc::make_callable(&function_ndo_strftime, "self", "format")), };
+
     *out_functions = date_array_functions;
     *out_count = sizeof(date_array_functions) / sizeof(date_array_functions[0]);
 }
@@ -913,3 +927,12 @@ size_t datetime_type::make_elwise_property_setter_kernel(
     return offset_out + sizeof(datetime_property_kernel_extra);
 }
 
+const ndt::type& ndt::make_datetime()
+{
+    // Static instance of the type, which has a reference count > 0 for the
+    // lifetime of the program. This static construction is inside a
+    // function to ensure correct creation order during startup.
+    static datetime_type dt(tz_abstract);
+    static const ndt::type static_instance(&dt, true);
+    return static_instance;
+}

@@ -17,6 +17,7 @@
 #include <dynd/shortvector.hpp>
 #include <dynd/irange.hpp>
 #include <dynd/memblock/array_memory_block.hpp>
+#include <dynd/types/type_type.hpp>
 
 namespace dynd { namespace nd {
 
@@ -98,7 +99,7 @@ public:
     /**
      * Constructs a scalar with the 'type' type.
      * NOTE: Does NOT create a scalar of the provided type,
-     *       use dynd::empty(type) for that!
+     *       use nd::empty(type) for that!
      */
     array(const ndt::type& dt);
 
@@ -113,6 +114,9 @@ public:
     /** Specialize to create 1D arrays of strings */
     template<int N>
     array(const char *(&rhs)[N]);
+    /** Specialize to create 1D arrays of ndt::types */
+    template<int N>
+    array(const ndt::type (&rhs)[N]);
 
 #ifdef DYND_INIT_LIST
     /** Constructs an array from a 1D initializer list */
@@ -668,6 +672,11 @@ nd::array array_rw(const char *str, size_t size);
  *       use dynd::empty(type) for that!
  */
 nd::array array_rw(const ndt::type& dt);
+/**
+ * Constructs a readwrite array from a C-style array.
+ */
+template<class T, int N>
+nd::array array_rw(const T (&rhs)[N]);
 
 /**
  * This is a helper class for dealing with value assignment and collapsing
@@ -858,14 +867,15 @@ inline array make_utf32_array(const uint32_t (&static_string)[N]) {
 }
 
 /**
- * \brief Creates an array array of strings.
+ * \brief Creates a strided array of strings.
  *
  * \param cstr_array  An array of NULL-terminated UTF8 strings.
  * \param array_size  The number of elements in `cstr_array`.
  *
- * \returns  An array of type strided_dim<string<utf_8>>.
+ * \returns  An array of type "strided * string".
  */
-array make_utf8_array_array(const char **cstr_array, size_t array_size);
+array make_strided_string_array(const char **cstr_array, size_t array_size);
+array make_strided_string_array(const std::string **str_array, size_t array_size);
 
 inline array make_strided_array(intptr_t shape0, const ndt::type& uniform_dtype) {
     return make_strided_array(uniform_dtype, 1, &shape0, read_access_flag|write_access_flag, NULL);
@@ -903,6 +913,106 @@ inline array_vals_at array::vals_at(const irange& i0, const irange& i1,
     irange i[4] = {i0, i1, i2, i3};
     return array_vals_at(at_array(4, i, false));
 }
+
+/**
+ * Constructs an uninitialized array of the given type.
+ */
+array empty(const ndt::type& tp);
+
+/**
+ * Constructs an uninitialized array of the given type,
+ * specified as a string. This is a shortcut for expressions
+ * like
+ *
+ *      array a = nd::empty("10 * int32");
+ */
+template<int N>
+inline array empty(const char (&dshape)[N]) {
+    return empty(ndt::type(dshape, dshape + N - 1));
+}
+
+/**
+ * Constructs a writable uninitialized array of the specified type.
+ * This type should be at least one dimensional, and is initialized
+ * using the specified dimension size.
+ */
+array empty(intptr_t dim0, const ndt::type& tp);
+
+/**
+ * Constructs an uninitialized array of the given type,
+ * specified as a string. This is a shortcut for expressions
+ * like
+ *
+ *      array a = nd::empty(10, "strided * int32");
+ */
+template<int N>
+inline array empty(intptr_t dim0, const char (&dshape)[N]) {
+    return empty(dim0, ndt::type(dshape, dshape + N - 1));
+}
+
+/**
+ * Constructs a writable uninitialized array of the specified type.
+ * This type should be at least two dimensional, and is initialized
+ * using the specified dimension sizes.
+ */
+array empty(intptr_t dim0, intptr_t dim1, const ndt::type& tp);
+
+/**
+ * Constructs an uninitialized array of the given type,
+ * specified as a string. This is a shortcut for expressions
+ * like
+ *
+ *      array a = nd::empty(10, 10, "strided * strided * int32");
+ */
+template<int N>
+inline array empty(intptr_t dim0, intptr_t dim1, const char (&dshape)[N]) {
+    return empty(dim0, dim1, ndt::type(dshape, dshape + N - 1));
+}
+
+/**
+ * Constructs a writable uninitialized array of the specified type.
+ * This type should be at least three dimensional, and is initialized
+ * using the specified dimension sizes.
+ */
+array empty(intptr_t dim0, intptr_t dim1, intptr_t dim2, const ndt::type& tp);
+
+/**
+ * Constructs an uninitialized array of the given type,
+ * specified as a string. This is a shortcut for expressions
+ * like
+ *
+ *      array a = nd::empty(10, 10, 10, "strided * strided * strided * int32");
+ */
+template<int N>
+inline array empty(intptr_t dim0, intptr_t dim1, intptr_t dim2, const char (&dshape)[N]) {
+    return empty(dim0, dim1, dim2, ndt::type(dshape, dshape + N - 1));
+}
+
+/**
+ * Constructs an uninitialized array of the given C++ type.
+ *
+ *      array a = nd::empty<double>();
+ */
+template<typename T>
+inline array empty() {
+    return empty(ndt::make_type<T>());
+}
+
+/**
+ * Constructs an array with the same shape and memory layout
+ * of the one given, but replacing the
+ *
+ * \param rhs  The array whose shape and memory layout to emulate.
+ * \param uniform_dtype   The array data type of the new array.
+ */
+array empty_like(const array& rhs, const ndt::type& uniform_dtype);
+
+/**
+ * Constructs an empty array matching the parameters of 'rhs'
+ *
+ * \param rhs  The array whose shape, memory layout, and dtype to emulate.
+ */
+array empty_like(const array& rhs);
 
 ///////////// Initializer list constructor implementation /////////////////////////
 #ifdef DYND_INIT_LIST
@@ -1063,8 +1173,36 @@ nd::array::array(const T (&rhs)[N])
 
     *this = make_strided_array(
                     ndt::type(static_cast<type_id_t>(detail::uniform_type_from_array<T>::type_id)),
-                    ndim, shape, read_access_flag|write_access_flag, NULL);
+                    ndim, shape, default_access_flags, NULL);
     DYND_MEMCPY(get_ndo()->m_data_pointer, reinterpret_cast<const void *>(&rhs), size);
+}
+
+template<class T, int N>
+nd::array array_rw(const T (&rhs)[N])
+{
+    const int ndim = detail::ndim_from_array<T[N]>::value;
+    intptr_t shape[ndim];
+    size_t size = detail::fill_shape<T[N]>::fill(shape);
+
+    nd::array result =
+        make_strided_array(ndt::type(static_cast<type_id_t>(
+                               detail::uniform_type_from_array<T>::type_id)),
+                           ndim, shape, readwrite_access_flags, NULL);
+    DYND_MEMCPY(result.get_ndo()->m_data_pointer, reinterpret_cast<const void *>(&rhs), size);
+    return result;
+}
+
+
+template<int N>
+nd::array::array(const ndt::type (&rhs)[N])
+    : m_memblock()
+{
+    nd::empty(N, ndt::make_strided_of_type()).swap(*this);
+    ndt::type *out = reinterpret_cast<ndt::type *>(get_ndo()->m_data_pointer);
+    for (int i = 0; i < N; ++i) {
+        out[i] = rhs[i];
+    }
+    flag_as_immutable();
 }
 
 template<int N>
@@ -1077,7 +1215,7 @@ inline nd::array::array(const char (&rhs)[N])
 template<int N>
 inline nd::array::array(const char *(&rhs)[N])
 {
-    make_utf8_array_array(rhs, N).swap(*this);
+    make_strided_string_array(rhs, N).swap(*this);
 }
 
 ///////////// std::vector constructor implementation /////////////////////////
@@ -1166,106 +1304,6 @@ T array::as(assign_error_mode errmode) const {
  * evaluates a new copy of it as the canonical type.
  */
 array eval_raw_copy(const ndt::type& dt, const char *metadata, const char *data);
-
-/**
- * Constructs an uninitialized array of the given type.
- */
-array empty(const ndt::type& tp);
-
-/**
- * Constructs an uninitialized array of the given type,
- * specified as a string. This is a shortcut for expressions
- * like
- *
- *      array a = nd::empty("10 * int32");
- */
-template<int N>
-inline array empty(const char (&dshape)[N]) {
-    return empty(ndt::type(dshape, dshape + N - 1));
-}
-
-/**
- * Constructs a writable uninitialized array of the specified type.
- * This type should be at least one dimensional, and is initialized
- * using the specified dimension size.
- */
-array empty(intptr_t dim0, const ndt::type& tp);
-
-/**
- * Constructs an uninitialized array of the given type,
- * specified as a string. This is a shortcut for expressions
- * like
- *
- *      array a = nd::empty(10, "strided * int32");
- */
-template<int N>
-inline array empty(intptr_t dim0, const char (&dshape)[N]) {
-    return empty(dim0, ndt::type(dshape, dshape + N - 1));
-}
-
-/**
- * Constructs a writable uninitialized array of the specified type.
- * This type should be at least two dimensional, and is initialized
- * using the specified dimension sizes.
- */
-array empty(intptr_t dim0, intptr_t dim1, const ndt::type& tp);
-
-/**
- * Constructs an uninitialized array of the given type,
- * specified as a string. This is a shortcut for expressions
- * like
- *
- *      array a = nd::empty(10, 10, "strided * strided * int32");
- */
-template<int N>
-inline array empty(intptr_t dim0, intptr_t dim1, const char (&dshape)[N]) {
-    return empty(dim0, dim1, ndt::type(dshape, dshape + N - 1));
-}
-
-/**
- * Constructs a writable uninitialized array of the specified type.
- * This type should be at least three dimensional, and is initialized
- * using the specified dimension sizes.
- */
-array empty(intptr_t dim0, intptr_t dim1, intptr_t dim2, const ndt::type& tp);
-
-/**
- * Constructs an uninitialized array of the given type,
- * specified as a string. This is a shortcut for expressions
- * like
- *
- *      array a = nd::empty(10, 10, 10, "strided * strided * strided * int32");
- */
-template<int N>
-inline array empty(intptr_t dim0, intptr_t dim1, intptr_t dim2, const char (&dshape)[N]) {
-    return empty(dim0, dim1, dim2, ndt::type(dshape, dshape + N - 1));
-}
-
-/**
- * Constructs an uninitialized array of the given C++ type.
- *
- *      array a = nd::empty<double>();
- */
-template<typename T>
-inline array empty() {
-    return empty(ndt::make_type<T>());
-}
-
-/**
- * Constructs an array with the same shape and memory layout
- * of the one given, but replacing the
- *
- * \param rhs  The array whose shape and memory layout to emulate.
- * \param uniform_dtype   The array data type of the new array.
- */
-array empty_like(const array& rhs, const ndt::type& uniform_dtype);
-
-/**
- * Constructs an empty array matching the parameters of 'rhs'
- *
- * \param rhs  The array whose shape, memory layout, and dtype to emulate.
- */
-array empty_like(const array& rhs);
 
 /**
  * Memory-maps a file with dynd type 'bytes'.

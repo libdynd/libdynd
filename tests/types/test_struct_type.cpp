@@ -63,8 +63,8 @@ TEST(StructType, CreateOneField) {
     EXPECT_EQ(0u, (dt.get_flags()&(type_flag_blockref|type_flag_destructor)));
     tdt = dt.tcast<struct_type>();
     EXPECT_EQ(1u, tdt->get_field_count());
-    EXPECT_EQ(ndt::make_type<int32_t>(), tdt->get_field_types()[0]);
-    EXPECT_EQ("x", tdt->get_field_names()[0]);
+    EXPECT_EQ(ndt::make_type<int32_t>(), tdt->get_field_type(0));
+    EXPECT_EQ("x", tdt->get_field_name(0));
 }
 
 struct two_field_struct {
@@ -86,10 +86,10 @@ TEST(StructType, CreateTwoField) {
     EXPECT_EQ(0u, (dt.get_flags()&(type_flag_blockref|type_flag_destructor)));
     tdt = dt.tcast<struct_type>();
     EXPECT_EQ(2u, tdt->get_field_count());
-    EXPECT_EQ(ndt::make_type<int64_t>(), tdt->get_field_types()[0]);
-    EXPECT_EQ(ndt::make_type<int32_t>(), tdt->get_field_types()[1]);
-    EXPECT_EQ("a", tdt->get_field_names()[0]);
-    EXPECT_EQ("b", tdt->get_field_names()[1]);
+    EXPECT_EQ(ndt::make_type<int64_t>(), tdt->get_field_type(0));
+    EXPECT_EQ(ndt::make_type<int32_t>(), tdt->get_field_type(1));
+    EXPECT_EQ("a", tdt->get_field_name(0));
+    EXPECT_EQ("b", tdt->get_field_name(1));
 }
 
 struct three_field_struct {
@@ -115,12 +115,12 @@ TEST(StructType, CreateThreeField) {
     EXPECT_EQ(0u, (dt.get_flags()&(type_flag_blockref|type_flag_destructor)));
     tdt = dt.tcast<struct_type>();
     EXPECT_EQ(3u, tdt->get_field_count());
-    EXPECT_EQ(ndt::make_type<int64_t>(), tdt->get_field_types()[0]);
-    EXPECT_EQ(ndt::make_type<int32_t>(), tdt->get_field_types()[1]);
-    EXPECT_EQ(ndt::make_fixedstring(5, string_encoding_utf_8), tdt->get_field_types()[2]);
-    EXPECT_EQ("x", tdt->get_field_names()[0]);
-    EXPECT_EQ("y", tdt->get_field_names()[1]);
-    EXPECT_EQ("z", tdt->get_field_names()[2]);
+    EXPECT_EQ(ndt::make_type<int64_t>(), tdt->get_field_type(0));
+    EXPECT_EQ(ndt::make_type<int32_t>(), tdt->get_field_type(1));
+    EXPECT_EQ(ndt::make_fixedstring(5, string_encoding_utf_8), tdt->get_field_type(2));
+    EXPECT_EQ("x", tdt->get_field_name(0));
+    EXPECT_EQ("y", tdt->get_field_name(1));
+    EXPECT_EQ("z", tdt->get_field_name(2));
 }
 
 TEST(StructType, ReplaceScalarTypes) {

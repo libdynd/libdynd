@@ -44,10 +44,10 @@ namespace dynd {
  * \param reduction_identity  If not a NULL nd::array, this is the identity
  *                            value for the accumulator.
  */
-void lift_reduction_arrfunc(arrfunc *out_ar,
-                const nd::array& elwise_reduction,
+void lift_reduction_arrfunc(arrfunc_type_data *out_af,
+                const nd::arrfunc& elwise_reduction,
                 const ndt::type& lifted_arr_type,
-                const nd::array& dst_initialization,
+                const nd::arrfunc& dst_initialization,
                 bool keepdims,
                 intptr_t reduction_ndim,
                 const bool *reduction_dimflags,
@@ -55,6 +55,23 @@ void lift_reduction_arrfunc(arrfunc *out_ar,
                 bool commutative,
                 bool right_associative,
                 const nd::array& reduction_identity);
+
+inline nd::arrfunc lift_reduction_arrfunc(
+    const nd::arrfunc &elwise_reduction, const ndt::type &lifted_arr_type,
+    const nd::arrfunc &dst_initialization, bool keepdims,
+    intptr_t reduction_ndim, const bool *reduction_dimflags, bool associative,
+    bool commutative, bool right_associative,
+    const nd::array &reduction_identity)
+{
+    nd::array out_af = nd::empty(ndt::make_arrfunc());
+    lift_reduction_arrfunc(
+        reinterpret_cast<arrfunc_type_data *>(out_af.get_readwrite_originptr()),
+        elwise_reduction, lifted_arr_type, dst_initialization, keepdims,
+        reduction_ndim, reduction_dimflags, associative, commutative,
+        right_associative, reduction_identity);
+    out_af.flag_as_immutable();
+    return out_af;
+}
 
 } // namespace dynd
 

@@ -80,11 +80,13 @@ namespace {
         virtual ~arithmetic_op_kernel_generator() {
         }
 
-        size_t make_expr_kernel(
-                    ckernel_builder *out, size_t offset_out,
-                    const ndt::type& dst_tp, const char *dst_metadata,
-                    size_t src_count, const ndt::type *src_tp, const char **src_metadata,
-                    kernel_request_t kernreq, const eval::eval_context *ectx) const
+        size_t make_expr_kernel(ckernel_builder *out, size_t offset_out,
+                                const ndt::type &dst_tp,
+                                const char *dst_metadata, size_t src_count,
+                                const ndt::type *src_tp,
+                                const char *const *src_metadata,
+                                kernel_request_t kernreq,
+                                const eval::eval_context *ectx) const
         {
             if (src_count != 2) {
                 stringstream ss;
@@ -119,7 +121,7 @@ namespace {
                     throw runtime_error(ss.str());
                 }
             }
-            e->init(2, dst_metadata, src_metadata);
+            e->init(2, dst_metadata, (const char **)src_metadata);
             return offset_out + sizeof(extra_type);
         }
 
@@ -290,14 +292,15 @@ nd::array nd::operator+(const nd::array& op1, const nd::array& op2)
 
         // The signature is (T, T) -> T, so we don't use the original types
         return apply_binary_operator<ckernel_prefix_with_init>(
-            ops, rdt, rdt, rdt, func_ptr, "addition");
+            ops, rdt, rdt, rdt, func_ptr, "addition").eval_immutable();
     } else if (op1dt.get_kind() == string_kind && op2dt.get_kind() == string_kind) {
         ndt::type rdt = ndt::make_string();
         func_ptr.single = &kernels::string_concatenation_kernel::single;
         func_ptr.strided = &kernels::string_concatenation_kernel::strided;
         // The signature is (string, string) -> string, so we don't use the original types
         // NOTE: Using a different name for string concatenation in the generated expression
-        return apply_binary_operator<kernels::string_concatenation_kernel>(ops, rdt, rdt, rdt, func_ptr, "string_concat");
+        return apply_binary_operator<kernels::string_concatenation_kernel>(
+            ops, rdt, rdt, rdt, func_ptr, "string_concat").eval_immutable();
     } else {
         stringstream ss;
         ss << "Addition is not supported for dynd types ";
@@ -321,7 +324,8 @@ nd::array nd::operator-(const nd::array& op1, const nd::array& op2)
     }
 
     nd::array ops[2] = {op1, op2};
-    return apply_binary_operator<ckernel_prefix_with_init>(ops, rdt, rdt, rdt, func_ptr, "subtraction");
+    return apply_binary_operator<ckernel_prefix_with_init>(
+        ops, rdt, rdt, rdt, func_ptr, "subtraction").eval_immutable();
 }
 
 nd::array nd::operator*(const nd::array& op1, const nd::array& op2)
@@ -339,7 +343,8 @@ nd::array nd::operator*(const nd::array& op1, const nd::array& op2)
     }
 
     nd::array ops[2] = {op1, op2};
-    return apply_binary_operator<ckernel_prefix_with_init>(ops, rdt, rdt, rdt, func_ptr, "multiplication");
+    return apply_binary_operator<ckernel_prefix_with_init>(
+        ops, rdt, rdt, rdt, func_ptr, "multiplication").eval_immutable();
 }
 
 nd::array nd::operator/(const nd::array& op1, const nd::array& op2)
@@ -357,5 +362,6 @@ nd::array nd::operator/(const nd::array& op1, const nd::array& op2)
     }
 
     nd::array ops[2] = {op1, op2};
-    return apply_binary_operator<ckernel_prefix_with_init>(ops, rdt, rdt, rdt, func_ptr, "division");
+    return apply_binary_operator<ckernel_prefix_with_init>(
+        ops, rdt, rdt, rdt, func_ptr, "division").eval_immutable();
 }

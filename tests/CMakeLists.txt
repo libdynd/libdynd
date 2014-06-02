@@ -59,10 +59,12 @@ set(tests_SRC
     types/test_type_casting.cpp
     types/test_type_promotion.cpp
     types/test_var_dim_type.cpp
-    func/test_callable.cpp
     func/test_arrfunc.cpp
+    func/test_callable.cpp
+    func/test_lift_arrfunc.cpp
     func/test_reduction.cpp
     func/test_rolling.cpp
+    func/test_take.cpp
     array/test_array.cpp
     array/test_array_range.cpp
     array/test_array_assign.cpp

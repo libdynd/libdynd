@@ -265,24 +265,87 @@ nd::array nd::make_string_array(const char *str, size_t len,
     return result;
 }
 
-nd::array nd::make_utf8_array_array(const char **cstr_array, size_t array_size)
+nd::array nd::make_strided_string_array(const char **cstr_array, size_t array_size)
 {
-    ndt::type dt = ndt::make_string(string_encoding_utf_8);
-    nd::array result = nd::make_strided_array(array_size, dt);
+    size_t total_string_length = 0;
+    for (size_t i = 0; i != array_size; ++i) {
+        total_string_length += strlen(cstr_array[i]);
+    }
+
+    char *data_ptr = NULL, *string_ptr;
+    string_type_data *string_arr_ptr;
+    ndt::type stp = ndt::make_string(string_encoding_utf_8);
+    ndt::type tp = ndt::make_strided_dim(stp);
+    nd::array result(
+        make_array_memory_block(tp.extended()->get_metadata_size(),
+                                array_size * stp.get_data_size() + total_string_length,
+                                tp.get_data_alignment(), &data_ptr));
+    // Set the array metadata
+    array_preamble *ndo = result.get_ndo();
+    ndo->m_type = tp.release();
+    ndo->m_data_pointer = data_ptr;
+    ndo->m_data_reference = NULL;
+    ndo->m_flags = default_access_flags;
     // Get the allocator for the output string type
-    const string_type_metadata *md = reinterpret_cast<const string_type_metadata *>(result.get_arrmeta() + sizeof(strided_dim_type_metadata));
-    memory_block_data *dst_memblock = md->blockref;
-    memory_block_pod_allocator_api *allocator = get_memory_block_pod_allocator_api(dst_memblock);
-    char **out_data = reinterpret_cast<char **>(result.get_ndo()->m_data_pointer);
+    strided_dim_type_metadata *md =
+        reinterpret_cast<strided_dim_type_metadata *>(
+            result.get_arrmeta());
+    md->size = array_size;
+    md->stride = stp.get_data_size();
+    string_arr_ptr = reinterpret_cast<string_type_data *>(data_ptr);
+    string_ptr = data_ptr + array_size * stp.get_data_size();
     for (size_t i = 0; i < array_size; ++i) {
         size_t size = strlen(cstr_array[i]);
-        allocator->allocate(dst_memblock, size, 1, &out_data[0], &out_data[1]);
-        memcpy(out_data[0], cstr_array[i], size);
-        out_data += 2;
+        memcpy(string_ptr, cstr_array[i], size);
+        string_arr_ptr->begin = string_ptr;
+        string_arr_ptr->end = string_ptr + size;
+        ++string_arr_ptr;
+        string_ptr += size;
     }
-    allocator->finalize(dst_memblock);
     return result;
 }
+
+nd::array nd::make_strided_string_array(const std::string **str_array, size_t array_size)
+{
+    size_t total_string_length = 0;
+    for (size_t i = 0; i != array_size; ++i) {
+        total_string_length += str_array[i]->size();
+    }
+
+    char *data_ptr = NULL, *string_ptr;
+    string_type_data *string_arr_ptr;
+    ndt::type stp = ndt::make_string(string_encoding_utf_8);
+    ndt::type tp = ndt::make_strided_dim(stp);
+    nd::array result(
+        make_array_memory_block(tp.extended()->get_metadata_size(),
+                                array_size * stp.get_data_size() + total_string_length,
+                                tp.get_data_alignment(), &data_ptr));
+    // Set the array metadata
+    array_preamble *ndo = result.get_ndo();
+    ndo->m_type = tp.release();
+    ndo->m_data_pointer = data_ptr;
+    ndo->m_data_reference = NULL;
+    ndo->m_flags = default_access_flags;
+    // Get the allocator for the output string type
+    strided_dim_type_metadata *md =
+        reinterpret_cast<strided_dim_type_metadata *>(
+            result.get_arrmeta());
+    md->size = array_size;
+    md->stride = stp.get_data_size();
+    string_arr_ptr = reinterpret_cast<string_type_data *>(data_ptr);
+    string_ptr = data_ptr + array_size * stp.get_data_size();
+    for (size_t i = 0; i < array_size; ++i) {
+        size_t size = str_array[i]->size();
+        memcpy(string_ptr, str_array[i]->data(), size);
+        string_arr_ptr->begin = string_ptr;
+        string_arr_ptr->end = string_ptr + size;
+        ++string_arr_ptr;
+        string_ptr += size;
+    }
+    result.flag_as_immutable();
+    return result;
+}
+
 
 /**
  * Clones the metadata and swaps in a new type. The type must
@@ -558,7 +621,7 @@ nd::array nd::array_rw(const ndt::type& tp)
 
 nd::array nd::detail::make_from_vec<ndt::type>::make(const std::vector<ndt::type>& vec)
 {
-    ndt::type dt = ndt::make_strided_dim(ndt::make_type());
+    ndt::type dt = ndt::make_strided_of_type();
     char *data_ptr = NULL;
     array result(make_array_memory_block(dt.extended()->get_metadata_size(),
                     sizeof(type_type_data) * vec.size(),
@@ -590,7 +653,7 @@ nd::array nd::detail::make_from_vec<std::string>::make(const std::vector<std::st
         total_string_size += vec[i].size();
     }
 
-    ndt::type dt = ndt::make_strided_dim(ndt::make_string(string_encoding_utf_8));
+    ndt::type dt = ndt::make_strided_of_string();
     char *data_ptr = NULL;
     // Make an array memory block which contains both the string pointers and
     // the string data
@@ -1737,7 +1800,7 @@ nd::array nd::combine_into_tuple(size_t field_count, const array *field_values)
         flags &= field_values[i].get_flags();
     }
 
-    ndt::type result_type = ndt::make_ctuple(field_count, &field_types[0]);
+    ndt::type result_type = ndt::make_ctuple(field_types);
     const ctuple_type *fsd = result_type.tcast<ctuple_type>();
     char *data_ptr = NULL;
 
@@ -1751,10 +1814,10 @@ nd::array nd::combine_into_tuple(size_t field_count, const array *field_values)
     result.get_ndo()->m_flags = flags;
 
     // Copy all the needed metadata
-    const size_t *metadata_offsets = fsd->get_metadata_offsets();
+    const uintptr_t *arrmeta_offsets = fsd->get_arrmeta_offsets_raw();
     for (size_t i = 0; i != field_count; ++i) {
         pointer_type_metadata *pmeta;
-        pmeta = reinterpret_cast<pointer_type_metadata *>(result.get_arrmeta() + metadata_offsets[i]);
+        pmeta = reinterpret_cast<pointer_type_metadata *>(result.get_arrmeta() + arrmeta_offsets[i]);
         pmeta->offset = 0;
         pmeta->blockref = field_values[i].get_ndo()->m_data_reference
                         ? field_values[i].get_ndo()->m_data_reference

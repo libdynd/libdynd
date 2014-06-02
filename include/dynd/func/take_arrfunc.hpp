@@ -15,24 +15,19 @@
 namespace dynd { namespace kernels {
 
 /**
- * Create an arrfunc which applies a given window_op in a
- * rolling window fashion.
+ * Create an arrfunc which applies either a boolean masked or
+ * an indexed take/"fancy indexing" operation.
  *
- * \param out_af  The output arrfunc which is filled.
- * \param dst_tp  The destination type for the resulting arrfunc.
- * \param src_tp  The source type for the resulting arrfunc.
- * \param window_size  The size of the rolling window.
+ * \param out_af  The arrfunc to fill.
  */
-void make_take_arrfunc(arrfunc *out_af, const ndt::type &dst_tp,
-                       const ndt::type &src_tp, const ndt::type &mask_tp);
+void make_take_arrfunc(arrfunc_type_data *out_af);
 
-inline nd::array make_take_arrfunc(const ndt::type &dst_tp,
-                                   const ndt::type &src_tp,
-                                   const ndt::type &mask_tp)
+inline nd::arrfunc make_take_arrfunc()
 {
     nd::array af = nd::empty(ndt::make_arrfunc());
-    make_take_arrfunc(reinterpret_cast<arrfunc *>(af.get_readwrite_originptr()),
-                      dst_tp, src_tp, mask_tp);
+    make_take_arrfunc(
+        reinterpret_cast<arrfunc_type_data *>(af.get_readwrite_originptr()));
+    af.flag_as_immutable();
     return af;
 }
 

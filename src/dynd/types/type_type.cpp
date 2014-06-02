@@ -5,6 +5,7 @@
 
 #include <dynd/array.hpp>
 #include <dynd/types/type_type.hpp>
+#include <dynd/types/strided_dim_type.hpp>
 #include <dynd/memblock/pod_memory_block.hpp>
 #include <dynd/kernels/string_assignment_kernels.hpp>
 #include <dynd/kernels/assignment_kernels.hpp>
@@ -207,12 +208,55 @@ size_t type_type::make_assignment_kernel(
     throw dynd::type_error(ss.str());
 }
 
-ndt::type ndt::make_type()
+static int equal_comparison(const char *a, const char *b, ckernel_prefix *DYND_UNUSED(extra)) {
+    const ndt::type *da = reinterpret_cast<const ndt::type *>(a);
+    const ndt::type *db = reinterpret_cast<const ndt::type *>(b);
+    return *da == *db;
+}
+
+static int not_equal_comparison(const char *a, const char *b, ckernel_prefix *DYND_UNUSED(extra)) {
+    const ndt::type *da = reinterpret_cast<const ndt::type *>(a);
+    const ndt::type *db = reinterpret_cast<const ndt::type *>(b);
+    return *da != *db;
+}
+
+size_t type_type::make_comparison_kernel(
+                ckernel_builder *out, size_t offset_out,
+                const ndt::type& src0_dt, const char *DYND_UNUSED(src0_metadata),
+                const ndt::type& src1_dt, const char *DYND_UNUSED(src1_metadata),
+                comparison_type_t comptype,
+                const eval::eval_context *DYND_UNUSED(ectx)) const
+{
+    if (this == src0_dt.extended()) {
+        if (*this == *src1_dt.extended()) {
+            ckernel_prefix *e = out->get_at<ckernel_prefix>(offset_out);
+            if (comptype == comparison_type_equal) {
+                e->set_function<binary_single_predicate_t>(equal_comparison);
+            } else if (comptype == comparison_type_not_equal) {
+                e->set_function<binary_single_predicate_t>(not_equal_comparison);
+            } else {
+                throw not_comparable_error(src0_dt, src1_dt, comptype);
+            }
+            return offset_out + sizeof(ckernel_prefix);
+        }
+    }
+
+    throw not_comparable_error(src0_dt, src1_dt, comptype);
+}
+
+const ndt::type& ndt::make_type()
 {
     // Static instance of type_type, which has a reference count > 0 for the
     // lifetime of the program. This static construction is inside a
     // function to ensure correct creation order during startup.
     static type_type stt;
-    const ndt::type static_instance(&stt, true);
+    static const ndt::type static_instance(&stt, true);
+    return static_instance;
+}
+
+const ndt::type& ndt::make_strided_of_type()
+{
+    static strided_dim_type sdt(ndt::make_type());
+    static const ndt::type static_instance(&sdt, true);
     return static_instance;
 }

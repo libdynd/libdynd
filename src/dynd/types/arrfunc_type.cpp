@@ -32,12 +32,11 @@ arrfunc_type::~arrfunc_type()
 {
 }
 
-static void print_arrfunc(std::ostream& o, const arrfunc *af)
+static void print_arrfunc(std::ostream& o, const arrfunc_type_data *af)
 {
-    if (af->instantiate_func == NULL) {
+    if (af->instantiate == NULL) {
         o << "<uninitialized arrfunc>";
     } else {
-        o << "<arrfunc ";
         if (af->ckernel_funcproto == unary_operation_funcproto) {
             o << "unary ";
         } else if (af->ckernel_funcproto == expr_operation_funcproto) {
@@ -45,16 +44,9 @@ static void print_arrfunc(std::ostream& o, const arrfunc *af)
         } else if (af->ckernel_funcproto == binary_predicate_funcproto) {
             o << "binary_predicate ";
         } else {
-            o << "<unknown function prototype> ";
+            o << "<unknown ckernel_funcproto> ";
         }
-        o << ", types [";
-        for (intptr_t i = 0; i != af->data_types_size; ++i) {
-            o << af->data_dynd_types[i];
-            if (i != af->data_types_size - 1) {
-                o << "; ";
-            }
-        }
-        o << "]>";
+        o << af->func_proto;
     }
 }
 
@@ -100,9 +92,7 @@ void arrfunc_type::metadata_destruct(char *DYND_UNUSED(metadata)) const
 void arrfunc_type::data_destruct(const char *DYND_UNUSED(metadata), char *data) const
 {
     const arrfunc_type_data *d = reinterpret_cast<arrfunc_type_data *>(data);
-    if (d->data_ptr != NULL && d->free_func != NULL) {
-        d->free_func(d->data_ptr);
-    }
+    d->~arrfunc_type_data();
 }
 
 void arrfunc_type::data_destruct_strided(const char *DYND_UNUSED(metadata), char *data,
@@ -110,9 +100,7 @@ void arrfunc_type::data_destruct_strided(const char *DYND_UNUSED(metadata), char
 {
     for (size_t i = 0; i != count; ++i, data += stride) {
         const arrfunc_type_data *d = reinterpret_cast<arrfunc_type_data *>(data);
-        if (d->data_ptr != NULL && d->free_func != NULL) {
-            d->free_func(d->data_ptr);
-        }
+        d->~arrfunc_type_data();
     }
 }
 
@@ -131,7 +119,8 @@ namespace {
         static void single(char *dst, const char *src, ckernel_prefix *extra)
         {
             extra_type *e = reinterpret_cast<extra_type *>(extra);
-            const arrfunc *af = reinterpret_cast<const arrfunc *>(src);
+            const arrfunc_type_data *af =
+                reinterpret_cast<const arrfunc_type_data *>(src);
             stringstream ss;
             print_arrfunc(ss, af);
             e->dst_string_dt->set_utf8_string(e->dst_metadata, dst, e->errmode, ss.str());
@@ -190,27 +179,23 @@ size_t arrfunc_type::make_assignment_kernel(
 
 ///////// properties on the nd::array
 
-static nd::array property_ndo_get_types(const nd::array& n) {
+static nd::array property_ndo_get_proto(const nd::array& n) {
     if (n.get_type().get_type_id() != arrfunc_type_id) {
         throw runtime_error("arrfunc property 'types' only works on scalars presently");
     }
-    const arrfunc *af = reinterpret_cast<const arrfunc *>(n.get_readonly_originptr());
-    nd::array result = nd::empty(af->data_types_size, ndt::make_strided_dim(ndt::make_type()));
-    ndt::type *out_data = reinterpret_cast<ndt::type *>(result.get_readwrite_originptr());
-    for (intptr_t i = 0; i < af->data_types_size; ++i) {
-        out_data[i] = af->data_dynd_types[i];
-    }
-    return result;
+    const arrfunc_type_data *af =
+        reinterpret_cast<const arrfunc_type_data *>(n.get_readonly_originptr());
+    return af->func_proto;
 }
-
-static pair<string, gfunc::callable> arrfunc_array_properties[] = {
-    pair<string, gfunc::callable>("types", gfunc::make_callable(&property_ndo_get_types, "self"))
-};
 
 void arrfunc_type::get_dynamic_array_properties(
                 const std::pair<std::string, gfunc::callable> **out_properties,
                 size_t *out_count) const
 {
+    static pair<string, gfunc::callable> arrfunc_array_properties[] = {
+        pair<string, gfunc::callable>(
+            "proto", gfunc::make_callable(&property_ndo_get_proto, "self"))};
+
     *out_properties = arrfunc_array_properties;
     *out_count = sizeof(arrfunc_array_properties) / sizeof(arrfunc_array_properties[0]);
 }
@@ -242,36 +227,32 @@ static array_preamble *function___call__(const array_preamble *params, void *DYN
         }
     }
 
-    const arrfunc *af = reinterpret_cast<const arrfunc *>(par_arrs[0].get_readonly_originptr());
+    const arrfunc_type_data *af = reinterpret_cast<const arrfunc_type_data *>(
+        par_arrs[0].get_readonly_originptr());
+    const funcproto_type *proto = af->func_proto.tcast<funcproto_type>();
 
     nargs -= 1;
 
     // Validate the number of arguments
-    if (nargs != af->data_types_size) {
+    if ((size_t)nargs != proto->get_param_count() + 1) {
         stringstream ss;
-        ss << "arrfunc expected " << af->data_types_size << " arguments, got " << nargs;
+        ss << "arrfunc expected " << proto->get_param_count() + 1 << " arguments, got " << nargs;
         throw runtime_error(ss.str());
     }
-    // Validate that the types match exactly, attempting to take a view when they don't
-    for (int i = 0; i < nargs; ++i) {
-        try {
-            args[i] = nd::view(args[i], af->data_dynd_types[i]);
-        } catch(const type_error&) {
-            // Make a type error with a more specific message
-            stringstream ss;
-            ss << "arrfunc argument " << i << " expected type (" << af->data_dynd_types[i];
-            ss << "), got type (" << args[i].get_type() << ")";
-            throw type_error(ss.str());
-        }
-    }
     // Instantiate the ckernel
-    ckernel_builder ckb;
-    const char *dynd_metadata[max_args];
-    for (int i = 0; i < nargs; ++i) {
-        dynd_metadata[i] = args[i].get_arrmeta();
+    ndt::type src_tp[max_args];
+    for (int i = 0; i < nargs - 1; ++i) {
+        src_tp[i] = args[i + 1].get_type();
     }
-    af->instantiate_func(af->data_ptr, &ckb, 0, dynd_metadata,
-                          kernel_request_single, &eval::default_eval_context);
+    const char *dynd_metadata[max_args];
+    for (int i = 0; i < nargs - 1; ++i) {
+        dynd_metadata[i] = args[i + 1].get_arrmeta();
+    }
+    ckernel_builder ckb;
+    af->instantiate(af, &ckb, 0, args[0].get_type(),
+                         args[0].get_arrmeta(), src_tp,
+                         dynd_metadata, kernel_request_single,
+                         &eval::default_eval_context);
     // Call the ckernel
     if (af->ckernel_funcproto == unary_operation_funcproto) {
         unary_single_operation_t usngo = ckb.get()->get_function<unary_single_operation_t>();
@@ -290,24 +271,22 @@ static array_preamble *function___call__(const array_preamble *params, void *DYN
     return nd::empty(ndt::make_type<void>()).release();
 }
 
-static pair<string, gfunc::callable> arrfunc_array_functions[] = {
-    pair<string, gfunc::callable>("__call__", gfunc::callable(
-            ndt::type("c{self:ndarrayarg,out:ndarrayarg,p0:ndarrayarg,"
-                       "p1:ndarrayarg,p2:ndarrayarg,"
-                       "p3:ndarrayarg,p4:ndarrayarg}"),
-            &function___call__,
-            NULL,
-            3,
-            nd::empty("c{self:ndarrayarg,out:ndarrayarg,p0:ndarrayarg,"
-                       "p1:ndarrayarg,p2:ndarrayarg,"
-                       "p3:ndarrayarg,p4:ndarrayarg}")
-                    ))
-};
-
 void arrfunc_type::get_dynamic_array_functions(
                 const std::pair<std::string, gfunc::callable> **out_functions,
                 size_t *out_count) const
 {
+    static pair<string, gfunc::callable> arrfunc_array_functions[] = {
+        pair<string, gfunc::callable>(
+            "execute",
+            gfunc::callable(
+                ndt::type("c{self:ndarrayarg,out:ndarrayarg,p0:ndarrayarg,"
+                          "p1:ndarrayarg,p2:ndarrayarg,"
+                          "p3:ndarrayarg,p4:ndarrayarg}"),
+                &function___call__, NULL, 3,
+                nd::empty("c{self:ndarrayarg,out:ndarrayarg,p0:ndarrayarg,"
+                          "p1:ndarrayarg,p2:ndarrayarg,"
+                          "p3:ndarrayarg,p4:ndarrayarg}")))};
+
     *out_functions = arrfunc_array_functions;
     *out_count = sizeof(arrfunc_array_functions) / sizeof(arrfunc_array_functions[0]);
 }

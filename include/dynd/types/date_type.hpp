@@ -90,9 +90,8 @@ public:
 };
 
 namespace ndt {
-    inline ndt::type make_date() {
-        return ndt::type(new date_type(), false);
-    }
+    /** Returns type "date" */
+    const ndt::type& make_date();
 } // namespace ndt
 
 } // namespace dynd

@@ -27,7 +27,7 @@ TEST(DateTimeDType, Create) {
     ndt::type d;
     const datetime_type *dd;
 
-    d = ndt::make_datetime(tz_abstract);
+    d = ndt::make_datetime();
     ASSERT_EQ(datetime_type_id, d.get_type_id());
     dd = d.tcast<datetime_type>();
     EXPECT_EQ(8u, d.get_data_size());
@@ -65,7 +65,7 @@ TEST(DateTimeDType, CreateFromString) {
 }
 
 TEST(DateTimeDType, ValueCreationAbstract) {
-    ndt::type d = ndt::make_datetime(tz_abstract), di = ndt::make_type<int64_t>();
+    ndt::type d = ndt::make_datetime(), di = ndt::make_type<int64_t>();
 
     EXPECT_EQ((((1600-1970)*365 - (1972-1600)/4 + 3 - 365) * 1440LL + 4 * 60 + 16) * 60 * 10000000LL,
                     nd::array("1599-01-01T04:16").ucast(d).view_scalars(di).as<int64_t>());
@@ -169,4 +169,12 @@ TEST(DateTimeStruct, FromToString) {
     EXPECT_EQ("2030-07-06T17:55", dts.to_str());
     dts.set_from_str("1994-10-20 T 11:15");
     EXPECT_EQ("1994-10-20T11:15", dts.to_str());
+    dts.set_from_str("201303041438");
+    EXPECT_EQ("2013-03-04T14:38", dts.to_str());
+    dts.set_from_str("20130304143805");
+    EXPECT_EQ("2013-03-04T14:38:05", dts.to_str());
+    dts.set_from_str("20130304143805.");
+    EXPECT_EQ("2013-03-04T14:38:05", dts.to_str());
+    dts.set_from_str("20130304143805.123");
+    EXPECT_EQ("2013-03-04T14:38:05.123", dts.to_str());
 }

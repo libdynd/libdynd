@@ -64,7 +64,7 @@ void expr_as_unary_adapter_strided_ckernel(
 size_t make_constant_value_assignment_ckernel(
     ckernel_builder *out_ckb, intptr_t ckb_offset, const ndt::type &dst_tp,
     const char *dst_metadata, const nd::array &constant,
-    kernel_request_t kerntype, const eval::eval_context *ectx);
+    kernel_request_t kernreq, const eval::eval_context *ectx);
 
 /**
  * Adds an adapter ckernel which wraps a child unary ckernel
@@ -74,7 +74,7 @@ size_t make_constant_value_assignment_ckernel(
  */
 intptr_t wrap_unary_as_expr_ckernel(dynd::ckernel_builder *out_ckb,
                                     intptr_t ckb_offset,
-                                    kernel_request_t kerntype);
+                                    kernel_request_t kernreq);
 
 /**
  * Adds an adapter ckernel which wraps a child expr ckernel
@@ -85,7 +85,7 @@ intptr_t wrap_unary_as_expr_ckernel(dynd::ckernel_builder *out_ckb,
  */
 intptr_t wrap_expr_as_unary_ckernel(dynd::ckernel_builder *ckb,
                                     intptr_t ckb_offset,
-                                    kernel_request_t kerntype);
+                                    kernel_request_t kernreq);
 
 /**
  * Adds an adapter ckernel which wraps a child binary expr ckernel
@@ -104,7 +104,7 @@ intptr_t wrap_expr_as_unary_ckernel(dynd::ckernel_builder *ckb,
 intptr_t wrap_binary_as_unary_reduction_ckernel(
                 dynd::ckernel_builder *out_ckb, intptr_t ckb_offset,
                 bool right_associative,
-                kernel_request_t kerntype);
+                kernel_request_t kernreq);
 
 } // namespace kernels
 

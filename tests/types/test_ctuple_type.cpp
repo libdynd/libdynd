@@ -29,9 +29,9 @@ TEST(CTupleType, CreateSimple) {
     EXPECT_EQ(0u, (tp.get_flags()&(type_flag_blockref|type_flag_destructor)));
     tt = tp.tcast<ctuple_type>();
     ASSERT_EQ(1u, tt->get_field_count());
-    EXPECT_EQ(ndt::make_type<int32_t>(), tt->get_field_types()[0]);
-    EXPECT_EQ(0u, tt->get_data_offsets()[0]);
-    EXPECT_EQ(0u, tt->get_metadata_offsets()[0]);
+    EXPECT_EQ(ndt::make_type<int32_t>(), tt->get_field_type(0));
+    EXPECT_EQ(0u, tt->get_data_offset(0));
+    EXPECT_EQ(0u, tt->get_arrmeta_offset(0));
     // Roundtripping through a string
     EXPECT_EQ(tp, ndt::type(tp.str()));
 
@@ -44,12 +44,12 @@ TEST(CTupleType, CreateSimple) {
     EXPECT_EQ(0u, (tp.get_flags()&(type_flag_blockref|type_flag_destructor)));
     tt = tp.tcast<ctuple_type>();
     ASSERT_EQ(2u, tt->get_field_count());
-    EXPECT_EQ(ndt::make_type<int16_t>(), tt->get_field_types()[0]);
-    EXPECT_EQ(ndt::make_type<int32_t>(), tt->get_field_types()[1]);
-    EXPECT_EQ(0u, tt->get_data_offsets()[0]);
-    EXPECT_EQ(4u, tt->get_data_offsets()[1]);
-    EXPECT_EQ(0u, tt->get_metadata_offsets()[0]);
-    EXPECT_EQ(0u, tt->get_metadata_offsets()[1]);
+    EXPECT_EQ(ndt::make_type<int16_t>(), tt->get_field_type(0));
+    EXPECT_EQ(ndt::make_type<int32_t>(), tt->get_field_type(1));
+    EXPECT_EQ(0u, tt->get_data_offset(0));
+    EXPECT_EQ(4u, tt->get_data_offset(1));
+    EXPECT_EQ(0u, tt->get_arrmeta_offset(0));
+    EXPECT_EQ(0u, tt->get_arrmeta_offset(1));
     // Roundtripping through a string
     EXPECT_EQ(tp, ndt::type(tp.str()));
 }
