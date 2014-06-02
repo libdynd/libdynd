@@ -59,11 +59,13 @@ set(tests_SRC
     types/test_type_casting.cpp
     types/test_type_promotion.cpp
     types/test_var_dim_type.cpp
+    func/special_vals.hpp
     func/test_arrfunc.cpp
     func/test_callable.cpp
     func/test_lift_arrfunc.cpp
     func/test_reduction.cpp
     func/test_rolling.cpp
+    func/test_special.cpp
     func/test_take.cpp
     array/test_array.cpp
     array/test_array_range.cpp
@@ -81,8 +83,6 @@ set(tests_SRC
     vm/test_elwise_program.cpp
     test_arithmetic_op.cpp
     test_shape_tools.cpp
-    special_vals.hpp
-    test_special.cpp
     test_platform.cpp
     ../thirdparty/gtest/gtest-all.cc
     ../thirdparty/gtest/gtest_main.cc
