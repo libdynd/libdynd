@@ -8,7 +8,7 @@ cmake_minimum_required(VERSION 2.8.7)
 project(libdynd)
 
 find_package(CUDA)
-
+                                                                                                                              
 # -DDYND_ELWISE_MAX, the maximum number of arguments that the elwise function
 #   in libdynd will support
 SET(DYND_ELWISE_MAX 7 CACHE STRING
@@ -163,7 +163,7 @@ set(libdynd_SRC
     src/dynd/types/byteswap_type.cpp
     src/dynd/types/categorical_type.cpp
     src/dynd/types/cfixed_dim_type.cpp
-	src/dynd/types/char_type.cpp
+    src/dynd/types/char_type.cpp
     src/dynd/types/arrfunc_type.cpp
     src/dynd/types/convert_type.cpp
     src/dynd/types/ctuple_type.cpp
@@ -557,6 +557,10 @@ add_custom_command(OUTPUT ${CMAKE_CURRENT_BINARY_DIR}/include/dynd/pp/gen.hpp
 set_source_files_properties(${CMAKE_CURRENT_BINARY_DIR}/include/dynd/pp/gen.hpp PROPERTIES GENERATED true)
 add_dependencies(libdynd ppgen)
 
+# Copy the headers from cephes that need to be installed with libdynd
+file(COPY thirdparty/cephes/rename.h DESTINATION ${CMAKE_CURRENT_BINARY_DIR}/include/dynd/cephes)
+file(COPY thirdparty/cephes/protos.h DESTINATION ${CMAKE_CURRENT_BINARY_DIR}/include/dynd/cephes)
+
 include_directories(${CMAKE_CURRENT_BINARY_DIR}/include)
 
 if(WIN32)
@@ -636,6 +640,7 @@ if (DYND_INSTALL_LIB)
         ARCHIVE DESTINATION lib/static)
     # Install the libdynd headers
     install(DIRECTORY "include/dynd" DESTINATION "${CMAKE_INSTALL_PREFIX}/include")
+    install(DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}/include/dynd" DESTINATION "${CMAKE_INSTALL_PREFIX}/include")
     # Install the libdynd-config script
     if(WIN32)
         install(PROGRAMS "${CMAKE_CURRENT_BINARY_DIR}/libdynd-config.bat"
