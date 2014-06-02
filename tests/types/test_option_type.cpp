@@ -45,6 +45,10 @@ TEST(OptionType, Create) {
     // Roundtripping through a string
     EXPECT_EQ(d, ndt::type(d.str()));
     EXPECT_EQ("?string", d.str());
+
+    // No option of option allowed
+    EXPECT_THROW(ndt::make_option(ndt::make_option(ndt::make_type<int>())), type_error);
+    EXPECT_THROW(ndt::type("option[option[bool]]"), type_error);
 }
 
 TEST(OptionType, OptionIntAssign) {

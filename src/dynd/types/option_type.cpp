@@ -27,6 +27,13 @@ option_type::option_type(const ndt::type& value_tp)
                     value_tp.get_ndim()),
                     m_value_tp(value_tp)
 {
+    if (value_tp.get_type_id() == option_type_id) {
+        stringstream ss;
+        ss << "Cannot construct an option type out of " << value_tp
+           << ", it is already an option type";
+        throw type_error(ss.str());
+    }
+
     if (value_tp.is_builtin()) {
         m_nafunc = kernels::get_option_builtin_nafunc(value_tp.get_type_id());
         if (!m_nafunc.is_null()) {
