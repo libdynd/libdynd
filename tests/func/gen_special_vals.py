@@ -390,5 +390,6 @@ outfile.write('\n')
 outfile.write(make_assoc_legendre_p_vals())
 outfile.write('\n')
 outfile.write('#endif // _DYND__SPECIAL_VALS_HPP_')
+outfile.write('\n')
 
 outfile.close()
