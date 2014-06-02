@@ -75,7 +75,7 @@
 #define isinf(x) (!_finite(x) && !_isnan(x))
 #endif
 
-#include "cephes_names.h"
+#include "rename.h"
 #include "protos.h"
 
 /* Constant definitions for math error conditions
