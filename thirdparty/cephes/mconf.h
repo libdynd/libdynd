@@ -68,13 +68,14 @@
 #include <float.h>
 #include <math.h>
 
-#ifdef _MSC_VER
-# ifndef INFINITY
+#ifndef INFINITY
 #  define INFINITY (DBL_MAX + DBL_MAX)
-# endif
-# ifndef NAN
+#endif
+#ifndef NAN
 #  define NAN (INFINITY - INFINITY)
-# endif
+#endif
+
+#ifdef _MSC_VER
 # if _MSC_VER < 1800
 #  define isfinite(x) _finite(x)
 #  define isinf(x) (!_finite(x) && !_isnan(x))
