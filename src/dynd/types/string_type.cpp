@@ -10,6 +10,7 @@
 #include <dynd/kernels/string_numeric_assignment_kernels.hpp>
 #include <dynd/types/fixedstring_type.hpp>
 #include <dynd/types/strided_dim_type.hpp>
+#include <dynd/types/option_type.hpp>
 #include <dynd/iter/string_iter.hpp>
 #include <dynd/exceptions.hpp>
 
@@ -310,6 +311,27 @@ void string_type::make_string_iter(dim_iter *out_di, string_encoding_t encoding,
     }
     iter::make_string_iter(out_di, encoding,
             m_encoding, d->begin, d->end, dataref, buffer_max_mem, ectx);
+}
+
+namespace {
+struct string_is_avail_ck : public kernels::assignment_ck<string_is_avail_ck> {
+    inline static ndt::type proto() {
+        return ndt::type("(?T) -> bool");
+    }
+
+    inline void single(char *dst, const char *src)
+    {
+        const string_type_data *std =
+            reinterpret_cast<const string_type_data *>(src);
+        *dst = std->begin == NULL && std->end == NULL;
+    }
+
+};
+} // anonymous namespace
+
+nd::array string_type::get_option_nafunc() const
+{
+    return nd::array();
 }
 
 const ndt::type& ndt::make_string()
