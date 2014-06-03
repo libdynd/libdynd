@@ -15,7 +15,7 @@
 using namespace std;
 using namespace dynd;
 
-#define REL_ERROR_MAX 1E-8
+#define REL_ERROR_MAX 1E-11
 
 TEST(Special, Factorial) {
     nd::array vals = factorial_vals();
