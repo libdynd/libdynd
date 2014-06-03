@@ -23,14 +23,14 @@ namespace {
 
         ckernel_prefix base;
         size_t dst_alignment, src_alignment;
-        const bytes_type_metadata *dst_metadata, *src_metadata;
+        const bytes_type_arrmeta *dst_arrmeta, *src_arrmeta;
 
         /** Does a single blockref-string copy */
         static void single(char *dst, const char *src, ckernel_prefix *extra)
         {
             extra_type *e = reinterpret_cast<extra_type *>(extra);
-            const bytes_type_metadata *dst_md = e->dst_metadata;
-            const bytes_type_metadata *src_md = e->src_metadata;
+            const bytes_type_arrmeta *dst_md = e->dst_arrmeta;
+            const bytes_type_arrmeta *src_md = e->src_arrmeta;
             bytes_type_data *dst_d = reinterpret_cast<bytes_type_data *>(dst);
             const bytes_type_data *src_d = reinterpret_cast<const bytes_type_data *>(src);
 
@@ -68,8 +68,8 @@ namespace {
 
 size_t dynd::make_blockref_bytes_assignment_kernel(
                 ckernel_builder *out, size_t offset_out,
-                size_t dst_alignment, const char *dst_metadata,
-                size_t src_alignment, const char *src_metadata,
+                size_t dst_alignment, const char *dst_arrmeta,
+                size_t src_alignment, const char *src_arrmeta,
                 kernel_request_t kernreq, const eval::eval_context *DYND_UNUSED(ectx))
 {
     // Adapt the incoming request to a 'single' kernel
@@ -79,8 +79,8 @@ size_t dynd::make_blockref_bytes_assignment_kernel(
     e->base.set_function<unary_single_operation_t>(&blockref_bytes_kernel_extra::single);
     e->dst_alignment = dst_alignment;
     e->src_alignment = src_alignment;
-    e->dst_metadata = reinterpret_cast<const bytes_type_metadata *>(dst_metadata);
-    e->src_metadata = reinterpret_cast<const bytes_type_metadata *>(src_metadata);
+    e->dst_arrmeta = reinterpret_cast<const bytes_type_arrmeta *>(dst_arrmeta);
+    e->src_arrmeta = reinterpret_cast<const bytes_type_arrmeta *>(src_arrmeta);
     return offset_out + sizeof(blockref_bytes_kernel_extra);
 }
 
@@ -95,13 +95,13 @@ namespace {
         size_t dst_alignment;
         intptr_t src_data_size;
         size_t src_alignment;
-        const bytes_type_metadata *dst_metadata;
+        const bytes_type_arrmeta *dst_arrmeta;
 
         /** Does a single fixed-bytes copy */
         static void single(char *dst, const char *src, ckernel_prefix *extra)
         {
             extra_type *e = reinterpret_cast<extra_type *>(extra);
-            const bytes_type_metadata *dst_md = e->dst_metadata;
+            const bytes_type_arrmeta *dst_md = e->dst_arrmeta;
             // TODO: With some additional mechanism to track the source memory block, could
             //       avoid copying the bytes data.
             char *dst_begin = NULL, *dst_end = NULL;
@@ -128,7 +128,7 @@ namespace {
 
 size_t dynd::make_fixedbytes_to_blockref_bytes_assignment_kernel(
                 ckernel_builder *out, size_t offset_out,
-                size_t dst_alignment, const char *dst_metadata,
+                size_t dst_alignment, const char *dst_arrmeta,
                 intptr_t src_data_size, size_t src_alignment,
                 kernel_request_t kernreq, const eval::eval_context *DYND_UNUSED(ectx))
 {
@@ -140,6 +140,6 @@ size_t dynd::make_fixedbytes_to_blockref_bytes_assignment_kernel(
     e->dst_alignment = dst_alignment;
     e->src_data_size = src_data_size;
     e->src_alignment = src_alignment;
-    e->dst_metadata = reinterpret_cast<const bytes_type_metadata *>(dst_metadata);
+    e->dst_arrmeta = reinterpret_cast<const bytes_type_arrmeta *>(dst_arrmeta);
     return offset_out + sizeof(fixedbytes_to_blockref_bytes_kernel_extra);
 }

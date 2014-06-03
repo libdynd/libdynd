@@ -16,7 +16,7 @@ unary_expr_type::unary_expr_type(const ndt::type& value_type, const ndt::type& o
     : base_expression_type(unary_expr_type_id, expression_kind,
                         operand_type.get_data_size(), operand_type.get_data_alignment(),
                         inherited_flags(value_type.get_flags(), operand_type.get_flags()),
-                        operand_type.get_metadata_size(), value_type.get_ndim()),
+                        operand_type.get_arrmeta_size(), value_type.get_ndim()),
                     m_value_type(value_type), m_operand_type(operand_type),
                     m_kgen(kgen)
 {
@@ -28,7 +28,7 @@ unary_expr_type::~unary_expr_type()
 }
 
 void unary_expr_type::print_data(std::ostream& DYND_UNUSED(o),
-                const char *DYND_UNUSED(metadata), const char *DYND_UNUSED(data)) const
+                const char *DYND_UNUSED(arrmeta), const char *DYND_UNUSED(data)) const
 {
     throw runtime_error("internal error: unary_expr_type::print_data isn't supposed to be called");
 }
@@ -58,8 +58,8 @@ ndt::type unary_expr_type::apply_linear_index(intptr_t nindices, const irange *D
     }
 }
 
-intptr_t unary_expr_type::apply_linear_index(intptr_t nindices, const irange *DYND_UNUSED(indices), const char *metadata,
-                const ndt::type& DYND_UNUSED(result_tp), char *out_metadata,
+intptr_t unary_expr_type::apply_linear_index(intptr_t nindices, const irange *DYND_UNUSED(indices), const char *arrmeta,
+                const ndt::type& DYND_UNUSED(result_tp), char *out_arrmeta,
                 memory_block_data *embedded_reference,
                 size_t current_i, const ndt::type& DYND_UNUSED(root_tp),
                 bool DYND_UNUSED(leading_dimension), char **DYND_UNUSED(inout_data),
@@ -68,9 +68,9 @@ intptr_t unary_expr_type::apply_linear_index(intptr_t nindices, const irange *DY
     if (m_kgen->is_elwise()) {
         // Scalar behavior
         if (nindices == 0) {
-            // Copy any metadata verbatim
-            if (get_metadata_size() > 0) {
-                m_operand_type.extended()->metadata_copy_construct(out_metadata, metadata, embedded_reference);
+            // Copy any arrmeta verbatim
+            if (get_arrmeta_size() > 0) {
+                m_operand_type.extended()->arrmeta_copy_construct(out_arrmeta, arrmeta, embedded_reference);
             }
             return 0;
         } else {
@@ -104,22 +104,22 @@ bool unary_expr_type::operator==(const base_type& rhs) const
 
 size_t unary_expr_type::make_operand_to_value_assignment_kernel(
                 ckernel_builder *out, size_t offset_out,
-                const char *dst_metadata, const char *src_metadata,
+                const char *dst_arrmeta, const char *src_arrmeta,
                 kernel_request_t kernreq, const eval::eval_context *ectx) const
 {
     // As a special case, when src_count == 1, the kernel generated
     // is a unary_single_operation_t/unary_strided_operation_t instead of
     // expr_single_operation_t/expr_strided_operation_t
     return m_kgen->make_expr_kernel(out, offset_out,
-                    m_value_type, dst_metadata,
+                    m_value_type, dst_arrmeta,
                     1, &m_operand_type.value_type(),
-                    &src_metadata,
+                    &src_arrmeta,
                     kernreq, ectx);
 }
 
 size_t unary_expr_type::make_value_to_operand_assignment_kernel(
                 ckernel_builder *DYND_UNUSED(out), size_t DYND_UNUSED(offset_out),
-                const char *DYND_UNUSED(dst_metadata), const char *DYND_UNUSED(src_metadata),
+                const char *DYND_UNUSED(dst_arrmeta), const char *DYND_UNUSED(src_arrmeta),
                 kernel_request_t DYND_UNUSED(kernreq), const eval::eval_context *DYND_UNUSED(ectx)) const
 {
     throw runtime_error("Cannot assign to a dynd unary_expr object value");

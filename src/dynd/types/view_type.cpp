@@ -16,7 +16,7 @@ view_type::view_type(const ndt::type& value_type, const ndt::type& operand_type)
     : base_expression_type(view_type_id, expression_kind, operand_type.get_data_size(),
                     operand_type.get_data_alignment(),
                     inherited_flags(value_type.get_flags(), operand_type.get_flags()),
-                    operand_type.get_metadata_size()),
+                    operand_type.get_arrmeta_size()),
             m_value_type(value_type), m_operand_type(operand_type)
 {
     if (value_type.get_data_size() != operand_type.value_type().get_data_size()) {
@@ -33,31 +33,31 @@ view_type::~view_type()
 {
 }
 
-void view_type::print_data(std::ostream& o, const char *metadata, const char *data) const
+void view_type::print_data(std::ostream& o, const char *arrmeta, const char *data) const
 {
     // Allow calling print_data in the special case that the view
     // is being used just to align the data
     if (m_operand_type.get_type_id() == fixedbytes_type_id) {
         switch (m_operand_type.get_data_size()) {
             case 1:
-                m_value_type.print_data(o, metadata, data);
+                m_value_type.print_data(o, arrmeta, data);
                 return;
             case 2: {
                 uint16_t tmp;
                 memcpy(&tmp, data, sizeof(tmp));
-                m_value_type.print_data(o, metadata, reinterpret_cast<const char *>(&tmp));
+                m_value_type.print_data(o, arrmeta, reinterpret_cast<const char *>(&tmp));
                 return;
             }
             case 4: {
                 uint32_t tmp;
                 memcpy(&tmp, data, sizeof(tmp));
-                m_value_type.print_data(o, metadata, reinterpret_cast<const char *>(&tmp));
+                m_value_type.print_data(o, arrmeta, reinterpret_cast<const char *>(&tmp));
                 return;
             }
             case 8: {
                 uint64_t tmp;
                 memcpy(&tmp, data, sizeof(tmp));
-                m_value_type.print_data(o, metadata, reinterpret_cast<const char *>(&tmp));
+                m_value_type.print_data(o, arrmeta, reinterpret_cast<const char *>(&tmp));
                 return;
             }
             default: {
@@ -66,7 +66,7 @@ void view_type::print_data(std::ostream& o, const char *metadata, const char *da
                 // Make the storage aligned as needed
                 buffer = (char *)(((uintptr_t)buffer + (uintptr_t)m_value_type.get_data_alignment() - 1) & (m_value_type.get_data_alignment() - 1));
                 memcpy(buffer, data, m_value_type.get_data_size());
-                m_value_type.print_data(o, metadata, reinterpret_cast<const char *>(&buffer));
+                m_value_type.print_data(o, arrmeta, reinterpret_cast<const char *>(&buffer));
                 return;
             }
         }
@@ -87,7 +87,7 @@ void view_type::print_type(std::ostream& o) const
 }
 
 void view_type::get_shape(intptr_t ndim, intptr_t i,
-                intptr_t *out_shape, const char *DYND_UNUSED(metadata),
+                intptr_t *out_shape, const char *DYND_UNUSED(arrmeta),
                 const char *DYND_UNUSED(data)) const
 {
     if (!m_value_type.is_builtin()) {
@@ -139,7 +139,7 @@ ndt::type view_type::with_replaced_storage_type(const ndt::type& replacement_typ
 
 size_t view_type::make_operand_to_value_assignment_kernel(
                 ckernel_builder *out, size_t offset_out,
-                const char *DYND_UNUSED(dst_metadata), const char *DYND_UNUSED(src_metadata),
+                const char *DYND_UNUSED(dst_arrmeta), const char *DYND_UNUSED(src_arrmeta),
                 kernel_request_t kernreq, const eval::eval_context *DYND_UNUSED(ectx)) const
 {
     return ::make_pod_typed_data_assignment_kernel(out, offset_out,
@@ -150,7 +150,7 @@ size_t view_type::make_operand_to_value_assignment_kernel(
 
 size_t view_type::make_value_to_operand_assignment_kernel(
                 ckernel_builder *out, size_t offset_out,
-                const char *DYND_UNUSED(dst_metadata), const char *DYND_UNUSED(src_metadata),
+                const char *DYND_UNUSED(dst_arrmeta), const char *DYND_UNUSED(src_arrmeta),
                 kernel_request_t kernreq, const eval::eval_context *DYND_UNUSED(ectx)) const
 {
     return ::make_pod_typed_data_assignment_kernel(out, offset_out,

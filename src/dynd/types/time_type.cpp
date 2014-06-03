@@ -24,7 +24,7 @@ time_type::~time_type()
 {
 }
 
-void time_type::set_time(const char *DYND_UNUSED(metadata), char *data,
+void time_type::set_time(const char *DYND_UNUSED(arrmeta), char *data,
                          assign_error_mode errmode, int32_t hour,
                          int32_t minute, int32_t second, int32_t tick) const
 {
@@ -38,7 +38,7 @@ void time_type::set_time(const char *DYND_UNUSED(metadata), char *data,
     *reinterpret_cast<int64_t *>(data) = time_hmst::to_ticks(hour, minute, second, tick);
 }
 
-void time_type::set_utf8_string(const char *DYND_UNUSED(metadata),
+void time_type::set_utf8_string(const char *DYND_UNUSED(arrmeta),
                 char *data, assign_error_mode DYND_UNUSED(errmode), const std::string& utf8_str) const
 {
     time_hmst hmst;
@@ -52,14 +52,14 @@ void time_type::set_utf8_string(const char *DYND_UNUSED(metadata),
     *reinterpret_cast<int64_t *>(data) = hmst.to_ticks();
 }
 
-time_hmst time_type::get_time(const char *DYND_UNUSED(metadata), const char *data) const
+time_hmst time_type::get_time(const char *DYND_UNUSED(arrmeta), const char *data) const
 {
     time_hmst hmst;
     hmst.set_from_ticks(*reinterpret_cast<const int64_t *>(data));
     return hmst;
 }
 
-void time_type::print_data(std::ostream& o, const char *DYND_UNUSED(metadata), const char *data) const
+void time_type::print_data(std::ostream& o, const char *DYND_UNUSED(arrmeta), const char *data) const
 {
     time_hmst hmst;
     hmst.set_from_ticks(*reinterpret_cast<const int64_t *>(data));
@@ -120,8 +120,8 @@ bool time_type::operator==(const base_type& rhs) const
 
 size_t time_type::make_assignment_kernel(
                 ckernel_builder *out, size_t offset_out,
-                const ndt::type& dst_tp, const char *dst_metadata,
-                const ndt::type& src_tp, const char *src_metadata,
+                const ndt::type& dst_tp, const char *dst_arrmeta,
+                const ndt::type& src_tp, const char *src_arrmeta,
                 kernel_request_t kernreq, assign_error_mode errmode,
                 const eval::eval_context *ectx) const
 {
@@ -133,32 +133,32 @@ size_t time_type::make_assignment_kernel(
             // Assignment from strings
             return make_string_to_time_assignment_kernel(out, offset_out,
                             dst_tp,
-                            src_tp, src_metadata,
+                            src_tp, src_arrmeta,
                             kernreq, errmode, ectx);
         } else if (src_tp.get_kind() == struct_kind) {
             // Convert to struct using the "struct" property
             return ::make_assignment_kernel(out, offset_out,
-                ndt::make_property(dst_tp, "struct"), dst_metadata,
-                src_tp, src_metadata,
+                ndt::make_property(dst_tp, "struct"), dst_arrmeta,
+                src_tp, src_arrmeta,
                 kernreq, errmode, ectx);
         } else if (!src_tp.is_builtin()) {
             return src_tp.extended()->make_assignment_kernel(out, offset_out,
-                            dst_tp, dst_metadata,
-                            src_tp, src_metadata,
+                            dst_tp, dst_arrmeta,
+                            src_tp, src_arrmeta,
                             kernreq, errmode, ectx);
         }
     } else {
         if (dst_tp.get_kind() == string_kind) {
             // Assignment to strings
             return make_time_to_string_assignment_kernel(out, offset_out,
-                            dst_tp, dst_metadata,
+                            dst_tp, dst_arrmeta,
                             src_tp,
                             kernreq, errmode, ectx);
         } else if (dst_tp.get_kind() == struct_kind) {
             // Convert to struct using the "struct" property
             return ::make_assignment_kernel(out, offset_out,
-                dst_tp, dst_metadata,
-                ndt::make_property(src_tp, "struct"), src_metadata,
+                dst_tp, dst_arrmeta,
+                ndt::make_property(src_tp, "struct"), src_arrmeta,
                 kernreq, errmode, ectx);
         }
         // TODO
@@ -171,8 +171,8 @@ size_t time_type::make_assignment_kernel(
 
 size_t time_type::make_comparison_kernel(
                 ckernel_builder *out, size_t offset_out,
-                const ndt::type& src0_tp, const char *src0_metadata,
-                const ndt::type& src1_tp, const char *src1_metadata,
+                const ndt::type& src0_tp, const char *src0_arrmeta,
+                const ndt::type& src1_tp, const char *src1_arrmeta,
                 comparison_type_t comptype,
                 const eval::eval_context *ectx) const
 {
@@ -182,8 +182,8 @@ size_t time_type::make_comparison_kernel(
                             int64_type_id, int64_type_id, comptype);
         } else if (!src1_tp.is_builtin()) {
             return src1_tp.extended()->make_comparison_kernel(out, offset_out,
-                            src0_tp, src0_metadata,
-                            src1_tp, src1_metadata,
+                            src0_tp, src0_arrmeta,
+                            src1_tp, src1_arrmeta,
                             comptype, ectx);
         }
     }
@@ -378,8 +378,8 @@ ndt::type time_type::get_elwise_property_type(size_t property_index,
 
 size_t time_type::make_elwise_property_getter_kernel(
                 ckernel_builder *out, size_t offset_out,
-                const char *DYND_UNUSED(dst_metadata),
-                const char *DYND_UNUSED(src_metadata), size_t src_property_index,
+                const char *DYND_UNUSED(dst_arrmeta),
+                const char *DYND_UNUSED(src_arrmeta), size_t src_property_index,
                 kernel_request_t kernreq, const eval::eval_context *DYND_UNUSED(ectx)) const
 {
     offset_out = make_kernreq_to_single_kernel_adapter(out, offset_out, kernreq);
@@ -412,8 +412,8 @@ size_t time_type::make_elwise_property_getter_kernel(
 
 size_t time_type::make_elwise_property_setter_kernel(
                 ckernel_builder *out, size_t offset_out,
-                const char *DYND_UNUSED(dst_metadata), size_t dst_property_index,
-                const char *DYND_UNUSED(src_metadata),
+                const char *DYND_UNUSED(dst_arrmeta), size_t dst_property_index,
+                const char *DYND_UNUSED(src_arrmeta),
                 kernel_request_t kernreq, const eval::eval_context *DYND_UNUSED(ectx)) const
 {
     offset_out = make_kernreq_to_single_kernel_adapter(out, offset_out, kernreq);

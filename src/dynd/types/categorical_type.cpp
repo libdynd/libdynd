@@ -91,14 +91,14 @@ namespace {
 
         ckernel_prefix base;
         const categorical_type *dst_cat_tp;
-        const char *src_metadata;
+        const char *src_arrmeta;
 
         // Assign from an input matching the category type to a categorical type
         template<typename UIntType>
         inline static void single(char *dst, const char *src, ckernel_prefix *extra)
         {
             extra_type *e = reinterpret_cast<extra_type *>(extra);
-            uint32_t src_val = e->dst_cat_tp->get_value_from_category(e->src_metadata, src);
+            uint32_t src_val = e->dst_cat_tp->get_value_from_category(e->src_arrmeta, src);
             *reinterpret_cast<UIntType *>(dst) = src_val;
         }
 
@@ -167,23 +167,23 @@ namespace {
 
 /** This function converts the set of char* pointers into a strided immutable nd::array of the categories */
 static nd::array make_sorted_categories(const set<const char *, cmp>& uniques,
-                const ndt::type& element_tp, const char *metadata)
+                const ndt::type& element_tp, const char *arrmeta)
 {
     nd::array categories = nd::make_strided_array(uniques.size(), element_tp);
     assignment_ckernel_builder k;
     make_assignment_kernel(&k, 0,
-                    element_tp, categories.get_arrmeta() + sizeof(strided_dim_type_metadata),
-                    element_tp, metadata,
+                    element_tp, categories.get_arrmeta() + sizeof(strided_dim_type_arrmeta),
+                    element_tp, arrmeta,
                     kernel_request_single, assign_error_default,
                     &eval::default_eval_context);
 
-    intptr_t stride = reinterpret_cast<const strided_dim_type_metadata *>(categories.get_arrmeta())->stride;
+    intptr_t stride = reinterpret_cast<const strided_dim_type_arrmeta *>(categories.get_arrmeta())->stride;
     char *dst_ptr = categories.get_readwrite_originptr();
     for (set<const char *, cmp>::const_iterator it = uniques.begin(); it != uniques.end(); ++it) {
         k(dst_ptr, *it);
         dst_ptr += stride;
     }
-    categories.get_type().extended()->metadata_finalize_buffers(categories.get_arrmeta());
+    categories.get_type().extended()->arrmeta_finalize_buffers(categories.get_arrmeta());
     categories.flag_as_immutable();
 
     return categories;
@@ -220,13 +220,13 @@ categorical_type::categorical_type(const nd::array& categories, bool presorted)
         }
 
         category_count = categories.get_dim_size();
-        intptr_t categories_stride = reinterpret_cast<const strided_dim_type_metadata *>(categories.get_arrmeta())->stride;
+        intptr_t categories_stride = reinterpret_cast<const strided_dim_type_arrmeta *>(categories.get_arrmeta())->stride;
 
-        const char *categories_element_metadata = categories.get_arrmeta() + sizeof(strided_dim_type_metadata);
+        const char *categories_element_arrmeta = categories.get_arrmeta() + sizeof(strided_dim_type_arrmeta);
         comparison_ckernel_builder k;
         ::make_comparison_kernel(&k, 0,
-                        m_category_tp, categories_element_metadata,
-                        m_category_tp, categories_element_metadata,
+                        m_category_tp, categories_element_arrmeta,
+                        m_category_tp, categories_element_arrmeta,
                         comparison_type_sorting_less, &eval::default_eval_context);
 
         cmp less(k.get_function(), k.get());
@@ -246,7 +246,7 @@ categorical_type::categorical_type(const nd::array& categories, bool presorted)
             } else {
                 stringstream ss;
                 ss << "categories must be unique: category value ";
-                m_category_tp.print_data(ss, categories_element_metadata, category_value);
+                m_category_tp.print_data(ss, categories_element_arrmeta, category_value);
                 ss << " appears more than once";
                 throw std::runtime_error(ss.str());
             }
@@ -263,7 +263,7 @@ categorical_type::categorical_type(const nd::array& categories, bool presorted)
         }
 
         m_categories = make_sorted_categories(uniques, m_category_tp,
-                        categories_element_metadata);
+                        categories_element_arrmeta);
     }
 
     // Use the number of categories to set which underlying integer storage to use
@@ -278,7 +278,7 @@ categorical_type::categorical_type(const nd::array& categories, bool presorted)
     m_members.data_alignment = (uint8_t)m_storage_type.get_data_alignment();
 }
 
-void categorical_type::print_data(std::ostream& o, const char *DYND_UNUSED(metadata), const char *data) const
+void categorical_type::print_data(std::ostream& o, const char *DYND_UNUSED(arrmeta), const char *data) const
 {
     uint32_t value;
     switch (m_storage_type.get_type_id()) {
@@ -295,7 +295,7 @@ void categorical_type::print_data(std::ostream& o, const char *DYND_UNUSED(metad
             throw runtime_error("internal error in categorical_type::print_data");
     }
     if (value < m_value_to_category_index.size()) {
-        m_category_tp.print_data(o, get_category_metadata(),
+        m_category_tp.print_data(o, get_category_arrmeta(),
                                  get_category_data_from_value(value));
     }
     else {
@@ -307,24 +307,24 @@ void categorical_type::print_data(std::ostream& o, const char *DYND_UNUSED(metad
 void categorical_type::print_type(std::ostream& o) const
 {
     size_t category_count = get_category_count();
-    const char *metadata = m_categories.get_arrmeta() + sizeof(strided_dim_type_metadata);
+    const char *arrmeta = m_categories.get_arrmeta() + sizeof(strided_dim_type_arrmeta);
 
     o << "categorical[" << m_category_tp;
     o << ", [";
-    m_category_tp.print_data(o, metadata, get_category_data_from_value(0));
+    m_category_tp.print_data(o, arrmeta, get_category_data_from_value(0));
     for (size_t i = 1; i != category_count; ++i) {
         o << ", ";
-        m_category_tp.print_data(o, metadata, get_category_data_from_value((uint32_t)i));
+        m_category_tp.print_data(o, arrmeta, get_category_data_from_value((uint32_t)i));
     }
     o << "]]";
 }
 
 void dynd::categorical_type::get_shape(intptr_t ndim, intptr_t i, intptr_t *out_shape,
-                const char *DYND_UNUSED(metadata), const char *DYND_UNUSED(data)) const
+                const char *DYND_UNUSED(arrmeta), const char *DYND_UNUSED(data)) const
 {
     const ndt::type& cd = get_category_type();
     if (!cd.is_builtin()) {
-        cd.extended()->get_shape(ndim, i, out_shape, get_category_metadata(), NULL);
+        cd.extended()->get_shape(ndim, i, out_shape, get_category_arrmeta(), NULL);
     } else {
         stringstream ss;
         ss << "requested too many dimensions from type " << ndt::type(this, true);
@@ -332,13 +332,13 @@ void dynd::categorical_type::get_shape(intptr_t ndim, intptr_t i, intptr_t *out_
     }
 }
 
-uint32_t categorical_type::get_value_from_category(const char *category_metadata, const char *category_data) const
+uint32_t categorical_type::get_value_from_category(const char *category_arrmeta, const char *category_data) const
 {
-    intptr_t i = nd::binary_search(m_categories, category_metadata, category_data);
+    intptr_t i = nd::binary_search(m_categories, category_arrmeta, category_data);
     if (i < 0) {
         stringstream ss;
         ss << "Unrecognized category value ";
-        m_category_tp.print_data(ss, category_metadata, category_data);
+        m_category_tp.print_data(ss, category_arrmeta, category_data);
         ss << " assigning to dynd type " << ndt::type(this, true);
         throw std::runtime_error(ss.str());
     } else {
@@ -359,11 +359,11 @@ uint32_t categorical_type::get_value_from_category(const nd::array& category) co
     }
 }
 
-const char *categorical_type::get_category_metadata() const
+const char *categorical_type::get_category_arrmeta() const
 {
-    const char *metadata = m_categories.get_arrmeta();
-    m_categories.get_type().extended()->at_single(0, &metadata, NULL);
-    return metadata;
+    const char *arrmeta = m_categories.get_arrmeta();
+    m_categories.get_type().extended()->at_single(0, &arrmeta, NULL);
+    return arrmeta;
 }
 
 nd::array categorical_type::get_categories() const
@@ -373,8 +373,8 @@ nd::array categorical_type::get_categories() const
     nd::array categories = nd::make_strided_array(get_category_count(), m_category_tp);
     array_iter<1,0> iter(categories);
     assignment_ckernel_builder k;
-    ::make_assignment_kernel(&k, 0, iter.get_uniform_dtype(), iter.metadata(),
-                    m_category_tp, get_category_metadata(),
+    ::make_assignment_kernel(&k, 0, iter.get_uniform_dtype(), iter.arrmeta(),
+                    m_category_tp, get_category_arrmeta(),
                     kernel_request_single, assign_error_default, &eval::default_eval_context);
     if (!iter.empty()) {
         uint32_t i = 0;
@@ -404,8 +404,8 @@ bool categorical_type::is_lossless_assignment(const ndt::type& dst_tp, const ndt
 
 size_t categorical_type::make_assignment_kernel(
                 ckernel_builder *out, size_t offset_out,
-                const ndt::type& dst_tp, const char *dst_metadata,
-                const ndt::type& src_tp, const char *src_metadata,
+                const ndt::type& dst_tp, const char *dst_arrmeta,
+                const ndt::type& src_tp, const char *src_arrmeta,
                 kernel_request_t kernreq, assign_error_mode errmode,
                 const eval::eval_context *ectx) const
 {
@@ -446,21 +446,21 @@ size_t categorical_type::make_assignment_kernel(
             e->base.destructor = &category_to_categorical_kernel_extra::destruct;
             // The kernel type owns a reference to this type
             e->dst_cat_tp = static_cast<const categorical_type *>(ndt::type(dst_tp).release());
-            e->src_metadata = src_metadata;
+            e->src_arrmeta = src_arrmeta;
             return offset_out + sizeof(category_to_categorical_kernel_extra);
         } else if (src_tp.value_type() != m_category_tp &&
                         src_tp.value_type().get_type_id() != categorical_type_id) {
             // Make a convert type to the category type, and have it do the chaining
             ndt::type src_cvt_tp = ndt::make_convert(m_category_tp, src_tp);
             return src_cvt_tp.extended()->make_assignment_kernel(out, offset_out,
-                            dst_tp, dst_metadata,
-                            src_cvt_tp, src_metadata,
+                            dst_tp, dst_arrmeta,
+                            src_cvt_tp, src_arrmeta,
                             kernreq, errmode, ectx);
         } else {
             // Let the src_tp handle it
             return src_tp.extended()->make_assignment_kernel(out, offset_out,
-                            dst_tp, dst_metadata,
-                            src_tp, src_metadata,
+                            dst_tp, dst_arrmeta,
+                            src_tp, src_arrmeta,
                             kernreq, errmode, ectx);
         }
     }
@@ -486,8 +486,8 @@ size_t categorical_type::make_assignment_kernel(
             // The kernel type owns a reference to this type
             e->src_cat_tp = static_cast<const categorical_type *>(ndt::type(src_tp).release());
             return ::make_assignment_kernel(out, offset_out + sizeof(categorical_to_other_kernel_extra),
-                            dst_tp, dst_metadata,
-                            get_category_type(), get_category_metadata(),
+                            dst_tp, dst_arrmeta,
+                            get_category_type(), get_category_arrmeta(),
                             kernel_request_single, errmode, ectx);
         }
         else {
@@ -517,28 +517,28 @@ bool categorical_type::operator==(const base_type& rhs) const
 
 }
 
-void categorical_type::metadata_default_construct(char *DYND_UNUSED(metadata),
+void categorical_type::arrmeta_default_construct(char *DYND_UNUSED(arrmeta),
                 intptr_t DYND_UNUSED(ndim), const intptr_t* DYND_UNUSED(shape)) const
 {
-    // Data is stored as uint##, no metadata to process
+    // Data is stored as uint##, no arrmeta to process
 }
 
-void categorical_type::metadata_copy_construct(char *DYND_UNUSED(dst_metadata),
-                const char *DYND_UNUSED(src_metadata),
+void categorical_type::arrmeta_copy_construct(char *DYND_UNUSED(dst_arrmeta),
+                const char *DYND_UNUSED(src_arrmeta),
                 memory_block_data *DYND_UNUSED(embedded_reference)) const
 {
-    // Data is stored as uint##, no metadata to process
+    // Data is stored as uint##, no arrmeta to process
 }
 
-void categorical_type::metadata_destruct(char *DYND_UNUSED(metadata)) const
+void categorical_type::arrmeta_destruct(char *DYND_UNUSED(arrmeta)) const
 {
-    // Data is stored as uint##, no metadata to process
+    // Data is stored as uint##, no arrmeta to process
 }
 
-void categorical_type::metadata_debug_print(const char *DYND_UNUSED(metadata),
+void categorical_type::arrmeta_debug_print(const char *DYND_UNUSED(arrmeta),
                 std::ostream& DYND_UNUSED(o), const std::string& DYND_UNUSED(indent)) const
 {
-    // Data is stored as uint##, no metadata to process
+    // Data is stored as uint##, no arrmeta to process
 }
 
 ndt::type dynd::ndt::factor_categorical(const nd::array& values)
@@ -550,8 +550,8 @@ ndt::type dynd::ndt::factor_categorical(const nd::array& values)
 
     comparison_ckernel_builder k;
     ::make_comparison_kernel(&k, 0,
-                    iter.get_uniform_dtype(), iter.metadata(),
-                    iter.get_uniform_dtype(), iter.metadata(),
+                    iter.get_uniform_dtype(), iter.arrmeta(),
+                    iter.get_uniform_dtype(), iter.arrmeta(),
                     comparison_type_sorting_less, &eval::default_eval_context);
 
     cmp less(k.get_function(), k.get());
@@ -567,7 +567,7 @@ ndt::type dynd::ndt::factor_categorical(const nd::array& values)
 
     // Copy the values (now sorted and unique) into a new nd::array
     nd::array categories = make_sorted_categories(uniques,
-                    iter.get_uniform_dtype(), iter.metadata());
+                    iter.get_uniform_dtype(), iter.arrmeta());
 
     return ndt::type(new categorical_type(categories, true), false);
 }

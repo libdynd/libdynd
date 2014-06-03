@@ -42,13 +42,13 @@ fixedbytes_type::~fixedbytes_type()
 }
 
 void fixedbytes_type::get_bytes_range(const char **out_begin, const char**out_end,
-                const char *DYND_UNUSED(metadata), const char *data) const
+                const char *DYND_UNUSED(arrmeta), const char *data) const
 {
     *out_begin = data;
     *out_end = data + get_data_size();
 }
 
-void fixedbytes_type::print_data(std::ostream& o, const char *DYND_UNUSED(metadata), const char *data) const
+void fixedbytes_type::print_data(std::ostream& o, const char *DYND_UNUSED(arrmeta), const char *data) const
 {
     o << "0x";
     hexadecimal_print(o, data, get_data_size());
@@ -94,8 +94,8 @@ bool fixedbytes_type::operator==(const base_type& rhs) const
 
 size_t fixedbytes_type::make_assignment_kernel(
                 ckernel_builder *out, size_t offset_out,
-                const ndt::type& dst_tp, const char *dst_metadata,
-                const ndt::type& src_tp, const char *src_metadata,
+                const ndt::type& dst_tp, const char *dst_arrmeta,
+                const ndt::type& src_tp, const char *src_arrmeta,
                 kernel_request_t kernreq, assign_error_mode errmode,
                 const eval::eval_context *ectx) const
 {
@@ -112,8 +112,8 @@ size_t fixedbytes_type::make_assignment_kernel(
             }
             default: {
                 return src_tp.extended()->make_assignment_kernel(out, offset_out,
-                                dst_tp, dst_metadata,
-                                src_tp, src_metadata,
+                                dst_tp, dst_arrmeta,
+                                src_tp, src_arrmeta,
                                 kernreq, errmode, ectx);
             }
         }

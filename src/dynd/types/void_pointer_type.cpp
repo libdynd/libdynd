@@ -12,7 +12,7 @@
 using namespace std;
 using namespace dynd;
 
-void void_pointer_type::print_data(std::ostream& o, const char *DYND_UNUSED(metadata), const char *data) const
+void void_pointer_type::print_data(std::ostream& o, const char *DYND_UNUSED(arrmeta), const char *data) const
 {
     uintptr_t target_ptr = *reinterpret_cast<const uintptr_t *>(data);
     o << "0x";
@@ -36,8 +36,8 @@ bool void_pointer_type::operator==(const base_type& rhs) const
 
 size_t void_pointer_type::make_assignment_kernel(
                 ckernel_builder *out, size_t offset_out,
-                const ndt::type& dst_tp, const char *dst_metadata,
-                const ndt::type& src_tp, const char *src_metadata,
+                const ndt::type& dst_tp, const char *dst_arrmeta,
+                const ndt::type& src_tp, const char *src_arrmeta,
                 kernel_request_t kernreq, assign_error_mode errmode,
                 const eval::eval_context *ectx) const
 {
@@ -48,8 +48,8 @@ size_t void_pointer_type::make_assignment_kernel(
                     kernreq);
         } else if (!src_tp.is_builtin()) {
             src_tp.extended()->make_assignment_kernel(out, offset_out,
-                            dst_tp, dst_metadata,
-                            src_tp, src_metadata,
+                            dst_tp, dst_arrmeta,
+                            src_tp, src_arrmeta,
                             kernreq, errmode, ectx);
         }
     }

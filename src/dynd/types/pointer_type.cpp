@@ -20,7 +20,7 @@ pointer_type::pointer_type(const ndt::type& target_tp)
     : base_expression_type(pointer_type_id, expression_kind, sizeof(void *),
                     sizeof(void *),
                     inherited_flags(target_tp.get_flags(), type_flag_zeroinit|type_flag_blockref),
-                    sizeof(pointer_type_metadata) + target_tp.get_metadata_size(),
+                    sizeof(pointer_type_arrmeta) + target_tp.get_arrmeta_size(),
                     target_tp.get_ndim()),
                     m_target_tp(target_tp)
 {
@@ -39,11 +39,11 @@ pointer_type::~pointer_type()
 {
 }
 
-void pointer_type::print_data(std::ostream& o, const char *metadata, const char *data) const
+void pointer_type::print_data(std::ostream& o, const char *arrmeta, const char *data) const
 {
-    const pointer_type_metadata *md = reinterpret_cast<const pointer_type_metadata *>(metadata);
+    const pointer_type_arrmeta *md = reinterpret_cast<const pointer_type_arrmeta *>(arrmeta);
     const char *target_data = *reinterpret_cast<const char * const *>(data) + md->offset;
-    m_target_tp.print_data(o, metadata + sizeof(pointer_type_metadata), target_data);
+    m_target_tp.print_data(o, arrmeta + sizeof(pointer_type_arrmeta), target_data);
 }
 
 void pointer_type::print_type(std::ostream& o) const
@@ -58,9 +58,9 @@ bool pointer_type::is_expression() const
     return m_target_tp.is_expression();
 }
 
-bool pointer_type::is_unique_data_owner(const char *metadata) const
+bool pointer_type::is_unique_data_owner(const char *arrmeta) const
 {
-    const pointer_type_metadata *md = reinterpret_cast<const pointer_type_metadata *>(*metadata);
+    const pointer_type_arrmeta *md = reinterpret_cast<const pointer_type_arrmeta *>(*arrmeta);
     if (md->blockref != NULL &&
             (md->blockref->m_use_count != 1 ||
              (md->blockref->m_type != pod_memory_block_type &&
@@ -126,16 +126,16 @@ ndt::type pointer_type::apply_linear_index(intptr_t nindices, const irange *indi
     }
 }
 
-intptr_t pointer_type::apply_linear_index(intptr_t nindices, const irange *indices, const char *metadata,
-                const ndt::type& result_tp, char *out_metadata,
-                memory_block_data *embedded_reference,
-                size_t current_i, const ndt::type& root_tp,
-                bool leading_dimension, char **inout_data,
-                memory_block_data **inout_dataref) const
+intptr_t pointer_type::apply_linear_index(
+    intptr_t nindices, const irange *indices, const char *arrmeta,
+    const ndt::type &result_tp, char *out_arrmeta,
+    memory_block_data *embedded_reference, size_t current_i,
+    const ndt::type &root_tp, bool leading_dimension, char **inout_data,
+    memory_block_data **inout_dataref) const
 {
     if (leading_dimension) {
         // If it's a leading dimension, we always throw away the pointer
-        const pointer_type_metadata *md = reinterpret_cast<const pointer_type_metadata *>(metadata);
+        const pointer_type_arrmeta *md = reinterpret_cast<const pointer_type_arrmeta *>(arrmeta);
         *inout_data = *reinterpret_cast<char **>(*inout_data) + md->offset;
         if (*inout_dataref) {
             memory_block_decref(*inout_dataref);
@@ -146,24 +146,24 @@ intptr_t pointer_type::apply_linear_index(intptr_t nindices, const irange *indic
             return 0;
         } else {
             return m_target_tp.extended()->apply_linear_index(nindices, indices,
-                            metadata + sizeof(pointer_type_metadata),
-                            result_tp, out_metadata,
+                            arrmeta + sizeof(pointer_type_arrmeta),
+                            result_tp, out_arrmeta,
                             embedded_reference, current_i, root_tp,
                             true, inout_data, inout_dataref);
         }
     } else {
-        const pointer_type_metadata *md = reinterpret_cast<const pointer_type_metadata *>(metadata);
-        pointer_type_metadata *out_md = reinterpret_cast<pointer_type_metadata *>(out_metadata);
+        const pointer_type_arrmeta *md = reinterpret_cast<const pointer_type_arrmeta *>(arrmeta);
+        pointer_type_arrmeta *out_md = reinterpret_cast<pointer_type_arrmeta *>(out_arrmeta);
         // If there are no more indices, copy the rest verbatim
         out_md->blockref = md->blockref;
         memory_block_incref(out_md->blockref);
         out_md->offset = md->offset;
         if (!m_target_tp.is_builtin()) {
             const pointer_type *pdt = result_tp.tcast<pointer_type>();
-            // The indexing may cause a change to the metadata offset
+            // The indexing may cause a change to the arrmeta offset
             out_md->offset += m_target_tp.extended()->apply_linear_index(nindices, indices,
-                            metadata + sizeof(pointer_type_metadata),
-                            pdt->m_target_tp, out_metadata + sizeof(pointer_type_metadata),
+                            arrmeta + sizeof(pointer_type_arrmeta),
+                            pdt->m_target_tp, out_arrmeta + sizeof(pointer_type_arrmeta),
                             embedded_reference, current_i, root_tp,
                             false, NULL, NULL);
         }
@@ -171,43 +171,51 @@ intptr_t pointer_type::apply_linear_index(intptr_t nindices, const irange *indic
     }
 }
 
-ndt::type pointer_type::at_single(intptr_t i0, const char **inout_metadata, const char **inout_data) const
+ndt::type pointer_type::at_single(intptr_t i0, const char **inout_arrmeta,
+                                  const char **inout_data) const
 {
-    // If metadata/data is provided, follow the pointer and call the target type's at_single
-    if (inout_metadata) {
-        const pointer_type_metadata *md = reinterpret_cast<const pointer_type_metadata *>(*inout_metadata);
-        // Modify the metadata
-        *inout_metadata += sizeof(pointer_type_metadata);
+    // If arrmeta/data is provided, follow the pointer and call the target
+    // type's at_single
+    if (inout_arrmeta) {
+        const pointer_type_arrmeta *md =
+            reinterpret_cast<const pointer_type_arrmeta *>(*inout_arrmeta);
+        // Modify the arrmeta
+        *inout_arrmeta += sizeof(pointer_type_arrmeta);
         // If requested, modify the data pointer
         if (inout_data) {
-            *inout_data = *reinterpret_cast<const char * const *>(inout_data) + md->offset;
+            *inout_data =
+                *reinterpret_cast<const char *const *>(inout_data) + md->offset;
         }
     }
-    return m_target_tp.at_single(i0, inout_metadata, inout_data);
+    return m_target_tp.at_single(i0, inout_arrmeta, inout_data);
 }
 
-ndt::type pointer_type::get_type_at_dimension(char **inout_metadata, intptr_t i, intptr_t total_ndim) const
+ndt::type pointer_type::get_type_at_dimension(char **inout_arrmeta, intptr_t i,
+                                              intptr_t total_ndim) const
 {
     if (i == 0) {
         return ndt::type(this, true);
     } else {
-        *inout_metadata += sizeof(pointer_type_metadata);
-        return m_target_tp.get_type_at_dimension(inout_metadata, i, total_ndim);
+        *inout_arrmeta += sizeof(pointer_type_arrmeta);
+        return m_target_tp.get_type_at_dimension(inout_arrmeta, i, total_ndim);
     }
 }
 
 void pointer_type::get_shape(intptr_t ndim, intptr_t i, intptr_t *out_shape,
-                const char *metadata, const char *data) const
+                             const char *arrmeta, const char *data) const
 {
     if (!m_target_tp.is_builtin()) {
         const char *target_data = NULL;
-        if (metadata != NULL && data != NULL) {
-            const pointer_type_metadata *md = reinterpret_cast<const pointer_type_metadata *>(metadata);
-            target_data = *reinterpret_cast<const char * const *>(data) + md->offset;
+        if (arrmeta != NULL && data != NULL) {
+            const pointer_type_arrmeta *md =
+                reinterpret_cast<const pointer_type_arrmeta *>(arrmeta);
+            target_data =
+                *reinterpret_cast<const char *const *>(data) + md->offset;
         }
-        m_target_tp.extended()->get_shape(ndim, i, out_shape,
-                        metadata ? (metadata + sizeof(pointer_type_metadata)) : NULL,
-                        target_data);
+        m_target_tp.extended()->get_shape(
+            ndim, i, out_shape,
+            arrmeta ? (arrmeta + sizeof(pointer_type_arrmeta)) : NULL,
+            target_data);
     } else {
         stringstream ss;
         ss << "requested too many dimensions from type " << m_target_tp;
@@ -215,18 +223,20 @@ void pointer_type::get_shape(intptr_t ndim, intptr_t i, intptr_t *out_shape,
     }
 }
 
-axis_order_classification_t pointer_type::classify_axis_order(const char *metadata) const
+axis_order_classification_t
+pointer_type::classify_axis_order(const char *arrmeta) const
 {
     // Return the classification of the target type
     if (m_target_tp.get_ndim() > 1) {
         return m_target_tp.extended()->classify_axis_order(
-                        metadata + sizeof(pointer_type_metadata));
+            arrmeta + sizeof(pointer_type_arrmeta));
     } else {
         return axis_order_none;
     }
 }
 
-bool pointer_type::is_lossless_assignment(const ndt::type& dst_tp, const ndt::type& src_tp) const
+bool pointer_type::is_lossless_assignment(const ndt::type &dst_tp,
+                                          const ndt::type &src_tp) const
 {
     if (dst_tp.extended() == this) {
         return ::is_lossless_assignment(m_target_tp, src_tp);
@@ -247,88 +257,106 @@ bool pointer_type::operator==(const base_type& rhs) const
     }
 }
 
-ndt::type pointer_type::with_replaced_storage_type(const ndt::type& /*replacement_tp*/) const
+ndt::type
+pointer_type::with_replaced_storage_type(const ndt::type & /*replacement_tp*/)
+    const
 {
-    throw runtime_error("TODO: implement pointer_type::with_replaced_storage_type");
+    throw runtime_error(
+        "TODO: implement pointer_type::with_replaced_storage_type");
 }
 
-void pointer_type::metadata_default_construct(char *metadata, intptr_t ndim, const intptr_t* shape) const
+void pointer_type::arrmeta_default_construct(char *arrmeta, intptr_t ndim,
+                                             const intptr_t *shape) const
 {
     // Simply allocate a POD memory block
     // TODO: Will need a different kind of memory block if the data isn't POD.
-    pointer_type_metadata *md = reinterpret_cast<pointer_type_metadata *>(metadata);
+    pointer_type_arrmeta *md =
+        reinterpret_cast<pointer_type_arrmeta *>(arrmeta);
     md->blockref = make_pod_memory_block().release();
     if (!m_target_tp.is_builtin()) {
-        m_target_tp.extended()->metadata_default_construct(metadata + sizeof(pointer_type_metadata), ndim, shape);
+        m_target_tp.extended()->arrmeta_default_construct(
+            arrmeta + sizeof(pointer_type_arrmeta), ndim, shape);
     }
 }
 
-void pointer_type::metadata_copy_construct(char *dst_metadata, const char *src_metadata, memory_block_data *embedded_reference) const
+void pointer_type::arrmeta_copy_construct(char *dst_arrmeta,
+                                          const char *src_arrmeta,
+                                          memory_block_data *embedded_reference)
+    const
 {
     // Copy the blockref, switching it to the embedded_reference if necessary
-    const pointer_type_metadata *src_md = reinterpret_cast<const pointer_type_metadata *>(src_metadata);
-    pointer_type_metadata *dst_md = reinterpret_cast<pointer_type_metadata *>(dst_metadata);
+    const pointer_type_arrmeta *src_md =
+        reinterpret_cast<const pointer_type_arrmeta *>(src_arrmeta);
+    pointer_type_arrmeta *dst_md =
+        reinterpret_cast<pointer_type_arrmeta *>(dst_arrmeta);
     dst_md->blockref = src_md->blockref ? src_md->blockref : embedded_reference;
     if (dst_md->blockref) {
         memory_block_incref(dst_md->blockref);
     }
     dst_md->offset = src_md->offset;
-    // Copy the target metadata
+    // Copy the target arrmeta
     if (!m_target_tp.is_builtin()) {
-        m_target_tp.extended()->metadata_copy_construct(dst_metadata + sizeof(pointer_type_metadata),
-                        src_metadata + sizeof(pointer_type_metadata), embedded_reference);
+        m_target_tp.extended()->arrmeta_copy_construct(
+            dst_arrmeta + sizeof(pointer_type_arrmeta),
+            src_arrmeta + sizeof(pointer_type_arrmeta), embedded_reference);
     }
 }
 
-void pointer_type::metadata_reset_buffers(char *DYND_UNUSED(metadata)) const
+void pointer_type::arrmeta_reset_buffers(char *DYND_UNUSED(arrmeta)) const
 {
-    throw runtime_error("TODO implement pointer_type::metadata_reset_buffers");
+    throw runtime_error("TODO implement pointer_type::arrmeta_reset_buffers");
 }
 
-void pointer_type::metadata_finalize_buffers(char *metadata) const
+void pointer_type::arrmeta_finalize_buffers(char *arrmeta) const
 {
-    pointer_type_metadata *md = reinterpret_cast<pointer_type_metadata *>(metadata);
+    pointer_type_arrmeta *md =
+        reinterpret_cast<pointer_type_arrmeta *>(arrmeta);
     if (md->blockref != NULL) {
         // Finalize the memory block
-        memory_block_pod_allocator_api *allocator = get_memory_block_pod_allocator_api(md->blockref);
+        memory_block_pod_allocator_api *allocator =
+            get_memory_block_pod_allocator_api(md->blockref);
         if (allocator != NULL) {
             allocator->finalize(md->blockref);
         }
     }
 }
 
-void pointer_type::metadata_destruct(char *metadata) const
+void pointer_type::arrmeta_destruct(char *arrmeta) const
 {
-    pointer_type_metadata *md =
-                    reinterpret_cast<pointer_type_metadata *>(metadata);
+    pointer_type_arrmeta *md =
+                    reinterpret_cast<pointer_type_arrmeta *>(arrmeta);
     if (md->blockref) {
         memory_block_decref(md->blockref);
     }
     if (!m_target_tp.is_builtin()) {
-        m_target_tp.extended()->metadata_destruct(
-                        metadata + sizeof(pointer_type_metadata));
+        m_target_tp.extended()->arrmeta_destruct(
+                        arrmeta + sizeof(pointer_type_arrmeta));
     }
 }
 
-void pointer_type::metadata_debug_print(const char *metadata, std::ostream& o, const std::string& indent) const
+void pointer_type::arrmeta_debug_print(const char *arrmeta, std::ostream &o,
+                                       const std::string &indent) const
 {
-    const pointer_type_metadata *md = reinterpret_cast<const pointer_type_metadata *>(metadata);
-    o << indent << "pointer metadata\n";
+    const pointer_type_arrmeta *md =
+        reinterpret_cast<const pointer_type_arrmeta *>(arrmeta);
+    o << indent << "pointer arrmeta\n";
     o << indent << " offset: " << md->offset << "\n";
     memory_block_debug_print(md->blockref, o, indent + " ");
     if (!m_target_tp.is_builtin()) {
-        m_target_tp.extended()->metadata_debug_print(metadata + sizeof(pointer_type_metadata), o, indent + " ");
+        m_target_tp.extended()->arrmeta_debug_print(
+            arrmeta + sizeof(pointer_type_arrmeta), o, indent + " ");
     }
 }
 
-static ndt::type property_get_target_type(const ndt::type& tp) {
+static ndt::type property_get_target_type(const ndt::type &tp)
+{
     const pointer_type *pd = tp.tcast<pointer_type>();
     return pd->get_target_type();
 }
 
 void pointer_type::get_dynamic_type_properties(
-                const std::pair<std::string, gfunc::callable> **out_properties,
-                size_t *out_count) const
+    const std::pair<std::string, gfunc::callable> **out_properties,
+    size_t *out_count) const
 {
     static pair<string, gfunc::callable> type_properties[] = {
         pair<string, gfunc::callable>(

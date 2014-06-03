@@ -63,7 +63,7 @@ void expr_as_unary_adapter_strided_ckernel(
  */
 size_t make_constant_value_assignment_ckernel(
     ckernel_builder *out_ckb, intptr_t ckb_offset, const ndt::type &dst_tp,
-    const char *dst_metadata, const nd::array &constant,
+    const char *dst_arrmeta, const nd::array &constant,
     kernel_request_t kernreq, const eval::eval_context *ectx);
 
 /**

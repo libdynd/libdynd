@@ -36,7 +36,7 @@ struct masked_take_ck : public kernels::expr_ck<masked_take_ck, 2> {
         var_dim_type_data *vdd = reinterpret_cast<var_dim_type_data *>(dst);
         char *dst_ptr = vdd->begin;
         intptr_t dst_stride =
-            reinterpret_cast<const var_dim_type_metadata *>(m_dst_meta)->stride;
+            reinterpret_cast<const var_dim_type_arrmeta *>(m_dst_meta)->stride;
         intptr_t dst_count = 0;
         intptr_t i = 0;
         while (i < dim_size) {
@@ -183,7 +183,7 @@ instantiate_masked_take(const arrfunc_type_data *DYND_UNUSED(self_data_ptr), dyn
     self->m_dst_tp = dst_tp;
     self->m_dst_meta = dst_arrmeta;
     ndt::type dst_el_tp = self->m_dst_tp.tcast<var_dim_type>()->get_element_type();
-    const char *dst_el_meta = self->m_dst_meta + sizeof(var_dim_type_metadata);
+    const char *dst_el_meta = self->m_dst_meta + sizeof(var_dim_type_arrmeta);
 
     intptr_t src0_dim_size, mask_dim_size;
     ndt::type src0_el_tp, mask_el_tp;

@@ -26,7 +26,7 @@ public:
                     size_t alignment, size_t element_arrmeta_offset,
                     flags_type flags)
         : base_type(type_id, uniform_dim_kind, data_size,
-                        alignment, flags, element_arrmeta_offset + element_tp.get_metadata_size(),
+                        alignment, flags, element_arrmeta_offset + element_tp.get_arrmeta_size(),
                         1 + element_tp.get_ndim()),
             m_element_tp(element_tp), m_element_arrmeta_offset(element_arrmeta_offset)
     {
@@ -52,8 +52,8 @@ public:
     }
 
     /**
-     * The offset to add to the metadata to get to the
-     * element type's metadata.
+     * The offset to add to the arrmeta to get to the
+     * element type's arrmeta.
      */
     inline size_t get_element_arrmeta_offset() const {
         return m_element_arrmeta_offset;
@@ -63,26 +63,26 @@ public:
      * The dimension size, or -1 if it can't be determined
      * from the information given.
      *
-     * \param metadata  A metadata instance for the type, or NULL.
-     * \param data  A data instance for the type/metadata, or NULL.
+     * \param arrmeta  A arrmeta instance for the type, or NULL.
+     * \param data  A data instance for the type/arrmeta, or NULL.
      *
      * \returns  The size of the dimension, or -1.
      */
-    virtual intptr_t get_dim_size(const char *metadata = NULL, const char *data = NULL) const = 0;
+    virtual intptr_t get_dim_size(const char *arrmeta = NULL, const char *data = NULL) const = 0;
 
     /**
-     * Constructs the nd::array metadata for one dimension of this type, leaving
-     * the metadata for deeper dimensions uninitialized. Returns the size of
-     * the metadata that was copied.
+     * Constructs the nd::array arrmeta for one dimension of this type, leaving
+     * the arrmeta for deeper dimensions uninitialized. Returns the size of
+     * the arrmeta that was copied.
      *
-     * \param dst_metadata  The new metadata memory which is constructed.
-     * \param src_metadata   Existing metadata memory from which to copy.
+     * \param dst_arrmeta  The new arrmeta memory which is constructed.
+     * \param src_arrmeta   Existing arrmeta memory from which to copy.
      * \param embedded_reference  For references which are NULL, add this reference in the output.
      *                            A NULL means the data was embedded in the original nd::array, so
      *                            when putting it in a new nd::array, need to hold a reference to
      *                            that memory.
      */
-    virtual size_t metadata_copy_construct_onedim(char *dst_metadata, const char *src_metadata,
+    virtual size_t arrmeta_copy_construct_onedim(char *dst_arrmeta, const char *src_arrmeta,
                     memory_block_data *embedded_reference) const = 0;
 };
 

@@ -13,7 +13,7 @@ convert_type::convert_type(const ndt::type& value_type, const ndt::type& operand
     : base_expression_type(convert_type_id, expression_kind, operand_type.get_data_size(),
                         operand_type.get_data_alignment(),
                         inherited_flags(value_type.get_flags(), operand_type.get_flags()),
-                        operand_type.get_metadata_size(),
+                        operand_type.get_arrmeta_size(),
                         value_type.get_ndim()),
                 m_value_type(value_type), m_operand_type(operand_type), m_errmode(errmode)
 {
@@ -43,7 +43,7 @@ convert_type::~convert_type()
 }
 
 
-void convert_type::print_data(std::ostream& DYND_UNUSED(o), const char *DYND_UNUSED(metadata), const char *DYND_UNUSED(data)) const
+void convert_type::print_data(std::ostream& DYND_UNUSED(o), const char *DYND_UNUSED(arrmeta), const char *DYND_UNUSED(data)) const
 {
     throw runtime_error("internal error: convert_type::print_data isn't supposed to be called");
 }
@@ -58,11 +58,11 @@ void convert_type::print_type(std::ostream& o) const
 }
 
 void convert_type::get_shape(intptr_t ndim, intptr_t i, intptr_t *out_shape,
-                const char *metadata, const char *DYND_UNUSED(data)) const
+                const char *arrmeta, const char *DYND_UNUSED(data)) const
 {
     // Get the shape from the operand type
     if (!m_operand_type.is_builtin()) {
-        m_operand_type.extended()->get_shape(ndim, i, out_shape, metadata, NULL);
+        m_operand_type.extended()->get_shape(ndim, i, out_shape, arrmeta, NULL);
     } else {
         stringstream ss;
         ss << "requested too many dimensions from type " << ndt::type(this, true);
@@ -113,22 +113,22 @@ ndt::type convert_type::with_replaced_storage_type(const ndt::type& replacement_
 
 size_t convert_type::make_operand_to_value_assignment_kernel(
                 ckernel_builder *out, size_t offset_out,
-                const char *dst_metadata, const char *src_metadata,
+                const char *dst_arrmeta, const char *src_arrmeta,
                 kernel_request_t kernreq, const eval::eval_context *ectx) const
 {
     return ::make_assignment_kernel(out, offset_out,
-                    m_value_type, dst_metadata,
-                    m_operand_type.value_type(), src_metadata,
+                    m_value_type, dst_arrmeta,
+                    m_operand_type.value_type(), src_arrmeta,
                     kernreq, m_errmode_to_value, ectx);
 }
 
 size_t convert_type::make_value_to_operand_assignment_kernel(
                 ckernel_builder *out, size_t offset_out,
-                const char *dst_metadata, const char *src_metadata,
+                const char *dst_arrmeta, const char *src_arrmeta,
                 kernel_request_t kernreq, const eval::eval_context *ectx) const
 {
     return ::make_assignment_kernel(out, offset_out,
-                    m_operand_type.value_type(), dst_metadata,
-                    m_value_type, src_metadata,
+                    m_operand_type.value_type(), dst_arrmeta,
+                    m_value_type, src_arrmeta,
                     kernreq, m_errmode_to_value, ectx);
 }

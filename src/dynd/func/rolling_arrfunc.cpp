@@ -70,7 +70,7 @@ struct var_rolling_ck : public kernels::assignment_ck<strided_rolling_ck> {
         // Get pointers to the src and dst data
         var_dim_type_data *dst_dat = reinterpret_cast<var_dim_type_data *>(dst);
         intptr_t dst_stride =
-            reinterpret_cast<const var_dim_type_metadata *>(m_dst_meta)->stride;
+            reinterpret_cast<const var_dim_type_arrmeta *>(m_dst_meta)->stride;
         const var_dim_type_data *src_dat =
             reinterpret_cast<const var_dim_type_data *>(src);
         const char *src_arr_ptr = src_dat->begin + m_src_offset;
@@ -158,16 +158,16 @@ static void resolve_rolling_dst_shape(const arrfunc_type_data *af_self,
             ndt::type child_src_tp =
                 ndt::make_strided_dim(src_tp[0].get_type_at_dimension(
                     const_cast<char **>(&src_winop_el_meta), 1));
-            // We construct array metadata for the window op ckernel to use,
+            // We construct array arrmeta for the window op ckernel to use,
             // without actually creating an nd::array to hold it.
             arrmeta_holder src_winop_meta(ndt::make_strided_dim(child_src_tp));
-            src_winop_meta.get_at<strided_dim_type_metadata>(0)->size =
+            src_winop_meta.get_at<strided_dim_type_arrmeta>(0)->size =
                 data->window_size;
-            src_winop_meta.get_at<strided_dim_type_metadata>(0)->stride =
+            src_winop_meta.get_at<strided_dim_type_arrmeta>(0)->stride =
                 child_src_tp.get_default_data_size(0, NULL);
-            if (child_src_tp.get_metadata_size() > 0) {
-                child_src_tp.extended()->metadata_copy_construct(
-                    src_winop_meta.get() + sizeof(strided_dim_type_metadata),
+            if (child_src_tp.get_arrmeta_size() > 0) {
+                child_src_tp.extended()->arrmeta_copy_construct(
+                    src_winop_meta.get() + sizeof(strided_dim_type_arrmeta),
                     src_winop_el_meta, NULL);
             }
             const char *child_src_arrmeta = src_winop_meta.get();
@@ -234,17 +234,17 @@ instantiate_strided(const arrfunc_type_data *af_self, dynd::ckernel_builder *ckb
     self = ckb->get_at<self_type>(ckb_offset);
     // Create the window op child ckernel
     self->m_window_op_offset = ckb_end;
-    // We construct array metadata for the window op ckernel to use,
+    // We construct array arrmeta for the window op ckernel to use,
     // without actually creating an nd::array to hold it.
     arrmeta_holder(ndt::make_strided_dim(src_el_tp))
         .swap(self->m_src_winop_meta);
-    self->m_src_winop_meta.get_at<strided_dim_type_metadata>(0)->size =
+    self->m_src_winop_meta.get_at<strided_dim_type_arrmeta>(0)->size =
         self->m_window_size;
-    self->m_src_winop_meta.get_at<strided_dim_type_metadata>(0)->stride =
+    self->m_src_winop_meta.get_at<strided_dim_type_arrmeta>(0)->stride =
         self->m_src_stride;
-    if (src_el_tp.get_metadata_size() > 0) {
-        src_el_tp.extended()->metadata_copy_construct(
-            self->m_src_winop_meta.get() + sizeof(strided_dim_type_metadata),
+    if (src_el_tp.get_arrmeta_size() > 0) {
+        src_el_tp.extended()->arrmeta_copy_construct(
+            self->m_src_winop_meta.get() + sizeof(strided_dim_type_arrmeta),
             src_el_arrmeta, NULL);
     }
 

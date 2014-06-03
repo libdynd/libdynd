@@ -13,7 +13,7 @@
 
 namespace dynd {
 
-struct fixed_dim_type_metadata {
+struct fixed_dim_type_arrmeta {
     intptr_t stride;
 };
 
@@ -37,81 +37,81 @@ public:
         return m_dim_size;
     }
 
-    void print_data(std::ostream& o, const char *metadata, const char *data) const;
+    void print_data(std::ostream& o, const char *arrmeta, const char *data) const;
 
     void print_type(std::ostream& o) const;
 
     bool is_expression() const;
-    bool is_unique_data_owner(const char *metadata) const;
+    bool is_unique_data_owner(const char *arrmeta) const;
     void transform_child_types(type_transform_fn_t transform_fn, void *extra,
                     ndt::type& out_transformed_tp, bool& out_was_transformed) const;
     ndt::type get_canonical_type() const;
     bool is_strided() const;
-    void process_strided(const char *metadata, const char *data,
+    void process_strided(const char *arrmeta, const char *data,
                     ndt::type& out_dt, const char *&out_origin,
                     intptr_t& out_stride, intptr_t& out_dim_size) const;
 
     ndt::type apply_linear_index(intptr_t nindices, const irange *indices,
                 size_t current_i, const ndt::type& root_tp, bool leading_dimension) const;
-    intptr_t apply_linear_index(intptr_t nindices, const irange *indices, const char *metadata,
-                    const ndt::type& result_tp, char *out_metadata,
+    intptr_t apply_linear_index(intptr_t nindices, const irange *indices, const char *arrmeta,
+                    const ndt::type& result_tp, char *out_arrmeta,
                     memory_block_data *embedded_reference,
                     size_t current_i, const ndt::type& root_tp,
                     bool leading_dimension, char **inout_data,
                     memory_block_data **inout_dataref) const;
-    ndt::type at_single(intptr_t i0, const char **inout_metadata, const char **inout_data) const;
+    ndt::type at_single(intptr_t i0, const char **inout_arrmeta, const char **inout_data) const;
 
-    ndt::type get_type_at_dimension(char **inout_metadata, intptr_t i, intptr_t total_ndim = 0) const;
+    ndt::type get_type_at_dimension(char **inout_arrmeta, intptr_t i, intptr_t total_ndim = 0) const;
 
-    intptr_t get_dim_size(const char *metadata, const char *data) const;
-        void get_shape(intptr_t ndim, intptr_t i, intptr_t *out_shape, const char *metadata, const char *data) const;
-    void get_strides(size_t i, intptr_t *out_strides, const char *metadata) const;
+    intptr_t get_dim_size(const char *arrmeta, const char *data) const;
+        void get_shape(intptr_t ndim, intptr_t i, intptr_t *out_shape, const char *arrmeta, const char *data) const;
+    void get_strides(size_t i, intptr_t *out_strides, const char *arrmeta) const;
 
-    axis_order_classification_t classify_axis_order(const char *metadata) const;
+    axis_order_classification_t classify_axis_order(const char *arrmeta) const;
 
     bool is_lossless_assignment(const ndt::type& dst_tp, const ndt::type& src_tp) const;
 
     bool operator==(const base_type& rhs) const;
 
-    void metadata_default_construct(char *metadata, intptr_t ndim, const intptr_t* shape) const;
-    void metadata_copy_construct(char *dst_metadata, const char *src_metadata, memory_block_data *embedded_reference) const;
-    void metadata_reset_buffers(char *metadata) const;
-    void metadata_finalize_buffers(char *metadata) const;
-    void metadata_destruct(char *metadata) const;
-    void metadata_debug_print(const char *metadata, std::ostream& o, const std::string& indent) const;
-    size_t metadata_copy_construct_onedim(char *dst_metadata, const char *src_metadata,
+    void arrmeta_default_construct(char *arrmeta, intptr_t ndim, const intptr_t* shape) const;
+    void arrmeta_copy_construct(char *dst_arrmeta, const char *src_arrmeta, memory_block_data *embedded_reference) const;
+    void arrmeta_reset_buffers(char *arrmeta) const;
+    void arrmeta_finalize_buffers(char *arrmeta) const;
+    void arrmeta_destruct(char *arrmeta) const;
+    void arrmeta_debug_print(const char *arrmeta, std::ostream& o, const std::string& indent) const;
+    size_t arrmeta_copy_construct_onedim(char *dst_arrmeta, const char *src_arrmeta,
                     memory_block_data *embedded_reference) const;
 
     size_t get_iterdata_size(intptr_t ndim) const;
-    size_t iterdata_construct(iterdata_common *iterdata, const char **inout_metadata, intptr_t ndim, const intptr_t* shape, ndt::type& out_uniform_tp) const;
+    size_t iterdata_construct(iterdata_common *iterdata, const char **inout_arrmeta, intptr_t ndim, const intptr_t* shape, ndt::type& out_uniform_tp) const;
     size_t iterdata_destruct(iterdata_common *iterdata, intptr_t ndim) const;
 
-    void data_destruct(const char *metadata, char *data) const;
-    void data_destruct_strided(const char *metadata, char *data,
+    void data_destruct(const char *arrmeta, char *data) const;
+    void data_destruct_strided(const char *arrmeta, char *data,
                     intptr_t stride, size_t count) const;
 
     size_t make_assignment_kernel(
                     ckernel_builder *out, size_t offset_out,
-                    const ndt::type& dst_tp, const char *dst_metadata,
-                    const ndt::type& src_tp, const char *src_metadata,
+                    const ndt::type& dst_tp, const char *dst_arrmeta,
+                    const ndt::type& src_tp, const char *src_arrmeta,
                     kernel_request_t kernreq, assign_error_mode errmode,
                     const eval::eval_context *ectx) const;
 
-    void foreach_leading(const char *metadata, char *data,
+    void foreach_leading(const char *arrmeta, char *data,
                          foreach_fn_t callback, void *callback_data) const;
 
     /**
-     * Modifies metadata allocated using the metadata_default_construct function, to be used
-     * immediately after nd::array construction. Given an input type/metadata, edits the output
-     * metadata in place to match.
+     * Modifies arrmeta allocated using the arrmeta_default_construct function, to be used
+     * immediately after nd::array construction. Given an input type/arrmeta, edits the output
+     * arrmeta in place to match.
      *
-     * \param dst_metadata  The metadata created by metadata_default_construct, which is modified in place
+     * \param dst_arrmeta  The arrmeta created by arrmeta_default_construct, which is modified in place
      * \param src_tp  The type of the input nd::array whose stride ordering is to be matched.
-     * \param src_metadata  The metadata of the input nd::array whose stride ordering is to be matched.
+     * \param src_arrmeta  The arrmeta of the input nd::array whose stride ordering is to be matched.
      */
     void reorder_default_constructed_strides(
-                    char *dst_metadata,
-                    const ndt::type& src_tp, const char *src_metadata) const;
+                    char *dst_arrmeta,
+                    const ndt::type& src_tp, const char *src_arrmeta) const;
 
     void get_dynamic_type_properties(
                     const std::pair<std::string, gfunc::callable> **out_properties,

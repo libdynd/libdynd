@@ -58,8 +58,8 @@ struct dim_iter {
     uint64_t flags;
     /** The type of one element */
     const base_type *eltype;
-    /** Array metadata that each element conforms to. */
-    const char *elmeta;
+    /** Array arrmeta that each element conforms to. */
+    const char *el_arrmeta;
     /**
      * Some space the creator of the iterator can use. If all additional data
      * fits here, a memory allocation can be avoided, otherwise a dynamically
@@ -95,7 +95,7 @@ struct dim_iter {
  * \param out_di  An uninitialized dim_iter object. The function
  *                populates it assuming it is filled with garbage.
  * \param tp  The type of the elements being iterated
- * \param meta  The array metadata corresponding to `tp`.
+ * \param arrmeta  The arrmeta corresponding to `tp`.
  * \param data_ptr  The data pointer of element 0.
  * \param size  The dimension size.
  * \param stride  The stride between elements.
@@ -103,7 +103,7 @@ struct dim_iter {
  */
 void make_strided_dim_iter(
     dim_iter *out_di,
-    const ndt::type& tp, const char *meta,
+    const ndt::type& tp, const char *arrmeta,
     const char *data_ptr, intptr_t size, intptr_t stride,
     const memory_block_ptr& ref);
 
@@ -116,7 +116,7 @@ void make_strided_dim_iter(
  *                populates it assuming it is filled with garbage.
  * \param val_tp  The type of the elements the iterator should produce.
  * \param mem_tp  The type of elements in memory.
- * \param mem_meta  The array metadata for mem_tp.
+ * \param mem_arrmeta  The arrmeta for mem_tp.
  * \param data_ptr  The data pointer of element 0.
  * \param size  The dimension size.
  * \param stride  The stride between elements.
@@ -127,7 +127,7 @@ void make_strided_dim_iter(
 void make_buffered_strided_dim_iter(
     dim_iter *out_di,
     const ndt::type& val_tp,
-    const ndt::type& mem_tp, const char *mem_meta,
+    const ndt::type& mem_tp, const char *mem_arrmeta,
     const char *data_ptr, intptr_t size, intptr_t stride,
     const memory_block_ptr& ref, intptr_t buffer_max_mem = 65536,
     const eval::eval_context *ectx = &eval::default_eval_context);
@@ -138,14 +138,14 @@ void make_buffered_strided_dim_iter(
  * \param out_di  An uninitialized dim_iter object. The function
  *                populates it assuming it is filled with garbage.
  * \param tp  The type of the elements being iterated.
- * \param meta  The array metadata corresponding to `tp`.
+ * \param arrmeta  The arrmeta corresponding to `tp`.
  */
 inline void make_empty_dim_iter(
     dim_iter *out_di,
     const ndt::type& tp,
-    const char *meta)
+    const char *arrmeta)
 {
-    make_strided_dim_iter(out_di, tp, meta,
+    make_strided_dim_iter(out_di, tp, arrmeta,
         NULL, 0, 0, memory_block_ptr());
 }
 

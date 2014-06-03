@@ -61,9 +61,9 @@ public:
     }
 
 
-    void print_data(std::ostream& o, const char *metadata, const char *data) const;
+    void print_data(std::ostream& o, const char *arrmeta, const char *data) const;
     bool is_expression() const;
-    bool is_unique_data_owner(const char *metadata) const;
+    bool is_unique_data_owner(const char *arrmeta) const;
 
     size_t get_default_data_size(intptr_t ndim, const intptr_t *shape) const;
 
@@ -72,20 +72,20 @@ public:
 
     ndt::type apply_linear_index(intptr_t nindices, const irange *indices,
                 size_t current_i, const ndt::type& root_tp, bool leading_dimension) const;
-    intptr_t apply_linear_index(intptr_t nindices, const irange *indices, const char *metadata,
-                    const ndt::type& result_tp, char *out_metadata,
+    intptr_t apply_linear_index(intptr_t nindices, const irange *indices, const char *arrmeta,
+                    const ndt::type& result_tp, char *out_arrmeta,
                     memory_block_data *embedded_reference,
                     size_t current_i, const ndt::type& root_tp,
                     bool leading_dimension, char **inout_data,
                     memory_block_data **inout_dataref) const;
 
-    void metadata_default_construct(char *arrmeta, intptr_t ndim,
+    void arrmeta_default_construct(char *arrmeta, intptr_t ndim,
                                     const intptr_t *shape) const;
-    void metadata_copy_construct(char *dst_arrmeta, const char *src_arrmeta,
+    void arrmeta_copy_construct(char *dst_arrmeta, const char *src_arrmeta,
                                  memory_block_data *embedded_reference) const;
-    void metadata_reset_buffers(char *arrmeta) const;
-    void metadata_finalize_buffers(char *arrmeta) const;
-    void metadata_destruct(char *arrmeta) const;
+    void arrmeta_reset_buffers(char *arrmeta) const;
+    void arrmeta_finalize_buffers(char *arrmeta) const;
+    void arrmeta_destruct(char *arrmeta) const;
 
     void data_destruct(const char *arrmeta, char *data) const;
     void data_destruct_strided(const char *arrmeta, char *data,

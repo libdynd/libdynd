@@ -87,7 +87,7 @@ namespace {
 
 size_t kernels::make_constant_value_assignment_ckernel(
     ckernel_builder *out_ckb, intptr_t ckb_offset, const ndt::type &dst_tp,
-    const char *dst_metadata, const nd::array &constant,
+    const char *dst_arrmeta, const nd::array &constant,
     kernel_request_t kernreq, const eval::eval_context *ectx)
 {
     typedef constant_value_assignment_ck self_type;
@@ -98,7 +98,7 @@ size_t kernels::make_constant_value_assignment_ckernel(
     self->m_constant_data = self->m_constant.get_readonly_originptr();
     // Create the child assignment ckernel
     return make_assignment_kernel(
-        out_ckb, ckb_offset + sizeof(self_type), dst_tp, dst_metadata,
+        out_ckb, ckb_offset + sizeof(self_type), dst_tp, dst_arrmeta,
         self->m_constant.get_type(), self->m_constant.get_arrmeta(), kernreq,
         assign_error_default, ectx);
 }

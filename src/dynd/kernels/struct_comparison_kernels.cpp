@@ -15,9 +15,9 @@ using namespace std;
 using namespace dynd;
 
 namespace {
-    // Sorting less operation when the metadata is different
-    struct struct_compare_sorting_less_matching_metadata_kernel {
-        typedef struct_compare_sorting_less_matching_metadata_kernel extra_type;
+    // Sorting less operation when the arrmeta is different
+    struct struct_compare_sorting_less_matching_arrmeta_kernel {
+        typedef struct_compare_sorting_less_matching_arrmeta_kernel extra_type;
 
         ckernel_prefix base;
         size_t field_count;
@@ -62,9 +62,9 @@ namespace {
         }
     };
 
-    // Sorting less operation when the metadata is different
-    struct struct_compare_sorting_less_diff_metadata_kernel {
-        typedef struct_compare_sorting_less_diff_metadata_kernel extra_type;
+    // Sorting less operation when the arrmeta is different
+    struct struct_compare_sorting_less_diff_arrmeta_kernel {
+        typedef struct_compare_sorting_less_diff_arrmeta_kernel extra_type;
 
         ckernel_prefix base;
         size_t field_count;
@@ -185,28 +185,28 @@ namespace {
 size_t dynd::make_struct_comparison_kernel(
                 ckernel_builder *out, size_t offset_out,
                 const ndt::type& src_tp,
-                const char *src0_metadata, const char *src1_metadata,
+                const char *src0_arrmeta, const char *src1_arrmeta,
                 comparison_type_t comptype,
                 const eval::eval_context *ectx)
 {
     const base_struct_type *bsd = src_tp.tcast<base_struct_type>();
     size_t field_count = bsd->get_field_count();
     if (comptype == comparison_type_sorting_less) {
-        if (src0_metadata == src1_metadata ||
-                        src_tp.get_metadata_size() == 0 ||
-                        memcmp(src0_metadata, src1_metadata, src_tp.get_metadata_size()) == 0) {
-            // The metadata is identical, so can use a more specialized comparison function
+        if (src0_arrmeta == src1_arrmeta ||
+                        src_tp.get_arrmeta_size() == 0 ||
+                        memcmp(src0_arrmeta, src1_arrmeta, src_tp.get_arrmeta_size()) == 0) {
+            // The arrmeta is identical, so can use a more specialized comparison function
             size_t field_kernel_offset = offset_out +
-                            sizeof(struct_compare_sorting_less_matching_metadata_kernel) +
+                            sizeof(struct_compare_sorting_less_matching_arrmeta_kernel) +
                             field_count * sizeof(size_t);
             out->ensure_capacity(field_kernel_offset);
-            struct_compare_sorting_less_matching_metadata_kernel *e =
-                            out->get_at<struct_compare_sorting_less_matching_metadata_kernel>(offset_out);
+            struct_compare_sorting_less_matching_arrmeta_kernel *e =
+                            out->get_at<struct_compare_sorting_less_matching_arrmeta_kernel>(offset_out);
             e->base.set_function<binary_single_predicate_t>(
-                            &struct_compare_sorting_less_matching_metadata_kernel::sorting_less);
-            e->base.destructor = &struct_compare_sorting_less_matching_metadata_kernel::destruct;
+                            &struct_compare_sorting_less_matching_arrmeta_kernel::sorting_less);
+            e->base.destructor = &struct_compare_sorting_less_matching_arrmeta_kernel::destruct;
             e->field_count = field_count;
-            e->src_data_offsets = bsd->get_data_offsets(src0_metadata);
+            e->src_data_offsets = bsd->get_data_offsets(src0_arrmeta);
             size_t *field_kernel_offsets;
             const uintptr_t *arrmeta_offsets = bsd->get_arrmeta_offsets_raw();
             for (size_t i = 0; i != field_count; ++i) {
@@ -215,30 +215,30 @@ size_t dynd::make_struct_comparison_kernel(
                 // the pointer because creating the field comparison kernel may
                 // move the memory.
                 out->ensure_capacity(field_kernel_offset);
-                e = out->get_at<struct_compare_sorting_less_matching_metadata_kernel>(offset_out);
+                e = out->get_at<struct_compare_sorting_less_matching_arrmeta_kernel>(offset_out);
                 field_kernel_offsets = reinterpret_cast<size_t *>(e + 1);
                 field_kernel_offsets[i] = field_kernel_offset - offset_out;
-                const char *field_metadata = src0_metadata + arrmeta_offsets[i];
+                const char *field_arrmeta = src0_arrmeta + arrmeta_offsets[i];
                 const ndt::type &ft = bsd->get_field_type(i);
                 field_kernel_offset = make_comparison_kernel(
-                    out, field_kernel_offset, ft, field_metadata, ft,
-                    field_metadata, comparison_type_sorting_less, ectx);
+                    out, field_kernel_offset, ft, field_arrmeta, ft,
+                    field_arrmeta, comparison_type_sorting_less, ectx);
             }
             return field_kernel_offset;
         } else {
-            // The metadata is different, so have to get the kernels both ways for the fields
+            // The arrmeta is different, so have to get the kernels both ways for the fields
             size_t field_kernel_offset = offset_out +
-                            sizeof(struct_compare_sorting_less_diff_metadata_kernel) +
+                            sizeof(struct_compare_sorting_less_diff_arrmeta_kernel) +
                             2 * field_count * sizeof(size_t);
             out->ensure_capacity(field_kernel_offset);
-            struct_compare_sorting_less_diff_metadata_kernel *e =
-                            out->get_at<struct_compare_sorting_less_diff_metadata_kernel>(offset_out);
+            struct_compare_sorting_less_diff_arrmeta_kernel *e =
+                            out->get_at<struct_compare_sorting_less_diff_arrmeta_kernel>(offset_out);
             e->base.set_function<binary_single_predicate_t>(
-                            &struct_compare_sorting_less_diff_metadata_kernel::sorting_less);
-            e->base.destructor = &struct_compare_sorting_less_diff_metadata_kernel::destruct;
+                            &struct_compare_sorting_less_diff_arrmeta_kernel::sorting_less);
+            e->base.destructor = &struct_compare_sorting_less_diff_arrmeta_kernel::destruct;
             e->field_count = field_count;
-            e->src0_data_offsets = bsd->get_data_offsets(src0_metadata);
-            e->src1_data_offsets = bsd->get_data_offsets(src1_metadata);
+            e->src0_data_offsets = bsd->get_data_offsets(src0_arrmeta);
+            e->src1_data_offsets = bsd->get_data_offsets(src1_arrmeta);
             size_t *field_kernel_offsets;
             const uintptr_t *arrmeta_offsets = bsd->get_arrmeta_offsets_raw();
             for (size_t i = 0; i != field_count; ++i) {
@@ -248,21 +248,21 @@ size_t dynd::make_struct_comparison_kernel(
                 // the pointer because creating the field comparison kernel may
                 // move the memory.
                 out->ensure_capacity(field_kernel_offset);
-                e = out->get_at<struct_compare_sorting_less_diff_metadata_kernel>(offset_out);
+                e = out->get_at<struct_compare_sorting_less_diff_arrmeta_kernel>(offset_out);
                 field_kernel_offsets = reinterpret_cast<size_t *>(e + 1);
                 field_kernel_offsets[2*i] = field_kernel_offset - offset_out;
                 field_kernel_offset = make_comparison_kernel(out, field_kernel_offset,
-                                ft, src0_metadata + arrmeta_offsets[i],
-                                ft, src1_metadata + arrmeta_offsets[i],
+                                ft, src0_arrmeta + arrmeta_offsets[i],
+                                ft, src1_arrmeta + arrmeta_offsets[i],
                                 comparison_type_sorting_less, ectx);
                 // Repeat for comparing the other way
                 out->ensure_capacity(field_kernel_offset);
-                e = out->get_at<struct_compare_sorting_less_diff_metadata_kernel>(offset_out);
+                e = out->get_at<struct_compare_sorting_less_diff_arrmeta_kernel>(offset_out);
                 field_kernel_offsets = reinterpret_cast<size_t *>(e + 1);
                 field_kernel_offsets[2*i+1] = field_kernel_offset - offset_out;
                 field_kernel_offset = make_comparison_kernel(out, field_kernel_offset,
-                                ft, src1_metadata + arrmeta_offsets[i],
-                                ft, src0_metadata + arrmeta_offsets[i],
+                                ft, src1_arrmeta + arrmeta_offsets[i],
+                                ft, src0_arrmeta + arrmeta_offsets[i],
                                 comparison_type_sorting_less, ectx);
             }
             return field_kernel_offset;
@@ -283,8 +283,8 @@ size_t dynd::make_struct_comparison_kernel(
         }
         e->base.destructor = &struct_compare_equality_kernel::destruct;
         e->field_count = field_count;
-        e->src0_data_offsets = bsd->get_data_offsets(src0_metadata);
-        e->src1_data_offsets = bsd->get_data_offsets(src1_metadata);
+        e->src0_data_offsets = bsd->get_data_offsets(src0_arrmeta);
+        e->src1_data_offsets = bsd->get_data_offsets(src1_arrmeta);
         size_t *field_kernel_offsets;
         const uintptr_t *arrmeta_offsets = bsd->get_arrmeta_offsets_raw();
         for (size_t i = 0; i != field_count; ++i) {
@@ -297,10 +297,10 @@ size_t dynd::make_struct_comparison_kernel(
             e = out->get_at<struct_compare_equality_kernel>(offset_out);
             field_kernel_offsets = reinterpret_cast<size_t *>(e + 1);
             field_kernel_offsets[i] = field_kernel_offset - offset_out;
-            const char *field_metadata = src0_metadata + arrmeta_offsets[i];
+            const char *field_arrmeta = src0_arrmeta + arrmeta_offsets[i];
             field_kernel_offset = make_comparison_kernel(
-                out, field_kernel_offset, ft, field_metadata, ft,
-                field_metadata, comptype, ectx);
+                out, field_kernel_offset, ft, field_arrmeta, ft,
+                field_arrmeta, comptype, ectx);
         }
         return field_kernel_offset;
     } else {
@@ -310,8 +310,8 @@ size_t dynd::make_struct_comparison_kernel(
 
 size_t dynd::make_general_struct_comparison_kernel(
                 ckernel_builder *DYND_UNUSED(out), size_t DYND_UNUSED(offset_out),
-                const ndt::type& DYND_UNUSED(src0_dt), const char *DYND_UNUSED(src0_metadata),
-                const ndt::type& DYND_UNUSED(src1_dt), const char *DYND_UNUSED(src1_metadata),
+                const ndt::type& DYND_UNUSED(src0_dt), const char *DYND_UNUSED(src0_arrmeta),
+                const ndt::type& DYND_UNUSED(src1_dt), const char *DYND_UNUSED(src1_arrmeta),
                 comparison_type_t DYND_UNUSED(comptype),
                 const eval::eval_context *DYND_UNUSED(ectx))
 {

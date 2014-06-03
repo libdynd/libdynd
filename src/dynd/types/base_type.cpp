@@ -32,7 +32,7 @@ bool base_type::is_strided() const
     return false;
 }
 
-void base_type::process_strided(const char *DYND_UNUSED(metadata), const char *DYND_UNUSED(data),
+void base_type::process_strided(const char *DYND_UNUSED(arrmeta), const char *DYND_UNUSED(data),
                 ndt::type& DYND_UNUSED(out_dt), const char *&DYND_UNUSED(out_origin),
                 intptr_t& DYND_UNUSED(out_stride), intptr_t& DYND_UNUSED(out_dim_size)) const
 {
@@ -42,7 +42,7 @@ void base_type::process_strided(const char *DYND_UNUSED(metadata), const char *D
 }
 
 
-bool base_type::is_unique_data_owner(const char *DYND_UNUSED(metadata)) const
+bool base_type::is_unique_data_owner(const char *DYND_UNUSED(arrmeta)) const
 {
     return true;
 }
@@ -71,8 +71,8 @@ ndt::type base_type::apply_linear_index(intptr_t nindices, const irange *DYND_UN
     }
 }
 
-intptr_t base_type::apply_linear_index(intptr_t nindices, const irange *DYND_UNUSED(indices), const char *metadata,
-                const ndt::type& DYND_UNUSED(result_tp), char *out_metadata,
+intptr_t base_type::apply_linear_index(intptr_t nindices, const irange *DYND_UNUSED(indices), const char *arrmeta,
+                const ndt::type& DYND_UNUSED(result_tp), char *out_arrmeta,
                 memory_block_data *embedded_reference,
                 size_t current_i, const ndt::type& DYND_UNUSED(root_tp),
                 bool DYND_UNUSED(leading_dimension), char **DYND_UNUSED(inout_data),
@@ -80,22 +80,22 @@ intptr_t base_type::apply_linear_index(intptr_t nindices, const irange *DYND_UNU
 {
     // Default to scalar behavior
     if (nindices == 0) {
-        // Copy any metadata verbatim
-        metadata_copy_construct(out_metadata, metadata, embedded_reference);
+        // Copy any arrmeta verbatim
+        arrmeta_copy_construct(out_arrmeta, arrmeta, embedded_reference);
         return 0;
     } else {
         throw too_many_indices(ndt::type(this, true), current_i + nindices, current_i);
     }
 }
 
-ndt::type base_type::at_single(intptr_t DYND_UNUSED(i0), const char **DYND_UNUSED(inout_metadata),
+ndt::type base_type::at_single(intptr_t DYND_UNUSED(i0), const char **DYND_UNUSED(inout_arrmeta),
                 const char **DYND_UNUSED(inout_data)) const
 {
     // Default to scalar behavior
     throw too_many_indices(ndt::type(this, true), 1, 0);
 }
 
-ndt::type base_type::get_type_at_dimension(char **DYND_UNUSED(inout_metadata), intptr_t i, intptr_t total_ndim) const
+ndt::type base_type::get_type_at_dimension(char **DYND_UNUSED(inout_arrmeta), intptr_t i, intptr_t total_ndim) const
 {
     // Default to heterogeneous dimension/scalar behavior
     if (i == 0) {
@@ -107,7 +107,7 @@ ndt::type base_type::get_type_at_dimension(char **DYND_UNUSED(inout_metadata), i
 
 void base_type::get_shape(intptr_t DYND_UNUSED(ndim), intptr_t DYND_UNUSED(i),
                 intptr_t *DYND_UNUSED(out_shape),
-                const char *DYND_UNUSED(metadata),
+                const char *DYND_UNUSED(arrmeta),
                 const char *DYND_UNUSED(data)) const
 {
     // Default to scalar behavior
@@ -118,13 +118,13 @@ void base_type::get_shape(intptr_t DYND_UNUSED(ndim), intptr_t DYND_UNUSED(i),
 
 void base_type::get_strides(size_t DYND_UNUSED(i),
                 intptr_t *DYND_UNUSED(out_strides),
-                const char *DYND_UNUSED(metadata)) const
+                const char *DYND_UNUSED(arrmeta)) const
 {
     // Default to scalar behavior
 }
 
 axis_order_classification_t base_type::classify_axis_order(
-                const char *DYND_UNUSED(metadata)) const
+                const char *DYND_UNUSED(arrmeta)) const
 {
     // Scalar types have no axis order
     return axis_order_none;
@@ -145,51 +145,51 @@ size_t base_type::get_default_data_size(intptr_t DYND_UNUSED(ndim),
 }
 
 // TODO: Make this a pure virtual function eventually
-void base_type::metadata_default_construct(char *DYND_UNUSED(metadata),
+void base_type::arrmeta_default_construct(char *DYND_UNUSED(arrmeta),
                 intptr_t DYND_UNUSED(ndim),
                 const intptr_t* DYND_UNUSED(shape)) const
 {
     stringstream ss;
-    ss << "TODO: metadata_default_construct for " << ndt::type(this, true) << " is not implemented";
+    ss << "TODO: arrmeta_default_construct for " << ndt::type(this, true) << " is not implemented";
     throw std::runtime_error(ss.str());
 }
 
-void base_type::metadata_copy_construct(char *DYND_UNUSED(dst_metadata), const char *DYND_UNUSED(src_metadata), memory_block_data *DYND_UNUSED(embedded_reference)) const
+void base_type::arrmeta_copy_construct(char *DYND_UNUSED(dst_arrmeta), const char *DYND_UNUSED(src_arrmeta), memory_block_data *DYND_UNUSED(embedded_reference)) const
 {
     stringstream ss;
-    ss << "TODO: metadata_copy_construct for " << ndt::type(this, true) << " is not implemented";
+    ss << "TODO: arrmeta_copy_construct for " << ndt::type(this, true) << " is not implemented";
     throw std::runtime_error(ss.str());
 }
 
-void base_type::metadata_reset_buffers(char *DYND_UNUSED(metadata)) const
+void base_type::arrmeta_reset_buffers(char *DYND_UNUSED(arrmeta)) const
 {
     // By default there are no buffers to reset
 }
 
-void base_type::metadata_finalize_buffers(char *DYND_UNUSED(metadata)) const
+void base_type::arrmeta_finalize_buffers(char *DYND_UNUSED(arrmeta)) const
 {
     // By default there are no buffers to finalize
 }
 
 // TODO: Make this a pure virtual function eventually
-void base_type::metadata_destruct(char *DYND_UNUSED(metadata)) const
+void base_type::arrmeta_destruct(char *DYND_UNUSED(arrmeta)) const
 {
     stringstream ss;
-    ss << "TODO: metadata_destruct for " << ndt::type(this, true) << " is not implemented";
+    ss << "TODO: arrmeta_destruct for " << ndt::type(this, true) << " is not implemented";
     throw std::runtime_error(ss.str());
 }
 
 // TODO: Make this a pure virtual function eventually
-void base_type::metadata_debug_print(const char *DYND_UNUSED(metadata),
+void base_type::arrmeta_debug_print(const char *DYND_UNUSED(arrmeta),
                 std::ostream& DYND_UNUSED(o),
                 const std::string& DYND_UNUSED(indent)) const
 {
     stringstream ss;
-    ss << "TODO: metadata_debug_print for " << ndt::type(this, true) << " is not implemented";
+    ss << "TODO: arrmeta_debug_print for " << ndt::type(this, true) << " is not implemented";
     throw std::runtime_error(ss.str());
 }
 
-void base_type::data_destruct(const char *DYND_UNUSED(metadata),
+void base_type::data_destruct(const char *DYND_UNUSED(arrmeta),
                 char *DYND_UNUSED(data)) const
 {
     stringstream ss;
@@ -197,7 +197,7 @@ void base_type::data_destruct(const char *DYND_UNUSED(metadata),
     throw runtime_error(ss.str());
 }
 
-void base_type::data_destruct_strided(const char *DYND_UNUSED(metadata),
+void base_type::data_destruct_strided(const char *DYND_UNUSED(arrmeta),
                 char *DYND_UNUSED(data), intptr_t DYND_UNUSED(stride),
                 size_t DYND_UNUSED(count)) const
 {
@@ -213,7 +213,7 @@ size_t base_type::get_iterdata_size(intptr_t DYND_UNUSED(ndim)) const
     throw std::runtime_error(ss.str());
 }
 
-size_t base_type::iterdata_construct(iterdata_common *DYND_UNUSED(iterdata), const char **DYND_UNUSED(inout_metadata),
+size_t base_type::iterdata_construct(iterdata_common *DYND_UNUSED(iterdata), const char **DYND_UNUSED(inout_arrmeta),
                 intptr_t DYND_UNUSED(ndim), const intptr_t* DYND_UNUSED(shape), ndt::type& DYND_UNUSED(out_uniform_tp)) const
 {
     stringstream ss;
@@ -230,8 +230,8 @@ size_t base_type::iterdata_destruct(iterdata_common *DYND_UNUSED(iterdata), intp
 
 size_t base_type::make_assignment_kernel(
                 ckernel_builder *DYND_UNUSED(out), size_t DYND_UNUSED(offset_out),
-                const ndt::type& dst_tp, const char *DYND_UNUSED(dst_metadata),
-                const ndt::type& src_tp, const char *DYND_UNUSED(src_metadata),
+                const ndt::type& dst_tp, const char *DYND_UNUSED(dst_arrmeta),
+                const ndt::type& src_tp, const char *DYND_UNUSED(src_arrmeta),
                 kernel_request_t DYND_UNUSED(kernreq), assign_error_mode DYND_UNUSED(errmode),
                 const eval::eval_context *DYND_UNUSED(ectx)) const
 {
@@ -247,15 +247,15 @@ size_t base_type::make_assignment_kernel(
 
 size_t base_type::make_comparison_kernel(
                 ckernel_builder *DYND_UNUSED(out), size_t DYND_UNUSED(offset_out),
-                const ndt::type& src0_dt, const char *DYND_UNUSED(src0_metadata),
-                const ndt::type& src1_dt, const char *DYND_UNUSED(src1_metadata),
+                const ndt::type& src0_dt, const char *DYND_UNUSED(src0_arrmeta),
+                const ndt::type& src1_dt, const char *DYND_UNUSED(src1_arrmeta),
                 comparison_type_t comptype,
                 const eval::eval_context *DYND_UNUSED(ectx)) const
 {
     throw not_comparable_error(src0_dt, src1_dt, comptype);
 }
 
-void base_type::foreach_leading(const char *DYND_UNUSED(metadata),
+void base_type::foreach_leading(const char *DYND_UNUSED(arrmeta),
                                 char *DYND_UNUSED(data),
                                 foreach_fn_t DYND_UNUSED(callback),
                                 void *DYND_UNUSED(callback_data)) const
@@ -343,8 +343,8 @@ ndt::type base_type::get_elwise_property_type(size_t DYND_UNUSED(elwise_property
 
 size_t base_type::make_elwise_property_getter_kernel(
                 ckernel_builder *DYND_UNUSED(out), size_t DYND_UNUSED(offset_out),
-                const char *DYND_UNUSED(dst_metadata),
-                const char *DYND_UNUSED(src_metadata),
+                const char *DYND_UNUSED(dst_arrmeta),
+                const char *DYND_UNUSED(src_arrmeta),
                 size_t DYND_UNUSED(src_elwise_property_index),
                 kernel_request_t DYND_UNUSED(kernreq), const eval::eval_context *DYND_UNUSED(ectx)) const
 {
@@ -356,9 +356,9 @@ size_t base_type::make_elwise_property_getter_kernel(
 
 size_t base_type::make_elwise_property_setter_kernel(
                 ckernel_builder *DYND_UNUSED(out), size_t DYND_UNUSED(offset_out),
-                const char *DYND_UNUSED(dst_metadata),
+                const char *DYND_UNUSED(dst_arrmeta),
                 size_t DYND_UNUSED(dst_elwise_property_index),
-                const char *DYND_UNUSED(src_metadata),
+                const char *DYND_UNUSED(src_arrmeta),
                 kernel_request_t DYND_UNUSED(kernreq), const eval::eval_context *DYND_UNUSED(ectx)) const
 {
     std::stringstream ss;

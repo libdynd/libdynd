@@ -206,15 +206,15 @@ ndt::type ndt::type::with_replaced_dtype(const ndt::type& replacement_tp, intptr
     return result;
 }
 
-intptr_t ndt::type::get_dim_size(const char *metadata, const char *data) const
+intptr_t ndt::type::get_dim_size(const char *arrmeta, const char *data) const
 {
     if (get_kind() == uniform_dim_kind) {
-        return static_cast<const base_uniform_dim_type *>(m_extended)->get_dim_size(metadata, data);
+        return static_cast<const base_uniform_dim_type *>(m_extended)->get_dim_size(arrmeta, data);
     } else if (get_kind() == struct_kind) {
         return static_cast<const base_struct_type *>(m_extended)->get_field_count();
     } else if (get_ndim() > 0) {
         intptr_t dim_size = -1;
-        m_extended->get_shape(1, 0, &dim_size, metadata, data);
+        m_extended->get_shape(1, 0, &dim_size, arrmeta, data);
         if (dim_size >= 0) {
             return dim_size;
         }
@@ -225,9 +225,9 @@ intptr_t ndt::type::get_dim_size(const char *metadata, const char *data) const
     throw std::invalid_argument(ss.str());
 }
 
-bool ndt::type::get_as_strided_dim(const char *metadata, intptr_t &out_size,
+bool ndt::type::get_as_strided_dim(const char *arrmeta, intptr_t &out_size,
                                    intptr_t &out_stride, ndt::type &out_el_tp,
-                                   const char *&out_el_metadata) const
+                                   const char *&out_el_arrmeta) const
 {
     type_id_t tid = get_type_id();
     switch (tid) {
@@ -236,27 +236,27 @@ bool ndt::type::get_as_strided_dim(const char *metadata, intptr_t &out_size,
         out_size = fdt->get_fixed_dim_size();
         out_stride = fdt->get_fixed_stride();
         out_el_tp = fdt->get_element_type();
-        out_el_metadata = metadata;
+        out_el_arrmeta = arrmeta;
         return true;
     }
     case fixed_dim_type_id: {
         const fixed_dim_type *fdt = tcast<fixed_dim_type>();
-        const fixed_dim_type_metadata *m =
-            reinterpret_cast<const fixed_dim_type_metadata *>(metadata);
+        const fixed_dim_type_arrmeta *m =
+            reinterpret_cast<const fixed_dim_type_arrmeta *>(arrmeta);
         out_size = fdt->get_fixed_dim_size();
         out_stride = m->stride;
         out_el_tp = fdt->get_element_type();
-        out_el_metadata = metadata + sizeof(fixed_dim_type_metadata);
+        out_el_arrmeta = arrmeta + sizeof(fixed_dim_type_arrmeta);
         return true;
     }
     case strided_dim_type_id: {
         const strided_dim_type *fdt = tcast<strided_dim_type>();
-        const strided_dim_type_metadata *m =
-            reinterpret_cast<const strided_dim_type_metadata *>(metadata);
+        const strided_dim_type_arrmeta *m =
+            reinterpret_cast<const strided_dim_type_arrmeta *>(arrmeta);
         out_size = m->size;
         out_stride = m->stride;
         out_el_tp = fdt->get_element_type();
-        out_el_metadata = metadata + sizeof(strided_dim_type_metadata);
+        out_el_arrmeta = arrmeta + sizeof(strided_dim_type_arrmeta);
         return true;
     }
     default:
@@ -271,12 +271,12 @@ bool ndt::type::data_layout_compatible_with(const ndt::type& rhs) const
         return true;
     }
     if (get_data_size() != rhs.get_data_size() ||
-                    get_metadata_size() != rhs.get_metadata_size()) {
-        // The size of the data and metadata must be the same
+                    get_arrmeta_size() != rhs.get_arrmeta_size()) {
+        // The size of the data and arrmeta must be the same
         return false;
     }
-    if (get_metadata_size() == 0 && is_pod() && rhs.is_pod()) {
-        // If both are POD with no metadata, then they're compatible
+    if (get_arrmeta_size() == 0 && is_pod() && rhs.is_pod()) {
+        // If both are POD with no arrmeta, then they're compatible
         return true;
     }
     if (get_kind() == expression_kind || rhs.get_kind() == expression_kind) {
@@ -564,11 +564,11 @@ void dynd::print_builtin_scalar(type_id_t type_id, std::ostream& o, const char *
     }
 }
 
-void ndt::type::print_data(std::ostream& o, const char *metadata, const char *data) const
+void ndt::type::print_data(std::ostream& o, const char *arrmeta, const char *data) const
 {
     if (is_builtin()) {
         print_builtin_scalar(get_type_id(), o, data);
     } else {
-        extended()->print_data(o, metadata, data);
+        extended()->print_data(o, arrmeta, data);
     }
 }

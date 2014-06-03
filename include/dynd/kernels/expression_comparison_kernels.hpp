@@ -17,8 +17,8 @@ namespace dynd {
  */
 size_t make_expression_comparison_kernel(
                 ckernel_builder *out, size_t offset_out,
-                const ndt::type& src0_dt, const char *src0_metadata,
-                const ndt::type& src1_dt, const char *src1_metadata,
+                const ndt::type& src0_dt, const char *src0_arrmeta,
+                const ndt::type& src1_dt, const char *src1_arrmeta,
                 comparison_type_t comptype,
                 const eval::eval_context *ectx);
 

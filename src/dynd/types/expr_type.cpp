@@ -17,7 +17,7 @@ expr_type::expr_type(const ndt::type& value_type, const ndt::type& operand_type,
     : base_expression_type(expr_type_id, expression_kind,
                         operand_type.get_data_size(), operand_type.get_data_alignment(),
                         inherited_flags(value_type.get_flags(), operand_type.get_flags()),
-                        operand_type.get_metadata_size(), value_type.get_ndim()),
+                        operand_type.get_arrmeta_size(), value_type.get_ndim()),
                     m_value_type(value_type), m_operand_type(operand_type),
                     m_kgen(kgen)
 {
@@ -49,7 +49,7 @@ expr_type::~expr_type()
 }
 
 void expr_type::print_data(std::ostream& DYND_UNUSED(o),
-                const char *DYND_UNUSED(metadata), const char *DYND_UNUSED(data)) const
+                const char *DYND_UNUSED(arrmeta), const char *DYND_UNUSED(data)) const
 {
     throw runtime_error("internal error: expr_type::print_data isn't supposed to be called");
 }
@@ -102,8 +102,8 @@ ndt::type expr_type::apply_linear_index(intptr_t nindices, const irange *indices
     }
 }
 
-intptr_t expr_type::apply_linear_index(intptr_t nindices, const irange *indices, const char *metadata,
-                const ndt::type& result_tp, char *out_metadata,
+intptr_t expr_type::apply_linear_index(intptr_t nindices, const irange *indices, const char *arrmeta,
+                const ndt::type& result_tp, char *out_arrmeta,
                 memory_block_data *embedded_reference,
                 size_t current_i, const ndt::type& root_tp,
                 bool DYND_UNUSED(leading_dimension), char **DYND_UNUSED(inout_data),
@@ -122,14 +122,14 @@ intptr_t expr_type::apply_linear_index(intptr_t nindices, const irange *indices,
             const pointer_type *pd = fsd->get_field_type(i).tcast<pointer_type>();
             intptr_t field_undim = pd->get_ndim();
             if (nindices + field_undim <= undim) {
-                pd->metadata_copy_construct(out_metadata + out_arrmeta_offsets[i],
-                                metadata + arrmeta_offsets[i],
+                pd->arrmeta_copy_construct(out_arrmeta + out_arrmeta_offsets[i],
+                                arrmeta + arrmeta_offsets[i],
                                 embedded_reference);
             } else {
                 size_t index_offset = undim - field_undim;
                 intptr_t offset = pd->apply_linear_index(nindices - index_offset, indices + index_offset,
-                                metadata + arrmeta_offsets[i],
-                                out_fsd->get_field_type(i), out_metadata + out_arrmeta_offsets[i],
+                                arrmeta + arrmeta_offsets[i],
+                                out_fsd->get_field_type(i), out_arrmeta + out_arrmeta_offsets[i],
                                 embedded_reference, current_i, root_tp, false, NULL, NULL);
                 if (offset != 0) {
                     throw runtime_error("internal error: expr_type::apply_linear_index"
@@ -144,7 +144,7 @@ intptr_t expr_type::apply_linear_index(intptr_t nindices, const irange *indices,
 }
 
 void expr_type::get_shape(intptr_t ndim, intptr_t i, intptr_t *out_shape,
-                const char *metadata, const char *DYND_UNUSED(data)) const
+                const char *arrmeta, const char *DYND_UNUSED(data)) const
 {
     intptr_t undim = get_ndim();
     // Initialize the shape to all ones
@@ -163,7 +163,7 @@ void expr_type::get_shape(intptr_t ndim, intptr_t i, intptr_t *out_shape,
         size_t field_undim = dt.get_ndim();
         if (field_undim > 0) {
             dt.extended()->get_shape(field_undim, 0, shape.get(),
-                            metadata ? (metadata + arrmeta_offsets[fi]) : NULL,
+                            arrmeta ? (arrmeta + arrmeta_offsets[fi]) : NULL,
                             NULL);
             incremental_broadcast(undim, bcast_shape.get(), field_undim, shape.get());
         }
@@ -317,7 +317,7 @@ static size_t make_expr_type_offset_applier(
 
 size_t expr_type::make_operand_to_value_assignment_kernel(
                 ckernel_builder *out, size_t offset_out,
-                const char *dst_metadata, const char *src_metadata,
+                const char *dst_arrmeta, const char *src_arrmeta,
                 kernel_request_t kernreq, const eval::eval_context *ectx) const
 {
     const ctuple_type *fsd = m_operand_type.tcast<ctuple_type>();
@@ -325,7 +325,7 @@ size_t expr_type::make_operand_to_value_assignment_kernel(
     offset_out = make_kernreq_to_single_kernel_adapter(out, offset_out, kernreq);
     size_t input_count = fsd->get_field_count();
     const uintptr_t *arrmeta_offsets = fsd->get_arrmeta_offsets_raw();
-    shortvector<const char *> src_metadata_array(input_count);
+    shortvector<const char *> src_arrmeta_array(input_count);
     dimvector src_data_offsets(input_count);
     bool nonzero_offsets = false;
 
@@ -335,13 +335,13 @@ size_t expr_type::make_operand_to_value_assignment_kernel(
         src_dt[i] = pd->get_target_type();
     }
     for (size_t i = 0; i != input_count; ++i) {
-        const char *ptr_metadata = src_metadata + arrmeta_offsets[i];
-        intptr_t offset = reinterpret_cast<const pointer_type_metadata *>(ptr_metadata)->offset;
+        const char *ptr_arrmeta = src_arrmeta + arrmeta_offsets[i];
+        intptr_t offset = reinterpret_cast<const pointer_type_arrmeta *>(ptr_arrmeta)->offset;
         if (offset != 0) {
             nonzero_offsets = true;
         }
         src_data_offsets[i] = offset;
-        src_metadata_array[i] = ptr_metadata + sizeof(pointer_type_metadata);
+        src_arrmeta_array[i] = ptr_arrmeta + sizeof(pointer_type_arrmeta);
     }
     // If there were any non-zero pointer offsets, we need to add a kernel
     // adapter which applies those offsets.
@@ -350,15 +350,15 @@ size_t expr_type::make_operand_to_value_assignment_kernel(
                         input_count, src_data_offsets.get());
     }
     return m_kgen->make_expr_kernel(out, offset_out,
-                    m_value_type, dst_metadata,
+                    m_value_type, dst_arrmeta,
                     input_count, &src_dt[0],
-                    src_metadata_array.get(),
+                    src_arrmeta_array.get(),
                     kernel_request_single, ectx);
 }
 
 size_t expr_type::make_value_to_operand_assignment_kernel(
                 ckernel_builder *DYND_UNUSED(out), size_t DYND_UNUSED(offset_out),
-                const char *DYND_UNUSED(dst_metadata), const char *DYND_UNUSED(src_metadata),
+                const char *DYND_UNUSED(dst_arrmeta), const char *DYND_UNUSED(src_arrmeta),
                 kernel_request_t DYND_UNUSED(kernreq), const eval::eval_context *DYND_UNUSED(ectx)) const
 {
     throw runtime_error("Cannot assign to a dynd expr object value");

@@ -160,8 +160,8 @@ static void get_or_set_property_kernel_complex_float64_conj(char *dst, const cha
 size_t dynd::make_builtin_type_elwise_property_getter_kernel(
                 ckernel_builder *out, size_t offset_out,
                 type_id_t builtin_type_id,
-                const char *DYND_UNUSED(dst_metadata),
-                const char *DYND_UNUSED(src_metadata),
+                const char *DYND_UNUSED(dst_arrmeta),
+                const char *DYND_UNUSED(src_arrmeta),
                 size_t src_elwise_property_index,
                 kernel_request_t kernreq,
                 const eval::eval_context *DYND_UNUSED(ectx))
@@ -217,8 +217,8 @@ size_t dynd::make_builtin_type_elwise_property_getter_kernel(
 size_t dynd::make_builtin_type_elwise_property_setter_kernel(
                 ckernel_builder *out, size_t offset_out,
                 type_id_t builtin_type_id,
-                const char *DYND_UNUSED(dst_metadata), size_t dst_elwise_property_index,
-                const char *DYND_UNUSED(src_metadata),
+                const char *DYND_UNUSED(dst_arrmeta), size_t dst_elwise_property_index,
+                const char *DYND_UNUSED(src_arrmeta),
                 kernel_request_t kernreq, const eval::eval_context *DYND_UNUSED(ectx))
 {
     offset_out = make_kernreq_to_single_kernel_adapter(

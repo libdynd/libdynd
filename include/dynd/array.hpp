@@ -50,7 +50,7 @@ class array_vals_at;
 class array {
     /**
      * The nd::array class is a wrapper around an array_memory_block, which
-     * contains metadata as described by the type.
+     * contains arrmeta as described by the type.
      */
     memory_block_ptr m_memblock;
 
@@ -227,12 +227,12 @@ public:
         return reinterpret_cast<array_preamble *>(m_memblock.get());
     }
 
-    /** Low level access to the array metadata */
+    /** Low level access to the array arrmeta */
     inline const char *get_arrmeta() const {
         return get_ndo()->get_arrmeta();
     }
 
-    /** Low level access to the array metadata */
+    /** Low level access to the array arrmeta */
     inline char *get_arrmeta() {
         return get_ndo()->get_arrmeta();
     }
@@ -523,7 +523,7 @@ public:
     void val_assign(const array& rhs, assign_error_mode errmode = assign_error_default,
                         const eval::eval_context *ectx = &eval::default_eval_context) const;
     /** Does a value-assignment from the rhs raw scalar */
-    void val_assign(const ndt::type& rhs_dt, const char *rhs_metadata, const char *rhs_data,
+    void val_assign(const ndt::type& rhs_dt, const char *rhs_arrmeta, const char *rhs_data,
                         assign_error_mode errmode = assign_error_default,
                         const eval::eval_context *ectx = &eval::default_eval_context) const;
 
@@ -826,16 +826,16 @@ array make_strided_array(const ndt::type& uniform_dtype, intptr_t ndim, const in
  * \param access_flags Read/write/immutable flags.
  * \param data_ptr  Pointer to the element at index 0.
  * \param data_reference  A memory block which holds a reference to the data.
- * \param out_uniform_metadata  If the uniform_dtype has metadata (get_metadata_size() > 0),
+ * \param out_uniform_arrmeta  If the uniform_dtype has arrmeta (get_arrmeta_size() > 0),
  *                              this must be non-NULL, and is populated with a pointer to the
- *                              metadata for the uniform_dtype. The caller must populate it
+ *                              arrmeta for the uniform_dtype. The caller must populate it
  *                              with valid data.
  *
  * \returns  The created array.
  */
 array make_strided_array_from_data(const ndt::type& uniform_dtype, intptr_t ndim, const intptr_t *shape,
                 const intptr_t *strides, int64_t access_flags, char *data_ptr,
-                const memory_block_ptr& data_reference, char **out_uniform_metadata = NULL);
+                const memory_block_ptr& data_reference, char **out_uniform_arrmeta = NULL);
 
 /** Makes a POD (plain old data) array with data initialized by the provided pointer */
 array make_pod_array(const ndt::type& pod_dt, const void *data);
@@ -1319,10 +1319,10 @@ T array::as(assign_error_mode errmode) const {
 }
 
 /** 
- * Given the type/metadata/data of an array (or sub-component of an array),
+ * Given the type/arrmeta/data of an array (or sub-component of an array),
  * evaluates a new copy of it as the canonical type.
  */
-array eval_raw_copy(const ndt::type& dt, const char *metadata, const char *data);
+array eval_raw_copy(const ndt::type& dt, const char *arrmeta, const char *data);
 
 /**
  * Memory-maps a file with dynd type 'bytes'.
@@ -1341,11 +1341,11 @@ array memmap(const std::string& filename,
 
 /**
  * Performs a binary search of the first dimension of the array, which
- * should be sorted. The data/metadata must correspond to the type n.get_type().at(0).
+ * should be sorted. The data/arrmeta must correspond to the type n.get_type().at(0).
  *
  * \returns  The index of the found element, or -1 if not found.
  */
-intptr_t binary_search(const array& n, const char *data, const char *metadata);
+intptr_t binary_search(const array& n, const char *data, const char *arrmeta);
 
 array groupby(const array& data_values, const array& by,
                 const ndt::type& groups = ndt::type());

@@ -16,8 +16,8 @@ namespace dynd {
  */
 size_t make_broadcast_to_var_dim_assignment_kernel(
                 ckernel_builder *out, size_t offset_out,
-                const ndt::type& dst_var_dim_dt, const char *dst_metadata,
-                const ndt::type& src_tp, const char *src_metadata,
+                const ndt::type& dst_var_dim_dt, const char *dst_arrmeta,
+                const ndt::type& src_tp, const char *src_arrmeta,
                 kernel_request_t kernreq, assign_error_mode errmode,
                 const eval::eval_context *ectx);
 
@@ -26,8 +26,8 @@ size_t make_broadcast_to_var_dim_assignment_kernel(
  */
 size_t make_var_dim_assignment_kernel(
                 ckernel_builder *out, size_t offset_out,
-                const ndt::type& dst_var_dim_dt, const char *dst_metadata,
-                const ndt::type& src_var_dim_dt, const char *src_metadata,
+                const ndt::type& dst_var_dim_dt, const char *dst_arrmeta,
+                const ndt::type& src_var_dim_dt, const char *src_arrmeta,
                 kernel_request_t kernreq, assign_error_mode errmode,
                 const eval::eval_context *ectx);
 
@@ -36,9 +36,9 @@ size_t make_var_dim_assignment_kernel(
  */
 size_t make_strided_to_var_dim_assignment_kernel(
                 ckernel_builder *out, size_t offset_out,
-                const ndt::type& dst_var_dim_dt, const char *dst_metadata,
+                const ndt::type& dst_var_dim_dt, const char *dst_arrmeta,
                 intptr_t src_dim_size, intptr_t src_stride,
-                const ndt::type& src_el_tp, const char *src_el_metadata,
+                const ndt::type& src_el_tp, const char *src_el_arrmeta,
                 kernel_request_t kernreq, assign_error_mode errmode,
                 const eval::eval_context *ectx);
 
@@ -47,8 +47,8 @@ size_t make_strided_to_var_dim_assignment_kernel(
  */
 size_t make_var_to_strided_dim_assignment_kernel(
                 ckernel_builder *out, size_t offset_out,
-                const ndt::type& dst_strided_dim_dt, const char *dst_metadata,
-                const ndt::type& src_var_dim_dt, const char *src_metadata,
+                const ndt::type& dst_strided_dim_dt, const char *dst_arrmeta,
+                const ndt::type& src_var_dim_dt, const char *src_arrmeta,
                 kernel_request_t kernreq, assign_error_mode errmode,
                 const eval::eval_context *ectx);
 

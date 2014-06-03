@@ -18,41 +18,41 @@ namespace dynd { namespace gfunc {
 namespace detail {
     template<class T>
     struct callable_argument_setter {
-        static typename enable_if<is_dynd_scalar<T>::value, void>::type set(const ndt::type& paramtype, char *metadata, char *data, const T& value) {
+        static typename enable_if<is_dynd_scalar<T>::value, void>::type set(const ndt::type& paramtype, char *arrmeta, char *data, const T& value) {
             if (paramtype.get_type_id() == static_cast<type_id_t>(type_id_of<T>::value)) {
                 *reinterpret_cast<T *>(data) = value;
             } else {
-                typed_data_assign(paramtype, metadata, data, ndt::make_type<T>(), NULL, reinterpret_cast<const char *>(&value));
+                typed_data_assign(paramtype, arrmeta, data, ndt::make_type<T>(), NULL, reinterpret_cast<const char *>(&value));
             }
         }
     };
 
     template<>
     struct callable_argument_setter<bool> {
-        static void set(const ndt::type& paramtype, char *metadata, char *data, bool value) {
+        static void set(const ndt::type& paramtype, char *arrmeta, char *data, bool value) {
             if (paramtype.get_type_id() == bool_type_id) {
                *data = (value ? 1 : 0);
             } else {
                 dynd_bool tmp = value;
-                typed_data_assign(paramtype, metadata, data, ndt::make_type<dynd_bool>(), NULL, reinterpret_cast<const char *>(&tmp));
+                typed_data_assign(paramtype, arrmeta, data, ndt::make_type<dynd_bool>(), NULL, reinterpret_cast<const char *>(&tmp));
             }
         }
     };
 
     template<>
     struct callable_argument_setter<nd::array> {
-        static void set(const ndt::type& paramtype, char *metadata, char *data, const nd::array& value) {
+        static void set(const ndt::type& paramtype, char *arrmeta, char *data, const nd::array& value) {
             if (paramtype.get_type_id() == ndarrayarg_type_id) {
                 *reinterpret_cast<const array_preamble **>(data) = value.get_ndo();
             } else {
-                typed_data_assign(paramtype, metadata, data, value.get_type(), value.get_arrmeta(), value.get_ndo()->m_data_pointer);
+                typed_data_assign(paramtype, arrmeta, data, value.get_type(), value.get_arrmeta(), value.get_ndo()->m_data_pointer);
             }
         }
     };
 
     template<>
     struct callable_argument_setter<ndt::type> {
-        static void set(const ndt::type& paramtype, char *DYND_UNUSED(metadata), char *data, const ndt::type& value) {
+        static void set(const ndt::type& paramtype, char *DYND_UNUSED(arrmeta), char *data, const ndt::type& value) {
             if (paramtype.get_type_id() == type_type_id) {
                 reinterpret_cast<type_type_data *>(data)->tp = ndt::type(value).release();
             } else {
@@ -65,14 +65,14 @@ namespace detail {
 
     template<int N>
     struct callable_argument_setter<const char[N]> {
-        static void set(const ndt::type& paramtype, char *metadata, char *data, const char (&value)[N]) {
+        static void set(const ndt::type& paramtype, char *arrmeta, char *data, const char (&value)[N]) {
             // Setting from a known-sized character string array
             if (paramtype.get_type_id() == string_type_id &&
                     paramtype.tcast<string_type>()->get_encoding() == string_encoding_utf_8) {
                 reinterpret_cast<string_type_data*>(data)->begin = const_cast<char *>(value);
                 reinterpret_cast<string_type_data*>(data)->end = const_cast<char *>(value + N - 1);
             } else {
-                typed_data_assign(paramtype, metadata, data, ndt::make_fixedstring(N, string_encoding_utf_8),
+                typed_data_assign(paramtype, arrmeta, data, ndt::make_fixedstring(N, string_encoding_utf_8),
                         NULL, value);
             }
         }

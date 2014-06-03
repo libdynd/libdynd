@@ -141,15 +141,15 @@ TEST(View, Errors) {
 
 TEST(View, AsBytes) {
     nd::array a, b;
-    const bytes_type_metadata *btd_meta;
+    const bytes_type_arrmeta *btd_meta;
     const bytes_type_data *btd;
 
     // View a scalar as bytes
     a = (int32_t)100;
     b = nd::view(a, ndt::make_bytes(4));
     ASSERT_EQ(b.get_type(), ndt::make_bytes(4));
-    // Confirm the bytes metadata points to the right data reference
-    btd_meta = reinterpret_cast<const bytes_type_metadata *>(b.get_arrmeta());
+    // Confirm the bytes arrmeta points to the right data reference
+    btd_meta = reinterpret_cast<const bytes_type_arrmeta *>(b.get_arrmeta());
     EXPECT_EQ(btd_meta->blockref, a.get_data_memblock().get());
     // Confirm it's pointing to the right memory with the right size
     btd = reinterpret_cast<const bytes_type_data *>(b.get_readonly_originptr());
@@ -161,8 +161,8 @@ TEST(View, AsBytes) {
     a = a_data;
     b = nd::view(a, ndt::make_bytes(1));
     ASSERT_EQ(b.get_type(), ndt::make_bytes(1));
-    // Confirm the bytes metadata points to the right data reference
-    btd_meta = reinterpret_cast<const bytes_type_metadata *>(b.get_arrmeta());
+    // Confirm the bytes arrmeta points to the right data reference
+    btd_meta = reinterpret_cast<const bytes_type_arrmeta *>(b.get_arrmeta());
     EXPECT_EQ(btd_meta->blockref, a.get_data_memblock().get());
     // Confirm it's pointing to the right memory with the right size
     btd = reinterpret_cast<const bytes_type_data *>(b.get_readonly_originptr());
@@ -174,8 +174,8 @@ TEST(View, AsBytes) {
     a = a_data2;
     b = nd::view(a, ndt::make_bytes(2));
     ASSERT_EQ(b.get_type(), ndt::make_bytes(2));
-    // Confirm the bytes metadata points to the right data reference
-    btd_meta = reinterpret_cast<const bytes_type_metadata *>(b.get_arrmeta());
+    // Confirm the bytes arrmeta points to the right data reference
+    btd_meta = reinterpret_cast<const bytes_type_arrmeta *>(b.get_arrmeta());
     EXPECT_EQ(btd_meta->blockref, a.get_data_memblock().get());
     // Confirm it's pointing to the right memory with the right size
     btd = reinterpret_cast<const bytes_type_data *>(b.get_readonly_originptr());
@@ -187,10 +187,10 @@ TEST(View, AsBytes) {
     a = parse_json("var * 2 * int16", "[[1, 2], [3, 4], [5, 6]]");
     b = nd::view(a, ndt::make_bytes(1));
     ASSERT_EQ(b.get_type(), ndt::make_bytes(1));
-    // Confirm the bytes metadata points to the right data reference
-    btd_meta = reinterpret_cast<const bytes_type_metadata *>(b.get_arrmeta());
-    const var_dim_type_metadata *vdt_meta =
-        reinterpret_cast<const var_dim_type_metadata *>(a.get_arrmeta());
+    // Confirm the bytes arrmeta points to the right data reference
+    btd_meta = reinterpret_cast<const bytes_type_arrmeta *>(b.get_arrmeta());
+    const var_dim_type_arrmeta *vdt_meta =
+        reinterpret_cast<const var_dim_type_arrmeta *>(a.get_arrmeta());
     EXPECT_EQ(btd_meta->blockref, vdt_meta->blockref);
     // Confirm it's pointing to the right memory with the right size
     const var_dim_type_data *vdt_data =
@@ -220,7 +220,7 @@ TEST(View, StructAsBytes) {
 
 TEST(View, FromBytes) {
     nd::array a, b;
-    const bytes_type_metadata *btd_meta;
+    const bytes_type_arrmeta *btd_meta;
     const bytes_type_data *btd;
 
     double x = 3.25;
@@ -228,7 +228,7 @@ TEST(View, FromBytes) {
     ASSERT_EQ(ndt::make_bytes(8), a.get_type());
     b = nd::view(a, ndt::make_type<double>());
     EXPECT_EQ(3.25, b.as<double>());
-    btd_meta = reinterpret_cast<const bytes_type_metadata *>(a.get_arrmeta());
+    btd_meta = reinterpret_cast<const bytes_type_arrmeta *>(a.get_arrmeta());
     btd = reinterpret_cast<const bytes_type_data *>(a.get_readonly_originptr());
     if (btd_meta->blockref != NULL) {
         EXPECT_EQ(btd_meta->blockref, b.get_ndo()->m_data_reference);
@@ -244,7 +244,7 @@ TEST(View, FromBytes) {
     EXPECT_EQ(1.f, b(0).as<float>());
     EXPECT_EQ(2.5f, b(1).as<float>());
     EXPECT_EQ(-1.25f, b(2).as<float>());
-    btd_meta = reinterpret_cast<const bytes_type_metadata *>(a.get_arrmeta());
+    btd_meta = reinterpret_cast<const bytes_type_arrmeta *>(a.get_arrmeta());
     btd = reinterpret_cast<const bytes_type_data *>(a.get_readonly_originptr());
     if (btd_meta->blockref != NULL) {
         EXPECT_EQ(btd_meta->blockref, b.get_ndo()->m_data_reference);

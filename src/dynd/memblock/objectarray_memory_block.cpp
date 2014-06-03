@@ -23,7 +23,7 @@ namespace {
         /** Every memory block object needs this at the front */
         memory_block_data m_mbd;
         ndt::type m_dt;
-        const char *m_metadata;
+        const char *m_arrmeta;
         intptr_t m_stride;
         size_t m_total_allocated_count;
         bool m_finalized;
@@ -49,8 +49,8 @@ namespace {
             m_total_allocated_count += count;
         }
 
-        objectarray_memory_block(const ndt::type& dt, const char *metadata, intptr_t stride, intptr_t initial_count)
-            : m_mbd(1, objectarray_memory_block_type), m_dt(dt), m_metadata(metadata),
+        objectarray_memory_block(const ndt::type& dt, const char *arrmeta, intptr_t stride, intptr_t initial_count)
+            : m_mbd(1, objectarray_memory_block_type), m_dt(dt), m_arrmeta(arrmeta),
                             m_stride(stride), m_total_allocated_count(0),
                             m_finalized(false), m_memory_handles()
         {
@@ -67,7 +67,7 @@ namespace {
         {
             for (size_t i = 0, i_end = m_memory_handles.size(); i != i_end; ++i) {
                 memory_chunk& mc = m_memory_handles[i];
-                m_dt.extended()->data_destruct_strided(m_metadata, mc.memory, m_stride, mc.used_count);
+                m_dt.extended()->data_destruct_strided(m_arrmeta, mc.memory, m_stride, mc.used_count);
                 free(mc.memory);
             }
         }
@@ -75,10 +75,10 @@ namespace {
 } // anonymous namespace
 
 memory_block_ptr dynd::make_objectarray_memory_block(const ndt::type& dt,
-                const char *metadata, intptr_t stride, intptr_t initial_count)
+                const char *arrmeta, intptr_t stride, intptr_t initial_count)
 {
     objectarray_memory_block *pmb = new objectarray_memory_block(
-                    dt, metadata, stride, initial_count);
+                    dt, arrmeta, stride, initial_count);
     return memory_block_ptr(reinterpret_cast<memory_block_data *>(pmb), false);
 }
 
@@ -150,7 +150,7 @@ static char *resize(memory_block_data *self, char *previous_allocated, size_t co
             mc->used_count += (count - previous_count);
         } else {
             // Call the destructor on the elements no longer used
-            emb->m_dt.extended()->data_destruct_strided(emb->m_metadata,
+            emb->m_dt.extended()->data_destruct_strided(emb->m_arrmeta,
                             previous_allocated + emb->m_stride * count, emb->m_stride, previous_count - count);
             mc->used_count -= (previous_count - count);
         }
@@ -189,7 +189,7 @@ static void reset(memory_block_data *self)
         for (size_t i = 0, i_end = emb->m_memory_handles.size() - 1; i != i_end; ++i) {
             memory_chunk& mc = emb->m_memory_handles[i];
             emb->m_dt.extended()->data_destruct_strided(
-                            emb->m_metadata, mc.memory, emb->m_stride, mc.used_count);
+                emb->m_arrmeta, mc.memory, emb->m_stride, mc.used_count);
             free(mc.memory);
         }
         emb->m_memory_handles.front() = emb->m_memory_handles.back();
@@ -197,7 +197,7 @@ static void reset(memory_block_data *self)
         // Reset to zero used elements in the chunk
         memory_chunk& mc = emb->m_memory_handles.front();
         emb->m_dt.extended()->data_destruct_strided(
-                        emb->m_metadata, mc.memory, emb->m_stride, mc.used_count);
+            emb->m_arrmeta, mc.memory, emb->m_stride, mc.used_count);
         mc.used_count = 0;
     }
 }

@@ -44,7 +44,7 @@ byteswap_type::~byteswap_type()
 {
 }
 
-void byteswap_type::print_data(std::ostream& DYND_UNUSED(o), const char *DYND_UNUSED(metadata), const char *DYND_UNUSED(data)) const
+void byteswap_type::print_data(std::ostream& DYND_UNUSED(o), const char *DYND_UNUSED(arrmeta), const char *DYND_UNUSED(data)) const
 {
     throw runtime_error("internal error: byteswap_type::print_data isn't supposed to be called");
 }
@@ -94,7 +94,7 @@ ndt::type byteswap_type::with_replaced_storage_type(const ndt::type& replacement
 
 size_t byteswap_type::make_operand_to_value_assignment_kernel(
                 ckernel_builder *out, size_t offset_out,
-                const char *DYND_UNUSED(dst_metadata), const char *DYND_UNUSED(src_metadata),
+                const char *DYND_UNUSED(dst_arrmeta), const char *DYND_UNUSED(src_arrmeta),
                 kernel_request_t kernreq, const eval::eval_context *DYND_UNUSED(ectx)) const
 {
     if(m_value_type.get_kind() != complex_kind) {
@@ -110,7 +110,7 @@ size_t byteswap_type::make_operand_to_value_assignment_kernel(
 
 size_t byteswap_type::make_value_to_operand_assignment_kernel(
                 ckernel_builder *out, size_t offset_out,
-                const char *DYND_UNUSED(dst_metadata), const char *DYND_UNUSED(src_metadata),
+                const char *DYND_UNUSED(dst_arrmeta), const char *DYND_UNUSED(src_arrmeta),
                 kernel_request_t kernreq, const eval::eval_context *DYND_UNUSED(ectx)) const
 {
     if(m_value_type.get_kind() != complex_kind) {

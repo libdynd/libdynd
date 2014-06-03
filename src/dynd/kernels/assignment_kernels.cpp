@@ -99,8 +99,8 @@ static void unaligned_copy_strided(char *dst, intptr_t dst_stride,
 
 size_t dynd::make_assignment_kernel(
                 ckernel_builder *out, size_t offset_out,
-                const ndt::type& dst_tp, const char *dst_metadata,
-                const ndt::type& src_tp, const char *src_metadata,
+                const ndt::type& dst_tp, const char *dst_arrmeta,
+                const ndt::type& src_tp, const char *src_arrmeta,
                 kernel_request_t kernreq, assign_error_mode errmode,
                 const eval::eval_context *ectx)
 {
@@ -126,14 +126,14 @@ size_t dynd::make_assignment_kernel(
             }
         } else {
             return src_tp.extended()->make_assignment_kernel(out, offset_out,
-                            dst_tp, dst_metadata,
-                            src_tp, src_metadata,
+                            dst_tp, dst_arrmeta,
+                            src_tp, src_arrmeta,
                             kernreq, errmode, ectx);
         }
     } else {
         return dst_tp.extended()->make_assignment_kernel(out, offset_out,
-                        dst_tp, dst_metadata,
-                        src_tp, src_metadata,
+                        dst_tp, dst_arrmeta,
+                        src_tp, src_arrmeta,
                         kernreq, errmode, ectx);
     }
 }

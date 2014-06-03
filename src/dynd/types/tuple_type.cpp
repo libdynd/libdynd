@@ -157,7 +157,7 @@ bool tuple_type::operator==(const base_type& rhs) const
     }
 }
 
-void tuple_type::metadata_debug_print(const char *arrmeta, std::ostream& o, const std::string& indent) const
+void tuple_type::arrmeta_debug_print(const char *arrmeta, std::ostream& o, const std::string& indent) const
 {
     const size_t *data_offsets = reinterpret_cast<const size_t *>(arrmeta);
     o << indent << "tuple arrmeta\n";
@@ -172,9 +172,9 @@ void tuple_type::metadata_debug_print(const char *arrmeta, std::ostream& o, cons
     const uintptr_t *arrmeta_offsets = get_arrmeta_offsets_raw();
     for (size_t i = 0; i < m_field_count; ++i) {
         const ndt::type& field_dt = get_field_type(i);
-        if (!field_dt.is_builtin() && field_dt.extended()->get_metadata_size() > 0) {
+        if (!field_dt.is_builtin() && field_dt.extended()->get_arrmeta_size() > 0) {
             o << indent << " field " << i << " arrmeta:\n";
-            field_dt.extended()->metadata_debug_print(arrmeta + arrmeta_offsets[i], o, indent + "  ");
+            field_dt.extended()->arrmeta_debug_print(arrmeta + arrmeta_offsets[i], o, indent + "  ");
         }
     }
 }

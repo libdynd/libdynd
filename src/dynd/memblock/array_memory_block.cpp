@@ -17,14 +17,14 @@ namespace dynd { namespace detail {
 void free_array_memory_block(memory_block_data *memblock)
 {
     array_preamble *preamble = reinterpret_cast<array_preamble *>(memblock);
-    char *metadata = reinterpret_cast<char *>(preamble + 1);
+    char *arrmeta = reinterpret_cast<char *>(preamble + 1);
 
     // Call the data destructor if necessary (i.e. the nd::array owns
     // the data memory, and the type has a data destructor)
     if (preamble->m_data_reference == NULL &&
                     !preamble->is_builtin_type() &&
                     (preamble->m_type->get_flags()&type_flag_destructor) != 0) {
-        preamble->m_type->data_destruct(metadata, preamble->m_data_pointer);
+        preamble->m_type->data_destruct(arrmeta, preamble->m_data_pointer);
     }
 
     // Free the ndobject data if it wasn't allocated together with the memory block
@@ -37,9 +37,9 @@ void free_array_memory_block(memory_block_data *memblock)
         }
     }
 
-    // Free the references contained in the metadata
+    // Free the references contained in the arrmeta
     if (!preamble->is_builtin_type()) {
-        preamble->m_type->metadata_destruct(metadata);
+        preamble->m_type->arrmeta_destruct(arrmeta);
         base_type_decref(preamble->m_type);
     }
 
@@ -54,28 +54,28 @@ void free_array_memory_block(memory_block_data *memblock)
 
 }} // namespace dynd::detail
 
-memory_block_ptr dynd::make_array_memory_block(size_t metadata_size)
+memory_block_ptr dynd::make_array_memory_block(size_t arrmeta_size)
 {
-    char *result = (char *)malloc(sizeof(memory_block_data) + sizeof(array_preamble) + metadata_size);
+    char *result = (char *)malloc(sizeof(memory_block_data) + sizeof(array_preamble) + arrmeta_size);
     if (result == 0) {
         throw bad_alloc();
     }
-    // Zero out all the metadata to start
-    memset(result + sizeof(memory_block_data), 0, sizeof(array_preamble) + metadata_size);
+    // Zero out all the arrmeta to start
+    memset(result + sizeof(memory_block_data), 0, sizeof(array_preamble) + arrmeta_size);
     return memory_block_ptr(new (result) memory_block_data(1, array_memory_block_type), false);
 }
 
-memory_block_ptr dynd::make_array_memory_block(size_t metadata_size, size_t extra_size,
+memory_block_ptr dynd::make_array_memory_block(size_t arrmeta_size, size_t extra_size,
                     size_t extra_alignment, char **out_extra_ptr)
 {
-    size_t extra_offset = inc_to_alignment(sizeof(memory_block_data) + sizeof(array_preamble) + metadata_size,
+    size_t extra_offset = inc_to_alignment(sizeof(memory_block_data) + sizeof(array_preamble) + arrmeta_size,
                                         extra_alignment);
     char *result = (char *)malloc(extra_offset + extra_size);
     if (result == 0) {
         throw bad_alloc();
     }
-    // Zero out all the metadata to start
-    memset(result + sizeof(memory_block_data), 0, sizeof(array_preamble) + metadata_size);
+    // Zero out all the arrmeta to start
+    memset(result + sizeof(memory_block_data), 0, sizeof(array_preamble) + arrmeta_size);
     // Return a pointer to the extra allocated memory
     *out_extra_ptr = result + extra_offset;
     return memory_block_ptr(new (result) memory_block_data(1, array_memory_block_type), false);
@@ -85,22 +85,22 @@ memory_block_ptr dynd::make_array_memory_block(const ndt::type& tp, intptr_t ndi
 {
     const ndt::type& dtp = tp.get_dtype();
 
-    size_t metadata_size, data_size;
+    size_t arrmeta_size, data_size;
     if (tp.is_builtin()) {
-        metadata_size = 0;
+        arrmeta_size = 0;
         data_size = tp.get_data_size();
     } else {
-        metadata_size = tp.extended()->get_metadata_size();
+        arrmeta_size = tp.extended()->get_arrmeta_size();
         data_size = tp.extended()->get_default_data_size(ndim, shape);
     }
 
     memory_block_ptr result;
     char *data_ptr = NULL;
     if (dtp.get_kind() == memory_kind) {
-        result = make_array_memory_block(metadata_size);
+        result = make_array_memory_block(arrmeta_size);
         static_cast<const base_memory_type*>(dtp.extended())->data_alloc(&data_ptr, data_size);
     } else {
-        result = make_array_memory_block(metadata_size, data_size, tp.get_data_alignment(), &data_ptr);
+        result = make_array_memory_block(arrmeta_size, data_size, tp.get_data_alignment(), &data_ptr);
     }
 
     if (tp.get_flags()&type_flag_zeroinit) {
@@ -123,7 +123,7 @@ memory_block_ptr dynd::make_array_memory_block(const ndt::type& tp, intptr_t ndi
         }
     } else {
         preamble->m_type = ndt::type(tp).release();
-        preamble->m_type->metadata_default_construct(
+        preamble->m_type->arrmeta_default_construct(
             reinterpret_cast<char *>(preamble + 1), ndim, shape);
     }
     preamble->m_data_pointer = data_ptr;
@@ -138,11 +138,11 @@ memory_block_ptr dynd::shallow_copy_array_memory_block(const memory_block_ptr& n
 {
     // Allocate the new memory block.
     const array_preamble *preamble = reinterpret_cast<const array_preamble *>(ndo.get());
-    size_t metadata_size = 0;
+    size_t arrmeta_size = 0;
     if (!preamble->is_builtin_type()) {
-        metadata_size = preamble->m_type->get_metadata_size();
+        arrmeta_size = preamble->m_type->get_arrmeta_size();
     }
-    memory_block_ptr result = make_array_memory_block(metadata_size);
+    memory_block_ptr result = make_array_memory_block(arrmeta_size);
     array_preamble *result_preamble = reinterpret_cast<array_preamble *>(result.get());
 
     // Clone the data pointer
@@ -160,7 +160,7 @@ memory_block_ptr dynd::shallow_copy_array_memory_block(const memory_block_ptr& n
     result_preamble->m_type = preamble->m_type;
     if (!preamble->is_builtin_type()) {
         base_type_incref(preamble->m_type);
-        preamble->m_type->metadata_copy_construct(reinterpret_cast<char *>(result.get()) + sizeof(array_preamble),
+        preamble->m_type->arrmeta_copy_construct(reinterpret_cast<char *>(result.get()) + sizeof(array_preamble),
                         reinterpret_cast<const char *>(ndo.get()) + sizeof(array_preamble), ndo.get());
     }
 

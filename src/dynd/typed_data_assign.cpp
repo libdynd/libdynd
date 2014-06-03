@@ -167,24 +167,24 @@ bool dynd::is_lossless_assignment(const ndt::type& dst_tp, const ndt::type& src_
 }
 
 void dynd::typed_data_copy(const ndt::type& tp,
-                const char *dst_metadata, char *dst_data,
-                const char *src_metadata, const char *src_data)
+                const char *dst_arrmeta, char *dst_data,
+                const char *src_arrmeta, const char *src_data)
 {
     size_t data_size = tp.get_data_size();
     if (tp.is_pod()) {
         memcpy(dst_data, src_data, data_size);
     } else {
         assignment_ckernel_builder k;
-        make_assignment_kernel(&k, 0, tp, dst_metadata,
-                        tp, src_metadata,
+        make_assignment_kernel(&k, 0, tp, dst_arrmeta,
+                        tp, src_arrmeta,
                         kernel_request_single,
                         assign_error_none, &eval::default_eval_context);
         k(dst_data, src_data);
     }
 }
 
-void dynd::typed_data_assign(const ndt::type& dst_tp, const char *dst_metadata, char *dst_data,
-                const ndt::type& src_tp, const char *src_metadata, const char *src_data,
+void dynd::typed_data_assign(const ndt::type& dst_tp, const char *dst_arrmeta, char *dst_data,
+                const ndt::type& src_tp, const char *src_arrmeta, const char *src_data,
                 assign_error_mode errmode, const eval::eval_context *ectx)
 {
     DYND_ASSERT_ALIGNED(dst, 0, dst_tp.get_data_alignment(), "dst type: " << dst_tp << ", src type: " << src_tp);
@@ -207,8 +207,8 @@ void dynd::typed_data_assign(const ndt::type& dst_tp, const char *dst_metadata, 
     }
 
     assignment_ckernel_builder k;
-    make_assignment_kernel(&k, 0, dst_tp, dst_metadata,
-                    src_tp, src_metadata,
+    make_assignment_kernel(&k, 0, dst_tp, dst_arrmeta,
+                    src_tp, src_arrmeta,
                     kernel_request_single,
                     errmode, ectx);
     k(dst_data, src_data);

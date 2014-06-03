@@ -30,14 +30,14 @@ public:
         return m_name.str();
     }
 
-    void print_data(std::ostream& o, const char *metadata, const char *data) const;
+    void print_data(std::ostream& o, const char *arrmeta, const char *data) const;
 
     void print_type(std::ostream& o) const;
 
     ndt::type apply_linear_index(intptr_t nindices, const irange *indices,
                 size_t current_i, const ndt::type& root_tp, bool leading_dimension) const;
-    intptr_t apply_linear_index(intptr_t nindices, const irange *indices, const char *metadata,
-                    const ndt::type& result_tp, char *out_metadata,
+    intptr_t apply_linear_index(intptr_t nindices, const irange *indices, const char *arrmeta,
+                    const ndt::type& result_tp, char *out_arrmeta,
                     memory_block_data *embedded_reference,
                     size_t current_i, const ndt::type& root_tp,
                     bool leading_dimension, char **inout_data,
@@ -47,9 +47,9 @@ public:
 
     bool operator==(const base_type& rhs) const;
 
-    void metadata_default_construct(char *metadata, intptr_t ndim, const intptr_t* shape) const;
-    void metadata_copy_construct(char *dst_metadata, const char *src_metadata, memory_block_data *embedded_reference) const;
-    void metadata_destruct(char *metadata) const;
+    void arrmeta_default_construct(char *arrmeta, intptr_t ndim, const intptr_t* shape) const;
+    void arrmeta_copy_construct(char *dst_arrmeta, const char *src_arrmeta, memory_block_data *embedded_reference) const;
+    void arrmeta_destruct(char *arrmeta) const;
 
     void get_dynamic_type_properties(
         const std::pair<std::string, gfunc::callable> **out_properties,

@@ -309,15 +309,15 @@ size_t dynd::make_string_comparison_kernel(
 
 size_t dynd::make_general_string_comparison_kernel(
                 ckernel_builder *out, size_t offset_out,
-                const ndt::type& src0_dt, const char *src0_metadata,
-                const ndt::type& src1_dt, const char *src1_metadata,
+                const ndt::type& src0_dt, const char *src0_arrmeta,
+                const ndt::type& src1_dt, const char *src1_arrmeta,
                 comparison_type_t comptype,
                 const eval::eval_context *ectx)
 {
     // TODO: Make more efficient, direct comparison kernels
     ndt::type sdt = ndt::make_string();
     return make_comparison_kernel(out, offset_out,
-                    ndt::make_convert(sdt, src0_dt), src0_metadata,
-                    ndt::make_convert(sdt, src1_dt), src1_metadata,
+                    ndt::make_convert(sdt, src0_dt), src0_arrmeta,
+                    ndt::make_convert(sdt, src1_dt), src1_arrmeta,
                     comptype, ectx);
 }

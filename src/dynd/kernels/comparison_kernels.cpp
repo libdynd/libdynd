@@ -13,8 +13,8 @@ using namespace dynd;
 
 size_t dynd::make_comparison_kernel(
                 ckernel_builder *out, size_t offset_out,
-                const ndt::type& src0_dt, const char *src0_metadata,
-                const ndt::type& src1_dt, const char *src1_metadata,
+                const ndt::type& src0_dt, const char *src0_arrmeta,
+                const ndt::type& src1_dt, const char *src1_arrmeta,
                 comparison_type_t comptype,
                 const eval::eval_context *ectx)
 {
@@ -25,14 +25,14 @@ size_t dynd::make_comparison_kernel(
                             comptype);
         } else {
             return src1_dt.extended()->make_comparison_kernel(out, offset_out,
-                            src0_dt, src0_metadata,
-                            src1_dt, src1_metadata,
+                            src0_dt, src0_arrmeta,
+                            src1_dt, src1_arrmeta,
                             comptype, ectx);
         }
     } else {
         return src0_dt.extended()->make_comparison_kernel(out, offset_out,
-                        src0_dt, src0_metadata,
-                        src1_dt, src1_metadata,
+                        src0_dt, src0_arrmeta,
+                        src1_dt, src1_arrmeta,
                         comptype, ectx);
     }
 }

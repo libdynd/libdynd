@@ -30,7 +30,7 @@ base_struct_type::base_struct_type(type_id_t type_id,
     }
 
     // Make sure that the number of names matches
-    size_t name_count = reinterpret_cast<const strided_dim_type_metadata *>(
+    size_t name_count = reinterpret_cast<const strided_dim_type_arrmeta *>(
                             m_field_names.get_arrmeta())->size;
     if (name_count != m_field_count) {
         stringstream ss;
@@ -54,7 +54,7 @@ intptr_t base_struct_type::get_field_index(const char *field_name_begin,
         size_t field_count = get_field_count();
         const char *fn_ptr = m_field_names.get_readonly_originptr();
         intptr_t fn_stride =
-            reinterpret_cast<const strided_dim_type_metadata *>(
+            reinterpret_cast<const strided_dim_type_arrmeta *>(
                 m_field_names.get_arrmeta())->stride;
         for (size_t i = 0; i != field_count; ++i, fn_ptr += fn_stride) {
             const string_type_data *fn = reinterpret_cast<const string_type_data *>(fn_ptr);
@@ -106,10 +106,10 @@ ndt::type base_struct_type::apply_linear_index(intptr_t nindices,
             ndt::type stp = ndt::make_string(string_encoding_utf_8);
             ndt::type tp = ndt::make_strided_dim(stp);
             nd::array tmp_field_names(
-                make_array_memory_block(tp.extended()->get_metadata_size(),
+                make_array_memory_block(tp.extended()->get_arrmeta_size(),
                                         dimension_size * stp.get_data_size(),
                                         tp.get_data_alignment(), &data_ptr));
-            // Set the array metadata
+            // Set the array arrmeta
             array_preamble *ndo = tmp_field_names.get_ndo();
             ndo->m_type = tp.release();
             ndo->m_data_pointer = data_ptr;
@@ -117,19 +117,19 @@ ndt::type base_struct_type::apply_linear_index(intptr_t nindices,
             ndo->m_flags = nd::default_access_flags;
             string_arr_ptr = reinterpret_cast<string_type_data *>(data_ptr);
             // Get the allocator for the output string type
-            strided_dim_type_metadata *md =
-                reinterpret_cast<strided_dim_type_metadata *>(
+            strided_dim_type_arrmeta *md =
+                reinterpret_cast<strided_dim_type_arrmeta *>(
                     tmp_field_names.get_arrmeta());
             md->size = dimension_size;
             md->stride = stp.get_data_size();
-            string_type_metadata *smd =
-                reinterpret_cast<string_type_metadata *>(
+            string_type_arrmeta *smd =
+                reinterpret_cast<string_type_arrmeta *>(
                     tmp_field_names.get_arrmeta() +
-                    sizeof(strided_dim_type_metadata));
-            const string_type_metadata *smd_orig =
-                reinterpret_cast<const string_type_metadata *>(
+                    sizeof(strided_dim_type_arrmeta));
+            const string_type_arrmeta *smd_orig =
+                reinterpret_cast<const string_type_arrmeta *>(
                     m_field_names.get_arrmeta() +
-                    sizeof(strided_dim_type_metadata));
+                    sizeof(strided_dim_type_arrmeta));
             smd->blockref = smd_orig->blockref
                                 ? smd_orig->blockref
                                 : m_field_names.get_memblock().get();
@@ -157,8 +157,8 @@ intptr_t base_struct_type::apply_linear_index(
     memory_block_data **inout_dataref) const
 {
     if (nindices == 0) {
-        // If there are no more indices, copy the metadata verbatim
-        metadata_copy_construct(out_arrmeta, arrmeta, embedded_reference);
+        // If there are no more indices, copy the arrmeta verbatim
+        arrmeta_copy_construct(out_arrmeta, arrmeta, embedded_reference);
         return 0;
     } else {
         const uintptr_t *offsets = get_data_offsets(arrmeta);
@@ -266,8 +266,8 @@ namespace {
 
 size_t base_struct_type::make_elwise_property_getter_kernel(
                 ckernel_builder *out, size_t offset_out,
-                const char *dst_metadata,
-                const char *src_metadata, size_t src_elwise_property_index,
+                const char *dst_arrmeta,
+                const char *src_arrmeta, size_t src_elwise_property_index,
                 kernel_request_t kernreq, const eval::eval_context *ectx) const
 {
     size_t field_count = get_field_count();
@@ -291,10 +291,10 @@ size_t base_struct_type::make_elwise_property_getter_kernel(
             }   
         }
         e->base.destructor = &struct_property_getter_extra::destruct;
-        e->field_offset = get_data_offsets(src_metadata)[src_elwise_property_index];
+        e->field_offset = get_data_offsets(src_arrmeta)[src_elwise_property_index];
         return ::make_assignment_kernel(out, offset_out + sizeof(struct_property_getter_extra),
-                        field_type.value_type(), dst_metadata,
-                        field_type, src_metadata + arrmeta_offsets[src_elwise_property_index],
+                        field_type.value_type(), dst_arrmeta,
+                        field_type, src_arrmeta + arrmeta_offsets[src_elwise_property_index],
                         kernreq, assign_error_none, ectx);
     } else {
         stringstream ss;
@@ -306,8 +306,8 @@ size_t base_struct_type::make_elwise_property_getter_kernel(
 
 size_t base_struct_type::make_elwise_property_setter_kernel(
                 ckernel_builder *DYND_UNUSED(out), size_t DYND_UNUSED(offset_out),
-                const char *DYND_UNUSED(dst_metadata), size_t dst_elwise_property_index,
-                const char *DYND_UNUSED(src_metadata),
+                const char *DYND_UNUSED(dst_arrmeta), size_t dst_elwise_property_index,
+                const char *DYND_UNUSED(src_arrmeta),
                 kernel_request_t DYND_UNUSED(kernreq), const eval::eval_context *DYND_UNUSED(ectx)) const
 {
     // No writable properties

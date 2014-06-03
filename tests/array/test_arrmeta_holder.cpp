@@ -20,7 +20,7 @@ using namespace dynd;
 
 TEST(ArrMetaHolder, Basic) {
     // The string type requires a memory block allocated in its
-    // metadata, so this test checks that the arrmeta_holder can
+    // arrmeta, so this test checks that the arrmeta_holder can
     // allocate and manage that.
     string_type_data sarr[3];
     int iarr[3] = {-1234, 0, 999992};
@@ -31,8 +31,8 @@ TEST(ArrMetaHolder, Basic) {
     EXPECT_EQ(smeta.get_type(), ndt::type("strided * string"));
     arrmeta_holder imeta(ndt::type("3 * int"));
     EXPECT_EQ(imeta.get_type(), ndt::type("fixed[3] * int32"));
-    smeta.metadata_default_construct(1, &sarr_size);
-    imeta.get_at<fixed_dim_type_metadata>(0)->stride = sizeof(int);
+    smeta.arrmeta_default_construct(1, &sarr_size);
+    imeta.get_at<fixed_dim_type_arrmeta>(0)->stride = sizeof(int);
 
     // Copy from iarr to sarr
     typed_data_assign(smeta.get_type(), smeta.get(),

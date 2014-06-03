@@ -29,8 +29,8 @@ struct arrfunc_type_data;
  * caller should first allocate a `ckernel_builder` instance,
  * either from C++ normally or by reserving appropriately aligned/sized
  * data and calling the C function constructor dynd provides. When the
- * data types of the kernel require metadata, such as for 'strided'
- * or 'var' dimension types, the metadata must be provided as well.
+ * data types of the kernel require arrmeta, such as for 'strided'
+ * or 'var' dimension types, the arrmeta must be provided as well.
  *
  * \param self  The arrfunc.
  * \param ckb  A ckernel_builder instance where the kernel is placed.
@@ -105,7 +105,7 @@ typedef void (*arrfunc_resolve_dst_shape_t)(const arrfunc_type_data *self,
  * The arrfunc can produce a ckernel with with a few
  * variations, like choosing between a single
  * operation and a strided operation, or constructing
- * with different array metadata.
+ * with different array arrmeta.
  */
 struct arrfunc_type_data {
     /** The function prototype of the arrfunc */

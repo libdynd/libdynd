@@ -38,7 +38,7 @@ class base_type;
 struct iterdata_common;
 
 /** This is the callback function type used by the base_type::foreach function */
-typedef void (*foreach_fn_t)(const ndt::type &dt, const char *metadata,
+typedef void (*foreach_fn_t)(const ndt::type &dt, const char *arrmeta,
                              char *data, void *callback_data);
 
 /**
@@ -91,15 +91,15 @@ struct base_type_members {
     /** The size of one instance of the type, or 0 if there is not one fixed size. */
     size_t data_size;
     /** The size of a arrmeta instance for the type. */
-    size_t metadata_size;
+    size_t arrmeta_size;
     /** The number of array dimensions this type has */
     uint8_t undim;
 
     base_type_members(uint16_t type_id_, uint8_t kind_, uint8_t data_alignment_,
                       flags_type flags_, size_t data_size_,
-                      size_t metadata_size_, uint8_t undim_)
+                      size_t arrmeta_size_, uint8_t undim_)
         : type_id(type_id_), kind(kind_), data_alignment(data_alignment_),
-          flags(flags_), data_size(data_size_), metadata_size(metadata_size_),
+          flags(flags_), data_size(data_size_), arrmeta_size(arrmeta_size_),
           undim(undim_)
     {}
 };
@@ -133,12 +133,12 @@ public:
 
     /** Starts off the extended type instance with a use count of 1. */
     inline base_type(type_id_t type_id, type_kind_t kind, size_t data_size,
-                     size_t alignment, flags_type flags, size_t metadata_size,
+                     size_t alignment, flags_type flags, size_t arrmeta_size,
                      size_t undim)
         : m_use_count(1),
           m_members(static_cast<uint16_t>(type_id), static_cast<uint8_t>(kind),
                     static_cast<uint8_t>(alignment), flags, data_size,
-                    metadata_size, static_cast<uint8_t>(undim))
+                    arrmeta_size, static_cast<uint8_t>(undim))
     {}
 
     virtual ~base_type();
@@ -182,10 +182,10 @@ public:
      * Print the raw data interpreted as a single instance of this type.
      *
      * \param o  The std::ostream to print to.
-     * \param metadata  Pointer to the type metadata of the data element to print.
+     * \param arrmeta  Pointer to the type arrmeta of the data element to print.
      * \param data  Pointer to the data element to print.
      */
-    virtual void print_data(std::ostream& o, const char *metadata, const char *data) const = 0;
+    virtual void print_data(std::ostream& o, const char *arrmeta, const char *data) const = 0;
 
     /**
      * Print a representation of the type itself
@@ -221,10 +221,10 @@ public:
 
     /**
      * Should return true if there is no additional blockref which might point
-     * to data not owned by the metadata. For example, a blockref which points
+     * to data not owned by the arrmeta. For example, a blockref which points
      * to an 'external' memory block does not own its data uniquely.
      */
-    virtual bool is_unique_data_owner(const char *metadata) const;
+    virtual bool is_unique_data_owner(const char *arrmeta) const;
 
     /**
      * Applies the transform function to all the child types, creating
@@ -257,10 +257,10 @@ public:
 
     /**
      * When is_strided() returns true, this function can be used to
-     * get the striding parameters for a given metadata/data instance
+     * get the striding parameters for a given arrmeta/data instance
      * of the type.
      */
-    virtual void process_strided(const char *metadata, const char *data,
+    virtual void process_strided(const char *arrmeta, const char *data,
                                  ndt::type &out_dt, const char *&out_origin,
                                  intptr_t &out_stride,
                                  intptr_t &out_dim_size) const;
@@ -290,9 +290,9 @@ public:
      *
      * \param nindices     The number of elements in the 'indices' array. This is shrunk by one for each recursive call.
      * \param indices      The indices to apply. This is incremented by one for each recursive call.
-     * \param metadata     The metadata of the input array.
+     * \param arrmeta     The arrmeta of the input array.
      * \param result_type The result of an apply_linear_index call.
-     * \param out_metadata The metadata of the output array. The output data should all be references to the data
+     * \param out_arrmeta The arrmeta of the output array. The output data should all be references to the data
      *                     of the input array, so there is no out_data parameter.
      * \param embedded_reference  For references which are NULL, add this reference in the output.
      *                            A NULL means the data was embedded in the original nd::array, so
@@ -321,8 +321,8 @@ public:
      * @return  An offset to apply to the data pointer(s).
      */
     virtual intptr_t apply_linear_index(
-        intptr_t nindices, const irange *indices, const char *metadata,
-        const ndt::type &result_type, char *out_metadata,
+        intptr_t nindices, const irange *indices, const char *arrmeta,
+        const ndt::type &result_type, char *out_arrmeta,
         memory_block_data *embedded_reference, size_t current_i,
         const ndt::type &root_tp, bool leading_dimension, char **inout_data,
         memory_block_data **inout_dataref) const;
@@ -330,19 +330,19 @@ public:
     /**
      * The 'at' function is used for indexing. Indexing one dimension with
      * an integer index is special-cased, both for higher performance and
-     * to provide a way to get a metadata pointer for the result type.
+     * to provide a way to get a arrmeta pointer for the result type.
      *
      * \param i0  The index to apply.
-     * \param inout_metadata  If non-NULL, points to a metadata pointer for
+     * \param inout_arrmeta  If non-NULL, points to a arrmeta pointer for
      *                        this type that is modified to point to the
-     *                        result's metadata.
+     *                        result's arrmeta.
      * \param inout_data  If non-NULL, points to a data pointer that is modified
      *                    to point to the result's data. If `inout_data` is non-NULL,
-     *                    `inout_metadata` must also be non-NULL.
+     *                    `inout_arrmeta` must also be non-NULL.
      *
      * \returns  The type that results from the indexing operation.
      */
-    virtual ndt::type at_single(intptr_t i0, const char **inout_metadata,
+    virtual ndt::type at_single(intptr_t i0, const char **inout_arrmeta,
                                 const char **inout_data) const;
 
     /**
@@ -350,14 +350,14 @@ public:
      * generally equivalent to apply_linear_index with a count of 'dim'
      * scalar indices.
      *
-     * \param inout_metadata  NULL to ignore, or point it at some metadata for the type,
-     *                        and it will be updated to point to the metadata for the returned
+     * \param inout_arrmeta  NULL to ignore, or point it at some arrmeta for the type,
+     *                        and it will be updated to point to the arrmeta for the returned
      *                        type.
      * \param i         The dimension number to retrieve.
      * \param total_ndim  A count of how many dimensions have been traversed from the
      *                    type start, for producing error messages.
      */
-    virtual ndt::type get_type_at_dimension(char **inout_metadata, intptr_t i,
+    virtual ndt::type get_type_at_dimension(char **inout_arrmeta, intptr_t i,
                                             intptr_t total_ndim = 0) const;
 
     /**
@@ -365,7 +365,7 @@ public:
      * populating up to 'ndim' elements of out_shape. For dimensions with
      * variable or unknown shape, -1 is returned.
      *
-     * The 'metadata' may be NULL, in which case -1 should be used when
+     * The 'arrmeta' may be NULL, in which case -1 should be used when
      * the shape cannot be determined.
      * The 'data' may be NULL, and only gets fed deeper when an element
      * is unique (i.e. the dimension size is 1, it's a pointer type, etc).
@@ -373,7 +373,7 @@ public:
      * The output must be pre-initialized to have 'ndim' elements.
      */
     virtual void get_shape(intptr_t ndim, intptr_t i, intptr_t *out_shape,
-                           const char *metadata, const char *data) const;
+                           const char *arrmeta, const char *data) const;
 
     /**
      * Retrieves the strides of the type nd::array instance,
@@ -384,13 +384,13 @@ public:
      * The output must be pre-initialized to have get_ndim() elements.
      */
     virtual void get_strides(size_t i, intptr_t *out_strides,
-                             const char *metadata) const;
+                             const char *arrmeta) const;
 
     /**
      * Classifies the order the axes occur in the memory
      * layout of the array.
      */
-    virtual axis_order_classification_t classify_axis_order(const char *metadata) const;
+    virtual axis_order_classification_t classify_axis_order(const char *arrmeta) const;
 
     /**
      * Called by ::dynd::is_lossless_assignment, with (this == dst_tp->extended()).
@@ -399,58 +399,58 @@ public:
 
     virtual bool operator==(const base_type& rhs) const = 0;
 
-    /** The size of the nd::array metadata for this type */
-    inline size_t get_metadata_size() const {
-        return m_members.metadata_size;
+    /** The size of the nd::array arrmeta for this type */
+    inline size_t get_arrmeta_size() const {
+        return m_members.arrmeta_size;
     }
     /**
-     * Constructs the nd::array metadata for this type, prepared for writing.
+     * Constructs the nd::array arrmeta for this type, prepared for writing.
      * The element size of the result must match that from get_default_data_size().
      */
-    virtual void metadata_default_construct(char *metadata, intptr_t ndim, const intptr_t* shape) const;
+    virtual void arrmeta_default_construct(char *arrmeta, intptr_t ndim, const intptr_t* shape) const;
     /**
-     * Constructs the nd::array metadata for this type, copying everything exactly from
-     * input metadata for the same type.
+     * Constructs the nd::array arrmeta for this type, copying everything exactly from
+     * input arrmeta for the same type.
      *
-     * \param dst_metadata  The new metadata memory which is constructed.
-     * \param src_metadata   Existing metadata memory from which to copy.
+     * \param dst_arrmeta  The new arrmeta memory which is constructed.
+     * \param src_arrmeta   Existing arrmeta memory from which to copy.
      * \param embedded_reference  For references which are NULL, add this reference in the output.
      *                            A NULL means the data was embedded in the original nd::array, so
      *                            when putting it in a new nd::array, need to hold a reference to
      *                            that memory.
      */
-    virtual void metadata_copy_construct(char *dst_metadata, const char *src_metadata,
+    virtual void arrmeta_copy_construct(char *dst_arrmeta, const char *src_arrmeta,
                     memory_block_data *embedded_reference) const;
-    /** Destructs any references or other state contained in the nd::arrays' metdata */
-    virtual void metadata_destruct(char *metadata) const;
+    /** Destructs any references or other state contained in the nd::arrays' arrmeta */
+    virtual void arrmeta_destruct(char *arrmeta) const;
     /**
-     * When metadata is used for temporary buffers of a type,
+     * When arrmeta is used for temporary buffers of a type,
      * and that usage is finished one execution cycle, this function
      * is called to clear usage of that memory so it can be reused in
      * the next cycle.
      */
-    virtual void metadata_reset_buffers(char *metadata) const;
+    virtual void arrmeta_reset_buffers(char *arrmeta) const;
     /**
      * For blockref types, once all the elements have been written
      * we want to turn off further memory allocation, and possibly
      * trim excess memory that was allocated. This function
      * does this.
      */
-    virtual void metadata_finalize_buffers(char *metadata) const;
+    virtual void arrmeta_finalize_buffers(char *arrmeta) const;
     /** Debug print of the metdata */
-    virtual void metadata_debug_print(const char *metadata, std::ostream& o,
-                    const std::string& indent) const;
+    virtual void arrmeta_debug_print(const char *arrmeta, std::ostream &o,
+                                     const std::string &indent) const;
 
     /**
      * For types that have the flag type_flag_destructor set, this function
      * or the strided version is called to destruct data.
      */
-    virtual void data_destruct(const char *metadata, char *data) const;
+    virtual void data_destruct(const char *arrmeta, char *data) const;
     /**
      * For types that have the flag type_flag_destructor set, this function
      * or the non-strided version is called to destruct data.
      */
-    virtual void data_destruct_strided(const char *metadata, char *data,
+    virtual void data_destruct_strided(const char *arrmeta, char *data,
                     intptr_t stride, size_t count) const;
 
     /** The size of the data required for uniform iteration */
@@ -467,7 +467,7 @@ public:
 
     /**
      * Creates an assignment kernel for one data value from the
-     * src type/metadata to the dst type/metadata. This adds the
+     * src type/arrmeta to the dst type/arrmeta. This adds the
      * kernel at the 'out_offset' position in 'out's data, as part
      * of a hierarchy matching the type's hierarchy.
      *
@@ -487,7 +487,7 @@ public:
 
     /**
      * Creates a comparison kernel for one data value from one
-     * type/metadata to another type/metadata. This adds the
+     * type/arrmeta to another type/arrmeta. This adds the
      * kernel at the 'out_offset' position in 'out's data, as part
      * of a hierarchy matching the type's hierarchy.
      *
@@ -590,14 +590,14 @@ public:
      *
      * \param out  The hierarchical assignment kernel being constructed.
      * \param offset_out  The offset within 'out'.
-     * \param dst_metadata  Metadata for the destination property being written to.
-     * \param src_metadata  Metadata for the operand type being read from.
+     * \param dst_arrmeta  Arrmeta for the destination property being written to.
+     * \param src_arrmeta  Arrmeta for the operand type being read from.
      * \param src_elwise_property_index  The index of the property, from get_elwise_property_index().
      * \param ectx  DyND evaluation context.
      */
     virtual size_t make_elwise_property_getter_kernel(
-        ckernel_builder *out, size_t offset_out, const char *dst_metadata,
-        const char *src_metadata, size_t src_elwise_property_index,
+        ckernel_builder *out, size_t offset_out, const char *dst_arrmeta,
+        const char *src_arrmeta, size_t src_elwise_property_index,
         kernel_request_t kernreq, const eval::eval_context *ectx) const;
 
     /**
@@ -611,14 +611,14 @@ public:
      *
      * \param ckb  The hierarchical assignment kernel being constructed.
      * \param ckb_offset  The offset within 'ckb'.
-     * \param dst_metadata  Metadata for the operand type being written to.
+     * \param dst_arrmeta  Arrmeta for the operand type being written to.
      * \param dst_elwise_property_index  The index of the property, from get_elwise_property_index().
-     * \param src_metadata  Metadata for the source property being read from.
+     * \param src_arrmeta  Arrmeta for the source property being read from.
      * \param ectx  DyND evaluation contrext.
      */
     virtual size_t make_elwise_property_setter_kernel(
-        ckernel_builder *ckb, size_t ckb_offset, const char *dst_metadata,
-        size_t dst_elwise_property_index, const char *src_metadata,
+        ckernel_builder *ckb, size_t ckb_offset, const char *dst_arrmeta,
+        size_t dst_elwise_property_index, const char *src_arrmeta,
         kernel_request_t kernreq, const eval::eval_context *ectx) const;
 
     friend void base_type_incref(const base_type *ed);

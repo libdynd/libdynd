@@ -353,7 +353,7 @@ TEST(StructType, SingleCompare) {
 }
 
 
-TEST(StructType, SingleCompareDifferentMetadata) {
+TEST(StructType, SingleCompareDifferentArrmeta) {
     nd::array a, b;
     ndt::type sdt = ndt::make_struct(ndt::make_type<int32_t>(), "a",
                     ndt::make_type<float>(), "b", ndt::make_type<int64_t>(), "c");
@@ -362,7 +362,7 @@ TEST(StructType, SingleCompareDifferentMetadata) {
     a = nd::empty(sdt);
     b = nd::empty(sdt_reverse)(irange().by(-1));
 
-    // Confirm that the metadata is different
+    // Confirm that the arrmeta is different
     EXPECT_EQ(a.get_type(), b.get_type());
     const struct_type *a_sdt = static_cast<const struct_type *>(a.get_type().extended());
     const struct_type *b_sdt = static_cast<const struct_type *>(b.get_type().extended());

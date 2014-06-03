@@ -251,21 +251,21 @@ public:
      * function. Overloading operator[] isn't
      * practical for multidimensional objects. Indexing one dimension with
      * an integer index is special-cased, both for higher performance and
-     * to provide a way to get a metadata pointer for the result type.
+     * to provide a way to get a arrmeta pointer for the result type.
      *
      * \param i0  The index to apply.
-     * \param inout_metadata  If non-NULL, points to a metadata pointer for
+     * \param inout_arrmeta  If non-NULL, points to an arrmeta pointer for
      *                        this type that is modified to point to the
-     *                        result's metadata.
+     *                        result's arrmeta.
      * \param inout_data  If non-NULL, points to a data pointer that is modified
      *                    to point to the result's data. If `inout_data` is non-NULL,
-     *                    `inout_metadata` must also be non-NULL.
+     *                    `inout_arrmeta` must also be non-NULL.
      *
      * \returns  The type that results from the indexing operation.
      */
-    inline type at_single(intptr_t i0, const char **inout_metadata = NULL, const char **inout_data = NULL) const {
+    inline type at_single(intptr_t i0, const char **inout_arrmeta = NULL, const char **inout_data = NULL) const {
         if (!is_builtin()) {
-            return m_extended->at_single(i0, inout_metadata, inout_data);
+            return m_extended->at_single(i0, inout_arrmeta, inout_data);
         } else {
             throw too_many_indices(*this, 1, 0);
         }
@@ -420,16 +420,16 @@ public:
         }
     }
 
-    inline size_t get_metadata_size() const {
+    inline size_t get_arrmeta_size() const {
         if (is_builtin()) {
             return 0;
         } else {
-            return m_extended->get_metadata_size();
+            return m_extended->get_arrmeta_size();
         }
     }
 
     /**
-     * Returns true if the data layout (both data and metadata)
+     * Returns true if the data layout (both data and arrmeta)
      * is compatible with that of 'rhs'. If this returns true,
      * the types can be substituted for each other in an nd::array.
      */
@@ -559,11 +559,11 @@ public:
         }
     }
 
-    intptr_t get_dim_size(const char *metadata, const char *data) const;
+    intptr_t get_dim_size(const char *arrmeta, const char *data) const;
 
-    inline type get_type_at_dimension(char **inout_metadata, intptr_t i, intptr_t total_ndim = 0) const {
+    inline type get_type_at_dimension(char **inout_arrmeta, intptr_t i, intptr_t total_ndim = 0) const {
         if (!is_builtin()) {
-            return m_extended->get_type_at_dimension(inout_metadata, i, total_ndim);
+            return m_extended->get_type_at_dimension(inout_arrmeta, i, total_ndim);
         } else if (i == 0) {
             return *this;
         } else {
@@ -586,17 +586,17 @@ public:
      * and the data is at addresses `dst`, `dst + stride`, etc, this extracts those
      * values and returns true.
      *
-     * \param metadata  The array metadata for the type.
+     * \param arrmeta  The arrmeta for the type.
      * \param out_size  Is filled with the size of the dimension.
      * \param out_stride  Is filled with the stride.
      * \param out_el_tp  Is filled with the element type.
-     * \param out_el_metadata  Is filled with the array metadata of the element type.
+     * \param out_el_arrmeta  Is filled with the arrmeta of the element type.
      *
      * \returns  True if it is a strided array type, false otherwise.
      */
-    bool get_as_strided_dim(const char *metadata, intptr_t &out_size,
+    bool get_as_strided_dim(const char *arrmeta, intptr_t &out_size,
                             intptr_t &out_stride, ndt::type &out_el_tp,
-                            const char *&out_el_metadata) const;
+                            const char *&out_el_arrmeta) const;
 
     /** The size of the data required for uniform iteration */
     inline size_t get_iterdata_size(intptr_t ndim) const {
@@ -610,17 +610,17 @@ public:
      * \brief Constructs the iterdata for processing iteration of the specified shape.
      *
      * \param iterdata  The allocated iterdata to construct.
-     * \param inout_metadata  The metadata corresponding to the type for the iterdata construction.
-     *                        This is modified in place to become the metadata for the array data type.
+     * \param inout_arrmeta  The arrmeta corresponding to the type for the iterdata construction.
+     *                        This is modified in place to become the arrmeta for the array data type.
      * \param ndim      Number of iteration dimensions.
      * \param shape     The iteration shape.
      * \param out_uniform_type  This is populated with the type of each iterated element
      */
-    inline void iterdata_construct(iterdata_common *iterdata, const char **inout_metadata,
+    inline void iterdata_construct(iterdata_common *iterdata, const char **inout_arrmeta,
                     intptr_t ndim, const intptr_t* shape, type& out_uniform_type) const
     {
         if (!is_builtin()) {
-            m_extended->iterdata_construct(iterdata, inout_metadata, ndim, shape, out_uniform_type);
+            m_extended->iterdata_construct(iterdata, inout_arrmeta, ndim, shape, out_uniform_type);
         }
     }
 
@@ -644,20 +644,20 @@ public:
      * Constructs an iterdata which can be broadcast to the left indefinitely, by capping
      * off the iterdata with a iterdata_broadcasting_terminator.
      * \param iterdata  The allocated iterdata to construct.
-     * \param inout_metadata  The metadata corresponding to the type for the iterdata construction.
-     *                        This is modified in place to become the metadata for the array data type.
+     * \param inout_arrmeta  The arrmeta corresponding to the type for the iterdata construction.
+     *                        This is modified in place to become the arrmeta for the array data type.
      * \param ndim      Number of iteration dimensions.
      * \param shape     The iteration shape.
      * \param out_uniform_tp  This is populated with the type of each iterated element
      */
-    inline void broadcasted_iterdata_construct(iterdata_common *iterdata, const char **inout_metadata,
+    inline void broadcasted_iterdata_construct(iterdata_common *iterdata, const char **inout_arrmeta,
                     intptr_t ndim, const intptr_t* shape, type& out_uniform_tp) const
     {
         size_t size;
         if (is_builtin()) {
             size = 0;
         } else {
-            size = m_extended->iterdata_construct(iterdata, inout_metadata, ndim, shape, out_uniform_tp);
+            size = m_extended->iterdata_construct(iterdata, inout_arrmeta, ndim, shape, out_uniform_tp);
         }
         iterdata_broadcasting_terminator *id = reinterpret_cast<iterdata_broadcasting_terminator *>(
                         reinterpret_cast<char *>(iterdata) + size);
@@ -670,9 +670,9 @@ public:
      *
      * \param o         the std::ostream to print to
      * \param data      pointer to the data element to print
-     * \param metadata  pointer to the nd::array metadata for the data element
+     * \param arrmeta  pointer to the nd::array arrmeta for the data element
      */
-    void print_data(std::ostream& o, const char *metadata, const char *data) const;
+    void print_data(std::ostream& o, const char *arrmeta, const char *data) const;
 
     inline std::string str() const {
         std::stringstream ss;

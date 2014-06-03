@@ -48,9 +48,9 @@ base_tuple_type::base_tuple_type(type_id_t type_id,
         m_members.flags |= (ft.get_flags()&type_flags_operand_inherited);
         // Calculate the arrmeta offsets
         arrmeta_offsets[i] = arrmeta_offset;
-        arrmeta_offset += ft.get_metadata_size();
+        arrmeta_offset += ft.get_arrmeta_size();
     }
-    m_members.metadata_size = arrmeta_offset;
+    m_members.arrmeta_size = arrmeta_offset;
 
     m_arrmeta_offsets.flag_as_immutable();
 }
@@ -195,7 +195,7 @@ intptr_t base_tuple_type::apply_linear_index(intptr_t nindices, const irange *in
 {
     if (nindices == 0) {
         // If there are no more indices, copy the arrmeta verbatim
-        metadata_copy_construct(out_arrmeta, arrmeta, embedded_reference);
+        arrmeta_copy_construct(out_arrmeta, arrmeta, embedded_reference);
         return 0;
     } else {
         const uintptr_t *offsets = get_data_offsets(arrmeta);
@@ -245,7 +245,7 @@ intptr_t base_tuple_type::apply_linear_index(intptr_t nindices, const irange *in
     }
 }
 
-void base_tuple_type::metadata_default_construct(char *arrmeta, intptr_t ndim,
+void base_tuple_type::arrmeta_default_construct(char *arrmeta, intptr_t ndim,
                                                  const intptr_t *shape) const
 {
     // Validate that the shape is ok
@@ -264,7 +264,7 @@ void base_tuple_type::metadata_default_construct(char *arrmeta, intptr_t ndim,
         for (size_t i = 0, i_end = get_field_count(); i != i_end; ++i) {
             const ndt::type& field_dt = get_field_type(i);
             if (!field_dt.is_builtin()) {
-                field_dt.extended()->metadata_default_construct(
+                field_dt.extended()->arrmeta_default_construct(
                     arrmeta + arrmeta_offsets[i], ndim, shape);
             }
         }
@@ -276,14 +276,14 @@ void base_tuple_type::metadata_default_construct(char *arrmeta, intptr_t ndim,
             data_offsets[i] = offs;
             if (!field_dt.is_builtin()) {
                 try {
-                    field_dt.extended()->metadata_default_construct(
+                    field_dt.extended()->arrmeta_default_construct(
                                 arrmeta + arrmeta_offsets[i], ndim, shape);
                 } catch(...) {
                     // Since we're explicitly controlling the memory, need to manually do the cleanup too
                     for (size_t j = 0; j < i; ++j) {
                         const ndt::type& ft = get_field_type(j);
                         if (!ft.is_builtin()) {
-                            ft.extended()->metadata_destruct(arrmeta + arrmeta_offsets[i]);
+                            ft.extended()->arrmeta_destruct(arrmeta + arrmeta_offsets[i]);
                         }
                     }
                     throw;
@@ -296,7 +296,7 @@ void base_tuple_type::metadata_default_construct(char *arrmeta, intptr_t ndim,
     }
 }
 
-void base_tuple_type::metadata_copy_construct(
+void base_tuple_type::arrmeta_copy_construct(
     char *dst_arrmeta, const char *src_arrmeta,
     memory_block_data *embedded_reference) const
 {
@@ -306,47 +306,47 @@ void base_tuple_type::metadata_copy_construct(
         memcpy(dst_data_offsets, get_data_offsets(src_arrmeta),
                get_field_count() * sizeof(uintptr_t));
     }
-    // Copy construct all the field's metadata
+    // Copy construct all the field's arrmeta
     const uintptr_t *arrmeta_offsets = get_arrmeta_offsets_raw();
     for (size_t i = 0, i_end = get_field_count(); i != i_end; ++i) {
         const ndt::type& field_dt = get_field_type(i);
         if (!field_dt.is_builtin()) {
-            field_dt.extended()->metadata_copy_construct(
+            field_dt.extended()->arrmeta_copy_construct(
                 dst_arrmeta + arrmeta_offsets[i],
                 src_arrmeta + arrmeta_offsets[i], embedded_reference);
         }
     }
 }
 
-void base_tuple_type::metadata_reset_buffers(char *metadata) const
+void base_tuple_type::arrmeta_reset_buffers(char *arrmeta) const
 {
     const uintptr_t *arrmeta_offsets = get_arrmeta_offsets_raw();
     for (size_t i = 0, i_end = get_field_count(); i != i_end; ++i) {
         const ndt::type& field_dt = get_field_type(i);
-        if (field_dt.get_metadata_size() > 0) {
-            field_dt.extended()->metadata_reset_buffers(metadata + arrmeta_offsets[i]);
+        if (field_dt.get_arrmeta_size() > 0) {
+            field_dt.extended()->arrmeta_reset_buffers(arrmeta + arrmeta_offsets[i]);
         }
     }
 }
 
-void base_tuple_type::metadata_finalize_buffers(char *arrmeta) const
+void base_tuple_type::arrmeta_finalize_buffers(char *arrmeta) const
 {
     const uintptr_t *arrmeta_offsets = get_arrmeta_offsets_raw();
     for (size_t i = 0, i_end = get_field_count(); i != i_end; ++i) {
         const ndt::type& field_dt = get_field_type(i);
         if (!field_dt.is_builtin()) {
-            field_dt.extended()->metadata_finalize_buffers(arrmeta + arrmeta_offsets[i]);
+            field_dt.extended()->arrmeta_finalize_buffers(arrmeta + arrmeta_offsets[i]);
         }
     }
 }
 
-void base_tuple_type::metadata_destruct(char *metadata) const
+void base_tuple_type::arrmeta_destruct(char *arrmeta) const
 {
     const uintptr_t *arrmeta_offsets = get_arrmeta_offsets_raw();
     for (size_t i = 0, i_end = get_field_count(); i != i_end; ++i) {
         const ndt::type& field_dt = get_field_type(i);
         if (!field_dt.is_builtin()) {
-            field_dt.extended()->metadata_destruct(metadata + arrmeta_offsets[i]);
+            field_dt.extended()->arrmeta_destruct(arrmeta + arrmeta_offsets[i]);
         }
     }
 }

@@ -99,13 +99,13 @@ ndt::type ctuple_type::get_canonical_type() const
 }
 
 ndt::type ctuple_type::at_single(intptr_t i0,
-                const char **inout_metadata, const char **inout_data) const
+                const char **inout_arrmeta, const char **inout_data) const
 {
     // Bounds-checking of the index
     i0 = apply_single_index(i0, m_field_count, NULL);
-    if (inout_metadata) {
-        // Modify the metadata
-        *inout_metadata += get_arrmeta_offsets_raw()[i0];
+    if (inout_arrmeta) {
+        // Modify the arrmeta
+        *inout_arrmeta += get_arrmeta_offsets_raw()[i0];
         // If requested, modify the data
         if (inout_data) {
             *inout_data += get_data_offsets_raw()[i0];
@@ -129,8 +129,8 @@ bool ctuple_type::is_lossless_assignment(const ndt::type& dst_tp, const ndt::typ
 
 size_t ctuple_type::make_assignment_kernel(
                 ckernel_builder *DYND_UNUSED(out_ckb), size_t DYND_UNUSED(ckb_offset),
-                const ndt::type& dst_tp, const char *DYND_UNUSED(dst_metadata),
-                const ndt::type& src_tp, const char *DYND_UNUSED(src_metadata),
+                const ndt::type& dst_tp, const char *DYND_UNUSED(dst_arrmeta),
+                const ndt::type& src_tp, const char *DYND_UNUSED(src_arrmeta),
                 kernel_request_t DYND_UNUSED(kernreq), assign_error_mode DYND_UNUSED(errmode),
                 const eval::eval_context *DYND_UNUSED(ectx)) const
 {
@@ -138,22 +138,22 @@ size_t ctuple_type::make_assignment_kernel(
     if (this == dst_tp.extended()) {
         if (this == src_tp.extended()) {
             return make_tuple_identical_assignment_kernel(
-                out_ckb, ckb_offset, dst_tp, dst_metadata, src_metadata,
+                out_ckb, ckb_offset, dst_tp, dst_arrmeta, src_arrmeta,
                 kernreq, errmode, ectx);
         } else if (src_tp.get_kind() == struct_kind) {
             return make_tuple_assignment_kernel(out_ckb, ckb_offset,
-                            dst_tp, dst_metadata,
-                            src_tp, src_metadata,
+                            dst_tp, dst_arrmeta,
+                            src_tp, src_arrmeta,
                             kernreq, errmode, ectx);
         } else if (src_tp.is_builtin()) {
             return make_broadcast_to_tuple_assignment_kernel(out_ckb, ckb_offset,
-                            dst_tp, dst_metadata,
-                            src_tp, src_metadata,
+                            dst_tp, dst_arrmeta,
+                            src_tp, src_arrmeta,
                             kernreq, errmode, ectx);
         } else {
             return src_tp.extended()->make_assignment_kernel(out_ckb, ckb_offset,
-                            dst_tp, dst_metadata,
-                            src_tp, src_metadata,
+                            dst_tp, dst_arrmeta,
+                            src_tp, src_arrmeta,
                             kernreq, errmode, ectx);
         }
     }
@@ -166,8 +166,8 @@ size_t ctuple_type::make_assignment_kernel(
 
 size_t ctuple_type::make_comparison_kernel(
                 ckernel_builder *DYND_UNUSED(out), size_t DYND_UNUSED(offset_out),
-                const ndt::type& src0_tp, const char *DYND_UNUSED(src0_metadata),
-                const ndt::type& src1_tp, const char *DYND_UNUSED(src1_metadata),
+                const ndt::type& src0_tp, const char *DYND_UNUSED(src0_arrmeta),
+                const ndt::type& src1_tp, const char *DYND_UNUSED(src1_arrmeta),
                 comparison_type_t comptype,
                 const eval::eval_context *DYND_UNUSED(ectx)) const
 {
@@ -175,12 +175,12 @@ size_t ctuple_type::make_comparison_kernel(
     if (this == src0_tp.extended()) {
         if (*this == *src1_tp.extended()) {
             return make_tuple_comparison_kernel(out, offset_out,
-                            src0_tp, src0_metadata, src1_metadata,
+                            src0_tp, src0_arrmeta, src1_arrmeta,
                             comptype, ectx);
         } else if (src1_tp.get_kind() == struct_kind) {
             return make_general_tuple_comparison_kernel(out, offset_out,
-                            src0_tp, src0_metadata,
-                            src1_tp, src1_metadata,
+                            src0_tp, src0_arrmeta,
+                            src1_tp, src1_arrmeta,
                             comptype, ectx);
         }
     }
@@ -202,15 +202,15 @@ bool ctuple_type::operator==(const base_type& rhs) const
     }
 }
 
-void ctuple_type::metadata_debug_print(const char *metadata, std::ostream& o, const std::string& indent) const
+void ctuple_type::arrmeta_debug_print(const char *arrmeta, std::ostream& o, const std::string& indent) const
 {
     o << indent << "ctuple arrmeta\n";
     const uintptr_t *arrmeta_offsets = get_arrmeta_offsets_raw();
     for (size_t i = 0; i < m_field_count; ++i) {
         const ndt::type& field_dt = get_field_type(i);
-        if (!field_dt.is_builtin() && field_dt.extended()->get_metadata_size() > 0) {
+        if (!field_dt.is_builtin() && field_dt.extended()->get_arrmeta_size() > 0) {
             o << indent << " field " << i << " arrmeta:\n";
-            field_dt.extended()->metadata_debug_print(metadata + arrmeta_offsets[i], o, indent + "  ");
+            field_dt.extended()->arrmeta_debug_print(arrmeta + arrmeta_offsets[i], o, indent + "  ");
         }
     }
 }

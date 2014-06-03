@@ -41,14 +41,14 @@ public:
         return m_operand_type;
     }
 
-    void print_data(std::ostream& o, const char *metadata, const char *data) const;
+    void print_data(std::ostream& o, const char *arrmeta, const char *data) const;
 
     void print_type(std::ostream& o) const;
 
     ndt::type apply_linear_index(intptr_t nindices, const irange *indices,
                 size_t current_i, const ndt::type& root_tp, bool leading_dimension) const;
-    intptr_t apply_linear_index(intptr_t nindices, const irange *indices, const char *metadata,
-                    const ndt::type& result_tp, char *out_metadata,
+    intptr_t apply_linear_index(intptr_t nindices, const irange *indices, const char *arrmeta,
+                    const ndt::type& result_tp, char *out_arrmeta,
                     memory_block_data *embedded_reference,
                     size_t current_i, const ndt::type& root_tp,
                     bool leading_dimension, char **inout_data,
@@ -62,11 +62,11 @@ public:
 
     size_t make_operand_to_value_assignment_kernel(
                     ckernel_builder *out, size_t offset_out,
-                    const char *dst_metadata, const char *src_metadata,
+                    const char *dst_arrmeta, const char *src_arrmeta,
                     kernel_request_t kernreq, const eval::eval_context *ectx) const;
     size_t make_value_to_operand_assignment_kernel(
                     ckernel_builder *out, size_t offset_out,
-                    const char *dst_metadata, const char *src_metadata,
+                    const char *dst_arrmeta, const char *src_arrmeta,
                     kernel_request_t kernreq, const eval::eval_context *ectx) const;
 
     void get_dynamic_array_properties(const std::pair<std::string, gfunc::callable> **out_properties,

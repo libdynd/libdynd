@@ -17,7 +17,7 @@ namespace dynd {
  * These are all the types of memory blocks supported by the dnd library.
  */
 enum memory_block_type_t {
-    /** A dynd array containing the metadata specified by the type */
+    /** A dynd array containing the arrmeta specified by the type */
     array_memory_block_type,
     /** Memory from outside the dnd library */
     external_memory_block_type,

@@ -205,7 +205,7 @@ a "var to strided" function, and an "int32 to int32" function.
         unary_strided_operation_t dim1_kernel_func;
         destructor_fn_t dim1_kernel_destructor;
         intptr_t dim1_dst_stride, dim1_dst_dim_size;
-        const var_dim_dtype_metadata *dim1_src_md;
+        const var_dim_dtype_arrmeta *dim1_src_md;
 
         // The final ckernel_prefix ("int32 to int32")
         unary_strided_operation_t scalar_kernel_func;
@@ -218,7 +218,7 @@ the same as the one in the last example. The second kernel
 function is defined in 'dynd/kernels/var_dimn_assignment_kernels.cpp',
 as var_to_strided_assign_kernel. The destination is strided,
 so the stride and size are stored for it. For the source, a
-pointer to its metadata is copied, though the individual fields
+pointer to its arrmeta is copied, though the individual fields
 needed could be copied as well to avoid the indirection.
 
 The 'dim1_kernel_func' does a check for a broadcasting error

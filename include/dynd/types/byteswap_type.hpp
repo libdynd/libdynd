@@ -34,7 +34,7 @@ public:
     const ndt::type& get_operand_type() const {
         return m_operand_type;
     }
-    void print_data(std::ostream& o, const char *metadata, const char *data) const;
+    void print_data(std::ostream& o, const char *arrmeta, const char *data) const;
 
     void print_type(std::ostream& o) const;
 
@@ -46,11 +46,11 @@ public:
 
     size_t make_operand_to_value_assignment_kernel(
                     ckernel_builder *out, size_t offset_out,
-                    const char *dst_metadata, const char *src_metadata,
+                    const char *dst_arrmeta, const char *src_arrmeta,
                     kernel_request_t kernreq, const eval::eval_context *ectx) const;
     size_t make_value_to_operand_assignment_kernel(
                     ckernel_builder *out, size_t offset_out,
-                    const char *dst_metadata, const char *src_metadata,
+                    const char *dst_arrmeta, const char *src_arrmeta,
                     kernel_request_t kernreq, const eval::eval_context *ectx) const;
 };
 

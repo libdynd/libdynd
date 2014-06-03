@@ -12,10 +12,10 @@
 
 namespace dynd {
 
-struct bytes_type_metadata {
+struct bytes_type_arrmeta {
     /**
      * A reference to the memory block which contains the byte's data.
-     * NOTE: This is identical to string_type_metadata, by design. Maybe
+     * NOTE: This is identical to string_type_arrmeta, by design. Maybe
      *       both should become a typedef to a common class?
      */
     memory_block_data *blockref;
@@ -43,34 +43,34 @@ public:
         return m_alignment;
     }
 
-    void print_data(std::ostream& o, const char *metadata, const char *data) const;
+    void print_data(std::ostream& o, const char *arrmeta, const char *data) const;
 
     void print_type(std::ostream& o) const;
 
-    void get_bytes_range(const char **out_begin, const char**out_end, const char *metadata, const char *data) const;
-    void set_bytes_data(const char *metadata, char *data,
+    void get_bytes_range(const char **out_begin, const char**out_end, const char *arrmeta, const char *data) const;
+    void set_bytes_data(const char *arrmeta, char *data,
                     const char* bytes_begin, const char *bytes_end) const;
 
-    bool is_unique_data_owner(const char *metadata) const;
+    bool is_unique_data_owner(const char *arrmeta) const;
     ndt::type get_canonical_type() const;
 
-    void get_shape(intptr_t ndim, intptr_t i, intptr_t *out_shape, const char *metadata, const char *data) const;
+    void get_shape(intptr_t ndim, intptr_t i, intptr_t *out_shape, const char *arrmeta, const char *data) const;
 
     bool is_lossless_assignment(const ndt::type& dst_tp, const ndt::type& src_tp) const;
 
     bool operator==(const base_type& rhs) const;
 
-    void metadata_default_construct(char *metadata, intptr_t ndim, const intptr_t* shape) const;
-    void metadata_copy_construct(char *dst_metadata, const char *src_metadata, memory_block_data *embedded_reference) const;
-    void metadata_reset_buffers(char *metadata) const;
-    void metadata_finalize_buffers(char *metadata) const;
-    void metadata_destruct(char *metadata) const;
-    void metadata_debug_print(const char *metadata, std::ostream& o, const std::string& indent) const;
+    void arrmeta_default_construct(char *arrmeta, intptr_t ndim, const intptr_t* shape) const;
+    void arrmeta_copy_construct(char *dst_arrmeta, const char *src_arrmeta, memory_block_data *embedded_reference) const;
+    void arrmeta_reset_buffers(char *arrmeta) const;
+    void arrmeta_finalize_buffers(char *arrmeta) const;
+    void arrmeta_destruct(char *arrmeta) const;
+    void arrmeta_debug_print(const char *arrmeta, std::ostream& o, const std::string& indent) const;
 
     size_t make_assignment_kernel(
                     ckernel_builder *out, size_t offset_out,
-                    const ndt::type& dst_tp, const char *dst_metadata,
-                    const ndt::type& src_tp, const char *src_metadata,
+                    const ndt::type& dst_tp, const char *dst_arrmeta,
+                    const ndt::type& src_tp, const char *src_arrmeta,
                     kernel_request_t kernreq, assign_error_mode errmode,
                     const eval::eval_context *ectx) const;
 

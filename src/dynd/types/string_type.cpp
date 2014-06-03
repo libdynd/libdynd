@@ -21,7 +21,7 @@ using namespace dynd;
 string_type::string_type(string_encoding_t encoding)
     : base_string_type(string_type_id, sizeof(string_type_data),
                     sizeof(const char *), type_flag_scalar|type_flag_zeroinit|type_flag_blockref,
-                    sizeof(string_type_metadata)),
+                    sizeof(string_type_arrmeta)),
             m_encoding(encoding)
 {
     switch (encoding) {
@@ -41,16 +41,16 @@ string_type::~string_type()
 }
 
 void string_type::get_string_range(const char **out_begin, const char**out_end,
-                const char *DYND_UNUSED(metadata), const char *data) const
+                const char *DYND_UNUSED(arrmeta), const char *data) const
 {
     *out_begin = reinterpret_cast<const string_type_data *>(data)->begin;
     *out_end = reinterpret_cast<const string_type_data *>(data)->end;
 }
 
-void string_type::set_utf8_string(const char *data_metadata, char *data,
+void string_type::set_utf8_string(const char *data_arrmeta, char *data,
                 assign_error_mode errmode, const char* utf8_begin, const char *utf8_end) const
 {
-    const string_type_metadata *data_md = reinterpret_cast<const string_type_metadata *>(data_metadata);
+    const string_type_arrmeta *data_md = reinterpret_cast<const string_type_arrmeta *>(data_arrmeta);
     const intptr_t src_charsize = 1;
     intptr_t dst_charsize = string_encoding_char_size_table[m_encoding];
     char *dst_begin = NULL, *dst_current, *dst_end = NULL;
@@ -88,7 +88,7 @@ void string_type::set_utf8_string(const char *data_metadata, char *data,
     reinterpret_cast<string_type_data*>(data)->end = dst_end;
 }
 
-void string_type::print_data(std::ostream& o, const char *DYND_UNUSED(metadata), const char *data) const
+void string_type::print_data(std::ostream& o, const char *DYND_UNUSED(arrmeta), const char *data) const
 {
     uint32_t cp;
     next_unicode_codepoint_t next_fn;
@@ -113,9 +113,9 @@ void string_type::print_type(std::ostream& o) const {
     }
 }
 
-bool string_type::is_unique_data_owner(const char *metadata) const
+bool string_type::is_unique_data_owner(const char *arrmeta) const
 {
-    const string_type_metadata *md = reinterpret_cast<const string_type_metadata *>(metadata);
+    const string_type_arrmeta *md = reinterpret_cast<const string_type_arrmeta *>(arrmeta);
     if (md->blockref != NULL &&
             (md->blockref->m_use_count != 1 ||
              md->blockref->m_type != pod_memory_block_type)) {
@@ -130,7 +130,7 @@ ndt::type string_type::get_canonical_type() const
 }
 
 void string_type::get_shape(intptr_t ndim, intptr_t i, intptr_t *out_shape,
-                const char *DYND_UNUSED(metadata), const char *DYND_UNUSED(data)) const
+                const char *DYND_UNUSED(arrmeta), const char *DYND_UNUSED(data)) const
 {
     out_shape[i] = -1;
     if (i+1 < ndim) {
@@ -161,27 +161,27 @@ bool string_type::operator==(const base_type& rhs) const
     }
 }
 
-void string_type::metadata_default_construct(char *metadata, intptr_t DYND_UNUSED(ndim), const intptr_t* DYND_UNUSED(shape)) const
+void string_type::arrmeta_default_construct(char *arrmeta, intptr_t DYND_UNUSED(ndim), const intptr_t* DYND_UNUSED(shape)) const
 {
     // Simply allocate a POD memory block
-    string_type_metadata *md = reinterpret_cast<string_type_metadata *>(metadata);
+    string_type_arrmeta *md = reinterpret_cast<string_type_arrmeta *>(arrmeta);
     md->blockref = make_pod_memory_block().release();
 }
 
-void string_type::metadata_copy_construct(char *dst_metadata, const char *src_metadata, memory_block_data *embedded_reference) const
+void string_type::arrmeta_copy_construct(char *dst_arrmeta, const char *src_arrmeta, memory_block_data *embedded_reference) const
 {
     // Copy the blockref, switching it to the embedded_reference if necessary
-    const string_type_metadata *src_md = reinterpret_cast<const string_type_metadata *>(src_metadata);
-    string_type_metadata *dst_md = reinterpret_cast<string_type_metadata *>(dst_metadata);
+    const string_type_arrmeta *src_md = reinterpret_cast<const string_type_arrmeta *>(src_arrmeta);
+    string_type_arrmeta *dst_md = reinterpret_cast<string_type_arrmeta *>(dst_arrmeta);
     dst_md->blockref = src_md->blockref ? src_md->blockref : embedded_reference;
     if (dst_md->blockref) {
         memory_block_incref(dst_md->blockref);
     }
 }
 
-void string_type::metadata_reset_buffers(char *metadata) const
+void string_type::arrmeta_reset_buffers(char *arrmeta) const
 {
-    const string_type_metadata *md = reinterpret_cast<const string_type_metadata *>(metadata);
+    const string_type_arrmeta *md = reinterpret_cast<const string_type_arrmeta *>(arrmeta);
     if (md->blockref != NULL && md->blockref->m_type == pod_memory_block_type) {
         memory_block_pod_allocator_api *allocator = get_memory_block_pod_allocator_api(md->blockref);
         allocator->reset(md->blockref);
@@ -191,9 +191,9 @@ void string_type::metadata_reset_buffers(char *metadata) const
     }
 }
 
-void string_type::metadata_finalize_buffers(char *metadata) const
+void string_type::arrmeta_finalize_buffers(char *arrmeta) const
 {
-    string_type_metadata *md = reinterpret_cast<string_type_metadata *>(metadata);
+    string_type_arrmeta *md = reinterpret_cast<string_type_arrmeta *>(arrmeta);
     if (md->blockref != NULL) {
         // Finalize the memory block
         memory_block_pod_allocator_api *allocator = get_memory_block_pod_allocator_api(md->blockref);
@@ -203,25 +203,25 @@ void string_type::metadata_finalize_buffers(char *metadata) const
     }
 }
 
-void string_type::metadata_destruct(char *metadata) const
+void string_type::arrmeta_destruct(char *arrmeta) const
 {
-    string_type_metadata *md = reinterpret_cast<string_type_metadata *>(metadata);
+    string_type_arrmeta *md = reinterpret_cast<string_type_arrmeta *>(arrmeta);
     if (md->blockref) {
         memory_block_decref(md->blockref);
     }
 }
 
-void string_type::metadata_debug_print(const char *metadata, std::ostream& o, const std::string& indent) const
+void string_type::arrmeta_debug_print(const char *arrmeta, std::ostream& o, const std::string& indent) const
 {
-    const string_type_metadata *md = reinterpret_cast<const string_type_metadata *>(metadata);
-    o << indent << "string metadata\n";
+    const string_type_arrmeta *md = reinterpret_cast<const string_type_arrmeta *>(arrmeta);
+    o << indent << "string arrmeta\n";
     memory_block_debug_print(md->blockref, o, indent + " ");
 }
 
 size_t string_type::make_assignment_kernel(
                 ckernel_builder *out, size_t offset_out,
-                const ndt::type& dst_tp, const char *dst_metadata,
-                const ndt::type& src_tp, const char *src_metadata,
+                const ndt::type& dst_tp, const char *dst_arrmeta,
+                const ndt::type& src_tp, const char *src_arrmeta,
                 kernel_request_t kernreq, assign_error_mode errmode,
                 const eval::eval_context *ectx) const
 {
@@ -229,13 +229,13 @@ size_t string_type::make_assignment_kernel(
         switch (src_tp.get_type_id()) {
             case string_type_id: {
                 return make_blockref_string_assignment_kernel(out, offset_out,
-                                dst_metadata, get_encoding(),
-                                src_metadata, src_tp.tcast<base_string_type>()->get_encoding(),
+                                dst_arrmeta, get_encoding(),
+                                src_arrmeta, src_tp.tcast<base_string_type>()->get_encoding(),
                                 kernreq, errmode, ectx);
             }
             case fixedstring_type_id: {
                 return make_fixedstring_to_blockref_string_assignment_kernel(out, offset_out,
-                                dst_metadata, get_encoding(),
+                                dst_arrmeta, get_encoding(),
                                 src_tp.get_data_size(),
                                 src_tp.tcast<base_string_type>()->get_encoding(),
                                 kernreq, errmode, ectx);
@@ -243,12 +243,12 @@ size_t string_type::make_assignment_kernel(
             default: {
                 if (!src_tp.is_builtin()) {
                     return src_tp.extended()->make_assignment_kernel(out, offset_out,
-                                    dst_tp, dst_metadata,
-                                    src_tp, src_metadata,
+                                    dst_tp, dst_arrmeta,
+                                    src_tp, src_arrmeta,
                                     kernreq, errmode, ectx);
                 } else {
                     return make_builtin_to_string_assignment_kernel(out, offset_out,
-                                dst_tp, dst_metadata,
+                                dst_tp, dst_arrmeta,
                                 src_tp.get_type_id(),
                                 kernreq, errmode, ectx);
                 }
@@ -258,7 +258,7 @@ size_t string_type::make_assignment_kernel(
         if (dst_tp.is_builtin()) {
             return make_string_to_builtin_assignment_kernel(out, offset_out,
                             dst_tp.get_type_id(),
-                            src_tp, src_metadata,
+                            src_tp, src_arrmeta,
                             kernreq, errmode, ectx);
         } else {
             stringstream ss;
@@ -270,8 +270,8 @@ size_t string_type::make_assignment_kernel(
 
 size_t string_type::make_comparison_kernel(
                 ckernel_builder *out, size_t offset_out,
-                const ndt::type& src0_dt, const char *src0_metadata,
-                const ndt::type& src1_dt, const char *src1_metadata,
+                const ndt::type& src0_dt, const char *src0_arrmeta,
+                const ndt::type& src1_dt, const char *src1_arrmeta,
                 comparison_type_t comptype,
                 const eval::eval_context *ectx) const
 {
@@ -282,13 +282,13 @@ size_t string_type::make_comparison_kernel(
                             comptype, ectx);
         } else if (src1_dt.get_kind() == string_kind) {
             return make_general_string_comparison_kernel(out, offset_out,
-                            src0_dt, src0_metadata,
-                            src1_dt, src1_metadata,
+                            src0_dt, src0_arrmeta,
+                            src1_dt, src1_arrmeta,
                             comptype, ectx);
         } else if (!src1_dt.is_builtin()) {
             return src1_dt.extended()->make_comparison_kernel(out, offset_out,
-                            src0_dt, src0_metadata,
-                            src1_dt, src1_metadata,
+                            src0_dt, src0_arrmeta,
+                            src1_dt, src1_arrmeta,
                             comptype, ectx);
         }
     }
@@ -297,14 +297,14 @@ size_t string_type::make_comparison_kernel(
 }
 
 void string_type::make_string_iter(dim_iter *out_di, string_encoding_t encoding,
-            const char *metadata, const char *data,
+            const char *arrmeta, const char *data,
             const memory_block_ptr& ref,
             intptr_t buffer_max_mem,
             const eval::eval_context *ectx) const
 {
     const string_type_data *d = reinterpret_cast<const string_type_data *>(data);
     memory_block_ptr dataref = ref;
-    const string_type_metadata *md = reinterpret_cast<const string_type_metadata *>(metadata);
+    const string_type_arrmeta *md = reinterpret_cast<const string_type_arrmeta *>(arrmeta);
     if (md->blockref != NULL) {
         dataref = memory_block_ptr(md->blockref);
     }

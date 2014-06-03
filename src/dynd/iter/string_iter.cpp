@@ -119,7 +119,7 @@ void iter::make_string_iter(
         if (!is_variable_length_string_encoding(iter_encoding) && datasize <= bufsize) {
             // If the whole input string fits in the output max buffer size, make a copy
             nd::array tmp = nd::empty(ndt::make_string(iter_encoding));
-            string_type_metadata md;
+            string_type_arrmeta md;
             md.blockref = ref.get();
             string_type_data d;
             d.begin = const_cast<char *>(data_begin);
@@ -151,7 +151,7 @@ void iter::make_string_iter(
         out_di->data_elcount = 0;
         out_di->data_stride = charsize;
         out_di->eltype = char_type_of_encoding(iter_encoding).release();
-        out_di->elmeta = NULL;
+        out_di->el_arrmeta = NULL;
         // The custom fields are where we place the data needed for seeking
         // and the reference object.
         out_di->custom[0] = 0; // The next index to buffer

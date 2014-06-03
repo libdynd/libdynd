@@ -39,22 +39,22 @@ In the DyND nd::array's Python exposure, the same data is:
     >>> a = nd.array([[1,2,3],[4,5,6]])
     >>> nd.debug_repr(a)
     ------ array
-     address: 00000000004566A0
+     address: 00000000003F6B50
      refcount: 1
      type:
-      pointer: 0000000000463410
+      pointer: 000000000041F8B0
       type: strided * strided * int32
-     metadata:
+     arrmeta:
       flags: 5 (read_access immutable )
-      type-specific metadata:
-       strided_dim metadata
+      type-specific arrmeta:
+       strided_dim arrmeta
         stride: 12
         size: 2
-        strided_dim metadata
+        strided_dim arrmeta
          stride: 4
          size: 3
      data:
-       pointer: 00000000004566F0
+       pointer: 00000000003F6BA0
        reference: 0000000000000000 (embedded in array memory)
     ------
 
@@ -65,16 +65,16 @@ strided array is encoded in the DyND dtype. One way to think of this
 dtype is that it is a strided array of strided int32 arrays.
 
 In the debug printout of the nd::array, there is first some metadata
-about the nd::array, currently only access permission flags. The
-dtype-specific metadata is determined by the structure of the dtype.
-In this case, each strided_array part of the dtype owns some metadata
-memory which contains its stride and dimension size. The int32 doesn't
-require any additional metadata.
+about the nd::array (called arrmeta), some access permission flags.
+The following dtype-specific arrmeta is determined by the structure of
+the dtype. In this case, each strided_array part of the dtype owns
+some arrmeta memory which contains its stride and dimension size.
+The int32 doesn't require any additional arrmeta.
 
 The data consists of a pointer to the memory containing the array elements,
 and a reference to a memory block which holds the data
 for the nd::array. In this case, the data has been embedded within
-the same memory allocation as the nd::array metadata.
+the same memory allocation as the arrmeta.
 
 Memory Blocks
 -------------
@@ -97,40 +97,42 @@ indexing operation.
     >>> a = nd.array([1,2,3])
     >>> nd.debug_repr(a)
     ------ array
-     address: 000000000043F5B0
+     address: 00000000003FAE30
      refcount: 1
      type:
-      pointer: 000000000048FA80
+      pointer: 000007FEE194E8F0
       type: strided * int32
-     metadata:
+     arrmeta:
       flags: 5 (read_access immutable )
-      type-specific metadata:
-       strided_dim metadata
+      type-specific arrmeta:
+       strided_dim arrmeta
         stride: 4
         size: 3
      data:
-       pointer: 000000000043F5F0
+       pointer: 00000000003FAE70
        reference: 0000000000000000 (embedded in array memory)
     ------
 
+
     >>> nd.debug_repr(a[1])
     ------ array
-     address: 0000000000461460
+     address: 0000000000415480
      refcount: 1
      type:
       pointer: 0000000000000004
       type: int32
-     metadata:
+     arrmeta:
       flags: 5 (read_access immutable )
      data:
-       pointer: 000000000043F5F4
-       reference: 000000000043F5B0
-        ------ memory_block at 000000000043F5B0
+       pointer: 00000000003FAE74
+       reference: 00000000003FAE30
+        ------ memory_block at 00000000003FAE30
          reference count: 2
-         type: ndarray
+         type: array
          type: strided * int32
         ------
     ------
+
 
 In the printout of a[1], the first thing to note is the
 dtype pointer, it's just the value 4. This is because
@@ -154,25 +156,25 @@ more interesting, we cause the memory of the array to be unaligned.
     >>> b = nd.view(a)
     >>> nd.debug_repr(b)
     ------ array
-     address: 000000000048CD50
+     address: 000000000041F9A0
      refcount: 1
      type:
-      pointer: 0000000000474D90
+      pointer: 000000000041F950
       type: strided * unaligned[int32]
-     metadata:
+     arrmeta:
       flags: 3 (read_access write_access )
-      type-specific metadata:
-       strided_dim metadata
+      type-specific arrmeta:
+       strided_dim arrmeta
         stride: 4
         size: 2
      data:
-       pointer: 000000000404FC61
-       reference: 000000000043A790
-        ------ memory_block at 000000000043A790
+       pointer: 0000000003BC4A71
+       reference: 00000000004078B0
+        ------ memory_block at 00000000004078B0
          reference count: 1
          type: external
-         object void pointer: 0000000003F9C610
-         free function: 000007FEE582251D
+         object void pointer: 00000000043DD670
+         free function: 000007FEE15E2743
         ------
     ------
 
@@ -192,30 +194,31 @@ thread safety.
 
 The default string dtype for dynd is parameterized by its encoding and is
 variable-length.  This is handled by having a memory block reference in the
-string's metadata, and the primary string data itself being a pair of pointers
+string's arrmeta, and the primary string data itself being a pair of pointers
 to the beginning and one past the end of the string. For an example, here's
 how a single Python string converts to an nd::array:
 
     >>> a = nd.array("This is a string")
     >>> nd.debug_repr(a)
     ------ array
-     address: 00000000004DA8C0
+     address: 00000000003FAE30
      refcount: 1
      type:
-      pointer: 0000000000508EA0
+      pointer: 00000000004154C0
       type: string
-     metadata:
+     arrmeta:
       flags: 5 (read_access immutable )
-      type-specific metadata:
-       string metadata
+      type-specific arrmeta:
+       string arrmeta
         ------ NULL memory block
      data:
-       pointer: 00000000004DA8F8
+       pointer: 00000000003FAE68
        reference: 0000000000000000 (embedded in array memory)
     ------
 
+
 What you will notice here is that the memory block inside of the
-string metadata is NULL, as is the data reference at the nd::array
+string arrmeta is NULL, as is the data reference at the nd::array
 level. This is because a larger amount of memory was allocated for
 the nd::array, and the space at the end was used for the string,
 to minimize the number of memory allocations. Both of the NULL
@@ -226,25 +229,25 @@ Let's do this also for an array of strings::
     >>> a = nd.array([u"This", u"is", u"unicode."])
     >>> nd.debug_repr(a)
     ------ array
-     address: 000000000050F1C0
+     address: 000000000041FEC0
      refcount: 1
      type:
-      pointer: 00000000004ED810
+      pointer: 000000000041F9F0
       type: strided * string
-     metadata:
+     arrmeta:
       flags: 5 (read_access immutable )
-      type-specific metadata:
-       strided_dim metadata
+      type-specific arrmeta:
+       strided_dim arrmeta
         stride: 16
         size: 3
-        string metadata
-         ------ memory_block at 000000000050C530
+        string arrmeta
+         ------ memory_block at 000000000041FA40
           reference count: 1
           type: pod
           finalized: 14
          ------
      data:
-       pointer: 000000000050F208
+       pointer: 000000000041FF08
        reference: 0000000000000000 (embedded in array memory)
     ------
 

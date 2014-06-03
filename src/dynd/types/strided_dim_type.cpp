@@ -18,7 +18,7 @@ using namespace dynd;
 
 strided_dim_type::strided_dim_type(const ndt::type& element_tp)
     : base_uniform_dim_type(strided_dim_type_id, element_tp, 0, element_tp.get_data_alignment(),
-                    sizeof(strided_dim_type_metadata), type_flag_none)
+                    sizeof(strided_dim_type_arrmeta), type_flag_none)
 {
     // Propagate the operand flags from the element
     m_members.flags |= (element_tp.get_flags()&type_flags_operand_inherited);
@@ -48,16 +48,16 @@ size_t strided_dim_type::get_default_data_size(intptr_t ndim,
     }
 }
 
-void strided_dim_type::print_data(std::ostream &o, const char *metadata,
+void strided_dim_type::print_data(std::ostream &o, const char *arrmeta,
                                   const char *data) const
 {
-    const strided_dim_type_metadata *md =
-        reinterpret_cast<const strided_dim_type_metadata *>(metadata);
+    const strided_dim_type_arrmeta *md =
+        reinterpret_cast<const strided_dim_type_arrmeta *>(arrmeta);
     size_t stride = md->stride;
-    metadata += sizeof(strided_dim_type_metadata);
+    arrmeta += sizeof(strided_dim_type_arrmeta);
     o << "[";
     for (size_t i = 0, i_end = md->size; i != i_end; ++i, data += stride) {
-        m_element_tp.print_data(o, metadata, data);
+        m_element_tp.print_data(o, arrmeta, data);
         if (i != i_end - 1) {
             o << ", ";
         }
@@ -75,13 +75,13 @@ bool strided_dim_type::is_expression() const
     return m_element_tp.is_expression();
 }
 
-bool strided_dim_type::is_unique_data_owner(const char *metadata) const
+bool strided_dim_type::is_unique_data_owner(const char *arrmeta) const
 {
     if (m_element_tp.is_builtin()) {
         return true;
     } else {
         return m_element_tp.extended()->is_unique_data_owner(
-            metadata + sizeof(strided_dim_type_metadata));
+            arrmeta + sizeof(strided_dim_type_arrmeta));
     }
 }
 
@@ -113,14 +113,14 @@ bool strided_dim_type::is_strided() const
     return true;
 }
 
-void strided_dim_type::process_strided(const char *metadata, const char *data,
+void strided_dim_type::process_strided(const char *arrmeta, const char *data,
                                        ndt::type &out_dt,
                                        const char *&out_origin,
                                        intptr_t &out_stride,
                                        intptr_t &out_dim_size) const
 {
-    const strided_dim_type_metadata *md =
-        reinterpret_cast<const strided_dim_type_metadata *>(metadata);
+    const strided_dim_type_arrmeta *md =
+        reinterpret_cast<const strided_dim_type_arrmeta *>(arrmeta);
     out_dt = m_element_tp;
     out_origin = data;
     out_stride = md->stride;
@@ -163,19 +163,19 @@ ndt::type strided_dim_type::apply_linear_index(intptr_t nindices,
 }
 
 intptr_t strided_dim_type::apply_linear_index(
-    intptr_t nindices, const irange *indices, const char *metadata,
-    const ndt::type &result_tp, char *out_metadata,
+    intptr_t nindices, const irange *indices, const char *arrmeta,
+    const ndt::type &result_tp, char *out_arrmeta,
     memory_block_data *embedded_reference, size_t current_i,
     const ndt::type &root_tp, bool leading_dimension, char **inout_data,
     memory_block_data **inout_dataref) const
 {
-    const strided_dim_type_metadata *md =
-        reinterpret_cast<const strided_dim_type_metadata *>(metadata);
-    strided_dim_type_metadata *out_md =
-        reinterpret_cast<strided_dim_type_metadata *>(out_metadata);
+    const strided_dim_type_arrmeta *md =
+        reinterpret_cast<const strided_dim_type_arrmeta *>(arrmeta);
+    strided_dim_type_arrmeta *out_md =
+        reinterpret_cast<strided_dim_type_arrmeta *>(out_arrmeta);
     if (nindices == 0) {
         // If there are no more indices, copy the rest verbatim
-        metadata_copy_construct(out_metadata, metadata, embedded_reference);
+        arrmeta_copy_construct(out_arrmeta, arrmeta, embedded_reference);
         return 0;
     } else {
         bool remove_dimension;
@@ -192,14 +192,14 @@ intptr_t strided_dim_type::apply_linear_index(
                     // for the collapsing of leading dimensions to work correctly.
                     *inout_data += offset;
                     offset = m_element_tp.extended()->apply_linear_index(nindices - 1, indices + 1,
-                                    metadata + sizeof(strided_dim_type_metadata),
-                                    result_tp, out_metadata,
+                                    arrmeta + sizeof(strided_dim_type_arrmeta),
+                                    result_tp, out_arrmeta,
                                     embedded_reference, current_i + 1, root_tp,
                                     true, inout_data, inout_dataref);
                 } else {
                     offset += m_element_tp.extended()->apply_linear_index(nindices - 1, indices + 1,
-                                    metadata + sizeof(strided_dim_type_metadata),
-                                    result_tp, out_metadata,
+                                    arrmeta + sizeof(strided_dim_type_arrmeta),
+                                    result_tp, out_arrmeta,
                                     embedded_reference, current_i + 1, root_tp,
                                     false, NULL, NULL);
                 }
@@ -213,8 +213,8 @@ intptr_t strided_dim_type::apply_linear_index(
             if (!m_element_tp.is_builtin()) {
                 const strided_dim_type *result_etp = result_tp.tcast<strided_dim_type>();
                 offset += m_element_tp.extended()->apply_linear_index(nindices - 1, indices + 1,
-                                metadata + sizeof(strided_dim_type_metadata),
-                                result_etp->m_element_tp, out_metadata + sizeof(strided_dim_type_metadata),
+                                arrmeta + sizeof(strided_dim_type_arrmeta),
+                                result_etp->m_element_tp, out_arrmeta + sizeof(strided_dim_type_arrmeta),
                                 embedded_reference, current_i + 1, root_tp,
                                 false, NULL, NULL);
             }
@@ -223,14 +223,14 @@ intptr_t strided_dim_type::apply_linear_index(
     }
 }
 
-ndt::type strided_dim_type::at_single(intptr_t i0, const char **inout_metadata, const char **inout_data) const
+ndt::type strided_dim_type::at_single(intptr_t i0, const char **inout_arrmeta, const char **inout_data) const
 {
-    if (inout_metadata) {
-        const strided_dim_type_metadata *md = reinterpret_cast<const strided_dim_type_metadata *>(*inout_metadata);
+    if (inout_arrmeta) {
+        const strided_dim_type_arrmeta *md = reinterpret_cast<const strided_dim_type_arrmeta *>(*inout_arrmeta);
         // Bounds-checking of the index
         i0 = apply_single_index(i0, md->size, NULL);
-        // Modify the metadata
-        *inout_metadata += sizeof(strided_dim_type_metadata);
+        // Modify the arrmeta
+        *inout_arrmeta += sizeof(strided_dim_type_arrmeta);
         // If requested, modify the data
         if (inout_data) {
             *inout_data += i0 * md->stride;
@@ -239,32 +239,37 @@ ndt::type strided_dim_type::at_single(intptr_t i0, const char **inout_metadata, 
     return m_element_tp;
 }
 
-ndt::type strided_dim_type::get_type_at_dimension(char **inout_metadata, intptr_t i, intptr_t total_ndim) const
+ndt::type strided_dim_type::get_type_at_dimension(char **inout_arrmeta,
+                                                  intptr_t i,
+                                                  intptr_t total_ndim) const
 {
     if (i == 0) {
         return ndt::type(this, true);
     } else {
-        if (inout_metadata) {
-            *inout_metadata += sizeof(strided_dim_type_metadata);
+        if (inout_arrmeta) {
+            *inout_arrmeta += sizeof(strided_dim_type_arrmeta);
         }
-        return m_element_tp.get_type_at_dimension(inout_metadata, i - 1, total_ndim + 1);
+        return m_element_tp.get_type_at_dimension(inout_arrmeta, i - 1,
+                                                  total_ndim + 1);
     }
 }
 
-intptr_t strided_dim_type::get_dim_size(const char *metadata, const char *DYND_UNUSED(data)) const
+intptr_t strided_dim_type::get_dim_size(const char *arrmeta,
+                                        const char *DYND_UNUSED(data)) const
 {
-    if (metadata != NULL) {
-        return reinterpret_cast<const strided_dim_type_metadata *>(metadata)->size;
+    if (arrmeta != NULL) {
+        return reinterpret_cast<const strided_dim_type_arrmeta *>(arrmeta)
+            ->size;
     } else {
         return -1;
     }
 }
 
 void strided_dim_type::get_shape(intptr_t ndim, intptr_t i,
-                intptr_t *out_shape, const char *metadata, const char *data) const
+                intptr_t *out_shape, const char *arrmeta, const char *data) const
 {
-    if (metadata) {
-        const strided_dim_type_metadata *md = reinterpret_cast<const strided_dim_type_metadata *>(metadata);
+    if (arrmeta) {
+        const strided_dim_type_arrmeta *md = reinterpret_cast<const strided_dim_type_arrmeta *>(arrmeta);
         out_shape[i] = md->size;
         if (md->size != 1) {
             data = NULL;
@@ -278,7 +283,7 @@ void strided_dim_type::get_shape(intptr_t ndim, intptr_t i,
     if (i+1 < ndim) {
         if (!m_element_tp.is_builtin()) {
             m_element_tp.extended()->get_shape(ndim, i+1, out_shape,
-                            metadata ? (metadata + sizeof(strided_dim_type_metadata)) : NULL,
+                            arrmeta ? (arrmeta + sizeof(strided_dim_type_arrmeta)) : NULL,
                             data);
         } else {
             stringstream ss;
@@ -288,30 +293,30 @@ void strided_dim_type::get_shape(intptr_t ndim, intptr_t i,
     }
 }
 
-void strided_dim_type::get_strides(size_t i, intptr_t *out_strides, const char *metadata) const
+void strided_dim_type::get_strides(size_t i, intptr_t *out_strides, const char *arrmeta) const
 {
-    const strided_dim_type_metadata *md = reinterpret_cast<const strided_dim_type_metadata *>(metadata);
+    const strided_dim_type_arrmeta *md = reinterpret_cast<const strided_dim_type_arrmeta *>(arrmeta);
 
     out_strides[i] = md->stride;
 
     // Process the later shape values
     if (!m_element_tp.is_builtin()) {
-        m_element_tp.extended()->get_strides(i+1, out_strides, metadata + sizeof(strided_dim_type_metadata));
+        m_element_tp.extended()->get_strides(i+1, out_strides, arrmeta + sizeof(strided_dim_type_arrmeta));
     }
 }
 
-axis_order_classification_t strided_dim_type::classify_axis_order(const char *metadata) const
+axis_order_classification_t strided_dim_type::classify_axis_order(const char *arrmeta) const
 {
-    const strided_dim_type_metadata *md = reinterpret_cast<const strided_dim_type_metadata *>(metadata);
+    const strided_dim_type_arrmeta *md = reinterpret_cast<const strided_dim_type_arrmeta *>(arrmeta);
     if (m_element_tp.get_ndim() > 0) {
         if (md->stride != 0) {
             // Call the helper function to do the classification
             return classify_strided_axis_order(md->stride >= 0 ? md->stride : -md->stride, m_element_tp,
-                            metadata + sizeof(strided_dim_type_metadata));
+                            arrmeta + sizeof(strided_dim_type_arrmeta));
         } else {
             // Use the classification of the element type
             return m_element_tp.extended()->classify_axis_order(
-                            metadata + sizeof(strided_dim_type_metadata));
+                            arrmeta + sizeof(strided_dim_type_arrmeta));
         }
     } else {
         return axis_order_none;
@@ -343,7 +348,7 @@ bool strided_dim_type::operator==(const base_type& rhs) const
     }
 }
 
-void strided_dim_type::metadata_default_construct(char *metadata, intptr_t ndim, const intptr_t* shape) const
+void strided_dim_type::arrmeta_default_construct(char *arrmeta, intptr_t ndim, const intptr_t* shape) const
 {
     // Validate that the shape is ok
     if (ndim == 0 || shape[0] < 0) {
@@ -352,7 +357,7 @@ void strided_dim_type::metadata_default_construct(char *metadata, intptr_t ndim,
     size_t element_size = m_element_tp.is_builtin() ? m_element_tp.get_data_size()
                                                      : m_element_tp.extended()->get_default_data_size(ndim-1, shape+1);
 
-    strided_dim_type_metadata *md = reinterpret_cast<strided_dim_type_metadata *>(metadata);
+    strided_dim_type_arrmeta *md = reinterpret_cast<strided_dim_type_arrmeta *>(arrmeta);
     md->size = shape[0];
     if (shape[0] > 1) {
         md->stride = element_size;
@@ -360,62 +365,62 @@ void strided_dim_type::metadata_default_construct(char *metadata, intptr_t ndim,
         md->stride = 0;
     }
     if (!m_element_tp.is_builtin()) {
-        m_element_tp.extended()->metadata_default_construct(metadata + sizeof(strided_dim_type_metadata), ndim-1, shape+1);
+        m_element_tp.extended()->arrmeta_default_construct(arrmeta + sizeof(strided_dim_type_arrmeta), ndim-1, shape+1);
     }
 }
 
-void strided_dim_type::metadata_copy_construct(char *dst_metadata, const char *src_metadata, memory_block_data *embedded_reference) const
+void strided_dim_type::arrmeta_copy_construct(char *dst_arrmeta, const char *src_arrmeta, memory_block_data *embedded_reference) const
 {
-    const strided_dim_type_metadata *src_md = reinterpret_cast<const strided_dim_type_metadata *>(src_metadata);
-    strided_dim_type_metadata *dst_md = reinterpret_cast<strided_dim_type_metadata *>(dst_metadata);
+    const strided_dim_type_arrmeta *src_md = reinterpret_cast<const strided_dim_type_arrmeta *>(src_arrmeta);
+    strided_dim_type_arrmeta *dst_md = reinterpret_cast<strided_dim_type_arrmeta *>(dst_arrmeta);
     dst_md->size = src_md->size;
     dst_md->stride = src_md->stride;
     if (!m_element_tp.is_builtin()) {
-        m_element_tp.extended()->metadata_copy_construct(dst_metadata + sizeof(strided_dim_type_metadata),
-                        src_metadata + sizeof(strided_dim_type_metadata), embedded_reference);
+        m_element_tp.extended()->arrmeta_copy_construct(dst_arrmeta + sizeof(strided_dim_type_arrmeta),
+                        src_arrmeta + sizeof(strided_dim_type_arrmeta), embedded_reference);
     }
 }
 
-size_t strided_dim_type::metadata_copy_construct_onedim(char *dst_metadata, const char *src_metadata,
+size_t strided_dim_type::arrmeta_copy_construct_onedim(char *dst_arrmeta, const char *src_arrmeta,
                 memory_block_data *DYND_UNUSED(embedded_reference)) const
 {
-    const strided_dim_type_metadata *src_md = reinterpret_cast<const strided_dim_type_metadata *>(src_metadata);
-    strided_dim_type_metadata *dst_md = reinterpret_cast<strided_dim_type_metadata *>(dst_metadata);
+    const strided_dim_type_arrmeta *src_md = reinterpret_cast<const strided_dim_type_arrmeta *>(src_arrmeta);
+    strided_dim_type_arrmeta *dst_md = reinterpret_cast<strided_dim_type_arrmeta *>(dst_arrmeta);
     dst_md->size = src_md->size;
     dst_md->stride = src_md->stride;
-    return sizeof(strided_dim_type_metadata);
+    return sizeof(strided_dim_type_arrmeta);
 }
 
-void strided_dim_type::metadata_reset_buffers(char *metadata) const
+void strided_dim_type::arrmeta_reset_buffers(char *arrmeta) const
 {
-    if (m_element_tp.get_metadata_size() > 0) {
-        m_element_tp.extended()->metadata_reset_buffers(
-                        metadata + sizeof(strided_dim_type_metadata));
+    if (m_element_tp.get_arrmeta_size() > 0) {
+        m_element_tp.extended()->arrmeta_reset_buffers(
+                        arrmeta + sizeof(strided_dim_type_arrmeta));
     }
 }
 
-void strided_dim_type::metadata_finalize_buffers(char *metadata) const
+void strided_dim_type::arrmeta_finalize_buffers(char *arrmeta) const
 {
     if (!m_element_tp.is_builtin()) {
-        m_element_tp.extended()->metadata_finalize_buffers(metadata + sizeof(strided_dim_type_metadata));
+        m_element_tp.extended()->arrmeta_finalize_buffers(arrmeta + sizeof(strided_dim_type_arrmeta));
     }
 }
 
-void strided_dim_type::metadata_destruct(char *metadata) const
+void strided_dim_type::arrmeta_destruct(char *arrmeta) const
 {
     if (!m_element_tp.is_builtin()) {
-        m_element_tp.extended()->metadata_destruct(metadata + sizeof(strided_dim_type_metadata));
+        m_element_tp.extended()->arrmeta_destruct(arrmeta + sizeof(strided_dim_type_arrmeta));
     }
 }
 
-void strided_dim_type::metadata_debug_print(const char *metadata, std::ostream& o, const std::string& indent) const
+void strided_dim_type::arrmeta_debug_print(const char *arrmeta, std::ostream& o, const std::string& indent) const
 {
-    const strided_dim_type_metadata *md = reinterpret_cast<const strided_dim_type_metadata *>(metadata);
-    o << indent << "strided_dim metadata\n";
+    const strided_dim_type_arrmeta *md = reinterpret_cast<const strided_dim_type_arrmeta *>(arrmeta);
+    o << indent << "strided_dim arrmeta\n";
     o << indent << " stride: " << md->stride << "\n";
     o << indent << " size: " << md->size << "\n";
     if (!m_element_tp.is_builtin()) {
-        m_element_tp.extended()->metadata_debug_print(metadata + sizeof(strided_dim_type_metadata), o, indent + " ");
+        m_element_tp.extended()->arrmeta_debug_print(arrmeta + sizeof(strided_dim_type_arrmeta), o, indent + " ");
     }
 }
 
@@ -455,14 +460,14 @@ static char *iterdata_reset(iterdata_common *iterdata, char *data, intptr_t ndim
     }
 }
 
-size_t strided_dim_type::iterdata_construct(iterdata_common *iterdata, const char **inout_metadata, intptr_t ndim, const intptr_t* shape, ndt::type& out_uniform_tp) const
+size_t strided_dim_type::iterdata_construct(iterdata_common *iterdata, const char **inout_arrmeta, intptr_t ndim, const intptr_t* shape, ndt::type& out_uniform_tp) const
 {
-    const strided_dim_type_metadata *md = reinterpret_cast<const strided_dim_type_metadata *>(*inout_metadata);
-    *inout_metadata += sizeof(strided_dim_type_metadata);
+    const strided_dim_type_arrmeta *md = reinterpret_cast<const strided_dim_type_arrmeta *>(*inout_arrmeta);
+    *inout_arrmeta += sizeof(strided_dim_type_arrmeta);
     size_t inner_size = 0;
     if (ndim > 1) {
         // Place any inner iterdata earlier than the outer iterdata
-        inner_size = m_element_tp.extended()->iterdata_construct(iterdata, inout_metadata,
+        inner_size = m_element_tp.extended()->iterdata_construct(iterdata, inout_arrmeta,
                         ndim - 1, shape + 1, out_uniform_tp);
         iterdata = reinterpret_cast<iterdata_common *>(reinterpret_cast<char *>(iterdata) + inner_size);
     } else {
@@ -489,38 +494,38 @@ size_t strided_dim_type::iterdata_destruct(iterdata_common *iterdata, intptr_t n
     return inner_size + sizeof(strided_dim_type_iterdata);
 }
 
-void strided_dim_type::data_destruct(const char *metadata, char *data) const
+void strided_dim_type::data_destruct(const char *arrmeta, char *data) const
 {
-    const strided_dim_type_metadata *md = reinterpret_cast<const strided_dim_type_metadata *>(metadata);
+    const strided_dim_type_arrmeta *md = reinterpret_cast<const strided_dim_type_arrmeta *>(arrmeta);
     m_element_tp.extended()->data_destruct_strided(
-                    metadata + sizeof(strided_dim_type_metadata),
+                    arrmeta + sizeof(strided_dim_type_arrmeta),
                     data, md->stride, md->size);
 }
 
-void strided_dim_type::data_destruct_strided(const char *metadata, char *data,
+void strided_dim_type::data_destruct_strided(const char *arrmeta, char *data,
                 intptr_t stride, size_t count) const
 {
-    const strided_dim_type_metadata *md = reinterpret_cast<const strided_dim_type_metadata *>(metadata);
-    metadata += sizeof(strided_dim_type_metadata);
+    const strided_dim_type_arrmeta *md = reinterpret_cast<const strided_dim_type_arrmeta *>(arrmeta);
+    arrmeta += sizeof(strided_dim_type_arrmeta);
     intptr_t child_stride = md->stride;
     size_t child_size = md->size;
 
     for (size_t i = 0; i != count; ++i, data += stride) {
         m_element_tp.extended()->data_destruct_strided(
-                        metadata, data, child_stride, child_size);
+                        arrmeta, data, child_stride, child_size);
     }
 }
 
 size_t strided_dim_type::make_assignment_kernel(
                 ckernel_builder *out_ckb, size_t ckb_offset,
-                const ndt::type& dst_tp, const char *dst_metadata,
-                const ndt::type& src_tp, const char *src_metadata,
+                const ndt::type& dst_tp, const char *dst_arrmeta,
+                const ndt::type& src_tp, const char *src_arrmeta,
                 kernel_request_t kernreq, assign_error_mode errmode,
                 const eval::eval_context *ectx) const
 {
     if (this == dst_tp.extended()) {
-        const strided_dim_type_metadata *dst_md =
-                        reinterpret_cast<const strided_dim_type_metadata *>(dst_metadata);
+        const strided_dim_type_arrmeta *dst_md =
+                        reinterpret_cast<const strided_dim_type_arrmeta *>(dst_arrmeta);
         kernels::strided_assign_ck *self =
             kernels::strided_assign_ck::create(out_ckb, ckb_offset, kernreq);
         intptr_t ckb_end = ckb_offset + sizeof(kernels::strided_assign_ck);
@@ -529,32 +534,32 @@ size_t strided_dim_type::make_assignment_kernel(
 
         intptr_t src_size;
         ndt::type src_el_tp;
-        const char *src_el_metadata;
+        const char *src_el_arrmeta;
 
         if (src_tp.get_ndim() < dst_tp.get_ndim()) {
             // If the src has fewer dimensions, broadcast it across this one
             self->m_src_stride = 0;
             return ::make_assignment_kernel(
                 out_ckb, ckb_end, m_element_tp,
-                dst_metadata + sizeof(strided_dim_type_metadata), src_tp,
-                src_metadata, kernel_request_strided, errmode, ectx);
-        } else if (src_tp.get_as_strided_dim(src_metadata, src_size,
+                dst_arrmeta + sizeof(strided_dim_type_arrmeta), src_tp,
+                src_arrmeta, kernel_request_strided, errmode, ectx);
+        } else if (src_tp.get_as_strided_dim(src_arrmeta, src_size,
                                              self->m_src_stride, src_el_tp,
-                                             src_el_metadata)) {
+                                             src_el_arrmeta)) {
             // Check for a broadcasting error
             if (src_size != 1 && dst_md->size != src_size) {
-                throw broadcast_error(dst_tp, dst_metadata, src_tp, src_metadata);
+                throw broadcast_error(dst_tp, dst_arrmeta, src_tp, src_arrmeta);
             }
 
             return ::make_assignment_kernel(
                 out_ckb, ckb_end, m_element_tp,
-                dst_metadata + sizeof(strided_dim_type_metadata), src_el_tp,
-                src_el_metadata, kernel_request_strided, errmode, ectx);
+                dst_arrmeta + sizeof(strided_dim_type_arrmeta), src_el_tp,
+                src_el_arrmeta, kernel_request_strided, errmode, ectx);
         } else if (!src_tp.is_builtin()) {
             // Give the src type a chance to make a kernel
             return src_tp.extended()->make_assignment_kernel(out_ckb, ckb_offset,
-                            dst_tp, dst_metadata,
-                            src_tp, src_metadata,
+                            dst_tp, dst_arrmeta,
+                            src_tp, src_arrmeta,
                             kernreq, errmode, ectx);
         } else {
             stringstream ss;
@@ -562,7 +567,7 @@ size_t strided_dim_type::make_assignment_kernel(
             throw dynd::type_error(ss.str());
         }
     } else if (dst_tp.get_ndim() < src_tp.get_ndim()) {
-        throw broadcast_error(dst_tp, dst_metadata, src_tp, src_metadata);
+        throw broadcast_error(dst_tp, dst_arrmeta, src_tp, src_arrmeta);
     } else {
         stringstream ss;
         ss << "Cannot assign from " << src_tp << " to " << dst_tp;
@@ -570,20 +575,20 @@ size_t strided_dim_type::make_assignment_kernel(
     }
 }
 
-void strided_dim_type::foreach_leading(const char *metadata, char *data,
+void strided_dim_type::foreach_leading(const char *arrmeta, char *data,
                                        foreach_fn_t callback,
                                        void *callback_data) const
 {
-    const strided_dim_type_metadata *md = reinterpret_cast<const strided_dim_type_metadata *>(metadata);
-    const char *child_metadata = metadata + sizeof(strided_dim_type_metadata);
+    const strided_dim_type_arrmeta *md = reinterpret_cast<const strided_dim_type_arrmeta *>(arrmeta);
+    const char *child_arrmeta = arrmeta + sizeof(strided_dim_type_arrmeta);
     intptr_t stride = md->stride;
     for (intptr_t i = 0, i_end = md->size; i < i_end; ++i, data += stride) {
-        callback(m_element_tp, child_metadata, data, callback_data);
+        callback(m_element_tp, child_arrmeta, data, callback_data);
     }
 }
 
-void strided_dim_type::reorder_default_constructed_strides(char *dst_metadata,
-                const ndt::type& src_tp, const char *src_metadata) const
+void strided_dim_type::reorder_default_constructed_strides(char *dst_arrmeta,
+                const ndt::type& src_tp, const char *src_arrmeta) const
 {
     if (m_element_tp.get_type_id() != strided_dim_type_id) {
         // Nothing to do if there's just one reorderable dimension
@@ -597,8 +602,8 @@ void strided_dim_type::reorder_default_constructed_strides(char *dst_metadata,
         if (m_element_tp.get_type_id() == strided_dim_type_id) {
             const strided_dim_type *sdd = m_element_tp.tcast<strided_dim_type>();
             sdd->reorder_default_constructed_strides(
-                            dst_metadata + sizeof(strided_dim_type_metadata),
-                            src_tp, src_metadata);
+                            dst_arrmeta + sizeof(strided_dim_type_arrmeta),
+                            src_tp, src_arrmeta);
         }
         return;
     }
@@ -630,10 +635,10 @@ void strided_dim_type::reorder_default_constructed_strides(char *dst_metadata,
             }
             case strided_dim_type_id: {
                 const strided_dim_type *sdd = last_src_tp.tcast<strided_dim_type>();
-                const strided_dim_type_metadata *md = reinterpret_cast<const strided_dim_type_metadata *>(src_metadata);
+                const strided_dim_type_arrmeta *md = reinterpret_cast<const strided_dim_type_arrmeta *>(src_arrmeta);
                 stride = md->stride;
                 last_src_tp = sdd->get_element_type();
-                src_metadata += sizeof(strided_dim_type_metadata);
+                src_arrmeta += sizeof(strided_dim_type_arrmeta);
                 break;
             }
             default:
@@ -660,8 +665,8 @@ void strided_dim_type::reorder_default_constructed_strides(char *dst_metadata,
     if (!c_order) {
         shortvector<int> axis_perm(ndim_partial);
         strides_to_axis_perm(ndim_partial, strides.get(), axis_perm.get());
-        strided_dim_type_metadata *md =
-                        reinterpret_cast<strided_dim_type_metadata *>(dst_metadata);
+        strided_dim_type_arrmeta *md =
+                        reinterpret_cast<strided_dim_type_arrmeta *>(dst_arrmeta);
         intptr_t stride = md[ndim_partial-1].stride;
         if (stride == 0) {
             // Because of the rule that size one dimensions have
@@ -673,7 +678,7 @@ void strided_dim_type::reorder_default_constructed_strides(char *dst_metadata,
         }
         for (size_t i = 0; i < ndim_partial; ++i) {
             int i_perm = axis_perm[i];
-            strided_dim_type_metadata& i_md = md[i_perm];
+            strided_dim_type_arrmeta& i_md = md[i_perm];
             intptr_t dim_size = i_md.size;
             i_md.stride = dim_size > 1 ? stride : 0;
             stride *= dim_size;
@@ -683,12 +688,12 @@ void strided_dim_type::reorder_default_constructed_strides(char *dst_metadata,
     // If that didn't cover all the dimensions, then get the
     // axis order classification to handle the rest
     if (ndim_partial < ndim && !last_src_tp.is_builtin()) {
-        axis_order_classification_t aoc = last_src_tp.extended()->classify_axis_order(src_metadata);
+        axis_order_classification_t aoc = last_src_tp.extended()->classify_axis_order(src_arrmeta);
         // TODO: Allow user control by adding a "default axis order" to the evaluation context
         if (aoc == axis_order_f) {
             // If it's F-order, reverse the ordering of the strides
-            strided_dim_type_metadata *md =
-                            reinterpret_cast<strided_dim_type_metadata *>(dst_metadata);
+            strided_dim_type_arrmeta *md =
+                            reinterpret_cast<strided_dim_type_arrmeta *>(dst_arrmeta);
             intptr_t stride = md[ndim-1].stride;
             if (stride == 0) {
                 // Because of the rule that size one dimensions have

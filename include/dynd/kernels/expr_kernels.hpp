@@ -87,8 +87,8 @@ class expr_kernel_generator;
  * kernel.
  */
 size_t make_expression_type_expr_kernel(ckernel_builder *out, size_t offset_out,
-                const ndt::type& dst_tp, const char *dst_metadata,
-                size_t src_count, const ndt::type *src_dt, const char **src_metadata,
+                const ndt::type& dst_tp, const char *dst_arrmeta,
+                size_t src_count, const ndt::type *src_dt, const char **src_arrmeta,
                 kernel_request_t kernreq, const eval::eval_context *ectx,
                 const expr_kernel_generator *handler);
 

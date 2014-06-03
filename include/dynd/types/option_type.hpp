@@ -91,14 +91,14 @@ public:
 
     bool operator==(const base_type& rhs) const;
 
-    void metadata_default_construct(char *arrmeta, intptr_t ndim,
+    void arrmeta_default_construct(char *arrmeta, intptr_t ndim,
                                     const intptr_t *shape) const;
-    void metadata_copy_construct(char *dst_arrmeta, const char *src_arrmeta,
+    void arrmeta_copy_construct(char *dst_arrmeta, const char *src_arrmeta,
                                  memory_block_data *embedded_reference) const;
-    void metadata_reset_buffers(char *arrmeta) const;
-    void metadata_finalize_buffers(char *arrmeta) const;
-    void metadata_destruct(char *arrmeta) const;
-    void metadata_debug_print(const char *arrmeta, std::ostream &o,
+    void arrmeta_reset_buffers(char *arrmeta) const;
+    void arrmeta_finalize_buffers(char *arrmeta) const;
+    void arrmeta_destruct(char *arrmeta) const;
+    void arrmeta_debug_print(const char *arrmeta, std::ostream &o,
                               const std::string &indent) const;
 
     size_t

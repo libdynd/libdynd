@@ -52,7 +52,7 @@ void char_type::set_code_point(char *out_data, uint32_t cp)
     append_fn(cp, out_data, out_data + get_data_size());
 }
 
-void char_type::print_data(std::ostream& o, const char *DYND_UNUSED(metadata), const char *data) const
+void char_type::print_data(std::ostream& o, const char *DYND_UNUSED(arrmeta), const char *data) const
 {
     // Print as an escaped string
     o << "\"";
@@ -104,8 +104,8 @@ bool char_type::operator==(const base_type& rhs) const
 
 size_t char_type::make_assignment_kernel(
     ckernel_builder *out, size_t offset_out,
-    const ndt::type& dst_tp, const char *dst_metadata,
-    const ndt::type& src_tp, const char *src_metadata,
+    const ndt::type& dst_tp, const char *dst_arrmeta,
+    const ndt::type& src_tp, const char *src_arrmeta,
     kernel_request_t kernreq, assign_error_mode errmode,
     const eval::eval_context *ectx) const
 {
@@ -140,8 +140,8 @@ size_t char_type::make_assignment_kernel(
             default: {
                 if (!src_tp.is_builtin()) {
                     return src_tp.extended()->make_assignment_kernel(out, offset_out,
-                        dst_tp, dst_metadata,
-                        src_tp, src_metadata,
+                        dst_tp, dst_arrmeta,
+                        src_tp, src_arrmeta,
                         kernreq, errmode, ectx);
                 }
                 break;
@@ -160,7 +160,7 @@ size_t char_type::make_assignment_kernel(
             case string_type_id: {
                 const base_string_type *dst_fs = dst_tp.tcast<base_string_type>();
                 return make_fixedstring_to_blockref_string_assignment_kernel(out, offset_out,
-                                dst_metadata, dst_fs->get_encoding(), get_data_size(), m_encoding,
+                                dst_arrmeta, dst_fs->get_encoding(), get_data_size(), m_encoding,
                                 kernreq, errmode, ectx);
             }
             default: {
@@ -176,8 +176,8 @@ size_t char_type::make_assignment_kernel(
 
 size_t char_type::make_comparison_kernel(
     ckernel_builder *out, size_t offset_out,
-    const ndt::type& src0_dt, const char *src0_metadata,
-    const ndt::type& src1_dt, const char *src1_metadata,
+    const ndt::type& src0_dt, const char *src0_arrmeta,
+    const ndt::type& src1_dt, const char *src1_arrmeta,
     comparison_type_t comptype,
     const eval::eval_context *ectx) const
 {
@@ -189,14 +189,14 @@ size_t char_type::make_comparison_kernel(
         }
         else if (src1_dt.get_kind() == string_kind) {
             return make_general_string_comparison_kernel(out, offset_out,
-                src0_dt, src0_metadata,
-                src1_dt, src1_metadata,
+                src0_dt, src0_arrmeta,
+                src1_dt, src1_arrmeta,
                 comptype, ectx);
         }
         else if (!src1_dt.is_builtin()) {
             return src1_dt.extended()->make_comparison_kernel(out, offset_out,
-                src0_dt, src0_metadata,
-                src1_dt, src1_metadata,
+                src0_dt, src0_arrmeta,
+                src1_dt, src1_arrmeta,
                 comptype, ectx);
         }
     }

@@ -21,8 +21,8 @@ namespace dynd {
 class base_string_type : public base_type {
 public:
     inline base_string_type(type_id_t type_id, size_t data_size,
-                    size_t alignment, flags_type flags, size_t metadata_size)
-        : base_type(type_id, string_kind, data_size, alignment, flags, metadata_size, 0)
+                    size_t alignment, flags_type flags, size_t arrmeta_size)
+        : base_type(type_id, string_kind, data_size, alignment, flags, arrmeta_size, 0)
     {}
 
     virtual ~base_string_type();
@@ -31,16 +31,16 @@ public:
 
     /** Retrieves the data range in which a string is stored */
     virtual void get_string_range(const char **out_begin, const char**out_end,
-                    const char *metadata, const char *data) const = 0;
+                    const char *arrmeta, const char *data) const = 0;
     /** Converts a string element into a C++ std::string with a UTF8 encoding */
-    std::string get_utf8_string(const char *metadata, const char *data, assign_error_mode errmode) const;
+    std::string get_utf8_string(const char *arrmeta, const char *data, assign_error_mode errmode) const;
     /** Copies a string with a UTF8 encoding to a string element */
-    virtual void set_utf8_string(const char *metadata, char *data, assign_error_mode errmode,
+    virtual void set_utf8_string(const char *arrmeta, char *data, assign_error_mode errmode,
                     const char* utf8_begin, const char *utf8_end) const = 0;
     /** Copies a C++ std::string with a UTF8 encoding to a string element */
-    inline void set_utf8_string(const char *metadata, char *data, assign_error_mode errmode,
+    inline void set_utf8_string(const char *arrmeta, char *data, assign_error_mode errmode,
                     const std::string& utf8_str) const {
-        set_utf8_string(metadata, data, errmode, utf8_str.data(), utf8_str.data() + utf8_str.size());
+        set_utf8_string(arrmeta, data, errmode, utf8_str.data(), utf8_str.data() + utf8_str.size());
     }
 
     /**
@@ -58,15 +58,15 @@ public:
      * \param out_di  The dim_iter to populate. This should point to an
      *                uninitialized dim_iter.
      * \param encoding  The encoding the user of the iterator should see.
-     * \param metadata  Array metadata of the string to.
+     * \param arrmeta  Arrmeta of the string.
      * \param data  Data of the string.
      * \param ref  A reference which holds on to the memory of the string.
      */
-    virtual void make_string_iter(dim_iter *out_di, string_encoding_t encoding,
-            const char *metadata, const char *data,
-            const memory_block_ptr& ref,
-            intptr_t buffer_max_mem = 65536,
-            const eval::eval_context *ectx = &eval::default_eval_context) const = 0;
+    virtual void make_string_iter(
+        dim_iter *out_di, string_encoding_t encoding, const char *arrmeta,
+        const char *data, const memory_block_ptr &ref,
+        intptr_t buffer_max_mem = 65536,
+        const eval::eval_context *ectx = &eval::default_eval_context) const = 0;
 
     // String types stop the iterdata chain
     // TODO: Maybe it should be more flexible?

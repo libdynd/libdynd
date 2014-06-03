@@ -110,8 +110,8 @@ bool struct_type::is_lossless_assignment(const ndt::type& dst_tp, const ndt::typ
 
 size_t struct_type::make_assignment_kernel(
                 ckernel_builder *out_ckb, size_t ckb_offset,
-                const ndt::type& dst_tp, const char *dst_metadata,
-                const ndt::type& src_tp, const char *src_metadata,
+                const ndt::type& dst_tp, const char *dst_arrmeta,
+                const ndt::type& src_tp, const char *src_arrmeta,
                 kernel_request_t kernreq, assign_error_mode errmode,
                 const eval::eval_context *ectx) const
 {
@@ -119,22 +119,22 @@ size_t struct_type::make_assignment_kernel(
         if (this == src_tp.extended()) {
             return make_struct_identical_assignment_kernel(out_ckb, ckb_offset,
                             dst_tp,
-                            dst_metadata, src_metadata,
+                            dst_arrmeta, src_arrmeta,
                             kernreq, errmode, ectx);
         } else if (src_tp.get_kind() == struct_kind) {
             return make_struct_assignment_kernel(out_ckb, ckb_offset,
-                            dst_tp, dst_metadata,
-                            src_tp, src_metadata,
+                            dst_tp, dst_arrmeta,
+                            src_tp, src_arrmeta,
                             kernreq, errmode, ectx);
         } else if (src_tp.is_builtin()) {
             return make_broadcast_to_struct_assignment_kernel(out_ckb, ckb_offset,
-                            dst_tp, dst_metadata,
-                            src_tp, src_metadata,
+                            dst_tp, dst_arrmeta,
+                            src_tp, src_arrmeta,
                             kernreq, errmode, ectx);
         } else {
             return src_tp.extended()->make_assignment_kernel(out_ckb, ckb_offset,
-                            dst_tp, dst_metadata,
-                            src_tp, src_metadata,
+                            dst_tp, dst_arrmeta,
+                            src_tp, src_arrmeta,
                             kernreq, errmode, ectx);
         }
     }
@@ -146,20 +146,20 @@ size_t struct_type::make_assignment_kernel(
 
 size_t struct_type::make_comparison_kernel(
                 ckernel_builder *out, size_t offset_out,
-                const ndt::type& src0_dt, const char *src0_metadata,
-                const ndt::type& src1_dt, const char *src1_metadata,
+                const ndt::type& src0_dt, const char *src0_arrmeta,
+                const ndt::type& src1_dt, const char *src1_arrmeta,
                 comparison_type_t comptype,
                 const eval::eval_context *ectx) const
 {
     if (this == src0_dt.extended()) {
         if (*this == *src1_dt.extended()) {
             return make_struct_comparison_kernel(out, offset_out,
-                            src0_dt, src0_metadata, src1_metadata,
+                            src0_dt, src0_arrmeta, src1_arrmeta,
                             comptype, ectx);
         } else if (src1_dt.get_kind() == struct_kind) {
             return make_general_struct_comparison_kernel(out, offset_out,
-                            src0_dt, src0_metadata,
-                            src1_dt, src1_metadata,
+                            src0_dt, src0_arrmeta,
+                            src1_dt, src1_arrmeta,
                             comptype, ectx);
         }
     }
@@ -181,7 +181,7 @@ bool struct_type::operator==(const base_type& rhs) const
     }
 }
 
-void struct_type::metadata_debug_print(const char *arrmeta, std::ostream& o, const std::string& indent) const
+void struct_type::arrmeta_debug_print(const char *arrmeta, std::ostream& o, const std::string& indent) const
 {
     const size_t *offsets = reinterpret_cast<const size_t *>(arrmeta);
     o << indent << "struct arrmeta\n";
@@ -197,12 +197,12 @@ void struct_type::metadata_debug_print(const char *arrmeta, std::ostream& o, con
     for (size_t i = 0; i < m_field_count; ++i) {
         const ndt::type& field_dt = get_field_type(i);
         if (!field_dt.is_builtin() &&
-                field_dt.extended()->get_metadata_size() > 0) {
+                field_dt.extended()->get_arrmeta_size() > 0) {
             o << indent << " field " << i << " (name ";
             const string_type_data& fnr = get_field_name_raw(i);
             o.write(fnr.begin, fnr.end - fnr.begin);
             o << ") arrmeta:\n";
-            field_dt.extended()->metadata_debug_print(
+            field_dt.extended()->arrmeta_debug_print(
                 arrmeta + arrmeta_offsets[i], o, indent + "  ");
         }
     }

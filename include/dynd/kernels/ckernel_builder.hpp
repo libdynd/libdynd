@@ -17,7 +17,7 @@ namespace dynd {
 
 /**
  * Function pointers + data for a hierarchical
- * kernel which operates on type/metadata in
+ * kernel which operates on type/arrmeta in
  * some configuration. Individual kernel types
  * are handled by the classes assignment_ckernel_builder, etc.
  *

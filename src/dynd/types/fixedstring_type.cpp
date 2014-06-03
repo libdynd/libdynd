@@ -46,7 +46,7 @@ fixedstring_type::~fixedstring_type()
 }
 
 void fixedstring_type::get_string_range(const char **out_begin, const char**out_end,
-                const char *DYND_UNUSED(metadata), const char *data) const
+                const char *DYND_UNUSED(arrmeta), const char *data) const
 {
     // Beginning of the string
     *out_begin = data;
@@ -82,7 +82,7 @@ void fixedstring_type::get_string_range(const char **out_begin, const char**out_
     }
 }
 
-void fixedstring_type::set_utf8_string(const char *DYND_UNUSED(metadata), char *dst,
+void fixedstring_type::set_utf8_string(const char *DYND_UNUSED(arrmeta), char *dst,
                 assign_error_mode errmode,
                 const char* utf8_begin, const char *utf8_end) const
 {
@@ -104,7 +104,7 @@ void fixedstring_type::set_utf8_string(const char *DYND_UNUSED(metadata), char *
     }
 }
 
-void fixedstring_type::print_data(std::ostream& o, const char *DYND_UNUSED(metadata), const char *data) const
+void fixedstring_type::print_data(std::ostream& o, const char *DYND_UNUSED(arrmeta), const char *data) const
 {
     uint32_t cp;
     next_unicode_codepoint_t next_fn;
@@ -161,8 +161,8 @@ bool fixedstring_type::operator==(const base_type& rhs) const
 
 size_t fixedstring_type::make_assignment_kernel(
                 ckernel_builder *out, size_t offset_out,
-                const ndt::type& dst_tp, const char *dst_metadata,
-                const ndt::type& src_tp, const char *src_metadata,
+                const ndt::type& dst_tp, const char *dst_arrmeta,
+                const ndt::type& src_tp, const char *src_arrmeta,
                 kernel_request_t kernreq, assign_error_mode errmode,
                 const eval::eval_context *ectx) const
 {
@@ -183,12 +183,12 @@ size_t fixedstring_type::make_assignment_kernel(
             default: {
                 if (!src_tp.is_builtin()) {
                     return src_tp.extended()->make_assignment_kernel(out, offset_out,
-                                    dst_tp, dst_metadata,
-                                    src_tp, src_metadata,
+                                    dst_tp, dst_arrmeta,
+                                    src_tp, src_arrmeta,
                                     kernreq, errmode, ectx);
                 } else {
                     return make_builtin_to_string_assignment_kernel(out, offset_out,
-                                dst_tp, dst_metadata,
+                                dst_tp, dst_arrmeta,
                                 src_tp.get_type_id(),
                                 kernreq, errmode, ectx);
                 }
@@ -198,7 +198,7 @@ size_t fixedstring_type::make_assignment_kernel(
         if (dst_tp.is_builtin()) {
             return make_string_to_builtin_assignment_kernel(out, offset_out,
                             dst_tp.get_type_id(),
-                            src_tp, src_metadata,
+                            src_tp, src_arrmeta,
                             kernreq, errmode, ectx);
         } else {
             stringstream ss;
@@ -210,8 +210,8 @@ size_t fixedstring_type::make_assignment_kernel(
 
 size_t fixedstring_type::make_comparison_kernel(
                 ckernel_builder *out, size_t offset_out,
-                const ndt::type& src0_dt, const char *src0_metadata,
-                const ndt::type& src1_dt, const char *src1_metadata,
+                const ndt::type& src0_dt, const char *src0_arrmeta,
+                const ndt::type& src1_dt, const char *src1_arrmeta,
                 comparison_type_t comptype,
                 const eval::eval_context *ectx) const
 {
@@ -222,13 +222,13 @@ size_t fixedstring_type::make_comparison_kernel(
                             comptype, ectx);
         } else if (src1_dt.get_kind() == string_kind) {
             return make_general_string_comparison_kernel(out, offset_out,
-                            src0_dt, src0_metadata,
-                            src1_dt, src1_metadata,
+                            src0_dt, src0_arrmeta,
+                            src1_dt, src1_arrmeta,
                             comptype, ectx);
         } else if (!src1_dt.is_builtin()) {
             return src1_dt.extended()->make_comparison_kernel(out, offset_out,
-                            src0_dt, src0_metadata,
-                            src1_dt, src1_metadata,
+                            src0_dt, src0_arrmeta,
+                            src1_dt, src1_arrmeta,
                             comptype, ectx);
         }
     }
@@ -237,14 +237,14 @@ size_t fixedstring_type::make_comparison_kernel(
 }
 
 void fixedstring_type::make_string_iter(dim_iter *out_di, string_encoding_t encoding,
-            const char *metadata, const char *data,
+            const char *arrmeta, const char *data,
             const memory_block_ptr& ref,
             intptr_t buffer_max_mem,
             const eval::eval_context *ectx) const
 {
     const char *data_begin;
     const char *data_end;
-    get_string_range(&data_begin, &data_end, metadata, data);
+    get_string_range(&data_begin, &data_end, arrmeta, data);
     iter::make_string_iter(out_di, encoding,
             m_encoding, data_begin, data_end, ref, buffer_max_mem, ectx);
 }

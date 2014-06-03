@@ -20,10 +20,10 @@ using namespace dynd;
 
 void kernels::string_concatenation_kernel::init(
                 size_t nop,
-                const char *dst_metadata,
-                const char **DYND_UNUSED(src_metadata))
+                const char *dst_arrmeta,
+                const char **DYND_UNUSED(src_arrmeta))
 {
-    const string_type_metadata *sdm = reinterpret_cast<const string_type_metadata *>(dst_metadata);
+    const string_type_arrmeta *sdm = reinterpret_cast<const string_type_arrmeta *>(dst_arrmeta);
     m_nop = nop;
     // This is a borrowed reference
     m_dst_blockref = sdm->blockref;
@@ -90,7 +90,7 @@ void kernels::string_concatenation_kernel::strided(
 /////////////////////////////////////////////
 // String find kernel
 
-void kernels::string_find_kernel::init(const ndt::type* src_tp, const char *const*src_metadata)
+void kernels::string_find_kernel::init(const ndt::type* src_tp, const char *const*src_arrmeta)
 {
     if (src_tp[0].get_kind() != string_kind) {
         stringstream ss;
@@ -104,9 +104,9 @@ void kernels::string_find_kernel::init(const ndt::type* src_tp, const char *cons
     }
     m_base.destructor = &kernels::string_find_kernel::destruct;
     m_str_type = static_cast<const base_string_type *>(ndt::type(src_tp[0]).release());
-    m_str_metadata = src_metadata[0];
+    m_str_arrmeta = src_arrmeta[0];
     m_sub_type = static_cast<const base_string_type *>(ndt::type(src_tp[1]).release());
-    m_sub_metadata = src_metadata[1];
+    m_sub_arrmeta = src_arrmeta[1];
 
 }
 
@@ -172,9 +172,9 @@ void kernels::string_find_kernel::single(
     intptr_t *d = reinterpret_cast<intptr_t *>(dst);
     // Get the extents of the string and substring
     const char *str_begin, *str_end;
-    e->m_str_type->get_string_range(&str_begin, &str_end, e->m_str_metadata, src[0]);
+    e->m_str_type->get_string_range(&str_begin, &str_end, e->m_str_arrmeta, src[0]);
     const char *sub_begin, *sub_end;
-    e->m_sub_type->get_string_range(&sub_begin, &sub_end, e->m_sub_metadata, src[1]);
+    e->m_sub_type->get_string_range(&sub_begin, &sub_end, e->m_sub_arrmeta, src[1]);
     find_one_string(d, str_begin, str_end, sub_begin, sub_end, str_next_fn, sub_next_fn);
 }
 
@@ -196,9 +196,9 @@ void kernels::string_find_kernel::strided(
         intptr_t *d = reinterpret_cast<intptr_t *>(dst);
         // Get the extents of the string and substring
         const char *str_begin, *str_end;
-        e->m_str_type->get_string_range(&str_begin, &str_end, e->m_str_metadata, src_str);
+        e->m_str_type->get_string_range(&str_begin, &str_end, e->m_str_arrmeta, src_str);
         const char *sub_begin, *sub_end;
-        e->m_sub_type->get_string_range(&sub_begin, &sub_end, e->m_sub_metadata, src_sub);
+        e->m_sub_type->get_string_range(&sub_begin, &sub_end, e->m_sub_arrmeta, src_sub);
         find_one_string(d, str_begin, str_end, sub_begin, sub_end, str_next_fn, sub_next_fn);
 
         dst += dst_stride;

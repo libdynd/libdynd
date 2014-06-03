@@ -64,7 +64,7 @@ namespace {
 
 size_t dynd::make_struct_identical_assignment_kernel(
     ckernel_builder *ckb, size_t ckb_offset, const ndt::type &val_struct_tp,
-    const char *dst_metadata, const char *src_metadata,
+    const char *dst_arrmeta, const char *src_arrmeta,
     kernel_request_t kernreq, assign_error_mode errmode,
     const eval::eval_context *ectx)
 {
@@ -93,8 +93,8 @@ size_t dynd::make_struct_identical_assignment_kernel(
     e->base.destructor = &struct_kernel_extra::destruct;
     e->field_count = field_count;
 
-    const uintptr_t *dst_data_offsets = sd->get_data_offsets(dst_metadata);
-    const uintptr_t *src_data_offsets = sd->get_data_offsets(src_metadata);
+    const uintptr_t *dst_data_offsets = sd->get_data_offsets(dst_arrmeta);
+    const uintptr_t *src_data_offsets = sd->get_data_offsets(src_arrmeta);
 
     // Create the kernels and dst offsets for copying individual fields
     size_t current_offset = ckb_offset + extra_size;
@@ -110,8 +110,8 @@ size_t dynd::make_struct_identical_assignment_kernel(
         const ndt::type &ft = sd->get_field_type(i);
         uintptr_t arrmeta_offset = sd->get_arrmeta_offset(i);
         current_offset = ::make_assignment_kernel(ckb, current_offset,
-                        ft, dst_metadata + arrmeta_offset,
-                        ft, src_metadata + arrmeta_offset,
+                        ft, dst_arrmeta + arrmeta_offset,
+                        ft, src_arrmeta + arrmeta_offset,
                         kernel_request_single, errmode, ectx);
     }
     return current_offset;
@@ -122,8 +122,8 @@ size_t dynd::make_struct_identical_assignment_kernel(
 
 size_t dynd::make_struct_assignment_kernel(
                 ckernel_builder *ckb, size_t ckb_offset,
-                const ndt::type& dst_struct_tp, const char *dst_metadata,
-                const ndt::type& src_struct_tp, const char *src_metadata,
+                const ndt::type& dst_struct_tp, const char *dst_arrmeta,
+                const ndt::type& src_struct_tp, const char *src_arrmeta,
                 kernel_request_t kernreq, assign_error_mode errmode,
                 const eval::eval_context *ectx)
 {
@@ -172,8 +172,8 @@ size_t dynd::make_struct_assignment_kernel(
         field_reorder[i] = src_i;
     }
 
-    const uintptr_t *src_data_offsets = src_sd->get_data_offsets(src_metadata);
-    const uintptr_t *dst_data_offsets = dst_sd->get_data_offsets(dst_metadata);
+    const uintptr_t *src_data_offsets = src_sd->get_data_offsets(src_arrmeta);
+    const uintptr_t *dst_data_offsets = dst_sd->get_data_offsets(dst_arrmeta);
     const uintptr_t *src_arrmeta_offsets = src_sd->get_arrmeta_offsets_raw();
     const uintptr_t *dst_arrmeta_offsets = dst_sd->get_arrmeta_offsets_raw();
 
@@ -191,9 +191,9 @@ size_t dynd::make_struct_assignment_kernel(
         fi->src_data_offset = src_data_offsets[i_src];
         current_offset = ::make_assignment_kernel(
             ckb, current_offset, dst_sd->get_field_type(i),
-            dst_metadata + dst_arrmeta_offsets[i],
+            dst_arrmeta + dst_arrmeta_offsets[i],
             src_sd->get_field_type(i_src),
-            src_metadata + src_arrmeta_offsets[i_src], kernel_request_single,
+            src_arrmeta + src_arrmeta_offsets[i_src], kernel_request_single,
             errmode, ectx);
     }
     return current_offset;
@@ -204,8 +204,8 @@ size_t dynd::make_struct_assignment_kernel(
 
 size_t dynd::make_broadcast_to_struct_assignment_kernel(
                 ckernel_builder *ckb, size_t ckb_offset,
-                const ndt::type& dst_struct_tp, const char *dst_metadata,
-                const ndt::type& src_tp, const char *src_metadata,
+                const ndt::type& dst_struct_tp, const char *dst_arrmeta,
+                const ndt::type& src_tp, const char *src_arrmeta,
                 kernel_request_t kernreq, assign_error_mode errmode,
                 const eval::eval_context *ectx)
 {
@@ -231,7 +231,7 @@ size_t dynd::make_broadcast_to_struct_assignment_kernel(
     e->base.destructor = &struct_kernel_extra::destruct;
     e->field_count = field_count;
 
-    const uintptr_t *dst_data_offsets = dst_sd->get_data_offsets(dst_metadata);
+    const uintptr_t *dst_data_offsets = dst_sd->get_data_offsets(dst_arrmeta);
     const uintptr_t *dst_arrmeta_offsets = dst_sd->get_arrmeta_offsets_raw();
 
     // Create the kernels and dst offsets for copying individual fields
@@ -246,8 +246,8 @@ size_t dynd::make_broadcast_to_struct_assignment_kernel(
         fi->dst_data_offset = dst_data_offsets[i];
         fi->src_data_offset = 0;
         current_offset = ::make_assignment_kernel(ckb, current_offset,
-                        dst_sd->get_field_type(i), dst_metadata + dst_arrmeta_offsets[i],
-                        src_tp, src_metadata,
+                        dst_sd->get_field_type(i), dst_arrmeta + dst_arrmeta_offsets[i],
+                        src_tp, src_arrmeta,
                         kernel_request_single, errmode, ectx);
     }
     return current_offset;

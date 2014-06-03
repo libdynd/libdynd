@@ -36,8 +36,8 @@ size_t make_char_assignment_kernel(
  */
 size_t make_blockref_string_assignment_kernel(
                 ckernel_builder *out, size_t offset_out,
-                const char *dst_metadata, string_encoding_t dst_encoding,
-                const char *src_metadata, string_encoding_t src_encoding,
+                const char *dst_arrmeta, string_encoding_t dst_encoding,
+                const char *src_arrmeta, string_encoding_t src_encoding,
                 kernel_request_t kernreq, assign_error_mode errmode,
                 const eval::eval_context *ectx);
 
@@ -46,7 +46,7 @@ size_t make_blockref_string_assignment_kernel(
  */
 size_t make_fixedstring_to_blockref_string_assignment_kernel(
                 ckernel_builder *out, size_t offset_out,
-                const char *dst_metadata, string_encoding_t dst_encoding,
+                const char *dst_arrmeta, string_encoding_t dst_encoding,
                 intptr_t src_element_size, string_encoding_t src_encoding,
                 kernel_request_t kernreq, assign_error_mode errmode,
                 const eval::eval_context *ectx);

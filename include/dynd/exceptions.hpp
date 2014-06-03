@@ -72,10 +72,10 @@ public:
      */
     broadcast_error(intptr_t ninputs, const nd::array *inputs);
 
-    broadcast_error(const ndt::type& dst_tp, const char *dst_metadata,
-                    const ndt::type& src_tp, const char *src_metadata);
+    broadcast_error(const ndt::type& dst_tp, const char *dst_arrmeta,
+                    const ndt::type& src_tp, const char *src_arrmeta);
 
-    broadcast_error(const ndt::type& dst_tp, const char *dst_metadata,
+    broadcast_error(const ndt::type& dst_tp, const char *dst_arrmeta,
                     const char *src_name);
 
     /**

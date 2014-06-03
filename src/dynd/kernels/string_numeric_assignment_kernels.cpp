@@ -92,7 +92,7 @@ namespace {
         ckernel_prefix base;
         const base_string_type *src_string_tp;
         assign_error_mode errmode;
-        const char *src_metadata;
+        const char *src_arrmeta;
 
         static void destruct(ckernel_prefix *extra)
         {
@@ -109,23 +109,23 @@ namespace {
 
 static void raise_string_cast_error(const ndt::type &dst_tp,
                                     const ndt::type &string_tp,
-                                    const char *metadata, const char *data)
+                                    const char *arrmeta, const char *data)
 {
     stringstream ss;
     ss << "cannot cast string ";
-    string_tp.print_data(ss, metadata, data);
+    string_tp.print_data(ss, arrmeta, data);
     ss << " to " << dst_tp;
     throw invalid_argument(ss.str());
 }
 
 static void raise_string_cast_overflow_error(const ndt::type &dst_tp,
                                              const ndt::type &string_tp,
-                                             const char *metadata,
+                                             const char *arrmeta,
                                              const char *data)
 {
     stringstream ss;
     ss << "overflow converting string ";
-    string_tp.print_data(ss, metadata, data);
+    string_tp.print_data(ss, arrmeta, data);
     ss << " to " << dst_tp;
     throw overflow_error(ss.str());
 }
@@ -137,7 +137,7 @@ static void string_to_bool_single(char *dst, const char *src,
         reinterpret_cast<string_to_builtin_kernel_extra *>(extra);
     // Get the string from the source
     string s =
-        e->src_string_tp->get_utf8_string(e->src_metadata, src, e->errmode);
+        e->src_string_tp->get_utf8_string(e->src_arrmeta, src, e->errmode);
     trim(s);
     parse::string_to_bool(dst, s.data(), s.data() + s.size(), false, e->errmode);
 }
@@ -178,7 +178,7 @@ namespace { template<typename T> struct string_to_int {
                         ckernel_prefix *extra)
     {
         string_to_builtin_kernel_extra *e = reinterpret_cast<string_to_builtin_kernel_extra *>(extra);
-        string s = e->src_string_tp->get_utf8_string(e->src_metadata, src, e->errmode);
+        string s = e->src_string_tp->get_utf8_string(e->src_arrmeta, src, e->errmode);
         trim(s);
         bool negative = false;
         if (!s.empty() && s[0] == '-') {
@@ -198,12 +198,12 @@ namespace { template<typename T> struct string_to_int {
             if (badparse) {
                 raise_string_cast_error(ndt::make_type<T>(),
                                         ndt::type(e->src_string_tp, true),
-                                        e->src_metadata, src);
+                                        e->src_arrmeta, src);
             } else if (overflow ||
                        overflow_check<T>::is_overflow(value, negative)) {
                 raise_string_cast_overflow_error(
                     ndt::make_type<T>(), ndt::type(e->src_string_tp, true),
-                    e->src_metadata, src);
+                    e->src_arrmeta, src);
             }
             result = negative ? static_cast<T>(-static_cast<int64_t>(value))
                               : static_cast<T>(value);
@@ -217,7 +217,7 @@ namespace { template<typename T> struct string_to_uint {
                         ckernel_prefix *extra)
     {
         string_to_builtin_kernel_extra *e = reinterpret_cast<string_to_builtin_kernel_extra *>(extra);
-        string s = e->src_string_tp->get_utf8_string(e->src_metadata, src, e->errmode);
+        string s = e->src_string_tp->get_utf8_string(e->src_arrmeta, src, e->errmode);
         trim(s);
         bool negative = false;
         if (!s.empty() && s[0] == '-') {
@@ -236,12 +236,12 @@ namespace { template<typename T> struct string_to_uint {
             if (badparse) {
                 raise_string_cast_error(ndt::make_type<T>(),
                                         ndt::type(e->src_string_tp, true),
-                                        e->src_metadata, src);
+                                        e->src_arrmeta, src);
             } else if (overflow || (negative && value != 0) ||
                        overflow_check<T>::is_overflow(value)) {
                 raise_string_cast_overflow_error(
                     ndt::make_type<T>(), ndt::type(e->src_string_tp, true),
-                    e->src_metadata, src);
+                    e->src_arrmeta, src);
             }
             result = static_cast<T>(value);
         }
@@ -253,7 +253,7 @@ static void string_to_int128_single(char *dst, const char *src,
                                     ckernel_prefix *extra)
 {
     string_to_builtin_kernel_extra *e = reinterpret_cast<string_to_builtin_kernel_extra *>(extra);
-    string s = e->src_string_tp->get_utf8_string(e->src_metadata, src, e->errmode);
+    string s = e->src_string_tp->get_utf8_string(e->src_arrmeta, src, e->errmode);
     trim(s);
     bool negative = false;
     if (!s.empty() && s[0] == '-') {
@@ -272,12 +272,12 @@ static void string_to_int128_single(char *dst, const char *src,
         if (badparse) {
             raise_string_cast_error(ndt::make_type<dynd_int128>(),
                                     ndt::type(e->src_string_tp, true),
-                                    e->src_metadata, src);
+                                    e->src_arrmeta, src);
         } else if (overflow ||
                    overflow_check<dynd_int128>::is_overflow(value, negative)) {
             raise_string_cast_overflow_error(ndt::make_type<dynd_int128>(),
                                              ndt::type(e->src_string_tp, true),
-                                             e->src_metadata, src);
+                                             e->src_arrmeta, src);
         }
         result = negative ? -static_cast<dynd_int128>(value)
                           : static_cast<dynd_int128>(value);
@@ -289,7 +289,7 @@ static void string_to_uint128_single(char *dst, const char *src,
                                      ckernel_prefix *extra)
 {
     string_to_builtin_kernel_extra *e = reinterpret_cast<string_to_builtin_kernel_extra *>(extra);
-    string s = e->src_string_tp->get_utf8_string(e->src_metadata, src, e->errmode);
+    string s = e->src_string_tp->get_utf8_string(e->src_arrmeta, src, e->errmode);
     trim(s);
     bool negative = false;
     if (!s.empty() && s[0] == '-') {
@@ -307,11 +307,11 @@ static void string_to_uint128_single(char *dst, const char *src,
         if (badparse) {
             raise_string_cast_error(ndt::make_type<dynd_int128>(),
                                     ndt::type(e->src_string_tp, true),
-                                    e->src_metadata, src);
+                                    e->src_arrmeta, src);
         } else if (overflow || (negative && result != 0)) {
             raise_string_cast_overflow_error(ndt::make_type<dynd_uint128>(),
                                              ndt::type(e->src_string_tp, true),
-                                             e->src_metadata, src);
+                                             e->src_arrmeta, src);
         }
     }
     *reinterpret_cast<dynd_uint128 *>(dst) = result;
@@ -322,7 +322,7 @@ static void string_to_float32_single(char *dst, const char *src,
 {
     string_to_builtin_kernel_extra *e = reinterpret_cast<string_to_builtin_kernel_extra *>(extra);
     // Get the string from the source
-    string s = e->src_string_tp->get_utf8_string(e->src_metadata, src,e->errmode);
+    string s = e->src_string_tp->get_utf8_string(e->src_arrmeta, src,e->errmode);
     trim(s);
     double value = parse::checked_string_to_float64(
         s.data(), s.data() + s.size(), e->errmode);
@@ -356,7 +356,7 @@ static void string_to_float64_single(char *dst, const char *src,
 {
     string_to_builtin_kernel_extra *e = reinterpret_cast<string_to_builtin_kernel_extra *>(extra);
     // Get the string from the source
-    string s = e->src_string_tp->get_utf8_string(e->src_metadata, src, e->errmode);
+    string s = e->src_string_tp->get_utf8_string(e->src_arrmeta, src, e->errmode);
     trim(s);
     double value = parse::checked_string_to_float64(
         s.data(), s.data() + s.size(), e->errmode);
@@ -413,7 +413,7 @@ static unary_single_operation_t static_string_to_builtin_kernels[builtin_type_id
 size_t dynd::make_string_to_builtin_assignment_kernel(
                 ckernel_builder *out, size_t offset_out,
                 type_id_t dst_type_id,
-                const ndt::type& src_string_tp, const char *src_metadata,
+                const ndt::type& src_string_tp, const char *src_arrmeta,
                 kernel_request_t kernreq, assign_error_mode errmode,
                 const eval::eval_context *ectx)
 {
@@ -439,7 +439,7 @@ size_t dynd::make_string_to_builtin_assignment_kernel(
         e->errmode = (errmode == assign_error_default)
                          ? static_cast<assign_error_mode>(ectx->default_errmode)
                          : errmode;
-        e->src_metadata = src_metadata;
+        e->src_arrmeta = src_arrmeta;
         return offset_out + sizeof(string_to_builtin_kernel_extra);
     } else {
         stringstream ss;
@@ -459,7 +459,7 @@ namespace {
         const base_string_type *dst_string_tp;
         type_id_t src_type_id;
         assign_error_mode errmode;
-        const char *dst_metadata;
+        const char *dst_arrmeta;
 
         static void single(char *dst, const char *src,
                             ckernel_prefix *extra)
@@ -472,7 +472,7 @@ namespace {
             //       the same float number, would be better.
             stringstream ss;
             ndt::type(e->src_type_id).print_data(ss, NULL, src);
-            e->dst_string_tp->set_utf8_string(e->dst_metadata, dst, e->errmode, ss.str());
+            e->dst_string_tp->set_utf8_string(e->dst_arrmeta, dst, e->errmode, ss.str());
         }
 
         static void destruct(ckernel_prefix *extra)
@@ -487,7 +487,7 @@ namespace {
 
 size_t dynd::make_builtin_to_string_assignment_kernel(
                 ckernel_builder *out, size_t offset_out,
-                const ndt::type& dst_string_tp, const char *dst_metadata,
+                const ndt::type& dst_string_tp, const char *dst_arrmeta,
                 type_id_t src_type_id,
                 kernel_request_t kernreq, assign_error_mode errmode,
                 const eval::eval_context *ectx)
@@ -510,7 +510,7 @@ size_t dynd::make_builtin_to_string_assignment_kernel(
         e->errmode = (errmode == assign_error_default)
                          ? static_cast<assign_error_mode>(ectx->default_errmode)
                          : errmode;
-        e->dst_metadata = dst_metadata;
+        e->dst_arrmeta = dst_arrmeta;
         return offset_out + sizeof(builtin_to_string_kernel_extra);
     } else {
         stringstream ss;
@@ -525,7 +525,7 @@ void dynd::assign_utf8_string_to_builtin(type_id_t dst_type_id, char *dst,
 {
     ndt::type dt = ndt::make_string();
     string_type_data d;
-    string_type_metadata md;
+    string_type_arrmeta md;
     d.begin = const_cast<char *>(str_begin);
     d.end = const_cast<char *>(str_end);
     md.blockref = NULL;

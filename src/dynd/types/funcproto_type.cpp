@@ -22,12 +22,12 @@ funcproto_type::funcproto_type(const nd::array &param_types,
               "array with type " << m_param_types.get_type();
         throw invalid_argument(ss.str());
     }
-    m_param_count = reinterpret_cast<const strided_dim_type_metadata *>(
+    m_param_count = reinterpret_cast<const strided_dim_type_arrmeta *>(
                         m_param_types.get_arrmeta())->size;
 }
 
 void funcproto_type::print_data(std::ostream &DYND_UNUSED(o),
-                                const char *DYND_UNUSED(metadata),
+                                const char *DYND_UNUSED(arrmeta),
                                 const char *DYND_UNUSED(data)) const
 {
     throw type_error("Cannot store data of funcproto type");
@@ -92,8 +92,8 @@ ndt::type funcproto_type::apply_linear_index(
 
 intptr_t funcproto_type::apply_linear_index(
     intptr_t DYND_UNUSED(nindices), const irange *DYND_UNUSED(indices),
-    const char *DYND_UNUSED(metadata), const ndt::type &DYND_UNUSED(result_tp),
-    char *DYND_UNUSED(out_metadata), memory_block_data *DYND_UNUSED(embedded_reference), size_t DYND_UNUSED(current_i),
+    const char *DYND_UNUSED(arrmeta), const ndt::type &DYND_UNUSED(result_tp),
+    char *DYND_UNUSED(out_arrmeta), memory_block_data *DYND_UNUSED(embedded_reference), size_t DYND_UNUSED(current_i),
     const ndt::type &DYND_UNUSED(root_tp), bool DYND_UNUSED(leading_dimension), char **DYND_UNUSED(inout_data),
     memory_block_data **DYND_UNUSED(inout_dataref)) const
 {
@@ -116,8 +116,8 @@ bool funcproto_type::is_lossless_assignment(const ndt::type& dst_tp, const ndt::
 /*
 size_t funcproto_type::make_assignment_kernel(
                 ckernel_builder *DYND_UNUSED(out_ckb), size_t DYND_UNUSED(ckb_offset),
-                const ndt::type& dst_tp, const char *DYND_UNUSED(dst_metadata),
-                const ndt::type& src_tp, const char *DYND_UNUSED(src_metadata),
+                const ndt::type& dst_tp, const char *DYND_UNUSED(dst_arrmeta),
+                const ndt::type& src_tp, const char *DYND_UNUSED(src_arrmeta),
                 kernel_request_t DYND_UNUSED(kernreq), assign_error_mode DYND_UNUSED(errmode),
                 const eval::eval_context *DYND_UNUSED(ectx)) const
 {
@@ -126,8 +126,8 @@ size_t funcproto_type::make_assignment_kernel(
 
 size_t funcproto_type::make_comparison_kernel(
                 ckernel_builder *DYND_UNUSED(out), size_t DYND_UNUSED(offset_out),
-                const ndt::type& src0_tp, const char *DYND_UNUSED(src0_metadata),
-                const ndt::type& src1_tp, const char *DYND_UNUSED(src1_metadata),
+                const ndt::type& src0_tp, const char *DYND_UNUSED(src0_arrmeta),
+                const ndt::type& src1_tp, const char *DYND_UNUSED(src1_arrmeta),
                 comparison_type_t comptype,
                 const eval::eval_context *DYND_UNUSED(ectx)) const
 {
@@ -147,21 +147,21 @@ bool funcproto_type::operator==(const base_type& rhs) const
     }
 }
 
-void funcproto_type::metadata_default_construct(
-    char *DYND_UNUSED(metadata), intptr_t DYND_UNUSED(ndim),
+void funcproto_type::arrmeta_default_construct(
+    char *DYND_UNUSED(arrmeta), intptr_t DYND_UNUSED(ndim),
     const intptr_t *DYND_UNUSED(shape)) const
 {
     throw type_error("Cannot store data of funcproto type");
 }
 
-void funcproto_type::metadata_copy_construct(
-    char *DYND_UNUSED(dst_metadata), const char *DYND_UNUSED(src_metadata),
+void funcproto_type::arrmeta_copy_construct(
+    char *DYND_UNUSED(dst_arrmeta), const char *DYND_UNUSED(src_arrmeta),
     memory_block_data *DYND_UNUSED(embedded_reference)) const
 {
     throw type_error("Cannot store data of funcproto type");
 }
 
-void funcproto_type::metadata_destruct(char *DYND_UNUSED(metadata)) const
+void funcproto_type::arrmeta_destruct(char *DYND_UNUSED(arrmeta)) const
 {
     throw type_error("Cannot store data of funcproto type");
 }

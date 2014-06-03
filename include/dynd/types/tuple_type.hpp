@@ -21,8 +21,8 @@ class tuple_type : public base_tuple_type {
     std::vector<std::pair<std::string, gfunc::callable> > m_array_properties;
 protected:
 
-    uintptr_t *get_arrmeta_data_offsets(char *metadata) const {
-        return reinterpret_cast<uintptr_t *>(metadata);
+    uintptr_t *get_arrmeta_data_offsets(char *arrmeta) const {
+        return reinterpret_cast<uintptr_t *>(arrmeta);
     }
 public:
     inline tuple_type(const nd::array &field_types)
@@ -32,8 +32,8 @@ public:
 
     virtual ~tuple_type();
 
-    inline const uintptr_t *get_data_offsets(const char *metadata) const {
-        return reinterpret_cast<const uintptr_t *>(metadata);
+    inline const uintptr_t *get_data_offsets(const char *arrmeta) const {
+        return reinterpret_cast<const uintptr_t *>(arrmeta);
     }
 
     void print_type(std::ostream& o) const;
@@ -46,20 +46,20 @@ public:
 
     bool operator==(const base_type& rhs) const;
 
-    void metadata_debug_print(const char *metadata, std::ostream& o, const std::string& indent) const;
+    void arrmeta_debug_print(const char *arrmeta, std::ostream& o, const std::string& indent) const;
 
 
     size_t make_assignment_kernel(
                     ckernel_builder *out, size_t offset_out,
-                    const ndt::type& dst_tp, const char *dst_metadata,
-                    const ndt::type& src_tp, const char *src_metadata,
+                    const ndt::type& dst_tp, const char *dst_arrmeta,
+                    const ndt::type& src_tp, const char *src_arrmeta,
                     kernel_request_t kernreq, assign_error_mode errmode,
                     const eval::eval_context *ectx) const;
 
     size_t make_comparison_kernel(
                     ckernel_builder *out, size_t offset_out,
-                    const ndt::type& src0_dt, const char *src0_metadata,
-                    const ndt::type& src1_dt, const char *src1_metadata,
+                    const ndt::type& src0_dt, const char *src0_arrmeta,
+                    const ndt::type& src1_dt, const char *src1_arrmeta,
                     comparison_type_t comptype,
                     const eval::eval_context *ectx) const;
 

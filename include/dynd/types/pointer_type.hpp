@@ -21,7 +21,7 @@
 
 namespace dynd {
 
-struct pointer_type_metadata {
+struct pointer_type_arrmeta {
     /**
      * A reference to the memory block which contains the data.
      */
@@ -47,7 +47,7 @@ public:
         return m_target_tp;
     }
 
-    void print_data(std::ostream& o, const char *metadata, const char *data) const;
+    void print_data(std::ostream& o, const char *arrmeta, const char *data) const;
 
     void print_type(std::ostream& o) const;
 
@@ -58,26 +58,26 @@ public:
     }
 
     bool is_expression() const;
-    bool is_unique_data_owner(const char *metadata) const;
+    bool is_unique_data_owner(const char *arrmeta) const;
     void transform_child_types(type_transform_fn_t transform_fn, void *extra,
                     ndt::type& out_transformed_tp, bool& out_was_transformed) const;
     ndt::type get_canonical_type() const;
 
     ndt::type apply_linear_index(intptr_t nindices, const irange *indices,
                 size_t current_i, const ndt::type& root_tp, bool leading_dimension) const;
-    intptr_t apply_linear_index(intptr_t nindices, const irange *indices, const char *metadata,
-                    const ndt::type& result_tp, char *out_metadata,
+    intptr_t apply_linear_index(intptr_t nindices, const irange *indices, const char *arrmeta,
+                    const ndt::type& result_tp, char *out_arrmeta,
                     memory_block_data *embedded_reference,
                     size_t current_i, const ndt::type& root_tp,
                     bool leading_dimension, char **inout_data,
                     memory_block_data **inout_dataref) const;
-    ndt::type at_single(intptr_t i0, const char **inout_metadata, const char **inout_data) const;
+    ndt::type at_single(intptr_t i0, const char **inout_arrmeta, const char **inout_data) const;
 
-    ndt::type get_type_at_dimension(char **inout_metadata, intptr_t i, intptr_t total_ndim = 0) const;
+    ndt::type get_type_at_dimension(char **inout_arrmeta, intptr_t i, intptr_t total_ndim = 0) const;
 
-        void get_shape(intptr_t ndim, intptr_t i, intptr_t *out_shape, const char *metadata, const char *data) const;
+        void get_shape(intptr_t ndim, intptr_t i, intptr_t *out_shape, const char *arrmeta, const char *data) const;
 
-    axis_order_classification_t classify_axis_order(const char *metadata) const;
+    axis_order_classification_t classify_axis_order(const char *arrmeta) const;
 
     bool is_lossless_assignment(const ndt::type& dst_tp, const ndt::type& src_tp) const;
 
@@ -85,12 +85,12 @@ public:
 
     ndt::type with_replaced_storage_type(const ndt::type& replacement_type) const;
 
-    void metadata_default_construct(char *metadata, intptr_t ndim, const intptr_t* shape) const;
-    void metadata_copy_construct(char *dst_metadata, const char *src_metadata, memory_block_data *embedded_reference) const;
-    void metadata_reset_buffers(char *metadata) const;
-    void metadata_finalize_buffers(char *metadata) const;
-    void metadata_destruct(char *metadata) const;
-    void metadata_debug_print(const char *metadata, std::ostream& o, const std::string& indent) const;
+    void arrmeta_default_construct(char *arrmeta, intptr_t ndim, const intptr_t* shape) const;
+    void arrmeta_copy_construct(char *dst_arrmeta, const char *src_arrmeta, memory_block_data *embedded_reference) const;
+    void arrmeta_reset_buffers(char *arrmeta) const;
+    void arrmeta_finalize_buffers(char *arrmeta) const;
+    void arrmeta_destruct(char *arrmeta) const;
+    void arrmeta_debug_print(const char *arrmeta, std::ostream& o, const std::string& indent) const;
 
     void get_dynamic_type_properties(
                     const std::pair<std::string, gfunc::callable> **out_properties,

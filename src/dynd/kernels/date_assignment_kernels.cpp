@@ -16,7 +16,7 @@ using namespace dynd;
 namespace {
     struct string_to_date_ck : public kernels::assignment_ck<string_to_date_ck> {
         ndt::type m_src_string_tp;
-        const char *m_src_metadata;
+        const char *m_src_arrmeta;
         assign_error_mode m_errmode;
         date_parse_order_t m_date_parse_order;
         int m_century_window;
@@ -24,7 +24,7 @@ namespace {
         inline void single(char *dst, const char *src)
         {
             const base_string_type *bst = static_cast<const base_string_type *>(m_src_string_tp.extended());
-            const string& s = bst->get_utf8_string(m_src_metadata, src, m_errmode);
+            const string& s = bst->get_utf8_string(m_src_arrmeta, src, m_errmode);
             date_ymd ymd;
             // TODO: properly distinguish "date" and "option[date]" with respect to NA support
             if (s == "NA") {
@@ -39,7 +39,7 @@ namespace {
 
 size_t dynd::make_string_to_date_assignment_kernel(
                 ckernel_builder *out_ckb, size_t ckb_offset,
-                const ndt::type& src_string_tp, const char *src_metadata,
+                const ndt::type& src_string_tp, const char *src_arrmeta,
                 kernel_request_t kernreq, assign_error_mode errmode,
                 const eval::eval_context *ectx)
 {
@@ -52,7 +52,7 @@ size_t dynd::make_string_to_date_assignment_kernel(
 
     self_type *self = self_type::create_leaf(out_ckb, ckb_offset, kernreq);
     self->m_src_string_tp = src_string_tp;
-    self->m_src_metadata = src_metadata;
+    self->m_src_arrmeta = src_arrmeta;
     self->m_errmode = errmode;
     self->m_date_parse_order = ectx->date_parse_order;
     self->m_century_window = ectx->century_window;
@@ -65,7 +65,7 @@ size_t dynd::make_string_to_date_assignment_kernel(
 namespace {
     struct date_to_string_ck : public kernels::assignment_ck<date_to_string_ck> {
         ndt::type m_dst_string_tp;
-        const char *m_dst_metadata;
+        const char *m_dst_arrmeta;
         assign_error_mode m_errmode;
 
         inline void single(char *dst, const char *src)
@@ -77,14 +77,14 @@ namespace {
                 s = "NA";
             }
             const base_string_type *bst = static_cast<const base_string_type *>(m_dst_string_tp.extended());
-            bst->set_utf8_string(m_dst_metadata, dst, m_errmode, s);
+            bst->set_utf8_string(m_dst_arrmeta, dst, m_errmode, s);
         }
     };
 } // anonymous namespace
 
 size_t dynd::make_date_to_string_assignment_kernel(
                 ckernel_builder *out_ckb, size_t ckb_offset,
-                const ndt::type& dst_string_tp, const char *dst_metadata,
+                const ndt::type& dst_string_tp, const char *dst_arrmeta,
                 kernel_request_t kernreq, assign_error_mode errmode,
                 const eval::eval_context *DYND_UNUSED(ectx))
 {
@@ -97,7 +97,7 @@ size_t dynd::make_date_to_string_assignment_kernel(
 
     self_type *self = self_type::create_leaf(out_ckb, ckb_offset, kernreq);
     self->m_dst_string_tp = dst_string_tp;
-    self->m_dst_metadata = dst_metadata;
+    self->m_dst_arrmeta = dst_arrmeta;
     self->m_errmode = errmode;
     return ckb_offset + sizeof(self_type);
 }

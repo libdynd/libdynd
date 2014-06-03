@@ -23,7 +23,7 @@ option_type::option_type(const ndt::type& value_tp)
     : base_type(option_type_id, option_kind, value_tp.get_data_size(),
                     value_tp.get_data_alignment(),
                     (value_tp.get_flags()&type_flags_value_inherited) | type_flag_constructor,
-                    value_tp.get_metadata_size(),
+                    value_tp.get_arrmeta_size(),
                     value_tp.get_ndim()),
                     m_value_tp(value_tp)
 {
@@ -243,7 +243,7 @@ bool option_type::operator==(const base_type& rhs) const
     }
 }
 
-void option_type::metadata_default_construct(char *arrmeta, intptr_t ndim,
+void option_type::arrmeta_default_construct(char *arrmeta, intptr_t ndim,
                                              const intptr_t *shape) const
 {
     if (m_nafunc.is_null()) {
@@ -253,44 +253,44 @@ void option_type::metadata_default_construct(char *arrmeta, intptr_t ndim,
     }
 
     if (!m_value_tp.is_builtin()) {
-        m_value_tp.extended()->metadata_default_construct(arrmeta, ndim, shape);
+        m_value_tp.extended()->arrmeta_default_construct(arrmeta, ndim, shape);
     }
 }
 
-void option_type::metadata_copy_construct(char *dst_arrmeta, const char *src_arrmeta, memory_block_data *embedded_reference) const
+void option_type::arrmeta_copy_construct(char *dst_arrmeta, const char *src_arrmeta, memory_block_data *embedded_reference) const
 {
     if (!m_value_tp.is_builtin()) {
-        m_value_tp.extended()->metadata_copy_construct(dst_arrmeta, src_arrmeta,
+        m_value_tp.extended()->arrmeta_copy_construct(dst_arrmeta, src_arrmeta,
                                                        embedded_reference);
     }
 }
 
-void option_type::metadata_reset_buffers(char *arrmeta) const
+void option_type::arrmeta_reset_buffers(char *arrmeta) const
 {
     if (!m_value_tp.is_builtin()) {
-        m_value_tp.extended()->metadata_reset_buffers(arrmeta);
+        m_value_tp.extended()->arrmeta_reset_buffers(arrmeta);
     }
 }
 
-void option_type::metadata_finalize_buffers(char *arrmeta) const
+void option_type::arrmeta_finalize_buffers(char *arrmeta) const
 {
     if (!m_value_tp.is_builtin()) {
-        m_value_tp.extended()->metadata_finalize_buffers(arrmeta);
+        m_value_tp.extended()->arrmeta_finalize_buffers(arrmeta);
     }
 }
 
-void option_type::metadata_destruct(char *arrmeta) const
+void option_type::arrmeta_destruct(char *arrmeta) const
 {
     if (!m_value_tp.is_builtin()) {
-        m_value_tp.extended()->metadata_destruct(arrmeta);
+        m_value_tp.extended()->arrmeta_destruct(arrmeta);
     }
 }
 
-void option_type::metadata_debug_print(const char *arrmeta, std::ostream& o, const std::string& indent) const
+void option_type::arrmeta_debug_print(const char *arrmeta, std::ostream& o, const std::string& indent) const
 {
     o << indent << "option arrmeta\n";
     if (!m_value_tp.is_builtin()) {
-        m_value_tp.extended()->metadata_debug_print(arrmeta, o, indent + " ");
+        m_value_tp.extended()->arrmeta_debug_print(arrmeta, o, indent + " ");
     }
 }
 

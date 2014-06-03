@@ -68,7 +68,7 @@ Numba kernels which produce variable-sized strings as their output would use thi
 to allocate the string output memory. A typical sequence of events for such a kernel
 might be:
 
- * Get the memblock pointer from the string's dtype metadata.
+ * Get the memblock pointer from the string's dtype arrmeta.
  * Request the allocator API for that memblock pointer.
  * For each output string, first call 'allocate' to get more memory than
    needed if the amount of memory is unknown, or the exact amount if known.
@@ -97,14 +97,15 @@ by the struct dynd::array_preamble. This struct looks like
         memory_block_data *m_data_reference;
     };
 
-This struct begins with the standard memory block data (use count and type), then
-has a reference to a dtype, a pointer to the data, and a small bit of metadata that
-exists in all nd::arrays, including some flags and a memblock reference for the data.
-Presently the flags are only used for access control (read, write, and immutable).
+This struct begins with the standard memory block data (use count and type),
+then has a reference to a dtype, a pointer to the data, and a small bit of
+metadata that exists in all nd::arrays, including some flags and a memblock
+reference for the data. Presently the flags are only used for access
+control (read, write, and immutable).
 
-Many dtypes require additional metadata, and this is stored in memory immediately after
-the dynd::array_preamble. The dtype has a method get_metadata_size() which returns how much
-memory is needed here.
+Many dtypes require additional metadata, called arrmeta, and this is
+stored in memory immediately after the dynd::array_preamble. The dtype has
+a method get_arrmeta_size() which returns how much memory is needed here.
 
 NDT::Type
 ---------
@@ -124,8 +125,8 @@ method to test whether only the lowest bits are set.
 
 The interface to a dtype is defined by virtual functions in the base class extended_dtype.
 These functions can be broadly grouped into three different kinds, functions which operate
-on just dtypes, functions which use the dtype and metadata together, and functions
-which use dtype, metadata, and data together.
+on just dtypes, functions which use the dtype and arrmeta together, and functions
+which use dtype, arrmeta, and data together.
 
 This API is presently designed for use from C++, and with some stabilization of the
 fundamental dtypes for arrays and various primitives, an important development will
@@ -145,19 +146,19 @@ The structure of a simple 1D strided array is as follows, as seen from Python:
     >>> a = nd.array([1, 2, 3, 4])
     >>> nd.debug_repr(a)
     ------ array
-     address: 00000000004DA8C0
+     address: 00000000003FAE30
      refcount: 1
      type:
-      pointer: 000000000050F240
+      pointer: 000007FEE194E8F0
       type: strided * int32
-     metadata:
+     arrmeta:
       flags: 5 (read_access immutable )
-      type-specific metadata:
-       strided_dim metadata
+      type-specific arrmeta:
+       strided_dim arrmeta
         stride: 4
         size: 4
      data:
-       pointer: 00000000004DA900
+       pointer: 00000000003FAE70
        reference: 0000000000000000 (embedded in array memory)
     ------
 
@@ -167,7 +168,8 @@ The structure of a simple 1D strided array is as follows, as seen from Python:
     >>> nd.dtype_of(a)
     ndt.int32
 
-If you have a raw pointer to this object, you can first check its dtype by inspecting
-it as a pointer to `dynd::array_preamble`, whose structure is given above. After checking
-that the type_id of the type is `strided_dim_type_id`, the type can be cast
-to a strided_dim_type pointer.
+If you have a raw pointer to this object, you can first check its dtype
+by inspecting it as a pointer to `dynd::array_preamble`, whose structure
+is given above. After checking that the type_id of the type is
+`strided_dim_type_id`, the type can be cast to a strided_dim_type pointer.
+

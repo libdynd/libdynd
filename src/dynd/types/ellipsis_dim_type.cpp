@@ -32,7 +32,7 @@ ellipsis_dim_type::ellipsis_dim_type(const nd::string &name,
 }
 
 void ellipsis_dim_type::print_data(std::ostream &DYND_UNUSED(o),
-                                const char *DYND_UNUSED(metadata),
+                                const char *DYND_UNUSED(arrmeta),
                                 const char *DYND_UNUSED(data)) const
 {
     throw type_error("Cannot store data of ellipsis type");
@@ -57,15 +57,15 @@ ndt::type ellipsis_dim_type::apply_linear_index(
 
 intptr_t ellipsis_dim_type::apply_linear_index(
     intptr_t DYND_UNUSED(nindices), const irange *DYND_UNUSED(indices),
-    const char *DYND_UNUSED(metadata), const ndt::type &DYND_UNUSED(result_tp),
-    char *DYND_UNUSED(out_metadata), memory_block_data *DYND_UNUSED(embedded_reference), size_t DYND_UNUSED(current_i),
+    const char *DYND_UNUSED(arrmeta), const ndt::type &DYND_UNUSED(result_tp),
+    char *DYND_UNUSED(out_arrmeta), memory_block_data *DYND_UNUSED(embedded_reference), size_t DYND_UNUSED(current_i),
     const ndt::type &DYND_UNUSED(root_tp), bool DYND_UNUSED(leading_dimension), char **DYND_UNUSED(inout_data),
     memory_block_data **DYND_UNUSED(inout_dataref)) const
 {
     throw type_error("Cannot store data of ellipsis type");
 }
 
-intptr_t ellipsis_dim_type::get_dim_size(const char *DYND_UNUSED(metadata),
+intptr_t ellipsis_dim_type::get_dim_size(const char *DYND_UNUSED(arrmeta),
                                         const char *DYND_UNUSED(data)) const
 {
     return -1;
@@ -98,28 +98,28 @@ bool ellipsis_dim_type::operator==(const base_type& rhs) const
     }
 }
 
-void ellipsis_dim_type::metadata_default_construct(
-    char *DYND_UNUSED(metadata), intptr_t DYND_UNUSED(ndim),
+void ellipsis_dim_type::arrmeta_default_construct(
+    char *DYND_UNUSED(arrmeta), intptr_t DYND_UNUSED(ndim),
     const intptr_t *DYND_UNUSED(shape)) const
 {
     throw type_error("Cannot store data of ellipsis type");
 }
 
-void ellipsis_dim_type::metadata_copy_construct(
-    char *DYND_UNUSED(dst_metadata), const char *DYND_UNUSED(src_metadata),
+void ellipsis_dim_type::arrmeta_copy_construct(
+    char *DYND_UNUSED(dst_arrmeta), const char *DYND_UNUSED(src_arrmeta),
     memory_block_data *DYND_UNUSED(embedded_reference)) const
 {
     throw type_error("Cannot store data of ellipsis type");
 }
 
-size_t ellipsis_dim_type::metadata_copy_construct_onedim(
-    char *DYND_UNUSED(dst_metadata), const char *DYND_UNUSED(src_metadata),
+size_t ellipsis_dim_type::arrmeta_copy_construct_onedim(
+    char *DYND_UNUSED(dst_arrmeta), const char *DYND_UNUSED(src_arrmeta),
     memory_block_data *DYND_UNUSED(embedded_reference)) const
 {
     throw type_error("Cannot store data of ellipsis type");
 }
 
-void ellipsis_dim_type::metadata_destruct(char *DYND_UNUSED(metadata)) const
+void ellipsis_dim_type::arrmeta_destruct(char *DYND_UNUSED(arrmeta)) const
 {
     throw type_error("Cannot store data of ellipsis type");
 }

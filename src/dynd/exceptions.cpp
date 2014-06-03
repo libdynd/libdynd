@@ -83,39 +83,39 @@ broadcast_error::broadcast_error(intptr_t ninputs, const nd::array *inputs)
 {
 }
 
-inline string broadcast_error_message(const ndt::type& dst_tp, const char *dst_metadata,
-                const ndt::type& src_tp, const char *src_metadata)
+inline string broadcast_error_message(const ndt::type& dst_tp, const char *dst_arrmeta,
+                const ndt::type& src_tp, const char *src_arrmeta)
 {
     stringstream ss;
     ss << "cannot broadcast input datashape '";
-    format_datashape(ss, src_tp, src_metadata, NULL, false);
+    format_datashape(ss, src_tp, src_arrmeta, NULL, false);
     ss << "' into datashape '";
-    format_datashape(ss, dst_tp, dst_metadata, NULL, false);
+    format_datashape(ss, dst_tp, dst_arrmeta, NULL, false);
     ss << "'";
     return ss.str();
 }
 
-broadcast_error::broadcast_error(const ndt::type& dst_tp, const char *dst_metadata,
-                const ndt::type& src_tp, const char *src_metadata)
+broadcast_error::broadcast_error(const ndt::type& dst_tp, const char *dst_arrmeta,
+                const ndt::type& src_tp, const char *src_arrmeta)
     : dynd_exception("broadcast error", broadcast_error_message(
-                    dst_tp, dst_metadata, src_tp, src_metadata))
+                    dst_tp, dst_arrmeta, src_tp, src_arrmeta))
 {
 }
 
-inline string broadcast_error_message(const ndt::type& dst_tp, const char *dst_metadata,
+inline string broadcast_error_message(const ndt::type& dst_tp, const char *dst_arrmeta,
                 const char *src_name)
 {
     stringstream ss;
     ss << "cannot broadcast input " << src_name << " into datashape '";
-    format_datashape(ss, dst_tp, dst_metadata, NULL, false);
+    format_datashape(ss, dst_tp, dst_arrmeta, NULL, false);
     ss << "'";
     return ss.str();
 }
 
-broadcast_error::broadcast_error(const ndt::type& dst_tp, const char *dst_metadata,
+broadcast_error::broadcast_error(const ndt::type& dst_tp, const char *dst_arrmeta,
                 const char *src_name)
     : dynd_exception("broadcast error", broadcast_error_message(
-                    dst_tp, dst_metadata, src_name))
+                    dst_tp, dst_arrmeta, src_name))
 {
 }
 

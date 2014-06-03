@@ -28,7 +28,7 @@ type_type::~type_type()
 }
 
 void type_type::print_data(std::ostream& o,
-                const char *DYND_UNUSED(metadata), const char *data) const
+                const char *DYND_UNUSED(arrmeta), const char *data) const
 {
     const type_type_data *ddd = reinterpret_cast<const type_type_data *>(data);
     // This tests avoids the atomic increment/decrement of
@@ -50,29 +50,29 @@ bool type_type::operator==(const base_type& rhs) const
     return this == &rhs || rhs.get_type_id() == type_type_id;
 }
 
-void type_type::metadata_default_construct(char *DYND_UNUSED(metadata),
+void type_type::arrmeta_default_construct(char *DYND_UNUSED(arrmeta),
                 intptr_t DYND_UNUSED(ndim), const intptr_t* DYND_UNUSED(shape)) const
 {
 }
 
-void type_type::metadata_copy_construct(char *DYND_UNUSED(dst_metadata),
-                const char *DYND_UNUSED(src_metadata), memory_block_data *DYND_UNUSED(embedded_reference)) const
+void type_type::arrmeta_copy_construct(char *DYND_UNUSED(dst_arrmeta),
+                const char *DYND_UNUSED(src_arrmeta), memory_block_data *DYND_UNUSED(embedded_reference)) const
 {
 }
 
-void type_type::metadata_reset_buffers(char *DYND_UNUSED(metadata)) const
+void type_type::arrmeta_reset_buffers(char *DYND_UNUSED(arrmeta)) const
 {
 }
 
-void type_type::metadata_finalize_buffers(char *DYND_UNUSED(metadata)) const
+void type_type::arrmeta_finalize_buffers(char *DYND_UNUSED(arrmeta)) const
 {
 }
 
-void type_type::metadata_destruct(char *DYND_UNUSED(metadata)) const
+void type_type::arrmeta_destruct(char *DYND_UNUSED(arrmeta)) const
 {
 }
 
-void type_type::data_destruct(const char *DYND_UNUSED(metadata), char *data) const
+void type_type::data_destruct(const char *DYND_UNUSED(arrmeta), char *data) const
 {
     const base_type *bd = reinterpret_cast<type_type_data *>(data)->tp;
     if (!is_builtin_type(bd)) {
@@ -80,7 +80,7 @@ void type_type::data_destruct(const char *DYND_UNUSED(metadata), char *data) con
     }
 }
 
-void type_type::data_destruct_strided(const char *DYND_UNUSED(metadata), char *data,
+void type_type::data_destruct_strided(const char *DYND_UNUSED(arrmeta), char *data,
                 intptr_t stride, size_t count) const
 {
     for (size_t i = 0; i != count; ++i, data += stride) {
@@ -108,13 +108,13 @@ namespace {
 
         ckernel_prefix base;
         const base_string_type *src_string_dt;
-        const char *src_metadata;
+        const char *src_arrmeta;
         assign_error_mode errmode;
 
         static void single(char *dst, const char *src, ckernel_prefix *extra)
         {
             extra_type *e = reinterpret_cast<extra_type *>(extra);
-            const string& s = e->src_string_dt->get_utf8_string(e->src_metadata, src, e->errmode);
+            const string& s = e->src_string_dt->get_utf8_string(e->src_arrmeta, src, e->errmode);
             ndt::type(s).swap(reinterpret_cast<type_type_data *>(dst)->tp);
         }
 
@@ -130,7 +130,7 @@ namespace {
 
         ckernel_prefix base;
         const base_string_type *dst_string_dt;
-        const char *dst_metadata;
+        const char *dst_arrmeta;
         assign_error_mode errmode;
 
         static void single(char *dst, const char *src, ckernel_prefix *extra)
@@ -143,7 +143,7 @@ namespace {
             } else {
                 bd->print_type(ss);
             }
-            e->dst_string_dt->set_utf8_string(e->dst_metadata, dst, e->errmode,
+            e->dst_string_dt->set_utf8_string(e->dst_arrmeta, dst, e->errmode,
                             ss.str());
         }
 
@@ -159,8 +159,8 @@ namespace {
 
 size_t type_type::make_assignment_kernel(
                 ckernel_builder *out, size_t offset_out,
-                const ndt::type& dst_tp, const char *dst_metadata,
-                const ndt::type& src_tp, const char *src_metadata,
+                const ndt::type& dst_tp, const char *dst_arrmeta,
+                const ndt::type& src_tp, const char *src_arrmeta,
                 kernel_request_t kernreq, assign_error_mode errmode,
                 const eval::eval_context *ectx) const
 {
@@ -179,13 +179,13 @@ size_t type_type::make_assignment_kernel(
             e->base.destructor = &string_to_type_kernel_extra::destruct;
             // The kernel data owns a reference to this type
             e->src_string_dt = static_cast<const base_string_type *>(ndt::type(src_tp).release());
-            e->src_metadata = src_metadata;
+            e->src_arrmeta = src_arrmeta;
             e->errmode = errmode;
             return offset_out + sizeof(string_to_type_kernel_extra);
         } else if (!src_tp.is_builtin()) {
             return src_tp.extended()->make_assignment_kernel(out, offset_out,
-                            dst_tp, dst_metadata,
-                            src_tp, src_metadata,
+                            dst_tp, dst_arrmeta,
+                            src_tp, src_arrmeta,
                             kernreq, errmode, ectx);
         }
     } else {
@@ -197,7 +197,7 @@ size_t type_type::make_assignment_kernel(
             e->base.destructor = &type_to_string_kernel_extra::destruct;
             // The kernel data owns a reference to this type
             e->dst_string_dt = static_cast<const base_string_type *>(ndt::type(dst_tp).release());
-            e->dst_metadata = dst_metadata;
+            e->dst_arrmeta = dst_arrmeta;
             e->errmode = errmode;
             return offset_out + sizeof(type_to_string_kernel_extra);
         }
@@ -222,8 +222,8 @@ static int not_equal_comparison(const char *a, const char *b, ckernel_prefix *DY
 
 size_t type_type::make_comparison_kernel(
                 ckernel_builder *out, size_t offset_out,
-                const ndt::type& src0_dt, const char *DYND_UNUSED(src0_metadata),
-                const ndt::type& src1_dt, const char *DYND_UNUSED(src1_metadata),
+                const ndt::type& src0_dt, const char *DYND_UNUSED(src0_arrmeta),
+                const ndt::type& src1_dt, const char *DYND_UNUSED(src1_arrmeta),
                 comparison_type_t comptype,
                 const eval::eval_context *DYND_UNUSED(ectx)) const
 {

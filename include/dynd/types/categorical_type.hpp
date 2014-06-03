@@ -36,20 +36,22 @@ class categorical_type : public base_type {
     std::vector<intptr_t> m_value_to_category_index;
 
 public:
-    categorical_type(const nd::array& categories, bool presorted=false);
+    categorical_type(const nd::array &categories, bool presorted = false);
 
     virtual ~categorical_type() {
     }
 
-    void print_data(std::ostream& o, const char *metadata, const char *data) const;
+    void print_data(std::ostream &o, const char *arrmeta,
+                    const char *data) const;
 
     void print_type(std::ostream& o) const;
 
     void get_shape(intptr_t ndim, intptr_t i, intptr_t *out_shape,
-                   const char *metadata, const char *data) const;
+                   const char *arrmeta, const char *data) const;
 
     size_t get_category_count() const {
-        return (size_t)reinterpret_cast<const strided_dim_type_metadata *>(m_categories.get_arrmeta())->size;
+        return (size_t) reinterpret_cast<const strided_dim_type_arrmeta *>(
+                   m_categories.get_arrmeta())->size;
     }
 
     /**
@@ -67,44 +69,51 @@ public:
         return m_storage_type;
     }
 
-    uint32_t get_value_from_category(const char *category_metadata, const char *category_data) const;
-    uint32_t get_value_from_category(const nd::array& category) const;
+    uint32_t get_value_from_category(const char *category_arrmeta,
+                                     const char *category_data) const;
+    uint32_t get_value_from_category(const nd::array &category) const;
 
     const char *get_category_data_from_value(size_t value) const {
         if (value >= get_category_count()) {
             throw std::runtime_error("category value is out of bounds");
         }
         return m_categories.get_readonly_originptr() +
-                    m_value_to_category_index[value] * reinterpret_cast<const strided_dim_type_metadata *>(m_categories.get_arrmeta())->stride;
+               m_value_to_category_index[value] *
+                   reinterpret_cast<const strided_dim_type_arrmeta *>(
+                       m_categories.get_arrmeta())->stride;
     }
-    /** Returns the metadata corresponding to data from get_category_data_from_value */
-    const char *get_category_metadata() const;
+    /** Returns the arrmeta corresponding to data from get_category_data_from_value */
+    const char *get_category_arrmeta() const;
 
     /** Returns the categories as an immutable nd::array */
     nd::array get_categories() const;
 
-    bool is_lossless_assignment(const ndt::type& dst_tp, const ndt::type& src_tp) const;
+    bool is_lossless_assignment(const ndt::type &dst_tp,
+                                const ndt::type &src_tp) const;
 
     bool operator==(const base_type& rhs) const;
 
-    void metadata_default_construct(char *metadata, intptr_t ndim, const intptr_t* shape) const;
-    void metadata_copy_construct(char *dst_metadata, const char *src_metadata, memory_block_data *embedded_reference) const;
-    void metadata_destruct(char *metadata) const;
-    void metadata_debug_print(const char *metadata, std::ostream& o, const std::string& indent) const;
+    void arrmeta_default_construct(char *arrmeta, intptr_t ndim,
+                                   const intptr_t *shape) const;
+    void arrmeta_copy_construct(char *dst_arrmeta, const char *src_arrmeta,
+                                memory_block_data *embedded_reference) const;
+    void arrmeta_destruct(char *arrmeta) const;
+    void arrmeta_debug_print(const char *arrmeta, std::ostream &o,
+                             const std::string &indent) const;
 
-    size_t make_assignment_kernel(
-                    ckernel_builder *out, size_t offset_out,
-                    const ndt::type& dst_tp, const char *dst_metadata,
-                    const ndt::type& src_tp, const char *src_metadata,
-                    kernel_request_t kernreq, assign_error_mode errmode,
-                    const eval::eval_context *ectx) const;
+    size_t
+    make_assignment_kernel(ckernel_builder *out, size_t offset_out,
+                           const ndt::type &dst_tp, const char *dst_arrmeta,
+                           const ndt::type &src_tp, const char *src_arrmeta,
+                           kernel_request_t kernreq, assign_error_mode errmode,
+                           const eval::eval_context *ectx) const;
 
     void get_dynamic_array_properties(
-                    const std::pair<std::string, gfunc::callable> **out_properties,
-                    size_t *out_count) const;
+        const std::pair<std::string, gfunc::callable> **out_properties,
+        size_t *out_count) const;
     void get_dynamic_type_properties(
-                    const std::pair<std::string, gfunc::callable> **out_properties,
-                    size_t *out_count) const;
+        const std::pair<std::string, gfunc::callable> **out_properties,
+        size_t *out_count) const;
 
     friend struct assign_to_same_category_type;
     friend struct assign_from_same_category_type;

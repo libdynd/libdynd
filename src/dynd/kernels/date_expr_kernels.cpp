@@ -38,13 +38,13 @@ namespace {
         ckernel_prefix base;
         size_t format_size;
         const char *format;
-        const string_type_metadata *dst_metadata;
+        const string_type_arrmeta *dst_arrmeta;
 
         static void single_unary(char *dst, const char *src,
                         ckernel_prefix *extra)
         {
             extra_type *e = reinterpret_cast<extra_type *>(extra);
-            const string_type_metadata *dst_md = e->dst_metadata;
+            const string_type_arrmeta *dst_md = e->dst_arrmeta;
 
             struct tm tm_val;
             int32_t date = *reinterpret_cast<const int32_t *>(src);
@@ -90,7 +90,7 @@ namespace {
             extra_type *e = reinterpret_cast<extra_type *>(extra);
             size_t format_size = e->format_size;
             const char *format = e->format;
-            const string_type_metadata *dst_md = e->dst_metadata;
+            const string_type_arrmeta *dst_md = e->dst_arrmeta;
 
             struct tm tm_val;
 #ifdef _MSC_VER
@@ -147,8 +147,8 @@ public:
 
     size_t make_expr_kernel(
                 ckernel_builder *out, size_t offset_out,
-                const ndt::type& dst_tp, const char *dst_metadata,
-                size_t src_count, const ndt::type *src_tp, const char *const*src_metadata,
+                const ndt::type& dst_tp, const char *dst_arrmeta,
+                size_t src_count, const ndt::type *src_tp, const char *const*src_arrmeta,
                 kernel_request_t kernreq, const eval::eval_context *ectx) const
     {
         if (src_count != 1) {
@@ -164,8 +164,8 @@ public:
         // giving 'this' as the next kernel generator to call
         if (require_elwise) {
             return make_elwise_dimension_expr_kernel(out, offset_out,
-                            dst_tp, dst_metadata,
-                            src_count, src_tp, src_metadata,
+                            dst_tp, dst_arrmeta,
+                            src_count, src_tp, src_arrmeta,
                             kernreq, ectx,
                             this);
         }
@@ -190,7 +190,7 @@ public:
         // so we can point at data in the kernel generator
         e->format_size = m_format.size();
         e->format = m_format.c_str();
-        e->dst_metadata = reinterpret_cast<const string_type_metadata *>(dst_metadata);
+        e->dst_arrmeta = reinterpret_cast<const string_type_arrmeta *>(dst_arrmeta);
         return offset_out + extra_size;
     }
 
@@ -296,8 +296,8 @@ public:
 
     size_t make_expr_kernel(
                 ckernel_builder *out, size_t offset_out,
-                const ndt::type& dst_tp, const char *dst_metadata,
-                size_t src_count, const ndt::type *src_tp, const char *const*src_metadata,
+                const ndt::type& dst_tp, const char *dst_arrmeta,
+                size_t src_count, const ndt::type *src_tp, const char *const*src_arrmeta,
                 kernel_request_t kernreq, const eval::eval_context *ectx) const
     {
         if (src_count != 1) {
@@ -313,8 +313,8 @@ public:
         // giving 'this' as the next kernel generator to call
         if (require_elwise) {
             return make_elwise_dimension_expr_kernel(out, offset_out,
-                            dst_tp, dst_metadata,
-                            src_count, src_tp, src_metadata,
+                            dst_tp, dst_arrmeta,
+                            src_count, src_tp, src_arrmeta,
                             kernreq, ectx,
                             this);
         }

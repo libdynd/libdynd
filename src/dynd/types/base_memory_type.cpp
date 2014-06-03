@@ -21,9 +21,9 @@ size_t base_memory_type::get_default_data_size(intptr_t ndim, const intptr_t *sh
     }
 }
 
-void base_memory_type::print_data(std::ostream& o, const char *metadata, const char *data) const
+void base_memory_type::print_data(std::ostream& o, const char *arrmeta, const char *data) const
 {
-    m_storage_tp.print_data(o, metadata + m_storage_arrmeta_offset, data);
+    m_storage_tp.print_data(o, arrmeta + m_storage_arrmeta_offset, data);
 }
 
 bool base_memory_type::is_lossless_assignment(const ndt::type& dst_tp, const ndt::type& src_tp) const
@@ -55,25 +55,27 @@ ndt::type base_memory_type::get_canonical_type() const
     return m_storage_tp.get_canonical_type();
 }
 
-void base_memory_type::metadata_default_construct(char *metadata, intptr_t ndim, const intptr_t* shape) const
+void base_memory_type::arrmeta_default_construct(char *arrmeta, intptr_t ndim, const intptr_t* shape) const
 {
     if (!m_storage_tp.is_builtin()) {
-        m_storage_tp.extended()->metadata_default_construct(metadata + m_storage_arrmeta_offset, ndim, shape);
+        m_storage_tp.extended()->arrmeta_default_construct(arrmeta + m_storage_arrmeta_offset, ndim, shape);
     }
 }
 
-void base_memory_type::metadata_copy_construct(char *dst_metadata, const char *src_metadata, memory_block_data *embedded_reference) const
+void base_memory_type::arrmeta_copy_construct(
+    char *dst_arrmeta, const char *src_arrmeta,
+    memory_block_data *embedded_reference) const
 {
     if (!m_storage_tp.is_builtin()) {
-        m_storage_tp.extended()->metadata_copy_construct(dst_metadata + m_storage_arrmeta_offset,
-                        src_metadata + m_storage_arrmeta_offset, embedded_reference);
+        m_storage_tp.extended()->arrmeta_copy_construct(dst_arrmeta + m_storage_arrmeta_offset,
+                        src_arrmeta + m_storage_arrmeta_offset, embedded_reference);
     }
 }
 
-void base_memory_type::metadata_destruct(char *metadata) const
+void base_memory_type::arrmeta_destruct(char *arrmeta) const
 {
     if (!m_storage_tp.is_builtin()) {
-        m_storage_tp.extended()->metadata_destruct(metadata + m_storage_arrmeta_offset);
+        m_storage_tp.extended()->arrmeta_destruct(arrmeta + m_storage_arrmeta_offset);
     }
 }
 

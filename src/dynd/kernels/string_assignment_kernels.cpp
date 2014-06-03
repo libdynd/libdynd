@@ -79,12 +79,12 @@ namespace {
         string_encoding_t m_dst_encoding, m_src_encoding;
         next_unicode_codepoint_t m_next_fn;
         append_unicode_codepoint_t m_append_fn;
-        const string_type_metadata *m_dst_metadata, *m_src_metadata;
+        const string_type_arrmeta *m_dst_arrmeta, *m_src_arrmeta;
 
         inline void single(char *dst, const char *src)
         {
-            const string_type_metadata *dst_md = m_dst_metadata;
-            const string_type_metadata *src_md = m_src_metadata;
+            const string_type_arrmeta *dst_md = m_dst_arrmeta;
+            const string_type_arrmeta *src_md = m_src_arrmeta;
             string_type_data *dst_d = reinterpret_cast<string_type_data *>(dst);
             const string_type_data *src_d = reinterpret_cast<const string_type_data *>(src);
             intptr_t src_charsize = string_encoding_char_size_table[m_src_encoding];
@@ -147,8 +147,8 @@ namespace {
 
 size_t dynd::make_blockref_string_assignment_kernel(
                 ckernel_builder *out_ckb, size_t ckb_offset,
-                const char *dst_metadata, string_encoding_t dst_encoding,
-                const char *src_metadata, string_encoding_t src_encoding,
+                const char *dst_arrmeta, string_encoding_t dst_encoding,
+                const char *src_arrmeta, string_encoding_t src_encoding,
                 kernel_request_t kernreq, assign_error_mode errmode,
                 const eval::eval_context *DYND_UNUSED(ectx))
 {
@@ -158,8 +158,8 @@ size_t dynd::make_blockref_string_assignment_kernel(
     self->m_src_encoding = src_encoding;
     self->m_next_fn = get_next_unicode_codepoint_function(src_encoding, errmode);
     self->m_append_fn = get_append_unicode_codepoint_function(dst_encoding, errmode);
-    self->m_dst_metadata = reinterpret_cast<const string_type_metadata *>(dst_metadata);
-    self->m_src_metadata = reinterpret_cast<const string_type_metadata *>(src_metadata);
+    self->m_dst_arrmeta = reinterpret_cast<const string_type_arrmeta *>(dst_arrmeta);
+    self->m_src_arrmeta = reinterpret_cast<const string_type_arrmeta *>(src_arrmeta);
     return ckb_offset + sizeof(self_type);
 }
 
@@ -172,11 +172,11 @@ namespace {
         intptr_t m_src_element_size;
         next_unicode_codepoint_t m_next_fn;
         append_unicode_codepoint_t m_append_fn;
-        const string_type_metadata *m_dst_metadata;
+        const string_type_arrmeta *m_dst_arrmeta;
 
         inline void single(char *dst, const char *src)
         {
-            const string_type_metadata *dst_md = m_dst_metadata;
+            const string_type_arrmeta *dst_md = m_dst_arrmeta;
             string_type_data *dst_d = reinterpret_cast<string_type_data *>(dst);
             intptr_t src_charsize = string_encoding_char_size_table[m_src_encoding];
             intptr_t dst_charsize = string_encoding_char_size_table[m_dst_encoding];
@@ -230,7 +230,7 @@ namespace {
 
 size_t dynd::make_fixedstring_to_blockref_string_assignment_kernel(
                 ckernel_builder *out_ckb, size_t ckb_offset,
-                const char *dst_metadata, string_encoding_t dst_encoding,
+                const char *dst_arrmeta, string_encoding_t dst_encoding,
                 intptr_t src_element_size, string_encoding_t src_encoding,
                 kernel_request_t kernreq, assign_error_mode errmode,
                 const eval::eval_context *DYND_UNUSED(ectx))
@@ -242,7 +242,7 @@ size_t dynd::make_fixedstring_to_blockref_string_assignment_kernel(
     self->m_src_element_size = src_element_size;
     self->m_next_fn = get_next_unicode_codepoint_function(src_encoding, errmode);
     self->m_append_fn = get_append_unicode_codepoint_function(dst_encoding, errmode);
-    self->m_dst_metadata = reinterpret_cast<const string_type_metadata *>(dst_metadata);
+    self->m_dst_arrmeta = reinterpret_cast<const string_type_arrmeta *>(dst_arrmeta);
     return ckb_offset + sizeof(self_type);
 }
 

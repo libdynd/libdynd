@@ -12,7 +12,7 @@ namespace dynd {
 
 /**
  * A helper class which owns an ndt::type and memory
- * for corresponding array metadata, but does not itself
+ * for corresponding array arrmeta, but does not itself
  * hold any data.
  *
  * An example usage for this is within
@@ -21,7 +21,7 @@ namespace dynd {
  * reference counted nd::array object.
  */
 class arrmeta_holder {
-    /** This memory holds one ndt::type, followed by its array metadata */
+    /** This memory holds one ndt::type, followed by its array arrmeta */
     void *m_arrmeta;
 
     // Non-copyable
@@ -30,13 +30,13 @@ class arrmeta_holder {
 public:
     arrmeta_holder() : m_arrmeta(NULL) {}
     arrmeta_holder(const ndt::type &tp)
-        : m_arrmeta(malloc(sizeof(ndt::type) + tp.get_metadata_size()))
+        : m_arrmeta(malloc(sizeof(ndt::type) + tp.get_arrmeta_size()))
     {
         if (!m_arrmeta) {
             throw std::bad_alloc();
         }
         memset(reinterpret_cast<char *>(m_arrmeta) + sizeof(ndt::type), 0,
-               tp.get_metadata_size());
+               tp.get_arrmeta_size());
         try {
             new (m_arrmeta) ndt::type(tp);
         } catch(...) {
@@ -49,8 +49,8 @@ public:
     {
         if (m_arrmeta != NULL) {
             ndt::type &tp = *reinterpret_cast<ndt::type *>(m_arrmeta);
-            if (tp.get_metadata_size() > 0) {
-                tp.extended()->metadata_destruct(
+            if (tp.get_arrmeta_size() > 0) {
+                tp.extended()->arrmeta_destruct(
                     reinterpret_cast<char *>(m_arrmeta) + sizeof(ndt::type));
             }
             tp.~type();
@@ -78,10 +78,10 @@ public:
             reinterpret_cast<char *>(m_arrmeta) + sizeof(ndt::type) + offset);
     }
 
-    void metadata_default_construct(intptr_t ndim, const intptr_t *shape) {
+    void arrmeta_default_construct(intptr_t ndim, const intptr_t *shape) {
         const ndt::type& tp = get_type();
         if (!tp.is_builtin()) {
-            tp.extended()->metadata_default_construct(get(), ndim, shape);
+            tp.extended()->arrmeta_default_construct(get(), ndim, shape);
         }
     }
 };

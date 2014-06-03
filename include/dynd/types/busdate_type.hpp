@@ -70,7 +70,7 @@ public:
     void print_workweek(std::ostream& o) const;
     void print_holidays(std::ostream& o) const;
 
-    void print_data(std::ostream& o, const char *metadata, const char *data) const;
+    void print_data(std::ostream& o, const char *arrmeta, const char *data) const;
 
     void print_type(std::ostream& o) const;
 
@@ -78,13 +78,13 @@ public:
 
     bool operator==(const base_type& rhs) const;
 
-    void metadata_default_construct(char *DYND_UNUSED(metadata), intptr_t DYND_UNUSED(ndim), const intptr_t* DYND_UNUSED(shape)) const {
+    void arrmeta_default_construct(char *DYND_UNUSED(arrmeta), intptr_t DYND_UNUSED(ndim), const intptr_t* DYND_UNUSED(shape)) const {
     }
-    void metadata_copy_construct(char *DYND_UNUSED(dst_metadata), const char *DYND_UNUSED(src_metadata), memory_block_data *DYND_UNUSED(embedded_reference)) const {
+    void arrmeta_copy_construct(char *DYND_UNUSED(dst_arrmeta), const char *DYND_UNUSED(src_arrmeta), memory_block_data *DYND_UNUSED(embedded_reference)) const {
     }
-    void metadata_destruct(char *DYND_UNUSED(metadata)) const {
+    void arrmeta_destruct(char *DYND_UNUSED(arrmeta)) const {
     }
-    void metadata_debug_print(const char *DYND_UNUSED(metadata), std::ostream& DYND_UNUSED(o), const std::string& DYND_UNUSED(indent)) const {
+    void arrmeta_debug_print(const char *DYND_UNUSED(arrmeta), std::ostream& DYND_UNUSED(o), const std::string& DYND_UNUSED(indent)) const {
     }
 };
 

@@ -14,7 +14,7 @@
 
 namespace dynd {
 
-struct var_dim_type_metadata {
+struct var_dim_type_arrmeta {
     /**
      * A reference to the memory block which contains the array's data.
      */
@@ -46,63 +46,63 @@ public:
         return m_element_tp.get_data_alignment();
     }
 
-    void print_data(std::ostream& o, const char *metadata, const char *data) const;
+    void print_data(std::ostream& o, const char *arrmeta, const char *data) const;
 
     void print_type(std::ostream& o) const;
 
     bool is_expression() const;
-    bool is_unique_data_owner(const char *metadata) const;
+    bool is_unique_data_owner(const char *arrmeta) const;
     void transform_child_types(type_transform_fn_t transform_fn, void *extra,
                     ndt::type& out_transformed_tp, bool& out_was_transformed) const;
     ndt::type get_canonical_type() const;
     bool is_strided() const;
-    void process_strided(const char *metadata, const char *data,
+    void process_strided(const char *arrmeta, const char *data,
                     ndt::type& out_dt, const char *&out_origin,
                     intptr_t& out_stride, intptr_t& out_dim_size) const;
 
     ndt::type apply_linear_index(intptr_t nindices, const irange *indices,
                 size_t current_i, const ndt::type& root_tp, bool leading_dimension) const;
-    intptr_t apply_linear_index(intptr_t nindices, const irange *indices, const char *metadata,
-                    const ndt::type& result_tp, char *out_metadata,
+    intptr_t apply_linear_index(intptr_t nindices, const irange *indices, const char *arrmeta,
+                    const ndt::type& result_tp, char *out_arrmeta,
                     memory_block_data *embedded_reference,
                     size_t current_i, const ndt::type& root_tp,
                     bool leading_dimension, char **inout_data,
                     memory_block_data **inout_dataref) const;
-    ndt::type at_single(intptr_t i0, const char **inout_metadata, const char **inout_data) const;
+    ndt::type at_single(intptr_t i0, const char **inout_arrmeta, const char **inout_data) const;
 
-    ndt::type get_type_at_dimension(char **inout_metadata, intptr_t i, intptr_t total_ndim = 0) const;
+    ndt::type get_type_at_dimension(char **inout_arrmeta, intptr_t i, intptr_t total_ndim = 0) const;
 
-    intptr_t get_dim_size(const char *metadata, const char *data) const;
-        void get_shape(intptr_t ndim, intptr_t i, intptr_t *out_shape, const char *metadata, const char *data) const;
-    void get_strides(size_t i, intptr_t *out_strides, const char *metadata) const;
+    intptr_t get_dim_size(const char *arrmeta, const char *data) const;
+        void get_shape(intptr_t ndim, intptr_t i, intptr_t *out_shape, const char *arrmeta, const char *data) const;
+    void get_strides(size_t i, intptr_t *out_strides, const char *arrmeta) const;
 
-    axis_order_classification_t classify_axis_order(const char *metadata) const;
+    axis_order_classification_t classify_axis_order(const char *arrmeta) const;
 
     bool is_lossless_assignment(const ndt::type& dst_tp, const ndt::type& src_tp) const;
 
     bool operator==(const base_type& rhs) const;
 
-    void metadata_default_construct(char *metadata, intptr_t ndim, const intptr_t* shape) const;
-    void metadata_copy_construct(char *dst_metadata, const char *src_metadata, memory_block_data *embedded_reference) const;
-    void metadata_reset_buffers(char *metadata) const;
-    void metadata_finalize_buffers(char *metadata) const;
-    void metadata_destruct(char *metadata) const;
-    void metadata_debug_print(const char *metadata, std::ostream& o, const std::string& indent) const;
-    size_t metadata_copy_construct_onedim(char *dst_metadata, const char *src_metadata,
+    void arrmeta_default_construct(char *arrmeta, intptr_t ndim, const intptr_t* shape) const;
+    void arrmeta_copy_construct(char *dst_arrmeta, const char *src_arrmeta, memory_block_data *embedded_reference) const;
+    void arrmeta_reset_buffers(char *arrmeta) const;
+    void arrmeta_finalize_buffers(char *arrmeta) const;
+    void arrmeta_destruct(char *arrmeta) const;
+    void arrmeta_debug_print(const char *arrmeta, std::ostream& o, const std::string& indent) const;
+    size_t arrmeta_copy_construct_onedim(char *dst_arrmeta, const char *src_arrmeta,
                     memory_block_data *embedded_reference) const;
 
     size_t get_iterdata_size(intptr_t ndim) const;
-    size_t iterdata_construct(iterdata_common *iterdata, const char **inout_metadata, intptr_t ndim, const intptr_t* shape, ndt::type& out_uniform_tp) const;
+    size_t iterdata_construct(iterdata_common *iterdata, const char **inout_arrmeta, intptr_t ndim, const intptr_t* shape, ndt::type& out_uniform_tp) const;
     size_t iterdata_destruct(iterdata_common *iterdata, intptr_t ndim) const;
 
     size_t make_assignment_kernel(
                     ckernel_builder *out, size_t offset_out,
-                    const ndt::type& dst_tp, const char *dst_metadata,
-                    const ndt::type& src_tp, const char *src_metadata,
+                    const ndt::type& dst_tp, const char *dst_arrmeta,
+                    const ndt::type& src_tp, const char *src_arrmeta,
                     kernel_request_t kernreq, assign_error_mode errmode,
                     const eval::eval_context *ectx) const;
 
-    void foreach_leading(const char *metadata, char *data,
+    void foreach_leading(const char *arrmeta, char *data,
                          foreach_fn_t callback, void *callback_data) const;
 
     void get_dynamic_type_properties(
@@ -127,13 +127,13 @@ namespace ndt {
      * it allocates `count` elements to start of the var element.
      *
      * \param tp  This must be a var_dim type.
-     * \param metadata  Array metadata for `tp`.
-     * \param data  Array data for the `tp`, `metadata` pair, this
+     * \param arrmeta  Arrmeta for `tp`.
+     * \param data  Array data for the `tp`, `arrmeta` pair, this
      *              is written to.
      * \param count  The number of elements to start off with.
      */
     void var_dim_element_initialize(const type& tp,
-            const char *metadata, char *data, intptr_t count);
+            const char *arrmeta, char *data, intptr_t count);
 
     /**
      * A helper function for resizing the allocated space in a var dim
@@ -143,13 +143,13 @@ namespace ndt {
      * initialized previously, it is initialized to the requested count.
      *
      * \param tp  This must be a var_dim type.
-     * \param metadata  Array metadata for `tp`.
-     * \param data  Array data for the `tp`, `metadata` pair, this
+     * \param arrmeta  Arrmeta for `tp`.
+     * \param data  Array data for the `tp`, `arrmeta` pair, this
      *              is written to.
      * \param count  The number of elements to resize to.
      */
     void var_dim_element_resize(const type& tp,
-            const char *metadata, char *data, intptr_t count);
+            const char *arrmeta, char *data, intptr_t count);
 } // namespace ndt
 
 } // namespace dynd

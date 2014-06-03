@@ -151,9 +151,9 @@ namespace kernels {
  * \param ckb  The ckernel_builder being constructed.
  * \param ckb_offset  The offset within 'ckb'.
  * \param dst_tp  The destination dynd type.
- * \param dst_arrmeta  Metadata for the destination data.
+ * \param dst_arrmeta  Arrmeta for the destination data.
  * \param src_tp  The source dynd type.
- * \param src_arrmeta  Metadata for the source data
+ * \param src_arrmeta  Arrmeta for the source data
  * \param kernreq  What kind of kernel must be placed in 'ckb'.
  * \param errmode  The error mode to use for assignments.
  * \param ectx  DyND evaluation context.
@@ -267,9 +267,9 @@ struct strided_assign_ck : public kernels::assignment_ck<strided_assign_ck> {
  * \param ckb  The hierarchical assignment kernel being constructed.
  * \param ckb_offset  The offset within 'ckb'.
  * \param dst_tp  The destination dynd type.
- * \param dst_arrmeta  Metadata for the destination data.
+ * \param dst_arrmeta  Arrmeta for the destination data.
  * \param src_tp  The source dynd type.
- * \param src_arrmeta  Metadata for the source data
+ * \param src_arrmeta  Arrmeta for the source data
  * \param kernreq  What kind of kernel must be placed in 'ckb'.
  * \param errmode  The error mode to use for assignments.
  * \param ectx  DyND evaluation context.

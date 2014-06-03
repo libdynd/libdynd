@@ -98,7 +98,7 @@ nd::array dynd::parse_json(const ndt::type &tp, const nd::array &json,
     return parse_json(tp, json_begin, json_end, ectx);
 }
 
-static void parse_json(const ndt::type &tp, const char *metadata,
+static void parse_json(const ndt::type &tp, const char *arrmeta,
                        char *out_data, const char *&json_begin,
                        const char *json_end, const eval::eval_context *ectx);
 
@@ -208,13 +208,13 @@ static void skip_json_value(const char *&begin, const char *end)
     }
 }
 
-static void parse_strided_dim_json(const ndt::type& tp, const char *metadata, char *out_data,
+static void parse_strided_dim_json(const ndt::type& tp, const char *arrmeta, char *out_data,
                 const char *&begin, const char *end, const eval::eval_context *ectx)
 {
     intptr_t dim_size, stride;
     ndt::type el_tp;
     const char *el_arrmeta;
-    if (!tp.get_as_strided_dim(metadata, dim_size, stride, el_tp, el_arrmeta)) {
+    if (!tp.get_as_strided_dim(arrmeta, dim_size, stride, el_tp, el_arrmeta)) {
         throw json_parse_error(begin, "expected a strided dimension", tp);
     }
 
@@ -232,11 +232,11 @@ static void parse_strided_dim_json(const ndt::type& tp, const char *metadata, ch
     }
 }
 
-static void parse_var_dim_json(const ndt::type& tp, const char *metadata, char *out_data,
+static void parse_var_dim_json(const ndt::type& tp, const char *arrmeta, char *out_data,
                 const char *&begin, const char *end, const eval::eval_context *ectx)
 {
     const var_dim_type *vad = tp.tcast<var_dim_type>();
-    const var_dim_type_metadata *md = reinterpret_cast<const var_dim_type_metadata *>(metadata);
+    const var_dim_type_arrmeta *md = reinterpret_cast<const var_dim_type_arrmeta *>(arrmeta);
     intptr_t stride = md->stride;
     const ndt::type& element_tp = vad->get_element_type();
 
@@ -261,7 +261,7 @@ static void parse_var_dim_json(const ndt::type& tp, const char *metadata, char *
             }
             ++size;
             out->size = size;
-            parse_json(element_tp, metadata + sizeof(var_dim_type_metadata),
+            parse_json(element_tp, arrmeta + sizeof(var_dim_type_arrmeta),
                             out->begin + (size-1) * stride, begin, end, ectx);
             if (!parse_token(begin, end, ",")) {
                 break;
@@ -278,7 +278,7 @@ static void parse_var_dim_json(const ndt::type& tp, const char *metadata, char *
 }
 
 static bool parse_struct_json_from_object(const ndt::type &tp,
-                                          const char *metadata, char *out_data,
+                                          const char *arrmeta, char *out_data,
                                           const char *&begin, const char *end,
                                           const eval::eval_context *ectx)
 {
@@ -289,7 +289,7 @@ static bool parse_struct_json_from_object(const ndt::type &tp,
 
     const base_struct_type *fsd = tp.tcast<base_struct_type>();
     size_t field_count = fsd->get_field_count();
-    const size_t *data_offsets = fsd->get_data_offsets(metadata);
+    const size_t *data_offsets = fsd->get_data_offsets(arrmeta);
     const size_t *arrmeta_offsets = fsd->get_arrmeta_offsets_raw();
 
     // Keep track of which fields we've seen
@@ -322,7 +322,7 @@ static bool parse_struct_json_from_object(const ndt::type &tp,
                 //       or not. For now, just throw away fields not in the destination.
                 skip_json_value(begin, end);
             } else {
-                parse_json(fsd->get_field_type(i), metadata + arrmeta_offsets[i],
+                parse_json(fsd->get_field_type(i), arrmeta + arrmeta_offsets[i],
                            out_data + data_offsets[i], begin, end, ectx);
                 populated_fields[i] = true;
             }
@@ -349,7 +349,7 @@ static bool parse_struct_json_from_object(const ndt::type &tp,
 }
 
 static bool parse_struct_json_from_list(const ndt::type &tp,
-                                        const char *metadata, char *out_data,
+                                        const char *arrmeta, char *out_data,
                                         const char *&begin, const char *end,
                                         const eval::eval_context *ectx)
 {
@@ -359,13 +359,13 @@ static bool parse_struct_json_from_list(const ndt::type &tp,
 
     const base_struct_type *fsd = tp.tcast<base_struct_type>();
     size_t field_count = fsd->get_field_count();
-    const size_t *data_offsets = fsd->get_data_offsets(metadata);
+    const size_t *data_offsets = fsd->get_data_offsets(arrmeta);
     const size_t *arrmeta_offsets = fsd->get_arrmeta_offsets_raw();
 
     // Loop through all the fields
     for (size_t i = 0; i != field_count; ++i) {
         begin = skip_whitespace(begin, end);
-        parse_json(fsd->get_field_type(i), metadata + arrmeta_offsets[i],
+        parse_json(fsd->get_field_type(i), arrmeta + arrmeta_offsets[i],
                    out_data + data_offsets[i], begin, end, ectx);
         if (i != field_count - 1 && !parse_token(begin, end, ",")) {
             throw json_parse_error(begin, "expected list item separator ','",
@@ -380,11 +380,11 @@ static bool parse_struct_json_from_list(const ndt::type &tp,
     return true;
 }
 
-static void parse_struct_json(const ndt::type& tp, const char *metadata, char *out_data,
+static void parse_struct_json(const ndt::type& tp, const char *arrmeta, char *out_data,
                 const char *&begin, const char *end, const eval::eval_context *ectx)
 {
-    if (parse_struct_json_from_object(tp, metadata, out_data, begin, end, ectx)) {
-    } else if (parse_struct_json_from_list(tp, metadata, out_data, begin, end, ectx)) {
+    if (parse_struct_json_from_object(tp, arrmeta, out_data, begin, end, ectx)) {
+    } else if (parse_struct_json_from_list(tp, arrmeta, out_data, begin, end, ectx)) {
     } else {
         throw json_parse_error(
             begin, "expected object dict starting with '{' or list with '['",
@@ -392,7 +392,7 @@ static void parse_struct_json(const ndt::type& tp, const char *metadata, char *o
     }
 }
 
-static void parse_bool_json(const ndt::type &tp, const char *metadata,
+static void parse_bool_json(const ndt::type &tp, const char *arrmeta,
                             char *out_data, const char *&rbegin, const char *end,
                             bool option, const eval::eval_context *ectx)
 {
@@ -436,7 +436,7 @@ static void parse_bool_json(const ndt::type &tp, const char *metadata,
         if (tp.get_type_id() == bool_type_id) {
             *out_data = value;
         } else {
-            typed_data_assign(tp, metadata, out_data,
+            typed_data_assign(tp, arrmeta, out_data,
                               ndt::make_type<dynd_bool>(), NULL, &value);
         }
         rbegin = begin;
@@ -444,7 +444,7 @@ static void parse_bool_json(const ndt::type &tp, const char *metadata,
         if (!tp.is_expression()) {
             *out_data = value;
         } else {
-            typed_data_assign(tp, metadata, out_data,
+            typed_data_assign(tp, arrmeta, out_data,
                               ndt::make_option<dynd_bool>(), NULL, &value);
         }
         rbegin = begin;
@@ -488,18 +488,18 @@ static void parse_number_json(const ndt::type &tp, const char *arrmeta,
     rbegin = begin;
 }
 
-static void parse_jsonstring_json(const ndt::type& tp, const char *metadata, char *out_data,
+static void parse_jsonstring_json(const ndt::type& tp, const char *arrmeta, char *out_data,
                 const char *&begin, const char *end)
 {
     const char *saved_begin = skip_whitespace(begin, end);
     skip_json_value(begin, end);
     const base_string_type *bsd = tp.tcast<base_string_type>();
     // The skipped JSON value gets copied verbatim into the json string
-    bsd->set_utf8_string(metadata, out_data, assign_error_none,
+    bsd->set_utf8_string(arrmeta, out_data, assign_error_none,
             saved_begin, begin);
 }
 
-static void parse_string_json(const ndt::type& tp, const char *metadata, char *out_data,
+static void parse_string_json(const ndt::type& tp, const char *arrmeta, char *out_data,
                 const char *&rbegin, const char *end)
 {
     const char *begin = rbegin;
@@ -511,11 +511,11 @@ static void parse_string_json(const ndt::type& tp, const char *metadata, char *o
         const base_string_type *bsd = tp.tcast<base_string_type>();
         try {
             if (!escaped) {
-                bsd->set_utf8_string(metadata, out_data, assign_error_fractional, strbegin, strend);
+                bsd->set_utf8_string(arrmeta, out_data, assign_error_fractional, strbegin, strend);
             } else {
                 string val;
                 parse::unescape_string(strbegin, strend, val);
-                bsd->set_utf8_string(metadata, out_data, assign_error_fractional, val);
+                bsd->set_utf8_string(arrmeta, out_data, assign_error_fractional, val);
             }
         } catch (const std::exception& e) {
             throw json_parse_error(skip_whitespace(rbegin, begin), e.what(), tp);
@@ -526,7 +526,7 @@ static void parse_string_json(const ndt::type& tp, const char *metadata, char *o
     rbegin = begin;
 }
 
-static void parse_datetime_json(const ndt::type& tp, const char *metadata, char *out_data,
+static void parse_datetime_json(const ndt::type& tp, const char *arrmeta, char *out_data,
                 const char *&rbegin, const char *end, const eval::eval_context *ectx)
 {
     const char *begin = rbegin;
@@ -544,21 +544,21 @@ static void parse_datetime_json(const ndt::type& tp, const char *metadata, char 
         if (tp.get_type_id() == date_type_id) {
             const date_type *dd = tp.tcast<date_type>();
             try {
-                dd->set_utf8_string(metadata, out_data, assign_error_fractional, val, ectx);
+                dd->set_utf8_string(arrmeta, out_data, assign_error_fractional, val, ectx);
             } catch (const std::exception& e) {
                 throw json_parse_error(skip_whitespace(rbegin, begin), e.what(), tp);
             }
         } else if (tp.get_type_id() == datetime_type_id) {
             const datetime_type *dt = tp.tcast<datetime_type>();
             try {
-                dt->set_utf8_string(metadata, out_data, assign_error_fractional, val, ectx);
+                dt->set_utf8_string(arrmeta, out_data, assign_error_fractional, val, ectx);
             } catch (const std::exception& e) {
                 throw json_parse_error(skip_whitespace(rbegin, begin), e.what(), tp);
             }
         } else if (tp.get_type_id() == time_type_id) {
             const time_type *tt = tp.tcast<time_type>();
             try {
-                tt->set_utf8_string(metadata, out_data, assign_error_fractional, val);
+                tt->set_utf8_string(arrmeta, out_data, assign_error_fractional, val);
             } catch (const std::exception& e) {
                 throw json_parse_error(skip_whitespace(rbegin, begin), e.what(), tp);
             }
@@ -573,17 +573,17 @@ static void parse_datetime_json(const ndt::type& tp, const char *metadata, char 
     rbegin = begin;
 }
 
-static void parse_uniform_dim_json(const ndt::type& tp, const char *metadata, char *out_data,
+static void parse_uniform_dim_json(const ndt::type& tp, const char *arrmeta, char *out_data,
                 const char *&begin, const char *end, const eval::eval_context *ectx)
 {
     switch (tp.get_type_id()) {
         case fixed_dim_type_id:
         case cfixed_dim_type_id:
         case strided_dim_type_id:
-            parse_strided_dim_json(tp, metadata, out_data, begin, end, ectx);
+            parse_strided_dim_json(tp, arrmeta, out_data, begin, end, ectx);
             break;
         case var_dim_type_id:
-            parse_var_dim_json(tp, metadata, out_data, begin, end, ectx);
+            parse_var_dim_json(tp, arrmeta, out_data, begin, end, ectx);
             break;
         default: {
             stringstream ss;
@@ -593,7 +593,7 @@ static void parse_uniform_dim_json(const ndt::type& tp, const char *metadata, ch
     }
 }
 
-static void parse_option_json(const ndt::type &tp, const char *metadata,
+static void parse_option_json(const ndt::type &tp, const char *arrmeta,
                               char *out_data, const char *&begin,
                               const char *end, const eval::eval_context *ectx)
 {
@@ -601,13 +601,13 @@ static void parse_option_json(const ndt::type &tp, const char *metadata,
     begin = skip_whitespace(begin, end);
     switch (value_tp.get_kind()) {
         case bool_kind:
-            parse_bool_json(tp, metadata, out_data, begin, end, true, ectx);
+            parse_bool_json(tp, arrmeta, out_data, begin, end, true, ectx);
             return;
         case int_kind:
         case uint_kind:
         case real_kind:
         case complex_kind:
-            parse_number_json(value_tp, metadata, out_data, begin, end, true, ectx);
+            parse_number_json(value_tp, arrmeta, out_data, begin, end, true, ectx);
             return;
         default:
             break;
@@ -618,19 +618,19 @@ static void parse_option_json(const ndt::type &tp, const char *metadata,
     throw runtime_error(ss.str());
 }
 
-static void parse_json(const ndt::type& tp, const char *metadata, char *out_data,
+static void parse_json(const ndt::type& tp, const char *arrmeta, char *out_data,
                 const char *&json_begin, const char *json_end, const eval::eval_context *ectx)
 {
     json_begin = skip_whitespace(json_begin, json_end);
     switch (tp.get_kind()) {
         case uniform_dim_kind:
-            parse_uniform_dim_json(tp, metadata, out_data, json_begin, json_end, ectx);
+            parse_uniform_dim_json(tp, arrmeta, out_data, json_begin, json_end, ectx);
             return;
         case struct_kind:
-            parse_struct_json(tp, metadata, out_data, json_begin, json_end, ectx);
+            parse_struct_json(tp, arrmeta, out_data, json_begin, json_end, ectx);
             return;
         case bool_kind:
-            parse_bool_json(tp, metadata, out_data, json_begin, json_end,
+            parse_bool_json(tp, arrmeta, out_data, json_begin, json_end,
                             false, ectx);
             return;
         case int_kind:
@@ -638,23 +638,23 @@ static void parse_json(const ndt::type& tp, const char *metadata, char *out_data
         case real_kind:
         case complex_kind:
             json_begin = skip_whitespace(json_begin, json_end);
-            parse_number_json(tp, metadata, out_data, json_begin, json_end,
+            parse_number_json(tp, arrmeta, out_data, json_begin, json_end,
                                false, ectx);
             return;
         case string_kind:
-            parse_string_json(tp, metadata, out_data, json_begin, json_end);
+            parse_string_json(tp, arrmeta, out_data, json_begin, json_end);
             return;
         case datetime_kind:
-            parse_datetime_json(tp, metadata, out_data, json_begin, json_end, ectx);
+            parse_datetime_json(tp, arrmeta, out_data, json_begin, json_end, ectx);
             return;
         case option_kind:
-            parse_option_json(tp, metadata, out_data, json_begin, json_end, ectx);
+            parse_option_json(tp, arrmeta, out_data, json_begin, json_end, ectx);
             return;
         case dynamic_kind:
             if (tp.get_type_id() == json_type_id) {
                 // The json type is a special string type that contains JSON directly
                 // Copy the JSON verbatim in this case.
-                parse_jsonstring_json(tp, metadata, out_data, json_begin, json_end);
+                parse_jsonstring_json(tp, arrmeta, out_data, json_begin, json_end);
                 return;
             }
             break;
@@ -796,7 +796,7 @@ nd::array dynd::parse_json(const ndt::type &tp, const char *json_begin,
     result = nd::empty(tp);
     parse_json(result, json_begin, json_end, ectx);
     if (!tp.is_builtin()) {
-        tp.extended()->metadata_finalize_buffers(result.get_arrmeta());
+        tp.extended()->arrmeta_finalize_buffers(result.get_arrmeta());
     }
     result.flag_as_immutable();
     return result;

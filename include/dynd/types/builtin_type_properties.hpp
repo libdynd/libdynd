@@ -28,15 +28,15 @@ ndt::type get_builtin_type_elwise_property_type(
 size_t make_builtin_type_elwise_property_getter_kernel(
                 ckernel_builder *out, size_t offset_out,
                 type_id_t builtin_type_id,
-                const char *dst_metadata,
-                const char *src_metadata, size_t src_elwise_property_index,
+                const char *dst_arrmeta,
+                const char *src_arrmeta, size_t src_elwise_property_index,
                 kernel_request_t kernreq, const eval::eval_context *ectx);
 
 size_t make_builtin_type_elwise_property_setter_kernel(
                 ckernel_builder *out, size_t offset_out,
                 type_id_t builtin_type_id,
-                const char *dst_metadata, size_t dst_elwise_property_index,
-                const char *src_metadata,
+                const char *dst_arrmeta, size_t dst_elwise_property_index,
+                const char *src_arrmeta,
                 kernel_request_t kernreq, const eval::eval_context *ectx);
 
 } // namespace dynd

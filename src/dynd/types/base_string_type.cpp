@@ -20,10 +20,10 @@ base_string_type::~base_string_type()
 {
 }
 
-std::string base_string_type::get_utf8_string(const char *metadata, const char *data, assign_error_mode errmode) const
+std::string base_string_type::get_utf8_string(const char *arrmeta, const char *data, assign_error_mode errmode) const
 {
     const char *begin, *end;
-    get_string_range(&begin, &end, metadata, data);
+    get_string_range(&begin, &end, arrmeta, data);
     return string_range_as_utf8_string(get_encoding(), begin, end, errmode);
 }
 
@@ -72,8 +72,8 @@ namespace {
 
         size_t make_expr_kernel(
                     ckernel_builder *out, size_t offset_out,
-                    const ndt::type& dst_tp, const char *dst_metadata,
-                    size_t src_count, const ndt::type *src_tp, const char *const*src_metadata,
+                    const ndt::type& dst_tp, const char *dst_arrmeta,
+                    size_t src_count, const ndt::type *src_tp, const char *const*src_arrmeta,
                     kernel_request_t kernreq, const eval::eval_context *ectx) const
         {
             if (src_count != 2) {
@@ -89,8 +89,8 @@ namespace {
                 // or handle input/output buffering, giving 'this' as the next
                 // kernel generator to call
                 return make_elwise_dimension_expr_kernel(out, offset_out,
-                                dst_tp, dst_metadata,
-                                src_count, src_tp, src_metadata,
+                                dst_tp, dst_arrmeta,
+                                src_count, src_tp, src_arrmeta,
                                 kernreq, ectx,
                                 this);
             }
@@ -109,7 +109,7 @@ namespace {
                     throw runtime_error(ss.str());
                 }
             }
-            e->init(src_tp, src_metadata);
+            e->init(src_tp, src_arrmeta);
             return offset_out + sizeof(extra_type);
         }
 

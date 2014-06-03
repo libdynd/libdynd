@@ -82,9 +82,9 @@ namespace {
 
         size_t make_expr_kernel(ckernel_builder *out, size_t offset_out,
                                 const ndt::type &dst_tp,
-                                const char *dst_metadata, size_t src_count,
+                                const char *dst_arrmeta, size_t src_count,
                                 const ndt::type *src_tp,
-                                const char *const *src_metadata,
+                                const char *const *src_arrmeta,
                                 kernel_request_t kernreq,
                                 const eval::eval_context *ectx) const
         {
@@ -101,8 +101,8 @@ namespace {
                 // or handle input/output buffering, giving 'this' as the next
                 // kernel generator to call
                 return make_elwise_dimension_expr_kernel(out, offset_out,
-                                dst_tp, dst_metadata,
-                                src_count, src_tp, src_metadata,
+                                dst_tp, dst_arrmeta,
+                                src_count, src_tp, src_arrmeta,
                                 kernreq, ectx,
                                 this);
             }
@@ -121,7 +121,7 @@ namespace {
                     throw runtime_error(ss.str());
                 }
             }
-            e->init(2, dst_metadata, (const char **)src_metadata);
+            e->init(2, dst_arrmeta, (const char **)src_arrmeta);
             return offset_out + sizeof(extra_type);
         }
 

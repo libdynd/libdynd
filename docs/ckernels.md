@@ -64,13 +64,13 @@ make things thread safe. Here's some example code which does one
 assignment using this mechanism.
 
 ```cpp
-void default_assign(const dtype& dst_dt, const char *dst_metadata, char *dst_data,
-                const dtype& src_dt, const char *src_metadata, const char *src_data)
+void default_assign(const dtype& dst_dt, const char *dst_arrmeta, char *dst_data,
+                const dtype& src_dt, const char *src_arrmeta, const char *src_data)
 {
     assignment_ckernel_builder k;
     make_assignment_kernel(&k, 0,
-                    dst_dt, dst_metadata,
-                    src_dt, src_metadata,
+                    dst_dt, dst_arrmeta,
+                    src_dt, src_arrmeta,
                     kernel_request_single,
                     assign_error_fractional, &eval::default_eval_context);
     k(dst_data, src_data);
@@ -331,8 +331,8 @@ its reference to the resources holding the JITted function.
 
 ```cpp
 // A hypothetical JIT API
-void create_jit_assignment(const dtype& dst_dt, const char *dst_metadata,
-                const dtype& src_dt, const char *src_metadata,
+void create_jit_assignment(const dtype& dst_dt, const char *dst_arrmeta,
+                const dtype& src_dt, const char *src_arrmeta,
                 kernel_request_t kernreq,
                 void **out_function_ptr,
                 void **out_jit_handle)
@@ -357,8 +357,8 @@ static void destruct(ckernel_prefix *extra)
 
 size_t make_jit_assignment_kernel(
                 ckernel_builder *out, size_t offset_out,
-                const dtype& dst_dt, const char *dst_metadata,
-                const dtype& src_dt, const char *src_metadata,
+                const dtype& dst_dt, const char *dst_arrmeta,
+                const dtype& src_dt, const char *src_arrmeta,
                 kernel_request_t kernreq)
 {
     // Allocate the necessary space in the output kernel buffer
@@ -372,7 +372,7 @@ size_t make_jit_assignment_kernel(
 
     // Set the function and the jit handle at once.
     // Assume the jit_assignment function raises an exception on error
-    create_jit_assignment(dst_dt, dst_metadata, src_dt, src_metadata, kernreq,
+    create_jit_assignment(dst_dt, dst_arrmeta, src_dt, src_arrmeta, kernreq,
                     &result->base.function,
                     &result->jit_handle);
 
@@ -421,8 +421,8 @@ static void strided_assign(char *dst, intptr_t dst_stride,
 
 size_t make_ptr_assignment_kernel(
                 ckernel_builder *out, size_t offset_out,
-                const dtype& dst_dt, const char *dst_metadata,
-                const dtype& src_target_dt, const char *src_target_metadata,
+                const dtype& dst_dt, const char *dst_arrmeta,
+                const dtype& src_target_dt, const char *src_target_arrmeta,
                 kernel_request_t kernreq)
 {
     ckernel_prefix *result;
@@ -447,8 +447,8 @@ size_t make_ptr_assignment_kernel(
     // Construct the child assignment kernel, and
     // return the offset immediately after the child kernel's data
     return make_assignment_kernel(out, offset_out + sizeof(ckernel_prefix),
-                    dst_dt, dst_metadata,
-                    src_target_dt, src_target_metadata,
+                    dst_dt, dst_arrmeta,
+                    src_target_dt, src_target_arrmeta,
                     kernel_request_single,
                     assign_error_default, &eval::default_eval_context);
 }

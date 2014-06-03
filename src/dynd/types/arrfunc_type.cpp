@@ -51,7 +51,7 @@ static void print_arrfunc(std::ostream& o, const arrfunc_type_data *af)
 }
 
 void arrfunc_type::print_data(std::ostream& o,
-                const char *DYND_UNUSED(metadata), const char *data) const
+                const char *DYND_UNUSED(arrmeta), const char *data) const
 {
     const arrfunc_type_data *af = reinterpret_cast<const arrfunc_type_data *>(data);
     print_arrfunc(o, af);
@@ -67,35 +67,35 @@ bool arrfunc_type::operator==(const base_type& rhs) const
     return this == &rhs || rhs.get_type_id() == arrfunc_type_id;
 }
 
-void arrfunc_type::metadata_default_construct(char *DYND_UNUSED(metadata),
+void arrfunc_type::arrmeta_default_construct(char *DYND_UNUSED(arrmeta),
                 intptr_t DYND_UNUSED(ndim), const intptr_t* DYND_UNUSED(shape)) const
 {
 }
 
-void arrfunc_type::metadata_copy_construct(char *DYND_UNUSED(dst_metadata),
-                const char *DYND_UNUSED(src_metadata), memory_block_data *DYND_UNUSED(embedded_reference)) const
+void arrfunc_type::arrmeta_copy_construct(char *DYND_UNUSED(dst_arrmeta),
+                const char *DYND_UNUSED(src_arrmeta), memory_block_data *DYND_UNUSED(embedded_reference)) const
 {
 }
 
-void arrfunc_type::metadata_reset_buffers(char *DYND_UNUSED(metadata)) const
+void arrfunc_type::arrmeta_reset_buffers(char *DYND_UNUSED(arrmeta)) const
 {
 }
 
-void arrfunc_type::metadata_finalize_buffers(char *DYND_UNUSED(metadata)) const
+void arrfunc_type::arrmeta_finalize_buffers(char *DYND_UNUSED(arrmeta)) const
 {
 }
 
-void arrfunc_type::metadata_destruct(char *DYND_UNUSED(metadata)) const
+void arrfunc_type::arrmeta_destruct(char *DYND_UNUSED(arrmeta)) const
 {
 }
 
-void arrfunc_type::data_destruct(const char *DYND_UNUSED(metadata), char *data) const
+void arrfunc_type::data_destruct(const char *DYND_UNUSED(arrmeta), char *data) const
 {
     const arrfunc_type_data *d = reinterpret_cast<arrfunc_type_data *>(data);
     d->~arrfunc_type_data();
 }
 
-void arrfunc_type::data_destruct_strided(const char *DYND_UNUSED(metadata), char *data,
+void arrfunc_type::data_destruct_strided(const char *DYND_UNUSED(arrmeta), char *data,
                 intptr_t stride, size_t count) const
 {
     for (size_t i = 0; i != count; ++i, data += stride) {
@@ -113,7 +113,7 @@ namespace {
 
         ckernel_prefix base;
         const base_string_type *dst_string_dt;
-        const char *dst_metadata;
+        const char *dst_arrmeta;
         assign_error_mode errmode;
 
         static void single(char *dst, const char *src, ckernel_prefix *extra)
@@ -123,7 +123,7 @@ namespace {
                 reinterpret_cast<const arrfunc_type_data *>(src);
             stringstream ss;
             print_arrfunc(ss, af);
-            e->dst_string_dt->set_utf8_string(e->dst_metadata, dst, e->errmode, ss.str());
+            e->dst_string_dt->set_utf8_string(e->dst_arrmeta, dst, e->errmode, ss.str());
         }
 
         static void destruct(ckernel_prefix *extra)
@@ -136,7 +136,7 @@ namespace {
 
 static intptr_t make_arrfunc_to_string_assignment_kernel(
                 ckernel_builder *out_ckb, size_t ckb_offset,
-                const ndt::type& dst_string_dt, const char *dst_metadata,
+                const ndt::type& dst_string_dt, const char *dst_arrmeta,
                 kernel_request_t kernreq, assign_error_mode errmode,
                 const eval::eval_context *DYND_UNUSED(ectx))
 {
@@ -149,15 +149,15 @@ static intptr_t make_arrfunc_to_string_assignment_kernel(
     e->base.destructor = &arrfunc_to_string_kernel_extra::destruct;
     // The kernel data owns a reference to this type
     e->dst_string_dt = static_cast<const base_string_type *>(ndt::type(dst_string_dt).release());
-    e->dst_metadata = dst_metadata;
+    e->dst_arrmeta = dst_arrmeta;
     e->errmode = errmode;
     return ckb_end_offset;
 }
 
 size_t arrfunc_type::make_assignment_kernel(
                 ckernel_builder *out_ckb, size_t ckb_offset,
-                const ndt::type& dst_tp, const char *dst_metadata,
-                const ndt::type& src_tp, const char *DYND_UNUSED(src_metadata),
+                const ndt::type& dst_tp, const char *dst_arrmeta,
+                const ndt::type& src_tp, const char *DYND_UNUSED(src_arrmeta),
                 kernel_request_t kernreq, assign_error_mode errmode,
                 const eval::eval_context *ectx) const
 {
@@ -166,7 +166,7 @@ size_t arrfunc_type::make_assignment_kernel(
         if (dst_tp.get_kind() == string_kind) {
             // Assignment to strings
             return make_arrfunc_to_string_assignment_kernel(out_ckb, ckb_offset,
-                            dst_tp, dst_metadata,
+                            dst_tp, dst_arrmeta,
                             kernreq, errmode, ectx);
         }
     }
@@ -244,14 +244,14 @@ static array_preamble *function___call__(const array_preamble *params, void *DYN
     for (int i = 0; i < nargs - 1; ++i) {
         src_tp[i] = args[i + 1].get_type();
     }
-    const char *dynd_metadata[max_args];
+    const char *dynd_arrmeta[max_args];
     for (int i = 0; i < nargs - 1; ++i) {
-        dynd_metadata[i] = args[i + 1].get_arrmeta();
+        dynd_arrmeta[i] = args[i + 1].get_arrmeta();
     }
     ckernel_builder ckb;
     af->instantiate(af, &ckb, 0, args[0].get_type(),
                          args[0].get_arrmeta(), src_tp,
-                         dynd_metadata, kernel_request_single,
+                         dynd_arrmeta, kernel_request_single,
                          &eval::default_eval_context);
     // Call the ckernel
     if (af->ckernel_funcproto == unary_operation_funcproto) {

@@ -16,7 +16,7 @@ property_type::property_type(const ndt::type& operand_type, const std::string& p
                 size_t property_index)
     : base_expression_type(property_type_id, expression_kind,
                     operand_type.get_data_size(), operand_type.get_data_alignment(), type_flag_none,
-                    operand_type.get_metadata_size()),
+                    operand_type.get_arrmeta_size()),
             m_value_tp(), m_operand_tp(operand_type),
             m_readable(false), m_writable(false),
             m_reversed_property(false),
@@ -47,7 +47,7 @@ property_type::property_type(const ndt::type& value_tp, const ndt::type& operand
                 const std::string& property_name, size_t property_index)
     : base_expression_type(property_type_id, expression_kind,
                     operand_tp.get_data_size(), operand_tp.get_data_alignment(), type_flag_none,
-                    operand_tp.get_metadata_size()),
+                    operand_tp.get_arrmeta_size()),
             m_value_tp(value_tp), m_operand_tp(operand_tp),
             m_readable(false), m_writable(false),
             m_reversed_property(true),
@@ -90,7 +90,7 @@ property_type::~property_type()
 {
 }
 
-void property_type::print_data(std::ostream& DYND_UNUSED(o), const char *DYND_UNUSED(metadata), const char *DYND_UNUSED(data)) const
+void property_type::print_data(std::ostream& DYND_UNUSED(o), const char *DYND_UNUSED(arrmeta), const char *DYND_UNUSED(data)) const
 {
     throw runtime_error("internal error: property_type::print_data isn't supposed to be called");
 }
@@ -110,7 +110,7 @@ void property_type::print_type(std::ostream& o) const
 }
 
 void property_type::get_shape(intptr_t ndim, intptr_t i, intptr_t *out_shape,
-                const char *DYND_UNUSED(metadata), const char *DYND_UNUSED(data)) const
+                const char *DYND_UNUSED(arrmeta), const char *DYND_UNUSED(data)) const
 {
     if (!m_value_tp.is_builtin()) {
         m_value_tp.extended()->get_shape(ndim, i, out_shape, NULL, NULL);
@@ -148,7 +148,7 @@ bool property_type::operator==(const base_type& rhs) const
 
 size_t property_type::make_operand_to_value_assignment_kernel(
                 ckernel_builder *out, size_t offset_out,
-                const char *dst_metadata, const char *src_metadata,
+                const char *dst_arrmeta, const char *src_arrmeta,
                 kernel_request_t kernreq, const eval::eval_context *ectx) const
 {
     if (!m_reversed_property) {
@@ -157,15 +157,15 @@ size_t property_type::make_operand_to_value_assignment_kernel(
             if (!ovdt.is_builtin()) {
                 return ovdt.extended()->make_elwise_property_getter_kernel(
                                 out, offset_out,
-                                dst_metadata,
-                                src_metadata, m_property_index,
+                                dst_arrmeta,
+                                src_arrmeta, m_property_index,
                                 kernreq, ectx);
             } else {
                 return make_builtin_type_elwise_property_getter_kernel(
                                 out, offset_out,
                                 ovdt.get_type_id(),
-                                dst_metadata,
-                                src_metadata, m_property_index,
+                                dst_arrmeta,
+                                src_arrmeta, m_property_index,
                                 kernreq, ectx);
             }
         } else {
@@ -179,15 +179,15 @@ size_t property_type::make_operand_to_value_assignment_kernel(
             if (!m_value_tp.is_builtin()) {
                 return m_value_tp.extended()->make_elwise_property_setter_kernel(
                                 out, offset_out,
-                                dst_metadata, m_property_index,
-                                src_metadata,
+                                dst_arrmeta, m_property_index,
+                                src_arrmeta,
                                 kernreq, ectx);
             } else {
                 return make_builtin_type_elwise_property_setter_kernel(
                                 out, offset_out,
                                 m_value_tp.get_type_id(),
-                                dst_metadata, m_property_index,
-                                src_metadata,
+                                dst_arrmeta, m_property_index,
+                                src_arrmeta,
                                 kernreq, ectx);
             }
         } else {
@@ -201,7 +201,7 @@ size_t property_type::make_operand_to_value_assignment_kernel(
 
 size_t property_type::make_value_to_operand_assignment_kernel(
                 ckernel_builder *out, size_t offset_out,
-                const char *dst_metadata, const char *src_metadata,
+                const char *dst_arrmeta, const char *src_arrmeta,
                 kernel_request_t kernreq, const eval::eval_context *ectx) const
 {
     if (!m_reversed_property) {
@@ -210,15 +210,15 @@ size_t property_type::make_value_to_operand_assignment_kernel(
             if (!ovdt.is_builtin()) {
                 return ovdt.extended()->make_elwise_property_setter_kernel(
                                 out, offset_out,
-                                dst_metadata, m_property_index,
-                                src_metadata,
+                                dst_arrmeta, m_property_index,
+                                src_arrmeta,
                                 kernreq, ectx);
             } else {
                 return make_builtin_type_elwise_property_setter_kernel(
                                 out, offset_out,
                                 ovdt.get_type_id(),
-                                dst_metadata, m_property_index,
-                                src_metadata,
+                                dst_arrmeta, m_property_index,
+                                src_arrmeta,
                                 kernreq, ectx);
             }
         } else {
@@ -232,15 +232,15 @@ size_t property_type::make_value_to_operand_assignment_kernel(
             if (!m_value_tp.is_builtin()) {
                 return m_value_tp.extended()->make_elwise_property_getter_kernel(
                                 out, offset_out,
-                                dst_metadata,
-                                src_metadata, m_property_index,
+                                dst_arrmeta,
+                                src_arrmeta, m_property_index,
                                 kernreq, ectx);
             } else {
                 return make_builtin_type_elwise_property_getter_kernel(
                                 out, offset_out,
                                 m_value_tp.get_type_id(),
-                                dst_metadata,
-                                src_metadata, m_property_index,
+                                dst_arrmeta,
+                                src_arrmeta, m_property_index,
                                 kernreq, ectx);
             }
         } else {
