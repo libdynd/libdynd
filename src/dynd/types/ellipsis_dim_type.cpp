@@ -11,8 +11,9 @@ using namespace std;
 using namespace dynd;
 
 ellipsis_dim_type::ellipsis_dim_type(const nd::string &name,
-                                   const ndt::type &element_type)
-    : base_uniform_dim_type(ellipsis_dim_type_id, element_type, 0, 1, 0, type_flag_none),
+                                     const ndt::type &element_type)
+    : base_uniform_dim_type(ellipsis_dim_type_id, element_type, 0, 1, 0,
+                            type_flag_symbolic),
       m_name(name)
 {
     if (!m_name.is_null()) {

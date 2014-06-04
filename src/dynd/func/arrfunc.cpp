@@ -66,12 +66,13 @@ static void delete_property_arrfunc_data(void *self_data_ptr)
 }
 
 static intptr_t instantiate_unary_property_ckernel(
-    const arrfunc_type_data *self, dynd::ckernel_builder *ckb, intptr_t ckb_offset,
-    const ndt::type &dst_tp, const char *dst_arrmeta, const ndt::type *src_tp,
-    const char *const *src_arrmeta, uint32_t kernreq,
+    const arrfunc_type_data *self, dynd::ckernel_builder *ckb,
+    intptr_t ckb_offset, const ndt::type &dst_tp, const char *dst_arrmeta,
+    const ndt::type *src_tp, const char *const *src_arrmeta, uint32_t kernreq,
     const eval::eval_context *ectx)
 {
-    ndt::type prop_src_tp(reinterpret_cast<const base_type *>(self->data_ptr), true);
+    ndt::type prop_src_tp(reinterpret_cast<const base_type *>(self->data_ptr),
+                          true);
 
     if (dst_tp.value_type() == prop_src_tp.value_type()) {
         if (src_tp[0] == prop_src_tp.operand_type()) {

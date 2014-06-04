@@ -270,32 +270,41 @@ void base_type::get_scalar_properties_and_functions(
                 std::vector<std::pair<std::string, gfunc::callable> >& out_properties,
                 std::vector<std::pair<std::string, gfunc::callable> >& out_functions) const
 {
-    // This copies properties from the first non-array data type dimension to
-    // the requested vectors. It is for use by array data types, which by convention
-    // expose the properties from the first non-array data types, and possibly add
-    // additional properties of their own.
-    size_t ndim = get_ndim();
-    size_t properties_count = 0, functions_count = 0;
-    const std::pair<std::string, gfunc::callable> *properties = NULL, *functions = NULL;
-    if (ndim == 0) {
-        get_dynamic_array_properties(&properties, &properties_count);
-        get_dynamic_array_functions(&functions, &functions_count);
-    } else {
-        ndt::type dt = get_type_at_dimension(NULL, ndim);
-        if (!dt.is_builtin()) {
-            dt.extended()->get_dynamic_array_properties(&properties, &properties_count);
-            dt.extended()->get_dynamic_array_functions(&functions, &functions_count);
+    if ((get_flags() & type_flag_symbolic) == 0) {
+        // This copies properties from the first non-array data type dimension
+        // to
+        // the requested vectors. It is for use by array data types, which by
+        // convention
+        // expose the properties from the first non-array data types, and
+        // possibly add
+        // additional properties of their own.
+        size_t ndim = get_ndim();
+        size_t properties_count = 0, functions_count = 0;
+        const std::pair<std::string, gfunc::callable> *properties = NULL,
+                                                      *functions = NULL;
+        if (ndim == 0) {
+            get_dynamic_array_properties(&properties, &properties_count);
+            get_dynamic_array_functions(&functions, &functions_count);
         } else {
-            get_builtin_type_dynamic_array_properties(dt.get_type_id(), &properties, &properties_count);
+            ndt::type dt = get_type_at_dimension(NULL, ndim);
+            if (!dt.is_builtin()) {
+                dt.extended()->get_dynamic_array_properties(&properties,
+                                                            &properties_count);
+                dt.extended()->get_dynamic_array_functions(&functions,
+                                                           &functions_count);
+            } else {
+                get_builtin_type_dynamic_array_properties(
+                    dt.get_type_id(), &properties, &properties_count);
+            }
         }
-    }
-    out_properties.resize(properties_count);
-    for (size_t i = 0; i < properties_count; ++i) {
-        out_properties[i] = properties[i];
-    }
-    out_functions.resize(functions_count);
-    for (size_t i = 0; i < functions_count; ++i) {
-        out_functions[i] = functions[i];
+        out_properties.resize(properties_count);
+        for (size_t i = 0; i < properties_count; ++i) {
+            out_properties[i] = properties[i];
+        }
+        out_functions.resize(functions_count);
+        for (size_t i = 0; i < functions_count; ++i) {
+            out_functions[i] = functions[i];
+        }
     }
 }
 

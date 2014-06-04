@@ -3,12 +3,15 @@
 // BSD 2-Clause License, see LICENSE.txt
 //
 
+#include <algorithm>
+
 #include <dynd/string.hpp>
 #include <dynd/types/string_type.hpp>
 
 using namespace std;
 namespace nd = dynd::nd;
 namespace ndt = dynd::ndt;
+using dynd::string_type_data;
 
 nd::string::string(const nd::array& rhs)
 {
@@ -71,6 +74,24 @@ bool nd::string::operator==(const nd::string& rhs) const
         return is_null() == rhs.is_null();
     }
 }
+
+static inline bool lex_comp(const string_type_data *lhs,
+                            const string_type_data *rhs)
+{
+    return std::lexicographical_compare(lhs->begin, lhs->end, rhs->begin,
+                                        rhs->end);
+}
+bool nd::string::operator<(const nd::string& rhs) const
+{
+    return !rhs.is_null() &&
+            (is_null() ||
+            lex_comp(reinterpret_cast<const string_type_data *>(
+                            m_value.get_readonly_originptr()),
+                        reinterpret_cast<const string_type_data *>(
+                            rhs.m_value.get_readonly_originptr())));
+}
+
+
 
 const char *nd::string::begin() const
 {

@@ -213,13 +213,11 @@ public:
     }
 
     inline bool operator==(const type& rhs) const {
-        if (is_builtin() || rhs.is_builtin()) {
-            return m_extended == rhs.m_extended;
-        } else {
-            return *m_extended == *rhs.m_extended;
-        }
+        return m_extended == rhs.m_extended ||
+               (!is_builtin() && !rhs.is_builtin() &&
+                *m_extended == *rhs.m_extended);
     }
-    bool operator!=(const type& rhs) const {
+    inline bool operator!=(const type& rhs) const {
         return !(operator==(rhs));
     }
 
@@ -488,14 +486,24 @@ public:
     }
 
     /**
+     * Returns true if the type constains a symbolic construct
+     * like a type var.
+     */
+    inline bool is_symbolic() const {
+        return !is_builtin() &&
+               (m_extended->get_flags() & type_flag_symbolic) != 0;
+    }
+
+    /**
      * For array types, recursively applies to each child type, and for
      * scalar types converts to the provided one.
      *
      * \param scalar_type  The scalar type to convert all scalars to.
      * \param errmode       The error mode for the conversion.
      */
-    type with_replaced_scalar_types(const type& scalar_type,
-                    assign_error_mode errmode = assign_error_default) const;
+    type with_replaced_scalar_types(
+        const type &scalar_type,
+        assign_error_mode errmode = assign_error_default) const;
 
     /**
      * Replaces the data type of the this type with the provided one.
@@ -504,7 +512,8 @@ public:
      * \param replace_ndim  The number of array dimensions to include in
      *                      the data type which is replaced.
      */
-    type with_replaced_dtype(const type& replacement_tp, intptr_t replace_ndim = 0) const;
+    type with_replaced_dtype(const type &replacement_tp,
+                             intptr_t replace_ndim = 0) const;
 
     /**
      * Returns a modified type with all expression types replaced with

@@ -113,7 +113,8 @@ endif()
 # Get the git revision
 include(GetGitRevisionDescriptionDyND)
 get_git_head_revision("${CMAKE_CURRENT_SOURCE_DIR}" GIT_REFSPEC DYND_GIT_SHA1)
-git_describe("${CMAKE_CURRENT_SOURCE_DIR}" DYND_VERSION_STRING --dirty --always --match "v*")
+git_describe("${CMAKE_CURRENT_SOURCE_DIR}" DYND_VERSION_STRING
+             --dirty --always --match "v*")
 message(STATUS "DyND version: ${DYND_VERSION_STRING}")
 configure_file(
     "${CMAKE_CURRENT_SOURCE_DIR}/src/dynd/git_version.cpp.in"
@@ -183,6 +184,7 @@ set(libdynd_SRC
     src/dynd/types/dynd_float128.cpp
     src/dynd/types/dynd_int128.cpp
     src/dynd/types/dynd_uint128.cpp
+    src/dynd/types/dim_fragment_type.cpp
     src/dynd/types/ellipsis_dim_type.cpp
     src/dynd/types/expr_type.cpp
     src/dynd/types/fixed_dim_type.cpp
@@ -204,6 +206,7 @@ set(libdynd_SRC
     src/dynd/types/tuple_type.cpp
     src/dynd/types/type_alignment.cpp
     src/dynd/types/type_id.cpp
+    src/dynd/types/type_pattern_match.cpp
     src/dynd/types/type_type.cpp
     src/dynd/types/typevar_dim_type.cpp
     src/dynd/types/typevar_type.cpp
@@ -238,6 +241,7 @@ set(libdynd_SRC
     include/dynd/types/datetime_parser.hpp
     include/dynd/types/datetime_type.hpp
     include/dynd/types/datetime_util.hpp
+    include/dynd/types/dim_fragment_type.hpp
     include/dynd/types/ellipsis_dim_type.hpp
     include/dynd/types/funcproto_type.hpp
     include/dynd/types/type_type.hpp
@@ -268,6 +272,7 @@ set(libdynd_SRC
     include/dynd/types/time_util.hpp
     include/dynd/types/tuple_type.hpp
     include/dynd/types/type_id.hpp
+    include/dynd/types/type_pattern_match.hpp
     include/dynd/types/typevar_dim_type.hpp
     include/dynd/types/typevar_type.hpp
     include/dynd/types/unary_expr_type.hpp
@@ -503,7 +508,8 @@ if (DYND_CUDA)
 #    set(CUDA_SEPARABLE_COMPILATION ON)
 endif()
 
-# Add a preprocessor definition for the maximum number of arguments that elwise will support
+# Add a preprocessor definition for the maximum number
+# of arguments that elwise will support
 add_definitions(-DDYND_ELWISE_MAX=${DYND_ELWISE_MAX})
 
 if ((NOT DYND_SHARED_LIB) AND (DYND_INSTALL_LIB))
@@ -511,8 +517,12 @@ if ((NOT DYND_SHARED_LIB) AND (DYND_INSTALL_LIB))
     # include the sublibraries source directly because
     # including static libraries in other static libraries
     # is a hassle
-    get_directory_property(cephes_SRC DIRECTORY "thirdparty/cephes" DEFINITION cephes_SRC)
-    get_directory_property(datetime_SRC DIRECTORY "thirdparty/datetime" DEFINITION datetime_SRC)
+    get_directory_property(cephes_SRC
+                           DIRECTORY "thirdparty/cephes"
+                           DEFINITION cephes_SRC)
+    get_directory_property(datetime_SRC
+                           DIRECTORY "thirdparty/datetime"
+                           DEFINITION datetime_SRC)
     set(libdynd_SRC
         ${libdynd_SRC}
         ${cephes_SRC}
@@ -565,8 +575,10 @@ set_source_files_properties(${CMAKE_CURRENT_BINARY_DIR}/include/dynd/pp/gen.hpp 
 add_dependencies(libdynd ppgen)
 
 # Copy the headers from cephes that need to be installed with libdynd
-file(COPY thirdparty/cephes/rename.h DESTINATION ${CMAKE_CURRENT_BINARY_DIR}/include/dynd/cephes)
-file(COPY thirdparty/cephes/protos.h DESTINATION ${CMAKE_CURRENT_BINARY_DIR}/include/dynd/cephes)
+file(COPY thirdparty/cephes/rename.h
+     DESTINATION ${CMAKE_CURRENT_BINARY_DIR}/include/dynd/cephes)
+file(COPY thirdparty/cephes/protos.h
+     DESTINATION ${CMAKE_CURRENT_BINARY_DIR}/include/dynd/cephes)
 
 include_directories(${CMAKE_CURRENT_BINARY_DIR}/include)
 
@@ -646,8 +658,10 @@ if (DYND_INSTALL_LIB)
         LIBRARY DESTINATION lib
         ARCHIVE DESTINATION lib/static)
     # Install the libdynd headers
-    install(DIRECTORY "include/dynd" DESTINATION "${CMAKE_INSTALL_PREFIX}/include")
-    install(DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}/include/dynd" DESTINATION "${CMAKE_INSTALL_PREFIX}/include")
+    install(DIRECTORY "include/dynd"
+            DESTINATION "${CMAKE_INSTALL_PREFIX}/include")
+    install(DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}/include/dynd"
+            DESTINATION "${CMAKE_INSTALL_PREFIX}/include")
     # Install the libdynd-config script
     if(WIN32)
         install(PROGRAMS "${CMAKE_CURRENT_BINARY_DIR}/libdynd-config.bat"
