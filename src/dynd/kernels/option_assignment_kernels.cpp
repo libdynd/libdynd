@@ -7,6 +7,7 @@
 #include <dynd/types/option_type.hpp>
 #include <dynd/kernels/option_assignment_kernels.hpp>
 #include <dynd/types/type_pattern_match.hpp>
+#include <dynd/parser_util.hpp>
 
 using namespace std;
 using namespace dynd;
@@ -262,6 +263,86 @@ static intptr_t instantiate_option_to_value_assignment_kernel(
     return ckb_end + sizeof(ckernel_prefix);
 }
 
+namespace {
+struct string_to_option_bool_ck : public kernels::assignment_ck<string_to_option_bool_ck> {
+    assign_error_mode m_errmode;
+
+    inline void single(char *dst, const char *src)
+    {
+        const string_type_data *std =
+            reinterpret_cast<const string_type_data *>(src);
+        parse::string_to_bool(dst, std->begin, std->end, true, m_errmode);
+    }
+};
+
+struct string_to_option_number_ck : public kernels::assignment_ck<string_to_option_number_ck> {
+    type_id_t m_tid;
+    assign_error_mode m_errmode;
+
+    inline void single(char *dst, const char *src)
+    {
+        const string_type_data *std =
+            reinterpret_cast<const string_type_data *>(src);
+        parse::string_to_number(dst, m_tid, std->begin, std->end, true,
+                                m_errmode);
+    }
+};
+}
+
+static intptr_t instantiate_string_to_option_assignment_kernel(
+    const arrfunc_type_data *DYND_UNUSED(self), dynd::ckernel_builder *ckb,
+    intptr_t ckb_offset, const ndt::type &dst_tp, const char *dst_arrmeta,
+    const ndt::type *src_tp, const char *const *src_arrmeta, uint32_t kernreq,
+    const eval::eval_context *ectx)
+{
+    // Deal with some string to option[T] conversions where string values
+    // might mean NA
+    if (dst_tp.get_type_id() != option_type_id ||
+            !(src_tp[0].get_kind() == string_kind ||
+                (src_tp[0].get_type_id() == option_type_id &&
+                src_tp[0].tcast<option_type>()->get_value_type().get_kind() ==
+                    string_kind))) {
+        stringstream ss;
+        ss << "string to option kernel needs string/option types, got ("
+           << src_tp[0] << ") -> " << dst_tp;
+        throw invalid_argument(ss.str());
+    }
+
+    type_id_t tid = dst_tp.tcast<option_type>()->get_value_type().get_type_id();
+    switch (tid) {
+        case bool_type_id: {
+            string_to_option_bool_ck *self =
+                string_to_option_bool_ck::create_leaf(
+                    ckb, ckb_offset, (kernel_request_t)kernreq);
+            self->m_errmode = ectx->default_errmode;
+            return ckb_offset + sizeof(string_to_option_bool_ck);
+        }
+        case int8_type_id:
+        case int16_type_id:
+        case int32_type_id:
+        case int64_type_id:
+        case int128_type_id:
+        case float16_type_id:
+        case float32_type_id:
+        case float64_type_id: {
+            string_to_option_number_ck *self =
+                string_to_option_number_ck::create_leaf(
+                    ckb, ckb_offset, (kernel_request_t)kernreq);
+            self->m_tid = tid;
+            self->m_errmode = ectx->default_errmode;
+            return ckb_offset + sizeof(string_to_option_number_ck);
+        }
+        default:
+            break;
+    }
+
+    // Fall back to an assignment without any option[S] support
+    return ::make_assignment_kernel(
+        ckb, ckb_offset, dst_tp.tcast<option_type>()->get_value_type(),
+        dst_arrmeta, src_tp[0], src_arrmeta[0], (kernel_request_t)kernreq,
+        ectx);
+}
+
 static intptr_t instantiate_option_as_value_assignment_kernel(
     const arrfunc_type_data *DYND_UNUSED(self), dynd::ckernel_builder *ckb,
     intptr_t ckb_offset, const ndt::type &dst_tp, const char *dst_arrmeta,
@@ -293,10 +374,15 @@ static intptr_t instantiate_option_as_value_assignment_kernel(
 namespace {
 
 struct option_arrfunc_list {
-    arrfunc_type_data af[3];
+    arrfunc_type_data af[5];
 
     option_arrfunc_list() {
         int i = 0;
+        af[i].func_proto = ndt::type("(?string) -> ?S");
+        af[i].ckernel_funcproto = unary_operation_funcproto;
+        af[i].data_ptr = NULL;
+        af[i].instantiate = &instantiate_string_to_option_assignment_kernel;
+        ++i;
         af[i].func_proto = ndt::type("(?T) -> ?S");
         af[i].ckernel_funcproto = unary_operation_funcproto;
         af[i].data_ptr = NULL;
@@ -306,6 +392,11 @@ struct option_arrfunc_list {
         af[i].ckernel_funcproto = unary_operation_funcproto;
         af[i].data_ptr = NULL;
         af[i].instantiate = &instantiate_option_to_value_assignment_kernel;
+        ++i;
+        af[i].func_proto = ndt::type("(string) -> ?S");
+        af[i].ckernel_funcproto = unary_operation_funcproto;
+        af[i].data_ptr = NULL;
+        af[i].instantiate = &instantiate_string_to_option_assignment_kernel;
         ++i;
         af[i].func_proto = ndt::type("(T) -> S");
         af[i].ckernel_funcproto = unary_operation_funcproto;
