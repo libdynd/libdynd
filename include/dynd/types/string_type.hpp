@@ -46,9 +46,11 @@ public:
         return string_encoding_char_size_table[m_encoding];
     }
 
-    void get_string_range(const char **out_begin, const char**out_end, const char *arrmeta, const char *data) const;
-    void set_utf8_string(const char *arrmeta, char *data, assign_error_mode errmode,
-                    const char* utf8_begin, const char *utf8_end) const;
+    void get_string_range(const char **out_begin, const char **out_end,
+                          const char *arrmeta, const char *data) const;
+    void set_from_utf8_string(const char *arrmeta, char *dst,
+                              const char *utf8_begin, const char *utf8_end,
+                              const eval::eval_context *ectx) const;
 
     void print_data(std::ostream& o, const char *arrmeta, const char *data) const;
 

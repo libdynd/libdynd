@@ -49,23 +49,32 @@ void string_type::get_string_range(const char **out_begin, const char**out_end,
     *out_end = reinterpret_cast<const string_type_data *>(data)->end;
 }
 
-void string_type::set_utf8_string(const char *data_arrmeta, char *data,
-                assign_error_mode errmode, const char* utf8_begin, const char *utf8_end) const
+void string_type::set_from_utf8_string(const char *arrmeta, char *dst,
+                                       const char *utf8_begin,
+                                       const char *utf8_end,
+                                       const eval::eval_context *ectx) const
 {
-    const string_type_arrmeta *data_md = reinterpret_cast<const string_type_arrmeta *>(data_arrmeta);
+    const string_type_arrmeta *data_md =
+        reinterpret_cast<const string_type_arrmeta *>(arrmeta);
+    assign_error_mode errmode = ectx->default_errmode;
     const intptr_t src_charsize = 1;
     intptr_t dst_charsize = string_encoding_char_size_table[m_encoding];
     char *dst_begin = NULL, *dst_current, *dst_end = NULL;
-    next_unicode_codepoint_t next_fn = get_next_unicode_codepoint_function(string_encoding_utf_8, errmode);
-    append_unicode_codepoint_t append_fn = get_append_unicode_codepoint_function(m_encoding, errmode);
+    next_unicode_codepoint_t next_fn =
+        get_next_unicode_codepoint_function(string_encoding_utf_8, errmode);
+    append_unicode_codepoint_t append_fn =
+        get_append_unicode_codepoint_function(m_encoding, errmode);
     uint32_t cp;
 
-    memory_block_pod_allocator_api *allocator = get_memory_block_pod_allocator_api(data_md->blockref);
+    memory_block_pod_allocator_api *allocator =
+        get_memory_block_pod_allocator_api(data_md->blockref);
 
     // Allocate the initial output as the src number of characters + some padding
     // TODO: Don't add padding if the output is not a multi-character encoding
-    allocator->allocate(data_md->blockref, ((utf8_end - utf8_begin) / src_charsize + 16) * dst_charsize * 1124 / 1024,
-                    dst_charsize, &dst_begin, &dst_end);
+    allocator->allocate(data_md->blockref,
+                        ((utf8_end - utf8_begin) / src_charsize + 16) *
+                            dst_charsize * 1124 / 1024,
+                        dst_charsize, &dst_begin, &dst_end);
 
     dst_current = dst_begin;
     while (utf8_begin < utf8_end) {
@@ -75,7 +84,8 @@ void string_type::set_utf8_string(const char *data_arrmeta, char *data,
             append_fn(cp, dst_current, dst_end);
         } else {
             char *dst_begin_saved = dst_begin;
-            allocator->resize(data_md->blockref, 2 * (dst_end - dst_begin), &dst_begin, &dst_end);
+            allocator->resize(data_md->blockref, 2 * (dst_end - dst_begin),
+                              &dst_begin, &dst_end);
             dst_current = dst_begin + (dst_current - dst_begin_saved);
 
             append_fn(cp, dst_current, dst_end);
@@ -83,11 +93,12 @@ void string_type::set_utf8_string(const char *data_arrmeta, char *data,
     }
 
     // Shrink-wrap the memory to just fit the string
-    allocator->resize(data_md->blockref, dst_current - dst_begin, &dst_begin, &dst_end);
+    allocator->resize(data_md->blockref, dst_current - dst_begin, &dst_begin,
+                      &dst_end);
 
     // Set the output
-    reinterpret_cast<string_type_data *>(data)->begin = dst_begin;
-    reinterpret_cast<string_type_data*>(data)->end = dst_end;
+    reinterpret_cast<string_type_data *>(dst)->begin = dst_begin;
+    reinterpret_cast<string_type_data*>(dst)->end = dst_end;
 }
 
 void string_type::print_data(std::ostream& o, const char *DYND_UNUSED(arrmeta), const char *data) const
@@ -364,9 +375,6 @@ struct string_assign_na_ck {
         const string_type_data *std =
             reinterpret_cast<const string_type_data *>(dst);
         if (std->begin != NULL) {
-cout << "std->begin ptr " << (void *)std->begin << endl;
-cout << "std->end ptr " << (void *)std->end << endl;
-print_escaped_utf8_string(cout, std->begin, std->end);
             throw invalid_argument("Cannot assign an NA to a dynd string after "
                                    "it has been allocated");
         }

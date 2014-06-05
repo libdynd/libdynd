@@ -45,8 +45,10 @@ fixedstring_type::~fixedstring_type()
 {
 }
 
-void fixedstring_type::get_string_range(const char **out_begin, const char**out_end,
-                const char *DYND_UNUSED(arrmeta), const char *data) const
+void fixedstring_type::get_string_range(const char **out_begin,
+                                        const char **out_end,
+                                        const char *DYND_UNUSED(arrmeta),
+                                        const char *data) const
 {
     // Beginning of the string
     *out_begin = data;
@@ -82,13 +84,18 @@ void fixedstring_type::get_string_range(const char **out_begin, const char**out_
     }
 }
 
-void fixedstring_type::set_utf8_string(const char *DYND_UNUSED(arrmeta), char *dst,
-                assign_error_mode errmode,
-                const char* utf8_begin, const char *utf8_end) const
+void fixedstring_type::set_from_utf8_string(const char *arrmeta, char *dst,
+                                            const char *utf8_begin,
+                                            const char *utf8_end,
+                                            const eval::eval_context *ectx)
+    const
 {
+    assign_error_mode errmode = ectx->default_errmode;
     char *dst_end = dst + get_data_size();
-    next_unicode_codepoint_t next_fn = get_next_unicode_codepoint_function(string_encoding_utf_8, errmode);
-    append_unicode_codepoint_t append_fn = get_append_unicode_codepoint_function(m_encoding, errmode);
+    next_unicode_codepoint_t next_fn =
+        get_next_unicode_codepoint_function(string_encoding_utf_8, errmode);
+    append_unicode_codepoint_t append_fn =
+        get_append_unicode_codepoint_function(m_encoding, errmode);
     uint32_t cp;
 
     while (utf8_begin < utf8_end && dst < dst_end) {
@@ -97,7 +104,8 @@ void fixedstring_type::set_utf8_string(const char *DYND_UNUSED(arrmeta), char *d
     }
     if (utf8_begin < utf8_end) {
         if (errmode != assign_error_none) {
-            throw std::runtime_error("Input is too large to convert to destination fixed-size string");
+            throw std::runtime_error("Input is too large to convert to "
+                                     "destination fixed-size string");
         }
     } else if (dst < dst_end) {
         memset(dst, 0, dst_end - dst);

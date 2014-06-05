@@ -454,7 +454,7 @@ namespace {
         ckernel_prefix base;
         const base_string_type *dst_string_tp;
         type_id_t src_type_id;
-        assign_error_mode errmode;
+        eval::eval_context ectx;
         const char *dst_arrmeta;
 
         static void single(char *dst, const char *src,
@@ -468,7 +468,7 @@ namespace {
             //       the same float number, would be better.
             stringstream ss;
             ndt::type(e->src_type_id).print_data(ss, NULL, src);
-            e->dst_string_tp->set_utf8_string(e->dst_arrmeta, dst, e->errmode, ss.str());
+            e->dst_string_tp->set_from_utf8_string(e->dst_arrmeta, dst, ss.str(), &e->ectx);
         }
 
         static void destruct(ckernel_prefix *extra)
@@ -501,7 +501,7 @@ size_t dynd::make_builtin_to_string_assignment_kernel(
         // The kernel data owns this reference
         e->dst_string_tp = static_cast<const base_string_type *>(ndt::type(dst_string_tp).release());
         e->src_type_id = src_type_id;
-        e->errmode = ectx->default_errmode;
+        e->ectx = *ectx;
         e->dst_arrmeta = dst_arrmeta;
         return offset_out + sizeof(builtin_to_string_kernel_extra);
     } else {

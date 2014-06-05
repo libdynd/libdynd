@@ -38,8 +38,10 @@ void time_type::set_time(const char *DYND_UNUSED(arrmeta), char *data,
     *reinterpret_cast<int64_t *>(data) = time_hmst::to_ticks(hour, minute, second, tick);
 }
 
-void time_type::set_utf8_string(const char *DYND_UNUSED(arrmeta),
-                char *data, assign_error_mode DYND_UNUSED(errmode), const std::string& utf8_str) const
+void time_type::set_utf8_string(const char *DYND_UNUSED(arrmeta), char *data,
+                                const std::string &utf8_str,
+                                const eval::eval_context *DYND_UNUSED(ectx))
+    const
 {
     time_hmst hmst;
     // TODO: Use errmode to adjust strictness of the parsing

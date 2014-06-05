@@ -72,7 +72,7 @@ namespace {
         ndt::type m_dst_string_tp;
         ndt::type m_src_datetime_tp;
         const char *m_dst_arrmeta;
-        assign_error_mode m_errmode;
+        eval::eval_context m_ectx;
 
         inline void single(char *dst, const char *src)
         {
@@ -83,7 +83,7 @@ namespace {
                 s = "NA";
             }
             const base_string_type *bst = static_cast<const base_string_type *>(m_dst_string_tp.extended());
-            bst->set_utf8_string(m_dst_arrmeta, dst, m_errmode, s);
+            bst->set_from_utf8_string(m_dst_arrmeta, dst, s, &m_ectx);
         }
     };
 } // anonymous namespace
@@ -106,7 +106,7 @@ size_t dynd::make_datetime_to_string_assignment_kernel(
     self->m_dst_string_tp = dst_string_tp;
     self->m_src_datetime_tp = src_datetime_tp;
     self->m_dst_arrmeta = dst_arrmeta;
-    self->m_errmode = ectx->default_errmode;
+    self->m_ectx = *ectx;
     return ckb_offset + sizeof(self_type);
 }
 

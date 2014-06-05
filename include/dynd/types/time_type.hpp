@@ -27,8 +27,8 @@ public:
                   int32_t hour, int32_t minute, int32_t second,
                   int32_t tick) const;
     void set_utf8_string(const char *arrmeta, char *data,
-                         assign_error_mode errmode,
-                         const std::string &utf8_str) const;
+                         const std::string &utf8_str,
+                         const eval::eval_context *ectx) const;
 
     time_hmst get_time(const char *arrmeta, const char *data) const;
 

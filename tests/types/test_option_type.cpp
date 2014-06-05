@@ -95,3 +95,9 @@ TEST(OptionType, Cast) {
         nd::view(parse_json("3 * ?int", "[null, null, 25]"), "3 * int"),
         nd::view(b, "3 * int"));
 }
+
+TEST(OptionType, Date) {
+    nd::array a, b;
+
+    a = parse_json("5 * ?date", "[null, \"2013-04-05\", \"NA\", \"\", \"Jan 3, 2020\"]");
+}

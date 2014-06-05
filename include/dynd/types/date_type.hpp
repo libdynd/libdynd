@@ -20,7 +20,6 @@ public:
     void set_ymd(const char *arrmeta, char *data, assign_error_mode errmode,
                     int32_t year, int32_t month, int32_t day) const;
     void set_utf8_string(const char *arrmeta, char *data,
-                         assign_error_mode errmode,
                          const std::string &utf8_str,
                          const eval::eval_context *ectx) const;
 
@@ -89,6 +88,8 @@ public:
                     const char *dst_arrmeta, size_t dst_elwise_property_index,
                     const char *src_arrmeta,
                     kernel_request_t kernreq, const eval::eval_context *ectx) const;
+
+    nd::array get_option_nafunc() const;
 };
 
 namespace ndt {

@@ -63,7 +63,7 @@ namespace {
     struct time_to_string_ck : public kernels::assignment_ck<time_to_string_ck> {
         ndt::type m_dst_string_tp;
         const char *m_dst_arrmeta;
-        assign_error_mode m_errmode;
+        eval::eval_context m_ectx;
 
         inline void single(char *dst, const char *src)
         {
@@ -74,7 +74,7 @@ namespace {
                 s = "NA";
             }
             const base_string_type *bst = static_cast<const base_string_type *>(m_dst_string_tp.extended());
-            bst->set_utf8_string(m_dst_arrmeta, dst, m_errmode, s);
+            bst->set_from_utf8_string(m_dst_arrmeta, dst, s, &m_ectx);
         }
     };
 } // anonymous namespace
@@ -95,7 +95,7 @@ size_t dynd::make_time_to_string_assignment_kernel(
     self_type *self = self_type::create_leaf(out_ckb, ckb_offset, kernreq);
     self->m_dst_string_tp = dst_string_tp;
     self->m_dst_arrmeta = dst_arrmeta;
-    self->m_errmode = ectx->default_errmode;
+    self->m_ectx = *ectx;
     return ckb_offset + sizeof(self_type);
 }
 

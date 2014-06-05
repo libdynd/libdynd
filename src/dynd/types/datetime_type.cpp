@@ -86,9 +86,7 @@ void datetime_type::set_cal(const char *DYND_UNUSED(arrmeta), char *data,
 }
 
 void datetime_type::set_utf8_string(const char *DYND_UNUSED(arrmeta),
-                                    char *data,
-                                    assign_error_mode DYND_UNUSED(errmode),
-                                    const std::string &utf8_str,
+                                    char *data, const std::string &utf8_str,
                                     const eval::eval_context *ectx) const
 {
     // TODO: Use errmode to adjust strictness

@@ -40,27 +40,27 @@ void json_type::get_string_range(const char **out_begin, const char **out_end,
     *out_end = reinterpret_cast<const json_type_data *>(data)->end;
 }
 
-void json_type::set_utf8_string(const char *data_arrmeta, char *data,
-                                assign_error_mode errmode,
-                                const char *utf8_begin, const char *utf8_end)
-    const
+void json_type::set_from_utf8_string(const char *arrmeta, char *dst,
+                                     const char *utf8_begin,
+                                     const char *utf8_end,
+                                     const eval::eval_context *ectx) const
 {
     // Validate that the input is JSON
-    if (errmode != assign_error_none) {
+    if (ectx->default_errmode != assign_error_none) {
         validate_json(utf8_begin, utf8_end);
     }
 
     const json_type_arrmeta *data_md =
-        reinterpret_cast<const json_type_arrmeta *>(data_arrmeta);
+        reinterpret_cast<const json_type_arrmeta *>(arrmeta);
 
     memory_block_pod_allocator_api *allocator =
         get_memory_block_pod_allocator_api(data_md->blockref);
 
     allocator->allocate(data_md->blockref, utf8_end - utf8_begin, 1,
-                        &reinterpret_cast<json_type_data *>(data)->begin,
-                        &reinterpret_cast<json_type_data *>(data)->end);
+                        &reinterpret_cast<json_type_data *>(dst)->begin,
+                        &reinterpret_cast<json_type_data *>(dst)->end);
 
-    memcpy(reinterpret_cast<json_type_data *>(data)->begin,
+    memcpy(reinterpret_cast<json_type_data *>(dst)->begin,
                     utf8_begin, utf8_end - utf8_begin);
 }
 

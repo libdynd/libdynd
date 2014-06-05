@@ -41,7 +41,7 @@ public:
                     int32_t year, int32_t month, int32_t day,
                     int32_t hour, int32_t min=0, int32_t sec=0, int32_t tick=0) const;
     void set_utf8_string(const char *arrmeta, char *data,
-                         assign_error_mode errmode, const std::string &utf8_str,
+                         const std::string &utf8_str,
                          const eval::eval_context *ectx) const;
 
     void get_cal(const char *arrmeta, const char *data,
