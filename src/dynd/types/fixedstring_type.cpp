@@ -160,46 +160,41 @@ bool fixedstring_type::operator==(const base_type& rhs) const
 }
 
 size_t fixedstring_type::make_assignment_kernel(
-                ckernel_builder *out, size_t offset_out,
-                const ndt::type& dst_tp, const char *dst_arrmeta,
-                const ndt::type& src_tp, const char *src_arrmeta,
-                kernel_request_t kernreq, assign_error_mode errmode,
-                const eval::eval_context *ectx) const
+    ckernel_builder *out, size_t offset_out, const ndt::type &dst_tp,
+    const char *dst_arrmeta, const ndt::type &src_tp, const char *src_arrmeta,
+    kernel_request_t kernreq, const eval::eval_context *ectx) const
 {
     if (this == dst_tp.extended()) {
         switch (src_tp.get_type_id()) {
             case fixedstring_type_id: {
                 const fixedstring_type *src_fs = src_tp.tcast<fixedstring_type>();
-                return make_fixedstring_assignment_kernel(out, offset_out,
-                                get_data_size(), m_encoding, src_fs->get_data_size(), src_fs->m_encoding,
-                                kernreq, errmode, ectx);
+                return make_fixedstring_assignment_kernel(
+                    out, offset_out, get_data_size(), m_encoding,
+                    src_fs->get_data_size(), src_fs->m_encoding, kernreq, ectx);
             }
             case string_type_id: {
                 const base_string_type *src_fs = src_tp.tcast<base_string_type>();
-                return make_blockref_string_to_fixedstring_assignment_kernel(out, offset_out,
-                                get_data_size(), m_encoding, src_fs->get_encoding(),
-                                kernreq, errmode, ectx);
+                return make_blockref_string_to_fixedstring_assignment_kernel(
+                    out, offset_out, get_data_size(), m_encoding,
+                    src_fs->get_encoding(), kernreq, ectx);
             }
             default: {
                 if (!src_tp.is_builtin()) {
-                    return src_tp.extended()->make_assignment_kernel(out, offset_out,
-                                    dst_tp, dst_arrmeta,
-                                    src_tp, src_arrmeta,
-                                    kernreq, errmode, ectx);
+                    return src_tp.extended()->make_assignment_kernel(
+                        out, offset_out, dst_tp, dst_arrmeta, src_tp,
+                        src_arrmeta, kernreq, ectx);
                 } else {
-                    return make_builtin_to_string_assignment_kernel(out, offset_out,
-                                dst_tp, dst_arrmeta,
-                                src_tp.get_type_id(),
-                                kernreq, errmode, ectx);
+                    return make_builtin_to_string_assignment_kernel(
+                        out, offset_out, dst_tp, dst_arrmeta,
+                        src_tp.get_type_id(), kernreq, ectx);
                 }
             }
         }
     } else {
         if (dst_tp.is_builtin()) {
-            return make_string_to_builtin_assignment_kernel(out, offset_out,
-                            dst_tp.get_type_id(),
-                            src_tp, src_arrmeta,
-                            kernreq, errmode, ectx);
+            return make_string_to_builtin_assignment_kernel(
+                out, offset_out, dst_tp.get_type_id(), src_tp, src_arrmeta,
+                kernreq, ectx);
         } else {
             stringstream ss;
             ss << "Cannot assign from " << src_tp << " to " << dst_tp;
@@ -209,11 +204,10 @@ size_t fixedstring_type::make_assignment_kernel(
 }
 
 size_t fixedstring_type::make_comparison_kernel(
-                ckernel_builder *out, size_t offset_out,
-                const ndt::type& src0_dt, const char *src0_arrmeta,
-                const ndt::type& src1_dt, const char *src1_arrmeta,
-                comparison_type_t comptype,
-                const eval::eval_context *ectx) const
+    ckernel_builder *out, size_t offset_out, const ndt::type &src0_dt,
+    const char *src0_arrmeta, const ndt::type &src1_dt,
+    const char *src1_arrmeta, comparison_type_t comptype,
+    const eval::eval_context *ectx) const
 {
     if (this == src0_dt.extended()) {
         if (*this == *src1_dt.extended()) {

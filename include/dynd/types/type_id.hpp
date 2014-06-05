@@ -182,7 +182,7 @@ enum type_flags_t {
     // Memory of this type must be zero-initialized
     type_flag_zeroinit = 0x00000002,
     // Memory of this type must be constructed
-    type_flag_constructor = 0x00000004,
+    //type_flag_constructor = 0x00000004,
     // Instances of this type point into other memory
     // blocks, e.g. string_type, var_dim_type.
     type_flag_blockref = 0x00000008,

@@ -19,13 +19,13 @@
 using namespace std;
 using namespace dynd;
 
-option_type::option_type(const ndt::type& value_tp)
+option_type::option_type(const ndt::type &value_tp)
     : base_type(option_type_id, option_kind, value_tp.get_data_size(),
-                    value_tp.get_data_alignment(),
-                    (value_tp.get_flags()&type_flags_value_inherited) | type_flag_constructor,
-                    value_tp.get_arrmeta_size(),
-                    value_tp.get_ndim()),
-                    m_value_tp(value_tp)
+                value_tp.get_data_alignment(),
+                value_tp.get_flags() &
+                    (type_flags_value_inherited | type_flags_operand_inherited),
+                value_tp.get_arrmeta_size(), value_tp.get_ndim()),
+      m_value_tp(value_tp)
 {
     if (value_tp.get_type_id() == option_type_id) {
         stringstream ss;
@@ -38,6 +38,17 @@ option_type::option_type(const ndt::type& value_tp)
         m_nafunc = kernels::get_option_builtin_nafunc(value_tp.get_type_id());
         if (!m_nafunc.is_null()) {
             return;
+        }
+    } else {
+        m_nafunc = value_tp.extended()->get_option_nafunc();
+        if (!m_nafunc.is_null() &&
+                m_nafunc.get_type() != option_type::make_nafunc_type()) {
+            stringstream ss;
+            ss << "Type " << m_value_tp
+               << " returned invalid nafunc object, had type "
+               << m_nafunc.get_type() << " instead of "
+               << option_type::make_nafunc_type();
+            throw invalid_argument(ss.str());
         }
     }
 }
@@ -297,12 +308,11 @@ void option_type::arrmeta_debug_print(const char *arrmeta, std::ostream& o, cons
 size_t option_type::make_assignment_kernel(
     ckernel_builder *ckb, size_t ckb_offset, const ndt::type &dst_tp,
     const char *dst_arrmeta, const ndt::type &src_tp, const char *src_arrmeta,
-    kernel_request_t kernreq, assign_error_mode errmode,
-    const eval::eval_context *ectx) const
+    kernel_request_t kernreq, const eval::eval_context *ectx) const
 {
-    return kernels::make_option_assignment_kernel(
-        ckb, ckb_offset, dst_tp, dst_arrmeta, src_tp, src_arrmeta,
-        kernreq, errmode, ectx);
+    return kernels::make_option_assignment_kernel(ckb, ckb_offset, dst_tp,
+                                                  dst_arrmeta, src_tp,
+                                                  src_arrmeta, kernreq, ectx);
 }
 
 

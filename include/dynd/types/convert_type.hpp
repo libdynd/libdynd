@@ -19,12 +19,9 @@ namespace dynd {
 
 class convert_type : public base_expression_type {
     ndt::type m_value_type, m_operand_type;
-    assign_error_mode m_errmode;
-    // These error modes may be set to assign_error_none if the
-    // assignment is lossless in that direction.
-    assign_error_mode m_errmode_to_value, m_errmode_to_operand;
+
 public:
-    convert_type(const ndt::type& value_type, const ndt::type& operand_type, assign_error_mode errmode);
+    convert_type(const ndt::type &value_type, const ndt::type &operand_type);
 
     virtual ~convert_type();
 
@@ -38,7 +35,8 @@ public:
 
     void print_type(std::ostream& o) const;
 
-        void get_shape(intptr_t ndim, intptr_t i, intptr_t *out_shape, const char *arrmeta, const char *data) const;
+    void get_shape(intptr_t ndim, intptr_t i, intptr_t *out_shape,
+                   const char *arrmeta, const char *data) const;
 
     bool is_lossless_assignment(const ndt::type& dst_tp, const ndt::type& src_tp) const;
 
@@ -80,22 +78,27 @@ namespace ndt {
      * If the value_type has expression_kind, it chains operand_type.value_type()
      * into value_type.storage_type().
      */
-    inline ndt::type make_convert(const ndt::type& value_type, const ndt::type& operand_type,
-                    assign_error_mode errmode = assign_error_default) {
+    inline ndt::type make_convert(const ndt::type &value_type,
+                                  const ndt::type &operand_type)
+    {
         if (operand_type.value_type() != value_type) {
             if (value_type.get_kind() != expression_kind) {
                 // Create a conversion type when the value kind is different
-                return ndt::type(new convert_type(value_type, operand_type, errmode), false);
+                return ndt::type(new convert_type(value_type, operand_type),
+                                 false);
             } else if (value_type.storage_type() == operand_type.value_type()) {
                 // No conversion required at the connection
                 return static_cast<const base_expression_type *>(
-                                value_type.extended())->with_replaced_storage_type(operand_type);
+                           value_type.extended())
+                    ->with_replaced_storage_type(operand_type);
             } else {
                 // A conversion required at the connection
                 return static_cast<const base_expression_type *>(
-                                value_type.extended())->with_replaced_storage_type(
-                                    ndt::type(new convert_type(
-                                        value_type.storage_type(), operand_type, errmode), false));
+                           value_type.extended())
+                    ->with_replaced_storage_type(
+                        ndt::type(new convert_type(value_type.storage_type(),
+                                                   operand_type),
+                                  false));
             }
         } else {
             return operand_type;
@@ -103,8 +106,10 @@ namespace ndt {
     }
 
     template<typename Tvalue, typename Tstorage>
-    ndt::type make_convert(assign_error_mode errmode = assign_error_default) {
-        return ndt::type(new convert_type(ndt::make_type<Tvalue>(), ndt::make_type<Tstorage>(), errmode), false);
+    ndt::type make_convert() {
+        return ndt::type(new convert_type(ndt::make_type<Tvalue>(),
+                                          ndt::make_type<Tstorage>()),
+                         false);
     }
 } // namespace ndt
 

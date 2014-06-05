@@ -295,7 +295,7 @@ size_t base_struct_type::make_elwise_property_getter_kernel(
         return ::make_assignment_kernel(out, offset_out + sizeof(struct_property_getter_extra),
                         field_type.value_type(), dst_arrmeta,
                         field_type, src_arrmeta + arrmeta_offsets[src_elwise_property_index],
-                        kernreq, assign_error_none, ectx);
+                        kernreq, ectx);
     } else {
         stringstream ss;
         ss << "dynd type " << ndt::type(this, true);

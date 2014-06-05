@@ -52,14 +52,16 @@ TEST(OptionType, Create) {
 }
 
 TEST(OptionType, OptionIntAssign) {
-    nd::array a, b;
+    nd::array a, b, c;
+    eval::eval_context tmp_ectx;
 
     // Assignment from option[S] to option[T]
     a = parse_json("2 * ?int8", "[-10, null]");
     b = nd::empty("2 * ?int16");
     b.vals() = a;
     EXPECT_JSON_EQ_ARR("[-10, -32768]", nd::view(b, "2 * int16"));
-    b.val_assign(a, assign_error_none);
+    tmp_ectx.default_errmode = assign_error_none;
+    b.val_assign(a, &tmp_ectx);
     EXPECT_JSON_EQ_ARR("[-10, -32768]", nd::view(b, "2 * int16"));
 
     // Assignment from option[T] to T without any NAs
@@ -73,4 +75,12 @@ TEST(OptionType, OptionIntAssign) {
     b = nd::empty("3 * ?int32");
     b.vals() = a;
     EXPECT_ARR_EQ(a, nd::view(b, "3 * int32"));
+
+    // Assignment from string to option[int]
+    a = parse_json("5 * string", "[\"null\", \"12\", \"NA\", \"34\", \"\"]");
+    b = nd::empty("5 * ?int32");
+    b.vals() = a;
+    c = parse_json("5 * ?int32", "[null, 12, null, 34, null]");
+    EXPECT_ARR_EQ(nd::view(c, "strided * int32"),
+                  nd::view(b, "strided * int32"));
 }

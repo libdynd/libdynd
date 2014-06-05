@@ -520,12 +520,12 @@ public:
     }
 
     /** Does a value-assignment from the rhs array. */
-    void val_assign(const array& rhs, assign_error_mode errmode = assign_error_default,
-                        const eval::eval_context *ectx = &eval::default_eval_context) const;
+    void val_assign(const array &rhs, const eval::eval_context *ectx =
+                                          &eval::default_eval_context) const;
     /** Does a value-assignment from the rhs raw scalar */
-    void val_assign(const ndt::type& rhs_dt, const char *rhs_arrmeta, const char *rhs_data,
-                        assign_error_mode errmode = assign_error_default,
-                        const eval::eval_context *ectx = &eval::default_eval_context) const;
+    void val_assign(
+        const ndt::type &rhs_dt, const char *rhs_arrmeta, const char *rhs_data,
+        const eval::eval_context *ectx = &eval::default_eval_context) const;
 
     /**
      * Casts the type of the array into the specified type.
@@ -533,9 +533,8 @@ public:
      * array data type, use 'ucast' instead.
      *
      * \param dt  The type into which the array should be cast.
-     * \param errmode  Policy for dealing with errors.
      */
-    array cast(const ndt::type& tp, assign_error_mode errmode = assign_error_default) const;
+    array cast(const ndt::type& tp) const;
 
     /**
      * Casts the array data type of the array into the specified type.
@@ -547,20 +546,16 @@ public:
      *                       E.g. the value 1 could cast the last
      *                       array dimension and the array data type
      *                       to the replacement uniform_dt.
-     * \param errmode  Policy for dealing with errors.
      */
-    array ucast(const ndt::type& uniform_dt,
-                    intptr_t replace_ndim = 0,
-                    assign_error_mode errmode = assign_error_default) const;
+    array ucast(const ndt::type &uniform_dt, intptr_t replace_ndim = 0) const;
 
     /**
      * Casts the array data type of the array into the type specified
      * as the template parameter.
      */
     template<class T>
-    inline array ucast(intptr_t replace_ndim = 0,
-                    assign_error_mode errmode = assign_error_default) const {
-        return ucast(ndt::make_type<T>(), replace_ndim, errmode);
+    inline array ucast(intptr_t replace_ndim = 0) const {
+        return ucast(ndt::make_type<T>(), replace_ndim);
     }
 
     /**
@@ -1274,39 +1269,43 @@ array::array(const std::vector<T>& vec)
 namespace detail {
     template <class T>
     struct array_as_helper {
-        static typename enable_if<is_dynd_scalar<T>::value, T>::type as(const array& lhs,
-                                                                    assign_error_mode errmode) {
+        inline static typename enable_if<is_dynd_scalar<T>::value, T>::type
+        as(const array &lhs, const eval::eval_context *ectx)
+        {
             T result;
             if (!lhs.is_scalar()) {
                 throw std::runtime_error("can only convert arrays with 0 dimensions to scalars");
             }
             typed_data_assign(ndt::make_type<T>(), NULL, (char *)&result,
-                        lhs.get_type(), lhs.get_arrmeta(), lhs.get_ndo()->m_data_pointer, errmode);
+                        lhs.get_type(), lhs.get_arrmeta(), lhs.get_ndo()->m_data_pointer, ectx);
             return result;
         }
     };
 
     template <>
     struct array_as_helper<bool> {
-        static bool as(const array& lhs, assign_error_mode errmode) {
-            return array_as_helper<dynd_bool>::as(lhs, errmode);
+        inline static bool as(const array& lhs, const eval::eval_context *ectx) {
+            return array_as_helper<dynd_bool>::as(lhs, ectx);
         }
     };
 
     std::string array_as_string(const array& lhs, assign_error_mode errmode);
-    ndt::type array_as_type(const array& lhs, assign_error_mode errmode);
+    ndt::type array_as_type(const array& lhs);
 
     template <>
     struct array_as_helper<std::string> {
-        static std::string as(const array& lhs, assign_error_mode errmode) {
-            return array_as_string(lhs, errmode);
+        static std::string as(const array &lhs, const eval::eval_context *ectx)
+        {
+            return array_as_string(lhs, ectx->default_errmode);
         }
     };
 
     template <>
     struct array_as_helper<ndt::type> {
-        static ndt::type as(const array& lhs, assign_error_mode errmode) {
-            return array_as_type(lhs, errmode);
+        static ndt::type as(const array &lhs,
+                            const eval::eval_context *DYND_UNUSED(ectx))
+        {
+            return array_as_type(lhs);
         }
     };
 
@@ -1315,7 +1314,14 @@ namespace detail {
 
 template<class T>
 T array::as(assign_error_mode errmode) const {
-    return detail::array_as_helper<T>::as(*this, errmode);
+    if (errmode == assign_error_default ||
+            errmode == eval::default_eval_context.default_errmode) {
+        return detail::array_as_helper<T>::as(*this, &eval::default_eval_context);
+    } else {
+        eval::eval_context tmp_ectx(eval::default_eval_context);
+        tmp_ectx.default_errmode = errmode;
+        return detail::array_as_helper<T>::as(*this, &tmp_ectx);
+    }
 }
 
 /** 

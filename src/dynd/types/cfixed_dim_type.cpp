@@ -490,11 +490,9 @@ void cfixed_dim_type::data_destruct_strided(const char *arrmeta, char *data,
 }
 
 size_t cfixed_dim_type::make_assignment_kernel(
-                ckernel_builder *out_ckb, size_t ckb_offset,
-                const ndt::type& dst_tp, const char *dst_arrmeta,
-                const ndt::type& src_tp, const char *src_arrmeta,
-                kernel_request_t kernreq, assign_error_mode errmode,
-                const eval::eval_context *ectx) const
+    ckernel_builder *out_ckb, size_t ckb_offset, const ndt::type &dst_tp,
+    const char *dst_arrmeta, const ndt::type &src_tp, const char *src_arrmeta,
+    kernel_request_t kernreq, const eval::eval_context *ectx) const
 {
     if (this == dst_tp.extended()) {
         kernels::strided_assign_ck *self =
@@ -510,9 +508,9 @@ size_t cfixed_dim_type::make_assignment_kernel(
         if (src_tp.get_ndim() < dst_tp.get_ndim()) {
             // If the src has fewer dimensions, broadcast it across this one
             self->m_src_stride = 0;
-            return ::make_assignment_kernel(
-                out_ckb, ckb_end, m_element_tp, dst_arrmeta, src_tp,
-                src_arrmeta, kernel_request_strided, errmode, ectx);
+            return ::make_assignment_kernel(out_ckb, ckb_end, m_element_tp,
+                                            dst_arrmeta, src_tp, src_arrmeta,
+                                            kernel_request_strided, ectx);
         } else if (src_tp.get_as_strided_dim(src_arrmeta, src_size,
                                              self->m_src_stride, src_el_tp,
                                              src_el_arrmeta)) {
@@ -524,13 +522,12 @@ size_t cfixed_dim_type::make_assignment_kernel(
 
             return ::make_assignment_kernel(
                 out_ckb, ckb_end, m_element_tp, dst_arrmeta, src_el_tp,
-                src_el_arrmeta, kernel_request_strided, errmode, ectx);
+                src_el_arrmeta, kernel_request_strided, ectx);
         } else if (!src_tp.is_builtin()) {
             // Give the src type a chance to make a kernel
-            return src_tp.extended()->make_assignment_kernel(out_ckb, ckb_offset,
-                            dst_tp, dst_arrmeta,
-                            src_tp, src_arrmeta,
-                            kernreq, errmode, ectx);
+            return src_tp.extended()->make_assignment_kernel(
+                out_ckb, ckb_offset, dst_tp, dst_arrmeta, src_tp, src_arrmeta,
+                kernreq, ectx);
         } else {
             stringstream ss;
             ss << "Cannot assign from " << src_tp << " to " << dst_tp;

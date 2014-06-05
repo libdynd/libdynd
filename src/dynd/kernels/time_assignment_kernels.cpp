@@ -36,11 +36,10 @@ namespace {
 } // anonymous namespace
 
 size_t dynd::make_string_to_time_assignment_kernel(
-                ckernel_builder *out_ckb, size_t ckb_offset,
-                const ndt::type& DYND_UNUSED(dst_time_tp),
-                const ndt::type& src_string_tp, const char *src_arrmeta,
-                kernel_request_t kernreq, assign_error_mode errmode,
-                const eval::eval_context *DYND_UNUSED(ectx))
+    ckernel_builder *out_ckb, size_t ckb_offset,
+    const ndt::type &DYND_UNUSED(dst_time_tp), const ndt::type &src_string_tp,
+    const char *src_arrmeta, kernel_request_t kernreq,
+    const eval::eval_context *ectx)
 {
     typedef string_to_time_ck self_type;
     // TODO: Use dst_time_tp when time zone is developed more.
@@ -53,7 +52,7 @@ size_t dynd::make_string_to_time_assignment_kernel(
     self_type *self = self_type::create_leaf(out_ckb, ckb_offset, kernreq);
     self->m_src_string_tp = src_string_tp;
     self->m_src_arrmeta = src_arrmeta;
-    self->m_errmode = errmode;
+    self->m_errmode = ectx->default_errmode;
     return ckb_offset + sizeof(self_type);
 }
 
@@ -81,11 +80,9 @@ namespace {
 } // anonymous namespace
 
 size_t dynd::make_time_to_string_assignment_kernel(
-                ckernel_builder *out_ckb, size_t ckb_offset,
-                const ndt::type& dst_string_tp, const char *dst_arrmeta,
-                const ndt::type& DYND_UNUSED(src_time_tp),
-                kernel_request_t kernreq, assign_error_mode errmode,
-                const eval::eval_context *DYND_UNUSED(ectx))
+    ckernel_builder *out_ckb, size_t ckb_offset, const ndt::type &dst_string_tp,
+    const char *dst_arrmeta, const ndt::type &DYND_UNUSED(src_time_tp),
+    kernel_request_t kernreq, const eval::eval_context *ectx)
 {
     typedef time_to_string_ck self_type;
     // TODO: Use src_time_tp when time zone is developed more.
@@ -98,7 +95,7 @@ size_t dynd::make_time_to_string_assignment_kernel(
     self_type *self = self_type::create_leaf(out_ckb, ckb_offset, kernreq);
     self->m_dst_string_tp = dst_string_tp;
     self->m_dst_arrmeta = dst_arrmeta;
-    self->m_errmode = errmode;
+    self->m_errmode = ectx->default_errmode;
     return ckb_offset + sizeof(self_type);
 }
 

@@ -229,11 +229,11 @@ size_t base_type::iterdata_destruct(iterdata_common *DYND_UNUSED(iterdata), intp
 }
 
 size_t base_type::make_assignment_kernel(
-                ckernel_builder *DYND_UNUSED(out), size_t DYND_UNUSED(offset_out),
-                const ndt::type& dst_tp, const char *DYND_UNUSED(dst_arrmeta),
-                const ndt::type& src_tp, const char *DYND_UNUSED(src_arrmeta),
-                kernel_request_t DYND_UNUSED(kernreq), assign_error_mode DYND_UNUSED(errmode),
-                const eval::eval_context *DYND_UNUSED(ectx)) const
+    ckernel_builder *DYND_UNUSED(out), size_t DYND_UNUSED(offset_out),
+    const ndt::type &dst_tp, const char *DYND_UNUSED(dst_arrmeta),
+    const ndt::type &src_tp, const char *DYND_UNUSED(src_arrmeta),
+    kernel_request_t DYND_UNUSED(kernreq),
+    const eval::eval_context *DYND_UNUSED(ectx)) const
 {
     stringstream ss;
     ss << "make_assignment_kernel has not been implemented for ";

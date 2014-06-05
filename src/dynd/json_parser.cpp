@@ -609,6 +609,13 @@ static void parse_option_json(const ndt::type &tp, const char *arrmeta,
         case complex_kind:
             parse_number_json(value_tp, arrmeta, out_data, begin, end, true, ectx);
             return;
+        case string_kind:
+            if (parse_token(begin, end, "null")) {
+                tp.tcast<option_type>()->assign_na(arrmeta, out_data, ectx);
+            } else {
+                parse_string_json(value_tp, arrmeta, out_data, begin, end);
+            }
+            return;
         default:
             break;
     }

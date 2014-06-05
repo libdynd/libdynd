@@ -175,41 +175,23 @@ void dynd::typed_data_copy(const ndt::type& tp,
         memcpy(dst_data, src_data, data_size);
     } else {
         assignment_ckernel_builder k;
-        make_assignment_kernel(&k, 0, tp, dst_arrmeta,
-                        tp, src_arrmeta,
-                        kernel_request_single,
-                        assign_error_none, &eval::default_eval_context);
+        make_assignment_kernel(&k, 0, tp, dst_arrmeta, tp, src_arrmeta,
+                               kernel_request_single,
+                               &eval::default_eval_context);
         k(dst_data, src_data);
     }
 }
 
-void dynd::typed_data_assign(const ndt::type& dst_tp, const char *dst_arrmeta, char *dst_data,
-                const ndt::type& src_tp, const char *src_arrmeta, const char *src_data,
-                assign_error_mode errmode, const eval::eval_context *ectx)
+void dynd::typed_data_assign(const ndt::type &dst_tp, const char *dst_arrmeta,
+                             char *dst_data, const ndt::type &src_tp,
+                             const char *src_arrmeta, const char *src_data,
+                             const eval::eval_context *ectx)
 {
     DYND_ASSERT_ALIGNED(dst, 0, dst_tp.get_data_alignment(), "dst type: " << dst_tp << ", src type: " << src_tp);
     DYND_ASSERT_ALIGNED(src, 0, src_dt.get_data_alignment(), "src type: " << src_tp << ", dst type: " << dst_tp);
 
-    if (errmode == assign_error_default) {
-        if (ectx != NULL) {
-            if (dst_tp.get_dtype().get_type_id() == cuda_device_type_id && src_tp.get_dtype().get_type_id() == cuda_device_type_id) {
-                errmode = ectx->default_cuda_device_errmode;
-            } else {
-                errmode = ectx->default_errmode;
-            }
-        } else if (dst_tp == src_tp) {
-            errmode = assign_error_none;
-        } else {
-            stringstream ss;
-            ss << "assignment from " << src_tp << " to " << dst_tp << " with default error mode requires an eval_context";
-            throw dynd::type_error(ss.str());
-        }
-    }
-
     assignment_ckernel_builder k;
-    make_assignment_kernel(&k, 0, dst_tp, dst_arrmeta,
-                    src_tp, src_arrmeta,
-                    kernel_request_single,
-                    errmode, ectx);
+    make_assignment_kernel(&k, 0, dst_tp, dst_arrmeta, src_tp, src_arrmeta,
+                           kernel_request_single, ectx);
     k(dst_data, src_data);
 }

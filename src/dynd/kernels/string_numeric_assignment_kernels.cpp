@@ -411,11 +411,9 @@ static unary_single_operation_t static_string_to_builtin_kernels[builtin_type_id
     };
 
 size_t dynd::make_string_to_builtin_assignment_kernel(
-                ckernel_builder *out, size_t offset_out,
-                type_id_t dst_type_id,
-                const ndt::type& src_string_tp, const char *src_arrmeta,
-                kernel_request_t kernreq, assign_error_mode errmode,
-                const eval::eval_context *ectx)
+    ckernel_builder *out, size_t offset_out, type_id_t dst_type_id,
+    const ndt::type &src_string_tp, const char *src_arrmeta,
+    kernel_request_t kernreq, const eval::eval_context *ectx)
 {
     if (src_string_tp.get_kind() != string_kind) {
         stringstream ss;
@@ -436,9 +434,7 @@ size_t dynd::make_string_to_builtin_assignment_kernel(
         // The kernel data owns this reference
         e->src_string_tp = static_cast<const base_string_type *>(
             ndt::type(src_string_tp).release());
-        e->errmode = (errmode == assign_error_default)
-                         ? static_cast<assign_error_mode>(ectx->default_errmode)
-                         : errmode;
+        e->errmode = ectx->default_errmode;
         e->src_arrmeta = src_arrmeta;
         return offset_out + sizeof(string_to_builtin_kernel_extra);
     } else {
@@ -486,11 +482,9 @@ namespace {
 } // anonymous namespace
 
 size_t dynd::make_builtin_to_string_assignment_kernel(
-                ckernel_builder *out, size_t offset_out,
-                const ndt::type& dst_string_tp, const char *dst_arrmeta,
-                type_id_t src_type_id,
-                kernel_request_t kernreq, assign_error_mode errmode,
-                const eval::eval_context *ectx)
+    ckernel_builder *out, size_t offset_out, const ndt::type &dst_string_tp,
+    const char *dst_arrmeta, type_id_t src_type_id, kernel_request_t kernreq,
+    const eval::eval_context *ectx)
 {
     if (dst_string_tp.get_kind() != string_kind) {
         stringstream ss;
@@ -507,9 +501,7 @@ size_t dynd::make_builtin_to_string_assignment_kernel(
         // The kernel data owns this reference
         e->dst_string_tp = static_cast<const base_string_type *>(ndt::type(dst_string_tp).release());
         e->src_type_id = src_type_id;
-        e->errmode = (errmode == assign_error_default)
-                         ? static_cast<assign_error_mode>(ectx->default_errmode)
-                         : errmode;
+        e->errmode = ectx->default_errmode;
         e->dst_arrmeta = dst_arrmeta;
         return offset_out + sizeof(builtin_to_string_kernel_extra);
     } else {
@@ -519,9 +511,10 @@ size_t dynd::make_builtin_to_string_assignment_kernel(
     }
 }
 
-
 void dynd::assign_utf8_string_to_builtin(type_id_t dst_type_id, char *dst,
-                const char *str_begin, const char *str_end, assign_error_mode errmode)
+                                         const char *str_begin,
+                                         const char *str_end,
+                                         const eval::eval_context *ectx)
 {
     ndt::type dt = ndt::make_string();
     string_type_data d;
@@ -531,9 +524,8 @@ void dynd::assign_utf8_string_to_builtin(type_id_t dst_type_id, char *dst,
     md.blockref = NULL;
 
     assignment_ckernel_builder k;
-    make_string_to_builtin_assignment_kernel(&k, 0,
-                    dst_type_id,
-                    dt, reinterpret_cast<const char *>(&md),
-                    kernel_request_single, errmode, &eval::default_eval_context);
+    make_string_to_builtin_assignment_kernel(
+        &k, 0, dst_type_id, dt, reinterpret_cast<const char *>(&md),
+        kernel_request_single, ectx);
     k(dst, reinterpret_cast<const char *>(&d));
 }

@@ -30,9 +30,17 @@ static intptr_t instantiate_unary_assignment_ckernel(
         reinterpret_cast<uintptr_t>(self->data_ptr));
     if (dst_tp.value_type() == self->get_return_type() &&
             src_tp[0].value_type() == self->get_param_type(0)) {
-        return make_assignment_kernel(
-            ckb, ckb_offset, dst_tp, dst_arrmeta, src_tp[0], src_arrmeta[0],
-            (kernel_request_t)kernreq, errmode, ectx);
+        if (errmode == ectx->default_errmode) {
+            return make_assignment_kernel(
+                ckb, ckb_offset, dst_tp, dst_arrmeta, src_tp[0], src_arrmeta[0],
+                (kernel_request_t)kernreq, ectx);
+        } else {
+            eval::eval_context ectx_tmp(*ectx);
+            ectx_tmp.default_errmode = errmode;
+            return make_assignment_kernel(ckb, ckb_offset, dst_tp, dst_arrmeta,
+                                          src_tp[0], src_arrmeta[0],
+                                          (kernel_request_t)kernreq, &ectx_tmp);
+        }
     } else {
         stringstream ss;
         ss << "Cannot instantiate arrfunc for assigning from ";
@@ -78,15 +86,13 @@ static intptr_t instantiate_unary_property_ckernel(
         if (src_tp[0] == prop_src_tp.operand_type()) {
             return make_assignment_kernel(ckb, ckb_offset, dst_tp, dst_arrmeta,
                                           prop_src_tp, src_arrmeta[0],
-                                          (kernel_request_t)kernreq,
-                                          assign_error_default, ectx);
+                                          (kernel_request_t)kernreq, ectx);
         } else if (src_tp[0].value_type() == prop_src_tp.operand_type()) {
             return make_assignment_kernel(
                 ckb, ckb_offset, dst_tp, dst_arrmeta,
                 prop_src_tp.tcast<base_expression_type>()
                     ->with_replaced_storage_type(src_tp[0]),
-                src_arrmeta[0], (kernel_request_t)kernreq, assign_error_default,
-                ectx);
+                src_arrmeta[0], (kernel_request_t)kernreq, ectx);
         }
     }
 

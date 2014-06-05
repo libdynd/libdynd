@@ -499,11 +499,8 @@ public:
      * scalar types converts to the provided one.
      *
      * \param scalar_type  The scalar type to convert all scalars to.
-     * \param errmode       The error mode for the conversion.
      */
-    type with_replaced_scalar_types(
-        const type &scalar_type,
-        assign_error_mode errmode = assign_error_default) const;
+    type with_replaced_scalar_types(const type &scalar_type) const;
 
     /**
      * Replaces the data type of the this type with the provided one.

@@ -149,11 +149,9 @@ namespace {
 } // anonymous namespace
 
 size_t dynd::make_expression_assignment_kernel(
-                ckernel_builder *out, size_t offset_out,
-                const ndt::type& dst_tp, const char *dst_arrmeta,
-                const ndt::type& src_tp, const char *src_arrmeta,
-                kernel_request_t kernreq, assign_error_mode errmode,
-                const eval::eval_context *ectx)
+    ckernel_builder *out, size_t offset_out, const ndt::type &dst_tp,
+    const char *dst_arrmeta, const ndt::type &src_tp, const char *src_arrmeta,
+    kernel_request_t kernreq, const eval::eval_context *ectx)
 {
     if (dst_tp.get_kind() == expression_kind) {
         const base_expression_type *dst_bed = dst_tp.tcast<base_expression_type>();
@@ -189,7 +187,7 @@ size_t dynd::make_expression_assignment_kernel(
                 return ::make_assignment_kernel(out, offset_out + e->second_kernel_offset,
                                 opdt, dst_arrmeta,
                                 buffer_tp, e->buffer_arrmeta,
-                                kernreq, errmode, ectx);
+                                kernreq, ectx);
             }
         } else {
             ndt::type buffer_tp;
@@ -212,7 +210,7 @@ size_t dynd::make_expression_assignment_kernel(
             buffer_data_offset = ::make_assignment_kernel(out, offset_out + e->first_kernel_offset,
                             buffer_tp, e->buffer_arrmeta,
                             src_tp, src_arrmeta,
-                            kernreq, errmode, ectx);
+                            kernreq, ectx);
             // Allocate the buffer data
             buffer_data_offset = inc_to_alignment(buffer_data_offset, buffer_tp.get_data_alignment());
             out->ensure_capacity(offset_out + buffer_data_offset + buffer_data_size);
@@ -224,7 +222,7 @@ size_t dynd::make_expression_assignment_kernel(
             return ::make_assignment_kernel(out, offset_out + e->second_kernel_offset,
                             dst_tp, dst_arrmeta,
                             buffer_tp, e->buffer_arrmeta,
-                            kernreq, errmode, ectx);
+                            kernreq, ectx);
         }
     } else {
         const base_expression_type *src_bed = src_tp.tcast<base_expression_type>();
@@ -246,10 +244,9 @@ size_t dynd::make_expression_assignment_kernel(
                 // Construct the first kernel (src -> buffer)
                 e->first_kernel_offset = sizeof(buffered_kernel_extra);
                 size_t buffer_data_offset;
-                buffer_data_offset = ::make_assignment_kernel(out, offset_out + e->first_kernel_offset,
-                                buffer_tp, e->buffer_arrmeta,
-                                opdt, src_arrmeta,
-                                kernreq, errmode, ectx);
+                buffer_data_offset = ::make_assignment_kernel(
+                    out, offset_out + e->first_kernel_offset, buffer_tp,
+                    e->buffer_arrmeta, opdt, src_arrmeta, kernreq, ectx);
                 // Allocate the buffer data
                 buffer_data_offset = inc_to_alignment(buffer_data_offset, buffer_tp.get_data_alignment());
                 out->ensure_capacity(offset_out + buffer_data_offset + buffer_data_size);
@@ -273,22 +270,21 @@ size_t dynd::make_expression_assignment_kernel(
             // Construct the first kernel (src -> buffer)
             e->first_kernel_offset = sizeof(buffered_kernel_extra);
             size_t buffer_data_offset;
-            buffer_data_offset = ::make_assignment_kernel(out, offset_out + e->first_kernel_offset,
-                            buffer_tp, e->buffer_arrmeta,
-                            src_tp, src_arrmeta,
-                            kernreq, errmode, ectx);
+            buffer_data_offset = ::make_assignment_kernel(
+                out, offset_out + e->first_kernel_offset, buffer_tp,
+                e->buffer_arrmeta, src_tp, src_arrmeta, kernreq, ectx);
             // Allocate the buffer data
-            buffer_data_offset = inc_to_alignment(buffer_data_offset, buffer_tp.get_data_alignment());
+            buffer_data_offset = inc_to_alignment(
+                buffer_data_offset, buffer_tp.get_data_alignment());
             out->ensure_capacity(offset_out + buffer_data_offset + buffer_data_size);
             // This may have invalidated the 'e' pointer, so get it again!
             e = out->get_at<buffered_kernel_extra>(offset_out);
             e->buffer_data_offset = buffer_data_offset;
             // Construct the second kernel (buffer -> dst)
             e->second_kernel_offset = buffer_data_offset + e->buffer_data_size;
-            return ::make_assignment_kernel(out, offset_out + e->second_kernel_offset,
-                            dst_tp, dst_arrmeta,
-                            buffer_tp, e->buffer_arrmeta,
-                            kernreq, errmode, ectx);
+            return ::make_assignment_kernel(
+                out, offset_out + e->second_kernel_offset, dst_tp, dst_arrmeta,
+                buffer_tp, e->buffer_arrmeta, kernreq, ectx);
         }
     }
 }

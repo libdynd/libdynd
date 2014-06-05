@@ -171,11 +171,10 @@ static nd::array make_sorted_categories(const set<const char *, cmp>& uniques,
 {
     nd::array categories = nd::make_strided_array(uniques.size(), element_tp);
     assignment_ckernel_builder k;
-    make_assignment_kernel(&k, 0,
-                    element_tp, categories.get_arrmeta() + sizeof(strided_dim_type_arrmeta),
-                    element_tp, arrmeta,
-                    kernel_request_single, assign_error_default,
-                    &eval::default_eval_context);
+    make_assignment_kernel(
+        &k, 0, element_tp,
+        categories.get_arrmeta() + sizeof(strided_dim_type_arrmeta), element_tp,
+        arrmeta, kernel_request_single, &eval::default_eval_context);
 
     intptr_t stride = reinterpret_cast<const strided_dim_type_arrmeta *>(categories.get_arrmeta())->stride;
     char *dst_ptr = categories.get_readwrite_originptr();
@@ -374,8 +373,9 @@ nd::array categorical_type::get_categories() const
     array_iter<1,0> iter(categories);
     assignment_ckernel_builder k;
     ::make_assignment_kernel(&k, 0, iter.get_uniform_dtype(), iter.arrmeta(),
-                    m_category_tp, get_category_arrmeta(),
-                    kernel_request_single, assign_error_default, &eval::default_eval_context);
+                             m_category_tp, get_category_arrmeta(),
+                             kernel_request_single,
+                             &eval::default_eval_context);
     if (!iter.empty()) {
         uint32_t i = 0;
         do {
@@ -403,11 +403,9 @@ bool categorical_type::is_lossless_assignment(const ndt::type& dst_tp, const ndt
 }
 
 size_t categorical_type::make_assignment_kernel(
-                ckernel_builder *out, size_t offset_out,
-                const ndt::type& dst_tp, const char *dst_arrmeta,
-                const ndt::type& src_tp, const char *src_arrmeta,
-                kernel_request_t kernreq, assign_error_mode errmode,
-                const eval::eval_context *ectx) const
+    ckernel_builder *out, size_t offset_out, const ndt::type &dst_tp,
+    const char *dst_arrmeta, const ndt::type &src_tp, const char *src_arrmeta,
+    kernel_request_t kernreq, const eval::eval_context *ectx) const
 {
     if (this == dst_tp.extended()) {
         if (this == src_tp.extended()) {
@@ -455,13 +453,13 @@ size_t categorical_type::make_assignment_kernel(
             return src_cvt_tp.extended()->make_assignment_kernel(out, offset_out,
                             dst_tp, dst_arrmeta,
                             src_cvt_tp, src_arrmeta,
-                            kernreq, errmode, ectx);
+                            kernreq, ectx);
         } else {
             // Let the src_tp handle it
             return src_tp.extended()->make_assignment_kernel(out, offset_out,
                             dst_tp, dst_arrmeta,
                             src_tp, src_arrmeta,
-                            kernreq, errmode, ectx);
+                            kernreq, ectx);
         }
     }
     else {
@@ -485,10 +483,10 @@ size_t categorical_type::make_assignment_kernel(
             e->base.destructor = &categorical_to_other_kernel_extra::destruct;
             // The kernel type owns a reference to this type
             e->src_cat_tp = static_cast<const categorical_type *>(ndt::type(src_tp).release());
-            return ::make_assignment_kernel(out, offset_out + sizeof(categorical_to_other_kernel_extra),
-                            dst_tp, dst_arrmeta,
-                            get_category_type(), get_category_arrmeta(),
-                            kernel_request_single, errmode, ectx);
+            return ::make_assignment_kernel(
+                out, offset_out + sizeof(categorical_to_other_kernel_extra),
+                dst_tp, dst_arrmeta, get_category_type(),
+                get_category_arrmeta(), kernel_request_single, ectx);
         }
         else {
             stringstream ss;

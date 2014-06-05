@@ -54,11 +54,9 @@ namespace {
 } // anonymous namespace
 
 size_t ndarrayarg_type::make_assignment_kernel(
-    ckernel_builder *ckb, size_t ckb_offset,
-    const ndt::type &dst_tp, const char *DYND_UNUSED(dst_arrmeta),
-    const ndt::type &src_tp, const char *DYND_UNUSED(src_arrmeta),
-    kernel_request_t kernreq,
-    assign_error_mode DYND_UNUSED(errmode),
+    ckernel_builder *ckb, size_t ckb_offset, const ndt::type &dst_tp,
+    const char *DYND_UNUSED(dst_arrmeta), const ndt::type &src_tp,
+    const char *DYND_UNUSED(src_arrmeta), kernel_request_t kernreq,
     const eval::eval_context *DYND_UNUSED(ectx)) const
 {
     if (this == dst_tp.extended() && src_tp.get_type_id() == ndarrayarg_type_id) {

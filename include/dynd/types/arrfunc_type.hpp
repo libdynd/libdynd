@@ -36,19 +36,20 @@ public:
     void data_destruct_strided(const char *arrmeta, char *data,
                     intptr_t stride, size_t count) const;
 
-    size_t make_assignment_kernel(
-                    ckernel_builder *out, size_t offset_out,
-                    const ndt::type& dst_tp, const char *dst_arrmeta,
-                    const ndt::type& src_tp, const char *src_arrmeta,
-                    kernel_request_t kernreq, assign_error_mode errmode,
-                    const eval::eval_context *ectx) const;
+    size_t make_assignment_kernel(ckernel_builder *out, size_t offset_out,
+                                  const ndt::type &dst_tp,
+                                  const char *dst_arrmeta,
+                                  const ndt::type &src_tp,
+                                  const char *src_arrmeta,
+                                  kernel_request_t kernreq,
+                                  const eval::eval_context *ectx) const;
 
     void get_dynamic_array_properties(
-                    const std::pair<std::string, gfunc::callable> **out_properties,
-                    size_t *out_count) const;
+        const std::pair<std::string, gfunc::callable> **out_properties,
+        size_t *out_count) const;
     void get_dynamic_array_functions(
-                    const std::pair<std::string, gfunc::callable> **out_functions,
-                    size_t *out_count) const;
+        const std::pair<std::string, gfunc::callable> **out_functions,
+        size_t *out_count) const;
 };
 
 namespace ndt {

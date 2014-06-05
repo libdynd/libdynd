@@ -155,7 +155,6 @@ namespace kernels {
  * \param src_tp  The source dynd type.
  * \param src_arrmeta  Arrmeta for the source data
  * \param kernreq  What kind of kernel must be placed in 'ckb'.
- * \param errmode  The error mode to use for assignments.
  * \param ectx  DyND evaluation context.
  *
  * \returns  The offset within 'ckb' immediately after the
@@ -165,7 +164,6 @@ size_t make_assignment_kernel(ckernel_builder *ckb, size_t ckb_offset,
                               const ndt::type &dst_tp, const char *dst_arrmeta,
                               const ndt::type &src_tp, const char *src_arrmeta,
                               kernel_request_t kernreq,
-                              assign_error_mode errmode,
                               const eval::eval_context *ectx);
 
 /**
@@ -281,7 +279,7 @@ size_t make_cuda_assignment_kernel(
                 ckernel_builder *ckb, size_t ckb_offset,
                 const ndt::type& dst_tp, const char *dst_arrmeta,
                 const ndt::type& src_tp, const char *src_arrmeta,
-                kernel_request_t kernreq, assign_error_mode errmode,
+                kernel_request_t kernreq,
                 const eval::eval_context *ectx);
 
 /**

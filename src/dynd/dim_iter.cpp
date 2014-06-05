@@ -187,20 +187,21 @@ void dynd::make_buffered_strided_dim_iter(
         buffer_elcount = size;
     }
     buffer_shape[0] = buffer_elcount;
-    nd::array buf = nd::array(make_array_memory_block(ndt::make_strided_dim(val_tp), buffer_ndim, buffer_shape.get()));
+    nd::array buf = nd::array(make_array_memory_block(
+        ndt::make_strided_dim(val_tp), buffer_ndim, buffer_shape.get()));
     if (buffer_ndim > 2 && val_tp.get_type_id() == strided_dim_type_id) {
         // Reorder the strides to preserve F-order if it's a strided array
         val_tp.tcast<strided_dim_type>()->reorder_default_constructed_strides(
-                            buf.get_arrmeta() + sizeof(strided_dim_type_arrmeta), mem_tp, mem_arrmeta);
+            buf.get_arrmeta() + sizeof(strided_dim_type_arrmeta), mem_tp,
+            mem_arrmeta);
     }
-    intptr_t buffer_stride = reinterpret_cast<const strided_dim_type_arrmeta *>(buf.get_arrmeta())->stride;
+    intptr_t buffer_stride = reinterpret_cast<const strided_dim_type_arrmeta *>(
+                                 buf.get_arrmeta())->stride;
     // Make the ckernel that copies data to the buffer
     ckernel_builder k;
     make_assignment_kernel(&k, 0, val_tp,
-        buf.get_arrmeta() + sizeof(strided_dim_type_arrmeta),
-        mem_tp, mem_arrmeta,
-        kernel_request_strided,
-        ectx->default_errmode, ectx);
+                           buf.get_arrmeta() + sizeof(strided_dim_type_arrmeta),
+                           mem_tp, mem_arrmeta, kernel_request_strided, ectx);
 
     if (buffer_elcount == size) {
         // If the buffer is big enough for all the data, just make a copy and

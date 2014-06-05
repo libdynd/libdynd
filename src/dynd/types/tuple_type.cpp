@@ -82,11 +82,11 @@ bool tuple_type::is_lossless_assignment(const ndt::type& dst_tp, const ndt::type
 }
 
 size_t tuple_type::make_assignment_kernel(
-                ckernel_builder *DYND_UNUSED(out_ckb), size_t DYND_UNUSED(ckb_offset),
-                const ndt::type& dst_tp, const char *DYND_UNUSED(dst_arrmeta),
-                const ndt::type& src_tp, const char *DYND_UNUSED(src_arrmeta),
-                kernel_request_t DYND_UNUSED(kernreq), assign_error_mode DYND_UNUSED(errmode),
-                const eval::eval_context *DYND_UNUSED(ectx)) const
+    ckernel_builder *DYND_UNUSED(out_ckb), size_t DYND_UNUSED(ckb_offset),
+    const ndt::type &dst_tp, const char *DYND_UNUSED(dst_arrmeta),
+    const ndt::type &src_tp, const char *DYND_UNUSED(src_arrmeta),
+    kernel_request_t DYND_UNUSED(kernreq),
+    const eval::eval_context *DYND_UNUSED(ectx)) const
 {
     /*
     if (this == dst_tp.extended()) {

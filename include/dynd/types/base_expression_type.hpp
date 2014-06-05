@@ -61,10 +61,13 @@ public:
     ndt::type get_canonical_type() const;
 
     // Expression types use the values from their operand type.
-    void arrmeta_default_construct(char *arrmeta, intptr_t ndim, const intptr_t* shape) const;
-    void arrmeta_copy_construct(char *dst_arrmeta, const char *src_arrmeta, memory_block_data *embedded_reference) const;
+    void arrmeta_default_construct(char *arrmeta, intptr_t ndim,
+                                   const intptr_t *shape) const;
+    void arrmeta_copy_construct(char *dst_arrmeta, const char *src_arrmeta,
+                                memory_block_data *embedded_reference) const;
     void arrmeta_destruct(char *arrmeta) const;
-    void arrmeta_debug_print(const char *arrmeta, std::ostream& o, const std::string& indent) const;
+    void arrmeta_debug_print(const char *arrmeta, std::ostream &o,
+                             const std::string &indent) const;
 
     // Expression types stop the iterdata chain
     // TODO: Maybe it should be more flexible?
@@ -72,29 +75,31 @@ public:
 
     /** Makes a kernel which converts from (operand_type().value_type()) to (value_type()) */
     virtual size_t make_operand_to_value_assignment_kernel(
-                    ckernel_builder *out, size_t offset_out,
-                    const char *dst_arrmeta, const char *src_arrmeta,
-                    kernel_request_t kernreq, const eval::eval_context *ectx) const;
+        ckernel_builder *out, size_t offset_out, const char *dst_arrmeta,
+        const char *src_arrmeta, kernel_request_t kernreq,
+        const eval::eval_context *ectx) const;
 
     /** Makes a kernel which converts from (value_type()) to (operand_type().value_type()) */
     virtual size_t make_value_to_operand_assignment_kernel(
-                    ckernel_builder *out, size_t offset_out,
-                    const char *dst_arrmeta, const char *src_arrmeta,
-                    kernel_request_t kernreq, const eval::eval_context *ectx) const;
+        ckernel_builder *out, size_t offset_out, const char *dst_arrmeta,
+        const char *src_arrmeta, kernel_request_t kernreq,
+        const eval::eval_context *ectx) const;
 
-    size_t make_assignment_kernel(
-                    ckernel_builder *out, size_t offset_out,
-                    const ndt::type& dst_tp, const char *dst_arrmeta,
-                    const ndt::type& src_tp, const char *src_arrmeta,
-                    kernel_request_t kernreq, assign_error_mode errmode,
-                    const eval::eval_context *ectx) const;
+    size_t make_assignment_kernel(ckernel_builder *out, size_t offset_out,
+                                  const ndt::type &dst_tp,
+                                  const char *dst_arrmeta,
+                                  const ndt::type &src_tp,
+                                  const char *src_arrmeta,
+                                  kernel_request_t kernreq,
+                                  const eval::eval_context *ectx) const;
 
-    size_t make_comparison_kernel(
-                    ckernel_builder *out, size_t offset_out,
-                    const ndt::type& src0_dt, const char *src0_arrmeta,
-                    const ndt::type& src1_dt, const char *src1_arrmeta,
-                    comparison_type_t comptype,
-                    const eval::eval_context *ectx) const;
+    size_t make_comparison_kernel(ckernel_builder *out, size_t offset_out,
+                                  const ndt::type &src0_dt,
+                                  const char *src0_arrmeta,
+                                  const ndt::type &src1_dt,
+                                  const char *src1_arrmeta,
+                                  comparison_type_t comptype,
+                                  const eval::eval_context *ectx) const;
 };
 
 } // namespace dynd

@@ -98,23 +98,12 @@ static void unaligned_copy_strided(char *dst, intptr_t dst_stride,
 }
 
 size_t dynd::make_assignment_kernel(
-                ckernel_builder *out, size_t offset_out,
-                const ndt::type& dst_tp, const char *dst_arrmeta,
-                const ndt::type& src_tp, const char *src_arrmeta,
-                kernel_request_t kernreq, assign_error_mode errmode,
-                const eval::eval_context *ectx)
+    ckernel_builder *out, size_t offset_out, const ndt::type &dst_tp,
+    const char *dst_arrmeta, const ndt::type &src_tp, const char *src_arrmeta,
+    kernel_request_t kernreq, const eval::eval_context *ectx)
 {
-    if (errmode == assign_error_default && ectx != NULL) {
-        errmode = ectx->default_errmode;
-    }
-
     if (dst_tp.is_builtin()) {
         if (src_tp.is_builtin()) {
-            // If the casting can be done losslessly, disable the error check to find faster code paths
-            if (errmode != assign_error_none && is_lossless_assignment(dst_tp, src_tp)) {
-                errmode = assign_error_none;
-            }
-
             if (dst_tp.extended() == src_tp.extended()) {
                 return make_pod_typed_data_assignment_kernel(out, offset_out,
                                 dst_tp.get_data_size(), dst_tp.get_data_alignment(),
@@ -122,19 +111,19 @@ size_t dynd::make_assignment_kernel(
             } else {
                 return make_builtin_type_assignment_kernel(out, offset_out,
                                 dst_tp.get_type_id(), src_tp.get_type_id(),
-                                kernreq, errmode);
+                                kernreq, ectx->default_errmode);
             }
         } else {
             return src_tp.extended()->make_assignment_kernel(out, offset_out,
                             dst_tp, dst_arrmeta,
                             src_tp, src_arrmeta,
-                            kernreq, errmode, ectx);
+                            kernreq, ectx);
         }
     } else {
         return dst_tp.extended()->make_assignment_kernel(out, offset_out,
                         dst_tp, dst_arrmeta,
                         src_tp, src_arrmeta,
-                        kernreq, errmode, ectx);
+                        kernreq, ectx);
     }
 }
 

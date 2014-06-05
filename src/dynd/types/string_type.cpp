@@ -11,6 +11,7 @@
 #include <dynd/types/fixedstring_type.hpp>
 #include <dynd/types/strided_dim_type.hpp>
 #include <dynd/types/option_type.hpp>
+#include <dynd/types/typevar_type.hpp>
 #include <dynd/iter/string_iter.hpp>
 #include <dynd/exceptions.hpp>
 
@@ -220,47 +221,42 @@ void string_type::arrmeta_debug_print(const char *arrmeta, std::ostream& o, cons
 }
 
 size_t string_type::make_assignment_kernel(
-                ckernel_builder *out, size_t offset_out,
-                const ndt::type& dst_tp, const char *dst_arrmeta,
-                const ndt::type& src_tp, const char *src_arrmeta,
-                kernel_request_t kernreq, assign_error_mode errmode,
-                const eval::eval_context *ectx) const
+    ckernel_builder *out, size_t offset_out, const ndt::type &dst_tp,
+    const char *dst_arrmeta, const ndt::type &src_tp, const char *src_arrmeta,
+    kernel_request_t kernreq, const eval::eval_context *ectx) const
 {
     if (this == dst_tp.extended()) {
         switch (src_tp.get_type_id()) {
             case string_type_id: {
-                return make_blockref_string_assignment_kernel(out, offset_out,
-                                dst_arrmeta, get_encoding(),
-                                src_arrmeta, src_tp.tcast<base_string_type>()->get_encoding(),
-                                kernreq, errmode, ectx);
+                return make_blockref_string_assignment_kernel(
+                    out, offset_out, dst_arrmeta, get_encoding(), src_arrmeta,
+                    src_tp.tcast<base_string_type>()->get_encoding(), kernreq,
+                    ectx);
             }
             case fixedstring_type_id: {
-                return make_fixedstring_to_blockref_string_assignment_kernel(out, offset_out,
-                                dst_arrmeta, get_encoding(),
-                                src_tp.get_data_size(),
-                                src_tp.tcast<base_string_type>()->get_encoding(),
-                                kernreq, errmode, ectx);
+                return make_fixedstring_to_blockref_string_assignment_kernel(
+                    out, offset_out, dst_arrmeta, get_encoding(),
+                    src_tp.get_data_size(),
+                    src_tp.tcast<base_string_type>()->get_encoding(), kernreq,
+                    ectx);
             }
             default: {
                 if (!src_tp.is_builtin()) {
-                    return src_tp.extended()->make_assignment_kernel(out, offset_out,
-                                    dst_tp, dst_arrmeta,
-                                    src_tp, src_arrmeta,
-                                    kernreq, errmode, ectx);
+                    return src_tp.extended()->make_assignment_kernel(
+                        out, offset_out, dst_tp, dst_arrmeta, src_tp,
+                        src_arrmeta, kernreq, ectx);
                 } else {
-                    return make_builtin_to_string_assignment_kernel(out, offset_out,
-                                dst_tp, dst_arrmeta,
-                                src_tp.get_type_id(),
-                                kernreq, errmode, ectx);
+                    return make_builtin_to_string_assignment_kernel(
+                        out, offset_out, dst_tp, dst_arrmeta,
+                        src_tp.get_type_id(), kernreq, ectx);
                 }
             }
         }
     } else {
         if (dst_tp.is_builtin()) {
-            return make_string_to_builtin_assignment_kernel(out, offset_out,
-                            dst_tp.get_type_id(),
-                            src_tp, src_arrmeta,
-                            kernreq, errmode, ectx);
+            return make_string_to_builtin_assignment_kernel(
+                out, offset_out, dst_tp.get_type_id(), src_tp, src_arrmeta,
+                kernreq, ectx);
         } else {
             stringstream ss;
             ss << "Cannot assign from " << src_tp << " to " << dst_tp;
@@ -270,11 +266,10 @@ size_t string_type::make_assignment_kernel(
 }
 
 size_t string_type::make_comparison_kernel(
-                ckernel_builder *out, size_t offset_out,
-                const ndt::type& src0_dt, const char *src0_arrmeta,
-                const ndt::type& src1_dt, const char *src1_arrmeta,
-                comparison_type_t comptype,
-                const eval::eval_context *ectx) const
+    ckernel_builder *out, size_t offset_out, const ndt::type &src0_dt,
+    const char *src0_arrmeta, const ndt::type &src1_dt,
+    const char *src1_arrmeta, comparison_type_t comptype,
+    const eval::eval_context *ectx) const
 {
     if (this == src0_dt.extended()) {
         if (*this == *src1_dt.extended()) {
@@ -314,24 +309,128 @@ void string_type::make_string_iter(dim_iter *out_di, string_encoding_t encoding,
 }
 
 namespace {
-struct string_is_avail_ck : public kernels::assignment_ck<string_is_avail_ck> {
-    inline static ndt::type proto() {
-        return ndt::type("(?T) -> bool");
-    }
-
-    inline void single(char *dst, const char *src)
+struct string_is_avail_ck {
+    static void single(char *dst, const char *src,
+                       ckernel_prefix *DYND_UNUSED(self))
     {
         const string_type_data *std =
             reinterpret_cast<const string_type_data *>(src);
-        *dst = std->begin == NULL && std->end == NULL;
+        *dst = std->begin != NULL;
     }
 
+    static void strided(char *dst, intptr_t dst_stride, const char *src,
+                        intptr_t src_stride, size_t count,
+                        ckernel_prefix *DYND_UNUSED(self))
+    {
+        for (size_t i = 0; i != count;
+                ++i, dst += dst_stride, src += src_stride) {
+            const string_type_data *std =
+                reinterpret_cast<const string_type_data *>(src);
+            *dst = std->begin != NULL;
+        }
+    }
+
+    static intptr_t instantiate(const arrfunc_type_data *DYND_UNUSED(self),
+                                dynd::ckernel_builder *ckb, intptr_t ckb_offset,
+                                const ndt::type &dst_tp,
+                                const char *DYND_UNUSED(dst_arrmeta),
+                                const ndt::type *src_tp,
+                                const char *const *DYND_UNUSED(src_arrmeta),
+                                uint32_t kernreq,
+                                const eval::eval_context *DYND_UNUSED(ectx))
+    {
+        if (src_tp[0].get_type_id() != option_type_id ||
+                src_tp[0].tcast<option_type>()->get_value_type().get_type_id() !=
+                    string_type_id) {
+            stringstream ss;
+            ss << "Expected source type ?string, got " << src_tp[0];
+            throw type_error(ss.str());
+        }
+        if (dst_tp.get_type_id() != bool_type_id) {
+            stringstream ss;
+            ss << "Expected destination type bool, got " << dst_tp;
+            throw type_error(ss.str());
+        }
+        ckernel_prefix *ckp = ckb->get_at<ckernel_prefix>(ckb_offset);
+        ckp->set_unary_function<string_is_avail_ck>((kernel_request_t)kernreq);
+        return ckb_offset + sizeof(ckernel_prefix);
+    }
+};
+
+struct string_assign_na_ck {
+    static void single(char *dst, const char *const *DYND_UNUSED(src),
+                       ckernel_prefix *DYND_UNUSED(self))
+    {
+        const string_type_data *std =
+            reinterpret_cast<const string_type_data *>(dst);
+        if (std->begin != NULL) {
+cout << "std->begin ptr " << (void *)std->begin << endl;
+cout << "std->end ptr " << (void *)std->end << endl;
+print_escaped_utf8_string(cout, std->begin, std->end);
+            throw invalid_argument("Cannot assign an NA to a dynd string after "
+                                   "it has been allocated");
+        }
+    }
+
+    static void strided(char *dst, intptr_t dst_stride,
+                        const char *const *DYND_UNUSED(src),
+                        const intptr_t *DYND_UNUSED(src_stride), size_t count,
+                        ckernel_prefix *DYND_UNUSED(self))
+    {
+        for (size_t i = 0; i != count; ++i, dst += dst_stride) {
+            const string_type_data *std =
+                reinterpret_cast<const string_type_data *>(dst);
+            if (std->begin != NULL) {
+                throw invalid_argument(
+                    "Cannot assign an NA to a dynd string after "
+                    "it has been allocated");
+            }
+        }
+    }
+
+    static intptr_t instantiate(const arrfunc_type_data *DYND_UNUSED(self),
+                                dynd::ckernel_builder *ckb, intptr_t ckb_offset,
+                                const ndt::type &dst_tp,
+                                const char *DYND_UNUSED(dst_arrmeta),
+                                const ndt::type *DYND_UNUSED(src_tp),
+                                const char *const *DYND_UNUSED(src_arrmeta),
+                                uint32_t kernreq,
+                                const eval::eval_context *DYND_UNUSED(ectx))
+    {
+        if (dst_tp.get_type_id() != option_type_id ||
+                dst_tp.tcast<option_type>()->get_value_type().get_type_id() !=
+                    string_type_id) {
+            stringstream ss;
+            ss << "Expected destination type ?string, got " << dst_tp;
+            throw type_error(ss.str());
+        }
+        ckernel_prefix *ckp = ckb->get_at<ckernel_prefix>(ckb_offset);
+        ckp->set_expr_function<string_assign_na_ck>((kernel_request_t)kernreq);
+        return ckb_offset + sizeof(ckernel_prefix);
+    }
 };
 } // anonymous namespace
 
 nd::array string_type::get_option_nafunc() const
 {
-    return nd::array();
+    nd::array naf = nd::empty(option_type::make_nafunc_type());
+    arrfunc_type_data *is_avail =
+        reinterpret_cast<arrfunc_type_data *>(naf.get_ndo()->m_data_pointer);
+    arrfunc_type_data *assign_na = is_avail + 1;
+
+    // Use a typevar instead of option[T] to avoid a circular dependency
+    is_avail->func_proto = ndt::make_funcproto(ndt::make_typevar("T"),
+                                               ndt::make_type<dynd_bool>());
+    is_avail->ckernel_funcproto = unary_operation_funcproto;
+    is_avail->data_ptr = NULL;
+    is_avail->instantiate = &string_is_avail_ck::instantiate;
+    assign_na->func_proto =
+        ndt::make_funcproto(0, NULL, ndt::make_typevar("T"));
+    assign_na->ckernel_funcproto = expr_operation_funcproto;
+    assign_na->data_ptr = NULL;
+    assign_na->instantiate = &string_assign_na_ck::instantiate;
+    naf.flag_as_immutable();
+    return naf;
 }
 
 const ndt::type& ndt::make_string()

@@ -64,7 +64,6 @@ void
 typed_data_assign(const ndt::type &dst_tp, const char *dst_arrmeta,
                   char *dst_data, const ndt::type &src_tp,
                   const char *src_arrmeta, const char *src_data,
-                  assign_error_mode errmode = assign_error_default,
                   const eval::eval_context *ectx = &eval::default_eval_context);
 
 } // namespace dynd

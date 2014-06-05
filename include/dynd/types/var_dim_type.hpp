@@ -95,12 +95,13 @@ public:
     size_t iterdata_construct(iterdata_common *iterdata, const char **inout_arrmeta, intptr_t ndim, const intptr_t* shape, ndt::type& out_uniform_tp) const;
     size_t iterdata_destruct(iterdata_common *iterdata, intptr_t ndim) const;
 
-    size_t make_assignment_kernel(
-                    ckernel_builder *out, size_t offset_out,
-                    const ndt::type& dst_tp, const char *dst_arrmeta,
-                    const ndt::type& src_tp, const char *src_arrmeta,
-                    kernel_request_t kernreq, assign_error_mode errmode,
-                    const eval::eval_context *ectx) const;
+    size_t make_assignment_kernel(ckernel_builder *out, size_t offset_out,
+                                  const ndt::type &dst_tp,
+                                  const char *dst_arrmeta,
+                                  const ndt::type &src_tp,
+                                  const char *src_arrmeta,
+                                  kernel_request_t kernreq,
+                                  const eval::eval_context *ectx) const;
 
     void foreach_leading(const char *arrmeta, char *data,
                          foreach_fn_t callback, void *callback_data) const;
