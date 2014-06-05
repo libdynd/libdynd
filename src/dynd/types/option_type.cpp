@@ -310,6 +310,13 @@ size_t option_type::make_assignment_kernel(
     const char *dst_arrmeta, const ndt::type &src_tp, const char *src_arrmeta,
     kernel_request_t kernreq, const eval::eval_context *ectx) const
 {
+    // Let expression types resolve themselves first
+    if (this == dst_tp.extended() && src_tp.get_kind() == expression_kind) {
+        return src_tp.extended()->make_assignment_kernel(
+            ckb, ckb_offset, dst_tp, dst_arrmeta, src_tp, src_arrmeta, kernreq,
+            ectx);
+    }
+
     return kernels::make_option_assignment_kernel(ckb, ckb_offset, dst_tp,
                                                   dst_arrmeta, src_tp,
                                                   src_arrmeta, kernreq, ectx);

@@ -84,3 +84,14 @@ TEST(OptionType, OptionIntAssign) {
     EXPECT_ARR_EQ(nd::view(c, "strided * int32"),
                   nd::view(b, "strided * int32"));
 }
+
+TEST(OptionType, Cast) {
+    nd::array a, b;
+
+    a = parse_json("3 * string", "[\"null\", \"NA\", \"25\"]");
+    b = a.ucast(ndt::type("?int"));
+    b = b.eval();
+    EXPECT_ARR_EQ(
+        nd::view(parse_json("3 * ?int", "[null, null, 25]"), "3 * int"),
+        nd::view(b, "3 * int"));
+}
