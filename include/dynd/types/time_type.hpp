@@ -26,9 +26,9 @@ public:
     void set_time(const char *arrmeta, char *data, assign_error_mode errmode,
                   int32_t hour, int32_t minute, int32_t second,
                   int32_t tick) const;
-    void set_utf8_string(const char *arrmeta, char *data,
-                         const std::string &utf8_str,
-                         const eval::eval_context *ectx) const;
+    void set_from_utf8_string(const char *arrmeta, char *data,
+                              const char *utf8_begin, const char *utf8_end,
+                              const eval::eval_context *ectx) const;
 
     time_hmst get_time(const char *arrmeta, const char *data) const;
 
@@ -78,19 +78,20 @@ public:
         const std::pair<std::string, gfunc::callable> **out_functions,
         size_t *out_count) const;
 
-    size_t get_elwise_property_index(const std::string& property_name) const;
+    size_t get_elwise_property_index(const std::string &property_name) const;
     ndt::type get_elwise_property_type(size_t elwise_property_index,
-                    bool& out_readable, bool& out_writable) const;
+                                       bool &out_readable,
+                                       bool &out_writable) const;
     size_t make_elwise_property_getter_kernel(
-                    ckernel_builder *out, size_t offset_out,
-                    const char *dst_arrmeta,
-                    const char *src_arrmeta, size_t src_elwise_property_index,
-                    kernel_request_t kernreq, const eval::eval_context *ectx) const;
+        ckernel_builder *out, size_t offset_out, const char *dst_arrmeta,
+        const char *src_arrmeta, size_t src_elwise_property_index,
+        kernel_request_t kernreq, const eval::eval_context *ectx) const;
     size_t make_elwise_property_setter_kernel(
-                    ckernel_builder *out, size_t offset_out,
-                    const char *dst_arrmeta, size_t dst_elwise_property_index,
-                    const char *src_arrmeta,
-                    kernel_request_t kernreq, const eval::eval_context *ectx) const;
+        ckernel_builder *out, size_t offset_out, const char *dst_arrmeta,
+        size_t dst_elwise_property_index, const char *src_arrmeta,
+        kernel_request_t kernreq, const eval::eval_context *ectx) const;
+
+    nd::array get_option_nafunc() const;
 };
 
 namespace ndt {

@@ -19,9 +19,9 @@ public:
 
     void set_ymd(const char *arrmeta, char *data, assign_error_mode errmode,
                     int32_t year, int32_t month, int32_t day) const;
-    void set_utf8_string(const char *arrmeta, char *data,
-                         const std::string &utf8_str,
-                         const eval::eval_context *ectx) const;
+    void set_from_utf8_string(const char *arrmeta, char *data,
+                              const char *utf8_begin, const char *utf8_end,
+                              const eval::eval_context *ectx) const;
 
     date_ymd get_ymd(const char *arrmeta, const char *data) const;
 

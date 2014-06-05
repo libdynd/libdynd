@@ -249,6 +249,20 @@ public:
      */
     virtual ndt::type get_canonical_type() const;
 
+    /** Sets the value from a UTF8 string */
+    virtual void set_from_utf8_string(const char *arrmeta, char *data,
+                                      const char *utf8_begin,
+                                      const char *utf8_end,
+                                      const eval::eval_context *ectx) const;
+    /** Copies a C++ std::string with a UTF8 encoding to a string element */
+    inline void set_from_utf8_string(const char *arrmeta, char *data,
+                                     const std::string &utf8_str,
+                                     const eval::eval_context *ectx) const
+    {
+        this->set_from_utf8_string(arrmeta, data, utf8_str.data(),
+                             utf8_str.data() + utf8_str.size(), ectx);
+    }
+
     /**
      * Returns true if this level of the type can be processed as an
      * origin pointer, a stride, and a size.
@@ -269,13 +283,19 @@ public:
      * Indexes into the type. This function returns the type which results
      * from applying the same index to an ndarray of this type.
      *
-     * \param nindices     The number of elements in the 'indices' array. This is shrunk by one for each recursive call.
-     * \param indices      The indices to apply. This is incremented by one for each recursive call.
+     * \param nindices     The number of elements in the 'indices' array. This
+     *                     is shrunk by one for each recursive call.
+     * \param indices      The indices to apply. This is incremented by one for
+     *                     each recursive call.
      * \param current_i    The current index position. Used for error messages.
-     * \param root_tp      The data type in the first call, before any recursion. Used for error messages.
-     * \param leading_dimension  If this is true, the current dimension is one for which there is only a single
-     *                           data instance, and the type can do operations relying on the data. An example
-     *                           of this is a pointer data throwing away the pointer part, so the result
+     * \param root_tp      The data type in the first call, before any
+     *                     recursion. Used for error messages.
+     * \param leading_dimension  If this is true, the current dimension is one
+     *                           for which there is only a single
+     *                           data instance, and the type can do operations
+     *                           relying on the data. An example
+     *                           of this is a pointer data throwing away the
+     *                           pointer part, so the result
      *                           doesn't contain that indirection.
      */
     virtual ndt::type apply_linear_index(intptr_t nindices,
@@ -407,7 +427,8 @@ public:
      * Constructs the nd::array arrmeta for this type, prepared for writing.
      * The element size of the result must match that from get_default_data_size().
      */
-    virtual void arrmeta_default_construct(char *arrmeta, intptr_t ndim, const intptr_t* shape) const;
+    virtual void arrmeta_default_construct(char *arrmeta, intptr_t ndim,
+                                           const intptr_t *shape) const;
     /**
      * Constructs the nd::array arrmeta for this type, copying everything exactly from
      * input arrmeta for the same type.
@@ -419,8 +440,9 @@ public:
      *                            when putting it in a new nd::array, need to hold a reference to
      *                            that memory.
      */
-    virtual void arrmeta_copy_construct(char *dst_arrmeta, const char *src_arrmeta,
-                    memory_block_data *embedded_reference) const;
+    virtual void
+    arrmeta_copy_construct(char *dst_arrmeta, const char *src_arrmeta,
+                           memory_block_data *embedded_reference) const;
     /** Destructs any references or other state contained in the nd::arrays' arrmeta */
     virtual void arrmeta_destruct(char *arrmeta) const;
     /**
@@ -451,7 +473,7 @@ public:
      * or the non-strided version is called to destruct data.
      */
     virtual void data_destruct_strided(const char *arrmeta, char *data,
-                    intptr_t stride, size_t count) const;
+                                       intptr_t stride, size_t count) const;
 
     /** The size of the data required for uniform iteration */
     virtual size_t get_iterdata_size(intptr_t ndim) const;
@@ -459,11 +481,12 @@ public:
      * Constructs the iterdata for processing iteration at this level of the datashape
      */
     virtual size_t iterdata_construct(iterdata_common *iterdata,
-                                      const char **inout_arrmeta,
-                                      intptr_t ndim, const intptr_t *shape,
+                                      const char **inout_arrmeta, intptr_t ndim,
+                                      const intptr_t *shape,
                                       ndt::type &out_uniform_tp) const;
     /** Destructs any references or other state contained in the iterdata */
-    virtual size_t iterdata_destruct(iterdata_common *iterdata, intptr_t ndim) const;
+    virtual size_t iterdata_destruct(iterdata_common *iterdata,
+                                     intptr_t ndim) const;
 
     /**
      * Creates an assignment kernel for one data value from the
@@ -498,12 +521,12 @@ public:
      * \returns  The offset at the end of 'out' after adding this
      *           kernel.
      */
-    virtual size_t make_comparison_kernel(
-                    ckernel_builder *out, size_t offset_out,
-                    const ndt::type& src0_dt, const char *src0_arrmeta,
-                    const ndt::type& src1_dt, const char *src1_arrmeta,
-                    comparison_type_t comptype,
-                    const eval::eval_context *ectx) const;
+    virtual size_t
+    make_comparison_kernel(ckernel_builder *out, size_t offset_out,
+                           const ndt::type &src0_dt, const char *src0_arrmeta,
+                           const ndt::type &src1_dt, const char *src1_arrmeta,
+                           comparison_type_t comptype,
+                           const eval::eval_context *ectx) const;
 
     /**
      * Call the callback on each element of the array with given data/arrmeta along the leading
@@ -531,8 +554,8 @@ public:
      * Additional dynamic properties exposed by the type as gfunc::callable.
      */
     virtual void get_dynamic_type_properties(
-                    const std::pair<std::string, gfunc::callable> **out_properties,
-                    size_t *out_count) const;
+        const std::pair<std::string, gfunc::callable> **out_properties,
+        size_t *out_count) const;
 
     /**
      * Additional dynamic functions exposed by the type as gfunc::callable.
@@ -638,7 +661,10 @@ public:
  */
 inline void base_type_incref(const base_type *bd)
 {
-    //std::cout << "dynd type " << (void *)ed << " inc: " << ed->m_use_count + 1 << "\t"; ed->print_type(std::cout); std::cout << std::endl;
+    //std::cout << "dynd type " << (void *)ed << " inc: " << ed->m_use_count + 1
+    //          << "\t";
+    //ed->print_type(std::cout);
+    //std::cout << std::endl;
     ++bd->m_use_count;
 }
 

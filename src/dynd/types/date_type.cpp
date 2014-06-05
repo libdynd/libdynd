@@ -22,6 +22,7 @@
 #include <dynd/exceptions.hpp>
 #include <dynd/func/make_callable.hpp>
 #include <dynd/array_iter.hpp>
+#include <dynd/parser_util.hpp>
 
 #include <datetime_strings.h>
 #include <datetime_localtime.h>
@@ -51,19 +52,14 @@ void date_type::set_ymd(const char *DYND_UNUSED(arrmeta), char *data,
     *reinterpret_cast<int32_t *>(data) = date_ymd::to_days(year, month, day);
 }
 
-void date_type::set_utf8_string(const char *DYND_UNUSED(arrmeta), char *data,
-                                const std::string &utf8_str,
-                                const eval::eval_context *ectx) const
+void date_type::set_from_utf8_string(const char *DYND_UNUSED(arrmeta), char *data,
+                                     const char *utf8_begin,
+                                     const char *utf8_end,
+                                     const eval::eval_context *ectx) const
 {
     date_ymd ymd;
-    // TODO: Use errmode to adjust strictness of the parsing
-    // TODO: properly distinguish "date" and "option[date]" with respect to NA support
-    if (utf8_str == "NA") {
-        ymd.set_to_na();
-    } else {
-        ymd.set_from_str(utf8_str, ectx->date_parse_order, ectx->century_window,
-                         ectx->default_errmode);
-    }
+    ymd.set_from_str(utf8_begin, utf8_end, ectx->date_parse_order,
+                     ectx->century_window, ectx->default_errmode);
     *reinterpret_cast<int32_t *>(data) = ymd.to_days();
 }
 
@@ -522,7 +518,6 @@ size_t date_type::make_elwise_property_setter_kernel(
     }
 }
 
-
 namespace {
 struct date_is_avail_ck {
     static void single(char *dst, const char *src,
@@ -598,9 +593,9 @@ struct date_assign_na_ck {
     {
         if (dst_tp.get_type_id() != option_type_id ||
                 dst_tp.tcast<option_type>()->get_value_type().get_type_id() !=
-                    string_type_id) {
+                    date_type_id) {
             stringstream ss;
-            ss << "Expected destination type ?string, got " << dst_tp;
+            ss << "Expected destination type ?date, got " << dst_tp;
             throw type_error(ss.str());
         }
         ckernel_prefix *ckp = ckb->get_at<ckernel_prefix>(ckb_offset);

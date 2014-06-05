@@ -28,6 +28,7 @@ TEST(OptionType, Create) {
     EXPECT_EQ(2u, d.get_data_size());
     EXPECT_EQ(ndt::make_type<int16_t>(),
               d.tcast<option_type>()->get_value_type());
+    EXPECT_TRUE(d.is_scalar());
     EXPECT_FALSE(d.is_expression());
     // Roundtripping through a string
     EXPECT_EQ(d, ndt::type(d.str()));
@@ -97,7 +98,37 @@ TEST(OptionType, Cast) {
 }
 
 TEST(OptionType, Date) {
-    nd::array a, b;
+    nd::array a;
 
-    a = parse_json("5 * ?date", "[null, \"2013-04-05\", \"NA\", \"\", \"Jan 3, 2020\"]");
+    a = parse_json("5 * ?date",
+                   "[null, \"2013-04-05\", \"NA\", \"\", \"Jan 3, 2020\"]");
+    EXPECT_FALSE(nd::is_scalar_avail(a(0)));
+    EXPECT_EQ("2013-04-05", a(1).as<string>());
+    EXPECT_FALSE(nd::is_scalar_avail(a(2)));
+    EXPECT_FALSE(nd::is_scalar_avail(a(3)));
+    EXPECT_EQ("2020-01-03", a(4).as<string>());
+}
+
+TEST(OptionType, Time) {
+    nd::array a;
+
+    a = parse_json("5 * ?time",
+                   "[null, \"3:45\", \"NA\", \"\", \"05:17:33.1234 PM\"]");
+    EXPECT_FALSE(nd::is_scalar_avail(a(0)));
+    EXPECT_EQ("03:45", a(1).as<string>());
+    EXPECT_FALSE(nd::is_scalar_avail(a(2)));
+    EXPECT_FALSE(nd::is_scalar_avail(a(3)));
+    EXPECT_EQ("17:17:33.1234", a(4).as<string>());
+}
+
+TEST(OptionType, DateTime) {
+    nd::array a;
+
+    a = parse_json("5 * ?datetime", "[null, \"2013-04-05 3:45\", \"NA\", \"\","
+                                    " \"Jan 3, 2020 05:17:33.1234 PM\"]");
+    EXPECT_FALSE(nd::is_scalar_avail(a(0)));
+    EXPECT_EQ("2013-04-05T03:45", a(1).as<string>());
+    EXPECT_FALSE(nd::is_scalar_avail(a(2)));
+    EXPECT_FALSE(nd::is_scalar_avail(a(3)));
+    EXPECT_EQ("2020-01-03T17:17:33.1234", a(4).as<string>());
 }

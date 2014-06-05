@@ -1351,10 +1351,24 @@ array memmap(const std::string& filename,
  *
  * \returns  The index of the found element, or -1 if not found.
  */
-intptr_t binary_search(const array& n, const char *data, const char *arrmeta);
+intptr_t binary_search(const array &n, const char *data, const char *arrmeta);
 
 array groupby(const array& data_values, const array& by,
                 const ndt::type& groups = ndt::type());
+
+bool is_scalar_avail(const ndt::type &tp, const char *arrmeta, const char *data,
+                     const eval::eval_context *ectx);
+
+/**
+ * Returns true if the array is a scalar whose value is available (not NA).
+ */
+inline bool
+is_scalar_avail(const array &arr,
+                const eval::eval_context *ectx = &eval::default_eval_context)
+{
+    return is_scalar_avail(arr.get_type(), arr.get_arrmeta(),
+                           arr.get_readonly_originptr(), ectx);
+}
 
 void assign_na(const ndt::type &tp, const char *arrmeta, char *data,
                const eval::eval_context *ectx);

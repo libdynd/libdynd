@@ -13,6 +13,7 @@
 #include <dynd/kernels/assignment_kernels.hpp>
 #include <dynd/func/make_callable.hpp>
 #include <dynd/pp/list.hpp>
+#include <dynd/parser_util.hpp>
 
 #include <algorithm>
 
@@ -231,6 +232,32 @@ void option_type::transform_child_types(type_transform_fn_t transform_fn,
 ndt::type option_type::get_canonical_type() const
 {
     return ndt::make_option(m_value_tp.get_canonical_type());
+}
+
+void option_type::set_from_utf8_string(const char *arrmeta, char *data,
+                                       const char *utf8_begin,
+                                       const char *utf8_end,
+                                       const eval::eval_context *ectx) const
+{
+    if (m_value_tp.get_kind() != string_kind &&
+            m_value_tp.get_kind() != dynamic_kind &&
+            parse::matches_option_type_na_token(utf8_begin, utf8_end)) {
+        assign_na(arrmeta, data, ectx);
+    } else {
+        if (m_value_tp.is_builtin()) {
+            if (m_value_tp.unchecked_get_builtin_type_id() == bool_type_id) {
+                parse::string_to_bool(data, utf8_begin, utf8_end, false,
+                                      ectx->default_errmode);
+            } else {
+                parse::string_to_number(
+                    data, m_value_tp.unchecked_get_builtin_type_id(),
+                    utf8_begin, utf8_end, false, ectx->default_errmode);
+            }
+        } else {
+            m_value_tp.extended()->set_from_utf8_string(
+                arrmeta, data, utf8_begin, utf8_end, ectx);
+        }
+    }
 }
 
 bool option_type::is_lossless_assignment(const ndt::type& dst_tp, const ndt::type& src_tp) const

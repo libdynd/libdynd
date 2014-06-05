@@ -74,12 +74,12 @@ void time_hmst::set_from_ticks(int64_t ticks)
     }
 }
 
-void time_hmst::set_from_str(const std::string& s)
+void time_hmst::set_from_str(const char *begin, const char *end)
 {
-    if (!string_to_time(s.data(), s.data() + s.size(), *this)) {
+    if (!string_to_time(begin, end, *this)) {
         stringstream ss;
         ss << "Unable to parse ";
-        print_escaped_utf8_string(ss, s);
+        print_escaped_utf8_string(ss, begin, end);
         ss << " as a time";
         throw invalid_argument(ss.str());
     }

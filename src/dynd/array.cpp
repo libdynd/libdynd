@@ -1787,6 +1787,26 @@ nd::array nd::groupby(const nd::array& data_values, const nd::array& by_values, 
     return result;
 }
 
+bool nd::is_scalar_avail(const ndt::type &tp, const char *arrmeta,
+                      const char *data, const eval::eval_context *ectx)
+{
+    if (tp.is_scalar()) {
+        if (tp.get_type_id() == option_type_id) {
+            return tp.tcast<option_type>()->is_avail(arrmeta, data, ectx);
+        } else if (tp.get_kind() == expression_kind &&
+                   tp.value_type().get_type_id() == option_type_id) {
+            nd::array tmp = nd::empty(tp.value_type());
+            tmp.val_assign(tp, arrmeta, data, ectx);
+            return tmp.get_type().tcast<option_type>()->is_avail(arrmeta, data,
+                                                                 ectx);
+        } else {
+            return true;
+        }
+    } else {
+        return false;
+    }
+}
+
 void nd::assign_na(const ndt::type &tp, const char *arrmeta, char *data,
                    const eval::eval_context *ectx)
 {

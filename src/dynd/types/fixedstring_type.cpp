@@ -84,8 +84,8 @@ void fixedstring_type::get_string_range(const char **out_begin,
     }
 }
 
-void fixedstring_type::set_from_utf8_string(const char *arrmeta, char *dst,
-                                            const char *utf8_begin,
+void fixedstring_type::set_from_utf8_string(const char *DYND_UNUSED(arrmeta),
+                                            char *dst, const char *utf8_begin,
                                             const char *utf8_end,
                                             const eval::eval_context *ectx)
     const
@@ -112,11 +112,14 @@ void fixedstring_type::set_from_utf8_string(const char *arrmeta, char *dst,
     }
 }
 
-void fixedstring_type::print_data(std::ostream& o, const char *DYND_UNUSED(arrmeta), const char *data) const
+void fixedstring_type::print_data(std::ostream &o,
+                                  const char *DYND_UNUSED(arrmeta),
+                                  const char *data) const
 {
     uint32_t cp;
     next_unicode_codepoint_t next_fn;
-    next_fn = get_next_unicode_codepoint_function(m_encoding, assign_error_none);
+    next_fn =
+        get_next_unicode_codepoint_function(m_encoding, assign_error_none);
     const char *data_end = data + get_data_size();
 
     // Print as an escaped string

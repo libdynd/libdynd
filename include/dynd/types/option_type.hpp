@@ -86,6 +86,10 @@ public:
                                bool &out_was_transformed) const;
     ndt::type get_canonical_type() const;
 
+    void set_from_utf8_string(const char *arrmeta, char *data,
+                              const char *utf8_begin, const char *utf8_end,
+                              const eval::eval_context *ectx) const;
+
     bool is_lossless_assignment(const ndt::type &dst_tp,
                                 const ndt::type &src_tp) const;
 

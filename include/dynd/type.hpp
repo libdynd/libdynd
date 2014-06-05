@@ -466,11 +466,7 @@ public:
     }
 
     inline bool is_scalar() const {
-        if (is_builtin()) {
-            return true;
-        } else {
-            return m_extended->is_scalar();
-        }
+        return is_builtin() || m_extended->is_scalar();
     }
 
     /**
