@@ -60,14 +60,14 @@ namespace {
     template<int N>
     struct unaligned_fixed_size_copy_assign {
         static void single(char *dst, const char *src,
-                        ckernel_prefix *DYND_UNUSED(extra))
+                           ckernel_prefix *DYND_UNUSED(extra))
         {
             memcpy(dst, src, N);
         }
 
-        static void strided(char *dst, intptr_t dst_stride,
-                        const char *src, intptr_t src_stride,
-                        size_t count, ckernel_prefix *DYND_UNUSED(extra))
+        static void strided(char *dst, intptr_t dst_stride, const char *src,
+                            intptr_t src_stride, size_t count,
+                            ckernel_prefix *DYND_UNUSED(extra))
         {
             for (size_t i = 0; i != count; ++i,
                             dst += dst_stride, src += src_stride) {
@@ -83,14 +83,16 @@ struct unaligned_copy_single_kernel_extra {
 static void unaligned_copy_single(char *dst, const char *src,
                 ckernel_prefix *extra)
 {
-    size_t data_size = reinterpret_cast<unaligned_copy_single_kernel_extra *>(extra)->data_size;
+    size_t data_size = reinterpret_cast<unaligned_copy_single_kernel_extra *>(
+                           extra)->data_size;
     memcpy(dst, src, data_size);
 }
 static void unaligned_copy_strided(char *dst, intptr_t dst_stride,
-                        const char *src, intptr_t src_stride,
-                        size_t count, ckernel_prefix *extra)
+                                   const char *src, intptr_t src_stride,
+                                   size_t count, ckernel_prefix *extra)
 {
-    size_t data_size = reinterpret_cast<unaligned_copy_single_kernel_extra *>(extra)->data_size;
+    size_t data_size = reinterpret_cast<unaligned_copy_single_kernel_extra *>(
+                           extra)->data_size;
     for (size_t i = 0; i != count; ++i,
                     dst += dst_stride, src += src_stride) {
         memcpy(dst, src, data_size);
@@ -127,10 +129,11 @@ size_t dynd::make_assignment_kernel(
     }
 }
 
-size_t dynd::make_pod_typed_data_assignment_kernel(
-                ckernel_builder *out, size_t offset_out,
-                size_t data_size, size_t data_alignment,
-                kernel_request_t kernreq)
+size_t dynd::make_pod_typed_data_assignment_kernel(ckernel_builder *out,
+                                                   size_t offset_out,
+                                                   size_t data_size,
+                                                   size_t data_alignment,
+                                                   kernel_request_t kernreq)
 {
     bool single = (kernreq == kernel_request_single);
     if (!single && kernreq != kernel_request_strided) {

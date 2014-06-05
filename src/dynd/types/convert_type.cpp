@@ -32,10 +32,12 @@ convert_type::~convert_type()
 {
 }
 
-
-void convert_type::print_data(std::ostream& DYND_UNUSED(o), const char *DYND_UNUSED(arrmeta), const char *DYND_UNUSED(data)) const
+void convert_type::print_data(std::ostream &DYND_UNUSED(o),
+                              const char *DYND_UNUSED(arrmeta),
+                              const char *DYND_UNUSED(data)) const
 {
-    throw runtime_error("internal error: convert_type::print_data isn't supposed to be called");
+    throw runtime_error(
+        "internal error: convert_type::print_data isn't supposed to be called");
 }
 
 void convert_type::print_type(std::ostream& o) const
@@ -57,7 +59,8 @@ void convert_type::get_shape(intptr_t ndim, intptr_t i, intptr_t *out_shape,
     }
 }
 
-bool convert_type::is_lossless_assignment(const ndt::type& dst_tp, const ndt::type& src_tp) const
+bool convert_type::is_lossless_assignment(const ndt::type &dst_tp,
+                                          const ndt::type &src_tp) const
 {
     // Treat this type as the value type for whether assignment is always lossless
     if (src_tp.extended() == this) {
@@ -92,8 +95,10 @@ ndt::type convert_type::with_replaced_storage_type(const ndt::type& replacement_
     } else {
         if (m_operand_type != replacement_type.value_type()) {
             std::stringstream ss;
-            ss << "Cannot chain expression types, because the conversion's storage type, " << m_operand_type;
-            ss << ", does not match the replacement's value type, " << replacement_type.value_type();
+            ss << "Cannot chain expression types, because the conversion's "
+                  "storage type, " << m_operand_type
+               << ", does not match the replacement's value type, "
+               << replacement_type.value_type();
             throw std::runtime_error(ss.str());
         }
         return ndt::type(new convert_type(m_value_type, replacement_type),
