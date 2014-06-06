@@ -12,6 +12,7 @@
 #include <dynd/types/funcproto_type.hpp>
 #include <dynd/types/arrfunc_type.hpp>
 #include <dynd/kernels/ckernel_builder.hpp>
+#include <dynd/types/type_pattern_match.hpp>
 
 namespace dynd {
 
@@ -171,14 +172,18 @@ struct arrfunc_type_data {
         } else {
             size_t param_count = get_param_count();
             const ndt::type *param_types = get_param_types();
+            std::map<nd::string, ndt::type> typevars;
             for (size_t i = 0; i != param_count; ++i) {
-                if (src_tp[i].value_type() != param_types[i]) {
+                if (!ndt::type_pattern_match(src_tp[i].value_type(),
+                                             param_types[i], typevars)) {
                     std::stringstream ss;
                     ss << "parameter " << (i + 1) << " to arrfunc does not match, ";
                     ss << "expected " << param_types[i] << ", received " << src_tp[i];
                     throw std::invalid_argument(ss.str());
                 }
             }
+            // TODO:
+            // return ndt::substitute_type_vars(get_return_type(), typevars);
             return get_return_type();
         }
     }

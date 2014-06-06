@@ -131,7 +131,7 @@ namespace {
         ckernel_prefix base;
         const base_string_type *dst_string_dt;
         const char *dst_arrmeta;
-        assign_error_mode errmode;
+        eval::eval_context ectx;
 
         static void single(char *dst, const char *src, ckernel_prefix *extra)
         {
@@ -143,8 +143,8 @@ namespace {
             } else {
                 bd->print_type(ss);
             }
-            e->dst_string_dt->set_utf8_string(e->dst_arrmeta, dst, e->errmode,
-                            ss.str());
+            e->dst_string_dt->set_from_utf8_string(e->dst_arrmeta, dst,
+                                                   ss.str(), &e->ectx);
         }
 
         static void destruct(ckernel_prefix *extra)
@@ -155,38 +155,36 @@ namespace {
     };
 } // anonymous namespace
 
-
-
 size_t type_type::make_assignment_kernel(
-                ckernel_builder *out, size_t offset_out,
-                const ndt::type& dst_tp, const char *dst_arrmeta,
-                const ndt::type& src_tp, const char *src_arrmeta,
-                kernel_request_t kernreq, assign_error_mode errmode,
-                const eval::eval_context *ectx) const
+    ckernel_builder *out, size_t offset_out, const ndt::type &dst_tp,
+    const char *dst_arrmeta, const ndt::type &src_tp, const char *src_arrmeta,
+    kernel_request_t kernreq, const eval::eval_context *ectx) const
 {
     offset_out = make_kernreq_to_single_kernel_adapter(out, offset_out, kernreq);
 
     if (this == dst_tp.extended()) {
         if (src_tp.get_type_id() == type_type_id) {
             ckernel_prefix *e = out->get_at<ckernel_prefix>(offset_out);
-            e->set_function<unary_single_operation_t>(typed_data_assignment_kernel_single);
+            e->set_function<unary_single_operation_t>(
+                typed_data_assignment_kernel_single);
             return offset_out + sizeof(ckernel_prefix);
         } else if (src_tp.get_kind() == string_kind) {
             // String to type
             out->ensure_capacity(offset_out + sizeof(string_to_type_kernel_extra));
-            string_to_type_kernel_extra *e = out->get_at<string_to_type_kernel_extra>(offset_out);
-            e->base.set_function<unary_single_operation_t>(&string_to_type_kernel_extra::single);
+            string_to_type_kernel_extra *e =
+                out->get_at<string_to_type_kernel_extra>(offset_out);
+            e->base.set_function<unary_single_operation_t>(
+                &string_to_type_kernel_extra::single);
             e->base.destructor = &string_to_type_kernel_extra::destruct;
             // The kernel data owns a reference to this type
             e->src_string_dt = static_cast<const base_string_type *>(ndt::type(src_tp).release());
             e->src_arrmeta = src_arrmeta;
-            e->errmode = errmode;
+            e->errmode = ectx->default_errmode;
             return offset_out + sizeof(string_to_type_kernel_extra);
         } else if (!src_tp.is_builtin()) {
-            return src_tp.extended()->make_assignment_kernel(out, offset_out,
-                            dst_tp, dst_arrmeta,
-                            src_tp, src_arrmeta,
-                            kernreq, errmode, ectx);
+            return src_tp.extended()->make_assignment_kernel(
+                out, offset_out, dst_tp, dst_arrmeta, src_tp, src_arrmeta,
+                kernreq, ectx);
         }
     } else {
         if (dst_tp.get_kind() == string_kind) {
@@ -198,7 +196,7 @@ size_t type_type::make_assignment_kernel(
             // The kernel data owns a reference to this type
             e->dst_string_dt = static_cast<const base_string_type *>(ndt::type(dst_tp).release());
             e->dst_arrmeta = dst_arrmeta;
-            e->errmode = errmode;
+            e->ectx = *ectx;
             return offset_out + sizeof(type_to_string_kernel_extra);
         }
     }
@@ -221,11 +219,10 @@ static int not_equal_comparison(const char *a, const char *b, ckernel_prefix *DY
 }
 
 size_t type_type::make_comparison_kernel(
-                ckernel_builder *out, size_t offset_out,
-                const ndt::type& src0_dt, const char *DYND_UNUSED(src0_arrmeta),
-                const ndt::type& src1_dt, const char *DYND_UNUSED(src1_arrmeta),
-                comparison_type_t comptype,
-                const eval::eval_context *DYND_UNUSED(ectx)) const
+    ckernel_builder *out, size_t offset_out, const ndt::type &src0_dt,
+    const char *DYND_UNUSED(src0_arrmeta), const ndt::type &src1_dt,
+    const char *DYND_UNUSED(src1_arrmeta), comparison_type_t comptype,
+    const eval::eval_context *DYND_UNUSED(ectx)) const
 {
     if (this == src0_dt.extended()) {
         if (*this == *src1_dt.extended()) {

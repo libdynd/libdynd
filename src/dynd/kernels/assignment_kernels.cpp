@@ -60,14 +60,14 @@ namespace {
     template<int N>
     struct unaligned_fixed_size_copy_assign {
         static void single(char *dst, const char *src,
-                        ckernel_prefix *DYND_UNUSED(extra))
+                           ckernel_prefix *DYND_UNUSED(extra))
         {
             memcpy(dst, src, N);
         }
 
-        static void strided(char *dst, intptr_t dst_stride,
-                        const char *src, intptr_t src_stride,
-                        size_t count, ckernel_prefix *DYND_UNUSED(extra))
+        static void strided(char *dst, intptr_t dst_stride, const char *src,
+                            intptr_t src_stride, size_t count,
+                            ckernel_prefix *DYND_UNUSED(extra))
         {
             for (size_t i = 0; i != count; ++i,
                             dst += dst_stride, src += src_stride) {
@@ -83,14 +83,16 @@ struct unaligned_copy_single_kernel_extra {
 static void unaligned_copy_single(char *dst, const char *src,
                 ckernel_prefix *extra)
 {
-    size_t data_size = reinterpret_cast<unaligned_copy_single_kernel_extra *>(extra)->data_size;
+    size_t data_size = reinterpret_cast<unaligned_copy_single_kernel_extra *>(
+                           extra)->data_size;
     memcpy(dst, src, data_size);
 }
 static void unaligned_copy_strided(char *dst, intptr_t dst_stride,
-                        const char *src, intptr_t src_stride,
-                        size_t count, ckernel_prefix *extra)
+                                   const char *src, intptr_t src_stride,
+                                   size_t count, ckernel_prefix *extra)
 {
-    size_t data_size = reinterpret_cast<unaligned_copy_single_kernel_extra *>(extra)->data_size;
+    size_t data_size = reinterpret_cast<unaligned_copy_single_kernel_extra *>(
+                           extra)->data_size;
     for (size_t i = 0; i != count; ++i,
                     dst += dst_stride, src += src_stride) {
         memcpy(dst, src, data_size);
@@ -98,23 +100,12 @@ static void unaligned_copy_strided(char *dst, intptr_t dst_stride,
 }
 
 size_t dynd::make_assignment_kernel(
-                ckernel_builder *out, size_t offset_out,
-                const ndt::type& dst_tp, const char *dst_arrmeta,
-                const ndt::type& src_tp, const char *src_arrmeta,
-                kernel_request_t kernreq, assign_error_mode errmode,
-                const eval::eval_context *ectx)
+    ckernel_builder *out, size_t offset_out, const ndt::type &dst_tp,
+    const char *dst_arrmeta, const ndt::type &src_tp, const char *src_arrmeta,
+    kernel_request_t kernreq, const eval::eval_context *ectx)
 {
-    if (errmode == assign_error_default && ectx != NULL) {
-        errmode = ectx->default_errmode;
-    }
-
     if (dst_tp.is_builtin()) {
         if (src_tp.is_builtin()) {
-            // If the casting can be done losslessly, disable the error check to find faster code paths
-            if (errmode != assign_error_none && is_lossless_assignment(dst_tp, src_tp)) {
-                errmode = assign_error_none;
-            }
-
             if (dst_tp.extended() == src_tp.extended()) {
                 return make_pod_typed_data_assignment_kernel(out, offset_out,
                                 dst_tp.get_data_size(), dst_tp.get_data_alignment(),
@@ -122,26 +113,27 @@ size_t dynd::make_assignment_kernel(
             } else {
                 return make_builtin_type_assignment_kernel(out, offset_out,
                                 dst_tp.get_type_id(), src_tp.get_type_id(),
-                                kernreq, errmode);
+                                kernreq, ectx->default_errmode);
             }
         } else {
             return src_tp.extended()->make_assignment_kernel(out, offset_out,
                             dst_tp, dst_arrmeta,
                             src_tp, src_arrmeta,
-                            kernreq, errmode, ectx);
+                            kernreq, ectx);
         }
     } else {
         return dst_tp.extended()->make_assignment_kernel(out, offset_out,
                         dst_tp, dst_arrmeta,
                         src_tp, src_arrmeta,
-                        kernreq, errmode, ectx);
+                        kernreq, ectx);
     }
 }
 
-size_t dynd::make_pod_typed_data_assignment_kernel(
-                ckernel_builder *out, size_t offset_out,
-                size_t data_size, size_t data_alignment,
-                kernel_request_t kernreq)
+size_t dynd::make_pod_typed_data_assignment_kernel(ckernel_builder *out,
+                                                   size_t offset_out,
+                                                   size_t data_size,
+                                                   size_t data_alignment,
+                                                   kernel_request_t kernreq)
 {
     bool single = (kernreq == kernel_request_single);
     if (!single && kernreq != kernel_request_strided) {

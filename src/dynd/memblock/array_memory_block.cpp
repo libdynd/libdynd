@@ -99,15 +99,13 @@ memory_block_ptr dynd::make_array_memory_block(const ndt::type& tp, intptr_t ndi
     if (dtp.get_kind() == memory_kind) {
         result = make_array_memory_block(arrmeta_size);
         static_cast<const base_memory_type*>(dtp.extended())->data_alloc(&data_ptr, data_size);
-    } else {
-        result = make_array_memory_block(arrmeta_size, data_size, tp.get_data_alignment(), &data_ptr);
-    }
-
-    if (tp.get_flags()&type_flag_zeroinit) {
-        if (dtp.get_kind() == memory_kind) {
+        if (tp.get_flags()&type_flag_zeroinit) {
             static_cast<const base_memory_type *>(dtp.extended())
                 ->data_zeroinit(data_ptr, data_size);
-        } else {
+        }
+    } else {
+        result = make_array_memory_block(arrmeta_size, data_size, tp.get_data_alignment(), &data_ptr);
+        if (tp.get_flags()&type_flag_zeroinit) {
             memset(data_ptr, 0, data_size);
         }
     }

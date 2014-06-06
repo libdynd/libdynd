@@ -125,8 +125,8 @@ void iter::make_string_iter(
             d.begin = const_cast<char *>(data_begin);
             d.end = const_cast<char *>(data_end);
             tmp.val_assign(ndt::make_string(data_encoding),
-                reinterpret_cast<const char *>(&md),
-                reinterpret_cast<const char *>(&d), dynd::assign_error_default, ectx);
+                           reinterpret_cast<const char *>(&md),
+                           reinterpret_cast<const char *>(&d), ectx);
             tmp.get_type().tcast<string_type>()->make_string_iter(
                 out_di, iter_encoding, tmp.get_arrmeta(),
                 tmp.get_readonly_originptr(), tmp.get_data_memblock(),

@@ -30,9 +30,17 @@ static intptr_t instantiate_unary_assignment_ckernel(
         reinterpret_cast<uintptr_t>(self->data_ptr));
     if (dst_tp.value_type() == self->get_return_type() &&
             src_tp[0].value_type() == self->get_param_type(0)) {
-        return make_assignment_kernel(
-            ckb, ckb_offset, dst_tp, dst_arrmeta, src_tp[0], src_arrmeta[0],
-            (kernel_request_t)kernreq, errmode, ectx);
+        if (errmode == ectx->default_errmode) {
+            return make_assignment_kernel(
+                ckb, ckb_offset, dst_tp, dst_arrmeta, src_tp[0], src_arrmeta[0],
+                (kernel_request_t)kernreq, ectx);
+        } else {
+            eval::eval_context ectx_tmp(*ectx);
+            ectx_tmp.default_errmode = errmode;
+            return make_assignment_kernel(ckb, ckb_offset, dst_tp, dst_arrmeta,
+                                          src_tp[0], src_arrmeta[0],
+                                          (kernel_request_t)kernreq, &ectx_tmp);
+        }
     } else {
         stringstream ss;
         ss << "Cannot instantiate arrfunc for assigning from ";
@@ -66,26 +74,25 @@ static void delete_property_arrfunc_data(void *self_data_ptr)
 }
 
 static intptr_t instantiate_unary_property_ckernel(
-    const arrfunc_type_data *self, dynd::ckernel_builder *ckb, intptr_t ckb_offset,
-    const ndt::type &dst_tp, const char *dst_arrmeta, const ndt::type *src_tp,
-    const char *const *src_arrmeta, uint32_t kernreq,
+    const arrfunc_type_data *self, dynd::ckernel_builder *ckb,
+    intptr_t ckb_offset, const ndt::type &dst_tp, const char *dst_arrmeta,
+    const ndt::type *src_tp, const char *const *src_arrmeta, uint32_t kernreq,
     const eval::eval_context *ectx)
 {
-    ndt::type prop_src_tp(reinterpret_cast<const base_type *>(self->data_ptr), true);
+    ndt::type prop_src_tp(reinterpret_cast<const base_type *>(self->data_ptr),
+                          true);
 
     if (dst_tp.value_type() == prop_src_tp.value_type()) {
         if (src_tp[0] == prop_src_tp.operand_type()) {
             return make_assignment_kernel(ckb, ckb_offset, dst_tp, dst_arrmeta,
                                           prop_src_tp, src_arrmeta[0],
-                                          (kernel_request_t)kernreq,
-                                          assign_error_default, ectx);
+                                          (kernel_request_t)kernreq, ectx);
         } else if (src_tp[0].value_type() == prop_src_tp.operand_type()) {
             return make_assignment_kernel(
                 ckb, ckb_offset, dst_tp, dst_arrmeta,
                 prop_src_tp.tcast<base_expression_type>()
                     ->with_replaced_storage_type(src_tp[0]),
-                src_arrmeta[0], (kernel_request_t)kernreq, assign_error_default,
-                ectx);
+                src_arrmeta[0], (kernel_request_t)kernreq, ectx);
         }
     }
 

@@ -45,8 +45,10 @@ fixedstring_type::~fixedstring_type()
 {
 }
 
-void fixedstring_type::get_string_range(const char **out_begin, const char**out_end,
-                const char *DYND_UNUSED(arrmeta), const char *data) const
+void fixedstring_type::get_string_range(const char **out_begin,
+                                        const char **out_end,
+                                        const char *DYND_UNUSED(arrmeta),
+                                        const char *data) const
 {
     // Beginning of the string
     *out_begin = data;
@@ -82,13 +84,18 @@ void fixedstring_type::get_string_range(const char **out_begin, const char**out_
     }
 }
 
-void fixedstring_type::set_utf8_string(const char *DYND_UNUSED(arrmeta), char *dst,
-                assign_error_mode errmode,
-                const char* utf8_begin, const char *utf8_end) const
+void fixedstring_type::set_from_utf8_string(const char *DYND_UNUSED(arrmeta),
+                                            char *dst, const char *utf8_begin,
+                                            const char *utf8_end,
+                                            const eval::eval_context *ectx)
+    const
 {
+    assign_error_mode errmode = ectx->default_errmode;
     char *dst_end = dst + get_data_size();
-    next_unicode_codepoint_t next_fn = get_next_unicode_codepoint_function(string_encoding_utf_8, errmode);
-    append_unicode_codepoint_t append_fn = get_append_unicode_codepoint_function(m_encoding, errmode);
+    next_unicode_codepoint_t next_fn =
+        get_next_unicode_codepoint_function(string_encoding_utf_8, errmode);
+    append_unicode_codepoint_t append_fn =
+        get_append_unicode_codepoint_function(m_encoding, errmode);
     uint32_t cp;
 
     while (utf8_begin < utf8_end && dst < dst_end) {
@@ -97,18 +104,22 @@ void fixedstring_type::set_utf8_string(const char *DYND_UNUSED(arrmeta), char *d
     }
     if (utf8_begin < utf8_end) {
         if (errmode != assign_error_none) {
-            throw std::runtime_error("Input is too large to convert to destination fixed-size string");
+            throw std::runtime_error("Input is too large to convert to "
+                                     "destination fixed-size string");
         }
     } else if (dst < dst_end) {
         memset(dst, 0, dst_end - dst);
     }
 }
 
-void fixedstring_type::print_data(std::ostream& o, const char *DYND_UNUSED(arrmeta), const char *data) const
+void fixedstring_type::print_data(std::ostream &o,
+                                  const char *DYND_UNUSED(arrmeta),
+                                  const char *data) const
 {
     uint32_t cp;
     next_unicode_codepoint_t next_fn;
-    next_fn = get_next_unicode_codepoint_function(m_encoding, assign_error_none);
+    next_fn =
+        get_next_unicode_codepoint_function(m_encoding, assign_error_none);
     const char *data_end = data + get_data_size();
 
     // Print as an escaped string
@@ -160,46 +171,41 @@ bool fixedstring_type::operator==(const base_type& rhs) const
 }
 
 size_t fixedstring_type::make_assignment_kernel(
-                ckernel_builder *out, size_t offset_out,
-                const ndt::type& dst_tp, const char *dst_arrmeta,
-                const ndt::type& src_tp, const char *src_arrmeta,
-                kernel_request_t kernreq, assign_error_mode errmode,
-                const eval::eval_context *ectx) const
+    ckernel_builder *out, size_t offset_out, const ndt::type &dst_tp,
+    const char *dst_arrmeta, const ndt::type &src_tp, const char *src_arrmeta,
+    kernel_request_t kernreq, const eval::eval_context *ectx) const
 {
     if (this == dst_tp.extended()) {
         switch (src_tp.get_type_id()) {
             case fixedstring_type_id: {
                 const fixedstring_type *src_fs = src_tp.tcast<fixedstring_type>();
-                return make_fixedstring_assignment_kernel(out, offset_out,
-                                get_data_size(), m_encoding, src_fs->get_data_size(), src_fs->m_encoding,
-                                kernreq, errmode, ectx);
+                return make_fixedstring_assignment_kernel(
+                    out, offset_out, get_data_size(), m_encoding,
+                    src_fs->get_data_size(), src_fs->m_encoding, kernreq, ectx);
             }
             case string_type_id: {
                 const base_string_type *src_fs = src_tp.tcast<base_string_type>();
-                return make_blockref_string_to_fixedstring_assignment_kernel(out, offset_out,
-                                get_data_size(), m_encoding, src_fs->get_encoding(),
-                                kernreq, errmode, ectx);
+                return make_blockref_string_to_fixedstring_assignment_kernel(
+                    out, offset_out, get_data_size(), m_encoding,
+                    src_fs->get_encoding(), kernreq, ectx);
             }
             default: {
                 if (!src_tp.is_builtin()) {
-                    return src_tp.extended()->make_assignment_kernel(out, offset_out,
-                                    dst_tp, dst_arrmeta,
-                                    src_tp, src_arrmeta,
-                                    kernreq, errmode, ectx);
+                    return src_tp.extended()->make_assignment_kernel(
+                        out, offset_out, dst_tp, dst_arrmeta, src_tp,
+                        src_arrmeta, kernreq, ectx);
                 } else {
-                    return make_builtin_to_string_assignment_kernel(out, offset_out,
-                                dst_tp, dst_arrmeta,
-                                src_tp.get_type_id(),
-                                kernreq, errmode, ectx);
+                    return make_builtin_to_string_assignment_kernel(
+                        out, offset_out, dst_tp, dst_arrmeta,
+                        src_tp.get_type_id(), kernreq, ectx);
                 }
             }
         }
     } else {
         if (dst_tp.is_builtin()) {
-            return make_string_to_builtin_assignment_kernel(out, offset_out,
-                            dst_tp.get_type_id(),
-                            src_tp, src_arrmeta,
-                            kernreq, errmode, ectx);
+            return make_string_to_builtin_assignment_kernel(
+                out, offset_out, dst_tp.get_type_id(), src_tp, src_arrmeta,
+                kernreq, ectx);
         } else {
             stringstream ss;
             ss << "Cannot assign from " << src_tp << " to " << dst_tp;
@@ -209,11 +215,10 @@ size_t fixedstring_type::make_assignment_kernel(
 }
 
 size_t fixedstring_type::make_comparison_kernel(
-                ckernel_builder *out, size_t offset_out,
-                const ndt::type& src0_dt, const char *src0_arrmeta,
-                const ndt::type& src1_dt, const char *src1_arrmeta,
-                comparison_type_t comptype,
-                const eval::eval_context *ectx) const
+    ckernel_builder *out, size_t offset_out, const ndt::type &src0_dt,
+    const char *src0_arrmeta, const ndt::type &src1_dt,
+    const char *src1_arrmeta, comparison_type_t comptype,
+    const eval::eval_context *ectx) const
 {
     if (this == src0_dt.extended()) {
         if (*this == *src1_dt.extended()) {

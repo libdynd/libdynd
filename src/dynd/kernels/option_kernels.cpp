@@ -328,7 +328,7 @@ struct assign_na<dynd_complex<double> > {
 
 template<typename T>
 struct nafunc {
-    typedef T base_type;
+    typedef T nafunc_type;
 
     static intptr_t instantiate_is_avail(
         const arrfunc_type_data *DYND_UNUSED(self), dynd::ckernel_builder *ckb,
@@ -339,9 +339,9 @@ struct nafunc {
     {
         if (src_tp[0].get_type_id() != option_type_id ||
                 src_tp[0].tcast<option_type>()->get_value_type().get_type_id() !=
-                    (type_id_t)type_id_of<base_type>::value) {
+                    (type_id_t)type_id_of<nafunc_type>::value) {
             stringstream ss;
-            ss << "Expected source type ?" << ndt::make_type<base_type>()
+            ss << "Expected source type ?" << ndt::make_type<nafunc_type>()
                << ", got " << src_tp[0];
             throw type_error(ss.str());
         }
@@ -371,9 +371,9 @@ struct nafunc {
     {
         if (dst_tp.get_type_id() != option_type_id ||
                 dst_tp.tcast<option_type>()->get_value_type().get_type_id() !=
-                    (type_id_t)type_id_of<base_type>::value) {
+                    (type_id_t)type_id_of<nafunc_type>::value) {
             stringstream ss;
-            ss << "Expected dst type " << ndt::make_type<base_type>()
+            ss << "Expected dst type " << ndt::make_type<nafunc_type>()
                << ", got " << dst_tp;
             throw type_error(ss.str());
         }

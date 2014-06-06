@@ -86,6 +86,10 @@ public:
                                bool &out_was_transformed) const;
     ndt::type get_canonical_type() const;
 
+    void set_from_utf8_string(const char *arrmeta, char *data,
+                              const char *utf8_begin, const char *utf8_end,
+                              const eval::eval_context *ectx) const;
+
     bool is_lossless_assignment(const ndt::type &dst_tp,
                                 const ndt::type &src_tp) const;
 
@@ -101,12 +105,13 @@ public:
     void arrmeta_debug_print(const char *arrmeta, std::ostream &o,
                               const std::string &indent) const;
 
-    size_t
-    make_assignment_kernel(ckernel_builder *ckb, size_t ckb_offset,
-                           const ndt::type &dst_tp, const char *dst_arrmeta,
-                           const ndt::type &src_tp, const char *src_arrmeta,
-                           kernel_request_t kernreq, assign_error_mode errmode,
-                           const eval::eval_context *ectx) const;
+    size_t make_assignment_kernel(ckernel_builder *ckb, size_t ckb_offset,
+                                  const ndt::type &dst_tp,
+                                  const char *dst_arrmeta,
+                                  const ndt::type &src_tp,
+                                  const char *src_arrmeta,
+                                  kernel_request_t kernreq,
+                                  const eval::eval_context *ectx) const;
 
     void get_dynamic_type_properties(
         const std::pair<std::string, gfunc::callable> **out_properties,

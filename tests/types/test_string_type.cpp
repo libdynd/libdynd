@@ -335,9 +335,11 @@ TEST(StringType, StringToBool) {
     EXPECT_THROW(nd::array(nd::array("flase").ucast<dynd_bool>().eval()), invalid_argument);
 
     // In "none" mode, it's a bit more permissive
-    EXPECT_FALSE(nd::array(nd::array("").ucast<dynd_bool>(0, assign_error_none).eval()).as<bool>());
-    EXPECT_TRUE(nd::array(nd::array("2").ucast<dynd_bool>(0, assign_error_none).eval()).as<bool>());
-    EXPECT_TRUE(nd::array(nd::array("flase").ucast<dynd_bool>(0, assign_error_none).eval()).as<bool>());
+    eval::eval_context tmp_ectx;
+    tmp_ectx.default_errmode = assign_error_none;
+    EXPECT_FALSE(nd::array(nd::array("").ucast<dynd_bool>().eval(&tmp_ectx)).as<bool>());
+    EXPECT_TRUE(nd::array(nd::array("2").ucast<dynd_bool>().eval(&tmp_ectx)).as<bool>());
+    EXPECT_TRUE(nd::array(nd::array("flase").ucast<dynd_bool>().eval(&tmp_ectx)).as<bool>());
 }
 
 TEST(StringType, StringToInteger) {

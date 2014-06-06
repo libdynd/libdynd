@@ -46,9 +46,11 @@ public:
         return string_encoding_char_size_table[m_encoding];
     }
 
-    void get_string_range(const char **out_begin, const char**out_end, const char *arrmeta, const char *data) const;
-    void set_utf8_string(const char *arrmeta, char *data, assign_error_mode errmode,
-                    const char* utf8_begin, const char *utf8_end) const;
+    void get_string_range(const char **out_begin, const char **out_end,
+                          const char *arrmeta, const char *data) const;
+    void set_from_utf8_string(const char *arrmeta, char *dst,
+                              const char *utf8_begin, const char *utf8_end,
+                              const eval::eval_context *ectx) const;
 
     void print_data(std::ostream& o, const char *arrmeta, const char *data) const;
 
@@ -70,12 +72,13 @@ public:
     void arrmeta_destruct(char *arrmeta) const;
     void arrmeta_debug_print(const char *arrmeta, std::ostream& o, const std::string& indent) const;
 
-    size_t make_assignment_kernel(
-                    ckernel_builder *out, size_t offset_out,
-                    const ndt::type& dst_tp, const char *dst_arrmeta,
-                    const ndt::type& src_tp, const char *src_arrmeta,
-                    kernel_request_t kernreq, assign_error_mode errmode,
-                    const eval::eval_context *ectx) const;
+    size_t make_assignment_kernel(ckernel_builder *out, size_t offset_out,
+                                  const ndt::type &dst_tp,
+                                  const char *dst_arrmeta,
+                                  const ndt::type &src_tp,
+                                  const char *src_arrmeta,
+                                  kernel_request_t kernreq,
+                                  const eval::eval_context *ectx) const;
 
     size_t make_comparison_kernel(
                     ckernel_builder *out, size_t offset_out,
@@ -89,6 +92,8 @@ public:
             const memory_block_ptr& ref,
             intptr_t buffer_max_mem,
             const eval::eval_context *ectx) const;
+
+    nd::array get_option_nafunc() const;
 };
 
 namespace ndt {

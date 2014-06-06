@@ -774,8 +774,8 @@ nd::array nd::array::at_array(intptr_t nindices, const irange *indices, bool col
     }
 }
 
-void nd::array::val_assign(const array& rhs, assign_error_mode errmode,
-                    const eval::eval_context *ectx) const
+void nd::array::val_assign(const array &rhs, const eval::eval_context *ectx)
+    const
 {
     // Verify read access permission
     if (!(rhs.get_flags()&read_access_flag)) {
@@ -783,16 +783,16 @@ void nd::array::val_assign(const array& rhs, assign_error_mode errmode,
     }
 
     typed_data_assign(get_type(), get_arrmeta(), get_readwrite_originptr(),
-                    rhs.get_type(), rhs.get_arrmeta(), rhs.get_readonly_originptr(),
-                    errmode, ectx);
+                      rhs.get_type(), rhs.get_arrmeta(),
+                      rhs.get_readonly_originptr(), ectx);
 }
 
-void nd::array::val_assign(const ndt::type& rhs_dt, const char *rhs_arrmeta, const char *rhs_data,
-                    assign_error_mode errmode, const eval::eval_context *ectx) const
+void nd::array::val_assign(const ndt::type &rhs_dt, const char *rhs_arrmeta,
+                           const char *rhs_data, const eval::eval_context *ectx)
+    const
 {
     typed_data_assign(get_type(), get_arrmeta(), get_readwrite_originptr(),
-                    rhs_dt, rhs_arrmeta, rhs_data,
-                    errmode, ectx);
+                      rhs_dt, rhs_arrmeta, rhs_data, ectx);
 }
 
 void nd::array::flag_as_immutable()
@@ -918,11 +918,11 @@ nd::array nd::array::eval(const eval::eval_context *ectx) const
         array result(make_array_memory_block(dt, ndim, shape.get()));
         if (dt.get_type_id() == strided_dim_type_id) {
             // Reorder strides of output strided dimensions in a KEEPORDER fashion
-            static_cast<const strided_dim_type *>(
-                            dt.extended())->reorder_default_constructed_strides(
-                                            result.get_arrmeta(), get_type(), get_arrmeta());
+            static_cast<const strided_dim_type *>(dt.extended())
+                ->reorder_default_constructed_strides(
+                    result.get_arrmeta(), get_type(), get_arrmeta());
         }
-        result.val_assign(*this, assign_error_default, ectx);
+        result.val_assign(*this, ectx);
         return result;
     }
 }
@@ -946,7 +946,7 @@ nd::array nd::array::eval_immutable(const eval::eval_context *ectx) const
                             dt.extended())->reorder_default_constructed_strides(
                                             result.get_arrmeta(), get_type(), get_arrmeta());
         }
-        result.val_assign(*this, assign_error_default, ectx);
+        result.val_assign(*this, ectx);
         result.get_ndo()->m_flags = immutable_access_flag|read_access_flag;
         return result;
     }
@@ -967,7 +967,7 @@ nd::array nd::array::eval_copy(uint32_t access_flags, const eval::eval_context *
                                         result.get_arrmeta(),
                                         get_type(), get_arrmeta());
     }
-    result.val_assign(*this, assign_error_default, ectx);
+    result.val_assign(*this, ectx);
     // If the access_flags are 0, use the defaults
     access_flags = access_flags ? access_flags
                                 : (int32_t)nd::default_access_flags;
@@ -1136,20 +1136,19 @@ bool nd::array::equals_exact(const array& rhs) const
     }
 }
 
-nd::array nd::array::cast(const ndt::type& tp, assign_error_mode errmode) const
+nd::array nd::array::cast(const ndt::type& tp) const
 {
     // Use the ucast function specifying to replace all dimensions
-    return ucast(tp, get_type().get_ndim(), errmode);
+    return ucast(tp, get_type().get_ndim());
 }
 
 namespace {
     struct cast_dtype_extra {
-        cast_dtype_extra(const ndt::type& tp, size_t ru, assign_error_mode em)
-            : replacement_tp(tp), errmode(em), replace_ndim(ru), out_can_view_data(true)
+        cast_dtype_extra(const ndt::type& tp, size_t ru)
+            : replacement_tp(tp), replace_ndim(ru), out_can_view_data(true)
         {
         }
         const ndt::type& replacement_tp;
-        assign_error_mode errmode;
         intptr_t replace_ndim;
         bool out_can_view_data;
     };
@@ -1195,14 +1194,14 @@ namespace {
                     }
                     if (can_keep_dim) {
                         cast_dtype_extra extra_child(child_replacement_tp,
-                                    replace_ndim - 1, e->errmode);
+                                                     replace_ndim - 1);
                         dt.extended()->transform_child_types(&cast_dtype,
                                         &extra_child, out_transformed_tp, out_was_transformed);
                         return;
                     }
                 }
             }
-            out_transformed_tp = ndt::make_convert(e->replacement_tp, dt, e->errmode);
+            out_transformed_tp = ndt::make_convert(e->replacement_tp, dt);
             // Only flag the transformation if this actually created a convert type
             if (out_transformed_tp.extended() != e->replacement_tp.extended()) {
                 out_was_transformed= true;
@@ -1212,16 +1211,15 @@ namespace {
     }
 } // anonymous namespace
 
-nd::array nd::array::ucast(const ndt::type& scalar_tp,
-                intptr_t replace_ndim,
-                assign_error_mode errmode) const
+nd::array nd::array::ucast(const ndt::type &scalar_tp, intptr_t replace_ndim)
+    const
 {
     // This creates a type which has a convert type for every scalar of different type.
     // The result has the exact same arrmeta and data, so we just have to swap in the new
     // type in a shallow copy.
     ndt::type replaced_tp;
     bool was_transformed = false;
-    cast_dtype_extra extra(scalar_tp, replace_ndim, errmode);
+    cast_dtype_extra extra(scalar_tp, replace_ndim);
     cast_dtype(get_type(), &extra, replaced_tp, was_transformed);
     if (was_transformed) {
         return make_array_clone_with_new_type(*this, replaced_tp);
@@ -1409,14 +1407,14 @@ std::string nd::detail::array_as_string(const nd::array& lhs, assign_error_mode 
 
     nd::array temp = lhs;
     if (temp.get_type().get_kind() != string_kind) {
-        temp = temp.ucast(ndt::make_string(string_encoding_utf_8)).eval();
+        temp = temp.ucast(ndt::make_string()).eval();
     }
     const base_string_type *esd =
                     static_cast<const base_string_type *>(temp.get_type().extended());
     return esd->get_utf8_string(temp.get_arrmeta(), temp.get_ndo()->m_data_pointer, errmode);
 }
 
-ndt::type nd::detail::array_as_type(const nd::array& lhs, assign_error_mode errmode)
+ndt::type nd::detail::array_as_type(const nd::array& lhs)
 {
     if (!lhs.is_scalar()) {
         throw std::runtime_error("can only convert arrays with 0 dimensions to scalars");
@@ -1424,7 +1422,7 @@ ndt::type nd::detail::array_as_type(const nd::array& lhs, assign_error_mode errm
 
     nd::array temp = lhs;
     if (temp.get_type().get_type_id() != type_type_id) {
-        temp = temp.ucast(ndt::make_type(), 0, errmode).eval();
+        temp = temp.ucast(ndt::make_type()).eval();
     }
     return ndt::type(reinterpret_cast<const type_type_data *>(temp.get_readonly_originptr())->tp, true);
 }
@@ -1498,17 +1496,17 @@ nd::array nd::eval_raw_copy(const ndt::type& dt, const char *arrmeta, const char
         result.set(make_array_memory_block(cdt, ndim, shape.get()));
         // Reorder strides of output strided dimensions in a KEEPORDER fashion
         if (dt.get_type_id() == strided_dim_type_id) {
-            static_cast<const strided_dim_type *>(
-                        cdt.extended())->reorder_default_constructed_strides(result.get_arrmeta(),
-                                    dt, arrmeta);
+            static_cast<const strided_dim_type *>(cdt.extended())
+                ->reorder_default_constructed_strides(result.get_arrmeta(), dt,
+                                                      arrmeta);
         }
     } else {
         result.set(make_array_memory_block(cdt, 0, NULL));
     }
 
-    typed_data_assign(cdt, result.get_arrmeta(), result.get_readwrite_originptr(),
-                    dt, arrmeta, data,
-                    assign_error_default, &eval::default_eval_context);
+    typed_data_assign(cdt, result.get_arrmeta(),
+                      result.get_readwrite_originptr(), dt, arrmeta, data,
+                      &eval::default_eval_context);
 
     return result;
 }
@@ -1787,6 +1785,26 @@ nd::array nd::groupby(const nd::array& data_values, const nd::array& by_values, 
         result.get_ndo()->m_flags |= immutable_access_flag;
     }
     return result;
+}
+
+bool nd::is_scalar_avail(const ndt::type &tp, const char *arrmeta,
+                      const char *data, const eval::eval_context *ectx)
+{
+    if (tp.is_scalar()) {
+        if (tp.get_type_id() == option_type_id) {
+            return tp.tcast<option_type>()->is_avail(arrmeta, data, ectx);
+        } else if (tp.get_kind() == expression_kind &&
+                   tp.value_type().get_type_id() == option_type_id) {
+            nd::array tmp = nd::empty(tp.value_type());
+            tmp.val_assign(tp, arrmeta, data, ectx);
+            return tmp.get_type().tcast<option_type>()->is_avail(arrmeta, data,
+                                                                 ectx);
+        } else {
+            return true;
+        }
+    } else {
+        return false;
+    }
 }
 
 void nd::assign_na(const ndt::type &tp, const char *arrmeta, char *data,

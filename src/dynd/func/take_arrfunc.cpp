@@ -219,9 +219,9 @@ instantiate_masked_take(const arrfunc_type_data *DYND_UNUSED(self_data_ptr), dyn
     }
 
     // Create the child element assignment ckernel
-    return make_assignment_kernel(
-        ckb, ckb_end, dst_el_tp, dst_el_meta, src0_el_tp, src0_el_meta,
-        kernel_request_strided, assign_error_default, ectx);
+    return make_assignment_kernel(ckb, ckb_end, dst_el_tp, dst_el_meta,
+                                  src0_el_tp, src0_el_meta,
+                                  kernel_request_strided, ectx);
 }
 
 static intptr_t
@@ -280,9 +280,9 @@ instantiate_indexed_take(const arrfunc_type_data *DYND_UNUSED(self_data_ptr), dy
     }
 
     // Create the child element assignment ckernel
-    return make_assignment_kernel(
-        ckb, ckb_end, dst_el_tp, dst_el_meta, src0_el_tp, src0_el_meta,
-        kernel_request_single, assign_error_default, ectx);
+    return make_assignment_kernel(ckb, ckb_end, dst_el_tp, dst_el_meta,
+                                  src0_el_tp, src0_el_meta,
+                                  kernel_request_single, ectx);
 }
 
 static intptr_t

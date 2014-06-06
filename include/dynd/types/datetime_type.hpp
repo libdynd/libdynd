@@ -40,9 +40,9 @@ public:
     void set_cal(const char *arrmeta, char *data, assign_error_mode errmode,
                     int32_t year, int32_t month, int32_t day,
                     int32_t hour, int32_t min=0, int32_t sec=0, int32_t tick=0) const;
-    void set_utf8_string(const char *arrmeta, char *data,
-                         assign_error_mode errmode, const std::string &utf8_str,
-                         const eval::eval_context *ectx) const;
+    void set_from_utf8_string(const char *arrmeta, char *data,
+                              const char *utf8_begin, const char *utf8_end,
+                              const eval::eval_context *ectx) const;
 
     void get_cal(const char *arrmeta, const char *data,
                     int32_t &out_year, int32_t &out_month, int32_t &out_day,
@@ -65,12 +65,13 @@ public:
     void arrmeta_debug_print(const char *DYND_UNUSED(arrmeta), std::ostream& DYND_UNUSED(o), const std::string& DYND_UNUSED(indent)) const {
     }
 
-    size_t make_assignment_kernel(
-                    ckernel_builder *out, size_t offset_out,
-                    const ndt::type& dst_tp, const char *dst_arrmeta,
-                    const ndt::type& src_tp, const char *src_arrmeta,
-                    kernel_request_t kernreq, assign_error_mode errmode,
-                    const eval::eval_context *ectx) const;
+    size_t make_assignment_kernel(ckernel_builder *out, size_t offset_out,
+                                  const ndt::type &dst_tp,
+                                  const char *dst_arrmeta,
+                                  const ndt::type &src_tp,
+                                  const char *src_arrmeta,
+                                  kernel_request_t kernreq,
+                                  const eval::eval_context *ectx) const;
 
     void get_dynamic_type_properties(const std::pair<std::string, gfunc::callable> **out_properties, size_t *out_count) const;
     void get_dynamic_type_functions(const std::pair<std::string, gfunc::callable> **out_functions, size_t *out_count) const;
@@ -90,6 +91,8 @@ public:
                     const char *dst_arrmeta, size_t dst_elwise_property_index,
                     const char *src_arrmeta,
                     kernel_request_t kernreq, const eval::eval_context *ectx) const;
+
+    nd::array get_option_nafunc() const;
 };
 
 namespace ndt {

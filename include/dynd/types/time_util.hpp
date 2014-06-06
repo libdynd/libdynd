@@ -90,12 +90,16 @@ struct time_hmst {
     inline void set_to_na() {
         hour = -128;
     }
+    void set_from_str(const char *begin, const char *end);
     /**
      * Sets the hmst from a string.
      *
      * \param s  Date string.
      */
-    void set_from_str(const std::string& s);
+    inline void set_from_str(const std::string& s) {
+        set_from_str(s.data(), s.data() + s.size());
+    }
+
 
     /**
      * Returns the current time in the local time zone.

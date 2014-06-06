@@ -13,19 +13,20 @@
 #include <dynd/kernels/assignment_kernels.hpp>
 #include <dynd/func/make_callable.hpp>
 #include <dynd/pp/list.hpp>
+#include <dynd/parser_util.hpp>
 
 #include <algorithm>
 
 using namespace std;
 using namespace dynd;
 
-option_type::option_type(const ndt::type& value_tp)
+option_type::option_type(const ndt::type &value_tp)
     : base_type(option_type_id, option_kind, value_tp.get_data_size(),
-                    value_tp.get_data_alignment(),
-                    (value_tp.get_flags()&type_flags_value_inherited) | type_flag_constructor,
-                    value_tp.get_arrmeta_size(),
-                    value_tp.get_ndim()),
-                    m_value_tp(value_tp)
+                value_tp.get_data_alignment(),
+                value_tp.get_flags() &
+                    (type_flags_value_inherited | type_flags_operand_inherited),
+                value_tp.get_arrmeta_size(), value_tp.get_ndim()),
+      m_value_tp(value_tp)
 {
     if (value_tp.get_type_id() == option_type_id) {
         stringstream ss;
@@ -38,6 +39,17 @@ option_type::option_type(const ndt::type& value_tp)
         m_nafunc = kernels::get_option_builtin_nafunc(value_tp.get_type_id());
         if (!m_nafunc.is_null()) {
             return;
+        }
+    } else {
+        m_nafunc = value_tp.extended()->get_option_nafunc();
+        if (!m_nafunc.is_null() &&
+                m_nafunc.get_type() != option_type::make_nafunc_type()) {
+            stringstream ss;
+            ss << "Type " << m_value_tp
+               << " returned invalid nafunc object, had type "
+               << m_nafunc.get_type() << " instead of "
+               << option_type::make_nafunc_type();
+            throw invalid_argument(ss.str());
         }
     }
 }
@@ -222,6 +234,32 @@ ndt::type option_type::get_canonical_type() const
     return ndt::make_option(m_value_tp.get_canonical_type());
 }
 
+void option_type::set_from_utf8_string(const char *arrmeta, char *data,
+                                       const char *utf8_begin,
+                                       const char *utf8_end,
+                                       const eval::eval_context *ectx) const
+{
+    if (m_value_tp.get_kind() != string_kind &&
+            m_value_tp.get_kind() != dynamic_kind &&
+            parse::matches_option_type_na_token(utf8_begin, utf8_end)) {
+        assign_na(arrmeta, data, ectx);
+    } else {
+        if (m_value_tp.is_builtin()) {
+            if (m_value_tp.unchecked_get_builtin_type_id() == bool_type_id) {
+                parse::string_to_bool(data, utf8_begin, utf8_end, false,
+                                      ectx->default_errmode);
+            } else {
+                parse::string_to_number(
+                    data, m_value_tp.unchecked_get_builtin_type_id(),
+                    utf8_begin, utf8_end, false, ectx->default_errmode);
+            }
+        } else {
+            m_value_tp.extended()->set_from_utf8_string(
+                arrmeta, data, utf8_begin, utf8_end, ectx);
+        }
+    }
+}
+
 bool option_type::is_lossless_assignment(const ndt::type& dst_tp, const ndt::type& src_tp) const
 {
     if (dst_tp.extended() == this) {
@@ -297,12 +335,18 @@ void option_type::arrmeta_debug_print(const char *arrmeta, std::ostream& o, cons
 size_t option_type::make_assignment_kernel(
     ckernel_builder *ckb, size_t ckb_offset, const ndt::type &dst_tp,
     const char *dst_arrmeta, const ndt::type &src_tp, const char *src_arrmeta,
-    kernel_request_t kernreq, assign_error_mode errmode,
-    const eval::eval_context *ectx) const
+    kernel_request_t kernreq, const eval::eval_context *ectx) const
 {
-    return kernels::make_option_assignment_kernel(
-        ckb, ckb_offset, dst_tp, dst_arrmeta, src_tp, src_arrmeta,
-        kernreq, errmode, ectx);
+    // Let expression types resolve themselves first
+    if (this == dst_tp.extended() && src_tp.get_kind() == expression_kind) {
+        return src_tp.extended()->make_assignment_kernel(
+            ckb, ckb_offset, dst_tp, dst_arrmeta, src_tp, src_arrmeta, kernreq,
+            ectx);
+    }
+
+    return kernels::make_option_assignment_kernel(ckb, ckb_offset, dst_tp,
+                                                  dst_arrmeta, src_tp,
+                                                  src_arrmeta, kernreq, ectx);
 }
 
 

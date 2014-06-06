@@ -103,11 +103,9 @@ bool char_type::operator==(const base_type& rhs) const
 }
 
 size_t char_type::make_assignment_kernel(
-    ckernel_builder *out, size_t offset_out,
-    const ndt::type& dst_tp, const char *dst_arrmeta,
-    const ndt::type& src_tp, const char *src_arrmeta,
-    kernel_request_t kernreq, assign_error_mode errmode,
-    const eval::eval_context *ectx) const
+    ckernel_builder *out, size_t offset_out, const ndt::type &dst_tp,
+    const char *dst_arrmeta, const ndt::type &src_tp, const char *src_arrmeta,
+    kernel_request_t kernreq, const eval::eval_context *ectx) const
 {
     if (this == dst_tp.extended()) {
         if (dst_tp == src_tp) {
@@ -120,29 +118,29 @@ size_t char_type::make_assignment_kernel(
             case char_type_id: {
                 // Use the fixedstring assignment to do this conversion
                 const char_type *src_fs = src_tp.tcast<char_type>();
-                return make_fixedstring_assignment_kernel(out, offset_out,
-                                get_data_size(), m_encoding, src_fs->get_data_size(), src_fs->m_encoding,
-                                kernreq, errmode, ectx);
+                return make_fixedstring_assignment_kernel(
+                    out, offset_out, get_data_size(), m_encoding,
+                    src_fs->get_data_size(), src_fs->m_encoding, kernreq, ectx);
             }
             case fixedstring_type_id: {
                 // Use the fixedstring assignment to do this conversion
                 const base_string_type *src_fs = src_tp.tcast<base_string_type>();
-                return make_fixedstring_assignment_kernel(out, offset_out,
-                                get_data_size(), m_encoding, src_fs->get_data_size(), src_fs->get_encoding(),
-                                kernreq, errmode, ectx);
+                return make_fixedstring_assignment_kernel(
+                    out, offset_out, get_data_size(), m_encoding,
+                    src_fs->get_data_size(), src_fs->get_encoding(), kernreq,
+                    ectx);
             }
             case string_type_id: {
                 const base_string_type *src_fs = src_tp.tcast<base_string_type>();
-                return make_blockref_string_to_fixedstring_assignment_kernel(out, offset_out,
-                                get_data_size(), m_encoding, src_fs->get_encoding(),
-                                kernreq, errmode, ectx);
+                return make_blockref_string_to_fixedstring_assignment_kernel(
+                    out, offset_out, get_data_size(), m_encoding,
+                    src_fs->get_encoding(), kernreq, ectx);
             }
             default: {
                 if (!src_tp.is_builtin()) {
-                    return src_tp.extended()->make_assignment_kernel(out, offset_out,
-                        dst_tp, dst_arrmeta,
-                        src_tp, src_arrmeta,
-                        kernreq, errmode, ectx);
+                    return src_tp.extended()->make_assignment_kernel(
+                        out, offset_out, dst_tp, dst_arrmeta, src_tp,
+                        src_arrmeta, kernreq, ectx);
                 }
                 break;
             }
@@ -153,15 +151,16 @@ size_t char_type::make_assignment_kernel(
             case fixedstring_type_id: {
                 // Use the fixedstring assignment to do this conversion
                 const base_string_type *dst_fs = dst_tp.tcast<base_string_type>();
-                return make_fixedstring_assignment_kernel(out, offset_out,
-                                dst_fs->get_data_size(), dst_fs->get_encoding(), get_data_size(), m_encoding, 
-                                kernreq, errmode, ectx);
+                return make_fixedstring_assignment_kernel(
+                    out, offset_out, dst_fs->get_data_size(),
+                    dst_fs->get_encoding(), get_data_size(), m_encoding,
+                    kernreq, ectx);
             }
             case string_type_id: {
                 const base_string_type *dst_fs = dst_tp.tcast<base_string_type>();
-                return make_fixedstring_to_blockref_string_assignment_kernel(out, offset_out,
-                                dst_arrmeta, dst_fs->get_encoding(), get_data_size(), m_encoding,
-                                kernreq, errmode, ectx);
+                return make_fixedstring_to_blockref_string_assignment_kernel(
+                    out, offset_out, dst_arrmeta, dst_fs->get_encoding(),
+                    get_data_size(), m_encoding, kernreq, ectx);
             }
             default: {
                 break;

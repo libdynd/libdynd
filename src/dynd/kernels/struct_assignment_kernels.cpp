@@ -64,8 +64,7 @@ namespace {
 
 size_t dynd::make_struct_identical_assignment_kernel(
     ckernel_builder *ckb, size_t ckb_offset, const ndt::type &val_struct_tp,
-    const char *dst_arrmeta, const char *src_arrmeta,
-    kernel_request_t kernreq, assign_error_mode errmode,
+    const char *dst_arrmeta, const char *src_arrmeta, kernel_request_t kernreq,
     const eval::eval_context *ectx)
 {
     if (val_struct_tp.get_kind() != struct_kind) {
@@ -112,7 +111,7 @@ size_t dynd::make_struct_identical_assignment_kernel(
         current_offset = ::make_assignment_kernel(ckb, current_offset,
                         ft, dst_arrmeta + arrmeta_offset,
                         ft, src_arrmeta + arrmeta_offset,
-                        kernel_request_single, errmode, ectx);
+                        kernel_request_single, ectx);
     }
     return current_offset;
 }
@@ -121,11 +120,10 @@ size_t dynd::make_struct_identical_assignment_kernel(
 // struct to different struct assignment
 
 size_t dynd::make_struct_assignment_kernel(
-                ckernel_builder *ckb, size_t ckb_offset,
-                const ndt::type& dst_struct_tp, const char *dst_arrmeta,
-                const ndt::type& src_struct_tp, const char *src_arrmeta,
-                kernel_request_t kernreq, assign_error_mode errmode,
-                const eval::eval_context *ectx)
+    ckernel_builder *ckb, size_t ckb_offset, const ndt::type &dst_struct_tp,
+    const char *dst_arrmeta, const ndt::type &src_struct_tp,
+    const char *src_arrmeta, kernel_request_t kernreq,
+    const eval::eval_context *ectx)
 {
     if (src_struct_tp.get_kind() != struct_kind) {
         stringstream ss;
@@ -191,10 +189,9 @@ size_t dynd::make_struct_assignment_kernel(
         fi->src_data_offset = src_data_offsets[i_src];
         current_offset = ::make_assignment_kernel(
             ckb, current_offset, dst_sd->get_field_type(i),
-            dst_arrmeta + dst_arrmeta_offsets[i],
-            src_sd->get_field_type(i_src),
+            dst_arrmeta + dst_arrmeta_offsets[i], src_sd->get_field_type(i_src),
             src_arrmeta + src_arrmeta_offsets[i_src], kernel_request_single,
-            errmode, ectx);
+            ectx);
     }
     return current_offset;
 }
@@ -203,11 +200,9 @@ size_t dynd::make_struct_assignment_kernel(
 // value to each struct field assignment
 
 size_t dynd::make_broadcast_to_struct_assignment_kernel(
-                ckernel_builder *ckb, size_t ckb_offset,
-                const ndt::type& dst_struct_tp, const char *dst_arrmeta,
-                const ndt::type& src_tp, const char *src_arrmeta,
-                kernel_request_t kernreq, assign_error_mode errmode,
-                const eval::eval_context *ectx)
+    ckernel_builder *ckb, size_t ckb_offset, const ndt::type &dst_struct_tp,
+    const char *dst_arrmeta, const ndt::type &src_tp, const char *src_arrmeta,
+    kernel_request_t kernreq, const eval::eval_context *ectx)
 {
     // This implementation uses the same struct to struct kernel, just with
     // an offset of 0 for each source value. A kernel tailored to this
@@ -245,10 +240,10 @@ size_t dynd::make_broadcast_to_struct_assignment_kernel(
         fi->child_kernel_offset = current_offset - ckb_offset;
         fi->dst_data_offset = dst_data_offsets[i];
         fi->src_data_offset = 0;
-        current_offset = ::make_assignment_kernel(ckb, current_offset,
-                        dst_sd->get_field_type(i), dst_arrmeta + dst_arrmeta_offsets[i],
-                        src_tp, src_arrmeta,
-                        kernel_request_single, errmode, ectx);
+        current_offset = ::make_assignment_kernel(
+            ckb, current_offset, dst_sd->get_field_type(i),
+            dst_arrmeta + dst_arrmeta_offsets[i], src_tp, src_arrmeta,
+            kernel_request_single, ectx);
     }
     return current_offset;
 }

@@ -184,10 +184,19 @@ struct date_ymd {
      *                        starting at the year given. The value 0 means to
      *                        disallow two digit years.
      */
-    void set_from_str(const std::string &s,
-                      date_parse_order_t ambig = date_parse_no_ambig,
-                      int century_window = 70,
-                      assign_error_mode errmode = assign_error_fractional);
+    inline void
+    set_from_str(const std::string &s,
+                 date_parse_order_t ambig = date_parse_no_ambig,
+                 int century_window = 70,
+                 assign_error_mode errmode = assign_error_fractional)
+    {
+        return set_from_str(s.data(), s.data() + s.size(), ambig, century_window, errmode);
+    }
+
+    void set_from_str(const char *begin, const char *end,
+                      date_parse_order_t ambig,
+                      int century_window,
+                      assign_error_mode errmode);
 
     /**
      * When a year is a two digit year that should be resolved as a four

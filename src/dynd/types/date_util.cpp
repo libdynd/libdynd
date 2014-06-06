@@ -152,14 +152,15 @@ void date_ymd::set_from_days(int32_t days)
     }
 }
 
-void date_ymd::set_from_str(const std::string &s, date_parse_order_t ambig,
-                            int century_window, assign_error_mode errmode)
+void date_ymd::set_from_str(const char *begin, const char *end,
+                            date_parse_order_t ambig = date_parse_no_ambig,
+                            int century_window = 70,
+                            assign_error_mode errmode = assign_error_fractional)
 {
-    if (!string_to_date(s.data(), s.data() + s.size(), *this,
-                        ambig, century_window, errmode)) {
+    if (!string_to_date(begin, end, *this, ambig, century_window, errmode)) {
         stringstream ss;
         ss << "Unable to parse ";
-        print_escaped_utf8_string(ss, s);
+        print_escaped_utf8_string(ss, begin, end);
         ss << " as a date";
         throw invalid_argument(ss.str());
     }

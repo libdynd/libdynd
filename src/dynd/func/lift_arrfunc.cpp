@@ -75,7 +75,7 @@ static int resolve_lifted_dst_type(const arrfunc_type_data *self,
     }
     // Then build the type for the rest of the dimensions
     if (ndim > 0) {
-        dimvector shape(ndim), tmp_shape(ndim);;
+        dimvector shape(ndim), tmp_shape(ndim);
         for (intptr_t i = 0; i < ndim; ++i) {
             shape[i] = -1;
         }

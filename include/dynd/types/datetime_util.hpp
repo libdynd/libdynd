@@ -94,10 +94,19 @@ struct datetime_struct {
      *                 values. In mode assign_error_none, tries to do a "best interpretation"
      *                 conversion.
      */
-    void set_from_str(const std::string &s,
-                      date_parse_order_t ambig = date_parse_no_ambig,
-                      int century_window = 70,
-                      assign_error_mode errmode = assign_error_fractional);
+    inline void
+    set_from_str(const std::string &s,
+                 date_parse_order_t ambig = date_parse_no_ambig,
+                 int century_window = 70,
+                 assign_error_mode errmode = assign_error_fractional)
+    {
+        set_from_str(s.data(), s.data() + s.size(), ambig, century_window,
+                     errmode);
+    }
+
+    void set_from_str(const char *begin, const char *end,
+                      date_parse_order_t ambig, int century_window,
+                      assign_error_mode errmode);
 
     /**
      * Returns an ndt::type corresponding to the datetime_struct structure.

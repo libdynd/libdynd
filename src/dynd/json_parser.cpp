@@ -488,19 +488,21 @@ static void parse_number_json(const ndt::type &tp, const char *arrmeta,
     rbegin = begin;
 }
 
-static void parse_jsonstring_json(const ndt::type& tp, const char *arrmeta, char *out_data,
-                const char *&begin, const char *end)
+static void parse_jsonstring_json(const ndt::type &tp, const char *arrmeta,
+                                  char *out_data, const char *&begin,
+                                  const char *end,
+                                  const eval::eval_context *ectx)
 {
     const char *saved_begin = skip_whitespace(begin, end);
     skip_json_value(begin, end);
     const base_string_type *bsd = tp.tcast<base_string_type>();
     // The skipped JSON value gets copied verbatim into the json string
-    bsd->set_utf8_string(arrmeta, out_data, assign_error_none,
-            saved_begin, begin);
+    bsd->set_from_utf8_string(arrmeta, out_data, saved_begin, begin, ectx);
 }
 
-static void parse_string_json(const ndt::type& tp, const char *arrmeta, char *out_data,
-                const char *&rbegin, const char *end)
+static void parse_string_json(const ndt::type &tp, const char *arrmeta,
+                              char *out_data, const char *&rbegin,
+                              const char *end, const eval::eval_context *ectx)
 {
     const char *begin = rbegin;
     begin = skip_whitespace(begin, end);
@@ -511,11 +513,12 @@ static void parse_string_json(const ndt::type& tp, const char *arrmeta, char *ou
         const base_string_type *bsd = tp.tcast<base_string_type>();
         try {
             if (!escaped) {
-                bsd->set_utf8_string(arrmeta, out_data, assign_error_fractional, strbegin, strend);
+                bsd->set_from_utf8_string(arrmeta, out_data, strbegin, strend,
+                                          ectx);
             } else {
                 string val;
                 parse::unescape_string(strbegin, strend, val);
-                bsd->set_utf8_string(arrmeta, out_data, assign_error_fractional, val);
+                bsd->set_from_utf8_string(arrmeta, out_data, val, ectx);
             }
         } catch (const std::exception& e) {
             throw json_parse_error(skip_whitespace(rbegin, begin), e.what(), tp);
@@ -526,46 +529,46 @@ static void parse_string_json(const ndt::type& tp, const char *arrmeta, char *ou
     rbegin = begin;
 }
 
-static void parse_datetime_json(const ndt::type& tp, const char *arrmeta, char *out_data,
-                const char *&rbegin, const char *end, const eval::eval_context *ectx)
+static void parse_datetime_json(const ndt::type &tp, const char *arrmeta,
+                                char *out_data, const char *&rbegin,
+                                const char *end, bool option,
+                                const eval::eval_context *ectx)
 {
     const char *begin = rbegin;
     begin = skip_whitespace(begin, end);
     const char *strbegin, *strend;
     bool escaped;
-    if (parse::parse_doublequote_string_no_ws(begin, end, strbegin, strend,
-                                              escaped)) {
-        string val;
-        if (!escaped) {
-            val.assign(strbegin, strend);
-        } else {
-            parse::unescape_string(strbegin, strend, val);
+    if (option && parse_token(begin, end, "null")) {
+        switch (tp.get_type_id()) {
+            case date_type_id:
+                *reinterpret_cast<int32_t *>(out_data) = DYND_DATE_NA;
+                return;
+            case time_type_id:
+                *reinterpret_cast<int64_t *>(out_data) = DYND_TIME_NA;
+                return;
+            case datetime_type_id:
+                *reinterpret_cast<int64_t *>(out_data) = DYND_DATETIME_NA;
+                return;
+            default:
+                break;
         }
-        if (tp.get_type_id() == date_type_id) {
-            const date_type *dd = tp.tcast<date_type>();
-            try {
-                dd->set_utf8_string(arrmeta, out_data, assign_error_fractional, val, ectx);
-            } catch (const std::exception& e) {
-                throw json_parse_error(skip_whitespace(rbegin, begin), e.what(), tp);
-            }
-        } else if (tp.get_type_id() == datetime_type_id) {
-            const datetime_type *dt = tp.tcast<datetime_type>();
-            try {
-                dt->set_utf8_string(arrmeta, out_data, assign_error_fractional, val, ectx);
-            } catch (const std::exception& e) {
-                throw json_parse_error(skip_whitespace(rbegin, begin), e.what(), tp);
-            }
-        } else if (tp.get_type_id() == time_type_id) {
-            const time_type *tt = tp.tcast<time_type>();
-            try {
-                tt->set_utf8_string(arrmeta, out_data, assign_error_fractional, val);
-            } catch (const std::exception& e) {
-                throw json_parse_error(skip_whitespace(rbegin, begin), e.what(), tp);
-            }
-        } else {
-            stringstream ss;
-            ss << "nd::parse_json: unexpected type " << tp;
-            throw type_error(ss.str());
+        stringstream ss;
+        ss << "Unrecognized datetime type " << tp;
+        throw runtime_error(ss.str());
+    } else if (parse::parse_doublequote_string_no_ws(begin, end, strbegin,
+                                                     strend, escaped)) {
+        string val;
+        if (escaped) {
+            parse::unescape_string(strbegin, strend, val);
+            strbegin = val.data();
+            strend = strbegin + val.size();
+        }
+        try {
+            tp.extended()->set_from_utf8_string(arrmeta, out_data, strbegin,
+                                                strend, ectx);
+        } catch (const std::exception &e) {
+            throw json_parse_error(skip_whitespace(rbegin, begin), e.what(),
+                                   tp);
         }
     } else {
         throw json_parse_error(begin, "expected a string", tp);
@@ -597,20 +600,70 @@ static void parse_option_json(const ndt::type &tp, const char *arrmeta,
                               char *out_data, const char *&begin,
                               const char *end, const eval::eval_context *ectx)
 {
-    const ndt::type &value_tp = tp.tcast<option_type>()->get_value_type();
     begin = skip_whitespace(begin, end);
-    switch (value_tp.get_kind()) {
-        case bool_kind:
-            parse_bool_json(tp, arrmeta, out_data, begin, end, true, ectx);
+    const char *saved_begin = begin;
+    if (tp.is_scalar()) {
+        if (parse_token(begin, end, "null")) {
+            tp.tcast<option_type>()->assign_na(arrmeta, out_data, ectx);
             return;
-        case int_kind:
-        case uint_kind:
-        case real_kind:
-        case complex_kind:
-            parse_number_json(value_tp, arrmeta, out_data, begin, end, true, ectx);
-            return;
-        default:
-            break;
+        } else {
+            const ndt::type &value_tp =
+                tp.tcast<option_type>()->get_value_type();
+            const char *strbegin, *strend;
+            bool escaped;
+            if (parse::parse_doublequote_string_no_ws(begin, end, strbegin,
+                                                      strend, escaped)) {
+                try {
+                    if (!escaped) {
+                        tp.extended()->set_from_utf8_string(
+                            arrmeta, out_data, strbegin, strend, ectx);
+                    } else {
+                        string val;
+                        parse::unescape_string(strbegin, strend, val);
+                        tp.extended()->set_from_utf8_string(arrmeta, out_data,
+                                                            val, ectx);
+                    }
+                    return;
+                } catch(const exception& e) {
+                    throw json_parse_error(saved_begin, e.what(), tp);
+                }
+            } else if (value_tp.get_kind() == bool_kind) {
+                if (parse_token(begin, end, "true")) {
+                    *out_data = 1;
+                } else if (parse_token(begin, end, "false")) {
+                    *out_data = 0;
+                } else if (parse::parse_json_number_no_ws(begin, end, strbegin,
+                                                          strend)) {
+                    if (parse::compare_range_to_literal(strbegin, strend,
+                                                        "1")) {
+                        *out_data = 1;
+                    } else if (parse::compare_range_to_literal(strbegin, strend,
+                                                               "0")) {
+                        *out_data = 0;
+                    } else {
+                        throw json_parse_error(begin, "expected a boolean", tp);
+                    }
+                } else {
+                    throw json_parse_error(begin, "expected a boolean", tp);
+                }
+                return;
+            } else if (value_tp.get_kind() == int_kind ||
+                       value_tp.get_kind() == uint_kind ||
+                       value_tp.get_kind() == real_kind ||
+                       value_tp.get_kind() == complex_kind) {
+                if (parse::parse_json_number_no_ws(begin, end, strbegin,
+                                                   strend)) {
+                    parse::string_to_number(out_data, value_tp.get_type_id(),
+                                            strbegin, strend, false,
+                                            ectx->default_errmode);
+                } else {
+                    throw json_parse_error(begin, "expected a number", tp);
+                }
+                return;
+            } else {
+                throw json_parse_error(begin, "expected a string", tp);
+            }
+        }
     }
 
     stringstream ss;
@@ -618,43 +671,44 @@ static void parse_option_json(const ndt::type &tp, const char *arrmeta,
     throw runtime_error(ss.str());
 }
 
-static void parse_json(const ndt::type& tp, const char *arrmeta, char *out_data,
-                const char *&json_begin, const char *json_end, const eval::eval_context *ectx)
+static void parse_json(const ndt::type &tp, const char *arrmeta, char *out_data,
+                       const char *&begin, const char *end,
+                       const eval::eval_context *ectx)
 {
-    json_begin = skip_whitespace(json_begin, json_end);
+    begin = skip_whitespace(begin, end);
     switch (tp.get_kind()) {
         case uniform_dim_kind:
-            parse_uniform_dim_json(tp, arrmeta, out_data, json_begin, json_end, ectx);
+            parse_uniform_dim_json(tp, arrmeta, out_data, begin, end, ectx);
             return;
         case struct_kind:
-            parse_struct_json(tp, arrmeta, out_data, json_begin, json_end, ectx);
+            parse_struct_json(tp, arrmeta, out_data, begin, end, ectx);
             return;
         case bool_kind:
-            parse_bool_json(tp, arrmeta, out_data, json_begin, json_end,
+            parse_bool_json(tp, arrmeta, out_data, begin, end,
                             false, ectx);
             return;
         case int_kind:
         case uint_kind:
         case real_kind:
         case complex_kind:
-            json_begin = skip_whitespace(json_begin, json_end);
-            parse_number_json(tp, arrmeta, out_data, json_begin, json_end,
+            parse_number_json(tp, arrmeta, out_data, begin, end,
                                false, ectx);
             return;
         case string_kind:
-            parse_string_json(tp, arrmeta, out_data, json_begin, json_end);
+            parse_string_json(tp, arrmeta, out_data, begin, end, ectx);
             return;
         case datetime_kind:
-            parse_datetime_json(tp, arrmeta, out_data, json_begin, json_end, ectx);
+            parse_datetime_json(tp, arrmeta, out_data, begin, end,
+                                false, ectx);
             return;
         case option_kind:
-            parse_option_json(tp, arrmeta, out_data, json_begin, json_end, ectx);
+            parse_option_json(tp, arrmeta, out_data, begin, end, ectx);
             return;
         case dynamic_kind:
             if (tp.get_type_id() == json_type_id) {
                 // The json type is a special string type that contains JSON directly
                 // Copy the JSON verbatim in this case.
-                parse_jsonstring_json(tp, arrmeta, out_data, json_begin, json_end);
+                parse_jsonstring_json(tp, arrmeta, out_data, begin, end, ectx);
                 return;
             }
             break;
@@ -772,7 +826,7 @@ void dynd::parse_json(nd::array &out, const char *json_begin,
         get_error_line_column(json_begin, json_end, e.get_position(),
                         line_prev, line_cur, line, column);
         ss << "Error parsing JSON at line " << line << ", column " << column << "\n";
-        ss << "DType: " << e.get_type() << "\n";
+        ss << "DyND Type: " << e.get_type() << "\n";
         ss << "Message: " << e.what() << "\n";
         print_json_parse_error_marker(ss, line_prev, line_cur, line, column);
         throw invalid_argument(ss.str());

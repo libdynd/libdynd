@@ -9,13 +9,14 @@
 using namespace std;
 using namespace dynd;
 
-convert_type::convert_type(const ndt::type& value_type, const ndt::type& operand_type, assign_error_mode errmode)
-    : base_expression_type(convert_type_id, expression_kind, operand_type.get_data_size(),
-                        operand_type.get_data_alignment(),
-                        inherited_flags(value_type.get_flags(), operand_type.get_flags()),
-                        operand_type.get_arrmeta_size(),
-                        value_type.get_ndim()),
-                m_value_type(value_type), m_operand_type(operand_type), m_errmode(errmode)
+convert_type::convert_type(const ndt::type &value_type,
+                           const ndt::type &operand_type)
+    : base_expression_type(
+          convert_type_id, expression_kind, operand_type.get_data_size(),
+          operand_type.get_data_alignment(),
+          inherited_flags(value_type.get_flags(), operand_type.get_flags()),
+          operand_type.get_arrmeta_size(), value_type.get_ndim()),
+      m_value_type(value_type), m_operand_type(operand_type)
 {
     // An alternative to this error would be to use value_type.value_type(), cutting
     // away the expression part of the given value_type.
@@ -25,35 +26,23 @@ convert_type::convert_type(const ndt::type& value_type, const ndt::type& operand
         ss << " should not be an expression_kind";
         throw dynd::type_error(ss.str());
     }
-
-    // Initialize the kernels
-    if (errmode != assign_error_none) {
-        m_errmode_to_value = ::dynd::is_lossless_assignment(m_value_type, m_operand_type)
-                        ? assign_error_none : errmode;
-        m_errmode_to_operand = ::dynd::is_lossless_assignment(m_operand_type, m_value_type)
-                        ? assign_error_none : errmode;
-    } else {
-        m_errmode_to_value = assign_error_none;
-        m_errmode_to_operand = assign_error_none;
-    }
 }
 
 convert_type::~convert_type()
 {
 }
 
-
-void convert_type::print_data(std::ostream& DYND_UNUSED(o), const char *DYND_UNUSED(arrmeta), const char *DYND_UNUSED(data)) const
+void convert_type::print_data(std::ostream &DYND_UNUSED(o),
+                              const char *DYND_UNUSED(arrmeta),
+                              const char *DYND_UNUSED(data)) const
 {
-    throw runtime_error("internal error: convert_type::print_data isn't supposed to be called");
+    throw runtime_error(
+        "internal error: convert_type::print_data isn't supposed to be called");
 }
 
 void convert_type::print_type(std::ostream& o) const
 {
     o << "convert[to=" << m_value_type << ", from=" << m_operand_type;
-    if (m_errmode != assign_error_default) {
-        o << ", errmode=" << m_errmode;
-    }
     o << "]";
 }
 
@@ -70,7 +59,8 @@ void convert_type::get_shape(intptr_t ndim, intptr_t i, intptr_t *out_shape,
     }
 }
 
-bool convert_type::is_lossless_assignment(const ndt::type& dst_tp, const ndt::type& src_tp) const
+bool convert_type::is_lossless_assignment(const ndt::type &dst_tp,
+                                          const ndt::type &src_tp) const
 {
     // Treat this type as the value type for whether assignment is always lossless
     if (src_tp.extended() == this) {
@@ -88,26 +78,31 @@ bool convert_type::operator==(const base_type& rhs) const
         return false;
     } else {
         const convert_type *dt = static_cast<const convert_type*>(&rhs);
-        return m_errmode == dt->m_errmode &&
-            m_value_type == dt->m_value_type &&
-            m_operand_type == dt->m_operand_type;
+        return m_value_type == dt->m_value_type &&
+               m_operand_type == dt->m_operand_type;
     }
 }
 
 ndt::type convert_type::with_replaced_storage_type(const ndt::type& replacement_type) const
 {
     if (m_operand_type.get_kind() == expression_kind) {
-        return ndt::type(new convert_type(m_value_type,
-                        m_operand_type.tcast<base_expression_type>()->with_replaced_storage_type(replacement_type),
-                        m_errmode), false);
+        return ndt::type(
+            new convert_type(
+                m_value_type,
+                m_operand_type.tcast<base_expression_type>()
+                    ->with_replaced_storage_type(replacement_type)),
+            false);
     } else {
         if (m_operand_type != replacement_type.value_type()) {
             std::stringstream ss;
-            ss << "Cannot chain expression types, because the conversion's storage type, " << m_operand_type;
-            ss << ", does not match the replacement's value type, " << replacement_type.value_type();
+            ss << "Cannot chain expression types, because the conversion's "
+                  "storage type, " << m_operand_type
+               << ", does not match the replacement's value type, "
+               << replacement_type.value_type();
             throw std::runtime_error(ss.str());
         }
-        return ndt::type(new convert_type(m_value_type, replacement_type, m_errmode), false);
+        return ndt::type(new convert_type(m_value_type, replacement_type),
+                         false);
     }
 }
 
@@ -116,10 +111,9 @@ size_t convert_type::make_operand_to_value_assignment_kernel(
                 const char *dst_arrmeta, const char *src_arrmeta,
                 kernel_request_t kernreq, const eval::eval_context *ectx) const
 {
-    return ::make_assignment_kernel(out, offset_out,
-                    m_value_type, dst_arrmeta,
-                    m_operand_type.value_type(), src_arrmeta,
-                    kernreq, m_errmode_to_value, ectx);
+    return ::make_assignment_kernel(out, offset_out, m_value_type, dst_arrmeta,
+                                    m_operand_type.value_type(), src_arrmeta,
+                                    kernreq, ectx);
 }
 
 size_t convert_type::make_value_to_operand_assignment_kernel(
@@ -128,7 +122,6 @@ size_t convert_type::make_value_to_operand_assignment_kernel(
                 kernel_request_t kernreq, const eval::eval_context *ectx) const
 {
     return ::make_assignment_kernel(out, offset_out,
-                    m_operand_type.value_type(), dst_arrmeta,
-                    m_value_type, src_arrmeta,
-                    kernreq, m_errmode_to_value, ectx);
+                                    m_operand_type.value_type(), dst_arrmeta,
+                                    m_value_type, src_arrmeta, kernreq, ectx);
 }

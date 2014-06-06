@@ -165,6 +165,9 @@ enum type_id_t {
     typevar_type_id,
     typevar_dim_type_id,
     ellipsis_dim_type_id,
+    // A special type which holds a fragment of canonical dimensions
+    // for the purpose of broadcasting together named ellipsis type vars.
+    dim_fragment_type_id,
 
     // The number of built-in, atomic types (including uninitialized and void)
     builtin_type_id_count = 19
@@ -179,7 +182,7 @@ enum type_flags_t {
     // Memory of this type must be zero-initialized
     type_flag_zeroinit = 0x00000002,
     // Memory of this type must be constructed
-    type_flag_constructor = 0x00000004,
+    //type_flag_constructor = 0x00000004,
     // Instances of this type point into other memory
     // blocks, e.g. string_type, var_dim_type.
     type_flag_blockref = 0x00000008,
@@ -188,6 +191,8 @@ enum type_flags_t {
     type_flag_destructor = 0x00000010,
     // Memory of this type is not readable directly from the host
     type_flag_not_host_readable = 0x00000020,
+    // This type contains a symbolic construct like a type var
+    type_flag_symbolic = 0x00000040,
 };
 
 enum axis_order_classification_t {
@@ -209,14 +214,16 @@ enum {
     // These are the flags expression types should inherit
     // from their operand type
     type_flags_operand_inherited =
-                    type_flag_zeroinit|
-                    type_flag_blockref|
+                    type_flag_zeroinit |
+                    type_flag_blockref |
                     type_flag_destructor |
-                    type_flag_not_host_readable,
+                    type_flag_not_host_readable |
+                    type_flag_symbolic,
     // These are the flags expression types should inherit
     // from their value type
     type_flags_value_inherited =
-                    type_flag_scalar
+                    type_flag_scalar |
+                    type_flag_symbolic
 };
 
 std::ostream& operator<<(std::ostream& o, type_kind_t kind);

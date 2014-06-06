@@ -813,23 +813,25 @@ static ndt::type parse_tuple_or_funcproto(const char *&rbegin, const char *end, 
             return ndt::type(uninitialized_type_id);
         }
     }
-    for (;;) {
-        ndt::type tp = parse_datashape(begin, end, symtable);
-        if (tp.get_type_id() != uninitialized_type_id) {
-            field_type_list.push_back(tp);
-        } else {
-            throw datashape_parse_error(begin, "expected a type");
-        }
-        
-        if (parse_token_ds(begin, end, ',')) {
-            if (!field_type_list.empty() &&
-                    parse_token_ds(begin, end, ')')) {
-                break;
+    if (!parse_token_ds(begin, end, ')')) {
+        for (;;) {
+            ndt::type tp = parse_datashape(begin, end, symtable);
+            if (tp.get_type_id() != uninitialized_type_id) {
+                field_type_list.push_back(tp);
+            } else {
+                throw datashape_parse_error(begin, "expected a type");
             }
-        } else if (parse_token_ds(begin, end, ')')) {
-            break;
-        } else {
-            throw datashape_parse_error(begin, "expected ',' or ')'");
+        
+            if (parse_token_ds(begin, end, ',')) {
+                if (!field_type_list.empty() &&
+                        parse_token_ds(begin, end, ')')) {
+                    break;
+                }
+            } else if (parse_token_ds(begin, end, ')')) {
+                break;
+            } else {
+                throw datashape_parse_error(begin, "expected ',' or ')'");
+            }
         }
     }
 

@@ -114,7 +114,7 @@ namespace {
         ckernel_prefix base;
         const base_string_type *dst_string_dt;
         const char *dst_arrmeta;
-        assign_error_mode errmode;
+        eval::eval_context ectx;
 
         static void single(char *dst, const char *src, ckernel_prefix *extra)
         {
@@ -123,7 +123,7 @@ namespace {
                 reinterpret_cast<const arrfunc_type_data *>(src);
             stringstream ss;
             print_arrfunc(ss, af);
-            e->dst_string_dt->set_utf8_string(e->dst_arrmeta, dst, e->errmode, ss.str());
+            e->dst_string_dt->set_from_utf8_string(e->dst_arrmeta, dst, ss.str(), &e->ectx);
         }
 
         static void destruct(ckernel_prefix *extra)
@@ -135,39 +135,39 @@ namespace {
 } // anonymous namespace
 
 static intptr_t make_arrfunc_to_string_assignment_kernel(
-                ckernel_builder *out_ckb, size_t ckb_offset,
-                const ndt::type& dst_string_dt, const char *dst_arrmeta,
-                kernel_request_t kernreq, assign_error_mode errmode,
-                const eval::eval_context *DYND_UNUSED(ectx))
+    ckernel_builder *out_ckb, size_t ckb_offset, const ndt::type &dst_string_dt,
+    const char *dst_arrmeta, kernel_request_t kernreq,
+    const eval::eval_context *ectx)
 {
-    ckb_offset = make_kernreq_to_single_kernel_adapter(out_ckb, ckb_offset, kernreq);
-    intptr_t ckb_end_offset = ckb_offset + sizeof(arrfunc_to_string_kernel_extra);
+    ckb_offset =
+        make_kernreq_to_single_kernel_adapter(out_ckb, ckb_offset, kernreq);
+    intptr_t ckb_end_offset =
+        ckb_offset + sizeof(arrfunc_to_string_kernel_extra);
     out_ckb->ensure_capacity_leaf(ckb_end_offset);
     arrfunc_to_string_kernel_extra *e =
-                    out_ckb->get_at<arrfunc_to_string_kernel_extra>(ckb_offset);
-    e->base.set_function<unary_single_operation_t>(&arrfunc_to_string_kernel_extra::single);
+        out_ckb->get_at<arrfunc_to_string_kernel_extra>(ckb_offset);
+    e->base.set_function<unary_single_operation_t>(
+        &arrfunc_to_string_kernel_extra::single);
     e->base.destructor = &arrfunc_to_string_kernel_extra::destruct;
     // The kernel data owns a reference to this type
     e->dst_string_dt = static_cast<const base_string_type *>(ndt::type(dst_string_dt).release());
     e->dst_arrmeta = dst_arrmeta;
-    e->errmode = errmode;
+    e->ectx = *ectx;
     return ckb_end_offset;
 }
 
 size_t arrfunc_type::make_assignment_kernel(
-                ckernel_builder *out_ckb, size_t ckb_offset,
-                const ndt::type& dst_tp, const char *dst_arrmeta,
-                const ndt::type& src_tp, const char *DYND_UNUSED(src_arrmeta),
-                kernel_request_t kernreq, assign_error_mode errmode,
-                const eval::eval_context *ectx) const
+    ckernel_builder *out_ckb, size_t ckb_offset, const ndt::type &dst_tp,
+    const char *dst_arrmeta, const ndt::type &src_tp,
+    const char *DYND_UNUSED(src_arrmeta), kernel_request_t kernreq,
+    const eval::eval_context *ectx) const
 {
     if (this == dst_tp.extended()) {
     } else {
         if (dst_tp.get_kind() == string_kind) {
             // Assignment to strings
-            return make_arrfunc_to_string_assignment_kernel(out_ckb, ckb_offset,
-                            dst_tp, dst_arrmeta,
-                            kernreq, errmode, ectx);
+            return make_arrfunc_to_string_assignment_kernel(
+                out_ckb, ckb_offset, dst_tp, dst_arrmeta, kernreq, ectx);
         }
     }
     

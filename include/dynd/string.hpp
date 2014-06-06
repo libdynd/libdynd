@@ -16,6 +16,7 @@ namespace dynd { namespace nd {
  */
 class string {
     nd::array m_value;
+
 public:
     inline string() : m_value() {}
     /**
@@ -56,6 +57,8 @@ public:
     }
 
     bool operator==(const nd::string& rhs) const;
+
+    bool operator<(const nd::string& rhs) const;
 
     const char *begin() const;
     const char *end() const;

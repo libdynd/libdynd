@@ -288,18 +288,20 @@ size_t groupby_type::make_operand_to_value_assignment_kernel(
     return ::make_assignment_kernel(out, offset_out + sizeof(groupby_to_value_assign_extra),
                     dst_element_tp, dst_element_arrmeta,
                     src_element_tp, src_element_arrmeta,
-                    kernel_request_single, assign_error_none, ectx);
+                    kernel_request_single, ectx);
 }
 
 size_t groupby_type::make_value_to_operand_assignment_kernel(
-                ckernel_builder *DYND_UNUSED(out), size_t DYND_UNUSED(offset_out),
-                const char *DYND_UNUSED(dst_arrmeta), const char *DYND_UNUSED(src_arrmeta),
-                kernel_request_t DYND_UNUSED(kernreq), const eval::eval_context *DYND_UNUSED(ectx)) const
+    ckernel_builder *DYND_UNUSED(out), size_t DYND_UNUSED(offset_out),
+    const char *DYND_UNUSED(dst_arrmeta), const char *DYND_UNUSED(src_arrmeta),
+    kernel_request_t DYND_UNUSED(kernreq),
+    const eval::eval_context *DYND_UNUSED(ectx)) const
 {
     throw runtime_error("Cannot assign to a dynd groupby object value");
 }
 
-ndt::type groupby_type::with_replaced_storage_type(const ndt::type& DYND_UNUSED(replacement_type)) const
+ndt::type groupby_type::with_replaced_storage_type(
+    const ndt::type &DYND_UNUSED(replacement_type)) const
 {
     throw runtime_error("TODO: implement groupby_type::with_replaced_storage_type");
 }
@@ -315,7 +317,9 @@ static nd::array property_ndo_get_groups(const nd::array& n) {
     return gd->get_groups_type().p("categories");
 }
 
-void groupby_type::get_dynamic_array_properties(const std::pair<std::string, gfunc::callable> **out_properties, size_t *out_count) const
+void groupby_type::get_dynamic_array_properties(
+    const std::pair<std::string, gfunc::callable> **out_properties,
+    size_t *out_count) const
 {
     static pair<string, gfunc::callable> groupby_array_properties[] = {
         pair<string, gfunc::callable>(

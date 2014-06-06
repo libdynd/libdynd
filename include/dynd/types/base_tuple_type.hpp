@@ -42,6 +42,10 @@ public:
     inline const nd::array& get_field_types() const {
         return m_field_types;
     }
+    inline const ndt::type *get_field_types_raw() const {
+        return reinterpret_cast<const ndt::type *>(
+            m_field_types.get_readonly_originptr());
+    }
     /** The array of the field data offsets */
     virtual const uintptr_t *get_data_offsets(const char *arrmeta) const = 0;
     /** The array of the field arrmeta offsets */

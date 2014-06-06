@@ -100,7 +100,7 @@ size_t kernels::make_constant_value_assignment_ckernel(
     return make_assignment_kernel(
         out_ckb, ckb_offset + sizeof(self_type), dst_tp, dst_arrmeta,
         self->m_constant.get_type(), self->m_constant.get_arrmeta(), kernreq,
-        assign_error_default, ectx);
+        ectx);
 }
 
 intptr_t kernels::wrap_unary_as_expr_ckernel(dynd::ckernel_builder *ckb,
