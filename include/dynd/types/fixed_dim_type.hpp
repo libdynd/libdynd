@@ -133,6 +133,17 @@ namespace ndt {
     ndt::type make_fixed_dim(intptr_t ndim, const intptr_t *shape,
                               const ndt::type &dtp);
 
+
+    template<class T> struct fixed_dim_from_array {
+        static inline ndt::type make() {
+            return ndt::make_type<T>();
+        }
+    };
+    template<class T, int N> struct fixed_dim_from_array<T[N]> {
+        static inline ndt::type make() {
+            return ndt::make_fixed_dim(N, ndt::fixed_dim_from_array<T>::make());
+        }
+    };
 } // namespace ndt
 
 } // namespace dynd

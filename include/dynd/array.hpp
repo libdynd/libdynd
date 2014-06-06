@@ -17,6 +17,7 @@
 #include <dynd/shortvector.hpp>
 #include <dynd/irange.hpp>
 #include <dynd/memblock/array_memory_block.hpp>
+#include <dynd/types/fixed_dim_type.hpp>
 #include <dynd/types/type_type.hpp>
 
 namespace dynd { namespace nd {
@@ -1006,10 +1007,11 @@ inline array empty(intptr_t dim0, intptr_t dim1, intptr_t dim2, const char (&dsh
  * Constructs an uninitialized array of the given C++ type.
  *
  *      array a = nd::empty<double>();
+ *      array b = nd::empty<double[3][4]>();
  */
 template<typename T>
 inline array empty() {
-    return empty(ndt::make_type<T>());
+    return empty(ndt::fixed_dim_from_array<T>::make());
 }
 
 /**
