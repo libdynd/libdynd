@@ -24,6 +24,7 @@ using namespace dynd;
 int main()
 {
     try {
+        /*
         nd::array a = nd::empty<double[4][3]>();
         a(0).vals() = nd::range(3);
         a(1).vals() = nd::range(3) + 5;
@@ -41,6 +42,7 @@ int main()
             return sum(a + x).as<double>();
         }, a);
         cout << b << endl;
+        */
 
     } catch(const std::exception& e) {
         cout << "Error: " << e.what() << "\n";
