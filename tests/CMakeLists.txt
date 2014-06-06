@@ -65,6 +65,12 @@ set(tests_SRC
     func/special_vals.hpp
     func/test_arrfunc.cpp
     func/test_callable.cpp
+    func/test_elwise_funcretres.cpp
+    func/test_elwise_funcrefres.cpp
+    func/test_elwise_methretres.cpp
+    func/test_elwise_methrefres.cpp
+    func/test_elwise_callretres.cpp
+    func/test_elwise_callrefres.cpp
     func/test_lift_arrfunc.cpp
     func/test_reduction.cpp
     func/test_rolling.cpp
@@ -78,7 +84,6 @@ set(tests_SRC
     array/test_array_compare.cpp
     array/test_array_views.cpp
     array/test_arrmeta_holder.cpp
-    array/test_elwise.cpp
     array/test_json_formatter.cpp
     array/test_json_parser.cpp
     array/test_memmap.cpp
