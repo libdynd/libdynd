@@ -66,7 +66,7 @@
 #define _CEPHES__MCONF_H_
 
 #if !defined(_GNU_SOURCE) && defined(__GNUC__) && (__GNUC__ == 4) && \
-    (__GNUC_MINOR__ <= 1)
+    (__GNUC_MINOR__ <= 4)
 #define _GNU_SOURCE
 #endif
 
