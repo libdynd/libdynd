@@ -11,7 +11,7 @@ find_package(CUDA)
                                                                                                                               
 # -DDYND_ELWISE_MAX, the maximum number of arguments that the elwise function
 #   in libdynd will support
-SET(DYND_ELWISE_MAX 7 CACHE STRING
+SET(DYND_ELWISE_MAX 4 CACHE STRING
     "Build a libdynd library with an elwise function that supports the specified maximum number of arguments")
 # TODO: Check that the preprocessor can handle this number
 
