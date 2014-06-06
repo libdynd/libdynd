@@ -12,7 +12,7 @@
 #include "dynd_assertions.hpp"
 
 #include <dynd/array.hpp>
-#include <dynd/elwise.hpp>
+#include <dynd/func/elwise_methretres.hpp>
 
 using namespace std;
 using namespace dynd;

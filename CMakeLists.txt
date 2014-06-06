@@ -304,6 +304,14 @@ set(libdynd_SRC
     include/dynd/func/arrfunc.hpp
     include/dynd/func/callable.hpp
     include/dynd/func/call_callable.hpp
+    include/dynd/func/elwise.hpp
+    include/dynd/func/elwise_common.hpp
+    include/dynd/func/elwise_callrefres.hpp
+    include/dynd/func/elwise_callretres.hpp
+    include/dynd/func/elwise_funcrefres.hpp
+    include/dynd/func/elwise_funcretres.hpp
+    include/dynd/func/elwise_methrefres.hpp
+    include/dynd/func/elwise_methretres.hpp
     include/dynd/func/elwise_gfunc.hpp
     include/dynd/func/elwise_reduce_gfunc.hpp
     include/dynd/func/make_callable.hpp
@@ -450,7 +458,6 @@ set(libdynd_SRC
     include/dynd/lowlevel_api.hpp
     include/dynd/parser_util.hpp
     include/dynd/platform_definitions.hpp
-    include/dynd/elwise.hpp
     include/dynd/shortvector.hpp
     include/dynd/shape_tools.hpp
     include/dynd/special.hpp

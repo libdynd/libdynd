@@ -14,7 +14,7 @@
 #include <dynd/array_range.hpp>
 #include <dynd/kernels/assignment_kernels.hpp>
 #include <dynd/json_parser.hpp>
-#include <dynd/elwise.hpp>
+#include <dynd/func/elwise.hpp>
 #include <dynd/func/lift_reduction_arrfunc.hpp>
 #include <dynd/kernels/reduction_kernels.hpp>
 
