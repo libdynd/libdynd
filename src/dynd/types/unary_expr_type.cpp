@@ -108,8 +108,8 @@ size_t unary_expr_type::make_operand_to_value_assignment_kernel(
                 kernel_request_t kernreq, const eval::eval_context *ectx) const
 {
     // As a special case, when src_count == 1, the kernel generated
-    // is a unary_single_operation_t/unary_strided_operation_t instead of
-    // expr_single_operation_t/expr_strided_operation_t
+    // is a expr_single_t/expr_strided_t instead of
+    // expr_single_t/expr_strided_t
     return m_kgen->make_expr_kernel(out, offset_out,
                     m_value_type, dst_arrmeta,
                     1, &m_operand_type.value_type(),

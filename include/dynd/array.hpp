@@ -1298,7 +1298,7 @@ namespace detail {
     struct array_as_helper<std::string> {
         static std::string as(const array &lhs, const eval::eval_context *ectx)
         {
-            return array_as_string(lhs, ectx->default_errmode);
+            return array_as_string(lhs, ectx->errmode);
         }
     };
 
@@ -1317,11 +1317,11 @@ namespace detail {
 template<class T>
 T array::as(assign_error_mode errmode) const {
     if (errmode == assign_error_default ||
-            errmode == eval::default_eval_context.default_errmode) {
+            errmode == eval::default_eval_context.errmode) {
         return detail::array_as_helper<T>::as(*this, &eval::default_eval_context);
     } else {
         eval::eval_context tmp_ectx(eval::default_eval_context);
-        tmp_ectx.default_errmode = errmode;
+        tmp_ectx.errmode = errmode;
         return detail::array_as_helper<T>::as(*this, &tmp_ectx);
     }
 }

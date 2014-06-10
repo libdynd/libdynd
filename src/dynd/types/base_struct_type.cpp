@@ -234,68 +234,51 @@ ndt::type base_struct_type::get_elwise_property_type(size_t elwise_property_inde
 }
 
 namespace {
-    struct struct_property_getter_extra {
-        typedef struct_property_getter_extra extra_type;
+struct struct_property_getter_ck
+  : public kernels::assignment_ck<struct_property_getter_ck> {
+    size_t m_field_offset;
 
-        ckernel_prefix base;
-        size_t field_offset;
+    inline void single(char *dst, const char *src)
+    {
+        ckernel_prefix *child = get_child_ckernel();
+        expr_single_t child_fn = child->get_function<expr_single_t>();
+        src += m_field_offset;
+        child_fn(dst, &src, child);
+    }
 
-        static void single(char *dst, const char *src, ckernel_prefix *extra)
-        {
-            extra_type *e = reinterpret_cast<extra_type *>(extra);
-            ckernel_prefix *echild = &(e + 1)->base;
-            unary_single_operation_t opchild = echild->get_function<unary_single_operation_t>();
-            opchild(dst, src + e->field_offset, echild);
-        }
-        static void strided(char *dst, intptr_t dst_stride,
-                        const char *src, intptr_t src_stride,
-                        size_t count, ckernel_prefix *extra)
-        {
-            extra_type *e = reinterpret_cast<extra_type *>(extra);
-            ckernel_prefix *echild = &(e + 1)->base;
-            unary_strided_operation_t opchild = echild->get_function<unary_strided_operation_t>();
-            opchild(dst, dst_stride, src + e->field_offset, src_stride, count, echild);
-        }
+    inline void strided(char *dst, intptr_t dst_stride, const char *src,
+                        intptr_t src_stride, size_t count)
+    {
+        ckernel_prefix *child = get_child_ckernel();
+        expr_strided_t child_fn = child->get_function<expr_strided_t>();
+        src += m_field_offset;
+        child_fn(dst, dst_stride, &src, &src_stride, count, child);
+    }
 
-        static void destruct(ckernel_prefix *self)
-        {
-            self->destroy_child_ckernel(sizeof(extra_type));
-        }
-    };
+    inline void destruct_children()
+    {
+        get_child_ckernel()->destroy();
+    }
+};
 } // anonymous namespace
 
 size_t base_struct_type::make_elwise_property_getter_kernel(
-                ckernel_builder *out, size_t offset_out,
-                const char *dst_arrmeta,
-                const char *src_arrmeta, size_t src_elwise_property_index,
-                kernel_request_t kernreq, const eval::eval_context *ectx) const
+    ckernel_builder *ckb, size_t ckb_offset, const char *dst_arrmeta,
+    const char *src_arrmeta, size_t src_elwise_property_index,
+    kernel_request_t kernreq, const eval::eval_context *ectx) const
 {
+    typedef struct_property_getter_ck self_type;
     size_t field_count = get_field_count();
     if (src_elwise_property_index < field_count) {
         const uintptr_t *arrmeta_offsets = get_arrmeta_offsets_raw();
         const ndt::type& field_type = get_field_type(src_elwise_property_index);
-        out->ensure_capacity(offset_out + sizeof(struct_property_getter_extra));
-        struct_property_getter_extra *e = out->get_at<struct_property_getter_extra>(offset_out);
-        switch (kernreq) {
-            case kernel_request_single:
-                e->base.set_function<unary_single_operation_t>(&struct_property_getter_extra::single);
-                break;
-            case kernel_request_strided:
-                e->base.set_function<unary_strided_operation_t>(&struct_property_getter_extra::strided);
-                break;
-            default: {
-                stringstream ss;
-                ss << "base_struct_type::make_elwise_property_getter_kernel: ";
-                ss << "unrecognized request " << (int)kernreq;
-                throw runtime_error(ss.str());
-            }   
-        }
-        e->base.destructor = &struct_property_getter_extra::destruct;
-        e->field_offset = get_data_offsets(src_arrmeta)[src_elwise_property_index];
-        return ::make_assignment_kernel(out, offset_out + sizeof(struct_property_getter_extra),
-                        field_type.value_type(), dst_arrmeta,
-                        field_type, src_arrmeta + arrmeta_offsets[src_elwise_property_index],
-                        kernreq, ectx);
+        self_type *self = self_type::create(ckb, ckb_offset, kernreq);
+        ckb_offset += sizeof(self_type);
+        self->m_field_offset = get_data_offsets(src_arrmeta)[src_elwise_property_index];
+        return ::make_assignment_kernel(
+            ckb, ckb_offset, field_type.value_type(), dst_arrmeta, field_type,
+            src_arrmeta + arrmeta_offsets[src_elwise_property_index], kernreq,
+            ectx);
     } else {
         stringstream ss;
         ss << "dynd type " << ndt::type(this, true);

@@ -33,10 +33,10 @@ namespace {
             size_t element_count = 1;
             switch (kernreq) {
                 case kernel_request_single:
-                    base.set_function<unary_single_operation_t>(&single);
+                    base.set_function<expr_single_t>(&single);
                     break;
                 case kernel_request_strided:
-                    base.set_function<unary_strided_operation_t>(&strided);
+                    base.set_function<expr_strided_t>(&strided);
                     element_count = DYND_BUFFER_CHUNK_SIZE;
                     break;
                 default: {
@@ -68,13 +68,13 @@ namespace {
             
         }
 
-        static void single(char *dst, const char *src,
-                            ckernel_prefix *extra)
+        static void single(char *dst, const char *const *src,
+                           ckernel_prefix *extra)
         {
             char *eraw = reinterpret_cast<char *>(extra);
             extra_type *e = reinterpret_cast<extra_type *>(extra);
             ckernel_prefix *echild_first, *echild_second;
-            unary_single_operation_t opchild;
+            expr_single_t opchild;
             const base_type *buffer_tp = e->buffer_tp;
             char *buffer_arrmeta = e->buffer_arrmeta;
             char *buffer_data_ptr = eraw + e->buffer_data_offset;
@@ -86,47 +86,54 @@ namespace {
                 memset(buffer_data_ptr, 0, e->buffer_data_size);
             }
             // First kernel (src -> buffer)
-            opchild = echild_first->get_function<unary_single_operation_t>();
+            opchild = echild_first->get_function<expr_single_t>();
             opchild(buffer_data_ptr, src, echild_first);
             // Second kernel (buffer -> dst)
-            opchild = echild_second->get_function<unary_single_operation_t>();
-            opchild(dst, buffer_data_ptr, echild_second);
+            opchild = echild_second->get_function<expr_single_t>();
+            opchild(dst, &buffer_data_ptr, echild_second);
             // Reset the buffer storage if used
             if (buffer_arrmeta != NULL) {
                 buffer_tp->arrmeta_reset_buffers(buffer_arrmeta);
             }
         }
         static void strided(char *dst, intptr_t dst_stride,
-                        const char *src, intptr_t src_stride,
-                        size_t count, ckernel_prefix *extra)
+                            const char *const *src, const intptr_t *src_stride,
+                            size_t count, ckernel_prefix *extra)
         {
             char *eraw = reinterpret_cast<char *>(extra);
             extra_type *e = reinterpret_cast<extra_type *>(extra);
             ckernel_prefix *echild_first, *echild_second;
-            unary_strided_operation_t opchild_first, opchild_second;
+            expr_strided_t opchild_first, opchild_second;
             const base_type *buffer_tp = e->buffer_tp;
             char *buffer_arrmeta = e->buffer_arrmeta;
             char *buffer_data_ptr = eraw + e->buffer_data_offset;
-            size_t buffer_stride = e->buffer_stride;
+            intptr_t buffer_stride = e->buffer_stride;
             echild_first = reinterpret_cast<ckernel_prefix *>(eraw + e->first_kernel_offset);
             echild_second = reinterpret_cast<ckernel_prefix *>(eraw + e->second_kernel_offset);
 
-            opchild_first = echild_first->get_function<unary_strided_operation_t>();
-            opchild_second = echild_second->get_function<unary_strided_operation_t>();
+            opchild_first = echild_first->get_function<expr_strided_t>();
+            opchild_second = echild_second->get_function<expr_strided_t>();
+            const char *src0 = src[0];
+            intptr_t src0_stride = src_stride[0];
             while (count > 0) {
                 size_t chunk_size = min(DYND_BUFFER_CHUNK_SIZE, count);
                 // If the type needs it, initialize the buffer data to zero
-                if (!is_builtin_type(buffer_tp) && (buffer_tp->get_flags()&type_flag_zeroinit) != 0) {
+                if (!is_builtin_type(buffer_tp) &&
+                        (buffer_tp->get_flags() & type_flag_zeroinit) != 0) {
                     memset(buffer_data_ptr, 0, chunk_size * e->buffer_stride);
                 }
                 // First kernel (src -> buffer)
-                opchild_first(buffer_data_ptr, buffer_stride, src, src_stride, chunk_size, echild_first);
+                opchild_first(buffer_data_ptr, buffer_stride, &src0,
+                              &src0_stride, chunk_size, echild_first);
                 // Second kernel (buffer -> dst)
-                opchild_second(dst, dst_stride, buffer_data_ptr, buffer_stride, chunk_size, echild_second);
+                opchild_second(dst, dst_stride, &buffer_data_ptr,
+                               &buffer_stride, chunk_size, echild_second);
                 // Reset the buffer storage if used
                 if (buffer_arrmeta != NULL) {
                     buffer_tp->arrmeta_reset_buffers(buffer_arrmeta);
                 }
+                dst += chunk_size * dst_stride;
+                src0 += chunk_size * src0_stride;
                 count -= chunk_size;
             }
         }

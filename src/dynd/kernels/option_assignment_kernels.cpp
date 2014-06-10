@@ -30,23 +30,23 @@ struct option_to_option_ck
         // TODO: Would be nice to do this as a predicate
         //       instead of having to go through a dst pointer
         ckernel_prefix *src_is_avail = get_child_ckernel();
-        unary_single_operation_t src_is_avail_fn =
-            src_is_avail->get_function<unary_single_operation_t>();
+        expr_single_t src_is_avail_fn =
+            src_is_avail->get_function<expr_single_t>();
         dynd_bool avail = false;
-        src_is_avail_fn(reinterpret_cast<char *>(&avail), src, src_is_avail);
+        src_is_avail_fn(reinterpret_cast<char *>(&avail), &src, src_is_avail);
         if (avail) {
             // It's available, copy using value assignment
             ckernel_prefix *value_assign =
                 get_child_ckernel(m_value_assign_offset);
-            unary_single_operation_t value_assign_fn =
-                value_assign->get_function<unary_single_operation_t>();
-            value_assign_fn(dst, src, value_assign);
+            expr_single_t value_assign_fn =
+                value_assign->get_function<expr_single_t>();
+            value_assign_fn(dst, &src, value_assign);
         } else {
             // It's not available, assign an NA
             ckernel_prefix *dst_assign_na =
                 get_child_ckernel(m_dst_assign_na_offset);
-            expr_single_operation_t dst_assign_na_fn =
-                dst_assign_na->get_function<expr_single_operation_t>();
+            expr_single_t dst_assign_na_fn =
+                dst_assign_na->get_function<expr_single_t>();
             dst_assign_na_fn(dst, NULL, dst_assign_na);
         }
     }
@@ -56,36 +56,36 @@ struct option_to_option_ck
     {
         // Three child ckernels
         ckernel_prefix *src_is_avail = get_child_ckernel();
-        unary_strided_operation_t src_is_avail_fn =
-            src_is_avail->get_function<unary_strided_operation_t>();
+        expr_strided_t src_is_avail_fn =
+            src_is_avail->get_function<expr_strided_t>();
         ckernel_prefix *value_assign =
             get_child_ckernel(m_value_assign_offset);
-        unary_strided_operation_t value_assign_fn =
-            value_assign->get_function<unary_strided_operation_t>();
+        expr_strided_t value_assign_fn =
+            value_assign->get_function<expr_strided_t>();
         ckernel_prefix *dst_assign_na =
             get_child_ckernel(m_dst_assign_na_offset);
-        expr_strided_operation_t dst_assign_na_fn =
-            dst_assign_na->get_function<expr_strided_operation_t>();
+        expr_strided_t dst_assign_na_fn =
+            dst_assign_na->get_function<expr_strided_t>();
         // Process in chunks using the dynd default buffer size
         dynd_bool avail[DYND_BUFFER_CHUNK_SIZE];
         while (count > 0) {
             size_t chunk_size = min(count, DYND_BUFFER_CHUNK_SIZE);
             count -= chunk_size;
-            src_is_avail_fn(reinterpret_cast<char *>(avail), 1, src, src_stride,
-                            chunk_size, src_is_avail);
+            src_is_avail_fn(reinterpret_cast<char *>(avail), 1, &src,
+                            &src_stride, chunk_size, src_is_avail);
             void *avail_ptr = avail;
             do {
                 // Process a run of available values
                 void *next_avail_ptr = memchr(avail_ptr, 0, chunk_size);
                 if (!next_avail_ptr) {
-                    value_assign_fn(dst, dst_stride, src, src_stride,
+                    value_assign_fn(dst, dst_stride, &src, &src_stride,
                                     chunk_size, value_assign);
                     dst += chunk_size * dst_stride;
                     src += chunk_size * src_stride;
                     break;
                 } else if (next_avail_ptr > avail_ptr) {
                     size_t segment_size = (char *)next_avail_ptr - (char *)avail_ptr;
-                    value_assign_fn(dst, dst_stride, src, src_stride,
+                    value_assign_fn(dst, dst_stride, &src, &src_stride,
                                     segment_size, value_assign);
                     dst += segment_size * dst_stride;
                     src += segment_size * src_stride;
@@ -136,21 +136,21 @@ struct option_to_value_ck
     inline void single(char *dst, const char *src)
     {
         ckernel_prefix *src_is_avail = get_child_ckernel();
-        unary_single_operation_t src_is_avail_fn =
-            src_is_avail->get_function<unary_single_operation_t>();
+        expr_single_t src_is_avail_fn =
+            src_is_avail->get_function<expr_single_t>();
         ckernel_prefix *value_assign =
             get_child_ckernel(m_value_assign_offset);
-        unary_single_operation_t value_assign_fn =
-            value_assign->get_function<unary_single_operation_t>();
+        expr_single_t value_assign_fn =
+            value_assign->get_function<expr_single_t>();
         // Make sure it's not an NA
         dynd_bool avail = false;
-        src_is_avail_fn(reinterpret_cast<char *>(&avail), src, src_is_avail);
+        src_is_avail_fn(reinterpret_cast<char *>(&avail), &src, src_is_avail);
         if (!avail) {
             throw overflow_error(
                 "cannot assign an NA value to a non-option type");
         }
         // Copy using value assignment
-        value_assign_fn(dst, src, value_assign);
+        value_assign_fn(dst, &src, value_assign);
     }
 
     inline void strided(char *dst, intptr_t dst_stride, const char *src,
@@ -158,23 +158,23 @@ struct option_to_value_ck
     {
         // Two child ckernels
         ckernel_prefix *src_is_avail = get_child_ckernel();
-        unary_strided_operation_t src_is_avail_fn =
-            src_is_avail->get_function<unary_strided_operation_t>();
+        expr_strided_t src_is_avail_fn =
+            src_is_avail->get_function<expr_strided_t>();
         ckernel_prefix *value_assign =
             get_child_ckernel(m_value_assign_offset);
-        unary_strided_operation_t value_assign_fn =
-            value_assign->get_function<unary_strided_operation_t>();
+        expr_strided_t value_assign_fn =
+            value_assign->get_function<expr_strided_t>();
         // Process in chunks using the dynd default buffer size
         dynd_bool avail[DYND_BUFFER_CHUNK_SIZE];
         while (count > 0) {
             size_t chunk_size = min(count, DYND_BUFFER_CHUNK_SIZE);
-            src_is_avail_fn(reinterpret_cast<char *>(avail), 1, src, src_stride,
+            src_is_avail_fn(reinterpret_cast<char *>(avail), 1, &src, &src_stride,
                             chunk_size, src_is_avail);
             if (memchr(avail, 0, chunk_size) != NULL) {
                 throw overflow_error(
                     "cannot assign an NA value to a non-option type");
             }
-            value_assign_fn(dst, dst_stride, src, src_stride, chunk_size,
+            value_assign_fn(dst, dst_stride, &src, &src_stride, chunk_size,
                             value_assign);
             dst += chunk_size * dst_stride;
             src += chunk_size * src_stride;
@@ -197,7 +197,7 @@ struct option_to_value_ck
 static intptr_t instantiate_option_to_option_assignment_kernel(
     const arrfunc_type_data *DYND_UNUSED(self), dynd::ckernel_builder *ckb,
     intptr_t ckb_offset, const ndt::type &dst_tp, const char *dst_arrmeta,
-    const ndt::type *src_tp, const char *const *src_arrmeta, uint32_t kernreq,
+    const ndt::type *src_tp, const char *const *src_arrmeta, kernel_request_t kernreq,
     const eval::eval_context *ectx)
 {
     typedef option_to_option_ck self_type;
@@ -236,8 +236,8 @@ static intptr_t instantiate_option_to_option_assignment_kernel(
 static intptr_t instantiate_option_to_value_assignment_kernel(
     const arrfunc_type_data *DYND_UNUSED(self), dynd::ckernel_builder *ckb,
     intptr_t ckb_offset, const ndt::type &dst_tp, const char *dst_arrmeta,
-    const ndt::type *src_tp, const char *const *src_arrmeta, uint32_t kernreq,
-    const eval::eval_context *ectx)
+    const ndt::type *src_tp, const char *const *src_arrmeta,
+    kernel_request_t kernreq, const eval::eval_context *ectx)
 {
     typedef option_to_value_ck self_type;
     if (dst_tp.get_type_id() == option_type_id ||
@@ -292,7 +292,7 @@ struct string_to_option_number_ck : public kernels::assignment_ck<string_to_opti
 static intptr_t instantiate_string_to_option_assignment_kernel(
     const arrfunc_type_data *DYND_UNUSED(self), dynd::ckernel_builder *ckb,
     intptr_t ckb_offset, const ndt::type &dst_tp, const char *dst_arrmeta,
-    const ndt::type *src_tp, const char *const *src_arrmeta, uint32_t kernreq,
+    const ndt::type *src_tp, const char *const *src_arrmeta, kernel_request_t kernreq,
     const eval::eval_context *ectx)
 {
     // Deal with some string to option[T] conversions where string values
@@ -314,7 +314,7 @@ static intptr_t instantiate_string_to_option_assignment_kernel(
             string_to_option_bool_ck *self =
                 string_to_option_bool_ck::create_leaf(
                     ckb, ckb_offset, (kernel_request_t)kernreq);
-            self->m_errmode = ectx->default_errmode;
+            self->m_errmode = ectx->errmode;
             return ckb_offset + sizeof(string_to_option_bool_ck);
         }
         case int8_type_id:
@@ -329,7 +329,7 @@ static intptr_t instantiate_string_to_option_assignment_kernel(
                 string_to_option_number_ck::create_leaf(
                     ckb, ckb_offset, (kernel_request_t)kernreq);
             self->m_tid = tid;
-            self->m_errmode = ectx->default_errmode;
+            self->m_errmode = ectx->errmode;
             return ckb_offset + sizeof(string_to_option_number_ck);
         }
         default:
@@ -346,7 +346,7 @@ static intptr_t instantiate_string_to_option_assignment_kernel(
 static intptr_t instantiate_option_as_value_assignment_kernel(
     const arrfunc_type_data *DYND_UNUSED(self), dynd::ckernel_builder *ckb,
     intptr_t ckb_offset, const ndt::type &dst_tp, const char *dst_arrmeta,
-    const ndt::type *src_tp, const char *const *src_arrmeta, uint32_t kernreq,
+    const ndt::type *src_tp, const char *const *src_arrmeta, kernel_request_t kernreq,
     const eval::eval_context *ectx)
 {
     // In all cases not handled, we use the
@@ -379,28 +379,18 @@ struct option_arrfunc_list {
     option_arrfunc_list() {
         int i = 0;
         af[i].func_proto = ndt::type("(?string) -> ?S");
-        af[i].ckernel_funcproto = unary_operation_funcproto;
-        af[i].data_ptr = NULL;
         af[i].instantiate = &instantiate_string_to_option_assignment_kernel;
         ++i;
         af[i].func_proto = ndt::type("(?T) -> ?S");
-        af[i].ckernel_funcproto = unary_operation_funcproto;
-        af[i].data_ptr = NULL;
         af[i].instantiate = &instantiate_option_to_option_assignment_kernel;
         ++i;
         af[i].func_proto = ndt::type("(?T) -> S");
-        af[i].ckernel_funcproto = unary_operation_funcproto;
-        af[i].data_ptr = NULL;
         af[i].instantiate = &instantiate_option_to_value_assignment_kernel;
         ++i;
         af[i].func_proto = ndt::type("(string) -> ?S");
-        af[i].ckernel_funcproto = unary_operation_funcproto;
-        af[i].data_ptr = NULL;
         af[i].instantiate = &instantiate_string_to_option_assignment_kernel;
         ++i;
         af[i].func_proto = ndt::type("(T) -> S");
-        af[i].ckernel_funcproto = unary_operation_funcproto;
-        af[i].data_ptr = NULL;
         af[i].instantiate = &instantiate_option_as_value_assignment_kernel;
     }
 

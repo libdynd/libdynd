@@ -652,23 +652,23 @@ static float checked_float64_to_float32(double value, assign_error_mode errmode)
     switch (errmode) {
         case assign_error_none:
             single_assigner_builtin<float, double, assign_error_none>::assign(
-                            reinterpret_cast<float *>(&out.dst), &value, NULL);
+                            reinterpret_cast<float *>(&out.dst), &value);
             break;
         case assign_error_overflow:
             single_assigner_builtin<float, double, assign_error_overflow>::assign(
-                            reinterpret_cast<float *>(&out.dst), &value, NULL);
+                            reinterpret_cast<float *>(&out.dst), &value);
             break;
         case assign_error_fractional:
             single_assigner_builtin<float, double, assign_error_fractional>::assign(
-                            reinterpret_cast<float *>(&out.dst), &value, NULL);
+                            reinterpret_cast<float *>(&out.dst), &value);
             break;
         case assign_error_inexact:
             single_assigner_builtin<float, double, assign_error_inexact>::assign(
-                            reinterpret_cast<float *>(&out.dst), &value, NULL);
+                            reinterpret_cast<float *>(&out.dst), &value);
             break;
         default:
             single_assigner_builtin<float, double, assign_error_fractional>::assign(
-                            reinterpret_cast<float *>(&out.dst), &value, NULL);
+                            reinterpret_cast<float *>(&out.dst), &value);
             break;
     }
     return out.result;

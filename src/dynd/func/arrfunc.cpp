@@ -20,23 +20,24 @@ namespace {
 ////////////////////////////////////////////////////////////////
 // Functions for the unary assignment as an arrfunc
 
-static intptr_t instantiate_unary_assignment_ckernel(
-    const arrfunc_type_data *self, dynd::ckernel_builder *ckb, intptr_t ckb_offset,
-    const ndt::type &dst_tp, const char *dst_arrmeta, const ndt::type *src_tp,
-    const char *const *src_arrmeta, uint32_t kernreq,
-    const eval::eval_context *ectx)
+static intptr_t instantiate_assignment_ckernel(
+    const arrfunc_type_data *self, dynd::ckernel_builder *ckb,
+    intptr_t ckb_offset, const ndt::type &dst_tp, const char *dst_arrmeta,
+    const ndt::type *src_tp, const char *const *src_arrmeta,
+    kernel_request_t kernreq, const eval::eval_context *ectx)
 {
+    try {
     assign_error_mode errmode = static_cast<assign_error_mode>(
         reinterpret_cast<uintptr_t>(self->data_ptr));
     if (dst_tp.value_type() == self->get_return_type() &&
             src_tp[0].value_type() == self->get_param_type(0)) {
-        if (errmode == ectx->default_errmode) {
+        if (errmode == ectx->errmode) {
             return make_assignment_kernel(
                 ckb, ckb_offset, dst_tp, dst_arrmeta, src_tp[0], src_arrmeta[0],
                 (kernel_request_t)kernreq, ectx);
         } else {
             eval::eval_context ectx_tmp(*ectx);
-            ectx_tmp.default_errmode = errmode;
+            ectx_tmp.errmode = errmode;
             return make_assignment_kernel(ckb, ckb_offset, dst_tp, dst_arrmeta,
                                           src_tp[0], src_arrmeta[0],
                                           (kernel_request_t)kernreq, &ectx_tmp);
@@ -49,19 +50,11 @@ static intptr_t instantiate_unary_assignment_ckernel(
         ss << " and output type " << dst_tp;
         throw type_error(ss.str());
     }
-}
 
-static intptr_t instantiate_adapted_expr_assignment_ckernel(
-    const arrfunc_type_data *self, dynd::ckernel_builder *ckb, intptr_t ckb_offset,
-    const ndt::type &dst_tp, const char *dst_arrmeta, const ndt::type *src_tp,
-    const char *const *src_arrmeta, uint32_t kernreq,
-    const eval::eval_context *ectx)
-{
-    ckb_offset = kernels::wrap_unary_as_expr_ckernel(ckb, ckb_offset,
-                                                     (kernel_request_t)kernreq);
-    return instantiate_unary_assignment_ckernel(self, ckb, ckb_offset, dst_tp,
-                                                dst_arrmeta, src_tp,
-                                                src_arrmeta, kernreq, ectx);
+    } catch (const std::exception& e) {
+        cout << "exception: " << e.what() << endl;
+        throw;
+    }
 }
 
 ////////////////////////////////////////////////////////////////
@@ -73,11 +66,11 @@ static void delete_property_arrfunc_data(void *self_data_ptr)
     base_type_xdecref(data);
 }
 
-static intptr_t instantiate_unary_property_ckernel(
+static intptr_t instantiate_property_ckernel(
     const arrfunc_type_data *self, dynd::ckernel_builder *ckb,
     intptr_t ckb_offset, const ndt::type &dst_tp, const char *dst_arrmeta,
-    const ndt::type *src_tp, const char *const *src_arrmeta, uint32_t kernreq,
-    const eval::eval_context *ectx)
+    const ndt::type *src_tp, const char *const *src_arrmeta,
+    kernel_request_t kernreq, const eval::eval_context *ectx)
 {
     ndt::type prop_src_tp(reinterpret_cast<const base_type *>(self->data_ptr),
                           true);
@@ -85,14 +78,14 @@ static intptr_t instantiate_unary_property_ckernel(
     if (dst_tp.value_type() == prop_src_tp.value_type()) {
         if (src_tp[0] == prop_src_tp.operand_type()) {
             return make_assignment_kernel(ckb, ckb_offset, dst_tp, dst_arrmeta,
-                                          prop_src_tp, src_arrmeta[0],
-                                          (kernel_request_t)kernreq, ectx);
+                                          prop_src_tp, src_arrmeta[0], kernreq,
+                                          ectx);
         } else if (src_tp[0].value_type() == prop_src_tp.operand_type()) {
             return make_assignment_kernel(
                 ckb, ckb_offset, dst_tp, dst_arrmeta,
                 prop_src_tp.tcast<base_expression_type>()
                     ->with_replaced_storage_type(src_tp[0]),
-                src_arrmeta[0], (kernel_request_t)kernreq, ectx);
+                src_arrmeta[0], kernreq, ectx);
         }
     }
 
@@ -104,25 +97,12 @@ static intptr_t instantiate_unary_property_ckernel(
     throw type_error(ss.str());
 }
 
-static intptr_t instantiate_expr_property_ckernel(
-    const arrfunc_type_data *self, dynd::ckernel_builder *ckb, intptr_t ckb_offset,
-    const ndt::type &dst_tp, const char *dst_arrmeta, const ndt::type *src_tp,
-    const char *const *src_arrmeta, uint32_t kernreq,
-    const eval::eval_context *ectx)
-{
-    ckb_offset = kernels::wrap_unary_as_expr_ckernel(ckb, ckb_offset,
-                                                     (kernel_request_t)kernreq);
-    return instantiate_unary_property_ckernel(self, ckb, ckb_offset, dst_tp,
-                                              dst_arrmeta, src_tp, src_arrmeta,
-                                              kernreq, ectx);
-}
-
 } // anonymous namespace
 
-void dynd::make_arrfunc_from_assignment(
-                const ndt::type& dst_tp, const ndt::type& src_tp,
-                arrfunc_proto_t funcproto,
-                assign_error_mode errmode, arrfunc_type_data &out_af)
+void dynd::make_arrfunc_from_assignment(const ndt::type &dst_tp,
+                                        const ndt::type &src_tp,
+                                        assign_error_mode errmode,
+                                        arrfunc_type_data &out_af)
 {
     if (dst_tp.get_kind() == expression_kind ||
             (src_tp.get_kind() == expression_kind &&
@@ -133,30 +113,14 @@ void dynd::make_arrfunc_from_assignment(
         throw type_error(ss.str());
     }
     memset(&out_af, 0, sizeof(arrfunc_type_data));
-    if (funcproto == unary_operation_funcproto) {
-        // Since a unary operation was requested, it's a straightforward unary assignment ckernel
-        out_af.data_ptr = reinterpret_cast<void *>(errmode);
-        out_af.free_func = NULL;
-        out_af.instantiate = &instantiate_unary_assignment_ckernel;
-        out_af.ckernel_funcproto = unary_operation_funcproto;
-        out_af.func_proto = ndt::make_funcproto(src_tp, dst_tp);
-    } else if (funcproto == expr_operation_funcproto) {
-        // Adapt the assignment to an expr kernel
-        out_af.data_ptr = reinterpret_cast<void *>(errmode);
-        out_af.free_func = NULL;
-        out_af.instantiate = &instantiate_adapted_expr_assignment_ckernel;
-        out_af.ckernel_funcproto = expr_operation_funcproto;
-        out_af.func_proto = ndt::make_funcproto(src_tp, dst_tp);
-    } else {
-        stringstream ss;
-        ss << "unrecognized ckernel function prototype enum value " << funcproto;
-        throw runtime_error(ss.str());
-    }
+    out_af.data_ptr = reinterpret_cast<void *>(errmode);
+    out_af.free_func = NULL;
+    out_af.instantiate = &instantiate_assignment_ckernel;
+    out_af.func_proto = ndt::make_funcproto(src_tp, dst_tp);
 }
 
 void dynd::make_arrfunc_from_property(const ndt::type &tp,
                                       const std::string &propname,
-                                      arrfunc_proto_t funcproto,
                                       arrfunc_type_data &out_af)
 {
     if (tp.get_kind() == expression_kind) {
@@ -170,17 +134,7 @@ void dynd::make_arrfunc_from_property(const ndt::type &tp,
     out_af.free_func = &delete_property_arrfunc_data;
     out_af.data_ptr =
         const_cast<void *>(reinterpret_cast<const void *>(prop_tp.release()));
-    if (funcproto == unary_operation_funcproto) {
-        out_af.ckernel_funcproto = unary_operation_funcproto;
-        out_af.instantiate = &instantiate_unary_property_ckernel;
-    } else if (funcproto == expr_operation_funcproto) {
-        out_af.ckernel_funcproto = expr_operation_funcproto;
-        out_af.instantiate = &instantiate_expr_property_ckernel;
-    } else {
-        stringstream ss;
-        ss << "unrecognized ckernel function prototype enum value " << funcproto;
-        throw runtime_error(ss.str());
-    }
+    out_af.instantiate = &instantiate_property_ckernel;
 }
 
 nd::arrfunc::arrfunc(const nd::array &rhs)
@@ -262,21 +216,10 @@ nd::array nd::arrfunc::call(intptr_t arg_count, const nd::array *args,
     ckernel_builder ckb;
     af->instantiate(af, &ckb, 0, dst_tp, result.get_arrmeta(), &src_tp[0],
                     &src_arrmeta[0], kernel_request_single, ectx);
-    if (af->ckernel_funcproto == expr_operation_funcproto) {
-        expr_single_operation_t fn =
-            ckb.get()->get_function<expr_single_operation_t>();
-        fn(result.get_readwrite_originptr(), &src_data[0], ckb.get());
-    } else if (af->ckernel_funcproto == unary_operation_funcproto) {
-        unary_single_operation_t fn =
-            ckb.get()->get_function<unary_single_operation_t>();
-        fn(result.get_readwrite_originptr(), src_data[0],
-           ckb.get());
-    } else {
-        stringstream ss;
-        ss << "unrecognized arrfunc function prototype ";
-        ss << af->ckernel_funcproto;
-        throw invalid_argument(ss.str());
-    }
+    expr_single_t fn =
+        ckb.get()->get_function<expr_single_t>();
+    fn(result.get_readwrite_originptr(), src_data.empty() ? NULL : &src_data[0],
+       ckb.get());
     result.flag_as_immutable();
     return result;
 }

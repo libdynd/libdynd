@@ -26,10 +26,10 @@ TYPED_TEST_CASE_P(ArrayAssign);
 TYPED_TEST_P(ArrayAssign, ScalarAssignment_Bool) {
     nd::array a;
     eval::eval_context ectx_nocheck, ectx_overflow, ectx_fractional, ectx_inexact;
-    ectx_nocheck.default_errmode = assign_error_none;
-    ectx_overflow.default_errmode = assign_error_overflow;
-    ectx_fractional.default_errmode = assign_error_fractional;
-    ectx_inexact.default_errmode = assign_error_inexact;
+    ectx_nocheck.errmode = assign_error_none;
+    ectx_overflow.errmode = assign_error_overflow;
+    ectx_fractional.errmode = assign_error_fractional;
+    ectx_inexact.errmode = assign_error_inexact;
 
     // assignment to a bool scalar
     a = nd::empty(TestFixture::First::MakeType(ndt::make_type<dynd_bool>()));
@@ -72,9 +72,9 @@ TYPED_TEST_P(ArrayAssign, ScalarAssignment_Int8) {
     nd::array a;
     const int8_t *ptr_i8;
     eval::eval_context ectx_nocheck, ectx_overflow, ectx_inexact;
-    ectx_nocheck.default_errmode = assign_error_none;
-    ectx_overflow.default_errmode = assign_error_overflow;
-    ectx_inexact.default_errmode = assign_error_inexact;
+    ectx_nocheck.errmode = assign_error_none;
+    ectx_overflow.errmode = assign_error_overflow;
+    ectx_inexact.errmode = assign_error_inexact;
 
     // Assignment to an int8_t scalar
     a = nd::empty(TestFixture::First::MakeType(ndt::make_type<int8_t>()));
@@ -116,8 +116,8 @@ TYPED_TEST_P(ArrayAssign, ScalarAssignment_UInt16) {
     nd::array a;
     const uint16_t *ptr_u16;
     eval::eval_context ectx_nocheck, ectx_overflow;
-    ectx_nocheck.default_errmode = assign_error_none;
-    ectx_overflow.default_errmode = assign_error_overflow;
+    ectx_nocheck.errmode = assign_error_none;
+    ectx_overflow.errmode = assign_error_overflow;
 
     // Assignment to a uint16_t scalar
     a = nd::empty(TestFixture::First::MakeType(ndt::make_type<uint16_t>()));
@@ -142,7 +142,7 @@ TYPED_TEST_P(ArrayAssign, ScalarAssignment_Float32) {
     nd::array a;
     const float *ptr_f32;
     eval::eval_context ectx_inexact;
-    ectx_inexact.default_errmode = assign_error_inexact;
+    ectx_inexact.errmode = assign_error_inexact;
 
     // Assignment to a float scalar
     a = nd::empty(TestFixture::First::MakeType(ndt::make_type<float>()));
@@ -176,7 +176,7 @@ TYPED_TEST_P(ArrayAssign, ScalarAssignment_Float64) {
     nd::array a;
     const double *ptr_f64;
     eval::eval_context ectx_inexact;
-    ectx_inexact.default_errmode = assign_error_inexact;
+    ectx_inexact.errmode = assign_error_inexact;
 
     // Assignment to a double scalar
     a = nd::empty(TestFixture::First::MakeType(ndt::make_type<double>()));
@@ -225,7 +225,7 @@ TYPED_TEST_P(ArrayAssign, ScalarAssignment_Uint64_LargeNumbers) {
     nd::array a;
     const uint64_t *ptr_u64;
     eval::eval_context ectx_nocheck;
-    ectx_nocheck.default_errmode = assign_error_none;
+    ectx_nocheck.errmode = assign_error_none;
 
     // Assignment to a double scalar
     a = nd::empty(TestFixture::First::MakeType(ndt::make_type<uint64_t>()));
@@ -246,7 +246,7 @@ TYPED_TEST_P(ArrayAssign, ScalarAssignment_Complex_Float32) {
     nd::array a;
     const dynd_complex<float> *ptr_cf32;
     eval::eval_context ectx_inexact;
-    ectx_inexact.default_errmode = assign_error_inexact;
+    ectx_inexact.errmode = assign_error_inexact;
 
     // Assignment to a complex float scalar
     a = nd::empty(TestFixture::First::MakeType(ndt::make_type<dynd_complex<float> >()));
@@ -283,7 +283,7 @@ TYPED_TEST_P(ArrayAssign, ScalarAssignment_Complex_Float64) {
     nd::array a;
     const dynd_complex<double> *ptr_cf64;
     eval::eval_context ectx_inexact;
-    ectx_inexact.default_errmode = assign_error_inexact;
+    ectx_inexact.errmode = assign_error_inexact;
 
     // Assignment to a complex float scalar
     a = nd::empty(TestFixture::First::MakeType(ndt::make_type<dynd_complex<double> >()));
@@ -376,7 +376,7 @@ TEST(ArrayAssign, Casting) {
 
     // Allow truncation of fractional part
     b = a.ucast(ndt::make_type<int>());
-    tmp_ectx.default_errmode = assign_error_overflow;
+    tmp_ectx.errmode = assign_error_overflow;
     b = b.eval(&tmp_ectx);
     EXPECT_EQ(3, b(0).as<int>());
     EXPECT_EQ(1, b(1).as<int>());
@@ -385,7 +385,7 @@ TEST(ArrayAssign, Casting) {
 
     // cast_scalars<int>() should be equivalent to cast_scalars(ndt::make_type<int>())
     b = a.ucast<int>(0);
-    tmp_ectx.default_errmode = assign_error_overflow;
+    tmp_ectx.errmode = assign_error_overflow;
     b = b.eval(&tmp_ectx);
     EXPECT_EQ(3, b(0).as<int>());
     EXPECT_EQ(1, b(1).as<int>());
@@ -395,13 +395,13 @@ TEST(ArrayAssign, Casting) {
     b = a.ucast(ndt::make_type<int8_t>());
     // This triggers conversion from float to int8,
     // which overflows
-    tmp_ectx.default_errmode = assign_error_overflow;
+    tmp_ectx.errmode = assign_error_overflow;
     EXPECT_THROW(b.eval(), runtime_error);
 
     // Remove the overflowing value in 'a', so b.vals() no
     // longer triggers an overflow.
     a(3).val_assign(-120);
-    tmp_ectx.default_errmode = assign_error_overflow;
+    tmp_ectx.errmode = assign_error_overflow;
     b = b.eval(&tmp_ectx);
     EXPECT_EQ(3, b(0).as<int>());
     EXPECT_EQ(1, b(1).as<int>());
@@ -413,7 +413,7 @@ TYPED_TEST_P(ArrayAssign, Overflow) {
     int v0[4] = {0,1,2,3};
     nd::array a = TestFixture::First::To(v0);
     eval::eval_context ectx_overflow;
-    ectx_overflow.default_errmode = assign_error_overflow;
+    ectx_overflow.errmode = assign_error_overflow;
 
     if (!TestFixture::First::IsTypeID(cuda_device_type_id) && !TestFixture::Second::IsTypeID(cuda_device_type_id)) {
         EXPECT_THROW(a.val_assign(TestFixture::Second::To(1e25), &ectx_overflow), runtime_error);
@@ -438,7 +438,7 @@ TEST(ArrayAssign, ChainedCastingRead) {
               b.get_type());
 
     // Evaluating the values should truncate them to integers
-    tmp_ectx.default_errmode = assign_error_overflow;
+    tmp_ectx.errmode = assign_error_overflow;
     b = b.eval(&tmp_ectx);
     // Now it's just the value type, no chaining
     EXPECT_EQ(ndt::type("strided * float32"), b.get_type());
@@ -468,7 +468,7 @@ TEST(ArrayAssign, ChainedCastingRead) {
                                   ndt::make_type<int32_t>(),
                                   ndt::make_convert<int16_t, float>())))))),
               b.get_type());
-    tmp_ectx.default_errmode = assign_error_overflow;
+    tmp_ectx.errmode = assign_error_overflow;
     b = b.eval(&tmp_ectx);
     EXPECT_EQ(ndt::type("strided * int32"), b.get_type());
     EXPECT_EQ(3, b(0).as<int32_t>());
@@ -490,7 +490,7 @@ TEST(ArrayAssign, ChainedCastingWrite) {
                   ndt::make_type<float>(), ndt::make_convert<int, float>())),
               b.get_type());
 
-    tmp_ectx.default_errmode = assign_error_overflow;
+    tmp_ectx.errmode = assign_error_overflow;
     b(0).val_assign(6.8f, &tmp_ectx);
     b(1).val_assign(-3.1, &tmp_ectx);
     b(2).val_assign(1000.5, &tmp_ectx);
@@ -513,7 +513,7 @@ TEST(ArrayAssign, ChainedCastingReadWrite) {
     nd::array aview = a.ucast<double>();
     nd::array bview = b.ucast<int32_t>();
 
-    tmp_ectx.default_errmode = assign_error_overflow;
+    tmp_ectx.errmode = assign_error_overflow;
     bview.val_assign(aview, &tmp_ectx);
     EXPECT_EQ(0, b(0).as<int>());
     EXPECT_EQ(-1000, b(1).as<int>());
@@ -525,7 +525,7 @@ TEST(ArrayAssign, ChainedCastingReadWrite) {
     aview = aview.ucast<int16_t>(0);
     bview = bview.ucast<int64_t>(0);
 
-    tmp_ectx.default_errmode = assign_error_overflow;
+    tmp_ectx.errmode = assign_error_overflow;
     bview.val_assign(aview, &tmp_ectx);
     EXPECT_EQ(0, b(0).as<int>());
     EXPECT_EQ(-1000, b(1).as<int>());

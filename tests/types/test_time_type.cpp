@@ -107,14 +107,21 @@ TEST(TimeDType, ConvertToString) {
 }
 
 TEST(TimeDType, Properties) {
-    nd::array n;
+    nd::array a, b;
 
-    n = nd::array("12:34:56.7890123").cast(ndt::type("time")).eval();
-    EXPECT_EQ(12, n.p("hour").as<int32_t>());
-    EXPECT_EQ(34, n.p("minute").as<int32_t>());
-    EXPECT_EQ(56, n.p("second").as<int32_t>());
-    EXPECT_EQ(789012, n.p("microsecond").as<int32_t>());
-    EXPECT_EQ(7890123, n.p("tick").as<int32_t>());
+    a = nd::array("12:34:56.7890123").cast(ndt::type("time")).eval();
+    EXPECT_EQ(12, a.p("hour").as<int32_t>());
+    EXPECT_EQ(34, a.p("minute").as<int32_t>());
+    EXPECT_EQ(56, a.p("second").as<int32_t>());
+    EXPECT_EQ(789012, a.p("microsecond").as<int32_t>());
+    EXPECT_EQ(7890123, a.p("tick").as<int32_t>());
+
+    b = a.f("to_struct").eval();
+    EXPECT_EQ(time_hmst::type(), b.get_type());
+    EXPECT_EQ(12, b.p("hour").as<int32_t>());
+    EXPECT_EQ(34, b.p("minute").as<int32_t>());
+    EXPECT_EQ(56, b.p("second").as<int32_t>());
+    EXPECT_EQ(7890123, b.p("tick").as<int32_t>());
 }
 
 TEST(TimeHMST, SetFromStr) {

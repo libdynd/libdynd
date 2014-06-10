@@ -38,7 +38,7 @@ static void delete_lifted_reduction_arrfunc_data(void *self_data_ptr)
 static intptr_t instantiate_lifted_reduction_arrfunc_data(
     const arrfunc_type_data *af_self, dynd::ckernel_builder *ckb, intptr_t ckb_offset,
     const ndt::type &dst_tp, const char *dst_arrmeta, const ndt::type *src_tp,
-    const char *const *src_arrmeta, uint32_t kernreq,
+    const char *const *src_arrmeta, kernel_request_t kernreq,
     const eval::eval_context *ectx)
 
 {
@@ -77,9 +77,8 @@ void dynd::lift_reduction_arrfunc(arrfunc_type_data *out_ar,
         throw runtime_error("lift_reduction_arrfunc: 'elwise_reduction' may not be empty");
     }
     const arrfunc_type_data *elwise_reduction = elwise_reduction_arr.get();
-    if (elwise_reduction->ckernel_funcproto != unary_operation_funcproto &&
-            !(elwise_reduction->ckernel_funcproto == expr_operation_funcproto &&
-              elwise_reduction->get_param_count() == 2 &&
+    if (elwise_reduction->get_param_count() != 1 &&
+            !(elwise_reduction->get_param_count() == 2 &&
               elwise_reduction->get_param_type(0) ==
                   elwise_reduction->get_param_type(1) &&
               elwise_reduction->get_param_type(0) ==
@@ -89,16 +88,6 @@ void dynd::lift_reduction_arrfunc(arrfunc_type_data *out_ar,
               " unary operation ckernel or a binary expr ckernel with all "
               "equal types, its prototype is " << elwise_reduction->func_proto;
         throw invalid_argument(ss.str());
-    }
-
-    // Validate the input dst_initialization arrfunc
-    const arrfunc_type_data *dst_initialization = NULL;
-    if (!dst_initialization_arr.is_null()) {
-        dst_initialization = dst_initialization_arr.get();
-        if (dst_initialization->ckernel_funcproto != unary_operation_funcproto) {
-            throw runtime_error("lift_reduction_arrfunc: 'dst_initialization' must contain a"
-                            " unary operation ckernel");
-        }
     }
 
     lifted_reduction_arrfunc_data *self = new lifted_reduction_arrfunc_data;
@@ -154,5 +143,4 @@ void dynd::lift_reduction_arrfunc(arrfunc_type_data *out_ar,
 
     out_ar->instantiate = &instantiate_lifted_reduction_arrfunc_data;
     out_ar->func_proto = ndt::make_funcproto(lifted_arr_type, lifted_dst_type);
-    out_ar->ckernel_funcproto = unary_operation_funcproto;
 }

@@ -120,7 +120,7 @@ bool option_type::is_avail(const char *arrmeta, const char *data,
                         kernel_request_single, ectx);
         ckernel_prefix *ckp = ckb.get();
         char result;
-        ckp->get_function<unary_single_operation_t>()(&result, data, ckp);
+        ckp->get_function<expr_single_t>()(&result, &data, ckp);
         return result != 0;
     }
 }
@@ -178,7 +178,7 @@ void option_type::assign_na(const char *arrmeta, char *data,
         af->instantiate(af, &ckb, 0, ndt::type(this, true), arrmeta, NULL, NULL,
                         kernel_request_single, ectx);
         ckernel_prefix *ckp = ckb.get();
-        ckp->get_function<expr_single_operation_t>()(data, NULL, ckp);
+        ckp->get_function<expr_single_t>()(data, NULL, ckp);
     }
 }
 
@@ -247,11 +247,11 @@ void option_type::set_from_utf8_string(const char *arrmeta, char *data,
         if (m_value_tp.is_builtin()) {
             if (m_value_tp.unchecked_get_builtin_type_id() == bool_type_id) {
                 parse::string_to_bool(data, utf8_begin, utf8_end, false,
-                                      ectx->default_errmode);
+                                      ectx->errmode);
             } else {
                 parse::string_to_number(
                     data, m_value_tp.unchecked_get_builtin_type_id(),
-                    utf8_begin, utf8_end, false, ectx->default_errmode);
+                    utf8_begin, utf8_end, false, ectx->errmode);
             }
         } else {
             m_value_tp.extended()->set_from_utf8_string(

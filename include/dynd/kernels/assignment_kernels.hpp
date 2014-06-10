@@ -19,7 +19,6 @@
 #define DYND_BUFFER_CHUNK_SIZE ((size_t)128)
 
 namespace dynd {
-
 /**
  * See the ckernel_builder class documentation
  * for details about how ckernels can be built and
@@ -37,15 +36,15 @@ public:
     {
     }
 
-    inline unary_single_operation_t get_function() const {
-        return get()->get_function<unary_single_operation_t>();
+    inline expr_single_t get_function() const {
+        return get()->get_function<expr_single_t>();
     }
 
     /** Calls the function to do the assignment */
     inline void operator()(char *dst, const char *src) const {
         ckernel_prefix *kdp = get();
-        unary_single_operation_t fn = kdp->get_function<unary_single_operation_t>();
-        fn(dst, src, kdp);
+        expr_single_t fn = kdp->get_function<expr_single_t>();
+        fn(dst, &src, kdp);
     }
 };
 
@@ -67,20 +66,22 @@ public:
     {
     }
 
-    inline unary_strided_operation_t get_function() const {
-        return get()->get_function<unary_strided_operation_t>();
+    inline expr_strided_t get_function() const {
+        return get()->get_function<expr_strided_t>();
     }
 
     /** Calls the function to do the assignment */
     inline void operator()(char *dst, intptr_t dst_stride,
                 const char *src, intptr_t src_stride, size_t count) const {
         ckernel_prefix *kdp = get();
-        unary_strided_operation_t fn = kdp->get_function<unary_strided_operation_t>();
-        fn(dst, dst_stride, src, src_stride, count, kdp);
+        expr_strided_t fn = kdp->get_function<expr_strided_t>();
+        fn(dst, dst_stride, &src, &src_stride, count, kdp);
     }
 };
 
+
 namespace kernels {
+
     /**
      * A CRTP (curiously recurring template pattern) base class to help
      * create ckernels.
@@ -97,10 +98,10 @@ namespace kernels {
         {
             switch (kernreq) {
             case kernel_request_single:
-                this->base.template set_function<unary_single_operation_t>(&self_type::single_wrapper);
+                this->base.template set_function<expr_single_t>(&self_type::single_wrapper);
                 break;
             case kernel_request_strided:
-                this->base.template set_function<unary_strided_operation_t>(&self_type::strided_wrapper);
+                this->base.template set_function<expr_strided_t>(&self_type::strided_wrapper);
                 break;
             default: {
                 std::stringstream ss;
@@ -110,16 +111,19 @@ namespace kernels {
             }
         }
 
-        static void single_wrapper(char *dst, const char *src, ckernel_prefix *rawself) {
-            return parent_type::get_self(rawself)->single(dst, src);
+        static void single_wrapper(char *dst, const char *const *src,
+                                   ckernel_prefix *rawself)
+        {
+            return parent_type::get_self(rawself)->single(dst, *src);
         }
 
         static void strided_wrapper(char *dst, intptr_t dst_stride,
-                                    const char *src, intptr_t src_stride,
-                                    size_t count, ckernel_prefix *rawself)
+                                    const char *const *src,
+                                    const intptr_t *src_stride, size_t count,
+                                    ckernel_prefix *rawself)
         {
             return parent_type::get_self(rawself)
-                ->strided(dst, dst_stride, src, src_stride, count);
+                ->strided(dst, dst_stride, *src, *src_stride, count);
         }
 
         /**
@@ -208,9 +212,9 @@ size_t make_builtin_type_assignment_kernel(
  *                      ckb, ckb_offset, kernreq);
  *      // Proceed to create 'single' kernel...
  */
-size_t make_kernreq_to_single_kernel_adapter(
-                ckernel_builder *ckb, size_t ckb_offset,
-                kernel_request_t kernreq);
+size_t make_kernreq_to_single_kernel_adapter(ckernel_builder *ckb,
+                                             size_t ckb_offset, int nsrc,
+                                             kernel_request_t kernreq);
 
 namespace kernels {
 /**
@@ -225,20 +229,22 @@ struct strided_assign_ck : public kernels::assignment_ck<strided_assign_ck> {
     inline void single(char *dst, const char *src)
     {
         ckernel_prefix *child = get_child_ckernel();
-        unary_strided_operation_t child_fn = child->get_function<unary_strided_operation_t>();
-        child_fn(dst, m_dst_stride, src, m_src_stride,m_size, child);
+        expr_strided_t child_fn = child->get_function<expr_strided_t>();
+        child_fn(dst, m_dst_stride, &src, &m_src_stride, m_size, child);
     }
 
     inline void strided(char *dst, intptr_t dst_stride, const char *src,
                         intptr_t src_stride, size_t count)
     {
         ckernel_prefix *child = get_child_ckernel();
-        unary_strided_operation_t child_fn = child->get_function<unary_strided_operation_t>();
+        expr_strided_t child_fn = child->get_function<expr_strided_t>();
         intptr_t inner_size = m_size, inner_dst_stride = m_dst_stride,
                  inner_src_stride = m_src_stride;
-        for (size_t i = 0; i != count;
-             ++i, dst += dst_stride, src += src_stride) {
-            child_fn(dst, inner_dst_stride, src, inner_src_stride, inner_size, child);
+        for (size_t i = 0; i != count; ++i) {
+            child_fn(dst, inner_dst_stride, &src, &inner_src_stride, inner_size,
+                     child);
+            dst += dst_stride;
+            src += src_stride;
         }
     }
 

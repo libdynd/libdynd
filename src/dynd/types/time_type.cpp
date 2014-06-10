@@ -261,54 +261,59 @@ void time_type::get_dynamic_array_functions(
 ///////// property accessor kernels (used by property_type)
 
 namespace {
-    void get_property_kernel_hour_single(char *dst, const char *src,
-                    ckernel_prefix *DYND_UNUSED(extra))
-    {
-        int64_t ticks = *reinterpret_cast<const int64_t *>(src);
-        *reinterpret_cast<int32_t *>(dst) = static_cast<int32_t>(ticks / DYND_TICKS_PER_HOUR);
-    }
+void get_property_kernel_hour_single(char *dst, const char *const *src,
+                                     ckernel_prefix *DYND_UNUSED(self))
+{
+    int64_t ticks = **reinterpret_cast<const int64_t *const *>(src);
+    *reinterpret_cast<int32_t *>(dst) =
+        static_cast<int32_t>(ticks / DYND_TICKS_PER_HOUR);
+}
 
-    void get_property_kernel_minute_single(char *dst, const char *src,
-                    ckernel_prefix *DYND_UNUSED(extra))
-    {
-        int64_t ticks = *reinterpret_cast<const int64_t *>(src);
-        *reinterpret_cast<int32_t *>(dst) = static_cast<int32_t>((ticks / DYND_TICKS_PER_MINUTE) % 60);
-    }
+void get_property_kernel_minute_single(char *dst, const char *const *src,
+                                       ckernel_prefix *DYND_UNUSED(self))
+{
+    int64_t ticks = **reinterpret_cast<const int64_t *const *>(src);
+    *reinterpret_cast<int32_t *>(dst) =
+        static_cast<int32_t>((ticks / DYND_TICKS_PER_MINUTE) % 60);
+}
 
-    void get_property_kernel_second_single(char *dst, const char *src,
-                    ckernel_prefix *DYND_UNUSED(extra))
-    {
-        int64_t ticks = *reinterpret_cast<const int64_t *>(src);
-        *reinterpret_cast<int32_t *>(dst) = static_cast<int32_t>((ticks / DYND_TICKS_PER_SECOND) % 60);
-    }
+void get_property_kernel_second_single(char *dst, const char *const *src,
+                                       ckernel_prefix *DYND_UNUSED(self))
+{
+    int64_t ticks = **reinterpret_cast<const int64_t *const *>(src);
+    *reinterpret_cast<int32_t *>(dst) =
+        static_cast<int32_t>((ticks / DYND_TICKS_PER_SECOND) % 60);
+}
 
-    void get_property_kernel_microsecond_single(char *dst, const char *src,
-                    ckernel_prefix *DYND_UNUSED(extra))
-    {
-        int64_t ticks = *reinterpret_cast<const int64_t *>(src);
-        *reinterpret_cast<int32_t *>(dst) = static_cast<int32_t>((ticks / DYND_TICKS_PER_MICROSECOND) % 1000000);
-    }
+void get_property_kernel_microsecond_single(char *dst, const char *const *src,
+                                            ckernel_prefix *DYND_UNUSED(self))
+{
+    int64_t ticks = **reinterpret_cast<const int64_t *const *>(src);
+    *reinterpret_cast<int32_t *>(dst) =
+        static_cast<int32_t>((ticks / DYND_TICKS_PER_MICROSECOND) % 1000000);
+}
 
-    void get_property_kernel_tick_single(char *dst, const char *src,
-                    ckernel_prefix *DYND_UNUSED(extra))
-    {
-        int64_t ticks = *reinterpret_cast<const int64_t *>(src);
-        *reinterpret_cast<int32_t *>(dst) = static_cast<int32_t>(ticks % 10000000);
-    }
+void get_property_kernel_tick_single(char *dst, const char *const *src,
+                                     ckernel_prefix *DYND_UNUSED(self))
+{
+    int64_t ticks = **reinterpret_cast<const int64_t *const *>(src);
+    *reinterpret_cast<int32_t *>(dst) = static_cast<int32_t>(ticks % 10000000);
+}
 
-    void get_property_kernel_struct_single(char *dst, const char *src,
-                    ckernel_prefix *DYND_UNUSED(extra))
-    {
-        time_hmst *dst_struct = reinterpret_cast<time_hmst *>(dst);
-        dst_struct->set_from_ticks(*reinterpret_cast<const int64_t *>(src));
-    }
+void get_property_kernel_struct_single(char *dst, const char *const *src,
+                                       ckernel_prefix *DYND_UNUSED(self))
+{
+    time_hmst *dst_struct = reinterpret_cast<time_hmst *>(dst);
+    dst_struct->set_from_ticks(**reinterpret_cast<const int64_t *const *>(src));
+}
 
-    void set_property_kernel_struct_single(char *dst, const char *src,
-                    ckernel_prefix *DYND_UNUSED(extra))
-    {
-        const time_hmst *src_struct = reinterpret_cast<const time_hmst *>(src);
-        *reinterpret_cast<int64_t *>(dst) = src_struct->to_ticks();
-    }
+void set_property_kernel_struct_single(char *dst, const char *const *src,
+                                       ckernel_prefix *DYND_UNUSED(self))
+{
+    const time_hmst *src_struct =
+        *reinterpret_cast<const time_hmst *const *>(src);
+    *reinterpret_cast<int64_t *>(dst) = src_struct->to_ticks();
+}
 } // anonymous namespace
 
 namespace {
@@ -368,31 +373,32 @@ ndt::type time_type::get_elwise_property_type(size_t property_index,
 }
 
 size_t time_type::make_elwise_property_getter_kernel(
-                ckernel_builder *out, size_t offset_out,
-                const char *DYND_UNUSED(dst_arrmeta),
-                const char *DYND_UNUSED(src_arrmeta), size_t src_property_index,
-                kernel_request_t kernreq, const eval::eval_context *DYND_UNUSED(ectx)) const
+    ckernel_builder *out, size_t offset_out,
+    const char *DYND_UNUSED(dst_arrmeta), const char *DYND_UNUSED(src_arrmeta),
+    size_t src_property_index, kernel_request_t kernreq,
+    const eval::eval_context *DYND_UNUSED(ectx)) const
 {
-    offset_out = make_kernreq_to_single_kernel_adapter(out, offset_out, kernreq);
+    offset_out =
+        make_kernreq_to_single_kernel_adapter(out, offset_out, 1, kernreq);
     ckernel_prefix *e = out->get_at<ckernel_prefix>(offset_out);
     switch (src_property_index) {
         case timeprop_hour:
-            e->set_function<unary_single_operation_t>(&get_property_kernel_hour_single);
+            e->set_function<expr_single_t>(&get_property_kernel_hour_single);
             return offset_out + sizeof(ckernel_prefix);
         case timeprop_minute:
-            e->set_function<unary_single_operation_t>(&get_property_kernel_minute_single);
+            e->set_function<expr_single_t>(&get_property_kernel_minute_single);
             return offset_out + sizeof(ckernel_prefix);
         case timeprop_second:
-            e->set_function<unary_single_operation_t>(&get_property_kernel_second_single);
+            e->set_function<expr_single_t>(&get_property_kernel_second_single);
             return offset_out + sizeof(ckernel_prefix);
         case timeprop_microsecond:
-            e->set_function<unary_single_operation_t>(&get_property_kernel_microsecond_single);
+            e->set_function<expr_single_t>(&get_property_kernel_microsecond_single);
             return offset_out + sizeof(ckernel_prefix);
         case timeprop_tick:
-            e->set_function<unary_single_operation_t>(&get_property_kernel_tick_single);
+            e->set_function<expr_single_t>(&get_property_kernel_tick_single);
             return offset_out + sizeof(ckernel_prefix);
         case timeprop_struct:
-            e->set_function<unary_single_operation_t>(&get_property_kernel_struct_single);
+            e->set_function<expr_single_t>(&get_property_kernel_struct_single);
             return offset_out + sizeof(ckernel_prefix);
         default:
             stringstream ss;
@@ -402,16 +408,17 @@ size_t time_type::make_elwise_property_getter_kernel(
 }
 
 size_t time_type::make_elwise_property_setter_kernel(
-                ckernel_builder *out, size_t offset_out,
-                const char *DYND_UNUSED(dst_arrmeta), size_t dst_property_index,
-                const char *DYND_UNUSED(src_arrmeta),
-                kernel_request_t kernreq, const eval::eval_context *DYND_UNUSED(ectx)) const
+    ckernel_builder *out, size_t offset_out,
+    const char *DYND_UNUSED(dst_arrmeta), size_t dst_property_index,
+    const char *DYND_UNUSED(src_arrmeta), kernel_request_t kernreq,
+    const eval::eval_context *DYND_UNUSED(ectx)) const
 {
-    offset_out = make_kernreq_to_single_kernel_adapter(out, offset_out, kernreq);
+    offset_out =
+        make_kernreq_to_single_kernel_adapter(out, offset_out, 1, kernreq);
     ckernel_prefix *e = out->get_at<ckernel_prefix>(offset_out);
     switch (dst_property_index) {
         case timeprop_struct:
-            e->set_function<unary_single_operation_t>(&set_property_kernel_struct_single);
+            e->set_function<expr_single_t>(&set_property_kernel_struct_single);
             return offset_out + sizeof(ckernel_prefix);
         default:
             stringstream ss;
@@ -423,21 +430,24 @@ size_t time_type::make_elwise_property_setter_kernel(
 
 namespace {
 struct time_is_avail_ck {
-    static void single(char *dst, const char *src,
+    static void single(char *dst, const char *const *src,
                        ckernel_prefix *DYND_UNUSED(self))
     {
-        int64_t v = *reinterpret_cast<const int64_t *>(src);
+        int64_t v = **reinterpret_cast<const int64_t *const *>(src);
         *dst = v != DYND_TIME_NA;
     }
 
-    static void strided(char *dst, intptr_t dst_stride, const char *src,
-                        intptr_t src_stride, size_t count,
+    static void strided(char *dst, intptr_t dst_stride, const char *const *src,
+                        const intptr_t *src_stride, size_t count,
                         ckernel_prefix *DYND_UNUSED(self))
     {
-        for (size_t i = 0; i != count;
-                ++i, dst += dst_stride, src += src_stride) {
-            int64_t v = *reinterpret_cast<const int64_t *>(src);
+        const char *src0 = src[0];
+        intptr_t src0_stride = src_stride[0];
+        for (size_t i = 0; i != count; ++i) {
+            int64_t v = *reinterpret_cast<const int64_t *>(src0);
             *dst = v != DYND_TIME_NA;
+            dst += dst_stride;
+            src0 += src0_stride;
         }
     }
 
@@ -447,7 +457,7 @@ struct time_is_avail_ck {
                                 const char *DYND_UNUSED(dst_arrmeta),
                                 const ndt::type *src_tp,
                                 const char *const *DYND_UNUSED(src_arrmeta),
-                                uint32_t kernreq,
+                                kernel_request_t kernreq,
                                 const eval::eval_context *DYND_UNUSED(ectx))
     {
         if (src_tp[0].get_type_id() != option_type_id ||
@@ -463,7 +473,7 @@ struct time_is_avail_ck {
             throw type_error(ss.str());
         }
         ckernel_prefix *ckp = ckb->get_at<ckernel_prefix>(ckb_offset);
-        ckp->set_unary_function<time_is_avail_ck>((kernel_request_t)kernreq);
+        ckp->set_expr_function<time_is_avail_ck>((kernel_request_t)kernreq);
         return ckb_offset + sizeof(ckernel_prefix);
     }
 };
@@ -491,7 +501,7 @@ struct time_assign_na_ck {
                                 const char *DYND_UNUSED(dst_arrmeta),
                                 const ndt::type *DYND_UNUSED(src_tp),
                                 const char *const *DYND_UNUSED(src_arrmeta),
-                                uint32_t kernreq,
+                                kernel_request_t kernreq,
                                 const eval::eval_context *DYND_UNUSED(ectx))
     {
         if (dst_tp.get_type_id() != option_type_id ||
@@ -518,12 +528,10 @@ nd::array time_type::get_option_nafunc() const
     // Use a typevar instead of option[T] to avoid a circular dependency
     is_avail->func_proto = ndt::make_funcproto(ndt::make_typevar("T"),
                                                ndt::make_type<dynd_bool>());
-    is_avail->ckernel_funcproto = unary_operation_funcproto;
     is_avail->data_ptr = NULL;
     is_avail->instantiate = &time_is_avail_ck::instantiate;
     assign_na->func_proto =
         ndt::make_funcproto(0, NULL, ndt::make_typevar("T"));
-    assign_na->ckernel_funcproto = expr_operation_funcproto;
     assign_na->data_ptr = NULL;
     assign_na->instantiate = &time_assign_na_ck::instantiate;
     naf.flag_as_immutable();

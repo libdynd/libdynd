@@ -12,7 +12,9 @@
 template<>
 struct single_assigner_builtin_base<dynd_bool, dynd_float128, bool_kind, real_kind, assign_error_none>
 {
-    DYND_CUDA_HOST_DEVICE static void assign(dynd_bool *dst, const dynd_float128 *src, ckernel_prefix *DYND_UNUSED(extra)) {
+    DYND_CUDA_HOST_DEVICE inline static void assign(dynd_bool *dst,
+                                                    const dynd_float128 *src)
+    {
         DYND_TRACE_ASSIGNMENT((bool)(s != src_type(0)), dynd_bool, s, src_type);
 
         *dst = ((src->m_lo != 0) || ((src->m_hi&0x7fffffffffffffffULL) != 0));
@@ -21,7 +23,8 @@ struct single_assigner_builtin_base<dynd_bool, dynd_float128, bool_kind, real_ki
 template<>
 struct single_assigner_builtin_base<dynd_bool, dynd_float128, bool_kind, real_kind, assign_error_overflow>
 {
-    static void assign(dynd_bool *dst, const dynd_float128 *src, ckernel_prefix *DYND_UNUSED(extra)) {
+    inline static void assign(dynd_bool *dst, const dynd_float128 *src)
+    {
         // DYND_TRACE_ASSIGNMENT((bool)(s != src_type(0)), dynd_bool, s, src_type);
 
         if ((src->m_hi&0x7fffffffffffffffULL) == 0 && src->m_lo == 0) {
@@ -48,7 +51,7 @@ struct single_assigner_builtin_base<dynd_bool, dynd_float128, bool_kind, real_ki
 template<>
 struct single_assigner_builtin_base<dynd_float128, dynd_bool, real_kind, bool_kind, assign_error_none>
 {
-    DYND_CUDA_HOST_DEVICE static void assign(dynd_float128 *dst, const dynd_bool *src, ckernel_prefix *DYND_UNUSED(extra)) {
+    DYND_CUDA_HOST_DEVICE static void assign(dynd_float128 *dst, const dynd_bool *src) {
         DYND_TRACE_ASSIGNMENT((bool)(s != src_type(0)), dynd_bool, s, src_type);
 
         if (*src) {

@@ -15,28 +15,32 @@ using namespace dynd;
 namespace {
     template<class T, class Accum>
     struct sum_reduction {
-        static void single(char *dst, const char *src,
-                        ckernel_prefix *DYND_UNUSED(ckp))
+        static void single(char *dst, const char *const *src,
+                           ckernel_prefix *DYND_UNUSED(self))
         {
-            *reinterpret_cast<T *>(dst) = *reinterpret_cast<T *>(dst) + *reinterpret_cast<const T *>(src);
+            *reinterpret_cast<T *>(dst) =
+                *reinterpret_cast<T *>(dst) +
+                **reinterpret_cast<const T *const *>(src);
         }
 
         static void strided(char *dst, intptr_t dst_stride,
-                        const char *src, intptr_t src_stride,
-                        size_t count, ckernel_prefix *DYND_UNUSED(ckp))
+                            const char *const *src, const intptr_t *src_stride,
+                            size_t count, ckernel_prefix *DYND_UNUSED(self))
         {
+            const char *src0 = src[0];
+            intptr_t src0_stride = src_stride[0];
             if (dst_stride == 0) {
                 Accum s = 0;
                 for (size_t i = 0; i < count; ++i) {
-                    s = s + *reinterpret_cast<const T *>(src);
-                    src += src_stride;
+                    s = s + *reinterpret_cast<const T *>(src0);
+                    src0 += src0_stride;
                 }
                 *reinterpret_cast<T *>(dst) = static_cast<T>(*reinterpret_cast<const T *>(dst) + s);
             } else {
                 for (size_t i = 0; i < count; ++i) {
-                    *reinterpret_cast<T *>(dst) = *reinterpret_cast<T *>(dst) + *reinterpret_cast<const T *>(src);
+                    *reinterpret_cast<T *>(dst) = *reinterpret_cast<T *>(dst) + *reinterpret_cast<const T *>(src0);
                     dst += dst_stride;
-                    src += src_stride;
+                    src0 += src0_stride;
                 }
             }
         }
@@ -52,24 +56,24 @@ intptr_t kernels::make_builtin_sum_reduction_ckernel(
     ckernel_prefix *ckp = out_ckb->get_at<ckernel_prefix>(ckb_offset);
     switch (tid) {
         case int32_type_id:
-            ckp->set_unary_function<sum_reduction<int32_t, int32_t> >(kernreq);
+            ckp->set_expr_function<sum_reduction<int32_t, int32_t> >(kernreq);
             break;
         case int64_type_id:
-            ckp->set_unary_function<sum_reduction<int64_t, int64_t> >(kernreq);
+            ckp->set_expr_function<sum_reduction<int64_t, int64_t> >(kernreq);
             break;
         case float32_type_id:
-            ckp->set_unary_function<sum_reduction<float, double> >(kernreq);
+            ckp->set_expr_function<sum_reduction<float, double> >(kernreq);
             break;
         case float64_type_id:
-            ckp->set_unary_function<sum_reduction<double, double> >(kernreq);
+            ckp->set_expr_function<sum_reduction<double, double> >(kernreq);
             break;
         case complex_float32_type_id:
-            ckp->set_unary_function<
+            ckp->set_expr_function<
                 sum_reduction<dynd_complex<float>, dynd_complex<float> > >(
                 kernreq);
             break;
         case complex_float64_type_id:
-            ckp->set_unary_function<
+            ckp->set_expr_function<
                 sum_reduction<dynd_complex<double>, dynd_complex<double> > >(
                 kernreq);
             break;
@@ -88,7 +92,7 @@ static intptr_t instantiate_builtin_sum_reduction_arrfunc(
     const arrfunc_type_data *DYND_UNUSED(self_data_ptr), dynd::ckernel_builder *ckb,
     intptr_t ckb_offset, const ndt::type &dst_tp,
     const char *DYND_UNUSED(dst_arrmeta), const ndt::type *src_tp,
-    const char *const *DYND_UNUSED(src_arrmeta), uint32_t kernreq,
+    const char *const *DYND_UNUSED(src_arrmeta), kernel_request_t kernreq,
     const eval::eval_context *DYND_UNUSED(ectx))
 {
     if (dst_tp != src_tp[0]) {
@@ -111,7 +115,6 @@ void kernels::make_builtin_sum_reduction_arrfunc(
         ss << ndt::type(tid) << " is not supported";
         throw type_error(ss.str());
     }
-    out_af->ckernel_funcproto = unary_operation_funcproto;
     out_af->func_proto = ndt::make_funcproto(ndt::type(tid), ndt::type(tid));
     out_af->data_ptr = reinterpret_cast<void *>(tid);
     out_af->instantiate = &instantiate_builtin_sum_reduction_arrfunc;
@@ -168,7 +171,7 @@ namespace {
         instantiate(const arrfunc_type_data *af_self, dynd::ckernel_builder *ckb,
                     intptr_t ckb_offset, const ndt::type &dst_tp,
                     const char *DYND_UNUSED(dst_arrmeta), const ndt::type *src_tp,
-                    const char *const *src_arrmeta, uint32_t kernreq,
+                    const char *const *src_arrmeta, kernel_request_t kernreq,
                     const eval::eval_context *DYND_UNUSED(ectx))
         {
             typedef double_mean1d_ck self_type;
@@ -219,7 +222,6 @@ nd::arrfunc kernels::make_builtin_mean1d_arrfunc(type_id_t tid, intptr_t minp)
     nd::array mean1d = nd::empty(ndt::make_arrfunc());
     arrfunc_type_data *out_af =
         reinterpret_cast<arrfunc_type_data *>(mean1d.get_readwrite_originptr());
-    out_af->ckernel_funcproto = unary_operation_funcproto;
     mean1d_arrfunc_data *data = new mean1d_arrfunc_data;
     data->minp = minp;
     out_af->func_proto =

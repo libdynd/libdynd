@@ -405,7 +405,7 @@ static void parse_bool_json(const ndt::type &tp, const char *arrmeta,
     } else if (parse_token(begin, end, "false")) {
         value = 0;
     } else if (parse_token(begin, end, "null")) {
-        if (option || ectx->default_errmode != assign_error_none) {
+        if (option || ectx->errmode != assign_error_none) {
             value = 2;
         } else {
             value = 0;
@@ -415,7 +415,7 @@ static void parse_bool_json(const ndt::type &tp, const char *arrmeta,
             if (*nbegin == '0') {
                 value = 0;
             } else if (*nbegin == '1' ||
-                       ectx->default_errmode == assign_error_none) {
+                       ectx->errmode == assign_error_none) {
                 value = 1;
             }
         }
@@ -423,12 +423,12 @@ static void parse_bool_json(const ndt::type &tp, const char *arrmeta,
                                                      escaped)) {
         if (!escaped) {
             parse::string_to_bool(&value, nbegin, nend, option,
-                                  ectx->default_errmode);
+                                  ectx->errmode);
         } else {
             string s;
             parse::unescape_string(nbegin, nend, s);
             parse::string_to_bool(&value, s.data(), s.data() + s.size(),
-                                  option, ectx->default_errmode);
+                                  option, ectx->errmode);
         }
     }
 
@@ -465,19 +465,19 @@ static void parse_number_json(const ndt::type &tp, const char *arrmeta,
         ndt::make_option(tp).tcast<option_type>()->assign_na(arrmeta, out_data, ectx);
     } else if (parse::parse_json_number_no_ws(begin, end, nbegin, nend)) {
         parse::string_to_number(out_data, tp.get_type_id(), nbegin, nend,
-                             false, ectx->default_errmode);
+                             false, ectx->errmode);
     } else if (parse::parse_doublequote_string_no_ws(begin, end, nbegin, nend,
                                                      escaped)) {
         // Interpret the data inside the string as an int
         try {
             if (!escaped) {
                 parse::string_to_number(out_data, tp.get_type_id(), nbegin, nend,
-                                     option, ectx->default_errmode);
+                                     option, ectx->errmode);
             } else {
                 string s;
                 parse::unescape_string(nbegin, nend, s);
                 parse::string_to_number(out_data, tp.get_type_id(), nbegin, nend,
-                                     option, ectx->default_errmode);
+                                     option, ectx->errmode);
             }
         } catch (const std::exception& e) {
             throw json_parse_error(rbegin, e.what(), tp);
@@ -655,7 +655,7 @@ static void parse_option_json(const ndt::type &tp, const char *arrmeta,
                                                    strend)) {
                     parse::string_to_number(out_data, value_tp.get_type_id(),
                                             strbegin, strend, false,
-                                            ectx->default_errmode);
+                                            ectx->errmode);
                 } else {
                     throw json_parse_error(begin, "expected a number", tp);
                 }

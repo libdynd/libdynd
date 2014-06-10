@@ -689,7 +689,7 @@ nd::array nd::detail::make_from_vec<std::string>::make(const std::vector<std::st
 }
 
 namespace {
-    static void as_storage_type(const ndt::type& dt, void *DYND_UNUSED(extra),
+    static void as_storage_type(const ndt::type& dt, void *DYND_UNUSED(self),
                 ndt::type& out_transformed_tp, bool& out_was_transformed)
     {
         // If the type is a simple POD, switch it to a bytes type. Otherwise, keep it
@@ -1821,8 +1821,8 @@ void nd::assign_na(const ndt::type &tp, const char *arrmeta, char *data,
             make_lifted_expr_ckernel(af, &ckb, 0, tp, arrmeta, NULL, NULL,
                                      kernel_request_single, ectx);
             ckernel_prefix *ckp = ckb.get();
-            expr_single_operation_t ckp_fn =
-                ckp->get_function<expr_single_operation_t>();
+            expr_single_t ckp_fn =
+                ckp->get_function<expr_single_t>();
             ckp_fn(data, NULL, ckp);
         } else {
             stringstream ss;

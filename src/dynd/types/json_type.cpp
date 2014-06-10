@@ -46,7 +46,7 @@ void json_type::set_from_utf8_string(const char *arrmeta, char *dst,
                                      const eval::eval_context *ectx) const
 {
     // Validate that the input is JSON
-    if (ectx->default_errmode != assign_error_none) {
+    if (ectx->errmode != assign_error_none) {
         validate_json(utf8_begin, utf8_end);
     }
 
@@ -200,48 +200,47 @@ void json_type::arrmeta_debug_print(const char *arrmeta, std::ostream &o,
 }
 
 namespace {
-   struct string_to_json_kernel_extra {
-        typedef string_to_json_kernel_extra extra_type;
+struct string_to_json_ck
+  : public kernels::assignment_ck<string_to_json_ck> {
+    const char *m_dst_arrmeta;
+    bool m_validate;
 
-        ckernel_prefix base;
-        const char *dst_arrmeta;
-        bool validate;
-
-        static void single(char *dst, const char *src, ckernel_prefix *extra)
-        {
-            extra_type *e = reinterpret_cast<extra_type *>(extra);
-            const json_type_arrmeta *md =
-                reinterpret_cast<const json_type_arrmeta *>(e->dst_arrmeta);
-            json_type_data *out_d = reinterpret_cast<json_type_data *>(dst);
-            // First copy it as a string
-            (e + 1)->base.get_function<unary_single_operation_t>()(
-                dst, src, &(e + 1)->base);
-            // Then validate that it's correct JSON
-            if (e->validate) {
-                try { validate_json(out_d->begin, out_d->end); }
-                catch (const std::exception &)
-                {
-                    // Free the memory allocated for the output json data
-                    memory_block_pod_allocator_api *allocator =
-                        get_memory_block_pod_allocator_api(md->blockref);
-                    allocator->allocate(md->blockref, 0, 1, &out_d->begin,
-                                        &out_d->end);
-                    out_d->begin = NULL;
-                    out_d->end = NULL;
-                    throw;
-                }
+    inline void single(char *dst, const char *src)
+    {
+        const json_type_arrmeta *md =
+            reinterpret_cast<const json_type_arrmeta *>(m_dst_arrmeta);
+        json_type_data *out_d = reinterpret_cast<json_type_data *>(dst);
+        // First copy it as a string
+        ckernel_prefix *child = get_child_ckernel();
+        expr_single_t child_fn = child->get_function<expr_single_t>();
+        child_fn(dst, &src, child);
+        // Then validate that it's correct JSON
+        if (m_validate) {
+            try { validate_json(out_d->begin, out_d->end); }
+            catch (const std::exception &)
+            {
+                // Free the memory allocated for the output json data
+                memory_block_pod_allocator_api *allocator =
+                    get_memory_block_pod_allocator_api(md->blockref);
+                allocator->allocate(md->blockref, 0, 1, &out_d->begin,
+                                    &out_d->end);
+                out_d->begin = NULL;
+                out_d->end = NULL;
+                throw;
             }
         }
+    }
 
-        static void destruct(ckernel_prefix *self)
-        {
-            self->destroy_child_ckernel(sizeof(extra_type));
-        }
-    };
+    inline void destruct_children()
+    {
+        // Destroy the child ckernel
+        get_child_ckernel()->destroy();
+    }
+};
 } // anonymous namespace
 
 size_t json_type::make_assignment_kernel(
-    ckernel_builder *out, size_t offset_out, const ndt::type &dst_tp,
+    ckernel_builder *ckb, size_t ckb_offset, const ndt::type &dst_tp,
     const char *dst_arrmeta, const ndt::type &src_tp, const char *src_arrmeta,
     kernel_request_t kernreq, const eval::eval_context *ectx) const
 {
@@ -250,32 +249,25 @@ size_t json_type::make_assignment_kernel(
             case json_type_id: {
                 // Assume the input is valid JSON when copying from json to json types
                 return make_blockref_string_assignment_kernel(
-                    out, offset_out, dst_arrmeta, string_encoding_utf_8,
+                    ckb, ckb_offset, dst_arrmeta, string_encoding_utf_8,
                     src_arrmeta, string_encoding_utf_8, kernreq, ectx);
             }
             case string_type_id:
             case fixedstring_type_id: {
-                offset_out = make_kernreq_to_single_kernel_adapter(
-                    out, offset_out, kernreq);
-                out->ensure_capacity(offset_out +
-                                     sizeof(string_to_json_kernel_extra));
-                string_to_json_kernel_extra *e =
-                    out->get_at<string_to_json_kernel_extra>(offset_out);
-                e->base.set_function<unary_single_operation_t>(
-                    &string_to_json_kernel_extra::single);
-                e->base.destructor = &string_to_json_kernel_extra::destruct;
-                e->dst_arrmeta = dst_arrmeta;
-                e->validate = (ectx->default_errmode != assign_error_none);
+                string_to_json_ck *self =
+                    string_to_json_ck::create(ckb, ckb_offset, kernreq);
+                ckb_offset += sizeof(string_to_json_ck);
+                self->m_dst_arrmeta = dst_arrmeta;
+                self->m_validate = (ectx->errmode != assign_error_none);
                 if (src_tp.get_type_id() == string_type_id) {
                     return make_blockref_string_assignment_kernel(
-                        out, offset_out + sizeof(string_to_json_kernel_extra),
-                        dst_arrmeta, string_encoding_utf_8, src_arrmeta,
+                        ckb, ckb_offset, dst_arrmeta, string_encoding_utf_8,
+                        src_arrmeta,
                         src_tp.tcast<base_string_type>()->get_encoding(),
                         kernel_request_single, ectx);
                 } else {
                     return make_fixedstring_to_blockref_string_assignment_kernel(
-                        out, offset_out + sizeof(string_to_json_kernel_extra),
-                        dst_arrmeta, string_encoding_utf_8,
+                        ckb, ckb_offset, dst_arrmeta, string_encoding_utf_8,
                         src_tp.get_data_size(),
                         src_tp.tcast<base_string_type>()->get_encoding(),
                         kernel_request_single, ectx);
@@ -284,11 +276,11 @@ size_t json_type::make_assignment_kernel(
             default: {
                 if (!src_tp.is_builtin()) {
                     return src_tp.extended()->make_assignment_kernel(
-                        out, offset_out, dst_tp, dst_arrmeta, src_tp,
+                        ckb, ckb_offset, dst_tp, dst_arrmeta, src_tp,
                         src_arrmeta, kernreq, ectx);
                 } else {
                     return make_builtin_to_string_assignment_kernel(
-                        out, offset_out, dst_tp, dst_arrmeta,
+                        ckb, ckb_offset, dst_tp, dst_arrmeta,
                         src_tp.get_type_id(), kernreq, ectx);
                 }
             }
@@ -296,16 +288,16 @@ size_t json_type::make_assignment_kernel(
     } else {
         if (dst_tp.is_builtin()) {
             return make_string_to_builtin_assignment_kernel(
-                out, offset_out, dst_tp.get_type_id(), src_tp, src_arrmeta,
+                ckb, ckb_offset, dst_tp.get_type_id(), src_tp, src_arrmeta,
                 kernreq, ectx);
         } else if(dst_tp.get_type_id() == string_type_id) {
             return make_blockref_string_assignment_kernel(
-                out, offset_out, dst_arrmeta,
+                ckb, ckb_offset, dst_arrmeta,
                 dst_tp.tcast<base_string_type>()->get_encoding(), src_arrmeta,
                 string_encoding_utf_8, kernreq, ectx);
         } else if(dst_tp.get_type_id() == fixedstring_type_id) {
             return make_blockref_string_to_fixedstring_assignment_kernel(
-                out, offset_out, dst_tp.get_data_size(),
+                ckb, ckb_offset, dst_tp.get_data_size(),
                 dst_tp.tcast<base_string_type>()->get_encoding(),
                 string_encoding_utf_8, kernreq, ectx);
         } else {

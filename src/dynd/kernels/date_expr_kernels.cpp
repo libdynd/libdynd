@@ -40,14 +40,14 @@ namespace {
         const char *format;
         const string_type_arrmeta *dst_arrmeta;
 
-        static void single_unary(char *dst, const char *src,
-                        ckernel_prefix *extra)
+        static void single_unary(char *dst, const char *const *src,
+                                 ckernel_prefix *extra)
         {
             extra_type *e = reinterpret_cast<extra_type *>(extra);
             const string_type_arrmeta *dst_md = e->dst_arrmeta;
 
             struct tm tm_val;
-            int32_t date = *reinterpret_cast<const int32_t *>(src);
+            int32_t date = **reinterpret_cast<const int32_t *const *>(src);
             // Convert the date to a 'struct tm'
             date_ymd ymd;
             ymd.set_from_days(date);
@@ -84,8 +84,9 @@ namespace {
         }
 
         static void strided_unary(char *dst, intptr_t dst_stride,
-                    const char *src, intptr_t src_stride,
-                    size_t count, ckernel_prefix *extra)
+                                  const char *const *src,
+                                  const intptr_t *src_stride, size_t count,
+                                  ckernel_prefix *extra)
         {
             extra_type *e = reinterpret_cast<extra_type *>(extra);
             size_t format_size = e->format_size;
@@ -99,10 +100,11 @@ namespace {
             disable_invalid_parameter_handler raii;
 #endif
             memory_block_pod_allocator_api *allocator = get_memory_block_pod_allocator_api(dst_md->blockref);
-
-            for (size_t i = 0; i != count; ++i, dst += dst_stride, src += src_stride) {
+            const char *src0 = src[0];
+            intptr_t src0_stride = src_stride[0];
+            for (size_t i = 0; i != count; ++i) {
                 string_type_data *dst_d = reinterpret_cast<string_type_data *>(dst);
-                int32_t date = *reinterpret_cast<const int32_t *>(src);
+                int32_t date = *reinterpret_cast<const int32_t *>(src0);
                 // Convert the date to a 'struct tm'
                 date_ymd ymd;
                 ymd.set_from_days(date);
@@ -129,6 +131,8 @@ namespace {
                         allocator->resize(dst_md->blockref, str_size, &dst_d->begin, &dst_d->end);
                     }
                 }
+                dst += dst_stride;
+                src0 += src0_stride;
             }
         }
     };
@@ -145,11 +149,12 @@ public:
     virtual ~date_strftime_kernel_generator() {
     }
 
-    size_t make_expr_kernel(
-                ckernel_builder *out, size_t offset_out,
-                const ndt::type& dst_tp, const char *dst_arrmeta,
-                size_t src_count, const ndt::type *src_tp, const char *const*src_arrmeta,
-                kernel_request_t kernreq, const eval::eval_context *ectx) const
+    size_t make_expr_kernel(ckernel_builder *out, size_t offset_out,
+                            const ndt::type &dst_tp, const char *dst_arrmeta,
+                            size_t src_count, const ndt::type *src_tp,
+                            const char *const *src_arrmeta,
+                            kernel_request_t kernreq,
+                            const eval::eval_context *ectx) const
     {
         if (src_count != 1) {
             stringstream ss;
@@ -163,11 +168,9 @@ public:
         // call the elementwise dimension handler to handle one dimension,
         // giving 'this' as the next kernel generator to call
         if (require_elwise) {
-            return make_elwise_dimension_expr_kernel(out, offset_out,
-                            dst_tp, dst_arrmeta,
-                            src_count, src_tp, src_arrmeta,
-                            kernreq, ectx,
-                            this);
+            return make_elwise_dimension_expr_kernel(
+                out, offset_out, dst_tp, dst_arrmeta, src_count, src_tp,
+                src_arrmeta, kernreq, ectx, this);
         }
 
         size_t extra_size = sizeof(date_strftime_kernel_extra);
@@ -175,10 +178,10 @@ public:
         date_strftime_kernel_extra *e = out->get_at<date_strftime_kernel_extra>(offset_out);
         switch (kernreq) {
             case kernel_request_single:
-                e->base.set_function<unary_single_operation_t>(&date_strftime_kernel_extra::single_unary);
+                e->base.set_function<expr_single_t>(&date_strftime_kernel_extra::single_unary);
                 break;
             case kernel_request_strided:
-                e->base.set_function<unary_strided_operation_t>(&date_strftime_kernel_extra::strided_unary);
+                e->base.set_function<expr_strided_t>(&date_strftime_kernel_extra::strided_unary);
                 break;
             default: {
                 stringstream ss;
@@ -218,13 +221,13 @@ namespace {
         ckernel_prefix base;
         int32_t year, month, day;
 
-        static void single_unary(char *dst, const char *src,
-                        ckernel_prefix *extra)
+        static void single_unary(char *dst, const char *const *src,
+                                 ckernel_prefix *extra)
         {
             extra_type *e = reinterpret_cast<extra_type *>(extra);
             int32_t year = e->year, month = e->month, day = e->day;
 
-            int32_t date = *reinterpret_cast<const int32_t *>(src);
+            int32_t date = **reinterpret_cast<const int32_t *const *>(src);
             // Convert the date to YMD form
             date_ymd ymd;
             ymd.set_from_days(date);
@@ -273,11 +276,16 @@ namespace {
             *reinterpret_cast<int32_t *>(dst) = ymd.to_days();
         }
         static void strided_unary(char *dst, intptr_t dst_stride,
-                    const char *src, intptr_t src_stride,
-                    size_t count, ckernel_prefix *extra)
+                                  const char *const *src,
+                                  const intptr_t *src_stride, size_t count,
+                                  ckernel_prefix *extra)
         {
-            for (size_t i = 0; i != count; ++i, dst += dst_stride, src += src_stride) {
+            const char *src0 = src[0];
+            intptr_t src0_stride = src_stride[0];
+            for (size_t i = 0; i != count; ++i) {
                 single_unary(dst, src, extra);
+                dst += dst_stride;
+                src0 += src0_stride;
             }
         }
     };
@@ -287,18 +295,19 @@ class date_replace_kernel_generator : public expr_kernel_generator {
     int32_t m_year, m_month, m_day;
 public:
     date_replace_kernel_generator(int32_t year, int32_t month, int32_t day)
-        : expr_kernel_generator(true), m_year(year), m_month(month), m_day(day)
+      : expr_kernel_generator(true), m_year(year), m_month(month), m_day(day)
     {
     }
 
     virtual ~date_replace_kernel_generator() {
     }
 
-    size_t make_expr_kernel(
-                ckernel_builder *out, size_t offset_out,
-                const ndt::type& dst_tp, const char *dst_arrmeta,
-                size_t src_count, const ndt::type *src_tp, const char *const*src_arrmeta,
-                kernel_request_t kernreq, const eval::eval_context *ectx) const
+    size_t make_expr_kernel(ckernel_builder *out, size_t offset_out,
+                            const ndt::type &dst_tp, const char *dst_arrmeta,
+                            size_t src_count, const ndt::type *src_tp,
+                            const char *const *src_arrmeta,
+                            kernel_request_t kernreq,
+                            const eval::eval_context *ectx) const
     {
         if (src_count != 1) {
             stringstream ss;
@@ -324,10 +333,10 @@ public:
         date_replace_kernel_extra *e = out->get_at<date_replace_kernel_extra>(offset_out);
         switch (kernreq) {
             case kernel_request_single:
-                e->base.set_function<unary_single_operation_t>(&date_replace_kernel_extra::single_unary);
+                e->base.set_function<expr_single_t>(&date_replace_kernel_extra::single_unary);
                 break;
             case kernel_request_strided:
-                e->base.set_function<unary_strided_operation_t>(&date_replace_kernel_extra::strided_unary);
+                e->base.set_function<expr_strided_t>(&date_replace_kernel_extra::strided_unary);
                 break;
             default: {
                 stringstream ss;

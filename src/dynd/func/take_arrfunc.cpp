@@ -24,8 +24,8 @@ struct masked_take_ck : public kernels::expr_ck<masked_take_ck, 2> {
     inline void single(char *dst, const char * const *src)
     {
         ckernel_prefix *child = get_child_ckernel();
-        unary_strided_operation_t child_fn =
-                     child->get_function<unary_strided_operation_t>();
+        expr_strided_t child_fn =
+                     child->get_function<expr_strided_t>();
         const char *src0 = src[0];
         const char *mask = src[1];
         intptr_t dim_size = m_dim_size, src0_stride = m_src0_stride,
@@ -51,7 +51,7 @@ struct masked_take_ck : public kernels::expr_ck<masked_take_ck, 2> {
             // Copy the run of true
             if (i > i_saved) {
                 intptr_t run_count = i - i_saved;
-                child_fn(dst_ptr, dst_stride, src0, src0_stride, run_count,
+                child_fn(dst_ptr, dst_stride, &src0, &src0_stride, run_count,
                          child);
                 dst_ptr += run_count * dst_stride;
                 src0 += run_count * src0_stride;
@@ -80,8 +80,8 @@ struct indexed_take_ck : public kernels::expr_ck<indexed_take_ck, 2> {
     inline void single(char *dst, const char * const *src)
     {
         ckernel_prefix *child = get_child_ckernel();
-        unary_single_operation_t child_fn =
-                     child->get_function<unary_single_operation_t>();
+        expr_single_t child_fn =
+                     child->get_function<expr_single_t>();
         const char *src0 = src[0];
         const char *index = src[1];
         intptr_t dst_dim_size = m_dst_dim_size, src0_dim_size = m_src0_dim_size,
@@ -92,7 +92,8 @@ struct indexed_take_ck : public kernels::expr_ck<indexed_take_ck, 2> {
             // Handle Python-style negative index, bounds checking
             ix = apply_single_index(ix, src0_dim_size, NULL);
             // Copy one element at a time
-            child_fn(dst, src0 + ix * src0_stride, child);
+            const char *child_src0 = src0 + ix * src0_stride;
+            child_fn(dst, &child_src0, child);
             dst += dst_stride;
             index += index_stride;
         }
@@ -166,7 +167,7 @@ static intptr_t
 instantiate_masked_take(const arrfunc_type_data *DYND_UNUSED(self_data_ptr), dynd::ckernel_builder *ckb,
                         intptr_t ckb_offset, const ndt::type &dst_tp,
                         const char *dst_arrmeta, const ndt::type *src_tp,
-                        const char *const *src_arrmeta, uint32_t kernreq,
+                        const char *const *src_arrmeta, kernel_request_t kernreq,
                         const eval::eval_context *ectx)
 {
     typedef masked_take_ck self_type;
@@ -228,7 +229,7 @@ static intptr_t
 instantiate_indexed_take(const arrfunc_type_data *DYND_UNUSED(self_data_ptr), dynd::ckernel_builder *ckb,
                          intptr_t ckb_offset, const ndt::type &dst_tp,
                          const char *dst_arrmeta, const ndt::type *src_tp,
-                         const char *const *src_arrmeta, uint32_t kernreq,
+                         const char *const *src_arrmeta, kernel_request_t kernreq,
                          const eval::eval_context *ectx)
 {
     typedef indexed_take_ck self_type;
@@ -289,7 +290,7 @@ static intptr_t
 instantiate_take(const arrfunc_type_data *af_self, dynd::ckernel_builder *ckb,
                          intptr_t ckb_offset, const ndt::type &dst_tp,
                          const char *dst_arrmeta, const ndt::type *src_tp,
-                         const char *const *src_arrmeta, uint32_t kernreq,
+                         const char *const *src_arrmeta, kernel_request_t kernreq,
                          const eval::eval_context *ectx)
 {
     ndt::type mask_el_tp = src_tp[1].get_type_at_dimension(NULL, 1);
@@ -320,7 +321,6 @@ void kernels::make_take_arrfunc(arrfunc_type_data *out_af)
     // Create the data for the arrfunc
     out_af->data_ptr = NULL;
     out_af->free_func = NULL;
-    out_af->ckernel_funcproto = expr_operation_funcproto;
     out_af->func_proto = func_proto;
     out_af->resolve_dst_type = &resolve_take_dst_type;
     out_af->resolve_dst_shape = &resolve_take_dst_shape;

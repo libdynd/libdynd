@@ -119,69 +119,78 @@ ndt::type dynd::get_builtin_type_elwise_property_type(
     return ndt::type();
 }
 
-static void get_property_kernel_complex_float32_real(char *dst, const char *src,
-                ckernel_prefix *DYND_UNUSED(extra))
+static void
+get_property_kernel_complex_float32_real(char *dst, const char *const *src,
+                                         ckernel_prefix *DYND_UNUSED(self))
 {
-    *reinterpret_cast<uint32_t *>(dst) = reinterpret_cast<const uint32_t *>(src)[0];
+    *reinterpret_cast<uint32_t *>(dst) =
+        (*reinterpret_cast<const uint32_t *const *>(src))[0];
 }
 
-static void get_property_kernel_complex_float32_imag(char *dst, const char *src,
-                ckernel_prefix *DYND_UNUSED(extra))
+static void
+get_property_kernel_complex_float32_imag(char *dst, const char *const *src,
+                                         ckernel_prefix *DYND_UNUSED(self))
 {
-    *reinterpret_cast<uint32_t *>(dst) = reinterpret_cast<const uint32_t *>(src)[1];
+    *reinterpret_cast<uint32_t *>(dst) =
+        (*reinterpret_cast<const uint32_t *const *>(src))[1];
 }
 
-static void get_property_kernel_complex_float64_real(char *dst, const char *src,
-                ckernel_prefix *DYND_UNUSED(extra))
+static void
+get_property_kernel_complex_float64_real(char *dst, const char *const *src,
+                                         ckernel_prefix *DYND_UNUSED(self))
 {
-    *reinterpret_cast<uint64_t *>(dst) = reinterpret_cast<const uint64_t *>(src)[0];
+    *reinterpret_cast<uint64_t *>(dst) =
+        (*reinterpret_cast<const uint64_t *const *>(src))[0];
 }
 
-static void get_property_kernel_complex_float64_imag(char *dst, const char *src,
-                ckernel_prefix *DYND_UNUSED(extra))
+static void
+get_property_kernel_complex_float64_imag(char *dst, const char *const *src,
+                                         ckernel_prefix *DYND_UNUSED(self))
 {
-    *reinterpret_cast<uint64_t *>(dst) = reinterpret_cast<const uint64_t *>(src)[1];
+    *reinterpret_cast<uint64_t *>(dst) =
+        (*reinterpret_cast<const uint64_t *const *>(src))[1];
 }
 
-static void get_or_set_property_kernel_complex_float32_conj(char *dst, const char *src,
-                ckernel_prefix *DYND_UNUSED(extra))
+static void get_or_set_property_kernel_complex_float32_conj(
+    char *dst, const char *const *src, ckernel_prefix *DYND_UNUSED(self))
 {
-    dynd_complex<float> value = *reinterpret_cast<const dynd_complex<float> *>(src);
-    *reinterpret_cast<dynd_complex<float> *>(dst) = dynd_complex<float>(value.real(), -value.imag());
+    dynd_complex<float> value =
+        **reinterpret_cast<const dynd_complex<float> *const *>(src);
+    *reinterpret_cast<dynd_complex<float> *>(dst) =
+        dynd_complex<float>(value.real(), -value.imag());
 }
 
-static void get_or_set_property_kernel_complex_float64_conj(char *dst, const char *src,
-                ckernel_prefix *DYND_UNUSED(extra))
+static void get_or_set_property_kernel_complex_float64_conj(
+    char *dst, const char *const *src, ckernel_prefix *DYND_UNUSED(self))
 {
-    dynd_complex<double> value = *reinterpret_cast<const dynd_complex<double> *>(src);
-    *reinterpret_cast<dynd_complex<double> *>(dst) = dynd_complex<double>(value.real(), -value.imag());
+    dynd_complex<double> value =
+        **reinterpret_cast<const dynd_complex<double> *const *>(src);
+    *reinterpret_cast<dynd_complex<double> *>(dst) =
+        dynd_complex<double>(value.real(), -value.imag());
 }
 
 size_t dynd::make_builtin_type_elwise_property_getter_kernel(
-                ckernel_builder *out, size_t offset_out,
-                type_id_t builtin_type_id,
-                const char *DYND_UNUSED(dst_arrmeta),
-                const char *DYND_UNUSED(src_arrmeta),
-                size_t src_elwise_property_index,
-                kernel_request_t kernreq,
-                const eval::eval_context *DYND_UNUSED(ectx))
+    ckernel_builder *out, size_t offset_out, type_id_t builtin_type_id,
+    const char *DYND_UNUSED(dst_arrmeta), const char *DYND_UNUSED(src_arrmeta),
+    size_t src_elwise_property_index, kernel_request_t kernreq,
+    const eval::eval_context *DYND_UNUSED(ectx))
 {
-    offset_out = make_kernreq_to_single_kernel_adapter(
-                    out, offset_out, kernreq);
+    offset_out =
+        make_kernreq_to_single_kernel_adapter(out, offset_out, 1, kernreq);
     ckernel_prefix *e = out->get_at<ckernel_prefix>(offset_out);
     switch (builtin_type_id) {
         case complex_float32_type_id:
             switch (src_elwise_property_index) {
                 case 0:
-                    e->set_function<unary_single_operation_t>(
+                    e->set_function<expr_single_t>(
                                     &get_property_kernel_complex_float32_real);
                     return offset_out + sizeof(ckernel_prefix);
                 case 1:
-                    e->set_function<unary_single_operation_t>(
+                    e->set_function<expr_single_t>(
                                     &get_property_kernel_complex_float32_imag);
                     return offset_out + sizeof(ckernel_prefix);
                 case 2:
-                    e->set_function<unary_single_operation_t>(
+                    e->set_function<expr_single_t>(
                                     &get_or_set_property_kernel_complex_float32_conj);
                     return offset_out + sizeof(ckernel_prefix);
                 default:
@@ -191,15 +200,15 @@ size_t dynd::make_builtin_type_elwise_property_getter_kernel(
         case complex_float64_type_id:
             switch (src_elwise_property_index) {
                 case 0:
-                    e->set_function<unary_single_operation_t>(
+                    e->set_function<expr_single_t>(
                                     &get_property_kernel_complex_float64_real);
                     return offset_out + sizeof(ckernel_prefix);
                 case 1:
-                    e->set_function<unary_single_operation_t>(
+                    e->set_function<expr_single_t>(
                                     &get_property_kernel_complex_float64_imag);
                     return offset_out + sizeof(ckernel_prefix);
                 case 2:
-                    e->set_function<unary_single_operation_t>(
+                    e->set_function<expr_single_t>(
                                     &get_or_set_property_kernel_complex_float64_conj);
                     return offset_out + sizeof(ckernel_prefix);
                 default:
@@ -221,14 +230,14 @@ size_t dynd::make_builtin_type_elwise_property_setter_kernel(
                 const char *DYND_UNUSED(src_arrmeta),
                 kernel_request_t kernreq, const eval::eval_context *DYND_UNUSED(ectx))
 {
-    offset_out = make_kernreq_to_single_kernel_adapter(
-                    out, offset_out, kernreq);
+    offset_out =
+        make_kernreq_to_single_kernel_adapter(out, offset_out, 1, kernreq);
     ckernel_prefix *e = out->get_at<ckernel_prefix>(offset_out);
     switch (builtin_type_id) {
         case complex_float32_type_id:
             switch (dst_elwise_property_index) {
                 case 2:
-                    e->set_function<unary_single_operation_t>(
+                    e->set_function<expr_single_t>(
                                     &get_or_set_property_kernel_complex_float32_conj);
                     return offset_out + sizeof(ckernel_prefix);
                 default:
@@ -238,7 +247,7 @@ size_t dynd::make_builtin_type_elwise_property_setter_kernel(
         case complex_float64_type_id:
             switch (dst_elwise_property_index) {
                 case 2:
-                    e->set_function<unary_single_operation_t>(
+                    e->set_function<expr_single_t>(
                                     &get_or_set_property_kernel_complex_float64_conj);
                     return offset_out + sizeof(ckernel_prefix);
                 default:

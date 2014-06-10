@@ -23,25 +23,34 @@ namespace {
     class sorter {
         const char *m_originptr;
         intptr_t m_stride;
-        const binary_single_predicate_t m_less;
-        ckernel_prefix *m_extra;
+        const expr_predicate_t m_less;
+        ckernel_prefix *m_less_self;
     public:
-        sorter(const char *originptr, intptr_t stride,
-                        const binary_single_predicate_t less, ckernel_prefix *extra) :
-            m_originptr(originptr), m_stride(stride), m_less(less), m_extra(extra) {}
+      sorter(const char *originptr, intptr_t stride,
+             const expr_predicate_t less, ckernel_prefix *less_self)
+          : m_originptr(originptr), m_stride(stride), m_less(less),
+            m_less_self(less_self)
+      {
+      }
         bool operator()(intptr_t i, intptr_t j) const {
-            return m_less(m_originptr + i * m_stride, m_originptr + j * m_stride, m_extra) != 0;
+            const char *s[2] = {m_originptr + i * m_stride,
+                                m_originptr + j * m_stride};
+            return m_less(s, m_less_self) != 0;
         }
     };
 
     class cmp {
-        const binary_single_predicate_t m_less;
-        ckernel_prefix *m_extra;
+        const expr_predicate_t m_less;
+        ckernel_prefix *m_less_self;
     public:
-        cmp(const binary_single_predicate_t less, ckernel_prefix *extra) :
-            m_less(less), m_extra(extra) {}
-        bool operator()(const char *a, const char *b) const {
-            bool result = m_less(a, b, m_extra) != 0;
+        cmp(const expr_predicate_t less, ckernel_prefix *less_self)
+          : m_less(less), m_less_self(less_self)
+        {
+        }
+        bool operator()(const char *a, const char *b) const
+        {
+            const char *s[2] = {a, b};
+            bool result = m_less(s, m_less_self) != 0;
             return result;
         }
     };
@@ -58,22 +67,28 @@ namespace {
         {
             extra_type *e = reinterpret_cast<extra_type *>(extra);
             ckernel_prefix *echild = &(e + 1)->base;
-            unary_single_operation_t opchild = echild->get_function<unary_single_operation_t>();
+            expr_single_t opchild = echild->get_function<expr_single_t>();
 
             uint32_t value = *reinterpret_cast<const UIntType *>(src);
             const char *src_val = e->src_cat_tp->get_category_data_from_value(value);
-            opchild(dst, src_val, echild);
+            opchild(dst, &src_val, echild);
         }
 
         // Some compilers are finicky about getting single<T> as a function pointer, so this...
-        static void single_uint8(char *dst, const char *src, ckernel_prefix *extra) {
-            single<uint8_t>(dst, src, extra);
+        static void single_uint8(char *dst, const char *const *src,
+                                 ckernel_prefix *extra)
+        {
+            single<uint8_t>(dst, *src, extra);
         }
-        static void single_uint16(char *dst, const char *src, ckernel_prefix *extra) {
-            single<uint16_t>(dst, src, extra);
+        static void single_uint16(char *dst, const char *const *src,
+                                  ckernel_prefix *extra)
+        {
+            single<uint16_t>(dst, *src, extra);
         }
-        static void single_uint32(char *dst, const char *src, ckernel_prefix *extra) {
-            single<uint32_t>(dst, src, extra);
+        static void single_uint32(char *dst, const char *const *src,
+                                  ckernel_prefix *extra)
+        {
+            single<uint32_t>(dst, *src, extra);
         }
 
         static void destruct(ckernel_prefix *self)
@@ -87,35 +102,43 @@ namespace {
     };
 
     struct category_to_categorical_kernel_extra {
-        typedef category_to_categorical_kernel_extra extra_type;
+        typedef category_to_categorical_kernel_extra self_type;
 
         ckernel_prefix base;
         const categorical_type *dst_cat_tp;
         const char *src_arrmeta;
 
         // Assign from an input matching the category type to a categorical type
-        template<typename UIntType>
-        inline static void single(char *dst, const char *src, ckernel_prefix *extra)
+        template <typename UIntType>
+        inline static void single(char *dst, const char *src,
+                                  ckernel_prefix *self)
         {
-            extra_type *e = reinterpret_cast<extra_type *>(extra);
-            uint32_t src_val = e->dst_cat_tp->get_value_from_category(e->src_arrmeta, src);
+            self_type *e = reinterpret_cast<self_type *>(self);
+            uint32_t src_val =
+                e->dst_cat_tp->get_value_from_category(e->src_arrmeta, src);
             *reinterpret_cast<UIntType *>(dst) = src_val;
         }
 
         // Some compilers are finicky about getting single<T> as a function pointer, so this...
-        static void single_uint8(char *dst, const char *src, ckernel_prefix *extra) {
-            single<uint8_t>(dst, src, extra);
+        static void single_uint8(char *dst, const char *const *src,
+                                 ckernel_prefix *self)
+        {
+            single<uint8_t>(dst, *src, self);
         }
-        static void single_uint16(char *dst, const char *src, ckernel_prefix *extra) {
-            single<uint16_t>(dst, src, extra);
+        static void single_uint16(char *dst, const char *const *src,
+                                  ckernel_prefix *self)
+        {
+            single<uint16_t>(dst, *src, self);
         }
-        static void single_uint32(char *dst, const char *src, ckernel_prefix *extra) {
-            single<uint32_t>(dst, src, extra);
+        static void single_uint32(char *dst, const char *const *src,
+                                  ckernel_prefix *self)
+        {
+            single<uint32_t>(dst, *src, self);
         }
 
-        static void destruct(ckernel_prefix *extra)
+        static void destruct(ckernel_prefix *self)
         {
-            extra_type *e = reinterpret_cast<extra_type *>(extra);
+            self_type *e = reinterpret_cast<self_type *>(self);
             if (e->dst_cat_tp != NULL) {
                 base_type_decref(e->dst_cat_tp);
             }
@@ -166,8 +189,9 @@ namespace {
 } // anoymous namespace
 
 /** This function converts the set of char* pointers into a strided immutable nd::array of the categories */
-static nd::array make_sorted_categories(const set<const char *, cmp>& uniques,
-                const ndt::type& element_tp, const char *arrmeta)
+static nd::array make_sorted_categories(const set<const char *, cmp> &uniques,
+                                        const ndt::type &element_tp,
+                                        const char *arrmeta)
 {
     nd::array categories = nd::make_strided_array(uniques.size(), element_tp);
     assignment_ckernel_builder k;
@@ -421,21 +445,21 @@ size_t categorical_type::make_assignment_kernel(
         }
         // assign from the same category value type
         else if (src_tp == m_category_tp) {
-            offset_out = make_kernreq_to_single_kernel_adapter(out, offset_out, kernreq);
+            offset_out = make_kernreq_to_single_kernel_adapter(out, offset_out, 1, kernreq);
             out->ensure_capacity_leaf(offset_out + sizeof(category_to_categorical_kernel_extra));
             category_to_categorical_kernel_extra *e =
                             out->get_at<category_to_categorical_kernel_extra>(offset_out);
             switch (m_storage_type.get_type_id()) {
                 case uint8_type_id:
-                    e->base.set_function<unary_single_operation_t>(
+                    e->base.set_function<expr_single_t>(
                                     &category_to_categorical_kernel_extra::single_uint8);
                     break;
                 case uint16_type_id:
-                    e->base.set_function<unary_single_operation_t>(
+                    e->base.set_function<expr_single_t>(
                                     &category_to_categorical_kernel_extra::single_uint16);
                     break;
                 case uint32_type_id:
-                    e->base.set_function<unary_single_operation_t>(
+                    e->base.set_function<expr_single_t>(
                                     &category_to_categorical_kernel_extra::single_uint32);
                     break;
                 default:
@@ -464,18 +488,18 @@ size_t categorical_type::make_assignment_kernel(
     }
     else {
         if (dst_tp.value_type().get_type_id() != categorical_type_id) {
-            offset_out = make_kernreq_to_single_kernel_adapter(out, offset_out, kernreq);
+            offset_out = make_kernreq_to_single_kernel_adapter(out, offset_out, 1, kernreq);
             out->ensure_capacity(offset_out + sizeof(categorical_to_other_kernel_extra));
             categorical_to_other_kernel_extra *e = out->get_at<categorical_to_other_kernel_extra>(offset_out);
             switch (m_storage_type.get_type_id()) {
                 case uint8_type_id:
-                    e->base.set_function<unary_single_operation_t>(&categorical_to_other_kernel_extra::single_uint8);
+                    e->base.set_function<expr_single_t>(&categorical_to_other_kernel_extra::single_uint8);
                     break;
                 case uint16_type_id:
-                    e->base.set_function<unary_single_operation_t>(&categorical_to_other_kernel_extra::single_uint16);
+                    e->base.set_function<expr_single_t>(&categorical_to_other_kernel_extra::single_uint16);
                     break;
                 case uint32_type_id:
-                    e->base.set_function<unary_single_operation_t>(&categorical_to_other_kernel_extra::single_uint32);
+                    e->base.set_function<expr_single_t>(&categorical_to_other_kernel_extra::single_uint32);
                     break;
                 default:
                     throw runtime_error("internal error in categorical_type::make_assignment_kernel");

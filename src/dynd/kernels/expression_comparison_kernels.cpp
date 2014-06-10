@@ -64,33 +64,38 @@ namespace {
 
             // Get and execute the assignment kernel
             ckernel_prefix *echild;
-            unary_single_operation_t opchild;
+            expr_single_t opchild;
             echild = reinterpret_cast<ckernel_prefix *>(eraw + b.kernel_offset);
-            opchild = echild->get_function<unary_single_operation_t>();
-            opchild(dst, src, echild);
+            opchild = echild->get_function<expr_single_t>();
+            opchild(dst, &src, echild);
 
             // Return the buffer
             return dst;
         }
 
-        static int kernel(const char *src0, const char *src1, ckernel_prefix *extra)
+        static int kernel(const char *const *src, ckernel_prefix *extra)
         {
+            const char *src_buffered[2];
             char *eraw = reinterpret_cast<char *>(extra);
             extra_type *e = reinterpret_cast<extra_type *>(extra);
             // Buffer the first operand if necessary
             if (e->buf[0].kernel_offset != 0) {
-                src0 = e->buffer_operand(e->buf[0], src0);
+                src_buffered[0] = e->buffer_operand(e->buf[0], src[0]);
+            } else {
+                src_buffered[0] = src[0];
             }
             // Buffer the second operand if necessary
             if (e->buf[1].kernel_offset != 0) {
-                src1 = e->buffer_operand(e->buf[1], src1);
+                src_buffered[1] = e->buffer_operand(e->buf[1], src[1]);
+            } else {
+                src_buffered[1] = src[1];
             }
             // Call the comparison kernel
             ckernel_prefix *echild;
-            binary_single_predicate_t opchild;
+            expr_predicate_t opchild;
             echild = reinterpret_cast<ckernel_prefix *>(eraw + e->cmp_kernel_offset);
-            opchild = echild->get_function<binary_single_predicate_t>();
-            int result = opchild(src0, src1, echild);
+            opchild = echild->get_function<expr_predicate_t>();
+            int result = opchild(src_buffered, echild);
 
             // Clear the buffer data if necessary
             if (e->buf[0].arrmeta != NULL) {
@@ -138,7 +143,7 @@ size_t dynd::make_expression_comparison_kernel(
     size_t current_offset = offset_out + sizeof(buffered_kernel_extra);
     out->ensure_capacity(current_offset);
     buffered_kernel_extra *e = out->get_at<buffered_kernel_extra>(offset_out);
-    e->base.set_function<binary_single_predicate_t>(&buffered_kernel_extra::kernel);
+    e->base.set_function<expr_predicate_t>(&buffered_kernel_extra::kernel);
     e->base.destructor = &buffered_kernel_extra::destruct;
     // Initialize the information for buffering the operands
     if (src0_dt.get_kind() == expression_kind) {

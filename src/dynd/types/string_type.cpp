@@ -56,7 +56,7 @@ void string_type::set_from_utf8_string(const char *arrmeta, char *dst,
 {
     const string_type_arrmeta *data_md =
         reinterpret_cast<const string_type_arrmeta *>(arrmeta);
-    assign_error_mode errmode = ectx->default_errmode;
+    assign_error_mode errmode = ectx->errmode;
     const intptr_t src_charsize = 1;
     intptr_t dst_charsize = string_encoding_char_size_table[m_encoding];
     char *dst_begin = NULL, *dst_current, *dst_end = NULL;
@@ -321,23 +321,26 @@ void string_type::make_string_iter(dim_iter *out_di, string_encoding_t encoding,
 
 namespace {
 struct string_is_avail_ck {
-    static void single(char *dst, const char *src,
+    static void single(char *dst, const char *const *src,
                        ckernel_prefix *DYND_UNUSED(self))
     {
         const string_type_data *std =
-            reinterpret_cast<const string_type_data *>(src);
+            *reinterpret_cast<const string_type_data *const *>(src);
         *dst = std->begin != NULL;
     }
 
-    static void strided(char *dst, intptr_t dst_stride, const char *src,
-                        intptr_t src_stride, size_t count,
+    static void strided(char *dst, intptr_t dst_stride, const char *const *src,
+                        const intptr_t *src_stride, size_t count,
                         ckernel_prefix *DYND_UNUSED(self))
     {
-        for (size_t i = 0; i != count;
-                ++i, dst += dst_stride, src += src_stride) {
+        const char *src0 = src[0];
+        intptr_t src0_stride = src_stride[0];
+        for (size_t i = 0; i != count; ++i) {
             const string_type_data *std =
-                reinterpret_cast<const string_type_data *>(src);
+                reinterpret_cast<const string_type_data *>(src0);
             *dst = std->begin != NULL;
+            dst += dst_stride;
+            src0 += src0_stride;
         }
     }
 
@@ -347,7 +350,7 @@ struct string_is_avail_ck {
                                 const char *DYND_UNUSED(dst_arrmeta),
                                 const ndt::type *src_tp,
                                 const char *const *DYND_UNUSED(src_arrmeta),
-                                uint32_t kernreq,
+                                kernel_request_t kernreq,
                                 const eval::eval_context *DYND_UNUSED(ectx))
     {
         if (src_tp[0].get_type_id() != option_type_id ||
@@ -363,7 +366,7 @@ struct string_is_avail_ck {
             throw type_error(ss.str());
         }
         ckernel_prefix *ckp = ckb->get_at<ckernel_prefix>(ckb_offset);
-        ckp->set_unary_function<string_is_avail_ck>((kernel_request_t)kernreq);
+        ckp->set_expr_function<string_is_avail_ck>((kernel_request_t)kernreq);
         return ckb_offset + sizeof(ckernel_prefix);
     }
 };
@@ -402,7 +405,7 @@ struct string_assign_na_ck {
                                 const char *DYND_UNUSED(dst_arrmeta),
                                 const ndt::type *DYND_UNUSED(src_tp),
                                 const char *const *DYND_UNUSED(src_arrmeta),
-                                uint32_t kernreq,
+                                kernel_request_t kernreq,
                                 const eval::eval_context *DYND_UNUSED(ectx))
     {
         if (dst_tp.get_type_id() != option_type_id ||
@@ -429,12 +432,10 @@ nd::array string_type::get_option_nafunc() const
     // Use a typevar instead of option[T] to avoid a circular dependency
     is_avail->func_proto = ndt::make_funcproto(ndt::make_typevar("T"),
                                                ndt::make_type<dynd_bool>());
-    is_avail->ckernel_funcproto = unary_operation_funcproto;
     is_avail->data_ptr = NULL;
     is_avail->instantiate = &string_is_avail_ck::instantiate;
     assign_na->func_proto =
         ndt::make_funcproto(0, NULL, ndt::make_typevar("T"));
-    assign_na->ckernel_funcproto = expr_operation_funcproto;
     assign_na->data_ptr = NULL;
     assign_na->instantiate = &string_assign_na_ck::instantiate;
     naf.flag_as_immutable();

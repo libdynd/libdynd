@@ -59,7 +59,7 @@ void date_type::set_from_utf8_string(const char *DYND_UNUSED(arrmeta), char *dat
 {
     date_ymd ymd;
     ymd.set_from_str(utf8_begin, utf8_end, ectx->date_parse_order,
-                     ectx->century_window, ectx->default_errmode);
+                     ectx->century_window, ectx->errmode);
     *reinterpret_cast<int32_t *>(data) = ymd.to_days();
 }
 
@@ -329,77 +329,77 @@ void date_type::get_dynamic_array_functions(
 ///////// property accessor kernels (used by property_type)
 
 namespace {
-    void get_property_kernel_year_single(char *dst, const char *src,
-                    ckernel_prefix *DYND_UNUSED(extra))
-    {
-        date_ymd ymd;
-        ymd.set_from_days(*reinterpret_cast<const int32_t *>(src));
-        *reinterpret_cast<int32_t *>(dst) = ymd.year;
-    }
+void get_property_kernel_year_single(char *dst, const char *const *src,
+                                     ckernel_prefix *DYND_UNUSED(self))
+{
+    date_ymd ymd;
+    ymd.set_from_days(**reinterpret_cast<const int32_t *const *>(src));
+    *reinterpret_cast<int32_t *>(dst) = ymd.year;
+}
 
-    void get_property_kernel_month_single(char *dst, const char *src,
-                    ckernel_prefix *DYND_UNUSED(extra))
-    {
-        date_ymd ymd;
-        ymd.set_from_days(*reinterpret_cast<const int32_t *>(src));
-        *reinterpret_cast<int32_t *>(dst) = ymd.month;
-    }
+void get_property_kernel_month_single(char *dst, const char *const *src,
+                                      ckernel_prefix *DYND_UNUSED(self))
+{
+    date_ymd ymd;
+    ymd.set_from_days(**reinterpret_cast<const int32_t *const *>(src));
+    *reinterpret_cast<int32_t *>(dst) = ymd.month;
+}
 
-    void get_property_kernel_day_single(char *dst, const char *src,
-                    ckernel_prefix *DYND_UNUSED(extra))
-    {
-        date_ymd ymd;
-        ymd.set_from_days(*reinterpret_cast<const int32_t *>(src));
-        *reinterpret_cast<int32_t *>(dst) = ymd.day;
-    }
+void get_property_kernel_day_single(char *dst, const char *const *src,
+                                    ckernel_prefix *DYND_UNUSED(self))
+{
+    date_ymd ymd;
+    ymd.set_from_days(**reinterpret_cast<const int32_t *const *>(src));
+    *reinterpret_cast<int32_t *>(dst) = ymd.day;
+}
 
-    void get_property_kernel_weekday_single(char *dst, const char *src,
-                    ckernel_prefix *DYND_UNUSED(extra))
-    {
-        int32_t days = *reinterpret_cast<const int32_t *>(src);
-        // 1970-01-05 is Monday
-        int weekday = (int)((days - 4) % 7);
-        if (weekday < 0) {
-            weekday += 7;
-        }
-        *reinterpret_cast<int32_t *>(dst) = weekday;
+void get_property_kernel_weekday_single(char *dst, const char *const *src,
+                                        ckernel_prefix *DYND_UNUSED(self))
+{
+    int32_t days = **reinterpret_cast<const int32_t *const *>(src);
+    // 1970-01-05 is Monday
+    int weekday = (int)((days - 4) % 7);
+    if (weekday < 0) {
+        weekday += 7;
     }
+    *reinterpret_cast<int32_t *>(dst) = weekday;
+}
 
-    void get_property_kernel_days_after_1970_int64_single(char *dst, const char *src,
-                    ckernel_prefix *DYND_UNUSED(extra))
-    {
-        int32_t days = *reinterpret_cast<const int32_t *>(src);
-        if (days == DYND_DATE_NA) {
-            *reinterpret_cast<int64_t *>(dst) = numeric_limits<int64_t>::min();
-        } else {
-            *reinterpret_cast<int64_t *>(dst) = days;
-        }
+void get_property_kernel_days_after_1970_int64_single(
+    char *dst, const char *const *src, ckernel_prefix *DYND_UNUSED(self))
+{
+    int32_t days = **reinterpret_cast<const int32_t *const *>(src);
+    if (days == DYND_DATE_NA) {
+        *reinterpret_cast<int64_t *>(dst) = numeric_limits<int64_t>::min();
+    } else {
+        *reinterpret_cast<int64_t *>(dst) = days;
     }
+}
 
-    void set_property_kernel_days_after_1970_int64_single(char *dst, const char *src,
-                    ckernel_prefix *DYND_UNUSED(extra))
-    {
-        int64_t days = *reinterpret_cast<const int64_t *>(src);
-        if (days == numeric_limits<int64_t>::min()) {
-            *reinterpret_cast<int32_t *>(dst) = DYND_DATE_NA;
-        } else {
-            *reinterpret_cast<int32_t *>(dst) = static_cast<int32_t>(days);
-        }
+void set_property_kernel_days_after_1970_int64_single(
+    char *dst, const char *const *src, ckernel_prefix *DYND_UNUSED(self))
+{
+    int64_t days = **reinterpret_cast<const int64_t *const *>(src);
+    if (days == numeric_limits<int64_t>::min()) {
+        *reinterpret_cast<int32_t *>(dst) = DYND_DATE_NA;
+    } else {
+        *reinterpret_cast<int32_t *>(dst) = static_cast<int32_t>(days);
     }
+}
 
-    void get_property_kernel_struct_single(char *dst, const char *src,
-                    ckernel_prefix *DYND_UNUSED(extra))
-    {
-        date_ymd *dst_struct = reinterpret_cast<date_ymd *>(dst);
-        dst_struct->set_from_days(*reinterpret_cast<const int32_t *>(src));
-    }
+void get_property_kernel_struct_single(char *dst, const char *const *src,
+                                       ckernel_prefix *DYND_UNUSED(self))
+{
+    date_ymd *dst_struct = reinterpret_cast<date_ymd *>(dst);
+    dst_struct->set_from_days(**reinterpret_cast<const int32_t *const *>(src));
+}
 
-    void set_property_kernel_struct_single(char *dst, const char *src,
-                    ckernel_prefix *DYND_UNUSED(extra))
-    {
-        const date_ymd *src_struct = reinterpret_cast<const date_ymd *>(src);
-        *reinterpret_cast<int32_t *>(dst) = src_struct->to_days();
-    }
+void set_property_kernel_struct_single(char *dst, const char *const*src,
+                ckernel_prefix *DYND_UNUSED(self))
+{
+    const date_ymd *src_struct = *reinterpret_cast<const date_ymd *const *>(src);
+    *reinterpret_cast<int32_t *>(dst) = src_struct->to_days();
+}
 } // anonymous namespace
 
 namespace {
@@ -463,31 +463,32 @@ ndt::type date_type::get_elwise_property_type(size_t property_index,
 }
 
 size_t date_type::make_elwise_property_getter_kernel(
-                ckernel_builder *out, size_t offset_out,
-                const char *DYND_UNUSED(dst_arrmeta),
-                const char *DYND_UNUSED(src_arrmeta), size_t src_property_index,
-                kernel_request_t kernreq, const eval::eval_context *DYND_UNUSED(ectx)) const
+    ckernel_builder *out, size_t offset_out,
+    const char *DYND_UNUSED(dst_arrmeta), const char *DYND_UNUSED(src_arrmeta),
+    size_t src_property_index, kernel_request_t kernreq,
+    const eval::eval_context *DYND_UNUSED(ectx)) const
 {
-    offset_out = make_kernreq_to_single_kernel_adapter(out, offset_out, kernreq);
+    offset_out =
+        make_kernreq_to_single_kernel_adapter(out, offset_out, 1, kernreq);
     ckernel_prefix *e = out->get_at<ckernel_prefix>(offset_out);
     switch (src_property_index) {
         case dateprop_year:
-            e->set_function<unary_single_operation_t>(&get_property_kernel_year_single);
+            e->set_function<expr_single_t>(&get_property_kernel_year_single);
             return offset_out + sizeof(ckernel_prefix);
         case dateprop_month:
-            e->set_function<unary_single_operation_t>(&get_property_kernel_month_single);
+            e->set_function<expr_single_t>(&get_property_kernel_month_single);
             return offset_out + sizeof(ckernel_prefix);
         case dateprop_day:
-            e->set_function<unary_single_operation_t>(&get_property_kernel_day_single);
+            e->set_function<expr_single_t>(&get_property_kernel_day_single);
             return offset_out + sizeof(ckernel_prefix);
         case dateprop_weekday:
-            e->set_function<unary_single_operation_t>(&get_property_kernel_weekday_single);
+            e->set_function<expr_single_t>(&get_property_kernel_weekday_single);
             return offset_out + sizeof(ckernel_prefix);
         case dateprop_days_after_1970_int64:
-            e->set_function<unary_single_operation_t>(&get_property_kernel_days_after_1970_int64_single);
+            e->set_function<expr_single_t>(&get_property_kernel_days_after_1970_int64_single);
             return offset_out + sizeof(ckernel_prefix);
         case dateprop_struct:
-            e->set_function<unary_single_operation_t>(&get_property_kernel_struct_single);
+            e->set_function<expr_single_t>(&get_property_kernel_struct_single);
             return offset_out + sizeof(ckernel_prefix);
         default:
             stringstream ss;
@@ -497,19 +498,20 @@ size_t date_type::make_elwise_property_getter_kernel(
 }
 
 size_t date_type::make_elwise_property_setter_kernel(
-                ckernel_builder *out, size_t offset_out,
-                const char *DYND_UNUSED(dst_arrmeta), size_t dst_property_index,
-                const char *DYND_UNUSED(src_arrmeta),
-                kernel_request_t kernreq, const eval::eval_context *DYND_UNUSED(ectx)) const
+    ckernel_builder *out, size_t offset_out,
+    const char *DYND_UNUSED(dst_arrmeta), size_t dst_property_index,
+    const char *DYND_UNUSED(src_arrmeta), kernel_request_t kernreq,
+    const eval::eval_context *DYND_UNUSED(ectx)) const
 {
-    offset_out = make_kernreq_to_single_kernel_adapter(out, offset_out, kernreq);
+    offset_out =
+        make_kernreq_to_single_kernel_adapter(out, offset_out, 1, kernreq);
     ckernel_prefix *e = out->get_at<ckernel_prefix>(offset_out);
     switch (dst_property_index) {
         case dateprop_days_after_1970_int64:
-            e->set_function<unary_single_operation_t>(&set_property_kernel_days_after_1970_int64_single);
+            e->set_function<expr_single_t>(&set_property_kernel_days_after_1970_int64_single);
             return offset_out + sizeof(ckernel_prefix);
         case dateprop_struct:
-            e->set_function<unary_single_operation_t>(&set_property_kernel_struct_single);
+            e->set_function<expr_single_t>(&set_property_kernel_struct_single);
             return offset_out + sizeof(ckernel_prefix);
         default:
             stringstream ss;
@@ -520,21 +522,24 @@ size_t date_type::make_elwise_property_setter_kernel(
 
 namespace {
 struct date_is_avail_ck {
-    static void single(char *dst, const char *src,
+    static void single(char *dst, const char *const *src,
                        ckernel_prefix *DYND_UNUSED(self))
     {
-        int32_t date = *reinterpret_cast<const int32_t *>(src);
+        int32_t date = **reinterpret_cast<const int32_t *const *>(src);
         *dst = date != DYND_DATE_NA;
     }
 
-    static void strided(char *dst, intptr_t dst_stride, const char *src,
-                        intptr_t src_stride, size_t count,
+    static void strided(char *dst, intptr_t dst_stride, const char *const *src,
+                        const intptr_t *src_stride, size_t count,
                         ckernel_prefix *DYND_UNUSED(self))
     {
-        for (size_t i = 0; i != count;
-                ++i, dst += dst_stride, src += src_stride) {
+        const char *src0 = src[0];
+        intptr_t src0_stride = src_stride[0];
+        for (size_t i = 0; i != count; ++i) {
             int32_t date = *reinterpret_cast<const int32_t *>(src);
             *dst = date != DYND_DATE_NA;
+            dst += dst_stride;
+            src0 += src0_stride;
         }
     }
 
@@ -544,7 +549,7 @@ struct date_is_avail_ck {
                                 const char *DYND_UNUSED(dst_arrmeta),
                                 const ndt::type *src_tp,
                                 const char *const *DYND_UNUSED(src_arrmeta),
-                                uint32_t kernreq,
+                                kernel_request_t kernreq,
                                 const eval::eval_context *DYND_UNUSED(ectx))
     {
         if (src_tp[0].get_type_id() != option_type_id ||
@@ -560,7 +565,7 @@ struct date_is_avail_ck {
             throw type_error(ss.str());
         }
         ckernel_prefix *ckp = ckb->get_at<ckernel_prefix>(ckb_offset);
-        ckp->set_unary_function<date_is_avail_ck>((kernel_request_t)kernreq);
+        ckp->set_expr_function<date_is_avail_ck>((kernel_request_t)kernreq);
         return ckb_offset + sizeof(ckernel_prefix);
     }
 };
@@ -588,7 +593,7 @@ struct date_assign_na_ck {
                                 const char *DYND_UNUSED(dst_arrmeta),
                                 const ndt::type *DYND_UNUSED(src_tp),
                                 const char *const *DYND_UNUSED(src_arrmeta),
-                                uint32_t kernreq,
+                                kernel_request_t kernreq,
                                 const eval::eval_context *DYND_UNUSED(ectx))
     {
         if (dst_tp.get_type_id() != option_type_id ||
@@ -615,12 +620,10 @@ nd::array date_type::get_option_nafunc() const
     // Use a typevar instead of option[T] to avoid a circular dependency
     is_avail->func_proto = ndt::make_funcproto(ndt::make_typevar("T"),
                                                ndt::make_type<dynd_bool>());
-    is_avail->ckernel_funcproto = unary_operation_funcproto;
     is_avail->data_ptr = NULL;
     is_avail->instantiate = &date_is_avail_ck::instantiate;
     assign_na->func_proto =
         ndt::make_funcproto(0, NULL, ndt::make_typevar("T"));
-    assign_na->ckernel_funcproto = expr_operation_funcproto;
     assign_na->data_ptr = NULL;
     assign_na->instantiate = &date_assign_na_ck::instantiate;
     naf.flag_as_immutable();
