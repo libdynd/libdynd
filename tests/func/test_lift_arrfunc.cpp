@@ -26,8 +26,7 @@ using namespace dynd;
 TEST(LiftArrFunc, UnaryExpr_FixedDim) {
     // Create an arrfunc for converting string to int
     nd::arrfunc af_base = make_arrfunc_from_assignment(
-        ndt::make_type<int>(), ndt::make_string(),
-        expr_operation_funcproto, assign_error_default);
+        ndt::make_type<int>(), ndt::make_string(), assign_error_default);
     // Lift the arrfunc
     nd::arrfunc af = lift_arrfunc(af_base);
 
@@ -45,8 +44,7 @@ TEST(LiftArrFunc, UnaryExpr_FixedDim) {
 TEST(LiftArrFunc, UnaryExpr_StridedDim) {
     // Create an arrfunc for converting string to int
     nd::arrfunc af_base = make_arrfunc_from_assignment(
-        ndt::make_type<int>(), ndt::make_fixedstring(16),
-        expr_operation_funcproto, assign_error_default);
+        ndt::make_type<int>(), ndt::make_fixedstring(16), assign_error_default);
     // Lift the arrfunc
     nd::arrfunc af = lift_arrfunc(af_base);
 
@@ -66,8 +64,7 @@ TEST(LiftArrFunc, UnaryExpr_StridedDim) {
 TEST(LiftArrFunc, UnaryExpr_VarDim) {
     // Create an arrfunc for converting string to int
     nd::arrfunc af_base = make_arrfunc_from_assignment(
-        ndt::make_type<int>(), ndt::make_fixedstring(16),
-        expr_operation_funcproto, assign_error_default);
+        ndt::make_type<int>(), ndt::make_fixedstring(16), assign_error_default);
     // Lift the arrfunc
     nd::arrfunc af = lift_arrfunc(af_base);
 
@@ -88,8 +85,7 @@ TEST(LiftArrFunc, UnaryExpr_VarDim) {
 TEST(LiftArrFunc, UnaryExpr_StridedToVarDim) {
     // Create an arrfunc for converting string to int
     nd::arrfunc af_base = make_arrfunc_from_assignment(
-                    ndt::make_type<int>(), ndt::make_fixedstring(16),
-                    expr_operation_funcproto, assign_error_default);
+        ndt::make_type<int>(), ndt::make_fixedstring(16), assign_error_default);
 
     // Lift the kernel to particular fixed dim arrays
     arrfunc_type_data af;
@@ -111,7 +107,7 @@ TEST(LiftArrFunc, UnaryExpr_StridedToVarDim) {
     af.instantiate(&af, &ckb, 0, dst_tp,
                         out.get_arrmeta(), &src_tp, src_arrmeta,
                         kernel_request_single, &eval::default_eval_context);
-    expr_single_operation_t usngo = ckb.get()->get_function<expr_single_operation_t>();
+    expr_single_t usngo = ckb.get()->get_function<expr_single_t>();
     usngo(out.get_readwrite_originptr(), &in_ptr, ckb.get());
     EXPECT_EQ(5, out.get_shape()[0]);
     EXPECT_EQ(172, out(0).as<int>());
@@ -124,8 +120,7 @@ TEST(LiftArrFunc, UnaryExpr_StridedToVarDim) {
 TEST(LiftArrFunc, UnaryExpr_VarToVarDim) {
     // Create an arrfunc for converting string to int
     nd::arrfunc af_base = make_arrfunc_from_assignment(
-        ndt::make_type<int>(), ndt::make_fixedstring(16),
-        expr_operation_funcproto, assign_error_default);
+        ndt::make_type<int>(), ndt::make_fixedstring(16), assign_error_default);
 
     // Lift the kernel to particular fixed dim arrays
     arrfunc_type_data af;
@@ -142,7 +137,7 @@ TEST(LiftArrFunc, UnaryExpr_VarToVarDim) {
     af.instantiate(&af, &ckb, 0, out.get_type(),
                         out.get_arrmeta(), &in.get_type(), src_arrmeta,
                         kernel_request_single, &eval::default_eval_context);
-    expr_single_operation_t usngo = ckb.get()->get_function<expr_single_operation_t>();
+    expr_single_t usngo = ckb.get()->get_function<expr_single_t>();
     usngo(out.get_readwrite_originptr(), &in_ptr, ckb.get());
     EXPECT_EQ(5, out.get_shape()[0]);
     EXPECT_EQ(172, out(0).as<int>());
@@ -155,8 +150,7 @@ TEST(LiftArrFunc, UnaryExpr_VarToVarDim) {
 TEST(LiftArrFunc, UnaryExpr_MultiDimVarToVarDim) {
     // Create an arrfunc for converting string to int
     nd::arrfunc af_base = make_arrfunc_from_assignment(
-                    ndt::make_type<int>(), ndt::make_fixedstring(16),
-                    expr_operation_funcproto, assign_error_default);
+        ndt::make_type<int>(), ndt::make_fixedstring(16), assign_error_default);
     // Lift the arrfunc
     nd::arrfunc af = lift_arrfunc(af_base);
 
@@ -193,7 +187,7 @@ TEST(LiftArrFunc, Expr_MultiDimVarToVarDim) {
     ndt::type add_ints_type = (nd::array((int32_t)0) + nd::array((int32_t)0)).get_type();
     nd::arrfunc af_base = make_arrfunc_from_assignment(
         ndt::make_type<int32_t>(), add_ints_type,
-        expr_operation_funcproto, assign_error_default);
+        assign_error_default);
     // Lift the arrfunc
     nd::arrfunc af = lift_arrfunc(af_base);
 

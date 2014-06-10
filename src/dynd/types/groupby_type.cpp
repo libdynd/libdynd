@@ -205,14 +205,15 @@ namespace {
             // Loop through both by_values and data_values,
             // copying the data to the right place in the output
             ckernel_prefix *echild = &(e + 1)->base;
-            unary_single_operation_t opchild = echild->get_function<unary_single_operation_t>();
+            expr_single_t opchild = echild->get_function<expr_single_t>();
             array_iter<0, 1> iter(data_values_tp, data_values_arrmeta, data_values_data, 1);
             if (!iter.empty()) {
                 by_values_ptr = by_values_origin;
                 do {
                     UIntType value = *reinterpret_cast<const UIntType *>(by_values_ptr);
                     char *&cp = cat_pointers[value];
-                    opchild(cp, iter.data(), echild);
+                    const char *data_ptr = iter.data();
+                    opchild(cp, &data_ptr, echild);
                     // Advance the pointer inside the cat_pointers array
                     cp += vad_stride;
                     by_values_ptr += by_values_stride;
@@ -221,14 +222,20 @@ namespace {
         }
 
         // Some compilers are finicky about getting single<T> as a function pointer, so this...
-        static void single_uint8(char *dst, const char *src, ckernel_prefix *extra) {
-            single<uint8_t>(dst, src, extra);
+        static void single_uint8(char *dst, const char *const *src,
+                                 ckernel_prefix *extra)
+        {
+            single<uint8_t>(dst, *src, extra);
         }
-        static void single_uint16(char *dst, const char *src, ckernel_prefix *extra) {
-            single<uint16_t>(dst, src, extra);
+        static void single_uint16(char *dst, const char *const *src,
+                                  ckernel_prefix *extra)
+        {
+            single<uint16_t>(dst, *src, extra);
         }
-        static void single_uint32(char *dst, const char *src, ckernel_prefix *extra) {
-            single<uint32_t>(dst, src, extra);
+        static void single_uint32(char *dst, const char *const *src,
+                                  ckernel_prefix *extra)
+        {
+            single<uint32_t>(dst, *src, extra);
         }
 
         static void destruct(ckernel_prefix *self)
@@ -243,23 +250,24 @@ namespace {
 } // anonymous namespace
 
 size_t groupby_type::make_operand_to_value_assignment_kernel(
-                ckernel_builder *out, size_t offset_out,
-                const char *dst_arrmeta, const char *src_arrmeta,
-                kernel_request_t kernreq, const eval::eval_context *ectx) const
+    ckernel_builder *out, size_t offset_out, const char *dst_arrmeta,
+    const char *src_arrmeta, kernel_request_t kernreq,
+    const eval::eval_context *ectx) const
 {
-    offset_out = make_kernreq_to_single_kernel_adapter(out, offset_out, kernreq);
+    offset_out =
+        make_kernreq_to_single_kernel_adapter(out, offset_out, 1, kernreq);
     out->ensure_capacity(offset_out + sizeof(groupby_to_value_assign_extra));
     groupby_to_value_assign_extra *e = out->get_at<groupby_to_value_assign_extra>(offset_out);
     const categorical_type *cd = m_groups_type.tcast<categorical_type>();
     switch (cd->get_storage_type().get_type_id()) {
         case uint8_type_id:
-            e->base.set_function<unary_single_operation_t>(&groupby_to_value_assign_extra::single_uint8);
+            e->base.set_function<expr_single_t>(&groupby_to_value_assign_extra::single_uint8);
             break;
         case uint16_type_id:
-            e->base.set_function<unary_single_operation_t>(&groupby_to_value_assign_extra::single_uint16);
+            e->base.set_function<expr_single_t>(&groupby_to_value_assign_extra::single_uint16);
             break;
         case uint32_type_id:
-            e->base.set_function<unary_single_operation_t>(&groupby_to_value_assign_extra::single_uint32);
+            e->base.set_function<expr_single_t>(&groupby_to_value_assign_extra::single_uint32);
             break;
         default:
             throw runtime_error("internal error in groupby_type::get_operand_to_value_kernel");

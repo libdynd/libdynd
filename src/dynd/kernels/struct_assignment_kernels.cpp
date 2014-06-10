@@ -29,20 +29,23 @@ namespace {
             size_t src_data_offset;
         };
 
-        static void single(char *dst, const char *src, ckernel_prefix *extra)
+        static void single(char *dst, const char *const *src,
+                           ckernel_prefix *extra)
         {
             char *eraw = reinterpret_cast<char *>(extra);
             extra_type *e = reinterpret_cast<extra_type *>(extra);
             const field_items *fi = reinterpret_cast<const field_items *>(e + 1);
             size_t field_count = e->field_count;
             ckernel_prefix *echild;
-            unary_single_operation_t child_fn;
+            expr_single_t child_fn;
 
             for (size_t i = 0; i < field_count; ++i) {
                 const field_items& item = fi[i];
-                echild  = reinterpret_cast<ckernel_prefix *>(eraw + item.child_kernel_offset);
-                child_fn = echild->get_function<unary_single_operation_t>();
-                child_fn(dst + item.dst_data_offset, src + item.src_data_offset, echild);
+                echild = reinterpret_cast<ckernel_prefix *>(
+                    eraw + item.child_kernel_offset);
+                child_fn = echild->get_function<expr_single_t>();
+                const char *child_src = src[0] + item.src_data_offset;
+                child_fn(dst + item.dst_data_offset, &child_src, echild);
             }
         }
 
@@ -69,17 +72,19 @@ size_t dynd::make_struct_identical_assignment_kernel(
 {
     if (val_struct_tp.get_kind() != struct_kind) {
         stringstream ss;
-        ss << "make_struct_identical_assignment_kernel: provided type " << val_struct_tp << " is not of struct kind";
+        ss << "make_struct_identical_assignment_kernel: provided type "
+           << val_struct_tp << " is not of struct kind";
         throw runtime_error(ss.str());
     }
     if (val_struct_tp.is_pod()) {
         // For POD structs, get a trivial memory copy kernel
-        return make_pod_typed_data_assignment_kernel(ckb, ckb_offset,
-                        val_struct_tp.get_data_size(), val_struct_tp.get_data_alignment(),
-                        kernreq);
+        return make_pod_typed_data_assignment_kernel(
+            ckb, ckb_offset, val_struct_tp.get_data_size(),
+            val_struct_tp.get_data_alignment(), kernreq);
     }
 
-    ckb_offset = make_kernreq_to_single_kernel_adapter(ckb, ckb_offset, kernreq);
+    ckb_offset =
+        make_kernreq_to_single_kernel_adapter(ckb, ckb_offset, 1, kernreq);
 
     const base_struct_type *sd = val_struct_tp.tcast<base_struct_type>();
     size_t field_count = sd->get_field_count();
@@ -88,7 +93,7 @@ size_t dynd::make_struct_identical_assignment_kernel(
                     field_count * sizeof(struct_kernel_extra::field_items);
     ckb->ensure_capacity(ckb_offset + extra_size);
     struct_kernel_extra *e = ckb->get_at<struct_kernel_extra>(ckb_offset);
-    e->base.set_function<unary_single_operation_t>(&struct_kernel_extra::single);
+    e->base.set_function<expr_single_t>(&struct_kernel_extra::single);
     e->base.destructor = &struct_kernel_extra::destruct;
     e->field_count = field_count;
 
@@ -127,12 +132,14 @@ size_t dynd::make_struct_assignment_kernel(
 {
     if (src_struct_tp.get_kind() != struct_kind) {
         stringstream ss;
-        ss << "make_struct_assignment_kernel: provided source type " << src_struct_tp << " is not of struct kind";
+        ss << "make_struct_assignment_kernel: provided source type "
+           << src_struct_tp << " is not of struct kind";
         throw runtime_error(ss.str());
     }
     if (dst_struct_tp.get_kind() != struct_kind) {
         stringstream ss;
-        ss << "make_struct_assignment_kernel: provided destination type " << dst_struct_tp << " is not of struct kind";
+        ss << "make_struct_assignment_kernel: provided destination type "
+           << dst_struct_tp << " is not of struct kind";
         throw runtime_error(ss.str());
     }
     const base_struct_type *dst_sd = dst_struct_tp.tcast<base_struct_type>();
@@ -146,13 +153,13 @@ size_t dynd::make_struct_assignment_kernel(
         throw runtime_error(ss.str());
     }
 
-    ckb_offset = make_kernreq_to_single_kernel_adapter(ckb, ckb_offset, kernreq);
+    ckb_offset = make_kernreq_to_single_kernel_adapter(ckb, ckb_offset, 1, kernreq);
 
     size_t extra_size = sizeof(struct_kernel_extra) +
                     field_count * sizeof(struct_kernel_extra::field_items);
     ckb->ensure_capacity(ckb_offset + extra_size);
     struct_kernel_extra *e = ckb->get_at<struct_kernel_extra>(ckb_offset);
-    e->base.set_function<unary_single_operation_t>(&struct_kernel_extra::single);
+    e->base.set_function<expr_single_t>(&struct_kernel_extra::single);
     e->base.destructor = &struct_kernel_extra::destruct;
     e->field_count = field_count;
 
@@ -210,19 +217,21 @@ size_t dynd::make_broadcast_to_struct_assignment_kernel(
 
     if (dst_struct_tp.get_kind() != struct_kind) {
         stringstream ss;
-        ss << "make_struct_assignment_kernel: provided destination type " << dst_struct_tp << " is not of struct kind";
+        ss << "make_struct_assignment_kernel: provided destination type "
+           << dst_struct_tp << " is not of struct kind";
         throw runtime_error(ss.str());
     }
     const base_struct_type *dst_sd = dst_struct_tp.tcast<base_struct_type>();
     size_t field_count = dst_sd->get_field_count();
 
-    ckb_offset = make_kernreq_to_single_kernel_adapter(ckb, ckb_offset, kernreq);
+    ckb_offset =
+        make_kernreq_to_single_kernel_adapter(ckb, ckb_offset, 1, kernreq);
 
     size_t extra_size = sizeof(struct_kernel_extra) +
                     field_count * sizeof(struct_kernel_extra::field_items);
     ckb->ensure_capacity(ckb_offset + extra_size);
     struct_kernel_extra *e = ckb->get_at<struct_kernel_extra>(ckb_offset);
-    e->base.set_function<unary_single_operation_t>(&struct_kernel_extra::single);
+    e->base.set_function<expr_single_t>(&struct_kernel_extra::single);
     e->base.destructor = &struct_kernel_extra::destruct;
     e->field_count = field_count;
 

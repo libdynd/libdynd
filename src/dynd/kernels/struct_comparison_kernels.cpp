@@ -25,26 +25,31 @@ namespace {
         // After this are field_count sorting_less kernel offsets, for
         // src#.field_i < src#.field_i with each 0 <= i < field_count
 
-        static int sorting_less(const char *src0, const char *src1, ckernel_prefix *extra) {
+        static int sorting_less(const char *const *src, ckernel_prefix *extra)
+        {
             char *eraw = reinterpret_cast<char *>(extra);
             extra_type *e = reinterpret_cast<extra_type *>(extra);
             size_t field_count = e->field_count;
             const size_t *src_data_offsets = e->src_data_offsets;
             const size_t *kernel_offsets = reinterpret_cast<const size_t *>(e + 1);
+            const char *child_src[2];
             for (size_t i = 0; i != field_count; ++i) {
                 ckernel_prefix *sorting_less_kdp =
-                                reinterpret_cast<ckernel_prefix *>(eraw + kernel_offsets[i]);
-                binary_single_predicate_t opchild =
-                                sorting_less_kdp->get_function<binary_single_predicate_t>();
+                    reinterpret_cast<ckernel_prefix *>(eraw +
+                                                       kernel_offsets[i]);
+                expr_predicate_t opchild =
+                    sorting_less_kdp->get_function<expr_predicate_t>();
                 size_t data_offset = src_data_offsets[i];
                 // if (src0.field_i < src1.field_i) return true
-                if (opchild(src0 + data_offset, src1 + data_offset,
-                                sorting_less_kdp)) {
+                child_src[0] = src[0] + data_offset;
+                child_src[1] = src[1] + data_offset;
+                if (opchild(child_src, sorting_less_kdp)) {
                     return true;
                 }
                 // if (src1.field_i < src0.field_i) return false
-                if (opchild(src1 + data_offset, src0 + data_offset,
-                                sorting_less_kdp)) {
+                child_src[0] = src[1] + data_offset;
+                child_src[1] = src[0] + data_offset;
+                if (opchild(child_src, sorting_less_kdp)) {
                     return false;
                 }
             }
@@ -73,31 +78,32 @@ namespace {
         // src0.field_i < src1.field_i and src1.field_i < src0.field_i
         // with each 0 <= i < field_count
 
-        static int sorting_less(const char *src0, const char *src1, ckernel_prefix *extra) {
+        static int sorting_less(const char *const *src, ckernel_prefix *extra) {
             char *eraw = reinterpret_cast<char *>(extra);
             extra_type *e = reinterpret_cast<extra_type *>(extra);
             size_t field_count = e->field_count;
             const size_t *src0_data_offsets = e->src0_data_offsets;
             const size_t *src1_data_offsets = e->src1_data_offsets;
             const size_t *kernel_offsets = reinterpret_cast<const size_t *>(e + 1);
+            const char *child_src[2];
             for (size_t i = 0; i != field_count; ++i) {
                 ckernel_prefix *src0_sorting_less_src1 =
                                 reinterpret_cast<ckernel_prefix *>(eraw + kernel_offsets[2*i]);
-                binary_single_predicate_t opchild =
-                                src0_sorting_less_src1->get_function<binary_single_predicate_t>();
+                expr_predicate_t opchild =
+                                src0_sorting_less_src1->get_function<expr_predicate_t>();
                 // if (src0.field_i < src1.field_i) return true
-                if (opchild(src0 + src0_data_offsets[i],
-                                src1 + src1_data_offsets[i],
-                                src0_sorting_less_src1)) {
+                child_src[0] = src[0] + src0_data_offsets[i];
+                child_src[1] = src[1] + src1_data_offsets[i];
+                if (opchild(child_src, src0_sorting_less_src1)) {
                     return true;
                 }
                 ckernel_prefix *src1_sorting_less_src0 =
                                 reinterpret_cast<ckernel_prefix *>(eraw + kernel_offsets[2*i+1]);
-                opchild = src1_sorting_less_src0->get_function<binary_single_predicate_t>();
+                opchild = src1_sorting_less_src0->get_function<expr_predicate_t>();
                 // if (src1.field_i < src0.field_i) return false
-                if (opchild(src1 + src1_data_offsets[i],
-                                src0 + src0_data_offsets[i],
-                                src1_sorting_less_src0)) {
+                child_src[0] = src[1] + src1_data_offsets[i];
+                child_src[1] = src[0] + src0_data_offsets[i];
+                if (opchild(child_src, src1_sorting_less_src0)) {
                     return false;
                 }
             }
@@ -126,44 +132,46 @@ namespace {
         // src0.field_i <op> src1.field_i
         // with each 0 <= i < field_count
 
-        static int equal(const char *src0, const char *src1, ckernel_prefix *extra) {
+        static int equal(const char *const *src, ckernel_prefix *extra) {
             char *eraw = reinterpret_cast<char *>(extra);
             extra_type *e = reinterpret_cast<extra_type *>(extra);
             size_t field_count = e->field_count;
             const size_t *src0_data_offsets = e->src0_data_offsets;
             const size_t *src1_data_offsets = e->src1_data_offsets;
             const size_t *kernel_offsets = reinterpret_cast<const size_t *>(e + 1);
+            const char *child_src[2];
             for (size_t i = 0; i != field_count; ++i) {
                 ckernel_prefix *echild =
                                 reinterpret_cast<ckernel_prefix *>(eraw + kernel_offsets[i]);
-                binary_single_predicate_t opchild =
-                                echild->get_function<binary_single_predicate_t>();
+                expr_predicate_t opchild =
+                                echild->get_function<expr_predicate_t>();
                 // if (src0.field_i < src1.field_i) return true
-                if (!opchild(src0 + src0_data_offsets[i],
-                                src1 + src1_data_offsets[i],
-                                echild)) {
+                child_src[0] = src[0] + src0_data_offsets[i];
+                child_src[1] = src[1] + src1_data_offsets[i];
+                if (!opchild(child_src, echild)) {
                     return false;
                 }
             }
             return true;
         }
 
-        static int not_equal(const char *src0, const char *src1, ckernel_prefix *extra) {
+        static int not_equal(const char *const *src, ckernel_prefix *extra) {
             char *eraw = reinterpret_cast<char *>(extra);
             extra_type *e = reinterpret_cast<extra_type *>(extra);
             size_t field_count = e->field_count;
             const size_t *src0_data_offsets = e->src0_data_offsets;
             const size_t *src1_data_offsets = e->src1_data_offsets;
             const size_t *kernel_offsets = reinterpret_cast<const size_t *>(e + 1);
+            const char *child_src[2];
             for (size_t i = 0; i != field_count; ++i) {
                 ckernel_prefix *echild =
                                 reinterpret_cast<ckernel_prefix *>(eraw + kernel_offsets[i]);
-                binary_single_predicate_t opchild =
-                                echild->get_function<binary_single_predicate_t>();
+                expr_predicate_t opchild =
+                                echild->get_function<expr_predicate_t>();
                 // if (src0.field_i < src1.field_i) return true
-                if (opchild(src0 + src0_data_offsets[i],
-                                src1 + src1_data_offsets[i],
-                                echild)) {
+                child_src[0] = src[0] + src0_data_offsets[i];
+                child_src[1] = src[1] + src1_data_offsets[i];
+                if (opchild(child_src, echild)) {
                     return true;
                 }
             }
@@ -202,7 +210,7 @@ size_t dynd::make_struct_comparison_kernel(
             out->ensure_capacity(field_kernel_offset);
             struct_compare_sorting_less_matching_arrmeta_kernel *e =
                             out->get_at<struct_compare_sorting_less_matching_arrmeta_kernel>(offset_out);
-            e->base.set_function<binary_single_predicate_t>(
+            e->base.set_function<expr_predicate_t>(
                             &struct_compare_sorting_less_matching_arrmeta_kernel::sorting_less);
             e->base.destructor = &struct_compare_sorting_less_matching_arrmeta_kernel::destruct;
             e->field_count = field_count;
@@ -233,7 +241,7 @@ size_t dynd::make_struct_comparison_kernel(
             out->ensure_capacity(field_kernel_offset);
             struct_compare_sorting_less_diff_arrmeta_kernel *e =
                             out->get_at<struct_compare_sorting_less_diff_arrmeta_kernel>(offset_out);
-            e->base.set_function<binary_single_predicate_t>(
+            e->base.set_function<expr_predicate_t>(
                             &struct_compare_sorting_less_diff_arrmeta_kernel::sorting_less);
             e->base.destructor = &struct_compare_sorting_less_diff_arrmeta_kernel::destruct;
             e->field_count = field_count;
@@ -275,10 +283,10 @@ size_t dynd::make_struct_comparison_kernel(
         struct_compare_equality_kernel *e =
                         out->get_at<struct_compare_equality_kernel>(offset_out);
         if (comptype == comparison_type_equal) {
-            e->base.set_function<binary_single_predicate_t>(
+            e->base.set_function<expr_predicate_t>(
                             &struct_compare_equality_kernel::equal);
         } else {
-            e->base.set_function<binary_single_predicate_t>(
+            e->base.set_function<expr_predicate_t>(
                             &struct_compare_equality_kernel::not_equal);
         }
         e->base.destructor = &struct_compare_equality_kernel::destruct;

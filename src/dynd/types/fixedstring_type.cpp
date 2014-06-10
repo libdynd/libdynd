@@ -90,7 +90,7 @@ void fixedstring_type::set_from_utf8_string(const char *DYND_UNUSED(arrmeta),
                                             const eval::eval_context *ectx)
     const
 {
-    assign_error_mode errmode = ectx->default_errmode;
+    assign_error_mode errmode = ectx->errmode;
     char *dst_end = dst + get_data_size();
     next_unicode_codepoint_t next_fn =
         get_next_unicode_codepoint_function(string_encoding_utf_8, errmode);

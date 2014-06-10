@@ -16,12 +16,6 @@
 
 namespace dynd {
 
-enum arrfunc_proto_t {
-    unary_operation_funcproto,
-    expr_operation_funcproto,
-    binary_predicate_funcproto
-};
-
 struct arrfunc_type_data;
 
 /**
@@ -46,8 +40,8 @@ struct arrfunc_type_data;
  *                match the patterns.
  * \param src_arrmeta  An array of dynd arrmeta pointers,
  *                     corresponding to the source types.
- * \param kernreq  Either dynd::kernel_request_single or dynd::kernel_request_strided,
- *                  as required by the caller.
+ * \param kernreq  What kind of C function prototype the resulting ckernel should
+ *                 follow. Defined by the enum with kernel_request_* values.
  * \param ectx  The evaluation context.
  *
  * \returns  The offset into ``ckb`` immediately after the instantiated ckernel.
@@ -55,7 +49,7 @@ struct arrfunc_type_data;
 typedef intptr_t (*arrfunc_instantiate_t)(
     const arrfunc_type_data *self, dynd::ckernel_builder *ckb,
     intptr_t ckb_offset, const ndt::type &dst_tp, const char *dst_arrmeta,
-    const ndt::type *src_tp, const char *const *src_arrmeta, uint32_t kernreq,
+    const ndt::type *src_tp, const char *const *src_arrmeta, kernel_request_t kernreq,
     const eval::eval_context *ectx);
 
 /**
@@ -111,8 +105,6 @@ typedef void (*arrfunc_resolve_dst_shape_t)(const arrfunc_type_data *self,
 struct arrfunc_type_data {
     /** The function prototype of the arrfunc */
     ndt::type func_proto;
-    /** A value from the enumeration `arrfunc_proto_t`. */
-    size_t ckernel_funcproto;
     /**
      * A pointer to typically heap-allocated memory for
      * the arrfunc. This is the value to be passed
@@ -134,7 +126,7 @@ struct arrfunc_type_data {
 
     // Default to all NULL, so the destructor works correctly
     inline arrfunc_type_data()
-        : func_proto(), ckernel_funcproto(0),
+        : func_proto(),
             data_ptr(0), instantiate(0), free_func(0)
     {
     }
@@ -271,18 +263,16 @@ public:
  */
 void make_arrfunc_from_assignment(const ndt::type &dst_tp,
                                   const ndt::type &src_tp,
-                                  arrfunc_proto_t funcproto,
                                   assign_error_mode errmode,
                                   arrfunc_type_data &out_af);
 
 inline nd::arrfunc make_arrfunc_from_assignment(const ndt::type &dst_tp,
                                                 const ndt::type &src_tp,
-                                                arrfunc_proto_t funcproto,
                                                 assign_error_mode errmode)
 {
     nd::array af = nd::empty(ndt::make_arrfunc());
     make_arrfunc_from_assignment(
-        dst_tp, src_tp, funcproto, errmode,
+        dst_tp, src_tp, errmode,
         *reinterpret_cast<arrfunc_type_data *>(af.get_readwrite_originptr()));
     af.flag_as_immutable();
     return af;
@@ -300,15 +290,14 @@ inline nd::arrfunc make_arrfunc_from_assignment(const ndt::type &dst_tp,
  */
 void make_arrfunc_from_property(const ndt::type &tp,
                                 const std::string &propname,
-                                arrfunc_proto_t funcproto,
                                 arrfunc_type_data &out_af);
 
 inline nd::arrfunc make_arrfunc_from_property(const ndt::type &tp,
-                                              const std::string &propname,
-                                              arrfunc_proto_t funcproto)
+                                              const std::string &propname)
 {
     nd::array af = nd::empty(ndt::make_arrfunc());
-    make_arrfunc_from_property(tp, propname, funcproto,
+    make_arrfunc_from_property(
+        tp, propname,
         *reinterpret_cast<arrfunc_type_data *>(af.get_readwrite_originptr()));
     af.flag_as_immutable();
     return af;

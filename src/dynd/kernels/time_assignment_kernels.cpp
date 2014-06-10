@@ -52,7 +52,7 @@ size_t dynd::make_string_to_time_assignment_kernel(
     self_type *self = self_type::create_leaf(out_ckb, ckb_offset, kernreq);
     self->m_src_string_tp = src_string_tp;
     self->m_src_arrmeta = src_arrmeta;
-    self->m_errmode = ectx->default_errmode;
+    self->m_errmode = ectx->errmode;
     return ckb_offset + sizeof(self_type);
 }
 

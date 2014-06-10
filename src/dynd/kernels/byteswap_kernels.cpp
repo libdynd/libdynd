@@ -13,51 +13,71 @@ using namespace dynd;
 
 namespace {
 
-    template<typename T>
-    struct aligned_fixed_size_byteswap {
-        static void single(char *dst, const char *src,
-                        ckernel_prefix *DYND_UNUSED(extra))
-        {
-            DYND_ASSERT_ALIGNED(dst, 0, sizeof(T), "type: " << ndt::type(dynd::type_id_of<T>::value));
-            DYND_ASSERT_ALIGNED(src, 0, sizeof(T), "type: " << ndt::type(dynd::type_id_of<T>::value));
-            *(T *)dst = byteswap_value(*(T *)src);
+template<typename T>
+struct aligned_fixed_size_byteswap {
+    static void single(char *dst, const char *const *src,
+                       ckernel_prefix *DYND_UNUSED(self))
+    {
+        DYND_ASSERT_ALIGNED(dst, 0, sizeof(T),
+                            "type: " << ndt::type(dynd::type_id_of<T>::value));
+        DYND_ASSERT_ALIGNED(src, 0, sizeof(T),
+                            "type: " << ndt::type(dynd::type_id_of<T>::value));
+        *reinterpret_cast<T *>(dst) =
+            byteswap_value(**reinterpret_cast<const T *const *>(src));
+    }
+    static void strided(char *dst, intptr_t dst_stride, const char *const *src,
+                        const intptr_t *src_stride, size_t count,
+                        ckernel_prefix *DYND_UNUSED(self))
+    {
+        DYND_ASSERT_ALIGNED(dst, dst_stride, sizeof(T),
+                            "type: " << ndt::type(dynd::type_id_of<T>::value));
+        DYND_ASSERT_ALIGNED(src, src_stride, sizeof(T),
+                            "type: " << ndt::type(dynd::type_id_of<T>::value));
+        const char *src0 = src[0];
+        intptr_t src0_stride = src_stride[0];
+        for (size_t i = 0; i != count; ++i) {
+            *reinterpret_cast<T *>(dst) =
+                byteswap_value(*reinterpret_cast<const T *>(src0));
+            dst += dst_stride;
+            src0 += src0_stride;
         }
-        static void strided(char *dst, intptr_t dst_stride,
-                        const char *src, intptr_t src_stride,
-                        size_t count, ckernel_prefix *DYND_UNUSED(extra))
-        {
-            DYND_ASSERT_ALIGNED(dst, dst_stride, sizeof(T), "type: " << ndt::type(dynd::type_id_of<T>::value));
-            DYND_ASSERT_ALIGNED(src, src_stride, sizeof(T), "type: " << ndt::type(dynd::type_id_of<T>::value));
-            for (size_t i = 0; i != count; ++i,
-                            dst += dst_stride, src += src_stride) {
-                *(T *)dst = byteswap_value(*(T *)src);
-            }
-        }
-    };
+    }
+};
 
-    template<typename T>
-    struct aligned_fixed_size_pairwise_byteswap_kernel {
-        static void single(char *dst, const char *src,
-                        ckernel_prefix *DYND_UNUSED(extra))
-        {
-            DYND_ASSERT_ALIGNED(dst, 0, sizeof(T), "type: " << ndt::type(dynd::type_id_of<T>::value));
-            DYND_ASSERT_ALIGNED(src, 0, sizeof(T), "type: " << ndt::type(dynd::type_id_of<T>::value));
-            *(T *)dst = byteswap_value(*(T *)src);
-            *((T *)dst + 1) = byteswap_value(*((T *)src + 1));
+template<typename T>
+struct aligned_fixed_size_pairwise_byteswap_kernel {
+    static void single(char *dst, const char *const *src,
+                       ckernel_prefix *DYND_UNUSED(self))
+    {
+        DYND_ASSERT_ALIGNED(dst, 0, sizeof(T),
+                            "type: " << ndt::type(dynd::type_id_of<T>::value));
+        DYND_ASSERT_ALIGNED(src, 0, sizeof(T),
+                            "type: " << ndt::type(dynd::type_id_of<T>::value));
+        *reinterpret_cast<T *>(dst) =
+            byteswap_value(**reinterpret_cast<const T *const *>(src));
+        *(reinterpret_cast<T *>(dst) + 1) =
+            byteswap_value(*(*reinterpret_cast<const T *const *>(src) + 1));
+    }
+    static void strided(char *dst, intptr_t dst_stride, const char *const *src,
+                        const intptr_t *src_stride, size_t count,
+                        ckernel_prefix *DYND_UNUSED(self))
+    {
+        DYND_ASSERT_ALIGNED(dst, dst_stride, sizeof(T),
+                            "type: " << ndt::type(dynd::type_id_of<T>::value));
+        DYND_ASSERT_ALIGNED(src, src_stride, sizeof(T),
+                            "type: " << ndt::type(dynd::type_id_of<T>::value));
+        const char *src0 = src[0];
+        intptr_t src0_stride = src_stride[0];
+        for (size_t i = 0; i != count; ++i) {
+            *reinterpret_cast<T *>(dst) =
+                byteswap_value(**reinterpret_cast<const T *const *>(src0));
+            *(reinterpret_cast<T *>(dst) + 1) =
+                byteswap_value(*(*reinterpret_cast<const T *const *>(src0) + 1));
+            dst += dst_stride;
+            src0 += src0_stride;
         }
-        static void strided(char *dst, intptr_t dst_stride,
-                        const char *src, intptr_t src_stride,
-                        size_t count, ckernel_prefix *DYND_UNUSED(extra))
-        {
-            DYND_ASSERT_ALIGNED(dst, dst_stride, sizeof(T), "type: " << ndt::type(dynd::type_id_of<T>::value));
-            DYND_ASSERT_ALIGNED(src, src_stride, sizeof(T), "type: " << ndt::type(dynd::type_id_of<T>::value));
-            for (size_t i = 0; i != count; ++i,
-                            dst += dst_stride, src += src_stride) {
-                *(T *)dst = byteswap_value(*(T *)src);
-                *((T *)dst + 1) = byteswap_value(*((T *)src + 1));
-            }
-        }
-    };
+    }
+};
 } // anonymous namespace
 
 namespace {
@@ -121,18 +141,18 @@ size_t dynd::make_byteswap_assignment_function(
         switch (data_size) {
         case 2:
             result = out_ckb->get_at<ckernel_prefix>(ckb_offset);
-            result->set_unary_function<aligned_fixed_size_byteswap<uint16_t> >(
+            result->set_expr_function<aligned_fixed_size_byteswap<uint16_t> >(
                 kernreq);
             return ckb_offset + sizeof(ckernel_prefix);
         case 4:
             result = out_ckb->get_at<ckernel_prefix>(ckb_offset);
-            result->set_unary_function<aligned_fixed_size_byteswap<uint32_t> >(
+            result->set_expr_function<aligned_fixed_size_byteswap<uint32_t> >(
                 kernreq);
             return ckb_offset + sizeof(ckernel_prefix);
             break;
         case 8:
             result = out_ckb->get_at<ckernel_prefix>(ckb_offset);
-            result->set_unary_function<aligned_fixed_size_byteswap<uint64_t> >(
+            result->set_expr_function<aligned_fixed_size_byteswap<uint64_t> >(
                 kernreq);
             return ckb_offset + sizeof(ckernel_prefix);
             break;
@@ -158,19 +178,19 @@ size_t dynd::make_pairwise_byteswap_assignment_function(
         switch (data_size) {
         case 4:
             result = out_ckb->get_at<ckernel_prefix>(ckb_offset);
-            result->set_unary_function<
+            result->set_expr_function<
                 aligned_fixed_size_pairwise_byteswap_kernel<uint16_t> >(
                 kernreq);
             return ckb_offset + sizeof(ckernel_prefix);
         case 8:
             result = out_ckb->get_at<ckernel_prefix>(ckb_offset);
-            result->set_unary_function<
+            result->set_expr_function<
                 aligned_fixed_size_pairwise_byteswap_kernel<uint32_t> >(
                 kernreq);
             return ckb_offset + sizeof(ckernel_prefix);
         case 16:
             result = out_ckb->get_at<ckernel_prefix>(ckb_offset);
-            result->set_unary_function<
+            result->set_expr_function<
                 aligned_fixed_size_pairwise_byteswap_kernel<uint64_t> >(
                 kernreq);
             return ckb_offset + sizeof(ckernel_prefix);

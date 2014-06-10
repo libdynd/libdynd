@@ -27,11 +27,11 @@ namespace kernels {
         {
             switch (kernreq) {
             case kernel_request_single:
-                this->base.template set_function<expr_single_operation_t>(
+                this->base.template set_function<expr_single_t>(
                     &self_type::single_wrapper);
                 break;
             case kernel_request_strided:
-                this->base.template set_function<expr_strided_operation_t>(
+                this->base.template set_function<expr_strided_t>(
                     &self_type::strided_wrapper);
                 break;
             default: {

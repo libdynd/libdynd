@@ -53,7 +53,7 @@ size_t dynd::make_string_to_date_assignment_kernel(
     self_type *self = self_type::create_leaf(out_ckb, ckb_offset, kernreq);
     self->m_src_string_tp = src_string_tp;
     self->m_src_arrmeta = src_arrmeta;
-    self->m_errmode = ectx->default_errmode;
+    self->m_errmode = ectx->errmode;
     self->m_date_parse_order = ectx->date_parse_order;
     self->m_century_window = ectx->century_window;
     return ckb_offset + sizeof(self_type);

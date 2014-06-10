@@ -91,13 +91,15 @@ void type_type::data_destruct_strided(const char *DYND_UNUSED(arrmeta), char *da
     }
 }
 
-static void typed_data_assignment_kernel_single(char *dst, const char *src,
-                ckernel_prefix *DYND_UNUSED(extra))
+static void
+typed_data_assignment_kernel_single(char *dst, const char *const *src,
+                                    ckernel_prefix *DYND_UNUSED(self))
 {
     // Free the destination reference
     base_type_xdecref(reinterpret_cast<const type_type_data *>(dst)->tp);
     // Copy the pointer and count the reference
-    const base_type *bd = reinterpret_cast<const type_type_data *>(src)->tp;
+    const base_type *bd =
+        (*reinterpret_cast<const type_type_data *const *>(src))->tp;
     reinterpret_cast<type_type_data *>(dst)->tp = bd;
     base_type_xincref(bd);
 }
@@ -111,10 +113,12 @@ namespace {
         const char *src_arrmeta;
         assign_error_mode errmode;
 
-        static void single(char *dst, const char *src, ckernel_prefix *extra)
+        static void single(char *dst, const char *const *src,
+                           ckernel_prefix *extra)
         {
             extra_type *e = reinterpret_cast<extra_type *>(extra);
-            const string& s = e->src_string_dt->get_utf8_string(e->src_arrmeta, src, e->errmode);
+            const string &s = e->src_string_dt->get_utf8_string(
+                e->src_arrmeta, src[0], e->errmode);
             ndt::type(s).swap(reinterpret_cast<type_type_data *>(dst)->tp);
         }
 
@@ -133,10 +137,12 @@ namespace {
         const char *dst_arrmeta;
         eval::eval_context ectx;
 
-        static void single(char *dst, const char *src, ckernel_prefix *extra)
+        static void single(char *dst, const char *const *src,
+                           ckernel_prefix *extra)
         {
             extra_type *e = reinterpret_cast<extra_type *>(extra);
-            const base_type *bd = reinterpret_cast<const type_type_data *>(src)->tp;
+            const base_type *bd =
+                (*reinterpret_cast<const type_type_data *const *>(src))->tp;
             stringstream ss;
             if (is_builtin_type(bd)) {
                 ss << ndt::type(bd, true);
@@ -160,12 +166,13 @@ size_t type_type::make_assignment_kernel(
     const char *dst_arrmeta, const ndt::type &src_tp, const char *src_arrmeta,
     kernel_request_t kernreq, const eval::eval_context *ectx) const
 {
-    offset_out = make_kernreq_to_single_kernel_adapter(out, offset_out, kernreq);
+    offset_out =
+        make_kernreq_to_single_kernel_adapter(out, offset_out, 1, kernreq);
 
     if (this == dst_tp.extended()) {
         if (src_tp.get_type_id() == type_type_id) {
             ckernel_prefix *e = out->get_at<ckernel_prefix>(offset_out);
-            e->set_function<unary_single_operation_t>(
+            e->set_function<expr_single_t>(
                 typed_data_assignment_kernel_single);
             return offset_out + sizeof(ckernel_prefix);
         } else if (src_tp.get_kind() == string_kind) {
@@ -173,13 +180,13 @@ size_t type_type::make_assignment_kernel(
             out->ensure_capacity(offset_out + sizeof(string_to_type_kernel_extra));
             string_to_type_kernel_extra *e =
                 out->get_at<string_to_type_kernel_extra>(offset_out);
-            e->base.set_function<unary_single_operation_t>(
+            e->base.set_function<expr_single_t>(
                 &string_to_type_kernel_extra::single);
             e->base.destructor = &string_to_type_kernel_extra::destruct;
             // The kernel data owns a reference to this type
             e->src_string_dt = static_cast<const base_string_type *>(ndt::type(src_tp).release());
             e->src_arrmeta = src_arrmeta;
-            e->errmode = ectx->default_errmode;
+            e->errmode = ectx->errmode;
             return offset_out + sizeof(string_to_type_kernel_extra);
         } else if (!src_tp.is_builtin()) {
             return src_tp.extended()->make_assignment_kernel(
@@ -191,7 +198,7 @@ size_t type_type::make_assignment_kernel(
             // Type to string
             out->ensure_capacity(offset_out + sizeof(type_to_string_kernel_extra));
             type_to_string_kernel_extra *e = out->get_at<type_to_string_kernel_extra>(offset_out);
-            e->base.set_function<unary_single_operation_t>(&type_to_string_kernel_extra::single);
+            e->base.set_function<expr_single_t>(&type_to_string_kernel_extra::single);
             e->base.destructor = &type_to_string_kernel_extra::destruct;
             // The kernel data owns a reference to this type
             e->dst_string_dt = static_cast<const base_string_type *>(ndt::type(dst_tp).release());
@@ -206,15 +213,19 @@ size_t type_type::make_assignment_kernel(
     throw dynd::type_error(ss.str());
 }
 
-static int equal_comparison(const char *a, const char *b, ckernel_prefix *DYND_UNUSED(extra)) {
-    const ndt::type *da = reinterpret_cast<const ndt::type *>(a);
-    const ndt::type *db = reinterpret_cast<const ndt::type *>(b);
+static int equal_comparison(const char *const *src,
+                            ckernel_prefix *DYND_UNUSED(self))
+{
+    const ndt::type *da = reinterpret_cast<const ndt::type *const *>(src)[0];
+    const ndt::type *db = reinterpret_cast<const ndt::type *const *>(src)[1];
     return *da == *db;
 }
 
-static int not_equal_comparison(const char *a, const char *b, ckernel_prefix *DYND_UNUSED(extra)) {
-    const ndt::type *da = reinterpret_cast<const ndt::type *>(a);
-    const ndt::type *db = reinterpret_cast<const ndt::type *>(b);
+static int not_equal_comparison(const char *const *src,
+                                ckernel_prefix *DYND_UNUSED(self))
+{
+    const ndt::type *da = reinterpret_cast<const ndt::type *const *>(src)[0];
+    const ndt::type *db = reinterpret_cast<const ndt::type *const *>(src)[1];
     return *da != *db;
 }
 
@@ -228,9 +239,9 @@ size_t type_type::make_comparison_kernel(
         if (*this == *src1_dt.extended()) {
             ckernel_prefix *e = out->get_at<ckernel_prefix>(offset_out);
             if (comptype == comparison_type_equal) {
-                e->set_function<binary_single_predicate_t>(equal_comparison);
+                e->set_function<expr_predicate_t>(equal_comparison);
             } else if (comptype == comparison_type_not_equal) {
-                e->set_function<binary_single_predicate_t>(not_equal_comparison);
+                e->set_function<expr_predicate_t>(not_equal_comparison);
             } else {
                 throw not_comparable_error(src0_dt, src1_dt, comptype);
             }

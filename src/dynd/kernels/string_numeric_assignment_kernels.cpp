@@ -130,14 +130,14 @@ static void raise_string_cast_overflow_error(const ndt::type &dst_tp,
     throw overflow_error(ss.str());
 }
 
-static void string_to_bool_single(char *dst, const char *src,
+static void string_to_bool_single(char *dst, const char *const *src,
                                   ckernel_prefix *extra)
 {
     string_to_builtin_kernel_extra *e =
         reinterpret_cast<string_to_builtin_kernel_extra *>(extra);
     // Get the string from the source
     string s =
-        e->src_string_tp->get_utf8_string(e->src_arrmeta, src, e->errmode);
+        e->src_string_tp->get_utf8_string(e->src_arrmeta, src[0], e->errmode);
     trim(s);
     parse::string_to_bool(dst, s.data(), s.data() + s.size(), false, e->errmode);
 }
@@ -174,11 +174,11 @@ template <> struct overflow_check<uint64_t> { inline static bool is_overflow(uin
 }};
 
 namespace { template<typename T> struct string_to_int {
-    static void single(char *dst, const char *src, 
+    static void single(char *dst, const char *const *src, 
                         ckernel_prefix *extra)
     {
         string_to_builtin_kernel_extra *e = reinterpret_cast<string_to_builtin_kernel_extra *>(extra);
-        string s = e->src_string_tp->get_utf8_string(e->src_arrmeta, src, e->errmode);
+        string s = e->src_string_tp->get_utf8_string(e->src_arrmeta, src[0], e->errmode);
         trim(s);
         bool negative = false;
         if (!s.empty() && s[0] == '-') {
@@ -198,12 +198,12 @@ namespace { template<typename T> struct string_to_int {
             if (badparse) {
                 raise_string_cast_error(ndt::make_type<T>(),
                                         ndt::type(e->src_string_tp, true),
-                                        e->src_arrmeta, src);
+                                        e->src_arrmeta, src[0]);
             } else if (overflow ||
                        overflow_check<T>::is_overflow(value, negative)) {
                 raise_string_cast_overflow_error(
                     ndt::make_type<T>(), ndt::type(e->src_string_tp, true),
-                    e->src_arrmeta, src);
+                    e->src_arrmeta, src[0]);
             }
             result = negative ? static_cast<T>(-static_cast<int64_t>(value))
                               : static_cast<T>(value);
@@ -213,11 +213,11 @@ namespace { template<typename T> struct string_to_int {
 };}
 
 namespace { template<typename T> struct string_to_uint {
-    static void single(char *dst, const char *src, 
+    static void single(char *dst, const char *const *src, 
                         ckernel_prefix *extra)
     {
         string_to_builtin_kernel_extra *e = reinterpret_cast<string_to_builtin_kernel_extra *>(extra);
-        string s = e->src_string_tp->get_utf8_string(e->src_arrmeta, src, e->errmode);
+        string s = e->src_string_tp->get_utf8_string(e->src_arrmeta, src[0], e->errmode);
         trim(s);
         bool negative = false;
         if (!s.empty() && s[0] == '-') {
@@ -236,12 +236,12 @@ namespace { template<typename T> struct string_to_uint {
             if (badparse) {
                 raise_string_cast_error(ndt::make_type<T>(),
                                         ndt::type(e->src_string_tp, true),
-                                        e->src_arrmeta, src);
+                                        e->src_arrmeta, src[0]);
             } else if (overflow || (negative && value != 0) ||
                        overflow_check<T>::is_overflow(value)) {
                 raise_string_cast_overflow_error(
                     ndt::make_type<T>(), ndt::type(e->src_string_tp, true),
-                    e->src_arrmeta, src);
+                    e->src_arrmeta, src[0]);
             }
             result = static_cast<T>(value);
         }
@@ -249,11 +249,13 @@ namespace { template<typename T> struct string_to_uint {
     }
 };}
 
-static void string_to_int128_single(char *dst, const char *src,
+static void string_to_int128_single(char *dst, const char *const *src,
                                     ckernel_prefix *extra)
 {
-    string_to_builtin_kernel_extra *e = reinterpret_cast<string_to_builtin_kernel_extra *>(extra);
-    string s = e->src_string_tp->get_utf8_string(e->src_arrmeta, src, e->errmode);
+    string_to_builtin_kernel_extra *e =
+        reinterpret_cast<string_to_builtin_kernel_extra *>(extra);
+    string s =
+        e->src_string_tp->get_utf8_string(e->src_arrmeta, src[0], e->errmode);
     trim(s);
     bool negative = false;
     if (!s.empty() && s[0] == '-') {
@@ -272,12 +274,12 @@ static void string_to_int128_single(char *dst, const char *src,
         if (badparse) {
             raise_string_cast_error(ndt::make_type<dynd_int128>(),
                                     ndt::type(e->src_string_tp, true),
-                                    e->src_arrmeta, src);
+                                    e->src_arrmeta, src[0]);
         } else if (overflow ||
                    overflow_check<dynd_int128>::is_overflow(value, negative)) {
             raise_string_cast_overflow_error(ndt::make_type<dynd_int128>(),
                                              ndt::type(e->src_string_tp, true),
-                                             e->src_arrmeta, src);
+                                             e->src_arrmeta, src[0]);
         }
         result = negative ? -static_cast<dynd_int128>(value)
                           : static_cast<dynd_int128>(value);
@@ -285,11 +287,13 @@ static void string_to_int128_single(char *dst, const char *src,
     *reinterpret_cast<dynd_int128 *>(dst) = result;
 }
 
-static void string_to_uint128_single(char *dst, const char *src,
+static void string_to_uint128_single(char *dst, const char *const *src,
                                      ckernel_prefix *extra)
 {
-    string_to_builtin_kernel_extra *e = reinterpret_cast<string_to_builtin_kernel_extra *>(extra);
-    string s = e->src_string_tp->get_utf8_string(e->src_arrmeta, src, e->errmode);
+    string_to_builtin_kernel_extra *e =
+        reinterpret_cast<string_to_builtin_kernel_extra *>(extra);
+    string s =
+        e->src_string_tp->get_utf8_string(e->src_arrmeta, src[0], e->errmode);
     trim(s);
     bool negative = false;
     if (!s.empty() && s[0] == '-') {
@@ -307,22 +311,24 @@ static void string_to_uint128_single(char *dst, const char *src,
         if (badparse) {
             raise_string_cast_error(ndt::make_type<dynd_int128>(),
                                     ndt::type(e->src_string_tp, true),
-                                    e->src_arrmeta, src);
+                                    e->src_arrmeta, src[0]);
         } else if (overflow || (negative && result != 0)) {
             raise_string_cast_overflow_error(ndt::make_type<dynd_uint128>(),
                                              ndt::type(e->src_string_tp, true),
-                                             e->src_arrmeta, src);
+                                             e->src_arrmeta, src[0]);
         }
     }
     *reinterpret_cast<dynd_uint128 *>(dst) = result;
 }
 
-static void string_to_float32_single(char *dst, const char *src,
-                        ckernel_prefix *extra)
+static void string_to_float32_single(char *dst, const char *const *src,
+                                     ckernel_prefix *extra)
 {
-    string_to_builtin_kernel_extra *e = reinterpret_cast<string_to_builtin_kernel_extra *>(extra);
+    string_to_builtin_kernel_extra *e =
+        reinterpret_cast<string_to_builtin_kernel_extra *>(extra);
     // Get the string from the source
-    string s = e->src_string_tp->get_utf8_string(e->src_arrmeta, src,e->errmode);
+    string s =
+        e->src_string_tp->get_utf8_string(e->src_arrmeta, src[0], e->errmode);
     trim(s);
     double value = parse::checked_string_to_float64(
         s.data(), s.data() + s.size(), e->errmode);
@@ -330,67 +336,74 @@ static void string_to_float32_single(char *dst, const char *src,
     switch (e->errmode) {
         case assign_error_none:
             single_assigner_builtin<float, double, assign_error_none>::assign(
-                            reinterpret_cast<float *>(dst), &value, NULL);
+                reinterpret_cast<float *>(dst), &value);
             break;
         case assign_error_overflow:
-            single_assigner_builtin<float, double, assign_error_overflow>::assign(
-                            reinterpret_cast<float *>(dst), &value, NULL);
+            single_assigner_builtin<float, double, assign_error_overflow>::
+                assign(reinterpret_cast<float *>(dst), &value);
             break;
         case assign_error_fractional:
-            single_assigner_builtin<float, double, assign_error_fractional>::assign(
-                            reinterpret_cast<float *>(dst), &value, NULL);
+            single_assigner_builtin<float, double, assign_error_fractional>::
+                assign(reinterpret_cast<float *>(dst), &value);
             break;
         case assign_error_inexact:
-            single_assigner_builtin<float, double, assign_error_inexact>::assign(
-                            reinterpret_cast<float *>(dst), &value, NULL);
+            single_assigner_builtin<float, double, assign_error_inexact>::
+                assign(reinterpret_cast<float *>(dst), &value);
             break;
         default:
-            single_assigner_builtin<float, double, assign_error_fractional>::assign(
-                            reinterpret_cast<float *>(dst), &value, NULL);
+            single_assigner_builtin<float, double, assign_error_fractional>::
+                assign(reinterpret_cast<float *>(dst), &value);
             break;
     }
 }
 
-static void string_to_float64_single(char *dst, const char *src,
+static void string_to_float64_single(char *dst, const char *const *src,
                         ckernel_prefix *extra)
 {
     string_to_builtin_kernel_extra *e = reinterpret_cast<string_to_builtin_kernel_extra *>(extra);
     // Get the string from the source
-    string s = e->src_string_tp->get_utf8_string(e->src_arrmeta, src, e->errmode);
+    string s =
+        e->src_string_tp->get_utf8_string(e->src_arrmeta, src[0], e->errmode);
     trim(s);
     double value = parse::checked_string_to_float64(
         s.data(), s.data() + s.size(), e->errmode);
     *reinterpret_cast<double *>(dst) = value;
 }
 
-static void string_to_float16_single(char *dst, const char *src,
+static void string_to_float16_single(char *dst, const char *const *src,
                         ckernel_prefix *extra)
 {
-    string_to_builtin_kernel_extra *e = reinterpret_cast<string_to_builtin_kernel_extra *>(extra);
+    string_to_builtin_kernel_extra *e =
+        reinterpret_cast<string_to_builtin_kernel_extra *>(extra);
     double tmp;
     string_to_float64_single(reinterpret_cast<char *>(&tmp), src, extra);
     *reinterpret_cast<dynd_float16 *>(dst) = dynd_float16(tmp, e->errmode);
 }
 
-static void string_to_float128_single(char *DYND_UNUSED(dst), const char *DYND_UNUSED(src),
-                        ckernel_prefix *DYND_UNUSED(extra))
+static void string_to_float128_single(char *DYND_UNUSED(dst),
+                                      const char *const *DYND_UNUSED(src),
+                                      ckernel_prefix *DYND_UNUSED(self))
 {
     throw std::runtime_error("TODO: implement string_to_float128_single");
 }
 
-static void string_to_complex_float32_single(char *DYND_UNUSED(dst), const char *DYND_UNUSED(src),
-                ckernel_prefix *DYND_UNUSED(extra))
+static void
+string_to_complex_float32_single(char *DYND_UNUSED(dst),
+                                 const char *const *DYND_UNUSED(src),
+                                 ckernel_prefix *DYND_UNUSED(self))
 {
     throw std::runtime_error("TODO: implement string_to_complex_float32_single");
 }
 
-static void string_to_complex_float64_single(char *DYND_UNUSED(dst), const char *DYND_UNUSED(src),
-                ckernel_prefix *DYND_UNUSED(extra))
+static void
+string_to_complex_float64_single(char *DYND_UNUSED(dst),
+                                 const char *const *DYND_UNUSED(src),
+                                 ckernel_prefix *DYND_UNUSED(self))
 {
     throw std::runtime_error("TODO: implement string_to_complex_float64_single");
 }
 
-static unary_single_operation_t static_string_to_builtin_kernels[builtin_type_id_count-2] = {
+static expr_single_t static_string_to_builtin_kernels[builtin_type_id_count-2] = {
         &string_to_bool_single,
         &string_to_int<int8_t>::single,
         &string_to_int<int16_t>::single,
@@ -417,29 +430,31 @@ size_t dynd::make_string_to_builtin_assignment_kernel(
 {
     if (src_string_tp.get_kind() != string_kind) {
         stringstream ss;
-        ss << "make_string_to_builtin_assignment_kernel: source type " << src_string_tp << " is not a string type";
+        ss << "make_string_to_builtin_assignment_kernel: source type "
+           << src_string_tp << " is not a string type";
         throw runtime_error(ss.str());
     }
 
     if (dst_type_id >= bool_type_id && dst_type_id <= complex_float64_type_id) {
         offset_out =
-            make_kernreq_to_single_kernel_adapter(out, offset_out, kernreq);
+            make_kernreq_to_single_kernel_adapter(out, offset_out, 1, kernreq);
         out->ensure_capacity_leaf(offset_out +
                                   sizeof(string_to_builtin_kernel_extra));
         string_to_builtin_kernel_extra *e =
             out->get_at<string_to_builtin_kernel_extra>(offset_out);
-        e->base.set_function<unary_single_operation_t>(
+        e->base.set_function<expr_single_t>(
             static_string_to_builtin_kernels[dst_type_id - bool_type_id]);
         e->base.destructor = string_to_builtin_kernel_extra::destruct;
         // The kernel data owns this reference
         e->src_string_tp = static_cast<const base_string_type *>(
             ndt::type(src_string_tp).release());
-        e->errmode = ectx->default_errmode;
+        e->errmode = ectx->errmode;
         e->src_arrmeta = src_arrmeta;
         return offset_out + sizeof(string_to_builtin_kernel_extra);
     } else {
         stringstream ss;
-        ss << "make_string_to_builtin_assignment_kernel: destination type id " << dst_type_id << " is not builtin";
+        ss << "make_string_to_builtin_assignment_kernel: destination type id "
+           << dst_type_id << " is not builtin";
         throw runtime_error(ss.str());
     }
 }
@@ -457,17 +472,18 @@ namespace {
         eval::eval_context ectx;
         const char *dst_arrmeta;
 
-        static void single(char *dst, const char *src,
+        static void single(char *dst, const char *const *src,
                             ckernel_prefix *extra)
         {
             extra_type *e = reinterpret_cast<extra_type *>(extra);
 
             // TODO: There are much faster ways to do this, but it's very generic!
-            //       Also, for floating point values, a printing scheme like Python's,
-            //       where it prints the shortest string that's guaranteed to parse to
-            //       the same float number, would be better.
+            //       Also, for floating point values, a printing scheme like
+            //       Python's, where it prints the shortest string that's
+            //       guaranteed to parse to the same float number, would be
+            //       better.
             stringstream ss;
-            ndt::type(e->src_type_id).print_data(ss, NULL, src);
+            ndt::type(e->src_type_id).print_data(ss, NULL, src[0]);
             e->dst_string_tp->set_from_utf8_string(e->dst_arrmeta, dst, ss.str(), &e->ectx);
         }
 
@@ -493,10 +509,10 @@ size_t dynd::make_builtin_to_string_assignment_kernel(
     }
 
     if (src_type_id >= 0 && src_type_id < builtin_type_id_count) {
-        offset_out = make_kernreq_to_single_kernel_adapter(out, offset_out, kernreq);
+        offset_out = make_kernreq_to_single_kernel_adapter(out, offset_out, 1, kernreq);
         out->ensure_capacity_leaf(offset_out + sizeof(builtin_to_string_kernel_extra));
         builtin_to_string_kernel_extra *e = out->get_at<builtin_to_string_kernel_extra>(offset_out);
-        e->base.set_function<unary_single_operation_t>(builtin_to_string_kernel_extra::single);
+        e->base.set_function<expr_single_t>(builtin_to_string_kernel_extra::single);
         e->base.destructor = builtin_to_string_kernel_extra::destruct;
         // The kernel data owns this reference
         e->dst_string_tp = static_cast<const base_string_type *>(ndt::type(dst_string_tp).release());

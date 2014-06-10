@@ -26,13 +26,15 @@ namespace {
         const bytes_type_arrmeta *dst_arrmeta, *src_arrmeta;
 
         /** Does a single blockref-string copy */
-        static void single(char *dst, const char *src, ckernel_prefix *extra)
+        static void single(char *dst, const char *const *src,
+                           ckernel_prefix *extra)
         {
             extra_type *e = reinterpret_cast<extra_type *>(extra);
             const bytes_type_arrmeta *dst_md = e->dst_arrmeta;
             const bytes_type_arrmeta *src_md = e->src_arrmeta;
             bytes_type_data *dst_d = reinterpret_cast<bytes_type_data *>(dst);
-            const bytes_type_data *src_d = reinterpret_cast<const bytes_type_data *>(src);
+            const bytes_type_data *src_d =
+                *reinterpret_cast<const bytes_type_data *const *>(src);
 
             if (dst_d->begin != NULL) {
                 throw runtime_error("Cannot assign to an already initialized dynd string");
@@ -67,16 +69,16 @@ namespace {
 } // anonymous namespace
 
 size_t dynd::make_blockref_bytes_assignment_kernel(
-                ckernel_builder *out, size_t offset_out,
-                size_t dst_alignment, const char *dst_arrmeta,
-                size_t src_alignment, const char *src_arrmeta,
-                kernel_request_t kernreq, const eval::eval_context *DYND_UNUSED(ectx))
+    ckernel_builder *out, size_t offset_out, size_t dst_alignment,
+    const char *dst_arrmeta, size_t src_alignment, const char *src_arrmeta,
+    kernel_request_t kernreq, const eval::eval_context *DYND_UNUSED(ectx))
 {
     // Adapt the incoming request to a 'single' kernel
-    offset_out = make_kernreq_to_single_kernel_adapter(out, offset_out, kernreq);
+    offset_out =
+        make_kernreq_to_single_kernel_adapter(out, offset_out, 1, kernreq);
     out->ensure_capacity_leaf(offset_out + sizeof(blockref_bytes_kernel_extra));
     blockref_bytes_kernel_extra *e = out->get_at<blockref_bytes_kernel_extra>(offset_out);
-    e->base.set_function<unary_single_operation_t>(&blockref_bytes_kernel_extra::single);
+    e->base.set_function<expr_single_t>(&blockref_bytes_kernel_extra::single);
     e->dst_alignment = dst_alignment;
     e->src_alignment = src_alignment;
     e->dst_arrmeta = reinterpret_cast<const bytes_type_arrmeta *>(dst_arrmeta);
@@ -98,15 +100,16 @@ namespace {
         const bytes_type_arrmeta *dst_arrmeta;
 
         /** Does a single fixed-bytes copy */
-        static void single(char *dst, const char *src, ckernel_prefix *extra)
+        static void single(char *dst, const char *const *src,
+                           ckernel_prefix *extra)
         {
             extra_type *e = reinterpret_cast<extra_type *>(extra);
             const bytes_type_arrmeta *dst_md = e->dst_arrmeta;
             // TODO: With some additional mechanism to track the source memory block, could
             //       avoid copying the bytes data.
             char *dst_begin = NULL, *dst_end = NULL;
-            const char *src_begin = src;
-            const char *src_end = src + e->src_data_size;
+            const char *src_begin = src[0];
+            const char *src_end = src_begin + e->src_data_size;
             bytes_type_data *dst_d = reinterpret_cast<bytes_type_data *>(dst);
 
             if (dst_d->begin != NULL) {
@@ -127,16 +130,16 @@ namespace {
 } // anonymous namespace
 
 size_t dynd::make_fixedbytes_to_blockref_bytes_assignment_kernel(
-                ckernel_builder *out, size_t offset_out,
-                size_t dst_alignment, const char *dst_arrmeta,
-                intptr_t src_data_size, size_t src_alignment,
-                kernel_request_t kernreq, const eval::eval_context *DYND_UNUSED(ectx))
+    ckernel_builder *out, size_t offset_out, size_t dst_alignment,
+    const char *dst_arrmeta, intptr_t src_data_size, size_t src_alignment,
+    kernel_request_t kernreq, const eval::eval_context *DYND_UNUSED(ectx))
 {
     // Adapt the incoming request to a 'single' kernel
-    offset_out = make_kernreq_to_single_kernel_adapter(out, offset_out, kernreq);
+    offset_out =
+        make_kernreq_to_single_kernel_adapter(out, offset_out, 1, kernreq);
     out->ensure_capacity_leaf(offset_out + sizeof(fixedbytes_to_blockref_bytes_kernel_extra));
     fixedbytes_to_blockref_bytes_kernel_extra *e = out->get_at<fixedbytes_to_blockref_bytes_kernel_extra>(offset_out);
-    e->base.set_function<unary_single_operation_t>(&fixedbytes_to_blockref_bytes_kernel_extra::single);
+    e->base.set_function<expr_single_t>(&fixedbytes_to_blockref_bytes_kernel_extra::single);
     e->dst_alignment = dst_alignment;
     e->src_data_size = src_data_size;
     e->src_alignment = src_alignment;

@@ -29,7 +29,7 @@ namespace {
         {
             var_dim_type_data *dst_d = reinterpret_cast<var_dim_type_data *>(dst);
             ckernel_prefix *child = get_child_ckernel();
-            unary_strided_operation_t child_fn = child->get_function<unary_strided_operation_t>();
+            expr_strided_t child_fn = child->get_function<expr_strided_t>();
             if (dst_d->begin == NULL) {
                 if (m_dst_md->offset != 0) {
                     throw runtime_error("Cannot assign to an uninitialized dynd var_dim which has a non-zero offset");
@@ -53,11 +53,13 @@ namespace {
                 }
                 dst_d->size = 1;
                 // Copy a single input to the newly allocated element
-                child_fn(dst_d->begin, 0, src, 0, 1, child);
+                intptr_t zero_stride = 0;
+                child_fn(dst_d->begin, 0, &src, &zero_stride, 1, child);
             } else {
                 // We're broadcasting elements to an already allocated array segment
                 dst = dst_d->begin + m_dst_md->offset;
-                child_fn(dst, m_dst_md->stride, src, 0, dst_d->size, child);
+                intptr_t zero_stride = 0;
+                child_fn(dst, m_dst_md->stride, &src, &zero_stride, dst_d->size, child);
             }
         }
 
@@ -106,7 +108,7 @@ namespace {
             var_dim_type_data *dst_d = reinterpret_cast<var_dim_type_data *>(dst);
             const var_dim_type_data *src_d = reinterpret_cast<const var_dim_type_data *>(src);
             ckernel_prefix *child = get_child_ckernel();
-            unary_strided_operation_t child_fn = child->get_function<unary_strided_operation_t>();
+            expr_strided_t child_fn = child->get_function<expr_strided_t>();
             if (dst_d->begin == NULL) {
                 if (m_dst_md->offset != 0) {
                     throw runtime_error("Cannot assign to an uninitialized dynd var_dim which has a non-zero offset");
@@ -136,7 +138,7 @@ namespace {
                     // Copy to the newly allocated element
                     dst = dst_d->begin;
                     src = src_d->begin + m_src_md->offset;
-                    child_fn(dst, dst_stride, src, src_stride, dim_size, child);
+                    child_fn(dst, dst_stride, &src, &src_stride, dim_size, child);
                 }
             } else {
                 if (src_d->begin == NULL) {
@@ -156,7 +158,7 @@ namespace {
                 // We're copying/broadcasting elements to an already allocated array segment
                 dst = dst_d->begin + m_dst_md->offset;
                 src = src_d->begin + m_src_md->offset;
-                child_fn(dst, dst_stride, src, src_stride, dst_dim_size, child);
+                child_fn(dst, dst_stride, &src, &src_stride, dst_dim_size, child);
             }
         }
 
@@ -217,7 +219,7 @@ namespace {
         {
             var_dim_type_data *dst_d = reinterpret_cast<var_dim_type_data *>(dst);
             ckernel_prefix *child = get_child_ckernel();
-            unary_strided_operation_t child_fn = child->get_function<unary_strided_operation_t>();
+            expr_strided_t child_fn = child->get_function<expr_strided_t>();
             if (dst_d->begin == NULL) {
                 if (m_dst_md->offset != 0) {
                     throw runtime_error("Cannot assign to an uninitialized dynd var_dim which has a non-zero offset");
@@ -244,7 +246,7 @@ namespace {
                 dst_d->size = dim_size;
                 // Copy to the newly allocated element
                 dst = dst_d->begin;
-                child_fn(dst, dst_stride, src, src_stride, dim_size, child);
+                child_fn(dst, dst_stride, &src, &src_stride, dim_size, child);
             } else {
                 intptr_t dst_dim_size = dst_d->size, src_dim_size = m_src_dim_size;
                 intptr_t dst_stride = m_dst_md->stride, src_stride = m_src_stride;
@@ -257,7 +259,7 @@ namespace {
                 }
                 // We're copying/broadcasting elements to an already allocated array segment
                 dst = dst_d->begin + m_dst_md->offset;
-                child_fn(dst, dst_stride, src, src_stride, dst_dim_size, child);
+                child_fn(dst, dst_stride, &src, &src_stride, dst_dim_size, child);
             }
         }
 
@@ -309,7 +311,7 @@ namespace {
         {
             const var_dim_type_data *src_d = reinterpret_cast<const var_dim_type_data *>(src);
             ckernel_prefix *child = get_child_ckernel();
-            unary_strided_operation_t child_fn = child->get_function<unary_strided_operation_t>();
+            expr_strided_t child_fn = child->get_function<expr_strided_t>();
             if (src_d->begin == NULL) {
                 throw runtime_error("Cannot assign an uninitialized dynd var "
                                     "array to a strided one");
@@ -327,7 +329,7 @@ namespace {
             }
             // Copying/broadcasting elements
             src = src_d->begin + m_src_md->offset;
-            child_fn(dst, dst_stride, src, src_stride, dst_dim_size, child);
+            child_fn(dst, dst_stride, &src, &src_stride, dst_dim_size, child);
         }
 
         inline void destruct_children()

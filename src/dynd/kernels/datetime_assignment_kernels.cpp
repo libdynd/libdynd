@@ -58,7 +58,7 @@ size_t dynd::make_string_to_datetime_assignment_kernel(
     self->m_dst_datetime_tp = dst_datetime_tp;
     self->m_src_string_tp = src_string_tp;
     self->m_src_arrmeta = src_arrmeta;
-    self->m_errmode = ectx->default_errmode;
+    self->m_errmode = ectx->errmode;
     self->m_date_parse_order = ectx->date_parse_order;
     self->m_century_window = ectx->century_window;
     return ckb_offset + sizeof(self_type);

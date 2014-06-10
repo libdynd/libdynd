@@ -25,19 +25,19 @@ struct strided_rolling_ck : public kernels::assignment_ck<strided_rolling_ck> {
     {
         ckernel_prefix *nachild = get_child_ckernel();
         ckernel_prefix *wopchild = get_child_ckernel(m_window_op_offset);
-        unary_strided_operation_t nachild_fn =
-                     nachild->get_function<unary_strided_operation_t>();
-        unary_strided_operation_t wopchild_fn =
-                     wopchild->get_function<unary_strided_operation_t>();
+        expr_strided_t nachild_fn =
+                     nachild->get_function<expr_strided_t>();
+        expr_strided_t wopchild_fn =
+                     wopchild->get_function<expr_strided_t>();
         // Fill in NA/NaN at the beginning
         if (m_dim_size > 0) {
-            nachild_fn(dst, m_dst_stride, NULL, 0,
+            nachild_fn(dst, m_dst_stride, NULL, NULL,
                        std::min(m_window_size - 1, m_dim_size), nachild);
         }
         // Use stride trickery to do this as one strided call
         if (m_dim_size >= m_window_size) {
             wopchild_fn(dst + m_dst_stride * (m_window_size - 1), m_dst_stride,
-                        src, m_src_stride, m_dim_size - m_window_size + 1,
+                        &src, &m_src_stride, m_dim_size - m_window_size + 1,
                         wopchild);
         }
     }
@@ -51,7 +51,7 @@ struct strided_rolling_ck : public kernels::assignment_ck<strided_rolling_ck> {
     }
 };
 
-struct var_rolling_ck : public kernels::assignment_ck<strided_rolling_ck> {
+struct var_rolling_ck : public kernels::assignment_ck<var_rolling_ck> {
     intptr_t m_window_size;
     intptr_t m_src_stride, m_src_offset;
     ndt::type m_dst_tp;
@@ -63,10 +63,10 @@ struct var_rolling_ck : public kernels::assignment_ck<strided_rolling_ck> {
         // Get the child ckernels
         ckernel_prefix *nachild = get_child_ckernel();
         ckernel_prefix *wopchild = get_child_ckernel(m_window_op_offset);
-        unary_strided_operation_t nachild_fn =
-                     nachild->get_function<unary_strided_operation_t>();
-        unary_strided_operation_t wopchild_fn =
-                     wopchild->get_function<unary_strided_operation_t>();
+        expr_strided_t nachild_fn =
+                     nachild->get_function<expr_strided_t>();
+        expr_strided_t wopchild_fn =
+                     wopchild->get_function<expr_strided_t>();
         // Get pointers to the src and dst data
         var_dim_type_data *dst_dat = reinterpret_cast<var_dim_type_data *>(dst);
         intptr_t dst_stride =
@@ -81,13 +81,13 @@ struct var_rolling_ck : public kernels::assignment_ck<strided_rolling_ck> {
 
         // Fill in NA/NaN at the beginning
         if (dim_size > 0) {
-            nachild_fn(dst_arr_ptr, dst_stride, NULL, 0,
+            nachild_fn(dst_arr_ptr, dst_stride, NULL, NULL,
                        std::min(m_window_size - 1, dim_size), nachild);
         }
         // Use stride trickery to do this as one strided call
         if (dim_size >= m_window_size) {
             wopchild_fn(dst_arr_ptr + dst_stride * (m_window_size - 1),
-                        dst_stride, src_arr_ptr, m_src_stride,
+                        dst_stride, &src_arr_ptr, &m_src_stride,
                         dim_size - m_window_size + 1, wopchild);
         }
     }
@@ -188,7 +188,7 @@ static intptr_t
 instantiate_strided(const arrfunc_type_data *af_self, dynd::ckernel_builder *ckb,
                     intptr_t ckb_offset, const ndt::type &dst_tp,
                     const char *dst_arrmeta, const ndt::type *src_tp,
-                    const char *const *src_arrmeta, uint32_t kernreq,
+                    const char *const *src_arrmeta, kernel_request_t kernreq,
                     const eval::eval_context *ectx)
 {
     typedef strided_rolling_ck self_type;
@@ -248,19 +248,6 @@ instantiate_strided(const arrfunc_type_data *af_self, dynd::ckernel_builder *ckb
             src_el_arrmeta, NULL);
     }
 
-    // Allow expr ckernels as well as unary via an adapter
-    if (window_af->ckernel_funcproto != unary_operation_funcproto) {
-        if (window_af->ckernel_funcproto == expr_operation_funcproto) {
-            ckb_end = kernels::wrap_expr_as_unary_ckernel(
-                ckb, ckb_end, kernel_request_strided);
-        } else {
-            stringstream ss;
-            ss << "rolling window ckernel: invalid funcproto "
-               << (arrfunc_proto_t)window_af->ckernel_funcproto
-               << " in window_op ckernel";
-            throw runtime_error(ss.str());
-        }
-    }
     const char *src_winop_meta = self->m_src_winop_meta.get();
     return window_af->instantiate(
         window_af, ckb, ckb_end, dst_el_tp, dst_el_arrmeta,
@@ -300,7 +287,6 @@ void dynd::make_rolling_arrfunc(arrfunc_type_data *out_af,
     rolling_arrfunc_data *data = new rolling_arrfunc_data;
     out_af->data_ptr = data;
     out_af->free_func = &free_rolling_arrfunc_data;
-    out_af->ckernel_funcproto = unary_operation_funcproto;
     out_af->func_proto = ndt::make_funcproto(roll_src_tp, roll_dst_tp);
     out_af->resolve_dst_type = &resolve_rolling_dst_type;
     out_af->resolve_dst_shape = &resolve_rolling_dst_shape;

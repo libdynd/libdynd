@@ -8,6 +8,7 @@
 #include <dynd/types/ctuple_type.hpp>
 #include <dynd/types/builtin_type_properties.hpp>
 #include <dynd/shape_tools.hpp>
+#include <dynd/kernels/ckernel_common_functions.hpp>
 
 using namespace std;
 using namespace dynd;
@@ -225,7 +226,7 @@ namespace {
                 src_modified[i] = src[i] + offsets[i];
             }
             ckernel_prefix *echild = &(e + 1)->base;
-            expr_single_operation_t opchild = echild->get_function<expr_single_operation_t>();
+            expr_single_t opchild = echild->get_function<expr_single_t>();
             opchild(dst, src_modified, echild);
         }
 
@@ -256,7 +257,7 @@ namespace {
             ckernel_prefix *echild = reinterpret_cast<ckernel_prefix *>(
                             reinterpret_cast<char *>(extra) + sizeof(extra_type) +
                             src_count * sizeof(size_t));
-            expr_single_operation_t opchild = echild->get_function<expr_single_operation_t>();
+            expr_single_t opchild = echild->get_function<expr_single_t>();
             opchild(dst, src_modified.get(), echild);
         }
 
@@ -279,7 +280,7 @@ static size_t make_expr_type_offset_applier(
             out->ensure_capacity(offset_out + sizeof(expr_type_offset_applier_extra<2>));
             expr_type_offset_applier_extra<2> *e = out->get_at<expr_type_offset_applier_extra<2> >(offset_out);
             memcpy(e->offsets, src_data_offsets, sizeof(e->offsets));
-            e->base.set_function<expr_single_operation_t>(&expr_type_offset_applier_extra<2>::single);
+            e->base.set_function<expr_single_t>(&expr_type_offset_applier_extra<2>::single);
             e->base.destructor = &expr_type_offset_applier_extra<2>::destruct;
             return offset_out + sizeof(expr_type_offset_applier_extra<2>);
         }
@@ -287,7 +288,7 @@ static size_t make_expr_type_offset_applier(
             out->ensure_capacity(offset_out + sizeof(expr_type_offset_applier_extra<3>));
             expr_type_offset_applier_extra<3> *e = out->get_at<expr_type_offset_applier_extra<3> >(offset_out);
             memcpy(e->offsets, src_data_offsets, sizeof(e->offsets));
-            e->base.set_function<expr_single_operation_t>(&expr_type_offset_applier_extra<3>::single);
+            e->base.set_function<expr_single_t>(&expr_type_offset_applier_extra<3>::single);
             e->base.destructor = &expr_type_offset_applier_extra<3>::destruct;
             return offset_out + sizeof(expr_type_offset_applier_extra<3>);
         }
@@ -295,7 +296,7 @@ static size_t make_expr_type_offset_applier(
             out->ensure_capacity(offset_out + sizeof(expr_type_offset_applier_extra<4>));
             expr_type_offset_applier_extra<4> *e = out->get_at<expr_type_offset_applier_extra<4> >(offset_out);
             memcpy(e->offsets, src_data_offsets, sizeof(e->offsets));
-            e->base.set_function<expr_single_operation_t>(&expr_type_offset_applier_extra<4>::single);
+            e->base.set_function<expr_single_t>(&expr_type_offset_applier_extra<4>::single);
             e->base.destructor = &expr_type_offset_applier_extra<4>::destruct;
             return offset_out + sizeof(expr_type_offset_applier_extra<4>);
         }
@@ -307,22 +308,39 @@ static size_t make_expr_type_offset_applier(
             e->src_count = src_count;
             size_t *out_offsets = reinterpret_cast<size_t *>(e + 1);
             memcpy(out_offsets, src_data_offsets, src_count * sizeof(size_t));
-            e->base.set_function<expr_single_operation_t>(&expr_type_offset_applier_general_extra::single);
+            e->base.set_function<expr_single_t>(&expr_type_offset_applier_general_extra::single);
             e->base.destructor = &expr_type_offset_applier_general_extra::destruct;
             return offset_out + extra_size;
         }
-    }
-    
+    }   
+}
+
+static void src_deref_single(char *dst, const char *const *src,
+                             ckernel_prefix *self)
+{
+    ckernel_prefix *child = self->get_child_ckernel(sizeof(ckernel_prefix));
+    expr_single_t child_fn = child->get_function<expr_single_t>();
+    child_fn(dst, reinterpret_cast<const char *const *>(*src), child);
+}
+
+static size_t make_src_deref_ckernel(ckernel_builder *ckb, size_t ckb_offset) {
+    ckb->ensure_capacity(ckb_offset + sizeof(ckernel_prefix));
+    ckernel_prefix *self = ckb->get_at<ckernel_prefix>(ckb_offset);
+    self->set_function<expr_single_t>(&src_deref_single);
+    self->destructor = &kernels::destroy_trivial_parent_ckernel;
+    return ckb_offset + sizeof(ckernel_prefix);
 }
 
 size_t expr_type::make_operand_to_value_assignment_kernel(
-                ckernel_builder *out, size_t offset_out,
+                ckernel_builder *ckb, size_t ckb_offset,
                 const char *dst_arrmeta, const char *src_arrmeta,
                 kernel_request_t kernreq, const eval::eval_context *ectx) const
 {
     const ctuple_type *fsd = m_operand_type.tcast<ctuple_type>();
 
-    offset_out = make_kernreq_to_single_kernel_adapter(out, offset_out, kernreq);
+    ckb_offset =
+        make_kernreq_to_single_kernel_adapter(ckb, ckb_offset, 1, kernreq);
+    ckb_offset = make_src_deref_ckernel(ckb, ckb_offset);
     size_t input_count = fsd->get_field_count();
     const uintptr_t *arrmeta_offsets = fsd->get_arrmeta_offsets_raw();
     shortvector<const char *> src_arrmeta_array(input_count);
@@ -346,10 +364,10 @@ size_t expr_type::make_operand_to_value_assignment_kernel(
     // If there were any non-zero pointer offsets, we need to add a kernel
     // adapter which applies those offsets.
     if (nonzero_offsets) {
-        offset_out = make_expr_type_offset_applier(out, offset_out,
+        ckb_offset = make_expr_type_offset_applier(ckb, ckb_offset,
                         input_count, src_data_offsets.get());
     }
-    return m_kgen->make_expr_kernel(out, offset_out,
+    return m_kgen->make_expr_kernel(ckb, ckb_offset,
                     m_value_type, dst_arrmeta,
                     input_count, &src_dt[0],
                     src_arrmeta_array.get(),

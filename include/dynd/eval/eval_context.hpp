@@ -23,18 +23,18 @@ struct eval_context {
     // to the evaluation context settings, 
 #ifdef DYND_USE_STD_ATOMIC
     // Default error mode for computations
-    std::atomic<assign_error_mode> default_errmode;
+    std::atomic<assign_error_mode> errmode;
     // Default error mode for CUDA device to device computations
-    std::atomic<assign_error_mode> default_cuda_device_errmode;
+    std::atomic<assign_error_mode> cuda_device_errmode;
     // Parse order of ambiguous date strings
     std::atomic<date_parse_order_t> date_parse_order;
     // Century selection for 2 digit years in date strings
     std::atomic<int> century_window;
 #else
     // Default error mode for computations
-    assign_error_mode default_errmode;
+    assign_error_mode errmode;
     // Default error mode for CUDA device to device computations
-    assign_error_mode default_cuda_device_errmode;
+    assign_error_mode cuda_device_errmode;
     // Parse order of ambiguous date strings
     date_parse_order_t date_parse_order;
     // Century selection for 2 digit years in date strings
@@ -42,8 +42,8 @@ struct eval_context {
 #endif
 
     DYND_CONSTEXPR eval_context()
-        : default_errmode(assign_error_fractional),
-          default_cuda_device_errmode(assign_error_none),
+        : errmode(assign_error_fractional),
+          cuda_device_errmode(assign_error_none),
           date_parse_order(date_parse_no_ambig), century_window(70)
     {
     }
@@ -51,16 +51,16 @@ struct eval_context {
 #ifdef DYND_USE_STD_ATOMIC
     // Note: the entire eval_context isn't atomic, just its pieces
     DYND_CONSTEXPR eval_context(const eval_context &rhs)
-        : default_errmode(rhs.default_errmode.load()),
-          default_cuda_device_errmode(rhs.default_cuda_device_errmode.load()),
+        : errmode(rhs.errmode.load()),
+          cuda_device_errmode(rhs.cuda_device_errmode.load()),
           date_parse_order(rhs.date_parse_order.load()),
           century_window(rhs.century_window.load())
     {
     }
 
     eval_context &operator=(const eval_context &rhs) {
-        default_errmode.store(rhs.default_errmode.load());
-        default_cuda_device_errmode.store(rhs.default_cuda_device_errmode.load());
+        errmode.store(rhs.errmode.load());
+        cuda_device_errmode.store(rhs.cuda_device_errmode.load());
         date_parse_order.store(rhs.date_parse_order.load());
         century_window.store(rhs.century_window.load());
         return *this;

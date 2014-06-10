@@ -37,23 +37,15 @@ static void print_arrfunc(std::ostream& o, const arrfunc_type_data *af)
     if (af->instantiate == NULL) {
         o << "<uninitialized arrfunc>";
     } else {
-        if (af->ckernel_funcproto == unary_operation_funcproto) {
-            o << "unary ";
-        } else if (af->ckernel_funcproto == expr_operation_funcproto) {
-            o << "expr ";
-        } else if (af->ckernel_funcproto == binary_predicate_funcproto) {
-            o << "binary_predicate ";
-        } else {
-            o << "<unknown ckernel_funcproto> ";
-        }
-        o << af->func_proto;
+        o << "arrfunc: " << af->func_proto;
     }
 }
 
-void arrfunc_type::print_data(std::ostream& o,
-                const char *DYND_UNUSED(arrmeta), const char *data) const
+void arrfunc_type::print_data(std::ostream &o, const char *DYND_UNUSED(arrmeta),
+                              const char *data) const
 {
-    const arrfunc_type_data *af = reinterpret_cast<const arrfunc_type_data *>(data);
+    const arrfunc_type_data *af =
+        reinterpret_cast<const arrfunc_type_data *>(data);
     print_arrfunc(o, af);
 }
 
@@ -105,55 +97,39 @@ void arrfunc_type::data_destruct_strided(const char *DYND_UNUSED(arrmeta), char 
 }
 
 /////////////////////////////////////////
-// date to string assignment
+// arrfunc to string assignment
 
 namespace {
-    struct arrfunc_to_string_kernel_extra {
-        typedef arrfunc_to_string_kernel_extra extra_type;
+    struct arrfunc_to_string_ck : public kernels::assignment_ck<arrfunc_to_string_ck> {
+        ndt::type m_dst_string_dt;
+        const char *m_dst_arrmeta;
+        eval::eval_context m_ectx;
 
-        ckernel_prefix base;
-        const base_string_type *dst_string_dt;
-        const char *dst_arrmeta;
-        eval::eval_context ectx;
-
-        static void single(char *dst, const char *src, ckernel_prefix *extra)
+        inline void single(char *dst, const char *src)
         {
-            extra_type *e = reinterpret_cast<extra_type *>(extra);
             const arrfunc_type_data *af =
                 reinterpret_cast<const arrfunc_type_data *>(src);
             stringstream ss;
             print_arrfunc(ss, af);
-            e->dst_string_dt->set_from_utf8_string(e->dst_arrmeta, dst, ss.str(), &e->ectx);
-        }
-
-        static void destruct(ckernel_prefix *extra)
-        {
-            extra_type *e = reinterpret_cast<extra_type *>(extra);
-            base_type_xdecref(e->dst_string_dt);
+            m_dst_string_dt.tcast<base_string_type>()->set_from_utf8_string(
+                m_dst_arrmeta, dst, ss.str(), &m_ectx);
         }
     };
 } // anonymous namespace
 
 static intptr_t make_arrfunc_to_string_assignment_kernel(
-    ckernel_builder *out_ckb, size_t ckb_offset, const ndt::type &dst_string_dt,
+    ckernel_builder *ckb, size_t ckb_offset, const ndt::type &dst_string_dt,
     const char *dst_arrmeta, kernel_request_t kernreq,
     const eval::eval_context *ectx)
 {
-    ckb_offset =
-        make_kernreq_to_single_kernel_adapter(out_ckb, ckb_offset, kernreq);
-    intptr_t ckb_end_offset =
-        ckb_offset + sizeof(arrfunc_to_string_kernel_extra);
-    out_ckb->ensure_capacity_leaf(ckb_end_offset);
-    arrfunc_to_string_kernel_extra *e =
-        out_ckb->get_at<arrfunc_to_string_kernel_extra>(ckb_offset);
-    e->base.set_function<unary_single_operation_t>(
-        &arrfunc_to_string_kernel_extra::single);
-    e->base.destructor = &arrfunc_to_string_kernel_extra::destruct;
+    typedef arrfunc_to_string_ck self_type;
+    self_type *self = self_type::create_leaf(ckb, ckb_offset, kernreq);
+    ckb_offset += sizeof(self_type);
     // The kernel data owns a reference to this type
-    e->dst_string_dt = static_cast<const base_string_type *>(ndt::type(dst_string_dt).release());
-    e->dst_arrmeta = dst_arrmeta;
-    e->ectx = *ectx;
-    return ckb_end_offset;
+    self->m_dst_string_dt = dst_string_dt;
+    self->m_dst_arrmeta = dst_arrmeta;
+    self->m_ectx = *ectx;
+    return ckb_offset;
 }
 
 size_t arrfunc_type::make_assignment_kernel(
@@ -206,7 +182,7 @@ void arrfunc_type::get_dynamic_array_properties(
 // (need to add varargs capability to this calling convention)
 static const int max_args = 6;
 
-static array_preamble *function___call__(const array_preamble *params, void *DYND_UNUSED(extra))
+static array_preamble *function___call__(const array_preamble *params, void *DYND_UNUSED(self))
 {
     // TODO: Remove the const_cast
     nd::array par(const_cast<array_preamble *>(params), true);
@@ -254,19 +230,12 @@ static array_preamble *function___call__(const array_preamble *params, void *DYN
                          dynd_arrmeta, kernel_request_single,
                          &eval::default_eval_context);
     // Call the ckernel
-    if (af->ckernel_funcproto == unary_operation_funcproto) {
-        unary_single_operation_t usngo = ckb.get()->get_function<unary_single_operation_t>();
-        usngo(args[0].get_readwrite_originptr(), args[1].get_readonly_originptr(), ckb.get());
-    } else if (af->ckernel_funcproto == expr_operation_funcproto) {
-        expr_single_operation_t usngo = ckb.get()->get_function<expr_single_operation_t>();
-        const char *in_ptrs[max_args];
-        for (int i = 0; i < nargs - 1; ++i) {
-            in_ptrs[i] = args[i+1].get_readonly_originptr();
-        }
-        usngo(args[0].get_readwrite_originptr(), in_ptrs, ckb.get());
-    } else {
-        throw runtime_error("unrecognized arrfunc function prototype");
+    expr_single_t usngo = ckb.get()->get_function<expr_single_t>();
+    const char *in_ptrs[max_args];
+    for (int i = 0; i < nargs - 1; ++i) {
+        in_ptrs[i] = args[i+1].get_readonly_originptr();
     }
+    usngo(args[0].get_readwrite_originptr(), in_ptrs, ckb.get());
     // Return void
     return nd::empty(ndt::make_type<void>()).release();
 }

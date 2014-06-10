@@ -16,28 +16,26 @@ namespace dynd {
 
 struct ckernel_prefix;
 
-/** Typedef for a unary operation on a single element */
-typedef void (*unary_single_operation_t)(char *dst, const char *src,
-                                         ckernel_prefix *self);
-/** Typedef for a unary operation on a strided segment of elements */
-typedef void (*unary_strided_operation_t)(char *dst, intptr_t dst_stride,
-                                          const char *src, intptr_t src_stride,
-                                          size_t count, ckernel_prefix *self);
+typedef void (*expr_single_t)(char *dst, const char *const *src,
+                              ckernel_prefix *self);
+typedef void (*expr_strided_t)(char *dst, intptr_t dst_stride,
+                               const char *const *src,
+                               const intptr_t *src_stride, size_t count,
+                               ckernel_prefix *self);
+typedef int (*expr_predicate_t)(const char *const *src, ckernel_prefix *self);
 
-typedef void (*expr_single_operation_t)(char *dst, const char *const *src,
-                                        ckernel_prefix *extra);
-typedef void (*expr_strided_operation_t)(char *dst, intptr_t dst_stride,
-                                         const char *const *src,
-                                         const intptr_t *src_stride,
-                                         size_t count, ckernel_prefix *extra);
-
-enum kernel_request_t {
-    /** Kernel function unary_single_operation_t or expr_single_operation_t */
-    kernel_request_single,
-    /** Kernel function unary_strided_operation_t or expr_strided_operation_t*/
-    kernel_request_strided,
+/**
+ * Definition for kernel request parameters.
+ */
+enum {
+    /** Kernel function expr_single_t, "(T1, T2, ...) -> R" */
+    kernel_request_single = 0,
+    /** Kernel function expr_strided_t, "(T1, T2, ...) -> R" */
+    kernel_request_strided = 1,
+    /** Kernel function expr_predicate_t, "(T1, T2, ...) -> bool" */
+    kernel_request_predicate = 2,
     /**
-     * Kernel function unary_single_operation_t,
+     * Kernel function expr_single_t,
      * but the data in the kernel at position 'offset_out'
      * is for data that describes the accumulation
      * of multiple strided dimensions that work
@@ -45,7 +43,7 @@ enum kernel_request_t {
      */
 //    kernel_request_single_multistride,
     /**
-     * Kernel function unary_strided_operation_t,
+     * Kernel function expr_strided_t,
      * but the data in the kernel at position 'offset_out'
      * is for data that describes the accumulation
      * of multiple strided dimensions that work
@@ -53,14 +51,13 @@ enum kernel_request_t {
      */
 //    kernel_request_strided_multistride
 };
-
-std::ostream& operator<<(std::ostream& o, kernel_request_t kernreq);
+typedef uint32_t kernel_request_t;
 
 /**
  * This is the struct which begins the memory layout
  * of all ckernels. First comes the function pointer,
  * which has a context-specific prototype, such as
- * `unary_single_operation_t`, and then comes the
+ * `expr_single_t`, and then comes the
  * destructor.
  *
  * The ckernel is defined in terms of a C ABI definition,
@@ -87,7 +84,7 @@ struct ckernel_prefix {
      * Call to get the kernel function pointer, whose type
      * must be known by the context.
      *
-     *      kdp->get_function<unary_single_operation_t>()
+     *      kdp->get_function<expr_single_t>()
      */
     template<typename T>
     inline T get_function() const {
@@ -99,30 +96,9 @@ struct ckernel_prefix {
         function = reinterpret_cast<void *>(fnptr);
     }
 
-    inline void set_unary_function(kernel_request_t kernreq,
-                                   unary_single_operation_t single,
-                                   unary_strided_operation_t strided)
-    {
-        if (kernreq == kernel_request_single) {
-            function = reinterpret_cast<void *>(single);
-        } else if (kernreq == kernel_request_strided) {
-            function = reinterpret_cast<void *>(strided);
-        } else {
-            std::stringstream ss;
-            ss << "unrecognized unary kernel request type " << kernreq;
-            throw std::runtime_error(ss.str());
-        }
-    }
-
-    template<class T>
-    inline void set_unary_function(kernel_request_t kernreq)
-    {
-        set_unary_function(kernreq, &T::single, &T::strided);
-    }
-
     inline void set_expr_function(kernel_request_t kernreq,
-                                  expr_single_operation_t single,
-                                  expr_strided_operation_t strided)
+                                  expr_single_t single,
+                                  expr_strided_t strided)
     {
         if (kernreq == kernel_request_single) {
             function = reinterpret_cast<void *>(single);
@@ -130,7 +106,7 @@ struct ckernel_prefix {
             function = reinterpret_cast<void *>(strided);
         } else {
             std::stringstream ss;
-            ss << "unrecognized expr kernel request type " << kernreq;
+            ss << "unrecognized dynd kernel request " << kernreq;
             throw std::runtime_error(ss.str());
         }
     }

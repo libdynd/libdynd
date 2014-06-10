@@ -10,13 +10,13 @@
 using namespace std;
 using namespace dynd;
 
-
-size_t dynd::make_comparison_kernel(
-                ckernel_builder *out, size_t offset_out,
-                const ndt::type& src0_dt, const char *src0_arrmeta,
-                const ndt::type& src1_dt, const char *src1_arrmeta,
-                comparison_type_t comptype,
-                const eval::eval_context *ectx)
+size_t dynd::make_comparison_kernel(ckernel_builder *out, size_t offset_out,
+                                    const ndt::type &src0_dt,
+                                    const char *src0_arrmeta,
+                                    const ndt::type &src1_dt,
+                                    const char *src1_arrmeta,
+                                    comparison_type_t comptype,
+                                    const eval::eval_context *ectx)
 {
     if (src0_dt.is_builtin()) {
         if (src1_dt.is_builtin()) {
@@ -37,7 +37,7 @@ size_t dynd::make_comparison_kernel(
     }
 }
 
-static binary_single_predicate_t compare_kernel_table[builtin_type_id_count-2][builtin_type_id_count-2][7] =
+static expr_predicate_t compare_kernel_table[builtin_type_id_count-2][builtin_type_id_count-2][7] =
 {
 #define INNER_LEVEL(src0_type, src1_type) { \
                 &single_comparison_builtin<src0_type, src1_type>::sorting_less, \
@@ -100,7 +100,7 @@ size_t dynd::make_builtin_type_comparison_kernel(
                     comptype >= 0 && comptype <= comparison_type_greater) {
         // No need to reserve more space, the space for a leaf is already there
         ckernel_prefix *result = out->get_at<ckernel_prefix>(offset_out);
-        result->set_function<binary_single_predicate_t>(
+        result->set_function<expr_predicate_t>(
                         compare_kernel_table[src0_type_id-bool_type_id]
                                         [src1_type_id-bool_type_id][comptype]);
         return offset_out + sizeof(ckernel_prefix);

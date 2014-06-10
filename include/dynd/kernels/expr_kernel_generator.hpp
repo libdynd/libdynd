@@ -21,8 +21,8 @@ namespace ndt {
 class expr_kernel_generator;
 
 struct expr_operation_pair {
-    expr_single_operation_t single;
-    expr_strided_operation_t strided;
+    expr_single_t single;
+    expr_strided_t strided;
 };
 
 /**

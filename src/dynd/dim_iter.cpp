@@ -131,10 +131,10 @@ static int buffered_strided_dim_iter_next(dim_iter *self)
         intptr_t stride = static_cast<intptr_t>(self->custom[3]);
         ckernel_builder *ckb = reinterpret_cast<ckernel_builder *>(self->custom[4]);
         ckernel_prefix *kdp = ckb->get();
-        unary_strided_operation_t fn = kdp->get_function<unary_strided_operation_t>();
-        fn(buf.get_readwrite_originptr(),
-            self->data_stride,
-            data_ptr + i * stride, stride, bufsize, kdp);
+        expr_strided_t fn = kdp->get_function<expr_strided_t>();
+        const char *child_data_ptr = data_ptr + i * stride;
+        fn(buf.get_readwrite_originptr(), self->data_stride, &child_data_ptr,
+           &stride, bufsize, kdp);
         // Update the dim_iter's size
         self->data_elcount = bufsize;
         return 1;
@@ -207,9 +207,9 @@ void dynd::make_buffered_strided_dim_iter(
         // If the buffer is big enough for all the data, just make a copy and
         // create a strided dim_iter around it.
         ckernel_prefix *kdp = k.get();
-        unary_strided_operation_t fn = kdp->get_function<unary_strided_operation_t>();
+        expr_strided_t fn = kdp->get_function<expr_strided_t>();
         fn(buf.get_readwrite_originptr(),
-            buffer_stride, data_ptr, stride, size, kdp);
+            buffer_stride, &data_ptr, &stride, size, kdp);
         make_strided_dim_iter(out_di, val_tp,
             buf.get_arrmeta() + sizeof(strided_dim_type_arrmeta),
             buf.get_readonly_originptr(), size, buffer_stride, buf.get_memblock());

@@ -24,7 +24,7 @@ static void delete_lifted_expr_arrfunc_data(void *self_data_ptr)
 static intptr_t instantiate_lifted_expr_arrfunc_data(
     const arrfunc_type_data *self, dynd::ckernel_builder *ckb, intptr_t ckb_offset,
     const ndt::type &dst_tp, const char *dst_arrmeta, const ndt::type *src_tp,
-    const char *const *src_arrmeta, uint32_t kernreq,
+    const char *const *src_arrmeta, kernel_request_t kernreq,
     const eval::eval_context *ectx)
 {
     const array_preamble *data =
@@ -237,20 +237,10 @@ static ndt::type lift_proto(const ndt::type& proto)
 void dynd::lift_arrfunc(arrfunc_type_data *out_af, const nd::arrfunc &af)
 {
     const arrfunc_type_data *af_ptr = af.get();
-    if (af_ptr->ckernel_funcproto == unary_operation_funcproto) {
-        throw runtime_error("lift_arrfunc() for unary operations is not finished");
-    } else if (af_ptr->ckernel_funcproto == expr_operation_funcproto) {
-        out_af->free_func = &delete_lifted_expr_arrfunc_data;
-        out_af->data_ptr = nd::array(af).release();
-        out_af->instantiate = &instantiate_lifted_expr_arrfunc_data;
-        out_af->resolve_dst_type = &resolve_lifted_dst_type;
-        out_af->resolve_dst_shape = &resolve_lifted_dst_shape;
-        out_af->ckernel_funcproto = expr_operation_funcproto;
-        out_af->func_proto = lift_proto(af_ptr->func_proto);
-    } else {
-        stringstream ss;
-        ss << "lift_arrfunc() unrecognized ckernel function"
-           << " prototype enum value " << af_ptr->ckernel_funcproto;
-        throw runtime_error(ss.str());
-    }
+    out_af->free_func = &delete_lifted_expr_arrfunc_data;
+    out_af->data_ptr = nd::array(af).release();
+    out_af->instantiate = &instantiate_lifted_expr_arrfunc_data;
+    out_af->resolve_dst_type = &resolve_lifted_dst_type;
+    out_af->resolve_dst_shape = &resolve_lifted_dst_shape;
+    out_af->func_proto = lift_proto(af_ptr->func_proto);
 }

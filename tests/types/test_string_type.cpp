@@ -336,7 +336,7 @@ TEST(StringType, StringToBool) {
 
     // In "none" mode, it's a bit more permissive
     eval::eval_context tmp_ectx;
-    tmp_ectx.default_errmode = assign_error_none;
+    tmp_ectx.errmode = assign_error_none;
     EXPECT_FALSE(nd::array(nd::array("").ucast<dynd_bool>().eval(&tmp_ectx)).as<bool>());
     EXPECT_TRUE(nd::array(nd::array("2").ucast<dynd_bool>().eval(&tmp_ectx)).as<bool>());
     EXPECT_TRUE(nd::array(nd::array("flase").ucast<dynd_bool>().eval(&tmp_ectx)).as<bool>());
@@ -495,18 +495,19 @@ TEST(StringType, Comparisons) {
 }
 
 TEST(StringType, Concatenation) {
-    nd::array a, b;
+    nd::array a, b, c;
 
     a = "first";
     b = "second";
-    EXPECT_EQ("firstsecond", (a+b).as<string>());
+    c = a + b;
+    EXPECT_EQ("firstsecond", c.as<string>());
 
     const char *a_arr[3] = {"testing", "one", "two"};
     const char *b_arr[3] = {"alpha", "beta", "gamma"};
 
     a = a_arr;
     b = b_arr;
-    nd::array c = (a + b).eval();
+    c = (a + b).eval();
     ASSERT_EQ(ndt::type("strided * string"), c.get_type());
     EXPECT_EQ(3, c.get_dim_size());
     EXPECT_EQ("testingalpha", c(0).as<string>());

@@ -292,8 +292,8 @@ namespace kernels {
         }
 
         static inline self_type *create(ckernel_builder *ckb,
-                                             intptr_t ckb_offset,
-                                             kernel_request_t kernreq)
+                                        intptr_t ckb_offset,
+                                        kernel_request_t kernreq)
         {
             ckb->ensure_capacity(ckb_offset + sizeof(self_type));
             ckernel_prefix *rawself = ckb->get_at<ckernel_prefix>(ckb_offset);

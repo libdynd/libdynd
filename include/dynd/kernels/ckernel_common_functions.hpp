@@ -67,16 +67,6 @@ size_t make_constant_value_assignment_ckernel(
     kernel_request_t kernreq, const eval::eval_context *ectx);
 
 /**
- * Adds an adapter ckernel which wraps a child unary ckernel
- * as an expr ckernel.
- *
- * \returns  The ckb_offset where the child ckernel should be placed.
- */
-intptr_t wrap_unary_as_expr_ckernel(dynd::ckernel_builder *out_ckb,
-                                    intptr_t ckb_offset,
-                                    kernel_request_t kernreq);
-
-/**
  * Adds an adapter ckernel which wraps a child expr ckernel
  * as a unary ckernel. The child expr single ckernel
  * must itself be unary as well.

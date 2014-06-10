@@ -67,7 +67,7 @@ namespace detail {
                     const arrfunc_type_data *af_self, dynd::ckernel_builder *ckb, \
                     intptr_t ckb_offset, const ndt::type &DYND_UNUSED(dst_tp), \
                     const char *DYND_UNUSED(dst_arrmeta), const ndt::type *DYND_UNUSED(src_tp), \
-                    const char *const *DYND_UNUSED(src_arrmeta), uint32_t kernreq, \
+                    const char *const *DYND_UNUSED(src_arrmeta), kernel_request_t kernreq, \
                     const eval::eval_context *DYND_UNUSED(ectx)) \
         { \
             extra_type *e = ckb->get_at<extra_type>(ckb_offset); \
@@ -141,7 +141,6 @@ DYND_PP_JOIN_MAP(METH_RET_RES_CKERNEL_INSTANTIATOR, (), DYND_PP_RANGE(1, DYND_PP
         std::pair<const T *, func_type *> obj_func(&obj, &func); \
 \
         arrfunc_type_data af; \
-        af.ckernel_funcproto = expr_operation_funcproto; \
         af.func_proto = ndt::make_funcproto(src_tp, dst_tp); \
         af.data_ptr = reinterpret_cast<void *>(&obj_func); \
         af.instantiate = &detail::elwise_ckernel_instantiator<func_type>::instantiate; \
@@ -157,7 +156,7 @@ DYND_PP_JOIN_MAP(METH_RET_RES_CKERNEL_INSTANTIATOR, (), DYND_PP_RANGE(1, DYND_PP
                             lifted_types, dynd_arrmeta, kernel_request_single, ectx); \
 \
         ckernel_prefix *ckprefix = ckb.get(); \
-        expr_single_operation_t op = ckprefix->get_function<expr_single_operation_t>(); \
+        expr_single_t op = ckprefix->get_function<expr_single_t>(); \
         const char *src[NSRC] = {DYND_PP_JOIN_OUTER_1(DYND_PP_META_DOT_CALL, (,), \
             DYND_PP_META_NAME_RANGE(acast, NSRC), (get_readonly_originptr))}; \
         op(res.get_readwrite_originptr(), src, ckprefix); \

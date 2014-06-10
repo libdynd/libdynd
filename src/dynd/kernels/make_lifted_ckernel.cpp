@@ -37,7 +37,7 @@ struct strided_expr_kernel_extra {
     {
         extra_type *e = reinterpret_cast<extra_type *>(extra);
         ckernel_prefix *echild = &(e + 1)->base;
-        expr_strided_operation_t opchild = echild->get_function<expr_strided_operation_t>();
+        expr_strided_t opchild = echild->get_function<expr_strided_t>();
         opchild(dst, e->dst_stride, src, e->src_stride, e->size, echild);
     }
 
@@ -47,7 +47,7 @@ struct strided_expr_kernel_extra {
     {
         extra_type *e = reinterpret_cast<extra_type *>(extra);
         ckernel_prefix *echild = &(e + 1)->base;
-        expr_strided_operation_t opchild = echild->get_function<expr_strided_operation_t>();
+        expr_strided_t opchild = echild->get_function<expr_strided_t>();
         intptr_t inner_size = e->size, inner_dst_stride = e->dst_stride;
         const intptr_t *inner_src_stride = e->src_stride;
         const char *src_loop[N];
@@ -88,10 +88,10 @@ static size_t make_elwise_strided_dimension_expr_kernel_for_N(
     strided_expr_kernel_extra<N> *e = out_ckb->get_at<strided_expr_kernel_extra<N> >(ckb_offset);
     switch (kernreq) {
         case kernel_request_single:
-            e->base.template set_function<expr_single_operation_t>(&strided_expr_kernel_extra<N>::single);
+            e->base.template set_function<expr_single_t>(&strided_expr_kernel_extra<N>::single);
             break;
         case kernel_request_strided:
-            e->base.template set_function<expr_strided_operation_t>(&strided_expr_kernel_extra<N>::strided);
+            e->base.template set_function<expr_strided_t>(&strided_expr_kernel_extra<N>::strided);
             break;
         default: {
             stringstream ss;
@@ -223,7 +223,7 @@ struct strided_or_var_to_strided_expr_kernel_extra {
     {
         extra_type *e = reinterpret_cast<extra_type *>(extra);
         ckernel_prefix *echild = &(e + 1)->base;
-        expr_strided_operation_t opchild = echild->get_function<expr_strided_operation_t>();
+        expr_strided_t opchild = echild->get_function<expr_strided_t>();
         // Broadcast all the src 'var' dimensions to dst
         intptr_t dim_size = e->size;
         const char *modified_src[N];
@@ -291,10 +291,10 @@ static size_t make_elwise_strided_or_var_to_strided_dimension_expr_kernel_for_N(
                     out_ckb->get_at<strided_or_var_to_strided_expr_kernel_extra<N> >(ckb_offset);
     switch (kernreq) {
         case kernel_request_single:
-            e->base.template set_function<expr_single_operation_t>(&strided_or_var_to_strided_expr_kernel_extra<N>::single);
+            e->base.template set_function<expr_single_t>(&strided_or_var_to_strided_expr_kernel_extra<N>::single);
             break;
         case kernel_request_strided:
-            e->base.template set_function<expr_strided_operation_t>(&strided_or_var_to_strided_expr_kernel_extra<N>::strided);
+            e->base.template set_function<expr_strided_t>(&strided_or_var_to_strided_expr_kernel_extra<N>::strided);
             break;
         default: {
             stringstream ss;
@@ -425,7 +425,7 @@ struct strided_or_var_to_var_expr_kernel_extra {
     {
         extra_type *e = reinterpret_cast<extra_type *>(extra);
         ckernel_prefix *echild = &(e + 1)->base;
-        expr_strided_operation_t opchild = echild->get_function<expr_strided_operation_t>();
+        expr_strided_t opchild = echild->get_function<expr_strided_t>();
         var_dim_type_data *dst_vddd = reinterpret_cast<var_dim_type_data *>(dst);
         char *modified_dst;
         intptr_t modified_dst_stride = 0;
@@ -564,11 +564,11 @@ static size_t make_elwise_strided_or_var_to_var_dimension_expr_kernel_for_N(
                     out_ckb->get_at<strided_or_var_to_var_expr_kernel_extra<N> >(ckb_offset);
     switch (kernreq) {
         case kernel_request_single:
-            e->base.template set_function<expr_single_operation_t>(
+            e->base.template set_function<expr_single_t>(
                             &strided_or_var_to_var_expr_kernel_extra<N>::single);
             break;
         case kernel_request_strided:
-            e->base.template set_function<expr_strided_operation_t>(
+            e->base.template set_function<expr_strided_t>(
                             &strided_or_var_to_var_expr_kernel_extra<N>::strided);
             break;
         default: {
