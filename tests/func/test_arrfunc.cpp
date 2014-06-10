@@ -112,10 +112,9 @@ TEST(ArrFunc, Property) {
                         kernel_request_single, &eval::default_eval_context);
     int int_out = 0;
     int date_in = date_ymd::to_days(2013, 12, 30);
-    int *date_in_ptr = &date_in;
+    const char *date_in_ptr = reinterpret_cast<const char *>(&date_in);
     expr_single_t usngo = ckb.get()->get_function<expr_single_t>();
-    usngo(reinterpret_cast<char *>(&int_out),
-          reinterpret_cast<const char *const *>(&date_in_ptr), ckb.get());
+    usngo(reinterpret_cast<char *>(&int_out), &date_in_ptr, ckb.get());
     EXPECT_EQ(2013, int_out);
 }
 
