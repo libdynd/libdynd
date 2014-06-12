@@ -11,6 +11,7 @@
 #include <dynd/kernels/assignment_kernels.hpp>
 #include <dynd/kernels/time_assignment_kernels.hpp>
 #include <dynd/func/make_callable.hpp>
+#include <dynd/parser_util.hpp>
 
 using namespace std;
 using namespace dynd;
@@ -45,8 +46,21 @@ void time_type::set_from_utf8_string(
     const char *utf8_end, const eval::eval_context *DYND_UNUSED(ectx)) const
 {
     time_hmst hmst;
+    const char *tz_begin = NULL, *tz_end = NULL;
     // TODO: Use errmode to adjust strictness of the parsing
-    hmst.set_from_str(utf8_begin, utf8_end);
+    hmst.set_from_str(utf8_begin, utf8_end, tz_begin, tz_end);
+    if (m_timezone != tz_abstract && tz_begin != tz_end) {
+        if (m_timezone == tz_utc &&
+                (parse::compare_range_to_literal(tz_begin, tz_end, "Z") ||
+                 parse::compare_range_to_literal(tz_begin, tz_end, "UTC"))) {
+            // It's a UTC time to a UTC time zone
+        } else {
+            stringstream ss;
+            ss << "DyND time zone support is partial, cannot handle ";
+            ss.write(tz_begin, tz_end - tz_begin);
+            throw runtime_error(ss.str());
+        }
+    }
     *reinterpret_cast<int64_t *>(data) = hmst.to_ticks();
 }
 
@@ -62,11 +76,9 @@ void time_type::print_data(std::ostream& o, const char *DYND_UNUSED(arrmeta), co
 {
     time_hmst hmst;
     hmst.set_from_ticks(*reinterpret_cast<const int64_t *>(data));
-    string s = hmst.to_str();
-    if (s.empty()) {
-        o << "NA";
-    } else {
-        o << s;
+    o << hmst.to_str();
+    if (m_timezone == tz_utc) {
+        o << "Z";
     }
 }
 

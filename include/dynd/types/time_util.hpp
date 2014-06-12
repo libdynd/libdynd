@@ -90,14 +90,19 @@ struct time_hmst {
     inline void set_to_na() {
         hour = -128;
     }
-    void set_from_str(const char *begin, const char *end);
+    void set_from_str(const char *begin, const char *end,
+                      const char *&out_tz_begin, const char *&out_tz_end);
     /**
      * Sets the hmst from a string.
      *
      * \param s  Date string.
+     *
+     * \returns  The time zone, if any, found in the string
      */
-    inline void set_from_str(const std::string& s) {
-        set_from_str(s.data(), s.data() + s.size());
+    inline std::string set_from_str(const std::string& s) {
+        const char *tz_begin = NULL, *tz_end = NULL;
+        set_from_str(s.data(), s.data() + s.size(), tz_begin, tz_end);
+        return std::string(tz_begin, tz_end);
     }
 
 

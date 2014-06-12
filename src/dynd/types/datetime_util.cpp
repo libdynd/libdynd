@@ -23,10 +23,12 @@ std::string datetime_struct::to_str() const
 
 void datetime_struct::set_from_str(const char *begin, const char *end,
                                    date_parse_order_t ambig, int century_window,
-                                   assign_error_mode errmode)
+                                   assign_error_mode errmode,
+                                   const char *&out_tz_begin,
+                                   const char *&out_tz_end)
 {
-    if (!string_to_datetime(begin, end, *this, ambig,
-                            century_window, errmode)) {
+    if (!string_to_datetime(begin, end, ambig, century_window, errmode, *this,
+                            out_tz_begin, out_tz_end)) {
         stringstream ss;
         ss << "Unable to parse ";
         print_escaped_utf8_string(ss, begin, end);

@@ -52,7 +52,7 @@ static bool parse_postgres_datetime(const char *&begin, const char *end,
         return sbs.fail();
     }
     // "15:10:11 "
-    if (!parse_time(begin, end, out_dt.hmst)) {
+    if (!parse_time_no_tz(begin, end, out_dt.hmst)) {
         return sbs.fail();
     }
     if (!skip_required_whitespace(begin, end)) {
@@ -157,10 +157,13 @@ static bool parse_iso8601_nodashes_datetime(const char *&begin, const char *end,
 }
 
 // <date> T <time>, <date>:<time>, <date> <time>
+// optionally followed by a timezone specifier
 static bool parse_date_time_datetime(const char *&begin, const char *end,
                                      datetime_struct &out_dt,
                                      date_parse_order_t ambig,
-                                     int century_window)
+                                     int century_window,
+                                     const char *&out_tz_begin,
+                                     const char *&out_tz_end)
 {
     saved_begin_state sbs(begin);
 
@@ -175,7 +178,7 @@ static bool parse_date_time_datetime(const char *&begin, const char *end,
             !skip_required_whitespace(begin, end)) {
         return sbs.fail();
     }
-    if (!parse_time(begin, end, out_dt.hmst)) {
+    if (!parse_time(begin, end, out_dt.hmst, out_tz_begin, out_tz_end)) {
         // In most cases we don't accept just an hour as a time, but for
         // ISO dash-formatted dates, we do, so try again as that.
         begin = sbs.saved_begin();
@@ -207,10 +210,12 @@ static bool parse_date_time_datetime(const char *&begin, const char *end,
 }
 
 bool parse::parse_datetime(const char *&begin, const char *end,
-                           datetime_struct &out_dt, date_parse_order_t ambig,
-                           int century_window)
+                           date_parse_order_t ambig, int century_window,
+                           datetime_struct &out_dt, const char *&out_tz_begin,
+                           const char *&out_tz_end)
 {
-    if (parse_date_time_datetime(begin, end, out_dt, ambig, century_window)) {
+    if (parse_date_time_datetime(begin, end, out_dt, ambig, century_window,
+                                 out_tz_begin, out_tz_end)) {
         // <date>T<time>, <date> <time>
     } else if (parse_postgres_datetime(begin, end, out_dt)) {
         // Fri Dec 19 15:10:11 1997, Fri 19 Dec 15:10:11 1997
@@ -223,12 +228,16 @@ bool parse::parse_datetime(const char *&begin, const char *end,
 }
 
 bool dynd::string_to_datetime(const char *begin, const char *end,
-                              datetime_struct &out_dt, date_parse_order_t ambig,
-                              int century_window, assign_error_mode errmode)
+                              date_parse_order_t ambig, int century_window,
+                              assign_error_mode errmode,
+                              datetime_struct &out_dt,
+                              const char *&out_tz_begin,
+                              const char *&out_tz_end)
 {
     datetime_struct dt;
     skip_whitespace(begin, end);
-    if (!parse_datetime(begin, end, dt, ambig, century_window)) {
+    if (!parse_datetime(begin, end, ambig, century_window, dt, out_tz_begin,
+                        out_tz_end)) {
         return false;
     }
     skip_whitespace(begin, end);
