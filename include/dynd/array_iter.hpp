@@ -24,6 +24,9 @@ namespace detail {
 template<int Nwrite, int Nread>
 class array_iter;
 
+template<int Nwrite, int Nread>
+class array_neighborhood_iter;
+
 template<>
 class array_iter<1, 0> {
     intptr_t m_itersize;
@@ -118,6 +121,7 @@ public:
 
 template<>
 class array_iter<0, 1> {
+protected:
     intptr_t m_itersize;
     size_t m_iter_ndim;
     dimvector m_iterindex;
@@ -126,6 +130,9 @@ class array_iter<0, 1> {
     const char *m_arrmeta;
     iterdata_common *m_iterdata;
     ndt::type m_array_tp, m_uniform_tp;
+
+    array_iter() {
+    }
 
     inline void init(const ndt::type& tp0, const char *arrmeta0, const char *data0, size_t ndim)
     {
@@ -158,6 +165,7 @@ class array_iter<0, 1> {
             m_arrmeta = arrmeta0;
         }
     }
+
 public:
     array_iter(const ndt::type& tp0, const char *arrmeta0, const char *data0, size_t ndim = 0) {
         init(tp0, arrmeta0, data0, ndim);
@@ -211,6 +219,169 @@ public:
         return m_uniform_tp;
     }
 };
+
+template<>
+class array_neighborhood_iter<0, 1> : public array_iter<0, 1> {
+    dimvector m_neighborhood_iterindex;
+    dimvector m_neighborhood_iteroffset;
+    dimvector m_neighborhood_itershape;
+    const char *m_origin_data;
+    const char *m_neighbor_data;
+    iterdata_common *m_neighborhood_iterdata;
+    bool m_within_bounds;
+
+    inline void init(const ndt::type& tp0, const char *arrmeta0, const char *data0, size_t ndim,
+        const intptr_t *neighborhood_shape, const intptr_t *neighborhood_offset)
+    {
+        array_iter<0, 1>::init(tp0, arrmeta0, data0, ndim);
+
+        if (m_iter_ndim != 0) {
+            m_neighborhood_iterindex.init(m_iter_ndim);
+            memset(m_neighborhood_iterindex.get(), 0, sizeof(intptr_t) * m_iter_ndim);
+            m_neighborhood_itershape.init(m_iter_ndim, neighborhood_shape);
+            if (neighborhood_offset == NULL) {
+                m_neighborhood_iteroffset.init(m_iter_ndim);
+                memset(m_neighborhood_iteroffset.get(), 0, sizeof(intptr_t) * m_iter_ndim);
+            } else {
+                m_neighborhood_iteroffset.init(m_iter_ndim, neighborhood_offset);
+            }
+
+            m_neighborhood_iterdata = reinterpret_cast<iterdata_common *>(malloc(sizeof(m_iterdata)));
+            if (!m_iterdata) {
+                throw std::bad_alloc();
+            }
+            m_array_tp.iterdata_construct(m_neighborhood_iterdata,
+                            &m_arrmeta, m_iter_ndim, m_itershape.get(), m_uniform_tp);
+            m_origin_data = m_neighborhood_iterdata->reset(m_neighborhood_iterdata, const_cast<char *>(data0), m_iter_ndim);
+            m_neighbor_data = m_origin_data;
+        } else {
+            m_neighborhood_iterdata = NULL;
+            m_origin_data = data0;
+            m_neighbor_data = m_origin_data;
+        }
+    }
+
+public:
+    array_neighborhood_iter(const nd::array& op0, const intptr_t *shape, const intptr_t *offset = NULL) {
+        init(op0.get_type(), op0.get_arrmeta(), op0.get_readonly_originptr(), 0, shape, offset);
+    }
+
+    bool next() {
+        array_iter<0, 1>::next();
+
+        size_t i = m_iter_ndim;
+        if (i != 0) {
+            do {
+                --i;
+                if (++m_neighborhood_iterindex[i] != m_itershape[i]) {
+                    m_neighbor_data = m_neighborhood_iterdata->incr(m_neighborhood_iterdata, m_iter_ndim - i - 1);
+                    return true;
+                } else {
+                    m_neighborhood_iterindex[i] = 0;
+                }
+            } while (i != 0);
+        }
+
+        return false;
+    }
+
+    bool next_neighbor() {
+        return false;
+    }
+
+    const char *neighbor_data() {
+//        if (m_within_bounds) {
+            return m_neighbor_data;
+  //      } else {
+    //        return NULL;
+      //  }
+    }
+};
+
+/*
+        if (array_iter<0, 1>::next()) {
+  //          m_neighborhood_iterdata->reset(m_neighborhood_iterdata, const_cast<char *>(m_origin_data), m_iter_ndim);
+//            m_neighbor_data = m_neighborhood_iterdata->adv(m_neighborhood_iterdata, 0, 0);
+
+
+            size_t i = m_iter_ndim;
+            if (i != 0) {
+                do {
+                    --i;
+                    if (m_iterindex[i] != m_itershape[i]) {
+                        m_neighbor_data = m_neighborhood_iterdata->incr(m_neighborhood_iterdata, m_iter_ndim - i - 1);
+                        break;
+                    } else {
+                        m_iterindex[i] = 0;
+                    }
+                } while (i != 0);
+            }
+*/
+
+//            bool found = false;
+
+/*            size_t i = m_iter_ndim;
+            if (i != 0) {
+                m_within_bounds = true;
+                do {
+                    --i;
+                    intptr_t index = m_iterindex[i] + m_neighborhood_iteroffset[i];
+                    std::cout << "DEBUG: INDEX " << index << std::endl;
+                    if (index < 0) {
+                        m_within_bounds = false;
+                        index = 0;
+                    } else if (index >= m_itershape[i]) {
+                        m_within_bounds = false;
+                        index = m_itershape[i] - 1;
+                    }
+                    if (m_iterindex[i] != 0 && !found) {
+                        found = true;
+//                      m_neighbor_data = m_neighborhood_iterdata->adv(m_neighborhood_iterdata, m_iter_ndim - i - 1, index);
+                        m_neighbor_data = m_neighborhood_iterdata->incr(m_neighborhood_iterdata, m_iter_ndim - i - 1);
+                    }
+                } while (i != 0);
+            }
+
+            return true;
+        }
+
+        return false;
+*/
+
+    // if new is at 0, then incr and adv by appropriate amount
+    // otherwise, if within_bounds then adv by 1
+
+    // inside -> inside = adv by 1, unless at boundary of neighborhood then same as outside -> inside
+    // outside -> inside = incr, then adv by appropriate amount
+    // inside -> outside or outside -> outside = nothing
+
+
+/*
+        size_t i = m_iter_ndim;
+        if (i != 0) {
+            m_within_bounds = true;
+            do {
+                --i;
+                if (++m_iterindex[i] != m_itershape[i]) {
+                    // modify m_within_bounds
+                    break;
+                } else {
+                    m_iterindex[i] = 0;
+                    // modify m_within_bounds
+                }
+            } while (i != 0);
+
+            if (m_within_bounds) {
+                // adv level i by 1
+                do {
+                    ++i;
+                    // incr and adv level
+                } while (i != m_iter_ndim)
+            }
+
+            return true;
+        }*/
+
 
 template<>
 class array_iter<1, 1> {

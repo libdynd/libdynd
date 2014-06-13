@@ -48,6 +48,13 @@ typedef void (*foreach_fn_t)(const ndt::type &dt, const char *arrmeta,
 typedef char *(*iterdata_increment_fn_t)(iterdata_common *iterdata,
                                          intptr_t level);
 /**
+ * This is the iteration advance function used by iterdata. It advances the
+ * iterator at the specified level by the specified amount, resetting all the
+ * more inner levels to 0.
+ */
+typedef char *(*iterdata_advance_fn_t)(iterdata_common *iterdata,
+                                         intptr_t level, intptr_t i);
+/**
  * This is the reset function which is called when an outer dimension
  * increment resets all the lower dimensions to index 0. It returns
  * the data pointer for the next inner level of iteration.
@@ -73,6 +80,8 @@ typedef void (*type_transform_fn_t)(const ndt::type &dt, void *extra,
 struct iterdata_common {
     // This increments the iterator at the requested level
     iterdata_increment_fn_t incr;
+    // This advances the iterator at the requested level by the requested amount
+    iterdata_advance_fn_t adv;
     // This resets the data pointers of the iterator
     iterdata_reset_fn_t reset;
 };
