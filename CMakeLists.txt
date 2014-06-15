@@ -8,7 +8,10 @@ cmake_minimum_required(VERSION 2.8.7)
 project(libdynd)
 
 find_package(CUDA)
-                                                                                                                              
+
+set(LIB_SUFFIX "" CACHE STRING
+    "Typically an empty string or 64. Controls installation to lib or lib64")
+
 # -DDYND_ELWISE_MAX, the maximum number of arguments that the elwise function
 #   in libdynd will support
 SET(DYND_ELWISE_MAX 4 CACHE STRING
@@ -660,9 +663,9 @@ endif()
 if (DYND_INSTALL_LIB)
     # Install the libdynd binary
     install(TARGETS libdynd
-        RUNTIME DESTINATION lib
-        LIBRARY DESTINATION lib
-        ARCHIVE DESTINATION lib/static)
+        RUNTIME DESTINATION lib${LIB_SUFFIX}
+        LIBRARY DESTINATION lib${LIB_SUFFIX}
+        ARCHIVE DESTINATION lib${LIB_SUFFIX}/static)
     # Install the libdynd headers
     install(DIRECTORY "include/dynd"
             DESTINATION "${CMAKE_INSTALL_PREFIX}/include")

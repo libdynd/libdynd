@@ -7,7 +7,7 @@ if NOT "%1"=="-libname" goto notlibname
 
 if NOT "%1"=="-libpath" goto notlibname
     REM This batch file should be in a ...\bin relative to ...\lib
-    pushd %~f0\..\..\lib@DYND_STATIC_LIB_DIR@
+    pushd %~f0\..\..\lib@LIB_SUFFIX@@DYND_STATIC_LIB_DIR@
     echo %CD%\@DYND_LIB_FILE@
     popd
     exit /B 0

@@ -14,7 +14,7 @@ if [ "$1" == "-libpath" ]; then
     # This script should be in .../bin relative to .../lib.
     # Note this isn't robust against symbolic links, etc.
     DIR=`dirname $0`
-    echo `dirname ${DIR}`/lib/@DYND_STATIC_LIB_DIR@@DYND_LIB_FILE@
+    echo `dirname ${DIR}`/lib@LIB_SUFFIX@/@DYND_STATIC_LIB_DIR@@DYND_LIB_FILE@
     exit 0
 fi
 
