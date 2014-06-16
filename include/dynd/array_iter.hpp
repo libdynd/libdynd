@@ -613,6 +613,7 @@ public:
 
     bool next() {
         if (array_iter<1, 1>::next()) {
+            memset(m_neighbor_iterindex.get(), 0, sizeof(intptr_t) * m_iter_ndim[0]);
             memset(m_neighbor_rel_iterindex.get(), 0, sizeof(intptr_t) * m_iter_ndim[0]);
             m_neighborhood_iterdata[0]->reset(m_neighborhood_iterdata[0], const_cast<char *>(m_origin_data[0]), m_iter_ndim[0]);
             m_neighborhood_iterdata[1]->reset(m_neighborhood_iterdata[1], const_cast<char *>(m_origin_data[1]), m_iter_ndim[0]);
