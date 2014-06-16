@@ -550,16 +550,18 @@ class array_neighborhood_iter<1, 1> : public array_iter<1, 1> {
             }
             m_neighbor_iterindex.init(m_iter_ndim[0]);
 
-            m_neighborhood_iterdata[0] = reinterpret_cast<iterdata_common *>(malloc(sizeof(m_iterdata[0])));
-            if (!m_iterdata[0]) {
+            size_t iterdata_size = m_array_tp[0].extended()->get_iterdata_size(m_iter_ndim[0]);
+            m_neighborhood_iterdata[0] = reinterpret_cast<iterdata_common *>(malloc(iterdata_size));
+            if (!m_neighborhood_iterdata[0]) {
                 throw std::bad_alloc();
             }
             m_array_tp[0].iterdata_construct(m_neighborhood_iterdata[0],
                             &arrmeta0, m_iter_ndim[0], m_itershape.get(), m_uniform_tp[0]);
             m_origin_data[0] = m_neighborhood_iterdata[0]->reset(m_neighborhood_iterdata[0], const_cast<char *>(data0), m_iter_ndim[0]);
             m_neighbor_data[0] = m_origin_data[0];
-            m_neighborhood_iterdata[1] = reinterpret_cast<iterdata_common *>(malloc(sizeof(m_iterdata[1])));
-            if (!m_iterdata[1]) {
+            iterdata_size = m_array_tp[1].get_broadcasted_iterdata_size(m_iter_ndim[1]);
+            m_neighborhood_iterdata[1] = reinterpret_cast<iterdata_common *>(malloc(iterdata_size));
+            if (!m_neighborhood_iterdata[1]) {
                 throw std::bad_alloc();
             }
             m_array_tp[1].broadcasted_iterdata_construct(m_neighborhood_iterdata[1],
