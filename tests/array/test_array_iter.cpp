@@ -16,43 +16,64 @@
 using namespace std;
 using namespace dynd;
 
-TEST(ArrayIter, Unknown) {
-    int vals[2][3] = {{45, 1, 2}, {3, 4, 5}};
+TEST(ArrayNeighborhoodIter, Simple) {
+    intptr_t neighborhood_shape[2] = {2, 2};
+    intptr_t neighborhood_offset[2] = {-1, -1};
 
-    nd::array a = nd::empty(2, 3, ndt::make_strided_dim(ndt::make_strided_dim(ndt::make_type<int>())));
-    a.vals() = vals;
+    int vals[2][3] = {{0, 1, 2}, {3, 4, 5}};
 
-    const intptr_t offset[2] = {-1, -1};
-    const intptr_t shape[2] = {2, 2};
+    nd::array arg = nd::empty(2, 3, ndt::make_strided_dim(ndt::make_strided_dim(ndt::make_type<int>())));
+    arg.vals() = vals;
 
-    array_neighborhood_iter<0, 1> iter(a, shape, offset);
-  //  const intptr_t *index = iter.index();
-//    const intptr_t *neighbor_index = iter.neighbor_index();
+    nd::array res = nd::empty(2, 3, ndt::make_strided_dim(ndt::make_strided_dim(ndt::make_type<int>())));
+    res.vals() = 0;
+
+    array_neighborhood_iter<1, 1> iter(res, arg, neighborhood_shape, neighborhood_offset);
     do {
-        const char *data = iter.data();
-      //  cout << "(DEBUG) index is " << index[0] << ", " << index[1] << endl;
-        cout << "(DEBUG) data is " << *reinterpret_cast<const int *>(data) << endl;
-
+        int *res_data = reinterpret_cast<int *>(iter.data<0>());
         do {
-            const char *neighbor_data = iter.neighbor_data();
-//            cout << "(DEBUG) relative_neighbor_index is " << neighbor_index[0] - 1 << ", " << neighbor_index[1] - 1 << endl;
-  //          cout << "(DEBUG) neighbor_index is " << index[0] - 1 + neighbor_index[0] << ", " << index[1] - 1 + neighbor_index[1] << endl;
-    //        cout << "(DEBUG) within_bounds is " << iter.within_bounds() << endl;
-            if (neighbor_data != NULL) {
-                cout << "(DEBUG) neighbor_data is " << *reinterpret_cast<const int *>(neighbor_data) << endl;
+            if (iter.neighbor_within_bounds()) {
+                const int *neighbor_data = reinterpret_cast<const int *>(iter.neighbor_data<1>());
+                *res_data += *neighbor_data;
             }
         } while (iter.next_neighbor());
     } while(iter.next());
+
+    EXPECT_EQ(0, res(0, 0).as<int>());
+    EXPECT_EQ(1, res(0, 1).as<int>());
+    EXPECT_EQ(3, res(0, 2).as<int>());
+    EXPECT_EQ(3, res(1, 0).as<int>());
+    EXPECT_EQ(8, res(1, 1).as<int>());
+    EXPECT_EQ(12, res(1, 2).as<int>());
 }
 
-/*
-TEST(ArrayIter, Mean) {
+TEST(ArrayNeighborhoodIter, Simple2) {
+    intptr_t neighborhood_shape[2] = {2, 2};
+    intptr_t neighborhood_offset[2] = {0, 0};
+
     int vals[2][3] = {{0, 1, 2}, {3, 4, 5}};
 
-    nd::array a = nd::empty(2, 3, ndt::make_strided_dim(ndt::make_strided_dim(ndt::make_type<int>())));
-    a.vals() = vals;
+    nd::array arg = nd::empty(2, 3, ndt::make_strided_dim(ndt::make_strided_dim(ndt::make_type<int>())));
+    arg.vals() = vals;
 
-    const intptr_t neighborhood_shape[2] = {2, 2};
-    const intptr_t neighborhood_offset[2] = {-1, -1};
+    nd::array res = nd::empty(2, 3, ndt::make_strided_dim(ndt::make_strided_dim(ndt::make_type<int>())));
+    res.vals() = 0;
+
+    array_neighborhood_iter<1, 1> iter1(res, arg, neighborhood_shape, neighborhood_offset);
+    do {
+        int *res_data = reinterpret_cast<int *>(iter1.data<0>());
+        do {
+            if (iter1.neighbor_within_bounds()) {
+                const int *neighbor_data = reinterpret_cast<const int *>(iter1.neighbor_data<1>());
+                *res_data += *neighbor_data;
+            }
+        } while (iter1.next_neighbor());
+    } while(iter1.next());
+
+    EXPECT_EQ(8, res(0, 0).as<int>());
+    EXPECT_EQ(12, res(0, 1).as<int>());
+    EXPECT_EQ(7, res(0, 2).as<int>());
+    EXPECT_EQ(7, res(1, 0).as<int>());
+    EXPECT_EQ(9, res(1, 1).as<int>());
+    EXPECT_EQ(5, res(1, 2).as<int>());
 }
-*/

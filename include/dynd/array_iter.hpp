@@ -296,20 +296,24 @@ public:
     bool next_neighbor() {
         size_t i = m_iter_ndim;
         if (i != 0) {
-            bool empty = true;
+            bool neighborhood_empty = true;
             do {
                 --i;
                 if (++m_neighbor_iterindex[i] != m_neighborhood_itershape[i]) {
-                    empty = false;
+                    neighborhood_empty = false;
                     break;
                 } else {
                     m_neighbor_iterindex[i] = 0;
                 }
             } while (i != 0);
 
-            if (empty) {
+            if (neighborhood_empty) {
                 return false;
             }
+
+            size_t k = i;
+
+            // do rest of within_bounds
 
             if (m_neighbor_within_bounds) {
                 m_neighbor_data = m_neighborhood_iterdata->incr(m_neighborhood_iterdata, m_iter_ndim - i - 1);
@@ -355,6 +359,7 @@ public:
 
 template<>
 class array_iter<1, 1> {
+protected:
     intptr_t m_itersize;
     size_t m_iter_ndim[2];
     dimvector m_iterindex;
@@ -363,6 +368,15 @@ class array_iter<1, 1> {
     const char *m_arrmeta[2];
     iterdata_common *m_iterdata[2];
     ndt::type m_array_tp[2], m_uniform_tp[2];
+
+    array_iter() {
+        m_iterdata[0] = NULL;
+        m_iterdata[1] = NULL;
+        m_data[0] = NULL;
+        m_data[1] = NULL;
+        m_arrmeta[0] = NULL;
+        m_arrmeta[1] = NULL;
+    }
 
     inline void init(const ndt::type& tp0, const char *arrmeta0, char *data0,
                     const ndt::type& tp1, const char *arrmeta1, const char *data1)
@@ -476,6 +490,10 @@ public:
         return false;
     }
 
+    const intptr_t *index() const {
+        return m_iterindex.get();
+    }
+
     /**
      * Provide non-const access to the 'write' operands.
      */
@@ -500,6 +518,204 @@ public:
     template<int K>
     inline typename enable_if<detail::is_value_within_bounds<K, 0, 2>::value, const ndt::type&>::type get_uniform_dtype() const {
         return m_uniform_tp[K];
+    }
+};
+
+template<>
+class array_neighborhood_iter<1, 1> : public array_iter<1, 1> {
+    dimvector m_neighbor_iterindex;
+    dimvector m_neighborhood_iteroffset;
+    dimvector m_neighborhood_itershape;
+    bool m_neighbor_within_bounds;
+    char *m_origin_data[2];
+    char *m_neighbor_data[2];
+    iterdata_common *m_neighborhood_iterdata[2];
+
+    inline void init(const ndt::type& tp0, const char *arrmeta0, char *data0,
+                    const ndt::type& tp1, const char *arrmeta1, const char *data1,
+                    const intptr_t *neighborhood_shape, const intptr_t *neighborhood_offset)
+    {
+        array_iter<1, 1>::init(tp0, arrmeta0, data0, tp1, arrmeta1, data1);
+
+        if (m_iter_ndim[0] != 0) {
+            m_neighbor_iterindex.init(m_iter_ndim[0]);
+            memset(m_neighbor_iterindex.get(), 0, sizeof(intptr_t) * m_iter_ndim[0]);
+            m_neighborhood_itershape.init(m_iter_ndim[0], neighborhood_shape);
+            if (neighborhood_offset == NULL) {
+                m_neighborhood_iteroffset.init(m_iter_ndim[0]);
+                memset(m_neighborhood_iteroffset.get(), 0, sizeof(intptr_t) * m_iter_ndim[0]);
+            } else {
+                m_neighborhood_iteroffset.init(m_iter_ndim[0], neighborhood_offset);
+            }
+
+            m_neighborhood_iterdata[0] = reinterpret_cast<iterdata_common *>(malloc(sizeof(m_iterdata[0])));
+            if (!m_iterdata[0]) {
+                throw std::bad_alloc();
+            }
+            m_array_tp[0].iterdata_construct(m_neighborhood_iterdata[0],
+                            &arrmeta0, m_iter_ndim[0], m_itershape.get(), m_uniform_tp[0]);
+            m_origin_data[0] = m_neighborhood_iterdata[0]->reset(m_neighborhood_iterdata[0], const_cast<char *>(data0), m_iter_ndim[0]);
+            m_neighbor_data[0] = m_origin_data[0];
+            m_neighborhood_iterdata[1] = reinterpret_cast<iterdata_common *>(malloc(sizeof(m_iterdata[1])));
+            if (!m_iterdata[1]) {
+                throw std::bad_alloc();
+            }
+            m_array_tp[1].broadcasted_iterdata_construct(m_neighborhood_iterdata[1],
+                            &arrmeta1, m_iter_ndim[1],
+                            m_itershape.get() + (m_iter_ndim[0] - m_iter_ndim[1]), m_uniform_tp[1]);
+            m_origin_data[1] = m_neighborhood_iterdata[1]->reset(m_neighborhood_iterdata[1], const_cast<char *>(data1), m_iter_ndim[0]);
+            m_neighbor_data[1] = m_origin_data[1];
+
+            size_t i = 0;
+            m_neighbor_within_bounds = true;
+            while (i != m_iter_ndim[0]) {
+                intptr_t j = m_iterindex[i] + m_neighborhood_iteroffset[i];
+                if (j >= 0) {
+                    m_neighbor_data[0] = m_neighborhood_iterdata[0]->adv(m_neighborhood_iterdata[0], m_iter_ndim[0] - i - 1, j);
+                    m_neighbor_data[1] = m_neighborhood_iterdata[1]->adv(m_neighborhood_iterdata[1], m_iter_ndim[0] - i - 1, j);
+                } else {
+                    m_neighbor_within_bounds = false;
+                }
+                ++i;
+            }
+        } else {
+            m_neighborhood_iterdata[0] = NULL;
+            m_neighborhood_iterdata[1] = NULL;
+            m_origin_data[0] = data0;
+            m_origin_data[1] = const_cast<char *>(data1);
+            m_neighbor_data[0] = m_origin_data[0];
+            m_neighbor_data[1] = m_origin_data[1];
+        }
+    }
+
+public:
+    array_neighborhood_iter(const ndt::type& tp0, const char *arrmeta0, char *data0,
+                    const ndt::type& tp1, const char *arrmeta1, const char *data1,
+                    const intptr_t *neighborhood_shape, const intptr_t *neighborhood_offset = NULL) {
+        init(tp0, arrmeta0, data0, tp1, arrmeta1, data1, neighborhood_shape, neighborhood_offset);
+    }
+    array_neighborhood_iter(const nd::array& op0, const nd::array& op1, const intptr_t *neighborhood_shape,
+                    const intptr_t *neighborhood_offset = NULL) {
+        init(op0.get_type(), op0.get_arrmeta(), op0.get_readwrite_originptr(),
+                        op1.get_type(), op1.get_arrmeta(), op1.get_readonly_originptr(),
+                        neighborhood_shape, neighborhood_offset);
+    }
+
+    ~array_neighborhood_iter() {
+        if (m_neighborhood_iterdata[0]) {
+            m_array_tp[0].iterdata_destruct(m_neighborhood_iterdata[0], m_iter_ndim[0]);
+            free(m_neighborhood_iterdata[0]);
+        }
+        if (m_neighborhood_iterdata[1]) {
+            m_array_tp[1].iterdata_destruct(m_neighborhood_iterdata[1], m_iter_ndim[1]);
+            free(m_neighborhood_iterdata[1]);
+        }
+    }
+
+    bool next() {
+        size_t i = 0;
+        if (array_iter<1, 1>::next()) {
+            memset(m_neighbor_iterindex.get(), 0, sizeof(intptr_t) * m_iter_ndim[0]);
+            m_neighborhood_iterdata[0]->reset(m_neighborhood_iterdata[0], const_cast<char *>(m_origin_data[0]), m_iter_ndim[0]);
+            m_neighborhood_iterdata[1]->reset(m_neighborhood_iterdata[1], const_cast<char *>(m_origin_data[1]), m_iter_ndim[0]);
+
+            m_neighbor_within_bounds = true;
+            while (i != m_iter_ndim[0]) {
+                intptr_t j = m_iterindex[i] + m_neighborhood_iteroffset[i];
+                if (j >= 0) {
+                    m_neighbor_data[0] = m_neighborhood_iterdata[0]->adv(m_neighborhood_iterdata[0], m_iter_ndim[0] - i - 1, j);
+                    m_neighbor_data[1] = m_neighborhood_iterdata[1]->adv(m_neighborhood_iterdata[1], m_iter_ndim[0] - i - 1, j);
+                } else {
+                    m_neighbor_within_bounds = false;
+                }
+                ++i;
+            }
+
+            return true;
+        }
+
+        return false;
+    }
+
+    bool next_neighbor() {
+        size_t i = m_iter_ndim[0];
+        if (i != 0) {
+            bool empty = true;
+            do {
+                --i;
+                if (++m_neighbor_iterindex[i] != m_neighborhood_itershape[i]) {
+                    empty = false;
+                    break;
+                } else {
+                    m_neighbor_iterindex[i] = 0;
+                }
+            } while (i != 0);
+
+            if (empty) {
+                return false;
+            }
+
+            if (m_neighbor_within_bounds) {
+                while (i != 0 && (m_iterindex[i] + m_neighborhood_iteroffset[i] + m_neighbor_iterindex[i]) >= m_itershape[i]) {
+                    --i;
+                }
+
+                m_neighbor_data[0] = m_neighborhood_iterdata[0]->incr(m_neighborhood_iterdata[0], m_iter_ndim[0] - i - 1);
+                m_neighbor_data[1] = m_neighborhood_iterdata[1]->incr(m_neighborhood_iterdata[1], m_iter_ndim[0] - i - 1);
+                while (++i != m_iter_ndim[0]) {
+                    intptr_t j = m_iterindex[i] + m_neighborhood_iteroffset[i];
+                    if (j >= 0) {
+                        m_neighbor_data[0] = m_neighborhood_iterdata[0]->adv(m_neighborhood_iterdata[0], m_iter_ndim[0] - i - 1, j);
+                        m_neighbor_data[1] = m_neighborhood_iterdata[1]->adv(m_neighborhood_iterdata[1], m_iter_ndim[0] - i - 1, j);
+                    }
+                }
+            } else {
+                i = m_iter_ndim[0];
+            }
+
+            m_neighbor_within_bounds = true;
+            do {
+                --i;
+                intptr_t j = m_iterindex[i] + m_neighborhood_iteroffset[i] + m_neighbor_iterindex[i];
+                m_neighbor_within_bounds &= (j >= 0) && (j < m_itershape[i]);
+            } while (i != 0);
+
+            return true;
+        }
+
+        return false;
+    }
+
+    const intptr_t *neighbor_index() const {
+        return m_neighbor_iterindex.get();
+    }
+
+    bool neighbor_within_bounds() const {
+        return m_neighbor_within_bounds;
+    }
+
+    /**
+     * Provide non-const access to the 'write' operands.
+     */
+    template<int K>
+    inline typename enable_if<detail::is_value_within_bounds<K, 0, 1>::value, char *>::type neighbor_data() {
+        if (m_neighbor_within_bounds) {
+            return m_neighbor_data[K];
+        } else {
+            return NULL;
+        }
+    }
+
+    /**
+     * Provide const access to all the operands.
+     */
+    template<int K>
+    inline typename enable_if<detail::is_value_within_bounds<K, 0, 2>::value, const char *>::type neighbor_data() const {
+        if (m_neighbor_within_bounds) {
+            return m_neighbor_data[K];
+        } else {
+            return NULL;
+        }
     }
 };
 
