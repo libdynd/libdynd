@@ -207,6 +207,10 @@ public:
         return false;
     }
 
+    const intptr_t *index() const {
+        return m_iterindex.get();
+    }
+
     const char *data() {
         return m_data;
     }
@@ -222,13 +226,13 @@ public:
 
 template<>
 class array_neighborhood_iter<0, 1> : public array_iter<0, 1> {
-    dimvector m_neighborhood_iterindex;
+    dimvector m_neighbor_iterindex;
     dimvector m_neighborhood_iteroffset;
     dimvector m_neighborhood_itershape;
+    bool m_neighbor_within_bounds;
     const char *m_origin_data;
     const char *m_neighbor_data;
     iterdata_common *m_neighborhood_iterdata;
-    bool m_within_bounds;
 
     inline void init(const ndt::type& tp0, const char *arrmeta0, const char *data0, size_t ndim,
         const intptr_t *neighborhood_shape, const intptr_t *neighborhood_offset)
@@ -236,8 +240,8 @@ class array_neighborhood_iter<0, 1> : public array_iter<0, 1> {
         array_iter<0, 1>::init(tp0, arrmeta0, data0, ndim);
 
         if (m_iter_ndim != 0) {
-            m_neighborhood_iterindex.init(m_iter_ndim);
-            memset(m_neighborhood_iterindex.get(), 0, sizeof(intptr_t) * m_iter_ndim);
+            m_neighbor_iterindex.init(m_iter_ndim);
+            memset(m_neighbor_iterindex.get(), 0, sizeof(intptr_t) * m_iter_ndim);
             m_neighborhood_itershape.init(m_iter_ndim, neighborhood_shape);
             if (neighborhood_offset == NULL) {
                 m_neighborhood_iteroffset.init(m_iter_ndim);
@@ -251,7 +255,7 @@ class array_neighborhood_iter<0, 1> : public array_iter<0, 1> {
                 throw std::bad_alloc();
             }
             m_array_tp.iterdata_construct(m_neighborhood_iterdata,
-                            &m_arrmeta, m_iter_ndim, m_itershape.get(), m_uniform_tp);
+                            &arrmeta0, m_iter_ndim, m_itershape.get(), m_uniform_tp);
             m_origin_data = m_neighborhood_iterdata->reset(m_neighborhood_iterdata, const_cast<char *>(data0), m_iter_ndim);
             m_neighbor_data = m_origin_data;
         } else {
@@ -267,121 +271,87 @@ public:
     }
 
     bool next() {
-        array_iter<0, 1>::next();
+        size_t i = 0;
+        if (array_iter<0, 1>::next()) {
+            memset(m_neighbor_iterindex.get(), 0, sizeof(intptr_t) * m_iter_ndim);
+            m_neighborhood_iterdata->reset(m_neighborhood_iterdata, const_cast<char *>(m_origin_data), m_iter_ndim);
 
-        size_t i = m_iter_ndim;
-        if (i != 0) {
-            do {
-                --i;
-                if (++m_neighborhood_iterindex[i] != m_itershape[i]) {
-                    m_neighbor_data = m_neighborhood_iterdata->incr(m_neighborhood_iterdata, m_iter_ndim - i - 1);
-                    return true;
+            m_neighbor_within_bounds = true;
+            while (i != m_iter_ndim) {
+                intptr_t j = m_iterindex[i] + m_neighborhood_iteroffset[i];
+                if (j >= 0) {
+                    m_neighbor_data = m_neighborhood_iterdata->adv(m_neighborhood_iterdata, m_iter_ndim - i - 1, j);
                 } else {
-                    m_neighborhood_iterindex[i] = 0;
+                    m_neighbor_within_bounds = false;
                 }
-            } while (i != 0);
+                ++i;
+            }
+
+            return true;
         }
 
         return false;
     }
 
     bool next_neighbor() {
-        return false;
-    }
+        size_t i = m_iter_ndim;
+        if (i != 0) {
+            bool empty = true;
+            do {
+                --i;
+                if (++m_neighbor_iterindex[i] != m_neighborhood_itershape[i]) {
+                    empty = false;
+                    break;
+                } else {
+                    m_neighbor_iterindex[i] = 0;
+                }
+            } while (i != 0);
 
-    const char *neighbor_data() {
-//        if (m_within_bounds) {
-            return m_neighbor_data;
-  //      } else {
-    //        return NULL;
-      //  }
-    }
-};
-
-/*
-        if (array_iter<0, 1>::next()) {
-  //          m_neighborhood_iterdata->reset(m_neighborhood_iterdata, const_cast<char *>(m_origin_data), m_iter_ndim);
-//            m_neighbor_data = m_neighborhood_iterdata->adv(m_neighborhood_iterdata, 0, 0);
-
-
-            size_t i = m_iter_ndim;
-            if (i != 0) {
-                do {
-                    --i;
-                    if (m_iterindex[i] != m_itershape[i]) {
-                        m_neighbor_data = m_neighborhood_iterdata->incr(m_neighborhood_iterdata, m_iter_ndim - i - 1);
-                        break;
-                    } else {
-                        m_iterindex[i] = 0;
-                    }
-                } while (i != 0);
+            if (empty) {
+                return false;
             }
-*/
 
-//            bool found = false;
-
-/*            size_t i = m_iter_ndim;
-            if (i != 0) {
-                m_within_bounds = true;
-                do {
-                    --i;
-                    intptr_t index = m_iterindex[i] + m_neighborhood_iteroffset[i];
-                    std::cout << "DEBUG: INDEX " << index << std::endl;
-                    if (index < 0) {
-                        m_within_bounds = false;
-                        index = 0;
-                    } else if (index >= m_itershape[i]) {
-                        m_within_bounds = false;
-                        index = m_itershape[i] - 1;
+            if (m_neighbor_within_bounds) {
+                m_neighbor_data = m_neighborhood_iterdata->incr(m_neighborhood_iterdata, m_iter_ndim - i - 1);
+                while (++i != m_iter_ndim) {
+                    intptr_t j = m_iterindex[i] + m_neighborhood_iteroffset[i];
+                    if (j >= 0) {
+                        m_neighbor_data = m_neighborhood_iterdata->adv(m_neighborhood_iterdata, m_iter_ndim - i - 1, j);
                     }
-                    if (m_iterindex[i] != 0 && !found) {
-                        found = true;
-//                      m_neighbor_data = m_neighborhood_iterdata->adv(m_neighborhood_iterdata, m_iter_ndim - i - 1, index);
-                        m_neighbor_data = m_neighborhood_iterdata->incr(m_neighborhood_iterdata, m_iter_ndim - i - 1);
-                    }
-                } while (i != 0);
+                }
+            } else {
+                i = m_iter_ndim;
             }
+
+            m_neighbor_within_bounds = true;
+            do {
+                --i;
+                intptr_t j = m_iterindex[i] + m_neighborhood_iteroffset[i] + m_neighbor_iterindex[i];
+                m_neighbor_within_bounds &= (j >= 0) && (j < m_itershape[i]);
+            } while (i != 0);
 
             return true;
         }
 
         return false;
-*/
+    }
 
-    // if new is at 0, then incr and adv by appropriate amount
-    // otherwise, if within_bounds then adv by 1
+    const intptr_t *neighbor_index() const {
+        return m_neighbor_iterindex.get();
+    }
 
-    // inside -> inside = adv by 1, unless at boundary of neighborhood then same as outside -> inside
-    // outside -> inside = incr, then adv by appropriate amount
-    // inside -> outside or outside -> outside = nothing
+    bool neighbor_within_bounds() const {
+        return m_neighbor_within_bounds;
+    }
 
-
-/*
-        size_t i = m_iter_ndim;
-        if (i != 0) {
-            m_within_bounds = true;
-            do {
-                --i;
-                if (++m_iterindex[i] != m_itershape[i]) {
-                    // modify m_within_bounds
-                    break;
-                } else {
-                    m_iterindex[i] = 0;
-                    // modify m_within_bounds
-                }
-            } while (i != 0);
-
-            if (m_within_bounds) {
-                // adv level i by 1
-                do {
-                    ++i;
-                    // incr and adv level
-                } while (i != m_iter_ndim)
-            }
-
-            return true;
-        }*/
-
+    const char *neighbor_data() {
+        if (m_neighbor_within_bounds) {
+            return m_neighbor_data;
+        } else {
+            return NULL;
+        }
+    }
+};
 
 template<>
 class array_iter<1, 1> {
