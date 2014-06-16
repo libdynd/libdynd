@@ -541,6 +541,8 @@ class array_neighborhood_iter<1, 1> : public array_iter<1, 1> {
         if (m_iter_ndim[0] != 0) {
             m_neighbor_rel_iterindex.init(m_iter_ndim[0]);
             memset(m_neighbor_rel_iterindex.get(), 0, sizeof(intptr_t) * m_iter_ndim[0]);
+            m_neighbor_iterindex.init(m_iter_ndim[0]);
+            memset(m_neighbor_iterindex.get(), 0, sizeof(intptr_t) * m_iter_ndim[0]);
             m_neighborhood_itershape.init(m_iter_ndim[0], neighborhood_shape);
             if (neighborhood_offset == NULL) {
                 m_neighborhood_iteroffset.init(m_iter_ndim[0]);
@@ -548,7 +550,6 @@ class array_neighborhood_iter<1, 1> : public array_iter<1, 1> {
             } else {
                 m_neighborhood_iteroffset.init(m_iter_ndim[0], neighborhood_offset);
             }
-            m_neighbor_iterindex.init(m_iter_ndim[0]);
 
             size_t iterdata_size = m_array_tp[0].extended()->get_iterdata_size(m_iter_ndim[0]);
             m_neighborhood_iterdata[0] = reinterpret_cast<iterdata_common *>(malloc(iterdata_size));
