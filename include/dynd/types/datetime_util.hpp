@@ -93,20 +93,25 @@ struct datetime_struct {
      * \param errmode  The error mode to use for how strict to be when converting
      *                 values. In mode assign_error_none, tries to do a "best interpretation"
      *                 conversion.
+     *
+     * \returns  The time zone, if any, found in the string
      */
-    inline void
+    inline std::string
     set_from_str(const std::string &s,
                  date_parse_order_t ambig = date_parse_no_ambig,
                  int century_window = 70,
                  assign_error_mode errmode = assign_error_fractional)
     {
+        const char *tz_begin = NULL, *tz_end = NULL;
         set_from_str(s.data(), s.data() + s.size(), ambig, century_window,
-                     errmode);
+                     errmode, tz_begin, tz_end);
+        return std::string(tz_begin, tz_end);
     }
 
     void set_from_str(const char *begin, const char *end,
                       date_parse_order_t ambig, int century_window,
-                      assign_error_mode errmode);
+                      assign_error_mode errmode, const char *&out_tz_begin,
+                      const char *&out_tz_end);
 
     /**
      * Returns an ndt::type corresponding to the datetime_struct structure.

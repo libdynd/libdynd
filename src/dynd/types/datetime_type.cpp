@@ -24,6 +24,7 @@
 #include <dynd/exceptions.hpp>
 #include <dynd/func/make_callable.hpp>
 #include <dynd/array_iter.hpp>
+#include <dynd/parser_util.hpp>
 
 #include <datetime_strings.h>
 #include <datetime_localtime.h>
@@ -93,8 +94,21 @@ void datetime_type::set_from_utf8_string(const char *DYND_UNUSED(arrmeta),
                                          const eval::eval_context *ectx) const
 {
     datetime_struct dts;
+    const char *tz_begin = NULL, *tz_end = NULL;
     dts.set_from_str(utf8_begin, utf8_end, ectx->date_parse_order,
-                     ectx->century_window, ectx->errmode);
+                     ectx->century_window, ectx->errmode, tz_begin, tz_end);
+    if (m_timezone != tz_abstract && tz_begin != tz_end) {
+        if (m_timezone == tz_utc &&
+                (parse::compare_range_to_literal(tz_begin, tz_end, "Z") ||
+                 parse::compare_range_to_literal(tz_begin, tz_end, "UTC"))) {
+            // It's a UTC time to a UTC time zone
+        } else {
+            stringstream ss;
+            ss << "DyND time zone support is partial, cannot handle ";
+            ss.write(tz_begin, tz_end - tz_begin);
+            throw runtime_error(ss.str());
+        }
+    }
     *reinterpret_cast<int64_t *>(data) = dts.to_ticks();
 }
 
@@ -118,8 +132,10 @@ void datetime_type::print_data(std::ostream& o,
 {
     datetime_struct dts;
     dts.set_from_ticks(*reinterpret_cast<const int64_t *>(data));
-    // TODO: Handle distiction between printing abstract and UTC units
     o << dts.to_str();
+    if (m_timezone == tz_utc) {
+        o << "Z";
+    }
 }
 
 void datetime_type::print_type(std::ostream& o) const

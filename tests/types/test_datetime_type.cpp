@@ -74,10 +74,12 @@ TEST(DateTimeDType, ValueCreationAbstract) {
     EXPECT_EQ((((1600-1970)*365 - (1972-1600)/4 + 3 + 366) * 1440LL) * 60 * 10000000LL,
                     nd::array("1601-01-01T00").ucast(d).view_scalars(di).as<int64_t>());
 
-    // Parsing Zulu timezone as abstract raises an error
-    EXPECT_THROW(nd::array("2000-01-01T03:00Z").ucast(d).eval(), invalid_argument);
-    // Parsing specified timezone as abstract raises an error
-    EXPECT_THROW(nd::array("2000-01-01T03:00+0300").ucast(d).eval(), invalid_argument);
+    // Parsing Zulu timezone as abstract works ok (throws away time zone)
+    EXPECT_EQ("2000-01-01T03:00",
+              nd::array("2000-01-01T03:00Z").ucast(d).eval().as<string>());
+    // Parsing specified timezone as abstract works ok (throws away time zone)
+    EXPECT_EQ("2000-01-01T03:00",
+              nd::array("2000-01-01T03:00+0300").ucast(d).eval().as<string>());
 
     // Parsing Zulu timezone as abstract with no error checking works though
 //    EXPECT_EQ((((1600-1970)*365 - (1972-1600)/4 + 3) * 1440LL + 15 * 60 + 45) * 60 * 10000000LL,

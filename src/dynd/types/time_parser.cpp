@@ -12,8 +12,67 @@ using namespace std;
 using namespace dynd;
 using namespace dynd::parse;
 
+bool parse::parse_timezone(const char *&rbegin, const char *end,
+                           const char *&out_tz_begin, const char *&out_tz_end)
+{
+    const char *begin = rbegin;
+    skip_whitespace(begin, end);
+    if (begin == end) {
+        return false;
+    }
+    const char *tz_begin = begin;
+    if (begin[0] == '+' || begin[0] == '-') {
+        // ISO-style offset +05, +0500, -05:30
+        ++begin;
+        if (end - begin < 2 || begin[0] < '0' || begin[0] > '9' ||
+                begin[1] < '0' || begin[1] > '9') {
+            return false;
+        }
+        begin += 2;
+        if (begin == end ||
+                !(begin[0] == ':' || (begin[0] >= '0' && begin[0] <= '9'))) {
+            // +hh or -hh
+            rbegin = begin;
+            out_tz_begin = tz_begin;
+            out_tz_end = begin;
+            return true;
+        }
+        if (begin[0] == ':') {
+            // +hh:mm or -hh:mm
+            ++begin;
+        }
+        if (end - begin < 2 || begin[0] < '0' || begin[0] > '9' ||
+                begin[1] < '0' || begin[1] > '9') {
+            return false;
+        }
+        begin += 2;
+        if (begin != end && begin[0] >= '0' && begin[0] <= '9') {
+            // Don't allow extra digits
+            return false;
+        }
+        // +hh:mm, -hh:mm, +hhmm, -hhmm
+        rbegin = begin;
+        out_tz_begin = tz_begin;
+        out_tz_end = begin;
+        return true;
+    } else if (isalpha(begin[0])) {
+        // Z, UTC, CST, America/Chicago, etc
+        ++begin;
+        while (begin < end && (isalpha(begin[0]) || begin[0] == '/')) {
+            ++begin;
+        }
+        rbegin = begin;
+        out_tz_begin = tz_begin;
+        out_tz_end = begin;
+        return true;
+    } else {
+        return false;
+    }
+}
+
 // Similar to ISO 8601, but allow 1-digit hour, AM/PM specifier
-static bool parse_flex_time(const char *&begin, const char *end, time_hmst &out_hmst)
+static bool parse_flex_time(const char *&begin, const char *end,
+                            time_hmst &out_hmst)
 {
     saved_begin_state sbs(begin);
 
@@ -136,7 +195,19 @@ bool parse::parse_time_ampm(const char *&begin, const char *end, int& inout_hour
     }
 }
 
-bool parse::parse_time(const char *&begin, const char *end, time_hmst &out_hmst)
+bool parse::parse_time(const char *&begin, const char *end, time_hmst &out_hmst,
+                       const char *&out_tz_begin, const char *&out_tz_end)
+{
+    if (parse::parse_time_no_tz(begin, end, out_hmst)) {
+        parse_timezone(begin, end, out_tz_begin, out_tz_end);
+        return true;
+    } else {
+        return false;
+    }
+}
+
+bool parse::parse_time_no_tz(const char *&begin, const char *end,
+                             time_hmst &out_hmst)
 {
     if (parse_flex_time(begin, end, out_hmst)) {
         // Allows 1-digit hour, AM/PM
@@ -148,12 +219,13 @@ bool parse::parse_time(const char *&begin, const char *end, time_hmst &out_hmst)
     return true;
 }
 
-
-bool dynd::string_to_time(const char *begin, const char *end, time_hmst &out_hmst)
+bool dynd::string_to_time(const char *begin, const char *end,
+                          time_hmst &out_hmst, const char *&out_tz_begin,
+                          const char *&out_tz_end)
 {
     time_hmst hmst;
     skip_whitespace(begin, end);
-    if (!parse_time(begin, end, hmst)) {
+    if (!parse_time(begin, end, hmst, out_tz_begin, out_tz_end)) {
         return false;
     }
     skip_whitespace(begin, end);

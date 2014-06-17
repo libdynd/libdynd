@@ -74,9 +74,10 @@ void time_hmst::set_from_ticks(int64_t ticks)
     }
 }
 
-void time_hmst::set_from_str(const char *begin, const char *end)
+void time_hmst::set_from_str(const char *begin, const char *end,
+                             const char *&out_tz_begin, const char *&out_tz_end)
 {
-    if (!string_to_time(begin, end, *this)) {
+    if (!string_to_time(begin, end, *this, out_tz_begin, out_tz_end)) {
         stringstream ss;
         ss << "Unable to parse ";
         print_escaped_utf8_string(ss, begin, end);
