@@ -19,11 +19,12 @@
 #include <dynd/types/struct_type.hpp>
 #include <dynd/func/callable.hpp>
 #include <dynd/func/call_callable.hpp>
+#include <dynd/json_parser.hpp>
 
 using namespace std;
 using namespace dynd;
 
-TEST(DateTimeDType, Create) {
+TEST(DatetimeType, Create) {
     ndt::type d;
     const datetime_type *dd;
 
@@ -45,7 +46,7 @@ TEST(DateTimeDType, Create) {
     EXPECT_EQ(d, ndt::type(d.str()));
 }
 
-TEST(DateTimeDType, CreateFromString) {
+TEST(DatetimeType, CreateFromString) {
     ndt::type d;
     const datetime_type *dd;
 
@@ -64,7 +65,7 @@ TEST(DateTimeDType, CreateFromString) {
     EXPECT_EQ(d, ndt::type(d.str()));
 }
 
-TEST(DateTimeDType, ValueCreationAbstract) {
+TEST(DatetimeType, ValueCreationAbstract) {
     ndt::type d = ndt::make_datetime(), di = ndt::make_type<int64_t>();
 
     EXPECT_EQ((((1600-1970)*365 - (1972-1600)/4 + 3 - 365) * 1440LL + 4 * 60 + 16) * 60 * 10000000LL,
@@ -90,54 +91,74 @@ TEST(DateTimeDType, ValueCreationAbstract) {
 }
 
 
-TEST(DateTimeDType, ValueCreationUTC) {
+TEST(DatetimeType, ValueCreationUTC) {
     ndt::type d = ndt::make_datetime(tz_utc), di = ndt::make_type<int64_t>();
 
+    EXPECT_EQ((((1600-1970)*365 - (1972-1600)/4 + 3 - 365) * 1440LL + 4 * 60 + 16) * 60 * 10000000LL,
+                    nd::array("1599-01-01T04:16").ucast(d).view_scalars(di).as<int64_t>());
+    EXPECT_EQ((((1600-1970)*365 - (1972-1600)/4 + 3 - 365) * 1440LL + 4 * 60 + 16) * 60 * 10000000LL,
+                    nd::array("1599-01-01T04:16Z").ucast(d).view_scalars(di).as<int64_t>());
     // TODO: enable this test
-    //EXPECT_EQ((((1600-1970)*365 - (1972-1600)/4 + 3 - 365) * 1440LL + 4 * 60 + 16) * 60 * 10000000LL,
-    //                nd::array("1599-01-01T04:16").ucast(d).view_scalars(di).as<int64_t>());
-//    EXPECT_EQ((((1600-1970)*365 - (1972-1600)/4 + 3 - 365) * 1440LL + 4 * 60 + 16) * 60 * 10000000LL,
-//                    nd::array("1599-01-01T04:16Z").ucast(d).view_scalars(di).as<int64_t>());
-//    EXPECT_EQ((((1600-1970)*365 - (1972-1600)/4 + 3) * 1440LL + 15 * 60 + 45) * 60 * 10000000LL,
-//                    nd::array("1600-01-01 14:45-0100").ucast(d).view_scalars(di).as<int64_t>());
-//    EXPECT_EQ((((1600-1970)*365 - (1972-1600)/4 + 3 + 366) * 1440LL) * 60 * 10000000LL,
-//                    nd::array("1601-01-01T00Z").ucast(d).view_scalars(di).as<int64_t>());
+    //EXPECT_EQ((((1600-1970)*365 - (1972-1600)/4 + 3) * 1440LL + 15 * 60 + 45) * 60 * 10000000LL,
+    //                nd::array("1600-01-01 14:45-0100").ucast(d).view_scalars(di).as<int64_t>());
+    EXPECT_EQ((((1600-1970)*365 - (1972-1600)/4 + 3 + 366) * 1440LL) * 60 * 10000000LL,
+                    nd::array("1601-01-01T00:00Z").ucast(d).view_scalars(di).as<int64_t>());
 }
 
-TEST(DateTimeDType, ConvertToString) {
+TEST(DatetimeType, ConvertToString) {
     EXPECT_EQ("2013-02-16T12:00",
                     nd::array("2013-02-16T12").cast(ndt::type("datetime")).as<string>());
-//    EXPECT_EQ("2013-02-16T12:00Z",
-//                    nd::array("2013-02-16T12Z").cast(ndt::type("datetime[tz='UTC']")).as<string>());
+    EXPECT_EQ("2013-02-16T12:00Z",
+                    nd::array("2013-02-16T12").cast(ndt::type("datetime[tz='UTC']")).as<string>());
 
     EXPECT_EQ("2013-02-16T12:13",
                     nd::array("2013-02-16T12:13").cast(ndt::type("datetime")).as<string>());
-//    EXPECT_EQ("2013-02-16T12:13Z",
-//                    nd::array("2013-02-16T12:13Z").cast(ndt::type("datetime[tz='UTC']")).as<string>());
+    EXPECT_EQ("2013-02-16T12:13Z",
+                    nd::array("2013-02-16T12:13Z").cast(ndt::type("datetime[tz='UTC']")).as<string>());
 
     EXPECT_EQ("2013-02-16T12:13:19",
                     nd::array("2013-02-16T12:13:19").cast(ndt::type("datetime")).as<string>());
-//    EXPECT_EQ("2013-02-16T12:13:19Z",
-//                    nd::array("2013-02-16T12:13:19Z").cast(ndt::type("datetime[tz='UTC']")).as<string>());
+    EXPECT_EQ("2013-02-16T12:13:19Z",
+                    nd::array("2013-02-16T12:13:19Z").cast(ndt::type("datetime[tz='UTC']")).as<string>());
 
     EXPECT_EQ("2013-02-16T12:13:19.012",
                     nd::array("2013-02-16T12:13:19.012").cast(ndt::type("datetime")).as<string>());
-//    EXPECT_EQ("2013-02-16T12:13:19.012Z",
-//                    nd::array("2013-02-16T12:13:19.012Z").cast(ndt::type("datetime[tz='UTC']")).as<string>());
+    EXPECT_EQ("2013-02-16T12:13:19.012Z",
+                    nd::array("2013-02-16T12:13:19.012Z").cast(ndt::type("datetime[tz='UTC']")).as<string>());
 
     EXPECT_EQ("2013-02-16T12:13:19.012345",
                     nd::array("2013-02-16T12:13:19.012345").cast(ndt::type("datetime")).as<string>());
-//    EXPECT_EQ("2013-02-16T12:13:19.012345Z",
-//                    nd::array("2013-02-16T12:13:19.012345Z").cast(ndt::type("datetime[tz='UTC']")).as<string>());
+    EXPECT_EQ("2013-02-16T12:13:19.012345Z",
+                    nd::array("2013-02-16T12:13:19.012345Z").cast(ndt::type("datetime[tz='UTC']")).as<string>());
 
     // Ticks resolution (100*nanoseconds)
     EXPECT_EQ("2013-02-16T12:13:19.0123456",
                     nd::array("2013-02-16T12:13:19.0123456").cast(ndt::type("datetime")).as<string>());
-//    EXPECT_EQ("2013-02-16T12:13:19.0123456Z",
-//                    nd::array("2013-02-16T12:13:19.0123456Z").cast(ndt::type("datetime[tz='UTC']")).as<string>());
+    EXPECT_EQ("2013-02-16T12:13:19.0123456Z",
+                    nd::array("2013-02-16T12:13:19.0123456Z").cast(ndt::type("datetime[tz='UTC']")).as<string>());
 }
 
-TEST(DateTimeDType, Properties) {
+TEST(DatetimeType, AbstractTZToUTC) {
+    // Assigning from an abstract/naive timezone to UTC is allowed, the datetime
+    // value adopts the destination time zone.
+    nd::array a = parse_json("2 * datetime",
+                             "[\"2013-01-15T12:30\", \"2010-03-12T11:15:59\"]");
+    nd::array b = nd::empty("2 * datetime[tz='UTC']");
+    b.vals() = a;
+    EXPECT_EQ("2013-01-15T12:30Z", b(0).as<string>());
+    EXPECT_EQ("2010-03-12T11:15:59Z", b(1).as<string>());
+
+    // Assigning the other way is not ok by default, except in nocheck error
+    // mode
+    a = nd::empty("datetime");
+    EXPECT_THROW(a.vals() = b(0), type_error);
+    eval::eval_context ectx;
+    ectx.errmode = assign_error_none;
+    a.val_assign(b(1), &ectx);
+    EXPECT_EQ("2010-03-12T11:15:59", a.as<string>());
+}
+
+TEST(DatetimeType, Properties) {
     nd::array n;
 
     n = nd::array("1963-02-28T16:12:14.123654").cast(ndt::type("datetime")).eval();

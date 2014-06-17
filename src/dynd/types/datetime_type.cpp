@@ -194,6 +194,30 @@ size_t datetime_type::make_assignment_kernel(
         if (src_tp == dst_tp) {
             return make_pod_typed_data_assignment_kernel(out, offset_out,
                             get_data_size(), get_data_alignment(), kernreq);
+        } else if (src_tp.get_type_id() == datetime_type_id) {
+            if (src_tp.tcast<datetime_type>()->get_timezone() == tz_abstract) {
+                // TODO: If the destination timezone is not UTC, do an
+                //       appropriate transformation
+                if (get_timezone() == tz_utc) {
+                    return make_pod_typed_data_assignment_kernel(
+                        out, offset_out, get_data_size(), get_data_alignment(),
+                        kernreq);
+                }
+            } else if (get_timezone() != tz_abstract) {
+                // The value stored is independent of the time zone, so
+                // a straight assignment is fine.
+                return make_pod_typed_data_assignment_kernel(
+                    out, offset_out, get_data_size(), get_data_alignment(),
+                    kernreq);
+            } else if (ectx->errmode == assign_error_none) {
+                // TODO: If the source timezone is not UTC, do an appropriate
+                //       transformation
+                if (src_tp.tcast<datetime_type>()->get_timezone() == tz_utc) {
+                    return make_pod_typed_data_assignment_kernel(
+                        out, offset_out, get_data_size(), get_data_alignment(),
+                        kernreq);
+                }
+            }
         } else if (src_tp.get_kind() == string_kind) {
             // Assignment from strings
             return make_string_to_datetime_assignment_kernel(

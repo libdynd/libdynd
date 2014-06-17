@@ -81,6 +81,9 @@ namespace {
             string s = dts.to_str();
             if (s.empty()) {
                 s = "NA";
+            } else if (m_src_datetime_tp.tcast<datetime_type>()
+                           ->get_timezone() == tz_utc) {
+                s += "Z";
             }
             const base_string_type *bst = static_cast<const base_string_type *>(m_dst_string_tp.extended());
             bst->set_from_utf8_string(m_dst_arrmeta, dst, s, &m_ectx);
