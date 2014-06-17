@@ -1,5 +1,5 @@
 //
-// Copyright (C) 2011-14 Mark Wiebe, DyND Developers
+// Copyright (C) 2011-14 Mark Wiebe, Irwin Zaid, DyND Developers
 // BSD 2-Clause License, see LICENSE.txt
 //
 
@@ -121,7 +121,6 @@ public:
 
 template<>
 class array_iter<0, 1> {
-protected:
     intptr_t m_itersize;
     size_t m_iter_ndim;
     dimvector m_iterindex;
@@ -130,9 +129,6 @@ protected:
     const char *m_arrmeta;
     iterdata_common *m_iterdata;
     ndt::type m_array_tp, m_uniform_tp;
-
-    array_iter() {
-    }
 
     inline void init(const ndt::type& tp0, const char *arrmeta0, const char *data0, size_t ndim)
     {
@@ -207,10 +203,6 @@ public:
         return false;
     }
 
-    const intptr_t *index() const {
-        return m_iterindex.get();
-    }
-
     const char *data() {
         return m_data;
     }
@@ -221,139 +213,6 @@ public:
 
     const ndt::type& get_uniform_dtype() const {
         return m_uniform_tp;
-    }
-};
-
-template<>
-class array_neighborhood_iter<0, 1> : public array_iter<0, 1> {
-    dimvector m_neighbor_iterindex;
-    dimvector m_neighborhood_iteroffset;
-    dimvector m_neighborhood_itershape;
-    bool m_neighbor_within_bounds;
-    const char *m_origin_data;
-    const char *m_neighbor_data;
-    iterdata_common *m_neighborhood_iterdata;
-
-    inline void init(const ndt::type& tp0, const char *arrmeta0, const char *data0, size_t ndim,
-        const intptr_t *neighborhood_shape, const intptr_t *neighborhood_offset)
-    {
-        array_iter<0, 1>::init(tp0, arrmeta0, data0, ndim);
-
-        if (m_iter_ndim != 0) {
-            m_neighbor_iterindex.init(m_iter_ndim);
-            memset(m_neighbor_iterindex.get(), 0, sizeof(intptr_t) * m_iter_ndim);
-            m_neighborhood_itershape.init(m_iter_ndim, neighborhood_shape);
-            if (neighborhood_offset == NULL) {
-                m_neighborhood_iteroffset.init(m_iter_ndim);
-                memset(m_neighborhood_iteroffset.get(), 0, sizeof(intptr_t) * m_iter_ndim);
-            } else {
-                m_neighborhood_iteroffset.init(m_iter_ndim, neighborhood_offset);
-            }
-
-            m_neighborhood_iterdata = reinterpret_cast<iterdata_common *>(malloc(sizeof(m_iterdata)));
-            if (!m_iterdata) {
-                throw std::bad_alloc();
-            }
-            m_array_tp.iterdata_construct(m_neighborhood_iterdata,
-                            &arrmeta0, m_iter_ndim, m_itershape.get(), m_uniform_tp);
-            m_origin_data = m_neighborhood_iterdata->reset(m_neighborhood_iterdata, const_cast<char *>(data0), m_iter_ndim);
-            m_neighbor_data = m_origin_data;
-        } else {
-            m_neighborhood_iterdata = NULL;
-            m_origin_data = data0;
-            m_neighbor_data = m_origin_data;
-        }
-    }
-
-public:
-    array_neighborhood_iter(const nd::array& op0, const intptr_t *shape, const intptr_t *offset = NULL) {
-        init(op0.get_type(), op0.get_arrmeta(), op0.get_readonly_originptr(), 0, shape, offset);
-    }
-
-    bool next() {
-        size_t i = 0;
-        if (array_iter<0, 1>::next()) {
-            memset(m_neighbor_iterindex.get(), 0, sizeof(intptr_t) * m_iter_ndim);
-            m_neighborhood_iterdata->reset(m_neighborhood_iterdata, const_cast<char *>(m_origin_data), m_iter_ndim);
-
-            m_neighbor_within_bounds = true;
-            while (i != m_iter_ndim) {
-                intptr_t j = m_iterindex[i] + m_neighborhood_iteroffset[i];
-                if (j >= 0) {
-                    m_neighbor_data = m_neighborhood_iterdata->adv(m_neighborhood_iterdata, m_iter_ndim - i - 1, j);
-                } else {
-                    m_neighbor_within_bounds = false;
-                }
-                ++i;
-            }
-
-            return true;
-        }
-
-        return false;
-    }
-
-    bool next_neighbor() {
-        size_t i = m_iter_ndim;
-        if (i != 0) {
-            bool neighborhood_empty = true;
-            do {
-                --i;
-                if (++m_neighbor_iterindex[i] != m_neighborhood_itershape[i]) {
-                    neighborhood_empty = false;
-                    break;
-                } else {
-                    m_neighbor_iterindex[i] = 0;
-                }
-            } while (i != 0);
-
-            if (neighborhood_empty) {
-                return false;
-            }
-
-//            size_t k = i;
-
-            // do rest of within_bounds
-
-            if (m_neighbor_within_bounds) {
-                m_neighbor_data = m_neighborhood_iterdata->incr(m_neighborhood_iterdata, m_iter_ndim - i - 1);
-                while (++i != m_iter_ndim) {
-                    intptr_t j = m_iterindex[i] + m_neighborhood_iteroffset[i];
-                    if (j >= 0) {
-                        m_neighbor_data = m_neighborhood_iterdata->adv(m_neighborhood_iterdata, m_iter_ndim - i - 1, j);
-                    }
-                }
-            } else {
-                i = m_iter_ndim;
-            }
-
-            m_neighbor_within_bounds = true;
-            do {
-                --i;
-                intptr_t j = m_iterindex[i] + m_neighborhood_iteroffset[i] + m_neighbor_iterindex[i];
-                m_neighbor_within_bounds &= (j >= 0) && (j < m_itershape[i]);
-            } while (i != 0);
-
-            return true;
-        }
-
-        return false;
-    }
-
-    const intptr_t *neighbor_index() const {
-        return m_neighbor_iterindex.get();
-    }
-
-    bool neighbor_within_bounds() const {
-        return m_neighbor_within_bounds;
-    }
-
-    const char *neighbor_data() {
-        if (m_neighbor_within_bounds) {
-            return m_neighbor_data;
-        } else {
-            return NULL;
-        }
     }
 };
 
