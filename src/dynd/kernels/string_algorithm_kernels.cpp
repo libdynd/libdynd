@@ -166,8 +166,8 @@ void kernels::string_find_kernel::single(
     string_encoding_t str_encoding = e->m_str_type->get_encoding();
     string_encoding_t sub_encoding = e->m_sub_type->get_encoding();
     // TODO: Get the error mode from the evaluation context
-    next_unicode_codepoint_t str_next_fn = get_next_unicode_codepoint_function(str_encoding, assign_error_none);
-    next_unicode_codepoint_t sub_next_fn = get_next_unicode_codepoint_function(sub_encoding, assign_error_none);
+    next_unicode_codepoint_t str_next_fn = get_next_unicode_codepoint_function(str_encoding, assign_error_nocheck);
+    next_unicode_codepoint_t sub_next_fn = get_next_unicode_codepoint_function(sub_encoding, assign_error_nocheck);
 
     intptr_t *d = reinterpret_cast<intptr_t *>(dst);
     // Get the extents of the string and substring
@@ -188,8 +188,8 @@ void kernels::string_find_kernel::strided(
     string_encoding_t str_encoding = e->m_str_type->get_encoding();
     string_encoding_t sub_encoding = e->m_sub_type->get_encoding();
     // TODO: Get the error mode from the evaluation context
-    next_unicode_codepoint_t str_next_fn = get_next_unicode_codepoint_function(str_encoding, assign_error_none);
-    next_unicode_codepoint_t sub_next_fn = get_next_unicode_codepoint_function(sub_encoding, assign_error_none);
+    next_unicode_codepoint_t str_next_fn = get_next_unicode_codepoint_function(str_encoding, assign_error_nocheck);
+    next_unicode_codepoint_t sub_next_fn = get_next_unicode_codepoint_function(sub_encoding, assign_error_nocheck);
 
     const char *src_str = src[0], *src_sub = src[1];
     for (size_t i = 0; i != count; ++i) {

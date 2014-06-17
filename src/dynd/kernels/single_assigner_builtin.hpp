@@ -43,7 +43,7 @@ struct single_assigner_builtin_base : public single_assigner_builtin_base_error<
 
 // Any assignment with no error checking
 template<class dst_type, class src_type, type_kind_t dst_kind, type_kind_t src_kind>
-struct single_assigner_builtin_base<dst_type, src_type, dst_kind, src_kind, assign_error_none>
+struct single_assigner_builtin_base<dst_type, src_type, dst_kind, src_kind, assign_error_nocheck>
 {
     DYND_CUDA_HOST_DEVICE static void assign(dst_type *dst, const src_type *src) {
         DYND_TRACE_ASSIGNMENT(static_cast<dst_type>(*src), dst_type, *src, src_type);
@@ -54,7 +54,7 @@ struct single_assigner_builtin_base<dst_type, src_type, dst_kind, src_kind, assi
 
 // Complex floating point -> non-complex with no error checking
 template<class dst_type, class src_real_type>
-struct single_assigner_builtin_base<dst_type, dynd_complex<src_real_type>, int_kind, complex_kind, assign_error_none>
+struct single_assigner_builtin_base<dst_type, dynd_complex<src_real_type>, int_kind, complex_kind, assign_error_nocheck>
 {
     DYND_CUDA_HOST_DEVICE static void assign(dst_type *dst, const dynd_complex<src_real_type> *src) {
         DYND_TRACE_ASSIGNMENT(static_cast<dst_type>(src->real()), dst_type, *src, dynd_complex<src_real_type>);
@@ -63,7 +63,7 @@ struct single_assigner_builtin_base<dst_type, dynd_complex<src_real_type>, int_k
     }
 };
 template<class dst_type, class src_real_type>
-struct single_assigner_builtin_base<dst_type, dynd_complex<src_real_type>, uint_kind, complex_kind, assign_error_none>
+struct single_assigner_builtin_base<dst_type, dynd_complex<src_real_type>, uint_kind, complex_kind, assign_error_nocheck>
 {
     DYND_CUDA_HOST_DEVICE static void assign(dst_type *dst, const dynd_complex<src_real_type> *src) {
         DYND_TRACE_ASSIGNMENT(static_cast<dst_type>(src->real()), dst_type, *src, dynd_complex<src_real_type>);
@@ -72,7 +72,7 @@ struct single_assigner_builtin_base<dst_type, dynd_complex<src_real_type>, uint_
     }
 };
 template<class src_real_type>
-struct single_assigner_builtin_base<float, dynd_complex<src_real_type>, real_kind, complex_kind, assign_error_none>
+struct single_assigner_builtin_base<float, dynd_complex<src_real_type>, real_kind, complex_kind, assign_error_nocheck>
 {
     DYND_CUDA_HOST_DEVICE static void assign(float *dst, const dynd_complex<src_real_type> *src) {
         DYND_TRACE_ASSIGNMENT(static_cast<float>(src->real()), dst_type, *src, dynd_complex<src_real_type>);
@@ -81,7 +81,7 @@ struct single_assigner_builtin_base<float, dynd_complex<src_real_type>, real_kin
     }
 };
 template<class src_real_type>
-struct single_assigner_builtin_base<double, dynd_complex<src_real_type>, real_kind, complex_kind, assign_error_none>
+struct single_assigner_builtin_base<double, dynd_complex<src_real_type>, real_kind, complex_kind, assign_error_nocheck>
 {
     DYND_CUDA_HOST_DEVICE static void assign(double *dst, const dynd_complex<src_real_type> *src) {
         DYND_TRACE_ASSIGNMENT(static_cast<double>(src->real()), dst_type, *src, dynd_complex<src_real_type>);
@@ -93,7 +93,7 @@ struct single_assigner_builtin_base<double, dynd_complex<src_real_type>, real_ki
 
 // Anything -> boolean always means (Anything != 0), does not do overflow, etc checking
 template<class src_type, type_kind_t src_kind>
-struct single_assigner_builtin_base<dynd_bool, src_type, bool_kind, src_kind, assign_error_none>
+struct single_assigner_builtin_base<dynd_bool, src_type, bool_kind, src_kind, assign_error_nocheck>
 {
     DYND_CUDA_HOST_DEVICE static void assign(dynd_bool *dst, const src_type *src) {
         DYND_TRACE_ASSIGNMENT((bool)(s != src_type(0)), dynd_bool, s, src_type);
@@ -103,41 +103,41 @@ struct single_assigner_builtin_base<dynd_bool, src_type, bool_kind, src_kind, as
 };
 template<class src_type, type_kind_t src_kind>
 struct single_assigner_builtin_base<dynd_bool, src_type, bool_kind, src_kind, assign_error_overflow>
-    : public single_assigner_builtin_base<dynd_bool, src_type, bool_kind, src_kind, assign_error_none> {};
+    : public single_assigner_builtin_base<dynd_bool, src_type, bool_kind, src_kind, assign_error_nocheck> {};
 template<class src_type, type_kind_t src_kind>
 struct single_assigner_builtin_base<dynd_bool, src_type, bool_kind, src_kind, assign_error_fractional>
-    : public single_assigner_builtin_base<dynd_bool, src_type, bool_kind, src_kind, assign_error_none> {};
+    : public single_assigner_builtin_base<dynd_bool, src_type, bool_kind, src_kind, assign_error_nocheck> {};
 template<class src_type, type_kind_t src_kind>
 struct single_assigner_builtin_base<dynd_bool, src_type, bool_kind, src_kind, assign_error_inexact>
-    : public single_assigner_builtin_base<dynd_bool, src_type, bool_kind, src_kind, assign_error_none> {};
+    : public single_assigner_builtin_base<dynd_bool, src_type, bool_kind, src_kind, assign_error_nocheck> {};
 
 
 // Boolean -> anything with other error checking
 template<class dst_type, type_kind_t dst_kind>
 struct single_assigner_builtin_base<dst_type, dynd_bool, dst_kind, bool_kind, assign_error_overflow>
-    : public single_assigner_builtin_base<dst_type, dynd_bool, dst_kind, bool_kind, assign_error_none> {};
+    : public single_assigner_builtin_base<dst_type, dynd_bool, dst_kind, bool_kind, assign_error_nocheck> {};
 template<class dst_type, type_kind_t dst_kind>
 struct single_assigner_builtin_base<dst_type, dynd_bool, dst_kind, bool_kind, assign_error_fractional>
-    : public single_assigner_builtin_base<dst_type, dynd_bool, dst_kind, bool_kind, assign_error_none> {};
+    : public single_assigner_builtin_base<dst_type, dynd_bool, dst_kind, bool_kind, assign_error_nocheck> {};
 template<class dst_type, type_kind_t dst_kind>
 struct single_assigner_builtin_base<dst_type, dynd_bool, dst_kind, bool_kind, assign_error_inexact>
-    : public single_assigner_builtin_base<dst_type, dynd_bool, dst_kind, bool_kind, assign_error_none> {};
+    : public single_assigner_builtin_base<dst_type, dynd_bool, dst_kind, bool_kind, assign_error_nocheck> {};
 
 // Boolean -> boolean with other error checking
 template<>
 struct single_assigner_builtin_base<dynd_bool, dynd_bool, bool_kind, bool_kind, assign_error_overflow>
-    : public single_assigner_builtin_base<dynd_bool, dynd_bool, bool_kind, bool_kind, assign_error_none> {};
+    : public single_assigner_builtin_base<dynd_bool, dynd_bool, bool_kind, bool_kind, assign_error_nocheck> {};
 template<>
 struct single_assigner_builtin_base<dynd_bool, dynd_bool, bool_kind, bool_kind, assign_error_fractional>
-    : public single_assigner_builtin_base<dynd_bool, dynd_bool, bool_kind, bool_kind, assign_error_none> {};
+    : public single_assigner_builtin_base<dynd_bool, dynd_bool, bool_kind, bool_kind, assign_error_nocheck> {};
 template<>
 struct single_assigner_builtin_base<dynd_bool, dynd_bool, bool_kind, bool_kind, assign_error_inexact>
-    : public single_assigner_builtin_base<dynd_bool, dynd_bool, bool_kind, bool_kind, assign_error_none> {};
+    : public single_assigner_builtin_base<dynd_bool, dynd_bool, bool_kind, bool_kind, assign_error_nocheck> {};
 
 // Signed int -> signed int with overflow checking just when sizeof(dst) < sizeof(src)
 template<class dst_type, class src_type, bool dst_lt>
 struct single_assigner_builtin_signed_to_signed_overflow_base
-    : public single_assigner_builtin_base<dst_type, src_type, int_kind, int_kind, assign_error_none> {};
+    : public single_assigner_builtin_base<dst_type, src_type, int_kind, int_kind, assign_error_nocheck> {};
 
 // Signed int -> signed int with overflow checking
 template<class dst_type, class src_type>
@@ -173,7 +173,7 @@ struct single_assigner_builtin_base<dst_type, src_type, int_kind, int_kind, assi
 // Unsigned int -> signed int with overflow checking just when sizeof(dst) <= sizeof(src)
 template<class dst_type, class src_type, bool dst_le>
 struct single_assigner_builtin_unsigned_to_signed_overflow_base
-    : public single_assigner_builtin_base<dst_type, src_type, int_kind, uint_kind, assign_error_none> {};
+    : public single_assigner_builtin_base<dst_type, src_type, int_kind, uint_kind, assign_error_nocheck> {};
 template<class dst_type, class src_type>
 struct single_assigner_builtin_unsigned_to_signed_overflow_base<dst_type, src_type, true>
 {
@@ -255,7 +255,7 @@ struct single_assigner_builtin_base<dst_type, src_type, uint_kind, int_kind, ass
 // Unsigned int -> unsigned int with overflow checking just when sizeof(dst) < sizeof(src)
 template<class dst_type, class src_type, bool dst_lt>
 struct single_assigner_builtin_unsigned_to_unsigned_overflow_base
-    : public single_assigner_builtin_base<dst_type, src_type, uint_kind, uint_kind, assign_error_none> {};
+    : public single_assigner_builtin_base<dst_type, src_type, uint_kind, uint_kind, assign_error_nocheck> {};
 
 // Unsigned int -> unsigned int with overflow checking
 template<class dst_type, class src_type>
@@ -311,14 +311,14 @@ struct single_assigner_builtin_base<dst_type, src_type, real_kind, int_kind, ass
 // Signed int -> floating point with other checking
 template<class dst_type, class src_type>
 struct single_assigner_builtin_base<dst_type, src_type, real_kind, int_kind, assign_error_overflow>
-    : public single_assigner_builtin_base<dst_type, src_type, real_kind, int_kind, assign_error_none> {};
+    : public single_assigner_builtin_base<dst_type, src_type, real_kind, int_kind, assign_error_nocheck> {};
 template<class dst_type, class src_type>
 struct single_assigner_builtin_base<dst_type, src_type, real_kind, int_kind, assign_error_fractional>
-    : public single_assigner_builtin_base<dst_type, src_type, real_kind, int_kind, assign_error_none> {};
+    : public single_assigner_builtin_base<dst_type, src_type, real_kind, int_kind, assign_error_nocheck> {};
 
 // Signed int -> complex floating point with no checking
 template<class dst_real_type, class src_type>
-struct single_assigner_builtin_base<dynd_complex<dst_real_type>, src_type, complex_kind, int_kind, assign_error_none>
+struct single_assigner_builtin_base<dynd_complex<dst_real_type>, src_type, complex_kind, int_kind, assign_error_nocheck>
 {
     DYND_CUDA_HOST_DEVICE static void assign(dynd_complex<dst_real_type> *dst, const src_type *src) {
         DYND_TRACE_ASSIGNMENT(d, dynd_complex<dst_real_type>, *src, src_type);
@@ -350,10 +350,10 @@ struct single_assigner_builtin_base<dynd_complex<dst_real_type>, src_type, compl
 // Signed int -> complex floating point with other checking
 template<class dst_real_type, class src_type>
 struct single_assigner_builtin_base<dynd_complex<dst_real_type>, src_type, complex_kind, int_kind, assign_error_overflow>
-    : public single_assigner_builtin_base<dynd_complex<dst_real_type>, src_type, complex_kind, int_kind, assign_error_none> {};
+    : public single_assigner_builtin_base<dynd_complex<dst_real_type>, src_type, complex_kind, int_kind, assign_error_nocheck> {};
 template<class dst_real_type, class src_type>
 struct single_assigner_builtin_base<dynd_complex<dst_real_type>, src_type, complex_kind, int_kind, assign_error_fractional>
-    : public single_assigner_builtin_base<dynd_complex<dst_real_type>, src_type, complex_kind, int_kind, assign_error_none> {};
+    : public single_assigner_builtin_base<dynd_complex<dst_real_type>, src_type, complex_kind, int_kind, assign_error_nocheck> {};
 
 // Unsigned int -> floating point with inexact checking
 template<class dst_type, class src_type>
@@ -378,14 +378,14 @@ struct single_assigner_builtin_base<dst_type, src_type, real_kind, uint_kind, as
 // Unsigned int -> floating point with other checking
 template<class dst_type, class src_type>
 struct single_assigner_builtin_base<dst_type, src_type, real_kind, uint_kind, assign_error_overflow>
-    : public single_assigner_builtin_base<dst_type, src_type, real_kind, uint_kind, assign_error_none> {};
+    : public single_assigner_builtin_base<dst_type, src_type, real_kind, uint_kind, assign_error_nocheck> {};
 template<class dst_type, class src_type>
 struct single_assigner_builtin_base<dst_type, src_type, real_kind, uint_kind, assign_error_fractional>
-    : public single_assigner_builtin_base<dst_type, src_type, real_kind, uint_kind, assign_error_none> {};
+    : public single_assigner_builtin_base<dst_type, src_type, real_kind, uint_kind, assign_error_nocheck> {};
 
 // Unsigned int -> complex floating point with no checking
 template<class dst_real_type, class src_type>
-struct single_assigner_builtin_base<dynd_complex<dst_real_type>, src_type, complex_kind, uint_kind, assign_error_none>
+struct single_assigner_builtin_base<dynd_complex<dst_real_type>, src_type, complex_kind, uint_kind, assign_error_nocheck>
 {
     DYND_CUDA_HOST_DEVICE static void assign(dynd_complex<dst_real_type> *dst, const src_type *src) {
         DYND_TRACE_ASSIGNMENT(d, dynd_complex<dst_real_type>, *src, src_type);
@@ -417,10 +417,10 @@ struct single_assigner_builtin_base<dynd_complex<dst_real_type>, src_type, compl
 // Unsigned int -> complex floating point with other checking
 template<class dst_real_type, class src_type>
 struct single_assigner_builtin_base<dynd_complex<dst_real_type>, src_type, complex_kind, uint_kind, assign_error_overflow>
-    : public single_assigner_builtin_base<dynd_complex<dst_real_type>, src_type, complex_kind, uint_kind, assign_error_none> {};
+    : public single_assigner_builtin_base<dynd_complex<dst_real_type>, src_type, complex_kind, uint_kind, assign_error_nocheck> {};
 template<class dst_real_type, class src_type>
 struct single_assigner_builtin_base<dynd_complex<dst_real_type>, src_type, complex_kind, uint_kind, assign_error_fractional>
-    : public single_assigner_builtin_base<dynd_complex<dst_real_type>, src_type, complex_kind, uint_kind, assign_error_none> {};
+    : public single_assigner_builtin_base<dynd_complex<dst_real_type>, src_type, complex_kind, uint_kind, assign_error_nocheck> {};
 
 // Floating point -> signed int with overflow checking
 template<class dst_type, class src_type>
@@ -653,68 +653,68 @@ struct single_assigner_builtin_base<dst_type, dynd_complex<src_real_type>, uint_
 // float -> float with no checking
 template<>
 struct single_assigner_builtin_base<float, float, real_kind, real_kind, assign_error_overflow>
-    : public single_assigner_builtin_base<float, float, real_kind, real_kind, assign_error_none> {};
+    : public single_assigner_builtin_base<float, float, real_kind, real_kind, assign_error_nocheck> {};
 template<>
 struct single_assigner_builtin_base<float, float, real_kind, real_kind, assign_error_fractional>
-    : public single_assigner_builtin_base<float, float, real_kind, real_kind, assign_error_none> {};
+    : public single_assigner_builtin_base<float, float, real_kind, real_kind, assign_error_nocheck> {};
 template<>
 struct single_assigner_builtin_base<float, float, real_kind, real_kind, assign_error_inexact>
-    : public single_assigner_builtin_base<float, float, real_kind, real_kind, assign_error_none> {};
+    : public single_assigner_builtin_base<float, float, real_kind, real_kind, assign_error_nocheck> {};
 
 // complex<float> -> complex<float> with no checking
 template<>
 struct single_assigner_builtin_base<dynd_complex<float>, dynd_complex<float>, complex_kind, complex_kind, assign_error_overflow>
-    : public single_assigner_builtin_base<dynd_complex<float>, dynd_complex<float>, complex_kind, complex_kind, assign_error_none> {};
+    : public single_assigner_builtin_base<dynd_complex<float>, dynd_complex<float>, complex_kind, complex_kind, assign_error_nocheck> {};
 template<>
 struct single_assigner_builtin_base<dynd_complex<float>, dynd_complex<float>, complex_kind, complex_kind, assign_error_fractional>
-    : public single_assigner_builtin_base<dynd_complex<float>, dynd_complex<float>, complex_kind, complex_kind, assign_error_none> {};
+    : public single_assigner_builtin_base<dynd_complex<float>, dynd_complex<float>, complex_kind, complex_kind, assign_error_nocheck> {};
 template<>
 struct single_assigner_builtin_base<dynd_complex<float>, dynd_complex<float>, complex_kind, complex_kind, assign_error_inexact>
-    : public single_assigner_builtin_base<dynd_complex<float>, dynd_complex<float>, complex_kind, complex_kind, assign_error_none> {};
+    : public single_assigner_builtin_base<dynd_complex<float>, dynd_complex<float>, complex_kind, complex_kind, assign_error_nocheck> {};
 
 // float -> double with no checking
 template<>
 struct single_assigner_builtin_base<double, float, real_kind, real_kind, assign_error_overflow>
-    : public single_assigner_builtin_base<double, float, real_kind, real_kind, assign_error_none> {};
+    : public single_assigner_builtin_base<double, float, real_kind, real_kind, assign_error_nocheck> {};
 template<>
 struct single_assigner_builtin_base<double, float, real_kind, real_kind, assign_error_fractional>
-    : public single_assigner_builtin_base<double, float, real_kind, real_kind, assign_error_none> {};
+    : public single_assigner_builtin_base<double, float, real_kind, real_kind, assign_error_nocheck> {};
 template<>
 struct single_assigner_builtin_base<double, float, real_kind, real_kind, assign_error_inexact>
-    : public single_assigner_builtin_base<double, float, real_kind, real_kind, assign_error_none> {};
+    : public single_assigner_builtin_base<double, float, real_kind, real_kind, assign_error_nocheck> {};
 
 // complex<float> -> complex<double> with no checking
 template<>
 struct single_assigner_builtin_base<dynd_complex<double>, dynd_complex<float>, complex_kind, complex_kind, assign_error_overflow>
-    : public single_assigner_builtin_base<dynd_complex<double>, dynd_complex<float>, complex_kind, complex_kind, assign_error_none> {};
+    : public single_assigner_builtin_base<dynd_complex<double>, dynd_complex<float>, complex_kind, complex_kind, assign_error_nocheck> {};
 template<>
 struct single_assigner_builtin_base<dynd_complex<double>, dynd_complex<float>, complex_kind, complex_kind, assign_error_fractional>
-    : public single_assigner_builtin_base<dynd_complex<double>, dynd_complex<float>, complex_kind, complex_kind, assign_error_none> {};
+    : public single_assigner_builtin_base<dynd_complex<double>, dynd_complex<float>, complex_kind, complex_kind, assign_error_nocheck> {};
 template<>
 struct single_assigner_builtin_base<dynd_complex<double>, dynd_complex<float>, complex_kind, complex_kind, assign_error_inexact>
-    : public single_assigner_builtin_base<dynd_complex<double>, dynd_complex<float>, complex_kind, complex_kind, assign_error_none> {};
+    : public single_assigner_builtin_base<dynd_complex<double>, dynd_complex<float>, complex_kind, complex_kind, assign_error_nocheck> {};
 
 // double -> double with no checking
 template<>
 struct single_assigner_builtin_base<double, double, real_kind, real_kind, assign_error_overflow>
-    : public single_assigner_builtin_base<double, double, real_kind, real_kind, assign_error_none> {};
+    : public single_assigner_builtin_base<double, double, real_kind, real_kind, assign_error_nocheck> {};
 template<>
 struct single_assigner_builtin_base<double, double, real_kind, real_kind, assign_error_fractional>
-    : public single_assigner_builtin_base<double, double, real_kind, real_kind, assign_error_none> {};
+    : public single_assigner_builtin_base<double, double, real_kind, real_kind, assign_error_nocheck> {};
 template<>
 struct single_assigner_builtin_base<double, double, real_kind, real_kind, assign_error_inexact>
-    : public single_assigner_builtin_base<double, double, real_kind, real_kind, assign_error_none> {};
+    : public single_assigner_builtin_base<double, double, real_kind, real_kind, assign_error_nocheck> {};
 
 // complex<double> -> complex<double> with no checking
 template<>
 struct single_assigner_builtin_base<dynd_complex<double>, dynd_complex<double>, complex_kind, complex_kind, assign_error_overflow>
-    : public single_assigner_builtin_base<dynd_complex<double>, dynd_complex<double>, complex_kind, complex_kind, assign_error_none> {};
+    : public single_assigner_builtin_base<dynd_complex<double>, dynd_complex<double>, complex_kind, complex_kind, assign_error_nocheck> {};
 template<>
 struct single_assigner_builtin_base<dynd_complex<double>, dynd_complex<double>, complex_kind, complex_kind, assign_error_fractional>
-    : public single_assigner_builtin_base<dynd_complex<double>, dynd_complex<double>, complex_kind, complex_kind, assign_error_none> {};
+    : public single_assigner_builtin_base<dynd_complex<double>, dynd_complex<double>, complex_kind, complex_kind, assign_error_nocheck> {};
 template<>
 struct single_assigner_builtin_base<dynd_complex<double>, dynd_complex<double>, complex_kind, complex_kind, assign_error_inexact>
-    : public single_assigner_builtin_base<dynd_complex<double>, dynd_complex<double>, complex_kind, complex_kind, assign_error_none> {};
+    : public single_assigner_builtin_base<dynd_complex<double>, dynd_complex<double>, complex_kind, complex_kind, assign_error_nocheck> {};
 
 // double -> float with overflow checking
 template<>
@@ -910,7 +910,7 @@ struct single_assigner_builtin_base<real_type, dynd_complex<real_type>, real_kin
 
 // double -> complex<float>
 template<>
-struct single_assigner_builtin_base<dynd_complex<float>, double, complex_kind, real_kind, assign_error_none>
+struct single_assigner_builtin_base<dynd_complex<float>, double, complex_kind, real_kind, assign_error_nocheck>
 {
     DYND_CUDA_HOST_DEVICE static void assign(dynd_complex<float> *dst, const double *src) {
         DYND_TRACE_ASSIGNMENT(static_cast<dynd_complex<float> >(*src), dynd_complex<float>, *src, double);
@@ -920,7 +920,7 @@ struct single_assigner_builtin_base<dynd_complex<float>, double, complex_kind, r
 };
 // T -> complex<T>
 template<typename real_type>
-struct single_assigner_builtin_base<dynd_complex<real_type>, real_type, complex_kind, real_kind, assign_error_none>
+struct single_assigner_builtin_base<dynd_complex<real_type>, real_type, complex_kind, real_kind, assign_error_nocheck>
 {
     DYND_CUDA_HOST_DEVICE static void assign(dynd_complex<real_type> *dst, const real_type *src) {
         DYND_TRACE_ASSIGNMENT(static_cast<dynd_complex<real_type> >(*src), dynd_complex<real_type>, *src, real_type);
@@ -930,11 +930,11 @@ struct single_assigner_builtin_base<dynd_complex<real_type>, real_type, complex_
 };
 template<typename real_type, assign_error_mode errmode>
 struct single_assigner_builtin_base<dynd_complex<real_type>, real_type, complex_kind, real_kind, errmode>
-    : public single_assigner_builtin_base<dynd_complex<real_type>, real_type, complex_kind, real_kind, assign_error_none> {};
+    : public single_assigner_builtin_base<dynd_complex<real_type>, real_type, complex_kind, real_kind, assign_error_nocheck> {};
 
 // float -> complex<double>
 template<>
-struct single_assigner_builtin_base<dynd_complex<double>, float, complex_kind, real_kind, assign_error_none>
+struct single_assigner_builtin_base<dynd_complex<double>, float, complex_kind, real_kind, assign_error_nocheck>
 {
     DYND_CUDA_HOST_DEVICE static void assign(dynd_complex<double> *dst, const float *src) {
         DYND_TRACE_ASSIGNMENT(static_cast<dynd_complex<double> >(*src), dynd_complex<double>, *src, float);
@@ -944,7 +944,7 @@ struct single_assigner_builtin_base<dynd_complex<double>, float, complex_kind, r
 };
 template<assign_error_mode errmode>
 struct single_assigner_builtin_base<dynd_complex<double>, float, complex_kind, real_kind, errmode>
-    : public single_assigner_builtin_base<dynd_complex<double>, float, complex_kind, real_kind, assign_error_none> {};
+    : public single_assigner_builtin_base<dynd_complex<double>, float, complex_kind, real_kind, assign_error_nocheck> {};
 
 // complex<float> -> double with overflow checking
 template<>

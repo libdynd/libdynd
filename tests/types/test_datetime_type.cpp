@@ -84,10 +84,10 @@ TEST(DatetimeType, ValueCreationAbstract) {
 
     // Parsing Zulu timezone as abstract with no error checking works though
 //    EXPECT_EQ((((1600-1970)*365 - (1972-1600)/4 + 3) * 1440LL + 15 * 60 + 45) * 60 * 10000000LL,
-//                    nd::array("1600-01-01 15:45Z").ucast(d, 0, assign_error_none).view_scalars(di).as<int64_t>());
+//                    nd::array("1600-01-01 15:45Z").ucast(d, 0, assign_error_nocheck).view_scalars(di).as<int64_t>());
     // Parsing specified timezone as abstract with no error checking throws away the time zone
 //    EXPECT_EQ((((1600-1970)*365 - (1972-1600)/4 + 3) * 1440LL + 15 * 60 + 45) * 60 * 10000000LL,
-//                    nd::array("1600-01-01 15:45+0600").ucast(d, 0, assign_error_none).view_scalars(di).as<int64_t>());
+//                    nd::array("1600-01-01 15:45+0600").ucast(d, 0, assign_error_nocheck).view_scalars(di).as<int64_t>());
 }
 
 
@@ -153,7 +153,7 @@ TEST(DatetimeType, AbstractTZToUTC) {
     a = nd::empty("datetime");
     EXPECT_THROW(a.vals() = b(0), type_error);
     eval::eval_context ectx;
-    ectx.errmode = assign_error_none;
+    ectx.errmode = assign_error_nocheck;
     a.val_assign(b(1), &ectx);
     EXPECT_EQ("2010-03-12T11:15:59", a.as<string>());
 }

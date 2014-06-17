@@ -595,7 +595,7 @@ double parse::checked_string_to_float64(const char *begin, const char *end, assi
     char *end_ptr;
     string s(begin, end);
     double value = strtod(s.c_str(), &end_ptr);
-    if (errmode != assign_error_none && (size_t)(end_ptr - s.c_str()) != s.size()) {
+    if (errmode != assign_error_nocheck && (size_t)(end_ptr - s.c_str()) != s.size()) {
         stringstream ss;
         ss << "parse error converting string ";
         print_escaped_utf8_string(ss, begin, end);
@@ -650,8 +650,8 @@ static float checked_float64_to_float32(double value, assign_error_mode errmode)
         char dst[4];
     } out;
     switch (errmode) {
-        case assign_error_none:
-            single_assigner_builtin<float, double, assign_error_none>::assign(
+        case assign_error_nocheck:
+            single_assigner_builtin<float, double, assign_error_nocheck>::assign(
                             reinterpret_cast<float *>(&out.dst), &value);
             break;
         case assign_error_overflow:
@@ -729,7 +729,7 @@ void parse::string_to_number(char *out, type_id_t tid, const char *begin,
         negative = true;
         ++begin;
     }
-    if (errmode != assign_error_none) {
+    if (errmode != assign_error_nocheck) {
         switch (tid) {
             case int8_type_id:
                 uvalue = parse::checked_string_to_uint64(begin, end, overflow,
@@ -847,7 +847,7 @@ void parse::string_to_number(char *out, type_id_t tid, const char *begin,
             throw invalid_argument(ss.str());
         }
     } else {
-        // errmode == assign_error_none
+        // errmode == assign_error_nocheck
         switch (tid) {
             case int8_type_id:
                 uvalue = parse::unchecked_string_to_uint64(begin, end);
@@ -946,13 +946,13 @@ void parse::string_to_bool(char *out_bool, const char *begin, const char *end,
             if (c == '0' || c == 'n' || c == 'N' || c == 'f' || c == 'F') {
                 *out_bool = 0;
                 return;
-            } else if (errmode == assign_error_none || c == '1' || c == 'y' ||
+            } else if (errmode == assign_error_nocheck || c == '1' || c == 'y' ||
                        c == 'Y' || c == 't' || c == 'T') {
                 *out_bool = 1;
                 return;
             }
         } else if (size == 4) {
-            if (errmode == assign_error_none) {
+            if (errmode == assign_error_nocheck) {
                 *out_bool = 1;
                 return;
             } else if ((begin[0] == 'T' || begin[0] == 't') &&
@@ -970,12 +970,12 @@ void parse::string_to_bool(char *out_bool, const char *begin, const char *end,
                 (begin[4] == 'E' || begin[4] == 'e')) {
                 *out_bool = 0;
                 return;
-            } else if (errmode == assign_error_none) {
+            } else if (errmode == assign_error_nocheck) {
                 *out_bool = 1;
                 return;
             }
         } else if (size == 0) {
-            if (errmode == assign_error_none) {
+            if (errmode == assign_error_nocheck) {
                 *out_bool = 0;
                 return;
             }
@@ -984,7 +984,7 @@ void parse::string_to_bool(char *out_bool, const char *begin, const char *end,
                 (begin[1] == 'O' || begin[1] == 'o')) {
                 *out_bool = 0;
                 return;
-            } else if (errmode == assign_error_none ||
+            } else if (errmode == assign_error_nocheck ||
                        ((begin[0] == 'O' || begin[0] == 'o') &&
                         (begin[1] == 'N' || begin[1] == 'n'))) {
                 *out_bool = 1;
@@ -996,7 +996,7 @@ void parse::string_to_bool(char *out_bool, const char *begin, const char *end,
                 (begin[2] == 'F' || begin[2] == 'f')) {
                 *out_bool = 0;
                 return;
-            } else if (errmode == assign_error_none ||
+            } else if (errmode == assign_error_nocheck ||
                        ((begin[0] == 'Y' || begin[0] == 'y') &&
                         (begin[1] == 'E' || begin[1] == 'e') &&
                         (begin[2] == 'S' || begin[2] == 's'))) {

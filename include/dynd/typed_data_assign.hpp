@@ -25,7 +25,7 @@ namespace eval {
  */
 enum assign_error_mode {
     /** No error checking during assignment */
-    assign_error_none,
+    assign_error_nocheck,
     /** Overflow checking, but loss of precision ok. This checks loss of imaginary component  */
     assign_error_overflow,
     /** Overflow and loss of fractional part (for float -> int) checking */

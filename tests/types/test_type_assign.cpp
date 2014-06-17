@@ -33,7 +33,7 @@ TEST(TypeAssign, FixedSizeTestsNoExcept) {
     ndt::type s_dt, d_dt;
     char *s_ptr;
     eval::eval_context ectx_nocheck;
-    ectx_nocheck.errmode = assign_error_none;
+    ectx_nocheck.errmode = assign_error_nocheck;
 
     // Test bool -> each builtin type
     s_dt = ndt::type(bool_type_id);
@@ -337,7 +337,7 @@ TEST(TypeAssign, FixedSizeTests_Float64) {
                                    (char *)&v_cf32, s_dt, NULL, s_ptr,
                                    &tmp_ectx),
                  runtime_error);
-    tmp_ectx.errmode = assign_error_none;
+    tmp_ectx.errmode = assign_error_nocheck;
     typed_data_assign(ndt::type(float32_type_id), NULL, (char *)&v_f32, s_dt,
                       NULL, s_ptr, &tmp_ectx);
 #ifdef _WIN32
@@ -818,7 +818,7 @@ TEST(TypeAssign, FixedSizeTests_Complex_Float64) {
                                    ndt::type(complex_float64_type_id), NULL,
                                    (char *)&v_cf64, &tmp_ectx),
                  runtime_error);
-    tmp_ectx.errmode = assign_error_none;
+    tmp_ectx.errmode = assign_error_nocheck;
     typed_data_assign(ndt::type(float32_type_id), NULL, (char *)&v_f32,
                       ndt::type(complex_float64_type_id), NULL, (char *)&v_cf64,
                       &tmp_ectx);

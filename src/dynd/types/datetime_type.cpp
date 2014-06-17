@@ -48,7 +48,7 @@ void datetime_type::set_cal(const char *DYND_UNUSED(arrmeta), char *data,
                 int32_t year, int32_t month, int32_t day,
                 int32_t hour, int32_t minute, int32_t second, int32_t tick) const
 {
-    if (errmode != assign_error_none) {
+    if (errmode != assign_error_nocheck) {
         if (!date_ymd::is_valid(year, month, day)) {
             stringstream ss;
             ss << "invalid input year/month/day " << year << "/" << month << "/" << day;
@@ -209,7 +209,7 @@ size_t datetime_type::make_assignment_kernel(
                 return make_pod_typed_data_assignment_kernel(
                     out, offset_out, get_data_size(), get_data_alignment(),
                     kernreq);
-            } else if (ectx->errmode == assign_error_none) {
+            } else if (ectx->errmode == assign_error_nocheck) {
                 // TODO: If the source timezone is not UTC, do an appropriate
                 //       transformation
                 if (src_tp.tcast<datetime_type>()->get_timezone() == tz_utc) {

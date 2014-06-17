@@ -68,7 +68,7 @@ size_t dynd::make_fixedstring_assignment_kernel(
     self->m_append_fn = get_append_unicode_codepoint_function(dst_encoding, errmode);
     self->m_dst_data_size = dst_data_size;
     self->m_src_data_size = src_data_size;
-    self->m_overflow_check = (errmode != assign_error_none);
+    self->m_overflow_check = (errmode != assign_error_nocheck);
     return ckb_offset + sizeof(self_type);
 }
 
@@ -295,6 +295,6 @@ size_t dynd::make_blockref_string_to_fixedstring_assignment_kernel(
     self->m_next_fn = get_next_unicode_codepoint_function(src_encoding, errmode);
     self->m_append_fn = get_append_unicode_codepoint_function(dst_encoding, errmode);
     self->m_dst_data_size = dst_data_size;
-    self->m_overflow_check = (errmode != assign_error_none);
+    self->m_overflow_check = (errmode != assign_error_nocheck);
     return ckb_offset + sizeof(self_type);
 }

@@ -64,7 +64,7 @@ TEST(JSONParser, BuiltinsFromBool) {
     EXPECT_THROW(parse_json(ndt::make_type<dynd_bool>(), "\"flase\""), invalid_argument);
     EXPECT_THROW(parse_json(ndt::make_type<dynd_bool>(), "\"\""), invalid_argument);
     eval::eval_context ectx;
-    ectx.errmode = assign_error_none;
+    ectx.errmode = assign_error_nocheck;
     a = parse_json(ndt::make_type<dynd_bool>(), "null", &ectx);
     EXPECT_FALSE(a.as<bool>());
     a = parse_json(ndt::make_type<dynd_bool>(), "\"flase\"", &ectx);
@@ -260,7 +260,7 @@ TEST(JSONParser, IntFromString) {
 
     EXPECT_THROW(parse_json(ndt::make_type<int>(), "\"-12356blarg\""), exception);
     eval::eval_context ectx_nocheck;
-    ectx_nocheck.errmode = assign_error_none;
+    ectx_nocheck.errmode = assign_error_nocheck;
     a = parse_json(ndt::make_type<int>(), "\"-12356blarg\"", &ectx_nocheck);
     EXPECT_EQ(-12356, a.as<int>());
 }

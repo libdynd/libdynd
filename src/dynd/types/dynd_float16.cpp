@@ -329,17 +329,17 @@ double dynd::halfbits_to_double(uint16_t h)
 
 dynd::dynd_float16::dynd_float16(const dynd_int128& value)
 {
-    m_bits = double_to_halfbits((double)value, assign_error_none);
+    m_bits = double_to_halfbits((double)value, assign_error_nocheck);
 }
 
 dynd::dynd_float16::dynd_float16(const dynd_uint128& value)
 {
-    m_bits = double_to_halfbits((double)value, assign_error_none);
+    m_bits = double_to_halfbits((double)value, assign_error_nocheck);
 }
 
 dynd::dynd_float16::dynd_float16(const dynd_float128& value)
 {
-    m_bits = double_to_halfbits(double(value), assign_error_none);
+    m_bits = double_to_halfbits(double(value), assign_error_nocheck);
 }
 
 dynd::dynd_float16::operator dynd_int128() const

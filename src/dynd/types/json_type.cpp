@@ -46,7 +46,7 @@ void json_type::set_from_utf8_string(const char *arrmeta, char *dst,
                                      const eval::eval_context *ectx) const
 {
     // Validate that the input is JSON
-    if (ectx->errmode != assign_error_none) {
+    if (ectx->errmode != assign_error_nocheck) {
         validate_json(utf8_begin, utf8_end);
     }
 
@@ -70,7 +70,7 @@ void json_type::print_data(std::ostream &o, const char *DYND_UNUSED(arrmeta),
     uint32_t cp;
     next_unicode_codepoint_t next_fn;
     next_fn = get_next_unicode_codepoint_function(string_encoding_utf_8,
-                                                  assign_error_none);
+                                                  assign_error_nocheck);
     const char *begin = reinterpret_cast<const json_type_data *>(data)->begin;
     const char *end = reinterpret_cast<const json_type_data *>(data)->end;
 
@@ -258,7 +258,7 @@ size_t json_type::make_assignment_kernel(
                     string_to_json_ck::create(ckb, ckb_offset, kernreq);
                 ckb_offset += sizeof(string_to_json_ck);
                 self->m_dst_arrmeta = dst_arrmeta;
-                self->m_validate = (ectx->errmode != assign_error_none);
+                self->m_validate = (ectx->errmode != assign_error_nocheck);
                 if (src_tp.get_type_id() == string_type_id) {
                     return make_blockref_string_assignment_kernel(
                         ckb, ckb_offset, dst_arrmeta, string_encoding_utf_8,

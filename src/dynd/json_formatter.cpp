@@ -154,8 +154,8 @@ static void format_json_encoded_string(output_data &out, const char *begin,
     uint32_t cp;
     next_unicode_codepoint_t next_fn;
     append_unicode_codepoint_t append_fn;
-    next_fn = get_next_unicode_codepoint_function(encoding, assign_error_none);
-    append_fn = get_append_unicode_codepoint_function(string_encoding_utf_8, assign_error_none);
+    next_fn = get_next_unicode_codepoint_function(encoding, assign_error_nocheck);
+    append_fn = get_append_unicode_codepoint_function(string_encoding_utf_8, assign_error_nocheck);
     out.write('\"');
     while (begin < end) {
         cp = next_fn(begin, end);

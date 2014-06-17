@@ -358,15 +358,15 @@ next_unicode_codepoint_t dynd::get_next_unicode_codepoint_function(string_encodi
 {
     switch (encoding) {
         case string_encoding_ascii:
-            return (errmode != assign_error_none) ? next_ascii : noerror_next_ascii;
+            return (errmode != assign_error_nocheck) ? next_ascii : noerror_next_ascii;
         case string_encoding_ucs_2:
-            return (errmode != assign_error_none) ? next_ucs2 : noerror_next_ucs2;
+            return (errmode != assign_error_nocheck) ? next_ucs2 : noerror_next_ucs2;
         case string_encoding_utf_8:
-            return (errmode != assign_error_none) ? next_utf8 : noerror_next_utf8;
+            return (errmode != assign_error_nocheck) ? next_utf8 : noerror_next_utf8;
         case string_encoding_utf_16:
-            return (errmode != assign_error_none) ? next_utf16 : noerror_next_utf16;
+            return (errmode != assign_error_nocheck) ? next_utf16 : noerror_next_utf16;
         case string_encoding_utf_32:
-            return (errmode != assign_error_none) ? next_utf32 : noerror_next_utf32;
+            return (errmode != assign_error_nocheck) ? next_utf32 : noerror_next_utf32;
         default:
             throw runtime_error("get_next_unicode_codepoint_function: Unrecognized string encoding");
     }
@@ -376,15 +376,15 @@ append_unicode_codepoint_t dynd::get_append_unicode_codepoint_function(string_en
 {
     switch (encoding) {
         case string_encoding_ascii:
-            return (errmode != assign_error_none) ? append_ascii : noerror_append_ascii;
+            return (errmode != assign_error_nocheck) ? append_ascii : noerror_append_ascii;
         case string_encoding_ucs_2:
-            return (errmode != assign_error_none) ? append_ucs2 : noerror_append_ucs2;
+            return (errmode != assign_error_nocheck) ? append_ucs2 : noerror_append_ucs2;
         case string_encoding_utf_8:
-            return (errmode != assign_error_none) ? append_utf8 : noerror_append_utf8;
+            return (errmode != assign_error_nocheck) ? append_utf8 : noerror_append_utf8;
         case string_encoding_utf_16:
-            return (errmode != assign_error_none) ? append_utf16 : noerror_append_utf16;
+            return (errmode != assign_error_nocheck) ? append_utf16 : noerror_append_utf16;
         case string_encoding_utf_32:
-            return (errmode != assign_error_none) ? append_utf32 : noerror_append_utf32;
+            return (errmode != assign_error_nocheck) ? append_utf32 : noerror_append_utf32;
         default:
             throw runtime_error("get_append_unicode_codepoint_function: Unrecognized string encoding");
     }
@@ -410,20 +410,20 @@ std::string dynd::string_range_as_utf8_string(string_encoding_t encoding, const 
             // TODO: Validate the input string according to errmode
             return string(begin, end);
         case string_encoding_ucs_2:
-            if (errmode == assign_error_none) {
+            if (errmode == assign_error_nocheck) {
                 return string_range_as_utf8_string_templ<&noerror_next_ucs2>(begin, end);
             } else {
                 return string_range_as_utf8_string_templ<&next_ucs2>(begin, end);
             }
         case string_encoding_utf_16: {
-            if (errmode == assign_error_none) {
+            if (errmode == assign_error_nocheck) {
                 return string_range_as_utf8_string_templ<&noerror_next_utf16>(begin, end);
             } else {
                 return string_range_as_utf8_string_templ<&next_utf16>(begin, end);
             }
         }
         case string_encoding_utf_32: {
-            if (errmode == assign_error_none) {
+            if (errmode == assign_error_nocheck) {
                 return string_range_as_utf8_string_templ<&noerror_next_utf32>(begin, end);
             } else {
                 return string_range_as_utf8_string_templ<&next_utf32>(begin, end);

@@ -161,7 +161,7 @@ ndarray_node_ptr dynd::eval::evaluate_groupby_elwise_reduce(ndarray_node *node, 
         // Fill the result with the identity
         dtype_strided_assign(result_dt, result_originptr, result_dt.get_data_size(),
                             result_dt, rnode->get_identity()->get_readonly_originptr(), 0,
-                            num_groups, assign_error_none, ectx);
+                            num_groups, assign_error_nocheck, ectx);
 
         if (data_kernels.empty() && by_kernels.empty()) {
             groupby_elwise_reduce_loop(result_originptr, result_stride,

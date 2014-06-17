@@ -645,8 +645,8 @@ bool dynd::string_to_date(const char *begin, const char *end, date_ymd &out_ymd,
     if (!parse_date(begin, end, ymd, ambig, century_window)) {
         return false;
     }
-    if (errmode == assign_error_none) {
-        // If the assignment error mode is "none", just take
+    if (errmode == assign_error_nocheck) {
+        // If the assignment error mode is "nocheck", just take
         // what we got no matter what comes next.
         out_ymd = ymd;
         return true;

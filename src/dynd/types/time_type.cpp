@@ -31,7 +31,7 @@ void time_type::set_time(const char *DYND_UNUSED(arrmeta), char *data,
                          assign_error_mode errmode, int32_t hour,
                          int32_t minute, int32_t second, int32_t tick) const
 {
-    if (errmode != assign_error_none &&
+    if (errmode != assign_error_nocheck &&
             !time_hmst::is_valid(hour, minute, second, tick)) {
         stringstream ss;
         ss << "invalid input time " << hour << ":" << minute << ":" << second << ", ticks: " << tick;

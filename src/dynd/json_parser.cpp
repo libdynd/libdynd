@@ -405,7 +405,7 @@ static void parse_bool_json(const ndt::type &tp, const char *arrmeta,
     } else if (parse_token(begin, end, "false")) {
         value = 0;
     } else if (parse_token(begin, end, "null")) {
-        if (option || ectx->errmode != assign_error_none) {
+        if (option || ectx->errmode != assign_error_nocheck) {
             value = 2;
         } else {
             value = 0;
@@ -415,7 +415,7 @@ static void parse_bool_json(const ndt::type &tp, const char *arrmeta,
             if (*nbegin == '0') {
                 value = 0;
             } else if (*nbegin == '1' ||
-                       ectx->errmode == assign_error_none) {
+                       ectx->errmode == assign_error_nocheck) {
                 value = 1;
             }
         }

@@ -10,7 +10,7 @@
 
 // float128 -> boolean with no checking
 template<>
-struct single_assigner_builtin_base<dynd_bool, dynd_float128, bool_kind, real_kind, assign_error_none>
+struct single_assigner_builtin_base<dynd_bool, dynd_float128, bool_kind, real_kind, assign_error_nocheck>
 {
     DYND_CUDA_HOST_DEVICE inline static void assign(dynd_bool *dst,
                                                     const dynd_float128 *src)
@@ -49,7 +49,7 @@ struct single_assigner_builtin_base<dynd_bool, dynd_float128, bool_kind, real_ki
 
 // Bool -> float128
 template<>
-struct single_assigner_builtin_base<dynd_float128, dynd_bool, real_kind, bool_kind, assign_error_none>
+struct single_assigner_builtin_base<dynd_float128, dynd_bool, real_kind, bool_kind, assign_error_nocheck>
 {
     DYND_CUDA_HOST_DEVICE static void assign(dynd_float128 *dst, const dynd_bool *src) {
         DYND_TRACE_ASSIGNMENT((bool)(s != src_type(0)), dynd_bool, s, src_type);
@@ -63,19 +63,19 @@ struct single_assigner_builtin_base<dynd_float128, dynd_bool, real_kind, bool_ki
 };
 template<>
 struct single_assigner_builtin_base<dynd_float128, dynd_bool, real_kind, bool_kind, assign_error_overflow>
-    : public single_assigner_builtin_base<dynd_float128, dynd_bool, real_kind, bool_kind, assign_error_none> {};
+    : public single_assigner_builtin_base<dynd_float128, dynd_bool, real_kind, bool_kind, assign_error_nocheck> {};
 template<>
 struct single_assigner_builtin_base<dynd_float128, dynd_bool, real_kind, bool_kind, assign_error_fractional>
-    : public single_assigner_builtin_base<dynd_float128, dynd_bool, real_kind, bool_kind, assign_error_none> {};
+    : public single_assigner_builtin_base<dynd_float128, dynd_bool, real_kind, bool_kind, assign_error_nocheck> {};
 template<>
 struct single_assigner_builtin_base<dynd_float128, dynd_bool, real_kind, bool_kind, assign_error_inexact>
-    : public single_assigner_builtin_base<dynd_float128,dynd_bool,  real_kind, bool_kind, assign_error_none> {};
+    : public single_assigner_builtin_base<dynd_float128,dynd_bool,  real_kind, bool_kind, assign_error_nocheck> {};
 
 // Anything -> float128
 #define DYND_MAKE_WITH_KIND(src_kind) \
 template<class src_type> \
-struct single_assigner_builtin_base<dynd_float128, src_type, real_kind, src_kind, assign_error_none> \
-    : public single_assigner_builtin_base_error<dynd_float128, src_type, assign_error_none> {}; \
+struct single_assigner_builtin_base<dynd_float128, src_type, real_kind, src_kind, assign_error_nocheck> \
+    : public single_assigner_builtin_base_error<dynd_float128, src_type, assign_error_nocheck> {}; \
 template<class src_type> \
 struct single_assigner_builtin_base<dynd_float128, src_type, real_kind, src_kind, assign_error_overflow> \
     : public single_assigner_builtin_base_error<dynd_float128, src_type, assign_error_overflow> {}; \
@@ -96,8 +96,8 @@ DYND_MAKE_WITH_KIND(complex_kind);
 // Float128 -> anything
 #define DYND_MAKE_WITH_KIND(dst_kind) \
 template<class dst_type> \
-struct single_assigner_builtin_base<dst_type, dynd_float128, dst_kind, real_kind, assign_error_none> \
-    : public single_assigner_builtin_base_error<dst_type, dynd_float128, assign_error_none> {}; \
+struct single_assigner_builtin_base<dst_type, dynd_float128, dst_kind, real_kind, assign_error_nocheck> \
+    : public single_assigner_builtin_base_error<dst_type, dynd_float128, assign_error_nocheck> {}; \
 template<class dst_type> \
 struct single_assigner_builtin_base<dst_type, dynd_float128, dst_kind, real_kind, assign_error_overflow> \
     : public single_assigner_builtin_base_error<dst_type, dynd_float128, assign_error_overflow> {}; \
@@ -118,8 +118,8 @@ DYND_MAKE_WITH_KIND(complex_kind);
 
 // float16 -> float128
 template<>
-struct single_assigner_builtin_base<dynd_float128, dynd_float16, real_kind, real_kind, assign_error_none>
-    : public single_assigner_builtin_base_error<dynd_float128, dynd_float16, assign_error_none> {};
+struct single_assigner_builtin_base<dynd_float128, dynd_float16, real_kind, real_kind, assign_error_nocheck>
+    : public single_assigner_builtin_base_error<dynd_float128, dynd_float16, assign_error_nocheck> {};
 template<>
 struct single_assigner_builtin_base<dynd_float128, dynd_float16, real_kind, real_kind, assign_error_overflow>
     : public single_assigner_builtin_base_error<dynd_float128, dynd_float16, assign_error_overflow> {};
@@ -133,8 +133,8 @@ struct single_assigner_builtin_base<dynd_float128, dynd_float16, real_kind, real
 
 // float128 -> float16
 template<>
-struct single_assigner_builtin_base<dynd_float16, dynd_float128, real_kind, real_kind, assign_error_none>
-    : public single_assigner_builtin_base_error<dynd_float16, dynd_float128, assign_error_none> {};
+struct single_assigner_builtin_base<dynd_float16, dynd_float128, real_kind, real_kind, assign_error_nocheck>
+    : public single_assigner_builtin_base_error<dynd_float16, dynd_float128, assign_error_nocheck> {};
 template<>
 struct single_assigner_builtin_base<dynd_float16, dynd_float128, real_kind, real_kind, assign_error_overflow>
     : public single_assigner_builtin_base_error<dynd_float16, dynd_float128, assign_error_overflow> {};

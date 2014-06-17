@@ -105,7 +105,7 @@ void string_type::print_data(std::ostream& o, const char *DYND_UNUSED(arrmeta), 
 {
     uint32_t cp;
     next_unicode_codepoint_t next_fn;
-    next_fn = get_next_unicode_codepoint_function(m_encoding, assign_error_none);
+    next_fn = get_next_unicode_codepoint_function(m_encoding, assign_error_nocheck);
     const char *begin = reinterpret_cast<const string_type_data *>(data)->begin;
     const char *end = reinterpret_cast<const string_type_data *>(data)->end;
 
@@ -157,7 +157,7 @@ bool string_type::is_lossless_assignment(
                 const ndt::type& DYND_UNUSED(dst_tp),
                 const ndt::type& DYND_UNUSED(src_tp)) const
 {
-    // Don't shortcut anything to 'none' error checking, so that
+    // Don't shortcut anything to 'nocheck' error checking, so that
     // decoding errors get caught appropriately.
     return false;
 }

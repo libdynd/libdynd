@@ -21,8 +21,8 @@ using namespace dynd;
 std::ostream& dynd::operator<<(ostream& o, assign_error_mode errmode)
 {
     switch (errmode) {
-        case assign_error_none:
-            o << "none";
+        case assign_error_nocheck:
+            o << "nocheck";
             break;
         case assign_error_overflow:
             o << "overflow";

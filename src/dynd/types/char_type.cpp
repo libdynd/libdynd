@@ -41,14 +41,14 @@ char_type::~char_type()
 uint32_t char_type::get_code_point(const char *data) const
 {
     next_unicode_codepoint_t next_fn;
-    next_fn = get_next_unicode_codepoint_function(m_encoding, assign_error_none);
+    next_fn = get_next_unicode_codepoint_function(m_encoding, assign_error_nocheck);
     return next_fn(data, data + get_data_size());
 }
 
 void char_type::set_code_point(char *out_data, uint32_t cp)
 {
     append_unicode_codepoint_t append_fn;
-    append_fn = get_append_unicode_codepoint_function(m_encoding, assign_error_none);
+    append_fn = get_append_unicode_codepoint_function(m_encoding, assign_error_nocheck);
     append_fn(cp, out_data, out_data + get_data_size());
 }
 
@@ -83,7 +83,7 @@ bool char_type::is_lossless_assignment(
     const ndt::type& DYND_UNUSED(dst_tp),
     const ndt::type& DYND_UNUSED(src_tp)) const
 {
-    // Don't shortcut anything to 'none' error checking, so that
+    // Don't shortcut anything to 'nocheck' error checking, so that
     // decoding errors get caught appropriately.
     return false;
 }

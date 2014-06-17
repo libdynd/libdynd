@@ -119,7 +119,7 @@ static ndarray_node_ptr evaluate_strided_array_expression_dtype(ndarray_node* no
     //int ndim = node->get_ndim();
 
     kernel_instance<unary_operation_pair_t> operation;
-    get_typed_data_assignment_kernel(value_dt, dt, assign_error_none, ectx, operation);
+    get_typed_data_assignment_kernel(value_dt, dt, assign_error_nocheck, ectx, operation);
 
     return evaluate_strided_with_unary_kernel(node, ectx, copy, access_flags, value_dt, operation);
 }

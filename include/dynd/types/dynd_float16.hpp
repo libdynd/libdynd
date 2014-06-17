@@ -57,17 +57,17 @@ public:
         : m_bits(rhs ? DYND_FLOAT16_ONE : DYND_FLOAT16_ZERO) {}
 
     DYND_CUDA_HOST_DEVICE inline dynd_float16(float f)
-        : m_bits(float_to_halfbits(f, assign_error_none)) {}
+        : m_bits(float_to_halfbits(f, assign_error_nocheck)) {}
     DYND_CUDA_HOST_DEVICE inline dynd_float16(double d)
-        : m_bits(double_to_halfbits(d, assign_error_none)) {}
+        : m_bits(double_to_halfbits(d, assign_error_nocheck)) {}
     DYND_CUDA_HOST_DEVICE inline dynd_float16(int32_t value)
-        : m_bits(float_to_halfbits((float)value, assign_error_none)) {}
+        : m_bits(float_to_halfbits((float)value, assign_error_nocheck)) {}
     DYND_CUDA_HOST_DEVICE inline dynd_float16(uint32_t value)
-        : m_bits(float_to_halfbits((float)value, assign_error_none)) {}
+        : m_bits(float_to_halfbits((float)value, assign_error_nocheck)) {}
     DYND_CUDA_HOST_DEVICE inline dynd_float16(int64_t value)
-        : m_bits(float_to_halfbits((float)value, assign_error_none)) {}
+        : m_bits(float_to_halfbits((float)value, assign_error_nocheck)) {}
     DYND_CUDA_HOST_DEVICE inline dynd_float16(uint64_t value)
-        : m_bits(float_to_halfbits((float)value, assign_error_none)) {}
+        : m_bits(float_to_halfbits((float)value, assign_error_nocheck)) {}
     DYND_CUDA_HOST_DEVICE dynd_float16(const dynd_int128& value);
     DYND_CUDA_HOST_DEVICE dynd_float16(const dynd_uint128& value);
     DYND_CUDA_HOST_DEVICE dynd_float16(const dynd_float128& value);

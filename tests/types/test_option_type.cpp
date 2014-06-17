@@ -61,7 +61,7 @@ TEST(OptionType, OptionIntAssign) {
     b = nd::empty("2 * ?int16");
     b.vals() = a;
     EXPECT_JSON_EQ_ARR("[-10, -32768]", nd::view(b, "2 * int16"));
-    tmp_ectx.errmode = assign_error_none;
+    tmp_ectx.errmode = assign_error_nocheck;
     b.val_assign(a, &tmp_ectx);
     EXPECT_JSON_EQ_ARR("[-10, -32768]", nd::view(b, "2 * int16"));
 

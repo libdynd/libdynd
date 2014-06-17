@@ -280,7 +280,7 @@ static expr_single_t assign_table_single_kernel[builtin_type_id_count-2][builtin
             &single_assigner_as_expr_single<dst_type, src_type, errmode>::single
         
 #define ERROR_MODE_LEVEL(dst_type, src_type) { \
-        SINGLE_OPERATION_PAIR_LEVEL(dst_type, src_type, assign_error_none), \
+        SINGLE_OPERATION_PAIR_LEVEL(dst_type, src_type, assign_error_nocheck), \
         SINGLE_OPERATION_PAIR_LEVEL(dst_type, src_type, assign_error_overflow), \
         SINGLE_OPERATION_PAIR_LEVEL(dst_type, src_type, assign_error_fractional), \
         SINGLE_OPERATION_PAIR_LEVEL(dst_type, src_type, assign_error_inexact) \
@@ -348,7 +348,7 @@ namespace {
         }
     };
     template<typename dst_type, typename src_type>
-    struct multiple_assignment_builtin<dst_type, src_type, assign_error_none> {
+    struct multiple_assignment_builtin<dst_type, src_type, assign_error_nocheck> {
          DYND_CUDA_HOST_DEVICE static void strided_assign(
                         char *dst, intptr_t dst_stride,
                         const char *const *src, const intptr_t *src_stride,
@@ -357,7 +357,7 @@ namespace {
             const char *src0 = src[0];
             intptr_t src0_stride = src_stride[0];
             for (size_t i = 0; i != count; ++i) {
-                single_assigner_builtin<dst_type, src_type, assign_error_none>::
+                single_assigner_builtin<dst_type, src_type, assign_error_nocheck>::
                     assign(reinterpret_cast<dst_type *>(dst),
                            reinterpret_cast<const src_type *>(src0));
                 dst += dst_stride;
@@ -373,7 +373,7 @@ static expr_strided_t assign_table_strided_kernel[builtin_type_id_count-2][built
             &multiple_assignment_builtin<dst_type, src_type, errmode>::strided_assign
         
 #define ERROR_MODE_LEVEL(dst_type, src_type) { \
-        STRIDED_OPERATION_PAIR_LEVEL(dst_type, src_type, assign_error_none), \
+        STRIDED_OPERATION_PAIR_LEVEL(dst_type, src_type, assign_error_nocheck), \
         STRIDED_OPERATION_PAIR_LEVEL(dst_type, src_type, assign_error_overflow), \
         STRIDED_OPERATION_PAIR_LEVEL(dst_type, src_type, assign_error_fractional), \
         STRIDED_OPERATION_PAIR_LEVEL(dst_type, src_type, assign_error_inexact) \

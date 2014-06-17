@@ -91,7 +91,7 @@ struct datetime_struct {
      *                        starting at the year given. The value 0 means to
      *                        disallow two digit years.
      * \param errmode  The error mode to use for how strict to be when converting
-     *                 values. In mode assign_error_none, tries to do a "best interpretation"
+     *                 values. In mode assign_error_nocheck, tries to do a "best interpretation"
      *                 conversion.
      *
      * \returns  The time zone, if any, found in the string

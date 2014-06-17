@@ -43,7 +43,7 @@ date_type::~date_type()
 void date_type::set_ymd(const char *DYND_UNUSED(arrmeta), char *data,
                 assign_error_mode errmode, int32_t year, int32_t month, int32_t day) const
 {
-    if (errmode != assign_error_none && !date_ymd::is_valid(year, month, day)) {
+    if (errmode != assign_error_nocheck && !date_ymd::is_valid(year, month, day)) {
         stringstream ss;
         ss << "invalid input year/month/day " << year << "/" << month << "/" << day;
         throw runtime_error(ss.str());

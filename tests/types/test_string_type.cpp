@@ -334,9 +334,9 @@ TEST(StringType, StringToBool) {
     EXPECT_THROW(nd::array(nd::array("2").ucast<dynd_bool>().eval()), invalid_argument);
     EXPECT_THROW(nd::array(nd::array("flase").ucast<dynd_bool>().eval()), invalid_argument);
 
-    // In "none" mode, it's a bit more permissive
+    // In "nocheck" mode, it's a bit more permissive
     eval::eval_context tmp_ectx;
-    tmp_ectx.errmode = assign_error_none;
+    tmp_ectx.errmode = assign_error_nocheck;
     EXPECT_FALSE(nd::array(nd::array("").ucast<dynd_bool>().eval(&tmp_ectx)).as<bool>());
     EXPECT_TRUE(nd::array(nd::array("2").ucast<dynd_bool>().eval(&tmp_ectx)).as<bool>());
     EXPECT_TRUE(nd::array(nd::array("flase").ucast<dynd_bool>().eval(&tmp_ectx)).as<bool>());

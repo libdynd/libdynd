@@ -438,10 +438,10 @@ TYPED_TEST_P(Array, AsScalar) {
     EXPECT_EQ(3, a.as<int64_t>(assign_error_overflow));
     EXPECT_THROW(a.as<dynd_bool>(), runtime_error);
     EXPECT_THROW(a.as<dynd_bool>(assign_error_overflow), runtime_error);
-    EXPECT_EQ(true, a.as<dynd_bool>(assign_error_none));
+    EXPECT_EQ(true, a.as<dynd_bool>(assign_error_nocheck));
     EXPECT_THROW(a.as<bool>(), runtime_error);
     EXPECT_THROW(a.as<bool>(assign_error_overflow), runtime_error);
-    EXPECT_EQ(true, a.as<bool>(assign_error_none));
+    EXPECT_EQ(true, a.as<bool>(assign_error_nocheck));
 
     a = nd::empty(TestFixture::MakeType(ndt::make_type<double>()));
     a.val_assign(3.141592653589);

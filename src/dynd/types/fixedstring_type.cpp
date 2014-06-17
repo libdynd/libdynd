@@ -103,7 +103,7 @@ void fixedstring_type::set_from_utf8_string(const char *DYND_UNUSED(arrmeta),
         append_fn(cp, dst, dst_end);
     }
     if (utf8_begin < utf8_end) {
-        if (errmode != assign_error_none) {
+        if (errmode != assign_error_nocheck) {
             throw std::runtime_error("Input is too large to convert to "
                                      "destination fixed-size string");
         }
@@ -119,7 +119,7 @@ void fixedstring_type::print_data(std::ostream &o,
     uint32_t cp;
     next_unicode_codepoint_t next_fn;
     next_fn =
-        get_next_unicode_codepoint_function(m_encoding, assign_error_none);
+        get_next_unicode_codepoint_function(m_encoding, assign_error_nocheck);
     const char *data_end = data + get_data_size();
 
     // Print as an escaped string
@@ -153,7 +153,7 @@ bool fixedstring_type::is_lossless_assignment(
                 const ndt::type& DYND_UNUSED(dst_tp),
                 const ndt::type& DYND_UNUSED(src_tp)) const
 {
-    // Don't shortcut anything to 'none' error checking, so that
+    // Don't shortcut anything to 'nocheck' error checking, so that
     // decoding errors get caught appropriately.
     return false;
 }

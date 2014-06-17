@@ -186,7 +186,7 @@ namespace { template<typename T> struct string_to_int {
             negative = true;
         }
         T result;
-        if (e->errmode == assign_error_none) {
+        if (e->errmode == assign_error_nocheck) {
             uint64_t value = parse::unchecked_string_to_uint64(
                 s.data(), s.data() + s.size());
             result = negative ? static_cast<T>(-static_cast<int64_t>(value))
@@ -225,7 +225,7 @@ namespace { template<typename T> struct string_to_uint {
             negative = true;
         }
         T result;
-        if (e->errmode == assign_error_none) {
+        if (e->errmode == assign_error_nocheck) {
             uint64_t value = parse::unchecked_string_to_uint64(
                 s.data(), s.data() + s.size());
             result = negative ? static_cast<T>(0) : static_cast<T>(value);
@@ -263,7 +263,7 @@ static void string_to_int128_single(char *dst, const char *const *src,
         negative = true;
     }
     dynd_int128 result;
-    if (e->errmode == assign_error_none) {
+    if (e->errmode == assign_error_nocheck) {
         dynd_uint128 value =
             parse::unchecked_string_to_uint128(s.data(), s.data() + s.size());
         result = negative ? static_cast<dynd_int128>(0) : static_cast<dynd_int128>(value);
@@ -301,7 +301,7 @@ static void string_to_uint128_single(char *dst, const char *const *src,
         negative = true;
     }
     dynd_int128 result;
-    if (e->errmode == assign_error_none) {
+    if (e->errmode == assign_error_nocheck) {
         result =
             parse::unchecked_string_to_uint128(s.data(), s.data() + s.size());
     } else {
@@ -334,8 +334,8 @@ static void string_to_float32_single(char *dst, const char *const *src,
         s.data(), s.data() + s.size(), e->errmode);
     // Assign double -> float according to the error mode
     switch (e->errmode) {
-        case assign_error_none:
-            single_assigner_builtin<float, double, assign_error_none>::assign(
+        case assign_error_nocheck:
+            single_assigner_builtin<float, double, assign_error_nocheck>::assign(
                 reinterpret_cast<float *>(dst), &value);
             break;
         case assign_error_overflow:

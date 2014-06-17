@@ -241,7 +241,7 @@ bool dynd::string_to_datetime(const char *begin, const char *end,
         return false;
     }
     skip_whitespace(begin, end);
-    if (begin == end || errmode == assign_error_none) {
+    if (begin == end || errmode == assign_error_nocheck) {
         out_dt = dt;
         return true;
     } else {

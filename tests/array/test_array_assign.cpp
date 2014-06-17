@@ -26,7 +26,7 @@ TYPED_TEST_CASE_P(ArrayAssign);
 TYPED_TEST_P(ArrayAssign, ScalarAssignment_Bool) {
     nd::array a;
     eval::eval_context ectx_nocheck, ectx_overflow, ectx_fractional, ectx_inexact;
-    ectx_nocheck.errmode = assign_error_none;
+    ectx_nocheck.errmode = assign_error_nocheck;
     ectx_overflow.errmode = assign_error_overflow;
     ectx_fractional.errmode = assign_error_fractional;
     ectx_inexact.errmode = assign_error_inexact;
@@ -72,7 +72,7 @@ TYPED_TEST_P(ArrayAssign, ScalarAssignment_Int8) {
     nd::array a;
     const int8_t *ptr_i8;
     eval::eval_context ectx_nocheck, ectx_overflow, ectx_inexact;
-    ectx_nocheck.errmode = assign_error_none;
+    ectx_nocheck.errmode = assign_error_nocheck;
     ectx_overflow.errmode = assign_error_overflow;
     ectx_inexact.errmode = assign_error_inexact;
 
@@ -116,7 +116,7 @@ TYPED_TEST_P(ArrayAssign, ScalarAssignment_UInt16) {
     nd::array a;
     const uint16_t *ptr_u16;
     eval::eval_context ectx_nocheck, ectx_overflow;
-    ectx_nocheck.errmode = assign_error_none;
+    ectx_nocheck.errmode = assign_error_nocheck;
     ectx_overflow.errmode = assign_error_overflow;
 
     // Assignment to a uint16_t scalar
@@ -225,7 +225,7 @@ TYPED_TEST_P(ArrayAssign, ScalarAssignment_Uint64_LargeNumbers) {
     nd::array a;
     const uint64_t *ptr_u64;
     eval::eval_context ectx_nocheck;
-    ectx_nocheck.errmode = assign_error_none;
+    ectx_nocheck.errmode = assign_error_nocheck;
 
     // Assignment to a double scalar
     a = nd::empty(TestFixture::First::MakeType(ndt::make_type<uint64_t>()));

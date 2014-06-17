@@ -43,7 +43,7 @@ struct eval_context {
 
     DYND_CONSTEXPR eval_context()
         : errmode(assign_error_fractional),
-          cuda_device_errmode(assign_error_none),
+          cuda_device_errmode(assign_error_nocheck),
           date_parse_order(date_parse_no_ambig), century_window(70)
     {
     }
