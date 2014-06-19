@@ -37,6 +37,10 @@ if("${CMAKE_SOURCE_DIR}" STREQUAL "${CMAKE_CURRENT_SOURCE_DIR}")
     option(DYND_CUDA
         "Build a libdynd library with CUDA"
         OFF) # While CUDA support is in development, we default to OFF.
+# -DDYND_FFTW=ON/OFF, whether to build libdynd with or without FFTW
+    option(DYND_FFTW
+        "Build a libdynd library with FFTW"
+        OFF)
 #
 # -DDYND_INSTALL_LIB=ON/OFF, whether to install libdynd into the
 #   CMAKE_INSTALL_PREFIX. Its main purpose is to allow dynd-python and
@@ -430,6 +434,7 @@ set(libdynd_SRC
     # Main
     src/dynd/arithmetic_op.cpp
     src/dynd/array.cpp
+    src/dynd/fft.cpp
     src/dynd/array_range.cpp
     src/dynd/config.cpp
     src/dynd/dim_iter.cpp
@@ -464,6 +469,7 @@ set(libdynd_SRC
     include/dynd/dynd_math.hpp
     include/dynd/ensure_immutable_contig.hpp
     include/dynd/random.hpp
+    include/dynd/fft.hpp
     include/dynd/type.hpp
     include/dynd/typed_data_assign.hpp
     include/dynd/type_promotion.hpp
@@ -631,6 +637,8 @@ if (DYND_SHARED_LIB OR (NOT DYND_INSTALL_LIB))
     target_link_libraries(libdynd
         cephes
         datetime
+	fftw3
+	fftw3f
         )
 endif()
 
