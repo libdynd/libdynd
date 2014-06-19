@@ -32,6 +32,13 @@ char *dynd::iterdata_broadcasting_terminator_incr(iterdata_common *iterdata, int
     return id->data;
 }
 
+char *dynd::iterdata_broadcasting_terminator_adv(iterdata_common *iterdata, intptr_t DYND_UNUSED(level), intptr_t DYND_UNUSED(i))
+{
+    // This repeats the same data over and over again, broadcasting additional leftmost dimensions
+    iterdata_broadcasting_terminator *id = reinterpret_cast<iterdata_broadcasting_terminator *>(iterdata);
+    return id->data;
+}
+
 char *dynd::iterdata_broadcasting_terminator_reset(iterdata_common *iterdata, char *data, intptr_t DYND_UNUSED(level))
 {
     iterdata_broadcasting_terminator *id = reinterpret_cast<iterdata_broadcasting_terminator *>(iterdata);

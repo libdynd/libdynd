@@ -448,6 +448,18 @@ static char *iterdata_incr(iterdata_common *iterdata, intptr_t level)
     }
 }
 
+static char *iterdata_adv(iterdata_common *iterdata, intptr_t level, intptr_t i)
+{
+    strided_dim_type_iterdata *id = reinterpret_cast<strided_dim_type_iterdata *>(iterdata);
+    if (level == 0) {
+        id->data += i * id->stride;
+        return id->data;
+    } else {
+        id->data = (id + 1)->common.adv(&(id + 1)->common, level - 1, i);
+        return id->data;
+    }
+}
+
 static char *iterdata_reset(iterdata_common *iterdata, char *data, intptr_t ndim)
 {
     strided_dim_type_iterdata *id = reinterpret_cast<strided_dim_type_iterdata *>(iterdata);
@@ -477,6 +489,7 @@ size_t strided_dim_type::iterdata_construct(iterdata_common *iterdata, const cha
     strided_dim_type_iterdata *id = reinterpret_cast<strided_dim_type_iterdata *>(iterdata);
 
     id->common.incr = &iterdata_incr;
+    id->common.adv = &iterdata_adv;
     id->common.reset = &iterdata_reset;
     id->data = NULL;
     id->stride = md->stride;

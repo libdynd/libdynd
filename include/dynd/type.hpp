@@ -68,6 +68,7 @@ struct iterdata_broadcasting_terminator {
     char *data;
 };
 char *iterdata_broadcasting_terminator_incr(iterdata_common *iterdata, intptr_t level);
+char *iterdata_broadcasting_terminator_adv(iterdata_common *iterdata, intptr_t level, intptr_t i);
 char *iterdata_broadcasting_terminator_reset(iterdata_common *iterdata, char *data, intptr_t level);
 
 // Forward declaration of the nd::array
@@ -664,6 +665,7 @@ public:
         iterdata_broadcasting_terminator *id = reinterpret_cast<iterdata_broadcasting_terminator *>(
                         reinterpret_cast<char *>(iterdata) + size);
         id->common.incr = &iterdata_broadcasting_terminator_incr;
+        id->common.adv = &iterdata_broadcasting_terminator_adv;
         id->common.reset = &iterdata_broadcasting_terminator_reset;
     }
 
