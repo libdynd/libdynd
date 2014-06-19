@@ -19,6 +19,7 @@
 #include <dynd/kernels/date_expr_kernels.hpp>
 #include <dynd/kernels/string_assignment_kernels.hpp>
 #include <dynd/kernels/assignment_kernels.hpp>
+#include <dynd/kernels/date_adapter_kernels.hpp>
 #include <dynd/exceptions.hpp>
 #include <dynd/func/make_callable.hpp>
 #include <dynd/array_iter.hpp>
@@ -634,7 +635,7 @@ bool date_type::adapt_type(const ndt::type &operand_tp, const nd::string &op,
                            nd::arrfunc &out_forward, nd::arrfunc &out_reverse)
     const
 {
-    return false;
+    return make_date_adapter_arrfunc(operand_tp, op, out_forward, out_reverse);
 }
 
 
