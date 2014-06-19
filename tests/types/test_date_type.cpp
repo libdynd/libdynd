@@ -21,6 +21,7 @@
 #include <dynd/types/adapt_type.hpp>
 #include <dynd/func/callable.hpp>
 #include <dynd/func/call_callable.hpp>
+#include <dynd/json_parser.hpp>
 
 using namespace std;
 using namespace dynd;
@@ -409,8 +410,7 @@ TEST(DateDType, NumPyCompatibleProperty) {
     int64_t vals64[] = {-16730, 0, 11001, numeric_limits<int64_t>::min()};
 
     nd::array a = nd::array_rw(vals64);
-    nd::array a_date = a.view_scalars(ndt::make_reversed_property(ndt::make_date(),
-                    ndt::make_type<int64_t>(), "days_after_1970_int64"));
+    nd::array a_date = a.adapt(ndt::make_date(), "days since 1970-01-01");
     // Reading from the 'int64 as date' view
     EXPECT_EQ("1924-03-13", a_date(0).as<string>());
     EXPECT_EQ("1970-01-01", a_date(1).as<string>());
@@ -424,7 +424,7 @@ TEST(DateDType, NumPyCompatibleProperty) {
     EXPECT_EQ(numeric_limits<int64_t>::min(), a(0).as<int64_t>());
 }
 
-TEST(DateDType, AdaptAsInt) {
+TEST(DateDType, AdaptFromInt) {
     nd::array a, b;
 
     // int32
@@ -454,6 +454,16 @@ TEST(DateDType, AdaptAsInt) {
     EXPECT_EQ(-365 * 100 - 25, a(0).as<int>());
     EXPECT_EQ(31, a(1).as<int>());
     EXPECT_EQ(-1, a(2).as<int>());
+}
+
+TEST(DateDType, AdaptAsInt) {
+    nd::array a, b;
+
+    a = parse_json("3 * date", "[\"2001-01-05\", \"1999-12-20\", \"2000-01-01\"]");
+    b = a.adapt(ndt::make_type<int>(), "days since 2000-01-01");
+    EXPECT_EQ(370, b(0).as<int>());
+    EXPECT_EQ(-12, b(1).as<int>());
+    EXPECT_EQ(0, b(2).as<int>());
 }
 
 TEST(DateYMD, LeapYear) {
