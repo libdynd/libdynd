@@ -153,6 +153,7 @@ set(libdynd_SRC
     include/dynd/codegen/calling_conventions.hpp
     include/dynd/codegen/codegen_cache.hpp
     # Types
+    src/dynd/types/adapt_type.cpp
     src/dynd/types/base_bytes_type.cpp
     src/dynd/types/base_type.cpp
     src/dynd/types/base_expression_type.cpp
@@ -217,6 +218,7 @@ set(libdynd_SRC
     src/dynd/types/var_dim_type.cpp
     src/dynd/types/view_type.cpp
     src/dynd/types/void_pointer_type.cpp
+    include/dynd/types/adapt_type.hpp
     include/dynd/types/base_bytes_type.hpp
     include/dynd/types/base_type.hpp
     include/dynd/types/base_memory_type.hpp

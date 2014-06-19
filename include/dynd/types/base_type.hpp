@@ -31,6 +31,8 @@ namespace ndt {
 // Forward definition from dynd/array.hpp
 namespace nd {
     class array;
+    class string;
+    class arrfunc;
 } // namsepace nd
 
 class base_type;
@@ -660,6 +662,26 @@ public:
         ckernel_builder *ckb, size_t ckb_offset, const char *dst_arrmeta,
         size_t dst_elwise_property_index, const char *src_arrmeta,
         kernel_request_t kernreq, const eval::eval_context *ectx) const;
+
+    /**
+     * Produces forward and reverse arrfuncs for adapting the operand
+     * type to the current type, according to the information stored in
+     * ``op``.
+     *
+     * \returns  True if the adapt is ok, false otherwise.
+     */
+    bool adapt_type(const ndt::type &operand_tp, const nd::string &op,
+                    nd::arrfunc &out_forward, nd::arrfunc &out_reverse) const;
+    /**
+     * Produces forward and reverse arrfuncs for adapting the current type
+     * to the value type, according to the information stored in
+     * ``op``.
+     *
+     * \returns  True if the adapt is ok, false otherwise.
+     */
+    bool reverse_adapt_type(const ndt::type &value_tp, const nd::string &op,
+                            nd::arrfunc &out_forward,
+                            nd::arrfunc &out_reverse) const;
 
     friend void base_type_incref(const base_type *ed);
     friend void base_type_decref(const base_type *ed);

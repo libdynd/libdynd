@@ -630,6 +630,14 @@ nd::array date_type::get_option_nafunc() const
     return naf;
 }
 
+bool date_type::adapt_type(const ndt::type &operand_tp, const nd::string &op,
+                           nd::arrfunc &out_forward, nd::arrfunc &out_reverse)
+    const
+{
+    return false;
+}
+
+
 const ndt::type& ndt::make_date()
 {
     // Static instance of the type, which has a reference count > 0 for the

@@ -137,6 +137,7 @@ enum type_id_t {
     ndarrayarg_type_id,
 
     // Adapter types
+    adapt_type_id,
     convert_type_id,
     byteswap_type_id,
     view_type_id,

@@ -9,6 +9,7 @@
 #include <dynd/string_encodings.hpp>
 #include <dynd/types/char_type.hpp>
 #include <dynd/types/fixedbytes_type.hpp>
+#include <dynd/string.hpp>
 
 #include <utf8.h>
 
@@ -481,7 +482,8 @@ void dynd::print_escaped_unicode_codepoint(std::ostream& o, uint32_t cp)
     }
 }
 
-void dynd::print_escaped_utf8_string(std::ostream& o, const char *str_begin, const char *str_end)
+void dynd::print_escaped_utf8_string(std::ostream &o, const char *str_begin,
+                                     const char *str_end)
 {
     uint32_t cp = 0;
 
@@ -492,6 +494,11 @@ void dynd::print_escaped_utf8_string(std::ostream& o, const char *str_begin, con
         print_escaped_unicode_codepoint(o, cp);
     }
     o << "\"";
+}
+
+void dynd::print_escaped_utf8_string(std::ostream &o, const nd::string &str)
+{
+    print_escaped_utf8_string(o, str.begin(), str.end());
 }
 
 void dynd::append_utf8_codepoint(uint32_t cp, std::string& out_str)
