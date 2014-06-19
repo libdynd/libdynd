@@ -100,7 +100,7 @@ void arrfunc_type::data_destruct_strided(const char *DYND_UNUSED(arrmeta), char 
 // arrfunc to string assignment
 
 namespace {
-    struct arrfunc_to_string_ck : public kernels::assignment_ck<arrfunc_to_string_ck> {
+    struct arrfunc_to_string_ck : public kernels::unary_ck<arrfunc_to_string_ck> {
         ndt::type m_dst_string_dt;
         const char *m_dst_arrmeta;
         eval::eval_context m_ectx;

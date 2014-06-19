@@ -8,8 +8,8 @@
 using namespace std;
 using namespace dynd;
 
-adapt_type::adapt_type(const ndt::type &value_type,
-                       const ndt::type &operand_type, const nd::string &op)
+adapt_type::adapt_type(const ndt::type &operand_type,
+                       const ndt::type &value_type, const nd::string &op)
     : base_expression_type(
           adapt_type_id, expression_kind, operand_type.get_data_size(),
           operand_type.get_data_alignment(),
@@ -112,8 +112,8 @@ size_t adapt_type::make_value_to_operand_assignment_kernel(
 {
     const arrfunc_type_data *af = m_reverse.get();
     if (af != NULL) {
-        return af->instantiate(af, ckb, ckb_offset, m_value_type, dst_arrmeta,
-                               &m_operand_type, &src_arrmeta, kernreq, ectx);
+        return af->instantiate(af, ckb, ckb_offset, m_operand_type, src_arrmeta,
+                               &m_value_type, &dst_arrmeta, kernreq, ectx);
     } else {
         stringstream ss;
         ss << "Cannot apply ";

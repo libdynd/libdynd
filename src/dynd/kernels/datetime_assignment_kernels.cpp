@@ -16,7 +16,7 @@ using namespace dynd;
 // string to datetime assignment
 
 namespace {
-    struct string_to_datetime_ck : public kernels::assignment_ck<string_to_datetime_ck> {
+    struct string_to_datetime_ck : public kernels::unary_ck<string_to_datetime_ck> {
         ndt::type m_dst_datetime_tp;
         ndt::type m_src_string_tp;
         const char *m_src_arrmeta;
@@ -68,7 +68,7 @@ size_t dynd::make_string_to_datetime_assignment_kernel(
 // datetime to string assignment
 
 namespace {
-    struct datetime_to_string_ck : public kernels::assignment_ck<datetime_to_string_ck> {
+    struct datetime_to_string_ck : public kernels::unary_ck<datetime_to_string_ck> {
         ndt::type m_dst_string_tp;
         ndt::type m_src_datetime_tp;
         const char *m_dst_arrmeta;

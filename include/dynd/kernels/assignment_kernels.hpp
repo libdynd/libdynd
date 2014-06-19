@@ -87,7 +87,7 @@ namespace kernels {
      * create ckernels.
      */
     template<class CKT>
-    struct assignment_ck : public general_ck<CKT> {
+    struct unary_ck : public general_ck<CKT> {
         typedef CKT self_type;
         typedef general_ck<CKT> parent_type;
 
@@ -126,6 +126,26 @@ namespace kernels {
                 ->strided(dst, dst_stride, *src, *src_stride, count);
         }
 
+        template<class R, class T0>
+        inline void call_single_typed(char *dst, const char *src, R (self_type::*)(T0))
+        {
+            *reinterpret_cast<R *>(dst) =
+                static_cast<self_type *>(this)
+                    ->operator()(*reinterpret_cast<const T0 *>(src));
+        }
+
+        /**
+         * Default single implementation calls operator(), which
+         * should look similar to int32_t operator()(int64_t val).
+         *
+         * This can also be implemented directly in self_type to provide
+         * more controlled behavior or for non-trivial types.
+         */
+        inline void single(char *dst, const char *src)
+        {
+            call_single_typed(dst, src, &self_type::operator());
+        }
+
         /**
          * Default strided implementation calls single repeatedly.
          */
@@ -140,6 +160,7 @@ namespace kernels {
             }
         }
     };
+
 } // namespace kernels
 
 /**
@@ -222,7 +243,7 @@ namespace kernels {
  * This requires that the child kernel be created with the
  * kernel_request_strided type of kernel.
  */
-struct strided_assign_ck : public kernels::assignment_ck<strided_assign_ck> {
+struct strided_assign_ck : public kernels::unary_ck<strided_assign_ck> {
     intptr_t m_size;
     intptr_t m_dst_stride, m_src_stride;
 

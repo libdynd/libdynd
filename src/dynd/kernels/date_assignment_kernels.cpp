@@ -14,7 +14,7 @@ using namespace dynd;
 // string to date assignment
 
 namespace {
-    struct string_to_date_ck : public kernels::assignment_ck<string_to_date_ck> {
+    struct string_to_date_ck : public kernels::unary_ck<string_to_date_ck> {
         ndt::type m_src_string_tp;
         const char *m_src_arrmeta;
         assign_error_mode m_errmode;
@@ -63,7 +63,7 @@ size_t dynd::make_string_to_date_assignment_kernel(
 // date to string assignment
 
 namespace {
-    struct date_to_string_ck : public kernels::assignment_ck<date_to_string_ck> {
+    struct date_to_string_ck : public kernels::unary_ck<date_to_string_ck> {
         ndt::type m_dst_string_tp;
         const char *m_dst_arrmeta;
         eval::eval_context m_ectx;

@@ -18,7 +18,7 @@ using namespace dynd;
 // fixedstring to fixedstring assignment
 
 namespace {
-    struct fixedstring_assign_ck : public kernels::assignment_ck<fixedstring_assign_ck> {
+    struct fixedstring_assign_ck : public kernels::unary_ck<fixedstring_assign_ck> {
         next_unicode_codepoint_t m_next_fn;
         append_unicode_codepoint_t m_append_fn;
         intptr_t m_dst_data_size, m_src_data_size;
@@ -76,7 +76,7 @@ size_t dynd::make_fixedstring_assignment_kernel(
 // blockref string to blockref string assignment
 
 namespace {
-    struct blockref_string_assign_ck : public kernels::assignment_ck<blockref_string_assign_ck> {
+    struct blockref_string_assign_ck : public kernels::unary_ck<blockref_string_assign_ck> {
         string_encoding_t m_dst_encoding, m_src_encoding;
         next_unicode_codepoint_t m_next_fn;
         append_unicode_codepoint_t m_append_fn;
@@ -168,7 +168,7 @@ size_t dynd::make_blockref_string_assignment_kernel(
 // fixedstring to blockref string assignment
 
 namespace {
-    struct fixedstring_to_blockref_string_assign_ck : public kernels::assignment_ck<fixedstring_to_blockref_string_assign_ck> {
+    struct fixedstring_to_blockref_string_assign_ck : public kernels::unary_ck<fixedstring_to_blockref_string_assign_ck> {
         string_encoding_t m_dst_encoding, m_src_encoding;
         intptr_t m_src_element_size;
         next_unicode_codepoint_t m_next_fn;
@@ -251,7 +251,7 @@ size_t dynd::make_fixedstring_to_blockref_string_assignment_kernel(
 // blockref string to fixedstring assignment
 
 namespace {
-    struct blockref_string_to_fixedstring_assign_ck : public kernels::assignment_ck<blockref_string_to_fixedstring_assign_ck> {
+    struct blockref_string_to_fixedstring_assign_ck : public kernels::unary_ck<blockref_string_to_fixedstring_assign_ck> {
         next_unicode_codepoint_t m_next_fn;
         append_unicode_codepoint_t m_append_fn;
         intptr_t m_dst_data_size, m_src_element_size;

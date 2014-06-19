@@ -18,6 +18,7 @@
 #include <dynd/types/convert_type.hpp>
 #include <dynd/types/cstruct_type.hpp>
 #include <dynd/types/struct_type.hpp>
+#include <dynd/types/adapt_type.hpp>
 #include <dynd/func/callable.hpp>
 #include <dynd/func/call_callable.hpp>
 
@@ -421,6 +422,38 @@ TEST(DateDType, NumPyCompatibleProperty) {
     EXPECT_EQ(1855, a(0).as<int64_t>());
     a_date(0).vals() = "NA";
     EXPECT_EQ(numeric_limits<int64_t>::min(), a(0).as<int64_t>());
+}
+
+TEST(DateDType, AdaptAsInt) {
+    nd::array a, b;
+
+    // int32
+    a = nd::array_rw(25);
+    b = a.adapt(ndt::make_date(), "days since 2012-03-02");
+    EXPECT_EQ("2012-03-27", b.as<string>());
+    // This adapter works both ways
+    b.vals() = "2012-03-01";
+    EXPECT_EQ(-1, a.as<int>());
+
+    // int64
+    a = nd::array_rw(365LL);
+    b = a.adapt(ndt::make_date(), "days since 1925-03-02");
+    EXPECT_EQ("1926-03-02", b.as<string>());
+    b.vals() = "1925-04-02";
+    EXPECT_EQ(31, a.as<int>());
+
+    // Array of int32
+    const char *s_vals[] = {"2000-01-01", "2100-02-01", "2099-12-31"};
+    int32_t i32_vals[] = {-5, 10, 0};
+    a = nd::array_rw(i32_vals);
+    b = a.adapt(ndt::make_date(), "days since 2100-1-1");
+    EXPECT_EQ("2099-12-27", b(0).as<string>());
+    EXPECT_EQ("2100-01-11", b(1).as<string>());
+    EXPECT_EQ("2100-01-01", b(2).as<string>());
+    b.vals() = s_vals;
+    EXPECT_EQ(-365 * 100 - 25, a(0).as<int>());
+    EXPECT_EQ(31, a(1).as<int>());
+    EXPECT_EQ(-1, a(2).as<int>());
 }
 
 TEST(DateYMD, LeapYear) {

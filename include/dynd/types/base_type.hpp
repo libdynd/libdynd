@@ -670,8 +670,9 @@ public:
      *
      * \returns  True if the adapt is ok, false otherwise.
      */
-    bool adapt_type(const ndt::type &operand_tp, const nd::string &op,
-                    nd::arrfunc &out_forward, nd::arrfunc &out_reverse) const;
+    virtual bool adapt_type(const ndt::type &operand_tp, const nd::string &op,
+                            nd::arrfunc &out_forward,
+                            nd::arrfunc &out_reverse) const;
     /**
      * Produces forward and reverse arrfuncs for adapting the current type
      * to the value type, according to the information stored in
@@ -679,9 +680,10 @@ public:
      *
      * \returns  True if the adapt is ok, false otherwise.
      */
-    bool reverse_adapt_type(const ndt::type &value_tp, const nd::string &op,
-                            nd::arrfunc &out_forward,
-                            nd::arrfunc &out_reverse) const;
+    virtual bool reverse_adapt_type(const ndt::type &value_tp,
+                                    const nd::string &op,
+                                    nd::arrfunc &out_forward,
+                                    nd::arrfunc &out_reverse) const;
 
     friend void base_type_incref(const base_type *ed);
     friend void base_type_decref(const base_type *ed);

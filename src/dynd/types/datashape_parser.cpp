@@ -38,6 +38,7 @@
 #include <dynd/types/typevar_dim_type.hpp>
 #include <dynd/types/ellipsis_dim_type.hpp>
 #include <dynd/types/option_type.hpp>
+#include <dynd/types/adapt_type.hpp>
 
 using namespace std;
 using namespace dynd;
@@ -352,6 +353,46 @@ static ndt::type parse_option_parameters(const char *&rbegin, const char *end,
     // TODO catch errors, convert them to datashape_parse_error so the position is shown
     rbegin = begin;
     return ndt::make_option(tp);
+}
+
+static ndt::type parse_adapt_parameters(const char *&rbegin, const char *end,
+                                        map<string, ndt::type> &symtable)
+{
+    const char *begin = rbegin;
+    if (!parse_token_ds(begin, end, '[')) {
+        throw datashape_parse_error(begin, "expected opening '[' after 'adapt'");
+    }
+    ndt::type operand_tp = parse_datashape(begin, end, symtable);
+    if (operand_tp.is_null()) {
+        throw datashape_parse_error(begin, "expected a data type");
+    }
+    if (!parse_token_ds(begin, end, ',')) {
+        throw datashape_parse_error(begin, "expected a ,");
+    }
+    string adapt_op;
+    ndt::type value_tp;
+    if (!parse_quoted_string(begin, end, adapt_op)) {
+        value_tp = parse_datashape(begin, end, symtable);
+        if (value_tp.is_null()) {
+            throw datashape_parse_error(begin, "expected a type or an adapt op");
+        }
+        if (!parse_token_ds(begin, end, ',')) {
+            throw datashape_parse_error(begin, "expected a ,");
+        }
+        if (!parse_quoted_string(begin, end, adapt_op)) {
+            throw datashape_parse_error(begin, "expected an adapt op");
+        }
+    }
+    if (!parse_token_ds(begin, end, ']')) {
+        throw datashape_parse_error(begin, "expected closing ']'");
+    }
+    // TODO catch errors, convert them to datashape_parse_error so the position is shown
+    rbegin = begin;
+    if (value_tp.is_null()) {
+        return ndt::make_adapt(operand_tp, operand_tp, adapt_op);
+    } else {
+        return ndt::make_adapt(value_tp, operand_tp, adapt_op);
+    }
 }
 
 static string_encoding_t string_to_encoding(const char *error_begin, const string& estr)
@@ -928,6 +969,8 @@ static ndt::type parse_datashape_nooption(const char *&rbegin, const char *end,
             result = parse_fixed_dim_parameters(begin, end, symtable);
         } else if (parse::compare_range_to_literal(nbegin, nend, "option")) {
             result = parse_option_parameters(begin, end, symtable);
+        } else if (parse::compare_range_to_literal(nbegin, nend, "adapt")) {
+            result = parse_adapt_parameters(begin, end, symtable);
         } else if (parse::compare_range_to_literal(nbegin, nend, "c")) {
             // Fall through to struct/tuple cases to allow "c{" and "c("
             // matching

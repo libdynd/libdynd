@@ -201,7 +201,7 @@ void json_type::arrmeta_debug_print(const char *arrmeta, std::ostream &o,
 
 namespace {
 struct string_to_json_ck
-  : public kernels::assignment_ck<string_to_json_ck> {
+  : public kernels::unary_ck<string_to_json_ck> {
     const char *m_dst_arrmeta;
     bool m_validate;
 

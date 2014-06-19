@@ -20,7 +20,7 @@ class adapt_type : public base_expression_type {
     nd::arrfunc m_forward, m_reverse;
 
 public:
-    adapt_type(const ndt::type &value_type, const ndt::type &operand_type,
+    adapt_type(const ndt::type &operand_type, const ndt::type &value_type,
                const nd::string &op);
 
     virtual ~adapt_type();
@@ -52,11 +52,11 @@ public:
 };
 
 namespace ndt {
-    inline ndt::type make_adapt(const ndt::type &value_type,
-                                const ndt::type &operand_type,
+    inline ndt::type make_adapt(const ndt::type &operand_type,
+                                const ndt::type &value_type,
                                 const nd::string &op)
     {
-        return ndt::type(new adapt_type(value_type, operand_type, op), false);
+        return ndt::type(new adapt_type(operand_type, value_type, op), false);
     }
 } // namespace ndt
 

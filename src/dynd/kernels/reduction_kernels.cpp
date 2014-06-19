@@ -135,7 +135,7 @@ nd::arrfunc kernels::make_builtin_sum1d_arrfunc(type_id_t tid)
 }
 
 namespace {
-    struct double_mean1d_ck : public kernels::assignment_ck<double_mean1d_ck> {
+    struct double_mean1d_ck : public kernels::unary_ck<double_mean1d_ck> {
         intptr_t m_minp;
         intptr_t m_src_dim_size, m_src_stride;
 

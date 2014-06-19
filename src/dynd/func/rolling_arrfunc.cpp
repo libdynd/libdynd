@@ -15,7 +15,7 @@ using namespace std;
 using namespace dynd;
 
 namespace {
-struct strided_rolling_ck : public kernels::assignment_ck<strided_rolling_ck> {
+struct strided_rolling_ck : public kernels::unary_ck<strided_rolling_ck> {
     intptr_t m_window_size;
     intptr_t m_dim_size, m_dst_stride, m_src_stride;
     size_t m_window_op_offset;
@@ -51,7 +51,7 @@ struct strided_rolling_ck : public kernels::assignment_ck<strided_rolling_ck> {
     }
 };
 
-struct var_rolling_ck : public kernels::assignment_ck<var_rolling_ck> {
+struct var_rolling_ck : public kernels::unary_ck<var_rolling_ck> {
     intptr_t m_window_size;
     intptr_t m_src_stride, m_src_offset;
     ndt::type m_dst_tp;
