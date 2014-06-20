@@ -113,7 +113,7 @@ void string_type::print_data(std::ostream& o, const char *DYND_UNUSED(arrmeta), 
     o << "\"";
     while (begin < end) {
         cp = next_fn(begin, end);
-        print_escaped_unicode_codepoint(o, cp);
+        print_escaped_unicode_codepoint(o, cp, false);
     }
     o << "\"";
 }

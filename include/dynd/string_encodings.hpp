@@ -110,25 +110,29 @@ std::string string_range_as_utf8_string(string_encoding_t encoding, const char *
 /**
  * Prints the given code point to the output stream, escaping it as necessary.
  */
-void print_escaped_unicode_codepoint(std::ostream& o, uint32_t cp);
+void print_escaped_unicode_codepoint(std::ostream &o, uint32_t cp,
+                                     bool single_quote);
 
 /**
  * Prints the utf8 string, escaping as necessary.
  */
 void print_escaped_utf8_string(std::ostream &o, const char *str_begin,
-                               const char *str_end);
+                               const char *str_end, bool single_quote = false);
 
 /**
  * Prints the utf8 string, escaping as necessary.
  */
-void print_escaped_utf8_string(std::ostream &o, const nd::string &str);
+void print_escaped_utf8_string(std::ostream &o, const nd::string &str,
+                               bool single_quote = false);
 
 /**
  * Prints the utf8 string, escaping as necessary.
  */
-inline void print_escaped_utf8_string(std::ostream &o, const std::string &str)
+inline void print_escaped_utf8_string(std::ostream &o, const std::string &str,
+                                      bool single_quote = false)
 {
-    print_escaped_utf8_string(o, str.data(), str.data() + str.size());
+  print_escaped_utf8_string(o, str.data(), str.data() + str.size(),
+                            single_quote);
 }
 
 

@@ -56,7 +56,7 @@ void char_type::print_data(std::ostream& o, const char *DYND_UNUSED(arrmeta), co
 {
     // Print as an escaped string
     o << "\"";
-    print_escaped_unicode_codepoint(o, get_code_point(data));
+    print_escaped_unicode_codepoint(o, get_code_point(data), false);
     o << "\"";
 }
 

@@ -45,14 +45,15 @@ void adapt_type::print_data(std::ostream &DYND_UNUSED(o),
 void adapt_type::print_type(std::ostream& o) const
 {
     o << "adapt[(" << m_operand_type << ") -> " << m_value_type << ", ";
-    print_escaped_utf8_string(o, m_op);
+    print_escaped_utf8_string(o, m_op, true);
     o << "]";
 }
 
-bool adapt_type::is_lossless_assignment(const ndt::type &dst_tp,
-                                        const ndt::type &src_tp) const
+bool adapt_type::is_lossless_assignment(const ndt::type &DYND_UNUSED(dst_tp),
+                                        const ndt::type &DYND_UNUSED(src_tp))
+    const
 {
-    return false;
+  return false;
 }
 
 bool adapt_type::operator==(const base_type& rhs) const
