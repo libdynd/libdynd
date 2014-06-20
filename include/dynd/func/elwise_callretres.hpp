@@ -70,7 +70,7 @@ namespace detail {
         { \
             extra_type *e = ckb->get_at<extra_type>(ckb_offset); \
             e->base.template set_expr_function<extra_type>((kernel_request_t)kernreq); \
-            e->obj = af_self->get_data_as<const T *>(); \
+            e->obj = *af_self->get_data_as<const T *>(); \
 \
             return ckb_offset + sizeof(extra_type); \
         } \
@@ -136,7 +136,7 @@ DYND_PP_JOIN_MAP(CALL_RET_RES_CKERNEL_INSTANTIATOR, (), DYND_PP_RANGE(1, DYND_PP
 \
         arrfunc_type_data af; \
         af.func_proto = ndt::make_funcproto(src_tp, dst_tp); \
-        af.get_data_as<const T *>() = &obj; \
+        *af.get_data_as<const T *>() = &obj; \
         af.instantiate = &detail::elwise_from_callable_ckernel_instantiator<func_type>::instantiate; \
         af.free_func = NULL; \
 \

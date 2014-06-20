@@ -109,7 +109,7 @@ struct rolling_arrfunc_data {
 
 
 static void free_rolling_arrfunc_data(arrfunc_type_data *self_af) {
-    delete self_af->get_data_as<rolling_arrfunc_data *>();
+    delete *self_af->get_data_as<rolling_arrfunc_data *>();
 }
 } // anonymous namespace
 
@@ -117,7 +117,7 @@ static int resolve_rolling_dst_type(const arrfunc_type_data *af_self,
                                     ndt::type &out_dst_tp,
                                     const ndt::type *src_tp, int throw_on_error)
 {
-    rolling_arrfunc_data *data = af_self->get_data_as<rolling_arrfunc_data *>();
+    rolling_arrfunc_data *data = *af_self->get_data_as<rolling_arrfunc_data *>();
     const arrfunc_type_data *child_af = data->window_op.get();
     // First get the type for the child arrfunc
     ndt::type child_dst_tp;
@@ -147,7 +147,7 @@ static void resolve_rolling_dst_shape(const arrfunc_type_data *af_self,
                                       const char *const *src_arrmeta,
                                       const char *const *src_data)
 {
-    rolling_arrfunc_data *data = af_self->get_data_as<rolling_arrfunc_data *>();
+    rolling_arrfunc_data *data = *af_self->get_data_as<rolling_arrfunc_data *>();
     const arrfunc_type_data *child_af = data->window_op.get();
     out_shape[0] = src_tp[0].get_dim_size(src_arrmeta[0], src_data[0]);
     if (dst_tp.get_ndim() > 0) {
@@ -190,7 +190,7 @@ instantiate_strided(const arrfunc_type_data *af_self, dynd::ckernel_builder *ckb
                     const eval::eval_context *ectx)
 {
     typedef strided_rolling_ck self_type;
-    rolling_arrfunc_data *data = af_self->get_data_as<rolling_arrfunc_data *>();
+    rolling_arrfunc_data *data = *af_self->get_data_as<rolling_arrfunc_data *>();
 
     self_type *self = self_type::create(ckb, ckb_offset, (kernel_request_t)kernreq);
     const arrfunc_type_data *window_af = data->window_op.get();
@@ -282,7 +282,7 @@ void dynd::make_rolling_arrfunc(arrfunc_type_data *out_af,
 
     // Create the data for the arrfunc
     rolling_arrfunc_data *data = new rolling_arrfunc_data;
-    out_af->get_data_as<rolling_arrfunc_data *>() = data;
+    *out_af->get_data_as<rolling_arrfunc_data *>() = data;
     out_af->free_func = &free_rolling_arrfunc_data;
     out_af->func_proto = ndt::make_funcproto(roll_src_tp, roll_dst_tp);
     out_af->resolve_dst_type = &resolve_rolling_dst_type;

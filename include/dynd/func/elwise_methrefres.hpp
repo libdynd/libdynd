@@ -73,7 +73,7 @@ namespace detail {
             extra_type *e = ckb->get_at<extra_type>(ckb_offset); \
             e->base.template set_expr_function<extra_type>((kernel_request_t)kernreq); \
             std::pair<const T *, func_type *> *obj_func = \
-                af_self->get_data_as<std::pair<const T *, func_type *> *>(); \
+                *af_self->get_data_as<std::pair<const T *, func_type *> *>(); \
             e->obj = obj_func->first; \
             e->func = obj_func->second; \
 \
@@ -143,7 +143,7 @@ DYND_PP_JOIN_MAP(METH_REF_RES_CKERNEL_INSTANTIATOR, (), DYND_PP_RANGE(1, DYND_PP
 \
         arrfunc_type_data af; \
         af.func_proto = ndt::make_funcproto(src_tp, dst_tp); \
-        af.get_data_as<std::pair<const T *, func_type *> *>() = &obj_func; \
+        *af.get_data_as<std::pair<const T *, func_type *> *>() = &obj_func; \
         af.instantiate = &detail::elwise_ckernel_instantiator<func_type>::instantiate; \
         af.free_func = NULL; \
 \

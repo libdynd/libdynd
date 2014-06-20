@@ -115,18 +115,18 @@ struct arrfunc_type_data {
      * Helper function to reinterpret the data as the specified type.
      */
     template<typename T>
-    inline T& get_data_as() {
+    inline T* get_data_as() {
       DYND_STATIC_ASSERT(sizeof(T) <= sizeof(data), "data does not fit");
       DYND_STATIC_ASSERT(scalar_align_of<T>::value <= sizeof(void *),
                          "data requires stronger alignment");
-      return reinterpret_cast<T &>(data);
+      return reinterpret_cast<T *>(data);
     }
     template<typename T>
-    inline const T& get_data_as() const {
+    inline const T* get_data_as() const {
       DYND_STATIC_ASSERT(sizeof(T) <= sizeof(data), "data does not fit");
       DYND_STATIC_ASSERT(scalar_align_of<T>::value <= sizeof(void *),
                          "data requires stronger alignment");
-      return reinterpret_cast<const T &>(data);
+      return reinterpret_cast<const T *>(data);
     }
     /**
      * The function which instantiates a ckernel. See the documentation

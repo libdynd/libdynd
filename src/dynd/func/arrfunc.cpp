@@ -28,7 +28,7 @@ static intptr_t instantiate_assignment_ckernel(
 {
   try
   {
-    assign_error_mode errmode = self->get_data_as<assign_error_mode>();
+    assign_error_mode errmode = *self->get_data_as<assign_error_mode>();
     if (dst_tp.value_type() == self->get_return_type() &&
         src_tp[0].value_type() == self->get_param_type(0)) {
       if (errmode == ectx->errmode) {
@@ -63,7 +63,7 @@ static intptr_t instantiate_assignment_ckernel(
 
 static void delete_property_arrfunc_data(arrfunc_type_data *self_af)
 {
-    base_type_xdecref(self_af->get_data_as<const base_type *>());
+    base_type_xdecref(*self_af->get_data_as<const base_type *>());
 }
 
 static intptr_t instantiate_property_ckernel(
@@ -72,7 +72,7 @@ static intptr_t instantiate_property_ckernel(
     const ndt::type *src_tp, const char *const *src_arrmeta,
     kernel_request_t kernreq, const eval::eval_context *ectx)
 {
-  ndt::type prop_src_tp(self->get_data_as<const base_type *>(), true);
+  ndt::type prop_src_tp(*self->get_data_as<const base_type *>(), true);
 
   if (dst_tp.value_type() == prop_src_tp.value_type()) {
     if (src_tp[0] == prop_src_tp.operand_type()) {
@@ -111,7 +111,7 @@ void dynd::make_arrfunc_from_assignment(const ndt::type &dst_tp,
         throw type_error(ss.str());
     }
     memset(&out_af, 0, sizeof(arrfunc_type_data));
-    out_af.get_data_as<assign_error_mode>() = errmode;
+    *out_af.get_data_as<assign_error_mode>() = errmode;
     out_af.free_func = NULL;
     out_af.instantiate = &instantiate_assignment_ckernel;
     out_af.func_proto = ndt::make_funcproto(src_tp, dst_tp);
@@ -130,7 +130,7 @@ void dynd::make_arrfunc_from_property(const ndt::type &tp,
     ndt::type prop_tp = ndt::make_property(tp, propname);
     out_af.func_proto = ndt::make_funcproto(tp, prop_tp.value_type());
     out_af.free_func = &delete_property_arrfunc_data;
-    out_af.get_data_as<const base_type *>() = prop_tp.release();
+    *out_af.get_data_as<const base_type *>() = prop_tp.release();
     out_af.instantiate = &instantiate_property_ckernel;
 }
 

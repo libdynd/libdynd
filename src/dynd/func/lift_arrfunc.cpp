@@ -16,7 +16,7 @@ using namespace dynd;
 
 static void delete_lifted_expr_arrfunc_data(arrfunc_type_data *self_af)
 {
-    memory_block_decref(self_af->get_data_as<memory_block_data *>());
+    memory_block_decref(*self_af->get_data_as<memory_block_data *>());
 }
 
 static intptr_t instantiate_lifted_expr_arrfunc_data(
@@ -25,7 +25,7 @@ static intptr_t instantiate_lifted_expr_arrfunc_data(
     const char *const *src_arrmeta, kernel_request_t kernreq,
     const eval::eval_context *ectx)
 {
-    const array_preamble *data = self->get_data_as<const array_preamble *>();
+    const array_preamble *data = *self->get_data_as<const array_preamble *>();
     const arrfunc_type_data *child_af =
         reinterpret_cast<const arrfunc_type_data *>(data->m_data_pointer);
     return make_lifted_expr_ckernel(child_af,
@@ -41,7 +41,7 @@ static int resolve_lifted_dst_type(const arrfunc_type_data *self,
                                    const ndt::type *src_tp, int throw_on_error)
 {
     intptr_t param_count = self->get_param_count();
-    const array_preamble *data = self->get_data_as<const array_preamble *>();
+    const array_preamble *data = *self->get_data_as<const array_preamble *>();
     const arrfunc_type_data *child_af =
         reinterpret_cast<const arrfunc_type_data *>(data->m_data_pointer);
     intptr_t ndim = 0;
@@ -157,7 +157,7 @@ static void resolve_lifted_dst_shape(const arrfunc_type_data *self,
                                        const char *const *src_data)
 {
     intptr_t param_count = self->get_param_count();
-    const array_preamble *data = self->get_data_as<const array_preamble *>();
+    const array_preamble *data = *self->get_data_as<const array_preamble *>();
     const arrfunc_type_data *child_af =
         reinterpret_cast<const arrfunc_type_data *>(data->m_data_pointer);
     intptr_t child_ndim = child_af->get_return_type().get_ndim();
@@ -233,7 +233,7 @@ void dynd::lift_arrfunc(arrfunc_type_data *out_af, const nd::arrfunc &af)
 {
     const arrfunc_type_data *af_ptr = af.get();
     out_af->free_func = &delete_lifted_expr_arrfunc_data;
-    out_af->get_data_as<const array_preamble *>() = nd::array(af).release();
+    *out_af->get_data_as<const array_preamble *>() = nd::array(af).release();
     out_af->instantiate = &instantiate_lifted_expr_arrfunc_data;
     out_af->resolve_dst_type = &resolve_lifted_dst_type;
     out_af->resolve_dst_shape = &resolve_lifted_dst_shape;
