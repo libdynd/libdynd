@@ -1183,6 +1183,7 @@ array empty_like(const array& rhs, const ndt::type& uniform_dtype);
 array empty_like(const array& rhs);
 
 /**
+<<<<<<< HEAD
  * Primitive function to construct an nd::array with each element initialized to 0.
  * In this function, the type provided is the complete type of the array
  * result, not just its dtype.
@@ -1239,6 +1240,20 @@ inline array dtyped_ones(intptr_t ndim, const intptr_t *shape,
 
   return res;
 }
+=======
+ * Constructs a writable zero-initialized array of the specified type.
+ * This type should be at least two dimensional, and is initialized
+ * using the specified dimension sizes.
+ */
+array zeros(intptr_t dim0, intptr_t dim1, const ndt::type& tp);
+
+/**
+ * Constructs a writable one-initialized array of the specified type.
+ * This type should be at least two dimensional, and is initialized
+ * using the specified dimension sizes.
+ */
+array ones(intptr_t dim0, intptr_t dim1, const ndt::type& tp);
+>>>>>>>  Some changes to FFTW wrappers
 
 ///////////// Initializer list constructor implementation /////////////////////////
 #ifdef DYND_INIT_LIST

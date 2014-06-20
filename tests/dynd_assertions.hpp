@@ -152,8 +152,12 @@ inline double rel_error(double expected, double actual)
 inline double rel_error(dynd::dynd_complex<double> expected,
                         dynd::dynd_complex<double> actual)
 {
-    if ((expected == 0.0) && (actual == 0.0)) {
-        return 0.0;
+    if (expected == 0.0) {
+        if (actual == 0.0) {
+            return 0.0;
+        } else {
+            return fabs(abs(expected - actual));
+        }
     }
 
     return fabs(abs(expected - actual) / abs(expected));
@@ -171,6 +175,16 @@ template <typename T>
     return ::testing::AssertionFailure()
         << "Expected: rel_error(" << expected << ", " << actual << ") <= " << rel_error_max << "\n"
         << "  Actual: " << rel_error_val << " vs " << rel_error_max;
+}
+
+inline ::testing::AssertionResult AssertRelErrorLE(const char *expected_expr, const char *actual_expr,
+    const char *rel_error_max_expr, float expected, dynd::dynd_complex<float> actual, float rel_error_max) {
+    return AssertRelErrorLE(expected_expr, actual_expr, rel_error_max_expr, dynd::dynd_complex<float>(expected), actual, rel_error_max);
+}
+
+inline ::testing::AssertionResult AssertRelErrorLE(const char *expected_expr, const char *actual_expr,
+    const char *rel_error_max_expr, double expected, dynd::dynd_complex<double> actual, double rel_error_max) {
+    return AssertRelErrorLE(expected_expr, actual_expr, rel_error_max_expr, dynd::dynd_complex<double>(expected), actual, rel_error_max);
 }
 
 #define EXPECT_EQ_RELERR(expected, actual, rel_error_max) \

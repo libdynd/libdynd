@@ -1782,6 +1782,21 @@ nd::array nd::typed_ones(intptr_t ndim, const intptr_t *shape,
     nd::array res = nd::typed_empty(ndim, shape, tp);
     res.val_assign(1);
 
+nd::array nd::zeros(intptr_t dim0, intptr_t dim1, const ndt::type& tp)
+{
+    intptr_t dims[2] = {dim0, dim1};
+    nd::array res = nd::array(make_array_memory_block(tp, 2, dims));
+    res.vals() = 0;
+
+    return res;
+}
+
+nd::array nd::ones(intptr_t dim0, intptr_t dim1, const ndt::type& tp)
+{
+    intptr_t dims[2] = {dim0, dim1};
+    nd::array res = nd::array(make_array_memory_block(tp, 2, dims));
+    res.vals() = 1;
+
     return res;
 }
 
