@@ -358,41 +358,33 @@ static ndt::type parse_option_parameters(const char *&rbegin, const char *end,
 static ndt::type parse_adapt_parameters(const char *&rbegin, const char *end,
                                         map<string, ndt::type> &symtable)
 {
-    const char *begin = rbegin;
-    if (!parse_token_ds(begin, end, '[')) {
-        throw datashape_parse_error(begin, "expected opening '[' after 'adapt'");
-    }
-    ndt::type operand_tp = parse_datashape(begin, end, symtable);
-    if (operand_tp.is_null()) {
-        throw datashape_parse_error(begin, "expected a data type");
-    }
-    if (!parse_token_ds(begin, end, ',')) {
-        throw datashape_parse_error(begin, "expected a ,");
-    }
-    string adapt_op;
-    ndt::type value_tp;
-    if (!parse_quoted_string(begin, end, adapt_op)) {
-        value_tp = parse_datashape(begin, end, symtable);
-        if (value_tp.is_null()) {
-            throw datashape_parse_error(begin, "expected a type or an adapt op");
-        }
-        if (!parse_token_ds(begin, end, ',')) {
-            throw datashape_parse_error(begin, "expected a ,");
-        }
-        if (!parse_quoted_string(begin, end, adapt_op)) {
-            throw datashape_parse_error(begin, "expected an adapt op");
-        }
-    }
-    if (!parse_token_ds(begin, end, ']')) {
-        throw datashape_parse_error(begin, "expected closing ']'");
-    }
-    // TODO catch errors, convert them to datashape_parse_error so the position is shown
-    rbegin = begin;
-    if (value_tp.is_null()) {
-        return ndt::make_adapt(operand_tp, operand_tp, adapt_op);
-    } else {
-        return ndt::make_adapt(operand_tp, value_tp, adapt_op);
-    }
+  const char *begin = rbegin;
+  if (!parse_token_ds(begin, end, '[')) {
+    throw datashape_parse_error(begin, "expected opening '[' after 'adapt'");
+  }
+  const char *saved_begin = begin;
+  ndt::type proto_tp = parse_datashape(begin, end, symtable);
+  if (proto_tp.is_null() || proto_tp.get_type_id() != funcproto_type_id ||
+      proto_tp.tcast<funcproto_type>()->get_param_count() != 1) {
+    throw datashape_parse_error(saved_begin, "expected a unary function signature");
+  }
+  if (!parse_token_ds(begin, end, ',')) {
+    throw datashape_parse_error(begin, "expected a ,");
+  }
+  string adapt_op;
+  ndt::type value_tp;
+  if (!parse_quoted_string(begin, end, adapt_op)) {
+    throw datashape_parse_error(begin, "expected an an adapt op");
+  }
+  if (!parse_token_ds(begin, end, ']')) {
+    throw datashape_parse_error(begin, "expected closing ']'");
+  }
+  // TODO catch errors, convert them to datashape_parse_error so the position is
+  // shown
+  rbegin = begin;
+  return ndt::make_adapt(proto_tp.tcast<funcproto_type>()->get_param_type(0),
+                         proto_tp.tcast<funcproto_type>()->get_return_type(),
+                         adapt_op);
 }
 
 static string_encoding_t string_to_encoding(const char *error_begin, const string& estr)

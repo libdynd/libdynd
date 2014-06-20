@@ -44,7 +44,7 @@ void adapt_type::print_data(std::ostream &DYND_UNUSED(o),
 
 void adapt_type::print_type(std::ostream& o) const
 {
-    o << "adapt[" << m_operand_type << ", " << m_value_type << ", ";
+    o << "adapt[(" << m_operand_type << ") -> " << m_value_type << ", ";
     print_escaped_utf8_string(o, m_op);
     o << "]";
 }
