@@ -391,7 +391,7 @@ static ndt::type parse_adapt_parameters(const char *&rbegin, const char *end,
     if (value_tp.is_null()) {
         return ndt::make_adapt(operand_tp, operand_tp, adapt_op);
     } else {
-        return ndt::make_adapt(value_tp, operand_tp, adapt_op);
+        return ndt::make_adapt(operand_tp, value_tp, adapt_op);
     }
 }
 

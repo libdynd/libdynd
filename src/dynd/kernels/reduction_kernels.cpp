@@ -116,7 +116,7 @@ void kernels::make_builtin_sum_reduction_arrfunc(
         throw type_error(ss.str());
     }
     out_af->func_proto = ndt::make_funcproto(ndt::type(tid), ndt::type(tid));
-    out_af->data_ptr = reinterpret_cast<void *>(tid);
+    out_af->get_data_as<type_id_t>() = tid;
     out_af->instantiate = &instantiate_builtin_sum_reduction_arrfunc;
     out_af->free_func = NULL;
 }
@@ -163,8 +163,8 @@ namespace {
     struct mean1d_arrfunc_data {
         intptr_t minp;
 
-        static void free(void *data_ptr) {
-            delete reinterpret_cast<mean1d_arrfunc_data *>(data_ptr);
+        static void free(arrfunc_type_data *self_af) {
+          delete self_af->get_data_as<mean1d_arrfunc_data *>();
         }
 
         static intptr_t
@@ -175,8 +175,7 @@ namespace {
                     const eval::eval_context *DYND_UNUSED(ectx))
         {
             typedef double_mean1d_ck self_type;
-            mean1d_arrfunc_data *data =
-                reinterpret_cast<mean1d_arrfunc_data *>(af_self->data_ptr);
+            mean1d_arrfunc_data *data = af_self->get_data_as<mean1d_arrfunc_data *>();
             self_type *self = self_type::create_leaf(ckb, ckb_offset,
                                                      (kernel_request_t)kernreq);
             intptr_t src_dim_size, src_stride;
@@ -222,12 +221,12 @@ nd::arrfunc kernels::make_builtin_mean1d_arrfunc(type_id_t tid, intptr_t minp)
     nd::array mean1d = nd::empty(ndt::make_arrfunc());
     arrfunc_type_data *out_af =
         reinterpret_cast<arrfunc_type_data *>(mean1d.get_readwrite_originptr());
-    mean1d_arrfunc_data *data = new mean1d_arrfunc_data;
-    data->minp = minp;
     out_af->func_proto =
         ndt::make_funcproto(ndt::make_strided_dim(ndt::make_type<double>()),
                             ndt::make_type<double>());
-    out_af->data_ptr = data;
+    mean1d_arrfunc_data *data = new mean1d_arrfunc_data;
+    data->minp = minp;
+    out_af->get_data_as<mean1d_arrfunc_data *>() = data;
     out_af->instantiate = &mean1d_arrfunc_data::instantiate;
     out_af->free_func = &mean1d_arrfunc_data::free;
     mean1d.flag_as_immutable();

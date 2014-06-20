@@ -87,6 +87,13 @@ struct time_hmst {
     /**
      * Sets the hmst to NA.
      */
+    inline void set_to_zero() {
+        memset(this, 0, sizeof(*this));
+    }
+
+    /**
+     * Sets the hmst to NA.
+     */
     inline void set_to_na() {
         hour = -128;
     }

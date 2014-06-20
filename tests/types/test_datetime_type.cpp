@@ -9,6 +9,7 @@
 #include "inc_gtest.hpp"
 
 #include <dynd/array.hpp>
+#include <dynd/string.hpp>
 #include <dynd/types/datetime_type.hpp>
 #include <dynd/types/property_type.hpp>
 #include <dynd/types/strided_dim_type.hpp>
@@ -169,6 +170,39 @@ TEST(DatetimeType, Properties) {
     EXPECT_EQ(12, n.p("minute").as<int32_t>());
     EXPECT_EQ(14, n.p("second").as<int32_t>());
     EXPECT_EQ(1236540, n.p("tick").as<int32_t>());
+}
+
+
+TEST(DatetimeType, AdaptFromInt) {
+    nd::array a, b;
+
+    a = parse_json("3 * int64", "[31968000000, -999480000, 45296789]");
+    b = a.adapt(ndt::make_datetime(), "milliseconds since 2000-01-01T00:00");
+    EXPECT_EQ("2001-01-05T00:00", b(0).as<string>());
+    EXPECT_EQ("1999-12-20T10:22", b(1).as<string>());
+    EXPECT_EQ("2000-01-01T12:34:56.789", b(2).as<string>());
+
+    a = parse_json("3 * int64", "[31968000000000, -999480000000, 45296789123]");
+    b = a.adapt(ndt::make_datetime(), "microseconds since 2000-01-01");
+    EXPECT_EQ("2001-01-05T00:00", b(0).as<string>());
+    EXPECT_EQ("1999-12-20T10:22", b(1).as<string>());
+    EXPECT_EQ("2000-01-01T12:34:56.789123", b(2).as<string>());
+
+    a = parse_json("3 * int64", "[31968000000000000, -999480000000000, 45296789123456]");
+    b = a.adapt(ndt::make_datetime(), "nanoseconds since 2000");
+    EXPECT_EQ("2001-01-05T00:00", b(0).as<string>());
+    EXPECT_EQ("1999-12-20T10:22", b(1).as<string>());
+    EXPECT_EQ("2000-01-01T12:34:56.7891234", b(2).as<string>());
+}
+
+TEST(DatetimeType, AdaptAsInt) {
+    nd::array a, b;
+
+    a = parse_json("3 * datetime", "[\"2001-01-05T00:00\", \"1999-12-20T10:22\", \"2000-01-01T12:34:56\"]");
+    b = a.adapt(ndt::make_type<int64_t>(), "seconds since 2000-01-01T00:00");
+    EXPECT_EQ(370*24*60*60, b(0).as<int64_t>());
+    EXPECT_EQ(-12*24*60*60 + 10*60*60 + 22*60, b(1).as<int64_t>());
+    EXPECT_EQ(12*60*60 + 34*60 + 56, b(2).as<int64_t>());
 }
 
 TEST(DateTimeStruct, FromToString) {

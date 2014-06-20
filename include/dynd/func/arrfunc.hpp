@@ -106,11 +106,28 @@ struct arrfunc_type_data {
     /** The function prototype of the arrfunc */
     ndt::type func_proto;
     /**
-     * A pointer to typically heap-allocated memory for
-     * the arrfunc. This is the value to be passed
-     * in when calling instantiate_func and free_func.
+     * Some memory for the arrfunc to use. If this is not
+     * enough space to hold all the data by value, should allocate
+     * space on the heap, and free it when free_func is called.
      */
-    void *data_ptr;
+    char data[4 * sizeof(void *)];
+    /**
+     * Helper function to reinterpret the data as the specified type.
+     */
+    template<typename T>
+    T& get_data_as() {
+      DYND_STATIC_ASSERT(sizeof(T) <= sizeof(data), "data does not fit");
+      DYND_STATIC_ASSERT(scalar_align_of<T>::value <= sizeof(void *),
+                         "data requires stronger alignment");
+      return *reinterpret_cast<T *>(&data[0]);
+    }
+    template<typename T>
+    const T& get_data_as() const {
+      DYND_STATIC_ASSERT(sizeof(T) <= sizeof(data), "data does not fit");
+      DYND_STATIC_ASSERT(scalar_align_of<T>::value <= sizeof(void *),
+                         "data requires stronger alignment");
+      return *reinterpret_cast<const T *>(&data[0]);
+    }
     /**
      * The function which instantiates a ckernel. See the documentation
      * for the function typedef for more details.
@@ -122,20 +139,16 @@ struct arrfunc_type_data {
      * A function which deallocates the memory behind data_ptr after
      * freeing any additional resources it might contain.
      */
-    void (*free_func)(void *self_data_ptr);
+    void (*free_func)(arrfunc_type_data *self_data_ptr);
 
     // Default to all NULL, so the destructor works correctly
-    inline arrfunc_type_data()
-        : func_proto(),
-            data_ptr(0), instantiate(0), free_func(0)
-    {
-    }
+    inline arrfunc_type_data() : func_proto(), instantiate(0), free_func(0) {}
 
     // If it contains an arrfunc, free it
     inline ~arrfunc_type_data()
     {
-        if (free_func && data_ptr) {
-            free_func(data_ptr);
+        if (free_func) {
+            free_func(this);
         }
     }
 

@@ -432,11 +432,9 @@ nd::array string_type::get_option_nafunc() const
     // Use a typevar instead of option[T] to avoid a circular dependency
     is_avail->func_proto = ndt::make_funcproto(ndt::make_typevar("T"),
                                                ndt::make_type<dynd_bool>());
-    is_avail->data_ptr = NULL;
     is_avail->instantiate = &string_is_avail_ck::instantiate;
     assign_na->func_proto =
         ndt::make_funcproto(0, NULL, ndt::make_typevar("T"));
-    assign_na->data_ptr = NULL;
     assign_na->instantiate = &string_assign_na_ck::instantiate;
     naf.flag_as_immutable();
     return naf;

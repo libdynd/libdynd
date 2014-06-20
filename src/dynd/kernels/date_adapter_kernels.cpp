@@ -26,7 +26,12 @@ static bool parse_days_since(const char *begin, const char *end,
     if (!parse::skip_required_whitespace(begin, end)) {
         return false;
     }
-    if (!parse::parse_token(begin, end, "since")) {
+    // The tokens supported by netcdf, as from the udunits libarary
+    if (!parse::parse_token(begin, end, "since") &&
+            !parse::parse_token(begin, end, "after") &&
+            !parse::parse_token(begin, end, "from") &&
+            !parse::parse_token(begin, end, "ref") &&
+            !parse::parse_token(begin, end, '@')) {
         return false;
     }
     if (!parse::skip_required_whitespace(begin, end)) {
@@ -34,7 +39,14 @@ static bool parse_days_since(const char *begin, const char *end,
     }
     date_ymd epoch;
     if (!parse::parse_date(begin, end, epoch, date_parse_no_ambig, 0)) {
+      int year;
+      if (parse::parse_4digit_int_no_ws(begin, end, year)) {
+        epoch.year = static_cast<int16_t>(year);
+        epoch.month = 1;
+        epoch.day = 1;
+      } else {
         return false;
+      }
     }
     parse::skip_whitespace(begin, end);
     out_epoch_date = epoch.to_days();
@@ -72,7 +84,7 @@ static intptr_t instantiate_int_offset_arrfunc(
         throw type_error(ss.str());
     }
     self_type *self = self_type::create_leaf(ckb, ckb_offset, kernreq);
-    self->m_offset = reinterpret_cast<Tdst>(self_af->data_ptr);
+    self->m_offset = self_af->get_data_as<Tdst>();
     return ckb_offset + sizeof(self_type);
 }
 
@@ -83,7 +95,7 @@ nd::arrfunc make_int_offset_arrfunc(Tdst offset, const ndt::type &func_proto)
     arrfunc_type_data *af =
         reinterpret_cast<arrfunc_type_data *>(out_af.get_readwrite_originptr());
     af->func_proto = func_proto;
-    af->data_ptr = reinterpret_cast<void *>(offset);
+    af->get_data_as<Tdst>() = offset;
     af->instantiate = &instantiate_int_offset_arrfunc<Tsrc, Tdst>;
     out_af.flag_as_immutable();
     return out_af;

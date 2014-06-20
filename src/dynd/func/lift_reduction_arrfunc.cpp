@@ -28,11 +28,11 @@ struct lifted_reduction_arrfunc_data {
     shortvector<bool> reduction_dimflags;
 };
 
-static void delete_lifted_reduction_arrfunc_data(void *self_data_ptr)
+static void delete_lifted_reduction_arrfunc_data(arrfunc_type_data *self_af)
 {
-    lifted_reduction_arrfunc_data *self =
-                    reinterpret_cast<lifted_reduction_arrfunc_data *>(self_data_ptr);
-    delete self;
+  lifted_reduction_arrfunc_data *self =
+      self_af->get_data_as<lifted_reduction_arrfunc_data *>();
+  delete self;
 }
 
 static intptr_t instantiate_lifted_reduction_arrfunc_data(
@@ -42,20 +42,14 @@ static intptr_t instantiate_lifted_reduction_arrfunc_data(
     const eval::eval_context *ectx)
 
 {
-    lifted_reduction_arrfunc_data *data =
-                    reinterpret_cast<lifted_reduction_arrfunc_data *>(af_self->data_ptr);
-    return make_lifted_reduction_ckernel(
-                    data->child_elwise_reduction.get(),
-                    data->child_dst_initialization.get(),
-                    ckb, ckb_offset,
-                    dst_tp, dst_arrmeta,
-                    src_tp[0], src_arrmeta[0],
-                    data->reduction_ndim,
-                    data->reduction_dimflags.get(),
-                    data->associative, data->commutative,
-                    data->right_associative, data->reduction_identity,
-                    static_cast<dynd::kernel_request_t>(kernreq),
-                    ectx);
+  lifted_reduction_arrfunc_data *data =
+      af_self->get_data_as<lifted_reduction_arrfunc_data *>();
+  return make_lifted_reduction_ckernel(
+      data->child_elwise_reduction.get(), data->child_dst_initialization.get(),
+      ckb, ckb_offset, dst_tp, dst_arrmeta, src_tp[0], src_arrmeta[0],
+      data->reduction_ndim, data->reduction_dimflags.get(), data->associative,
+      data->commutative, data->right_associative, data->reduction_identity,
+      static_cast<dynd::kernel_request_t>(kernreq), ectx);
 }
 
 } // anonymous namespace
@@ -91,7 +85,7 @@ void dynd::lift_reduction_arrfunc(arrfunc_type_data *out_ar,
     }
 
     lifted_reduction_arrfunc_data *self = new lifted_reduction_arrfunc_data;
-    out_ar->data_ptr = self;
+    out_ar->get_data_as<lifted_reduction_arrfunc_data *>() = self;
     out_ar->free_func = &delete_lifted_reduction_arrfunc_data;
     self->child_elwise_reduction = elwise_reduction_arr;
     self->child_dst_initialization = dst_initialization_arr;

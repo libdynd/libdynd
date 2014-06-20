@@ -26,44 +26,44 @@ static intptr_t instantiate_assignment_ckernel(
     const ndt::type *src_tp, const char *const *src_arrmeta,
     kernel_request_t kernreq, const eval::eval_context *ectx)
 {
-    try {
-    assign_error_mode errmode = static_cast<assign_error_mode>(
-        reinterpret_cast<uintptr_t>(self->data_ptr));
+  try
+  {
+    assign_error_mode errmode = self->get_data_as<assign_error_mode>();
     if (dst_tp.value_type() == self->get_return_type() &&
-            src_tp[0].value_type() == self->get_param_type(0)) {
-        if (errmode == ectx->errmode) {
-            return make_assignment_kernel(
-                ckb, ckb_offset, dst_tp, dst_arrmeta, src_tp[0], src_arrmeta[0],
-                (kernel_request_t)kernreq, ectx);
-        } else {
-            eval::eval_context ectx_tmp(*ectx);
-            ectx_tmp.errmode = errmode;
-            return make_assignment_kernel(ckb, ckb_offset, dst_tp, dst_arrmeta,
-                                          src_tp[0], src_arrmeta[0],
-                                          (kernel_request_t)kernreq, &ectx_tmp);
-        }
+        src_tp[0].value_type() == self->get_param_type(0)) {
+      if (errmode == ectx->errmode) {
+        return make_assignment_kernel(ckb, ckb_offset, dst_tp, dst_arrmeta,
+                                      src_tp[0], src_arrmeta[0],
+                                      (kernel_request_t)kernreq, ectx);
+      } else {
+        eval::eval_context ectx_tmp(*ectx);
+        ectx_tmp.errmode = errmode;
+        return make_assignment_kernel(ckb, ckb_offset, dst_tp, dst_arrmeta,
+                                      src_tp[0], src_arrmeta[0],
+                                      (kernel_request_t)kernreq, &ectx_tmp);
+      }
     } else {
-        stringstream ss;
-        ss << "Cannot instantiate arrfunc for assigning from ";
-        ss << self->get_param_type(0) << " to " << self->get_return_type();
-        ss << " using input type " << src_tp[0];
-        ss << " and output type " << dst_tp;
-        throw type_error(ss.str());
+      stringstream ss;
+      ss << "Cannot instantiate arrfunc for assigning from ";
+      ss << self->get_param_type(0) << " to " << self->get_return_type();
+      ss << " using input type " << src_tp[0];
+      ss << " and output type " << dst_tp;
+      throw type_error(ss.str());
     }
-
-    } catch (const std::exception& e) {
-        cout << "exception: " << e.what() << endl;
-        throw;
-    }
+  }
+  catch (const std::exception &e)
+  {
+    cout << "exception: " << e.what() << endl;
+    throw;
+  }
 }
 
 ////////////////////////////////////////////////////////////////
 // Functions for property access as an arrfunc
 
-static void delete_property_arrfunc_data(void *self_data_ptr)
+static void delete_property_arrfunc_data(arrfunc_type_data *self_af)
 {
-    const base_type *data = reinterpret_cast<const base_type *>(self_data_ptr);
-    base_type_xdecref(data);
+    base_type_xdecref(self_af->get_data_as<const base_type *>());
 }
 
 static intptr_t instantiate_property_ckernel(
@@ -72,29 +72,27 @@ static intptr_t instantiate_property_ckernel(
     const ndt::type *src_tp, const char *const *src_arrmeta,
     kernel_request_t kernreq, const eval::eval_context *ectx)
 {
-    ndt::type prop_src_tp(reinterpret_cast<const base_type *>(self->data_ptr),
-                          true);
+  ndt::type prop_src_tp(self->get_data_as<const base_type *>(), true);
 
-    if (dst_tp.value_type() == prop_src_tp.value_type()) {
-        if (src_tp[0] == prop_src_tp.operand_type()) {
-            return make_assignment_kernel(ckb, ckb_offset, dst_tp, dst_arrmeta,
-                                          prop_src_tp, src_arrmeta[0], kernreq,
-                                          ectx);
-        } else if (src_tp[0].value_type() == prop_src_tp.operand_type()) {
-            return make_assignment_kernel(
-                ckb, ckb_offset, dst_tp, dst_arrmeta,
-                prop_src_tp.tcast<base_expression_type>()
-                    ->with_replaced_storage_type(src_tp[0]),
-                src_arrmeta[0], kernreq, ectx);
-        }
+  if (dst_tp.value_type() == prop_src_tp.value_type()) {
+    if (src_tp[0] == prop_src_tp.operand_type()) {
+      return make_assignment_kernel(ckb, ckb_offset, dst_tp, dst_arrmeta,
+                                    prop_src_tp, src_arrmeta[0], kernreq, ectx);
+    } else if (src_tp[0].value_type() == prop_src_tp.operand_type()) {
+      return make_assignment_kernel(
+          ckb, ckb_offset, dst_tp, dst_arrmeta,
+          prop_src_tp.tcast<base_expression_type>()->with_replaced_storage_type(
+              src_tp[0]),
+          src_arrmeta[0], kernreq, ectx);
     }
+  }
 
-    stringstream ss;
-    ss << "Cannot instantiate arrfunc for assigning from ";
-    ss << self->get_param_type(0) << " to " << self->get_return_type();
-    ss << " using input type " << src_tp[0];
-    ss << " and output type " << dst_tp;
-    throw type_error(ss.str());
+  stringstream ss;
+  ss << "Cannot instantiate arrfunc for assigning from ";
+  ss << self->get_param_type(0) << " to " << self->get_return_type();
+  ss << " using input type " << src_tp[0];
+  ss << " and output type " << dst_tp;
+  throw type_error(ss.str());
 }
 
 } // anonymous namespace
@@ -113,7 +111,7 @@ void dynd::make_arrfunc_from_assignment(const ndt::type &dst_tp,
         throw type_error(ss.str());
     }
     memset(&out_af, 0, sizeof(arrfunc_type_data));
-    out_af.data_ptr = reinterpret_cast<void *>(errmode);
+    out_af.get_data_as<assign_error_mode>() = errmode;
     out_af.free_func = NULL;
     out_af.instantiate = &instantiate_assignment_ckernel;
     out_af.func_proto = ndt::make_funcproto(src_tp, dst_tp);
@@ -132,8 +130,7 @@ void dynd::make_arrfunc_from_property(const ndt::type &tp,
     ndt::type prop_tp = ndt::make_property(tp, propname);
     out_af.func_proto = ndt::make_funcproto(tp, prop_tp.value_type());
     out_af.free_func = &delete_property_arrfunc_data;
-    out_af.data_ptr =
-        const_cast<void *>(reinterpret_cast<const void *>(prop_tp.release()));
+    out_af.get_data_as<const base_type *>() = prop_tp.release();
     out_af.instantiate = &instantiate_property_ckernel;
 }
 

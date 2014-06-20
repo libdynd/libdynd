@@ -338,6 +338,7 @@ set(libdynd_SRC
     src/dynd/kernels/date_assignment_kernels.cpp
     src/dynd/kernels/date_adapter_kernels.cpp
     src/dynd/kernels/datetime_assignment_kernels.cpp
+    src/dynd/kernels/datetime_adapter_kernels.cpp
     src/dynd/kernels/date_expr_kernels.cpp
     src/dynd/kernels/elwise_expr_kernels.cpp
     src/dynd/kernels/expr_kernel_generator.cpp
@@ -375,6 +376,7 @@ set(libdynd_SRC
     include/dynd/kernels/date_assignment_kernels.hpp
     include/dynd/kernels/date_adapter_kernels.hpp
     include/dynd/kernels/datetime_assignment_kernels.hpp
+    include/dynd/kernels/datetime_adapter_kernels.hpp
     include/dynd/kernels/date_expr_kernels.hpp
     include/dynd/kernels/elwise_expr_kernels.hpp
     include/dynd/kernels/expr_kernels.hpp
