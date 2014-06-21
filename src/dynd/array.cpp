@@ -20,6 +20,7 @@
 #include <dynd/types/cuda_host_type.hpp>
 #include <dynd/types/cuda_device_type.hpp>
 #include <dynd/types/option_type.hpp>
+#include <dynd/types/adapt_type.hpp>
 #include <dynd/kernels/assignment_kernels.hpp>
 #include <dynd/kernels/comparison_kernels.hpp>
 #include <dynd/exceptions.hpp>
@@ -30,6 +31,7 @@
 #include <dynd/types/builtin_type_properties.hpp>
 #include <dynd/memblock/memmap_memory_block.hpp>
 #include <dynd/kernels/make_lifted_ckernel.hpp>
+#include <dynd/view.hpp>
 
 using namespace std;
 using namespace dynd;
@@ -1228,21 +1230,20 @@ nd::array nd::array::ucast(const ndt::type &scalar_tp, intptr_t replace_ndim)
     }
 }
 
-nd::array nd::array::view(const ndt::type& DYND_UNUSED(dt)) const
+nd::array nd::array::view(const ndt::type& tp) const
 {
-    // It appears that the way to fully support this operation is
-    // similar to the two-pass indexing operation. This would
-    // do one recursive pass through the type to build the output
-    // type (e.g. determine whether the data can be viewed directly,
-    // or expression types need a view expression added on the end),
-    // then a second pass to construct the arrmeta
-    throw runtime_error("TODO: Implement nd::array::view");
+    return nd::view(*this, tp);
 }
 
 nd::array nd::array::uview(const ndt::type& uniform_dt, intptr_t replace_ndim) const
 {
     // Use the view function specifying to replace all dimensions
     return view(get_type().with_replaced_dtype(uniform_dt, replace_ndim));
+}
+
+nd::array nd::array::adapt(const ndt::type& tp, const nd::string& adapt_op)
+{
+    return uview(ndt::make_adapt(get_dtype(), tp, adapt_op), 0);
 }
 
 namespace {

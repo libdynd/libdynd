@@ -14,7 +14,7 @@ using namespace dynd;
 // string to time assignment
 
 namespace {
-    struct string_to_time_ck : public kernels::assignment_ck<string_to_time_ck> {
+    struct string_to_time_ck : public kernels::unary_ck<string_to_time_ck> {
         ndt::type m_src_string_tp;
         const char *m_src_arrmeta;
         assign_error_mode m_errmode;
@@ -60,7 +60,7 @@ size_t dynd::make_string_to_time_assignment_kernel(
 // time to string assignment
 
 namespace {
-    struct time_to_string_ck : public kernels::assignment_ck<time_to_string_ck> {
+    struct time_to_string_ck : public kernels::unary_ck<time_to_string_ck> {
         ndt::type m_dst_string_tp;
         const char *m_dst_arrmeta;
         eval::eval_context m_ectx;

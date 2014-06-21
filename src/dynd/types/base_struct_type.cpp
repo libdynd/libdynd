@@ -235,7 +235,7 @@ ndt::type base_struct_type::get_elwise_property_type(size_t elwise_property_inde
 
 namespace {
 struct struct_property_getter_ck
-  : public kernels::assignment_ck<struct_property_getter_ck> {
+  : public kernels::unary_ck<struct_property_getter_ck> {
     size_t m_field_offset;
 
     inline void single(char *dst, const char *src)

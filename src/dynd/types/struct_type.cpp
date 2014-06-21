@@ -51,7 +51,7 @@ void struct_type::print_type(std::ostream& o) const
         if (is_simple_identifier_name(fn.begin, fn.end)) {
             o.write(fn.begin, fn.end - fn.begin);
         } else {
-            print_escaped_utf8_string(o, fn.begin, fn.end);
+            print_escaped_utf8_string(o, fn.begin, fn.end, true);
         }
         o << " : " << get_field_type(i);
     }

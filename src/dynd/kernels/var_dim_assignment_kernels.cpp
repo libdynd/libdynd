@@ -21,7 +21,7 @@ using namespace dynd;
 // broadcast to var array assignment
 
 namespace {
-    struct broadcast_to_var_assign_ck : public kernels::assignment_ck<broadcast_to_var_assign_ck> {
+    struct broadcast_to_var_assign_ck : public kernels::unary_ck<broadcast_to_var_assign_ck> {
         intptr_t m_dst_target_alignment;
         const var_dim_type_arrmeta *m_dst_md;
 
@@ -99,7 +99,7 @@ size_t dynd::make_broadcast_to_var_dim_assignment_kernel(
 // var array to var array assignment
 
 namespace {
-    struct var_assign_ck : public kernels::assignment_ck<var_assign_ck> {
+    struct var_assign_ck : public kernels::unary_ck<var_assign_ck> {
         intptr_t m_dst_target_alignment;
         const var_dim_type_arrmeta *m_dst_md, *m_src_md;
 
@@ -210,7 +210,7 @@ size_t dynd::make_var_dim_assignment_kernel(
 // strided array to var array assignment
 
 namespace {
-    struct strided_to_var_assign_ck : public kernels::assignment_ck<strided_to_var_assign_ck> {
+    struct strided_to_var_assign_ck : public kernels::unary_ck<strided_to_var_assign_ck> {
         intptr_t m_dst_target_alignment;
         const var_dim_type_arrmeta *m_dst_md;
         intptr_t m_src_stride, m_src_dim_size;
@@ -303,7 +303,7 @@ size_t dynd::make_strided_to_var_dim_assignment_kernel(
 // var array to strided array assignment
 
 namespace {
-    struct var_to_strided_assign_ck : public kernels::assignment_ck<var_to_strided_assign_ck> {
+    struct var_to_strided_assign_ck : public kernels::unary_ck<var_to_strided_assign_ck> {
         intptr_t m_dst_stride, m_dst_dim_size;
         const var_dim_type_arrmeta *m_src_md;
 

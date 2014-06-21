@@ -565,7 +565,7 @@ public:
      *
      * \param dt  The dynd type to view the entire data as.
      */
-    array view(const ndt::type& dt) const;
+    array view(const ndt::type& tp) const;
 
     /**
      * Attempts to view the uniform type-level of the array as a
@@ -576,6 +576,15 @@ public:
      *                       into the viewed uniform_dt.
      */
     array uview(const ndt::type& uniform_dt, intptr_t replace_ndim) const;
+
+    /**
+     * Adapts the array into the destination type, using the provided
+     * adaption operator. This creates an adapt[] type.
+     *
+     * Example:
+     * nd::array({3, 5, 10}).adapt(ndt::make_date(), "days since 2001-1-1");
+     */
+    array adapt(const ndt::type& tp, const nd::string& adapt_op);
 
     /**
      * DEPRECATED

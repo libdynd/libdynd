@@ -19,6 +19,7 @@
 #include <dynd/kernels/date_expr_kernels.hpp>
 #include <dynd/kernels/string_assignment_kernels.hpp>
 #include <dynd/kernels/assignment_kernels.hpp>
+#include <dynd/kernels/date_adapter_kernels.hpp>
 #include <dynd/exceptions.hpp>
 #include <dynd/func/make_callable.hpp>
 #include <dynd/array_iter.hpp>
@@ -365,28 +366,6 @@ void get_property_kernel_weekday_single(char *dst, const char *const *src,
     *reinterpret_cast<int32_t *>(dst) = weekday;
 }
 
-void get_property_kernel_days_after_1970_int64_single(
-    char *dst, const char *const *src, ckernel_prefix *DYND_UNUSED(self))
-{
-    int32_t days = **reinterpret_cast<const int32_t *const *>(src);
-    if (days == DYND_DATE_NA) {
-        *reinterpret_cast<int64_t *>(dst) = numeric_limits<int64_t>::min();
-    } else {
-        *reinterpret_cast<int64_t *>(dst) = days;
-    }
-}
-
-void set_property_kernel_days_after_1970_int64_single(
-    char *dst, const char *const *src, ckernel_prefix *DYND_UNUSED(self))
-{
-    int64_t days = **reinterpret_cast<const int64_t *const *>(src);
-    if (days == numeric_limits<int64_t>::min()) {
-        *reinterpret_cast<int32_t *>(dst) = DYND_DATE_NA;
-    } else {
-        *reinterpret_cast<int32_t *>(dst) = static_cast<int32_t>(days);
-    }
-}
-
 void get_property_kernel_struct_single(char *dst, const char *const *src,
                                        ckernel_prefix *DYND_UNUSED(self))
 {
@@ -408,7 +387,6 @@ namespace {
         dateprop_month,
         dateprop_day,
         dateprop_weekday,
-        dateprop_days_after_1970_int64,
         dateprop_struct
     };
 }
@@ -423,9 +401,6 @@ size_t date_type::get_elwise_property_index(const std::string& property_name) co
         return dateprop_day;
     } else if (property_name == "weekday") {
         return dateprop_weekday;
-    } else if (property_name == "days_after_1970_int64") {
-        // A read/write property for NumPy datetime64[D] compatibility
-        return dateprop_days_after_1970_int64;
     } else if (property_name == "struct") {
         // A read/write property for accessing a date as a struct
         return dateprop_struct;
@@ -447,10 +422,6 @@ ndt::type date_type::get_elwise_property_type(size_t property_index,
             out_readable = true;
             out_writable = false;
             return ndt::make_type<int32_t>();
-        case dateprop_days_after_1970_int64:
-            out_readable = true;
-            out_writable = true;
-            return ndt::make_type<int64_t>();
         case dateprop_struct:
             out_readable = true;
             out_writable = true;
@@ -484,9 +455,6 @@ size_t date_type::make_elwise_property_getter_kernel(
         case dateprop_weekday:
             e->set_function<expr_single_t>(&get_property_kernel_weekday_single);
             return offset_out + sizeof(ckernel_prefix);
-        case dateprop_days_after_1970_int64:
-            e->set_function<expr_single_t>(&get_property_kernel_days_after_1970_int64_single);
-            return offset_out + sizeof(ckernel_prefix);
         case dateprop_struct:
             e->set_function<expr_single_t>(&get_property_kernel_struct_single);
             return offset_out + sizeof(ckernel_prefix);
@@ -507,9 +475,6 @@ size_t date_type::make_elwise_property_setter_kernel(
         make_kernreq_to_single_kernel_adapter(out, offset_out, 1, kernreq);
     ckernel_prefix *e = out->get_at<ckernel_prefix>(offset_out);
     switch (dst_property_index) {
-        case dateprop_days_after_1970_int64:
-            e->set_function<expr_single_t>(&set_property_kernel_days_after_1970_int64_single);
-            return offset_out + sizeof(ckernel_prefix);
         case dateprop_struct:
             e->set_function<expr_single_t>(&set_property_kernel_struct_single);
             return offset_out + sizeof(ckernel_prefix);
@@ -620,14 +585,29 @@ nd::array date_type::get_option_nafunc() const
     // Use a typevar instead of option[T] to avoid a circular dependency
     is_avail->func_proto = ndt::make_funcproto(ndt::make_typevar("T"),
                                                ndt::make_type<dynd_bool>());
-    is_avail->data_ptr = NULL;
     is_avail->instantiate = &date_is_avail_ck::instantiate;
     assign_na->func_proto =
         ndt::make_funcproto(0, NULL, ndt::make_typevar("T"));
-    assign_na->data_ptr = NULL;
     assign_na->instantiate = &date_assign_na_ck::instantiate;
     naf.flag_as_immutable();
     return naf;
+}
+
+bool date_type::adapt_type(const ndt::type &operand_tp, const nd::string &op,
+                           nd::arrfunc &out_forward, nd::arrfunc &out_reverse)
+    const
+{
+    return make_date_adapter_arrfunc(operand_tp, op, out_forward, out_reverse);
+}
+
+bool date_type::reverse_adapt_type(const ndt::type &value_tp,
+                                   const nd::string &op,
+                                   nd::arrfunc &out_forward,
+                                   nd::arrfunc &out_reverse) const
+{
+    // Note that out_reverse and out_forward are swapped compared with
+    // adapt_type
+    return make_date_adapter_arrfunc(value_tp, op, out_reverse, out_forward);
 }
 
 const ndt::type& ndt::make_date()

@@ -81,7 +81,7 @@ struct aligned_fixed_size_pairwise_byteswap_kernel {
 } // anonymous namespace
 
 namespace {
-    struct byteswap_ck : public kernels::assignment_ck<byteswap_ck> {
+    struct byteswap_ck : public kernels::unary_ck<byteswap_ck> {
         size_t m_data_size;
 
         inline void single(char *dst, const char *src)
@@ -102,7 +102,7 @@ namespace {
         }
     };
 
-    struct pairwise_byteswap_ck : public kernels::assignment_ck<pairwise_byteswap_ck> {
+    struct pairwise_byteswap_ck : public kernels::unary_ck<pairwise_byteswap_ck> {
         size_t m_data_size;
 
         inline void single(char *dst, const char *src)

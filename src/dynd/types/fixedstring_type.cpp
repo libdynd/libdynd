@@ -127,7 +127,7 @@ void fixedstring_type::print_data(std::ostream &o,
     while (data < data_end) {
         cp = next_fn(data, data_end);
         if (cp != 0) {
-            print_escaped_unicode_codepoint(o, cp);
+            print_escaped_unicode_codepoint(o, cp, false);
         } else {
             break;
         }

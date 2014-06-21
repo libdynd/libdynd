@@ -40,7 +40,7 @@ bool ndarrayarg_type::operator==(const base_type& rhs) const
 }
 
 namespace {
-    struct ndarrayarg_assign_ck : public kernels::assignment_ck<ndarrayarg_assign_ck> {
+    struct ndarrayarg_assign_ck : public kernels::unary_ck<ndarrayarg_assign_ck> {
         inline void single(char *dst, const char *src)
         {
             if (*reinterpret_cast<void *const *>(src) == NULL) {

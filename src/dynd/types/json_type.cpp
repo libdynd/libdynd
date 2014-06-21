@@ -78,7 +78,7 @@ void json_type::print_data(std::ostream &o, const char *DYND_UNUSED(arrmeta),
     o << "\"";
     while (begin < end) {
         cp = next_fn(begin, end);
-        print_escaped_unicode_codepoint(o, cp);
+        print_escaped_unicode_codepoint(o, cp, false);
     }
     o << "\"";
 }
@@ -201,7 +201,7 @@ void json_type::arrmeta_debug_print(const char *arrmeta, std::ostream &o,
 
 namespace {
 struct string_to_json_ck
-  : public kernels::assignment_ck<string_to_json_ck> {
+  : public kernels::unary_ck<string_to_json_ck> {
     const char *m_dst_arrmeta;
     bool m_validate;
 

@@ -18,7 +18,7 @@ namespace {
  * A ckernel which assigns option[S] to option[T].
  */
 struct option_to_option_ck
-        : public kernels::assignment_ck<option_to_option_ck> {
+        : public kernels::unary_ck<option_to_option_ck> {
     // The default child is the src is_avail ckernel
     // This child is the dst assign_na ckernel
     size_t m_dst_assign_na_offset;
@@ -129,7 +129,7 @@ struct option_to_option_ck
  * A ckernel which assigns option[S] to T.
  */
 struct option_to_value_ck
-        : public kernels::assignment_ck<option_to_value_ck> {
+        : public kernels::unary_ck<option_to_value_ck> {
     // The default child is the src_is_avail ckernel
     size_t m_value_assign_offset;
 
@@ -264,7 +264,7 @@ static intptr_t instantiate_option_to_value_assignment_kernel(
 }
 
 namespace {
-struct string_to_option_bool_ck : public kernels::assignment_ck<string_to_option_bool_ck> {
+struct string_to_option_bool_ck : public kernels::unary_ck<string_to_option_bool_ck> {
     assign_error_mode m_errmode;
 
     inline void single(char *dst, const char *src)
@@ -275,7 +275,7 @@ struct string_to_option_bool_ck : public kernels::assignment_ck<string_to_option
     }
 };
 
-struct string_to_option_number_ck : public kernels::assignment_ck<string_to_option_number_ck> {
+struct string_to_option_number_ck : public kernels::unary_ck<string_to_option_number_ck> {
     type_id_t m_tid;
     assign_error_mode m_errmode;
 

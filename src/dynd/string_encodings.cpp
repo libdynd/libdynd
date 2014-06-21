@@ -9,6 +9,7 @@
 #include <dynd/string_encodings.hpp>
 #include <dynd/types/char_type.hpp>
 #include <dynd/types/fixedbytes_type.hpp>
+#include <dynd/string.hpp>
 
 #include <utf8.h>
 
@@ -438,60 +439,71 @@ std::string dynd::string_range_as_utf8_string(string_encoding_t encoding, const 
     }
 }
 
-void dynd::print_escaped_unicode_codepoint(std::ostream& o, uint32_t cp)
+void dynd::print_escaped_unicode_codepoint(std::ostream &o, uint32_t cp,
+                                           bool single_quote)
 {
-    if (cp < 0x80) {
-        switch (cp) {
-            case '\b':
-                o << "\\b";
-                break;
-            case '\f':
-                o << "\\f";
-                break;
-            case '\n':
-                o << "\\n";
-                break;
-            case '\r':
-                o << "\\r";
-                break;
-            case '\t':
-                o << "\\t";
-                break;
-            case '\\':
-                o << "\\\\";
-                break;
-            case '\"':
-                o << "\\\"";
-                break;
-            default:
-                if (cp < 0x20 || cp == 0x7f) {
-                    o << "\\u";
-                    hexadecimal_print(o, static_cast<uint16_t>(cp));
-                } else {
-                    o << static_cast<char>(cp);
-                }
-                break;
-        }
-    } else if (cp < 0x10000) {
+  if (cp < 0x80) {
+    switch (cp) {
+    case '\b':
+      o << "\\b";
+      break;
+    case '\f':
+      o << "\\f";
+      break;
+    case '\n':
+      o << "\\n";
+      break;
+    case '\r':
+      o << "\\r";
+      break;
+    case '\t':
+      o << "\\t";
+      break;
+    case '\\':
+      o << "\\\\";
+      break;
+    case '\'':
+      o << (single_quote ? "\\'" : "'");
+      break;
+    case '\"':
+      o << (single_quote ? "\"" : "\\\"");
+      break;
+    default:
+      if (cp < 0x20 || cp == 0x7f) {
         o << "\\u";
         hexadecimal_print(o, static_cast<uint16_t>(cp));
-    } else {
-        o << "\\U";
-        hexadecimal_print(o, static_cast<uint32_t>(cp));
+      } else {
+        o << static_cast<char>(cp);
+      }
+      break;
     }
+  } else if (cp < 0x10000) {
+    o << "\\u";
+    hexadecimal_print(o, static_cast<uint16_t>(cp));
+  } else {
+    o << "\\U";
+    hexadecimal_print(o, static_cast<uint32_t>(cp));
+  }
 }
 
-void dynd::print_escaped_utf8_string(std::ostream& o, const char *str_begin, const char *str_end)
+void dynd::print_escaped_utf8_string(std::ostream &o, const char *str_begin,
+                                     const char *str_end, bool single_quote)
 {
     uint32_t cp = 0;
 
     // Print as an escaped string
-    o << "\"";
+    o << (single_quote ? '\'' : '\"');
     while (str_begin < str_end) {
         cp = next_utf8(str_begin, str_end);
-        print_escaped_unicode_codepoint(o, cp);
+        print_escaped_unicode_codepoint(o, cp, single_quote);
     }
-    o << "\"";
+    o << (single_quote ? '\'' : '\"');
+}
+
+void dynd::print_escaped_utf8_string(std::ostream &o, const nd::string &str,
+                                     bool single_quote)
+{
+  print_escaped_utf8_string(o, str.begin(), str.end(), single_quote);
 }
 
 void dynd::append_utf8_codepoint(uint32_t cp, std::string& out_str)

@@ -435,6 +435,23 @@ size_t base_type::make_elwise_property_setter_kernel(
     throw std::runtime_error(ss.str());
 }
 
+bool base_type::adapt_type(const ndt::type &DYND_UNUSED(operand_tp),
+                           const nd::string &DYND_UNUSED(op),
+                           nd::arrfunc &DYND_UNUSED(out_forward),
+                           nd::arrfunc &DYND_UNUSED(out_reverse)) const
+{
+    return false;
+}
+
+bool base_type::reverse_adapt_type(const ndt::type &DYND_UNUSED(value_tp),
+                                   const nd::string &DYND_UNUSED(op),
+                                   nd::arrfunc &DYND_UNUSED(out_forward),
+                                   nd::arrfunc &DYND_UNUSED(out_reverse)) const
+{
+    return false;
+}
+
+
 // Some information about the builtin types
 
 uint8_t detail::builtin_data_sizes[builtin_type_id_count] = {

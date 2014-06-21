@@ -90,6 +90,12 @@ public:
                     kernel_request_t kernreq, const eval::eval_context *ectx) const;
 
     nd::array get_option_nafunc() const;
+
+    bool adapt_type(const ndt::type &operand_tp, const nd::string &op,
+                    nd::arrfunc &out_forward, nd::arrfunc &out_reverse) const;
+    bool reverse_adapt_type(const ndt::type &value_tp, const nd::string &op,
+                            nd::arrfunc &out_forward,
+                            nd::arrfunc &out_reverse) const;
 };
 
 namespace ndt {

@@ -319,7 +319,6 @@ void kernels::make_take_arrfunc(arrfunc_type_data *out_af)
     static ndt::type param_types[2] = {ndt::type("M * T"), ndt::type("N * Ix")};
     static ndt::type func_proto = ndt::make_funcproto(param_types, ndt::type("R * T"));
     // Create the data for the arrfunc
-    out_af->data_ptr = NULL;
     out_af->free_func = NULL;
     out_af->func_proto = func_proto;
     out_af->resolve_dst_type = &resolve_take_dst_type;

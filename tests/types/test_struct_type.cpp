@@ -46,7 +46,7 @@ TEST(StructType, IOStream) {
                     ndt::make_type<int16_t>(), "y",
                     ndt::make_type<float>(), "Verbose Field!");
     ss << tp;
-    EXPECT_EQ("{x : int32, y : int16, \"Verbose Field!\" : float32}", ss.str());
+    EXPECT_EQ("{x : int32, y : int16, 'Verbose Field!' : float32}", ss.str());
 }
 
 TEST(StructType, CreateOneField) {

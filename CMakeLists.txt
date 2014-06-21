@@ -153,6 +153,7 @@ set(libdynd_SRC
     include/dynd/codegen/calling_conventions.hpp
     include/dynd/codegen/codegen_cache.hpp
     # Types
+    src/dynd/types/adapt_type.cpp
     src/dynd/types/base_bytes_type.cpp
     src/dynd/types/base_type.cpp
     src/dynd/types/base_expression_type.cpp
@@ -217,6 +218,7 @@ set(libdynd_SRC
     src/dynd/types/var_dim_type.cpp
     src/dynd/types/view_type.cpp
     src/dynd/types/void_pointer_type.cpp
+    include/dynd/types/adapt_type.hpp
     include/dynd/types/base_bytes_type.hpp
     include/dynd/types/base_type.hpp
     include/dynd/types/base_memory_type.hpp
@@ -334,7 +336,9 @@ set(libdynd_SRC
     src/dynd/kernels/ckernel_common_functions.cpp
     src/dynd/kernels/comparison_kernels.cpp
     src/dynd/kernels/date_assignment_kernels.cpp
+    src/dynd/kernels/date_adapter_kernels.cpp
     src/dynd/kernels/datetime_assignment_kernels.cpp
+    src/dynd/kernels/datetime_adapter_kernels.cpp
     src/dynd/kernels/date_expr_kernels.cpp
     src/dynd/kernels/elwise_expr_kernels.cpp
     src/dynd/kernels/expr_kernel_generator.cpp
@@ -370,7 +374,9 @@ set(libdynd_SRC
     include/dynd/kernels/ckernel_prefix.hpp
     include/dynd/kernels/comparison_kernels.hpp
     include/dynd/kernels/date_assignment_kernels.hpp
+    include/dynd/kernels/date_adapter_kernels.hpp
     include/dynd/kernels/datetime_assignment_kernels.hpp
+    include/dynd/kernels/datetime_adapter_kernels.hpp
     include/dynd/kernels/date_expr_kernels.hpp
     include/dynd/kernels/elwise_expr_kernels.hpp
     include/dynd/kernels/expr_kernels.hpp
