@@ -27,11 +27,15 @@ public:
     typedef T RealType;
     typedef dynd_complex<T> ComplexType;
 
-    typedef RealType SrcType;
-    typedef ComplexType DstType;
+    static const bool Redundant;
 
-    static const intptr_t Shape[2];
-    static const intptr_t Size = M * N;
+    static const intptr_t SrcShape[2];
+    static const intptr_t SrcSize;
+    typedef RealType SrcType;
+
+    static const intptr_t DstShape[2];
+    static const intptr_t DstSize;
+    typedef ComplexType DstType;
 };
 
 template <typename T, int M, int N>
@@ -40,29 +44,54 @@ public:
     typedef T RealType;
     typedef dynd_complex<T> ComplexType;
 
+    static const bool Redundant;
+
+    static const intptr_t SrcShape[2];
+    static const intptr_t SrcSize;
     typedef ComplexType SrcType;
+
+    static const intptr_t DstShape[2];
+    static const intptr_t DstSize;
     typedef ComplexType DstType;
-
-    static const intptr_t Shape[2];
-    static const intptr_t Size;
-
 };
 
 template <typename T, int M, int N>
-const intptr_t FFT2D<T[M][N]>::Shape[2] = {M, N}; 
+const intptr_t FFT2D<T[M][N]>::SrcShape[2] = {M, N};
 
 template <typename T, int M, int N>
-const intptr_t FFT2D<dynd_complex<T>[M][N]>::Shape[2] = {M, N}; 
+const bool FFT2D<T[M][N]>::Redundant = false;
 
 template <typename T, int M, int N>
-const intptr_t FFT2D<dynd_complex<T>[M][N]>::Size = M * N; 
+const intptr_t FFT2D<T[M][N]>::SrcSize = M * N; 
 
-typedef testing::Types<dynd_complex<float>[4][4], dynd_complex<float>[8][8], dynd_complex<float>[17][25],
-    dynd_complex<float>[64][64], dynd_complex<float>[76][14], dynd_complex<float>[128][128],
-    dynd_complex<float>[203][99], dynd_complex<float>[256][256], dynd_complex<float>[512][512]> FloatFFT2DTypes;
-typedef testing::Types<dynd_complex<double>[4][4], dynd_complex<double>[8][8], dynd_complex<double>[17][25],
-    dynd_complex<double>[64][64], dynd_complex<double>[76][14], dynd_complex<double>[128][128],
-    dynd_complex<double>[203][99], dynd_complex<double>[256][256], dynd_complex<double>[512][512]> DoubleFFT2DTypes;
+template <typename T, int M, int N>
+const intptr_t FFT2D<T[M][N]>::DstShape[2] = {M, N / 2 + 1};
+
+template <typename T, int M, int N>
+const intptr_t FFT2D<T[M][N]>::DstSize = M * (N / 2 + 1); 
+
+template <typename T, int M, int N>
+const intptr_t FFT2D<dynd_complex<T>[M][N]>::SrcShape[2] = {M, N}; 
+
+template <typename T, int M, int N>
+const intptr_t FFT2D<dynd_complex<T>[M][N]>::SrcSize = M * N; 
+
+template <typename T, int M, int N>
+const intptr_t FFT2D<dynd_complex<T>[M][N]>::DstShape[2] = {M, N};
+
+template <typename T, int M, int N>
+const intptr_t FFT2D<dynd_complex<T>[M][N]>::DstSize = M * N;
+
+template <typename T, int M, int N>
+const bool FFT2D<dynd_complex<T>[M][N]>::Redundant = true;
+
+template <typename T>
+struct FixedDim2D {
+    typedef testing::Types<T[4][4], T[8][8], T[17][25], T[64][64], T[76][14], T[128][128],
+        T[203][99], T[256][256], T[512][512]> Types;    
+
+    typedef testing::Types<T[4][4]> SimpleTypes;    
+};
 
 TYPED_TEST_CASE_P(FFT2D);
 
@@ -158,26 +187,13 @@ TYPED_TEST_P(FFT, OneDimDelta) {
 }
 */
 
-TYPED_TEST_P(FFT2D, Inverse) {
-    nd::array x = dynd::rand(TestFixture::Shape[0], TestFixture::Shape[1],
-        ndt::make_type<typename TestFixture::SrcType>());
 
-    nd::array y = ifft2(fft2(x));
-
-    for (int i = 0; i < TestFixture::Shape[0]; ++i) {
-        for (int j = 0; j < TestFixture::Shape[1]; ++j) {
-            EXPECT_EQ_RELERR(x(i, j).as<typename TestFixture::DstType>(),
-                y(i, j).as<typename TestFixture::DstType>() / TestFixture::Size,
-                rel_err_max<typename TestFixture::RealType>());
-        }
-    }
-}
 
 /*
 TYPED_TEST_P(FFT2D, Linear) {
-    nd::array x0 = dynd::rand(TestFixture::Shape[0], TestFixture::Shape[1],
+    nd::array x0 = dynd::rand(TestFixture::SrcShape[0], TestFixture::SrcShape[1],
         ndt::make_type<typename TestFixture::SrcType>());
-    nd::array x1 = dynd::rand(TestFixture::Shape[0], TestFixture::Shape[1],
+    nd::array x1 = dynd::rand(TestFixture::SrcShape[0], TestFixture::SrcShape[1],
         ndt::make_type<typename TestFixture::SrcType>());
     nd::array x = x0 + x1;
 
@@ -185,8 +201,8 @@ TYPED_TEST_P(FFT2D, Linear) {
 //    nd::array y1 = fft2(x1);
 //    nd::array y = fft2(x);
 
-    for (int i = 0; i < TestFixture::Shape[0]; ++i) {
-        for (int j = 0; j < TestFixture::Shape[1]; ++j) {
+    for (int i = 0; i < TestFixture::SrcShape[0]; ++i) {
+        for (int j = 0; j < TestFixture::SrcShape[1]; ++j) {
             EXPECT_EQ_RELERR(y0(i, j).as<typename TestFixture::DstType>() + y1(i, j).as<typename TestFixture::DstType>(),
                 y(i, j).as<typename TestFixture::DstType>(),
                 rel_err_max<typename TestFixture::RealType>());
@@ -195,47 +211,42 @@ TYPED_TEST_P(FFT2D, Linear) {
 }
 */
 
-TYPED_TEST_P(FFT2D, Zeros) {
-    nd::array x = nd::zeros(TestFixture::Shape[0], TestFixture::Shape[1],
-        ndt::make_strided_dim(ndt::make_strided_dim(ndt::make_type<typename TestFixture::SrcType>())));
+TYPED_TEST_P(FFT2D, Inverse) {
+    nd::array x = dynd::rand(TestFixture::SrcShape[0], TestFixture::SrcShape[1],
+        ndt::make_type<typename TestFixture::SrcType>());
 
-    nd::array y = fft2(x);
-    for (int i = 0; i < TestFixture::Shape[0]; ++i) {
-        for (int j = 0; j < TestFixture::Shape[1]; ++j) {
-            EXPECT_EQ(0, y(i, j).as<typename TestFixture::DstType>());
+    nd::array y = ifft2(fft2(x, TestFixture::Redundant), TestFixture::SrcShape[0], TestFixture::SrcShape[1],
+        TestFixture::Redundant);
+    for (int i = 0; i < TestFixture::SrcShape[0]; ++i) {
+        for (int j = 0; j < TestFixture::SrcShape[1]; ++j) {
+            EXPECT_EQ_RELERR(x(i, j).as<typename TestFixture::SrcType>(),
+                y(i, j).as<typename TestFixture::SrcType>() / TestFixture::SrcSize,
+                rel_err_max<typename TestFixture::RealType>());
         }
     }
+}
 
-    y = ifft2(x);
-    for (int i = 0; i < TestFixture::Shape[0]; ++i) {
-        for (int j = 0; j < TestFixture::Shape[1]; ++j) {
+TYPED_TEST_P(FFT2D, Zeros) {
+    nd::array x = nd::zeros(TestFixture::SrcShape[0], TestFixture::SrcShape[1],
+        ndt::make_strided_dim(ndt::make_strided_dim(ndt::make_type<typename TestFixture::SrcType>())));
+
+    nd::array y = fft2(x, TestFixture::Redundant);
+    for (int i = 0; i < TestFixture::DstShape[0]; ++i) {
+        for (int j = 0; j < TestFixture::DstShape[1]; ++j) {
             EXPECT_EQ(0, y(i, j).as<typename TestFixture::DstType>());
         }
     }
 }
 
 TYPED_TEST_P(FFT2D, Ones) {
-    nd::array x = nd::ones(TestFixture::Shape[0], TestFixture::Shape[1],
+    nd::array x = nd::ones(TestFixture::SrcShape[0], TestFixture::SrcShape[1],
         ndt::make_strided_dim(ndt::make_strided_dim(ndt::make_type<typename TestFixture::SrcType>())));
 
-    nd::array y = fft2(x);
-    for (int i = 0; i < TestFixture::Shape[0]; ++i) {
-        for (int j = 0; j < TestFixture::Shape[1]; ++j) {
+    nd::array y = fft2(x, TestFixture::Redundant);
+    for (int i = 0; i < TestFixture::DstShape[0]; ++i) {
+        for (int j = 0; j < TestFixture::DstShape[1]; ++j) {
             if (i == 0 && j == 0) {
-                EXPECT_EQ_RELERR(TestFixture::Size, y(i, j).as<typename TestFixture::DstType>(),
-                    rel_err_max<typename TestFixture::RealType>());
-            } else {
-                EXPECT_EQ_RELERR(0, y(i, j).as<typename TestFixture::DstType>(),
-                    rel_err_max<typename TestFixture::RealType>());
-            }
-        }
-    }
-
-    y = ifft2(x);
-    for (int i = 0; i < TestFixture::Shape[0]; ++i) {
-        for (int j = 0; j < TestFixture::Shape[1]; ++j) {
-            if (i == 0 && j == 0) {
-                EXPECT_EQ_RELERR(TestFixture::Size, y(i, j).as<typename TestFixture::DstType>(),
+                EXPECT_EQ_RELERR(TestFixture::SrcSize, y(i, j).as<typename TestFixture::DstType>(),
                     rel_err_max<typename TestFixture::RealType>());
             } else {
                 EXPECT_EQ_RELERR(0, y(i, j).as<typename TestFixture::DstType>(),
@@ -246,23 +257,49 @@ TYPED_TEST_P(FFT2D, Ones) {
 }
 
 TYPED_TEST_P(FFT2D, KroneckerDelta) {
-    if (TestFixture::Shape[0] % 2 != 0 || TestFixture::Shape[1] % 2 != 0) {
+    if ((TestFixture::SrcShape[0] % 2) != 0 || (TestFixture::SrcShape[1] % 2) != 0) {
         return;
     }
 
-    nd::array x = nd::zeros(TestFixture::Shape[0], TestFixture::Shape[1],
+    nd::array x = nd::zeros(TestFixture::SrcShape[0], TestFixture::SrcShape[1],
         ndt::make_strided_dim(ndt::make_strided_dim(ndt::make_type<typename TestFixture::SrcType>())));
-    x(TestFixture::Shape[0] / 2, TestFixture::Shape[1] / 2).vals() = 1;
+    x(TestFixture::SrcShape[0] / 2, TestFixture::SrcShape[1] / 2).vals() = 1;
 
-    nd::array y = fft2(x);
-    for (int i = 0; i < TestFixture::Shape[0]; ++i) {
-        for (int j = 0; j < TestFixture::Shape[1]; ++j) {
+    nd::array y = fft2(x, false);
+    for (int i = 0; i < TestFixture::DstShape[0]; ++i) {
+        for (int j = 0; j < TestFixture::DstShape[1]; ++j) {
             EXPECT_EQ(pow(-1.0, i) * pow(-1.0, j), y(i, j).as<typename TestFixture::DstType>());
         }
     }
+
+/*
+    if ((TestFixture::SrcShape[0] % 4) != 0 || (TestFixture::SrcShape[1] % 4) != 0) {
+        return;
+    }
+
+    y = fft2(x(irange().by(2), irange().by(2)));
+    for (int i = 0; i < TestFixture::SrcShape[0] / 2; ++i) {
+        for (int j = 0; j < TestFixture::SrcShape[1] / 2; ++j) {
+            EXPECT_EQ(pow(-1.0, i) * pow(-1.0, j), y(i, j).as<typename TestFixture::DstType>());
+        }
+    }
+*/
 }
 
-REGISTER_TYPED_TEST_CASE_P(FFT2D, Inverse, Zeros, Ones, KroneckerDelta);
+/*
+    if ((TestFixture::SrcShape[0] % 4) != 0 || (TestFixture::SrcShape[1] % 4) != 0) {
+        return;
+    }
 
-INSTANTIATE_TYPED_TEST_CASE_P(Float, FFT2D, FloatFFT2DTypes);
-INSTANTIATE_TYPED_TEST_CASE_P(Double, FFT2D, DoubleFFT2DTypes);
+    y = rfft2(x(irange().by(2), irange().by(2)));
+    for (int i = 0; i < TestFixture::DstShape[0] / 2; ++i) {
+        for (int j = 0; j < TestFixture::DstShape[1] / 2; ++j) {
+            EXPECT_EQ(pow(-1.0, i) * pow(-1.0, j), y(i, j).as<typename TestFixture::DstType>());
+        }
+    }
+*/
+
+REGISTER_TYPED_TEST_CASE_P(FFT2D, Inverse, Zeros, Ones, KroneckerDelta);
+//INSTANTIATE_TYPED_TEST_CASE_P(ComplexFloat, FFT2D, FixedDim2D<dynd_complex<float> >::Types);
+INSTANTIATE_TYPED_TEST_CASE_P(Double, FFT2D, FixedDim2D<double>::Types);
+INSTANTIATE_TYPED_TEST_CASE_P(ComplexDouble, FFT2D, FixedDim2D<dynd_complex<double> >::Types);
