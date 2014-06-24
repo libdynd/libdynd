@@ -109,20 +109,20 @@ static intptr_t instantiate_int_multiply_and_offset_arrfunc(
     const char *const *DYND_UNUSED(src_arrmeta), kernel_request_t kernreq,
     const eval::eval_context *DYND_UNUSED(ectx))
 {
-    typedef int_multiply_and_offset_ck<Tsrc, Tdst> self_type;
-    if (dst_tp !=
-                self_af->func_proto.tcast<funcproto_type>()->get_return_type() ||
-            src_tp[0] !=
-                self_af->func_proto.tcast<funcproto_type>()->get_param_type(0)) {
-        stringstream ss;
-        ss << "Cannot instantiate arrfunc with signature ";
-        ss << self_af->func_proto << " with types (";
-        ss << src_tp[0] << ") -> " << dst_tp;
-        throw type_error(ss.str());
-    }
-    self_type *self = self_type::create_leaf(ckb, ckb_offset, kernreq);
-    self->m_factor_offset = *self_af->get_data_as<pair<Tdst, Tdst> >();
-    return ckb_offset + sizeof(self_type);
+  typedef int_multiply_and_offset_ck<Tsrc, Tdst> self_type;
+  if (dst_tp !=
+          self_af->func_proto.tcast<funcproto_type>()->get_return_type() ||
+      src_tp[0] !=
+          self_af->func_proto.tcast<funcproto_type>()->get_param_type(0)) {
+    stringstream ss;
+    ss << "Cannot instantiate arrfunc with signature ";
+    ss << self_af->func_proto << " with types (";
+    ss << src_tp[0] << ") -> " << dst_tp;
+    throw type_error(ss.str());
+  }
+  self_type *self = self_type::create_leaf(ckb, ckb_offset, kernreq);
+  self_af->get_data_unaligned(&self->m_factor_offset);
+  return ckb_offset + sizeof(self_type);
 }
 
 template <class Tsrc, class Tdst>
@@ -133,7 +133,8 @@ nd::arrfunc make_int_multiply_and_offset_arrfunc(Tdst factor, Tdst offset,
   arrfunc_type_data *af =
       reinterpret_cast<arrfunc_type_data *>(out_af.get_readwrite_originptr());
   af->func_proto = func_proto;
-  *af->get_data_as<pair<Tdst, Tdst> >() = make_pair(factor, offset);
+  pair<Tdst, Tdst> factor_offset = make_pair(factor, offset);
+  af->set_data_unaligned(&factor_offset);
   af->instantiate = &instantiate_int_multiply_and_offset_arrfunc<Tsrc, Tdst>;
   out_af.flag_as_immutable();
   return out_af;
@@ -175,7 +176,7 @@ static intptr_t instantiate_int_offset_and_divide_arrfunc(
         throw type_error(ss.str());
     }
     self_type *self = self_type::create_leaf(ckb, ckb_offset, kernreq);
-    self->m_offset_divisor = *self_af->get_data_as<pair<Tdst, Tdst> >();
+    self_af->get_data_unaligned(&self->m_offset_divisor);
     return ckb_offset + sizeof(self_type);
 }
 
@@ -187,7 +188,8 @@ nd::arrfunc make_int_offset_and_divide_arrfunc(Tdst offset, Tdst divisor,
   arrfunc_type_data *af =
       reinterpret_cast<arrfunc_type_data *>(out_af.get_readwrite_originptr());
   af->func_proto = func_proto;
-  *af->get_data_as<pair<Tdst, Tdst> >() = make_pair(offset, divisor);
+  pair<Tdst, Tdst> offset_divisor = make_pair(offset, divisor);
+  af->set_data_unaligned(&offset_divisor);
   af->instantiate = &instantiate_int_offset_and_divide_arrfunc<Tsrc, Tdst>;
   out_af.flag_as_immutable();
   return out_af;

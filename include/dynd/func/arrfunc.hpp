@@ -128,6 +128,16 @@ struct arrfunc_type_data {
                          "data requires stronger alignment");
       return reinterpret_cast<const T *>(data);
     }
+    template<typename T>
+    inline void get_data_unaligned(T *out) const {
+      DYND_STATIC_ASSERT(sizeof(T) <= sizeof(data), "data does not fit");
+      memcpy(out, data, sizeof(T));
+    }
+    template<typename T>
+    inline void set_data_unaligned(const T *in) {
+      DYND_STATIC_ASSERT(sizeof(T) <= sizeof(data), "data does not fit");
+      memcpy(data, in, sizeof(T));
+    }
     /**
      * The function which instantiates a ckernel. See the documentation
      * for the function typedef for more details.
