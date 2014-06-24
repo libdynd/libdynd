@@ -106,7 +106,7 @@ TEST(CStructType, CreateOneField) {
     EXPECT_EQ(ndt::make_type<int32_t>().get_data_alignment(), dt.get_data_alignment());
     EXPECT_TRUE(dt.is_pod());
     tdt = dt.tcast<cstruct_type>();
-    EXPECT_EQ(1u, tdt->get_field_count());
+    EXPECT_EQ(1, tdt->get_field_count());
     EXPECT_EQ(ndt::make_type<int32_t>(), tdt->get_field_type(0));
     EXPECT_EQ(0u, tdt->get_data_offset(0));
     EXPECT_EQ("x", tdt->get_field_name(0));
@@ -129,7 +129,7 @@ TEST(CStructType, CreateTwoField) {
     EXPECT_EQ(ndt::make_type<int64_t>().get_data_alignment(), dt.get_data_alignment());
     EXPECT_TRUE(dt.is_pod());
     tdt = dt.tcast<cstruct_type>();
-    EXPECT_EQ(2u, tdt->get_field_count());
+    EXPECT_EQ(2, tdt->get_field_count());
     EXPECT_EQ(ndt::make_type<int64_t>(), tdt->get_field_type(0));
     EXPECT_EQ(ndt::make_type<int32_t>(), tdt->get_field_type(1));
     EXPECT_EQ(0u, tdt->get_data_offset(0));
@@ -159,7 +159,7 @@ TEST(CStructType, CreateThreeField) {
     EXPECT_EQ(d1.get_data_alignment(), dt.get_data_alignment());
     EXPECT_TRUE(dt.is_pod());
     tdt = dt.tcast<cstruct_type>();
-    EXPECT_EQ(3u, tdt->get_field_count());
+    EXPECT_EQ(3, tdt->get_field_count());
     EXPECT_EQ(ndt::make_type<int64_t>(), tdt->get_field_type(0));
     EXPECT_EQ(ndt::make_type<int32_t>(), tdt->get_field_type(1));
     EXPECT_EQ(ndt::make_fixedstring(5, string_encoding_utf_8),
