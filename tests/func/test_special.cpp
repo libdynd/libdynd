@@ -11,6 +11,7 @@
 #include "special_vals.hpp"
 
 #include <dynd/special.hpp>
+#include <dynd/func/callable.hpp>
 
 using namespace std;
 using namespace dynd;

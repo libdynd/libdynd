@@ -26,7 +26,7 @@ TEST(ArrayViews, OneDimensionalRawMemory) {
     uint64_t u8_value;
 
     // Make an 8 byte aligned array of 80 chars
-    a = nd::make_strided_array(10, ndt::make_type<uint64_t>());
+    a = nd::empty<uint64_t[10]>();
     a = a.view_scalars(ndt::make_type<char>());
 
     // Initialize the char values from a uint64_t,

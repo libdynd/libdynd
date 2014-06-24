@@ -216,12 +216,13 @@ static ndt::type lift_proto(const ndt::type& proto)
 {
     const funcproto_type *p = proto.tcast<funcproto_type>();
     const ndt::type *param_types = p->get_param_types_raw();
-    nd::array out_param_types = nd::empty(
-        p->get_param_count(), ndt::make_strided_of_type());
+    intptr_t param_count = p->get_param_count();
+    nd::array out_param_types =
+        nd::typed_empty(1, &param_count, ndt::make_strided_of_type());
     nd::string dimsname("Dims");
     ndt::type *pt = reinterpret_cast<ndt::type *>(
         out_param_types.get_readwrite_originptr());
-    for (size_t i = 0, i_end = p->get_param_count(); i != i_end; ++i) {
+    for (intptr_t i = 0, i_end = p->get_param_count(); i != i_end; ++i) {
         pt[i] = ndt::make_ellipsis_dim(dimsname, param_types[i]);
     }
     return ndt::make_funcproto(

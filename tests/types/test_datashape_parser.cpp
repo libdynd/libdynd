@@ -21,6 +21,7 @@
 #include <dynd/types/json_type.hpp>
 #include <dynd/types/option_type.hpp>
 #include <dynd/types/type_alignment.hpp>
+#include <dynd/func/callable.hpp>
 
 using namespace std;
 using namespace dynd;

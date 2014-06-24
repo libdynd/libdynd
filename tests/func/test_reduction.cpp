@@ -300,7 +300,7 @@ TEST(Reduction, BuiltinSum_Lift2D_StridedStrided_ReduceReduce_KeepDim) {
     // Slice the array so it is "strided * strided * float32" instead of fixed dims
     a = a(irange(), irange());
     ASSERT_EQ(af.get_param_type(0), a.get_type());
-    nd::array b = nd::empty(1, 1, ndt::type("strided * strided * float32"));
+    nd::array b = nd::empty(1, 1, "float32");
     ASSERT_EQ(af.get_return_type(), b.get_type());
 
     // Instantiate the lifted ckernel
@@ -334,7 +334,7 @@ TEST(Reduction, BuiltinSum_Lift2D_StridedStrided_BroadcastReduce) {
     // Slice the array so it is "strided * strided * float32" instead of fixed dims
     a = a(irange(), irange());
     ASSERT_EQ(af.get_param_type(0), a.get_type());
-    nd::array b = nd::empty(2, ndt::type("strided * float32"));
+    nd::array b = nd::empty(2, "float32");
     ASSERT_EQ(af.get_return_type(), b.get_type());
 
     // Instantiate the lifted ckernel
@@ -357,7 +357,7 @@ TEST(Reduction, BuiltinSum_Lift2D_StridedStrided_BroadcastReduce) {
             "[[1.5, -2]]");
     // Slice the array so it is "strided * strided * float32" instead of fixed dims
     a = a(irange(), irange());
-    b = nd::empty(1, ndt::type("strided * float32"));
+    b = nd::empty(1, "float32");
     src_tp[0] = a.get_type();
     src_arrmeta[0] = a.get_arrmeta();
     af.instantiate(&af, &ckb, 0, b.get_type(), b.get_arrmeta(),
@@ -388,7 +388,7 @@ TEST(Reduction, BuiltinSum_Lift2D_StridedStrided_BroadcastReduce_KeepDim) {
     // Slice the array so it is "strided * strided * float32" instead of fixed dims
     a = a(irange(), irange());
     ASSERT_EQ(af.get_param_type(0), a.get_type());
-    nd::array b = nd::empty(2, 1, ndt::type("strided * strided * float32"));
+    nd::array b = nd::empty(2, 1, "float32");
     ASSERT_EQ(af.get_return_type(), b.get_type());
 
     // Instantiate the lifted ckernel
@@ -424,7 +424,7 @@ TEST(Reduction, BuiltinSum_Lift2D_StridedStrided_ReduceBroadcast) {
     // Slice the array so it is "strided * strided * float32" instead of fixed dims
     a = a(irange(), irange());
     ASSERT_EQ(af.get_param_type(0), a.get_type());
-    nd::array b = nd::empty(3, ndt::type("strided * float32"));
+    nd::array b = nd::empty(3, "float32");
     ASSERT_EQ(af.get_return_type(), b.get_type());
 
     // Instantiate the lifted ckernel
@@ -448,7 +448,7 @@ TEST(Reduction, BuiltinSum_Lift2D_StridedStrided_ReduceBroadcast) {
             "[[1.5, -2]]");
     // Slice the array so it is "strided * strided * float32" instead of fixed dims
     a = a(irange(), irange());
-    b = nd::empty(2, ndt::type("strided * float32"));
+    b = nd::empty(2, "float32");
     src_tp[0] = a.get_type();
     src_arrmeta[0] = a.get_arrmeta();
     af.instantiate(&af, &ckb, 0, b.get_type(), b.get_arrmeta(),
@@ -480,7 +480,7 @@ TEST(Reduction, BuiltinSum_Lift2D_StridedStrided_ReduceBroadcast_KeepDim) {
     // Slice the array so it is "strided * strided * float32" instead of fixed dims
     a = a(irange(), irange());
     ASSERT_EQ(af.get_param_type(0), a.get_type());
-    nd::array b = nd::empty(1, 3, ndt::type("strided * strided * float32"));
+    nd::array b = nd::empty(1, 3, "float32");
     ASSERT_EQ(af.get_return_type(), b.get_type());
 
     // Instantiate the lifted ckernel
@@ -517,7 +517,7 @@ TEST(Reduction, BuiltinSum_Lift3D_StridedStridedStrided_ReduceReduceReduce) {
     // Slice the array so it is "strided * strided * strided * float32" instead of fixed dims
     a = a(irange(), irange(), irange());
     ASSERT_EQ(af.get_param_type(0), a.get_type());
-    nd::array b = nd::empty(ndt::type("float32"));
+    nd::array b = nd::empty("float32");
     ASSERT_EQ(af.get_return_type(), b.get_type());
 
     // Instantiate the lifted ckernel
@@ -553,7 +553,7 @@ TEST(Reduction, BuiltinSum_Lift3D_StridedStridedStrided_BroadcastReduceReduce) {
     // Slice the array so it is "strided * strided * strided * float32" instead of fixed dims
     a = a(irange(), irange(), irange());
     ASSERT_EQ(af.get_param_type(0), a.get_type());
-    nd::array b = nd::empty(2, ndt::type("strided * float32"));
+    nd::array b = nd::empty(2, "float32");
     ASSERT_EQ(af.get_return_type(), b.get_type());
 
     // Instantiate the lifted ckernel
@@ -591,7 +591,7 @@ TEST(Reduction, BuiltinSum_Lift3D_StridedStridedStrided_ReduceBroadcastReduce) {
     // Slice the array so it is "strided * strided * strided * float32" instead of fixed dims
     a = a(irange(), irange(), irange());
     ASSERT_EQ(af.get_param_type(0), a.get_type());
-    nd::array b = nd::empty(3, ndt::type("strided * float32"));
+    nd::array b = nd::empty(3, "float32");
     ASSERT_EQ(af.get_return_type(), b.get_type());
 
     // Instantiate the lifted ckernel

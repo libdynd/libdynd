@@ -173,7 +173,7 @@ nd::array nd::arrfunc::call(intptr_t arg_count, const nd::array *args,
                             const eval::eval_context *ectx) const
 {
     const arrfunc_type_data *af = get();
-    if (arg_count != (intptr_t)af->get_param_count()) {
+    if (arg_count != af->get_param_count()) {
         stringstream ss;
         ss << "Wrong number of arguments to arrfunc with prototype ";
         ss << af->func_proto << ", got " << arg_count << " arguments";
@@ -203,8 +203,7 @@ nd::array nd::arrfunc::call(intptr_t arg_count, const nd::array *args,
         dimvector shape(dst_tp.get_ndim());
         af->resolve_dst_shape(af, shape.get(), dst_tp, &src_tp[0],
                               &src_arrmeta[0], &src_data[0]);
-        result = nd::array(
-            make_array_memory_block(dst_tp, dst_tp.get_ndim(), shape.get()));
+        result = nd::typed_empty(dst_tp.get_ndim(), shape.get(), dst_tp);
     } else {
         result = nd::empty(dst_tp);
     }

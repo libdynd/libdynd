@@ -22,7 +22,7 @@ void tuple_type::print_type(std::ostream& o) const
 {
     // Use the tuple datashape syntax
     o << "(";
-    for (size_t i = 0, i_end = m_field_count; i != i_end; ++i) {
+    for (intptr_t i = 0, i_end = m_field_count; i != i_end; ++i) {
         if (i != 0) {
             o << ", ";
         }
@@ -35,12 +35,12 @@ void tuple_type::transform_child_types(type_transform_fn_t transform_fn, void *e
                 ndt::type& out_transformed_tp, bool& out_was_transformed) const
 {
     nd::array tmp_field_types(
-        nd::empty(m_field_count, ndt::make_strided_of_type()));
+        nd::typed_empty(1, &m_field_count, ndt::make_strided_of_type()));
     ndt::type *tmp_field_types_raw = reinterpret_cast<ndt::type *>(
         tmp_field_types.get_readwrite_originptr());
 
     bool was_transformed = false;
-    for (size_t i = 0, i_end = m_field_count; i != i_end; ++i) {
+    for (intptr_t i = 0, i_end = m_field_count; i != i_end; ++i) {
         transform_fn(get_field_type(i), extra, tmp_field_types_raw[i],
                      was_transformed);
     }
@@ -56,11 +56,11 @@ void tuple_type::transform_child_types(type_transform_fn_t transform_fn, void *e
 ndt::type tuple_type::get_canonical_type() const
 {
     nd::array tmp_field_types(
-        nd::empty(m_field_count, ndt::make_strided_of_type()));
+        nd::typed_empty(1, &m_field_count, ndt::make_strided_of_type()));
     ndt::type *tmp_field_types_raw = reinterpret_cast<ndt::type *>(
         tmp_field_types.get_readwrite_originptr());
 
-    for (size_t i = 0, i_end = m_field_count; i != i_end; ++i) {
+    for (intptr_t i = 0, i_end = m_field_count; i != i_end; ++i) {
         tmp_field_types_raw[i] = get_field_type(i).get_canonical_type();
     }
 
@@ -162,7 +162,7 @@ void tuple_type::arrmeta_debug_print(const char *arrmeta, std::ostream& o, const
     const size_t *data_offsets = reinterpret_cast<const size_t *>(arrmeta);
     o << indent << "tuple arrmeta\n";
     o << indent << " field offsets: ";
-    for (size_t i = 0, i_end = m_field_count; i != i_end; ++i) {
+    for (intptr_t i = 0, i_end = m_field_count; i != i_end; ++i) {
         o << data_offsets[i];
         if (i != i_end - 1) {
             o << ", ";
@@ -170,7 +170,7 @@ void tuple_type::arrmeta_debug_print(const char *arrmeta, std::ostream& o, const
     }
     o << "\n";
     const uintptr_t *arrmeta_offsets = get_arrmeta_offsets_raw();
-    for (size_t i = 0; i < m_field_count; ++i) {
+    for (intptr_t i = 0; i < m_field_count; ++i) {
         const ndt::type& field_dt = get_field_type(i);
         if (!field_dt.is_builtin() && field_dt.extended()->get_arrmeta_size() > 0) {
             o << indent << " field " << i << " arrmeta:\n";

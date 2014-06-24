@@ -15,7 +15,7 @@
 namespace dynd {
 
 class funcproto_type : public base_type {
-    size_t m_param_count;
+    intptr_t m_param_count;
     // This is always a contiguous immutable "strided * type" array
     nd::array m_param_types;
     ndt::type m_return_type;
@@ -25,7 +25,7 @@ public:
 
     virtual ~funcproto_type() {}
 
-    inline size_t get_param_count() const {
+    inline intptr_t get_param_count() const {
         return m_param_count;
     }
 
@@ -86,15 +86,15 @@ namespace ndt {
     }
 
     /** Makes a funcproto type with the specified types */
-    inline ndt::type make_funcproto(size_t param_count,
+    inline ndt::type make_funcproto(intptr_t param_count,
                                     const ndt::type *param_types,
                                     const ndt::type &return_type)
     {
         nd::array tmp =
-            nd::empty(param_count, ndt::make_strided_of_type());
+            nd::typed_empty(1, &param_count, ndt::make_strided_of_type());
         ndt::type *tmp_vals =
             reinterpret_cast<ndt::type *>(tmp.get_readwrite_originptr());
-        for (size_t i = 0; i != param_count; ++i) {
+        for (intptr_t i = 0; i != param_count; ++i) {
             tmp_vals[i] = param_types[i];
         }
         tmp.flag_as_immutable();
@@ -118,9 +118,11 @@ namespace ndt {
         template<typename R>
         struct make_func_proto<R ()> {
             static inline ndt::type make() {
-                nd::array param_types = nd::empty(0, ndt::make_strided_of_type());
-                param_types.flag_as_immutable();
-                return make_funcproto(param_types, make_type<R>());
+              intptr_t zero = 0;
+              nd::array param_types =
+                  nd::typed_empty(1, &zero, ndt::make_strided_of_type());
+              param_types.flag_as_immutable();
+              return make_funcproto(param_types, make_type<R>());
             }
         };
 

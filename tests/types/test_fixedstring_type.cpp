@@ -95,8 +95,7 @@ TEST(FixedstringDType, Casting) {
 }
 
 TEST(FixedstringDType, SingleCompare) {
-    nd::array a = nd::make_strided_array(2,
-                    ndt::make_fixedstring(7, string_encoding_utf_8));
+    nd::array a = nd::empty(2, ndt::make_fixedstring(7, string_encoding_utf_8));
 
     a(0).vals() = "abc";
     a(1).vals() = "abd";

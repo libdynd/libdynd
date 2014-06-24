@@ -3,6 +3,7 @@
 // BSD 2-Clause License, see LICENSE.txt
 //
 
+#include <dynd/array.hpp>
 #include <dynd/types/adapt_type.hpp>
 
 using namespace std;

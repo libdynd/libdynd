@@ -16,6 +16,7 @@
 #include <dynd/types/cstruct_type.hpp>
 #include <dynd/types/string_type.hpp>
 #include <dynd/types/fixedstring_type.hpp>
+#include <dynd/func/callable.hpp>
 
 using namespace std;
 using namespace dynd;
@@ -108,13 +109,15 @@ TEST(DataShapeFormatter, DTypeStringAtoms) {
 }
 
 TEST(DataShapeFormatter, ArrayUniformArrays) {
-    EXPECT_EQ("3 * int32", format_datashape(
-                    nd::make_strided_array(3, ndt::make_type<int32_t>()), "", false));
-    EXPECT_EQ("var * int32", format_datashape(
-                    nd::empty(ndt::make_var_dim(ndt::make_type<int32_t>())), "", false));
-    EXPECT_EQ("var * 3 * int32", format_datashape(
-                    nd::empty(ndt::make_var_dim(
-                        ndt::make_cfixed_dim(3, ndt::make_type<int32_t>()))), "", false));
+  EXPECT_EQ("3 * int32", format_datashape(nd::empty<int32_t[3]>(), "", false));
+  EXPECT_EQ(
+      "var * int32",
+      format_datashape(nd::empty(ndt::make_var_dim(ndt::make_type<int32_t>())),
+                       "", false));
+  EXPECT_EQ("var * 3 * int32",
+            format_datashape(nd::empty(ndt::make_var_dim(ndt::make_cfixed_dim(
+                                 3, ndt::make_type<int32_t>()))),
+                             "", false));
 }
 
 TEST(DataShapeFormatter, DTypeUniformArrays) {

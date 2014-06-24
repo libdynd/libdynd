@@ -16,6 +16,7 @@
 #include <dynd/types/byteswap_type.hpp>
 #include <dynd/types/cstruct_type.hpp>
 #include <dynd/json_parser.hpp>
+#include <dynd/func/callable.hpp>
 
 using namespace std;
 using namespace dynd;
@@ -193,7 +194,7 @@ TEST(StructType, PropertyAccess) {
 
 TEST(StructType, EqualTypeAssign) {
     ndt::type dt = ndt::make_struct(ndt::make_type<int>(), "x", ndt::make_type<double>(), "y", ndt::make_type<short>(), "z");
-    nd::array a = nd::make_strided_array(2, dt);
+    nd::array a = nd::empty(2, dt);
     a(0,0).vals() = 3;
     a(0,1).vals() = 4.25;
     a(0,2).vals() = 5;
@@ -201,7 +202,7 @@ TEST(StructType, EqualTypeAssign) {
     a(1,1).vals() = 7.25;
     a(1,2).vals() = 8;
 
-    nd::array b = nd::make_strided_array(2, dt);
+    nd::array b = nd::empty(2, dt);
     b.val_assign(a);
     EXPECT_EQ(3,    a(0,0).as<int>());
     EXPECT_EQ(4.25, a(0,1).as<double>());
@@ -213,7 +214,7 @@ TEST(StructType, EqualTypeAssign) {
 
 TEST(StructType, DifferentTypeAssign) {
     ndt::type dt = ndt::make_struct(ndt::make_type<int>(), "x", ndt::make_type<double>(), "y", ndt::make_type<short>(), "z");
-    nd::array a = nd::make_strided_array(2, dt);
+    nd::array a = nd::empty(2, dt);
     a(0,0).vals() = 3;
     a(0,1).vals() = 4.25;
     a(0,2).vals() = 5;
@@ -222,7 +223,7 @@ TEST(StructType, DifferentTypeAssign) {
     a(1,2).vals() = 8;
 
     ndt::type dt2 = ndt::make_struct(ndt::make_type<float>(), "y", ndt::make_type<int>(), "z", ndt::make_type<uint8_t>(), "x");
-    nd::array b = nd::make_strided_array(2, dt2);
+    nd::array b = nd::empty(2, dt2);
     b.val_assign(a);
     EXPECT_EQ(3,    b(0,2).as<int>());
     EXPECT_EQ(4.25, b(0,0).as<double>());
@@ -234,7 +235,7 @@ TEST(StructType, DifferentTypeAssign) {
 
 TEST(StructType, FromCStructAssign) {
     ndt::type dt = ndt::make_cstruct(ndt::make_type<int>(), "x", ndt::make_type<double>(), "y", ndt::make_type<short>(), "z");
-    nd::array a = nd::make_strided_array(2, dt);
+    nd::array a = nd::empty(2, dt);
     a(0,0).vals() = 3;
     a(0,1).vals() = 4.25;
     a(0,2).vals() = 5;
@@ -243,7 +244,7 @@ TEST(StructType, FromCStructAssign) {
     a(1,2).vals() = 8;
 
     ndt::type dt2 = ndt::make_struct(ndt::make_type<float>(), "y", ndt::make_type<int>(), "z", ndt::make_type<uint8_t>(), "x");
-    nd::array b = nd::make_strided_array(2, dt2);
+    nd::array b = nd::empty(2, dt2);
     b.val_assign(a);
     EXPECT_EQ(3,    b(0,2).as<int>());
     EXPECT_EQ(4.25, b(0,0).as<double>());

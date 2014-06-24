@@ -12,6 +12,7 @@
 #include <dynd/types/tuple_type.hpp>
 #include <dynd/types/ctuple_type.hpp>
 #include <dynd/types/fixedstring_type.hpp>
+#include <dynd/func/callable.hpp>
 
 using namespace std;
 using namespace dynd;

@@ -103,8 +103,7 @@ nd::array dynd::nd::range(const ndt::type& scalar_tp, const void *beginval, cons
 #define ONE_ARANGE_SPECIALIZATION(type) \
     case type_id_of<type>::value: { \
         intptr_t dim_size = range_counter<type, dynd_kind_of<type>::value>::count(beginval, endval, stepval); \
-        nd::array result = \
-                nd::make_strided_array(dim_size, scalar_tp); \
+        nd::array result = nd::empty(dim_size, scalar_tp); \
         range_specialization<type>::range(beginval, stepval, result); \
         return DYND_MOVE(result); \
     }
@@ -203,25 +202,25 @@ nd::array dynd::nd::linspace(const ndt::type& dt, const void *startval, const vo
 
     switch (dt.get_type_id()) {
         case float32_type_id: {
-            nd::array result = nd::make_strided_array(count, dt);
+            nd::array result = nd::empty(count, dt);
             linspace_specialization(*reinterpret_cast<const float *>(startval),
                             *reinterpret_cast<const float *>(stopval), count, result);
             return DYND_MOVE(result);
         }
         case float64_type_id: {
-            nd::array result = nd::make_strided_array(count, dt);
+            nd::array result = nd::empty(count, dt);
             linspace_specialization(*reinterpret_cast<const double *>(startval),
                             *reinterpret_cast<const double *>(stopval), count, result);
             return DYND_MOVE(result);
         }
         case complex_float32_type_id: {
-            nd::array result = nd::make_strided_array(count, dt);
+            nd::array result = nd::empty(count, dt);
             linspace_specialization(*reinterpret_cast<const dynd_complex<float> *>(startval),
                             *reinterpret_cast<const dynd_complex<float> *>(stopval), count, result);
             return DYND_MOVE(result);
         }
         case complex_float64_type_id: {
-            nd::array result = nd::make_strided_array(count, dt);
+            nd::array result = nd::empty(count, dt);
             linspace_specialization(*reinterpret_cast<const dynd_complex<double> *>(startval),
                             *reinterpret_cast<const dynd_complex<double> *>(stopval), count, result);
             return DYND_MOVE(result);

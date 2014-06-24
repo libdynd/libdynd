@@ -11,6 +11,7 @@
 #include <dynd/diagnostics.hpp>
 #include <dynd/kernels/assignment_kernels.hpp>
 #include <dynd/kernels/struct_assignment_kernels.hpp>
+#include <dynd/func/callable.hpp>
 
 using namespace std;
 using namespace dynd;
@@ -20,7 +21,7 @@ namespace {
         typedef struct_kernel_extra extra_type;
 
         ckernel_prefix base;
-        size_t field_count;
+        intptr_t field_count;
         // After this, there are 'field_count' of
         // the following in a row
         struct field_items {
@@ -35,11 +36,11 @@ namespace {
             char *eraw = reinterpret_cast<char *>(extra);
             extra_type *e = reinterpret_cast<extra_type *>(extra);
             const field_items *fi = reinterpret_cast<const field_items *>(e + 1);
-            size_t field_count = e->field_count;
+            intptr_t field_count = e->field_count;
             ckernel_prefix *echild;
             expr_single_t child_fn;
 
-            for (size_t i = 0; i < field_count; ++i) {
+            for (intptr_t i = 0; i < field_count; ++i) {
                 const field_items& item = fi[i];
                 echild = reinterpret_cast<ckernel_prefix *>(
                     eraw + item.child_kernel_offset);
@@ -53,8 +54,8 @@ namespace {
         {
             extra_type *e = reinterpret_cast<extra_type *>(self);
             const field_items *fi = reinterpret_cast<const field_items *>(e + 1);
-            size_t field_count = e->field_count;
-            for (size_t i = 0; i < field_count; ++i) {
+            intptr_t field_count = e->field_count;
+            for (intptr_t i = 0; i < field_count; ++i) {
                 const field_items& item = fi[i];
                 self->destroy_child_ckernel(item.child_kernel_offset);
             }
@@ -87,7 +88,7 @@ size_t dynd::make_struct_identical_assignment_kernel(
         make_kernreq_to_single_kernel_adapter(ckb, ckb_offset, 1, kernreq);
 
     const base_struct_type *sd = val_struct_tp.tcast<base_struct_type>();
-    size_t field_count = sd->get_field_count();
+    intptr_t field_count = sd->get_field_count();
 
     size_t extra_size = sizeof(struct_kernel_extra) +
                     field_count * sizeof(struct_kernel_extra::field_items);
@@ -103,7 +104,7 @@ size_t dynd::make_struct_identical_assignment_kernel(
     // Create the kernels and dst offsets for copying individual fields
     size_t current_offset = ckb_offset + extra_size;
     struct_kernel_extra::field_items *fi;
-    for (size_t i = 0; i != field_count; ++i) {
+    for (intptr_t i = 0; i != field_count; ++i) {
         ckb->ensure_capacity(current_offset);
         // Adding another kernel may have invalidated 'e', so get it again
         e = ckb->get_at<struct_kernel_extra>(ckb_offset);
@@ -144,7 +145,7 @@ size_t dynd::make_struct_assignment_kernel(
     }
     const base_struct_type *dst_sd = dst_struct_tp.tcast<base_struct_type>();
     const base_struct_type *src_sd = src_struct_tp.tcast<base_struct_type>();
-    size_t field_count = dst_sd->get_field_count();
+    intptr_t field_count = dst_sd->get_field_count();
 
     if (field_count != src_sd->get_field_count()) {
         stringstream ss;
@@ -165,7 +166,7 @@ size_t dynd::make_struct_assignment_kernel(
 
     // Match up the fields
     vector<size_t> field_reorder(field_count);
-    for (size_t i = 0; i != field_count; ++i) {
+    for (intptr_t i = 0; i != field_count; ++i) {
         const string_type_data& dst_name = dst_sd->get_field_name_raw(i);
         intptr_t src_i = src_sd->get_field_index(dst_name.begin, dst_name.end);
         if (src_i < 0) {
@@ -185,7 +186,7 @@ size_t dynd::make_struct_assignment_kernel(
     // Create the kernels and dst offsets for copying individual fields
     size_t current_offset = ckb_offset + extra_size;
     struct_kernel_extra::field_items *fi;
-    for (size_t i = 0; i != field_count; ++i) {
+    for (intptr_t i = 0; i != field_count; ++i) {
         size_t i_src = field_reorder[i];
         ckb->ensure_capacity(current_offset);
         // Ensuring capacity may have invalidated 'e', so get it again
@@ -222,7 +223,7 @@ size_t dynd::make_broadcast_to_struct_assignment_kernel(
         throw runtime_error(ss.str());
     }
     const base_struct_type *dst_sd = dst_struct_tp.tcast<base_struct_type>();
-    size_t field_count = dst_sd->get_field_count();
+    intptr_t field_count = dst_sd->get_field_count();
 
     ckb_offset =
         make_kernreq_to_single_kernel_adapter(ckb, ckb_offset, 1, kernreq);
@@ -241,7 +242,7 @@ size_t dynd::make_broadcast_to_struct_assignment_kernel(
     // Create the kernels and dst offsets for copying individual fields
     size_t current_offset = ckb_offset + extra_size;
     struct_kernel_extra::field_items *fi;
-    for (size_t i = 0; i != field_count; ++i) {
+    for (intptr_t i = 0; i != field_count; ++i) {
         ckb->ensure_capacity(current_offset);
         // Ensuring capacity may have invalidated 'e', so get it again
         e = ckb->get_at<struct_kernel_extra>(ckb_offset);

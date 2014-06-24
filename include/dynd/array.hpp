@@ -17,10 +17,16 @@
 #include <dynd/shortvector.hpp>
 #include <dynd/irange.hpp>
 #include <dynd/memblock/array_memory_block.hpp>
-#include <dynd/types/fixed_dim_type.hpp>
 #include <dynd/types/type_type.hpp>
 
-namespace dynd { namespace nd {
+namespace dynd {
+
+namespace ndt {
+  type make_var_dim(const type &element_tp);
+  type make_strided_dim(const type& element_tp);
+} // namespace ndt;
+
+namespace nd {
 
 class array;
 
@@ -901,18 +907,6 @@ inline array make_utf32_array(const uint32_t (&static_string)[N]) {
 array make_strided_string_array(const char **cstr_array, size_t array_size);
 array make_strided_string_array(const std::string **str_array, size_t array_size);
 
-inline array make_strided_array(intptr_t shape0, const ndt::type& uniform_dtype) {
-    return make_strided_array(uniform_dtype, 1, &shape0, read_access_flag|write_access_flag, NULL);
-}
-inline array make_strided_array(intptr_t shape0, intptr_t shape1, const ndt::type& uniform_dtype) {
-    intptr_t shape[2] = {shape0, shape1};
-    return make_strided_array(uniform_dtype, 2, shape, read_access_flag|write_access_flag, NULL);
-}
-inline array make_strided_array(intptr_t shape0, intptr_t shape1, intptr_t shape2, const ndt::type& uniform_dtype) {
-    intptr_t shape[3] = {shape0, shape1, shape2};
-    return make_strided_array(uniform_dtype, 3, shape, read_access_flag|write_access_flag, NULL);
-}
-
 inline array_vals array::vals() const {
     return array_vals(*this);
 }
@@ -938,55 +932,136 @@ inline array_vals_at array::vals_at(const irange& i0, const irange& i1,
     return array_vals_at(at_array(4, i, false));
 }
 
-/**
- * Constructs an uninitialized array of the given type.
- */
-array empty(const ndt::type& tp);
+// Some C array metaprogramming used by empty<> as well as assignment
+// from a C array
+namespace detail {
+    template<class T> struct dtype_from_array {
+        typedef T type;
+        enum { element_size = sizeof(T) };
+        enum { type_id = type_id_of<T>::value };
+    };
+    template<class T, int N> struct dtype_from_array<T[N]> {
+        typedef typename dtype_from_array<T>::type type;
+        enum { element_size = dtype_from_array<T>::element_size };
+        enum { type_id = dtype_from_array<T>::type_id };
+    };
+
+    template<class T> struct ndim_from_array { enum { value = 0 }; };
+    template<class T, int N> struct ndim_from_array<T[N]> {
+        enum { value = ndim_from_array<T>::value + 1 };
+    };
+
+    template<class T> struct fill_shape {
+        inline static size_t fill(intptr_t *) {
+            return sizeof(T);
+        }
+    };
+    template<class T, int N> struct fill_shape<T[N]> {
+        inline static size_t fill(intptr_t *out_shape) {
+            out_shape[0] = N;
+            return N * fill_shape<T>::fill(out_shape + 1);
+        }
+    };
+} // namespace detail
 
 /**
- * Constructs an uninitialized array of the given type,
- * specified as a string. This is a shortcut for expressions
- * like
- *
- *      array a = nd::empty("10 * int32");
+ * Primitive function to construct an uninitialized nd::array. In
+ * this function, the type provided is the complete type of the array
+ * result, not just its dtype.
  */
-template<int N>
-inline array empty(const char (&dshape)[N]) {
-    return empty(ndt::type(dshape, dshape + N - 1));
+array typed_empty(intptr_t ndim, const intptr_t *shape, const ndt::type &tp);
+
+/**
+ * A version of typed_empty that excepts a std::vector as the shape.
+ */
+inline array typed_empty(const std::vector<intptr_t> &shape,
+                         const ndt::type &tp)
+{
+  return typed_empty(shape.size(), shape.empty() ? NULL : &shape[0], tp);
 }
 
 /**
- * Constructs a writable uninitialized array of the specified type.
- * This type should be at least one dimensional, and is initialized
- * using the specified dimension size.
+ * Constructs an uninitialized array of the given dtype, with ndim/shape
+ * pointer. This function is not named ``empty`` because (intptr_t, intptr_t,
+ * type) and (intptr_t, const intptr_t *, type) can sometimes result in
+ * unexpected overloads.
  */
-array empty(intptr_t dim0, const ndt::type& tp);
-
-/**
- * Constructs an uninitialized array of the given type,
- * specified as a string. This is a shortcut for expressions
- * like
- *
- *      array a = nd::empty(10, "strided * int32");
- */
-template<int N>
-inline array empty(intptr_t dim0, const char (&dshape)[N]) {
-    return empty(dim0, ndt::type(dshape, dshape + N - 1));
+inline array dtyped_empty(intptr_t ndim, const intptr_t *shape,
+                          const ndt::type &tp)
+{
+  if (ndim > 0) {
+    intptr_t i = ndim - 1;
+    ndt::type rtp =
+        shape[i] >= 0 ? ndt::make_strided_dim(tp) : ndt::make_var_dim(tp);
+    while (i-- > 0) {
+      rtp = shape[i] >= 0 ? ndt::make_strided_dim(rtp) : ndt::make_var_dim(rtp);
+    }
+    return typed_empty(ndim, shape, rtp);
+  } else {
+    return typed_empty(ndim, shape, tp);
+  }
 }
 
 /**
- * Constructs a writable uninitialized array of the specified type.
- * This type should be at least two dimensional, and is initialized
- * using the specified dimension sizes.
+ * Constructs an uninitialized array of the given dtype.
  */
-array empty(intptr_t dim0, intptr_t dim1, const ndt::type& tp);
+inline array empty(const ndt::type &tp) { return typed_empty(0, NULL, tp); }
+
+/**
+ * Constructs an uninitialized array of the given dtype,
+ * specified as a string literal. This is a shortcut for expressions
+ * like
+ *
+ * nd::array a = nd::empty("10 * int32");
+ */
+template <int N>
+inline array empty(const char (&dshape)[N])
+{
+  return nd::empty(ndt::type(dshape, dshape + N - 1));
+}
+
+/**
+ * Constructs a writable uninitialized array of the specified shape
+ * and dtype. Prefixes the dtype with ``strided`` or ``var`` dimensions.
+ */
+inline array empty(intptr_t dim0, const ndt::type &tp)
+{
+  return nd::typed_empty(1, &dim0, dim0 >= 0 ? ndt::make_strided_dim(tp)
+                                             : ndt::make_var_dim(tp));
+}
 
 /**
  * Constructs an uninitialized array of the given type,
  * specified as a string. This is a shortcut for expressions
  * like
  *
- *      array a = nd::empty(10, 10, "strided * strided * int32");
+ *      array a = nd::empty(10, "int32");
+ */
+template <int N>
+inline array empty(intptr_t dim0, const char (&dshape)[N])
+{
+  return empty(dim0, ndt::type(dshape, dshape + N - 1));
+}
+
+/**
+ * Constructs a writable uninitialized array of the specified shape
+ * and dtype. Prefixes the dtype with ``strided`` or ``var`` dimensions.
+ */
+inline array empty(intptr_t dim0, intptr_t dim1, const ndt::type &tp)
+{
+  intptr_t dims[2] = {dim0, dim1};
+  ndt::type rtp =
+      (dim1 >= 0) ? ndt::make_strided_dim(tp) : ndt::make_var_dim(tp);
+  rtp = (dim0 >= 0) ? ndt::make_strided_dim(rtp) : ndt::make_var_dim(rtp);
+  return nd::typed_empty(2, dims, rtp);
+}
+
+/**
+ * Constructs an uninitialized array of the given type,
+ * specified as a string. This is a shortcut for expressions
+ * like
+ *
+ *      array a = nd::empty(10, 10, "int32");
  */
 template<int N>
 inline array empty(intptr_t dim0, intptr_t dim1, const char (&dshape)[N]) {
@@ -998,14 +1073,22 @@ inline array empty(intptr_t dim0, intptr_t dim1, const char (&dshape)[N]) {
  * This type should be at least three dimensional, and is initialized
  * using the specified dimension sizes.
  */
-array empty(intptr_t dim0, intptr_t dim1, intptr_t dim2, const ndt::type& tp);
+inline array empty(intptr_t dim0, intptr_t dim1, intptr_t dim2, const ndt::type &tp)
+{
+  intptr_t dims[3] = {dim0, dim1, dim2};
+  ndt::type rtp =
+      (dim2 >= 0) ? ndt::make_strided_dim(tp) : ndt::make_var_dim(tp);
+  rtp = (dim1 >= 0) ? ndt::make_strided_dim(rtp) : ndt::make_var_dim(rtp);
+  rtp = (dim0 >= 0) ? ndt::make_strided_dim(rtp) : ndt::make_var_dim(rtp);
+  return typed_empty(3, dims, rtp);
+}
 
 /**
  * Constructs an uninitialized array of the given type,
  * specified as a string. This is a shortcut for expressions
  * like
  *
- *      array a = nd::empty(10, 10, 10, "strided * strided * strided * int32");
+ *      array a = nd::empty(10, 10, 10, "int32");
  */
 template<int N>
 inline array empty(intptr_t dim0, intptr_t dim1, intptr_t dim2, const char (&dshape)[N]) {
@@ -1013,14 +1096,24 @@ inline array empty(intptr_t dim0, intptr_t dim1, intptr_t dim2, const char (&dsh
 }
 
 /**
- * Constructs an uninitialized array of the given C++ type.
+ * Constructs an uninitialized array of the given C++ type, as a strided array.
  *
- *      array a = nd::empty<double>();
- *      array b = nd::empty<double[3][4]>();
+ * // a has type "float64"
+ * array a = nd::empty<double>();
+ * // b has type "strided * strided * float64", has shape (3, 4), and is in C order
+ * array b = nd::empty<double[3][4]>();
  */
 template<typename T>
 inline array empty() {
-    return empty(ndt::fixed_dim_from_array<T>::make());
+  const intptr_t ndim = detail::ndim_from_array<T>::value;
+  intptr_t shape[ndim ? ndim : 1];
+  detail::fill_shape<T>::fill(shape);
+  ndt::type tp =
+      ndt::type(static_cast<type_id_t>(detail::dtype_from_array<T>::type_id));
+  for (intptr_t i = 0; i < ndim; ++i) {
+    tp = ndt::make_strided_dim(tp);
+  }
+  return typed_empty(ndim, shape, tp);
 }
 
 /**
@@ -1158,35 +1251,6 @@ dynd::nd::array::array(std::initializer_list<std::initializer_list<std::initiali
 #endif // DYND_INIT_LIST
 
 ///////////// C-style array constructor implementation /////////////////////////
-namespace detail {
-    template<class T> struct uniform_type_from_array {
-        typedef T type;
-        enum { element_size = sizeof(T) };
-        enum { type_id = type_id_of<T>::value };
-    };
-    template<class T, int N> struct uniform_type_from_array<T[N]> {
-        typedef typename uniform_type_from_array<T>::type type;
-        enum { element_size = uniform_type_from_array<T>::element_size };
-        enum { type_id = uniform_type_from_array<T>::type_id };
-    };
-
-    template<class T> struct ndim_from_array { enum { value = 0 }; };
-    template<class T, int N> struct ndim_from_array<T[N]> {
-        enum { value = ndim_from_array<T>::value + 1 };
-    };
-
-    template<class T> struct fill_shape {
-        static size_t fill(intptr_t *) {
-            return sizeof(T);
-        }
-    };
-    template<class T, int N> struct fill_shape<T[N]> {
-        static size_t fill(intptr_t *out_shape) {
-            out_shape[0] = N;
-            return N * fill_shape<T>::fill(out_shape + 1);
-        }
-    };
-} // namespace detail
 
 template<class T, int N>
 nd::array::array(const T (&rhs)[N])
@@ -1197,7 +1261,7 @@ nd::array::array(const T (&rhs)[N])
     size_t size = detail::fill_shape<T[N]>::fill(shape);
 
     *this = make_strided_array(
-                    ndt::type(static_cast<type_id_t>(detail::uniform_type_from_array<T>::type_id)),
+                    ndt::type(static_cast<type_id_t>(detail::dtype_from_array<T>::type_id)),
                     ndim, shape, default_access_flags, NULL);
     DYND_MEMCPY(get_ndo()->m_data_pointer, reinterpret_cast<const void *>(&rhs), size);
 }
@@ -1211,7 +1275,7 @@ nd::array array_rw(const T (&rhs)[N])
 
     nd::array result =
         make_strided_array(ndt::type(static_cast<type_id_t>(
-                               detail::uniform_type_from_array<T>::type_id)),
+                               detail::dtype_from_array<T>::type_id)),
                            ndim, shape, readwrite_access_flags, NULL);
     DYND_MEMCPY(result.get_ndo()->m_data_pointer, reinterpret_cast<const void *>(&rhs), size);
     return result;
@@ -1222,7 +1286,8 @@ template<int N>
 nd::array::array(const ndt::type (&rhs)[N])
     : m_memblock()
 {
-    nd::empty(N, ndt::make_strided_of_type()).swap(*this);
+    intptr_t dim_size = N;
+    nd::typed_empty(1, &dim_size, ndt::make_strided_of_type()).swap(*this);
     ndt::type *out = reinterpret_cast<ndt::type *>(get_ndo()->m_data_pointer);
     for (int i = 0; i < N; ++i) {
         out[i] = rhs[i];
@@ -1250,7 +1315,7 @@ namespace detail {
         inline static typename enable_if<is_dynd_scalar<T>::value, array>::type
                         make(const std::vector<T>& vec)
         {
-            array result = make_strided_array(vec.size(), ndt::make_type<T>());
+            array result = nd::empty(vec.size(), ndt::make_type<T>());
             if (!vec.empty()) {
                 memcpy(result.get_readwrite_originptr(), &vec[0], vec.size() * sizeof(T));
             }
@@ -1400,6 +1465,7 @@ assign_na(array &out,
  * \param  field_values  The values of the fields.
  */
 array combine_into_tuple(size_t field_count, const array *field_values);
+
 }} // namespace dynd::nd
 
 #endif // _DYND__ARRAY_HPP_

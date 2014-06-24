@@ -221,12 +221,12 @@ static void format_json_datetime(output_data &out, const ndt::type &dt,
 static void format_json_struct(output_data& out, const ndt::type& dt, const char *arrmeta, const char *data)
 {
     const base_struct_type *bsd = dt.tcast<base_struct_type>();
-    size_t field_count = bsd->get_field_count();
+    intptr_t field_count = bsd->get_field_count();
     const size_t *data_offsets = bsd->get_data_offsets(arrmeta);
     const size_t *arrmeta_offsets = bsd->get_arrmeta_offsets_raw();
 
     out.write('{');
-    for (size_t i = 0; i < field_count; ++i) {
+    for (intptr_t i = 0; i < field_count; ++i) {
         const string_type_data& fname = bsd->get_field_name_raw(i);
         format_json_encoded_string(out, fname.begin, fname.end, string_encoding_utf_8);
         out.write(':');

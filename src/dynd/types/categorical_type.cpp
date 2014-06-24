@@ -193,7 +193,7 @@ static nd::array make_sorted_categories(const set<const char *, cmp> &uniques,
                                         const ndt::type &element_tp,
                                         const char *arrmeta)
 {
-    nd::array categories = nd::make_strided_array(uniques.size(), element_tp);
+    nd::array categories = nd::empty(uniques.size(), element_tp);
     assignment_ckernel_builder k;
     make_assignment_kernel(
         &k, 0, element_tp,
@@ -393,7 +393,7 @@ nd::array categorical_type::get_categories() const
 {
     // TODO: store categories in their original order
     //       so this is simply "return m_categories".
-    nd::array categories = nd::make_strided_array(get_category_count(), m_category_tp);
+    nd::array categories = nd::empty(get_category_count(), m_category_tp);
     array_iter<1,0> iter(categories);
     assignment_ckernel_builder k;
     ::make_assignment_kernel(&k, 0, iter.get_uniform_dtype(), iter.arrmeta(),

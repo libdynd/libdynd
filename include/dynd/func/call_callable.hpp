@@ -85,12 +85,12 @@ namespace detail {
 inline nd::array callable::call() const
 {
     const cstruct_type *fsdt = m_parameters_type.tcast<cstruct_type>();
-    size_t parameter_count = fsdt->get_field_count();
+    intptr_t parameter_count = fsdt->get_field_count();
     nd::array params = nd::empty(m_parameters_type);
     if (parameter_count != 0) {
         if (m_first_default_parameter <= 0) {
             // Fill the missing parameters with their defaults, if available
-            for (size_t i = 0; i < parameter_count; ++i) {
+            for (intptr_t i = 0; i < parameter_count; ++i) {
                 uintptr_t arrmeta_offset = fsdt->get_arrmeta_offset(i);
                 uintptr_t data_offset = fsdt->get_data_offset(i);
                 typed_data_copy(fsdt->get_field_type(i),
@@ -112,12 +112,12 @@ template<class T>
 inline nd::array callable::call(const T& p0) const
 {
     const cstruct_type *fsdt = m_parameters_type.tcast<cstruct_type>();
-    size_t parameter_count = fsdt->get_field_count();
+    intptr_t parameter_count = fsdt->get_field_count();
     nd::array params = nd::empty(m_parameters_type);
     if (parameter_count != 1) {
         if (parameter_count > 1 && m_first_default_parameter <= 1) {
             // Fill the missing parameters with their defaults, if available
-            for (size_t i = 1; i < parameter_count; ++i) {
+            for (intptr_t i = 1; i < parameter_count; ++i) {
                 size_t arrmeta_offset = fsdt->get_arrmeta_offset(i);
                 size_t data_offset = fsdt->get_data_offset(i);
                 typed_data_copy(fsdt->get_field_type(i),
@@ -143,12 +143,12 @@ template<class T0, class T1>
 inline nd::array callable::call(const T0& p0, const T1& p1) const
 {
     const cstruct_type *fsdt = m_parameters_type.tcast<cstruct_type>();
-    size_t parameter_count = fsdt->get_field_count();
+    intptr_t parameter_count = fsdt->get_field_count();
     nd::array params = nd::empty(m_parameters_type);
     if (fsdt->get_field_count() != 2) {
         if (parameter_count > 2 && m_first_default_parameter <= 2) {
             // Fill the missing parameters with their defaults, if available
-            for (size_t i = 2; i < parameter_count; ++i) {
+            for (intptr_t i = 2; i < parameter_count; ++i) {
                 size_t arrmeta_offset = fsdt->get_arrmeta_offset(i);
                 size_t data_offset = fsdt->get_data_offset(i);
                 typed_data_copy(fsdt->get_field_type(i),
@@ -178,12 +178,12 @@ template<class T0, class T1, class T2>
 inline nd::array callable::call(const T0& p0, const T1& p1, const T2& p2) const
 {
     const cstruct_type *fsdt = m_parameters_type.tcast<cstruct_type>();
-    size_t parameter_count = fsdt->get_field_count();
+    intptr_t parameter_count = fsdt->get_field_count();
     nd::array params = nd::empty(m_parameters_type);
     if (fsdt->get_field_count() != 3) {
         if (parameter_count > 3 && m_first_default_parameter <= 3) {
             // Fill the missing parameters with their defaults, if available
-            for (size_t i = 3; i < parameter_count; ++i) {
+            for (intptr_t i = 3; i < parameter_count; ++i) {
                 size_t arrmeta_offset = fsdt->get_arrmeta_offset(i);
                 size_t data_offset = fsdt->get_data_offset(i);
                 typed_data_copy(fsdt->get_field_type(i),
@@ -217,12 +217,12 @@ template<class T0, class T1, class T2, class T3>
 inline nd::array callable::call(const T0& p0, const T1& p1, const T2& p2, const T3& p3) const
 {
     const cstruct_type *fsdt = m_parameters_type.tcast<cstruct_type>();
-    size_t parameter_count = fsdt->get_field_count();
+    intptr_t parameter_count = fsdt->get_field_count();
     nd::array params = nd::empty(m_parameters_type);
     if (fsdt->get_field_count() != 4) {
         if (parameter_count > 4 && m_first_default_parameter <= 4) {
             // Fill the missing parameters with their defaults, if available
-            for (size_t i = 4; i < parameter_count; ++i) {
+            for (intptr_t i = 4; i < parameter_count; ++i) {
                 size_t arrmeta_offset = fsdt->get_arrmeta_offset(i);
                 size_t data_offset = fsdt->get_data_offset(i);
                 typed_data_copy(fsdt->get_field_type(i),
@@ -260,12 +260,12 @@ template<class T0, class T1, class T2, class T3, class T4>
 inline nd::array callable::call(const T0& p0, const T1& p1, const T2& p2, const T3& p3, const T4& p4) const
 {
     const cstruct_type *fsdt = m_parameters_type.tcast<cstruct_type>();
-    size_t parameter_count = fsdt->get_field_count();
+    intptr_t parameter_count = fsdt->get_field_count();
     nd::array params = nd::empty(m_parameters_type);
     if (fsdt->get_field_count() != 5) {
         if (parameter_count > 5 && m_first_default_parameter <= 5) {
             // Fill the missing parameters with their defaults, if available
-            for (size_t i = 5; i < parameter_count; ++i) {
+            for (intptr_t i = 5; i < parameter_count; ++i) {
                 size_t arrmeta_offset = fsdt->get_arrmeta_offset(i);
                 size_t data_offset = fsdt->get_data_offset(i);
                 typed_data_copy(fsdt->get_field_type(i),

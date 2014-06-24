@@ -152,7 +152,7 @@ struct arrfunc_type_data {
         }
     }
 
-    inline size_t get_param_count() const {
+    inline intptr_t get_param_count() const {
         return func_proto.tcast<funcproto_type>()->get_param_count();
     }
 
@@ -175,10 +175,10 @@ struct arrfunc_type_data {
             resolve_dst_type(this, result, src_tp, true);
             return result;
         } else {
-            size_t param_count = get_param_count();
+            intptr_t param_count = get_param_count();
             const ndt::type *param_types = get_param_types();
             std::map<nd::string, ndt::type> typevars;
-            for (size_t i = 0; i != param_count; ++i) {
+            for (intptr_t i = 0; i != param_count; ++i) {
                 if (!ndt::type_pattern_match(src_tp[i].value_type(),
                                              param_types[i], typevars)) {
                     std::stringstream ss;
