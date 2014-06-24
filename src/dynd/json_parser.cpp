@@ -288,7 +288,7 @@ static bool parse_struct_json_from_object(const ndt::type &tp,
     }
 
     const base_struct_type *fsd = tp.tcast<base_struct_type>();
-    size_t field_count = fsd->get_field_count();
+    intptr_t field_count = fsd->get_field_count();
     const size_t *data_offsets = fsd->get_data_offsets(arrmeta);
     const size_t *arrmeta_offsets = fsd->get_arrmeta_offsets_raw();
 
@@ -335,7 +335,7 @@ static bool parse_struct_json_from_object(const ndt::type &tp,
         }
     }
 
-    for (size_t i = 0; i < field_count; ++i) {
+    for (intptr_t i = 0; i < field_count; ++i) {
         if (!populated_fields[i]) {
             stringstream ss;
             ss << "object dict does not contain the field ";
@@ -358,12 +358,12 @@ static bool parse_struct_json_from_list(const ndt::type &tp,
     }
 
     const base_struct_type *fsd = tp.tcast<base_struct_type>();
-    size_t field_count = fsd->get_field_count();
+    intptr_t field_count = fsd->get_field_count();
     const size_t *data_offsets = fsd->get_data_offsets(arrmeta);
     const size_t *arrmeta_offsets = fsd->get_arrmeta_offsets_raw();
 
     // Loop through all the fields
-    for (size_t i = 0; i != field_count; ++i) {
+    for (intptr_t i = 0; i != field_count; ++i) {
         begin = skip_whitespace(begin, end);
         parse_json(fsd->get_field_type(i), arrmeta + arrmeta_offsets[i],
                    out_data + data_offsets[i], begin, end, ectx);

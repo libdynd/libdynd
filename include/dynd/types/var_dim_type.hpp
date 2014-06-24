@@ -3,8 +3,8 @@
 // BSD 2-Clause License, see LICENSE.txt
 //
 
-#ifndef _DYND__VAR_DIM_TYPE_HPP_
-#define _DYND__VAR_DIM_TYPE_HPP_
+#ifndef DYND_TYPES_VAR_DIM_TYPE_HPP
+#define DYND_TYPES_VAR_DIM_TYPE_HPP
 
 #include <dynd/type.hpp>
 #include <dynd/types/base_uniform_dim_type.hpp>
@@ -118,9 +118,7 @@ public:
 };
 
 namespace ndt {
-    inline type make_var_dim(const type& element_tp) {
-        return type(new var_dim_type(element_tp), false);
-    }
+    type make_var_dim(const type& element_tp);
 
     /**
      * A helper function for reserving initial space in a var dim element.
@@ -155,4 +153,4 @@ namespace ndt {
 
 } // namespace dynd
 
-#endif // _DYND__VAR_DIM_TYPE_HPP_
+#endif // DYND_TYPES_VAR_DIM_TYPE_HPP

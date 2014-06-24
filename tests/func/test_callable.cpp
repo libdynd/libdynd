@@ -340,7 +340,7 @@ TEST(GFuncCallable, FiveParameters) {
 }
 
 static nd::array array_return(int a, int b, int c) {
-    nd::array result = nd::make_strided_array(3, ndt::make_type<int>());
+    nd::array result = nd::empty<int[3]>();
     result(0).vals() = a;
     result(1).vals() = b;
     result(2).vals() = c;
@@ -378,7 +378,7 @@ TEST(GFuncCallable, ArrayParam) {
     nd::array a, r;
     a = nd::empty(c.get_parameters_type());
 
-    tmp = nd::make_strided_array(2, 3, 1, ndt::make_type<int>());
+    tmp = nd::empty<int[2][3][1]>();
     *(void**)a.get_ndo()->m_data_pointer = tmp.get_ndo();
     r = c.call_generic(a);
     EXPECT_EQ(ndt::make_type<size_t>(), r.get_type());

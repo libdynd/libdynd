@@ -81,57 +81,6 @@ memory_block_ptr dynd::make_array_memory_block(size_t arrmeta_size, size_t extra
     return memory_block_ptr(new (result) memory_block_data(1, array_memory_block_type), false);
 }
 
-memory_block_ptr dynd::make_array_memory_block(const ndt::type& tp, intptr_t ndim, const intptr_t *shape)
-{
-    const ndt::type& dtp = tp.get_dtype();
-
-    size_t arrmeta_size, data_size;
-    if (tp.is_builtin()) {
-        arrmeta_size = 0;
-        data_size = tp.get_data_size();
-    } else {
-        arrmeta_size = tp.extended()->get_arrmeta_size();
-        data_size = tp.extended()->get_default_data_size(ndim, shape);
-    }
-
-    memory_block_ptr result;
-    char *data_ptr = NULL;
-    if (dtp.get_kind() == memory_kind) {
-        result = make_array_memory_block(arrmeta_size);
-        static_cast<const base_memory_type*>(dtp.extended())->data_alloc(&data_ptr, data_size);
-        if (tp.get_flags()&type_flag_zeroinit) {
-            static_cast<const base_memory_type *>(dtp.extended())
-                ->data_zeroinit(data_ptr, data_size);
-        }
-    } else {
-        result = make_array_memory_block(arrmeta_size, data_size, tp.get_data_alignment(), &data_ptr);
-        if (tp.get_flags()&type_flag_zeroinit) {
-            memset(data_ptr, 0, data_size);
-        }
-    }
-
-    array_preamble *preamble = reinterpret_cast<array_preamble *>(result.get());
-    if (tp.is_builtin()) {
-        preamble->m_type = reinterpret_cast<base_type *>(tp.get_type_id());
-        if (ndim != 0) {
-            stringstream ss;
-            ss << "too many dimensions (" << ndim
-               << ") for creating dynd array of type " << tp;
-            throw runtime_error(ss.str());
-        }
-    } else {
-        preamble->m_type = ndt::type(tp).release();
-        preamble->m_type->arrmeta_default_construct(
-            reinterpret_cast<char *>(preamble + 1), ndim, shape);
-    }
-    preamble->m_data_pointer = data_ptr;
-    preamble->m_data_reference = NULL;
-    // This is an uninitialized allocation, so should be read/write by default,
-    // not immutable
-    preamble->m_flags = nd::read_access_flag|nd::write_access_flag;
-    return result;
-}
-
 memory_block_ptr dynd::shallow_copy_array_memory_block(const memory_block_ptr& ndo)
 {
     // Allocate the new memory block.

@@ -17,16 +17,17 @@
 using namespace std;
 using namespace dynd;
 
-cstruct_type::cstruct_type(const nd::array &field_names, const nd::array &field_types)
-    : base_struct_type(cstruct_type_id, field_names, field_types, type_flag_none, false),
-      m_data_offsets(nd::empty(
-          m_field_count, ndt::make_strided_dim(ndt::make_type<uintptr_t>())))
+cstruct_type::cstruct_type(const nd::array &field_names,
+                           const nd::array &field_types)
+    : base_struct_type(cstruct_type_id, field_names, field_types,
+                       type_flag_none, false),
+      m_data_offsets(nd::empty(m_field_count, ndt::make_type<uintptr_t>()))
 {
     uintptr_t *data_offsets = reinterpret_cast<uintptr_t *>(
         m_data_offsets.get_readwrite_originptr());
 
     size_t offs = 0;
-    for (size_t i = 0; i < m_field_count; ++i) {
+    for (intptr_t i = 0; i < m_field_count; ++i) {
         const ndt::type& field_tp = get_field_type(i);
         offs = inc_to_alignment(offs, field_tp.get_data_alignment());
         data_offsets[i] = offs;
@@ -74,7 +75,7 @@ void cstruct_type::print_type(std::ostream& o) const
 {
     // Use the record datashape syntax prefixed with a "c"
     o << "c{";
-    for (size_t i = 0, i_end = m_field_count; i != i_end; ++i) {
+    for (intptr_t i = 0, i_end = m_field_count; i != i_end; ++i) {
         if (i != 0) {
             o << ", ";
         }
@@ -93,13 +94,13 @@ void cstruct_type::transform_child_types(type_transform_fn_t transform_fn, void 
                 ndt::type& out_transformed_tp, bool& out_was_transformed) const
 {
     nd::array tmp_field_types(
-        nd::empty(m_field_count, ndt::make_strided_of_type()));
+        nd::typed_empty(1, &m_field_count, ndt::make_strided_of_type()));
     ndt::type *tmp_field_types_raw = reinterpret_cast<ndt::type *>(
         tmp_field_types.get_readwrite_originptr());
 
     bool switch_to_struct = false;
     bool was_any_transformed = false;
-    for (size_t i = 0, i_end = m_field_count; i != i_end; ++i) {
+    for (intptr_t i = 0, i_end = m_field_count; i != i_end; ++i) {
         bool was_transformed = false;
         transform_fn(get_field_type(i), extra, tmp_field_types_raw[i],
                      was_transformed);
@@ -127,11 +128,11 @@ void cstruct_type::transform_child_types(type_transform_fn_t transform_fn, void 
 ndt::type cstruct_type::get_canonical_type() const
 {
     nd::array tmp_field_types(
-        nd::empty(m_field_count, ndt::make_strided_of_type()));
+        nd::typed_empty(1, &m_field_count, ndt::make_strided_of_type()));
     ndt::type *tmp_field_types_raw = reinterpret_cast<ndt::type *>(
         tmp_field_types.get_readwrite_originptr());
 
-    for (size_t i = 0, i_end = m_field_count; i != i_end; ++i) {
+    for (intptr_t i = 0, i_end = m_field_count; i != i_end; ++i) {
         tmp_field_types_raw[i] = get_field_type(i).get_canonical_type();
     }
 
@@ -239,7 +240,7 @@ void cstruct_type::arrmeta_debug_print(const char *arrmeta, std::ostream &o,
 {
     o << indent << "cstruct arrmeta\n";
     const uintptr_t *arrmeta_offsets = get_arrmeta_offsets_raw();
-    for (size_t i = 0; i < m_field_count; ++i) {
+    for (intptr_t i = 0; i < m_field_count; ++i) {
         const ndt::type& field_dt = get_field_type(i);
         if (!field_dt.is_builtin() && field_dt.extended()->get_arrmeta_size() > 0) {
             o << indent << " field " << i << " (";
@@ -299,10 +300,11 @@ static nd::array make_self_names()
 
 static nd::array make_self_types()
 {
-    nd::array result = nd::empty(1, ndt::make_strided_of_type());
-    unchecked_strided_dim_get_rw<ndt::type>(result, 0) = ndt::make_ndarrayarg();
-    result.flag_as_immutable();
-    return result;
+  intptr_t one = 1;
+  nd::array result = nd::typed_empty(1, &one, ndt::make_strided_of_type());
+  unchecked_strided_dim_get_rw<ndt::type>(result, 0) = ndt::make_ndarrayarg();
+  result.flag_as_immutable();
+  return result;
 }
 
 cstruct_type::cstruct_type(int, int)
@@ -352,7 +354,7 @@ void cstruct_type::create_array_properties()
     ndt::type array_parameters_type(new cstruct_type(0, 0), false);
 
     m_array_properties.resize(m_field_count);
-    for (size_t i = 0, i_end = m_field_count; i != i_end; ++i) {
+    for (intptr_t i = 0, i_end = m_field_count; i != i_end; ++i) {
         // TODO: Transform the name into a valid Python symbol?
         m_array_properties[i].first = get_field_name(i);
         m_array_properties[i].second.set(array_parameters_type, &property_get_array_field, (void *)i);

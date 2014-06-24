@@ -20,7 +20,7 @@ using namespace dynd;
 
 TEST(CategoricalDType, Create) {
     const char *a_vals[] = {"foo", "bar", "baz"};
-    nd::array a = nd::make_strided_array(3, ndt::make_fixedstring(3, string_encoding_ascii));
+    nd::array a = nd::empty(3, ndt::make_fixedstring(3, string_encoding_ascii));
     a.vals() = a_vals;
 
     ndt::type d;
@@ -64,7 +64,7 @@ TEST(CategoricalDType, Create) {
 
 TEST(CategoricalDType, Convert) {
     const char *a_vals[] = {"foo", "bar", "baz"};
-    nd::array a = nd::make_strided_array(3, ndt::make_fixedstring(3, string_encoding_ascii));
+    nd::array a = nd::empty(3, ndt::make_fixedstring(3, string_encoding_ascii));
     a.vals() = a_vals;
 
     ndt::type cd = ndt::make_categorical(a);
@@ -83,11 +83,11 @@ TEST(CategoricalDType, Convert) {
 
 TEST(CategoricalDType, Compare) {
     const char *a_vals[] = {"foo", "bar", "baz"};
-    nd::array a = nd::make_strided_array(3, ndt::make_fixedstring(3, string_encoding_ascii));
+    nd::array a = nd::empty(3, ndt::make_fixedstring(3, string_encoding_ascii));
     a.vals() = a_vals;
 
     const char *b_vals[] = {"foo", "bar"};
-    nd::array b = nd::make_strided_array(2, ndt::make_fixedstring(3, string_encoding_ascii));
+    nd::array b = nd::empty(2, ndt::make_fixedstring(3, string_encoding_ascii));
     b.vals() = b_vals;
 
     ndt::type da = ndt::make_categorical(a);
@@ -98,7 +98,7 @@ TEST(CategoricalDType, Compare) {
     EXPECT_EQ(da, da2);
     EXPECT_NE(da, db);
 
-    nd::array i = nd::make_strided_array(3, ndt::make_type<int32_t>());
+    nd::array i = nd::empty(3, ndt::make_type<int32_t>());
     i(0).vals() = 0;
     i(1).vals() = 10;
     i(2).vals() = 100;
@@ -109,7 +109,7 @@ TEST(CategoricalDType, Compare) {
 
 TEST(CategoricalDType, Unique) {
     const char *a_vals[] = {"foo", "bar", "foo"};
-    nd::array a = nd::make_strided_array(3, ndt::make_fixedstring(3, string_encoding_ascii));
+    nd::array a = nd::empty(3, ndt::make_fixedstring(3, string_encoding_ascii));
     a.vals() = a_vals;
 
     EXPECT_THROW(ndt::make_categorical(a), std::runtime_error);
@@ -122,11 +122,11 @@ TEST(CategoricalDType, Unique) {
 
 TEST(CategoricalDType, FactorFixedString) {
     const char *string_cats_vals[] = {"bar", "foo"};
-    nd::array string_cats = nd::make_strided_array(2, ndt::make_fixedstring(3, string_encoding_ascii));
+    nd::array string_cats = nd::empty(2, ndt::make_fixedstring(3, string_encoding_ascii));
     string_cats.vals() = string_cats_vals;
 
     const char *a_vals[] = {"foo", "bar", "foo"};
-    nd::array a = nd::make_strided_array(3, ndt::make_fixedstring(3, string_encoding_ascii));
+    nd::array a = nd::empty(3, ndt::make_fixedstring(3, string_encoding_ascii));
     a.vals() = a_vals;
 
     ndt::type da = ndt::factor_categorical(a);
@@ -152,11 +152,11 @@ TEST(CategoricalDType, FactorStringLonger) {
 
 TEST(CategoricalDType, FactorInt) {
     int int_cats_vals[] = {0, 10};
-    nd::array int_cats = nd::make_strided_array(2, ndt::make_type<int32_t>());
+    nd::array int_cats = nd::empty(2, ndt::make_type<int32_t>());
     int_cats.vals() = int_cats_vals;
 
     int i_vals[] = {10, 10, 0};
-    nd::array i = nd::make_strided_array(3, ndt::make_type<int32_t>());
+    nd::array i = nd::empty(3, ndt::make_type<int32_t>());
     i.vals() = i_vals;
 
     ndt::type di = ndt::factor_categorical(i);
@@ -165,7 +165,7 @@ TEST(CategoricalDType, FactorInt) {
 
 TEST(CategoricalDType, Values) {
     const char *a_vals[] = {"foo", "bar", "baz"};
-    nd::array a = nd::make_strided_array(3, ndt::make_fixedstring(3, string_encoding_ascii));
+    nd::array a = nd::empty(3, ndt::make_fixedstring(3, string_encoding_ascii));
     a.vals() = a_vals;
 
     ndt::type dt = ndt::make_categorical(a);
@@ -206,12 +206,12 @@ TEST(CategoricalDType, ValuesLonger) {
 
 TEST(CategoricalDType, AssignFixedString) {
     const char *cat_vals[] = {"foo", "bar", "baz"};
-    nd::array cat = nd::make_strided_array(3, ndt::make_fixedstring(3, string_encoding_ascii));
+    nd::array cat = nd::empty(3, ndt::make_fixedstring(3, string_encoding_ascii));
     cat.vals() = cat_vals;
 
     ndt::type dt = ndt::make_categorical(cat);
 
-    nd::array a = nd::make_strided_array(3, dt);
+    nd::array a = nd::empty(3, dt);
     a.val_assign(cat);
     EXPECT_EQ("foo", a(0).as<string>());
     EXPECT_EQ("bar", a(1).as<string>());
@@ -222,7 +222,7 @@ TEST(CategoricalDType, AssignFixedString) {
     cat(0).vals() = "zzz";
     EXPECT_THROW(a(0).vals() = cat(0), std::runtime_error);
 
-    nd::array tmp = nd::make_strided_array(3, cat.get_type().at(0));
+    nd::array tmp = nd::empty(3, cat.get_type().at(0));
     tmp.val_assign(a);
     EXPECT_EQ("baz", tmp(0).as<string>());
     EXPECT_EQ("bar", tmp(1).as<string>());
@@ -239,7 +239,7 @@ TEST(CategoricalDType, AssignInt) {
 
     ndt::type dt = ndt::make_categorical(cat);
 
-    nd::array a = nd::make_strided_array(3, dt);
+    nd::array a = nd::empty(3, dt);
     a.val_assign(cat);
     EXPECT_EQ(10, a(0).as<int32_t>());
     EXPECT_EQ(100, a(1).as<int32_t>());
@@ -251,7 +251,7 @@ TEST(CategoricalDType, AssignInt) {
     //a(0).vals() = string("bar");
     //cout << a << endl;
 
-    nd::array tmp = nd::make_strided_array(3, cat.get_type().at(0));
+    nd::array tmp = nd::empty(3, cat.get_type().at(0));
     tmp.val_assign(a);
     EXPECT_EQ(1000, tmp(0).as<int32_t>());
     EXPECT_EQ(100, tmp(1).as<int32_t>());
@@ -263,12 +263,12 @@ TEST(CategoricalDType, AssignInt) {
 
 TEST(CategoricalDType, AssignRange) {
     const char *cat_vals[] = {"foo", "bar", "baz"};
-    nd::array cat = nd::make_strided_array(3, ndt::make_fixedstring(3, string_encoding_ascii));
+    nd::array cat = nd::empty(3, ndt::make_fixedstring(3, string_encoding_ascii));
     cat.vals() = cat_vals;
 
     ndt::type dt = ndt::make_categorical(cat);
 
-    nd::array a = nd::make_strided_array(9, dt);
+    nd::array a = nd::empty(9, dt);
     nd::array b = a(0 <= irange() < 3);
     b.val_assign(cat);
     nd::array c = a(3 <= irange() < 6 );

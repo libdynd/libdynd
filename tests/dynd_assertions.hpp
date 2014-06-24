@@ -110,8 +110,7 @@ CompareDyNDArrayToJSON(const char *expr1, const char *expr2,
     using namespace dynd;
     dimvector shape(b.get_ndim());
     b.get_shape(shape.get());
-    nd::array a(
-        make_array_memory_block(b.get_type(), b.get_ndim(), shape.get()));
+    nd::array a(nd::typed_empty(b.get_ndim(), shape.get(), b.get_type()));
     parse_json(a, json);
     return CompareDyNDArrays(expr1, expr2, a, b);
 }

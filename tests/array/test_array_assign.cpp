@@ -318,7 +318,7 @@ TYPED_TEST_P(ArrayAssign, ScalarAssignment_Complex_Float64) {
 }
 
 TYPED_TEST_P(ArrayAssign, BroadcastAssign) {
-    nd::array a = nd::make_strided_array(2, 3, 4, TestFixture::First::MakeType(ndt::make_type<float>()));
+    nd::array a = nd::empty(2, 3, 4, TestFixture::First::MakeType(ndt::make_type<float>()));
     int v0[4] = {3,4,5,6};
     nd::array b = TestFixture::Second::To(v0);
 
@@ -533,7 +533,7 @@ TEST(ArrayAssign, ChainedCastingReadWrite) {
 }
 
 TEST(ArrayAssign, ZeroSizedAssign) {
-    nd::array a = nd::empty(0, "strided * float64"), b = nd::empty(0, "strided * float32");
+    nd::array a = nd::empty(0, "float64"), b = nd::empty(0, "float32");
     EXPECT_EQ(1u, a.get_shape().size());
     EXPECT_EQ(0, a.get_shape()[0]);
     // Should be able to assign zero-sized array to zero-sized array
@@ -545,7 +545,7 @@ TEST(ArrayAssign, ZeroSizedAssign) {
     EXPECT_EQ(0, a.get_dim_size());
     // With a struct
     a = nd::empty("var * {a:int32, b:string}");
-    b = nd::empty(0, "strided * {a:int32, b:string}");
+    b = nd::empty(0, "{a:int32, b:string}");
     a.vals() = b;
 }
 

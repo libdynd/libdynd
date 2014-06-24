@@ -15,6 +15,7 @@
 #include <dynd/types/cfixed_dim_type.hpp>
 #include <dynd/kernels/assignment_kernels.hpp>
 #include <dynd/json_parser.hpp>
+#include <dynd/func/callable.hpp>
 
 using namespace std;
 using namespace dynd;
@@ -34,7 +35,7 @@ TEST(VarArrayDType, Shape) {
     ndt::type darr3 = ndt::make_strided_dim(darr2);
 
     intptr_t shape[3] = {3, -1, 2};
-    nd::array a = nd::make_strided_array(dfloat, 3, shape);
+    nd::array a = nd::dtyped_empty(3, shape, dfloat);
     EXPECT_EQ(darr3, a.get_type());
     EXPECT_EQ(3u, a.get_shape().size());
     EXPECT_EQ(3, a.get_shape()[0]);
@@ -389,7 +390,7 @@ TEST(VarArrayDType, AssignVarStridedKernel) {
     k.reset();
 
     // Assignment initialized var array -> strided array
-    a = nd::make_strided_array(3, ndt::make_type<int>());
+    a = nd::empty<int[3]>();
     a.vals() = 0;
     b = parse_json("var * int32", "[3, 5, 7]");
     EXPECT_EQ(strided_dim_type_id, a.get_type().get_type_id());
@@ -404,7 +405,7 @@ TEST(VarArrayDType, AssignVarStridedKernel) {
     k.reset();
 
     // Error assignment initialized var array -> strided array
-    a = nd::make_strided_array(3, ndt::make_type<int>());
+    a = nd::empty<int[3]>();
     a.vals() = 0;
     b = parse_json("var * int32", "[3, 5, 7, 9]");
     EXPECT_EQ(strided_dim_type_id, a.get_type().get_type_id());
@@ -418,7 +419,7 @@ TEST(VarArrayDType, AssignVarStridedKernel) {
     k.reset();
 
     // Error assignment uninitialized var array -> strided array
-    a = nd::make_strided_array(3, ndt::make_type<int>());
+    a = nd::empty<int[3]>();
     a.vals() = 0;
     b = nd::empty(ndt::make_var_dim(ndt::make_type<int>()));
     EXPECT_EQ(strided_dim_type_id, a.get_type().get_type_id());

@@ -15,6 +15,7 @@
 #include <dynd/exceptions.hpp>
 #include <dynd/array.hpp>
 #include <dynd/kernels/assignment_kernels.hpp>
+#include <dynd/func/callable.hpp>
 
 using namespace std;
 using namespace dynd;
@@ -107,7 +108,7 @@ TEST(StridedArrayDType, AssignKernel) {
     k.reset();
 
     // Assignment strided array -> strided array
-    a = nd::make_strided_array(3, ndt::make_type<float>());
+    a = nd::empty<float[3]>();
     a.vals() = 0;
     b = vals_int;
     EXPECT_EQ(strided_dim_type_id, a.get_type().get_type_id());

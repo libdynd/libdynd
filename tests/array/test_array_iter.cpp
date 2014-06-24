@@ -22,10 +22,10 @@ TEST(ArrayNeighborhoodIter, Simple) {
 
     int vals[2][3] = {{0, 1, 2}, {3, 4, 5}};
 
-    nd::array arg = nd::empty(2, 3, ndt::make_strided_dim(ndt::make_strided_dim(ndt::make_type<int>())));
+    nd::array arg = nd::empty<int[2][3]>();
     arg.vals() = vals;
 
-    nd::array res = nd::empty(2, 3, ndt::make_strided_dim(ndt::make_strided_dim(ndt::make_type<int>())));
+    nd::array res = nd::empty<int[2][3]>();
     res.vals() = 0;
 
     array_neighborhood_iter<1, 1> iter(res, arg, neighborhood_shape, neighborhood_offset);
@@ -53,10 +53,10 @@ TEST(ArrayNeighborhoodIter, Offset) {
 
     int vals[2][3] = {{0, 1, 2}, {3, 4, 5}};
 
-    nd::array arg = nd::empty(2, 3, ndt::make_strided_dim(ndt::make_strided_dim(ndt::make_type<int>())));
+    nd::array arg = nd::empty<int[2][3]>();
     arg.vals() = vals;
 
-    nd::array res = nd::empty(2, 3, ndt::make_strided_dim(ndt::make_strided_dim(ndt::make_type<int>())));
+    nd::array res = nd::empty<int[2][3]>();
     res.vals() = 0;
 
     array_neighborhood_iter<1, 1> iter(res, arg, neighborhood_shape, neighborhood_offset);

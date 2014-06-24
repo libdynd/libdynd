@@ -17,6 +17,7 @@
 #include <dynd/types/convert_type.hpp>
 #include <dynd/types/struct_type.hpp>
 #include <dynd/types/cstruct_type.hpp>
+#include <dynd/func/callable.hpp>
 
 using namespace std;
 using namespace dynd;
@@ -59,7 +60,7 @@ TEST(GroupByDType, BasicDeduceGroups) {
 
 TEST(GroupByDType, MediumDeduceGroups) {
     nd::array data = nd::range(100);
-    nd::array by = nd::make_strided_array(100, ndt::make_type<int>());
+    nd::array by = nd::empty<int[100]>();
     // Since at this point dynd doesn't have a very sophisticated
     // calculation mechanism, construct by as a series of runs
     by(0 <= irange() < 10).vals() = nd::range(10);
@@ -99,7 +100,7 @@ TEST(GroupByDType, Struct) {
     // Create a simple structured array
     ndt::type d = ndt::make_cstruct(ndt::make_string(), "name", ndt::make_type<float>(), "height",
                     ndt::make_fixedstring(1, string_encoding_ascii), "gender");
-    nd::array a = nd::make_strided_array(5, d);
+    nd::array a = nd::empty(5, d);
     const char *name_vals[] = {"Paul", "Jennifer", "Frank", "Louise", "Anne"};
     float height_vals[] = {171.5f, 156.25f, 177.0f, 164.75f, 170.5f};
     const char *gender_vals[] = {"M", "F", "M", "F", "F"};
@@ -135,7 +136,7 @@ TEST(GroupByDType, StructSubset) {
     ndt::type d = ndt::make_cstruct(ndt::make_string(), "lastname",
                     ndt::make_string(), "firstname",
                     ndt::make_fixedstring(1, string_encoding_ascii), "gender");
-    nd::array a = nd::make_strided_array(7, d);
+    nd::array a = nd::empty(7, d);
     const char *lastname_vals[] = {"Wiebe", "Friesen", "Klippenstein", "Wiebe", "Friesen",
                     "Friesen", "Friesen"};
     const char *firstname_vals[] = {"Paul", "Jennifer", "Frank", "Louise", "Jake",
@@ -212,7 +213,7 @@ TEST(GroupByDType, StructUnsortedCats) {
     // Create a simple structured array
     ndt::type d = ndt::make_cstruct(ndt::make_string(), "name", ndt::make_type<float>(), "height",
                     ndt::make_fixedstring(1, string_encoding_ascii), "gender");
-    nd::array a = nd::make_strided_array(5, d);
+    nd::array a = nd::empty(5, d);
     const char *name_vals[] = {"Paul", "Jennifer", "Frank", "Louise", "Anne"};
     float height_vals[] = {171.5f, 156.25f, 177.0f, 164.75f, 170.5f};
     const char *gender_vals[] = {"M", "F", "M", "F", "F"};

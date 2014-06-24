@@ -61,8 +61,9 @@ make_builtin_scalar_array(const T& value, uint64_t flags)
     return result;
 }
 
-nd::array nd::make_strided_array(const ndt::type& dtp, intptr_t ndim, const intptr_t *shape,
-                int64_t access_flags, const int *axis_perm)
+nd::array nd::make_strided_array(const ndt::type &dtp, intptr_t ndim,
+                                 const intptr_t *shape, int64_t access_flags,
+                                 const int *axis_perm)
 {
     // Create the type of the result
     bool any_variable_dims = false;
@@ -157,8 +158,8 @@ nd::array nd::make_strided_array_from_data(const ndt::type& uniform_tp, intptr_t
     ndt::type array_type = ndt::make_strided_dim(uniform_tp, ndim);
 
     // Allocate the array arrmeta and data in one memory block
-    memory_block_ptr result = make_array_memory_block(
-                    array_type.get_arrmeta_size());
+    memory_block_ptr result =
+        make_array_memory_block(array_type.get_arrmeta_size());
 
     // Fill in the preamble arrmeta
     array_preamble *ndo = reinterpret_cast<array_preamble *>(result.get());
@@ -200,7 +201,8 @@ nd::array nd::make_pod_array(const ndt::type& pod_dt, const void *data)
 
     // Allocate the array arrmeta and data in one memory block
     char *data_ptr = NULL;
-    memory_block_ptr result = make_array_memory_block(0, size, pod_dt.get_data_alignment(), &data_ptr);
+    memory_block_ptr result = make_array_memory_block(
+        0, size, pod_dt.get_data_alignment(), &data_ptr);
 
     // Fill in the preamble arrmeta
     array_preamble *ndo = reinterpret_cast<array_preamble *>(result.get());
@@ -223,8 +225,10 @@ nd::array nd::make_bytes_array(const char *data, size_t len, size_t alignment)
 {
     char *data_ptr = NULL, *bytes_data_ptr;
     ndt::type dt = ndt::make_bytes(alignment);
-    nd::array result(make_array_memory_block(dt.extended()->get_arrmeta_size(),
-                        dt.get_data_size() + len + alignment - 1, dt.get_data_alignment(), &data_ptr));
+    nd::array result(
+        make_array_memory_block(dt.extended()->get_arrmeta_size(),
+                                dt.get_data_size() + len + alignment - 1,
+                                dt.get_data_alignment(), &data_ptr));
     // Set the string extents
     bytes_data_ptr = inc_to_alignment(data_ptr + dt.get_data_size(), alignment);
     ((char **)data_ptr)[0] = bytes_data_ptr;
@@ -249,8 +253,9 @@ nd::array nd::make_string_array(const char *str, size_t len,
 {
     char *data_ptr = NULL, *string_ptr;
     ndt::type dt = ndt::make_string(encoding);
-    nd::array result(make_array_memory_block(dt.extended()->get_arrmeta_size(),
-                        dt.get_data_size() + len, dt.get_data_alignment(), &data_ptr));
+    nd::array result(make_array_memory_block(
+        dt.extended()->get_arrmeta_size(), dt.get_data_size() + len,
+        dt.get_data_alignment(), &data_ptr));
     // Set the string extents
     string_ptr = data_ptr + dt.get_data_size();
     ((char **)data_ptr)[0] = string_ptr;
@@ -280,10 +285,10 @@ nd::array nd::make_strided_string_array(const char **cstr_array, size_t array_si
     string_type_data *string_arr_ptr;
     ndt::type stp = ndt::make_string(string_encoding_utf_8);
     ndt::type tp = ndt::make_strided_dim(stp);
-    nd::array result(
-        make_array_memory_block(tp.extended()->get_arrmeta_size(),
-                                array_size * stp.get_data_size() + total_string_length,
-                                tp.get_data_alignment(), &data_ptr));
+    nd::array result(make_array_memory_block(
+        tp.extended()->get_arrmeta_size(),
+        array_size * stp.get_data_size() + total_string_length,
+        tp.get_data_alignment(), &data_ptr));
     // Set the array arrmeta
     array_preamble *ndo = result.get_ndo();
     ndo->m_type = tp.release();
@@ -320,10 +325,10 @@ nd::array nd::make_strided_string_array(const std::string **str_array, size_t ar
     string_type_data *string_arr_ptr;
     ndt::type stp = ndt::make_string(string_encoding_utf_8);
     ndt::type tp = ndt::make_strided_dim(stp);
-    nd::array result(
-        make_array_memory_block(tp.extended()->get_arrmeta_size(),
-                                array_size * stp.get_data_size() + total_string_length,
-                                tp.get_data_alignment(), &data_ptr));
+    nd::array result(make_array_memory_block(
+        tp.extended()->get_arrmeta_size(),
+        array_size * stp.get_data_size() + total_string_length,
+        tp.get_data_alignment(), &data_ptr));
     // Set the array arrmeta
     array_preamble *ndo = result.get_ndo();
     ndo->m_type = tp.release();
@@ -482,7 +487,7 @@ nd::array::array(const char *str, size_t size)
 }
 nd::array::array(const ndt::type& tp)
 {
-    array temp(make_array_memory_block(ndt::make_type(), 0, NULL));
+    array temp(nd::typed_empty(0, NULL, ndt::make_type()));
     temp.swap(*this);
     ndt::type(tp).swap(reinterpret_cast<type_type_data *>(get_ndo()->m_data_pointer)->tp);
     get_ndo()->m_flags = nd::default_access_flags;
@@ -617,9 +622,8 @@ nd::array nd::array_rw(const char *str, size_t size)
 }
 nd::array nd::array_rw(const ndt::type& tp)
 {
-    array temp = array(make_array_memory_block(ndt::make_type(), 0, NULL));
+  array temp = array(nd::typed_empty(0, NULL, ndt::make_type()));
     ndt::type(tp).swap(reinterpret_cast<type_type_data *>(temp.get_ndo()->m_data_pointer)->tp);
-    temp.get_ndo()->m_flags = nd::readwrite_access_flags;
     return temp;
 }
 
@@ -917,7 +921,7 @@ nd::array nd::array::eval(const eval::eval_context *ectx) const
         size_t ndim = current_tp.get_ndim();
         dimvector shape(ndim);
         get_shape(shape.get());
-        array result(make_array_memory_block(dt, ndim, shape.get()));
+        array result(nd::typed_empty(ndim, shape.get(), dt));
         if (dt.get_type_id() == strided_dim_type_id) {
             // Reorder strides of output strided dimensions in a KEEPORDER fashion
             static_cast<const strided_dim_type *>(dt.extended())
@@ -941,7 +945,7 @@ nd::array nd::array::eval_immutable(const eval::eval_context *ectx) const
         size_t ndim = current_tp.get_ndim();
         dimvector shape(ndim);
         get_shape(shape.get());
-        array result(make_array_memory_block(dt, ndim, shape.get()));
+        array result(nd::typed_empty(ndim, shape.get(), dt));
         if (dt.get_type_id() == strided_dim_type_id) {
             // Reorder strides of output strided dimensions in a KEEPORDER fashion
             static_cast<const strided_dim_type *>(
@@ -961,7 +965,7 @@ nd::array nd::array::eval_copy(uint32_t access_flags, const eval::eval_context *
     size_t ndim = current_tp.get_ndim();
     dimvector shape(ndim);
     get_shape(shape.get());
-    array result(make_array_memory_block(dt, ndim, shape.get()));
+    array result(nd::typed_empty(ndim, shape.get(), dt));
     if (dt.get_type_id() == strided_dim_type_id) {
         // Reorder strides of output strided dimensions in a KEEPORDER fashion
         static_cast<const strided_dim_type *>(
@@ -1494,7 +1498,7 @@ nd::array nd::eval_raw_copy(const ndt::type& dt, const char *arrmeta, const char
     if (ndim > 0) {
         dimvector shape(ndim);
         dt.extended()->get_shape(ndim, 0, shape.get(), arrmeta, data);
-        result.set(make_array_memory_block(cdt, ndim, shape.get()));
+        result = nd::typed_empty(ndim, shape.get(), cdt);
         // Reorder strides of output strided dimensions in a KEEPORDER fashion
         if (dt.get_type_id() == strided_dim_type_id) {
             static_cast<const strided_dim_type *>(cdt.extended())
@@ -1502,7 +1506,7 @@ nd::array nd::eval_raw_copy(const ndt::type& dt, const char *arrmeta, const char
                                                       arrmeta);
         }
     } else {
-        result.set(make_array_memory_block(cdt, 0, NULL));
+        result = nd::typed_empty(0, NULL, cdt);
     }
 
     typed_data_assign(cdt, result.get_arrmeta(),
@@ -1512,26 +1516,65 @@ nd::array nd::eval_raw_copy(const ndt::type& dt, const char *arrmeta, const char
     return result;
 }
 
-nd::array nd::empty(const ndt::type& tp)
+nd::array nd::typed_empty(intptr_t ndim, const intptr_t *shape,
+                          const ndt::type &tp)
 {
-    return nd::array(make_array_memory_block(tp, 0, NULL));
-}
-
-nd::array nd::empty(intptr_t dim0, const ndt::type& tp)
-{
-    return nd::array(make_array_memory_block(tp, 1, &dim0));
-}
-
-nd::array nd::empty(intptr_t dim0, intptr_t dim1, const ndt::type& dt)
-{
-    intptr_t dims[2] = {dim0, dim1};
-    return nd::array(make_array_memory_block(dt, 2, dims));
-}
-
-nd::array nd::empty(intptr_t dim0, intptr_t dim1, intptr_t dim2, const ndt::type& dt)
-{
-    intptr_t dims[3] = {dim0, dim1, dim2};
-    return nd::array(make_array_memory_block(dt, 3, dims));
+  if (tp.is_builtin()) {
+    // This code path builds a builtin scalar type as directly as possible
+    if (ndim != 0) {
+      stringstream ss;
+      ss << "too many dimensions provided (" << ndim
+         << ") for creating dynd array of type " << tp;
+      throw invalid_argument(ss.str());
+    }
+    char *data_ptr = NULL;
+    intptr_t data_size =
+        static_cast<intptr_t>(dynd::detail::builtin_data_sizes
+                                  [reinterpret_cast<uintptr_t>(tp.extended())]);
+    intptr_t data_alignment =
+        static_cast<intptr_t>(dynd::detail::builtin_data_alignments
+                                  [reinterpret_cast<uintptr_t>(tp.extended())]);
+    memory_block_ptr result(
+        make_array_memory_block(0, data_size, data_alignment, &data_ptr));
+    array_preamble *preamble = reinterpret_cast<array_preamble *>(result.get());
+    // It's a builtin type id, so no incref
+    preamble->m_type = tp.extended();
+    preamble->m_data_pointer = data_ptr;
+    preamble->m_data_reference = NULL;
+    preamble->m_flags = nd::read_access_flag | nd::write_access_flag;
+    return nd::array(DYND_MOVE(result));
+  } else {
+    char *data_ptr = NULL;
+    size_t arrmeta_size = tp.extended()->get_arrmeta_size();
+    size_t data_size = tp.extended()->get_default_data_size(ndim, shape);
+    memory_block_ptr result;
+    const ndt::type &dtp = tp.get_dtype();
+    if (dtp.get_kind() != memory_kind) {
+      // Allocate memory the default way
+      result = make_array_memory_block(
+          arrmeta_size, data_size, tp.get_data_alignment(), &data_ptr);
+      if (tp.get_flags() & type_flag_zeroinit) {
+        memset(data_ptr, 0, data_size);
+      }
+    } else {
+      // Allocate memory based on the memory_kind type
+      result = make_array_memory_block(arrmeta_size);
+      static_cast<const base_memory_type *>(dtp.extended())
+          ->data_alloc(&data_ptr, data_size);
+      if (tp.get_flags() & type_flag_zeroinit) {
+        static_cast<const base_memory_type *>(dtp.extended())
+            ->data_zeroinit(data_ptr, data_size);
+      }
+    }
+    array_preamble *preamble = reinterpret_cast<array_preamble *>(result.get());
+    preamble->m_type = ndt::type(tp).release();
+    preamble->m_type->arrmeta_default_construct(
+        reinterpret_cast<char *>(preamble + 1), ndim, shape);
+    preamble->m_data_pointer = data_ptr;
+    preamble->m_data_reference = NULL;
+    preamble->m_flags = nd::read_access_flag | nd::write_access_flag;
+    return nd::array(DYND_MOVE(result));
+  }
 }
 
 nd::array nd::empty_like(const nd::array& rhs, const ndt::type& uniform_tp)

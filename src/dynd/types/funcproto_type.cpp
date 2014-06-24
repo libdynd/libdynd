@@ -6,6 +6,7 @@
 #include <dynd/types/funcproto_type.hpp>
 #include <dynd/types/strided_dim_type.hpp>
 #include <dynd/func/make_callable.hpp>
+#include <dynd/ensure_immutable_contig.hpp>
 
 using namespace std;
 using namespace dynd;
@@ -25,7 +26,7 @@ funcproto_type::funcproto_type(const nd::array &param_types,
     m_param_count = reinterpret_cast<const strided_dim_type_arrmeta *>(
                         m_param_types.get_arrmeta())->size;
     m_members.flags |= return_type.get_flags() & type_flags_value_inherited;
-    for (size_t i = 0; i != m_param_count; ++i) {
+    for (intptr_t i = 0; i != m_param_count; ++i) {
         m_members.flags |=
             get_param_type(i).get_flags() & type_flags_value_inherited;
     }

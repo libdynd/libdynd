@@ -20,7 +20,7 @@ namespace dynd {
  */
 class base_tuple_type : public base_type {
 protected:
-    size_t m_field_count;
+    intptr_t m_field_count;
     // m_field_types always has type "strided * type",
     // and m_arrmeta_offsets always has type "strided * uintptr"
     nd::array m_field_types, m_arrmeta_offsets;
@@ -35,7 +35,7 @@ public:
     virtual ~base_tuple_type();
 
     /** The number of fields in the struct. This is the size of the other arrays. */
-    inline size_t get_field_count() const {
+    inline intptr_t get_field_count() const {
         return m_field_count;
     }
     /** The array of the field types */

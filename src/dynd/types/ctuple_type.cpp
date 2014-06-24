@@ -19,14 +19,13 @@ using namespace dynd;
 
 ctuple_type::ctuple_type(const nd::array &field_types)
     : base_tuple_type(ctuple_type_id, field_types, type_flag_none, false),
-      m_data_offsets(nd::empty(
-          m_field_count, ndt::make_strided_dim(ndt::make_type<uintptr_t>())))
+      m_data_offsets(nd::empty(m_field_count, ndt::make_type<uintptr_t>()))
 {
     uintptr_t *data_offsets = reinterpret_cast<uintptr_t *>(
         m_data_offsets.get_readwrite_originptr());
 
     size_t offs = 0;
-    for (size_t i = 0; i < m_field_count; ++i) {
+    for (intptr_t i = 0; i < m_field_count; ++i) {
         const ndt::type& field_tp = get_field_type(i);
         offs = inc_to_alignment(offs, field_tp.get_data_alignment());
         data_offsets[i] = offs;
@@ -52,7 +51,7 @@ void ctuple_type::print_type(std::ostream& o) const
 {
     // Use the tuple datashape syntax prefixed with a "c"
     o << "c(";
-    for (size_t i = 0, i_end = m_field_count; i != i_end; ++i) {
+    for (intptr_t i = 0, i_end = m_field_count; i != i_end; ++i) {
         if (i != 0) {
             o << ", ";
         }
@@ -65,12 +64,12 @@ void ctuple_type::transform_child_types(type_transform_fn_t transform_fn, void *
                 ndt::type& out_transformed_tp, bool& out_was_transformed) const
 {
     nd::array tmp_field_types(
-        nd::empty(m_field_count, ndt::make_strided_of_type()));
+        nd::typed_empty(1, &m_field_count, ndt::make_strided_of_type()));
     ndt::type *tmp_field_types_raw = reinterpret_cast<ndt::type *>(
         tmp_field_types.get_readwrite_originptr());
 
     bool was_transformed = false;
-    for (size_t i = 0, i_end = m_field_count; i != i_end; ++i) {
+    for (intptr_t i = 0, i_end = m_field_count; i != i_end; ++i) {
         transform_fn(get_field_type(i), extra, tmp_field_types_raw[i],
                      was_transformed);
     }
@@ -86,11 +85,11 @@ void ctuple_type::transform_child_types(type_transform_fn_t transform_fn, void *
 ndt::type ctuple_type::get_canonical_type() const
 {
     nd::array tmp_field_types(
-        nd::empty(m_field_count, ndt::make_strided_of_type()));
+        nd::typed_empty(1, &m_field_count, ndt::make_strided_of_type()));
     ndt::type *tmp_field_types_raw = reinterpret_cast<ndt::type *>(
         tmp_field_types.get_readwrite_originptr());
 
-    for (size_t i = 0, i_end = m_field_count; i != i_end; ++i) {
+    for (intptr_t i = 0, i_end = m_field_count; i != i_end; ++i) {
         tmp_field_types_raw[i] = get_field_type(i).get_canonical_type();
     }
 
@@ -206,7 +205,7 @@ void ctuple_type::arrmeta_debug_print(const char *arrmeta, std::ostream& o, cons
 {
     o << indent << "ctuple arrmeta\n";
     const uintptr_t *arrmeta_offsets = get_arrmeta_offsets_raw();
-    for (size_t i = 0; i < m_field_count; ++i) {
+    for (intptr_t i = 0; i < m_field_count; ++i) {
         const ndt::type& field_dt = get_field_type(i);
         if (!field_dt.is_builtin() && field_dt.extended()->get_arrmeta_size() > 0) {
             o << indent << " field " << i << " arrmeta:\n";

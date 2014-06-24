@@ -11,6 +11,8 @@
 #include <dynd/kernels/assignment_kernels.hpp>
 #include <dynd/shortvector.hpp>
 #include <dynd/shape_tools.hpp>
+#include <dynd/func/callable.hpp>
+#include <dynd/ensure_immutable_contig.hpp>
 
 using namespace std;
 using namespace dynd;
@@ -30,8 +32,8 @@ base_struct_type::base_struct_type(type_id_t type_id,
     }
 
     // Make sure that the number of names matches
-    size_t name_count = reinterpret_cast<const strided_dim_type_arrmeta *>(
-                            m_field_names.get_arrmeta())->size;
+    intptr_t name_count = reinterpret_cast<const strided_dim_type_arrmeta *>(
+                              m_field_names.get_arrmeta())->size;
     if (name_count != m_field_count) {
         stringstream ss;
         ss << "dynd struct type requires that the number of names, "
@@ -51,12 +53,12 @@ intptr_t base_struct_type::get_field_index(const char *field_name_begin,
     size_t size = field_name_end - field_name_begin;
     if (size > 0) {
         char firstchar = *field_name_begin;
-        size_t field_count = get_field_count();
+        intptr_t field_count = get_field_count();
         const char *fn_ptr = m_field_names.get_readonly_originptr();
         intptr_t fn_stride =
             reinterpret_cast<const strided_dim_type_arrmeta *>(
                 m_field_names.get_arrmeta())->stride;
-        for (size_t i = 0; i != field_count; ++i, fn_ptr += fn_stride) {
+        for (intptr_t i = 0; i != field_count; ++i, fn_ptr += fn_stride) {
             const string_type_data *fn = reinterpret_cast<const string_type_data *>(fn_ptr);
             const char *begin = fn->begin, *end = fn->end;
             if ((size_t)(end - begin) == size && *begin == firstchar) {
@@ -89,13 +91,13 @@ ndt::type base_struct_type::apply_linear_index(intptr_t nindices,
                 .apply_linear_index(nindices - 1, indices + 1, current_i + 1,
                                     root_tp, leading_dimension);
         } else if (nindices == 1 && start_index == 0 && index_stride == 1 &&
-                        (size_t)dimension_size == m_field_count) {
+                        dimension_size == m_field_count) {
             // This is a do-nothing index, keep the same type
             return ndt::type(this, true);
         } else {
             // Take the subset of the fields in-place
-            nd::array tmp_field_types(nd::empty(
-                dimension_size, ndt::make_strided_of_type()));
+            nd::array tmp_field_types(nd::typed_empty(
+                1, &dimension_size, ndt::make_strided_of_type()));
             ndt::type *tmp_field_types_raw = reinterpret_cast<ndt::type *>(
                 tmp_field_types.get_readwrite_originptr());
 

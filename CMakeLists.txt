@@ -455,6 +455,7 @@ set(libdynd_SRC
     include/dynd/diagnostics.hpp
     include/dynd/dim_iter.hpp
     include/dynd/dynd_math.hpp
+    include/dynd/ensure_immutable_contig.hpp
     include/dynd/type.hpp
     include/dynd/typed_data_assign.hpp
     include/dynd/type_promotion.hpp

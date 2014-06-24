@@ -80,7 +80,7 @@ TEST(DTypeDType, StridedArrayRefCount) {
     d = ndt::type("strided * 12 * int");
 
     // 1D Strided Array
-    a = nd::empty(10, ndt::make_strided_of_type());
+    a = nd::empty(10, ndt::make_type());
     EXPECT_EQ(1, d.extended()->get_use_count());
     a.vals() = d;
     EXPECT_EQ(11, d.extended()->get_use_count());
@@ -98,7 +98,7 @@ TEST(DTypeDType, StridedArrayRefCount) {
     EXPECT_EQ(1, d.extended()->get_use_count());
 
     // 2D Strided Array
-    a = nd::empty(3, 3, ndt::type("strided * strided * type"));
+    a = nd::empty(3, 3, "type");
     EXPECT_EQ(strided_dim_type_id, a.get_type().get_type_id());
     EXPECT_EQ(1, d.extended()->get_use_count());
     a.vals() = d;
@@ -196,7 +196,7 @@ TEST(DTypeDType, VarArrayRefCount) {
     EXPECT_EQ(1, d.extended()->get_use_count());
 
     // 2D Strided + Var Array
-    a = nd::empty(3, ndt::make_strided_dim(ndt::make_var_dim(ndt::make_type())));
+    a = nd::empty(3, ndt::make_var_dim(ndt::make_type()));
     a.vals_at(0) = nd::empty("2 * type");
     a.vals_at(1) = nd::empty("3 * type");
     a.vals_at(2) = nd::empty("4 * type");
@@ -248,7 +248,7 @@ TEST(DTypeDType, CStructRefCount) {
     EXPECT_EQ(1, d.extended()->get_use_count());
 
     // Array of CStruct Instance
-    a = nd::empty(10, "strided * {dt: type, more: {a: int32, b: type}, other: string}");
+    a = nd::empty(10, "{dt: type, more: {a: int32, b: type}, other: string}");
     EXPECT_EQ(struct_type_id, a(0).get_type().get_type_id());
     EXPECT_EQ(1, d.extended()->get_use_count());
     a.p("dt").vals() = d;
@@ -298,7 +298,7 @@ TEST(DTypeDType, StructRefCount) {
     EXPECT_EQ(1, d.extended()->get_use_count());
 
     // Array of Struct Instance
-    a = nd::empty(10, "strided * {dt: type, more: {a: int32, b: type}, other: string}")(irange(), 0 <= irange() < 2);
+    a = nd::empty(10, "{dt: type, more: {a: int32, b: type}, other: string}")(irange(), 0 <= irange() < 2);
     EXPECT_EQ(struct_type_id, a(0).get_type().get_type_id());
     EXPECT_EQ(1, d.extended()->get_use_count());
     a.p("dt").vals() = d;

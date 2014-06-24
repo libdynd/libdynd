@@ -43,7 +43,7 @@ void struct_type::print_type(std::ostream& o) const
 {
     // Use the record datashape syntax
     o << "{";
-    for (size_t i = 0, i_end = m_field_count; i != i_end; ++i) {
+    for (intptr_t i = 0, i_end = m_field_count; i != i_end; ++i) {
         if (i != 0) {
             o << ", ";
         }
@@ -62,12 +62,12 @@ void struct_type::transform_child_types(type_transform_fn_t transform_fn, void *
                 ndt::type& out_transformed_tp, bool& out_was_transformed) const
 {
     nd::array tmp_field_types(
-        nd::empty(m_field_count, ndt::make_strided_of_type()));
+        nd::typed_empty(1, &m_field_count, ndt::make_strided_of_type()));
     ndt::type *tmp_field_types_raw = reinterpret_cast<ndt::type *>(
         tmp_field_types.get_readwrite_originptr());
 
     bool was_transformed = false;
-    for (size_t i = 0, i_end = m_field_count; i != i_end; ++i) {
+    for (intptr_t i = 0, i_end = m_field_count; i != i_end; ++i) {
         transform_fn(get_field_type(i), extra, tmp_field_types_raw[i],
                      was_transformed);
     }
@@ -83,11 +83,11 @@ void struct_type::transform_child_types(type_transform_fn_t transform_fn, void *
 ndt::type struct_type::get_canonical_type() const
 {
     nd::array tmp_field_types(
-        nd::empty(m_field_count, ndt::make_strided_of_type()));
+        nd::typed_empty(1, &m_field_count, ndt::make_strided_of_type()));
     ndt::type *tmp_field_types_raw = reinterpret_cast<ndt::type *>(
         tmp_field_types.get_readwrite_originptr());
 
-    for (size_t i = 0, i_end = m_field_count; i != i_end; ++i) {
+    for (intptr_t i = 0, i_end = m_field_count; i != i_end; ++i) {
         tmp_field_types_raw[i] = get_field_type(i).get_canonical_type();
     }
 
@@ -179,7 +179,7 @@ void struct_type::arrmeta_debug_print(const char *arrmeta, std::ostream &o,
     const size_t *offsets = reinterpret_cast<const size_t *>(arrmeta);
     o << indent << "struct arrmeta\n";
     o << indent << " field offsets: ";
-    for (size_t i = 0, i_end = m_field_count; i != i_end; ++i) {
+    for (intptr_t i = 0, i_end = m_field_count; i != i_end; ++i) {
         o << offsets[i];
         if (i != i_end - 1) {
             o << ", ";
@@ -187,7 +187,7 @@ void struct_type::arrmeta_debug_print(const char *arrmeta, std::ostream &o,
     }
     o << "\n";
     const uintptr_t *arrmeta_offsets = get_arrmeta_offsets_raw();
-    for (size_t i = 0; i < m_field_count; ++i) {
+    for (intptr_t i = 0; i < m_field_count; ++i) {
         const ndt::type& field_dt = get_field_type(i);
         if (!field_dt.is_builtin() &&
                 field_dt.extended()->get_arrmeta_size() > 0) {
@@ -259,7 +259,7 @@ void struct_type::create_array_properties()
         ndt::make_cstruct(ndt::make_ndarrayarg(), "self");
 
     m_array_properties.resize(m_field_count);
-    for (size_t i = 0, i_end = m_field_count; i != i_end; ++i) {
+    for (intptr_t i = 0, i_end = m_field_count; i != i_end; ++i) {
         // TODO: Transform the name into a valid Python symbol?
         m_array_properties[i].first = get_field_name(i);
         m_array_properties[i].second.set(array_parameters_type, &property_get_array_field, (void *)i);

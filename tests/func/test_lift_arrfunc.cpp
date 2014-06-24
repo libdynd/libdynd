@@ -50,7 +50,7 @@ TEST(LiftArrFunc, UnaryExpr_StridedDim) {
 
     // Test it on some data
     ckernel_builder ckb;
-    nd::array in = nd::empty(3, "strided * string[16]");
+    nd::array in = nd::empty(3, "string[16]");
     in(0).vals() = "172";
     in(1).vals() = "-139";
     in(2).vals() = "12345";
@@ -95,7 +95,8 @@ TEST(LiftArrFunc, UnaryExpr_StridedToVarDim) {
     ndt::type dst_tp("var * int32");
     ndt::type src_tp("strided * string[16]");
     ckernel_builder ckb;
-    nd::array in = nd::empty(5, src_tp);
+    intptr_t five = 5;
+    nd::array in = nd::typed_empty(1, &five, src_tp);
     nd::array out = nd::empty(dst_tp);
     in(0).vals() = "172";
     in(1).vals() = "-139";
@@ -128,8 +129,8 @@ TEST(LiftArrFunc, UnaryExpr_VarToVarDim) {
 
     // Test it on some data
     ckernel_builder ckb;
-    nd::array in = nd::empty(ndt::type("var * string[16]"));
-    nd::array out = nd::empty(ndt::type("var * int32"));
+    nd::array in = nd::empty("var * string[16]");
+    nd::array out = nd::empty("var * int32");
     const char *in_vals[] = {"172", "-139", "12345", "-1111", "284"};
     in.vals() = in_vals;
     const char *in_ptr = in.get_readonly_originptr();
@@ -155,7 +156,7 @@ TEST(LiftArrFunc, UnaryExpr_MultiDimVarToVarDim) {
     nd::arrfunc af = lift_arrfunc(af_base);
 
     // Test it on some data
-    nd::array in = nd::empty(ndt::type("3 * var * string[16]"));
+    nd::array in = nd::empty("3 * var * string[16]");
     const char *in_vals0[] = {"172", "-139", "12345", "-1111", "284"};
     const char *in_vals1[] = {"989767"};
     const char *in_vals2[] = {"1", "2", "4"};

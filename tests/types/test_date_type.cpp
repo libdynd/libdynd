@@ -326,7 +326,7 @@ TEST(DateType, StrFTimeOfConvert) {
 TEST(DateType, StrFTimeOfMultiDim) {
     const char *vals_0[] = {"1920-03-12", "2013-01-01"};
     const char *vals_1[] = {"2000-12-25"};
-    nd::array a = nd::make_strided_array(2, -1, ndt::make_date());
+    nd::array a = nd::empty(2, -1, ndt::make_date());
     a.vals_at(0) = vals_0;
     a.vals_at(1) = vals_1;
 

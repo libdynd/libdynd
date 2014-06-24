@@ -50,7 +50,7 @@ def make_special_vals(func_name, *args):
     def decl_asgn_ndarray(*args):
         size = len(args[0])
 
-        return 'dynd::nd::array vals = dynd::nd::make_strided_array({}, dynd::ndt::make_tuple({}));\n'.format(size,
+        return 'dynd::nd::array vals = dynd::nd::empty({}, dynd::ndt::make_tuple({}));\n'.format(size,
             ', '.join(make_type(vals) for vals in args))
 
     def asgn_vals(index, name):

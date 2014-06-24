@@ -78,13 +78,6 @@ memory_block_ptr make_array_memory_block(size_t arrmeta_size, size_t extra_size,
                                          char **out_extra_ptr);
 
 /**
- * Creates an nd::array memory block, and default-constructs it for the type
- * and specified shape.
- */
-memory_block_ptr make_array_memory_block(const ndt::type &dt, intptr_t ndim,
-                                         const intptr_t *shape);
-
-/**
  * Makes a shallow copy of the nd::array memory block. In the copy, only the
  * nd::array arrmeta is duplicated, all the references are the same. Any NULL
  * references are swapped to point at the original nd::array memory block, as they

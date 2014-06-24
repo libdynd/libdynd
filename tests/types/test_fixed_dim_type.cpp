@@ -190,7 +190,7 @@ TEST(FixedDimType, AssignFixedStridedKernel) {
     k.reset();
 
     // Assignment fixed array -> strided array
-    a = nd::make_strided_array(3, ndt::make_type<float>());
+    a = nd::empty<float[3]>();
     a.vals() = 0;
     b = parse_json("3 * int32", "[3, 5, 7]");
     EXPECT_EQ(strided_dim_type_id, a.get_type().get_type_id());
@@ -205,7 +205,7 @@ TEST(FixedDimType, AssignFixedStridedKernel) {
     k.reset();
 
     // Broadcasting assignment fixed array -> strided array
-    a = nd::make_strided_array(3, ndt::make_type<float>());
+    a = nd::empty<float[3]>();
     a.vals() = 0;
     b = parse_json("1 * int32", "[9]");
     EXPECT_EQ(strided_dim_type_id, a.get_type().get_type_id());
