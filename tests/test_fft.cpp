@@ -301,5 +301,5 @@ TYPED_TEST_P(FFT2D, KroneckerDelta) {
 
 REGISTER_TYPED_TEST_CASE_P(FFT2D, Inverse, Zeros, Ones, KroneckerDelta);
 //INSTANTIATE_TYPED_TEST_CASE_P(ComplexFloat, FFT2D, FixedDim2D<dynd_complex<float> >::Types);
-INSTANTIATE_TYPED_TEST_CASE_P(Double, FFT2D, FixedDim2D<double>::Types);
+//INSTANTIATE_TYPED_TEST_CASE_P(Double, FFT2D, FixedDim2D<double>::Types);
 INSTANTIATE_TYPED_TEST_CASE_P(ComplexDouble, FFT2D, FixedDim2D<dynd_complex<double> >::Types);
