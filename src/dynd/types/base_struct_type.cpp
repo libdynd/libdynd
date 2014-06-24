@@ -13,6 +13,7 @@
 #include <dynd/shape_tools.hpp>
 #include <dynd/func/callable.hpp>
 #include <dynd/ensure_immutable_contig.hpp>
+#include <dynd/func/callable.hpp>
 
 using namespace std;
 using namespace dynd;
