@@ -1251,51 +1251,41 @@ nd::array nd::array::adapt(const ndt::type& tp, const nd::string& adapt_op)
 }
 
 namespace {
-    struct replace_dim_type_extra {
-        intptr_t replace_ndim;
-    };
-
-    static void replace_dim_type(const ndt::type& tp, void *,
+    static void with_strided_dim_type(const ndt::type& tp, void *DYND_UNUSED(extra),
                 ndt::type& out_transformed_tp, bool& out_was_transformed)
     {
-        if (tp.get_ndim() > 0) {
-            const ndt::type &el_tp = tp.tcast<base_uniform_dim_type>()->get_element_type();
-            out_transformed_tp = ndt::make_strided_dim(el_tp);
+        type_id_t tp_id = tp.get_type_id();
+        if (tp.get_ndim() > 0 && (tp_id == fixed_dim_type_id || tp_id == cfixed_dim_type_id)) {
+            out_transformed_tp = ndt::make_strided_dim(tp.tcast<base_uniform_dim_type>()->get_element_type());
             out_was_transformed = true;
-        }
-        else {
+        } else {
             out_was_transformed = false;
         }
     }
-
 } // anonymous namespace
 
 nd::array nd::array::permute(intptr_t ndim, const intptr_t *axes)
 {
-    ndt::type tp = get_type();
-    if (!tp.extended()->is_strided()) {
-        throw std::runtime_error("not implemented");
-    }
-
-    char *old_arrmeta[ndim];
-    for (intptr_t i = 0; i < ndim; ++i) {
-        old_arrmeta[i] = get_arrmeta();
-        tp.get_type_at_dimension(old_arrmeta + i, i);
-    }
-
-    ndt::type replaced_tp;
+    ndt::type transformed_tp;
     bool was_transformed = false;
-    tp.extended()->transform_child_types(&replace_dim_type,
-            NULL, replaced_tp, was_transformed);
-    std::cout << "(DEBUG) replaced, " << replaced_tp << std::endl;
+    get_type().extended()->transform_child_types(&with_strided_dim_type,
+            NULL, transformed_tp, was_transformed);
 
-    nd::array res = make_array_clone_with_new_type(*this, get_type());
+    nd::array res = view(transformed_tp);
 
+    dimvector shape(ndim);
+    get_shape(shape.get());
+
+    dimvector strides(ndim);
+    get_strides(strides.get());
+
+    char *md = res.get_arrmeta();
     for (intptr_t i = 0; i < ndim; ++i) {
-        char *new_arrmeta = res.get_arrmeta();
+        strided_dim_type_arrmeta *smd = reinterpret_cast<strided_dim_type_arrmeta *>(md);
+        smd->size = shape[axes[i]];
+        smd->stride = strides[axes[i]];
 
-        const base_uniform_dim_type *uad = tp.get_type_at_dimension(&new_arrmeta, i).tcast<base_uniform_dim_type>();
-        uad->arrmeta_copy_construct_onedim(new_arrmeta, old_arrmeta[axes[i]], NULL);
+        transformed_tp = transformed_tp.get_type_at_dimension(&md, 1);
     }
 
     return res;
@@ -1304,12 +1294,12 @@ nd::array nd::array::permute(intptr_t ndim, const intptr_t *axes)
 nd::array nd::array::transpose()
 {
     intptr_t ndim = get_ndim();
-    intptr_t axes[ndim];
+    dimvector axes(ndim);
     for (intptr_t i = 0; i < ndim; ++i) {
         axes[i] = ndim - i - 1;
     }
 
-    return permute(ndim, axes);
+    return permute(ndim, axes.get());
 }
 
 namespace {

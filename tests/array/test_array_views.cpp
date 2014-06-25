@@ -109,7 +109,6 @@ TEST(ArrayViews, ExpressionDType) {
     EXPECT_EQ(0, b(1, 2).as<int16_t>());
 }
 
-/*
 TEST(ArrayViews, Transpose) {
     static int vals[3][3] = {{0, 1, 2}, {3, 4, -4}, {-3, -2, -1}};
 
@@ -118,9 +117,9 @@ TEST(ArrayViews, Transpose) {
 
     nd::array b = a.transpose();
 
-//    std::cout << "(DEBUG) strided, " << a << std::endl;
-  //  std::cout << "(DEBUG) strided, " << b << std::endl;
-}*/
+    std::cout << "(DEBUG) strided, " << a << std::endl;
+    std::cout << "(DEBUG) strided, " << b << std::endl;
+}
 
 TEST(ArrayViews, TransposeCFixed) {
     static int vals[3][3] = {{0, 1, 2}, {3, 4, -4}, {-3, -2, -1}};
@@ -130,8 +129,11 @@ TEST(ArrayViews, TransposeCFixed) {
 
     nd::array b = a.transpose();
 
-//    std::cout << "(DEBUG) cfixed, " << a << std::endl;
-  //  std::cout << "(DEBUG) cfixed, " << b << std::endl;
+    std::cout << "(DEBUG) cfixed, " << a << std::endl;
+//    for (intptr_t i = 0; i < b.get_ndim(); ++i) {
+  //      std::cout << "(DEBUG) " << b.get_shape()[i] << std::endl;
+    //}
+    std::cout << "(DEBUG) cfixed, " << b << std::endl;
 
 //    std::cout << "(DEBUG) " << a.get_type().get_canonical_type() << std::endl;
 }
