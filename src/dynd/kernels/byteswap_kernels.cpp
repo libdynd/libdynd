@@ -131,7 +131,7 @@ namespace {
 } // anonymous namespace
 
 size_t dynd::make_byteswap_assignment_function(
-                ckernel_builder *out_ckb, size_t ckb_offset,
+                ckernel_builder *ckb, intptr_t ckb_offset,
                 intptr_t data_size, intptr_t data_alignment,
                 kernel_request_t kernreq)
 {
@@ -140,21 +140,21 @@ size_t dynd::make_byteswap_assignment_function(
     if (data_size == data_alignment) {
         switch (data_size) {
         case 2:
-            result = out_ckb->get_at<ckernel_prefix>(ckb_offset);
+            result = ckb->alloc_ck_leaf<ckernel_prefix>(ckb_offset);
             result->set_expr_function<aligned_fixed_size_byteswap<uint16_t> >(
                 kernreq);
-            return ckb_offset + sizeof(ckernel_prefix);
+            return ckb_offset;
         case 4:
-            result = out_ckb->get_at<ckernel_prefix>(ckb_offset);
+            result = ckb->alloc_ck_leaf<ckernel_prefix>(ckb_offset);
             result->set_expr_function<aligned_fixed_size_byteswap<uint32_t> >(
                 kernreq);
-            return ckb_offset + sizeof(ckernel_prefix);
+            return ckb_offset;
             break;
         case 8:
-            result = out_ckb->get_at<ckernel_prefix>(ckb_offset);
+            result = ckb->alloc_ck_leaf<ckernel_prefix>(ckb_offset);
             result->set_expr_function<aligned_fixed_size_byteswap<uint64_t> >(
                 kernreq);
-            return ckb_offset + sizeof(ckernel_prefix);
+            return ckb_offset;
             break;
         default:
             break;
@@ -162,13 +162,13 @@ size_t dynd::make_byteswap_assignment_function(
     }
 
     // Otherwise use the general case ckernel
-    byteswap_ck *self = byteswap_ck::create_leaf(out_ckb, ckb_offset, kernreq);
+    byteswap_ck *self = byteswap_ck::create_leaf(ckb, kernreq, ckb_offset);
     self->m_data_size = data_size;
-    return ckb_offset + sizeof(byteswap_ck);
+    return ckb_offset;
 }
 
 size_t dynd::make_pairwise_byteswap_assignment_function(
-                ckernel_builder *out_ckb, size_t ckb_offset,
+                ckernel_builder *ckb, intptr_t ckb_offset,
                 intptr_t data_size, intptr_t data_alignment,
                 kernel_request_t kernreq)
 {
@@ -177,23 +177,23 @@ size_t dynd::make_pairwise_byteswap_assignment_function(
     if (data_size == data_alignment) {
         switch (data_size) {
         case 4:
-            result = out_ckb->get_at<ckernel_prefix>(ckb_offset);
+            result = ckb->alloc_ck_leaf<ckernel_prefix>(ckb_offset);
             result->set_expr_function<
                 aligned_fixed_size_pairwise_byteswap_kernel<uint16_t> >(
                 kernreq);
-            return ckb_offset + sizeof(ckernel_prefix);
+            return ckb_offset;
         case 8:
-            result = out_ckb->get_at<ckernel_prefix>(ckb_offset);
+            result = ckb->alloc_ck_leaf<ckernel_prefix>(ckb_offset);
             result->set_expr_function<
                 aligned_fixed_size_pairwise_byteswap_kernel<uint32_t> >(
                 kernreq);
-            return ckb_offset + sizeof(ckernel_prefix);
+            return ckb_offset;
         case 16:
-            result = out_ckb->get_at<ckernel_prefix>(ckb_offset);
+            result = ckb->alloc_ck_leaf<ckernel_prefix>(ckb_offset);
             result->set_expr_function<
                 aligned_fixed_size_pairwise_byteswap_kernel<uint64_t> >(
                 kernreq);
-            return ckb_offset + sizeof(ckernel_prefix);
+            return ckb_offset;
         default:
             break;
         }
@@ -201,7 +201,7 @@ size_t dynd::make_pairwise_byteswap_assignment_function(
 
     // Otherwise use the general case ckernel
     pairwise_byteswap_ck *self =
-        pairwise_byteswap_ck::create_leaf(out_ckb, ckb_offset, kernreq);
+        pairwise_byteswap_ck::create_leaf(ckb, kernreq, ckb_offset);
     self->m_data_size = data_size;
-    return ckb_offset + sizeof(byteswap_ck);
+    return ckb_offset;
 }

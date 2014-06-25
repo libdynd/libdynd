@@ -147,7 +147,7 @@ bool property_type::operator==(const base_type& rhs) const
 }
 
 size_t property_type::make_operand_to_value_assignment_kernel(
-                ckernel_builder *out, size_t offset_out,
+                ckernel_builder *ckb, intptr_t ckb_offset,
                 const char *dst_arrmeta, const char *src_arrmeta,
                 kernel_request_t kernreq, const eval::eval_context *ectx) const
 {
@@ -156,13 +156,13 @@ size_t property_type::make_operand_to_value_assignment_kernel(
             const ndt::type& ovdt = m_operand_tp.value_type();
             if (!ovdt.is_builtin()) {
                 return ovdt.extended()->make_elwise_property_getter_kernel(
-                                out, offset_out,
+                                ckb, ckb_offset,
                                 dst_arrmeta,
                                 src_arrmeta, m_property_index,
                                 kernreq, ectx);
             } else {
                 return make_builtin_type_elwise_property_getter_kernel(
-                                out, offset_out,
+                                ckb, ckb_offset,
                                 ovdt.get_type_id(),
                                 dst_arrmeta,
                                 src_arrmeta, m_property_index,
@@ -178,13 +178,13 @@ size_t property_type::make_operand_to_value_assignment_kernel(
         if (m_readable) {
             if (!m_value_tp.is_builtin()) {
                 return m_value_tp.extended()->make_elwise_property_setter_kernel(
-                                out, offset_out,
+                                ckb, ckb_offset,
                                 dst_arrmeta, m_property_index,
                                 src_arrmeta,
                                 kernreq, ectx);
             } else {
                 return make_builtin_type_elwise_property_setter_kernel(
-                                out, offset_out,
+                                ckb, ckb_offset,
                                 m_value_tp.get_type_id(),
                                 dst_arrmeta, m_property_index,
                                 src_arrmeta,
@@ -200,7 +200,7 @@ size_t property_type::make_operand_to_value_assignment_kernel(
 }
 
 size_t property_type::make_value_to_operand_assignment_kernel(
-                ckernel_builder *out, size_t offset_out,
+                ckernel_builder *ckb, intptr_t ckb_offset,
                 const char *dst_arrmeta, const char *src_arrmeta,
                 kernel_request_t kernreq, const eval::eval_context *ectx) const
 {
@@ -209,13 +209,13 @@ size_t property_type::make_value_to_operand_assignment_kernel(
             const ndt::type& ovdt = m_operand_tp.value_type();
             if (!ovdt.is_builtin()) {
                 return ovdt.extended()->make_elwise_property_setter_kernel(
-                                out, offset_out,
+                                ckb, ckb_offset,
                                 dst_arrmeta, m_property_index,
                                 src_arrmeta,
                                 kernreq, ectx);
             } else {
                 return make_builtin_type_elwise_property_setter_kernel(
-                                out, offset_out,
+                                ckb, ckb_offset,
                                 ovdt.get_type_id(),
                                 dst_arrmeta, m_property_index,
                                 src_arrmeta,
@@ -231,13 +231,13 @@ size_t property_type::make_value_to_operand_assignment_kernel(
         if (m_writable) {
             if (!m_value_tp.is_builtin()) {
                 return m_value_tp.extended()->make_elwise_property_getter_kernel(
-                                out, offset_out,
+                                ckb, ckb_offset,
                                 dst_arrmeta,
                                 src_arrmeta, m_property_index,
                                 kernreq, ectx);
             } else {
                 return make_builtin_type_elwise_property_getter_kernel(
-                                out, offset_out,
+                                ckb, ckb_offset,
                                 m_value_tp.get_type_id(),
                                 dst_arrmeta,
                                 src_arrmeta, m_property_index,

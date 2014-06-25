@@ -86,7 +86,7 @@ class expr_kernel_generator;
  * types on to the handler to build the rest of the
  * kernel.
  */
-size_t make_expression_type_expr_kernel(ckernel_builder *out, size_t offset_out,
+size_t make_expression_type_expr_kernel(ckernel_builder *ckb, intptr_t ckb_offset,
                 const ndt::type& dst_tp, const char *dst_arrmeta,
                 size_t src_count, const ndt::type *src_dt, const char **src_arrmeta,
                 kernel_request_t kernreq, const eval::eval_context *ectx,

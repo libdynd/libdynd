@@ -192,9 +192,9 @@ instantiate_strided(const arrfunc_type_data *af_self, dynd::ckernel_builder *ckb
     typedef strided_rolling_ck self_type;
     rolling_arrfunc_data *data = *af_self->get_data_as<rolling_arrfunc_data *>();
 
-    self_type *self = self_type::create(ckb, ckb_offset, (kernel_request_t)kernreq);
+    intptr_t root_ckb_offset = ckb_offset;
+    self_type *self = self_type::create(ckb, kernreq, ckb_offset);
     const arrfunc_type_data *window_af = data->window_op.get();
-    intptr_t ckb_end = ckb_offset + sizeof(self_type);
     ndt::type dst_el_tp, src_el_tp;
     const char *dst_el_arrmeta, *src_el_arrmeta;
     if (!dst_tp.get_as_strided_dim(dst_arrmeta, self->m_dim_size,
@@ -224,13 +224,13 @@ instantiate_strided(const arrfunc_type_data *af_self, dynd::ckernel_builder *ckb
     }
     self->m_window_size = data->window_size;
     // Create the NA-filling child ckernel
-    ckb_end = kernels::make_constant_value_assignment_ckernel(
-        ckb, ckb_end, dst_el_tp, dst_el_arrmeta,
+    ckb_offset = kernels::make_constant_value_assignment_ckernel(
+        ckb, ckb_offset, dst_el_tp, dst_el_arrmeta,
         numeric_limits<double>::quiet_NaN(), kernel_request_strided, ectx);
     // Re-retrieve the self pointer, because it may be at a new memory location now
-    self = ckb->get_at<self_type>(ckb_offset);
+    self = ckb->get_at<self_type>(root_ckb_offset);
     // Create the window op child ckernel
-    self->m_window_op_offset = ckb_end;
+    self->m_window_op_offset = ckb_offset - root_ckb_offset;
     // We construct array arrmeta for the window op ckernel to use,
     // without actually creating an nd::array to hold it.
     arrmeta_holder(ndt::make_strided_dim(src_el_tp))
@@ -247,7 +247,7 @@ instantiate_strided(const arrfunc_type_data *af_self, dynd::ckernel_builder *ckb
 
     const char *src_winop_meta = self->m_src_winop_meta.get();
     return window_af->instantiate(
-        window_af, ckb, ckb_end, dst_el_tp, dst_el_arrmeta,
+        window_af, ckb, ckb_offset, dst_el_tp, dst_el_arrmeta,
         &self->m_src_winop_meta.get_type(), &src_winop_meta,
         kernel_request_strided, ectx);
 }

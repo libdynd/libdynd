@@ -55,7 +55,7 @@ namespace {
 } // anonymous namespace
 
 size_t dynd::make_fixedstring_assignment_kernel(
-                ckernel_builder *out_ckb, size_t ckb_offset,
+                ckernel_builder *ckb, intptr_t ckb_offset,
                 intptr_t dst_data_size, string_encoding_t dst_encoding,
                 intptr_t src_data_size, string_encoding_t src_encoding,
                 kernel_request_t kernreq,
@@ -63,13 +63,13 @@ size_t dynd::make_fixedstring_assignment_kernel(
 {
     typedef fixedstring_assign_ck self_type;
     assign_error_mode errmode = ectx->errmode;
-    self_type *self = self_type::create_leaf(out_ckb, ckb_offset, kernreq);
+    self_type *self = self_type::create_leaf(ckb, kernreq, ckb_offset);
     self->m_next_fn = get_next_unicode_codepoint_function(src_encoding, errmode);
     self->m_append_fn = get_append_unicode_codepoint_function(dst_encoding, errmode);
     self->m_dst_data_size = dst_data_size;
     self->m_src_data_size = src_data_size;
     self->m_overflow_check = (errmode != assign_error_nocheck);
-    return ckb_offset + sizeof(self_type);
+    return ckb_offset;
 }
 
 /////////////////////////////////////////
@@ -147,21 +147,21 @@ namespace {
 } // anonymous namespace
 
 size_t dynd::make_blockref_string_assignment_kernel(
-    ckernel_builder *out_ckb, size_t ckb_offset, const char *dst_arrmeta,
+    ckernel_builder *ckb, intptr_t ckb_offset, const char *dst_arrmeta,
     string_encoding_t dst_encoding, const char *src_arrmeta,
     string_encoding_t src_encoding, kernel_request_t kernreq,
     const eval::eval_context *ectx)
 {
     typedef blockref_string_assign_ck self_type;
     assign_error_mode errmode = ectx->errmode;
-    self_type *self = self_type::create_leaf(out_ckb, ckb_offset, kernreq);
+    self_type *self = self_type::create_leaf(ckb, kernreq, ckb_offset);
     self->m_dst_encoding = dst_encoding;
     self->m_src_encoding = src_encoding;
     self->m_next_fn = get_next_unicode_codepoint_function(src_encoding, errmode);
     self->m_append_fn = get_append_unicode_codepoint_function(dst_encoding, errmode);
     self->m_dst_arrmeta = reinterpret_cast<const string_type_arrmeta *>(dst_arrmeta);
     self->m_src_arrmeta = reinterpret_cast<const string_type_arrmeta *>(src_arrmeta);
-    return ckb_offset + sizeof(self_type);
+    return ckb_offset;
 }
 
 /////////////////////////////////////////
@@ -230,21 +230,21 @@ namespace {
 } // anonymous namespace
 
 size_t dynd::make_fixedstring_to_blockref_string_assignment_kernel(
-    ckernel_builder *out_ckb, size_t ckb_offset, const char *dst_arrmeta,
+    ckernel_builder *ckb, intptr_t ckb_offset, const char *dst_arrmeta,
     string_encoding_t dst_encoding, intptr_t src_element_size,
     string_encoding_t src_encoding, kernel_request_t kernreq,
     const eval::eval_context *ectx)
 {
     typedef fixedstring_to_blockref_string_assign_ck self_type;
     assign_error_mode errmode = ectx->errmode;
-    self_type *self = self_type::create_leaf(out_ckb, ckb_offset, kernreq);
+    self_type *self = self_type::create_leaf(ckb, kernreq, ckb_offset);
     self->m_dst_encoding = dst_encoding;
     self->m_src_encoding = src_encoding;
     self->m_src_element_size = src_element_size;
     self->m_next_fn = get_next_unicode_codepoint_function(src_encoding, errmode);
     self->m_append_fn = get_append_unicode_codepoint_function(dst_encoding, errmode);
     self->m_dst_arrmeta = reinterpret_cast<const string_type_arrmeta *>(dst_arrmeta);
-    return ckb_offset + sizeof(self_type);
+    return ckb_offset;
 }
 
 /////////////////////////////////////////
@@ -285,16 +285,16 @@ namespace {
 } // anonymous namespace
 
 size_t dynd::make_blockref_string_to_fixedstring_assignment_kernel(
-    ckernel_builder *out_ckb, size_t ckb_offset, intptr_t dst_data_size,
+    ckernel_builder *ckb, intptr_t ckb_offset, intptr_t dst_data_size,
     string_encoding_t dst_encoding, string_encoding_t src_encoding,
     kernel_request_t kernreq, const eval::eval_context *ectx)
 {
     typedef blockref_string_to_fixedstring_assign_ck self_type;
     assign_error_mode errmode = ectx->errmode;
-    self_type *self = self_type::create_leaf(out_ckb, ckb_offset, kernreq);
+    self_type *self = self_type::create_leaf(ckb, kernreq, ckb_offset);
     self->m_next_fn = get_next_unicode_codepoint_function(src_encoding, errmode);
     self->m_append_fn = get_append_unicode_codepoint_function(dst_encoding, errmode);
     self->m_dst_data_size = dst_data_size;
     self->m_overflow_check = (errmode != assign_error_nocheck);
-    return ckb_offset + sizeof(self_type);
+    return ckb_offset;
 }

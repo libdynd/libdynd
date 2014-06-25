@@ -170,26 +170,26 @@ bool cstruct_type::is_lossless_assignment(const ndt::type& dst_tp, const ndt::ty
 }
 
 size_t cstruct_type::make_assignment_kernel(
-    ckernel_builder *out_ckb, size_t ckb_offset, const ndt::type &dst_tp,
+    ckernel_builder *ckb, intptr_t ckb_offset, const ndt::type &dst_tp,
     const char *dst_arrmeta, const ndt::type &src_tp, const char *src_arrmeta,
     kernel_request_t kernreq, const eval::eval_context *ectx) const
 {
     if (this == dst_tp.extended()) {
         if (*this == *src_tp.extended()) {
             return make_struct_identical_assignment_kernel(
-                out_ckb, ckb_offset, dst_tp, dst_arrmeta, src_arrmeta, kernreq,
+                ckb, ckb_offset, dst_tp, dst_arrmeta, src_arrmeta, kernreq,
                 ectx);
         } else if (src_tp.get_kind() == struct_kind) {
-            return make_struct_assignment_kernel(out_ckb, ckb_offset, dst_tp,
+            return make_struct_assignment_kernel(ckb, ckb_offset, dst_tp,
                                                  dst_arrmeta, src_tp,
                                                  src_arrmeta, kernreq, ectx);
         } else if (src_tp.is_builtin()) {
             return make_broadcast_to_struct_assignment_kernel(
-                out_ckb, ckb_offset, dst_tp, dst_arrmeta, src_tp, src_arrmeta,
+                ckb, ckb_offset, dst_tp, dst_arrmeta, src_tp, src_arrmeta,
                 kernreq, ectx);
         } else {
             return src_tp.extended()->make_assignment_kernel(
-                out_ckb, ckb_offset, dst_tp, dst_arrmeta, src_tp, src_arrmeta,
+                ckb, ckb_offset, dst_tp, dst_arrmeta, src_tp, src_arrmeta,
                 kernreq, ectx);
         }
     }
@@ -200,18 +200,18 @@ size_t cstruct_type::make_assignment_kernel(
 }
 
 size_t cstruct_type::make_comparison_kernel(
-    ckernel_builder *out, size_t offset_out, const ndt::type &src0_tp,
+    ckernel_builder *ckb, intptr_t ckb_offset, const ndt::type &src0_tp,
     const char *src0_arrmeta, const ndt::type &src1_tp,
     const char *src1_arrmeta, comparison_type_t comptype,
     const eval::eval_context *ectx) const
 {
     if (this == src0_tp.extended()) {
         if (*this == *src1_tp.extended()) {
-            return make_struct_comparison_kernel(out, offset_out,
+            return make_struct_comparison_kernel(ckb, ckb_offset,
                             src0_tp, src0_arrmeta, src1_arrmeta,
                             comptype, ectx);
         } else if (src1_tp.get_kind() == struct_kind) {
-            return make_general_struct_comparison_kernel(out, offset_out,
+            return make_general_struct_comparison_kernel(ckb, ckb_offset,
                             src0_tp, src0_arrmeta,
                             src1_tp, src1_arrmeta,
                             comptype, ectx);

@@ -93,7 +93,7 @@ bool fixedbytes_type::operator==(const base_type& rhs) const
 }
 
 size_t fixedbytes_type::make_assignment_kernel(
-    ckernel_builder *out, size_t offset_out, const ndt::type &dst_tp,
+    ckernel_builder *ckb, intptr_t ckb_offset, const ndt::type &dst_tp,
     const char *dst_arrmeta, const ndt::type &src_tp, const char *src_arrmeta,
     kernel_request_t kernreq, const eval::eval_context *ectx) const
 {
@@ -104,13 +104,13 @@ size_t fixedbytes_type::make_assignment_kernel(
                 if (get_data_size() != src_fs->get_data_size()) {
                     throw runtime_error("cannot assign to a fixedbytes type of a different size");
                 }
-                return ::make_pod_typed_data_assignment_kernel(out, offset_out,
+                return ::make_pod_typed_data_assignment_kernel(ckb, ckb_offset,
                                 get_data_size(), std::min(get_data_alignment(), src_fs->get_data_alignment()),
                                 kernreq);
             }
             default: {
                 return src_tp.extended()->make_assignment_kernel(
-                    out, offset_out, dst_tp, dst_arrmeta, src_tp, src_arrmeta,
+                    ckb, ckb_offset, dst_tp, dst_arrmeta, src_tp, src_arrmeta,
                     kernreq, ectx);
             }
         }

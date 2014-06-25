@@ -71,7 +71,7 @@ namespace {
         }
 
         size_t make_expr_kernel(
-                    ckernel_builder *out, size_t offset_out,
+                    ckernel_builder *ckb, intptr_t ckb_offset,
                     const ndt::type& dst_tp, const char *dst_arrmeta,
                     size_t src_count, const ndt::type *src_tp, const char *const*src_arrmeta,
                     kernel_request_t kernreq, const eval::eval_context *ectx) const
@@ -88,14 +88,14 @@ namespace {
                 // call the elementwise dimension handler to handle one dimension
                 // or handle input/output buffering, giving 'this' as the next
                 // kernel generator to call
-                return make_elwise_dimension_expr_kernel(out, offset_out,
+                return make_elwise_dimension_expr_kernel(ckb, ckb_offset,
                                 dst_tp, dst_arrmeta,
                                 src_count, src_tp, src_arrmeta,
                                 kernreq, ectx,
                                 this);
             }
             // This is a leaf kernel, so no additional allocation is needed
-            extra_type *e = out->get_at<extra_type>(offset_out);
+            extra_type *e = ckb->alloc_ck_leaf<extra_type>(ckb_offset);
             switch (kernreq) {
                 case kernel_request_single:
                     e->base().set_function(m_op_pair.single);
@@ -110,7 +110,7 @@ namespace {
                 }
             }
             e->init(src_tp, src_arrmeta);
-            return offset_out + sizeof(extra_type);
+            return ckb_offset;
         }
 
 

@@ -22,7 +22,7 @@ using namespace dynd;
 
 arrfunc_type::arrfunc_type()
     : base_type(arrfunc_type_id, custom_kind, sizeof(arrfunc_type_data),
-                    sizeof(void *),
+                    scalar_align_of<uint64_t>::value,
                     type_flag_scalar|type_flag_zeroinit|type_flag_destructor,
                     0, 0)
 {
@@ -118,13 +118,12 @@ namespace {
 } // anonymous namespace
 
 static intptr_t make_arrfunc_to_string_assignment_kernel(
-    ckernel_builder *ckb, size_t ckb_offset, const ndt::type &dst_string_dt,
+    ckernel_builder *ckb, intptr_t ckb_offset, const ndt::type &dst_string_dt,
     const char *dst_arrmeta, kernel_request_t kernreq,
     const eval::eval_context *ectx)
 {
     typedef arrfunc_to_string_ck self_type;
-    self_type *self = self_type::create_leaf(ckb, ckb_offset, kernreq);
-    ckb_offset += sizeof(self_type);
+    self_type *self = self_type::create_leaf(ckb, kernreq, ckb_offset);
     // The kernel data owns a reference to this type
     self->m_dst_string_dt = dst_string_dt;
     self->m_dst_arrmeta = dst_arrmeta;
@@ -133,7 +132,7 @@ static intptr_t make_arrfunc_to_string_assignment_kernel(
 }
 
 size_t arrfunc_type::make_assignment_kernel(
-    ckernel_builder *out_ckb, size_t ckb_offset, const ndt::type &dst_tp,
+    ckernel_builder *ckb, intptr_t ckb_offset, const ndt::type &dst_tp,
     const char *dst_arrmeta, const ndt::type &src_tp,
     const char *DYND_UNUSED(src_arrmeta), kernel_request_t kernreq,
     const eval::eval_context *ectx) const
@@ -143,7 +142,7 @@ size_t arrfunc_type::make_assignment_kernel(
         if (dst_tp.get_kind() == string_kind) {
             // Assignment to strings
             return make_arrfunc_to_string_assignment_kernel(
-                out_ckb, ckb_offset, dst_tp, dst_arrmeta, kernreq, ectx);
+                ckb, ckb_offset, dst_tp, dst_arrmeta, kernreq, ectx);
         }
     }
     

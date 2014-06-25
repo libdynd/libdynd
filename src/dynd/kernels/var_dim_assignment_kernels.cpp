@@ -71,7 +71,7 @@ namespace {
 } // anonymous namespace
 
 size_t dynd::make_broadcast_to_var_dim_assignment_kernel(
-    ckernel_builder *ckb, size_t ckb_offset, const ndt::type &dst_var_dim_tp,
+    ckernel_builder *ckb, intptr_t ckb_offset, const ndt::type &dst_var_dim_tp,
     const char *dst_arrmeta, const ndt::type &src_tp, const char *src_arrmeta,
     kernel_request_t kernreq, const eval::eval_context *ectx)
 {
@@ -86,11 +86,11 @@ size_t dynd::make_broadcast_to_var_dim_assignment_kernel(
     const var_dim_type_arrmeta *dst_md =
                     reinterpret_cast<const var_dim_type_arrmeta *>(dst_arrmeta);
 
-    self_type *self = self_type::create(ckb, ckb_offset, kernreq);
+    self_type *self = self_type::create(ckb, kernreq, ckb_offset);
     self->m_dst_target_alignment = dst_vad->get_target_alignment();
     self->m_dst_md = dst_md;
     return ::make_assignment_kernel(
-        ckb, ckb_offset + sizeof(self_type), dst_vad->get_element_type(),
+        ckb, ckb_offset, dst_vad->get_element_type(),
         dst_arrmeta + sizeof(var_dim_type_arrmeta), src_tp, src_arrmeta,
         kernel_request_strided, ectx);
 }
@@ -170,7 +170,7 @@ namespace {
 } // anonymous namespace
 
 size_t dynd::make_var_dim_assignment_kernel(
-    ckernel_builder *ckb, size_t ckb_offset, const ndt::type &dst_var_dim_tp,
+    ckernel_builder *ckb, intptr_t ckb_offset, const ndt::type &dst_var_dim_tp,
     const char *dst_arrmeta, const ndt::type &src_var_dim_tp,
     const char *src_arrmeta, kernel_request_t kernreq,
     const eval::eval_context *ectx)
@@ -195,12 +195,12 @@ size_t dynd::make_var_dim_assignment_kernel(
     const var_dim_type_arrmeta *src_md =
         reinterpret_cast<const var_dim_type_arrmeta *>(src_arrmeta);
 
-    self_type *self = self_type::create(ckb, ckb_offset, kernreq);
+    self_type *self = self_type::create(ckb, kernreq, ckb_offset);
     self->m_dst_target_alignment = dst_vad->get_target_alignment();
     self->m_dst_md = dst_md;
     self->m_src_md = src_md;
     return ::make_assignment_kernel(
-        ckb, ckb_offset + sizeof(self_type), dst_vad->get_element_type(),
+        ckb, ckb_offset, dst_vad->get_element_type(),
         dst_arrmeta + sizeof(var_dim_type_arrmeta), src_vad->get_element_type(),
         src_arrmeta + sizeof(var_dim_type_arrmeta), kernel_request_strided,
         ectx);
@@ -271,7 +271,7 @@ namespace {
 } // anonymous namespace
 
 size_t dynd::make_strided_to_var_dim_assignment_kernel(
-    ckernel_builder *ckb, size_t ckb_offset, const ndt::type &dst_var_dim_tp,
+    ckernel_builder *ckb, intptr_t ckb_offset, const ndt::type &dst_var_dim_tp,
     const char *dst_arrmeta, intptr_t src_dim_size, intptr_t src_stride,
     const ndt::type &src_el_tp, const char *src_el_arrmeta,
     kernel_request_t kernreq, const eval::eval_context *ectx)
@@ -287,14 +287,14 @@ size_t dynd::make_strided_to_var_dim_assignment_kernel(
     const var_dim_type_arrmeta *dst_md =
                     reinterpret_cast<const var_dim_type_arrmeta *>(dst_arrmeta);
 
-    self_type *self = self_type::create(ckb, ckb_offset, kernreq);
+    self_type *self = self_type::create(ckb, kernreq, ckb_offset);
     self->m_dst_target_alignment = dst_vad->get_target_alignment();
     self->m_dst_md = dst_md;
     self->m_src_stride = src_stride;
     self->m_src_dim_size = src_dim_size;
 
     return ::make_assignment_kernel(
-        ckb, ckb_offset + sizeof(self_type), dst_vad->get_element_type(),
+        ckb, ckb_offset, dst_vad->get_element_type(),
         dst_arrmeta + sizeof(var_dim_type_arrmeta), src_el_tp, src_el_arrmeta,
         kernel_request_strided, ectx);
 }
@@ -340,7 +340,7 @@ namespace {
 } // anonymous namespace
 
 size_t dynd::make_var_to_strided_dim_assignment_kernel(
-    ckernel_builder *ckb, size_t ckb_offset,
+    ckernel_builder *ckb, intptr_t ckb_offset,
     const ndt::type &dst_strided_dim_tp, const char *dst_arrmeta,
     const ndt::type &src_var_dim_tp, const char *src_arrmeta,
     kernel_request_t kernreq, const eval::eval_context *ectx)
@@ -355,7 +355,7 @@ size_t dynd::make_var_to_strided_dim_assignment_kernel(
     const var_dim_type_arrmeta *src_md =
         reinterpret_cast<const var_dim_type_arrmeta *>(src_arrmeta);
 
-    self_type *self = self_type::create(ckb, ckb_offset, kernreq);
+    self_type *self = self_type::create(ckb, kernreq, ckb_offset);
     ndt::type dst_element_tp;
     const char *dst_element_arrmeta;
     if (!dst_strided_dim_tp.get_as_strided_dim(
@@ -369,7 +369,7 @@ size_t dynd::make_var_to_strided_dim_assignment_kernel(
     }
 
     self->m_src_md = src_md;
-    return ::make_assignment_kernel(ckb, ckb_offset + sizeof(self_type),
+    return ::make_assignment_kernel(ckb, ckb_offset,
                                     dst_element_tp, dst_element_arrmeta,
                                     src_vad->get_element_type(),
                                     src_arrmeta + sizeof(var_dim_type_arrmeta),

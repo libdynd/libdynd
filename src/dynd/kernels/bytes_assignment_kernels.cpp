@@ -69,21 +69,21 @@ namespace {
 } // anonymous namespace
 
 size_t dynd::make_blockref_bytes_assignment_kernel(
-    ckernel_builder *out, size_t offset_out, size_t dst_alignment,
+    ckernel_builder *ckb, intptr_t ckb_offset, size_t dst_alignment,
     const char *dst_arrmeta, size_t src_alignment, const char *src_arrmeta,
     kernel_request_t kernreq, const eval::eval_context *DYND_UNUSED(ectx))
 {
     // Adapt the incoming request to a 'single' kernel
-    offset_out =
-        make_kernreq_to_single_kernel_adapter(out, offset_out, 1, kernreq);
-    out->ensure_capacity_leaf(offset_out + sizeof(blockref_bytes_kernel_extra));
-    blockref_bytes_kernel_extra *e = out->get_at<blockref_bytes_kernel_extra>(offset_out);
-    e->base.set_function<expr_single_t>(&blockref_bytes_kernel_extra::single);
-    e->dst_alignment = dst_alignment;
-    e->src_alignment = src_alignment;
-    e->dst_arrmeta = reinterpret_cast<const bytes_type_arrmeta *>(dst_arrmeta);
-    e->src_arrmeta = reinterpret_cast<const bytes_type_arrmeta *>(src_arrmeta);
-    return offset_out + sizeof(blockref_bytes_kernel_extra);
+  ckb_offset =
+      make_kernreq_to_single_kernel_adapter(ckb, ckb_offset, 1, kernreq);
+  blockref_bytes_kernel_extra *e =
+      ckb->alloc_ck_leaf<blockref_bytes_kernel_extra>(ckb_offset);
+  e->base.set_function<expr_single_t>(&blockref_bytes_kernel_extra::single);
+  e->dst_alignment = dst_alignment;
+  e->src_alignment = src_alignment;
+  e->dst_arrmeta = reinterpret_cast<const bytes_type_arrmeta *>(dst_arrmeta);
+  e->src_arrmeta = reinterpret_cast<const bytes_type_arrmeta *>(src_arrmeta);
+  return ckb_offset;
 }
 
 /////////////////////////////////////////
@@ -130,19 +130,20 @@ namespace {
 } // anonymous namespace
 
 size_t dynd::make_fixedbytes_to_blockref_bytes_assignment_kernel(
-    ckernel_builder *out, size_t offset_out, size_t dst_alignment,
+    ckernel_builder *ckb, intptr_t ckb_offset, size_t dst_alignment,
     const char *dst_arrmeta, intptr_t src_data_size, size_t src_alignment,
     kernel_request_t kernreq, const eval::eval_context *DYND_UNUSED(ectx))
 {
-    // Adapt the incoming request to a 'single' kernel
-    offset_out =
-        make_kernreq_to_single_kernel_adapter(out, offset_out, 1, kernreq);
-    out->ensure_capacity_leaf(offset_out + sizeof(fixedbytes_to_blockref_bytes_kernel_extra));
-    fixedbytes_to_blockref_bytes_kernel_extra *e = out->get_at<fixedbytes_to_blockref_bytes_kernel_extra>(offset_out);
-    e->base.set_function<expr_single_t>(&fixedbytes_to_blockref_bytes_kernel_extra::single);
-    e->dst_alignment = dst_alignment;
-    e->src_data_size = src_data_size;
-    e->src_alignment = src_alignment;
-    e->dst_arrmeta = reinterpret_cast<const bytes_type_arrmeta *>(dst_arrmeta);
-    return offset_out + sizeof(fixedbytes_to_blockref_bytes_kernel_extra);
+  // Adapt the incoming request to a 'single' kernel
+  ckb_offset =
+      make_kernreq_to_single_kernel_adapter(ckb, ckb_offset, 1, kernreq);
+  fixedbytes_to_blockref_bytes_kernel_extra *e =
+      ckb->alloc_ck_leaf<fixedbytes_to_blockref_bytes_kernel_extra>(ckb_offset);
+  e->base.set_function<expr_single_t>(
+      &fixedbytes_to_blockref_bytes_kernel_extra::single);
+  e->dst_alignment = dst_alignment;
+  e->src_data_size = src_data_size;
+  e->src_alignment = src_alignment;
+  e->dst_arrmeta = reinterpret_cast<const bytes_type_arrmeta *>(dst_arrmeta);
+  return ckb_offset;
 }

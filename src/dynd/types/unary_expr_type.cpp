@@ -103,14 +103,14 @@ bool unary_expr_type::operator==(const base_type& rhs) const
 }
 
 size_t unary_expr_type::make_operand_to_value_assignment_kernel(
-                ckernel_builder *out, size_t offset_out,
+                ckernel_builder *ckb, intptr_t ckb_offset,
                 const char *dst_arrmeta, const char *src_arrmeta,
                 kernel_request_t kernreq, const eval::eval_context *ectx) const
 {
     // As a special case, when src_count == 1, the kernel generated
     // is a expr_single_t/expr_strided_t instead of
     // expr_single_t/expr_strided_t
-    return m_kgen->make_expr_kernel(out, offset_out,
+    return m_kgen->make_expr_kernel(ckb, ckb_offset,
                     m_value_type, dst_arrmeta,
                     1, &m_operand_type.value_type(),
                     &src_arrmeta,
@@ -118,7 +118,7 @@ size_t unary_expr_type::make_operand_to_value_assignment_kernel(
 }
 
 size_t unary_expr_type::make_value_to_operand_assignment_kernel(
-                ckernel_builder *DYND_UNUSED(out), size_t DYND_UNUSED(offset_out),
+                ckernel_builder *DYND_UNUSED(ckb), intptr_t DYND_UNUSED(ckb_offset),
                 const char *DYND_UNUSED(dst_arrmeta), const char *DYND_UNUSED(src_arrmeta),
                 kernel_request_t DYND_UNUSED(kernreq), const eval::eval_context *DYND_UNUSED(ectx)) const
 {

@@ -64,16 +64,16 @@ public:
 
 /**
  * Creates a comparison kernel for two type/arrmeta
- * pairs. This adds the kernel at the 'out_offset' position
- * in 'out's data, as part of a hierarchy matching the
+ * pairs. This adds the kernel at the 'ckb_offset' position
+ * in 'ckb's data, as part of a hierarchy matching the
  * type's hierarchy.
  *
  * This function should always be called with this == src0_dt first,
  * and types which don't support the particular assignment should
  * then call the corresponding function with this == src1_dt.
  *
- * \param out  The hierarchical assignment kernel being constructed.
- * \param offset_out  The offset within 'out'.
+ * \param ckb  The hierarchical assignment kernel being constructed.
+ * \param ckb_offset  The offset within 'ckb'.
  * \param src0_dt  The first dynd type.
  * \param src0_arrmeta  Arrmeta for the first data.
  * \param src1_dt  The second dynd type.
@@ -84,7 +84,7 @@ public:
  * \returns  The offset within 'out' immediately after the
  *           created kernel.
  */
-size_t make_comparison_kernel(ckernel_builder *out, size_t offset_out,
+size_t make_comparison_kernel(ckernel_builder *ckb, intptr_t ckb_offset,
                               const ndt::type &src0_dt,
                               const char *src0_arrmeta,
                               const ndt::type &src1_dt,
@@ -96,14 +96,14 @@ size_t make_comparison_kernel(ckernel_builder *out, size_t offset_out,
  * Creates a comparison kernel that compares the two builtin
  * types.
  *
- * \param out  The hierarchical assignment kernel being constructed.
- * \param offset_out  The offset within 'out'.
+ * \param ckb  The hierarchical assignment kernel being constructed.
+ * \param ckb_offset  The offset within 'ckb'.
  * \param src0_type_id  The first dynd type id.
  * \param src1_type_id  The second dynd type id.
  * \param comptype  The type of comparison to do.
  */
-size_t make_builtin_type_comparison_kernel(ckernel_builder *out,
-                                           size_t offset_out,
+size_t make_builtin_type_comparison_kernel(ckernel_builder *ckb,
+                                           intptr_t ckb_offset,
                                            type_id_t src0_type_id,
                                            type_id_t src1_type_id,
                                            comparison_type_t comptype);

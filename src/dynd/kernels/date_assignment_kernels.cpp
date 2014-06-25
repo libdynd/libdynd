@@ -38,7 +38,7 @@ namespace {
 } // anonymous namespace
 
 size_t dynd::make_string_to_date_assignment_kernel(
-    ckernel_builder *out_ckb, size_t ckb_offset, const ndt::type &src_string_tp,
+    ckernel_builder *ckb, intptr_t ckb_offset, const ndt::type &src_string_tp,
     const char *src_arrmeta, kernel_request_t kernreq,
     const eval::eval_context *ectx)
 {
@@ -50,13 +50,13 @@ size_t dynd::make_string_to_date_assignment_kernel(
         throw runtime_error(ss.str());
     }
 
-    self_type *self = self_type::create_leaf(out_ckb, ckb_offset, kernreq);
+    self_type *self = self_type::create_leaf(ckb, kernreq, ckb_offset);
     self->m_src_string_tp = src_string_tp;
     self->m_src_arrmeta = src_arrmeta;
     self->m_errmode = ectx->errmode;
     self->m_date_parse_order = ectx->date_parse_order;
     self->m_century_window = ectx->century_window;
-    return ckb_offset + sizeof(self_type);
+    return ckb_offset;
 }
 
 /////////////////////////////////////////
@@ -83,7 +83,7 @@ namespace {
 } // anonymous namespace
 
 size_t dynd::make_date_to_string_assignment_kernel(
-    ckernel_builder *out_ckb, size_t ckb_offset, const ndt::type &dst_string_tp,
+    ckernel_builder *ckb, intptr_t ckb_offset, const ndt::type &dst_string_tp,
     const char *dst_arrmeta, kernel_request_t kernreq,
     const eval::eval_context *ectx)
 {
@@ -95,10 +95,10 @@ size_t dynd::make_date_to_string_assignment_kernel(
         throw runtime_error(ss.str());
     }
 
-    self_type *self = self_type::create_leaf(out_ckb, ckb_offset, kernreq);
+    self_type *self = self_type::create_leaf(ckb, kernreq, ckb_offset);
     self->m_dst_string_tp = dst_string_tp;
     self->m_dst_arrmeta = dst_arrmeta;
     self->m_ectx = *ectx;
-    return ckb_offset + sizeof(self_type);
+    return ckb_offset;
 }
 
