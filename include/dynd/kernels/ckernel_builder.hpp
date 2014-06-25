@@ -384,10 +384,9 @@ namespace kernels {
                                   kernel_request_t kernreq)
     {
       // Alignment requirement of the type
-      DYND_STATIC_ASSERT(
-          (size_t)scalar_align_of<self_type>::value ==
-              (size_t)scalar_align_of<void *>::value,
-          "ckernel types require alignment matching that of pointers");
+      DYND_STATIC_ASSERT((size_t)scalar_align_of<self_type>::value <=
+                             (size_t)scalar_align_of<uint64_t>::value,
+                         "ckernel types require alignment <= 64 bits");
 
       // Call the constructor in-place
       self_type *self = new (rawself) self_type();
