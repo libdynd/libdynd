@@ -1251,6 +1251,68 @@ nd::array nd::array::adapt(const ndt::type& tp, const nd::string& adapt_op)
 }
 
 namespace {
+    struct replace_dim_type_extra {
+        intptr_t replace_ndim;
+    };
+
+    static void replace_dim_type(const ndt::type& tp, void *,
+                ndt::type& out_transformed_tp, bool& out_was_transformed)
+    {
+        if (tp.get_ndim() > 0) {
+            const ndt::type &el_tp = tp.tcast<base_uniform_dim_type>()->get_element_type();
+            out_transformed_tp = ndt::make_strided_dim(el_tp);
+            out_was_transformed = true;
+        }
+        else {
+            out_was_transformed = false;
+        }
+    }
+
+} // anonymous namespace
+
+nd::array nd::array::permute(intptr_t ndim, const intptr_t *axes)
+{
+    ndt::type tp = get_type();
+    if (!tp.extended()->is_strided()) {
+        throw std::runtime_error("not implemented");
+    }
+
+    char *old_arrmeta[ndim];
+    for (intptr_t i = 0; i < ndim; ++i) {
+        old_arrmeta[i] = get_arrmeta();
+        tp.get_type_at_dimension(old_arrmeta + i, i);
+    }
+
+    ndt::type replaced_tp;
+    bool was_transformed = false;
+    tp.extended()->transform_child_types(&replace_dim_type,
+            NULL, replaced_tp, was_transformed);
+    std::cout << "(DEBUG) replaced, " << replaced_tp << std::endl;
+
+    nd::array res = make_array_clone_with_new_type(*this, get_type());
+
+    for (intptr_t i = 0; i < ndim; ++i) {
+        char *new_arrmeta = res.get_arrmeta();
+
+        const base_uniform_dim_type *uad = tp.get_type_at_dimension(&new_arrmeta, i).tcast<base_uniform_dim_type>();
+        uad->arrmeta_copy_construct_onedim(new_arrmeta, old_arrmeta[axes[i]], NULL);
+    }
+
+    return res;
+}
+
+nd::array nd::array::transpose()
+{
+    intptr_t ndim = get_ndim();
+    intptr_t axes[ndim];
+    for (intptr_t i = 0; i < ndim; ++i) {
+        axes[i] = ndim - i - 1;
+    }
+
+    return permute(ndim, axes);
+}
+
+namespace {
     struct replace_compatible_dtype_extra {
         replace_compatible_dtype_extra(const ndt::type& tp,
                         intptr_t replace_ndim_)

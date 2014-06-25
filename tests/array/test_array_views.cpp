@@ -17,6 +17,9 @@
 #include <dynd/types/fixedbytes_type.hpp>
 #include <dynd/types/strided_dim_type.hpp>
 
+
+#include <dynd/types/cfixed_dim_type.hpp>
+
 using namespace std;
 using namespace dynd;
 
@@ -104,4 +107,31 @@ TEST(ArrayViews, ExpressionDType) {
     EXPECT_EQ(-1, b(1, 0).as<int16_t>());
     EXPECT_EQ(std::numeric_limits<int16_t>::min(), b(1, 1).as<int16_t>());
     EXPECT_EQ(0, b(1, 2).as<int16_t>());
+}
+
+/*
+TEST(ArrayViews, Transpose) {
+    static int vals[3][3] = {{0, 1, 2}, {3, 4, -4}, {-3, -2, -1}};
+
+    nd::array a = nd::empty<int[3][3]>();
+    a.vals() = vals;
+
+    nd::array b = a.transpose();
+
+//    std::cout << "(DEBUG) strided, " << a << std::endl;
+  //  std::cout << "(DEBUG) strided, " << b << std::endl;
+}*/
+
+TEST(ArrayViews, TransposeCFixed) {
+    static int vals[3][3] = {{0, 1, 2}, {3, 4, -4}, {-3, -2, -1}};
+
+    nd::array a = nd::empty(ndt::make_cfixed_dim(3, ndt::make_cfixed_dim(3, ndt::make_type<int>())));
+    a.vals() = vals;
+
+    nd::array b = a.transpose();
+
+//    std::cout << "(DEBUG) cfixed, " << a << std::endl;
+  //  std::cout << "(DEBUG) cfixed, " << b << std::endl;
+
+//    std::cout << "(DEBUG) " << a.get_type().get_canonical_type() << std::endl;
 }

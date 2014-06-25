@@ -592,6 +592,10 @@ public:
      */
     array adapt(const ndt::type& tp, const nd::string& adapt_op);
 
+    array permute(intptr_t ndim, const intptr_t *axes);
+
+    array transpose();
+
     /**
      * DEPRECATED
      * Views the array's memory as another type, where such an operation
