@@ -21,8 +21,7 @@ struct cfixed_dim_type_iterdata {
 };
 
 class cfixed_dim_type : public base_uniform_dim_type {
-    intptr_t m_stride;
-    size_t m_dim_size;
+    intptr_t m_stride, m_dim_size;
     std::vector<std::pair<std::string, gfunc::callable> > m_array_properties, m_array_functions;
 
 public:
@@ -39,7 +38,7 @@ public:
         return m_stride;
     }
 
-    inline size_t get_fixed_dim_size() const {
+    inline intptr_t get_fixed_dim_size() const {
         return m_dim_size;
     }
 
@@ -96,7 +95,7 @@ public:
     void data_destruct_strided(const char *arrmeta, char *data,
                     intptr_t stride, size_t count) const;
 
-    size_t make_assignment_kernel(ckernel_builder *out, size_t offset_out,
+    size_t make_assignment_kernel(ckernel_builder *ckb, intptr_t ckb_offset,
                                   const ndt::type &dst_tp,
                                   const char *dst_arrmeta,
                                   const ndt::type &src_tp,

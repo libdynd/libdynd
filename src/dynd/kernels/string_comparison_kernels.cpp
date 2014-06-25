@@ -238,33 +238,30 @@ namespace {
     }
 
 size_t dynd::make_fixedstring_comparison_kernel(
-                ckernel_builder *out, size_t offset_out,
+                ckernel_builder *ckb, intptr_t ckb_offset,
                 size_t string_size, string_encoding_t encoding,
                 comparison_type_t comptype,
                 const eval::eval_context *DYND_UNUSED(ectx))
 {
-    static int lookup[5] = {0, 1, 0, 1, 2};
-    static expr_predicate_t fixedstring_comparisons_table[3][7] = {
-        DYND_FIXEDSTRING_COMPARISON_TABLE_TYPE_LEVEL(ascii_utf8),
-        DYND_FIXEDSTRING_COMPARISON_TABLE_TYPE_LEVEL(utf16),
-        DYND_FIXEDSTRING_COMPARISON_TABLE_TYPE_LEVEL(utf32)
-    };
-    if (0 <= encoding && encoding < 5 && 0 <= comptype && comptype < 7) {
-        out->ensure_capacity_leaf(offset_out +
-                                  sizeof(fixedstring_compare_kernel_extra));
-        fixedstring_compare_kernel_extra *e =
-            out->get_at<fixedstring_compare_kernel_extra>(offset_out);
-        e->base.set_function<expr_predicate_t>(
-            fixedstring_comparisons_table[lookup[encoding]][comptype]);
-        e->string_size = string_size;
-        return offset_out + sizeof(fixedstring_compare_kernel_extra);
-    } else {
-        stringstream ss;
-        ss << "make_fixedstring_comparison_kernel: Unexpected encoding ("
-           << encoding;
-        ss << ") or comparison type (" << comptype << ")";
-        throw runtime_error(ss.str());
-    }
+  static int lookup[5] = {0, 1, 0, 1, 2};
+  static expr_predicate_t fixedstring_comparisons_table[3][7] = {
+      DYND_FIXEDSTRING_COMPARISON_TABLE_TYPE_LEVEL(ascii_utf8),
+      DYND_FIXEDSTRING_COMPARISON_TABLE_TYPE_LEVEL(utf16),
+      DYND_FIXEDSTRING_COMPARISON_TABLE_TYPE_LEVEL(utf32)};
+  if (0 <= encoding && encoding < 5 && 0 <= comptype && comptype < 7) {
+    fixedstring_compare_kernel_extra *e =
+        ckb->alloc_ck_leaf<fixedstring_compare_kernel_extra>(ckb_offset);
+    e->base.set_function<expr_predicate_t>(
+        fixedstring_comparisons_table[lookup[encoding]][comptype]);
+    e->string_size = string_size;
+    return ckb_offset;
+  } else {
+    stringstream ss;
+    ss << "make_fixedstring_comparison_kernel: Unexpected encoding ("
+       << encoding;
+    ss << ") or comparison type (" << comptype << ")";
+    throw runtime_error(ss.str());
+  }
 }
 
 #undef DYND_FIXEDSTRING_COMPARISON_TABLE_TYPE_LEVEL
@@ -360,34 +357,33 @@ struct string_compare_kernel {
     }
 
 size_t dynd::make_string_comparison_kernel(
-                ckernel_builder *out, size_t offset_out,
+                ckernel_builder *ckb, intptr_t ckb_offset,
                 string_encoding_t encoding,
                 comparison_type_t comptype,
                 const eval::eval_context *DYND_UNUSED(ectx))
 {
-    static int lookup[5] = {0, 1, 0, 1, 2};
-    static expr_predicate_t string_comparisons_table[3][7] = {
-        DYND_STRING_COMPARISON_TABLE_TYPE_LEVEL(uint8_t),
-        DYND_STRING_COMPARISON_TABLE_TYPE_LEVEL(uint16_t),
-        DYND_STRING_COMPARISON_TABLE_TYPE_LEVEL(uint32_t)
-    };
-    if (0 <= encoding && encoding < 5 && 0 <= comptype && comptype < 7) {
-        out->ensure_capacity_leaf(offset_out + sizeof(ckernel_prefix));
-        ckernel_prefix *e = out->get_at<ckernel_prefix>(offset_out);
-        e->set_function<expr_predicate_t>(string_comparisons_table[lookup[encoding]][comptype]);
-        return offset_out + sizeof(ckernel_prefix);
-    } else {
-        stringstream ss;
-        ss << "make_string_comparison_kernel: Unexpected encoding (" << encoding;
-        ss << ") or comparison type (" << comptype << ")";
-        throw runtime_error(ss.str());
-    }
+  static int lookup[5] = {0, 1, 0, 1, 2};
+  static expr_predicate_t string_comparisons_table[3][7] = {
+      DYND_STRING_COMPARISON_TABLE_TYPE_LEVEL(uint8_t),
+      DYND_STRING_COMPARISON_TABLE_TYPE_LEVEL(uint16_t),
+      DYND_STRING_COMPARISON_TABLE_TYPE_LEVEL(uint32_t)};
+  if (0 <= encoding && encoding < 5 && 0 <= comptype && comptype < 7) {
+    ckernel_prefix *e = ckb->alloc_ck_leaf<ckernel_prefix>(ckb_offset);
+    e->set_function<expr_predicate_t>(
+        string_comparisons_table[lookup[encoding]][comptype]);
+    return ckb_offset;
+  } else {
+    stringstream ss;
+    ss << "make_string_comparison_kernel: Unexpected encoding (" << encoding;
+    ss << ") or comparison type (" << comptype << ")";
+    throw runtime_error(ss.str());
+  }
 }
 
 #undef DYND_STRING_COMPARISON_TABLE_TYPE_LEVEL
 
 size_t dynd::make_general_string_comparison_kernel(
-                ckernel_builder *out, size_t offset_out,
+                ckernel_builder *ckb, intptr_t ckb_offset,
                 const ndt::type& src0_dt, const char *src0_arrmeta,
                 const ndt::type& src1_dt, const char *src1_arrmeta,
                 comparison_type_t comptype,
@@ -395,7 +391,7 @@ size_t dynd::make_general_string_comparison_kernel(
 {
     // TODO: Make more efficient, direct comparison kernels
     ndt::type sdt = ndt::make_string();
-    return make_comparison_kernel(out, offset_out,
+    return make_comparison_kernel(ckb, ckb_offset,
                     ndt::make_convert(sdt, src0_dt), src0_arrmeta,
                     ndt::make_convert(sdt, src1_dt), src1_arrmeta,
                     comptype, ectx);

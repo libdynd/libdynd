@@ -368,9 +368,9 @@ struct nafunc {
             ss << "Expected destination type bool, got " << dst_tp;
             throw type_error(ss.str());
         }
-        ckernel_prefix *ckp = ckb->get_at<ckernel_prefix>(ckb_offset);
-        ckp->set_expr_function< ::is_avail<T> >((kernel_request_t)kernreq);
-        return ckb_offset + sizeof(ckernel_prefix);
+        ckernel_prefix *ckp = ckb->alloc_ck_leaf<ckernel_prefix>(ckb_offset);
+        ckp->set_expr_function< ::is_avail<T> >(kernreq);
+        return ckb_offset;
     }
 
     static int resolve_is_avail_dst_type(
@@ -395,9 +395,9 @@ struct nafunc {
                << ", got " << dst_tp;
             throw type_error(ss.str());
         }
-        ckernel_prefix *ckp = ckb->get_at<ckernel_prefix>(ckb_offset);
-        ckp->set_expr_function< ::assign_na<T> >((kernel_request_t)kernreq);
-        return ckb_offset + sizeof(ckernel_prefix);
+        ckernel_prefix *ckp = ckb->alloc_ck_leaf<ckernel_prefix>(ckb_offset);
+        ckp->set_expr_function< ::assign_na<T> >(kernreq);
+        return ckb_offset;
     }
 
     static nd::array get()

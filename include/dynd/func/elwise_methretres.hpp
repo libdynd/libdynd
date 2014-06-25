@@ -70,14 +70,14 @@ namespace detail {
                     const char *const *DYND_UNUSED(src_arrmeta), kernel_request_t kernreq, \
                     const eval::eval_context *DYND_UNUSED(ectx)) \
         { \
-            extra_type *e = ckb->get_at<extra_type>(ckb_offset); \
-            e->base.template set_expr_function<extra_type>((kernel_request_t)kernreq); \
+            extra_type *e = ckb->alloc_ck_leaf<extra_type>(ckb_offset); \
+            e->base.template set_expr_function<extra_type>(kernreq); \
             std::pair<const T *, func_type *> *obj_func = \
                 *af_self->get_data_as<std::pair<const T *, func_type *> *>(); \
             e->obj = obj_func->first; \
             e->func = obj_func->second; \
 \
-            return ckb_offset + sizeof(extra_type); \
+            return ckb_offset; \
         } \
     };
 

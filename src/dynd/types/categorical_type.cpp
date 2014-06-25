@@ -427,99 +427,102 @@ bool categorical_type::is_lossless_assignment(const ndt::type& dst_tp, const ndt
 }
 
 size_t categorical_type::make_assignment_kernel(
-    ckernel_builder *out, size_t offset_out, const ndt::type &dst_tp,
+    ckernel_builder *ckb, intptr_t ckb_offset, const ndt::type &dst_tp,
     const char *dst_arrmeta, const ndt::type &src_tp, const char *src_arrmeta,
     kernel_request_t kernreq, const eval::eval_context *ectx) const
 {
-    if (this == dst_tp.extended()) {
-        if (this == src_tp.extended()) {
-            // When assigning identical types, just use a POD copy
-            return make_pod_typed_data_assignment_kernel(out, offset_out,
-                            get_data_size(), get_data_alignment(), kernreq);
-        }
-        // try to assign from another categorical type if it can be mapped
-        else if (src_tp.get_type_id() == categorical_type_id) {
-            //out_kernel.specializations = assign_from_commensurate_category_specializations;
-            // TODO auxdata
-            throw std::runtime_error("assignment between different categorical types isn't supported yet");
-        }
-        // assign from the same category value type
-        else if (src_tp == m_category_tp) {
-            offset_out = make_kernreq_to_single_kernel_adapter(out, offset_out, 1, kernreq);
-            out->ensure_capacity_leaf(offset_out + sizeof(category_to_categorical_kernel_extra));
-            category_to_categorical_kernel_extra *e =
-                            out->get_at<category_to_categorical_kernel_extra>(offset_out);
-            switch (m_storage_type.get_type_id()) {
-                case uint8_type_id:
-                    e->base.set_function<expr_single_t>(
-                                    &category_to_categorical_kernel_extra::single_uint8);
-                    break;
-                case uint16_type_id:
-                    e->base.set_function<expr_single_t>(
-                                    &category_to_categorical_kernel_extra::single_uint16);
-                    break;
-                case uint32_type_id:
-                    e->base.set_function<expr_single_t>(
-                                    &category_to_categorical_kernel_extra::single_uint32);
-                    break;
-                default:
-                    throw runtime_error("internal error in categorical_type::make_assignment_kernel");
-            }
-            e->base.destructor = &category_to_categorical_kernel_extra::destruct;
-            // The kernel type owns a reference to this type
-            e->dst_cat_tp = static_cast<const categorical_type *>(ndt::type(dst_tp).release());
-            e->src_arrmeta = src_arrmeta;
-            return offset_out + sizeof(category_to_categorical_kernel_extra);
-        } else if (src_tp.value_type() != m_category_tp &&
-                        src_tp.value_type().get_type_id() != categorical_type_id) {
-            // Make a convert type to the category type, and have it do the chaining
-            ndt::type src_cvt_tp = ndt::make_convert(m_category_tp, src_tp);
-            return src_cvt_tp.extended()->make_assignment_kernel(out, offset_out,
-                            dst_tp, dst_arrmeta,
-                            src_cvt_tp, src_arrmeta,
-                            kernreq, ectx);
-        } else {
-            // Let the src_tp handle it
-            return src_tp.extended()->make_assignment_kernel(out, offset_out,
-                            dst_tp, dst_arrmeta,
-                            src_tp, src_arrmeta,
-                            kernreq, ectx);
-        }
+  if (this == dst_tp.extended()) {
+    if (this == src_tp.extended()) {
+      // When assigning identical types, just use a POD copy
+      return make_pod_typed_data_assignment_kernel(
+          ckb, ckb_offset, get_data_size(), get_data_alignment(), kernreq);
     }
-    else {
-        if (dst_tp.value_type().get_type_id() != categorical_type_id) {
-            offset_out = make_kernreq_to_single_kernel_adapter(out, offset_out, 1, kernreq);
-            out->ensure_capacity(offset_out + sizeof(categorical_to_other_kernel_extra));
-            categorical_to_other_kernel_extra *e = out->get_at<categorical_to_other_kernel_extra>(offset_out);
-            switch (m_storage_type.get_type_id()) {
-                case uint8_type_id:
-                    e->base.set_function<expr_single_t>(&categorical_to_other_kernel_extra::single_uint8);
-                    break;
-                case uint16_type_id:
-                    e->base.set_function<expr_single_t>(&categorical_to_other_kernel_extra::single_uint16);
-                    break;
-                case uint32_type_id:
-                    e->base.set_function<expr_single_t>(&categorical_to_other_kernel_extra::single_uint32);
-                    break;
-                default:
-                    throw runtime_error("internal error in categorical_type::make_assignment_kernel");
-            }
-            e->base.destructor = &categorical_to_other_kernel_extra::destruct;
-            // The kernel type owns a reference to this type
-            e->src_cat_tp = static_cast<const categorical_type *>(ndt::type(src_tp).release());
-            return ::make_assignment_kernel(
-                out, offset_out + sizeof(categorical_to_other_kernel_extra),
-                dst_tp, dst_arrmeta, get_category_type(),
-                get_category_arrmeta(), kernel_request_single, ectx);
-        }
-        else {
-            stringstream ss;
-            ss << "Cannot assign from " << src_tp << " to " << dst_tp;
-            throw runtime_error(ss.str());
-        }
-
+    // try to assign from another categorical type if it can be mapped
+    else if (src_tp.get_type_id() == categorical_type_id) {
+      // out_kernel.specializations =
+      // assign_from_commensurate_category_specializations;
+      // TODO auxdata
+      throw std::runtime_error(
+          "assignment between different categorical types isn't supported yet");
     }
-
+    // assign from the same category value type
+    else if (src_tp == m_category_tp) {
+      ckb_offset =
+          make_kernreq_to_single_kernel_adapter(ckb, ckb_offset, 1, kernreq);
+      category_to_categorical_kernel_extra *e =
+          ckb->alloc_ck_leaf<category_to_categorical_kernel_extra>(ckb_offset);
+      switch (m_storage_type.get_type_id()) {
+      case uint8_type_id:
+        e->base.set_function<expr_single_t>(
+            &category_to_categorical_kernel_extra::single_uint8);
+        break;
+      case uint16_type_id:
+        e->base.set_function<expr_single_t>(
+            &category_to_categorical_kernel_extra::single_uint16);
+        break;
+      case uint32_type_id:
+        e->base.set_function<expr_single_t>(
+            &category_to_categorical_kernel_extra::single_uint32);
+        break;
+      default:
+        throw runtime_error(
+            "internal error in categorical_type::make_assignment_kernel");
+      }
+      e->base.destructor = &category_to_categorical_kernel_extra::destruct;
+      // The kernel type owns a reference to this type
+      e->dst_cat_tp =
+          static_cast<const categorical_type *>(ndt::type(dst_tp).release());
+      e->src_arrmeta = src_arrmeta;
+      return ckb_offset;
+    } else if (src_tp.value_type() != m_category_tp &&
+               src_tp.value_type().get_type_id() != categorical_type_id) {
+      // Make a convert type to the category type, and have it do the chaining
+      ndt::type src_cvt_tp = ndt::make_convert(m_category_tp, src_tp);
+      return src_cvt_tp.extended()->make_assignment_kernel(
+          ckb, ckb_offset, dst_tp, dst_arrmeta, src_cvt_tp, src_arrmeta,
+          kernreq, ectx);
+    } else {
+      // Let the src_tp handle it
+      return src_tp.extended()->make_assignment_kernel(
+          ckb, ckb_offset, dst_tp, dst_arrmeta, src_tp, src_arrmeta, kernreq,
+          ectx);
+    }
+  } else {
+    if (dst_tp.value_type().get_type_id() != categorical_type_id) {
+      ckb_offset =
+          make_kernreq_to_single_kernel_adapter(ckb, ckb_offset, 1, kernreq);
+      categorical_to_other_kernel_extra *e =
+          ckb->alloc_ck<categorical_to_other_kernel_extra>(ckb_offset);
+      switch (m_storage_type.get_type_id()) {
+      case uint8_type_id:
+        e->base.set_function<expr_single_t>(
+            &categorical_to_other_kernel_extra::single_uint8);
+        break;
+      case uint16_type_id:
+        e->base.set_function<expr_single_t>(
+            &categorical_to_other_kernel_extra::single_uint16);
+        break;
+      case uint32_type_id:
+        e->base.set_function<expr_single_t>(
+            &categorical_to_other_kernel_extra::single_uint32);
+        break;
+      default:
+        throw runtime_error(
+            "internal error in categorical_type::make_assignment_kernel");
+      }
+      e->base.destructor = &categorical_to_other_kernel_extra::destruct;
+      // The kernel type owns a reference to this type
+      e->src_cat_tp =
+          static_cast<const categorical_type *>(ndt::type(src_tp).release());
+      return ::make_assignment_kernel(
+          ckb, ckb_offset, dst_tp, dst_arrmeta, get_category_type(),
+          get_category_arrmeta(), kernel_request_single, ectx);
+    } else {
+      stringstream ss;
+      ss << "Cannot assign from " << src_tp << " to " << dst_tp;
+      throw runtime_error(ss.str());
+    }
+  }
 }
 
 bool categorical_type::operator==(const base_type& rhs) const

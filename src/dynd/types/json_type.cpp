@@ -240,7 +240,7 @@ struct string_to_json_ck
 } // anonymous namespace
 
 size_t json_type::make_assignment_kernel(
-    ckernel_builder *ckb, size_t ckb_offset, const ndt::type &dst_tp,
+    ckernel_builder *ckb, intptr_t ckb_offset, const ndt::type &dst_tp,
     const char *dst_arrmeta, const ndt::type &src_tp, const char *src_arrmeta,
     kernel_request_t kernreq, const eval::eval_context *ectx) const
 {
@@ -255,8 +255,7 @@ size_t json_type::make_assignment_kernel(
             case string_type_id:
             case fixedstring_type_id: {
                 string_to_json_ck *self =
-                    string_to_json_ck::create(ckb, ckb_offset, kernreq);
-                ckb_offset += sizeof(string_to_json_ck);
+                    string_to_json_ck::create(ckb, kernreq, ckb_offset);
                 self->m_dst_arrmeta = dst_arrmeta;
                 self->m_validate = (ectx->errmode != assign_error_nocheck);
                 if (src_tp.get_type_id() == string_type_id) {

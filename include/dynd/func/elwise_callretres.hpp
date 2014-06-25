@@ -68,11 +68,11 @@ namespace detail {
                     const char *const *DYND_UNUSED(src_arrmeta), kernel_request_t kernreq, \
                     const eval::eval_context *DYND_UNUSED(ectx)) \
         { \
-            extra_type *e = ckb->get_at<extra_type>(ckb_offset); \
-            e->base.template set_expr_function<extra_type>((kernel_request_t)kernreq); \
+            extra_type *e = ckb->alloc_ck_leaf<extra_type>(ckb_offset); \
+            e->base.template set_expr_function<extra_type>(kernreq); \
             e->obj = *af_self->get_data_as<const T *>(); \
 \
-            return ckb_offset + sizeof(extra_type); \
+            return ckb_offset; \
         } \
     };
 

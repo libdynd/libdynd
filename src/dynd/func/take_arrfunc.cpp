@@ -170,59 +170,59 @@ instantiate_masked_take(const arrfunc_type_data *DYND_UNUSED(self_data_ptr), dyn
                         const char *const *src_arrmeta, kernel_request_t kernreq,
                         const eval::eval_context *ectx)
 {
-    typedef masked_take_ck self_type;
+  typedef masked_take_ck self_type;
 
-    self_type *self = self_type::create(ckb, ckb_offset, (kernel_request_t)kernreq);
-    intptr_t ckb_end = ckb_offset + sizeof(self_type);
+  self_type *self = self_type::create(ckb, kernreq, ckb_offset);
 
-    if (dst_tp.get_type_id() != var_dim_type_id) {
-        stringstream ss;
-        ss << "masked take arrfunc: could not process type " << dst_tp;
-        ss << " as a var dimension";
-        throw type_error(ss.str());
-    }
-    self->m_dst_tp = dst_tp;
-    self->m_dst_meta = dst_arrmeta;
-    ndt::type dst_el_tp = self->m_dst_tp.tcast<var_dim_type>()->get_element_type();
-    const char *dst_el_meta = self->m_dst_meta + sizeof(var_dim_type_arrmeta);
+  if (dst_tp.get_type_id() != var_dim_type_id) {
+    stringstream ss;
+    ss << "masked take arrfunc: could not process type " << dst_tp;
+    ss << " as a var dimension";
+    throw type_error(ss.str());
+  }
+  self->m_dst_tp = dst_tp;
+  self->m_dst_meta = dst_arrmeta;
+  ndt::type dst_el_tp =
+      self->m_dst_tp.tcast<var_dim_type>()->get_element_type();
+  const char *dst_el_meta = self->m_dst_meta + sizeof(var_dim_type_arrmeta);
 
-    intptr_t src0_dim_size, mask_dim_size;
-    ndt::type src0_el_tp, mask_el_tp;
-    const char *src0_el_meta, *mask_el_meta;
-    if (!src_tp[0].get_as_strided_dim(src_arrmeta[0], src0_dim_size,
-                                      self->m_src0_stride, src0_el_tp,
-                                      src0_el_meta)) {
-        stringstream ss;
-        ss << "masked take arrfunc: could not process type " << src_tp[0];
-        ss << " as a strided dimension";
-        throw type_error(ss.str());
-    }
-    if (!src_tp[1].get_as_strided_dim(src_arrmeta[1], mask_dim_size,
-                                      self->m_mask_stride, mask_el_tp,
-                                      mask_el_meta)) {
-        stringstream ss;
-        ss << "masked take arrfunc: could not process type " << src_tp[1];
-        ss << " as a strided dimension";
-        throw type_error(ss.str());
-    }
-    if (src0_dim_size != mask_dim_size) {
-        stringstream ss;
-        ss << "masked take arrfunc: source data and mask have different sizes, ";
-        ss << src0_dim_size << " and " << mask_dim_size;
-        throw invalid_argument(ss.str());
-    }
-    self->m_dim_size = src0_dim_size;
-    if (mask_el_tp.get_type_id() != bool_type_id) {
-        stringstream ss;
-        ss << "masked take arrfunc: mask type should be bool, not ";
-        ss << mask_el_tp;
-        throw type_error(ss.str());
-    }
+  intptr_t src0_dim_size, mask_dim_size;
+  ndt::type src0_el_tp, mask_el_tp;
+  const char *src0_el_meta, *mask_el_meta;
+  if (!src_tp[0].get_as_strided_dim(src_arrmeta[0], src0_dim_size,
+                                    self->m_src0_stride, src0_el_tp,
+                                    src0_el_meta)) {
+    stringstream ss;
+    ss << "masked take arrfunc: could not process type " << src_tp[0];
+    ss << " as a strided dimension";
+    throw type_error(ss.str());
+  }
+  if (!src_tp[1].get_as_strided_dim(src_arrmeta[1], mask_dim_size,
+                                    self->m_mask_stride, mask_el_tp,
+                                    mask_el_meta)) {
+    stringstream ss;
+    ss << "masked take arrfunc: could not process type " << src_tp[1];
+    ss << " as a strided dimension";
+    throw type_error(ss.str());
+  }
+  if (src0_dim_size != mask_dim_size) {
+    stringstream ss;
+    ss << "masked take arrfunc: source data and mask have different sizes, ";
+    ss << src0_dim_size << " and " << mask_dim_size;
+    throw invalid_argument(ss.str());
+  }
+  self->m_dim_size = src0_dim_size;
+  if (mask_el_tp.get_type_id() != bool_type_id) {
+    stringstream ss;
+    ss << "masked take arrfunc: mask type should be bool, not ";
+    ss << mask_el_tp;
+    throw type_error(ss.str());
+  }
 
-    // Create the child element assignment ckernel
-    return make_assignment_kernel(ckb, ckb_end, dst_el_tp, dst_el_meta,
-                                  src0_el_tp, src0_el_meta,
-                                  kernel_request_strided, ectx);
+  // Create the child element assignment ckernel
+  return make_assignment_kernel(ckb, ckb_offset, dst_el_tp, dst_el_meta,
+                                src0_el_tp, src0_el_meta,
+                                kernel_request_strided, ectx);
 }
 
 static intptr_t
@@ -234,8 +234,7 @@ instantiate_indexed_take(const arrfunc_type_data *DYND_UNUSED(self_data_ptr), dy
 {
     typedef indexed_take_ck self_type;
 
-    self_type *self = self_type::create(ckb, ckb_offset, (kernel_request_t)kernreq);
-    intptr_t ckb_end = ckb_offset + sizeof(self_type);
+    self_type *self = self_type::create(ckb, kernreq, ckb_offset);
 
     ndt::type dst_el_tp;
     const char *dst_el_meta;
@@ -281,7 +280,7 @@ instantiate_indexed_take(const arrfunc_type_data *DYND_UNUSED(self_data_ptr), dy
     }
 
     // Create the child element assignment ckernel
-    return make_assignment_kernel(ckb, ckb_end, dst_el_tp, dst_el_meta,
+    return make_assignment_kernel(ckb, ckb_offset, dst_el_tp, dst_el_meta,
                                   src0_el_tp, src0_el_meta,
                                   kernel_request_single, ectx);
 }

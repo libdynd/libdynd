@@ -502,18 +502,18 @@ public:
     /**
      * Creates an assignment kernel for one data value from the
      * src type/arrmeta to the dst type/arrmeta. This adds the
-     * kernel at the 'out_offset' position in 'out's data, as part
+     * kernel at the 'ckb_offset' position in 'ckb's data, as part
      * of a hierarchy matching the type's hierarchy.
      *
      * This function should always be called with this == dst_tp first,
      * and types which don't support the particular assignment should
      * then call the corresponding function with this == src_dt.
      *
-     * \returns  The offset at the end of 'out' after adding this
+     * \returns  The offset at the end of 'ckb' after adding this
      *           kernel.
      */
     virtual size_t
-    make_assignment_kernel(ckernel_builder *out, size_t offset_out,
+    make_assignment_kernel(ckernel_builder *ckb, intptr_t ckb_offset,
                            const ndt::type &dst_tp, const char *dst_arrmeta,
                            const ndt::type &src_tp, const char *src_arrmeta,
                            kernel_request_t kernreq,
@@ -522,18 +522,18 @@ public:
     /**
      * Creates a comparison kernel for one data value from one
      * type/arrmeta to another type/arrmeta. This adds the
-     * kernel at the 'out_offset' position in 'out's data, as part
+     * kernel at the 'ckb_offset' position in 'ckb's data, as part
      * of a hierarchy matching the type's hierarchy.
      *
      * This function should always be called with this == src0_dt first,
      * and types which don't support the particular comparison should
      * then call the corresponding function with this == src1_dt.
      *
-     * \returns  The offset at the end of 'out' after adding this
+     * \returns  The offset at the end of 'ckb' after adding this
      *           kernel.
      */
     virtual size_t
-    make_comparison_kernel(ckernel_builder *out, size_t offset_out,
+    make_comparison_kernel(ckernel_builder *ckb, intptr_t ckb_offset,
                            const ndt::type &src0_dt, const char *src0_arrmeta,
                            const ndt::type &src1_dt, const char *src1_arrmeta,
                            comparison_type_t comptype,
@@ -630,15 +630,15 @@ public:
      * Returns a kernel to transform instances of this type into values of the
      * element-wise property.
      *
-     * \param out  The hierarchical assignment kernel being constructed.
-     * \param offset_out  The offset within 'out'.
+     * \param ckb  The ckernel_builder being constructed.
+     * \param ckb_offset  The offset within 'ckb'.
      * \param dst_arrmeta  Arrmeta for the destination property being written to.
      * \param src_arrmeta  Arrmeta for the operand type being read from.
      * \param src_elwise_property_index  The index of the property, from get_elwise_property_index().
      * \param ectx  DyND evaluation context.
      */
     virtual size_t make_elwise_property_getter_kernel(
-        ckernel_builder *out, size_t offset_out, const char *dst_arrmeta,
+        ckernel_builder *ckb, intptr_t ckb_offset, const char *dst_arrmeta,
         const char *src_arrmeta, size_t src_elwise_property_index,
         kernel_request_t kernreq, const eval::eval_context *ectx) const;
 
@@ -651,7 +651,7 @@ public:
      *       setting just the "year" property of a date is not possible
      *       with this mechanism.
      *
-     * \param ckb  The hierarchical assignment kernel being constructed.
+     * \param ckb  The ckernel_builder being constructed.
      * \param ckb_offset  The offset within 'ckb'.
      * \param dst_arrmeta  Arrmeta for the operand type being written to.
      * \param dst_elwise_property_index  The index of the property, from get_elwise_property_index().
@@ -659,7 +659,7 @@ public:
      * \param ectx  DyND evaluation contrext.
      */
     virtual size_t make_elwise_property_setter_kernel(
-        ckernel_builder *ckb, size_t ckb_offset, const char *dst_arrmeta,
+        ckernel_builder *ckb, intptr_t ckb_offset, const char *dst_arrmeta,
         size_t dst_elwise_property_index, const char *src_arrmeta,
         kernel_request_t kernreq, const eval::eval_context *ectx) const;
 

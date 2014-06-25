@@ -171,7 +171,7 @@ bool fixedstring_type::operator==(const base_type& rhs) const
 }
 
 size_t fixedstring_type::make_assignment_kernel(
-    ckernel_builder *out, size_t offset_out, const ndt::type &dst_tp,
+    ckernel_builder *ckb, intptr_t ckb_offset, const ndt::type &dst_tp,
     const char *dst_arrmeta, const ndt::type &src_tp, const char *src_arrmeta,
     kernel_request_t kernreq, const eval::eval_context *ectx) const
 {
@@ -180,23 +180,23 @@ size_t fixedstring_type::make_assignment_kernel(
             case fixedstring_type_id: {
                 const fixedstring_type *src_fs = src_tp.tcast<fixedstring_type>();
                 return make_fixedstring_assignment_kernel(
-                    out, offset_out, get_data_size(), m_encoding,
+                    ckb, ckb_offset, get_data_size(), m_encoding,
                     src_fs->get_data_size(), src_fs->m_encoding, kernreq, ectx);
             }
             case string_type_id: {
                 const base_string_type *src_fs = src_tp.tcast<base_string_type>();
                 return make_blockref_string_to_fixedstring_assignment_kernel(
-                    out, offset_out, get_data_size(), m_encoding,
+                    ckb, ckb_offset, get_data_size(), m_encoding,
                     src_fs->get_encoding(), kernreq, ectx);
             }
             default: {
                 if (!src_tp.is_builtin()) {
                     return src_tp.extended()->make_assignment_kernel(
-                        out, offset_out, dst_tp, dst_arrmeta, src_tp,
+                        ckb, ckb_offset, dst_tp, dst_arrmeta, src_tp,
                         src_arrmeta, kernreq, ectx);
                 } else {
                     return make_builtin_to_string_assignment_kernel(
-                        out, offset_out, dst_tp, dst_arrmeta,
+                        ckb, ckb_offset, dst_tp, dst_arrmeta,
                         src_tp.get_type_id(), kernreq, ectx);
                 }
             }
@@ -204,7 +204,7 @@ size_t fixedstring_type::make_assignment_kernel(
     } else {
         if (dst_tp.is_builtin()) {
             return make_string_to_builtin_assignment_kernel(
-                out, offset_out, dst_tp.get_type_id(), src_tp, src_arrmeta,
+                ckb, ckb_offset, dst_tp.get_type_id(), src_tp, src_arrmeta,
                 kernreq, ectx);
         } else {
             stringstream ss;
@@ -215,23 +215,23 @@ size_t fixedstring_type::make_assignment_kernel(
 }
 
 size_t fixedstring_type::make_comparison_kernel(
-    ckernel_builder *out, size_t offset_out, const ndt::type &src0_dt,
+    ckernel_builder *ckb, intptr_t ckb_offset, const ndt::type &src0_dt,
     const char *src0_arrmeta, const ndt::type &src1_dt,
     const char *src1_arrmeta, comparison_type_t comptype,
     const eval::eval_context *ectx) const
 {
     if (this == src0_dt.extended()) {
         if (*this == *src1_dt.extended()) {
-            return make_fixedstring_comparison_kernel(out, offset_out,
+            return make_fixedstring_comparison_kernel(ckb, ckb_offset,
                             m_stringsize, m_encoding,
                             comptype, ectx);
         } else if (src1_dt.get_kind() == string_kind) {
-            return make_general_string_comparison_kernel(out, offset_out,
+            return make_general_string_comparison_kernel(ckb, ckb_offset,
                             src0_dt, src0_arrmeta,
                             src1_dt, src1_arrmeta,
                             comptype, ectx);
         } else if (!src1_dt.is_builtin()) {
-            return src1_dt.extended()->make_comparison_kernel(out, offset_out,
+            return src1_dt.extended()->make_comparison_kernel(ckb, ckb_offset,
                             src0_dt, src0_arrmeta,
                             src1_dt, src1_arrmeta,
                             comptype, ectx);

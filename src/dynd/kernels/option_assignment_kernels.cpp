@@ -200,37 +200,39 @@ static intptr_t instantiate_option_to_option_assignment_kernel(
     const ndt::type *src_tp, const char *const *src_arrmeta, kernel_request_t kernreq,
     const eval::eval_context *ectx)
 {
-    typedef option_to_option_ck self_type;
-    if (dst_tp.get_type_id() != option_type_id ||
-            src_tp[0].get_type_id() != option_type_id) {
-        stringstream ss;
-        ss << "option to option kernel needs option types, got " << dst_tp
-           << " and " << src_tp[0];
-        throw invalid_argument(ss.str());
-    }
-    const ndt::type &dst_val_tp = dst_tp.tcast<option_type>()->get_value_type();
-    const ndt::type &src_val_tp = src_tp[0].tcast<option_type>()->get_value_type();
-    self_type *self = self_type::create(ckb, ckb_offset, (kernel_request_t)kernreq);
-    size_t ckb_end = ckb_offset + sizeof(self_type);
-    // instantiate src_is_avail
-    const arrfunc_type_data *af = src_tp[0].tcast<option_type>()->get_is_avail_arrfunc();
-    ckb_end = af->instantiate(af, ckb, ckb_end, ndt::make_type<dynd_bool>(),
-                              NULL, src_tp, src_arrmeta, kernreq, ectx);
-    // instantiate dst_assign_na
-    ckb->ensure_capacity_leaf(ckb_end + sizeof(ckernel_prefix));
-    self = ckb->get_at<self_type>(ckb_offset);
-    self->m_dst_assign_na_offset = ckb_end - ckb_offset;
-    af = dst_tp.tcast<option_type>()->get_assign_na_arrfunc();
-    ckb_end = af->instantiate(af, ckb, ckb_end, dst_tp, dst_arrmeta, NULL, NULL,
-                              kernreq, ectx);
-    // instantiate value_assign
-    ckb->ensure_capacity(ckb_end);
-    self = ckb->get_at<self_type>(ckb_offset);
-    self->m_value_assign_offset = ckb_end- ckb_offset;
-    ckb_end = make_assignment_kernel(ckb, ckb_end, dst_val_tp, dst_arrmeta,
-                                     src_val_tp, src_arrmeta[0],
-                                     (kernel_request_t)kernreq, ectx);
-    return ckb_end;
+  intptr_t root_ckb_offset = ckb_offset;
+  typedef option_to_option_ck self_type;
+  if (dst_tp.get_type_id() != option_type_id ||
+      src_tp[0].get_type_id() != option_type_id) {
+    stringstream ss;
+    ss << "option to option kernel needs option types, got " << dst_tp
+       << " and " << src_tp[0];
+    throw invalid_argument(ss.str());
+  }
+  const ndt::type &dst_val_tp = dst_tp.tcast<option_type>()->get_value_type();
+  const ndt::type &src_val_tp =
+      src_tp[0].tcast<option_type>()->get_value_type();
+  self_type *self = self_type::create(ckb, kernreq, ckb_offset);
+  // instantiate src_is_avail
+  const arrfunc_type_data *af =
+      src_tp[0].tcast<option_type>()->get_is_avail_arrfunc();
+  ckb_offset = af->instantiate(af, ckb, ckb_offset, ndt::make_type<dynd_bool>(),
+                               NULL, src_tp, src_arrmeta, kernreq, ectx);
+  // instantiate dst_assign_na
+  ckb->ensure_capacity_leaf(ckb_offset);
+  self = ckb->get_at<self_type>(root_ckb_offset);
+  self->m_dst_assign_na_offset = ckb_offset - root_ckb_offset;
+  af = dst_tp.tcast<option_type>()->get_assign_na_arrfunc();
+  ckb_offset = af->instantiate(af, ckb, ckb_offset, dst_tp, dst_arrmeta, NULL,
+                               NULL, kernreq, ectx);
+  // instantiate value_assign
+  ckb->ensure_capacity(ckb_offset);
+  self = ckb->get_at<self_type>(root_ckb_offset);
+  self->m_value_assign_offset = ckb_offset - root_ckb_offset;
+  ckb_offset =
+      make_assignment_kernel(ckb, ckb_offset, dst_val_tp, dst_arrmeta,
+                             src_val_tp, src_arrmeta[0], kernreq, ectx);
+  return ckb_offset;
 }
 
 static intptr_t instantiate_option_to_value_assignment_kernel(
@@ -239,40 +241,42 @@ static intptr_t instantiate_option_to_value_assignment_kernel(
     const ndt::type *src_tp, const char *const *src_arrmeta,
     kernel_request_t kernreq, const eval::eval_context *ectx)
 {
-    typedef option_to_value_ck self_type;
-    if (dst_tp.get_type_id() == option_type_id ||
-            src_tp[0].get_type_id() != option_type_id) {
-        stringstream ss;
-        ss << "option to value kernel needs value/option types, got " << dst_tp
-           << " and " << src_tp[0];
-        throw invalid_argument(ss.str());
-    }
-    const ndt::type &src_val_tp = src_tp[0].tcast<option_type>()->get_value_type();
-    self_type *self = self_type::create(ckb, ckb_offset, (kernel_request_t)kernreq);
-    size_t ckb_end = ckb_offset + sizeof(self_type);
-    // instantiate src_is_avail
-    const arrfunc_type_data *af = src_tp[0].tcast<option_type>()->get_is_avail_arrfunc();
-    ckb_end = af->instantiate(af, ckb, ckb_end, ndt::make_type<dynd_bool>(),
-                              NULL, src_tp, src_arrmeta, kernreq, ectx);
-    // instantiate value_assign
-    ckb->ensure_capacity_leaf(ckb_end + sizeof(ckernel_prefix));
-    self = ckb->get_at<self_type>(ckb_offset);
-    self->m_value_assign_offset = ckb_end - ckb_offset;
-    ckb_end = make_assignment_kernel(ckb, ckb_end, dst_tp, dst_arrmeta, src_val_tp,
-                                     src_arrmeta[0], (kernel_request_t)kernreq, ectx);
-    return ckb_end + sizeof(ckernel_prefix);
+  intptr_t root_ckb_offset = ckb_offset;
+  typedef option_to_value_ck self_type;
+  if (dst_tp.get_type_id() == option_type_id ||
+      src_tp[0].get_type_id() != option_type_id) {
+    stringstream ss;
+    ss << "option to value kernel needs value/option types, got " << dst_tp
+       << " and " << src_tp[0];
+    throw invalid_argument(ss.str());
+  }
+  const ndt::type &src_val_tp =
+      src_tp[0].tcast<option_type>()->get_value_type();
+  self_type *self = self_type::create(ckb, kernreq, ckb_offset);
+  // instantiate src_is_avail
+  const arrfunc_type_data *af =
+      src_tp[0].tcast<option_type>()->get_is_avail_arrfunc();
+  ckb_offset = af->instantiate(af, ckb, ckb_offset, ndt::make_type<dynd_bool>(),
+                               NULL, src_tp, src_arrmeta, kernreq, ectx);
+  // instantiate value_assign
+  ckb->ensure_capacity_leaf(ckb_offset);
+  self = ckb->get_at<self_type>(root_ckb_offset);
+  self->m_value_assign_offset = ckb_offset - root_ckb_offset;
+  return make_assignment_kernel(ckb, ckb_offset, dst_tp, dst_arrmeta,
+                                src_val_tp, src_arrmeta[0], kernreq, ectx);
 }
 
 namespace {
-struct string_to_option_bool_ck : public kernels::unary_ck<string_to_option_bool_ck> {
-    assign_error_mode m_errmode;
+struct string_to_option_bool_ck
+    : public kernels::unary_ck<string_to_option_bool_ck> {
+  assign_error_mode m_errmode;
 
-    inline void single(char *dst, const char *src)
-    {
-        const string_type_data *std =
-            reinterpret_cast<const string_type_data *>(src);
-        parse::string_to_bool(dst, std->begin, std->end, true, m_errmode);
-    }
+  inline void single(char *dst, const char *src)
+  {
+    const string_type_data *std =
+        reinterpret_cast<const string_type_data *>(src);
+    parse::string_to_bool(dst, std->begin, std->end, true, m_errmode);
+  }
 };
 
 struct string_to_option_number_ck : public kernels::unary_ck<string_to_option_number_ck> {
@@ -292,55 +296,52 @@ struct string_to_option_number_ck : public kernels::unary_ck<string_to_option_nu
 static intptr_t instantiate_string_to_option_assignment_kernel(
     const arrfunc_type_data *DYND_UNUSED(self), dynd::ckernel_builder *ckb,
     intptr_t ckb_offset, const ndt::type &dst_tp, const char *dst_arrmeta,
-    const ndt::type *src_tp, const char *const *src_arrmeta, kernel_request_t kernreq,
-    const eval::eval_context *ectx)
+    const ndt::type *src_tp, const char *const *src_arrmeta,
+    kernel_request_t kernreq, const eval::eval_context *ectx)
 {
-    // Deal with some string to option[T] conversions where string values
-    // might mean NA
-    if (dst_tp.get_type_id() != option_type_id ||
-            !(src_tp[0].get_kind() == string_kind ||
-                (src_tp[0].get_type_id() == option_type_id &&
-                src_tp[0].tcast<option_type>()->get_value_type().get_kind() ==
-                    string_kind))) {
-        stringstream ss;
-        ss << "string to option kernel needs string/option types, got ("
-           << src_tp[0] << ") -> " << dst_tp;
-        throw invalid_argument(ss.str());
-    }
+  // Deal with some string to option[T] conversions where string values
+  // might mean NA
+  if (dst_tp.get_type_id() != option_type_id ||
+      !(src_tp[0].get_kind() == string_kind ||
+        (src_tp[0].get_type_id() == option_type_id &&
+         src_tp[0].tcast<option_type>()->get_value_type().get_kind() ==
+             string_kind))) {
+    stringstream ss;
+    ss << "string to option kernel needs string/option types, got ("
+       << src_tp[0] << ") -> " << dst_tp;
+    throw invalid_argument(ss.str());
+  }
 
-    type_id_t tid = dst_tp.tcast<option_type>()->get_value_type().get_type_id();
-    switch (tid) {
-        case bool_type_id: {
-            string_to_option_bool_ck *self =
-                string_to_option_bool_ck::create_leaf(
-                    ckb, ckb_offset, (kernel_request_t)kernreq);
-            self->m_errmode = ectx->errmode;
-            return ckb_offset + sizeof(string_to_option_bool_ck);
-        }
-        case int8_type_id:
-        case int16_type_id:
-        case int32_type_id:
-        case int64_type_id:
-        case int128_type_id:
-        case float16_type_id:
-        case float32_type_id:
-        case float64_type_id: {
-            string_to_option_number_ck *self =
-                string_to_option_number_ck::create_leaf(
-                    ckb, ckb_offset, (kernel_request_t)kernreq);
-            self->m_tid = tid;
-            self->m_errmode = ectx->errmode;
-            return ckb_offset + sizeof(string_to_option_number_ck);
-        }
-        default:
-            break;
-    }
+  type_id_t tid = dst_tp.tcast<option_type>()->get_value_type().get_type_id();
+  switch (tid) {
+  case bool_type_id: {
+    string_to_option_bool_ck *self =
+        string_to_option_bool_ck::create_leaf(ckb, kernreq, ckb_offset);
+    self->m_errmode = ectx->errmode;
+    return ckb_offset;
+  }
+  case int8_type_id:
+  case int16_type_id:
+  case int32_type_id:
+  case int64_type_id:
+  case int128_type_id:
+  case float16_type_id:
+  case float32_type_id:
+  case float64_type_id: {
+    string_to_option_number_ck *self =
+        string_to_option_number_ck::create_leaf(ckb, kernreq, ckb_offset);
+    self->m_tid = tid;
+    self->m_errmode = ectx->errmode;
+    return ckb_offset;
+  }
+  default:
+    break;
+  }
 
-    // Fall back to an assignment without any option[S] support
-    return ::make_assignment_kernel(
-        ckb, ckb_offset, dst_tp.tcast<option_type>()->get_value_type(),
-        dst_arrmeta, src_tp[0], src_arrmeta[0], (kernel_request_t)kernreq,
-        ectx);
+  // Fall back to an assignment without any option[S] support
+  return ::make_assignment_kernel(
+      ckb, ckb_offset, dst_tp.tcast<option_type>()->get_value_type(),
+      dst_arrmeta, src_tp[0], src_arrmeta[0], kernreq, ectx);
 }
 
 static intptr_t instantiate_option_as_value_assignment_kernel(
@@ -349,26 +350,23 @@ static intptr_t instantiate_option_as_value_assignment_kernel(
     const ndt::type *src_tp, const char *const *src_arrmeta, kernel_request_t kernreq,
     const eval::eval_context *ectx)
 {
-    // In all cases not handled, we use the
-    // regular S to T assignment kernel.
-    //
-    // Note that this does NOT catch the case where a value
-    // which was ok with type S, but equals the NA
-    // token in type T, is assigned. Checking this
-    // properly across all the cases would add
-    // fairly significant cost, and it seems maybe ok
-    // to skip it.
-    ndt::type val_dst_tp =
-        dst_tp.get_type_id() == option_type_id
-            ? dst_tp.tcast<option_type>()->get_value_type()
-            : dst_tp;
-    ndt::type val_src_tp =
-        src_tp[0].get_type_id() == option_type_id
-            ? src_tp[0].tcast<option_type>()->get_value_type()
-            : src_tp[0];
-    return ::make_assignment_kernel(ckb, ckb_offset, val_dst_tp, dst_arrmeta,
-                                    val_src_tp, src_arrmeta[0],
-                                    (kernel_request_t)kernreq, ectx);
+  // In all cases not handled, we use the
+  // regular S to T assignment kernel.
+  //
+  // Note that this does NOT catch the case where a value
+  // which was ok with type S, but equals the NA
+  // token in type T, is assigned. Checking this
+  // properly across all the cases would add
+  // fairly significant cost, and it seems maybe ok
+  // to skip it.
+  ndt::type val_dst_tp = dst_tp.get_type_id() == option_type_id
+                             ? dst_tp.tcast<option_type>()->get_value_type()
+                             : dst_tp;
+  ndt::type val_src_tp = src_tp[0].get_type_id() == option_type_id
+                             ? src_tp[0].tcast<option_type>()->get_value_type()
+                             : src_tp[0];
+  return ::make_assignment_kernel(ckb, ckb_offset, val_dst_tp, dst_arrmeta,
+                                  val_src_tp, src_arrmeta[0], kernreq, ectx);
 }
 
 namespace {
@@ -405,7 +403,7 @@ struct option_arrfunc_list {
 } // anonymous namespace
 
 size_t kernels::make_option_assignment_kernel(
-    ckernel_builder *ckb, size_t ckb_offset, const ndt::type &dst_tp,
+    ckernel_builder *ckb, intptr_t ckb_offset, const ndt::type &dst_tp,
     const char *dst_arrmeta, const ndt::type &src_tp, const char *src_arrmeta,
     kernel_request_t kernreq, const eval::eval_context *ectx)
 {

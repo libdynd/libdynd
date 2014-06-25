@@ -338,7 +338,7 @@ void cfixed_dim_type::arrmeta_default_construct(char *arrmeta, intptr_t ndim, co
 {
     // Validate that the shape is ok
     if (ndim > 0) {
-        if (shape[0] >= 0 && (size_t)shape[0] != m_dim_size) {
+        if (shape[0] >= 0 && shape[0] != m_dim_size) {
             stringstream ss;
             ss << "Cannot construct dynd object of type " << ndt::type(this, true);
             ss << " with dimension size " << shape[0] << ", the size must be " << m_dim_size;
@@ -444,7 +444,7 @@ size_t cfixed_dim_type::iterdata_construct(iterdata_common *iterdata, const char
         out_uniform_tp = m_element_tp;
     }
 
-    if (m_dim_size != 1 && (size_t)shape[0] != m_dim_size) {
+    if (m_dim_size != 1 && shape[0] != m_dim_size) {
         stringstream ss;
         ss << "Cannot construct dynd iterator of type " << ndt::type(this, true);
         ss << " with dimension size " << shape[0] << ", the size must be " << m_dim_size;
@@ -490,56 +490,59 @@ void cfixed_dim_type::data_destruct_strided(const char *arrmeta, char *data,
 }
 
 size_t cfixed_dim_type::make_assignment_kernel(
-    ckernel_builder *out_ckb, size_t ckb_offset, const ndt::type &dst_tp,
+    ckernel_builder *ckb, intptr_t ckb_offset, const ndt::type &dst_tp,
     const char *dst_arrmeta, const ndt::type &src_tp, const char *src_arrmeta,
     kernel_request_t kernreq, const eval::eval_context *ectx) const
 {
-    if (this == dst_tp.extended()) {
-        kernels::strided_assign_ck *self =
-            kernels::strided_assign_ck::create(out_ckb, ckb_offset, kernreq);
-        intptr_t ckb_end = ckb_offset + sizeof(kernels::strided_assign_ck);
-        self->m_size = m_dim_size;
-        self->m_dst_stride = m_stride;
+  if (this == dst_tp.extended()) {
+    intptr_t src_size, src_stride;
+    ndt::type src_el_tp;
+    const char *src_el_arrmeta;
 
-        intptr_t src_size;
-        ndt::type src_el_tp;
-        const char *src_el_arrmeta;
-
-        if (src_tp.get_ndim() < dst_tp.get_ndim()) {
-            // If the src has fewer dimensions, broadcast it across this one
-            self->m_src_stride = 0;
-            return ::make_assignment_kernel(out_ckb, ckb_end, m_element_tp,
-                                            dst_arrmeta, src_tp, src_arrmeta,
-                                            kernel_request_strided, ectx);
-        } else if (src_tp.get_as_strided_dim(src_arrmeta, src_size,
-                                             self->m_src_stride, src_el_tp,
-                                             src_el_arrmeta)) {
-
-            // Check for a broadcasting error
-            if (src_size != 1 && (intptr_t)m_dim_size != src_size) {
-                throw broadcast_error(dst_tp, dst_arrmeta, src_tp, src_arrmeta);
-            }
-
-            return ::make_assignment_kernel(
-                out_ckb, ckb_end, m_element_tp, dst_arrmeta, src_el_tp,
-                src_el_arrmeta, kernel_request_strided, ectx);
-        } else if (!src_tp.is_builtin()) {
-            // Give the src type a chance to make a kernel
-            return src_tp.extended()->make_assignment_kernel(
-                out_ckb, ckb_offset, dst_tp, dst_arrmeta, src_tp, src_arrmeta,
-                kernreq, ectx);
-        } else {
-            stringstream ss;
-            ss << "Cannot assign from " << src_tp << " to " << dst_tp;
-            throw dynd::type_error(ss.str());
-        }
-    } else if (dst_tp.get_ndim() < src_tp.get_ndim()) {
+    if (src_tp.get_ndim() < dst_tp.get_ndim()) {
+      kernels::strided_assign_ck *self =
+          kernels::strided_assign_ck::create(ckb, kernreq, ckb_offset);
+      self->m_size = get_fixed_dim_size();
+      self->m_dst_stride = get_fixed_stride();
+      // If the src has fewer dimensions, broadcast it across this one
+      self->m_src_stride = 0;
+      return ::make_assignment_kernel(
+          ckb, ckb_offset, m_element_tp,
+          dst_arrmeta, src_tp, src_arrmeta,
+          kernel_request_strided, ectx);
+    } else if (src_tp.get_as_strided_dim(src_arrmeta, src_size, src_stride,
+                                         src_el_tp, src_el_arrmeta)) {
+      kernels::strided_assign_ck *self =
+          kernels::strided_assign_ck::create(ckb, kernreq, ckb_offset);
+      self->m_size = get_fixed_dim_size();
+      self->m_dst_stride = get_fixed_stride();
+      self->m_src_stride = src_stride;
+      // Check for a broadcasting error
+      if (src_size != 1 && get_fixed_dim_size() != src_size) {
         throw broadcast_error(dst_tp, dst_arrmeta, src_tp, src_arrmeta);
+      }
+
+      return ::make_assignment_kernel(
+          ckb, ckb_offset, m_element_tp,
+          dst_arrmeta, src_el_tp,
+          src_el_arrmeta, kernel_request_strided, ectx);
+    } else if (!src_tp.is_builtin()) {
+      // Give the src type a chance to make a kernel
+      return src_tp.extended()->make_assignment_kernel(
+          ckb, ckb_offset, dst_tp, dst_arrmeta, src_tp, src_arrmeta,
+          kernreq, ectx);
     } else {
-        stringstream ss;
-        ss << "Cannot assign from " << src_tp << " to " << dst_tp;
-        throw dynd::type_error(ss.str());
+      stringstream ss;
+      ss << "Cannot assign from " << src_tp << " to " << dst_tp;
+      throw dynd::type_error(ss.str());
     }
+  } else if (dst_tp.get_ndim() < src_tp.get_ndim()) {
+    throw broadcast_error(dst_tp, dst_arrmeta, src_tp, src_arrmeta);
+  } else {
+    stringstream ss;
+    ss << "Cannot assign from " << src_tp << " to " << dst_tp;
+    throw dynd::type_error(ss.str());
+  }
 }
 
 void cfixed_dim_type::foreach_leading(const char *arrmeta, char *data,
@@ -581,7 +584,7 @@ ndt::type dynd::ndt::make_cfixed_dim(intptr_t ndim, const intptr_t *shape,
     }
 }
 
-static size_t get_fixed_dim_size(const ndt::type& dt) {
+static intptr_t get_fixed_dim_size(const ndt::type& dt) {
     return  dt.tcast<cfixed_dim_type>()->get_fixed_dim_size();
 }
 

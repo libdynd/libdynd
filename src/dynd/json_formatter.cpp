@@ -261,7 +261,7 @@ static void format_json_uniform_dim(output_data& out, const ndt::type& dt, const
             const fixed_dim_type_arrmeta *md =
                 reinterpret_cast<const fixed_dim_type_arrmeta *>(arrmeta);
             ndt::type element_tp = fad->get_element_type();
-            intptr_t size = (intptr_t)fad->get_fixed_dim_size(),
+            intptr_t size = fad->get_fixed_dim_size(),
                      stride = md->stride;
             for (intptr_t i = 0; i < size; ++i) {
                 ::format_json(out, element_tp,
@@ -276,7 +276,7 @@ static void format_json_uniform_dim(output_data& out, const ndt::type& dt, const
         case cfixed_dim_type_id: {
             const cfixed_dim_type *fad = dt.tcast<cfixed_dim_type>();
             ndt::type element_tp = fad->get_element_type();
-            intptr_t size = (intptr_t)fad->get_fixed_dim_size(), stride = fad->get_fixed_stride();
+            intptr_t size = fad->get_fixed_dim_size(), stride = fad->get_fixed_stride();
             for (intptr_t i = 0; i < size; ++i) {
                 ::format_json(out, element_tp, arrmeta, data + i * stride);
                 if (i != size - 1) {

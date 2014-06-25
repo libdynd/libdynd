@@ -94,7 +94,7 @@ static void format_uniform_dim_datashape(std::ostream& o,
         }
         case fixed_dim_type_id: {
             const fixed_dim_type *fad = dt.tcast<fixed_dim_type>();
-            size_t dim_size = fad->get_fixed_dim_size();
+            intptr_t dim_size = fad->get_fixed_dim_size();
             o << dim_size << " * ";
             // Allow data to keep going only if the dimension size is 1
             if (dim_size != 1) {
@@ -105,7 +105,7 @@ static void format_uniform_dim_datashape(std::ostream& o,
         }
         case cfixed_dim_type_id: {
             const cfixed_dim_type *fad = dt.tcast<cfixed_dim_type>();
-            size_t dim_size = fad->get_fixed_dim_size();
+            intptr_t dim_size = fad->get_fixed_dim_size();
             o << dim_size << " * ";
             // Allow data to keep going only if the dimension size is 1
             if (dim_size != 1) {

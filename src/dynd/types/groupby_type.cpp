@@ -250,57 +250,64 @@ namespace {
 } // anonymous namespace
 
 size_t groupby_type::make_operand_to_value_assignment_kernel(
-    ckernel_builder *out, size_t offset_out, const char *dst_arrmeta,
+    ckernel_builder *ckb, intptr_t ckb_offset, const char *dst_arrmeta,
     const char *src_arrmeta, kernel_request_t kernreq,
     const eval::eval_context *ectx) const
 {
-    offset_out =
-        make_kernreq_to_single_kernel_adapter(out, offset_out, 1, kernreq);
-    out->ensure_capacity(offset_out + sizeof(groupby_to_value_assign_extra));
-    groupby_to_value_assign_extra *e = out->get_at<groupby_to_value_assign_extra>(offset_out);
-    const categorical_type *cd = m_groups_type.tcast<categorical_type>();
-    switch (cd->get_storage_type().get_type_id()) {
-        case uint8_type_id:
-            e->base.set_function<expr_single_t>(&groupby_to_value_assign_extra::single_uint8);
-            break;
-        case uint16_type_id:
-            e->base.set_function<expr_single_t>(&groupby_to_value_assign_extra::single_uint16);
-            break;
-        case uint32_type_id:
-            e->base.set_function<expr_single_t>(&groupby_to_value_assign_extra::single_uint32);
-            break;
-        default:
-            throw runtime_error("internal error in groupby_type::get_operand_to_value_kernel");
-    }
-    e->base.destructor = &groupby_to_value_assign_extra::destruct;
-    // The kernel type owns a reference to this type
-    e->src_groupby_tp = this;
-    base_type_incref(e->src_groupby_tp);
-    e->src_arrmeta = src_arrmeta;
-    e->dst_arrmeta = dst_arrmeta;
+  ckb_offset =
+      make_kernreq_to_single_kernel_adapter(ckb, ckb_offset, 1, kernreq);
+  groupby_to_value_assign_extra *e =
+      ckb->alloc_ck<groupby_to_value_assign_extra>(ckb_offset);
+  const categorical_type *cd = m_groups_type.tcast<categorical_type>();
+  switch (cd->get_storage_type().get_type_id()) {
+  case uint8_type_id:
+    e->base.set_function<expr_single_t>(
+        &groupby_to_value_assign_extra::single_uint8);
+    break;
+  case uint16_type_id:
+    e->base.set_function<expr_single_t>(
+        &groupby_to_value_assign_extra::single_uint16);
+    break;
+  case uint32_type_id:
+    e->base.set_function<expr_single_t>(
+        &groupby_to_value_assign_extra::single_uint32);
+    break;
+  default:
+    throw runtime_error(
+        "internal error in groupby_type::get_operand_to_value_kernel");
+  }
+  e->base.destructor = &groupby_to_value_assign_extra::destruct;
+  // The kernel type owns a reference to this type
+  e->src_groupby_tp = this;
+  base_type_incref(e->src_groupby_tp);
+  e->src_arrmeta = src_arrmeta;
+  e->dst_arrmeta = dst_arrmeta;
 
-    // The following is the setup for copying a single 'data' value to the output
-    // The destination element type and arrmeta
-    const ndt::type& dst_element_tp = static_cast<const var_dim_type *>(
-                    m_value_type.tcast<cfixed_dim_type>()->get_element_type().extended()
-                    )->get_element_type();
-    const char *dst_element_arrmeta = dst_arrmeta + 0 + sizeof(var_dim_type_arrmeta);
-    // Get source element type and arrmeta
-    ndt::type src_element_tp = m_operand_type;
-    const char *src_element_arrmeta = e->src_arrmeta;
-    src_element_tp = src_element_tp.extended()->at_single(0, &src_element_arrmeta, NULL);
-    src_element_tp = src_element_tp.tcast<pointer_type>()->get_target_type();
-    src_element_arrmeta += sizeof(pointer_type_arrmeta);
-    src_element_tp = src_element_tp.extended()->at_single(0, &src_element_arrmeta, NULL);
+  // The following is the setup for copying a single 'data' value to the output
+  // The destination element type and arrmeta
+  const ndt::type &dst_element_tp =
+      static_cast<const var_dim_type *>(
+          m_value_type.tcast<cfixed_dim_type>()->get_element_type().extended())
+          ->get_element_type();
+  const char *dst_element_arrmeta =
+      dst_arrmeta + 0 + sizeof(var_dim_type_arrmeta);
+  // Get source element type and arrmeta
+  ndt::type src_element_tp = m_operand_type;
+  const char *src_element_arrmeta = e->src_arrmeta;
+  src_element_tp =
+      src_element_tp.extended()->at_single(0, &src_element_arrmeta, NULL);
+  src_element_tp = src_element_tp.tcast<pointer_type>()->get_target_type();
+  src_element_arrmeta += sizeof(pointer_type_arrmeta);
+  src_element_tp =
+      src_element_tp.extended()->at_single(0, &src_element_arrmeta, NULL);
 
-    return ::make_assignment_kernel(out, offset_out + sizeof(groupby_to_value_assign_extra),
-                    dst_element_tp, dst_element_arrmeta,
-                    src_element_tp, src_element_arrmeta,
-                    kernel_request_single, ectx);
+  return ::make_assignment_kernel(
+      ckb, ckb_offset, dst_element_tp, dst_element_arrmeta, src_element_tp,
+      src_element_arrmeta, kernel_request_single, ectx);
 }
 
 size_t groupby_type::make_value_to_operand_assignment_kernel(
-    ckernel_builder *DYND_UNUSED(out), size_t DYND_UNUSED(offset_out),
+    ckernel_builder *DYND_UNUSED(ckb), intptr_t DYND_UNUSED(ckb_offset),
     const char *DYND_UNUSED(dst_arrmeta), const char *DYND_UNUSED(src_arrmeta),
     kernel_request_t DYND_UNUSED(kernreq),
     const eval::eval_context *DYND_UNUSED(ectx)) const

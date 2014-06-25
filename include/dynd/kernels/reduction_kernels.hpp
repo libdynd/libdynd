@@ -16,7 +16,7 @@ namespace dynd { namespace kernels {
  * Makes a unary reduction ckernel which adds values for the
  * given type id. This is not defined for all type_id values.
  */
-intptr_t make_builtin_sum_reduction_ckernel(ckernel_builder *out_ckb,
+intptr_t make_builtin_sum_reduction_ckernel(ckernel_builder *ckb,
                                             intptr_t ckb_offset,
                                             type_id_t tid,
                                             kernel_request_t kernreq);

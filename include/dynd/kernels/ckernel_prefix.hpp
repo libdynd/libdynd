@@ -36,7 +36,7 @@ enum {
     kernel_request_predicate = 2,
     /**
      * Kernel function expr_single_t,
-     * but the data in the kernel at position 'offset_out'
+     * but the data in the kernel at position 'ckb_offset'
      * is for data that describes the accumulation
      * of multiple strided dimensions that work
      * in a simple NumPy fashion.
@@ -44,7 +44,7 @@ enum {
 //    kernel_request_single_multistride,
     /**
      * Kernel function expr_strided_t,
-     * but the data in the kernel at position 'offset_out'
+     * but the data in the kernel at position 'ckb_offset'
      * is for data that describes the accumulation
      * of multiple strided dimensions that work
      * in a simple NumPy fashion.

@@ -29,7 +29,7 @@ struct arrfunc_type_data;
  *
  * \param self  The arrfunc.
  * \param ckb  A ckernel_builder instance where the kernel is placed.
- * \param ckb_offset  The offset into the output ckernel_builder `out_ckb`
+ * \param ckb_offset  The offset into the output ckernel_builder `ckb`
  *                    where the kernel should be placed.
  * \param dst_tp  The destination type of the ckernel to generate. This may be
  *                different from the one in the function prototype, but must
@@ -103,105 +103,104 @@ typedef void (*arrfunc_resolve_dst_shape_t)(const arrfunc_type_data *self,
  * with different array arrmeta.
  */
 struct arrfunc_type_data {
-    /** The function prototype of the arrfunc */
-    ndt::type func_proto;
-    /**
-     * Some memory for the arrfunc to use. If this is not
-     * enough space to hold all the data by value, should allocate
-     * space on the heap, and free it when free_func is called.
-     */
-    char data[4 * sizeof(void *)];
-    /**
-     * Helper function to reinterpret the data as the specified type.
-     */
-    template<typename T>
-    inline T* get_data_as() {
-      DYND_STATIC_ASSERT(sizeof(T) <= sizeof(data), "data does not fit");
-      DYND_STATIC_ASSERT(scalar_align_of<T>::value <= sizeof(void *),
-                         "data requires stronger alignment");
-      return reinterpret_cast<T *>(data);
-    }
-    template<typename T>
-    inline const T* get_data_as() const {
-      DYND_STATIC_ASSERT(sizeof(T) <= sizeof(data), "data does not fit");
-      DYND_STATIC_ASSERT(scalar_align_of<T>::value <= sizeof(void *),
-                         "data requires stronger alignment");
-      return reinterpret_cast<const T *>(data);
-    }
-    template<typename T>
-    inline void get_data_unaligned(T *out) const {
-      DYND_STATIC_ASSERT(sizeof(T) <= sizeof(data), "data does not fit");
-      memcpy(out, data, sizeof(T));
-    }
-    template<typename T>
-    inline void set_data_unaligned(const T *in) {
-      DYND_STATIC_ASSERT(sizeof(T) <= sizeof(data), "data does not fit");
-      memcpy(data, in, sizeof(T));
-    }
-    /**
-     * The function which instantiates a ckernel. See the documentation
-     * for the function typedef for more details.
-     */
-    arrfunc_instantiate_t instantiate;
-    arrfunc_resolve_dst_type_t resolve_dst_type;
-    arrfunc_resolve_dst_shape_t resolve_dst_shape;
-    /**
-     * A function which deallocates the memory behind data_ptr after
-     * freeing any additional resources it might contain.
-     */
-    void (*free_func)(arrfunc_type_data *self_data_ptr);
+  /**
+   * Some memory for the arrfunc to use. If this is not
+   * enough space to hold all the data by value, should allocate
+   * space on the heap, and free it when free_func is called.
+   */
+  char data[4 * 8];
+  /** The function prototype of the arrfunc */
+  ndt::type func_proto;
+  /**
+   * The function which instantiates a ckernel. See the documentation
+   * for the function typedef for more details.
+   */
+  arrfunc_instantiate_t instantiate;
+  arrfunc_resolve_dst_type_t resolve_dst_type;
+  arrfunc_resolve_dst_shape_t resolve_dst_shape;
+  /**
+   * A function which deallocates the memory behind data_ptr after
+   * freeing any additional resources it might contain.
+   */
+  void (*free_func)(arrfunc_type_data *self_data_ptr);
 
-    // Default to all NULL, so the destructor works correctly
-    inline arrfunc_type_data() : func_proto(), instantiate(0), free_func(0) {}
+  // Default to all NULL, so the destructor works correctly
+  inline arrfunc_type_data() : func_proto(), instantiate(0), free_func(0) {}
 
-    // If it contains an arrfunc, free it
-    inline ~arrfunc_type_data()
-    {
-        if (free_func) {
-            free_func(this);
+  // If it contains an arrfunc, free it
+  inline ~arrfunc_type_data()
+  {
+    if (free_func) {
+      free_func(this);
+    }
+  }
+
+  /**
+   * Helper function to reinterpret the data as the specified type.
+   */
+  template <typename T>
+  inline T *get_data_as()
+  {
+    DYND_STATIC_ASSERT(sizeof(T) <= sizeof(data), "data does not fit");
+    DYND_STATIC_ASSERT((int)scalar_align_of<T>::value <=
+                           (int)scalar_align_of<uint64_t>::value,
+                       "data requires stronger alignment");
+    return reinterpret_cast<T *>(data);
+  }
+  template <typename T>
+  inline const T *get_data_as() const
+  {
+    DYND_STATIC_ASSERT(sizeof(T) <= sizeof(data), "data does not fit");
+    DYND_STATIC_ASSERT((int)scalar_align_of<T>::value <=
+                           (int)scalar_align_of<uint64_t>::value,
+                       "data requires stronger alignment");
+    return reinterpret_cast<const T *>(data);
+  }
+
+  inline intptr_t get_param_count() const
+  {
+    return func_proto.tcast<funcproto_type>()->get_param_count();
+  }
+
+  inline const ndt::type *get_param_types() const
+  {
+    return func_proto.tcast<funcproto_type>()->get_param_types_raw();
+  }
+
+  inline const ndt::type &get_param_type(intptr_t i) const
+  {
+    return get_param_types()[i];
+  }
+
+  inline const ndt::type &get_return_type() const
+  {
+    return func_proto.tcast<funcproto_type>()->get_return_type();
+  }
+
+  inline ndt::type resolve(const ndt::type *src_tp) const
+  {
+    if (resolve_dst_type != NULL) {
+      ndt::type result;
+      resolve_dst_type(this, result, src_tp, true);
+      return result;
+    } else {
+      intptr_t param_count = get_param_count();
+      const ndt::type *param_types = get_param_types();
+      std::map<nd::string, ndt::type> typevars;
+      for (intptr_t i = 0; i != param_count; ++i) {
+        if (!ndt::type_pattern_match(src_tp[i].value_type(), param_types[i],
+                                     typevars)) {
+          std::stringstream ss;
+          ss << "parameter " << (i + 1) << " to arrfunc does not match, ";
+          ss << "expected " << param_types[i] << ", received " << src_tp[i];
+          throw std::invalid_argument(ss.str());
         }
+      }
+      // TODO:
+      // return ndt::substitute_type_vars(get_return_type(), typevars);
+      return get_return_type();
     }
-
-    inline intptr_t get_param_count() const {
-        return func_proto.tcast<funcproto_type>()->get_param_count();
-    }
-
-    inline const ndt::type *get_param_types() const {
-        return func_proto.tcast<funcproto_type>()->get_param_types_raw();
-    }
-
-    inline const ndt::type &get_param_type(intptr_t i) const {
-        return get_param_types()[i];
-    }
-
-    inline const ndt::type &get_return_type() const {
-        return func_proto.tcast<funcproto_type>()->get_return_type();
-    }
-
-    inline ndt::type resolve(const ndt::type *src_tp) const
-    {
-        if (resolve_dst_type != NULL) {
-            ndt::type result;
-            resolve_dst_type(this, result, src_tp, true);
-            return result;
-        } else {
-            intptr_t param_count = get_param_count();
-            const ndt::type *param_types = get_param_types();
-            std::map<nd::string, ndt::type> typevars;
-            for (intptr_t i = 0; i != param_count; ++i) {
-                if (!ndt::type_pattern_match(src_tp[i].value_type(),
-                                             param_types[i], typevars)) {
-                    std::stringstream ss;
-                    ss << "parameter " << (i + 1) << " to arrfunc does not match, ";
-                    ss << "expected " << param_types[i] << ", received " << src_tp[i];
-                    throw std::invalid_argument(ss.str());
-                }
-            }
-            // TODO:
-            // return ndt::substitute_type_vars(get_return_type(), typevars);
-            return get_return_type();
-        }
-    }
+  }
 };
 
 namespace nd {

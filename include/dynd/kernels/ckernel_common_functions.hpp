@@ -62,7 +62,7 @@ void expr_as_unary_adapter_strided_ckernel(
  *
  */
 size_t make_constant_value_assignment_ckernel(
-    ckernel_builder *out_ckb, intptr_t ckb_offset, const ndt::type &dst_tp,
+    ckernel_builder *ckb, intptr_t ckb_offset, const ndt::type &dst_tp,
     const char *dst_arrmeta, const nd::array &constant,
     kernel_request_t kernreq, const eval::eval_context *ectx);
 
@@ -82,7 +82,7 @@ intptr_t wrap_expr_as_unary_ckernel(dynd::ckernel_builder *ckb,
  * as a unary reduction ckernel. The three types of the binary
  * expr kernel must all be equal.
  *
- * \param out_ckb  The ckernel_builder into which the kernel adapter is placed.
+ * \param ckb  The ckernel_builder into which the kernel adapter is placed.
  * \param ckb_offset  The offset within the ckernel_builder at which to place the adapter.
  * \param right_associative  If true, the reduction is to be evaluated right to left,
  *                           (x0 * (x1 * (x2 * x3))), if false, the reduction is to be
@@ -92,7 +92,7 @@ intptr_t wrap_expr_as_unary_ckernel(dynd::ckernel_builder *ckb,
  * \returns  The ckb_offset where the child ckernel should be placed.
  */
 intptr_t wrap_binary_as_unary_reduction_ckernel(
-                dynd::ckernel_builder *out_ckb, intptr_t ckb_offset,
+                dynd::ckernel_builder *ckb, intptr_t ckb_offset,
                 bool right_associative,
                 kernel_request_t kernreq);
 

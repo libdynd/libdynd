@@ -115,162 +115,164 @@ static void unaligned_copy_strided(char *dst, intptr_t dst_stride,
 }
 
 size_t dynd::make_assignment_kernel(
-    ckernel_builder *out, size_t offset_out, const ndt::type &dst_tp,
+    ckernel_builder *ckb, intptr_t ckb_offset, const ndt::type &dst_tp,
     const char *dst_arrmeta, const ndt::type &src_tp, const char *src_arrmeta,
     kernel_request_t kernreq, const eval::eval_context *ectx)
 {
     if (dst_tp.is_builtin()) {
         if (src_tp.is_builtin()) {
             if (dst_tp.extended() == src_tp.extended()) {
-                return make_pod_typed_data_assignment_kernel(out, offset_out,
+                return make_pod_typed_data_assignment_kernel(ckb, ckb_offset,
                                 dst_tp.get_data_size(), dst_tp.get_data_alignment(),
                                 kernreq);
             } else {
-                return make_builtin_type_assignment_kernel(out, offset_out,
+                return make_builtin_type_assignment_kernel(ckb, ckb_offset,
                                 dst_tp.get_type_id(), src_tp.get_type_id(),
                                 kernreq, ectx->errmode);
             }
         } else {
-            return src_tp.extended()->make_assignment_kernel(out, offset_out,
+            return src_tp.extended()->make_assignment_kernel(ckb, ckb_offset,
                             dst_tp, dst_arrmeta,
                             src_tp, src_arrmeta,
                             kernreq, ectx);
         }
     } else {
-        return dst_tp.extended()->make_assignment_kernel(out, offset_out,
+        return dst_tp.extended()->make_assignment_kernel(ckb, ckb_offset,
                         dst_tp, dst_arrmeta,
                         src_tp, src_arrmeta,
                         kernreq, ectx);
     }
 }
 
-size_t dynd::make_pod_typed_data_assignment_kernel(ckernel_builder *out,
-                                                   size_t offset_out,
+size_t dynd::make_pod_typed_data_assignment_kernel(ckernel_builder *ckb,
+                                                   intptr_t ckb_offset,
                                                    size_t data_size,
                                                    size_t data_alignment,
                                                    kernel_request_t kernreq)
 {
-    bool single = (kernreq == kernel_request_single);
-    if (!single && kernreq != kernel_request_strided) {
-        stringstream ss;
-        ss << "make_pod_typed_data_assignment_kernel: unrecognized request " << (int)kernreq;
-        throw runtime_error(ss.str());
+  bool single = (kernreq == kernel_request_single);
+  if (!single && kernreq != kernel_request_strided) {
+    stringstream ss;
+    ss << "make_pod_typed_data_assignment_kernel: unrecognized request "
+       << (int)kernreq;
+    throw runtime_error(ss.str());
+  }
+  ckernel_prefix *result = NULL;
+  if (data_size == data_alignment) {
+    // Aligned specialization tables
+    // No need to reserve more space in the trivial cases, the space for a leaf
+    // is already there
+    switch (data_size) {
+    case 1:
+      result = ckb->alloc_ck_leaf<ckernel_prefix>(ckb_offset);
+      if (single) {
+        result->set_function<expr_single_t>(
+            &aligned_fixed_size_copy_assign<1>::single);
+      } else {
+        result->set_function<expr_strided_t>(
+            &aligned_fixed_size_copy_assign<1>::strided);
+      }
+      return ckb_offset;
+    case 2:
+      result = ckb->alloc_ck_leaf<ckernel_prefix>(ckb_offset);
+      if (single) {
+        result->set_function<expr_single_t>(
+            &aligned_fixed_size_copy_assign<2>::single);
+      } else {
+        result->set_function<expr_strided_t>(
+            &aligned_fixed_size_copy_assign<2>::strided);
+      }
+      return ckb_offset;
+    case 4:
+      result = ckb->alloc_ck_leaf<ckernel_prefix>(ckb_offset);
+      if (single) {
+        result->set_function<expr_single_t>(
+            &aligned_fixed_size_copy_assign<4>::single);
+      } else {
+        result->set_function<expr_strided_t>(
+            &aligned_fixed_size_copy_assign<4>::strided);
+      }
+      return ckb_offset;
+    case 8:
+      result = ckb->alloc_ck_leaf<ckernel_prefix>(ckb_offset);
+      if (single) {
+        result->set_function<expr_single_t>(
+            &aligned_fixed_size_copy_assign<8>::single);
+      } else {
+        result->set_function<expr_strided_t>(
+            &aligned_fixed_size_copy_assign<8>::strided);
+      }
+      return ckb_offset;
+    default: {
+      unaligned_copy_ck *self =
+          ckb->alloc_ck_leaf<unaligned_copy_ck>(ckb_offset);
+      if (single) {
+        self->base.set_function<expr_single_t>(&unaligned_copy_single);
+      } else {
+        self->base.set_function<expr_strided_t>(&unaligned_copy_strided);
+      }
+      self->data_size = data_size;
+      return ckb_offset;
     }
-    ckernel_prefix *result = NULL;
-    if (data_size == data_alignment) {
-        // Aligned specialization tables
-        // No need to reserve more space in the trivial cases, the space for a leaf is already there
-        switch (data_size) {
-            case 1:
-                result = out->get_at<ckernel_prefix>(offset_out);
-                if (single) {
-                    result->set_function<expr_single_t>(
-                                    &aligned_fixed_size_copy_assign<1>::single);
-                } else {
-                    result->set_function<expr_strided_t>(
-                                    &aligned_fixed_size_copy_assign<1>::strided);
-                }
-                return offset_out + sizeof(ckernel_prefix);
-            case 2:
-                result = out->get_at<ckernel_prefix>(offset_out);
-                if (single) {
-                    result->set_function<expr_single_t>(
-                                    &aligned_fixed_size_copy_assign<2>::single);
-                } else {
-                    result->set_function<expr_strided_t>(
-                                    &aligned_fixed_size_copy_assign<2>::strided);
-                }
-                return offset_out + sizeof(ckernel_prefix);
-            case 4:
-                result = out->get_at<ckernel_prefix>(offset_out);
-                if (single) {
-                    result->set_function<expr_single_t>(
-                                    &aligned_fixed_size_copy_assign<4>::single);
-                } else {
-                    result->set_function<expr_strided_t>(
-                                    &aligned_fixed_size_copy_assign<4>::strided);
-                }
-                return offset_out + sizeof(ckernel_prefix);
-            case 8:
-                result = out->get_at<ckernel_prefix>(offset_out);
-                if (single) {
-                    result->set_function<expr_single_t>(
-                                    &aligned_fixed_size_copy_assign<8>::single);
-                } else {
-                    result->set_function<expr_strided_t>(
-                                    &aligned_fixed_size_copy_assign<8>::strided);
-                }
-                return offset_out + sizeof(ckernel_prefix);
-            default:
-                out->ensure_capacity_leaf(offset_out + sizeof(unaligned_copy_ck));
-                result = out->get_at<ckernel_prefix>(offset_out);
-                if (single) {
-                    result->set_function<expr_single_t>(&unaligned_copy_single);
-                } else {
-                    result->set_function<expr_strided_t>(&unaligned_copy_strided);
-                }
-                reinterpret_cast<unaligned_copy_ck *>(result)->data_size = data_size;
-                return offset_out + sizeof(unaligned_copy_ck);
-        }
-    } else {
-        // Unaligned specialization tables
-        switch (data_size) {
-            case 2:
-                result = out->get_at<ckernel_prefix>(offset_out);
-                if (single) {
-                    result->set_function<expr_single_t>(
-                                    unaligned_fixed_size_copy_assign<2>::single);
-                } else {
-                    result->set_function<expr_strided_t>(
-                                    unaligned_fixed_size_copy_assign<2>::strided);
-                }
-                return offset_out + sizeof(ckernel_prefix);
-            case 4:
-                result = out->get_at<ckernel_prefix>(offset_out);
-                if (single) {
-                    result->set_function<expr_single_t>(
-                                    unaligned_fixed_size_copy_assign<4>::single);
-                } else {
-                    result->set_function<expr_strided_t>(
-                                    unaligned_fixed_size_copy_assign<4>::strided);
-                }
-                return offset_out + sizeof(ckernel_prefix);
-            case 8:
-                result = out->get_at<ckernel_prefix>(offset_out);
-                if (single) {
-                    result->set_function<expr_single_t>(
-                                    unaligned_fixed_size_copy_assign<8>::single);
-                } else {
-                    result->set_function<expr_strided_t>(
-                                    unaligned_fixed_size_copy_assign<8>::strided);
-                }
-                return offset_out + sizeof(ckernel_prefix);
-            default:
-                // Subtract the base amount to avoid over-reserving memory in this leaf case
-                out->ensure_capacity(offset_out + sizeof(unaligned_copy_ck) -
-                                sizeof(ckernel_prefix));
-                result = out->get_at<ckernel_prefix>(offset_out);
-                if (single) {
-                    result->set_function<expr_single_t>(&unaligned_copy_single);
-                } else {
-                    result->set_function<expr_strided_t>(&unaligned_copy_strided);
-                }
-                reinterpret_cast<unaligned_copy_ck *>(result)->data_size = data_size;
-                return offset_out + sizeof(unaligned_copy_ck);
-        }
     }
+  } else {
+    // Unaligned specialization tables
+    switch (data_size) {
+    case 2:
+      result = ckb->alloc_ck_leaf<ckernel_prefix>(ckb_offset);
+      if (single) {
+        result->set_function<expr_single_t>(
+            unaligned_fixed_size_copy_assign<2>::single);
+      } else {
+        result->set_function<expr_strided_t>(
+            unaligned_fixed_size_copy_assign<2>::strided);
+      }
+      return ckb_offset;
+    case 4:
+      result = ckb->alloc_ck_leaf<ckernel_prefix>(ckb_offset);
+      if (single) {
+        result->set_function<expr_single_t>(
+            unaligned_fixed_size_copy_assign<4>::single);
+      } else {
+        result->set_function<expr_strided_t>(
+            unaligned_fixed_size_copy_assign<4>::strided);
+      }
+      return ckb_offset;
+    case 8:
+      result = ckb->alloc_ck_leaf<ckernel_prefix>(ckb_offset);
+      if (single) {
+        result->set_function<expr_single_t>(
+            unaligned_fixed_size_copy_assign<8>::single);
+      } else {
+        result->set_function<expr_strided_t>(
+            unaligned_fixed_size_copy_assign<8>::strided);
+      }
+      return ckb_offset;
+    default: {
+      unaligned_copy_ck *self =
+          ckb->alloc_ck_leaf<unaligned_copy_ck>(ckb_offset);
+      if (single) {
+        self->base.set_function<expr_single_t>(&unaligned_copy_single);
+      } else {
+        self->base.set_function<expr_strided_t>(&unaligned_copy_strided);
+      }
+      self->data_size = data_size;
+      return ckb_offset;
+    }
+    }
+  }
 }
 
 namespace {
 template<class dst_type, class src_type, assign_error_mode errmode>
 struct single_assigner_as_expr_single {
-    static void single(char *dst, const char *const *src,
-                       ckernel_prefix *DYND_UNUSED(self))
-    {
-        single_assigner_builtin<dst_type, src_type, errmode>::assign(
-            reinterpret_cast<dst_type *>(dst),
-            reinterpret_cast<const src_type *>(*src));
-    }
+  static void single(char *dst, const char *const *src,
+                     ckernel_prefix *DYND_UNUSED(self))
+  {
+    single_assigner_builtin<dst_type, src_type, errmode>::assign(
+        reinterpret_cast<dst_type *>(dst),
+        reinterpret_cast<const src_type *>(*src));
+  }
 };
 } // anonymous namespace
 
@@ -422,7 +424,7 @@ static expr_strided_t assign_table_strided_kernel[builtin_type_id_count-2][built
 };
 
 size_t dynd::make_builtin_type_assignment_kernel(
-                ckernel_builder *out, size_t offset_out,
+                ckernel_builder *ckb, intptr_t ckb_offset,
                 type_id_t dst_type_id, type_id_t src_type_id,
                 kernel_request_t kernreq, assign_error_mode errmode)
 {
@@ -431,7 +433,8 @@ size_t dynd::make_builtin_type_assignment_kernel(
                     src_type_id >= bool_type_id && src_type_id <= complex_float64_type_id &&
                     errmode != assign_error_default) {
         // No need to reserve more space, the space for a leaf is already there
-        ckernel_prefix *result = out->get_at<ckernel_prefix>(offset_out);
+        ckernel_prefix *result = ckb->get_at<ckernel_prefix>(ckb_offset);
+        kernels::inc_ckb_offset<ckernel_prefix>(ckb_offset);
         switch (kernreq) {
             case kernel_request_single:
                 result->set_function<expr_single_t>(
@@ -449,7 +452,7 @@ size_t dynd::make_builtin_type_assignment_kernel(
                 throw runtime_error(ss.str());
             }   
         }
-        return offset_out + sizeof(ckernel_prefix);
+        return ckb_offset;
     } else {
         stringstream ss;
         ss << "Cannot assign from " << ndt::type(src_type_id) << " to " << ndt::type(dst_type_id);
@@ -482,18 +485,18 @@ struct wrap_single_as_strided_fixedcount_ck {
 
 template<>
 struct wrap_single_as_strided_fixedcount_ck<0> {
-    static void strided(char *dst, intptr_t dst_stride,
-                        const char *const *DYND_UNUSED(src),
-                        const intptr_t *DYND_UNUSED(src_stride), size_t count,
-                        ckernel_prefix *self)
-    {
-        ckernel_prefix *echild = self->get_child_ckernel(sizeof(ckernel_prefix));
-        expr_single_t opchild = echild->get_function<expr_single_t>();
-        for (size_t i = 0; i != count; ++i) {
-            opchild(dst, NULL, echild);
-            dst += dst_stride;
-        }
+  static void strided(char *dst, intptr_t dst_stride,
+                      const char *const *DYND_UNUSED(src),
+                      const intptr_t *DYND_UNUSED(src_stride), size_t count,
+                      ckernel_prefix *self)
+  {
+    ckernel_prefix *echild = self->get_child_ckernel(sizeof(ckernel_prefix));
+    expr_single_t opchild = echild->get_function<expr_single_t>();
+    for (size_t i = 0; i != count; ++i) {
+      opchild(dst, NULL, echild);
+      dst += dst_stride;
     }
+  }
 };
 
 static const expr_strided_t wrap_single_as_strided_fixedcount[7] = {
@@ -508,73 +511,69 @@ static const expr_strided_t wrap_single_as_strided_fixedcount[7] = {
 
 static void simple_wrapper_kernel_destruct(ckernel_prefix *self)
 {
-    self->destroy_child_ckernel(sizeof(ckernel_prefix));
+  self->destroy_child_ckernel(sizeof(ckernel_prefix));
 }
 
 struct wrap_single_as_strided_ck {
-    typedef wrap_single_as_strided_ck self_type;
-    ckernel_prefix base;
-    intptr_t nsrc;
+  typedef wrap_single_as_strided_ck self_type;
+  ckernel_prefix base;
+  intptr_t nsrc;
 
-    static inline void strided(char *dst, intptr_t dst_stride,
-                               const char *const *src,
-                               const intptr_t *src_stride, size_t count,
-                               ckernel_prefix *self)
-    {
-        intptr_t nsrc = reinterpret_cast<self_type *>(self)->nsrc;
-        shortvector<const char *> src_copy(nsrc, src);
-        ckernel_prefix *child =
-            self->get_child_ckernel(sizeof(self_type));
-        expr_single_t child_fn = child->get_function<expr_single_t>();
-        for (size_t i = 0; i != count; ++i) {
-            child_fn(dst, src_copy.get(), child);
-            dst += dst_stride;
-            for (intptr_t j = 0; j < nsrc; ++j) {
-                src_copy[j] += src_stride[j];
-            }
-        }
+  static inline void strided(char *dst, intptr_t dst_stride,
+                             const char *const *src, const intptr_t *src_stride,
+                             size_t count, ckernel_prefix *self)
+  {
+    intptr_t nsrc = reinterpret_cast<self_type *>(self)->nsrc;
+    shortvector<const char *> src_copy(nsrc, src);
+    ckernel_prefix *child = self->get_child_ckernel(sizeof(self_type));
+    expr_single_t child_fn = child->get_function<expr_single_t>();
+    for (size_t i = 0; i != count; ++i) {
+      child_fn(dst, src_copy.get(), child);
+      dst += dst_stride;
+      for (intptr_t j = 0; j < nsrc; ++j) {
+        src_copy[j] += src_stride[j];
+      }
     }
+  }
 
-    static void destruct(ckernel_prefix *self)
-    {
-        self->destroy_child_ckernel(sizeof(self_type));
-    }
+  static void destruct(ckernel_prefix *self)
+  {
+    self->destroy_child_ckernel(sizeof(self_type));
+  }
 };
 
 } // anonymous namespace
 
 size_t dynd::make_kernreq_to_single_kernel_adapter(ckernel_builder *ckb,
-                                                   size_t ckb_offset, int nsrc,
+                                                   intptr_t ckb_offset, int nsrc,
                                                    kernel_request_t kernreq)
 {
-    switch (kernreq) {
-        case kernel_request_single: {
-            return ckb_offset;
-        }
-        case kernel_request_strided: {
-            if (nsrc >= 0 &&
-                    nsrc < (int)(sizeof(wrap_single_as_strided_fixedcount) /
-                            sizeof(wrap_single_as_strided_fixedcount[0]))) {
-                ckb->ensure_capacity(ckb_offset + sizeof(ckernel_prefix));
-                ckernel_prefix *e = ckb->get_at<ckernel_prefix>(ckb_offset);
-                e->set_function<expr_strided_t>(
-                    wrap_single_as_strided_fixedcount[nsrc]);
-                e->destructor = &simple_wrapper_kernel_destruct;
-                return ckb_offset + sizeof(ckernel_prefix);
-            } else {
-                ckb->ensure_capacity(ckb_offset + sizeof(wrap_single_as_strided_ck));
-                wrap_single_as_strided_ck *e = ckb->get_at<wrap_single_as_strided_ck>(ckb_offset);
-                e->base.set_function<expr_strided_t>(
-                    &wrap_single_as_strided_ck::strided);
-                e->base.destructor = &wrap_single_as_strided_ck::destruct;
-                e->nsrc = nsrc;
-                return ckb_offset + sizeof(wrap_single_as_strided_ck);
-            }
-        }
-        default: {
-            stringstream ss;
-            ss << "make_kernreq_to_single_kernel_adapter: unrecognized request " << (int)kernreq;
-            throw runtime_error(ss.str());
-        }
+  switch (kernreq) {
+  case kernel_request_single: {
+    return ckb_offset;
+  }
+  case kernel_request_strided: {
+    if (nsrc >= 0 &&
+        nsrc < (int)(sizeof(wrap_single_as_strided_fixedcount) /
+                     sizeof(wrap_single_as_strided_fixedcount[0]))) {
+      ckernel_prefix *e = ckb->alloc_ck<ckernel_prefix>(ckb_offset);
+      e->set_function<expr_strided_t>(wrap_single_as_strided_fixedcount[nsrc]);
+      e->destructor = &simple_wrapper_kernel_destruct;
+      return ckb_offset;
+    } else {
+      wrap_single_as_strided_ck *e =
+          ckb->alloc_ck<wrap_single_as_strided_ck>(ckb_offset);
+      e->base.set_function<expr_strided_t>(&wrap_single_as_strided_ck::strided);
+      e->base.destructor = &wrap_single_as_strided_ck::destruct;
+      e->nsrc = nsrc;
+      return ckb_offset;
     }
+  }
+  default: {
+    stringstream ss;
+    ss << "make_kernreq_to_single_kernel_adapter: unrecognized request "
+       << (int)kernreq;
+    throw runtime_error(ss.str());
+  }
+  }
 }

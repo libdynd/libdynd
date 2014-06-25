@@ -84,9 +84,9 @@ static intptr_t instantiate_int_offset_arrfunc(
         ss << src_tp[0] << ") -> " << dst_tp;
         throw type_error(ss.str());
     }
-    self_type *self = self_type::create_leaf(ckb, ckb_offset, kernreq);
-    self_af->get_data_unaligned(&self->m_offset);
-    return ckb_offset + sizeof(self_type);
+    self_type *self = self_type::create_leaf(ckb, kernreq, ckb_offset);
+    self->m_offset = *self_af->get_data_as<Tdst>();
+    return ckb_offset;
 }
 
 template <class Tsrc, class Tdst>
@@ -96,7 +96,7 @@ nd::arrfunc make_int_offset_arrfunc(Tdst offset, const ndt::type &func_proto)
     arrfunc_type_data *af =
         reinterpret_cast<arrfunc_type_data *>(out_af.get_readwrite_originptr());
     af->func_proto = func_proto;
-    af->set_data_unaligned(&offset);
+    *af->get_data_as<Tdst>() = offset;
     af->instantiate = &instantiate_int_offset_arrfunc<Tsrc, Tdst>;
     out_af.flag_as_immutable();
     return out_af;

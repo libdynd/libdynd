@@ -34,13 +34,13 @@ static intptr_t instantiate_assignment_ckernel(
       if (errmode == ectx->errmode) {
         return make_assignment_kernel(ckb, ckb_offset, dst_tp, dst_arrmeta,
                                       src_tp[0], src_arrmeta[0],
-                                      (kernel_request_t)kernreq, ectx);
+                                      kernreq, ectx);
       } else {
         eval::eval_context ectx_tmp(*ectx);
         ectx_tmp.errmode = errmode;
         return make_assignment_kernel(ckb, ckb_offset, dst_tp, dst_arrmeta,
                                       src_tp[0], src_arrmeta[0],
-                                      (kernel_request_t)kernreq, &ectx_tmp);
+                                      kernreq, &ectx_tmp);
       }
     } else {
       stringstream ss;
