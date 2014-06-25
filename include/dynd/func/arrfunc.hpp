@@ -128,7 +128,11 @@ struct arrfunc_type_data {
   void (*free_func)(arrfunc_type_data *self_data_ptr);
 
   // Default to all NULL, so the destructor works correctly
-  inline arrfunc_type_data() : func_proto(), instantiate(0), free_func(0) {}
+  inline arrfunc_type_data() : func_proto(), instantiate(0), free_func(0)
+  {
+    DYND_STATIC_ASSERT((sizeof(arrfunc_type_data) & 7) == 0,
+                       "arrfunc_type_data must have size divisible by 8");
+  }
 
   // If it contains an arrfunc, free it
   inline ~arrfunc_type_data()
@@ -205,9 +209,6 @@ struct arrfunc_type_data {
     }
   }
 };
-
-DYND_STATIC_ASSERT((sizeof(arrfunc_type_data) & 7) == 0,
-                   "arrfunc_type_data must have size divisible by 8");
 
 namespace nd {
 /**
