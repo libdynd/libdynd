@@ -286,6 +286,17 @@ TYPED_TEST_P(FFT2D, KroneckerDelta) {
 */
 }
 
+TEST(FFT2D, Shift)  {
+    static int vals[3][3] = {{0, 1, 2}, {3, 4, -4}, {-3, -2, -1}};
+
+    nd::array x = nd::empty<int[3][3]>();
+    x.vals() = vals;
+
+    nd::array y = fftshift(x);
+}
+
+
+
 /*
     if ((TestFixture::SrcShape[0] % 4) != 0 || (TestFixture::SrcShape[1] % 4) != 0) {
         return;
@@ -299,7 +310,8 @@ TYPED_TEST_P(FFT2D, KroneckerDelta) {
     }
 */
 
-REGISTER_TYPED_TEST_CASE_P(FFT2D, Inverse, Zeros, Ones, KroneckerDelta);
+//REGISTER_TYPED_TEST_CASE_P(FFT2D, Inverse, Zeros, Ones, KroneckerDelta);
+//INSTANTIATE_TYPED_TEST_CASE_P(ComplexDouble, FFT2D, FixedDim2D<dynd_complex<double> >::Types);
+
 //INSTANTIATE_TYPED_TEST_CASE_P(ComplexFloat, FFT2D, FixedDim2D<dynd_complex<float> >::Types);
 //INSTANTIATE_TYPED_TEST_CASE_P(Double, FFT2D, FixedDim2D<double>::Types);
-INSTANTIATE_TYPED_TEST_CASE_P(ComplexDouble, FFT2D, FixedDim2D<dynd_complex<double> >::Types);

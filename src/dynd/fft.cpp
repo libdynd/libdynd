@@ -8,6 +8,8 @@
 
 #include <dynd/fft.hpp>
 #include <dynd/types/strided_dim_type.hpp>
+#include <dynd/types/arrfunc_type.hpp>
+#include <dynd/func/take_arrfunc.hpp>
 
 using namespace std;
 using namespace dynd;
@@ -254,5 +256,16 @@ nd::array dynd::fftw::ifft(const nd::array &x, const vector<intptr_t> &shape, bo
 #endif // DYND_FFTW
 
 nd::array dynd::fftshift(const nd::array &x) {
+    nd::arrfunc take = kernels::make_take_arrfunc();
+
+    nd::array b;
+    intptr_t bvals[3] = {1, 0, 2};
+    b = bvals;
+
+    nd::array y = take(x, b);
+
+    std::cout << "(DEBUG) x: " << x << std::endl;
+    std::cout << "(DEBUG) y: " << y << std::endl;
+
     return x;
 }
