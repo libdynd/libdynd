@@ -111,7 +111,7 @@ struct arrfunc_type_data {
    * On 32-bit platforms, the size of this data is increased by 4
    * so the entire struct is 8-byte aligned.
    */
-  char data[4 * 8 + ((SIZE_MAX == UINT_MAX) ? 4 : 0)];
+  char data[4 * 8 + ((sizeof(void *) == 4) ? 4 : 0)];
   /** The function prototype of the arrfunc */
   ndt::type func_proto;
   /**

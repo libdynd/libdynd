@@ -6,10 +6,6 @@
 #ifndef _DYND__CONFIG_HPP_
 #define _DYND__CONFIG_HPP_
 
-#if defined(__GNUC__)
-#define __STDC_LIMIT_MACROS
-#endif
-
 #include <cstdlib>
 #include <stdint.h>
 #include <limits>
