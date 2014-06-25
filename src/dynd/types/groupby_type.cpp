@@ -204,7 +204,7 @@ namespace {
 
             // Loop through both by_values and data_values,
             // copying the data to the right place in the output
-            ckernel_prefix *echild = &(e + 1)->base;
+            ckernel_prefix *echild = e->base.get_child_ckernel(sizeof(extra_type));
             expr_single_t opchild = echild->get_function<expr_single_t>();
             array_iter<0, 1> iter(data_values_tp, data_values_arrmeta, data_values_data, 1);
             if (!iter.empty()) {

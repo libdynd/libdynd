@@ -37,12 +37,12 @@ public:
 
     virtual ~string_type();
 
-    string_encoding_t get_encoding() const {
+    inline string_encoding_t get_encoding() const {
         return m_encoding;
     }
 
     /** Alignment of the string data being pointed to. */
-    size_t get_target_alignment() const {
+    inline size_t get_target_alignment() const {
         return string_encoding_char_size_table[m_encoding];
     }
 

@@ -36,7 +36,7 @@ struct strided_expr_kernel_extra {
                     ckernel_prefix *extra)
     {
         extra_type *e = reinterpret_cast<extra_type *>(extra);
-        ckernel_prefix *echild = &(e + 1)->base;
+        ckernel_prefix *echild = e->base.get_child_ckernel(sizeof(extra_type));
         expr_strided_t opchild = echild->get_function<expr_strided_t>();
         opchild(dst, e->dst_stride, src, e->src_stride, e->size, echild);
     }
@@ -46,7 +46,7 @@ struct strided_expr_kernel_extra {
                     size_t count, ckernel_prefix *extra)
     {
         extra_type *e = reinterpret_cast<extra_type *>(extra);
-        ckernel_prefix *echild = &(e + 1)->base;
+        ckernel_prefix *echild = e->base.get_child_ckernel(sizeof(extra_type));
         expr_strided_t opchild = echild->get_function<expr_strided_t>();
         intptr_t inner_size = e->size, inner_dst_stride = e->dst_stride;
         const intptr_t *inner_src_stride = e->src_stride;
@@ -219,7 +219,7 @@ struct strided_or_var_to_strided_expr_kernel_extra {
                     ckernel_prefix *extra)
     {
         extra_type *e = reinterpret_cast<extra_type *>(extra);
-        ckernel_prefix *echild = &(e + 1)->base;
+        ckernel_prefix *echild = e->base.get_child_ckernel(sizeof(extra_type));
         expr_strided_t opchild = echild->get_function<expr_strided_t>();
         // Broadcast all the src 'var' dimensions to dst
         intptr_t dim_size = e->size;
@@ -420,7 +420,7 @@ struct strided_or_var_to_var_expr_kernel_extra {
                     ckernel_prefix *extra)
     {
         extra_type *e = reinterpret_cast<extra_type *>(extra);
-        ckernel_prefix *echild = &(e + 1)->base;
+        ckernel_prefix *echild = e->base.get_child_ckernel(sizeof(extra_type));
         expr_strided_t opchild = echild->get_function<expr_strided_t>();
         var_dim_type_data *dst_vddd = reinterpret_cast<var_dim_type_data *>(dst);
         char *modified_dst;

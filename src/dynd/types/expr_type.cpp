@@ -225,7 +225,7 @@ namespace {
             for (int i = 0; i < N; ++i) {
                 src_modified[i] = src[i] + offsets[i];
             }
-            ckernel_prefix *echild = &(e + 1)->base;
+            ckernel_prefix *echild = e->base.get_child_ckernel(sizeof(extra_type));
             expr_single_t opchild = echild->get_function<expr_single_t>();
             opchild(dst, src_modified, echild);
         }
@@ -254,9 +254,8 @@ namespace {
             for (size_t i = 0; i != src_count; ++i) {
                 src_modified[i] = src[i] + offsets[i];
             }
-            ckernel_prefix *echild = reinterpret_cast<ckernel_prefix *>(
-                            reinterpret_cast<char *>(extra) + sizeof(extra_type) +
-                            src_count * sizeof(size_t));
+            ckernel_prefix *echild = extra->get_child_ckernel(
+                sizeof(extra_type) + src_count * sizeof(size_t));
             expr_single_t opchild = echild->get_function<expr_single_t>();
             opchild(dst, src_modified.get(), echild);
         }

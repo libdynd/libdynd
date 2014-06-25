@@ -23,7 +23,7 @@ namespace kernels {
    */
   inline void inc_ckb_offset(intptr_t& inout_ckb_offset, size_t inc)
   {
-    inout_ckb_offset += static_cast<intptr_t>((inc + size_t(7)) & ~size_t(7));
+    inout_ckb_offset += static_cast<intptr_t>(ckernel_prefix::align_offset(inc));
   }
 
   template<class T>
@@ -432,7 +432,7 @@ namespace kernels {
      */
     inline ckernel_prefix *get_child_ckernel(intptr_t offset)
     {
-      return base.get_child_ckernel(offset);
+      return base.get_child_ckernel(ckernel_prefix::align_offset(offset));
     }
   };
 } // namespace kernels

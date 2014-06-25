@@ -107,8 +107,11 @@ struct arrfunc_type_data {
    * Some memory for the arrfunc to use. If this is not
    * enough space to hold all the data by value, should allocate
    * space on the heap, and free it when free_func is called.
+   *
+   * On 32-bit platforms, the size of this data is increased by 4
+   * so the entire struct is 8-byte aligned.
    */
-  char data[4 * 8];
+  char data[4 * 8 + ((SIZE_MAX == UINT_MAX) ? 4 : 0)];
   /** The function prototype of the arrfunc */
   ndt::type func_proto;
   /**
@@ -202,6 +205,9 @@ struct arrfunc_type_data {
     }
   }
 };
+
+DYND_STATIC_ASSERT((sizeof(arrfunc_type_data) & 7) == 0,
+                   "arrfunc_type_data must have size divisible by 8");
 
 namespace nd {
 /**

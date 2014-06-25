@@ -65,13 +65,14 @@ namespace {
         template<typename UIntType>
         inline static void single(char *dst, const char *src, ckernel_prefix *extra)
         {
-            extra_type *e = reinterpret_cast<extra_type *>(extra);
-            ckernel_prefix *echild = &(e + 1)->base;
-            expr_single_t opchild = echild->get_function<expr_single_t>();
+          extra_type *e = reinterpret_cast<extra_type *>(extra);
+          ckernel_prefix *echild = extra->get_child_ckernel(sizeof(extra_type));
+          expr_single_t opchild = echild->get_function<expr_single_t>();
 
-            uint32_t value = *reinterpret_cast<const UIntType *>(src);
-            const char *src_val = e->src_cat_tp->get_category_data_from_value(value);
-            opchild(dst, &src_val, echild);
+          uint32_t value = *reinterpret_cast<const UIntType *>(src);
+          const char *src_val =
+              e->src_cat_tp->get_category_data_from_value(value);
+          opchild(dst, &src_val, echild);
         }
 
         // Some compilers are finicky about getting single<T> as a function pointer, so this...

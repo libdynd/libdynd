@@ -81,6 +81,13 @@ struct ckernel_prefix {
     }
 
     /**
+     * Aligns an offset as required by ckernels.
+     */
+    inline static size_t align_offset(size_t offset) {
+      return (offset + size_t(7)) & ~size_t(7);
+    }
+
+    /**
      * Call to get the kernel function pointer, whose type
      * must be known by the context.
      *
@@ -131,9 +138,10 @@ struct ckernel_prefix {
      * Returns the pointer to a child ckernel at the provided
      * offset.
      */
-    inline ckernel_prefix *get_child_ckernel(size_t offset) {
-        return reinterpret_cast<ckernel_prefix *>(
-            reinterpret_cast<char *>(this) + offset);
+    inline ckernel_prefix *get_child_ckernel(intptr_t offset) {
+      return reinterpret_cast<ckernel_prefix *>(
+          reinterpret_cast<char *>(this) +
+          ckernel_prefix::align_offset(offset));
     }
 
     /**
@@ -141,11 +149,10 @@ struct ckernel_prefix {
      * a ckernel at the given offset from `this`.
      */
     inline void destroy_child_ckernel(size_t offset) {
-        if (offset != 0) {
-            ckernel_prefix *child = reinterpret_cast<ckernel_prefix *>(
-                reinterpret_cast<char *>(this) + offset);
-            child->destroy();
-        }
+      if (offset != 0) {
+        ckernel_prefix *child = get_child_ckernel(offset);
+        child->destroy();
+      }
     }
 };
 
