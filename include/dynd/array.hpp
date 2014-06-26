@@ -598,21 +598,30 @@ public:
     array adapt(const ndt::type& tp, const nd::string& adapt_op);
 
     /**
+     * Permutes the dimensions of the array, returning a view to the result.
+     * Only strided dimensions can be permuted and no dimension can be permuted
+     * across a variable dimension. At present, there is no error checking.
      *
+     * \param ndim The number of dimensions to permute. If `ndim' is less than that
+     *             of this array, the other dimensions will not be modified.
+     * \param axes The permutation. It must be of length `ndim' and not contain
+     *             a value greater or equal to `ndim'.
      */
     array permute(intptr_t ndim, const intptr_t *axes) const;
 
     /**
-     *
+     * Rolls the dimensions of the array so the axis `from' becomes the axis `to'.
+     * At present, there cannot be any variable dimensions.
      */
-    array roll(intptr_t to_axis, intptr_t from_axis = 0) const;
+    array roll(intptr_t to, intptr_t from = 0) const;
 
-    array roll(intptr_t from_axis = 0) const {
-        return roll(get_ndim() - 1, from_axis);
+    array roll(intptr_t from = 0) const {
+        return roll(get_ndim() - 1, from);
     }
 
     /**
-     *
+     * Transposes (reverses) the dimensions of the array.
+     * At present, there cannot be any variable dimensions.
      */
     array transpose() const;
 
@@ -996,7 +1005,7 @@ namespace detail {
 array typed_empty(intptr_t ndim, const intptr_t *shape, const ndt::type &tp);
 
 /**
- * A version of typed_empty that excepts a std::vector as the shape.
+ * A version of typed_empty that accepts a std::vector as the shape.
  */
 inline array typed_empty(const std::vector<intptr_t> &shape,
                          const ndt::type &tp)
@@ -1155,6 +1164,64 @@ array empty_like(const array& rhs, const ndt::type& uniform_dtype);
  * \param rhs  The array whose shape, memory layout, and dtype to emulate.
  */
 array empty_like(const array& rhs);
+
+/**
+ * Primitive function to construct an nd::array with each element initialized to 0.
+ * In this function, the type provided is the complete type of the array
+ * result, not just its dtype.
+ */
+array typed_zeros(intptr_t ndim, const intptr_t *shape, const ndt::type &tp);
+
+/**
+ * A version of typed_zeros that accepts a std::vector as the shape.
+ */
+inline array typed_zeros(const std::vector<intptr_t> &shape,
+                         const ndt::type &tp)
+{
+  return typed_zeros(shape.size(), shape.empty() ? NULL : &shape[0], tp);
+}
+
+/**
+ * Constructs an array, with each element initialized to 0, of the given dtype,
+ * with ndim/shape pointer.
+ */
+inline array dtyped_zeros(intptr_t ndim, const intptr_t *shape,
+                          const ndt::type &tp)
+{
+  nd::array res = dtyped_empty(ndim, shape, tp);
+  res.val_assign(0);
+
+  return res;
+}
+
+/**
+ * Primitive function to construct an nd::array with each element initialized to 1.
+ * In this function, the type provided is the complete type of the array
+ * result, not just its dtype.
+ */
+array typed_ones(intptr_t ndim, const intptr_t *shape, const ndt::type &tp);
+
+/**
+ * A version of typed_ones that accepts a std::vector as the shape.
+ */
+inline array typed_ones(const std::vector<intptr_t> &shape,
+                         const ndt::type &tp)
+{
+  return typed_ones(shape.size(), shape.empty() ? NULL : &shape[0], tp);
+}
+
+/**
+ * Constructs an array, with each element initialized to 1, of the given dtype,
+ * with ndim/shape pointer.
+ */
+inline array dtyped_ones(intptr_t ndim, const intptr_t *shape,
+                          const ndt::type &tp)
+{
+  nd::array res = dtyped_empty(ndim, shape, tp);
+  res.val_assign(1);
+
+  return res;
+}
 
 ///////////// Initializer list constructor implementation /////////////////////////
 #ifdef DYND_INIT_LIST

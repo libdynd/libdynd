@@ -1296,30 +1296,30 @@ nd::array nd::array::permute(intptr_t ndim, const intptr_t *axes) const
     return res;
 }
 
-nd::array nd::array::roll(intptr_t to_axis, intptr_t from_axis) const
+nd::array nd::array::roll(intptr_t to, intptr_t from) const
 {
-    if (from_axis < to_axis) {
-        intptr_t ndim = to_axis + 1;
+    if (from < to) {
+        intptr_t ndim = to + 1;
         dimvector axes(ndim);
-        for (intptr_t i = 0; i < from_axis; ++i) {
+        for (intptr_t i = 0; i < from; ++i) {
             axes[i] = i;
         }
-        for (intptr_t i = from_axis; i < to_axis; ++i) {
+        for (intptr_t i = from; i < to; ++i) {
             axes[i] = i + 1;
         }
-        axes[to_axis] = from_axis;
+        axes[to] = from;
 
         return permute(ndim, axes.get());
     }
 
-    if (from_axis > to_axis) {
-        intptr_t ndim = from_axis + 1;
+    if (from > to) {
+        intptr_t ndim = from + 1;
         dimvector axes(ndim);
-        for (intptr_t i = 0; i < to_axis; ++i) {
+        for (intptr_t i = 0; i < to; ++i) {
             axes[i] = i;
         }
-        axes[to_axis] = from_axis;
-        for (intptr_t i = to_axis + 1; i <= from_axis; ++i) {
+        axes[to] = from;
+        for (intptr_t i = to + 1; i <= from; ++i) {
             axes[i] = i - 1;
         }
 
@@ -1712,6 +1712,24 @@ nd::array nd::empty_like(const nd::array& rhs)
         }
         return result;
     }
+}
+
+nd::array nd::typed_zeros(intptr_t ndim, const intptr_t *shape,
+                          const ndt::type &tp)
+{
+    nd::array res = nd::typed_empty(ndim, shape, tp);
+    res.val_assign(0);
+
+    return res;
+}
+
+nd::array nd::typed_ones(intptr_t ndim, const intptr_t *shape,
+                          const ndt::type &tp)
+{
+    nd::array res = nd::typed_empty(ndim, shape, tp);
+    res.val_assign(1);
+
+    return res;
 }
 
 nd::array nd::memmap(const std::string& filename,
