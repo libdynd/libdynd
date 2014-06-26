@@ -1,5 +1,5 @@
 //
-// Copyright (C) 2011-14 Mark Wiebe, DyND Developers
+// Copyright (C) 2011-14 Mark Wiebe, Irwin Zaid, DyND Developers
 // BSD 2-Clause License, see LICENSE.txt
 //
 
@@ -1284,6 +1284,7 @@ nd::array nd::array::permute(intptr_t ndim, const intptr_t *axes) const
 
     char *md = res.get_arrmeta();
     for (intptr_t i = 0; i < ndim; ++i) {
+        // A permutation must leave dimensions that are not strided alone, so this check handles those.
         if (i != axes[i]) {
             strided_dim_type_arrmeta *smd = reinterpret_cast<strided_dim_type_arrmeta *>(md);
             smd->size = shape[axes[i]];
