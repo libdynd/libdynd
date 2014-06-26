@@ -12,7 +12,7 @@ namespace dynd { namespace nd {
  * Primitive function to construct an nd::array with each element initialized
  * to a random value. This is used only for testing right now, and it should be 
  * completely redone at some point. Variable dimensions are supported. Only a dtype
- * of double is currently supported 
+ * of double is currently supported.
  */
 nd::array typed_rand(intptr_t ndim, const intptr_t *shape, const ndt::type &tp);
 
