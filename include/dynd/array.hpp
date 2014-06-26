@@ -525,6 +525,11 @@ public:
         irange i[4] = {i0, i1, i2, i3};
         return at_array(4, i);
     }
+    /** Indexing with five index values */
+    array operator()(const irange& i0, const irange& i1, const irange& i2, const irange& i3, const irange& i4) const {
+        irange i[5] = {i0, i1, i2, i3, i4};
+        return at_array(5, i);
+    }
 
     /** Does a value-assignment from the rhs array. */
     void val_assign(const array &rhs, const eval::eval_context *ectx =
@@ -592,9 +597,24 @@ public:
      */
     array adapt(const ndt::type& tp, const nd::string& adapt_op);
 
-    array permute(intptr_t ndim, const intptr_t *axes);
+    /**
+     *
+     */
+    array permute(intptr_t ndim, const intptr_t *axes) const;
 
-    array transpose();
+    /**
+     *
+     */
+    array roll(intptr_t to_axis, intptr_t from_axis = 0) const;
+
+    array roll(intptr_t from_axis = 0) const {
+        return roll(get_ndim() - 1, from_axis);
+    }
+
+    /**
+     *
+     */
+    array transpose() const;
 
     /**
      * DEPRECATED

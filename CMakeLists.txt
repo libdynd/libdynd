@@ -324,9 +324,9 @@ set(libdynd_SRC
     include/dynd/func/lift_reduction_arrfunc.hpp
     include/dynd/func/rolling_arrfunc.hpp
     include/dynd/func/take_arrfunc.hpp
-	# Iter
-	src/dynd/iter/string_iter.cpp
-	include/dynd/iter/string_iter.hpp
+    # Iter
+    src/dynd/iter/string_iter.cpp
+    include/dynd/iter/string_iter.hpp
     # Kernels
     src/dynd/kernels/assignment_kernels.cpp
     src/dynd/kernels/var_dim_assignment_kernels.cpp
@@ -437,6 +437,7 @@ set(libdynd_SRC
     src/dynd/json_parser.cpp
     src/dynd/lowlevel_api.cpp
     src/dynd/parser_util.cpp
+    src/dynd/random.cpp
     src/dynd/shape_tools.cpp
     src/dynd/special.cpp
     src/dynd/string.cpp
@@ -456,6 +457,7 @@ set(libdynd_SRC
     include/dynd/dim_iter.hpp
     include/dynd/dynd_math.hpp
     include/dynd/ensure_immutable_contig.hpp
+    include/dynd/random.hpp
     include/dynd/type.hpp
     include/dynd/typed_data_assign.hpp
     include/dynd/type_promotion.hpp

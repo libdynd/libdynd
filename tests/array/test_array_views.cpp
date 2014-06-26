@@ -18,7 +18,9 @@
 #include <dynd/types/strided_dim_type.hpp>
 
 
+#include <dynd/random.hpp>
 #include <dynd/types/cfixed_dim_type.hpp>
+#include <dynd/types/fixed_dim_type.hpp>
 
 using namespace std;
 using namespace dynd;
@@ -109,31 +111,165 @@ TEST(ArrayViews, ExpressionDType) {
     EXPECT_EQ(0, b(1, 2).as<int16_t>());
 }
 
-TEST(ArrayViews, Transpose) {
+TEST(ArrayViews, OneDimPermute) {
+    static int vals[3] = {0, 1, 2};
+
+    nd::array a = nd::empty<int[3]>();
+    a.vals() = vals;
+
+    intptr_t ndim = 1;
+    intptr_t axes[1] = {0};
+
+    nd::array b = a.permute(ndim, axes);
+    for (int i = 0; i < 3; ++i) {
+        EXPECT_EQ(vals[i], b(i).as<int>());
+    }
+
+    a = nd::empty(ndt::make_fixed_dim(3, ndt::make_type<int>()));
+    a.vals() = vals;
+
+    b = a.permute(ndim, axes);
+    for (int i = 0; i < 3; ++i) {
+        EXPECT_EQ(vals[i], b(i).as<int>());
+    }
+}
+
+TEST(ArrayViews, TwoDimPermute) {
     static int vals[3][3] = {{0, 1, 2}, {3, 4, -4}, {-3, -2, -1}};
 
     nd::array a = nd::empty<int[3][3]>();
     a.vals() = vals;
 
-    nd::array b = a.transpose();
+    intptr_t ndim = 2;
+    intptr_t axes[2] = {1, 0};
 
-    std::cout << "(DEBUG) strided, " << a << std::endl;
-    std::cout << "(DEBUG) strided, " << b << std::endl;
-}
+    nd::array b = a.permute(ndim, axes);
+    EXPECT_EQ(3, b.get_shape()[0]);
+    EXPECT_EQ(3, b.get_shape()[1]);
+    EXPECT_EQ(ndt::make_strided_dim(ndt::make_strided_dim(ndt::make_type<int>())), b.get_type());
+    for (int i = 0; i < 3; ++i) {
+        for (int j = 0; j < 3; ++j) {
+            EXPECT_EQ(vals[j][i], b(i, j).as<int>());
+        }
+    }
 
-TEST(ArrayViews, TransposeCFixed) {
-    static int vals[3][3] = {{0, 1, 2}, {3, 4, -4}, {-3, -2, -1}};
-
-    nd::array a = nd::empty(ndt::make_cfixed_dim(3, ndt::make_cfixed_dim(3, ndt::make_type<int>())));
+    a = nd::empty(3, ndt::make_fixed_dim(3, ndt::make_type<int>()));
     a.vals() = vals;
 
-    nd::array b = a.transpose();
+    b = a.permute(ndim, axes);
+    EXPECT_EQ(3, b.get_shape()[0]);
+    EXPECT_EQ(3, b.get_shape()[1]);
+    EXPECT_EQ(ndt::make_strided_dim(ndt::make_strided_dim(ndt::make_type<int>())), b.get_type());
+    for (int i = 0; i < 3; ++i) {
+        for (int j = 0; j < 3; ++j) {
+            EXPECT_EQ(vals[j][i], b(i, j).as<int>());
+        }
+    }
 
-    std::cout << "(DEBUG) cfixed, " << a << std::endl;
-//    for (intptr_t i = 0; i < b.get_ndim(); ++i) {
-  //      std::cout << "(DEBUG) " << b.get_shape()[i] << std::endl;
-    //}
-    std::cout << "(DEBUG) cfixed, " << b << std::endl;
+    a = nd::empty(ndt::make_fixed_dim(3, ndt::make_fixed_dim(3, ndt::make_type<int>())));
+    a.vals() = vals;
 
-//    std::cout << "(DEBUG) " << a.get_type().get_canonical_type() << std::endl;
+    b = a.permute(ndim, axes);
+    EXPECT_EQ(3, b.get_shape()[0]);
+    EXPECT_EQ(3, b.get_shape()[1]);
+    EXPECT_EQ(ndt::make_strided_dim(ndt::make_strided_dim(ndt::make_type<int>())), b.get_type());
+    for (int i = 0; i < 3; ++i) {
+        for (int j = 0; j < 3; ++j) {
+            EXPECT_EQ(vals[j][i], b(i, j).as<int>());
+        }
+    }
+}
+
+TEST(ArrayViews, NDimPermute) {
+    const intptr_t ndim = 5;
+    intptr_t shape[ndim] = {5, 8, 3, 4, 2};
+
+    intptr_t axes0[ndim] = {1, 0, 2, 3, 4};
+
+    nd::array a = nd::typed_rand(5, shape, ndt::type("strided * strided * strided * 4 * 2 * float64"));
+
+    nd::array b = a.permute(2, axes0);
+    EXPECT_EQ(a.get_ndim(), b.get_ndim());
+    EXPECT_EQ(a.get_shape()[0], b.get_shape()[1]);
+    EXPECT_EQ(a.get_shape()[1], b.get_shape()[0]);
+    EXPECT_EQ(a.get_shape()[2], b.get_shape()[2]);
+    EXPECT_EQ(a.get_shape()[3], b.get_shape()[3]);
+    EXPECT_EQ(a.get_shape()[4], b.get_shape()[4]);
+    for (int i = 0; i < shape[0]; ++i) {
+        for (int j = 0; j < shape[1]; ++j) {
+            for (int k = 0; k < shape[2]; ++k) {
+                for (int l = 0; l < shape[3]; ++l) {
+                    for (int m = 0; m < shape[4]; ++m) {
+                        EXPECT_EQ(a(i, j, k, l, m).as<double>(), b(j, i, k, l, m).as<double>());
+                    }
+                }
+            }
+        }
+    }
+
+    a = nd::typed_rand(ndim, shape, ndt::type("strided * strided * var * strided * strided * float64"));
+
+    b = a.permute(2, axes0);
+    EXPECT_EQ(a.get_ndim(), b.get_ndim());
+    EXPECT_EQ(a.get_shape()[0], b.get_shape()[1]);
+    EXPECT_EQ(a.get_shape()[1], b.get_shape()[0]);
+    EXPECT_EQ(a.get_shape()[2], b.get_shape()[2]);
+    EXPECT_EQ(a.get_shape()[3], b.get_shape()[3]);
+    EXPECT_EQ(a.get_shape()[4], b.get_shape()[4]);
+    EXPECT_EQ(ndt::type("strided * strided * var * strided * strided * float64"), b.get_type());
+    for (int i = 0; i < shape[0]; ++i) {
+        for (int j = 0; j < shape[1]; ++j) {
+            for (int k = 0; k < shape[2]; ++k) {
+                for (int l = 0; l < shape[3]; ++l) {
+                    for (int m = 0; m < shape[4]; ++m) {
+                        EXPECT_EQ(a(i, j, k, l, m).as<double>(), b(j, i, k, l, m).as<double>());
+                    }
+                }
+            }
+        }
+    }
+
+    intptr_t axes1[ndim] = {1, 0, 2, 4, 3};
+    b = a.permute(5, axes1);
+    EXPECT_EQ(a.get_ndim(), b.get_ndim());
+    EXPECT_EQ(a.get_shape()[0], b.get_shape()[1]);
+    EXPECT_EQ(a.get_shape()[1], b.get_shape()[0]);
+    EXPECT_EQ(a.get_shape()[2], b.get_shape()[2]);
+    EXPECT_EQ(a.get_shape()[3], b.get_shape()[4]);
+    EXPECT_EQ(a.get_shape()[4], b.get_shape()[3]);
+    EXPECT_EQ(ndt::type("strided * strided * var * strided * strided * float64"), b.get_type());
+    for (int i = 0; i < shape[0]; ++i) {
+        for (int j = 0; j < shape[1]; ++j) {
+            for (int k = 0; k < shape[2]; ++k) {
+                for (int l = 0; l < shape[3]; ++l) {
+                    for (int m = 0; m < shape[4]; ++m) {
+                        EXPECT_EQ(a(i, j, k, l, m).as<double>(), b(j, i, k, m, l).as<double>());
+                    }
+                }
+            }
+        }
+    }
+
+    a = nd::typed_rand(ndim, shape, ndt::type("var * var * var * strided * strided * float64"));
+
+    intptr_t axes2[ndim] = {0, 1, 2, 4, 3};
+    b = a.permute(5, axes2);
+    EXPECT_EQ(a.get_ndim(), b.get_ndim());
+    EXPECT_EQ(a.get_shape()[0], b.get_shape()[0]);
+    EXPECT_EQ(a.get_shape()[1], b.get_shape()[1]);
+    EXPECT_EQ(a.get_shape()[2], b.get_shape()[2]);
+    EXPECT_EQ(a.get_shape()[3], b.get_shape()[4]);
+    EXPECT_EQ(a.get_shape()[4], b.get_shape()[3]);
+    EXPECT_EQ(ndt::type("var * var * var * strided * strided * float64"), b.get_type());
+    for (int i = 0; i < shape[0]; ++i) {
+        for (int j = 0; j < shape[1]; ++j) {
+            for (int k = 0; k < shape[2]; ++k) {
+                for (int l = 0; l < shape[3]; ++l) {
+                    for (int m = 0; m < shape[4]; ++m) {
+                        EXPECT_EQ(a(i, j, k, l, m).as<double>(), b(i, j, k, m, l).as<double>());
+                    }
+                }
+            }
+        }
+    }
 }
