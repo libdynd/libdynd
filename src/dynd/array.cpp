@@ -1297,7 +1297,7 @@ nd::array nd::array::permute(intptr_t ndim, const intptr_t *axes) const
     return res;
 }
 
-nd::array nd::array::roll(intptr_t to, intptr_t from) const
+nd::array nd::array::rotate(intptr_t to, intptr_t from) const
 {
     if (from < to) {
         intptr_t ndim = to + 1;

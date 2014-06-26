@@ -613,10 +613,10 @@ public:
      * Rolls the dimensions of the array so the axis `from' becomes the axis `to'.
      * At present, there cannot be any variable dimensions.
      */
-    array roll(intptr_t to, intptr_t from = 0) const;
+    array rotate(intptr_t to, intptr_t from = 0) const;
 
-    array roll(intptr_t from = 0) const {
-        return roll(get_ndim() - 1, from);
+    array rotate(intptr_t from = 0) const {
+        return rotate(get_ndim() - 1, from);
     }
 
     /**
