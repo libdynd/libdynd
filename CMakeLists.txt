@@ -300,6 +300,7 @@ set(libdynd_SRC
     # Func
     src/dynd/func/arrfunc.cpp
     src/dynd/func/callable.cpp
+    src/dynd/func/copy_arrfunc.cpp
     src/dynd/func/elwise_gfunc.cpp
     src/dynd/func/elwise_reduce_gfunc.cpp
     src/dynd/func/lift_arrfunc.cpp
@@ -309,6 +310,7 @@ set(libdynd_SRC
     include/dynd/func/arrfunc.hpp
     include/dynd/func/callable.hpp
     include/dynd/func/call_callable.hpp
+    include/dynd/func/copy_arrfunc.hpp
     include/dynd/func/elwise.hpp
     include/dynd/func/elwise_common.hpp
     include/dynd/func/elwise_callrefres.hpp
