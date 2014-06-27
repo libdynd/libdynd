@@ -7,6 +7,7 @@
 #include <dynd/types/string_type.hpp>
 #include <dynd/types/json_type.hpp>
 #include <dynd/types/date_type.hpp>
+#include <dynd/types/datetime_type.hpp>
 #include <dynd/types/base_struct_type.hpp>
 #include <dynd/types/strided_dim_type.hpp>
 #include <dynd/types/fixed_dim_type.hpp>
@@ -188,34 +189,36 @@ static void format_json_option(output_data &out, const ndt::type &dt,
 static void format_json_dynamic(output_data &out, const ndt::type &dt,
                                 const char *DYND_UNUSED(arrmeta), const char *data)
 {
-    if (dt.get_type_id() == json_type_id) {
-        // Copy the JSON data directly
-        const json_type_data *d = reinterpret_cast<const json_type_data *>(data);
-        out.write(d->begin, d->end);
-    } else {
-        stringstream ss;
-        ss << "Formatting dynd type " << dt << " as JSON is not implemented yet";
-        throw runtime_error(ss.str());
-    }
+  if (dt.get_type_id() == json_type_id) {
+    // Copy the JSON data directly
+    const json_type_data *d = reinterpret_cast<const json_type_data *>(data);
+    out.write(d->begin, d->end);
+  } else {
+    stringstream ss;
+    ss << "Formatting dynd type " << dt << " as JSON is not implemented yet";
+    throw runtime_error(ss.str());
+  }
 }
 
 static void format_json_datetime(output_data &out, const ndt::type &dt,
                                  const char *arrmeta, const char *data)
 {
-    switch (dt.get_type_id()) {
-        case date_type_id: {
-            stringstream ss;
-            dt.print_data(ss, arrmeta, data);
-            string s = ss.str();
-            format_json_encoded_string(out, s.data(), s.data() + s.size(), string_encoding_ascii);
-            break;
-        }
-        default: {
-            stringstream ss;
-            ss << "Formatting dynd type " << dt << " as JSON is not implemented yet";
-            throw runtime_error(ss.str());
-        }
-    }
+  switch (dt.get_type_id()) {
+  case date_type_id:
+  case datetime_type_id: {
+    stringstream ss;
+    dt.print_data(ss, arrmeta, data);
+    string s = ss.str();
+    format_json_encoded_string(out, s.data(), s.data() + s.size(),
+                               string_encoding_ascii);
+    break;
+  }
+  default: {
+    stringstream ss;
+    ss << "Formatting dynd type " << dt << " as JSON is not implemented yet";
+    throw runtime_error(ss.str());
+  }
+  }
 }
 
 static void format_json_struct(output_data& out, const ndt::type& dt, const char *arrmeta, const char *data)
