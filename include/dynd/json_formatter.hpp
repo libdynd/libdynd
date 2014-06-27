@@ -13,9 +13,11 @@ namespace dynd {
 /**
  * Formats the nd::array as JSON.
  *
- * \param n  The object to format as JSON.
+ * \param a  The array to format as JSON.
+ * \param struct_as_list  If true, formats struct objects as lists, otherwise
+ *                        formats them as objects/dicts.
  */
-nd::array format_json(const nd::array& n);
+nd::array format_json(const nd::array &a, bool struct_as_list = false);
 
 } // namespace dynd
 

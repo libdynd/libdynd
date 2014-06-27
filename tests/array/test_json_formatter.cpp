@@ -89,6 +89,9 @@ TEST(JSONFormatter, Struct) {
   EXPECT_EQ("{\"a\":100,\"b\":\"testing\","
             "\"c\":[   {\"first\":true, \"second\":3}, null,\n \"test\"]}",
             format_json(a).as<string>());
+  EXPECT_EQ(
+      "[100,\"testing\",[   {\"first\":true, \"second\":3}, null,\n \"test\"]]",
+      format_json(a, true).as<string>());
 }
 
 TEST(JSONFormatter, UniformDim) {
