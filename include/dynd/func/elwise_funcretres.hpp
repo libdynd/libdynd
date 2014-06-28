@@ -144,9 +144,14 @@ DYND_PP_JOIN_MAP(FUNC_RET_RES_CKERNEL_INSTANTIATOR, (), DYND_PP_RANGE(1, DYND_PP
             DYND_PP_META_NAME_RANGE(acast, NSRC), (get_type))}; \
         const char *dynd_arrmeta[NSRC] = {DYND_PP_JOIN_OUTER_1(DYND_PP_META_DOT_CALL, (,), \
             DYND_PP_META_NAME_RANGE(acast, NSRC), (get_arrmeta))}; \
+        intptr_t src_ndim[NSRC]; \
+        for (int i = 0; i < NSRC; ++i) { \
+          src_ndim[i] = lifted_types[i].get_ndim() - src_tp[i].get_ndim(); \
+        } \
         make_lifted_expr_ckernel(&af, &ckb, 0, \
+                            res.get_type().get_ndim() - dst_tp.get_ndim(), \
                             res.get_type(), res.get_arrmeta(), \
-                            lifted_types, dynd_arrmeta, kernel_request_single, ectx); \
+                            src_ndim, lifted_types, dynd_arrmeta, kernel_request_single, ectx); \
 \
         ckernel_prefix *ckprefix = ckb.get(); \
         expr_single_t op = ckprefix->get_function<expr_single_t>(); \
