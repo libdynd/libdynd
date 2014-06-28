@@ -172,50 +172,81 @@ nd::arrfunc::arrfunc(const nd::array &rhs)
 nd::array nd::arrfunc::call(intptr_t arg_count, const nd::array *args,
                             const eval::eval_context *ectx) const
 {
-    const arrfunc_type_data *af = get();
-    if (arg_count != af->get_param_count()) {
-        stringstream ss;
-        ss << "Wrong number of arguments to arrfunc with prototype ";
-        ss << af->func_proto << ", got " << arg_count << " arguments";
-        throw invalid_argument(ss.str());
-    }
-    std::vector<ndt::type> src_tp(arg_count);
-    for (intptr_t i = 0; i < arg_count; ++i) {
-        src_tp[i] = args[i].get_type();
-    }
+  const arrfunc_type_data *af = get();
+  if (arg_count != af->get_param_count()) {
+    stringstream ss;
+    ss << "Wrong number of arguments to arrfunc with prototype ";
+    ss << af->func_proto << ", got " << arg_count << " arguments";
+    throw invalid_argument(ss.str());
+  }
+  std::vector<ndt::type> src_tp(arg_count);
+  for (intptr_t i = 0; i < arg_count; ++i) {
+    src_tp[i] = args[i].get_type();
+  }
 
-    // Resolve the destination type
-    ndt::type dst_tp = af->resolve(arg_count ? &src_tp[0] : NULL);
+  // Resolve the destination type
+  ndt::type dst_tp = af->resolve(arg_count ? &src_tp[0] : NULL);
 
-    std::vector<const char *> src_arrmeta(arg_count);
-    for (intptr_t i = 0; i < arg_count; ++i) {
-        src_arrmeta[i] = args[i].get_arrmeta();
-    }
-    std::vector<const char *> src_data(arg_count);
-    for (intptr_t i = 0; i < arg_count; ++i) {
-        src_data[i] = args[i].get_readonly_originptr();
-    }
+  std::vector<const char *> src_arrmeta(arg_count);
+  for (intptr_t i = 0; i < arg_count; ++i) {
+    src_arrmeta[i] = args[i].get_arrmeta();
+  }
+  std::vector<const char *> src_data(arg_count);
+  for (intptr_t i = 0; i < arg_count; ++i) {
+    src_data[i] = args[i].get_readonly_originptr();
+  }
 
+  // Resolve the destination shape if needed
+  nd::array result;
+  if (dst_tp.get_ndim() > 0 && af->resolve_dst_shape != NULL) {
+    dimvector shape(dst_tp.get_ndim());
+    af->resolve_dst_shape(af, shape.get(), dst_tp, &src_tp[0], &src_arrmeta[0],
+                          &src_data[0]);
+    result = nd::typed_empty(dst_tp.get_ndim(), shape.get(), dst_tp);
+  } else {
+    result = nd::empty(dst_tp);
+  }
 
-    // Resolve the destination shape if needed
-    nd::array result;
-    if (dst_tp.get_ndim() > 0 && af->resolve_dst_shape != NULL) {
-        dimvector shape(dst_tp.get_ndim());
-        af->resolve_dst_shape(af, shape.get(), dst_tp, &src_tp[0],
-                              &src_arrmeta[0], &src_data[0]);
-        result = nd::typed_empty(dst_tp.get_ndim(), shape.get(), dst_tp);
-    } else {
-        result = nd::empty(dst_tp);
-    }
+  // Generate and evaluate the ckernel
+  ckernel_builder ckb;
+  af->instantiate(af, &ckb, 0, dst_tp, result.get_arrmeta(), &src_tp[0],
+                  &src_arrmeta[0], kernel_request_single, ectx);
+  expr_single_t fn = ckb.get()->get_function<expr_single_t>();
+  fn(result.get_readwrite_originptr(), src_data.empty() ? NULL : &src_data[0],
+     ckb.get());
+  result.flag_as_immutable();
+  return result;
+}
 
-    // Generate and evaluate the ckernel
-    ckernel_builder ckb;
-    af->instantiate(af, &ckb, 0, dst_tp, result.get_arrmeta(), &src_tp[0],
-                    &src_arrmeta[0], kernel_request_single, ectx);
-    expr_single_t fn =
-        ckb.get()->get_function<expr_single_t>();
-    fn(result.get_readwrite_originptr(), src_data.empty() ? NULL : &src_data[0],
-       ckb.get());
-    result.flag_as_immutable();
-    return result;
+void nd::arrfunc::call_out(intptr_t arg_count, const nd::array *args,
+                           const nd::array &out, const eval::eval_context *ectx)
+    const
+{
+  const arrfunc_type_data *af = get();
+  if (arg_count != af->get_param_count()) {
+    stringstream ss;
+    ss << "Wrong number of arguments to arrfunc with prototype ";
+    ss << af->func_proto << ", got " << arg_count << " arguments";
+    throw invalid_argument(ss.str());
+  }
+  std::vector<ndt::type> src_tp(arg_count);
+  for (intptr_t i = 0; i < arg_count; ++i) {
+    src_tp[i] = args[i].get_type();
+  }
+  std::vector<const char *> src_arrmeta(arg_count);
+  for (intptr_t i = 0; i < arg_count; ++i) {
+    src_arrmeta[i] = args[i].get_arrmeta();
+  }
+  std::vector<const char *> src_data(arg_count);
+  for (intptr_t i = 0; i < arg_count; ++i) {
+    src_data[i] = args[i].get_readonly_originptr();
+  }
+
+  // Generate and evaluate the ckernel
+  ckernel_builder ckb;
+  af->instantiate(af, &ckb, 0, out.get_type(), out.get_arrmeta(), &src_tp[0],
+                  &src_arrmeta[0], kernel_request_single, ectx);
+  expr_single_t fn = ckb.get()->get_function<expr_single_t>();
+  fn(out.get_readwrite_originptr(), src_data.empty() ? NULL : &src_data[0],
+     ckb.get());
 }

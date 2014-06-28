@@ -212,70 +212,98 @@ struct arrfunc_type_data {
 
 namespace nd {
 /**
-    * Holds a single instance of an arrfunc in an immutable nd::array,
-    * providing some more direct convenient interface.
-    */
+ * Holds a single instance of an arrfunc in an immutable nd::array,
+ * providing some more direct convenient interface.
+ */
 class arrfunc {
-    nd::array m_value;
+  nd::array m_value;
+
 public:
-    inline arrfunc() : m_value() {}
-    inline arrfunc(const arrfunc &rhs) : m_value(rhs.m_value) {}
-    /**
-     * Constructor from an nd::array. Validates that the input
-     * has "arrfunc" type and is immutable.
-     */
-    arrfunc(const nd::array& rhs);
+  inline arrfunc() : m_value() {}
+  inline arrfunc(const arrfunc &rhs) : m_value(rhs.m_value) {}
+  /**
+    * Constructor from an nd::array. Validates that the input
+    * has "arrfunc" type and is immutable.
+    */
+  arrfunc(const nd::array &rhs);
 
-    inline arrfunc& operator=(const arrfunc& rhs) {
-        m_value = rhs.m_value;
-        return *this;
-    }
+  inline arrfunc &operator=(const arrfunc &rhs)
+  {
+    m_value = rhs.m_value;
+    return *this;
+  }
 
-    inline bool is_null() const {
-        return m_value.is_null();
-    }
+  inline bool is_null() const { return m_value.is_null(); }
 
-    inline const arrfunc_type_data *get() const {
-        return !m_value.is_null() ? reinterpret_cast<const arrfunc_type_data *>(
-                                        m_value.get_readonly_originptr())
-                                  : NULL;
-    }
+  inline const arrfunc_type_data *get() const
+  {
+    return !m_value.is_null() ? reinterpret_cast<const arrfunc_type_data *>(
+                                    m_value.get_readonly_originptr())
+                              : NULL;
+  }
 
-    inline operator nd::array() const {
-        return m_value;
-    }
+  inline operator nd::array() const { return m_value; }
 
-    /** Implements the general call operator */
-    nd::array call(intptr_t arg_count, const nd::array *args,
-                   const eval::eval_context *ectx) const;
+  /** Implements the general call operator */
+  nd::array call(intptr_t arg_count, const nd::array *args,
+                 const eval::eval_context *ectx) const;
 
-    /** Convenience call operators */
-    inline nd::array
-    operator()()
-        const
-    {
-        return call(0, NULL, &eval::default_eval_context);
-    }
-    inline nd::array
-    operator()(const nd::array &a0)
-        const
-    {
-        return call(1, &a0, &eval::default_eval_context);
-    }
-    inline nd::array
-    operator()(const nd::array &a0, const nd::array &a1)
-        const
-    {
-        nd::array args[2] = {a0, a1};
-        return call(2, args, &eval::default_eval_context);
-    }
-    inline nd::array
-    operator()(const nd::array &a0, const nd::array &a1, const nd::array &a2)
-        const
-    {
-        nd::array args[3] = {a0, a1, a2};
-        return call(3, args, &eval::default_eval_context);
-    }
+  /** Convenience call operators */
+  inline nd::array operator()() const
+  {
+    return call(0, NULL, &eval::default_eval_context);
+  }
+  inline nd::array operator()(const nd::array &a0) const
+  {
+    return call(1, &a0, &eval::default_eval_context);
+  }
+  inline nd::array operator()(const nd::array &a0, const nd::array &a1) const
+  {
+    nd::array args[2] = {a0, a1};
+    return call(2, args, &eval::default_eval_context);
+  }
+  inline nd::array operator()(const nd::array &a0, const nd::array &a1,
+                              const nd::array &a2) const
+  {
+    nd::array args[3] = {a0, a1, a2};
+    return call(3, args, &eval::default_eval_context);
+  }
+
+  /** Implements the general call operator with output parameter */
+  void call_out(intptr_t arg_count, const nd::array *args, const nd::array &out,
+                const eval::eval_context *ectx) const;
+
+  inline void call_out(const nd::array &out) const
+  {
+    call_out(0, NULL, out, &eval::default_eval_context);
+  }
+
+  inline void call_out(const nd::array &a0, const nd::array &out) const
+  {
+    call_out(1, &a0, out, &eval::default_eval_context);
+  }
+
+  inline void call_out(const nd::array &a0, const nd::array &a1,
+                       const nd::array &out) const
+  {
+    nd::array args[2] = {a0, a1};
+    call_out(2, args, out, &eval::default_eval_context);
+  }
+
+  inline void call_out(const nd::array &a0, const nd::array &a1,
+                       const nd::array &a2, const nd::array &out) const
+  {
+    nd::array args[3] = {a0, a1, a2};
+    call_out(3, args, out, &eval::default_eval_context);
+  }
+
+  inline void call_out(const nd::array &a0, const nd::array &a1,
+                       const nd::array &a2, const nd::array &a3, nd::array &out)
+      const
+  {
+    nd::array args[4] = {a0, a1, a2, a3};
+    call_out(4, args, out, &eval::default_eval_context);
+  }
 };
 } // namespace nd
 
