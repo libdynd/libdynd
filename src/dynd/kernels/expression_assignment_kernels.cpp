@@ -116,7 +116,7 @@ namespace {
             const char *src0 = src[0];
             intptr_t src0_stride = src_stride[0];
             while (count > 0) {
-                size_t chunk_size = min(DYND_BUFFER_CHUNK_SIZE, count);
+                size_t chunk_size = min(count, (size_t)DYND_BUFFER_CHUNK_SIZE);
                 // If the type needs it, initialize the buffer data to zero
                 if (!is_builtin_type(buffer_tp) &&
                         (buffer_tp->get_flags() & type_flag_zeroinit) != 0) {

@@ -69,7 +69,7 @@ struct option_to_option_ck
         // Process in chunks using the dynd default buffer size
         dynd_bool avail[DYND_BUFFER_CHUNK_SIZE];
         while (count > 0) {
-            size_t chunk_size = min(count, DYND_BUFFER_CHUNK_SIZE);
+            size_t chunk_size = min(count, (size_t)DYND_BUFFER_CHUNK_SIZE);
             count -= chunk_size;
             src_is_avail_fn(reinterpret_cast<char *>(avail), 1, &src,
                             &src_stride, chunk_size, src_is_avail);
@@ -167,7 +167,7 @@ struct option_to_value_ck
         // Process in chunks using the dynd default buffer size
         dynd_bool avail[DYND_BUFFER_CHUNK_SIZE];
         while (count > 0) {
-            size_t chunk_size = min(count, DYND_BUFFER_CHUNK_SIZE);
+            size_t chunk_size = min(count, (size_t)DYND_BUFFER_CHUNK_SIZE);
             src_is_avail_fn(reinterpret_cast<char *>(avail), 1, &src, &src_stride,
                             chunk_size, src_is_avail);
             if (memchr(avail, 0, chunk_size) != NULL) {

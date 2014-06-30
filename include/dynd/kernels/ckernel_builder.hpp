@@ -23,7 +23,8 @@ namespace kernels {
    */
   inline void inc_ckb_offset(intptr_t& inout_ckb_offset, size_t inc)
   {
-    inout_ckb_offset += static_cast<intptr_t>(ckernel_prefix::align_offset(inc));
+    inout_ckb_offset +=
+        static_cast<intptr_t>(ckernel_prefix::align_offset(inc));
   }
 
   template<class T>

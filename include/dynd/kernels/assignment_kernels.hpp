@@ -15,9 +15,6 @@
 #include <dynd/typed_data_assign.hpp>
 #include <dynd/types/type_id.hpp>
 
-/** The number of elements buffered when chaining expressions */
-#define DYND_BUFFER_CHUNK_SIZE ((size_t)128)
-
 namespace dynd {
 /**
  * See the ckernel_builder class documentation

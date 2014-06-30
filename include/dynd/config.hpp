@@ -10,6 +10,10 @@
 #include <stdint.h>
 #include <limits>
 
+/** The number of elements to process at once when doing chunking/buffering */
+#define DYND_BUFFER_CHUNK_SIZE 128
+
+
 #ifdef __clang__
 // It appears that on OSX, one can have a configuration with
 // clang that supports rvalue references but no implementation
