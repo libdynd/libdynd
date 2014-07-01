@@ -343,7 +343,7 @@ TEST(TypeAssign, FixedSizeTests_Float64) {
 #ifdef _WIN32
     EXPECT_TRUE(_fpclass(v_f32) == _FPCLASS_NINF);
 #else
-    EXPECT_TRUE(isinf(v_f32));
+    EXPECT_TRUE(std::isinf(v_f32));
 #endif
     EXPECT_TRUE(v_f32 < 0);
 }
@@ -825,7 +825,7 @@ TEST(TypeAssign, FixedSizeTests_Complex_Float64) {
 #ifdef _WIN32
     EXPECT_TRUE(_fpclass(v_f32) == _FPCLASS_NINF);
 #else
-    EXPECT_TRUE(isinf(v_f32));
+    EXPECT_TRUE(std::isinf(v_f32));
 #endif
     EXPECT_TRUE(v_f32 < 0);
 
