@@ -388,20 +388,6 @@ void dynd::print_shape(std::ostream& o, intptr_t ndim, const intptr_t *shape)
 void dynd::apply_single_linear_index(const irange& irnge, intptr_t dimension_size, intptr_t error_i, const ndt::type* error_tp,
         bool& out_remove_dimension, intptr_t& out_start_index, intptr_t& out_index_stride, intptr_t& out_dimension_size)
 {
-//    std::cout << "applying single linear index" << std::endl;
-    // step = 1
-    // start = -7
-
-/*
-    std::cout << "dimension_size = " << dimension_size << std::endl;
-    std::cout << "error_i = " << error_i << std::endl;
-    std::cout << "error_tp = " << *error_tp << std::endl;
-    std::cout << "out_remove_dimension = " << out_remove_dimension << std::endl;
-    std::cout << "out_start_index = " << out_start_index << std::endl;
-    std::cout << "out_index_stride = " << out_index_stride << std::endl;
-    std::cout << "out_dimension_size = " << out_dimension_size << std::endl;
-*/
-
     intptr_t step = irnge.step();
     if (step == 0) {
         // A single index

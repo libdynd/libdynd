@@ -31,10 +31,14 @@
 #define DYND_CUDA_HOST_DEVICE
 
 namespace dynd {
-// Prevent isfinite from nvcc clashing with isfinite from cmath
+// Prevent from nvcc clashing with cmath
 template <typename T>
 inline bool isfinite(T arg) {
     return (std::isfinite)(arg);
+}
+template <typename T>
+inline bool isinf(T arg) {
+    return (std::isinf)(arg);
 }
 } // namespace dynd
 
