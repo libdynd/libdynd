@@ -200,7 +200,7 @@ inline dynd_complex<T> exp(dynd_complex<T> z) {
                 std::numeric_limits<T>::quiet_NaN(),
                 copysign(std::numeric_limits<T>::quiet_NaN(), i));
         }
-    } else if (isnan(r)) {
+    } else if (DYND_ISNAN(r)) {
         // r is nan
         if (i == 0) {
             ret = dynd_complex<T>(r, 0);
@@ -263,7 +263,7 @@ inline dynd_complex<T> sqrt(dynd_complex<T> z) {
     if (isinf(b)) {
         return dynd_complex<T>(std::numeric_limits<T>::infinity(), b);
     }
-    if (isnan(a)) {
+    if (DYND_ISNAN(a)) {
         t = (b - b) / (b - b); // raise invalid if b is not a NaN
         return dynd_complex<T>(a, t); // return NaN + NaN i
     }
