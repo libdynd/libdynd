@@ -134,55 +134,54 @@ namespace {
 } // anonymous namespace
 
 size_t dynd::make_expression_comparison_kernel(
-                ckernel_builder *out, size_t offset_out,
+                ckernel_builder *ckb, intptr_t ckb_offset,
                 const ndt::type& src0_dt, const char *src0_arrmeta,
                 const ndt::type& src1_dt, const char *src1_arrmeta,
                 comparison_type_t comptype,
                 const eval::eval_context *ectx)
 {
-    size_t current_offset = offset_out + sizeof(buffered_kernel_extra);
-    out->ensure_capacity(current_offset);
-    buffered_kernel_extra *e = out->get_at<buffered_kernel_extra>(offset_out);
+    intptr_t root_ckb_offset = ckb_offset;
+    buffered_kernel_extra *e = ckb->alloc_ck<buffered_kernel_extra>(ckb_offset);
     e->base.set_function<expr_predicate_t>(&buffered_kernel_extra::kernel);
     e->base.destructor = &buffered_kernel_extra::destruct;
     // Initialize the information for buffering the operands
     if (src0_dt.get_kind() == expression_kind) {
         e->init_buffer(0, src0_dt.value_type());
-        e->buf[0].kernel_offset = current_offset - offset_out;
-        current_offset = make_assignment_kernel(
-            out, current_offset, src0_dt.value_type(), e->buf[0].arrmeta,
+        e->buf[0].kernel_offset = ckb_offset - root_ckb_offset;
+        ckb_offset = make_assignment_kernel(
+            ckb, ckb_offset, src0_dt.value_type(), e->buf[0].arrmeta,
             src0_dt, src0_arrmeta, kernel_request_single, ectx);
         // Have to re-retrieve 'e', because creating another kernel may invalidate it
-        e = out->get_at<buffered_kernel_extra>(offset_out);
+        e = ckb->get_at<buffered_kernel_extra>(root_ckb_offset);
     }
     if (src1_dt.get_kind() == expression_kind) {
         e->init_buffer(1, src1_dt.value_type());
-        e->buf[1].kernel_offset = current_offset - offset_out;
-        current_offset = make_assignment_kernel(
-            out, current_offset, src1_dt.value_type(), e->buf[1].arrmeta,
-            src1_dt, src1_arrmeta, kernel_request_single, ectx);
+        e->buf[1].kernel_offset = ckb_offset - root_ckb_offset;
+        ckb_offset = make_assignment_kernel(
+            ckb, ckb_offset, src1_dt.value_type(), e->buf[1].arrmeta, src1_dt,
+            src1_arrmeta, kernel_request_single, ectx);
         // Have to re-retrieve 'e', because creating another kernel may invalidate it
-        e = out->get_at<buffered_kernel_extra>(offset_out);
+        e = ckb->get_at<buffered_kernel_extra>(root_ckb_offset);
     }
     // Allocate the data for the buffers
     if (e->buf[0].kernel_offset != 0) {
-        current_offset = inc_to_alignment(current_offset, src0_dt.get_data_alignment());
-        e->buf[0].data_offset = current_offset - offset_out;
-        current_offset += e->buf[0].data_size;
+        ckb_offset = inc_to_alignment(ckb_offset, src0_dt.get_data_alignment());
+        e->buf[0].data_offset = ckb_offset - root_ckb_offset;
+        ckb_offset += e->buf[0].data_size;
     }
     if (e->buf[1].kernel_offset != 0) {
-        current_offset = inc_to_alignment(current_offset, src1_dt.get_data_alignment());
-        e->buf[1].data_offset = current_offset - offset_out;
-        current_offset += e->buf[1].data_size;
+        ckb_offset = inc_to_alignment(ckb_offset, src1_dt.get_data_alignment());
+        e->buf[1].data_offset = ckb_offset - root_ckb_offset;
+        ckb_offset += e->buf[1].data_size;
     }
-    out->ensure_capacity(current_offset);
+    ckb->ensure_capacity(ckb_offset);
     // Have to re-retrieve 'e', because allocating the buffer data may invalidate it
-    e = out->get_at<buffered_kernel_extra>(offset_out);
-    e->cmp_kernel_offset = current_offset - offset_out;
-    return make_comparison_kernel(out, current_offset,
-                    src0_dt.value_type(),
-                    (e->buf[0].kernel_offset != 0) ? e->buf[0].arrmeta : src0_arrmeta,
-                    src1_dt.value_type(),
-                    (e->buf[1].kernel_offset != 0) ? e->buf[1].arrmeta : src1_arrmeta,
-                    comptype, ectx);
+    e = ckb->get_at<buffered_kernel_extra>(root_ckb_offset);
+    e->cmp_kernel_offset = ckb_offset - root_ckb_offset;
+    return make_comparison_kernel(
+        ckb, ckb_offset, src0_dt.value_type(),
+        (e->buf[0].kernel_offset != 0) ? e->buf[0].arrmeta : src0_arrmeta,
+        src1_dt.value_type(),
+        (e->buf[1].kernel_offset != 0) ? e->buf[1].arrmeta : src1_arrmeta,
+        comptype, ectx);
 }

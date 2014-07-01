@@ -13,6 +13,7 @@
 #include <dynd/shape_tools.hpp>
 #include <dynd/func/callable.hpp>
 #include <dynd/ensure_immutable_contig.hpp>
+#include <dynd/func/callable.hpp>
 
 using namespace std;
 using namespace dynd;
@@ -265,7 +266,7 @@ struct struct_property_getter_ck
 } // anonymous namespace
 
 size_t base_struct_type::make_elwise_property_getter_kernel(
-    ckernel_builder *ckb, size_t ckb_offset, const char *dst_arrmeta,
+    ckernel_builder *ckb, intptr_t ckb_offset, const char *dst_arrmeta,
     const char *src_arrmeta, size_t src_elwise_property_index,
     kernel_request_t kernreq, const eval::eval_context *ectx) const
 {
@@ -274,8 +275,7 @@ size_t base_struct_type::make_elwise_property_getter_kernel(
     if (src_elwise_property_index < field_count) {
         const uintptr_t *arrmeta_offsets = get_arrmeta_offsets_raw();
         const ndt::type& field_type = get_field_type(src_elwise_property_index);
-        self_type *self = self_type::create(ckb, ckb_offset, kernreq);
-        ckb_offset += sizeof(self_type);
+        self_type *self = self_type::create(ckb, kernreq, ckb_offset);
         self->m_field_offset = get_data_offsets(src_arrmeta)[src_elwise_property_index];
         return ::make_assignment_kernel(
             ckb, ckb_offset, field_type.value_type(), dst_arrmeta, field_type,
@@ -290,7 +290,7 @@ size_t base_struct_type::make_elwise_property_getter_kernel(
 }
 
 size_t base_struct_type::make_elwise_property_setter_kernel(
-                ckernel_builder *DYND_UNUSED(out), size_t DYND_UNUSED(offset_out),
+                ckernel_builder *DYND_UNUSED(ckb), intptr_t DYND_UNUSED(ckb_offset),
                 const char *DYND_UNUSED(dst_arrmeta), size_t dst_elwise_property_index,
                 const char *DYND_UNUSED(src_arrmeta),
                 kernel_request_t DYND_UNUSED(kernreq), const eval::eval_context *DYND_UNUSED(ectx)) const

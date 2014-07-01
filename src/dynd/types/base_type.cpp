@@ -268,7 +268,7 @@ size_t base_type::iterdata_destruct(iterdata_common *DYND_UNUSED(iterdata),
 }
 
 size_t base_type::make_assignment_kernel(
-    ckernel_builder *DYND_UNUSED(out), size_t DYND_UNUSED(offset_out),
+    ckernel_builder *DYND_UNUSED(ckb), intptr_t DYND_UNUSED(ckb_offset),
     const ndt::type &dst_tp, const char *DYND_UNUSED(dst_arrmeta),
     const ndt::type &src_tp, const char *DYND_UNUSED(src_arrmeta),
     kernel_request_t DYND_UNUSED(kernreq),
@@ -285,7 +285,7 @@ size_t base_type::make_assignment_kernel(
 }
 
 size_t base_type::make_comparison_kernel(
-    ckernel_builder *DYND_UNUSED(out), size_t DYND_UNUSED(offset_out),
+    ckernel_builder *DYND_UNUSED(ckb), intptr_t DYND_UNUSED(ckb_offset),
     const ndt::type &src0_dt, const char *DYND_UNUSED(src0_arrmeta),
     const ndt::type &src1_dt, const char *DYND_UNUSED(src1_arrmeta),
     comparison_type_t comptype, const eval::eval_context *DYND_UNUSED(ectx))
@@ -410,7 +410,7 @@ base_type::get_elwise_property_type(size_t DYND_UNUSED(elwise_property_index),
 }
 
 size_t base_type::make_elwise_property_getter_kernel(
-    ckernel_builder *DYND_UNUSED(out), size_t DYND_UNUSED(offset_out),
+    ckernel_builder *DYND_UNUSED(ckb), intptr_t DYND_UNUSED(ckb_offset),
     const char *DYND_UNUSED(dst_arrmeta), const char *DYND_UNUSED(src_arrmeta),
     size_t DYND_UNUSED(src_elwise_property_index),
     kernel_request_t DYND_UNUSED(kernreq),
@@ -423,7 +423,7 @@ size_t base_type::make_elwise_property_getter_kernel(
 }
 
 size_t base_type::make_elwise_property_setter_kernel(
-    ckernel_builder *DYND_UNUSED(out), size_t DYND_UNUSED(offset_out),
+    ckernel_builder *DYND_UNUSED(ckb), intptr_t DYND_UNUSED(ckb_offset),
     const char *DYND_UNUSED(dst_arrmeta),
     size_t DYND_UNUSED(dst_elwise_property_index),
     const char *DYND_UNUSED(src_arrmeta), kernel_request_t DYND_UNUSED(kernreq),

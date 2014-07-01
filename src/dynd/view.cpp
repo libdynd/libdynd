@@ -59,7 +59,7 @@ static bool try_view(const ndt::type &tp, const char *arrmeta,
         case fixed_dim_type_id: { // strided as fixed
             const fixed_dim_type *view_fdt = view_tp.tcast<fixed_dim_type>();
             // The size must match exactly in this case
-            if (md->size != (intptr_t)view_fdt->get_fixed_dim_size()) {
+            if (md->size != view_fdt->get_fixed_dim_size()) {
                 return false;
             }
             fixed_dim_type_arrmeta *view_md =
@@ -79,7 +79,7 @@ static bool try_view(const ndt::type &tp, const char *arrmeta,
             const cfixed_dim_type *view_fdt =
                 view_tp.tcast<cfixed_dim_type>();
             // The size and stride must match exactly in this case
-            if (md->size != (intptr_t)view_fdt->get_fixed_dim_size() ||
+            if (md->size != view_fdt->get_fixed_dim_size() ||
                     md->stride != view_fdt->get_fixed_stride()) {
                 return false;
             }

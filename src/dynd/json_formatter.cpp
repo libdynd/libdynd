@@ -7,6 +7,7 @@
 #include <dynd/types/string_type.hpp>
 #include <dynd/types/json_type.hpp>
 #include <dynd/types/date_type.hpp>
+#include <dynd/types/datetime_type.hpp>
 #include <dynd/types/base_struct_type.hpp>
 #include <dynd/types/strided_dim_type.hpp>
 #include <dynd/types/fixed_dim_type.hpp>
@@ -18,77 +19,89 @@ using namespace std;
 using namespace dynd;
 
 struct output_data {
-    char *out_begin, *out_end, *out_capacity_end;
-    memory_block_pod_allocator_api *api;
-    memory_block_data *blockref;
+  char *out_begin, *out_end, *out_capacity_end;
+  memory_block_pod_allocator_api *api;
+  memory_block_data *blockref;
+  bool struct_as_list;
 
-    void ensure_capacity(intptr_t added_capacity) {
-        // If there's not enough space, double the capacity
-        if (out_capacity_end - out_end < added_capacity) {
-            intptr_t current_size = out_end - out_begin;
-            intptr_t new_capacity = 2 * (out_capacity_end - out_begin);
-            // Make sure this adds the requested additional capacity
-            if (new_capacity < current_size + added_capacity) {
-                new_capacity = current_size + added_capacity;
-            }
-            api->resize(blockref, new_capacity, &out_begin, &out_capacity_end);
-            out_end = out_begin + current_size;
-        }
+  void ensure_capacity(intptr_t added_capacity)
+  {
+    // If there's not enough space, double the capacity
+    if (out_capacity_end - out_end < added_capacity) {
+      intptr_t current_size = out_end - out_begin;
+      intptr_t new_capacity = 2 * (out_capacity_end - out_begin);
+      // Make sure this adds the requested additional capacity
+      if (new_capacity < current_size + added_capacity) {
+        new_capacity = current_size + added_capacity;
+      }
+      api->resize(blockref, new_capacity, &out_begin, &out_capacity_end);
+      out_end = out_begin + current_size;
     }
+  }
 
-    inline void write(char c) {
-        ensure_capacity(1);
-        *out_end++ = c;
-    }
+  inline void write(char c)
+  {
+    ensure_capacity(1);
+    *out_end++ = c;
+  }
 
-    // Write a literal string
-    template<int N>
-    inline void write(const char (&str)[N]) {
-        ensure_capacity(N - 1);
-        memcpy(out_end, str, N - 1);
-        out_end += N - 1;
-    }
+  // Write a literal string
+  template <int N>
+  inline void write(const char (&str)[N])
+  {
+    ensure_capacity(N - 1);
+    memcpy(out_end, str, N - 1);
+    out_end += N - 1;
+  }
 
-    // Write a std::string
-    inline void write(const std::string& s) {
-        ensure_capacity(s.size());
-        memcpy(out_end, s.data(), s.size());
-        out_end += s.size();
-    }
+  // Write a std::string
+  inline void write(const std::string &s)
+  {
+    ensure_capacity(s.size());
+    memcpy(out_end, s.data(), s.size());
+    out_end += s.size();
+  }
 
-    // Write a string-range
-    inline void write(const char *begin, const char *end) {
-        ensure_capacity(end - begin);
-        memcpy(out_end, begin, end - begin);
-        out_end += (end - begin);
-    }
+  // Write a string-range
+  inline void write(const char *begin, const char *end)
+  {
+    ensure_capacity(end - begin);
+    memcpy(out_end, begin, end - begin);
+    out_end += (end - begin);
+  }
 };
 
-static void format_json(output_data& out, const ndt::type& dt, const char *arrmeta, const char *data);
+static void format_json(output_data &out, const ndt::type &dt,
+                        const char *arrmeta, const char *data);
 
-static void format_json_bool(output_data& out, const ndt::type& dt, const char *arrmeta, const char *data)
+static void format_json_bool(output_data &out, const ndt::type &dt,
+                             const char *arrmeta, const char *data)
 {
-    dynd_bool value = false;
-    if (dt.get_type_id() == bool_type_id) {
-        value = (*data != 0);
-    } else {
-        typed_data_assign(ndt::make_type<dynd_bool>(), NULL, reinterpret_cast<char *>(&value), dt, arrmeta, data);
-    }
-    if (value) {
-        out.write("true");
-    } else {
-        out.write("false");
-    }
+  dynd_bool value = false;
+  if (dt.get_type_id() == bool_type_id) {
+    value = (*data != 0);
+  } else {
+    typed_data_assign(ndt::make_type<dynd_bool>(), NULL,
+                      reinterpret_cast<char *>(&value), dt, arrmeta, data);
+  }
+  if (value) {
+    out.write("true");
+  } else {
+    out.write("false");
+  }
 }
 
-static void format_json_number(output_data& out, const ndt::type& dt, const char *arrmeta, const char *data)
+static void format_json_number(output_data &out, const ndt::type &dt,
+                               const char *arrmeta, const char *data)
 {
-    stringstream ss;
-    dt.print_data(ss, arrmeta, data);
-    out.write(ss.str());
+  stringstream ss;
+  dt.print_data(ss, arrmeta, data);
+  out.write(ss.str());
 }
 
-static void print_escaped_unicode_codepoint(output_data& out, uint32_t cp, append_unicode_codepoint_t append_fn)
+static void
+print_escaped_unicode_codepoint(output_data &out, uint32_t cp,
+                                append_unicode_codepoint_t append_fn)
 {
     if (cp < 0x80) {
         switch (cp) {
@@ -151,91 +164,110 @@ static void format_json_encoded_string(output_data &out, const char *begin,
                                        const char *end,
                                        string_encoding_t encoding)
 {
-    uint32_t cp;
-    next_unicode_codepoint_t next_fn;
-    append_unicode_codepoint_t append_fn;
-    next_fn = get_next_unicode_codepoint_function(encoding, assign_error_nocheck);
-    append_fn = get_append_unicode_codepoint_function(string_encoding_utf_8, assign_error_nocheck);
-    out.write('\"');
-    while (begin < end) {
-        cp = next_fn(begin, end);
-        print_escaped_unicode_codepoint(out, cp, append_fn);
-    }
-    out.write('\"');
+  uint32_t cp;
+  next_unicode_codepoint_t next_fn;
+  append_unicode_codepoint_t append_fn;
+  next_fn = get_next_unicode_codepoint_function(encoding, assign_error_nocheck);
+  append_fn = get_append_unicode_codepoint_function(string_encoding_utf_8,
+                                                    assign_error_nocheck);
+  out.write('\"');
+  while (begin < end) {
+    cp = next_fn(begin, end);
+    print_escaped_unicode_codepoint(out, cp, append_fn);
+  }
+  out.write('\"');
 }
 
 static void format_json_string(output_data &out, const ndt::type &dt,
                                const char *arrmeta, const char *data)
 {
-    const base_string_type *bsd = dt.tcast<base_string_type>();
-    string_encoding_t encoding = bsd->get_encoding();
-    const char *begin = NULL, *end = NULL;
-    bsd->get_string_range(&begin, &end, arrmeta, data);
-    format_json_encoded_string(out, begin, end, encoding);
+  const base_string_type *bsd = dt.tcast<base_string_type>();
+  string_encoding_t encoding = bsd->get_encoding();
+  const char *begin = NULL, *end = NULL;
+  bsd->get_string_range(&begin, &end, arrmeta, data);
+  format_json_encoded_string(out, begin, end, encoding);
 }
 
 static void format_json_option(output_data &out, const ndt::type &dt,
                                const char *arrmeta, const char *data)
 {
-    const option_type *ot = dt.tcast<option_type>();
-    if (ot->is_avail(arrmeta, data, &eval::default_eval_context)) {
-        format_json(out, ot->get_value_type(), arrmeta, data);
-    } else {
-        out.write("null");
-    }
+  const option_type *ot = dt.tcast<option_type>();
+  if (ot->is_avail(arrmeta, data, &eval::default_eval_context)) {
+    format_json(out, ot->get_value_type(), arrmeta, data);
+  } else {
+    out.write("null");
+  }
 }
 
 static void format_json_dynamic(output_data &out, const ndt::type &dt,
-                                const char *DYND_UNUSED(arrmeta), const char *data)
+                                const char *DYND_UNUSED(arrmeta),
+                                const char *data)
 {
-    if (dt.get_type_id() == json_type_id) {
-        // Copy the JSON data directly
-        const json_type_data *d = reinterpret_cast<const json_type_data *>(data);
-        out.write(d->begin, d->end);
-    } else {
-        stringstream ss;
-        ss << "Formatting dynd type " << dt << " as JSON is not implemented yet";
-        throw runtime_error(ss.str());
-    }
+  if (dt.get_type_id() == json_type_id) {
+    // Copy the JSON data directly
+    const json_type_data *d = reinterpret_cast<const json_type_data *>(data);
+    out.write(d->begin, d->end);
+  } else {
+    stringstream ss;
+    ss << "Formatting dynd type " << dt << " as JSON is not implemented yet";
+    throw runtime_error(ss.str());
+  }
 }
 
 static void format_json_datetime(output_data &out, const ndt::type &dt,
                                  const char *arrmeta, const char *data)
 {
-    switch (dt.get_type_id()) {
-        case date_type_id: {
-            stringstream ss;
-            dt.print_data(ss, arrmeta, data);
-            string s = ss.str();
-            format_json_encoded_string(out, s.data(), s.data() + s.size(), string_encoding_ascii);
-            break;
-        }
-        default: {
-            stringstream ss;
-            ss << "Formatting dynd type " << dt << " as JSON is not implemented yet";
-            throw runtime_error(ss.str());
-        }
-    }
+  switch (dt.get_type_id()) {
+  case date_type_id:
+  case datetime_type_id: {
+    stringstream ss;
+    dt.print_data(ss, arrmeta, data);
+    string s = ss.str();
+    format_json_encoded_string(out, s.data(), s.data() + s.size(),
+                               string_encoding_ascii);
+    break;
+  }
+  default: {
+    stringstream ss;
+    ss << "Formatting dynd type " << dt << " as JSON is not implemented yet";
+    throw runtime_error(ss.str());
+  }
+  }
 }
 
-static void format_json_struct(output_data& out, const ndt::type& dt, const char *arrmeta, const char *data)
+static void format_json_struct(output_data &out, const ndt::type &dt,
+                               const char *arrmeta, const char *data)
 {
-    const base_struct_type *bsd = dt.tcast<base_struct_type>();
-    intptr_t field_count = bsd->get_field_count();
-    const size_t *data_offsets = bsd->get_data_offsets(arrmeta);
-    const size_t *arrmeta_offsets = bsd->get_arrmeta_offsets_raw();
+  const base_struct_type *bsd = dt.tcast<base_struct_type>();
+  intptr_t field_count = bsd->get_field_count();
+  const size_t *data_offsets = bsd->get_data_offsets(arrmeta);
+  const size_t *arrmeta_offsets = bsd->get_arrmeta_offsets_raw();
 
+  if (out.struct_as_list) {
+    out.write('[');
+    for (intptr_t i = 0; i < field_count; ++i) {
+      ::format_json(out, bsd->get_field_type(i), arrmeta + arrmeta_offsets[i],
+                    data + data_offsets[i]);
+      if (i != field_count - 1) {
+        out.write(',');
+      }
+    }
+    out.write(']');
+  } else {
     out.write('{');
     for (intptr_t i = 0; i < field_count; ++i) {
-        const string_type_data& fname = bsd->get_field_name_raw(i);
-        format_json_encoded_string(out, fname.begin, fname.end, string_encoding_utf_8);
-        out.write(':');
-        ::format_json(out, bsd->get_field_type(i), arrmeta + arrmeta_offsets[i], data + data_offsets[i]);
-        if (i != field_count - 1) {
-            out.write(',');
-        }
+      const string_type_data &fname = bsd->get_field_name_raw(i);
+      format_json_encoded_string(out, fname.begin, fname.end,
+                                 string_encoding_utf_8);
+      out.write(':');
+      ::format_json(out, bsd->get_field_type(i), arrmeta + arrmeta_offsets[i],
+                    data + data_offsets[i]);
+      if (i != field_count - 1) {
+        out.write(',');
+      }
     }
     out.write('}');
+  }
 }
 
 static void format_json_uniform_dim(output_data& out, const ndt::type& dt, const char *arrmeta, const char *data)
@@ -261,7 +293,7 @@ static void format_json_uniform_dim(output_data& out, const ndt::type& dt, const
             const fixed_dim_type_arrmeta *md =
                 reinterpret_cast<const fixed_dim_type_arrmeta *>(arrmeta);
             ndt::type element_tp = fad->get_element_type();
-            intptr_t size = (intptr_t)fad->get_fixed_dim_size(),
+            intptr_t size = fad->get_fixed_dim_size(),
                      stride = md->stride;
             for (intptr_t i = 0; i < size; ++i) {
                 ::format_json(out, element_tp,
@@ -276,7 +308,7 @@ static void format_json_uniform_dim(output_data& out, const ndt::type& dt, const
         case cfixed_dim_type_id: {
             const cfixed_dim_type *fad = dt.tcast<cfixed_dim_type>();
             ndt::type element_tp = fad->get_element_type();
-            intptr_t size = (intptr_t)fad->get_fixed_dim_size(), stride = fad->get_fixed_stride();
+            intptr_t size = fad->get_fixed_dim_size(), stride = fad->get_fixed_stride();
             for (intptr_t i = 0; i < size; ++i) {
                 ::format_json(out, element_tp, arrmeta, data + i * stride);
                 if (i != size - 1) {
@@ -312,70 +344,77 @@ static void format_json_uniform_dim(output_data& out, const ndt::type& dt, const
 
 static void format_json(output_data& out, const ndt::type& dt, const char *arrmeta, const char *data)
 {
-    switch (dt.get_kind()) {
-        case bool_kind:
-            format_json_bool(out, dt, arrmeta, data);
-            break;
-        case int_kind:
-        case uint_kind:
-        case real_kind:
-        case complex_kind:
-            format_json_number(out, dt, arrmeta, data);
-            break;
-        case string_kind:
-            format_json_string(out, dt, arrmeta, data);
-            break;
-        case datetime_kind:
-            format_json_datetime(out, dt, arrmeta, data);
-            break;
-        case struct_kind:
-            format_json_struct(out, dt, arrmeta, data);
-            break;
-        case option_kind:
-            format_json_option(out, dt, arrmeta, data);
-            break;
-        case dynamic_kind:
-            format_json_dynamic(out, dt, arrmeta, data);
-            break;
-        case uniform_dim_kind:
-            format_json_uniform_dim(out, dt, arrmeta, data);
-            break;
-        default: {
-            stringstream ss;
-            ss << "Formatting dynd type " << dt << " as JSON is not implemented yet";
-            throw runtime_error(ss.str());
-        }
-    }
+  switch (dt.get_kind()) {
+  case bool_kind:
+    format_json_bool(out, dt, arrmeta, data);
+    break;
+  case int_kind:
+  case uint_kind:
+  case real_kind:
+  case complex_kind:
+    format_json_number(out, dt, arrmeta, data);
+    break;
+  case string_kind:
+    format_json_string(out, dt, arrmeta, data);
+    break;
+  case datetime_kind:
+    format_json_datetime(out, dt, arrmeta, data);
+    break;
+  case struct_kind:
+    format_json_struct(out, dt, arrmeta, data);
+    break;
+  case option_kind:
+    format_json_option(out, dt, arrmeta, data);
+    break;
+  case dynamic_kind:
+    format_json_dynamic(out, dt, arrmeta, data);
+    break;
+  case uniform_dim_kind:
+    format_json_uniform_dim(out, dt, arrmeta, data);
+    break;
+  default: {
+    stringstream ss;
+    ss << "Formatting dynd type " << dt << " as JSON is not implemented yet";
+    throw runtime_error(ss.str());
+  }
+  }
 }
 
-nd::array dynd::format_json(const nd::array& n)
+nd::array dynd::format_json(const nd::array& n, bool struct_as_list)
 {
-    // Create a UTF-8 string
-    nd::array result = nd::empty(ndt::make_string());
+  // Create a UTF-8 string
+  nd::array result = nd::empty(ndt::make_string());
 
-    // Initialize the output with some memory
-    output_data out;
-    out.blockref = reinterpret_cast<const string_type_arrmeta *>(result.get_arrmeta())->blockref;
-    out.api = get_memory_block_pod_allocator_api(out.blockref);
-    out.api->allocate(out.blockref, 1024, 1, &out.out_begin, &out.out_capacity_end);
-    out.out_end = out.out_begin;
+  // Initialize the output with some memory
+  output_data out;
+  out.blockref = reinterpret_cast<const string_type_arrmeta *>(
+                     result.get_arrmeta())->blockref;
+  out.api = get_memory_block_pod_allocator_api(out.blockref);
+  out.api->allocate(out.blockref, 1024, 1, &out.out_begin,
+                    &out.out_capacity_end);
+  out.out_end = out.out_begin;
+  out.struct_as_list = struct_as_list;
 
-    if (!n.get_type().is_expression()) {
-        ::format_json(out, n.get_type(), n.get_arrmeta(), n.get_readonly_originptr());
-    } else {
-        nd::array tmp = n.eval();
-        ::format_json(out, tmp.get_type(), tmp.get_arrmeta(), tmp.get_readonly_originptr());
-    }
+  if (!n.get_type().is_expression()) {
+    ::format_json(out, n.get_type(), n.get_arrmeta(),
+                  n.get_readonly_originptr());
+  } else {
+    nd::array tmp = n.eval();
+    ::format_json(out, tmp.get_type(), tmp.get_arrmeta(),
+                  tmp.get_readonly_originptr());
+  }
 
-    // Shrink the memory to fit, and set the pointers in the output
-    string_type_data *d = reinterpret_cast<string_type_data *>(result.get_readwrite_originptr());
-    d->begin = out.out_begin;
-    d->end = out.out_capacity_end;
-    out.api->resize(out.blockref, out.out_end - out.out_begin, &d->begin, &d->end);
+  // Shrink the memory to fit, and set the pointers in the output
+  string_type_data *d =
+      reinterpret_cast<string_type_data *>(result.get_readwrite_originptr());
+  d->begin = out.out_begin;
+  d->end = out.out_capacity_end;
+  out.api->resize(out.blockref, out.out_end - out.out_begin, &d->begin,
+                  &d->end);
 
-    // Finalize processing and mark the result as immutable
-    result.get_type().extended()->arrmeta_finalize_buffers(result.get_arrmeta());
-    result.flag_as_immutable();
+  // Finalize processing and mark the result as immutable
+  result.get_type().extended()->arrmeta_finalize_buffers(result.get_arrmeta());
+  result.flag_as_immutable();
 
-    return result;
+  return result;
 }

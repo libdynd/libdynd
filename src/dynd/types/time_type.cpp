@@ -130,37 +130,37 @@ bool time_type::operator==(const base_type& rhs) const
 }
 
 size_t time_type::make_assignment_kernel(
-    ckernel_builder *out, size_t offset_out, const ndt::type &dst_tp,
+    ckernel_builder *ckb, intptr_t ckb_offset, const ndt::type &dst_tp,
     const char *dst_arrmeta, const ndt::type &src_tp, const char *src_arrmeta,
     kernel_request_t kernreq, const eval::eval_context *ectx) const
 {
     if (this == dst_tp.extended()) {
         if (src_tp.get_type_id() == time_type_id) {
-            return make_pod_typed_data_assignment_kernel(out, offset_out,
+            return make_pod_typed_data_assignment_kernel(ckb, ckb_offset,
                             get_data_size(), get_data_alignment(), kernreq);
         } else if (src_tp.get_kind() == string_kind) {
             // Assignment from strings
             return make_string_to_time_assignment_kernel(
-                out, offset_out, dst_tp, src_tp, src_arrmeta, kernreq, ectx);
+                ckb, ckb_offset, dst_tp, src_tp, src_arrmeta, kernreq, ectx);
         } else if (src_tp.get_kind() == struct_kind) {
             // Convert to struct using the "struct" property
             return ::make_assignment_kernel(
-                out, offset_out, ndt::make_property(dst_tp, "struct"),
+                ckb, ckb_offset, ndt::make_property(dst_tp, "struct"),
                 dst_arrmeta, src_tp, src_arrmeta, kernreq, ectx);
         } else if (!src_tp.is_builtin()) {
             return src_tp.extended()->make_assignment_kernel(
-                out, offset_out, dst_tp, dst_arrmeta, src_tp, src_arrmeta,
+                ckb, ckb_offset, dst_tp, dst_arrmeta, src_tp, src_arrmeta,
                 kernreq, ectx);
         }
     } else {
         if (dst_tp.get_kind() == string_kind) {
             // Assignment to strings
             return make_time_to_string_assignment_kernel(
-                out, offset_out, dst_tp, dst_arrmeta, src_tp, kernreq, ectx);
+                ckb, ckb_offset, dst_tp, dst_arrmeta, src_tp, kernreq, ectx);
         } else if (dst_tp.get_kind() == struct_kind) {
             // Convert to struct using the "struct" property
             return ::make_assignment_kernel(
-                out, offset_out, dst_tp, dst_arrmeta,
+                ckb, ckb_offset, dst_tp, dst_arrmeta,
                 ndt::make_property(src_tp, "struct"), src_arrmeta, kernreq,
                 ectx);
         }
@@ -173,7 +173,7 @@ size_t time_type::make_assignment_kernel(
 }
 
 size_t time_type::make_comparison_kernel(
-                ckernel_builder *out, size_t offset_out,
+                ckernel_builder *ckb, intptr_t ckb_offset,
                 const ndt::type& src0_tp, const char *src0_arrmeta,
                 const ndt::type& src1_tp, const char *src1_arrmeta,
                 comparison_type_t comptype,
@@ -181,10 +181,10 @@ size_t time_type::make_comparison_kernel(
 {
     if (this == src0_tp.extended()) {
         if (*this == *src1_tp.extended()) {
-            return make_builtin_type_comparison_kernel(out, offset_out,
+            return make_builtin_type_comparison_kernel(ckb, ckb_offset,
                             int64_type_id, int64_type_id, comptype);
         } else if (!src1_tp.is_builtin()) {
-            return src1_tp.extended()->make_comparison_kernel(out, offset_out,
+            return src1_tp.extended()->make_comparison_kernel(ckb, ckb_offset,
                             src0_tp, src0_arrmeta,
                             src1_tp, src1_arrmeta,
                             comptype, ectx);
@@ -385,33 +385,33 @@ ndt::type time_type::get_elwise_property_type(size_t property_index,
 }
 
 size_t time_type::make_elwise_property_getter_kernel(
-    ckernel_builder *out, size_t offset_out,
+    ckernel_builder *ckb, intptr_t ckb_offset,
     const char *DYND_UNUSED(dst_arrmeta), const char *DYND_UNUSED(src_arrmeta),
     size_t src_property_index, kernel_request_t kernreq,
     const eval::eval_context *DYND_UNUSED(ectx)) const
 {
-    offset_out =
-        make_kernreq_to_single_kernel_adapter(out, offset_out, 1, kernreq);
-    ckernel_prefix *e = out->get_at<ckernel_prefix>(offset_out);
+    ckb_offset =
+        make_kernreq_to_single_kernel_adapter(ckb, ckb_offset, 1, kernreq);
+    ckernel_prefix *e = ckb->alloc_ck_leaf<ckernel_prefix>(ckb_offset);
     switch (src_property_index) {
         case timeprop_hour:
             e->set_function<expr_single_t>(&get_property_kernel_hour_single);
-            return offset_out + sizeof(ckernel_prefix);
+            return ckb_offset;
         case timeprop_minute:
             e->set_function<expr_single_t>(&get_property_kernel_minute_single);
-            return offset_out + sizeof(ckernel_prefix);
+            return ckb_offset;
         case timeprop_second:
             e->set_function<expr_single_t>(&get_property_kernel_second_single);
-            return offset_out + sizeof(ckernel_prefix);
+            return ckb_offset;
         case timeprop_microsecond:
             e->set_function<expr_single_t>(&get_property_kernel_microsecond_single);
-            return offset_out + sizeof(ckernel_prefix);
+            return ckb_offset;
         case timeprop_tick:
             e->set_function<expr_single_t>(&get_property_kernel_tick_single);
-            return offset_out + sizeof(ckernel_prefix);
+            return ckb_offset;
         case timeprop_struct:
             e->set_function<expr_single_t>(&get_property_kernel_struct_single);
-            return offset_out + sizeof(ckernel_prefix);
+            return ckb_offset;
         default:
             stringstream ss;
             ss << "dynd time type given an invalid property index" << src_property_index;
@@ -420,25 +420,25 @@ size_t time_type::make_elwise_property_getter_kernel(
 }
 
 size_t time_type::make_elwise_property_setter_kernel(
-    ckernel_builder *out, size_t offset_out,
+    ckernel_builder *ckb, intptr_t ckb_offset,
     const char *DYND_UNUSED(dst_arrmeta), size_t dst_property_index,
     const char *DYND_UNUSED(src_arrmeta), kernel_request_t kernreq,
     const eval::eval_context *DYND_UNUSED(ectx)) const
 {
-    offset_out =
-        make_kernreq_to_single_kernel_adapter(out, offset_out, 1, kernreq);
-    ckernel_prefix *e = out->get_at<ckernel_prefix>(offset_out);
-    switch (dst_property_index) {
-        case timeprop_struct:
-            e->set_function<expr_single_t>(&set_property_kernel_struct_single);
-            return offset_out + sizeof(ckernel_prefix);
-        default:
-            stringstream ss;
-            ss << "dynd time type given an invalid property index" << dst_property_index;
-            throw runtime_error(ss.str());
-    }
+  ckb_offset =
+      make_kernreq_to_single_kernel_adapter(ckb, ckb_offset, 1, kernreq);
+  ckernel_prefix *e = ckb->alloc_ck_leaf<ckernel_prefix>(ckb_offset);
+  switch (dst_property_index) {
+  case timeprop_struct:
+    e->set_function<expr_single_t>(&set_property_kernel_struct_single);
+    return ckb_offset;
+  default:
+    stringstream ss;
+    ss << "dynd time type given an invalid property index"
+       << dst_property_index;
+    throw runtime_error(ss.str());
+  }
 }
-
 
 namespace {
 struct time_is_avail_ck {
@@ -484,9 +484,9 @@ struct time_is_avail_ck {
             ss << "Expected destination type bool, got " << dst_tp;
             throw type_error(ss.str());
         }
-        ckernel_prefix *ckp = ckb->get_at<ckernel_prefix>(ckb_offset);
-        ckp->set_expr_function<time_is_avail_ck>((kernel_request_t)kernreq);
-        return ckb_offset + sizeof(ckernel_prefix);
+        ckernel_prefix *ckp = ckb->alloc_ck_leaf<ckernel_prefix>(ckb_offset);
+        ckp->set_expr_function<time_is_avail_ck>(kernreq);
+        return ckb_offset;
     }
 };
 
@@ -523,9 +523,9 @@ struct time_assign_na_ck {
             ss << "Expected destination type ?time, got " << dst_tp;
             throw type_error(ss.str());
         }
-        ckernel_prefix *ckp = ckb->get_at<ckernel_prefix>(ckb_offset);
-        ckp->set_expr_function<time_assign_na_ck>((kernel_request_t)kernreq);
-        return ckb_offset + sizeof(ckernel_prefix);
+        ckernel_prefix *ckp = ckb->alloc_ck_leaf<ckernel_prefix>(ckb_offset);
+        ckp->set_expr_function<time_assign_na_ck>(kernreq);
+        return ckb_offset;
     }
 };
 } // anonymous namespace

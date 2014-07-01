@@ -117,7 +117,7 @@ bool date_type::operator==(const base_type& rhs) const
 }
 
 size_t date_type::make_assignment_kernel(
-                ckernel_builder *out, size_t offset_out,
+                ckernel_builder *ckb, intptr_t ckb_offset,
                 const ndt::type& dst_tp, const char *dst_arrmeta,
                 const ndt::type& src_tp, const char *src_arrmeta,
                 kernel_request_t kernreq,
@@ -125,31 +125,31 @@ size_t date_type::make_assignment_kernel(
 {
     if (this == dst_tp.extended()) {
         if (src_tp.get_type_id() == date_type_id) {
-            return make_pod_typed_data_assignment_kernel(out, offset_out,
+            return make_pod_typed_data_assignment_kernel(ckb, ckb_offset,
                             get_data_size(), get_data_alignment(), kernreq);
         } else if (src_tp.get_kind() == string_kind) {
             // Assignment from strings
             return make_string_to_date_assignment_kernel(
-                out, offset_out, src_tp, src_arrmeta, kernreq, ectx);
+                ckb, ckb_offset, src_tp, src_arrmeta, kernreq, ectx);
         } else if (src_tp.get_kind() == struct_kind) {
             // Convert to struct using the "struct" property
             return ::make_assignment_kernel(
-                out, offset_out, ndt::make_property(dst_tp, "struct"),
+                ckb, ckb_offset, ndt::make_property(dst_tp, "struct"),
                 dst_arrmeta, src_tp, src_arrmeta, kernreq, ectx);
         } else if (!src_tp.is_builtin()) {
             return src_tp.extended()->make_assignment_kernel(
-                out, offset_out, dst_tp, dst_arrmeta, src_tp, src_arrmeta,
+                ckb, ckb_offset, dst_tp, dst_arrmeta, src_tp, src_arrmeta,
                 kernreq, ectx);
         }
     } else {
         if (dst_tp.get_kind() == string_kind) {
             // Assignment to strings
             return make_date_to_string_assignment_kernel(
-                out, offset_out, dst_tp, dst_arrmeta, kernreq, ectx);
+                ckb, ckb_offset, dst_tp, dst_arrmeta, kernreq, ectx);
         } else if (dst_tp.get_kind() == struct_kind) {
             // Convert to struct using the "struct" property
             return ::make_assignment_kernel(
-                out, offset_out, dst_tp, dst_arrmeta,
+                ckb, ckb_offset, dst_tp, dst_arrmeta,
                 ndt::make_property(src_tp, "struct"), src_arrmeta, kernreq,
                 ectx);
         }
@@ -162,7 +162,7 @@ size_t date_type::make_assignment_kernel(
 }
 
 size_t date_type::make_comparison_kernel(
-                ckernel_builder *out, size_t offset_out,
+                ckernel_builder *ckb, intptr_t ckb_offset,
                 const ndt::type& src0_tp, const char *src0_arrmeta,
                 const ndt::type& src1_tp, const char *src1_arrmeta,
                 comparison_type_t comptype,
@@ -170,10 +170,10 @@ size_t date_type::make_comparison_kernel(
 {
     if (this == src0_tp.extended()) {
         if (*this == *src1_tp.extended()) {
-            return make_builtin_type_comparison_kernel(out, offset_out,
+            return make_builtin_type_comparison_kernel(ckb, ckb_offset,
                             int32_type_id, int32_type_id, comptype);
         } else if (!src1_tp.is_builtin()) {
-            return src1_tp.extended()->make_comparison_kernel(out, offset_out,
+            return src1_tp.extended()->make_comparison_kernel(ckb, ckb_offset,
                             src0_tp, src0_arrmeta,
                             src1_tp, src1_arrmeta,
                             comptype, ectx);
@@ -382,102 +382,105 @@ void set_property_kernel_struct_single(char *dst, const char *const*src,
 } // anonymous namespace
 
 namespace {
-    enum date_properties_t {
-        dateprop_year,
-        dateprop_month,
-        dateprop_day,
-        dateprop_weekday,
-        dateprop_struct
-    };
+enum date_properties_t {
+  dateprop_year,
+  dateprop_month,
+  dateprop_day,
+  dateprop_weekday,
+  dateprop_struct
+};
 }
 
 size_t date_type::get_elwise_property_index(const std::string& property_name) const
 {
-    if (property_name == "year") {
-        return dateprop_year;
-    } else if (property_name == "month") {
-        return dateprop_month;
-    } else if (property_name == "day") {
-        return dateprop_day;
-    } else if (property_name == "weekday") {
-        return dateprop_weekday;
-    } else if (property_name == "struct") {
-        // A read/write property for accessing a date as a struct
-        return dateprop_struct;
-    } else {
-        stringstream ss;
-        ss << "dynd date type does not have a kernel for property " << property_name;
-        throw runtime_error(ss.str());
-    }
+  if (property_name == "year") {
+    return dateprop_year;
+  } else if (property_name == "month") {
+    return dateprop_month;
+  } else if (property_name == "day") {
+    return dateprop_day;
+  } else if (property_name == "weekday") {
+    return dateprop_weekday;
+  } else if (property_name == "struct") {
+    // A read/write property for accessing a date as a struct
+    return dateprop_struct;
+  } else {
+    stringstream ss;
+    ss << "dynd date type does not have a kernel for property "
+       << property_name;
+    throw runtime_error(ss.str());
+  }
 }
 
 ndt::type date_type::get_elwise_property_type(size_t property_index,
-            bool& out_readable, bool& out_writable) const
+                                              bool &out_readable,
+                                              bool &out_writable) const
 {
-    switch (property_index) {
-        case dateprop_year:
-        case dateprop_month:
-        case dateprop_day:
-        case dateprop_weekday:
-            out_readable = true;
-            out_writable = false;
-            return ndt::make_type<int32_t>();
-        case dateprop_struct:
-            out_readable = true;
-            out_writable = true;
-            return date_ymd::type();
-        default:
-            out_readable = false;
-            out_writable = false;
-            return ndt::make_type<void>();
-    }
+  switch (property_index) {
+  case dateprop_year:
+  case dateprop_month:
+  case dateprop_day:
+  case dateprop_weekday:
+    out_readable = true;
+    out_writable = false;
+    return ndt::make_type<int32_t>();
+  case dateprop_struct:
+    out_readable = true;
+    out_writable = true;
+    return date_ymd::type();
+  default:
+    out_readable = false;
+    out_writable = false;
+    return ndt::make_type<void>();
+  }
 }
 
 size_t date_type::make_elwise_property_getter_kernel(
-    ckernel_builder *out, size_t offset_out,
+    ckernel_builder *ckb, intptr_t ckb_offset,
     const char *DYND_UNUSED(dst_arrmeta), const char *DYND_UNUSED(src_arrmeta),
     size_t src_property_index, kernel_request_t kernreq,
     const eval::eval_context *DYND_UNUSED(ectx)) const
 {
-    offset_out =
-        make_kernreq_to_single_kernel_adapter(out, offset_out, 1, kernreq);
-    ckernel_prefix *e = out->get_at<ckernel_prefix>(offset_out);
-    switch (src_property_index) {
-        case dateprop_year:
-            e->set_function<expr_single_t>(&get_property_kernel_year_single);
-            return offset_out + sizeof(ckernel_prefix);
-        case dateprop_month:
-            e->set_function<expr_single_t>(&get_property_kernel_month_single);
-            return offset_out + sizeof(ckernel_prefix);
-        case dateprop_day:
-            e->set_function<expr_single_t>(&get_property_kernel_day_single);
-            return offset_out + sizeof(ckernel_prefix);
-        case dateprop_weekday:
-            e->set_function<expr_single_t>(&get_property_kernel_weekday_single);
-            return offset_out + sizeof(ckernel_prefix);
-        case dateprop_struct:
-            e->set_function<expr_single_t>(&get_property_kernel_struct_single);
-            return offset_out + sizeof(ckernel_prefix);
-        default:
-            stringstream ss;
-            ss << "dynd date type given an invalid property index" << src_property_index;
-            throw runtime_error(ss.str());
-    }
+  ckb_offset =
+      make_kernreq_to_single_kernel_adapter(ckb, ckb_offset, 1, kernreq);
+  ckernel_prefix *e = ckb->alloc_ck_leaf<ckernel_prefix>(ckb_offset);
+  switch (src_property_index) {
+  case dateprop_year:
+    e->set_function<expr_single_t>(&get_property_kernel_year_single);
+    return ckb_offset;
+  case dateprop_month:
+    e->set_function<expr_single_t>(&get_property_kernel_month_single);
+    return ckb_offset;
+  case dateprop_day:
+    e->set_function<expr_single_t>(&get_property_kernel_day_single);
+    return ckb_offset;
+  case dateprop_weekday:
+    e->set_function<expr_single_t>(&get_property_kernel_weekday_single);
+    return ckb_offset;
+  case dateprop_struct:
+    e->set_function<expr_single_t>(&get_property_kernel_struct_single);
+    return ckb_offset;
+  default:
+    stringstream ss;
+    ss << "dynd date type given an invalid property index"
+       << src_property_index;
+    throw runtime_error(ss.str());
+  }
 }
 
 size_t date_type::make_elwise_property_setter_kernel(
-    ckernel_builder *out, size_t offset_out,
+    ckernel_builder *ckb, intptr_t ckb_offset,
     const char *DYND_UNUSED(dst_arrmeta), size_t dst_property_index,
     const char *DYND_UNUSED(src_arrmeta), kernel_request_t kernreq,
     const eval::eval_context *DYND_UNUSED(ectx)) const
 {
-    offset_out =
-        make_kernreq_to_single_kernel_adapter(out, offset_out, 1, kernreq);
-    ckernel_prefix *e = out->get_at<ckernel_prefix>(offset_out);
+    ckb_offset =
+        make_kernreq_to_single_kernel_adapter(ckb, ckb_offset, 1, kernreq);
+    ckernel_prefix *e = ckb->alloc_ck_leaf<ckernel_prefix>(ckb_offset);
     switch (dst_property_index) {
         case dateprop_struct:
             e->set_function<expr_single_t>(&set_property_kernel_struct_single);
-            return offset_out + sizeof(ckernel_prefix);
+            return ckb_offset;
         default:
             stringstream ss;
             ss << "dynd date type given an invalid property index" << dst_property_index;
@@ -487,117 +490,116 @@ size_t date_type::make_elwise_property_setter_kernel(
 
 namespace {
 struct date_is_avail_ck {
-    static void single(char *dst, const char *const *src,
-                       ckernel_prefix *DYND_UNUSED(self))
-    {
-        int32_t date = **reinterpret_cast<const int32_t *const *>(src);
-        *dst = date != DYND_DATE_NA;
-    }
+  static void single(char *dst, const char *const *src,
+                     ckernel_prefix *DYND_UNUSED(self))
+  {
+    int32_t date = **reinterpret_cast<const int32_t *const *>(src);
+    *dst = date != DYND_DATE_NA;
+  }
 
-    static void strided(char *dst, intptr_t dst_stride, const char *const *src,
-                        const intptr_t *src_stride, size_t count,
-                        ckernel_prefix *DYND_UNUSED(self))
-    {
-        const char *src0 = src[0];
-        intptr_t src0_stride = src_stride[0];
-        for (size_t i = 0; i != count; ++i) {
-            int32_t date = *reinterpret_cast<const int32_t *>(src);
-            *dst = date != DYND_DATE_NA;
-            dst += dst_stride;
-            src0 += src0_stride;
-        }
+  static void strided(char *dst, intptr_t dst_stride, const char *const *src,
+                      const intptr_t *src_stride, size_t count,
+                      ckernel_prefix *DYND_UNUSED(self))
+  {
+    const char *src0 = src[0];
+    intptr_t src0_stride = src_stride[0];
+    for (size_t i = 0; i != count; ++i) {
+      int32_t date = *reinterpret_cast<const int32_t *>(src);
+      *dst = date != DYND_DATE_NA;
+      dst += dst_stride;
+      src0 += src0_stride;
     }
+  }
 
-    static intptr_t instantiate(const arrfunc_type_data *DYND_UNUSED(self),
-                                dynd::ckernel_builder *ckb, intptr_t ckb_offset,
-                                const ndt::type &dst_tp,
-                                const char *DYND_UNUSED(dst_arrmeta),
-                                const ndt::type *src_tp,
-                                const char *const *DYND_UNUSED(src_arrmeta),
-                                kernel_request_t kernreq,
-                                const eval::eval_context *DYND_UNUSED(ectx))
-    {
-        if (src_tp[0].get_type_id() != option_type_id ||
-                src_tp[0].tcast<option_type>()->get_value_type().get_type_id() !=
-                    date_type_id) {
-            stringstream ss;
-            ss << "Expected source type ?date, got " << src_tp[0];
-            throw type_error(ss.str());
-        }
-        if (dst_tp.get_type_id() != bool_type_id) {
-            stringstream ss;
-            ss << "Expected destination type bool, got " << dst_tp;
-            throw type_error(ss.str());
-        }
-        ckernel_prefix *ckp = ckb->get_at<ckernel_prefix>(ckb_offset);
-        ckp->set_expr_function<date_is_avail_ck>((kernel_request_t)kernreq);
-        return ckb_offset + sizeof(ckernel_prefix);
+  static intptr_t instantiate(const arrfunc_type_data *DYND_UNUSED(self),
+                              dynd::ckernel_builder *ckb, intptr_t ckb_offset,
+                              const ndt::type &dst_tp,
+                              const char *DYND_UNUSED(dst_arrmeta),
+                              const ndt::type *src_tp,
+                              const char *const *DYND_UNUSED(src_arrmeta),
+                              kernel_request_t kernreq,
+                              const eval::eval_context *DYND_UNUSED(ectx))
+  {
+    if (src_tp[0].get_type_id() != option_type_id ||
+        src_tp[0].tcast<option_type>()->get_value_type().get_type_id() !=
+            date_type_id) {
+      stringstream ss;
+      ss << "Expected source type ?date, got " << src_tp[0];
+      throw type_error(ss.str());
     }
+    if (dst_tp.get_type_id() != bool_type_id) {
+      stringstream ss;
+      ss << "Expected destination type bool, got " << dst_tp;
+      throw type_error(ss.str());
+    }
+    ckernel_prefix *ckp = ckb->alloc_ck_leaf<ckernel_prefix>(ckb_offset);
+    ckp->set_expr_function<date_is_avail_ck>(kernreq);
+    return ckb_offset;
+  }
 };
 
 struct date_assign_na_ck {
-    static void single(char *dst, const char *const *DYND_UNUSED(src),
-                       ckernel_prefix *DYND_UNUSED(self))
-    {
-        *reinterpret_cast<int32_t *>(dst) = DYND_DATE_NA;
-    }
+  static void single(char *dst, const char *const *DYND_UNUSED(src),
+                     ckernel_prefix *DYND_UNUSED(self))
+  {
+    *reinterpret_cast<int32_t *>(dst) = DYND_DATE_NA;
+  }
 
-    static void strided(char *dst, intptr_t dst_stride,
-                        const char *const *DYND_UNUSED(src),
-                        const intptr_t *DYND_UNUSED(src_stride), size_t count,
-                        ckernel_prefix *DYND_UNUSED(self))
-    {
-        for (size_t i = 0; i != count; ++i, dst += dst_stride) {
-            *reinterpret_cast<int32_t *>(dst) = DYND_DATE_NA;
-        }
+  static void strided(char *dst, intptr_t dst_stride,
+                      const char *const *DYND_UNUSED(src),
+                      const intptr_t *DYND_UNUSED(src_stride), size_t count,
+                      ckernel_prefix *DYND_UNUSED(self))
+  {
+    for (size_t i = 0; i != count; ++i, dst += dst_stride) {
+      *reinterpret_cast<int32_t *>(dst) = DYND_DATE_NA;
     }
+  }
 
-    static intptr_t instantiate(const arrfunc_type_data *DYND_UNUSED(self),
-                                dynd::ckernel_builder *ckb, intptr_t ckb_offset,
-                                const ndt::type &dst_tp,
-                                const char *DYND_UNUSED(dst_arrmeta),
-                                const ndt::type *DYND_UNUSED(src_tp),
-                                const char *const *DYND_UNUSED(src_arrmeta),
-                                kernel_request_t kernreq,
-                                const eval::eval_context *DYND_UNUSED(ectx))
-    {
-        if (dst_tp.get_type_id() != option_type_id ||
-                dst_tp.tcast<option_type>()->get_value_type().get_type_id() !=
-                    date_type_id) {
-            stringstream ss;
-            ss << "Expected destination type ?date, got " << dst_tp;
-            throw type_error(ss.str());
-        }
-        ckernel_prefix *ckp = ckb->get_at<ckernel_prefix>(ckb_offset);
-        ckp->set_expr_function<date_assign_na_ck>((kernel_request_t)kernreq);
-        return ckb_offset + sizeof(ckernel_prefix);
+  static intptr_t instantiate(const arrfunc_type_data *DYND_UNUSED(self),
+                              dynd::ckernel_builder *ckb, intptr_t ckb_offset,
+                              const ndt::type &dst_tp,
+                              const char *DYND_UNUSED(dst_arrmeta),
+                              const ndt::type *DYND_UNUSED(src_tp),
+                              const char *const *DYND_UNUSED(src_arrmeta),
+                              kernel_request_t kernreq,
+                              const eval::eval_context *DYND_UNUSED(ectx))
+  {
+    if (dst_tp.get_type_id() != option_type_id ||
+        dst_tp.tcast<option_type>()->get_value_type().get_type_id() !=
+            date_type_id) {
+      stringstream ss;
+      ss << "Expected destination type ?date, got " << dst_tp;
+      throw type_error(ss.str());
     }
+    ckernel_prefix *ckp = ckb->alloc_ck_leaf<ckernel_prefix>(ckb_offset);
+    ckp->set_expr_function<date_assign_na_ck>(kernreq);
+    return ckb_offset;
+  }
 };
 } // anonymous namespace
 
 nd::array date_type::get_option_nafunc() const
 {
-    nd::array naf = nd::empty(option_type::make_nafunc_type());
-    arrfunc_type_data *is_avail =
-        reinterpret_cast<arrfunc_type_data *>(naf.get_ndo()->m_data_pointer);
-    arrfunc_type_data *assign_na = is_avail + 1;
+  nd::array naf = nd::empty(option_type::make_nafunc_type());
+  arrfunc_type_data *is_avail =
+      reinterpret_cast<arrfunc_type_data *>(naf.get_ndo()->m_data_pointer);
+  arrfunc_type_data *assign_na = is_avail + 1;
 
-    // Use a typevar instead of option[T] to avoid a circular dependency
-    is_avail->func_proto = ndt::make_funcproto(ndt::make_typevar("T"),
-                                               ndt::make_type<dynd_bool>());
-    is_avail->instantiate = &date_is_avail_ck::instantiate;
-    assign_na->func_proto =
-        ndt::make_funcproto(0, NULL, ndt::make_typevar("T"));
-    assign_na->instantiate = &date_assign_na_ck::instantiate;
-    naf.flag_as_immutable();
-    return naf;
+  // Use a typevar instead of option[T] to avoid a circular dependency
+  is_avail->func_proto =
+      ndt::make_funcproto(ndt::make_typevar("T"), ndt::make_type<dynd_bool>());
+  is_avail->instantiate = &date_is_avail_ck::instantiate;
+  assign_na->func_proto = ndt::make_funcproto(0, NULL, ndt::make_typevar("T"));
+  assign_na->instantiate = &date_assign_na_ck::instantiate;
+  naf.flag_as_immutable();
+  return naf;
 }
 
 bool date_type::adapt_type(const ndt::type &operand_tp, const nd::string &op,
                            nd::arrfunc &out_forward, nd::arrfunc &out_reverse)
     const
 {
-    return make_date_adapter_arrfunc(operand_tp, op, out_forward, out_reverse);
+  return make_date_adapter_arrfunc(operand_tp, op, out_forward, out_reverse);
 }
 
 bool date_type::reverse_adapt_type(const ndt::type &value_tp,
@@ -605,17 +607,17 @@ bool date_type::reverse_adapt_type(const ndt::type &value_tp,
                                    nd::arrfunc &out_forward,
                                    nd::arrfunc &out_reverse) const
 {
-    // Note that out_reverse and out_forward are swapped compared with
-    // adapt_type
-    return make_date_adapter_arrfunc(value_tp, op, out_reverse, out_forward);
+  // Note that out_reverse and out_forward are swapped compared with
+  // adapt_type
+  return make_date_adapter_arrfunc(value_tp, op, out_reverse, out_forward);
 }
 
 const ndt::type& ndt::make_date()
 {
-    // Static instance of the type, which has a reference count > 0 for the
-    // lifetime of the program. This static construction is inside a
-    // function to ensure correct creation order during startup.
-    static date_type dt;
-    static const ndt::type static_instance(&dt, true);
-    return static_instance;
+  // Static instance of the type, which has a reference count > 0 for the
+  // lifetime of the program. This static construction is inside a
+  // function to ensure correct creation order during startup.
+  static date_type dt;
+  static const ndt::type static_instance(&dt, true);
+  return static_instance;
 }

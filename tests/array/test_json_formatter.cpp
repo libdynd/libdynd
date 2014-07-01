@@ -16,6 +16,7 @@
 #include <dynd/types/cfixed_dim_type.hpp>
 #include <dynd/types/cstruct_type.hpp>
 #include <dynd/types/date_type.hpp>
+#include <dynd/types/datetime_type.hpp>
 #include <dynd/types/string_type.hpp>
 #include <dynd/types/json_type.hpp>
 
@@ -65,18 +66,32 @@ TEST(JSONFormatter, String) {
 }
 
 TEST(JSONFormatter, JSON) {
-    nd::array a;
-    a = nd::array("[ 1, 3, 5] ").ucast(ndt::make_json());
-    EXPECT_EQ("[ 1, 3, 5] ", format_json(a).as<string>());
+  nd::array a;
+  a = nd::array("[ 1, 3, 5] ").ucast(ndt::make_json());
+  EXPECT_EQ("[ 1, 3, 5] ", format_json(a).as<string>());
+}
+
+TEST(JSONFormatter, DateTime) {
+  nd::array a;
+  a = nd::array("2013-12-15").ucast(ndt::make_date());
+  EXPECT_EQ("\"2013-12-15\"", format_json(a).as<string>());
+  a = nd::array("2013-12-15T13:14:22.19").ucast(ndt::make_datetime());
+  EXPECT_EQ("\"2013-12-15T13:14:22.19\"", format_json(a).as<string>());
+  a = nd::array("2013-12-15T13:14:22.19").ucast(ndt::make_datetime(tz_utc));
+  EXPECT_EQ("\"2013-12-15T13:14:22.19Z\"", format_json(a).as<string>());
 }
 
 TEST(JSONFormatter, Struct) {
-    nd::array a = parse_json("{ a: int32, b: string, c: json }",
-                    "{ \"b\": \"testing\",  \"a\":    100,\n"
-                    "\"c\": [   {\"first\":true, \"second\":3}, null,\n \"test\"]  }");
-    EXPECT_EQ("{\"a\":100,\"b\":\"testing\","
-                    "\"c\":[   {\"first\":true, \"second\":3}, null,\n \"test\"]}",
-                    format_json(a).as<string>());
+  nd::array a = parse_json(
+      "{ a: int32, b: string, c: json }",
+      "{ \"b\": \"testing\",  \"a\":    100,\n"
+      "\"c\": [   {\"first\":true, \"second\":3}, null,\n \"test\"]  }");
+  EXPECT_EQ("{\"a\":100,\"b\":\"testing\","
+            "\"c\":[   {\"first\":true, \"second\":3}, null,\n \"test\"]}",
+            format_json(a).as<string>());
+  EXPECT_EQ(
+      "[100,\"testing\",[   {\"first\":true, \"second\":3}, null,\n \"test\"]]",
+      format_json(a, true).as<string>());
 }
 
 TEST(JSONFormatter, UniformDim) {

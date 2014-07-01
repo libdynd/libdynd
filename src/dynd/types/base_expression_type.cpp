@@ -64,7 +64,7 @@ size_t base_expression_type::get_iterdata_size(intptr_t DYND_UNUSED(ndim)) const
 }
 
 size_t base_expression_type::make_operand_to_value_assignment_kernel(
-                ckernel_builder *DYND_UNUSED(out), size_t DYND_UNUSED(offset_out),
+                ckernel_builder *DYND_UNUSED(ckb), intptr_t DYND_UNUSED(ckb_offset),
                 const char *DYND_UNUSED(dst_arrmeta), const char *DYND_UNUSED(src_arrmeta),
                 kernel_request_t DYND_UNUSED(kernreq), const eval::eval_context *DYND_UNUSED(ectx)) const
 {
@@ -74,7 +74,7 @@ size_t base_expression_type::make_operand_to_value_assignment_kernel(
 }
 
 size_t base_expression_type::make_value_to_operand_assignment_kernel(
-                ckernel_builder *DYND_UNUSED(out), size_t DYND_UNUSED(offset_out),
+                ckernel_builder *DYND_UNUSED(ckb), intptr_t DYND_UNUSED(ckb_offset),
                 const char *DYND_UNUSED(dst_arrmeta), const char *DYND_UNUSED(src_arrmeta),
                 kernel_request_t DYND_UNUSED(kernreq), const eval::eval_context *DYND_UNUSED(ectx)) const
 {
@@ -84,23 +84,23 @@ size_t base_expression_type::make_value_to_operand_assignment_kernel(
 }
 
 size_t base_expression_type::make_assignment_kernel(
-    ckernel_builder *out, size_t offset_out, const ndt::type &dst_tp,
+    ckernel_builder *ckb, intptr_t ckb_offset, const ndt::type &dst_tp,
     const char *dst_arrmeta, const ndt::type &src_tp, const char *src_arrmeta,
     kernel_request_t kernreq, const eval::eval_context *ectx) const
 {
-    return make_expression_assignment_kernel(out, offset_out,
+    return make_expression_assignment_kernel(ckb, ckb_offset,
                     dst_tp, dst_arrmeta, src_tp, src_arrmeta,
                     kernreq, ectx);
 }
 
 size_t base_expression_type::make_comparison_kernel(
-                ckernel_builder *out, size_t offset_out,
+                ckernel_builder *ckb, intptr_t ckb_offset,
                 const ndt::type& src0_dt, const char *src0_arrmeta,
                 const ndt::type& src1_dt, const char *src1_arrmeta,
                 comparison_type_t comptype,
                 const eval::eval_context *ectx) const
 {
-    return make_expression_comparison_kernel(out, offset_out,
+    return make_expression_comparison_kernel(ckb, ckb_offset,
                     src0_dt, src0_arrmeta,
                     src1_dt, src1_arrmeta,
                     comptype, ectx);

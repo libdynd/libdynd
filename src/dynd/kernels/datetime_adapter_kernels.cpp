@@ -109,20 +109,20 @@ static intptr_t instantiate_int_multiply_and_offset_arrfunc(
     const char *const *DYND_UNUSED(src_arrmeta), kernel_request_t kernreq,
     const eval::eval_context *DYND_UNUSED(ectx))
 {
-    typedef int_multiply_and_offset_ck<Tsrc, Tdst> self_type;
-    if (dst_tp !=
-                self_af->func_proto.tcast<funcproto_type>()->get_return_type() ||
-            src_tp[0] !=
-                self_af->func_proto.tcast<funcproto_type>()->get_param_type(0)) {
-        stringstream ss;
-        ss << "Cannot instantiate arrfunc with signature ";
-        ss << self_af->func_proto << " with types (";
-        ss << src_tp[0] << ") -> " << dst_tp;
-        throw type_error(ss.str());
-    }
-    self_type *self = self_type::create_leaf(ckb, ckb_offset, kernreq);
-    self->m_factor_offset = *self_af->get_data_as<pair<Tdst, Tdst> >();
-    return ckb_offset + sizeof(self_type);
+  typedef int_multiply_and_offset_ck<Tsrc, Tdst> self_type;
+  if (dst_tp !=
+          self_af->func_proto.tcast<funcproto_type>()->get_return_type() ||
+      src_tp[0] !=
+          self_af->func_proto.tcast<funcproto_type>()->get_param_type(0)) {
+    stringstream ss;
+    ss << "Cannot instantiate arrfunc with signature ";
+    ss << self_af->func_proto << " with types (";
+    ss << src_tp[0] << ") -> " << dst_tp;
+    throw type_error(ss.str());
+  }
+  self_type *self = self_type::create_leaf(ckb, kernreq, ckb_offset);
+  self->m_factor_offset = *self_af->get_data_as<pair<Tdst, Tdst> >();
+  return ckb_offset;
 }
 
 template <class Tsrc, class Tdst>
@@ -147,10 +147,10 @@ struct int_offset_and_divide_ck
   Tdst operator()(Tsrc value)
   {
     if (value != std::numeric_limits<Tsrc>::min()) {
-        value += m_offset_divisor.first;
-        return floordiv(value, m_offset_divisor.second);
+      value += m_offset_divisor.first;
+      return floordiv(value, m_offset_divisor.second);
     } else {
-        return std::numeric_limits<Tdst>::min();
+      return std::numeric_limits<Tdst>::min();
     }
   }
 };
@@ -163,20 +163,20 @@ static intptr_t instantiate_int_offset_and_divide_arrfunc(
     const char *const *DYND_UNUSED(src_arrmeta), kernel_request_t kernreq,
     const eval::eval_context *DYND_UNUSED(ectx))
 {
-    typedef int_offset_and_divide_ck<Tsrc, Tdst> self_type;
-    if (dst_tp !=
-                self_af->func_proto.tcast<funcproto_type>()->get_return_type() ||
-            src_tp[0] !=
-                self_af->func_proto.tcast<funcproto_type>()->get_param_type(0)) {
-        stringstream ss;
-        ss << "Cannot instantiate arrfunc with signature ";
-        ss << self_af->func_proto << " with types (";
-        ss << src_tp[0] << ") -> " << dst_tp;
-        throw type_error(ss.str());
-    }
-    self_type *self = self_type::create_leaf(ckb, ckb_offset, kernreq);
-    self->m_offset_divisor = *self_af->get_data_as<pair<Tdst, Tdst> >();
-    return ckb_offset + sizeof(self_type);
+  typedef int_offset_and_divide_ck<Tsrc, Tdst> self_type;
+  if (dst_tp !=
+          self_af->func_proto.tcast<funcproto_type>()->get_return_type() ||
+      src_tp[0] !=
+          self_af->func_proto.tcast<funcproto_type>()->get_param_type(0)) {
+    stringstream ss;
+    ss << "Cannot instantiate arrfunc with signature ";
+    ss << self_af->func_proto << " with types (";
+    ss << src_tp[0] << ") -> " << dst_tp;
+    throw type_error(ss.str());
+  }
+  self_type *self = self_type::create_leaf(ckb, kernreq, ckb_offset);
+  self->m_offset_divisor = *self_af->get_data_as<pair<Tdst, Tdst> >();
+  return ckb_offset;
 }
 
 template <class Tsrc, class Tdst>

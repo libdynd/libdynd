@@ -63,7 +63,7 @@ TEST(StructType, CreateOneField) {
     EXPECT_FALSE(dt.is_pod());
     EXPECT_EQ(0u, (dt.get_flags()&(type_flag_blockref|type_flag_destructor)));
     tdt = dt.tcast<struct_type>();
-    EXPECT_EQ(1u, tdt->get_field_count());
+    EXPECT_EQ(1, tdt->get_field_count());
     EXPECT_EQ(ndt::make_type<int32_t>(), tdt->get_field_type(0));
     EXPECT_EQ("x", tdt->get_field_name(0));
 }
@@ -86,7 +86,7 @@ TEST(StructType, CreateTwoField) {
     EXPECT_FALSE(dt.is_pod());
     EXPECT_EQ(0u, (dt.get_flags()&(type_flag_blockref|type_flag_destructor)));
     tdt = dt.tcast<struct_type>();
-    EXPECT_EQ(2u, tdt->get_field_count());
+    EXPECT_EQ(2, tdt->get_field_count());
     EXPECT_EQ(ndt::make_type<int64_t>(), tdt->get_field_type(0));
     EXPECT_EQ(ndt::make_type<int32_t>(), tdt->get_field_type(1));
     EXPECT_EQ("a", tdt->get_field_name(0));
@@ -115,7 +115,7 @@ TEST(StructType, CreateThreeField) {
     EXPECT_FALSE(dt.is_pod());
     EXPECT_EQ(0u, (dt.get_flags()&(type_flag_blockref|type_flag_destructor)));
     tdt = dt.tcast<struct_type>();
-    EXPECT_EQ(3u, tdt->get_field_count());
+    EXPECT_EQ(3, tdt->get_field_count());
     EXPECT_EQ(ndt::make_type<int64_t>(), tdt->get_field_type(0));
     EXPECT_EQ(ndt::make_type<int32_t>(), tdt->get_field_type(1));
     EXPECT_EQ(ndt::make_fixedstring(5, string_encoding_utf_8), tdt->get_field_type(2));

@@ -8,6 +8,7 @@
 
 #include <dynd/types/base_type.hpp>
 #include <dynd/types/strided_dim_type.hpp>
+#include <dynd/func/callable.hpp>
 #include <dynd/array.hpp>
 
 namespace dynd {

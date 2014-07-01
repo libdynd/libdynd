@@ -52,21 +52,20 @@ namespace {
 } // anonymous namespace
 
 size_t kernels::make_constant_value_assignment_ckernel(
-    ckernel_builder *out_ckb, intptr_t ckb_offset, const ndt::type &dst_tp,
+    ckernel_builder *ckb, intptr_t ckb_offset, const ndt::type &dst_tp,
     const char *dst_arrmeta, const nd::array &constant,
     kernel_request_t kernreq, const eval::eval_context *ectx)
 {
-    typedef constant_value_assignment_ck self_type;
-    // Initialize the ckernel
-    self_type *self = self_type::create(out_ckb, ckb_offset, kernreq);
-    // Store the constant data
-    self->m_constant = constant.cast(dst_tp).eval_immutable(ectx);
-    self->m_constant_data = self->m_constant.get_readonly_originptr();
-    // Create the child assignment ckernel
-    return make_assignment_kernel(
-        out_ckb, ckb_offset + sizeof(self_type), dst_tp, dst_arrmeta,
-        self->m_constant.get_type(), self->m_constant.get_arrmeta(), kernreq,
-        ectx);
+  typedef constant_value_assignment_ck self_type;
+  // Initialize the ckernel
+  self_type *self = self_type::create(ckb, kernreq, ckb_offset);
+  // Store the constant data
+  self->m_constant = constant.cast(dst_tp).eval_immutable(ectx);
+  self->m_constant_data = self->m_constant.get_readonly_originptr();
+  // Create the child assignment ckernel
+  return make_assignment_kernel(ckb, ckb_offset, dst_tp, dst_arrmeta,
+                                self->m_constant.get_type(),
+                                self->m_constant.get_arrmeta(), kernreq, ectx);
 }
 
 static void binary_as_unary_right_associative_reduction_adapter_single_ckernel(
@@ -122,25 +121,24 @@ static void binary_as_unary_left_associative_reduction_adapter_strided_ckernel(
 }
 
 intptr_t kernels::wrap_binary_as_unary_reduction_ckernel(
-                dynd::ckernel_builder *out_ckb, intptr_t ckb_offset,
+                dynd::ckernel_builder *ckb, intptr_t ckb_offset,
                 bool right_associative,
                 kernel_request_t kernreq)
 {
-    // Add an adapter kernel which converts the binary expr kernel to an expr kernel
-    intptr_t ckb_child_offset = ckb_offset + sizeof(ckernel_prefix);
-    out_ckb->ensure_capacity(ckb_child_offset);
-    ckernel_prefix *ckp = out_ckb->get_at<ckernel_prefix>(ckb_offset);
-    ckp->destructor = &kernels::destroy_trivial_parent_ckernel;
-    if (right_associative) {
-        ckp->set_expr_function(
-            kernreq,
-            &binary_as_unary_right_associative_reduction_adapter_single_ckernel,
-            &binary_as_unary_right_associative_reduction_adapter_strided_ckernel);
-    } else {
-        ckp->set_expr_function(
-            kernreq,
-            &binary_as_unary_left_associative_reduction_adapter_single_ckernel,
-            &binary_as_unary_left_associative_reduction_adapter_strided_ckernel);
-    }
-    return ckb_child_offset;
+  // Add an adapter kernel which converts the binary expr kernel to an expr
+  // kernel
+  ckernel_prefix *ckp = ckb->alloc_ck<ckernel_prefix>(ckb_offset);
+  ckp->destructor = &kernels::destroy_trivial_parent_ckernel;
+  if (right_associative) {
+    ckp->set_expr_function(
+        kernreq,
+        &binary_as_unary_right_associative_reduction_adapter_single_ckernel,
+        &binary_as_unary_right_associative_reduction_adapter_strided_ckernel);
+  } else {
+    ckp->set_expr_function(
+        kernreq,
+        &binary_as_unary_left_associative_reduction_adapter_single_ckernel,
+        &binary_as_unary_left_associative_reduction_adapter_strided_ckernel);
+  }
+  return ckb_offset;
 }

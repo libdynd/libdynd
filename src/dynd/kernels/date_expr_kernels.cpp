@@ -149,7 +149,7 @@ public:
     virtual ~date_strftime_kernel_generator() {
     }
 
-    size_t make_expr_kernel(ckernel_builder *out, size_t offset_out,
+    size_t make_expr_kernel(ckernel_builder *ckb, intptr_t ckb_offset,
                             const ndt::type &dst_tp, const char *dst_arrmeta,
                             size_t src_count, const ndt::type *src_tp,
                             const char *const *src_arrmeta,
@@ -169,13 +169,12 @@ public:
         // giving 'this' as the next kernel generator to call
         if (require_elwise) {
             return make_elwise_dimension_expr_kernel(
-                out, offset_out, dst_tp, dst_arrmeta, src_count, src_tp,
+                ckb, ckb_offset, dst_tp, dst_arrmeta, src_count, src_tp,
                 src_arrmeta, kernreq, ectx, this);
         }
 
-        size_t extra_size = sizeof(date_strftime_kernel_extra);
-        out->ensure_capacity_leaf(offset_out + extra_size);
-        date_strftime_kernel_extra *e = out->get_at<date_strftime_kernel_extra>(offset_out);
+        date_strftime_kernel_extra *e =
+            ckb->alloc_ck_leaf<date_strftime_kernel_extra>(ckb_offset);
         switch (kernreq) {
             case kernel_request_single:
                 e->base.set_function<expr_single_t>(&date_strftime_kernel_extra::single_unary);
@@ -194,7 +193,7 @@ public:
         e->format_size = m_format.size();
         e->format = m_format.c_str();
         e->dst_arrmeta = reinterpret_cast<const string_type_arrmeta *>(dst_arrmeta);
-        return offset_out + extra_size;
+        return ckb_offset;
     }
 
     void print_type(std::ostream& o) const
@@ -302,52 +301,52 @@ public:
     virtual ~date_replace_kernel_generator() {
     }
 
-    size_t make_expr_kernel(ckernel_builder *out, size_t offset_out,
+    size_t make_expr_kernel(ckernel_builder *ckb, intptr_t ckb_offset,
                             const ndt::type &dst_tp, const char *dst_arrmeta,
                             size_t src_count, const ndt::type *src_tp,
                             const char *const *src_arrmeta,
                             kernel_request_t kernreq,
                             const eval::eval_context *ectx) const
     {
-        if (src_count != 1) {
-            stringstream ss;
-            ss << "date_replace_kernel_generator requires 1 src operand, ";
-            ss << "received " << src_count;
-            throw runtime_error(ss.str());
-        }
-        bool require_elwise = dst_tp.get_type_id() != date_type_id ||
-                        src_tp[0].get_type_id() != date_type_id;
-        // If the types don't match the ones for this generator,
-        // call the elementwise dimension handler to handle one dimension,
-        // giving 'this' as the next kernel generator to call
-        if (require_elwise) {
-            return make_elwise_dimension_expr_kernel(out, offset_out,
-                            dst_tp, dst_arrmeta,
-                            src_count, src_tp, src_arrmeta,
-                            kernreq, ectx,
-                            this);
-        }
+      if (src_count != 1) {
+        stringstream ss;
+        ss << "date_replace_kernel_generator requires 1 src operand, ";
+        ss << "received " << src_count;
+        throw runtime_error(ss.str());
+      }
+      bool require_elwise = dst_tp.get_type_id() != date_type_id ||
+                            src_tp[0].get_type_id() != date_type_id;
+      // If the types don't match the ones for this generator,
+      // call the elementwise dimension handler to handle one dimension,
+      // giving 'this' as the next kernel generator to call
+      if (require_elwise) {
+        return make_elwise_dimension_expr_kernel(
+            ckb, ckb_offset, dst_tp, dst_arrmeta, src_count, src_tp,
+            src_arrmeta, kernreq, ectx, this);
+      }
 
-        size_t extra_size = sizeof(date_replace_kernel_extra);
-        out->ensure_capacity_leaf(offset_out + extra_size);
-        date_replace_kernel_extra *e = out->get_at<date_replace_kernel_extra>(offset_out);
-        switch (kernreq) {
-            case kernel_request_single:
-                e->base.set_function<expr_single_t>(&date_replace_kernel_extra::single_unary);
-                break;
-            case kernel_request_strided:
-                e->base.set_function<expr_strided_t>(&date_replace_kernel_extra::strided_unary);
-                break;
-            default: {
-                stringstream ss;
-                ss << "date_replace_kernel_generator: unrecognized request " << (int)kernreq;
-                throw runtime_error(ss.str());
-            }
-        }
-        e->year = m_year;
-        e->month = m_month;
-        e->day = m_day;
-        return offset_out + extra_size;
+      date_replace_kernel_extra *e =
+          ckb->alloc_ck_leaf<date_replace_kernel_extra>(ckb_offset);
+      switch (kernreq) {
+      case kernel_request_single:
+        e->base.set_function<expr_single_t>(
+            &date_replace_kernel_extra::single_unary);
+        break;
+      case kernel_request_strided:
+        e->base.set_function<expr_strided_t>(
+            &date_replace_kernel_extra::strided_unary);
+        break;
+      default: {
+        stringstream ss;
+        ss << "date_replace_kernel_generator: unrecognized request "
+           << (int)kernreq;
+        throw runtime_error(ss.str());
+      }
+      }
+      e->year = m_year;
+      e->month = m_month;
+      e->day = m_day;
+      return ckb_offset;
     }
 
     void print_type(std::ostream& o) const

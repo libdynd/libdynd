@@ -12,6 +12,7 @@
 #include <dynd/shape_tools.hpp>
 #include <dynd/ensure_immutable_contig.hpp>
 #include <dynd/func/callable.hpp>
+#include <dynd/buffer_storage.hpp>
 
 using namespace std;
 using namespace dynd;
@@ -375,7 +376,7 @@ void base_tuple_type::data_destruct_strided(const char *arrmeta, char *data,
     // Destruct all the fields a chunk at a time, in an
     // attempt to have some kind of locality
     while (count > 0) {
-        size_t chunk_size = min(count, DYND_BUFFER_CHUNK_SIZE);
+        size_t chunk_size = min(count, (size_t)DYND_BUFFER_CHUNK_SIZE);
         for (intptr_t i = 0; i != field_count; ++i) {
             const ndt::type& ft = get_field_type(i);
             if (ft.get_flags()&type_flag_destructor) {

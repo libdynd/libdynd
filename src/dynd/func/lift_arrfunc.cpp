@@ -20,20 +20,24 @@ static void delete_lifted_expr_arrfunc_data(arrfunc_type_data *self_af)
 }
 
 static intptr_t instantiate_lifted_expr_arrfunc_data(
-    const arrfunc_type_data *self, dynd::ckernel_builder *ckb, intptr_t ckb_offset,
-    const ndt::type &dst_tp, const char *dst_arrmeta, const ndt::type *src_tp,
-    const char *const *src_arrmeta, kernel_request_t kernreq,
-    const eval::eval_context *ectx)
+    const arrfunc_type_data *self, dynd::ckernel_builder *ckb,
+    intptr_t ckb_offset, const ndt::type &dst_tp, const char *dst_arrmeta,
+    const ndt::type *src_tp, const char *const *src_arrmeta,
+    kernel_request_t kernreq, const eval::eval_context *ectx)
 {
-    const array_preamble *data = *self->get_data_as<const array_preamble *>();
-    const arrfunc_type_data *child_af =
-        reinterpret_cast<const arrfunc_type_data *>(data->m_data_pointer);
-    return make_lifted_expr_ckernel(child_af,
-                    ckb, ckb_offset,
-                    dst_tp, dst_arrmeta,
-                    src_tp, src_arrmeta,
-                    static_cast<dynd::kernel_request_t>(kernreq),
-                    ectx);
+  const array_preamble *data = *self->get_data_as<const array_preamble *>();
+  const arrfunc_type_data *child_af =
+      reinterpret_cast<const arrfunc_type_data *>(data->m_data_pointer);
+  intptr_t src_count = child_af->get_param_count();
+  dimvector src_ndim(src_count);
+  for (int i = 0; i < src_count; ++i) {
+    src_ndim[i] = src_tp[i].get_ndim() - child_af->get_param_type(i).get_ndim();
+  }
+  return make_lifted_expr_ckernel(
+      child_af, ckb, ckb_offset,
+      dst_tp.get_ndim() - child_af->get_return_type().get_ndim(), dst_tp,
+      dst_arrmeta, src_ndim.get(), src_tp, src_arrmeta,
+      static_cast<dynd::kernel_request_t>(kernreq), ectx);
 }
 
 static int resolve_lifted_dst_type(const arrfunc_type_data *self,

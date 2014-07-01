@@ -36,7 +36,7 @@ enum {
     kernel_request_predicate = 2,
     /**
      * Kernel function expr_single_t,
-     * but the data in the kernel at position 'offset_out'
+     * but the data in the kernel at position 'ckb_offset'
      * is for data that describes the accumulation
      * of multiple strided dimensions that work
      * in a simple NumPy fashion.
@@ -44,7 +44,7 @@ enum {
 //    kernel_request_single_multistride,
     /**
      * Kernel function expr_strided_t,
-     * but the data in the kernel at position 'offset_out'
+     * but the data in the kernel at position 'ckb_offset'
      * is for data that describes the accumulation
      * of multiple strided dimensions that work
      * in a simple NumPy fashion.
@@ -78,6 +78,13 @@ struct ckernel_prefix {
      */
     inline ckernel_prefix& base() {
         return *this;
+    }
+
+    /**
+     * Aligns an offset as required by ckernels.
+     */
+    inline static size_t align_offset(size_t offset) {
+      return (offset + size_t(7)) & ~size_t(7);
     }
 
     /**
@@ -131,9 +138,10 @@ struct ckernel_prefix {
      * Returns the pointer to a child ckernel at the provided
      * offset.
      */
-    inline ckernel_prefix *get_child_ckernel(size_t offset) {
-        return reinterpret_cast<ckernel_prefix *>(
-            reinterpret_cast<char *>(this) + offset);
+    inline ckernel_prefix *get_child_ckernel(intptr_t offset) {
+      return reinterpret_cast<ckernel_prefix *>(
+          reinterpret_cast<char *>(this) +
+          ckernel_prefix::align_offset(offset));
     }
 
     /**
@@ -141,11 +149,10 @@ struct ckernel_prefix {
      * a ckernel at the given offset from `this`.
      */
     inline void destroy_child_ckernel(size_t offset) {
-        if (offset != 0) {
-            ckernel_prefix *child = reinterpret_cast<ckernel_prefix *>(
-                reinterpret_cast<char *>(this) + offset);
-            child->destroy();
-        }
+      if (offset != 0) {
+        ckernel_prefix *child = get_child_ckernel(offset);
+        child->destroy();
+      }
     }
 };
 

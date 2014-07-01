@@ -49,11 +49,11 @@ namespace {
 
 
 intptr_t kernels::make_builtin_sum_reduction_ckernel(
-                dynd::ckernel_builder *out_ckb, intptr_t ckb_offset,
+                dynd::ckernel_builder *ckb, intptr_t ckb_offset,
                 type_id_t tid,
                 kernel_request_t kernreq)
 {
-    ckernel_prefix *ckp = out_ckb->get_at<ckernel_prefix>(ckb_offset);
+    ckernel_prefix *ckp = ckb->alloc_ck_leaf<ckernel_prefix>(ckb_offset);
     switch (tid) {
         case int32_type_id:
             ckp->set_expr_function<sum_reduction<int32_t, int32_t> >(kernreq);
@@ -85,7 +85,7 @@ intptr_t kernels::make_builtin_sum_reduction_ckernel(
         }
     }
 
-    return ckb_offset + sizeof(ckernel_prefix);
+    return ckb_offset;
 }
 
 static intptr_t instantiate_builtin_sum_reduction_arrfunc(
@@ -102,7 +102,7 @@ static intptr_t instantiate_builtin_sum_reduction_arrfunc(
         throw type_error(ss.str());
     }
     return kernels::make_builtin_sum_reduction_ckernel(
-        ckb, ckb_offset, dst_tp.get_type_id(), (kernel_request_t)kernreq);
+        ckb, ckb_offset, dst_tp.get_type_id(), kernreq);
 }
 
 void kernels::make_builtin_sum_reduction_arrfunc(
@@ -176,8 +176,7 @@ namespace {
         {
             typedef double_mean1d_ck self_type;
             mean1d_arrfunc_data *data = *af_self->get_data_as<mean1d_arrfunc_data *>();
-            self_type *self = self_type::create_leaf(ckb, ckb_offset,
-                                                     (kernel_request_t)kernreq);
+            self_type *self = self_type::create_leaf(ckb, kernreq, ckb_offset);
             intptr_t src_dim_size, src_stride;
             ndt::type src_el_tp;
             const char *src_el_arrmeta;
@@ -205,7 +204,7 @@ namespace {
             }
             self->m_src_dim_size = src_dim_size;
             self->m_src_stride = src_stride;
-            return ckb_offset + sizeof(self_type);
+            return ckb_offset;
         }
     };
 } // anonymous namespace

@@ -170,94 +170,92 @@ static void get_or_set_property_kernel_complex_float64_conj(
 }
 
 size_t dynd::make_builtin_type_elwise_property_getter_kernel(
-    ckernel_builder *out, size_t offset_out, type_id_t builtin_type_id,
+    ckernel_builder *ckb, intptr_t ckb_offset, type_id_t builtin_type_id,
     const char *DYND_UNUSED(dst_arrmeta), const char *DYND_UNUSED(src_arrmeta),
     size_t src_elwise_property_index, kernel_request_t kernreq,
     const eval::eval_context *DYND_UNUSED(ectx))
 {
-    offset_out =
-        make_kernreq_to_single_kernel_adapter(out, offset_out, 1, kernreq);
-    ckernel_prefix *e = out->get_at<ckernel_prefix>(offset_out);
-    switch (builtin_type_id) {
-        case complex_float32_type_id:
-            switch (src_elwise_property_index) {
-                case 0:
-                    e->set_function<expr_single_t>(
-                                    &get_property_kernel_complex_float32_real);
-                    return offset_out + sizeof(ckernel_prefix);
-                case 1:
-                    e->set_function<expr_single_t>(
-                                    &get_property_kernel_complex_float32_imag);
-                    return offset_out + sizeof(ckernel_prefix);
-                case 2:
-                    e->set_function<expr_single_t>(
-                                    &get_or_set_property_kernel_complex_float32_conj);
-                    return offset_out + sizeof(ckernel_prefix);
-                default:
-                    break;
-            }
-            break;
-        case complex_float64_type_id:
-            switch (src_elwise_property_index) {
-                case 0:
-                    e->set_function<expr_single_t>(
-                                    &get_property_kernel_complex_float64_real);
-                    return offset_out + sizeof(ckernel_prefix);
-                case 1:
-                    e->set_function<expr_single_t>(
-                                    &get_property_kernel_complex_float64_imag);
-                    return offset_out + sizeof(ckernel_prefix);
-                case 2:
-                    e->set_function<expr_single_t>(
-                                    &get_or_set_property_kernel_complex_float64_conj);
-                    return offset_out + sizeof(ckernel_prefix);
-                default:
-                    break;
-            }
-            break;
-        default:
-            break;
+  ckb_offset =
+      make_kernreq_to_single_kernel_adapter(ckb, ckb_offset, 1, kernreq);
+  ckernel_prefix *e = ckb->alloc_ck_leaf<ckernel_prefix>(ckb_offset);
+  switch (builtin_type_id) {
+  case complex_float32_type_id:
+    switch (src_elwise_property_index) {
+    case 0:
+      e->set_function<expr_single_t>(&get_property_kernel_complex_float32_real);
+      return ckb_offset;
+    case 1:
+      e->set_function<expr_single_t>(&get_property_kernel_complex_float32_imag);
+      return ckb_offset;
+    case 2:
+      e->set_function<expr_single_t>(
+          &get_or_set_property_kernel_complex_float32_conj);
+      return ckb_offset;
+    default:
+      break;
     }
-    stringstream ss;
-    ss << "dynd type " << ndt::type(builtin_type_id) << " given an invalid property index " << src_elwise_property_index;
-    throw runtime_error(ss.str());
+    break;
+  case complex_float64_type_id:
+    switch (src_elwise_property_index) {
+    case 0:
+      e->set_function<expr_single_t>(&get_property_kernel_complex_float64_real);
+      return ckb_offset;
+    case 1:
+      e->set_function<expr_single_t>(&get_property_kernel_complex_float64_imag);
+      return ckb_offset;
+    case 2:
+      e->set_function<expr_single_t>(
+          &get_or_set_property_kernel_complex_float64_conj);
+      return ckb_offset;
+    default:
+      break;
+    }
+    break;
+  default:
+    break;
+  }
+  stringstream ss;
+  ss << "dynd type " << ndt::type(builtin_type_id)
+     << " given an invalid property index " << src_elwise_property_index;
+  throw runtime_error(ss.str());
 }
 
 size_t dynd::make_builtin_type_elwise_property_setter_kernel(
-                ckernel_builder *out, size_t offset_out,
+                ckernel_builder *ckb, intptr_t ckb_offset,
                 type_id_t builtin_type_id,
                 const char *DYND_UNUSED(dst_arrmeta), size_t dst_elwise_property_index,
                 const char *DYND_UNUSED(src_arrmeta),
                 kernel_request_t kernreq, const eval::eval_context *DYND_UNUSED(ectx))
 {
-    offset_out =
-        make_kernreq_to_single_kernel_adapter(out, offset_out, 1, kernreq);
-    ckernel_prefix *e = out->get_at<ckernel_prefix>(offset_out);
-    switch (builtin_type_id) {
-        case complex_float32_type_id:
-            switch (dst_elwise_property_index) {
-                case 2:
-                    e->set_function<expr_single_t>(
-                                    &get_or_set_property_kernel_complex_float32_conj);
-                    return offset_out + sizeof(ckernel_prefix);
-                default:
-                    break;
-            }
-            break;
-        case complex_float64_type_id:
-            switch (dst_elwise_property_index) {
-                case 2:
-                    e->set_function<expr_single_t>(
-                                    &get_or_set_property_kernel_complex_float64_conj);
-                    return offset_out + sizeof(ckernel_prefix);
-                default:
-                    break;
-            }
-            break;
-        default:
-            break;
+  ckb_offset =
+      make_kernreq_to_single_kernel_adapter(ckb, ckb_offset, 1, kernreq);
+  ckernel_prefix *e = ckb->alloc_ck_leaf<ckernel_prefix>(ckb_offset);
+  switch (builtin_type_id) {
+  case complex_float32_type_id:
+    switch (dst_elwise_property_index) {
+    case 2:
+      e->set_function<expr_single_t>(
+          &get_or_set_property_kernel_complex_float32_conj);
+      return ckb_offset;
+    default:
+      break;
     }
-    stringstream ss;
-    ss << "dynd type " << ndt::type(builtin_type_id) << " given an invalid property index " << dst_elwise_property_index;
-    throw runtime_error(ss.str());
+    break;
+  case complex_float64_type_id:
+    switch (dst_elwise_property_index) {
+    case 2:
+      e->set_function<expr_single_t>(
+          &get_or_set_property_kernel_complex_float64_conj);
+      return ckb_offset;
+    default:
+      break;
+    }
+    break;
+  default:
+    break;
+  }
+  stringstream ss;
+  ss << "dynd type " << ndt::type(builtin_type_id)
+     << " given an invalid property index " << dst_elwise_property_index;
+  throw runtime_error(ss.str());
 }

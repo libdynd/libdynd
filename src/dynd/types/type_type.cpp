@@ -162,55 +162,54 @@ namespace {
 } // anonymous namespace
 
 size_t type_type::make_assignment_kernel(
-    ckernel_builder *out, size_t offset_out, const ndt::type &dst_tp,
+    ckernel_builder *ckb, intptr_t ckb_offset, const ndt::type &dst_tp,
     const char *dst_arrmeta, const ndt::type &src_tp, const char *src_arrmeta,
     kernel_request_t kernreq, const eval::eval_context *ectx) const
 {
-    offset_out =
-        make_kernreq_to_single_kernel_adapter(out, offset_out, 1, kernreq);
+  ckb_offset =
+      make_kernreq_to_single_kernel_adapter(ckb, ckb_offset, 1, kernreq);
 
-    if (this == dst_tp.extended()) {
-        if (src_tp.get_type_id() == type_type_id) {
-            ckernel_prefix *e = out->get_at<ckernel_prefix>(offset_out);
-            e->set_function<expr_single_t>(
-                typed_data_assignment_kernel_single);
-            return offset_out + sizeof(ckernel_prefix);
-        } else if (src_tp.get_kind() == string_kind) {
-            // String to type
-            out->ensure_capacity(offset_out + sizeof(string_to_type_kernel_extra));
-            string_to_type_kernel_extra *e =
-                out->get_at<string_to_type_kernel_extra>(offset_out);
-            e->base.set_function<expr_single_t>(
-                &string_to_type_kernel_extra::single);
-            e->base.destructor = &string_to_type_kernel_extra::destruct;
-            // The kernel data owns a reference to this type
-            e->src_string_dt = static_cast<const base_string_type *>(ndt::type(src_tp).release());
-            e->src_arrmeta = src_arrmeta;
-            e->errmode = ectx->errmode;
-            return offset_out + sizeof(string_to_type_kernel_extra);
-        } else if (!src_tp.is_builtin()) {
-            return src_tp.extended()->make_assignment_kernel(
-                out, offset_out, dst_tp, dst_arrmeta, src_tp, src_arrmeta,
-                kernreq, ectx);
-        }
-    } else {
-        if (dst_tp.get_kind() == string_kind) {
-            // Type to string
-            out->ensure_capacity(offset_out + sizeof(type_to_string_kernel_extra));
-            type_to_string_kernel_extra *e = out->get_at<type_to_string_kernel_extra>(offset_out);
-            e->base.set_function<expr_single_t>(&type_to_string_kernel_extra::single);
-            e->base.destructor = &type_to_string_kernel_extra::destruct;
-            // The kernel data owns a reference to this type
-            e->dst_string_dt = static_cast<const base_string_type *>(ndt::type(dst_tp).release());
-            e->dst_arrmeta = dst_arrmeta;
-            e->ectx = *ectx;
-            return offset_out + sizeof(type_to_string_kernel_extra);
-        }
+  if (this == dst_tp.extended()) {
+    if (src_tp.get_type_id() == type_type_id) {
+      ckernel_prefix *e = ckb->alloc_ck_leaf<ckernel_prefix>(ckb_offset);
+      e->set_function<expr_single_t>(typed_data_assignment_kernel_single);
+      return ckb_offset;
+    } else if (src_tp.get_kind() == string_kind) {
+      // String to type
+      string_to_type_kernel_extra *e =
+          ckb->alloc_ck_leaf<string_to_type_kernel_extra>(ckb_offset);
+      e->base.set_function<expr_single_t>(&string_to_type_kernel_extra::single);
+      e->base.destructor = &string_to_type_kernel_extra::destruct;
+      // The kernel data owns a reference to this type
+      e->src_string_dt =
+          static_cast<const base_string_type *>(ndt::type(src_tp).release());
+      e->src_arrmeta = src_arrmeta;
+      e->errmode = ectx->errmode;
+      return ckb_offset;
+    } else if (!src_tp.is_builtin()) {
+      return src_tp.extended()->make_assignment_kernel(
+          ckb, ckb_offset, dst_tp, dst_arrmeta, src_tp, src_arrmeta, kernreq,
+          ectx);
     }
+  } else {
+    if (dst_tp.get_kind() == string_kind) {
+      // Type to string
+      type_to_string_kernel_extra *e =
+          ckb->alloc_ck_leaf<type_to_string_kernel_extra>(ckb_offset);
+      e->base.set_function<expr_single_t>(&type_to_string_kernel_extra::single);
+      e->base.destructor = &type_to_string_kernel_extra::destruct;
+      // The kernel data owns a reference to this type
+      e->dst_string_dt =
+          static_cast<const base_string_type *>(ndt::type(dst_tp).release());
+      e->dst_arrmeta = dst_arrmeta;
+      e->ectx = *ectx;
+      return ckb_offset;
+    }
+  }
 
-    stringstream ss;
-    ss << "Cannot assign from " << src_tp << " to " << dst_tp;
-    throw dynd::type_error(ss.str());
+  stringstream ss;
+  ss << "Cannot assign from " << src_tp << " to " << dst_tp;
+  throw dynd::type_error(ss.str());
 }
 
 static int equal_comparison(const char *const *src,
@@ -230,26 +229,26 @@ static int not_equal_comparison(const char *const *src,
 }
 
 size_t type_type::make_comparison_kernel(
-    ckernel_builder *out, size_t offset_out, const ndt::type &src0_dt,
+    ckernel_builder *ckb, intptr_t ckb_offset, const ndt::type &src0_dt,
     const char *DYND_UNUSED(src0_arrmeta), const ndt::type &src1_dt,
     const char *DYND_UNUSED(src1_arrmeta), comparison_type_t comptype,
     const eval::eval_context *DYND_UNUSED(ectx)) const
 {
-    if (this == src0_dt.extended()) {
-        if (*this == *src1_dt.extended()) {
-            ckernel_prefix *e = out->get_at<ckernel_prefix>(offset_out);
-            if (comptype == comparison_type_equal) {
-                e->set_function<expr_predicate_t>(equal_comparison);
-            } else if (comptype == comparison_type_not_equal) {
-                e->set_function<expr_predicate_t>(not_equal_comparison);
-            } else {
-                throw not_comparable_error(src0_dt, src1_dt, comptype);
-            }
-            return offset_out + sizeof(ckernel_prefix);
-        }
+  if (this == src0_dt.extended()) {
+    if (*this == *src1_dt.extended()) {
+      ckernel_prefix *e = ckb->alloc_ck_leaf<ckernel_prefix>(ckb_offset);
+      if (comptype == comparison_type_equal) {
+        e->set_function<expr_predicate_t>(equal_comparison);
+      } else if (comptype == comparison_type_not_equal) {
+        e->set_function<expr_predicate_t>(not_equal_comparison);
+      } else {
+        throw not_comparable_error(src0_dt, src1_dt, comptype);
+      }
+      return ckb_offset;
     }
+  }
 
-    throw not_comparable_error(src0_dt, src1_dt, comptype);
+  throw not_comparable_error(src0_dt, src1_dt, comptype);
 }
 
 const ndt::type& ndt::make_type()

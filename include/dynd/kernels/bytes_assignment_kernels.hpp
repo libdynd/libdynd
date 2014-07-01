@@ -15,7 +15,7 @@ namespace dynd {
  * Makes a kernel which copies blockref bytes.
  */
 size_t make_blockref_bytes_assignment_kernel(
-                ckernel_builder *out, size_t offset_out,
+                ckernel_builder *ckb, intptr_t ckb_offset,
                 size_t dst_alignment, const char *dst_arrmeta,
                 size_t src_alignment, const char *src_arrmeta,
                 kernel_request_t kernreq, const eval::eval_context *ectx);
@@ -24,7 +24,7 @@ size_t make_blockref_bytes_assignment_kernel(
  * Makes a kernel which copies fixed-size bytes to bytes.
  */
 size_t make_fixedbytes_to_blockref_bytes_assignment_kernel(
-                ckernel_builder *out, size_t offset_out,
+                ckernel_builder *ckb, intptr_t ckb_offset,
                 size_t dst_alignment, const char *dst_arrmeta,
                 intptr_t src_element_size, size_t src_alignment,
                 kernel_request_t kernreq, const eval::eval_context *ectx);
