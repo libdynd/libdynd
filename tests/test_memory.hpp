@@ -16,7 +16,16 @@
 using namespace std;
 using namespace dynd;
 
-typedef ::testing::internal::None None;
+typedef void None;
+
+namespace testing {
+
+// This is needed to pretty print ::testing::Types
+template <typename T0, typename T1>
+struct Types2 : ::testing::Types<T0, T1> {
+};
+
+}
 
 /**
  * This class describes a memory space for testing purposes.
@@ -35,10 +44,13 @@ class Memory;
  * This class is a pair of memory spaces, which is needed by some tests.
  */
 template <typename T>
-class MemoryPair : public ::testing::Test {
+class MemoryPair;
+
+template <typename T0, typename T1>
+class MemoryPair< ::testing::Types2<T0, T1> > : public ::testing::Test {
 public:
-    typedef Memory<typename T::first_type> First;
-    typedef Memory<typename T::second_type> Second;
+    typedef Memory<T0> First;
+    typedef Memory<T1> Second;
 };
 
 template <>
@@ -69,7 +81,7 @@ public:
 };
 
 typedef ::testing::Types<None> DefaultMemory;
-typedef ::testing::Types< pair<None, None> > DefaultMemoryPairs;
+typedef ::testing::Types< ::testing::Types2<None, None> > DefaultMemoryPairs;
 
 #ifdef DYND_CUDA
 
@@ -124,9 +136,9 @@ public:
 };
 
 typedef ::testing::Types<cuda_host_type, cuda_device_type> CUDAMemory;
-typedef ::testing::Types< pair<None, cuda_host_type>, pair<None, cuda_device_type>,
-    pair<cuda_host_type, None>, pair<cuda_device_type, None>,
-    pair<cuda_host_type, cuda_host_type>, pair<cuda_host_type, cuda_device_type>,
-    pair<cuda_device_type, cuda_host_type>, pair<cuda_device_type, cuda_device_type> > CUDAMemoryPairs;
+typedef ::testing::Types< ::testing::Types2<None, cuda_host_type>, ::testing::Types2<None, cuda_device_type>,
+    ::testing::Types2<cuda_host_type, None>, ::testing::Types2<cuda_device_type, None>,
+    ::testing::Types2<cuda_host_type, cuda_host_type>, ::testing::Types2<cuda_host_type, cuda_device_type>,
+    ::testing::Types2<cuda_device_type, cuda_host_type>, ::testing::Types2<cuda_device_type, cuda_device_type> > CUDAMemoryPairs;
 
 #endif // DYND_CUDA

@@ -144,7 +144,7 @@ TYPED_TEST_P(Array, ScalarConstructor) {
     EXPECT_EQ(nd::readwrite_access_flags, a.get_access_flags());
     EXPECT_TRUE(a.is_scalar());
     // Constructing an empty array with too many dimensions should raise an error
-//    EXPECT_THROW(nd::empty(1, ndt::make_type<double>()), runtime_error);
+    EXPECT_THROW(nd::typed_empty(1, TestFixture::MakeType(ndt::make_type<double>())), runtime_error);
 }
 
 TYPED_TEST_P(Array, OneDimConstructor) {
@@ -436,11 +436,11 @@ TYPED_TEST_P(Array, AsScalar) {
     EXPECT_EQ(3.14f, a.as<double>());
     EXPECT_THROW(a.as<int64_t>(), runtime_error);
     EXPECT_EQ(3, a.as<int64_t>(assign_error_overflow));
-//    EXPECT_THROW(a.as<dynd_bool>(), runtime_error);
-//    EXPECT_THROW(a.as<dynd_bool>(assign_error_overflow), runtime_error);
+    EXPECT_THROW(a.as<dynd_bool>(), runtime_error);
+    EXPECT_THROW(a.as<dynd_bool>(assign_error_overflow), runtime_error);
     EXPECT_EQ(true, a.as<dynd_bool>(assign_error_nocheck));
-//    EXPECT_THROW(a.as<bool>(), runtime_error);
-//    EXPECT_THROW(a.as<bool>(assign_error_overflow), runtime_error);
+    EXPECT_THROW(a.as<bool>(), runtime_error);
+    EXPECT_THROW(a.as<bool>(assign_error_overflow), runtime_error);
     EXPECT_EQ(true, a.as<bool>(assign_error_nocheck));
 
     a = nd::typed_empty(TestFixture::MakeType(ndt::make_type<double>()));
@@ -590,8 +590,7 @@ TEST(Array, Storage) {
     EXPECT_EQ(a.get_strides(), b.get_strides());
 }
 
-REGISTER_TYPED_TEST_CASE_P(Array, ScalarConstructor, OneDimConstructor, TwoDimConstructor, ThreeDimConstructor,
-    AsScalar);
+REGISTER_TYPED_TEST_CASE_P(Array, ScalarConstructor, OneDimConstructor, TwoDimConstructor, ThreeDimConstructor, AsScalar);
 
 INSTANTIATE_TYPED_TEST_CASE_P(Default, Array, DefaultMemory);
 #ifdef DYND_CUDA
