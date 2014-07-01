@@ -971,6 +971,23 @@ namespace detail {
  */
 array typed_empty(intptr_t ndim, const intptr_t *shape, const ndt::type &tp);
 
+inline array typed_empty(const ndt::type &tp) {
+    return typed_empty(0, static_cast<const intptr_t *>(NULL), tp);
+}
+inline array typed_empty(intptr_t dim0, const ndt::type &tp) {
+    return typed_empty(1, &dim0, tp);
+}
+inline array typed_empty(intptr_t dim0, intptr_t dim1, const ndt::type &tp) {
+    intptr_t dims[2] = {dim0, dim1};
+
+    return typed_empty(2, dims, tp);
+}
+inline array typed_empty(intptr_t dim0, intptr_t dim1, intptr_t dim2, const ndt::type &tp) {
+    intptr_t dims[3] = {dim0, dim1, dim2};
+
+    return typed_empty(3, dims, tp);
+}
+
 /**
  * A version of typed_empty that excepts a std::vector as the shape.
  */
@@ -1005,7 +1022,7 @@ inline array dtyped_empty(intptr_t ndim, const intptr_t *shape,
 /**
  * Constructs an uninitialized array of the given dtype.
  */
-inline array empty(const ndt::type &tp) { return typed_empty(0, NULL, tp); }
+inline array empty(const ndt::type &tp) { return typed_empty(0, static_cast<const intptr_t *>(NULL), tp); }
 
 /**
  * Constructs an uninitialized array of the given dtype,

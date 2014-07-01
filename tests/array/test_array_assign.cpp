@@ -32,7 +32,7 @@ TYPED_TEST_P(ArrayAssign, ScalarAssignment_Bool) {
     ectx_inexact.errmode = assign_error_inexact;
 
     // assignment to a bool scalar
-    a = nd::empty(TestFixture::First::MakeType(ndt::make_type<dynd_bool>()));
+    a = nd::typed_empty(TestFixture::First::MakeType(ndt::make_type<dynd_bool>()));
     const dynd_bool *ptr_a = (const dynd_bool *)a.get_ndo()->m_data_pointer;
     a.val_assign(TestFixture::Second::To(true));
     EXPECT_TRUE(TestFixture::First::Dereference(ptr_a));

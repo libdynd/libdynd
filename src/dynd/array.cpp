@@ -487,7 +487,7 @@ nd::array::array(const char *str, size_t size)
 }
 nd::array::array(const ndt::type& tp)
 {
-    array temp(nd::typed_empty(0, NULL, ndt::make_type()));
+    array temp(nd::typed_empty(0, static_cast<const intptr_t *>(NULL), ndt::make_type()));
     temp.swap(*this);
     ndt::type(tp).swap(reinterpret_cast<type_type_data *>(get_ndo()->m_data_pointer)->tp);
     get_ndo()->m_flags = nd::default_access_flags;
@@ -622,7 +622,7 @@ nd::array nd::array_rw(const char *str, size_t size)
 }
 nd::array nd::array_rw(const ndt::type& tp)
 {
-  array temp = array(nd::typed_empty(0, NULL, ndt::make_type()));
+  array temp = array(nd::typed_empty(0, static_cast<const intptr_t *>(NULL), ndt::make_type()));
     ndt::type(tp).swap(reinterpret_cast<type_type_data *>(temp.get_ndo()->m_data_pointer)->tp);
     return temp;
 }
@@ -1506,7 +1506,7 @@ nd::array nd::eval_raw_copy(const ndt::type& dt, const char *arrmeta, const char
                                                       arrmeta);
         }
     } else {
-        result = nd::typed_empty(0, NULL, cdt);
+        result = nd::typed_empty(0, static_cast<const intptr_t *>(NULL), cdt);
     }
 
     typed_data_assign(cdt, result.get_arrmeta(),

@@ -621,7 +621,7 @@ static ndt::type parse_cuda_device_parameters(const char *&rbegin, const char *e
         if (tp.is_null()) {
             throw datashape_parse_error(begin, "expected a type parameter");
         }
-        if (!parse_token(begin, end, ']')) {
+        if (!parse_token_ds(begin, end, ']')) {
             throw datashape_parse_error(begin, "expected closing ']'");
         }
         rbegin = begin;
