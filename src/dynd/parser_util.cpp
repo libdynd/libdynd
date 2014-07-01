@@ -332,43 +332,6 @@ bool parse::parse_6digit_int_no_ws(const char *&begin, const char *end,
     return false;
 }
 
-namespace {
-template <class T> struct overflow_check;
-template <> struct overflow_check<signed char> { inline static bool is_overflow(uint64_t value, bool negative) {
-    return (value&~0x7fULL) != 0 && !(negative && value == 0x80ULL);
-}};
-template <> struct overflow_check<short> { inline static bool is_overflow(uint64_t value, bool negative) {
-    return (value&~0x7fffULL) != 0 && !(negative && value == 0x8000ULL);
-}};
-template <> struct overflow_check<int> { inline static bool is_overflow(uint64_t value, bool negative) {
-    return (value&~0x7fffffffULL) != 0 && !(negative && value == 0x80000000ULL);
-}};
-template <> struct overflow_check<long> { inline static bool is_overflow(uint64_t value, bool negative) {
-#if INT_MAX == LONG_MAX
-    return (value&~0x7fffffffULL) != 0 && !(negative && value == 0x80000000ULL);
-#else
-    return (value&~0x7fffffffffffffffULL) != 0 && !(negative && value == 0x8000000000000000ULL);
-#endif
-}};
-template <> struct overflow_check<long long> { inline static bool is_overflow(uint64_t value, bool negative) {
-    return (value&~0x7fffffffffffffffULL) != 0 && !(negative && value == 0x8000000000000000ULL);
-}};
-template <> struct overflow_check<dynd_int128> { inline static bool is_overflow(const dynd_uint128 &value, bool negative) {
-        return (value.m_hi & ~0x7fffffffffffffffULL) != 0 &&
-               !(negative && value.m_hi == 0x8000000000000000ULL &&
-                 value.m_lo == 0ULL);
-}};
-template <> struct overflow_check<uint8_t> { inline static bool is_overflow(uint64_t value) {
-    return (value&~0xffULL) != 0;
-}};
-template <> struct overflow_check<uint16_t> { inline static bool is_overflow(uint64_t value) {
-    return (value&~0xffffULL) != 0;
-}};
-template <> struct overflow_check<uint32_t> { inline static bool is_overflow(uint64_t value) {
-    return (value&~0xffffffffULL) != 0;
-}};
-} // anonymous namespace
-
 template <class T>
 inline static T checked_string_to_uint(const char *begin, const char *end,
                                        bool &out_overflow, bool &out_badparse)
@@ -611,24 +574,26 @@ static inline void assign_signed_int_value(char *out_int, uint64_t uvalue,
                                     bool &negative, bool &overflow,
                                     bool &badparse)
 {
-    overflow = overflow || overflow_check<T>::is_overflow(uvalue, negative);
-    if (!overflow && !badparse) {
-        *reinterpret_cast<T *>(out_int) =
-            static_cast<T>(negative ? -static_cast<int64_t>(uvalue)
-                                    : static_cast<int64_t>(uvalue));
-    }
+  overflow =
+      overflow || parse::overflow_check<T>::is_overflow(uvalue, negative);
+  if (!overflow && !badparse) {
+    *reinterpret_cast<T *>(out_int) =
+        static_cast<T>(negative ? -static_cast<int64_t>(uvalue)
+                                : static_cast<int64_t>(uvalue));
+  }
 }
 
 static inline void assign_signed_int128_value(char *out_int, dynd_uint128 uvalue,
                                     bool &negative, bool &overflow,
                                     bool &badparse)
 {
-    overflow = overflow || overflow_check<dynd_int128>::is_overflow(uvalue, negative);
-    if (!overflow && !badparse) {
-        *reinterpret_cast<dynd_int128 *>(out_int) =
-            negative ? -static_cast<dynd_int128>(uvalue)
-                     : static_cast<dynd_int128>(uvalue);
-    }
+  overflow = overflow ||
+             parse::overflow_check<dynd_int128>::is_overflow(uvalue, negative);
+  if (!overflow && !badparse) {
+    *reinterpret_cast<dynd_int128 *>(out_int) =
+        negative ? -static_cast<dynd_int128>(uvalue)
+                 : static_cast<dynd_int128>(uvalue);
+  }
 }
 
 template <class T>
@@ -636,11 +601,11 @@ static inline void assign_unsigned_int_value(char *out_int, uint64_t uvalue,
                                     bool &negative, bool &overflow,
                                     bool &badparse)
 {
-    overflow = overflow || negative ||
-               overflow_check<T>::is_overflow(uvalue);
-    if (!overflow && !badparse) {
-        *reinterpret_cast<T *>(out_int) = static_cast<T>(uvalue);
-    }
+  overflow =
+      overflow || negative || parse::overflow_check<T>::is_overflow(uvalue);
+  if (!overflow && !badparse) {
+    *reinterpret_cast<T *>(out_int) = static_cast<T>(uvalue);
+  }
 }
 
 static float checked_float64_to_float32(double value, assign_error_mode errmode)

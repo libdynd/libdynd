@@ -14,6 +14,7 @@
 #include <dynd/types/convert_type.hpp>
 #include <dynd/kernels/assignment_kernels.hpp>
 #include <dynd/diagnostics.hpp>
+#include <dynd/array.hpp>
 
 using namespace std;
 using namespace dynd;
@@ -196,4 +197,13 @@ void dynd::typed_data_assign(const ndt::type &dst_tp, const char *dst_arrmeta,
   make_assignment_kernel(&k, 0, dst_tp, dst_arrmeta, src_tp, src_arrmeta,
                          kernel_request_single, ectx);
   k(dst_data, src_data);
+}
+
+void dynd::typed_data_assign(const ndt::type &dst_tp, const char *dst_arrmeta,
+                             char *dst_data, const nd::array &src_arr,
+                             const eval::eval_context *ectx)
+{
+  typed_data_assign(dst_tp, dst_arrmeta, dst_data, src_arr.get_type(),
+                    src_arr.get_arrmeta(), src_arr.get_readonly_originptr(),
+                    ectx);
 }
