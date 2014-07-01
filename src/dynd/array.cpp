@@ -1544,6 +1544,12 @@ nd::array nd::typed_empty(intptr_t ndim, const intptr_t *shape,
     preamble->m_flags = nd::read_access_flag | nd::write_access_flag;
     return nd::array(DYND_MOVE(result));
   } else {
+    if (ndim != 0 && tp.is_scalar()) {
+      stringstream ss;
+      ss << "too many dimensions provided (" << ndim
+         << ") for creating dynd array of type " << tp;
+      throw invalid_argument(ss.str());
+    }
     char *data_ptr = NULL;
     size_t arrmeta_size = tp.extended()->get_arrmeta_size();
     size_t data_size = tp.extended()->get_default_data_size(ndim, shape);

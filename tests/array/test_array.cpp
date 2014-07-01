@@ -144,9 +144,7 @@ TYPED_TEST_P(Array, ScalarConstructor) {
     EXPECT_EQ(nd::readwrite_access_flags, a.get_access_flags());
     EXPECT_TRUE(a.is_scalar());
     // Constructing an empty array with too many dimensions should raise an error
-    EXPECT_THROW(
-        nd::typed_empty(1, TestFixture::MakeType(ndt::make_type<double>())),
-        invalid_argument);
+    EXPECT_THROW(nd::typed_empty(1, TestFixture::MakeType(ndt::make_type<double>())), invalid_argument);
 }
 
 TYPED_TEST_P(Array, OneDimConstructor) {

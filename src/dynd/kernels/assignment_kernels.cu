@@ -83,7 +83,7 @@ static const ndt::type& get_storage_type(const ndt::type& tp) {
 }
 
 size_t dynd::make_cuda_assignment_kernel(
-                ckernel_builder *ckb, size_t ckb_offset,
+                ckernel_builder *ckb, intptr_t ckb_offset,
                 const ndt::type& dst_tp, const char *dst_arrmeta,
                 const ndt::type& src_tp, const char *src_arrmeta,
                 kernel_request_t kernreq, const eval::eval_context *ectx)
@@ -514,7 +514,7 @@ static expr_strided_t assign_table_strided_cuda_device_to_device_kernel[builtin_
 
 // This is meant to reflect make_builtin_type_assignment_kernel
 size_t dynd::make_cuda_builtin_type_assignment_kernel(
-                ckernel_builder *out, size_t offset_out,
+                ckernel_builder *out, intptr_t offset_out,
                 bool dst_device, type_id_t dst_type_id,
                 bool src_device, type_id_t src_type_id,
                 kernel_request_t kernreq, assign_error_mode errmode)
@@ -597,7 +597,7 @@ size_t dynd::make_cuda_builtin_type_assignment_kernel(
 
 // This is meant to reflect make_pod_typed_data_assignment_kernel
 size_t dynd::make_cuda_pod_typed_data_assignment_kernel(
-                ckernel_builder *out, size_t offset_out,
+                ckernel_builder *out, intptr_t offset_out,
                 bool dst_device, bool src_device,
                 size_t data_size, size_t data_alignment,
                 kernel_request_t kernreq)
