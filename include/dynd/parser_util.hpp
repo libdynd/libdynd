@@ -656,14 +656,17 @@ struct overflow_check<long> {
            !(negative && value == 0x8000000000000000ULL);
 #endif
   }
+#if INT_MAX == LONG_MAX
   inline static bool is_overflow(int64_t value)
   {
-#if INT_MAX == LONG_MAX
     return (value < -0x80000000LL) || (value > 0x7fffffffLL);
-#else
-    return false;
-#endif
   }
+#else
+  inline static bool is_overflow(int64_t DYND_UNUSED(value))
+  {
+    return false;
+  }
+#endif
 };
 template <>
 struct overflow_check<long long> {
@@ -672,7 +675,7 @@ struct overflow_check<long long> {
     return (value & ~0x7fffffffffffffffULL) != 0 &&
            !(negative && value == 0x8000000000000000ULL);
   }
-  inline static bool is_overflow(int64_t value)
+  inline static bool is_overflow(int64_t DYND_UNUSED(value))
   {
     return false;
   }
