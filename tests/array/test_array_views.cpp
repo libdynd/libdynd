@@ -116,6 +116,7 @@ TEST(ArrayViews, OneDimPermute) {
     intptr_t ndim = 1;
     intptr_t axes[1] = {0};
     nd::array b = a.permute(ndim, axes);
+    EXPECT_EQ(a.get_readonly_originptr(), b.get_readonly_originptr());
     for (int i = 0; i < 3; ++i) {
         EXPECT_EQ(a(i).as<int>(), b(i).as<int>());
     }
@@ -124,6 +125,7 @@ TEST(ArrayViews, OneDimPermute) {
     a.vals() = vals0;
 
     b = a.permute(ndim, axes);
+    EXPECT_EQ(a.get_readonly_originptr(), b.get_readonly_originptr());
     for (int i = 0; i < 3; ++i) {
         EXPECT_EQ(a(i).as<int>(), b(i).as<int>());
     }
@@ -138,6 +140,7 @@ TEST(ArrayViews, TwoDimPermute) {
     intptr_t ndim = 2;
     intptr_t axes[2] = {1, 0};
     nd::array b = a.permute(ndim, axes);
+    EXPECT_EQ(a.get_readonly_originptr(), b.get_readonly_originptr());
     EXPECT_EQ(a.get_ndim(), b.get_ndim());
     EXPECT_EQ(3, b.get_shape()[0]);
     EXPECT_EQ(3, b.get_shape()[1]);
@@ -152,6 +155,7 @@ TEST(ArrayViews, TwoDimPermute) {
     a.vals() = vals0;
 
     b = a.permute(ndim, axes);
+    EXPECT_EQ(a.get_readonly_originptr(), b.get_readonly_originptr());
     EXPECT_EQ(a.get_ndim(), b.get_ndim());
     EXPECT_EQ(a.get_shape()[0], b.get_shape()[1]);
     EXPECT_EQ(a.get_shape()[1], b.get_shape()[0]);
@@ -166,6 +170,7 @@ TEST(ArrayViews, TwoDimPermute) {
     a.vals() = vals0;
 
     b = a.permute(ndim, axes);
+    EXPECT_EQ(a.get_readonly_originptr(), b.get_readonly_originptr());
     EXPECT_EQ(a.get_ndim(), b.get_ndim());
     EXPECT_EQ(a.get_shape()[0], b.get_shape()[1]);
     EXPECT_EQ(a.get_shape()[1], b.get_shape()[0]);
@@ -182,6 +187,7 @@ TEST(ArrayViews, TwoDimPermute) {
     a.vals() = vals1;
 
     b = a.permute(ndim, axes);
+    EXPECT_EQ(a.get_readonly_originptr(), b.get_readonly_originptr());
     EXPECT_EQ(a.get_ndim(), b.get_ndim());
     EXPECT_EQ(a.get_shape()[0], b.get_shape()[1]);
     EXPECT_EQ(a.get_shape()[1], b.get_shape()[0]);
@@ -196,6 +202,7 @@ TEST(ArrayViews, TwoDimPermute) {
     a.vals() = vals1;
 
     b = a.permute(ndim, axes);
+    EXPECT_EQ(a.get_readonly_originptr(), b.get_readonly_originptr());
     EXPECT_EQ(a.get_ndim(), b.get_ndim());
     EXPECT_EQ(a.get_shape()[0], b.get_shape()[1]);
     EXPECT_EQ(a.get_shape()[1], b.get_shape()[0]);
@@ -214,6 +221,7 @@ TEST(ArrayViews, NDimPermute) {
 
     intptr_t axes0[ndim0] = {2, 3, 1, 0};
     nd::array b = a.permute(ndim0, axes0);
+    EXPECT_EQ(a.get_readonly_originptr(), b.get_readonly_originptr());
     EXPECT_EQ(a.get_ndim(), b.get_ndim());
     EXPECT_EQ(a.get_shape()[0], b.get_shape()[3]);
     EXPECT_EQ(a.get_shape()[1], b.get_shape()[2]);
@@ -233,6 +241,7 @@ TEST(ArrayViews, NDimPermute) {
     a = nd::typed_rand(ndim0, shape0, ndt::type("strided * strided * strided * 23 * float64"));
 
     b = a.permute(ndim0, axes0);
+    EXPECT_EQ(a.get_readonly_originptr(), b.get_readonly_originptr());
     EXPECT_EQ(a.get_ndim(), b.get_ndim());
     EXPECT_EQ(a.get_shape()[0], b.get_shape()[3]);
     EXPECT_EQ(a.get_shape()[1], b.get_shape()[2]);
@@ -252,6 +261,7 @@ TEST(ArrayViews, NDimPermute) {
     a = nd::typed_rand(ndim0, shape0, ndt::type("strided * strided * 15 * strided * float64"));
 
     b = a.permute(ndim0, axes0);
+    EXPECT_EQ(a.get_readonly_originptr(), b.get_readonly_originptr());
     EXPECT_EQ(a.get_ndim(), b.get_ndim());
     EXPECT_EQ(a.get_shape()[0], b.get_shape()[3]);
     EXPECT_EQ(a.get_shape()[1], b.get_shape()[2]);
@@ -274,6 +284,7 @@ TEST(ArrayViews, NDimPermute) {
 
     intptr_t axes1[ndim1] = {1, 0, 2, 3, 4};
     b = a.permute(2, axes1);
+    EXPECT_EQ(a.get_readonly_originptr(), b.get_readonly_originptr());
     EXPECT_EQ(a.get_ndim(), b.get_ndim());
     EXPECT_EQ(a.get_shape()[0], b.get_shape()[1]);
     EXPECT_EQ(a.get_shape()[1], b.get_shape()[0]);
@@ -296,6 +307,7 @@ TEST(ArrayViews, NDimPermute) {
     a = nd::typed_rand(ndim1, shape1, ndt::type("strided * strided * var * strided * strided * float64"));
 
     b = a.permute(2, axes1);
+    EXPECT_EQ(a.get_readonly_originptr(), b.get_readonly_originptr());
     EXPECT_EQ(a.get_ndim(), b.get_ndim());
     EXPECT_EQ(a.get_shape()[0], b.get_shape()[1]);
     EXPECT_EQ(a.get_shape()[1], b.get_shape()[0]);
@@ -317,6 +329,7 @@ TEST(ArrayViews, NDimPermute) {
 
     intptr_t axes2[ndim1] = {1, 0, 2, 4, 3};
     b = a.permute(ndim1, axes2);
+    EXPECT_EQ(a.get_readonly_originptr(), b.get_readonly_originptr());
     EXPECT_EQ(a.get_ndim(), b.get_ndim());
     EXPECT_EQ(a.get_shape()[0], b.get_shape()[1]);
     EXPECT_EQ(a.get_shape()[1], b.get_shape()[0]);
@@ -340,6 +353,7 @@ TEST(ArrayViews, NDimPermute) {
 
     intptr_t axes3[ndim1] = {0, 1, 2, 4, 3};
     b = a.permute(ndim1, axes3);
+    EXPECT_EQ(a.get_readonly_originptr(), b.get_readonly_originptr());
     EXPECT_EQ(a.get_ndim(), b.get_ndim());
     EXPECT_EQ(a.get_shape()[0], b.get_shape()[0]);
     EXPECT_EQ(a.get_shape()[1], b.get_shape()[1]);
