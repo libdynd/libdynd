@@ -503,11 +503,11 @@ struct strided_or_var_to_var_expr_kernel_extra {
             }
             modified_dst = dst_vddd->begin;
             dst_vddd->size = dim_size;
-            if (dim_size <= 1) {
-                modified_dst_stride = 0;
-            } else {
-                modified_dst_stride = e->dst_stride;
-            }
+        }
+        if (dim_size <= 1) {
+            modified_dst_stride = 0;
+        } else {
+            modified_dst_stride = e->dst_stride;
         }
         opchild(modified_dst, modified_dst_stride, modified_src, modified_src_stride, dim_size, echild);
     }

@@ -1111,6 +1111,10 @@ bool nd::array::equals_exact(const array& rhs) const
                         rhs.get_type(), rhs.get_arrmeta(),
                         comparison_type_equal, &eval::default_eval_context);
         return k(get_readonly_originptr(), rhs.get_readonly_originptr());
+    } else if (get_type().get_type_id() == var_dim_type_id) {
+      // If there's a leading var dimension, convert it to strided and compare
+      // (Note: this is a hack)
+      return operator()(irange()).equals_exact(rhs(irange()));
     } else {
         // First compare the shape, to avoid triggering an exception in common cases
         size_t ndim = get_ndim();

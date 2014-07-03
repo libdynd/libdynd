@@ -7,6 +7,7 @@
 #include <sstream>
 #include <stdexcept>
 #include "inc_gtest.hpp"
+#include "dynd_assertions.hpp"
 
 #include <dynd/array.hpp>
 #include <dynd/types/tuple_type.hpp>
@@ -527,14 +528,40 @@ TEST(VarArrayDType, AssignVarFixedKernel) {
 }
 
 TEST(VarDimDType, IsTypeSubarray) {
-    EXPECT_TRUE(ndt::type("var * int32").is_type_subarray(ndt::type("var * int32")));
-    EXPECT_TRUE(ndt::type("3 * var * int32").is_type_subarray(ndt::type("var * int32")));
-    EXPECT_TRUE(ndt::type("var * var * int32").is_type_subarray(ndt::type("int32")));
-    EXPECT_TRUE(ndt::type("var * int32").is_type_subarray(ndt::make_type<int32_t>()));
-    EXPECT_FALSE(ndt::make_type<int32_t>().is_type_subarray(ndt::type("var * int32")));
-    EXPECT_FALSE(ndt::type("var * int32").is_type_subarray(ndt::type("var * var * int32")));
-    EXPECT_FALSE(ndt::type("var * int32").is_type_subarray(ndt::type("strided * int32")));
-    EXPECT_FALSE(ndt::type("var * int32").is_type_subarray(ndt::type("3 * int32")));
-    EXPECT_FALSE(ndt::type("strided * int32").is_type_subarray(ndt::type("var * int32")));
-    EXPECT_FALSE(ndt::type("3 * int32").is_type_subarray(ndt::type("var * int32")));
+  EXPECT_TRUE(
+      ndt::type("var * int32").is_type_subarray(ndt::type("var * int32")));
+  EXPECT_TRUE(
+      ndt::type("3 * var * int32").is_type_subarray(ndt::type("var * int32")));
+  EXPECT_TRUE(
+      ndt::type("var * var * int32").is_type_subarray(ndt::type("int32")));
+  EXPECT_TRUE(
+      ndt::type("var * int32").is_type_subarray(ndt::make_type<int32_t>()));
+  EXPECT_FALSE(
+      ndt::make_type<int32_t>().is_type_subarray(ndt::type("var * int32")));
+  EXPECT_FALSE(ndt::type("var * int32")
+                   .is_type_subarray(ndt::type("var * var * int32")));
+  EXPECT_FALSE(
+      ndt::type("var * int32").is_type_subarray(ndt::type("strided * int32")));
+  EXPECT_FALSE(
+      ndt::type("var * int32").is_type_subarray(ndt::type("3 * int32")));
+  EXPECT_FALSE(
+      ndt::type("strided * int32").is_type_subarray(ndt::type("var * int32")));
+  EXPECT_FALSE(
+      ndt::type("3 * int32").is_type_subarray(ndt::type("var * int32")));
+}
+
+TEST(VarArrayDType, AssignAfterCreated) {
+  nd::array a;
+
+  a = nd::empty("var * int32");
+  // First assign an array, allocating var storage
+  int vals[3] = {1, 3, 5};
+  a.vals() = vals;
+  EXPECT_JSON_EQ_ARR("[1, 3, 5]", a);
+  // Now do a broadcasting assignment into that
+  a.vals() = 7;
+  EXPECT_JSON_EQ_ARR("[7, 7, 7]", a);
+  // Finally do another array assignment into it
+  a.vals() = vals;
+  EXPECT_JSON_EQ_ARR("[1, 3, 5]", a);
 }
