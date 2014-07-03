@@ -1,5 +1,5 @@
 //
-// Copyright (C) 2011-14 Mark Wiebe, DyND Developers
+// Copyright (C) 2011-14 Mark Wiebe, Irwin Zaid, DyND Developers
 // BSD 2-Clause License, see LICENSE.txt
 //
 
@@ -525,6 +525,11 @@ public:
         irange i[4] = {i0, i1, i2, i3};
         return at_array(4, i);
     }
+    /** Indexing with five index values */
+    array operator()(const irange& i0, const irange& i1, const irange& i2, const irange& i3, const irange& i4) const {
+        irange i[5] = {i0, i1, i2, i3, i4};
+        return at_array(5, i);
+    }
 
     /** Does a value-assignment from the rhs array. */
     void val_assign(const array &rhs, const eval::eval_context *ectx =
@@ -591,6 +596,34 @@ public:
      * nd::array({3, 5, 10}).adapt(ndt::make_date(), "days since 2001-1-1");
      */
     array adapt(const ndt::type& tp, const nd::string& adapt_op);
+
+    /**
+     * Permutes the dimensions of the array, returning a view to the result.
+     * Only strided dimensions can be permuted and no dimension can be permuted
+     * across a variable dimension. At present, there is no error checking.
+     *
+     * \param ndim The number of dimensions to permute. If `ndim' is less than that
+     *             of this array, the other dimensions will not be modified.
+     * \param axes The permutation. It must be of length `ndim' and not contain
+     *             a value greater or equal to `ndim'.
+     */
+    array permute(intptr_t ndim, const intptr_t *axes) const;
+
+    /**
+     * Rolls the dimensions of the array so the axis `from' becomes the axis `to'.
+     * At present, there cannot be any variable dimensions.
+     */
+    array rotate(intptr_t to, intptr_t from = 0) const;
+
+    array rotate(intptr_t from = 0) const {
+        return rotate(get_ndim() - 1, from);
+    }
+
+    /**
+     * Transposes (reverses) the dimensions of the array.
+     * At present, there cannot be any variable dimensions.
+     */
+    array transpose() const;
 
     /**
      * DEPRECATED
@@ -989,7 +1022,7 @@ inline array typed_empty(intptr_t dim0, intptr_t dim1, intptr_t dim2, const ndt:
 }
 
 /**
- * A version of typed_empty that excepts a std::vector as the shape.
+ * A version of typed_empty that accepts a std::vector as the shape.
  */
 inline array typed_empty(const std::vector<intptr_t> &shape,
                          const ndt::type &tp)
@@ -1148,6 +1181,64 @@ array empty_like(const array& rhs, const ndt::type& uniform_dtype);
  * \param rhs  The array whose shape, memory layout, and dtype to emulate.
  */
 array empty_like(const array& rhs);
+
+/**
+ * Primitive function to construct an nd::array with each element initialized to 0.
+ * In this function, the type provided is the complete type of the array
+ * result, not just its dtype.
+ */
+array typed_zeros(intptr_t ndim, const intptr_t *shape, const ndt::type &tp);
+
+/**
+ * A version of typed_zeros that accepts a std::vector as the shape.
+ */
+inline array typed_zeros(const std::vector<intptr_t> &shape,
+                         const ndt::type &tp)
+{
+  return typed_zeros(shape.size(), shape.empty() ? NULL : &shape[0], tp);
+}
+
+/**
+ * Constructs an array, with each element initialized to 0, of the given dtype,
+ * with ndim/shape pointer.
+ */
+inline array dtyped_zeros(intptr_t ndim, const intptr_t *shape,
+                          const ndt::type &tp)
+{
+  nd::array res = dtyped_empty(ndim, shape, tp);
+  res.val_assign(0);
+
+  return res;
+}
+
+/**
+ * Primitive function to construct an nd::array with each element initialized to 1.
+ * In this function, the type provided is the complete type of the array
+ * result, not just its dtype.
+ */
+array typed_ones(intptr_t ndim, const intptr_t *shape, const ndt::type &tp);
+
+/**
+ * A version of typed_ones that accepts a std::vector as the shape.
+ */
+inline array typed_ones(const std::vector<intptr_t> &shape,
+                         const ndt::type &tp)
+{
+  return typed_ones(shape.size(), shape.empty() ? NULL : &shape[0], tp);
+}
+
+/**
+ * Constructs an array, with each element initialized to 1, of the given dtype,
+ * with ndim/shape pointer.
+ */
+inline array dtyped_ones(intptr_t ndim, const intptr_t *shape,
+                          const ndt::type &tp)
+{
+  nd::array res = dtyped_empty(ndim, shape, tp);
+  res.val_assign(1);
+
+  return res;
+}
 
 ///////////// Initializer list constructor implementation /////////////////////////
 #ifdef DYND_INIT_LIST

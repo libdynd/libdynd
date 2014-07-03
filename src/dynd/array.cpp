@@ -1,5 +1,5 @@
 //
-// Copyright (C) 2011-14 Mark Wiebe, DyND Developers
+// Copyright (C) 2011-14 Mark Wiebe, Irwin Zaid, DyND Developers
 // BSD 2-Clause License, see LICENSE.txt
 //
 
@@ -1255,6 +1255,97 @@ nd::array nd::array::adapt(const ndt::type& tp, const nd::string& adapt_op)
 }
 
 namespace {
+    static void with_strided_dim_type(const ndt::type& tp, void *extra,
+                ndt::type& out_transformed_tp, bool& out_was_transformed)
+    {
+        if (tp.get_ndim() > 0) {
+            tp.extended()->transform_child_types(&with_strided_dim_type, extra, out_transformed_tp, out_was_transformed);
+            type_id_t tp_id = tp.get_type_id();
+            if (tp_id == fixed_dim_type_id || tp_id == cfixed_dim_type_id) {
+                out_transformed_tp = ndt::make_strided_dim(out_transformed_tp.tcast<base_uniform_dim_type>()->get_element_type());
+                out_was_transformed = true;
+            }
+        } else {
+            out_transformed_tp = tp;
+        }
+    }
+} // anonymous namespace
+
+nd::array nd::array::permute(intptr_t ndim, const intptr_t *axes) const
+{
+    ndt::type transformed_tp;
+    bool was_transformed = false;
+    with_strided_dim_type(get_type(), NULL, transformed_tp, was_transformed);
+
+    nd::array res(shallow_copy_array_memory_block(get_memblock()));
+    res = res.view(transformed_tp);
+
+    dimvector shape(get_ndim());
+    get_shape(shape.get());
+
+    dimvector strides(get_ndim());
+    get_strides(strides.get());
+
+    char *md = res.get_arrmeta();
+    for (intptr_t i = 0; i < ndim; ++i) {
+        // A permutation must leave dimensions that are not strided alone, so this check handles those.
+        if (i != axes[i]) {
+            strided_dim_type_arrmeta *smd = reinterpret_cast<strided_dim_type_arrmeta *>(md);
+            smd->size = shape[axes[i]];
+            smd->stride = strides[axes[i]];
+        }
+
+        transformed_tp = transformed_tp.get_type_at_dimension(&md, 1);
+    }
+
+    return res;
+}
+
+nd::array nd::array::rotate(intptr_t to, intptr_t from) const
+{
+    if (from < to) {
+        intptr_t ndim = to + 1;
+        dimvector axes(ndim);
+        for (intptr_t i = 0; i < from; ++i) {
+            axes[i] = i;
+        }
+        for (intptr_t i = from; i < to; ++i) {
+            axes[i] = i + 1;
+        }
+        axes[to] = from;
+
+        return permute(ndim, axes.get());
+    }
+
+    if (from > to) {
+        intptr_t ndim = from + 1;
+        dimvector axes(ndim);
+        for (intptr_t i = 0; i < to; ++i) {
+            axes[i] = i;
+        }
+        axes[to] = from;
+        for (intptr_t i = to + 1; i <= from; ++i) {
+            axes[i] = i - 1;
+        }
+
+        return permute(ndim, axes.get());
+    }
+
+    return *this;
+}
+
+nd::array nd::array::transpose() const
+{
+    intptr_t ndim = get_ndim();
+    dimvector axes(ndim);
+    for (intptr_t i = 0; i < ndim; ++i) {
+        axes[i] = ndim - i - 1;
+    }
+
+    return permute(ndim, axes.get());
+}
+
+namespace {
     struct replace_compatible_dtype_extra {
         replace_compatible_dtype_extra(const ndt::type& tp,
                         intptr_t replace_ndim_)
@@ -1632,6 +1723,24 @@ nd::array nd::empty_like(const nd::array& rhs)
         }
         return result;
     }
+}
+
+nd::array nd::typed_zeros(intptr_t ndim, const intptr_t *shape,
+                          const ndt::type &tp)
+{
+    nd::array res = nd::typed_empty(ndim, shape, tp);
+    res.val_assign(0);
+
+    return res;
+}
+
+nd::array nd::typed_ones(intptr_t ndim, const intptr_t *shape,
+                          const ndt::type &tp)
+{
+    nd::array res = nd::typed_empty(ndim, shape, tp);
+    res.val_assign(1);
+
+    return res;
 }
 
 nd::array nd::memmap(const std::string& filename,
