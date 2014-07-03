@@ -1224,81 +1224,89 @@ namespace {
 nd::array nd::array::ucast(const ndt::type &scalar_tp, intptr_t replace_ndim)
     const
 {
-    // This creates a type which has a convert type for every scalar of different type.
-    // The result has the exact same arrmeta and data, so we just have to swap in the new
-    // type in a shallow copy.
-    ndt::type replaced_tp;
-    bool was_transformed = false;
-    cast_dtype_extra extra(scalar_tp, replace_ndim);
-    cast_dtype(get_type(), &extra, replaced_tp, was_transformed);
-    if (was_transformed) {
-        return make_array_clone_with_new_type(*this, replaced_tp);
-    } else {
-        return *this;
-    }
+  // This creates a type which has a convert type for every scalar of different
+  // type.
+  // The result has the exact same arrmeta and data, so we just have to swap in
+  // the new
+  // type in a shallow copy.
+  ndt::type replaced_tp;
+  bool was_transformed = false;
+  cast_dtype_extra extra(scalar_tp, replace_ndim);
+  cast_dtype(get_type(), &extra, replaced_tp, was_transformed);
+  if (was_transformed) {
+    return make_array_clone_with_new_type(*this, replaced_tp);
+  } else {
+    return *this;
+  }
 }
 
 nd::array nd::array::view(const ndt::type& tp) const
 {
-    return nd::view(*this, tp);
+  return nd::view(*this, tp);
 }
 
 nd::array nd::array::uview(const ndt::type& uniform_dt, intptr_t replace_ndim) const
 {
-    // Use the view function specifying to replace all dimensions
-    return view(get_type().with_replaced_dtype(uniform_dt, replace_ndim));
+  // Use the view function specifying to replace all dimensions
+  return view(get_type().with_replaced_dtype(uniform_dt, replace_ndim));
 }
 
 nd::array nd::array::adapt(const ndt::type& tp, const nd::string& adapt_op)
 {
-    return uview(ndt::make_adapt(get_dtype(), tp, adapt_op), 0);
+  return uview(ndt::make_adapt(get_dtype(), tp, adapt_op), 0);
 }
 
 namespace {
-    static void with_strided_dim_type(const ndt::type& tp, void *extra,
-                ndt::type& out_transformed_tp, bool& out_was_transformed)
-    {
-        if (tp.get_ndim() > 0) {
-            tp.extended()->transform_child_types(&with_strided_dim_type, extra, out_transformed_tp, out_was_transformed);
-            type_id_t tp_id = tp.get_type_id();
-            if (tp_id == fixed_dim_type_id || tp_id == cfixed_dim_type_id) {
-                out_transformed_tp = ndt::make_strided_dim(out_transformed_tp.tcast<base_uniform_dim_type>()->get_element_type());
-                out_was_transformed = true;
-            }
-        } else {
-            out_transformed_tp = tp;
-        }
+static void with_strided_dim_type(const ndt::type &tp, void *extra,
+                                  ndt::type &out_transformed_tp,
+                                  bool &out_was_transformed)
+{
+  if (tp.get_ndim() > 0) {
+    tp.extended()->transform_child_types(
+        &with_strided_dim_type, extra, out_transformed_tp, out_was_transformed);
+    type_id_t tp_id = tp.get_type_id();
+    if (tp_id == fixed_dim_type_id || tp_id == cfixed_dim_type_id) {
+      out_transformed_tp = ndt::make_strided_dim(
+          out_transformed_tp.tcast<base_uniform_dim_type>()
+              ->get_element_type());
+      out_was_transformed = true;
     }
+  } else {
+    out_transformed_tp = tp;
+  }
+}
 } // anonymous namespace
 
 nd::array nd::array::permute(intptr_t ndim, const intptr_t *axes) const
 {
-    ndt::type transformed_tp;
-    bool was_transformed = false;
-    with_strided_dim_type(get_type(), NULL, transformed_tp, was_transformed);
+  ndt::type transformed_tp;
+  bool was_transformed = false;
+  with_strided_dim_type(get_type(), NULL, transformed_tp, was_transformed);
 
-    nd::array res(shallow_copy_array_memory_block(get_memblock()));
-    res = res.view(transformed_tp);
+  nd::array res(shallow_copy_array_memory_block(get_memblock()));
+  res = res.view(transformed_tp);
 
-    dimvector shape(get_ndim());
-    get_shape(shape.get());
+  dimvector shape(get_ndim());
+  get_shape(shape.get());
 
-    dimvector strides(get_ndim());
-    get_strides(strides.get());
+  dimvector strides(get_ndim());
+  get_strides(strides.get());
 
-    char *md = res.get_arrmeta();
-    for (intptr_t i = 0; i < ndim; ++i) {
-        // A permutation must leave dimensions that are not strided alone, so this check handles those.
-        if (i != axes[i]) {
-            strided_dim_type_arrmeta *smd = reinterpret_cast<strided_dim_type_arrmeta *>(md);
-            smd->size = shape[axes[i]];
-            smd->stride = strides[axes[i]];
-        }
-
-        transformed_tp = transformed_tp.get_type_at_dimension(&md, 1);
+  char *md = res.get_arrmeta();
+  for (intptr_t i = 0; i < ndim; ++i) {
+    // A permutation must leave dimensions that are not strided alone, so this
+    // check handles those.
+    if (i != axes[i]) {
+      strided_dim_type_arrmeta *smd =
+          reinterpret_cast<strided_dim_type_arrmeta *>(md);
+      smd->size = shape[axes[i]];
+      smd->stride = strides[axes[i]];
     }
 
-    return res;
+    transformed_tp = transformed_tp.get_type_at_dimension(&md, 1);
+  }
+
+  return res;
 }
 
 nd::array nd::array::rotate(intptr_t to, intptr_t from) const
