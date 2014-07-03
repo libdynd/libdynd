@@ -1279,6 +1279,12 @@ static void with_strided_dim_type(const ndt::type &tp, void *extra,
 
 nd::array nd::array::permute(intptr_t ndim, const intptr_t *axes) const
 {
+  if (ndim > get_ndim()) {
+    stringstream ss;
+    ss << "Too many dimensions provided for axis permutation, got " << ndim
+       << " for type " << get_type();
+    throw invalid_argument(ss.str());
+  }
   ndt::type transformed_tp;
   bool was_transformed = false;
   with_strided_dim_type(get_type(), NULL, transformed_tp, was_transformed);
@@ -1293,14 +1299,42 @@ nd::array nd::array::permute(intptr_t ndim, const intptr_t *axes) const
   get_strides(strides.get());
 
   char *md = res.get_arrmeta();
+  shortvector<char> permcheck(ndim);
+  memset(permcheck.get(), 0, ndim * sizeof(bool));
+  // ``barrier`` is the highest ``var`` dimension prior
+  // to ``i``, axes are not permitted to cross this barrier
+  intptr_t barrier = -1;
   for (intptr_t i = 0; i < ndim; ++i) {
     // A permutation must leave dimensions that are not strided alone, so this
     // check handles those.
-    if (i != axes[i]) {
-      strided_dim_type_arrmeta *smd =
-          reinterpret_cast<strided_dim_type_arrmeta *>(md);
-      smd->size = shape[axes[i]];
-      smd->stride = strides[axes[i]];
+    intptr_t axes_i = axes[i];
+    if (axes_i < 0 || axes_i >= ndim || permcheck[axes_i] != 0) {
+      stringstream ss;
+      ss << "Invalid axis permutation [" << axes[0];
+      for (i = 1; i < ndim; ++i) {
+        ss << ", " << i;
+      }
+      ss << "]";
+      throw invalid_argument(ss.str());
+    } else {
+      permcheck[axes_i] = 1;
+    }
+    if (i != axes_i) {
+      if (shape[i] >= 0 && axes_i > barrier) {
+        // It's a strided dim and does not cross the barrier
+        strided_dim_type_arrmeta *smd =
+            reinterpret_cast<strided_dim_type_arrmeta *>(md);
+        smd->size = shape[axes_i];
+        smd->stride = strides[axes_i];
+      } else if (shape[i] < 0) {
+        throw invalid_argument(
+            "Cannot permute a dynd var dimension, it must remain fixed");
+      } else {
+        throw invalid_argument(
+            "Cannot permute a strided dimension across a dynd var dimension");
+      }
+    } else if (shape[i] < 0) {
+      barrier = i;
     }
 
     transformed_tp = transformed_tp.get_type_at_dimension(&md, 1);

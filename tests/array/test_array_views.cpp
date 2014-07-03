@@ -373,3 +373,36 @@ TEST(ArrayViews, NDimPermute) {
         }
     }
 }
+
+TEST(ArrayViews, NDimPermute_BadPerms) {
+  nd::array a;
+  const intptr_t ndim1 = 5;
+  intptr_t shape1[ndim1] = {5, 8, 3, 4, 2};
+  a = nd::typed_rand(
+      ndim1, shape1,
+      ndt::type("strided * strided * var * strided * strided * float64"));
+
+  // A dimension may not be permuted across a var dimension
+  intptr_t axes1[ndim1] = {1, 3, 2, 0, 4};
+  EXPECT_THROW(a.permute(ndim1, axes1), invalid_argument);
+
+  a = nd::typed_rand(
+      ndim1, shape1,
+      ndt::type("strided * strided * var * var * strided * float64"));
+
+  // A var dimension dimension may not change position
+  intptr_t axes2[ndim1] = {0, 1, 3, 2, 4};
+  EXPECT_THROW(a.permute(ndim1, axes2), invalid_argument);
+
+  a = nd::typed_rand(
+      ndim1, shape1,
+      ndt::type("strided * strided * strided * strided * strided * float64"));
+
+  // The permutation must be valid and not be larger than ndim
+  intptr_t axes3[ndim1] = {0, 1, 2, 3, 5};
+  EXPECT_THROW(a.permute(ndim1, axes3), invalid_argument);
+  intptr_t axes4[ndim1] = {0, 1, 2, 3, 0};
+  EXPECT_THROW(a.permute(ndim1, axes4), invalid_argument);
+  intptr_t axes5[ndim1 + 1] = {0, 1, 2, 3, 4, 5};
+  EXPECT_THROW(a.permute(ndim1 + 1, axes5), invalid_argument);
+}
