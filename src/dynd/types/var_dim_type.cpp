@@ -615,17 +615,18 @@ size_t var_dim_type::make_assignment_kernel(
     } else if (dst_tp.get_ndim() < src_tp.get_ndim()) {
         throw broadcast_error(dst_tp, dst_arrmeta, src_tp, src_arrmeta);
     } else {
-        if (dst_tp.get_type_id() == strided_dim_type_id ||
-                        dst_tp.get_type_id() == cfixed_dim_type_id) {
-            // var_dim to strided_dim
-            return make_var_to_strided_dim_assignment_kernel(
-                ckb, ckb_offset, dst_tp, dst_arrmeta, src_tp, src_arrmeta,
-                kernreq, ectx);
-        } else {
-            stringstream ss;
-            ss << "Cannot assign from " << src_tp << " to " << dst_tp;
-            throw dynd::type_error(ss.str());
-        }
+      if (dst_tp.get_type_id() == strided_dim_type_id ||
+          dst_tp.get_type_id() == fixed_dim_type_id ||
+          dst_tp.get_type_id() == cfixed_dim_type_id) {
+        // var_dim to strided_dim
+        return make_var_to_strided_dim_assignment_kernel(
+            ckb, ckb_offset, dst_tp, dst_arrmeta, src_tp, src_arrmeta, kernreq,
+            ectx);
+      } else {
+        stringstream ss;
+        ss << "Cannot assign from " << src_tp << " to " << dst_tp;
+        throw dynd::type_error(ss.str());
+      }
     }
 }
 
