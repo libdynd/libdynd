@@ -1,0 +1,14 @@
+package: libdynd_build_test
+platform:
+    - linux-64
+    - linux-32
+    - osx-64
+script:
+    - touch build.sh
+    - conda build .
+build_targets:
+    files: conda
+    channels: main
+
+# before_script:
+#     - sudo yum -y install git dos2unix gcc gcc-c++
