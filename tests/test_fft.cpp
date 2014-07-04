@@ -119,7 +119,7 @@ TYPED_TEST_P(FFT, OneDimInverse) {
     for (int i = 0; i < n; ++i) {
         size_t size = sizes[i];
 
-        nd::array x = dynd::rand(size, ndt::make_type<complex_type>());
+        nd::array x = nd::dtyped_rand(size, ndt::make_type<complex_type>());
         nd::array y = ifft1(fft1(x));
 
         EXPECT_EQ(x.get_dim_size(), y.get_dim_size());
@@ -176,7 +176,7 @@ TYPED_TEST_P(FFT, OneDimDelta) {
         xe(xe.get_dim_size() / 2).vals() = 1;
 
         nd::array xo = x(1 <= irange().by(2));
-        xo.vals() = dynd::rand(xo.get_dim_size(), ndt::make_type<complex_type>());
+        xo.vals() = nd::dtyped_rand(xo.get_dim_size(), ndt::make_type<complex_type>());
 
         y = fft1(xe);
         for (int i = 0; i < y.get_dim_size(); i += 2) {
@@ -191,9 +191,9 @@ TYPED_TEST_P(FFT, OneDimDelta) {
 
 /*
 TYPED_TEST_P(FFT2D, Linear) {
-    nd::array x0 = dynd::rand(TestFixture::SrcShape[0], TestFixture::SrcShape[1],
+    nd::array x0 = nd::dtyped_rand(TestFixture::SrcShape[0], TestFixture::SrcShape[1],
         ndt::make_type<typename TestFixture::SrcType>());
-    nd::array x1 = dynd::rand(TestFixture::SrcShape[0], TestFixture::SrcShape[1],
+    nd::array x1 = nd::dtyped_rand(TestFixture::SrcShape[0], TestFixture::SrcShape[1],
         ndt::make_type<typename TestFixture::SrcType>());
     nd::array x = x0 + x1;
 
@@ -212,7 +212,7 @@ TYPED_TEST_P(FFT2D, Linear) {
 */
 
 TYPED_TEST_P(FFT2D, Inverse) {
-    nd::array x = dynd::rand(TestFixture::SrcShape[0], TestFixture::SrcShape[1],
+    nd::array x = nd::dtyped_rand(TestFixture::SrcShape[0], TestFixture::SrcShape[1],
         ndt::make_type<typename TestFixture::SrcType>());
 
     nd::array y = ifft2(fft2(x, TestFixture::Redundant), TestFixture::SrcShape[0], TestFixture::SrcShape[1],
@@ -286,6 +286,7 @@ TYPED_TEST_P(FFT2D, KroneckerDelta) {
 */
 }
 
+/*
 TEST(FFT2D, Shift)  {
     static int vals[3][3] = {{0, 1, 2}, {3, 4, -4}, {-3, -2, -1}};
 
@@ -294,6 +295,7 @@ TEST(FFT2D, Shift)  {
 
     nd::array y = fftshift(x);
 }
+*/
 
 
 
@@ -310,8 +312,8 @@ TEST(FFT2D, Shift)  {
     }
 */
 
-//REGISTER_TYPED_TEST_CASE_P(FFT2D, Inverse, Zeros, Ones, KroneckerDelta);
-//INSTANTIATE_TYPED_TEST_CASE_P(ComplexDouble, FFT2D, FixedDim2D<dynd_complex<double> >::Types);
+REGISTER_TYPED_TEST_CASE_P(FFT2D, Inverse, Zeros, Ones, KroneckerDelta);
+INSTANTIATE_TYPED_TEST_CASE_P(ComplexDouble, FFT2D, FixedDim2D<dynd_complex<double> >::Types);
 
 //INSTANTIATE_TYPED_TEST_CASE_P(ComplexFloat, FFT2D, FixedDim2D<dynd_complex<float> >::Types);
 //INSTANTIATE_TYPED_TEST_CASE_P(Double, FFT2D, FixedDim2D<double>::Types);

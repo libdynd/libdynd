@@ -1782,6 +1782,9 @@ nd::array nd::typed_ones(intptr_t ndim, const intptr_t *shape,
     nd::array res = nd::typed_empty(ndim, shape, tp);
     res.val_assign(1);
 
+    return res;
+}
+
 nd::array nd::zeros(intptr_t dim0, intptr_t dim1, const ndt::type& tp)
 {
     intptr_t dims[2] = {dim0, dim1};
