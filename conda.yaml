@@ -2,13 +2,16 @@ package:
   name: libdynd
   version: 0.0
 
-source:
-  git_url: https://github.com/ContinuumIO/libdynd.git
-  git_tag: master
+build:
+  number: {{environ.get('BINSTAR_BUILD', 1)}}
 
 requirements:
   build:
-    - cmake           [linux]
+    - cmake
+
+test:
+  commands:
+    - test_libdynd
 
 about:
   home: https://github.com/ContinuumIO/libdynd
