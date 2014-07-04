@@ -502,6 +502,16 @@ dynd_uint128 parse::unchecked_string_to_uint128(const char *begin,
   return unchecked_string_to_uint<dynd_uint128>(begin, end);
 }
 
+inline static double make_double_nan(bool negative)
+{
+  union {
+    uint64_t i;
+    double d;
+  } nan;
+  nan.i = negative ? 0xfff8000000000000ULL : 0x7ff8000000000000ULL;
+  return nan.d;
+}
+
 double parse::checked_string_to_float64(const char *begin, const char *end,
                                         assign_error_mode errmode)
 {
@@ -517,8 +527,7 @@ double parse::checked_string_to_float64(const char *begin, const char *end,
     if ((pos[0] == 'N' || pos[0] == 'n') &&
         (pos[1] == 'A' || pos[1] == 'a') &&
         (pos[2] == 'N' || pos[2] == 'n')) {
-      return negative ? -numeric_limits<double>::quiet_NaN()
-                      : numeric_limits<double>::quiet_NaN();
+      return make_double_nan(negative);
     } else if ((pos[0] == 'I' || pos[0] == 'i') &&
                 (pos[1] == 'N' || pos[1] == 'n') &&
                 (pos[2] == 'F' || pos[2] == 'f')) {
@@ -531,16 +540,14 @@ double parse::checked_string_to_float64(const char *begin, const char *end,
         (pos[4] == 'N' || pos[4] == 'n') &&
         (pos[5] == 'A' || pos[5] == 'a') &&
         (pos[6] == 'N' || pos[6] == 'n')) {
-      return negative ? -numeric_limits<double>::quiet_NaN()
-                      : numeric_limits<double>::quiet_NaN();
+      return make_double_nan(negative);
     }
 } else if (size == 6) {
     if ((pos[0] == '1') && (pos[1] == '.') && (pos[2] == '#')) {
       if ((pos[3] == 'I' || pos[3] == 'i') &&
           (pos[4] == 'N' || pos[4] == 'n') &&
           (pos[5] == 'D' || pos[5] == 'd')) {
-        return negative ? -numeric_limits<double>::quiet_NaN()
-                        : numeric_limits<double>::quiet_NaN();
+        return make_double_nan(negative);
       } else if ((pos[3] == 'I' || pos[3] == 'i') &&
                   (pos[4] == 'N' || pos[4] == 'n') &&
                   (pos[5] == 'F' || pos[5] == 'f')) {
