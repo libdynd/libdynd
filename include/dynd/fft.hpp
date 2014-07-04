@@ -11,6 +11,7 @@
 #endif // DYND_FFTW
 
 #include <dynd/array.hpp>
+#include <dynd/shape_tools.hpp>
 
 namespace dynd {
 
@@ -21,79 +22,152 @@ fftwf_plan fftplan(size_t ndim, std::vector<intptr_t> shape, fftwf_complex *src,
     fftwf_complex *dst, std::vector<intptr_t> dst_strides, int sign, unsigned int flags, bool cache = true);
 fftw_plan fftplan(size_t ndim, std::vector<intptr_t> shape, fftw_complex *src, std::vector<intptr_t> src_strides,
     fftw_complex *dst, std::vector<intptr_t> dst_strides, int sign, unsigned int flags, bool cache = true);
+
+fftwf_plan fftplan(size_t ndim, std::vector<intptr_t> shape, float *src, std::vector<intptr_t> src_strides,
+    fftwf_complex *dst, std::vector<intptr_t> dst_strides, unsigned int flags, bool cache = true);
 fftw_plan fftplan(size_t ndim, std::vector<intptr_t> shape, double *src, std::vector<intptr_t> src_strides,
     fftw_complex *dst, std::vector<intptr_t> dst_strides, unsigned int flags, bool cache = true);
+
+fftwf_plan fftplan(size_t ndim, std::vector<intptr_t> shape, fftwf_complex *src, std::vector<intptr_t> src_strides,
+    float *dst, std::vector<intptr_t> dst_strides, unsigned int flags, bool cache = true);
 fftw_plan fftplan(size_t ndim, std::vector<intptr_t> shape, fftw_complex *src, std::vector<intptr_t> src_strides,
     double *dst, std::vector<intptr_t> dst_strides, unsigned int flags, bool cache = true);
 
 void fftcleanup();
 
-nd::array fft1(const nd::array &x, unsigned int flags = FFTW_ESTIMATE, bool cache = true);
-nd::array ifft1(const nd::array &x, unsigned int flags = FFTW_ESTIMATE, bool cache = true);
+nd::array fft(const nd::array &x, const std::vector<intptr_t> &shape, unsigned int flags = FFTW_ESTIMATE);
+nd::array ifft(const nd::array &x, const std::vector<intptr_t> &shape, unsigned int flags = FFTW_ESTIMATE);
 
-nd::array fft2(const nd::array &x, unsigned int flags = FFTW_ESTIMATE, bool cache = true);
-nd::array ifft2(const nd::array &x, unsigned int flags = FFTW_ESTIMATE, bool cache = true);
-
-nd::array fft(const nd::array &x, const std::vector<intptr_t> &shape, bool redundant = true, unsigned int flags = FFTW_ESTIMATE, bool cache = true);
-nd::array ifft(const nd::array &x, const std::vector<intptr_t> &shape, bool redundant = true, unsigned int flags = FFTW_ESTIMATE, bool cache = true);
+nd::array rfft(const nd::array &x, const std::vector<intptr_t> &shape, unsigned int flags = FFTW_ESTIMATE);
+nd::array irfft(const nd::array &x, const std::vector<intptr_t> &shape, unsigned int flags = FFTW_ESTIMATE);
 
 } // namespace fftw
 #endif // DYND_FFTW
 
-inline nd::array fft(const nd::array &x, const std::vector<intptr_t> &shape, bool redundant = true) {
+#define INLINE_DECLARATIONS(FUNC) \
+    inline nd::array FUNC(const nd::array &x) { \
+        return FUNC(x, x.get_shape()); \
+    } \
+\
+    inline nd::array FUNC(const nd::array &x, intptr_t ndim, const intptr_t *shape) { \
+        return FUNC(x, std::vector<intptr_t>(shape, shape + ndim)); \
+    } \
+\
+    inline nd::array FUNC(const nd::array &x, intptr_t n0) { \
+        intptr_t shape[1] = {n0}; \
+\
+        return FUNC(x, 1, shape); \
+    } \
+\
+    inline nd::array FUNC(const nd::array &x, intptr_t n0, intptr_t n1) { \
+        intptr_t shape[2] = {n0, n1}; \
+\
+        return FUNC(x, 2, shape); \
+    } \
+\
+    inline nd::array FUNC(const nd::array &x, intptr_t n0, intptr_t n1, intptr_t n2) { \
+        intptr_t shape[3] = {n0, n1, n2}; \
+\
+        return FUNC(x, 3, shape); \
+    }
+
+/**
+ *
+ */
+inline nd::array fft(const nd::array &x, const std::vector<intptr_t> &shape) {
+    if (x.get_ndim() != (intptr_t) shape.size()) {
+        std::stringstream ss;
+        ss << "too many dimensions provided for fft, got " << x.get_ndim()
+           << " for type " << x.get_type();
+        throw std::invalid_argument(ss.str());
+    }
+
     const ndt::type &tp = x.get_type();
     if (tp.get_flags() | type_flag_not_host_readable) {
     }
 
 #ifdef DYND_FFTW
-    return fftw::fft(x, shape, redundant);
+    return fftw::fft(x, shape);
 #else
     throw std::runtime_error("no fft available");
 #endif
 }
 
-inline nd::array fft(const nd::array &x, bool redundant = true) {
-    return fft(x, x.get_shape(), redundant);
-}
+INLINE_DECLARATIONS(fft)
 
-inline nd::array ifft(const nd::array &x, const std::vector<intptr_t> &shape, bool redundant = true) {
+/**
+ *
+ */
+inline nd::array ifft(const nd::array &x, const std::vector<intptr_t> &shape) {
+    if (x.get_ndim() != (intptr_t) shape.size()) {
+        std::stringstream ss;
+        ss << "too many dimensions provided for ifft, got " << x.get_ndim()
+           << " for type " << x.get_type();
+        throw std::invalid_argument(ss.str());
+    }
+
     const ndt::type &tp = x.get_type();
     if (tp.get_flags() | type_flag_not_host_readable) {
-        // dispatch to cufft or whatever
     }
 
 #ifdef DYND_FFTW
-    return fftw::ifft(x, shape, redundant);
+    return fftw::ifft(x, shape);
 #else
     throw std::runtime_error("no fft available");
 #endif
 }
 
-inline nd::array ifft(const nd::array &x, bool redundant = true) {
-    return ifft(x, x.get_shape(), redundant);
+INLINE_DECLARATIONS(ifft)
+
+/**
+ *
+ */
+inline nd::array rfft(const nd::array &x, const std::vector<intptr_t> &shape) {
+    if (x.get_ndim() != (intptr_t) shape.size()) {
+        std::stringstream ss;
+        ss << "too many dimensions provided for rfft, got " << x.get_ndim()
+           << " for type " << x.get_type();
+        throw std::invalid_argument(ss.str());
+    }
+
+    const ndt::type &tp = x.get_type();
+    if (tp.get_flags() | type_flag_not_host_readable) {
+    }
+
+#ifdef DYND_FFTW
+    return fftw::rfft(x, shape);
+#else
+    throw std::runtime_error("no fft available");
+#endif
 }
 
-inline nd::array fft1(const nd::array &x) {
-    return fft(x);
+INLINE_DECLARATIONS(rfft)
+
+/**
+ *
+ */
+inline nd::array irfft(const nd::array &x, const std::vector<intptr_t> &shape) {
+    if (x.get_ndim() != (intptr_t) shape.size()) {
+        std::stringstream ss;
+        ss << "too many dimensions provided for irfft, got " << x.get_ndim()
+           << " for type " << x.get_type();
+        throw std::invalid_argument(ss.str());
+    }
+
+    const ndt::type &tp = x.get_type();
+    if (tp.get_flags() | type_flag_not_host_readable) {
+    }
+
+#ifdef DYND_FFTW
+    return fftw::irfft(x, shape);
+#else
+    throw std::runtime_error("no fft available");
+#endif
 }
 
-inline nd::array ifft1(const nd::array &x) {
-    return ifft(x);
-}
+INLINE_DECLARATIONS(irfft)
 
-inline nd::array fft2(const nd::array &x, bool redundant = true) {
-    return fft(x, redundant);
-}
-
-inline nd::array ifft2(const nd::array &x, bool redundant = true) {
-    return ifft(x, redundant);
-}
-
-inline nd::array ifft2(const nd::array &x, intptr_t n0, intptr_t n1, bool redundant = true) {
-    const intptr_t shape[2] = {n0, n1};
-
-    return ifft(x, std::vector<intptr_t>(shape, shape + 2), redundant);
-}
+#undef INLINE_DECLARATIONS
 
 nd::array fftshift(const nd::array &x);
 

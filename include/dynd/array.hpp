@@ -1052,6 +1052,24 @@ inline array dtyped_empty(intptr_t ndim, const intptr_t *shape,
   }
 }
 
+inline array dtyped_empty(intptr_t dim0, const ndt::type &tp) {
+    return dtyped_empty(1, &dim0, tp);
+}
+inline array dtyped_empty(intptr_t dim0, intptr_t dim1, const ndt::type &tp) {
+    intptr_t dims[2] = {dim0, dim1};
+
+    return dtyped_empty(2, dims, tp);
+}
+
+/**
+ * A version of dtyped_empty that accepts a std::vector as the shape.
+ */
+inline array dtyped_empty(const std::vector<intptr_t> &shape,
+                         const ndt::type &tp)
+{
+  return dtyped_empty(shape.size(), shape.empty() ? NULL : &shape[0], tp);
+}
+
 /**
  * Constructs an uninitialized array of the given dtype.
  */
@@ -1211,6 +1229,21 @@ inline array dtyped_zeros(intptr_t ndim, const intptr_t *shape,
   return res;
 }
 
+inline array dtyped_zeros(intptr_t dim0,
+                          const ndt::type &tp)
+{
+    intptr_t shape[1] = {dim0};
+
+    return dtyped_zeros(1, shape, tp);
+}
+inline array dtyped_zeros(intptr_t dim0, intptr_t dim1,
+                          const ndt::type &tp)
+{
+    intptr_t shape[2] = {dim0, dim1};
+
+    return dtyped_zeros(2, shape, tp);
+}
+
 /**
  * Primitive function to construct an nd::array with each element initialized to 1.
  * In this function, the type provided is the complete type of the array
@@ -1240,19 +1273,20 @@ inline array dtyped_ones(intptr_t ndim, const intptr_t *shape,
   return res;
 }
 
-/**
- * Constructs a writable zero-initialized array of the specified type.
- * This type should be at least two dimensional, and is initialized
- * using the specified dimension sizes.
- */
-array zeros(intptr_t dim0, intptr_t dim1, const ndt::type& tp);
+inline array dtyped_ones(intptr_t dim0,
+                          const ndt::type &tp)
+{
+    intptr_t shape[1] = {dim0};
 
-/**
- * Constructs a writable one-initialized array of the specified type.
- * This type should be at least two dimensional, and is initialized
- * using the specified dimension sizes.
- */
-array ones(intptr_t dim0, intptr_t dim1, const ndt::type& tp);
+    return dtyped_ones(1, shape, tp);
+}
+inline array dtyped_ones(intptr_t dim0, intptr_t dim1,
+                          const ndt::type &tp)
+{
+    intptr_t shape[2] = {dim0, dim1};
+
+    return dtyped_ones(2, shape, tp);
+}
 
 ///////////// Initializer list constructor implementation /////////////////////////
 #ifdef DYND_INIT_LIST

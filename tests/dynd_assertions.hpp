@@ -140,6 +140,29 @@ CompareDyNDArrayToJSON(const char *expr1, const char *expr2,
   ASSERT_PRED_FORMAT2(CompareDyNDArrayToJSON, \
                       expected, actual)
 
+inline float rel_error(float expected, float actual)
+{
+    if ((expected == 0.0f) && (actual == 0.0f)) {
+        return 0.0f;
+    }
+
+    return fabs(1.0f - actual / expected);
+}
+
+inline float rel_error(dynd::dynd_complex<float> expected,
+                        dynd::dynd_complex<float> actual)
+{
+    if (expected == 0.0f) {
+        if (actual == 0.0f) {
+            return 0.0f;
+        } else {
+            return fabs(abs(expected - actual));
+        }
+    }
+
+    return fabs(abs(expected - actual) / abs(expected));
+}
+
 inline double rel_error(double expected, double actual)
 {
     if ((expected == 0.0) && (actual == 0.0)) {
@@ -161,6 +184,20 @@ inline double rel_error(dynd::dynd_complex<double> expected,
     }
 
     return fabs(abs(expected - actual) / abs(expected));
+}
+
+template <typename T>
+::testing::AssertionResult AssertRelErrorLE(const char *DYND_UNUSED(expected_expr), const char *DYND_UNUSED(actual_expr),
+    const char *DYND_UNUSED(rel_error_max_expr), T expected, T actual, float rel_error_max) {
+    float rel_error_val = rel_error(expected, actual);
+
+    if (rel_error_val <= rel_error_max) {
+        return ::testing::AssertionSuccess();
+    }
+
+    return ::testing::AssertionFailure()
+        << "Expected: rel_error(" << expected << ", " << actual << ") <= " << rel_error_max << "\n"
+        << "  Actual: " << rel_error_val << " vs " << rel_error_max;
 }
 
 template <typename T>

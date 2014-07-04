@@ -1785,24 +1785,6 @@ nd::array nd::typed_ones(intptr_t ndim, const intptr_t *shape,
     return res;
 }
 
-nd::array nd::zeros(intptr_t dim0, intptr_t dim1, const ndt::type& tp)
-{
-    intptr_t dims[2] = {dim0, dim1};
-    nd::array res = nd::typed_empty(2, dims, tp);
-    res.vals() = 0;
-
-    return res;
-}
-
-nd::array nd::ones(intptr_t dim0, intptr_t dim1, const ndt::type& tp)
-{
-    intptr_t dims[2] = {dim0, dim1};
-    nd::array res = nd::typed_empty(2, dims, tp);
-    res.vals() = 1;
-
-    return res;
-}
-
 nd::array nd::memmap(const std::string& filename,
     intptr_t begin,
     intptr_t end,
