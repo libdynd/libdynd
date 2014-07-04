@@ -5,10 +5,13 @@ package:
 build:
   number: {{environ.get('BINSTAR_BUILD', 1)}}
 
-
 requirements:
   build:
     - cmake
+
+test:
+  commands:
+    - test_libdynd
 
 about:
   home: https://github.com/ContinuumIO/libdynd
