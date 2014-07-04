@@ -1,5 +1,7 @@
 #!/bin/bash
 
+cd $RECIPE_DIR
+
 echo Setting the compiler...
 CC=cc
 CXX=c++
