@@ -16,6 +16,11 @@
 using namespace std;
 using namespace dynd;
 
+namespace {
+class neighborhood2d_ck : public kernels::general_ck<neighborhood2d_ck> {
+};
+} // anonymous namespace
+
 void dynd::make_neighborhood2d_arrfunc(arrfunc_type_data *out_af,
                                        const nd::arrfunc &neighborhood_op,
                                        const intptr_t *nh_shape,
@@ -38,4 +43,6 @@ void dynd::make_neighborhood2d_arrfunc(arrfunc_type_data *out_af,
     throw invalid_argument(ss.str());
   }
   out_af->func_proto = ndt::substitute(result_pattern, typevars, true);
+
+
 }
