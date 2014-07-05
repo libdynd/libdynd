@@ -282,14 +282,29 @@ nd::array dynd::fftw::irfft(const nd::array &x, const std::vector<intptr_t> &sha
 nd::array dynd::fftshift(const nd::array &x) {
     nd::arrfunc take = kernels::make_take_arrfunc();
 
-    nd::array b;
-    intptr_t bvals[3] = {1, 0, 2};
-    b = bvals;
+    nd::array y = x;
+    for (intptr_t i = 0; i < x.get_ndim(); ++i) {
+        intptr_t p = y.get_dim_size();
+        intptr_t q = (p + 1) / 2;
 
-    nd::array y = take(x, b);
+        y = take(y, nd::concatenate(nd::range(q, p), nd::range(q)));
+        y = y.rotate();
+    }
 
-    std::cout << "(DEBUG) x: " << x << std::endl;
-    std::cout << "(DEBUG) y: " << y << std::endl;
+    return y;
+}
 
-    return x;
+nd::array dynd::ifftshift(const nd::array &x) {
+    nd::arrfunc take = kernels::make_take_arrfunc();
+
+    nd::array y = x;
+    for (intptr_t i = 0; i < x.get_ndim(); ++i) {
+        intptr_t p = y.get_dim_size();
+        intptr_t q = (p - 1) / 2;
+
+        y = take(y, nd::concatenate(nd::range(q, p), nd::range(q)));
+        y = y.rotate();
+    }
+
+    return y;
 }

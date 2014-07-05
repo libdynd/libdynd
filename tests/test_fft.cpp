@@ -11,6 +11,7 @@
 #include "inc_gtest.hpp"
 #include "dynd_assertions.hpp"
 
+#include <dynd/array_range.hpp>
 #include <dynd/fft.hpp>
 #include <dynd/random.hpp>
 
@@ -296,6 +297,18 @@ TYPED_TEST_P(RFFT2D, KroneckerDelta) {
                 y(i, j).as<typename TestFixture::DstType>());
         }
     }
+}
+
+TEST(FFT2D, Shift)  {
+    static int vals[3][3] = {{0, 1, 2}, {3, 4, -4}, {-3, -2, -1}};
+    nd::array x = nd::empty<int[3][3]>();
+    x.vals() = vals;
+
+    nd::array y = fftshift(x);
+    std::cout << "(DEBUG) " << y << std::endl;
+
+    nd::array z = ifftshift(y);
+    std::cout << "(DEBUG) " << z << std::endl;
 }
 
 REGISTER_TYPED_TEST_CASE_P(FFT2D, Linear, Inverse, Zeros, Ones, KroneckerDelta);

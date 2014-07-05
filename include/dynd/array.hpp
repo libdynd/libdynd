@@ -1288,6 +1288,8 @@ inline array dtyped_ones(intptr_t dim0, intptr_t dim1,
     return dtyped_ones(2, shape, tp);
 }
 
+array concatenate(const nd::array &x, const nd::array &y);
+
 ///////////// Initializer list constructor implementation /////////////////////////
 #ifdef DYND_INIT_LIST
 namespace detail {

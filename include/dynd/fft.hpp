@@ -11,6 +11,7 @@
 #endif // DYND_FFTW
 
 #include <dynd/array.hpp>
+#include <dynd/array_range.hpp>
 #include <dynd/shape_tools.hpp>
 
 namespace dynd {
@@ -170,6 +171,7 @@ INLINE_DECLARATIONS(irfft)
 #undef INLINE_DECLARATIONS
 
 nd::array fftshift(const nd::array &x);
+nd::array ifftshift(const nd::array &x);
 
 } // namespace dynd
 
