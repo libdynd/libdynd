@@ -22,10 +22,13 @@ fixed_dim_type::fixed_dim_type(intptr_t dim_size, const ndt::type &element_tp)
                             sizeof(fixed_dim_type_arrmeta), type_flag_none),
       m_dim_size(dim_size)
 {
-    // Propagate the operand flags from the element
-    m_members.flags |= (element_tp.get_flags()&type_flags_operand_inherited);
-    // Copy nd::array properties and functions from the first non-array dimension
-    get_scalar_properties_and_functions(m_array_properties, m_array_functions);
+  // Propagate the inherited flags from the element
+  m_members.flags |=
+      (element_tp.get_flags() &
+       ((type_flags_operand_inherited | type_flags_value_inherited) &
+        ~type_flag_scalar));
+  // Copy nd::array properties and functions from the first non-array dimension
+  get_scalar_properties_and_functions(m_array_properties, m_array_functions);
 }
 
 fixed_dim_type::~fixed_dim_type()

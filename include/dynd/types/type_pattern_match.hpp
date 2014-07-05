@@ -29,25 +29,22 @@ namespace dynd { namespace ndt {
  *                  otherwise it is a dim type var match, and the first
  *                  dimension of the type only is what is relevant.
  */
-bool
-type_pattern_match(const ndt::type &concrete, const ndt::type &pattern,
-                   std::map<nd::string, ndt::type> &typevars);
+bool pattern_match(const ndt::type &concrete, const ndt::type &pattern,
+                    std::map<nd::string, ndt::type> &typevars);
 
 /**
  * Matches the provided concrete type against the pattern type, which may
  * include type vars. Returns true if it matches, false otherwise.
  */
-inline bool type_pattern_match(const ndt::type &concrete,
-                               const ndt::type &pattern)
+inline bool pattern_match(const ndt::type &concrete, const ndt::type &pattern)
 {
-    if (!pattern.is_symbolic()) {
-        return concrete == pattern;
-    } else {
-        std::map<nd::string, ndt::type> typevars;
-        return type_pattern_match(concrete, pattern, typevars);
-    }
+  if (!pattern.is_symbolic()) {
+    return concrete == pattern;
+  } else {
+    std::map<nd::string, ndt::type> typevars;
+    return pattern_match(concrete, pattern, typevars);
+  }
 }
-
 }} // namespace dynd::ndt
 
 #endif // _DYND__TYPE_PATTERN_MATCH_HPP_

@@ -26,13 +26,17 @@ var_dim_type::var_dim_type(const ndt::type& element_tp)
                     sizeof(const char *), sizeof(var_dim_type_arrmeta),
                     type_flag_zeroinit|type_flag_blockref)
 {
-    // NOTE: The element type may have type_flag_destructor set. In this case,
-    //       the var_dim type does NOT need to also set it, because the lifetime
-    //       of the elements it allocates is owned by the objectarray_memory_block,
-    //       not by the var_dim elements.
+  // NOTE: The element type may have type_flag_destructor set. In this case,
+  //       the var_dim type does NOT need to also set it, because the lifetime
+  //       of the elements it allocates is owned by the
+  //       objectarray_memory_block,
+  //       not by the var_dim elements.
+  // Propagate just the value-inherited flags from the element
+  m_members.flags |= (element_tp.get_flags() &
+                      (type_flags_value_inherited & ~type_flag_scalar));
 
-    // Copy nd::array properties and functions from the first non-array dimension
-    get_scalar_properties_and_functions(m_array_properties, m_array_functions);
+  // Copy nd::array properties and functions from the first non-array dimension
+  get_scalar_properties_and_functions(m_array_properties, m_array_functions);
 }
 
 var_dim_type::~var_dim_type()

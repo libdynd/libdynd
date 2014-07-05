@@ -138,6 +138,7 @@ TEST(SymbolicTypes, CreateEllipsisDim) {
     EXPECT_EQ(0u, tp.get_data_size());
     EXPECT_EQ(1u, tp.get_data_alignment());
     EXPECT_FALSE(tp.is_pod());
+    EXPECT_TRUE(tp.is_symbolic());
     et = tp.tcast<ellipsis_dim_type>();
     EXPECT_EQ("Blah", et->get_name_str());
     EXPECT_EQ(ndt::make_type<int>(), et->get_element_type());
@@ -154,6 +155,7 @@ TEST(SymbolicTypes, CreateEllipsisDim) {
     EXPECT_EQ(0u, tp.get_data_size());
     EXPECT_EQ(1u, tp.get_data_alignment());
     EXPECT_FALSE(tp.is_pod());
+    EXPECT_TRUE(tp.is_symbolic());
     et = tp.tcast<ellipsis_dim_type>();
     EXPECT_TRUE(et->get_name().is_null());
     EXPECT_EQ(ndt::make_type<int>(), et->get_element_type());

@@ -195,7 +195,7 @@ struct arrfunc_type_data {
       const ndt::type *param_types = get_param_types();
       std::map<nd::string, ndt::type> typevars;
       for (intptr_t i = 0; i != param_count; ++i) {
-        if (!ndt::type_pattern_match(src_tp[i].value_type(), param_types[i],
+        if (!ndt::pattern_match(src_tp[i].value_type(), param_types[i],
                                      typevars)) {
           std::stringstream ss;
           ss << "parameter " << (i + 1) << " to arrfunc does not match, ";

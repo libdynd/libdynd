@@ -20,8 +20,11 @@ strided_dim_type::strided_dim_type(const ndt::type& element_tp)
     : base_uniform_dim_type(strided_dim_type_id, element_tp, 0, element_tp.get_data_alignment(),
                     sizeof(strided_dim_type_arrmeta), type_flag_none)
 {
-    // Propagate the operand flags from the element
-    m_members.flags |= (element_tp.get_flags()&type_flags_operand_inherited);
+  // Propagate the inherited flags from the element
+  m_members.flags |=
+      (element_tp.get_flags() &
+       ((type_flags_operand_inherited | type_flags_value_inherited) &
+        ~type_flag_scalar));
 }
 
 strided_dim_type::~strided_dim_type()

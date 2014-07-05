@@ -21,20 +21,23 @@ cfixed_dim_type::cfixed_dim_type(size_t dimension_size, const ndt::type& element
                     0, type_flag_none),
             m_dim_size(dimension_size)
 {
-    size_t child_element_size = element_tp.get_data_size();
-    if (child_element_size == 0) {
-        stringstream ss;
-        ss << "Cannot create dynd cfixed_dim type with element type " << element_tp;
-        ss << ", as it does not have a fixed size";
-        throw dynd::type_error(ss.str());
-    }
-    m_stride = m_dim_size > 1 ? element_tp.get_data_size() : 0;
-    m_members.data_size = m_stride * (m_dim_size-1) + child_element_size;
-    // Propagate the operand flags from the element
-    m_members.flags |= (element_tp.get_flags()&type_flags_operand_inherited);
+  size_t child_element_size = element_tp.get_data_size();
+  if (child_element_size == 0) {
+    stringstream ss;
+    ss << "Cannot create dynd cfixed_dim type with element type " << element_tp;
+    ss << ", as it does not have a fixed size";
+    throw dynd::type_error(ss.str());
+  }
+  m_stride = m_dim_size > 1 ? element_tp.get_data_size() : 0;
+  m_members.data_size = m_stride * (m_dim_size - 1) + child_element_size;
+  // Propagate the inherited flags from the element
+  m_members.flags |=
+      (element_tp.get_flags() &
+       ((type_flags_operand_inherited | type_flags_value_inherited) &
+        ~type_flag_scalar));
 
-    // Copy nd::array properties and functions from the first non-array dimension
-    get_scalar_properties_and_functions(m_array_properties, m_array_functions);
+  // Copy nd::array properties and functions from the first non-array dimension
+  get_scalar_properties_and_functions(m_array_properties, m_array_functions);
 }
 
 cfixed_dim_type::cfixed_dim_type(size_t dimension_size, const ndt::type& element_tp, intptr_t stride)

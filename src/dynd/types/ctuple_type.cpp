@@ -30,7 +30,7 @@ ctuple_type::ctuple_type(const nd::array &field_types)
         offs = inc_to_alignment(offs, field_tp.get_data_alignment());
         data_offsets[i] = offs;
         size_t field_element_size = field_tp.get_data_size();
-        if (field_element_size == 0) {
+        if (field_element_size == 0 && !field_tp.is_symbolic()) {
             stringstream ss;
             ss << "Cannot create dynd ctuple type with type " << field_tp;
             ss << " for field at index " << i << ", as it does not have a fixed size";
