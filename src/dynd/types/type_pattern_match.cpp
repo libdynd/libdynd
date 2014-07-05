@@ -326,7 +326,7 @@ static bool recursive_match(const ndt::type& concrete, const ndt::type &pattern,
     }
 }
 
-bool ndt::type_pattern_match(const ndt::type &concrete,
+bool ndt::pattern_match(const ndt::type &concrete,
                              const ndt::type &pattern,
                              std::map<nd::string, ndt::type> &typevars)
 {

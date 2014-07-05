@@ -59,6 +59,7 @@ set(tests_SRC
     types/test_type_type.cpp
     types/test_type_assign.cpp
     types/test_type_casting.cpp
+    types/test_type_substitute.cpp
     types/test_type_pattern_match.cpp
     types/test_type_promotion.cpp
     types/test_var_dim_type.cpp
