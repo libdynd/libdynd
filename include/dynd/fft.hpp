@@ -28,19 +28,19 @@ namespace dynd {
 namespace fftw {
 
 fftwf_plan fftplan(size_t ndim, std::vector<intptr_t> shape, fftwf_complex *src, std::vector<intptr_t> src_strides,
-    fftwf_complex *dst, std::vector<intptr_t> dst_strides, int sign, unsigned int flags, bool cache = true);
+    fftwf_complex *dst, std::vector<intptr_t> dst_strides, int sign, unsigned int flags);
 fftw_plan fftplan(size_t ndim, std::vector<intptr_t> shape, fftw_complex *src, std::vector<intptr_t> src_strides,
-    fftw_complex *dst, std::vector<intptr_t> dst_strides, int sign, unsigned int flags, bool cache = true);
+    fftw_complex *dst, std::vector<intptr_t> dst_strides, int sign, unsigned int flags);
 
 fftwf_plan fftplan(size_t ndim, std::vector<intptr_t> shape, float *src, std::vector<intptr_t> src_strides,
-    fftwf_complex *dst, std::vector<intptr_t> dst_strides, unsigned int flags, bool cache = true);
+    fftwf_complex *dst, std::vector<intptr_t> dst_strides, unsigned int flags);
 fftw_plan fftplan(size_t ndim, std::vector<intptr_t> shape, double *src, std::vector<intptr_t> src_strides,
-    fftw_complex *dst, std::vector<intptr_t> dst_strides, unsigned int flags, bool cache = true);
+    fftw_complex *dst, std::vector<intptr_t> dst_strides, unsigned int flags);
 
 fftwf_plan fftplan(size_t ndim, std::vector<intptr_t> shape, fftwf_complex *src, std::vector<intptr_t> src_strides,
-    float *dst, std::vector<intptr_t> dst_strides, unsigned int flags, bool cache = true);
+    float *dst, std::vector<intptr_t> dst_strides, unsigned int flags);
 fftw_plan fftplan(size_t ndim, std::vector<intptr_t> shape, fftw_complex *src, std::vector<intptr_t> src_strides,
-    double *dst, std::vector<intptr_t> dst_strides, unsigned int flags, bool cache = true);
+    double *dst, std::vector<intptr_t> dst_strides, unsigned int flags);
 
 void fftcleanup();
 
@@ -179,6 +179,7 @@ INLINE_DECLARATIONS(irfft)
 #undef INLINE_DECLARATIONS
 
 nd::array fftshift(const nd::array &x);
+
 nd::array ifftshift(const nd::array &x);
 
 } // namespace dynd
