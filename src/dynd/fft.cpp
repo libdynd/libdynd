@@ -23,7 +23,6 @@ static map<key_type, void *> plans;
 static int cleanup_atexit = atexit(dynd::fftw::fftcleanup);
 }} // namespace dynd::fftw
 
-
 #define FFTW_FFTPLAN_C2C(LIB, REAL_TYPE, SRC_ID, DST_ID) \
     LIB##_plan dynd::fftw::fftplan(size_t ndim, vector<intptr_t> shape, LIB##_complex *src, vector<intptr_t> src_strides, \
                                    LIB##_complex *dst, vector<intptr_t> dst_strides, int sign, unsigned int flags, bool cache) { \
