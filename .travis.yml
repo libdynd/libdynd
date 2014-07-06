@@ -10,7 +10,7 @@ env:
 
 before_script:
   - sudo apt-get -qq install valgrind
-  - if [ "$DYND_FFTW" == "ON" ]; then sudo apt-get -qq install libfftw3-dev; fi
+  - if [ "$DYND_FFTW" == "ON" ]; then sudo apt-get -qq install libfftw3-dev libfftw3-single3; fi #fftw-dev
   - mkdir build
   - cd build
   - cmake -DDYND_FFTW=${DYND_FFTW} ..
