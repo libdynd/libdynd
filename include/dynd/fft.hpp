@@ -9,8 +9,10 @@
 #ifdef DYND_FFTW
 #include <fftw3.h>
 
+extern "C" {
 FFTW_EXTERN int fftwf_alignment_of(float *p);
 FFTW_EXTERN int fftw_alignment_of(double *p);
+}
 
 #endif // DYND_FFTW
 
