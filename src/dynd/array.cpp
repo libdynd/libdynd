@@ -1787,7 +1787,7 @@ nd::array nd::typed_ones(intptr_t ndim, const intptr_t *shape,
 
 nd::array nd::concatenate(const nd::array &x, const nd::array &y) {
     if (x.get_ndim() != 1 || y.get_ndim() != 1) {
-
+        throw runtime_error("TODO: nd::concatenate is WIP");
     }
 
     if (x.get_dtype() != y.get_dtype()) {
