@@ -11,8 +11,10 @@
 #include <fftw3.h>
 
 // These are only available publicly as of FFTW 3.3.4, so we declare them here too
-extern "C" FFTW_EXTERN int fftwf_alignment_of(float *p);
-extern "C" FFTW_EXTERN int fftw_alignment_of(double *p);
+extern "C" {
+FFTW_EXTERN int fftwf_alignment_of(float *p);
+FFTW_EXTERN int fftw_alignment_of(double *p);
+}
 
 #endif // DYND_FFTW
 
