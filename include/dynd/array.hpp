@@ -1288,6 +1288,11 @@ inline array dtyped_ones(intptr_t dim0, intptr_t dim1,
     return dtyped_ones(2, shape, tp);
 }
 
+/**
+ * This concatenates two 1D arrays. It is really just a placeholder until a proper
+ * concatenate is written. It shouldn't be used unless you absolutely know what you
+ * are doing. It needs to be implemented properly.
+ */
 array concatenate(const nd::array &x, const nd::array &y);
 
 ///////////// Initializer list constructor implementation /////////////////////////

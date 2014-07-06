@@ -660,9 +660,9 @@ TYPED_TEST_P(RFFT2D, KroneckerDelta) {
 
 #ifdef DYND_FFTW // For now, only test FFTs if we built DYND with FFTW
 
-/* TODO: A few of the single-precision tests fail, even at what should be reasonable relative error.
- *       As all of the double-precision tests are fine, I think this is inherent to FFTW. For now,
- *       I'm commenting out the single-precision tests.
+/** TODO: A few of the single-precision tests fail, even at what should be reasonable relative error.
+ *        As all of the double-precision tests are fine, I think this is inherent to FFTW. For now,
+ *        I'm commenting out the single-precision tests.
  */
 
 REGISTER_TYPED_TEST_CASE_P(FFT1D, Linear, Inverse, Zeros, Ones, KroneckerDelta);
