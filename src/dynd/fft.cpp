@@ -299,7 +299,7 @@ nd::array dynd::ifftshift(const nd::array &x) {
     nd::array y = x;
     for (intptr_t i = 0; i < x.get_ndim(); ++i) {
         intptr_t p = y.get_dim_size();
-        intptr_t q = (p - 1) / 2;
+        intptr_t q = p - (p + 1) / 2;
 
         y = take(y, nd::concatenate(nd::range(q, p), nd::range(q)));
         y = y.rotate();

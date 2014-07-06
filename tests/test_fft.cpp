@@ -18,8 +18,6 @@
 using namespace std;
 using namespace dynd;
 
-#ifdef DYND_FFTW // For now, only test FFTs if we built DYND with FFTW
-
 template <typename T>
 class FFT2D;
 
@@ -101,6 +99,51 @@ inline float rel_err_max<float>() {
 template <>
 inline double rel_err_max<double>() {
     return 1E-8;
+}
+
+TEST(FFT1D, Shift) {
+    double vals0[9] = {0.0, 1.0, 2.0, 3.0, 4.0, -4.0, -3.0, -2.0, -1.0};
+
+    nd::array x0 = nd::empty<double[9]>();
+    x0.vals() = vals0;
+
+    nd::array y0 = fftshift(x0);
+    EXPECT_EQ(y0(0).as<double>(), -4.0);
+    EXPECT_EQ(y0(1).as<double>(), -3.0);
+    EXPECT_EQ(y0(2).as<double>(), -2.0);
+    EXPECT_EQ(y0(3).as<double>(), -1.0);
+    EXPECT_EQ(y0(4).as<double>(), 0.0);
+    EXPECT_EQ(y0(5).as<double>(), 1.0);
+    EXPECT_EQ(y0(6).as<double>(), 2.0);
+    EXPECT_EQ(y0(7).as<double>(), 3.0);
+    EXPECT_EQ(y0(8).as<double>(), 4.0);
+
+    y0 = ifftshift(y0);
+    for (int i = 0; i < 9; ++i) {
+        EXPECT_EQ(y0(i).as<double>(), x0(i).as<double>());
+    }
+
+    double vals1[10] = {0.0, 1.0, 2.0, 3.0, 4.0, -5.0, -4.0, -3.0, -2.0, -1.0};
+
+    nd::array x1 = nd::empty<double[10]>();
+    x1.vals() = vals1;
+
+    nd::array y1 = fftshift(x1);
+    EXPECT_EQ(y1(0).as<double>(), -5.0);
+    EXPECT_EQ(y1(1).as<double>(), -4.0);
+    EXPECT_EQ(y1(2).as<double>(), -3.0);
+    EXPECT_EQ(y1(3).as<double>(), -2.0);
+    EXPECT_EQ(y1(4).as<double>(), -1.0);
+    EXPECT_EQ(y1(5).as<double>(), 0.0);
+    EXPECT_EQ(y1(6).as<double>(), 1.0);
+    EXPECT_EQ(y1(7).as<double>(), 2.0);
+    EXPECT_EQ(y1(8).as<double>(), 3.0);
+    EXPECT_EQ(y1(9).as<double>(), 4.0);
+
+    y1 = ifftshift(y1);
+    for (int i = 0; i < 10; ++i) {
+        EXPECT_EQ(y1(i).as<double>(), x1(i).as<double>());
+    }
 }
 
 TYPED_TEST_P(FFT2D, Linear) {
@@ -299,17 +342,74 @@ TYPED_TEST_P(RFFT2D, KroneckerDelta) {
     }
 }
 
-TEST(FFT2D, Shift)  {
-    static int vals[3][3] = {{0, 1, 2}, {3, 4, -4}, {-3, -2, -1}};
-    nd::array x = nd::empty<int[3][3]>();
-    x.vals() = vals;
+TEST(FFT2D, Shift) {
+    double vals0[3][3] = {{0.0, 1.0, 2.0}, {3.0, 4.0, -4.0}, {-3.0, -2.0, -1.0}};
 
-    nd::array y = fftshift(x);
-    std::cout << "(DEBUG) " << y << std::endl;
+    nd::array x0 = nd::empty<double[3][3]>();
+    x0.vals() = vals0;
 
-    nd::array z = ifftshift(y);
-    std::cout << "(DEBUG) " << z << std::endl;
+    nd::array y0 = fftshift(x0);
+    EXPECT_EQ(y0(0, 0).as<double>(), -1.0);
+    EXPECT_EQ(y0(0, 1).as<double>(), -3.0);
+    EXPECT_EQ(y0(0, 2).as<double>(), -2.0);
+    EXPECT_EQ(y0(1, 0).as<double>(), 2.0);
+    EXPECT_EQ(y0(1, 1).as<double>(), 0.0);
+    EXPECT_EQ(y0(1, 2).as<double>(), 1.0);
+    EXPECT_EQ(y0(2, 0).as<double>(), -4.0);
+    EXPECT_EQ(y0(2, 1).as<double>(), 3.0);
+    EXPECT_EQ(y0(2, 2).as<double>(), 4.0);
+
+    y0 = ifftshift(y0);
+    for (int i = 0; i < 3; ++i) {
+        for (int j = 0; j < 3; ++j) {
+            EXPECT_EQ(y0(i, j).as<double>(), x0(i, j).as<double>());
+        }
+    }
+
+    double vals1[4][2] = {{0.0, 5.0}, {1.0, 8.0}, {-6.0, 7.0}, {3.0, -1.0}};
+
+    nd::array x1 = nd::empty<double[4][2]>();
+    x1.vals() = vals1;
+
+    nd::array y1 = fftshift(x1);
+    EXPECT_EQ(y1(0, 0).as<double>(), 7.0);
+    EXPECT_EQ(y1(0, 1).as<double>(), -6.0);
+    EXPECT_EQ(y1(1, 0).as<double>(), -1.0);
+    EXPECT_EQ(y1(1, 1).as<double>(), 3.0);
+    EXPECT_EQ(y1(2, 0).as<double>(), 5.0);
+    EXPECT_EQ(y1(2, 1).as<double>(), 0.0);
+    EXPECT_EQ(y1(3, 0).as<double>(), 8.0);
+    EXPECT_EQ(y1(3, 1).as<double>(), 1.0);
+
+    y1 = ifftshift(y1);
+    for (int i = 0; i < 4; ++i) {
+        for (int j = 0; j < 2; ++j) {
+            EXPECT_EQ(y1(i, j).as<double>(), x1(i, j).as<double>());
+        }
+    }
+
+    double vals2[2][3] = {{0.0, 5.0, 1.0}, {8.0, -6.0, 7.0}};
+
+    nd::array x2 = nd::empty<double[2][3]>();
+    x2.vals() = vals2;
+
+    nd::array y2 = fftshift(x2);
+    EXPECT_EQ(y2(0, 0).as<double>(), 7.0);
+    EXPECT_EQ(y2(0, 1).as<double>(), 8.0);
+    EXPECT_EQ(y2(0, 2).as<double>(), -6.0);
+    EXPECT_EQ(y2(1, 0).as<double>(), 1.0);
+    EXPECT_EQ(y2(1, 1).as<double>(), 0.0);
+    EXPECT_EQ(y2(1, 2).as<double>(), 5.0);
+
+    y2 = ifftshift(y2);
+    for (int i = 0; i < 2; ++i) {
+        for (int j = 0; j < 3; ++j) {
+            EXPECT_EQ(y2(i, j).as<double>(), x2(i, j).as<double>());
+        }
+    }
 }
+
+#ifdef DYND_FFTW // For now, only test FFTs if we built DYND with FFTW
 
 REGISTER_TYPED_TEST_CASE_P(FFT2D, Linear, Inverse, Zeros, Ones, KroneckerDelta);
 // INSTANTIATE_TYPED_TEST_CASE_P(ComplexFloat, FFT2D, FixedDim2D<dynd_complex<float> >::Types);
