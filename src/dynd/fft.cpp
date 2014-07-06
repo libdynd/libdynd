@@ -7,8 +7,6 @@
 #include <tr1/tuple>
 
 #include <dynd/fft.hpp>
-#include <dynd/types/strided_dim_type.hpp>
-#include <dynd/types/arrfunc_type.hpp>
 #include <dynd/func/take_arrfunc.hpp>
 
 using namespace std;
@@ -28,11 +26,15 @@ static int cleanup_atexit = atexit(fftcleanup);
 
 #define FFTW_FFTPLAN_C2C(LIB, REAL_TYPE, SRC_ID, DST_ID) \
     LIB##_plan dynd::fftw::fftplan(size_t ndim, vector<intptr_t> shape, LIB##_complex *src, vector<intptr_t> src_strides, \
-                                   LIB##_complex *dst, vector<intptr_t> dst_strides, int sign, unsigned int flags) { \
+                                   LIB##_complex *dst, vector<intptr_t> dst_strides, int sign, unsigned int flags, bool overwrite) { \
         key_type key(shape, SRC_ID, src_strides, LIB##_alignment_of(reinterpret_cast<REAL_TYPE *>(src)), \
             DST_ID, dst_strides, LIB##_alignment_of(reinterpret_cast<REAL_TYPE *>(dst)), sign, flags); \
         if (plans.find(key) != plans.end()) { \
             return reinterpret_cast<LIB##_plan>(plans[key]); \
+        } \
+\
+        if (!overwrite && (flags & FFTW_ESTIMATE) == 0) { \
+            return NULL; \
         } \
 \
         shortvector<LIB##_iodim> iodims(ndim); \
@@ -43,7 +45,9 @@ static int cleanup_atexit = atexit(fftcleanup);
         } \
 \
         LIB##_plan plan = LIB##_plan_guru_dft(ndim, iodims.get(), 0, NULL, src, dst, sign, flags); \
-        plans[key] = plan; \
+        if (plan != NULL) { \
+            plans[key] = plan; \
+        } \
 \
         return plan; \
     }
@@ -55,11 +59,15 @@ FFTW_FFTPLAN_C2C(fftw, double, complex_float64_type_id, complex_float64_type_id)
 
 #define FFTW_FFTPLAN_R2C(LIB, REAL_TYPE, SRC_ID, DST_ID) \
     LIB##_plan dynd::fftw::fftplan(size_t ndim, vector<intptr_t> shape, REAL_TYPE *src, vector<intptr_t> src_strides, \
-                                  LIB##_complex *dst, vector<intptr_t> dst_strides, unsigned int flags) { \
+                                  LIB##_complex *dst, vector<intptr_t> dst_strides, unsigned int flags, bool overwrite) { \
         key_type key(shape, SRC_ID, src_strides, LIB##_alignment_of(reinterpret_cast<REAL_TYPE *>(src)), \
             DST_ID, dst_strides, LIB##_alignment_of(reinterpret_cast<REAL_TYPE *>(dst)), FFTW_FORWARD, flags); \
         if (plans.find(key) != plans.end()) { \
             return reinterpret_cast<LIB##_plan>(plans[key]); \
+        } \
+\
+        if (!overwrite && (flags & FFTW_ESTIMATE) == 0) { \
+            return NULL; \
         } \
 \
         shortvector<LIB##_iodim> iodims(ndim); \
@@ -70,7 +78,9 @@ FFTW_FFTPLAN_C2C(fftw, double, complex_float64_type_id, complex_float64_type_id)
         } \
 \
         LIB##_plan plan = LIB##_plan_guru_dft_r2c(ndim, iodims.get(), 0, NULL, src, dst, flags); \
-        plans[key] = plan; \
+        if (plan != NULL) { \
+            plans[key] = plan; \
+        } \
 \
         return plan;\
     }
@@ -82,11 +92,15 @@ FFTW_FFTPLAN_R2C(fftw, double, float64_type_id, complex_float64_type_id)
 
 #define FFTW_FFTPLAN_C2R(LIB, REAL_TYPE, SRC_ID, DST_ID) \
     LIB##_plan dynd::fftw::fftplan(size_t ndim, vector<intptr_t> shape, LIB##_complex *src, vector<intptr_t> src_strides, \
-                                  REAL_TYPE *dst, vector<intptr_t> dst_strides, unsigned int flags) { \
+                                  REAL_TYPE *dst, vector<intptr_t> dst_strides, unsigned int flags, bool overwrite) { \
         key_type key(shape, SRC_ID, src_strides, LIB##_alignment_of(reinterpret_cast<REAL_TYPE *>(src)), \
             DST_ID, dst_strides, LIB##_alignment_of(reinterpret_cast<REAL_TYPE *>(dst)), FFTW_BACKWARD, flags); \
         if (plans.find(key) != plans.end()) { \
             return reinterpret_cast<LIB##_plan>(plans[key]); \
+        } \
+\
+        if (!overwrite && (flags & FFTW_ESTIMATE) == 0) { \
+            return NULL; \
         } \
 \
         shortvector<LIB##_iodim> iodims(ndim); \
@@ -97,7 +111,9 @@ FFTW_FFTPLAN_R2C(fftw, double, float64_type_id, complex_float64_type_id)
         } \
 \
         LIB##_plan plan = LIB##_plan_guru_dft_c2r(ndim, iodims.get(), 0, NULL, src, dst, flags); \
-        plans[key] = plan; \
+        if (plan != NULL) { \
+            plans[key] = plan; \
+        } \
 \
         return plan; \
     }
@@ -119,7 +135,7 @@ void dynd::fftw::fftcleanup() {
                 fftw_destroy_plan(reinterpret_cast<fftw_plan>(iter->second));
                 break;
             default:
-                throw std::runtime_error("");
+                throw runtime_error("unsupported type for fftw plans");
         }
     }
 
@@ -127,7 +143,7 @@ void dynd::fftw::fftcleanup() {
     fftw_cleanup();
 }
 
-nd::array dynd::fftw::fft(const nd::array &x, const std::vector<intptr_t> &shape, unsigned int flags) {
+nd::array dynd::fftw::fft(const nd::array &x, const vector<intptr_t> &shape, unsigned int flags) {
     type_id_t dtp_id = x.get_dtype().get_type_id();
 
     if (dtp_id == complex_float32_type_id) {
@@ -136,7 +152,16 @@ nd::array dynd::fftw::fft(const nd::array &x, const std::vector<intptr_t> &shape
         fftwf_complex *src = reinterpret_cast<fftwf_complex *>(x.get_readwrite_originptr());
         fftwf_complex *dst = reinterpret_cast<fftwf_complex *>(y.get_readwrite_originptr());
         fftwf_plan plan = fftw::fftplan(x.get_ndim(), shape, src, x.get_strides(),
-            dst, y.get_strides(), FFTW_FORWARD, flags);
+            dst, y.get_strides(), FFTW_FORWARD, flags, false);
+        if (plan == NULL) {
+            if (flags & FFTW_WISDOM_ONLY) {
+                throw runtime_error("fftw does not have the wisdom available");
+            }
+            nd::array backup = x.eval_copy();
+            plan = fftw::fftplan(x.get_ndim(), shape, src, x.get_strides(),
+                dst, y.get_strides(), FFTW_FORWARD, flags, true);
+            x.val_assign(backup);
+        }
         fftwf_execute_dft(plan, src, dst);
 
         return y;
@@ -148,16 +173,25 @@ nd::array dynd::fftw::fft(const nd::array &x, const std::vector<intptr_t> &shape
         fftw_complex *src = reinterpret_cast<fftw_complex *>(x.get_readwrite_originptr());
         fftw_complex *dst = reinterpret_cast<fftw_complex *>(y.get_readwrite_originptr());
         fftw_plan plan = fftw::fftplan(x.get_ndim(), shape, src, x.get_strides(),
-            dst, y.get_strides(), FFTW_FORWARD, flags);
+            dst, y.get_strides(), FFTW_FORWARD, flags, false);
+        if (plan == NULL) {
+            if (flags & FFTW_WISDOM_ONLY) {
+                throw runtime_error("fftw does not have the wisdom available");
+            }
+            nd::array backup = x.eval_copy();
+            plan = fftw::fftplan(x.get_ndim(), shape, src, x.get_strides(),
+                dst, y.get_strides(), FFTW_FORWARD, flags, true);
+            x.val_assign(backup);
+        }
         fftw_execute_dft(plan, src, dst);
 
         return y;
     }
 
-    throw std::runtime_error("");
+    throw runtime_error("unsupported type for fft");
 }
 
-nd::array dynd::fftw::ifft(const nd::array &x, const std::vector<intptr_t> &shape, unsigned int flags) {
+nd::array dynd::fftw::ifft(const nd::array &x, const vector<intptr_t> &shape, unsigned int flags) {
     type_id_t dtp_id = x.get_dtype().get_type_id();
 
     if (dtp_id == complex_float32_type_id) {
@@ -166,7 +200,16 @@ nd::array dynd::fftw::ifft(const nd::array &x, const std::vector<intptr_t> &shap
         fftwf_complex *src = reinterpret_cast<fftwf_complex *>(x.get_readwrite_originptr());
         fftwf_complex *dst = reinterpret_cast<fftwf_complex *>(y.get_readwrite_originptr());
         fftwf_plan plan = fftw::fftplan(x.get_ndim(), shape, src, x.get_strides(),
-            dst, y.get_strides(), FFTW_BACKWARD, flags);
+            dst, y.get_strides(), FFTW_BACKWARD, flags, false);
+        if (plan == NULL) {
+            if (flags & FFTW_WISDOM_ONLY) {
+                throw runtime_error("fftw does not have the wisdom available");
+            }
+            nd::array backup = x.eval_copy();
+            plan = fftw::fftplan(x.get_ndim(), shape, src, x.get_strides(),
+                dst, y.get_strides(), FFTW_BACKWARD, flags, true);
+            x.val_assign(backup);
+        }
         fftwf_execute_dft(plan, src, dst);
 
         return y;
@@ -178,52 +221,76 @@ nd::array dynd::fftw::ifft(const nd::array &x, const std::vector<intptr_t> &shap
         fftw_complex *src = reinterpret_cast<fftw_complex *>(x.get_readwrite_originptr());
         fftw_complex *dst = reinterpret_cast<fftw_complex *>(y.get_readwrite_originptr());
         fftw_plan plan = fftw::fftplan(x.get_ndim(), shape, src, x.get_strides(),
-            dst, y.get_strides(), FFTW_BACKWARD, flags);
+            dst, y.get_strides(), FFTW_BACKWARD, flags, false);
+        if (plan == NULL) {
+            if (flags & FFTW_WISDOM_ONLY) {
+                throw runtime_error("fftw does not have the wisdom available");
+            }
+            nd::array backup = x.eval_copy();
+            plan = fftw::fftplan(x.get_ndim(), shape, src, x.get_strides(),
+                dst, y.get_strides(), FFTW_BACKWARD, flags, true);
+            x.val_assign(backup);
+        }
         fftw_execute_dft(plan, src, dst);
 
         return y;
     }
 
-    throw std::runtime_error("");
+    throw runtime_error("unsupported type for ifft");
 }
 
-nd::array dynd::fftw::rfft(const nd::array &x, const std::vector<intptr_t> &shape, unsigned int flags) {
+nd::array dynd::fftw::rfft(const nd::array &x, const vector<intptr_t> &shape, unsigned int flags) {
+    vector<intptr_t> dst_shape = shape;
+    dst_shape[x.get_ndim() - 1] = dst_shape[x.get_ndim() - 1] / 2 + 1;
+
     type_id_t dtp_id = x.get_dtype().get_type_id();
 
     if (dtp_id == float32_type_id) {
-        std::vector<intptr_t> dst_shape = shape;
-        dst_shape[x.get_ndim() - 1] = dst_shape[x.get_ndim() - 1] / 2 + 1;
-
-        nd::array y = nd::dtyped_empty(shape, ndt::make_type<dynd_complex<float> >());
+        nd::array y = nd::dtyped_empty(dst_shape, ndt::make_type<dynd_complex<float> >());
 
         float *src = reinterpret_cast<float *>(x.get_readwrite_originptr());
         fftwf_complex *dst = reinterpret_cast<fftwf_complex *>(y.get_readwrite_originptr());
         fftwf_plan plan = fftw::fftplan(x.get_ndim(), shape, src, x.get_strides(),
-            dst, y.get_strides(), flags);
+            dst, y.get_strides(), flags, false);
+        if (plan == NULL) {
+            if (flags & FFTW_WISDOM_ONLY) {
+                throw runtime_error("fftw does not have the wisdom available");
+            }
+            nd::array backup = x.eval_copy();
+            plan = fftw::fftplan(x.get_ndim(), shape, src, x.get_strides(),
+                dst, y.get_strides(), flags, true);
+            x.val_assign(backup);
+        }
         fftwf_execute_dft_r2c(plan, src, dst);
 
         return y;
     }
 
     if (dtp_id == float64_type_id) {
-        std::vector<intptr_t> dst_shape = shape;
-        dst_shape[x.get_ndim() - 1] = dst_shape[x.get_ndim() - 1] / 2 + 1;
-
-        nd::array y = nd::dtyped_empty(shape, ndt::make_type<dynd_complex<double> >());
+        nd::array y = nd::dtyped_empty(dst_shape, ndt::make_type<dynd_complex<double> >());
 
         double *src = reinterpret_cast<double *>(x.get_readwrite_originptr());
         fftw_complex *dst = reinterpret_cast<fftw_complex *>(y.get_readwrite_originptr());
         fftw_plan plan = fftw::fftplan(x.get_ndim(), shape, src, x.get_strides(),
-            dst, y.get_strides(), flags);
+            dst, y.get_strides(), flags, false);
+        if (plan == NULL) {
+            if (flags & FFTW_WISDOM_ONLY) {
+                throw runtime_error("fftw does not have the wisdom available");
+            }
+            nd::array backup = x.eval_copy();
+            plan = fftw::fftplan(x.get_ndim(), shape, src, x.get_strides(),
+                dst, y.get_strides(), flags, true);
+            x.val_assign(backup);
+        }
         fftw_execute_dft_r2c(plan, src, dst);
 
         return y;
     }
 
-    throw std::runtime_error("");
+    throw runtime_error("unsupported type for rfft");
 }
 
-nd::array dynd::fftw::irfft(const nd::array &x, const std::vector<intptr_t> &shape, unsigned int flags) {
+nd::array dynd::fftw::irfft(const nd::array &x, const vector<intptr_t> &shape, unsigned int flags) {
     type_id_t dtp_id = x.get_dtype().get_type_id();
 
     if (dtp_id == complex_float32_type_id) {
@@ -232,7 +299,16 @@ nd::array dynd::fftw::irfft(const nd::array &x, const std::vector<intptr_t> &sha
         fftwf_complex *src = reinterpret_cast<fftwf_complex *>(x.get_readwrite_originptr());
         float *dst = reinterpret_cast<float *>(y.get_readwrite_originptr());
         fftwf_plan plan = fftw::fftplan(x.get_ndim(), shape, src, x.get_strides(),
-            dst, y.get_strides(), flags);
+            dst, y.get_strides(), flags, false);
+        if (plan == NULL) {
+            if (flags & FFTW_WISDOM_ONLY) {
+                throw runtime_error("fftw does not have the wisdom available");
+            }
+            nd::array backup = x.eval_copy();
+            plan = fftw::fftplan(x.get_ndim(), shape, src, x.get_strides(),
+                dst, y.get_strides(), flags, true);
+            x.val_assign(backup);
+        }
         fftwf_execute_dft_c2r(plan, src, dst);
 
         return y;
@@ -244,13 +320,22 @@ nd::array dynd::fftw::irfft(const nd::array &x, const std::vector<intptr_t> &sha
         fftw_complex *src = reinterpret_cast<fftw_complex *>(x.get_readwrite_originptr());
         double *dst = reinterpret_cast<double *>(y.get_readwrite_originptr());
         fftw_plan plan = fftw::fftplan(x.get_ndim(), shape, src, x.get_strides(),
-            dst, y.get_strides(), flags);
+            dst, y.get_strides(), flags, false);
+        if (plan == NULL) {
+            if (flags & FFTW_WISDOM_ONLY) {
+                throw runtime_error("fftw does not have the wisdom available");
+            }
+            nd::array backup = x.eval_copy();
+            plan = fftw::fftplan(x.get_ndim(), shape, src, x.get_strides(),
+                dst, y.get_strides(), flags, true);
+            x.val_assign(backup);
+        }
         fftw_execute_dft_c2r(plan, src, dst);
 
         return y;
     }
 
-    throw std::runtime_error("");
+    throw runtime_error("unsupported type for irfft");
 }
 
 #endif // DYND_FFTW

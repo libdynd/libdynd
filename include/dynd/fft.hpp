@@ -20,7 +20,6 @@ FFTW_EXTERN int fftw_alignment_of(double *p);
 
 #include <dynd/array.hpp>
 #include <dynd/array_range.hpp>
-#include <dynd/shape_tools.hpp>
 
 namespace dynd {
 
@@ -28,32 +27,32 @@ namespace dynd {
 namespace fftw {
 
 fftwf_plan fftplan(size_t ndim, std::vector<intptr_t> shape, fftwf_complex *src, std::vector<intptr_t> src_strides,
-    fftwf_complex *dst, std::vector<intptr_t> dst_strides, int sign, unsigned int flags);
+    fftwf_complex *dst, std::vector<intptr_t> dst_strides, int sign, unsigned int flags, bool overwrite);
 fftw_plan fftplan(size_t ndim, std::vector<intptr_t> shape, fftw_complex *src, std::vector<intptr_t> src_strides,
-    fftw_complex *dst, std::vector<intptr_t> dst_strides, int sign, unsigned int flags);
+    fftw_complex *dst, std::vector<intptr_t> dst_strides, int sign, unsigned int flags, bool overwrite);
 
 fftwf_plan fftplan(size_t ndim, std::vector<intptr_t> shape, float *src, std::vector<intptr_t> src_strides,
-    fftwf_complex *dst, std::vector<intptr_t> dst_strides, unsigned int flags);
+    fftwf_complex *dst, std::vector<intptr_t> dst_strides, unsigned int flags, bool overwrite);
 fftw_plan fftplan(size_t ndim, std::vector<intptr_t> shape, double *src, std::vector<intptr_t> src_strides,
-    fftw_complex *dst, std::vector<intptr_t> dst_strides, unsigned int flags);
+    fftw_complex *dst, std::vector<intptr_t> dst_strides, unsigned int flags, bool overwrite);
 
 fftwf_plan fftplan(size_t ndim, std::vector<intptr_t> shape, fftwf_complex *src, std::vector<intptr_t> src_strides,
-    float *dst, std::vector<intptr_t> dst_strides, unsigned int flags);
+    float *dst, std::vector<intptr_t> dst_strides, unsigned int flags, bool overwrite);
 fftw_plan fftplan(size_t ndim, std::vector<intptr_t> shape, fftw_complex *src, std::vector<intptr_t> src_strides,
-    double *dst, std::vector<intptr_t> dst_strides, unsigned int flags);
+    double *dst, std::vector<intptr_t> dst_strides, unsigned int flags, bool overwrite);
 
 void fftcleanup();
 
-nd::array fft(const nd::array &x, const std::vector<intptr_t> &shape, unsigned int flags = FFTW_ESTIMATE);
-nd::array ifft(const nd::array &x, const std::vector<intptr_t> &shape, unsigned int flags = FFTW_ESTIMATE);
+nd::array fft(const nd::array &x, const std::vector<intptr_t> &shape, unsigned int flags = FFTW_MEASURE);
+nd::array ifft(const nd::array &x, const std::vector<intptr_t> &shape, unsigned int flags = FFTW_MEASURE);
 
-nd::array rfft(const nd::array &x, const std::vector<intptr_t> &shape, unsigned int flags = FFTW_ESTIMATE);
-nd::array irfft(const nd::array &x, const std::vector<intptr_t> &shape, unsigned int flags = FFTW_ESTIMATE);
+nd::array rfft(const nd::array &x, const std::vector<intptr_t> &shape, unsigned int flags = FFTW_MEASURE);
+nd::array irfft(const nd::array &x, const std::vector<intptr_t> &shape, unsigned int flags = FFTW_MEASURE);
 
 } // namespace fftw
 #endif // DYND_FFTW
 
-#define INLINE_DECLARATIONS(FUNC) \
+#define DECL_INLINES(FUNC) \
     inline nd::array FUNC(const nd::array &x) { \
         return FUNC(x, x.get_shape()); \
     } \
@@ -81,105 +80,110 @@ nd::array irfft(const nd::array &x, const std::vector<intptr_t> &shape, unsigned
     }
 
 /**
+ * Computes the discrete Fourier transform of a complex array.
  *
+ * @param x An array of complex numbers with arbitrary dimensions.
+ * @param shape The shape of the Fourier transform. If any dimension is less than
+ *              the corresponding dimension of 'x', that dimension will be truncated.
+ *
+ * @return A complex array with dimensions specified by 'shape'.
  */
 inline nd::array fft(const nd::array &x, const std::vector<intptr_t> &shape) {
-    if (x.get_ndim() != (intptr_t) shape.size()) {
-        std::stringstream ss;
-        ss << "too many dimensions provided for fft, got " << x.get_ndim()
-           << " for type " << x.get_type();
-        throw std::invalid_argument(ss.str());
-    }
-
-    const ndt::type &tp = x.get_type();
-    if (tp.get_flags() | type_flag_not_host_readable) {
+    if (x.get_ndim() != static_cast<intptr_t>(shape.size())) {
+        throw std::invalid_argument("dimensions provided for fft do not match");
     }
 
 #ifdef DYND_FFTW
     return fftw::fft(x, shape);
 #else
-    throw std::runtime_error("no fft available");
+    throw std::runtime_error("fft is not implemented");
 #endif
 }
 
-INLINE_DECLARATIONS(fft)
+DECL_INLINES(fft)
 
 /**
+ * Computes the inverse discrete Fourier transform of a complex array.
  *
+ * @param x An array of complex numbers with arbitrary dimensions.
+ * @param shape The shape of the inverse Fourier transform. If any dimension is less than
+ *              the corresponding dimension of 'x', that dimension will be truncated.
+ *
+ * @return A complex array with dimensions specified by 'shape'.
  */
 inline nd::array ifft(const nd::array &x, const std::vector<intptr_t> &shape) {
-    if (x.get_ndim() != (intptr_t) shape.size()) {
-        std::stringstream ss;
-        ss << "too many dimensions provided for ifft, got " << x.get_ndim()
-           << " for type " << x.get_type();
-        throw std::invalid_argument(ss.str());
-    }
-
-    const ndt::type &tp = x.get_type();
-    if (tp.get_flags() | type_flag_not_host_readable) {
+    if (x.get_ndim() != static_cast<intptr_t>(shape.size())) {
+        throw std::invalid_argument("dimensions provided for ifft do not match");
     }
 
 #ifdef DYND_FFTW
     return fftw::ifft(x, shape);
 #else
-    throw std::runtime_error("no fft available");
+    throw std::runtime_error("ifft is not implemented");
 #endif
 }
 
-INLINE_DECLARATIONS(ifft)
+DECL_INLINES(ifft)
 
 /**
+ * Computes the discrete Fourier transform of a real array.
  *
+ * @param x An array of real numbers with arbitrary dimensions.
+ * @param shape The shape of the Fourier transform. If any dimension is less than
+ *              the corresponding dimension of 'x', that dimension will be truncated.
+ *
+ * @return A complex array with dimensions specified by 'shape', except the last dimension
+ *         is '(shape[shape.size() - 1] / 2) + 1'.
  */
 inline nd::array rfft(const nd::array &x, const std::vector<intptr_t> &shape) {
-    if (x.get_ndim() != (intptr_t) shape.size()) {
-        std::stringstream ss;
-        ss << "too many dimensions provided for rfft, got " << x.get_ndim()
-           << " for type " << x.get_type();
-        throw std::invalid_argument(ss.str());
-    }
-
-    const ndt::type &tp = x.get_type();
-    if (tp.get_flags() | type_flag_not_host_readable) {
+    if (x.get_ndim() != static_cast<intptr_t>(shape.size())) {
+        throw std::invalid_argument("dimensions provided for rfft do not match");
     }
 
 #ifdef DYND_FFTW
     return fftw::rfft(x, shape);
 #else
-    throw std::runtime_error("no fft available");
+    throw std::runtime_error("rfft is not implemented");
 #endif
 }
 
-INLINE_DECLARATIONS(rfft)
+DECL_INLINES(rfft)
 
 /**
+ * Computes the discrete inverse Fourier transform of a complex array, under the
+ * assumption that the result is a real array.
  *
+ * @param x An array of real numbers with arbitrary dimensions.
+ * @param shape The shape of the Fourier transform. If any dimension is less than
+ *              the corresponding dimension of 'x', that dimension will be truncated.
+ *
+ * @return A complex array with dimensions specified by 'shape'. By default, the shape
+ *         is the same as that of 'x', except the last dimension is '2 * (x.get_shape[x.get_ndim() - 1] - 1)'.
  */
 inline nd::array irfft(const nd::array &x, const std::vector<intptr_t> &shape) {
-    if (x.get_ndim() != (intptr_t) shape.size()) {
-        std::stringstream ss;
-        ss << "too many dimensions provided for irfft, got " << x.get_ndim()
-           << " for type " << x.get_type();
-        throw std::invalid_argument(ss.str());
-    }
-
-    const ndt::type &tp = x.get_type();
-    if (tp.get_flags() | type_flag_not_host_readable) {
+    if (x.get_ndim() != static_cast<intptr_t>(shape.size())) {
+        throw std::invalid_argument("dimensions provided for irfft do not match");
     }
 
 #ifdef DYND_FFTW
     return fftw::irfft(x, shape);
 #else
-    throw std::runtime_error("no fft available");
+    throw std::runtime_error("irfft is not implemented");
 #endif
 }
 
-INLINE_DECLARATIONS(irfft)
+DECL_INLINES(irfft)
 
-#undef INLINE_DECLARATIONS
+#undef DECL_INLINES
 
+/**
+ * Shifts the zero-frequency element to the center of an array.
+ */
 nd::array fftshift(const nd::array &x);
 
+/**
+ * Inverts fftshift.
+ */
 nd::array ifftshift(const nd::array &x);
 
 } // namespace dynd
