@@ -4,11 +4,14 @@ compiler:
   - gcc
   - clang
 
+env:
+  - DYND_FFTW=OFF
+
 before_script:
   - sudo apt-get -qq install valgrind
   - mkdir build
   - cd build
-  - cmake ..
+  - cmake -DDYND_FFTW=${DYND_FFTW} ..
 
 script:
   - make
