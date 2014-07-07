@@ -37,6 +37,10 @@ if("${CMAKE_SOURCE_DIR}" STREQUAL "${CMAKE_CURRENT_SOURCE_DIR}")
     option(DYND_CUDA
         "Build a libdynd library with CUDA"
         OFF) # While CUDA support is in development, we default to OFF.
+# -DDYND_FFTW=ON/OFF, whether to build libdynd with or without FFTW
+    option(DYND_FFTW
+        "Build a libdynd library with FFTW"
+        OFF)
 #
 # -DDYND_INSTALL_LIB=ON/OFF, whether to install libdynd into the
 #   CMAKE_INSTALL_PREFIX. Its main purpose is to allow dynd-python and
@@ -72,6 +76,8 @@ set(CMAKE_VERBOSE_MAKEFILE 1)
 add_subdirectory(thirdparty/cephes)
 add_subdirectory(thirdparty/datetime)
 include_directories(thirdparty/datetime/include)
+
+set(DYND_LINK_LIBS cephes datetime)
 
 if(WIN32)
     # Treat warnings as errors (-WX does this)
@@ -410,7 +416,7 @@ set(libdynd_SRC
     src/dynd/memblock/executable_memory_block_linux_x64.cpp
     src/dynd/memblock/external_memory_block.cpp
     src/dynd/memblock/fixed_size_pod_memory_block.cpp
-	src/dynd/memblock/memmap_memory_block.cpp
+    src/dynd/memblock/memmap_memory_block.cpp
     src/dynd/memblock/pod_memory_block.cpp
     src/dynd/memblock/array_memory_block.cpp
     src/dynd/memblock/objectarray_memory_block.cpp
@@ -419,7 +425,7 @@ set(libdynd_SRC
     include/dynd/memblock/executable_memory_block.hpp
     include/dynd/memblock/external_memory_block.hpp
     include/dynd/memblock/fixed_size_pod_memory_block.hpp
-	include/dynd/memblock/memmap_memory_block.hpp
+    include/dynd/memblock/memmap_memory_block.hpp
     include/dynd/memblock/pod_memory_block.hpp
     include/dynd/memblock/array_memory_block.hpp
     include/dynd/memblock/objectarray_memory_block.hpp
@@ -432,6 +438,7 @@ set(libdynd_SRC
     # Main
     src/dynd/arithmetic_op.cpp
     src/dynd/array.cpp
+    src/dynd/fft.cpp
     src/dynd/array_range.cpp
     src/dynd/config.cpp
     src/dynd/dim_iter.cpp
@@ -466,6 +473,7 @@ set(libdynd_SRC
     include/dynd/dynd_math.hpp
     include/dynd/ensure_immutable_contig.hpp
     include/dynd/random.hpp
+    include/dynd/fft.hpp
     include/dynd/type.hpp
     include/dynd/typed_data_assign.hpp
     include/dynd/type_promotion.hpp
@@ -532,6 +540,15 @@ if (DYND_CUDA)
     set(CUDA_NVCC_FLAGS ${CUDA_NVCC_FLAGS};-Xcudafe;--diag_suppress=boolean_controlling_expr_is_constant)
 
 #    set(CUDA_SEPARABLE_COMPILATION ON)
+endif()
+
+if (DYND_FFTW)
+    find_path(FFTW_PATH fftw3.h)
+    include_directories(${FFTW_PATH})
+    set(DYND_LINK_LIBS ${DYND_LINK_LIBS} fftw3 fftw3f)
+
+    # Add a preprocessor definition to indicate we're building with FFTW
+    add_definitions(-DDYND_FFTW)
 endif()
 
 # Add a preprocessor definition for the maximum number
@@ -630,10 +647,7 @@ endif()
 if (DYND_SHARED_LIB OR (NOT DYND_INSTALL_LIB))
     # If we're not making an installable static library,
     # link the sublibraries normally
-    target_link_libraries(libdynd
-        cephes
-        datetime
-        )
+    target_link_libraries(libdynd ${DYND_LINK_LIBS})
 endif()
 
 # add_subdirectory(basic_kernels)

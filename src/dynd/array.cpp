@@ -1785,6 +1785,22 @@ nd::array nd::typed_ones(intptr_t ndim, const intptr_t *shape,
     return res;
 }
 
+nd::array nd::concatenate(const nd::array &x, const nd::array &y) {
+    if (x.get_ndim() != 1 || y.get_ndim() != 1) {
+        throw runtime_error("TODO: nd::concatenate is WIP");
+    }
+
+    if (x.get_dtype() != y.get_dtype()) {
+        throw runtime_error("dtypes must be the same for concatenate");
+    }
+
+    nd::array res = nd::empty(x.get_dim_size() + y.get_dim_size(), x.get_dtype());
+    res(irange(0, x.get_dim_size())).val_assign(x);
+    res(irange(x.get_dim_size(), res.get_dim_size())).val_assign(y);
+
+    return res;
+}
+
 nd::array nd::memmap(const std::string& filename,
     intptr_t begin,
     intptr_t end,

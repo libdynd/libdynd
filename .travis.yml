@@ -4,11 +4,16 @@ compiler:
   - gcc
   - clang
 
+env:
+  - DYND_FFTW=OFF
+  - DYND_FFTW=ON
+
 before_script:
   - sudo apt-get -qq install valgrind
+  - if [ "$DYND_FFTW" == "ON" ]; then sudo apt-get -qq install libfftw3-dev; fi
   - mkdir build
   - cd build
-  - cmake ..
+  - cmake -DDYND_FFTW=${DYND_FFTW} ..
 
 script:
   - make
