@@ -17,7 +17,39 @@ using namespace std;
 using namespace dynd;
 
 namespace {
+
+
 class neighborhood2d_ck : public kernels::general_ck<neighborhood2d_ck> {
+  // The neighborhood
+  intptr_t m_nh_shape[2], m_nh_centre[2];
+  // Both src and dst have the same shape
+  intptr_t m_shape[2];
+  // But may have different strides
+  intptr_t m_dst_strides[2], m_src_strides[2];
+
+  static void single(char *dst, const char *const *src, ckernel_prefix *rawself)
+  {
+    // First pass of this implementation just visits all the complete
+    // neighborhoods
+    self_type *self = get_self(rawself);
+    ckernel_prefix *nh_op = self->get_child_ckernel();
+    expr_strided_t nh_op_fn = nh_op->get_function<expr_strided_t>();
+
+    const char *src_it[2] = {src[0], src[1]};
+    intptr_t src_it_strides[2] = {self->m_src_strides[1], 0};
+
+    // Position the destination at the first output
+    dst += self->m_nh_centre[0] * self->m_dst_strides[0] +
+           self->m_nh_centre[1] * self->m_dst_strides[1];
+    for (intptr_t coord0 = 0; coord0 < self->m_shape[0] - self->m_nh_shape[0];
+         ++coord0) {
+      // Handle the whole run at once using the child strided ckernel
+      nh_op_fn(dst, self->m_dst_strides[1], src_it, src_it_strides,
+               self->m_shape[1] - self->m_nh_shape[1], nh_op);
+      dst += self->m_dst_strides[0];
+      src_it_strides[0] += self->m_src_strides[0];
+    }
+  }
 };
 } // anonymous namespace
 
@@ -43,6 +75,6 @@ void dynd::make_neighborhood2d_arrfunc(arrfunc_type_data *out_af,
     throw invalid_argument(ss.str());
   }
   out_af->func_proto = ndt::substitute(result_pattern, typevars, true);
-
+  
 
 }
