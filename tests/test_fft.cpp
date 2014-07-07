@@ -162,7 +162,7 @@ T rel_err_max();
 
 template <>
 inline float rel_err_max<float>() {
-    return 1E-4;
+    return 1E-4f;
 }
 
 template <>

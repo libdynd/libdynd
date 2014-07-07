@@ -4,7 +4,6 @@
 //
 
 #include <map>
-#include <tr1/tuple>
 
 #include <dynd/fft.hpp>
 #include <dynd/func/take_arrfunc.hpp>
@@ -13,6 +12,7 @@ using namespace std;
 using namespace dynd;
 
 #ifdef DYND_FFTW
+#include <tr1/tuple>
 
 namespace dynd { namespace fftw {
 
