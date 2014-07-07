@@ -265,20 +265,10 @@ TEST(FFT1D, Shift) {
     x0.vals() = vals0;
 
     nd::array y0 = fftshift(x0);
-    EXPECT_EQ(y0(0).as<double>(), -4.0);
-    EXPECT_EQ(y0(1).as<double>(), -3.0);
-    EXPECT_EQ(y0(2).as<double>(), -2.0);
-    EXPECT_EQ(y0(3).as<double>(), -1.0);
-    EXPECT_EQ(y0(4).as<double>(), 0.0);
-    EXPECT_EQ(y0(5).as<double>(), 1.0);
-    EXPECT_EQ(y0(6).as<double>(), 2.0);
-    EXPECT_EQ(y0(7).as<double>(), 3.0);
-    EXPECT_EQ(y0(8).as<double>(), 4.0);
+    EXPECT_JSON_EQ_ARR("[-4, -3, -2, -1, 0, 1, 2, 3, 4]", y0);
 
     y0 = ifftshift(y0);
-    for (int i = 0; i < 9; ++i) {
-        EXPECT_EQ(y0(i).as<double>(), x0(i).as<double>());
-    }
+    EXPECT_ARR_EQ(x0, y0);
 
     double vals1[10] = {0.0, 1.0, 2.0, 3.0, 4.0, -5.0, -4.0, -3.0, -2.0, -1.0};
 
@@ -286,21 +276,10 @@ TEST(FFT1D, Shift) {
     x1.vals() = vals1;
 
     nd::array y1 = fftshift(x1);
-    EXPECT_EQ(y1(0).as<double>(), -5.0);
-    EXPECT_EQ(y1(1).as<double>(), -4.0);
-    EXPECT_EQ(y1(2).as<double>(), -3.0);
-    EXPECT_EQ(y1(3).as<double>(), -2.0);
-    EXPECT_EQ(y1(4).as<double>(), -1.0);
-    EXPECT_EQ(y1(5).as<double>(), 0.0);
-    EXPECT_EQ(y1(6).as<double>(), 1.0);
-    EXPECT_EQ(y1(7).as<double>(), 2.0);
-    EXPECT_EQ(y1(8).as<double>(), 3.0);
-    EXPECT_EQ(y1(9).as<double>(), 4.0);
+    EXPECT_JSON_EQ_ARR("[-5, -4, -3, -2, -1, 0, 1, 2, 3, 4]", y1);
 
     y1 = ifftshift(y1);
-    for (int i = 0; i < 10; ++i) {
-        EXPECT_EQ(y1(i).as<double>(), x1(i).as<double>());
-    }
+    EXPECT_ARR_EQ(x1, y1);
 }
 
 TYPED_TEST_P(RFFT1D, Linear) {
