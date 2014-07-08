@@ -53,17 +53,11 @@ size_t fixed_dim_type::get_default_data_size(intptr_t ndim, const intptr_t *shap
 
 void fixed_dim_type::print_data(std::ostream& o, const char *arrmeta, const char *data) const
 {
-    const fixed_dim_type_arrmeta *md = reinterpret_cast<const fixed_dim_type_arrmeta *>(arrmeta);
-    size_t stride = md->stride;
-    arrmeta += sizeof(fixed_dim_type_arrmeta);
-    o << "[";
-    for (size_t i = 0, i_end = m_dim_size; i != i_end; ++i, data += stride) {
-        m_element_tp.print_data(o, arrmeta, data);
-        if (i != i_end - 1) {
-            o << ", ";
-        }
-    }
-    o << "]";
+  const fixed_dim_type_arrmeta *md =
+      reinterpret_cast<const fixed_dim_type_arrmeta *>(arrmeta);
+  strided_array_summarized(o, get_element_type(),
+                           arrmeta + sizeof(fixed_dim_type_arrmeta), data,
+                           m_dim_size, md->stride);
 }
 
 void fixed_dim_type::print_type(std::ostream& o) const

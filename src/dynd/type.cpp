@@ -21,6 +21,9 @@
 #include <sstream>
 #include <cstring>
 #include <vector>
+#include <algorithm>
+#include <functional>
+#include <iomanip>
 
 using namespace std;
 using namespace dynd;
@@ -507,6 +510,181 @@ void dynd::hexadecimal_print(std::ostream& o, const char *data, intptr_t element
     }
 }
 
+void dynd::hexadecimal_print_summarized(std::ostream &o, const char *data,
+                                        intptr_t element_size,
+                                        intptr_t summary_size)
+{
+  if (element_size * 2 <= summary_size) {
+    hexadecimal_print(o, data, element_size);
+  } else {
+    // Print a summary
+    intptr_t size = max(summary_size / 4 - 1, (intptr_t)1);
+    hexadecimal_print(o, data, size);
+    o << " ... ";
+    size = max(summary_size / 4 - size - 1, (intptr_t)1);
+    hexadecimal_print(o, data + element_size - size, size);
+  }
+}
+
+static intptr_t line_count(const string& s)
+{
+  return 1 + count_if(s.begin(), s.end(), bind1st(equal_to<char>(), '\n'));
+}
+
+static void summarize_stats(const string &s, intptr_t &num_rows,
+                            intptr_t &max_num_cols)
+{
+  num_rows += line_count(s);
+  max_num_cols = max(max_num_cols, (intptr_t)s.size());
+}
+
+void dynd::print_indented(ostream &o, const string &indent, const string &s,
+                          bool skipfirstline)
+{
+  const char *begin = s.data();
+  const char *end = s.data() + s.size();
+  const char *cur = begin;
+  while (cur != end) {
+    const char *next = find_if(cur, end, bind1st(equal_to<char>(), '\n'));
+    if (*next == '\n') ++next;
+    if (!skipfirstline || cur != begin) o << indent;
+    o.write(cur, next - cur);
+    cur = next;
+  }
+}
+
+// TODO Move the magic numbers into parameters
+void dynd::strided_array_summarized(std::ostream &o, const ndt::type &tp,
+                                    const char *arrmeta, const char *data,
+                                    intptr_t dim_size, intptr_t stride)
+{
+  const int leading_count = 7, trailing_count = 3, row_threshold = 10,
+            col_threshold = 30, packing_cols = 75;
+
+  vector<string> leading, trailing;
+  intptr_t ilead = 0, itrail = dim_size - 1;
+  intptr_t num_rows = 0, max_num_cols = 0;
+  // Get leading strings
+  for (; ilead < leading_count && ilead < dim_size; ++ilead) {
+    stringstream ss;
+    tp.print_data(ss, arrmeta, data + ilead * stride);
+    leading.push_back(ss.str());
+    summarize_stats(leading.back(), num_rows, max_num_cols);
+  }
+  // Get trailing strings
+  for (itrail = max(dim_size - trailing_count, ilead + 1); itrail < dim_size;
+       ++itrail) {
+    stringstream ss;
+    tp.print_data(ss, arrmeta, data + itrail * stride);
+    trailing.push_back(ss.str());
+    summarize_stats(trailing.back(), num_rows, max_num_cols);
+  }
+  itrail = dim_size - trailing.size() - 1;
+
+  // Select between two printing strategies depending on what we got
+  if ((size_t)num_rows > (leading.size() + trailing.size()) || max_num_cols > col_threshold) {
+    // Trim the leading/trailing vectors until we get to our threshold
+    while (num_rows > row_threshold &&
+           (trailing.size() > 1 || leading.size() > 1)) {
+      if (trailing.size() > 1) {
+        num_rows -= line_count(trailing.front());
+        trailing.erase(trailing.begin());
+      }
+      if (num_rows > row_threshold && leading.size() > 1) {
+        num_rows -= line_count(leading.back());
+        leading.pop_back();
+      }
+    }
+    // Print the [leading, ..., trailing]
+    o << "[";
+    print_indented(o, " ", leading.front(), true);
+    for (size_t i = 1; i < leading.size(); ++i) {
+      o << ",\n";
+      print_indented(o, " ", leading[i]);
+    }
+    if (!trailing.empty()) {
+      if ((size_t)dim_size > (leading.size() + trailing.size())) {
+        o << ",\n ...\n";
+      }
+      print_indented(o, " ", trailing.front());
+      for (size_t i = 1; i < trailing.size(); ++i) {
+        o << ",\n";
+        print_indented(o, " ", trailing[i]);
+      }
+    }
+    o << "]";
+  } else {
+    // Pack the values in a regular grid
+    // Keep getting more strings until we use up our column budget.
+    intptr_t total_cols = (max_num_cols + 2) * (leading.size() + trailing.size());
+    while (ilead <= itrail && total_cols < packing_cols * row_threshold) {
+      if (ilead <= itrail) {
+        stringstream ss;
+        tp.print_data(ss, arrmeta, data + ilead++ * stride);
+        leading.push_back(ss.str());
+        summarize_stats(leading.back(), num_rows, max_num_cols);
+      }
+      if (ilead <= itrail) {
+        stringstream ss;
+        tp.print_data(ss, arrmeta, data + itrail-- * stride);
+        trailing.insert(trailing.begin(), ss.str());
+        summarize_stats(trailing.front(), num_rows, max_num_cols);
+      }
+      total_cols = (max_num_cols + 2) * (leading.size() + trailing.size());
+    }
+
+    intptr_t per_row = packing_cols / (max_num_cols + 2);
+
+    if (leading.size() + trailing.size() == (size_t)dim_size) {
+      // Combine the lists if the total size is covered
+      copy(trailing.begin(), trailing.end(), back_inserter(leading));
+      trailing.clear();
+    } else {
+      // Remove partial rows if the total size is not covered
+      if (leading.size() > (size_t)per_row &&
+             leading.size() % per_row != 0) {
+        leading.erase(leading.begin() + (leading.size() / per_row) * per_row,
+                      leading.end());
+      }
+      if (trailing.size() > (size_t)per_row &&
+             trailing.size() % per_row != 0) {
+        trailing.erase(trailing.begin(),
+                       trailing.begin() + trailing.size() % per_row);
+      }
+    }
+
+    intptr_t i = 0, j;
+    intptr_t i_size = leading.size();
+    while (i < i_size) {
+      o << ((i == 0) ? "[" : " ") << setw(max_num_cols) << leading[i]
+        << setw(0);
+      ++i;
+      for (j = 1; j < per_row && i < i_size; ++j, ++i) {
+        o << ", " << setw(max_num_cols) << leading[i] << setw(0);
+      }
+      if (i < i_size - 1) {
+        o << ",\n";
+      }
+    }
+    if (!trailing.empty()) {
+      i = 0;
+      i_size = trailing.size();
+      o << ",\n ...\n";
+      while (i < i_size) {
+        o << " " << setw(max_num_cols) << trailing[i] << setw(0);
+        ++i;
+        for (j = 1; j < per_row && i < i_size; ++j, ++i) {
+          o << ", " << setw(max_num_cols) << trailing[i] << setw(0);
+        }
+        if (i < i_size - 1) {
+          o << ",\n";
+        }
+      }
+    }
+    o << "]";
+  }
+}
+
 void dynd::print_builtin_scalar(type_id_t type_id, std::ostream& o, const char *data)
 {
     switch (type_id) {
@@ -571,11 +749,12 @@ void dynd::print_builtin_scalar(type_id_t type_id, std::ostream& o, const char *
     }
 }
 
-void ndt::type::print_data(std::ostream& o, const char *arrmeta, const char *data) const
+void ndt::type::print_data(std::ostream &o, const char *arrmeta,
+                           const char *data) const
 {
-    if (is_builtin()) {
-        print_builtin_scalar(get_type_id(), o, data);
-    } else {
-        extended()->print_data(o, arrmeta, data);
-    }
+  if (is_builtin()) {
+    print_builtin_scalar(get_type_id(), o, data);
+  } else {
+    extended()->print_data(o, arrmeta, data);
+  }
 }

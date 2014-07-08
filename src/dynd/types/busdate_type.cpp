@@ -50,16 +50,18 @@ void dynd::busdate_type::print_holidays(std::ostream& /*o*/) const
     throw std::runtime_error("busdate_type::print_holidays to be implemented");
 }
 
-void dynd::busdate_type::print_data(std::ostream& o, const char *DYND_UNUSED(arrmeta), const char *data) const
+void dynd::busdate_type::print_data(std::ostream &o,
+                                    const char *DYND_UNUSED(arrmeta),
+                                    const char *data) const
 {
-    date_ymd ymd;
-    ymd.set_from_days(*reinterpret_cast<const int32_t *>(data));
-    string s = ymd.to_str();
-    if (s.empty()) {
-        o << "NA";
-    } else {
-        o << s;
-    }
+  date_ymd ymd;
+  ymd.set_from_days(*reinterpret_cast<const int32_t *>(data));
+  string s = ymd.to_str();
+  if (s.empty()) {
+    o << "NA";
+  } else {
+    o << s;
+  }
 }
 
 void dynd::busdate_type::print_type(std::ostream& o) const

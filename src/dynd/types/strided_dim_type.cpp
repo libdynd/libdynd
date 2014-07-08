@@ -54,28 +54,21 @@ size_t strided_dim_type::get_default_data_size(intptr_t ndim,
 void strided_dim_type::print_data(std::ostream &o, const char *arrmeta,
                                   const char *data) const
 {
-    const strided_dim_type_arrmeta *md =
-        reinterpret_cast<const strided_dim_type_arrmeta *>(arrmeta);
-    size_t stride = md->stride;
-    arrmeta += sizeof(strided_dim_type_arrmeta);
-    o << "[";
-    for (size_t i = 0, i_end = md->size; i != i_end; ++i, data += stride) {
-        m_element_tp.print_data(o, arrmeta, data);
-        if (i != i_end - 1) {
-            o << ", ";
-        }
-    }
-    o << "]";
+  const strided_dim_type_arrmeta *md =
+      reinterpret_cast<const strided_dim_type_arrmeta *>(arrmeta);
+  strided_array_summarized(o, get_element_type(),
+                           arrmeta + sizeof(strided_dim_type_arrmeta), data,
+                           md->size, md->stride);
 }
 
 void strided_dim_type::print_type(std::ostream& o) const
 {
-    o << "strided * " << m_element_tp;
+  o << "strided * " << m_element_tp;
 }
 
 bool strided_dim_type::is_expression() const
 {
-    return m_element_tp.is_expression();
+  return m_element_tp.is_expression();
 }
 
 bool strided_dim_type::is_unique_data_owner(const char *arrmeta) const

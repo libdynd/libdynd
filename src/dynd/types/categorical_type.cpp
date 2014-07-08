@@ -304,29 +304,27 @@ categorical_type::categorical_type(const nd::array& categories, bool presorted)
 
 void categorical_type::print_data(std::ostream& o, const char *DYND_UNUSED(arrmeta), const char *data) const
 {
-    uint32_t value;
-    switch (m_storage_type.get_type_id()) {
-        case uint8_type_id:
-            value = *reinterpret_cast<const uint8_t*>(data);
-            break;
-        case uint16_type_id:
-            value = *reinterpret_cast<const uint16_t*>(data);
-            break;
-        case uint32_type_id:
-            value = *reinterpret_cast<const uint32_t*>(data);
-            break;
-        default:
-            throw runtime_error("internal error in categorical_type::print_data");
-    }
-    if (value < m_value_to_category_index.size()) {
-        m_category_tp.print_data(o, get_category_arrmeta(),
-                                 get_category_data_from_value(value));
-    }
-    else {
-        o << "UNK"; // TODO better outpout?
-    }
+  uint32_t value;
+  switch (m_storage_type.get_type_id()) {
+  case uint8_type_id:
+    value = *reinterpret_cast<const uint8_t *>(data);
+    break;
+  case uint16_type_id:
+    value = *reinterpret_cast<const uint16_t *>(data);
+    break;
+  case uint32_type_id:
+    value = *reinterpret_cast<const uint32_t *>(data);
+    break;
+  default:
+    throw runtime_error("internal error in categorical_type::print_data");
+  }
+  if (value < m_value_to_category_index.size()) {
+    m_category_tp.print_data(o, get_category_arrmeta(),
+                             get_category_data_from_value(value));
+  } else {
+    o << "NA";
+  }
 }
-
 
 void categorical_type::print_type(std::ostream& o) const
 {

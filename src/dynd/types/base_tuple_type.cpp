@@ -60,20 +60,21 @@ base_tuple_type::base_tuple_type(type_id_t type_id,
 base_tuple_type::~base_tuple_type() {
 }
 
-void base_tuple_type::print_data(std::ostream& o, const char *arrmeta, const char *data) const
+void base_tuple_type::print_data(std::ostream &o, const char *arrmeta,
+                                 const char *data) const
 {
-    const uintptr_t *arrmeta_offsets = reinterpret_cast<const uintptr_t *>(
-        m_arrmeta_offsets.get_readonly_originptr());
-    const size_t *data_offsets = get_data_offsets(arrmeta);
-    o << "[";
-    for (intptr_t i = 0, i_end = get_field_count(); i != i_end; ++i) {
-        get_field_type(i).print_data(o, arrmeta + arrmeta_offsets[i],
-                                     data + data_offsets[i]);
-        if (i != i_end - 1) {
-            o << ", ";
-        }
+  const uintptr_t *arrmeta_offsets = reinterpret_cast<const uintptr_t *>(
+      m_arrmeta_offsets.get_readonly_originptr());
+  const size_t *data_offsets = get_data_offsets(arrmeta);
+  o << "[";
+  for (intptr_t i = 0, i_end = get_field_count(); i != i_end; ++i) {
+    get_field_type(i)
+        .print_data(o, arrmeta + arrmeta_offsets[i], data + data_offsets[i]);
+    if (i != i_end - 1) {
+      o << ", ";
     }
-    o << "]";
+  }
+  o << "]";
 }
 
 bool base_tuple_type::is_expression() const

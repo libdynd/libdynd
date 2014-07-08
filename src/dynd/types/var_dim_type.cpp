@@ -45,24 +45,19 @@ var_dim_type::~var_dim_type()
 
 void var_dim_type::print_data(std::ostream& o, const char *arrmeta, const char *data) const
 {
-    const var_dim_type_arrmeta *md = reinterpret_cast<const var_dim_type_arrmeta *>(arrmeta);
-    const var_dim_type_data *d = reinterpret_cast<const var_dim_type_data *>(data);
-    const char *element_data = d->begin + md->offset;
-    size_t stride = md->stride;
-    arrmeta += sizeof(var_dim_type_arrmeta);
-    o << "[";
-    for (size_t i = 0, i_end = d->size; i != i_end; ++i, element_data += stride) {
-        m_element_tp.print_data(o, arrmeta, element_data);
-        if (i != i_end - 1) {
-            o << ", ";
-        }
-    }
-    o << "]";
+  const var_dim_type_arrmeta *md =
+      reinterpret_cast<const var_dim_type_arrmeta *>(arrmeta);
+  const var_dim_type_data *d =
+      reinterpret_cast<const var_dim_type_data *>(data);
+  const char *element_data = d->begin + md->offset;
+  strided_array_summarized(o, get_element_type(),
+                           arrmeta + sizeof(var_dim_type_arrmeta),
+                           element_data, d->size, md->stride);
 }
 
 void var_dim_type::print_type(std::ostream& o) const
 {
-    o << "var * " << m_element_tp;
+  o << "var * " << m_element_tp;
 }
 
 bool var_dim_type::is_expression() const

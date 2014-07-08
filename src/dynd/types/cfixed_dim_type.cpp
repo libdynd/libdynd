@@ -78,15 +78,8 @@ cfixed_dim_type::~cfixed_dim_type()
 
 void cfixed_dim_type::print_data(std::ostream& o, const char *arrmeta, const char *data) const
 {
-    size_t stride = m_stride;
-    o << "[";
-    for (size_t i = 0, i_end = m_dim_size; i != i_end; ++i, data += stride) {
-        m_element_tp.print_data(o, arrmeta, data);
-        if (i != i_end - 1) {
-            o << ", ";
-        }
-    }
-    o << "]";
+  strided_array_summarized(o, get_element_type(), arrmeta, data, m_dim_size,
+                           m_stride);
 }
 
 void cfixed_dim_type::print_type(std::ostream& o) const
