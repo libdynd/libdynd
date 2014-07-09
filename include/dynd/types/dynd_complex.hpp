@@ -198,7 +198,7 @@ std::ostream& operator<<(std::ostream& out, const dynd_complex<double>& val);
 
 template <typename T>
 T abs(dynd_complex<T> z) {
-    return hypot(z.real(), z.imag());
+    return static_cast<T>(hypot(z.real(), z.imag()));
 }
 
 template <typename T>
