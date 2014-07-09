@@ -745,6 +745,14 @@ void hexadecimal_print(std::ostream& o, unsigned int value);
 void hexadecimal_print(std::ostream& o, unsigned long value);
 void hexadecimal_print(std::ostream& o, unsigned long long value);
 void hexadecimal_print(std::ostream& o, const char *data, intptr_t element_size);
+void hexadecimal_print_summarized(std::ostream &o, const char *data,
+                                  intptr_t element_size, intptr_t summary_size);
+
+void strided_array_summarized(std::ostream &o, const ndt::type &tp,
+                              const char *arrmeta, const char *data,
+                              intptr_t dim_size, intptr_t stride);
+void print_indented(std::ostream &o, const std::string &indent,
+                    const std::string &s, bool skipfirstline = false);
 
 } // namespace dynd
 

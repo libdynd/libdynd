@@ -96,3 +96,16 @@ TEST(BytesDType, Alignment) {
     btd = reinterpret_cast<const bytes_type_data *>(a.get_readonly_originptr());
     EXPECT_TRUE(offset_is_aligned(reinterpret_cast<size_t>(btd->begin), 16));
 }
+
+TEST(Bytes, Summary) {
+  stringstream ss;
+  char x[100];
+  for (size_t i = 0; i < sizeof(x); ++i) {
+    x[i] = (char)i;
+  }
+  hexadecimal_print_summarized(ss, x, 10, 20);
+  EXPECT_EQ("00010203040506070809", ss.str());
+  ss.str(""); ss.clear();
+  hexadecimal_print_summarized(ss, x, 10, 12);
+  EXPECT_EQ("0001 ... 09", ss.str());
+}

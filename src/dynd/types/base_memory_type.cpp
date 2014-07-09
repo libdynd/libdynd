@@ -21,9 +21,10 @@ size_t base_memory_type::get_default_data_size(intptr_t ndim, const intptr_t *sh
     }
 }
 
-void base_memory_type::print_data(std::ostream& o, const char *arrmeta, const char *data) const
+void base_memory_type::print_data(std::ostream &o, const char *arrmeta,
+                                  const char *data) const
 {
-    m_storage_tp.print_data(o, arrmeta + m_storage_arrmeta_offset, data);
+  m_storage_tp.print_data(o, arrmeta + m_storage_arrmeta_offset, data);
 }
 
 bool base_memory_type::is_lossless_assignment(const ndt::type& dst_tp, const ndt::type& src_tp) const

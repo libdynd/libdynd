@@ -12,6 +12,7 @@
 #include <dynd/func/callable.hpp>
 #include <dynd/func/make_callable.hpp>
 #include <dynd/types/builtin_type_properties.hpp>
+#include <dynd/kernels/string_assignment_kernels.hpp>
 
 using namespace std;
 using namespace dynd;
@@ -54,28 +55,21 @@ size_t strided_dim_type::get_default_data_size(intptr_t ndim,
 void strided_dim_type::print_data(std::ostream &o, const char *arrmeta,
                                   const char *data) const
 {
-    const strided_dim_type_arrmeta *md =
-        reinterpret_cast<const strided_dim_type_arrmeta *>(arrmeta);
-    size_t stride = md->stride;
-    arrmeta += sizeof(strided_dim_type_arrmeta);
-    o << "[";
-    for (size_t i = 0, i_end = md->size; i != i_end; ++i, data += stride) {
-        m_element_tp.print_data(o, arrmeta, data);
-        if (i != i_end - 1) {
-            o << ", ";
-        }
-    }
-    o << "]";
+  const strided_dim_type_arrmeta *md =
+      reinterpret_cast<const strided_dim_type_arrmeta *>(arrmeta);
+  strided_array_summarized(o, get_element_type(),
+                           arrmeta + sizeof(strided_dim_type_arrmeta), data,
+                           md->size, md->stride);
 }
 
 void strided_dim_type::print_type(std::ostream& o) const
 {
-    o << "strided * " << m_element_tp;
+  o << "strided * " << m_element_tp;
 }
 
 bool strided_dim_type::is_expression() const
 {
-    return m_element_tp.is_expression();
+  return m_element_tp.is_expression();
 }
 
 bool strided_dim_type::is_unique_data_owner(const char *arrmeta) const
@@ -581,6 +575,10 @@ size_t strided_dim_type::make_assignment_kernel(
       ss << "Cannot assign from " << src_tp << " to " << dst_tp;
       throw dynd::type_error(ss.str());
     }
+  } else if (dst_tp.get_kind() == string_kind) {
+    return make_any_to_string_assignment_kernel(ckb, ckb_offset, dst_tp,
+                                                dst_arrmeta, src_tp,
+                                                src_arrmeta, kernreq, ectx);
   } else if (dst_tp.get_ndim() < src_tp.get_ndim()) {
     throw broadcast_error(dst_tp, dst_arrmeta, src_tp, src_arrmeta);
   } else {

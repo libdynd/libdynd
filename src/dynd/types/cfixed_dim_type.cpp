@@ -10,6 +10,7 @@
 #include <dynd/shortvector.hpp>
 #include <dynd/exceptions.hpp>
 #include <dynd/kernels/assignment_kernels.hpp>
+#include <dynd/kernels/string_assignment_kernels.hpp>
 #include <dynd/func/callable.hpp>
 #include <dynd/func/make_callable.hpp>
 
@@ -78,15 +79,8 @@ cfixed_dim_type::~cfixed_dim_type()
 
 void cfixed_dim_type::print_data(std::ostream& o, const char *arrmeta, const char *data) const
 {
-    size_t stride = m_stride;
-    o << "[";
-    for (size_t i = 0, i_end = m_dim_size; i != i_end; ++i, data += stride) {
-        m_element_tp.print_data(o, arrmeta, data);
-        if (i != i_end - 1) {
-            o << ", ";
-        }
-    }
-    o << "]";
+  strided_array_summarized(o, get_element_type(), arrmeta, data, m_dim_size,
+                           m_stride);
 }
 
 void cfixed_dim_type::print_type(std::ostream& o) const
@@ -539,6 +533,10 @@ size_t cfixed_dim_type::make_assignment_kernel(
       ss << "Cannot assign from " << src_tp << " to " << dst_tp;
       throw dynd::type_error(ss.str());
     }
+  } else if (dst_tp.get_kind() == string_kind) {
+    return make_any_to_string_assignment_kernel(ckb, ckb_offset, dst_tp,
+                                                dst_arrmeta, src_tp,
+                                                src_arrmeta, kernreq, ectx);
   } else if (dst_tp.get_ndim() < src_tp.get_ndim()) {
     throw broadcast_error(dst_tp, dst_arrmeta, src_tp, src_arrmeta);
   } else {
