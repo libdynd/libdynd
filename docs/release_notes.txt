@@ -5,6 +5,50 @@ DyND is a C++ library for array programming with a dynamic
 type system. It is currently in a preview state, and nothing
 about the API or the ABI is guaranteed to stay the same.
 
+Version 0.6.3
+-------------
+
+Commits by author since last release:
+
+   201  Mark Wiebe
+    65  Irwin Zaid
+     4  T.J. Alumbaugh
+
+- Date parsing adjustments, making it more relaxed for now.
+- Improve JSON parsing performance.
+- Accept integer values like 123.0 and 1e5 when converting string to int.
+- Add ndarrayarg type to make the callable interface work more cleanly.
+- Add funcproto type, for function types like "(int, real) -> 3 * int"
+- Add typevar, typevar_dim and ellipsis_dim types as specified by datashape.
+- Implement type pattern matching and substitution based on typevars.
+- Design change from deferred evaluation to immediate evaluation, instead
+  with the goal of creating functional array programming primitives that
+  can be composed.
+- Rename ckernel_deferred to arrfunc as a representation of an array function.
+- Convert internal type details of tuple and struct to use nd::array for
+  arrays of field names, types, and offsets.
+- Incorporate 3rd party cephes library (from SciPy version) to add support
+  for special functions.
+- Add conversion for int128 and uint128 to/from strings.
+- Add some preliminary support for an option[T] type.
+- Add syntax like nd::empty<float[3][4]>() to create uninitialized arrays.
+- A first pass implementation of neighborhood iterators.
+- Create an adapt[] type, for providing parameterized ways to adapt between
+  types. For example, "adapt[(int32) -> date, 'days since 2012']" is a type
+  which adapts integers representing days since 2012-01-01 as a date.
+- Change nd::empty to treat integer parameters at the beginning as new
+  strided dimensions. nd::typed_empty provides the previous behavior, where
+  these parameters provide shape information to the dimensions already in
+  the type.
+- Implement permute, transpose, and rotate which apply permutations to the
+  shape of strided dimensions.
+- Add FFTW wrapper functions, enabled by a build time option.
+- Change printing code to summarize data instead of printing all of it.
+  This is useful for large arrays, which would otherwise slowly create
+  giant strings to print.
+- Fix printing of array types as strings, to longer produce a broadcasting
+  error.
+
 Version 0.6.2
 -------------
 
