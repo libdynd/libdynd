@@ -10,6 +10,7 @@
 #include <dynd/shape_tools.hpp>
 #include <dynd/exceptions.hpp>
 #include <dynd/kernels/assignment_kernels.hpp>
+#include <dynd/kernels/string_assignment_kernels.hpp>
 #include <dynd/func/callable.hpp>
 #include <dynd/func/make_callable.hpp>
 
@@ -526,6 +527,10 @@ size_t fixed_dim_type::make_assignment_kernel(
       ss << "Cannot assign from " << src_tp << " to " << dst_tp;
       throw dynd::type_error(ss.str());
     }
+  } else if (dst_tp.get_kind() == string_kind) {
+    return make_any_to_string_assignment_kernel(ckb, ckb_offset, dst_tp,
+                                                dst_arrmeta, src_tp,
+                                                src_arrmeta, kernreq, ectx);
   } else if (dst_tp.get_ndim() < src_tp.get_ndim()) {
     throw broadcast_error(dst_tp, dst_arrmeta, src_tp, src_arrmeta);
   } else {

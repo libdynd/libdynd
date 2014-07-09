@@ -591,7 +591,11 @@ void dynd::strided_array_summarized(std::ostream &o, const ndt::type &tp,
         trailing.erase(trailing.begin());
       }
       if (num_rows > row_threshold && leading.size() > 1) {
-        num_rows -= line_count(leading.back());
+        if (trailing.empty()) {
+          trailing.insert(trailing.begin(), leading.back());
+        } else {
+          num_rows -= line_count(leading.back());
+        }
         leading.pop_back();
       }
     }
@@ -602,11 +606,13 @@ void dynd::strided_array_summarized(std::ostream &o, const ndt::type &tp,
       o << ",\n";
       print_indented(o, " ", leading[i]);
     }
-    if (!trailing.empty()) {
+    if (leading.size() != (size_t)dim_size) {
       if ((size_t)dim_size > (leading.size() + trailing.size())) {
         o << ",\n ...\n";
       }
-      print_indented(o, " ", trailing.front());
+      if (!trailing.empty()) {
+        print_indented(o, " ", trailing.front());
+      }
       for (size_t i = 1; i < trailing.size(); ++i) {
         o << ",\n";
         print_indented(o, " ", trailing[i]);
@@ -666,7 +672,7 @@ void dynd::strided_array_summarized(std::ostream &o, const ndt::type &tp,
         o << ",\n";
       }
     }
-    if (!trailing.empty()) {
+    if (leading.size() != (size_t)dim_size) {
       i = 0;
       i_size = trailing.size();
       o << ",\n ...\n";

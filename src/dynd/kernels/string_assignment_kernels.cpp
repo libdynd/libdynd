@@ -298,3 +298,45 @@ size_t dynd::make_blockref_string_to_fixedstring_assignment_kernel(
     self->m_overflow_check = (errmode != assign_error_nocheck);
     return ckb_offset;
 }
+
+namespace {
+struct date_to_string_ck : public kernels::unary_ck<date_to_string_ck> {
+  ndt::type m_dst_string_tp;
+  const char *m_dst_arrmeta;
+  ndt::type m_src_tp;
+  const char *m_src_arrmeta;
+  eval::eval_context m_ectx;
+
+  inline void single(char *dst, const char *src)
+  {
+    stringstream ss;
+    m_src_tp.extended()->print_data(ss, m_src_arrmeta, src);
+    const base_string_type *bst =
+        static_cast<const base_string_type *>(m_dst_string_tp.extended());
+    bst->set_from_utf8_string(m_dst_arrmeta, dst, ss.str(), &m_ectx);
+  }
+};
+} // anonymous namespace
+
+size_t dynd::make_any_to_string_assignment_kernel(
+    ckernel_builder *ckb, intptr_t ckb_offset,
+    const ndt::type &dst_tp, const char *dst_arrmeta,
+    const ndt::type &src_tp, const char *src_arrmeta,
+    kernel_request_t kernreq, const eval::eval_context *ectx)
+{
+  typedef date_to_string_ck self_type;
+  if (dst_tp.get_kind() != string_kind) {
+    stringstream ss;
+    ss << "make_any_to_string_assignment_kernel: dest type " << dst_tp
+       << " is not a string type";
+    throw runtime_error(ss.str());
+  }
+
+  self_type *self = self_type::create_leaf(ckb, kernreq, ckb_offset);
+  self->m_dst_string_tp = dst_tp;
+  self->m_dst_arrmeta = dst_arrmeta;
+  self->m_src_tp = src_tp;
+  self->m_src_arrmeta = src_arrmeta;
+  self->m_ectx = *ectx;
+  return ckb_offset;
+}

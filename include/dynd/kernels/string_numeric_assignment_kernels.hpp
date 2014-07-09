@@ -33,6 +33,7 @@ size_t make_string_to_builtin_assignment_kernel(
     ckernel_builder *ckb, intptr_t ckb_offset, type_id_t dst_type_id,
     const ndt::type &src_string_dt, const char *src_arrmeta,
     kernel_request_t kernreq, const eval::eval_context *ectx);
+
 } // namespace dynd
 
 #endif // _DYND__STRING_NUMERIC_ASSIGNMENT_KERNELS_HPP_

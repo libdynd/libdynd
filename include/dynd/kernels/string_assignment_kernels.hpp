@@ -55,6 +55,15 @@ size_t make_blockref_string_to_fixedstring_assignment_kernel(
     string_encoding_t dst_encoding, string_encoding_t src_encoding,
     kernel_request_t kernreq, const eval::eval_context *ectx);
 
+/**
+ * Makes a kernel which converts values to string using the
+ * stream output operator defined on the type objects.
+ */
+size_t make_any_to_string_assignment_kernel(
+    ckernel_builder *ckb, intptr_t ckb_offset, const ndt::type &dst_tp,
+    const char *dst_arrmeta, const ndt::type &src_tp, const char *src_arrmeta,
+    kernel_request_t kernreq, const eval::eval_context *ectx);
+
 } // namespace dynd
 
 #endif // _DYND__STRING_ASSIGNMENT_KERNELS_HPP_

@@ -15,6 +15,7 @@
 #include <dynd/exceptions.hpp>
 #include <dynd/kernels/assignment_kernels.hpp>
 #include <dynd/kernels/var_dim_assignment_kernels.hpp>
+#include <dynd/kernels/string_assignment_kernels.hpp>
 #include <dynd/func/callable.hpp>
 #include <dynd/func/make_callable.hpp>
 
@@ -579,54 +580,57 @@ size_t var_dim_type::make_assignment_kernel(
     const char *dst_arrmeta, const ndt::type &src_tp, const char *src_arrmeta,
     kernel_request_t kernreq, const eval::eval_context *ectx) const
 {
-    if (this == dst_tp.extended()) {
-        intptr_t src_size, src_stride;
-        ndt::type src_el_tp;
-        const char *src_el_arrmeta;
+  if (this == dst_tp.extended()) {
+    intptr_t src_size, src_stride;
+    ndt::type src_el_tp;
+    const char *src_el_arrmeta;
 
-        if (src_tp.get_ndim() < dst_tp.get_ndim()) {
-            // If the src has fewer dimensions, broadcast it across this one
-            return make_broadcast_to_var_dim_assignment_kernel(
-                ckb, ckb_offset, dst_tp, dst_arrmeta, src_tp, src_arrmeta,
-                kernreq, ectx);
-        } else if (src_tp.get_type_id() == var_dim_type_id) {
-            // var_dim to var_dim
-            return make_var_dim_assignment_kernel(ckb, ckb_offset, dst_tp,
-                                                  dst_arrmeta, src_tp,
-                                                  src_arrmeta, kernreq, ectx);
-        } else if (src_tp.get_as_strided_dim(src_arrmeta, src_size,
-                                             src_stride, src_el_tp,
-                                             src_el_arrmeta)) {
-            // strided_dim to var_dim
-            return make_strided_to_var_dim_assignment_kernel(
-                ckb, ckb_offset, dst_tp, dst_arrmeta, src_size, src_stride,
-                src_el_tp, src_el_arrmeta, kernreq, ectx);
-        } else if (!src_tp.is_builtin()) {
-            // Give the src type a chance to make a kernel
-            return src_tp.extended()->make_assignment_kernel(
-                ckb, ckb_offset, dst_tp, dst_arrmeta, src_tp, src_arrmeta,
-                kernreq, ectx);
-        } else {
-            stringstream ss;
-            ss << "Cannot assign from " << src_tp << " to " << dst_tp;
-            throw dynd::type_error(ss.str());
-        }
-    } else if (dst_tp.get_ndim() < src_tp.get_ndim()) {
-        throw broadcast_error(dst_tp, dst_arrmeta, src_tp, src_arrmeta);
+    if (src_tp.get_ndim() < dst_tp.get_ndim()) {
+      // If the src has fewer dimensions, broadcast it across this one
+      return make_broadcast_to_var_dim_assignment_kernel(
+          ckb, ckb_offset, dst_tp, dst_arrmeta, src_tp, src_arrmeta, kernreq,
+          ectx);
+    } else if (src_tp.get_type_id() == var_dim_type_id) {
+      // var_dim to var_dim
+      return make_var_dim_assignment_kernel(ckb, ckb_offset, dst_tp,
+                                            dst_arrmeta, src_tp, src_arrmeta,
+                                            kernreq, ectx);
+    } else if (src_tp.get_as_strided_dim(src_arrmeta, src_size, src_stride,
+                                         src_el_tp, src_el_arrmeta)) {
+      // strided_dim to var_dim
+      return make_strided_to_var_dim_assignment_kernel(
+          ckb, ckb_offset, dst_tp, dst_arrmeta, src_size, src_stride, src_el_tp,
+          src_el_arrmeta, kernreq, ectx);
+    } else if (!src_tp.is_builtin()) {
+      // Give the src type a chance to make a kernel
+      return src_tp.extended()->make_assignment_kernel(
+          ckb, ckb_offset, dst_tp, dst_arrmeta, src_tp, src_arrmeta, kernreq,
+          ectx);
     } else {
-      if (dst_tp.get_type_id() == strided_dim_type_id ||
-          dst_tp.get_type_id() == fixed_dim_type_id ||
-          dst_tp.get_type_id() == cfixed_dim_type_id) {
-        // var_dim to strided_dim
-        return make_var_to_strided_dim_assignment_kernel(
-            ckb, ckb_offset, dst_tp, dst_arrmeta, src_tp, src_arrmeta, kernreq,
-            ectx);
-      } else {
-        stringstream ss;
-        ss << "Cannot assign from " << src_tp << " to " << dst_tp;
-        throw dynd::type_error(ss.str());
-      }
+      stringstream ss;
+      ss << "Cannot assign from " << src_tp << " to " << dst_tp;
+      throw dynd::type_error(ss.str());
     }
+  } else if (dst_tp.get_kind() == string_kind) {
+    return make_any_to_string_assignment_kernel(ckb, ckb_offset, dst_tp,
+                                                dst_arrmeta, src_tp,
+                                                src_arrmeta, kernreq, ectx);
+  } else if (dst_tp.get_ndim() < src_tp.get_ndim()) {
+    throw broadcast_error(dst_tp, dst_arrmeta, src_tp, src_arrmeta);
+  } else {
+    if (dst_tp.get_type_id() == strided_dim_type_id ||
+        dst_tp.get_type_id() == fixed_dim_type_id ||
+        dst_tp.get_type_id() == cfixed_dim_type_id) {
+      // var_dim to strided_dim
+      return make_var_to_strided_dim_assignment_kernel(
+          ckb, ckb_offset, dst_tp, dst_arrmeta, src_tp, src_arrmeta, kernreq,
+          ectx);
+    } else {
+      stringstream ss;
+      ss << "Cannot assign from " << src_tp << " to " << dst_tp;
+      throw dynd::type_error(ss.str());
+    }
+  }
 }
 
 void var_dim_type::foreach_leading(const char *arrmeta, char *data,
