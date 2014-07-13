@@ -662,6 +662,8 @@ void dynd::strided_array_summarized(std::ostream &o, const ndt::type &tp,
 
     intptr_t i = 0, j;
     intptr_t i_size = leading.size();
+    if (!i_size)
+        o << '[';
     while (i < i_size) {
       o << ((i == 0) ? "[" : " ") << setw(max_num_cols) << leading[i]
         << setw(0);
