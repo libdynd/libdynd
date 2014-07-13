@@ -598,6 +598,14 @@ TEST(Array, SimplePrint) {
   EXPECT_EQ("array([1, 2, 3],\n      type=\"strided * int32\")", ss.str());
 }
 
+TEST(Array, SimplePrintEmpty) {
+  std::vector<float> v;
+  nd::array a = v;
+  stringstream ss;
+  ss << a;
+  EXPECT_EQ("array([],\n      type=\"strided * float32\")", ss.str());
+}
+
 REGISTER_TYPED_TEST_CASE_P(Array, ScalarConstructor, OneDimConstructor, TwoDimConstructor, ThreeDimConstructor, AsScalar);
 
 INSTANTIATE_TYPED_TEST_CASE_P(Default, Array, DefaultMemory);
