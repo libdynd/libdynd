@@ -6,6 +6,7 @@
 #include <dynd/kernels/assignment_kernels.hpp>
 #include <dynd/func/neighborhood_arrfunc.hpp>
 #include <dynd/kernels/ckernel_common_functions.hpp>
+#include <dynd/kernels/expr_kernels.hpp>
 #include <dynd/types/strided_dim_type.hpp>
 #include <dynd/types/var_dim_type.hpp>
 #include <dynd/types/typevar_dim_type.hpp>
@@ -19,39 +20,78 @@ using namespace dynd;
 namespace {
 
 
-class neighborhood2d_ck : public kernels::general_ck<neighborhood2d_ck> {
+struct neighborhood2d_ck : public kernels::expr_ck<neighborhood2d_ck, 2> {
   // The neighborhood
-  intptr_t m_nh_shape[2], m_nh_centre[2];
-  // Both src and dst have the same shape
+  intptr_t m_nh_centre[2];
+  // Arrmeta for a full neighborhood "strided * strided * T"
+  arrmeta_holder m_nh_arrmeta;
+  // Arrmeta for a partial neighborhood "strided * strided * pointer[T]"
+  //TODO arrmeta_holder m_nh_partial_arrmeta
+  // The shape of the src/dst arrays
   intptr_t m_shape[2];
-  // But may have different strides
+  // The strides of the src/dst arrays may differ
   intptr_t m_dst_strides[2], m_src_strides[2];
 
-  static void single(char *dst, const char *const *src, ckernel_prefix *rawself)
+  inline void single(char *dst, const char *const *src)
   {
     // First pass of this implementation just visits all the complete
     // neighborhoods
-    self_type *self = get_self(rawself);
-    ckernel_prefix *nh_op = self->get_child_ckernel();
+    ckernel_prefix *nh_op = get_child_ckernel();
     expr_strided_t nh_op_fn = nh_op->get_function<expr_strided_t>();
 
     const char *src_it[2] = {src[0], src[1]};
-    intptr_t src_it_strides[2] = {self->m_src_strides[1], 0};
+    intptr_t src_it_strides[2] = {m_src_strides[1], 0};
+    const strided_dim_type_arrmeta *nh_arrmeta =
+        reinterpret_cast<const strided_dim_type_arrmeta *>(m_nh_arrmeta.get());
 
     // Position the destination at the first output
-    dst += self->m_nh_centre[0] * self->m_dst_strides[0] +
-           self->m_nh_centre[1] * self->m_dst_strides[1];
-    for (intptr_t coord0 = 0; coord0 < self->m_shape[0] - self->m_nh_shape[0];
+    dst += m_nh_centre[0] * m_dst_strides[0] +
+           m_nh_centre[1] * m_dst_strides[1];
+    for (intptr_t coord0 = 0; coord0 < m_shape[0] - nh_arrmeta[0].size;
          ++coord0) {
       // Handle the whole run at once using the child strided ckernel
-      nh_op_fn(dst, self->m_dst_strides[1], src_it, src_it_strides,
-               self->m_shape[1] - self->m_nh_shape[1], nh_op);
-      dst += self->m_dst_strides[0];
-      src_it_strides[0] += self->m_src_strides[0];
+      nh_op_fn(dst, m_dst_strides[1], src_it, src_it_strides,
+               m_shape[1] - nh_arrmeta[1].size, nh_op);
+      dst += m_dst_strides[0];
+      src_it_strides[0] += m_src_strides[0];
     }
   }
 };
+
+struct neighborhood2d {
+  intptr_t nh_shape[2];
+  intptr_t nh_centre[2];
+  nd::arrfunc neighborhood_op;
+};
 } // anonymous namespace
+
+static intptr_t instantiate_neighborhood2d(
+    const arrfunc_type_data *af_self, dynd::ckernel_builder *ckb,
+    intptr_t ckb_offset, const ndt::type &dst_tp, const char *dst_arrmeta,
+    const ndt::type *src_tp, const char *const *src_arrmeta,
+    kernel_request_t kernreq, const eval::eval_context *ectx)
+{
+  typedef neighborhood2d_ck self_type;
+  const neighborhood2d *nh = af_self->get_data_as<neighborhood2d>();
+  self_type *self = self_type::create(ckb, kernreq, ckb_offset);
+
+  // Process the input for the neighborhood ckernel
+  const char *nh_dst_arrmeta = dst_arrmeta;
+  ndt::type nh_dst_tp =
+      dst_tp.get_type_at_dimension(const_cast<char **>(&nh_dst_arrmeta), 2);
+  ndt::type nh_src_tp[2];
+  arrmeta_holder(nh_src_tp[0]).swap(self->m_nh_arrmeta);
+  const char *nh_src_arrmeta[2] = {self->m_nh_arrmeta.get(), src_arrmeta[1]};
+  self->m_nh_shape[0] = nh->nh_shape[0];
+  self->m_nh_shape[1] = nh->nh_shape[1];
+  self->m_nh_centre[0] = nh->nh_centre[0];
+  self->m_nh_centre[1] = nh->nh_centre[1];
+
+  ckb_offset = nh->neighborhood_op.get()->instantiate(
+      nh->neighborhood_op.get(), ckb, ckb_offset, nh_dst_tp, nh_dst_arrmeta,
+      nh_src_tp, nh_src_arrmeta, kernel_request_strided, ectx);
+  return ckb_offset;
+}
 
 void dynd::make_neighborhood2d_arrfunc(arrfunc_type_data *out_af,
                                        const nd::arrfunc &neighborhood_op,
@@ -75,6 +115,10 @@ void dynd::make_neighborhood2d_arrfunc(arrfunc_type_data *out_af,
     throw invalid_argument(ss.str());
   }
   out_af->func_proto = ndt::substitute(result_pattern, typevars, true);
-  
-
+  out_af->instantiate = &instantiate_neighborhood2d;
+  neighborhood2d *nh = out_af->get_data_as<neighborhood2d>();
+  nh->nh_shape[0] = nh_shape[0];
+  nh->nh_shape[1] = nh_shape[1];
+  nh->nh_centre[0] = nh_centre[0];
+  nh->nh_centre[1] = nh_centre[1];
 }
