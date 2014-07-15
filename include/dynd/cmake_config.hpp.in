@@ -1,0 +1,3 @@
+#cmakedefine DYND_CUDA
+#define DYND_ELWISE_MAX @DYND_ELWISE_MAX@
+#cmakedefine DYND_FFTW
