@@ -57,7 +57,8 @@ static int cleanup_atexit = atexit(fftcleanup);
             howmany_dims[i].os = dst_strides[j] / sizeof(LIB##_complex); \
         } \
 \
-        LIB##_plan plan = LIB##_plan_guru_dft(rank, dims.get(), howmany_rank, howmany_dims.get(), src, dst, sign, flags); \
+        LIB##_plan plan = LIB##_plan_guru_dft(rank, dims.get(), howmany_rank, howmany_rank ? howmany_dims.get() : NULL, \
+            src, dst, sign, flags); \
         if (plan != NULL) { \
             plans[key] = plan; \
         } \
