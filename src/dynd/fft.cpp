@@ -37,6 +37,8 @@ static int cleanup_atexit = atexit(fftcleanup);
             return NULL; \
         } \
 \
+        LIB##_plan plan; \
+\
         int rank = axes.size(); \
         shortvector<LIB##_iodim> dims(rank); \
         intptr_t i, j; \
@@ -47,18 +49,23 @@ static int cleanup_atexit = atexit(fftcleanup);
         } \
 \
         int howmany_rank = shape.size() - rank; \
-        shortvector<LIB##_iodim> howmany_dims(howmany_rank); \
-        vector<intptr_t>::iterator iter; \
-        for (i = 0, j = 0, iter = axes.begin(); i < howmany_rank; ++i, ++j) { \
-            for (; j == *iter; ++j, ++iter) { \
+        if (howmany_rank == 0) { \
+            plan = LIB##_plan_guru_dft(rank, dims.get(), 0, NULL, \
+                src, dst, sign, flags); \
+        } else { \
+            shortvector<LIB##_iodim> howmany_dims(howmany_rank); \
+            vector<intptr_t>::iterator iter; \
+            for (i = 0, j = 0, iter = axes.begin(); i < howmany_rank; ++i, ++j) { \
+                for (; j == *iter; ++j, ++iter) { \
+                } \
+                howmany_dims[i].n = shape[j]; \
+                howmany_dims[i].is = src_strides[j] / sizeof(LIB##_complex); \
+                howmany_dims[i].os = dst_strides[j] / sizeof(LIB##_complex); \
             } \
-            howmany_dims[i].n = shape[j]; \
-            howmany_dims[i].is = src_strides[j] / sizeof(LIB##_complex); \
-            howmany_dims[i].os = dst_strides[j] / sizeof(LIB##_complex); \
+            plan = LIB##_plan_guru_dft(rank, dims.get(), howmany_rank, howmany_dims.get(), \
+                src, dst, sign, flags); \
         } \
 \
-        LIB##_plan plan = LIB##_plan_guru_dft(rank, dims.get(), howmany_rank, howmany_rank ? howmany_dims.get() : NULL, \
-            src, dst, sign, flags); \
         if (plan != NULL) { \
             plans[key] = plan; \
         } \
