@@ -95,7 +95,7 @@ nd::array irfft(const nd::array &x, std::vector<intptr_t> shape, unsigned int fl
  * @return A complex array with dimensions specified by 'shape'.
  */
 inline nd::array fft(const nd::array &x, std::vector<intptr_t> shape, std::vector<intptr_t> axes) {
-    if (x.get_ndim() != static_cast<intptr_t>(shape.size())) {
+    if (x.get_ndim() != static_cast<intptr_t>(shape.size()) || static_cast<intptr_t>(axes.size()) > x.get_ndim()) {
         throw std::invalid_argument("dimensions provided for fft do not match");
     }
 
@@ -107,9 +107,9 @@ inline nd::array fft(const nd::array &x, std::vector<intptr_t> shape, std::vecto
 }
 
 inline nd::array fft(const nd::array &x, std::vector<intptr_t> shape) {
-    std::vector<intptr_t> axes(x.get_ndim());
-    for (size_t i = 0; i < axes.size(); ++i) {
-        axes[i] = i;
+    std::vector<intptr_t> axes;
+    for (intptr_t i = 0; i < x.get_ndim(); ++i) {
+        axes.push_back(i);
     }
 
     return fft(x, shape, axes);
@@ -127,7 +127,7 @@ DECL_INLINES(fft)
  * @return A complex array with dimensions specified by 'shape'.
  */
 inline nd::array ifft(const nd::array &x, std::vector<intptr_t> shape, std::vector<intptr_t> axes) {
-    if (x.get_ndim() != static_cast<intptr_t>(shape.size())) {
+    if (x.get_ndim() != static_cast<intptr_t>(shape.size()) || static_cast<intptr_t>(axes.size()) > x.get_ndim()) {
         throw std::invalid_argument("dimensions provided for ifft do not match");
     }
 
@@ -139,9 +139,9 @@ inline nd::array ifft(const nd::array &x, std::vector<intptr_t> shape, std::vect
 }
 
 inline nd::array ifft(const nd::array &x, std::vector<intptr_t> shape) {
-    std::vector<intptr_t> axes(x.get_ndim());
-    for (size_t i = 0; i < axes.size(); ++i) {
-        axes[i] = i;
+    std::vector<intptr_t> axes;
+    for (intptr_t i = 0; i < x.get_ndim(); ++i) {
+        axes.push_back(i);
     }
 
     return ifft(x, shape, axes);
