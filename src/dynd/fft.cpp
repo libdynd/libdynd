@@ -39,14 +39,25 @@ static int cleanup_atexit = atexit(fftcleanup);
 \
         int rank = axes.size(); \
         shortvector<LIB##_iodim> dims(rank); \
-        intptr_t i, j; \
-        for (i = 0, j = axes[0]; i < rank; ++i, j = axes[i]) { \
+        for (intptr_t i = 0; i < rank; ++i) { \
+            intptr_t j = axes[i]; \
             dims[i].n = shape[j]; \
             dims[i].is = src_strides[j] / sizeof(LIB##_complex); \
             dims[i].os = dst_strides[j] / sizeof(LIB##_complex); \
         } \
 \
-        LIB##_plan plan = LIB##_plan_guru_dft(rank, dims.get(), 0, NULL, \
+        int howmany_rank = shape.size() - rank; \
+        shortvector<LIB##_iodim> howmany_dims(howmany_rank); \
+        vector<intptr_t>::iterator iter = axes.begin(); \
+        for (intptr_t i = 0, j = 0; i < howmany_rank; ++i, ++j) { \
+            for (; j == *iter; ++j, ++iter) { \
+            } \
+            howmany_dims[i].n = shape[j]; \
+            howmany_dims[i].is = src_strides[j] / sizeof(LIB##_complex); \
+            howmany_dims[i].os = dst_strides[j] / sizeof(LIB##_complex); \
+        } \
+\
+        LIB##_plan plan = LIB##_plan_guru_dft(rank, dims.get(), howmany_rank, howmany_dims.get(), \
             src, dst, sign, flags); \
 \
         if (plan != NULL) { \
@@ -57,21 +68,7 @@ static int cleanup_atexit = atexit(fftcleanup);
     }
 
 /*
-        int howmany_rank = shape.size() - rank;
-        if (howmany_rank == 0) {
-            plan = LIB##_plan_guru_dft(rank, dims.get(), 0, NULL,
-                src, dst, sign, flags);
-        } else {
-            shortvector<LIB##_iodim> howmany_dims(howmany_rank);
-            vector<intptr_t>::iterator iter;
-            for (i = 0, j = 0, iter = axes.begin(); i < howmany_rank; ++i, ++j) {
-                for (; j == *iter; ++j, ++iter) {
-                }
-                howmany_dims[i].n = shape[j];
-                howmany_dims[i].is = src_strides[j] / sizeof(LIB##_complex);
-                howmany_dims[i].os = dst_strides[j] / sizeof(LIB##_complex);
-            }
-        }
+
 */
 
 FFTW_FFTPLAN_C2C(fftwf, float, complex_float32_type_id, complex_float32_type_id)
