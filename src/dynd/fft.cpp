@@ -50,7 +50,7 @@ static int cleanup_atexit = atexit(fftcleanup);
         shortvector<LIB##_iodim> howmany_dims(howmany_rank); \
         vector<intptr_t>::iterator iter = axes.begin(); \
         for (intptr_t i = 0, j = 0; i < howmany_rank; ++i, ++j) { \
-            for (; j == *iter; ++j, ++iter) { \
+            for (; iter != axes.end() && j == *iter; ++j, ++iter) { \
             } \
             howmany_dims[i].n = shape[j]; \
             howmany_dims[i].is = src_strides[j] / sizeof(LIB##_complex); \
