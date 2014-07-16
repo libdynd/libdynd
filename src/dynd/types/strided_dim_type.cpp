@@ -19,7 +19,7 @@ using namespace dynd;
 
 strided_dim_type::strided_dim_type(const ndt::type& element_tp)
     : base_uniform_dim_type(strided_dim_type_id, element_tp, 0, element_tp.get_data_alignment(),
-                    sizeof(strided_dim_type_arrmeta), type_flag_none)
+                    sizeof(strided_dim_type_arrmeta), type_flag_none, true)
 {
   // Propagate the inherited flags from the element
   m_members.flags |=
@@ -59,7 +59,7 @@ void strided_dim_type::print_data(std::ostream &o, const char *arrmeta,
       reinterpret_cast<const strided_dim_type_arrmeta *>(arrmeta);
   strided_array_summarized(o, get_element_type(),
                            arrmeta + sizeof(strided_dim_type_arrmeta), data,
-                           md->size, md->stride);
+                           md->dim_size, md->stride);
 }
 
 void strided_dim_type::print_type(std::ostream& o) const
@@ -158,7 +158,7 @@ intptr_t strided_dim_type::apply_linear_index(
     } else {
         bool remove_dimension;
         intptr_t start_index, index_stride, dimension_size;
-        apply_single_linear_index(*indices, md->size, current_i, &root_tp,
+        apply_single_linear_index(*indices, md->dim_size, current_i, &root_tp,
                         remove_dimension, start_index, index_stride, dimension_size);
         if (remove_dimension) {
             // Apply the strided offset and continue applying the index
@@ -187,7 +187,7 @@ intptr_t strided_dim_type::apply_linear_index(
             // Produce the new offset data, stride, and size for the resulting array
             intptr_t offset = md->stride * start_index;
             out_md->stride = md->stride * index_stride;
-            out_md->size = dimension_size;
+            out_md->dim_size = dimension_size;
             if (!m_element_tp.is_builtin()) {
                 const strided_dim_type *result_etp = result_tp.tcast<strided_dim_type>();
                 offset += m_element_tp.extended()->apply_linear_index(nindices - 1, indices + 1,
@@ -206,7 +206,7 @@ ndt::type strided_dim_type::at_single(intptr_t i0, const char **inout_arrmeta, c
     if (inout_arrmeta) {
         const strided_dim_type_arrmeta *md = reinterpret_cast<const strided_dim_type_arrmeta *>(*inout_arrmeta);
         // Bounds-checking of the index
-        i0 = apply_single_index(i0, md->size, NULL);
+        i0 = apply_single_index(i0, md->dim_size, NULL);
         // Modify the arrmeta
         *inout_arrmeta += sizeof(strided_dim_type_arrmeta);
         // If requested, modify the data
@@ -235,12 +235,12 @@ ndt::type strided_dim_type::get_type_at_dimension(char **inout_arrmeta,
 intptr_t strided_dim_type::get_dim_size(const char *arrmeta,
                                         const char *DYND_UNUSED(data)) const
 {
-    if (arrmeta != NULL) {
-        return reinterpret_cast<const strided_dim_type_arrmeta *>(arrmeta)
-            ->size;
-    } else {
-        return -1;
-    }
+  if (arrmeta != NULL) {
+    return reinterpret_cast<const strided_dim_type_arrmeta *>(arrmeta)
+        ->dim_size;
+  } else {
+    return -1;
+  }
 }
 
 void strided_dim_type::get_shape(intptr_t ndim, intptr_t i,
@@ -248,8 +248,8 @@ void strided_dim_type::get_shape(intptr_t ndim, intptr_t i,
 {
     if (arrmeta) {
         const strided_dim_type_arrmeta *md = reinterpret_cast<const strided_dim_type_arrmeta *>(arrmeta);
-        out_shape[i] = md->size;
-        if (md->size != 1) {
+        out_shape[i] = md->dim_size;
+        if (md->dim_size != 1) {
             data = NULL;
         }
     } else {
@@ -336,7 +336,7 @@ void strided_dim_type::arrmeta_default_construct(char *arrmeta, intptr_t ndim, c
                                                      : m_element_tp.extended()->get_default_data_size(ndim-1, shape+1);
 
     strided_dim_type_arrmeta *md = reinterpret_cast<strided_dim_type_arrmeta *>(arrmeta);
-    md->size = shape[0];
+    md->dim_size = shape[0];
     if (shape[0] > 1) {
         md->stride = element_size;
     } else {
@@ -351,7 +351,7 @@ void strided_dim_type::arrmeta_copy_construct(char *dst_arrmeta, const char *src
 {
     const strided_dim_type_arrmeta *src_md = reinterpret_cast<const strided_dim_type_arrmeta *>(src_arrmeta);
     strided_dim_type_arrmeta *dst_md = reinterpret_cast<strided_dim_type_arrmeta *>(dst_arrmeta);
-    dst_md->size = src_md->size;
+    dst_md->dim_size = src_md->dim_size;
     dst_md->stride = src_md->stride;
     if (!m_element_tp.is_builtin()) {
         m_element_tp.extended()->arrmeta_copy_construct(dst_arrmeta + sizeof(strided_dim_type_arrmeta),
@@ -364,7 +364,7 @@ size_t strided_dim_type::arrmeta_copy_construct_onedim(char *dst_arrmeta, const 
 {
     const strided_dim_type_arrmeta *src_md = reinterpret_cast<const strided_dim_type_arrmeta *>(src_arrmeta);
     strided_dim_type_arrmeta *dst_md = reinterpret_cast<strided_dim_type_arrmeta *>(dst_arrmeta);
-    dst_md->size = src_md->size;
+    dst_md->dim_size = src_md->dim_size;
     dst_md->stride = src_md->stride;
     return sizeof(strided_dim_type_arrmeta);
 }
@@ -397,7 +397,7 @@ void strided_dim_type::arrmeta_debug_print(const char *arrmeta, std::ostream &o,
   const strided_dim_type_arrmeta *md =
       reinterpret_cast<const strided_dim_type_arrmeta *>(arrmeta);
   o << indent << "strided_dim arrmeta\n";
-  o << indent << " size: " << md->size << "\n";
+  o << indent << " size: " << md->dim_size << "\n";
   o << indent << " stride: " << md->stride << "\n";
   if (!m_element_tp.is_builtin()) {
     m_element_tp.extended()->arrmeta_debug_print(
@@ -493,7 +493,7 @@ void strided_dim_type::data_destruct(const char *arrmeta, char *data) const
     const strided_dim_type_arrmeta *md = reinterpret_cast<const strided_dim_type_arrmeta *>(arrmeta);
     m_element_tp.extended()->data_destruct_strided(
                     arrmeta + sizeof(strided_dim_type_arrmeta),
-                    data, md->stride, md->size);
+                    data, md->stride, md->dim_size);
 }
 
 void strided_dim_type::data_destruct_strided(const char *arrmeta, char *data,
@@ -502,7 +502,7 @@ void strided_dim_type::data_destruct_strided(const char *arrmeta, char *data,
     const strided_dim_type_arrmeta *md = reinterpret_cast<const strided_dim_type_arrmeta *>(arrmeta);
     arrmeta += sizeof(strided_dim_type_arrmeta);
     intptr_t child_stride = md->stride;
-    size_t child_size = md->size;
+    size_t child_size = md->dim_size;
 
     for (size_t i = 0; i != count; ++i, data += stride) {
         m_element_tp.extended()->data_destruct_strided(
@@ -525,7 +525,7 @@ size_t strided_dim_type::make_assignment_kernel(
     if (src_tp.get_ndim() < dst_tp.get_ndim()) {
       kernels::strided_assign_ck *self =
           kernels::strided_assign_ck::create(ckb, kernreq, ckb_offset);
-      self->m_size = dst_md->size;
+      self->m_size = dst_md->dim_size;
       self->m_dst_stride = dst_md->stride;
       // If the src has fewer dimensions, broadcast it across this one
       self->m_src_stride = 0;
@@ -533,15 +533,15 @@ size_t strided_dim_type::make_assignment_kernel(
           ckb, ckb_offset, m_element_tp,
           dst_arrmeta + sizeof(strided_dim_type_arrmeta), src_tp, src_arrmeta,
           kernel_request_strided, ectx);
-    } else if (src_tp.get_as_strided_dim(src_arrmeta, src_size, src_stride,
-                                         src_el_tp, src_el_arrmeta)) {
+    } else if (src_tp.get_as_strided(src_arrmeta, &src_size, &src_stride,
+                                         &src_el_tp, &src_el_arrmeta)) {
       kernels::strided_assign_ck *self =
           kernels::strided_assign_ck::create(ckb, kernreq, ckb_offset);
-      self->m_size = dst_md->size;
+      self->m_size = dst_md->dim_size;
       self->m_dst_stride = dst_md->stride;
       self->m_src_stride = src_stride;
       // Check for a broadcasting error
-      if (src_size != 1 && dst_md->size != src_size) {
+      if (src_size != 1 && dst_md->dim_size != src_size) {
         throw broadcast_error(dst_tp, dst_arrmeta, src_tp, src_arrmeta);
       }
 
@@ -579,7 +579,7 @@ void strided_dim_type::foreach_leading(const char *arrmeta, char *data,
     const strided_dim_type_arrmeta *md = reinterpret_cast<const strided_dim_type_arrmeta *>(arrmeta);
     const char *child_arrmeta = arrmeta + sizeof(strided_dim_type_arrmeta);
     intptr_t stride = md->stride;
-    for (intptr_t i = 0, i_end = md->size; i < i_end; ++i, data += stride) {
+    for (intptr_t i = 0, i_end = md->dim_size; i < i_end; ++i, data += stride) {
         callback(m_element_tp, child_arrmeta, data, callback_data);
     }
 }
@@ -677,7 +677,7 @@ void strided_dim_type::reorder_default_constructed_strides(char *dst_arrmeta,
         for (size_t i = 0; i < ndim_partial; ++i) {
             int i_perm = axis_perm[i];
             strided_dim_type_arrmeta& i_md = md[i_perm];
-            intptr_t dim_size = i_md.size;
+            intptr_t dim_size = i_md.dim_size;
             i_md.stride = dim_size > 1 ? stride : 0;
             stride *= dim_size;
         }
@@ -702,7 +702,7 @@ void strided_dim_type::reorder_default_constructed_strides(char *dst_arrmeta,
                 } while (stride == 0 && i >= (intptr_t)ndim_partial);
             }
             for (size_t i = ndim_partial; i != ndim; ++i) {
-                intptr_t dim_size = md[i].size;
+                intptr_t dim_size = md[i].dim_size;
                 md[i].stride = dim_size > 1 ? stride : 0;
                 stride *= dim_size;
             }

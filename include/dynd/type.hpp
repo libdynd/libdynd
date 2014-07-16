@@ -523,23 +523,39 @@ public:
         }
     }
 
-    inline base_type::flags_type get_flags() const {
-        if (is_builtin()) {
-            return type_flag_scalar;
-        } else {
-            return m_extended->get_flags();
-        }
+    inline base_type::flags_type get_flags() const
+    {
+      if (is_builtin()) {
+        return type_flag_scalar;
+      } else {
+        return m_extended->get_flags();
+      }
     }
 
     /**
      * Gets the number of array dimensions in the type.
      */
-    inline intptr_t get_ndim() const {
-        if (is_builtin()) {
-            return 0;
-        } else {
-            return m_extended->get_ndim();
-        }
+    inline intptr_t get_ndim() const
+    {
+      if (is_builtin()) {
+        return 0;
+      } else {
+        return m_extended->get_ndim();
+      }
+    }
+
+    /**
+     * Gets the number of outer strided dimensions this type has in a row.
+     * The initial arrmeta for this type begins with this many
+     * strided_dim_type_arrmeta instances.
+     */
+    inline intptr_t get_strided_ndim() const
+    {
+      if (is_builtin()) {
+        return 0;
+      } else {
+        return m_extended->get_strided_ndim();
+      }
     }
 
     /**
@@ -590,16 +606,35 @@ public:
      * values and returns true.
      *
      * \param arrmeta  The arrmeta for the type.
-     * \param out_size  Is filled with the size of the dimension.
-     * \param out_stride  Is filled with the stride.
+     * \param ndim  The number of strided dimensions desired.
+     * \param out_size_stride  Is filled with a pointer to an array of
+     *                         size_stride_t of length ``ndim``.
      * \param out_el_tp  Is filled with the element type.
      * \param out_el_arrmeta  Is filled with the arrmeta of the element type.
      *
      * \returns  True if it is a strided array type, false otherwise.
      */
-    bool get_as_strided_dim(const char *arrmeta, intptr_t &out_size,
-                            intptr_t &out_stride, ndt::type &out_el_tp,
-                            const char *&out_el_arrmeta) const;
+    bool get_as_strided(const char *arrmeta, intptr_t *out_dim_size,
+                        intptr_t *out_stride, ndt::type *out_el_tp,
+                        const char **out_el_arrmeta) const;
+
+    /**
+     * If the type is a multidimensional strided dimension type, where the
+     * dimension has a fixed size and the data is at addresses `dst`, `dst +
+     * stride`, etc, this extracts those values and returns true.
+     *
+     * \param arrmeta  The arrmeta for the type.
+     * \param ndim  The number of strided dimensions desired.
+     * \param out_size_stride  Is filled with a pointer to an array of
+     *                         size_stride_t of length ``ndim``.
+     * \param out_el_tp  Is filled with the element type.
+     * \param out_el_arrmeta  Is filled with the arrmeta of the element type.
+     *
+     * \returns  True if it is a strided array type, false otherwise.
+     */
+    bool get_as_strided(const char *arrmeta, intptr_t ndim,
+                        const size_stride_t **out_size_stride, ndt::type *out_el_tp,
+                        const char **out_el_arrmeta) const;
 
     /** The size of the data required for uniform iteration */
     inline size_t get_iterdata_size(intptr_t ndim) const {

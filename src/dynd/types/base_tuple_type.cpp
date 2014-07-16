@@ -20,7 +20,7 @@ using namespace dynd;
 base_tuple_type::base_tuple_type(type_id_t type_id,
                                  const nd::array &field_types, flags_type flags,
                                  bool variable_layout)
-    : base_type(type_id, tuple_kind, 0, 1, flags, 0, 0),
+    : base_type(type_id, tuple_kind, 0, 1, flags, 0, 0, 0),
       m_field_count(field_types.get_dim_size()), m_field_types(field_types),
       m_arrmeta_offsets(nd::empty(m_field_count, ndt::make_type<uintptr_t>()))
 {

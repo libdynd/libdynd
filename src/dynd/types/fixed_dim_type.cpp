@@ -18,9 +18,9 @@ using namespace std;
 using namespace dynd;
 
 fixed_dim_type::fixed_dim_type(intptr_t dim_size, const ndt::type &element_tp)
-    : base_uniform_dim_type(fixed_dim_type_id, element_tp, 0,
-                            element_tp.get_data_alignment(),
-                            sizeof(fixed_dim_type_arrmeta), type_flag_none),
+    : base_uniform_dim_type(
+          fixed_dim_type_id, element_tp, 0, element_tp.get_data_alignment(),
+          sizeof(fixed_dim_type_arrmeta), type_flag_none, true),
       m_dim_size(dim_size)
 {
   // Propagate the inherited flags from the element
@@ -161,7 +161,7 @@ intptr_t fixed_dim_type::apply_linear_index(intptr_t nindices, const irange *ind
             // Produce the new offset data, stride, and size for the resulting array
             intptr_t offset = md->stride * start_index;
             out_md->stride = md->stride * index_stride;
-            out_md->size = dimension_size;
+            out_md->dim_size = dimension_size;
             if (!m_element_tp.is_builtin()) {
                 const strided_dim_type *result_etp = result_tp.tcast<strided_dim_type>();
                 offset += m_element_tp.extended()->apply_linear_index(
@@ -316,7 +316,7 @@ void fixed_dim_type::arrmeta_default_construct(char *arrmeta, intptr_t ndim,
 
   fixed_dim_type_arrmeta *md =
       reinterpret_cast<fixed_dim_type_arrmeta *>(arrmeta);
-  md->size = get_fixed_dim_size();
+  md->dim_size = get_fixed_dim_size();
   md->stride = m_dim_size > 1 ? element_size : 0;
   if (!m_element_tp.is_builtin()) {
     m_element_tp.extended()->arrmeta_default_construct(
@@ -382,8 +382,8 @@ void fixed_dim_type::arrmeta_debug_print(const char *arrmeta, std::ostream &o,
   const fixed_dim_type_arrmeta *md =
       reinterpret_cast<const fixed_dim_type_arrmeta *>(arrmeta);
   o << indent << "fixed_dim arrmeta\n";
-  o << indent << " size: " << md->size;
-  if (md->size != get_fixed_dim_size()) {
+  o << indent << " size: " << md->dim_size;
+  if (md->dim_size != get_fixed_dim_size()) {
     o << " INTERNAL INCONSISTENCY, type size: " << get_fixed_dim_size();
   }
   o << "\n";
@@ -509,8 +509,8 @@ size_t fixed_dim_type::make_assignment_kernel(
           ckb, ckb_offset, m_element_tp,
           dst_arrmeta + sizeof(fixed_dim_type_arrmeta), src_tp, src_arrmeta,
           kernel_request_strided, ectx);
-    } else if (src_tp.get_as_strided_dim(src_arrmeta, src_size, src_stride,
-                                         src_el_tp, src_el_arrmeta)) {
+    } else if (src_tp.get_as_strided(src_arrmeta, &src_size, &src_stride,
+                                     &src_el_tp, &src_el_arrmeta)) {
       kernels::strided_assign_ck *self =
           kernels::strided_assign_ck::create(ckb, kernreq, ckb_offset);
       self->m_size = get_fixed_dim_size();

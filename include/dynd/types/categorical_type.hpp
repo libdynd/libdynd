@@ -51,7 +51,7 @@ public:
 
     size_t get_category_count() const {
         return (size_t) reinterpret_cast<const strided_dim_type_arrmeta *>(
-                   m_categories.get_arrmeta())->size;
+                   m_categories.get_arrmeta())->dim_size;
     }
 
     /**

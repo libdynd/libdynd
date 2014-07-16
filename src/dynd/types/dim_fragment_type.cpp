@@ -14,10 +14,10 @@ using namespace dynd;
 
 dim_fragment_type::dim_fragment_type(intptr_t ndim, const intptr_t *tagged_dims)
     : base_uniform_dim_type(dim_fragment_type_id, ndt::make_type<void>(), 0, 1,
-                            0, type_flag_symbolic),
+                            0, type_flag_symbolic, false),
       m_tagged_dims(ndim, tagged_dims)
 {
-    m_members.undim = static_cast<uint8_t>(ndim);
+    m_members.ndim = static_cast<uint8_t>(ndim);
 }
 
 static inline ndt::type get_tagged_dims_from_type(intptr_t ndim,
@@ -96,7 +96,7 @@ static inline bool broadcast_tagged_dims_from_type(intptr_t ndim, ndt::type tp,
 
 dim_fragment_type::dim_fragment_type(intptr_t ndim, const ndt::type &tp)
     : base_uniform_dim_type(dim_fragment_type_id, ndt::make_type<void>(), 0, 1,
-                            0, type_flag_symbolic),
+                            0, type_flag_symbolic, false),
       m_tagged_dims(ndim)
 {
     if (ndim > tp.get_ndim()) {
@@ -107,7 +107,7 @@ dim_fragment_type::dim_fragment_type(intptr_t ndim, const ndt::type &tp)
         throw type_error(ss.str());
     }
     get_tagged_dims_from_type(ndim, tp, m_tagged_dims.get());
-    m_members.undim = static_cast<uint8_t>(ndim);
+    m_members.ndim = static_cast<uint8_t>(ndim);
 }
 
 ndt::type dim_fragment_type::broadcast_with_type(intptr_t ndim,

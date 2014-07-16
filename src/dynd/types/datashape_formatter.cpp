@@ -62,9 +62,9 @@ static void format_uniform_dim_datashape(std::ostream& o,
                 // If arrmeta is provided, use the actual dimension size
                 const strided_dim_type_arrmeta *md =
                                 reinterpret_cast<const strided_dim_type_arrmeta *>(arrmeta);
-                o << md->size << " * ";
+                o << md->dim_size << " * ";
                 // Allow data to keep going only if the dimension size is 1
-                if (md->size != 1) {
+                if (md->dim_size != 1) {
                     data = NULL;
                 }
                 format_datashape(o, sad->get_element_type(),

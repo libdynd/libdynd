@@ -10,12 +10,11 @@
 #include <dynd/types/base_uniform_dim_type.hpp>
 #include <dynd/typed_data_assign.hpp>
 #include <dynd/types/view_type.hpp>
-#include <dynd/types/strided_dim_type.hpp>
 
 namespace dynd {
 
 // fixed_dim (redundantly) uses the same arrmeta as strided_dim
-typedef strided_dim_type_arrmeta fixed_dim_type_arrmeta;
+typedef size_stride_t fixed_dim_type_arrmeta;
 
 struct fixed_dim_type_iterdata {
     iterdata_common common;

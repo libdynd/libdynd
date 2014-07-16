@@ -161,9 +161,9 @@ namespace {
 
             // Get a strided representation of by_values for processing
             intptr_t by_values_stride, by_values_size;
-            by_values_tp.get_as_strided_dim(by_values_arrmeta, by_values_size,
-                                            by_values_stride, by_values_tp,
-                                            by_values_arrmeta);
+            by_values_tp.get_as_strided(by_values_arrmeta, &by_values_size,
+                                        &by_values_stride, &by_values_tp,
+                                        &by_values_arrmeta);
 
             const ndt::type& result_tp = gd->get_value_type();
             const cfixed_dim_type *fad = result_tp.tcast<cfixed_dim_type>();

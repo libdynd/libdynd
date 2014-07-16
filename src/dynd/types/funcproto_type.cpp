@@ -13,9 +13,9 @@ using namespace dynd;
 
 funcproto_type::funcproto_type(const nd::array &param_types,
                                const ndt::type &return_type)
-    : base_type(funcproto_type_id, symbolic_kind, 0, 1, type_flag_none, 0, 0),
-      m_param_types(param_types),
-      m_return_type(return_type)
+    : base_type(funcproto_type_id, symbolic_kind, 0, 1, type_flag_none, 0, 0,
+                0),
+      m_param_types(param_types), m_return_type(return_type)
 {
     if (!nd::ensure_immutable_contig<ndt::type>(m_param_types)) {
         stringstream ss;
@@ -24,7 +24,7 @@ funcproto_type::funcproto_type(const nd::array &param_types,
         throw invalid_argument(ss.str());
     }
     m_param_count = reinterpret_cast<const strided_dim_type_arrmeta *>(
-                        m_param_types.get_arrmeta())->size;
+                        m_param_types.get_arrmeta())->dim_size;
     m_members.flags |= return_type.get_flags() & type_flags_value_inherited;
     for (intptr_t i = 0; i != m_param_count; ++i) {
         m_members.flags |=

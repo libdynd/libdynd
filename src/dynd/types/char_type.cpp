@@ -17,7 +17,7 @@ using namespace dynd;
 
 char_type::char_type(string_encoding_t encoding)
 : base_type(char_type_id, char_kind, string_encoding_char_size_table[encoding],
-        string_encoding_char_size_table[encoding], type_flag_scalar, 0, 0),
+        string_encoding_char_size_table[encoding], type_flag_scalar, 0, 0, 0),
 m_encoding(encoding)
 {
     switch (encoding) {

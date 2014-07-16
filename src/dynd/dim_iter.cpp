@@ -120,7 +120,8 @@ static int buffered_strided_dim_iter_next(dim_iter *self)
             buf.get_type().extended()->arrmeta_reset_buffers(buf.get_arrmeta());
         }
         // Figure out how many elements we will buffer
-        intptr_t bufsize = reinterpret_cast<const strided_dim_type_arrmeta *>(buf.get_arrmeta())->size;
+        intptr_t bufsize = reinterpret_cast<const strided_dim_type_arrmeta *>(
+                               buf.get_arrmeta())->dim_size;
         if (i + bufsize > size) {
             bufsize = size - i;
         }

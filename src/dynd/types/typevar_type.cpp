@@ -9,8 +9,9 @@
 using namespace std;
 using namespace dynd;
 
-typevar_type::typevar_type(const nd::string& name)
-    : base_type(typevar_type_id, symbolic_kind, 0, 1, type_flag_symbolic, 0, 0),
+typevar_type::typevar_type(const nd::string &name)
+    : base_type(typevar_type_id, symbolic_kind, 0, 1, type_flag_symbolic, 0, 0,
+                0),
       m_name(name)
 {
     if (m_name.is_null()) {

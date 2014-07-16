@@ -16,10 +16,7 @@
 
 namespace dynd {
 
-struct strided_dim_type_arrmeta {
-    intptr_t size;
-    intptr_t stride;
-};
+typedef size_stride_t strided_dim_type_arrmeta;
 
 struct strided_dim_type_iterdata {
     iterdata_common common;

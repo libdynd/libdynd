@@ -22,10 +22,11 @@
 using namespace std;
 using namespace dynd;
 
-var_dim_type::var_dim_type(const ndt::type& element_tp)
-    : base_uniform_dim_type(var_dim_type_id, element_tp, sizeof(var_dim_type_data),
-                    sizeof(const char *), sizeof(var_dim_type_arrmeta),
-                    type_flag_zeroinit|type_flag_blockref)
+var_dim_type::var_dim_type(const ndt::type &element_tp)
+    : base_uniform_dim_type(var_dim_type_id, element_tp,
+                            sizeof(var_dim_type_data), sizeof(const char *),
+                            sizeof(var_dim_type_arrmeta),
+                            type_flag_zeroinit | type_flag_blockref, false)
 {
   // NOTE: The element type may have type_flag_destructor set. In this case,
   //       the var_dim type does NOT need to also set it, because the lifetime
@@ -209,7 +210,7 @@ intptr_t var_dim_type::apply_linear_index(intptr_t nindices, const irange *indic
                 // We can dereference the pointer as we
                 // index it and produce a strided array result
                 strided_dim_type_arrmeta *out_md = reinterpret_cast<strided_dim_type_arrmeta *>(out_arrmeta);
-                out_md->size = dimension_size;
+                out_md->dim_size = dimension_size;
                 out_md->stride = md->stride * index_stride;
                 *inout_data = d->begin + md->offset + md->stride * start_index;
                 if (*inout_dataref) {
@@ -578,8 +579,8 @@ size_t var_dim_type::make_assignment_kernel(
       return make_var_dim_assignment_kernel(ckb, ckb_offset, dst_tp,
                                             dst_arrmeta, src_tp, src_arrmeta,
                                             kernreq, ectx);
-    } else if (src_tp.get_as_strided_dim(src_arrmeta, src_size, src_stride,
-                                         src_el_tp, src_el_arrmeta)) {
+    } else if (src_tp.get_as_strided(src_arrmeta, &src_size, &src_stride,
+                                     &src_el_tp, &src_el_arrmeta)) {
       // strided_dim to var_dim
       return make_strided_to_var_dim_assignment_kernel(
           ckb, ckb_offset, dst_tp, dst_arrmeta, src_size, src_stride, src_el_tp,

@@ -18,10 +18,10 @@ namespace dynd {
 
 class void_pointer_type : public base_type {
 public:
-    void_pointer_type()
-        : base_type(void_pointer_type_id, void_kind, sizeof(void *),
-                        sizeof(void *), type_flag_scalar|type_flag_zeroinit|type_flag_blockref,
-                        0, 0)
+  void_pointer_type()
+      : base_type(
+            void_pointer_type_id, void_kind, sizeof(void *), sizeof(void *),
+            type_flag_scalar | type_flag_zeroinit | type_flag_blockref, 0, 0, 0)
     {}
 
     void print_data(std::ostream& o, const char *arrmeta, const char *data) const;

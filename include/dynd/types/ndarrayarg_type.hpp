@@ -21,11 +21,9 @@ namespace dynd {
 
 class ndarrayarg_type : public base_type {
 public:
-    ndarrayarg_type()
-        : base_type(ndarrayarg_type_id, dynamic_kind, sizeof(memory_block_data *),
-                    sizeof(memory_block_data *),
-                    type_flag_zeroinit,
-                    0, 0)
+  ndarrayarg_type()
+      : base_type(ndarrayarg_type_id, dynamic_kind, sizeof(memory_block_data *),
+                  sizeof(memory_block_data *), type_flag_zeroinit, 0, 0, 0)
     {
     }
 

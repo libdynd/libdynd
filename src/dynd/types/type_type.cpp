@@ -17,9 +17,9 @@ using namespace dynd;
 
 type_type::type_type()
     : base_type(type_type_id, custom_kind, sizeof(const base_type *),
-                    sizeof(const base_type *),
-                    type_flag_scalar|type_flag_zeroinit|type_flag_destructor,
-                    0, 0)
+                sizeof(const base_type *),
+                type_flag_scalar | type_flag_zeroinit | type_flag_destructor, 0,
+                0, 0)
 {
 }
 

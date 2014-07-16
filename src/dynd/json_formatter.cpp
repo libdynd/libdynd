@@ -281,7 +281,7 @@ static void format_json_uniform_dim(output_data& out, const ndt::type& dt, const
     const strided_dim_type_arrmeta *md =
         reinterpret_cast<const strided_dim_type_arrmeta *>(arrmeta);
     ndt::type element_tp = sad->get_element_type();
-    intptr_t size = md->size, stride = md->stride;
+    intptr_t size = md->dim_size, stride = md->stride;
     arrmeta += sizeof(strided_dim_type_arrmeta);
     for (intptr_t i = 0; i < size; ++i) {
       ::format_json(out, element_tp, arrmeta, data + i * stride);

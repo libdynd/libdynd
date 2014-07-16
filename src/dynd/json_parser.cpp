@@ -214,7 +214,7 @@ static void parse_strided_dim_json(const ndt::type& tp, const char *arrmeta, cha
     intptr_t dim_size, stride;
     ndt::type el_tp;
     const char *el_arrmeta;
-    if (!tp.get_as_strided_dim(arrmeta, dim_size, stride, el_tp, el_arrmeta)) {
+    if (!tp.get_as_strided(arrmeta, &dim_size, &stride, &el_tp, &el_arrmeta)) {
         throw json_parse_error(begin, "expected a strided dimension", tp);
     }
 
