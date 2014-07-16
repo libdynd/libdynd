@@ -12,7 +12,7 @@ using namespace dynd;
 
 typevar_dim_type::typevar_dim_type(const nd::string &name,
                                    const ndt::type &element_type)
-    : base_uniform_dim_type(typevar_dim_type_id, element_type, 0, 1, 0,
+    : base_dim_type(typevar_dim_type_id, element_type, 0, 1, 0,
                             type_flag_symbolic, false),
       m_name(name)
 {

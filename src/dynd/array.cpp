@@ -1190,10 +1190,10 @@ namespace {
                         }
                         case strided_dim_type_id:
                         case var_dim_type_id: {
-                            const base_uniform_dim_type *dt_budd =
-                                            dt.tcast<base_uniform_dim_type>();
-                            const base_uniform_dim_type *r_budd =
-                                            static_cast<const base_uniform_dim_type *>(e->replacement_tp.extended());
+                            const base_dim_type *dt_budd =
+                                            dt.tcast<base_dim_type>();
+                            const base_dim_type *r_budd =
+                                            static_cast<const base_dim_type *>(e->replacement_tp.extended());
                             can_keep_dim = true;
                             child_dt = dt_budd->get_element_type();
                             child_replacement_tp = r_budd->get_element_type();
@@ -1267,7 +1267,7 @@ static void with_strided_dim_type(const ndt::type &tp, void *extra,
     type_id_t tp_id = tp.get_type_id();
     if (tp_id == fixed_dim_type_id || tp_id == cfixed_dim_type_id) {
       out_transformed_tp = ndt::make_strided_dim(
-          out_transformed_tp.tcast<base_uniform_dim_type>()
+          out_transformed_tp.tcast<base_dim_type>()
               ->get_element_type());
       out_was_transformed = true;
     }

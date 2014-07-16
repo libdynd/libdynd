@@ -51,7 +51,7 @@ static void format_struct_datashape(std::ostream &o, const ndt::type &dt,
     o << indent << "}";
 }
 
-static void format_uniform_dim_datashape(std::ostream& o,
+static void format_dim_datashape(std::ostream& o,
                 const ndt::type& dt, const char *arrmeta, const char *data,
                 const std::string& indent, bool multiline)
 {
@@ -181,8 +181,8 @@ static void format_datashape(std::ostream& o, const ndt::type& dt, const char *a
         case struct_kind:
             format_struct_datashape(o, dt, arrmeta, data, indent, multiline);
             break;
-        case uniform_dim_kind:
-            format_uniform_dim_datashape(o, dt, arrmeta, data, indent, multiline);
+        case dim_kind:
+            format_dim_datashape(o, dt, arrmeta, data, indent, multiline);
             break;
         case string_kind:
             format_string_datashape(o, dt);

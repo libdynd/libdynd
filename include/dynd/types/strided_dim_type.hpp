@@ -7,7 +7,7 @@
 #define _DYND__STRIDED_DIM_TYPE_HPP_
 
 #include <dynd/type.hpp>
-#include <dynd/types/base_uniform_dim_type.hpp>
+#include <dynd/types/base_dim_type.hpp>
 #include <dynd/typed_data_assign.hpp>
 #include <dynd/types/view_type.hpp>
 #include <dynd/types/string_type.hpp>
@@ -24,7 +24,7 @@ struct strided_dim_type_iterdata {
     intptr_t stride;
 };
 
-class strided_dim_type : public base_uniform_dim_type {
+class strided_dim_type : public base_dim_type {
 public:
     strided_dim_type(const ndt::type& element_tp);
 

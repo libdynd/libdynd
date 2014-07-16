@@ -31,7 +31,7 @@ enum type_kind_t {
     void_kind,
     datetime_kind,
     // For any dimension types which have elements of all the same type
-    uniform_dim_kind,
+    dim_kind,
     // For struct_type_id and cstruct_type_id
     struct_kind,
     // For tuple_type_id and ctuple_type_id

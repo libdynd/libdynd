@@ -9,7 +9,7 @@
 #include <dynd/type.hpp>
 #include <dynd/typed_data_assign.hpp>
 #include <dynd/types/view_type.hpp>
-#include <dynd/types/base_uniform_dim_type.hpp>
+#include <dynd/types/base_dim_type.hpp>
 #include <dynd/array.hpp>
 
 namespace dynd {
@@ -23,7 +23,7 @@ struct cfixed_dim_type_iterdata {
     intptr_t stride;
 };
 
-class cfixed_dim_type : public base_uniform_dim_type {
+class cfixed_dim_type : public base_dim_type {
     intptr_t m_stride, m_dim_size;
     std::vector<std::pair<std::string, gfunc::callable> > m_array_properties, m_array_functions;
 

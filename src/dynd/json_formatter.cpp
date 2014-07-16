@@ -270,14 +270,14 @@ static void format_json_struct(output_data &out, const ndt::type &dt,
   }
 }
 
-static void format_json_uniform_dim(output_data& out, const ndt::type& dt, const char *arrmeta, const char *data)
+static void format_json_dim(output_data& out, const ndt::type& dt, const char *arrmeta, const char *data)
 {
   out.write('[');
   switch (dt.get_type_id()) {
   case cfixed_dim_type_id:
   case fixed_dim_type_id:
   case strided_dim_type_id: {
-    const base_uniform_dim_type *sad = dt.tcast<base_uniform_dim_type>();
+    const base_dim_type *sad = dt.tcast<base_dim_type>();
     const strided_dim_type_arrmeta *md =
         reinterpret_cast<const strided_dim_type_arrmeta *>(arrmeta);
     ndt::type element_tp = sad->get_element_type();
@@ -345,8 +345,8 @@ static void format_json(output_data& out, const ndt::type& dt, const char *arrme
   case dynamic_kind:
     format_json_dynamic(out, dt, arrmeta, data);
     break;
-  case uniform_dim_kind:
-    format_json_uniform_dim(out, dt, arrmeta, data);
+  case dim_kind:
+    format_json_dim(out, dt, arrmeta, data);
     break;
   default: {
     stringstream ss;

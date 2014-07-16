@@ -18,7 +18,7 @@ using namespace std;
 using namespace dynd;
 
 strided_dim_type::strided_dim_type(const ndt::type& element_tp)
-    : base_uniform_dim_type(strided_dim_type_id, element_tp, 0, element_tp.get_data_alignment(),
+    : base_dim_type(strided_dim_type_id, element_tp, 0, element_tp.get_data_alignment(),
                     sizeof(strided_dim_type_arrmeta), type_flag_none, true)
 {
   // Propagate the inherited flags from the element

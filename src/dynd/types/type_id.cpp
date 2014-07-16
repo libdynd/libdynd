@@ -29,8 +29,8 @@ std::ostream& dynd::operator<<(std::ostream& o, type_kind_t kind)
             return (o << "void");
         case datetime_kind:
             return (o << "datetime");
-        case uniform_dim_kind:
-            return (o << "uniform_dim");
+        case dim_kind:
+            return (o << "dim");
         case struct_kind:
             return (o << "struct");
         case tuple_kind:
