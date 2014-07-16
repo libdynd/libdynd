@@ -67,10 +67,6 @@ static int cleanup_atexit = atexit(fftcleanup);
         return plan; \
     }
 
-/*
-
-*/
-
 FFTW_FFTPLAN_C2C(fftwf, float, complex_float32_type_id, complex_float32_type_id)
 FFTW_FFTPLAN_C2C(fftw, double, complex_float64_type_id, complex_float64_type_id)
 
