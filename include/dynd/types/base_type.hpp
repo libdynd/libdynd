@@ -104,14 +104,17 @@ struct base_type_members {
     /** The size of a arrmeta instance for the type. */
     size_t arrmeta_size;
     /** The number of array dimensions this type has */
-    uint8_t undim;
+    uint8_t ndim;
+    /** The number of strided dimensions (strided/fixed/cfixed) in a row
+     *  with no pointers, var dims, etc in between. */
+    uint8_t strided_ndim;
 
     base_type_members(uint16_t type_id_, uint8_t kind_, uint8_t data_alignment_,
                       flags_type flags_, size_t data_size_,
-                      size_t arrmeta_size_, uint8_t undim_)
+                      size_t arrmeta_size_, uint8_t ndim_, uint8_t strided_ndim_)
         : type_id(type_id_), kind(kind_), data_alignment(data_alignment_),
           flags(flags_), data_size(data_size_), arrmeta_size(arrmeta_size_),
-          undim(undim_)
+          ndim(ndim_), strided_ndim(strided_ndim_)
     {}
 };
 
@@ -145,11 +148,12 @@ public:
     /** Starts off the extended type instance with a use count of 1. */
     inline base_type(type_id_t type_id, type_kind_t kind, size_t data_size,
                      size_t alignment, flags_type flags, size_t arrmeta_size,
-                     size_t undim)
+                     size_t ndim, size_t strided_ndim)
         : m_use_count(1),
           m_members(static_cast<uint16_t>(type_id), static_cast<uint8_t>(kind),
                     static_cast<uint8_t>(alignment), flags, data_size,
-                    arrmeta_size, static_cast<uint8_t>(undim))
+                    arrmeta_size, static_cast<uint8_t>(ndim),
+                    static_cast<uint8_t>(strided_ndim))
     {}
 
     virtual ~base_type();
@@ -182,7 +186,11 @@ public:
     }
     /** The number of array dimensions this type has */
     inline intptr_t get_ndim() const {
-        return m_members.undim;
+        return m_members.ndim;
+    }
+    /** The number of outer strided dimensions this type has in a row */
+    inline intptr_t get_strided_ndim() const {
+      return m_members.strided_ndim;
     }
     inline base_type_members::flags_type get_flags() const {
         return m_members.flags;
@@ -273,22 +281,6 @@ public:
         this->set_from_utf8_string(arrmeta, data, utf8_str.data(),
                              utf8_str.data() + utf8_str.size(), ectx);
     }
-
-    /**
-     * Returns true if this level of the type can be processed as an
-     * origin pointer, a stride, and a size.
-     */
-    virtual bool is_strided() const;
-
-    /**
-     * When is_strided() returns true, this function can be used to
-     * get the striding parameters for a given arrmeta/data instance
-     * of the type.
-     */
-    virtual void process_strided(const char *arrmeta, const char *data,
-                                 ndt::type &out_dt, const char *&out_origin,
-                                 intptr_t &out_stride,
-                                 intptr_t &out_dim_size) const;
 
     /**
      * Indexes into the type. This function returns the type which results
@@ -687,6 +679,17 @@ public:
 
     friend void base_type_incref(const base_type *ed);
     friend void base_type_decref(const base_type *ed);
+};
+
+/**
+ * A pair of values describing the parameters of a single
+ * strided dimension. When a type ``tp`` describes a multi-dimensional
+ * strided array, its arrmeta always begins with an array
+ * of ``size_stride_t`` with length ``tp.get_strided_ndim()``.
+ */
+struct size_stride_t {
+  intptr_t dim_size;
+  intptr_t stride;
 };
 
 /**

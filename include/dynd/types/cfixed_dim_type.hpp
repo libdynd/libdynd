@@ -14,6 +14,9 @@
 
 namespace dynd {
 
+// cfixed_dim (redundantly) uses the same arrmeta as strided_dim
+typedef size_stride_t cfixed_dim_type_arrmeta;
+
 struct cfixed_dim_type_iterdata {
     iterdata_common common;
     char *data;
@@ -51,10 +54,6 @@ public:
     void transform_child_types(type_transform_fn_t transform_fn, void *extra,
                     ndt::type& out_transformed_tp, bool& out_was_transformed) const;
     ndt::type get_canonical_type() const;
-    bool is_strided() const;
-    void process_strided(const char *arrmeta, const char *data,
-                    ndt::type& out_dt, const char *&out_origin,
-                    intptr_t& out_stride, intptr_t& out_dim_size) const;
 
     ndt::type apply_linear_index(intptr_t nindices, const irange *indices,
                 size_t current_i, const ndt::type& root_tp, bool leading_dimension) const;
@@ -78,17 +77,24 @@ public:
 
     bool operator==(const base_type& rhs) const;
 
-    void arrmeta_default_construct(char *arrmeta, intptr_t ndim, const intptr_t* shape) const;
-    void arrmeta_copy_construct(char *dst_arrmeta, const char *src_arrmeta, memory_block_data *embedded_reference) const;
+    void arrmeta_default_construct(char *arrmeta, intptr_t ndim,
+                                   const intptr_t *shape) const;
+    void arrmeta_copy_construct(char *dst_arrmeta, const char *src_arrmeta,
+                                memory_block_data *embedded_reference) const;
     void arrmeta_reset_buffers(char *arrmeta) const;
     void arrmeta_finalize_buffers(char *arrmeta) const;
     void arrmeta_destruct(char *arrmeta) const;
-    void arrmeta_debug_print(const char *arrmeta, std::ostream& o, const std::string& indent) const;
-    size_t arrmeta_copy_construct_onedim(char *dst_arrmeta, const char *src_arrmeta,
-                    memory_block_data *embedded_reference) const;
+    void arrmeta_debug_print(const char *arrmeta, std::ostream &o,
+                             const std::string &indent) const;
+    size_t
+    arrmeta_copy_construct_onedim(char *dst_arrmeta, const char *src_arrmeta,
+                                  memory_block_data *embedded_reference) const;
 
     size_t get_iterdata_size(intptr_t ndim) const;
-    size_t iterdata_construct(iterdata_common *iterdata, const char **inout_arrmeta, intptr_t ndim, const intptr_t* shape, ndt::type& out_uniform_tp) const;
+    size_t iterdata_construct(iterdata_common *iterdata,
+                              const char **inout_arrmeta, intptr_t ndim,
+                              const intptr_t *shape,
+                              ndt::type &out_uniform_tp) const;
     size_t iterdata_destruct(iterdata_common *iterdata, intptr_t ndim) const;
 
     void data_destruct(const char *arrmeta, char *data) const;

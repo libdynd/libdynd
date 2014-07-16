@@ -159,7 +159,7 @@ static void resolve_rolling_dst_shape(const arrfunc_type_data *af_self,
             // We construct array arrmeta for the window op ckernel to use,
             // without actually creating an nd::array to hold it.
             arrmeta_holder src_winop_meta(ndt::make_strided_dim(child_src_tp));
-            src_winop_meta.get_at<strided_dim_type_arrmeta>(0)->size =
+            src_winop_meta.get_at<strided_dim_type_arrmeta>(0)->dim_size =
                 data->window_size;
             src_winop_meta.get_at<strided_dim_type_arrmeta>(0)->stride =
                 child_src_tp.get_default_data_size(0, NULL);
@@ -197,18 +197,18 @@ instantiate_strided(const arrfunc_type_data *af_self, dynd::ckernel_builder *ckb
     const arrfunc_type_data *window_af = data->window_op.get();
     ndt::type dst_el_tp, src_el_tp;
     const char *dst_el_arrmeta, *src_el_arrmeta;
-    if (!dst_tp.get_as_strided_dim(dst_arrmeta, self->m_dim_size,
-                                   self->m_dst_stride, dst_el_tp,
-                                   dst_el_arrmeta)) {
+    if (!dst_tp.get_as_strided(dst_arrmeta, &self->m_dim_size,
+                               &self->m_dst_stride, &dst_el_tp,
+                               &dst_el_arrmeta)) {
         stringstream ss;
         ss << "rolling window ckernel: could not process type " << dst_tp;
         ss << " as a strided dimension";
         throw type_error(ss.str());
     }
     intptr_t src_dim_size;
-    if (!src_tp[0].get_as_strided_dim(src_arrmeta[0], src_dim_size,
-                                      self->m_src_stride, src_el_tp,
-                                      src_el_arrmeta)) {
+    if (!src_tp[0].get_as_strided(src_arrmeta[0], &src_dim_size,
+                                  &self->m_src_stride, &src_el_tp,
+                                  &src_el_arrmeta)) {
         stringstream ss;
         ss << "rolling window ckernel: could not process type " << src_tp[0];
         ss << " as a strided dimension";
@@ -235,7 +235,7 @@ instantiate_strided(const arrfunc_type_data *af_self, dynd::ckernel_builder *ckb
     // without actually creating an nd::array to hold it.
     arrmeta_holder(ndt::make_strided_dim(src_el_tp))
         .swap(self->m_src_winop_meta);
-    self->m_src_winop_meta.get_at<strided_dim_type_arrmeta>(0)->size =
+    self->m_src_winop_meta.get_at<strided_dim_type_arrmeta>(0)->dim_size =
         self->m_window_size;
     self->m_src_winop_meta.get_at<strided_dim_type_arrmeta>(0)->stride =
         self->m_src_stride;

@@ -32,6 +32,7 @@ TEST(ArrMetaHolder, Basic) {
     arrmeta_holder imeta(ndt::type("3 * int"));
     EXPECT_EQ(imeta.get_type(), ndt::type("fixed[3] * int32"));
     smeta.arrmeta_default_construct(1, &sarr_size);
+    imeta.get_at<fixed_dim_type_arrmeta>(0)->dim_size = 3;
     imeta.get_at<fixed_dim_type_arrmeta>(0)->stride = sizeof(int);
 
     // Copy from iarr to sarr

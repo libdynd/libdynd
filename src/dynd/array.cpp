@@ -120,7 +120,7 @@ nd::array nd::make_strided_array(const ndt::type &dtp, intptr_t ndim,
             for (ptrdiff_t i = (ptrdiff_t)ndim - 1; i >= 0; --i) {
                 intptr_t dim_size = shape[i];
                 meta[i].stride = dim_size > 1 ? stride : 0;
-                meta[i].size = dim_size;
+                meta[i].dim_size = dim_size;
                 stride *= dim_size;
             }
         } else {
@@ -128,7 +128,7 @@ nd::array nd::make_strided_array(const ndt::type &dtp, intptr_t ndim,
                 int i_perm = axis_perm[i];
                 intptr_t dim_size = shape[i_perm];
                 meta[i_perm].stride = dim_size > 1 ? stride : 0;
-                meta[i_perm].size = dim_size;
+                meta[i_perm].dim_size = dim_size;
                 stride *= dim_size;
             }
         }
@@ -174,7 +174,7 @@ nd::array nd::make_strided_array_from_data(const ndt::type& uniform_tp, intptr_t
     for (intptr_t i = 0; i < ndim; ++i) {
         intptr_t dim_size = shape[i];
         meta[i].stride = dim_size > 1 ? strides[i] : 0;
-        meta[i].size = dim_size;
+        meta[i].dim_size = dim_size;
     }
 
     // Return a pointer to the arrmeta for uniform_tp.
@@ -299,7 +299,7 @@ nd::array nd::make_strided_string_array(const char **cstr_array, size_t array_si
     strided_dim_type_arrmeta *md =
         reinterpret_cast<strided_dim_type_arrmeta *>(
             result.get_arrmeta());
-    md->size = array_size;
+    md->dim_size = array_size;
     md->stride = stp.get_data_size();
     string_arr_ptr = reinterpret_cast<string_type_data *>(data_ptr);
     string_ptr = data_ptr + array_size * stp.get_data_size();
@@ -339,7 +339,7 @@ nd::array nd::make_strided_string_array(const std::string **str_array, size_t ar
     strided_dim_type_arrmeta *md =
         reinterpret_cast<strided_dim_type_arrmeta *>(
             result.get_arrmeta());
-    md->size = array_size;
+    md->dim_size = array_size;
     md->stride = stp.get_data_size();
     string_arr_ptr = reinterpret_cast<string_type_data *>(data_ptr);
     string_ptr = data_ptr + array_size * stp.get_data_size();
@@ -643,7 +643,7 @@ nd::array nd::detail::make_from_vec<ndt::type>::make(const std::vector<ndt::type
     // The arrmeta for the strided and string parts of the type
     strided_dim_type_arrmeta *sa_md = reinterpret_cast<strided_dim_type_arrmeta *>(
                                             result.get_arrmeta());
-    sa_md->size = vec.size();
+    sa_md->dim_size = vec.size();
     sa_md->stride = vec.empty() ? 0 : sizeof(type_type_data);
     // The data
     type_type_data *data = reinterpret_cast<type_type_data *>(data_ptr);
@@ -678,7 +678,7 @@ nd::array nd::detail::make_from_vec<std::string>::make(const std::vector<std::st
     // The arrmeta for the strided and string parts of the type
     strided_dim_type_arrmeta *sa_md = reinterpret_cast<strided_dim_type_arrmeta *>(
                                             result.get_arrmeta());
-    sa_md->size = vec.size();
+    sa_md->dim_size = vec.size();
     sa_md->stride = vec.empty() ? 0 : sizeof(string_type_data);
     string_type_arrmeta *s_md = reinterpret_cast<string_type_arrmeta *>(sa_md + 1);
     s_md->blockref = NULL;
@@ -1324,7 +1324,7 @@ nd::array nd::array::permute(intptr_t ndim, const intptr_t *axes) const
         // It's a strided dim and does not cross the barrier
         strided_dim_type_arrmeta *smd =
             reinterpret_cast<strided_dim_type_arrmeta *>(md);
-        smd->size = shape[axes_i];
+        smd->dim_size = shape[axes_i];
         smd->stride = strides[axes_i];
       } else if (shape[i] < 0) {
         throw invalid_argument(
@@ -1498,7 +1498,7 @@ nd::array nd::array::view_scalars(const ndt::type& scalar_tp) const
         const ndt::type& edt = sad->get_element_type();
         if (edt.is_pod() && (intptr_t)edt.get_data_size() == md->stride &&
                     sad->get_element_type().get_kind() != expression_kind) {
-            intptr_t nbytes = md->size * edt.get_data_size();
+            intptr_t nbytes = md->dim_size * edt.get_data_size();
             // Make sure the element size divides into the # of bytes
             if (nbytes % scalar_tp.get_data_size() != 0) {
                 std::stringstream ss;
@@ -1528,7 +1528,7 @@ nd::array nd::array::view_scalars(const ndt::type& scalar_tp) const
             result.get_ndo()->m_flags = get_ndo()->m_flags;
             // The result has one strided ndarray field
             strided_dim_type_arrmeta *result_md = reinterpret_cast<strided_dim_type_arrmeta *>(result.get_arrmeta());
-            result_md->size = nbytes / scalar_tp.get_data_size();
+            result_md->dim_size = nbytes / scalar_tp.get_data_size();
             result_md->stride = scalar_tp.get_data_size();
             return result;
         }

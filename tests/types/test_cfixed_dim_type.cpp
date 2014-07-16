@@ -28,6 +28,8 @@ TEST(CFixedDimType, Create) {
     EXPECT_EQ(uniform_dim_kind, d.get_kind());
     EXPECT_EQ(4u, d.get_data_alignment());
     EXPECT_EQ(12u, d.get_data_size());
+    EXPECT_EQ(1, d.get_ndim());
+    EXPECT_EQ(1, d.get_strided_ndim());
     EXPECT_FALSE(d.is_expression());
     EXPECT_EQ(ndt::make_type<int32_t>(), d.p("element_type").as<ndt::type>());
     EXPECT_EQ(ndt::make_type<int32_t>(), d.at(-3));
@@ -71,6 +73,8 @@ TEST(CFixedDimType, Create) {
 TEST(CFixedDimType, CreateCOrder) {
     intptr_t shape[3] = {2, 3, 4};
     ndt::type d = ndt::make_cfixed_dim(3, shape, ndt::make_type<int16_t>(), NULL);
+    EXPECT_EQ(3, d.get_ndim());
+    EXPECT_EQ(3, d.get_strided_ndim());
     EXPECT_EQ(cfixed_dim_type_id, d.get_type_id());
     EXPECT_EQ(ndt::make_cfixed_dim(2, shape+1, ndt::make_type<int16_t>(), NULL), d.at(0));
     EXPECT_EQ(ndt::make_cfixed_dim(1, shape+2, ndt::make_type<int16_t>(), NULL), d.at(0,0));
@@ -88,6 +92,8 @@ TEST(CFixedDimType, CreateFOrder) {
     int axis_perm[3] = {0, 1, 2};
     intptr_t shape[3] = {2, 3, 4};
     ndt::type d = ndt::make_cfixed_dim(3, shape, ndt::make_type<int16_t>(), axis_perm);
+    EXPECT_EQ(3, d.get_ndim());
+    EXPECT_EQ(3, d.get_strided_ndim());
     EXPECT_EQ(48u, d.get_data_size());
     EXPECT_EQ(cfixed_dim_type_id, d.get_type_id());
     EXPECT_EQ(cfixed_dim_type_id, d.at(0).get_type_id());
@@ -103,25 +109,27 @@ TEST(CFixedDimType, CreateFOrder) {
 }
 
 TEST(CFixedDimType, Basic) {
-    nd::array a;
-    float vals[3] = {1.5f, 2.5f, -1.5f};
+  nd::array a;
+  float vals[3] = {1.5f, 2.5f, -1.5f};
 
-    a = nd::empty(ndt::make_cfixed_dim(3, ndt::make_type<float>()));
-    a.vals() = vals;
+  a = nd::empty(ndt::make_cfixed_dim(3, ndt::make_type<float>()));
+  a.vals() = vals;
 
-    EXPECT_EQ(ndt::make_cfixed_dim(3, ndt::make_type<float>()), a.get_type());
-    EXPECT_EQ(1u, a.get_shape().size());
-    EXPECT_EQ(3, a.get_shape()[0]);
-    EXPECT_EQ(1u, a.get_strides().size());
-    EXPECT_EQ(4, a.get_strides()[0]);
-    EXPECT_EQ(1.5f, a(-3).as<float>());
-    EXPECT_EQ(2.5f, a(-2).as<float>());
-    EXPECT_EQ(-1.5f, a(-1).as<float>());
-    EXPECT_EQ(1.5f, a(0).as<float>());
-    EXPECT_EQ(2.5f, a(1).as<float>());
-    EXPECT_EQ(-1.5f, a(2).as<float>());
-    EXPECT_THROW(a(-4), index_out_of_bounds);
-    EXPECT_THROW(a(3), index_out_of_bounds);
+  EXPECT_EQ(ndt::make_cfixed_dim(3, ndt::make_type<float>()), a.get_type());
+  EXPECT_EQ(1, a.get_type().get_ndim());
+  EXPECT_EQ(1, a.get_type().get_strided_ndim());
+  EXPECT_EQ(1u, a.get_shape().size());
+  EXPECT_EQ(3, a.get_shape()[0]);
+  EXPECT_EQ(1u, a.get_strides().size());
+  EXPECT_EQ(4, a.get_strides()[0]);
+  EXPECT_EQ(1.5f, a(-3).as<float>());
+  EXPECT_EQ(2.5f, a(-2).as<float>());
+  EXPECT_EQ(-1.5f, a(-1).as<float>());
+  EXPECT_EQ(1.5f, a(0).as<float>());
+  EXPECT_EQ(2.5f, a(1).as<float>());
+  EXPECT_EQ(-1.5f, a(2).as<float>());
+  EXPECT_THROW(a(-4), index_out_of_bounds);
+  EXPECT_THROW(a(3), index_out_of_bounds);
 }
 
 TEST(CFixedDimType, SimpleIndex) {

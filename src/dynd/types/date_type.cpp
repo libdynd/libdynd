@@ -33,7 +33,7 @@ using namespace dynd;
 
 date_type::date_type()
     : base_type(date_type_id, datetime_kind, 4, scalar_align_of<int32_t>::value,
-                type_flag_scalar, 0, 0)
+                type_flag_scalar, 0, 0, 0)
 {
 }
 

@@ -189,17 +189,17 @@ instantiate_masked_take(const arrfunc_type_data *DYND_UNUSED(self_data_ptr), dyn
   intptr_t src0_dim_size, mask_dim_size;
   ndt::type src0_el_tp, mask_el_tp;
   const char *src0_el_meta, *mask_el_meta;
-  if (!src_tp[0].get_as_strided_dim(src_arrmeta[0], src0_dim_size,
-                                    self->m_src0_stride, src0_el_tp,
-                                    src0_el_meta)) {
+  if (!src_tp[0].get_as_strided(src_arrmeta[0], &src0_dim_size,
+                                &self->m_src0_stride, &src0_el_tp,
+                                &src0_el_meta)) {
     stringstream ss;
     ss << "masked take arrfunc: could not process type " << src_tp[0];
     ss << " as a strided dimension";
     throw type_error(ss.str());
   }
-  if (!src_tp[1].get_as_strided_dim(src_arrmeta[1], mask_dim_size,
-                                    self->m_mask_stride, mask_el_tp,
-                                    mask_el_meta)) {
+  if (!src_tp[1].get_as_strided(src_arrmeta[1], &mask_dim_size,
+                                &self->m_mask_stride, &mask_el_tp,
+                                &mask_el_meta)) {
     stringstream ss;
     ss << "masked take arrfunc: could not process type " << src_tp[1];
     ss << " as a strided dimension";
@@ -238,9 +238,8 @@ instantiate_indexed_take(const arrfunc_type_data *DYND_UNUSED(self_data_ptr), dy
 
     ndt::type dst_el_tp;
     const char *dst_el_meta;
-    if (!dst_tp.get_as_strided_dim(dst_arrmeta, self->m_dst_dim_size,
-                                   self->m_dst_stride, dst_el_tp,
-                                   dst_el_meta)) {
+    if (!dst_tp.get_as_strided(dst_arrmeta, &self->m_dst_dim_size,
+                               &self->m_dst_stride, &dst_el_tp, &dst_el_meta)) {
         stringstream ss;
         ss << "indexed take arrfunc: could not process type " << dst_tp;
         ss << " as a strided dimension";
@@ -250,17 +249,17 @@ instantiate_indexed_take(const arrfunc_type_data *DYND_UNUSED(self_data_ptr), dy
     intptr_t index_dim_size;
     ndt::type src0_el_tp, index_el_tp;
     const char *src0_el_meta, *index_el_meta;
-    if (!src_tp[0].get_as_strided_dim(src_arrmeta[0], self->m_src0_dim_size,
-                                      self->m_src0_stride, src0_el_tp,
-                                      src0_el_meta)) {
+    if (!src_tp[0].get_as_strided(src_arrmeta[0], &self->m_src0_dim_size,
+                                  &self->m_src0_stride, &src0_el_tp,
+                                  &src0_el_meta)) {
         stringstream ss;
         ss << "indexed take arrfunc: could not process type " << src_tp[0];
         ss << " as a strided dimension";
         throw type_error(ss.str());
     }
-    if (!src_tp[1].get_as_strided_dim(src_arrmeta[1], index_dim_size,
-                                      self->m_index_stride, index_el_tp,
-                                      index_el_meta)) {
+    if (!src_tp[1].get_as_strided(src_arrmeta[1], &index_dim_size,
+                                  &self->m_index_stride, &index_el_tp,
+                                  &index_el_meta)) {
         stringstream ss;
         ss << "take arrfunc: could not process type " << src_tp[1];
         ss << " as a strided dimension";

@@ -19,7 +19,7 @@ using namespace dynd;
 
 cfixed_dim_type::cfixed_dim_type(size_t dimension_size, const ndt::type& element_tp)
     : base_uniform_dim_type(cfixed_dim_type_id, element_tp, 0, element_tp.get_data_alignment(),
-                    0, type_flag_none),
+                    sizeof(cfixed_dim_type_arrmeta), type_flag_none, true),
             m_dim_size(dimension_size)
 {
   size_t child_element_size = element_tp.get_data_size();
@@ -41,10 +41,12 @@ cfixed_dim_type::cfixed_dim_type(size_t dimension_size, const ndt::type& element
   get_scalar_properties_and_functions(m_array_properties, m_array_functions);
 }
 
-cfixed_dim_type::cfixed_dim_type(size_t dimension_size, const ndt::type& element_tp, intptr_t stride)
-    : base_uniform_dim_type(cfixed_dim_type_id, element_tp, 0, element_tp.get_data_alignment(),
-                    0, type_flag_none),
-            m_stride(stride), m_dim_size(dimension_size)
+cfixed_dim_type::cfixed_dim_type(size_t dimension_size,
+                                 const ndt::type &element_tp, intptr_t stride)
+    : base_uniform_dim_type(cfixed_dim_type_id, element_tp, 0,
+                            element_tp.get_data_alignment(), 0, type_flag_none,
+                            true),
+      m_stride(stride), m_dim_size(dimension_size)
 {
     size_t child_element_size = element_tp.get_data_size();
     if (child_element_size == 0) {
@@ -77,10 +79,12 @@ cfixed_dim_type::~cfixed_dim_type()
 {
 }
 
-void cfixed_dim_type::print_data(std::ostream& o, const char *arrmeta, const char *data) const
+void cfixed_dim_type::print_data(std::ostream &o, const char *arrmeta,
+                                 const char *data) const
 {
-  strided_array_summarized(o, get_element_type(), arrmeta, data, m_dim_size,
-                           m_stride);
+  strided_array_summarized(o, get_element_type(),
+                           arrmeta + sizeof(cfixed_dim_type_arrmeta), data,
+                           m_dim_size, m_stride);
 }
 
 void cfixed_dim_type::print_type(std::ostream& o) const
@@ -96,20 +100,23 @@ void cfixed_dim_type::print_type(std::ostream& o) const
 
 bool cfixed_dim_type::is_expression() const
 {
-    return m_element_tp.is_expression();
+  return m_element_tp.is_expression();
 }
 
 bool cfixed_dim_type::is_unique_data_owner(const char *arrmeta) const
 {
-    if (m_element_tp.is_builtin()) {
-        return true;
-    } else {
-        return m_element_tp.extended()->is_unique_data_owner(arrmeta);
-    }
+  if (m_element_tp.is_builtin()) {
+    return true;
+  } else {
+    return m_element_tp.extended()->is_unique_data_owner(
+        arrmeta + sizeof(cfixed_dim_type_arrmeta));
+  }
 }
 
-void cfixed_dim_type::transform_child_types(type_transform_fn_t transform_fn, void *extra,
-                ndt::type& out_transformed_tp, bool& out_was_transformed) const
+void cfixed_dim_type::transform_child_types(type_transform_fn_t transform_fn,
+                                            void *extra,
+                                            ndt::type &out_transformed_tp,
+                                            bool &out_was_transformed) const
 {
     ndt::type tmp_tp;
     bool was_transformed = false;
@@ -139,21 +146,6 @@ ndt::type cfixed_dim_type::get_canonical_type() const
     }
 }
 
-bool cfixed_dim_type::is_strided() const
-{
-    return true;
-}
-
-void cfixed_dim_type::process_strided(const char *DYND_UNUSED(arrmeta), const char *data,
-                ndt::type& out_dt, const char *&out_origin,
-                intptr_t& out_stride, intptr_t& out_dim_size) const
-{
-    out_dt = m_element_tp;
-    out_origin = data;
-    out_stride = m_stride;
-    out_dim_size = m_dim_size;
-}
-
 ndt::type cfixed_dim_type::apply_linear_index(intptr_t nindices, const irange *indices,
                 size_t current_i, const ndt::type& root_tp, bool leading_dimension) const
 {
@@ -176,12 +168,12 @@ ndt::type cfixed_dim_type::apply_linear_index(intptr_t nindices, const irange *i
     }
 }
 
-intptr_t cfixed_dim_type::apply_linear_index(intptr_t nindices, const irange *indices, const char *arrmeta,
-                const ndt::type& result_tp, char *out_arrmeta,
-                memory_block_data *embedded_reference,
-                size_t current_i, const ndt::type& root_tp,
-                bool leading_dimension, char **inout_data,
-                memory_block_data **inout_dataref) const
+intptr_t cfixed_dim_type::apply_linear_index(
+    intptr_t nindices, const irange *indices, const char *arrmeta,
+    const ndt::type &result_tp, char *out_arrmeta,
+    memory_block_data *embedded_reference, size_t current_i,
+    const ndt::type &root_tp, bool leading_dimension, char **inout_data,
+    memory_block_data **inout_dataref) const
 {
     if (nindices == 0) {
         // If there are no more indices, copy the arrmeta verbatim
@@ -201,13 +193,17 @@ intptr_t cfixed_dim_type::apply_linear_index(intptr_t nindices, const irange *in
                     // the data pointer, so that it's pointing at the right element
                     // for the collapsing of leading dimensions to work correctly.
                     *inout_data += offset;
-                    offset = m_element_tp.extended()->apply_linear_index(nindices - 1, indices + 1,
-                                    arrmeta, result_tp, out_arrmeta, embedded_reference, current_i + 1, root_tp,
-                                    true, inout_data, inout_dataref);
+                    offset = m_element_tp.extended()->apply_linear_index(
+                        nindices - 1, indices + 1,
+                        arrmeta + sizeof(cfixed_dim_type_arrmeta), result_tp,
+                        out_arrmeta, embedded_reference, current_i + 1, root_tp,
+                        true, inout_data, inout_dataref);
                 } else {
-                    offset += m_element_tp.extended()->apply_linear_index(nindices - 1, indices + 1,
-                                    arrmeta, result_tp, out_arrmeta, embedded_reference, current_i + 1, root_tp,
-                                    false, NULL, NULL);
+                  offset += m_element_tp.extended()->apply_linear_index(
+                      nindices - 1, indices + 1,
+                      arrmeta + sizeof(cfixed_dim_type_arrmeta), result_tp,
+                      out_arrmeta, embedded_reference, current_i + 1, root_tp,
+                      false, NULL, NULL);
                 }
             }
             return offset;
@@ -217,26 +213,30 @@ intptr_t cfixed_dim_type::apply_linear_index(intptr_t nindices, const irange *in
             // which is now a strided_dim instead of a cfixed_dim
             intptr_t offset = m_stride * start_index;
             out_md->stride = m_stride * index_stride;
-            out_md->size = dimension_size;
+            out_md->dim_size = dimension_size;
             if (!m_element_tp.is_builtin()) {
                 const strided_dim_type *result_etp = result_tp.tcast<strided_dim_type>();
-                offset += m_element_tp.extended()->apply_linear_index(nindices - 1, indices + 1,
-                                arrmeta,
-                                result_etp->get_element_type(),
-                                out_arrmeta + sizeof(strided_dim_type_arrmeta),
-                                embedded_reference, current_i + 1, root_tp,
-                                false, NULL, NULL);
+                offset += m_element_tp.extended()->apply_linear_index(
+                    nindices - 1, indices + 1,
+                    arrmeta + sizeof(cfixed_dim_type_arrmeta),
+                    result_etp->get_element_type(),
+                    out_arrmeta + sizeof(strided_dim_type_arrmeta),
+                    embedded_reference, current_i + 1, root_tp, false, NULL,
+                    NULL);
             }
             return offset;
         }
     }
 }
 
-ndt::type cfixed_dim_type::at_single(intptr_t i0,
-                const char **DYND_UNUSED(inout_arrmeta), const char **inout_data) const
+ndt::type cfixed_dim_type::at_single(intptr_t i0, const char **inout_arrmeta,
+                                     const char **inout_data) const
 {
     // Bounds-checking of the index
     i0 = apply_single_index(i0, m_dim_size, NULL);
+    if (inout_arrmeta) {
+      *inout_arrmeta += sizeof(cfixed_dim_type_arrmeta);
+    }
     // The cfixed_dim type has no arrmeta
     // If requested, modify the data
     if (inout_data) {
@@ -245,152 +245,199 @@ ndt::type cfixed_dim_type::at_single(intptr_t i0,
     return m_element_tp;
 }
 
-ndt::type cfixed_dim_type::get_type_at_dimension(char **inout_arrmeta, intptr_t i, intptr_t total_ndim) const
+ndt::type cfixed_dim_type::get_type_at_dimension(char **inout_arrmeta,
+                                                 intptr_t i,
+                                                 intptr_t total_ndim) const
 {
     if (i == 0) {
         return ndt::type(this, true);
     } else {
-        return m_element_tp.get_type_at_dimension(inout_arrmeta, i - 1, total_ndim + 1);
+      if (inout_arrmeta) {
+        *inout_arrmeta += sizeof(cfixed_dim_type_arrmeta);
+      }
+      return m_element_tp.get_type_at_dimension(inout_arrmeta, i - 1,
+                                                total_ndim + 1);
     }
 }
 
-intptr_t cfixed_dim_type::get_dim_size(const char *DYND_UNUSED(arrmeta), const char *DYND_UNUSED(data)) const
+intptr_t cfixed_dim_type::get_dim_size(const char *DYND_UNUSED(arrmeta),
+                                       const char *DYND_UNUSED(data)) const
 {
     return m_dim_size;
 }
 
 void cfixed_dim_type::get_shape(intptr_t ndim, intptr_t i, intptr_t *out_shape,
-            const char *arrmeta, const char *data) const
+                                const char *arrmeta, const char *data) const
 {
-    out_shape[i] = m_dim_size;
+  out_shape[i] = m_dim_size;
 
-    // Process the later shape values
-    if (i+1 < ndim) {
-        if (!m_element_tp.is_builtin()) {
-            m_element_tp.extended()->get_shape(ndim, i+1, out_shape,
-                        arrmeta, (m_dim_size == 1) ? data : NULL);
-        } else {
-            stringstream ss;
-            ss << "requested too many dimensions from type " << ndt::type(this, true);
-            throw runtime_error(ss.str());
-        }
+  // Process the later shape values
+  if (i + 1 < ndim) {
+    if (!m_element_tp.is_builtin()) {
+      m_element_tp.extended()->get_shape(
+          ndim, i + 1, out_shape, arrmeta + sizeof(cfixed_dim_type_arrmeta),
+          (m_dim_size == 1) ? data : NULL);
+    } else {
+      stringstream ss;
+      ss << "requested too many dimensions from type " << ndt::type(this, true);
+      throw runtime_error(ss.str());
     }
+  }
 }
 
 void cfixed_dim_type::get_strides(size_t i, intptr_t *out_strides,
                                   const char *arrmeta) const
 {
-    out_strides[i] = m_stride;
+  out_strides[i] = m_stride;
 
-    // Process the later shape values
-    if (!m_element_tp.is_builtin()) {
-        m_element_tp.extended()->get_strides(i+1, out_strides, arrmeta);
-    }
+  // Process the later shape values
+  if (!m_element_tp.is_builtin()) {
+    m_element_tp.extended()->get_strides(
+        i + 1, out_strides, arrmeta + sizeof(cfixed_dim_type_arrmeta));
+  }
 }
 
 axis_order_classification_t
 cfixed_dim_type::classify_axis_order(const char *arrmeta) const
 {
-    if (m_element_tp.get_ndim() > 0) {
-        if (m_stride != 0) {
-            // Call the helper function to do the classification
-            return classify_strided_axis_order(m_stride, m_element_tp, arrmeta);
-        } else {
-            // Use the classification of the element type
-            return m_element_tp.extended()->classify_axis_order(arrmeta);
-        }
+  if (m_element_tp.get_ndim() > 0) {
+    if (m_stride != 0) {
+      // Call the helper function to do the classification
+      return classify_strided_axis_order(
+          m_stride, m_element_tp, arrmeta + sizeof(cfixed_dim_type_arrmeta));
     } else {
-        return axis_order_none;
+      // Use the classification of the element type
+      return m_element_tp.extended()->classify_axis_order(
+          arrmeta + sizeof(cfixed_dim_type_arrmeta));
     }
+  } else {
+    return axis_order_none;
+  }
 }
 
-bool cfixed_dim_type::is_lossless_assignment(const ndt::type& dst_tp, const ndt::type& src_tp) const
+bool cfixed_dim_type::is_lossless_assignment(const ndt::type &dst_tp,
+                                             const ndt::type &src_tp) const
 {
-    if (dst_tp.extended() == this) {
-        if (src_tp.extended() == this) {
-            return true;
-        } else if (src_tp.get_type_id() == cfixed_dim_type_id) {
-            return *dst_tp.extended() == *src_tp.extended();
-        }
+  if (dst_tp.extended() == this) {
+    if (src_tp.extended() == this) {
+      return true;
+    } else if (src_tp.get_type_id() == cfixed_dim_type_id) {
+      return *dst_tp.extended() == *src_tp.extended();
     }
+  }
 
+  return false;
+}
+
+bool cfixed_dim_type::operator==(const base_type &rhs) const
+{
+  if (this == &rhs) {
+    return true;
+  } else if (rhs.get_type_id() != cfixed_dim_type_id) {
     return false;
+  } else {
+    const cfixed_dim_type *dt = static_cast<const cfixed_dim_type *>(&rhs);
+    return m_element_tp == dt->m_element_tp && m_dim_size == dt->m_dim_size &&
+           m_stride == dt->m_stride;
+  }
 }
 
-bool cfixed_dim_type::operator==(const base_type& rhs) const
+void cfixed_dim_type::arrmeta_default_construct(char *arrmeta, intptr_t ndim,
+                                                const intptr_t *shape) const
 {
-    if (this == &rhs) {
-        return true;
-    } else if (rhs.get_type_id() != cfixed_dim_type_id) {
-        return false;
-    } else {
-        const cfixed_dim_type *dt = static_cast<const cfixed_dim_type*>(&rhs);
-        return m_element_tp == dt->m_element_tp &&
-                m_dim_size == dt->m_dim_size &&
-                m_stride == dt->m_stride;
+  // Validate that the shape is ok
+  if (ndim > 0) {
+    if (shape[0] >= 0 && shape[0] != m_dim_size) {
+      stringstream ss;
+      ss << "Cannot construct dynd object of type " << ndt::type(this, true);
+      ss << " with dimension size " << shape[0] << ", the size must be "
+         << m_dim_size;
+      throw runtime_error(ss.str());
     }
-}
+  }
 
-void cfixed_dim_type::arrmeta_default_construct(char *arrmeta, intptr_t ndim, const intptr_t* shape) const
-{
-    // Validate that the shape is ok
-    if (ndim > 0) {
-        if (shape[0] >= 0 && shape[0] != m_dim_size) {
-            stringstream ss;
-            ss << "Cannot construct dynd object of type " << ndt::type(this, true);
-            ss << " with dimension size " << shape[0] << ", the size must be " << m_dim_size;
-            throw runtime_error(ss.str());
-        }
-    }
-
-    if (!m_element_tp.is_builtin()) {
-        m_element_tp.extended()->arrmeta_default_construct(arrmeta, ndim ? (ndim-1) : 0, shape+1);
-    }
+  cfixed_dim_type_arrmeta *md =
+      reinterpret_cast<cfixed_dim_type_arrmeta *>(arrmeta);
+  md->dim_size = get_fixed_dim_size();
+  md->stride = get_fixed_stride();
+  if (!m_element_tp.is_builtin()) {
+    m_element_tp.extended()->arrmeta_default_construct(
+        arrmeta + sizeof(cfixed_dim_type_arrmeta), ndim ? (ndim - 1) : 0,
+        shape + 1);
+  }
 }
 
 void cfixed_dim_type::arrmeta_copy_construct(
-                char *dst_arrmeta, const char *src_arrmeta,
-                memory_block_data *embedded_reference) const
+    char *dst_arrmeta, const char *src_arrmeta,
+    memory_block_data *embedded_reference) const
 {
-    if (!m_element_tp.is_builtin()) {
-        m_element_tp.extended()->arrmeta_copy_construct(dst_arrmeta, src_arrmeta, embedded_reference);
-    }
+  const cfixed_dim_type_arrmeta *src_md =
+      reinterpret_cast<const cfixed_dim_type_arrmeta *>(src_arrmeta);
+  cfixed_dim_type_arrmeta *dst_md =
+      reinterpret_cast<cfixed_dim_type_arrmeta *>(dst_arrmeta);
+  *dst_md = *src_md;
+  if (!m_element_tp.is_builtin()) {
+    m_element_tp.extended()->arrmeta_copy_construct(
+        dst_arrmeta + sizeof(cfixed_dim_type_arrmeta),
+        src_arrmeta + sizeof(cfixed_dim_type_arrmeta), embedded_reference);
+  }
 }
 
 size_t cfixed_dim_type::arrmeta_copy_construct_onedim(
-                char *DYND_UNUSED(dst_arrmeta), const char *DYND_UNUSED(src_arrmeta),
-                memory_block_data *DYND_UNUSED(embedded_reference)) const
+    char *dst_arrmeta, const char *src_arrmeta,
+    memory_block_data *DYND_UNUSED(embedded_reference)) const
 {
-    // No arrmeta to copy for cfixed_dim
-    return 0;
+  const cfixed_dim_type_arrmeta *src_md =
+      reinterpret_cast<const cfixed_dim_type_arrmeta *>(src_arrmeta);
+  cfixed_dim_type_arrmeta *dst_md =
+      reinterpret_cast<cfixed_dim_type_arrmeta *>(dst_arrmeta);
+  *dst_md = *src_md;
+  return sizeof(cfixed_dim_type_arrmeta);
 }
 
 void cfixed_dim_type::arrmeta_reset_buffers(char *arrmeta) const
 {
-    if (m_element_tp.get_arrmeta_size() > 0) {
-        m_element_tp.extended()->arrmeta_reset_buffers(arrmeta);
-    }
+  if (m_element_tp.get_arrmeta_size() > 0) {
+    m_element_tp.extended()->arrmeta_reset_buffers(arrmeta);
+  }
 }
 
 void cfixed_dim_type::arrmeta_finalize_buffers(char *arrmeta) const
 {
-    if (!m_element_tp.is_builtin()) {
-        m_element_tp.extended()->arrmeta_finalize_buffers(arrmeta);
-    }
+  if (!m_element_tp.is_builtin()) {
+    m_element_tp.extended()->arrmeta_finalize_buffers(
+        arrmeta + sizeof(cfixed_dim_type_arrmeta));
+  }
 }
 
 void cfixed_dim_type::arrmeta_destruct(char *arrmeta) const
 {
-    if (!m_element_tp.is_builtin()) {
-        m_element_tp.extended()->arrmeta_destruct(arrmeta);
-    }
+  if (!m_element_tp.is_builtin()) {
+    m_element_tp.extended()->arrmeta_destruct(arrmeta +
+                                              sizeof(cfixed_dim_type_arrmeta));
+  }
 }
 
-void cfixed_dim_type::arrmeta_debug_print(const char *arrmeta, std::ostream& o, const std::string& indent) const
+void cfixed_dim_type::arrmeta_debug_print(const char *arrmeta, std::ostream &o,
+                                         const std::string &indent) const
 {
-    if (!m_element_tp.is_builtin()) {
-        m_element_tp.extended()->arrmeta_debug_print(arrmeta, o, indent);
-    }
+  const cfixed_dim_type_arrmeta *md =
+      reinterpret_cast<const cfixed_dim_type_arrmeta *>(arrmeta);
+  o << indent << "cfixed_dim arrmeta\n";
+  o << indent << " size: " << md->dim_size;
+  if (md->dim_size != get_fixed_dim_size()) {
+    o << " INTERNAL INCONSISTENCY, type size: " << get_fixed_dim_size();
+  }
+  o << "\n";
+  o << indent << " stride: " << md->stride;
+  if (md->stride != get_fixed_stride()) {
+    o << " INTERNAL INCONSISTENCY, type stride: " << get_fixed_stride();
+  }
+  o << "\n";
+  if (!m_element_tp.is_builtin()) {
+    m_element_tp.extended()->arrmeta_debug_print(
+        arrmeta + sizeof(cfixed_dim_type_arrmeta), o, indent + " ");
+  }
 }
 
 size_t cfixed_dim_type::get_iterdata_size(intptr_t ndim) const
@@ -429,10 +476,14 @@ static char *iterdata_reset(iterdata_common *iterdata, char *data, intptr_t ndim
     }
 }
 
-size_t cfixed_dim_type::iterdata_construct(iterdata_common *iterdata, const char **inout_arrmeta, intptr_t ndim, const intptr_t* shape, ndt::type& out_uniform_tp) const
+size_t cfixed_dim_type::iterdata_construct(iterdata_common *iterdata,
+                                           const char **inout_arrmeta,
+                                           intptr_t ndim, const intptr_t *shape,
+                                           ndt::type &out_uniform_tp) const
 {
     size_t inner_size = 0;
     if (ndim > 1) {
+        *inout_arrmeta += sizeof(cfixed_dim_type_arrmeta);
         // Place any inner iterdata earlier than the outer iterdata
         inner_size = m_element_tp.extended()->iterdata_construct(iterdata, inout_arrmeta,
                         ndim - 1, shape + 1, out_uniform_tp);
@@ -470,20 +521,21 @@ size_t cfixed_dim_type::iterdata_destruct(iterdata_common *iterdata, intptr_t nd
 
 void cfixed_dim_type::data_destruct(const char *arrmeta, char *data) const
 {
-    m_element_tp.extended()->data_destruct_strided(
-                    arrmeta, data, m_stride, m_dim_size);
+  m_element_tp.extended()->data_destruct_strided(
+      arrmeta + sizeof(cfixed_dim_type_arrmeta), data, m_stride, m_dim_size);
 }
 
 void cfixed_dim_type::data_destruct_strided(const char *arrmeta, char *data,
-                intptr_t stride, size_t count) const
+                                            intptr_t stride, size_t count) const
 {
-    intptr_t child_stride = m_stride;
-    size_t child_size = m_dim_size;
+  intptr_t child_stride = m_stride;
+  size_t child_size = m_dim_size;
 
-    for (size_t i = 0; i != count; ++i, data += stride) {
-        m_element_tp.extended()->data_destruct_strided(
-                        arrmeta, data, child_stride, child_size);
-    }
+  for (size_t i = 0; i != count; ++i, data += stride) {
+    m_element_tp.extended()->data_destruct_strided(
+        arrmeta + sizeof(cfixed_dim_type_arrmeta), data, child_stride,
+        child_size);
+  }
 }
 
 size_t cfixed_dim_type::make_assignment_kernel(
@@ -505,10 +557,10 @@ size_t cfixed_dim_type::make_assignment_kernel(
       self->m_src_stride = 0;
       return ::make_assignment_kernel(
           ckb, ckb_offset, m_element_tp,
-          dst_arrmeta, src_tp, src_arrmeta,
+          dst_arrmeta + sizeof(cfixed_dim_type_arrmeta), src_tp, src_arrmeta,
           kernel_request_strided, ectx);
-    } else if (src_tp.get_as_strided_dim(src_arrmeta, src_size, src_stride,
-                                         src_el_tp, src_el_arrmeta)) {
+    } else if (src_tp.get_as_strided(src_arrmeta, &src_size, &src_stride,
+                                         &src_el_tp, &src_el_arrmeta)) {
       kernels::strided_assign_ck *self =
           kernels::strided_assign_ck::create(ckb, kernreq, ckb_offset);
       self->m_size = get_fixed_dim_size();
@@ -521,7 +573,7 @@ size_t cfixed_dim_type::make_assignment_kernel(
 
       return ::make_assignment_kernel(
           ckb, ckb_offset, m_element_tp,
-          dst_arrmeta, src_el_tp,
+          dst_arrmeta + sizeof(cfixed_dim_type_arrmeta), src_el_tp,
           src_el_arrmeta, kernel_request_strided, ectx);
     } else if (!src_tp.is_builtin()) {
       // Give the src type a chance to make a kernel
@@ -550,10 +602,10 @@ void cfixed_dim_type::foreach_leading(const char *arrmeta, char *data,
                                       foreach_fn_t callback,
                                       void *callback_data) const
 {
-    intptr_t stride = m_stride;
-    for (intptr_t i = 0, i_end = m_dim_size; i < i_end; ++i, data += stride) {
-        callback(m_element_tp, arrmeta, data, callback_data);
-    }
+  intptr_t stride = m_stride;
+  for (intptr_t i = 0, i_end = m_dim_size; i < i_end; ++i, data += stride) {
+    callback(m_element_tp, arrmeta + sizeof(cfixed_dim_type_arrmeta), data, callback_data);
+  }
 }
 
 ndt::type dynd::ndt::make_cfixed_dim(intptr_t ndim, const intptr_t *shape,

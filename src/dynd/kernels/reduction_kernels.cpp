@@ -180,9 +180,9 @@ namespace {
             intptr_t src_dim_size, src_stride;
             ndt::type src_el_tp;
             const char *src_el_arrmeta;
-            if (!src_tp[0].get_as_strided_dim(src_arrmeta[0], src_dim_size,
-                                              src_stride, src_el_tp,
-                                              src_el_arrmeta)) {
+            if (!src_tp[0].get_as_strided(src_arrmeta[0], &src_dim_size,
+                                          &src_stride, &src_el_tp,
+                                          &src_el_arrmeta)) {
                 stringstream ss;
                 ss << "mean1d: could not process type " << src_tp[0];
                 ss << " as a strided dimension";

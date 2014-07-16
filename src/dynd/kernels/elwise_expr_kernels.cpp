@@ -83,8 +83,8 @@ static size_t make_elwise_strided_dimension_expr_kernel_for_N(
   e->base.template set_expr_function<strided_expr_kernel_extra<N> >(kernreq);
   e->base.destructor = strided_expr_kernel_extra<N>::destruct;
   // The dst strided parameters
-  if (!dst_tp.get_as_strided_dim(dst_arrmeta, e->size, e->dst_stride,
-                                 dst_child_dt, dst_child_arrmeta)) {
+  if (!dst_tp.get_as_strided(dst_arrmeta, &e->size, &e->dst_stride,
+                                 &dst_child_dt, &dst_child_arrmeta)) {
     throw type_error("make_elwise_strided_dimension_expr_kernel: dst was not "
                      "strided as expected");
   }
@@ -96,9 +96,9 @@ static size_t make_elwise_strided_dimension_expr_kernel_for_N(
       e->src_stride[i] = 0;
       src_child_arrmeta[i] = src_arrmeta[i];
       src_child_dt[i] = src_tp[i];
-    } else if (src_tp[i].get_as_strided_dim(src_arrmeta[i], src_size,
-                                            e->src_stride[i], src_child_dt[i],
-                                            src_child_arrmeta[i])) {
+    } else if (src_tp[i].get_as_strided(src_arrmeta[i], &src_size,
+                                        &e->src_stride[i], &src_child_dt[i],
+                                        &src_child_arrmeta[i])) {
       // Check for a broadcasting error
       if (src_size != 1 && e->size != src_size) {
         throw broadcast_error(dst_tp, dst_arrmeta, src_tp[i], src_arrmeta[i]);
@@ -259,8 +259,8 @@ static size_t make_elwise_strided_or_var_to_strided_dimension_expr_kernel_for_N(
   e->base.destructor =
       &strided_or_var_to_strided_expr_kernel_extra<N>::destruct;
   // The dst strided parameters
-  if (!dst_tp.get_as_strided_dim(dst_arrmeta, e->size, e->dst_stride,
-                                 dst_child_dt, dst_child_arrmeta)) {
+  if (!dst_tp.get_as_strided(dst_arrmeta, &e->size, &e->dst_stride,
+                             &dst_child_dt, &dst_child_arrmeta)) {
     throw type_error("make_elwise_strided_dimension_expr_kernel: dst was not "
                      "strided as expected");
   }
@@ -275,9 +275,9 @@ static size_t make_elwise_strided_or_var_to_strided_dimension_expr_kernel_for_N(
       e->is_src_var[i] = false;
       src_child_arrmeta[i] = src_arrmeta[i];
       src_child_dt[i] = src_tp[i];
-    } else if (src_tp[i].get_as_strided_dim(src_arrmeta[i], src_size,
-                                            e->src_stride[i], src_child_dt[i],
-                                            src_child_arrmeta[i])) {
+    } else if (src_tp[i].get_as_strided(src_arrmeta[i], &src_size,
+                                        &e->src_stride[i], &src_child_dt[i],
+                                        &src_child_arrmeta[i])) {
       // Check for a broadcasting error
       if (src_size != 1 && e->size != src_size) {
         throw broadcast_error(dst_tp, dst_arrmeta, src_tp[i], src_arrmeta[i]);
@@ -524,9 +524,9 @@ static size_t make_elwise_strided_or_var_to_var_dimension_expr_kernel_for_N(
       e->is_src_var[i] = false;
       src_child_arrmeta[i] = src_arrmeta[i];
       src_child_dt[i] = src_tp[i];
-    } else if (src_tp[i].get_as_strided_dim(src_arrmeta[i], src_size,
-                                            e->src_stride[i], src_child_dt[i],
-                                            src_child_arrmeta[i])) {
+    } else if (src_tp[i].get_as_strided(src_arrmeta[i], &src_size,
+                                        &e->src_stride[i], &src_child_dt[i],
+                                        &src_child_arrmeta[i])) {
       // Check for a broadcasting error (the strided dimension size must be 1,
       // otherwise the destination should be strided, not var)
       if (src_size != 1) {

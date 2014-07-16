@@ -34,7 +34,7 @@ base_struct_type::base_struct_type(type_id_t type_id,
 
     // Make sure that the number of names matches
     intptr_t name_count = reinterpret_cast<const strided_dim_type_arrmeta *>(
-                              m_field_names.get_arrmeta())->size;
+                              m_field_names.get_arrmeta())->dim_size;
     if (name_count != m_field_count) {
         stringstream ss;
         ss << "dynd struct type requires that the number of names, "
@@ -123,7 +123,7 @@ ndt::type base_struct_type::apply_linear_index(intptr_t nindices,
             strided_dim_type_arrmeta *md =
                 reinterpret_cast<strided_dim_type_arrmeta *>(
                     tmp_field_names.get_arrmeta());
-            md->size = dimension_size;
+            md->dim_size = dimension_size;
             md->stride = stp.get_data_size();
             string_type_arrmeta *smd =
                 reinterpret_cast<string_type_arrmeta *>(

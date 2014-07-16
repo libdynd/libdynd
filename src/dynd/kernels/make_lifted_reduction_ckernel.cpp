@@ -1064,7 +1064,8 @@ size_t dynd::make_lifted_reduction_ckernel(
     for (intptr_t i = 0; i < reduction_ndim; ++i) {
         intptr_t dst_stride, dst_size, src_stride, src_size;
         // Get the striding parameters for the source dimension
-        if (!src_i_tp.get_as_strided_dim(src_arrmeta, src_size, src_stride, src_i_tp, src_arrmeta)) {
+        if (!src_i_tp.get_as_strided(src_arrmeta, &src_size, &src_stride,
+                                     &src_i_tp, &src_arrmeta)) {
             stringstream ss;
             ss << "make_lifted_reduction_ckernel: type " << src_i_tp << " not supported as source";
             throw type_error(ss.str());
@@ -1082,7 +1083,8 @@ size_t dynd::make_lifted_reduction_ckernel(
             if (keep_dims) {
                 // If the dimensions are being kept, the output should be a
                 // a strided dimension of size one
-                if (dst_i_tp.get_as_strided_dim(dst_arrmeta, dst_size, dst_stride, dst_i_tp, dst_arrmeta)) {
+              if (dst_i_tp.get_as_strided(dst_arrmeta, &dst_size, &dst_stride,
+                                          &dst_i_tp, &dst_arrmeta)) {
                     if (dst_size != 1 || dst_stride != 0) {
                         stringstream ss;
                         ss << "make_lifted_reduction_ckernel: destination of a reduction dimension ";
@@ -1115,7 +1117,8 @@ size_t dynd::make_lifted_reduction_ckernel(
             }
         } else {
             // This dimension is being broadcast, not reduced
-            if (!dst_i_tp.get_as_strided_dim(dst_arrmeta, dst_size, dst_stride, dst_i_tp, dst_arrmeta)) {
+          if (!dst_i_tp.get_as_strided(dst_arrmeta, &dst_size, &dst_stride,
+                                       &dst_i_tp, &dst_arrmeta)) {
                 stringstream ss;
                 ss << "make_lifted_reduction_ckernel: type " << dst_i_tp << " not supported as destination";
                 throw type_error(ss.str());

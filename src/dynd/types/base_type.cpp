@@ -27,21 +27,6 @@ bool base_type::is_expression() const
     return false;
 }
 
-bool base_type::is_strided() const
-{
-    return false;
-}
-
-void base_type::process_strided(const char *DYND_UNUSED(arrmeta), const char *DYND_UNUSED(data),
-                ndt::type& DYND_UNUSED(out_dt), const char *&DYND_UNUSED(out_origin),
-                intptr_t& DYND_UNUSED(out_stride), intptr_t& DYND_UNUSED(out_dim_size)) const
-{
-    stringstream ss;
-    ss << "dynd type " << ndt::type(this, true) << " is not strided, so process_strided should not be called";
-    throw runtime_error(ss.str());
-}
-
-
 bool base_type::is_unique_data_owner(const char *DYND_UNUSED(arrmeta)) const
 {
     return true;

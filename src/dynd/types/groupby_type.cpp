@@ -148,34 +148,40 @@ namespace {
             by_values_arrmeta += sizeof(pointer_type_arrmeta);
             by_values_data = *reinterpret_cast<const char * const *>(by_values_data);
 
-            // If by_values is an expression, evaluate it since we're doing two passes through them
+            // If by_values is an expression, evaluate it since we're doing two
+            // passes through it
             nd::array by_values_tmp;
-            if (by_values_tp.is_expression() || !by_values_tp.extended()->is_strided()) {
-                by_values_tmp = nd::eval_raw_copy(by_values_tp, by_values_arrmeta, by_values_data);
-                by_values_tp = by_values_tmp.get_type();
-                by_values_arrmeta = by_values_tmp.get_arrmeta();
-                by_values_data = by_values_tmp.get_readonly_originptr();
+            if (by_values_tp.is_expression()) {
+              by_values_tmp = nd::eval_raw_copy(by_values_tp, by_values_arrmeta,
+                                                by_values_data);
+              by_values_tp = by_values_tmp.get_type();
+              by_values_arrmeta = by_values_tmp.get_arrmeta();
+              by_values_data = by_values_tmp.get_readonly_originptr();
             }
 
             // Get a strided representation of by_values for processing
-            const char *by_values_origin = NULL;
             intptr_t by_values_stride, by_values_size;
-            by_values_tp.extended()->process_strided(by_values_arrmeta, by_values_data,
-                            by_values_tp, by_values_origin, by_values_stride, by_values_size);
+            by_values_tp.get_as_strided(by_values_arrmeta, &by_values_size,
+                                        &by_values_stride, &by_values_tp,
+                                        &by_values_arrmeta);
 
             const ndt::type& result_tp = gd->get_value_type();
             const cfixed_dim_type *fad = result_tp.tcast<cfixed_dim_type>();
             intptr_t fad_stride = fad->get_fixed_stride();
-            const var_dim_type *vad = static_cast<const var_dim_type *>(fad->get_element_type().extended());
-            const var_dim_type_arrmeta *vad_md = reinterpret_cast<const var_dim_type_arrmeta *>(e->dst_arrmeta);
+            const var_dim_type *vad = static_cast<const var_dim_type *>(
+                fad->get_element_type().extended());
+            const var_dim_type_arrmeta *vad_md =
+                reinterpret_cast<const var_dim_type_arrmeta *>(
+                    e->dst_arrmeta + sizeof(cfixed_dim_type_arrmeta));
             if (vad_md->offset != 0) {
-                throw runtime_error("dynd groupby: destination var_dim offset must be zero to allocate output");
+              throw runtime_error("dynd groupby: destination var_dim offset "
+                                  "must be zero to allocate output");
             }
             intptr_t vad_stride = vad_md->stride;
 
             // Do a pass through by_values to get the size of each variable-sized dimension
             vector<size_t> cat_sizes(fad->get_fixed_dim_size());
-            const char *by_values_ptr = by_values_origin;
+            const char *by_values_ptr = by_values_data;
             for (intptr_t i = 0; i < by_values_size; ++i, by_values_ptr += by_values_stride) {
                 UIntType value = *reinterpret_cast<const UIntType *>(by_values_ptr);
                 if (value >= cat_sizes.size()) {
@@ -208,7 +214,7 @@ namespace {
             expr_single_t opchild = echild->get_function<expr_single_t>();
             array_iter<0, 1> iter(data_values_tp, data_values_arrmeta, data_values_data, 1);
             if (!iter.empty()) {
-                by_values_ptr = by_values_origin;
+                by_values_ptr = by_values_data;
                 do {
                     UIntType value = *reinterpret_cast<const UIntType *>(by_values_ptr);
                     char *&cp = cat_pointers[value];
@@ -289,8 +295,9 @@ size_t groupby_type::make_operand_to_value_assignment_kernel(
       static_cast<const var_dim_type *>(
           m_value_type.tcast<cfixed_dim_type>()->get_element_type().extended())
           ->get_element_type();
-  const char *dst_element_arrmeta =
-      dst_arrmeta + 0 + sizeof(var_dim_type_arrmeta);
+  const char *dst_element_arrmeta = dst_arrmeta +
+                                    sizeof(cfixed_dim_type_arrmeta) +
+                                    sizeof(var_dim_type_arrmeta);
   // Get source element type and arrmeta
   ndt::type src_element_tp = m_operand_type;
   const char *src_element_arrmeta = e->src_arrmeta;

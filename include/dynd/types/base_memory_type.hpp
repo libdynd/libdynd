@@ -29,11 +29,14 @@ protected:
     ndt::type m_storage_tp;
     size_t m_storage_arrmeta_offset;
 public:
-    inline base_memory_type(type_id_t type_id, const ndt::type& storage_tp, size_t data_size,
-            size_t alignment, size_t storage_arrmeta_offset, flags_type flags)
-        : base_type(type_id, memory_kind, data_size, alignment, flags,
-            storage_arrmeta_offset + storage_tp.get_arrmeta_size(),
-            storage_tp.get_ndim()), m_storage_tp(storage_tp), m_storage_arrmeta_offset(storage_arrmeta_offset)
+  inline base_memory_type(type_id_t type_id, const ndt::type &storage_tp,
+                          size_t data_size, size_t alignment,
+                          size_t storage_arrmeta_offset, flags_type flags)
+      : base_type(type_id, memory_kind, data_size, alignment, flags,
+                  storage_arrmeta_offset + storage_tp.get_arrmeta_size(),
+                  storage_tp.get_ndim(), 0),
+        m_storage_tp(storage_tp),
+        m_storage_arrmeta_offset(storage_arrmeta_offset)
     {
         if (storage_tp.get_kind() == uniform_dim_kind || storage_tp.get_kind() == memory_kind
                     || storage_tp.get_kind() == symbolic_kind) {

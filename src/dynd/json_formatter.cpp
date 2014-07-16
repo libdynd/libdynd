@@ -272,74 +272,50 @@ static void format_json_struct(output_data &out, const ndt::type &dt,
 
 static void format_json_uniform_dim(output_data& out, const ndt::type& dt, const char *arrmeta, const char *data)
 {
-    out.write('[');
-    switch (dt.get_type_id()) {
-        case strided_dim_type_id: {
-            const strided_dim_type *sad = dt.tcast<strided_dim_type>();
-            const strided_dim_type_arrmeta *md = reinterpret_cast<const strided_dim_type_arrmeta *>(arrmeta);
-            ndt::type element_tp = sad->get_element_type();
-            intptr_t size = md->size, stride = md->stride;
-            arrmeta += sizeof(strided_dim_type_arrmeta);
-            for (intptr_t i = 0; i < size; ++i) {
-                ::format_json(out, element_tp, arrmeta, data + i * stride);
-                if (i != size - 1) {
-                    out.write(',');
-                }
-            }
-            break;
-        }
-        case fixed_dim_type_id: {
-            const fixed_dim_type *fad = dt.tcast<fixed_dim_type>();
-            const fixed_dim_type_arrmeta *md =
-                reinterpret_cast<const fixed_dim_type_arrmeta *>(arrmeta);
-            ndt::type element_tp = fad->get_element_type();
-            intptr_t size = fad->get_fixed_dim_size(),
-                     stride = md->stride;
-            for (intptr_t i = 0; i < size; ++i) {
-                ::format_json(out, element_tp,
-                              arrmeta + sizeof(fixed_dim_type_arrmeta),
-                              data + i * stride);
-                if (i != size - 1) {
-                    out.write(',');
-                }
-            }
-            break;
-        }
-        case cfixed_dim_type_id: {
-            const cfixed_dim_type *fad = dt.tcast<cfixed_dim_type>();
-            ndt::type element_tp = fad->get_element_type();
-            intptr_t size = fad->get_fixed_dim_size(), stride = fad->get_fixed_stride();
-            for (intptr_t i = 0; i < size; ++i) {
-                ::format_json(out, element_tp, arrmeta, data + i * stride);
-                if (i != size - 1) {
-                    out.write(',');
-                }
-            }
-            break;
-        }
-        case var_dim_type_id: {
-            const var_dim_type *vad = dt.tcast<var_dim_type>();
-            const var_dim_type_arrmeta *md = reinterpret_cast<const var_dim_type_arrmeta *>(arrmeta);
-            const var_dim_type_data *d = reinterpret_cast<const var_dim_type_data *>(data);
-            ndt::type element_tp = vad->get_element_type();
-            intptr_t size = d->size, stride = md->stride;
-            const char *begin = d->begin + md->offset;
-            arrmeta += sizeof(var_dim_type_arrmeta);
-            for (intptr_t i = 0; i < size; ++i) {
-                ::format_json(out, element_tp, arrmeta, begin + i * stride);
-                if (i != size - 1) {
-                    out.write(',');
-                }
-            }
-            break;
-        }
-        default: {
-            stringstream ss;
-            ss << "Formatting dynd type " << dt << " as JSON is not implemented yet";
-            throw runtime_error(ss.str());
-        }
+  out.write('[');
+  switch (dt.get_type_id()) {
+  case cfixed_dim_type_id:
+  case fixed_dim_type_id:
+  case strided_dim_type_id: {
+    const base_uniform_dim_type *sad = dt.tcast<base_uniform_dim_type>();
+    const strided_dim_type_arrmeta *md =
+        reinterpret_cast<const strided_dim_type_arrmeta *>(arrmeta);
+    ndt::type element_tp = sad->get_element_type();
+    intptr_t size = md->dim_size, stride = md->stride;
+    arrmeta += sizeof(strided_dim_type_arrmeta);
+    for (intptr_t i = 0; i < size; ++i) {
+      ::format_json(out, element_tp, arrmeta, data + i * stride);
+      if (i != size - 1) {
+        out.write(',');
+      }
     }
-    out.write(']');
+    break;
+  }
+  case var_dim_type_id: {
+    const var_dim_type *vad = dt.tcast<var_dim_type>();
+    const var_dim_type_arrmeta *md =
+        reinterpret_cast<const var_dim_type_arrmeta *>(arrmeta);
+    const var_dim_type_data *d =
+        reinterpret_cast<const var_dim_type_data *>(data);
+    ndt::type element_tp = vad->get_element_type();
+    intptr_t size = d->size, stride = md->stride;
+    const char *begin = d->begin + md->offset;
+    arrmeta += sizeof(var_dim_type_arrmeta);
+    for (intptr_t i = 0; i < size; ++i) {
+      ::format_json(out, element_tp, arrmeta, begin + i * stride);
+      if (i != size - 1) {
+        out.write(',');
+      }
+    }
+    break;
+  }
+  default: {
+    stringstream ss;
+    ss << "Formatting dynd type " << dt << " as JSON is not implemented yet";
+    throw runtime_error(ss.str());
+  }
+  }
+  out.write(']');
 }
 
 static void format_json(output_data& out, const ndt::type& dt, const char *arrmeta, const char *data)

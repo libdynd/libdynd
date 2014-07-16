@@ -358,9 +358,9 @@ size_t dynd::make_var_to_strided_dim_assignment_kernel(
     self_type *self = self_type::create(ckb, kernreq, ckb_offset);
     ndt::type dst_element_tp;
     const char *dst_element_arrmeta;
-    if (!dst_strided_dim_tp.get_as_strided_dim(
-            dst_arrmeta, self->m_dst_dim_size, self->m_dst_stride,
-            dst_element_tp, dst_element_arrmeta)) {
+    if (!dst_strided_dim_tp.get_as_strided(dst_arrmeta, &self->m_dst_dim_size,
+                                           &self->m_dst_stride, &dst_element_tp,
+                                           &dst_element_arrmeta)) {
         stringstream ss;
         ss << "make_var_to_strided_dim_assignment_kernel: provided destination "
               "type " << dst_strided_dim_tp

@@ -214,7 +214,7 @@ static nd::array make_sorted_categories(const set<const char *, cmp> &uniques,
 }
 
 categorical_type::categorical_type(const nd::array& categories, bool presorted)
-    : base_type(categorical_type_id, custom_kind, 4, 4, type_flag_scalar, 0, 0)
+    : base_type(categorical_type_id, custom_kind, 4, 4, type_flag_scalar, 0, 0, 0)
 {
     intptr_t category_count;
     if (presorted) {

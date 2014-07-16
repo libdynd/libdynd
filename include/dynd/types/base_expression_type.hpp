@@ -16,8 +16,8 @@ namespace dynd {
 class base_expression_type : public base_type {
 public:
     inline base_expression_type(type_id_t type_id, type_kind_t kind,
-                    size_t data_size, size_t alignment, flags_type flags, size_t arrmeta_size, size_t undim=0)
-        : base_type(type_id, kind, data_size, alignment, flags, arrmeta_size, undim)
+                    size_t data_size, size_t alignment, flags_type flags, size_t arrmeta_size, size_t ndim=0)
+        : base_type(type_id, kind, data_size, alignment, flags, arrmeta_size, ndim, 0)
     {}
 
     virtual ~base_expression_type();

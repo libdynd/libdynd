@@ -34,7 +34,7 @@ inline void reset_strided_buffer_array(const nd::array& buf)
     if (flags & type_flag_destructor) {
       buf_tp.extended()->data_destruct(buf_arrmeta, buf_data);
     }
-    memset(buf_data, 0, am->size * am->stride);
+    memset(buf_data, 0, am->dim_size * am->stride);
   }
 }
 

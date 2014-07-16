@@ -236,45 +236,35 @@ intptr_t ndt::type::get_dim_size(const char *arrmeta, const char *data) const
     throw std::invalid_argument(ss.str());
 }
 
-bool ndt::type::get_as_strided_dim(const char *arrmeta, intptr_t &out_size,
-                                   intptr_t &out_stride, ndt::type &out_el_tp,
-                                   const char *&out_el_arrmeta) const
+bool ndt::type::get_as_strided(const char *arrmeta, intptr_t *out_dim_size,
+                               intptr_t *out_stride, ndt::type *out_el_tp,
+                               const char **out_el_arrmeta) const
 {
-    type_id_t tid = get_type_id();
-    switch (tid) {
-    case cfixed_dim_type_id: {
-        const cfixed_dim_type *fdt = tcast<cfixed_dim_type>();
-        out_size = fdt->get_fixed_dim_size();
-        out_stride = fdt->get_fixed_stride();
-        out_el_tp = fdt->get_element_type();
-        out_el_arrmeta = arrmeta;
-        return true;
-    }
-    case fixed_dim_type_id: {
-        const fixed_dim_type *fdt = tcast<fixed_dim_type>();
-        const fixed_dim_type_arrmeta *m =
-            reinterpret_cast<const fixed_dim_type_arrmeta *>(arrmeta);
-        out_size = fdt->get_fixed_dim_size();
-        out_stride = m->stride;
-        out_el_tp = fdt->get_element_type();
-        out_el_arrmeta = arrmeta + sizeof(fixed_dim_type_arrmeta);
-        return true;
-    }
-    case strided_dim_type_id: {
-        const strided_dim_type *fdt = tcast<strided_dim_type>();
-        const strided_dim_type_arrmeta *m =
-            reinterpret_cast<const strided_dim_type_arrmeta *>(arrmeta);
-        out_size = m->size;
-        out_stride = m->stride;
-        out_el_tp = fdt->get_element_type();
-        out_el_arrmeta = arrmeta + sizeof(strided_dim_type_arrmeta);
-        return true;
-    }
-    default:
-        return false;
-    }
+  if (get_strided_ndim() >= 1) {
+    *out_dim_size = reinterpret_cast<const size_stride_t *>(arrmeta)->dim_size;
+    *out_stride = reinterpret_cast<const size_stride_t *>(arrmeta)->stride;
+    *out_el_tp = tcast<base_uniform_dim_type>()->get_element_type();
+    *out_el_arrmeta = arrmeta + sizeof(strided_dim_type_arrmeta);
+    return true;
+  } else {
+    return false;
+  }
 }
 
+bool ndt::type::get_as_strided(const char *arrmeta, intptr_t ndim,
+                               const size_stride_t **out_size_stride,
+                               ndt::type *out_el_tp,
+                               const char **out_el_arrmeta) const
+{
+  if (get_strided_ndim() >= ndim) {
+    *out_size_stride = reinterpret_cast<const size_stride_t *>(arrmeta);
+    *out_el_tp = tcast<base_uniform_dim_type>()->get_element_type();
+    *out_el_arrmeta = arrmeta + ndim * sizeof(strided_dim_type_arrmeta);
+    return true;
+  } else {
+    return false;
+  }
+}
 bool ndt::type::data_layout_compatible_with(const ndt::type& rhs) const
 {
     if (extended() == rhs.extended()) {

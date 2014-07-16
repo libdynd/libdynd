@@ -16,24 +16,11 @@ using namespace std;
 using namespace dynd;
 
 static void format_datashape(std::ostream& o, const ndt::type& dt, const char *arrmeta, const char *data,
-                const std::string& indent, bool multiline, int &identifier);
-
-static void format_identifier_string(std::ostream& o, int &identifier)
-{
-    if (identifier < 26) {
-        string result("A");
-        result[0] += identifier;
-        o << result;
-    } else {
-        o << "X" << (identifier - 26);
-    }
-    ++identifier;
-}
+                const std::string& indent, bool multiline);
 
 static void format_struct_datashape(std::ostream &o, const ndt::type &dt,
                                     const char *arrmeta, const char *data,
-                                    const std::string &indent, bool multiline,
-                                    int &identifier)
+                                    const std::string &indent, bool multiline)
 {
     // The data requires arrmeta
     if (arrmeta == NULL) {
@@ -54,7 +41,7 @@ static void format_struct_datashape(std::ostream &o, const ndt::type &dt,
         o << bsd->get_field_name(i) << ": ";
         format_datashape(o, bsd->get_field_type(i), arrmeta ? (arrmeta + arrmeta_offsets[i]) : NULL,
                         data ? (data + data_offsets[i]) : NULL,
-                        multiline ? (indent + "  ") : indent, multiline, identifier);
+                        multiline ? (indent + "  ") : indent, multiline);
         if (multiline) {
             o << ",\n";
         } else if (i != field_count - 1) {
@@ -66,7 +53,7 @@ static void format_struct_datashape(std::ostream &o, const ndt::type &dt,
 
 static void format_uniform_dim_datashape(std::ostream& o,
                 const ndt::type& dt, const char *arrmeta, const char *data,
-                const std::string& indent, bool multiline, int &identifier)
+                const std::string& indent, bool multiline)
 {
     switch (dt.get_type_id()) {
         case strided_dim_type_id: {
@@ -75,20 +62,19 @@ static void format_uniform_dim_datashape(std::ostream& o,
                 // If arrmeta is provided, use the actual dimension size
                 const strided_dim_type_arrmeta *md =
                                 reinterpret_cast<const strided_dim_type_arrmeta *>(arrmeta);
-                o << md->size << " * ";
+                o << md->dim_size << " * ";
                 // Allow data to keep going only if the dimension size is 1
-                if (md->size != 1) {
+                if (md->dim_size != 1) {
                     data = NULL;
                 }
                 format_datashape(o, sad->get_element_type(),
                                 arrmeta + sizeof(strided_dim_type_arrmeta), data,
-                                indent, multiline, identifier);
+                                indent, multiline);
             } else {
-                // If no arrmeta, use a symbol
-                format_identifier_string(o, identifier);
-                o << " * ";
+                // If no arrmeta, use "strided"
+                o << "strided * ";
                 format_datashape(o, sad->get_element_type(), NULL, NULL,
-                                indent, multiline, identifier);
+                                indent, multiline);
             }
             break;
         }
@@ -100,7 +86,10 @@ static void format_uniform_dim_datashape(std::ostream& o,
             if (dim_size != 1) {
                 data = NULL;
             }
-            format_datashape(o, fad->get_element_type(), arrmeta, data, indent, multiline, identifier);
+            format_datashape(o, fad->get_element_type(),
+                             arrmeta +
+                                 (arrmeta ? sizeof(fixed_dim_type_arrmeta) : 0),
+                             data, indent, multiline);
             break;
         }
         case cfixed_dim_type_id: {
@@ -111,7 +100,10 @@ static void format_uniform_dim_datashape(std::ostream& o,
             if (dim_size != 1) {
                 data = NULL;
             }
-            format_datashape(o, fad->get_element_type(), arrmeta, data, indent, multiline, identifier);
+            format_datashape(
+                o, fad->get_element_type(),
+                arrmeta + (arrmeta ? sizeof(cfixed_dim_type_arrmeta) : 0), data,
+                indent, multiline);
             break;
         }
         case var_dim_type_id: {
@@ -134,7 +126,7 @@ static void format_uniform_dim_datashape(std::ostream& o,
             format_datashape(o, vad->get_element_type(),
                             arrmeta ? (arrmeta + sizeof(var_dim_type_arrmeta)) : NULL,
                             child_data,
-                            indent, multiline, identifier);
+                            indent, multiline);
             break;
         }
         default: {
@@ -183,14 +175,14 @@ static void format_complex_datashape(std::ostream& o, const ndt::type& dt)
 }
 
 static void format_datashape(std::ostream& o, const ndt::type& dt, const char *arrmeta, const char *data,
-                const std::string& indent, bool multiline, int &identifier)
+                const std::string& indent, bool multiline)
 {
     switch (dt.get_kind()) {
         case struct_kind:
-            format_struct_datashape(o, dt, arrmeta, data, indent, multiline, identifier);
+            format_struct_datashape(o, dt, arrmeta, data, indent, multiline);
             break;
         case uniform_dim_kind:
-            format_uniform_dim_datashape(o, dt, arrmeta, data, indent, multiline, identifier);
+            format_uniform_dim_datashape(o, dt, arrmeta, data, indent, multiline);
             break;
         case string_kind:
             format_string_datashape(o, dt);
@@ -199,7 +191,7 @@ static void format_datashape(std::ostream& o, const ndt::type& dt, const char *a
             format_complex_datashape(o, dt);
             break;
         case expression_kind:
-            format_datashape(o, dt.value_type(), NULL, NULL, indent, multiline, identifier);
+            format_datashape(o, dt.value_type(), NULL, NULL, indent, multiline);
             break;
         default:
             o << dt;
@@ -210,8 +202,7 @@ static void format_datashape(std::ostream& o, const ndt::type& dt, const char *a
 void dynd::format_datashape(std::ostream& o, const ndt::type& dt, const char *arrmeta, const char *data,
                 bool multiline)
 {
-    int identifier = 0;
-    ::format_datashape(o, dt, arrmeta, data, "", multiline, identifier);
+    ::format_datashape(o, dt, arrmeta, data, "", multiline);
 }
 
 string dynd::format_datashape(const nd::array& n,
@@ -219,9 +210,8 @@ string dynd::format_datashape(const nd::array& n,
 {
     stringstream ss;
     ss << prefix;
-    int identifier = 0;
     ::format_datashape(ss, n.get_type(), n.get_arrmeta(),
-                    n.get_readonly_originptr(), "", multiline, identifier);
+                    n.get_readonly_originptr(), "", multiline);
     return ss.str();
 }
 
@@ -230,7 +220,6 @@ string dynd::format_datashape(const ndt::type& d,
 {
     stringstream ss;
     ss << prefix;
-    int identifier = 0;
-    ::format_datashape(ss, d, NULL, NULL, "", multiline, identifier);
+    ::format_datashape(ss, d, NULL, NULL, "", multiline);
     return ss.str();
 }

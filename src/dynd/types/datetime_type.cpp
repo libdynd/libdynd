@@ -35,7 +35,7 @@ using namespace dynd;
 
 datetime_type::datetime_type(datetime_tz_t timezone)
     : base_type(datetime_type_id, datetime_kind, 8,
-                scalar_align_of<int64_t>::value, type_flag_scalar, 0, 0),
+                scalar_align_of<int64_t>::value, type_flag_scalar, 0, 0, 0),
       m_timezone(timezone)
 {
 }

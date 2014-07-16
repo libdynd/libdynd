@@ -24,7 +24,7 @@ arrfunc_type::arrfunc_type()
     : base_type(arrfunc_type_id, custom_kind, sizeof(arrfunc_type_data),
                     scalar_align_of<uint64_t>::value,
                     type_flag_scalar|type_flag_zeroinit|type_flag_destructor,
-                    0, 0)
+                    0, 0, 0)
 {
 }
 
