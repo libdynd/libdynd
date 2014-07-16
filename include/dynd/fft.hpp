@@ -6,6 +6,9 @@
 #ifndef _DYND__FFT_HPP_
 #define _DYND__FFT_HPP_
 
+#include <dynd/array.hpp>
+#include <dynd/array_range.hpp>
+
 #ifdef DYND_FFTW
 
 #include <fftw3.h>
@@ -17,9 +20,6 @@ FFTW_EXTERN int fftw_alignment_of(double *p);
 }
 
 #endif // DYND_FFTW
-
-#include <dynd/array.hpp>
-#include <dynd/array_range.hpp>
 
 namespace dynd {
 

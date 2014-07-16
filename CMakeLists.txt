@@ -533,9 +533,6 @@ if (DYND_CUDA)
         src/dynd/kernels/assignment_kernels.cu
         )
 
-    # Add a preprocessor definition to indicate we're building with CUDA
-    add_definitions(-DDYND_CUDA)
-
     # Disable warnings about "controlling expression is constant"
     set(CUDA_NVCC_FLAGS ${CUDA_NVCC_FLAGS};-Xcudafe;--diag_suppress=boolean_controlling_expr_is_constant)
 
@@ -546,14 +543,7 @@ if (DYND_FFTW)
     find_path(FFTW_PATH fftw3.h)
     include_directories(${FFTW_PATH})
     set(DYND_LINK_LIBS ${DYND_LINK_LIBS} fftw3 fftw3f)
-
-    # Add a preprocessor definition to indicate we're building with FFTW
-    add_definitions(-DDYND_FFTW)
 endif()
-
-# Add a preprocessor definition for the maximum number
-# of arguments that elwise will support
-add_definitions(-DDYND_ELWISE_MAX=${DYND_ELWISE_MAX})
 
 if ((NOT DYND_SHARED_LIB) AND (DYND_INSTALL_LIB))
     # If we're making an installable static library,
@@ -606,6 +596,9 @@ else()
         PREFIX "${CMAKE_STATIC_LIBRARY_PREFIX}"
         )
 endif()
+
+# Add preprocessor definitions from CMake
+configure_file("include/dynd/cmake_config.hpp.in" "${CMAKE_CURRENT_BINARY_DIR}/include/dynd/cmake_config.hpp")
 
 # Special build targets that generate part of the library
 execute_process(COMMAND ${CMAKE_COMMAND} -E make_directory ${CMAKE_CURRENT_BINARY_DIR}/include/dynd/pp)

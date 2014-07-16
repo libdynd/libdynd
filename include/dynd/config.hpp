@@ -10,6 +10,8 @@
 #include <stdint.h>
 #include <limits>
 
+#include <dynd/cmake_config.hpp>
+
 /** The number of elements to process at once when doing chunking/buffering */
 #define DYND_BUFFER_CHUNK_SIZE 128
 
