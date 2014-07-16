@@ -44,10 +44,6 @@ public:
     void transform_child_types(type_transform_fn_t transform_fn, void *extra,
                     ndt::type& out_transformed_tp, bool& out_was_transformed) const;
     ndt::type get_canonical_type() const;
-    bool is_strided() const;
-    void process_strided(const char *arrmeta, const char *data,
-                    ndt::type& out_dt, const char *&out_origin,
-                    intptr_t& out_stride, intptr_t& out_dim_size) const;
 
     ndt::type apply_linear_index(intptr_t nindices, const irange *indices,
                 size_t current_i, const ndt::type& root_tp, bool leading_dimension) const;

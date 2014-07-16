@@ -33,9 +33,13 @@ static bool try_view(const ndt::type &tp, const char *arrmeta,
                      const ndt::type &view_tp, char *view_arrmeta,
                      dynd::memory_block_data *embedded_reference)
 {
-    switch (tp.get_type_id()) {
+  switch (tp.get_type_id()) {
+    case cfixed_dim_type_id:
+    case fixed_dim_type_id:
     case strided_dim_type_id: {
-        const strided_dim_type *sdt = tp.tcast<strided_dim_type>();
+        // All the strided dim types share the same arrmeta, so can be
+        // treated uniformly here
+        const base_uniform_dim_type *sdt = tp.tcast<base_uniform_dim_type>();
         const strided_dim_type_arrmeta *md =
             reinterpret_cast<const strided_dim_type_arrmeta *>(arrmeta);
         switch (view_tp.get_type_id()) {
@@ -85,126 +89,14 @@ static bool try_view(const ndt::type &tp, const char *arrmeta,
             }
             return try_view(sdt->get_element_type(),
                             arrmeta + sizeof(strided_dim_type_arrmeta),
-                            view_fdt->get_element_type(), view_arrmeta,
+                            view_fdt->get_element_type(),
+                            view_arrmeta + sizeof(cfixed_dim_type_arrmeta),
                             embedded_reference);
         }
         default: // other cases cannot be handled
             return false;
         }
     }
-    case fixed_dim_type_id: {
-        const fixed_dim_type *fdt = tp.tcast<fixed_dim_type>();
-        const fixed_dim_type_arrmeta *md =
-            reinterpret_cast<const fixed_dim_type_arrmeta *>(arrmeta);
-        switch (view_tp.get_type_id()) {
-        case strided_dim_type_id: { // fixed as strided
-            const strided_dim_type *view_sdt =
-                view_tp.tcast<strided_dim_type>();
-            strided_dim_type_arrmeta *view_md =
-                reinterpret_cast<strided_dim_type_arrmeta *>(view_arrmeta);
-            if (try_view(fdt->get_element_type(),
-                         arrmeta + sizeof(fixed_dim_type_arrmeta),
-                         view_sdt->get_element_type(),
-                         view_arrmeta + sizeof(strided_dim_type_arrmeta),
-                         embedded_reference)) {
-                view_md->size = fdt->get_fixed_dim_size();
-                view_md->stride = md->stride;
-                return true;
-            } else {
-                return false;
-            }
-        }
-        case fixed_dim_type_id: { // fixed as fixed
-            const fixed_dim_type *view_fdt = view_tp.tcast<fixed_dim_type>();
-            // The size must match exactly in this case
-            if (fdt->get_fixed_dim_size() != view_fdt->get_fixed_dim_size()) {
-                return false;
-            }
-            fixed_dim_type_arrmeta *view_md =
-                reinterpret_cast<fixed_dim_type_arrmeta *>(view_arrmeta);
-            if (try_view(fdt->get_element_type(),
-                         arrmeta + sizeof(fixed_dim_type_arrmeta),
-                         view_fdt->get_element_type(),
-                         view_arrmeta + sizeof(fixed_dim_type_arrmeta),
-                         embedded_reference)) {
-                view_md->stride = md->stride;
-                return true;
-            } else {
-                return false;
-            }
-        }
-        case cfixed_dim_type_id: { // strided as cfixed
-            const cfixed_dim_type *view_fdt =
-                view_tp.tcast<cfixed_dim_type>();
-            // The size and stride must match exactly in this case
-            if (fdt->get_fixed_dim_size() != view_fdt->get_fixed_dim_size() ||
-                    md->stride != view_fdt->get_fixed_stride()) {
-                return false;
-            }
-            return try_view(fdt->get_element_type(),
-                            arrmeta + sizeof(fixed_dim_type_arrmeta),
-                            view_fdt->get_element_type(), view_arrmeta,
-                            embedded_reference);
-        }
-        default: // other cases cannot be handled
-            return false;
-        }
-    }
-    case cfixed_dim_type_id: {
-        const cfixed_dim_type *fdt =
-            tp.tcast<cfixed_dim_type>();
-        switch (view_tp.get_type_id()) {
-        case cfixed_dim_type_id: { // cfixed as cfixed
-            const cfixed_dim_type *view_fdt =
-                view_tp.tcast<cfixed_dim_type>();
-            // The size and stride must match exactly in this case
-            if (fdt->get_fixed_dim_size() != view_fdt->get_fixed_dim_size() ||
-                    fdt->get_fixed_stride() != view_fdt->get_fixed_stride()) {
-                return false;
-            }
-            return try_view(fdt->get_element_type(), arrmeta,
-                            view_fdt->get_element_type(), view_arrmeta,
-                            embedded_reference);
-        }
-        case fixed_dim_type_id: { // cfixed as fixed
-            const fixed_dim_type *view_fdt =
-                view_tp.tcast<fixed_dim_type>();
-            // The size must match exactly in this case
-            if (fdt->get_fixed_dim_size() != view_fdt->get_fixed_dim_size()) {
-                return false;
-            }
-            fixed_dim_type_arrmeta *view_md =
-                reinterpret_cast<fixed_dim_type_arrmeta *>(view_arrmeta);
-            if (try_view(fdt->get_element_type(), arrmeta,
-                         view_fdt->get_element_type(),
-                         view_arrmeta + sizeof(fixed_dim_type_arrmeta),
-                         embedded_reference)) {
-                view_md->stride = fdt->get_fixed_stride();
-                return true;
-            } else {
-                return false;
-            }
-        }
-        case strided_dim_type_id: { // cfixed as strided
-            const strided_dim_type *view_sdt =
-                view_tp.tcast<strided_dim_type>();
-            strided_dim_type_arrmeta *view_md =
-                reinterpret_cast<strided_dim_type_arrmeta *>(view_arrmeta);
-            if (try_view(fdt->get_element_type(), arrmeta,
-                         view_sdt->get_element_type(),
-                         view_arrmeta + sizeof(strided_dim_type_arrmeta),
-                         embedded_reference)) {
-                view_md->size = fdt->get_fixed_dim_size();
-                view_md->stride = fdt->get_fixed_stride();
-                return true;
-            } else {
-                return false;
-            }
-        }
-        default: // other cases cannot be handled
-            return false;
-        }
-        }
     default:
         if (tp == view_tp) {
             // require equal types otherwise

@@ -11,6 +11,7 @@
 #include <dynd/types/datashape_formatter.hpp>
 #include <dynd/types/strided_dim_type.hpp>
 #include <dynd/types/var_dim_type.hpp>
+#include <dynd/types/fixed_dim_type.hpp>
 #include <dynd/types/cfixed_dim_type.hpp>
 #include <dynd/types/struct_type.hpp>
 #include <dynd/types/cstruct_type.hpp>
@@ -121,14 +122,17 @@ TEST(DataShapeFormatter, ArrayUniformArrays) {
 }
 
 TEST(DataShapeFormatter, DTypeUniformArrays) {
-    EXPECT_EQ("A * B * C * int32", format_datashape(
+    EXPECT_EQ("strided * strided * strided * int32", format_datashape(
                     ndt::make_strided_dim(ndt::make_type<int32_t>(), 3), "", false));
     EXPECT_EQ("var * int32", format_datashape(
                     ndt::make_var_dim(ndt::make_type<int32_t>()), "", false));
     EXPECT_EQ("var * 3 * int32", format_datashape(
                     ndt::make_var_dim(
                         ndt::make_cfixed_dim(3, ndt::make_type<int32_t>())), "", false));
-    EXPECT_EQ("var * A * int32", format_datashape(
+    EXPECT_EQ("var * 3 * int32", format_datashape(
+                    ndt::make_var_dim(
+                        ndt::make_fixed_dim(3, ndt::make_type<int32_t>())), "", false));
+    EXPECT_EQ("var * strided * int32", format_datashape(
                     ndt::make_var_dim(
                         ndt::make_strided_dim(ndt::make_type<int32_t>())), "", false));
 }
@@ -159,7 +163,7 @@ TEST(DataShapeFormatter, DTypeStructs) {
                                         ndt::make_type<int8_t>(), "b")), "x",
                                     ndt::make_cfixed_dim(5, ndt::make_var_dim(
                                         ndt::make_type<uint8_t>())), "y"), "", false));
-    EXPECT_EQ("{x: A * {a: int32, b: int8}, y: var * B * uint8}",
+    EXPECT_EQ("{x: strided * {a: int32, b: int8}, y: var * strided * uint8}",
                     format_datashape(ndt::make_struct(
                                     ndt::make_strided_dim(ndt::make_cstruct(
                                         ndt::make_type<int32_t>(), "a",

@@ -275,22 +275,6 @@ public:
     }
 
     /**
-     * Returns true if this level of the type can be processed as an
-     * origin pointer, a stride, and a size.
-     */
-    virtual bool is_strided() const;
-
-    /**
-     * When is_strided() returns true, this function can be used to
-     * get the striding parameters for a given arrmeta/data instance
-     * of the type.
-     */
-    virtual void process_strided(const char *arrmeta, const char *data,
-                                 ndt::type &out_dt, const char *&out_origin,
-                                 intptr_t &out_stride,
-                                 intptr_t &out_dim_size) const;
-
-    /**
      * Indexes into the type. This function returns the type which results
      * from applying the same index to an ndarray of this type.
      *

@@ -102,23 +102,6 @@ ndt::type var_dim_type::get_canonical_type() const
     return ndt::type(new var_dim_type(m_element_tp.get_canonical_type()), false);
 }
 
-bool var_dim_type::is_strided() const
-{
-    return true;
-}
-
-void var_dim_type::process_strided(const char *arrmeta, const char *data,
-                ndt::type& out_dt, const char *&out_origin,
-                intptr_t& out_stride, intptr_t& out_dim_size) const
-{
-    const var_dim_type_arrmeta *md = reinterpret_cast<const var_dim_type_arrmeta *>(arrmeta);
-    const var_dim_type_data *d = reinterpret_cast<const var_dim_type_data *>(data);
-    out_dt = m_element_tp;
-    out_origin = d->begin;
-    out_stride = md->stride;
-    out_dim_size = d->size;
-}
-
 ndt::type var_dim_type::apply_linear_index(intptr_t nindices, const irange *indices,
                 size_t current_i, const ndt::type& root_tp, bool leading_dimension) const
 {

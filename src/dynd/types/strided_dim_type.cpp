@@ -105,25 +105,6 @@ ndt::type strided_dim_type::get_canonical_type() const
                      false);
 }
 
-bool strided_dim_type::is_strided() const
-{
-    return true;
-}
-
-void strided_dim_type::process_strided(const char *arrmeta, const char *data,
-                                       ndt::type &out_dt,
-                                       const char *&out_origin,
-                                       intptr_t &out_stride,
-                                       intptr_t &out_dim_size) const
-{
-    const strided_dim_type_arrmeta *md =
-        reinterpret_cast<const strided_dim_type_arrmeta *>(arrmeta);
-    out_dt = m_element_tp;
-    out_origin = data;
-    out_stride = md->stride;
-    out_dim_size = md->size;
-}
-
 ndt::type strided_dim_type::apply_linear_index(intptr_t nindices,
                                                const irange *indices,
                                                size_t current_i,
@@ -410,15 +391,18 @@ void strided_dim_type::arrmeta_destruct(char *arrmeta) const
     }
 }
 
-void strided_dim_type::arrmeta_debug_print(const char *arrmeta, std::ostream& o, const std::string& indent) const
+void strided_dim_type::arrmeta_debug_print(const char *arrmeta, std::ostream &o,
+                                           const std::string &indent) const
 {
-    const strided_dim_type_arrmeta *md = reinterpret_cast<const strided_dim_type_arrmeta *>(arrmeta);
-    o << indent << "strided_dim arrmeta\n";
-    o << indent << " stride: " << md->stride << "\n";
-    o << indent << " size: " << md->size << "\n";
-    if (!m_element_tp.is_builtin()) {
-        m_element_tp.extended()->arrmeta_debug_print(arrmeta + sizeof(strided_dim_type_arrmeta), o, indent + " ");
-    }
+  const strided_dim_type_arrmeta *md =
+      reinterpret_cast<const strided_dim_type_arrmeta *>(arrmeta);
+  o << indent << "strided_dim arrmeta\n";
+  o << indent << " size: " << md->size << "\n";
+  o << indent << " stride: " << md->stride << "\n";
+  if (!m_element_tp.is_builtin()) {
+    m_element_tp.extended()->arrmeta_debug_print(
+        arrmeta + sizeof(strided_dim_type_arrmeta), o, indent + " ");
+  }
 }
 
 size_t strided_dim_type::get_iterdata_size(intptr_t ndim) const
@@ -644,6 +628,7 @@ void strided_dim_type::reorder_default_constructed_strides(char *dst_arrmeta,
                 const cfixed_dim_type *fdd = last_src_tp.tcast<cfixed_dim_type>();
                 stride = fdd->get_fixed_stride();
                 last_src_tp = fdd->get_element_type();
+                src_arrmeta += sizeof(cfixed_dim_type_arrmeta);
                 break;
             }
             case strided_dim_type_id: {

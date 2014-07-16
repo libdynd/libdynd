@@ -240,39 +240,23 @@ bool ndt::type::get_as_strided_dim(const char *arrmeta, intptr_t &out_size,
                                    intptr_t &out_stride, ndt::type &out_el_tp,
                                    const char *&out_el_arrmeta) const
 {
-    type_id_t tid = get_type_id();
-    switch (tid) {
-    case cfixed_dim_type_id: {
-        const cfixed_dim_type *fdt = tcast<cfixed_dim_type>();
-        out_size = fdt->get_fixed_dim_size();
-        out_stride = fdt->get_fixed_stride();
-        out_el_tp = fdt->get_element_type();
-        out_el_arrmeta = arrmeta;
-        return true;
-    }
-    case fixed_dim_type_id: {
-        const fixed_dim_type *fdt = tcast<fixed_dim_type>();
-        const fixed_dim_type_arrmeta *m =
-            reinterpret_cast<const fixed_dim_type_arrmeta *>(arrmeta);
-        out_size = fdt->get_fixed_dim_size();
-        out_stride = m->stride;
-        out_el_tp = fdt->get_element_type();
-        out_el_arrmeta = arrmeta + sizeof(fixed_dim_type_arrmeta);
-        return true;
-    }
-    case strided_dim_type_id: {
-        const strided_dim_type *fdt = tcast<strided_dim_type>();
-        const strided_dim_type_arrmeta *m =
-            reinterpret_cast<const strided_dim_type_arrmeta *>(arrmeta);
-        out_size = m->size;
-        out_stride = m->stride;
-        out_el_tp = fdt->get_element_type();
-        out_el_arrmeta = arrmeta + sizeof(strided_dim_type_arrmeta);
-        return true;
-    }
-    default:
-        return false;
-    }
+  type_id_t tid = get_type_id();
+  switch (tid) {
+  case cfixed_dim_type_id:
+  case fixed_dim_type_id:
+  case strided_dim_type_id: {
+    const base_uniform_dim_type *fdt = tcast<base_uniform_dim_type>();
+    const strided_dim_type_arrmeta *m =
+        reinterpret_cast<const strided_dim_type_arrmeta *>(arrmeta);
+    out_size = m->size;
+    out_stride = m->stride;
+    out_el_tp = fdt->get_element_type();
+    out_el_arrmeta = arrmeta + sizeof(strided_dim_type_arrmeta);
+    return true;
+  }
+  default:
+    return false;
+  }
 }
 
 bool ndt::type::data_layout_compatible_with(const ndt::type& rhs) const

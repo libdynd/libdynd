@@ -112,8 +112,11 @@ namespace {
 
                 // Allocate the initial output as the src number of characters + some padding
                 // TODO: Don't add padding if the output is not a multi-character encoding
-                allocator->allocate(dst_md->blockref, ((src_end - src_begin) / src_charsize + 16) * dst_charsize * 1124 / 1024,
-                                dst_charsize, &dst_begin, &dst_end);
+                allocator->allocate(
+                    dst_md->blockref,
+                    ((src_end - src_begin) / src_charsize + 16) * dst_charsize *
+                        1124 / 1024,
+                    dst_charsize, &dst_begin, &dst_end);
 
                 dst_current = dst_begin;
                 while (src_begin < src_end) {
