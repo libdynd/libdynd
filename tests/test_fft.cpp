@@ -391,6 +391,7 @@ TYPED_TEST_P(FFT2D, Linear) {
         }
     }
 
+/*
     vector<intptr_t> axes;
     axes.push_back(0);
 
@@ -420,6 +421,7 @@ TYPED_TEST_P(FFT2D, Linear) {
                 rel_err_max<typename TestFixture::RealType>());
         }
     }
+*/
 }
 
 TYPED_TEST_P(FFT2D, Inverse) {
@@ -435,6 +437,7 @@ TYPED_TEST_P(FFT2D, Inverse) {
         }
     }
 
+/*
     vector<intptr_t> axes;
     axes.push_back(0);
 
@@ -458,6 +461,7 @@ TYPED_TEST_P(FFT2D, Inverse) {
                 rel_err_max<typename TestFixture::RealType>());
         }
     }
+*/
 }
 
 TYPED_TEST_P(FFT2D, Zeros) {
@@ -471,6 +475,7 @@ TYPED_TEST_P(FFT2D, Zeros) {
         }
     }
 
+/*
     vector<intptr_t> axes;
     axes.push_back(0);
 
@@ -490,6 +495,7 @@ TYPED_TEST_P(FFT2D, Zeros) {
             EXPECT_EQ(0, y(i, j).as<typename TestFixture::DstType>());
         }
     }
+*/
 }
 
 TYPED_TEST_P(FFT2D, Ones) {
