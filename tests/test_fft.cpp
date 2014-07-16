@@ -391,7 +391,6 @@ TYPED_TEST_P(FFT2D, Linear) {
         }
     }
 
-/*
     vector<intptr_t> axes;
     axes.push_back(0);
 
@@ -407,6 +406,7 @@ TYPED_TEST_P(FFT2D, Linear) {
         }
     }
 
+/*
     axes.clear();
     axes.push_back(1);
 
