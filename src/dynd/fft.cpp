@@ -59,7 +59,6 @@ static int cleanup_atexit = atexit(fftcleanup);
 \
         LIB##_plan plan = LIB##_plan_guru_dft(rank, dims.get(), howmany_rank, howmany_dims.get(), \
             src, dst, sign, flags); \
-\
         if (plan != NULL) { \
             plans[key] = plan; \
         } \
