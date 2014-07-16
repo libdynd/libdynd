@@ -466,6 +466,8 @@ set(libdynd_SRC
     include/dynd/auxiliary_data.hpp
     include/dynd/buffer_storage.hpp
     include/dynd/config.hpp
+    include/dynd/cmake_config.hpp.in # Included here for ease of editing in IDEs
+    ${CMAKE_CURRENT_BINARY_DIR}/include/dynd/cmake_config.hpp
     include/dynd/cuda_config.hpp
     include/dynd/cling_all.hpp
     include/dynd/diagnostics.hpp
@@ -598,16 +600,19 @@ else()
 endif()
 
 # Add preprocessor definitions from CMake
-configure_file("include/dynd/cmake_config.hpp.in" "${CMAKE_CURRENT_BINARY_DIR}/include/dynd/cmake_config.hpp")
+configure_file("include/dynd/cmake_config.hpp.in"
+               "${CMAKE_CURRENT_BINARY_DIR}/include/dynd/cmake_config.hpp")
 
 # Special build targets that generate part of the library
-execute_process(COMMAND ${CMAKE_COMMAND} -E make_directory ${CMAKE_CURRENT_BINARY_DIR}/include/dynd/pp)
+execute_process(COMMAND ${CMAKE_COMMAND}
+                -E make_directory ${CMAKE_CURRENT_BINARY_DIR}/include/dynd/pp)
 add_executable(ppgen include/dynd/pp/gen.cpp)
 add_custom_command(OUTPUT ${CMAKE_CURRENT_BINARY_DIR}/include/dynd/pp/gen.hpp
         DEPENDS include/dynd/pp/gen.cpp
         COMMAND ppgen 8 3 ${CMAKE_CURRENT_BINARY_DIR}/include/dynd/pp)
 # Make libdynd depend on ppgen_run to make sure gen.hpp is there when it builds
-set_source_files_properties(${CMAKE_CURRENT_BINARY_DIR}/include/dynd/pp/gen.hpp PROPERTIES GENERATED true)
+set_source_files_properties(${CMAKE_CURRENT_BINARY_DIR}/include/dynd/pp/gen.hpp
+                            PROPERTIES GENERATED true)
 add_dependencies(libdynd ppgen)
 
 # Copy the headers from cephes that need to be installed with libdynd
