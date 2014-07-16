@@ -26,28 +26,34 @@ namespace dynd {
 #ifdef DYND_FFTW
 namespace fftw {
 
-fftwf_plan fftplan(size_t ndim, std::vector<intptr_t> shape, fftwf_complex *src, std::vector<intptr_t> src_strides,
-    fftwf_complex *dst, std::vector<intptr_t> dst_strides, int sign, unsigned int flags, bool overwrite);
-fftw_plan fftplan(size_t ndim, std::vector<intptr_t> shape, fftw_complex *src, std::vector<intptr_t> src_strides,
-    fftw_complex *dst, std::vector<intptr_t> dst_strides, int sign, unsigned int flags, bool overwrite);
+fftwf_plan fftplan(std::vector<intptr_t> shape, std::vector<intptr_t> axes,
+    fftwf_complex *src, std::vector<intptr_t> src_strides,
+    fftwf_complex *dst, std::vector<intptr_t> dst_strides,
+    int sign, unsigned int flags, bool overwrite);
+fftw_plan fftplan(std::vector<intptr_t> shape, std::vector<intptr_t> axes,
+    fftw_complex *src, std::vector<intptr_t> src_strides,
+    fftw_complex *dst, std::vector<intptr_t> dst_strides,
+    int sign, unsigned int flags, bool overwrite);
 
-fftwf_plan fftplan(size_t ndim, std::vector<intptr_t> shape, float *src, std::vector<intptr_t> src_strides,
+fftwf_plan fftplan(std::vector<intptr_t> shape, float *src, std::vector<intptr_t> src_strides,
     fftwf_complex *dst, std::vector<intptr_t> dst_strides, unsigned int flags, bool overwrite);
-fftw_plan fftplan(size_t ndim, std::vector<intptr_t> shape, double *src, std::vector<intptr_t> src_strides,
+fftw_plan fftplan(std::vector<intptr_t> shape, double *src, std::vector<intptr_t> src_strides,
     fftw_complex *dst, std::vector<intptr_t> dst_strides, unsigned int flags, bool overwrite);
 
-fftwf_plan fftplan(size_t ndim, std::vector<intptr_t> shape, fftwf_complex *src, std::vector<intptr_t> src_strides,
+fftwf_plan fftplan(std::vector<intptr_t> shape, fftwf_complex *src, std::vector<intptr_t> src_strides,
     float *dst, std::vector<intptr_t> dst_strides, unsigned int flags, bool overwrite);
-fftw_plan fftplan(size_t ndim, std::vector<intptr_t> shape, fftw_complex *src, std::vector<intptr_t> src_strides,
+fftw_plan fftplan(std::vector<intptr_t> shape, fftw_complex *src, std::vector<intptr_t> src_strides,
     double *dst, std::vector<intptr_t> dst_strides, unsigned int flags, bool overwrite);
 
 void fftcleanup();
 
-nd::array fft(const nd::array &x, const std::vector<intptr_t> &shape, unsigned int flags = FFTW_MEASURE);
-nd::array ifft(const nd::array &x, const std::vector<intptr_t> &shape, unsigned int flags = FFTW_MEASURE);
+nd::array fft(const nd::array &x, std::vector<intptr_t> shape, std::vector<intptr_t> axes,
+    unsigned int flags = FFTW_MEASURE);
+nd::array ifft(const nd::array &x, std::vector<intptr_t> shape, std::vector<intptr_t> axes,
+    unsigned int flags = FFTW_MEASURE);
 
-nd::array rfft(const nd::array &x, const std::vector<intptr_t> &shape, unsigned int flags = FFTW_MEASURE);
-nd::array irfft(const nd::array &x, const std::vector<intptr_t> &shape, unsigned int flags = FFTW_MEASURE);
+nd::array rfft(const nd::array &x, std::vector<intptr_t> shape, unsigned int flags = FFTW_MEASURE);
+nd::array irfft(const nd::array &x, std::vector<intptr_t> shape, unsigned int flags = FFTW_MEASURE);
 
 } // namespace fftw
 #endif // DYND_FFTW
@@ -88,16 +94,25 @@ nd::array irfft(const nd::array &x, const std::vector<intptr_t> &shape, unsigned
  *
  * @return A complex array with dimensions specified by 'shape'.
  */
-inline nd::array fft(const nd::array &x, const std::vector<intptr_t> &shape) {
-    if (x.get_ndim() != static_cast<intptr_t>(shape.size())) {
+inline nd::array fft(const nd::array &x, std::vector<intptr_t> shape, std::vector<intptr_t> axes) {
+    if (x.get_ndim() != static_cast<intptr_t>(shape.size()) || static_cast<intptr_t>(axes.size()) > x.get_ndim()) {
         throw std::invalid_argument("dimensions provided for fft do not match");
     }
 
 #ifdef DYND_FFTW
-    return fftw::fft(x, shape);
+    return fftw::fft(x, shape, axes);
 #else
     throw std::runtime_error("fft is not implemented");
 #endif
+}
+
+inline nd::array fft(const nd::array &x, std::vector<intptr_t> shape) {
+    std::vector<intptr_t> axes;
+    for (intptr_t i = 0; i < x.get_ndim(); ++i) {
+        axes.push_back(i);
+    }
+
+    return fft(x, shape, axes);
 }
 
 DECL_INLINES(fft)
@@ -111,16 +126,25 @@ DECL_INLINES(fft)
  *
  * @return A complex array with dimensions specified by 'shape'.
  */
-inline nd::array ifft(const nd::array &x, const std::vector<intptr_t> &shape) {
-    if (x.get_ndim() != static_cast<intptr_t>(shape.size())) {
+inline nd::array ifft(const nd::array &x, std::vector<intptr_t> shape, std::vector<intptr_t> axes) {
+    if (x.get_ndim() != static_cast<intptr_t>(shape.size()) || static_cast<intptr_t>(axes.size()) > x.get_ndim()) {
         throw std::invalid_argument("dimensions provided for ifft do not match");
     }
 
 #ifdef DYND_FFTW
-    return fftw::ifft(x, shape);
+    return fftw::ifft(x, shape, axes);
 #else
     throw std::runtime_error("ifft is not implemented");
 #endif
+}
+
+inline nd::array ifft(const nd::array &x, std::vector<intptr_t> shape) {
+    std::vector<intptr_t> axes;
+    for (intptr_t i = 0; i < x.get_ndim(); ++i) {
+        axes.push_back(i);
+    }
+
+    return ifft(x, shape, axes);
 }
 
 DECL_INLINES(ifft)
@@ -135,7 +159,7 @@ DECL_INLINES(ifft)
  * @return A complex array with dimensions specified by 'shape', except the last dimension
  *         is '(shape[shape.size() - 1] / 2) + 1'.
  */
-inline nd::array rfft(const nd::array &x, const std::vector<intptr_t> &shape) {
+inline nd::array rfft(const nd::array &x, std::vector<intptr_t> shape) {
     if (x.get_ndim() != static_cast<intptr_t>(shape.size())) {
         throw std::invalid_argument("dimensions provided for rfft do not match");
     }
@@ -160,7 +184,7 @@ DECL_INLINES(rfft)
  * @return A complex array with dimensions specified by 'shape'. By default, the shape
  *         is the same as that of 'x', except the last dimension is '2 * (x.get_shape[x.get_ndim() - 1] - 1)'.
  */
-inline nd::array irfft(const nd::array &x, const std::vector<intptr_t> &shape) {
+inline nd::array irfft(const nd::array &x, std::vector<intptr_t> shape) {
     if (x.get_ndim() != static_cast<intptr_t>(shape.size())) {
         throw std::invalid_argument("dimensions provided for irfft do not match");
     }
@@ -185,6 +209,11 @@ nd::array fftshift(const nd::array &x);
  * Inverts fftshift.
  */
 nd::array ifftshift(const nd::array &x);
+
+/**
+ * Returns the sample frequencies of a discrete Fourier transform, with units of cycles per seconds.
+ */
+nd::array fftspace(intptr_t count, double step = 1.0);
 
 } // namespace dynd
 

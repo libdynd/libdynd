@@ -390,6 +390,36 @@ TYPED_TEST_P(FFT2D, Linear) {
                 rel_err_max<typename TestFixture::RealType>());
         }
     }
+
+    vector<intptr_t> axes;
+    axes.push_back(0);
+
+    y0 = fft(x0, x0.get_shape(), axes);
+    y1 = fft(x1, x1.get_shape(), axes);
+    y = fft(x, x.get_shape(), axes);
+
+    for (int i = 0; i < TestFixture::DstShape[0]; ++i) {
+        for (int j = 0; j < TestFixture::DstShape[1]; ++j) {
+            EXPECT_EQ_RELERR(y0(i, j).as<typename TestFixture::DstType>() + y1(i, j).as<typename TestFixture::DstType>(),
+                y(i, j).as<typename TestFixture::DstType>(),
+                rel_err_max<typename TestFixture::RealType>());
+        }
+    }
+
+    axes.clear();
+    axes.push_back(1);
+
+    y0 = fft(x0, x0.get_shape(), axes);
+    y1 = fft(x1, x1.get_shape(), axes);
+    y = fft(x, x.get_shape(), axes);
+
+    for (int i = 0; i < TestFixture::DstShape[0]; ++i) {
+        for (int j = 0; j < TestFixture::DstShape[1]; ++j) {
+            EXPECT_EQ_RELERR(y0(i, j).as<typename TestFixture::DstType>() + y1(i, j).as<typename TestFixture::DstType>(),
+                y(i, j).as<typename TestFixture::DstType>(),
+                rel_err_max<typename TestFixture::RealType>());
+        }
+    }
 }
 
 TYPED_TEST_P(FFT2D, Inverse) {
@@ -404,6 +434,30 @@ TYPED_TEST_P(FFT2D, Inverse) {
                 rel_err_max<typename TestFixture::RealType>());
         }
     }
+
+    vector<intptr_t> axes;
+    axes.push_back(0);
+
+    y = ifft(fft(x, x.get_shape(), axes), y.get_shape(), axes);
+    for (int i = 0; i < TestFixture::SrcShape[0]; ++i) {
+        for (int j = 0; j < TestFixture::SrcShape[1]; ++j) {
+            EXPECT_EQ_RELERR(x(i, j).as<typename TestFixture::SrcType>(),
+                y(i, j).as<typename TestFixture::SrcType>() / TestFixture::SrcShape[0],
+                rel_err_max<typename TestFixture::RealType>());
+        }
+    }
+
+    axes.clear();
+    axes.push_back(1);
+
+    y = ifft(fft(x, x.get_shape(), axes), y.get_shape(), axes);
+    for (int i = 0; i < TestFixture::SrcShape[0]; ++i) {
+        for (int j = 0; j < TestFixture::SrcShape[1]; ++j) {
+            EXPECT_EQ_RELERR(x(i, j).as<typename TestFixture::SrcType>(),
+                y(i, j).as<typename TestFixture::SrcType>() / TestFixture::SrcShape[1],
+                rel_err_max<typename TestFixture::RealType>());
+        }
+    }
 }
 
 TYPED_TEST_P(FFT2D, Zeros) {
@@ -411,6 +465,26 @@ TYPED_TEST_P(FFT2D, Zeros) {
         ndt::make_type<typename TestFixture::SrcType>());
 
     nd::array y = fft(x);
+    for (int i = 0; i < TestFixture::DstShape[0]; ++i) {
+        for (int j = 0; j < TestFixture::DstShape[1]; ++j) {
+            EXPECT_EQ(0, y(i, j).as<typename TestFixture::DstType>());
+        }
+    }
+
+    vector<intptr_t> axes;
+    axes.push_back(0);
+
+    y = fft(x, x.get_shape(), axes);
+    for (int i = 0; i < TestFixture::DstShape[0]; ++i) {
+        for (int j = 0; j < TestFixture::DstShape[1]; ++j) {
+            EXPECT_EQ(0, y(i, j).as<typename TestFixture::DstType>());
+        }
+    }
+
+    axes.clear();
+    axes.push_back(1);
+
+    y = fft(x, x.get_shape(), axes);
     for (int i = 0; i < TestFixture::DstShape[0]; ++i) {
         for (int j = 0; j < TestFixture::DstShape[1]; ++j) {
             EXPECT_EQ(0, y(i, j).as<typename TestFixture::DstType>());
