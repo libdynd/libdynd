@@ -12,7 +12,7 @@
 
 namespace dynd {
 
-class view_type : public base_expression_type {
+class view_type : public base_expr_type {
     ndt::type m_value_type, m_operand_type;
 
 public:
@@ -70,12 +70,12 @@ namespace ndt {
      * Makes an unaligned type to view the given type without alignment requirements.
      */
     inline ndt::type make_view(const ndt::type& value_type, const ndt::type& operand_type) {
-        if (value_type.get_kind() != expression_kind) {
+        if (value_type.get_kind() != expr_kind) {
             return ndt::type(new view_type(value_type, operand_type), false);
         } else {
-            // When the value type has an expression_kind, we need to chain things together
+            // When the value type has an expr_kind, we need to chain things together
             // so that the view operation happens just at the primitive level.
-            return value_type.tcast<base_expression_type>()->with_replaced_storage_type(
+            return value_type.tcast<base_expr_type>()->with_replaced_storage_type(
                 ndt::type(new view_type(value_type.storage_type(), operand_type), false));
         }
     }

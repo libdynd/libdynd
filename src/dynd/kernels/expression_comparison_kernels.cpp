@@ -4,7 +4,7 @@
 //
 
 #include <dynd/type.hpp>
-#include <dynd/types/base_expression_type.hpp>
+#include <dynd/types/base_expr_type.hpp>
 #include <dynd/kernels/expression_comparison_kernels.hpp>
 #include <dynd/kernels/assignment_kernels.hpp>
 
@@ -145,7 +145,7 @@ size_t dynd::make_expression_comparison_kernel(
     e->base.set_function<expr_predicate_t>(&buffered_kernel_extra::kernel);
     e->base.destructor = &buffered_kernel_extra::destruct;
     // Initialize the information for buffering the operands
-    if (src0_dt.get_kind() == expression_kind) {
+    if (src0_dt.get_kind() == expr_kind) {
         e->init_buffer(0, src0_dt.value_type());
         e->buf[0].kernel_offset = ckb_offset - root_ckb_offset;
         ckb_offset = make_assignment_kernel(
@@ -154,7 +154,7 @@ size_t dynd::make_expression_comparison_kernel(
         // Have to re-retrieve 'e', because creating another kernel may invalidate it
         e = ckb->get_at<buffered_kernel_extra>(root_ckb_offset);
     }
-    if (src1_dt.get_kind() == expression_kind) {
+    if (src1_dt.get_kind() == expr_kind) {
         e->init_buffer(1, src1_dt.value_type());
         e->buf[1].kernel_offset = ckb_offset - root_ckb_offset;
         ckb_offset = make_assignment_kernel(

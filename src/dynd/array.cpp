@@ -715,7 +715,7 @@ namespace {
                                 storage_dt.extended())->get_target_alignment());
                 out_was_transformed = true;
             } else {
-                if (dt.get_kind() == expression_kind) {
+                if (dt.get_kind() == expr_kind) {
                     out_transformed_tp = storage_dt;
                     out_was_transformed = true;
                 } else {
@@ -1446,7 +1446,7 @@ namespace {
         if (dt.is_scalar()) {
             const ndt::type *e = reinterpret_cast<const ndt::type *>(extra);
             // If things aren't simple, use a view_type
-            if (dt.get_kind() == expression_kind || dt.get_data_size() != e->get_data_size() ||
+            if (dt.get_kind() == expr_kind || dt.get_data_size() != e->get_data_size() ||
                         !dt.is_pod() || !e->is_pod()) {
                 // Some special cases that have the same memory layouts
                 switch (dt.get_type_id()) {
@@ -1497,7 +1497,7 @@ nd::array nd::array::view_scalars(const ndt::type& scalar_tp) const
         const strided_dim_type_arrmeta *md = reinterpret_cast<const strided_dim_type_arrmeta *>(get_arrmeta());
         const ndt::type& edt = sad->get_element_type();
         if (edt.is_pod() && (intptr_t)edt.get_data_size() == md->stride &&
-                    sad->get_element_type().get_kind() != expression_kind) {
+                    sad->get_element_type().get_kind() != expr_kind) {
             intptr_t nbytes = md->dim_size * edt.get_data_size();
             // Make sure the element size divides into the # of bytes
             if (nbytes % scalar_tp.get_data_size() != 0) {
@@ -2018,7 +2018,7 @@ bool nd::is_scalar_avail(const ndt::type &tp, const char *arrmeta,
     if (tp.is_scalar()) {
         if (tp.get_type_id() == option_type_id) {
             return tp.tcast<option_type>()->is_avail(arrmeta, data, ectx);
-        } else if (tp.get_kind() == expression_kind &&
+        } else if (tp.get_kind() == expr_kind &&
                    tp.value_type().get_type_id() == option_type_id) {
             nd::array tmp = nd::empty(tp.value_type());
             tmp.val_assign(tp, arrmeta, data, ectx);

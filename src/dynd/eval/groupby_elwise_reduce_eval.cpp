@@ -101,12 +101,12 @@ ndarray_node_ptr dynd::eval::evaluate_groupby_elwise_reduce(ndarray_node *node, 
     deque<intptr_t> data_element_sizes, by_element_sizes;
 
     if (data_strided_node->get_category() != strided_array_node_category ||
-                    data_strided_node->get_type().get_kind() == expression_kind) {
+                    data_strided_node->get_type().get_kind() == expr_kind) {
         data_strided_node = push_front_node_unary_kernels(data_strided_node, ectx, data_kernels, data_element_sizes);
     }
 
     if (by_strided_node->get_category() != strided_array_node_category ||
-                    by_strided_node->get_type().get_kind() == expression_kind) {
+                    by_strided_node->get_type().get_kind() == expr_kind) {
         by_strided_node = push_front_node_unary_kernels(by_strided_node, ectx, by_kernels, by_element_sizes);
     }
 

@@ -20,7 +20,7 @@ using namespace dynd;
 
 groupby_type::groupby_type(const ndt::type& data_values_tp,
                 const ndt::type& by_values_tp)
-    : base_expression_type(groupby_type_id, expression_kind,
+    : base_expr_type(groupby_type_id, expr_kind,
                     sizeof(groupby_type_data), sizeof(void *), type_flag_none,
                     0, 1 + data_values_tp.get_ndim())
 {

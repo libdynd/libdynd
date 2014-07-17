@@ -13,7 +13,7 @@ using namespace std;
 using namespace dynd;
 
 view_type::view_type(const ndt::type& value_type, const ndt::type& operand_type)
-    : base_expression_type(view_type_id, expression_kind, operand_type.get_data_size(),
+    : base_expr_type(view_type_id, expr_kind, operand_type.get_data_size(),
                     operand_type.get_data_alignment(),
                     inherited_flags(value_type.get_flags(), operand_type.get_flags()),
                     operand_type.get_arrmeta_size()),
@@ -123,9 +123,9 @@ bool view_type::operator==(const base_type& rhs) const
 
 ndt::type view_type::with_replaced_storage_type(const ndt::type& replacement_type) const
 {
-    if (m_operand_type.get_kind() == expression_kind) {
+    if (m_operand_type.get_kind() == expr_kind) {
         return ndt::type(new view_type(m_value_type,
-                        m_operand_type.tcast<base_expression_type>()->with_replaced_storage_type(replacement_type)), false);
+                        m_operand_type.tcast<base_expr_type>()->with_replaced_storage_type(replacement_type)), false);
     } else {
         if (m_operand_type != replacement_type.value_type()) {
             std::stringstream ss;

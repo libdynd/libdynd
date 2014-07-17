@@ -3,8 +3,8 @@
 // BSD 2-Clause License, see LICENSE.txt
 //
 
-#ifndef _DYND__BASE_UNIFORM_DIM_TYPE_HPP_
-#define _DYND__BASE_UNIFORM_DIM_TYPE_HPP_
+#ifndef DYND__TYPES__BASE_DIM_TYPE_HPP
+#define DYND__TYPES__BASE_DIM_TYPE_HPP
 
 #include <dynd/types/base_type.hpp>
 #include <dynd/type.hpp>
@@ -92,4 +92,4 @@ public:
 
 } // namespace dynd
 
-#endif // _DYND__BASE_UNIFORM_DIM_TYPE_HPP_
+#endif // DYND__TYPES__BASE_DIM_TYPE_HPP

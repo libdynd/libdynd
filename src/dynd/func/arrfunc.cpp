@@ -81,7 +81,7 @@ static intptr_t instantiate_property_ckernel(
     } else if (src_tp[0].value_type() == prop_src_tp.operand_type()) {
       return make_assignment_kernel(
           ckb, ckb_offset, dst_tp, dst_arrmeta,
-          prop_src_tp.tcast<base_expression_type>()->with_replaced_storage_type(
+          prop_src_tp.tcast<base_expr_type>()->with_replaced_storage_type(
               src_tp[0]),
           src_arrmeta[0], kernreq, ectx);
     }
@@ -102,8 +102,8 @@ void dynd::make_arrfunc_from_assignment(const ndt::type &dst_tp,
                                         assign_error_mode errmode,
                                         arrfunc_type_data &out_af)
 {
-    if (dst_tp.get_kind() == expression_kind ||
-            (src_tp.get_kind() == expression_kind &&
+    if (dst_tp.get_kind() == expr_kind ||
+            (src_tp.get_kind() == expr_kind &&
             src_tp.get_type_id() != expr_type_id)) {
         stringstream ss;
         ss << "Creating an arrfunc from an assignment requires non-expression"
@@ -121,7 +121,7 @@ void dynd::make_arrfunc_from_property(const ndt::type &tp,
                                       const std::string &propname,
                                       arrfunc_type_data &out_af)
 {
-    if (tp.get_kind() == expression_kind) {
+    if (tp.get_kind() == expr_kind) {
         stringstream ss;
         ss << "Creating an arrfunc from a property requires a non-expression"
            << ", got " << tp;

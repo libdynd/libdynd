@@ -67,14 +67,14 @@ ndarray_node *dynd::eval::push_front_node_unary_kernels(ndarray_node* node,
     switch (node->get_category()) {
         case strided_array_node_category:
             // The expression type kernels
-            if (dt.get_kind() == expression_kind) {
+            if (dt.get_kind() == expr_kind) {
                 push_front_dtype_storage_to_value_kernels(dt, ectx, out_kernels, out_element_sizes);
             }
             return node;
         case elwise_node_category:
             if (node->get_nop() == 1) {
                 // The expression type kernels
-                if (dt.get_kind() == expression_kind) {
+                if (dt.get_kind() == expr_kind) {
                     push_front_dtype_storage_to_value_kernels(dt, ectx, out_kernels, out_element_sizes);
                 } else if (out_kernels.empty()) {
                     out_element_sizes.push_front(node->get_opnode(0)->get_type().value_type().get_data_size());

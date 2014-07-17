@@ -34,7 +34,7 @@ namespace dynd {
  *       +, -, *, /. The operand type defines the arrmeta, though,
  *       so a special type just for this purpose may be required.
  */
-class expr_type : public base_expression_type {
+class expr_type : public base_expr_type {
     ndt::type m_value_type, m_operand_type;
     const expr_kernel_generator *m_kgen;
 

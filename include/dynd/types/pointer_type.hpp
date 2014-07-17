@@ -30,7 +30,7 @@ struct pointer_type_arrmeta {
     intptr_t offset;
 };
 
-class pointer_type : public base_expression_type {
+class pointer_type : public base_expr_type {
     ndt::type m_target_tp;
 
 public:

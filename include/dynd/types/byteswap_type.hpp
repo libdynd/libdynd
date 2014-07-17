@@ -19,7 +19,7 @@
 
 namespace dynd {
 
-class byteswap_type : public base_expression_type {
+class byteswap_type : public base_expr_type {
     ndt::type m_value_type, m_operand_type;
 
 public:

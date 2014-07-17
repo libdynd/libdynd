@@ -14,7 +14,7 @@
 
 namespace dynd {
 
-class adapt_type : public base_expression_type {
+class adapt_type : public base_expr_type {
     ndt::type m_value_type, m_operand_type;
     nd::string m_op;
     nd::arrfunc m_forward, m_reverse;

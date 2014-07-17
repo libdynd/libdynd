@@ -280,7 +280,7 @@ bool ndt::type::data_layout_compatible_with(const ndt::type& rhs) const
         // If both are POD with no arrmeta, then they're compatible
         return true;
     }
-    if (get_kind() == expression_kind || rhs.get_kind() == expression_kind) {
+    if (get_kind() == expr_kind || rhs.get_kind() == expr_kind) {
         // If either is an expression type, check compatibility with
         // the storage types
         return storage_type().data_layout_compatible_with(rhs.storage_type());

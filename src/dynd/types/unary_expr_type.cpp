@@ -13,7 +13,7 @@ using namespace dynd;
 
 unary_expr_type::unary_expr_type(const ndt::type& value_type, const ndt::type& operand_type,
                 const expr_kernel_generator *kgen)
-    : base_expression_type(unary_expr_type_id, expression_kind,
+    : base_expr_type(unary_expr_type_id, expr_kind,
                         operand_type.get_data_size(), operand_type.get_data_alignment(),
                         inherited_flags(value_type.get_flags(), operand_type.get_flags()),
                         operand_type.get_arrmeta_size(), value_type.get_ndim()),

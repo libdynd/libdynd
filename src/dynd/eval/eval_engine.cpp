@@ -170,7 +170,7 @@ ndarray_node_ptr dynd::eval::evaluate(ndarray_node *node, const eval::eval_conte
 
     switch (node->get_category()) {
         case strided_array_node_category:
-            if (node->get_type().get_kind() != expression_kind) {
+            if (node->get_type().get_kind() != expr_kind) {
                 if (!copy && (access_flags == 0 || access_flags == node->get_access_flags() ||
                                 (access_flags == read_access_flag &&
                                  node->get_access_flags() == (read_access_flag|immutable_access_flag)))) {

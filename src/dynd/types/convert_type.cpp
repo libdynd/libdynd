@@ -11,8 +11,8 @@ using namespace dynd;
 
 convert_type::convert_type(const ndt::type &value_type,
                            const ndt::type &operand_type)
-    : base_expression_type(
-          convert_type_id, expression_kind, operand_type.get_data_size(),
+    : base_expr_type(
+          convert_type_id, expr_kind, operand_type.get_data_size(),
           operand_type.get_data_alignment(),
           inherited_flags(value_type.get_flags(), operand_type.get_flags()),
           operand_type.get_arrmeta_size(), value_type.get_ndim()),
@@ -20,10 +20,10 @@ convert_type::convert_type(const ndt::type &value_type,
 {
     // An alternative to this error would be to use value_type.value_type(), cutting
     // away the expression part of the given value_type.
-    if (m_value_type.get_kind() == expression_kind) {
+    if (m_value_type.get_kind() == expr_kind) {
         std::stringstream ss;
         ss << "convert_type: The destination type " << m_value_type;
-        ss << " should not be an expression_kind";
+        ss << " should not be an expr_kind";
         throw dynd::type_error(ss.str());
     }
 }
@@ -85,11 +85,11 @@ bool convert_type::operator==(const base_type& rhs) const
 
 ndt::type convert_type::with_replaced_storage_type(const ndt::type& replacement_type) const
 {
-    if (m_operand_type.get_kind() == expression_kind) {
+    if (m_operand_type.get_kind() == expr_kind) {
         return ndt::type(
             new convert_type(
                 m_value_type,
-                m_operand_type.tcast<base_expression_type>()
+                m_operand_type.tcast<base_expr_type>()
                     ->with_replaced_storage_type(replacement_type)),
             false);
     } else {

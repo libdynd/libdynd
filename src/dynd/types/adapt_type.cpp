@@ -11,8 +11,8 @@ using namespace dynd;
 
 adapt_type::adapt_type(const ndt::type &operand_type,
                        const ndt::type &value_type, const nd::string &op)
-    : base_expression_type(
-          adapt_type_id, expression_kind, operand_type.get_data_size(),
+    : base_expr_type(
+          adapt_type_id, expr_kind, operand_type.get_data_size(),
           operand_type.get_data_alignment(),
           inherited_flags(value_type.get_flags(), operand_type.get_flags()), 0),
       m_value_type(value_type), m_operand_type(operand_type), m_op(op)
@@ -72,7 +72,7 @@ bool adapt_type::operator==(const base_type& rhs) const
 
 ndt::type adapt_type::with_replaced_storage_type(const ndt::type& replacement_type) const
 {
-    if (m_operand_type.get_kind() != expression_kind) {
+    if (m_operand_type.get_kind() != expr_kind) {
         // If there's no expression in the operand, just try substituting (the
         // constructor will error-check)
         return ndt::type(new adapt_type(m_value_type, replacement_type, m_op),
@@ -81,7 +81,7 @@ ndt::type adapt_type::with_replaced_storage_type(const ndt::type& replacement_ty
         // With an expression operand, replace it farther down the chain
         return ndt::type(
             new adapt_type(m_value_type,
-                           reinterpret_cast<const base_expression_type *>(
+                           reinterpret_cast<const base_expr_type *>(
                                replacement_type.extended())
                                ->with_replaced_storage_type(replacement_type),
                            m_op),

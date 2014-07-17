@@ -7,7 +7,7 @@
 //
 // This type takes on the characteristics of its storage type
 // through the type interface, except for the "kind" which
-// is expression_kind to signal that the value_type must be examined.
+// is expr_kind to signal that the value_type must be examined.
 //
 #ifndef _DYND__CONVERT_TYPE_HPP_
 #define _DYND__CONVERT_TYPE_HPP_
@@ -17,7 +17,7 @@
 
 namespace dynd {
 
-class convert_type : public base_expression_type {
+class convert_type : public base_expr_type {
     ndt::type m_value_type, m_operand_type;
 
 public:
@@ -75,25 +75,25 @@ public:
 namespace ndt {
     /**
      * Makes a conversion type to convert from the operand_type to the value_type.
-     * If the value_type has expression_kind, it chains operand_type.value_type()
+     * If the value_type has expr_kind, it chains operand_type.value_type()
      * into value_type.storage_type().
      */
     inline ndt::type make_convert(const ndt::type &value_type,
                                   const ndt::type &operand_type)
     {
         if (operand_type.value_type() != value_type) {
-            if (value_type.get_kind() != expression_kind) {
+            if (value_type.get_kind() != expr_kind) {
                 // Create a conversion type when the value kind is different
                 return ndt::type(new convert_type(value_type, operand_type),
                                  false);
             } else if (value_type.storage_type() == operand_type.value_type()) {
                 // No conversion required at the connection
-                return static_cast<const base_expression_type *>(
+                return static_cast<const base_expr_type *>(
                            value_type.extended())
                     ->with_replaced_storage_type(operand_type);
             } else {
                 // A conversion required at the connection
-                return static_cast<const base_expression_type *>(
+                return static_cast<const base_expr_type *>(
                            value_type.extended())
                     ->with_replaced_storage_type(
                         ndt::type(new convert_type(value_type.storage_type(),

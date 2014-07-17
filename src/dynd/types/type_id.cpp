@@ -37,8 +37,8 @@ std::ostream& dynd::operator<<(std::ostream& o, type_kind_t kind)
             return (o << "tuple");
         case dynamic_kind:
             return (o << "dynamic");
-        case expression_kind:
-            return (o << "expression");
+        case expr_kind:
+            return (o << "expr");
         case option_kind:
             return (o << "option");
         case symbolic_kind:

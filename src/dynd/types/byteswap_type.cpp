@@ -12,7 +12,7 @@ using namespace std;
 using namespace dynd;
 
 byteswap_type::byteswap_type(const ndt::type& value_type)
-    : base_expression_type(byteswap_type_id, expression_kind, value_type.get_data_size(),
+    : base_expr_type(byteswap_type_id, expr_kind, value_type.get_data_size(),
                             value_type.get_data_alignment(), type_flag_scalar, 0),
                     m_value_type(value_type),
                     m_operand_type(ndt::make_fixedbytes(value_type.get_data_size(), value_type.get_data_alignment()))
@@ -23,7 +23,7 @@ byteswap_type::byteswap_type(const ndt::type& value_type)
 }
 
 byteswap_type::byteswap_type(const ndt::type& value_type, const ndt::type& operand_type)
-    : base_expression_type(byteswap_type_id, expression_kind, operand_type.get_data_size(),
+    : base_expr_type(byteswap_type_id, expr_kind, operand_type.get_data_size(),
                     operand_type.get_data_alignment(), type_flag_scalar, 0),
             m_value_type(value_type), m_operand_type(operand_type)
 {
@@ -83,13 +83,13 @@ bool byteswap_type::operator==(const base_type& rhs) const
 
 ndt::type byteswap_type::with_replaced_storage_type(const ndt::type& replacement_type) const
 {
-    if (m_operand_type.get_kind() != expression_kind) {
+    if (m_operand_type.get_kind() != expr_kind) {
         // If there's no expression in the operand, just try substituting (the constructor will error-check)
         return ndt::type(new byteswap_type(m_value_type, replacement_type), false);
     } else {
         // With an expression operand, replace it farther down the chain
         return ndt::type(new byteswap_type(m_value_type,
-                reinterpret_cast<const base_expression_type *>(replacement_type.extended())->with_replaced_storage_type(replacement_type)), false);
+                reinterpret_cast<const base_expr_type *>(replacement_type.extended())->with_replaced_storage_type(replacement_type)), false);
     }
 }
 
