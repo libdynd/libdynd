@@ -1,4 +1,4 @@
-ND::Array Low Level Details
+﻿ND::Array Low Level Details
 ===========================
 
 This document describes low level details of DyND nd::arrays, and how
@@ -18,21 +18,23 @@ a memory block type.
         uint32_t m_type;
     };
 
-Two functions are exposed for incref/decref, which perform the atomic increment
-or atomic decrement + free respectively. For integration with Numba, the increment
-and decrement operations should be atomic and ideally inlined, and llvmpy has the method
-Builder.atomic_add which can be used for this. When a decrement takes the use count
-to zero, the function dynd::detail::memory_block_free is called to deallocate the block.
-This function could be provided to Numba via a ctypes function pointer, in a 'lowlevel'
-namespace of the Python exposure.
+Two functions are exposed for incref/decref, which perform the atomic
+increment or atomic decrement + free respectively. For integration
+with Numba, the increment and decrement operations should be atomic
+and ideally inlined, and llvmpy has the method Builder.atomic_add
+which can be used for this. When a decrement takes the use count
+to zero, the function dynd::detail::memory_block_free is called to
+deallocate the block. This function could be provided to Numba via a
+ctypes function pointer, in a 'lowlevel' namespace of the Python exposure.
 
 Memory Block Allocator API
 --------------------------
 
-For variable-sized blockref dtypes, a memory block which has a simple allocator
-API for getting new element memory is used. This is exposed by a function
-dynd::get_memory_block_pod_allocator_api which accepts a memory block pointer and
-returns a pointer to a struct of three functions,
+For variable-sized blockref dtypes, a memory block which has a simple
+allocator API for getting new element memory is used. This is exposed
+by a function dynd::get_memory_block_pod_allocator_api which accepts
+a memory block pointer and returns a pointer to a struct of
+three functions,
 
     struct memory_block_pod_allocator_api {
         /**
@@ -64,9 +66,9 @@ returns a pointer to a struct of three functions,
         void (*finalize)(memory_block_data *self);
     };
 
-Numba kernels which produce variable-sized strings as their output would use this API
-to allocate the string output memory. A typical sequence of events for such a kernel
-might be:
+Numba kernels which produce variable-sized strings as their output
+would use this API to allocate the string output memory.
+A typical sequence of events for such a kernel might be:
 
  * Get the memblock pointer from the string's dtype arrmeta.
  * Request the allocator API for that memblock pointer.
@@ -97,11 +99,12 @@ by the struct dynd::array_preamble. This struct looks like
         memory_block_data *m_data_reference;
     };
 
-This struct begins with the standard memory block data (use count and type),
-then has a reference to a dtype, a pointer to the data, and a small bit of
-metadata that exists in all nd::arrays, including some flags and a memblock
-reference for the data. Presently the flags are only used for access
-control (read, write, and immutable).
+This struct begins with the standard memory block data (use count
+and type), then has a reference to a dtype, a pointer to the data,
+and a small bit of metadata that exists in all nd::arrays,
+including some flags and a memblock reference for the data.
+Presently the flags are only used for access control (read,
+write, and immutable).
 
 Many dtypes require additional metadata, called arrmeta, and this is
 stored in memory immediately after the dynd::array_preamble. The dtype has
@@ -112,30 +115,36 @@ NDT::Type
 
     #include <dynd/type.hpp>
 
-DTypes are represented in one of two ways. The most basic types, like the ones
-built into C/C++, are classified as "builtin dtypes", and represented simply by an
-enumeration value. This means there are no atomic reference increments/decrements when
-these dtypes are passed around, and no memory is ever allocated or freed for them.
-More complex types are subclasses of the virtual base class extended_dtype, which defines
-the interface for dtypes.
+DTypes are represented in one of two ways. The most basic types,
+like the ones built into C/C++, are classified as "builtin dtypes",
+and represented simply by an enumeration value. This means there are
+no atomic reference increments/decrements when these dtypes are
+passed around, and no memory is ever allocated or freed for them.
+More complex types are subclasses of the virtual base class
+base_dtype, which defines the interface for dtypes.
 
-To distinguish between these two cases, there is a constant `builtin_type_id_mask`, which
-indicates the bits used for the builtin type id. This is used by the dtype.is_builtin()
+To distinguish between these two cases, there is a constant
+`builtin_type_id_mask`, which indicates the bits used for the
+builtin type id. This is used by the dtype.is_builtin()
 method to test whether only the lowest bits are set.
 
-The interface to a dtype is defined by virtual functions in the base class extended_dtype.
-These functions can be broadly grouped into three different kinds, functions which operate
-on just dtypes, functions which use the dtype and arrmeta together, and functions
+The interface to a dtype is defined by virtual functions in the base
+class extended_dtype. These functions can be broadly grouped into
+three different kinds, functions which operate on just dtypes,
+functions which use the dtype and arrmeta together, and functions
 which use dtype, arrmeta, and data together.
 
-This API is presently designed for use from C++, and with some stabilization of the
-fundamental dtypes for arrays and various primitives, an important development will
-be to create a C API that wraps the C++ implementation. Whether and how to create a mechanism
-to create new dtypes in other languages like C or Python is something for later.
+This API is presently designed for use from C++, and with some
+stabilization of the fundamental dtypes for arrays and various
+primitives, an important development will be to create a C API
+that wraps the C++ implementation. Whether and how to create a mechanism
+to create new dtypes in other languages like C or Python is
+something for later.
 
-One likely development path is to restructure the extended_dtype type hierarchy so that
-is has a predictable memory layout irrespective of the C++ compiler it is created with.
-The tricky part of this is to maintain the convenience, performance, and brevity of C++ virtual
+One likely development path is to restructure the extended_dtype type
+hierarchy so that is has a predictable memory layout irrespective
+of the C++ compiler it is created with. The tricky part of this is
+to maintain the convenience, performance, and brevity of C++ virtual
 functions in creating such a scheme.
 
 
