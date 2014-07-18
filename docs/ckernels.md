@@ -1,10 +1,12 @@
 ﻿# Blaze/DyND CKernels
 
 The initial versions of DyND began with an iterator approach,
-similar to nditer in NumPy. With the addition of the variable-sized
-dimension type 'var', it became clear that this does not generalize
-cleanly to handle broadcasting and other operations on 'var' dimensions
-nicely. The solution was to define a kernel mechanism, which is described here.
+similar to the nditer object in NumPy. With the addition of
+the variable-sized dimension type ``var``, it became
+clear that this does not generalize cleanly to handle
+broadcasting and other operations on 'var' dimensions
+nicely. The solution was to define a hierarchical kernel
+mechanism, which is described here.
 
 * [Assignment CKernels](assign_ckernels.md)
 * [Expression CKernels](expr_ckernels.md)
@@ -12,16 +14,19 @@ nicely. The solution was to define a kernel mechanism, which is described here.
 * [Accumulator CKernels](accum_ckernels.md)
 * [Multi-dimensional kernel documentation](multidim_kernels.md)
 
-Headers and implementation for kernels are in the 'dynd/kernels'
-subdirectories.
+Headers and implementation for kernels are in the
+``dynd/kernels`` subdirectories.
 
 Current Limitations
 -------------------
 
-The biggest limitation of the ckernel mechanism that some of the
-implemented buffering operations aren't threadsafe. These should be
-able to use the stack for smaller buffers, or use a TLS variable when
-the buffer is large.
+The biggest limitation of the ckernel mechanism that some of
+the implemented buffering operations aren't threadsafe.
+These should be able to use the stack for smaller buffers,
+or use a TLS variable when the buffer is large. The plan
+is to add multi-threading to DyND's computation by default
+using TBB after fleshing out the front end with
+NumPy-like ufuncs.
 
 CKernel Basics
 --------------
@@ -32,58 +37,61 @@ CKernel Basics
 A DyND ckernel is a block of memory that contains at its start
 a function pointer and a destructor. The ``ckernel_prefix`` class
 defines these members, and the class which manages the memory for
-creating such a kernel is `ckernel_builder`. Here's the
+creating such a kernel is ``ckernel_builder``. Here's the
 ckernel_prefix structure:
 
 ```cpp
 struct ckernel_prefix {
-    typedef void (*destructor_fn_t)(ckernel_prefix *);
+  typedef void (*destructor_fn_t)(ckernel_prefix *);
 
-    void *function;
-    destructor_fn_t destructor;
+  void *function;
+  destructor_fn_t destructor;
 };
 ```
 
-The simplest ckernel to implement is a ``single`` ckernel, which
-performs an operation on ``N`` source data elements, writing the
-result to a destination. Its function prototype is:
+The simplest ckernel to implement is an ``expr_single_t``
+ckernel, which performs an operation on ``N`` source data
+elements, writing the result to a destination. Its
+function prototype is:
 
 ```cpp
 typedef void (*expr_single_t)(char *dst, const char *const *src,
                               ckernel_prefix *self);
 ```
 
-The ``N`` parameter is baked into the ckernel, so it is not provided
-redundantly as a parameter. Similarly, it must have full knowledge of
-the input and output memory layout.
+The ``N`` parameter is baked into the ckernel, so it is not
+provided redundantly as a parameter. Similarly, it must
+have full knowledge of the input and output memory layout.
 
-Here's some example code which does one assignment using this mechanism,
-by building an assignment ckernel and calling it.
+Here's some example code which does one assignment using
+this mechanism, by building an assignment ckernel and
+calling it.
 
 ```cpp
-void dynd::typed_data_assign(const ndt::type &dst_tp, const char *dst_arrmeta,
+void dynd::typed_data_assign(const ndt::type &dst_tp,
+                             const char *dst_arrmeta,
                              char *dst_data, const ndt::type &src_tp,
                              const char *src_arrmeta, const char *src_data,
                              const eval::eval_context *ectx)
 {
-  assignment_ckernel_builder k;
+  unary_ckernel_builder k;
   make_assignment_kernel(&k, 0, dst_tp, dst_arrmeta, src_tp, src_arrmeta,
                          kernel_request_single, ectx);
   k(dst_data, src_data);
 }
 ```
 
-The 'assignment_ckernel_builder' object is a subclass of
-'ckernel_builder', which overloads the call operator to
+The ``unary_ckernel_builder`` object is a subclass of
+``ckernel_builder``, which overloads the call operator to
 provide a more convenient kernel function call syntax.
 
 ### Assignment Kernel Example
 
 CKernels are typically constructed hierarchically, often matching
-the hierarchical structure of the types it is operating
+the hierarchical structure of the types they are operating
 on. To illustrate how this works, we'll work out the memory
 structure and functions created dynamically for creating
-the assignment of a strided integer array. We've included
+the copying of a strided integer array. We've included
 some of the function prototypes from the dynd headers
 to provide some more context.
 

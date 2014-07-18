@@ -20,7 +20,7 @@ using namespace std;
 using namespace dynd;
 
 TEST(Reduction, BuiltinSum_Kernel) {
-    assignment_ckernel_builder ckb;
+    unary_ckernel_builder ckb;
 
     // int32
     kernels::make_builtin_sum_reduction_ckernel(&ckb, 0, int32_type_id, kernel_request_single);
@@ -111,7 +111,7 @@ TEST(Reduction, BuiltinSum_Lift0D_NoIdentity) {
     ASSERT_EQ(af.get_return_type(), b.get_type());
 
     // Instantiate the lifted ckernel
-    assignment_ckernel_builder ckb;
+    unary_ckernel_builder ckb;
     const ndt::type src_tp[1] = {a.get_type()};
     const char *src_arrmeta[1] = {a.get_arrmeta()};
     af.instantiate(&af, &ckb, 0, b.get_type(), b.get_arrmeta(),
@@ -143,7 +143,7 @@ TEST(Reduction, BuiltinSum_Lift0D_WithIdentity) {
     ASSERT_EQ(af.get_return_type(), b.get_type());
 
     // Instantiate the lifted ckernel
-    assignment_ckernel_builder ckb;
+    unary_ckernel_builder ckb;
     const ndt::type src_tp[1] = {a.get_type()};
     const char *src_arrmeta[1] = {a.get_arrmeta()};
     af.instantiate(&af, &ckb, 0, b.get_type(), b.get_arrmeta(),
@@ -175,7 +175,7 @@ TEST(Reduction, BuiltinSum_Lift1D_NoIdentity) {
     ASSERT_EQ(af.get_return_type(), b.get_type());
 
     // Instantiate the lifted ckernel
-    assignment_ckernel_builder ckb;
+    unary_ckernel_builder ckb;
     ndt::type src_tp[1] = {a.get_type()};
     const char *src_arrmeta[1] = {a.get_arrmeta()};
     af.instantiate(&af, &ckb, 0, b.get_type(), b.get_arrmeta(),
@@ -222,7 +222,7 @@ TEST(Reduction, BuiltinSum_Lift1D_WithIdentity) {
     ASSERT_EQ(af.get_return_type(), b.get_type());
 
     // Instantiate the lifted ckernel
-    assignment_ckernel_builder ckb;
+    unary_ckernel_builder ckb;
     ndt::type src_tp[1] = {a.get_type()};
     const char *src_arrmeta[1] = {a.get_arrmeta()};
     af.instantiate(&af, &ckb, 0, b.get_type(), b.get_arrmeta(),
@@ -255,7 +255,7 @@ TEST(Reduction, BuiltinSum_Lift2D_StridedStrided_ReduceReduce) {
     ASSERT_EQ(af.get_return_type(), b.get_type());
 
     // Instantiate the lifted ckernel
-    assignment_ckernel_builder ckb;
+    unary_ckernel_builder ckb;
     ndt::type src_tp[1] = {a.get_type()};
     const char *src_arrmeta[1] = {a.get_arrmeta()};
     af.instantiate(&af, &ckb, 0, b.get_type(), b.get_arrmeta(),
@@ -304,7 +304,7 @@ TEST(Reduction, BuiltinSum_Lift2D_StridedStrided_ReduceReduce_KeepDim) {
     ASSERT_EQ(af.get_return_type(), b.get_type());
 
     // Instantiate the lifted ckernel
-    assignment_ckernel_builder ckb;
+    unary_ckernel_builder ckb;
     ndt::type src_tp[1] = {a.get_type()};
     const char *src_arrmeta[1] = {a.get_arrmeta()};
     af.instantiate(&af, &ckb, 0, b.get_type(), b.get_arrmeta(),
@@ -338,7 +338,7 @@ TEST(Reduction, BuiltinSum_Lift2D_StridedStrided_BroadcastReduce) {
     ASSERT_EQ(af.get_return_type(), b.get_type());
 
     // Instantiate the lifted ckernel
-    assignment_ckernel_builder ckb;
+    unary_ckernel_builder ckb;
     ndt::type src_tp[1] = {a.get_type()};
     const char *src_arrmeta[1] = {a.get_arrmeta()};
     af.instantiate(&af, &ckb, 0, b.get_type(), b.get_arrmeta(),
@@ -392,7 +392,7 @@ TEST(Reduction, BuiltinSum_Lift2D_StridedStrided_BroadcastReduce_KeepDim) {
     ASSERT_EQ(af.get_return_type(), b.get_type());
 
     // Instantiate the lifted ckernel
-    assignment_ckernel_builder ckb;
+    unary_ckernel_builder ckb;
     const ndt::type src_tp[1] = {a.get_type()};
     const char *src_arrmeta[1] = {a.get_arrmeta()};
     af.instantiate(&af, &ckb, 0, b.get_type(), b.get_arrmeta(),
@@ -428,7 +428,7 @@ TEST(Reduction, BuiltinSum_Lift2D_StridedStrided_ReduceBroadcast) {
     ASSERT_EQ(af.get_return_type(), b.get_type());
 
     // Instantiate the lifted ckernel
-    assignment_ckernel_builder ckb;
+    unary_ckernel_builder ckb;
     ndt::type src_tp[1] = {a.get_type()};
     const char *src_arrmeta[1] = {a.get_arrmeta()};
     af.instantiate(&af, &ckb, 0, b.get_type(), b.get_arrmeta(),
@@ -484,7 +484,7 @@ TEST(Reduction, BuiltinSum_Lift2D_StridedStrided_ReduceBroadcast_KeepDim) {
     ASSERT_EQ(af.get_return_type(), b.get_type());
 
     // Instantiate the lifted ckernel
-    assignment_ckernel_builder ckb;
+    unary_ckernel_builder ckb;
     const ndt::type src_tp[1] = {a.get_type()};
     const char *src_arrmeta[1] = {a.get_arrmeta()};
     af.instantiate(&af, &ckb, 0, b.get_type(), b.get_arrmeta(),
@@ -521,7 +521,7 @@ TEST(Reduction, BuiltinSum_Lift3D_StridedStridedStrided_ReduceReduceReduce) {
     ASSERT_EQ(af.get_return_type(), b.get_type());
 
     // Instantiate the lifted ckernel
-    assignment_ckernel_builder ckb;
+    unary_ckernel_builder ckb;
     const ndt::type src_tp[1] = {a.get_type()};
     const char *src_arrmeta[1] = {a.get_arrmeta()};
     af.instantiate(&af, &ckb, 0, b.get_type(), b.get_arrmeta(),
@@ -557,7 +557,7 @@ TEST(Reduction, BuiltinSum_Lift3D_StridedStridedStrided_BroadcastReduceReduce) {
     ASSERT_EQ(af.get_return_type(), b.get_type());
 
     // Instantiate the lifted ckernel
-    assignment_ckernel_builder ckb;
+    unary_ckernel_builder ckb;
     const ndt::type src_tp[1] = {a.get_type()};
     const char *src_arrmeta[1] = {a.get_arrmeta()};
     af.instantiate(&af, &ckb, 0, b.get_type(), b.get_arrmeta(),
@@ -595,7 +595,7 @@ TEST(Reduction, BuiltinSum_Lift3D_StridedStridedStrided_ReduceBroadcastReduce) {
     ASSERT_EQ(af.get_return_type(), b.get_type());
 
     // Instantiate the lifted ckernel
-    assignment_ckernel_builder ckb;
+    unary_ckernel_builder ckb;
     const ndt::type src_tp[1] = {a.get_type()};
     const char *src_arrmeta[1] = {a.get_arrmeta()};
     af.instantiate(&af, &ckb, 0, b.get_type(), b.get_arrmeta(),

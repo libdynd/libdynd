@@ -19,7 +19,7 @@ namespace dynd {
  *
  * The computation is held by an expr_kernel_generator
  * instance, which is able to create the kernels
- * on demand, as a subkernel of an assignment_ckernel_builder
+ * on demand, as a subkernel of an unary_ckernel_builder
  * object.
  *
  * The unary kernel is always treated specially, it

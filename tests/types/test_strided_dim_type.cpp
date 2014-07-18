@@ -93,7 +93,7 @@ TEST(StridedArrayDType, IsExpression) {
 
 TEST(StridedArrayDType, AssignKernel) {
     nd::array a, b;
-    assignment_ckernel_builder k;
+    unary_ckernel_builder k;
     int vals_int[] = {3,5,7};
 
     // Assignment scalar -> strided array

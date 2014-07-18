@@ -175,7 +175,7 @@ void dynd::typed_data_copy(const ndt::type& tp,
     if (tp.is_pod()) {
         memcpy(dst_data, src_data, data_size);
     } else {
-        assignment_ckernel_builder k;
+        unary_ckernel_builder k;
         make_assignment_kernel(&k, 0, tp, dst_arrmeta, tp, src_arrmeta,
                                kernel_request_single,
                                &eval::default_eval_context);
@@ -193,7 +193,7 @@ void dynd::typed_data_assign(const ndt::type &dst_tp, const char *dst_arrmeta,
   DYND_ASSERT_ALIGNED(src, 0, src_dt.get_data_alignment(),
                       "src type: " << src_tp << ", dst type: " << dst_tp);
 
-  assignment_ckernel_builder k;
+  unary_ckernel_builder k;
   make_assignment_kernel(&k, 0, dst_tp, dst_arrmeta, src_tp, src_arrmeta,
                          kernel_request_single, ectx);
   k(dst_data, src_data);
