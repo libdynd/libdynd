@@ -688,7 +688,7 @@ void dynd::print_builtin_scalar(type_id_t type_id, std::ostream& o, const char *
 {
     switch (type_id) {
         case bool_type_id:
-            o << (*data ? "true" : "false");
+            o << (*data ? "True" : "False");
             break;
         case int8_type_id:
             print_as<int8_t, int32_t>(o, data);
