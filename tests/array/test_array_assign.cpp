@@ -555,6 +555,19 @@ TEST(ArrayAssign, VarToFixedStruct) {
                      b);
 }
 
+TEST(ArrayAssign, ArrayValsAtType)
+{
+    nd::array a = nd::empty(4, "int64");
+
+    a.vals_at(irange().by(2)) = 0;
+    a.vals_at(irange(1, 4, 1).by(2)) = 1;
+    const int64_t* data = reinterpret_cast<const int64_t*>(a.get_readonly_originptr());
+    int64_t vals[] = {0, 1, 0, 1};
+    for (int i = 0; i < 4; ++i) {
+        EXPECT_EQ(vals[i], data[i]);
+    }
+}
+
 #if !(defined(_WIN32) && !defined(_M_X64)) // TODO: How to mark as expected failures in googletest?
 REGISTER_TYPED_TEST_CASE_P(ArrayAssign, ScalarAssignment_Bool, ScalarAssignment_Int8, ScalarAssignment_UInt16,
     ScalarAssignment_Float32, ScalarAssignment_Float64, ScalarAssignment_Uint64,
