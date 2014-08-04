@@ -13,7 +13,7 @@ namespace dynd {
 /**
  * Makes a kernel which does an assignment when
  * at least one of dst_dt and src_dt is an
- * expression_kind type.
+ * expr_kind type.
  */
 size_t make_expression_assignment_kernel(
     ckernel_builder *ckb, intptr_t ckb_offset, const ndt::type &dst_tp,

@@ -195,9 +195,9 @@ static bool recursive_match(const ndt::type& concrete, const ndt::type &pattern,
                 case offset_dim_type_id:
                 case var_dim_type_id:
                     return recursive_match(
-                        concrete.tcast<base_uniform_dim_type>()
+                        concrete.tcast<base_dim_type>()
                             ->get_element_type(),
-                        pattern.tcast<base_uniform_dim_type>()
+                        pattern.tcast<base_dim_type>()
                             ->get_element_type(),
                         typevars);
                 case fixed_dim_type_id:
@@ -206,9 +206,9 @@ static bool recursive_match(const ndt::type& concrete, const ndt::type &pattern,
                                pattern.tcast<fixed_dim_type>()
                                    ->get_fixed_dim_size() &&
                            recursive_match(
-                               concrete.tcast<base_uniform_dim_type>()
+                               concrete.tcast<base_dim_type>()
                                    ->get_element_type(),
-                               pattern.tcast<base_uniform_dim_type>()
+                               pattern.tcast<base_dim_type>()
                                    ->get_element_type(),
                                typevars);
                 case cfixed_dim_type_id:
@@ -221,9 +221,9 @@ static bool recursive_match(const ndt::type& concrete, const ndt::type &pattern,
                                pattern.tcast<cfixed_dim_type>()
                                    ->get_fixed_stride() &&
                            recursive_match(
-                               concrete.tcast<base_uniform_dim_type>()
+                               concrete.tcast<base_dim_type>()
                                    ->get_element_type(),
-                               pattern.tcast<base_uniform_dim_type>()
+                               pattern.tcast<base_dim_type>()
                                    ->get_element_type(),
                                typevars);
                 default:

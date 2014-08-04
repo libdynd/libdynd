@@ -3,24 +3,24 @@
 // BSD 2-Clause License, see LICENSE.txt
 //
 
-#ifndef _DYND__BASE_EXPRESSION_TYPE_HPP_
-#define _DYND__BASE_EXPRESSION_TYPE_HPP_
+#ifndef DYND__TYPES__BASE_EXPR_TYPE_HPP
+#define DYND__TYPES__BASE_EXPR_TYPE_HPP
 
 #include <dynd/types/base_type.hpp>
 
 namespace dynd {
 
 /**
- * Base class for all types of expression_kind, and for the pointer_type.
+ * Base class for all types of expr_kind, and for the pointer_type.
  */
-class base_expression_type : public base_type {
+class base_expr_type : public base_type {
 public:
-    inline base_expression_type(type_id_t type_id, type_kind_t kind,
+    inline base_expr_type(type_id_t type_id, type_kind_t kind,
                     size_t data_size, size_t alignment, flags_type flags, size_t arrmeta_size, size_t ndim=0)
         : base_type(type_id, kind, data_size, alignment, flags, arrmeta_size, ndim, 0)
     {}
 
-    virtual ~base_expression_type();
+    virtual ~base_expr_type();
 
     /**
      * Should return a reference to the type representing the value which
@@ -104,4 +104,4 @@ public:
 
 } // namespace dynd
 
-#endif // _DYND__BASE_EXPRESSION_TYPE_HPP_
+#endif // DYND__TYPES__BASE_EXPR_TYPE_HPP

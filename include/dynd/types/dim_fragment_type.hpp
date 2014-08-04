@@ -11,7 +11,7 @@
 
 #include <dynd/array.hpp>
 #include <dynd/string.hpp>
-#include <dynd/types/base_uniform_dim_type.hpp>
+#include <dynd/types/base_dim_type.hpp>
 
 namespace dynd {
 
@@ -25,7 +25,7 @@ enum {
     // values >= 0 mean fixed[N]
 };
 
-class dim_fragment_type : public base_uniform_dim_type {
+class dim_fragment_type : public base_dim_type {
     dimvector m_tagged_dims;
 
 public:

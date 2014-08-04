@@ -18,7 +18,7 @@ using namespace std;
 using namespace dynd;
 
 fixed_dim_type::fixed_dim_type(intptr_t dim_size, const ndt::type &element_tp)
-    : base_uniform_dim_type(
+    : base_dim_type(
           fixed_dim_type_id, element_tp, 0, element_tp.get_data_alignment(),
           sizeof(fixed_dim_type_arrmeta), type_flag_none, true),
       m_dim_size(dim_size)

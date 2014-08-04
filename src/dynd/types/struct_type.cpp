@@ -237,7 +237,7 @@ static array_preamble *property_get_array_field(const array_preamble *params, vo
     intptr_t i = reinterpret_cast<intptr_t>(extra);
     intptr_t undim = n.get_ndim();
     ndt::type udt = n.get_dtype();
-    if (udt.get_kind() == expression_kind) {
+    if (udt.get_kind() == expr_kind) {
         string field_name =
             udt.value_type().tcast<struct_type>()->get_field_name(i);
         return n.replace_dtype(ndt::make_property(udt, field_name, i))

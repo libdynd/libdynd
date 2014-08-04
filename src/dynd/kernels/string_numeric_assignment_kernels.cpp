@@ -537,7 +537,7 @@ void dynd::assign_utf8_string_to_builtin(type_id_t dst_type_id, char *dst,
     d.end = const_cast<char *>(str_end);
     md.blockref = NULL;
 
-    assignment_ckernel_builder k;
+    unary_ckernel_builder k;
     make_string_to_builtin_assignment_kernel(
         &k, 0, dst_type_id, dt, reinterpret_cast<const char *>(&md),
         kernel_request_single, ectx);

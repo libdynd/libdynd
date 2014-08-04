@@ -7,7 +7,7 @@
 #define _DYND__FIXED_DIM_TYPE_HPP_
 
 #include <dynd/type.hpp>
-#include <dynd/types/base_uniform_dim_type.hpp>
+#include <dynd/types/base_dim_type.hpp>
 #include <dynd/typed_data_assign.hpp>
 #include <dynd/types/view_type.hpp>
 
@@ -22,7 +22,7 @@ struct fixed_dim_type_iterdata {
     intptr_t stride;
 };
 
-class fixed_dim_type : public base_uniform_dim_type {
+class fixed_dim_type : public base_dim_type {
     intptr_t m_dim_size;
     std::vector<std::pair<std::string, gfunc::callable> > m_array_properties, m_array_functions;
 public:

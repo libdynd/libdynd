@@ -39,7 +39,7 @@ static bool try_view(const ndt::type &tp, const char *arrmeta,
     case strided_dim_type_id: {
         // All the strided dim types share the same arrmeta, so can be
         // treated uniformly here
-        const base_uniform_dim_type *sdt = tp.tcast<base_uniform_dim_type>();
+        const base_dim_type *sdt = tp.tcast<base_dim_type>();
         const strided_dim_type_arrmeta *md =
             reinterpret_cast<const strided_dim_type_arrmeta *>(arrmeta);
         switch (view_tp.get_type_id()) {

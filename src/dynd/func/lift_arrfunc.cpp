@@ -134,7 +134,7 @@ static int resolve_lifted_dst_type(const arrfunc_type_data *self,
                                 return 0;
                             }
                     }
-                    tp = tp.tcast<base_uniform_dim_type>()->get_element_type();
+                    tp = tp.tcast<base_dim_type>()->get_element_type();
                 }
             }
         }

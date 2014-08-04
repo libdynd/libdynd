@@ -11,11 +11,11 @@
 
 #include <dynd/array.hpp>
 #include <dynd/string.hpp>
-#include <dynd/types/base_uniform_dim_type.hpp>
+#include <dynd/types/base_dim_type.hpp>
 
 namespace dynd {
 
-class ellipsis_dim_type : public base_uniform_dim_type {
+class ellipsis_dim_type : public base_dim_type {
     // m_name is either NULL or an immutable array of type "string"
     nd::string m_name;
 

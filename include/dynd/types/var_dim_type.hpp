@@ -7,7 +7,7 @@
 #define DYND_TYPES_VAR_DIM_TYPE_HPP
 
 #include <dynd/type.hpp>
-#include <dynd/types/base_uniform_dim_type.hpp>
+#include <dynd/types/base_dim_type.hpp>
 #include <dynd/typed_data_assign.hpp>
 #include <dynd/types/view_type.hpp>
 #include <dynd/string_encodings.hpp>
@@ -29,7 +29,7 @@ struct var_dim_type_data {
     size_t size;
 };
 
-class var_dim_type : public base_uniform_dim_type {
+class var_dim_type : public base_dim_type {
     std::vector<std::pair<std::string, gfunc::callable> > m_array_properties, m_array_functions;
 public:
     var_dim_type(const ndt::type& element_tp);

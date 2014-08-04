@@ -19,7 +19,7 @@ namespace dynd {
  *
  * The computation is held by an expr_kernel_generator
  * instance, which is able to create the kernels
- * on demand, as a subkernel of an assignment_ckernel_builder
+ * on demand, as a subkernel of an unary_ckernel_builder
  * object.
  *
  * The unary kernel is always treated specially, it
@@ -34,7 +34,7 @@ namespace dynd {
  *       +, -, *, /. The operand type defines the arrmeta, though,
  *       so a special type just for this purpose may be required.
  */
-class expr_type : public base_expression_type {
+class expr_type : public base_expr_type {
     ndt::type m_value_type, m_operand_type;
     const expr_kernel_generator *m_kgen;
 

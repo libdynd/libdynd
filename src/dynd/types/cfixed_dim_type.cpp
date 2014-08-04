@@ -18,7 +18,7 @@ using namespace std;
 using namespace dynd;
 
 cfixed_dim_type::cfixed_dim_type(size_t dimension_size, const ndt::type& element_tp)
-    : base_uniform_dim_type(cfixed_dim_type_id, element_tp, 0, element_tp.get_data_alignment(),
+    : base_dim_type(cfixed_dim_type_id, element_tp, 0, element_tp.get_data_alignment(),
                     sizeof(cfixed_dim_type_arrmeta), type_flag_none, true),
             m_dim_size(dimension_size)
 {
@@ -43,7 +43,7 @@ cfixed_dim_type::cfixed_dim_type(size_t dimension_size, const ndt::type& element
 
 cfixed_dim_type::cfixed_dim_type(size_t dimension_size,
                                  const ndt::type &element_tp, intptr_t stride)
-    : base_uniform_dim_type(cfixed_dim_type_id, element_tp, 0,
+    : base_dim_type(cfixed_dim_type_id, element_tp, 0,
                             element_tp.get_data_alignment(), 0, type_flag_none,
                             true),
       m_stride(stride), m_dim_size(dimension_size)

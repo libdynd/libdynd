@@ -6,7 +6,7 @@
 #include <algorithm>
 
 #include <dynd/type.hpp>
-#include <dynd/types/base_expression_type.hpp>
+#include <dynd/types/base_expr_type.hpp>
 #include <dynd/kernels/expression_assignment_kernels.hpp>
 
 using namespace std;
@@ -161,18 +161,18 @@ size_t dynd::make_expression_assignment_kernel(
     kernel_request_t kernreq, const eval::eval_context *ectx)
 {
     intptr_t root_ckb_offset = ckb_offset;
-    if (dst_tp.get_kind() == expression_kind) {
-        const base_expression_type *dst_bed = dst_tp.tcast<base_expression_type>();
+    if (dst_tp.get_kind() == expr_kind) {
+        const base_expr_type *dst_bed = dst_tp.tcast<base_expr_type>();
         if (src_tp == dst_bed->get_value_type()) {
             // In this case, it's just a chain of value -> operand on the dst side
             const ndt::type& opdt = dst_bed->get_operand_type();
-            if (opdt.get_kind() != expression_kind) {
+            if (opdt.get_kind() != expr_kind) {
                 // Leaf case, just a single value -> operand kernel
                 return dst_bed->make_value_to_operand_assignment_kernel(ckb, ckb_offset,
                                 dst_arrmeta, src_arrmeta, kernreq, ectx);
             } else {
                 // Chain case, buffer one segment of the chain
-                const ndt::type& buffer_tp = static_cast<const base_expression_type *>(
+                const ndt::type& buffer_tp = static_cast<const base_expr_type *>(
                                     opdt.extended())->get_value_type();
                 buffered_kernel_extra *e = ckb->alloc_ck<buffered_kernel_extra>(ckb_offset);
                 e->init(buffer_tp, kernreq);
@@ -199,7 +199,7 @@ size_t dynd::make_expression_assignment_kernel(
             }
         } else {
             ndt::type buffer_tp;
-            if (src_tp.get_kind() != expression_kind) {
+            if (src_tp.get_kind() != expr_kind) {
                 // In this case, need a data converting assignment to dst_tp.value_type(),
                 // then the dst_tp expression chain
                 buffer_tp = dst_bed->get_value_type();
@@ -233,17 +233,17 @@ size_t dynd::make_expression_assignment_kernel(
                             kernreq, ectx);
         }
     } else {
-        const base_expression_type *src_bed = src_tp.tcast<base_expression_type>();
+        const base_expr_type *src_bed = src_tp.tcast<base_expr_type>();
         if (dst_tp == src_bed->get_value_type()) {
             // In this case, it's just a chain of operand -> value on the src side
             const ndt::type& opdt = src_bed->get_operand_type();
-            if (opdt.get_kind() != expression_kind) {
+            if (opdt.get_kind() != expr_kind) {
                 // Leaf case, just a single value -> operand kernel
                 return src_bed->make_operand_to_value_assignment_kernel(ckb, ckb_offset,
                                 dst_arrmeta, src_arrmeta, kernreq, ectx);
             } else {
                 // Chain case, buffer one segment of the chain
-                const ndt::type& buffer_tp = static_cast<const base_expression_type *>(
+                const ndt::type& buffer_tp = static_cast<const base_expr_type *>(
                                 opdt.extended())->get_value_type();
                 buffered_kernel_extra *e = ckb->alloc_ck<buffered_kernel_extra>(ckb_offset);
                 e->init(buffer_tp, kernreq);

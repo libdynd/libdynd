@@ -26,9 +26,9 @@ namespace dynd {
  * a different type/arrmeta destination, using
  * the `unary_single_operation_t` function prototype.
  */
-class assignment_ckernel_builder : public ckernel_builder {
+class unary_ckernel_builder : public ckernel_builder {
 public:
-    assignment_ckernel_builder()
+    unary_ckernel_builder()
         : ckernel_builder()
     {
     }

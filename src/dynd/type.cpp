@@ -4,7 +4,7 @@
 //
 
 #include <dynd/type.hpp>
-#include <dynd/types/base_uniform_dim_type.hpp>
+#include <dynd/types/base_dim_type.hpp>
 #include <dynd/types/strided_dim_type.hpp>
 #include <dynd/types/fixed_dim_type.hpp>
 #include <dynd/types/var_dim_type.hpp>
@@ -219,8 +219,8 @@ ndt::type ndt::type::with_replaced_dtype(const ndt::type& replacement_tp, intptr
 
 intptr_t ndt::type::get_dim_size(const char *arrmeta, const char *data) const
 {
-    if (get_kind() == uniform_dim_kind) {
-        return static_cast<const base_uniform_dim_type *>(m_extended)->get_dim_size(arrmeta, data);
+    if (get_kind() == dim_kind) {
+        return static_cast<const base_dim_type *>(m_extended)->get_dim_size(arrmeta, data);
     } else if (get_kind() == struct_kind) {
         return static_cast<const base_struct_type *>(m_extended)->get_field_count();
     } else if (get_ndim() > 0) {
@@ -243,7 +243,7 @@ bool ndt::type::get_as_strided(const char *arrmeta, intptr_t *out_dim_size,
   if (get_strided_ndim() >= 1) {
     *out_dim_size = reinterpret_cast<const size_stride_t *>(arrmeta)->dim_size;
     *out_stride = reinterpret_cast<const size_stride_t *>(arrmeta)->stride;
-    *out_el_tp = tcast<base_uniform_dim_type>()->get_element_type();
+    *out_el_tp = tcast<base_dim_type>()->get_element_type();
     *out_el_arrmeta = arrmeta + sizeof(strided_dim_type_arrmeta);
     return true;
   } else {
@@ -258,7 +258,7 @@ bool ndt::type::get_as_strided(const char *arrmeta, intptr_t ndim,
 {
   if (get_strided_ndim() >= ndim) {
     *out_size_stride = reinterpret_cast<const size_stride_t *>(arrmeta);
-    *out_el_tp = tcast<base_uniform_dim_type>()->get_element_type();
+    *out_el_tp = tcast<base_dim_type>()->get_element_type();
     *out_el_arrmeta = arrmeta + ndim * sizeof(strided_dim_type_arrmeta);
     return true;
   } else {
@@ -280,7 +280,7 @@ bool ndt::type::data_layout_compatible_with(const ndt::type& rhs) const
         // If both are POD with no arrmeta, then they're compatible
         return true;
     }
-    if (get_kind() == expression_kind || rhs.get_kind() == expression_kind) {
+    if (get_kind() == expr_kind || rhs.get_kind() == expr_kind) {
         // If either is an expression type, check compatibility with
         // the storage types
         return storage_type().data_layout_compatible_with(rhs.storage_type());
@@ -317,8 +317,8 @@ bool ndt::type::data_layout_compatible_with(const ndt::type& rhs) const
             // For strided and var dimensions, it's data layout
             // compatible if the element is
             if (rhs.get_type_id() == get_type_id()) {
-                const base_uniform_dim_type *budd = static_cast<const base_uniform_dim_type *>(extended());
-                const base_uniform_dim_type *rhs_budd = rhs.tcast<base_uniform_dim_type>();
+                const base_dim_type *budd = static_cast<const base_dim_type *>(extended());
+                const base_dim_type *rhs_budd = rhs.tcast<base_dim_type>();
                 return budd->get_element_type().data_layout_compatible_with(
                                     rhs_budd->get_element_type());
             }

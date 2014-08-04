@@ -23,7 +23,7 @@ using namespace std;
 using namespace dynd;
 
 var_dim_type::var_dim_type(const ndt::type &element_tp)
-    : base_uniform_dim_type(var_dim_type_id, element_tp,
+    : base_dim_type(var_dim_type_id, element_tp,
                             sizeof(var_dim_type_data), sizeof(const char *),
                             sizeof(var_dim_type_arrmeta),
                             type_flag_zeroinit | type_flag_blockref, false)

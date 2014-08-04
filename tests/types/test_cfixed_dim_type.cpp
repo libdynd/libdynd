@@ -25,7 +25,7 @@ TEST(CFixedDimType, Create) {
     // Strings with various encodings and sizes
     d = ndt::make_cfixed_dim(3, ndt::make_type<int32_t>());
     EXPECT_EQ(cfixed_dim_type_id, d.get_type_id());
-    EXPECT_EQ(uniform_dim_kind, d.get_kind());
+    EXPECT_EQ(dim_kind, d.get_kind());
     EXPECT_EQ(4u, d.get_data_alignment());
     EXPECT_EQ(12u, d.get_data_size());
     EXPECT_EQ(1, d.get_ndim());
@@ -46,7 +46,7 @@ TEST(CFixedDimType, Create) {
 
     d = ndt::make_cfixed_dim(1, ndt::make_type<int32_t>());
     EXPECT_EQ(cfixed_dim_type_id, d.get_type_id());
-    EXPECT_EQ(uniform_dim_kind, d.get_kind());
+    EXPECT_EQ(dim_kind, d.get_kind());
     EXPECT_EQ(4u, d.get_data_alignment());
     EXPECT_EQ(4u, d.get_data_size());
     EXPECT_FALSE(d.is_expression());
@@ -59,7 +59,7 @@ TEST(CFixedDimType, Create) {
     // With the stride != element type size
     d = ndt::make_cfixed_dim(3, ndt::make_type<int32_t>(), 8);
     EXPECT_EQ(cfixed_dim_type_id, d.get_type_id());
-    EXPECT_EQ(uniform_dim_kind, d.get_kind());
+    EXPECT_EQ(dim_kind, d.get_kind());
     EXPECT_EQ(4u, d.get_data_alignment());
     EXPECT_EQ(20u, d.get_data_size());
     EXPECT_FALSE(d.is_expression());
@@ -160,7 +160,7 @@ TEST(CFixedDimType, SimpleIndex) {
 
 TEST(CFixedDimType, AssignKernel_ScalarToFixed) {
     nd::array a, b;
-    assignment_ckernel_builder k;
+    unary_ckernel_builder k;
 
     // Assignment scalar -> fixed array
     a = nd::empty(ndt::make_cfixed_dim(3, ndt::make_type<int>()));
@@ -178,7 +178,7 @@ TEST(CFixedDimType, AssignKernel_ScalarToFixed) {
 
 TEST(CFixedDimType, AssignKernel_FixedToFixed) {
     nd::array a, b;
-    assignment_ckernel_builder k;
+    unary_ckernel_builder k;
 
     // Assignment fixed array -> fixed array
     a = nd::empty(ndt::make_cfixed_dim(3, ndt::make_type<int>()));
@@ -197,7 +197,7 @@ TEST(CFixedDimType, AssignKernel_FixedToFixed) {
 
 TEST(CFixedDimType, AssignKernel_FixedToScalarError) {
     nd::array a, b;
-    assignment_ckernel_builder k;
+    unary_ckernel_builder k;
 
     // Assignment fixed array -> scalar
     a = 9.0;
@@ -212,7 +212,7 @@ TEST(CFixedDimType, AssignKernel_FixedToScalarError) {
 
 TEST(CFixedDimType, AssignFixedStridedKernel) {
     nd::array a, b;
-    assignment_ckernel_builder k;
+    unary_ckernel_builder k;
     int vals_int[] = {3,5,7};
     int vals_int_single[] = {9};
 

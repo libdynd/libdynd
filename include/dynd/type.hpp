@@ -10,7 +10,7 @@
 #include <stdexcept>
 
 #include <dynd/types/base_type.hpp>
-#include <dynd/types/base_expression_type.hpp>
+#include <dynd/types/base_expr_type.hpp>
 #include <dynd/types/base_string_type.hpp>
 #include <dynd/types/dynd_float16.hpp>
 #include <dynd/eval/eval_context.hpp>
@@ -325,12 +325,12 @@ public:
      * printing, etc.
      */
     const type& value_type() const {
-        // Only expression_kind types have different value_type
-        if (is_builtin() || m_extended->get_kind() != expression_kind) {
+        // Only expr_kind types have different value_type
+        if (is_builtin() || m_extended->get_kind() != expr_kind) {
             return *this;
         } else {
             // All chaining happens in the operand_type
-            return static_cast<const base_expression_type *>(m_extended)->get_value_type();
+            return static_cast<const base_expr_type *>(m_extended)->get_value_type();
         }
     }
 
@@ -340,11 +340,11 @@ public:
      * This is one link down the expression chain.
      */
     const type& operand_type() const {
-        // Only expression_kind types have different operand_type
-        if (is_builtin() || m_extended->get_kind() != expression_kind) {
+        // Only expr_kind types have different operand_type
+        if (is_builtin() || m_extended->get_kind() != expr_kind) {
             return *this;
         } else {
-            return static_cast<const base_expression_type *>(m_extended)->get_operand_type();
+            return static_cast<const base_expr_type *>(m_extended)->get_operand_type();
         }
     }
 
@@ -354,14 +354,14 @@ public:
      * This is the bottom of the expression chain.
      */
     const type& storage_type() const {
-        // Only expression_kind types have different storage_type
-        if (is_builtin() || m_extended->get_kind() != expression_kind) {
+        // Only expr_kind types have different storage_type
+        if (is_builtin() || m_extended->get_kind() != expr_kind) {
             return *this;
         } else {
             // Follow the operand type chain to get the storage type
-            const type* dt = &static_cast<const base_expression_type *>(m_extended)->get_operand_type();
-            while (dt->get_kind() == expression_kind) {
-                dt = &static_cast<const base_expression_type *>(dt->m_extended)->get_operand_type();
+            const type* dt = &static_cast<const base_expr_type *>(m_extended)->get_operand_type();
+            while (dt->get_kind() == expr_kind) {
+                dt = &static_cast<const base_expr_type *>(dt->m_extended)->get_operand_type();
             }
             return *dt;
         }

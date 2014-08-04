@@ -576,7 +576,7 @@ static void parse_datetime_json(const ndt::type &tp, const char *arrmeta,
     rbegin = begin;
 }
 
-static void parse_uniform_dim_json(const ndt::type& tp, const char *arrmeta, char *out_data,
+static void parse_dim_json(const ndt::type& tp, const char *arrmeta, char *out_data,
                 const char *&begin, const char *end, const eval::eval_context *ectx)
 {
     switch (tp.get_type_id()) {
@@ -677,8 +677,8 @@ static void parse_json(const ndt::type &tp, const char *arrmeta, char *out_data,
 {
     begin = skip_whitespace(begin, end);
     switch (tp.get_kind()) {
-        case uniform_dim_kind:
-            parse_uniform_dim_json(tp, arrmeta, out_data, begin, end, ectx);
+        case dim_kind:
+            parse_dim_json(tp, arrmeta, out_data, begin, end, ectx);
             return;
         case struct_kind:
             parse_struct_json(tp, arrmeta, out_data, begin, end, ectx);

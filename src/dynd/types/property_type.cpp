@@ -14,7 +14,7 @@ using namespace dynd;
 
 property_type::property_type(const ndt::type& operand_type, const std::string& property_name,
                 size_t property_index)
-    : base_expression_type(property_type_id, expression_kind,
+    : base_expr_type(property_type_id, expr_kind,
                     operand_type.get_data_size(), operand_type.get_data_alignment(), type_flag_none,
                     operand_type.get_arrmeta_size()),
             m_value_tp(), m_operand_tp(operand_type),
@@ -45,7 +45,7 @@ property_type::property_type(const ndt::type& operand_type, const std::string& p
 
 property_type::property_type(const ndt::type& value_tp, const ndt::type& operand_tp,
                 const std::string& property_name, size_t property_index)
-    : base_expression_type(property_type_id, expression_kind,
+    : base_expr_type(property_type_id, expr_kind,
                     operand_tp.get_data_size(), operand_tp.get_data_alignment(), type_flag_none,
                     operand_tp.get_arrmeta_size()),
             m_value_tp(value_tp), m_operand_tp(operand_tp),
@@ -54,10 +54,10 @@ property_type::property_type(const ndt::type& value_tp, const ndt::type& operand
             m_property_name(property_name),
             m_property_index(property_index)
 {
-    if (m_value_tp.get_kind() == expression_kind) {
+    if (m_value_tp.get_kind() == expr_kind) {
         stringstream ss;
         ss << "property_type: The destination type " << m_value_tp;
-        ss << " should not be an expression_kind";
+        ss << " should not be an expr_kind";
         throw std::runtime_error(ss.str());
     }
 
@@ -254,9 +254,9 @@ size_t property_type::make_value_to_operand_assignment_kernel(
 
 ndt::type property_type::with_replaced_storage_type(const ndt::type& replacement_type) const
 {
-    if (m_operand_tp.get_kind() == expression_kind) {
+    if (m_operand_tp.get_kind() == expr_kind) {
         return ndt::type(new property_type(
-                        m_operand_tp.tcast<base_expression_type>()->with_replaced_storage_type(replacement_type),
+                        m_operand_tp.tcast<base_expr_type>()->with_replaced_storage_type(replacement_type),
                         m_property_name), false);
     } else {
         if (m_operand_tp != replacement_type.value_type()) {

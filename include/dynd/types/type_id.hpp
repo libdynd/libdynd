@@ -31,7 +31,7 @@ enum type_kind_t {
     void_kind,
     datetime_kind,
     // For any dimension types which have elements of all the same type
-    uniform_dim_kind,
+    dim_kind,
     // For struct_type_id and cstruct_type_id
     struct_kind,
     // For tuple_type_id and ctuple_type_id
@@ -41,7 +41,7 @@ enum type_kind_t {
     // For types whose value_type != the type, signals
     // that calculations should look at the value_type for
     // type promotion, etc.
-    expression_kind,
+    expr_kind,
     // For the option type, whose value may or may not be present
     option_kind,
     // For types that specify a memory space

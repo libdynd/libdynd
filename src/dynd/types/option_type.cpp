@@ -199,7 +199,7 @@ void option_type::print_type(std::ostream& o) const
 
 bool option_type::is_expression() const
 {
-    // Even though the pointer is an instance of an base_expression_type,
+    // Even though the pointer is an instance of an base_expr_type,
     // we'll only call it an expression if the target is.
     return m_value_tp.is_expression();
 }
@@ -338,7 +338,7 @@ size_t option_type::make_assignment_kernel(
     kernel_request_t kernreq, const eval::eval_context *ectx) const
 {
     // Let expression types resolve themselves first
-    if (this == dst_tp.extended() && src_tp.get_kind() == expression_kind) {
+    if (this == dst_tp.extended() && src_tp.get_kind() == expr_kind) {
         return src_tp.extended()->make_assignment_kernel(
             ckb, ckb_offset, dst_tp, dst_arrmeta, src_tp, src_arrmeta, kernreq,
             ectx);

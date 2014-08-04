@@ -33,7 +33,7 @@ TEST(PointerType, PointerToBuiltIn) {
 
     d = ndt::make_pointer<char>();
     EXPECT_EQ(pointer_type_id, d.get_type_id());
-    EXPECT_EQ(expression_kind, d.get_kind());
+    EXPECT_EQ(expr_kind, d.get_kind());
     EXPECT_EQ(sizeof(void *), d.get_data_size());
     EXPECT_EQ(sizeof(void *), d.get_data_alignment());
     EXPECT_NE(0u, d.get_flags()&type_flag_blockref);
@@ -42,7 +42,7 @@ TEST(PointerType, PointerToBuiltIn) {
     EXPECT_EQ(ndt::make_pointer<void>(), d.operand_type());
     EXPECT_EQ(ndt::make_pointer<void>(), d.storage_type());
     // As a special case, the pointer_type says it isn't an expression type,
-    // even though it is derived from base_expression_type
+    // even though it is derived from base_expr_type
     EXPECT_FALSE(d.is_expression());
     // Roundtripping through a string
     EXPECT_EQ(d, ndt::type(d.str()));

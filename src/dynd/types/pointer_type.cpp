@@ -17,7 +17,7 @@ using namespace std;
 using namespace dynd;
 
 pointer_type::pointer_type(const ndt::type& target_tp)
-    : base_expression_type(pointer_type_id, expression_kind, sizeof(void *),
+    : base_expr_type(pointer_type_id, expr_kind, sizeof(void *),
                     sizeof(void *),
                     inherited_flags(target_tp.get_flags(), type_flag_zeroinit|type_flag_blockref),
                     sizeof(pointer_type_arrmeta) + target_tp.get_arrmeta_size(),
@@ -27,7 +27,7 @@ pointer_type::pointer_type(const ndt::type& target_tp)
     // I'm not 100% sure how blockref pointer types should interact with
     // the computational subsystem, the details will have to shake out
     // when we want to actually do something with them.
-    if (target_tp.get_kind() == expression_kind && target_tp.get_type_id() != pointer_type_id) {
+    if (target_tp.get_kind() == expr_kind && target_tp.get_type_id() != pointer_type_id) {
         stringstream ss;
         ss << "A dynd pointer type's target cannot be the expression type ";
         ss << target_tp;
@@ -53,7 +53,7 @@ void pointer_type::print_type(std::ostream& o) const
 
 bool pointer_type::is_expression() const
 {
-    // Even though the pointer is an instance of an base_expression_type,
+    // Even though the pointer is an instance of an base_expr_type,
     // we'll only call it an expression if the target is.
     return m_target_tp.is_expression();
 }

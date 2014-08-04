@@ -38,7 +38,7 @@ namespace kernels {
  * Function pointers + data for a hierarchical
  * kernel which operates on type/arrmeta in
  * some configuration. Individual kernel types
- * are handled by the classes assignment_ckernel_builder, etc.
+ * are handled by the classes unary_ckernel_builder, etc.
  *
  * The data placed in the kernel's data must
  * be relocatable with a memcpy, it must not rely on its

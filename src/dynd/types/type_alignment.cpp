@@ -16,11 +16,11 @@ ndt::type ndt::make_unaligned(const ndt::type& value_type)
 {
     if (value_type.get_data_alignment() > 1) {
         // Only do something if it requires alignment
-        if (value_type.get_kind() != expression_kind) {
+        if (value_type.get_kind() != expr_kind) {
             return ndt::make_view(value_type, ndt::make_fixedbytes(value_type.get_data_size(), 1));
         } else {
             const ndt::type& sdt = value_type.storage_type();
-            return ndt::type(value_type.tcast<base_expression_type>()->with_replaced_storage_type(ndt::make_view(sdt, ndt::make_fixedbytes(sdt.get_data_size(), 1))));
+            return ndt::type(value_type.tcast<base_expr_type>()->with_replaced_storage_type(ndt::make_view(sdt, ndt::make_fixedbytes(sdt.get_data_size(), 1))));
         }
     } else {
         return value_type;
