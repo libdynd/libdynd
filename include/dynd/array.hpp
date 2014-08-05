@@ -828,7 +828,7 @@ public:
 
     /** Does a value-assignment from the rhs C++ scalar. */
     template<class T>
-    typename enable_if<is_dynd_scalar<T>::value, array_vals&>::type operator=(const T& rhs) {
+    typename enable_if<is_dynd_scalar<T>::value, array_vals_at&>::type operator=(const T& rhs) {
         m_arr.val_assign(ndt::make_type<T>(), NULL, (const char *)&rhs);
         return *this;
     }
@@ -841,7 +841,7 @@ public:
      * as would seem obvious.
      */
     template<class T>
-    typename enable_if<is_type_bool<T>::value, array_vals&>::type  operator=(const T& rhs) {
+    typename enable_if<is_type_bool<T>::value, array_vals_at&>::type  operator=(const T& rhs) {
         dynd_bool v = rhs;
         m_arr.val_assign(ndt::make_type<dynd_bool>(), NULL, (const char *)&v);
         return *this;
