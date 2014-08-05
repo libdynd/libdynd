@@ -20,6 +20,7 @@
 using namespace std;
 using namespace dynd;
 
+
 template <typename T>
 class Array : public Memory<T> {
 };
@@ -604,6 +605,21 @@ TEST(Array, SimplePrintEmpty) {
   stringstream ss;
   ss << a;
   EXPECT_EQ("array([],\n      type=\"strided * float32\")", ss.str());
+}
+
+TEST(Array, PrintBoolScalar) {
+  nd::array a(true);
+  stringstream ss;
+  ss << a;
+  EXPECT_EQ("array(True,\n      type=\"bool\")", ss.str());
+}
+
+TEST(Array, PrintBoolVector) {
+  nd::array a = nd::empty(3, "bool");
+  a.vals() = true;
+  stringstream ss;
+  ss << a;
+  EXPECT_EQ("array([True, True, True],\n      type=\"strided * bool\")", ss.str());
 }
 
 REGISTER_TYPED_TEST_CASE_P(Array, ScalarConstructor, OneDimConstructor, TwoDimConstructor, ThreeDimConstructor, AsScalar);
