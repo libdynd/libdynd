@@ -9,6 +9,7 @@ env:
   - DYND_FFTW=ON
 
 before_script:
+  - sudo apt-get update
   - sudo apt-get -qq install valgrind
   - if [ "$DYND_FFTW" == "ON" ]; then sudo apt-get -qq install libfftw3-dev; fi
   - mkdir build
