@@ -268,3 +268,17 @@ TEST(View, WeakerAlignment) {
     EXPECT_EQ(0x01020304, b(1).as<int32_t>());
 #endif
 }
+
+TEST(View, StringAsBytes) {
+  nd::array a, b;
+
+  a = parse_json("string", "\"\\U00024B62\"");
+  b = nd::view(a, "bytes");
+  const bytes_type_data *btd =
+      reinterpret_cast<const bytes_type_data *>(b.get_readonly_originptr());
+  ASSERT_EQ(4, btd->end - btd->begin);
+  EXPECT_EQ('\xF0', btd->begin[0]);
+  EXPECT_EQ('\xA4', btd->begin[1]);
+  EXPECT_EQ('\xAD', btd->begin[2]);
+  EXPECT_EQ('\xA2', btd->begin[3]);
+}

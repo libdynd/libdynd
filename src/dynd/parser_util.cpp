@@ -110,6 +110,21 @@ bool parse::parse_doublequote_string_no_ws(const char *&rbegin, const char *end,
         }
         break;
       }
+      case 'U': {
+        if (end - begin < 8) {
+          throw parse::parse_error(begin - 2,
+                                   "invalid unicode escape sequence in string");
+        }
+        for (int i = 0; i < 8; ++i) {
+          char c = *begin++;
+          if (!(('0' <= c && c <= '9') || ('A' <= c && c <= 'F') ||
+                ('a' <= c && c <= 'f'))) {
+            throw parse::parse_error(
+                begin - 1, "invalid unicode escape sequence in string");
+          }
+        }
+        break;
+      }
       default:
         throw parse::parse_error(begin - 2,
                                  "invalid escape sequence in string");
@@ -162,6 +177,27 @@ void parse::unescape_string(const char *strbegin, const char *strend,
         }
         uint32_t cp = 0;
         for (int i = 0; i < 4; ++i) {
+          char c = *strbegin++;
+          cp *= 16;
+          if ('0' <= c && c <= '9') {
+            cp += c - '0';
+          } else if ('A' <= c && c <= 'F') {
+            cp += c - 'A' + 10;
+          } else if ('a' <= c && c <= 'f') {
+            cp += c - 'a' + 10;
+          } else {
+            cp = '?';
+          }
+        }
+        append_utf8_codepoint(cp, out);
+        break;
+      }
+      case 'U': {
+        if (strend - strbegin < 8) {
+          return;
+        }
+        uint32_t cp = 0;
+        for (int i = 0; i < 8; ++i) {
           char c = *strbegin++;
           cp *= 16;
           if ('0' <= c && c <= '9') {

@@ -193,7 +193,9 @@ static void refine_bytes_view(memory_block_ptr &data_ref, char *&data_ptr,
   case var_dim_type_id: {
     // We can only allow leading var_dim
     if (data_dim_size != -1) {
-      break;
+      data_tp = ndt::type();
+      data_dim_size = -1;
+      return;
     }
     const var_dim_type_arrmeta *meta =
         reinterpret_cast<const var_dim_type_arrmeta *>(data_meta);
@@ -213,7 +215,9 @@ static void refine_bytes_view(memory_block_ptr &data_ref, char *&data_ptr,
   case pointer_type_id: {
     // We can only strip away leading pointers
     if (data_dim_size != -1) {
-      break;
+      data_tp = ndt::type();
+      data_dim_size = -1;
+      return;
     }
     const pointer_type_arrmeta *meta =
         reinterpret_cast<const pointer_type_arrmeta *>(data_meta);
@@ -223,6 +227,27 @@ static void refine_bytes_view(memory_block_ptr &data_ref, char *&data_ptr,
     data_ptr = *reinterpret_cast<char **>(data_ptr) + meta->offset;
     data_tp = data_tp.tcast<pointer_type>()->get_target_type();
     data_meta += sizeof(pointer_type_arrmeta);
+    return;
+  }
+  case string_type_id: {
+    // We can only view leading strings
+    if (data_dim_size != -1) {
+      data_tp = ndt::type();
+      data_dim_size = -1;
+      return;
+    }
+    // Look at the actual string data, not the pointer to it
+    const string_type_arrmeta *meta =
+        reinterpret_cast<const string_type_arrmeta *>(data_meta);
+    if (meta->blockref != NULL) {
+      data_ref = meta->blockref;
+    }
+    const string_type_data *str_ptr =
+        reinterpret_cast<const string_type_data *>(data_ptr);
+    data_ptr = str_ptr->begin;
+    data_tp = ndt::type();
+    data_dim_size = str_ptr->end - str_ptr->begin;
+    data_stride = 1;
     return;
   }
   default:
