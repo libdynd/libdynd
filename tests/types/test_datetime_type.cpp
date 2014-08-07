@@ -234,4 +234,6 @@ TEST(DateTimeStruct, FromToString) {
     EXPECT_EQ("2013-03-04T14:38:05", dts.to_str());
     dts.set_from_str("20130304143805.123");
     EXPECT_EQ("2013-03-04T14:38:05.123", dts.to_str());
+    dts.set_from_str("Jan 2 2050");
+    EXPECT_EQ("2050-01-02T00:00", dts.to_str());
 }

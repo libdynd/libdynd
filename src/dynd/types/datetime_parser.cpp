@@ -172,11 +172,18 @@ static bool parse_date_time_datetime(const char *&begin, const char *end,
     }
     // "T", ":', or whitespace may separate a date and a time
     if (parse_token(begin, end, 'T')) {
-        // Allow whitespace around the T
-        skip_whitespace(begin, end);
-    } else if (!parse_token_no_ws(begin, end, ':') &&
-            !skip_required_whitespace(begin, end)) {
-        return sbs.fail();
+      // Allow whitespace around the T
+      skip_whitespace(begin, end);
+    } else if (!parse_token_no_ws(begin, end, ':')) {
+      if (!skip_required_whitespace(begin, end)) {
+        out_dt.hmst.set_to_zero();
+        return sbs.succeed();
+      }
+      if (begin == end) {
+        // If there was just the date, set the rest to zero
+        out_dt.hmst.set_to_zero();
+        return sbs.succeed();
+      }
     }
     if (!parse_time(begin, end, out_dt.hmst, out_tz_begin, out_tz_end)) {
         // In most cases we don't accept just an hour as a time, but for
