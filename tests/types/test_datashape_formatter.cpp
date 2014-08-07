@@ -23,22 +23,25 @@ using namespace std;
 using namespace dynd;
 
 TEST(DataShapeFormatter, ArrayBuiltinAtoms) {
-    EXPECT_EQ("bool", format_datashape(nd::array(true), "", false));
-    EXPECT_EQ("int8", format_datashape(nd::array((int8_t)0), "", false));
-    EXPECT_EQ("int16", format_datashape(nd::array((int16_t)0), "", false));
-    EXPECT_EQ("int32", format_datashape(nd::array((int32_t)0), "", false));
-    EXPECT_EQ("int64", format_datashape(nd::array((int64_t)0), "", false));
-    EXPECT_EQ("int128", format_datashape(nd::array(dynd_int128(0)), "", false));
-    EXPECT_EQ("uint8", format_datashape(nd::array((uint8_t)0), "", false));
-    EXPECT_EQ("uint16", format_datashape(nd::array((uint16_t)0), "", false));
-    EXPECT_EQ("uint32", format_datashape(nd::array((uint32_t)0), "", false));
-    EXPECT_EQ("uint64", format_datashape(nd::array((uint64_t)0), "", false));
-    EXPECT_EQ("uint128", format_datashape(nd::array(dynd_uint128(0)), "", false));
-    EXPECT_EQ("float16", format_datashape(nd::array(dynd_float16(0.f, assign_error_nocheck)), "", false));
-    EXPECT_EQ("float32", format_datashape(nd::array(0.f), "", false));
-    EXPECT_EQ("float64", format_datashape(nd::array(0.), "", false));
-    EXPECT_EQ("complex[float32]", format_datashape(nd::array(dynd_complex<float>(0.f)), "", false));
-    EXPECT_EQ("complex[float64]", format_datashape(nd::array(dynd_complex<double>(0.)), "", false));
+  // A NULL array
+  EXPECT_EQ("uninitialized", format_datashape(nd::array()));
+  // Scalar arrays of builtin types
+  EXPECT_EQ("bool", format_datashape(nd::array(true), "", false));
+  EXPECT_EQ("int8", format_datashape(nd::array((int8_t)0), "", false));
+  EXPECT_EQ("int16", format_datashape(nd::array((int16_t)0), "", false));
+  EXPECT_EQ("int32", format_datashape(nd::array((int32_t)0), "", false));
+  EXPECT_EQ("int64", format_datashape(nd::array((int64_t)0), "", false));
+  EXPECT_EQ("int128", format_datashape(nd::array(dynd_int128(0)), "", false));
+  EXPECT_EQ("uint8", format_datashape(nd::array((uint8_t)0), "", false));
+  EXPECT_EQ("uint16", format_datashape(nd::array((uint16_t)0), "", false));
+  EXPECT_EQ("uint32", format_datashape(nd::array((uint32_t)0), "", false));
+  EXPECT_EQ("uint64", format_datashape(nd::array((uint64_t)0), "", false));
+  EXPECT_EQ("uint128", format_datashape(nd::array(dynd_uint128(0)), "", false));
+  EXPECT_EQ("float16", format_datashape(nd::array(dynd_float16(0.f, assign_error_nocheck)), "", false));
+  EXPECT_EQ("float32", format_datashape(nd::array(0.f), "", false));
+  EXPECT_EQ("float64", format_datashape(nd::array(0.), "", false));
+  EXPECT_EQ("complex[float32]", format_datashape(nd::array(dynd_complex<float>(0.f)), "", false));
+  EXPECT_EQ("complex[float64]", format_datashape(nd::array(dynd_complex<double>(0.)), "", false));
 }
 
 TEST(DataShapeFormatter, DTypeBuiltinAtoms) {
