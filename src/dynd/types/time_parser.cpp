@@ -108,19 +108,20 @@ static bool parse_flex_time(const char *&begin, const char *end,
     if (!parse_2digit_int_no_ws(begin, end, second)) {
         return sbs.fail();
     }
-    // .SS*
-    if (!parse_token_no_ws(begin, end, '.')) {
-        // If there's no '.', stop here and match just the HH:MM:SS
-        parse_time_ampm(begin, end, hour);
-        if (time_hmst::is_valid(hour, minute, second, 0)) {
-            out_hmst.hour = hour;
-            out_hmst.minute = minute;
-            out_hmst.second = second;
-            out_hmst.tick = 0;
-            return sbs.succeed();
-        } else {
-            return sbs.fail();
-        }
+    // .SS* or :SS*
+    if (!parse_token_no_ws(begin, end, '.') &&
+        !parse_token_no_ws(begin, end, ':')) {
+      // If there's no '.', stop here and match just the HH:MM:SS
+      parse_time_ampm(begin, end, hour);
+      if (time_hmst::is_valid(hour, minute, second, 0)) {
+        out_hmst.hour = hour;
+        out_hmst.minute = minute;
+        out_hmst.second = second;
+        out_hmst.tick = 0;
+        return sbs.succeed();
+      } else {
+        return sbs.fail();
+      }
     }
     int tick = 0;
     if (!(begin < end && isdigit(*begin))) {

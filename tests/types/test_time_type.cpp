@@ -157,6 +157,11 @@ TEST(TimeHMST, SetFromStr) {
     EXPECT_EQ(34, hmst.minute);
     EXPECT_EQ(56, hmst.second);
     EXPECT_EQ(7890123, hmst.tick);
+    hmst.set_from_str("09:30:00:003");
+    EXPECT_EQ(9, hmst.hour);
+    EXPECT_EQ(30, hmst.minute);
+    EXPECT_EQ(0, hmst.second);
+    EXPECT_EQ(30000, hmst.tick);
 }
 
 TEST(TimeHMST, SetFromStr_Errors) {
