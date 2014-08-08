@@ -565,6 +565,8 @@ if ((NOT DYND_SHARED_LIB) AND (DYND_INSTALL_LIB))
         )
 endif()
 
+include_directories(${CMAKE_CURRENT_BINARY_DIR}/include)
+
 if (DYND_SHARED_LIB)
     if (DYND_CUDA)
         set(CUDA_OPTIONS "-arch=compute_20")
@@ -620,8 +622,6 @@ file(COPY thirdparty/cephes/rename.h
      DESTINATION ${CMAKE_CURRENT_BINARY_DIR}/include/dynd/cephes)
 file(COPY thirdparty/cephes/protos.h
      DESTINATION ${CMAKE_CURRENT_BINARY_DIR}/include/dynd/cephes)
-
-include_directories(${CMAKE_CURRENT_BINARY_DIR}/include)
 
 if(WIN32)
     set_target_properties(libdynd
