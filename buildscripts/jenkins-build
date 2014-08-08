@@ -60,6 +60,10 @@ else
     export EXTRA=
 fi
 
+if [ ${PLATFORM} == 'cuda' ]; then
+    export EXTRA=${EXTRA} -DDYND_CUDA=ON
+fi
+
 mkdir build
 cd build
 cmake ${EXTRA} -DCMAKE_INSTALL_PREFIX=install -DCMAKE_C_COMPILER=${CC} -DCMAKE_CXX_COMPILER=${CXX} .. || exit 1
