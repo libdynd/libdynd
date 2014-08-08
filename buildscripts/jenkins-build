@@ -61,7 +61,7 @@ else
 fi
 
 if [ ${PLATFORM} == 'cuda' ]; then
-    export EXTRA=${EXTRA} -DDYND_CUDA=ON
+    export EXTRA="${EXTRA} -DDYND_CUDA=ON"
 fi
 
 mkdir build
