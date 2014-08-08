@@ -137,6 +137,11 @@ namespace std {
 }
 #endif
 
+#if _MSC_VER == 1700
+// MSVC 2012
+#define DYND_ATOLL(x) (_atoi64(x))
+#endif
+
 #if _MSC_VER >= 1700
 // MSVC 2012 and later
 #define DYND_USE_STD_ATOMIC
