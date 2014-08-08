@@ -5,6 +5,28 @@ DyND is a C++ library for array programming with a dynamic
 type system. It is currently in a preview state, and nothing
 about the API or the ABI is guaranteed to stay the same.
 
+Version 0.6.4
+-------------
+
+Commits by author since last release:
+
+    26  Mark Wiebe
+    13  Irwin Zaid
+     5  Phillip Cloud
+
+- Fixes to array printing edge cases.
+- Improvements to FFT functions.
+- Change all strided dimension types (strided, fixed, cfixed) to
+  use the same metadata layout, and added a strided_ndim property
+  to the type's data. This permits simplified handling in common
+  strided cases.
+- Rename uniform_dim_kind to dim_kind, expression_kind to expr_kind.
+- Change boolean printing from true/false to True/False like Python.
+- Fix nd::view of a string as bytes to look at the string data.
+- Allow input of times like "09:30:00:000" with ":" instead of "."
+  separating seconds from the fractional seconds.
+- Allow dates to parse as datetimes, setting the time to all zeros.
+
 Version 0.6.3
 -------------
 
