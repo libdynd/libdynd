@@ -34,11 +34,20 @@ namespace dynd {
 // Prevent from nvcc clashing with cmath
 template <typename T>
 inline bool isfinite(T arg) {
-    return (std::isfinite)(arg);
+#ifndef _MSC_VER
+  return (std::isfinite)(arg);
+#else
+  return _finite(arg) != 0;
+#endif
 }
 template <typename T>
 inline bool isinf(T arg) {
-    return (std::isinf)(arg);
+#ifndef _MSC_VER
+  return (std::isinf)(arg);
+#else
+  return arg == std::numeric_limits<double>::infinity() ||
+         arg == -std::numeric_limits<double>::infinity();
+#endif
 }
 } // namespace dynd
 

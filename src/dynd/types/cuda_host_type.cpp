@@ -3,6 +3,8 @@
 // BSD 2-Clause License, see LICENSE.txt
 //
 
+#include <dynd/config.hpp>
+
 #ifdef DYND_CUDA
 
 #include <dynd/types/cuda_host_type.hpp>
