@@ -144,3 +144,21 @@ TEST(OptionType, DateTime) {
   a.vals_at(4) = "NA";
   EXPECT_FALSE(nd::is_scalar_avail(a(4)));
 }
+
+TEST(OptionType, String) {
+  nd::array a = nd::empty("5 * ?string");
+
+  parse_json(a, "[null, \"testing\", \"NA\", \"\","
+                " \"valid\"]");
+  EXPECT_FALSE(nd::is_scalar_avail(a(0)));
+  EXPECT_EQ("testing", a(1).as<string>());
+  EXPECT_EQ("NA", a(2).as<string>());
+  EXPECT_EQ("", a(3).as<string>());
+  EXPECT_EQ("valid", a(4).as<string>());
+
+  a = nd::empty("5 * ?string");
+  a.vals_at(0) = "";
+  EXPECT_EQ("", a(0).as<string>());
+  a.vals_at(1) = "NA";
+  EXPECT_EQ("NA", a(1).as<string>());
+}

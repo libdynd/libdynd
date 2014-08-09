@@ -358,6 +358,12 @@ static intptr_t instantiate_string_to_option_assignment_kernel(
     self->m_errmode = ectx->errmode;
     return ckb_offset;
   }
+  case string_type_id: {
+    // Just a string to string assignment
+    return ::make_assignment_kernel(
+        ckb, ckb_offset, dst_tp.tcast<option_type>()->get_value_type(),
+        dst_arrmeta, src_tp[0], src_arrmeta[0], kernreq, ectx);
+  }
   default:
     break;
   }
