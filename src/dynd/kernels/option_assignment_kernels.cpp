@@ -291,6 +291,30 @@ struct string_to_option_number_ck : public kernels::unary_ck<string_to_option_nu
                                 m_errmode);
     }
 };
+
+struct string_to_option_tp_ck : public kernels::unary_ck<string_to_option_tp_ck> {
+    intptr_t m_dst_assign_na_offset;
+
+    inline void single(char *dst, const char *src)
+    {
+        const string_type_data *std =
+            reinterpret_cast<const string_type_data *>(src);
+        if (parse::matches_option_type_na_token(std->begin, std->end)) {
+          // It's not available, assign an NA
+          ckernel_prefix *dst_assign_na =
+              get_child_ckernel(m_dst_assign_na_offset);
+          expr_single_t dst_assign_na_fn =
+              dst_assign_na->get_function<expr_single_t>();
+          dst_assign_na_fn(dst, NULL, dst_assign_na);
+        } else {
+          // It's available, copy using value assignment
+          ckernel_prefix *value_assign = get_child_ckernel();
+          expr_single_t value_assign_fn =
+              value_assign->get_function<expr_single_t>();
+          value_assign_fn(dst, &src, value_assign);
+        }
+    }
+};
 }
 
 static intptr_t instantiate_string_to_option_assignment_kernel(
@@ -338,10 +362,25 @@ static intptr_t instantiate_string_to_option_assignment_kernel(
     break;
   }
 
-  // Fall back to an assignment without any option[S] support
-  return ::make_assignment_kernel(
+  // Fall back to an adaptor that checks for a few standard
+  // missing value tokens, then uses the standard value assignment
+  intptr_t root_ckb_offset = ckb_offset;
+  string_to_option_tp_ck *self =
+      string_to_option_tp_ck::create(ckb, kernreq, ckb_offset);
+  // First child ckernel is the value assignment
+  ckb_offset = ::make_assignment_kernel(
       ckb, ckb_offset, dst_tp.tcast<option_type>()->get_value_type(),
       dst_arrmeta, src_tp[0], src_arrmeta[0], kernreq, ectx);
+  // Re-acquire self because the address may have changed
+  self = ckb->get_at<string_to_option_tp_ck>(root_ckb_offset);
+  // Second child ckernel is the NA assignment
+  self->m_dst_assign_na_offset = ckb_offset - root_ckb_offset;
+  const arrfunc_type_data *af =
+      dst_tp.tcast<option_type>()->get_assign_na_arrfunc();
+  ckb_offset = af->instantiate(af, ckb, ckb_offset, dst_tp, dst_arrmeta, NULL,
+                               NULL, kernreq, ectx);
+  return ckb_offset;
+
 }
 
 static intptr_t instantiate_option_as_value_assignment_kernel(
