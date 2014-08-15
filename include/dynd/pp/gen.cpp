@@ -84,19 +84,19 @@ string cat(const string &name, int i) {
 string repeat(const string& prefix, string (*func)(const string), const string &sep, int start, int stop, int step) {
     ostringstream oss;
     for (int i = start; i < stop - 1; i += step) {
-        oss << (*func)(prefix) << sep;
+        oss << func(prefix) << sep;
     }
-    oss << (*func)(prefix);
+    oss << func(prefix);
     return oss.str();
 }
 
 string args(const string& prefix, string (*func)(const string), const string &sep, int start, int stop, int step) {
     ostringstream oss;
     if (start < stop) {
-        oss << (*func)(cat(prefix, start));
+        oss << func(cat(prefix, start));
     }
     for (int i = start + step; i < stop; i += step) {
-        oss << sep << (*func)(cat(prefix, i));
+        oss << sep << func(cat(prefix, i));
     }
     return oss.str();
 }
@@ -105,11 +105,11 @@ template <typename iter>
 string args(const string& prefix, string (*func)(const string), const string &sep, iter first, iter last) {
     ostringstream oss;    
     if (first != last) {
-        oss << (*func)(cat(prefix, *first));
+        oss << func(cat(prefix, *first));
     }
     first++;
     while (first != last) {
-        oss << sep << (*func)(cat(prefix, *first));
+        oss << sep << func(cat(prefix, *first));
         ++first;
     }
     return oss.str();
@@ -206,11 +206,6 @@ int main(int argc, char **argv) {
     }
 
     const int pp_ary_max = 4;
-
-    int *range = new int[pp_ary_max];
-    for (int i = 0; i < pp_ary_max; i++) {
-        range[i] = i;
-    }
 
     string filename("gen.hpp");
 
