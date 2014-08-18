@@ -19,7 +19,7 @@
  *
  * NAME0, NAME1, ...
  */
-#define DYND_PP_ARG_RANGE_1(NAME, N)                                           \
+#define DYND_PP_ARGRANGE_1(NAME, N)                                            \
   DYND_PP_JOIN_1((, ), DYND_PP_META_NAME_RANGE(NAME, N))
 
 /**
@@ -28,7 +28,7 @@
  *
  * typename NAME0, typename NAME1, ...
  */
-#define DYND_PP_TYPENAME_RANGE_1(NAME, N)                                      \
+#define DYND_PP_TYPENAME_ARGRANGE_1(NAME, N)                                   \
   DYND_PP_JOIN_MAP_1(DYND_PP_META_TYPENAME, (, ),                              \
                      DYND_PP_META_NAME_RANGE(NAME, N))
 
@@ -100,7 +100,7 @@
  * *reinterpret_cast<const TYPE1 *>(ARG_NAME1), ...",
  * ...
  */
-#define DYND_PP_DEREF_CAST_ARG_RANGE_1(TYPE, ARG_NAME, N)                      \
+#define DYND_PP_DEREF_CAST_ARGRANGE_1(TYPE, ARG_NAME, N)                      \
   DYND_PP_JOIN_MAP_1(                                                          \
       DYND_PP_META_DEREFERENCE, (, ),                                          \
       DYND_PP_ELWISE_1(DYND_PP_META_REINTERPRET_CAST,                          \
@@ -177,9 +177,10 @@ namespace detail {
  * object which returns a value.
  */
 #define DYND_CODE(NSRC)                                                        \
-  template <typename Functor, typename R, DYND_PP_TYPENAME_RANGE_1(A, NSRC)>   \
+  template <typename Functor, typename R,                                      \
+            DYND_PP_TYPENAME_ARGRANGE_1(A, NSRC)>                              \
   struct functor_ckernel_instantiator<Functor,                                 \
-                                      R (*)(DYND_PP_ARG_RANGE_1(A, NSRC))> {   \
+                                      R (*)(DYND_PP_ARGRANGE_1(A, NSRC))> {    \
     typedef functor_ckernel_instantiator self_type;                            \
                                                                                \
     DYND_PP_CLEAN_TYPE_RANGE_1(D, A, NSRC);                                    \
@@ -206,7 +207,7 @@ namespace detail {
       for (size_t i = 0; i < count; ++i) {                                     \
         /* *(R *)dst = func(*(const D0 *)src0, ...); */                        \
         *reinterpret_cast<R *>(dst) =                                          \
-            func(DYND_PP_DEREF_CAST_ARG_RANGE_1(D, src, NSRC));                \
+            func(DYND_PP_DEREF_CAST_ARGRANGE_1(D, src, NSRC));                 \
                                                                                \
         /* Increment ``dst``, ``src#`` by their respective strides */          \
         DYND_PP_STRIDED_INCREMENT(NSRC);                                       \
@@ -252,9 +253,10 @@ DYND_PP_JOIN_MAP(DYND_CODE, (), DYND_PP_RANGE(1, DYND_PP_INC(DYND_ELWISE_MAX)))
  * object which returns a value in the first parameter as an output reference.
  */
 #define DYND_CODE(NSRC)                                                        \
-  template <typename Functor, typename R, DYND_PP_TYPENAME_RANGE_1(A, NSRC)>   \
+  template <typename Functor, typename R,                                      \
+            DYND_PP_TYPENAME_ARGRANGE_1(A, NSRC)>                              \
   struct functor_ckernel_instantiator<                                         \
-      Functor, void (*)(R &, DYND_PP_ARG_RANGE_1(A, NSRC))> {                  \
+      Functor, void (*)(R &, DYND_PP_ARGRANGE_1(A, NSRC))> {                   \
     typedef functor_ckernel_instantiator self_type;                            \
                                                                                \
     DYND_PP_CLEAN_TYPE_RANGE_1(D, A, NSRC);                                    \
@@ -281,7 +283,7 @@ DYND_PP_JOIN_MAP(DYND_CODE, (), DYND_PP_RANGE(1, DYND_PP_INC(DYND_ELWISE_MAX)))
       for (size_t i = 0; i < count; ++i) {                                     \
         /*  func(*(R *)dst, *(const D0 *)src0, ...); */                        \
         func(*reinterpret_cast<R *>(dst),                                      \
-             DYND_PP_DEREF_CAST_ARG_RANGE_1(D, src, NSRC));                    \
+             DYND_PP_DEREF_CAST_ARGRANGE_1(D, src, NSRC));                     \
                                                                                \
         /* Increment ``dst``, ``src#`` by their respective strides */          \
         DYND_PP_STRIDED_INCREMENT(NSRC);                                       \
@@ -337,9 +339,9 @@ DYND_PP_JOIN_MAP(DYND_CODE, (), DYND_PP_RANGE(1, DYND_PP_INC(DYND_ELWISE_MAX)))
  * Creates an arrfunc from a function pointer that returns a value.
  */
 #define DYND_CODE(NSRC)                                                        \
-  template <typename R, DYND_PP_TYPENAME_RANGE_1(A, NSRC)>                     \
-  struct functor_arrfunc_maker<R (*)(DYND_PP_ARG_RANGE_1(A, NSRC))> {          \
-    typedef R (*func_type)(DYND_PP_ARG_RANGE_1(A, NSRC));                      \
+  template <typename R, DYND_PP_TYPENAME_ARGRANGE_1(A, NSRC)>                  \
+  struct functor_arrfunc_maker<R (*)(DYND_PP_ARGRANGE_1(A, NSRC))> {           \
+    typedef R (*func_type)(DYND_PP_ARGRANGE_1(A, NSRC));                       \
     static void make(func_type func, arrfunc_type_data *out_af)                \
     {                                                                          \
       DYND_PP_STATIC_ASSERT_RANGE_1("all reference arguments must be const",   \
@@ -366,9 +368,9 @@ DYND_PP_JOIN_MAP(DYND_CODE, (), DYND_PP_RANGE(1, DYND_PP_INC(DYND_ELWISE_MAX)))
  * in the first parameter.
  */
 #define DYND_CODE(NSRC)                                                        \
-  template <typename R, DYND_PP_TYPENAME_RANGE_1(A, NSRC)>                     \
-  struct functor_arrfunc_maker<void (*)(R &, DYND_PP_ARG_RANGE_1(A, NSRC))> {  \
-    typedef void (*func_type)(R &, DYND_PP_ARG_RANGE_1(A, NSRC));              \
+  template <typename R, DYND_PP_TYPENAME_ARGRANGE_1(A, NSRC)>                  \
+  struct functor_arrfunc_maker<void (*)(R &, DYND_PP_ARGRANGE_1(A, NSRC))> {   \
+    typedef void (*func_type)(R &, DYND_PP_ARGRANGE_1(A, NSRC));               \
     static void make(func_type func, arrfunc_type_data *out_af)                \
     {                                                                          \
       DYND_PP_STATIC_ASSERT_RANGE_1("all reference arguments must be const",   \
