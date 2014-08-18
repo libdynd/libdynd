@@ -137,6 +137,7 @@ list(GET DYND_VERSION 0 "${DYND_VERSION}")
 set(libdynd_SRC
     # Preprocessor
     include/dynd/pp/arithmetic.hpp
+    include/dynd/pp/arrfunc_util.hpp
     include/dynd/pp/comparison.hpp
     include/dynd/pp/if.hpp
     include/dynd/pp/list.hpp
