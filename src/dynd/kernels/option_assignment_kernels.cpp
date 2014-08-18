@@ -182,7 +182,6 @@ struct option_to_value_ck
         }
     }
 
-
     inline void destruct_children()
     {
         // src_is_avail
@@ -313,6 +312,14 @@ struct string_to_option_tp_ck : public kernels::unary_ck<string_to_option_tp_ck>
               value_assign->get_function<expr_single_t>();
           value_assign_fn(dst, &src, value_assign);
         }
+    }
+
+    inline void destruct_children()
+    {
+        // value_assign
+        get_child_ckernel()->destroy();
+        // dst_assign_na
+        base.destroy_child_ckernel(m_dst_assign_na_offset);
     }
 };
 }
