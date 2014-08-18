@@ -15,12 +15,22 @@
 // TODO: Move some/all of these into the PP library
 
 /**
- * Generates comma-separated names typically used for arguments.
+ * Generates comma-separated names typically used for function arguments.
  *
  * NAME0, NAME1, ...
  */
 #define DYND_PP_ARG_RANGE_1(NAME, N)                                           \
   DYND_PP_JOIN_1((, ), DYND_PP_META_NAME_RANGE(NAME, N))
+
+/**
+ * Generates comma-separated typename names typically used for template
+ * arguments.
+ *
+ * typename NAME0, typename NAME1, ...
+ */
+#define DYND_PP_TYPENAME_RANGE_1(NAME, N)                                      \
+  DYND_PP_JOIN_MAP_1(DYND_PP_META_TYPENAME, (, ),                              \
+                     DYND_PP_META_NAME_RANGE(NAME, N))
 
 /**
  * Applies a template metafunction to a range of named types.
@@ -47,7 +57,7 @@
           DYND_PP_META_TEMPLATE_INSTANTIATION_SCOPE,                           \
           DYND_PP_REPEAT(remove_const, N),                                     \
           DYND_PP_ELWISE_1(DYND_PP_META_TYPENAME_TEMPLATE_INSTANTIATION_SCOPE, \
-                           DYND_PP_REPEAT(typename remove_reference, N),       \
+                           DYND_PP_REPEAT(remove_reference, N),       \
                            DYND_PP_META_NAME_RANGE(TYPE, N),                   \
                            DYND_PP_REPEAT(type, N)),                           \
           DYND_PP_REPEAT(type, N)),                                            \
@@ -167,8 +177,7 @@ namespace detail {
  * object which returns a value.
  */
 #define DYND_CODE(NSRC)                                                        \
-  template <typename Functor, typename R,                                      \
-            DYND_PP_ARG_RANGE_1(typename A, NSRC)>                             \
+  template <typename Functor, typename R, DYND_PP_TYPENAME_RANGE_1(A, NSRC)>   \
   struct functor_ckernel_instantiator<Functor,                                 \
                                       R (*)(DYND_PP_ARG_RANGE_1(A, NSRC))> {   \
     typedef functor_ckernel_instantiator self_type;                            \
@@ -243,8 +252,7 @@ DYND_PP_JOIN_MAP(DYND_CODE, (), DYND_PP_RANGE(1, DYND_PP_INC(DYND_ELWISE_MAX)))
  * object which returns a value in the first parameter as an output reference.
  */
 #define DYND_CODE(NSRC)                                                        \
-  template <typename Functor, typename R,                                      \
-            DYND_PP_ARG_RANGE_1(typename A, NSRC)>                             \
+  template <typename Functor, typename R, DYND_PP_TYPENAME_RANGE_1(A, NSRC)>   \
   struct functor_ckernel_instantiator<                                         \
       Functor, void (*)(R &, DYND_PP_ARG_RANGE_1(A, NSRC))> {                  \
     typedef functor_ckernel_instantiator self_type;                            \
@@ -317,8 +325,8 @@ DYND_PP_JOIN_MAP(DYND_CODE, (), DYND_PP_RANGE(1, DYND_PP_INC(DYND_ELWISE_MAX)))
   template<typename T>
   struct is_suitable_input {
     enum {
-      value =
-          !is_reference<T>::value || is_const<remove_reference<T>::type>::value
+      value = !is_reference<T>::value ||
+              is_const<typename remove_reference<T>::type>::value
     };
   };
 
@@ -329,7 +337,7 @@ DYND_PP_JOIN_MAP(DYND_CODE, (), DYND_PP_RANGE(1, DYND_PP_INC(DYND_ELWISE_MAX)))
  * Creates an arrfunc from a function pointer that returns a value.
  */
 #define DYND_CODE(NSRC)                                                        \
-  template <typename R, DYND_PP_ARG_RANGE_1(typename A, NSRC)>                 \
+  template <typename R, DYND_PP_TYPENAME_RANGE_1(A, NSRC)>                     \
   struct functor_arrfunc_maker<R (*)(DYND_PP_ARG_RANGE_1(A, NSRC))> {          \
     typedef R (*func_type)(DYND_PP_ARG_RANGE_1(A, NSRC));                      \
     static void make(func_type func, arrfunc_type_data *out_af)                \
@@ -358,7 +366,7 @@ DYND_PP_JOIN_MAP(DYND_CODE, (), DYND_PP_RANGE(1, DYND_PP_INC(DYND_ELWISE_MAX)))
  * in the first parameter.
  */
 #define DYND_CODE(NSRC)                                                        \
-  template <typename R, DYND_PP_ARG_RANGE_1(typename A, NSRC)>                 \
+  template <typename R, DYND_PP_TYPENAME_RANGE_1(A, NSRC)>                     \
   struct functor_arrfunc_maker<void (*)(R &, DYND_PP_ARG_RANGE_1(A, NSRC))> {  \
     typedef void (*func_type)(R &, DYND_PP_ARG_RANGE_1(A, NSRC));              \
     static void make(func_type func, arrfunc_type_data *out_af)                \
