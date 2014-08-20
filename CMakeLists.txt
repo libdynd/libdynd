@@ -137,6 +137,7 @@ list(GET DYND_VERSION 0 "${DYND_VERSION}")
 set(libdynd_SRC
     # Preprocessor
     include/dynd/pp/arithmetic.hpp
+    include/dynd/pp/arrfunc_util.hpp
     include/dynd/pp/comparison.hpp
     include/dynd/pp/if.hpp
     include/dynd/pp/list.hpp
@@ -332,6 +333,7 @@ set(libdynd_SRC
     include/dynd/func/elwise_methretres.hpp
     include/dynd/func/elwise_gfunc.hpp
     include/dynd/func/elwise_reduce_gfunc.hpp
+    include/dynd/func/functor_arrfunc.hpp
     include/dynd/func/make_callable.hpp
     include/dynd/func/math_arrfunc.hpp
     include/dynd/func/lift_arrfunc.hpp

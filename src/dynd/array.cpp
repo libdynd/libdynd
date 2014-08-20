@@ -247,31 +247,33 @@ nd::array nd::make_bytes_array(const char *data, size_t len, size_t alignment)
     return result;
 }
 
-
 nd::array nd::make_string_array(const char *str, size_t len,
-                string_encoding_t encoding, uint64_t access_flags)
+                                string_encoding_t encoding,
+                                uint64_t access_flags)
 {
-    char *data_ptr = NULL, *string_ptr;
-    ndt::type dt = ndt::make_string(encoding);
-    nd::array result(make_array_memory_block(
-        dt.extended()->get_arrmeta_size(), dt.get_data_size() + len,
-        dt.get_data_alignment(), &data_ptr));
-    // Set the string extents
-    string_ptr = data_ptr + dt.get_data_size();
-    ((char **)data_ptr)[0] = string_ptr;
-    ((char **)data_ptr)[1] = string_ptr + len;
-    // Copy the string data
-    memcpy(string_ptr, str, len);
-    // Set the array arrmeta
-    array_preamble *ndo = result.get_ndo();
-    ndo->m_type = dt.release();
-    ndo->m_data_pointer = data_ptr;
-    ndo->m_data_reference = NULL;
-    ndo->m_flags = access_flags;
-    // Set the string arrmeta, telling the system that the string data was embedded in the array memory
-    string_type_arrmeta *ndo_meta = reinterpret_cast<string_type_arrmeta *>(result.get_arrmeta());
-    ndo_meta->blockref = NULL;
-    return result;
+  char *data_ptr = NULL, *string_ptr;
+  ndt::type dt = ndt::make_string(encoding);
+  nd::array result(make_array_memory_block(dt.extended()->get_arrmeta_size(),
+                                           dt.get_data_size() + len,
+                                           dt.get_data_alignment(), &data_ptr));
+  // Set the string extents
+  string_ptr = data_ptr + dt.get_data_size();
+  ((char **)data_ptr)[0] = string_ptr;
+  ((char **)data_ptr)[1] = string_ptr + len;
+  // Copy the string data
+  memcpy(string_ptr, str, len);
+  // Set the array arrmeta
+  array_preamble *ndo = result.get_ndo();
+  ndo->m_type = dt.release();
+  ndo->m_data_pointer = data_ptr;
+  ndo->m_data_reference = NULL;
+  ndo->m_flags = access_flags;
+  // Set the string arrmeta, telling the system that the string data was
+  // embedded in the array memory
+  string_type_arrmeta *ndo_meta =
+      reinterpret_cast<string_type_arrmeta *>(result.get_arrmeta());
+  ndo_meta->blockref = NULL;
+  return result;
 }
 
 nd::array nd::make_strided_string_array(const char **cstr_array, size_t array_size)
@@ -783,14 +785,14 @@ nd::array nd::array::at_array(intptr_t nindices, const irange *indices, bool col
 void nd::array::val_assign(const array &rhs, const eval::eval_context *ectx)
     const
 {
-    // Verify read access permission
-    if (!(rhs.get_flags()&read_access_flag)) {
-        throw runtime_error("tried to read from a dynd array that is not readable");
-    }
+  // Verify read access permission
+  if (!(rhs.get_flags() & read_access_flag)) {
+    throw runtime_error("tried to read from a dynd array that is not readable");
+  }
 
-    typed_data_assign(get_type(), get_arrmeta(), get_readwrite_originptr(),
-                      rhs.get_type(), rhs.get_arrmeta(),
-                      rhs.get_readonly_originptr(), ectx);
+  typed_data_assign(get_type(), get_arrmeta(), get_readwrite_originptr(),
+                    rhs.get_type(), rhs.get_arrmeta(),
+                    rhs.get_readonly_originptr(), ectx);
 }
 
 void nd::array::val_assign(const ndt::type &rhs_dt, const char *rhs_arrmeta,
