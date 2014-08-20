@@ -13,6 +13,17 @@
 
 namespace dynd {
 
+namespace nd { namespace detail {
+  /**
+   * Metaprogram to tell whether an argument is const or by value.
+   */
+  template<typename T>
+  struct is_suitable_input {
+    // TODO: Reenable - error was triggering when not expected
+    enum { value = true }; //is_const<T>::value || !is_reference<T>::value };
+  };
+}} // namespace nd::detail
+
 /**
  * Metaprogram to detect whether a type is a function pointer.
  */
@@ -187,11 +198,6 @@ DYND_PP_JOIN_MAP(DYND_CODE, (), DYND_PP_RANGE(1, DYND_PP_INC(DYND_ELWISE_MAX)))
   };
 DYND_PP_JOIN_MAP(DYND_CODE, (), DYND_PP_RANGE(1, DYND_PP_INC(DYND_ELWISE_MAX)))
 #undef DYND_CODE
-
-  template<typename T>
-  struct is_suitable_input {
-    enum { value = is_const<T>::value || !is_reference<T>::value };
-  };
 
   template<bool CallOp, typename Functor>
   struct functor_arrfunc_maker;
