@@ -190,10 +190,7 @@ DYND_PP_JOIN_MAP(DYND_CODE, (), DYND_PP_RANGE(1, DYND_PP_INC(DYND_ELWISE_MAX)))
 
   template<typename T>
   struct is_suitable_input {
-    enum {
-      value = !is_reference<T>::value ||
-              is_const<typename remove_reference<T>::type>::value
-    };
+    enum { value = is_const<T>::value || !is_reference<T>::value };
   };
 
   template<bool CallOp, typename Functor>
@@ -283,6 +280,34 @@ struct functor_arrfunc_maker<false, Functor> {
     *out_af->get_data_as<Functor>() = func;                                    \
     /* Make func ptr type to reuse functor_ckernel_instantiator */             \
     typedef R (*func_type)(DYND_PP_ARGRANGE_1(A, NSRC));                       \
+    out_af->instantiate = &detail::functor_ckernel_instantiator<               \
+                              Functor, func_type>::instantiate;                \
+    out_af->free_func = NULL;                                                  \
+  }
+DYND_PP_JOIN_MAP(DYND_CODE, (), DYND_PP_RANGE(1, DYND_PP_INC(DYND_ELWISE_MAX)))
+#undef DYND_CODE
+
+/**
+ * A second round of make_tagged functions for R& return argument.
+ */
+#define DYND_CODE(NSRC)                                                        \
+  template <typename R, DYND_PP_TYPENAME_ARGRANGE_1(A, NSRC)>                  \
+  inline static void make_tagged(                                              \
+      Functor func, arrfunc_type_data *out_af,                                 \
+      void (Functor::*)(R &, DYND_PP_ARGRANGE_1(A, NSRC)) const)               \
+  {                                                                            \
+    DYND_PP_STATIC_ASSERT_RANGE_1("all reference arguments must be const",     \
+                                  detail::is_suitable_input, A, NSRC)          \
+    /* Create D0, D1, ... as cleaned version of A0, A1, ... */                 \
+    DYND_PP_CLEAN_TYPE_RANGE_1(D, A, NSRC);                                    \
+                                                                               \
+    /* Create dst_tp and the src_tp array from R and D0, D1, ... */            \
+    DYND_PP_NDT_TYPES_FROM_TYPES(R, D, NSRC);                                  \
+                                                                               \
+    out_af->func_proto = ndt::make_funcproto(src_tp, dst_tp);                  \
+    *out_af->get_data_as<Functor>() = func;                                    \
+    /* Make func ptr type to reuse functor_ckernel_instantiator */             \
+    typedef void (*func_type)(R &, DYND_PP_ARGRANGE_1(A, NSRC));               \
     out_af->instantiate = &detail::functor_ckernel_instantiator<               \
                               Functor, func_type>::instantiate;                \
     out_af->free_func = NULL;                                                  \

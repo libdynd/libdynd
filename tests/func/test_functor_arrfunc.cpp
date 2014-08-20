@@ -27,10 +27,14 @@ class FunctorArrfunc_FuncRefRes : public ::testing::Test {
 template <typename T>
 class FunctorArrfunc_CallRetRes : public ::testing::Test {
 };
+template <typename T>
+class FunctorArrfunc_CallRefRes : public ::testing::Test {
+};
 
 TYPED_TEST_CASE_P(FunctorArrfunc_FuncRetRes);
 TYPED_TEST_CASE_P(FunctorArrfunc_FuncRefRes);
 TYPED_TEST_CASE_P(FunctorArrfunc_CallRetRes);
+TYPED_TEST_CASE_P(FunctorArrfunc_CallRefRes);
 
 template <typename T>
 int func0(T x, const T &y) {
@@ -116,6 +120,26 @@ public:
     Callable(R (*func)(A0, A1)) : m_func(func) {}
     R operator ()(A0 a0, A1 a1) const {
         return (*m_func)(a0, a1);
+    }
+};
+template <typename R, typename A0>
+class Callable<void (*)(R &, A0)> {
+private:
+    void (*m_func)(R &, A0);
+public:
+    Callable(void (*func)(R &, A0)) : m_func(func) {}
+    void operator ()(R &res, A0 a0) const {
+        (*m_func)(res, a0);
+    }
+};
+template <typename R, typename A0, typename A1>
+class Callable<void (*)(R &, A0, A1)> {
+private:
+    void (*m_func)(R &, A0, A1);
+public:
+    Callable(void (*func)(R &, A0, A1)) : m_func(func) {}
+    void operator ()(R &res, A0 a0, A1 a1) const {
+        (*m_func)(res, a0, a1);
     }
 };
 
@@ -387,6 +411,144 @@ TEST(FunctorArrfunc, LambdaFunc) {
 }
 #endif
 
+TYPED_TEST_P(FunctorArrfunc_CallRefRes, CallRefRes)
+{
+  typedef Callable<void (*)(int &, TypeParam, const TypeParam &)> Callable0;
+  typedef Callable<void (*)(TypeParam &, const TypeParam(&)[3])> Callable1;
+  typedef Callable<void (*)(TypeParam &, const TypeParam(&)[3],
+                            const TypeParam(&)[3])> Callable2;
+  typedef Callable<void (*)(TypeParam &, const TypeParam(&)[2][3])> Callable3;
+  typedef Callable<void (*)(TypeParam(&)[2], TypeParam, TypeParam)> Callable4;
+  typedef Callable<void (*)(TypeParam(&)[3], const TypeParam(&)[3][3],
+                            const TypeParam(&)[3])> Callable5;
+  typedef Callable<void (*)(double(&)[2][2], TypeParam)> Callable6;
+  typedef Callable<void (*)(TypeParam(&)[3][3], const TypeParam(&)[3][3],
+                            const TypeParam(&)[3][3])> Callable7;
+
+  nd::array res, a, b;
+  nd::arrfunc af;
+
+  a = static_cast<TypeParam>(10);
+  b = static_cast<TypeParam>(20);
+
+  af = nd::make_functor_arrfunc(Callable0(&func0));
+  res = af(a, b);
+  EXPECT_EQ(-20, res.as<int>());
+
+  af = nd::make_functor_arrfunc(Callable4(&func4));
+  res = af(a, b);
+  EXPECT_EQ(ndt::make_cfixed_dim(2, ndt::make_type<TypeParam>()),
+            res.get_type());
+  EXPECT_EQ(20, res(0).as<TypeParam>());
+  EXPECT_EQ(10, res(1).as<TypeParam>());
+
+  a = static_cast<TypeParam>(1);
+
+  af = nd::make_functor_arrfunc(Callable6(&func6));
+  res = af(a);
+  EXPECT_EQ(ndt::type("cfixed[2] * cfixed[2] * float64"), res.get_type());
+  EXPECT_EQ(cos((double)1), res(0, 0).as<double>());
+  EXPECT_EQ(-sin((double)1), res(0, 1).as<double>());
+  EXPECT_EQ(sin((double)1), res(1, 0).as<double>());
+  EXPECT_EQ(cos((double)1), res(1, 1).as<double>());
+
+  TypeParam avals0[2][3] = {{0, 1, 2}, {5, 6, 7}};
+  TypeParam bvals0[3] = {5, 2, 4};
+
+  a = avals0;
+  b = bvals0;
+  af = nd::make_functor_arrfunc(Callable0(&func0));
+  af = lift_arrfunc(af);
+  res = af(a, b);
+  EXPECT_EQ(ndt::type("strided * strided * int"), res.get_type());
+  EXPECT_JSON_EQ_ARR("[[-10,-2,-4], [0,8,6]]", res);
+
+  af = nd::make_functor_arrfunc(Callable4(&func4));
+  af = lift_arrfunc(af);
+  res = af(a, b);
+  EXPECT_EQ(ndt::make_strided_dim(ndt::make_strided_dim(
+                ndt::make_cfixed_dim(2, ndt::make_type<TypeParam>()))),
+            res.get_type());
+  ASSERT_EQ(2, res.get_shape()[0]);
+  ASSERT_EQ(3, res.get_shape()[1]);
+  for (int i = 0; i < 2; ++i) {
+    for (int j = 0; j < 3; ++j) {
+      EXPECT_EQ(bvals0[j], res(i, j, 0).as<TypeParam>());
+      EXPECT_EQ(avals0[i][j], res(i, j, 1).as<TypeParam>());
+    }
+  }
+
+  TypeParam vals1[2][3] = {{0, 1, 2}, {3, 4, 5}};
+
+  a = nd::empty(ndt::make_cfixed_dim(3, ndt::make_type<TypeParam>()));
+
+  a.vals() = vals1[0];
+  af = nd::make_functor_arrfunc(Callable1(&func1));
+  res = af(a);
+  EXPECT_EQ(ndt::make_type<TypeParam>(), res.get_type());
+  EXPECT_EQ(3, res.as<TypeParam>());
+
+  a.vals() = vals1[1];
+  res = af(a);
+  EXPECT_EQ(ndt::make_type<TypeParam>(), res.get_type());
+  EXPECT_EQ(12, res.as<TypeParam>());
+
+  b = nd::empty(ndt::make_cfixed_dim(3, ndt::make_type<TypeParam>()));
+
+  a.vals() = vals1[0];
+  b.vals() = vals1[1];
+  af = nd::make_functor_arrfunc(Callable2(&func2));
+  res = af(a, b);
+  EXPECT_EQ(ndt::make_type<TypeParam>(), res.get_type());
+  EXPECT_EQ(14, res.as<TypeParam>());
+
+  a = nd::empty(ndt::cfixed_dim_from_array<TypeParam[2][3]>::make());
+
+  a.vals() = vals1;
+  af = nd::make_functor_arrfunc(Callable3(&func3));
+  res = af(a);
+  EXPECT_EQ(ndt::make_type<TypeParam>(), res.get_type());
+  EXPECT_EQ(6, res.as<TypeParam>());
+
+  TypeParam avals2[3][3] = {{8, -7, (TypeParam)6.353},
+                            {(TypeParam)5.432423, -4, 3},
+                            {2, (TypeParam) - 1.7023, 0}};
+  TypeParam bvals2[3] = {33, 7, 53401};
+
+  a = nd::empty(ndt::cfixed_dim_from_array<TypeParam[3][3]>::make());
+
+  a.vals() = avals2;
+  b.vals() = bvals2;
+  af = nd::make_functor_arrfunc(Callable5(&func5));
+  res = af(a, b);
+  EXPECT_EQ(ndt::make_cfixed_dim(3, ndt::make_type<TypeParam>()),
+            res.get_type());
+  for (int i = 0; i < 3; ++i) {
+    EXPECT_EQ(res(i), avals2[i][0] * bvals2[0] + avals2[i][1] * bvals2[1] +
+                          avals2[i][2] * bvals2[2]);
+  }
+
+  TypeParam bvals_3[3][3] = {{(TypeParam)12.4, 0, -5},
+                             {(TypeParam)33.5, (TypeParam)7.2, 53401},
+                             {(TypeParam)64.512, 952, (TypeParam)8.1}};
+
+  b = nd::empty(a.get_type());
+
+  b.vals() = bvals_3;
+  af = nd::make_functor_arrfunc(Callable7(&func7));
+  res = af(a, b);
+  EXPECT_EQ(ndt::make_cfixed_dim(
+                3, ndt::make_cfixed_dim(3, ndt::make_type<TypeParam>())),
+            res.get_type());
+  for (int i = 0; i < 3; ++i) {
+    for (int j = 0; j < 3; ++j) {
+      EXPECT_EQ(res(i, j), avals2[i][0] * bvals_3[0][j] +
+                               avals2[i][1] * bvals_3[1][j] +
+                               avals2[i][2] * bvals_3[2][j]);
+    }
+  }
+}
+
 typedef ::testing::Types<int, float, long, double> types;
 
 REGISTER_TYPED_TEST_CASE_P(FunctorArrfunc_FuncRetRes, FuncRetRes);
@@ -397,3 +559,6 @@ INSTANTIATE_TYPED_TEST_CASE_P(Builtin, FunctorArrfunc_FuncRefRes, types);
 
 REGISTER_TYPED_TEST_CASE_P(FunctorArrfunc_CallRetRes, CallRetRes);
 INSTANTIATE_TYPED_TEST_CASE_P(Builtin, FunctorArrfunc_CallRetRes, types);
+
+REGISTER_TYPED_TEST_CASE_P(FunctorArrfunc_CallRefRes, CallRefRes);
+INSTANTIATE_TYPED_TEST_CASE_P(Builtin, FunctorArrfunc_CallRefRes, types);
