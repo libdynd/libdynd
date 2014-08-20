@@ -11,6 +11,26 @@
 #include <dynd/func/arrfunc.hpp>
 #include <dynd/pp/arrfunc_util.hpp>
 
+namespace dynd {
+
+/**
+ * Metaprogram to detect whether a type is a function pointer.
+ */
+template <typename T>
+struct is_function_pointer {
+  enum { value = false };
+};
+
+#define DYND_CODE(N)                                                           \
+  template <typename R, DYND_PP_TYPENAME_ARGRANGE_1(A, N)>                     \
+  struct is_function_pointer<R (*)(DYND_PP_ARGRANGE_1(A, N))> {                \
+    enum { value = true };                                                     \
+  };
+DYND_PP_JOIN_MAP(DYND_CODE, (), DYND_PP_RANGE(1, DYND_PP_INC(DYND_ELWISE_MAX)))
+#undef DYND_CODE
+
+} // namespace dynd
+
 namespace dynd { namespace nd {
 
 namespace detail {
@@ -90,7 +110,6 @@ namespace detail {
       return ckb_offset;                                                       \
     }                                                                          \
   };
-
 DYND_PP_JOIN_MAP(DYND_CODE, (), DYND_PP_RANGE(1, DYND_PP_INC(DYND_ELWISE_MAX)))
 #undef DYND_CODE
 
@@ -166,7 +185,6 @@ DYND_PP_JOIN_MAP(DYND_CODE, (), DYND_PP_RANGE(1, DYND_PP_INC(DYND_ELWISE_MAX)))
       return ckb_offset;                                                       \
     }                                                                          \
   };
-
 DYND_PP_JOIN_MAP(DYND_CODE, (), DYND_PP_RANGE(1, DYND_PP_INC(DYND_ELWISE_MAX)))
 #undef DYND_CODE
 
@@ -178,7 +196,7 @@ DYND_PP_JOIN_MAP(DYND_CODE, (), DYND_PP_RANGE(1, DYND_PP_INC(DYND_ELWISE_MAX)))
     };
   };
 
-  template<typename Functor>
+  template<bool CallOp, typename Functor>
   struct functor_arrfunc_maker;
 
 /**
@@ -186,7 +204,7 @@ DYND_PP_JOIN_MAP(DYND_CODE, (), DYND_PP_RANGE(1, DYND_PP_INC(DYND_ELWISE_MAX)))
  */
 #define DYND_CODE(NSRC)                                                        \
   template <typename R, DYND_PP_TYPENAME_ARGRANGE_1(A, NSRC)>                  \
-  struct functor_arrfunc_maker<R (*)(DYND_PP_ARGRANGE_1(A, NSRC))> {           \
+  struct functor_arrfunc_maker<true, R (*)(DYND_PP_ARGRANGE_1(A, NSRC))> {    \
     typedef R (*func_type)(DYND_PP_ARGRANGE_1(A, NSRC));                       \
     static void make(func_type func, arrfunc_type_data *out_af)                \
     {                                                                          \
@@ -205,7 +223,6 @@ DYND_PP_JOIN_MAP(DYND_CODE, (), DYND_PP_RANGE(1, DYND_PP_INC(DYND_ELWISE_MAX)))
       out_af->free_func = NULL;                                                \
     }                                                                          \
   };
-
 DYND_PP_JOIN_MAP(DYND_CODE, (), DYND_PP_RANGE(1, DYND_PP_INC(DYND_ELWISE_MAX)))
 #undef DYND_CODE
 
@@ -215,7 +232,8 @@ DYND_PP_JOIN_MAP(DYND_CODE, (), DYND_PP_RANGE(1, DYND_PP_INC(DYND_ELWISE_MAX)))
  */
 #define DYND_CODE(NSRC)                                                        \
   template <typename R, DYND_PP_TYPENAME_ARGRANGE_1(A, NSRC)>                  \
-  struct functor_arrfunc_maker<void (*)(R &, DYND_PP_ARGRANGE_1(A, NSRC))> {   \
+  struct functor_arrfunc_maker<true,                                           \
+                               void (*)(R &, DYND_PP_ARGRANGE_1(A, NSRC))> {   \
     typedef void (*func_type)(R &, DYND_PP_ARGRANGE_1(A, NSRC));               \
     static void make(func_type func, arrfunc_type_data *out_af)                \
     {                                                                          \
@@ -234,16 +252,56 @@ DYND_PP_JOIN_MAP(DYND_CODE, (), DYND_PP_RANGE(1, DYND_PP_INC(DYND_ELWISE_MAX)))
       out_af->free_func = NULL;                                                \
     }                                                                          \
   };
-
 DYND_PP_JOIN_MAP(DYND_CODE, (), DYND_PP_RANGE(1, DYND_PP_INC(DYND_ELWISE_MAX)))
 #undef DYND_CODE
+
+/**
+ * Gets triggered when Functor is not a function pointer type, in
+ * which case we expect it to be a class with operator() defined.
+ */
+template <typename Functor>
+struct functor_arrfunc_maker<false, Functor> {
+/**
+ * The make_tagged functions include a pointer-to-member function as an
+ * argument, which lets us pull out the type information from the type.
+ */
+#define DYND_CODE(NSRC)                                                        \
+  template <typename R, DYND_PP_TYPENAME_ARGRANGE_1(A, NSRC)>                  \
+  inline void make_tagged(Functor func, arrfunc_type_data *out_af,             \
+                          R (Functor::*)(DYND_PP_ARGRANGE_1(A, NSRC)))         \
+  {                                                                            \
+    DYND_PP_STATIC_ASSERT_RANGE_1("all reference arguments must be const",     \
+                                  detail::is_suitable_input, A, NSRC)          \
+    /* Create D0, D1, ... as cleaned version of A0, A1, ... */                 \
+    DYND_PP_CLEAN_TYPE_RANGE_1(D, A, NSRC);                                    \
+                                                                               \
+    /* Create dst_tp and the src_tp array from R and D0, D1, ... */            \
+    DYND_PP_NDT_TYPES_FROM_TYPES(R, D, NSRC);                                  \
+                                                                               \
+    out_af->func_proto = ndt::make_funcproto(src_tp, dst_tp);                  \
+    *out_af->get_data_as<Functor>() = func;                                    \
+    /* Make func ptr type to reuse functor_ckernel_instantiator */             \
+    typedef R (*func_type)(DYND_PP_ARGRANGE_1(A, NSRC));                       \
+    out_af->instantiate = &detail::functor_ckernel_instantiator<               \
+                              Functor, func_type>::instantiate;                \
+    out_af->free_func = NULL;                                                  \
+  }
+DYND_PP_JOIN_MAP(DYND_CODE, (), DYND_PP_RANGE(1, DYND_PP_INC(DYND_ELWISE_MAX)))
+#undef DYND_CODE
+
+  static void make(Functor func, arrfunc_type_data *out_af)
+  {
+    make_tagged(func, out_af, &Functor::operator());
+  }
+};
 
 } // namespace detail
 
 template <typename Functor>
 void make_functor_arrfunc(Functor func, arrfunc_type_data *out_af)
 {
-  detail::functor_arrfunc_maker<Functor>::make(func, out_af);
+  detail::functor_arrfunc_maker<(bool)is_function_pointer<Functor>::value,
+                                Functor>::make(func, out_af);
 }
 
 template <typename Functor>
