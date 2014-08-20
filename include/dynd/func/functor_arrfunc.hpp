@@ -267,8 +267,9 @@ struct functor_arrfunc_maker<false, Functor> {
  */
 #define DYND_CODE(NSRC)                                                        \
   template <typename R, DYND_PP_TYPENAME_ARGRANGE_1(A, NSRC)>                  \
-  inline void make_tagged(Functor func, arrfunc_type_data *out_af,             \
-                          R (Functor::*)(DYND_PP_ARGRANGE_1(A, NSRC)))         \
+  inline static void make_tagged(Functor func, arrfunc_type_data *out_af,      \
+                                 R (Functor::*)(DYND_PP_ARGRANGE_1(A, NSRC))   \
+                                 const)                                        \
   {                                                                            \
     DYND_PP_STATIC_ASSERT_RANGE_1("all reference arguments must be const",     \
                                   detail::is_suitable_input, A, NSRC)          \

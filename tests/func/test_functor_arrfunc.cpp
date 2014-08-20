@@ -24,9 +24,13 @@ class FunctorArrfunc_FuncRetRes : public ::testing::Test {
 template <typename T>
 class FunctorArrfunc_FuncRefRes : public ::testing::Test {
 };
+template <typename T>
+class FunctorArrfunc_CallRetRes : public ::testing::Test {
+};
 
 TYPED_TEST_CASE_P(FunctorArrfunc_FuncRetRes);
 TYPED_TEST_CASE_P(FunctorArrfunc_FuncRefRes);
+TYPED_TEST_CASE_P(FunctorArrfunc_CallRetRes);
 
 template <typename T>
 int func0(T x, const T &y) {
@@ -90,6 +94,30 @@ void func7(T (&res)[3][3], const T(&x)[3][3], const T(&y)[3][3]) {
     res[2][1] = x[2][0] * y[0][1] + x[2][1] * y[1][1] + x[2][2] * y[2][1];
     res[2][2] = x[2][0] * y[0][2] + x[2][1] * y[1][2] + x[2][2] * y[2][2];
 }
+
+template <typename T>
+class Callable;
+
+template <typename R, typename A0>
+class Callable<R (*)(A0)> {
+private:
+    R (*m_func)(A0);
+public:
+    Callable(R (*func)(A0)) : m_func(func) {}
+    R operator ()(A0 a0) const {
+        return (*m_func)(a0);
+    }
+};
+template <typename R, typename A0, typename A1>
+class Callable<R (*)(A0, A1)> {
+private:
+    R (*m_func)(A0, A1);
+public:
+    Callable(R (*func)(A0, A1)) : m_func(func) {}
+    R operator ()(A0 a0, A1 a1) const {
+        return (*m_func)(a0, a1);
+    }
+};
 
 TYPED_TEST_P(FunctorArrfunc_FuncRetRes, FuncRetRes) {
   nd::array res, a, b;
@@ -273,6 +301,92 @@ TYPED_TEST_P(FunctorArrfunc_FuncRefRes, FuncRefRes) {
   }
 }
 
+TYPED_TEST_P(FunctorArrfunc_CallRetRes, CallRetRes) {
+  typedef Callable<int (*)(TypeParam, const TypeParam &)> Callable0;
+  typedef Callable<TypeParam (*)(const TypeParam(&)[3])> Callable1;
+  typedef Callable<TypeParam (*)(const TypeParam(&)[3], const TypeParam(&)[3])>
+    Callable2;
+  typedef Callable<TypeParam (*)(const TypeParam(&)[2][3])> Callable3;
+
+  nd::array res, a, b;
+  nd::arrfunc af;
+
+  a = static_cast<TypeParam>(10);
+  b = static_cast<TypeParam>(20);
+
+  af = nd::make_functor_arrfunc(Callable0(&func0));
+  res = af(a, b);
+  EXPECT_EQ(-20, res.as<int>());
+
+  TypeParam avals0[2][3] = {{0, 1, 2}, {5, 6, 7}};
+  TypeParam bvals0[3] = {5, 2, 4};
+
+  a = avals0;
+  b = bvals0;
+  af = nd::make_functor_arrfunc(Callable0(&func0));
+  af = lift_arrfunc(af);
+  res = af(a, b);
+  EXPECT_EQ(ndt::type("strided * strided * int"), res.get_type());
+  EXPECT_JSON_EQ_ARR("[[-10,-2,-4], [0,8,6]]", res);
+
+  TypeParam vals1[2][3] = {{0, 1, 2}, {3, 4, 5}};
+
+  a = nd::empty(ndt::make_cfixed_dim(3, ndt::make_type<TypeParam>()));
+
+  a.vals() = vals1[0];
+  af = nd::make_functor_arrfunc(Callable1(&func1));
+  res = af(a);
+  EXPECT_EQ(ndt::make_type<TypeParam>(), res.get_type());
+  EXPECT_EQ(3, res.as<TypeParam>());
+
+  a.vals() = vals1[1];
+  af = nd::make_functor_arrfunc(Callable1(&func1));
+  res = af(a);
+  EXPECT_EQ(ndt::make_type<TypeParam>(), res.get_type());
+  EXPECT_EQ(12, res.as<TypeParam>());
+
+  b = nd::empty(ndt::make_cfixed_dim(3, ndt::make_type<TypeParam>()));
+
+  a.vals() = vals1[0];
+  b.vals() = vals1[1];
+  af = nd::make_functor_arrfunc(Callable2(&func2));
+  res = af(a, b);
+  EXPECT_EQ(ndt::make_type<TypeParam>(), res.get_type());
+  EXPECT_EQ(14, res.as<TypeParam>());
+
+  a = nd::empty(ndt::cfixed_dim_from_array<TypeParam[2][3]>::make());
+
+  a.vals() = vals1;
+  af = nd::make_functor_arrfunc(Callable3(&func3));
+  res = af(a);
+  EXPECT_EQ(ndt::make_type<TypeParam>(), res.get_type());
+  EXPECT_EQ(6, res.as<TypeParam>());
+}
+
+#ifdef DYND_CXX_LAMBDAS
+TEST(FunctorArrfunc, LambdaFunc) {
+  nd::array a, b, res;
+  nd::arrfunc af;
+
+  a = 100;
+  b = 1.5;
+  af = nd::make_functor_arrfunc([](int x, double y) { return (float)(x + y); });
+  res = af(a, b);
+  EXPECT_EQ(ndt::make_type<float>(), res.get_type());
+  EXPECT_EQ(101.5f, res.as<float>());
+
+  double a_val[3] = {1.5, 2.0, 3.125};
+  a = a_val;
+  b = 3.25;
+  af = nd::make_functor_arrfunc([](double x, double y,
+                                   int z) { return x * z + y; });
+  af = lift_arrfunc(af);
+  res = af(a, b, 10);
+  EXPECT_EQ(ndt::type("strided * float64"), res.get_type());
+  EXPECT_JSON_EQ_ARR("[18.25,23.25,34.5]", res);
+}
+#endif
+
 typedef ::testing::Types<int, float, long, double> types;
 
 REGISTER_TYPED_TEST_CASE_P(FunctorArrfunc_FuncRetRes, FuncRetRes);
@@ -280,3 +394,6 @@ INSTANTIATE_TYPED_TEST_CASE_P(Builtin, FunctorArrfunc_FuncRetRes, types);
 
 REGISTER_TYPED_TEST_CASE_P(FunctorArrfunc_FuncRefRes, FuncRefRes);
 INSTANTIATE_TYPED_TEST_CASE_P(Builtin, FunctorArrfunc_FuncRefRes, types);
+
+REGISTER_TYPED_TEST_CASE_P(FunctorArrfunc_CallRetRes, CallRetRes);
+INSTANTIATE_TYPED_TEST_CASE_P(Builtin, FunctorArrfunc_CallRetRes, types);
