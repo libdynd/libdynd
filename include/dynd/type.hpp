@@ -510,6 +510,21 @@ public:
                              intptr_t replace_ndim = 0) const;
 
     /**
+     * Returns this type with a new strided dimension.
+     *
+     * \param i  The axis of the new strided dimension.
+     */
+    type with_new_axis(intptr_t i) const;
+
+    /**
+     * Returns this type with a new strided dimension.
+     *
+     * \param i  The axis of the new strided dimension.
+     * \param out_el_tp  Is filled with the element type of the new strided dimension.
+     */
+    type with_new_axis(intptr_t i, type &out_el_tp) const;
+
+    /**
      * Returns a modified type with all expression types replaced with
      * their value types, and types replaced with "standard versions"
      * whereever appropriate. For example, an offset-based uniform array

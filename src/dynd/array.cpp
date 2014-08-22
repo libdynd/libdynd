@@ -1443,11 +1443,11 @@ nd::array nd::array::replace_dtype(const ndt::type& replacement_tp, intptr_t rep
 
 nd::array nd::array::new_axis(intptr_t i) const
 {
-    ndt::type tp = get_type();
-    ndt::type tp_at = tp.get_type_at_dimension(NULL, i);
+    ndt::type tp = get_type(), el_tp;
+    ndt::type new_tp = tp.with_new_axis(i, el_tp);
 
-    // ndt::make_strided_dim
-    ndt::type new_tp = tp.with_replaced_dtype(ndt::make_strided_dim(tp_at), get_ndim() - i);
+    size_t el_arrmeta_size = el_tp.get_arrmeta_size();
+    size_t arrmeta_diff = tp.get_arrmeta_size() - el_arrmeta_size;
 
     nd::array res(make_array_memory_block(new_tp.get_arrmeta_size()));
     // Copy the fields
@@ -1461,17 +1461,13 @@ nd::array nd::array::new_axis(intptr_t i) const
     }
     res.get_ndo()->m_type = new_tp.release();
     res.get_ndo()->m_flags = get_ndo()->m_flags;
-
-    size_t leading_arrmeta_size = tp.get_arrmeta_size() - tp_at.get_arrmeta_size();
-    size_t trailing_arrmeta_size = tp_at.get_arrmeta_size();
-
-    DYND_MEMCPY(res.get_arrmeta(), get_arrmeta(), leading_arrmeta_size);
-
-    strided_dim_type_arrmeta *smd = reinterpret_cast<strided_dim_type_arrmeta *>(res.get_arrmeta() + leading_arrmeta_size);
+    // Copy the arrmeta, including setting the appropriate shape and strides of the new arrmeta
+    DYND_MEMCPY(res.get_arrmeta(), get_arrmeta(), arrmeta_diff);
+    strided_dim_type_arrmeta *smd = reinterpret_cast<strided_dim_type_arrmeta *>(res.get_arrmeta() + arrmeta_diff);
     smd->dim_size = 1;
     smd->stride = 0;
-
-    DYND_MEMCPY(res.get_arrmeta() + leading_arrmeta_size + sizeof(strided_dim_type_arrmeta), get_arrmeta() + leading_arrmeta_size, trailing_arrmeta_size);
+    DYND_MEMCPY(smd + 1, get_arrmeta() + arrmeta_diff, el_tp.get_strided_ndim() * sizeof(strided_dim_type_arrmeta));
+    DYND_MEMCPY(res.get_arrmeta() + arrmeta_diff + sizeof(strided_dim_type_arrmeta), get_arrmeta() + arrmeta_diff, el_arrmeta_size);
 
     return res;
 }

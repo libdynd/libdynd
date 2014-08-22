@@ -644,7 +644,9 @@ public:
     array replace_dtype(const ndt::type& replacement_tp, intptr_t replace_ndim = 0) const;
 
     /**
+     * Inserts a new strided dimension into the array.
      *
+     * \param i  The axis of the new strided dimension.
      */
     array new_axis(intptr_t i) const;
 
