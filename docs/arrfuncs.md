@@ -33,37 +33,20 @@ the same interface.
 ### Function Signatures
 
 Types for overloads are defined via datashape type
-signatures, which encompass both dimensions and data types 
+signatures. For simple arrfuncs, these signatures contain
+concrete types, like ``(bool, bool) -> bool``. Because
+dimensions can be specified as part of datashapes, the
+``gufunc`` core dimensions can be part of a signature like
+``(M * bool, M * bool) -> bool``.
 
-Some problems with this system include:
+### Overloading
 
-* Parameterized types like the datetime64 were added
-  much later than ufuncs, and do not fit with the simple
-  type id approach used to define overload signatures.
-* The definition of overload resolution is somewhat ad
-  hoc. It's well defined for the list of built-in type
-  signatures, but not for interactions between different
-  plugin types in the dictionary of extension signatures.
+* https://github.com/ContinuumIO/libdynd/issues/97
 
-
-The first ``ufunc`` feature we'll look at is the ability
-to provide a number of overloads, based on type ID.
-In the ``gufunc`` this is extended with a "core dimensions"
-signature that specifies dimensions to process all at once
-instead of via element-wise broadcasting rules.
-
-Some drawbacks in how this works include:
-
-* Basic type resolution is implemented via a linear list
-  of type id signatures. The datetime64 parameterized type
-  doesn't really fit in well here.
-* For pluggable types, there is an additional dictionary
-  of signatures, which gets looked at after the linear list
-  is exhausted.
-* Only one core dimension signature is allowed, so it
-  doesn't work for overloading something like gradient
-  via something like ``(M * N * T) -> M * N * 2 * T``
-  and ``(M * N * R * T) -> M * N * R * 3 * T``.
+The concept for overloading is that an overloaded arrfunc
+contains an array of arrfuncs with simple signatures,
+and exposes a function signature which matches against
+input signatures for any of the overloads.
 
 ## Datashape Function Signature Limitations
 

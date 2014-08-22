@@ -3,8 +3,8 @@
 // BSD 2-Clause License, see LICENSE.txt
 //
 
-#ifndef _DYND__ARRFUNC_HPP_
-#define _DYND__ARRFUNC_HPP_
+#ifndef DYND__FUNC_ARRFUNC_HPP
+#define DYND__FUNC_ARRFUNC_HPP
 
 #include <dynd/buffer.hpp>
 #include <dynd/config.hpp>
@@ -447,4 +447,4 @@ inline nd::arrfunc make_arrfunc_from_property(const ndt::type &tp,
 
 } // namespace dynd
 
-#endif // _DYND__ARRFUNC_HPP_
+#endif // DYND__FUNC_ARRFUNC_HPP
