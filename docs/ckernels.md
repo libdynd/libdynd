@@ -1,4 +1,4 @@
-﻿# Blaze/DyND CKernels
+﻿# DyND CKernels
 
 The initial versions of DyND began with an iterator approach,
 similar to the nditer object in NumPy. With the addition of

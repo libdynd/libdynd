@@ -1,4 +1,4 @@
-Documentation Index
+﻿Documentation Index
 ===================
 
 This is the documentation for DyND. It's being updated
@@ -9,5 +9,7 @@ for any queries regarding the library.
  * [Developer Guide](developer-guide.md)
  * [ND::Array](ndarray.md)
  * [ND::Array Low Level Details](ndarray_lowlevel.md)
- * [CKernels](ckernels.md)
- * [Multi-dimensional Kernels](multidim_kernels.md)
+ * ArrFuncs and CKernels
+   * [ArrFuncs](arrfuncs.md)
+   * [CKernels](ckernels.md)
+   * [Multi-dimensional Kernels](multidim_kernels.md)
