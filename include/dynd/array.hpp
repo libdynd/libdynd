@@ -362,6 +362,11 @@ public:
         return get_type().get_dim_size(get_arrmeta(), get_ndo()->m_data_pointer);
     }
 
+    /**
+     * Returns the size of the requested dimension.
+     */
+    intptr_t get_dim_size(intptr_t i) const;
+
     std::vector<intptr_t> get_strides() const {
         std::vector<intptr_t> result(get_ndim());
         get_strides(&result[0]);
@@ -610,7 +615,7 @@ public:
     array permute(intptr_t ndim, const intptr_t *axes) const;
 
     /**
-     * Rolls the dimensions of the array so the axis `from' becomes the axis `to'.
+     * Rotates the dimensions of the array so the axis `from' becomes the axis `to'.
      * At present, there cannot be any variable dimensions.
      */
     array rotate(intptr_t to, intptr_t from = 0) const;
