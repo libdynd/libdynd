@@ -555,9 +555,9 @@ TEST(Array, InitFromInitializerLists) {
     EXPECT_EQ(ndt::make_type<double>(), b.get_dtype());
     ASSERT_EQ(2, b.get_ndim());
     ASSERT_EQ(2, b.get_shape()[0]);
-    ASSERT_EQ(2, a.get_dim_size(0));
+    ASSERT_EQ(2, b.get_dim_size(0));
     ASSERT_EQ(3, b.get_shape()[1]);
-    ASSERT_EQ(3, a.get_dim_size(1));
+    ASSERT_EQ(3, b.get_dim_size(1));
     EXPECT_EQ(3*(int)sizeof(double), b.get_strides()[0]);
     EXPECT_EQ((int)sizeof(double), b.get_strides()[1]);
     const double *ptr_d = (const double *)b.get_readonly_originptr();
