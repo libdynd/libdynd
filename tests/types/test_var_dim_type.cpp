@@ -40,8 +40,11 @@ TEST(VarArrayDType, Shape) {
     EXPECT_EQ(darr3, a.get_type());
     EXPECT_EQ(3u, a.get_shape().size());
     EXPECT_EQ(3, a.get_shape()[0]);
+    EXPECT_EQ(3, a.get_dim_size(0));
     EXPECT_EQ(-1, a.get_shape()[1]);
+    EXPECT_EQ(-1, a.get_dim_size(1));
     EXPECT_EQ(2, a.get_shape()[2]);
+    EXPECT_EQ(2, a.get_dim_size(2));
 }
 
 TEST(VarArrayDType, DTypeSubscriptSimpleSingle) {

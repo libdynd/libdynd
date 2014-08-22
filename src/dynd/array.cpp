@@ -9,7 +9,7 @@
 #include <dynd/types/var_dim_type.hpp>
 #include <dynd/types/cfixed_dim_type.hpp>
 #include <dynd/types/ctuple_type.hpp>
-#include <dynd/types/type_alignment.hpp>               
+#include <dynd/types/type_alignment.hpp>
 #include <dynd/types/view_type.hpp>
 #include <dynd/types/string_type.hpp>
 #include <dynd/types/bytes_type.hpp>
@@ -840,15 +840,6 @@ void nd::array::flag_as_immutable()
         ss << "it does not uniquely own all of its data";
         throw runtime_error(ss.str());
     }
-}
-
-intptr_t nd::array::get_dim_size(intptr_t i) const {
-    if (i <= get_type().get_strided_ndim()) {
-        const strided_dim_type_arrmeta *smd = reinterpret_cast<const strided_dim_type_arrmeta *>(get_arrmeta());
-        return smd[i].dim_size;
-    }
-
-    return -1;
 }
 
 nd::array nd::array::p(const char *property_name) const

@@ -365,7 +365,14 @@ public:
     /**
      * Returns the size of the requested dimension.
      */
-    intptr_t get_dim_size(intptr_t i) const;
+    inline intptr_t get_dim_size(intptr_t i) const {
+        if (i < get_type().get_strided_ndim()) {
+            const size_stride_t *ss = reinterpret_cast<const size_stride_t *>(get_arrmeta());
+            return ss[i].dim_size;
+        }
+
+        return get_shape()[i];
+    }
 
     std::vector<intptr_t> get_strides() const {
         std::vector<intptr_t> result(get_ndim());
