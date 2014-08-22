@@ -311,6 +311,7 @@ set(libdynd_SRC
     include/dynd/eval/unary_elwise_eval.hpp
     # Func
     src/dynd/func/arrfunc.cpp
+    src/dynd/func/arrfunc_registry.cpp
     src/dynd/func/callable.cpp
     src/dynd/func/copy_arrfunc.cpp
     src/dynd/func/chain_arrfunc.cpp
@@ -323,6 +324,7 @@ set(libdynd_SRC
     src/dynd/func/rolling_arrfunc.cpp
     src/dynd/func/take_arrfunc.cpp
     include/dynd/func/arrfunc.hpp
+    include/dynd/func/arrfunc_registry.hpp
     include/dynd/func/callable.hpp
     include/dynd/func/call_callable.hpp
     include/dynd/func/copy_arrfunc.hpp
