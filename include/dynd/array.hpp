@@ -369,9 +369,16 @@ public:
         if (i < get_type().get_strided_ndim()) {
             const size_stride_t *ss = reinterpret_cast<const size_stride_t *>(get_arrmeta());
             return ss[i].dim_size;
+        } else if (i < get_ndim()) {
+            dimvector shape(i + 1);
+            if (!get_ndo()->is_builtin_type()) {
+                get_ndo()->m_type->get_shape(i + 1, 0, shape.get(),
+                                get_arrmeta(), get_ndo()->m_data_pointer);
+            }
+            return shape[i];
+        } else {
+            throw std::invalid_argument("Not enough dimensions in array");
         }
-
-        return get_shape()[i];
     }
 
     std::vector<intptr_t> get_strides() const {
