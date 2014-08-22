@@ -282,3 +282,65 @@ TEST(View, StringAsBytes) {
   EXPECT_EQ('\xAD', btd->begin[2]);
   EXPECT_EQ('\xA2', btd->begin[3]);
 }
+
+TEST(View, NewAxis) {
+    nd::array a = nd::empty("int32");
+    for (int i = 0; i <= a.get_ndim(); ++i) {
+        nd::array b = a.new_axis(i);
+        EXPECT_EQ(a.get_ndim() + 1, b.get_ndim());
+        for (int j = 0; j <= a.get_ndim(); ++j) {
+            if (j < i) {
+                EXPECT_EQ(a.get_shape()[j], b.get_shape()[j]);
+            } else if (j == i) {
+                EXPECT_EQ(1, b.get_shape()[j]);
+            } else {
+                EXPECT_EQ(a.get_shape()[j - 1], b.get_shape()[j]);
+            }
+        }
+    }
+
+    a = nd::empty("3 * int32");
+    for (int i = 0; i <= a.get_ndim(); ++i) {
+        nd::array b = a.new_axis(i);
+        EXPECT_EQ(a.get_ndim() + 1, b.get_ndim());
+        for (int j = 0; j <= a.get_ndim(); ++j) {
+            if (j < i) {
+                EXPECT_EQ(a.get_shape()[j], b.get_shape()[j]);
+            } else if (j == i) {
+                EXPECT_EQ(1, b.get_shape()[j]);
+            } else {
+                EXPECT_EQ(a.get_shape()[j - 1], b.get_shape()[j]);
+            }
+        }
+    }
+
+    a = nd::empty("5 * 3 * int32");
+    for (int i = 0; i <= a.get_ndim(); ++i) {
+        nd::array b = a.new_axis(i);
+        EXPECT_EQ(a.get_ndim() + 1, b.get_ndim());
+        for (int j = 0; j <= a.get_ndim(); ++j) {
+            if (j < i) {
+                EXPECT_EQ(a.get_shape()[j], b.get_shape()[j]);
+            } else if (j == i) {
+                EXPECT_EQ(1, b.get_shape()[j]);
+            } else {
+                EXPECT_EQ(a.get_shape()[j - 1], b.get_shape()[j]);
+            }
+        }
+    }
+
+    a = nd::empty("7 * 5 * 3 * int32");
+    for (int i = 0; i <= a.get_ndim(); ++i) {
+        nd::array b = a.new_axis(i);
+        EXPECT_EQ(a.get_ndim() + 1, b.get_ndim());
+        for (int j = 0; j <= a.get_ndim(); ++j) {
+            if (j < i) {
+                EXPECT_EQ(a.get_shape()[j], b.get_shape()[j]);
+            } else if (j == i) {
+                EXPECT_EQ(1, b.get_shape()[j]);
+            } else {
+                EXPECT_EQ(a.get_shape()[j - 1], b.get_shape()[j]);
+            }
+        }
+    }
+}

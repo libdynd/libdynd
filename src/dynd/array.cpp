@@ -1441,6 +1441,41 @@ nd::array nd::array::replace_dtype(const ndt::type& replacement_tp, intptr_t rep
     }
 }
 
+nd::array nd::array::new_axis(intptr_t i) const
+{
+    ndt::type tp = get_type();
+    ndt::type tp_at = tp.get_type_at_dimension(NULL, i);
+
+    // ndt::make_strided_dim
+    ndt::type new_tp = tp.with_replaced_dtype(ndt::make_strided_dim(tp_at), get_ndim() - i);
+
+    nd::array res(make_array_memory_block(new_tp.get_arrmeta_size()));
+    // Copy the fields
+    res.get_ndo()->m_data_pointer = get_ndo()->m_data_pointer;
+    if (get_ndo()->m_data_reference == NULL) {
+        // Embedded data, need reference to the array
+        res.get_ndo()->m_data_reference = get_memblock().release();
+    } else {
+        // Use the same data reference, avoid producing a chain
+        res.get_ndo()->m_data_reference = get_data_memblock().release();
+    }
+    res.get_ndo()->m_type = new_tp.release();
+    res.get_ndo()->m_flags = get_ndo()->m_flags;
+
+    size_t leading_arrmeta_size = tp.get_arrmeta_size() - tp_at.get_arrmeta_size();
+    size_t trailing_arrmeta_size = tp_at.get_arrmeta_size();
+
+    DYND_MEMCPY(res.get_arrmeta(), get_arrmeta(), leading_arrmeta_size);
+
+    strided_dim_type_arrmeta *smd = reinterpret_cast<strided_dim_type_arrmeta *>(res.get_arrmeta() + leading_arrmeta_size);
+    smd->dim_size = 1;
+    smd->stride = 0;
+
+    DYND_MEMCPY(res.get_arrmeta() + leading_arrmeta_size + sizeof(strided_dim_type_arrmeta), get_arrmeta() + leading_arrmeta_size, trailing_arrmeta_size);
+
+    return res;
+}
+
 namespace {
     static void view_scalar_types(const ndt::type& dt, void *extra,
                 ndt::type& out_transformed_tp, bool& out_was_transformed)

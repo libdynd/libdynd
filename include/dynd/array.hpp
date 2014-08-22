@@ -644,6 +644,11 @@ public:
     array replace_dtype(const ndt::type& replacement_tp, intptr_t replace_ndim = 0) const;
 
     /**
+     *
+     */
+    array new_axis(intptr_t i) const;
+
+    /**
      * Views the array's memory as another type, where such an operation
      * makes sense. This is analogous to reinterpret_case<>.
      */
