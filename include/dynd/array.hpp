@@ -377,7 +377,10 @@ public:
             }
             return shape[i];
         } else {
-            throw std::invalid_argument("Not enough dimensions in array");
+            std::stringstream ss;
+            ss << "Not enough dimensions in array, tried to access axis " << i
+               << " for type " << get_type();
+            throw std::invalid_argument(ss.str());
         }
     }
 
