@@ -5,6 +5,7 @@
 
 #include <dynd/array.hpp>
 #include <dynd/types/adapt_type.hpp>
+#include <dynd/func/chain_arrfunc.hpp>
 
 using namespace std;
 using namespace dynd;
@@ -28,6 +29,15 @@ adapt_type::adapt_type(const ndt::type &operand_type,
     ss << "Cannot create type ";
     print_type(ss);
     throw type_error(ss.str());
+  }
+
+  // If the operand is an expression, make a buffering arrfunc
+  if (m_operand_type.get_kind() == expr_kind && !m_forward.is_null() &&
+      m_operand_type != m_forward.get()->get_param_type(0)) {
+    m_forward = make_chain_arrfunc(
+        make_arrfunc_from_assignment(m_forward.get()->get_param_type(0),
+                                     m_operand_type, assign_error_default),
+        m_forward, m_forward.get()->get_param_type(0));
   }
 }
 
@@ -76,16 +86,15 @@ adapt_type::with_replaced_storage_type(const ndt::type &replacement_type) const
   if (m_operand_type.get_kind() != expr_kind) {
     // If there's no expression in the operand, just try substituting (the
     // constructor will error-check)
-    return ndt::type(new adapt_type(m_value_type, replacement_type, m_op),
+    return ndt::type(new adapt_type(replacement_type, m_value_type, m_op),
                      false);
   } else {
     // With an expression operand, replace it farther down the chain
     return ndt::type(
-        new adapt_type(m_value_type,
-                       reinterpret_cast<const base_expr_type *>(
+        new adapt_type(reinterpret_cast<const base_expr_type *>(
                            replacement_type.extended())
                            ->with_replaced_storage_type(replacement_type),
-                       m_op),
+                       m_value_type, m_op),
         false);
   }
 }
