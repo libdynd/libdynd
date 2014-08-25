@@ -156,6 +156,7 @@ TYPED_TEST_P(Array, OneDimConstructor) {
     EXPECT_FALSE(a.is_scalar());
     EXPECT_EQ(1u, a.get_shape().size());
     EXPECT_EQ(1, a.get_shape()[0]);
+    EXPECT_EQ(1, a.get_dim_size(0));
     EXPECT_EQ(1u, a.get_strides().size());
     EXPECT_EQ(0, a.get_strides()[0]);
 
@@ -166,6 +167,7 @@ TYPED_TEST_P(Array, OneDimConstructor) {
     EXPECT_FALSE(a.is_scalar());
     EXPECT_EQ(1u, a.get_shape().size());
     EXPECT_EQ(3, a.get_shape()[0]);
+    EXPECT_EQ(3, a.get_dim_size(0));
     EXPECT_EQ(1u, a.get_strides().size());
     EXPECT_EQ(sizeof(float), (unsigned)a.get_strides()[0]);
 }
@@ -178,7 +180,9 @@ TYPED_TEST_P(Array, TwoDimConstructor) {
     EXPECT_FALSE(a.is_scalar());
     EXPECT_EQ(2u, a.get_shape().size());
     EXPECT_EQ(3, a.get_shape()[0]);
+    EXPECT_EQ(3, a.get_dim_size(0));
     EXPECT_EQ(1, a.get_shape()[1]);
+    EXPECT_EQ(1, a.get_dim_size(1));
     EXPECT_EQ(2u, a.get_strides().size());
     EXPECT_EQ(sizeof(float), (unsigned)a.get_strides()[0]);
     EXPECT_EQ(0, a.get_strides()[1]);
@@ -190,7 +194,9 @@ TYPED_TEST_P(Array, TwoDimConstructor) {
     EXPECT_FALSE(a.is_scalar());
     EXPECT_EQ(2u, a.get_shape().size());
     EXPECT_EQ(1, a.get_shape()[0]);
+    EXPECT_EQ(1, a.get_dim_size(0));
     EXPECT_EQ(3, a.get_shape()[1]);
+    EXPECT_EQ(3, a.get_dim_size(1));
     EXPECT_EQ(2u, a.get_strides().size());
     EXPECT_EQ(0, a.get_strides()[0]);
     EXPECT_EQ(sizeof(float), (unsigned)a.get_strides()[1]);
@@ -202,7 +208,9 @@ TYPED_TEST_P(Array, TwoDimConstructor) {
     EXPECT_FALSE(a.is_scalar());
     EXPECT_EQ(2u, a.get_shape().size());
     EXPECT_EQ(3, a.get_shape()[0]);
+    EXPECT_EQ(3, a.get_dim_size(0));
     EXPECT_EQ(5, a.get_shape()[1]);
+    EXPECT_EQ(5, a.get_dim_size(1));
     EXPECT_EQ(2u, a.get_strides().size());
     EXPECT_EQ(5 * sizeof(float), (unsigned)a.get_strides()[0]);
     EXPECT_EQ(sizeof(float), (unsigned)a.get_strides()[1]);
@@ -220,8 +228,11 @@ TYPED_TEST_P(Array, ThreeDimConstructor) {
     EXPECT_FALSE(a.is_scalar());
     EXPECT_EQ(3u, a.get_shape().size());
     EXPECT_EQ(1, a.get_shape()[0]);
+    EXPECT_EQ(1, a.get_dim_size(0));
     EXPECT_EQ(5, a.get_shape()[1]);
+    EXPECT_EQ(5, a.get_dim_size(1));
     EXPECT_EQ(4, a.get_shape()[2]);
+    EXPECT_EQ(4, a.get_dim_size(2));
     EXPECT_EQ(3u, a.get_strides().size());
     EXPECT_EQ(0, a.get_strides()[0]);
     EXPECT_EQ(4 * sizeof(float), (unsigned)a.get_strides()[1]);
@@ -238,8 +249,11 @@ TYPED_TEST_P(Array, ThreeDimConstructor) {
     EXPECT_FALSE(a.is_scalar());
     EXPECT_EQ(3u, a.get_shape().size());
     EXPECT_EQ(3, a.get_shape()[0]);
+    EXPECT_EQ(3, a.get_dim_size(0));
     EXPECT_EQ(1, a.get_shape()[1]);
+    EXPECT_EQ(1, a.get_dim_size(1));
     EXPECT_EQ(4, a.get_shape()[2]);
+    EXPECT_EQ(4, a.get_dim_size(2));
     EXPECT_EQ(3u, a.get_strides().size());
     EXPECT_EQ(4 * sizeof(float), (unsigned)a.get_strides()[0]);
     EXPECT_EQ(0, a.get_strides()[1]);
@@ -256,8 +270,11 @@ TYPED_TEST_P(Array, ThreeDimConstructor) {
     EXPECT_FALSE(a.is_scalar());
     EXPECT_EQ(3u, a.get_shape().size());
     EXPECT_EQ(3, a.get_shape()[0]);
+    EXPECT_EQ(3, a.get_dim_size(0));
     EXPECT_EQ(5, a.get_shape()[1]);
+    EXPECT_EQ(5, a.get_dim_size(1));
     EXPECT_EQ(1, a.get_shape()[2]);
+    EXPECT_EQ(1, a.get_dim_size(2));
     EXPECT_EQ(3u, a.get_strides().size());
     EXPECT_EQ(5 * sizeof(float), (unsigned)a.get_strides()[0]);
     EXPECT_EQ(sizeof(float), (unsigned)a.get_strides()[1]);
@@ -274,8 +291,11 @@ TYPED_TEST_P(Array, ThreeDimConstructor) {
     EXPECT_FALSE(a.is_scalar());
     EXPECT_EQ(3u, a.get_shape().size());
     EXPECT_EQ(3, a.get_shape()[0]);
+    EXPECT_EQ(3, a.get_dim_size(0));
     EXPECT_EQ(5, a.get_shape()[1]);
+    EXPECT_EQ(5, a.get_dim_size(1));
     EXPECT_EQ(4, a.get_shape()[2]);
+    EXPECT_EQ(4, a.get_dim_size(2));
     EXPECT_EQ(3u, a.get_strides().size());
     EXPECT_EQ(5 * 4 * sizeof(float), (unsigned)a.get_strides()[0]);
     EXPECT_EQ(4 * sizeof(float), (unsigned)a.get_strides()[1]);
@@ -378,6 +398,7 @@ TEST(Array, StdVectorConstructor) {
     EXPECT_EQ(1, a.get_type().get_ndim());
     EXPECT_EQ(1u, a.get_shape().size());
     EXPECT_EQ(0, a.get_shape()[0]);
+    EXPECT_EQ(0, a.get_dim_size(0));
     EXPECT_EQ(1u, a.get_strides().size());
     EXPECT_EQ(0, a.get_strides()[0]);
 
@@ -390,6 +411,7 @@ TEST(Array, StdVectorConstructor) {
     EXPECT_EQ(1, a.get_type().get_ndim());
     EXPECT_EQ(1u, a.get_shape().size());
     EXPECT_EQ(10, a.get_shape()[0]);
+    EXPECT_EQ(10, a.get_dim_size(0));
     EXPECT_EQ(1u, a.get_strides().size());
     EXPECT_EQ((int)sizeof(float), a.get_strides()[0]);
     for (int i = 0; i < 10; ++i) {
@@ -407,6 +429,7 @@ TEST(Array, StdVectorStringConstructor) {
     EXPECT_EQ(1, a.get_type().get_ndim());
     EXPECT_EQ(1u, a.get_shape().size());
     EXPECT_EQ(0, a.get_shape()[0]);
+    EXPECT_EQ(0, a.get_dim_size(0));
     EXPECT_EQ(1u, a.get_strides().size());
     EXPECT_EQ(0, a.get_strides()[0]);
 
@@ -421,6 +444,7 @@ TEST(Array, StdVectorStringConstructor) {
     EXPECT_EQ(1, a.get_type().get_ndim());
     EXPECT_EQ(1u, a.get_shape().size());
     EXPECT_EQ(5, a.get_shape()[0]);
+    EXPECT_EQ(5, a.get_dim_size(0));
     EXPECT_EQ(1u, a.get_strides().size());
     EXPECT_EQ((intptr_t)a.get_type().at(0).get_data_size(), a.get_strides()[0]);
     for (int i = 0; i < 5; ++i) {
@@ -518,6 +542,7 @@ TEST(Array, InitFromInitializerLists) {
     EXPECT_EQ(ndt::make_type<int>(), a.get_dtype());
     ASSERT_EQ(1, a.get_ndim());
     ASSERT_EQ(5, a.get_shape()[0]);
+    ASSERT_EQ(5, a.get_dim_size(0));
     EXPECT_EQ((int)sizeof(int), a.get_strides()[0]);
     const int *ptr_i = (const int *)a.get_readonly_originptr();
     EXPECT_EQ(1, ptr_i[0]);
@@ -530,7 +555,9 @@ TEST(Array, InitFromInitializerLists) {
     EXPECT_EQ(ndt::make_type<double>(), b.get_dtype());
     ASSERT_EQ(2, b.get_ndim());
     ASSERT_EQ(2, b.get_shape()[0]);
+    ASSERT_EQ(2, b.get_dim_size(0));
     ASSERT_EQ(3, b.get_shape()[1]);
+    ASSERT_EQ(3, b.get_dim_size(1));
     EXPECT_EQ(3*(int)sizeof(double), b.get_strides()[0]);
     EXPECT_EQ((int)sizeof(double), b.get_strides()[1]);
     const double *ptr_d = (const double *)b.get_readonly_originptr();
@@ -546,8 +573,11 @@ TEST(Array, InitFromInitializerLists) {
     EXPECT_EQ(ndt::make_type<long long>(), a.get_dtype());
     ASSERT_EQ(3, a.get_ndim());
     ASSERT_EQ(2, a.get_shape()[0]);
+    ASSERT_EQ(2, a.get_dim_size(0));
     ASSERT_EQ(2, a.get_shape()[1]);
+    ASSERT_EQ(2, a.get_dim_size(1));
     ASSERT_EQ(2, a.get_shape()[2]);
+    ASSERT_EQ(2, a.get_dim_size(2));
     EXPECT_EQ(4*(int)sizeof(long long), a.get_strides()[0]);
     EXPECT_EQ(2*(int)sizeof(long long), a.get_strides()[1]);
     EXPECT_EQ((int)sizeof(long long), a.get_strides()[2]);

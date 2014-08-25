@@ -362,6 +362,28 @@ public:
         return get_type().get_dim_size(get_arrmeta(), get_ndo()->m_data_pointer);
     }
 
+    /**
+     * Returns the size of the requested dimension.
+     */
+    inline intptr_t get_dim_size(intptr_t i) const {
+        if (i < get_type().get_strided_ndim()) {
+            const size_stride_t *ss = reinterpret_cast<const size_stride_t *>(get_arrmeta());
+            return ss[i].dim_size;
+        } else if (i < get_ndim()) {
+            dimvector shape(i + 1);
+            if (!get_ndo()->is_builtin_type()) {
+                get_ndo()->m_type->get_shape(i + 1, 0, shape.get(),
+                                get_arrmeta(), get_ndo()->m_data_pointer);
+            }
+            return shape[i];
+        } else {
+            std::stringstream ss;
+            ss << "Not enough dimensions in array, tried to access axis " << i
+               << " for type " << get_type();
+            throw std::invalid_argument(ss.str());
+        }
+    }
+
     std::vector<intptr_t> get_strides() const {
         std::vector<intptr_t> result(get_ndim());
         get_strides(&result[0]);
@@ -610,7 +632,7 @@ public:
     array permute(intptr_t ndim, const intptr_t *axes) const;
 
     /**
-     * Rolls the dimensions of the array so the axis `from' becomes the axis `to'.
+     * Rotates the dimensions of the array so the axis `from' becomes the axis `to'.
      * At present, there cannot be any variable dimensions.
      */
     array rotate(intptr_t to, intptr_t from = 0) const;
