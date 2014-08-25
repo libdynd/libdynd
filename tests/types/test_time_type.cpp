@@ -128,40 +128,21 @@ TEST(TimeHMST, SetFromStr) {
   time_hmst hmst;
 
   hmst.set_from_str("00:00");
-  EXPECT_EQ(0, hmst.hour);
-  EXPECT_EQ(0, hmst.minute);
-  EXPECT_EQ(0, hmst.second);
-  EXPECT_EQ(0, hmst.tick);
+  EXPECT_EQ("00:00", hmst.to_str());
   hmst.set_from_str("12:29p");
-  EXPECT_EQ(12, hmst.hour);
-  EXPECT_EQ(29, hmst.minute);
-  EXPECT_EQ(0, hmst.second);
-  EXPECT_EQ(0, hmst.tick);
+  EXPECT_EQ("12:29", hmst.to_str());
   hmst.set_from_str("12:14:22a.m.");
-  EXPECT_EQ(0, hmst.hour);
-  EXPECT_EQ(14, hmst.minute);
-  EXPECT_EQ(22, hmst.second);
-  EXPECT_EQ(0, hmst.tick);
+  EXPECT_EQ("00:14:22", hmst.to_str());
   hmst.set_from_str("3:30 pm");
-  EXPECT_EQ(15, hmst.hour);
-  EXPECT_EQ(30, hmst.minute);
-  EXPECT_EQ(0, hmst.second);
-  EXPECT_EQ(0, hmst.tick);
+  EXPECT_EQ("15:30", hmst.to_str());
   hmst.set_from_str("12:34:56.7");
-  EXPECT_EQ(12, hmst.hour);
-  EXPECT_EQ(34, hmst.minute);
-  EXPECT_EQ(56, hmst.second);
-  EXPECT_EQ(700 * DYND_TICKS_PER_MILLISECOND, hmst.tick);
+  EXPECT_EQ("12:34:56.7", hmst.to_str());
   hmst.set_from_str("12:34:56.789012345678901234 AM");
-  EXPECT_EQ(0, hmst.hour);
-  EXPECT_EQ(34, hmst.minute);
-  EXPECT_EQ(56, hmst.second);
-  EXPECT_EQ(7890123, hmst.tick);
+  EXPECT_EQ("00:34:56.7890123", hmst.to_str());
   hmst.set_from_str("09:30:00:003");
-  EXPECT_EQ(9, hmst.hour);
-  EXPECT_EQ(30, hmst.minute);
-  EXPECT_EQ(0, hmst.second);
-  EXPECT_EQ(30000, hmst.tick);
+  EXPECT_EQ("09:30:00.003", hmst.to_str());
+  hmst.set_from_str("11.00.00.000000000 AM");
+  EXPECT_EQ("11:00", hmst.to_str());
 }
 
 TEST(TimeHMST, SetFromStr_Errors) {

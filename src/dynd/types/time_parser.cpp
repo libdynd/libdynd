@@ -70,7 +70,8 @@ bool parse::parse_timezone(const char *&rbegin, const char *end,
   }
 }
 
-// Similar to ISO 8601, but allow 1-digit hour, AM/PM specifier
+// Similar to ISO 8601, but allow 1-digit hour, AM/PM specifier,
+// either ':' or '.' to separate the time components
 static bool parse_flex_time(const char *&begin, const char *end,
                             time_hmst &out_hmst)
 {
@@ -82,8 +83,9 @@ static bool parse_flex_time(const char *&begin, const char *end,
     return sbs.fail();
   }
   // :MM
-  if (!parse_token_no_ws(begin, end, ':')) {
-    // If there's no ':', fail
+  if (!parse_token_no_ws(begin, end, '.') &&
+      !parse_token_no_ws(begin, end, ':')) {
+    // If there's no '.' or ':', fail
     return sbs.fail();
   }
   int minute;
@@ -91,8 +93,9 @@ static bool parse_flex_time(const char *&begin, const char *end,
     return sbs.fail();
   }
   // :SS
-  if (!parse_token_no_ws(begin, end, ':')) {
-    // If there's no ':', stop here and match just the HH:MM
+  if (!parse_token_no_ws(begin, end, '.') &&
+      !parse_token_no_ws(begin, end, ':')) {
+    // If there's no '.' or ':', stop here and match just the HH:MM
     parse_time_ampm(begin, end, hour);
     if (time_hmst::is_valid(hour, minute, 0, 0)) {
       out_hmst.hour = hour;
