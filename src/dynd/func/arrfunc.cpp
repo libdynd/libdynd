@@ -29,8 +29,8 @@ static intptr_t instantiate_assignment_ckernel(
   try
   {
     assign_error_mode errmode = *self->get_data_as<assign_error_mode>();
-    if (dst_tp.value_type() == self->get_return_type() &&
-        src_tp[0].value_type() == self->get_param_type(0)) {
+    if (dst_tp == self->get_return_type() &&
+        src_tp[0] == self->get_param_type(0)) {
       if (errmode == ectx->errmode) {
         return make_assignment_kernel(ckb, ckb_offset, dst_tp, dst_arrmeta,
                                       src_tp[0], src_arrmeta[0],
@@ -102,19 +102,11 @@ void dynd::make_arrfunc_from_assignment(const ndt::type &dst_tp,
                                         assign_error_mode errmode,
                                         arrfunc_type_data &out_af)
 {
-    if (dst_tp.get_kind() == expr_kind ||
-            (src_tp.get_kind() == expr_kind &&
-            src_tp.get_type_id() != expr_type_id)) {
-        stringstream ss;
-        ss << "Creating an arrfunc from an assignment requires non-expression"
-           << "src and dst types, got " << src_tp << " and " << dst_tp;
-        throw type_error(ss.str());
-    }
-    memset(&out_af, 0, sizeof(arrfunc_type_data));
-    *out_af.get_data_as<assign_error_mode>() = errmode;
-    out_af.free_func = NULL;
-    out_af.instantiate = &instantiate_assignment_ckernel;
-    out_af.func_proto = ndt::make_funcproto(src_tp, dst_tp);
+  memset(&out_af, 0, sizeof(arrfunc_type_data));
+  *out_af.get_data_as<assign_error_mode>() = errmode;
+  out_af.free_func = NULL;
+  out_af.instantiate = &instantiate_assignment_ckernel;
+  out_af.func_proto = ndt::make_funcproto(src_tp, dst_tp);
 }
 
 void dynd::make_arrfunc_from_property(const ndt::type &tp,
