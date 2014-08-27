@@ -34,7 +34,6 @@ void make_builtin_sum_reduction_arrfunc(arrfunc_type_data *out_af,
  */
 inline nd::arrfunc make_builtin_sum_reduction_arrfunc(type_id_t tid)
 {
-std::cout << "rk " << __LINE__ << std::endl;
     nd::array af = nd::empty(ndt::make_arrfunc());
     make_builtin_sum_reduction_arrfunc(
         reinterpret_cast<arrfunc_type_data *>(af.get_readwrite_originptr()),

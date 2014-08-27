@@ -328,9 +328,9 @@ struct pod_arrfunc {
     return reinterpret_cast<const nd::arrfunc *>(&m_memblock)->get();
   }
 
-  void init(nd::arrfunc &rhs)
+  void init(const nd::arrfunc &rhs)
   {
-    reinterpret_cast<nd::arrfunc *>(&m_memblock)->swap(rhs);
+    *reinterpret_cast<nd::arrfunc *>(&m_memblock) = rhs;
   }
 
   void cleanup()
@@ -364,7 +364,6 @@ inline nd::arrfunc make_arrfunc_from_assignment(const ndt::type &dst_tp,
                                                 const ndt::type &src_tp,
                                                 assign_error_mode errmode)
 {
-std::cout << "af " << __LINE__ << std::endl;
     nd::array af = nd::empty(ndt::make_arrfunc());
     make_arrfunc_from_assignment(
         dst_tp, src_tp, errmode,
@@ -390,7 +389,6 @@ void make_arrfunc_from_property(const ndt::type &tp,
 inline nd::arrfunc make_arrfunc_from_property(const ndt::type &tp,
                                               const std::string &propname)
 {
-std::cout << "af " << __LINE__ << std::endl;
     nd::array af = nd::empty(ndt::make_arrfunc());
     make_arrfunc_from_property(
         tp, propname,

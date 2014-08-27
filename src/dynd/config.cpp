@@ -31,7 +31,6 @@ bool dynd::built_with_cuda()
 
 int dynd::libdynd_init()
 {
-cout << "libdynd_init" << endl;
   dynd::init::static_types_init();
   dynd::init::datashape_parser_init();
 #ifdef DYND_FFTW
@@ -40,13 +39,11 @@ cout << "libdynd_init" << endl;
   math::sin.init(
       nd::make_functor_arrfunc(static_cast<double (*)(double)>(&::sin)));
 
-cout << "libdynd_init done" << endl;
   return 0;
 }
 
 int dynd::libdynd_cleanup()
 {
-cout << "libdynd_cleanup" << endl;
   math::sin.cleanup();
 #ifdef DYND_FFTW
   dynd::init::fft_cleanup();
@@ -54,6 +51,5 @@ cout << "libdynd_cleanup" << endl;
   dynd::init::datashape_parser_cleanup();
   dynd::init::static_types_cleanup();
 
-cout << "libdynd_cleanup done" << endl;
   return 0;
 }

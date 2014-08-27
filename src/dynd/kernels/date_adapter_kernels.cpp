@@ -92,7 +92,6 @@ static intptr_t instantiate_int_offset_arrfunc(
 template <class Tsrc, class Tdst>
 nd::arrfunc make_int_offset_arrfunc(Tdst offset, const ndt::type &func_proto)
 {
-std::cout << "dak " << __LINE__ << std::endl;
     nd::array out_af = nd::empty(ndt::make_arrfunc());
     arrfunc_type_data *af =
         reinterpret_cast<arrfunc_type_data *>(out_af.get_readwrite_originptr());

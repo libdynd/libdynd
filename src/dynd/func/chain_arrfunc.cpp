@@ -182,7 +182,6 @@ nd::arrfunc dynd::make_chain_arrfunc(const nd::arrfunc &first,
                                      const nd::arrfunc &second,
                                      const ndt::type &buf_tp)
 {
-std::cout << "ca " << __LINE__ << std::endl;
   nd::array af = nd::empty(ndt::make_arrfunc());
   make_chain_arrfunc(
       first, second, buf_tp,

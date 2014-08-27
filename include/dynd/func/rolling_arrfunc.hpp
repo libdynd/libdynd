@@ -31,7 +31,6 @@ void make_rolling_arrfunc(arrfunc_type_data *out_af, const nd::arrfunc &window_o
 inline nd::arrfunc make_rolling_arrfunc(const nd::arrfunc &window_op,
                                         intptr_t window_size)
 {
-std::cout << "ra " << __LINE__ << std::endl;
     nd::array af = nd::empty(ndt::make_arrfunc());
     make_rolling_arrfunc(
         reinterpret_cast<arrfunc_type_data *>(af.get_readwrite_originptr()),

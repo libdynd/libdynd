@@ -24,7 +24,6 @@ void make_take_arrfunc(arrfunc_type_data *out_af);
 
 inline nd::arrfunc make_take_arrfunc()
 {
-std::cout << "ta " << __LINE__ << std::endl;
     nd::array af = nd::empty(ndt::make_arrfunc());
     make_take_arrfunc(
         reinterpret_cast<arrfunc_type_data *>(af.get_readwrite_originptr()));

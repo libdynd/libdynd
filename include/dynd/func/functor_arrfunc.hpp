@@ -339,7 +339,6 @@ void make_functor_arrfunc(Functor func, arrfunc_type_data *out_af)
 template <typename Functor>
 nd::arrfunc make_functor_arrfunc(Functor func)
 {
-std::cout << "faf " << __LINE__ << std::endl;
   nd::array af = nd::empty(ndt::make_arrfunc());
   make_functor_arrfunc(func, reinterpret_cast<arrfunc_type_data *>(
                                  af.get_readwrite_originptr()));
