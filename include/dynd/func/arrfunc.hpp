@@ -330,7 +330,8 @@ struct pod_arrfunc {
 
   void init(const nd::arrfunc &rhs)
   {
-    *reinterpret_cast<nd::arrfunc *>(&m_memblock) = rhs;
+    m_memblock = nd::array(rhs).get_memblock().get();
+    memory_block_incref(m_memblock);
   }
 
   void cleanup()
