@@ -19,6 +19,13 @@ nd::arrfunc get_regfunction(const nd::string &name);
   */
 void set_regfunction(const nd::string &name, const nd::arrfunc &af);
 
-}} // namespace dynd::func
+} // namespace func
+
+namespace init {
+void arrfunc_registry_init();
+void arrfunc_registry_cleanup();
+} // namespace init
+
+} // namespace dynd
 
 #endif // DYND__FUNC_ARRFUNC_REGISTRY_HPP

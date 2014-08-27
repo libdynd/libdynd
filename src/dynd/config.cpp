@@ -13,6 +13,7 @@
 #include <dynd/func/functor_arrfunc.hpp>
 #include <dynd/func/math_arrfunc.hpp>
 #include <dynd/types/datashape_parser.hpp>
+#include <dynd/func/arrfunc_registry.hpp>
 
 using namespace std;
 
@@ -33,6 +34,7 @@ int dynd::libdynd_init()
 {
   dynd::init::static_types_init();
   dynd::init::datashape_parser_init();
+  dynd::init::arrfunc_registry_init();
 #ifdef DYND_FFTW
   dynd::init::fft_init();
 #endif
@@ -48,6 +50,7 @@ void dynd::libdynd_cleanup()
 #ifdef DYND_FFTW
   dynd::init::fft_cleanup();
 #endif
+  dynd::init::arrfunc_registry_cleanup();
   dynd::init::datashape_parser_cleanup();
   dynd::init::static_types_cleanup();
 }
