@@ -45,8 +45,6 @@ fftwf_plan fftplan(std::vector<intptr_t> shape, fftwf_complex *src, std::vector<
 fftw_plan fftplan(std::vector<intptr_t> shape, fftw_complex *src, std::vector<intptr_t> src_strides,
     double *dst, std::vector<intptr_t> dst_strides, unsigned int flags, bool overwrite);
 
-void fftcleanup();
-
 nd::array fft(const nd::array &x, std::vector<intptr_t> shape, std::vector<intptr_t> axes,
     unsigned int flags = FFTW_MEASURE);
 nd::array ifft(const nd::array &x, std::vector<intptr_t> shape, std::vector<intptr_t> axes,
@@ -56,6 +54,15 @@ nd::array rfft(const nd::array &x, std::vector<intptr_t> shape, unsigned int fla
 nd::array irfft(const nd::array &x, std::vector<intptr_t> shape, unsigned int flags = FFTW_MEASURE);
 
 } // namespace fftw
+
+namespace init {
+/**
+ * These functions are called by libdynd_init/libdynd_cleanup.
+ */
+void fft_init();
+void fft_cleanup();
+} // namespace init
+
 #endif // DYND_FFTW
 
 #define DECL_INLINES(FUNC) \

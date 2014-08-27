@@ -123,6 +123,7 @@ void kernels::make_builtin_sum_reduction_arrfunc(
 
 nd::arrfunc kernels::make_builtin_sum1d_arrfunc(type_id_t tid)
 {
+std::cout << "rk " << __LINE__ << std::endl;
     nd::arrfunc sum_ew = kernels::make_builtin_sum_reduction_arrfunc(tid);
     nd::array sum_1d = nd::empty(ndt::make_arrfunc());
     bool reduction_dimflags[1] = {true};
@@ -211,6 +212,7 @@ namespace {
 
 nd::arrfunc kernels::make_builtin_mean1d_arrfunc(type_id_t tid, intptr_t minp)
 {
+std::cout << "rk " << __LINE__ << std::endl;
     if (tid != float64_type_id) {
         stringstream ss;
         ss << "make_builtin_mean1d_arrfunc: data type ";

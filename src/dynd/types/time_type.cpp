@@ -547,13 +547,3 @@ nd::array time_type::get_option_nafunc() const
     naf.flag_as_immutable();
     return naf;
 }
-
-const ndt::type& ndt::make_time()
-{
-    // Static instance of the type, which has a reference count > 0 for the
-    // lifetime of the program. This static construction is inside a
-    // function to ensure correct creation order during startup.
-    static time_type tt(tz_abstract);
-    static const ndt::type static_instance(&tt, true);
-    return static_instance;
-}

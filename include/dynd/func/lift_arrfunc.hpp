@@ -22,6 +22,7 @@ void lift_arrfunc(arrfunc_type_data *out_af, const nd::arrfunc &af);
 
 inline nd::arrfunc lift_arrfunc(const nd::arrfunc &af)
 {
+std::cout << "la " << __LINE__ << std::endl;
     nd::array out_af = nd::empty(ndt::make_arrfunc());
     lift_arrfunc(
         reinterpret_cast<arrfunc_type_data *>(out_af.get_readwrite_originptr()),

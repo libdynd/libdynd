@@ -8,6 +8,7 @@
 
 #include <dynd/type.hpp>
 #include <dynd/types/datetime_util.hpp>
+#include <dynd/types/static_type_instances.hpp>
 
 namespace dynd {
 
@@ -95,12 +96,16 @@ public:
 };
 
 namespace ndt {
-    /** Returns type "time" (with abstract/naive time zone) */
-    const ndt::type& make_time();
-    /** Returns type "time[tz=<timezone>]" */
-    inline ndt::type make_time(datetime_tz_t timezone) {
-        return ndt::type(new time_type(timezone), false);
-    }
+  /** Returns type "time" (with abstract/naive time zone) */
+  inline const ndt::type &make_time()
+  {
+    return *reinterpret_cast<const ndt::type *>(&types::time_tp);
+  }
+  /** Returns type "time[tz=<timezone>]" */
+  inline ndt::type make_time(datetime_tz_t timezone)
+  {
+    return ndt::type(new time_type(timezone), false);
+  }
 } // namespace ndt
 
 } // namespace dynd

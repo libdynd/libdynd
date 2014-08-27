@@ -611,13 +611,3 @@ bool date_type::reverse_adapt_type(const ndt::type &value_tp,
   // adapt_type
   return make_date_adapter_arrfunc(value_tp, op, out_reverse, out_forward);
 }
-
-const ndt::type& ndt::make_date()
-{
-  // Static instance of the type, which has a reference count > 0 for the
-  // lifetime of the program. This static construction is inside a
-  // function to ensure correct creation order during startup.
-  static date_type dt;
-  static const ndt::type static_instance(&dt, true);
-  return static_instance;
-}

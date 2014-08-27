@@ -339,12 +339,22 @@ namespace dynd {
 #endif
 
 namespace dynd {
-    /**
-     * A function which can be used at runtime to identify whether
-     * the build of dynd being linked against was built with CUDA
-     * support enabled.
-     */
-    bool built_with_cuda();
+  /**
+   * Function to call for initializing dynd's global state, such
+   * as cached ndt::type objects, the arrfunc registry, etc.
+   */
+  int libdynd_init();
+  /**
+   * Function to call to free all resources associated with
+   * dynd's global state, that were initialized by libdynd_init.
+   */
+  int libdynd_cleanup();
+  /**
+    * A function which can be used at runtime to identify whether
+    * the build of dynd being linked against was built with CUDA
+    * support enabled.
+    */
+  bool built_with_cuda();
 } // namespace dynd
 
 #include <dynd/cuda_config.hpp>

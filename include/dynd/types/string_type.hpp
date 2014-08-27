@@ -12,6 +12,7 @@
 #include <dynd/typed_data_assign.hpp>
 #include <dynd/types/view_type.hpp>
 #include <dynd/string_encodings.hpp>
+#include <dynd/types/static_type_instances.hpp>
 
 namespace dynd {
 
@@ -97,14 +98,21 @@ public:
 };
 
 namespace ndt {
-    /** Returns type "string" */
-    const ndt::type& make_string();
-    /** Returns type "string[<encoding>]" */
-    inline ndt::type make_string(string_encoding_t encoding) {
-        return ndt::type(new string_type(encoding), false);
-    }
-    /** Returns type "strided * string" */
-    const ndt::type& make_strided_of_string();
+  /** Returns type "string" */
+  inline const ndt::type &make_string()
+  {
+    return *reinterpret_cast<const ndt::type *>(&types::string_tp);
+  }
+  /** Returns type "string[<encoding>]" */
+  inline ndt::type make_string(string_encoding_t encoding)
+  {
+    return ndt::type(new string_type(encoding), false);
+  }
+  /** Returns type "strided * string" */
+  inline const ndt::type &make_strided_of_string()
+  {
+    return *reinterpret_cast<const ndt::type *>(&types::strided_of_string_tp);
+  }
 } // namespace ndt
 
 } // namespace dynd

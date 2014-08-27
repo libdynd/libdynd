@@ -10,7 +10,7 @@
 
 namespace dynd { namespace math {
 
-extern nd::arrfunc sin;
+extern nd::pod_arrfunc sin;
 
 }} // namespace dynd::math
 

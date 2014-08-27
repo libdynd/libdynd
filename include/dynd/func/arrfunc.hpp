@@ -244,6 +244,8 @@ public:
 
   inline operator nd::array() const { return m_value; }
 
+  inline void swap(nd::arrfunc &rhs) { m_value.swap(rhs.m_value); }
+
   /** Implements the general call operator */
   nd::array call(intptr_t arg_count, const nd::array *args,
                  const eval::eval_context *ectx) const;
@@ -305,6 +307,41 @@ public:
     call_out(4, args, out, &eval::default_eval_context);
   }
 };
+
+/**
+ * This is a helper class for creating static nd::arrfunc instances
+ * whose lifetime is managed by init/cleanup functions. When declared
+ * as a global static variable, because it is a POD type, this will begin with
+ * the value NULL. It can generally be treated just like an nd::arrfunc, though
+ * its internals are not protected from meddling.
+ */
+struct pod_arrfunc {
+  memory_block_data *m_memblock;
+
+  operator const nd::arrfunc &()
+  {
+    return *reinterpret_cast<const nd::arrfunc *>(&m_memblock);
+  }
+
+  inline const arrfunc_type_data *get() const
+  {
+    return reinterpret_cast<const nd::arrfunc *>(&m_memblock)->get();
+  }
+
+  void init(nd::arrfunc &rhs)
+  {
+    reinterpret_cast<nd::arrfunc *>(&m_memblock)->swap(rhs);
+  }
+
+  void cleanup()
+  {
+    if (m_memblock) {
+      memory_block_decref(m_memblock);
+      m_memblock = NULL;
+    }
+  }
+};
+
 } // namespace nd
 
 /**
@@ -327,6 +364,7 @@ inline nd::arrfunc make_arrfunc_from_assignment(const ndt::type &dst_tp,
                                                 const ndt::type &src_tp,
                                                 assign_error_mode errmode)
 {
+std::cout << "af " << __LINE__ << std::endl;
     nd::array af = nd::empty(ndt::make_arrfunc());
     make_arrfunc_from_assignment(
         dst_tp, src_tp, errmode,
@@ -352,6 +390,7 @@ void make_arrfunc_from_property(const ndt::type &tp,
 inline nd::arrfunc make_arrfunc_from_property(const ndt::type &tp,
                                               const std::string &propname)
 {
+std::cout << "af " << __LINE__ << std::endl;
     nd::array af = nd::empty(ndt::make_arrfunc());
     make_arrfunc_from_property(
         tp, propname,

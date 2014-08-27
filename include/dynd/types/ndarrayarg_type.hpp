@@ -12,10 +12,11 @@
  * of cycle collection.
  */
 
-#ifndef _DYND__NDARRAYARG_TYPE_HPP_
-#define _DYND__NDARRAYARG_TYPE_HPP_
+#ifndef DYND__TYPES_NDARRAYARG_TYPE_HPP
+#define DYND__TYPES_NDARRAYARG_TYPE_HPP
 
 #include <dynd/array.hpp>
+#include <dynd/types/static_type_instances.hpp>
 
 namespace dynd {
 
@@ -72,10 +73,13 @@ public:
 };
 
 namespace ndt {
-    ndt::type make_ndarrayarg();
+  inline const ndt::type &make_ndarrayarg()
+  {
+    return *reinterpret_cast<const ndt::type *>(&types::ndarrayarg_tp);
+  }
 } // namespace ndt
 
 } // namespace dynd
 
-#endif // _DYND__NDARRAYARG_TYPE_HPP_
+#endif // DYND__TYPES_NDARRAYARG_TYPE_HPP
  

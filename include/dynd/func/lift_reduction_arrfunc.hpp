@@ -63,6 +63,7 @@ inline nd::arrfunc lift_reduction_arrfunc(
     bool commutative, bool right_associative,
     const nd::array &reduction_identity)
 {
+std::cout << "lra " << __LINE__ << std::endl;
     nd::array out_af = nd::empty(ndt::make_arrfunc());
     lift_reduction_arrfunc(
         reinterpret_cast<arrfunc_type_data *>(out_af.get_readwrite_originptr()),

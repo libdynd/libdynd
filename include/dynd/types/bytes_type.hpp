@@ -9,6 +9,7 @@
 #include <dynd/type.hpp>
 #include <dynd/types/base_bytes_type.hpp>
 #include <dynd/typed_data_assign.hpp>
+#include <dynd/types/static_type_instances.hpp>
 
 namespace dynd {
 
@@ -84,9 +85,15 @@ public:
 };
 
 namespace ndt {
-    inline ndt::type make_bytes(size_t alignment) {
-        return ndt::type(new bytes_type(alignment), false);
-    }
+  inline const ndt::type &make_bytes()
+  {
+    return *reinterpret_cast<const ndt::type *>(&types::bytes_tp);
+  }
+
+  inline ndt::type make_bytes(size_t alignment)
+  {
+    return ndt::type(new bytes_type(alignment), false);
+  }
 } // namespace ndt
 
 } // namespace dynd

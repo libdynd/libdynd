@@ -439,20 +439,3 @@ nd::array string_type::get_option_nafunc() const
     naf.flag_as_immutable();
     return naf;
 }
-
-const ndt::type& ndt::make_string()
-{
-    // Static instance of type_type, which has a reference count > 0 for the
-    // lifetime of the program. This static construction is inside a
-    // function to ensure correct creation order during startup.
-    static string_type st(string_encoding_utf_8);
-    static const ndt::type static_instance(&st, true);
-    return static_instance;
-}
-
-const ndt::type& ndt::make_strided_of_string()
-{
-    static strided_dim_type sdt(ndt::make_string());
-    static const ndt::type static_instance(&sdt, true);
-    return static_instance;
-}

@@ -118,7 +118,7 @@ TYPED_TEST_P(ElwiseMethRetRes, MethRetRes) {
     EXPECT_EQ(6, res.as<TypeParam>());
 }
 
-typedef ::testing::Types<int, float, long, double> types;
+typedef ::testing::Types<int, float, long, double> test_types;
 
 REGISTER_TYPED_TEST_CASE_P(ElwiseMethRetRes, MethRetRes);
-INSTANTIATE_TYPED_TEST_CASE_P(Builtin, ElwiseMethRetRes, types);
+INSTANTIATE_TYPED_TEST_CASE_P(Builtin, ElwiseMethRetRes, test_types);

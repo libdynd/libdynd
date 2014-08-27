@@ -59,6 +59,7 @@ option_type::~option_type()
 
 const ndt::type &option_type::make_nafunc_type()
 {
+std::cout << "ot " << __LINE__ << std::endl;
   static ndt::type static_instance = ndt::make_cstruct(
       ndt::make_arrfunc(), "is_avail", ndt::make_arrfunc(), "assign_na");
   return static_instance;

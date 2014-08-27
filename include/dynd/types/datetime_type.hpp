@@ -11,6 +11,7 @@
 #include <dynd/types/view_type.hpp>
 #include <dynd/string_encodings.hpp>
 #include <dynd/types/datetime_util.hpp>
+#include <dynd/types/static_type_instances.hpp>
 
 namespace dynd {
 
@@ -102,12 +103,16 @@ public:
 };
 
 namespace ndt {
-    /** Returns type "datetime" (with abstract/naive time zone) */
-    const ndt::type& make_datetime();
-    /** Returns type "datetime[tz=<timezone>]" */
-    inline ndt::type make_datetime(datetime_tz_t timezone) {
-        return ndt::type(new datetime_type(timezone), false);
-    }
+  /** Returns type "datetime" (with abstract/naive time zone) */
+  inline const ndt::type &make_datetime()
+  {
+    return *reinterpret_cast<const ndt::type *>(&types::datetime_tp);
+  }
+  /** Returns type "datetime[tz=<timezone>]" */
+  inline ndt::type make_datetime(datetime_tz_t timezone)
+  {
+    return ndt::type(new datetime_type(timezone), false);
+  }
 } // namespace ndt
 
 } // namespace dynd

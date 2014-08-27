@@ -258,10 +258,3 @@ void arrfunc_type::get_dynamic_array_functions(
     *out_functions = arrfunc_array_functions;
     *out_count = sizeof(arrfunc_array_functions) / sizeof(arrfunc_array_functions[0]);
 }
-
-const ndt::type &ndt::make_arrfunc()
-{
-    static arrfunc_type aft;
-    static const ndt::type static_instance(&aft, true);
-    return static_instance;
-}
