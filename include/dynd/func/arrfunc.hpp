@@ -351,8 +351,6 @@ struct pod_arrfunc {
  *
  * \param dst_tp  The type of the destination.
  * \param src_tp  The type of the source.
- * \param funcproto  The function prototype to generate (must be
- *                   unary_operation_funcproto or expr_operation_funcproto).
  * \param errmode  The error mode to use for the assignment.
  * \param out_af  The output `arrfunc` struct to be populated.
  */
@@ -379,8 +377,6 @@ inline nd::arrfunc make_arrfunc_from_assignment(const ndt::type &dst_tp,
  *
  * \param tp  The type of the source.
  * \param propname  The name of the property.
- * \param funcproto  The function prototype to generate (must be
- *                   unary_operation_funcproto or expr_operation_funcproto).
  * \param out_af  The output `arrfunc` struct to be populated.
  */
 void make_arrfunc_from_property(const ndt::type &tp,
