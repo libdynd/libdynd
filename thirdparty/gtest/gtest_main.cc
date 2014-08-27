@@ -37,6 +37,6 @@ GTEST_API_ int main(int argc, char **argv) {
   printf("Running main() from gtest_main.cc\n");
   testing::InitGoogleTest(&argc, argv);
   dynd::libdynd_init();
-  onexit((onexit_t)&dynd::libdynd_cleanup);
+  atexit(&dynd::libdynd_cleanup);
   return RUN_ALL_TESTS();
 }

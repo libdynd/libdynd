@@ -348,7 +348,7 @@ namespace dynd {
    * Function to call to free all resources associated with
    * dynd's global state, that were initialized by libdynd_init.
    */
-  int libdynd_cleanup();
+  void libdynd_cleanup();
   /**
     * A function which can be used at runtime to identify whether
     * the build of dynd being linked against was built with CUDA

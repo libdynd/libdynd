@@ -42,7 +42,7 @@ int dynd::libdynd_init()
   return 0;
 }
 
-int dynd::libdynd_cleanup()
+void dynd::libdynd_cleanup()
 {
   math::sin.cleanup();
 #ifdef DYND_FFTW
@@ -50,6 +50,4 @@ int dynd::libdynd_cleanup()
 #endif
   dynd::init::datashape_parser_cleanup();
   dynd::init::static_types_cleanup();
-
-  return 0;
 }
