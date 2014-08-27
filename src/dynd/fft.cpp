@@ -28,12 +28,12 @@ static plans_map_type *plans;
 
 void init::fft_init()
 {
-  fftw::plans = new map<key_type, void *>();
+  fftw::plans = new map<fftw::key_type, void *>();
 }
 
 void init::fft_cleanup()
 {
-  for (map<key_type, void *>::iterator iter = fftw::plans->begin();
+  for (map<fftw::key_type, void *>::iterator iter = fftw::plans->begin();
        iter != fftw::plans->end(); ++iter) {
     switch (tr1::get<2>(iter->first)) {
     case float32_type_id:
@@ -49,8 +49,8 @@ void init::fft_cleanup()
     }
   }
 
-  delete plans;
-  plans = NULL;
+  delete dynd::fftw::plans;
+  dynd::fftw::plans = NULL;
 
   fftwf_cleanup();
   fftw_cleanup();
