@@ -208,6 +208,7 @@ set(libdynd_SRC
     src/dynd/types/option_type.cpp
     src/dynd/types/pointer_type.cpp
     src/dynd/types/property_type.cpp
+    src/dynd/types/static_type_instances.cpp
     src/dynd/types/strided_dim_type.cpp
     src/dynd/types/string_type.cpp
     src/dynd/types/struct_type.cpp
@@ -266,6 +267,7 @@ set(libdynd_SRC
     include/dynd/types/expr_type.hpp
     include/dynd/types/fixed_dim_type.hpp
     include/dynd/types/property_type.hpp
+    include/dynd/types/static_type_instances.hpp
     include/dynd/types/type_alignment.hpp
     include/dynd/types/cfixed_dim_type.hpp
     include/dynd/types/fixedbytes_type.hpp
@@ -315,7 +317,6 @@ set(libdynd_SRC
     src/dynd/func/elwise_reduce_gfunc.cpp
     src/dynd/func/lift_arrfunc.cpp
     src/dynd/func/lift_reduction_arrfunc.cpp
-    src/dynd/func/math_arrfunc.cpp
     src/dynd/func/rolling_arrfunc.cpp
     src/dynd/func/take_arrfunc.cpp
     include/dynd/func/arrfunc.hpp

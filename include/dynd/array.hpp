@@ -566,7 +566,7 @@ public:
      * This casts the entire type. If you want to cast the
      * array data type, use 'ucast' instead.
      *
-     * \param dt  The type into which the array should be cast.
+     * \param tp  The type into which the array should be cast.
      */
     array cast(const ndt::type& tp) const;
 
@@ -596,7 +596,7 @@ public:
      * Attempts to view the data of the array as a new dynd type,
      * raising an error if it cannot be done.
      *
-     * \param dt  The dynd type to view the entire data as.
+     * \param tp  The dynd type to view the entire data as.
      */
     array view(const ndt::type& tp) const;
 

@@ -7,6 +7,7 @@
 #define _DYND__ARRFUNC_TYPE_HPP_
 
 #include <dynd/type.hpp>
+#include <dynd/types/static_type_instances.hpp>
 
 namespace dynd {
 
@@ -53,7 +54,10 @@ public:
 };
 
 namespace ndt {
-    const ndt::type &make_arrfunc();
+  inline const ndt::type &make_arrfunc()
+  {
+    return *reinterpret_cast<const ndt::type *>(&types::arrfunc_tp);
+  }
 } // namespace ndt
 
 } // namespace dynd

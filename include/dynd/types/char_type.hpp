@@ -13,6 +13,7 @@
 #include <dynd/typed_data_assign.hpp>
 #include <dynd/types/view_type.hpp>
 #include <dynd/string_encodings.hpp>
+#include <dynd/types/static_type_instances.hpp>
 
 namespace dynd {
 
@@ -77,9 +78,17 @@ public:
 };
 
 namespace ndt {
-    inline ndt::type make_char(string_encoding_t encoding = string_encoding_utf_32) {
-        return ndt::type(new char_type(encoding), false);
-    }
+  inline const ndt::type &
+  make_char()
+  {
+    return *reinterpret_cast<const ndt::type *>(&types::char_tp);
+  }
+
+  inline ndt::type
+  make_char(string_encoding_t encoding)
+  {
+    return ndt::type(new char_type(encoding), false);
+  }
 } // namespace ndt
 
 } // namespace dynd

@@ -38,6 +38,11 @@ inline ndt::type type_from_datashape(const char (&datashape)[N])
     return type_from_datashape(datashape, datashape + N - 1);
 }
 
+namespace init {
+void datashape_parser_init();
+void datashape_parser_cleanup();
+}
+
 } // namespace dynd
 
 #endif // _DYND__DATASHAPE_PARSER_HPP_

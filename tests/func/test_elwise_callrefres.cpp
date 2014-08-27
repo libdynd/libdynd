@@ -225,7 +225,7 @@ TYPED_TEST_P(ElwiseCallRefRes, CallRefRes) {
     }
 }
 
-typedef ::testing::Types<int, float, long, double> types;
+typedef ::testing::Types<int, float, long, double> test_types;
 
 REGISTER_TYPED_TEST_CASE_P(ElwiseCallRefRes, CallRefRes);
-INSTANTIATE_TYPED_TEST_CASE_P(Builtin, ElwiseCallRefRes, types);
+INSTANTIATE_TYPED_TEST_CASE_P(Builtin, ElwiseCallRefRes, test_types);

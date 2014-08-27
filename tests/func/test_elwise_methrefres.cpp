@@ -224,7 +224,7 @@ TYPED_TEST_P(ElwiseMethRefRes, MethRefRes) {
     }
 }
 
-typedef ::testing::Types<int, float, long, double> types;
+typedef ::testing::Types<int, float, long, double> test_types;
 
 REGISTER_TYPED_TEST_CASE_P(ElwiseMethRefRes, MethRefRes);
-INSTANTIATE_TYPED_TEST_CASE_P(Builtin, ElwiseMethRefRes, types);
+INSTANTIATE_TYPED_TEST_CASE_P(Builtin, ElwiseMethRefRes, test_types);

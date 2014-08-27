@@ -50,7 +50,7 @@ inline nd::array range(const irange& i) {
  * \param start  The value placed at index 0 of the result.
  * \param stop  The value placed at index count-1 of the result.
  * \param count  The size of the result's first dimension.
- * \param dt  The required dtype of the output.
+ * \param tp  The required dtype of the output.
  */
 nd::array linspace(const nd::array& start, const nd::array& stop, intptr_t count, const ndt::type& tp);
 

@@ -18,8 +18,6 @@ namespace dynd {
  * rolling window fashion.
  *
  * \param out_af  The output arrfunc which is filled.
- * \param dst_tp  The destination type for the resulting arrfunc.
- * \param src_tp  The source type for the resulting arrfunc.
  * \param window_op  A arrfunc object which should be applied to each
  *                   window. The types of this ckernel must match appropriately
  *                   with `dst_tp` and `src_tp`.

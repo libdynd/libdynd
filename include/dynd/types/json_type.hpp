@@ -65,9 +65,10 @@ public:
 };
 
 namespace ndt {
-    inline ndt::type make_json() {
-        return ndt::type(new json_type(), false);
-    }
+  inline ndt::type make_json()
+  {
+    return *reinterpret_cast<const ndt::type *>(&types::json_tp);
+  }
 } // namespace ndt
 
 } // namespace dynd

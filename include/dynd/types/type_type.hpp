@@ -8,6 +8,7 @@
 
 #include <dynd/type.hpp>
 #include <dynd/typed_data_assign.hpp>
+#include <dynd/types/static_type_instances.hpp>
 
 namespace dynd {
 
@@ -64,10 +65,16 @@ public:
 };
 
 namespace ndt {
-    /** Returns type "type" */
-    const ndt::type& make_type();
-    /** Returns type "strided * type" */
-    const ndt::type& make_strided_of_type();
+  /** Returns type "type" */
+  inline const ndt::type &make_type()
+  {
+    return *reinterpret_cast<const ndt::type *>(&types::type_tp);
+  }
+  /** Returns type "strided * type" */
+  inline const ndt::type &make_strided_of_type()
+  {
+    return *reinterpret_cast<const ndt::type *>(&types::strided_of_type_tp);
+  }
 } // namespace ndt
 
 } // namespace dynd
