@@ -5,6 +5,8 @@
 
 #include <dynd/func/arrfunc.hpp>
 #include <dynd/func/arrfunc_registry.hpp>
+#include <dynd/func/functor_arrfunc.hpp>
+#include <dynd/func/lift_arrfunc.hpp>
 
 #include <map>
 
@@ -18,6 +20,13 @@ static map<nd::string, nd::arrfunc> *registry;
 void init::arrfunc_registry_init()
 {
   registry = new map<nd::string, nd::arrfunc>;
+
+  func::set_regfunction("sin", lift_arrfunc(nd::make_functor_arrfunc(
+                                   static_cast<double (*)(double)>(&::sin))));
+  func::set_regfunction("cos", lift_arrfunc(nd::make_functor_arrfunc(
+                                   static_cast<double (*)(double)>(&::cos))));
+  func::set_regfunction("exp", lift_arrfunc(nd::make_functor_arrfunc(
+                                   static_cast<double (*)(double)>(&::exp))));
 }
 
 void init::arrfunc_registry_cleanup()

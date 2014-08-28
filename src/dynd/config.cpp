@@ -11,15 +11,10 @@
 
 // TODO: Move elsewhere
 #include <dynd/func/functor_arrfunc.hpp>
-#include <dynd/func/math_arrfunc.hpp>
 #include <dynd/types/datashape_parser.hpp>
 #include <dynd/func/arrfunc_registry.hpp>
 
 using namespace std;
-
-namespace dynd { namespace math {
-  nd::pod_arrfunc sin;
-}}
 
 bool dynd::built_with_cuda()
 {
@@ -38,15 +33,12 @@ int dynd::libdynd_init()
 #ifdef DYND_FFTW
   dynd::init::fft_init();
 #endif
-  math::sin.init(
-      nd::make_functor_arrfunc(static_cast<double (*)(double)>(&::sin)));
 
   return 0;
 }
 
 void dynd::libdynd_cleanup()
 {
-  math::sin.cleanup();
 #ifdef DYND_FFTW
   dynd::init::fft_cleanup();
 #endif
