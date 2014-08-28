@@ -6,9 +6,10 @@
 #include <dynd/type.hpp>
 #include <dynd/types/base_dim_type.hpp>
 
+#include <dynd/types/string_type.hpp>
+
 using namespace std;
 using namespace dynd;
-
 
 base_dim_type::~base_dim_type() {
 }

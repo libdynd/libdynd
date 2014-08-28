@@ -102,7 +102,7 @@ intptr_t dynd::make_chain_buf_tp_ckernel(
     self->m_buf_tp = buf_tp;
     arrmeta_holder(buf_tp).swap(self->m_buf_arrmeta);
     if (buf_tp.get_ndim() == 0 || first->resolve_dst_shape == NULL) {
-      self->m_buf_arrmeta.arrmeta_default_construct(0, NULL);
+      self->m_buf_arrmeta.arrmeta_default_construct(0, NULL, true);
       self->m_buf_shape.push_back(DYND_BUFFER_CHUNK_SIZE);
     } else {
       intptr_t ndim = buf_tp.get_ndim();
@@ -110,7 +110,7 @@ intptr_t dynd::make_chain_buf_tp_ckernel(
       shape[0] = DYND_BUFFER_CHUNK_SIZE;
       first->resolve_dst_shape(first, &shape[0] + 1, buf_tp, src_tp,
                                src_arrmeta, NULL);
-      self->m_buf_arrmeta.arrmeta_default_construct(ndim, &shape[0] + 1);
+      self->m_buf_arrmeta.arrmeta_default_construct(ndim, &shape[0] + 1, true);
       self->m_buf_shape.swap(shape);
     }
     ckb_offset = first->instantiate(first, ckb, ckb_offset, buf_tp,

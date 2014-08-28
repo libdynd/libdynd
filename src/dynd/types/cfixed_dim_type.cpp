@@ -343,7 +343,8 @@ bool cfixed_dim_type::operator==(const base_type &rhs) const
 }
 
 void cfixed_dim_type::arrmeta_default_construct(char *arrmeta, intptr_t ndim,
-                                                const intptr_t *shape) const
+                                                const intptr_t *shape,
+                                                bool blockref_alloc) const
 {
   // Validate that the shape is ok
   if (ndim > 0) {
@@ -363,7 +364,7 @@ void cfixed_dim_type::arrmeta_default_construct(char *arrmeta, intptr_t ndim,
   if (!m_element_tp.is_builtin()) {
     m_element_tp.extended()->arrmeta_default_construct(
         arrmeta + sizeof(cfixed_dim_type_arrmeta), ndim ? (ndim - 1) : 0,
-        shape + 1);
+        shape + 1, blockref_alloc);
   }
 }
 

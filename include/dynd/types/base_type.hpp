@@ -427,11 +427,23 @@ public:
         return m_members.arrmeta_size;
     }
     /**
-     * Constructs the nd::array arrmeta for this type, prepared for writing.
-     * The element size of the result must match that from get_default_data_size().
+     * Constructs the nd::array arrmeta for this type using default settings.
+     * The element size of the result must match that from
+     * get_default_data_size().
+     *
+     * \param arrmeta  The arrmeta to default construct.
+     * \param ndim  Number of dimensions in the provided shape.
+     * \param shape  The array shape to use when shape is not from the type.
+     * \param blockref_alloc  If ``true``, blockref types should allocate
+     *                        writable memory blocks, and if ``false``, they
+     *                        should set their blockrefs to NULL. The latter
+     *                        indicates the blockref memory is owned by
+     *                        the parent nd::array, and is useful for viewing
+     *                        external memory with compatible layout.
      */
     virtual void arrmeta_default_construct(char *arrmeta, intptr_t ndim,
-                                           const intptr_t *shape) const;
+                                           const intptr_t *shape,
+                                           bool blockref_alloc) const;
     /**
      * Constructs the nd::array arrmeta for this type, copying everything exactly from
      * input arrmeta for the same type.

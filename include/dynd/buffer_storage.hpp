@@ -58,7 +58,7 @@ class buffer_storage {
       try
       {
         m_arrmeta = new char[metasize];
-        m_type.extended()->arrmeta_default_construct(m_arrmeta, 0, NULL);
+        m_type.extended()->arrmeta_default_construct(m_arrmeta, 0, NULL, true);
       }
       catch (const std::exception &)
       {

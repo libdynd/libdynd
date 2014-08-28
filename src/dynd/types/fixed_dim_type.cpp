@@ -300,7 +300,8 @@ bool fixed_dim_type::operator==(const base_type &rhs) const
 }
 
 void fixed_dim_type::arrmeta_default_construct(char *arrmeta, intptr_t ndim,
-                                               const intptr_t *shape) const
+                                               const intptr_t *shape,
+                                               bool blockref_alloc) const
 {
   // Validate that the shape is ok
   if (ndim > 0 && shape[0] >= 0 && shape[0] != (intptr_t)m_dim_size) {
@@ -320,7 +321,8 @@ void fixed_dim_type::arrmeta_default_construct(char *arrmeta, intptr_t ndim,
   md->stride = m_dim_size > 1 ? element_size : 0;
   if (!m_element_tp.is_builtin()) {
     m_element_tp.extended()->arrmeta_default_construct(
-        arrmeta + sizeof(fixed_dim_type_arrmeta), ndim - 1, shape + 1);
+        arrmeta + sizeof(fixed_dim_type_arrmeta), ndim - 1, shape + 1,
+        blockref_alloc);
   }
 }
 

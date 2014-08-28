@@ -71,7 +71,9 @@ public:
 
     virtual ndt::type with_replaced_storage_type(const ndt::type& storage_tp) const = 0;
 
-    virtual void arrmeta_default_construct(char *arrmeta, intptr_t ndim, const intptr_t* shape) const;
+    virtual void arrmeta_default_construct(char *arrmeta, intptr_t ndim,
+                                           const intptr_t *shape,
+                                           bool blockref_alloc) const;
     virtual void arrmeta_copy_construct(char *dst_arrmeta, const char *src_arrmeta, memory_block_data *embedded_reference) const;
     virtual void arrmeta_destruct(char *arrmeta) const;
 

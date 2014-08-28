@@ -249,54 +249,60 @@ intptr_t base_tuple_type::apply_linear_index(intptr_t nindices, const irange *in
 }
 
 void base_tuple_type::arrmeta_default_construct(char *arrmeta, intptr_t ndim,
-                                                 const intptr_t *shape) const
+                                                const intptr_t *shape,
+                                                bool blockref_alloc) const
 {
-    // Validate that the shape is ok
-    if (ndim > 0) {
-        if (shape[0] >= 0 && shape[0] != get_field_count()) {
-            stringstream ss;
-            ss << "Cannot construct dynd object of type " << ndt::type(this, true);
-            ss << " with dimension size " << shape[0] << ", the size must be " << get_field_count();
-            throw dynd::type_error(ss.str());
-        }
+  // Validate that the shape is ok
+  if (ndim > 0) {
+    if (shape[0] >= 0 && shape[0] != get_field_count()) {
+      stringstream ss;
+      ss << "Cannot construct dynd object of type " << ndt::type(this, true);
+      ss << " with dimension size " << shape[0] << ", the size must be "
+         << get_field_count();
+      throw dynd::type_error(ss.str());
     }
+  }
 
-    const uintptr_t *arrmeta_offsets = get_arrmeta_offsets_raw();
-    uintptr_t *data_offsets = get_arrmeta_data_offsets(arrmeta);
-    if (data_offsets == NULL) {
-        for (intptr_t i = 0, i_end = get_field_count(); i != i_end; ++i) {
-            const ndt::type& field_dt = get_field_type(i);
-            if (!field_dt.is_builtin()) {
-                field_dt.extended()->arrmeta_default_construct(
-                    arrmeta + arrmeta_offsets[i], ndim, shape);
-            }
-        }
-    } else {
-        size_t offs = 0;
-        for (intptr_t i = 0, i_end = get_field_count(); i != i_end; ++i) {
-            const ndt::type& field_dt = get_field_type(i);
-            offs = inc_to_alignment(offs, field_dt.get_data_alignment());
-            data_offsets[i] = offs;
-            if (!field_dt.is_builtin()) {
-                try {
-                    field_dt.extended()->arrmeta_default_construct(
-                                arrmeta + arrmeta_offsets[i], ndim, shape);
-                } catch(...) {
-                    // Since we're explicitly controlling the memory, need to manually do the cleanup too
-                    for (intptr_t j = 0; j < i; ++j) {
-                        const ndt::type& ft = get_field_type(j);
-                        if (!ft.is_builtin()) {
-                            ft.extended()->arrmeta_destruct(arrmeta + arrmeta_offsets[i]);
-                        }
-                    }
-                    throw;
-                }
-                offs += field_dt.extended()->get_default_data_size(ndim, shape);
-            } else {
-                offs += field_dt.get_data_size();
-            }
-        }
+  const uintptr_t *arrmeta_offsets = get_arrmeta_offsets_raw();
+  uintptr_t *data_offsets = get_arrmeta_data_offsets(arrmeta);
+  if (data_offsets == NULL) {
+    for (intptr_t i = 0, i_end = get_field_count(); i != i_end; ++i) {
+      const ndt::type &field_dt = get_field_type(i);
+      if (!field_dt.is_builtin()) {
+        field_dt.extended()->arrmeta_default_construct(
+            arrmeta + arrmeta_offsets[i], ndim, shape, blockref_alloc);
+      }
     }
+  } else {
+    size_t offs = 0;
+    for (intptr_t i = 0, i_end = get_field_count(); i != i_end; ++i) {
+      const ndt::type &field_dt = get_field_type(i);
+      offs = inc_to_alignment(offs, field_dt.get_data_alignment());
+      data_offsets[i] = offs;
+      if (!field_dt.is_builtin()) {
+        try
+        {
+          field_dt.extended()->arrmeta_default_construct(
+              arrmeta + arrmeta_offsets[i], ndim, shape, blockref_alloc);
+        }
+        catch (...)
+        {
+          // Since we're explicitly controlling the memory, need to manually do
+          // the cleanup too
+          for (intptr_t j = 0; j < i; ++j) {
+            const ndt::type &ft = get_field_type(j);
+            if (!ft.is_builtin()) {
+              ft.extended()->arrmeta_destruct(arrmeta + arrmeta_offsets[i]);
+            }
+          }
+          throw;
+        }
+        offs += field_dt.extended()->get_default_data_size(ndim, shape);
+      } else {
+        offs += field_dt.get_data_size();
+      }
+    }
+  }
 }
 
 void base_tuple_type::arrmeta_copy_construct(

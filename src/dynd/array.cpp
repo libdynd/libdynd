@@ -113,8 +113,8 @@ nd::array nd::make_strided_array(const ndt::type &dtp, intptr_t ndim,
             stride = dtp.extended()->get_default_data_size(0, NULL);
         }
         if (!dtp.is_builtin()) {
-            dtp.extended()->arrmeta_default_construct(
-                            reinterpret_cast<char *>(meta + ndim), 0, NULL);
+          dtp.extended()->arrmeta_default_construct(
+              reinterpret_cast<char *>(meta + ndim), 0, NULL, true);
         }
         if (axis_perm == NULL) {
             for (ptrdiff_t i = (ptrdiff_t)ndim - 1; i >= 0; --i) {
@@ -139,7 +139,7 @@ nd::array nd::make_strided_array(const ndt::type &dtp, intptr_t ndim,
         }
         // Fill in the array arrmeta with strides and sizes
         char *meta = reinterpret_cast<char *>(ndo + 1);
-        ndo->m_type->arrmeta_default_construct(meta, ndim, shape);
+        ndo->m_type->arrmeta_default_construct(meta, ndim, shape, true);
     }
 
     return array(result);
@@ -1581,6 +1581,10 @@ void nd::array::debug_print(std::ostream& o, const std::string& indent) const
         o << " type:\n";
         o << "  pointer: " << (void *)ndo->m_type << "\n";
         o << "  type: " << get_type() << "\n";
+        if (!get_type().is_builtin()) {
+          o << "  type refcount: " << get_type().extended()->get_use_count()
+            << "\n";
+        }
         o << " arrmeta:\n";
         o << "  flags: " << ndo->m_flags << " (";
         if (ndo->m_flags & read_access_flag) o << "read_access ";
@@ -1718,7 +1722,7 @@ nd::array nd::typed_empty(intptr_t ndim, const intptr_t *shape,
     array_preamble *preamble = reinterpret_cast<array_preamble *>(result.get());
     preamble->m_type = ndt::type(tp).release();
     preamble->m_type->arrmeta_default_construct(
-        reinterpret_cast<char *>(preamble + 1), ndim, shape);
+        reinterpret_cast<char *>(preamble + 1), ndim, shape, true);
     preamble->m_data_pointer = data_ptr;
     preamble->m_data_reference = NULL;
     preamble->m_flags = nd::read_access_flag | nd::write_access_flag;

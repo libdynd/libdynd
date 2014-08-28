@@ -326,25 +326,33 @@ bool strided_dim_type::operator==(const base_type& rhs) const
     }
 }
 
-void strided_dim_type::arrmeta_default_construct(char *arrmeta, intptr_t ndim, const intptr_t* shape) const
+void strided_dim_type::arrmeta_default_construct(char *arrmeta, intptr_t ndim,
+                                                 const intptr_t *shape,
+                                                 bool blockref_alloc) const
 {
-    // Validate that the shape is ok
-    if (ndim == 0 || shape[0] < 0) {
-        throw std::runtime_error("the strided_dim type requires a shape be specified for default construction");
-    }
-    size_t element_size = m_element_tp.is_builtin() ? m_element_tp.get_data_size()
-                                                     : m_element_tp.extended()->get_default_data_size(ndim-1, shape+1);
+  // Validate that the shape is ok
+  if (ndim == 0 || shape[0] < 0) {
+    throw std::runtime_error("the strided_dim type requires a shape be "
+                             "specified for default construction");
+  }
+  size_t element_size =
+      m_element_tp.is_builtin()
+          ? m_element_tp.get_data_size()
+          : m_element_tp.extended()->get_default_data_size(ndim - 1, shape + 1);
 
-    strided_dim_type_arrmeta *md = reinterpret_cast<strided_dim_type_arrmeta *>(arrmeta);
-    md->dim_size = shape[0];
-    if (shape[0] > 1) {
-        md->stride = element_size;
-    } else {
-        md->stride = 0;
-    }
-    if (!m_element_tp.is_builtin()) {
-        m_element_tp.extended()->arrmeta_default_construct(arrmeta + sizeof(strided_dim_type_arrmeta), ndim-1, shape+1);
-    }
+  strided_dim_type_arrmeta *md =
+      reinterpret_cast<strided_dim_type_arrmeta *>(arrmeta);
+  md->dim_size = shape[0];
+  if (shape[0] > 1) {
+    md->stride = element_size;
+  } else {
+    md->stride = 0;
+  }
+  if (!m_element_tp.is_builtin()) {
+    m_element_tp.extended()->arrmeta_default_construct(
+        arrmeta + sizeof(strided_dim_type_arrmeta), ndim - 1, shape + 1,
+        blockref_alloc);
+  }
 }
 
 void strided_dim_type::arrmeta_copy_construct(char *dst_arrmeta, const char *src_arrmeta, memory_block_data *embedded_reference) const
