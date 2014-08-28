@@ -266,17 +266,17 @@ pointer_type::with_replaced_storage_type(const ndt::type & /*replacement_tp*/)
 }
 
 void pointer_type::arrmeta_default_construct(char *arrmeta, intptr_t ndim,
-                                             const intptr_t *shape) const
+                                             const intptr_t *shape,
+                                             bool blockref_alloc) const
 {
-    // Simply allocate a POD memory block
-    // TODO: Will need a different kind of memory block if the data isn't POD.
-    pointer_type_arrmeta *md =
-        reinterpret_cast<pointer_type_arrmeta *>(arrmeta);
-    md->blockref = make_pod_memory_block().release();
-    if (!m_target_tp.is_builtin()) {
-        m_target_tp.extended()->arrmeta_default_construct(
-            arrmeta + sizeof(pointer_type_arrmeta), ndim, shape);
-    }
+  // Simply allocate a POD memory block
+  // TODO: Will need a different kind of memory block if the data isn't POD.
+  pointer_type_arrmeta *md = reinterpret_cast<pointer_type_arrmeta *>(arrmeta);
+  md->blockref = make_pod_memory_block().release();
+  if (!m_target_tp.is_builtin()) {
+    m_target_tp.extended()->arrmeta_default_construct(
+        arrmeta + sizeof(pointer_type_arrmeta), ndim, shape, blockref_alloc);
+  }
 }
 
 void pointer_type::arrmeta_copy_construct(char *dst_arrmeta,

@@ -114,7 +114,8 @@ static bool try_view(const ndt::type &tp, const char *arrmeta,
                tp.get_data_alignment() >= view_tp.get_data_alignment()) {
       // POD types with matching properties
       if (view_tp.get_arrmeta_size() > 0) {
-        view_tp.extended()->arrmeta_default_construct(view_arrmeta, 0, NULL);
+        view_tp.extended()->arrmeta_default_construct(view_arrmeta, 0, NULL,
+                                                      true);
       }
       return true;
     } else {
@@ -359,7 +360,8 @@ static nd::array view_from_bytes(const nd::array &arr, const ndt::type &tp)
       result.get_ndo()->m_type = ndt::type(tp).release();
       result.get_ndo()->m_flags = arr.get_ndo()->m_flags;
       if (tp.get_arrmeta_size() > 0) {
-        tp.extended()->arrmeta_default_construct(result.get_arrmeta(), 0, NULL);
+        tp.extended()->arrmeta_default_construct(result.get_arrmeta(), 0, NULL,
+                                                 true);
       }
       return result;
     }
@@ -380,7 +382,8 @@ static nd::array view_from_bytes(const nd::array &arr, const ndt::type &tp)
       result.get_ndo()->m_flags = arr.get_ndo()->m_flags;
       if (el_tp.get_arrmeta_size() > 0) {
         el_tp.extended()->arrmeta_default_construct(
-            result.get_arrmeta() + sizeof(strided_dim_type_arrmeta), 0, NULL);
+            result.get_arrmeta() + sizeof(strided_dim_type_arrmeta), 0, NULL,
+            true);
       }
       strided_dim_type_arrmeta *strided_meta =
           reinterpret_cast<strided_dim_type_arrmeta *>(result.get_arrmeta());

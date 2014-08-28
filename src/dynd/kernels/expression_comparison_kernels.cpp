@@ -41,7 +41,7 @@ namespace {
                     if (b.arrmeta == NULL) {
                         throw bad_alloc();
                     }
-                    b.tp->arrmeta_default_construct(b.arrmeta, 0, NULL);
+                    b.tp->arrmeta_default_construct(b.arrmeta, 0, NULL, true);
                 }
                 // Make sure the buffer data size is pointer size-aligned
                 b.data_size = inc_to_alignment(b.tp->get_default_data_size(0, NULL),
