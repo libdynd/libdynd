@@ -53,7 +53,7 @@ struct neighborhood2d_ck : public kernels::expr_ck<neighborhood2d_ck, 2> {
       nh_op_fn(dst, m_dst_strides[1], src_it, src_it_strides,
                m_shape[1] - nh_arrmeta[1].dim_size + 1, nh_op);
       dst += m_dst_strides[0];
-      src_it_strides[0] += m_src_strides[0];
+      src_it[0] += m_src_strides[0];
     }
   }
 };
@@ -113,6 +113,9 @@ static intptr_t instantiate_neighborhood2d(
   nh_src0_arrmeta[1].dim_size = nh->nh_shape[1];
   nh_src0_arrmeta[1].stride = src0_shape[1].stride;
   const char *nh_src_arrmeta[1] = {self->m_nh_arrmeta.get()};
+
+  self->m_src_strides[0] = src0_shape[0].stride;
+  self->m_src_strides[1] = src0_shape[1].stride;
 
   // Verify that the src0 and dst shapes match
   if (self->m_shape[0] != src0_shape[0].dim_size ||
