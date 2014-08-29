@@ -759,9 +759,24 @@ static bool parse_struct_item(const char *&rbegin, const char *end,
 {
     const char *begin = rbegin;
     const char *field_name_begin, *field_name_end;
+    //quoted_out_val and quoted_name are used to hold the field name and to  denote if the data given 
+    //  to this function needed special handling due to quoting of the struct field names.
+    string quoted_out_val;
+    bool quoted_name=false;
     parse::skip_whitespace_and_pound_comments(begin, end);
-    if (!parse::parse_name_no_ws(begin, end, field_name_begin, field_name_end)) {
-        return false;
+    if (parse::parse_name_no_ws(begin, end, field_name_begin, field_name_end)) {
+      //We successfully parsed a name with no whitespace
+      //We don't need to do anything else, because field_name_begin 
+    }
+    else if (parse_quoted_string(begin, end, quoted_out_val)) {
+      //parse_quoted_string must return a new string for us to use because it will parse
+      //  and potentially replace things in the string (like escaped characters)
+      //It will also remove the surrounding quotes.
+      quoted_name=true;
+    }
+    else{
+      //This struct item cannot be parsed. Ergo, we return false for failure.
+      return false;
     }
     if (!parse_token_ds(begin, end , ':')) {
         throw datashape_parse_error(begin, "expected ':' after record item name");
@@ -778,7 +793,15 @@ static bool parse_struct_item(const char *&rbegin, const char *end,
         throw datashape_parse_error(begin, "expected closing ')'");
     }
 
-    out_field_name.assign(field_name_begin, field_name_end);
+    if (!quoted_name) {
+      //A name that isn't quoted is probably the common case
+      out_field_name.assign(field_name_begin, field_name_end);
+    }
+    else{
+      //If a field name was quoted, parse_quoted_string() will have parsed and un/re-escaped everything and returned a new string
+      //The Return of the String is why we have two different out_field_name.assign() cases
+      out_field_name.assign(quoted_out_val);
+    }
     rbegin = begin;
     return true;
 }
