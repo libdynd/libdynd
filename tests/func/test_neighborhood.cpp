@@ -42,7 +42,7 @@ TEST(Neighborhood, Sum) {
   nd::array b = nd::empty<float[4][4]>();
   b.vals() = 0;
 
-  naf.call_out(a.view(ndt::type("strided * strided * float32")), b);
+  naf.call_out(a, b);
   cout << a << endl;
   cout << b << endl;
 }
