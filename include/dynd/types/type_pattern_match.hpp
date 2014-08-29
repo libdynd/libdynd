@@ -38,8 +38,8 @@ bool pattern_match(const ndt::type &concrete, const ndt::type &pattern,
  */
 inline bool pattern_match(const ndt::type &concrete, const ndt::type &pattern)
 {
-  if (!pattern.is_symbolic()) {
-    return concrete == pattern;
+  if (concrete.extended() == pattern.extended()) {
+    return true;
   } else {
     std::map<nd::string, ndt::type> typevars;
     return pattern_match(concrete, pattern, typevars);

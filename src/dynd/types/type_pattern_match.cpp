@@ -21,11 +21,6 @@ using namespace dynd;
 static bool recursive_match(const ndt::type &concrete, const ndt::type &pattern,
                             std::map<nd::string, ndt::type> &typevars)
 {
-  if (!pattern.is_symbolic()) {
-    // If both are concrete, it's just an equality check
-    return concrete == pattern;
-  }
-
   if (concrete.get_ndim() == 0) {
     if (pattern.get_ndim() == 0) {
       // Matching a scalar vs scalar
@@ -127,7 +122,7 @@ static bool recursive_match(const ndt::type &concrete, const ndt::type &pattern,
             return false;
           }
         default:
-          return false;
+          return pattern == concrete;
         }
       } else {
         return false;
@@ -197,6 +192,28 @@ static bool recursive_match(const ndt::type &concrete, const ndt::type &pattern,
       ss << "Type pattern matching between dimension types " << concrete
          << " and " << pattern << " is not yet implemented";
       throw type_error(ss.str());
+    } else if (pattern.get_type_id() == strided_dim_type_id) {
+      // fixed[N] and cfixed[M] matches against strided, and has
+      // identical arrmeta
+      if (concrete.get_type_id() == fixed_dim_type_id ||
+          concrete.get_type_id() == cfixed_dim_type_id) {
+        return recursive_match(
+            concrete.tcast<base_dim_type>()->get_element_type(),
+            pattern.tcast<base_dim_type>()->get_element_type(), typevars);
+      } else {
+        return false;
+      }
+    } else if (pattern.get_type_id() == fixed_dim_type_id) {
+      // cfixed[N] matches against fixed[N], and has identical arrmeta
+      if (concrete.get_type_id() == cfixed_dim_type_id &&
+          pattern.tcast<fixed_dim_type>()->get_fixed_dim_size() ==
+              concrete.tcast<cfixed_dim_type>()->get_fixed_dim_size()) {
+        return recursive_match(
+            concrete.tcast<base_dim_type>()->get_element_type(),
+            pattern.tcast<base_dim_type>()->get_element_type(), typevars);
+      } else {
+        return false;
+      }
     } else if (pattern.get_type_id() == ellipsis_dim_type_id) {
       // Match the number of concrete dimensions required on
       // the left

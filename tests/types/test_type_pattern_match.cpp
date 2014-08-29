@@ -93,3 +93,23 @@ TEST(TypePatternMatch, FuncProto) {
       ndt::type("(int32, strided * var * 2 * int16) -> float32"),
       ndt::type("(S, M * 2 * int16) -> T")));
 }
+
+TEST(TypePatternMatch, Strided) {
+  // cfixed and fixed can match against strided
+  EXPECT_TRUE(ndt::pattern_match(ndt::type("cfixed[3] * int32"),
+                                 ndt::type("strided * int32")));
+  EXPECT_TRUE(
+      ndt::pattern_match(ndt::type("3 * int32"), ndt::type("strided * int32")));
+  // cfixed can match against strided if the sizes match
+  EXPECT_TRUE(ndt::pattern_match(ndt::type("cfixed[3] * int32"),
+                                 ndt::type("3 * int32")));
+  // Things do not hold in other cases
+  EXPECT_FALSE(ndt::pattern_match(ndt::type("strided * int32"),
+                                  ndt::type("cfixed[3] * int32")));
+  EXPECT_FALSE(
+      ndt::pattern_match(ndt::type("strided * int32"), ndt::type("3 * int32")));
+  EXPECT_FALSE(ndt::pattern_match(ndt::type("3 * int32"),
+                                  ndt::type("cfixed[3] * int32")));
+  EXPECT_FALSE(ndt::pattern_match(ndt::type("cfixed[3] * int32"),
+                                  ndt::type("4 * int32")));
+}
