@@ -529,6 +529,7 @@ TEST(DataShapeParser, SpecialCharacterFields){
     - forwardslash?
     - parens?
     - date and time?
+    - numbers
    */
 
   //p_dt == primary_datatype, s_dt == secondary_datatype
@@ -794,7 +795,7 @@ TEST(DataShapeParser, SpecialCharacterFields){
   ss<<p_dt; s_dt=type_from_datashape(ss.str()); ss.str("");
   EXPECT_EQ(p_dt, s_dt);
 
-
+  //Testing forward slashes
   p_dt=type_from_datashape("{ '/usr/bin' : float64 }");
   EXPECT_EQ(p_dt, ndt::make_struct(ndt::make_type<double>(), "/usr/bin"));
   ss<<p_dt; s_dt=type_from_datashape(ss.str()); ss.str("");
@@ -826,6 +827,19 @@ TEST(DataShapeParser, SpecialCharacterFields){
   EXPECT_EQ(p_dt, ndt::make_cstruct(ndt::make_type<int>(), "a field with spaces and \" \'"));
   ss<<p_dt; s_dt=type_from_datashape(ss.str()); ss.str("");
   EXPECT_EQ(p_dt, s_dt);
+
+  //Testing field names as numbers
+  p_dt=type_from_datashape("{ '1234' : float64, '-1234':float64,'500=1234':float64 }");
+  EXPECT_EQ(p_dt, ndt::make_struct(ndt::make_type<double>(), "1234", ndt::make_type<double>(), "-1234",ndt::make_type<double>(), "500=1234"));
+  ss<<p_dt; s_dt=type_from_datashape(ss.str()); ss.str("");
+  EXPECT_EQ(p_dt, s_dt);
+
+  p_dt=type_from_datashape("c{ '1234' : float64, '-1234':float64,'500=1234':float64 }");
+  EXPECT_EQ(p_dt, ndt::make_cstruct(ndt::make_type<double>(), "1234", ndt::make_type<double>(), "-1234",ndt::make_type<double>(), "500=1234"));
+  ss<<p_dt; s_dt=type_from_datashape(ss.str()); ss.str("");
+  EXPECT_EQ(p_dt, s_dt);
+
+
 
 
   //Other characters or strings that the parser may have trouble with include
