@@ -258,8 +258,11 @@ bool ndt::type::get_as_strided(const char *arrmeta, intptr_t ndim,
 {
   if (get_strided_ndim() >= ndim) {
     *out_size_stride = reinterpret_cast<const size_stride_t *>(arrmeta);
-    *out_el_tp = tcast<base_dim_type>()->get_element_type();
     *out_el_arrmeta = arrmeta + ndim * sizeof(strided_dim_type_arrmeta);
+    *out_el_tp = *this;
+    while (ndim-- > 0) {
+      *out_el_tp = out_el_tp->tcast<base_dim_type>()->get_element_type();
+    }
     return true;
   } else {
     return false;

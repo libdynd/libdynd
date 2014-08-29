@@ -1044,6 +1044,7 @@ size_t dynd::make_lifted_reduction_ckernel(
         ss << "make_lifted_reduction_ckernel: wrong number of reduction dimensions, ";
         ss << "requested " << reduction_ndim << ", but types have ";
         ss << (src_tp.get_ndim() - src_el_tp.get_ndim());
+        ss << " lifting from " << src_el_tp << " to " << src_tp;
         throw runtime_error(ss.str());
     }
     // Determine whether reduced dimensions are being kept or not
@@ -1055,7 +1056,8 @@ size_t dynd::make_lifted_reduction_ckernel(
     } else {
         stringstream ss;
         ss << "make_lifted_reduction_ckernel: The number of dimensions flagged for reduction, ";
-        ss << reducedim_count << ", is not consistent with the destination type";
+        ss << reducedim_count << ", is not consistent with the destination type ";
+        ss << "reducing " << dst_tp << " with element " << dst_el_tp;
         throw runtime_error(ss.str());
     }
 

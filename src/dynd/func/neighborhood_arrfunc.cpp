@@ -39,19 +39,19 @@ struct neighborhood2d_ck : public kernels::expr_ck<neighborhood2d_ck, 2> {
     ckernel_prefix *nh_op = get_child_ckernel();
     expr_strided_t nh_op_fn = nh_op->get_function<expr_strided_t>();
 
-    const char *src_it[2] = {src[0], src[1]};
-    intptr_t src_it_strides[2] = {m_src_strides[1], 0};
+    const char *src_it[1] = {src[0]};
+    intptr_t src_it_strides[1] = {m_src_strides[1]};
     const strided_dim_type_arrmeta *nh_arrmeta =
         reinterpret_cast<const strided_dim_type_arrmeta *>(m_nh_arrmeta.get());
 
     // Position the destination at the first output
     dst += m_nh_centre[0] * m_dst_strides[0] +
            m_nh_centre[1] * m_dst_strides[1];
-    for (intptr_t coord0 = 0; coord0 < m_shape[0] - nh_arrmeta[0].dim_size;
+    for (intptr_t coord0 = 0; coord0 < m_shape[0] - nh_arrmeta[0].dim_size + 1;
          ++coord0) {
       // Handle the whole run at once using the child strided ckernel
       nh_op_fn(dst, m_dst_strides[1], src_it, src_it_strides,
-               m_shape[1] - nh_arrmeta[1].dim_size, nh_op);
+               m_shape[1] - nh_arrmeta[1].dim_size + 1, nh_op);
       dst += m_dst_strides[0];
       src_it_strides[0] += m_src_strides[0];
     }
@@ -103,9 +103,8 @@ static intptr_t instantiate_neighborhood2d(
   }
 
   // Synthesize the arrmeta for the src[0] passed to the neighborhood op
-  ndt::type nh_src_tp[2];
+  ndt::type nh_src_tp[1];
   nh_src_tp[0] = ndt::make_strided_dim(src0_el_tp, 2);
-  nh_src_tp[1] = src_tp[1];
   arrmeta_holder(nh_src_tp[0]).swap(self->m_nh_arrmeta);
   size_stride_t *nh_src0_arrmeta =
       reinterpret_cast<size_stride_t *>(self->m_nh_arrmeta.get());
@@ -113,7 +112,7 @@ static intptr_t instantiate_neighborhood2d(
   nh_src0_arrmeta[0].stride = src0_shape[0].stride;
   nh_src0_arrmeta[1].dim_size = nh->nh_shape[1];
   nh_src0_arrmeta[1].stride = src0_shape[1].stride;
-  const char *nh_src_arrmeta[2] = {self->m_nh_arrmeta.get(), src_arrmeta[1]};
+  const char *nh_src_arrmeta[1] = {self->m_nh_arrmeta.get()};
 
   // Verify that the src0 and dst shapes match
   if (self->m_shape[0] != src0_shape[0].dim_size ||
@@ -125,6 +124,10 @@ static intptr_t instantiate_neighborhood2d(
   self->m_nh_centre[1] = nh->nh_centre[1];
 
   // Instantiate the neighborhood op
+cout << "instantiate " << nh->neighborhood_op << endl;
+cout << "instantiate address " << (void *)nh->neighborhood_op.get()->instantiate << endl;
+cout << "nh_src_tp[0] " << nh_src_tp[0] << endl;
+cout << "nh_dst_tp " << nh_dst_tp << endl;
   ckb_offset = nh->neighborhood_op.get()->instantiate(
       nh->neighborhood_op.get(), ckb, ckb_offset, nh_dst_tp, nh_dst_arrmeta,
       nh_src_tp, nh_src_arrmeta, kernel_request_strided, ectx);
@@ -147,9 +150,9 @@ void dynd::make_neighborhood2d_arrfunc(arrfunc_type_data *out_af,
   // the resulting arrfunc will look like
   // (strided * strided * NH, strided * strided * MSK) -> strided * strided * OUT
   static ndt::type nhop_pattern(
-      "(strided * strided * NH, strided * strided * MSK) -> OUT");
+      "(strided * strided * NH) -> OUT");
   static ndt::type result_pattern(
-      "(strided * strided * NH, strided * strided * MSK) -> strided * strided * OUT");
+      "(strided * strided * NH) -> strided * strided * OUT");
   map<nd::string, ndt::type> typevars;
   if (!ndt::pattern_match(neighborhood_op.get()->func_proto, nhop_pattern,
                                typevars)) {
@@ -167,4 +170,5 @@ void dynd::make_neighborhood2d_arrfunc(arrfunc_type_data *out_af,
   (*nh)->nh_shape[1] = nh_shape[1];
   (*nh)->nh_centre[0] = nh_centre[0];
   (*nh)->nh_centre[1] = nh_centre[1];
+  (*nh)->neighborhood_op = neighborhood_op;
 }
