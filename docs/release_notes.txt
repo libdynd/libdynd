@@ -5,6 +5,25 @@ DyND is a C++ library for array programming with a dynamic
 type system. It is currently in a preview state, and nothing
 about the API or the ABI is guaranteed to stay the same.
 
+Version 0.6.5
+-------------
+
+Commits by author since last release:
+
+    42  Mark Wiebe
+     5  Irwin Zaid
+
+- Fix value assignment cases for some option[T] types.
+- Add a mechanism to create an nd::arrfunc from a C++ functor
+  or function pointer.
+- Add nd::array::get_dim_size which returns the size of a single
+  dimension.
+- Fix bug preventing view of unaligned int64 as datetime.
+- Support times formated like "11.00.00.000000000 AM".
+- Change initialization/cleanup to use libdynd_init and libdynd_cleanup
+  functions instead of C++ globals, which have non-deterministic
+  ordering.
+
 Version 0.6.4
 -------------
 
