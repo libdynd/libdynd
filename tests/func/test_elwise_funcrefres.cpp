@@ -192,7 +192,7 @@ TYPED_TEST_P(ElwiseFuncRefRes, FuncRefRes) {
     }
 }
 
-typedef ::testing::Types<int, float, long, double> types;
+typedef ::testing::Types<int, float, long, double> test_types;
 
 REGISTER_TYPED_TEST_CASE_P(ElwiseFuncRefRes, FuncRefRes);
-INSTANTIATE_TYPED_TEST_CASE_P(Builtin, ElwiseFuncRefRes, types);
+INSTANTIATE_TYPED_TEST_CASE_P(Builtin, ElwiseFuncRefRes, test_types);

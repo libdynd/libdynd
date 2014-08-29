@@ -152,13 +152,14 @@ size_t base_type::get_default_data_size(intptr_t DYND_UNUSED(ndim),
 // TODO: Make this a pure virtual function eventually
 void base_type::arrmeta_default_construct(char *DYND_UNUSED(arrmeta),
                                           intptr_t DYND_UNUSED(ndim),
-                                          const intptr_t *DYND_UNUSED(shape))
+                                          const intptr_t *DYND_UNUSED(shape),
+                                          bool DYND_UNUSED(blockref_alloc))
     const
 {
-    stringstream ss;
-    ss << "TODO: arrmeta_default_construct for " << ndt::type(this, true)
-       << " is not implemented";
-    throw std::runtime_error(ss.str());
+  stringstream ss;
+  ss << "TODO: arrmeta_default_construct for " << ndt::type(this, true)
+     << " is not implemented";
+  throw std::runtime_error(ss.str());
 }
 
 void base_type::arrmeta_copy_construct(

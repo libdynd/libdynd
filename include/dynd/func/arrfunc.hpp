@@ -244,6 +244,8 @@ public:
 
   inline operator nd::array() const { return m_value; }
 
+  inline void swap(nd::arrfunc &rhs) { m_value.swap(rhs.m_value); }
+
   /** Implements the general call operator */
   nd::array call(intptr_t arg_count, const nd::array *args,
                  const eval::eval_context *ectx) const;
@@ -305,6 +307,42 @@ public:
     call_out(4, args, out, &eval::default_eval_context);
   }
 };
+
+/**
+ * This is a helper class for creating static nd::arrfunc instances
+ * whose lifetime is managed by init/cleanup functions. When declared
+ * as a global static variable, because it is a POD type, this will begin with
+ * the value NULL. It can generally be treated just like an nd::arrfunc, though
+ * its internals are not protected from meddling.
+ */
+struct pod_arrfunc {
+  memory_block_data *m_memblock;
+
+  operator const nd::arrfunc &()
+  {
+    return *reinterpret_cast<const nd::arrfunc *>(&m_memblock);
+  }
+
+  inline const arrfunc_type_data *get() const
+  {
+    return reinterpret_cast<const nd::arrfunc *>(&m_memblock)->get();
+  }
+
+  void init(const nd::arrfunc &rhs)
+  {
+    m_memblock = nd::array(rhs).get_memblock().get();
+    memory_block_incref(m_memblock);
+  }
+
+  void cleanup()
+  {
+    if (m_memblock) {
+      memory_block_decref(m_memblock);
+      m_memblock = NULL;
+    }
+  }
+};
+
 } // namespace nd
 
 /**
@@ -313,8 +351,6 @@ public:
  *
  * \param dst_tp  The type of the destination.
  * \param src_tp  The type of the source.
- * \param funcproto  The function prototype to generate (must be
- *                   unary_operation_funcproto or expr_operation_funcproto).
  * \param errmode  The error mode to use for the assignment.
  * \param out_af  The output `arrfunc` struct to be populated.
  */
@@ -341,8 +377,6 @@ inline nd::arrfunc make_arrfunc_from_assignment(const ndt::type &dst_tp,
  *
  * \param tp  The type of the source.
  * \param propname  The name of the property.
- * \param funcproto  The function prototype to generate (must be
- *                   unary_operation_funcproto or expr_operation_funcproto).
  * \param out_af  The output `arrfunc` struct to be populated.
  */
 void make_arrfunc_from_property(const ndt::type &tp,

@@ -87,7 +87,7 @@ intptr_t wrap_expr_as_unary_ckernel(dynd::ckernel_builder *ckb,
  * \param right_associative  If true, the reduction is to be evaluated right to left,
  *                           (x0 * (x1 * (x2 * x3))), if false, the reduction is to be
  *                           evaluted left to right (((x0 * x1) * x2) * x3).
- * \param kerntype  The type of kernel to produce (single or strided).
+ * \param kernreq  The type of kernel to produce (single or strided).
  *
  * \returns  The ckb_offset where the child ckernel should be placed.
  */

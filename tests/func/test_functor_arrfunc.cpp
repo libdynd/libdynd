@@ -551,16 +551,16 @@ TYPED_TEST_P(FunctorArrfunc_CallRefRes, CallRefRes)
   }
 }
 
-typedef ::testing::Types<int, float, long, double> types;
+typedef ::testing::Types<int, float, long, double> test_types;
 
 REGISTER_TYPED_TEST_CASE_P(FunctorArrfunc_FuncRetRes, FuncRetRes);
-INSTANTIATE_TYPED_TEST_CASE_P(Builtin, FunctorArrfunc_FuncRetRes, types);
+INSTANTIATE_TYPED_TEST_CASE_P(Builtin, FunctorArrfunc_FuncRetRes, test_types);
 
 REGISTER_TYPED_TEST_CASE_P(FunctorArrfunc_FuncRefRes, FuncRefRes);
-INSTANTIATE_TYPED_TEST_CASE_P(Builtin, FunctorArrfunc_FuncRefRes, types);
+INSTANTIATE_TYPED_TEST_CASE_P(Builtin, FunctorArrfunc_FuncRefRes, test_types);
 
 REGISTER_TYPED_TEST_CASE_P(FunctorArrfunc_CallRetRes, CallRetRes);
-INSTANTIATE_TYPED_TEST_CASE_P(Builtin, FunctorArrfunc_CallRetRes, types);
+INSTANTIATE_TYPED_TEST_CASE_P(Builtin, FunctorArrfunc_CallRetRes, test_types);
 
 REGISTER_TYPED_TEST_CASE_P(FunctorArrfunc_CallRefRes, CallRefRes);
-INSTANTIATE_TYPED_TEST_CASE_P(Builtin, FunctorArrfunc_CallRefRes, types);
+INSTANTIATE_TYPED_TEST_CASE_P(Builtin, FunctorArrfunc_CallRefRes, test_types);

@@ -31,8 +31,12 @@
 
 #include "gtest/gtest.h"
 
+#include <dynd/config.hpp>
+
 GTEST_API_ int main(int argc, char **argv) {
   printf("Running main() from gtest_main.cc\n");
   testing::InitGoogleTest(&argc, argv);
+  dynd::libdynd_init();
+  atexit(&dynd::libdynd_cleanup);
   return RUN_ALL_TESTS();
 }

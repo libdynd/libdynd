@@ -55,7 +55,8 @@ namespace {
                     if (buffer_arrmeta == NULL) {
                         throw bad_alloc();
                     }
-                    buffer_tp->arrmeta_default_construct(buffer_arrmeta, 0, NULL);
+                    buffer_tp->arrmeta_default_construct(buffer_arrmeta, 0,
+                                                         NULL, true);
                 }
                 // Make sure the buffer data size is pointer size-aligned
                 buffer_stride = buffer_tp->get_default_data_size(0, NULL);

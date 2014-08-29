@@ -172,11 +172,16 @@ bool bytes_type::operator==(const base_type& rhs) const
     }
 }
 
-void bytes_type::arrmeta_default_construct(char *arrmeta, intptr_t DYND_UNUSED(ndim), const intptr_t* DYND_UNUSED(shape)) const
+void bytes_type::arrmeta_default_construct(char *arrmeta,
+                                           intptr_t DYND_UNUSED(ndim),
+                                           const intptr_t *DYND_UNUSED(shape),
+                                           bool blockref_alloc) const
 {
-    // Simply allocate a POD memory block
+  // Simply allocate a POD memory block
+  if (blockref_alloc) {
     bytes_type_arrmeta *md = reinterpret_cast<bytes_type_arrmeta *>(arrmeta);
     md->blockref = make_pod_memory_block().release();
+  }
 }
 
 void bytes_type::arrmeta_copy_construct(char *dst_arrmeta, const char *src_arrmeta, memory_block_data *embedded_reference) const

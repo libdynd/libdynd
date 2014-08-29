@@ -247,9 +247,9 @@ bool dim_fragment_type::operator==(const base_type& rhs) const
 
 void dim_fragment_type::arrmeta_default_construct(
     char *DYND_UNUSED(arrmeta), intptr_t DYND_UNUSED(ndim),
-    const intptr_t *DYND_UNUSED(shape)) const
+    const intptr_t *DYND_UNUSED(shape), bool DYND_UNUSED(blockref_alloc)) const
 {
-    throw type_error("Cannot store data of dim_fragment type");
+  throw type_error("Cannot store data of dim_fragment type");
 }
 
 void dim_fragment_type::arrmeta_copy_construct(

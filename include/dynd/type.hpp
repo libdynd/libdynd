@@ -606,9 +606,6 @@ public:
      * values and returns true.
      *
      * \param arrmeta  The arrmeta for the type.
-     * \param ndim  The number of strided dimensions desired.
-     * \param out_size_stride  Is filled with a pointer to an array of
-     *                         size_stride_t of length ``ndim``.
      * \param out_el_tp  Is filled with the element type.
      * \param out_el_arrmeta  Is filled with the arrmeta of the element type.
      *

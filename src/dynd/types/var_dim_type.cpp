@@ -406,27 +406,35 @@ bool var_dim_type::operator==(const base_type& rhs) const
     }
 }
 
-void var_dim_type::arrmeta_default_construct(char *arrmeta, intptr_t ndim, const intptr_t* shape) const
+void var_dim_type::arrmeta_default_construct(char *arrmeta, intptr_t ndim,
+                                             const intptr_t *shape,
+                                             bool blockref_alloc) const
 {
-    size_t element_size = m_element_tp.is_builtin() ? m_element_tp.get_data_size()
-                    : m_element_tp.extended()->get_default_data_size(ndim-1, shape+1);
+  size_t element_size =
+      m_element_tp.is_builtin()
+          ? m_element_tp.get_data_size()
+          : m_element_tp.extended()->get_default_data_size(ndim - 1, shape + 1);
 
-    var_dim_type_arrmeta *md = reinterpret_cast<var_dim_type_arrmeta *>(arrmeta);
-    md->stride = element_size;
-    md->offset = 0;
-    // Allocate a memory block
+  var_dim_type_arrmeta *md = reinterpret_cast<var_dim_type_arrmeta *>(arrmeta);
+  md->stride = element_size;
+  md->offset = 0;
+  // Allocate a memory block
+  if (blockref_alloc) {
     base_type::flags_type flags = m_element_tp.get_flags();
-    if (flags&type_flag_destructor) {
-        md->blockref = make_objectarray_memory_block(m_element_tp, arrmeta, element_size).release();
-    } else if (flags&type_flag_zeroinit) {
-        md->blockref = make_zeroinit_memory_block().release();
+    if (flags & type_flag_destructor) {
+      md->blockref = make_objectarray_memory_block(m_element_tp, arrmeta,
+                                                   element_size).release();
+    } else if (flags & type_flag_zeroinit) {
+      md->blockref = make_zeroinit_memory_block().release();
     } else {
-        md->blockref = make_pod_memory_block().release();
+      md->blockref = make_pod_memory_block().release();
     }
-    if (!m_element_tp.is_builtin()) {
-        m_element_tp.extended()->arrmeta_default_construct(
-                        arrmeta + sizeof(var_dim_type_arrmeta), ndim ? (ndim-1) : 0, shape+1);
-    }
+  }
+  if (!m_element_tp.is_builtin()) {
+    m_element_tp.extended()->arrmeta_default_construct(
+        arrmeta + sizeof(var_dim_type_arrmeta), ndim ? (ndim - 1) : 0,
+        shape + 1, blockref_alloc);
+  }
 }
 
 void var_dim_type::arrmeta_copy_construct(char *dst_arrmeta, const char *src_arrmeta, memory_block_data *embedded_reference) const

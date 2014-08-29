@@ -56,11 +56,14 @@ ndt::type base_memory_type::get_canonical_type() const
     return m_storage_tp.get_canonical_type();
 }
 
-void base_memory_type::arrmeta_default_construct(char *arrmeta, intptr_t ndim, const intptr_t* shape) const
+void base_memory_type::arrmeta_default_construct(char *arrmeta, intptr_t ndim,
+                                                 const intptr_t *shape,
+                                                 bool blockref_alloc) const
 {
-    if (!m_storage_tp.is_builtin()) {
-        m_storage_tp.extended()->arrmeta_default_construct(arrmeta + m_storage_arrmeta_offset, ndim, shape);
-    }
+  if (!m_storage_tp.is_builtin()) {
+    m_storage_tp.extended()->arrmeta_default_construct(
+        arrmeta + m_storage_arrmeta_offset, ndim, shape, blockref_alloc);
+  }
 }
 
 void base_memory_type::arrmeta_copy_construct(

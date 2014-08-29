@@ -51,7 +51,10 @@ bool type_type::operator==(const base_type& rhs) const
 }
 
 void type_type::arrmeta_default_construct(char *DYND_UNUSED(arrmeta),
-                intptr_t DYND_UNUSED(ndim), const intptr_t* DYND_UNUSED(shape)) const
+                                          intptr_t DYND_UNUSED(ndim),
+                                          const intptr_t *DYND_UNUSED(shape),
+                                          bool DYND_UNUSED(blockref_alloc))
+    const
 {
 }
 
@@ -249,21 +252,4 @@ size_t type_type::make_comparison_kernel(
   }
 
   throw not_comparable_error(src0_dt, src1_dt, comptype);
-}
-
-const ndt::type& ndt::make_type()
-{
-    // Static instance of type_type, which has a reference count > 0 for the
-    // lifetime of the program. This static construction is inside a
-    // function to ensure correct creation order during startup.
-    static type_type stt;
-    static const ndt::type static_instance(&stt, true);
-    return static_instance;
-}
-
-const ndt::type& ndt::make_strided_of_type()
-{
-    static strided_dim_type sdt(ndt::make_type());
-    static const ndt::type static_instance(&sdt, true);
-    return static_instance;
 }

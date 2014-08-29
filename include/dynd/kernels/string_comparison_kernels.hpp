@@ -36,9 +36,8 @@ size_t make_string_comparison_kernel(
                 const eval::eval_context *ectx);
 
 /**
- * Makes a kernel which compares two .
+ * Makes a kernel which compares two strings of any type.
  *
- * \param encoding  The encoding of the string.
  */
 size_t make_general_string_comparison_kernel(
                 ckernel_builder *ckb, intptr_t ckb_offset,

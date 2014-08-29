@@ -60,7 +60,10 @@ bool arrfunc_type::operator==(const base_type& rhs) const
 }
 
 void arrfunc_type::arrmeta_default_construct(char *DYND_UNUSED(arrmeta),
-                intptr_t DYND_UNUSED(ndim), const intptr_t* DYND_UNUSED(shape)) const
+                                             intptr_t DYND_UNUSED(ndim),
+                                             const intptr_t *DYND_UNUSED(shape),
+                                             bool DYND_UNUSED(blockref_alloc))
+    const
 {
 }
 
@@ -257,11 +260,4 @@ void arrfunc_type::get_dynamic_array_functions(
 
     *out_functions = arrfunc_array_functions;
     *out_count = sizeof(arrfunc_array_functions) / sizeof(arrfunc_array_functions[0]);
-}
-
-const ndt::type &ndt::make_arrfunc()
-{
-    static arrfunc_type aft;
-    static const ndt::type static_instance(&aft, true);
-    return static_instance;
 }

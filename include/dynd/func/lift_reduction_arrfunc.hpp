@@ -16,7 +16,7 @@ namespace dynd {
  * Lifts the provided arrfunc, broadcasting it as necessary to execute
  * across the additional dimensions in the ``lifted_types`` array.
  *
- * \param out_ar  The output arrfunc which is filled.
+ * \param out_af  The output arrfunc which is filled.
  * \param elwise_reduction  The arrfunc to be lifted. This must
  *                          be a unary operation, which modifies the output
  *                          in place.

@@ -140,7 +140,7 @@ TEST(ElWise, LambdaFunc) {
 }
 #endif
 
-typedef ::testing::Types<int, float, long, double> types;
+typedef ::testing::Types<int, float, long, double> test_types;
 
 REGISTER_TYPED_TEST_CASE_P(ElwiseCallRetRes, CallRetRes);
-INSTANTIATE_TYPED_TEST_CASE_P(Builtin, ElwiseCallRetRes, types);
+INSTANTIATE_TYPED_TEST_CASE_P(Builtin, ElwiseCallRetRes, test_types);
