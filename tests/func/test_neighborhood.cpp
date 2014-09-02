@@ -12,6 +12,7 @@
 
 #include <dynd/func/neighborhood_arrfunc.hpp>
 #include <dynd/kernels/reduction_kernels.hpp>
+#include <dynd/func/reduction_arrfunc.hpp>
 #include <dynd/func/lift_reduction_arrfunc.hpp>
 #include <dynd/func/lift_arrfunc.hpp>
 #include <dynd/func/functor_arrfunc.hpp>
@@ -22,9 +23,9 @@ using namespace dynd;
 
 static void elwise_func(float& out, float in)
 {
-  cout << out << " OP " << in;
+//  cout << out << " OP " << in;
   out += in;
-  cout << " ==> " << out << endl;
+//  cout << " ==> " << out << endl;
 }
 
 TEST(Neighborhood, Sum) {
@@ -52,4 +53,25 @@ TEST(Neighborhood, Sum) {
   naf.call_out(a, b);
   cout << a << endl;
   cout << b << endl;
+}
+
+void func(float &dst, vals<float> src)
+{
+    dst = 0.0;
+    for (int i = 0; i < src.get_dim_size(0); ++i) {
+        for (int j = 0; j < src.get_dim_size(1); ++j) {
+            dst += src(i, j);
+        }
+    }
+}
+
+TEST(Neighborhood, Reduction) {
+    nd::arrfunc af = nd::make_reduction_arrfunc(func);
+
+    nd::array a =
+        parse_json("4 * 4 * float32",
+                   "[[1, 2, 3, 4], [5, 6, 7, 8], [9, 10, 11, 12], [13, 14, 15, 16]]");
+    nd::array b = af(a);
+
+    std::cout << "(DEBUG) " << b << std::endl;
 }
