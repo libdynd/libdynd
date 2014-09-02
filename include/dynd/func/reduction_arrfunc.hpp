@@ -8,16 +8,21 @@
 
 #include <dynd/func/arrfunc.hpp>
 
+namespace dynd { namespace nd {
+
 template <typename T>
 class vals {
     intptr_t m_ndim;
-    dynd::size_stride_t m_ss[2];
-    const char *m_origin;
+    shortvector<size_stride_t> m_ss;
+    const char *m_data_pointer;
 
 public:
-    void init(intptr_t ndim, const dynd::size_stride_t *ss) {
+    vals() : m_data_pointer(NULL) {
+    }
+
+    void init(intptr_t ndim, const size_stride_t *ss) {
         m_ndim = ndim;
-        DYND_MEMCPY(m_ss, ss, m_ndim * sizeof(dynd::size_stride_t));
+        m_ss.init(m_ndim, ss);
     }
 
     intptr_t get_ndim() const {
@@ -28,21 +33,23 @@ public:
         return m_ss[i].dim_size;
     }
 
-    void set_origin(const char *origin) {
-        m_origin = origin;
+    void set_readonly_originptr(const char *data_pointer) {
+        m_data_pointer = data_pointer;
     }
 
-    T operator()(intptr_t i, intptr_t j) const {
-        return *reinterpret_cast<const T *>(m_origin + i * m_ss[0].stride + j * m_ss[1].stride);
+    T operator()(intptr_t i0) const {
+        return *reinterpret_cast<const T *>(m_data_pointer + i0 * m_ss[0].stride);
+    }
+
+    T operator()(intptr_t i0, intptr_t i1) const {
+        return *reinterpret_cast<const T *>(m_data_pointer + i0 * m_ss[0].stride + i1 * m_ss[1].stride);
     }
 };
-
-namespace dynd { namespace nd {
 
 template <typename R, typename A0>
 struct reduction_ck {
     typedef reduction_ck self_type; 
-    typedef void (*func_type)(R &, vals<A0>);
+    typedef void (*func_type)(R &, const vals<A0> &);
 
     ckernel_prefix base;
     func_type func;
@@ -51,11 +58,10 @@ struct reduction_ck {
     static void single(char *dst, const char *const *src, ckernel_prefix *ckp) {
         self_type *self = reinterpret_cast<self_type *>(ckp);
 
-        vals<A0> srcvals =
-            reinterpret_cast<self_type *>(self)->src[0];
-        srcvals.set_origin(src[0]);
+        vals<A0> &src0_vals = reinterpret_cast<self_type *>(self)->src[0];
+        src0_vals.set_readonly_originptr(src[0]);
 
-        self->func(*reinterpret_cast<R *>(dst), srcvals);
+        self->func(*reinterpret_cast<R *>(dst), src0_vals);
     }
 
     static intptr_t instantiate(const arrfunc_type_data *af_self, dynd::ckernel_builder *ckb,
@@ -76,8 +82,8 @@ template <typename func_type>
 struct arrfunc_from_func;
 
 template <typename R, typename A0>
-struct arrfunc_from_func<void (*)(R &, vals<A0>)> {
-    typedef void (*func_type)(R &, vals<A0>);
+struct arrfunc_from_func<void (*)(R &, const vals<A0> &)> {
+    typedef void (*func_type)(R &, const vals<A0> &);
 
     static void make(func_type func, arrfunc_type_data *out_af) {
         out_af->func_proto = ndt::make_funcproto(ndt::type("strided * strided * float32"), ndt::make_type<R>());
