@@ -1,5 +1,5 @@
 //
-// Copyright (C) 2011-14 Mark Wiebe, DyND Developers
+// Copyright (C) 2011-14 Mark Wiebe, Irwin Zaid, DyND Developers
 // BSD 2-Clause License, see LICENSE.txt
 //
 
@@ -75,3 +75,22 @@ TEST(Neighborhood, Reduction) {
 
     std::cout << "(DEBUG) " << b << std::endl;
 }
+
+/*
+TEST(Neighborhood, Sum2) {
+    nd::arrfunc af = nd::make_reduction_arrfunc(func);
+
+    intptr_t nh_shape[2] = {3, 3};
+    intptr_t nh_centre[2] = {1, 1};
+    nd::arrfunc naf = make_neighborhood2d_arrfunc(af, nh_shape, nh_centre);
+
+    nd::array a =
+        parse_json("4 * 4 * float32",
+                 "[[1, 2, 3, 4], [5, 6, 7, 8], [9, 10, 11, 12], [13, 14, 15, 16]]");
+    nd::array b = nd::empty<float[4][4]>();
+    b.vals() = 0;
+
+    naf.call_out(a, b);
+    cout << a << endl;
+    cout << b << endl;
+}*/

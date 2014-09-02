@@ -318,7 +318,6 @@ set(libdynd_SRC
     src/dynd/func/lift_arrfunc.cpp
     src/dynd/func/lift_reduction_arrfunc.cpp
     src/dynd/func/neighborhood_arrfunc.cpp
-    src/dynd/func/reduction_arrfunc.cpp
     src/dynd/func/rolling_arrfunc.cpp
     src/dynd/func/take_arrfunc.cpp
     include/dynd/func/arrfunc.hpp
