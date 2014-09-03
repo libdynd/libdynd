@@ -11,7 +11,6 @@
 #include <dynd/func/arrfunc.hpp>
 #include <dynd/func/make_callable.hpp>
 #include <dynd/pp/arrfunc_util.hpp>
-#include <dynd/func/reduction_arrfunc.hpp>
 #include <iostream>
 
 namespace dynd {
@@ -26,8 +25,8 @@ struct type_factory {
     }
 };
 
-template <typename T>
-struct type_factory<nd::vals<T> > {
+template <typename T, int N>
+struct type_factory<nd::strided<T, N> > {
     static ndt::type make() {
         return ndt::type("strided * strided * float32");
     }
@@ -50,23 +49,23 @@ struct ck_data_size {
 };
 
 
-template <typename T>
-struct ck_data_size<nd::vals<T> > {
-    static const size_t value = sizeof(nd::vals<T>);
+template <typename T, int N>
+struct ck_data_size<nd::strided<T, N> > {
+    static const size_t value = sizeof(nd::strided<T, N>);
 
     static void init(char *data, const char *arrmeta) {
-        nd::vals<T> &arg = *reinterpret_cast<nd::vals<T> *>(data);
-        arg.init(2, reinterpret_cast<const size_stride_t *>(arrmeta));
+        nd::strided<T, N> &arg = *reinterpret_cast<nd::strided<T, N> *>(data);
+        arg.init(reinterpret_cast<const size_stride_t *>(arrmeta));
     }
 
-    static nd::vals<T> *make(char *arg, char *data) {
-        nd::vals<T> *ptr = reinterpret_cast<nd::vals<T> *>(data);
+    static nd::strided<T, N> *make(char *arg, char *data) {
+        nd::strided<T, N> *ptr = reinterpret_cast<nd::strided<T, N> *>(data);
         ptr->set_readonly_originptr(arg);
         return ptr;
     }
 
-    static const nd::vals<T> *make(const char *arg, char *data) {
-        nd::vals<T> *ptr = reinterpret_cast<nd::vals<T> *>(data);
+    static const nd::strided<T, N> *make(const char *arg, char *data) {
+        nd::strided<T, N> *ptr = reinterpret_cast<nd::strided<T, N> *>(data);
         ptr->set_readonly_originptr(arg);
         return ptr;
     }
@@ -204,7 +203,6 @@ DYND_PP_JOIN_MAP(DYND_CODE, (), DYND_PP_RANGE(1, DYND_PP_INC(DYND_ELWISE_MAX)))
                                                                                \
     static void single(char *dst, const char *const *src, ckernel_prefix *ckp) \
     {                                                                          \
-      std::cout << "in single" << std::endl;                                   \
       self_type *e = reinterpret_cast<self_type *>(ckp);                       \
       e->func(*ck_data_size<R>::make(dst, e->data),                            \
               XDYND_PP_DEREF_CAST_ARRAY_RANGE_1(D, src, NSRC));                \

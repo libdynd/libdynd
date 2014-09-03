@@ -10,42 +10,6 @@
 
 namespace dynd { namespace nd {
 
-template <typename T>
-class vals {
-    intptr_t m_ndim;
-    shortvector<size_stride_t> m_ss;
-    const char *m_data_pointer;
-
-public:
-    vals() : m_data_pointer(NULL) {
-    }
-
-    void init(intptr_t ndim, const size_stride_t *ss) {
-        m_ndim = ndim;
-        m_ss.init(m_ndim, ss);
-    }
-
-    intptr_t get_ndim() const {
-        return m_ndim;
-    }
-
-    intptr_t get_dim_size(intptr_t i) const {
-        return m_ss[i].dim_size;
-    }
-
-    void set_readonly_originptr(const char *data_pointer) {
-        m_data_pointer = data_pointer;
-    }
-
-    T operator()(intptr_t i0) const {
-        return *reinterpret_cast<const T *>(m_data_pointer + i0 * m_ss[0].stride);
-    }
-
-    T operator()(intptr_t i0, intptr_t i1) const {
-        return *reinterpret_cast<const T *>(m_data_pointer + i0 * m_ss[0].stride + i1 * m_ss[1].stride);
-    }
-};
-
 template <typename R, typename A0>
 struct reduction_ck {
     typedef reduction_ck self_type; 

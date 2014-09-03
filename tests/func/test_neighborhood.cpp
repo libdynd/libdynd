@@ -12,7 +12,6 @@
 
 #include <dynd/func/neighborhood_arrfunc.hpp>
 #include <dynd/kernels/reduction_kernels.hpp>
-#include <dynd/func/reduction_arrfunc.hpp>
 #include <dynd/func/lift_reduction_arrfunc.hpp>
 #include <dynd/func/lift_arrfunc.hpp>
 #include <dynd/func/functor_arrfunc.hpp>
@@ -55,7 +54,7 @@ TEST(Neighborhood, Sum) {
   cout << b << endl;
 }
 
-void func(float &dst, const nd::vals<float> &src) {
+void func(float &dst, const nd::strided<float, 2> &src) {
     dst = 0.0;
     for (int i = 0; i < src.get_dim_size(0); ++i) {
         for (int j = 0; j < src.get_dim_size(1); ++j) {
