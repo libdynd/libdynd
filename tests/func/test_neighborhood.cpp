@@ -65,11 +65,12 @@ void func(float &dst, const nd::vals<float> &src) {
 }
 
 TEST(Neighborhood, Reduction) {
-    nd::arrfunc af = nd::make_reduction_arrfunc(func);
+    nd::arrfunc af = nd::make_functor_arrfunc(func);
 
     nd::array a =
         parse_json("4 * 4 * float32",
                    "[[1, 2, 3, 4], [5, 6, 7, 8], [9, 10, 11, 12], [13, 14, 15, 16]]");
+    a = a.view(ndt::make_strided_dim(ndt::make_strided_dim(ndt::make_type<float>())));
     nd::array b = af(a);
 
     std::cout << "(DEBUG) " << b << std::endl;

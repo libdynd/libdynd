@@ -9,9 +9,70 @@
 #include <dynd/types/funcproto_type.hpp>
 #include <dynd/types/cfixed_dim_type.hpp>
 #include <dynd/func/arrfunc.hpp>
+#include <dynd/func/make_callable.hpp>
 #include <dynd/pp/arrfunc_util.hpp>
+#include <dynd/func/reduction_arrfunc.hpp>
+#include <iostream>
 
 namespace dynd {
+
+template <typename T>
+struct type_factory;
+
+template <typename T>
+struct type_factory {
+    static ndt::type make() {
+        return ndt::cfixed_dim_from_array<T>::make();
+    }
+};
+
+template <typename T>
+struct type_factory<nd::vals<T> > {
+    static ndt::type make() {
+        return ndt::type("strided * strided * float32");
+    }
+};
+
+template <typename T>
+struct ck_data_size {
+    static const size_t value = 0;
+
+    static void init(char *DYND_UNUSED(data), const char *DYND_UNUSED(arrmeta)) {
+    }
+
+    static T *make(char *arg, char *DYND_UNUSED(data)) {
+        return reinterpret_cast<T *>(arg);
+    }
+
+    static const T *make(const char *arg, char *DYND_UNUSED(data)) {
+        return reinterpret_cast<const T *>(arg);
+    }
+};
+
+
+template <typename T>
+struct ck_data_size<nd::vals<T> > {
+    static const size_t value = sizeof(nd::vals<T>);
+
+    static void init(char *data, const char *arrmeta) {
+        nd::vals<T> &arg = *reinterpret_cast<nd::vals<T> *>(data);
+        arg.init(2, reinterpret_cast<const size_stride_t *>(arrmeta));
+    }
+
+    static nd::vals<T> *make(char *arg, char *data) {
+        nd::vals<T> *ptr = reinterpret_cast<nd::vals<T> *>(data);
+        ptr->set_readonly_originptr(arg);
+        return ptr;
+    }
+
+    static const nd::vals<T> *make(const char *arg, char *data) {
+        nd::vals<T> *ptr = reinterpret_cast<nd::vals<T> *>(data);
+        ptr->set_readonly_originptr(arg);
+        return ptr;
+    }
+
+};
+
 
 namespace nd { namespace detail {
   /**
@@ -139,12 +200,14 @@ DYND_PP_JOIN_MAP(DYND_CODE, (), DYND_PP_RANGE(1, DYND_PP_INC(DYND_ELWISE_MAX)))
                                                                                \
     ckernel_prefix base;                                                       \
     Functor func;                                                              \
+    char data[ck_data_size<R>::value + ck_data_size<D0>::value];               \
                                                                                \
     static void single(char *dst, const char *const *src, ckernel_prefix *ckp) \
     {                                                                          \
+      std::cout << "in single" << std::endl;                                   \
       self_type *e = reinterpret_cast<self_type *>(ckp);                       \
-      e->func(*reinterpret_cast<R *>(dst),                                     \
-              DYND_PP_DEREF_CAST_ARRAY_RANGE_1(D, src, NSRC));                 \
+      e->func(*ck_data_size<R>::make(dst, e->data),                            \
+              XDYND_PP_DEREF_CAST_ARRAY_RANGE_1(D, src, NSRC));                \
     }                                                                          \
                                                                                \
     static void strided(char *dst, intptr_t dst_stride,                        \
@@ -169,12 +232,13 @@ DYND_PP_JOIN_MAP(DYND_CODE, (), DYND_PP_RANGE(1, DYND_PP_INC(DYND_ELWISE_MAX)))
     static intptr_t instantiate(const arrfunc_type_data *af_self,              \
                                 dynd::ckernel_builder *ckb,                    \
                                 intptr_t ckb_offset, const ndt::type &dst_tp,  \
-                                const char *DYND_UNUSED(dst_arrmeta),          \
+                                const char *dst_arrmeta,                       \
                                 const ndt::type *src_tp,                       \
-                                const char *const *DYND_UNUSED(src_arrmeta),   \
+                                const char *const *src_arrmeta,                \
                                 kernel_request_t kernreq,                      \
                                 const eval::eval_context *DYND_UNUSED(ectx))   \
     {                                                                          \
+                                                                               \
       for (intptr_t i = 0; i < NSRC; ++i) {                                    \
         if (src_tp[i] != af_self->get_param_type(i)) {                         \
           std::stringstream ss;                                                \
@@ -192,6 +256,8 @@ DYND_PP_JOIN_MAP(DYND_CODE, (), DYND_PP_RANGE(1, DYND_PP_INC(DYND_ELWISE_MAX)))
       self_type *e = ckb->alloc_ck_leaf<self_type>(ckb_offset);                \
       e->base.template set_expr_function<self_type>(kernreq);                  \
       e->func = *af_self->get_data_as<Functor>();                              \
+      ck_data_size<R>::init(e->data, dst_arrmeta);                             \
+      ck_data_size<D0>::init(e->data, src_arrmeta[0]);                         \
                                                                                \
       return ckb_offset;                                                       \
     }                                                                          \
