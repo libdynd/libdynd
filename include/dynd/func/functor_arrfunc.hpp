@@ -48,6 +48,9 @@ namespace dynd { namespace nd {
 
 namespace detail {
 
+  /**
+   * Helper struct that casts or coerces data right before passing it to the functor.
+   */
   template <typename T>
   struct val_helper;
 
@@ -183,7 +186,7 @@ DYND_PP_JOIN_MAP(DYND_CODE, (), DYND_PP_RANGE(1, DYND_PP_INC(DYND_ELWISE_MAX)))
     static void single(char *dst, const char *const *src, ckernel_prefix *ckp) \
     {                                                                          \
       self_type *e = reinterpret_cast<self_type *>(ckp);                       \
-      e->func(*e->dst_helper.make(dst),                                      \
+      e->func(*e->dst_helper.make(dst),                                        \
               XDYND_PP_DEREF_CAST_ARRAY_RANGE_1(D, src, NSRC));                \
     }                                                                          \
                                                                                \
