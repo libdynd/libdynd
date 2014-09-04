@@ -187,7 +187,7 @@ DYND_PP_JOIN_MAP(DYND_CODE, (), DYND_PP_RANGE(1, DYND_PP_INC(DYND_ELWISE_MAX)))
     {                                                                          \
       self_type *e = reinterpret_cast<self_type *>(ckp);                       \
       e->func(*e->dst_helper.make(dst),                                        \
-              XDYND_PP_DEREF_CAST_ARRAY_RANGE_1(D, src, NSRC));                \
+              DYND_PP_DEREF_MAKE_ARRAY_RANGE_1(D, src, NSRC));                 \
     }                                                                          \
                                                                                \
     static void strided(char *dst, intptr_t dst_stride,                        \
@@ -201,8 +201,8 @@ DYND_PP_JOIN_MAP(DYND_CODE, (), DYND_PP_RANGE(1, DYND_PP_INC(DYND_ELWISE_MAX)))
       DYND_PP_INIT_SRC_VARIABLES(NSRC);                                        \
       for (size_t i = 0; i < count; ++i) {                                     \
         /*  func(*(R *)dst, *(const D0 *)src0, ...); */                        \
-        func(*e->dst_helper.make(dst),                                      \
-             XDYND_PP_DEREF_CAST_ARG_RANGE_1(D, src, NSRC));                     \
+        func(*e->dst_helper.make(dst),                                         \
+             DYND_PP_DEREF_MAKE_ARG_RANGE_1(D, src, NSRC));                    \
                                                                                \
         /* Increment ``dst``, ``src#`` by their respective strides */          \
         DYND_PP_STRIDED_INCREMENT(NSRC);                                       \
@@ -237,7 +237,7 @@ DYND_PP_JOIN_MAP(DYND_CODE, (), DYND_PP_RANGE(1, DYND_PP_INC(DYND_ELWISE_MAX)))
       e->base.template set_expr_function<self_type>(kernreq);                  \
       e->func = *af_self->get_data_as<Functor>();                              \
       e->dst_helper.init(dst_tp, dst_arrmeta);                                 \
-      e->src0_helper.init(src_tp[0], src_arrmeta[0]);                          \
+      DYND_PP_INIT_SRC_HELPERS(NSRC)                                           \
                                                                                \
       return ckb_offset;                                                       \
     }                                                                          \
@@ -253,7 +253,7 @@ DYND_PP_JOIN_MAP(DYND_CODE, (), DYND_PP_RANGE(1, DYND_PP_INC(DYND_ELWISE_MAX)))
  */
 #define DYND_CODE(NSRC)                                                        \
   template <typename R, DYND_PP_TYPENAME_ARGRANGE_1(A, NSRC)>                  \
-  struct functor_arrfunc_maker<true, R (*)(DYND_PP_ARGRANGE_1(A, NSRC))> {    \
+  struct functor_arrfunc_maker<true, R (*)(DYND_PP_ARGRANGE_1(A, NSRC))> {     \
     typedef R (*func_type)(DYND_PP_ARGRANGE_1(A, NSRC));                       \
     static void make(func_type func, arrfunc_type_data *out_af)                \
     {                                                                          \
