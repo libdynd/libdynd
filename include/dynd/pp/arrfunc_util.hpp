@@ -87,12 +87,24 @@
                                      DYND_PP_META_NAME_RANGE(TYPE, N)),        \
                        DYND_PP_META_AT_RANGE(ARG_NAME, N)))
 
-#define TEST_CAST(TYPE, NAME) ck_data_size<TYPE>::make(NAME, e->data)
+#define DYND_PP_DECL_HELPER(TYPE, NAME) val_helper<TYPE> DYND_PP_CAT((NAME, _helper))
+#define DYND_PP_DECL_HELPERS(TYPE, ARG_NAME, N)                                \
+    DYND_PP_JOIN_1((;),                                                        \
+        DYND_PP_ELWISE_1(DYND_PP_DECL_HELPER,                                  \
+            DYND_PP_META_NAME_RANGE(TYPE, N), DYND_PP_META_NAME_RANGE(ARG_NAME, N)))
+
+#define DYND_PP_ARROW(A, B) A->B
+#define TEST_CAST(NAME, NAME_AT) DYND_PP_ARROW(e, DYND_PP_CAT((NAME, _helper))).handle(NAME_AT)
 #define XDYND_PP_DEREF_CAST_ARRAY_RANGE_1(TYPE, ARG_NAME, N)                    \
   DYND_PP_JOIN_MAP_1(                                                          \
       DYND_PP_META_DEREFERENCE, (, ),                                          \
-      DYND_PP_ELWISE_1(TEST_CAST, DYND_PP_META_NAME_RANGE(TYPE, N),            \
+      DYND_PP_ELWISE_1(TEST_CAST, DYND_PP_META_NAME_RANGE(ARG_NAME, N),            \
                        DYND_PP_META_AT_RANGE(ARG_NAME, N)))
+#define XDYND_PP_DEREF_CAST_ARG_RANGE_1(TYPE, ARG_NAME, N)                    \
+  DYND_PP_JOIN_MAP_1(                                                          \
+      DYND_PP_META_DEREFERENCE, (, ),                                          \
+      DYND_PP_ELWISE_1(TEST_CAST, DYND_PP_META_NAME_RANGE(ARG_NAME, N),            \
+                       DYND_PP_META_NAME_RANGE(ARG_NAME, N)))
 
 /**
  * For generating ckernel function calls, casts each ``ARG_NAME#`` input to
@@ -159,11 +171,11 @@
  *
  */
 #define DYND_PP_NDT_TYPES_FROM_TYPES(DST_TYPE, SRC_TYPE, N)                    \
-  ndt::type dst_tp = type_factory<DST_TYPE>::make();             \
+  ndt::type dst_tp = ndt::type_from<DST_TYPE>::make();             \
   ndt::type src_tp[N] = {DYND_PP_JOIN_ELWISE_1(                                \
       DYND_PP_META_SCOPE_CALL, (, ),                                           \
       DYND_PP_ELWISE_1(DYND_PP_META_TEMPLATE_INSTANTIATION,                    \
-                       DYND_PP_REPEAT_1(type_factory, N),        \
+                       DYND_PP_REPEAT_1(ndt::type_from, N),        \
                        DYND_PP_META_NAME_RANGE(SRC_TYPE, N)),                  \
       DYND_PP_REPEAT_1(make, N))};
 

@@ -34,6 +34,7 @@ struct neighborhood2d_ck : public kernels::expr_ck<neighborhood2d_ck, 2> {
 
   inline void single(char *dst, const char *const *src)
   {
+
     // First pass of this implementation just visits all the complete
     // neighborhoods
     ckernel_prefix *nh_op = get_child_ckernel();

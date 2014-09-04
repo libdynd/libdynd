@@ -15,6 +15,7 @@
 #include <dynd/types/dynd_float16.hpp>
 #include <dynd/eval/eval_context.hpp>
 #include <dynd/exceptions.hpp>
+#include <dynd/strided_vals.hpp>
 
 namespace dynd {
 
@@ -719,6 +720,9 @@ public:
     friend std::ostream& operator<<(std::ostream& o, const type& rhs);
 };
 
+template <typename T>
+struct type_from;
+
 /**
  * Convenience function which makes an ndt::type
  * object from a template parameter.
@@ -726,7 +730,7 @@ public:
 template<class T>
 type make_type()
 {
-    return type(static_cast<type_id_t>(type_id_of<T>::value));
+    return type_from<T>::make();
 }
 
 /**
@@ -787,5 +791,32 @@ void print_indented(std::ostream &o, const std::string &indent,
                     const std::string &s, bool skipfirstline = false);
 
 } // namespace dynd
+
+namespace dynd { namespace ndt {
+
+ndt::type make_strided_dim(const ndt::type& uniform_tp, intptr_t ndim);
+
+template <typename T>
+struct type_from {
+    static type make() {
+        return type(static_cast<type_id_t>(type_id_of<T>::value));
+    }
+};
+
+template <typename T, int N>
+struct type_from<T[N]> {
+    static type make() {
+        return make_cfixed_dim(N, type_from<T>::make());
+    }
+};
+
+template <typename T, int N>
+struct type_from<nd::strided<T, N> > {
+    static type make() {
+        return make_strided_dim(type_from<T>::make(), N);
+    }
+};
+
+}} // namespace dynd::ndt
 
 #endif // _DYND__TYPE_HPP_

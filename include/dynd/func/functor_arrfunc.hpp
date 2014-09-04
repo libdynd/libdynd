@@ -15,64 +15,6 @@
 
 namespace dynd {
 
-template <typename T>
-struct type_factory;
-
-template <typename T>
-struct type_factory {
-    static ndt::type make() {
-        return ndt::cfixed_dim_from_array<T>::make();
-    }
-};
-
-template <typename T, int N>
-struct type_factory<nd::strided<T, N> > {
-    static ndt::type make() {
-        return ndt::type("strided * strided * float32");
-    }
-};
-
-template <typename T>
-struct ck_data_size {
-    static const size_t value = 0;
-
-    static void init(char *DYND_UNUSED(data), const char *DYND_UNUSED(arrmeta)) {
-    }
-
-    static T *make(char *arg, char *DYND_UNUSED(data)) {
-        return reinterpret_cast<T *>(arg);
-    }
-
-    static const T *make(const char *arg, char *DYND_UNUSED(data)) {
-        return reinterpret_cast<const T *>(arg);
-    }
-};
-
-
-template <typename T, int N>
-struct ck_data_size<nd::strided<T, N> > {
-    static const size_t value = sizeof(nd::strided<T, N>);
-
-    static void init(char *data, const char *arrmeta) {
-        nd::strided<T, N> &arg = *reinterpret_cast<nd::strided<T, N> *>(data);
-        arg.init(reinterpret_cast<const size_stride_t *>(arrmeta));
-    }
-
-    static nd::strided<T, N> *make(char *arg, char *data) {
-        nd::strided<T, N> *ptr = reinterpret_cast<nd::strided<T, N> *>(data);
-        ptr->set_readonly_originptr(arg);
-        return ptr;
-    }
-
-    static const nd::strided<T, N> *make(const char *arg, char *data) {
-        nd::strided<T, N> *ptr = reinterpret_cast<nd::strided<T, N> *>(data);
-        ptr->set_readonly_originptr(arg);
-        return ptr;
-    }
-
-};
-
-
 namespace nd { namespace detail {
   /**
    * Metaprogram to tell whether an argument is const or by value.
@@ -105,6 +47,39 @@ DYND_PP_JOIN_MAP(DYND_CODE, (), DYND_PP_RANGE(1, DYND_PP_INC(DYND_ELWISE_MAX)))
 namespace dynd { namespace nd {
 
 namespace detail {
+
+  template <typename T>
+  struct val_helper {
+    void init(const char *DYND_UNUSED(arrmeta)) {
+    }
+
+    T *handle(char *data) {
+        return reinterpret_cast<T *>(data);
+    }
+
+    const T *handle(const char *data) {
+        return reinterpret_cast<const T *>(data);
+    }
+  };
+
+  template <typename T, int N>
+  struct val_helper<nd::strided<T, N> > {
+    nd::strided<T, N> vals;
+
+    void init(const char *arrmeta) {
+        vals.init(reinterpret_cast<const size_stride_t *>(arrmeta));
+    }
+
+    nd::strided<T, N> *handle(char *data) {
+        vals.set_readonly_originptr(data);
+        return &vals;
+    }
+
+    const nd::strided<T, N> *handle(const char *data) {
+        vals.set_readonly_originptr(data);
+        return &vals;
+    }
+  };
 
   template <typename Functor, typename FuncProto>
   struct functor_ckernel_instantiator;
@@ -199,12 +174,13 @@ DYND_PP_JOIN_MAP(DYND_CODE, (), DYND_PP_RANGE(1, DYND_PP_INC(DYND_ELWISE_MAX)))
                                                                                \
     ckernel_prefix base;                                                       \
     Functor func;                                                              \
-    char data[ck_data_size<R>::value + ck_data_size<D0>::value];               \
+    val_helper<R> dst_helper;                                                  \
+    DYND_PP_DECL_HELPERS(D, src, NSRC);                                        \
                                                                                \
     static void single(char *dst, const char *const *src, ckernel_prefix *ckp) \
     {                                                                          \
       self_type *e = reinterpret_cast<self_type *>(ckp);                       \
-      e->func(*ck_data_size<R>::make(dst, e->data),                            \
+      e->func(*e->dst_helper.handle(dst),                                      \
               XDYND_PP_DEREF_CAST_ARRAY_RANGE_1(D, src, NSRC));                \
     }                                                                          \
                                                                                \
@@ -219,8 +195,8 @@ DYND_PP_JOIN_MAP(DYND_CODE, (), DYND_PP_RANGE(1, DYND_PP_INC(DYND_ELWISE_MAX)))
       DYND_PP_INIT_SRC_VARIABLES(NSRC);                                        \
       for (size_t i = 0; i < count; ++i) {                                     \
         /*  func(*(R *)dst, *(const D0 *)src0, ...); */                        \
-        func(*reinterpret_cast<R *>(dst),                                      \
-             DYND_PP_DEREF_CAST_ARGRANGE_1(D, src, NSRC));                     \
+        func(*e->dst_helper.handle(dst),                                      \
+             XDYND_PP_DEREF_CAST_ARG_RANGE_1(D, src, NSRC));                     \
                                                                                \
         /* Increment ``dst``, ``src#`` by their respective strides */          \
         DYND_PP_STRIDED_INCREMENT(NSRC);                                       \
@@ -254,8 +230,8 @@ DYND_PP_JOIN_MAP(DYND_CODE, (), DYND_PP_RANGE(1, DYND_PP_INC(DYND_ELWISE_MAX)))
       self_type *e = ckb->alloc_ck_leaf<self_type>(ckb_offset);                \
       e->base.template set_expr_function<self_type>(kernreq);                  \
       e->func = *af_self->get_data_as<Functor>();                              \
-      ck_data_size<R>::init(e->data, dst_arrmeta);                             \
-      ck_data_size<D0>::init(e->data, src_arrmeta[0]);                         \
+      e->dst_helper.init(dst_arrmeta);                                         \
+      e->src0_helper.init(src_arrmeta[0]);                                     \
                                                                                \
       return ckb_offset;                                                       \
     }                                                                          \
