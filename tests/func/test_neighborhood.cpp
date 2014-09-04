@@ -54,7 +54,7 @@ TEST(Neighborhood, Sum) {
   cout << "(DEBUG) " << b << endl;
 }
 
-void func(float &dst, const nd::strided<float, 2> &src) {
+void func(float &dst, const nd::strided_vals<float, 2> &src) {
     dst = 0.0;
     for (int i = 0; i < src.get_dim_size(0); ++i) {
         for (int j = 0; j < src.get_dim_size(1); ++j) {

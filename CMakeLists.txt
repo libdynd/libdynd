@@ -343,7 +343,6 @@ set(libdynd_SRC
     include/dynd/func/make_callable.hpp
     include/dynd/func/math_arrfunc.hpp
     include/dynd/func/neighborhood_arrfunc.hpp
-    include/dynd/func/reduction_arrfunc.hpp
     include/dynd/func/rolling_arrfunc.hpp
     include/dynd/func/take_arrfunc.hpp
     # Iter

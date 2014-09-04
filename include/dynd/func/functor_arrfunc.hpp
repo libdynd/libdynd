@@ -49,33 +49,36 @@ namespace dynd { namespace nd {
 namespace detail {
 
   template <typename T>
+  struct val_helper;
+
+  template <typename T>
   struct val_helper {
-    void init(const char *DYND_UNUSED(arrmeta)) {
+    void init(const ndt::type &DYND_UNUSED(tp), const char *DYND_UNUSED(arrmeta)) {
     }
 
-    T *handle(char *data) {
+    T *make(char *data) {
         return reinterpret_cast<T *>(data);
     }
 
-    const T *handle(const char *data) {
+    const T *make(const char *data) {
         return reinterpret_cast<const T *>(data);
     }
   };
 
   template <typename T, int N>
-  struct val_helper<nd::strided<T, N> > {
-    nd::strided<T, N> vals;
+  struct val_helper<nd::strided_vals<T, N> > {
+    nd::strided_vals<T, N> vals;
 
-    void init(const char *arrmeta) {
+    void init(const ndt::type &DYND_UNUSED(tp), const char *arrmeta) {
         vals.init(reinterpret_cast<const size_stride_t *>(arrmeta));
     }
 
-    nd::strided<T, N> *handle(char *data) {
+    nd::strided_vals<T, N> *make(char *data) {
         vals.set_readonly_originptr(data);
         return &vals;
     }
 
-    const nd::strided<T, N> *handle(const char *data) {
+    const nd::strided_vals<T, N> *make(const char *data) {
         vals.set_readonly_originptr(data);
         return &vals;
     }
@@ -180,7 +183,7 @@ DYND_PP_JOIN_MAP(DYND_CODE, (), DYND_PP_RANGE(1, DYND_PP_INC(DYND_ELWISE_MAX)))
     static void single(char *dst, const char *const *src, ckernel_prefix *ckp) \
     {                                                                          \
       self_type *e = reinterpret_cast<self_type *>(ckp);                       \
-      e->func(*e->dst_helper.handle(dst),                                      \
+      e->func(*e->dst_helper.make(dst),                                      \
               XDYND_PP_DEREF_CAST_ARRAY_RANGE_1(D, src, NSRC));                \
     }                                                                          \
                                                                                \
@@ -195,7 +198,7 @@ DYND_PP_JOIN_MAP(DYND_CODE, (), DYND_PP_RANGE(1, DYND_PP_INC(DYND_ELWISE_MAX)))
       DYND_PP_INIT_SRC_VARIABLES(NSRC);                                        \
       for (size_t i = 0; i < count; ++i) {                                     \
         /*  func(*(R *)dst, *(const D0 *)src0, ...); */                        \
-        func(*e->dst_helper.handle(dst),                                      \
+        func(*e->dst_helper.make(dst),                                      \
              XDYND_PP_DEREF_CAST_ARG_RANGE_1(D, src, NSRC));                     \
                                                                                \
         /* Increment ``dst``, ``src#`` by their respective strides */          \
@@ -230,8 +233,8 @@ DYND_PP_JOIN_MAP(DYND_CODE, (), DYND_PP_RANGE(1, DYND_PP_INC(DYND_ELWISE_MAX)))
       self_type *e = ckb->alloc_ck_leaf<self_type>(ckb_offset);                \
       e->base.template set_expr_function<self_type>(kernreq);                  \
       e->func = *af_self->get_data_as<Functor>();                              \
-      e->dst_helper.init(dst_arrmeta);                                         \
-      e->src0_helper.init(src_arrmeta[0]);                                     \
+      e->dst_helper.init(dst_tp, dst_arrmeta);                                 \
+      e->src0_helper.init(src_tp[0], src_arrmeta[0]);                          \
                                                                                \
       return ckb_offset;                                                       \
     }                                                                          \

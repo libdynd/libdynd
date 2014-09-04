@@ -11,12 +11,12 @@
 namespace dynd { namespace nd {
 
 template <typename T, int N>
-class strided {
+class strided_vals {
     size_stride_t m_ss[N];
     const char *m_data_pointer;
 
 public:
-    strided() : m_data_pointer(NULL) {
+    strided_vals() : m_data_pointer(NULL) {
     }
 
     void init(const size_stride_t *ss) {

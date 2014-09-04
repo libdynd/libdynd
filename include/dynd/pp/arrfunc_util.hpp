@@ -94,7 +94,7 @@
             DYND_PP_META_NAME_RANGE(TYPE, N), DYND_PP_META_NAME_RANGE(ARG_NAME, N)))
 
 #define DYND_PP_ARROW(A, B) A->B
-#define TEST_CAST(NAME, NAME_AT) DYND_PP_ARROW(e, DYND_PP_CAT((NAME, _helper))).handle(NAME_AT)
+#define TEST_CAST(NAME, NAME_AT) DYND_PP_ARROW(e, DYND_PP_CAT((NAME, _helper))).make(NAME_AT)
 #define XDYND_PP_DEREF_CAST_ARRAY_RANGE_1(TYPE, ARG_NAME, N)                    \
   DYND_PP_JOIN_MAP_1(                                                          \
       DYND_PP_META_DEREFERENCE, (, ),                                          \
