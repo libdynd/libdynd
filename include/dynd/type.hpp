@@ -723,6 +723,27 @@ public:
 template <typename T>
 struct type_from;
 
+template <typename T>
+struct type_from {
+    static type make() {
+        return type(static_cast<type_id_t>(type_id_of<T>::value));
+    }
+};
+
+template <typename T, int N>
+struct type_from<T[N]> {
+    static type make() {
+        return make_cfixed_dim(N, type_from<T>::make());
+    }
+};
+
+template <typename T, int N>
+struct type_from<nd::strided_vals<T, N> > {
+    static type make() {
+        return make_strided_dim(type_from<T>::make(), N);
+    }
+};
+
 /**
  * Convenience function which makes an ndt::type
  * object from a template parameter.
@@ -791,32 +812,5 @@ void print_indented(std::ostream &o, const std::string &indent,
                     const std::string &s, bool skipfirstline = false);
 
 } // namespace dynd
-
-namespace dynd { namespace ndt {
-
-ndt::type make_strided_dim(const ndt::type& uniform_tp, intptr_t ndim);
-
-template <typename T>
-struct type_from {
-    static type make() {
-        return type(static_cast<type_id_t>(type_id_of<T>::value));
-    }
-};
-
-template <typename T, int N>
-struct type_from<T[N]> {
-    static type make() {
-        return make_cfixed_dim(N, type_from<T>::make());
-    }
-};
-
-template <typename T, int N>
-struct type_from<nd::strided_vals<T, N> > {
-    static type make() {
-        return make_strided_dim(type_from<T>::make(), N);
-    }
-};
-
-}} // namespace dynd::ndt
 
 #endif // _DYND__TYPE_HPP_

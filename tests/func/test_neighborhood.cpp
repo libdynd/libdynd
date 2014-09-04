@@ -73,8 +73,6 @@ TEST(Neighborhood, Reduction) {
     nd::array a =
         parse_json("4 * 4 * float32",
                    "[[1, 2, 3, 4], [5, 6, 7, 8], [9, 10, 11, 12], [13, 14, 15, 16]]");
-    a = a.view(ndt::make_strided_dim(ndt::make_strided_dim(ndt::make_type<float>())));
-//    nd::array b = af(a);
     nd::array b = nd::empty<float[4][4]>();
     b.vals() = 0;
 
