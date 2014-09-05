@@ -20,6 +20,7 @@
 using namespace std;
 using namespace dynd;
 
+/*
 static void elwise_func(float& out, float in)
 {
 //  cout << out << " OP " << in;
@@ -53,6 +54,7 @@ TEST(Neighborhood, Sum) {
   cout << a << endl;
   cout << "(DEBUG) " << b << endl;
 }
+*/
 
 void func(float &dst, const nd::strided_vals<float, 2> &src) {
     dst = 0.0;
