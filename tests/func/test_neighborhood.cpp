@@ -89,12 +89,8 @@ TEST(Neighborhood, Reduction2D) {
 template <int N>
 void sum(float &dst, const nd::strided_vals<float, N> &src) {
     dst = 0.0;
-    for (int i = 0; i < src.get_dim_size(0); ++i) {
-        for (int j = 0; j < src.get_dim_size(1); ++j) {
-            for (int k = 0; k < src.get_dim_size(2); ++k) {
-                dst += src(i, j, k);
-            }
-        }
+    for (typename nd::strided_vals<float, N>::iterator it = src.begin(); it != src.end(); it++) {
+        dst += *it;
     }
 }
 
@@ -122,3 +118,25 @@ TEST(Neighborhood, Reduction3D) {
 
     std::exit(-1);
 }
+
+/*
+array([[[   92.,   144.,   156.,   108.],
+        [  162.,   252.,   270.,   186.],
+        [  210.,   324.,   342.,   234.],
+        [  156.,   240.,   252.,   172.]],
+
+       [[  234.,   360.,   378.,   258.],
+        [  387.,   594.,   621.,   423.],
+        [  459.,   702.,   729.,   495.],
+        [  330.,   504.,   522.,   354.]],
+
+       [[  426.,   648.,   666.,   450.],
+        [  675.,  1026.,  1053.,   711.],
+        [  747.,  1134.,  1161.,   783.],
+        [  522.,   792.,   810.,   546.]],
+
+       [[  348.,   528.,   540.,   364.],
+        [  546.,   828.,   846.,   570.],
+        [  594.,   900.,   918.,   618.],
+        [  412.,   624.,   636.,   428.]]])
+*/
