@@ -65,12 +65,14 @@ void func(float &dst, const nd::strided_vals<float, 2> &src) {
     }
 }
 
-TEST(Neighborhood, Reduction) {
+TEST(Neighborhood, Reduction2D) {
     nd::arrfunc af = nd::make_functor_arrfunc(func);
 
     intptr_t nh_shape[2] = {3, 3};
     intptr_t nh_centre[2] = {1, 1};
-    nd::arrfunc naf = make_neighborhood2d_arrfunc(af, nh_shape, nh_centre);
+    nd::arrfunc naf = make_neighborhood2d_arrfunc(af, 2, nh_shape, nh_centre);
+
+// (DEBUG) array([    [0, 0, 0, 0], [ 0, 54, 63,  0], [ 0, 90, 99,  0],     [0, 0, 0, 0]],
 
     nd::array a =
         parse_json("4 * 4 * float32",
@@ -80,5 +82,43 @@ TEST(Neighborhood, Reduction) {
 
     naf.call_out(a, b);
 
-    std::cout << "(DEBUG) " << b << std::endl;
+    std::cout << a << std::endl;
+    std::cout << b << std::endl;
+}
+
+template <int N>
+void sum(float &dst, const nd::strided_vals<float, N> &src) {
+    dst = 0.0;
+    for (int i = 0; i < src.get_dim_size(0); ++i) {
+        for (int j = 0; j < src.get_dim_size(1); ++j) {
+            for (int k = 0; k < src.get_dim_size(2); ++k) {
+                dst += src(i, j, k);
+            }
+        }
+    }
+}
+
+TEST(Neighborhood, Reduction3D) {
+    nd::arrfunc af = nd::make_functor_arrfunc(sum<3>);
+
+    intptr_t nh_shape[3] = {3, 3, 3};
+    intptr_t nh_centre[3] = {1, 1, 1};
+    nd::arrfunc naf = make_neighborhood2d_arrfunc(af, 3, nh_shape, nh_centre);
+
+    nd::array a =
+        parse_json("4 * 4 * 4 * float32",
+                   "[[[1, 2, 3, 4], [5, 6, 7, 8], [9, 10, 11, 12], [13, 14, 15, 16]],"
+                   "[[17, 18, 19, 20], [21, 22, 23, 24], [25, 26, 27, 28], [29, 30, 31, 32]],"
+                   "[[33, 34, 35, 36], [37, 38, 39, 40], [41, 42, 43, 44], [45, 46, 47, 48]],"
+                   "[[49, 50, 51, 52], [53, 54, 55, 56], [57, 58, 59, 60], [61, 62, 63, 64]]]");
+    a = a.view(ndt::make_strided_dim(ndt::make_strided_dim(ndt::make_strided_dim(ndt::make_type<float>()))));
+    nd::array b = nd::empty<float[4][4][4]>();
+    b.vals() = 0;
+
+    naf.call_out(a, b);
+
+    std::cout << a << std::endl;
+    std::cout << b << std::endl;
+
+    std::exit(-1);
 }

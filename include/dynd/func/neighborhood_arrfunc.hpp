@@ -25,17 +25,19 @@ namespace dynd {
  */
 void make_neighborhood2d_arrfunc(arrfunc_type_data *out_af,
                                  const nd::arrfunc &neighborhood_op,
+                                 intptr_t nh_ndim,
                                  const intptr_t *nh_shape,
                                  const intptr_t *nh_centre);
 
-inline nd::arrfunc
-make_neighborhood2d_arrfunc(const nd::arrfunc &neighborhood_op,
-                            const intptr_t *nh_shape, const intptr_t *nh_centre)
+inline nd::arrfunc make_neighborhood2d_arrfunc(const nd::arrfunc &neighborhood_op,
+                            intptr_t nh_ndim,
+                            const intptr_t *nh_shape,
+                            const intptr_t *nh_centre)
 {
   nd::array af = nd::empty(ndt::make_arrfunc());
   make_neighborhood2d_arrfunc(
       reinterpret_cast<arrfunc_type_data *>(af.get_readwrite_originptr()),
-      neighborhood_op, nh_shape, nh_centre);
+      neighborhood_op, nh_ndim, nh_shape, nh_centre);
   af.flag_as_immutable();
   return af;
 }
