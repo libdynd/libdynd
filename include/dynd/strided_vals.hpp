@@ -11,6 +11,36 @@
 namespace dynd { namespace nd {
 
 template <typename T, int N>
+class strided_vals;
+
+template <typename T, int N, int K = N - 1>
+struct iterator_helper {
+    typedef typename strided_vals<T, N>::iterator iterator_type;
+
+    static iterator_type &incr(iterator_type &it) {
+        if (++it.m_index[K] != it.m_src.m_ss[K].dim_size) {
+            it.m_data += it.m_src.m_ss[K].stride;
+            return it;
+        }
+
+        it.m_index[K] = 0;
+        it.m_data -= (it.m_src.m_ss[K].dim_size - 1) * it.m_src.m_ss[K].stride;
+        return iterator_helper<T, N, K - 1>::incr(it);
+    }
+};
+
+template <typename T, int N>
+struct iterator_helper<T, N, 0> {
+    typedef typename strided_vals<T, N>::iterator iterator_type;
+
+    static iterator_type &incr(iterator_type &it) {
+        ++it.m_index[0];
+        it.m_data += it.m_src.m_ss[0].stride;
+        return it;
+    }
+};
+
+template <typename T, int N>
 class strided_vals {
 public:
     size_stride_t m_ss[N];
@@ -22,50 +52,16 @@ public:
         const strided_vals<T, N> &m_src;
         const char *m_data;
         intptr_t m_index[N];
-        intptr_t m_size;
 
     public:
         iterator(const strided_vals<T, N> &src) : m_src(src), m_data(src.m_data_pointer) {
-            m_index[0] = 0;
-            m_index[1] = 0;
-            m_index[2] = 0;
+            for (int i = 0; i < N; ++i) {
+                m_index[i] = 0;
+            }
         }
 
         iterator& operator++() {
-            if (++m_index[2] != m_src.m_ss[2].dim_size) {
-                m_data += m_src.m_ss[2].stride;
-
-                return *this;
-            } else {
-                m_index[2] = 0;
-                m_data -= (m_src.m_ss[2].dim_size - 1) * m_src.m_ss[2].stride;
-            }
-
-            if (++m_index[1] != m_src.m_ss[1].dim_size) {
-                m_data += m_src.m_ss[1].stride;
-
-                return *this;
-            } else {
-                m_index[1] = 0;
-                m_data -= (m_src.m_ss[1].dim_size - 1) * m_src.m_ss[1].stride;
-            }
-
-            ++m_index[0];
-            m_data += m_src.m_ss[0].stride;
-            return *this;
-
-/*
-            if (++m_index[0] != m_src.m_ss[0].dim_size) {
-                m_data += m_src.m_ss[0].stride;
-
-                return *this;
-            } else {
-                m_index[0] = 0;
-                m_data -= m_src.m_ss[0].dim_size * m_src.m_ss[0].stride;
-            }
-
-            return *this;
-*/
+            return iterator_helper<T, N>::incr(*this);
         }
 
         iterator operator++(int) {

@@ -56,17 +56,16 @@ TEST(Neighborhood, Sum) {
 }
 */
 
-void func(float &dst, const nd::strided_vals<float, 2> &src) {
+template <int N>
+void sum(float &dst, const nd::strided_vals<float, N> &src) {
     dst = 0.0;
-    for (int i = 0; i < src.get_dim_size(0); ++i) {
-        for (int j = 0; j < src.get_dim_size(1); ++j) {
-            dst += src(i, j);
-        }
+    for (typename nd::strided_vals<float, N>::iterator it = src.begin(); it != src.end(); it++) {
+        dst += *it;
     }
 }
 
 TEST(Neighborhood, Reduction2D) {
-    nd::arrfunc af = nd::make_functor_arrfunc(func);
+    nd::arrfunc af = nd::make_functor_arrfunc(sum<2>);
 
     intptr_t nh_shape[2] = {3, 3};
     intptr_t nh_centre[2] = {1, 1};
@@ -84,14 +83,6 @@ TEST(Neighborhood, Reduction2D) {
 
     std::cout << a << std::endl;
     std::cout << b << std::endl;
-}
-
-template <int N>
-void sum(float &dst, const nd::strided_vals<float, N> &src) {
-    dst = 0.0;
-    for (typename nd::strided_vals<float, N>::iterator it = src.begin(); it != src.end(); it++) {
-        dst += *it;
-    }
 }
 
 TEST(Neighborhood, Reduction3D) {
