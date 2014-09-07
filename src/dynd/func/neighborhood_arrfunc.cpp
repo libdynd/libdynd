@@ -207,6 +207,8 @@ void dynd::make_neighborhood_arrfunc(arrfunc_type_data *out_af,
       }
     out_af->func_proto = ndt::substitute(result_pattern, typevars, true);
     out_af->instantiate = &instantiate_neighborhood<3>;
+  } else {
+    throw invalid_argument("TODO: implement neighborhood processing for dimensions that are not 2D or 3D");
   }
 
     out_af->free_func = &free_neighborhood;
