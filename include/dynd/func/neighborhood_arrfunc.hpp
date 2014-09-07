@@ -23,19 +23,19 @@ namespace dynd {
  *                         '(strided * strided * NH, strided * strided * MSK) -> OUT',
  * \param window_size  The size of the rolling window.
  */
-void make_neighborhood2d_arrfunc(arrfunc_type_data *out_af,
+void make_neighborhood_arrfunc(arrfunc_type_data *out_af,
                                  const nd::arrfunc &neighborhood_op,
                                  intptr_t nh_ndim,
                                  const intptr_t *nh_shape,
                                  const intptr_t *nh_centre);
 
-inline nd::arrfunc make_neighborhood2d_arrfunc(const nd::arrfunc &neighborhood_op,
+inline nd::arrfunc make_neighborhood_arrfunc(const nd::arrfunc &neighborhood_op,
                             intptr_t nh_ndim,
                             const intptr_t *nh_shape,
                             const intptr_t *nh_centre)
 {
   nd::array af = nd::empty(ndt::make_arrfunc());
-  make_neighborhood2d_arrfunc(
+  make_neighborhood_arrfunc(
       reinterpret_cast<arrfunc_type_data *>(af.get_readwrite_originptr()),
       neighborhood_op, nh_ndim, nh_shape, nh_centre);
   af.flag_as_immutable();

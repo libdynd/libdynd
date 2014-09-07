@@ -55,42 +55,40 @@ struct neighborhood_ck_iter {
 
 template <int N>
 struct neighborhood_ck : public kernels::expr_ck<neighborhood_ck<N>, 2> {
-  // The neighborhood
-  intptr_t m_nh_centre[N];
-  // Arrmeta for a full neighborhood "strided * strided * T"
-  arrmeta_holder m_nh_arrmeta;
-  // The shape of the src/dst arrays
-  intptr_t m_shape[N];
-  // The strides of the src/dst arrays may differ
-  intptr_t m_dst_strides[N], m_src_strides[N];
+    // The neighborhood
+    intptr_t m_nh_centre[N];
+    // Arrmeta for a full neighborhood
+    arrmeta_holder m_nh_arrmeta;
+    // The shape of the src/dst arrays
+    intptr_t m_shape[N];
+    // The strides of the src/dst arrays may differ
+    intptr_t m_dst_strides[N], m_src_strides[N];
 
-  inline void single(char *dst, const char *const *src)
-  {
-    std::cout << "single called" << std::endl;
+    inline void single(char *dst, const char *const *src) {
+        ckernel_prefix *nh_op = kernels::expr_ck<neighborhood_ck<N>, 2>::get_child_ckernel();
+        expr_strided_t nh_op_fn = nh_op->get_function<expr_strided_t>();
 
-    ckernel_prefix *nh_op = kernels::expr_ck<neighborhood_ck<N>, 2>::get_child_ckernel();
-    expr_strided_t nh_op_fn = nh_op->get_function<expr_strided_t>();
+        const char *src_it[1] = {src[0]};
+        const strided_dim_type_arrmeta *nh_arrmeta =
+            reinterpret_cast<const strided_dim_type_arrmeta *>(m_nh_arrmeta.get());
 
-    const char *src_it[1] = {src[0]};
-    const strided_dim_type_arrmeta *nh_arrmeta =
-        reinterpret_cast<const strided_dim_type_arrmeta *>(m_nh_arrmeta.get());
+        // Position the destination at the first output
+        for (intptr_t i = 0; i < N; ++i) {
+            dst += m_nh_centre[i] * m_dst_strides[i];
+        }
 
-    // Position the destination at the first output
-    for (intptr_t i = 0; i < N; ++i) {
-        dst += m_nh_centre[i] * m_dst_strides[i];
+        intptr_t src_inner_strides[1] = {m_src_strides[N - 1]};
+        neighborhood_ck_iter<N - 1>::interior(nh_op_fn, dst, m_dst_strides, src_it, m_src_strides, src_inner_strides, m_shape, nh_arrmeta, nh_op);
     }
-
-    intptr_t src_inner_strides[1] = {m_src_strides[N - 1]};
-    neighborhood_ck_iter<N - 1>::interior(nh_op_fn, dst, m_dst_strides, src_it, m_src_strides, src_inner_strides, m_shape, nh_arrmeta, nh_op);
-  }
 };
 
-template <int N>
 struct neighborhood {
-  intptr_t nh_shape[N];
-  intptr_t nh_centre[N];
-  nd::arrfunc neighborhood_op;
+    intptr_t ndim;
+    dimvector nh_shape;
+    dimvector nh_centre;
+    nd::arrfunc neighborhood_op;
 };
+
 } // anonymous namespace
 
 template <int N>
@@ -100,83 +98,76 @@ static intptr_t instantiate_neighborhood(
     const ndt::type *src_tp, const char *const *src_arrmeta,
     kernel_request_t kernreq, const eval::eval_context *ectx)
 {
-  typedef neighborhood_ck<N> self_type;
-  const neighborhood<N> *nh = *af_self->get_data_as<const neighborhood<N> *>();
-  self_type *self = self_type::create(ckb, kernreq, ckb_offset);
+    typedef neighborhood_ck<N> self_type;
+    const neighborhood *nh = *af_self->get_data_as<const neighborhood *>();
+    self_type *self = self_type::create(ckb, kernreq, ckb_offset);
 
-  // Process the dst array striding/types
-  const size_stride_t *dst_shape;
-  ndt::type nh_dst_tp;
-  const char *nh_dst_arrmeta;
-  if (!dst_tp.get_as_strided(dst_arrmeta, N, &dst_shape, &nh_dst_tp,
-                             &nh_dst_arrmeta)) {
-    stringstream ss;
-    ss << "neighborhood arrfunc dst must be a 2D strided array, not " << dst_tp;
-    throw invalid_argument(ss.str());
-  }
-  for (int i = 0; i < N; ++i) {
-    self->m_dst_strides[i] = dst_shape[i].stride;
-    self->m_shape[i] = dst_shape[i].dim_size;
-  }
-
-  // Process the src[0] array striding/type
-  const size_stride_t *src0_shape;
-  ndt::type src0_el_tp;
-  const char *src0_el_arrmeta;
-  if (!src_tp[0].get_as_strided(src_arrmeta[0], N, &src0_shape, &src0_el_tp,
-                                &src0_el_arrmeta)) {
-    stringstream ss;
-    ss << "neighborhood arrfunc argument 1 must be a 2D strided array, not "
-       << src_tp[0];
-    throw invalid_argument(ss.str());
-  }
-
-  // Synthesize the arrmeta for the src[0] passed to the neighborhood op
-  ndt::type nh_src_tp[1];
-  nh_src_tp[0] = ndt::make_strided_dim(src0_el_tp, N);
-  arrmeta_holder(nh_src_tp[0]).swap(self->m_nh_arrmeta);
-  size_stride_t *nh_src0_arrmeta =
-      reinterpret_cast<size_stride_t *>(self->m_nh_arrmeta.get());
-  for (int i = 0; i < N; ++i) {
-    nh_src0_arrmeta[i].dim_size = nh->nh_shape[i];
-    nh_src0_arrmeta[i].stride = src0_shape[i].stride;
-  }
-  const char *nh_src_arrmeta[1] = {self->m_nh_arrmeta.get()};
-
-  for (int i = 0; i < N; ++i) {
-    self->m_src_strides[i] = src0_shape[i].stride;
-  }
-
-  // Verify that the src0 and dst shapes match
-  for (int i = 0; i < N; ++i) {
-    if (self->m_shape[i] != src0_shape[i].dim_size) {
-      throw broadcast_error(dst_tp, dst_arrmeta, src_tp[0], src_arrmeta[0]);
+    // Process the dst array striding/types
+    const size_stride_t *dst_shape;
+    ndt::type nh_dst_tp;
+    const char *nh_dst_arrmeta;
+    if (!dst_tp.get_as_strided(dst_arrmeta, nh->ndim, &dst_shape, &nh_dst_tp,
+                               &nh_dst_arrmeta)) {
+        stringstream ss;
+        ss << "neighborhood arrfunc dst must be a strided array, not " << dst_tp;
+        throw invalid_argument(ss.str());
     }
-  }
 
-  for (int i = 0; i < N; ++i) {
-    self->m_nh_centre[i] = nh->nh_centre[i];
-  }
+    for (intptr_t i = 0; i < nh->ndim; ++i) {
+        self->m_dst_strides[i] = dst_shape[i].stride;
+        self->m_shape[i] = dst_shape[i].dim_size;
+    }
 
-  // Instantiate the neighborhood op
-cout << "instantiate " << nh->neighborhood_op << endl;
-cout << "instantiate address " << (void *)nh->neighborhood_op.get()->instantiate << endl;
-cout << "nh_src_tp[0] " << nh_src_tp[0] << endl;
-cout << "nh_dst_tp " << nh_dst_tp << endl;
-  ckb_offset = nh->neighborhood_op.get()->instantiate(
-      nh->neighborhood_op.get(), ckb, ckb_offset, nh_dst_tp, nh_dst_arrmeta,
-      nh_src_tp, nh_src_arrmeta, kernel_request_strided, ectx);
-  return ckb_offset;
+    // Process the src[0] array striding/type
+    const size_stride_t *src0_shape;
+    ndt::type src0_el_tp;
+    const char *src0_el_arrmeta;
+    if (!src_tp[0].get_as_strided(src_arrmeta[0], nh->ndim, &src0_shape, &src0_el_tp,
+                                  &src0_el_arrmeta)) {
+        stringstream ss;
+        ss << "neighborhood arrfunc argument 1 must be a 2D strided array, not "
+           << src_tp[0];
+        throw invalid_argument(ss.str());
+    }
+
+    // Synthesize the arrmeta for the src[0] passed to the neighborhood op
+    ndt::type nh_src_tp[1];
+    nh_src_tp[0] = ndt::make_strided_dim(src0_el_tp, nh->ndim);
+    arrmeta_holder(nh_src_tp[0]).swap(self->m_nh_arrmeta);
+    size_stride_t *nh_src0_arrmeta = reinterpret_cast<size_stride_t *>(self->m_nh_arrmeta.get());
+    for (intptr_t i = 0; i < nh->ndim; ++i) {
+        nh_src0_arrmeta[i].dim_size = nh->nh_shape[i];
+        nh_src0_arrmeta[i].stride = src0_shape[i].stride;
+    }
+    const char *nh_src_arrmeta[1] = {self->m_nh_arrmeta.get()};
+
+    for (intptr_t i = 0; i < nh->ndim; ++i) {
+        self->m_src_strides[i] = src0_shape[i].stride;
+    }
+
+    // Verify that the src0 and dst shapes match
+    for (intptr_t i = 0; i < nh->ndim; ++i) {
+        if (self->m_shape[i] != src0_shape[i].dim_size) {
+            throw broadcast_error(dst_tp, dst_arrmeta, src_tp[0], src_arrmeta[0]);
+        }
+    }
+
+    for (intptr_t i = 0; i < nh->ndim; ++i) {
+        self->m_nh_centre[i] = nh->nh_centre[i];
+    }
+
+    ckb_offset = nh->neighborhood_op.get()->instantiate(
+        nh->neighborhood_op.get(), ckb, ckb_offset, nh_dst_tp, nh_dst_arrmeta,
+        nh_src_tp, nh_src_arrmeta, kernel_request_strided, ectx);
+    return ckb_offset;
 }
 
-template <int N>
-static void free_neighborhood(arrfunc_type_data *self_af)
-{
-  neighborhood<N> *nh = *self_af->get_data_as<neighborhood<N> *>();
-  delete nh;
+static void free_neighborhood(arrfunc_type_data *self_af) {
+    neighborhood *nh = *self_af->get_data_as<neighborhood *>();
+    delete nh;
 }
 
-void dynd::make_neighborhood2d_arrfunc(arrfunc_type_data *out_af,
+void dynd::make_neighborhood_arrfunc(arrfunc_type_data *out_af,
                                        const nd::arrfunc &neighborhood_op,
                                        intptr_t nh_ndim,
                                        const intptr_t *nh_shape,
@@ -201,14 +192,6 @@ void dynd::make_neighborhood2d_arrfunc(arrfunc_type_data *out_af,
       }
     out_af->func_proto = ndt::substitute(result_pattern, typevars, true);
     out_af->instantiate = &instantiate_neighborhood<2>;
-    out_af->free_func = &free_neighborhood<2>;
-    neighborhood<2> **nh = out_af->get_data_as<neighborhood<2> *>();
-    *nh = new neighborhood<2>;
-    (*nh)->nh_shape[0] = nh_shape[0];
-    (*nh)->nh_shape[1] = nh_shape[1];
-    (*nh)->nh_centre[0] = nh_centre[0];
-    (*nh)->nh_centre[1] = nh_centre[1];
-    (*nh)->neighborhood_op = neighborhood_op;
   } else if (nh_ndim == 3) {
       ndt::type nhop_pattern(
           "(strided * strided * strided * NH) -> OUT");
@@ -224,15 +207,13 @@ void dynd::make_neighborhood2d_arrfunc(arrfunc_type_data *out_af,
       }
     out_af->func_proto = ndt::substitute(result_pattern, typevars, true);
     out_af->instantiate = &instantiate_neighborhood<3>;
-    out_af->free_func = &free_neighborhood<3>;
-    neighborhood<3> **nh = out_af->get_data_as<neighborhood<3> *>();
-    *nh = new neighborhood<3>;
-    (*nh)->nh_shape[0] = nh_shape[0];
-    (*nh)->nh_shape[1] = nh_shape[1];
-    (*nh)->nh_shape[2] = nh_shape[2];
-    (*nh)->nh_centre[0] = nh_centre[0];
-    (*nh)->nh_centre[1] = nh_centre[1];
-    (*nh)->nh_centre[2] = nh_centre[2];
-    (*nh)->neighborhood_op = neighborhood_op;
   }
+
+    out_af->free_func = &free_neighborhood;
+    neighborhood **nh = out_af->get_data_as<neighborhood *>();
+    *nh = new neighborhood;
+    (*nh)->ndim = nh_ndim;
+    (*nh)->nh_shape.init(nh_ndim, nh_shape);
+    (*nh)->nh_centre.init(nh_ndim, nh_centre);
+    (*nh)->neighborhood_op = neighborhood_op;
 }

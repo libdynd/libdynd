@@ -55,9 +55,7 @@ public:
 
     public:
         iterator(const strided_vals<T, N> &src) : m_src(src), m_data(src.m_data_pointer) {
-            for (int i = 0; i < N; ++i) {
-                m_index[i] = 0;
-            }
+            memset(m_index, 0, N * sizeof(intptr_t));
         }
 
         iterator& operator++() {
@@ -74,8 +72,8 @@ public:
             return m_data != other.m_data;
         }
 
-        T operator *() const {
-            return *reinterpret_cast<const T *>(m_data);
+        const T *operator *() const {
+            return reinterpret_cast<const T *>(m_data);
         }
     };
 
@@ -102,12 +100,12 @@ public:
         m_data_pointer = data_pointer;
     }
 
-    T operator()(intptr_t i0, intptr_t i1) const {
-        return *reinterpret_cast<const T *>(m_data_pointer + i0 * m_ss[0].stride + i1 * m_ss[1].stride);
+    const T *operator()(intptr_t i0, intptr_t i1) const {
+        return reinterpret_cast<const T *>(m_data_pointer + i0 * m_ss[0].stride + i1 * m_ss[1].stride);
     }
 
-    T operator()(intptr_t i0, intptr_t i1, intptr_t i2) const {
-        return *reinterpret_cast<const T *>(m_data_pointer + i0 * m_ss[0].stride + i1 * m_ss[1].stride + i2 * m_ss[2].stride);
+    const T *operator()(intptr_t i0, intptr_t i1, intptr_t i2) const {
+        return reinterpret_cast<const T *>(m_data_pointer + i0 * m_ss[0].stride + i1 * m_ss[1].stride + i2 * m_ss[2].stride);
     }
 
     iterator begin() const {
