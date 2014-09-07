@@ -80,7 +80,7 @@ public:
         }
 
         template <int K>
-        friend class iterator_helper;
+        friend struct iterator_helper;
     };
 
     strided_vals() : m_data(NULL) {
