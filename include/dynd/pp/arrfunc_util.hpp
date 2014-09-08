@@ -87,6 +87,12 @@
                                      DYND_PP_META_NAME_RANGE(TYPE, N)),        \
                        DYND_PP_META_AT_RANGE(ARG_NAME, N)))
 
+#define DYND_PP_DECL_HELPER(TYPE, NAME) val_helper<TYPE> DYND_PP_CAT((NAME, _helper))
+#define DYND_PP_DECL_HELPERS(TYPE, ARG_NAME, N)                                \
+    DYND_PP_JOIN_1((;),                                                        \
+        DYND_PP_ELWISE_1(DYND_PP_DECL_HELPER,                                  \
+            DYND_PP_META_NAME_RANGE(TYPE, N), DYND_PP_META_NAME_RANGE(ARG_NAME, N)))
+
 /**
  * For generating ckernel function calls, casts each ``ARG_NAME#`` input to
  * the type ``TYPE#`` and dereferences it, output with a comma separator.
@@ -149,15 +155,47 @@
 /**
  * Create ``dst_tp`` and ``src_tp[N]``, etc. from the types DST_TYPE, SRC_TYPE0,
  * etc.
- *
  */
 #define DYND_PP_NDT_TYPES_FROM_TYPES(DST_TYPE, SRC_TYPE, N)                    \
-  ndt::type dst_tp = ndt::cfixed_dim_from_array<DST_TYPE>::make();             \
-  ndt::type src_tp[N] = {DYND_PP_JOIN_ELWISE_1(                                \
-      DYND_PP_META_SCOPE_CALL, (, ),                                           \
-      DYND_PP_ELWISE_1(DYND_PP_META_TEMPLATE_INSTANTIATION,                    \
-                       DYND_PP_REPEAT_1(ndt::cfixed_dim_from_array, N),        \
-                       DYND_PP_META_NAME_RANGE(SRC_TYPE, N)),                  \
-      DYND_PP_REPEAT_1(make, N))};
+  ndt::type dst_tp = ndt::make_type<DST_TYPE>();                               \
+  ndt::type src_tp[N] = {                                                      \
+      DYND_PP_JOIN_ELWISE_1(DYND_PP_META_TEMPLATE_INSTANTIATION_CALL, (,),     \
+                       DYND_PP_REPEAT_1(ndt::make_type, N),                    \
+                       DYND_PP_META_NAME_RANGE(SRC_TYPE, N))};
+
+#define DYND_PP_SRC_HELPER_VAR(NAME) e->DYND_PP_CAT((NAME, _helper))
+
+/**
+ * Initialize ``src0_helper``, ``src1_helper``, etc.
+ */
+#define DYND_PP_SRC_HELPER_INIT(VAR, I) VAR.init(src_tp[I], src_arrmeta[I])
+#define DYND_PP_INIT_SRC_HELPERS(N)                                            \
+    DYND_PP_JOIN_ELWISE_1(DYND_PP_SRC_HELPER_INIT, (;),                        \
+        DYND_PP_MAP_1(DYND_PP_SRC_HELPER_VAR, DYND_PP_META_NAME_RANGE(src, N)),\
+        DYND_PP_RANGE(N));
+
+#define DYND_PP_SRC_HELPER_MAKE(NAME, ARG_NAME) DYND_PP_SRC_HELPER_VAR(NAME).make(ARG_NAME)
+
+/**
+ * For generating ckernel function calls, passes each ``ARG_NAME[#]`` input to
+ * the helper and dereferences it, output with a comma separator.
+ */
+#define DYND_PP_DEREF_MAKE_ARRAY_RANGE_1(TYPE, ARG_NAME, N)                    \
+  DYND_PP_JOIN_MAP_1(                                                          \
+      DYND_PP_META_DEREFERENCE, (, ),                                          \
+      DYND_PP_ELWISE_1(DYND_PP_SRC_HELPER_MAKE,                                \
+                      DYND_PP_META_NAME_RANGE(ARG_NAME, N),                    \
+                      DYND_PP_META_AT_RANGE(ARG_NAME, N)))                     \
+
+/**
+ * For generating ckernel function calls, passes each ``ARG_NAME#`` input to
+ * the helper and dereferences it, output with a comma separator.
+ */
+#define DYND_PP_DEREF_MAKE_ARG_RANGE_1(TYPE, ARG_NAME, N)                      \
+  DYND_PP_JOIN_MAP_1(                                                          \
+      DYND_PP_META_DEREFERENCE, (, ),                                          \
+      DYND_PP_ELWISE_1(DYND_PP_SRC_HELPER_MAKE,                                \
+                       DYND_PP_META_NAME_RANGE(ARG_NAME, N),                   \
+                       DYND_PP_META_NAME_RANGE(ARG_NAME, N)))
 
 #endif // DYND__PP_ARRFUNC_UTIL_HPP

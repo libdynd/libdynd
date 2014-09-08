@@ -13,6 +13,7 @@
 #include <dynd/types/arrfunc_type.hpp>
 #include <dynd/kernels/ckernel_builder.hpp>
 #include <dynd/types/type_pattern_match.hpp>
+#include <dynd/types/type_substitute.hpp>
 
 namespace dynd {
 
@@ -203,9 +204,7 @@ struct arrfunc_type_data {
           throw std::invalid_argument(ss.str());
         }
       }
-      // TODO:
-      // return ndt::substitute_type_vars(get_return_type(), typevars);
-      return get_return_type();
+      return ndt::substitute(get_return_type(), typevars, true);
     }
   }
 };

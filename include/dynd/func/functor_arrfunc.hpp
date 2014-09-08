@@ -9,7 +9,9 @@
 #include <dynd/types/funcproto_type.hpp>
 #include <dynd/types/cfixed_dim_type.hpp>
 #include <dynd/func/arrfunc.hpp>
+#include <dynd/func/make_callable.hpp>
 #include <dynd/pp/arrfunc_util.hpp>
+#include <iostream>
 
 namespace dynd {
 
@@ -45,6 +47,45 @@ DYND_PP_JOIN_MAP(DYND_CODE, (), DYND_PP_RANGE(1, DYND_PP_INC(DYND_ELWISE_MAX)))
 namespace dynd { namespace nd {
 
 namespace detail {
+
+  /**
+   * Helper struct that casts or coerces data right before passing it to the functor.
+   */
+  template <typename T>
+  struct val_helper;
+
+  template <typename T>
+  struct val_helper {
+    void init(const ndt::type &DYND_UNUSED(tp), const char *DYND_UNUSED(arrmeta)) {
+    }
+
+    T *make(char *data) {
+        return reinterpret_cast<T *>(data);
+    }
+
+    const T *make(const char *data) {
+        return reinterpret_cast<const T *>(data);
+    }
+  };
+
+  template <typename T, int N>
+  struct val_helper<nd::strided_vals<T, N> > {
+    nd::strided_vals<T, N> vals;
+
+    void init(const ndt::type &DYND_UNUSED(tp), const char *arrmeta) {
+        vals.init(reinterpret_cast<const size_stride_t *>(arrmeta));
+    }
+
+    nd::strided_vals<T, N> *make(char *data) {
+        vals.set_readonly_originptr(data);
+        return &vals;
+    }
+
+    const nd::strided_vals<T, N> *make(const char *data) {
+        vals.set_readonly_originptr(data);
+        return &vals;
+    }
+  };
 
   template <typename Functor, typename FuncProto>
   struct functor_ckernel_instantiator;
@@ -139,12 +180,14 @@ DYND_PP_JOIN_MAP(DYND_CODE, (), DYND_PP_RANGE(1, DYND_PP_INC(DYND_ELWISE_MAX)))
                                                                                \
     ckernel_prefix base;                                                       \
     Functor func;                                                              \
+    val_helper<R> dst_helper;                                                  \
+    DYND_PP_DECL_HELPERS(D, src, NSRC);                                        \
                                                                                \
     static void single(char *dst, const char *const *src, ckernel_prefix *ckp) \
     {                                                                          \
       self_type *e = reinterpret_cast<self_type *>(ckp);                       \
-      e->func(*reinterpret_cast<R *>(dst),                                     \
-              DYND_PP_DEREF_CAST_ARRAY_RANGE_1(D, src, NSRC));                 \
+      e->func(*e->dst_helper.make(dst),                                        \
+              DYND_PP_DEREF_MAKE_ARRAY_RANGE_1(D, src, NSRC));                 \
     }                                                                          \
                                                                                \
     static void strided(char *dst, intptr_t dst_stride,                        \
@@ -158,8 +201,8 @@ DYND_PP_JOIN_MAP(DYND_CODE, (), DYND_PP_RANGE(1, DYND_PP_INC(DYND_ELWISE_MAX)))
       DYND_PP_INIT_SRC_VARIABLES(NSRC);                                        \
       for (size_t i = 0; i < count; ++i) {                                     \
         /*  func(*(R *)dst, *(const D0 *)src0, ...); */                        \
-        func(*reinterpret_cast<R *>(dst),                                      \
-             DYND_PP_DEREF_CAST_ARGRANGE_1(D, src, NSRC));                     \
+        func(*e->dst_helper.make(dst),                                         \
+             DYND_PP_DEREF_MAKE_ARG_RANGE_1(D, src, NSRC));                    \
                                                                                \
         /* Increment ``dst``, ``src#`` by their respective strides */          \
         DYND_PP_STRIDED_INCREMENT(NSRC);                                       \
@@ -169,12 +212,13 @@ DYND_PP_JOIN_MAP(DYND_CODE, (), DYND_PP_RANGE(1, DYND_PP_INC(DYND_ELWISE_MAX)))
     static intptr_t instantiate(const arrfunc_type_data *af_self,              \
                                 dynd::ckernel_builder *ckb,                    \
                                 intptr_t ckb_offset, const ndt::type &dst_tp,  \
-                                const char *DYND_UNUSED(dst_arrmeta),          \
+                                const char *dst_arrmeta,                       \
                                 const ndt::type *src_tp,                       \
-                                const char *const *DYND_UNUSED(src_arrmeta),   \
+                                const char *const *src_arrmeta,                \
                                 kernel_request_t kernreq,                      \
                                 const eval::eval_context *DYND_UNUSED(ectx))   \
     {                                                                          \
+                                                                               \
       for (intptr_t i = 0; i < NSRC; ++i) {                                    \
         if (src_tp[i] != af_self->get_param_type(i)) {                         \
           std::stringstream ss;                                                \
@@ -192,6 +236,8 @@ DYND_PP_JOIN_MAP(DYND_CODE, (), DYND_PP_RANGE(1, DYND_PP_INC(DYND_ELWISE_MAX)))
       self_type *e = ckb->alloc_ck_leaf<self_type>(ckb_offset);                \
       e->base.template set_expr_function<self_type>(kernreq);                  \
       e->func = *af_self->get_data_as<Functor>();                              \
+      e->dst_helper.init(dst_tp, dst_arrmeta);                                 \
+      DYND_PP_INIT_SRC_HELPERS(NSRC)                                           \
                                                                                \
       return ckb_offset;                                                       \
     }                                                                          \
@@ -207,7 +253,7 @@ DYND_PP_JOIN_MAP(DYND_CODE, (), DYND_PP_RANGE(1, DYND_PP_INC(DYND_ELWISE_MAX)))
  */
 #define DYND_CODE(NSRC)                                                        \
   template <typename R, DYND_PP_TYPENAME_ARGRANGE_1(A, NSRC)>                  \
-  struct functor_arrfunc_maker<true, R (*)(DYND_PP_ARGRANGE_1(A, NSRC))> {    \
+  struct functor_arrfunc_maker<true, R (*)(DYND_PP_ARGRANGE_1(A, NSRC))> {     \
     typedef R (*func_type)(DYND_PP_ARGRANGE_1(A, NSRC));                       \
     static void make(func_type func, arrfunc_type_data *out_af)                \
     {                                                                          \
