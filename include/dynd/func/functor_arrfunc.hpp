@@ -144,14 +144,14 @@ namespace detail {
       for (intptr_t i = 0; i < NSRC; ++i) {                                    \
         if (src_tp[i] != af_self->get_param_type(i)) {                         \
           std::stringstream ss;                                                \
-          ss << "Provided types " << ndt::make_funcproto(1, src_tp, dst_tp)    \
+          ss << "Provided types " << ndt::make_funcproto(NSRC, src_tp, dst_tp) \
              << " do not match the arrfunc proto " << af_self->func_proto;     \
           throw type_error(ss.str());                                          \
         }                                                                      \
       }                                                                        \
       if (dst_tp != af_self->get_return_type()) {                              \
         std::stringstream ss;                                                  \
-        ss << "Provided types " << ndt::make_funcproto(1, src_tp, dst_tp)      \
+        ss << "Provided types " << ndt::make_funcproto(NSRC, src_tp, dst_tp)   \
            << " do not match the arrfunc proto " << af_self->func_proto;       \
         throw type_error(ss.str());                                            \
       }                                                                        \
@@ -222,14 +222,14 @@ DYND_PP_JOIN_MAP(DYND_CODE, (), DYND_PP_RANGE(1, DYND_PP_INC(DYND_ELWISE_MAX)))
       for (intptr_t i = 0; i < NSRC; ++i) {                                    \
         if (src_tp[i] != af_self->get_param_type(i)) {                         \
           std::stringstream ss;                                                \
-          ss << "Provided types " << ndt::make_funcproto(1, src_tp, dst_tp)    \
+          ss << "Provided types " << ndt::make_funcproto(NSRC, src_tp, dst_tp) \
              << " do not match the arrfunc proto " << af_self->func_proto;     \
           throw type_error(ss.str());                                          \
         }                                                                      \
       }                                                                        \
       if (dst_tp != af_self->get_return_type()) {                              \
         std::stringstream ss;                                                  \
-        ss << "Provided types " << ndt::make_funcproto(1, src_tp, dst_tp)      \
+        ss << "Provided types " << ndt::make_funcproto(NSRC, src_tp, dst_tp)   \
            << " do not match the arrfunc proto " << af_self->func_proto;       \
         throw type_error(ss.str());                                            \
       }                                                                        \
