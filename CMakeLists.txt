@@ -351,7 +351,7 @@ set(libdynd_SRC
     # Kernels
     src/dynd/kernels/assignment_kernels.cpp
     src/dynd/kernels/var_dim_assignment_kernels.cpp
-    src/dynd/kernels/buffered_binary_kernels.cpp
+    src/dynd/kernels/buffered_kernels.cpp
     src/dynd/kernels/bytes_assignment_kernels.cpp
     src/dynd/kernels/byteswap_kernels.cpp
     src/dynd/kernels/ckernel_common_functions.cpp
@@ -387,7 +387,7 @@ set(libdynd_SRC
     src/dynd/kernels/single_comparer_builtin.hpp
     include/dynd/kernels/assignment_kernels.hpp
     include/dynd/kernels/var_dim_assignment_kernels.hpp
-    include/dynd/kernels/buffered_binary_kernels.hpp
+    include/dynd/kernels/buffered_kernels.hpp
     include/dynd/kernels/bytes_assignment_kernels.hpp
     include/dynd/kernels/byteswap_kernels.hpp
     include/dynd/kernels/ckernel_builder.hpp

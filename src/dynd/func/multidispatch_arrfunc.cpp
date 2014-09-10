@@ -6,6 +6,7 @@
 #include <set>
 
 #include <dynd/func/multidispatch_arrfunc.hpp>
+#include <dynd/kernels/buffered_kernels.hpp>
 
 using namespace std;
 using namespace dynd;
@@ -18,6 +19,8 @@ using namespace dynd;
  * uint -> uint, where the size is nondecreasing
  * uint -> int, where the size is increasing
  * int -> int, where the size is nondecreasing
+ * uint -> real, where the size is increasing
+ * int -> real, where the size is increasing
  * real -> real, where the size is nondecreasing
  * real -> complex, where the size of the real component is nondecreasing
  *
@@ -28,10 +31,12 @@ static bool can_implicitly_convert(const ndt::type &src, const ndt::type &dst)
     return true;
   }
   if (src.get_kind() == uint_kind &&
-      (dst.get_kind() == uint_kind || dst.get_kind() == int_kind)) {
+      (dst.get_kind() == uint_kind || dst.get_kind() == int_kind ||
+       dst.get_kind() == real_kind)) {
     return src.get_data_size() < dst.get_data_size();
   }
-  if (src.get_kind() == int_kind && dst.get_kind() == int_kind) {
+  if (src.get_kind() == int_kind &&
+      (dst.get_kind() == int_kind || dst.get_kind() == real_kind)) {
     return src.get_data_size() < dst.get_data_size();
   }
   if (src.get_kind() == real_kind) {
@@ -51,28 +56,6 @@ static bool can_implicitly_convert(const ndt::type &src, const ndt::type &dst)
  * e.g. "(int16, int16) -> int16)" and "(int32, int16) -> int32"
  */
 static bool supercedes(const nd::arrfunc &lhs, const nd::arrfunc &rhs)
-{
-  intptr_t nargs = lhs.get()->get_param_count();
-  if (nargs == rhs.get()->get_param_count()) {
-    for(intptr_t i = 0; i < nargs; ++i) {
-      const ndt::type &lpt = lhs.get()->get_param_type(i);
-      const ndt::type &rpt = rhs.get()->get_param_type(i);
-      if (!can_implicitly_convert(lpt, rpt)) {
-        return false;
-      }
-    }
-    return true;
-  }
-  return false;
-}
-
-/**
- * Returns true if every argument type in ``lhs`` is implicitly
- * convertible to the corresponding argument type in ``rhs``.
- *
- * e.g. "(int16, int16) -> int16)" and "(int32, int16) -> int32"
- */
-static bool strictly_supercedes(const nd::arrfunc &lhs, const nd::arrfunc &rhs)
 {
   intptr_t nargs = lhs.get()->get_param_count();
   if (nargs == rhs.get()->get_param_count()) {
@@ -117,27 +100,6 @@ static bool ambiguous(const nd::arrfunc &lhs, const nd::arrfunc &rhs)
     }
     return (lsupercount != nargs && rsupercount != nargs) ||
            (lsupercount == rsupercount);
-  }
-  return false;
-}
-
-/**
- * Returns true if there exists a set of arguments which work for both
- * ``lhs`` and ``rhs``.
- */
-static bool consistent(const nd::arrfunc &lhs, const nd::arrfunc &rhs)
-{
-  intptr_t nargs = lhs.get()->get_param_count();
-  if (nargs == rhs.get()->get_param_count()) {
-    for(intptr_t i = 0; i < nargs; ++i) {
-      const ndt::type &lpt = lhs.get()->get_param_type(i);
-      const ndt::type &rpt = rhs.get()->get_param_type(i);
-      if (!can_implicitly_convert(lpt, rpt) &&
-          !can_implicitly_convert(rpt, lpt)) {
-        return false;
-      }
-    }
-    return true;
   }
   return false;
 }
@@ -266,9 +228,21 @@ static intptr_t instantiate_multidispatch_af(
       }
     }
     if (isrc == nsrc) {
-      return af.get()->instantiate(af.get(), ckb, ckb_offset, dst_tp,
-                                   dst_arrmeta, src_tp, src_arrmeta, kernreq,
-                                   ectx);
+      intptr_t j;
+      for (j = 0; j < nsrc; ++j) {
+        if (src_tp[j] != af.get()->get_param_type(j)) {
+          break;
+        }
+      }
+      if (j == nsrc) {
+        return af.get()->instantiate(af.get(), ckb, ckb_offset, dst_tp,
+                                     dst_arrmeta, src_tp, src_arrmeta, kernreq,
+                                     ectx);
+      } else {
+        return make_buffered_ckernel(
+            af.get(), ckb, ckb_offset, dst_tp, dst_arrmeta, nsrc, src_tp,
+            af.get()->get_param_types(), src_arrmeta, kernreq, ectx);
+      }
     }
   }
   // TODO: Good message here
@@ -297,7 +271,23 @@ static int resolve_multidispatch_dst_type(const arrfunc_type_data *af_self,
       return 1;
     }
   }
-  return 0;
+ 
+  if (throw_on_error) {
+    intptr_t isrc, nsrc = icd->front().get()->get_param_count();
+    stringstream ss;
+    ss << "Failed to find suitable signature in multidispatch resolution with "
+          "input types (";
+    for (isrc = 0; isrc < nsrc; ++isrc) {
+      ss << src_tp[isrc];
+      if (isrc != nsrc - 1) {
+        ss << ", ";
+      }
+    }
+    ss << ")";
+    throw type_error(ss.str());
+  } else {
+    return 0;
+  }
 }
 
 void dynd::make_multidispatch_arrfunc(arrfunc_type_data *out_af, intptr_t naf,

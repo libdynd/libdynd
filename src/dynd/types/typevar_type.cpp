@@ -148,6 +148,6 @@ void ndt::make_typevar_range(const char *name, intptr_t count,
   out.resize(count);
   for (int i = 0; i < count; ++i) {
     out[i] = ndt::make_typevar(s);
-    s.back()++;
+    s[s.size() - 1]++;
   }
 }

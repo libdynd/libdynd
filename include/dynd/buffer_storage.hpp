@@ -44,27 +44,25 @@ class buffer_storage {
   ndt::type m_type;
   intptr_t m_stride;
 
-  // Non-assignable
-  buffer_storage &operator=(const buffer_storage &);
-
   void internal_allocate()
   {
-    m_stride = m_type.get_data_size();
-    m_storage = new char[DYND_BUFFER_CHUNK_SIZE * m_stride];
-    m_arrmeta = NULL;
-    size_t metasize =
-        m_type.is_builtin() ? 0 : m_type.extended()->get_arrmeta_size();
-    if (metasize != 0) {
-      try
-      {
-        m_arrmeta = new char[metasize];
-        m_type.extended()->arrmeta_default_construct(m_arrmeta, 0, NULL, true);
-      }
-      catch (const std::exception &)
-      {
-        delete[] m_storage;
-        delete[] m_arrmeta;
-        throw;
+    if (m_type.get_type_id() != uninitialized_type_id) {
+      m_stride = m_type.get_data_size();
+      m_storage = new char[DYND_BUFFER_CHUNK_SIZE * m_stride];
+      m_arrmeta = NULL;
+      size_t metasize =
+          m_type.is_builtin() ? 0 : m_type.extended()->get_arrmeta_size();
+      if (metasize != 0) {
+        try {
+          m_arrmeta = new char[metasize];
+          m_type.extended()->arrmeta_default_construct(m_arrmeta, 0, NULL,
+                                                       true);
+        }
+        catch (const std::exception &) {
+          delete[] m_storage;
+          delete[] m_arrmeta;
+          throw;
+        }
       }
     }
   }
@@ -94,7 +92,14 @@ public:
     }
   }
 
-  void allocate(const ndt::type &dt)
+  // Assignment copies the same type
+  buffer_storage &operator=(const buffer_storage &rhs)
+  {
+    allocate(rhs.m_type);
+    return *this;
+  }
+
+  void allocate(const ndt::type &tp)
   {
     delete[] m_storage;
     m_storage = 0;
@@ -103,9 +108,11 @@ public:
       delete[] m_arrmeta;
       m_arrmeta = NULL;
     }
-    m_type = dt;
+    m_type = tp;
     internal_allocate();
   }
+
+  inline bool is_null() const { return m_storage == NULL; }
 
   inline intptr_t get_stride() const { return m_stride; }
 
