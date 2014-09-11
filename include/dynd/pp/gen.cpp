@@ -547,9 +547,9 @@ int main(int argc, char **argv) {
                 }
                 fout << "(MAC, SEP" << args(", A", "", ary - idx - 1);
                 fout << ", " << args("A", &pp_shuffle, ", ", ary - idx - 1, ary) << ")" << endl;
-                delete prev;
+                delete[] prev;
             }
-            delete curr;
+            delete[] curr;
         }
     }
 

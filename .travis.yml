@@ -5,13 +5,24 @@ compiler:
   - clang
 
 env:
-  - DYND_FFTW=OFF
+  - DYND_FFTW=OFF VALGRIND=ON
   - DYND_FFTW=ON
+  - DYND_FFTW=ON ASAN=ON
+#  - DYND_FFTW=ON MSAN=ON
+
+matrix:
+  exclude:
+    - compiler: gcc
+      env: DYND_FFTW=ON ASAN=ON
+    - compiler: gcc
+      env: DYND_FFTW=ON MSAN=ON
 
 before_script:
   - sudo apt-get update
-  - sudo apt-get -qq install valgrind
+  - if [ "$VALGRIND" == "ON" ]; then sudo apt-get -qq install valgrind; fi
   - if [ "$DYND_FFTW" == "ON" ]; then sudo apt-get -qq install libfftw3-dev; fi
+  - if [ "$ASAN" == "ON" ]; then export CXXFLAGS='-fsanitize=address -fno-omit-frame-pointer'; fi
+  - if [ "$MSAN" == "ON" ]; then export CXXFLAGS='-fsanitize=memory -fsanitize-memory-track-origins -fno-omit-frame-pointer'; fi
   - mkdir build
   - cd build
   - cmake -DDYND_FFTW=${DYND_FFTW} ..
@@ -19,7 +30,7 @@ before_script:
 script:
   - make
   - ./tests/test_libdynd
-  - valgrind --tool=memcheck --leak-check=yes --show-reachable=yes --error-exitcode=123 ./tests/test_libdynd
+  - if [ "$VALGRIND" == "ON" ]; then valgrind --tool=memcheck --leak-check=yes --show-reachable=yes --error-exitcode=123 ./tests/test_libdynd; fi
 
 notifications:
   email: false
