@@ -32,13 +32,28 @@ void init::arrfunc_registry_init()
   registry = new map<nd::string, nd::arrfunc>;
 
   func::set_regfunction("sin",
-                        make_ufunc(static_cast<float (*)(float)>(&::sin),
+                        make_ufunc(static_cast<float (*)(float)>(
+#ifdef WIN32
+                                       &::sin),
+#else
+                                       &::sinf),
+#endif
                                    static_cast<double (*)(double)>(&::sin)));
   func::set_regfunction("cos",
-                        make_ufunc(static_cast<float (*)(float)>(&::cos),
+                        make_ufunc(static_cast<float (*)(float)>(
+#ifdef WIN32
+                                       &::cos),
+#else
+                                       &::cosf),
+#endif
                                    static_cast<double (*)(double)>(&::cos)));
   func::set_regfunction("exp",
-                        make_ufunc(static_cast<float (*)(float)>(&::exp),
+                        make_ufunc(static_cast<float (*)(float)>(
+#ifdef WIN32
+                                       &::exp),
+#else
+                                       &::expf),
+#endif
                                    static_cast<double (*)(double)>(&::exp)));
 }
 
