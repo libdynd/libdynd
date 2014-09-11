@@ -6,6 +6,7 @@
 #include <dynd/func/arrfunc.hpp>
 #include <dynd/func/arrfunc_registry.hpp>
 #include <dynd/func/functor_arrfunc.hpp>
+#include <dynd/func/multidispatch_arrfunc.hpp>
 #include <dynd/func/lift_arrfunc.hpp>
 
 #include <map>
@@ -17,16 +18,28 @@ using namespace dynd;
 // http://www.threadingbuildingblocks.org/docs/help/reference/containers_overview/concurrent_hash_map_cls.htm
 static map<nd::string, nd::arrfunc> *registry;
 
+template<typename T0, typename T1>
+static nd::arrfunc make_ufunc(T0 f0, T1 f1)
+{
+  vector<nd::arrfunc> af;
+  af.push_back(nd::make_functor_arrfunc(f0));
+  af.push_back(nd::make_functor_arrfunc(f1));
+  return lift_arrfunc(make_multidispatch_arrfunc((intptr_t)af.size(), &af[0]));
+}
+
 void init::arrfunc_registry_init()
 {
   registry = new map<nd::string, nd::arrfunc>;
 
-  func::set_regfunction("sin", lift_arrfunc(nd::make_functor_arrfunc(
-                                   static_cast<double (*)(double)>(&::sin))));
-  func::set_regfunction("cos", lift_arrfunc(nd::make_functor_arrfunc(
-                                   static_cast<double (*)(double)>(&::cos))));
-  func::set_regfunction("exp", lift_arrfunc(nd::make_functor_arrfunc(
-                                   static_cast<double (*)(double)>(&::exp))));
+  func::set_regfunction("sin",
+                        make_ufunc(static_cast<float (*)(float)>(&::sin),
+                                   static_cast<double (*)(double)>(&::sin)));
+  func::set_regfunction("cos",
+                        make_ufunc(static_cast<float (*)(float)>(&::cos),
+                                   static_cast<double (*)(double)>(&::cos)));
+  func::set_regfunction("exp",
+                        make_ufunc(static_cast<float (*)(float)>(&::exp),
+                                   static_cast<double (*)(double)>(&::exp)));
 }
 
 void init::arrfunc_registry_cleanup()

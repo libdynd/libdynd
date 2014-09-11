@@ -20,4 +20,13 @@ TEST(ArrFuncRegistry, Unary) {
   nd::arrfunc af;
   af = func::get_regfunction("sin");
   EXPECT_DOUBLE_EQ(sin(1.0), af(1.0).as<double>());
+  EXPECT_DOUBLE_EQ(sin(2.0f), af(2.0f).as<float>());
+  // Implicit int -> double conversion
+  EXPECT_DOUBLE_EQ(sin(3), af(3.0).as<double>());
+  // Bool doesn't implicitly convert to float
+  EXPECT_THROW(af(true), type_error);
+  af = func::get_regfunction("cos");
+  EXPECT_DOUBLE_EQ(cos(1.0), af(1.0).as<double>());
+  af = func::get_regfunction("exp");
+  EXPECT_DOUBLE_EQ(exp(1.0), af(1.0).as<double>());
 }
