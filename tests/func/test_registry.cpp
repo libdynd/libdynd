@@ -6,7 +6,7 @@
 #include <iostream>
 #include <stdexcept>
 #include <algorithm>
-#include <cmath>
+#include <math.h>
 
 #include "inc_gtest.hpp"
 
@@ -16,19 +16,59 @@
 using namespace std;
 using namespace dynd;
 
-TEST(ArrFuncRegistry, Unary) {
+TEST(ArrFuncRegistry, Dispatch) {
   nd::arrfunc af;
   af = func::get_regfunction("sin");
+  // These are exact overloads of ``sin``
   EXPECT_DOUBLE_EQ(sin(1.0), af(1.0).as<double>());
   EXPECT_DOUBLE_EQ(sin(2.0f), af(2.0f).as<float>());
   // Implicit int -> double conversion
-  EXPECT_DOUBLE_EQ(sin(3), af(3.0).as<double>());
+  EXPECT_DOUBLE_EQ(sin(3.0), af(3).as<double>());
+  EXPECT_DOUBLE_EQ(sin(4.0), af(4u).as<double>());
   // Bool doesn't implicitly convert to float
   EXPECT_THROW(af(true), type_error);
+}
+
+TEST(ArrFuncRegistry, Trig) {
+  // Simple sanity checks
+  nd::arrfunc af;
+  af = func::get_regfunction("sin");
+  EXPECT_DOUBLE_EQ(sinf(2.0f), af(2.0f).as<float>());
+  EXPECT_DOUBLE_EQ(sin(1.0), af(1.0).as<double>());
   af = func::get_regfunction("cos");
+  EXPECT_DOUBLE_EQ(cosf(1.f), af(1.f).as<float>());
   EXPECT_DOUBLE_EQ(cos(1.0), af(1.0).as<double>());
+  af = func::get_regfunction("tan");
+  EXPECT_DOUBLE_EQ(tanf(1.f), af(1.f).as<float>());
+  EXPECT_DOUBLE_EQ(tan(1.0), af(1.0).as<double>());
   af = func::get_regfunction("exp");
+  EXPECT_DOUBLE_EQ(expf(1.f), af(1.f).as<float>());
   EXPECT_DOUBLE_EQ(exp(1.0), af(1.0).as<double>());
+  af = func::get_regfunction("arcsin");
+  EXPECT_DOUBLE_EQ(asinf(0.4f), af(0.4f).as<float>());
+  EXPECT_DOUBLE_EQ(asin(1.0), af(1.0).as<double>());
+  af = func::get_regfunction("arccos");
+  EXPECT_DOUBLE_EQ(acosf(1.f), af(1.f).as<float>());
+  EXPECT_DOUBLE_EQ(acos(1.0), af(1.0).as<double>());
+  af = func::get_regfunction("arctan");
+  EXPECT_DOUBLE_EQ(atanf(1.f), af(1.f).as<float>());
+  EXPECT_DOUBLE_EQ(atan(1.0), af(1.0).as<double>());
+  af = func::get_regfunction("arctan2");
+  EXPECT_DOUBLE_EQ(atan2f(1.f, 2.f), af(1.f, 2.f).as<float>());
+  EXPECT_DOUBLE_EQ(atan2(1.0, 2.0), af(1.0, 2.0).as<double>());
   af = func::get_regfunction("hypot");
-  EXPECT_DOUBLE_EQ(5, af(3, 4).as<double>());
+  EXPECT_DOUBLE_EQ(5, af(3.f, 4.f).as<float>());
+  EXPECT_DOUBLE_EQ(hypot(3.0, 4.5), af(3.0, 4.5).as<double>());
+  af = func::get_regfunction("sinh");
+  EXPECT_DOUBLE_EQ(sinhf(2.0f), af(2.0f).as<float>());
+  EXPECT_DOUBLE_EQ(sinh(1.0), af(1.0).as<double>());
+  af = func::get_regfunction("cosh");
+  EXPECT_DOUBLE_EQ(coshf(1.f), af(1.f).as<float>());
+  EXPECT_DOUBLE_EQ(cosh(1.0), af(1.0).as<double>());
+  af = func::get_regfunction("tanh");
+  EXPECT_DOUBLE_EQ(tanhf(1.f), af(1.f).as<float>());
+  EXPECT_DOUBLE_EQ(tanh(1.0), af(1.0).as<double>());
+  af = func::get_regfunction("power");
+  EXPECT_DOUBLE_EQ(powf(1.5f, 2.25f), af(1.5f, 2.25f).as<float>());
+  EXPECT_DOUBLE_EQ(pow(1.5, 2.25), af(1.5, 2.25).as<double>());
 }

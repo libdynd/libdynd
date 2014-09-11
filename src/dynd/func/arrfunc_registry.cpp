@@ -3,13 +3,14 @@
 // BSD 2-Clause License, see LICENSE.txt
 //
 
+#include <map>
+#include <math.h>
+
 #include <dynd/func/arrfunc.hpp>
 #include <dynd/func/arrfunc_registry.hpp>
 #include <dynd/func/functor_arrfunc.hpp>
 #include <dynd/func/multidispatch_arrfunc.hpp>
 #include <dynd/func/lift_arrfunc.hpp>
-
-#include <map>
 
 using namespace std;
 using namespace dynd;
@@ -41,127 +42,41 @@ void init::arrfunc_registry_init()
 {
   registry = new map<nd::string, nd::arrfunc>;
 
-  func::set_regfunction("sin",
-                        make_ufunc(static_cast<float (*)(float)>(
-#ifdef WIN32
-                                       &::sin),
-#else
-                                       &::sinf),
-#endif
-                                   static_cast<double (*)(double)>(&::sin)));
-  func::set_regfunction("cos",
-                        make_ufunc(static_cast<float (*)(float)>(
-#ifdef WIN32
-                                       &::cos),
-#else
-                                       &::cosf),
-#endif
-                                   static_cast<double (*)(double)>(&::cos)));
-  func::set_regfunction("tan",
-                        make_ufunc(static_cast<float (*)(float)>(
-#ifdef WIN32
-                                       &::tan),
-#else
-                                       &::tanf),
-#endif
-                                   static_cast<double (*)(double)>(&::tan)));
-  func::set_regfunction("exp",
-                        make_ufunc(static_cast<float (*)(float)>(
-#ifdef WIN32
-                                       &::exp),
-#else
-                                       &::expf),
-#endif
-                                   static_cast<double (*)(double)>(&::exp)));
-  func::set_regfunction("arcsin",
-                        make_ufunc(static_cast<float (*)(float)>(
-#ifdef WIN32
-                                       &::asin),
-#else
-                                       &::asinf),
-#endif
-                                   static_cast<double (*)(double)>(&::asin)));
-  func::set_regfunction("arccos",
-                        make_ufunc(static_cast<float (*)(float)>(
-#ifdef WIN32
-                                       &::acos),
-#else
-                                       &::acosf),
-#endif
-                                   static_cast<double (*)(double)>(&::acos)));
-  func::set_regfunction("arctan",
-                        make_ufunc(static_cast<float (*)(float)>(
-#ifdef WIN32
-                                       &::atan),
-#else
-                                       &::atanf),
-#endif
-                                   static_cast<double (*)(double)>(&::atan)));
-  func::set_regfunction("arctan2",
-                        make_ufunc(static_cast<float (*)(float, float)>(
-#ifdef WIN32
-                                       &::atan2),
-#else
-                                       &::atan2f),
-#endif
-                                   static_cast<double (*)(double, double)>(&::atan2)));
-  func::set_regfunction("hypot",
-                        make_ufunc(static_cast<float (*)(float, float)>(
-#ifdef WIN32
-                                       &::hypot),
-#else
-                                       &::hypotf),
-#endif
-                                   static_cast<double (*)(double, double)>(&::hypot)));
-  func::set_regfunction("sinh",
-                        make_ufunc(static_cast<float (*)(float)>(
-#ifdef WIN32
-                                       &::sinh),
-#else
-                                       &::sinhf),
-#endif
-                                   static_cast<double (*)(double)>(&::sinh)));
-  func::set_regfunction("cosh",
-                        make_ufunc(static_cast<float (*)(float)>(
-#ifdef WIN32
-                                       &::cosh),
-#else
-                                       &::coshf),
-#endif
-                                   static_cast<double (*)(double)>(&::cosh)));
-  func::set_regfunction("tanh",
-                        make_ufunc(static_cast<float (*)(float)>(
-#ifdef WIN32
-                                       &::tanh),
-#else
-                                       &::tanhf),
-#endif
-                                   static_cast<double (*)(double)>(&::tanh)));
-  func::set_regfunction("asinh",
-                        make_ufunc(static_cast<float (*)(float)>(
-#ifdef WIN32
-                                       &::asinh),
-#else
-                                       &::asinhf),
-#endif
-                                   static_cast<double (*)(double)>(&::asinh)));
-  func::set_regfunction("acosh",
-                        make_ufunc(static_cast<float (*)(float)>(
-#ifdef WIN32
-                                       &::acosh),
-#else
-                                       &::acoshf),
-#endif
-                                   static_cast<double (*)(double)>(&::acosh)));
-  func::set_regfunction("atanh",
-                        make_ufunc(static_cast<float (*)(float)>(
-#ifdef WIN32
-                                       &::atanh),
-#else
-                                       &::atanhf),
-#endif
-                                   static_cast<double (*)(double)>(&::atanh)));
-
+  func::set_regfunction(
+      "sin", make_ufunc(&::sinf, static_cast<double (*)(double)>(&::sin)));
+  func::set_regfunction(
+      "cos", make_ufunc(&::cosf, static_cast<double (*)(double)>(&::cos)));
+  func::set_regfunction(
+      "tan", make_ufunc(&::tanf, static_cast<double (*)(double)>(&::tan)));
+  func::set_regfunction(
+      "exp", make_ufunc(&::expf, static_cast<double (*)(double)>(&::exp)));
+  func::set_regfunction(
+      "arcsin", make_ufunc(&::asinf, static_cast<double (*)(double)>(&::asin)));
+  func::set_regfunction(
+      "arccos", make_ufunc(&::acosf, static_cast<double (*)(double)>(&::acos)));
+  func::set_regfunction(
+      "arctan", make_ufunc(&::atanf, static_cast<double (*)(double)>(&::atan)));
+  func::set_regfunction(
+      "arctan2",
+      make_ufunc(&::atan2f, static_cast<double (*)(double, double)>(&::atan2)));
+  func::set_regfunction(
+      "hypot",
+      make_ufunc(&::hypotf, static_cast<double (*)(double, double)>(&::hypot)));
+  func::set_regfunction(
+      "sinh", make_ufunc(&::sinhf, static_cast<double (*)(double)>(&::sinh)));
+  func::set_regfunction(
+      "cosh", make_ufunc(&::coshf, static_cast<double (*)(double)>(&::cosh)));
+  func::set_regfunction(
+      "tanh", make_ufunc(&::tanhf, static_cast<double (*)(double)>(&::tanh)));
+  func::set_regfunction(
+      "asinh",
+      make_ufunc(&::asinhf, static_cast<double (*)(double)>(&::asinh)));
+  func::set_regfunction(
+      "acosh",
+      make_ufunc(&::acoshf, static_cast<double (*)(double)>(&::acosh)));
+  func::set_regfunction(
+      "atanh",
+      make_ufunc(&::atanhf, static_cast<double (*)(double)>(&::atanh)));
 
   func::set_regfunction(
       "power",
