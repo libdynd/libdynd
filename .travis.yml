@@ -8,7 +8,7 @@ env:
   - DYND_FFTW=OFF VALGRIND=ON
   - DYND_FFTW=ON
   - DYND_FFTW=ON ASAN=ON
-  - DYND_FFTW=ON MSAN=ON
+#  - DYND_FFTW=ON MSAN=ON
 
 matrix:
   exclude:
