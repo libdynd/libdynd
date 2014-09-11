@@ -7,6 +7,7 @@
 #include <dynd/types/strided_dim_type.hpp>
 #include <dynd/func/make_callable.hpp>
 #include <dynd/ensure_immutable_contig.hpp>
+#include <dynd/types/typevar_type.hpp>
 
 using namespace std;
 using namespace dynd;
@@ -192,4 +193,12 @@ void funcproto_type::get_dynamic_type_properties(const std::pair<std::string, gf
 
     *out_properties = type_properties;
     *out_count = sizeof(type_properties) / sizeof(type_properties[0]);
+}
+
+ndt::type ndt::make_generic_funcproto(intptr_t nargs)
+{
+  vector<ndt::type> args;
+  ndt::make_typevar_range("T", nargs, args);
+  ndt::type ret = ndt::make_typevar("R");
+  return ndt::make_funcproto(args, ret);
 }

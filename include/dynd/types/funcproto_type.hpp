@@ -161,6 +161,8 @@ namespace ndt {
     {
         return detail::make_func_proto<T>::make();
     }
+
+    ndt::type make_generic_funcproto(intptr_t nargs);
 } // namespace ndt
 
 } // namespace dynd

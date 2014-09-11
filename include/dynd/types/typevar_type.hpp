@@ -59,11 +59,14 @@ public:
 }; // class typevar_type
 
 namespace ndt {
-    /** Makes a typevar type with the specified types */
-    inline ndt::type make_typevar(const nd::string& name)
-    {
-        return ndt::type(new typevar_type(name), false);
-    }
+  /** Makes a typevar type with the specified types */
+  inline ndt::type make_typevar(const nd::string &name)
+  {
+    return ndt::type(new typevar_type(name), false);
+  }
+
+  void make_typevar_range(const char *name, intptr_t count,
+                          std::vector<ndt::type> &out);
 } // namespace ndt
 
 /**
