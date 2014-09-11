@@ -29,4 +29,6 @@ TEST(ArrFuncRegistry, Unary) {
   EXPECT_DOUBLE_EQ(cos(1.0), af(1.0).as<double>());
   af = func::get_regfunction("exp");
   EXPECT_DOUBLE_EQ(exp(1.0), af(1.0).as<double>());
+  af = func::get_regfunction("hypot");
+  EXPECT_DOUBLE_EQ(5, af(3, 4).as<double>());
 }
