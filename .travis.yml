@@ -8,18 +8,21 @@ env:
   - DYND_FFTW=OFF VALGRIND=ON
   - DYND_FFTW=ON
   - DYND_FFTW=ON ASAN=ON
+  - DYND_FFTW=ON MSAN=ON
 
 matrix:
   exclude:
     - compiler: gcc
       env: DYND_FFTW=ON ASAN=ON
-
+    - compiler: gcc
+      env: DYND_FFTW=ON MSAN=ON
 
 before_script:
   - sudo apt-get update
   - if [ "$VALGRIND" == "ON" ]; then sudo apt-get -qq install valgrind; fi
   - if [ "$DYND_FFTW" == "ON" ]; then sudo apt-get -qq install libfftw3-dev; fi
   - if [ "$ASAN" == "ON" ]; then export CXXFLAGS='-fsanitize=address -fno-omit-frame-pointer'; fi
+  - if [ "$MSAN" == "ON" ]; then export CXXFLAGS='-fsanitize=memory -fsanitize-memory-track-origins -fno-omit-frame-pointer'; fi
   - mkdir build
   - cd build
   - cmake -DDYND_FFTW=${DYND_FFTW} ..
