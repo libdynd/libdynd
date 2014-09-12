@@ -20,8 +20,8 @@ namespace dynd {
 
 enum type_kind_t {
     bool_kind,
-    int_kind,
     uint_kind,
+    int_kind,
     real_kind,
     complex_kind,
     char_kind,
