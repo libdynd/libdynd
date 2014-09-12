@@ -471,6 +471,7 @@ set(libdynd_SRC
     include/dynd/arrmeta_holder.hpp
     include/dynd/atomic_refcount.hpp
     include/dynd/auxiliary_data.hpp
+	include/dynd/buffer.hpp
     include/dynd/buffer_storage.hpp
     include/dynd/config.hpp
     include/dynd/cmake_config.hpp.in # Included here for ease of editing in IDEs
