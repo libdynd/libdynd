@@ -29,6 +29,25 @@ TEST(ArrFuncRegistry, Dispatch) {
   EXPECT_THROW(af(true), type_error);
 }
 
+TEST(ArrFuncRegistry, Arithmetic) {
+  // Simple sanity checks
+  nd::arrfunc af;
+  af = func::get_regfunction("add");
+  EXPECT_EQ(ndt::type("int32"), af((int8_t)3, (int8_t)4).get_type());
+  EXPECT_EQ(8, af(3, 5).as<int>());
+  EXPECT_EQ(ndt::type("float32"), af(3.5f, 5.25f).get_type());
+  EXPECT_EQ(8.75, af(3.5f, 5.25f).as<float>());
+  af = func::get_regfunction("subtract");
+  EXPECT_EQ(ndt::type("float64"), af(3.5, 4).get_type());
+  EXPECT_EQ(-0.5, af(3.5, 4).as<double>());
+  af = func::get_regfunction("multiply");
+  EXPECT_EQ(ndt::type("float32"), af(3.5f, (int8_t)4).get_type());
+  EXPECT_EQ(14, af(3.5f, (int8_t)4).as<float>());
+  af = func::get_regfunction("divide");
+  EXPECT_EQ(ndt::type("float64"), af(12.0, (int8_t)4).get_type());
+  EXPECT_EQ(3, af(12.0, (int8_t)4).as<double>());
+}
+
 TEST(ArrFuncRegistry, Trig) {
   // Simple sanity checks
   nd::arrfunc af;

@@ -22,26 +22,114 @@ static map<nd::string, nd::arrfunc> *registry;
 template<typename T0, typename T1>
 static nd::arrfunc make_ufunc(T0 f0, T1 f1)
 {
-  vector<nd::arrfunc> af;
-  af.push_back(nd::make_functor_arrfunc(f0));
-  af.push_back(nd::make_functor_arrfunc(f1));
-  return lift_arrfunc(make_multidispatch_arrfunc((intptr_t)af.size(), &af[0]));
+  nd::arrfunc af[2] = {nd::make_functor_arrfunc(f0),
+                       nd::make_functor_arrfunc(f1)};
+  return lift_arrfunc(
+      make_multidispatch_arrfunc(sizeof(af) / sizeof(af[0]), af));
 }
 
 template<typename T0, typename T1, typename T2>
 static nd::arrfunc make_ufunc(T0 f0, T1 f1, T2 f2)
 {
-  vector<nd::arrfunc> af;
-  af.push_back(nd::make_functor_arrfunc(f0));
-  af.push_back(nd::make_functor_arrfunc(f1));
-  af.push_back(nd::make_functor_arrfunc(f2));
-  return lift_arrfunc(make_multidispatch_arrfunc((intptr_t)af.size(), &af[0]));
+  nd::arrfunc af[3] = {nd::make_functor_arrfunc(f0),
+                       nd::make_functor_arrfunc(f1),
+                       nd::make_functor_arrfunc(f2)};
+  return lift_arrfunc(
+      make_multidispatch_arrfunc(sizeof(af) / sizeof(af[0]), af));
 }
+
+template <typename T0, typename T1, typename T2, typename T3, typename T4,
+          typename T5, typename T6>
+static nd::arrfunc make_ufunc(T0 f0, T1 f1, T2 f2, T3 f3, T4 f4, T5 f5, T6 f6)
+{
+  nd::arrfunc af[7] = {
+      nd::make_functor_arrfunc(f0), nd::make_functor_arrfunc(f1),
+      nd::make_functor_arrfunc(f2), nd::make_functor_arrfunc(f3),
+      nd::make_functor_arrfunc(f4), nd::make_functor_arrfunc(f5),
+      nd::make_functor_arrfunc(f6)};
+  return lift_arrfunc(
+      make_multidispatch_arrfunc(sizeof(af) / sizeof(af[0]), af));
+}
+
+template <typename T0, typename T1, typename T2, typename T3, typename T4,
+          typename T5, typename T6, typename T7>
+static nd::arrfunc make_ufunc(T0 f0, T1 f1, T2 f2, T3 f3, T4 f4, T5 f5, T6 f6,
+                              T7 f7)
+{
+  nd::arrfunc af[8] = {
+      nd::make_functor_arrfunc(f0), nd::make_functor_arrfunc(f1),
+      nd::make_functor_arrfunc(f2), nd::make_functor_arrfunc(f3),
+      nd::make_functor_arrfunc(f4), nd::make_functor_arrfunc(f5),
+      nd::make_functor_arrfunc(f6), nd::make_functor_arrfunc(f7)};
+  return lift_arrfunc(
+      make_multidispatch_arrfunc(sizeof(af) / sizeof(af[0]), af));
+}
+
+template <typename T0, typename T1, typename T2, typename T3, typename T4,
+          typename T5, typename T6, typename T7, typename T8, typename T9>
+static nd::arrfunc make_ufunc(T0 f0, T1 f1, T2 f2, T3 f3, T4 f4, T5 f5, T6 f6,
+                              T7 f7, T8 f8, T9 f9)
+{
+  nd::arrfunc af[10] = {
+      nd::make_functor_arrfunc(f0), nd::make_functor_arrfunc(f1),
+      nd::make_functor_arrfunc(f2), nd::make_functor_arrfunc(f3),
+      nd::make_functor_arrfunc(f4), nd::make_functor_arrfunc(f5),
+      nd::make_functor_arrfunc(f6), nd::make_functor_arrfunc(f7),
+      nd::make_functor_arrfunc(f8), nd::make_functor_arrfunc(f9)};
+  return lift_arrfunc(
+      make_multidispatch_arrfunc(sizeof(af) / sizeof(af[0]), af));
+}
+
+namespace {
+template <typename T>
+struct add {
+  inline T operator()(T x, T y) const { return x + y; }
+};
+template <typename T>
+struct subtract {
+  inline T operator()(T x, T y) const { return x - y; }
+};
+template <typename T>
+struct multiply {
+  inline T operator()(T x, T y) const { return x * y; }
+};
+template <typename T>
+struct divide {
+  inline T operator()(T x, T y) const { return x / y; }
+};
+} // anonymous namespace
 
 void init::arrfunc_registry_init()
 {
   registry = new map<nd::string, nd::arrfunc>;
 
+  // Arithmetic
+  func::set_regfunction(
+      "add", make_ufunc(add<int32_t>(), add<int64_t>(), add<dynd_int128>(),
+                        add<uint32_t>(), add<uint64_t>(), add<dynd_uint128>(),
+                        add<float>(), add<double>(), add<complex<float> >(),
+                        add<complex<double> >()));
+  func::set_regfunction(
+      "subtract",
+      make_ufunc(subtract<int32_t>(), subtract<int64_t>(),
+                 subtract<dynd_int128>(), subtract<float>(), subtract<double>(),
+                 subtract<complex<float> >(), subtract<complex<double> >()));
+  func::set_regfunction(
+      "multiply",
+      make_ufunc(multiply<int32_t>(), multiply<int64_t>(),
+                 /*multiply<dynd_int128>(),*/ multiply<uint32_t>(),
+                 multiply<uint64_t>(), /*multiply<dynd_uint128>(),*/
+                 multiply<float>(), multiply<double>(),
+                 multiply<complex<float> >(), multiply<complex<double> >()));
+  func::set_regfunction(
+      "divide",
+      make_ufunc(
+          divide<int32_t>(), divide<int64_t>(),   /*divide<dynd_int128>(),*/
+          divide<uint32_t>(), divide<uint64_t>(), /*divide<dynd_uint128>(),*/
+          divide<float>(), divide<double>(), divide<complex<float> >(),
+          divide<complex<double> >()));
+
+  // Trig functions
   func::set_regfunction(
       "sin", make_ufunc(&::sinf, static_cast<double (*)(double)>(&::sin)));
   func::set_regfunction(
