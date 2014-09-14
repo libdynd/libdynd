@@ -126,7 +126,7 @@ size_t dynd::make_buffered_ckernel(
   // Instantiate the arrfunc being buffered
   ckb_offset =
       af->instantiate(af, ckb, ckb_offset, dst_tp, dst_arrmeta, src_tp_for_af,
-                      &buffered_arrmeta[0], kernreq, ectx);
+                      &buffered_arrmeta[0], kernreq, NULL, ectx);
   ckb->ensure_capacity(ckb_offset);
   self = ckb->get_at<self_type>(root_ckb_offset);
   // Instantiate assignments for all the buffered operands

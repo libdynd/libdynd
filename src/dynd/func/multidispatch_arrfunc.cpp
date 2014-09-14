@@ -215,7 +215,7 @@ static intptr_t instantiate_multidispatch_af(
     const arrfunc_type_data *af_self, dynd::ckernel_builder *ckb,
     intptr_t ckb_offset, const ndt::type &dst_tp, const char *dst_arrmeta,
     const ndt::type *src_tp, const char *const *src_arrmeta,
-    kernel_request_t kernreq, const eval::eval_context *ectx)
+    kernel_request_t kernreq, aux_buffer *aux, const eval::eval_context *ectx)
 {
   const vector<nd::arrfunc> *icd = af_self->get_data_as<vector<nd::arrfunc> >();
   for (intptr_t i = 0; i < (intptr_t)icd->size(); ++i) {
@@ -237,7 +237,7 @@ static intptr_t instantiate_multidispatch_af(
       if (j == nsrc) {
         return af.get()->instantiate(af.get(), ckb, ckb_offset, dst_tp,
                                      dst_arrmeta, src_tp, src_arrmeta, kernreq,
-                                     ectx);
+                                     aux, ectx);
       } else {
         return make_buffered_ckernel(
             af.get(), ckb, ckb_offset, dst_tp, dst_arrmeta, nsrc, src_tp,

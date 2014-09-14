@@ -15,23 +15,26 @@
 using namespace std;
 using namespace dynd;
 
-struct func_auxiliary_buffer : nd::auxiliary_buffer {
+struct func_aux_buffer : aux_buffer {
+    int val;
 };
 
-struct func_thread_local_buffer : nd::thread_local_buffer {
+struct func_thread_aux_buffer : thread_aux_buffer {
+    func_thread_aux_buffer(func_aux_buffer *) {
+    }
 };
 
-// thread_local_buffer *, thread_local_buffer &
+void func(int &dst, int src, func_aux_buffer *aux, func_thread_aux_buffer *) {
+    dst = src + aux->val;
+}
 
-TEST(Buffer, Untitled) {
-    typedef int (*func_type)(int, func_auxiliary_buffer *, func_thread_local_buffer *);
+TEST(Buffer, Simple) {
+    typedef void (*func_type)(int &, int, func_aux_buffer *, func_thread_aux_buffer *);
+    typedef void (*func_type)(int &, int, func_aux_buffer *, func_thread_aux_buffer *);
 
-    std::cout << is_auxiliary_buffered<func_type>::value << std::endl;
-    std::cout << is_thread_local_buffered<func_type>::value << std::endl;
+    func_aux_buffer aux;
+    aux.val = 5;
 
-//    std::cout << dynd::count<func_type, func_thread_local_buffer *>::value << std::endl;
-//    std::cout << is_thread_local_buffered<func_type>::value << std::endl;
-//    std::cout << is_auxiliary_buffered<func_type>::value << std::endl;
-
-    std::exit(-1);
+    nd::arrfunc af = nd::make_functor_arrfunc(func);
+    EXPECT_EQ(af(5, &aux).as<int>(), 10);
 }

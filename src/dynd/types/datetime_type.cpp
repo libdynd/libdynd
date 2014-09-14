@@ -834,7 +834,7 @@ struct datetime_is_avail_ck {
                               const ndt::type *src_tp,
                               const char *const *DYND_UNUSED(src_arrmeta),
                               kernel_request_t kernreq,
-                              const eval::eval_context *DYND_UNUSED(ectx))
+                              aux_buffer *DYND_UNUSED(aux), const eval::eval_context *DYND_UNUSED(ectx))
   {
     if (src_tp[0].get_type_id() != option_type_id ||
         src_tp[0].tcast<option_type>()->get_value_type().get_type_id() !=
@@ -878,7 +878,7 @@ struct datetime_assign_na_ck {
                               const ndt::type *DYND_UNUSED(src_tp),
                               const char *const *DYND_UNUSED(src_arrmeta),
                               kernel_request_t kernreq,
-                              const eval::eval_context *DYND_UNUSED(ectx))
+                              aux_buffer *DYND_UNUSED(aux), const eval::eval_context *DYND_UNUSED(ectx))
   {
     if (dst_tp.get_type_id() != option_type_id ||
         dst_tp.tcast<option_type>()->get_value_type().get_type_id() !=
