@@ -10,6 +10,8 @@
 #include <string>
 
 #include <dynd/array.hpp>
+#include <dynd/buffer.hpp>
+#include <dynd/pp/meta.hpp>
 #include <dynd/types/strided_dim_type.hpp>
 
 namespace dynd {
@@ -113,53 +115,79 @@ namespace ndt {
             new funcproto_type(param_types, return_type), false);
     }
 
-    namespace detail {
-        template<typename T>
-        struct make_func_proto;
+namespace detail {
 
-        template<typename R>
-        struct make_func_proto<R ()> {
-            static inline ndt::type make() {
-              intptr_t zero = 0;
-              nd::array param_types =
-                  nd::typed_empty(1, &zero, ndt::make_strided_of_type());
-              param_types.flag_as_immutable();
-              return make_funcproto(param_types, make_type<R>());
-            }
-        };
+template<typename T, bool aux_buffered, bool thread_aux_buffered>
+struct funcproto_from;
 
-        template<typename R, typename T0>
-        struct make_func_proto<R (T0)> {
-            static inline ndt::type make() {
-                ndt::type param_types[1] = {make_type<T0>()};
-                return make_funcproto(param_types, make_type<R>());
-            }
-        };
+template<typename R>
+struct funcproto_from<R (), false, false> {
+    static inline ndt::type make() {
+        intptr_t zero = 0;
+        nd::array param_types = nd::typed_empty(1, &zero, ndt::make_strided_of_type());
+        param_types.flag_as_immutable();
+        return make_funcproto(param_types, make_type<R>());
+    }
+};
 
-        template<typename R, typename T0, typename T1>
-        struct make_func_proto<R (T0, T1)> {
-            static inline ndt::type make() {
-                ndt::type param_types[2] = {make_type<T0>(), make_type<T1>()};
-                return make_funcproto(param_types, make_type<R>());
-            }
-        };
+#define FUNCPROTO_FROM(N) _FUNCPROTO_FROM(N, DYND_PP_META_NAME_RANGE(A, N), DYND_PP_META_NAME_RANGE(B, N))
+#define _FUNCPROTO_FROM(N, TYPENAMES, CONVERTED_TYPENAMES) \
+    template <typename R, DYND_PP_JOIN_MAP_1(DYND_PP_META_TYPENAME, (,), TYPENAMES)> \
+    struct funcproto_from<R TYPENAMES, false, false> { \
+    private: \
+        DYND_PP_JOIN_ELWISE_1(DYND_PP_META_TYPEDEF_TYPENAME, (;), \
+            DYND_PP_MAP_1(DYND_PP_META_STD_REMOVE_CONST_AND_STD_REMOVE_REFERENCE, TYPENAMES), CONVERTED_TYPENAMES); \
+    public: \
+        static inline ndt::type make() { \
+            ndt::type param_types[N] = {DYND_PP_JOIN_ELWISE_1(DYND_PP_META_TEMPLATE_INSTANTIATION_CALL, (,), \
+                DYND_PP_REPEAT_1(make_type, N), CONVERTED_TYPENAMES)}; \
+            return make_funcproto(param_types, make_type<R>()); \
+        } \
+    };
 
+DYND_PP_JOIN_MAP(FUNCPROTO_FROM, (), DYND_PP_RANGE(1, DYND_PP_INC(DYND_SRC_MAX)))
 
-        template<typename R, typename T0, typename T1, typename T2>
-        struct make_func_proto<R (T0, T1, T2)> {
-            static inline ndt::type make() {
-                ndt::type param_types[3] = {make_type<T0>(), make_type<T1>(),
-                                            make_type<T2>()};
-                return make_funcproto(param_types, make_type<R>());
-            }
-        };
-        // TODO use the pp lib to generate this
-    } // namespace detail
+#undef _FUNCPROTO_FROM
+#undef FUNCPROTO_FROM
 
-    template<class T>
-    inline ndt::type make_funcproto()
-    {
-        return detail::make_func_proto<T>::make();
+template<typename R>
+struct funcproto_from<void (R &), false, false> {
+    static inline ndt::type make() {
+        intptr_t zero = 0;
+        nd::array param_types = nd::typed_empty(1, &zero, ndt::make_strided_of_type());
+        param_types.flag_as_immutable();
+        return make_funcproto(param_types, make_type<R>());
+    }
+};
+
+#define FUNCPROTO_FROM(N) _FUNCPROTO_FROM(N, DYND_PP_META_NAME_RANGE(A, N), DYND_PP_META_NAME_RANGE(B, N))
+#define _FUNCPROTO_FROM(N, TYPENAMES, CONVERTED_TYPENAMES) \
+    template <typename R, DYND_PP_JOIN_MAP_1(DYND_PP_META_TYPENAME, (,), TYPENAMES)> \
+    struct funcproto_from<void (R &, DYND_PP_FLATTEN(TYPENAMES)), false, false> { \
+    private: \
+        DYND_PP_JOIN_ELWISE_1(DYND_PP_META_TYPEDEF_TYPENAME, (;), \
+            DYND_PP_MAP_1(DYND_PP_META_STD_REMOVE_CONST_AND_STD_REMOVE_REFERENCE, TYPENAMES), CONVERTED_TYPENAMES); \
+    public: \
+        static inline ndt::type make() { \
+            ndt::type param_types[N] = {DYND_PP_JOIN_ELWISE_1(DYND_PP_META_TEMPLATE_INSTANTIATION_CALL, (,), \
+                DYND_PP_REPEAT_1(make_type, N), CONVERTED_TYPENAMES)}; \
+            return make_funcproto(param_types, make_type<R>()); \
+        } \
+    };
+
+DYND_PP_JOIN_MAP(FUNCPROTO_FROM, (), DYND_PP_RANGE(1, DYND_PP_INC(DYND_SRC_MAX)))
+
+#undef _FUNCPROTO_FROM
+#undef FUNCPROTO_FROM
+
+} // namespace detail
+
+    template <typename func_type>
+    inline ndt::type make_funcproto() {
+        typedef typename func_like<func_type>::type funcproto_type;
+
+        return detail::funcproto_from<funcproto_type,
+            is_aux_buffered<funcproto_type>::value, is_thread_aux_buffered<funcproto_type>::value>::make();
     }
 
     ndt::type make_generic_funcproto(intptr_t nargs);

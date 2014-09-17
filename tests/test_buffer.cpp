@@ -9,8 +9,8 @@
 #include <cmath>
 #include "inc_gtest.hpp"
 
-#include "dynd/buffer.hpp"
-#include "dynd/func/functor_arrfunc.hpp"
+#include <dynd/buffer.hpp>
+#include <dynd/func/functor_arrfunc.hpp>
 
 using namespace std;
 using namespace dynd;
@@ -20,21 +20,41 @@ struct func_aux_buffer : aux_buffer {
 };
 
 struct func_thread_aux_buffer : thread_aux_buffer {
-    func_thread_aux_buffer(func_aux_buffer *) {
+    int val;
+
+    func_thread_aux_buffer() : val(9) {
+    }
+
+    func_thread_aux_buffer(func_aux_buffer *aux) : val(aux->val + 3) {
     }
 };
 
-void func(int &dst, int src, func_aux_buffer *aux, func_thread_aux_buffer *) {
+void func_with_aux(int &dst, int src, func_aux_buffer *aux) {
     dst = src + aux->val;
 }
 
+void func_with_thread_aux(int &dst, int src, func_thread_aux_buffer *thread_aux) {
+    dst = src + thread_aux->val;
+}
+
+void func_with_aux_and_thread_aux(int &dst, int src, func_aux_buffer *aux, func_thread_aux_buffer *thread_aux) {
+    dst = src + aux->val + thread_aux->val;
+}
+
 TEST(Buffer, Simple) {
-    typedef void (*func_type)(int &, int, func_aux_buffer *, func_thread_aux_buffer *);
-    typedef void (*func_type)(int &, int, func_aux_buffer *, func_thread_aux_buffer *);
-
     func_aux_buffer aux;
-    aux.val = 5;
+    aux.val = 7;
 
-    nd::arrfunc af = nd::make_functor_arrfunc(func);
-    EXPECT_EQ(af(5, &aux).as<int>(), 10);
+    assert_buffered_args<int (int, aux_buffer *, thread_aux_buffer *)>();
+
+/*
+    nd::arrfunc af = nd::make_functor_arrfunc(func_with_aux);
+    EXPECT_EQ(12, af(5, &aux).as<int>());
+
+    af = nd::make_functor_arrfunc(func_with_thread_aux);
+    EXPECT_EQ(14, af(5).as<int>());
+
+    af = nd::make_functor_arrfunc(func_with_aux_and_thread_aux);
+    EXPECT_EQ(22, af(5, &aux).as<int>());
+*/
 }

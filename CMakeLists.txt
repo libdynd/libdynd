@@ -12,11 +12,13 @@ find_package(CUDA)
 set(LIB_SUFFIX "" CACHE STRING
     "Typically an empty string or 64. Controls installation to lib or lib64")
 
-# -DDYND_ELWISE_MAX, the maximum number of arguments that the elwise function
-#   in libdynd will support
-SET(DYND_ELWISE_MAX 4 CACHE STRING
-    "Build a libdynd library with an elwise function that supports the specified maximum number of arguments")
+# -DDYND_SRC_MAX, the maximum number of arguments that functor arrfuncs will support
+SET(DYND_SRC_MAX 4 CACHE STRING
+    "Build a libdynd library with functor arrfuncs that support the specified maximum number of arguments")
 # TODO: Check that the preprocessor can handle this number
+# -DDYND_SRC_MAX, the maximum number of arguments that functor arrfuncs will support
+SET(DYND_ARG_MAX 6 CACHE STRING
+    "Build a libdynd library with functor arrfuncs that support the specified maximum number of arguments")
 
 # Only add these options if this is the top level CMakeLists.txt
 if("${CMAKE_SOURCE_DIR}" STREQUAL "${CMAKE_CURRENT_SOURCE_DIR}")

@@ -1,3 +1,5 @@
 #cmakedefine DYND_CUDA
-#define DYND_ELWISE_MAX @DYND_ELWISE_MAX@
+#define DYND_SRC_MAX @DYND_SRC_MAX@
+#define DYND_ARG_MAX @DYND_ARG_MAX@
+#define DYND_ELWISE_MAX DYND_SRC_MAX
 #cmakedefine DYND_FFTW

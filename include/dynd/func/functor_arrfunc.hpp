@@ -7,6 +7,7 @@
 #define DYND__FUNC_FUNCTOR_ARRFUNC_HPP
 
 #include <dynd/buffer.hpp>
+#include <dynd/kernels/functor_kernels.hpp>
 #include <dynd/types/funcproto_type.hpp>
 #include <dynd/types/cfixed_dim_type.hpp>
 #include <dynd/func/arrfunc.hpp>
@@ -14,9 +15,7 @@
 #include <dynd/pp/arrfunc_util.hpp>
 #include <iostream>
 
-namespace dynd {
-
-namespace nd { namespace detail {
+namespace dynd { namespace nd { namespace detail {
   /**
    * Metaprogram to tell whether an argument is const or by value.
    */
@@ -27,452 +26,33 @@ namespace nd { namespace detail {
   };
 }} // namespace nd::detail
 
-/**
- * Metaprogram to detect whether a type is a function pointer.
- */
-template <typename T>
-struct is_function_pointer {
-  enum { value = false };
-};
-
-#define DYND_CODE(N)                                                           \
-  template <typename R, DYND_PP_TYPENAME_ARGRANGE_1(A, N)>                     \
-  struct is_function_pointer<R (*)(DYND_PP_ARGRANGE_1(A, N))> {                \
-    enum { value = true };                                                     \
-  };
-DYND_PP_JOIN_MAP(DYND_CODE, (), DYND_PP_RANGE(1, DYND_PP_INC(DYND_ELWISE_MAX)))
-#undef DYND_CODE
-
 } // namespace dynd
 
-namespace dynd { namespace nd {
+namespace dynd { namespace nd { namespace detail {
 
-namespace detail {
+  template <typename func_type, bool callable>
+  struct functor_arrfunc_from;
 
-  /**
-   * Helper struct that casts or coerces data right before passing it to the functor.
-   */
-  template <typename T>
-  struct val_helper;
-
-  template <typename T>
-  struct val_helper {
-    void init(const ndt::type &DYND_UNUSED(tp), const char *DYND_UNUSED(arrmeta)) {
-    }
-
-    T *make(char *data) {
-        return reinterpret_cast<T *>(data);
-    }
-
-    const T *make(const char *data) {
-        return reinterpret_cast<const T *>(data);
+  template <typename func_type>
+  struct functor_arrfunc_from<func_type, false> {
+    static void make(func_type func, arrfunc_type_data *out_af) {
+      out_af->func_proto = ndt::make_funcproto<func_type>();
+      *out_af->get_data_as<func_type>() = func;
+      out_af->instantiate = &dynd::nd::functor_ckernel<func_type, func_type>::instantiate;
+      out_af->free_func = NULL;
     }
   };
 
-  template <typename T, int N>
-  struct val_helper<nd::strided_vals<T, N> > {
-    nd::strided_vals<T, N> vals;
-
-    void init(const ndt::type &DYND_UNUSED(tp), const char *arrmeta) {
-        vals.init(reinterpret_cast<const size_stride_t *>(arrmeta));
-    }
-
-    nd::strided_vals<T, N> *make(char *data) {
-        vals.set_readonly_originptr(data);
-        return &vals;
-    }
-
-    const nd::strided_vals<T, N> *make(const char *data) {
-        vals.set_readonly_originptr(data);
-        return &vals;
-    }
-  };
-
-  template <typename Functor, typename FuncProto, bool AuxBuffered = false, bool ThreadLocalBuffered = false>
-  struct functor_ckernel_instantiator;
-
-/**
- * This generates code to instantiate a ckernel calling a C++ function
- * object which returns a value.
- */
-#define DYND_CODE(NSRC)                                                        \
-  template <typename Functor, typename R,                                      \
-            DYND_PP_TYPENAME_ARGRANGE_1(A, NSRC)>                              \
-  struct functor_ckernel_instantiator<Functor,                                 \
-                                      R (*)(DYND_PP_ARGRANGE_1(A, NSRC))> {    \
-    typedef functor_ckernel_instantiator self_type;                            \
-                                                                               \
-    DYND_PP_CLEAN_TYPE_RANGE_1(D, A, NSRC);                                    \
-                                                                               \
-    ckernel_prefix base;                                                       \
-    Functor func;                                                              \
-                                                                               \
-    static void single(char *dst, const char *const *src, ckernel_prefix *ckp) \
-    {                                                                          \
-      self_type *e = reinterpret_cast<self_type *>(ckp);                       \
-      *reinterpret_cast<R *>(dst) =                                            \
-          e->func(DYND_PP_DEREF_CAST_ARRAY_RANGE_1(D, src, NSRC));             \
-    }                                                                          \
-                                                                               \
-    static void strided(char *dst, intptr_t dst_stride,                        \
-                        const char *const *src, const intptr_t *src_stride,    \
-                        size_t count, ckernel_prefix *ckp)                     \
-    {                                                                          \
-      self_type *e = reinterpret_cast<self_type *>(ckp);                       \
-      Functor func = e->func;                                                  \
-      /* const char *src# = src[#]; */                                         \
-      /* intptr_t src_stride# = src_stride[#]; */                              \
-      DYND_PP_INIT_SRC_VARIABLES(NSRC);                                        \
-      for (size_t i = 0; i < count; ++i) {                                     \
-        /* *(R *)dst = func(*(const D0 *)src0, ...); */                        \
-        *reinterpret_cast<R *>(dst) =                                          \
-            func(DYND_PP_DEREF_CAST_ARGRANGE_1(D, src, NSRC));                 \
-                                                                               \
-        /* Increment ``dst``, ``src#`` by their respective strides */          \
-        DYND_PP_STRIDED_INCREMENT(NSRC);                                       \
-      }                                                                        \
-    }                                                                          \
-                                                                               \
-    static intptr_t instantiate(const arrfunc_type_data *af_self,              \
-                                dynd::ckernel_builder *ckb,                    \
-                                intptr_t ckb_offset, const ndt::type &dst_tp,  \
-                                const char *DYND_UNUSED(dst_arrmeta),          \
-                                const ndt::type *src_tp,                       \
-                                const char *const *DYND_UNUSED(src_arrmeta),   \
-                                kernel_request_t kernreq,                      \
-                                aux_buffer *DYND_UNUSED(aux), const eval::eval_context *DYND_UNUSED(ectx))   \
-    {                                                                          \
-      for (intptr_t i = 0; i < NSRC; ++i) {                                    \
-        if (src_tp[i] != af_self->get_param_type(i)) {                         \
-          std::stringstream ss;                                                \
-          ss << "Provided types " << ndt::make_funcproto(NSRC, src_tp, dst_tp) \
-             << " do not match the arrfunc proto " << af_self->func_proto;     \
-          throw type_error(ss.str());                                          \
-        }                                                                      \
-      }                                                                        \
-      if (dst_tp != af_self->get_return_type()) {                              \
-        std::stringstream ss;                                                  \
-        ss << "Provided types " << ndt::make_funcproto(NSRC, src_tp, dst_tp)   \
-           << " do not match the arrfunc proto " << af_self->func_proto;       \
-        throw type_error(ss.str());                                            \
-      }                                                                        \
-      self_type *e = ckb->alloc_ck_leaf<self_type>(ckb_offset);                \
-      e->base.template set_expr_function<self_type>(kernreq);                  \
-      e->func = *af_self->get_data_as<Functor>();                              \
-                                                                               \
-      return ckb_offset;                                                       \
-    }                                                                          \
-  };
-DYND_PP_JOIN_MAP(DYND_CODE, (), DYND_PP_RANGE(1, DYND_PP_INC(DYND_ELWISE_MAX)))
-#undef DYND_CODE
-
-/**
- * This generates code to instantiate a ckernel calling a C++ function
- * object which returns a value in the first parameter as an output reference.
- */
-#define FUNCTOR_CKERNEL(COUNT)                                                        \
-  template <typename Functor, typename R,                                      \
-            DYND_PP_TYPENAME_ARGRANGE_1(A, COUNT)>                              \
-  struct functor_ckernel_instantiator<                                         \
-      Functor, void (*)(R &, DYND_PP_ARGRANGE_1(A, COUNT))> {                   \
-    typedef functor_ckernel_instantiator self_type;                            \
-                                                                               \
-    DYND_PP_CLEAN_TYPE_RANGE_1(D, A, COUNT);                                    \
-                                                                               \
-    ckernel_prefix base;                                                       \
-    Functor func;                                                              \
-    val_helper<R> dst_helper;                                                  \
-    DYND_PP_DECL_HELPERS(D, src, COUNT);                                        \
-                                                                               \
-    static void single(char *dst, const char *const *src, ckernel_prefix *ckp) \
-    {                                                                          \
-      self_type *e = reinterpret_cast<self_type *>(ckp);                       \
-      e->func(*e->dst_helper.make(dst),                                        \
-              DYND_PP_DEREF_MAKE_ARRAY_RANGE_1(D, src, COUNT));                 \
-    }                                                                          \
-                                                                               \
-    static void strided(char *dst, intptr_t dst_stride,                        \
-                        const char *const *src, const intptr_t *src_stride,    \
-                        size_t count, ckernel_prefix *ckp)                     \
-    {                                                                          \
-      self_type *e = reinterpret_cast<self_type *>(ckp);                       \
-      Functor func = e->func;                                                  \
-      /* const char *src# = src[#]; */                                         \
-      /* intptr_t src_stride# = src_stride[#]; */                              \
-      DYND_PP_INIT_SRC_VARIABLES(COUNT);                                        \
-      for (size_t i = 0; i < count; ++i) {                                     \
-        /*  func(*(R *)dst, *(const D0 *)src0, ...); */                        \
-        func(*e->dst_helper.make(dst),                                         \
-             DYND_PP_DEREF_MAKE_ARG_RANGE_1(D, src, COUNT));                    \
-                                                                               \
-        /* Increment ``dst``, ``src#`` by their respective strides */          \
-        DYND_PP_STRIDED_INCREMENT(COUNT);                                       \
-      }                                                                        \
-    }                                                                          \
-                                                                               \
-    static intptr_t instantiate(const arrfunc_type_data *af_self,              \
-                                dynd::ckernel_builder *ckb,                    \
-                                intptr_t ckb_offset, const ndt::type &dst_tp,  \
-                                const char *dst_arrmeta,                       \
-                                const ndt::type *src_tp,                       \
-                                const char *const *src_arrmeta,                \
-                                kernel_request_t kernreq,                      \
-                                aux_buffer *DYND_UNUSED(aux), const eval::eval_context *DYND_UNUSED(ectx))   \
-    {                                                                          \
-                                                                               \
-      for (intptr_t i = 0; i < COUNT; ++i) {                                    \
-        if (src_tp[i] != af_self->get_param_type(i)) {                         \
-          std::stringstream ss;                                                \
-          ss << "Provided types " << ndt::make_funcproto(COUNT, src_tp, dst_tp) \
-             << " do not match the arrfunc proto " << af_self->func_proto;     \
-          throw type_error(ss.str());                                          \
-        }                                                                      \
-      }                                                                        \
-      if (dst_tp != af_self->get_return_type()) {                              \
-        std::stringstream ss;                                                  \
-        ss << "Provided types " << ndt::make_funcproto(COUNT, src_tp, dst_tp)   \
-           << " do not match the arrfunc proto " << af_self->func_proto;       \
-        throw type_error(ss.str());                                            \
-      }                                                                        \
-      self_type *e = ckb->alloc_ck_leaf<self_type>(ckb_offset);                \
-      e->base.template set_expr_function<self_type>(kernreq);                  \
-      e->func = *af_self->get_data_as<Functor>();                              \
-      e->dst_helper.init(dst_tp, dst_arrmeta);                                 \
-      DYND_PP_INIT_SRC_HELPERS(COUNT)                                           \
-                                                                               \
-      return ckb_offset;                                                       \
-    }                                                                          \
-  }; \
-\
-  template <typename Functor, typename R, \
-            DYND_PP_TYPENAME_ARGRANGE_1(A, COUNT), \
-            typename B0, typename B1> \
-  struct functor_ckernel_instantiator< \
-      Functor, void (*)(R &, DYND_PP_ARGRANGE_1(A, COUNT), B0, B1), true, true> {                   \
-    typedef functor_ckernel_instantiator self_type;                            \
-                                                                               \
-    DYND_PP_CLEAN_TYPE_RANGE_1(D, A, COUNT);                                    \
-    typedef typename std::tr1::remove_pointer<B0>::type aux_buffer_type; \
-    typedef typename std::tr1::remove_pointer<B1>::type thread_aux_buffer_type; \
-\
-    ckernel_prefix base; \
-    Functor func; \
-    aux_buffer_type *aux; \
-    thread_aux_buffer_type thread_aux_buffer; \
-\
-    val_helper<R> dst_helper; \
-    DYND_PP_DECL_HELPERS(D, src, COUNT); \
-                                                                               \
-    static void single(char *dst, const char *const *src, ckernel_prefix *ckp) \
-    {                                                                          \
-      self_type *e = reinterpret_cast<self_type *>(ckp);                       \
-      e->func(*e->dst_helper.make(dst),                                        \
-              DYND_PP_DEREF_MAKE_ARRAY_RANGE_1(D, src, COUNT), \
-              e->aux, &e->thread_aux_buffer); \
-    }                                                                          \
-                                                                               \
-    static void strided(char *dst, intptr_t dst_stride,                        \
-                        const char *const *src, const intptr_t *src_stride,    \
-                        size_t count, ckernel_prefix *ckp)                     \
-    {                                                                          \
-      self_type *e = reinterpret_cast<self_type *>(ckp);                       \
-      Functor func = e->func;                                                  \
-      /* const char *src# = src[#]; */                                         \
-      /* intptr_t src_stride# = src_stride[#]; */                              \
-      DYND_PP_INIT_SRC_VARIABLES(COUNT);                                        \
-      for (size_t i = 0; i < count; ++i) {                                     \
-        /*  func(*(R *)dst, *(const D0 *)src0, ...); */                        \
-        func(*e->dst_helper.make(dst),                                         \
-             DYND_PP_DEREF_MAKE_ARG_RANGE_1(D, src, COUNT), \
-            e->aux, &e->thread_aux_buffer);                    \
-                                                                               \
-        /* Increment ``dst``, ``src#`` by their respective strides */          \
-        DYND_PP_STRIDED_INCREMENT(COUNT);                                       \
-      }                                                                        \
-    }                                                                          \
-                                                                               \
-    static intptr_t instantiate(const arrfunc_type_data *af_self,              \
-                                dynd::ckernel_builder *ckb,                    \
-                                intptr_t ckb_offset, const ndt::type &dst_tp,  \
-                                const char *dst_arrmeta,                       \
-                                const ndt::type *src_tp,                       \
-                                const char *const *src_arrmeta,                \
-                                kernel_request_t kernreq,                      \
-                                aux_buffer *aux, const eval::eval_context *DYND_UNUSED(ectx))   \
-    {                                                                          \
-      for (intptr_t i = 0; i < COUNT; ++i) {                                    \
-        if (src_tp[i] != af_self->get_param_type(i)) {                         \
-          std::stringstream ss;                                                \
-          ss << "Provided types " << ndt::make_funcproto(COUNT, src_tp, dst_tp) \
-             << " do not match the arrfunc proto " << af_self->func_proto;     \
-          throw type_error(ss.str());                                          \
-        }                                                                      \
-      }                                                                        \
-      if (dst_tp != af_self->get_return_type()) {                              \
-        std::stringstream ss;                                                  \
-        ss << "Provided types " << ndt::make_funcproto(COUNT, src_tp, dst_tp)   \
-           << " do not match the arrfunc proto " << af_self->func_proto;       \
-        throw type_error(ss.str());                                            \
-      }                                                                        \
-      self_type *e = ckb->alloc_ck_leaf<self_type>(ckb_offset);                \
-      e->base.template set_expr_function<self_type>(kernreq);                  \
-      e->func = *af_self->get_data_as<Functor>();                              \
-      e->aux = reinterpret_cast<aux_buffer_type *>(aux); \
-      new (&e->thread_aux_buffer) thread_aux_buffer_type(e->aux); \
-      e->dst_helper.init(dst_tp, dst_arrmeta);                                 \
-      DYND_PP_INIT_SRC_HELPERS(COUNT)                                           \
-                                                                               \
-      return ckb_offset;                                                       \
-    }                                                                          \
-  };
-
-DYND_PP_JOIN_MAP(FUNCTOR_CKERNEL, (), DYND_PP_RANGE(1, DYND_PP_INC(DYND_ELWISE_MAX)))
-#undef FUNCTOR_CKERNEL
-
-  template<bool CallOp, typename Functor, bool aux_buffered = false, bool thread_aux_buffered = false>
-  struct functor_arrfunc_maker;
-
-/**
- * Creates an arrfunc from a function pointer that returns a value.
- */
-#define DYND_CODE(NSRC)                                                        \
-  template <typename R, DYND_PP_TYPENAME_ARGRANGE_1(A, NSRC)>                  \
-  struct functor_arrfunc_maker<true, R (*)(DYND_PP_ARGRANGE_1(A, NSRC))> {     \
-    typedef R (*func_type)(DYND_PP_ARGRANGE_1(A, NSRC));                       \
-    static void make(func_type func, arrfunc_type_data *out_af)                \
-    {                                                                          \
-      DYND_PP_STATIC_ASSERT_RANGE_1("all reference arguments must be const",   \
-                                    detail::is_suitable_input, A, NSRC)        \
-      /* Create D0, D1, ... as cleaned version of A0, A1, ... */               \
-      DYND_PP_CLEAN_TYPE_RANGE_1(D, A, NSRC);                                  \
-                                                                               \
-      /* Create dst_tp and the src_tp array from R and D0, D1, ... */          \
-      DYND_PP_NDT_TYPES_FROM_TYPES(R, D, NSRC);                                \
-                                                                               \
-      out_af->func_proto = ndt::make_funcproto(src_tp, dst_tp);                \
-      *out_af->get_data_as<func_type>() = func;                                \
-      out_af->instantiate = &detail::functor_ckernel_instantiator<             \
-                                func_type, func_type>::instantiate;            \
-      out_af->free_func = NULL;                                                \
-    }                                                                          \
-  };
-DYND_PP_JOIN_MAP(DYND_CODE, (), DYND_PP_RANGE(1, DYND_PP_INC(DYND_ELWISE_MAX)))
-#undef DYND_CODE
-
-/**
- * Creates an arrfunc from a function pointer that puts the return value
- * in the first parameter.
- */
-#define DYND_CODE(NSRC)                                                        \
-  template <typename R, DYND_PP_TYPENAME_ARGRANGE_1(A, NSRC)>                  \
-  struct functor_arrfunc_maker<true,                                           \
-                               void (*)(R &, DYND_PP_ARGRANGE_1(A, NSRC))> {   \
-    typedef void (*func_type)(R &, DYND_PP_ARGRANGE_1(A, NSRC));               \
-    static void make(func_type func, arrfunc_type_data *out_af)                \
-    {                                                                          \
-      DYND_PP_STATIC_ASSERT_RANGE_1("all reference arguments must be const",   \
-                                    detail::is_suitable_input, A, NSRC)        \
-      /* Create D0, D1, ... as cleaned version of A0, A1, ... */               \
-      DYND_PP_CLEAN_TYPE_RANGE_1(D, A, NSRC);                                  \
-                                                                               \
-      /* Create dst_tp and the src_tp array from R and D0, D1, ... */          \
-      DYND_PP_NDT_TYPES_FROM_TYPES(R, D, NSRC);                                \
-                                                                               \
-      out_af->func_proto = ndt::make_funcproto(src_tp, dst_tp);                \
-      *out_af->get_data_as<func_type>() = func;                                \
-      out_af->instantiate = &detail::functor_ckernel_instantiator<             \
-                                func_type, func_type>::instantiate;            \
-      out_af->free_func = NULL;                                                \
-    }                                                                          \
-  }; \
-\
-  template <typename R, DYND_PP_TYPENAME_ARGRANGE_1(A, NSRC), typename B0, typename B1> \
-  struct functor_arrfunc_maker<true,                                           \
-                               void (*)(R &, DYND_PP_ARGRANGE_1(A, NSRC), B0, B1), true, true> {   \
-    typedef void (*func_type)(R &, DYND_PP_ARGRANGE_1(A, NSRC), B0, B1);               \
-    static void make(func_type func, arrfunc_type_data *out_af)                \
-    {                                                                          \
-      DYND_PP_STATIC_ASSERT_RANGE_1("all reference arguments must be const",   \
-                                    detail::is_suitable_input, A, NSRC)        \
-      /* Create D0, D1, ... as cleaned version of A0, A1, ... */               \
-      DYND_PP_CLEAN_TYPE_RANGE_1(D, A, NSRC);                                  \
-                                                                               \
-      /* Create dst_tp and the src_tp array from R and D0, D1, ... */          \
-      DYND_PP_NDT_TYPES_FROM_TYPES(R, D, NSRC);                                \
-                                                                               \
-      out_af->func_proto = ndt::make_funcproto(src_tp, dst_tp);                \
-      *out_af->get_data_as<func_type>() = func;                                \
-      out_af->instantiate = &detail::functor_ckernel_instantiator<             \
-                                func_type, func_type, true, true>::instantiate;            \
-      out_af->free_func = NULL;                                                \
-    }                                                                          \
-  };
-
-DYND_PP_JOIN_MAP(DYND_CODE, (), DYND_PP_RANGE(1, DYND_PP_INC(DYND_ELWISE_MAX)))
-#undef DYND_CODE
-
-/**
- * Gets triggered when Functor is not a function pointer type, in
- * which case we expect it to be a class with operator() defined.
- */
-template <typename Functor>
-struct functor_arrfunc_maker<false, Functor> {
-/**
- * The make_tagged functions include a pointer-to-member function as an
- * argument, which lets us pull out the type information from the type.
- */
-#define DYND_CODE(NSRC)                                                        \
-  template <typename R, DYND_PP_TYPENAME_ARGRANGE_1(A, NSRC)>                  \
-  inline static void make_tagged(Functor func, arrfunc_type_data *out_af,      \
-                                 R (Functor::*)(DYND_PP_ARGRANGE_1(A, NSRC))   \
-                                 const)                                        \
-  {                                                                            \
-    DYND_PP_STATIC_ASSERT_RANGE_1("all reference arguments must be const",     \
-                                  detail::is_suitable_input, A, NSRC)          \
-    /* Create D0, D1, ... as cleaned version of A0, A1, ... */                 \
-    DYND_PP_CLEAN_TYPE_RANGE_1(D, A, NSRC);                                    \
-                                                                               \
-    /* Create dst_tp and the src_tp array from R and D0, D1, ... */            \
-    DYND_PP_NDT_TYPES_FROM_TYPES(R, D, NSRC);                                  \
-                                                                               \
-    out_af->func_proto = ndt::make_funcproto(src_tp, dst_tp);                  \
-    *out_af->get_data_as<Functor>() = func;                                    \
-    /* Make func ptr type to reuse functor_ckernel_instantiator */             \
-    typedef R (*func_type)(DYND_PP_ARGRANGE_1(A, NSRC));                       \
-    out_af->instantiate = &detail::functor_ckernel_instantiator<               \
-                              Functor, func_type>::instantiate;                \
-    out_af->free_func = NULL;                                                  \
+  template <typename Functor>
+  struct functor_arrfunc_from<Functor, true> {
+  template <typename func_type>
+  inline static void make_tagged(Functor func, arrfunc_type_data *out_af, func_type)
+  {
+    out_af->func_proto = ndt::make_funcproto<func_type>();
+    *out_af->get_data_as<Functor>() = func;
+    out_af->instantiate = &dynd::nd::functor_ckernel<Functor, typename std::decay<typename func_like<func_type>::type>::type>::instantiate;
+    out_af->free_func = NULL;
   }
-DYND_PP_JOIN_MAP(DYND_CODE, (), DYND_PP_RANGE(1, DYND_PP_INC(DYND_ELWISE_MAX)))
-#undef DYND_CODE
-
-/**
- * A second round of make_tagged functions for R& return argument.
- */
-#define DYND_CODE(NSRC)                                                        \
-  template <typename R, DYND_PP_TYPENAME_ARGRANGE_1(A, NSRC)>                  \
-  inline static void make_tagged(                                              \
-      Functor func, arrfunc_type_data *out_af,                                 \
-      void (Functor::*)(R &, DYND_PP_ARGRANGE_1(A, NSRC)) const)               \
-  {                                                                            \
-    DYND_PP_STATIC_ASSERT_RANGE_1("all reference arguments must be const",     \
-                                  detail::is_suitable_input, A, NSRC)          \
-    /* Create D0, D1, ... as cleaned version of A0, A1, ... */                 \
-    DYND_PP_CLEAN_TYPE_RANGE_1(D, A, NSRC);                                    \
-                                                                               \
-    /* Create dst_tp and the src_tp array from R and D0, D1, ... */            \
-    DYND_PP_NDT_TYPES_FROM_TYPES(R, D, NSRC);                                  \
-                                                                               \
-    out_af->func_proto = ndt::make_funcproto(src_tp, dst_tp);                  \
-    *out_af->get_data_as<Functor>() = func;                                    \
-    /* Make func ptr type to reuse functor_ckernel_instantiator */             \
-    typedef void (*func_type)(R &, DYND_PP_ARGRANGE_1(A, NSRC));               \
-    out_af->instantiate = &detail::functor_ckernel_instantiator<               \
-                              Functor, func_type>::instantiate;                \
-    out_af->free_func = NULL;                                                  \
-  }
-DYND_PP_JOIN_MAP(DYND_CODE, (), DYND_PP_RANGE(1, DYND_PP_INC(DYND_ELWISE_MAX)))
-#undef DYND_CODE
 
   static void make(Functor func, arrfunc_type_data *out_af)
   {
@@ -482,22 +62,66 @@ DYND_PP_JOIN_MAP(DYND_CODE, (), DYND_PP_RANGE(1, DYND_PP_INC(DYND_ELWISE_MAX)))
 
 } // namespace detail
 
-template <typename Functor>
-void make_functor_arrfunc(Functor func, arrfunc_type_data *out_af)
+template <class O>
+void make_functor_arrfunc(O obj, arrfunc_type_data *out_af)
 {
-  detail::functor_arrfunc_maker<(bool) is_function_pointer<Functor>::value, Functor,
-    is_aux_buffered<Functor>::value, is_thread_aux_buffered<Functor>::value>::make(func, out_af);
+  detail::functor_arrfunc_from<O, true>::make(obj, out_af);
 }
 
-template <typename Functor>
-nd::arrfunc make_functor_arrfunc(Functor func)
+template <class O>
+nd::arrfunc make_functor_arrfunc(O obj)
 {
   nd::array af = nd::empty(ndt::make_arrfunc());
-  make_functor_arrfunc(func, reinterpret_cast<arrfunc_type_data *>(
-                                 af.get_readwrite_originptr()));
+  make_functor_arrfunc(obj, reinterpret_cast<arrfunc_type_data *>(af.get_readwrite_originptr()));
   af.flag_as_immutable();
   return af;
 }
+
+#define MAKE_FUNCTOR_ARRFUNC(N) _MAKE_FUNCTOR_ARRFUNC(N, DYND_PP_META_NAME_RANGE(A, N))
+#define _MAKE_FUNCTOR_ARRFUNC(N, ARG_TYPENAMES) \
+  template <typename R, DYND_PP_JOIN_MAP_1(DYND_PP_META_TYPENAME, (,), ARG_TYPENAMES)> \
+  void make_functor_arrfunc(R (*func) ARG_TYPENAMES, arrfunc_type_data *out_af) \
+  { \
+    typedef R (*func_type) ARG_TYPENAMES; \
+    detail::functor_arrfunc_from<func_type, false>::make(func, out_af); \
+  } \
+\
+  template <typename R, DYND_PP_JOIN_MAP_1(DYND_PP_META_TYPENAME, (,), ARG_TYPENAMES)> \
+  nd::arrfunc make_functor_arrfunc(R (*func) ARG_TYPENAMES) \
+  { \
+    nd::array af = nd::empty(ndt::make_arrfunc()); \
+    make_functor_arrfunc(func, reinterpret_cast<arrfunc_type_data *>(af.get_readwrite_originptr())); \
+    af.flag_as_immutable(); \
+    return af; \
+  }
+
+DYND_PP_JOIN_MAP(MAKE_FUNCTOR_ARRFUNC, (), DYND_PP_RANGE(1, DYND_PP_INC(DYND_ARG_MAX)))
+
+#undef _MAKE_FUNCTOR_ARRFUNC
+#undef MAKE_FUNCTOR_ARRFUNC
+
+#define MAKE_FUNCTOR_ARRFUNC(N) _MAKE_FUNCTOR_ARRFUNC(N, DYND_PP_META_NAME_RANGE(A, N))
+#define _MAKE_FUNCTOR_ARRFUNC(N, ARG_TYPENAMES) \
+  template <typename O, typename R, DYND_PP_JOIN_MAP_1(DYND_PP_META_TYPENAME, (,), ARG_TYPENAMES)> \
+  void make_functor_arrfunc(const O &DYND_UNUSED(obj), R (O::*func) ARG_TYPENAMES, arrfunc_type_data *out_af) \
+  { \
+    typedef R (*func_type) ARG_TYPENAMES; \
+    detail::functor_arrfunc_from<func_type, false>::make(func, out_af); \
+  } \
+\
+  template <class O, typename R, DYND_PP_JOIN_MAP_1(DYND_PP_META_TYPENAME, (,), ARG_TYPENAMES)> \
+  nd::arrfunc make_functor_arrfunc(const O obj, R (O::*func) ARG_TYPENAMES) \
+  { \
+    nd::array af = nd::empty(ndt::make_arrfunc()); \
+    make_functor_arrfunc(obj, func, reinterpret_cast<arrfunc_type_data *>(af.get_readwrite_originptr())); \
+    af.flag_as_immutable(); \
+    return af; \
+  }
+
+DYND_PP_JOIN_MAP(MAKE_FUNCTOR_ARRFUNC, (), DYND_PP_RANGE(1, DYND_PP_INC(DYND_ARG_MAX)))
+
+#undef _MAKE_FUNCTOR_ARRFUNC
+#undef MAKE_FUNCTOR_ARRFUNC
 
 }} // namespace dynd::nd
 
