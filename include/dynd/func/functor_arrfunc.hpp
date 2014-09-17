@@ -15,113 +15,76 @@
 #include <dynd/pp/arrfunc_util.hpp>
 #include <iostream>
 
-namespace dynd { namespace nd { namespace detail {
-  /**
-   * Metaprogram to tell whether an argument is const or by value.
-   */
-  template<typename T>
-  struct is_suitable_input {
-    // TODO: Reenable - error was triggering when not expected
-    enum { value = true }; //is_const<T>::value || !is_reference<T>::value };
-  };
-}} // namespace nd::detail
-
-} // namespace dynd
+template<typename testType>
+struct is_function_pointer
+{
+    static const bool value =
+        std::tr1::is_pointer<testType>::value ?
+        std::tr1::is_function<typename std::tr1::remove_pointer<testType>::type>::value :
+        false;
+};
 
 namespace dynd { namespace nd { namespace detail {
 
-  template <typename func_type, bool callable>
-  struct functor_arrfunc_from;
+template <typename func_type, bool func_pointer>
+struct functor_arrfunc_from;
 
-  template <typename func_type>
-  struct functor_arrfunc_from<func_type, false> {
-    static void make(func_type func, arrfunc_type_data *out_af) {
-      out_af->func_proto = ndt::make_funcproto<func_type>();
-      *out_af->get_data_as<func_type>() = func;
-      out_af->instantiate = &dynd::nd::functor_ckernel<func_type, func_type>::instantiate;
-      out_af->free_func = NULL;
-    }
-  };
-
-  template <typename Functor>
-  struct functor_arrfunc_from<Functor, true> {
-  template <typename func_type>
-  inline static void make_tagged(Functor func, arrfunc_type_data *out_af, func_type)
-  {
+template <typename func_type>
+struct functor_arrfunc_from<func_type, true> {
+  static void make(func_type func, arrfunc_type_data *out_af) {
     out_af->func_proto = ndt::make_funcproto<func_type>();
-    *out_af->get_data_as<Functor>() = func;
-    out_af->instantiate = &dynd::nd::functor_ckernel<Functor, typename std::decay<typename func_like<func_type>::type>::type>::instantiate;
+    *out_af->get_data_as<func_type>() = func;
+    out_af->instantiate = &dynd::nd::functor_ckernel<func_type>::instantiate;
+    out_af->free_func = NULL;
+  }
+};
+
+template <typename T>
+struct functor_arrfunc_from<T, false> {
+  template <typename func_type>
+  static void make(T func, func_type, arrfunc_type_data *out_af) {
+    typedef typename func_like<func_type>::type funcproto_type;
+    out_af->func_proto = ndt::make_funcproto<funcproto_type>();
+    *out_af->get_data_as<T>() = func;
+    out_af->instantiate = &dynd::nd::functor_ckernel<T, funcproto_type>::instantiate;
     out_af->free_func = NULL;
   }
 
-  static void make(Functor func, arrfunc_type_data *out_af)
-  {
-    make_tagged(func, out_af, &Functor::operator());
+  static void make(T func, arrfunc_type_data *out_af) {
+    make(func, &T::operator(), out_af);
   }
 };
 
 } // namespace detail
 
-template <class O>
-void make_functor_arrfunc(O obj, arrfunc_type_data *out_af)
-{
-  detail::functor_arrfunc_from<O, true>::make(obj, out_af);
+template <typename func_type>
+void make_functor_arrfunc(func_type func, arrfunc_type_data *out_af) {
+  detail::functor_arrfunc_from<func_type, is_function_pointer<func_type>::value>::make(func, out_af);
 }
 
-template <class O>
-nd::arrfunc make_functor_arrfunc(O obj)
-{
+template <typename T, typename func_type>
+void make_functor_arrfunc(T DYND_UNUSED(obj), func_type func, arrfunc_type_data *out_af) {
+  out_af->func_proto = ndt::make_funcproto<func_type>();
+  *out_af->get_data_as<func_type>() = func;
+  out_af->instantiate = &dynd::nd::functor_ckernel<func_type>::instantiate;
+  out_af->free_func = NULL;
+}
+
+template <typename func_type>
+nd::arrfunc make_functor_arrfunc(func_type func) {
   nd::array af = nd::empty(ndt::make_arrfunc());
-  make_functor_arrfunc(obj, reinterpret_cast<arrfunc_type_data *>(af.get_readwrite_originptr()));
+  make_functor_arrfunc(func, reinterpret_cast<arrfunc_type_data *>(af.get_readwrite_originptr()));
   af.flag_as_immutable();
   return af;
 }
 
-#define MAKE_FUNCTOR_ARRFUNC(N) _MAKE_FUNCTOR_ARRFUNC(N, DYND_PP_META_NAME_RANGE(A, N))
-#define _MAKE_FUNCTOR_ARRFUNC(N, ARG_TYPENAMES) \
-  template <typename R, DYND_PP_JOIN_MAP_1(DYND_PP_META_TYPENAME, (,), ARG_TYPENAMES)> \
-  void make_functor_arrfunc(R (*func) ARG_TYPENAMES, arrfunc_type_data *out_af) \
-  { \
-    typedef R (*func_type) ARG_TYPENAMES; \
-    detail::functor_arrfunc_from<func_type, false>::make(func, out_af); \
-  } \
-\
-  template <typename R, DYND_PP_JOIN_MAP_1(DYND_PP_META_TYPENAME, (,), ARG_TYPENAMES)> \
-  nd::arrfunc make_functor_arrfunc(R (*func) ARG_TYPENAMES) \
-  { \
-    nd::array af = nd::empty(ndt::make_arrfunc()); \
-    make_functor_arrfunc(func, reinterpret_cast<arrfunc_type_data *>(af.get_readwrite_originptr())); \
-    af.flag_as_immutable(); \
-    return af; \
-  }
-
-DYND_PP_JOIN_MAP(MAKE_FUNCTOR_ARRFUNC, (), DYND_PP_RANGE(1, DYND_PP_INC(DYND_ARG_MAX)))
-
-#undef _MAKE_FUNCTOR_ARRFUNC
-#undef MAKE_FUNCTOR_ARRFUNC
-
-#define MAKE_FUNCTOR_ARRFUNC(N) _MAKE_FUNCTOR_ARRFUNC(N, DYND_PP_META_NAME_RANGE(A, N))
-#define _MAKE_FUNCTOR_ARRFUNC(N, ARG_TYPENAMES) \
-  template <typename O, typename R, DYND_PP_JOIN_MAP_1(DYND_PP_META_TYPENAME, (,), ARG_TYPENAMES)> \
-  void make_functor_arrfunc(const O &DYND_UNUSED(obj), R (O::*func) ARG_TYPENAMES, arrfunc_type_data *out_af) \
-  { \
-    typedef R (*func_type) ARG_TYPENAMES; \
-    detail::functor_arrfunc_from<func_type, false>::make(func, out_af); \
-  } \
-\
-  template <class O, typename R, DYND_PP_JOIN_MAP_1(DYND_PP_META_TYPENAME, (,), ARG_TYPENAMES)> \
-  nd::arrfunc make_functor_arrfunc(const O obj, R (O::*func) ARG_TYPENAMES) \
-  { \
-    nd::array af = nd::empty(ndt::make_arrfunc()); \
-    make_functor_arrfunc(obj, func, reinterpret_cast<arrfunc_type_data *>(af.get_readwrite_originptr())); \
-    af.flag_as_immutable(); \
-    return af; \
-  }
-
-DYND_PP_JOIN_MAP(MAKE_FUNCTOR_ARRFUNC, (), DYND_PP_RANGE(1, DYND_PP_INC(DYND_ARG_MAX)))
-
-#undef _MAKE_FUNCTOR_ARRFUNC
-#undef MAKE_FUNCTOR_ARRFUNC
+template <typename T, typename func_type>
+nd::arrfunc make_functor_arrfunc(T obj, func_type func) {
+  nd::array af = nd::empty(ndt::make_arrfunc());
+  make_functor_arrfunc(obj, func, reinterpret_cast<arrfunc_type_data *>(af.get_readwrite_originptr()));
+  af.flag_as_immutable();
+  return af;
+}
 
 }} // namespace dynd::nd
 
