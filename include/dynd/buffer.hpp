@@ -83,7 +83,7 @@ struct is_aux_buffer_type {
 
 template <typename T>
 struct is_aux_buffer_arg_type {
-    // static_assert if T is anything else involving aux_buffer
+    // DYND_STATIC_ASSERT if T is anything else involving aux_buffer
     static const bool value = false;
 };
 
@@ -114,7 +114,7 @@ struct is_thread_aux_buffer_type {
 
 template <typename T>
 struct is_thread_aux_buffer_arg_type {
-    // static_assert if T is anything else involving aux_buffer
+    // DYND_STATIC_ASSERT if T is anything else involving aux_buffer
     static const bool value = false;
 };
 
@@ -138,7 +138,7 @@ struct is_thread_aux_buffer_arg_type<const T &> {
     static const bool value = is_thread_aux_buffer_type<T>::value;
 };
 
-//         static_assert(!inspect_buffered<void (*) (R &, DYND_PP_FLATTEN(DYND_PP_POP(TYPES)))>::is_thread_local, "error");
+//         DYND_STATIC_ASSERT(!inspect_buffered<void (*) (R &, DYND_PP_FLATTEN(DYND_PP_POP(TYPES)))>::is_thread_local, "error");
 
 } // namespace dynd::detail
 
@@ -158,7 +158,7 @@ protected:
     typedef typename remove_all_pointers<typename std::decay<T>::type>::type D;
 public:
     static const bool value = is_aux_buffer_type<D>::value;
-    static_assert(!value || (value && std::tr1::is_pointer<T>::value
+    DYND_STATIC_ASSERT(!value || (value && std::tr1::is_pointer<T>::value
         && !std::tr1::is_pointer<typename std::tr1::remove_pointer<T>::type>::value),
         "aux_buffer, or a subclass of it, must be passed as a pointer");
 };
@@ -169,7 +169,7 @@ protected:
     typedef typename remove_all_pointers<typename std::decay<T>::type>::type D;
 public:
     static const bool value = is_thread_aux_buffer_type<D>::value;
-    static_assert(!value || (value && std::tr1::is_pointer<T>::value
+    DYND_STATIC_ASSERT(!value || (value && std::tr1::is_pointer<T>::value
         && !std::tr1::is_pointer<typename std::tr1::remove_pointer<T>::type>::value),
         "thread_aux_buffer, or a subclass of it, must be passed as a pointer");
 };
@@ -211,9 +211,9 @@ struct assert_buffered_args<R (A0, A1)> {
         static const bool value = detail::assert_aux_buffer_arg_type<A1>::value ||
             (is_thread_aux_buffered::value && detail::assert_aux_buffer_arg_type<A0>::value);
     };
-    static_assert(!detail::assert_thread_aux_buffer_arg_type<A0>::value,
+    DYND_STATIC_ASSERT(!detail::assert_thread_aux_buffer_arg_type<A0>::value,
         DYND_THREAD_AUX_BUFFER_MESSAGE);
-    static_assert(is_thread_aux_buffered::value || !detail::assert_aux_buffer_arg_type<A0>::value,
+    DYND_STATIC_ASSERT(is_thread_aux_buffered::value || !detail::assert_aux_buffer_arg_type<A0>::value,
         DYND_AUX_BUFFER_MESSAGE);
 };
 
@@ -233,14 +233,14 @@ struct assert_buffered_args<R (A0, A1)> {
             static const bool value = DYND_PP_LAST(ASSERT_AUX_BUFFER_ARG_BASES)::value || \
                 (is_thread_aux_buffered::value && DYND_PP_LAST(DYND_PP_POP(ASSERT_AUX_BUFFER_ARG_BASES))::value); \
         }; \
-        static_assert(!DYND_PP_JOIN_ELWISE_1(DYND_PP_META_SCOPE, (||), \
+        DYND_STATIC_ASSERT(!DYND_PP_JOIN_ELWISE_1(DYND_PP_META_SCOPE, (||), \
             DYND_PP_POP(ASSERT_THREAD_AUX_BUFFER_ARG_BASES), DYND_PP_REPEAT_1(value, DYND_PP_DEC(N))), \
             DYND_THREAD_AUX_BUFFER_MESSAGE); \
-        static_assert(!(is_thread_aux_buffered::value && \
+        DYND_STATIC_ASSERT(!(is_thread_aux_buffered::value && \
             (DYND_PP_JOIN_ELWISE_1(DYND_PP_META_SCOPE, (||), \
                 DYND_PP_POP(DYND_PP_POP(ASSERT_AUX_BUFFER_ARG_BASES)), DYND_PP_REPEAT_1(value, DYND_PP_DEC(DYND_PP_DEC(N)))))), \
             DYND_AUX_BUFFER_MESSAGE); \
-        static_assert(!(!is_thread_aux_buffered::value && \
+        DYND_STATIC_ASSERT(!(!is_thread_aux_buffered::value && \
             (DYND_PP_JOIN_ELWISE_1(DYND_PP_META_SCOPE, (||), \
                 DYND_PP_POP(ASSERT_AUX_BUFFER_ARG_BASES), DYND_PP_REPEAT_1(value, DYND_PP_DEC(N))))), \
             DYND_AUX_BUFFER_MESSAGE); \
