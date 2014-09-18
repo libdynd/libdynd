@@ -15,17 +15,34 @@
 #include <dynd/pp/arrfunc_util.hpp>
 #include <dynd/pp/meta.hpp>
 #include <iostream>
-
-template<typename testType>
-struct is_function_pointer
-{
-    static const bool value =
-        std::tr1::is_pointer<testType>::value ?
-        std::tr1::is_function<typename std::tr1::remove_pointer<testType>::type>::value :
-        false;
-};
+#include <tr1/type_traits>
 
 namespace dynd { namespace nd { namespace detail {
+
+template <typename func_type, typename funcproto_type>
+class func_wrapper;
+
+#define FUNC_WRAPPER(N) \
+  template <typename func_type, typename R, DYND_PP_JOIN_MAP_1(DYND_PP_META_TYPENAME, (,), DYND_PP_META_NAME_RANGE(A, N))> \
+  class func_wrapper<func_type, R DYND_PP_META_NAME_RANGE(A, N)> { \
+    char m_func[sizeof(func_type)]; \
+\
+  public: \
+    func_wrapper() { \
+    } \
+\
+    func_wrapper(func_type func) { \
+        *reinterpret_cast<func_type *>(m_func) = func; \
+    } \
+\
+    R operator() DYND_PP_ELWISE_1(DYND_PP_META_DECL, DYND_PP_META_NAME_RANGE(A, N), DYND_PP_META_NAME_RANGE(a, N)) { \
+      return (*reinterpret_cast<func_type *>(m_func))DYND_PP_META_NAME_RANGE(a, N); \
+    } \
+  };
+
+DYND_PP_JOIN_MAP(FUNC_WRAPPER, (), DYND_PP_RANGE(1, DYND_PP_INC(DYND_SRC_MAX)))
+
+#undef FUNC_WRAPPER
 
 template <typename mem_func_type>
 class mem_func_wrapper;
@@ -39,7 +56,10 @@ class mem_func_wrapper;
     mem_func_type m_mem_func; \
 \
   public: \
-    mem_func_wrapper(T obj, mem_func_type mem_func) : m_obj(obj), m_mem_func(mem_func) { \
+    mem_func_wrapper() : m_obj(NULL), m_mem_func(NULL) { \
+    } \
+\
+    mem_func_wrapper(const T &obj, mem_func_type mem_func) : m_obj(obj), m_mem_func(mem_func) { \
     } \
 \
     R operator() DYND_PP_ELWISE_1(DYND_PP_META_DECL, DYND_PP_META_NAME_RANGE(A, N), DYND_PP_META_NAME_RANGE(a, N)) { \
@@ -51,58 +71,70 @@ DYND_PP_JOIN_MAP(MEM_FUNC_WRAPPER, (), DYND_PP_RANGE(1, DYND_PP_INC(DYND_SRC_MAX
 
 #undef MEM_FUNC_WRAPPER
 
-template <typename func_type, bool func_pointer>
+template <typename func_type, bool func_or_func_pointer>
 struct functor_arrfunc_from;
 
-template <typename func_type>
-struct functor_arrfunc_from<func_type, true> {
-  static void make(func_type func, arrfunc_type_data *out_af) {
-    out_af->func_proto = ndt::make_funcproto<func_type>();
-    *out_af->get_data_as<func_type>() = func;
-    out_af->instantiate = &dynd::nd::functor_ckernel<func_type>::instantiate;
-    out_af->free_func = NULL;
-  }
+template <typename funcproto_type>
+struct functor_arrfunc_from<funcproto_type *, true> {
+    typedef funcproto_type *func_type;
+
+    static void make(func_type func, arrfunc_type_data *out_af) {
+        out_af->func_proto = ndt::make_funcproto<funcproto_type>();
+        *out_af->get_data_as<func_type>() = func;
+        out_af->instantiate = &nd::functor_ck<func_type, funcproto_type>::instantiate;
+        out_af->free_func = NULL;
+    }
 };
 
-template <typename T>
-struct functor_arrfunc_from<T, false> {
-  template <typename func_type>
-  static void make(T func, func_type, arrfunc_type_data *out_af) {
-    typedef typename func_like<func_type>::type funcproto_type;
-    out_af->func_proto = ndt::make_funcproto<funcproto_type>();
-    *out_af->get_data_as<T>() = func;
-    out_af->instantiate = &dynd::nd::functor_ckernel<T, funcproto_type>::instantiate;
-    out_af->free_func = NULL;
-  }
+template <typename funcproto_type>
+struct functor_arrfunc_from<funcproto_type, true> {
+    static void make(funcproto_type func, arrfunc_type_data *out_af) {
+        functor_arrfunc_from<funcproto_type *, true>::make(&func, out_af);
+    }
+};
 
-  static void make(T func, arrfunc_type_data *out_af) {
-    make(func, &T::operator(), out_af);
-  }
+template <typename obj_type>
+struct functor_arrfunc_from<obj_type, false> {
+    static void make(obj_type obj, arrfunc_type_data *out_af) {
+        make(obj, &obj_type::operator(), out_af);
+    }
+
+    template <typename func_type>
+    static void make(obj_type obj, func_type, arrfunc_type_data *out_af) {
+        typedef typename func_like<func_type>::type funcproto_type;
+        typedef func_wrapper<obj_type, funcproto_type> wrapper_type;
+
+        out_af->func_proto = ndt::make_funcproto<funcproto_type>();
+        *out_af->get_data_as<wrapper_type>() = wrapper_type(obj);
+        out_af->instantiate = &nd::functor_ck<wrapper_type, funcproto_type>::instantiate;
+        out_af->free_func = NULL;
+    }
 };
 
 } // namespace detail
 
 template <typename func_type>
 void make_functor_arrfunc(func_type func, arrfunc_type_data *out_af) {
-  detail::functor_arrfunc_from<func_type, is_function_pointer<func_type>::value>::make(func, out_af);
+    detail::functor_arrfunc_from<func_type,
+        std::tr1::is_function<func_type>::value || is_function_pointer<func_type>::value>::make(func, out_af);
 }
 
-template <typename T, typename mem_func_type>
-void make_functor_arrfunc(T obj, mem_func_type mem_func, arrfunc_type_data *out_af) {
-  make_functor_arrfunc(detail::mem_func_wrapper<mem_func_type>(obj, mem_func), out_af);
+template <typename obj_type, typename mem_func_type>
+void make_functor_arrfunc(obj_type obj, mem_func_type mem_func, arrfunc_type_data *out_af) {
+    make_functor_arrfunc(detail::mem_func_wrapper<mem_func_type>(obj, mem_func), out_af);
 }
 
 template <typename func_type>
-nd::arrfunc make_functor_arrfunc(func_type func) {
-  nd::array af = nd::empty(ndt::make_arrfunc());
-  make_functor_arrfunc(func, reinterpret_cast<arrfunc_type_data *>(af.get_readwrite_originptr()));
-  af.flag_as_immutable();
-  return af;
+arrfunc make_functor_arrfunc(func_type func) {
+    array af = empty(ndt::make_arrfunc());
+    make_functor_arrfunc(func, reinterpret_cast<arrfunc_type_data *>(af.get_readwrite_originptr()));
+    af.flag_as_immutable();
+    return af;
 }
 
-template <typename T, typename mem_func_type>
-nd::arrfunc make_functor_arrfunc(T obj, mem_func_type mem_func) {
-  return make_functor_arrfunc(detail::mem_func_wrapper<mem_func_type>(obj, mem_func));
+template <typename obj_type, typename mem_func_type>
+arrfunc make_functor_arrfunc(obj_type obj, mem_func_type mem_func) {
+    return make_functor_arrfunc(detail::mem_func_wrapper<mem_func_type>(obj, mem_func));
 }
 
 }} // namespace dynd::nd

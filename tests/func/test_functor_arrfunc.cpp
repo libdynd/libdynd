@@ -581,6 +581,10 @@ public:
     R meth(A0 a0, A1 a1) {
         return (*m_func)(a0, a1);
     }
+    void help() const {
+        std::cout << "help" << std::endl;
+    }
+
 };
 template <typename R, typename A0>
 class FuncWrapper<void (*)(R &, A0)> {
@@ -615,7 +619,8 @@ TYPED_TEST_P(FunctorArrfunc_MethRetRes, MethRetRes) {
     a = static_cast<TypeParam>(10);
     b = static_cast<TypeParam>(20);
 
-    af = nd::make_functor_arrfunc(FuncWrapper0(&func0), &FuncWrapper0::meth);
+    FuncWrapper0 wrapper(&func0);
+    af = nd::make_functor_arrfunc(wrapper, &FuncWrapper0::meth);
     res = af(a, b);
     EXPECT_EQ(-20, res.as<int>());
 

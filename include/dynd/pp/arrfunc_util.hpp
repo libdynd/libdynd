@@ -87,7 +87,7 @@
                                      DYND_PP_META_NAME_RANGE(TYPE, N)),        \
                        DYND_PP_META_AT_RANGE(ARG_NAME, N)))
 
-#define DYND_PP_DECL_HELPER(TYPE, NAME) val_helper<TYPE> DYND_PP_CAT((NAME, _helper))
+#define DYND_PP_DECL_HELPER(TYPE, NAME) from_bytes<TYPE> DYND_PP_CAT((NAME, _helper))
 #define DYND_PP_DECL_HELPERS(TYPE, ARG_NAME, N)                                \
     DYND_PP_JOIN_1((;),                                                        \
         DYND_PP_ELWISE_1(DYND_PP_DECL_HELPER,                                  \
@@ -174,7 +174,7 @@
         DYND_PP_MAP_1(DYND_PP_SRC_HELPER_VAR, DYND_PP_META_NAME_RANGE(src, N)),\
         DYND_PP_RANGE(N));
 
-#define DYND_PP_SRC_HELPER_MAKE(NAME, ARG_NAME) DYND_PP_SRC_HELPER_VAR(NAME).make(ARG_NAME)
+#define DYND_PP_SRC_HELPER_MAKE(NAME, ARG_NAME) DYND_PP_SRC_HELPER_VAR(NAME).val(ARG_NAME)
 
 /**
  * For generating ckernel function calls, passes each ``ARG_NAME[#]`` input to
