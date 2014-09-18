@@ -139,7 +139,6 @@ list(GET DYND_VERSION 0 "${DYND_VERSION}")
 set(libdynd_SRC
     # Preprocessor
     include/dynd/pp/arithmetic.hpp
-    include/dynd/pp/arrfunc_util.hpp
     include/dynd/pp/comparison.hpp
     include/dynd/pp/if.hpp
     include/dynd/pp/list.hpp
@@ -406,6 +405,7 @@ set(libdynd_SRC
     include/dynd/kernels/expr_kernel_generator.hpp
     include/dynd/kernels/expression_assignment_kernels.hpp
     include/dynd/kernels/expression_comparison_kernels.hpp
+	include/dynd/kernels/functor_kernels.hpp
     include/dynd/kernels/make_lifted_ckernel.hpp
     include/dynd/kernels/make_lifted_reduction_ckernel.hpp
     include/dynd/kernels/option_assignment_kernels.hpp
@@ -486,6 +486,7 @@ set(libdynd_SRC
     include/dynd/ensure_immutable_contig.hpp
     include/dynd/random.hpp
     include/dynd/fft.hpp
+	include/dynd/funcproto.hpp
     include/dynd/type.hpp
     include/dynd/typed_data_assign.hpp
     include/dynd/type_promotion.hpp

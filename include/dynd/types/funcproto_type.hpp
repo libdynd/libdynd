@@ -11,6 +11,7 @@
 
 #include <dynd/array.hpp>
 #include <dynd/buffer.hpp>
+#include <dynd/funcproto.hpp>
 #include <dynd/pp/meta.hpp>
 #include <dynd/types/strided_dim_type.hpp>
 
@@ -121,10 +122,10 @@ namespace detail {
 #define MAKE_TYPE(TYPENAME) make_type<TYPENAME>()
 
 template<typename T, bool aux_buffered, bool thread_aux_buffered>
-struct funcproto_from;
+struct funcproto_type_from;
 
 template<typename R>
-struct funcproto_from<R (), false, false> {
+struct funcproto_type_from<R (), false, false> {
     static inline ndt::type make() {
         intptr_t zero = 0;
         nd::array param_types = nd::typed_empty(1, &zero, ndt::make_strided_of_type());
@@ -133,9 +134,9 @@ struct funcproto_from<R (), false, false> {
     }
 };
 
-#define FUNCPROTO_FROM(N) \
+#define FUNCPROTO_TYPE_FROM(N) \
     template <typename R, DYND_PP_JOIN_MAP_1(DYND_PP_META_TYPENAME, (,), DYND_PP_META_NAME_RANGE(A, N))> \
-    struct funcproto_from<R DYND_PP_META_NAME_RANGE(A, N), false, false> { \
+    struct funcproto_type_from<R DYND_PP_META_NAME_RANGE(A, N), false, false> { \
     private: \
         DYND_PP_JOIN_ELWISE_1(DYND_PP_META_TYPEDEF_TYPENAME, (;), \
             DYND_PP_MAP_1(PARTIAL_DECAY, DYND_PP_META_NAME_RANGE(A, N)), DYND_PP_META_NAME_RANGE(D, N)); \
@@ -146,12 +147,12 @@ struct funcproto_from<R (), false, false> {
         } \
     };
 
-DYND_PP_JOIN_MAP(FUNCPROTO_FROM, (), DYND_PP_RANGE(1, DYND_PP_INC(DYND_ARG_MAX)))
+DYND_PP_JOIN_MAP(FUNCPROTO_TYPE_FROM, (), DYND_PP_RANGE(1, DYND_PP_INC(DYND_ARG_MAX)))
 
-#undef FUNCPROTO_FROM
+#undef FUNCPROTO_TYPE_FROM
 
 template<typename R>
-struct funcproto_from<void (R &), false, false> {
+struct funcproto_type_from<void (R &), false, false> {
     static inline ndt::type make() {
         intptr_t zero = 0;
         nd::array param_types = nd::typed_empty(1, &zero, ndt::make_strided_of_type());
@@ -160,9 +161,9 @@ struct funcproto_from<void (R &), false, false> {
     }
 };
 
-#define FUNCPROTO_FROM(N) \
+#define FUNCPROTO_TYPE_FROM(N) \
     template <typename R, DYND_PP_JOIN_MAP_1(DYND_PP_META_TYPENAME, (,), DYND_PP_META_NAME_RANGE(A, N))> \
-    struct funcproto_from<void DYND_PP_PREPEND(R &, DYND_PP_META_NAME_RANGE(A, N)), false, false> { \
+    struct funcproto_type_from<void DYND_PP_PREPEND(R &, DYND_PP_META_NAME_RANGE(A, N)), false, false> { \
     private: \
         DYND_PP_JOIN_ELWISE_1(DYND_PP_META_TYPEDEF_TYPENAME, (;), \
             DYND_PP_MAP_1(PARTIAL_DECAY, DYND_PP_META_NAME_RANGE(A, N)), DYND_PP_META_NAME_RANGE(D, N)); \
@@ -173,34 +174,34 @@ struct funcproto_from<void (R &), false, false> {
         } \
     };
 
-DYND_PP_JOIN_MAP(FUNCPROTO_FROM, (), DYND_PP_RANGE(1, DYND_PP_INC(DYND_ARG_MAX)))
+DYND_PP_JOIN_MAP(FUNCPROTO_TYPE_FROM, (), DYND_PP_RANGE(1, DYND_PP_INC(DYND_ARG_MAX)))
 
-#undef FUNCPROTO_FROM
+#undef FUNCPROTO_TYPE_FROM
 
 template <typename R, typename A0>
-struct funcproto_from<R (A0), true, false>
-  : funcproto_from<R (), false, false> {
+struct funcproto_type_from<R (A0), true, false>
+  : funcproto_type_from<R (), false, false> {
 };
 
 template <typename R, typename A0>
-struct funcproto_from<R (A0), false, true>
-  : funcproto_from<R (), false, false> {
+struct funcproto_type_from<R (A0), false, true>
+  : funcproto_type_from<R (), false, false> {
 };
 
-#define FUNCPROTO_FROM(N) \
+#define FUNCPROTO_TYPE_FROM(N) \
     template <typename R, DYND_PP_JOIN_MAP_1(DYND_PP_META_TYPENAME, (,), DYND_PP_META_NAME_RANGE(A, N))> \
-    struct funcproto_from<R DYND_PP_META_NAME_RANGE(A, N), true, false> \
-      : funcproto_from<R DYND_PP_META_NAME_RANGE(A, DYND_PP_DEC(N)), false, false> { \
+    struct funcproto_type_from<R DYND_PP_META_NAME_RANGE(A, N), true, false> \
+      : funcproto_type_from<R DYND_PP_META_NAME_RANGE(A, DYND_PP_DEC(N)), false, false> { \
     }; \
 \
     template <typename R, DYND_PP_JOIN_MAP_1(DYND_PP_META_TYPENAME, (,), DYND_PP_META_NAME_RANGE(A, N))> \
-    struct funcproto_from<R DYND_PP_META_NAME_RANGE(A, N), false, true> \
-      : funcproto_from<R DYND_PP_META_NAME_RANGE(A, DYND_PP_DEC(N)), false, false> { \
+    struct funcproto_type_from<R DYND_PP_META_NAME_RANGE(A, N), false, true> \
+      : funcproto_type_from<R DYND_PP_META_NAME_RANGE(A, DYND_PP_DEC(N)), false, false> { \
     };
 
-DYND_PP_JOIN_MAP(FUNCPROTO_FROM, (), DYND_PP_RANGE(2, DYND_PP_INC(DYND_ARG_MAX)))
+DYND_PP_JOIN_MAP(FUNCPROTO_TYPE_FROM, (), DYND_PP_RANGE(2, DYND_PP_INC(DYND_ARG_MAX)))
 
-#undef FUNCPROTO_FROM
+#undef FUNCPROTO_TYPE_FROM
 
 #undef PARTIAL_DECAY
 #undef MAKE_TYPE
@@ -209,9 +210,9 @@ DYND_PP_JOIN_MAP(FUNCPROTO_FROM, (), DYND_PP_RANGE(2, DYND_PP_INC(DYND_ARG_MAX))
 
 template <typename func_type>
 inline ndt::type make_funcproto() {
-    typedef typename func_like<func_type>::type funcproto_type;
+    typedef typename funcproto_from<func_type>::type funcproto_type;
 
-    return detail::funcproto_from<funcproto_type,
+    return detail::funcproto_type_from<funcproto_type,
         is_aux_buffered<funcproto_type>::value, is_thread_aux_buffered<funcproto_type>::value>::make();
 }
 

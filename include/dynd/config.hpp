@@ -290,6 +290,16 @@ struct is_function_pointer {
         std::is_function<typename std::remove_pointer<T>::type>::value : false;
 };
 
+template <typename T>
+struct remove_all_pointers {
+    typedef T type;
+};
+
+template <typename T>
+struct remove_all_pointers<T *> {
+    typedef typename remove_all_pointers<typename std::remove_cv<T>::type>::type type;
+};
+
 } // namespace dynd
 
 

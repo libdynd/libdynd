@@ -111,7 +111,7 @@ struct functor_arrfunc_from<obj_type, false> {
 
     template <typename func_type>
     static void make(obj_type &obj, func_type, arrfunc_type_data *out_af) {
-        typedef typename func_like<func_type>::type funcproto_type;
+        typedef typename funcproto_from<func_type>::type funcproto_type;
         typedef func_wrapper<obj_type, funcproto_type> wrapper_type;
 
         out_af->func_proto = ndt::make_funcproto<funcproto_type>();
