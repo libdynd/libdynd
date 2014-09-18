@@ -25,6 +25,7 @@ class func_wrapper;
 #define FUNC_WRAPPER(N) \
   template <typename func_type, typename R, DYND_PP_JOIN_MAP_1(DYND_PP_META_TYPENAME, (,), DYND_PP_META_NAME_RANGE(A, N))> \
   class func_wrapper<func_type, R DYND_PP_META_NAME_RANGE(A, N)> { \
+    char m_buffer[sizeof(func_type)]; \
     func_type *m_func; \
 \
   public: \
@@ -32,19 +33,13 @@ class func_wrapper;
     } \
 \
     func_wrapper(const func_wrapper &other) { \
-        m_func = reinterpret_cast<func_type *>(malloc(sizeof(func_type))); \
+        m_func = reinterpret_cast<func_type *>(static_cast<void *>(m_buffer)); \
         DYND_MEMCPY(m_func, other.m_func, sizeof(func_type)); \
     } \
 \
-    func_wrapper(func_type func) { \
-        m_func = reinterpret_cast<func_type *>(malloc(sizeof(func_type))); \
+    func_wrapper(func_type &func) { \
+        m_func = reinterpret_cast<func_type *>(static_cast<void *>(m_buffer)); \
         DYND_MEMCPY(m_func, &func, sizeof(func_type)); \
-    } \
-\
-    ~func_wrapper() { \
-        if (m_func != NULL) { \
-            free(m_func); \
-        } \
     } \
 \
     R operator() DYND_PP_ELWISE_1(DYND_PP_META_DECL, DYND_PP_META_NAME_RANGE(A, N), DYND_PP_META_NAME_RANGE(a, N)) { \
@@ -56,7 +51,7 @@ class func_wrapper;
             return *this; \
         } \
 \
-        m_func = reinterpret_cast<func_type *>(malloc(sizeof(func_type))); \
+        m_func = reinterpret_cast<func_type *>(static_cast<void *>(m_buffer)); \
         DYND_MEMCPY(m_func, other.m_func, sizeof(func_type)); \
         return *this; \
     } \
@@ -122,7 +117,7 @@ struct functor_arrfunc_from<obj_type, false> {
     }
 
     template <typename func_type>
-    static void make(obj_type obj, func_type, arrfunc_type_data *out_af) {
+    static void make(obj_type &obj, func_type, arrfunc_type_data *out_af) {
         typedef typename func_like<func_type>::type funcproto_type;
         typedef func_wrapper<obj_type, funcproto_type> wrapper_type;
 
