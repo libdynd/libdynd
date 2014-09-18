@@ -126,7 +126,7 @@ struct functor_arrfunc_from<obj_type, false> {
 template <typename func_type>
 void make_functor_arrfunc(func_type func, arrfunc_type_data *out_af) {
     detail::functor_arrfunc_from<func_type,
-        std::tr1::is_function<func_type>::value || is_function_pointer<func_type>::value>::make(func, out_af);
+        std::is_function<func_type>::value || is_function_pointer<func_type>::value>::make(func, out_af);
 }
 
 template <typename obj_type, typename mem_func_type>
