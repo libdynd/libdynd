@@ -14,6 +14,7 @@
 #include <dynd/array.hpp>
 #include <dynd/func/functor_arrfunc.hpp>
 #include <dynd/func/lift_arrfunc.hpp>
+#include <dynd/types/cfixed_dim_type.hpp>
 
 using namespace std;
 using namespace dynd;
@@ -619,8 +620,7 @@ TYPED_TEST_P(FunctorArrfunc_MethRetRes, MethRetRes) {
     a = static_cast<TypeParam>(10);
     b = static_cast<TypeParam>(20);
 
-    FuncWrapper0 wrapper(&func0);
-    af = nd::make_functor_arrfunc(wrapper, &FuncWrapper0::meth);
+    af = nd::make_functor_arrfunc(FuncWrapper0(&func0), &FuncWrapper0::meth);
     res = af(a, b);
     EXPECT_EQ(-20, res.as<int>());
 

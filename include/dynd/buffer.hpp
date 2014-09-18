@@ -7,7 +7,6 @@
 #define _DYND__BUFFER_HPP_
 
 #define DYND_PP_POP(A) DYND_PP_DEL(DYND_PP_DEC(DYND_PP_LEN(A)), A)
-#define DYND_PP_META_VIRTUAL(NAME) virtual NAME
 
 #include <dynd/config.hpp>
 #include <dynd/pp/list.hpp>

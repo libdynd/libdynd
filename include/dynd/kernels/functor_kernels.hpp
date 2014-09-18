@@ -12,9 +12,6 @@
 #include <dynd/pp/meta.hpp>
 #include <dynd/types/funcproto_type.hpp>
 
-#include <dynd/pp/arrfunc_util.hpp> // Delete this
-#include <dynd/types/cfixed_dim_type.hpp> // Delete this
-
 namespace dynd { namespace nd { namespace detail {
 
 template <typename T>
@@ -53,10 +50,9 @@ public:
     }
 };
 
-
 #define DECL_FROM_BYTES(TYPENAME, NAME) DYND_PP_META_DECL(from_bytes<TYPENAME>, NAME)
 #define INIT_FROM_BYTES(NAME, TP, ARRMETA) NAME.init(TP, ARRMETA)
-#define PARTIAL_DECAY(TYPENAME) std::remove_const<typename std::remove_reference<TYPENAME>::type>::type
+#define PARTIAL_DECAY(TYPENAME) std::remove_cv<typename std::remove_reference<TYPENAME>::type>::type
 #define PASS(NAME, ARG) NAME.val(ARG)
 
 template <typename func_type, typename funcproto_type, bool aux_buffered, bool thread_aux_buffered>
