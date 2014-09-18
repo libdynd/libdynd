@@ -243,19 +243,25 @@ inline void DYND_MEMCPY(char *dst, const char *src, intptr_t count)
 #include <tr1/type_traits>
 
 namespace std {
- template<bool _Cond, typename _Iftrue, typename _Iffalse>
-    struct conditional
-    { typedef _Iftrue type; };
+    using std::tr1::is_base_of;
+}
 
-  template<typename _Iftrue, typename _Iffalse>
-    struct conditional<false, _Iftrue, _Iffalse>
-    { typedef _Iffalse type; };
+namespace std {
+
+template<bool _Cond, typename _Iftrue, typename _Iffalse>
+struct conditional {
+    typedef _Iftrue type;
+};
+
+template<typename _Iftrue, typename _Iffalse>
+struct conditional<false, _Iftrue, _Iffalse> {
+    typedef _Iffalse type;
+};
 
 template< class T >
 struct decay {
     typedef typename std::tr1::remove_reference<T>::type U;
-    typedef typename conditional< 
-        std::tr1::is_array<U>::value,
+    typedef typename conditional<std::tr1::is_array<U>::value,
         typename std::tr1::remove_extent<U>::type*,
         typename conditional< 
             std::tr1::is_function<U>::value,
@@ -264,7 +270,8 @@ struct decay {
         >::type
     >::type type;
 };
-}
+
+} // namespace std
 
 #else
 

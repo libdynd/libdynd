@@ -52,7 +52,7 @@ namespace detail {
 
 template <typename T>
 struct is_aux_buffer_type {
-    static const bool value = std::tr1::is_base_of<aux_buffer, T>::value;
+    static const bool value = std::is_base_of<aux_buffer, T>::value;
 };
 
 template <typename T>
