@@ -19,32 +19,46 @@
 
 namespace dynd { namespace nd { namespace detail {
 
-//      return (*((func_type *) m_func))DYND_PP_META_NAME_RANGE(a, N); 
-
-
 template <typename func_type, typename funcproto_type>
 class func_wrapper;
 
 #define FUNC_WRAPPER(N) \
   template <typename func_type, typename R, DYND_PP_JOIN_MAP_1(DYND_PP_META_TYPENAME, (,), DYND_PP_META_NAME_RANGE(A, N))> \
   class func_wrapper<func_type, R DYND_PP_META_NAME_RANGE(A, N)> { \
-    union U { \
-        char bytes[sizeof(func_type)]; \
-        func_type func; \
-\
-        U() { memset( this, 0, sizeof( U ) ); } \
-    } m_func; \
+    func_type *m_func; \
 \
   public: \
-    func_wrapper() { \
+    func_wrapper() : m_func(NULL) { \
+    } \
+\
+    func_wrapper(const func_wrapper &other) { \
+        m_func = reinterpret_cast<func_type *>(malloc(sizeof(func_type))); \
+        DYND_MEMCPY(m_func, other.m_func, sizeof(func_type)); \
     } \
 \
     func_wrapper(func_type func) { \
-        m_func.func = func; \
+        m_func = reinterpret_cast<func_type *>(malloc(sizeof(func_type))); \
+        DYND_MEMCPY(m_func, &func, sizeof(func_type)); \
+    } \
+\
+    ~func_wrapper() { \
+        if (m_func != NULL) { \
+            free(m_func); \
+        } \
     } \
 \
     R operator() DYND_PP_ELWISE_1(DYND_PP_META_DECL, DYND_PP_META_NAME_RANGE(A, N), DYND_PP_META_NAME_RANGE(a, N)) { \
-        return m_func.func DYND_PP_META_NAME_RANGE(a, N); \
+        return (*m_func) DYND_PP_META_NAME_RANGE(a, N); \
+    } \
+\
+    func_wrapper &operator =(const func_wrapper &other) { \
+        if(this == &other) { \
+            return *this; \
+        } \
+\
+        m_func = reinterpret_cast<func_type *>(malloc(sizeof(func_type))); \
+        DYND_MEMCPY(m_func, other.m_func, sizeof(func_type)); \
+        return *this; \
     } \
   };
 
