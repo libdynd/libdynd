@@ -83,7 +83,7 @@ struct is_aux_buffer_arg_type<const T &> {
 
 template <typename T>
 struct is_thread_aux_buffer_type {
-    static const bool value = std::tr1::is_base_of<thread_aux_buffer, T>::value;
+    static const bool value = std::is_base_of<thread_aux_buffer, T>::value;
 };
 
 template <typename T>
@@ -132,8 +132,8 @@ protected:
     typedef typename remove_all_pointers<typename std::decay<T>::type>::type D;
 public:
     static const bool value = is_aux_buffer_type<D>::value;
-    DYND_STATIC_ASSERT2(!value || (value && std::tr1::is_pointer<T>::value
-        && !std::tr1::is_pointer<typename std::tr1::remove_pointer<T>::type>::value),
+    DYND_STATIC_ASSERT2(!value || (value && std::is_pointer<T>::value
+        && !std::is_pointer<typename std::remove_pointer<T>::type>::value),
         "aux_buffer, or a subclass of it, must be passed as a pointer");
 };
 
@@ -143,8 +143,8 @@ protected:
     typedef typename remove_all_pointers<typename std::decay<T>::type>::type D;
 public:
     static const bool value = is_thread_aux_buffer_type<D>::value;
-    DYND_STATIC_ASSERT2(!value || (value && std::tr1::is_pointer<T>::value
-        && !std::tr1::is_pointer<typename std::tr1::remove_pointer<T>::type>::value),
+    DYND_STATIC_ASSERT2(!value || (value && std::is_pointer<T>::value
+        && !std::is_pointer<typename std::remove_pointer<T>::type>::value),
         "thread_aux_buffer, or a subclass of it, must be passed as a pointer");
 };
 

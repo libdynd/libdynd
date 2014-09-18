@@ -245,10 +245,16 @@ inline void DYND_MEMCPY(char *dst, const char *src, intptr_t count)
 #include <tr1/type_traits>
 
 namespace std {
-    using std::tr1::is_base_of;
-}
 
-namespace std {
+using std::tr1::add_pointer;
+using std::tr1::is_array;
+using std::tr1::is_base_of;
+using std::tr1::is_function;
+using std::tr1::is_pointer;
+using std::tr1::remove_cv;
+using std::tr1::remove_extent;
+using std::tr1::remove_reference;
+using std::tr1::remove_pointer;
 
 template<bool _Cond, typename _Iftrue, typename _Iffalse>
 struct conditional {
@@ -262,13 +268,13 @@ struct conditional<false, _Iftrue, _Iffalse> {
 
 template< class T >
 struct decay {
-    typedef typename std::tr1::remove_reference<T>::type U;
-    typedef typename conditional<std::tr1::is_array<U>::value,
-        typename std::tr1::remove_extent<U>::type*,
+    typedef typename remove_reference<T>::type U;
+    typedef typename conditional<is_array<U>::value,
+        typename remove_extent<U>::type*,
         typename conditional< 
-            std::tr1::is_function<U>::value,
-            typename std::tr1::add_pointer<U>::type,
-            typename std::tr1::remove_cv<U>::type
+            is_function<U>::value,
+            typename add_pointer<U>::type,
+            typename remove_cv<U>::type
         >::type
     >::type type;
 };

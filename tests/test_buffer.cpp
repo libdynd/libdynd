@@ -48,15 +48,6 @@ TEST(Buffer, Simple) {
     nd::arrfunc af = nd::make_functor_arrfunc(func_with_aux);
     EXPECT_EQ(12, af(5, &aux).as<int>());
 
-#if __has_include(<type_traits>)
-    std::cout << "(DEBUG) has type_traits" << std::endl;
-#else
-#endif
-
-//#ifdef DYND_CXX_11
-  //  std::cout << "(DEBUG) CXX_11 " << __cplusplus << std::endl;
-//#endif
-
 /*
     af = nd::make_functor_arrfunc(func_with_thread_aux);
     EXPECT_EQ(14, af(5).as<int>());
