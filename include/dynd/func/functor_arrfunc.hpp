@@ -6,16 +6,9 @@
 #ifndef DYND__FUNC_FUNCTOR_ARRFUNC_HPP
 #define DYND__FUNC_FUNCTOR_ARRFUNC_HPP
 
-#include <dynd/buffer.hpp>
+#include <dynd/func/arrfunc.hpp>
 #include <dynd/kernels/functor_kernels.hpp>
 #include <dynd/types/funcproto_type.hpp>
-#include <dynd/types/cfixed_dim_type.hpp>
-#include <dynd/func/arrfunc.hpp>
-#include <dynd/func/make_callable.hpp>
-#include <dynd/pp/arrfunc_util.hpp>
-#include <dynd/pp/meta.hpp>
-#include <iostream>
-#include <tr1/type_traits>
 
 namespace dynd { namespace nd { namespace detail {
 

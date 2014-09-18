@@ -50,9 +50,9 @@
       DYND_PP_META_TYPEDEF_TYPENAME, (;),                                      \
       DYND_PP_ELWISE_1(                                                        \
           DYND_PP_META_TEMPLATE_INSTANTIATION_SCOPE,                           \
-          DYND_PP_REPEAT(remove_const, N),                                     \
+          DYND_PP_REPEAT(std::remove_const, N),                                     \
           DYND_PP_ELWISE_1(DYND_PP_META_TYPENAME_TEMPLATE_INSTANTIATION_SCOPE, \
-                           DYND_PP_REPEAT(remove_reference, N),       \
+                           DYND_PP_REPEAT(std::remove_reference, N),       \
                            DYND_PP_META_NAME_RANGE(TYPE, N),                   \
                            DYND_PP_REPEAT(type, N)),                           \
           DYND_PP_REPEAT(type, N)),                                            \

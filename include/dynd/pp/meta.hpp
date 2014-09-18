@@ -94,7 +94,7 @@
 #define DYND_PP_META_STD_DECAY(TYPENAME) std::decay<TYPENAME>::type
 
 #define DYND_PP_META_STD_REMOVE_CONST_AND_STD_REMOVE_REFERENCE(TYPENAME) \
-    remove_const<typename remove_reference<TYPENAME>::type>::type
+    std::remove_const<typename std::remove_reference<TYPENAME>::type>::type
 #define DYND_PP_META_PARTIAL_DECAY DYND_PP_META_STD_REMOVE_CONST_AND_STD_REMOVE_REFERENCE
 
 #endif

@@ -243,56 +243,60 @@ inline void DYND_MEMCPY(char *dst, const char *src, intptr_t count)
 #include <type_traits>
 #elif defined(DYND_CXX_TR1_TYPE_TRAITS)
 #include <tr1/type_traits>
-
 namespace std {
 
 using std::tr1::add_pointer;
 using std::tr1::is_array;
 using std::tr1::is_base_of;
+using std::tr1::is_const;
 using std::tr1::is_function;
 using std::tr1::is_pointer;
+using std::tr1::is_reference;
+using std::tr1::remove_const;
 using std::tr1::remove_cv;
 using std::tr1::remove_extent;
 using std::tr1::remove_reference;
 using std::tr1::remove_pointer;
 
-template<bool _Cond, typename _Iftrue, typename _Iffalse>
+template <bool B, typename T, typename F>
 struct conditional {
-    typedef _Iftrue type;
+    typedef T type;
 };
 
-template<typename _Iftrue, typename _Iffalse>
-struct conditional<false, _Iftrue, _Iffalse> {
-    typedef _Iffalse type;
+template <typename T, typename F>
+struct conditional<false, T, F> {
+    typedef F type;
 };
 
-template< class T >
+template <typename T>
 struct decay {
-    typedef typename remove_reference<T>::type U;
-    typedef typename conditional<is_array<U>::value,
-        typename remove_extent<U>::type*,
-        typename conditional< 
-            is_function<U>::value,
-            typename add_pointer<U>::type,
-            typename remove_cv<U>::type
-        >::type
-    >::type type;
+    typedef typename std::remove_reference<T>::type U;
+    typedef typename std::conditional<std::is_array<U>::value,
+        typename std::remove_extent<U>::type *,
+        typename std::conditional<std::is_function<U>::value,
+            typename std::add_pointer<U>::type,
+            typename std::remove_cv<U>::type>::type>::type type;
 };
 
 } // namespace std
-
-#else
-
 #endif
+
+// These are small templates 'missing' from the standard library
+namespace dynd {
+
+template <typename T>
+struct is_function_pointer {
+    static const bool value = std::is_pointer<T>::value ?
+        std::is_function<typename std::remove_pointer<T>::type>::value : false;
+};
+
+} // namespace dynd
+
 
 #ifdef DYND_USE_TR1_ENABLE_IF
 #include <type_traits>
 namespace dynd {
     using std::tr1::enable_if;
-    using std::tr1::is_const;
-    using std::tr1::remove_const;
-    using std::tr1::is_reference;
-    using std::tr1::remove_reference;
 }
 #else
 // These are small templates, so we just replicate them here
@@ -302,40 +306,6 @@ namespace dynd {
  
 	template<class T>
 	struct enable_if<true, T> { typedef T type; };
-
-    template<class T>
-    struct is_const { enum { value = 0 }; };
-
-    template<class T>
-    struct is_const<const T> { enum { value = 1 }; };
-
-    template<class T>
-    struct remove_const { typedef T type; };
-
-    template<class T>
-    struct remove_const<const T> { typedef T type; };
-
-    template<class T>
-    struct is_reference { enum { value = 0 }; };
-
-    template<class T>
-    struct is_reference<T&> { enum { value = 1 }; };
-
-#ifdef DYND_RVALUE_REFS
-    template<class T>
-    struct is_reference<T&&> { enum { value = 1 }; };
-#endif
-
-    template<class T>
-    struct remove_reference { typedef T type; };
-
-    template<class T>
-    struct remove_reference<T&> { typedef T type; };
-
-#ifdef DYND_RVALUE_REFS
-    template<class T>
-    struct remove_reference<T&&> { typedef T type; };
-#endif
 }
 #endif
 

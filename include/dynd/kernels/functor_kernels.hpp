@@ -7,24 +7,13 @@
 #define DYND__KERNELS_FUNCTOR_KERNELS_HPP
 
 #include <dynd/buffer.hpp>
-#include <dynd/types/funcproto_type.hpp>
-#include <dynd/types/cfixed_dim_type.hpp>
-#include <dynd/func/arrfunc.hpp>
-#include <dynd/func/make_callable.hpp>
-#include <dynd/pp/arrfunc_util.hpp>
-#include <iostream>
 #include <dynd/kernels/ckernel_common_functions.hpp>
 #include <dynd/kernels/expr_kernels.hpp>
-#include <tr1/type_traits>
+#include <dynd/pp/meta.hpp>
+#include <dynd/types/funcproto_type.hpp>
 
-template<typename testType>
-struct is_function_pointer
-{
-    static const bool value =
-        std::tr1::is_pointer<testType>::value ?
-        std::tr1::is_function<typename std::tr1::remove_pointer<testType>::type>::value :
-        false;
-};
+#include <dynd/pp/arrfunc_util.hpp> // Delete this
+#include <dynd/types/cfixed_dim_type.hpp> // Delete this
 
 namespace dynd { namespace nd { namespace detail {
 
@@ -71,7 +60,7 @@ public:
 
 #define DECL_FROM_BYTES(TYPENAME, NAME) DYND_PP_META_DECL(from_bytes<TYPENAME>, NAME)
 #define INIT_FROM_BYTES(NAME, TP, ARRMETA) NAME.init(TP, ARRMETA)
-#define PARTIAL_DECAY(TYPENAME) remove_const<typename remove_reference<TYPENAME>::type>::type
+#define PARTIAL_DECAY(TYPENAME) std::remove_const<typename std::remove_reference<TYPENAME>::type>::type
 #define PASS(NAME, ARG) NAME.val(ARG)
 
 #define OLDPASS(NAME0, NAME1) (e->NAME0).val(NAME1)
