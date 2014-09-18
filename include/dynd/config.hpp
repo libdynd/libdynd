@@ -15,7 +15,6 @@
 /** The number of elements to process at once when doing chunking/buffering */
 #define DYND_BUFFER_CHUNK_SIZE 128
 
-
 #ifdef __clang__
 // It appears that on OSX, one can have a configuration with
 // clang that supports rvalue references but no implementation
@@ -42,6 +41,12 @@
 
 #if __has_feature(cxx_lambdas)
 #  define DYND_CXX_LAMBDAS
+#endif
+
+#if __has_include(<type_traits>)
+#  define DYND_CXX_TYPE_TRAITS
+#elif __has_include(<tr1/type_traits>)
+#  define DYND_CXX_TR1_TYPE_TRAITS
 #endif
 
 #include <cmath>
@@ -230,6 +235,39 @@ inline void DYND_MEMCPY(char *dst, const char *src, intptr_t count)
 // This static_assert fails at compile-time when expected, but with a more general message
 #ifndef DYND_STATIC_ASSERT
 #define DYND_STATIC_ASSERT(value, message) do { enum { dynd_static_assertion = 1 / (int)(value) }; } while (0)
+#endif
+
+#if defined(DYND_CXX_TYPE_TRAITS)
+#include <type_traits>
+#elif defined(DYND_CXX_TR1_TYPE_TRAITS)
+#include <tr1/type_traits>
+
+namespace std {
+ template<bool _Cond, typename _Iftrue, typename _Iffalse>
+    struct conditional
+    { typedef _Iftrue type; };
+
+  template<typename _Iftrue, typename _Iffalse>
+    struct conditional<false, _Iftrue, _Iffalse>
+    { typedef _Iffalse type; };
+
+template< class T >
+struct decay {
+    typedef typename std::tr1::remove_reference<T>::type U;
+    typedef typename conditional< 
+        std::tr1::is_array<U>::value,
+        typename std::tr1::remove_extent<U>::type*,
+        typename conditional< 
+            std::tr1::is_function<U>::value,
+            typename std::tr1::add_pointer<U>::type,
+            typename std::tr1::remove_cv<U>::type
+        >::type
+    >::type type;
+};
+}
+
+#else
+
 #endif
 
 #ifdef DYND_USE_TR1_ENABLE_IF

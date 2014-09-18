@@ -9,39 +9,11 @@
 #define DYND_PP_POP(A) DYND_PP_DEL(DYND_PP_DEC(DYND_PP_LEN(A)), A)
 #define DYND_PP_META_VIRTUAL(NAME) virtual NAME
 
-#include <tr1/type_traits>
-
 #include <dynd/config.hpp>
 #include <dynd/pp/list.hpp>
 #include <dynd/pp/meta.hpp>
 
 #define DYND_STATIC_ASSERT2(X, Y)
-
-namespace std {
-
-
- template<bool _Cond, typename _Iftrue, typename _Iffalse>
-    struct conditional
-    { typedef _Iftrue type; };
-
-  template<typename _Iftrue, typename _Iffalse>
-    struct conditional<false, _Iftrue, _Iffalse>
-    { typedef _Iffalse type; };
-
-template< class T >
-struct decay {
-    typedef typename std::tr1::remove_reference<T>::type U;
-    typedef typename conditional< 
-        std::tr1::is_array<U>::value,
-        typename std::tr1::remove_extent<U>::type*,
-        typename conditional< 
-            std::tr1::is_function<U>::value,
-            typename std::tr1::add_pointer<U>::type,
-            typename std::tr1::remove_cv<U>::type
-        >::type
-    >::type type;
-};
-}
 
 namespace dynd {
 
