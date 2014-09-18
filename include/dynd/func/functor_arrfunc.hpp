@@ -32,11 +32,11 @@ class func_wrapper;
     } \
 \
     func_wrapper(func_type func) { \
-        *reinterpret_cast<func_type *>(m_func) = func; \
+        *((func_type *) m_func) = func; \
     } \
 \
     R operator() DYND_PP_ELWISE_1(DYND_PP_META_DECL, DYND_PP_META_NAME_RANGE(A, N), DYND_PP_META_NAME_RANGE(a, N)) { \
-      return (*reinterpret_cast<func_type *>(m_func))DYND_PP_META_NAME_RANGE(a, N); \
+      return (*((func_type *) m_func))DYND_PP_META_NAME_RANGE(a, N); \
     } \
   };
 
