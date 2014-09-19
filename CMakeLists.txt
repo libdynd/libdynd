@@ -12,13 +12,13 @@ find_package(CUDA)
 set(LIB_SUFFIX "" CACHE STRING
     "Typically an empty string or 64. Controls installation to lib or lib64")
 
-# -DDYND_SRC_MAX, the maximum number of arguments that functor arrfuncs will support
+# -DDYND_SRC_MAX, the maximum number of src parameters that functor arrfuncs will support
 SET(DYND_SRC_MAX 4 CACHE STRING
     "Build a libdynd library with functor arrfuncs that support the specified maximum number of arguments")
 # TODO: Check that the preprocessor can handle this number
-# -DDYND_SRC_MAX, the maximum number of arguments that functor arrfuncs will support
-SET(DYND_ARG_MAX 6 CACHE STRING
-    "Build a libdynd library with functor arrfuncs that support the specified maximum number of arguments")
+# -DDYND_ARG_MAX, the maximum number of arguments that functor arrfuncs must support,
+# which is DYND_SRC_MAX + ?reference_dst + ?aux_buffer + ?thread_aux_buffer
+MATH(EXPR DYND_ARG_MAX "${DYND_SRC_MAX} + 3")
 
 # Only add these options if this is the top level CMakeLists.txt
 if("${CMAKE_SOURCE_DIR}" STREQUAL "${CMAKE_CURRENT_SOURCE_DIR}")
@@ -405,7 +405,7 @@ set(libdynd_SRC
     include/dynd/kernels/expr_kernel_generator.hpp
     include/dynd/kernels/expression_assignment_kernels.hpp
     include/dynd/kernels/expression_comparison_kernels.hpp
-	include/dynd/kernels/functor_kernels.hpp
+    include/dynd/kernels/functor_kernels.hpp
     include/dynd/kernels/make_lifted_ckernel.hpp
     include/dynd/kernels/make_lifted_reduction_ckernel.hpp
     include/dynd/kernels/option_assignment_kernels.hpp

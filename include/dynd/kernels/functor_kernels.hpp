@@ -14,7 +14,7 @@
 namespace dynd { namespace nd { namespace detail {
 
 template <typename T>
-class from_bytes {
+class typed_param_from_bytes {
 public:
     void init(const ndt::type &DYND_UNUSED(tp), const char *DYND_UNUSED(arrmeta)) {
     }
@@ -29,7 +29,7 @@ public:
 };
 
 template <typename T, int N>
-class from_bytes<nd::strided_vals<T, N> > {
+class typed_param_from_bytes<nd::strided_vals<T, N> > {
 private:
     nd::strided_vals<T, N> m_strided;
 
@@ -49,8 +49,8 @@ public:
     }
 };
 
-#define DECL_FROM_BYTES(TYPENAME, NAME) DYND_PP_META_DECL(from_bytes<TYPENAME>, NAME)
-#define INIT_FROM_BYTES(NAME, TP, ARRMETA) NAME.init(TP, ARRMETA)
+#define DECL_TYPED_PARAM_FROM_BYTES(TYPENAME, NAME) DYND_PP_META_DECL(typed_param_from_bytes<TYPENAME>, NAME)
+#define INIT_TYPED_PARAM_FROM_BYTES(NAME, TP, ARRMETA) NAME.init(TP, ARRMETA)
 #define PARTIAL_DECAY(TYPENAME) std::remove_cv<typename std::remove_reference<TYPENAME>::type>::type
 #define PASS(NAME, ARG) NAME.val(ARG)
 
@@ -70,7 +70,7 @@ struct functor_ck;
             DYND_PP_MAP_1(PARTIAL_DECAY, DYND_PP_META_NAME_RANGE(A, N)), DYND_PP_META_NAME_RANGE(D, N)); \
 \
         func_type func; \
-        DYND_PP_JOIN_ELWISE_1(DECL_FROM_BYTES, (;), \
+        DYND_PP_JOIN_ELWISE_1(DECL_TYPED_PARAM_FROM_BYTES, (;), \
             DYND_PP_META_NAME_RANGE(D, N), DYND_PP_META_NAME_RANGE(from_src, N)); \
 \
         inline void single(char *dst, const char *const *src) { \
@@ -117,7 +117,7 @@ struct functor_ck;
 \
             self_type *e = self_type::create(ckb, kernreq, ckb_offset); \
             e->func = *af_self->get_data_as<func_type>(); \
-            DYND_PP_JOIN_ELWISE_1(INIT_FROM_BYTES, (;), DYND_PP_META_NAME_RANGE(e->from_src, N), \
+            DYND_PP_JOIN_ELWISE_1(INIT_TYPED_PARAM_FROM_BYTES, (;), DYND_PP_META_NAME_RANGE(e->from_src, N), \
                 DYND_PP_META_AT_RANGE(src_tp, N), DYND_PP_META_AT_RANGE(src_arrmeta, N)); \
 \
             return ckb_offset; \
@@ -132,7 +132,7 @@ struct functor_ck;
             DYND_PP_MAP_1(PARTIAL_DECAY, DYND_PP_META_NAME_RANGE(A, N)), DYND_PP_META_NAME_RANGE(D, N)); \
 \
         func_type func; \
-        DYND_PP_JOIN_ELWISE_1(DECL_FROM_BYTES, (;), \
+        DYND_PP_JOIN_ELWISE_1(DECL_TYPED_PARAM_FROM_BYTES, (;), \
             DYND_PP_META_NAME_RANGE(D, N), DYND_PP_META_NAME_RANGE(from_src, N)); \
         aux_buffer_type *aux; \
 \
@@ -180,7 +180,7 @@ struct functor_ck;
 \
             self_type *e = self_type::create(ckb, kernreq, ckb_offset); \
             e->func = *af_self->get_data_as<func_type>(); \
-            DYND_PP_JOIN_ELWISE_1(INIT_FROM_BYTES, (;), DYND_PP_META_NAME_RANGE(e->from_src, N), \
+            DYND_PP_JOIN_ELWISE_1(INIT_TYPED_PARAM_FROM_BYTES, (;), DYND_PP_META_NAME_RANGE(e->from_src, N), \
                 DYND_PP_META_AT_RANGE(src_tp, N), DYND_PP_META_AT_RANGE(src_arrmeta, N)); \
             e->aux = reinterpret_cast<aux_buffer_type *>(aux); \
 \
@@ -205,8 +205,8 @@ DYND_PP_JOIN_MAP(FUNCTOR_CK, (), DYND_PP_RANGE(1, DYND_PP_INC(DYND_SRC_MAX)))
             DYND_PP_MAP_1(PARTIAL_DECAY, DYND_PP_META_NAME_RANGE(A, N)), DYND_PP_META_NAME_RANGE(D, N)); \
 \
         func_type func; \
-        DECL_FROM_BYTES(R, from_dst); \
-        DYND_PP_JOIN_ELWISE_1(DECL_FROM_BYTES, (;), \
+        DECL_TYPED_PARAM_FROM_BYTES(R, from_dst); \
+        DYND_PP_JOIN_ELWISE_1(DECL_TYPED_PARAM_FROM_BYTES, (;), \
             DYND_PP_META_NAME_RANGE(D, N), DYND_PP_META_NAME_RANGE(from_src, N)); \
 \
         inline void single(char *dst, const char *const *src) { \
@@ -253,8 +253,8 @@ DYND_PP_JOIN_MAP(FUNCTOR_CK, (), DYND_PP_RANGE(1, DYND_PP_INC(DYND_SRC_MAX)))
 \
             self_type *e = self_type::create(ckb, kernreq, ckb_offset); \
             e->func = *af_self->get_data_as<func_type>(); \
-            INIT_FROM_BYTES(e->from_dst, dst_tp, dst_arrmeta); \
-            DYND_PP_JOIN_ELWISE_1(INIT_FROM_BYTES, (;), DYND_PP_META_NAME_RANGE(e->from_src, N), \
+            INIT_TYPED_PARAM_FROM_BYTES(e->from_dst, dst_tp, dst_arrmeta); \
+            DYND_PP_JOIN_ELWISE_1(INIT_TYPED_PARAM_FROM_BYTES, (;), DYND_PP_META_NAME_RANGE(e->from_src, N), \
                 DYND_PP_META_AT_RANGE(src_tp, N), DYND_PP_META_AT_RANGE(src_arrmeta, N)); \
 \
             return ckb_offset; \
@@ -269,8 +269,8 @@ DYND_PP_JOIN_MAP(FUNCTOR_CK, (), DYND_PP_RANGE(1, DYND_PP_INC(DYND_SRC_MAX)))
             DYND_PP_MAP_1(PARTIAL_DECAY, DYND_PP_META_NAME_RANGE(A, N)), DYND_PP_META_NAME_RANGE(D, N)); \
 \
         func_type func; \
-        DECL_FROM_BYTES(R, from_dst); \
-        DYND_PP_JOIN_ELWISE_1(DECL_FROM_BYTES, (;), \
+        DECL_TYPED_PARAM_FROM_BYTES(R, from_dst); \
+        DYND_PP_JOIN_ELWISE_1(DECL_TYPED_PARAM_FROM_BYTES, (;), \
             DYND_PP_META_NAME_RANGE(D, N), DYND_PP_META_NAME_RANGE(from_src, N)); \
         aux_buffer_type *aux; \
 \
@@ -318,8 +318,8 @@ DYND_PP_JOIN_MAP(FUNCTOR_CK, (), DYND_PP_RANGE(1, DYND_PP_INC(DYND_SRC_MAX)))
 \
             self_type *e = self_type::create(ckb, kernreq, ckb_offset); \
             e->func = *af_self->get_data_as<func_type>(); \
-            INIT_FROM_BYTES(e->from_dst, dst_tp, dst_arrmeta); \
-            DYND_PP_JOIN_ELWISE_1(INIT_FROM_BYTES, (;), DYND_PP_META_NAME_RANGE(e->from_src, N), \
+            INIT_TYPED_PARAM_FROM_BYTES(e->from_dst, dst_tp, dst_arrmeta); \
+            DYND_PP_JOIN_ELWISE_1(INIT_TYPED_PARAM_FROM_BYTES, (;), DYND_PP_META_NAME_RANGE(e->from_src, N), \
                 DYND_PP_META_AT_RANGE(src_tp, N), DYND_PP_META_AT_RANGE(src_arrmeta, N)); \
             e->aux = reinterpret_cast<aux_buffer_type *>(aux); \
 \
@@ -331,8 +331,8 @@ DYND_PP_JOIN_MAP(FUNCTOR_CK, (), DYND_PP_RANGE(1, DYND_PP_INC(DYND_SRC_MAX)))
 
 #undef FUNCTOR_CK
 
-#undef DECL_FROM_BYTES
-#undef INIT_FROM_BYTES
+#undef DECL_TYPED_PARAM_FROM_BYTES
+#undef INIT_TYPED_PARAM_FROM_BYTES
 #undef PARTIAL_DECAY
 #undef PASS
 
