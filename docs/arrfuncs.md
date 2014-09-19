@@ -186,6 +186,70 @@ needs a way to create and populate the output arrmeta,
 instead of relying on default creation with a possible
 shape, as is done now.
 
+### Range
+
+DyND has ``nd.range``, which would ideally be modeled as
+an arrfunc as well. It has a few signatures in its Python
+binding:
+
+```
+nd.range(stop, dtype=None)
+nd.range(start, stop, dtype=None)
+nd.range(start, stop, step, dtype=None)
+```
+
+In the first signature, both ``stop`` and ``dtype`` affect
+the type or arrmeta of the result. ``nd.range(5)`` produces
+a size 5 ``strided`` array, while ``nd.range(10)`` produces
+size 10. Same for ``start`` and ``stop``. As a consequence,
+all parameters must be dynamic, and there are no array
+parameters.
+
+A possible signature for ``nd.range`` is
+``(start: ?T, stop: T, step: ?T, dtype: ?type) -> strided * R``,
+which will lower into a ckernel with signature
+``() -> strided * R``.
+
+### Reshape
+
+A very common operation in quick test NumPy code is to create a
+multi-dimensional array with increasing values as follows:
+
+```
+In [47]: np.arange(24).reshape(2, 3, 4)
+Out[47]: 
+array([[[ 0,  1,  2,  3],
+        [ 4,  5,  6,  7],
+        [ 8,  9, 10, 11]],
+
+       [[12, 13, 14, 15],
+        [16, 17, 18, 19],
+        [20, 21, 22, 23]]])
+```
+
+There is a corner case of the ``reshape``
+operation in NumPy that seem wise to restrict, namely if
+the input is multi-dimensional, it gets implicitly flattened
+in C-order before being reshaped. I think treating it always
+as a 1D to ND operation is better,
+something like ``(strided * T) -> Dims... * T``.
+
+The NumPy ``reshape`` signature doesn't quite fit with the
+idea of having positional arguments always be array parameters
+and keyword arguments always be dynamic parameters, because
+the shape needs to be variadic. If we accept the shape as
+a single argument, it would look like
+``(strided * T, shape: strided * intptr) -> Dims... * T``.
+
+Python code would look like
+
+```
+>>> nd.reshape(nd.range(24), (2, 3, 4))
+```
+
+This is another function which would support viewing the
+input data.
+
 ## Datashape Function Signature Limitations
 
 Datashape function signatures as presently defined don't
