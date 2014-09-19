@@ -111,6 +111,7 @@ inline bool DYND_ISNAN(long double x) {
 # define DYND_USE_FPSTATUS
 
 // MSVC 2010 and later
+# define DYND_CXX_TYPE_TRAITS
 # define DYND_USE_TR1_ENABLE_IF
 # define DYND_RVALUE_REFS
 # define DYND_STATIC_ASSERT(value, message) static_assert(value, message)
@@ -235,8 +236,9 @@ inline void DYND_MEMCPY(char *dst, const char *src, intptr_t count)
 #endif
 
 // This static_assert fails at compile-time when expected, but with a more general message
+// TODO: This doesn't work as a member of a class, need to fix that and reenable
 #ifndef DYND_STATIC_ASSERT
-#define DYND_STATIC_ASSERT(value, message) do { enum { dynd_static_assertion = 1 / (int)(value) }; } while (0)
+#define DYND_STATIC_ASSERT(value, message) // do { enum { dynd_static_assertion = 1 / (int)(value) }; } while (0)
 #endif
 
 #if defined(DYND_CXX_TYPE_TRAITS)

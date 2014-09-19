@@ -8,8 +8,6 @@
 
 #include <dynd/funcproto.hpp>
 
-#define DYND_STATIC_ASSERT2(X, Y)
-
 namespace dynd {
 
 struct aux_buffer {
@@ -31,7 +29,7 @@ protected:
     typedef typename remove_all_pointers<typename std::decay<T>::type>::type D;
 public:
     static const bool value = is_aux_buffer_type<D>::value;
-    DYND_STATIC_ASSERT2(!value || (value && std::is_pointer<T>::value
+    DYND_STATIC_ASSERT(!value || (value && std::is_pointer<T>::value
         && !std::is_pointer<typename std::remove_pointer<T>::type>::value),
         "aux_buffer, or a subclass of it, must be passed as a pointer");
 };
@@ -47,7 +45,7 @@ protected:
     typedef typename remove_all_pointers<typename std::decay<T>::type>::type D;
 public:
     static const bool value = is_thread_aux_buffer_type<D>::value;
-    DYND_STATIC_ASSERT2(!value || (value && std::is_pointer<T>::value
+    DYND_STATIC_ASSERT(!value || (value && std::is_pointer<T>::value
         && !std::is_pointer<typename std::remove_pointer<T>::type>::value),
         "thread_aux_buffer, or a subclass of it, must be passed as a pointer");
 };
@@ -91,9 +89,9 @@ struct assert_buffered_args<R (A0, A1)> {
         static const bool value = detail::assert_aux_buffer_arg_type<A1>::value ||
             (is_thread_aux_buffered::value && detail::assert_aux_buffer_arg_type<A0>::value);
     };
-    DYND_STATIC_ASSERT2(!detail::assert_thread_aux_buffer_arg_type<A0>::value,
+    DYND_STATIC_ASSERT(!detail::assert_thread_aux_buffer_arg_type<A0>::value,
         THREAD_AUX_BUFFER_MESSAGE);
-    DYND_STATIC_ASSERT2(is_thread_aux_buffered::value || !detail::assert_aux_buffer_arg_type<A0>::value,
+    DYND_STATIC_ASSERT(is_thread_aux_buffered::value || !detail::assert_aux_buffer_arg_type<A0>::value,
         AUX_BUFFER_MESSAGE);
 };
 
@@ -113,14 +111,14 @@ struct assert_buffered_args<R (A0, A1)> {
             static const bool value = DYND_PP_LAST(ASSERT_AUX_BUFFER_ARG_TYPES)::value || \
                 (is_thread_aux_buffered::value && DYND_PP_LAST(DYND_PP_POP(ASSERT_AUX_BUFFER_ARG_TYPES))::value); \
         }; \
-        DYND_STATIC_ASSERT2(!DYND_PP_JOIN_ELWISE_1(DYND_PP_META_SCOPE, (||), \
+        DYND_STATIC_ASSERT(!DYND_PP_JOIN_ELWISE_1(DYND_PP_META_SCOPE, (||), \
             DYND_PP_POP(ASSERT_THREAD_AUX_BUFFER_ARG_TYPES), DYND_PP_REPEAT_1(value, DYND_PP_DEC(N))), \
             THREAD_AUX_BUFFER_MESSAGE); \
-        DYND_STATIC_ASSERT2(!(is_thread_aux_buffered::value && \
+        DYND_STATIC_ASSERT(!(is_thread_aux_buffered::value && \
             (DYND_PP_JOIN_ELWISE_1(DYND_PP_META_SCOPE, (||), \
                 DYND_PP_POP(DYND_PP_POP(ASSERT_AUX_BUFFER_ARG_TYPES)), DYND_PP_REPEAT_1(value, DYND_PP_DEC(DYND_PP_DEC(N)))))), \
             AUX_BUFFER_MESSAGE); \
-        DYND_STATIC_ASSERT2(!(!is_thread_aux_buffered::value && \
+        DYND_STATIC_ASSERT(!(!is_thread_aux_buffered::value && \
             (DYND_PP_JOIN_ELWISE_1(DYND_PP_META_SCOPE, (||), \
                 DYND_PP_POP(ASSERT_AUX_BUFFER_ARG_TYPES), DYND_PP_REPEAT_1(value, DYND_PP_DEC(N))))), \
             AUX_BUFFER_MESSAGE); \

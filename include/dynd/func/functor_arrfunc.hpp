@@ -12,6 +12,12 @@
 
 namespace dynd { namespace nd { namespace detail {
 
+/*
+    If a callable object is not default-constructible, we need to generate a wrapper object
+    to make it work with ckernels. This is that wrapper. There are currently some issues
+    with pass-by-value callables that need to be sorted out, and its internals (the char buffer)
+    are a hack until we do.
+*/
 template <typename func_type, typename funcproto_type>
 class func_wrapper;
 
