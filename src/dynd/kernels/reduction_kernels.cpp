@@ -93,7 +93,7 @@ static intptr_t instantiate_builtin_sum_reduction_arrfunc(
     intptr_t ckb_offset, const ndt::type &dst_tp,
     const char *DYND_UNUSED(dst_arrmeta), const ndt::type *src_tp,
     const char *const *DYND_UNUSED(src_arrmeta), kernel_request_t kernreq,
-    const eval::eval_context *DYND_UNUSED(ectx))
+    aux_buffer *DYND_UNUSED(aux), const eval::eval_context *DYND_UNUSED(ectx))
 {
     if (dst_tp != src_tp[0]) {
         stringstream ss;
@@ -172,7 +172,7 @@ namespace {
                     intptr_t ckb_offset, const ndt::type &dst_tp,
                     const char *DYND_UNUSED(dst_arrmeta), const ndt::type *src_tp,
                     const char *const *src_arrmeta, kernel_request_t kernreq,
-                    const eval::eval_context *DYND_UNUSED(ectx))
+                    aux_buffer *DYND_UNUSED(aux), const eval::eval_context *DYND_UNUSED(ectx))
         {
             typedef double_mean1d_ck self_type;
             mean1d_arrfunc_data *data = *af_self->get_data_as<mean1d_arrfunc_data *>();

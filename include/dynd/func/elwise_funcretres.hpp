@@ -19,9 +19,9 @@ namespace detail {
 \
         typedef R (*func_type)(DYND_PP_JOIN_1((,), DYND_PP_META_NAME_RANGE(A, NSRC))); \
         DYND_PP_JOIN_ELWISE_1(DYND_PP_META_TYPEDEF_TYPENAME, (;), \
-            DYND_PP_OUTER_1(DYND_PP_META_TEMPLATE_INSTANTIATION_SCOPE, (remove_const), \
+            DYND_PP_OUTER_1(DYND_PP_META_TEMPLATE_INSTANTIATION_SCOPE, (std::remove_const), \
                 DYND_PP_OUTER_1(DYND_PP_META_TYPENAME_TEMPLATE_INSTANTIATION_SCOPE, \
-                    (remove_reference), DYND_PP_META_NAME_RANGE(A, NSRC), (type)), \
+                    (std::remove_reference), DYND_PP_META_NAME_RANGE(A, NSRC), (type)), \
                 (type)), \
             DYND_PP_META_NAME_RANGE(D, NSRC)); \
 \
@@ -66,7 +66,7 @@ namespace detail {
                     intptr_t ckb_offset, const ndt::type &DYND_UNUSED(dst_tp), \
                     const char *DYND_UNUSED(dst_arrmeta), const ndt::type *DYND_UNUSED(src_tp), \
                     const char *const *DYND_UNUSED(src_arrmeta), kernel_request_t kernreq, \
-                    const eval::eval_context *DYND_UNUSED(ectx)) \
+                    aux_buffer *DYND_UNUSED(aux), const eval::eval_context *DYND_UNUSED(ectx)) \
         { \
             extra_type *e = ckb->alloc_ck_leaf<extra_type>(ckb_offset); \
             e->base.template set_expr_function<extra_type>(kernreq); \
@@ -92,21 +92,21 @@ DYND_PP_JOIN_MAP(FUNC_RET_RES_CKERNEL_INSTANTIATOR, (), DYND_PP_RANGE(1, DYND_PP
             DYND_PP_ELWISE_1(DYND_PP_META_OR, \
                 DYND_PP_MAP_1(DYND_PP_META_NOT, \
                     DYND_PP_OUTER_1(DYND_PP_META_TEMPLATE_INSTANTIATION_SCOPE, \
-                        (is_reference), DYND_PP_META_NAME_RANGE(A, NSRC), (value))), \
+                        (std::is_reference), DYND_PP_META_NAME_RANGE(A, NSRC), (value))), \
                 DYND_PP_ELWISE_1(DYND_PP_META_PARENTHESIZED_AND, \
                     DYND_PP_OUTER_1(DYND_PP_META_TEMPLATE_INSTANTIATION_SCOPE, \
-                        (is_reference), DYND_PP_META_NAME_RANGE(A, NSRC), (value)), \
-                    DYND_PP_OUTER_1(DYND_PP_META_TEMPLATE_INSTANTIATION_SCOPE, (is_const), \
+                        (std::is_reference), DYND_PP_META_NAME_RANGE(A, NSRC), (value)), \
+                    DYND_PP_OUTER_1(DYND_PP_META_TEMPLATE_INSTANTIATION_SCOPE, (std::is_const), \
                         DYND_PP_OUTER_1(DYND_PP_META_TYPENAME_TEMPLATE_INSTANTIATION_SCOPE, \
-                            (remove_reference), DYND_PP_META_NAME_RANGE(A, NSRC), (type)), \
+                            (std::remove_reference), DYND_PP_META_NAME_RANGE(A, NSRC), (type)), \
                         (value)))), \
             ("all reference arguments must be const")); \
 \
         typedef R (*func_type)(DYND_PP_JOIN_1((,), DYND_PP_META_NAME_RANGE(A, NSRC))); \
         DYND_PP_JOIN_ELWISE_1(DYND_PP_META_TYPEDEF_TYPENAME, (;), \
-            DYND_PP_OUTER_1(DYND_PP_META_TEMPLATE_INSTANTIATION_SCOPE, (remove_const), \
+            DYND_PP_OUTER_1(DYND_PP_META_TEMPLATE_INSTANTIATION_SCOPE, (std::remove_const), \
                 DYND_PP_OUTER_1(DYND_PP_META_TYPENAME_TEMPLATE_INSTANTIATION_SCOPE, \
-                    (remove_reference), DYND_PP_META_NAME_RANGE(A, NSRC), (type)), \
+                    (std::remove_reference), DYND_PP_META_NAME_RANGE(A, NSRC), (type)), \
                 (type)), \
             DYND_PP_META_NAME_RANGE(D, NSRC)); \
 \

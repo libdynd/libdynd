@@ -6,6 +6,7 @@
 #ifndef _DYND__ARRFUNC_HPP_
 #define _DYND__ARRFUNC_HPP_
 
+#include <dynd/buffer.hpp>
 #include <dynd/config.hpp>
 #include <dynd/eval/eval_context.hpp>
 #include <dynd/types/base_type.hpp>
@@ -51,7 +52,7 @@ typedef intptr_t (*arrfunc_instantiate_t)(
     const arrfunc_type_data *self, dynd::ckernel_builder *ckb,
     intptr_t ckb_offset, const ndt::type &dst_tp, const char *dst_arrmeta,
     const ndt::type *src_tp, const char *const *src_arrmeta, kernel_request_t kernreq,
-    const eval::eval_context *ectx);
+    aux_buffer *aux, const eval::eval_context *ectx);
 
 /**
  * Resolves the destination type for this arrfunc based on the types
@@ -246,64 +247,75 @@ public:
   inline void swap(nd::arrfunc &rhs) { m_value.swap(rhs.m_value); }
 
   /** Implements the general call operator */
-  nd::array call(intptr_t arg_count, const nd::array *args,
+  nd::array call(intptr_t arg_count, const nd::array *args, aux_buffer *aux,
                  const eval::eval_context *ectx) const;
+  inline nd::array call(intptr_t arg_count, const nd::array *args,
+                 const eval::eval_context *ectx) const
+  {
+    return call(arg_count, args, NULL, ectx);
+  }
 
   /** Convenience call operators */
-  inline nd::array operator()() const
+  inline nd::array operator()(aux_buffer *aux = NULL) const
   {
-    return call(0, NULL, &eval::default_eval_context);
+    return call(0, NULL, aux, &eval::default_eval_context);
   }
-  inline nd::array operator()(const nd::array &a0) const
+  inline nd::array operator()(const nd::array &a0, aux_buffer *aux = NULL) const
   {
-    return call(1, &a0, &eval::default_eval_context);
+    return call(1, &a0, aux, &eval::default_eval_context);
   }
-  inline nd::array operator()(const nd::array &a0, const nd::array &a1) const
+  inline nd::array operator()(const nd::array &a0, const nd::array &a1, aux_buffer *aux = NULL) const
   {
     nd::array args[2] = {a0, a1};
-    return call(2, args, &eval::default_eval_context);
+    return call(2, args, aux, &eval::default_eval_context);
   }
   inline nd::array operator()(const nd::array &a0, const nd::array &a1,
-                              const nd::array &a2) const
+                              const nd::array &a2, aux_buffer *aux = NULL) const
   {
     nd::array args[3] = {a0, a1, a2};
-    return call(3, args, &eval::default_eval_context);
+    return call(3, args, aux, &eval::default_eval_context);
   }
 
   /** Implements the general call operator with output parameter */
   void call_out(intptr_t arg_count, const nd::array *args, const nd::array &out,
-                const eval::eval_context *ectx) const;
-
-  inline void call_out(const nd::array &out) const
+                aux_buffer *aux, const eval::eval_context *ectx) const;
+  inline void call_out(intptr_t arg_count, const nd::array *args, const nd::array &out,
+                       const eval::eval_context *ectx) const
   {
-    call_out(0, NULL, out, &eval::default_eval_context);
+    call_out(arg_count, args, out, NULL, ectx);
   }
 
-  inline void call_out(const nd::array &a0, const nd::array &out) const
+  inline void call_out(const nd::array &out, aux_buffer *aux = NULL) const
   {
-    call_out(1, &a0, out, &eval::default_eval_context);
+    call_out(0, NULL, out, aux, &eval::default_eval_context);
+  }
+
+  inline void call_out(const nd::array &a0, const nd::array &out, aux_buffer *aux = NULL) const
+  {
+    call_out(1, &a0, out, aux, &eval::default_eval_context);
   }
 
   inline void call_out(const nd::array &a0, const nd::array &a1,
-                       const nd::array &out) const
+                       const nd::array &out, aux_buffer *aux = NULL) const
   {
     nd::array args[2] = {a0, a1};
-    call_out(2, args, out, &eval::default_eval_context);
+    call_out(2, args, out, aux, &eval::default_eval_context);
   }
 
   inline void call_out(const nd::array &a0, const nd::array &a1,
-                       const nd::array &a2, const nd::array &out) const
+                       const nd::array &a2, const nd::array &out, aux_buffer *aux = NULL) const
   {
     nd::array args[3] = {a0, a1, a2};
-    call_out(3, args, out, &eval::default_eval_context);
+    call_out(3, args, out, aux, &eval::default_eval_context);
   }
 
   inline void call_out(const nd::array &a0, const nd::array &a1,
-                       const nd::array &a2, const nd::array &a3, nd::array &out)
+                       const nd::array &a2, const nd::array &a3, nd::array &out,
+                       aux_buffer *aux = NULL)
       const
   {
     nd::array args[4] = {a0, a1, a2, a3};
-    call_out(4, args, out, &eval::default_eval_context);
+    call_out(4, args, out, aux, &eval::default_eval_context);
   }
 };
 

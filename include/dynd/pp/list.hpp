@@ -34,6 +34,8 @@
 #define DYND_PP__FIRST_IF_NOT_EMPTY(...) DYND_PP_ID(DYND_PP___FIRST_IF_NOT_EMPTY(__VA_ARGS__))
 #define DYND_PP___FIRST_IF_NOT_EMPTY(A0, ...) A0
 
+#define DYND_PP_POP(A) DYND_PP_DEL(DYND_PP_DEC(DYND_PP_LEN(A)), A)
+
 /**
  * Expands to A without its first token if A is not empty. Otherwise expands to ().
  */
