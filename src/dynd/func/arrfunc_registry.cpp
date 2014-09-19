@@ -97,6 +97,65 @@ template <typename T>
 struct divide {
   inline T operator()(T x, T y) const { return x / y; }
 };
+template <typename T>
+struct negative {
+  inline T operator()(T x) const { return -x; }
+};
+template <typename T>
+struct sign {
+  // Note that by returning `x` in the else case, NaN will pass
+  // through
+  inline T operator()(T x) const { return x > 0 ? 1 : (x < 0 ? -1 : x); }
+};
+template <>
+struct sign<dynd_int128> {
+  inline dynd_int128 operator()(const dynd_int128 &x) const
+  {
+    return x.is_negative() ? -1 : (x == 0 ? 0 : 1);
+  }
+};
+template <>
+struct sign<dynd_uint128> {
+  inline dynd_uint128 operator()(const dynd_uint128 &x) const
+  {
+    return x == 0 ? 0 : 1;
+  }
+};
+template <typename T>
+struct conj_fn {
+  inline T operator()(T x) const { return conj(x); };
+};
+template <typename T>
+struct logaddexp {
+  inline T operator()(T x, T y) const
+  {
+    // log(exp(x) + exp(y))
+    if (x > y) {
+      return x + log1p(exp(y - x));
+    } else if (x <= y) {
+      return y + log1p(exp(x - y));
+    } else {
+      // a NaN, +inf/+inf, or -inf/-inf
+      return x + y;
+    }
+  }
+};
+template <typename T>
+struct logaddexp2 {
+  inline T operator()(T x, T y) const
+  {
+    const T log2_e = T(1.442695040888963407359924681001892137);
+    // log2(exp2(x) + exp2(y))
+    if (x > y) {
+      return x + log2_e * log1p(exp2(y - x));
+    } else if (x <= y) {
+      return y + log2_e * log1p(exp2(x - y));
+    } else {
+      // a NaN, +inf/+inf, or -inf/-inf
+      return x + y;
+    }
+  }
+};
 } // anonymous namespace
 
 void init::arrfunc_registry_init()
@@ -128,6 +187,22 @@ void init::arrfunc_registry_init()
           divide<uint32_t>(), divide<uint64_t>(), /*divide<dynd_uint128>(),*/
           divide<float>(), divide<double>(), divide<complex<float> >(),
           divide<complex<double> >()));
+  func::set_regfunction(
+      "negative",
+      make_ufunc(negative<int32_t>(), negative<int64_t>(),
+                 negative<dynd_int128>(), negative<float>(), negative<double>(),
+                 negative<complex<float> >(), negative<complex<double> >()));
+  func::set_regfunction(
+      "sign", make_ufunc(sign<uint32_t>(), sign<uint64_t>(),
+                         sign<dynd_uint128>(), sign<int32_t>(), sign<int64_t>(),
+                         sign<dynd_int128>(), sign<float>(), sign<double>()));
+  func::set_regfunction("conj", make_ufunc(conj_fn<complex<float> >(), conj_fn<complex<double> >()));
+
+  func::set_regfunction("logaddexp",
+                        make_ufunc(logaddexp<float>(), logaddexp<double>()));
+  func::set_regfunction("logaddexp2",
+                        make_ufunc(logaddexp2<float>(), logaddexp2<double>()));
+
 
   // Trig functions
   func::set_regfunction(
@@ -169,7 +244,6 @@ void init::arrfunc_registry_init()
   func::set_regfunction(
       "power",
       make_ufunc(&powf, static_cast<double (*)(double, double)>(&::pow)));
-
 }
 
 void init::arrfunc_registry_cleanup()
