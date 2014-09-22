@@ -98,7 +98,7 @@ struct functor_ck;
                                     dynd::ckernel_builder *ckb, intptr_t ckb_offset, \
                                     const ndt::type &dst_tp, const char *DYND_UNUSED(dst_arrmeta), \
                                     const ndt::type *src_tp, const char *const *src_arrmeta, \
-                                    kernel_request_t kernreq, aux_buffer *DYND_UNUSED(aux), \
+                                    kernel_request_t kernreq, const nd::array &DYND_UNUSED(aux), \
                                     const eval::eval_context *DYND_UNUSED(ectx)) { \
             for (intptr_t i = 0; i < N; ++i) { \
                 if (src_tp[i] != af_self->get_param_type(i)) { \
@@ -134,11 +134,11 @@ struct functor_ck;
         func_type func; \
         DYND_PP_JOIN_ELWISE_1(DECL_TYPED_PARAM_FROM_BYTES, (;), \
             DYND_PP_META_NAME_RANGE(D, N), DYND_PP_META_NAME_RANGE(from_src, N)); \
-        aux_buffer_type *aux; \
+        aux_buffer_type aux; \
 \
         inline void single(char *dst, const char *const *src) { \
             *reinterpret_cast<R *>(dst) = this->func(DYND_PP_JOIN_ELWISE_1(PASS, (,), \
-                DYND_PP_META_NAME_RANGE(this->from_src, N), DYND_PP_META_AT_RANGE(src, N)), this->aux); \
+                DYND_PP_META_NAME_RANGE(this->from_src, N), DYND_PP_META_AT_RANGE(src, N)), &this->aux); \
         } \
 \
         inline void strided(char *dst, intptr_t dst_stride, \
@@ -150,7 +150,7 @@ struct functor_ck;
                 DYND_PP_REPEAT_1(intptr_t, N), DYND_PP_META_NAME_RANGE(src_stride, N), DYND_PP_META_AT_RANGE(src_stride, N)); \
             for (size_t i = 0; i < count; ++i) { \
                 *reinterpret_cast<R *>(dst) = this->func(DYND_PP_JOIN_ELWISE_1(PASS, (,), \
-                    DYND_PP_META_NAME_RANGE(this->from_src, N), DYND_PP_META_NAME_RANGE(src, N)), this->aux); \
+                    DYND_PP_META_NAME_RANGE(this->from_src, N), DYND_PP_META_NAME_RANGE(src, N)), &this->aux); \
                 dst += dst_stride; \
                 DYND_PP_JOIN_ELWISE_1(DYND_PP_META_ADD_ASGN, (;), \
                     DYND_PP_META_NAME_RANGE(src, N), DYND_PP_META_NAME_RANGE(src_stride, N)); \
@@ -161,7 +161,7 @@ struct functor_ck;
                                     dynd::ckernel_builder *ckb, intptr_t ckb_offset, \
                                     const ndt::type &dst_tp, const char *DYND_UNUSED(dst_arrmeta), \
                                     const ndt::type *src_tp, const char *const *src_arrmeta, \
-                                    kernel_request_t kernreq, aux_buffer *aux, \
+                                    kernel_request_t kernreq, const nd::array &aux, \
                                     const eval::eval_context *DYND_UNUSED(ectx)) { \
             for (intptr_t i = 0; i < N; ++i) { \
                 if (src_tp[i] != af_self->get_param_type(i)) { \
@@ -182,7 +182,7 @@ struct functor_ck;
             e->func = *af_self->get_data_as<func_type>(); \
             DYND_PP_JOIN_ELWISE_1(INIT_TYPED_PARAM_FROM_BYTES, (;), DYND_PP_META_NAME_RANGE(e->from_src, N), \
                 DYND_PP_META_AT_RANGE(src_tp, N), DYND_PP_META_AT_RANGE(src_arrmeta, N)); \
-            e->aux = reinterpret_cast<aux_buffer_type *>(aux); \
+            aux_buffer_type::unpack(e->aux, aux); \
 \
             return ckb_offset; \
         } \
@@ -234,7 +234,7 @@ DYND_PP_JOIN_MAP(FUNCTOR_CK, (), DYND_PP_RANGE(1, DYND_PP_INC(DYND_SRC_MAX)))
                                     dynd::ckernel_builder *ckb, intptr_t ckb_offset, \
                                     const ndt::type &dst_tp, const char *dst_arrmeta, \
                                     const ndt::type *src_tp, const char *const *src_arrmeta, \
-                                    kernel_request_t kernreq, aux_buffer *DYND_UNUSED(aux), \
+                                    kernel_request_t kernreq, const nd::array &DYND_UNUSED(aux), \
                                     const eval::eval_context *DYND_UNUSED(ectx)) { \
             for (intptr_t i = 0; i < N; ++i) { \
                 if (src_tp[i] != af_self->get_param_type(i)) { \
@@ -272,11 +272,11 @@ DYND_PP_JOIN_MAP(FUNCTOR_CK, (), DYND_PP_RANGE(1, DYND_PP_INC(DYND_SRC_MAX)))
         DECL_TYPED_PARAM_FROM_BYTES(R, from_dst); \
         DYND_PP_JOIN_ELWISE_1(DECL_TYPED_PARAM_FROM_BYTES, (;), \
             DYND_PP_META_NAME_RANGE(D, N), DYND_PP_META_NAME_RANGE(from_src, N)); \
-        aux_buffer_type *aux; \
+        aux_buffer_type aux; \
 \
         inline void single(char *dst, const char *const *src) { \
             this->func(PASS(this->from_dst, dst), DYND_PP_JOIN_ELWISE_1(PASS, (,), \
-                DYND_PP_META_NAME_RANGE(this->from_src, N), DYND_PP_META_AT_RANGE(src, N)), this->aux); \
+                DYND_PP_META_NAME_RANGE(this->from_src, N), DYND_PP_META_AT_RANGE(src, N)), &this->aux); \
         } \
 \
         inline void strided(char *dst, intptr_t dst_stride, \
@@ -288,7 +288,7 @@ DYND_PP_JOIN_MAP(FUNCTOR_CK, (), DYND_PP_RANGE(1, DYND_PP_INC(DYND_SRC_MAX)))
                 DYND_PP_REPEAT_1(intptr_t, N), DYND_PP_META_NAME_RANGE(src_stride, N), DYND_PP_META_AT_RANGE(src_stride, N)); \
             for (size_t i = 0; i < count; ++i) { \
                 this->func(PASS(this->from_dst, dst), DYND_PP_JOIN_ELWISE_1(PASS, (,), \
-                    DYND_PP_META_NAME_RANGE(this->from_src, N), DYND_PP_META_NAME_RANGE(src, N)), this->aux); \
+                    DYND_PP_META_NAME_RANGE(this->from_src, N), DYND_PP_META_NAME_RANGE(src, N)), &this->aux); \
                 dst += dst_stride; \
                 DYND_PP_JOIN_ELWISE_1(DYND_PP_META_ADD_ASGN, (;), \
                     DYND_PP_META_NAME_RANGE(src, N), DYND_PP_META_NAME_RANGE(src_stride, N)); \
@@ -299,7 +299,7 @@ DYND_PP_JOIN_MAP(FUNCTOR_CK, (), DYND_PP_RANGE(1, DYND_PP_INC(DYND_SRC_MAX)))
                                     dynd::ckernel_builder *ckb, intptr_t ckb_offset, \
                                     const ndt::type &dst_tp, const char *dst_arrmeta, \
                                     const ndt::type *src_tp, const char *const *src_arrmeta, \
-                                    kernel_request_t kernreq, aux_buffer *aux, \
+                                    kernel_request_t kernreq, const nd::array &aux, \
                                     const eval::eval_context *DYND_UNUSED(ectx)) { \
             for (intptr_t i = 0; i < N; ++i) { \
                 if (src_tp[i] != af_self->get_param_type(i)) { \
@@ -321,7 +321,7 @@ DYND_PP_JOIN_MAP(FUNCTOR_CK, (), DYND_PP_RANGE(1, DYND_PP_INC(DYND_SRC_MAX)))
             INIT_TYPED_PARAM_FROM_BYTES(e->from_dst, dst_tp, dst_arrmeta); \
             DYND_PP_JOIN_ELWISE_1(INIT_TYPED_PARAM_FROM_BYTES, (;), DYND_PP_META_NAME_RANGE(e->from_src, N), \
                 DYND_PP_META_AT_RANGE(src_tp, N), DYND_PP_META_AT_RANGE(src_arrmeta, N)); \
-            e->aux = reinterpret_cast<aux_buffer_type *>(aux); \
+            aux_buffer_type::unpack(e->aux, aux); \
 \
             return ckb_offset; \
         } \

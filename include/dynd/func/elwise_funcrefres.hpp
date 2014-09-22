@@ -66,7 +66,7 @@ namespace detail {
                     intptr_t ckb_offset, const ndt::type &DYND_UNUSED(dst_tp), \
                     const char *DYND_UNUSED(dst_arrmeta), const ndt::type *DYND_UNUSED(src_tp), \
                     const char *const *DYND_UNUSED(src_arrmeta), kernel_request_t kernreq, \
-                    aux_buffer *DYND_UNUSED(aux), const eval::eval_context *DYND_UNUSED(ectx)) \
+                    const nd::array &DYND_UNUSED(aux), const eval::eval_context *DYND_UNUSED(ectx)) \
         { \
             extra_type *e = ckb->alloc_ck_leaf<extra_type>(ckb_offset); \
             e->base.template set_expr_function<extra_type>(kernreq); \

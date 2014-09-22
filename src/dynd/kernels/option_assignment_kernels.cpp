@@ -197,7 +197,7 @@ static intptr_t instantiate_option_to_option_assignment_kernel(
     const arrfunc_type_data *DYND_UNUSED(self), dynd::ckernel_builder *ckb,
     intptr_t ckb_offset, const ndt::type &dst_tp, const char *dst_arrmeta,
     const ndt::type *src_tp, const char *const *src_arrmeta, kernel_request_t kernreq,
-    aux_buffer *aux, const eval::eval_context *ectx)
+    const nd::array &aux, const eval::eval_context *ectx)
 {
   intptr_t root_ckb_offset = ckb_offset;
   typedef option_to_option_ck self_type;
@@ -238,7 +238,7 @@ static intptr_t instantiate_option_to_value_assignment_kernel(
     const arrfunc_type_data *DYND_UNUSED(self), dynd::ckernel_builder *ckb,
     intptr_t ckb_offset, const ndt::type &dst_tp, const char *dst_arrmeta,
     const ndt::type *src_tp, const char *const *src_arrmeta,
-    kernel_request_t kernreq, aux_buffer *aux, const eval::eval_context *ectx)
+    kernel_request_t kernreq, const nd::array &aux, const eval::eval_context *ectx)
 {
   intptr_t root_ckb_offset = ckb_offset;
   typedef option_to_value_ck self_type;
@@ -328,7 +328,7 @@ static intptr_t instantiate_string_to_option_assignment_kernel(
     const arrfunc_type_data *DYND_UNUSED(self), dynd::ckernel_builder *ckb,
     intptr_t ckb_offset, const ndt::type &dst_tp, const char *dst_arrmeta,
     const ndt::type *src_tp, const char *const *src_arrmeta,
-    kernel_request_t kernreq, aux_buffer *aux, const eval::eval_context *ectx)
+    kernel_request_t kernreq, const nd::array &aux, const eval::eval_context *ectx)
 {
   // Deal with some string to option[T] conversions where string values
   // might mean NA
@@ -400,7 +400,7 @@ static intptr_t instantiate_option_as_value_assignment_kernel(
     const arrfunc_type_data *DYND_UNUSED(self), dynd::ckernel_builder *ckb,
     intptr_t ckb_offset, const ndt::type &dst_tp, const char *dst_arrmeta,
     const ndt::type *src_tp, const char *const *src_arrmeta, kernel_request_t kernreq,
-    aux_buffer *DYND_UNUSED(aux), const eval::eval_context *ectx)
+    const nd::array &DYND_UNUSED(aux), const eval::eval_context *ectx)
 {
   // In all cases not handled, we use the
   // regular S to T assignment kernel.

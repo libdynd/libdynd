@@ -133,7 +133,7 @@ static intptr_t instantiate_chain_buf_tp(
     const arrfunc_type_data *af_self, dynd::ckernel_builder *ckb,
     intptr_t ckb_offset, const ndt::type &dst_tp, const char *dst_arrmeta,
     const ndt::type *src_tp, const char *const *src_arrmeta,
-    kernel_request_t kernreq, aux_buffer *DYND_UNUSED(aux), const eval::eval_context *ectx)
+    kernel_request_t kernreq, const nd::array &DYND_UNUSED(aux), const eval::eval_context *ectx)
 {
   const instantiate_chain_data *icd =
       af_self->get_data_as<instantiate_chain_data>();
