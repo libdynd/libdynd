@@ -115,14 +115,14 @@ intptr_t dynd::make_chain_buf_tp_ckernel(
     }
     ckb_offset = first->instantiate(first, ckb, ckb_offset, buf_tp,
                                     self->m_buf_arrmeta.get(), src_tp,
-                                    src_arrmeta, kernreq, NULL, ectx);
+                                    src_arrmeta, kernreq, nd::array(), ectx);
     ckb->ensure_capacity(ckb_offset);
     self = ckb->get_at<unary_heap_chain_ck>(root_ckb_offset);
     self->m_second_offset = ckb_offset - root_ckb_offset;
     const char *buf_arrmeta = self->m_buf_arrmeta.get();
     ckb_offset =
         second->instantiate(second, ckb, ckb_offset, dst_tp, dst_arrmeta,
-                            &buf_tp, &buf_arrmeta, kernreq, NULL, ectx);
+                            &buf_tp, &buf_arrmeta, kernreq, nd::array(), ectx);
     return ckb_offset;
   } else {
     throw runtime_error("Multi-parameter arrfunc chaining is not implemented");

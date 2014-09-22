@@ -1010,7 +1010,7 @@ size_t dynd::make_lifted_reduction_ckernel(
             if (dst_initialization != NULL) {
                 return dst_initialization->instantiate(
                     dst_initialization, ckb, ckb_offset, dst_tp,
-                    dst_arrmeta, &src_tp, &src_arrmeta, kernreq, NULL, ectx);
+                    dst_arrmeta, &src_tp, &src_arrmeta, kernreq, nd::array(), ectx);
             } else if (reduction_identity.is_null()) {
                 return make_assignment_kernel(ckb, ckb_offset, dst_tp,
                                               dst_arrmeta, src_tp, src_arrmeta,

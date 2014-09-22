@@ -685,7 +685,7 @@ size_t dynd::make_lifted_expr_ckernel(
       // No dimensions to lift, call the elementwise instantiate directly
       return elwise_handler->instantiate(elwise_handler, ckb, ckb_offset,
                                          dst_tp, dst_arrmeta, src_tp,
-                                         src_arrmeta, kernreq, NULL, ectx);
+                                         src_arrmeta, kernreq, nd::array(), ectx);
     } else {
       stringstream ss;
       ss << "Trying to broadcast " << src_ndim[i] << " dimensions of "

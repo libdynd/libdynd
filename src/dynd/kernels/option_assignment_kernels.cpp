@@ -468,7 +468,7 @@ size_t kernels::make_option_assignment_kernel(
         if (ndt::pattern_match(src_tp, af->get_param_type(0), typevars) &&
                 ndt::pattern_match(dst_tp, af->get_return_type(), typevars)) {
             return af->instantiate(af, ckb, ckb_offset, dst_tp, dst_arrmeta,
-                                   &src_tp, &src_arrmeta, kernreq, NULL, ectx);
+                                   &src_tp, &src_arrmeta, kernreq, nd::array(), ectx);
         }
     }
 

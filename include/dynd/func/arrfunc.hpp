@@ -253,7 +253,7 @@ public:
   inline nd::array call(intptr_t arg_count, const nd::array *args,
                  const eval::eval_context *ectx) const
   {
-    return call(arg_count, args, NULL, ectx);
+    return call(arg_count, args, nd::array(), ectx);
   }
 
   /** Convenience call operators */
@@ -305,7 +305,7 @@ public:
   inline void call_out(intptr_t arg_count, const nd::array *args, const nd::array &out,
                        const eval::eval_context *ectx) const
   {
-    call_out(arg_count, args, NULL, out, ectx);
+    call_out(arg_count, args, nd::array(), out, ectx);
   }
 
   inline void call_out(const nd::array &out) const
