@@ -146,7 +146,7 @@ static size_t make_elwise_strided_dimension_expr_kernel_for_N(
   // Instantiate the elementwise handler
   return elwise_handler->instantiate(
       elwise_handler, ckb, ckb_offset, child_dst_tp, child_dst_arrmeta,
-      child_src_tp, child_src_arrmeta, kernel_request_strided, NULL, ectx);
+      child_src_tp, child_src_arrmeta, kernel_request_strided, nd::array(), ectx);
 }
 
 inline static size_t make_elwise_strided_dimension_expr_kernel(
@@ -349,7 +349,7 @@ static size_t make_elwise_strided_or_var_to_strided_dimension_expr_kernel_for_N(
   // Instantiate the elementwise handler
   return elwise_handler->instantiate(
       elwise_handler, ckb, ckb_offset, child_dst_tp, child_dst_arrmeta,
-      child_src_tp, child_src_arrmeta, kernel_request_strided, NULL, ectx);
+      child_src_tp, child_src_arrmeta, kernel_request_strided, nd::array(), ectx);
 }
 
 static size_t make_elwise_strided_or_var_to_strided_dimension_expr_kernel(
@@ -622,7 +622,7 @@ static size_t make_elwise_strided_or_var_to_var_dimension_expr_kernel_for_N(
   // All the types matched, so instantiate the elementwise handler
   return elwise_handler->instantiate(
       elwise_handler, ckb, ckb_offset, child_dst_tp, child_dst_arrmeta,
-      child_src_tp, child_src_arrmeta, kernel_request_strided, NULL, ectx);
+      child_src_tp, child_src_arrmeta, kernel_request_strided, nd::array(), ectx);
 }
 
 static size_t make_elwise_strided_or_var_to_var_dimension_expr_kernel(
