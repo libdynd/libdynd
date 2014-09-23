@@ -230,7 +230,7 @@ static array_preamble *function___call__(const array_preamble *params, void *DYN
     af->instantiate(af, &ckb, 0, args[0].get_type(),
                          args[0].get_arrmeta(), src_tp,
                          dynd_arrmeta, kernel_request_single,
-                         NULL, &eval::default_eval_context);
+                         nd::array(), &eval::default_eval_context);
     // Call the ckernel
     expr_single_t usngo = ckb.get()->get_function<expr_single_t>();
     const char *in_ptrs[max_args];

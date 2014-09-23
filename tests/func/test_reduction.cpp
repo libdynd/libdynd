@@ -116,7 +116,7 @@ TEST(Reduction, BuiltinSum_Lift0D_NoIdentity) {
     const char *src_arrmeta[1] = {a.get_arrmeta()};
     af.instantiate(&af, &ckb, 0, b.get_type(), b.get_arrmeta(),
                         src_tp, src_arrmeta, kernel_request_single,
-                        NULL, &eval::default_eval_context);
+                        nd::array(), &eval::default_eval_context);
 
     // Call it on the data
     ckb(b.get_readwrite_originptr(), a.get_readonly_originptr());
@@ -148,7 +148,7 @@ TEST(Reduction, BuiltinSum_Lift0D_WithIdentity) {
     const char *src_arrmeta[1] = {a.get_arrmeta()};
     af.instantiate(&af, &ckb, 0, b.get_type(), b.get_arrmeta(),
                         src_tp, src_arrmeta, kernel_request_single,
-                        NULL, &eval::default_eval_context);
+                        nd::array(), &eval::default_eval_context);
 
     // Call it on the data
     ckb(b.get_readwrite_originptr(), a.get_readonly_originptr());
@@ -180,7 +180,7 @@ TEST(Reduction, BuiltinSum_Lift1D_NoIdentity) {
     const char *src_arrmeta[1] = {a.get_arrmeta()};
     af.instantiate(&af, &ckb, 0, b.get_type(), b.get_arrmeta(),
                         src_tp, src_arrmeta, kernel_request_single,
-                        NULL, &eval::default_eval_context);
+                        nd::array(), &eval::default_eval_context);
 
     // Call it on the data
     ckb(b.get_readwrite_originptr(), a.get_readonly_originptr());
@@ -194,7 +194,7 @@ TEST(Reduction, BuiltinSum_Lift1D_NoIdentity) {
     src_arrmeta[0] = a.get_arrmeta();
     af.instantiate(&af, &ckb, 0, b.get_type(), b.get_arrmeta(),
                         src_tp, src_arrmeta, kernel_request_single,
-                        NULL, &eval::default_eval_context);
+                        nd::array(), &eval::default_eval_context);
 
     // Call it on the data
     ckb(b.get_readwrite_originptr(), a.get_readonly_originptr());
@@ -227,7 +227,7 @@ TEST(Reduction, BuiltinSum_Lift1D_WithIdentity) {
     const char *src_arrmeta[1] = {a.get_arrmeta()};
     af.instantiate(&af, &ckb, 0, b.get_type(), b.get_arrmeta(),
                         src_tp, src_arrmeta, kernel_request_single,
-                        NULL, &eval::default_eval_context);
+                        nd::array(), &eval::default_eval_context);
 
     // Call it on the data
     ckb(b.get_readwrite_originptr(), a.get_readonly_originptr());
@@ -260,7 +260,7 @@ TEST(Reduction, BuiltinSum_Lift2D_StridedStrided_ReduceReduce) {
     const char *src_arrmeta[1] = {a.get_arrmeta()};
     af.instantiate(&af, &ckb, 0, b.get_type(), b.get_arrmeta(),
                         src_tp, src_arrmeta, kernel_request_single,
-                        NULL, &eval::default_eval_context);
+                        nd::array(), &eval::default_eval_context);
 
     // Call it on the data
     ckb(b.get_readwrite_originptr(), a.get_readonly_originptr());
@@ -276,7 +276,7 @@ TEST(Reduction, BuiltinSum_Lift2D_StridedStrided_ReduceReduce) {
     src_arrmeta[0] = a.get_arrmeta();
     af.instantiate(&af, &ckb, 0, b.get_type(), b.get_arrmeta(),
                         src_tp, src_arrmeta, kernel_request_single,
-                        NULL, &eval::default_eval_context);
+                        nd::array(), &eval::default_eval_context);
 
     // Call it on the data
     ckb(b.get_readwrite_originptr(), a.get_readonly_originptr());
@@ -309,7 +309,7 @@ TEST(Reduction, BuiltinSum_Lift2D_StridedStrided_ReduceReduce_KeepDim) {
     const char *src_arrmeta[1] = {a.get_arrmeta()};
     af.instantiate(&af, &ckb, 0, b.get_type(), b.get_arrmeta(),
                         src_tp, src_arrmeta, kernel_request_single,
-                        NULL, &eval::default_eval_context);
+                        nd::array(), &eval::default_eval_context);
 
     // Call it on the data
     ckb(b.get_readwrite_originptr(), a.get_readonly_originptr());
@@ -343,7 +343,7 @@ TEST(Reduction, BuiltinSum_Lift2D_StridedStrided_BroadcastReduce) {
     const char *src_arrmeta[1] = {a.get_arrmeta()};
     af.instantiate(&af, &ckb, 0, b.get_type(), b.get_arrmeta(),
                         src_tp, src_arrmeta, kernel_request_single,
-                        NULL, &eval::default_eval_context);
+                        nd::array(), &eval::default_eval_context);
 
     // Call it on the data
     ckb(b.get_readwrite_originptr(), a.get_readonly_originptr());
@@ -362,7 +362,7 @@ TEST(Reduction, BuiltinSum_Lift2D_StridedStrided_BroadcastReduce) {
     src_arrmeta[0] = a.get_arrmeta();
     af.instantiate(&af, &ckb, 0, b.get_type(), b.get_arrmeta(),
                         src_tp, src_arrmeta, kernel_request_single,
-                        NULL, &eval::default_eval_context);
+                        nd::array(), &eval::default_eval_context);
 
     // Call it on the data
     ckb(b.get_readwrite_originptr(), a.get_readonly_originptr());
@@ -397,7 +397,7 @@ TEST(Reduction, BuiltinSum_Lift2D_StridedStrided_BroadcastReduce_KeepDim) {
     const char *src_arrmeta[1] = {a.get_arrmeta()};
     af.instantiate(&af, &ckb, 0, b.get_type(), b.get_arrmeta(),
                         src_tp, src_arrmeta, kernel_request_single,
-                        NULL, &eval::default_eval_context);
+                        nd::array(), &eval::default_eval_context);
 
     // Call it on the data
     ckb(b.get_readwrite_originptr(), a.get_readonly_originptr());
@@ -433,7 +433,7 @@ TEST(Reduction, BuiltinSum_Lift2D_StridedStrided_ReduceBroadcast) {
     const char *src_arrmeta[1] = {a.get_arrmeta()};
     af.instantiate(&af, &ckb, 0, b.get_type(), b.get_arrmeta(),
                         src_tp, src_arrmeta, kernel_request_single,
-                        NULL, &eval::default_eval_context);
+                        nd::array(), &eval::default_eval_context);
 
     // Call it on the data
     ckb(b.get_readwrite_originptr(), a.get_readonly_originptr());
@@ -453,7 +453,7 @@ TEST(Reduction, BuiltinSum_Lift2D_StridedStrided_ReduceBroadcast) {
     src_arrmeta[0] = a.get_arrmeta();
     af.instantiate(&af, &ckb, 0, b.get_type(), b.get_arrmeta(),
                         src_tp, src_arrmeta, kernel_request_single,
-                        NULL, &eval::default_eval_context);
+                        nd::array(), &eval::default_eval_context);
 
     // Call it on the data
     ckb(b.get_readwrite_originptr(), a.get_readonly_originptr());
@@ -489,7 +489,7 @@ TEST(Reduction, BuiltinSum_Lift2D_StridedStrided_ReduceBroadcast_KeepDim) {
     const char *src_arrmeta[1] = {a.get_arrmeta()};
     af.instantiate(&af, &ckb, 0, b.get_type(), b.get_arrmeta(),
                         src_tp, src_arrmeta, kernel_request_single,
-                        NULL, &eval::default_eval_context);
+                        nd::array(), &eval::default_eval_context);
 
     // Call it on the data
     ckb(b.get_readwrite_originptr(), a.get_readonly_originptr());
@@ -526,7 +526,7 @@ TEST(Reduction, BuiltinSum_Lift3D_StridedStridedStrided_ReduceReduceReduce) {
     const char *src_arrmeta[1] = {a.get_arrmeta()};
     af.instantiate(&af, &ckb, 0, b.get_type(), b.get_arrmeta(),
                         src_tp, src_arrmeta, kernel_request_single,
-                        NULL, &eval::default_eval_context);
+                        nd::array(), &eval::default_eval_context);
 
     // Call it on the data
     ckb(b.get_readwrite_originptr(), a.get_readonly_originptr());
@@ -562,7 +562,7 @@ TEST(Reduction, BuiltinSum_Lift3D_StridedStridedStrided_BroadcastReduceReduce) {
     const char *src_arrmeta[1] = {a.get_arrmeta()};
     af.instantiate(&af, &ckb, 0, b.get_type(), b.get_arrmeta(),
                         src_tp, src_arrmeta, kernel_request_single,
-                        NULL, &eval::default_eval_context);
+                        nd::array(), &eval::default_eval_context);
 
     // Call it on the data
     ckb(b.get_readwrite_originptr(), a.get_readonly_originptr());
@@ -600,7 +600,7 @@ TEST(Reduction, BuiltinSum_Lift3D_StridedStridedStrided_ReduceBroadcastReduce) {
     const char *src_arrmeta[1] = {a.get_arrmeta()};
     af.instantiate(&af, &ckb, 0, b.get_type(), b.get_arrmeta(),
                         src_tp, src_arrmeta, kernel_request_single,
-                        NULL, &eval::default_eval_context);
+                        nd::array(), &eval::default_eval_context);
 
     // Call it on the data
     ckb(b.get_readwrite_originptr(), a.get_readonly_originptr());

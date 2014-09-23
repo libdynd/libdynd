@@ -828,11 +828,11 @@ static size_t make_strided_inner_reduction_dimension_kernel(
     const char *src_arrmeta_doubled[2] = {src_arrmeta, src_arrmeta};
     ckb_offset = elwise_reduction->instantiate(
         elwise_reduction, ckb, ckb_offset, dst_tp, dst_arrmeta, src_tp_doubled,
-        src_arrmeta_doubled, kernel_request_strided, NULL, ectx);
+        src_arrmeta_doubled, kernel_request_strided, nd::array(), ectx);
   } else {
     ckb_offset = elwise_reduction->instantiate(
         elwise_reduction, ckb, ckb_offset, dst_tp, dst_arrmeta, &src_tp,
-        &src_arrmeta, kernel_request_strided, NULL, ectx);
+        &src_arrmeta, kernel_request_strided, nd::array(), ectx);
   }
   // Make sure there's capacity for the next ckernel
   ckb->ensure_capacity(ckb_offset);
@@ -842,7 +842,7 @@ static size_t make_strided_inner_reduction_dimension_kernel(
   if (dst_initialization != NULL) {
     ckb_offset = dst_initialization->instantiate(
         dst_initialization, ckb, ckb_offset, dst_tp, dst_arrmeta, &src_tp,
-        &src_arrmeta, kernel_request_single, NULL, ectx);
+        &src_arrmeta, kernel_request_single, nd::array(), ectx);
   } else if (reduction_identity.is_null()) {
     ckb_offset =
         make_assignment_kernel(ckb, ckb_offset, dst_tp, dst_arrmeta, src_tp,
@@ -960,11 +960,11 @@ static size_t make_strided_inner_broadcast_dimension_kernel(
     const char *src_arrmeta_doubled[2] = {src_arrmeta, src_arrmeta};
     ckb_offset = elwise_reduction->instantiate(
         elwise_reduction, ckb, ckb_offset, dst_tp, dst_arrmeta, src_tp_doubled,
-        src_arrmeta_doubled, kernel_request_strided, NULL, ectx);
+        src_arrmeta_doubled, kernel_request_strided, nd::array(), ectx);
   } else {
     ckb_offset = elwise_reduction->instantiate(
         elwise_reduction, ckb, ckb_offset, dst_tp, dst_arrmeta, &src_tp,
-        &src_arrmeta, kernel_request_strided, NULL, ectx);
+        &src_arrmeta, kernel_request_strided, nd::array(), ectx);
   }
   // Make sure there's capacity for the next ckernel
   ckb->ensure_capacity(ckb_offset);
@@ -974,7 +974,7 @@ static size_t make_strided_inner_broadcast_dimension_kernel(
   if (dst_initialization != NULL) {
     ckb_offset = dst_initialization->instantiate(
         dst_initialization, ckb, ckb_offset, dst_tp, dst_arrmeta, &src_tp,
-        &src_arrmeta, kernel_request_strided, NULL, ectx);
+        &src_arrmeta, kernel_request_strided, nd::array(), ectx);
   } else if (reduction_identity.is_null()) {
     ckb_offset =
         make_assignment_kernel(ckb, ckb_offset, dst_tp, dst_arrmeta, src_tp,
@@ -1010,7 +1010,7 @@ size_t dynd::make_lifted_reduction_ckernel(
             if (dst_initialization != NULL) {
                 return dst_initialization->instantiate(
                     dst_initialization, ckb, ckb_offset, dst_tp,
-                    dst_arrmeta, &src_tp, &src_arrmeta, kernreq, NULL, ectx);
+                    dst_arrmeta, &src_tp, &src_arrmeta, kernreq, nd::array(), ectx);
             } else if (reduction_identity.is_null()) {
                 return make_assignment_kernel(ckb, ckb_offset, dst_tp,
                                               dst_arrmeta, src_tp, src_arrmeta,

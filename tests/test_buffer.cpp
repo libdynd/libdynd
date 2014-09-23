@@ -10,12 +10,17 @@
 #include "inc_gtest.hpp"
 
 #include <dynd/func/functor_arrfunc.hpp>
+#include <dynd/types/struct_type.hpp>
 
 using namespace std;
 using namespace dynd;
 
 struct func_aux_buffer : aux_buffer {
     int val;
+
+    static void unpack(func_aux_buffer &dst, const nd::array &src) {
+        dst.val = src.p("val").as<int>();
+    }
 };
 
 struct func_thread_aux_buffer : thread_aux_buffer {
@@ -49,14 +54,14 @@ void func_with_aux_and_thread_aux(int &dst, int src, func_aux_buffer *aux, func_
 */
 
 TEST(Buffer, Aux) {
-    func_aux_buffer aux;
-    aux.val = 7;
+    nd::array aux = nd::empty(ndt::make_struct(ndt::make_type<int>(), "val"));
+    aux.p("val").vals() = 7;
 
     nd::arrfunc af = nd::make_functor_arrfunc(ret_func_with_aux);
-    EXPECT_EQ(12, af(5, &aux).as<int>());
+    EXPECT_EQ(12, af(5, aux, true).as<int>());
 
     af = nd::make_functor_arrfunc(ref_func_with_aux);
-    EXPECT_EQ(12, af(5, &aux).as<int>());
+    EXPECT_EQ(12, af(5, aux, true).as<int>());
 
 /*
 TODO: Need thread_aux to reenable.
