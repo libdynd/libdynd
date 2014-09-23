@@ -78,7 +78,7 @@ TEST(ArrFunc, Assignment_CallInterface) {
 
     // Call it with some incompatible arguments
     EXPECT_THROW(af(12345), invalid_argument);
-    EXPECT_THROW(af(false, NULL), invalid_argument);
+    EXPECT_THROW(af(false), invalid_argument);
 
     // Test with the expr operation prototype
     af = make_arrfunc_from_assignment(ndt::make_type<int>(), ndt::make_string(),
@@ -91,7 +91,7 @@ TEST(ArrFunc, Assignment_CallInterface) {
 
     // Call it with some incompatible arguments
     EXPECT_THROW(af(12345), invalid_argument);
-    EXPECT_THROW(af(false, NULL), invalid_argument);
+    EXPECT_THROW(af(false), invalid_argument);
 }
 
 TEST(ArrFunc, Property) {
@@ -135,7 +135,7 @@ TEST(ArrFunc, AssignmentAsExpr) {
     ckernel_builder ckb;
     af.instantiate(&af, &ckb, 0, af.get_return_type(), NULL,
                    af.get_param_types(), src_arrmeta, kernel_request_single,
-                   NULL, &eval::default_eval_context);
+                   nd::array(), &eval::default_eval_context);
     int int_out = 0;
     char str_in[16] = "3251";
     char *str_in_ptr = str_in;
@@ -147,7 +147,7 @@ TEST(ArrFunc, AssignmentAsExpr) {
     ckb.reset();
     af.instantiate(&af, &ckb, 0, af.get_return_type(), NULL,
                    af.get_param_types(), src_arrmeta, kernel_request_strided,
-                   NULL, &eval::default_eval_context);
+                   nd::array(), &eval::default_eval_context);
     int ints_out[3] = {0, 0, 0};
     char strs_in[3][16] = {"123", "4567", "891029"};
     char *strs_in_ptr = strs_in[0];
