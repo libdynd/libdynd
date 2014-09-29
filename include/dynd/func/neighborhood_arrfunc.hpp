@@ -21,7 +21,6 @@ namespace dynd {
  * \param neighborhood_op  An arrfunc object which transforms a neighborhood into
  *                         a single output value. Signature
  *                         '(strided * strided * NH, strided * strided * MSK) -> OUT',
- * \param window_size  The size of the rolling window.
  */
 void make_neighborhood_arrfunc(arrfunc_type_data *out_af,
                                  const nd::arrfunc &neighborhood_op,

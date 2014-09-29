@@ -67,7 +67,6 @@ inline bool DYND_ISNAN(long double x) {
 
 #elif defined(__GNUC__)
 
-#define DYND_CXX_TR1_TYPE_TRAITS
 
 #if __GNUC__ > 4 || \
               (__GNUC__ == 4 && (__GNUC_MINOR__ >= 7))
@@ -80,10 +79,12 @@ inline bool DYND_ISNAN(long double x) {
 #  define DYND_ISNAN(x) (std::isnan(x))
 // Use static_assert on gcc >= 4.7
 #  define DYND_STATIC_ASSERT(value, message) static_assert(value, message)
+#  define DYND_CXX_TYPE_TRAITS
 #else
 // Don't use constexpr on gcc < 4.7
 #  define DYND_CONSTEXPR
 #  define DYND_ISNAN(x) isnan(x)
+#  define DYND_CXX_TR1_TYPE_TRAITS
 #endif
 
 
