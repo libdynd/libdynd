@@ -28,6 +28,24 @@ namespace {
         }
     };
 
+    template <>
+    struct range_specialization<dynd_int128> {
+      static void range(const void *beginval, const void *stepval,
+                        nd::array &result)
+      {
+        dynd_int128 begin = *reinterpret_cast<const dynd_int128 *>(beginval);
+        dynd_int128 step = *reinterpret_cast<const dynd_int128 *>(stepval);
+        intptr_t count = result.get_shape()[0],
+                 stride = result.get_strides()[0];
+        // cout << "range with count " << count << endl;
+        char *dst = result.get_readwrite_originptr();
+        for (intptr_t i = 0; i < count; ++i, dst += stride) {
+          *reinterpret_cast<dynd_int128 *>(dst) = begin;
+          begin = begin + step;
+        }
+      }
+    };
+
     template<class T, type_kind_t kind>
     struct range_counter {
         static intptr_t count(const void *beginval, const void *endval, const void *stepval) {
@@ -113,6 +131,7 @@ nd::array dynd::nd::range(const ndt::type& scalar_tp, const void *beginval, cons
         ONE_ARANGE_SPECIALIZATION(int16_t);
         ONE_ARANGE_SPECIALIZATION(int32_t);
         ONE_ARANGE_SPECIALIZATION(int64_t);
+        ONE_ARANGE_SPECIALIZATION(dynd_int128);
         ONE_ARANGE_SPECIALIZATION(uint8_t);
         ONE_ARANGE_SPECIALIZATION(uint16_t);
         ONE_ARANGE_SPECIALIZATION(uint32_t);
