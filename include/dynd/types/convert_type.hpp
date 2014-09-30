@@ -14,6 +14,7 @@
 
 #include <dynd/type.hpp>
 #include <dynd/typed_data_assign.hpp>
+#include <dynd/types/builtin_type_properties.hpp>
 
 namespace dynd {
 
@@ -58,9 +59,14 @@ public:
                     const std::pair<std::string, gfunc::callable> **out_properties,
                     size_t *out_count) const
     {
-        if (!m_value_type.is_builtin()) {
-            m_value_type.extended()->get_dynamic_array_properties(out_properties, out_count);
-        }
+      if (!m_value_type.is_builtin()) {
+        m_value_type.extended()->get_dynamic_array_properties(out_properties,
+                                                              out_count);
+      }
+      else {
+        get_builtin_type_dynamic_array_properties(m_value_type.get_type_id(),
+                                                  out_properties, out_count);
+      }
     }
     void get_dynamic_array_functions(
                     const std::pair<std::string, gfunc::callable> **out_functions,
@@ -68,6 +74,9 @@ public:
     {
         if (!m_value_type.is_builtin()) {
             m_value_type.extended()->get_dynamic_array_functions(out_functions, out_count);
+        } else {
+          *out_functions = NULL;
+          *out_count = NULL;
         }
     }
 };

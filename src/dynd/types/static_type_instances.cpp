@@ -15,6 +15,7 @@
 #include <dynd/types/strided_dim_type.hpp>
 #include <dynd/types/time_type.hpp>
 #include <dynd/types/type_type.hpp>
+#include <dynd/types/categorical_type.hpp>
 
 namespace dynd { namespace types {
 // Static instances of selected types
@@ -60,8 +61,11 @@ void dynd::init::static_types_init()
   static strided_dim_type stpt(
       *reinterpret_cast<const ndt::type *>(&types::type_tp));
   types::strided_of_type_tp = &stpt;
+  // Call initialization of individual types
+  init::categorical_type_init();
 }
 
 void dynd::init::static_types_cleanup()
 {
+  init::categorical_type_cleanup();
 }
