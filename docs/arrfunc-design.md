@@ -24,7 +24,10 @@ indexing and reduction fit into the arrfunc model.
   something like in-place ``sort``.
 * Some functions need to return views into an input
   array instead of creating fully new data. The indexing
-  operation is an example of this.
+  operation is an example of this. When doing buffering
+  operations with dynamically-allocated data, the ability
+  for the destination to gut/steal the innards of the
+  intermediate buffer would be nice.
 
 ## Design Outline
 
@@ -92,11 +95,31 @@ instantiation, depending on whether the output is
 being generated in a way which might view the input
 data. First is instantiation without allowing views.
 
+TODO: C ABI compatibility test
+
 ```
+/**
+ * @param self  The memory of the arrfunc object.
+ * @param ckb   The ckernel gets constructed in here.
+ * @param ckb_offset  Offset within ``ckb`` for the ckernel.
+ * @param dst_tp  The type of the destination.
+ * @param dst_arrmeta  The arrmeta of the destination.
+ * @param nsrc  The number of source parameters.
+ * @param src_tp  An array of all the source types.
+ * @param src_arrmeta  The arrmeta of all the source types.
+ * @param src_flags  The nd::array flags of all the src arguments,
+ *                   in particular may be checked for write access.
+ * @param kernreq  What kind of ckernel function is being requested,
+ *                 typically single or strided.
+ * @param dynd_params  The dynamic parameters for the call.
+ * @param ectx  An evaluation context instance.
+ */
 intptr_t instantiate(const arrfunc_type_data *self,
                      dynd::ckernel_builder *ckb, intptr_t ckb_offset,
                      const ndt::type &dst_tp, const char *dst_arrmeta,
+                     intptr_t nsrc,
                      const ndt::type *src_tp, const char *const *src_arrmeta,
+                     const uint64_t *src_flags,
                      kernel_request_t kernreq,
                      const nd::array &dyn_params,
                      const eval::eval_context *ectx);
@@ -106,6 +129,8 @@ Second is instantiation allowing for views, by having instantiate
 populate the output arrmeta. In this version, the output type
 should have been created by ``resolve_dst_type``, and an empty shell
 nd::array created with blank arrmeta to be filled.
+
+TODO: put view params in struct, in default-NULL parameter above
 
 ```
 intptr_t instantiate(const arrfunc_type_data *self,
