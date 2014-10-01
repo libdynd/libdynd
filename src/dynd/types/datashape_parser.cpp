@@ -929,10 +929,30 @@ static ndt::type parse_datashape_nooption(const char *&rbegin, const char *end,
     ndt::type result;
     const char *begin = rbegin;
     parse::skip_whitespace_and_pound_comments(begin, end);
-    // First try "dim ASTERISK datashape"
+    // First try "dim ASTERISK ASTERISK datashape", then "dim ASTERISK datashape"
     const char *nbegin, *nend;
     if (parse_name_or_number(begin, end, nbegin, nend)) {
-        if (parse_token_ds(begin, end, '*')) {
+        if (parse_token_ds(begin, end, "**")) {
+            const char *bbegin = nbegin;
+            const char *bend = nend;
+            parse_name_or_number(begin, end, nbegin, nend);
+            if ('1' <= *nbegin && *nbegin <= '9') {
+                intptr_t pow = parse::checked_string_to_intptr(nbegin, nend);
+                if (parse_token_ds(begin, end, '*')) {
+                    ndt::type element_tp = parse_datashape(begin, end, symtable);
+                    if ('0' <= *bbegin && *bbegin <= '9') {
+                        intptr_t size = parse::checked_string_to_intptr(bbegin, bend);
+                        result = ndt::make_fixed_dim(size, element_tp, pow);
+                    } else if (parse::compare_range_to_literal(bbegin, bend, "var")) {
+                        result = make_var_dim(element_tp, pow);
+                    } else if (parse::compare_range_to_literal(bbegin, bend, "strided")) {
+                        result = make_strided_dim(element_tp, pow);
+                    } else if (isupper(*bbegin)) {
+                        result = make_typevar_dim(nd::string(bbegin, bend), element_tp, pow);
+                    }
+                }
+            }
+        } else if (parse_token_ds(begin, end, '*')) {
             ndt::type element_tp = parse_datashape(begin, end, symtable);
             if (element_tp.is_null()) {
                 throw datashape_parse_error(begin, "expected a dynd type");

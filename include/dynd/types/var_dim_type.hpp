@@ -118,6 +118,15 @@ public:
 namespace ndt {
     type make_var_dim(const type& element_tp);
 
+    inline type make_var_dim(const type& element_tp, intptr_t ndim) {
+        type result = element_tp;
+        for (intptr_t i = 0; i < ndim; ++i) {
+            result = make_var_dim(result);
+        }
+
+        return result;
+    }
+
     /**
      * A helper function for reserving initial space in a var dim element.
      * This requires that the element being created (at `data`) is NULL, and

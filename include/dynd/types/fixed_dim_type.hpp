@@ -133,6 +133,14 @@ namespace ndt {
     ndt::type make_fixed_dim(intptr_t ndim, const intptr_t *shape,
                               const ndt::type &dtp);
 
+    inline type make_fixed_dim(size_t dim_size, const type& element_tp, intptr_t ndim) {
+        type result = element_tp;
+        for (intptr_t i = 0; i < ndim; ++i) {
+            result = make_fixed_dim(dim_size, result);
+        }
+
+        return result;
+    }
 
     template<class T> struct fixed_dim_from_array {
         static inline ndt::type make() {
