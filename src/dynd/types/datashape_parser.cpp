@@ -36,6 +36,7 @@
 #include <dynd/types/funcproto_type.hpp>
 #include <dynd/types/typevar_type.hpp>
 #include <dynd/types/typevar_dim_type.hpp>
+#include <dynd/types/typevar_dim_pow_type.hpp>
 #include <dynd/types/ellipsis_dim_type.hpp>
 #include <dynd/types/option_type.hpp>
 #include <dynd/types/adapt_type.hpp>
@@ -949,6 +950,24 @@ static ndt::type parse_datashape_nooption(const char *&rbegin, const char *end,
                         result = make_fixed_sym_dim(element_tp, pow);
                     } else if (isupper(*bbegin)) {
                         result = make_typevar_dim(nd::string(bbegin, bend), element_tp, pow);
+                    }
+                }
+            } else if (isupper(*nbegin)) {
+                nd::string pow(nbegin, nend);
+                if (parse_token_ds(begin, end, '*')) {
+                    if ('0' <= *bbegin && *bbegin <= '9') {
+                        intptr_t size = parse::checked_string_to_intptr(bbegin, bend);
+                        result = ndt::make_typevar_dim_pow(ndt::make_fixed_dim(size, ndt::make_type<void>()), pow,
+                                                           parse_datashape(begin, end, symtable));
+                    } else if (parse::compare_range_to_literal(bbegin, bend, "var")) {
+                        result = ndt::make_typevar_dim_pow(ndt::make_var_dim(ndt::make_type<void>()), pow,
+                                                           parse_datashape(begin, end, symtable));
+                    } else if (parse::compare_range_to_literal(bbegin, bend, "strided")) {
+                        result = ndt::make_typevar_dim_pow(ndt::make_strided_dim(ndt::make_type<void>()), pow,
+                                                           parse_datashape(begin, end, symtable));
+                    } else if (isupper(*bbegin)) {
+                        result = ndt::make_typevar_dim_pow(ndt::make_typevar_dim(nd::string(bbegin, bend), ndt::make_type<void>()), pow,
+                                                           parse_datashape(begin, end, symtable));
                     }
                 }
             }

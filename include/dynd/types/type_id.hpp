@@ -165,6 +165,7 @@ enum type_id_t {
     funcproto_type_id,
     typevar_type_id,
     typevar_dim_type_id,
+    typevar_dim_pow_type_id,
     ellipsis_dim_type_id,
     // A special type which holds a fragment of canonical dimensions
     // for the purpose of broadcasting together named ellipsis type vars.

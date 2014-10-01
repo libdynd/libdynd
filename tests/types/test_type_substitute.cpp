@@ -49,6 +49,9 @@ TEST(SubstituteTypeVars, SimpleSubstitution) {
   typevars["Amulti"] =
       ndt::make_dim_fragment(3, ndt::type("fixed * var * 3 * void"));
 
+  map<nd::string, intptr_t> vals;
+  vals["N"] = 3;
+
   EXPECT_EQ(ndt::type("int32"),
             ndt::substitute(ndt::type("Tint"), typevars, false));
   EXPECT_EQ(ndt::type("int32"),
@@ -71,6 +74,20 @@ TEST(SubstituteTypeVars, SimpleSubstitution) {
             ndt::substitute(ndt::type("Mvar * Tint"), typevars, false));
   EXPECT_EQ(ndt::type("var * int32"),
             ndt::substitute(ndt::type("Mvar * Tint"), typevars, true));
+
+  EXPECT_EQ(ndt::type("strided**3 * int32"),
+            ndt::substitute(ndt::type("Mstrided**N * Tint"), typevars, vals, false));
+  EXPECT_EQ(ndt::type("strided**3 * int32"),
+            ndt::substitute(ndt::type("Mstrided**N * Tint"), typevars, vals, true));
+  EXPECT_EQ(ndt::type("8**3 * int32"),
+            ndt::substitute(ndt::type("Mfixed**N * Tint"), typevars, vals, false));
+  EXPECT_EQ(ndt::type("8**3 * int32"),
+            ndt::substitute(ndt::type("Mfixed**N * Tint"), typevars, vals, true));
+  EXPECT_EQ(ndt::type("var**3 * int32"),
+            ndt::substitute(ndt::type("Mvar**N * Tint"), typevars, vals, false));
+  EXPECT_EQ(ndt::type("var**3 * int32"),
+            ndt::substitute(ndt::type("Mvar**N * Tint"), typevars, vals, true));
+
   EXPECT_EQ(
       ndt::type("var * int32"),
       ndt::substitute(ndt::type("Aempty... * Mvar * Tint"), typevars, false));
