@@ -43,7 +43,7 @@ enum array_access_flags {
 // Some additional access flags combinations for convenience
 enum {
     readwrite_access_flags = read_access_flag|write_access_flag,
-    default_access_flags = read_access_flag|immutable_access_flag,
+    default_access_flags = read_access_flag|write_access_flag,
 };
 
 /** Stream printing function */

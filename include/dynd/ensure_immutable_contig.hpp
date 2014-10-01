@@ -79,7 +79,7 @@ namespace detail {
                 const ndt::type& et = tp.get_type_at_dimension(NULL, 1).value_type();
                 if(et.get_kind() == string_kind) {
                     // It also has the same array kind as requested
-                    nd::array tmp = nd::empty(a.get_dim_size(), ndt::make_strided_of_string());
+                    nd::array tmp = nd::empty(a.get_dim_size(), ndt::make_string());
                     tmp.vals() = a;
                     tmp.flag_as_immutable();
                     a.swap(tmp);

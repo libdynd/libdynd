@@ -206,7 +206,6 @@ nd::array nd::arrfunc::call(intptr_t arg_count, const nd::array *args, const nd:
   expr_single_t fn = ckb.get()->get_function<expr_single_t>();
   fn(result.get_readwrite_originptr(), src_data.empty() ? NULL : &src_data[0],
      ckb.get());
-  result.flag_as_immutable();
   return result;
 }
 
