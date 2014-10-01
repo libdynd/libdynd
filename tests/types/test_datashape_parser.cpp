@@ -150,6 +150,8 @@ TEST(DataShapeParser, StridedDim) {
                     type_from_datashape("strided * bool"));
     EXPECT_EQ(ndt::make_strided_dim(ndt::make_type<float>(), 2),
                     type_from_datashape("strided * strided * float32"));
+    EXPECT_EQ(type_from_datashape("strided * strided * float32"),
+                    type_from_datashape("strided**2 * float32"));
 }
 
 TEST(DataShapeParser, FixedDim) {
@@ -160,6 +162,8 @@ TEST(DataShapeParser, FixedDim) {
     EXPECT_EQ(ndt::make_fixed_dim(
                   4, ndt::make_fixed_dim(3, ndt::make_type<float>())),
               type_from_datashape("4 * 3 * float32"));
+    EXPECT_EQ(type_from_datashape("7 * 7 * 7 * float32"),
+              type_from_datashape("7**3 * float32"));
 }
 
 TEST(DataShapeParser, CFixedDim) {
@@ -175,6 +179,8 @@ TEST(DataShapeParser, VarDim) {
               type_from_datashape("var * bool"));
     EXPECT_EQ(ndt::make_var_dim(ndt::make_var_dim(ndt::make_type<float>())),
               type_from_datashape("var * var * float32"));
+    EXPECT_EQ(type_from_datashape("var * var * var * var * var * float32"),
+              type_from_datashape("var**5 * float32"));
 }
 
 TEST(DataShapeParser, StridedFixedDim) {
