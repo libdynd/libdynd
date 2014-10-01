@@ -214,7 +214,7 @@ nd::array nd::make_pod_array(const ndt::type& pod_dt, const void *data)
     }
     ndo->m_data_pointer = data_ptr;
     ndo->m_data_reference = NULL;
-    ndo->m_flags = nd::default_access_flags;
+    ndo->m_flags = nd::read_access_flag | nd::immutable_access_flag;
 
     memcpy(data_ptr, data, size);
 
@@ -240,7 +240,7 @@ nd::array nd::make_bytes_array(const char *data, size_t len, size_t alignment)
     ndo->m_type = dt.release();
     ndo->m_data_pointer = data_ptr;
     ndo->m_data_reference = NULL;
-    ndo->m_flags = nd::default_access_flags;
+    ndo->m_flags = nd::read_access_flag | nd::immutable_access_flag;
     // Set the bytes arrmeta, telling the system that the bytes data was embedded in the array memory
     bytes_type_arrmeta *ndo_meta = reinterpret_cast<bytes_type_arrmeta *>(result.get_arrmeta());
     ndo_meta->blockref = NULL;
@@ -296,7 +296,7 @@ nd::array nd::make_strided_string_array(const char **cstr_array, size_t array_si
     ndo->m_type = tp.release();
     ndo->m_data_pointer = data_ptr;
     ndo->m_data_reference = NULL;
-    ndo->m_flags = default_access_flags;
+    ndo->m_flags = nd::read_access_flag | nd::immutable_access_flag;
     // Get the allocator for the output string type
     strided_dim_type_arrmeta *md =
         reinterpret_cast<strided_dim_type_arrmeta *>(
@@ -336,7 +336,7 @@ nd::array nd::make_strided_string_array(const std::string **str_array, size_t ar
     ndo->m_type = tp.release();
     ndo->m_data_pointer = data_ptr;
     ndo->m_data_reference = NULL;
-    ndo->m_flags = default_access_flags;
+    ndo->m_flags = nd::read_access_flag | nd::immutable_access_flag;
     // Get the allocator for the output string type
     strided_dim_type_arrmeta *md =
         reinterpret_cast<strided_dim_type_arrmeta *>(
@@ -380,12 +380,13 @@ static nd::array make_array_clone_with_new_type(const nd::array& n, const ndt::t
 
 // Constructors from C++ scalars
 nd::array::array(dynd_bool value)
-    : m_memblock(make_builtin_scalar_array(value, nd::default_access_flags))
+    : m_memblock(make_builtin_scalar_array(value,
+                nd::read_access_flag | nd::immutable_access_flag))
 {
 }
 nd::array::array(bool value)
     : m_memblock(make_builtin_scalar_array(dynd_bool(value),
-                nd::default_access_flags))
+                nd::read_access_flag | nd::immutable_access_flag))
 {
 }
 nd::array::array(signed char value)
@@ -394,97 +395,116 @@ nd::array::array(signed char value)
 {
 }
 nd::array::array(short value)
-    : m_memblock(make_builtin_scalar_array(value, nd::default_access_flags))
+    : m_memblock(make_builtin_scalar_array(value,
+                nd::read_access_flag | nd::immutable_access_flag))
 {
 }
 nd::array::array(int value)
-    : m_memblock(make_builtin_scalar_array(value, nd::default_access_flags))
+    : m_memblock(make_builtin_scalar_array(value,
+                nd::read_access_flag | nd::immutable_access_flag))
 {
 }
 nd::array::array(long value)
-    : m_memblock(make_builtin_scalar_array(value, nd::default_access_flags))
+    : m_memblock(make_builtin_scalar_array(value,
+                nd::read_access_flag | nd::immutable_access_flag))
 {
 }
 nd::array::array(long long value)
-    : m_memblock(make_builtin_scalar_array(value, nd::default_access_flags))
+    : m_memblock(make_builtin_scalar_array(value,
+                nd::read_access_flag | nd::immutable_access_flag))
 {
 }
 nd::array::array(const dynd_int128& value)
-    : m_memblock(make_builtin_scalar_array(value, nd::default_access_flags))
+    : m_memblock(make_builtin_scalar_array(value,
+                nd::read_access_flag | nd::immutable_access_flag))
 {
 }
 nd::array::array(unsigned char value)
-    : m_memblock(make_builtin_scalar_array(value, nd::default_access_flags))
+    : m_memblock(make_builtin_scalar_array(value,
+                nd::read_access_flag | nd::immutable_access_flag))
 {
 }
 nd::array::array(unsigned short value)
-    : m_memblock(make_builtin_scalar_array(value, nd::default_access_flags))
+    : m_memblock(make_builtin_scalar_array(value,
+                nd::read_access_flag | nd::immutable_access_flag))
 {
 }
 nd::array::array(unsigned int value)
-    : m_memblock(make_builtin_scalar_array(value, nd::default_access_flags))
+    : m_memblock(make_builtin_scalar_array(value,
+                nd::read_access_flag | nd::immutable_access_flag))
 {
 }
 nd::array::array(unsigned long value)
-    : m_memblock(make_builtin_scalar_array(value, nd::default_access_flags))
+    : m_memblock(make_builtin_scalar_array(value,
+                nd::read_access_flag | nd::immutable_access_flag))
 {
 }
 nd::array::array(unsigned long long value)
-    : m_memblock(make_builtin_scalar_array(value, nd::default_access_flags))
+    : m_memblock(make_builtin_scalar_array(value,
+                nd::read_access_flag | nd::immutable_access_flag))
 {
 }
 nd::array::array(const dynd_uint128& value)
-    : m_memblock(make_builtin_scalar_array(value, nd::default_access_flags))
+    : m_memblock(make_builtin_scalar_array(value,
+                nd::read_access_flag | nd::immutable_access_flag))
 {
 }
 nd::array::array(dynd_float16 value)
-    : m_memblock(make_builtin_scalar_array(value, nd::default_access_flags))
+    : m_memblock(make_builtin_scalar_array(value,
+                nd::read_access_flag | nd::immutable_access_flag))
 {
 }
 nd::array::array(float value)
-    : m_memblock(make_builtin_scalar_array(value, nd::default_access_flags))
+    : m_memblock(make_builtin_scalar_array(value,
+                nd::read_access_flag | nd::immutable_access_flag))
 {
 }
 nd::array::array(double value)
-    : m_memblock(make_builtin_scalar_array(value, nd::default_access_flags))
+    : m_memblock(make_builtin_scalar_array(value,
+                nd::read_access_flag | nd::immutable_access_flag))
 {
 }
 nd::array::array(const dynd_float128& value)
-    : m_memblock(make_builtin_scalar_array(value, nd::default_access_flags))
+    : m_memblock(make_builtin_scalar_array(value,
+                nd::read_access_flag | nd::immutable_access_flag))
 {
 }
 nd::array::array(dynd_complex<float> value)
-    : m_memblock(make_builtin_scalar_array(value, nd::default_access_flags))
+    : m_memblock(make_builtin_scalar_array(value,
+                nd::read_access_flag | nd::immutable_access_flag))
 {
 }
 nd::array::array(dynd_complex<double> value)
-    : m_memblock(make_builtin_scalar_array(value, nd::default_access_flags))
+    : m_memblock(make_builtin_scalar_array(value,
+                nd::read_access_flag | nd::immutable_access_flag))
 {
 }
 nd::array::array(std::complex<float> value)
-    : m_memblock(make_builtin_scalar_array(value, nd::default_access_flags))
+    : m_memblock(make_builtin_scalar_array(value,
+                nd::read_access_flag | nd::immutable_access_flag))
 {
 }
 nd::array::array(std::complex<double> value)
-    : m_memblock(make_builtin_scalar_array(value, nd::default_access_flags))
+    : m_memblock(make_builtin_scalar_array(value,
+                nd::read_access_flag | nd::immutable_access_flag))
 {
 }
 nd::array::array(const std::string& value)
 {
     array temp = make_string_array(value.c_str(), value.size(),
-                    string_encoding_utf_8, nd::default_access_flags);
+                    string_encoding_utf_8, nd::read_access_flag | nd::immutable_access_flag);
     temp.swap(*this);
 }
 nd::array::array(const char *cstr)
 {
     array temp = make_string_array(cstr, strlen(cstr),
-                    string_encoding_utf_8, nd::default_access_flags);
+                    string_encoding_utf_8, nd::read_access_flag | nd::immutable_access_flag);
     temp.swap(*this);
 }
 nd::array::array(const char *str, size_t size)
 {
     array temp = make_string_array(str, size,
-                    string_encoding_utf_8, nd::default_access_flags);
+                    string_encoding_utf_8, nd::read_access_flag | nd::immutable_access_flag);
     temp.swap(*this);
 }
 nd::array::array(const ndt::type& tp)
@@ -492,7 +512,7 @@ nd::array::array(const ndt::type& tp)
     array temp(nd::typed_empty(0, static_cast<const intptr_t *>(NULL), ndt::make_type()));
     temp.swap(*this);
     ndt::type(tp).swap(reinterpret_cast<type_type_data *>(get_ndo()->m_data_pointer)->tp);
-    get_ndo()->m_flags = nd::default_access_flags;
+    get_ndo()->m_flags = nd::read_access_flag | nd::immutable_access_flag;
 }
 
 nd::array nd::array_rw(dynd_bool value)
