@@ -473,7 +473,7 @@ set(libdynd_SRC
     include/dynd/arrmeta_holder.hpp
     include/dynd/atomic_refcount.hpp
     include/dynd/auxiliary_data.hpp
-	include/dynd/buffer.hpp
+    include/dynd/buffer.hpp
     include/dynd/buffer_storage.hpp
     include/dynd/config.hpp
     include/dynd/cmake_config.hpp.in # Included here for ease of editing in IDEs
@@ -486,7 +486,7 @@ set(libdynd_SRC
     include/dynd/ensure_immutable_contig.hpp
     include/dynd/random.hpp
     include/dynd/fft.hpp
-	include/dynd/funcproto.hpp
+    include/dynd/funcproto.hpp
     include/dynd/type.hpp
     include/dynd/typed_data_assign.hpp
     include/dynd/type_promotion.hpp
@@ -590,9 +590,7 @@ if (DYND_SHARED_LIB)
     endif()
     set_target_properties(libdynd
         PROPERTIES
-        # For now, during development, embed the full version string
-        # to reduce the chance of accidentally linking the wrong one.
-        OUTPUT_NAME "dynd_${DYND_VERSION_STRING}"
+        OUTPUT_NAME "dynd"
         PREFIX "${CMAKE_SHARED_LIBRARY_PREFIX}"
         )
 else()
