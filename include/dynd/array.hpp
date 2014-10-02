@@ -122,6 +122,8 @@ public:
     /** Specialize to create 1D arrays of strings */
     template<int N>
     array(const char *(&rhs)[N]);
+    template<int N>
+    array(const std::string *(&rhs)[N]);
     /** Specialize to create 1D arrays of ndt::types */
     template<int N>
     array(const ndt::type (&rhs)[N]);
@@ -1488,6 +1490,12 @@ inline nd::array::array(const char (&rhs)[N])
 
 template<int N>
 inline nd::array::array(const char *(&rhs)[N])
+{
+    make_strided_string_array(rhs, N).swap(*this);
+}
+
+template<int N>
+inline nd::array::array(const std::string *(&rhs)[N])
 {
     make_strided_string_array(rhs, N).swap(*this);
 }

@@ -11,8 +11,11 @@
 
 #include <dynd/type.hpp>
 #include <dynd/types/base_struct_type.hpp>
+#include <dynd/types/pointer_type.hpp>
 #include <dynd/types/type_type.hpp>
 #include <dynd/memblock/memory_block.hpp>
+#include <dynd/pp/list.hpp>
+#include <dynd/pp/meta.hpp>
 
 namespace dynd {
 
@@ -215,6 +218,96 @@ namespace ndt {
         return ndt::make_struct(field_names, field_types);
     }
 } // namespace ndt
+
+namespace detail {
+
+template <typename T>
+struct pack {
+    static ndt::type make_type(const T &DYND_UNUSED(val)) {
+        return ndt::make_type<T>();
+    }
+
+    static void insert(nd::array &a, const std::string &name, const T &val) {
+        a.p(name).vals() = val;
+    }
+};
+
+template <>
+struct pack<nd::array> {
+    static ndt::type make_type(const nd::array &val) {
+        return ndt::make_pointer(val.get_type());
+    }
+
+    static void insert(nd::array &a, const std::string &name, const nd::array &val) {
+        a.p(name).val_assign(combine_into_tuple(1, &val)(0));
+    }
+};
+
+template <typename T>
+void pack_insert(nd::array &a, const std::string &name, const T &val) {
+    pack<T>::insert(a, name, val);
+}
+
+} // namespace detail
+
+template <typename T>
+ndt::type make_pack_type(const T &val) {
+    return detail::pack<T>::make_type(val);
+}
+
+#define PACK_ARG(N) DYND_PP_ELWISE_1(DYND_PP_ID, \
+    DYND_PP_MAP_1(DYND_PP_META_DECL_CONST_STR_REF, DYND_PP_META_NAME_RANGE(name, N)), \
+    DYND_PP_ELWISE_1(DYND_PP_META_DECL_CONST_REF, DYND_PP_META_NAME_RANGE(A, N), DYND_PP_META_NAME_RANGE(a, N)))
+
+#define PACK(N) \
+    template <DYND_PP_JOIN_MAP_1(DYND_PP_META_TYPENAME, (,), DYND_PP_META_NAME_RANGE(A, N))> \
+    nd::array pack PACK_ARG(N) { \
+        const std::string *field_names[N] = {DYND_PP_JOIN_1((,), DYND_PP_META_NAME_RANGE(&name, N))}; \
+        const ndt::type field_types[N] = {DYND_PP_JOIN_MAP_1(make_pack_type, (,), DYND_PP_META_NAME_RANGE(a, N))}; \
+\
+        nd::array res = nd::empty(ndt::make_struct(field_names, field_types)); \
+        DYND_PP_JOIN_ELWISE_1(detail::pack_insert, (;), \
+            DYND_PP_REPEAT_1(res, N), DYND_PP_META_NAME_RANGE(name, N), DYND_PP_META_NAME_RANGE(a, N)); \
+\
+        return res; \
+    }
+
+DYND_PP_JOIN_MAP(PACK, (), DYND_PP_RANGE(1, DYND_PP_INC(DYND_ARG_MAX)))
+
+#undef PACK
+
+#define PACK(N) \
+    template <DYND_PP_JOIN_MAP_1(DYND_PP_META_TYPENAME, (,), DYND_PP_META_NAME_RANGE(A, N))> \
+    nd::array pack DYND_PP_PREPEND(const nd::array &aux, PACK_ARG(N)) { \
+        if (aux.is_null()) { \
+            return pack DYND_PP_ELWISE_1(DYND_PP_ID, DYND_PP_META_NAME_RANGE(name, N), DYND_PP_META_NAME_RANGE(a, N)); \
+        } \
+\
+        const nd::array &old_field_names = aux.get_dtype().tcast<base_struct_type>()->get_field_names(); \
+        const std::string *new_field_names[N] = {DYND_PP_JOIN_1((,), DYND_PP_META_NAME_RANGE(&name, N))}; \
+        nd::array field_names = nd::empty(old_field_names.get_dim_size() + N, ndt::make_string()); \
+        field_names(irange() < old_field_names.get_dim_size()).val_assign(old_field_names); \
+        field_names(old_field_names.get_dim_size() <= irange()).val_assign(new_field_names); \
+\
+        const nd::array &old_field_types = aux.get_dtype().tcast<base_struct_type>()->get_field_types(); \
+        const ndt::type new_field_types[N] = {DYND_PP_JOIN_MAP_1(make_pack_type, (,), DYND_PP_META_NAME_RANGE(a, N))}; \
+        nd::array field_types = nd::empty(old_field_types.get_dim_size() + N, ndt::make_type()); \
+        field_types(irange() < old_field_types.get_dim_size()).val_assign(old_field_types); \
+        field_types(old_field_types.get_dim_size() <= irange()).val_assign(new_field_types); \
+\
+        nd::array res = nd::empty(ndt::make_struct(field_names, field_types)); \
+        res(irange() < aux.get_dim_size()).val_assign(aux); \
+        DYND_PP_JOIN_ELWISE_1(detail::pack_insert, (;), \
+            DYND_PP_REPEAT_1(res, N), DYND_PP_META_NAME_RANGE(name, N), DYND_PP_META_NAME_RANGE(a, N)); \
+\
+        return res; \
+    }
+
+DYND_PP_JOIN_MAP(PACK, (), DYND_PP_RANGE(1, DYND_PP_INC(DYND_ARG_MAX)))
+
+#undef PACK
+
+#undef PACK_ARG
 
 } // namespace dynd
 
