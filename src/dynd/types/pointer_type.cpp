@@ -107,18 +107,10 @@ ndt::type pointer_type::apply_linear_index(intptr_t nindices, const irange *indi
                 size_t current_i, const ndt::type& root_tp, bool leading_dimension) const
 {
     if (nindices == 0) {
-        if (leading_dimension) {
-            // Even with 0 indices, throw away the pointer when it's a leading dimension
-            return m_target_tp.apply_linear_index(0, NULL, current_i, root_tp, true);
-        } else {
-            return ndt::type(this, true);
-        }
+        return ndt::type(this, true);
     } else {
         ndt::type dt = m_target_tp.apply_linear_index(nindices, indices, current_i, root_tp, leading_dimension);
-        if (leading_dimension) {
-            // If it's a leading dimension, throw away the pointer
-            return dt;
-        } else if (dt == m_target_tp) {
+        if (dt == m_target_tp) {
             return ndt::type(this, true);
         } else {
             return ndt::make_pointer(dt);
@@ -130,45 +122,25 @@ intptr_t pointer_type::apply_linear_index(
     intptr_t nindices, const irange *indices, const char *arrmeta,
     const ndt::type &result_tp, char *out_arrmeta,
     memory_block_data *embedded_reference, size_t current_i,
-    const ndt::type &root_tp, bool leading_dimension, char **inout_data,
-    memory_block_data **inout_dataref) const
+    const ndt::type &root_tp, bool DYND_UNUSED(leading_dimension), char **DYND_UNUSED(inout_data),
+    memory_block_data **DYND_UNUSED(inout_dataref)) const
 {
-    if (leading_dimension) {
-        // If it's a leading dimension, we always throw away the pointer
-        const pointer_type_arrmeta *md = reinterpret_cast<const pointer_type_arrmeta *>(arrmeta);
-        *inout_data = *reinterpret_cast<char **>(*inout_data) + md->offset;
-        if (*inout_dataref) {
-            memory_block_decref(*inout_dataref);
-        }
-        *inout_dataref = md->blockref ? md->blockref : embedded_reference;
-        memory_block_incref(*inout_dataref);
-        if (m_target_tp.is_builtin()) {
-            return 0;
-        } else {
-            return m_target_tp.extended()->apply_linear_index(nindices, indices,
-                            arrmeta + sizeof(pointer_type_arrmeta),
-                            result_tp, out_arrmeta,
-                            embedded_reference, current_i, root_tp,
-                            true, inout_data, inout_dataref);
-        }
-    } else {
-        const pointer_type_arrmeta *md = reinterpret_cast<const pointer_type_arrmeta *>(arrmeta);
-        pointer_type_arrmeta *out_md = reinterpret_cast<pointer_type_arrmeta *>(out_arrmeta);
-        // If there are no more indices, copy the rest verbatim
-        out_md->blockref = md->blockref;
-        memory_block_incref(out_md->blockref);
-        out_md->offset = md->offset;
-        if (!m_target_tp.is_builtin()) {
-            const pointer_type *pdt = result_tp.tcast<pointer_type>();
-            // The indexing may cause a change to the arrmeta offset
-            out_md->offset += m_target_tp.extended()->apply_linear_index(nindices, indices,
-                            arrmeta + sizeof(pointer_type_arrmeta),
-                            pdt->m_target_tp, out_arrmeta + sizeof(pointer_type_arrmeta),
-                            embedded_reference, current_i, root_tp,
-                            false, NULL, NULL);
-        }
-        return 0;
+    const pointer_type_arrmeta *md = reinterpret_cast<const pointer_type_arrmeta *>(arrmeta);
+    pointer_type_arrmeta *out_md = reinterpret_cast<pointer_type_arrmeta *>(out_arrmeta);
+    // If there are no more indices, copy the rest verbatim
+    out_md->blockref = md->blockref;
+    memory_block_incref(out_md->blockref);
+    out_md->offset = md->offset;
+    if (!m_target_tp.is_builtin()) {
+        const pointer_type *pdt = result_tp.tcast<pointer_type>();
+        // The indexing may cause a change to the arrmeta offset
+        out_md->offset += m_target_tp.extended()->apply_linear_index(nindices, indices,
+                        arrmeta + sizeof(pointer_type_arrmeta),
+                        pdt->m_target_tp, out_arrmeta + sizeof(pointer_type_arrmeta),
+                        embedded_reference, current_i, root_tp,
+                        false, NULL, NULL);
     }
+    return 0;
 }
 
 ndt::type pointer_type::at_single(intptr_t i0, const char **inout_arrmeta,
@@ -187,7 +159,7 @@ ndt::type pointer_type::at_single(intptr_t i0, const char **inout_arrmeta,
                 *reinterpret_cast<const char *const *>(inout_data) + md->offset;
         }
     }
-    return m_target_tp.at_single(i0, inout_arrmeta, inout_data);
+    return ndt::make_pointer(m_target_tp.at_single(i0, inout_arrmeta, inout_data));
 }
 
 ndt::type pointer_type::get_type_at_dimension(char **inout_arrmeta, intptr_t i,
@@ -196,8 +168,10 @@ ndt::type pointer_type::get_type_at_dimension(char **inout_arrmeta, intptr_t i,
     if (i == 0) {
         return ndt::type(this, true);
     } else {
-        *inout_arrmeta += sizeof(pointer_type_arrmeta);
-        return m_target_tp.get_type_at_dimension(inout_arrmeta, i, total_ndim);
+        if (inout_arrmeta != NULL) {
+            *inout_arrmeta += sizeof(pointer_type_arrmeta);
+        }
+        return ndt::make_pointer(m_target_tp.get_type_at_dimension(inout_arrmeta, i, total_ndim));
     }
 }
 
@@ -349,6 +323,20 @@ void pointer_type::arrmeta_debug_print(const char *arrmeta, std::ostream &o,
         m_target_tp.extended()->arrmeta_debug_print(
             arrmeta + sizeof(pointer_type_arrmeta), o, indent + " ");
     }
+}
+
+size_t pointer_type::make_assignment_kernel(
+    ckernel_builder *ckb, intptr_t ckb_offset, const ndt::type &dst_tp,
+    const char *dst_arrmeta, const ndt::type &src_tp, const char *src_arrmeta,
+    kernel_request_t kernreq, const eval::eval_context *ectx) const
+{
+    if (*this == *src_tp.extended()) {
+        return make_pod_typed_data_assignment_kernel(ckb, ckb_offset, get_data_size(), get_data_alignment(), kernreq);
+    }
+
+    return base_expr_type::make_assignment_kernel(ckb, ckb_offset,
+                    dst_tp, dst_arrmeta, src_tp, src_arrmeta,
+                    kernreq, ectx);
 }
 
 static ndt::type property_get_target_type(const ndt::type &tp)

@@ -6,7 +6,9 @@
 #include <iostream>
 #include <sstream>
 #include <stdexcept>
+
 #include "inc_gtest.hpp"
+#include "../dynd_assertions.hpp"
 
 #include <dynd/array.hpp>
 #include <dynd/types/struct_type.hpp>
@@ -466,3 +468,40 @@ TEST(StructType, SingleCompareDifferentArrmeta) {
     EXPECT_THROW((b > a), not_comparable_error);
 }
 
+TEST(StructType, Pack) {
+    nd::array a, b;
+
+    a = pack("val", 5);
+    EXPECT_EQ(a.get_type(),
+        ndt::make_struct(ndt::make_type<int>(), "val"));
+    EXPECT_EQ(a.p("val").as<int>(), 5);
+
+    a = pack("val0", -3, "val1", 7.5);
+    EXPECT_EQ(a.get_type(),
+        ndt::make_struct(ndt::make_type<int>(), "val0", ndt::make_type<double>(), "val1"));
+    EXPECT_EQ(a.p("val0").as<int>(), -3);
+    EXPECT_EQ(a.p("val1").as<double>(), 7.5);
+
+    a = pack(a, "val2", 10);
+    EXPECT_EQ(a.get_type(),
+        ndt::make_struct(ndt::make_type<int>(), "val0", ndt::make_type<double>(), "val1", ndt::make_type<int>(), "val2"));
+    EXPECT_EQ(a.p("val0").as<int>(), -3);
+    EXPECT_EQ(a.p("val1").as<double>(), 7.5);
+    EXPECT_EQ(a.p("val2").as<int>(), 10);
+
+    a = pack("val0", 2.3, "val1", 7.5f, "val2", std::complex<double>(0.0, 1.0));
+    EXPECT_EQ(a.get_type(),
+        ndt::make_struct(ndt::make_type<double>(), "val0", ndt::make_type<float>(), "val1", ndt::make_type<std::complex<double> >(), "val2"));
+    EXPECT_EQ(a.p("val0").as<double>(), 2.3);
+    EXPECT_EQ(a.p("val1").as<float>(), 7.5f);
+    EXPECT_EQ(a.p("val2").as<std::complex<double> >(), std::complex<double>(0.0, 1.0));
+
+    b = parse_json("4 * int", "[0, 1, 2, 3]");
+
+    a = pack("val0", 5, "val1", b);
+    EXPECT_EQ(a.get_type(),
+        ndt::make_struct(ndt::make_type<int>(), "val0", ndt::make_pointer(b.get_type()), "val1"));
+    EXPECT_EQ(a.p("val0").as<int>(), 5);
+    EXPECT_EQ(*reinterpret_cast<const char *const *>(a.p("val1").get_readonly_originptr()),
+        b.get_readonly_originptr());
+}
