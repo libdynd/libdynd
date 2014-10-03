@@ -166,6 +166,7 @@ void allocate_executable_memory(memory_block_data * self       //in
     }
 
     emb->m_pivot = end;
+#ifndef NDEBUG
     assert(ptr_in_range(begin
                         , emb->m_allocated_chunks.back()
                         , ptr_offset(emb->m_allocated_chunks.back()
@@ -174,6 +175,7 @@ void allocate_executable_memory(memory_block_data * self       //in
                         , emb->m_allocated_chunks.back()
                         , ptr_offset(emb->m_allocated_chunks.back()
                         , emb->m_chunk_size)));
+#endif
     assert(((int8_t*)end - (int8_t*)begin) == size_bytes);
     assert(emb->m_pivot == end);
     *out_begin = static_cast<char*>(begin);

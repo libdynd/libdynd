@@ -76,7 +76,7 @@ public:
             m_value_type.extended()->get_dynamic_array_functions(out_functions, out_count);
         } else {
           *out_functions = NULL;
-          *out_count = NULL;
+          *out_count = 0;
         }
     }
 };

@@ -38,6 +38,17 @@ static nd::arrfunc make_ufunc(T0 f0, T1 f1, T2 f2)
       make_multidispatch_arrfunc(sizeof(af) / sizeof(af[0]), af));
 }
 
+template <typename T0, typename T1, typename T2, typename T3, typename T4>
+static nd::arrfunc make_ufunc(T0 f0, T1 f1, T2 f2, T3 f3, T4 f4)
+{
+  nd::arrfunc af[5] = {
+      nd::make_functor_arrfunc(f0), nd::make_functor_arrfunc(f1),
+      nd::make_functor_arrfunc(f2), nd::make_functor_arrfunc(f3),
+      nd::make_functor_arrfunc(f4)};
+  return lift_arrfunc(
+      make_multidispatch_arrfunc(sizeof(af) / sizeof(af[0]), af));
+}
+
 template <typename T0, typename T1, typename T2, typename T3, typename T4,
           typename T5, typename T6>
 static nd::arrfunc make_ufunc(T0 f0, T1 f1, T2 f2, T3 f3, T4 f4, T5 f5, T6 f6)
@@ -105,7 +116,7 @@ template <typename T>
 struct sign {
   // Note that by returning `x` in the else case, NaN will pass
   // through
-  inline T operator()(T x) const { return x > 0 ? 1 : (x < 0 ? -1 : x); }
+  inline T operator()(T x) const { return x > T(0) ? 1 : (x < T(0) ? -1 : x); }
 };
 template <>
 struct sign<dynd_int128> {
@@ -192,10 +203,9 @@ void init::arrfunc_registry_init()
       make_ufunc(negative<int32_t>(), negative<int64_t>(),
                  negative<dynd_int128>(), negative<float>(), negative<double>(),
                  negative<complex<float> >(), negative<complex<double> >()));
-  func::set_regfunction(
-      "sign", make_ufunc(sign<uint32_t>(), sign<uint64_t>(),
-                         sign<dynd_uint128>(), sign<int32_t>(), sign<int64_t>(),
-                         sign<dynd_int128>(), sign<float>(), sign<double>()));
+  func::set_regfunction("sign", make_ufunc(sign<int32_t>(), sign<int64_t>(),
+                                           sign<dynd_int128>(), sign<float>(),
+                                           sign<double>()));
   func::set_regfunction("conj", make_ufunc(conj_fn<complex<float> >(), conj_fn<complex<double> >()));
 
   func::set_regfunction("logaddexp",
