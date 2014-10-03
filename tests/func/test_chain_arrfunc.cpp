@@ -22,8 +22,8 @@
 #include <dynd/func/call_callable.hpp>
 #include <dynd/func/chain_arrfunc.hpp>
 #include <dynd/func/copy_arrfunc.hpp>
-#include <dynd/func/math_arrfunc.hpp>
 #include <dynd/types/adapt_type.hpp>
+#include <dynd/func/arrfunc_registry.hpp>
 
 using namespace std;
 using namespace dynd;
@@ -31,7 +31,7 @@ using namespace dynd;
 TEST(ChainArrFunc, Simple) {
   const nd::arrfunc &copy = make_copy_arrfunc();
   const nd::arrfunc &chained = make_chain_arrfunc(
-      copy, math::sin, ndt::make_type<double>());
+      copy, func::get_regfunction("sin"), ndt::make_type<double>());
   nd::array a = nd::empty<double>();
   chained.call_out("0", a);
   EXPECT_EQ(0., a.as<double>());

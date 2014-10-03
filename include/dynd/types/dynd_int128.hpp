@@ -196,9 +196,14 @@ public:
 DYND_CUDA_HOST_DEVICE inline bool operator==(int lhs, const dynd_int128& rhs) {
     return rhs == lhs;
 }
-
 DYND_CUDA_HOST_DEVICE inline bool operator!=(int lhs, const dynd_int128& rhs) {
     return rhs != lhs;
+}
+DYND_CUDA_HOST_DEVICE inline bool operator<(const dynd_int128& lhs, int rhs) {
+    return lhs < dynd_int128(rhs);
+}
+DYND_CUDA_HOST_DEVICE inline bool operator>(const dynd_int128& lhs, int rhs) {
+    return lhs > dynd_int128(rhs);
 }
 
 DYND_CUDA_HOST_DEVICE inline bool operator<(float lhs, const dynd_int128& rhs) {
@@ -230,6 +235,37 @@ DYND_CUDA_HOST_DEVICE inline bool operator<(long long lhs, const dynd_int128& rh
 }
 DYND_CUDA_HOST_DEVICE inline bool operator<(unsigned long long lhs, const dynd_int128& rhs) {
     return dynd_int128(lhs) < rhs;
+}
+
+DYND_CUDA_HOST_DEVICE inline bool operator>(float lhs, const dynd_int128& rhs) {
+    return lhs > double(rhs);
+}
+DYND_CUDA_HOST_DEVICE inline bool operator>(double lhs, const dynd_int128& rhs) {
+    return lhs > double(rhs);
+}
+DYND_CUDA_HOST_DEVICE inline bool operator>(signed char lhs, const dynd_int128& rhs) {
+    return dynd_int128(lhs) > rhs;
+}
+DYND_CUDA_HOST_DEVICE inline bool operator>(unsigned char lhs, const dynd_int128& rhs) {
+    return dynd_int128(lhs) > rhs;
+}
+DYND_CUDA_HOST_DEVICE inline bool operator>(short lhs, const dynd_int128& rhs) {
+    return dynd_int128(lhs) > rhs;
+}
+DYND_CUDA_HOST_DEVICE inline bool operator>(unsigned short lhs, const dynd_int128& rhs) {
+    return dynd_int128(lhs) > rhs;
+}
+DYND_CUDA_HOST_DEVICE inline bool operator>(int lhs, const dynd_int128& rhs) {
+    return dynd_int128(lhs) > rhs;
+}
+DYND_CUDA_HOST_DEVICE inline bool operator>(unsigned int lhs, const dynd_int128& rhs) {
+    return dynd_int128(lhs) > rhs;
+}
+DYND_CUDA_HOST_DEVICE inline bool operator>(long long lhs, const dynd_int128& rhs) {
+    return dynd_int128(lhs) > rhs;
+}
+DYND_CUDA_HOST_DEVICE inline bool operator>(unsigned long long lhs, const dynd_int128& rhs) {
+    return dynd_int128(lhs) > rhs;
 }
 
 std::ostream& operator<<(std::ostream& out, const dynd_int128& val);

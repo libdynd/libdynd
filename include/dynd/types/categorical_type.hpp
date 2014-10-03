@@ -123,12 +123,18 @@ public:
 };
 
 namespace ndt {
-    inline ndt::type make_categorical(const nd::array& values) {
-        return ndt::type(new categorical_type(values), false);
-    }
+  inline ndt::type make_categorical(const nd::array &values)
+  {
+    return ndt::type(new categorical_type(values), false);
+  }
 
-    ndt::type factor_categorical(const nd::array& values);
+  ndt::type factor_categorical(const nd::array &values);
 } // namespace ndt
+
+namespace init {
+  void categorical_type_init();
+  void categorical_type_cleanup();
+} // namespace init
 
 } // namespace dynd
 

@@ -43,7 +43,7 @@ static bool can_implicitly_convert(const ndt::type &src, const ndt::type &dst)
     if (dst.get_kind() == real_kind) {
       return src.get_data_size() < dst.get_data_size();
     } else if (dst.get_kind() == complex_kind) {
-      return src.get_data_size() * 2 < dst.get_data_size();
+      return src.get_data_size() * 2 <= dst.get_data_size();
     }
   }
   return false;
@@ -63,6 +63,30 @@ static bool supercedes(const nd::arrfunc &lhs, const nd::arrfunc &rhs)
       const ndt::type &lpt = lhs.get()->get_param_type(i);
       const ndt::type &rpt = rhs.get()->get_param_type(i);
       if (!can_implicitly_convert(lpt, rpt)) {
+        return false;
+      }
+    }
+    return true;
+  }
+  return false;
+}
+
+/**
+ * Returns true if every argument type in ``lhs`` is implicitly
+ * convertible to the corresponding argument type in ``rhs``, or
+ * has kind less than the kind of the type in ``rhs``.
+ *
+ * e.g. "(int16, int16) -> int16)" and "(int32, int16) -> int32"
+ */
+static bool toposort_edge(const nd::arrfunc &lhs, const nd::arrfunc &rhs)
+{
+  intptr_t nargs = lhs.get()->get_param_count();
+  if (nargs == rhs.get()->get_param_count()) {
+    for(intptr_t i = 0; i < nargs; ++i) {
+      const ndt::type &lpt = lhs.get()->get_param_type(i);
+      const ndt::type &rpt = rhs.get()->get_param_type(i);
+      if (lpt.get_kind() >= rpt.get_kind() &&
+          !can_implicitly_convert(lpt, rpt)) {
         return false;
       }
     }
@@ -157,8 +181,8 @@ static void get_graph(intptr_t naf, const nd::arrfunc *af,
 {
   for (intptr_t i = 0; i < naf; ++i) {
     for (intptr_t j = 0; j < naf; ++j) {
-      if (i != j && supercedes(af[i], af[j])) {
-        if (!supercedes(af[j], af[i])) {
+      if (i != j && toposort_edge(af[i], af[j])) {
+        if (!toposort_edge(af[j], af[i])) {
           adjlist[i].push_back(j);
         } else {
           stringstream ss;
@@ -177,6 +201,17 @@ static void sort_arrfuncs(intptr_t naf, const nd::arrfunc *af,
 {
   vector<vector<intptr_t> > adjlist(naf);
   get_graph(naf, af, adjlist);
+
+  /*
+  cout << "Graph is: " << endl;
+  for (intptr_t i = 0; i < naf; ++i) {
+    cout << i << ": ";
+    for (size_t j = 0; j < adjlist[i].size(); ++j) {
+      cout << adjlist[i][j] << " ";
+    }
+    cout << endl;
+  }
+  //*/
   toposort(adjlist, naf, af, sorted_af);
 }
 
@@ -316,7 +351,7 @@ void dynd::make_multidispatch_arrfunc(arrfunc_type_data *out_af, intptr_t naf,
   /*
   cout << "Before: \n";
   for (intptr_t i = 0; i < naf; ++i) {
-    cout << af[i].get()->func_proto << endl;
+    cout << i << ": " << af[i].get()->func_proto << endl;
   }
   cout << endl;
   cout << "After: \n";
@@ -324,7 +359,7 @@ void dynd::make_multidispatch_arrfunc(arrfunc_type_data *out_af, intptr_t naf,
     cout << sorted_af[i].get()->func_proto << endl;
   }
   cout << endl;
-  */
+  //*/
 
   vector<pair<nd::arrfunc, nd::arrfunc> > ambig_pairs;
   get_ambiguous_pairs(naf, &sorted_af[0], ambig_pairs);

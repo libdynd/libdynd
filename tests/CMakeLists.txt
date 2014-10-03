@@ -78,6 +78,7 @@ set(tests_SRC
     func/test_neighborhood.cpp
     func/test_multidispatch_arrfunc.cpp
     func/test_reduction.cpp
+    func/test_registry.cpp
     func/test_rolling.cpp
     func/test_special.cpp
     func/test_take.cpp
