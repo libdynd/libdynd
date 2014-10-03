@@ -48,7 +48,7 @@ TEST(Neighborhood, Sum1D) {
     naf = make_neighborhood_arrfunc(af, 1, nh_shape);
     a = parse_json("4 * int",
         "[0, 1, 2, 3]");
-    EXPECT_JSON_EQ_ARR("[3, 6, 5, 3]", naf(a));
+    EXPECT_JSON_EQ_ARR("[3, 6, 5, 3]", naf(a, pack("nh_shape", nd::array(3)), true));
 
     nh_offset[0] = -1;
 
