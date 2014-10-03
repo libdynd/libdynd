@@ -5,32 +5,42 @@ compiler:
   - clang
 
 env:
-  - DYND_FFTW=OFF VALGRIND=ON
+  - VALGRIND=ON DYND_FFTW=OFF
   - DYND_FFTW=ON
-  - DYND_FFTW=ON ASAN=ON
-#  - DYND_FFTW=ON MSAN=ON
+  - ASAN=ON DYND_FFTW=ON
+  - PYTHON=ON DYND_FFTW=ON DYND_BUILD_TESTS=OFF
+#  - MSAN=ON DYND_FFTW=ON
 
 matrix:
   exclude:
     - compiler: gcc
-      env: DYND_FFTW=ON ASAN=ON
+      env: ASAN=ON DYND_FFTW=ON
     - compiler: gcc
-      env: DYND_FFTW=ON MSAN=ON
+      env: MSAN=ON DYND_FFTW=ON
+    - compiler: gcc
+      env: PYTHON=ON DYND_FFTW=ON DYND_BUILD_TESTS=OFF
 
 before_script:
   - sudo apt-get update
   - if [ "$VALGRIND" == "ON" ]; then sudo apt-get -qq install valgrind; fi
   - if [ "$DYND_FFTW" == "ON" ]; then sudo apt-get -qq install libfftw3-dev; fi
+  - if [ "$PYTHON" == "ON" ]; then sudo pip install numpy cython; fi
   - if [ "$ASAN" == "ON" ]; then export CXXFLAGS='-fsanitize=address -fno-omit-frame-pointer'; fi
   - if [ "$MSAN" == "ON" ]; then export CXXFLAGS='-fsanitize=memory -fsanitize-memory-track-origins -fno-omit-frame-pointer'; fi
+  - if [ "$DYND_BUILD_TESTS" == "" ]; then export DYND_BUILD_TESTS=ON; fi
   - mkdir build
   - cd build
-  - cmake -DDYND_FFTW=${DYND_FFTW} ..
+  - cmake -DDYND_FFTW=${DYND_FFTW} -DDYND_BUILD_TESTS=${DYND_BUILD_TESTS} ..
 
 script:
   - make
-  - ./tests/test_libdynd
+  - if [ "$DYND_BUILD_TESTS" == "ON" ]; then ./tests/test_libdynd; fi
   - if [ "$VALGRIND" == "ON" ]; then valgrind --tool=memcheck --leak-check=yes --show-reachable=yes --error-exitcode=123 ./tests/test_libdynd; fi
+  - if [ "$PYTHON" == "ON" ]; then sudo make install; sudo ldconfig; fi
+  - if [ "$PYTHON" == "ON" ]; then git clone https://github.com/ContinuumIO/dynd-python.git; fi
+  - if [ "$PYTHON" == "ON" ]; then cd dynd-python && mkdir build && cd build && cmake .. && make; fi
+  - if [ "$PYTHON" == "ON" ]; then sudo make install; fi
+  - if [ "$PYTHON" == "ON" ]; then python -c 'import dynd;dynd.test(exit=True)'; fi
 
 notifications:
   email: false
