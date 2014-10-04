@@ -358,6 +358,50 @@ void pointer_type::get_dynamic_type_properties(
     *out_count = sizeof(type_properties) / sizeof(type_properties[0]);
 }
 
+static nd::array array_function_dereference(const nd::array &self)
+{
+    // Follow the pointers to eliminate them
+    ndt::type dt = self.get_type();
+    const char *arrmeta = self.get_arrmeta();
+    char *data = self.get_ndo()->m_data_pointer;
+    memory_block_data *dataref = NULL;
+    uint64_t flags = self.get_ndo()->m_flags;
+    while (dt.get_type_id() == pointer_type_id) {
+        const pointer_type_arrmeta *md = reinterpret_cast<const pointer_type_arrmeta *>(arrmeta);
+        const pointer_type *pd = dt.tcast<pointer_type>();
+        dt = pd->get_target_type();
+        arrmeta += sizeof(pointer_type_arrmeta);
+        data = *reinterpret_cast<char **>(data) + md->offset;
+        dataref = md->blockref;
+    }
+
+    // Create an array without the pointers
+    nd::array result(make_array_memory_block(dt.is_builtin() ? 0 : dt.extended()->get_arrmeta_size()));
+    if (!dt.is_builtin()) {
+        dt.extended()->arrmeta_copy_construct(result.get_arrmeta(), arrmeta, &self.get_ndo()->m_memblockdata);
+    }
+    result.get_ndo()->m_type = dt.release();
+    result.get_ndo()->m_data_pointer = data;
+    result.get_ndo()->m_data_reference = dataref ? dataref : &self.get_ndo()->m_memblockdata;
+    memory_block_incref(result.get_ndo()->m_data_reference);
+    result.get_ndo()->m_flags = flags;
+    return result;
+
+    return self;
+}
+
+void pointer_type::get_dynamic_array_functions(
+                const std::pair<std::string, gfunc::callable> **out_functions,
+                size_t *out_count) const
+{
+    static pair<string, gfunc::callable> pointer_array_functions[] = {
+        pair<string, gfunc::callable>(
+            "dereference", gfunc::make_callable(&array_function_dereference, "self"))};
+
+    *out_functions = pointer_array_functions;
+    *out_count = sizeof(pointer_array_functions) / sizeof(pointer_array_functions[0]);
+}
+
 namespace {
     // TODO: use the PP meta stuff, but DYND_PP_LEN_MAX is set to 8 right now, would need to be 19
     struct static_pointer {
