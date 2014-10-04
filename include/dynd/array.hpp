@@ -432,6 +432,9 @@ public:
     array f(const char *function_name);
 
     /** Calls the dynamic function - #include <dynd/func/call_callable.hpp> to use it */
+    array f(const char *function_name) const;
+
+    /** Calls the dynamic function - #include <dynd/func/call_callable.hpp> to use it */
     template<class T0>
     array f(const char *function_name, const T0& p0);
 

@@ -312,6 +312,9 @@ inline nd::array callable::call(const T0& p0, const T1& p1, const T2& p2, const 
 inline nd::array nd::array::f(const char *function_name) {
     return find_dynamic_function(function_name).call(*this);
 }
+inline nd::array nd::array::f(const char *function_name) const {
+    return find_dynamic_function(function_name).call(*this);
+}
 
 /** Calls the dynamic function - #include <dynd/gfunc/call_callable.hpp> to use it */
 template<class T0>

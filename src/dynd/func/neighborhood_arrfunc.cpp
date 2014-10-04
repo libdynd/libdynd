@@ -16,6 +16,7 @@
 #include <dynd/arrmeta_holder.hpp>
 #include <dynd/types/type_pattern_match.hpp>
 #include <dynd/types/type_substitute.hpp>
+#include <dynd/func/call_callable.hpp>
 
 using namespace std;
 using namespace dynd;
@@ -80,8 +81,6 @@ struct neighborhood_ck : kernels::expr_ck<neighborhood_ck<N>, N> {
 
 struct neighborhood {
     intptr_t ndim;
-    dimvector nh_shape;
-    dimvector nh_offset;
     nd::arrfunc neighborhood_op;
 };
 
@@ -97,7 +96,13 @@ static intptr_t instantiate_neighborhood(
 {
     const neighborhood *nh = *af_self->get_data_as<const neighborhood *>();
 
-    std::cout << aux << std::endl;
+    const nd::array &shape = aux.p("shape").f("dereference");
+
+    nd::array offset;
+    try {
+        offset = aux.p("offset").f("dereference");
+    } catch (...) {
+    }
 
     // Process the dst array striding/types
     const size_stride_t *dst_shape;
@@ -129,7 +134,7 @@ static intptr_t instantiate_neighborhood(
     arrmeta_holder(nh_src_tp[0]).swap(nh_arrmeta);
     size_stride_t *nh_src0_arrmeta = reinterpret_cast<size_stride_t *>(nh_arrmeta.get());
     for (intptr_t i = 0; i < nh->ndim; ++i) {
-        nh_src0_arrmeta[i].dim_size = nh->nh_shape[i];
+        nh_src0_arrmeta[i].dim_size = shape(i).as<intptr_t>();
         nh_src0_arrmeta[i].stride = src0_shape[i].stride;
     }
     const char *nh_src_arrmeta[1] = {nh_arrmeta.get()};
@@ -142,17 +147,17 @@ static intptr_t instantiate_neighborhood(
 
         self->dst_stride = dst_shape[i].stride;
         for (intptr_t j = 0; j < N; ++j) {
-            self->src_offset[j] = nh->nh_offset[i] * src0_shape[i].stride;
+            self->src_offset[j] = offset.is_null() ? 0 : (offset(i).as<intptr_t>() * src0_shape[i].stride);
             self->src_stride[j] = src0_shape[i].stride;
         }
 
-        self->count[0] = -nh->nh_offset[i];
+        self->count[0] = offset.is_null() ? 0 : -offset(i).as<intptr_t>();
         if (self->count[0] < 0) {
             self->count[0] = 0;
         } else if (self->count[0] > dst_shape[i].dim_size) {
             self->count[0] = dst_shape[i].dim_size;
         }
-        self->count[2] = nh->nh_shape[i] + nh->nh_offset[i] - 1;
+        self->count[2] = shape(i).as<intptr_t>() + (offset.is_null() ? 0 : offset(i).as<intptr_t>()) - 1;
         if (self->count[2] < 0) {
             self->count[2] = 0;
         } else if (self->count[2] > (dst_shape[i].dim_size - self->count[0])) {
@@ -160,11 +165,10 @@ static intptr_t instantiate_neighborhood(
         }
         self->count[1] = dst_shape[i].dim_size - self->count[0] - self->count[2];
 
-        self->nh_size = nh->nh_shape[i];
+        self->nh_size = shape(i).as<intptr_t>();
         self->nh_start_stop = nh_start_stop + i;
     }
 
-    std::cout << reinterpret_cast<intptr_t>(nh_start_stop) << std::endl;
     ckb_offset = nh->neighborhood_op.get()->instantiate(
         nh->neighborhood_op.get(), ckb, ckb_offset, nh_dst_tp, nh_dst_arrmeta,
         nh_src_tp, nh_src_arrmeta, kernel_request_single, pack(aux, "start_stop", reinterpret_cast<intptr_t>(nh_start_stop)), ectx);
@@ -196,8 +200,7 @@ static void resolve_neighborhood_dst_shape(const arrfunc_type_data *self,
     }
 }
 
-void dynd::make_neighborhood_arrfunc(arrfunc_type_data *out_af, const nd::arrfunc &neighborhood_op,
-                                     intptr_t nh_ndim, const intptr_t *nh_shape, const intptr_t *nh_offset)
+void dynd::make_neighborhood_arrfunc(arrfunc_type_data *out_af, const nd::arrfunc &neighborhood_op, intptr_t nh_ndim)
 {
     std::ostringstream oss;
     oss << "strided**" << nh_ndim;
@@ -219,14 +222,5 @@ void dynd::make_neighborhood_arrfunc(arrfunc_type_data *out_af, const nd::arrfun
     neighborhood **nh = out_af->get_data_as<neighborhood *>();
     *nh = new neighborhood;
     (*nh)->ndim = nh_ndim;
-    (*nh)->nh_shape.init(nh_ndim, nh_shape);
-    if (nh_offset == NULL) {
-        (*nh)->nh_offset.init(nh_ndim);
-        for (intptr_t i = 0; i < nh_ndim; ++i) {
-            (*nh)->nh_offset[i] = 0;
-        }
-    } else {
-        (*nh)->nh_offset.init(nh_ndim, nh_offset);
-    }
     (*nh)->neighborhood_op = neighborhood_op;
 }

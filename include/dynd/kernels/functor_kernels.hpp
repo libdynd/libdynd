@@ -133,7 +133,6 @@ struct functor_ck;
             e->func = *af_self->get_data_as<func_type>(); \
             DYND_PP_JOIN_ELWISE_1(INIT_TYPED_PARAM_FROM_BYTES, (;), DYND_PP_META_NAME_RANGE(e->from_src, N), \
                 DYND_PP_META_AT_RANGE(src_tp, N), DYND_PP_META_AT_RANGE(src_arrmeta, N)); \
-            std::cout << aux << std::endl; \
 \
             return ckb_offset; \
         } \
