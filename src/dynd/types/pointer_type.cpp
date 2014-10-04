@@ -159,7 +159,9 @@ ndt::type pointer_type::at_single(intptr_t i0, const char **inout_arrmeta,
                 *reinterpret_cast<const char *const *>(inout_data) + md->offset;
         }
     }
-    return ndt::make_pointer(m_target_tp.at_single(i0, inout_arrmeta, inout_data));
+    // In at_single, we can't maintain a pointer wrapper, this would result in
+    // a type inconsistent with its arrmeta.
+    return m_target_tp.at_single(i0, inout_arrmeta, inout_data);
 }
 
 ndt::type pointer_type::get_type_at_dimension(char **inout_arrmeta, intptr_t i,
