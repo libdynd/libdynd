@@ -136,6 +136,7 @@ template <typename T>
 struct conj_fn {
   inline T operator()(T x) const { return conj(x); };
 };
+#if !(defined(_MSC_VER) && _MSC_VER < 1700)
 template <typename T>
 struct logaddexp {
   inline T operator()(T x, T y) const
@@ -167,6 +168,7 @@ struct logaddexp2 {
     }
   }
 };
+#endif
 } // anonymous namespace
 
 void init::arrfunc_registry_init()
@@ -208,11 +210,12 @@ void init::arrfunc_registry_init()
                                            sign<double>()));
   func::set_regfunction("conj", make_ufunc(conj_fn<complex<float> >(), conj_fn<complex<double> >()));
 
+#if !(defined(_MSC_VER) && _MSC_VER < 1700)
   func::set_regfunction("logaddexp",
                         make_ufunc(logaddexp<float>(), logaddexp<double>()));
   func::set_regfunction("logaddexp2",
                         make_ufunc(logaddexp2<float>(), logaddexp2<double>()));
-
+#endif
 
   // Trig functions
   func::set_regfunction(
@@ -241,6 +244,7 @@ void init::arrfunc_registry_init()
       "cosh", make_ufunc(&::coshf, static_cast<double (*)(double)>(&::cosh)));
   func::set_regfunction(
       "tanh", make_ufunc(&::tanhf, static_cast<double (*)(double)>(&::tanh)));
+#if !(defined(_MSC_VER) && _MSC_VER < 1700)
   func::set_regfunction(
       "asinh",
       make_ufunc(&::asinhf, static_cast<double (*)(double)>(&::asinh)));
@@ -250,6 +254,7 @@ void init::arrfunc_registry_init()
   func::set_regfunction(
       "atanh",
       make_ufunc(&::atanhf, static_cast<double (*)(double)>(&::atanh)));
+#endif
 
   func::set_regfunction(
       "power",
