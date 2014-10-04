@@ -97,6 +97,8 @@ static intptr_t instantiate_neighborhood(
 {
     const neighborhood *nh = *af_self->get_data_as<const neighborhood *>();
 
+    std::cout << aux << std::endl;
+
     // Process the dst array striding/types
     const size_stride_t *dst_shape;
     ndt::type nh_dst_tp;
@@ -174,14 +176,6 @@ static void free_neighborhood(arrfunc_type_data *self_af) {
     delete nh;
 }
 
-inline std::string gen(int n) {
-    if (n == 1) {
-        return "strided";
-    }
-
-    return "strided * " + gen(n - 1);
-}
-
 static void resolve_neighborhood_dst_shape(const arrfunc_type_data *self,
                                            intptr_t *out_shape,
                                            const ndt::type &dst_tp,
@@ -205,8 +199,10 @@ static void resolve_neighborhood_dst_shape(const arrfunc_type_data *self,
 void dynd::make_neighborhood_arrfunc(arrfunc_type_data *out_af, const nd::arrfunc &neighborhood_op,
                                      intptr_t nh_ndim, const intptr_t *nh_shape, const intptr_t *nh_offset)
 {
-    ndt::type nhop_pattern("(" + gen(nh_ndim) + " * NH) -> OUT");
-    ndt::type result_pattern("(" + gen(nh_ndim) + " * NH) -> " + gen(nh_ndim) + " * OUT");
+    std::ostringstream oss;
+    oss << "strided**" << nh_ndim;
+    ndt::type nhop_pattern("(" + oss.str() + " * NH) -> OUT");
+    ndt::type result_pattern("(" + oss.str() + " * NH) -> " + oss.str() + " * OUT");
 
     map<nd::string, ndt::type> typevars;
     if (!ndt::pattern_match(neighborhood_op.get()->func_proto, nhop_pattern, typevars)) {

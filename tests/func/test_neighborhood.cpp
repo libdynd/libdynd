@@ -34,12 +34,6 @@ int sum(const nd::strided_vals<int, N> &nh) {
 TEST(Neighborhood, Sum1D) {
     nd::arrfunc af = nd::make_functor_arrfunc(sum<1>), naf;
 
-/*
-    nd::array nh_shape2 = nd::typed_empty(1, ndt::make_fixed_dim(1, ndt::make_type<intptr_t>()));
-    pack("shape", nh_shape2);
-    nh_shape2.vals() = nh_shape;
-*/
-
     intptr_t nh_shape[1], nh_offset[1];
     nd::array a, mask;
 
@@ -48,7 +42,8 @@ TEST(Neighborhood, Sum1D) {
     naf = make_neighborhood_arrfunc(af, 1, nh_shape);
     a = parse_json("4 * int",
         "[0, 1, 2, 3]");
-    EXPECT_JSON_EQ_ARR("[3, 6, 5, 3]", naf(a, pack("nh_shape", nd::array(3)), true));
+    EXPECT_JSON_EQ_ARR("[3, 6, 5, 3]", naf(a, pack("nh_shape", parse_json("1 * int", "[3]")), true));
+    std::exit(-1);
 
     nh_offset[0] = -1;
 
