@@ -13,6 +13,7 @@
 #include <dynd/types/funcproto_type.hpp>
 #include <dynd/types/arrfunc_type.hpp>
 #include <dynd/kernels/ckernel_builder.hpp>
+#include <dynd/types/struct_type.hpp>
 #include <dynd/types/type_pattern_match.hpp>
 #include <dynd/types/type_substitute.hpp>
 
@@ -211,6 +212,31 @@ struct arrfunc_type_data {
   }
 };
 
+struct kwds {
+private:
+    nd::array m_kwds;
+
+public:
+    template <typename A0>
+    kwds(const std::string &name0, const A0 &a0)
+        : m_kwds(pack(name0, a0)) {
+    }
+
+    template <typename A0, typename A1>
+    kwds(const std::string &name0, const A0 &a0, const std::string &name1, const A1 &a1)
+        : m_kwds(pack(name0, a0, name1, a1)) {
+    }
+
+    template <typename A0, typename A1, typename A2>
+    kwds(const std::string &name0, const A0 &a0, const std::string &name1, const A1 &a1, const std::string &name2, const A1 &a2)
+        : m_kwds(pack(name0, a0, name1, a1, name2, a2)) {
+    }
+
+    const nd::array &get() const {
+        return m_kwds;
+    }
+};
+
 namespace nd {
 /**
  * Holds a single instance of an arrfunc in an immutable nd::array,
@@ -250,6 +276,8 @@ public:
   /** Implements the general call operator */
   nd::array call(intptr_t arg_count, const nd::array *args, const nd::array &aux,
                  const eval::eval_context *ectx) const;
+  nd::array call(intptr_t arg_count, const nd::array *args, const kwds &kwds,
+                 const eval::eval_context *ectx) const;
   inline nd::array call(intptr_t arg_count, const nd::array *args,
                  const eval::eval_context *ectx) const
   {
@@ -268,6 +296,10 @@ public:
     } else {
       return call(1, &a0, &eval::default_eval_context);
     }
+  }
+  inline nd::array operator()(const nd::array &a0, const kwds &kwds) const
+  {
+    return call(1, &a0, kwds, &eval::default_eval_context);
   }
   template <typename T>
   inline nd::array operator()(const nd::array &a0, const T &a1) const {
