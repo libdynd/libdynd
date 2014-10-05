@@ -406,14 +406,12 @@ bool var_dim_type::operator==(const base_type& rhs) const
     }
 }
 
-void var_dim_type::arrmeta_default_construct(char *arrmeta, intptr_t ndim,
-                                             const intptr_t *shape,
+void var_dim_type::arrmeta_default_construct(char *arrmeta,
                                              bool blockref_alloc) const
 {
-  size_t element_size =
-      m_element_tp.is_builtin()
-          ? m_element_tp.get_data_size()
-          : m_element_tp.extended()->get_default_data_size(ndim - 1, shape + 1);
+  size_t element_size = m_element_tp.is_builtin()
+                            ? m_element_tp.get_data_size()
+                            : m_element_tp.extended()->get_default_data_size();
 
   var_dim_type_arrmeta *md = reinterpret_cast<var_dim_type_arrmeta *>(arrmeta);
   md->stride = element_size;
@@ -432,8 +430,7 @@ void var_dim_type::arrmeta_default_construct(char *arrmeta, intptr_t ndim,
   }
   if (!m_element_tp.is_builtin()) {
     m_element_tp.extended()->arrmeta_default_construct(
-        arrmeta + sizeof(var_dim_type_arrmeta), ndim ? (ndim - 1) : 0,
-        shape + 1, blockref_alloc);
+        arrmeta + sizeof(var_dim_type_arrmeta), blockref_alloc);
   }
 }
 

@@ -30,7 +30,7 @@ public:
 
     virtual ~strided_dim_type();
 
-    size_t get_default_data_size(intptr_t ndim, const intptr_t *shape) const;
+    size_t get_default_data_size() const;
 
     void print_data(std::ostream& o, const char *arrmeta, const char *data) const;
 
@@ -64,9 +64,7 @@ public:
 
     bool operator==(const base_type& rhs) const;
 
-    void arrmeta_default_construct(char *arrmeta, intptr_t ndim,
-                                   const intptr_t *shape,
-                                   bool blockref_alloc) const;
+    void arrmeta_default_construct(char *arrmeta, bool blockref_alloc) const;
     void arrmeta_copy_construct(char *dst_arrmeta, const char *src_arrmeta, memory_block_data *embedded_reference) const;
     void arrmeta_reset_buffers(char *arrmeta) const;
     void arrmeta_finalize_buffers(char *arrmeta) const;

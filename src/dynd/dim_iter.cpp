@@ -181,15 +181,14 @@ void dynd::make_buffered_strided_dim_iter(
     if (!mem_tp.is_builtin()) {
         // Get the shape from mem_tp/mem_meta
         mem_tp.extended()->get_shape(buffer_ndim - 1, 0, buffer_shape.get() + 1, mem_arrmeta, NULL);
-        buffer_data_size = mem_tp.extended()->get_default_data_size(buffer_ndim - 1, buffer_shape.get() + 1);
+        buffer_data_size = mem_tp.extended()->get_default_data_size();
     }
     buffer_elcount /= buffer_data_size;
     if (buffer_elcount >= size) {
         buffer_elcount = size;
     }
     buffer_shape[0] = buffer_elcount;
-    nd::array buf = nd::array(nd::typed_empty(buffer_ndim, buffer_shape.get(),
-                                              ndt::make_strided_dim(val_tp)));
+    nd::array buf = nd::dtyped_empty(buffer_ndim, buffer_shape.get(), val_tp);
     if (buffer_ndim > 2 && val_tp.get_type_id() == strided_dim_type_id) {
         // Reorder the strides to preserve F-order if it's a strided array
         val_tp.tcast<strided_dim_type>()->reorder_default_constructed_strides(

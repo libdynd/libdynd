@@ -241,8 +241,7 @@ pointer_type::with_replaced_storage_type(const ndt::type & /*replacement_tp*/)
         "TODO: implement pointer_type::with_replaced_storage_type");
 }
 
-void pointer_type::arrmeta_default_construct(char *arrmeta, intptr_t ndim,
-                                             const intptr_t *shape,
+void pointer_type::arrmeta_default_construct(char *arrmeta,
                                              bool blockref_alloc) const
 {
   // Simply allocate a POD memory block
@@ -254,7 +253,7 @@ void pointer_type::arrmeta_default_construct(char *arrmeta, intptr_t ndim,
   }
   if (!m_target_tp.is_builtin()) {
     m_target_tp.extended()->arrmeta_default_construct(
-        arrmeta + sizeof(pointer_type_arrmeta), ndim, shape, blockref_alloc);
+        arrmeta + sizeof(pointer_type_arrmeta), blockref_alloc);
   }
 }
 

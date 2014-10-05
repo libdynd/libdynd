@@ -195,7 +195,7 @@ public:
     inline base_type_members::flags_type get_flags() const {
         return m_members.flags;
     }
-    virtual size_t get_default_data_size(intptr_t ndim, const intptr_t *shape) const;
+    virtual size_t get_default_data_size() const;
 
     /**
      * Print the raw data interpreted as a single instance of this type.
@@ -432,8 +432,6 @@ public:
      * get_default_data_size().
      *
      * \param arrmeta  The arrmeta to default construct.
-     * \param ndim  Number of dimensions in the provided shape.
-     * \param shape  The array shape to use when shape is not from the type.
      * \param blockref_alloc  If ``true``, blockref types should allocate
      *                        writable memory blocks, and if ``false``, they
      *                        should set their blockrefs to NULL. The latter
@@ -441,9 +439,7 @@ public:
      *                        the parent nd::array, and is useful for viewing
      *                        external memory with compatible layout.
      */
-    virtual void arrmeta_default_construct(char *arrmeta, intptr_t ndim,
-                                           const intptr_t *shape,
-                                           bool blockref_alloc) const;
+    virtual void arrmeta_default_construct(char *arrmeta, bool blockref_alloc) const;
     /**
      * Constructs the nd::array arrmeta for this type, copying everything exactly from
      * input arrmeta for the same type.

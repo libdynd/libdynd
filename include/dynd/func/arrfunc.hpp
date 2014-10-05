@@ -61,17 +61,20 @@ typedef intptr_t (*arrfunc_instantiate_t)(
  * of the source parameters.
  *
  * \param self  The arrfunc.
- * \param out_dst_tp  To be filled with the destination type.
+ * \param nsrc  The number of source parameters.
  * \param src_tp  An array of the source types.
+ * \param dyn_params  Dynamic parameters, generally a struct of parameters
+ *                    whose full values are passed to all phases of
+ *                    arrfunc execution.
  * \param throw_on_error  If true, should throw when there's an error, if
  *                        false, should return 0 when there's an error.
+ * \param out_dst_tp  To be filled with the destination type.
  *
  * \returns  True on success, false on error (if throw_on_error was false).
  */
-typedef int (*arrfunc_resolve_dst_type_t)(const arrfunc_type_data *self,
-                                          ndt::type &out_dst_tp,
-                                          const ndt::type *src_tp,
-                                          int throw_on_error);
+typedef int (*arrfunc_resolve_dst_type_t)(
+    const arrfunc_type_data *self, intptr_t nsrc, const ndt::type *src_tp,
+    const nd::array &dyn_params, int throw_on_error, ndt::type &out_dst_tp);
 
 /**
  * Returns the shape of the destination array for the provoided inputs
@@ -188,17 +191,23 @@ struct arrfunc_type_data {
     return func_proto.tcast<funcproto_type>()->get_return_type();
   }
 
-  inline ndt::type resolve(const ndt::type *src_tp) const
+  inline ndt::type resolve(intptr_t nsrc, const ndt::type *src_tp,
+                           const nd::array &dyn_params) const
   {
     if (resolve_dst_type != NULL) {
       ndt::type result;
-      resolve_dst_type(this, result, src_tp, true);
+      resolve_dst_type(this, nsrc, src_tp, dyn_params, true, result);
       return result;
     } else {
-      intptr_t param_count = get_param_count();
+      if (nsrc != get_param_count()) {
+        std::stringstream ss;
+        ss << "arrfunc expected " << get_param_count()
+           << " parameters, but received " << nsrc;
+        throw std::invalid_argument(ss.str());
+      }
       const ndt::type *param_types = get_param_types();
       std::map<nd::string, ndt::type> typevars;
-      for (intptr_t i = 0; i != param_count; ++i) {
+      for (intptr_t i = 0; i != nsrc; ++i) {
         if (!ndt::pattern_match(src_tp[i].value_type(), param_types[i],
                                      typevars)) {
           std::stringstream ss;

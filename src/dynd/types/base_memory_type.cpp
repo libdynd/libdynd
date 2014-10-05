@@ -13,11 +13,11 @@ base_memory_type::~base_memory_type()
 {
 }
 
-size_t base_memory_type::get_default_data_size(intptr_t ndim, const intptr_t *shape) const {
+size_t base_memory_type::get_default_data_size() const {
     if (m_storage_tp.is_builtin()) {
         return m_storage_tp.get_data_size();
     } else {
-        return m_storage_tp.extended()->get_default_data_size(ndim, shape);
+        return m_storage_tp.extended()->get_default_data_size();
     }
 }
 
@@ -56,13 +56,11 @@ ndt::type base_memory_type::get_canonical_type() const
     return m_storage_tp.get_canonical_type();
 }
 
-void base_memory_type::arrmeta_default_construct(char *arrmeta, intptr_t ndim,
-                                                 const intptr_t *shape,
-                                                 bool blockref_alloc) const
+void base_memory_type::arrmeta_default_construct(char *arrmeta, bool blockref_alloc) const
 {
   if (!m_storage_tp.is_builtin()) {
     m_storage_tp.extended()->arrmeta_default_construct(
-        arrmeta + m_storage_arrmeta_offset, ndim, shape, blockref_alloc);
+        arrmeta + m_storage_arrmeta_offset, blockref_alloc);
   }
 }
 

@@ -55,8 +55,7 @@ class buffer_storage {
       if (metasize != 0) {
         try {
           m_arrmeta = new char[metasize];
-          m_type.extended()->arrmeta_default_construct(m_arrmeta, 0, NULL,
-                                                       true);
+          m_type.extended()->arrmeta_default_construct(m_arrmeta, true);
         }
         catch (const std::exception &) {
           delete[] m_storage;

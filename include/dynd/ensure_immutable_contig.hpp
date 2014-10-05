@@ -117,8 +117,7 @@ namespace detail {
                 const ndt::type& et = tp.get_type_at_dimension(NULL, 1).value_type();
                 if(et.get_type_id() == type_type_id) {
                     // It also has the same array type as requested
-                    intptr_t dim_size = a.get_dim_size();
-                    nd::array tmp = nd::typed_empty(1, &dim_size, ndt::make_strided_of_type());
+                    nd::array tmp = nd::empty(a.get_dim_size(), ndt::make_type());
                     tmp.vals() = a;
                     tmp.flag_as_immutable();
                     a.swap(tmp);

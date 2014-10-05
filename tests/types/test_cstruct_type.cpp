@@ -102,7 +102,7 @@ TEST(CStructType, CreateOneField) {
     dt = ndt::make_cstruct(ndt::make_type<int32_t>(), "x");
     EXPECT_EQ(cstruct_type_id, dt.get_type_id());
     EXPECT_EQ(4u, dt.get_data_size());
-    EXPECT_EQ(4u, dt.extended()->get_default_data_size(0, NULL));
+    EXPECT_EQ(4u, dt.extended()->get_default_data_size());
     EXPECT_EQ(ndt::make_type<int32_t>().get_data_alignment(), dt.get_data_alignment());
     EXPECT_TRUE(dt.is_pod());
     tdt = dt.tcast<cstruct_type>();
@@ -125,7 +125,7 @@ TEST(CStructType, CreateTwoField) {
     dt = ndt::make_cstruct(ndt::make_type<int64_t>(), "a", ndt::make_type<int32_t>(), "b");
     EXPECT_EQ(cstruct_type_id, dt.get_type_id());
     EXPECT_EQ(sizeof(two_field_struct), dt.get_data_size());
-    EXPECT_EQ(sizeof(two_field_struct), dt.extended()->get_default_data_size(0, NULL));
+    EXPECT_EQ(sizeof(two_field_struct), dt.extended()->get_default_data_size());
     EXPECT_EQ(ndt::make_type<int64_t>().get_data_alignment(), dt.get_data_alignment());
     EXPECT_TRUE(dt.is_pod());
     tdt = dt.tcast<cstruct_type>();
@@ -155,7 +155,7 @@ TEST(CStructType, CreateThreeField) {
     dt = ndt::make_cstruct(d1, "x", d2, "y", d3, "z");
     EXPECT_EQ(cstruct_type_id, dt.get_type_id());
     EXPECT_EQ(sizeof(three_field_struct), dt.get_data_size());
-    EXPECT_EQ(sizeof(three_field_struct), dt.extended()->get_default_data_size(0, NULL));
+    EXPECT_EQ(sizeof(three_field_struct), dt.extended()->get_default_data_size());
     EXPECT_EQ(d1.get_data_alignment(), dt.get_data_alignment());
     EXPECT_TRUE(dt.is_pod());
     tdt = dt.tcast<cstruct_type>();

@@ -93,10 +93,9 @@ TEST(LiftArrFunc, UnaryExpr_StridedToVarDim) {
 
     // Test it on some data
     ndt::type dst_tp("var * int32");
-    ndt::type src_tp("strided * string[16]");
+    ndt::type src_tp("5 * string[16]");
     ckernel_builder ckb;
-    intptr_t five = 5;
-    nd::array in = nd::typed_empty(1, &five, src_tp);
+    nd::array in = nd::empty(src_tp);
     nd::array out = nd::empty(dst_tp);
     in(0).vals() = "172";
     in(1).vals() = "-139";

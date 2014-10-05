@@ -425,7 +425,7 @@ ndt::type ndt::make_type(intptr_t ndim, const intptr_t *shape, const ndt::type& 
         ndt::type result_tp = dtp;
         for (intptr_t i = ndim - 1; i >= 0; --i) {
             if (shape[i] >= 0) {
-                result_tp = ndt::make_strided_dim(result_tp);
+                result_tp = ndt::make_fixed_dim(shape[i], result_tp);
             }
             else {
                 result_tp = ndt::make_var_dim(result_tp);

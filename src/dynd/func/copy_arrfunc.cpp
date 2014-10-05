@@ -43,9 +43,19 @@ instantiate_copy(const arrfunc_type_data *DYND_UNUSED(af_self), dynd::ckernel_bu
 }
 
 static int resolve_dst_copy_type(const arrfunc_type_data *DYND_UNUSED(self),
-                                 ndt::type &out_dst_tp, const ndt::type *src_tp,
-                                 int DYND_UNUSED(throw_on_error))
+                                 intptr_t nsrc, const ndt::type *src_tp,
+                                 const nd::array &DYND_UNUSED(dyn_params),
+                                 int throw_on_error, ndt::type &out_dst_tp)
 {
+  if (nsrc != 1) {
+    if (throw_on_error) {
+      stringstream ss;
+      ss << "arrfunc 'copy' expected 1 argument, got " << nsrc;
+      throw std::invalid_argument(ss.str());
+    } else {
+      return 0;
+    }
+  }
   out_dst_tp = src_tp[0].get_canonical_type();
   return 1;
 }

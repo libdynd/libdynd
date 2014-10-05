@@ -342,29 +342,15 @@ bool cfixed_dim_type::operator==(const base_type &rhs) const
   }
 }
 
-void cfixed_dim_type::arrmeta_default_construct(char *arrmeta, intptr_t ndim,
-                                                const intptr_t *shape,
-                                                bool blockref_alloc) const
+void cfixed_dim_type::arrmeta_default_construct(char *arrmeta, bool blockref_alloc) const
 {
-  // Validate that the shape is ok
-  if (ndim > 0) {
-    if (shape[0] >= 0 && shape[0] != m_dim_size) {
-      stringstream ss;
-      ss << "Cannot construct dynd object of type " << ndt::type(this, true);
-      ss << " with dimension size " << shape[0] << ", the size must be "
-         << m_dim_size;
-      throw runtime_error(ss.str());
-    }
-  }
-
   cfixed_dim_type_arrmeta *md =
       reinterpret_cast<cfixed_dim_type_arrmeta *>(arrmeta);
   md->dim_size = get_fixed_dim_size();
   md->stride = get_fixed_stride();
   if (!m_element_tp.is_builtin()) {
     m_element_tp.extended()->arrmeta_default_construct(
-        arrmeta + sizeof(cfixed_dim_type_arrmeta), ndim ? (ndim - 1) : 0,
-        shape + 1, blockref_alloc);
+        arrmeta + sizeof(cfixed_dim_type_arrmeta), blockref_alloc);
   }
 }
 

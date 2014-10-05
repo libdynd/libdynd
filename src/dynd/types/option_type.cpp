@@ -272,9 +272,7 @@ bool option_type::operator==(const base_type &rhs) const
   }
 }
 
-void option_type::arrmeta_default_construct(char *arrmeta, intptr_t ndim,
-                                            const intptr_t *shape,
-                                            bool blockref_alloc) const
+void option_type::arrmeta_default_construct(char *arrmeta, bool blockref_alloc) const
 {
   if (m_nafunc.is_null()) {
     stringstream ss;
@@ -283,8 +281,7 @@ void option_type::arrmeta_default_construct(char *arrmeta, intptr_t ndim,
   }
 
   if (!m_value_tp.is_builtin()) {
-    m_value_tp.extended()->arrmeta_default_construct(arrmeta, ndim, shape,
-                                                     blockref_alloc);
+    m_value_tp.extended()->arrmeta_default_construct(arrmeta, blockref_alloc);
   }
 }
 

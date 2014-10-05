@@ -142,8 +142,7 @@ bool base_type::is_lossless_assignment(const ndt::type &dst_tp,
     return dst_tp == src_tp;
 }
 
-size_t base_type::get_default_data_size(intptr_t DYND_UNUSED(ndim),
-                                        const intptr_t *DYND_UNUSED(shape))
+size_t base_type::get_default_data_size()
     const
 {
     return get_data_size();
@@ -151,8 +150,6 @@ size_t base_type::get_default_data_size(intptr_t DYND_UNUSED(ndim),
 
 // TODO: Make this a pure virtual function eventually
 void base_type::arrmeta_default_construct(char *DYND_UNUSED(arrmeta),
-                                          intptr_t DYND_UNUSED(ndim),
-                                          const intptr_t *DYND_UNUSED(shape),
                                           bool DYND_UNUSED(blockref_alloc))
     const
 {

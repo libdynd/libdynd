@@ -36,16 +36,10 @@ fixed_dim_type::~fixed_dim_type()
 {
 }
 
-size_t fixed_dim_type::get_default_data_size(intptr_t ndim, const intptr_t *shape) const
+size_t fixed_dim_type::get_default_data_size() const
 {
     if (!m_element_tp.is_builtin()) {
-        if (ndim > 1) {
-            return m_dim_size * m_element_tp.extended()->get_default_data_size(
-                                    ndim - 1, shape + 1);
-        } else {
-            return m_dim_size *
-                   m_element_tp.extended()->get_default_data_size(0, NULL);
-        }
+      return m_dim_size * m_element_tp.extended()->get_default_data_size();
     } else {
         return m_dim_size * m_element_tp.get_data_size();
     }
@@ -299,21 +293,11 @@ bool fixed_dim_type::operator==(const base_type &rhs) const
   }
 }
 
-void fixed_dim_type::arrmeta_default_construct(char *arrmeta, intptr_t ndim,
-                                               const intptr_t *shape,
-                                               bool blockref_alloc) const
+void fixed_dim_type::arrmeta_default_construct(char *arrmeta, bool blockref_alloc) const
 {
-  // Validate that the shape is ok
-  if (ndim > 0 && shape[0] >= 0 && shape[0] != (intptr_t)m_dim_size) {
-    stringstream ss;
-    ss << "the fixed_dim type requires a shape match (provided ";
-    ss << shape[0] << ", required " << m_dim_size;
-    throw std::runtime_error(ss.str());
-  }
   size_t element_size = m_element_tp.is_builtin()
                             ? m_element_tp.get_data_size()
-                            : m_element_tp.extended()->get_default_data_size(
-                                  std::max(ndim - 1, (intptr_t)0), shape + 1);
+                            : m_element_tp.extended()->get_default_data_size();
 
   fixed_dim_type_arrmeta *md =
       reinterpret_cast<fixed_dim_type_arrmeta *>(arrmeta);
@@ -321,8 +305,7 @@ void fixed_dim_type::arrmeta_default_construct(char *arrmeta, intptr_t ndim,
   md->stride = m_dim_size > 1 ? element_size : 0;
   if (!m_element_tp.is_builtin()) {
     m_element_tp.extended()->arrmeta_default_construct(
-        arrmeta + sizeof(fixed_dim_type_arrmeta), ndim - 1, shape + 1,
-        blockref_alloc);
+        arrmeta + sizeof(fixed_dim_type_arrmeta), blockref_alloc);
   }
 }
 

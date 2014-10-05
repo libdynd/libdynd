@@ -25,8 +25,7 @@ struct unary_heap_chain_ck : public kernels::general_ck<unary_heap_chain_ck> {
   {
     self_type *self = get_self(rawself);
     // Allocate a temporary buffer on the heap
-    nd::array buf = nd::typed_empty(self->m_buf_shape.size() - 1,
-                                    &self->m_buf_shape[0] + 1, self->m_buf_tp);
+    nd::array buf = nd::empty(self->m_buf_tp);
     char *buf_data = buf.get_readwrite_originptr();
     ckernel_prefix *first = self->get_child_ckernel();
     expr_single_t first_fn = first->get_function<expr_single_t>();
@@ -42,8 +41,7 @@ struct unary_heap_chain_ck : public kernels::general_ck<unary_heap_chain_ck> {
   {
     self_type *self = get_self(rawself);
     // Allocate a temporary buffer on the heap
-    nd::array buf = nd::typed_empty(self->m_buf_shape,
-                                    ndt::make_strided_dim(self->m_buf_tp));
+    nd::array buf = nd::empty(self->m_buf_shape[0], self->m_buf_tp);
     char *buf_data = buf.get_readwrite_originptr();
     intptr_t buf_stride = reinterpret_cast<const strided_dim_type_arrmeta *>(
                               buf.get_arrmeta())->stride;
@@ -101,18 +99,8 @@ intptr_t dynd::make_chain_buf_tp_ckernel(
     unary_heap_chain_ck *self = unary_heap_chain_ck::create(ckb, kernreq, ckb_offset);
     self->m_buf_tp = buf_tp;
     arrmeta_holder(buf_tp).swap(self->m_buf_arrmeta);
-    if (buf_tp.get_ndim() == 0 || first->resolve_dst_shape == NULL) {
-      self->m_buf_arrmeta.arrmeta_default_construct(0, NULL, true);
-      self->m_buf_shape.push_back(DYND_BUFFER_CHUNK_SIZE);
-    } else {
-      intptr_t ndim = buf_tp.get_ndim();
-      vector<intptr_t> shape(ndim + 1);
-      shape[0] = DYND_BUFFER_CHUNK_SIZE;
-      first->resolve_dst_shape(first, &shape[0] + 1, buf_tp, src_tp,
-                               src_arrmeta, NULL);
-      self->m_buf_arrmeta.arrmeta_default_construct(ndim, &shape[0] + 1, true);
-      self->m_buf_shape.swap(shape);
-    }
+    self->m_buf_arrmeta.arrmeta_default_construct(true);
+    self->m_buf_shape.push_back(DYND_BUFFER_CHUNK_SIZE);
     ckb_offset = first->instantiate(first, ckb, ckb_offset, buf_tp,
                                     self->m_buf_arrmeta.get(), src_tp,
                                     src_arrmeta, kernreq, nd::array(), ectx);

@@ -286,33 +286,35 @@ static intptr_t instantiate_multidispatch_af(
   throw invalid_argument(ss.str());
 }
 
-static int resolve_multidispatch_dst_type(const arrfunc_type_data *af_self,
-                                          ndt::type &out_dst_tp,
-                                          const ndt::type *src_tp,
-                                          int throw_on_error)
+static int
+resolve_multidispatch_dst_type(const arrfunc_type_data *af_self, intptr_t nsrc,
+                               const ndt::type *src_tp,
+                               const nd::array &DYND_UNUSED(dyn_params),
+                               int throw_on_error, ndt::type &out_dst_tp)
 {
   const vector<nd::arrfunc> *icd = af_self->get_data_as<vector<nd::arrfunc> >();
   for (intptr_t i = 0; i < (intptr_t)icd->size(); ++i) {
     const nd::arrfunc &af = (*icd)[i];
-    intptr_t isrc, nsrc = af.get()->get_param_count();
-    for (isrc = 0; isrc < nsrc; ++isrc) {
-      if (!can_implicitly_convert(src_tp[isrc],
-                                  af.get()->get_param_type(isrc))) {
-        break;
+    if (nsrc == af.get()->get_param_count()) {
+      intptr_t isrc;
+      for (isrc = 0; isrc < nsrc; ++isrc) {
+        if (!can_implicitly_convert(src_tp[isrc],
+                                    af.get()->get_param_type(isrc))) {
+          break;
+        }
       }
-    }
-    if (isrc == nsrc) {
-      out_dst_tp = af.get()->get_return_type();
-      return 1;
+      if (isrc == nsrc) {
+        out_dst_tp = af.get()->get_return_type();
+        return 1;
+      }
     }
   }
  
   if (throw_on_error) {
-    intptr_t isrc, nsrc = icd->front().get()->get_param_count();
     stringstream ss;
     ss << "Failed to find suitable signature in multidispatch resolution with "
           "input types (";
-    for (isrc = 0; isrc < nsrc; ++isrc) {
+    for (intptr_t isrc = 0; isrc < nsrc; ++isrc) {
       ss << src_tp[isrc];
       if (isrc != nsrc - 1) {
         ss << ", ";

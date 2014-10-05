@@ -74,7 +74,7 @@ nd::array nd::make_strided_array(const ndt::type &dtp, intptr_t ndim,
     if (array_tp.is_builtin()) {
         data_size = array_tp.get_data_size();
     } else {
-        data_size = array_tp.extended()->get_default_data_size(ndim, shape);
+        data_size = array_tp.extended()->get_default_data_size();
     }
 
     memory_block_ptr result;
@@ -110,11 +110,11 @@ nd::array nd::make_strided_array(const ndt::type &dtp, intptr_t ndim,
         // Use the default construction to handle the uniform_tp's arrmeta
         intptr_t stride = dtp.get_data_size();
         if (stride == 0) {
-            stride = dtp.extended()->get_default_data_size(0, NULL);
+            stride = dtp.extended()->get_default_data_size();
         }
         if (!dtp.is_builtin()) {
           dtp.extended()->arrmeta_default_construct(
-              reinterpret_cast<char *>(meta + ndim), 0, NULL, true);
+              reinterpret_cast<char *>(meta + ndim), true);
         }
         if (axis_perm == NULL) {
             for (ptrdiff_t i = (ptrdiff_t)ndim - 1; i >= 0; --i) {
@@ -139,7 +139,7 @@ nd::array nd::make_strided_array(const ndt::type &dtp, intptr_t ndim,
         }
         // Fill in the array arrmeta with strides and sizes
         char *meta = reinterpret_cast<char *>(ndo + 1);
-        ndo->m_type->arrmeta_default_construct(meta, ndim, shape, true);
+        ndo->m_type->arrmeta_default_construct(meta, true);
     }
 
     return array(result);
@@ -509,7 +509,7 @@ nd::array::array(const char *str, size_t size)
 }
 nd::array::array(const ndt::type& tp)
 {
-    array temp(nd::typed_empty(0, static_cast<const intptr_t *>(NULL), ndt::make_type()));
+    array temp(nd::empty(ndt::make_type()));
     temp.swap(*this);
     ndt::type(tp).swap(reinterpret_cast<type_type_data *>(get_ndo()->m_data_pointer)->tp);
     get_ndo()->m_flags = nd::read_access_flag | nd::immutable_access_flag;
@@ -644,7 +644,7 @@ nd::array nd::array_rw(const char *str, size_t size)
 }
 nd::array nd::array_rw(const ndt::type& tp)
 {
-  array temp = array(nd::typed_empty(0, static_cast<const intptr_t *>(NULL), ndt::make_type()));
+  array temp = array(nd::empty(ndt::make_type()));
     ndt::type(tp).swap(reinterpret_cast<type_type_data *>(temp.get_ndo()->m_data_pointer)->tp);
     return temp;
 }
@@ -940,10 +940,7 @@ nd::array nd::array::eval(const eval::eval_context *ectx) const
     } else {
         // Create a canonical type for the result
         const ndt::type& dt = current_tp.get_canonical_type();
-        size_t ndim = current_tp.get_ndim();
-        dimvector shape(ndim);
-        get_shape(shape.get());
-        array result(nd::typed_empty(ndim, shape.get(), dt));
+        array result(nd::empty(dt));
         if (dt.get_type_id() == strided_dim_type_id) {
             // Reorder strides of output strided dimensions in a KEEPORDER fashion
             static_cast<const strided_dim_type *>(dt.extended())
@@ -964,10 +961,7 @@ nd::array nd::array::eval_immutable(const eval::eval_context *ectx) const
     } else {
         // Create a canonical type for the result
         const ndt::type& dt = current_tp.get_canonical_type();
-        size_t ndim = current_tp.get_ndim();
-        dimvector shape(ndim);
-        get_shape(shape.get());
-        array result(nd::typed_empty(ndim, shape.get(), dt));
+        array result(nd::empty(dt));
         if (dt.get_type_id() == strided_dim_type_id) {
             // Reorder strides of output strided dimensions in a KEEPORDER fashion
             static_cast<const strided_dim_type *>(
@@ -984,10 +978,7 @@ nd::array nd::array::eval_copy(uint32_t access_flags, const eval::eval_context *
 {
     const ndt::type& current_tp = get_type();
     const ndt::type& dt = current_tp.get_canonical_type();
-    size_t ndim = current_tp.get_ndim();
-    dimvector shape(ndim);
-    get_shape(shape.get());
-    array result(nd::typed_empty(ndim, shape.get(), dt));
+    array result(nd::empty(dt));
     if (dt.get_type_id() == strided_dim_type_id) {
         // Reorder strides of output strided dimensions in a KEEPORDER fashion
         static_cast<const strided_dim_type *>(
@@ -1663,9 +1654,7 @@ nd::array nd::eval_raw_copy(const ndt::type& dt, const char *arrmeta, const char
     size_t ndim = dt.get_ndim();
     array result;
     if (ndim > 0) {
-        dimvector shape(ndim);
-        dt.extended()->get_shape(ndim, 0, shape.get(), arrmeta, data);
-        result = nd::typed_empty(ndim, shape.get(), cdt);
+        result = nd::empty(cdt);
         // Reorder strides of output strided dimensions in a KEEPORDER fashion
         if (dt.get_type_id() == strided_dim_type_id) {
             static_cast<const strided_dim_type *>(cdt.extended())
@@ -1673,7 +1662,7 @@ nd::array nd::eval_raw_copy(const ndt::type& dt, const char *arrmeta, const char
                                                       arrmeta);
         }
     } else {
-        result = nd::typed_empty(0, static_cast<const intptr_t *>(NULL), cdt);
+        result = nd::empty(cdt);
     }
 
     typed_data_assign(cdt, result.get_arrmeta(),
@@ -1683,17 +1672,9 @@ nd::array nd::eval_raw_copy(const ndt::type& dt, const char *arrmeta, const char
     return result;
 }
 
-nd::array nd::typed_empty(intptr_t ndim, const intptr_t *shape,
-                          const ndt::type &tp)
+nd::array nd::empty(const ndt::type &tp)
 {
   if (tp.is_builtin()) {
-    // This code path builds a builtin scalar type as directly as possible
-    if (ndim != 0) {
-      stringstream ss;
-      ss << "too many dimensions provided (" << ndim
-         << ") for creating dynd array of type " << tp;
-      throw invalid_argument(ss.str());
-    }
     char *data_ptr = NULL;
     intptr_t data_size =
         static_cast<intptr_t>(dynd::detail::builtin_data_sizes
@@ -1711,15 +1692,9 @@ nd::array nd::typed_empty(intptr_t ndim, const intptr_t *shape,
     preamble->m_flags = nd::read_access_flag | nd::write_access_flag;
     return nd::array(DYND_MOVE(result));
   } else {
-    if (ndim != 0 && tp.is_scalar()) {
-      stringstream ss;
-      ss << "too many dimensions provided (" << ndim
-         << ") for creating dynd array of type " << tp;
-      throw invalid_argument(ss.str());
-    }
     char *data_ptr = NULL;
     size_t arrmeta_size = tp.extended()->get_arrmeta_size();
-    size_t data_size = tp.extended()->get_default_data_size(ndim, shape);
+    size_t data_size = tp.extended()->get_default_data_size();
     memory_block_ptr result;
     const ndt::type &dtp = tp.get_dtype();
     if (dtp.get_kind() != memory_kind) {
@@ -1742,7 +1717,7 @@ nd::array nd::typed_empty(intptr_t ndim, const intptr_t *shape,
     array_preamble *preamble = reinterpret_cast<array_preamble *>(result.get());
     preamble->m_type = ndt::type(tp).release();
     preamble->m_type->arrmeta_default_construct(
-        reinterpret_cast<char *>(preamble + 1), ndim, shape, true);
+        reinterpret_cast<char *>(preamble + 1), true);
     preamble->m_data_pointer = data_ptr;
     preamble->m_data_reference = NULL;
     preamble->m_flags = nd::read_access_flag | nd::write_access_flag;
@@ -1795,24 +1770,6 @@ nd::array nd::empty_like(const nd::array& rhs)
         }
         return result;
     }
-}
-
-nd::array nd::typed_zeros(intptr_t ndim, const intptr_t *shape,
-                          const ndt::type &tp)
-{
-    nd::array res = nd::typed_empty(ndim, shape, tp);
-    res.val_assign(0);
-
-    return res;
-}
-
-nd::array nd::typed_ones(intptr_t ndim, const intptr_t *shape,
-                          const ndt::type &tp)
-{
-    nd::array res = nd::typed_empty(ndim, shape, tp);
-    res.val_assign(1);
-
-    return res;
 }
 
 nd::array nd::concatenate(const nd::array &x, const nd::array &y) {

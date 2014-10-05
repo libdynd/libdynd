@@ -50,11 +50,9 @@ bool type_type::operator==(const base_type& rhs) const
     return this == &rhs || rhs.get_type_id() == type_type_id;
 }
 
-void type_type::arrmeta_default_construct(char *DYND_UNUSED(arrmeta),
-                                          intptr_t DYND_UNUSED(ndim),
-                                          const intptr_t *DYND_UNUSED(shape),
-                                          bool DYND_UNUSED(blockref_alloc))
-    const
+void
+type_type::arrmeta_default_construct(char *DYND_UNUSED(arrmeta),
+                                     bool DYND_UNUSED(blockref_alloc)) const
 {
 }
 

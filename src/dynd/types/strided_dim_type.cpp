@@ -32,24 +32,11 @@ strided_dim_type::~strided_dim_type()
 {
 }
 
-size_t strided_dim_type::get_default_data_size(intptr_t ndim,
-                                               const intptr_t *shape) const
+size_t strided_dim_type::get_default_data_size() const
 {
-    if (ndim == 0) {
-        throw std::runtime_error("the strided_dim type requires a shape be "
-                                 "specified for default construction");
-    } else if (shape[0] < 0) {
-        throw std::runtime_error("the strided_dim type requires a non-negative "
-                                 "shape to be specified for default "
-                                 "construction");
-    }
-
-    if (!m_element_tp.is_builtin()) {
-        return shape[0] * m_element_tp.extended()->get_default_data_size(
-                              ndim - 1, shape + 1);
-    } else {
-        return shape[0] * m_element_tp.get_data_size();
-    }
+  stringstream ss;
+  ss << "Cannot get default data size of type " << ndt::type(this, true);
+  throw runtime_error(ss.str());
 }
 
 void strided_dim_type::print_data(std::ostream &o, const char *arrmeta,
@@ -326,33 +313,12 @@ bool strided_dim_type::operator==(const base_type& rhs) const
     }
 }
 
-void strided_dim_type::arrmeta_default_construct(char *arrmeta, intptr_t ndim,
-                                                 const intptr_t *shape,
+void strided_dim_type::arrmeta_default_construct(char *arrmeta,
                                                  bool blockref_alloc) const
 {
-  // Validate that the shape is ok
-  if (ndim == 0 || shape[0] < 0) {
-    throw std::runtime_error("the strided_dim type requires a shape be "
-                             "specified for default construction");
-  }
-  size_t element_size =
-      m_element_tp.is_builtin()
-          ? m_element_tp.get_data_size()
-          : m_element_tp.extended()->get_default_data_size(ndim - 1, shape + 1);
-
-  strided_dim_type_arrmeta *md =
-      reinterpret_cast<strided_dim_type_arrmeta *>(arrmeta);
-  md->dim_size = shape[0];
-  if (shape[0] > 1) {
-    md->stride = element_size;
-  } else {
-    md->stride = 0;
-  }
-  if (!m_element_tp.is_builtin()) {
-    m_element_tp.extended()->arrmeta_default_construct(
-        arrmeta + sizeof(strided_dim_type_arrmeta), ndim - 1, shape + 1,
-        blockref_alloc);
-  }
+  stringstream ss;
+  ss << "Cannot default construct type " << ndt::type(this, true);
+  throw runtime_error(ss.str());
 }
 
 void strided_dim_type::arrmeta_copy_construct(char *dst_arrmeta, const char *src_arrmeta, memory_block_data *embedded_reference) const

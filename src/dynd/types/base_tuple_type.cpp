@@ -100,7 +100,7 @@ bool base_tuple_type::is_unique_data_owner(const char *arrmeta) const
     return true;
 }
 
-size_t base_tuple_type::get_default_data_size(intptr_t ndim, const intptr_t *shape) const
+size_t base_tuple_type::get_default_data_size() const
 {
     intptr_t field_count = get_field_count();
     // Default layout is to match the field order - could reorder the elements for more efficient packing
@@ -109,7 +109,7 @@ size_t base_tuple_type::get_default_data_size(intptr_t ndim, const intptr_t *sha
         const ndt::type& ft = get_field_type(i);
         s = inc_to_alignment(s, ft.get_data_alignment());
         if (!ft.is_builtin()) {
-            s += ft.extended()->get_default_data_size(ndim, shape);
+            s += ft.extended()->get_default_data_size();
         } else {
             s += ft.get_data_size();
         }
@@ -173,7 +173,7 @@ ndt::type base_tuple_type::apply_linear_index(intptr_t nindices, const irange *i
         } else {
             // Take the subset of the fields in-place
             nd::array tmp_field_types(
-                nd::typed_empty(1, &dimension_size, ndt::make_strided_of_type()));
+                nd::empty(dimension_size, ndt::make_type()));
             ndt::type *tmp_field_types_raw = reinterpret_cast<ndt::type *>(
                 tmp_field_types.get_readwrite_originptr());
 
@@ -248,21 +248,8 @@ intptr_t base_tuple_type::apply_linear_index(intptr_t nindices, const irange *in
     }
 }
 
-void base_tuple_type::arrmeta_default_construct(char *arrmeta, intptr_t ndim,
-                                                const intptr_t *shape,
-                                                bool blockref_alloc) const
+void base_tuple_type::arrmeta_default_construct(char *arrmeta, bool blockref_alloc) const
 {
-  // Validate that the shape is ok
-  if (ndim > 0) {
-    if (shape[0] >= 0 && shape[0] != get_field_count()) {
-      stringstream ss;
-      ss << "Cannot construct dynd object of type " << ndt::type(this, true);
-      ss << " with dimension size " << shape[0] << ", the size must be "
-         << get_field_count();
-      throw dynd::type_error(ss.str());
-    }
-  }
-
   const uintptr_t *arrmeta_offsets = get_arrmeta_offsets_raw();
   uintptr_t *data_offsets = get_arrmeta_data_offsets(arrmeta);
   if (data_offsets == NULL) {
@@ -270,7 +257,7 @@ void base_tuple_type::arrmeta_default_construct(char *arrmeta, intptr_t ndim,
       const ndt::type &field_dt = get_field_type(i);
       if (!field_dt.is_builtin()) {
         field_dt.extended()->arrmeta_default_construct(
-            arrmeta + arrmeta_offsets[i], ndim, shape, blockref_alloc);
+            arrmeta + arrmeta_offsets[i], blockref_alloc);
       }
     }
   } else {
@@ -283,7 +270,7 @@ void base_tuple_type::arrmeta_default_construct(char *arrmeta, intptr_t ndim,
         try
         {
           field_dt.extended()->arrmeta_default_construct(
-              arrmeta + arrmeta_offsets[i], ndim, shape, blockref_alloc);
+              arrmeta + arrmeta_offsets[i], blockref_alloc);
         }
         catch (...)
         {
@@ -297,7 +284,7 @@ void base_tuple_type::arrmeta_default_construct(char *arrmeta, intptr_t ndim,
           }
           throw;
         }
-        offs += field_dt.extended()->get_default_data_size(ndim, shape);
+        offs += field_dt.extended()->get_default_data_size();
       } else {
         offs += field_dt.get_data_size();
       }
