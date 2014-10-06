@@ -37,12 +37,16 @@ bool base_memory_type::is_lossless_assignment(const ndt::type& dst_tp, const ndt
     }
 }
 
-void base_memory_type::transform_child_types(type_transform_fn_t transform_fn, void *extra,
-                ndt::type& out_transformed_tp, bool& out_was_transformed) const
+void base_memory_type::transform_child_types(type_transform_fn_t transform_fn,
+                                             intptr_t arrmeta_offset,
+                                             void *extra,
+                                             ndt::type &out_transformed_tp,
+                                             bool &out_was_transformed) const
 {
     ndt::type tmp_tp;
     bool was_transformed = false;
-    transform_fn(m_storage_tp, extra, tmp_tp, was_transformed);
+    transform_fn(m_storage_tp, arrmeta_offset + m_storage_arrmeta_offset, extra,
+                 tmp_tp, was_transformed);
     if (was_transformed) {
         out_transformed_tp = with_replaced_storage_type(tmp_tp);
         out_was_transformed = true;

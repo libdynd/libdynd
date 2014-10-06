@@ -38,8 +38,10 @@ public:
 
     void print_type(std::ostream& o) const;
 
-    void transform_child_types(type_transform_fn_t transform_fn, void *extra,
-                    ndt::type& out_transformed_tp, bool& out_was_transformed) const;
+    void transform_child_types(type_transform_fn_t transform_fn,
+                               intptr_t arrmeta_offset, void *extra,
+                               ndt::type &out_transformed_tp,
+                               bool &out_was_transformed) const;
     ndt::type get_canonical_type() const;
 
     bool is_lossless_assignment(const ndt::type& dst_tp, const ndt::type& src_tp) const;

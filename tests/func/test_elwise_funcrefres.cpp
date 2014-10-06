@@ -116,11 +116,15 @@ TYPED_TEST_P(ElwiseFuncRefRes, FuncRefRes) {
     a = avals0;
     b = bvals0;
     res = nd::elwise(static_cast<void (*)(int &, TypeParam, const TypeParam &)>(&func0), a, b);
-    EXPECT_EQ(ndt::type("strided * strided * int"), res.get_type());
+    EXPECT_EQ(ndt::type("2 * 3 * int"), res.get_type());
     EXPECT_JSON_EQ_ARR("[[-10,-2,-4], [0,8,6]]", res);
 
     res = nd::elwise(func4<TypeParam>, a, b);
-    EXPECT_EQ(ndt::make_strided_dim(ndt::make_strided_dim(ndt::make_cfixed_dim(2, ndt::make_type<TypeParam>()))), res.get_type());
+    EXPECT_EQ(
+        ndt::make_fixed_dim(
+            2, ndt::make_fixed_dim(
+                   3, ndt::make_cfixed_dim(2, ndt::make_type<TypeParam>()))),
+        res.get_type());
     ASSERT_EQ(2, res.get_shape()[0]);
     ASSERT_EQ(3, res.get_shape()[1]);
     for (int i = 0; i < 2; ++i) {

@@ -31,9 +31,9 @@ TEST(VarArrayDType, Basic) {
 
 TEST(VarArrayDType, Shape) {
     ndt::type dfloat = ndt::make_type<float>();
-    ndt::type darr1 = ndt::make_strided_dim(dfloat);
+    ndt::type darr1 = ndt::make_fixed_dim(2, dfloat);
     ndt::type darr2 = ndt::make_var_dim(darr1);
-    ndt::type darr3 = ndt::make_strided_dim(darr2);
+    ndt::type darr3 = ndt::make_fixed_dim(3, darr2);
 
     intptr_t shape[3] = {3, -1, 2};
     nd::array a = nd::dtyped_empty(3, shape, dfloat);
@@ -192,12 +192,12 @@ TEST(VarArrayDType, DTypeSubscriptFixedVarStruct) {
                     "[{\"first_name\":\"Melissa\",\"last_name\":\"Philips\",\"gender\":\"F\",\"pictured\":false}]]");
 
     nd::array nlastname = n(irange(), irange(), 1);
-    EXPECT_EQ(ndt::type("strided * var * string"), nlastname.get_type());
+    EXPECT_EQ(ndt::type("2 * var * string"), nlastname.get_type());
     EXPECT_EQ("Abrams", nlastname(0,0).as<string>());
     EXPECT_EQ("Philips", nlastname(1,0).as<string>());
 
     nd::array ngender = n.p("gender");
-    EXPECT_EQ(ndt::type("strided * var * string[1]"), ngender.get_type());
+    EXPECT_EQ(ndt::type("2 * var * string[1]"), ngender.get_type());
     EXPECT_EQ("M", ngender(0,0).as<string>());
     EXPECT_EQ("F", ngender(1,0).as<string>());
 }
@@ -352,7 +352,7 @@ TEST(VarArrayDType, AssignVarStridedKernel) {
     a = nd::empty(ndt::make_var_dim(ndt::make_type<int>()));
     b = vals_int;
     EXPECT_EQ(var_dim_type_id, a.get_type().get_type_id());
-    EXPECT_EQ(strided_dim_type_id, b.get_type().get_type_id());
+    EXPECT_EQ(fixed_dim_type_id, b.get_type().get_type_id());
     make_assignment_kernel(&k, 0, a.get_type(), a.get_arrmeta(), b.get_type(),
                            b.get_arrmeta(), kernel_request_single,
                            &eval::default_eval_context);
@@ -368,7 +368,7 @@ TEST(VarArrayDType, AssignVarStridedKernel) {
     parse_json(a, "[0, 0, 0]");
     b = vals_int;
     EXPECT_EQ(var_dim_type_id, a.get_type().get_type_id());
-    EXPECT_EQ(strided_dim_type_id, b.get_type().get_type_id());
+    EXPECT_EQ(fixed_dim_type_id, b.get_type().get_type_id());
     make_assignment_kernel(&k, 0, a.get_type(), a.get_arrmeta(), b.get_type(),
                            b.get_arrmeta(), kernel_request_single,
                            &eval::default_eval_context);
@@ -384,7 +384,7 @@ TEST(VarArrayDType, AssignVarStridedKernel) {
     parse_json(a, "[0, 0, 0, 0]");
     b = vals_int;
     EXPECT_EQ(var_dim_type_id, a.get_type().get_type_id());
-    EXPECT_EQ(strided_dim_type_id, b.get_type().get_type_id());
+    EXPECT_EQ(fixed_dim_type_id, b.get_type().get_type_id());
     make_assignment_kernel(&k, 0, a.get_type(), a.get_arrmeta(), b.get_type(),
                            b.get_arrmeta(), kernel_request_single,
                            &eval::default_eval_context);
@@ -397,7 +397,7 @@ TEST(VarArrayDType, AssignVarStridedKernel) {
     a = nd::empty<int[3]>();
     a.vals() = 0;
     b = parse_json("var * int32", "[3, 5, 7]");
-    EXPECT_EQ(strided_dim_type_id, a.get_type().get_type_id());
+    EXPECT_EQ(fixed_dim_type_id, a.get_type().get_type_id());
     EXPECT_EQ(var_dim_type_id, b.get_type().get_type_id());
     make_assignment_kernel(&k, 0, a.get_type(), a.get_arrmeta(), b.get_type(),
                            b.get_arrmeta(), kernel_request_single,
@@ -412,7 +412,7 @@ TEST(VarArrayDType, AssignVarStridedKernel) {
     a = nd::empty<int[3]>();
     a.vals() = 0;
     b = parse_json("var * int32", "[3, 5, 7, 9]");
-    EXPECT_EQ(strided_dim_type_id, a.get_type().get_type_id());
+    EXPECT_EQ(fixed_dim_type_id, a.get_type().get_type_id());
     EXPECT_EQ(var_dim_type_id, b.get_type().get_type_id());
     make_assignment_kernel(&k, 0, a.get_type(), a.get_arrmeta(), b.get_type(),
                            b.get_arrmeta(), kernel_request_single,
@@ -426,7 +426,7 @@ TEST(VarArrayDType, AssignVarStridedKernel) {
     a = nd::empty<int[3]>();
     a.vals() = 0;
     b = nd::empty(ndt::make_var_dim(ndt::make_type<int>()));
-    EXPECT_EQ(strided_dim_type_id, a.get_type().get_type_id());
+    EXPECT_EQ(fixed_dim_type_id, a.get_type().get_type_id());
     EXPECT_EQ(var_dim_type_id, b.get_type().get_type_id());
     make_assignment_kernel(&k, 0, a.get_type(), a.get_arrmeta(), b.get_type(),
                            b.get_arrmeta(), kernel_request_single,

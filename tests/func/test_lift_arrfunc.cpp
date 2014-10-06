@@ -55,7 +55,7 @@ TEST(LiftArrFunc, UnaryExpr_StridedDim) {
     in(1).vals() = "-139";
     in(2).vals() = "12345";
     nd::array out = af(in);
-    EXPECT_EQ(ndt::type("strided * int32"), out.get_type());
+    EXPECT_EQ(ndt::type("3 * int32"), out.get_type());
     EXPECT_EQ(172, out(0).as<int>());
     EXPECT_EQ(-139, out(1).as<int>());
     EXPECT_EQ(12345, out(2).as<int>());
@@ -73,7 +73,7 @@ TEST(LiftArrFunc, UnaryExpr_VarDim) {
     a.vals() = in;
     nd::array out = af(a);
     EXPECT_EQ(ndt::type("var * string[16]"), a.get_type());
-    EXPECT_EQ(ndt::type("strided * int32"), out.get_type());
+    EXPECT_EQ(ndt::type("var * int32"), out.get_type());
     EXPECT_EQ(5, out.get_shape()[0]);
     EXPECT_EQ(172, out(0).as<int>());
     EXPECT_EQ(-139, out(1).as<int>());

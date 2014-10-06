@@ -88,9 +88,10 @@ TEST(StringType, ArrayCreation) {
     EXPECT_EQ("construction", a.as<string>());
 
     // An array of UTF8 strings
-    const char *i0[5] = {"this", "is", "a", "test", "of strings that are various sizes"};
+    const char *i0[5] = {"this", "is", "a", "test",
+                         "of strings that are various sizes"};
     a = i0;
-    EXPECT_EQ(ndt::make_strided_of_string(), a.get_type());
+    EXPECT_EQ(ndt::type("5 * string"), a.get_type());
     EXPECT_EQ(a.get_shape()[0], 5);
     EXPECT_EQ("this", a(0).as<string>());
     EXPECT_EQ("is", a(1).as<string>());
@@ -508,7 +509,7 @@ TEST(StringType, Concatenation) {
     a = a_arr;
     b = b_arr;
     c = (a + b).eval();
-    ASSERT_EQ(ndt::type("strided * string"), c.get_type());
+    ASSERT_EQ(ndt::type("3 * string"), c.get_type());
     EXPECT_EQ(3, c.get_dim_size());
     EXPECT_EQ("testingalpha", c(0).as<string>());
     EXPECT_EQ("onebeta", c(1).as<string>());
@@ -523,7 +524,7 @@ TEST(StringType, Find1) {
     b = "abc";
 
     c = a.f("find", b).eval();
-    ASSERT_EQ(ndt::make_strided_dim(ndt::make_type<intptr_t>()), c.get_type());
+    ASSERT_EQ(ndt::type("4 * intptr"), c.get_type());
     ASSERT_EQ(4, c.get_shape()[0]);
     EXPECT_EQ(0, c(0).as<intptr_t>());
     EXPECT_EQ(2, c(1).as<intptr_t>());
@@ -539,7 +540,7 @@ TEST(StringType, Find2) {
     b = b_arr;
 
     c = a.f("find", b).eval();
-    ASSERT_EQ(ndt::make_strided_dim(ndt::make_type<intptr_t>()), c.get_type());
+    ASSERT_EQ(ndt::type("6 * intptr"), c.get_type());
     ASSERT_EQ(6, c.get_shape()[0]);
     EXPECT_EQ(0, c(0).as<intptr_t>());
     EXPECT_EQ(1, c(1).as<intptr_t>());

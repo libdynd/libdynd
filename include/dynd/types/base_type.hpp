@@ -74,7 +74,8 @@ typedef char *(*iterdata_reset_fn_t)(iterdata_common *iterdata, char *data,
  * should place a different type in 'out_transformed_type', then set
  * 'out_was_transformed' to true.
  */
-typedef void (*type_transform_fn_t)(const ndt::type &dt, void *extra,
+typedef void (*type_transform_fn_t)(const ndt::type &dt,
+                                    intptr_t arrmeta_offset, void *extra,
                                     ndt::type &out_transformed_type,
                                     bool &out_was_transformed);
 
@@ -250,13 +251,16 @@ public:
      * a new type of the same type but with the transformed children.
      *
      * \param transform_fn  The function for transforming types.
+     * \param arrmeta_offset  An offset for arrmeta corresponding to the
+     *                        type. This is adjusted and passed to the
+     *                        transform_fn for each child type's arrmeta_offset.
      * \param extra  Extra data to pass to the transform function
      * \param out_transformed_type  The transformed type is placed here.
      * \param out_was_transformed  Is set to true if a transformation was done,
      *                             is left alone otherwise.
      */
     virtual void transform_child_types(type_transform_fn_t transform_fn,
-                                       void *extra,
+                                       intptr_t arrmeta_offset, void *extra,
                                        ndt::type &out_transformed_type,
                                        bool &out_was_transformed) const;
 

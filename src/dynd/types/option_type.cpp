@@ -205,13 +205,13 @@ bool option_type::is_unique_data_owner(const char *arrmeta) const
 }
 
 void option_type::transform_child_types(type_transform_fn_t transform_fn,
-                                        void *extra,
+                                        intptr_t arrmeta_offset, void *extra,
                                         ndt::type &out_transformed_tp,
                                         bool &out_was_transformed) const
 {
   ndt::type tmp_tp;
   bool was_transformed = false;
-  transform_fn(m_value_tp, extra, tmp_tp, was_transformed);
+  transform_fn(m_value_tp, arrmeta_offset + 0, extra, tmp_tp, was_transformed);
   if (was_transformed) {
     out_transformed_tp = ndt::make_option(tmp_tp);
     out_was_transformed = true;

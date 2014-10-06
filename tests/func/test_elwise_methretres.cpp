@@ -85,7 +85,7 @@ TYPED_TEST_P(ElwiseMethRetRes, MethRetRes) {
     a = avals0;
     b = bvals0;
     res = nd::elwise(FuncWrapper0(&func0), &FuncWrapper0::meth, a, b);
-    EXPECT_EQ(ndt::type("strided * strided * int"), res.get_type());
+    EXPECT_EQ(ndt::type("2 * 3 * int"), res.get_type());
     EXPECT_JSON_EQ_ARR("[[-10,-2,-4], [0,8,6]]", res);
 
     TypeParam vals1[2][3] = {{0, 1, 2}, {3, 4, 5}};

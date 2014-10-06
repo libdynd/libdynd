@@ -32,8 +32,12 @@ bool base_type::is_unique_data_owner(const char *DYND_UNUSED(arrmeta)) const
     return true;
 }
 
-void base_type::transform_child_types(type_transform_fn_t DYND_UNUSED(transform_fn), void *DYND_UNUSED(self),
-                ndt::type& out_transformed_type, bool& DYND_UNUSED(out_was_transformed)) const
+void
+base_type::transform_child_types(type_transform_fn_t DYND_UNUSED(transform_fn),
+                                 intptr_t DYND_UNUSED(arrmeta_offset),
+                                 void *DYND_UNUSED(self),
+                                 ndt::type &out_transformed_type,
+                                 bool &DYND_UNUSED(out_was_transformed)) const
 {
     // Default to behavior with no child types
     out_transformed_type = ndt::type(this, true);

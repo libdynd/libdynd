@@ -36,7 +36,8 @@ TEST(ArrayViews, OneDimensionalRawMemory) {
     memcpy(c_values, &u8_value, 8);
     a(irange() < 8).vals() = c_values;
     b = a.view_scalars<uint64_t>();
-    EXPECT_EQ(ndt::make_strided_dim(ndt::make_type<uint64_t>()), b.get_type());
+    EXPECT_EQ(ndt::make_fixed_dim(10, ndt::make_type<uint64_t>()),
+              b.get_type());
     EXPECT_EQ(1u, b.get_shape().size());
     EXPECT_EQ(10, b.get_shape()[0]);
     EXPECT_EQ(a.get_readonly_originptr(), b.get_readonly_originptr());
@@ -48,8 +49,10 @@ TEST(ArrayViews, OneDimensionalRawMemory) {
     // where necessary
     a(1 <= irange() < 9).vals() = c_values;
     b = a(1 <= irange() < 73).view_scalars<uint64_t>();
-    EXPECT_EQ(ndt::make_strided_dim(ndt::make_view(ndt::make_type<uint64_t>(), ndt::make_fixedbytes(8, 1))),
-                    b.get_type());
+    EXPECT_EQ(
+        ndt::make_fixed_dim(9, ndt::make_view(ndt::make_type<uint64_t>(),
+                                              ndt::make_fixedbytes(8, 1))),
+        b.get_type());
     EXPECT_EQ(1u, b.get_shape().size());
     EXPECT_EQ(9, b.get_shape()[0]);
     EXPECT_EQ(a.get_readonly_originptr() + 1, b.get_readonly_originptr());
@@ -66,7 +69,9 @@ TEST(ArrayViews, MultiDimensionalRawMemory) {
     EXPECT_THROW(b = a.view_scalars<int16_t>(), dynd::type_error);
 
     b = a.view_scalars<int32_t>();
-    EXPECT_EQ(ndt::make_strided_dim(ndt::make_type<int32_t>(), 2), b.get_type());
+    EXPECT_EQ(ndt::make_fixed_dim(
+                  2, ndt::make_fixed_dim(3, ndt::make_type<int32_t>())),
+              b.get_type());
     EXPECT_EQ(2u, b.get_shape().size());
     EXPECT_EQ(2, b.get_shape()[0]);
     EXPECT_EQ(3, b.get_shape()[1]);
@@ -87,14 +92,21 @@ TEST(ArrayViews, ExpressionDType) {
     // view uint16_t -> int16_t
     a = values;
     a_u2 = a.ucast<uint16_t>();
-    EXPECT_EQ(ndt::make_strided_dim(ndt::make_convert<uint16_t, uint32_t>(), 2), a_u2.get_type());
+    EXPECT_EQ(
+        ndt::make_fixed_dim(
+            2, ndt::make_fixed_dim(3, ndt::make_convert<uint16_t, uint32_t>())),
+        a_u2.get_type());
 
     // Wrong size, so should throw
     EXPECT_THROW(b = a_u2.view_scalars<int32_t>(), dynd::type_error);
 
     b = a_u2.view_scalars<int16_t>();
-    EXPECT_EQ(ndt::make_strided_dim(ndt::make_view(ndt::make_type<int16_t>(), ndt::make_convert<uint16_t, uint32_t>()), 2),
-                    b.get_type());
+    EXPECT_EQ(
+        ndt::make_fixed_dim(
+            2, ndt::make_fixed_dim(
+                   3, ndt::make_view(ndt::make_type<int16_t>(),
+                                     ndt::make_convert<uint16_t, uint32_t>()))),
+        b.get_type());
     EXPECT_EQ(2u, b.get_shape().size());
     EXPECT_EQ(2, b.get_shape()[0]);
     EXPECT_EQ(3, b.get_shape()[1]);
@@ -144,7 +156,7 @@ TEST(ArrayViews, TwoDimPermute) {
     EXPECT_EQ(a.get_ndim(), b.get_ndim());
     EXPECT_EQ(3, b.get_shape()[0]);
     EXPECT_EQ(3, b.get_shape()[1]);
-    EXPECT_EQ(ndt::type("strided * strided * int"), b.get_type());
+    EXPECT_EQ(ndt::type("3 * 3 * int"), b.get_type());
     for (int i = 0; i < 3; ++i) {
         for (int j = 0; j < 3; ++j) {
             EXPECT_EQ(a(i, j).as<int>(), b(j, i).as<int>());
@@ -159,7 +171,7 @@ TEST(ArrayViews, TwoDimPermute) {
     EXPECT_EQ(a.get_ndim(), b.get_ndim());
     EXPECT_EQ(a.get_shape()[0], b.get_shape()[1]);
     EXPECT_EQ(a.get_shape()[1], b.get_shape()[0]);
-    EXPECT_EQ(ndt::type("strided * strided * int"), b.get_type());
+    EXPECT_EQ(ndt::type("3 * 3 * int"), b.get_type());
     for (int i = 0; i < 3; ++i) {
         for (int j = 0; j < 3; ++j) {
             EXPECT_EQ(a(i, j).as<int>(), b(j, i).as<int>());
@@ -174,7 +186,7 @@ TEST(ArrayViews, TwoDimPermute) {
     EXPECT_EQ(a.get_ndim(), b.get_ndim());
     EXPECT_EQ(a.get_shape()[0], b.get_shape()[1]);
     EXPECT_EQ(a.get_shape()[1], b.get_shape()[0]);
-    EXPECT_EQ(ndt::type("strided * strided * int"), b.get_type());
+    EXPECT_EQ(ndt::type("3 * 3 * int"), b.get_type());
     for (int i = 0; i < 3; ++i) {
         for (int j = 0; j < 3; ++j) {
             EXPECT_EQ(a(i, j).as<int>(), b(j, i).as<int>());
@@ -191,7 +203,7 @@ TEST(ArrayViews, TwoDimPermute) {
     EXPECT_EQ(a.get_ndim(), b.get_ndim());
     EXPECT_EQ(a.get_shape()[0], b.get_shape()[1]);
     EXPECT_EQ(a.get_shape()[1], b.get_shape()[0]);
-    EXPECT_EQ(ndt::type("strided * strided * int"), b.get_type());
+    EXPECT_EQ(ndt::type("3 * 4 * int"), b.get_type());
     for (int i = 0; i < 4; ++i) {
         for (int j = 0; j < 3; ++j) {
             EXPECT_EQ(a(i, j).as<int>(), b(j, i).as<int>());
@@ -206,7 +218,7 @@ TEST(ArrayViews, TwoDimPermute) {
     EXPECT_EQ(a.get_ndim(), b.get_ndim());
     EXPECT_EQ(a.get_shape()[0], b.get_shape()[1]);
     EXPECT_EQ(a.get_shape()[1], b.get_shape()[0]);
-    EXPECT_EQ(ndt::type("strided * strided * int"), b.get_type());
+    EXPECT_EQ(ndt::type("3 * 4 * int"), b.get_type());
     for (int i = 0; i < 4; ++i) {
         for (int j = 0; j < 3; ++j) {
             EXPECT_EQ(a(i, j).as<int>(), b(j, i).as<int>());
@@ -227,7 +239,7 @@ TEST(ArrayViews, NDimPermute) {
     EXPECT_EQ(a.get_shape()[1], b.get_shape()[2]);
     EXPECT_EQ(a.get_shape()[2], b.get_shape()[0]);
     EXPECT_EQ(a.get_shape()[3], b.get_shape()[1]);
-    EXPECT_EQ(ndt::type("10 * 15 * 23 * 7 * float64"), b.get_type());
+    EXPECT_EQ(ndt::type("15 * 23 * 10 * 7 * float64"), b.get_type());
     for (int i = 0; i < shape0[0]; ++i) {
         for (int j = 0; j < shape0[1]; ++j) {
             for (int k = 0; k < shape0[2]; ++k) {

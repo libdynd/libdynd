@@ -84,12 +84,15 @@ bool var_dim_type::is_unique_data_owner(const char *arrmeta) const
     }
 }
 
-void var_dim_type::transform_child_types(type_transform_fn_t transform_fn, void *extra,
-                ndt::type& out_transformed_tp, bool& out_was_transformed) const
+void var_dim_type::transform_child_types(type_transform_fn_t transform_fn,
+                                         intptr_t arrmeta_offset, void *extra,
+                                         ndt::type &out_transformed_tp,
+                                         bool &out_was_transformed) const
 {
     ndt::type tmp_tp;
     bool was_transformed = false;
-    transform_fn(m_element_tp, extra, tmp_tp, was_transformed);
+    transform_fn(m_element_tp, arrmeta_offset + sizeof(var_dim_type_arrmeta),
+                 extra, tmp_tp, was_transformed);
     if (was_transformed) {
         out_transformed_tp = ndt::type(new var_dim_type(tmp_tp), false);
         out_was_transformed = true;
@@ -103,67 +106,90 @@ ndt::type var_dim_type::get_canonical_type() const
     return ndt::type(new var_dim_type(m_element_tp.get_canonical_type()), false);
 }
 
-ndt::type var_dim_type::apply_linear_index(intptr_t nindices, const irange *indices,
-                size_t current_i, const ndt::type& root_tp, bool leading_dimension) const
+ndt::type var_dim_type::apply_linear_index(intptr_t nindices,
+                                           const irange *indices,
+                                           size_t current_i,
+                                           const ndt::type &root_tp,
+                                           bool leading_dimension) const
 {
-    if (nindices == 0) {
-        return ndt::type(this, true);
-    } else if (nindices == 1) {
-        if (indices->step() == 0) {
-            if (leading_dimension) {
-                if (m_element_tp.is_builtin()) {
-                    return m_element_tp;
-                } else {
-                    return m_element_tp.apply_linear_index(0, NULL, current_i, root_tp, true);
-                }
-            } else {
-                // TODO: This is incorrect, but is here as a stopgap to be replaced by a sliced<> type
-                return ndt::make_pointer(m_element_tp);
-            }
-        } else {
-            if (leading_dimension) {
-                // In leading dimensions, we convert var_dim to strided_dim
-                return ndt::type(new strided_dim_type(m_element_tp), false);
-            } else {
-                if (indices->is_nop()) {
-                    // If the indexing operation does nothing, then leave things unchanged
-                    return ndt::type(this, true);
-                } else {
-                    // TODO: sliced_var_dim_type
-                    throw runtime_error("TODO: implement var_dim_type::apply_linear_index for general slices");
-                }
-            }
+  if (nindices == 0) {
+    return ndt::type(this, true);
+  }
+  else if (nindices == 1) {
+    if (indices->step() == 0) {
+      if (leading_dimension) {
+        if (m_element_tp.is_builtin()) {
+          return m_element_tp;
         }
-    } else {
-        if (indices->step() == 0) {
-            if (leading_dimension) {
-                return m_element_tp.apply_linear_index(nindices-1, indices+1,
-                                current_i+1, root_tp, true);
-            } else {
-                // TODO: This is incorrect, but is here as a stopgap to be replaced by a sliced<> type
-                return ndt::make_pointer(m_element_tp.apply_linear_index(nindices-1, indices+1,
-                                current_i+1, root_tp, false));
-            }
-        } else {
-            if (leading_dimension) {
-                // In leading dimensions, we convert var_dim to strided_dim
-                ndt::type edt = m_element_tp.apply_linear_index(nindices-1, indices+1,
-                                current_i+1, root_tp, false);
-                return ndt::type(new strided_dim_type(edt), false);
-            } else {
-                if (indices->is_nop()) {
-                    // If the indexing operation does nothing, then leave things unchanged
-                    ndt::type edt = m_element_tp.apply_linear_index(nindices-1, indices+1,
-                                    current_i+1, root_tp, false);
-                    return ndt::type(new var_dim_type(edt), false);
-                } else {
-                    // TODO: sliced_var_dim_type
-                    throw runtime_error("TODO: implement var_dim_type::apply_linear_index for general slices");
-                    //return ndt::type(new var_dim_type(m_element_tp.apply_linear_index(nindices-1, indices+1, current_i+1, root_tp)), false);
-                }
-            }
+        else {
+          return m_element_tp.apply_linear_index(0, NULL, current_i, root_tp,
+                                                 true);
         }
+      }
+      else {
+        // TODO: This is incorrect, but is here as a stopgap to be replaced by a
+        // sliced<> type
+        return ndt::make_pointer(m_element_tp);
+      }
     }
+    else {
+      if (leading_dimension) {
+        // In leading dimensions, we convert var_dim to strided_dim
+        return ndt::type(new strided_dim_type(m_element_tp), false);
+      }
+      else {
+        if (indices->is_nop()) {
+          // If the indexing operation does nothing, then leave things unchanged
+          return ndt::type(this, true);
+        }
+        else {
+          // TODO: sliced_var_dim_type
+          throw runtime_error("TODO: implement "
+                              "var_dim_type::apply_linear_index for general "
+                              "slices");
+        }
+      }
+    }
+  }
+  else {
+    if (indices->step() == 0) {
+      if (leading_dimension) {
+        return m_element_tp.apply_linear_index(nindices - 1, indices + 1,
+                                               current_i + 1, root_tp, true);
+      }
+      else {
+        // TODO: This is incorrect, but is here as a stopgap to be replaced by a
+        // sliced<> type
+        return ndt::make_pointer(m_element_tp.apply_linear_index(
+            nindices - 1, indices + 1, current_i + 1, root_tp, false));
+      }
+    }
+    else {
+      if (leading_dimension) {
+        // In leading dimensions, we convert var_dim to strided_dim
+        ndt::type edt = m_element_tp.apply_linear_index(
+            nindices - 1, indices + 1, current_i + 1, root_tp, false);
+        return ndt::type(new strided_dim_type(edt), false);
+      }
+      else {
+        if (indices->is_nop()) {
+          // If the indexing operation does nothing, then leave things unchanged
+          ndt::type edt = m_element_tp.apply_linear_index(
+              nindices - 1, indices + 1, current_i + 1, root_tp, false);
+          return ndt::type(new var_dim_type(edt), false);
+        }
+        else {
+          // TODO: sliced_var_dim_type
+          throw runtime_error("TODO: implement "
+                              "var_dim_type::apply_linear_index for general "
+                              "slices");
+          // return ndt::type(new
+          // var_dim_type(m_element_tp.apply_linear_index(nindices-1, indices+1,
+          // current_i+1, root_tp)), false);
+        }
+      }
+    }
+  }
 }
 
 intptr_t var_dim_type::apply_linear_index(intptr_t nindices, const irange *indices, const char *arrmeta,

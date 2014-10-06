@@ -10,6 +10,7 @@
 
 #include <dynd/json_parser.hpp>
 #include <dynd/types/base_struct_type.hpp>
+#include <dynd/types/type_pattern_match.hpp>
 
 inline std::string ShapeFormatter(const std::vector<intptr_t>& shape)
 {
@@ -113,6 +114,46 @@ CompareDyNDArrayToJSON(const char *expr1, const char *expr2,
     return CompareDyNDArrays(expr1, expr2, a, b);
 }
 
+inline ::testing::AssertionResult MatchNdtTypes(const char *expr1,
+                                                const char *expr2,
+                                                const dynd::ndt::type &pattern,
+                                                const dynd::ndt::type &actual)
+{
+  if (dynd::ndt::pattern_match(actual, pattern)) {
+    return ::testing::AssertionSuccess();
+  } else {
+    return ::testing::AssertionFailure()
+           << "The type of " << expr2 << " does not match pattern " << expr1
+           << "\n" << expr1 << " has value " << pattern << ",\n" << expr2
+           << " has value " << actual << ".";
+  }
+}
+
+inline ::testing::AssertionResult MatchNdtTypes(const char *expr1,
+                                                const char *expr2,
+                                                const char *pattern,
+                                                const dynd::ndt::type &actual)
+{
+  return MatchNdtTypes(expr1, expr2, dynd::ndt::type(pattern), actual);
+}
+
+inline ::testing::AssertionResult MatchNdtTypes(const char *expr1,
+                                                const char *expr2,
+                                                const dynd::ndt::type &pattern,
+                                                const char *actual)
+{
+  return MatchNdtTypes(expr1, expr2, pattern, dynd::ndt::type(actual));
+}
+
+inline ::testing::AssertionResult MatchNdtTypes(const char *expr1,
+                                                const char *expr2,
+                                                const char *pattern,
+                                                const char *actual)
+{
+  return MatchNdtTypes(expr1, expr2, dynd::ndt::type(pattern),
+                       dynd::ndt::type(actual));
+}
+
 /**
  * Macro to compare two arrays which should
  * be exactly equal
@@ -123,7 +164,7 @@ CompareDyNDArrayToJSON(const char *expr1, const char *expr2,
  * EXPECT_ARR_EQ(b, a);
  */
 #define EXPECT_ARR_EQ(expected, actual) \
-  ASSERT_PRED_FORMAT2(CompareDyNDArrays, \
+  EXPECT_PRED_FORMAT2(CompareDyNDArrays, \
                       expected, actual)
 
 /**
@@ -135,8 +176,12 @@ CompareDyNDArrayToJSON(const char *expr1, const char *expr2,
  * EXPECT_JSON_EQ_ARR("[1, 2, 3]", a);
  */
 #define EXPECT_JSON_EQ_ARR(expected, actual) \
-  ASSERT_PRED_FORMAT2(CompareDyNDArrayToJSON, \
+  EXPECT_PRED_FORMAT2(CompareDyNDArrayToJSON, \
                       expected, actual)
+
+#define EXPECT_TYPE_MATCHES(pattern, actual) \
+  EXPECT_PRED_FORMAT2(MatchNdtTypes, \
+                      pattern, actual)
 
 inline float rel_error(float expected, float actual)
 {

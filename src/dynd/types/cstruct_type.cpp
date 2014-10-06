@@ -90,8 +90,10 @@ void cstruct_type::print_type(std::ostream& o) const
     o << "}";
 }
 
-void cstruct_type::transform_child_types(type_transform_fn_t transform_fn, void *extra,
-                ndt::type& out_transformed_tp, bool& out_was_transformed) const
+void cstruct_type::transform_child_types(type_transform_fn_t transform_fn,
+                                         intptr_t arrmeta_offset, void *extra,
+                                         ndt::type &out_transformed_tp,
+                                         bool &out_was_transformed) const
 {
     nd::array tmp_field_types(
         nd::empty(m_field_count, ndt::make_type()));
@@ -102,8 +104,8 @@ void cstruct_type::transform_child_types(type_transform_fn_t transform_fn, void 
     bool was_any_transformed = false;
     for (intptr_t i = 0, i_end = m_field_count; i != i_end; ++i) {
         bool was_transformed = false;
-        transform_fn(get_field_type(i), extra, tmp_field_types_raw[i],
-                     was_transformed);
+        transform_fn(get_field_type(i), arrmeta_offset + get_arrmeta_offset(i),
+                     extra, tmp_field_types_raw[i], was_transformed);
         if (was_transformed) {
             // If the type turned into one without fixed size, have to use struct instead of cstruct
             if (tmp_field_types_raw[i].get_data_size() == 0) {

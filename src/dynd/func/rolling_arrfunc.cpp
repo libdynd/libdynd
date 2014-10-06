@@ -143,9 +143,9 @@ static int resolve_rolling_dst_type(const arrfunc_type_data *af_self,
     }
 
     if (src_tp[0].get_type_id() == var_dim_type_id) {
-        out_dst_tp = ndt::make_var_dim(child_dst_tp);
+      out_dst_tp = ndt::make_var_dim(child_dst_tp);
     } else {
-        out_dst_tp = ndt::make_strided_dim(child_dst_tp);
+      out_dst_tp = ndt::make_fixed_dim(src_tp[0].get_dim_size(NULL, NULL), child_dst_tp);
     }
 
     return 1;

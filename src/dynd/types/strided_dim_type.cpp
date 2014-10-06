@@ -70,13 +70,16 @@ bool strided_dim_type::is_unique_data_owner(const char *arrmeta) const
 }
 
 void strided_dim_type::transform_child_types(type_transform_fn_t transform_fn,
+                                             intptr_t arrmeta_offset,
                                              void *extra,
                                              ndt::type &out_transformed_tp,
                                              bool &out_was_transformed) const
 {
     ndt::type tmp_tp;
     bool was_transformed = false;
-    transform_fn(m_element_tp, extra, tmp_tp, was_transformed);
+    transform_fn(m_element_tp,
+                 arrmeta_offset + sizeof(strided_dim_type_arrmeta), extra,
+                 tmp_tp, was_transformed);
     if (was_transformed) {
         out_transformed_tp = ndt::type(new strided_dim_type(tmp_tp), false);
         out_was_transformed = true;

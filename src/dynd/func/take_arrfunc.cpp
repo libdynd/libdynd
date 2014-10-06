@@ -132,8 +132,9 @@ static int resolve_take_dst_type(const arrfunc_type_data *af_self, intptr_t nsrc
             out_dst_tp = ndt::make_var_dim(
                 src_tp[0].get_type_at_dimension(NULL, 1).get_canonical_type());
         } else {
-            out_dst_tp = ndt::make_strided_dim(
-                src_tp[0].get_type_at_dimension(NULL, 1).get_canonical_type());
+          out_dst_tp = ndt::make_fixed_dim(
+              src_tp[1].get_dim_size(NULL, NULL),
+              src_tp[0].get_type_at_dimension(NULL, 1).get_canonical_type());
         }
     } else {
         stringstream ss;

@@ -78,7 +78,8 @@ public:
 
   bool is_expression() const;
   bool is_unique_data_owner(const char *arrmeta) const;
-  void transform_child_types(type_transform_fn_t transform_fn, void *extra,
+  void transform_child_types(type_transform_fn_t transform_fn,
+                             intptr_t arrmeta_offset, void *extra,
                              ndt::type &out_transformed_tp,
                              bool &out_was_transformed) const;
   ndt::type get_canonical_type() const;

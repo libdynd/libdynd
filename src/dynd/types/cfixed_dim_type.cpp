@@ -114,18 +114,22 @@ bool cfixed_dim_type::is_unique_data_owner(const char *arrmeta) const
 }
 
 void cfixed_dim_type::transform_child_types(type_transform_fn_t transform_fn,
+                                            intptr_t arrmeta_offset,
                                             void *extra,
                                             ndt::type &out_transformed_tp,
                                             bool &out_was_transformed) const
 {
     ndt::type tmp_tp;
     bool was_transformed = false;
-    transform_fn(m_element_tp, extra, tmp_tp, was_transformed);
+    transform_fn(m_element_tp, arrmeta_offset + sizeof(cfixed_dim_type_arrmeta),
+                 extra, tmp_tp, was_transformed);
     if (was_transformed) {
         if (tmp_tp.get_data_size() != 0) {
-            out_transformed_tp = ndt::type(new cfixed_dim_type(m_dim_size, tmp_tp), false);
+          out_transformed_tp =
+              ndt::type(new cfixed_dim_type(m_dim_size, tmp_tp), false);
         } else {
-            out_transformed_tp = ndt::type(new strided_dim_type(tmp_tp), false);
+          out_transformed_tp =
+              ndt::type(new fixed_dim_type(m_dim_size, tmp_tp), false);
         }
         out_was_transformed = true;
     } else {
@@ -142,30 +146,36 @@ ndt::type cfixed_dim_type::get_canonical_type() const
     if (canonical_element_dt.get_data_size() != 0) {
         return ndt::type(new cfixed_dim_type(m_dim_size, canonical_element_dt), false);
     } else {
-        return ndt::type(new strided_dim_type(canonical_element_dt), false);
+        return ndt::type(new fixed_dim_type(m_dim_size, canonical_element_dt), false);
     }
 }
 
-ndt::type cfixed_dim_type::apply_linear_index(intptr_t nindices, const irange *indices,
-                size_t current_i, const ndt::type& root_tp, bool leading_dimension) const
+ndt::type cfixed_dim_type::apply_linear_index(intptr_t nindices,
+                                              const irange *indices,
+                                              size_t current_i,
+                                              const ndt::type &root_tp,
+                                              bool leading_dimension) const
 {
-    if (nindices == 0) {
-        return ndt::type(this, true);
-    } else if (nindices == 1) {
-        if (indices->step() == 0) {
-            return m_element_tp;
-        } else {
-            return ndt::type(new strided_dim_type(m_element_tp), false);
-        }
-    } else {
-        if (indices->step() == 0) {
-            return m_element_tp.apply_linear_index(nindices-1, indices+1,
-                            current_i+1, root_tp, leading_dimension);
-        } else {
-            return ndt::type(new strided_dim_type(m_element_tp.apply_linear_index(nindices-1, indices+1,
-                            current_i+1, root_tp, false)), false);
-        }
+  if (nindices == 0) {
+    return ndt::type(this, true);
+  }
+  else {
+    bool remove_dimension;
+    intptr_t start_index, index_stride, dimension_size;
+    apply_single_linear_index(*indices, m_dim_size, current_i, &root_tp,
+                              remove_dimension, start_index, index_stride,
+                              dimension_size);
+    if (remove_dimension) {
+      return m_element_tp.apply_linear_index(
+          nindices - 1, indices + 1, current_i + 1, root_tp, leading_dimension);
     }
+    else {
+      return ndt::make_fixed_dim(
+          dimension_size,
+          m_element_tp.apply_linear_index(nindices - 1, indices + 1,
+                                          current_i + 1, root_tp, false));
+    }
+  }
 }
 
 intptr_t cfixed_dim_type::apply_linear_index(
@@ -208,19 +218,19 @@ intptr_t cfixed_dim_type::apply_linear_index(
             }
             return offset;
         } else {
-            strided_dim_type_arrmeta *out_md = reinterpret_cast<strided_dim_type_arrmeta *>(out_arrmeta);
+            fixed_dim_type_arrmeta *out_md = reinterpret_cast<fixed_dim_type_arrmeta *>(out_arrmeta);
             // Produce the new offset data, stride, and size for the resulting array,
             // which is now a strided_dim instead of a cfixed_dim
             intptr_t offset = m_stride * start_index;
             out_md->stride = m_stride * index_stride;
             out_md->dim_size = dimension_size;
             if (!m_element_tp.is_builtin()) {
-                const strided_dim_type *result_etp = result_tp.tcast<strided_dim_type>();
+                const fixed_dim_type *result_etp = result_tp.tcast<fixed_dim_type>();
                 offset += m_element_tp.extended()->apply_linear_index(
                     nindices - 1, indices + 1,
                     arrmeta + sizeof(cfixed_dim_type_arrmeta),
                     result_etp->get_element_type(),
-                    out_arrmeta + sizeof(strided_dim_type_arrmeta),
+                    out_arrmeta + sizeof(fixed_dim_type_arrmeta),
                     embedded_reference, current_i + 1, root_tp, false, NULL,
                     NULL);
             }

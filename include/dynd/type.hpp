@@ -778,7 +778,7 @@ type make_type()
 /**
  * Constructs an array type from a shape and
  * a data type. Each dimension >= 0 is made
- * using a strided_dim type, and each dimension == -1
+ * using a fixed_dim type, and each dimension == -1
  * is made using a var_dim type.
  *
  * \param ndim   The number of dimensions in the shape

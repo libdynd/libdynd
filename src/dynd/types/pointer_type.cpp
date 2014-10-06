@@ -70,12 +70,15 @@ bool pointer_type::is_unique_data_owner(const char *arrmeta) const
     return true;
 }
 
-void pointer_type::transform_child_types(type_transform_fn_t transform_fn, void *extra,
-                ndt::type& out_transformed_tp, bool& out_was_transformed) const
+void pointer_type::transform_child_types(type_transform_fn_t transform_fn,
+                                         intptr_t arrmeta_offset, void *extra,
+                                         ndt::type &out_transformed_tp,
+                                         bool &out_was_transformed) const
 {
     ndt::type tmp_tp;
     bool was_transformed = false;
-    transform_fn(m_target_tp, extra, tmp_tp, was_transformed);
+    transform_fn(m_target_tp, arrmeta_offset + sizeof(pointer_type_arrmeta),
+                 extra, tmp_tp, was_transformed);
     if (was_transformed) {
         out_transformed_tp = ndt::make_pointer(tmp_tp);
         out_was_transformed = true;

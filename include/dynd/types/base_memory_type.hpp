@@ -65,8 +65,10 @@ public:
                         m_storage_tp.is_type_subarray(subarray_tp);
     }
 
-    virtual void transform_child_types(type_transform_fn_t transform_fn, void *extra,
-                    ndt::type& out_transformed_tp, bool& out_was_transformed) const;
+    virtual void transform_child_types(type_transform_fn_t transform_fn,
+                                       intptr_t arrmeta_offset, void *extra,
+                                       ndt::type &out_transformed_tp,
+                                       bool &out_was_transformed) const;
     virtual ndt::type get_canonical_type() const;
 
     virtual ndt::type with_replaced_storage_type(const ndt::type& storage_tp) const = 0;

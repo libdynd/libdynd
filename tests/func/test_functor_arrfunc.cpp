@@ -241,14 +241,15 @@ TYPED_TEST_P(FunctorArrfunc_FuncRefRes, FuncRefRes) {
       static_cast<void (*)(int &, TypeParam, const TypeParam &)>(&func0));
   af = lift_arrfunc(af);
   res = af(a, b);
-  EXPECT_EQ(ndt::type("strided * strided * int"), res.get_type());
+  EXPECT_EQ(ndt::type("2 * 3 * int"), res.get_type());
   EXPECT_JSON_EQ_ARR("[[-10,-2,-4], [0,8,6]]", res);
 
   af = nd::make_functor_arrfunc(func4<TypeParam>);
   af = lift_arrfunc(af);
   res = af(a, b);
-  EXPECT_EQ(ndt::make_strided_dim(ndt::make_strided_dim(
-                ndt::make_cfixed_dim(2, ndt::make_type<TypeParam>()))),
+  EXPECT_EQ(ndt::make_fixed_dim(
+                2, ndt::make_fixed_dim(3, ndt::make_cfixed_dim(
+                                              2, ndt::make_type<TypeParam>()))),
             res.get_type());
   ASSERT_EQ(2, res.get_shape()[0]);
   ASSERT_EQ(3, res.get_shape()[1]);
@@ -359,7 +360,7 @@ TYPED_TEST_P(FunctorArrfunc_CallRetRes, CallRetRes) {
   af = nd::make_functor_arrfunc(Callable0(&func0));
   af = lift_arrfunc(af);
   res = af(a, b);
-  EXPECT_EQ(ndt::type("strided * strided * int"), res.get_type());
+  EXPECT_EQ(ndt::type("2 * 3 * int"), res.get_type());
   EXPECT_JSON_EQ_ARR("[[-10,-2,-4], [0,8,6]]", res);
 
   TypeParam vals1[2][3] = {{0, 1, 2}, {3, 4, 5}};
@@ -417,7 +418,7 @@ TEST(FunctorArrfunc, LambdaFunc) {
                                    int z) { return x * z + y; });
   af = lift_arrfunc(af);
   res = af(a, b, 10);
-  EXPECT_EQ(ndt::type("strided * float64"), res.get_type());
+  EXPECT_EQ(ndt::type("3 * float64"), res.get_type());
   EXPECT_JSON_EQ_ARR("[18.25,23.25,34.5]", res);
 }
 #endif
@@ -471,14 +472,15 @@ TYPED_TEST_P(FunctorArrfunc_CallRefRes, CallRefRes)
   af = nd::make_functor_arrfunc(Callable0(&func0));
   af = lift_arrfunc(af);
   res = af(a, b);
-  EXPECT_EQ(ndt::type("strided * strided * int"), res.get_type());
+  EXPECT_EQ(ndt::type("2 * 3 * int"), res.get_type());
   EXPECT_JSON_EQ_ARR("[[-10,-2,-4], [0,8,6]]", res);
 
   af = nd::make_functor_arrfunc(Callable4(&func4));
   af = lift_arrfunc(af);
   res = af(a, b);
-  EXPECT_EQ(ndt::make_strided_dim(ndt::make_strided_dim(
-                ndt::make_cfixed_dim(2, ndt::make_type<TypeParam>()))),
+  EXPECT_EQ(ndt::make_fixed_dim(
+                2, ndt::make_fixed_dim(3, ndt::make_cfixed_dim(
+                                              2, ndt::make_type<TypeParam>()))),
             res.get_type());
   ASSERT_EQ(2, res.get_shape()[0]);
   ASSERT_EQ(3, res.get_shape()[1]);
@@ -632,7 +634,7 @@ TYPED_TEST_P(FunctorArrfunc_MethRetRes, MethRetRes) {
     af = nd::make_functor_arrfunc(FuncWrapper0(&func0), &FuncWrapper0::meth);
     af = lift_arrfunc(af);
     res = af(a, b);
-    EXPECT_EQ(ndt::type("strided * strided * int"), res.get_type());
+    EXPECT_EQ(ndt::type("2 * 3 * int"), res.get_type());
     EXPECT_JSON_EQ_ARR("[[-10,-2,-4], [0,8,6]]", res);
 
     TypeParam vals1[2][3] = {{0, 1, 2}, {3, 4, 5}};
@@ -713,13 +715,17 @@ TYPED_TEST_P(FunctorArrfunc_MethRefRes, MethRefRes) {
     af = nd::make_functor_arrfunc(FuncWrapper0(&func0), &FuncWrapper0::meth);
     af = lift_arrfunc(af);
     res = af(a, b);
-    EXPECT_EQ(ndt::type("strided * strided * int"), res.get_type());
+    EXPECT_EQ(ndt::type("2 * 3 * int"), res.get_type());
     EXPECT_JSON_EQ_ARR("[[-10,-2,-4], [0,8,6]]", res);
 
     af = nd::make_functor_arrfunc(FuncWrapper4(&func4), &FuncWrapper4::meth);
     af = lift_arrfunc(af);
     res = af(a, b);
-    EXPECT_EQ(ndt::make_strided_dim(ndt::make_strided_dim(ndt::make_cfixed_dim(2, ndt::make_type<TypeParam>()))), res.get_type());
+    EXPECT_EQ(
+        ndt::make_fixed_dim(
+            2, ndt::make_fixed_dim(
+                   3, ndt::make_cfixed_dim(2, ndt::make_type<TypeParam>()))),
+        res.get_type());
     ASSERT_EQ(2, res.get_shape()[0]);
     ASSERT_EQ(3, res.get_shape()[1]);
     for (int i = 0; i < 2; ++i) {
