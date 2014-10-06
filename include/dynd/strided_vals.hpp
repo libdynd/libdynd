@@ -6,8 +6,6 @@
 #ifndef _DYND__STRIDED_VALS_HPP_
 #define _DYND__STRIDED_VALS_HPP_
 
-#include <dynd/type.hpp>
-
 namespace dynd {
 
 struct start_stop_t {
@@ -87,9 +85,6 @@ class strided_vals {
     } m_mask;
 
 public:
-    strided_vals() : m_data({NULL}), m_mask({NULL}) {
-    }
-
     intptr_t get_ndim() const {
         return N;
     }

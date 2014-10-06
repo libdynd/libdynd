@@ -1,19 +1,13 @@
 //
-// Copyright (C) 2011-14 Mark Wiebe, DyND Developers
+// Copyright (C) 2011-14 Irwin Zaid, Mark Wiebe, DyND Developers
 // BSD 2-Clause License, see LICENSE.txt
 //
 
 #ifndef DYND_FUNC_NEIGHBORHOOD_ARRFUNC_HPP
 #define DYND_FUNC_NEIGHBORHOOD_ARRFUNC_HPP
 
-#include <dynd/config.hpp>
-#include <dynd/array.hpp>
 #include <dynd/strided_vals.hpp>
 #include <dynd/func/arrfunc.hpp>
-#include <dynd/types/fixed_dim_type.hpp>
-#include <dynd/types/struct_type.hpp>
-#include <dynd/types/arrfunc_type.hpp>
-#include <dynd/types/pointer_type.hpp>
 
 namespace dynd {
 
