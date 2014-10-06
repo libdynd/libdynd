@@ -226,19 +226,21 @@ inline intptr_t apply_single_index(intptr_t i0, intptr_t dimension_size,
  *
  * \returns  True if it's a valid permutation, false otherwise.
  */
-inline bool is_valid_perm(intptr_t size, const int *perm)
+template<typename T0, typename T1>
+inline bool is_valid_perm(T0 size, const T1 *perm)
 {
-    shortvector<char> flags(size);
-    memset(flags.get(), 0, size);
-    for (intptr_t i = 0; i < size; ++i) {
-        int v = perm[i];
-        if (static_cast<uintptr_t>(v) >= static_cast<uintptr_t>(size) ||
-            flags[v]) {
-            return false;
-        }
-        flags[v] = 1;
+  shortvector<char> flags(size);
+  memset(flags.get(), 0, size);
+  for (T0 i = 0; i != size; ++i) {
+    T1 v = *perm++;
+    if (v >= 0 && v < size && !flags[v]) {
+      flags[v] = 1;
     }
-    return true;
+    else {
+      return false;
+    }
+  }
+  return true;
 }
 
 inline bool strides_are_c_contiguous(intptr_t ndim, intptr_t element_size,

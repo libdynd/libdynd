@@ -1294,7 +1294,7 @@ static void permute_type_dims(const ndt::type &tp, intptr_t arrmeta_offset,
   intptr_t i = pdd->i;
   if (pdd->axes[i] == i) {
     // Stationary axis
-    if (pdd->i == pdd->ndim) {
+    if (pdd->i == pdd->ndim - 1) {
       // No more perm dimensions left, leave type as is
       out_transformed_tp = tp;
     } else {
@@ -1362,6 +1362,16 @@ nd::array nd::array::permute(intptr_t ndim, const intptr_t *axes) const
        << " for type " << get_type();
     throw invalid_argument(ss.str());
   }
+  if (!is_valid_perm(ndim, axes)) {
+    stringstream ss;
+    ss << "Invalid permutation provided to dynd axis permute: [";
+    for (intptr_t i = 0; i < ndim; ++i) {
+      ss << axes[i] << (i != ndim-1 ? " " : "");
+    }
+    ss << "]";
+    throw invalid_argument(ss.str());
+  }
+
   // Make a shallow copy of the arrmeta. When we permute the type,
   // its arrmeta has identical structure, so we can fix it up
   // while we're transforming the type.
