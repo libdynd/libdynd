@@ -54,14 +54,11 @@ void func_with_aux_and_thread_aux(int &dst, int src, func_aux_buffer *aux, func_
 */
 
 TEST(Buffer, Aux) {
-    nd::array aux = nd::empty(ndt::make_struct(ndt::make_type<int>(), "val"));
-    aux.p("val").vals() = 7;
-
     nd::arrfunc af = nd::make_functor_arrfunc(ret_func_with_aux);
-    EXPECT_EQ(12, af(5, aux, true).as<int>());
+    EXPECT_EQ(12, af(5, aux::kwds("val", 7)).as<int>());
 
     af = nd::make_functor_arrfunc(ref_func_with_aux);
-    EXPECT_EQ(12, af(5, aux, true).as<int>());
+    EXPECT_EQ(12, af(5, aux::kwds("val", 7)).as<int>());
 
 /*
 TODO: Need thread_aux to reenable.

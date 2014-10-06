@@ -6,17 +6,19 @@
 #ifndef DYND__KERNELS_FUNCTOR_KERNELS_HPP
 #define DYND__KERNELS_FUNCTOR_KERNELS_HPP
 
+#include <dynd/strided_vals.hpp>
 #include <dynd/kernels/ckernel_common_functions.hpp>
 #include <dynd/kernels/expr_kernels.hpp>
 #include <dynd/pp/meta.hpp>
 #include <dynd/types/funcproto_type.hpp>
+#include <dynd/types/base_struct_type.hpp>
 
 namespace dynd { namespace nd { namespace detail {
 
 template <typename T>
 class typed_param_from_bytes {
 public:
-    void init(const ndt::type &DYND_UNUSED(tp), const char *DYND_UNUSED(arrmeta)) {
+    void init(const ndt::type &DYND_UNUSED(tp), const char *DYND_UNUSED(arrmeta), const nd::array &DYND_UNUSED(aux)) {
     }
 
     T &val(char *data) {
@@ -34,8 +36,17 @@ private:
     nd::strided_vals<T, N> m_strided;
 
 public:
-    void init(const ndt::type &DYND_UNUSED(tp), const char *arrmeta) {
-        m_strided.init(reinterpret_cast<const size_stride_t *>(arrmeta));
+    void init(const ndt::type &DYND_UNUSED(tp), const char *arrmeta, const nd::array &aux) {
+        m_strided.set_data(NULL, reinterpret_cast<const size_stride_t *>(arrmeta),
+            reinterpret_cast<start_stop_t *>(aux.p("start_stop").as<intptr_t>()));
+
+        ndt::type dt = aux.get_dtype();
+        try {
+            const nd::array &mask = aux.p("mask").f("dereference");
+            m_strided.set_mask(mask.get_readonly_originptr(), reinterpret_cast<const size_stride_t *>(mask.get_arrmeta()));
+        } catch (...) {
+            m_strided.set_mask(NULL);
+        }
     }
 
     nd::strided_vals<T, N> &val(char *data) {
@@ -50,7 +61,7 @@ public:
 };
 
 #define DECL_TYPED_PARAM_FROM_BYTES(TYPENAME, NAME) DYND_PP_META_DECL(typed_param_from_bytes<TYPENAME>, NAME)
-#define INIT_TYPED_PARAM_FROM_BYTES(NAME, TP, ARRMETA) NAME.init(TP, ARRMETA)
+#define INIT_TYPED_PARAM_FROM_BYTES(NAME, TP, ARRMETA) NAME.init(TP, ARRMETA, aux)
 #define PARTIAL_DECAY(TYPENAME) std::remove_cv<typename std::remove_reference<TYPENAME>::type>::type
 #define PASS(NAME, ARG) NAME.val(ARG)
 
@@ -98,7 +109,7 @@ struct functor_ck;
                                     dynd::ckernel_builder *ckb, intptr_t ckb_offset, \
                                     const ndt::type &dst_tp, const char *DYND_UNUSED(dst_arrmeta), \
                                     const ndt::type *src_tp, const char *const *src_arrmeta, \
-                                    kernel_request_t kernreq, const nd::array &DYND_UNUSED(aux), \
+                                    kernel_request_t kernreq, const nd::array &aux, \
                                     const eval::eval_context *DYND_UNUSED(ectx)) { \
             for (intptr_t i = 0; i < N; ++i) { \
                 if (src_tp[i] != af_self->get_param_type(i)) { \
@@ -234,7 +245,7 @@ DYND_PP_JOIN_MAP(FUNCTOR_CK, (), DYND_PP_RANGE(1, DYND_PP_INC(DYND_SRC_MAX)))
                                     dynd::ckernel_builder *ckb, intptr_t ckb_offset, \
                                     const ndt::type &dst_tp, const char *dst_arrmeta, \
                                     const ndt::type *src_tp, const char *const *src_arrmeta, \
-                                    kernel_request_t kernreq, const nd::array &DYND_UNUSED(aux), \
+                                    kernel_request_t kernreq, const nd::array &aux, \
                                     const eval::eval_context *DYND_UNUSED(ectx)) { \
             for (intptr_t i = 0; i < N; ++i) { \
                 if (src_tp[i] != af_self->get_param_type(i)) { \

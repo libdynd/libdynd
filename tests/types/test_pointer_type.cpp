@@ -63,6 +63,7 @@ TEST(PointerType, Dereference) {
     a = combine_into_tuple(1, &a)(0);
 
     nd::array b = a.f("dereference");
+    EXPECT_EQ(a.get_type(), ndt::make_pointer(b.get_type()));
     EXPECT_EQ(b(0).as<int>(), 5);
     EXPECT_EQ(b(1).as<int>(), -1);
     EXPECT_EQ(b(2).as<int>(), 7);

@@ -161,7 +161,7 @@ nd::arrfunc::arrfunc(const nd::array &rhs)
     }
 }
 
-nd::array nd::arrfunc::call(intptr_t arg_count, const nd::array *args, const nd::array &aux,
+nd::array nd::arrfunc::call(intptr_t arg_count, const nd::array *args, const aux::kwds &kwds,
                             const eval::eval_context *ectx) const
 {
   const arrfunc_type_data *af = get();
@@ -202,14 +202,14 @@ nd::array nd::arrfunc::call(intptr_t arg_count, const nd::array *args, const nd:
   // Generate and evaluate the ckernel
   ckernel_builder ckb;
   af->instantiate(af, &ckb, 0, dst_tp, result.get_arrmeta(), &src_tp[0],
-                  &src_arrmeta[0], kernel_request_single, aux, ectx);
+                  &src_arrmeta[0], kernel_request_single, kwds.get(), ectx);
   expr_single_t fn = ckb.get()->get_function<expr_single_t>();
   fn(result.get_readwrite_originptr(), src_data.empty() ? NULL : &src_data[0],
      ckb.get());
   return result;
 }
 
-void nd::arrfunc::call_out(intptr_t arg_count, const nd::array *args, const nd::array &aux,
+void nd::arrfunc::call_out(intptr_t arg_count, const nd::array *args, const aux::kwds &kwds,
                            const nd::array &out, const eval::eval_context *ectx)
     const
 {
@@ -236,7 +236,7 @@ void nd::arrfunc::call_out(intptr_t arg_count, const nd::array *args, const nd::
   // Generate and evaluate the ckernel
   ckernel_builder ckb;
   af->instantiate(af, &ckb, 0, out.get_type(), out.get_arrmeta(), &src_tp[0],
-                  &src_arrmeta[0], kernel_request_single, aux, ectx);
+                  &src_arrmeta[0], kernel_request_single, kwds.get(), ectx);
   expr_single_t fn = ckb.get()->get_function<expr_single_t>();
   fn(out.get_readwrite_originptr(), src_data.empty() ? NULL : &src_data[0],
      ckb.get());

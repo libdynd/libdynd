@@ -71,9 +71,12 @@ char *iterdata_broadcasting_terminator_incr(iterdata_common *iterdata, intptr_t 
 char *iterdata_broadcasting_terminator_adv(iterdata_common *iterdata, intptr_t level, intptr_t i);
 char *iterdata_broadcasting_terminator_reset(iterdata_common *iterdata, char *data, intptr_t level);
 
-// Forward declaration of the nd::array
+// Forward declaration of nd::array and nd::strided_vals
 namespace nd {
     class array;
+
+    template <typename T, int N>
+    class strided_vals;
 } // namespace nd
 
 namespace ndt {
@@ -729,6 +732,30 @@ struct type_from {
     }
 };
 
+// Forward declaration of make_pointer
+type make_pointer(const type& target_tp);
+
+template <typename T>
+struct type_from<T *> {
+    static type make() {
+        return make_pointer(type_from<T>::make());
+    }
+};
+
+template <typename T, int N>
+struct type_from<T[N]> {
+    static type make() {
+        return make_cfixed_dim(N, type_from<T>::make());
+    }
+};
+
+template <typename T, int N>
+struct type_from<nd::strided_vals<T, N> > {
+    static type make() {
+        return make_strided_dim(type_from<T>::make(), N);
+    }
+};
+
 /**
  * Convenience function which makes an ndt::type
  * object from a template parameter.
@@ -797,33 +824,5 @@ void print_indented(std::ostream &o, const std::string &indent,
                     const std::string &s, bool skipfirstline = false);
 
 } // namespace dynd
-
-#include <dynd/strided_vals.hpp>
-#include <dynd/types/pointer_type.hpp>
-
-namespace dynd { namespace ndt {
-
-template <typename T>
-struct type_from<T *> {
-    static type make() {
-        return make_pointer(type_from<T>::make());
-    }
-};
-
-template <typename T, int N>
-struct type_from<T[N]> {
-    static type make() {
-        return make_cfixed_dim(N, type_from<T>::make());
-    }
-};
-
-template <typename T, int N>
-struct type_from<nd::strided_vals<T, N> > {
-    static type make() {
-        return make_strided_dim(type_from<T>::make(), N);
-    }
-};
-
-}} // namespace dynd::ndt
 
 #endif // _DYND__TYPE_HPP_

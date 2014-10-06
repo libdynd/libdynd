@@ -15,7 +15,6 @@
 #include <dynd/type.hpp>
 #include <dynd/typed_data_assign.hpp>
 #include <dynd/shortvector.hpp>
-#include <dynd/strided_vals.hpp>
 #include <dynd/irange.hpp>
 #include <dynd/memblock/array_memory_block.hpp>
 #include <dynd/types/type_type.hpp>
@@ -431,6 +430,9 @@ public:
 
     /** Calls the dynamic function - #include <dynd/func/call_callable.hpp> to use it */
     array f(const char *function_name);
+
+    /** Calls the dynamic function - #include <dynd/func/call_callable.hpp> to use it */
+    array f(const char *function_name) const;
 
     /** Calls the dynamic function - #include <dynd/func/call_callable.hpp> to use it */
     template<class T0>

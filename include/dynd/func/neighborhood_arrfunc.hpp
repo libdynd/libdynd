@@ -1,15 +1,13 @@
 //
-// Copyright (C) 2011-14 Mark Wiebe, DyND Developers
+// Copyright (C) 2011-14 Irwin Zaid, Mark Wiebe, DyND Developers
 // BSD 2-Clause License, see LICENSE.txt
 //
 
 #ifndef DYND_FUNC_NEIGHBORHOOD_ARRFUNC_HPP
 #define DYND_FUNC_NEIGHBORHOOD_ARRFUNC_HPP
 
-#include <dynd/config.hpp>
-#include <dynd/array.hpp>
+#include <dynd/strided_vals.hpp>
 #include <dynd/func/arrfunc.hpp>
-#include <dynd/types/arrfunc_type.hpp>
 
 namespace dynd {
 
@@ -22,24 +20,20 @@ namespace dynd {
  *                         a single output value. Signature
  *                         '(strided * strided * NH, strided * strided * MSK) -> OUT',
  */
-void make_neighborhood_arrfunc(arrfunc_type_data *out_af,
-                                 const nd::arrfunc &neighborhood_op,
-                                 intptr_t nh_ndim,
-                                 const intptr_t *nh_shape,
-                                 const intptr_t *nh_centre);
+void make_neighborhood_arrfunc(arrfunc_type_data *out_af, const nd::arrfunc &neighborhood_op,
+                               intptr_t nh_ndim);
 
 inline nd::arrfunc make_neighborhood_arrfunc(const nd::arrfunc &neighborhood_op,
-                            intptr_t nh_ndim,
-                            const intptr_t *nh_shape,
-                            const intptr_t *nh_centre)
+                            intptr_t nh_ndim)
 {
-  nd::array af = nd::empty(ndt::make_arrfunc());
-  make_neighborhood_arrfunc(
-      reinterpret_cast<arrfunc_type_data *>(af.get_readwrite_originptr()),
-      neighborhood_op, nh_ndim, nh_shape, nh_centre);
-  af.flag_as_immutable();
-  return af;
+    nd::array af = nd::empty(ndt::make_arrfunc());
+    make_neighborhood_arrfunc(reinterpret_cast<arrfunc_type_data *>(af.get_readwrite_originptr()),
+        neighborhood_op, nh_ndim);
+    af.flag_as_immutable();
+    return af;
 }
+
+inline nd::arrfunc make_neighborhood_arrfunc(const nd::arrfunc &neighborhood_op, const nd::array &mask);
 
 } // namespace dynd
 
