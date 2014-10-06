@@ -149,6 +149,13 @@ public:
         }
     }
 
+    void set_mask(const char *mask, const size_stride_t *size_stride) {
+        m_mask.pointer = mask;
+        for (intptr_t i = 0; i < N; ++i) {
+            m_mask.stride[i] = size_stride[i].stride;
+        }
+    }
+
     const T &operator()(intptr_t i0) const {
         return *reinterpret_cast<const T *>(detail::strided<1>::get(m_data.pointer, m_data.size_stride[0].stride, i0));
     }

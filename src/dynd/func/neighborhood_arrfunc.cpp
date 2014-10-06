@@ -92,15 +92,21 @@ static intptr_t instantiate_neighborhood(
     const arrfunc_type_data *af_self, dynd::ckernel_builder *ckb,
     intptr_t ckb_offset, const ndt::type &dst_tp, const char *dst_arrmeta,
     const ndt::type *src_tp, const char *const *src_arrmeta,
-    kernel_request_t kernreq, const nd::array &aux, const eval::eval_context *ectx)
+    kernel_request_t kernreq, const nd::array &kwds, const eval::eval_context *ectx)
 {
     const neighborhood *nh = *af_self->get_data_as<const neighborhood *>();
 
-    const nd::array &shape = aux.p("shape").f("dereference");
+    nd::array shape;
+    try {
+        shape = kwds.p("shape").f("dereference");
+    } catch (...) {
+        const nd::array &mask = kwds.p("mask").f("dereference");
+        shape = nd::array(mask.get_shape());
+    }
 
     nd::array offset;
     try {
-        offset = aux.p("offset").f("dereference");
+        offset = kwds.p("offset").f("dereference");
     } catch (...) {
     }
 
@@ -171,7 +177,7 @@ static intptr_t instantiate_neighborhood(
 
     ckb_offset = nh->neighborhood_op.get()->instantiate(
         nh->neighborhood_op.get(), ckb, ckb_offset, nh_dst_tp, nh_dst_arrmeta,
-        nh_src_tp, nh_src_arrmeta, kernel_request_single, pack(aux, "start_stop", reinterpret_cast<intptr_t>(nh_start_stop)), ectx);
+        nh_src_tp, nh_src_arrmeta, kernel_request_single, pack(kwds, "start_stop", reinterpret_cast<intptr_t>(nh_start_stop)), ectx);
     return ckb_offset;
 }
 

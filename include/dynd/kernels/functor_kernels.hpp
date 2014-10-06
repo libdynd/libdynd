@@ -41,13 +41,10 @@ public:
             reinterpret_cast<start_stop_t *>(aux.p("start_stop").as<intptr_t>()));
 
         ndt::type dt = aux.get_dtype();
-        if (dt.tcast<base_struct_type>()->get_field_index("mask") != -1) {
-//            const nd::array &mask = aux.p("mask");
-  //          dynd_bool *data = mask.p("data").as<dynd_bool *>();
-   //         nd::array stride = mask.p("stride");
-    //        m_strided.set_mask(reinterpret_cast<char *>(data), reinterpret_cast<const intptr_t *>(stride.get_readonly_originptr()));
-            m_strided.set_mask(NULL);
-        } else {
+        try {
+            const nd::array &mask = aux.p("mask").f("dereference");
+            m_strided.set_mask(mask.get_readonly_originptr(), reinterpret_cast<const size_stride_t *>(mask.get_arrmeta()));
+        } catch (...) {
             m_strided.set_mask(NULL);
         }
     }
