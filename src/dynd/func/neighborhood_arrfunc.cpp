@@ -132,9 +132,6 @@ static intptr_t instantiate_neighborhood(
     }
     const char *nh_src_arrmeta[1] = {nh_arrmeta.get()};
 
-    start_stop_t *nh_start_stop = (start_stop_t *) malloc(ndim * sizeof(start_stop_t));
-    nh->start_stop = nh_start_stop;
-
     for (intptr_t i = 0; i < ndim; ++i) {
         typedef neighborhood_ck<N> self_type;
         self_type *self = self_type::create(ckb, kernreq, ckb_offset);
@@ -160,12 +157,12 @@ static intptr_t instantiate_neighborhood(
         self->count[1] = dst_shape[i].dim_size - self->count[0] - self->count[2];
 
         self->nh_size = shape(i).as<intptr_t>();
-        self->nh_start_stop = nh_start_stop + i;
+        self->nh_start_stop = nh->start_stop + i;
     }
 
     ckb_offset = nh_op.get()->instantiate(nh_op.get(), ckb, ckb_offset,
         nh_dst_tp, nh_dst_arrmeta, nh_src_tp, nh_src_arrmeta,
-        kernel_request_single, pack(kwds, "start_stop", reinterpret_cast<intptr_t>(nh_start_stop)), ectx);
+        kernel_request_single, pack(kwds, "start_stop", reinterpret_cast<intptr_t>(nh->start_stop)), ectx);
     return ckb_offset;
 }
 
@@ -213,6 +210,7 @@ void dynd::make_neighborhood_arrfunc(arrfunc_type_data *out_af, const nd::arrfun
     neighborhood **nh = out_af->get_data_as<neighborhood *>();
     *nh = new neighborhood;
     (*nh)->op = neighborhood_op;
+    (*nh)->start_stop = (start_stop_t *) malloc(nh_ndim * sizeof(start_stop_t)); 
     out_af->func_proto = ndt::substitute(result_pattern, typevars, true);
     out_af->instantiate = &instantiate_neighborhood<1>;
     out_af->resolve_dst_shape = &resolve_neighborhood_dst_shape;

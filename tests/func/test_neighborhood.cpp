@@ -168,9 +168,10 @@ TEST(Neighborhood, Sum3D) {
         af(a, aux::kwds("mask", parse_json("3 * 3 * 3 * bool", "[[[true, false, true], [false, true, false], [true, false, true]],"
         "[[false, true, false], [true, false, true], [false, true, false]],"
         "[[true, false, true], [false, true, false], [true, false, true]]]"), "offset", parse_json("3 * int", "[-1, -1, -1]"))));
+}
 
 /*
-    Todo: Make this test pass.
+    Todo: Make this 3D test pass.
 
     EXPECT_JSON_EQ_ARR("[[[1128, 864, 588, 300], [918, 702, 477, 243], [660, 504, 342, 174], [354, 270, 183, 93]],"
         "[[1896, 1440, 972, 492], [1494, 1134, 765, 387], [1044, 792, 534, 270], [546, 414, 279, 141]],"
@@ -178,4 +179,3 @@ TEST(Neighborhood, Sum3D) {
         "[[888, 672, 452, 228], [690, 522, 351, 177], [476, 360, 242, 122], [246, 186, 125, 63]]]",
         af(a, aux::kwds("shape", parse_json("3 * int", "[3, 5, 7]"))));
 */
-}
