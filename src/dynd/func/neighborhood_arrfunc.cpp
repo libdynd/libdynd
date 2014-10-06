@@ -67,6 +67,11 @@ struct neighborhood_ck : kernels::expr_ck<neighborhood_ck<N>, N> {
     }
 };
 
+struct neighborhood {
+    nd::arrfunc op;
+    start_stop_t *start_stop;
+};
+
 template <int N>
 static intptr_t instantiate_neighborhood(
     const arrfunc_type_data *af_self, dynd::ckernel_builder *ckb,
@@ -74,7 +79,8 @@ static intptr_t instantiate_neighborhood(
     const ndt::type *src_tp, const char *const *src_arrmeta,
     kernel_request_t kernreq, const nd::array &kwds, const eval::eval_context *ectx)
 {
-    nd::arrfunc nh_op = *af_self->get_data_as<nd::arrfunc>();
+    neighborhood *nh = *af_self->get_data_as<neighborhood *>();
+    nd::arrfunc nh_op = nh->op;
 
     nd::array shape;
     try {
@@ -127,6 +133,7 @@ static intptr_t instantiate_neighborhood(
     const char *nh_src_arrmeta[1] = {nh_arrmeta.get()};
 
     start_stop_t *nh_start_stop = (start_stop_t *) malloc(ndim * sizeof(start_stop_t));
+    nh->start_stop = nh_start_stop;
 
     for (intptr_t i = 0; i < ndim; ++i) {
         typedef neighborhood_ck<N> self_type;
@@ -182,6 +189,12 @@ static void resolve_neighborhood_dst_shape(const arrfunc_type_data *self,
     }
 }
 
+static void free_neighborhood(arrfunc_type_data *self_af) {
+    neighborhood *nh = *self_af->get_data_as<neighborhood *>();
+    free(nh->start_stop);
+    delete nh;
+}
+
 void dynd::make_neighborhood_arrfunc(arrfunc_type_data *out_af, const nd::arrfunc &neighborhood_op, intptr_t nh_ndim)
 {
     std::ostringstream oss;
@@ -197,8 +210,11 @@ void dynd::make_neighborhood_arrfunc(arrfunc_type_data *out_af, const nd::arrfun
         throw invalid_argument(ss.str());
     }
 
-    *out_af->get_data_as<nd::arrfunc>() = neighborhood_op;
+    neighborhood **nh = out_af->get_data_as<neighborhood *>();
+    *nh = new neighborhood;
+    (*nh)->op = neighborhood_op;
     out_af->func_proto = ndt::substitute(result_pattern, typevars, true);
     out_af->instantiate = &instantiate_neighborhood<1>;
     out_af->resolve_dst_shape = &resolve_neighborhood_dst_shape;
+    out_af->free_func = &free_neighborhood;
 }
