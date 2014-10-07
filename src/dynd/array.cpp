@@ -1602,7 +1602,7 @@ nd::array nd::array::view_scalars(const ndt::type& scalar_tp) const
 
     // Transform the scalars into view types
     ndt::type viewed_tp;
-    bool was_transformed;
+    bool was_transformed = false;
     view_scalar_types(
         get_type(), 0,
         const_cast<void *>(reinterpret_cast<const void *>(&scalar_tp)),

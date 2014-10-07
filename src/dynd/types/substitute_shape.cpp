@@ -138,7 +138,7 @@ ndt::type ndt::substitute_shape(const ndt::type &pattern, intptr_t ndim,
   ssd.shape = shape;
   ssd.fulltype = &pattern;
   ndt::type transformed_tp;
-  bool was_transformed;
+  bool was_transformed = false;
   if (ndim > pattern.get_ndim()) {
     ssd.throw_error();
   }
