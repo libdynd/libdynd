@@ -444,7 +444,7 @@ nd::array nd::view(const nd::array &arr, const ndt::type &tp)
           memory_block_incref(in_am->blockref);
           result.get_ndo()->m_data_reference = in_am->blockref;
         }
-        result.get_ndo()->m_data_pointer = in_dat->begin;
+        result.get_ndo()->m_data_pointer = in_dat->begin + in_am->offset;
         // Try to copy the rest of the arrmeta as a view
         if (try_view(arr.get_type().tcast<base_dim_type>()->get_element_type(),
                      arr.get_arrmeta() + sizeof(var_dim_type_arrmeta),
