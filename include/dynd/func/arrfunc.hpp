@@ -233,10 +233,21 @@ public:
     }
 
     template <typename A0, typename A1, typename A2>
-    kwds(const std::string &name0, const A0 &a0, const std::string &name1, const A1 &a1, const std::string &name2, const A1 &a2)
+    kwds(const std::string &name0, const A0 &a0, const std::string &name1, const A1 &a1, const std::string &name2, const A2 &a2)
         : m_kwds(pack(name0, a0, name1, a1, name2, a2)) {
     }
 
+    template <typename A0, typename A1, typename A2, typename A3>
+    kwds(const std::string &name0, const A0 &a0, const std::string &name1, const A1 &a1, const std::string &name2, const A2 &a2,
+        const std::string &name3, const A3 &a3)
+        : m_kwds(pack(name0, a0, name1, a1, name2, a2, name3, a3)) {
+    }
+
+    template <typename A0, typename A1, typename A2, typename A3, typename A4>
+    kwds(const std::string &name0, const A0 &a0, const std::string &name1, const A1 &a1, const std::string &name2, const A2 &a2,
+        const std::string &name3, const A3 &a3, const std::string &name4, const A4 &a4)
+        : m_kwds(pack(name0, a0, name1, a1, name2, a2, name3, a3, name4, a4)) {
+    }
     const nd::array &get() const {
         return m_kwds;
     }
