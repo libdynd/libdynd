@@ -8,13 +8,14 @@
 #include "inc_gtest.hpp"
 
 #include <dynd/types/type_pattern_match.hpp>
-#include <dynd/types/type_substitute.hpp>
+#include <dynd/types/substitute_typevars.hpp>
+#include <dynd/types/substitute_shape.hpp>
 #include <dynd/types/dim_fragment_type.hpp>
 
 using namespace std;
 using namespace dynd;
 
-TEST(TypeSubstitute, SimpleNoSubstitutions) {
+TEST(SubstituteTypeVars, SimpleNoSubstitutions) {
   map<nd::string, ndt::type> typevars;
   EXPECT_EQ(ndt::type("int32"),
             ndt::substitute(ndt::type("int32"), typevars, false));
@@ -30,7 +31,7 @@ TEST(TypeSubstitute, SimpleNoSubstitutions) {
                invalid_argument);
 }
 
-TEST(TypeSubstitute, SimpleSubstitution) {
+TEST(SubstituteTypeVars, SimpleSubstitution) {
   map<nd::string, ndt::type> typevars;
   typevars["Tint"] = ndt::type("int32");
   typevars["Tsym"] = ndt::type("S");
@@ -102,7 +103,7 @@ TEST(TypeSubstitute, SimpleSubstitution) {
       ndt::substitute(ndt::type("Mvar * Amulti... * Tint"), typevars, false));
 }
 
-TEST(TypeSubstitute, Tuple) {
+TEST(SubstituteTypeVars, Tuple) {
   map<nd::string, ndt::type> typevars;
   typevars["T"] = ndt::type("int32");
   typevars["M"] = ndt::type("3 * void");
@@ -126,7 +127,7 @@ TEST(TypeSubstitute, Tuple) {
       ndt::substitute(ndt::type("(A... * T, M * real)"), typevars, true));
 }
 
-TEST(TypeSubstitute, Struct) {
+TEST(SubstituteTypeVars, Struct) {
   map<nd::string, ndt::type> typevars;
   typevars["T"] = ndt::type("int32");
   typevars["M"] = ndt::type("3 * void");
@@ -150,7 +151,7 @@ TEST(TypeSubstitute, Struct) {
                             true));
 }
 
-TEST(TypeSubstitute, FuncProto) {
+TEST(SubstituteTypeVars, FuncProto) {
   map<nd::string, ndt::type> typevars;
   typevars["T"] = ndt::type("int32");
   typevars["M"] = ndt::type("3 * void");
@@ -163,4 +164,26 @@ TEST(TypeSubstitute, FuncProto) {
     ndt::substitute(ndt::type("(int, real) -> complex"), typevars, true));
   EXPECT_EQ(ndt::type("(int32, 3 * real) -> var * 4 * 9 * complex"),
     ndt::substitute(ndt::type("(T, M * real) -> A... * complex"), typevars, false));
+}
+
+TEST(SubstituteShape, Simple) {
+  intptr_t shape[5] = {0, 1, 2, 3, 4};
+  EXPECT_EQ(ndt::type("0 * int32"),
+            ndt::substitute_shape(ndt::type("strided * int32"), 1, shape));
+  EXPECT_EQ(ndt::type("1 * 2 * T"),
+            ndt::substitute_shape(ndt::type("strided**2 * T"), 2, shape + 1));
+  EXPECT_EQ(ndt::type("1 * var * 3 * T"),
+            ndt::substitute_shape(ndt::type("strided * var * strided * T"), 3, shape + 1));
+  EXPECT_EQ(ndt::type("1 * var * 3 * T"),
+            ndt::substitute_shape(ndt::type("strided * var * 3 * T"), 3, shape + 1));
+}
+
+TEST(SubstituteShape, Errors) {
+  intptr_t shape[5] = {0, 1, 2, 3, 4};
+  // Too many dimensions
+  EXPECT_THROW(ndt::substitute_shape(ndt::type("strided * int32"), 2, shape),
+               invalid_argument);
+  // Mismatched fixed dimension
+  EXPECT_THROW(ndt::substitute_shape(ndt::type("10 * int32"), 1, shape + 1),
+               invalid_argument);
 }

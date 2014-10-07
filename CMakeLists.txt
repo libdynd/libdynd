@@ -213,6 +213,8 @@ set(libdynd_SRC
     src/dynd/types/strided_dim_type.cpp
     src/dynd/types/string_type.cpp
     src/dynd/types/struct_type.cpp
+    src/dynd/types/substitute_shape.cpp
+    src/dynd/types/substitute_typevars.cpp
     src/dynd/types/time_parser.cpp
     src/dynd/types/time_type.cpp
     src/dynd/types/time_util.cpp
@@ -220,7 +222,6 @@ set(libdynd_SRC
     src/dynd/types/type_alignment.cpp
     src/dynd/types/type_id.cpp
     src/dynd/types/type_pattern_match.cpp
-    src/dynd/types/type_substitute.cpp
     src/dynd/types/type_type.cpp
     src/dynd/types/typevar_dim_type.cpp
     src/dynd/types/typevar_type.cpp
@@ -283,13 +284,14 @@ set(libdynd_SRC
     include/dynd/types/string_type.hpp
     include/dynd/types/struct_type.hpp
     include/dynd/types/cstruct_type.hpp
+    include/dynd/types/substitute_shape.hpp
+    include/dynd/types/substitute_typevars.hpp
     include/dynd/types/time_parser.hpp
     include/dynd/types/time_type.hpp
     include/dynd/types/time_util.hpp
     include/dynd/types/tuple_type.hpp
     include/dynd/types/type_id.hpp
     include/dynd/types/type_pattern_match.hpp
-    include/dynd/types/type_substitute.hpp
     include/dynd/types/typevar_dim_type.hpp
     include/dynd/types/typevar_type.hpp
     include/dynd/types/unary_expr_type.hpp

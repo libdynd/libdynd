@@ -7,6 +7,7 @@
 #include <dynd/func/call_callable.hpp>
 #include <dynd/func/neighborhood_arrfunc.hpp>
 #include <dynd/kernels/expr_kernels.hpp>
+#include <dynd/types/substitute_shape.hpp>
 
 using namespace std;
 using namespace dynd;
@@ -197,7 +198,7 @@ static int resolve_neighborhood_dst_type(const arrfunc_type_data *self,
   intptr_t ndim = src_tp[0].get_ndim();
   dimvector shape(ndim);
   src_tp[0].extended()->get_shape(ndim, 0, shape.get(), NULL, NULL);
-  out_dst_tp = ndt::make_type(ndim, shape.get(), out_dst_tp.get_dtype());
+  out_dst_tp = ndt::substitute_shape(out_dst_tp, ndim, shape.get());
 
   return 1;
 }

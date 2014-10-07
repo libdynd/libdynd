@@ -3,7 +3,7 @@
 // BSD 2-Clause License, see LICENSE.txt
 //
 
-#include <dynd/types/type_substitute.hpp>
+#include <dynd/types/substitute_typevars.hpp>
 #include <dynd/types/pointer_type.hpp>
 #include <dynd/types/base_struct_type.hpp>
 #include <dynd/types/option_type.hpp>

@@ -15,7 +15,7 @@
 #include <dynd/kernels/ckernel_builder.hpp>
 #include <dynd/types/struct_type.hpp>
 #include <dynd/types/type_pattern_match.hpp>
-#include <dynd/types/type_substitute.hpp>
+#include <dynd/types/substitute_typevars.hpp>
 
 namespace dynd {
 
