@@ -1317,8 +1317,14 @@ inline array dtyped_ones(intptr_t dim0, intptr_t dim1,
  * This concatenates two 1D arrays. It is really just a placeholder until a proper
  * concatenate is written. It shouldn't be used unless you absolutely know what you
  * are doing. It needs to be implemented properly.
- */
+ */                                                                   
 array concatenate(const nd::array &x, const nd::array &y);
+
+/**
+ * Reshapes an array into the new shape. This is currently a prototype and should only be used
+ * with contiguous arrays of built-in dtypes.
+ */
+array reshape(const array &a, const array &shape);
 
 ///////////// Initializer list constructor implementation /////////////////////////
 #ifdef DYND_INIT_LIST

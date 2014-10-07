@@ -732,8 +732,9 @@ struct type_from {
     }
 };
 
-// Forward declaration of make_pointer
+// Forward declarations
 type make_pointer(const type& target_tp);
+type make_cfixed_dim(size_t size, const type& element_tp);
 
 template <typename T>
 struct type_from<T *> {
