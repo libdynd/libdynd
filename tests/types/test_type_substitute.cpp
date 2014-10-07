@@ -62,8 +62,6 @@ TEST(TypeSubstitute, SimpleSubstitution) {
                invalid_argument);
   EXPECT_EQ(ndt::type("strided * int32"),
             ndt::substitute(ndt::type("Mstrided * Tint"), typevars, false));
-  EXPECT_EQ(ndt::type("strided * int32"),
-            ndt::substitute(ndt::type("Mstrided * Tint"), typevars, true));
   EXPECT_EQ(ndt::type("8 * int32"),
             ndt::substitute(ndt::type("Mfixed * Tint"), typevars, false));
   EXPECT_EQ(ndt::type("8 * int32"),
@@ -83,7 +81,7 @@ TEST(TypeSubstitute, SimpleSubstitution) {
       ndt::substitute(ndt::type("Astrided... * Mvar * Tint"), typevars, false));
   EXPECT_EQ(
       ndt::type("var * strided * int32"),
-      ndt::substitute(ndt::type("Mvar * Astrided... * Tint"), typevars, true));
+      ndt::substitute(ndt::type("Mvar * Astrided... * Tint"), typevars, false));
   EXPECT_EQ(
       ndt::type("5 * var * int32"),
       ndt::substitute(ndt::type("Afixed... * Mvar * Tint"), typevars, false));
@@ -101,7 +99,7 @@ TEST(TypeSubstitute, SimpleSubstitution) {
       ndt::substitute(ndt::type("Amulti... * Mvar * Tint"), typevars, false));
   EXPECT_EQ(
       ndt::type("var * strided * var * 3 * int32"),
-      ndt::substitute(ndt::type("Mvar * Amulti... * Tint"), typevars, true));
+      ndt::substitute(ndt::type("Mvar * Amulti... * Tint"), typevars, false));
 }
 
 TEST(TypeSubstitute, Tuple) {
@@ -157,12 +155,12 @@ TEST(TypeSubstitute, FuncProto) {
   typevars["T"] = ndt::type("int32");
   typevars["M"] = ndt::type("3 * void");
   typevars["A"] =
-      ndt::make_dim_fragment(3, ndt::type("var * strided * 4 * void"));
+      ndt::make_dim_fragment(3, ndt::type("var * 4 * 9 * void"));
 
   EXPECT_EQ(ndt::type("(int, real) -> complex"),
     ndt::substitute(ndt::type("(int, real) -> complex"), typevars, false));
   EXPECT_EQ(ndt::type("(int, real) -> complex"),
     ndt::substitute(ndt::type("(int, real) -> complex"), typevars, true));
-  EXPECT_EQ(ndt::type("(int32, 3 * real) -> var * strided * 4 * complex"),
+  EXPECT_EQ(ndt::type("(int32, 3 * real) -> var * 4 * 9 * complex"),
     ndt::substitute(ndt::type("(T, M * real) -> A... * complex"), typevars, false));
 }

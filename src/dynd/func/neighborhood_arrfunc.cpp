@@ -191,7 +191,7 @@ static int resolve_neighborhood_dst_type(const arrfunc_type_data *self,
       throw std::invalid_argument(ss.str());
     }
   }
-  out_dst_tp = ndt::substitute(self->get_return_type(), typevars, true);
+  out_dst_tp = ndt::substitute(self->get_return_type(), typevars, false);
 
   // swap in the input dimension values for the strided**N
   intptr_t ndim = src_tp[0].get_ndim();
@@ -229,7 +229,7 @@ void dynd::make_neighborhood_arrfunc(arrfunc_type_data *out_af,
     *nh = new neighborhood;
     (*nh)->op = neighborhood_op;
     (*nh)->start_stop = (start_stop_t *) malloc(nh_ndim * sizeof(start_stop_t)); 
-    out_af->func_proto = ndt::substitute(result_pattern, typevars, true);
+    out_af->func_proto = ndt::substitute(result_pattern, typevars, false);
     out_af->instantiate = &instantiate_neighborhood<1>;
     out_af->resolve_dst_type = &resolve_neighborhood_dst_type;
     out_af->free_func = &free_neighborhood;

@@ -111,7 +111,7 @@ ndt::detail::internal_substitute(const ndt::type &pattern,
       if (it != typevars.end()) {
         if (it->second.get_ndim() != 0) {
           stringstream ss;
-          ss << "The substitution for dynd type var " << pattern << ", "
+          ss << "The substitution for dynd typevar " << pattern << ", "
              << it->second << ", is a dimension, expected a dtype";
           throw invalid_argument(ss.str());
         }
@@ -119,7 +119,7 @@ ndt::detail::internal_substitute(const ndt::type &pattern,
           return it->second;
         } else {
           stringstream ss;
-          ss << "The substitution for dynd type var " << pattern << ", "
+          ss << "The substitution for dynd typevar " << pattern << ", "
              << it->second << ", is not concrete as required";
           throw invalid_argument(ss.str());
         }
@@ -140,7 +140,7 @@ ndt::detail::internal_substitute(const ndt::type &pattern,
       if (it != typevars.end()) {
         if (it->second.get_ndim() == 0) {
           stringstream ss;
-          ss << "The substitution for dynd type var " << pattern << ", "
+          ss << "The substitution for dynd typevar " << pattern << ", "
              << it->second << ", is a dtype, expected a dimension";
           throw invalid_argument(ss.str());
         }
@@ -168,21 +168,21 @@ ndt::detail::internal_substitute(const ndt::type &pattern,
                 concrete));
           default: {
             stringstream ss;
-            ss << "The substitution for dynd type var " << pattern << ", "
+            ss << "The substitution for dynd typevar " << pattern << ", "
                << it->second << ", is not a substitutable dimension type";
             throw invalid_argument(ss.str());
           }
           }
         } else {
           stringstream ss;
-          ss << "The substitution for dynd type var " << pattern << ", "
+          ss << "The substitution for dynd typevar " << pattern << ", "
              << it->second << ", is not concrete as required";
           throw invalid_argument(ss.str());
         }
       } else {
         if (concrete) {
           stringstream ss;
-          ss << "No substitution type for dynd type var " << pattern
+          ss << "No substitution type for dynd typevar " << pattern
              << " was available";
           throw invalid_argument(ss.str());
         } else {
@@ -207,14 +207,14 @@ ndt::detail::internal_substitute(const ndt::type &pattern,
                     typevars, concrete));
           } else {
             stringstream ss;
-            ss << "The substitution for dynd type var " << pattern << ", "
+            ss << "The substitution for dynd typevar " << pattern << ", "
                << it->second << ", is not a dim fragment as required";
             throw invalid_argument(ss.str());
           }
         } else {
           if (concrete) {
             stringstream ss;
-            ss << "No substitution type for dynd type var " << pattern
+            ss << "No substitution type for dynd typevar " << pattern
                << " was available";
             throw invalid_argument(ss.str());
           } else {
