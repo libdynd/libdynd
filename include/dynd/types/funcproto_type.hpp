@@ -151,8 +151,7 @@ DYND_PP_JOIN_MAP(FUNCPROTO_TYPE_FROM, (), DYND_PP_RANGE(1, DYND_PP_INC(DYND_ARG_
 template<typename R>
 struct funcproto_type_from<void (R &), false, false> {
     static inline ndt::type make() {
-        intptr_t zero = 0;
-        nd::array param_types = nd::typed_empty(1, &zero, ndt::make_strided_of_type());
+        nd::array param_types = nd::empty(0, ndt::make_type());
         param_types.flag_as_immutable();
         return make_funcproto(param_types, make_type<R>());
     }

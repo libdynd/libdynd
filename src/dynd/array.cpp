@@ -1133,8 +1133,11 @@ bool nd::array::equals_exact(const array& rhs) const
         return k(get_readonly_originptr(), rhs.get_readonly_originptr());
     } else if (get_type().get_type_id() == var_dim_type_id) {
       // If there's a leading var dimension, convert it to strided and compare
-      // (Note: this is a hack)
-      return operator()(irange()).equals_exact(rhs(irange()));
+      // (Note: this is an inefficient hack)
+      ndt::type tp = ndt::make_fixed_dim(
+          get_shape()[0],
+          get_type().tcast<base_dim_type>()->get_element_type());
+      return nd::view(*this, tp).equals_exact(nd::view(rhs, tp));
     } else {
         // First compare the shape, to avoid triggering an exception in common cases
         size_t ndim = get_ndim();
@@ -1450,7 +1453,8 @@ namespace {
         intptr_t replace_ndim;
     };
     static void replace_compatible_dtype(const ndt::type &tp,
-                                         intptr_t arrmeta_offset, void *extra,
+                                         intptr_t DYND_UNUSED(arrmeta_offset),
+                                         void *extra,
                                          ndt::type &out_transformed_tp,
                                          bool &out_was_transformed)
     {

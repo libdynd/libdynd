@@ -604,6 +604,12 @@ public:
      */
     array view(const ndt::type& tp) const;
 
+    template<int N>
+    inline array view(const char (&rhs)[N])
+    {
+      return view(ndt::type(rhs));
+    }
+
     /**
      * Attempts to view the uniform type-level of the array as a
      * new dynd type, raising an error if it cannot be done.
@@ -1026,8 +1032,7 @@ namespace detail {
 /**
  * Constructs an uninitialized array of the given dtype.
  */
-inline array empty(const ndt::type &tp);
-
+array empty(const ndt::type &tp);
 
 /**
  * Constructs an uninitialized array of the given dtype, with ndim/shape

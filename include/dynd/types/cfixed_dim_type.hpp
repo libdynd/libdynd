@@ -33,7 +33,7 @@ public:
 
     virtual ~cfixed_dim_type();
 
-    inline size_t get_default_data_size(intptr_t DYND_UNUSED(ndim), const intptr_t *DYND_UNUSED(shape)) const {
+    inline size_t get_default_data_size() const {
         return get_data_size();
     }
 

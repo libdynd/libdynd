@@ -227,6 +227,16 @@ ndt::type dynd::promote_types_arithmetic(const ndt::type& tp0, const ndt::type& 
         return tp0_val;
     }
 
+    // Promote some dimension types
+    if ((tp0_val.get_type_id() == var_dim_type_id &&
+         tp1_val.get_kind() == dim_kind) ||
+        (tp1_val.get_type_id() == var_dim_type_id &&
+         tp0_val.get_kind() == dim_kind)) {
+      return ndt::make_var_dim(promote_types_arithmetic(
+          tp0_val.tcast<base_dim_type>()->get_element_type(),
+          tp1_val.tcast<base_dim_type>()->get_element_type()));
+    }
+
     stringstream ss;
     ss << "type promotion of " << tp0 << " and " << tp1
        << " is not yet supported";

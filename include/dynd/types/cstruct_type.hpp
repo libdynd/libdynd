@@ -42,7 +42,7 @@ public:
     cstruct_type(const nd::array &field_names, const nd::array &field_types);
     virtual ~cstruct_type();
 
-    size_t get_default_data_size(intptr_t DYND_UNUSED(ndim), const intptr_t *DYND_UNUSED(shape)) const {
+    size_t get_default_data_size() const {
         return get_data_size();
     }
 

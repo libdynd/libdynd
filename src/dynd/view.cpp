@@ -425,9 +425,39 @@ nd::array nd::view(const nd::array &arr, const ndt::type &tp)
     }
     result.get_ndo()->m_type = ndt::type(tp).release();
     result.get_ndo()->m_flags = arr.get_ndo()->m_flags;
-    // Now try to copy the arrmeta as a view
-    if (try_view(arr.get_type(), arr.get_arrmeta(), tp, result.get_arrmeta(),
-                 arr.get_memblock().get())) {
+    // First handle a special case of viewing outermost "var" as "fixed"
+    if (arr.get_type().get_type_id() == var_dim_type_id &&
+        tp.get_type_id() == fixed_dim_type_id) {
+      const var_dim_type_arrmeta *in_am =
+          reinterpret_cast<const var_dim_type_arrmeta *>(arr.get_arrmeta());
+      const var_dim_type_data *in_dat =
+          reinterpret_cast<const var_dim_type_data *>(
+              arr.get_readonly_originptr());
+      fixed_dim_type_arrmeta *out_am =
+          reinterpret_cast<fixed_dim_type_arrmeta *>(result.get_arrmeta());
+      out_am->dim_size = tp.tcast<fixed_dim_type>()->get_fixed_dim_size();
+      out_am->stride = in_am->stride;
+      if ((intptr_t)in_dat->size == out_am->dim_size) {
+        // Use the more specific data reference from the var arrmeta if possible
+        if (in_am->blockref != NULL) {
+          memory_block_decref(result.get_ndo()->m_data_reference);
+          memory_block_incref(in_am->blockref);
+          result.get_ndo()->m_data_reference = in_am->blockref;
+        }
+        result.get_ndo()->m_data_pointer = in_dat->begin;
+        // Try to copy the rest of the arrmeta as a view
+        if (try_view(arr.get_type().tcast<base_dim_type>()->get_element_type(),
+                     arr.get_arrmeta() + sizeof(var_dim_type_arrmeta),
+                     tp.tcast<base_dim_type>()->get_element_type(),
+                     result.get_arrmeta() + sizeof(fixed_dim_type_arrmeta),
+                     arr.get_memblock().get())) {
+          return result;
+        }
+      }
+    }
+    // Otherwise try to copy the arrmeta as a view
+    else if (try_view(arr.get_type(), arr.get_arrmeta(), tp,
+                      result.get_arrmeta(), arr.get_memblock().get())) {
       // If it succeeded, return it
       return result;
     }

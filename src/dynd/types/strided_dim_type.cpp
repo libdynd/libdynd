@@ -19,7 +19,7 @@ using namespace dynd;
 
 strided_dim_type::strided_dim_type(const ndt::type& element_tp)
     : base_dim_type(strided_dim_type_id, element_tp, 0, element_tp.get_data_alignment(),
-                    sizeof(strided_dim_type_arrmeta), type_flag_none, true)
+                    sizeof(strided_dim_type_arrmeta), type_flag_symbolic, true)
 {
   // Propagate the inherited flags from the element
   m_members.flags |=
@@ -316,8 +316,8 @@ bool strided_dim_type::operator==(const base_type& rhs) const
     }
 }
 
-void strided_dim_type::arrmeta_default_construct(char *arrmeta,
-                                                 bool blockref_alloc) const
+void strided_dim_type::arrmeta_default_construct(
+    char *DYND_UNUSED(arrmeta), bool DYND_UNUSED(blockref_alloc)) const
 {
   stringstream ss;
   ss << "Cannot default construct type " << ndt::type(this, true);

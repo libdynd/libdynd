@@ -90,13 +90,12 @@ TEST(GroupByDType, MediumDeduceGroups) {
     int group_15[] = {            50,     75        };
     int group_19[] = {            54,     79        };
     g = g.eval();
-    cout << g << endl;
-    EXPECT_ARR_EQ(nd::array(group_0), g(0, irange()).eval());
-    EXPECT_ARR_EQ(nd::array(group_6), g(6, irange()).eval());
-    EXPECT_ARR_EQ(nd::array(group_9), g(9, irange()).eval());
-    EXPECT_ARR_EQ(nd::array(group_10), g(10, irange()).eval());
-    EXPECT_ARR_EQ(nd::array(group_15), g(15, irange()).eval());
-    EXPECT_ARR_EQ(nd::array(group_19), g(19, irange()).eval());
+    EXPECT_ARR_VALS_EQ(nd::array(group_0), g(0, irange()).eval());
+    EXPECT_ARR_VALS_EQ(nd::array(group_6), g(6, irange()).eval());
+    EXPECT_ARR_VALS_EQ(nd::array(group_9), g(9, irange()).eval());
+    EXPECT_ARR_VALS_EQ(nd::array(group_10), g(10, irange()).eval());
+    EXPECT_ARR_VALS_EQ(nd::array(group_15), g(15, irange()).eval());
+    EXPECT_ARR_VALS_EQ(nd::array(group_19), g(19, irange()).eval());
 }
 
 TEST(GroupByDType, Struct) {

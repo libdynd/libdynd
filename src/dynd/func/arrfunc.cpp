@@ -172,7 +172,7 @@ nd::array nd::arrfunc::call(intptr_t arg_count, const nd::array *args, const aux
 
   // Resolve the destination type
   ndt::type dst_tp =
-      af->resolve(arg_count, arg_count ? &src_tp[0] : NULL, dyn_params);
+      af->resolve(arg_count, arg_count ? &src_tp[0] : NULL, kwds.get());
 
   std::vector<const char *> src_arrmeta(arg_count);
   for (intptr_t i = 0; i < arg_count; ++i) {

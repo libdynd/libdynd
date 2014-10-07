@@ -36,7 +36,7 @@ public:
 
     virtual ~var_dim_type();
 
-    size_t get_default_data_size(intptr_t DYND_UNUSED(ndim), const intptr_t *DYND_UNUSED(shape)) const {
+    size_t get_default_data_size() const {
         return sizeof(var_dim_type_data);
     }
 

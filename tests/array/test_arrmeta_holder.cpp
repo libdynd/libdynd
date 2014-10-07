@@ -25,10 +25,9 @@ TEST(ArrMetaHolder, Basic) {
     string_type_data sarr[3];
     int iarr[3] = {-1234, 0, 999992};
     memset(sarr, 0, sizeof(sarr));
-    intptr_t sarr_size = 3;
 
-    arrmeta_holder smeta(ndt::type("20 * string"));
-    EXPECT_EQ(smeta.get_type(), ndt::type("20 * string"));
+    arrmeta_holder smeta(ndt::type("3 * string"));
+    EXPECT_EQ(smeta.get_type(), ndt::type("3 * string"));
     arrmeta_holder imeta(ndt::type("3 * int"));
     EXPECT_EQ(imeta.get_type(), ndt::type("fixed[3] * int32"));
     smeta.arrmeta_default_construct(true);
