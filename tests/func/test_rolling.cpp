@@ -28,7 +28,7 @@ TEST(Rolling, BuiltinSum_Kernel) {
     double adata[] = {1, 3, 7, 2, 9, 4, -5, 100, 2, -20, 3, 9, 18};
     nd::array a = adata;
     nd::array b = rolling_sum(a);
-    EXPECT_EQ(ndt::type("strided * real"), b.get_type());
+    EXPECT_EQ(ndt::type("13 * real"), b.get_type());
     for (int i = 0; i < 3; ++i) {
         EXPECT_TRUE(DYND_ISNAN(b(i).as<double>()));
     }
@@ -49,7 +49,7 @@ TEST(Rolling, BuiltinMean_Kernel) {
     double adata[] = {1, 3, 7, 2, 9, 4, -5, 100, 2, -20, 3, 9, 18};
     nd::array a = adata;
     nd::array b = rolling_sum(a);
-    EXPECT_EQ(ndt::type("strided * real"), b.get_type());
+    EXPECT_EQ(ndt::type("13 * real"), b.get_type());
     for (int i = 0; i < 3; ++i) {
         EXPECT_TRUE(DYND_ISNAN(b(i).as<double>()));
     }

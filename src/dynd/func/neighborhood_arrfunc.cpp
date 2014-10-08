@@ -7,6 +7,7 @@
 #include <dynd/func/call_callable.hpp>
 #include <dynd/func/neighborhood_arrfunc.hpp>
 #include <dynd/kernels/expr_kernels.hpp>
+#include <dynd/types/substitute_shape.hpp>
 
 using namespace std;
 using namespace dynd;
@@ -166,24 +167,40 @@ static intptr_t instantiate_neighborhood(
     return ckb_offset;
 }
 
-static void resolve_neighborhood_dst_shape(const arrfunc_type_data *self,
-                                           intptr_t *out_shape,
-                                           const ndt::type &dst_tp,
-                                           const ndt::type *src_tp,
-                                           const char *const *src_arrmeta,
-                                           const char *const *src_data) {
-    intptr_t param_count = self->get_param_count();
-    intptr_t child_ndim = 0;
-    intptr_t ndim = dst_tp.get_ndim() - 0 * child_ndim;
-    if (ndim > 0) {
-        for (intptr_t i = 0; i < param_count; ++i) {
-            intptr_t ndim_i = src_tp[i].get_ndim();
-            if (ndim_i > 0) {
-                src_tp[i].extended()->get_shape(ndim_i, 0, out_shape,
-                                                src_arrmeta[i], src_data[i]);
-            }
-        }
+static int resolve_neighborhood_dst_type(const arrfunc_type_data *self,
+                                         intptr_t nsrc, const ndt::type *src_tp,
+                                         const nd::array &DYND_UNUSED(dyn_params),
+                                         int DYND_UNUSED(throw_on_error),
+                                         ndt::type &out_dst_tp)
+{
+  // TODO: Should be able to express the match/subsitution without special code
+
+  // This is basically resolve() from arrfunc.hpp
+  if (nsrc != self->get_param_count()) {
+    std::stringstream ss;
+    ss << "arrfunc expected " << self->get_param_count()
+       << " parameters, but received " << nsrc;
+    throw std::invalid_argument(ss.str());
+  }
+  const ndt::type *param_types = self->get_param_types();
+  std::map<nd::string, ndt::type> typevars;
+  for (intptr_t i = 0; i != nsrc; ++i) {
+    if (!ndt::pattern_match(src_tp[i].value_type(), param_types[i], typevars)) {
+      std::stringstream ss;
+      ss << "parameter " << (i + 1) << " to arrfunc does not match, ";
+      ss << "expected " << param_types[i] << ", received " << src_tp[i];
+      throw std::invalid_argument(ss.str());
     }
+  }
+  out_dst_tp = ndt::substitute(self->get_return_type(), typevars, false);
+
+  // swap in the input dimension values for the strided**N
+  intptr_t ndim = src_tp[0].get_ndim();
+  dimvector shape(ndim);
+  src_tp[0].extended()->get_shape(ndim, 0, shape.get(), NULL, NULL);
+  out_dst_tp = ndt::substitute_shape(out_dst_tp, ndim, shape.get());
+
+  return 1;
 }
 
 static void free_neighborhood(arrfunc_type_data *self_af) {
@@ -192,7 +209,9 @@ static void free_neighborhood(arrfunc_type_data *self_af) {
     delete nh;
 }
 
-void dynd::make_neighborhood_arrfunc(arrfunc_type_data *out_af, const nd::arrfunc &neighborhood_op, intptr_t nh_ndim)
+void dynd::make_neighborhood_arrfunc(arrfunc_type_data *out_af,
+                                     const nd::arrfunc &neighborhood_op,
+                                     intptr_t nh_ndim)
 {
     std::ostringstream oss;
     oss << "strided**" << nh_ndim;
@@ -211,8 +230,8 @@ void dynd::make_neighborhood_arrfunc(arrfunc_type_data *out_af, const nd::arrfun
     *nh = new neighborhood;
     (*nh)->op = neighborhood_op;
     (*nh)->start_stop = (start_stop_t *) malloc(nh_ndim * sizeof(start_stop_t)); 
-    out_af->func_proto = ndt::substitute(result_pattern, typevars, true);
+    out_af->func_proto = ndt::substitute(result_pattern, typevars, false);
     out_af->instantiate = &instantiate_neighborhood<1>;
-    out_af->resolve_dst_shape = &resolve_neighborhood_dst_shape;
+    out_af->resolve_dst_type = &resolve_neighborhood_dst_type;
     out_af->free_func = &free_neighborhood;
 }

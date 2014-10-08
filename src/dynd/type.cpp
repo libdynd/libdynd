@@ -163,25 +163,30 @@ namespace {
         }
         const ndt::type& scalar_tp;
     };
-    static void replace_scalar_types(const ndt::type& dt, void *extra,
-                ndt::type& out_transformed_tp, bool& out_was_transformed)
+    static void replace_scalar_types(const ndt::type &dt,
+                                     intptr_t DYND_UNUSED(arrmeta_offset),
+                                     void *extra, ndt::type &out_transformed_tp,
+                                     bool &out_was_transformed)
     {
         const replace_scalar_type_extra *e = reinterpret_cast<const replace_scalar_type_extra *>(extra);
         if (dt.is_scalar()) {
             out_transformed_tp = ndt::make_convert(e->scalar_tp, dt);
             out_was_transformed = true;
         } else {
-            dt.extended()->transform_child_types(&replace_scalar_types, extra, out_transformed_tp, out_was_transformed);
+          dt.extended()->transform_child_types(&replace_scalar_types, 0, extra,
+                                               out_transformed_tp,
+                                               out_was_transformed);
         }
     }
 } // anonymous namespace
 
-ndt::type ndt::type::with_replaced_scalar_types(const ndt::type& scalar_tp) const
+ndt::type
+ndt::type::with_replaced_scalar_types(const ndt::type &scalar_tp) const
 {
     ndt::type result;
     bool was_transformed;
     replace_scalar_type_extra extra(scalar_tp);
-    replace_scalar_types(*this, &extra, result, was_transformed);
+    replace_scalar_types(*this, 0, &extra, result, was_transformed);
     return result;
 }
 
@@ -194,26 +199,30 @@ namespace {
         const ndt::type& m_replacement_tp;
         intptr_t m_replace_ndim;
     };
-    static void replace_dtype(const ndt::type& tp, void *extra,
-                ndt::type& out_transformed_tp, bool& out_was_transformed)
+    static void replace_dtype(const ndt::type &tp,
+                              intptr_t DYND_UNUSED(arrmeta_offset), void *extra,
+                              ndt::type &out_transformed_tp,
+                              bool &out_was_transformed)
     {
         const replace_dtype_extra *e = reinterpret_cast<const replace_dtype_extra *>(extra);
         if (tp.get_ndim() == e->m_replace_ndim) {
             out_transformed_tp = e->m_replacement_tp;
             out_was_transformed = true;
         } else {
-            tp.extended()->transform_child_types(
-                &replace_dtype, extra, out_transformed_tp, out_was_transformed);
+          tp.extended()->transform_child_types(&replace_dtype, 0, extra,
+                                               out_transformed_tp,
+                                               out_was_transformed);
         }
     }
 } // anonymous namespace
 
-ndt::type ndt::type::with_replaced_dtype(const ndt::type& replacement_tp, intptr_t replace_ndim) const
+ndt::type ndt::type::with_replaced_dtype(const ndt::type &replacement_tp,
+                                         intptr_t replace_ndim) const
 {
     ndt::type result;
     bool was_transformed;
     replace_dtype_extra extra(replacement_tp, replace_ndim);
-    replace_dtype(*this, &extra, result, was_transformed);
+    replace_dtype(*this, 0, &extra, result, was_transformed);
     return result;
 }
 
@@ -402,21 +411,23 @@ std::ostream& dynd::ndt::operator<<(std::ostream& o, const ndt::type& rhs)
 
 ndt::type ndt::make_type(intptr_t ndim, const intptr_t *shape, const ndt::type& dtp)
 {
-    if (ndim > 0) {
-        ndt::type result_tp = shape[ndim-1] >= 0
-                        ? ndt::make_strided_dim(dtp)
-                        : ndt::make_var_dim(dtp);
-        for (intptr_t i = ndim-2; i >= 0; --i) {
-            if (shape[i] >= 0) {
-                result_tp = ndt::make_strided_dim(result_tp);
-            } else {
-                result_tp = ndt::make_var_dim(result_tp);
-            }
-        }
-        return result_tp;
-    } else {
-        return dtp;
+  if (ndim > 0) {
+    ndt::type result_tp = shape[ndim - 1] >= 0
+                              ? ndt::make_fixed_dim(shape[ndim - 1], dtp)
+                              : ndt::make_var_dim(dtp);
+    for (intptr_t i = ndim - 2; i >= 0; --i) {
+      if (shape[i] >= 0) {
+        result_tp = ndt::make_fixed_dim(shape[i], result_tp);
+      }
+      else {
+        result_tp = ndt::make_var_dim(result_tp);
+      }
     }
+    return result_tp;
+  }
+  else {
+    return dtp;
+  }
 }
 
 ndt::type ndt::make_type(intptr_t ndim, const intptr_t *shape, const ndt::type& dtp, bool& out_any_var)
@@ -425,7 +436,7 @@ ndt::type ndt::make_type(intptr_t ndim, const intptr_t *shape, const ndt::type& 
         ndt::type result_tp = dtp;
         for (intptr_t i = ndim - 1; i >= 0; --i) {
             if (shape[i] >= 0) {
-                result_tp = ndt::make_strided_dim(result_tp);
+                result_tp = ndt::make_fixed_dim(shape[i], result_tp);
             }
             else {
                 result_tp = ndt::make_var_dim(result_tp);

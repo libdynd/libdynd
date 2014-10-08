@@ -34,7 +34,7 @@ TYPED_TEST_P(ArrayAssign, ScalarAssignment_Bool) {
     ectx_inexact.errmode = assign_error_inexact;
 
     // assignment to a bool scalar
-    a = nd::typed_empty(TestFixture::First::MakeType(ndt::make_type<dynd_bool>()));
+    a = nd::empty(TestFixture::First::MakeType(ndt::make_type<dynd_bool>()));
     const dynd_bool *ptr_a = (const dynd_bool *)a.get_ndo()->m_data_pointer;
     a.val_assign(TestFixture::Second::To(true));
     EXPECT_TRUE(TestFixture::First::Dereference(ptr_a));
@@ -428,16 +428,16 @@ TEST(ArrayAssign, ChainedCastingRead) {
     b = a.ucast<int>();
     b = b.ucast<float>();
     // Multiple cast_scalars operations should make a chained conversion type
-    EXPECT_EQ(ndt::make_strided_dim(
-                    ndt::make_convert(ndt::make_type<float>(),
-                                    ndt::make_convert<int, float>())),
+    EXPECT_EQ(ndt::make_fixed_dim(
+                  5, ndt::make_convert(ndt::make_type<float>(),
+                                       ndt::make_convert<int, float>())),
               b.get_type());
 
     // Evaluating the values should truncate them to integers
     tmp_ectx.errmode = assign_error_overflow;
     b = b.eval(&tmp_ectx);
     // Now it's just the value type, no chaining
-    EXPECT_EQ(ndt::type("strided * float32"), b.get_type());
+    EXPECT_EQ(ndt::type("5 * float32"), b.get_type());
     EXPECT_EQ(3, b(0).as<float>());
     EXPECT_EQ(1, b(1).as<float>());
     EXPECT_EQ(-2, b(2).as<float>());
@@ -452,21 +452,23 @@ TEST(ArrayAssign, ChainedCastingRead) {
     b = b.ucast<float>();
     b = b.ucast<int32_t>();
 
-    EXPECT_EQ(ndt::make_strided_dim(ndt::make_convert(
-                  ndt::make_type<int32_t>(),
-                  ndt::make_convert(
-                      ndt::make_type<float>(),
-                      ndt::make_convert(
-                          ndt::make_type<int64_t>(),
-                          ndt::make_convert(
-                              ndt::make_type<int16_t>(),
-                              ndt::make_convert(
-                                  ndt::make_type<int32_t>(),
-                                  ndt::make_convert<int16_t, float>())))))),
-              b.get_type());
+    EXPECT_EQ(
+        ndt::make_fixed_dim(
+            5, ndt::make_convert(
+                   ndt::make_type<int32_t>(),
+                   ndt::make_convert(
+                       ndt::make_type<float>(),
+                       ndt::make_convert(
+                           ndt::make_type<int64_t>(),
+                           ndt::make_convert(
+                               ndt::make_type<int16_t>(),
+                               ndt::make_convert(
+                                   ndt::make_type<int32_t>(),
+                                   ndt::make_convert<int16_t, float>())))))),
+        b.get_type());
     tmp_ectx.errmode = assign_error_overflow;
     b = b.eval(&tmp_ectx);
-    EXPECT_EQ(ndt::type("strided * int32"), b.get_type());
+    EXPECT_EQ(ndt::type("5 * int32"), b.get_type());
     EXPECT_EQ(3, b(0).as<int32_t>());
     EXPECT_EQ(1, b(1).as<int32_t>());
     EXPECT_EQ(-2, b(2).as<int32_t>());
@@ -482,8 +484,9 @@ TEST(ArrayAssign, ChainedCastingWrite) {
     b = a.ucast<int>(0);
     b = b.ucast<float>(0);
     // Multiple cast_scalars operations should make a chained conversion type
-    EXPECT_EQ(ndt::make_strided_dim(ndt::make_convert(
-                  ndt::make_type<float>(), ndt::make_convert<int, float>())),
+    EXPECT_EQ(ndt::make_fixed_dim(
+                  3, ndt::make_convert(ndt::make_type<float>(),
+                                       ndt::make_convert<int, float>())),
               b.get_type());
 
     tmp_ectx.errmode = assign_error_overflow;

@@ -78,13 +78,11 @@ public:
             reinterpret_cast<char *>(m_arrmeta) + sizeof(ndt::type) + offset);
     }
 
-    void arrmeta_default_construct(intptr_t ndim, const intptr_t *shape,
-                                   bool blockref_alloc)
+    void arrmeta_default_construct(bool blockref_alloc)
     {
       const ndt::type &tp = get_type();
       if (!tp.is_builtin()) {
-        tp.extended()->arrmeta_default_construct(get(), ndim, shape,
-                                                 blockref_alloc);
+        tp.extended()->arrmeta_default_construct(get(), blockref_alloc);
       }
     }
 };

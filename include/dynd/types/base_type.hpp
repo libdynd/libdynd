@@ -74,7 +74,8 @@ typedef char *(*iterdata_reset_fn_t)(iterdata_common *iterdata, char *data,
  * should place a different type in 'out_transformed_type', then set
  * 'out_was_transformed' to true.
  */
-typedef void (*type_transform_fn_t)(const ndt::type &dt, void *extra,
+typedef void (*type_transform_fn_t)(const ndt::type &dt,
+                                    intptr_t arrmeta_offset, void *extra,
                                     ndt::type &out_transformed_type,
                                     bool &out_was_transformed);
 
@@ -195,7 +196,7 @@ public:
     inline base_type_members::flags_type get_flags() const {
         return m_members.flags;
     }
-    virtual size_t get_default_data_size(intptr_t ndim, const intptr_t *shape) const;
+    virtual size_t get_default_data_size() const;
 
     /**
      * Print the raw data interpreted as a single instance of this type.
@@ -250,13 +251,16 @@ public:
      * a new type of the same type but with the transformed children.
      *
      * \param transform_fn  The function for transforming types.
+     * \param arrmeta_offset  An offset for arrmeta corresponding to the
+     *                        type. This is adjusted and passed to the
+     *                        transform_fn for each child type's arrmeta_offset.
      * \param extra  Extra data to pass to the transform function
      * \param out_transformed_type  The transformed type is placed here.
      * \param out_was_transformed  Is set to true if a transformation was done,
      *                             is left alone otherwise.
      */
     virtual void transform_child_types(type_transform_fn_t transform_fn,
-                                       void *extra,
+                                       intptr_t arrmeta_offset, void *extra,
                                        ndt::type &out_transformed_type,
                                        bool &out_was_transformed) const;
 
@@ -432,8 +436,6 @@ public:
      * get_default_data_size().
      *
      * \param arrmeta  The arrmeta to default construct.
-     * \param ndim  Number of dimensions in the provided shape.
-     * \param shape  The array shape to use when shape is not from the type.
      * \param blockref_alloc  If ``true``, blockref types should allocate
      *                        writable memory blocks, and if ``false``, they
      *                        should set their blockrefs to NULL. The latter
@@ -441,9 +443,7 @@ public:
      *                        the parent nd::array, and is useful for viewing
      *                        external memory with compatible layout.
      */
-    virtual void arrmeta_default_construct(char *arrmeta, intptr_t ndim,
-                                           const intptr_t *shape,
-                                           bool blockref_alloc) const;
+    virtual void arrmeta_default_construct(char *arrmeta, bool blockref_alloc) const;
     /**
      * Constructs the nd::array arrmeta for this type, copying everything exactly from
      * input arrmeta for the same type.

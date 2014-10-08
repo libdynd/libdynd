@@ -171,11 +171,11 @@ inline double rel_err_max<double>() {
 }
 
 TYPED_TEST_P(FFT1D, Linear) {
-    nd::array x0 = nd::dtyped_rand(TestFixture::SrcShape[0],
+    nd::array x0 = nd::rand(TestFixture::SrcShape[0],
         ndt::make_type<typename TestFixture::SrcType>());
-    nd::array x1 = nd::dtyped_rand(TestFixture::SrcShape[0],
+    nd::array x1 = nd::rand(TestFixture::SrcShape[0],
         ndt::make_type<typename TestFixture::SrcType>());
-    nd::array x = nd::dtyped_empty(TestFixture::SrcShape[0],
+    nd::array x = nd::empty(TestFixture::SrcShape[0],
         ndt::make_type<typename TestFixture::SrcType>());
     x.vals() = x0 + x1;
 
@@ -191,7 +191,7 @@ TYPED_TEST_P(FFT1D, Linear) {
 }
 
 TYPED_TEST_P(FFT1D, Inverse) {
-    nd::array x = nd::dtyped_rand(TestFixture::SrcShape[0],
+    nd::array x = nd::rand(TestFixture::SrcShape[0],
         ndt::make_type<typename TestFixture::SrcType>());
 
     nd::array y = ifft(fft(x));
@@ -203,7 +203,7 @@ TYPED_TEST_P(FFT1D, Inverse) {
 }
 
 TYPED_TEST_P(FFT1D, Zeros) {
-    nd::array x = nd::dtyped_zeros(TestFixture::SrcShape[0],
+    nd::array x = nd::zeros(TestFixture::SrcShape[0],
         ndt::make_type<typename TestFixture::SrcType>());
 
     nd::array y = fft(x);
@@ -213,7 +213,7 @@ TYPED_TEST_P(FFT1D, Zeros) {
 }
 
 TYPED_TEST_P(FFT1D, Ones) {
-    nd::array x = nd::dtyped_ones(TestFixture::SrcShape[0],
+    nd::array x = nd::ones(TestFixture::SrcShape[0],
         ndt::make_type<typename TestFixture::SrcType>());
 
     nd::array y = fft(x);
@@ -234,7 +234,7 @@ TYPED_TEST_P(FFT1D, KroneckerDelta) {
         return;
     }
 
-    nd::array x = nd::dtyped_zeros(TestFixture::SrcShape[0],
+    nd::array x = nd::zeros(TestFixture::SrcShape[0],
         ndt::make_type<typename TestFixture::SrcType>());
     x(TestFixture::SrcShape[0] / 2).vals() = 1;
 
@@ -283,11 +283,11 @@ TEST(FFT1D, Shift) {
 }
 
 TYPED_TEST_P(RFFT1D, Linear) {
-    nd::array x0 = nd::dtyped_rand(TestFixture::SrcShape[0],
+    nd::array x0 = nd::rand(TestFixture::SrcShape[0],
         ndt::make_type<typename TestFixture::SrcType>());
-    nd::array x1 = nd::dtyped_rand(TestFixture::SrcShape[0],
+    nd::array x1 = nd::rand(TestFixture::SrcShape[0],
         ndt::make_type<typename TestFixture::SrcType>());
-    nd::array x = nd::dtyped_empty(TestFixture::SrcShape[0],
+    nd::array x = nd::empty(TestFixture::SrcShape[0],
         ndt::make_type<typename TestFixture::SrcType>());
     x.vals() = x0 + x1;
 
@@ -303,7 +303,7 @@ TYPED_TEST_P(RFFT1D, Linear) {
 }
 
 TYPED_TEST_P(RFFT1D, Inverse) {
-    nd::array x = nd::dtyped_rand(TestFixture::SrcShape[0],
+    nd::array x = nd::rand(TestFixture::SrcShape[0],
         ndt::make_type<typename TestFixture::SrcType>());
 
     nd::array y = irfft(rfft(x), TestFixture::SrcShape[0]);
@@ -315,7 +315,7 @@ TYPED_TEST_P(RFFT1D, Inverse) {
 }
 
 TYPED_TEST_P(RFFT1D, Zeros) {
-    nd::array x = nd::dtyped_zeros(TestFixture::SrcShape[0],
+    nd::array x = nd::zeros(TestFixture::SrcShape[0],
         ndt::make_type<typename TestFixture::SrcType>());
 
     nd::array y = rfft(x);
@@ -325,7 +325,7 @@ TYPED_TEST_P(RFFT1D, Zeros) {
 }
 
 TYPED_TEST_P(RFFT1D, Ones) {
-    nd::array x = nd::dtyped_ones(TestFixture::SrcShape[0],
+    nd::array x = nd::ones(TestFixture::SrcShape[0],
         ndt::make_type<typename TestFixture::SrcType>());
 
     nd::array y = rfft(x);
@@ -346,7 +346,7 @@ TYPED_TEST_P(RFFT1D, KroneckerDelta) {
         return;
     }
 
-    nd::array x = nd::dtyped_zeros(TestFixture::SrcShape[0],
+    nd::array x = nd::zeros(TestFixture::SrcShape[0],
         ndt::make_type<typename TestFixture::SrcType>());
     x(TestFixture::SrcShape[0] / 2).vals() = 1;
 
@@ -371,11 +371,11 @@ TYPED_TEST_P(RFFT1D, KroneckerDelta) {
 }
 
 TYPED_TEST_P(FFT2D, Linear) {
-    nd::array x0 = nd::dtyped_rand(TestFixture::SrcShape[0], TestFixture::SrcShape[1],
+    nd::array x0 = nd::rand(TestFixture::SrcShape[0], TestFixture::SrcShape[1],
         ndt::make_type<typename TestFixture::SrcType>());
-    nd::array x1 = nd::dtyped_rand(TestFixture::SrcShape[0], TestFixture::SrcShape[1],
+    nd::array x1 = nd::rand(TestFixture::SrcShape[0], TestFixture::SrcShape[1],
         ndt::make_type<typename TestFixture::SrcType>());
-    nd::array x = nd::dtyped_empty(TestFixture::SrcShape[0], TestFixture::SrcShape[1],
+    nd::array x = nd::empty(TestFixture::SrcShape[0], TestFixture::SrcShape[1],
         ndt::make_type<typename TestFixture::SrcType>());
     x.vals() = x0 + x1;
 
@@ -423,7 +423,7 @@ TYPED_TEST_P(FFT2D, Linear) {
 }
 
 TYPED_TEST_P(FFT2D, Inverse) {
-    nd::array x = nd::dtyped_rand(TestFixture::SrcShape[0], TestFixture::SrcShape[1],
+    nd::array x = nd::rand(TestFixture::SrcShape[0], TestFixture::SrcShape[1],
         ndt::make_type<typename TestFixture::SrcType>());
 
     nd::array y = ifft(fft(x));
@@ -461,7 +461,7 @@ TYPED_TEST_P(FFT2D, Inverse) {
 }
 
 TYPED_TEST_P(FFT2D, Zeros) {
-    nd::array x = nd::dtyped_zeros(TestFixture::SrcShape[0], TestFixture::SrcShape[1],
+    nd::array x = nd::zeros(TestFixture::SrcShape[0], TestFixture::SrcShape[1],
         ndt::make_type<typename TestFixture::SrcType>());
 
     nd::array y = fft(x);
@@ -493,7 +493,7 @@ TYPED_TEST_P(FFT2D, Zeros) {
 }
 
 TYPED_TEST_P(FFT2D, Ones) {
-    nd::array x = nd::dtyped_ones(TestFixture::SrcShape[0], TestFixture::SrcShape[1],
+    nd::array x = nd::ones(TestFixture::SrcShape[0], TestFixture::SrcShape[1],
         ndt::make_type<typename TestFixture::SrcType>());
 
     nd::array y = fft(x);
@@ -516,7 +516,7 @@ TYPED_TEST_P(FFT2D, KroneckerDelta) {
         return;
     }
 
-    nd::array x = nd::dtyped_zeros(TestFixture::SrcShape[0], TestFixture::SrcShape[1],
+    nd::array x = nd::zeros(TestFixture::SrcShape[0], TestFixture::SrcShape[1],
         ndt::make_type<typename TestFixture::SrcType>());
     x(TestFixture::SrcShape[0] / 2, TestFixture::SrcShape[1] / 2).vals() = 1;
 
@@ -612,11 +612,11 @@ TEST(FFT2D, Shift) {
 }
 
 TYPED_TEST_P(RFFT2D, Linear) {
-    nd::array x0 = nd::dtyped_rand(TestFixture::SrcShape[0], TestFixture::SrcShape[1],
+    nd::array x0 = nd::rand(TestFixture::SrcShape[0], TestFixture::SrcShape[1],
         ndt::make_type<typename TestFixture::SrcType>());
-    nd::array x1 = nd::dtyped_rand(TestFixture::SrcShape[0], TestFixture::SrcShape[1],
+    nd::array x1 = nd::rand(TestFixture::SrcShape[0], TestFixture::SrcShape[1],
         ndt::make_type<typename TestFixture::SrcType>());
-    nd::array x = nd::dtyped_empty(TestFixture::SrcShape[0], TestFixture::SrcShape[1],
+    nd::array x = nd::empty(TestFixture::SrcShape[0], TestFixture::SrcShape[1],
         ndt::make_type<typename TestFixture::SrcType>());
     x.vals() = x0 + x1;
 
@@ -634,7 +634,7 @@ TYPED_TEST_P(RFFT2D, Linear) {
 }
 
 TYPED_TEST_P(RFFT2D, Inverse) {
-    nd::array x = nd::dtyped_rand(TestFixture::SrcShape[0], TestFixture::SrcShape[1],
+    nd::array x = nd::rand(TestFixture::SrcShape[0], TestFixture::SrcShape[1],
         ndt::make_type<typename TestFixture::SrcType>());
 
     nd::array y = irfft(rfft(x), TestFixture::SrcShape[0], TestFixture::SrcShape[1]);
@@ -648,7 +648,7 @@ TYPED_TEST_P(RFFT2D, Inverse) {
 }
 
 TYPED_TEST_P(RFFT2D, Zeros) {
-    nd::array x = nd::dtyped_zeros(TestFixture::SrcShape[0], TestFixture::SrcShape[1],
+    nd::array x = nd::zeros(TestFixture::SrcShape[0], TestFixture::SrcShape[1],
         ndt::make_type<typename TestFixture::SrcType>());
 
     nd::array y = rfft(x);
@@ -660,7 +660,7 @@ TYPED_TEST_P(RFFT2D, Zeros) {
 }
 
 TYPED_TEST_P(RFFT2D, Ones) {
-    nd::array x = nd::dtyped_ones(TestFixture::SrcShape[0], TestFixture::SrcShape[1],
+    nd::array x = nd::ones(TestFixture::SrcShape[0], TestFixture::SrcShape[1],
         ndt::make_type<typename TestFixture::SrcType>());
 
     nd::array y = rfft(x);
@@ -683,7 +683,7 @@ TYPED_TEST_P(RFFT2D, KroneckerDelta) {
         return;
     }
 
-    nd::array x = nd::dtyped_zeros(TestFixture::SrcShape[0], TestFixture::SrcShape[1],
+    nd::array x = nd::zeros(TestFixture::SrcShape[0], TestFixture::SrcShape[1],
         ndt::make_type<typename TestFixture::SrcType>());
     x(TestFixture::SrcShape[0] / 2, TestFixture::SrcShape[1] / 2).vals() = 1;
 

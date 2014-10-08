@@ -54,8 +54,10 @@ void funcproto_type::print_type(std::ostream& o) const
     o << ") -> " << m_return_type;
 }
 
-void funcproto_type::transform_child_types(type_transform_fn_t transform_fn, void *extra,
-                ndt::type& out_transformed_tp, bool& out_was_transformed) const
+void funcproto_type::transform_child_types(type_transform_fn_t transform_fn,
+                                           intptr_t arrmeta_offset, void *extra,
+                                           ndt::type &out_transformed_tp,
+                                           bool &out_was_transformed) const
 {
     const ndt::type *param_types = get_param_types_raw();
     std::vector<ndt::type> tmp_param_types(m_param_count);
@@ -63,9 +65,11 @@ void funcproto_type::transform_child_types(type_transform_fn_t transform_fn, voi
 
     bool was_transformed = false;
     for (size_t i = 0, i_end = m_param_count; i != i_end; ++i) {
-        transform_fn(param_types[i], extra, tmp_param_types[i], was_transformed);
+      transform_fn(param_types[i], arrmeta_offset, extra, tmp_param_types[i],
+                   was_transformed);
     }
-    transform_fn(m_return_type, extra, tmp_return_type, was_transformed);
+    transform_fn(m_return_type, arrmeta_offset, extra, tmp_return_type,
+                 was_transformed);
     if (was_transformed) {
         out_transformed_tp =
             ndt::make_funcproto(tmp_param_types, tmp_return_type);
@@ -155,8 +159,7 @@ bool funcproto_type::operator==(const base_type& rhs) const
 }
 
 void funcproto_type::arrmeta_default_construct(
-    char *DYND_UNUSED(arrmeta), intptr_t DYND_UNUSED(ndim),
-    const intptr_t *DYND_UNUSED(shape), bool DYND_UNUSED(blockref_alloc)) const
+    char *DYND_UNUSED(arrmeta), bool DYND_UNUSED(blockref_alloc)) const
 {
   throw type_error("Cannot store data of funcproto type");
 }

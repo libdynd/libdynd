@@ -13,11 +13,11 @@ base_memory_type::~base_memory_type()
 {
 }
 
-size_t base_memory_type::get_default_data_size(intptr_t ndim, const intptr_t *shape) const {
+size_t base_memory_type::get_default_data_size() const {
     if (m_storage_tp.is_builtin()) {
         return m_storage_tp.get_data_size();
     } else {
-        return m_storage_tp.extended()->get_default_data_size(ndim, shape);
+        return m_storage_tp.extended()->get_default_data_size();
     }
 }
 
@@ -37,12 +37,16 @@ bool base_memory_type::is_lossless_assignment(const ndt::type& dst_tp, const ndt
     }
 }
 
-void base_memory_type::transform_child_types(type_transform_fn_t transform_fn, void *extra,
-                ndt::type& out_transformed_tp, bool& out_was_transformed) const
+void base_memory_type::transform_child_types(type_transform_fn_t transform_fn,
+                                             intptr_t arrmeta_offset,
+                                             void *extra,
+                                             ndt::type &out_transformed_tp,
+                                             bool &out_was_transformed) const
 {
     ndt::type tmp_tp;
     bool was_transformed = false;
-    transform_fn(m_storage_tp, extra, tmp_tp, was_transformed);
+    transform_fn(m_storage_tp, arrmeta_offset + m_storage_arrmeta_offset, extra,
+                 tmp_tp, was_transformed);
     if (was_transformed) {
         out_transformed_tp = with_replaced_storage_type(tmp_tp);
         out_was_transformed = true;
@@ -56,13 +60,11 @@ ndt::type base_memory_type::get_canonical_type() const
     return m_storage_tp.get_canonical_type();
 }
 
-void base_memory_type::arrmeta_default_construct(char *arrmeta, intptr_t ndim,
-                                                 const intptr_t *shape,
-                                                 bool blockref_alloc) const
+void base_memory_type::arrmeta_default_construct(char *arrmeta, bool blockref_alloc) const
 {
   if (!m_storage_tp.is_builtin()) {
     m_storage_tp.extended()->arrmeta_default_construct(
-        arrmeta + m_storage_arrmeta_offset, ndim, shape, blockref_alloc);
+        arrmeta + m_storage_arrmeta_offset, blockref_alloc);
   }
 }
 

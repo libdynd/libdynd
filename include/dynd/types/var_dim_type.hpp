@@ -36,7 +36,7 @@ public:
 
     virtual ~var_dim_type();
 
-    size_t get_default_data_size(intptr_t DYND_UNUSED(ndim), const intptr_t *DYND_UNUSED(shape)) const {
+    size_t get_default_data_size() const {
         return sizeof(var_dim_type_data);
     }
 
@@ -52,8 +52,10 @@ public:
 
     bool is_expression() const;
     bool is_unique_data_owner(const char *arrmeta) const;
-    void transform_child_types(type_transform_fn_t transform_fn, void *extra,
-                    ndt::type& out_transformed_tp, bool& out_was_transformed) const;
+    void transform_child_types(type_transform_fn_t transform_fn,
+                               intptr_t arrmeta_offset, void *extra,
+                               ndt::type &out_transformed_tp,
+                               bool &out_was_transformed) const;
     ndt::type get_canonical_type() const;
 
     ndt::type apply_linear_index(intptr_t nindices, const irange *indices,
@@ -78,9 +80,7 @@ public:
 
     bool operator==(const base_type& rhs) const;
 
-    void arrmeta_default_construct(char *arrmeta, intptr_t ndim,
-                                   const intptr_t *shape,
-                                   bool blockref_alloc) const;
+    void arrmeta_default_construct(char *arrmeta, bool blockref_alloc) const;
     void arrmeta_copy_construct(char *dst_arrmeta, const char *src_arrmeta, memory_block_data *embedded_reference) const;
     void arrmeta_reset_buffers(char *arrmeta) const;
     void arrmeta_finalize_buffers(char *arrmeta) const;

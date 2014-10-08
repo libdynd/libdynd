@@ -60,18 +60,20 @@ void ctuple_type::print_type(std::ostream& o) const
     o << ")";
 }
 
-void ctuple_type::transform_child_types(type_transform_fn_t transform_fn, void *extra,
-                ndt::type& out_transformed_tp, bool& out_was_transformed) const
+void ctuple_type::transform_child_types(type_transform_fn_t transform_fn,
+                                        intptr_t arrmeta_offset, void *extra,
+                                        ndt::type &out_transformed_tp,
+                                        bool &out_was_transformed) const
 {
     nd::array tmp_field_types(
-        nd::typed_empty(1, &m_field_count, ndt::make_strided_of_type()));
+        nd::empty(m_field_count, ndt::make_type()));
     ndt::type *tmp_field_types_raw = reinterpret_cast<ndt::type *>(
         tmp_field_types.get_readwrite_originptr());
 
     bool was_transformed = false;
     for (intptr_t i = 0, i_end = m_field_count; i != i_end; ++i) {
-        transform_fn(get_field_type(i), extra, tmp_field_types_raw[i],
-                     was_transformed);
+      transform_fn(get_field_type(i), arrmeta_offset + get_arrmeta_offset(i),
+                   extra, tmp_field_types_raw[i], was_transformed);
     }
     if (was_transformed) {
         tmp_field_types.flag_as_immutable();
@@ -85,7 +87,7 @@ void ctuple_type::transform_child_types(type_transform_fn_t transform_fn, void *
 ndt::type ctuple_type::get_canonical_type() const
 {
     nd::array tmp_field_types(
-        nd::typed_empty(1, &m_field_count, ndt::make_strided_of_type()));
+        nd::empty(m_field_count, ndt::make_type()));
     ndt::type *tmp_field_types_raw = reinterpret_cast<ndt::type *>(
         tmp_field_types.get_readwrite_originptr());
 

@@ -70,12 +70,15 @@ bool pointer_type::is_unique_data_owner(const char *arrmeta) const
     return true;
 }
 
-void pointer_type::transform_child_types(type_transform_fn_t transform_fn, void *extra,
-                ndt::type& out_transformed_tp, bool& out_was_transformed) const
+void pointer_type::transform_child_types(type_transform_fn_t transform_fn,
+                                         intptr_t arrmeta_offset, void *extra,
+                                         ndt::type &out_transformed_tp,
+                                         bool &out_was_transformed) const
 {
     ndt::type tmp_tp;
     bool was_transformed = false;
-    transform_fn(m_target_tp, extra, tmp_tp, was_transformed);
+    transform_fn(m_target_tp, arrmeta_offset + sizeof(pointer_type_arrmeta),
+                 extra, tmp_tp, was_transformed);
     if (was_transformed) {
         out_transformed_tp = ndt::make_pointer(tmp_tp);
         out_was_transformed = true;
@@ -241,8 +244,7 @@ pointer_type::with_replaced_storage_type(const ndt::type & /*replacement_tp*/)
         "TODO: implement pointer_type::with_replaced_storage_type");
 }
 
-void pointer_type::arrmeta_default_construct(char *arrmeta, intptr_t ndim,
-                                             const intptr_t *shape,
+void pointer_type::arrmeta_default_construct(char *arrmeta,
                                              bool blockref_alloc) const
 {
   // Simply allocate a POD memory block
@@ -254,7 +256,7 @@ void pointer_type::arrmeta_default_construct(char *arrmeta, intptr_t ndim,
   }
   if (!m_target_tp.is_builtin()) {
     m_target_tp.extended()->arrmeta_default_construct(
-        arrmeta + sizeof(pointer_type_arrmeta), ndim, shape, blockref_alloc);
+        arrmeta + sizeof(pointer_type_arrmeta), blockref_alloc);
   }
 }
 

@@ -235,8 +235,8 @@ categorical_type::categorical_type(const nd::array& categories, bool presorted)
     } else {
         // Process the categories array to make sure it's valid
         const ndt::type& cdt = categories.get_type();
-        if (cdt.get_type_id() != strided_dim_type_id) {
-            throw dynd::type_error("categorical_type only supports construction from a strided array of categories");
+        if (cdt.get_type_id() != fixed_dim_type_id) {
+            throw dynd::type_error("categorical_type only supports construction from a fixed-dim array of categories");
         }
         m_category_tp = categories.get_type().at(0);
         if (!m_category_tp.is_scalar()) {
@@ -244,9 +244,11 @@ categorical_type::categorical_type(const nd::array& categories, bool presorted)
         }
 
         category_count = categories.get_dim_size();
-        intptr_t categories_stride = reinterpret_cast<const strided_dim_type_arrmeta *>(categories.get_arrmeta())->stride;
+        intptr_t categories_stride =
+            reinterpret_cast<const fixed_dim_type_arrmeta *>(
+                categories.get_arrmeta())->stride;
 
-        const char *categories_element_arrmeta = categories.get_arrmeta() + sizeof(strided_dim_type_arrmeta);
+        const char *categories_element_arrmeta = categories.get_arrmeta() + sizeof(fixed_dim_type_arrmeta);
         comparison_ckernel_builder k;
         ::make_comparison_kernel(&k, 0,
                         m_category_tp, categories_element_arrmeta,
@@ -542,8 +544,7 @@ bool categorical_type::operator==(const base_type& rhs) const
 }
 
 void categorical_type::arrmeta_default_construct(
-    char *DYND_UNUSED(arrmeta), intptr_t DYND_UNUSED(ndim),
-    const intptr_t *DYND_UNUSED(shape), bool DYND_UNUSED(blockref_alloc)) const
+    char *DYND_UNUSED(arrmeta), bool DYND_UNUSED(blockref_alloc)) const
 {
   // Data is stored as uint##, no arrmeta to process
 }

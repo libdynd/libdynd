@@ -114,17 +114,28 @@ static void free_rolling_arrfunc_data(arrfunc_type_data *self_af) {
 } // anonymous namespace
 
 static int resolve_rolling_dst_type(const arrfunc_type_data *af_self,
-                                    ndt::type &out_dst_tp,
-                                    const ndt::type *src_tp, int throw_on_error)
+                                    intptr_t nsrc, const ndt::type *src_tp,
+                                    const nd::array &dyn_params,
+                                    int throw_on_error, ndt::type &out_dst_tp)
 {
+    if (nsrc != 1) {
+      if (throw_on_error) {
+        stringstream ss;
+        ss << "Wrong number of arguments to rolling arrfunc with prototype ";
+        ss << af_self->func_proto << ", got " << nsrc << " arguments";
+        throw invalid_argument(ss.str());
+      } else {
+        return 0;
+      }
+    }
     rolling_arrfunc_data *data = *af_self->get_data_as<rolling_arrfunc_data *>();
     const arrfunc_type_data *child_af = data->window_op.get();
     // First get the type for the child arrfunc
     ndt::type child_dst_tp;
     if (child_af->resolve_dst_type) {
         ndt::type child_src_tp = ndt::make_strided_dim(src_tp[0].get_type_at_dimension(NULL, 1));
-        if (!child_af->resolve_dst_type(child_af, child_dst_tp, &child_src_tp,
-                                        throw_on_error)) {
+        if (!child_af->resolve_dst_type(child_af, 1, &child_src_tp, dyn_params,
+                                        throw_on_error, child_dst_tp)) {
             return 0;
         }
     } else {
@@ -132,9 +143,9 @@ static int resolve_rolling_dst_type(const arrfunc_type_data *af_self,
     }
 
     if (src_tp[0].get_type_id() == var_dim_type_id) {
-        out_dst_tp = ndt::make_var_dim(child_dst_tp);
+      out_dst_tp = ndt::make_var_dim(child_dst_tp);
     } else {
-        out_dst_tp = ndt::make_strided_dim(child_dst_tp);
+      out_dst_tp = ndt::make_fixed_dim(src_tp[0].get_dim_size(NULL, NULL), child_dst_tp);
     }
 
     return 1;
@@ -162,7 +173,7 @@ static void resolve_rolling_dst_shape(const arrfunc_type_data *af_self,
             src_winop_meta.get_at<strided_dim_type_arrmeta>(0)->dim_size =
                 data->window_size;
             src_winop_meta.get_at<strided_dim_type_arrmeta>(0)->stride =
-                child_src_tp.get_default_data_size(0, NULL);
+                child_src_tp.get_default_data_size();
             if (child_src_tp.get_arrmeta_size() > 0) {
                 child_src_tp.extended()->arrmeta_copy_construct(
                     src_winop_meta.get() + sizeof(strided_dim_type_arrmeta),

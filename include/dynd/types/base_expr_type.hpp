@@ -61,9 +61,7 @@ public:
     ndt::type get_canonical_type() const;
 
     // Expression types use the values from their operand type.
-    void arrmeta_default_construct(char *arrmeta, intptr_t ndim,
-                                   const intptr_t *shape,
-                                   bool blockref_alloc) const;
+    void arrmeta_default_construct(char *arrmeta, bool blockref_alloc) const;
     void arrmeta_copy_construct(char *dst_arrmeta, const char *src_arrmeta,
                                 memory_block_data *embedded_reference) const;
     void arrmeta_destruct(char *arrmeta) const;

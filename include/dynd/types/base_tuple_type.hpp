@@ -70,7 +70,7 @@ public:
     bool is_expression() const;
     bool is_unique_data_owner(const char *arrmeta) const;
 
-    size_t get_default_data_size(intptr_t ndim, const intptr_t *shape) const;
+    size_t get_default_data_size() const;
 
     void get_shape(intptr_t ndim, intptr_t i, intptr_t *out_shape,
                     const char *arrmeta, const char *data) const;
@@ -84,9 +84,7 @@ public:
                     bool leading_dimension, char **inout_data,
                     memory_block_data **inout_dataref) const;
 
-    void arrmeta_default_construct(char *arrmeta, intptr_t ndim,
-                                   const intptr_t *shape,
-                                   bool blockref_alloc) const;
+    void arrmeta_default_construct(char *arrmeta, bool blockref_alloc) const;
     void arrmeta_copy_construct(char *dst_arrmeta, const char *src_arrmeta,
                                  memory_block_data *embedded_reference) const;
     void arrmeta_reset_buffers(char *arrmeta) const;

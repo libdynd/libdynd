@@ -205,13 +205,13 @@ bool option_type::is_unique_data_owner(const char *arrmeta) const
 }
 
 void option_type::transform_child_types(type_transform_fn_t transform_fn,
-                                        void *extra,
+                                        intptr_t arrmeta_offset, void *extra,
                                         ndt::type &out_transformed_tp,
                                         bool &out_was_transformed) const
 {
   ndt::type tmp_tp;
   bool was_transformed = false;
-  transform_fn(m_value_tp, extra, tmp_tp, was_transformed);
+  transform_fn(m_value_tp, arrmeta_offset + 0, extra, tmp_tp, was_transformed);
   if (was_transformed) {
     out_transformed_tp = ndt::make_option(tmp_tp);
     out_was_transformed = true;
@@ -272,9 +272,7 @@ bool option_type::operator==(const base_type &rhs) const
   }
 }
 
-void option_type::arrmeta_default_construct(char *arrmeta, intptr_t ndim,
-                                            const intptr_t *shape,
-                                            bool blockref_alloc) const
+void option_type::arrmeta_default_construct(char *arrmeta, bool blockref_alloc) const
 {
   if (m_nafunc.is_null()) {
     stringstream ss;
@@ -283,8 +281,7 @@ void option_type::arrmeta_default_construct(char *arrmeta, intptr_t ndim,
   }
 
   if (!m_value_tp.is_builtin()) {
-    m_value_tp.extended()->arrmeta_default_construct(arrmeta, ndim, shape,
-                                                     blockref_alloc);
+    m_value_tp.extended()->arrmeta_default_construct(arrmeta, blockref_alloc);
   }
 }
 

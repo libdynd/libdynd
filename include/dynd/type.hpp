@@ -410,16 +410,15 @@ public:
     }
 
     /** The element size of the type when default-constructed */
-    inline size_t get_default_data_size(intptr_t ndim, const intptr_t *shape)
-        const
+    inline size_t get_default_data_size() const
     {
-        if (is_builtin_type(m_extended)) {
-            return static_cast<intptr_t>(
-                detail::builtin_data_sizes
-                    [reinterpret_cast<uintptr_t>(m_extended)]);
-        } else {
-            return m_extended->get_default_data_size(ndim, shape);
-        }
+      if (is_builtin_type(m_extended)) {
+        return static_cast<intptr_t>(
+            detail::builtin_data_sizes[reinterpret_cast<uintptr_t>(
+                m_extended)]);
+      } else {
+        return m_extended->get_default_data_size();
+      }
     }
 
     inline size_t get_arrmeta_size() const {
@@ -564,21 +563,31 @@ public:
     /**
      * Gets the type with array dimensions stripped away.
      *
-     * \param include_ndim  The number of array dimensions to keep
+     * \param include_ndim  The number of array dimensions to keep.
+     * \param inout_arrmeta  If non-NULL, is a pointer to arrmeta to advance
+     *                       in place.
      */
-    inline type get_dtype(size_t include_ndim = 0) const {
-        size_t ndim = get_ndim();
-        if (ndim == include_ndim) {
-            return *this;
-        } else if (ndim > include_ndim) {
-            return m_extended->get_type_at_dimension(NULL, ndim - include_ndim);
-        } else {
-            std::stringstream ss;
-            ss << "Cannot use " << include_ndim << " array ";
-            ss << "dimensions from dynd type " << *this;
-            ss << ", it only has " << ndim;
-            throw dynd::type_error(ss.str());
-        }
+    inline type get_dtype(size_t include_ndim = 0,
+                          char **inout_arrmeta = NULL) const
+    {
+      size_t ndim = get_ndim();
+      if (ndim == include_ndim) {
+        return *this;
+      } else if (ndim > include_ndim) {
+        return m_extended->get_type_at_dimension(inout_arrmeta,
+                                                 ndim - include_ndim);
+      } else {
+        std::stringstream ss;
+        ss << "Cannot use " << include_ndim << " array ";
+        ss << "dimensions from dynd type " << *this;
+        ss << ", it only has " << ndim;
+        throw dynd::type_error(ss.str());
+      }
+    }
+
+    inline type get_dtype(size_t include_ndim, const char **inout_arrmeta) const
+    {
+      return get_dtype(include_ndim, const_cast<char **>(inout_arrmeta));
     }
 
     intptr_t get_dim_size(const char *arrmeta, const char *data) const;
@@ -770,7 +779,7 @@ type make_type()
 /**
  * Constructs an array type from a shape and
  * a data type. Each dimension >= 0 is made
- * using a strided_dim type, and each dimension == -1
+ * using a fixed_dim type, and each dimension == -1
  * is made using a var_dim type.
  *
  * \param ndim   The number of dimensions in the shape
@@ -782,7 +791,7 @@ type make_type(intptr_t ndim, const intptr_t *shape, const ndt::type& dtype);
 /**
 * Constructs an array type from a shape and
 * a data type. Each dimension >= 0 is made
-* using a strided_dim type, and each dimension == -1
+* using a fixed_dim type, and each dimension == -1
 * is made using a var_dim type.
 *
 * \param ndim   The number of dimensions in the shape

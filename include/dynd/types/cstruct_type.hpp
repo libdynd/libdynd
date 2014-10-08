@@ -42,7 +42,7 @@ public:
     cstruct_type(const nd::array &field_names, const nd::array &field_types);
     virtual ~cstruct_type();
 
-    size_t get_default_data_size(intptr_t DYND_UNUSED(ndim), const intptr_t *DYND_UNUSED(shape)) const {
+    size_t get_default_data_size() const {
         return get_data_size();
     }
 
@@ -65,8 +65,10 @@ public:
 
     void print_type(std::ostream& o) const;
 
-    void transform_child_types(type_transform_fn_t transform_fn, void *extra,
-                    ndt::type& out_transformed_tp, bool& out_was_transformed) const;
+    void transform_child_types(type_transform_fn_t transform_fn,
+                               intptr_t arrmeta_offset, void *extra,
+                               ndt::type &out_transformed_tp,
+                               bool &out_was_transformed) const;
     ndt::type get_canonical_type() const;
 
     ndt::type at_single(intptr_t i0, const char **inout_arrmeta, const char **inout_data) const;
@@ -115,8 +117,7 @@ namespace ndt {
     {
         const std::string *names[1] = {&name0};
         nd::array field_names = nd::make_strided_string_array(names, 1);
-        intptr_t one = 1;
-        nd::array field_types = nd::typed_empty(1, &one, ndt::make_strided_of_type());
+        nd::array field_types = nd::empty(1, ndt::make_type());
         unchecked_strided_dim_get_rw<ndt::type>(field_types, 0) = tp0;
         field_types.flag_as_immutable();
         return ndt::make_cstruct(field_names, field_types);
@@ -128,8 +129,7 @@ namespace ndt {
     {
         const std::string *names[2] = {&name0, &name1};
         nd::array field_names = nd::make_strided_string_array(names, 2);
-        intptr_t two = 2;
-        nd::array field_types = nd::typed_empty(1, &two, ndt::make_strided_of_type());
+        nd::array field_types = nd::empty(2, ndt::make_type());
         unchecked_strided_dim_get_rw<ndt::type>(field_types, 0) = tp0;
         unchecked_strided_dim_get_rw<ndt::type>(field_types, 1) = tp1;
         field_types.flag_as_immutable();
@@ -143,8 +143,7 @@ namespace ndt {
     {
         const std::string *names[3] = {&name0, &name1, &name2};
         nd::array field_names = nd::make_strided_string_array(names, 3);
-        intptr_t three = 3;
-        nd::array field_types = nd::typed_empty(1, &three, ndt::make_strided_of_type());
+        nd::array field_types = nd::empty(3, ndt::make_type());
         unchecked_strided_dim_get_rw<ndt::type>(field_types, 0) = tp0;
         unchecked_strided_dim_get_rw<ndt::type>(field_types, 1) = tp1;
         unchecked_strided_dim_get_rw<ndt::type>(field_types, 2) = tp2;
@@ -160,8 +159,7 @@ namespace ndt {
     {
         const std::string *names[4] = {&name0, &name1, &name2, &name3};
         nd::array field_names = nd::make_strided_string_array(names, 4);
-        intptr_t four = 4;
-        nd::array field_types = nd::typed_empty(1, &four, ndt::make_strided_of_type());
+        nd::array field_types = nd::empty(4, ndt::make_type());
         unchecked_strided_dim_get_rw<ndt::type>(field_types, 0) = tp0;
         unchecked_strided_dim_get_rw<ndt::type>(field_types, 1) = tp1;
         unchecked_strided_dim_get_rw<ndt::type>(field_types, 2) = tp2;
@@ -179,8 +177,7 @@ namespace ndt {
     {
         const std::string *names[5] = {&name0, &name1, &name2, &name3, &name4};
         nd::array field_names = nd::make_strided_string_array(names, 5);
-        intptr_t five = 5;
-        nd::array field_types = nd::typed_empty(1, &five, ndt::make_strided_of_type());
+        nd::array field_types = nd::empty(5, ndt::make_type());
         unchecked_strided_dim_get_rw<ndt::type>(field_types, 0) = tp0;
         unchecked_strided_dim_get_rw<ndt::type>(field_types, 1) = tp1;
         unchecked_strided_dim_get_rw<ndt::type>(field_types, 2) = tp2;
@@ -201,8 +198,7 @@ namespace ndt {
         const std::string *names[6] = {&name0, &name1, &name2,
                                        &name3, &name4, &name5};
         nd::array field_names = nd::make_strided_string_array(names, 6);
-        intptr_t six = 6;
-        nd::array field_types = nd::typed_empty(1, &six, ndt::make_strided_of_type());
+        nd::array field_types = nd::empty(6, ndt::make_type());
         unchecked_strided_dim_get_rw<ndt::type>(field_types, 0) = tp0;
         unchecked_strided_dim_get_rw<ndt::type>(field_types, 1) = tp1;
         unchecked_strided_dim_get_rw<ndt::type>(field_types, 2) = tp2;
@@ -225,8 +221,7 @@ namespace ndt {
         const std::string *names[7] = {&name0, &name1, &name2,
                                        &name3, &name4, &name5, &name6};
         nd::array field_names = nd::make_strided_string_array(names, 7);
-        intptr_t seven = 7;
-        nd::array field_types = nd::typed_empty(1, &seven, ndt::make_strided_of_type());
+        nd::array field_types = nd::empty(7, ndt::make_type());
         unchecked_strided_dim_get_rw<ndt::type>(field_types, 0) = tp0;
         unchecked_strided_dim_get_rw<ndt::type>(field_types, 1) = tp1;
         unchecked_strided_dim_get_rw<ndt::type>(field_types, 2) = tp2;

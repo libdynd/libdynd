@@ -297,17 +297,8 @@ static bool recursive_match(const ndt::type &concrete, const ndt::type &pattern,
   }
 }
 
-bool ndt::pattern_match(const ndt::type &concrete,
-                             const ndt::type &pattern,
-                             std::map<nd::string, ndt::type> &typevars)
+bool ndt::pattern_match(const ndt::type &concrete, const ndt::type &pattern,
+                        std::map<nd::string, ndt::type> &typevars)
 {
-  // Don't allow symbols in the LHS
-  if (concrete.is_symbolic()) {
-    stringstream ss;
-    ss << "Expected a concrete type for matching, got symbolic type "
-       << concrete;
-    throw type_error(ss.str());
-  }
-
   return recursive_match(concrete, pattern, typevars);
 }

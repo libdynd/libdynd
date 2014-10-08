@@ -40,7 +40,7 @@ TEST(ArrFunc, Take) {
     intptr_t bvals2[4] = {3, 0, -1, 4};
     b = bvals2;
     c = take(a, b);
-    EXPECT_EQ(ndt::type("strided * int"), c.get_type());
+    EXPECT_EQ(ndt::type("4 * int"), c.get_type());
     ASSERT_EQ(4, c.get_dim_size());
     EXPECT_EQ(4, c(0).as<int>());
     EXPECT_EQ(1, c(1).as<int>());
@@ -59,7 +59,7 @@ TEST(ArrFunc, TakeOfArray) {
     dynd_bool bvals[3] = {true, false, true};
     b = bvals;
     c = take(a, b);
-    EXPECT_EQ(ndt::type("var * strided * int"), c.get_type());
+    EXPECT_EQ(ndt::type("var * 2 * int"), c.get_type());
     ASSERT_EQ(2, c.get_dim_size());
     ASSERT_EQ(2, c.get_shape()[1]);
     EXPECT_EQ(0, c(0, 0).as<int>());
@@ -71,7 +71,7 @@ TEST(ArrFunc, TakeOfArray) {
     intptr_t bvals2[4] = {1, 0, -1, -2};
     b = bvals2;
     c = take(a, b);
-    EXPECT_EQ(ndt::type("strided * strided * int"), c.get_type());
+    EXPECT_EQ(ndt::type("4 * 2 * int"), c.get_type());
     ASSERT_EQ(4, c.get_dim_size());
     ASSERT_EQ(2, c.get_shape()[1]);
     EXPECT_EQ(2, c(0, 0).as<int>());

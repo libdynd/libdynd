@@ -107,10 +107,21 @@ struct indexed_take_ck : public kernels::expr_ck<indexed_take_ck, 2> {
 };
 } // anonymous namespace
 
-static int resolve_take_dst_type(const arrfunc_type_data *DYND_UNUSED(af_self),
-                                 ndt::type &out_dst_tp, const ndt::type *src_tp,
-                                 int DYND_UNUSED(throw_on_error))
+static int resolve_take_dst_type(const arrfunc_type_data *af_self, intptr_t nsrc,
+                                 const ndt::type *src_tp,
+                                 const nd::array &DYND_UNUSED(dyn_params),
+                                 int throw_on_error, ndt::type &out_dst_tp)
 {
+    if (nsrc != 2) {
+      if (throw_on_error) {
+        stringstream ss;
+        ss << "Wrong number of arguments to take arrfunc with prototype ";
+        ss << af_self->func_proto << ", got " << nsrc << " arguments";
+        throw invalid_argument(ss.str());
+      } else {
+        return 0;
+      }
+    }
     ndt::type mask_el_tp = src_tp[1].get_type_at_dimension(NULL, 1);
     if (mask_el_tp.get_type_id() == bool_type_id) {
         out_dst_tp = ndt::make_var_dim(
@@ -121,8 +132,9 @@ static int resolve_take_dst_type(const arrfunc_type_data *DYND_UNUSED(af_self),
             out_dst_tp = ndt::make_var_dim(
                 src_tp[0].get_type_at_dimension(NULL, 1).get_canonical_type());
         } else {
-            out_dst_tp = ndt::make_strided_dim(
-                src_tp[0].get_type_at_dimension(NULL, 1).get_canonical_type());
+          out_dst_tp = ndt::make_fixed_dim(
+              src_tp[1].get_dim_size(NULL, NULL),
+              src_tp[0].get_type_at_dimension(NULL, 1).get_canonical_type());
         }
     } else {
         stringstream ss;

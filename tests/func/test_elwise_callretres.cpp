@@ -84,7 +84,7 @@ TYPED_TEST_P(ElwiseCallRetRes, CallRetRes) {
     a = avals0;
     b = bvals0;
     res = nd::elwise(Callable0(&func0), a, b);
-    EXPECT_EQ(ndt::type("strided * strided * int"), res.get_type());
+    EXPECT_EQ(ndt::type("2 * 3 * int"), res.get_type());
     EXPECT_JSON_EQ_ARR("[[-10,-2,-4], [0,8,6]]", res);
 
     TypeParam vals1[2][3] = {{0, 1, 2}, {3, 4, 5}};
@@ -135,7 +135,7 @@ TEST(ElWise, LambdaFunc) {
     res = nd::elwise([](double x, double y, int z) {
         return x * z + y;
     }, a, b, 10);
-    EXPECT_EQ(ndt::type("strided * float64"), res.get_type());
+    EXPECT_EQ(ndt::type("3 * float64"), res.get_type());
     EXPECT_JSON_EQ_ARR("[18.25,23.25,34.5]", res);
 }
 #endif

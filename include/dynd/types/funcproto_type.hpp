@@ -52,7 +52,8 @@ public:
 
     void print_type(std::ostream& o) const;
 
-    void transform_child_types(type_transform_fn_t transform_fn, void *extra,
+    void transform_child_types(type_transform_fn_t transform_fn,
+                               intptr_t arrmeta_offset, void *extra,
                                ndt::type &out_transformed_tp,
                                bool &out_was_transformed) const;
     ndt::type get_canonical_type() const;
@@ -70,9 +71,7 @@ public:
 
     bool operator==(const base_type& rhs) const;
 
-    void arrmeta_default_construct(char *arrmeta, intptr_t ndim,
-                                   const intptr_t *shape,
-                                   bool blockref_alloc) const;
+    void arrmeta_default_construct(char *arrmeta, bool blockref_alloc) const;
     void arrmeta_copy_construct(char *dst_arrmeta, const char *src_arrmeta, memory_block_data *embedded_reference) const;
     void arrmeta_destruct(char *arrmeta) const;
 
@@ -95,8 +94,7 @@ namespace ndt {
                                     const ndt::type *param_types,
                                     const ndt::type &return_type)
     {
-        nd::array tmp =
-            nd::typed_empty(1, &param_count, ndt::make_strided_of_type());
+        nd::array tmp = nd::empty(param_count, ndt::make_type());
         ndt::type *tmp_vals =
             reinterpret_cast<ndt::type *>(tmp.get_readwrite_originptr());
         for (intptr_t i = 0; i != param_count; ++i) {
@@ -127,8 +125,7 @@ struct funcproto_type_from;
 template<typename R>
 struct funcproto_type_from<R (), false, false> {
     static inline ndt::type make() {
-        intptr_t zero = 0;
-        nd::array param_types = nd::typed_empty(1, &zero, ndt::make_strided_of_type());
+        nd::array param_types = nd::empty(0, ndt::make_type());
         param_types.flag_as_immutable();
         return make_funcproto(param_types, make_type<R>());
     }
@@ -154,8 +151,7 @@ DYND_PP_JOIN_MAP(FUNCPROTO_TYPE_FROM, (), DYND_PP_RANGE(1, DYND_PP_INC(DYND_ARG_
 template<typename R>
 struct funcproto_type_from<void (R &), false, false> {
     static inline ndt::type make() {
-        intptr_t zero = 0;
-        nd::array param_types = nd::typed_empty(1, &zero, ndt::make_strided_of_type());
+        nd::array param_types = nd::empty(0, ndt::make_type());
         param_types.flag_as_immutable();
         return make_funcproto(param_types, make_type<R>());
     }

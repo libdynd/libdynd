@@ -99,7 +99,7 @@ TEST(DTypeDType, StridedArrayRefCount) {
 
     // 2D Strided Array
     a = nd::empty(3, 3, "type");
-    EXPECT_EQ(strided_dim_type_id, a.get_type().get_type_id());
+    EXPECT_EQ(fixed_dim_type_id, a.get_type().get_type_id());
     EXPECT_EQ(1, d.extended()->get_use_count());
     a.vals() = d;
     EXPECT_EQ(10, d.extended()->get_use_count());

@@ -25,13 +25,12 @@ TEST(ArrMetaHolder, Basic) {
     string_type_data sarr[3];
     int iarr[3] = {-1234, 0, 999992};
     memset(sarr, 0, sizeof(sarr));
-    intptr_t sarr_size = 3;
 
-    arrmeta_holder smeta(ndt::type("strided * string"));
-    EXPECT_EQ(smeta.get_type(), ndt::type("strided * string"));
+    arrmeta_holder smeta(ndt::type("3 * string"));
+    EXPECT_EQ(smeta.get_type(), ndt::type("3 * string"));
     arrmeta_holder imeta(ndt::type("3 * int"));
     EXPECT_EQ(imeta.get_type(), ndt::type("fixed[3] * int32"));
-    smeta.arrmeta_default_construct(1, &sarr_size, true);
+    smeta.arrmeta_default_construct(true);
     imeta.get_at<fixed_dim_type_arrmeta>(0)->dim_size = 3;
     imeta.get_at<fixed_dim_type_arrmeta>(0)->stride = sizeof(int);
 

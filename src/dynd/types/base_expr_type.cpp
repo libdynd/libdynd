@@ -26,15 +26,12 @@ ndt::type base_expr_type::get_canonical_type() const
     return get_value_type();
 }
 
-void base_expr_type::arrmeta_default_construct(char *arrmeta, intptr_t ndim,
-                                               const intptr_t *shape,
-                                               bool blockref_alloc)
+void base_expr_type::arrmeta_default_construct(char *arrmeta, bool blockref_alloc)
     const
 {
   const ndt::type &dt = get_operand_type();
   if (!dt.is_builtin()) {
-    dt.extended()->arrmeta_default_construct(arrmeta, ndim, shape,
-                                             blockref_alloc);
+    dt.extended()->arrmeta_default_construct(arrmeta, blockref_alloc);
   }
 }
 

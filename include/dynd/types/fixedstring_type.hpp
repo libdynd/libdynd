@@ -46,8 +46,6 @@ public:
     bool operator==(const base_type& rhs) const;
 
     void arrmeta_default_construct(char *DYND_UNUSED(arrmeta),
-                                   intptr_t DYND_UNUSED(ndim),
-                                   const intptr_t *DYND_UNUSED(shape),
                                    bool DYND_UNUSED(blockref_alloc)) const
     {
     }
