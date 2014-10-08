@@ -77,28 +77,6 @@ typedef int (*arrfunc_resolve_dst_type_t)(
     const nd::array &dyn_params, int throw_on_error, ndt::type &out_dst_tp);
 
 /**
- * Returns the shape of the destination array for the provoided inputs
- * and the destination type (which would typically have been produced
- * via the ``resolve_dst_type`` call).
- *
- * \param self  The arrfunc.
- * \param out_shape  This is filled with the shape. It must have size
- *                   ``dst_tp.get_ndim()``.
- * \param dst_tp  The destination type.
- * \param src_tp  Array of source types. It must have the length matching
- *                the number of parameters.
- * \param src_arrmeta  Array of arrmeta corresponding to the source types.
- * \param src_data  Array of data corresponding to the source types/arrmetas.
- *                  This may be an array of NULLs.
- */
-typedef void (*arrfunc_resolve_dst_shape_t)(const arrfunc_type_data *self,
-                                            intptr_t *out_shape,
-                                            const ndt::type &dst_tp,
-                                            const ndt::type *src_tp,
-                                            const char *const *src_arrmeta,
-                                            const char *const *src_data);
-
-/**
  * This is a struct designed for interoperability at
  * the C ABI level. It contains enough information
  * to pass arrfuncs from one library to another
@@ -127,7 +105,6 @@ struct arrfunc_type_data {
    */
   arrfunc_instantiate_t instantiate;
   arrfunc_resolve_dst_type_t resolve_dst_type;
-  arrfunc_resolve_dst_shape_t resolve_dst_shape;
   /**
    * A function which deallocates the memory behind data_ptr after
    * freeing any additional resources it might contain.

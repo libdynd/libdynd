@@ -153,7 +153,6 @@ void dynd::make_chain_arrfunc(const nd::arrfunc &first,
       second.get()->func_proto.tcast<funcproto_type>()->get_return_type());
   if (buf_tp.get_type_id() == uninitialized_type_id) {
     //out_af->resolve_dst_type = &resolve_chain_dst_type;
-    //out_af->resolve_dst_shape = &resolve_chain_dst_shape;
     //out_af->instantiate = &instantiate_chain_resolve;
     throw runtime_error("Chaining functions without a provided intermediate "
                         "type is not implemented");
