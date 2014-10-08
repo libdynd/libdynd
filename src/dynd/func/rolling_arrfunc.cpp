@@ -151,47 +151,6 @@ static int resolve_rolling_dst_type(const arrfunc_type_data *af_self,
     return 1;
 }
 
-static void resolve_rolling_dst_shape(const arrfunc_type_data *af_self,
-                                      intptr_t *out_shape,
-                                      const ndt::type &dst_tp,
-                                      const ndt::type *src_tp,
-                                      const char *const *src_arrmeta,
-                                      const char *const *src_data)
-{
-    rolling_arrfunc_data *data = *af_self->get_data_as<rolling_arrfunc_data *>();
-    const arrfunc_type_data *child_af = data->window_op.get();
-    out_shape[0] = src_tp[0].get_dim_size(src_arrmeta[0], src_data[0]);
-    if (dst_tp.get_ndim() > 0) {
-        if (child_af->resolve_dst_shape != NULL) {
-            const char *src_winop_el_meta = src_arrmeta[0];
-            ndt::type child_src_tp =
-                ndt::make_strided_dim(src_tp[0].get_type_at_dimension(
-                    const_cast<char **>(&src_winop_el_meta), 1));
-            // We construct array arrmeta for the window op ckernel to use,
-            // without actually creating an nd::array to hold it.
-            arrmeta_holder src_winop_meta(ndt::make_strided_dim(child_src_tp));
-            src_winop_meta.get_at<strided_dim_type_arrmeta>(0)->dim_size =
-                data->window_size;
-            src_winop_meta.get_at<strided_dim_type_arrmeta>(0)->stride =
-                child_src_tp.get_default_data_size();
-            if (child_src_tp.get_arrmeta_size() > 0) {
-                child_src_tp.extended()->arrmeta_copy_construct(
-                    src_winop_meta.get() + sizeof(strided_dim_type_arrmeta),
-                    src_winop_el_meta, NULL);
-            }
-            const char *child_src_arrmeta = src_winop_meta.get();
-            const char *child_src_data = NULL;
-            child_af->resolve_dst_shape(
-                child_af, out_shape + 1, dst_tp.get_type_at_dimension(NULL, 1),
-                &child_src_tp, &child_src_arrmeta, &child_src_data);
-        } else {
-            for (intptr_t i = 1; i < dst_tp.get_ndim(); ++i) {
-                out_shape[i] = -1;
-            }
-        }
-    }
-}
-
 // TODO This should handle both strided and var cases
 static intptr_t
 instantiate_strided(const arrfunc_type_data *af_self, dynd::ckernel_builder *ckb,
@@ -297,7 +256,6 @@ void dynd::make_rolling_arrfunc(arrfunc_type_data *out_af,
     out_af->free_func = &free_rolling_arrfunc_data;
     out_af->func_proto = ndt::make_funcproto(roll_src_tp, roll_dst_tp);
     out_af->resolve_dst_type = &resolve_rolling_dst_type;
-    out_af->resolve_dst_shape = &resolve_rolling_dst_shape;
     out_af->instantiate = &instantiate_strided;
     data->window_size = window_size;
     data->window_op = window_op;
