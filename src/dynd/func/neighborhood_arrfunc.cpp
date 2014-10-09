@@ -89,17 +89,14 @@ static intptr_t instantiate_neighborhood(
     } catch (...) {
         const nd::array &mask = kwds.p("mask").f("dereference");
         shape = nd::array(mask.get_shape());
-cout << "... " << __LINE__ << endl;
     }
     intptr_t ndim = shape.get_dim_size();
 
-cout << "shape is " << shape << endl;
 
     nd::array offset;
     try {
         offset = kwds.p("offset").f("dereference");
     } catch (...) {
-cout << "... " << __LINE__ << endl;
     }
 
     // Process the dst array striding/types
@@ -112,13 +109,11 @@ cout << "... " << __LINE__ << endl;
         ss << "neighborhood arrfunc dst must be a strided array, not " << dst_tp;
         throw invalid_argument(ss.str());
     }
-cout << "na " << __LINE__ << endl;
 
     // Process the src[0] array striding/type
     const size_stride_t *src0_shape;
     ndt::type src0_el_tp;
     const char *src0_el_arrmeta;
-cout << "na " << __LINE__ << endl;
     if (!src_tp[0].get_as_strided(src_arrmeta[0], ndim, &src0_shape, &src0_el_tp,
                                   &src0_el_arrmeta)) {
         stringstream ss;
@@ -126,12 +121,10 @@ cout << "na " << __LINE__ << endl;
            << src_tp[0];
         throw invalid_argument(ss.str());
     }
-cout << "na " << __LINE__ << endl;
 
     // Synthesize the arrmeta for the src[0] passed to the neighborhood op
     ndt::type nh_src_tp[1];
     nh_src_tp[0] = ndt::make_fixed_sym_dim(src0_el_tp, ndim);
-cout << "na " << __LINE__ << endl;
     arrmeta_holder nh_arrmeta;
     arrmeta_holder(nh_src_tp[0]).swap(nh_arrmeta);
     size_stride_t *nh_src0_arrmeta = reinterpret_cast<size_stride_t *>(nh_arrmeta.get());
@@ -140,12 +133,10 @@ cout << "na " << __LINE__ << endl;
         nh_src0_arrmeta[i].stride = src0_shape[i].stride;
     }
     const char *nh_src_arrmeta[1] = {nh_arrmeta.get()};
-cout << "na " << __LINE__ << endl;
 
     for (intptr_t i = 0; i < ndim; ++i) {
         typedef neighborhood_ck<N> self_type;
         self_type *self = self_type::create(ckb, kernreq, ckb_offset);
-cout << "na " << __LINE__ << endl;
 
         self->dst_stride = dst_shape[i].stride;
         for (intptr_t j = 0; j < N; ++j) {
@@ -170,12 +161,10 @@ cout << "na " << __LINE__ << endl;
         self->nh_size = shape(i).as<intptr_t>();
         self->nh_start_stop = nh->start_stop + i;
     }
-cout << "na " << __LINE__ << endl;
 
     ckb_offset = nh_op.get()->instantiate(nh_op.get(), ckb, ckb_offset,
         nh_dst_tp, nh_dst_arrmeta, nh_src_tp, nh_src_arrmeta,
         kernel_request_single, pack(kwds, "start_stop", reinterpret_cast<intptr_t>(nh->start_stop)), ectx);
-cout << "na " << __LINE__ << endl;
     return ckb_offset;
 }
 

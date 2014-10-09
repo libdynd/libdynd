@@ -182,8 +182,8 @@ TEST(SubstituteShape, Errors) {
   intptr_t shape[5] = {0, 1, 2, 3, 4};
   // Too many dimensions
   EXPECT_THROW(ndt::substitute_shape(ndt::type("fixed * int32"), 2, shape),
-               invalid_argument);
+               type_error);
   // Mismatched fixed dimension
   EXPECT_THROW(ndt::substitute_shape(ndt::type("10 * int32"), 1, shape + 1),
-               invalid_argument);
+               type_error);
 }

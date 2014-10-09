@@ -348,20 +348,32 @@ static nd::array view_from_bytes(const nd::array &arr, const ndt::type &tp)
       }
       return result;
     }
-  } else if (tp.get_type_id() == fixed_dim_type_id) {
-    ndt::type el_tp = tp.tcast<fixed_dim_type>()->get_element_type();
+  }
+  else if (tp.get_type_id() == fixed_dim_type_id ||
+           tp.get_type_id() == fixed_sym_dim_type_id) {
+    ndt::type arr_tp = tp;
+    ndt::type el_tp = arr_tp.tcast<base_dim_type>()->get_element_type();
     size_t el_data_size = el_tp.get_data_size();
     // If the element type has a single chunk of POD memory, and
     // it divides into the memory size, it's ok
     if (data_size % (intptr_t)el_data_size == 0 &&
         offset_is_aligned(reinterpret_cast<size_t>(data_ptr),
-                          tp.get_data_alignment())) {
+                          arr_tp.get_data_alignment())) {
+      intptr_t dim_size = data_size / el_data_size;
+      if (arr_tp.get_type_id() == fixed_dim_type_id) {
+        if (arr_tp.tcast<fixed_dim_type>()->get_fixed_dim_size() != dim_size) {
+          return nd::array();
+        }
+      } else {
+        // Transform the symbolic fixed type into a concrete one
+        arr_tp = ndt::make_fixed_dim(dim_size, el_tp);
+      }
       // Allocate a result array to attempt the view in it
-      nd::array result(make_array_memory_block(tp.get_arrmeta_size()));
+      nd::array result(make_array_memory_block(arr_tp.get_arrmeta_size()));
       // Initialize the fields
       result.get_ndo()->m_data_pointer = data_ptr;
       result.get_ndo()->m_data_reference = data_ref.release();
-      result.get_ndo()->m_type = ndt::type(tp).release();
+      result.get_ndo()->m_type = ndt::type(arr_tp).release();
       result.get_ndo()->m_flags = arr.get_ndo()->m_flags;
       if (el_tp.get_arrmeta_size() > 0) {
         el_tp.extended()->arrmeta_default_construct(
@@ -369,7 +381,7 @@ static nd::array view_from_bytes(const nd::array &arr, const ndt::type &tp)
       }
       fixed_dim_type_arrmeta *fixed_meta =
           reinterpret_cast<fixed_dim_type_arrmeta *>(result.get_arrmeta());
-      fixed_meta->dim_size = data_size / el_data_size;
+      fixed_meta->dim_size = dim_size;
       fixed_meta->stride = el_data_size;
       return result;
     }

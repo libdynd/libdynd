@@ -19,8 +19,8 @@ using namespace dynd;
 
 fixed_sym_dim_type::fixed_sym_dim_type(const ndt::type &element_tp)
     : base_dim_type(fixed_sym_dim_type_id, element_tp, 0,
-                    element_tp.get_data_alignment(), 0, type_flag_symbolic,
-                    true)
+                    element_tp.get_data_alignment(), sizeof(size_stride_t),
+                    type_flag_symbolic, true)
 {
   // Propagate the inherited flags from the element
   m_members.flags |=

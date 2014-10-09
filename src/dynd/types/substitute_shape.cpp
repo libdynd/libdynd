@@ -37,7 +37,7 @@ struct substitute_shape_data {
     ss << "Cannot substitute shape ";
     print_shape(ss, ndim, shape);
     ss << " into type " << *fulltype;
-    throw invalid_argument(ss.str());
+    throw type_error(ss.str());
   }
 };
 
