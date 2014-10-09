@@ -50,12 +50,12 @@ public:
     }
 
     nd::strided_vals<T, N> &val(char *data) {
-        m_strided.set_readonly_originptr(data);
+        m_strided.set_data(data);
         return m_strided;
     }
 
     const nd::strided_vals<T, N> &val(const char *data) {
-        m_strided.set_readonly_originptr(data);
+        m_strided.set_data(data);
         return m_strided;
     }
 };
