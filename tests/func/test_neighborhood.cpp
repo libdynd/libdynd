@@ -15,6 +15,7 @@
 #include <dynd/func/functor_arrfunc.hpp>
 #include <dynd/func/neighborhood_arrfunc.hpp>
 #include <dynd/types/struct_type.hpp>
+#include <dynd/func/call_callable.hpp>
 
 using namespace std;
 using namespace dynd;
