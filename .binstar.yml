@@ -8,6 +8,7 @@ script:
 build_targets:
     files: conda
     channels: main
+iotimeout: 300
 
 # before_script:
 #     - sudo yum -y install git dos2unix gcc gcc-c++
