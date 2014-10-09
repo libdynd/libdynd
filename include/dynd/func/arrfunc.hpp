@@ -93,10 +93,12 @@ struct arrfunc_type_data {
    * enough space to hold all the data by value, should allocate
    * space on the heap, and free it when free_func is called.
    *
-   * On 32-bit platforms, the size of this data is increased by 4
-   * so the entire struct is 8-byte aligned.
+   * On 32-bit platforms, if the size changes, it may be
+   * necessary to use
+   * char data[4 * 8 + ((sizeof(void *) == 4) ? 4 : 0)];
+   * to ensure the total struct size is divisible by 64.
    */
-  char data[4 * 8 + ((sizeof(void *) == 4) ? 4 : 0)];
+  char data[4 * 8];
   /** The function prototype of the arrfunc */
   ndt::type func_proto;
   /**
