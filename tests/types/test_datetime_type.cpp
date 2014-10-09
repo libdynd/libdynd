@@ -12,7 +12,6 @@
 #include <dynd/string.hpp>
 #include <dynd/types/datetime_type.hpp>
 #include <dynd/types/property_type.hpp>
-#include <dynd/types/strided_dim_type.hpp>
 #include <dynd/types/fixedstring_type.hpp>
 #include <dynd/types/string_type.hpp>
 #include <dynd/types/convert_type.hpp>

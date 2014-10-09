@@ -761,9 +761,7 @@ struct type_from<T[N]> {
 
 template <typename T, int N>
 struct type_from<nd::strided_vals<T, N> > {
-    static type make() {
-        return make_strided_dim(type_from<T>::make(), N);
-    }
+  static type make() { return make_fixed_sym_dim(type_from<T>::make(), N); }
 };
 
 /**

@@ -6,6 +6,7 @@
 #include <dynd/types/dim_fragment_type.hpp>
 #include <dynd/types/fixed_dim_type.hpp>
 #include <dynd/types/var_dim_type.hpp>
+#include <dynd/types/fixed_sym_dim_type.hpp>
 #include <dynd/types/typevar_type.hpp>
 #include <dynd/func/make_callable.hpp>
 
@@ -33,7 +34,7 @@ static inline ndt::type get_tagged_dims_from_type(intptr_t ndim,
             case cfixed_dim_type_id:
                 out_tagged_dims[i] = tp.tcast<fixed_dim_type>()->get_fixed_dim_size();
                 break;
-            case strided_dim_type_id:
+            case fixed_sym_dim_type_id:
             case offset_dim_type_id:
                 out_tagged_dims[i] = -2;
                 break;
@@ -74,7 +75,7 @@ static inline bool broadcast_tagged_dims_from_type(intptr_t ndim, ndt::type tp,
                     return false;
                 }
                 break;
-            case strided_dim_type_id:
+            case fixed_sym_dim_type_id:
             case offset_dim_type_id:
                 if (tagged_dim < 0) {
                     out_tagged_dims[i] = -2;
@@ -159,8 +160,8 @@ ndt::type dim_fragment_type::apply_to_dtype(const ndt::type& dtp) const
                 case dim_fragment_var:
                     tp = ndt::make_var_dim(tp);
                     break;
-                case dim_fragment_strided:
-                    tp = ndt::make_strided_dim(tp);
+                case dim_fragment_fixed_sym:
+                    tp = ndt::make_fixed_sym_dim(tp);
                     break;
                 default:
                     tp = ndt::make_fixed_dim(m_tagged_dims[i], tp);
@@ -187,8 +188,8 @@ void dim_fragment_type::print_type(std::ostream& o) const
     for (intptr_t i = 0; i < ndim; ++i) {
         if (m_tagged_dims[i] == dim_fragment_var) {
             o << "var * ";
-        } else if (m_tagged_dims[i] == dim_fragment_strided) {
-            o << "strided * ";
+        } else if (m_tagged_dims[i] == dim_fragment_fixed_sym) {
+            o << "fixed * ";
         } else {
             o << "fixed[" << m_tagged_dims[i] << "]";
         }

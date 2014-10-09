@@ -8,7 +8,7 @@
 
 #include <dynd/types/datashape_parser.hpp>
 #include <dynd/parser_util.hpp>
-#include <dynd/types/strided_dim_type.hpp>
+#include <dynd/types/fixed_sym_dim_type.hpp>
 #include <dynd/types/var_dim_type.hpp>
 #include <dynd/types/fixed_dim_type.hpp>
 #include <dynd/types/cfixed_dim_type.hpp>
@@ -945,8 +945,8 @@ static ndt::type parse_datashape_nooption(const char *&rbegin, const char *end,
                         result = ndt::make_fixed_dim(size, element_tp, pow);
                     } else if (parse::compare_range_to_literal(bbegin, bend, "var")) {
                         result = make_var_dim(element_tp, pow);
-                    } else if (parse::compare_range_to_literal(bbegin, bend, "strided")) {
-                        result = make_strided_dim(element_tp, pow);
+                    } else if (parse::compare_range_to_literal(bbegin, bend, "fixed")) {
+                        result = make_fixed_sym_dim(element_tp, pow);
                     } else if (isupper(*bbegin)) {
                         result = make_typevar_dim(nd::string(bbegin, bend), element_tp, pow);
                     }
@@ -964,8 +964,8 @@ static ndt::type parse_datashape_nooption(const char *&rbegin, const char *end,
             } else if (parse::compare_range_to_literal(nbegin, nend, "var")) {
                 result = ndt::make_var_dim(element_tp);
             } else if (parse::compare_range_to_literal(nbegin, nend,
-                                                       "strided")) {
-                result = ndt::make_strided_dim(element_tp);
+                                                       "fixed")) {
+                result = ndt::make_fixed_sym_dim(element_tp);
             } else if (isupper(*nbegin)) {
                 result = ndt::make_typevar_dim(nd::string(nbegin, nend),
                                              element_tp);

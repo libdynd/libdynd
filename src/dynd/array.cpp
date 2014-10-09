@@ -5,7 +5,6 @@
 
 #include <dynd/array.hpp>
 #include <dynd/array_iter.hpp>
-#include <dynd/types/strided_dim_type.hpp>
 #include <dynd/types/var_dim_type.hpp>
 #include <dynd/types/cfixed_dim_type.hpp>
 #include <dynd/types/fixed_dim_type.hpp>
@@ -107,7 +106,7 @@ nd::array nd::make_strided_array(const ndt::type &dtp, intptr_t ndim,
 
     if (!any_variable_dims) {
         // Fill in the array arrmeta with strides and sizes
-        strided_dim_type_arrmeta *meta = reinterpret_cast<strided_dim_type_arrmeta *>(ndo + 1);
+        fixed_dim_type_arrmeta *meta = reinterpret_cast<fixed_dim_type_arrmeta *>(ndo + 1);
         // Use the default construction to handle the uniform_tp's arrmeta
         intptr_t stride = dtp.get_data_size();
         if (stride == 0) {
@@ -277,87 +276,86 @@ nd::array nd::make_string_array(const char *str, size_t len,
   return result;
 }
 
-nd::array nd::make_strided_string_array(const char **cstr_array, size_t array_size)
+nd::array nd::make_strided_string_array(const char **cstr_array,
+                                        size_t array_size)
 {
-    size_t total_string_length = 0;
-    for (size_t i = 0; i != array_size; ++i) {
-        total_string_length += strlen(cstr_array[i]);
-    }
+  size_t total_string_length = 0;
+  for (size_t i = 0; i != array_size; ++i) {
+    total_string_length += strlen(cstr_array[i]);
+  }
 
-    char *data_ptr = NULL, *string_ptr;
-    string_type_data *string_arr_ptr;
-    ndt::type stp = ndt::make_string(string_encoding_utf_8);
-    ndt::type tp = ndt::make_fixed_dim(array_size, stp);
-    nd::array result(make_array_memory_block(
-        tp.extended()->get_arrmeta_size(),
-        array_size * stp.get_data_size() + total_string_length,
-        tp.get_data_alignment(), &data_ptr));
-    // Set the array arrmeta
-    array_preamble *ndo = result.get_ndo();
-    ndo->m_type = tp.release();
-    ndo->m_data_pointer = data_ptr;
-    ndo->m_data_reference = NULL;
-    ndo->m_flags = nd::read_access_flag | nd::immutable_access_flag;
-    // Get the allocator for the output string type
-    strided_dim_type_arrmeta *md =
-        reinterpret_cast<strided_dim_type_arrmeta *>(
-            result.get_arrmeta());
-    md->dim_size = array_size;
-    md->stride = stp.get_data_size();
-    string_arr_ptr = reinterpret_cast<string_type_data *>(data_ptr);
-    string_ptr = data_ptr + array_size * stp.get_data_size();
-    for (size_t i = 0; i < array_size; ++i) {
-        size_t size = strlen(cstr_array[i]);
-        memcpy(string_ptr, cstr_array[i], size);
-        string_arr_ptr->begin = string_ptr;
-        string_arr_ptr->end = string_ptr + size;
-        ++string_arr_ptr;
-        string_ptr += size;
-    }
-    return result;
+  char *data_ptr = NULL, *string_ptr;
+  string_type_data *string_arr_ptr;
+  ndt::type stp = ndt::make_string(string_encoding_utf_8);
+  ndt::type tp = ndt::make_fixed_dim(array_size, stp);
+  nd::array result(make_array_memory_block(tp.extended()->get_arrmeta_size(),
+                                           array_size * stp.get_data_size() +
+                                               total_string_length,
+                                           tp.get_data_alignment(), &data_ptr));
+  // Set the array arrmeta
+  array_preamble *ndo = result.get_ndo();
+  ndo->m_type = tp.release();
+  ndo->m_data_pointer = data_ptr;
+  ndo->m_data_reference = NULL;
+  ndo->m_flags = nd::read_access_flag | nd::immutable_access_flag;
+  // Get the allocator for the output string type
+  fixed_dim_type_arrmeta *md =
+      reinterpret_cast<fixed_dim_type_arrmeta *>(result.get_arrmeta());
+  md->dim_size = array_size;
+  md->stride = stp.get_data_size();
+  string_arr_ptr = reinterpret_cast<string_type_data *>(data_ptr);
+  string_ptr = data_ptr + array_size * stp.get_data_size();
+  for (size_t i = 0; i < array_size; ++i) {
+    size_t size = strlen(cstr_array[i]);
+    memcpy(string_ptr, cstr_array[i], size);
+    string_arr_ptr->begin = string_ptr;
+    string_arr_ptr->end = string_ptr + size;
+    ++string_arr_ptr;
+    string_ptr += size;
+  }
+  return result;
 }
 
-nd::array nd::make_strided_string_array(const std::string **str_array, size_t array_size)
+nd::array nd::make_strided_string_array(const std::string **str_array,
+                                        size_t array_size)
 {
-    size_t total_string_length = 0;
-    for (size_t i = 0; i != array_size; ++i) {
-        total_string_length += str_array[i]->size();
-    }
+  size_t total_string_length = 0;
+  for (size_t i = 0; i != array_size; ++i) {
+    total_string_length += str_array[i]->size();
+  }
 
-    char *data_ptr = NULL, *string_ptr;
-    string_type_data *string_arr_ptr;
-    ndt::type stp = ndt::make_string(string_encoding_utf_8);
-    ndt::type tp = ndt::make_fixed_dim(array_size, stp);
-    nd::array result(make_array_memory_block(
-        tp.extended()->get_arrmeta_size(),
-        array_size * stp.get_data_size() + total_string_length,
-        tp.get_data_alignment(), &data_ptr));
-    // Set the array arrmeta
-    array_preamble *ndo = result.get_ndo();
-    ndo->m_type = tp.release();
-    ndo->m_data_pointer = data_ptr;
-    ndo->m_data_reference = NULL;
-    ndo->m_flags = nd::read_access_flag | nd::immutable_access_flag;
-    // Get the allocator for the output string type
-    strided_dim_type_arrmeta *md =
-        reinterpret_cast<strided_dim_type_arrmeta *>(
-            result.get_arrmeta());
-    md->dim_size = array_size;
-    md->stride = stp.get_data_size();
-    string_arr_ptr = reinterpret_cast<string_type_data *>(data_ptr);
-    string_ptr = data_ptr + array_size * stp.get_data_size();
-    for (size_t i = 0; i < array_size; ++i) {
-        size_t size = str_array[i]->size();
-        memcpy(string_ptr, str_array[i]->data(), size);
-        string_arr_ptr->begin = string_ptr;
-        string_arr_ptr->end = string_ptr + size;
-        ++string_arr_ptr;
-        string_ptr += size;
-    }
-    result.flag_as_immutable();
-    return result;
+  char *data_ptr = NULL, *string_ptr;
+  string_type_data *string_arr_ptr;
+  ndt::type stp = ndt::make_string(string_encoding_utf_8);
+  ndt::type tp = ndt::make_fixed_dim(array_size, stp);
+  nd::array result(make_array_memory_block(tp.extended()->get_arrmeta_size(),
+                                           array_size * stp.get_data_size() +
+                                               total_string_length,
+                                           tp.get_data_alignment(), &data_ptr));
+  // Set the array arrmeta
+  array_preamble *ndo = result.get_ndo();
+  ndo->m_type = tp.release();
+  ndo->m_data_pointer = data_ptr;
+  ndo->m_data_reference = NULL;
+  ndo->m_flags = nd::read_access_flag | nd::immutable_access_flag;
+  // Get the allocator for the output string type
+  fixed_dim_type_arrmeta *md =
+      reinterpret_cast<fixed_dim_type_arrmeta *>(result.get_arrmeta());
+  md->dim_size = array_size;
+  md->stride = stp.get_data_size();
+  string_arr_ptr = reinterpret_cast<string_type_data *>(data_ptr);
+  string_ptr = data_ptr + array_size * stp.get_data_size();
+  for (size_t i = 0; i < array_size; ++i) {
+    size_t size = str_array[i]->size();
+    memcpy(string_ptr, str_array[i]->data(), size);
+    string_arr_ptr->begin = string_ptr;
+    string_arr_ptr->end = string_ptr + size;
+    ++string_arr_ptr;
+    string_ptr += size;
+  }
+  result.flag_as_immutable();
+  return result;
 }
-
 
 /**
  * Clones the arrmeta and swaps in a new type. The type must
@@ -664,7 +662,7 @@ nd::array nd::detail::make_from_vec<ndt::type>::make(const std::vector<ndt::type
     preamble->m_type = dt.release();
     preamble->m_flags = read_access_flag | immutable_access_flag;
     // The arrmeta for the strided and type parts of the type
-    strided_dim_type_arrmeta *sa_md = reinterpret_cast<strided_dim_type_arrmeta *>(
+    fixed_dim_type_arrmeta *sa_md = reinterpret_cast<fixed_dim_type_arrmeta *>(
                                             result.get_arrmeta());
     sa_md->dim_size = vec.size();
     sa_md->stride = vec.empty() ? 0 : sizeof(type_type_data);
@@ -698,8 +696,8 @@ nd::array nd::detail::make_from_vec<std::string>::make(const std::vector<std::st
     preamble->m_data_reference = NULL;
     preamble->m_type = dt.release();
     preamble->m_flags = read_access_flag | immutable_access_flag;
-    // The arrmeta for the strided and string parts of the type
-    strided_dim_type_arrmeta *sa_md = reinterpret_cast<strided_dim_type_arrmeta *>(
+    // The arrmeta for the fixed_dim and string parts of the type
+    fixed_dim_type_arrmeta *sa_md = reinterpret_cast<fixed_dim_type_arrmeta *>(
                                             result.get_arrmeta());
     sa_md->dim_size = vec.size();
     sa_md->stride = vec.empty() ? 0 : sizeof(string_type_data);
@@ -1215,7 +1213,6 @@ namespace {
                             }
                             break;
                         }
-                        case strided_dim_type_id:
                         case var_dim_type_id: {
                             const base_dim_type *dt_budd =
                                             dt.tcast<base_dim_type>();
@@ -1559,8 +1556,9 @@ nd::array nd::array::view_scalars(const ndt::type& scalar_tp) const
     // First check if we're dealing with a simple one dimensional block of memory we can reinterpret
     // at will.
     if (uniform_ndim == 1 && array_type.get_type_id() == fixed_dim_type_id) {
-        const strided_dim_type *sad = array_type.tcast<strided_dim_type>();
-        const strided_dim_type_arrmeta *md = reinterpret_cast<const strided_dim_type_arrmeta *>(get_arrmeta());
+        const fixed_dim_type *sad = array_type.tcast<fixed_dim_type>();
+        const fixed_dim_type_arrmeta *md =
+            reinterpret_cast<const fixed_dim_type_arrmeta *>(get_arrmeta());
         const ndt::type& edt = sad->get_element_type();
         if (edt.is_pod() && (intptr_t)edt.get_data_size() == md->stride &&
                     sad->get_element_type().get_kind() != expr_kind) {
@@ -1594,7 +1592,9 @@ nd::array nd::array::view_scalars(const ndt::type& scalar_tp) const
             result.get_ndo()->m_type = result_tp.release();
             result.get_ndo()->m_flags = get_ndo()->m_flags;
             // The result has one strided ndarray field
-            strided_dim_type_arrmeta *result_md = reinterpret_cast<strided_dim_type_arrmeta *>(result.get_arrmeta());
+            fixed_dim_type_arrmeta *result_md =
+                reinterpret_cast<fixed_dim_type_arrmeta *>(
+                    result.get_arrmeta());
             result_md->dim_size = dim_size;
             result_md->stride = scalar_tp.get_data_size();
             return result;
@@ -1943,7 +1943,7 @@ intptr_t nd::binary_search(const nd::array& n, const char *arrmeta, const char *
         }
 
         const char *n_data = n.get_readonly_originptr();
-        intptr_t n_stride = reinterpret_cast<const strided_dim_type_arrmeta *>(n.get_arrmeta())->stride;
+        intptr_t n_stride = reinterpret_cast<const fixed_dim_type_arrmeta *>(n.get_arrmeta())->stride;
         intptr_t first = 0, last = n.get_dim_size();
         while (first < last) {
             intptr_t trial = first + (last - first) / 2;
@@ -1985,7 +1985,7 @@ intptr_t nd::binary_search(const nd::array& n, const char *arrmeta, const char *
         }
 
         const char *n_data = n.get_readonly_originptr();
-        intptr_t n_stride = reinterpret_cast<const strided_dim_type_arrmeta *>(n.get_arrmeta())->stride;
+        intptr_t n_stride = reinterpret_cast<const fixed_dim_type_arrmeta *>(n.get_arrmeta())->stride;
         intptr_t first = 0, last = n.get_dim_size();
         while (first < last) {
             intptr_t trial = first + (last - first) / 2;

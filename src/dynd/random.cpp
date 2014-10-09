@@ -33,12 +33,8 @@ nd::array nd::dtyped_rand(intptr_t ndim, const intptr_t *shape, const ndt::type 
             }
         } while (iter.next());
     } catch (...) {
-        ndt::type strided_tp = tp.get_dtype();
-        for (intptr_t i = 0; i < ndim; ++i) {
-            strided_tp = ndt::make_strided_dim(strided_tp);
-        }
-
-        res.vals() = nd::dtyped_rand(ndim, shape, strided_tp);
+      res.vals() =
+          nd::dtyped_rand(0, NULL, ndt::make_type(ndim, shape, tp.get_dtype()));
     }
 
     return res.ucast(tp.get_dtype()).eval();

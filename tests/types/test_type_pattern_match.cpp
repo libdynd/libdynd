@@ -97,9 +97,9 @@ TEST(TypePatternMatch, FuncProto) {
 TEST(TypePatternMatch, Strided) {
   // cfixed and fixed can match against strided
   EXPECT_TRUE(ndt::pattern_match(ndt::type("cfixed[3] * int32"),
-                                 ndt::type("strided * int32")));
+                                 ndt::type("fixed * int32")));
   EXPECT_TRUE(
-      ndt::pattern_match(ndt::type("3 * int32"), ndt::type("strided * int32")));
+      ndt::pattern_match(ndt::type("3 * int32"), ndt::type("fixed * int32")));
   // cfixed can match against strided if the sizes match
   EXPECT_TRUE(ndt::pattern_match(ndt::type("cfixed[3] * int32"),
                                  ndt::type("3 * int32")));

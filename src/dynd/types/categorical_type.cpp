@@ -11,7 +11,7 @@
 #include <dynd/types/categorical_type.hpp>
 #include <dynd/kernels/assignment_kernels.hpp>
 #include <dynd/kernels/comparison_kernels.hpp>
-#include <dynd/types/strided_dim_type.hpp>
+#include <dynd/types/fixed_dim_type.hpp>
 #include <dynd/types/convert_type.hpp>
 #include <dynd/func/make_callable.hpp>
 
@@ -198,10 +198,10 @@ static nd::array make_sorted_categories(const set<const char *, cmp> &uniques,
     unary_ckernel_builder k;
     make_assignment_kernel(
         &k, 0, element_tp,
-        categories.get_arrmeta() + sizeof(strided_dim_type_arrmeta), element_tp,
+        categories.get_arrmeta() + sizeof(fixed_dim_type_arrmeta), element_tp,
         arrmeta, kernel_request_single, &eval::default_eval_context);
 
-    intptr_t stride = reinterpret_cast<const strided_dim_type_arrmeta *>(categories.get_arrmeta())->stride;
+    intptr_t stride = reinterpret_cast<const fixed_dim_type_arrmeta *>(categories.get_arrmeta())->stride;
     char *dst_ptr = categories.get_readwrite_originptr();
     for (set<const char *, cmp>::const_iterator it = uniques.begin(); it != uniques.end(); ++it) {
         k(dst_ptr, *it);
@@ -331,7 +331,7 @@ void categorical_type::print_data(std::ostream& o, const char *DYND_UNUSED(arrme
 void categorical_type::print_type(std::ostream& o) const
 {
     size_t category_count = get_category_count();
-    const char *arrmeta = m_categories.get_arrmeta() + sizeof(strided_dim_type_arrmeta);
+    const char *arrmeta = m_categories.get_arrmeta() + sizeof(fixed_dim_type_arrmeta);
 
     o << "categorical[" << m_category_tp;
     o << ", [";

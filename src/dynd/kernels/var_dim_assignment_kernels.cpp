@@ -11,7 +11,7 @@
 #include <dynd/kernels/assignment_kernels.hpp>
 #include <dynd/kernels/var_dim_assignment_kernels.hpp>
 #include <dynd/types/var_dim_type.hpp>
-#include <dynd/types/strided_dim_type.hpp>
+#include <dynd/types/fixed_dim_type.hpp>
 #include <dynd/types/cfixed_dim_type.hpp>
 
 using namespace std;
@@ -339,7 +339,7 @@ namespace {
     };
 } // anonymous namespace
 
-size_t dynd::make_var_to_strided_dim_assignment_kernel(
+size_t dynd::make_var_to_fixed_dim_assignment_kernel(
     ckernel_builder *ckb, intptr_t ckb_offset,
     const ndt::type &dst_strided_dim_tp, const char *dst_arrmeta,
     const ndt::type &src_var_dim_tp, const char *src_arrmeta,
@@ -348,7 +348,7 @@ size_t dynd::make_var_to_strided_dim_assignment_kernel(
     typedef var_to_strided_assign_ck self_type;
     if (src_var_dim_tp.get_type_id() != var_dim_type_id) {
         stringstream ss;
-        ss << "make_var_to_strided_dim_assignment_kernel: provided source type " << src_var_dim_tp << " is not a var_dim";
+        ss << "make_var_to_fixed_dim_assignment_kernel: provided source type " << src_var_dim_tp << " is not a var_dim";
         throw runtime_error(ss.str());
     }
     const var_dim_type *src_vad = src_var_dim_tp.tcast<var_dim_type>();
@@ -362,7 +362,7 @@ size_t dynd::make_var_to_strided_dim_assignment_kernel(
                                            &self->m_dst_stride, &dst_element_tp,
                                            &dst_element_arrmeta)) {
         stringstream ss;
-        ss << "make_var_to_strided_dim_assignment_kernel: provided destination "
+        ss << "make_var_to_fixed_dim_assignment_kernel: provided destination "
               "type " << dst_strided_dim_tp
            << " is not a strided_dim or fixed_array";
         throw runtime_error(ss.str());

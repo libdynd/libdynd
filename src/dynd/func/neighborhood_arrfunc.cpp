@@ -92,6 +92,7 @@ static intptr_t instantiate_neighborhood(
     }
     intptr_t ndim = shape.get_dim_size();
 
+
     nd::array offset;
     try {
         offset = kwds.p("offset").f("dereference");
@@ -123,7 +124,7 @@ static intptr_t instantiate_neighborhood(
 
     // Synthesize the arrmeta for the src[0] passed to the neighborhood op
     ndt::type nh_src_tp[1];
-    nh_src_tp[0] = ndt::make_strided_dim(src0_el_tp, ndim);
+    nh_src_tp[0] = ndt::make_fixed_sym_dim(src0_el_tp, ndim);
     arrmeta_holder nh_arrmeta;
     arrmeta_holder(nh_src_tp[0]).swap(nh_arrmeta);
     size_stride_t *nh_src0_arrmeta = reinterpret_cast<size_stride_t *>(nh_arrmeta.get());
@@ -194,7 +195,7 @@ static int resolve_neighborhood_dst_type(const arrfunc_type_data *self,
   }
   out_dst_tp = ndt::substitute(self->get_return_type(), typevars, false);
 
-  // swap in the input dimension values for the strided**N
+  // swap in the input dimension values for the fixed**N
   intptr_t ndim = src_tp[0].get_ndim();
   dimvector shape(ndim);
   src_tp[0].extended()->get_shape(ndim, 0, shape.get(), NULL, NULL);
@@ -214,7 +215,7 @@ void dynd::make_neighborhood_arrfunc(arrfunc_type_data *out_af,
                                      intptr_t nh_ndim)
 {
     std::ostringstream oss;
-    oss << "strided**" << nh_ndim;
+    oss << "fixed**" << nh_ndim;
     ndt::type nhop_pattern("(" + oss.str() + " * NH) -> OUT");
     ndt::type result_pattern("(" + oss.str() + " * NH) -> " + oss.str() + " * OUT");
 

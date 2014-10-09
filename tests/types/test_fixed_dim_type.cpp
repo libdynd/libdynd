@@ -10,7 +10,6 @@
 
 #include <dynd/array.hpp>
 #include <dynd/types/fixed_dim_type.hpp>
-#include <dynd/types/strided_dim_type.hpp>
 #include <dynd/types/convert_type.hpp>
 #include <dynd/kernels/assignment_kernels.hpp>
 #include <dynd/json_parser.hpp>
@@ -171,10 +170,10 @@ TEST(FixedDimType, IsTypeSubarray) {
     EXPECT_FALSE(ndt::type("10 * int32").is_type_subarray(
         ndt::type("3 * 10 * int32")));
     EXPECT_FALSE(ndt::type("3 * int32")
-                     .is_type_subarray(ndt::type("strided * int32")));
+                     .is_type_subarray(ndt::type("fixed * int32")));
     EXPECT_FALSE(ndt::type("3 * int32")
                      .is_type_subarray(ndt::type("var * int32")));
-    EXPECT_FALSE(ndt::type("strided * int32")
+    EXPECT_FALSE(ndt::type("fixed * int32")
                      .is_type_subarray(ndt::type("3 * int32")));
     EXPECT_FALSE(ndt::type("var * int32")
                      .is_type_subarray(ndt::type("3 * int32")));

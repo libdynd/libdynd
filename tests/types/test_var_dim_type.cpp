@@ -12,7 +12,6 @@
 #include <dynd/array.hpp>
 #include <dynd/types/tuple_type.hpp>
 #include <dynd/types/var_dim_type.hpp>
-#include <dynd/types/strided_dim_type.hpp>
 #include <dynd/types/cfixed_dim_type.hpp>
 #include <dynd/kernels/assignment_kernels.hpp>
 #include <dynd/json_parser.hpp>
@@ -72,8 +71,8 @@ TEST(VarArrayDType, DTypeSubscriptSimpleSlice) {
     // Slicing does not collapse the leading dimension to a strided array (as it used to)
     EXPECT_EQ(ndt::make_var_dim(ndt::make_type<int>()), n(irange()).get_type());
     /* TODO: var dim indexing needs more work
-    EXPECT_EQ(ndt::make_strided_dim(ndt::make_type<int>()), n(irange().by(-1)).get_type());
-    EXPECT_EQ(ndt::make_strided_dim(ndt::make_type<int>()), n(1 <= irange() < 3).get_type());
+    EXPECT_EQ(ndt::make_fixed_sym_dim(ndt::make_type<int>()), n(irange().by(-1)).get_type());
+    EXPECT_EQ(ndt::make_fixed_sym_dim(ndt::make_type<int>()), n(1 <= irange() < 3).get_type());
 
     EXPECT_EQ(2, n(1 <= irange() < 3).get_shape()[0]);
     EXPECT_EQ(4, n(1 <= irange() < 3)(0).as<int>());
@@ -544,11 +543,11 @@ TEST(VarDimDType, IsTypeSubarray) {
   EXPECT_FALSE(ndt::type("var * int32")
                    .is_type_subarray(ndt::type("var * var * int32")));
   EXPECT_FALSE(
-      ndt::type("var * int32").is_type_subarray(ndt::type("strided * int32")));
+      ndt::type("var * int32").is_type_subarray(ndt::type("fixed * int32")));
   EXPECT_FALSE(
       ndt::type("var * int32").is_type_subarray(ndt::type("3 * int32")));
   EXPECT_FALSE(
-      ndt::type("strided * int32").is_type_subarray(ndt::type("var * int32")));
+      ndt::type("fixed * int32").is_type_subarray(ndt::type("var * int32")));
   EXPECT_FALSE(
       ndt::type("3 * int32").is_type_subarray(ndt::type("var * int32")));
 }

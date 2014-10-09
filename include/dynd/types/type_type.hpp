@@ -70,11 +70,6 @@ namespace ndt {
   {
     return *reinterpret_cast<const ndt::type *>(&types::type_tp);
   }
-  /** Returns type "strided * type" */
-  inline const ndt::type &make_strided_of_type()
-  {
-    return *reinterpret_cast<const ndt::type *>(&types::strided_of_type_tp);
-  }
 } // namespace ndt
 
 } // namespace dynd

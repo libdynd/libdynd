@@ -18,7 +18,7 @@ namespace dynd {
  * \param out_af  The output arrfunc which is filled.
  * \param neighborhood_op  An arrfunc object which transforms a neighborhood into
  *                         a single output value. Signature
- *                         '(strided * strided * NH, strided * strided * MSK) -> OUT',
+ *                         '(fixed * fixed * NH, fixed * fixed * MSK) -> OUT',
  */
 void make_neighborhood_arrfunc(arrfunc_type_data *out_af, const nd::arrfunc &neighborhood_op,
                                intptr_t nh_ndim);

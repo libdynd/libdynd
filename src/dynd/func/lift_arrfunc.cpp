@@ -100,9 +100,6 @@ static int resolve_lifted_dst_type(const arrfunc_type_data *self, intptr_t nsrc,
                 intptr_t shape_at_j;
                 for (intptr_t j = 0; j < ndim_i; ++j) {
                     switch (tp.get_type_id()) {
-                        case strided_dim_type_id:
-                          throw runtime_error("TODO: strided_dim shouldn't "
-                                              "appear in concrete arrays");
                         case fixed_dim_type_id:
                             shape_at_j = tp.tcast<fixed_dim_type>()->get_fixed_dim_size();
                             if (shape_i[j] < 0 || shape_i[j] == 1) {

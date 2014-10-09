@@ -6,7 +6,7 @@
 #include <dynd/kernels/assignment_kernels.hpp>
 #include <dynd/func/rolling_arrfunc.hpp>
 #include <dynd/kernels/ckernel_common_functions.hpp>
-#include <dynd/types/strided_dim_type.hpp>
+#include <dynd/types/fixed_dim_type.hpp>
 #include <dynd/types/var_dim_type.hpp>
 #include <dynd/types/typevar_dim_type.hpp>
 #include <dynd/arrmeta_holder.hpp>
@@ -118,37 +118,42 @@ static int resolve_rolling_dst_type(const arrfunc_type_data *af_self,
                                     const nd::array &dyn_params,
                                     int throw_on_error, ndt::type &out_dst_tp)
 {
-    if (nsrc != 1) {
-      if (throw_on_error) {
-        stringstream ss;
-        ss << "Wrong number of arguments to rolling arrfunc with prototype ";
-        ss << af_self->func_proto << ", got " << nsrc << " arguments";
-        throw invalid_argument(ss.str());
-      } else {
-        return 0;
-      }
+  if (nsrc != 1) {
+    if (throw_on_error) {
+      stringstream ss;
+      ss << "Wrong number of arguments to rolling arrfunc with prototype ";
+      ss << af_self->func_proto << ", got " << nsrc << " arguments";
+      throw invalid_argument(ss.str());
     }
-    rolling_arrfunc_data *data = *af_self->get_data_as<rolling_arrfunc_data *>();
-    const arrfunc_type_data *child_af = data->window_op.get();
-    // First get the type for the child arrfunc
-    ndt::type child_dst_tp;
-    if (child_af->resolve_dst_type) {
-        ndt::type child_src_tp = ndt::make_strided_dim(src_tp[0].get_type_at_dimension(NULL, 1));
-        if (!child_af->resolve_dst_type(child_af, 1, &child_src_tp, dyn_params,
-                                        throw_on_error, child_dst_tp)) {
-            return 0;
-        }
-    } else {
-        child_dst_tp = child_af->get_return_type();
+    else {
+      return 0;
     }
+  }
+  rolling_arrfunc_data *data = *af_self->get_data_as<rolling_arrfunc_data *>();
+  const arrfunc_type_data *child_af = data->window_op.get();
+  // First get the type for the child arrfunc
+  ndt::type child_dst_tp;
+  if (child_af->resolve_dst_type) {
+    ndt::type child_src_tp = ndt::make_fixed_dim(
+        data->window_size, src_tp[0].get_type_at_dimension(NULL, 1));
+    if (!child_af->resolve_dst_type(child_af, 1, &child_src_tp, dyn_params,
+                                    throw_on_error, child_dst_tp)) {
+      return 0;
+    }
+  }
+  else {
+    child_dst_tp = child_af->get_return_type();
+  }
 
-    if (src_tp[0].get_type_id() == var_dim_type_id) {
-      out_dst_tp = ndt::make_var_dim(child_dst_tp);
-    } else {
-      out_dst_tp = ndt::make_fixed_dim(src_tp[0].get_dim_size(NULL, NULL), child_dst_tp);
-    }
+  if (src_tp[0].get_type_id() == var_dim_type_id) {
+    out_dst_tp = ndt::make_var_dim(child_dst_tp);
+  }
+  else {
+    out_dst_tp =
+        ndt::make_fixed_dim(src_tp[0].get_dim_size(NULL, NULL), child_dst_tp);
+  }
 
-    return 1;
+  return 1;
 }
 
 // TODO This should handle both strided and var cases
@@ -203,15 +208,15 @@ instantiate_strided(const arrfunc_type_data *af_self, dynd::ckernel_builder *ckb
     self->m_window_op_offset = ckb_offset - root_ckb_offset;
     // We construct array arrmeta for the window op ckernel to use,
     // without actually creating an nd::array to hold it.
-    arrmeta_holder(ndt::make_strided_dim(src_el_tp))
+    arrmeta_holder(ndt::make_fixed_dim(data->window_size, src_el_tp))
         .swap(self->m_src_winop_meta);
-    self->m_src_winop_meta.get_at<strided_dim_type_arrmeta>(0)->dim_size =
+    self->m_src_winop_meta.get_at<fixed_dim_type_arrmeta>(0)->dim_size =
         self->m_window_size;
-    self->m_src_winop_meta.get_at<strided_dim_type_arrmeta>(0)->stride =
+    self->m_src_winop_meta.get_at<fixed_dim_type_arrmeta>(0)->stride =
         self->m_src_stride;
     if (src_el_tp.get_arrmeta_size() > 0) {
         src_el_tp.extended()->arrmeta_copy_construct(
-            self->m_src_winop_meta.get() + sizeof(strided_dim_type_arrmeta),
+            self->m_src_winop_meta.get() + sizeof(fixed_dim_type_arrmeta),
             src_el_arrmeta, NULL);
     }
 

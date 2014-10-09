@@ -13,13 +13,13 @@
 #include <dynd/buffer.hpp>
 #include <dynd/funcproto.hpp>
 #include <dynd/pp/meta.hpp>
-#include <dynd/types/strided_dim_type.hpp>
+#include <dynd/types/fixed_sym_dim_type.hpp>
 
 namespace dynd {
 
 class funcproto_type : public base_type {
     intptr_t m_param_count;
-    // This is always a contiguous immutable "strided * type" array
+    // This is always a contiguous immutable "N * type" array
     nd::array m_param_types;
     ndt::type m_return_type;
 

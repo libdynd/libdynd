@@ -4,7 +4,7 @@
 //
 
 #include <dynd/func/callable.hpp>
-#include <dynd/types/strided_dim_type.hpp>
+#include <dynd/types/fixed_dim_type.hpp>
 
 using namespace std;
 using namespace dynd;

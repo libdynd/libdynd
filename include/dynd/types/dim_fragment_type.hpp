@@ -21,7 +21,7 @@ namespace dynd {
  */
 enum {
     dim_fragment_var = -1,
-    dim_fragment_strided = -2
+    dim_fragment_fixed_sym = -2
     // values >= 0 mean fixed[N]
 };
 

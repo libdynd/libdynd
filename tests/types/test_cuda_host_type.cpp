@@ -30,7 +30,7 @@ TEST(CUDAHostType, Basic) {
     EXPECT_EQ(d, ndt::type(d.str()));
 
     // A memory type cannot have an array dimension type as storage
-    EXPECT_THROW(ndt::make_cuda_host(ndt::make_strided_dim(ndt::make_type<int32_t>())), runtime_error);
+    EXPECT_THROW(ndt::make_cuda_host(ndt::make_fixed_sym_dim(ndt::make_type<int32_t>())), runtime_error);
 
     d = ndt::make_cuda_host(ndt::make_type<float>(), cudaHostAllocMapped);
     EXPECT_EQ((unsigned int)cudaHostAllocMapped, d.tcast<cuda_host_type>()->get_cuda_host_flags());
@@ -49,7 +49,7 @@ TEST(CUDAHostType, BuiltIn) {
 TEST(CUDAHostType, IsTypeSubarray) {
     EXPECT_TRUE(ndt::make_cuda_host(ndt::make_type<int32_t>()).is_type_subarray(ndt::make_cuda_host(ndt::make_type<int32_t>())));
     EXPECT_TRUE(ndt::make_cuda_host(ndt::make_type<int32_t>()).is_type_subarray(ndt::make_type<int32_t>()));
-    EXPECT_TRUE(ndt::make_strided_dim(ndt::make_cuda_host(ndt::make_type<int32_t>())).is_type_subarray(ndt::make_type<int32_t>()));
+    EXPECT_TRUE(ndt::make_fixed_sym_dim(ndt::make_cuda_host(ndt::make_type<int32_t>())).is_type_subarray(ndt::make_type<int32_t>()));
     EXPECT_FALSE(ndt::make_type<int32_t>().is_type_subarray(ndt::make_cuda_host(ndt::make_type<int32_t>())));
 }
 

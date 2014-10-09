@@ -115,8 +115,8 @@ std::ostream& dynd::operator<<(std::ostream& o, type_id_t tid)
             return (o << "busdate");
         case json_type_id:
             return (o << "json");
-        case strided_dim_type_id:
-            return (o << "strided_dim");
+        case fixed_sym_dim_type_id:
+            return (o << "fixed_sym_dim");
         case fixed_dim_type_id:
             return (o << "fixed_dim");
         case cfixed_dim_type_id:

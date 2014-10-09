@@ -108,11 +108,6 @@ namespace ndt {
   {
     return ndt::type(new string_type(encoding), false);
   }
-  /** Returns type "strided * string" */
-  inline const ndt::type &make_strided_of_string()
-  {
-    return *reinterpret_cast<const ndt::type *>(&types::strided_of_string_tp);
-  }
 } // namespace ndt
 
 } // namespace dynd

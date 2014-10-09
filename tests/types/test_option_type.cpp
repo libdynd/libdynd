@@ -83,7 +83,7 @@ TEST(OptionType, OptionIntAssign) {
   b = nd::empty("5 * ?int32");
   b.vals() = a;
   c = parse_json("5 * ?int32", "[null, 12, null, 34, null]");
-  EXPECT_ARR_EQ(nd::view(c, "strided * int32"), nd::view(b, "strided * int32"));
+  EXPECT_ARR_EQ(nd::view(c, "fixed * int32"), nd::view(b, "fixed * int32"));
 }
 
 TEST(OptionType, Cast) {

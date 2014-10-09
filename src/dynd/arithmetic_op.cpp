@@ -11,7 +11,6 @@
 #include <dynd/kernels/expr_kernel_generator.hpp>
 #include <dynd/kernels/elwise_expr_kernels.hpp>
 #include <dynd/shape_tools.hpp>
-#include <dynd/types/strided_dim_type.hpp>
 #include <dynd/types/var_dim_type.hpp>
 #include <dynd/types/expr_type.hpp>
 #include <dynd/types/string_type.hpp>

@@ -166,7 +166,7 @@ TEST(Reduction, BuiltinSum_Lift1D_NoIdentity) {
     arrfunc_type_data af;
     bool reduction_dimflags[1] = {true};
     lift_reduction_arrfunc(&af, reduction_kernel,
-                    ndt::type("strided * float32"), nd::array(), false,
+                    ndt::type("fixed * float32"), nd::array(), false,
                     1, reduction_dimflags, true, true, false, nd::array());
 
     // Set up some data for the test reduction
@@ -213,7 +213,7 @@ TEST(Reduction, BuiltinSum_Lift1D_WithIdentity) {
     arrfunc_type_data af;
     bool reduction_dimflags[1] = {true};
     lift_reduction_arrfunc(&af, reduction_kernel,
-                    ndt::type("strided * float32"), nd::array(), false,
+                    ndt::type("fixed * float32"), nd::array(), false,
                     1, reduction_dimflags, true, true, false, nd::array(100.f));
 
     // Set up some data for the test reduction
@@ -244,7 +244,7 @@ TEST(Reduction, BuiltinSum_Lift2D_StridedStrided_ReduceReduce) {
     arrfunc_type_data af;
     bool reduction_dimflags[2] = {true, true};
     lift_reduction_arrfunc(&af, reduction_kernel,
-                    ndt::type("strided * strided * float32"), nd::array(), false,
+                    ndt::type("fixed * fixed * float32"), nd::array(), false,
                     2, reduction_dimflags, true, true, false, nd::array());
 
     // Set up some data for the test reduction
@@ -289,7 +289,7 @@ TEST(Reduction, BuiltinSum_Lift2D_StridedStrided_ReduceReduce_KeepDim) {
     arrfunc_type_data af;
     bool reduction_dimflags[2] = {true, true};
     lift_reduction_arrfunc(&af, reduction_kernel,
-                    ndt::type("strided * strided * float32"), nd::array(), true,
+                    ndt::type("fixed * fixed * float32"), nd::array(), true,
                     2, reduction_dimflags, true, true, false, nd::array());
 
     // Set up some data for the test reduction
@@ -321,7 +321,7 @@ TEST(Reduction, BuiltinSum_Lift2D_StridedStrided_BroadcastReduce) {
     arrfunc_type_data af;
     bool reduction_dimflags[2] = {false, true};
     lift_reduction_arrfunc(&af, reduction_kernel,
-                    ndt::type("strided * strided * float32"), nd::array(), false,
+                    ndt::type("fixed * fixed * float32"), nd::array(), false,
                     2, reduction_dimflags, true, true, false, nd::array());
 
     // Set up some data for the test reduction
@@ -371,7 +371,7 @@ TEST(Reduction, BuiltinSum_Lift2D_StridedStrided_BroadcastReduce_KeepDim) {
     arrfunc_type_data af;
     bool reduction_dimflags[2] = {false, true};
     lift_reduction_arrfunc(&af, reduction_kernel,
-                    ndt::type("strided * strided * float32"), nd::array(), true,
+                    ndt::type("fixed * fixed * float32"), nd::array(), true,
                     2, reduction_dimflags, true, true, false, nd::array());
 
     // Set up some data for the test reduction
@@ -405,7 +405,7 @@ TEST(Reduction, BuiltinSum_Lift2D_StridedStrided_ReduceBroadcast) {
     arrfunc_type_data af;
     bool reduction_dimflags[2] = {true, false};
     lift_reduction_arrfunc(&af, reduction_kernel,
-                    ndt::type("strided * strided * float32"), nd::array(), false,
+                    ndt::type("fixed * fixed * float32"), nd::array(), false,
                     2, reduction_dimflags, true, true, false, nd::array());
 
     // Set up some data for the test reduction
@@ -457,7 +457,7 @@ TEST(Reduction, BuiltinSum_Lift2D_StridedStrided_ReduceBroadcast_KeepDim) {
     arrfunc_type_data af;
     bool reduction_dimflags[2] = {true, false};
     lift_reduction_arrfunc(&af, reduction_kernel,
-                    ndt::type("strided * strided * float32"), nd::array(), true,
+                    ndt::type("fixed * fixed * float32"), nd::array(), true,
                     2, reduction_dimflags, true, true, false, nd::array());
 
     // Set up some data for the test reduction
@@ -492,7 +492,7 @@ TEST(Reduction, BuiltinSum_Lift3D_StridedStridedStrided_ReduceReduceReduce) {
     arrfunc_type_data af;
     bool reduction_dimflags[3] = {true, true, true};
     lift_reduction_arrfunc(&af, reduction_kernel,
-                    ndt::type("strided * strided * strided * float32"), nd::array(), false,
+                    ndt::type("fixed * fixed * fixed * float32"), nd::array(), false,
                     3, reduction_dimflags, true, true, false, nd::array());
 
     // Set up some data for the test reduction
@@ -526,7 +526,7 @@ TEST(Reduction, BuiltinSum_Lift3D_StridedStridedStrided_BroadcastReduceReduce) {
     arrfunc_type_data af;
     bool reduction_dimflags[3] = {false, true, true};
     lift_reduction_arrfunc(&af, reduction_kernel,
-                    ndt::type("strided * strided * strided * float32"), nd::array(), false,
+                    ndt::type("fixed * fixed * fixed * float32"), nd::array(), false,
                     3, reduction_dimflags, true, true, false, nd::array());
 
     // Set up some data for the test reduction
@@ -562,7 +562,7 @@ TEST(Reduction, BuiltinSum_Lift3D_StridedStridedStrided_ReduceBroadcastReduce) {
     arrfunc_type_data af;
     bool reduction_dimflags[3] = {true, false, true};
     lift_reduction_arrfunc(&af, reduction_kernel,
-                    ndt::type("strided * strided * strided * float32"), nd::array(), false,
+                    ndt::type("fixed * fixed * fixed * float32"), nd::array(), false,
                     3, reduction_dimflags, true, true, false, nd::array());
 
     // Set up some data for the test reduction

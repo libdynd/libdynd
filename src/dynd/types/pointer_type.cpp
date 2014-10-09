@@ -368,30 +368,31 @@ static nd::array array_function_dereference(const nd::array &self)
     ndt::type dt = self.get_type();
     const char *arrmeta = self.get_arrmeta();
     char *data = self.get_ndo()->m_data_pointer;
-    memory_block_data *dataref = NULL;
+    memory_block_data *dataref = self.get_ndo()->m_data_reference;
+    if (dataref == NULL) {
+      dataref = self.get_memblock().get();
+    }
     uint64_t flags = self.get_ndo()->m_flags;
+
     while (dt.get_type_id() == pointer_type_id) {
         const pointer_type_arrmeta *md = reinterpret_cast<const pointer_type_arrmeta *>(arrmeta);
-        const pointer_type *pd = dt.tcast<pointer_type>();
-        dt = pd->get_target_type();
+        dt = dt.tcast<pointer_type>()->get_target_type();
         arrmeta += sizeof(pointer_type_arrmeta);
         data = *reinterpret_cast<char **>(data) + md->offset;
         dataref = md->blockref;
     }
 
     // Create an array without the pointers
-    nd::array result(make_array_memory_block(dt.is_builtin() ? 0 : dt.extended()->get_arrmeta_size()));
+    nd::array result(make_array_memory_block(dt.get_arrmeta_size()));
     if (!dt.is_builtin()) {
         dt.extended()->arrmeta_copy_construct(result.get_arrmeta(), arrmeta, &self.get_ndo()->m_memblockdata);
     }
     result.get_ndo()->m_type = dt.release();
     result.get_ndo()->m_data_pointer = data;
-    result.get_ndo()->m_data_reference = dataref ? dataref : &self.get_ndo()->m_memblockdata;
+    result.get_ndo()->m_data_reference = dataref;
     memory_block_incref(result.get_ndo()->m_data_reference);
     result.get_ndo()->m_flags = flags;
     return result;
-
-    return self;
 }
 
 void pointer_type::get_dynamic_array_functions(

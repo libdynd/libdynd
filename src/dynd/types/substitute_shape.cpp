@@ -37,7 +37,7 @@ struct substitute_shape_data {
     ss << "Cannot substitute shape ";
     print_shape(ss, ndim, shape);
     ss << " into type " << *fulltype;
-    throw invalid_argument(ss.str());
+    throw type_error(ss.str());
   }
 };
 
@@ -56,7 +56,7 @@ static void substitute_shape_visitor(const ndt::type &tp,
       substitute_shape_visitor(subtp, 0, extra, subtp, out_was_transformed);
     }
     switch (tp.get_type_id()) {
-    case strided_dim_type_id:
+    case fixed_sym_dim_type_id:
       if (dim_size >= 0) {
         out_transformed_tp = ndt::make_fixed_dim(dim_size, subtp);
         out_was_transformed = true;

@@ -30,7 +30,7 @@ TEST(CUDADeviceType, Basic) {
     EXPECT_EQ(d, ndt::type(d.str()));
 
     // A memory type cannot have an array dimension type as storage
-    EXPECT_THROW(ndt::make_cuda_device(ndt::make_strided_dim(ndt::make_type<int32_t>())), runtime_error);
+    EXPECT_THROW(ndt::make_cuda_device(ndt::make_fixed_sym_dim(ndt::make_type<int32_t>())), runtime_error);
 
     // Only built-in types can be allocated in CUDA global memory
     EXPECT_THROW(ndt::make_cuda_device(ndt::make_pointer<char>()), runtime_error);
@@ -49,7 +49,7 @@ TEST(CUDADeviceType, BuiltIn) {
 TEST(CUDADeviceType, IsTypeSubarray) {
     EXPECT_TRUE(ndt::make_cuda_device(ndt::make_type<int32_t>()).is_type_subarray(ndt::make_cuda_device(ndt::make_type<int32_t>())));
     EXPECT_TRUE(ndt::make_cuda_device(ndt::make_type<int32_t>()).is_type_subarray(ndt::make_type<int32_t>()));
-    EXPECT_TRUE(ndt::make_strided_dim(ndt::make_cuda_device(ndt::make_type<int32_t>())).is_type_subarray(ndt::make_type<int32_t>()));
+    EXPECT_TRUE(ndt::make_fixed_sym_dim(ndt::make_cuda_device(ndt::make_type<int32_t>())).is_type_subarray(ndt::make_type<int32_t>()));
     EXPECT_FALSE(ndt::make_type<int32_t>().is_type_subarray(ndt::make_cuda_device(ndt::make_type<int32_t>())));
 }
 

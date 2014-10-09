@@ -112,9 +112,9 @@ enum type_id_t {
     // A UTF-8 encoded string type for holding JSON
     json_type_id,
 
-    // A strided array dimension type (like NumPy)
-    strided_dim_type_id,
-    // A fixed-sized array dimension type
+    // An unnamed symbolic fixed array dimension type
+    fixed_sym_dim_type_id,
+    // A fixed-sized strided array dimension type
     fixed_dim_type_id,
     // A fixed-sized, fixed-stride array dimension type
     cfixed_dim_type_id,

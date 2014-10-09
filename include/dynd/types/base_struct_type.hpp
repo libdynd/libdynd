@@ -36,7 +36,7 @@ public:
         return m_field_names;
     }
     const string_type_data& get_field_name_raw(intptr_t i) const {
-        return unchecked_strided_dim_get<string_type_data>(m_field_names, i);
+        return unchecked_fixed_dim_get<string_type_data>(m_field_names, i);
     }
     const std::string get_field_name(intptr_t i) const {
         const string_type_data& std(get_field_name_raw(i));

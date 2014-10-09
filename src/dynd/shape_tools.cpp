@@ -7,7 +7,7 @@
 
 #include <dynd/shape_tools.hpp>
 #include <dynd/exceptions.hpp>
-#include <dynd/types/strided_dim_type.hpp>
+#include <dynd/types/fixed_dim_type.hpp>
 #include <dynd/types/cfixed_dim_type.hpp>
 
 using namespace std;
@@ -610,9 +610,11 @@ axis_order_classification_t dynd::classify_strided_axis_order(intptr_t current_s
                 return axis_order_none;
             }
         }
-        case strided_dim_type_id: {
-            const strided_dim_type *edt = element_tp.tcast<strided_dim_type>();
-            const strided_dim_type_arrmeta *emd = reinterpret_cast<const strided_dim_type_arrmeta *>(element_arrmeta);
+        case fixed_dim_type_id: {
+            const fixed_dim_type *edt = element_tp.tcast<fixed_dim_type>();
+            const fixed_dim_type_arrmeta *emd =
+                reinterpret_cast<const fixed_dim_type_arrmeta *>(
+                    element_arrmeta);
             intptr_t estride = intptr_abs(emd->stride);
             if (estride != 0) {
                 axis_order_classification_t aoc;
@@ -620,7 +622,7 @@ axis_order_classification_t dynd::classify_strided_axis_order(intptr_t current_s
                 if (edt->get_ndim() > 1) {
                     aoc = classify_strided_axis_order(current_stride,
                                 edt->get_element_type(),
-                                element_arrmeta + sizeof(strided_dim_type_arrmeta));
+                                element_arrmeta + sizeof(fixed_dim_type_arrmeta));
                 } else {
                     aoc = axis_order_none;
                 }
@@ -638,7 +640,7 @@ axis_order_classification_t dynd::classify_strided_axis_order(intptr_t current_s
                 // be zero when the dimension size is one)
                 return classify_strided_axis_order(current_stride,
                                 edt->get_element_type(),
-                                element_arrmeta + sizeof(strided_dim_type_arrmeta));
+                                element_arrmeta + sizeof(fixed_dim_type_arrmeta));
             } else {
                 // There was only one dimension with a nonzero stride
                 return axis_order_none;
