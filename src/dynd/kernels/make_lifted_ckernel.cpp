@@ -5,7 +5,7 @@
 
 #include <dynd/kernels/make_lifted_ckernel.hpp>
 #include <dynd/kernels/ckernel_builder.hpp>
-#include <dynd/types/strided_dim_type.hpp>
+#include <dynd/types/fixed_dim_type.hpp>
 #include <dynd/types/cfixed_dim_type.hpp>
 #include <dynd/types/var_dim_type.hpp>
 #include <dynd/kernels/expr_kernel_generator.hpp>
@@ -699,7 +699,6 @@ size_t dynd::make_lifted_expr_ckernel(
   bool src_all_strided = true, src_all_strided_or_var = true;
   for (intptr_t i = 0; i < src_count; ++i) {
     switch (src_tp[i].get_type_id()) {
-    case strided_dim_type_id:
     case fixed_dim_type_id:
     case cfixed_dim_type_id:
       break;
@@ -719,7 +718,6 @@ size_t dynd::make_lifted_expr_ckernel(
   // Call to some special-case functions based on the
   // destination type
   switch (dst_tp.get_type_id()) {
-  case strided_dim_type_id:
   case fixed_dim_type_id:
   case cfixed_dim_type_id:
     if (src_all_strided) {

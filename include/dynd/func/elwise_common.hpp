@@ -13,7 +13,6 @@
 #include <dynd/kernels/make_lifted_ckernel.hpp>
 #include <dynd/kernels/expr_kernel_generator.hpp>
 #include <dynd/shape_tools.hpp>
-#include <dynd/types/strided_dim_type.hpp>
 #include <dynd/types/cfixed_dim_type.hpp>
 #include <dynd/pp/list.hpp>
 #include <dynd/pp/meta.hpp>

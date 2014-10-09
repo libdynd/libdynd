@@ -9,7 +9,7 @@
 #include "inc_gtest.hpp"
 
 #include <dynd/types/datashape_parser.hpp>
-#include <dynd/types/strided_dim_type.hpp>
+#include <dynd/types/fixed_sym_dim_type.hpp>
 #include <dynd/types/fixed_dim_type.hpp>
 #include <dynd/types/cfixed_dim_type.hpp>
 #include <dynd/types/var_dim_type.hpp>
@@ -112,10 +112,10 @@ TEST(DataShapeParser, StringAtoms) {
 }
 
 TEST(DataShapeParser, Unaligned) {
-    EXPECT_EQ(ndt::make_strided_dim(ndt::make_type<dynd_bool>()),
-                    type_from_datashape("strided * unaligned[bool]"));
-    EXPECT_EQ(ndt::make_strided_dim(ndt::make_unaligned(ndt::make_type<float>()), 2),
-                    type_from_datashape("strided * strided * unaligned[float32]"));
+    EXPECT_EQ(ndt::make_fixed_sym_dim(ndt::make_type<dynd_bool>()),
+                    type_from_datashape("fixed * unaligned[bool]"));
+    EXPECT_EQ(ndt::make_fixed_sym_dim(ndt::make_unaligned(ndt::make_type<float>()), 2),
+                    type_from_datashape("fixed * fixed * unaligned[float32]"));
     EXPECT_EQ(ndt::make_struct(ndt::make_unaligned(ndt::make_type<int32_t>()), "x",
                                 ndt::make_unaligned(ndt::make_type<int64_t>()), "y"),
                     type_from_datashape("{x : unaligned[int32], y : unaligned[int64]}"));
@@ -124,34 +124,33 @@ TEST(DataShapeParser, Unaligned) {
                     type_from_datashape("c{x : unaligned[int32], y : unaligned[int64]}"));
 }
 
-TEST(DataShapeParser, Option) {
-    EXPECT_EQ(ndt::make_strided_dim(ndt::make_option<dynd_bool>()),
-                    type_from_datashape("strided * option[bool]"));
-    EXPECT_EQ(ndt::make_strided_dim(ndt::make_option<dynd_bool>()),
-                    type_from_datashape("strided * ?bool"));
-    EXPECT_EQ(ndt::make_strided_dim(ndt::make_option(
-                  ndt::make_strided_dim(ndt::make_type<float>()))),
-              type_from_datashape("strided * option[strided * float32]"));
-    EXPECT_EQ(ndt::make_strided_dim(ndt::make_option(
-                  ndt::make_strided_dim(ndt::make_type<float>()))),
-              type_from_datashape("strided * ?strided * float32"));
-    EXPECT_EQ(ndt::make_struct(ndt::make_option(ndt::make_type<int32_t>()), "x",
-                               ndt::make_option(ndt::make_type<int64_t>()),
-                               "y"),
-              type_from_datashape("{x : option[int32], y : option[int64]}"));
-    EXPECT_EQ(
-        ndt::make_cstruct(ndt::make_option(ndt::make_type<int32_t>()), "x",
-                          ndt::make_option(ndt::make_type<int64_t>()), "y"),
-        type_from_datashape("c{x : ?int32, y : ?int64}"));
+TEST(DataShapeParser, Option)
+{
+  EXPECT_EQ(ndt::make_fixed_sym_dim(ndt::make_option<dynd_bool>()),
+            type_from_datashape("fixed * option[bool]"));
+  EXPECT_EQ(ndt::make_fixed_sym_dim(ndt::make_option<dynd_bool>()),
+            type_from_datashape("fixed * ?bool"));
+  EXPECT_EQ(ndt::make_fixed_sym_dim(ndt::make_option(
+                ndt::make_fixed_sym_dim(ndt::make_type<float>()))),
+            type_from_datashape("fixed * option[fixed * float32]"));
+  EXPECT_EQ(ndt::make_fixed_sym_dim(ndt::make_option(
+                ndt::make_fixed_sym_dim(ndt::make_type<float>()))),
+            type_from_datashape("fixed * ?fixed * float32"));
+  EXPECT_EQ(ndt::make_struct(ndt::make_option(ndt::make_type<int32_t>()), "x",
+                             ndt::make_option(ndt::make_type<int64_t>()), "y"),
+            type_from_datashape("{x : option[int32], y : option[int64]}"));
+  EXPECT_EQ(ndt::make_cstruct(ndt::make_option(ndt::make_type<int32_t>()), "x",
+                              ndt::make_option(ndt::make_type<int64_t>()), "y"),
+            type_from_datashape("c{x : ?int32, y : ?int64}"));
 }
 
 TEST(DataShapeParser, StridedDim) {
-    EXPECT_EQ(ndt::make_strided_dim(ndt::make_type<dynd_bool>()),
-                    type_from_datashape("strided * bool"));
-    EXPECT_EQ(ndt::make_strided_dim(ndt::make_type<float>(), 2),
-                    type_from_datashape("strided * strided * float32"));
-    EXPECT_EQ(type_from_datashape("strided * strided * float32"),
-                    type_from_datashape("strided**2 * float32"));
+    EXPECT_EQ(ndt::make_fixed_sym_dim(ndt::make_type<dynd_bool>()),
+                    type_from_datashape("fixed * bool"));
+    EXPECT_EQ(ndt::make_fixed_sym_dim(ndt::make_type<float>(), 2),
+                    type_from_datashape("fixed * fixed * float32"));
+    EXPECT_EQ(type_from_datashape("fixed * fixed * float32"),
+                    type_from_datashape("fixed**2 * float32"));
 }
 
 TEST(DataShapeParser, FixedDim) {
@@ -185,17 +184,17 @@ TEST(DataShapeParser, VarDim) {
 
 TEST(DataShapeParser, StridedFixedDim) {
     EXPECT_EQ(
-        ndt::make_strided_dim(ndt::make_fixed_dim(3, ndt::make_type<float>())),
-        type_from_datashape("strided * 3 * float32"));
+        ndt::make_fixed_sym_dim(ndt::make_fixed_dim(3, ndt::make_type<float>())),
+        type_from_datashape("fixed * 3 * float32"));
     EXPECT_EQ(
-        ndt::make_fixed_dim(3, ndt::make_strided_dim(ndt::make_type<float>())),
-        type_from_datashape("3 * strided * float32"));
+        ndt::make_fixed_dim(3, ndt::make_fixed_sym_dim(ndt::make_type<float>())),
+        type_from_datashape("3 * fixed * float32"));
 }
 
 TEST(DataShapeParser, StridedVarFixedDim) {
-    EXPECT_EQ(ndt::make_strided_dim(ndt::make_var_dim(
+    EXPECT_EQ(ndt::make_fixed_sym_dim(ndt::make_var_dim(
                   ndt::make_fixed_dim(3, ndt::make_type<float>()))),
-              type_from_datashape("strided * var * 3 * float32"));
+              type_from_datashape("fixed * var * 3 * float32"));
 }
 
 TEST(DataShapeParser, RecordOneField) {

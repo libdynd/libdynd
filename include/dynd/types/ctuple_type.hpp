@@ -89,7 +89,7 @@ namespace ndt {
     inline ndt::type make_ctuple(const ndt::type& tp0)
     {
       nd::array field_types = nd::empty(1, ndt::make_type());
-      unchecked_strided_dim_get_rw<ndt::type>(field_types, 0) = tp0;
+      unchecked_fixed_dim_get_rw<ndt::type>(field_types, 0) = tp0;
       field_types.flag_as_immutable();
       return ndt::make_ctuple(field_types);
     }
@@ -98,8 +98,8 @@ namespace ndt {
     inline ndt::type make_ctuple(const ndt::type& tp0, const ndt::type& tp1)
     {
         nd::array field_types = nd::empty(2, ndt::make_type());
-        unchecked_strided_dim_get_rw<ndt::type>(field_types, 0) = tp0;
-        unchecked_strided_dim_get_rw<ndt::type>(field_types, 1) = tp1;
+        unchecked_fixed_dim_get_rw<ndt::type>(field_types, 0) = tp0;
+        unchecked_fixed_dim_get_rw<ndt::type>(field_types, 1) = tp1;
         field_types.flag_as_immutable();
         return ndt::make_ctuple(field_types);
     }
@@ -108,9 +108,9 @@ namespace ndt {
     inline ndt::type make_ctuple(const ndt::type& tp0, const ndt::type& tp1, const ndt::type& tp2)
     {
         nd::array field_types = nd::empty(3, ndt::make_type());
-        unchecked_strided_dim_get_rw<ndt::type>(field_types, 0) = tp0;
-        unchecked_strided_dim_get_rw<ndt::type>(field_types, 1) = tp1;
-        unchecked_strided_dim_get_rw<ndt::type>(field_types, 2) = tp2;
+        unchecked_fixed_dim_get_rw<ndt::type>(field_types, 0) = tp0;
+        unchecked_fixed_dim_get_rw<ndt::type>(field_types, 1) = tp1;
+        unchecked_fixed_dim_get_rw<ndt::type>(field_types, 2) = tp2;
         field_types.flag_as_immutable();
         return ndt::make_ctuple(field_types);
     }
@@ -121,10 +121,10 @@ namespace ndt {
                     const ndt::type& tp3)
     {
         nd::array field_types = nd::empty(4, ndt::make_type());
-        unchecked_strided_dim_get_rw<ndt::type>(field_types, 0) = tp0;
-        unchecked_strided_dim_get_rw<ndt::type>(field_types, 1) = tp1;
-        unchecked_strided_dim_get_rw<ndt::type>(field_types, 2) = tp2;
-        unchecked_strided_dim_get_rw<ndt::type>(field_types, 3) = tp3;
+        unchecked_fixed_dim_get_rw<ndt::type>(field_types, 0) = tp0;
+        unchecked_fixed_dim_get_rw<ndt::type>(field_types, 1) = tp1;
+        unchecked_fixed_dim_get_rw<ndt::type>(field_types, 2) = tp2;
+        unchecked_fixed_dim_get_rw<ndt::type>(field_types, 3) = tp3;
         field_types.flag_as_immutable();
         return ndt::make_ctuple(field_types);
     }
@@ -135,11 +135,11 @@ namespace ndt {
                     const ndt::type& tp3, const ndt::type& tp4)
     {
         nd::array field_types = nd::empty(5, ndt::make_type());
-        unchecked_strided_dim_get_rw<ndt::type>(field_types, 0) = tp0;
-        unchecked_strided_dim_get_rw<ndt::type>(field_types, 1) = tp1;
-        unchecked_strided_dim_get_rw<ndt::type>(field_types, 2) = tp2;
-        unchecked_strided_dim_get_rw<ndt::type>(field_types, 3) = tp3;
-        unchecked_strided_dim_get_rw<ndt::type>(field_types, 4) = tp4;
+        unchecked_fixed_dim_get_rw<ndt::type>(field_types, 0) = tp0;
+        unchecked_fixed_dim_get_rw<ndt::type>(field_types, 1) = tp1;
+        unchecked_fixed_dim_get_rw<ndt::type>(field_types, 2) = tp2;
+        unchecked_fixed_dim_get_rw<ndt::type>(field_types, 3) = tp3;
+        unchecked_fixed_dim_get_rw<ndt::type>(field_types, 4) = tp4;
         field_types.flag_as_immutable();
         return ndt::make_ctuple(field_types);
     }
@@ -151,12 +151,12 @@ namespace ndt {
                     const ndt::type& tp5)
     {
         nd::array field_types = nd::empty(6, ndt::make_type());
-        unchecked_strided_dim_get_rw<ndt::type>(field_types, 0) = tp0;
-        unchecked_strided_dim_get_rw<ndt::type>(field_types, 1) = tp1;
-        unchecked_strided_dim_get_rw<ndt::type>(field_types, 2) = tp2;
-        unchecked_strided_dim_get_rw<ndt::type>(field_types, 3) = tp3;
-        unchecked_strided_dim_get_rw<ndt::type>(field_types, 4) = tp4;
-        unchecked_strided_dim_get_rw<ndt::type>(field_types, 5) = tp5;
+        unchecked_fixed_dim_get_rw<ndt::type>(field_types, 0) = tp0;
+        unchecked_fixed_dim_get_rw<ndt::type>(field_types, 1) = tp1;
+        unchecked_fixed_dim_get_rw<ndt::type>(field_types, 2) = tp2;
+        unchecked_fixed_dim_get_rw<ndt::type>(field_types, 3) = tp3;
+        unchecked_fixed_dim_get_rw<ndt::type>(field_types, 4) = tp4;
+        unchecked_fixed_dim_get_rw<ndt::type>(field_types, 5) = tp5;
         field_types.flag_as_immutable();
         return ndt::make_ctuple(field_types);
     }
@@ -168,13 +168,13 @@ namespace ndt {
                     const ndt::type& tp5, const ndt::type& tp6)
     {
         nd::array field_types = nd::empty(7, ndt::make_type());
-        unchecked_strided_dim_get_rw<ndt::type>(field_types, 0) = tp0;
-        unchecked_strided_dim_get_rw<ndt::type>(field_types, 1) = tp1;
-        unchecked_strided_dim_get_rw<ndt::type>(field_types, 2) = tp2;
-        unchecked_strided_dim_get_rw<ndt::type>(field_types, 3) = tp3;
-        unchecked_strided_dim_get_rw<ndt::type>(field_types, 4) = tp4;
-        unchecked_strided_dim_get_rw<ndt::type>(field_types, 5) = tp5;
-        unchecked_strided_dim_get_rw<ndt::type>(field_types, 6) = tp6;
+        unchecked_fixed_dim_get_rw<ndt::type>(field_types, 0) = tp0;
+        unchecked_fixed_dim_get_rw<ndt::type>(field_types, 1) = tp1;
+        unchecked_fixed_dim_get_rw<ndt::type>(field_types, 2) = tp2;
+        unchecked_fixed_dim_get_rw<ndt::type>(field_types, 3) = tp3;
+        unchecked_fixed_dim_get_rw<ndt::type>(field_types, 4) = tp4;
+        unchecked_fixed_dim_get_rw<ndt::type>(field_types, 5) = tp5;
+        unchecked_fixed_dim_get_rw<ndt::type>(field_types, 6) = tp6;
         field_types.flag_as_immutable();
         return ndt::make_ctuple(field_types);
     }

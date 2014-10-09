@@ -5,7 +5,6 @@
 
 #include <dynd/array.hpp>
 #include <dynd/types/type_type.hpp>
-#include <dynd/types/strided_dim_type.hpp>
 #include <dynd/memblock/pod_memory_block.hpp>
 #include <dynd/kernels/string_assignment_kernels.hpp>
 #include <dynd/kernels/assignment_kernels.hpp>

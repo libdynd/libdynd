@@ -55,10 +55,16 @@ ndt::detail::internal_substitute(const ndt::type &pattern,
       return ndt::make_pointer(
           ndt::substitute(pattern.tcast<pointer_type>()->get_target_type(),
                           typevars, concrete));
-    case strided_dim_type_id:
-      return ndt::make_strided_dim(
-          ndt::substitute(pattern.tcast<strided_dim_type>()->get_element_type(),
-                          typevars, concrete));
+    case fixed_sym_dim_type_id:
+      if (!concrete) {
+        return ndt::make_fixed_sym_dim(
+            ndt::substitute(pattern.tcast<base_dim_type>()->get_element_type(),
+                            typevars, concrete));
+      } else {
+        throw invalid_argument("The dynd pattern type includes a symbolic "
+                               "'fixed' dimension, which is not concrete as "
+                               "requested");
+      }
     case fixed_dim_type_id:
       return ndt::make_fixed_dim(
           pattern.tcast<fixed_dim_type>()->get_fixed_dim_size(),
@@ -146,8 +152,8 @@ ndt::detail::internal_substitute(const ndt::type &pattern,
         }
         if (!concrete || !it->second.is_symbolic()) {
           switch (it->second.get_type_id()) {
-          case strided_dim_type_id:
-            return ndt::make_strided_dim(ndt::substitute(
+          case fixed_sym_dim_type_id:
+            return ndt::make_fixed_sym_dim(ndt::substitute(
                 pattern.tcast<typevar_dim_type>()->get_element_type(), typevars,
                 concrete));
           case fixed_dim_type_id:

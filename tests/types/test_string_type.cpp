@@ -11,7 +11,6 @@
 #include <dynd/array.hpp>
 #include <dynd/types/string_type.hpp>
 #include <dynd/types/bytes_type.hpp>
-#include <dynd/types/strided_dim_type.hpp>
 #include <dynd/types/fixedstring_type.hpp>
 #include <dynd/types/convert_type.hpp>
 #include <dynd/json_parser.hpp>

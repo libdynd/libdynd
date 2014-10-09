@@ -5,7 +5,6 @@
 
 #include <dynd/types/fixed_dim_type.hpp>
 #include <dynd/types/cfixed_dim_type.hpp>
-#include <dynd/types/strided_dim_type.hpp>
 #include <dynd/types/type_alignment.hpp>
 #include <dynd/shape_tools.hpp>
 #include <dynd/exceptions.hpp>
@@ -133,7 +132,7 @@ intptr_t fixed_dim_type::apply_linear_index(
     memory_block_data **inout_dataref) const
 {
     const fixed_dim_type_arrmeta *md = reinterpret_cast<const fixed_dim_type_arrmeta *>(arrmeta);
-    strided_dim_type_arrmeta *out_md = reinterpret_cast<strided_dim_type_arrmeta *>(out_arrmeta);
+    fixed_dim_type_arrmeta *out_md = reinterpret_cast<fixed_dim_type_arrmeta *>(out_arrmeta);
     if (nindices == 0) {
         // If there are no more indices, copy the rest verbatim
         arrmeta_copy_construct(out_arrmeta, arrmeta, embedded_reference);
@@ -560,14 +559,19 @@ void fixed_dim_type::foreach_leading(const char *arrmeta, char *data,
     }
 }
 
-ndt::type dynd::ndt::make_fixed_dim(intptr_t ndim, const intptr_t *shape,
-                                    const ndt::type &uniform_tp)
+ndt::type ndt::make_fixed_dim(size_t dim_size, const ndt::type &element_tp)
 {
-    ndt::type result = uniform_tp;
-    for (ptrdiff_t i = (ptrdiff_t)ndim-1; i >= 0; --i) {
-        result = ndt::make_fixed_dim(shape[i], result);
-    }
-    return result;
+  return ndt::type(new fixed_dim_type(dim_size, element_tp), false);
+}
+
+ndt::type ndt::make_fixed_dim(intptr_t ndim, const intptr_t *shape,
+                              const ndt::type &uniform_tp)
+{
+  ndt::type result = uniform_tp;
+  for (ptrdiff_t i = (ptrdiff_t)ndim - 1; i >= 0; --i) {
+    result = ndt::make_fixed_dim(shape[i], result);
+  }
+  return result;
 }
 
 void fixed_dim_type::reorder_default_constructed_strides(
@@ -591,7 +595,7 @@ void fixed_dim_type::reorder_default_constructed_strides(
   }
 
   // Find the total number of dimensions we might be reordering, then process
-  // them all at once. This code handles a whole chain of strided_dim_type
+  // them all at once. This code handles a whole chain of fixed_dim_type
   // instances at once.
   size_t ndim = 1;
   ndt::type last_dt = m_element_tp;
@@ -609,14 +613,13 @@ void fixed_dim_type::reorder_default_constructed_strides(
   for (size_t i = 0; i < ndim; ++i) {
     intptr_t stride;
     switch (last_src_tp.get_type_id()) {
-    case strided_dim_type_id:
     case fixed_dim_type_id:
     case cfixed_dim_type_id: {
-      const strided_dim_type_arrmeta *md =
-          reinterpret_cast<const strided_dim_type_arrmeta *>(src_arrmeta);
+      const fixed_dim_type_arrmeta *md =
+          reinterpret_cast<const fixed_dim_type_arrmeta *>(src_arrmeta);
       stride = md->stride;
       last_src_tp = last_src_tp.tcast<base_dim_type>()->get_element_type();
-      src_arrmeta += sizeof(strided_dim_type_arrmeta);
+      src_arrmeta += sizeof(fixed_dim_type_arrmeta);
       break;
     }
     default:

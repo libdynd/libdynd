@@ -303,7 +303,7 @@ static nd::array make_self_names()
 static nd::array make_self_types()
 {
   nd::array result = nd::empty(1, ndt::make_type());
-  unchecked_strided_dim_get_rw<ndt::type>(result, 0) = ndt::make_ndarrayarg();
+  unchecked_fixed_dim_get_rw<ndt::type>(result, 0) = ndt::make_ndarrayarg();
   result.flag_as_immutable();
   return result;
 }

@@ -18,7 +18,6 @@
 #include <dynd/types/convert_type.hpp>
 #include <dynd/types/view_type.hpp>
 #include <dynd/types/fixedbytes_type.hpp>
-#include <dynd/types/strided_dim_type.hpp>
 
 using namespace std;
 using namespace dynd;

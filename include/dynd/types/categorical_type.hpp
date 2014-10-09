@@ -12,8 +12,7 @@
 
 #include <dynd/type.hpp>
 #include <dynd/array.hpp>
-#include <dynd/types/strided_dim_type.hpp>
-
+#include <dynd/types/fixed_dim_type.hpp>
 
 namespace {
 
@@ -50,7 +49,7 @@ public:
                    const char *arrmeta, const char *data) const;
 
     size_t get_category_count() const {
-        return (size_t) reinterpret_cast<const strided_dim_type_arrmeta *>(
+        return (size_t) reinterpret_cast<const fixed_dim_type_arrmeta *>(
                    m_categories.get_arrmeta())->dim_size;
     }
 
@@ -79,7 +78,7 @@ public:
         }
         return m_categories.get_readonly_originptr() +
                m_value_to_category_index[value] *
-                   reinterpret_cast<const strided_dim_type_arrmeta *>(
+                   reinterpret_cast<const fixed_dim_type_arrmeta *>(
                        m_categories.get_arrmeta())->stride;
     }
     /** Returns the arrmeta corresponding to data from get_category_data_from_value */

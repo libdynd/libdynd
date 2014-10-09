@@ -12,7 +12,6 @@
 #include <dynd/types/datetime_type.hpp>
 #include <dynd/types/json_type.hpp>
 #include <dynd/types/ndarrayarg_type.hpp>
-#include <dynd/types/strided_dim_type.hpp>
 #include <dynd/types/time_type.hpp>
 #include <dynd/types/type_type.hpp>
 #include <dynd/types/categorical_type.hpp>
@@ -28,10 +27,8 @@ base_type *datetime_tp;
 base_type *json_tp;
 base_type *ndarrayarg_tp;
 base_type *string_tp;
-base_type *strided_of_string_tp;
 base_type *time_tp;
 base_type *type_tp;
-base_type *strided_of_type_tp;
 }} // namespace dynd::types
 
 void dynd::init::static_types_init()
@@ -52,16 +49,10 @@ void dynd::init::static_types_init()
   types::ndarrayarg_tp = &naat;
   static string_type st(string_encoding_utf_8);
   types::string_tp = &st;
-  static strided_dim_type sst(
-      *reinterpret_cast<const ndt::type *>(&types::string_tp));
-  types::strided_of_string_tp = &sst;
   static time_type tt(tz_abstract);
   types::time_tp = &tt;
   static type_type tpt;
   types::type_tp = &tpt;
-  static strided_dim_type stpt(
-      *reinterpret_cast<const ndt::type *>(&types::type_tp));
-  types::strided_of_type_tp = &stpt;
   // Call initialization of individual types
   init::builtins_type_init();
   init::categorical_type_init();

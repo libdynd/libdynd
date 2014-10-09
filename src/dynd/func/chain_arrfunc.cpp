@@ -43,7 +43,7 @@ struct unary_heap_chain_ck : public kernels::general_ck<unary_heap_chain_ck> {
     // Allocate a temporary buffer on the heap
     nd::array buf = nd::empty(self->m_buf_shape[0], self->m_buf_tp);
     char *buf_data = buf.get_readwrite_originptr();
-    intptr_t buf_stride = reinterpret_cast<const strided_dim_type_arrmeta *>(
+    intptr_t buf_stride = reinterpret_cast<const fixed_dim_type_arrmeta *>(
                               buf.get_arrmeta())->stride;
     ckernel_prefix *first = self->get_child_ckernel();
     expr_strided_t first_fn = first->get_function<expr_strided_t>();

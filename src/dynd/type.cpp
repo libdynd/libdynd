@@ -5,7 +5,6 @@
 
 #include <dynd/type.hpp>
 #include <dynd/types/base_dim_type.hpp>
-#include <dynd/types/strided_dim_type.hpp>
 #include <dynd/types/fixed_dim_type.hpp>
 #include <dynd/types/var_dim_type.hpp>
 #include <dynd/exceptions.hpp>
@@ -253,7 +252,7 @@ bool ndt::type::get_as_strided(const char *arrmeta, intptr_t *out_dim_size,
     *out_dim_size = reinterpret_cast<const size_stride_t *>(arrmeta)->dim_size;
     *out_stride = reinterpret_cast<const size_stride_t *>(arrmeta)->stride;
     *out_el_tp = tcast<base_dim_type>()->get_element_type();
-    *out_el_arrmeta = arrmeta + sizeof(strided_dim_type_arrmeta);
+    *out_el_arrmeta = arrmeta + sizeof(fixed_dim_type_arrmeta);
     return true;
   } else {
     return false;
@@ -267,7 +266,7 @@ bool ndt::type::get_as_strided(const char *arrmeta, intptr_t ndim,
 {
   if (get_strided_ndim() >= ndim) {
     *out_size_stride = reinterpret_cast<const size_stride_t *>(arrmeta);
-    *out_el_arrmeta = arrmeta + ndim * sizeof(strided_dim_type_arrmeta);
+    *out_el_arrmeta = arrmeta + ndim * sizeof(fixed_dim_type_arrmeta);
     *out_el_tp = *this;
     while (ndim-- > 0) {
       *out_el_tp = out_el_tp->tcast<base_dim_type>()->get_element_type();
@@ -302,41 +301,52 @@ bool ndt::type::data_layout_compatible_with(const ndt::type& rhs) const
         case string_type_id:
         case bytes_type_id:
         case json_type_id:
-            switch (rhs.get_type_id()) {
-                case string_type_id:
-                case bytes_type_id:
-                case json_type_id:
-                    // All of string, bytes, json are compatible
-                    return true;
-                default:
-                    return false;
-            }
+          switch (rhs.get_type_id()) {
+          case string_type_id:
+          case bytes_type_id:
+          case json_type_id:
+            // All of string, bytes, json are compatible
+            return true;
+          default:
+            return false;
+          }
         case cfixed_dim_type_id:
-            // For fixed dimensions, it's data layout compatible if
-            // the shape and strides match, and the element is data
-            // layout compatible.
-            if (rhs.get_type_id() == cfixed_dim_type_id) {
-                const cfixed_dim_type *fdd = static_cast<const cfixed_dim_type *>(extended());
-                const cfixed_dim_type *rhs_fdd = rhs.tcast<cfixed_dim_type>();
-                return fdd->get_fixed_dim_size() == rhs_fdd->get_fixed_dim_size() &&
-                    fdd->get_fixed_stride() == rhs_fdd->get_fixed_stride() &&
-                    fdd->get_element_type().data_layout_compatible_with(
-                                    rhs_fdd->get_element_type());
-            }
-            break;
-        case strided_dim_type_id:
+          // For fixed dimensions, it's data layout compatible if
+          // the shape and strides match, and the element is data
+          // layout compatible.
+          if (rhs.get_type_id() == cfixed_dim_type_id) {
+            const cfixed_dim_type *fdd =
+                static_cast<const cfixed_dim_type *>(extended());
+            const cfixed_dim_type *rhs_fdd = rhs.tcast<cfixed_dim_type>();
+            return fdd->get_fixed_dim_size() == rhs_fdd->get_fixed_dim_size() &&
+                   fdd->get_fixed_stride() == rhs_fdd->get_fixed_stride() &&
+                   fdd->get_element_type().data_layout_compatible_with(
+                       rhs_fdd->get_element_type());
+          }
+          break;
+        case fixed_dim_type_id:
+          if (rhs.get_type_id() == fixed_dim_type_id) {
+            return tcast<fixed_dim_type>()->get_fixed_dim_size() ==
+                       rhs.tcast<fixed_dim_type>()->get_fixed_dim_size() &&
+                   tcast<fixed_dim_type>()
+                       ->get_element_type()
+                       .data_layout_compatible_with(
+                           rhs.tcast<fixed_dim_type>()->get_element_type());
+          }
+          break;
         case var_dim_type_id:
-            // For strided and var dimensions, it's data layout
-            // compatible if the element is
-            if (rhs.get_type_id() == get_type_id()) {
-                const base_dim_type *budd = static_cast<const base_dim_type *>(extended());
-                const base_dim_type *rhs_budd = rhs.tcast<base_dim_type>();
-                return budd->get_element_type().data_layout_compatible_with(
-                                    rhs_budd->get_element_type());
-            }
-            break;
+          // For var dimensions, it's data layout
+          // compatible if the element is
+          if (rhs.get_type_id() == var_dim_type_id) {
+            const base_dim_type *budd =
+                static_cast<const base_dim_type *>(extended());
+            const base_dim_type *rhs_budd = rhs.tcast<base_dim_type>();
+            return budd->get_element_type().data_layout_compatible_with(
+                rhs_budd->get_element_type());
+          }
+          break;
         default:
-            break;
+          break;
     }
     return false;
 }

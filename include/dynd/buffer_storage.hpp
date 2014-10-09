@@ -7,16 +7,16 @@
 #define _DYND__BUFFER_STORAGE_HPP_
 
 #include <dynd/array.hpp>
-#include <dynd/types/strided_dim_type.hpp>
+#include <dynd/types/fixed_dim_type.hpp>
 
 namespace dynd {
 
 /**
- * Given a buffer array of type "strided * T" which was
+ * Given a buffer array of type "N * T" which was
  * created by nd::empty, resets it so it can be used
  * as a buffer again.
  *
- * NOTE: If the array is not of type "strided * T" and default
+ * NOTE: If the array is not of type "N * T" and default
  *       initialized by nd::empty, undefined behavior will result.
  * 
  */
@@ -29,8 +29,8 @@ inline void reset_strided_buffer_array(const nd::array& buf)
     char *buf_arrmeta = buf.get_ndo()->get_arrmeta();
     char *buf_data = buf.get_readwrite_originptr();
     buf_tp.extended()->arrmeta_reset_buffers(buf.get_ndo()->get_arrmeta());
-    strided_dim_type_arrmeta *am =
-        reinterpret_cast<strided_dim_type_arrmeta *>(buf_arrmeta);
+    fixed_dim_type_arrmeta *am =
+        reinterpret_cast<fixed_dim_type_arrmeta *>(buf_arrmeta);
     if (flags & type_flag_destructor) {
       buf_tp.extended()->data_destruct(buf_arrmeta, buf_data);
     }

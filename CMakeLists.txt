@@ -200,6 +200,7 @@ set(libdynd_SRC
     src/dynd/types/ellipsis_dim_type.cpp
     src/dynd/types/expr_type.cpp
     src/dynd/types/fixed_dim_type.cpp
+    src/dynd/types/fixed_sym_dim_type.cpp
     src/dynd/types/fixedbytes_type.cpp
     src/dynd/types/fixedstring_type.cpp
     src/dynd/types/funcproto_type.cpp
@@ -210,7 +211,6 @@ set(libdynd_SRC
     src/dynd/types/pointer_type.cpp
     src/dynd/types/property_type.cpp
     src/dynd/types/static_type_instances.cpp
-    src/dynd/types/strided_dim_type.cpp
     src/dynd/types/string_type.cpp
     src/dynd/types/struct_type.cpp
     src/dynd/types/substitute_shape.cpp
@@ -268,19 +268,19 @@ set(libdynd_SRC
     include/dynd/types/dynd_uint128.hpp
     include/dynd/types/expr_type.hpp
     include/dynd/types/fixed_dim_type.hpp
+    include/dynd/types/fixed_sym_dim_type.hpp
+    include/dynd/types/fixedbytes_type.hpp
+    include/dynd/types/fixedstring_type.hpp
     include/dynd/types/property_type.hpp
     include/dynd/types/static_type_instances.hpp
     include/dynd/types/type_alignment.hpp
     include/dynd/types/cfixed_dim_type.hpp
-    include/dynd/types/fixedbytes_type.hpp
-    include/dynd/types/fixedstring_type.hpp
     include/dynd/types/cstruct_type.hpp
     include/dynd/types/groupby_type.hpp
     include/dynd/types/json_type.hpp
     include/dynd/types/ndarrayarg_type.hpp
     include/dynd/types/option_type.hpp
     include/dynd/types/pointer_type.hpp
-    include/dynd/types/strided_dim_type.hpp
     include/dynd/types/string_type.hpp
     include/dynd/types/struct_type.hpp
     include/dynd/types/cstruct_type.hpp

@@ -5,7 +5,7 @@
 
 #include <dynd/types/datashape_formatter.hpp>
 #include <dynd/types/base_struct_type.hpp>
-#include <dynd/types/strided_dim_type.hpp>
+#include <dynd/types/fixed_sym_dim_type.hpp>
 #include <dynd/types/fixed_dim_type.hpp>
 #include <dynd/types/cfixed_dim_type.hpp>
 #include <dynd/types/var_dim_type.hpp>
@@ -58,26 +58,11 @@ static void format_dim_datashape(std::ostream &o, const ndt::type &tp,
                                  const std::string &indent, bool multiline)
 {
   switch (tp.get_type_id()) {
-  case strided_dim_type_id: {
-    const strided_dim_type *sad = tp.tcast<strided_dim_type>();
-    if (arrmeta) {
-      // If arrmeta is provided, use the actual dimension size
-      const strided_dim_type_arrmeta *md =
-          reinterpret_cast<const strided_dim_type_arrmeta *>(arrmeta);
-      o << md->dim_size << " * ";
-      // Allow data to keep going only if the dimension size is 1
-      if (md->dim_size != 1) {
-        data = NULL;
-      }
-      format_datashape(o, sad->get_element_type(),
-                       arrmeta + sizeof(strided_dim_type_arrmeta), data, indent,
-                       multiline);
-    } else {
-      // If no arrmeta, use "strided"
-      o << "strided * ";
-      format_datashape(o, sad->get_element_type(), NULL, NULL, indent,
-                       multiline);
-    }
+  case fixed_sym_dim_type_id: {
+    // A symbolic type, so arrmeta/data can't exist
+    o << "fixed * ";
+    format_datashape(o, tp.tcast<base_dim_type>()->get_element_type(), NULL,
+                     NULL, indent, multiline);
     break;
   }
   case fixed_dim_type_id: {

@@ -13,7 +13,6 @@
 #include "dynd_assertions.hpp"
 
 #include <dynd/array.hpp>
-#include <dynd/types/strided_dim_type.hpp>
 #include <dynd/types/fixedbytes_type.hpp>
 #include <dynd/types/string_type.hpp>
 

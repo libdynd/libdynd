@@ -18,13 +18,24 @@
 #include <dynd/irange.hpp>
 #include <dynd/memblock/array_memory_block.hpp>
 #include <dynd/types/type_type.hpp>
-#include <dynd/types/fixed_dim_type.hpp>
 
 namespace dynd {
 
 namespace ndt {
   type make_var_dim(const type &element_tp);
-  type make_strided_dim(const type& element_tp);
+  type make_fixed_dim(size_t dim_size, const type &element_tp);
+
+  template <class T>
+  struct fixed_dim_from_array {
+    static inline ndt::type make() { return ndt::make_type<T>(); }
+  };
+  template <class T, int N>
+  struct fixed_dim_from_array<T[N]> {
+    static inline ndt::type make()
+    {
+      return ndt::make_fixed_dim(N, ndt::fixed_dim_from_array<T>::make());
+    }
+  };
 } // namespace ndt;
 
 namespace nd {
@@ -967,7 +978,7 @@ inline array make_utf32_array(const uint32_t (&static_string)[N]) {
  * \param cstr_array  An array of NULL-terminated UTF8 strings.
  * \param array_size  The number of elements in `cstr_array`.
  *
- * \returns  An array of type "strided * string".
+ * \returns  An array of type "N * string".
  */
 array make_strided_string_array(const char **cstr_array, size_t array_size);
 array make_strided_string_array(const std::string **str_array, size_t array_size);
@@ -1157,7 +1168,7 @@ inline array empty(intptr_t dim0, intptr_t dim1, intptr_t dim2, const char (&dsh
  *
  * // a has type "float64"
  * array a = nd::empty<double>();
- * // b has type "strided * strided * float64", has shape (3, 4), and is in C order
+ * // b has type "3 * 4 * float64", and is in C order
  * array b = nd::empty<double[3][4]>();
  */
 template<typename T>

@@ -4,7 +4,6 @@
 //
 
 #include <dynd/types/var_dim_type.hpp>
-#include <dynd/types/strided_dim_type.hpp>
 #include <dynd/types/cfixed_dim_type.hpp>
 #include <dynd/types/type_alignment.hpp>
 #include <dynd/types/pointer_type.hpp>
@@ -605,11 +604,10 @@ size_t var_dim_type::make_assignment_kernel(
   } else if (dst_tp.get_ndim() < src_tp.get_ndim()) {
     throw broadcast_error(dst_tp, dst_arrmeta, src_tp, src_arrmeta);
   } else {
-    if (dst_tp.get_type_id() == strided_dim_type_id ||
-        dst_tp.get_type_id() == fixed_dim_type_id ||
+    if (dst_tp.get_type_id() == fixed_dim_type_id ||
         dst_tp.get_type_id() == cfixed_dim_type_id) {
-      // var_dim to strided_dim
-      return make_var_to_strided_dim_assignment_kernel(
+      // var_dim to fixed_dim
+      return make_var_to_fixed_dim_assignment_kernel(
           ckb, ckb_offset, dst_tp, dst_arrmeta, src_tp, src_arrmeta, kernreq,
           ectx);
     } else {
@@ -634,9 +632,9 @@ void var_dim_type::foreach_leading(const char *arrmeta, char *data,
     }
 }
 
-static ndt::type get_element_type(const ndt::type& dt) {
-    const strided_dim_type *d = dt.tcast<strided_dim_type>();
-    return d->get_element_type();
+static ndt::type get_element_type(const ndt::type &dt)
+{
+  return dt.tcast<base_dim_type>()->get_element_type();
 }
 
 void var_dim_type::get_dynamic_type_properties(

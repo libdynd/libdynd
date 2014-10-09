@@ -4,7 +4,6 @@
 //
 
 #include <dynd/types/cfixed_dim_type.hpp>
-#include <dynd/types/strided_dim_type.hpp>
 #include <dynd/types/type_alignment.hpp>
 #include <dynd/shape_tools.hpp>
 #include <dynd/shortvector.hpp>
@@ -142,7 +141,7 @@ ndt::type cfixed_dim_type::get_canonical_type() const
 {
     ndt::type canonical_element_dt = m_element_tp.get_canonical_type();
     // The transformed type may no longer have a fixed size, so check whether
-    // we have to switch to the more flexible strided_dim_type
+    // we have to switch to the more flexible fixed_dim_type
     if (canonical_element_dt.get_data_size() != 0) {
         return ndt::type(new cfixed_dim_type(m_dim_size, canonical_element_dt), false);
     } else {
@@ -220,7 +219,7 @@ intptr_t cfixed_dim_type::apply_linear_index(
         } else {
             fixed_dim_type_arrmeta *out_md = reinterpret_cast<fixed_dim_type_arrmeta *>(out_arrmeta);
             // Produce the new offset data, stride, and size for the resulting array,
-            // which is now a strided_dim instead of a cfixed_dim
+            // which is now a fixed_dim instead of a cfixed_dim
             intptr_t offset = m_stride * start_index;
             out_md->stride = m_stride * index_stride;
             out_md->dim_size = dimension_size;

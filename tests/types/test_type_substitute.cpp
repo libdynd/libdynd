@@ -35,19 +35,19 @@ TEST(SubstituteTypeVars, SimpleSubstitution) {
   map<nd::string, ndt::type> typevars;
   typevars["Tint"] = ndt::type("int32");
   typevars["Tsym"] = ndt::type("S");
-  typevars["Mstrided"] = ndt::type("strided * void");
+  typevars["Mfixed_sym"] = ndt::type("fixed * void");
   typevars["Mfixed"] = ndt::type("8 * void");
   typevars["Mvar"] = ndt::type("var * void");
   typevars["Msym"] = ndt::type("N * void");
   typevars["Aempty"] = ndt::make_dim_fragment(0, ndt::make_type<void>());
-  typevars["Astrided"] =
-      ndt::make_dim_fragment(1, ndt::type("strided * void"));
+  typevars["Afixed_sym"] =
+      ndt::make_dim_fragment(1, ndt::type("fixed * void"));
   typevars["Afixed"] =
       ndt::make_dim_fragment(1, ndt::type("5 * void"));
   typevars["Avar"] =
       ndt::make_dim_fragment(1, ndt::type("var * void"));
   typevars["Amulti"] =
-      ndt::make_dim_fragment(3, ndt::type("strided * var * 3 * void"));
+      ndt::make_dim_fragment(3, ndt::type("fixed * var * 3 * void"));
 
   EXPECT_EQ(ndt::type("int32"),
             ndt::substitute(ndt::type("Tint"), typevars, false));
@@ -61,8 +61,8 @@ TEST(SubstituteTypeVars, SimpleSubstitution) {
             ndt::substitute(ndt::type("Tsym"), typevars, false));
   EXPECT_THROW(ndt::substitute(ndt::type("Tsym"), typevars, true),
                invalid_argument);
-  EXPECT_EQ(ndt::type("strided * int32"),
-            ndt::substitute(ndt::type("Mstrided * Tint"), typevars, false));
+  EXPECT_EQ(ndt::type("fixed * int32"),
+            ndt::substitute(ndt::type("Mfixed_sym * Tint"), typevars, false));
   EXPECT_EQ(ndt::type("8 * int32"),
             ndt::substitute(ndt::type("Mfixed * Tint"), typevars, false));
   EXPECT_EQ(ndt::type("8 * int32"),
@@ -78,11 +78,11 @@ TEST(SubstituteTypeVars, SimpleSubstitution) {
       ndt::type("var * int32"),
       ndt::substitute(ndt::type("Mvar * Aempty... * Tint"), typevars, true));
   EXPECT_EQ(
-      ndt::type("strided * var * int32"),
-      ndt::substitute(ndt::type("Astrided... * Mvar * Tint"), typevars, false));
+      ndt::type("fixed * var * int32"),
+      ndt::substitute(ndt::type("Afixed_sym... * Mvar * Tint"), typevars, false));
   EXPECT_EQ(
-      ndt::type("var * strided * int32"),
-      ndt::substitute(ndt::type("Mvar * Astrided... * Tint"), typevars, false));
+      ndt::type("var * fixed * int32"),
+      ndt::substitute(ndt::type("Mvar * Afixed_sym... * Tint"), typevars, false));
   EXPECT_EQ(
       ndt::type("5 * var * int32"),
       ndt::substitute(ndt::type("Afixed... * Mvar * Tint"), typevars, false));
@@ -96,10 +96,10 @@ TEST(SubstituteTypeVars, SimpleSubstitution) {
       ndt::type("var * var * int32"),
       ndt::substitute(ndt::type("Mvar * Avar... * Tint"), typevars, true));
   EXPECT_EQ(
-      ndt::type("strided * var * 3 * var * int32"),
+      ndt::type("fixed * var * 3 * var * int32"),
       ndt::substitute(ndt::type("Amulti... * Mvar * Tint"), typevars, false));
   EXPECT_EQ(
-      ndt::type("var * strided * var * 3 * int32"),
+      ndt::type("var * fixed * var * 3 * int32"),
       ndt::substitute(ndt::type("Mvar * Amulti... * Tint"), typevars, false));
 }
 
@@ -108,7 +108,7 @@ TEST(SubstituteTypeVars, Tuple) {
   typevars["T"] = ndt::type("int32");
   typevars["M"] = ndt::type("3 * void");
   typevars["A"] =
-      ndt::make_dim_fragment(3, ndt::type("var * strided * 4 * void"));
+      ndt::make_dim_fragment(3, ndt::type("var * fixed * 4 * void"));
 
   EXPECT_EQ(ndt::type("(int, real)"),
             ndt::substitute(ndt::type("(int, real)"), typevars, false));
@@ -120,10 +120,10 @@ TEST(SubstituteTypeVars, Tuple) {
             ndt::substitute(ndt::type("(T, M * real)"), typevars, true));
 
   EXPECT_EQ(
-      ndt::type("(var * strided * 4 * int32, 3 * real)"),
+      ndt::type("(var * fixed * 4 * int32, 3 * real)"),
       ndt::substitute(ndt::type("(A... * T, M * real)"), typevars, false));
   EXPECT_EQ(
-      ndt::type("(var * strided * 4 * int32, 3 * real)"),
+      ndt::type("(var * fixed * 4 * int32, 3 * real)"),
       ndt::substitute(ndt::type("(A... * T, M * real)"), typevars, true));
 }
 
@@ -132,7 +132,7 @@ TEST(SubstituteTypeVars, Struct) {
   typevars["T"] = ndt::type("int32");
   typevars["M"] = ndt::type("3 * void");
   typevars["A"] =
-      ndt::make_dim_fragment(3, ndt::type("var * strided * 4 * void"));
+      ndt::make_dim_fragment(3, ndt::type("var * fixed * 4 * void"));
 
   EXPECT_EQ(ndt::type("{x: int, y: real}"),
     ndt::substitute(ndt::type("{x: int, y: real}"), typevars, false));
@@ -143,10 +143,10 @@ TEST(SubstituteTypeVars, Struct) {
   EXPECT_EQ(ndt::type("{x: int32, y: 3 * real}"),
             ndt::substitute(ndt::type("{x: T, y: M * real}"), typevars, true));
 
-  EXPECT_EQ(ndt::type("{x: var * strided * 4 * int32, y: 3 * real}"),
+  EXPECT_EQ(ndt::type("{x: var * fixed * 4 * int32, y: 3 * real}"),
             ndt::substitute(ndt::type("{x: A... * T, y: M * real}"), typevars,
                             false));
-  EXPECT_EQ(ndt::type("{x: var * strided * 4 * int32, y: 3 * real}"),
+  EXPECT_EQ(ndt::type("{x: var * fixed * 4 * int32, y: 3 * real}"),
             ndt::substitute(ndt::type("{x: A... * T, y: M * real}"), typevars,
                             true));
 }
@@ -169,19 +169,19 @@ TEST(SubstituteTypeVars, FuncProto) {
 TEST(SubstituteShape, Simple) {
   intptr_t shape[5] = {0, 1, 2, 3, 4};
   EXPECT_EQ(ndt::type("0 * int32"),
-            ndt::substitute_shape(ndt::type("strided * int32"), 1, shape));
+            ndt::substitute_shape(ndt::type("fixed * int32"), 1, shape));
   EXPECT_EQ(ndt::type("1 * 2 * T"),
-            ndt::substitute_shape(ndt::type("strided**2 * T"), 2, shape + 1));
+            ndt::substitute_shape(ndt::type("fixed**2 * T"), 2, shape + 1));
   EXPECT_EQ(ndt::type("1 * var * 3 * T"),
-            ndt::substitute_shape(ndt::type("strided * var * strided * T"), 3, shape + 1));
+            ndt::substitute_shape(ndt::type("fixed * var * fixed * T"), 3, shape + 1));
   EXPECT_EQ(ndt::type("1 * var * 3 * T"),
-            ndt::substitute_shape(ndt::type("strided * var * 3 * T"), 3, shape + 1));
+            ndt::substitute_shape(ndt::type("fixed * var * 3 * T"), 3, shape + 1));
 }
 
 TEST(SubstituteShape, Errors) {
   intptr_t shape[5] = {0, 1, 2, 3, 4};
   // Too many dimensions
-  EXPECT_THROW(ndt::substitute_shape(ndt::type("strided * int32"), 2, shape),
+  EXPECT_THROW(ndt::substitute_shape(ndt::type("fixed * int32"), 2, shape),
                invalid_argument);
   // Mismatched fixed dimension
   EXPECT_THROW(ndt::substitute_shape(ndt::type("10 * int32"), 1, shape + 1),

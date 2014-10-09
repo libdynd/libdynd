@@ -24,10 +24,8 @@ extern base_type *datetime_tp;
 extern base_type *json_tp;
 extern base_type *ndarrayarg_tp;
 extern base_type *string_tp;
-extern base_type *strided_of_string_tp;
 extern base_type *time_tp;
 extern base_type *type_tp;
-extern base_type *strided_of_type_tp;
 } // namespace ndt
 
 } // namespace dynd

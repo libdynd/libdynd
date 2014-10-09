@@ -62,7 +62,7 @@ TEST(View, Errors) {
     nd::array a = nd::empty("5 * 3 * int32");
 
     // Shape mismatches
-    EXPECT_THROW(nd::view(a, ndt::type("strided * 2 * int32")), type_error);
+    EXPECT_THROW(nd::view(a, ndt::type("fixed * 2 * int32")), type_error);
     EXPECT_THROW(nd::view(a, ndt::type("5 * 2 * int32")), type_error);
     EXPECT_THROW(nd::view(a, ndt::type("6 * 3 * int32")), type_error);
     // DType mismatches
@@ -170,7 +170,7 @@ TEST(View, FromBytes) {
     float y[3] = {1.f, 2.5f, -1.25f};
     a = nd::make_bytes_array(reinterpret_cast<const char *>(&y), sizeof(y), 4);
     ASSERT_EQ(ndt::make_bytes(4), a.get_type());
-    b = nd::view(a, ndt::type("strided * float32"));
+    b = nd::view(a, ndt::type("fixed * float32"));
     EXPECT_EQ(1.f, b(0).as<float>());
     EXPECT_EQ(2.5f, b(1).as<float>());
     EXPECT_EQ(-1.25f, b(2).as<float>());

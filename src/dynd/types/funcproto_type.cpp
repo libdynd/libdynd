@@ -4,7 +4,7 @@
 //
 
 #include <dynd/types/funcproto_type.hpp>
-#include <dynd/types/strided_dim_type.hpp>
+#include <dynd/types/fixed_dim_type.hpp>
 #include <dynd/func/make_callable.hpp>
 #include <dynd/ensure_immutable_contig.hpp>
 #include <dynd/types/typevar_type.hpp>
@@ -24,7 +24,7 @@ funcproto_type::funcproto_type(const nd::array &param_types,
               "array with type " << m_param_types.get_type();
         throw invalid_argument(ss.str());
     }
-    m_param_count = reinterpret_cast<const strided_dim_type_arrmeta *>(
+    m_param_count = reinterpret_cast<const fixed_dim_type_arrmeta *>(
                         m_param_types.get_arrmeta())->dim_size;
     m_members.flags |= return_type.get_flags() & type_flags_value_inherited;
     for (intptr_t i = 0; i != m_param_count; ++i) {
