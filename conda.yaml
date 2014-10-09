@@ -7,7 +7,7 @@ build:
 
 requirements:
   build:
-    - cmake
+    - cmake    [unix]
 
 test:
   commands:
