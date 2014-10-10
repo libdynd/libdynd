@@ -1518,11 +1518,11 @@ nd::array nd::array::new_axis(intptr_t i) const
     res.get_ndo()->m_flags = get_ndo()->m_flags;
     // Copy the arrmeta, including setting the appropriate shape and strides of the new arrmeta
     DYND_MEMCPY(res.get_arrmeta(), get_arrmeta(), arrmeta_diff);
-    strided_dim_type_arrmeta *smd = reinterpret_cast<strided_dim_type_arrmeta *>(res.get_arrmeta() + arrmeta_diff);
+    size_stride_t *smd = reinterpret_cast<size_stride_t *>(res.get_arrmeta() + arrmeta_diff);
     smd->dim_size = 1;
     smd->stride = 0;
-    DYND_MEMCPY(smd + 1, get_arrmeta() + arrmeta_diff, el_tp.get_strided_ndim() * sizeof(strided_dim_type_arrmeta));
-    DYND_MEMCPY(res.get_arrmeta() + arrmeta_diff + sizeof(strided_dim_type_arrmeta), get_arrmeta() + arrmeta_diff, el_arrmeta_size);
+    DYND_MEMCPY(smd + 1, get_arrmeta() + arrmeta_diff, el_tp.get_strided_ndim() * sizeof(size_stride_t));
+    DYND_MEMCPY(res.get_arrmeta() + arrmeta_diff + sizeof(size_stride_t), get_arrmeta() + arrmeta_diff, el_arrmeta_size);
 
     return res;
 }

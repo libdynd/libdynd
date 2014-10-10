@@ -227,13 +227,13 @@ ndt::type ndt::type::with_replaced_dtype(const ndt::type &replacement_tp,
 
 ndt::type ndt::type::with_new_axis(intptr_t i) const
 {
-    return with_replaced_dtype(ndt::make_strided_dim(get_type_at_dimension(NULL, i)), get_ndim() - i);
+    return with_replaced_dtype(ndt::make_fixed_dim(1, get_type_at_dimension(NULL, i)), get_ndim() - i);
 }
 
 ndt::type ndt::type::with_new_axis(intptr_t i, type &out_el_tp) const
 {
     out_el_tp = get_type_at_dimension(NULL, i);
-    return with_replaced_dtype(ndt::make_strided_dim(out_el_tp), get_ndim() - i);
+    return with_replaced_dtype(ndt::make_fixed_dim(1, out_el_tp), get_ndim() - i);
 }
 
 intptr_t ndt::type::get_dim_size(const char *arrmeta, const char *data) const
