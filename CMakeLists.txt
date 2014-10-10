@@ -332,13 +332,6 @@ set(libdynd_SRC
     include/dynd/func/copy_arrfunc.hpp
     include/dynd/func/chain_arrfunc.hpp
     include/dynd/func/elwise.hpp
-    include/dynd/func/elwise_common.hpp
-    include/dynd/func/elwise_callrefres.hpp
-    include/dynd/func/elwise_callretres.hpp
-    include/dynd/func/elwise_funcrefres.hpp
-    include/dynd/func/elwise_funcretres.hpp
-    include/dynd/func/elwise_methrefres.hpp
-    include/dynd/func/elwise_methretres.hpp
     include/dynd/func/elwise_gfunc.hpp
     include/dynd/func/elwise_reduce_gfunc.hpp
     include/dynd/func/functor_arrfunc.hpp

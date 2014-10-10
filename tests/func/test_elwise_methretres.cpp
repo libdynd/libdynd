@@ -12,7 +12,8 @@
 #include "dynd_assertions.hpp"
 
 #include <dynd/array.hpp>
-#include <dynd/func/elwise_methretres.hpp>
+#include <dynd/func/elwise.hpp>
+#include <dynd/types/cfixed_dim_type.hpp>
 
 using namespace std;
 using namespace dynd;
@@ -33,7 +34,7 @@ T func1(const T (&x)[3]) {
     return x[0] + x[1] + x[2];
 }
 template <typename T>
-T func2(const T (&x)[3], const float (&y)[3]) {
+T func2(const T (&x)[3], const T (&y)[3]) {
     return static_cast<T>(x[0] * y[0] + x[1] * y[1] + x[2] * y[2]);
 }
 template <typename T>
@@ -50,7 +51,7 @@ private:
     R (*m_func)(A0);
 public:
     FuncWrapper(R (*func)(A0)) : m_func(func) {}
-    R meth(A0 a0) const {
+    R meth(A0 a0) {
         return (*m_func)(a0);
     }
 };
@@ -60,7 +61,7 @@ private:
     R (*m_func)(A0, A1);
 public:
     FuncWrapper(R (*func)(A0, A1)) : m_func(func) {}
-    R meth(A0 a0, A1 a1) const {
+    R meth(A0 a0, A1 a1) {
         return (*m_func)(a0, a1);
     }
 };
@@ -68,13 +69,13 @@ public:
 TYPED_TEST_P(ElwiseMethRetRes, MethRetRes) {
     typedef FuncWrapper<int (*)(TypeParam, const TypeParam &)> FuncWrapper0;
     typedef FuncWrapper<TypeParam (*)(const TypeParam (&)[3])> FuncWrapper1;
-    typedef FuncWrapper<TypeParam (*)(const TypeParam (&)[3], const float (&)[3])> FuncWrapper2;
+    typedef FuncWrapper<TypeParam (*)(const TypeParam (&)[3], const TypeParam (&)[3])> FuncWrapper2;
     typedef FuncWrapper<TypeParam (*)(const TypeParam (&)[2][3])> FuncWrapper3;
 
     nd::array res, a, b;
 
-    a = 10;
-    b = 20;
+    a = static_cast<TypeParam>(10);
+    b = static_cast<TypeParam>(20);
 
     res = nd::elwise(FuncWrapper0(&func0), &FuncWrapper0::meth, a, b);
     EXPECT_EQ(-20, res.as<int>());
