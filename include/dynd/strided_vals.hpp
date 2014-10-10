@@ -202,54 +202,90 @@ class strided_vals : public detail::strided_vals<T, N> {
 template <typename T>
 class strided_vals<T, 1> : public detail::strided_vals<T, 1> {
 public:
+    const T &operator ()(const intptr_t *index) const {
+        return detail::strided_vals<T, 1>::operator ()(index);
+    }
+
     const T &operator ()(intptr_t i0) const {
-        return (*this)(&i0);
+        return operator ()(&i0);
+    }
+
+    bool is_masked(const intptr_t *index) const {
+        return detail::strided_vals<T, 1>::is_masked(index);
     }
 
     bool is_masked(intptr_t i0) const {
-        return this->is_masked(&i0);
+        return is_masked(&i0);
+    }
+
+    bool is_valid(const intptr_t *index) const {
+        return detail::strided_vals<T, 1>::is_valid(index);
     }
 
     bool is_valid(intptr_t i0) const {
-        return this->is_valid(&i0);
+        return is_valid(&i0);
     }
 };
 
 template <typename T>
 class strided_vals<T, 2> : public detail::strided_vals<T, 2> {
 public:
+    const T &operator ()(const intptr_t *index) const {
+        return detail::strided_vals<T, 2>::operator ()(index);
+    }
+
     const T &operator ()(intptr_t i0, intptr_t i1) const {
         const intptr_t index[2] = {i0, i1};
-        return (*this)(index);
+        return operator ()(index);
+    }
+
+    bool is_masked(const intptr_t *index) const {
+        return detail::strided_vals<T, 2>::is_masked(index);
     }
 
     bool is_masked(intptr_t i0, intptr_t i1) const {
         const intptr_t index[2] = {i0, i1};
-        return this->is_masked(index);
+        return is_masked(index);
+    }
+
+    bool is_valid(const intptr_t *index) const {
+        return detail::strided_vals<T, 2>::is_valid(index);
     }
 
     bool is_valid(intptr_t i0, intptr_t i1) const {
         const intptr_t index[2] = {i0, i1};
-        return this->is_valid(index);
+        return is_valid(index);
     }
 };
 
 template <typename T>
 class strided_vals<T, 3> : public detail::strided_vals<T, 3> {
 public:
+    const T &operator ()(const intptr_t *index) const {
+        return detail::strided_vals<T, 3>::operator ()(index);
+    }
+
     const T &operator ()(intptr_t i0, intptr_t i1, intptr_t i2) const {
         const intptr_t index[3] = {i0, i1, i2};
-        return (*this)(index);
+        return operator ()(index);
+    }
+
+    bool is_masked(const intptr_t *index) const {
+        return detail::strided_vals<T, 3>::is_masked(index);
     }
 
     bool is_masked(intptr_t i0, intptr_t i1, intptr_t i2) const {
         const intptr_t index[3] = {i0, i1, i2};
-        return this->is_masked(index);
+        return is_masked(index);
+    }
+
+    bool is_valid(const intptr_t *index) const {
+        return detail::strided_vals<T, 3>::is_valid(index);
     }
 
     bool is_valid(intptr_t i0, intptr_t i1, intptr_t i2) const {
         const intptr_t index[3] = {i0, i1, i2};
-        return this->is_valid(index);
+        return is_valid(index);
     }
 };
 
