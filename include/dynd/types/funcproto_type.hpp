@@ -119,7 +119,7 @@ namespace detail {
 #define PARTIAL_DECAY(TYPENAME) std::remove_cv<typename std::remove_reference<TYPENAME>::type>::type
 #define MAKE_TYPE(TYPENAME) make_type<TYPENAME>()
 
-template<typename T, bool aux_buffered, bool thread_aux_buffered>
+template<typename T, bool buffered, bool thread_buffered>
 struct funcproto_type_from;
 
 template<typename R>
@@ -209,7 +209,7 @@ inline ndt::type make_funcproto() {
     typedef typename funcproto_from<func_type>::type funcproto_type;
 
     return detail::funcproto_type_from<funcproto_type,
-        is_aux_buffered<funcproto_type>::value, is_thread_aux_buffered<funcproto_type>::value>::make();
+        aux::is_buffered<funcproto_type>::value, aux::is_thread_buffered<funcproto_type>::value>::make();
 }
 
 ndt::type make_generic_funcproto(intptr_t nargs);

@@ -15,30 +15,19 @@
 using namespace std;
 using namespace dynd;
 
-struct func_aux_buffer : aux_buffer {
+struct func_buffer : aux::buffer {
     int val;
 
-    static void unpack(func_aux_buffer &dst, const nd::array &src) {
-        dst.val = src.p("val").as<int>();
+    func_buffer(const nd::array &kwds) : val(kwds.p("val").as<int>()) {
     }
 };
 
-struct func_thread_aux_buffer : thread_aux_buffer {
-    int val;
-
-    func_thread_aux_buffer() : val(9) {
-    }
-
-    func_thread_aux_buffer(func_aux_buffer *aux) : val(aux->val + 3) {
-    }
-};
-
-int ret_func_with_aux(int src, func_aux_buffer *aux) {
-    return src + aux->val;
+int ret_func_with_aux(int src, func_buffer *buffer) {
+    return src + buffer->val;
 }
 
-void ref_func_with_aux(int &dst, int src, func_aux_buffer *aux) {
-    dst = src + aux->val;
+void ref_func_with_aux(int &dst, int src, func_buffer *buffer) {
+    dst = src + buffer->val;
 }
 
 /*
@@ -53,7 +42,7 @@ void func_with_aux_and_thread_aux(int &dst, int src, func_aux_buffer *aux, func_
 }
 */
 
-TEST(Buffer, Aux) {
+TEST(Aux, Buffer) {
     nd::arrfunc af = nd::make_functor_arrfunc(ret_func_with_aux);
     EXPECT_EQ(12, af(5, aux::kwds("val", 7)).as<int>());
 
