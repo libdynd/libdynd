@@ -52,7 +52,7 @@ public:
         return m_storage_tp;
     }
 
-    virtual size_t get_default_data_size(intptr_t ndim, const intptr_t *shape) const;
+    virtual size_t get_default_data_size() const;
 
     virtual void print_data(std::ostream& o, const char *arrmeta, const char *data) const;
 
@@ -65,13 +65,15 @@ public:
                         m_storage_tp.is_type_subarray(subarray_tp);
     }
 
-    virtual void transform_child_types(type_transform_fn_t transform_fn, void *extra,
-                    ndt::type& out_transformed_tp, bool& out_was_transformed) const;
+    virtual void transform_child_types(type_transform_fn_t transform_fn,
+                                       intptr_t arrmeta_offset, void *extra,
+                                       ndt::type &out_transformed_tp,
+                                       bool &out_was_transformed) const;
     virtual ndt::type get_canonical_type() const;
 
     virtual ndt::type with_replaced_storage_type(const ndt::type& storage_tp) const = 0;
 
-    virtual void arrmeta_default_construct(char *arrmeta, intptr_t ndim, const intptr_t* shape) const;
+    virtual void arrmeta_default_construct(char *arrmeta, bool blockref_alloc) const;
     virtual void arrmeta_copy_construct(char *dst_arrmeta, const char *src_arrmeta, memory_block_data *embedded_reference) const;
     virtual void arrmeta_destruct(char *arrmeta) const;
 

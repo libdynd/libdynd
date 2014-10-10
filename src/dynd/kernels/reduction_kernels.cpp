@@ -6,7 +6,7 @@
 #include <dynd/kernels/reduction_kernels.hpp>
 #include <dynd/array.hpp>
 #include <dynd/types/arrfunc_type.hpp>
-#include <dynd/types/strided_dim_type.hpp>
+#include <dynd/types/fixed_sym_dim_type.hpp>
 #include <dynd/func/lift_reduction_arrfunc.hpp>
 
 using namespace std;
@@ -93,7 +93,7 @@ static intptr_t instantiate_builtin_sum_reduction_arrfunc(
     intptr_t ckb_offset, const ndt::type &dst_tp,
     const char *DYND_UNUSED(dst_arrmeta), const ndt::type *src_tp,
     const char *const *DYND_UNUSED(src_arrmeta), kernel_request_t kernreq,
-    const eval::eval_context *DYND_UNUSED(ectx))
+    const nd::array &DYND_UNUSED(aux), const eval::eval_context *DYND_UNUSED(ectx))
 {
     if (dst_tp != src_tp[0]) {
         stringstream ss;
@@ -128,7 +128,7 @@ nd::arrfunc kernels::make_builtin_sum1d_arrfunc(type_id_t tid)
     bool reduction_dimflags[1] = {true};
     lift_reduction_arrfunc(
         reinterpret_cast<arrfunc_type_data *>(sum_1d.get_readwrite_originptr()),
-        sum_ew, ndt::make_strided_dim(ndt::type(tid)), nd::array(), false, 1,
+        sum_ew, ndt::make_fixed_sym_dim(ndt::type(tid)), nd::array(), false, 1,
         reduction_dimflags, true, true, false, 0);
     sum_1d.flag_as_immutable();
     return sum_1d;
@@ -172,7 +172,7 @@ namespace {
                     intptr_t ckb_offset, const ndt::type &dst_tp,
                     const char *DYND_UNUSED(dst_arrmeta), const ndt::type *src_tp,
                     const char *const *src_arrmeta, kernel_request_t kernreq,
-                    const eval::eval_context *DYND_UNUSED(ectx))
+                    const nd::array &DYND_UNUSED(aux), const eval::eval_context *DYND_UNUSED(ectx))
         {
             typedef double_mean1d_ck self_type;
             mean1d_arrfunc_data *data = *af_self->get_data_as<mean1d_arrfunc_data *>();
@@ -221,7 +221,7 @@ nd::arrfunc kernels::make_builtin_mean1d_arrfunc(type_id_t tid, intptr_t minp)
     arrfunc_type_data *out_af =
         reinterpret_cast<arrfunc_type_data *>(mean1d.get_readwrite_originptr());
     out_af->func_proto =
-        ndt::make_funcproto(ndt::make_strided_dim(ndt::make_type<double>()),
+        ndt::make_funcproto(ndt::make_fixed_sym_dim(ndt::make_type<double>()),
                             ndt::make_type<double>());
     mean1d_arrfunc_data *data = new mean1d_arrfunc_data;
     data->minp = minp;

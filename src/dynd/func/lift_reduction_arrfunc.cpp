@@ -5,7 +5,7 @@
 
 #include <dynd/func/lift_reduction_arrfunc.hpp>
 #include <dynd/kernels/make_lifted_reduction_ckernel.hpp>
-#include <dynd/types/strided_dim_type.hpp>
+#include <dynd/types/fixed_dim_type.hpp>
 #include <dynd/types/cfixed_dim_type.hpp>
 #include <dynd/types/var_dim_type.hpp>
 
@@ -39,7 +39,7 @@ static intptr_t instantiate_lifted_reduction_arrfunc_data(
     const arrfunc_type_data *af_self, dynd::ckernel_builder *ckb, intptr_t ckb_offset,
     const ndt::type &dst_tp, const char *dst_arrmeta, const ndt::type *src_tp,
     const char *const *src_arrmeta, kernel_request_t kernreq,
-    const eval::eval_context *ectx)
+    const nd::array &DYND_UNUSED(aux), const eval::eval_context *ectx)
 
 {
   lifted_reduction_arrfunc_data *data =
@@ -105,24 +105,33 @@ void dynd::lift_reduction_arrfunc(arrfunc_type_data *out_ar,
     for (intptr_t i = reduction_ndim - 1; i >= 0; --i) {
         if (reduction_dimflags[i]) {
             if (keepdims) {
-                lifted_dst_type = ndt::make_strided_dim(lifted_dst_type);
+              lifted_dst_type = ndt::make_fixed_dim(1, lifted_dst_type);
             }
         } else {
             ndt::type subtype = lifted_arr_type.get_type_at_dimension(NULL, i);
             switch (subtype.get_type_id()) {
-                case strided_dim_type_id:
-                case cfixed_dim_type_id:
-                    lifted_dst_type = ndt::make_strided_dim(lifted_dst_type);
-                    break;
-                case var_dim_type_id:
-                    lifted_dst_type = ndt::make_var_dim(lifted_dst_type);
-                    break;
-                default: {
-                    stringstream ss;
-                    ss << "lift_reduction_arrfunc: don't know how to process ";
-                    ss << "dimension of type " << subtype;
-                    throw type_error(ss.str());
-                }
+            case fixed_sym_dim_type_id:
+              lifted_dst_type = ndt::make_fixed_sym_dim(lifted_dst_type);
+              break;
+            case fixed_dim_type_id:
+              lifted_dst_type = ndt::make_fixed_dim(
+                  subtype.tcast<fixed_dim_type>()->get_fixed_dim_size(),
+                  lifted_dst_type);
+              break;
+            case cfixed_dim_type_id:
+              lifted_dst_type = ndt::make_fixed_dim(
+                  subtype.tcast<cfixed_dim_type>()->get_fixed_dim_size(),
+                  lifted_dst_type);
+              break;
+            case var_dim_type_id:
+              lifted_dst_type = ndt::make_var_dim(lifted_dst_type);
+              break;
+            default: {
+              stringstream ss;
+              ss << "lift_reduction_arrfunc: don't know how to process ";
+              ss << "dimension of type " << subtype;
+              throw type_error(ss.str());
+            }
             }
         }
     }

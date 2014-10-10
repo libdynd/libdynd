@@ -12,7 +12,8 @@
 #include "dynd_assertions.hpp"
 
 #include <dynd/array.hpp>
-#include <dynd/func/elwise_funcrefres.hpp>
+#include <dynd/func/elwise.hpp>
+#include <dynd/types/cfixed_dim_type.hpp>
 
 using namespace std;
 using namespace dynd;
@@ -32,7 +33,7 @@ T func1(const T (&x)[3]) {
     return x[0] + x[1] + x[2];
 }
 template <typename T>
-T func2(const T (&x)[3], const float (&y)[3]) {
+T func2(const T (&x)[3], const T (&y)[3]) {
     return static_cast<T>(x[0] * y[0] + x[1] * y[1] + x[2] * y[2]);
 }
 template <typename T>
@@ -49,7 +50,7 @@ void func1(T &res, const T (&x)[3]) {
     res = func1(x);
 }
 template <typename T>
-void func2(T &res, const T (&x)[3], const float (&y)[3]) {
+void func2(T &res, const T (&x)[3], const T (&y)[3]) {
     res = func2(x, y);
 }
 template <typename T>
@@ -62,7 +63,7 @@ void func4(T (&res)[2], T x, T y) {
     res[1] = x;
 }
 template <typename T>
-void func5(T (&res)[3], const T(&x)[3][3], const T(&y)[3]) {
+void func5(T (&res)[3], const T (&x)[3][3], const T (&y)[3]) {
     res[0] = x[0][0] * y[0] + x[0][1] * y[1] + x[0][2] * y[2];
     res[1] = x[1][0] * y[0] + x[1][1] * y[1] + x[1][2] * y[2];
     res[2] = x[2][0] * y[0] + x[2][1] * y[1] + x[2][2] * y[2];
@@ -75,7 +76,7 @@ void func6(double (&res)[2][2], T x) {
     res[1][1] = cos((double) x);
 }
 template <typename T>
-void func7(T (&res)[3][3], const T(&x)[3][3], const T(&y)[3][3]) {
+void func7(T (&res)[3][3], const T (&x)[3][3], const T (&y)[3][3]) {
     res[0][0] = x[0][0] * y[0][0] + x[0][1] * y[1][0] + x[0][2] * y[2][0];
     res[0][1] = x[0][0] * y[0][1] + x[0][1] * y[1][1] + x[0][2] * y[2][1];
     res[0][2] = x[0][0] * y[0][2] + x[0][1] * y[1][2] + x[0][2] * y[2][2];
@@ -90,8 +91,8 @@ void func7(T (&res)[3][3], const T(&x)[3][3], const T(&y)[3][3]) {
 TYPED_TEST_P(ElwiseFuncRefRes, FuncRefRes) {
     nd::array res, a, b;
 
-    a = 10;
-    b = 20;
+    a = static_cast<TypeParam>(10);
+    b = static_cast<TypeParam>(20);
 
     res = nd::elwise(static_cast<void (*)(int &, TypeParam, const TypeParam &)>(&func0), a, b);
     EXPECT_EQ(-20, res.as<int>());
@@ -101,7 +102,7 @@ TYPED_TEST_P(ElwiseFuncRefRes, FuncRefRes) {
     EXPECT_EQ(20, res(0).as<TypeParam>());
     EXPECT_EQ(10, res(1).as<TypeParam>());
 
-    a = 1;
+    a = static_cast<TypeParam>(1);
 
     res = nd::elwise(func6<TypeParam>, a);
     EXPECT_EQ(ndt::type("cfixed[2] * cfixed[2] * float64"), res.get_type());
@@ -116,11 +117,15 @@ TYPED_TEST_P(ElwiseFuncRefRes, FuncRefRes) {
     a = avals0;
     b = bvals0;
     res = nd::elwise(static_cast<void (*)(int &, TypeParam, const TypeParam &)>(&func0), a, b);
-    EXPECT_EQ(ndt::type("strided * strided * int"), res.get_type());
+    EXPECT_EQ(ndt::type("2 * 3 * int"), res.get_type());
     EXPECT_JSON_EQ_ARR("[[-10,-2,-4], [0,8,6]]", res);
 
     res = nd::elwise(func4<TypeParam>, a, b);
-    EXPECT_EQ(ndt::make_strided_dim(ndt::make_strided_dim(ndt::make_cfixed_dim(2, ndt::make_type<TypeParam>()))), res.get_type());
+    EXPECT_EQ(
+        ndt::make_fixed_dim(
+            2, ndt::make_fixed_dim(
+                   3, ndt::make_cfixed_dim(2, ndt::make_type<TypeParam>()))),
+        res.get_type());
     ASSERT_EQ(2, res.get_shape()[0]);
     ASSERT_EQ(3, res.get_shape()[1]);
     for (int i = 0; i < 2; ++i) {
@@ -148,7 +153,7 @@ TYPED_TEST_P(ElwiseFuncRefRes, FuncRefRes) {
 
     a.vals() = vals1[0];
     b.vals() = vals1[1];
-    res = nd::elwise(static_cast<void (*)(TypeParam &, const TypeParam(&)[3], const float(&)[3])>(&func2), a, b);
+    res = nd::elwise(static_cast<void (*)(TypeParam &, const TypeParam(&)[3], const TypeParam(&)[3])>(&func2), a, b);
     EXPECT_EQ(ndt::make_type<TypeParam>(), res.get_type());
     EXPECT_EQ(14, res.as<TypeParam>());
 
@@ -192,7 +197,7 @@ TYPED_TEST_P(ElwiseFuncRefRes, FuncRefRes) {
     }
 }
 
-typedef ::testing::Types<int, float, long, double> types;
+typedef ::testing::Types<int, float, long, double> test_types;
 
 REGISTER_TYPED_TEST_CASE_P(ElwiseFuncRefRes, FuncRefRes);
-INSTANTIATE_TYPED_TEST_CASE_P(Builtin, ElwiseFuncRefRes, types);
+INSTANTIATE_TYPED_TEST_CASE_P(Builtin, ElwiseFuncRefRes, test_types);

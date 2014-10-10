@@ -11,7 +11,6 @@
 #include <dynd/kernels/assignment_kernels.hpp>
 #include <dynd/func/make_callable.hpp>
 #include <dynd/types/var_dim_type.hpp>
-#include <dynd/types/strided_dim_type.hpp>
 #include <dynd/func/make_callable.hpp>
 #include <dynd/kernels/expr_kernel_generator.hpp>
 
@@ -60,7 +59,8 @@ bool arrfunc_type::operator==(const base_type& rhs) const
 }
 
 void arrfunc_type::arrmeta_default_construct(char *DYND_UNUSED(arrmeta),
-                intptr_t DYND_UNUSED(ndim), const intptr_t* DYND_UNUSED(shape)) const
+                                             bool DYND_UNUSED(blockref_alloc))
+    const
 {
 }
 
@@ -227,7 +227,7 @@ static array_preamble *function___call__(const array_preamble *params, void *DYN
     af->instantiate(af, &ckb, 0, args[0].get_type(),
                          args[0].get_arrmeta(), src_tp,
                          dynd_arrmeta, kernel_request_single,
-                         &eval::default_eval_context);
+                         nd::array(), &eval::default_eval_context);
     // Call the ckernel
     expr_single_t usngo = ckb.get()->get_function<expr_single_t>();
     const char *in_ptrs[max_args];
@@ -257,11 +257,4 @@ void arrfunc_type::get_dynamic_array_functions(
 
     *out_functions = arrfunc_array_functions;
     *out_count = sizeof(arrfunc_array_functions) / sizeof(arrfunc_array_functions[0]);
-}
-
-const ndt::type &ndt::make_arrfunc()
-{
-    static arrfunc_type aft;
-    static const ndt::type static_instance(&aft, true);
-    return static_instance;
 }

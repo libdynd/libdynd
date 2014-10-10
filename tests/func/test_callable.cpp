@@ -13,7 +13,6 @@
 #include <dynd/func/callable.hpp>
 #include <dynd/func/make_callable.hpp>
 #include <dynd/func/call_callable.hpp>
-#include <dynd/types/strided_dim_type.hpp>
 #include <dynd/types/string_type.hpp>
 
 using namespace std;
@@ -359,7 +358,7 @@ TEST(GFuncCallable, ArrayReturn) {
     a(1).val_assign(20);
     a(2).val_assign(1000);
     r = c.call_generic(a);
-    EXPECT_EQ(ndt::make_strided_dim(ndt::make_type<int>()), r.get_type());
+    EXPECT_EQ(ndt::make_fixed_dim(3, ndt::make_type<int>()), r.get_type());
     EXPECT_EQ(-10, r(0).as<int>());
     EXPECT_EQ(20, r(1).as<int>());
     EXPECT_EQ(1000, r(2).as<int>());

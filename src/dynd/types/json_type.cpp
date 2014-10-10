@@ -129,13 +129,13 @@ bool json_type::operator==(const base_type &rhs) const
 }
 
 void json_type::arrmeta_default_construct(char *arrmeta,
-                                          intptr_t DYND_UNUSED(ndim),
-                                          const intptr_t *DYND_UNUSED(shape))
-    const
+                                          bool blockref_alloc) const
 {
-    // Simply allocate a POD memory block
+  // Simply allocate a POD memory block
+  if (blockref_alloc) {
     json_type_arrmeta *md = reinterpret_cast<json_type_arrmeta *>(arrmeta);
     md->blockref = make_pod_memory_block().release();
+  }
 }
 
 void json_type::arrmeta_copy_construct(char *dst_arrmeta,

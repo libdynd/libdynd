@@ -21,7 +21,7 @@ namespace dynd {
  */
 enum {
     dim_fragment_var = -1,
-    dim_fragment_strided = -2
+    dim_fragment_fixed_sym = -2
     // values >= 0 mean fixed[N]
 };
 
@@ -77,8 +77,7 @@ public:
 
     bool operator==(const base_type& rhs) const;
 
-    void arrmeta_default_construct(char *arrmeta, intptr_t ndim,
-                                    const intptr_t *shape) const;
+    void arrmeta_default_construct(char *arrmeta, bool blockref_alloc) const;
     void arrmeta_copy_construct(char *dst_arrmeta, const char *src_arrmeta,
                                  memory_block_data *embedded_reference) const;
     size_t

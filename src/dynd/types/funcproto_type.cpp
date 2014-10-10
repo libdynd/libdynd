@@ -4,9 +4,10 @@
 //
 
 #include <dynd/types/funcproto_type.hpp>
-#include <dynd/types/strided_dim_type.hpp>
+#include <dynd/types/fixed_dim_type.hpp>
 #include <dynd/func/make_callable.hpp>
 #include <dynd/ensure_immutable_contig.hpp>
+#include <dynd/types/typevar_type.hpp>
 
 using namespace std;
 using namespace dynd;
@@ -23,7 +24,7 @@ funcproto_type::funcproto_type(const nd::array &param_types,
               "array with type " << m_param_types.get_type();
         throw invalid_argument(ss.str());
     }
-    m_param_count = reinterpret_cast<const strided_dim_type_arrmeta *>(
+    m_param_count = reinterpret_cast<const fixed_dim_type_arrmeta *>(
                         m_param_types.get_arrmeta())->dim_size;
     m_members.flags |= return_type.get_flags() & type_flags_value_inherited;
     for (intptr_t i = 0; i != m_param_count; ++i) {
@@ -53,8 +54,10 @@ void funcproto_type::print_type(std::ostream& o) const
     o << ") -> " << m_return_type;
 }
 
-void funcproto_type::transform_child_types(type_transform_fn_t transform_fn, void *extra,
-                ndt::type& out_transformed_tp, bool& out_was_transformed) const
+void funcproto_type::transform_child_types(type_transform_fn_t transform_fn,
+                                           intptr_t arrmeta_offset, void *extra,
+                                           ndt::type &out_transformed_tp,
+                                           bool &out_was_transformed) const
 {
     const ndt::type *param_types = get_param_types_raw();
     std::vector<ndt::type> tmp_param_types(m_param_count);
@@ -62,9 +65,11 @@ void funcproto_type::transform_child_types(type_transform_fn_t transform_fn, voi
 
     bool was_transformed = false;
     for (size_t i = 0, i_end = m_param_count; i != i_end; ++i) {
-        transform_fn(param_types[i], extra, tmp_param_types[i], was_transformed);
+      transform_fn(param_types[i], arrmeta_offset, extra, tmp_param_types[i],
+                   was_transformed);
     }
-    transform_fn(m_return_type, extra, tmp_return_type, was_transformed);
+    transform_fn(m_return_type, arrmeta_offset, extra, tmp_return_type,
+                 was_transformed);
     if (was_transformed) {
         out_transformed_tp =
             ndt::make_funcproto(tmp_param_types, tmp_return_type);
@@ -154,10 +159,9 @@ bool funcproto_type::operator==(const base_type& rhs) const
 }
 
 void funcproto_type::arrmeta_default_construct(
-    char *DYND_UNUSED(arrmeta), intptr_t DYND_UNUSED(ndim),
-    const intptr_t *DYND_UNUSED(shape)) const
+    char *DYND_UNUSED(arrmeta), bool DYND_UNUSED(blockref_alloc)) const
 {
-    throw type_error("Cannot store data of funcproto type");
+  throw type_error("Cannot store data of funcproto type");
 }
 
 void funcproto_type::arrmeta_copy_construct(
@@ -192,4 +196,12 @@ void funcproto_type::get_dynamic_type_properties(const std::pair<std::string, gf
 
     *out_properties = type_properties;
     *out_count = sizeof(type_properties) / sizeof(type_properties[0]);
+}
+
+ndt::type ndt::make_generic_funcproto(intptr_t nargs)
+{
+  vector<ndt::type> args;
+  ndt::make_typevar_range("T", nargs, args);
+  ndt::type ret = ndt::make_typevar("R");
+  return ndt::make_funcproto(args, ret);
 }

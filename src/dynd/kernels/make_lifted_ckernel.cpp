@@ -5,7 +5,7 @@
 
 #include <dynd/kernels/make_lifted_ckernel.hpp>
 #include <dynd/kernels/ckernel_builder.hpp>
-#include <dynd/types/strided_dim_type.hpp>
+#include <dynd/types/fixed_dim_type.hpp>
 #include <dynd/types/cfixed_dim_type.hpp>
 #include <dynd/types/var_dim_type.hpp>
 #include <dynd/kernels/expr_kernel_generator.hpp>
@@ -146,7 +146,7 @@ static size_t make_elwise_strided_dimension_expr_kernel_for_N(
   // Instantiate the elementwise handler
   return elwise_handler->instantiate(
       elwise_handler, ckb, ckb_offset, child_dst_tp, child_dst_arrmeta,
-      child_src_tp, child_src_arrmeta, kernel_request_strided, ectx);
+      child_src_tp, child_src_arrmeta, kernel_request_strided, nd::array(), ectx);
 }
 
 inline static size_t make_elwise_strided_dimension_expr_kernel(
@@ -349,7 +349,7 @@ static size_t make_elwise_strided_or_var_to_strided_dimension_expr_kernel_for_N(
   // Instantiate the elementwise handler
   return elwise_handler->instantiate(
       elwise_handler, ckb, ckb_offset, child_dst_tp, child_dst_arrmeta,
-      child_src_tp, child_src_arrmeta, kernel_request_strided, ectx);
+      child_src_tp, child_src_arrmeta, kernel_request_strided, nd::array(), ectx);
 }
 
 static size_t make_elwise_strided_or_var_to_strided_dimension_expr_kernel(
@@ -622,7 +622,7 @@ static size_t make_elwise_strided_or_var_to_var_dimension_expr_kernel_for_N(
   // All the types matched, so instantiate the elementwise handler
   return elwise_handler->instantiate(
       elwise_handler, ckb, ckb_offset, child_dst_tp, child_dst_arrmeta,
-      child_src_tp, child_src_arrmeta, kernel_request_strided, ectx);
+      child_src_tp, child_src_arrmeta, kernel_request_strided, nd::array(), ectx);
 }
 
 static size_t make_elwise_strided_or_var_to_var_dimension_expr_kernel(
@@ -685,7 +685,7 @@ size_t dynd::make_lifted_expr_ckernel(
       // No dimensions to lift, call the elementwise instantiate directly
       return elwise_handler->instantiate(elwise_handler, ckb, ckb_offset,
                                          dst_tp, dst_arrmeta, src_tp,
-                                         src_arrmeta, kernreq, ectx);
+                                         src_arrmeta, kernreq, nd::array(), ectx);
     } else {
       stringstream ss;
       ss << "Trying to broadcast " << src_ndim[i] << " dimensions of "
@@ -699,7 +699,6 @@ size_t dynd::make_lifted_expr_ckernel(
   bool src_all_strided = true, src_all_strided_or_var = true;
   for (intptr_t i = 0; i < src_count; ++i) {
     switch (src_tp[i].get_type_id()) {
-    case strided_dim_type_id:
     case fixed_dim_type_id:
     case cfixed_dim_type_id:
       break;
@@ -719,7 +718,6 @@ size_t dynd::make_lifted_expr_ckernel(
   // Call to some special-case functions based on the
   // destination type
   switch (dst_tp.get_type_id()) {
-  case strided_dim_type_id:
   case fixed_dim_type_id:
   case cfixed_dim_type_id:
     if (src_all_strided) {

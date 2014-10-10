@@ -197,7 +197,7 @@ static intptr_t instantiate_option_to_option_assignment_kernel(
     const arrfunc_type_data *DYND_UNUSED(self), dynd::ckernel_builder *ckb,
     intptr_t ckb_offset, const ndt::type &dst_tp, const char *dst_arrmeta,
     const ndt::type *src_tp, const char *const *src_arrmeta, kernel_request_t kernreq,
-    const eval::eval_context *ectx)
+    const nd::array &aux, const eval::eval_context *ectx)
 {
   intptr_t root_ckb_offset = ckb_offset;
   typedef option_to_option_ck self_type;
@@ -216,14 +216,14 @@ static intptr_t instantiate_option_to_option_assignment_kernel(
   const arrfunc_type_data *af =
       src_tp[0].tcast<option_type>()->get_is_avail_arrfunc();
   ckb_offset = af->instantiate(af, ckb, ckb_offset, ndt::make_type<dynd_bool>(),
-                               NULL, src_tp, src_arrmeta, kernreq, ectx);
+                               NULL, src_tp, src_arrmeta, kernreq, aux, ectx);
   // instantiate dst_assign_na
   ckb->ensure_capacity_leaf(ckb_offset);
   self = ckb->get_at<self_type>(root_ckb_offset);
   self->m_dst_assign_na_offset = ckb_offset - root_ckb_offset;
   af = dst_tp.tcast<option_type>()->get_assign_na_arrfunc();
   ckb_offset = af->instantiate(af, ckb, ckb_offset, dst_tp, dst_arrmeta, NULL,
-                               NULL, kernreq, ectx);
+                               NULL, kernreq, aux, ectx);
   // instantiate value_assign
   ckb->ensure_capacity(ckb_offset);
   self = ckb->get_at<self_type>(root_ckb_offset);
@@ -238,7 +238,7 @@ static intptr_t instantiate_option_to_value_assignment_kernel(
     const arrfunc_type_data *DYND_UNUSED(self), dynd::ckernel_builder *ckb,
     intptr_t ckb_offset, const ndt::type &dst_tp, const char *dst_arrmeta,
     const ndt::type *src_tp, const char *const *src_arrmeta,
-    kernel_request_t kernreq, const eval::eval_context *ectx)
+    kernel_request_t kernreq, const nd::array &aux, const eval::eval_context *ectx)
 {
   intptr_t root_ckb_offset = ckb_offset;
   typedef option_to_value_ck self_type;
@@ -256,7 +256,7 @@ static intptr_t instantiate_option_to_value_assignment_kernel(
   const arrfunc_type_data *af =
       src_tp[0].tcast<option_type>()->get_is_avail_arrfunc();
   ckb_offset = af->instantiate(af, ckb, ckb_offset, ndt::make_type<dynd_bool>(),
-                               NULL, src_tp, src_arrmeta, kernreq, ectx);
+                               NULL, src_tp, src_arrmeta, kernreq, aux, ectx);
   // instantiate value_assign
   ckb->ensure_capacity_leaf(ckb_offset);
   self = ckb->get_at<self_type>(root_ckb_offset);
@@ -328,7 +328,7 @@ static intptr_t instantiate_string_to_option_assignment_kernel(
     const arrfunc_type_data *DYND_UNUSED(self), dynd::ckernel_builder *ckb,
     intptr_t ckb_offset, const ndt::type &dst_tp, const char *dst_arrmeta,
     const ndt::type *src_tp, const char *const *src_arrmeta,
-    kernel_request_t kernreq, const eval::eval_context *ectx)
+    kernel_request_t kernreq, const nd::array &aux, const eval::eval_context *ectx)
 {
   // Deal with some string to option[T] conversions where string values
   // might mean NA
@@ -391,7 +391,7 @@ static intptr_t instantiate_string_to_option_assignment_kernel(
   const arrfunc_type_data *af =
       dst_tp.tcast<option_type>()->get_assign_na_arrfunc();
   ckb_offset = af->instantiate(af, ckb, ckb_offset, dst_tp, dst_arrmeta, NULL,
-                               NULL, kernreq, ectx);
+                               NULL, kernreq, aux, ectx);
   return ckb_offset;
 
 }
@@ -400,7 +400,7 @@ static intptr_t instantiate_option_as_value_assignment_kernel(
     const arrfunc_type_data *DYND_UNUSED(self), dynd::ckernel_builder *ckb,
     intptr_t ckb_offset, const ndt::type &dst_tp, const char *dst_arrmeta,
     const ndt::type *src_tp, const char *const *src_arrmeta, kernel_request_t kernreq,
-    const eval::eval_context *ectx)
+    const nd::array &DYND_UNUSED(aux), const eval::eval_context *ectx)
 {
   // In all cases not handled, we use the
   // regular S to T assignment kernel.
@@ -468,7 +468,7 @@ size_t kernels::make_option_assignment_kernel(
         if (ndt::pattern_match(src_tp, af->get_param_type(0), typevars) &&
                 ndt::pattern_match(dst_tp, af->get_return_type(), typevars)) {
             return af->instantiate(af, ckb, ckb_offset, dst_tp, dst_arrmeta,
-                                   &src_tp, &src_arrmeta, kernreq, ectx);
+                                   &src_tp, &src_arrmeta, kernreq, nd::array(), ectx);
         }
     }
 

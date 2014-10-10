@@ -7,16 +7,16 @@
 #define _DYND__BUFFER_STORAGE_HPP_
 
 #include <dynd/array.hpp>
-#include <dynd/types/strided_dim_type.hpp>
+#include <dynd/types/fixed_dim_type.hpp>
 
 namespace dynd {
 
 /**
- * Given a buffer array of type "strided * T" which was
+ * Given a buffer array of type "N * T" which was
  * created by nd::empty, resets it so it can be used
  * as a buffer again.
  *
- * NOTE: If the array is not of type "strided * T" and default
+ * NOTE: If the array is not of type "N * T" and default
  *       initialized by nd::empty, undefined behavior will result.
  * 
  */
@@ -29,8 +29,8 @@ inline void reset_strided_buffer_array(const nd::array& buf)
     char *buf_arrmeta = buf.get_ndo()->get_arrmeta();
     char *buf_data = buf.get_readwrite_originptr();
     buf_tp.extended()->arrmeta_reset_buffers(buf.get_ndo()->get_arrmeta());
-    strided_dim_type_arrmeta *am =
-        reinterpret_cast<strided_dim_type_arrmeta *>(buf_arrmeta);
+    fixed_dim_type_arrmeta *am =
+        reinterpret_cast<fixed_dim_type_arrmeta *>(buf_arrmeta);
     if (flags & type_flag_destructor) {
       buf_tp.extended()->data_destruct(buf_arrmeta, buf_data);
     }
@@ -44,27 +44,24 @@ class buffer_storage {
   ndt::type m_type;
   intptr_t m_stride;
 
-  // Non-assignable
-  buffer_storage &operator=(const buffer_storage &);
-
   void internal_allocate()
   {
-    m_stride = m_type.get_data_size();
-    m_storage = new char[DYND_BUFFER_CHUNK_SIZE * m_stride];
-    m_arrmeta = NULL;
-    size_t metasize =
-        m_type.is_builtin() ? 0 : m_type.extended()->get_arrmeta_size();
-    if (metasize != 0) {
-      try
-      {
-        m_arrmeta = new char[metasize];
-        m_type.extended()->arrmeta_default_construct(m_arrmeta, 0, NULL);
-      }
-      catch (const std::exception &)
-      {
-        delete[] m_storage;
-        delete[] m_arrmeta;
-        throw;
+    if (m_type.get_type_id() != uninitialized_type_id) {
+      m_stride = m_type.get_data_size();
+      m_storage = new char[DYND_BUFFER_CHUNK_SIZE * m_stride];
+      m_arrmeta = NULL;
+      size_t metasize =
+          m_type.is_builtin() ? 0 : m_type.extended()->get_arrmeta_size();
+      if (metasize != 0) {
+        try {
+          m_arrmeta = new char[metasize];
+          m_type.extended()->arrmeta_default_construct(m_arrmeta, true);
+        }
+        catch (const std::exception &) {
+          delete[] m_storage;
+          delete[] m_arrmeta;
+          throw;
+        }
       }
     }
   }
@@ -94,7 +91,14 @@ public:
     }
   }
 
-  void allocate(const ndt::type &dt)
+  // Assignment copies the same type
+  buffer_storage &operator=(const buffer_storage &rhs)
+  {
+    allocate(rhs.m_type);
+    return *this;
+  }
+
+  void allocate(const ndt::type &tp)
   {
     delete[] m_storage;
     m_storage = 0;
@@ -103,9 +107,11 @@ public:
       delete[] m_arrmeta;
       m_arrmeta = NULL;
     }
-    m_type = dt;
+    m_type = tp;
     internal_allocate();
   }
+
+  inline bool is_null() const { return m_storage == NULL; }
 
   inline intptr_t get_stride() const { return m_stride; }
 

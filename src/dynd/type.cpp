@@ -5,7 +5,6 @@
 
 #include <dynd/type.hpp>
 #include <dynd/types/base_dim_type.hpp>
-#include <dynd/types/strided_dim_type.hpp>
 #include <dynd/types/fixed_dim_type.hpp>
 #include <dynd/types/var_dim_type.hpp>
 #include <dynd/exceptions.hpp>
@@ -163,25 +162,30 @@ namespace {
         }
         const ndt::type& scalar_tp;
     };
-    static void replace_scalar_types(const ndt::type& dt, void *extra,
-                ndt::type& out_transformed_tp, bool& out_was_transformed)
+    static void replace_scalar_types(const ndt::type &dt,
+                                     intptr_t DYND_UNUSED(arrmeta_offset),
+                                     void *extra, ndt::type &out_transformed_tp,
+                                     bool &out_was_transformed)
     {
         const replace_scalar_type_extra *e = reinterpret_cast<const replace_scalar_type_extra *>(extra);
         if (dt.is_scalar()) {
             out_transformed_tp = ndt::make_convert(e->scalar_tp, dt);
             out_was_transformed = true;
         } else {
-            dt.extended()->transform_child_types(&replace_scalar_types, extra, out_transformed_tp, out_was_transformed);
+          dt.extended()->transform_child_types(&replace_scalar_types, 0, extra,
+                                               out_transformed_tp,
+                                               out_was_transformed);
         }
     }
 } // anonymous namespace
 
-ndt::type ndt::type::with_replaced_scalar_types(const ndt::type& scalar_tp) const
+ndt::type
+ndt::type::with_replaced_scalar_types(const ndt::type &scalar_tp) const
 {
     ndt::type result;
     bool was_transformed;
     replace_scalar_type_extra extra(scalar_tp);
-    replace_scalar_types(*this, &extra, result, was_transformed);
+    replace_scalar_types(*this, 0, &extra, result, was_transformed);
     return result;
 }
 
@@ -194,26 +198,30 @@ namespace {
         const ndt::type& m_replacement_tp;
         intptr_t m_replace_ndim;
     };
-    static void replace_dtype(const ndt::type& tp, void *extra,
-                ndt::type& out_transformed_tp, bool& out_was_transformed)
+    static void replace_dtype(const ndt::type &tp,
+                              intptr_t DYND_UNUSED(arrmeta_offset), void *extra,
+                              ndt::type &out_transformed_tp,
+                              bool &out_was_transformed)
     {
         const replace_dtype_extra *e = reinterpret_cast<const replace_dtype_extra *>(extra);
         if (tp.get_ndim() == e->m_replace_ndim) {
             out_transformed_tp = e->m_replacement_tp;
             out_was_transformed = true;
         } else {
-            tp.extended()->transform_child_types(
-                &replace_dtype, extra, out_transformed_tp, out_was_transformed);
+          tp.extended()->transform_child_types(&replace_dtype, 0, extra,
+                                               out_transformed_tp,
+                                               out_was_transformed);
         }
     }
 } // anonymous namespace
 
-ndt::type ndt::type::with_replaced_dtype(const ndt::type& replacement_tp, intptr_t replace_ndim) const
+ndt::type ndt::type::with_replaced_dtype(const ndt::type &replacement_tp,
+                                         intptr_t replace_ndim) const
 {
     ndt::type result;
     bool was_transformed;
     replace_dtype_extra extra(replacement_tp, replace_ndim);
-    replace_dtype(*this, &extra, result, was_transformed);
+    replace_dtype(*this, 0, &extra, result, was_transformed);
     return result;
 }
 
@@ -255,7 +263,7 @@ bool ndt::type::get_as_strided(const char *arrmeta, intptr_t *out_dim_size,
     *out_dim_size = reinterpret_cast<const size_stride_t *>(arrmeta)->dim_size;
     *out_stride = reinterpret_cast<const size_stride_t *>(arrmeta)->stride;
     *out_el_tp = tcast<base_dim_type>()->get_element_type();
-    *out_el_arrmeta = arrmeta + sizeof(strided_dim_type_arrmeta);
+    *out_el_arrmeta = arrmeta + sizeof(fixed_dim_type_arrmeta);
     return true;
   } else {
     return false;
@@ -269,8 +277,11 @@ bool ndt::type::get_as_strided(const char *arrmeta, intptr_t ndim,
 {
   if (get_strided_ndim() >= ndim) {
     *out_size_stride = reinterpret_cast<const size_stride_t *>(arrmeta);
-    *out_el_tp = tcast<base_dim_type>()->get_element_type();
-    *out_el_arrmeta = arrmeta + ndim * sizeof(strided_dim_type_arrmeta);
+    *out_el_arrmeta = arrmeta + ndim * sizeof(fixed_dim_type_arrmeta);
+    *out_el_tp = *this;
+    while (ndim-- > 0) {
+      *out_el_tp = out_el_tp->tcast<base_dim_type>()->get_element_type();
+    }
     return true;
   } else {
     return false;
@@ -301,41 +312,52 @@ bool ndt::type::data_layout_compatible_with(const ndt::type& rhs) const
         case string_type_id:
         case bytes_type_id:
         case json_type_id:
-            switch (rhs.get_type_id()) {
-                case string_type_id:
-                case bytes_type_id:
-                case json_type_id:
-                    // All of string, bytes, json are compatible
-                    return true;
-                default:
-                    return false;
-            }
+          switch (rhs.get_type_id()) {
+          case string_type_id:
+          case bytes_type_id:
+          case json_type_id:
+            // All of string, bytes, json are compatible
+            return true;
+          default:
+            return false;
+          }
         case cfixed_dim_type_id:
-            // For fixed dimensions, it's data layout compatible if
-            // the shape and strides match, and the element is data
-            // layout compatible.
-            if (rhs.get_type_id() == cfixed_dim_type_id) {
-                const cfixed_dim_type *fdd = static_cast<const cfixed_dim_type *>(extended());
-                const cfixed_dim_type *rhs_fdd = rhs.tcast<cfixed_dim_type>();
-                return fdd->get_fixed_dim_size() == rhs_fdd->get_fixed_dim_size() &&
-                    fdd->get_fixed_stride() == rhs_fdd->get_fixed_stride() &&
-                    fdd->get_element_type().data_layout_compatible_with(
-                                    rhs_fdd->get_element_type());
-            }
-            break;
-        case strided_dim_type_id:
+          // For fixed dimensions, it's data layout compatible if
+          // the shape and strides match, and the element is data
+          // layout compatible.
+          if (rhs.get_type_id() == cfixed_dim_type_id) {
+            const cfixed_dim_type *fdd =
+                static_cast<const cfixed_dim_type *>(extended());
+            const cfixed_dim_type *rhs_fdd = rhs.tcast<cfixed_dim_type>();
+            return fdd->get_fixed_dim_size() == rhs_fdd->get_fixed_dim_size() &&
+                   fdd->get_fixed_stride() == rhs_fdd->get_fixed_stride() &&
+                   fdd->get_element_type().data_layout_compatible_with(
+                       rhs_fdd->get_element_type());
+          }
+          break;
+        case fixed_dim_type_id:
+          if (rhs.get_type_id() == fixed_dim_type_id) {
+            return tcast<fixed_dim_type>()->get_fixed_dim_size() ==
+                       rhs.tcast<fixed_dim_type>()->get_fixed_dim_size() &&
+                   tcast<fixed_dim_type>()
+                       ->get_element_type()
+                       .data_layout_compatible_with(
+                           rhs.tcast<fixed_dim_type>()->get_element_type());
+          }
+          break;
         case var_dim_type_id:
-            // For strided and var dimensions, it's data layout
-            // compatible if the element is
-            if (rhs.get_type_id() == get_type_id()) {
-                const base_dim_type *budd = static_cast<const base_dim_type *>(extended());
-                const base_dim_type *rhs_budd = rhs.tcast<base_dim_type>();
-                return budd->get_element_type().data_layout_compatible_with(
-                                    rhs_budd->get_element_type());
-            }
-            break;
+          // For var dimensions, it's data layout
+          // compatible if the element is
+          if (rhs.get_type_id() == var_dim_type_id) {
+            const base_dim_type *budd =
+                static_cast<const base_dim_type *>(extended());
+            const base_dim_type *rhs_budd = rhs.tcast<base_dim_type>();
+            return budd->get_element_type().data_layout_compatible_with(
+                rhs_budd->get_element_type());
+          }
+          break;
         default:
-            break;
+          break;
     }
     return false;
 }
@@ -410,21 +432,23 @@ std::ostream& dynd::ndt::operator<<(std::ostream& o, const ndt::type& rhs)
 
 ndt::type ndt::make_type(intptr_t ndim, const intptr_t *shape, const ndt::type& dtp)
 {
-    if (ndim > 0) {
-        ndt::type result_tp = shape[ndim-1] >= 0
-                        ? ndt::make_strided_dim(dtp)
-                        : ndt::make_var_dim(dtp);
-        for (intptr_t i = ndim-2; i >= 0; --i) {
-            if (shape[i] >= 0) {
-                result_tp = ndt::make_strided_dim(result_tp);
-            } else {
-                result_tp = ndt::make_var_dim(result_tp);
-            }
-        }
-        return result_tp;
-    } else {
-        return dtp;
+  if (ndim > 0) {
+    ndt::type result_tp = shape[ndim - 1] >= 0
+                              ? ndt::make_fixed_dim(shape[ndim - 1], dtp)
+                              : ndt::make_var_dim(dtp);
+    for (intptr_t i = ndim - 2; i >= 0; --i) {
+      if (shape[i] >= 0) {
+        result_tp = ndt::make_fixed_dim(shape[i], result_tp);
+      }
+      else {
+        result_tp = ndt::make_var_dim(result_tp);
+      }
     }
+    return result_tp;
+  }
+  else {
+    return dtp;
+  }
 }
 
 ndt::type ndt::make_type(intptr_t ndim, const intptr_t *shape, const ndt::type& dtp, bool& out_any_var)
@@ -433,7 +457,7 @@ ndt::type ndt::make_type(intptr_t ndim, const intptr_t *shape, const ndt::type& 
         ndt::type result_tp = dtp;
         for (intptr_t i = ndim - 1; i >= 0; --i) {
             if (shape[i] >= 0) {
-                result_tp = ndt::make_strided_dim(result_tp);
+                result_tp = ndt::make_fixed_dim(shape[i], result_tp);
             }
             else {
                 result_tp = ndt::make_var_dim(result_tp);

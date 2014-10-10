@@ -12,7 +12,6 @@
 #include <dynd/types/date_type.hpp>
 #include <dynd/types/date_util.hpp>
 #include <dynd/types/property_type.hpp>
-#include <dynd/types/strided_dim_type.hpp>
 #include <dynd/types/fixedstring_type.hpp>
 #include <dynd/types/string_type.hpp>
 #include <dynd/types/convert_type.hpp>
@@ -165,19 +164,20 @@ TEST(DateType, DatePropertyConvertOfString) {
     const char *strs[] = {"1931-12-12", "2013-05-14", "2012-12-25"};
     a = nd::array(strs).ucast(ndt::make_fixedstring(10, string_encoding_ascii)).eval();
     b = a.ucast(ndt::make_date());
-    EXPECT_EQ(ndt::make_strided_dim(
-                    ndt::make_fixedstring(10, string_encoding_ascii)),
-                    a.get_type());
-    EXPECT_EQ(ndt::make_strided_dim(
-                    ndt::make_convert(ndt::make_date(),
-                        ndt::make_fixedstring(10, string_encoding_ascii))),
-                    b.get_type());
+    EXPECT_EQ(ndt::make_fixed_dim(
+                  3, ndt::make_fixedstring(10, string_encoding_ascii)),
+              a.get_type());
+    EXPECT_EQ(ndt::make_fixed_dim(
+                  3, ndt::make_convert(
+                         ndt::make_date(),
+                         ndt::make_fixedstring(10, string_encoding_ascii))),
+              b.get_type());
 
     // year property
     c = b.p("year");
     EXPECT_EQ(property_type_id, c.get_dtype().get_type_id());
     c = c.eval();
-    EXPECT_EQ(ndt::make_strided_dim(ndt::make_type<int>()), c.get_type());
+    EXPECT_EQ(ndt::make_fixed_dim(3, ndt::make_type<int>()), c.get_type());
     EXPECT_EQ(1931, c(0).as<int>());
     EXPECT_EQ(2013, c(1).as<int>());
     EXPECT_EQ(2012, c(2).as<int>());
@@ -186,7 +186,7 @@ TEST(DateType, DatePropertyConvertOfString) {
     c = b.f("weekday");
     EXPECT_EQ(property_type_id, c.get_dtype().get_type_id());
     c = c.eval();
-    EXPECT_EQ(ndt::make_strided_dim(ndt::make_type<int>()), c.get_type());
+    EXPECT_EQ(ndt::make_fixed_dim(3, ndt::make_type<int>()), c.get_type());
     EXPECT_EQ(5, c(0).as<int>());
     EXPECT_EQ(1, c(1).as<int>());
     EXPECT_EQ(1, c(2).as<int>());
@@ -314,8 +314,9 @@ TEST(DateType, StrFTimeOfConvert) {
     // First create a date array which is still a convert expression type
     const char *vals[] = {"1920-03-12", "2013-01-01", "2000-12-25"};
     nd::array a = nd::array(vals).ucast(ndt::make_date());
-    EXPECT_EQ(ndt::make_strided_dim(ndt::make_convert(ndt::make_date(), ndt::make_string())),
-                    a.get_type());
+    EXPECT_EQ(ndt::make_fixed_dim(
+                  3, ndt::make_convert(ndt::make_date(), ndt::make_string())),
+              a.get_type());
 
     nd::array b = a.f("strftime", "%Y %m %d");
     EXPECT_EQ("1920 03 12", b(0).as<string>());

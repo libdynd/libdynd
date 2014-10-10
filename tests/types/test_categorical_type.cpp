@@ -300,10 +300,10 @@ TEST(CategoricalDType, AssignFromOther) {
     ndt::type cd = ndt::make_categorical(cats_values);
     int16_t a_values[] = {6, 3, 100, 3, 1000, 100, 6, 1000};
     nd::array a = nd::array(a_values).ucast(cd);
-    EXPECT_EQ(ndt::make_strided_dim(ndt::make_convert(cd, ndt::make_type<int16_t>())),
+    EXPECT_EQ(ndt::make_fixed_dim(8, ndt::make_convert(cd, ndt::make_type<int16_t>())),
                     a.get_type());
     a = a.eval();
-    EXPECT_EQ(ndt::make_strided_dim(cd), a.get_type());
+    EXPECT_EQ(ndt::make_fixed_dim(8, cd), a.get_type());
     EXPECT_EQ(6,    a(0).as<int>());
     EXPECT_EQ(3,    a(1).as<int>());
     EXPECT_EQ(100,  a(2).as<int>());

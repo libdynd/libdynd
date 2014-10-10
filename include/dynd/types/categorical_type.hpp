@@ -12,8 +12,7 @@
 
 #include <dynd/type.hpp>
 #include <dynd/array.hpp>
-#include <dynd/types/strided_dim_type.hpp>
-
+#include <dynd/types/fixed_dim_type.hpp>
 
 namespace {
 
@@ -50,7 +49,7 @@ public:
                    const char *arrmeta, const char *data) const;
 
     size_t get_category_count() const {
-        return (size_t) reinterpret_cast<const strided_dim_type_arrmeta *>(
+        return (size_t) reinterpret_cast<const fixed_dim_type_arrmeta *>(
                    m_categories.get_arrmeta())->dim_size;
     }
 
@@ -79,7 +78,7 @@ public:
         }
         return m_categories.get_readonly_originptr() +
                m_value_to_category_index[value] *
-                   reinterpret_cast<const strided_dim_type_arrmeta *>(
+                   reinterpret_cast<const fixed_dim_type_arrmeta *>(
                        m_categories.get_arrmeta())->stride;
     }
     /** Returns the arrmeta corresponding to data from get_category_data_from_value */
@@ -93,8 +92,7 @@ public:
 
     bool operator==(const base_type& rhs) const;
 
-    void arrmeta_default_construct(char *arrmeta, intptr_t ndim,
-                                   const intptr_t *shape) const;
+    void arrmeta_default_construct(char *arrmeta, bool blockref_alloc) const;
     void arrmeta_copy_construct(char *dst_arrmeta, const char *src_arrmeta,
                                 memory_block_data *embedded_reference) const;
     void arrmeta_destruct(char *arrmeta) const;
@@ -122,12 +120,18 @@ public:
 };
 
 namespace ndt {
-    inline ndt::type make_categorical(const nd::array& values) {
-        return ndt::type(new categorical_type(values), false);
-    }
+  inline ndt::type make_categorical(const nd::array &values)
+  {
+    return ndt::type(new categorical_type(values), false);
+  }
 
-    ndt::type factor_categorical(const nd::array& values);
+  ndt::type factor_categorical(const nd::array &values);
 } // namespace ndt
+
+namespace init {
+  void categorical_type_init();
+  void categorical_type_cleanup();
+} // namespace init
 
 } // namespace dynd
 

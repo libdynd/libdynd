@@ -7,7 +7,7 @@
 #define _DYND__BASE_TUPLE_TYPE_HPP_
 
 #include <dynd/types/base_type.hpp>
-#include <dynd/types/strided_dim_type.hpp>
+#include <dynd/types/fixed_dim_type.hpp>
 #include <dynd/func/callable.hpp>
 #include <dynd/array.hpp>
 
@@ -22,8 +22,8 @@ namespace dynd {
 class base_tuple_type : public base_type {
 protected:
     intptr_t m_field_count;
-    // m_field_types always has type "strided * type",
-    // and m_arrmeta_offsets always has type "strided * uintptr"
+    // m_field_types always has type "N * type",
+    // and m_arrmeta_offsets always has type "N * uintptr"
     nd::array m_field_types, m_arrmeta_offsets;
 
     virtual uintptr_t *get_arrmeta_data_offsets(char *DYND_UNUSED(arrmeta)) const {
@@ -59,10 +59,10 @@ public:
     }
 
     inline const ndt::type& get_field_type(intptr_t i) const {
-        return unchecked_strided_dim_get<ndt::type>(m_field_types, i);
+        return unchecked_fixed_dim_get<ndt::type>(m_field_types, i);
     }
     inline const uintptr_t& get_arrmeta_offset(intptr_t i) const {
-        return unchecked_strided_dim_get<uintptr_t>(m_arrmeta_offsets, i);
+        return unchecked_fixed_dim_get<uintptr_t>(m_arrmeta_offsets, i);
     }
 
 
@@ -70,7 +70,7 @@ public:
     bool is_expression() const;
     bool is_unique_data_owner(const char *arrmeta) const;
 
-    size_t get_default_data_size(intptr_t ndim, const intptr_t *shape) const;
+    size_t get_default_data_size() const;
 
     void get_shape(intptr_t ndim, intptr_t i, intptr_t *out_shape,
                     const char *arrmeta, const char *data) const;
@@ -84,8 +84,7 @@ public:
                     bool leading_dimension, char **inout_data,
                     memory_block_data **inout_dataref) const;
 
-    void arrmeta_default_construct(char *arrmeta, intptr_t ndim,
-                                    const intptr_t *shape) const;
+    void arrmeta_default_construct(char *arrmeta, bool blockref_alloc) const;
     void arrmeta_copy_construct(char *dst_arrmeta, const char *src_arrmeta,
                                  memory_block_data *embedded_reference) const;
     void arrmeta_reset_buffers(char *arrmeta) const;

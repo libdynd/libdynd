@@ -71,9 +71,12 @@ char *iterdata_broadcasting_terminator_incr(iterdata_common *iterdata, intptr_t 
 char *iterdata_broadcasting_terminator_adv(iterdata_common *iterdata, intptr_t level, intptr_t i);
 char *iterdata_broadcasting_terminator_reset(iterdata_common *iterdata, char *data, intptr_t level);
 
-// Forward declaration of the nd::array
+// Forward declaration of nd::array and nd::strided_vals
 namespace nd {
     class array;
+
+    template <typename T, int N>
+    class strided_vals;
 } // namespace nd
 
 namespace ndt {
@@ -407,16 +410,15 @@ public:
     }
 
     /** The element size of the type when default-constructed */
-    inline size_t get_default_data_size(intptr_t ndim, const intptr_t *shape)
-        const
+    inline size_t get_default_data_size() const
     {
-        if (is_builtin_type(m_extended)) {
-            return static_cast<intptr_t>(
-                detail::builtin_data_sizes
-                    [reinterpret_cast<uintptr_t>(m_extended)]);
-        } else {
-            return m_extended->get_default_data_size(ndim, shape);
-        }
+      if (is_builtin_type(m_extended)) {
+        return static_cast<intptr_t>(
+            detail::builtin_data_sizes[reinterpret_cast<uintptr_t>(
+                m_extended)]);
+      } else {
+        return m_extended->get_default_data_size();
+      }
     }
 
     inline size_t get_arrmeta_size() const {
@@ -576,21 +578,31 @@ public:
     /**
      * Gets the type with array dimensions stripped away.
      *
-     * \param include_ndim  The number of array dimensions to keep
+     * \param include_ndim  The number of array dimensions to keep.
+     * \param inout_arrmeta  If non-NULL, is a pointer to arrmeta to advance
+     *                       in place.
      */
-    inline type get_dtype(size_t include_ndim = 0) const {
-        size_t ndim = get_ndim();
-        if (ndim == include_ndim) {
-            return *this;
-        } else if (ndim > include_ndim) {
-            return m_extended->get_type_at_dimension(NULL, ndim - include_ndim);
-        } else {
-            std::stringstream ss;
-            ss << "Cannot use " << include_ndim << " array ";
-            ss << "dimensions from dynd type " << *this;
-            ss << ", it only has " << ndim;
-            throw dynd::type_error(ss.str());
-        }
+    inline type get_dtype(size_t include_ndim = 0,
+                          char **inout_arrmeta = NULL) const
+    {
+      size_t ndim = get_ndim();
+      if (ndim == include_ndim) {
+        return *this;
+      } else if (ndim > include_ndim) {
+        return m_extended->get_type_at_dimension(inout_arrmeta,
+                                                 ndim - include_ndim);
+      } else {
+        std::stringstream ss;
+        ss << "Cannot use " << include_ndim << " array ";
+        ss << "dimensions from dynd type " << *this;
+        ss << ", it only has " << ndim;
+        throw dynd::type_error(ss.str());
+      }
+    }
+
+    inline type get_dtype(size_t include_ndim, const char **inout_arrmeta) const
+    {
+      return get_dtype(include_ndim, const_cast<char **>(inout_arrmeta));
     }
 
     intptr_t get_dim_size(const char *arrmeta, const char *data) const;
@@ -621,9 +633,6 @@ public:
      * values and returns true.
      *
      * \param arrmeta  The arrmeta for the type.
-     * \param ndim  The number of strided dimensions desired.
-     * \param out_size_stride  Is filled with a pointer to an array of
-     *                         size_stride_t of length ``ndim``.
      * \param out_el_tp  Is filled with the element type.
      * \param out_el_arrmeta  Is filled with the arrmeta of the element type.
      *
@@ -737,6 +746,39 @@ public:
     friend std::ostream& operator<<(std::ostream& o, const type& rhs);
 };
 
+template <typename T>
+struct type_from;
+
+template <typename T>
+struct type_from {
+    static type make() {
+        return type(static_cast<type_id_t>(type_id_of<T>::value));
+    }
+};
+
+// Forward declarations
+type make_pointer(const type& target_tp);
+type make_cfixed_dim(size_t size, const type& element_tp);
+
+template <typename T>
+struct type_from<T *> {
+    static type make() {
+        return make_pointer(type_from<T>::make());
+    }
+};
+
+template <typename T, int N>
+struct type_from<T[N]> {
+    static type make() {
+        return make_cfixed_dim(N, type_from<T>::make());
+    }
+};
+
+template <typename T, int N>
+struct type_from<nd::strided_vals<T, N> > {
+  static type make() { return make_fixed_sym_dim(type_from<T>::make(), N); }
+};
+
 /**
  * Convenience function which makes an ndt::type
  * object from a template parameter.
@@ -744,13 +786,13 @@ public:
 template<class T>
 type make_type()
 {
-    return type(static_cast<type_id_t>(type_id_of<T>::value));
+    return type_from<T>::make();
 }
 
 /**
  * Constructs an array type from a shape and
  * a data type. Each dimension >= 0 is made
- * using a strided_dim type, and each dimension == -1
+ * using a fixed_dim type, and each dimension == -1
  * is made using a var_dim type.
  *
  * \param ndim   The number of dimensions in the shape
@@ -762,7 +804,7 @@ type make_type(intptr_t ndim, const intptr_t *shape, const ndt::type& dtype);
 /**
 * Constructs an array type from a shape and
 * a data type. Each dimension >= 0 is made
-* using a strided_dim type, and each dimension == -1
+* using a fixed_dim type, and each dimension == -1
 * is made using a var_dim type.
 *
 * \param ndim   The number of dimensions in the shape

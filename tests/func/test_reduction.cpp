@@ -16,6 +16,8 @@
 #include <dynd/func/lift_reduction_arrfunc.hpp>
 #include <dynd/json_parser.hpp>
 
+#include "dynd_assertions.hpp"
+
 using namespace std;
 using namespace dynd;
 
@@ -116,7 +118,7 @@ TEST(Reduction, BuiltinSum_Lift0D_NoIdentity) {
     const char *src_arrmeta[1] = {a.get_arrmeta()};
     af.instantiate(&af, &ckb, 0, b.get_type(), b.get_arrmeta(),
                         src_tp, src_arrmeta, kernel_request_single,
-                        &eval::default_eval_context);
+                        nd::array(), &eval::default_eval_context);
 
     // Call it on the data
     ckb(b.get_readwrite_originptr(), a.get_readonly_originptr());
@@ -148,7 +150,7 @@ TEST(Reduction, BuiltinSum_Lift0D_WithIdentity) {
     const char *src_arrmeta[1] = {a.get_arrmeta()};
     af.instantiate(&af, &ckb, 0, b.get_type(), b.get_arrmeta(),
                         src_tp, src_arrmeta, kernel_request_single,
-                        &eval::default_eval_context);
+                        nd::array(), &eval::default_eval_context);
 
     // Call it on the data
     ckb(b.get_readwrite_originptr(), a.get_readonly_originptr());
@@ -164,15 +166,15 @@ TEST(Reduction, BuiltinSum_Lift1D_NoIdentity) {
     arrfunc_type_data af;
     bool reduction_dimflags[1] = {true};
     lift_reduction_arrfunc(&af, reduction_kernel,
-                    ndt::type("strided * float32"), nd::array(), false,
+                    ndt::type("fixed * float32"), nd::array(), false,
                     1, reduction_dimflags, true, true, false, nd::array());
 
     // Set up some data for the test reduction
     float vals0[5] = {1.5, -22., 3.75, 1.125, -3.375};
     nd::array a = vals0;
-    ASSERT_EQ(af.get_param_type(0), a.get_type());
+    EXPECT_TYPE_MATCHES(af.get_param_type(0), a.get_type());
     nd::array b = nd::empty(ndt::make_type<float>());
-    ASSERT_EQ(af.get_return_type(), b.get_type());
+    EXPECT_TYPE_MATCHES(af.get_return_type(), b.get_type());
 
     // Instantiate the lifted ckernel
     unary_ckernel_builder ckb;
@@ -180,7 +182,7 @@ TEST(Reduction, BuiltinSum_Lift1D_NoIdentity) {
     const char *src_arrmeta[1] = {a.get_arrmeta()};
     af.instantiate(&af, &ckb, 0, b.get_type(), b.get_arrmeta(),
                         src_tp, src_arrmeta, kernel_request_single,
-                        &eval::default_eval_context);
+                        nd::array(), &eval::default_eval_context);
 
     // Call it on the data
     ckb(b.get_readwrite_originptr(), a.get_readonly_originptr());
@@ -194,7 +196,7 @@ TEST(Reduction, BuiltinSum_Lift1D_NoIdentity) {
     src_arrmeta[0] = a.get_arrmeta();
     af.instantiate(&af, &ckb, 0, b.get_type(), b.get_arrmeta(),
                         src_tp, src_arrmeta, kernel_request_single,
-                        &eval::default_eval_context);
+                        nd::array(), &eval::default_eval_context);
 
     // Call it on the data
     ckb(b.get_readwrite_originptr(), a.get_readonly_originptr());
@@ -211,15 +213,15 @@ TEST(Reduction, BuiltinSum_Lift1D_WithIdentity) {
     arrfunc_type_data af;
     bool reduction_dimflags[1] = {true};
     lift_reduction_arrfunc(&af, reduction_kernel,
-                    ndt::type("strided * float32"), nd::array(), false,
+                    ndt::type("fixed * float32"), nd::array(), false,
                     1, reduction_dimflags, true, true, false, nd::array(100.f));
 
     // Set up some data for the test reduction
     float vals0[5] = {1.5, -22., 3.75, 1.125, -3.375};
     nd::array a = vals0;
-    ASSERT_EQ(af.get_param_type(0), a.get_type());
+    EXPECT_TYPE_MATCHES(af.get_param_type(0), a.get_type());
     nd::array b = nd::empty(ndt::make_type<float>());
-    ASSERT_EQ(af.get_return_type(), b.get_type());
+    EXPECT_TYPE_MATCHES(af.get_return_type(), b.get_type());
 
     // Instantiate the lifted ckernel
     unary_ckernel_builder ckb;
@@ -227,7 +229,7 @@ TEST(Reduction, BuiltinSum_Lift1D_WithIdentity) {
     const char *src_arrmeta[1] = {a.get_arrmeta()};
     af.instantiate(&af, &ckb, 0, b.get_type(), b.get_arrmeta(),
                         src_tp, src_arrmeta, kernel_request_single,
-                        &eval::default_eval_context);
+                        nd::array(), &eval::default_eval_context);
 
     // Call it on the data
     ckb(b.get_readwrite_originptr(), a.get_readonly_originptr());
@@ -242,17 +244,15 @@ TEST(Reduction, BuiltinSum_Lift2D_StridedStrided_ReduceReduce) {
     arrfunc_type_data af;
     bool reduction_dimflags[2] = {true, true};
     lift_reduction_arrfunc(&af, reduction_kernel,
-                    ndt::type("strided * strided * float32"), nd::array(), false,
+                    ndt::type("fixed * fixed * float32"), nd::array(), false,
                     2, reduction_dimflags, true, true, false, nd::array());
 
     // Set up some data for the test reduction
     nd::array a = parse_json("2 * 3 * float32",
             "[[1.5, 2, 7], [-2.25, 7, 2.125]]");
-    // Slice the array so it is "strided * strided * float32" instead of fixed dims
-    a = a(irange(), irange());
-    ASSERT_EQ(af.get_param_type(0), a.get_type());
+    EXPECT_TYPE_MATCHES(af.get_param_type(0), a.get_type());
     nd::array b = nd::empty(ndt::make_type<float>());
-    ASSERT_EQ(af.get_return_type(), b.get_type());
+    EXPECT_TYPE_MATCHES(af.get_return_type(), b.get_type());
 
     // Instantiate the lifted ckernel
     unary_ckernel_builder ckb;
@@ -260,7 +260,7 @@ TEST(Reduction, BuiltinSum_Lift2D_StridedStrided_ReduceReduce) {
     const char *src_arrmeta[1] = {a.get_arrmeta()};
     af.instantiate(&af, &ckb, 0, b.get_type(), b.get_arrmeta(),
                         src_tp, src_arrmeta, kernel_request_single,
-                        &eval::default_eval_context);
+                        nd::array(), &eval::default_eval_context);
 
     // Call it on the data
     ckb(b.get_readwrite_originptr(), a.get_readonly_originptr());
@@ -270,13 +270,11 @@ TEST(Reduction, BuiltinSum_Lift2D_StridedStrided_ReduceReduce) {
     ckb.reset();
     a = parse_json("1 * 2 * float32",
             "[[1.5, -2]]");
-    // Slice the array so it is "strided * strided * float32" instead of fixed dims
-    a = a(irange(), irange());
     src_tp[0] = a.get_type();
     src_arrmeta[0] = a.get_arrmeta();
     af.instantiate(&af, &ckb, 0, b.get_type(), b.get_arrmeta(),
                         src_tp, src_arrmeta, kernel_request_single,
-                        &eval::default_eval_context);
+                        nd::array(), &eval::default_eval_context);
 
     // Call it on the data
     ckb(b.get_readwrite_originptr(), a.get_readonly_originptr());
@@ -291,17 +289,15 @@ TEST(Reduction, BuiltinSum_Lift2D_StridedStrided_ReduceReduce_KeepDim) {
     arrfunc_type_data af;
     bool reduction_dimflags[2] = {true, true};
     lift_reduction_arrfunc(&af, reduction_kernel,
-                    ndt::type("strided * strided * float32"), nd::array(), true,
+                    ndt::type("fixed * fixed * float32"), nd::array(), true,
                     2, reduction_dimflags, true, true, false, nd::array());
 
     // Set up some data for the test reduction
     nd::array a = parse_json("2 * 3 * float32",
             "[[1.5, 2, 7], [-2.25, 7, 2.125]]");
-    // Slice the array so it is "strided * strided * float32" instead of fixed dims
-    a = a(irange(), irange());
-    ASSERT_EQ(af.get_param_type(0), a.get_type());
+    EXPECT_TYPE_MATCHES(af.get_param_type(0), a.get_type());
     nd::array b = nd::empty(1, 1, "float32");
-    ASSERT_EQ(af.get_return_type(), b.get_type());
+    EXPECT_TYPE_MATCHES(af.get_return_type(), b.get_type());
 
     // Instantiate the lifted ckernel
     unary_ckernel_builder ckb;
@@ -309,7 +305,7 @@ TEST(Reduction, BuiltinSum_Lift2D_StridedStrided_ReduceReduce_KeepDim) {
     const char *src_arrmeta[1] = {a.get_arrmeta()};
     af.instantiate(&af, &ckb, 0, b.get_type(), b.get_arrmeta(),
                         src_tp, src_arrmeta, kernel_request_single,
-                        &eval::default_eval_context);
+                        nd::array(), &eval::default_eval_context);
 
     // Call it on the data
     ckb(b.get_readwrite_originptr(), a.get_readonly_originptr());
@@ -325,17 +321,15 @@ TEST(Reduction, BuiltinSum_Lift2D_StridedStrided_BroadcastReduce) {
     arrfunc_type_data af;
     bool reduction_dimflags[2] = {false, true};
     lift_reduction_arrfunc(&af, reduction_kernel,
-                    ndt::type("strided * strided * float32"), nd::array(), false,
+                    ndt::type("fixed * fixed * float32"), nd::array(), false,
                     2, reduction_dimflags, true, true, false, nd::array());
 
     // Set up some data for the test reduction
     nd::array a = parse_json("2 * 3 * float32",
             "[[1.5, 2, 7], [-2.25, 7, 2.125]]");
-    // Slice the array so it is "strided * strided * float32" instead of fixed dims
-    a = a(irange(), irange());
-    ASSERT_EQ(af.get_param_type(0), a.get_type());
+    EXPECT_TYPE_MATCHES(af.get_param_type(0), a.get_type());
     nd::array b = nd::empty(2, "float32");
-    ASSERT_EQ(af.get_return_type(), b.get_type());
+    EXPECT_TYPE_MATCHES(af.get_return_type(), b.get_type());
 
     // Instantiate the lifted ckernel
     unary_ckernel_builder ckb;
@@ -343,7 +337,7 @@ TEST(Reduction, BuiltinSum_Lift2D_StridedStrided_BroadcastReduce) {
     const char *src_arrmeta[1] = {a.get_arrmeta()};
     af.instantiate(&af, &ckb, 0, b.get_type(), b.get_arrmeta(),
                         src_tp, src_arrmeta, kernel_request_single,
-                        &eval::default_eval_context);
+                        nd::array(), &eval::default_eval_context);
 
     // Call it on the data
     ckb(b.get_readwrite_originptr(), a.get_readonly_originptr());
@@ -355,14 +349,12 @@ TEST(Reduction, BuiltinSum_Lift2D_StridedStrided_BroadcastReduce) {
     ckb.reset();
     a = parse_json("1 * 2 * float32",
             "[[1.5, -2]]");
-    // Slice the array so it is "strided * strided * float32" instead of fixed dims
-    a = a(irange(), irange());
     b = nd::empty(1, "float32");
     src_tp[0] = a.get_type();
     src_arrmeta[0] = a.get_arrmeta();
     af.instantiate(&af, &ckb, 0, b.get_type(), b.get_arrmeta(),
                         src_tp, src_arrmeta, kernel_request_single,
-                        &eval::default_eval_context);
+                        nd::array(), &eval::default_eval_context);
 
     // Call it on the data
     ckb(b.get_readwrite_originptr(), a.get_readonly_originptr());
@@ -379,17 +371,15 @@ TEST(Reduction, BuiltinSum_Lift2D_StridedStrided_BroadcastReduce_KeepDim) {
     arrfunc_type_data af;
     bool reduction_dimflags[2] = {false, true};
     lift_reduction_arrfunc(&af, reduction_kernel,
-                    ndt::type("strided * strided * float32"), nd::array(), true,
+                    ndt::type("fixed * fixed * float32"), nd::array(), true,
                     2, reduction_dimflags, true, true, false, nd::array());
 
     // Set up some data for the test reduction
     nd::array a = parse_json("2 * 3 * float32",
             "[[1.5, 2, 7], [-2.25, 7, 2.125]]");
-    // Slice the array so it is "strided * strided * float32" instead of fixed dims
-    a = a(irange(), irange());
-    ASSERT_EQ(af.get_param_type(0), a.get_type());
+    EXPECT_TYPE_MATCHES(af.get_param_type(0), a.get_type());
     nd::array b = nd::empty(2, 1, "float32");
-    ASSERT_EQ(af.get_return_type(), b.get_type());
+    EXPECT_TYPE_MATCHES(af.get_return_type(), b.get_type());
 
     // Instantiate the lifted ckernel
     unary_ckernel_builder ckb;
@@ -397,7 +387,7 @@ TEST(Reduction, BuiltinSum_Lift2D_StridedStrided_BroadcastReduce_KeepDim) {
     const char *src_arrmeta[1] = {a.get_arrmeta()};
     af.instantiate(&af, &ckb, 0, b.get_type(), b.get_arrmeta(),
                         src_tp, src_arrmeta, kernel_request_single,
-                        &eval::default_eval_context);
+                        nd::array(), &eval::default_eval_context);
 
     // Call it on the data
     ckb(b.get_readwrite_originptr(), a.get_readonly_originptr());
@@ -415,17 +405,15 @@ TEST(Reduction, BuiltinSum_Lift2D_StridedStrided_ReduceBroadcast) {
     arrfunc_type_data af;
     bool reduction_dimflags[2] = {true, false};
     lift_reduction_arrfunc(&af, reduction_kernel,
-                    ndt::type("strided * strided * float32"), nd::array(), false,
+                    ndt::type("fixed * fixed * float32"), nd::array(), false,
                     2, reduction_dimflags, true, true, false, nd::array());
 
     // Set up some data for the test reduction
     nd::array a = parse_json("2 * 3 * float32",
             "[[1.5, 2, 7], [-2.25, 7, 2.125]]");
-    // Slice the array so it is "strided * strided * float32" instead of fixed dims
-    a = a(irange(), irange());
-    ASSERT_EQ(af.get_param_type(0), a.get_type());
+    EXPECT_TYPE_MATCHES(af.get_param_type(0), a.get_type());
     nd::array b = nd::empty(3, "float32");
-    ASSERT_EQ(af.get_return_type(), b.get_type());
+    EXPECT_TYPE_MATCHES(af.get_return_type(), b.get_type());
 
     // Instantiate the lifted ckernel
     unary_ckernel_builder ckb;
@@ -433,7 +421,7 @@ TEST(Reduction, BuiltinSum_Lift2D_StridedStrided_ReduceBroadcast) {
     const char *src_arrmeta[1] = {a.get_arrmeta()};
     af.instantiate(&af, &ckb, 0, b.get_type(), b.get_arrmeta(),
                         src_tp, src_arrmeta, kernel_request_single,
-                        &eval::default_eval_context);
+                        nd::array(), &eval::default_eval_context);
 
     // Call it on the data
     ckb(b.get_readwrite_originptr(), a.get_readonly_originptr());
@@ -446,14 +434,12 @@ TEST(Reduction, BuiltinSum_Lift2D_StridedStrided_ReduceBroadcast) {
     ckb.reset();
     a = parse_json("1 * 2 * float32",
             "[[1.5, -2]]");
-    // Slice the array so it is "strided * strided * float32" instead of fixed dims
-    a = a(irange(), irange());
     b = nd::empty(2, "float32");
     src_tp[0] = a.get_type();
     src_arrmeta[0] = a.get_arrmeta();
     af.instantiate(&af, &ckb, 0, b.get_type(), b.get_arrmeta(),
                         src_tp, src_arrmeta, kernel_request_single,
-                        &eval::default_eval_context);
+                        nd::array(), &eval::default_eval_context);
 
     // Call it on the data
     ckb(b.get_readwrite_originptr(), a.get_readonly_originptr());
@@ -471,17 +457,15 @@ TEST(Reduction, BuiltinSum_Lift2D_StridedStrided_ReduceBroadcast_KeepDim) {
     arrfunc_type_data af;
     bool reduction_dimflags[2] = {true, false};
     lift_reduction_arrfunc(&af, reduction_kernel,
-                    ndt::type("strided * strided * float32"), nd::array(), true,
+                    ndt::type("fixed * fixed * float32"), nd::array(), true,
                     2, reduction_dimflags, true, true, false, nd::array());
 
     // Set up some data for the test reduction
     nd::array a = parse_json("2 * 3 * float32",
             "[[1.5, 2, 7], [-2.25, 7, 2.125]]");
-    // Slice the array so it is "strided * strided * float32" instead of fixed dims
-    a = a(irange(), irange());
-    ASSERT_EQ(af.get_param_type(0), a.get_type());
+    EXPECT_TYPE_MATCHES(af.get_param_type(0), a.get_type());
     nd::array b = nd::empty(1, 3, "float32");
-    ASSERT_EQ(af.get_return_type(), b.get_type());
+    EXPECT_TYPE_MATCHES(af.get_return_type(), b.get_type());
 
     // Instantiate the lifted ckernel
     unary_ckernel_builder ckb;
@@ -489,7 +473,7 @@ TEST(Reduction, BuiltinSum_Lift2D_StridedStrided_ReduceBroadcast_KeepDim) {
     const char *src_arrmeta[1] = {a.get_arrmeta()};
     af.instantiate(&af, &ckb, 0, b.get_type(), b.get_arrmeta(),
                         src_tp, src_arrmeta, kernel_request_single,
-                        &eval::default_eval_context);
+                        nd::array(), &eval::default_eval_context);
 
     // Call it on the data
     ckb(b.get_readwrite_originptr(), a.get_readonly_originptr());
@@ -508,17 +492,15 @@ TEST(Reduction, BuiltinSum_Lift3D_StridedStridedStrided_ReduceReduceReduce) {
     arrfunc_type_data af;
     bool reduction_dimflags[3] = {true, true, true};
     lift_reduction_arrfunc(&af, reduction_kernel,
-                    ndt::type("strided * strided * strided * float32"), nd::array(), false,
+                    ndt::type("fixed * fixed * fixed * float32"), nd::array(), false,
                     3, reduction_dimflags, true, true, false, nd::array());
 
     // Set up some data for the test reduction
     nd::array a = parse_json("2 * 3 * 2 * float32",
             "[[[1.5, -2.375], [2, 1.25], [7, -0.5]], [[-2.25, 1], [7, 0], [2.125, 0.25]]]");
-    // Slice the array so it is "strided * strided * strided * float32" instead of fixed dims
-    a = a(irange(), irange(), irange());
-    ASSERT_EQ(af.get_param_type(0), a.get_type());
+    EXPECT_TYPE_MATCHES(af.get_param_type(0), a.get_type());
     nd::array b = nd::empty("float32");
-    ASSERT_EQ(af.get_return_type(), b.get_type());
+    EXPECT_TYPE_MATCHES(af.get_return_type(), b.get_type());
 
     // Instantiate the lifted ckernel
     unary_ckernel_builder ckb;
@@ -526,7 +508,7 @@ TEST(Reduction, BuiltinSum_Lift3D_StridedStridedStrided_ReduceReduceReduce) {
     const char *src_arrmeta[1] = {a.get_arrmeta()};
     af.instantiate(&af, &ckb, 0, b.get_type(), b.get_arrmeta(),
                         src_tp, src_arrmeta, kernel_request_single,
-                        &eval::default_eval_context);
+                        nd::array(), &eval::default_eval_context);
 
     // Call it on the data
     ckb(b.get_readwrite_originptr(), a.get_readonly_originptr());
@@ -544,17 +526,15 @@ TEST(Reduction, BuiltinSum_Lift3D_StridedStridedStrided_BroadcastReduceReduce) {
     arrfunc_type_data af;
     bool reduction_dimflags[3] = {false, true, true};
     lift_reduction_arrfunc(&af, reduction_kernel,
-                    ndt::type("strided * strided * strided * float32"), nd::array(), false,
+                    ndt::type("fixed * fixed * fixed * float32"), nd::array(), false,
                     3, reduction_dimflags, true, true, false, nd::array());
 
     // Set up some data for the test reduction
     nd::array a = parse_json("2 * 3 * 2 * float32",
             "[[[1.5, -2.375], [2, 1.25], [7, -0.5]], [[-2.25, 1], [7, 0], [2.125, 0.25]]]");
-    // Slice the array so it is "strided * strided * strided * float32" instead of fixed dims
-    a = a(irange(), irange(), irange());
-    ASSERT_EQ(af.get_param_type(0), a.get_type());
+    EXPECT_TYPE_MATCHES(af.get_param_type(0), a.get_type());
     nd::array b = nd::empty(2, "float32");
-    ASSERT_EQ(af.get_return_type(), b.get_type());
+    EXPECT_TYPE_MATCHES(af.get_return_type(), b.get_type());
 
     // Instantiate the lifted ckernel
     unary_ckernel_builder ckb;
@@ -562,7 +542,7 @@ TEST(Reduction, BuiltinSum_Lift3D_StridedStridedStrided_BroadcastReduceReduce) {
     const char *src_arrmeta[1] = {a.get_arrmeta()};
     af.instantiate(&af, &ckb, 0, b.get_type(), b.get_arrmeta(),
                         src_tp, src_arrmeta, kernel_request_single,
-                        &eval::default_eval_context);
+                        nd::array(), &eval::default_eval_context);
 
     // Call it on the data
     ckb(b.get_readwrite_originptr(), a.get_readonly_originptr());
@@ -582,17 +562,16 @@ TEST(Reduction, BuiltinSum_Lift3D_StridedStridedStrided_ReduceBroadcastReduce) {
     arrfunc_type_data af;
     bool reduction_dimflags[3] = {true, false, true};
     lift_reduction_arrfunc(&af, reduction_kernel,
-                    ndt::type("strided * strided * strided * float32"), nd::array(), false,
+                    ndt::type("fixed * fixed * fixed * float32"), nd::array(), false,
                     3, reduction_dimflags, true, true, false, nd::array());
 
     // Set up some data for the test reduction
     nd::array a = parse_json("2 * 3 * 2 * float32",
             "[[[1.5, -2.375], [2, 1.25], [7, -0.5]], [[-2.25, 1], [7, 0], [2.125, 0.25]]]");
-    // Slice the array so it is "strided * strided * strided * float32" instead of fixed dims
     a = a(irange(), irange(), irange());
-    ASSERT_EQ(af.get_param_type(0), a.get_type());
+    EXPECT_TYPE_MATCHES(af.get_param_type(0), a.get_type());
     nd::array b = nd::empty(3, "float32");
-    ASSERT_EQ(af.get_return_type(), b.get_type());
+    EXPECT_TYPE_MATCHES(af.get_return_type(), b.get_type());
 
     // Instantiate the lifted ckernel
     unary_ckernel_builder ckb;
@@ -600,7 +579,7 @@ TEST(Reduction, BuiltinSum_Lift3D_StridedStridedStrided_ReduceBroadcastReduce) {
     const char *src_arrmeta[1] = {a.get_arrmeta()};
     af.instantiate(&af, &ckb, 0, b.get_type(), b.get_arrmeta(),
                         src_tp, src_arrmeta, kernel_request_single,
-                        &eval::default_eval_context);
+                        nd::array(), &eval::default_eval_context);
 
     // Call it on the data
     ckb(b.get_readwrite_originptr(), a.get_readonly_originptr());

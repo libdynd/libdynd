@@ -9,6 +9,7 @@
 #include <dynd/type.hpp>
 #include <dynd/types/base_bytes_type.hpp>
 #include <dynd/typed_data_assign.hpp>
+#include <dynd/types/static_type_instances.hpp>
 
 namespace dynd {
 
@@ -60,8 +61,7 @@ public:
 
     bool operator==(const base_type& rhs) const;
 
-    void arrmeta_default_construct(char *arrmeta, intptr_t ndim,
-                                   const intptr_t *shape) const;
+    void arrmeta_default_construct(char *arrmeta, bool blockref_alloc) const;
     void arrmeta_copy_construct(char *dst_arrmeta, const char *src_arrmeta,
                                 memory_block_data *embedded_reference) const;
     void arrmeta_reset_buffers(char *arrmeta) const;
@@ -84,9 +84,15 @@ public:
 };
 
 namespace ndt {
-    inline ndt::type make_bytes(size_t alignment) {
-        return ndt::type(new bytes_type(alignment), false);
-    }
+  inline const ndt::type &make_bytes()
+  {
+    return *reinterpret_cast<const ndt::type *>(&types::bytes_tp);
+  }
+
+  inline ndt::type make_bytes(size_t alignment)
+  {
+    return ndt::type(new bytes_type(alignment), false);
+  }
 } // namespace ndt
 
 } // namespace dynd

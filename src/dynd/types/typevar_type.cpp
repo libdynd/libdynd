@@ -81,11 +81,11 @@ bool typevar_type::operator==(const base_type& rhs) const
     }
 }
 
-void typevar_type::arrmeta_default_construct(
-    char *DYND_UNUSED(arrmeta), intptr_t DYND_UNUSED(ndim),
-    const intptr_t *DYND_UNUSED(shape)) const
+void
+typevar_type::arrmeta_default_construct(char *DYND_UNUSED(arrmeta),
+                                        bool DYND_UNUSED(blockref_alloc)) const
 {
-    throw type_error("Cannot store data of typevar type");
+  throw type_error("Cannot store data of typevar type");
 }
 
 void typevar_type::arrmeta_copy_construct(
@@ -133,4 +133,19 @@ bool dynd::is_valid_typevar_name(const char *begin, const char *end)
     } else {
         return false;
     }
+}
+
+void ndt::make_typevar_range(const char *name, intptr_t count,
+                                  std::vector<ndt::type> &out)
+{
+  string s(name);
+  s += '0';
+  if (count > 10) {
+    throw runtime_error("TODO: extend make_typevar_range");
+  }
+  out.resize(count);
+  for (int i = 0; i < count; ++i) {
+    out[i] = ndt::make_typevar(s);
+    s[s.size() - 1]++;
+  }
 }

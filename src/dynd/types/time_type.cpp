@@ -470,7 +470,7 @@ struct time_is_avail_ck {
                                 const ndt::type *src_tp,
                                 const char *const *DYND_UNUSED(src_arrmeta),
                                 kernel_request_t kernreq,
-                                const eval::eval_context *DYND_UNUSED(ectx))
+                                const nd::array &DYND_UNUSED(aux), const eval::eval_context *DYND_UNUSED(ectx))
     {
         if (src_tp[0].get_type_id() != option_type_id ||
                 src_tp[0].tcast<option_type>()->get_value_type().get_type_id() !=
@@ -514,7 +514,7 @@ struct time_assign_na_ck {
                                 const ndt::type *DYND_UNUSED(src_tp),
                                 const char *const *DYND_UNUSED(src_arrmeta),
                                 kernel_request_t kernreq,
-                                const eval::eval_context *DYND_UNUSED(ectx))
+                                const nd::array &DYND_UNUSED(aux), const eval::eval_context *DYND_UNUSED(ectx))
     {
         if (dst_tp.get_type_id() != option_type_id ||
                 dst_tp.tcast<option_type>()->get_value_type().get_type_id() !=
@@ -546,14 +546,4 @@ nd::array time_type::get_option_nafunc() const
     assign_na->instantiate = &time_assign_na_ck::instantiate;
     naf.flag_as_immutable();
     return naf;
-}
-
-const ndt::type& ndt::make_time()
-{
-    // Static instance of the type, which has a reference count > 0 for the
-    // lifetime of the program. This static construction is inside a
-    // function to ensure correct creation order during startup.
-    static time_type tt(tz_abstract);
-    static const ndt::type static_instance(&tt, true);
-    return static_instance;
 }

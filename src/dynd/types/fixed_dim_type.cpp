@@ -5,7 +5,6 @@
 
 #include <dynd/types/fixed_dim_type.hpp>
 #include <dynd/types/cfixed_dim_type.hpp>
-#include <dynd/types/strided_dim_type.hpp>
 #include <dynd/types/type_alignment.hpp>
 #include <dynd/shape_tools.hpp>
 #include <dynd/exceptions.hpp>
@@ -36,16 +35,10 @@ fixed_dim_type::~fixed_dim_type()
 {
 }
 
-size_t fixed_dim_type::get_default_data_size(intptr_t ndim, const intptr_t *shape) const
+size_t fixed_dim_type::get_default_data_size() const
 {
     if (!m_element_tp.is_builtin()) {
-        if (ndim > 1) {
-            return m_dim_size * m_element_tp.extended()->get_default_data_size(
-                                    ndim - 1, shape + 1);
-        } else {
-            return m_dim_size *
-                   m_element_tp.extended()->get_default_data_size(0, NULL);
-        }
+      return m_dim_size * m_element_tp.extended()->get_default_data_size();
     } else {
         return m_dim_size * m_element_tp.get_data_size();
     }
@@ -80,12 +73,15 @@ bool fixed_dim_type::is_unique_data_owner(const char *arrmeta) const
     }
 }
 
-void fixed_dim_type::transform_child_types(type_transform_fn_t transform_fn, void *extra,
-                ndt::type& out_transformed_tp, bool& out_was_transformed) const
+void fixed_dim_type::transform_child_types(type_transform_fn_t transform_fn,
+                                           intptr_t arrmeta_offset, void *extra,
+                                           ndt::type &out_transformed_tp,
+                                           bool &out_was_transformed) const
 {
     ndt::type tmp_tp;
     bool was_transformed = false;
-    transform_fn(m_element_tp, extra, tmp_tp, was_transformed);
+    transform_fn(m_element_tp, arrmeta_offset + sizeof(fixed_dim_type_arrmeta),
+                 extra, tmp_tp, was_transformed);
     if (was_transformed) {
         out_transformed_tp = ndt::type(new fixed_dim_type(m_dim_size, tmp_tp), false);
         out_was_transformed = true;
@@ -100,31 +96,43 @@ ndt::type fixed_dim_type::get_canonical_type() const
     return ndt::type(new fixed_dim_type(m_dim_size, m_element_tp.get_canonical_type()), false);
 }
 
-ndt::type fixed_dim_type::apply_linear_index(intptr_t nindices, const irange *indices,
-                size_t current_i, const ndt::type& root_tp, bool leading_dimension) const
+ndt::type fixed_dim_type::apply_linear_index(intptr_t nindices,
+                                             const irange *indices,
+                                             size_t current_i,
+                                             const ndt::type &root_tp,
+                                             bool leading_dimension) const
 {
-    if (nindices == 0) {
-        return ndt::type(this, true);
-    } else {
-        if (indices->step() == 0) {
-            return m_element_tp.apply_linear_index(nindices-1, indices+1,
-                            current_i+1, root_tp, leading_dimension);
-        } else {
-            return ndt::make_strided_dim(m_element_tp.apply_linear_index(nindices-1, indices+1,
-                            current_i+1, root_tp, false));
-        }
+  if (nindices == 0) {
+    return ndt::type(this, true);
+  }
+  else {
+    bool remove_dimension;
+    intptr_t start_index, index_stride, dimension_size;
+    apply_single_linear_index(*indices, m_dim_size, current_i, &root_tp,
+                              remove_dimension, start_index, index_stride,
+                              dimension_size);
+    if (remove_dimension) {
+      return m_element_tp.apply_linear_index(
+          nindices - 1, indices + 1, current_i + 1, root_tp, leading_dimension);
     }
+    else {
+      return ndt::make_fixed_dim(
+          dimension_size,
+          m_element_tp.apply_linear_index(nindices - 1, indices + 1,
+                                          current_i + 1, root_tp, false));
+    }
+  }
 }
 
-intptr_t fixed_dim_type::apply_linear_index(intptr_t nindices, const irange *indices, const char *arrmeta,
-                const ndt::type& result_tp, char *out_arrmeta,
-                memory_block_data *embedded_reference,
-                size_t current_i, const ndt::type& root_tp,
-                bool leading_dimension, char **inout_data,
-                memory_block_data **inout_dataref) const
+intptr_t fixed_dim_type::apply_linear_index(
+    intptr_t nindices, const irange *indices, const char *arrmeta,
+    const ndt::type &result_tp, char *out_arrmeta,
+    memory_block_data *embedded_reference, size_t current_i,
+    const ndt::type &root_tp, bool leading_dimension, char **inout_data,
+    memory_block_data **inout_dataref) const
 {
     const fixed_dim_type_arrmeta *md = reinterpret_cast<const fixed_dim_type_arrmeta *>(arrmeta);
-    strided_dim_type_arrmeta *out_md = reinterpret_cast<strided_dim_type_arrmeta *>(out_arrmeta);
+    fixed_dim_type_arrmeta *out_md = reinterpret_cast<fixed_dim_type_arrmeta *>(out_arrmeta);
     if (nindices == 0) {
         // If there are no more indices, copy the rest verbatim
         arrmeta_copy_construct(out_arrmeta, arrmeta, embedded_reference);
@@ -163,12 +171,12 @@ intptr_t fixed_dim_type::apply_linear_index(intptr_t nindices, const irange *ind
             out_md->stride = md->stride * index_stride;
             out_md->dim_size = dimension_size;
             if (!m_element_tp.is_builtin()) {
-                const strided_dim_type *result_etp = result_tp.tcast<strided_dim_type>();
+                const fixed_dim_type *result_etp = result_tp.tcast<fixed_dim_type>();
                 offset += m_element_tp.extended()->apply_linear_index(
                     nindices - 1, indices + 1,
                     arrmeta + sizeof(fixed_dim_type_arrmeta),
                     result_etp->get_element_type(),
-                    out_arrmeta + sizeof(strided_dim_type_arrmeta),
+                    out_arrmeta + sizeof(fixed_dim_type_arrmeta),
                     embedded_reference, current_i + 1, root_tp, false, NULL,
                     NULL);
             }
@@ -299,20 +307,11 @@ bool fixed_dim_type::operator==(const base_type &rhs) const
   }
 }
 
-void fixed_dim_type::arrmeta_default_construct(char *arrmeta, intptr_t ndim,
-                                               const intptr_t *shape) const
+void fixed_dim_type::arrmeta_default_construct(char *arrmeta, bool blockref_alloc) const
 {
-  // Validate that the shape is ok
-  if (ndim > 0 && shape[0] >= 0 && shape[0] != (intptr_t)m_dim_size) {
-    stringstream ss;
-    ss << "the fixed_dim type requires a shape match (provided ";
-    ss << shape[0] << ", required " << m_dim_size;
-    throw std::runtime_error(ss.str());
-  }
   size_t element_size = m_element_tp.is_builtin()
                             ? m_element_tp.get_data_size()
-                            : m_element_tp.extended()->get_default_data_size(
-                                  std::max(ndim - 1, (intptr_t)0), shape + 1);
+                            : m_element_tp.extended()->get_default_data_size();
 
   fixed_dim_type_arrmeta *md =
       reinterpret_cast<fixed_dim_type_arrmeta *>(arrmeta);
@@ -320,7 +319,7 @@ void fixed_dim_type::arrmeta_default_construct(char *arrmeta, intptr_t ndim,
   md->stride = m_dim_size > 1 ? element_size : 0;
   if (!m_element_tp.is_builtin()) {
     m_element_tp.extended()->arrmeta_default_construct(
-        arrmeta + sizeof(fixed_dim_type_arrmeta), ndim - 1, shape + 1);
+        arrmeta + sizeof(fixed_dim_type_arrmeta), blockref_alloc);
   }
 }
 
@@ -560,20 +559,140 @@ void fixed_dim_type::foreach_leading(const char *arrmeta, char *data,
     }
 }
 
-ndt::type dynd::ndt::make_fixed_dim(intptr_t ndim, const intptr_t *shape,
-                                    const ndt::type &uniform_tp)
+ndt::type ndt::make_fixed_dim(size_t dim_size, const ndt::type &element_tp)
 {
-    ndt::type result = uniform_tp;
-    for (ptrdiff_t i = (ptrdiff_t)ndim-1; i >= 0; --i) {
-        result = ndt::make_fixed_dim(shape[i], result);
-    }
-    return result;
+  return ndt::type(new fixed_dim_type(dim_size, element_tp), false);
 }
 
-void fixed_dim_type::reorder_default_constructed_strides(char *DYND_UNUSED(dst_arrmeta),
-                const ndt::type& DYND_UNUSED(src_tp), const char *DYND_UNUSED(src_arrmeta)) const
+ndt::type ndt::make_fixed_dim(intptr_t ndim, const intptr_t *shape,
+                              const ndt::type &uniform_tp)
 {
-    throw runtime_error("TODO: fixed_dim_type::reorder_default_constructed_strides");
+  ndt::type result = uniform_tp;
+  for (ptrdiff_t i = (ptrdiff_t)ndim - 1; i >= 0; --i) {
+    result = ndt::make_fixed_dim(shape[i], result);
+  }
+  return result;
+}
+
+void fixed_dim_type::reorder_default_constructed_strides(
+    char *dst_arrmeta, const ndt::type &src_tp, const char *src_arrmeta) const
+{
+  if (m_element_tp.get_type_id() != fixed_dim_type_id) {
+    // Nothing to do if there's just one reorderable dimension
+    return;
+  }
+
+  if (get_ndim() > src_tp.get_ndim()) {
+    // If the destination has more dimensions than the source,
+    // do the reordering starting from where they match, to
+    // follow the broadcasting rules.
+    if (m_element_tp.get_type_id() == fixed_dim_type_id) {
+      const fixed_dim_type *sdd = m_element_tp.tcast<fixed_dim_type>();
+      sdd->reorder_default_constructed_strides(
+          dst_arrmeta + sizeof(fixed_dim_type_arrmeta), src_tp, src_arrmeta);
+    }
+    return;
+  }
+
+  // Find the total number of dimensions we might be reordering, then process
+  // them all at once. This code handles a whole chain of fixed_dim_type
+  // instances at once.
+  size_t ndim = 1;
+  ndt::type last_dt = m_element_tp;
+  do {
+    ++ndim;
+    last_dt = last_dt.tcast<fixed_dim_type>()->get_element_type();
+  } while (last_dt.get_type_id() == fixed_dim_type_id);
+
+  dimvector strides(ndim);
+  ndt::type last_src_tp = src_tp;
+  intptr_t previous_stride = 0;
+  size_t ndim_partial = 0;
+  // Get representative strides from all the strided source dimensions
+  bool c_order = true;
+  for (size_t i = 0; i < ndim; ++i) {
+    intptr_t stride;
+    switch (last_src_tp.get_type_id()) {
+    case fixed_dim_type_id:
+    case cfixed_dim_type_id: {
+      const fixed_dim_type_arrmeta *md =
+          reinterpret_cast<const fixed_dim_type_arrmeta *>(src_arrmeta);
+      stride = md->stride;
+      last_src_tp = last_src_tp.tcast<base_dim_type>()->get_element_type();
+      src_arrmeta += sizeof(fixed_dim_type_arrmeta);
+      break;
+    }
+    default:
+      stride = numeric_limits<intptr_t>::max();
+      break;
+    }
+    ndim_partial = i + 1;
+    // To check for C-order, we skip over any 0-strides, and
+    // check if a stride ever gets  bigger instead of always
+    // getting smaller.
+    if (stride != 0) {
+      if (stride == numeric_limits<intptr_t>::max()) {
+        break;
+      }
+      if (previous_stride != 0 && previous_stride < stride) {
+        c_order = false;
+      }
+      previous_stride = stride;
+    }
+    strides[i] = stride;
+  }
+
+  // If it wasn't all C-order, reorder the axes
+  if (!c_order) {
+    shortvector<int> axis_perm(ndim_partial);
+    strides_to_axis_perm(ndim_partial, strides.get(), axis_perm.get());
+    fixed_dim_type_arrmeta *md =
+        reinterpret_cast<fixed_dim_type_arrmeta *>(dst_arrmeta);
+    intptr_t stride = md[ndim_partial - 1].stride;
+    if (stride == 0) {
+      // Because of the rule that size one dimensions have
+      // zero stride, may have to look further
+      intptr_t i = ndim_partial - 2;
+      do {
+        stride = md[i].stride;
+      } while (stride == 0 && i >= 0);
+    }
+    for (size_t i = 0; i < ndim_partial; ++i) {
+      int i_perm = axis_perm[i];
+      fixed_dim_type_arrmeta &i_md = md[i_perm];
+      intptr_t dim_size = i_md.dim_size;
+      i_md.stride = dim_size > 1 ? stride : 0;
+      stride *= dim_size;
+    }
+  }
+
+  // If that didn't cover all the dimensions, then get the
+  // axis order classification to handle the rest
+  if (ndim_partial < ndim && !last_src_tp.is_builtin()) {
+    axis_order_classification_t aoc =
+        last_src_tp.extended()->classify_axis_order(src_arrmeta);
+    // TODO: Allow user control by adding a "default axis order" to the
+    // evaluation context
+    if (aoc == axis_order_f) {
+      // If it's F-order, reverse the ordering of the strides
+      fixed_dim_type_arrmeta *md =
+          reinterpret_cast<fixed_dim_type_arrmeta *>(dst_arrmeta);
+      intptr_t stride = md[ndim - 1].stride;
+      if (stride == 0) {
+        // Because of the rule that size one dimensions have
+        // zero stride, may have to look further
+        intptr_t i = ndim - 2;
+        do {
+          stride = md[i].stride;
+        } while (stride == 0 && i >= (intptr_t)ndim_partial);
+      }
+      for (size_t i = ndim_partial; i != ndim; ++i) {
+        intptr_t dim_size = md[i].dim_size;
+        md[i].stride = dim_size > 1 ? stride : 0;
+        stride *= dim_size;
+      }
+    }
+  }
 }
 
 static intptr_t get_fixed_dim_size(const ndt::type& dt) {

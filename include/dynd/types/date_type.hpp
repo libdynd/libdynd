@@ -8,6 +8,7 @@
 
 #include <dynd/type.hpp>
 #include <dynd/types/date_util.hpp>
+#include <dynd/types/static_type_instances.hpp>
 
 namespace dynd {
 
@@ -34,8 +35,7 @@ public:
     bool operator==(const base_type& rhs) const;
 
     void arrmeta_default_construct(char *DYND_UNUSED(arrmeta),
-                                    intptr_t DYND_UNUSED(ndim),
-                                    const intptr_t *DYND_UNUSED(shape)) const
+                                   bool DYND_UNUSED(blockref_alloc)) const
     {
     }
     void arrmeta_copy_construct(
@@ -99,8 +99,11 @@ public:
 };
 
 namespace ndt {
-    /** Returns type "date" */
-    const ndt::type& make_date();
+  /** Returns type "date" */
+  inline const ndt::type &make_date()
+  {
+    return *reinterpret_cast<const ndt::type *>(&types::date_tp);
+  }
 } // namespace ndt
 
 } // namespace dynd

@@ -33,7 +33,7 @@ base_struct_type::base_struct_type(type_id_t type_id,
     }
 
     // Make sure that the number of names matches
-    intptr_t name_count = reinterpret_cast<const strided_dim_type_arrmeta *>(
+    intptr_t name_count = reinterpret_cast<const fixed_dim_type_arrmeta *>(
                               m_field_names.get_arrmeta())->dim_size;
     if (name_count != m_field_count) {
         stringstream ss;
@@ -57,7 +57,7 @@ intptr_t base_struct_type::get_field_index(const char *field_name_begin,
         intptr_t field_count = get_field_count();
         const char *fn_ptr = m_field_names.get_readonly_originptr();
         intptr_t fn_stride =
-            reinterpret_cast<const strided_dim_type_arrmeta *>(
+            reinterpret_cast<const fixed_dim_type_arrmeta *>(
                 m_field_names.get_arrmeta())->stride;
         for (intptr_t i = 0; i != field_count; ++i, fn_ptr += fn_stride) {
             const string_type_data *fn = reinterpret_cast<const string_type_data *>(fn_ptr);
@@ -97,17 +97,16 @@ ndt::type base_struct_type::apply_linear_index(intptr_t nindices,
             return ndt::type(this, true);
         } else {
             // Take the subset of the fields in-place
-            nd::array tmp_field_types(nd::typed_empty(
-                1, &dimension_size, ndt::make_strided_of_type()));
+            nd::array tmp_field_types(nd::empty(dimension_size, ndt::make_type()));
             ndt::type *tmp_field_types_raw = reinterpret_cast<ndt::type *>(
                 tmp_field_types.get_readwrite_originptr());
 
-            // Make a "strided * string" array without copying the actual
+            // Make an "N * string" array without copying the actual
             // string text data. TODO: encapsulate this into a function.
             char *data_ptr;
             string_type_data *string_arr_ptr;
             ndt::type stp = ndt::make_string(string_encoding_utf_8);
-            ndt::type tp = ndt::make_strided_dim(stp);
+            ndt::type tp = ndt::make_fixed_dim(dimension_size, stp);
             nd::array tmp_field_names(
                 make_array_memory_block(tp.extended()->get_arrmeta_size(),
                                         dimension_size * stp.get_data_size(),
@@ -120,19 +119,19 @@ ndt::type base_struct_type::apply_linear_index(intptr_t nindices,
             ndo->m_flags = nd::default_access_flags;
             string_arr_ptr = reinterpret_cast<string_type_data *>(data_ptr);
             // Get the allocator for the output string type
-            strided_dim_type_arrmeta *md =
-                reinterpret_cast<strided_dim_type_arrmeta *>(
+            fixed_dim_type_arrmeta *md =
+                reinterpret_cast<fixed_dim_type_arrmeta *>(
                     tmp_field_names.get_arrmeta());
             md->dim_size = dimension_size;
             md->stride = stp.get_data_size();
             string_type_arrmeta *smd =
                 reinterpret_cast<string_type_arrmeta *>(
                     tmp_field_names.get_arrmeta() +
-                    sizeof(strided_dim_type_arrmeta));
+                    sizeof(fixed_dim_type_arrmeta));
             const string_type_arrmeta *smd_orig =
                 reinterpret_cast<const string_type_arrmeta *>(
                     m_field_names.get_arrmeta() +
-                    sizeof(strided_dim_type_arrmeta));
+                    sizeof(fixed_dim_type_arrmeta));
             smd->blockref = smd_orig->blockref
                                 ? smd_orig->blockref
                                 : m_field_names.get_memblock().get();

@@ -13,6 +13,7 @@
 #include <dynd/typed_data_assign.hpp>
 #include <dynd/types/view_type.hpp>
 #include <dynd/string_encodings.hpp>
+#include <dynd/types/static_type_instances.hpp>
 
 namespace dynd {
 
@@ -50,7 +51,9 @@ public:
 
     bool operator==(const base_type& rhs) const;
 
-    void arrmeta_default_construct(char *DYND_UNUSED(arrmeta), intptr_t DYND_UNUSED(ndim), const intptr_t* DYND_UNUSED(shape)) const {
+    void arrmeta_default_construct(char *DYND_UNUSED(arrmeta),
+                                   bool DYND_UNUSED(blockref_alloc)) const
+    {
     }
     void arrmeta_copy_construct(char *DYND_UNUSED(dst_arrmeta), const char *DYND_UNUSED(src_arrmeta), memory_block_data *DYND_UNUSED(embedded_reference)) const {
     }
@@ -77,9 +80,17 @@ public:
 };
 
 namespace ndt {
-    inline ndt::type make_char(string_encoding_t encoding = string_encoding_utf_32) {
-        return ndt::type(new char_type(encoding), false);
-    }
+  inline const ndt::type &
+  make_char()
+  {
+    return *reinterpret_cast<const ndt::type *>(&types::char_tp);
+  }
+
+  inline ndt::type
+  make_char(string_encoding_t encoding)
+  {
+    return ndt::type(new char_type(encoding), false);
+  }
 } // namespace ndt
 
 } // namespace dynd

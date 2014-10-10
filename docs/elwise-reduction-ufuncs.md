@@ -220,7 +220,7 @@ function has a type signature like
 
 and a Python function has an opportunity to fill
 in the type variable values in the return type. The
-ReductionBlazeFunc accepts ``axis=`` and ``keepdims=``
+reduction arrfunc accepts ``axis=`` and ``keepdims=``
 keyword arguments, which are used to control how
 the dependent return type is computed. Here's
 some example code:

@@ -11,7 +11,7 @@
 #include <dynd/types/categorical_type.hpp>
 #include <dynd/kernels/assignment_kernels.hpp>
 #include <dynd/kernels/comparison_kernels.hpp>
-#include <dynd/types/strided_dim_type.hpp>
+#include <dynd/types/fixed_dim_type.hpp>
 #include <dynd/types/convert_type.hpp>
 #include <dynd/func/make_callable.hpp>
 
@@ -198,10 +198,10 @@ static nd::array make_sorted_categories(const set<const char *, cmp> &uniques,
     unary_ckernel_builder k;
     make_assignment_kernel(
         &k, 0, element_tp,
-        categories.get_arrmeta() + sizeof(strided_dim_type_arrmeta), element_tp,
+        categories.get_arrmeta() + sizeof(fixed_dim_type_arrmeta), element_tp,
         arrmeta, kernel_request_single, &eval::default_eval_context);
 
-    intptr_t stride = reinterpret_cast<const strided_dim_type_arrmeta *>(categories.get_arrmeta())->stride;
+    intptr_t stride = reinterpret_cast<const fixed_dim_type_arrmeta *>(categories.get_arrmeta())->stride;
     char *dst_ptr = categories.get_readwrite_originptr();
     for (set<const char *, cmp>::const_iterator it = uniques.begin(); it != uniques.end(); ++it) {
         k(dst_ptr, *it);
@@ -235,8 +235,8 @@ categorical_type::categorical_type(const nd::array& categories, bool presorted)
     } else {
         // Process the categories array to make sure it's valid
         const ndt::type& cdt = categories.get_type();
-        if (cdt.get_type_id() != strided_dim_type_id) {
-            throw dynd::type_error("categorical_type only supports construction from a strided array of categories");
+        if (cdt.get_type_id() != fixed_dim_type_id) {
+            throw dynd::type_error("categorical_type only supports construction from a fixed-dim array of categories");
         }
         m_category_tp = categories.get_type().at(0);
         if (!m_category_tp.is_scalar()) {
@@ -244,9 +244,11 @@ categorical_type::categorical_type(const nd::array& categories, bool presorted)
         }
 
         category_count = categories.get_dim_size();
-        intptr_t categories_stride = reinterpret_cast<const strided_dim_type_arrmeta *>(categories.get_arrmeta())->stride;
+        intptr_t categories_stride =
+            reinterpret_cast<const fixed_dim_type_arrmeta *>(
+                categories.get_arrmeta())->stride;
 
-        const char *categories_element_arrmeta = categories.get_arrmeta() + sizeof(strided_dim_type_arrmeta);
+        const char *categories_element_arrmeta = categories.get_arrmeta() + sizeof(fixed_dim_type_arrmeta);
         comparison_ckernel_builder k;
         ::make_comparison_kernel(&k, 0,
                         m_category_tp, categories_element_arrmeta,
@@ -329,7 +331,7 @@ void categorical_type::print_data(std::ostream& o, const char *DYND_UNUSED(arrme
 void categorical_type::print_type(std::ostream& o) const
 {
     size_t category_count = get_category_count();
-    const char *arrmeta = m_categories.get_arrmeta() + sizeof(strided_dim_type_arrmeta);
+    const char *arrmeta = m_categories.get_arrmeta() + sizeof(fixed_dim_type_arrmeta);
 
     o << "categorical[" << m_category_tp;
     o << ", [";
@@ -541,10 +543,10 @@ bool categorical_type::operator==(const base_type& rhs) const
 
 }
 
-void categorical_type::arrmeta_default_construct(char *DYND_UNUSED(arrmeta),
-                intptr_t DYND_UNUSED(ndim), const intptr_t* DYND_UNUSED(shape)) const
+void categorical_type::arrmeta_default_construct(
+    char *DYND_UNUSED(arrmeta), bool DYND_UNUSED(blockref_alloc)) const
 {
-    // Data is stored as uint##, no arrmeta to process
+  // Data is stored as uint##, no arrmeta to process
 }
 
 void categorical_type::arrmeta_copy_construct(char *DYND_UNUSED(dst_arrmeta),
@@ -602,16 +604,14 @@ static nd::array property_ndo_get_ints(const nd::array& n) {
     return n.view_scalars(cd->get_storage_type());
 }
 
+static size_t categorical_array_properties_size;
+static pair<string, gfunc::callable> *categorical_array_properties;
 void categorical_type::get_dynamic_array_properties(
                 const std::pair<std::string, gfunc::callable> **out_properties,
                 size_t *out_count) const
 {
-    static pair<string, gfunc::callable> categorical_array_properties[] = {
-        pair<string, gfunc::callable>(
-            "ints", gfunc::make_callable(&property_ndo_get_ints, "self"))};
-
-    *out_properties = categorical_array_properties;
-    *out_count = sizeof(categorical_array_properties) / sizeof(categorical_array_properties[0]);
+  *out_properties = categorical_array_properties;
+  *out_count = categorical_array_properties_size;
 }
 
 static nd::array property_type_get_categories(const ndt::type& d) {
@@ -648,3 +648,17 @@ void categorical_type::get_dynamic_type_properties(
     *out_count = sizeof(categorical_type_properties) / sizeof(categorical_type_properties[0]);
 }
 
+void init::categorical_type_init()
+{
+  categorical_array_properties_size = 1;
+  categorical_array_properties =
+      new pair<string, gfunc::callable>[categorical_array_properties_size];
+  categorical_array_properties[0] = pair<string, gfunc::callable>(
+      "ints", gfunc::make_callable(&property_ndo_get_ints, "self"));
+}
+
+void init::categorical_type_cleanup()
+{
+  delete[] categorical_array_properties;
+  categorical_array_properties = NULL;
+}

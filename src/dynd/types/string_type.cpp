@@ -9,7 +9,6 @@
 #include <dynd/kernels/string_comparison_kernels.hpp>
 #include <dynd/kernels/string_numeric_assignment_kernels.hpp>
 #include <dynd/types/fixedstring_type.hpp>
-#include <dynd/types/strided_dim_type.hpp>
 #include <dynd/types/option_type.hpp>
 #include <dynd/types/typevar_type.hpp>
 #include <dynd/iter/string_iter.hpp>
@@ -174,11 +173,14 @@ bool string_type::operator==(const base_type& rhs) const
     }
 }
 
-void string_type::arrmeta_default_construct(char *arrmeta, intptr_t DYND_UNUSED(ndim), const intptr_t* DYND_UNUSED(shape)) const
+void string_type::arrmeta_default_construct(char *arrmeta,
+                                            bool blockref_alloc) const
 {
-    // Simply allocate a POD memory block
+  // Simply allocate a POD memory block
+  if (blockref_alloc) {
     string_type_arrmeta *md = reinterpret_cast<string_type_arrmeta *>(arrmeta);
     md->blockref = make_pod_memory_block().release();
+  }
 }
 
 void string_type::arrmeta_copy_construct(char *dst_arrmeta, const char *src_arrmeta, memory_block_data *embedded_reference) const
@@ -351,7 +353,7 @@ struct string_is_avail_ck {
                                 const ndt::type *src_tp,
                                 const char *const *DYND_UNUSED(src_arrmeta),
                                 kernel_request_t kernreq,
-                                const eval::eval_context *DYND_UNUSED(ectx))
+                                const nd::array &DYND_UNUSED(aux), const eval::eval_context *DYND_UNUSED(ectx))
     {
         if (src_tp[0].get_type_id() != option_type_id ||
                 src_tp[0].tcast<option_type>()->get_value_type().get_type_id() !=
@@ -406,7 +408,7 @@ struct string_assign_na_ck {
                                 const ndt::type *DYND_UNUSED(src_tp),
                                 const char *const *DYND_UNUSED(src_arrmeta),
                                 kernel_request_t kernreq,
-                                const eval::eval_context *DYND_UNUSED(ectx))
+                                const nd::array &DYND_UNUSED(aux), const eval::eval_context *DYND_UNUSED(ectx))
     {
         if (dst_tp.get_type_id() != option_type_id ||
                 dst_tp.tcast<option_type>()->get_value_type().get_type_id() !=
@@ -438,21 +440,4 @@ nd::array string_type::get_option_nafunc() const
     assign_na->instantiate = &string_assign_na_ck::instantiate;
     naf.flag_as_immutable();
     return naf;
-}
-
-const ndt::type& ndt::make_string()
-{
-    // Static instance of type_type, which has a reference count > 0 for the
-    // lifetime of the program. This static construction is inside a
-    // function to ensure correct creation order during startup.
-    static string_type st(string_encoding_utf_8);
-    static const ndt::type static_instance(&st, true);
-    return static_instance;
-}
-
-const ndt::type& ndt::make_strided_of_string()
-{
-    static strided_dim_type sdt(ndt::make_string());
-    static const ndt::type static_instance(&sdt, true);
-    return static_instance;
 }

@@ -42,7 +42,7 @@ size_t make_strided_to_var_dim_assignment_kernel(
 /**
  * Makes a kernel which assigns var dims to strided dims
  */
-size_t make_var_to_strided_dim_assignment_kernel(
+size_t make_var_to_fixed_dim_assignment_kernel(
     ckernel_builder *ckb, intptr_t ckb_offset,
     const ndt::type &dst_strided_dim_dt, const char *dst_arrmeta,
     const ndt::type &src_var_dim_dt, const char *src_arrmeta,

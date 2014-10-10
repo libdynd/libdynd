@@ -353,7 +353,7 @@ struct nafunc {
         intptr_t ckb_offset, const ndt::type &dst_tp,
         const char *DYND_UNUSED(dst_arrmeta), const ndt::type *src_tp,
         const char *const *DYND_UNUSED(src_arrmeta), kernel_request_t kernreq,
-        const eval::eval_context *DYND_UNUSED(ectx))
+        const nd::array &DYND_UNUSED(aux), const eval::eval_context *DYND_UNUSED(ectx))
     {
         if (src_tp[0].get_type_id() != option_type_id ||
                 src_tp[0].tcast<option_type>()->get_value_type().get_type_id() !=
@@ -374,8 +374,10 @@ struct nafunc {
     }
 
     static int resolve_is_avail_dst_type(
-        const arrfunc_type_data *DYND_UNUSED(self), ndt::type &out_dst_tp,
-        const ndt::type *DYND_UNUSED(src_tp), int DYND_UNUSED(throw_on_error))
+        const arrfunc_type_data *DYND_UNUSED(self), intptr_t DYND_UNUSED(nsrc),
+        const ndt::type *DYND_UNUSED(src_tp),
+        const nd::array &DYND_UNUSED(dyn_params),
+        int DYND_UNUSED(throw_on_error), ndt::type &out_dst_tp)
     {
         out_dst_tp = ndt::make_type<dynd_bool>();
         return 1;
@@ -385,7 +387,7 @@ struct nafunc {
         const arrfunc_type_data *DYND_UNUSED(self), dynd::ckernel_builder *ckb,
         intptr_t ckb_offset, const ndt::type &dst_tp, const char *DYND_UNUSED(dst_arrmeta),
         const ndt::type *DYND_UNUSED(src_tp), const char *const *DYND_UNUSED(src_arrmeta),
-        kernel_request_t kernreq, const eval::eval_context *DYND_UNUSED(ectx))
+        kernel_request_t kernreq, const nd::array &DYND_UNUSED(aux), const eval::eval_context *DYND_UNUSED(ectx))
     {
         if (dst_tp.get_type_id() != option_type_id ||
                 dst_tp.tcast<option_type>()->get_value_type().get_type_id() !=

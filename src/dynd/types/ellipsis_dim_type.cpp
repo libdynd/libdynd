@@ -100,10 +100,9 @@ bool ellipsis_dim_type::operator==(const base_type& rhs) const
 }
 
 void ellipsis_dim_type::arrmeta_default_construct(
-    char *DYND_UNUSED(arrmeta), intptr_t DYND_UNUSED(ndim),
-    const intptr_t *DYND_UNUSED(shape)) const
+    char *DYND_UNUSED(arrmeta), bool DYND_UNUSED(blockref_alloc)) const
 {
-    throw type_error("Cannot store data of ellipsis type");
+  throw type_error("Cannot store data of ellipsis type");
 }
 
 void ellipsis_dim_type::arrmeta_copy_construct(

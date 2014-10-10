@@ -49,7 +49,6 @@ set(tests_SRC
     types/test_json_type.cpp
     types/test_option_type.cpp
     types/test_pointer_type.cpp
-    types/test_strided_dim_type.cpp
     types/test_string_type.cpp
     types/test_struct_type.cpp
     types/test_symbolic_types.cpp
@@ -75,7 +74,10 @@ set(tests_SRC
     func/test_elwise_callrefres.cpp
     func/test_functor_arrfunc.cpp
     func/test_lift_arrfunc.cpp
+    func/test_neighborhood.cpp
+    func/test_multidispatch_arrfunc.cpp
     func/test_reduction.cpp
+    func/test_registry.cpp
     func/test_rolling.cpp
     func/test_special.cpp
     func/test_take.cpp
@@ -85,7 +87,6 @@ set(tests_SRC
     array/test_array_at.cpp
     array/test_array_cast.cpp
     array/test_array_compare.cpp
-    array/test_array_iter.cpp
     array/test_array_views.cpp
     array/test_arrmeta_holder.cpp
     array/test_json_formatter.cpp
@@ -94,6 +95,7 @@ set(tests_SRC
     array/test_view.cpp
     vm/test_elwise_program.cpp
     test_arithmetic_op.cpp
+    test_buffer.cpp
     test_fft.cpp
     test_shape_tools.cpp
     test_platform.cpp

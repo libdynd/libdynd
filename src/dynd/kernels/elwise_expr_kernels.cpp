@@ -5,7 +5,7 @@
 // DEPRECATED in favor of make_lifted_ckernel
 
 #include <dynd/kernels/elwise_expr_kernels.hpp>
-#include <dynd/types/strided_dim_type.hpp>
+#include <dynd/types/fixed_dim_type.hpp>
 #include <dynd/types/cfixed_dim_type.hpp>
 #include <dynd/types/var_dim_type.hpp>
 
@@ -598,7 +598,6 @@ size_t dynd::make_elwise_dimension_expr_kernel(
   bool src_all_strided = true, src_all_strided_or_var = true;
   for (size_t i = 0; i != src_count; ++i) {
     switch (src_tp[i].get_type_id()) {
-    case strided_dim_type_id:
     case fixed_dim_type_id:
     case cfixed_dim_type_id:
       break;
@@ -618,7 +617,6 @@ size_t dynd::make_elwise_dimension_expr_kernel(
   // Call to some special-case functions based on the
   // destination type
   switch (dst_tp.get_type_id()) {
-  case strided_dim_type_id:
   case fixed_dim_type_id:
   case cfixed_dim_type_id:
     if (src_all_strided) {

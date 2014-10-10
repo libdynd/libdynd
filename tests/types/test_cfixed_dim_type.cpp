@@ -10,7 +10,6 @@
 
 #include <dynd/array.hpp>
 #include <dynd/types/cfixed_dim_type.hpp>
-#include <dynd/types/strided_dim_type.hpp>
 #include <dynd/types/convert_type.hpp>
 #include <dynd/kernels/assignment_kernels.hpp>
 #include <dynd/json_parser.hpp>
@@ -210,18 +209,18 @@ TEST(CFixedDimType, AssignKernel_FixedToScalarError) {
                  broadcast_error);
 }
 
-TEST(CFixedDimType, AssignFixedStridedKernel) {
+TEST(CFixedDimType, AssignCFixedToFixedKernel) {
     nd::array a, b;
     unary_ckernel_builder k;
     int vals_int[] = {3,5,7};
     int vals_int_single[] = {9};
 
-    // Assignment strided array -> fixed array
+    // Assignment strided array -> cfixed array
     a = nd::empty(ndt::make_cfixed_dim(3, ndt::make_type<int>()));
     a.vals() = 0;
     b = vals_int;
     EXPECT_EQ(cfixed_dim_type_id, a.get_type().get_type_id());
-    EXPECT_EQ(strided_dim_type_id, b.get_type().get_type_id());
+    EXPECT_EQ(fixed_dim_type_id, b.get_type().get_type_id());
     make_assignment_kernel(&k, 0, a.get_type(), a.get_arrmeta(), b.get_type(),
                            b.get_arrmeta(), kernel_request_single,
                            &eval::default_eval_context);
@@ -236,7 +235,7 @@ TEST(CFixedDimType, AssignFixedStridedKernel) {
     a.vals() = 0;
     b = vals_int_single;
     EXPECT_EQ(cfixed_dim_type_id, a.get_type().get_type_id());
-    EXPECT_EQ(strided_dim_type_id, b.get_type().get_type_id());
+    EXPECT_EQ(fixed_dim_type_id, b.get_type().get_type_id());
     make_assignment_kernel(&k, 0, a.get_type(), a.get_arrmeta(), b.get_type(),
                            b.get_arrmeta(), kernel_request_single,
                            &eval::default_eval_context);
@@ -250,7 +249,7 @@ TEST(CFixedDimType, AssignFixedStridedKernel) {
     a = nd::empty<float[3]>();
     a.vals() = 0;
     b = parse_json("cfixed[3] * int32", "[3, 5, 7]");
-    EXPECT_EQ(strided_dim_type_id, a.get_type().get_type_id());
+    EXPECT_EQ(fixed_dim_type_id, a.get_type().get_type_id());
     EXPECT_EQ(cfixed_dim_type_id, b.get_type().get_type_id());
     make_assignment_kernel(&k, 0, a.get_type(), a.get_arrmeta(), b.get_type(),
                            b.get_arrmeta(), kernel_request_single,
@@ -265,7 +264,7 @@ TEST(CFixedDimType, AssignFixedStridedKernel) {
     a = nd::empty<float[3]>();
     a.vals() = 0;
     b = parse_json("cfixed[1] * int32", "[9]");
-    EXPECT_EQ(strided_dim_type_id, a.get_type().get_type_id());
+    EXPECT_EQ(fixed_dim_type_id, a.get_type().get_type_id());
     EXPECT_EQ(cfixed_dim_type_id, b.get_type().get_type_id());
     make_assignment_kernel(&k, 0, a.get_type(), a.get_arrmeta(), b.get_type(),
                            b.get_arrmeta(), kernel_request_single,
@@ -293,10 +292,10 @@ TEST(CFixedDimType, IsTypeSubarray) {
     EXPECT_FALSE(ndt::type("cfixed[10] * int32").is_type_subarray(
         ndt::type("cfixed[3] * cfixed[10] * int32")));
     EXPECT_FALSE(ndt::type("cfixed[3] * int32")
-                     .is_type_subarray(ndt::type("strided * int32")));
+                     .is_type_subarray(ndt::type("fixed * int32")));
     EXPECT_FALSE(ndt::type("cfixed[3] * int32")
                      .is_type_subarray(ndt::type("var * int32")));
-    EXPECT_FALSE(ndt::type("strided * int32")
+    EXPECT_FALSE(ndt::type("fixed * int32")
                      .is_type_subarray(ndt::type("cfixed[3] * int32")));
     EXPECT_FALSE(ndt::type("var * int32")
                      .is_type_subarray(ndt::type("cfixed[3] * int32")));

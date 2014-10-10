@@ -47,7 +47,7 @@ public:
 
     bool operator==(const base_type& rhs) const;
 
-    void arrmeta_default_construct(char *arrmeta, intptr_t ndim, const intptr_t* shape) const;
+    void arrmeta_default_construct(char *arrmeta, bool blockref_alloc) const;
     void arrmeta_copy_construct(char *dst_arrmeta, const char *src_arrmeta, memory_block_data *embedded_reference) const;
     void arrmeta_destruct(char *arrmeta) const;
 
@@ -57,11 +57,14 @@ public:
 }; // class typevar_type
 
 namespace ndt {
-    /** Makes a typevar type with the specified types */
-    inline ndt::type make_typevar(const nd::string& name)
-    {
-        return ndt::type(new typevar_type(name), false);
-    }
+  /** Makes a typevar type with the specified types */
+  inline ndt::type make_typevar(const nd::string &name)
+  {
+    return ndt::type(new typevar_type(name), false);
+  }
+
+  void make_typevar_range(const char *name, intptr_t count,
+                          std::vector<ndt::type> &out);
 } // namespace ndt
 
 /**

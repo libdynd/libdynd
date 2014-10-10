@@ -25,8 +25,7 @@ struct unary_heap_chain_ck : public kernels::general_ck<unary_heap_chain_ck> {
   {
     self_type *self = get_self(rawself);
     // Allocate a temporary buffer on the heap
-    nd::array buf = nd::typed_empty(self->m_buf_shape.size() - 1,
-                                    &self->m_buf_shape[0] + 1, self->m_buf_tp);
+    nd::array buf = nd::empty(self->m_buf_tp);
     char *buf_data = buf.get_readwrite_originptr();
     ckernel_prefix *first = self->get_child_ckernel();
     expr_single_t first_fn = first->get_function<expr_single_t>();
@@ -42,10 +41,9 @@ struct unary_heap_chain_ck : public kernels::general_ck<unary_heap_chain_ck> {
   {
     self_type *self = get_self(rawself);
     // Allocate a temporary buffer on the heap
-    nd::array buf = nd::typed_empty(self->m_buf_shape,
-                                    ndt::make_strided_dim(self->m_buf_tp));
+    nd::array buf = nd::empty(self->m_buf_shape[0], self->m_buf_tp);
     char *buf_data = buf.get_readwrite_originptr();
-    intptr_t buf_stride = reinterpret_cast<const strided_dim_type_arrmeta *>(
+    intptr_t buf_stride = reinterpret_cast<const fixed_dim_type_arrmeta *>(
                               buf.get_arrmeta())->stride;
     ckernel_prefix *first = self->get_child_ckernel();
     expr_strided_t first_fn = first->get_function<expr_strided_t>();
@@ -101,28 +99,18 @@ intptr_t dynd::make_chain_buf_tp_ckernel(
     unary_heap_chain_ck *self = unary_heap_chain_ck::create(ckb, kernreq, ckb_offset);
     self->m_buf_tp = buf_tp;
     arrmeta_holder(buf_tp).swap(self->m_buf_arrmeta);
-    if (buf_tp.get_ndim() == 0 || first->resolve_dst_shape == NULL) {
-      self->m_buf_arrmeta.arrmeta_default_construct(0, NULL);
-      self->m_buf_shape.push_back(DYND_BUFFER_CHUNK_SIZE);
-    } else {
-      intptr_t ndim = buf_tp.get_ndim();
-      vector<intptr_t> shape(ndim + 1);
-      shape[0] = DYND_BUFFER_CHUNK_SIZE;
-      first->resolve_dst_shape(first, &shape[0] + 1, buf_tp, src_tp,
-                               src_arrmeta, NULL);
-      self->m_buf_arrmeta.arrmeta_default_construct(ndim, &shape[0] + 1);
-      self->m_buf_shape.swap(shape);
-    }
+    self->m_buf_arrmeta.arrmeta_default_construct(true);
+    self->m_buf_shape.push_back(DYND_BUFFER_CHUNK_SIZE);
     ckb_offset = first->instantiate(first, ckb, ckb_offset, buf_tp,
                                     self->m_buf_arrmeta.get(), src_tp,
-                                    src_arrmeta, kernreq, ectx);
+                                    src_arrmeta, kernreq, nd::array(), ectx);
     ckb->ensure_capacity(ckb_offset);
     self = ckb->get_at<unary_heap_chain_ck>(root_ckb_offset);
     self->m_second_offset = ckb_offset - root_ckb_offset;
     const char *buf_arrmeta = self->m_buf_arrmeta.get();
     ckb_offset =
         second->instantiate(second, ckb, ckb_offset, dst_tp, dst_arrmeta,
-                            &buf_tp, &buf_arrmeta, kernreq, ectx);
+                            &buf_tp, &buf_arrmeta, kernreq, nd::array(), ectx);
     return ckb_offset;
   } else {
     throw runtime_error("Multi-parameter arrfunc chaining is not implemented");
@@ -133,7 +121,7 @@ static intptr_t instantiate_chain_buf_tp(
     const arrfunc_type_data *af_self, dynd::ckernel_builder *ckb,
     intptr_t ckb_offset, const ndt::type &dst_tp, const char *dst_arrmeta,
     const ndt::type *src_tp, const char *const *src_arrmeta,
-    kernel_request_t kernreq, const eval::eval_context *ectx)
+    kernel_request_t kernreq, const nd::array &DYND_UNUSED(aux), const eval::eval_context *ectx)
 {
   const instantiate_chain_data *icd =
       af_self->get_data_as<instantiate_chain_data>();
@@ -165,7 +153,6 @@ void dynd::make_chain_arrfunc(const nd::arrfunc &first,
       second.get()->func_proto.tcast<funcproto_type>()->get_return_type());
   if (buf_tp.get_type_id() == uninitialized_type_id) {
     //out_af->resolve_dst_type = &resolve_chain_dst_type;
-    //out_af->resolve_dst_shape = &resolve_chain_dst_shape;
     //out_af->instantiate = &instantiate_chain_resolve;
     throw runtime_error("Chaining functions without a provided intermediate "
                         "type is not implemented");

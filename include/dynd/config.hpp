@@ -15,7 +15,6 @@
 /** The number of elements to process at once when doing chunking/buffering */
 #define DYND_BUFFER_CHUNK_SIZE 128
 
-
 #ifdef __clang__
 // It appears that on OSX, one can have a configuration with
 // clang that supports rvalue references but no implementation
@@ -44,6 +43,12 @@
 #  define DYND_CXX_LAMBDAS
 #endif
 
+#if __has_include(<type_traits>)
+#  define DYND_CXX_TYPE_TRAITS
+#elif __has_include(<tr1/type_traits>)
+#  define DYND_CXX_TR1_TYPE_TRAITS
+#endif
+
 #include <cmath>
 
 // Ran into some weird issues with
@@ -62,6 +67,7 @@ inline bool DYND_ISNAN(long double x) {
 
 #elif defined(__GNUC__)
 
+
 #if __GNUC__ > 4 || \
               (__GNUC__ == 4 && (__GNUC_MINOR__ >= 7))
 // Use initializer lists on gcc >= 4.7
@@ -73,10 +79,12 @@ inline bool DYND_ISNAN(long double x) {
 #  define DYND_ISNAN(x) (std::isnan(x))
 // Use static_assert on gcc >= 4.7
 #  define DYND_STATIC_ASSERT(value, message) static_assert(value, message)
+#  define DYND_CXX_TYPE_TRAITS
 #else
 // Don't use constexpr on gcc < 4.7
 #  define DYND_CONSTEXPR
 #  define DYND_ISNAN(x) isnan(x)
+#  define DYND_CXX_TR1_TYPE_TRAITS
 #endif
 
 
@@ -104,6 +112,7 @@ inline bool DYND_ISNAN(long double x) {
 # define DYND_USE_FPSTATUS
 
 // MSVC 2010 and later
+# define DYND_CXX_TYPE_TRAITS
 # define DYND_USE_TR1_ENABLE_IF
 # define DYND_RVALUE_REFS
 # define DYND_STATIC_ASSERT(value, message) static_assert(value, message)
@@ -228,18 +237,79 @@ inline void DYND_MEMCPY(char *dst, const char *src, intptr_t count)
 #endif
 
 // This static_assert fails at compile-time when expected, but with a more general message
+// TODO: This doesn't work as a member of a class, need to fix that and reenable
 #ifndef DYND_STATIC_ASSERT
-#define DYND_STATIC_ASSERT(value, message) do { enum { dynd_static_assertion = 1 / (int)(value) }; } while (0)
+#define DYND_STATIC_ASSERT(value, message) // do { enum { dynd_static_assertion = 1 / (int)(value) }; } while (0)
 #endif
+
+#if defined(DYND_CXX_TYPE_TRAITS)
+#include <type_traits>
+#elif defined(DYND_CXX_TR1_TYPE_TRAITS)
+#include <tr1/type_traits>
+namespace std {
+
+using std::tr1::add_pointer;
+using std::tr1::is_array;
+using std::tr1::is_base_of;
+using std::tr1::is_const;
+using std::tr1::is_function;
+using std::tr1::is_pointer;
+using std::tr1::is_reference;
+using std::tr1::remove_const;
+using std::tr1::remove_cv;
+using std::tr1::remove_extent;
+using std::tr1::remove_reference;
+using std::tr1::remove_pointer;
+
+template <bool B, typename T, typename F>
+struct conditional {
+    typedef T type;
+};
+
+template <typename T, typename F>
+struct conditional<false, T, F> {
+    typedef F type;
+};
+
+template <typename T>
+struct decay {
+    typedef typename std::remove_reference<T>::type U;
+    typedef typename std::conditional<std::is_array<U>::value,
+        typename std::remove_extent<U>::type *,
+        typename std::conditional<std::is_function<U>::value,
+            typename std::add_pointer<U>::type,
+            typename std::remove_cv<U>::type>::type>::type type;
+};
+
+} // namespace std
+#endif
+
+// These are small templates 'missing' from the standard library
+namespace dynd {
+
+template <typename T>
+struct is_function_pointer {
+    static const bool value = std::is_pointer<T>::value ?
+        std::is_function<typename std::remove_pointer<T>::type>::value : false;
+};
+
+template <typename T>
+struct remove_all_pointers {
+    typedef T type;
+};
+
+template <typename T>
+struct remove_all_pointers<T *> {
+    typedef typename remove_all_pointers<typename std::remove_cv<T>::type>::type type;
+};
+
+} // namespace dynd
+
 
 #ifdef DYND_USE_TR1_ENABLE_IF
 #include <type_traits>
 namespace dynd {
     using std::tr1::enable_if;
-    using std::tr1::is_const;
-    using std::tr1::remove_const;
-    using std::tr1::is_reference;
-    using std::tr1::remove_reference;
 }
 #else
 // These are small templates, so we just replicate them here
@@ -249,40 +319,6 @@ namespace dynd {
  
 	template<class T>
 	struct enable_if<true, T> { typedef T type; };
-
-    template<class T>
-    struct is_const { enum { value = 0 }; };
-
-    template<class T>
-    struct is_const<const T> { enum { value = 1 }; };
-
-    template<class T>
-    struct remove_const { typedef T type; };
-
-    template<class T>
-    struct remove_const<const T> { typedef T type; };
-
-    template<class T>
-    struct is_reference { enum { value = 0 }; };
-
-    template<class T>
-    struct is_reference<T&> { enum { value = 1 }; };
-
-#ifdef DYND_RVALUE_REFS
-    template<class T>
-    struct is_reference<T&&> { enum { value = 1 }; };
-#endif
-
-    template<class T>
-    struct remove_reference { typedef T type; };
-
-    template<class T>
-    struct remove_reference<T&> { typedef T type; };
-
-#ifdef DYND_RVALUE_REFS
-    template<class T>
-    struct remove_reference<T&&> { typedef T type; };
-#endif
 }
 #endif
 
@@ -339,12 +375,22 @@ namespace dynd {
 #endif
 
 namespace dynd {
-    /**
-     * A function which can be used at runtime to identify whether
-     * the build of dynd being linked against was built with CUDA
-     * support enabled.
-     */
-    bool built_with_cuda();
+  /**
+   * Function to call for initializing dynd's global state, such
+   * as cached ndt::type objects, the arrfunc registry, etc.
+   */
+  int libdynd_init();
+  /**
+   * Function to call to free all resources associated with
+   * dynd's global state, that were initialized by libdynd_init.
+   */
+  void libdynd_cleanup();
+  /**
+    * A function which can be used at runtime to identify whether
+    * the build of dynd being linked against was built with CUDA
+    * support enabled.
+    */
+  bool built_with_cuda();
 } // namespace dynd
 
 #include <dynd/cuda_config.hpp>

@@ -10,7 +10,6 @@
 
 #include <dynd/array.hpp>
 #include <dynd/types/fixed_dim_type.hpp>
-#include <dynd/types/strided_dim_type.hpp>
 #include <dynd/types/convert_type.hpp>
 #include <dynd/kernels/assignment_kernels.hpp>
 #include <dynd/json_parser.hpp>
@@ -155,73 +154,6 @@ TEST(FixedDimType, AssignKernel_FixedToScalarError) {
                  broadcast_error);
 }
 
-TEST(FixedDimType, AssignFixedStridedKernel) {
-    nd::array a, b;
-    unary_ckernel_builder k;
-    int vals_int[] = {3,5,7};
-    int vals_int_single[] = {9};
-
-    // Assignment strided array -> fixed array
-    a = nd::empty(ndt::make_fixed_dim(3, ndt::make_type<int>()));
-    a.vals() = 0;
-    b = vals_int;
-    EXPECT_EQ(fixed_dim_type_id, a.get_type().get_type_id());
-    EXPECT_EQ(strided_dim_type_id, b.get_type().get_type_id());
-    make_assignment_kernel(&k, 0, a.get_type(), a.get_arrmeta(), b.get_type(),
-                           b.get_arrmeta(), kernel_request_single,
-                           &eval::default_eval_context);
-    k(a.get_readwrite_originptr(), b.get_readonly_originptr());
-    EXPECT_EQ(3, a(0).as<int>());
-    EXPECT_EQ(5, a(1).as<int>());
-    EXPECT_EQ(7, a(2).as<int>());
-    k.reset();
-
-    // Broadcasting assignment strided array -> fixed array
-    a = nd::empty(ndt::make_fixed_dim(3, ndt::make_type<int>()));
-    a.vals() = 0;
-    b = vals_int_single;
-    EXPECT_EQ(fixed_dim_type_id, a.get_type().get_type_id());
-    EXPECT_EQ(strided_dim_type_id, b.get_type().get_type_id());
-    make_assignment_kernel(&k, 0, a.get_type(), a.get_arrmeta(), b.get_type(),
-                           b.get_arrmeta(), kernel_request_single,
-                           &eval::default_eval_context);
-    k(a.get_readwrite_originptr(), b.get_readonly_originptr());
-    EXPECT_EQ(9, a(0).as<int>());
-    EXPECT_EQ(9, a(1).as<int>());
-    EXPECT_EQ(9, a(2).as<int>());
-    k.reset();
-
-    // Assignment fixed array -> strided array
-    a = nd::empty<float[3]>();
-    a.vals() = 0;
-    b = parse_json("3 * int32", "[3, 5, 7]");
-    EXPECT_EQ(strided_dim_type_id, a.get_type().get_type_id());
-    EXPECT_EQ(fixed_dim_type_id, b.get_type().get_type_id());
-    make_assignment_kernel(&k, 0, a.get_type(), a.get_arrmeta(), b.get_type(),
-                           b.get_arrmeta(), kernel_request_single,
-                           &eval::default_eval_context);
-    k(a.get_readwrite_originptr(), b.get_readonly_originptr());
-    EXPECT_EQ(3, a(0).as<int>());
-    EXPECT_EQ(5, a(1).as<int>());
-    EXPECT_EQ(7, a(2).as<int>());
-    k.reset();
-
-    // Broadcasting assignment fixed array -> strided array
-    a = nd::empty<float[3]>();
-    a.vals() = 0;
-    b = parse_json("1 * int32", "[9]");
-    EXPECT_EQ(strided_dim_type_id, a.get_type().get_type_id());
-    EXPECT_EQ(fixed_dim_type_id, b.get_type().get_type_id());
-    make_assignment_kernel(&k, 0, a.get_type(), a.get_arrmeta(), b.get_type(),
-                           b.get_arrmeta(), kernel_request_single,
-                           &eval::default_eval_context);
-    k(a.get_readwrite_originptr(), b.get_readonly_originptr());
-    EXPECT_EQ(9, a(0).as<int>());
-    EXPECT_EQ(9, a(1).as<int>());
-    EXPECT_EQ(9, a(2).as<int>());
-    k.reset();
-}
-
 TEST(FixedDimType, IsTypeSubarray) {
     EXPECT_TRUE(ndt::type("3 * int32")
                     .is_type_subarray(ndt::type("3 * int32")));
@@ -238,10 +170,10 @@ TEST(FixedDimType, IsTypeSubarray) {
     EXPECT_FALSE(ndt::type("10 * int32").is_type_subarray(
         ndt::type("3 * 10 * int32")));
     EXPECT_FALSE(ndt::type("3 * int32")
-                     .is_type_subarray(ndt::type("strided * int32")));
+                     .is_type_subarray(ndt::type("fixed * int32")));
     EXPECT_FALSE(ndt::type("3 * int32")
                      .is_type_subarray(ndt::type("var * int32")));
-    EXPECT_FALSE(ndt::type("strided * int32")
+    EXPECT_FALSE(ndt::type("fixed * int32")
                      .is_type_subarray(ndt::type("3 * int32")));
     EXPECT_FALSE(ndt::type("var * int32")
                      .is_type_subarray(ndt::type("3 * int32")));

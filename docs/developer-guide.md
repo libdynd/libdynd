@@ -87,6 +87,9 @@ The code which consumes and produces Blaze datashapes is in
 ``include/dtypes/datashape_parser.hpp`` and
 ``include/dtypes/datashape_formatter.hpp``.
 
+See https://github.com/ContinuumIO/datashape/tree/master/docs/source
+for more general information aboud datashape.
+
 ### Kernels Source
 
 Kernels in DyND are mostly implemented in the

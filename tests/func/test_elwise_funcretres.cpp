@@ -12,7 +12,8 @@
 #include "dynd_assertions.hpp"
 
 #include <dynd/array.hpp>
-#include <dynd/func/elwise_funcretres.hpp>
+#include <dynd/func/elwise.hpp>
+#include <dynd/types/cfixed_dim_type.hpp>
 
 using namespace std;
 using namespace dynd;
@@ -32,7 +33,7 @@ T func1(const T (&x)[3]) {
     return x[0] + x[1] + x[2];
 }
 template <typename T>
-T func2(const T (&x)[3], const float (&y)[3]) {
+T func2(const T (&x)[3], const T (&y)[3]) {
     return static_cast<T>(x[0] * y[0] + x[1] * y[1] + x[2] * y[2]);
 }
 template <typename T>
@@ -43,8 +44,8 @@ T func3(const T (&x)[2][3]) {
 TYPED_TEST_P(ElwiseFuncRetRes, FuncRetRes) {
     nd::array res, a, b;
 
-    a = 10;
-    b = 20;
+    a = static_cast<TypeParam>(10);
+    b = static_cast<TypeParam>(20);
 
     res = nd::elwise(static_cast<int (*)(TypeParam, const TypeParam &)>(&func0), a, b);
     EXPECT_EQ(-20, res.as<int>());
@@ -55,7 +56,7 @@ TYPED_TEST_P(ElwiseFuncRetRes, FuncRetRes) {
     a = avals0;
     b = bvals0;
     res = nd::elwise(static_cast<int (*)(TypeParam, const TypeParam &)>(&func0), a, b);
-    EXPECT_EQ(ndt::type("strided * strided * int"), res.get_type());
+    EXPECT_EQ(ndt::type("2 * 3 * int"), res.get_type());
     EXPECT_JSON_EQ_ARR("[[-10,-2,-4], [0,8,6]]", res);
 
     TypeParam vals1[2][3] = {{0, 1, 2}, {3, 4, 5}};
@@ -76,7 +77,7 @@ TYPED_TEST_P(ElwiseFuncRetRes, FuncRetRes) {
 
     a.vals() = vals1[0];
     b.vals() = vals1[1];
-    res = nd::elwise(static_cast<TypeParam (*)(const TypeParam(&)[3], const float(&)[3])>(&func2), a, b);
+    res = nd::elwise(static_cast<TypeParam (*)(const TypeParam(&)[3], const TypeParam(&)[3])>(&func2), a, b);
     EXPECT_EQ(ndt::make_type<TypeParam>(), res.get_type());
     EXPECT_EQ(14, res.as<TypeParam>());
 
@@ -88,7 +89,7 @@ TYPED_TEST_P(ElwiseFuncRetRes, FuncRetRes) {
     EXPECT_EQ(6, res.as<TypeParam>());
 }
 
-typedef ::testing::Types<int, float, long, double> types;
+typedef ::testing::Types<int, float, long, double> test_types;
 
 REGISTER_TYPED_TEST_CASE_P(ElwiseFuncRetRes, FuncRetRes);
-INSTANTIATE_TYPED_TEST_CASE_P(Builtin, ElwiseFuncRetRes, types);
+INSTANTIATE_TYPED_TEST_CASE_P(Builtin, ElwiseFuncRetRes, test_types);

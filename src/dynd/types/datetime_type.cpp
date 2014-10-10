@@ -834,7 +834,7 @@ struct datetime_is_avail_ck {
                               const ndt::type *src_tp,
                               const char *const *DYND_UNUSED(src_arrmeta),
                               kernel_request_t kernreq,
-                              const eval::eval_context *DYND_UNUSED(ectx))
+                              const nd::array &DYND_UNUSED(aux), const eval::eval_context *DYND_UNUSED(ectx))
   {
     if (src_tp[0].get_type_id() != option_type_id ||
         src_tp[0].tcast<option_type>()->get_value_type().get_type_id() !=
@@ -878,7 +878,7 @@ struct datetime_assign_na_ck {
                               const ndt::type *DYND_UNUSED(src_tp),
                               const char *const *DYND_UNUSED(src_arrmeta),
                               kernel_request_t kernreq,
-                              const eval::eval_context *DYND_UNUSED(ectx))
+                              const nd::array &DYND_UNUSED(aux), const eval::eval_context *DYND_UNUSED(ectx))
   {
     if (dst_tp.get_type_id() != option_type_id ||
         dst_tp.tcast<option_type>()->get_value_type().get_type_id() !=
@@ -929,14 +929,4 @@ bool datetime_type::reverse_adapt_type(const ndt::type &value_tp,
   // adapt_type
   return make_datetime_adapter_arrfunc(ndt::type(this, true), value_tp, op,
                                        out_reverse, out_forward);
-}
-
-const ndt::type& ndt::make_datetime()
-{
-    // Static instance of the type, which has a reference count > 0 for the
-    // lifetime of the program. This static construction is inside a
-    // function to ensure correct creation order during startup.
-    static datetime_type dt(tz_abstract);
-    static const ndt::type static_instance(&dt, true);
-    return static_instance;
 }

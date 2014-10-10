@@ -10,6 +10,7 @@
 #include <dynd/types/base_dim_type.hpp>
 #include <dynd/typed_data_assign.hpp>
 #include <dynd/types/view_type.hpp>
+#include <dynd/array.hpp>
 
 namespace dynd {
 
@@ -30,7 +31,7 @@ public:
 
     virtual ~fixed_dim_type();
 
-    size_t get_default_data_size(intptr_t ndim, const intptr_t *shape) const;
+    size_t get_default_data_size() const;
 
     inline intptr_t get_fixed_dim_size() const {
         return m_dim_size;
@@ -42,8 +43,10 @@ public:
 
     bool is_expression() const;
     bool is_unique_data_owner(const char *arrmeta) const;
-    void transform_child_types(type_transform_fn_t transform_fn, void *extra,
-                    ndt::type& out_transformed_tp, bool& out_was_transformed) const;
+    void transform_child_types(type_transform_fn_t transform_fn,
+                               intptr_t arrmeta_offset, void *extra,
+                               ndt::type &out_transformed_tp,
+                               bool &out_was_transformed) const;
     ndt::type get_canonical_type() const;
 
     ndt::type apply_linear_index(intptr_t nindices, const irange *indices,
@@ -68,8 +71,7 @@ public:
 
     bool operator==(const base_type& rhs) const;
 
-    void arrmeta_default_construct(char *arrmeta, intptr_t ndim,
-                                   const intptr_t *shape) const;
+    void arrmeta_default_construct(char *arrmeta, bool blockref_alloc) const;
     void arrmeta_copy_construct(char *dst_arrmeta, const char *src_arrmeta,
                                 memory_block_data *embedded_reference) const;
     void arrmeta_reset_buffers(char *arrmeta) const;
@@ -124,25 +126,50 @@ public:
                     size_t *out_count) const;
 };
 
+/**
+ * Does a value lookup into an array of type "N * T", without
+ * bounds checking the index ``i`` or validating that ``a`` has the
+ * required type. Use only when these checks have been done externally.
+ */
+template <typename T>
+inline const T &unchecked_fixed_dim_get(const nd::array &a, intptr_t i)
+{
+  const fixed_dim_type_arrmeta *md =
+      reinterpret_cast<const fixed_dim_type_arrmeta *>(a.get_arrmeta());
+  return *reinterpret_cast<const T *>(a.get_readonly_originptr() +
+                                      i * md->stride);
+}
+
+/**
+ * Does a writable value lookup into an array of type "N * T", without
+ * bounds checking the index ``i`` or validating that ``a`` has the
+ * required type. Use only when these checks have been done externally.
+ */
+template <typename T>
+inline T &unchecked_fixed_dim_get_rw(const nd::array &a, intptr_t i)
+{
+  const fixed_dim_type_arrmeta *md =
+      reinterpret_cast<const fixed_dim_type_arrmeta *>(a.get_arrmeta());
+  return *reinterpret_cast<T *>(a.get_readwrite_originptr() + i * md->stride);
+}
+
 namespace ndt {
-    inline ndt::type make_fixed_dim(size_t dim_size, const ndt::type& element_tp) {
-        return ndt::type(new fixed_dim_type(dim_size, element_tp), false);
+  ndt::type make_fixed_dim(size_t dim_size, const ndt::type &element_tp);
+
+  ndt::type make_fixed_dim(intptr_t ndim, const intptr_t *shape,
+                           const ndt::type &dtp);
+
+  inline type make_fixed_dim(size_t dim_size, const type &element_tp,
+                             intptr_t ndim)
+  {
+    type result = element_tp;
+    for (intptr_t i = 0; i < ndim; ++i) {
+      result = make_fixed_dim(dim_size, result);
     }
 
-    ndt::type make_fixed_dim(intptr_t ndim, const intptr_t *shape,
-                              const ndt::type &dtp);
+    return result;
+  }
 
-
-    template<class T> struct fixed_dim_from_array {
-        static inline ndt::type make() {
-            return ndt::make_type<T>();
-        }
-    };
-    template<class T, int N> struct fixed_dim_from_array<T[N]> {
-        static inline ndt::type make() {
-            return ndt::make_fixed_dim(N, ndt::fixed_dim_from_array<T>::make());
-        }
-    };
 } // namespace ndt
 
 } // namespace dynd

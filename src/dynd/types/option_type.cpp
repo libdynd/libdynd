@@ -112,7 +112,7 @@ bool option_type::is_avail(const char *arrmeta, const char *data,
     const arrfunc_type_data *af = get_is_avail_arrfunc();
     ndt::type src_tp[1] = {ndt::type(this, true)};
     af->instantiate(af, &ckb, 0, ndt::make_type<dynd_bool>(), NULL, src_tp,
-                    &arrmeta, kernel_request_single, ectx);
+                    &arrmeta, kernel_request_single, nd::array(), ectx);
     ckernel_prefix *ckp = ckb.get();
     char result;
     ckp->get_function<expr_single_t>()(&result, &data, ckp);
@@ -171,7 +171,7 @@ void option_type::assign_na(const char *arrmeta, char *data,
     ckernel_builder ckb;
     const arrfunc_type_data *af = get_assign_na_arrfunc();
     af->instantiate(af, &ckb, 0, ndt::type(this, true), arrmeta, NULL, NULL,
-                    kernel_request_single, ectx);
+                    kernel_request_single, nd::array(), ectx);
     ckernel_prefix *ckp = ckb.get();
     ckp->get_function<expr_single_t>()(data, NULL, ckp);
   }
@@ -205,13 +205,13 @@ bool option_type::is_unique_data_owner(const char *arrmeta) const
 }
 
 void option_type::transform_child_types(type_transform_fn_t transform_fn,
-                                        void *extra,
+                                        intptr_t arrmeta_offset, void *extra,
                                         ndt::type &out_transformed_tp,
                                         bool &out_was_transformed) const
 {
   ndt::type tmp_tp;
   bool was_transformed = false;
-  transform_fn(m_value_tp, extra, tmp_tp, was_transformed);
+  transform_fn(m_value_tp, arrmeta_offset + 0, extra, tmp_tp, was_transformed);
   if (was_transformed) {
     out_transformed_tp = ndt::make_option(tmp_tp);
     out_was_transformed = true;
@@ -272,8 +272,7 @@ bool option_type::operator==(const base_type &rhs) const
   }
 }
 
-void option_type::arrmeta_default_construct(char *arrmeta, intptr_t ndim,
-                                            const intptr_t *shape) const
+void option_type::arrmeta_default_construct(char *arrmeta, bool blockref_alloc) const
 {
   if (m_nafunc.is_null()) {
     stringstream ss;
@@ -282,7 +281,7 @@ void option_type::arrmeta_default_construct(char *arrmeta, intptr_t ndim,
   }
 
   if (!m_value_tp.is_builtin()) {
-    m_value_tp.extended()->arrmeta_default_construct(arrmeta, ndim, shape);
+    m_value_tp.extended()->arrmeta_default_construct(arrmeta, blockref_alloc);
   }
 }
 

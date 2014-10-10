@@ -10,7 +10,6 @@
 
 #include <dynd/array.hpp>
 #include <dynd/types/type_type.hpp>
-#include <dynd/types/strided_dim_type.hpp>
 #include <dynd/types/cfixed_dim_type.hpp>
 #include <dynd/types/var_dim_type.hpp>
 
@@ -53,7 +52,7 @@ TEST(DTypeDType, StringCasting) {
 TEST(DTypeDType, ScalarRefCount) {
     nd::array a;
     ndt::type d, d2;
-    d = ndt::type("strided * 12 * int");
+    d = ndt::type("fixed * 12 * int");
 
     a = nd::empty(ndt::make_type());
     EXPECT_EQ(1, d.extended()->get_use_count());
@@ -77,7 +76,7 @@ TEST(DTypeDType, ScalarRefCount) {
 TEST(DTypeDType, StridedArrayRefCount) {
     nd::array a;
     ndt::type d;
-    d = ndt::type("strided * 12 * int");
+    d = ndt::type("fixed * 12 * int");
 
     // 1D Strided Array
     a = nd::empty(10, ndt::make_type());
@@ -99,7 +98,7 @@ TEST(DTypeDType, StridedArrayRefCount) {
 
     // 2D Strided Array
     a = nd::empty(3, 3, "type");
-    EXPECT_EQ(strided_dim_type_id, a.get_type().get_type_id());
+    EXPECT_EQ(fixed_dim_type_id, a.get_type().get_type_id());
     EXPECT_EQ(1, d.extended()->get_use_count());
     a.vals() = d;
     EXPECT_EQ(10, d.extended()->get_use_count());
@@ -124,7 +123,7 @@ TEST(DTypeDType, StridedArrayRefCount) {
 TEST(DTypeDType, FixedArrayRefCount) {
     nd::array a;
     ndt::type d;
-    d = ndt::type("strided * 12 * int");
+    d = ndt::type("fixed * 12 * int");
 
     // 1D Fixed Array
     a = nd::empty(ndt::make_cfixed_dim(10, ndt::make_type()));
@@ -170,7 +169,7 @@ TEST(DTypeDType, FixedArrayRefCount) {
 TEST(DTypeDType, VarArrayRefCount) {
     nd::array a;
     ndt::type d;
-    d = ndt::type("strided * 12 * int");
+    d = ndt::type("fixed * 12 * int");
 
     // 1D Var Array
     a = nd::empty(ndt::make_var_dim(ndt::make_type()));
@@ -223,7 +222,7 @@ TEST(DTypeDType, VarArrayRefCount) {
 TEST(DTypeDType, CStructRefCount) {
     nd::array a;
     ndt::type d;
-    d = ndt::type("strided * 12 * int");
+    d = ndt::type("fixed * 12 * int");
 
     // Single CStruct Instance
     a = nd::empty("{dt: type, more: {a: int32, b: type}, other: string}");
@@ -273,7 +272,7 @@ TEST(DTypeDType, CStructRefCount) {
 TEST(DTypeDType, StructRefCount) {
     nd::array a;
     ndt::type d;
-    d = ndt::type("strided * 12 * int");
+    d = ndt::type("fixed * 12 * int");
 
     // Single CStruct Instance
     a = nd::empty("{dt: type, more: {a: int32, b: type}, other: string}")(0 <= irange() < 2);

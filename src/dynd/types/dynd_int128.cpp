@@ -95,7 +95,6 @@ dynd_int128 dynd::dynd_int128::operator*(uint32_t rhs) const
     }
 }
 
-
 dynd_int128 dynd::dynd_int128::operator/(uint32_t rhs) const
 {
     if ((int64_t)m_hi < 0) {

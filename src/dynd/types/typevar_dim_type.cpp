@@ -40,24 +40,6 @@ void typevar_dim_type::print_type(std::ostream& o) const
     o << m_name.str() << " * " << get_element_type();
 }
 
-ndt::type typevar_dim_type::apply_linear_index(
-    intptr_t DYND_UNUSED(nindices), const irange *DYND_UNUSED(indices),
-    size_t DYND_UNUSED(current_i), const ndt::type &DYND_UNUSED(root_tp),
-    bool DYND_UNUSED(leading_dimension)) const
-{
-    throw type_error("Cannot store data of typevar type");
-}
-
-intptr_t typevar_dim_type::apply_linear_index(
-    intptr_t DYND_UNUSED(nindices), const irange *DYND_UNUSED(indices),
-    const char *DYND_UNUSED(arrmeta), const ndt::type &DYND_UNUSED(result_tp),
-    char *DYND_UNUSED(out_arrmeta), memory_block_data *DYND_UNUSED(embedded_reference), size_t DYND_UNUSED(current_i),
-    const ndt::type &DYND_UNUSED(root_tp), bool DYND_UNUSED(leading_dimension), char **DYND_UNUSED(inout_data),
-    memory_block_data **DYND_UNUSED(inout_dataref)) const
-{
-    throw type_error("Cannot store data of typevar type");
-}
-
 intptr_t typevar_dim_type::get_dim_size(const char *DYND_UNUSED(arrmeta),
                                         const char *DYND_UNUSED(data)) const
 {
@@ -92,10 +74,9 @@ bool typevar_dim_type::operator==(const base_type& rhs) const
 }
 
 void typevar_dim_type::arrmeta_default_construct(
-    char *DYND_UNUSED(arrmeta), intptr_t DYND_UNUSED(ndim),
-    const intptr_t *DYND_UNUSED(shape)) const
+    char *DYND_UNUSED(arrmeta), bool DYND_UNUSED(blockref_alloc)) const
 {
-    throw type_error("Cannot store data of typevar type");
+  throw type_error("Cannot store data of typevar type");
 }
 
 void typevar_dim_type::arrmeta_copy_construct(

@@ -9,7 +9,6 @@
 #include <dynd/types/date_type.hpp>
 #include <dynd/types/datetime_type.hpp>
 #include <dynd/types/base_struct_type.hpp>
-#include <dynd/types/strided_dim_type.hpp>
 #include <dynd/types/fixed_dim_type.hpp>
 #include <dynd/types/cfixed_dim_type.hpp>
 #include <dynd/types/var_dim_type.hpp>
@@ -275,14 +274,13 @@ static void format_json_dim(output_data& out, const ndt::type& dt, const char *a
   out.write('[');
   switch (dt.get_type_id()) {
   case cfixed_dim_type_id:
-  case fixed_dim_type_id:
-  case strided_dim_type_id: {
+  case fixed_dim_type_id: {
     const base_dim_type *sad = dt.tcast<base_dim_type>();
-    const strided_dim_type_arrmeta *md =
-        reinterpret_cast<const strided_dim_type_arrmeta *>(arrmeta);
+    const fixed_dim_type_arrmeta *md =
+        reinterpret_cast<const fixed_dim_type_arrmeta *>(arrmeta);
     ndt::type element_tp = sad->get_element_type();
     intptr_t size = md->dim_size, stride = md->stride;
-    arrmeta += sizeof(strided_dim_type_arrmeta);
+    arrmeta += sizeof(fixed_dim_type_arrmeta);
     for (intptr_t i = 0; i < size; ++i) {
       ::format_json(out, element_tp, arrmeta, data + i * stride);
       if (i != size - 1) {

@@ -77,13 +77,3 @@ size_t ndarrayarg_type::make_comparison_kernel(
 {
     throw not_comparable_error(src0_tp, src1_tp, comptype);
 }
-
-ndt::type ndt::make_ndarrayarg()
-{
-    // Static instance of ndarrayarg_type, which has a reference count > 0 for the
-    // lifetime of the program. This static construction is inside a
-    // function to ensure correct creation order during startup.
-    static ndarrayarg_type nat;
-    const ndt::type static_instance(&nat, true);
-    return static_instance;
-}

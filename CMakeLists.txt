@@ -12,11 +12,13 @@ find_package(CUDA)
 set(LIB_SUFFIX "" CACHE STRING
     "Typically an empty string or 64. Controls installation to lib or lib64")
 
-# -DDYND_ELWISE_MAX, the maximum number of arguments that the elwise function
-#   in libdynd will support
-SET(DYND_ELWISE_MAX 4 CACHE STRING
-    "Build a libdynd library with an elwise function that supports the specified maximum number of arguments")
+# -DDYND_SRC_MAX, the maximum number of src parameters that functor arrfuncs will support
+SET(DYND_SRC_MAX 4 CACHE STRING
+    "Build a libdynd library with functor arrfuncs that support the specified maximum number of arguments")
 # TODO: Check that the preprocessor can handle this number
+# -DDYND_ARG_MAX, the maximum number of arguments that functor arrfuncs must support,
+# which is DYND_SRC_MAX + ?reference_dst + ?aux_buffer + ?thread_aux_buffer
+MATH(EXPR DYND_ARG_MAX "${DYND_SRC_MAX} + 3")
 
 # Only add these options if this is the top level CMakeLists.txt
 if("${CMAKE_SOURCE_DIR}" STREQUAL "${CMAKE_CURRENT_SOURCE_DIR}")
@@ -137,7 +139,6 @@ list(GET DYND_VERSION 0 "${DYND_VERSION}")
 set(libdynd_SRC
     # Preprocessor
     include/dynd/pp/arithmetic.hpp
-    include/dynd/pp/arrfunc_util.hpp
     include/dynd/pp/comparison.hpp
     include/dynd/pp/if.hpp
     include/dynd/pp/list.hpp
@@ -199,6 +200,7 @@ set(libdynd_SRC
     src/dynd/types/ellipsis_dim_type.cpp
     src/dynd/types/expr_type.cpp
     src/dynd/types/fixed_dim_type.cpp
+    src/dynd/types/fixed_sym_dim_type.cpp
     src/dynd/types/fixedbytes_type.cpp
     src/dynd/types/fixedstring_type.cpp
     src/dynd/types/funcproto_type.cpp
@@ -208,9 +210,11 @@ set(libdynd_SRC
     src/dynd/types/option_type.cpp
     src/dynd/types/pointer_type.cpp
     src/dynd/types/property_type.cpp
-    src/dynd/types/strided_dim_type.cpp
+    src/dynd/types/static_type_instances.cpp
     src/dynd/types/string_type.cpp
     src/dynd/types/struct_type.cpp
+    src/dynd/types/substitute_shape.cpp
+    src/dynd/types/substitute_typevars.cpp
     src/dynd/types/time_parser.cpp
     src/dynd/types/time_type.cpp
     src/dynd/types/time_util.cpp
@@ -218,7 +222,6 @@ set(libdynd_SRC
     src/dynd/types/type_alignment.cpp
     src/dynd/types/type_id.cpp
     src/dynd/types/type_pattern_match.cpp
-    src/dynd/types/type_substitute.cpp
     src/dynd/types/type_type.cpp
     src/dynd/types/typevar_dim_type.cpp
     src/dynd/types/typevar_type.cpp
@@ -265,28 +268,30 @@ set(libdynd_SRC
     include/dynd/types/dynd_uint128.hpp
     include/dynd/types/expr_type.hpp
     include/dynd/types/fixed_dim_type.hpp
-    include/dynd/types/property_type.hpp
-    include/dynd/types/type_alignment.hpp
-    include/dynd/types/cfixed_dim_type.hpp
+    include/dynd/types/fixed_sym_dim_type.hpp
     include/dynd/types/fixedbytes_type.hpp
     include/dynd/types/fixedstring_type.hpp
+    include/dynd/types/property_type.hpp
+    include/dynd/types/static_type_instances.hpp
+    include/dynd/types/type_alignment.hpp
+    include/dynd/types/cfixed_dim_type.hpp
     include/dynd/types/cstruct_type.hpp
     include/dynd/types/groupby_type.hpp
     include/dynd/types/json_type.hpp
     include/dynd/types/ndarrayarg_type.hpp
     include/dynd/types/option_type.hpp
     include/dynd/types/pointer_type.hpp
-    include/dynd/types/strided_dim_type.hpp
     include/dynd/types/string_type.hpp
     include/dynd/types/struct_type.hpp
     include/dynd/types/cstruct_type.hpp
+    include/dynd/types/substitute_shape.hpp
+    include/dynd/types/substitute_typevars.hpp
     include/dynd/types/time_parser.hpp
     include/dynd/types/time_type.hpp
     include/dynd/types/time_util.hpp
     include/dynd/types/tuple_type.hpp
     include/dynd/types/type_id.hpp
     include/dynd/types/type_pattern_match.hpp
-    include/dynd/types/type_substitute.hpp
     include/dynd/types/typevar_dim_type.hpp
     include/dynd/types/typevar_type.hpp
     include/dynd/types/unary_expr_type.hpp
@@ -308,6 +313,7 @@ set(libdynd_SRC
     include/dynd/eval/unary_elwise_eval.hpp
     # Func
     src/dynd/func/arrfunc.cpp
+    src/dynd/func/arrfunc_registry.cpp
     src/dynd/func/callable.cpp
     src/dynd/func/copy_arrfunc.cpp
     src/dynd/func/chain_arrfunc.cpp
@@ -315,29 +321,26 @@ set(libdynd_SRC
     src/dynd/func/elwise_reduce_gfunc.cpp
     src/dynd/func/lift_arrfunc.cpp
     src/dynd/func/lift_reduction_arrfunc.cpp
-    src/dynd/func/math_arrfunc.cpp
+    src/dynd/func/neighborhood_arrfunc.cpp
+    src/dynd/func/multidispatch_arrfunc.cpp
     src/dynd/func/rolling_arrfunc.cpp
     src/dynd/func/take_arrfunc.cpp
     include/dynd/func/arrfunc.hpp
+    include/dynd/func/arrfunc_registry.hpp
     include/dynd/func/callable.hpp
     include/dynd/func/call_callable.hpp
     include/dynd/func/copy_arrfunc.hpp
     include/dynd/func/chain_arrfunc.hpp
     include/dynd/func/elwise.hpp
-    include/dynd/func/elwise_common.hpp
-    include/dynd/func/elwise_callrefres.hpp
-    include/dynd/func/elwise_callretres.hpp
-    include/dynd/func/elwise_funcrefres.hpp
-    include/dynd/func/elwise_funcretres.hpp
-    include/dynd/func/elwise_methrefres.hpp
-    include/dynd/func/elwise_methretres.hpp
     include/dynd/func/elwise_gfunc.hpp
     include/dynd/func/elwise_reduce_gfunc.hpp
     include/dynd/func/functor_arrfunc.hpp
     include/dynd/func/make_callable.hpp
-    include/dynd/func/math_arrfunc.hpp
     include/dynd/func/lift_arrfunc.hpp
     include/dynd/func/lift_reduction_arrfunc.hpp
+    include/dynd/func/make_callable.hpp
+    include/dynd/func/neighborhood_arrfunc.hpp
+    include/dynd/func/multidispatch_arrfunc.hpp
     include/dynd/func/rolling_arrfunc.hpp
     include/dynd/func/take_arrfunc.hpp
     # Iter
@@ -346,7 +349,7 @@ set(libdynd_SRC
     # Kernels
     src/dynd/kernels/assignment_kernels.cpp
     src/dynd/kernels/var_dim_assignment_kernels.cpp
-    src/dynd/kernels/buffered_binary_kernels.cpp
+    src/dynd/kernels/buffered_kernels.cpp
     src/dynd/kernels/bytes_assignment_kernels.cpp
     src/dynd/kernels/byteswap_kernels.cpp
     src/dynd/kernels/ckernel_common_functions.cpp
@@ -382,7 +385,7 @@ set(libdynd_SRC
     src/dynd/kernels/single_comparer_builtin.hpp
     include/dynd/kernels/assignment_kernels.hpp
     include/dynd/kernels/var_dim_assignment_kernels.hpp
-    include/dynd/kernels/buffered_binary_kernels.hpp
+    include/dynd/kernels/buffered_kernels.hpp
     include/dynd/kernels/bytes_assignment_kernels.hpp
     include/dynd/kernels/byteswap_kernels.hpp
     include/dynd/kernels/ckernel_builder.hpp
@@ -399,6 +402,7 @@ set(libdynd_SRC
     include/dynd/kernels/expr_kernel_generator.hpp
     include/dynd/kernels/expression_assignment_kernels.hpp
     include/dynd/kernels/expression_comparison_kernels.hpp
+    include/dynd/kernels/functor_kernels.hpp
     include/dynd/kernels/make_lifted_ckernel.hpp
     include/dynd/kernels/make_lifted_reduction_ckernel.hpp
     include/dynd/kernels/option_assignment_kernels.hpp
@@ -466,6 +470,7 @@ set(libdynd_SRC
     include/dynd/arrmeta_holder.hpp
     include/dynd/atomic_refcount.hpp
     include/dynd/auxiliary_data.hpp
+    include/dynd/buffer.hpp
     include/dynd/buffer_storage.hpp
     include/dynd/config.hpp
     include/dynd/cmake_config.hpp.in # Included here for ease of editing in IDEs
@@ -478,6 +483,7 @@ set(libdynd_SRC
     include/dynd/ensure_immutable_contig.hpp
     include/dynd/random.hpp
     include/dynd/fft.hpp
+    include/dynd/funcproto.hpp
     include/dynd/type.hpp
     include/dynd/typed_data_assign.hpp
     include/dynd/type_promotion.hpp
@@ -581,9 +587,7 @@ if (DYND_SHARED_LIB)
     endif()
     set_target_properties(libdynd
         PROPERTIES
-        # For now, during development, embed the full version string
-        # to reduce the chance of accidentally linking the wrong one.
-        OUTPUT_NAME "dynd_${DYND_VERSION_STRING}"
+        OUTPUT_NAME "dynd"
         PREFIX "${CMAKE_SHARED_LIBRARY_PREFIX}"
         )
 else()

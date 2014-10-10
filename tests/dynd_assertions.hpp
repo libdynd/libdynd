@@ -10,6 +10,8 @@
 
 #include <dynd/json_parser.hpp>
 #include <dynd/types/base_struct_type.hpp>
+#include <dynd/types/type_pattern_match.hpp>
+#include <dynd/type_promotion.hpp>
 
 inline std::string ShapeFormatter(const std::vector<intptr_t>& shape)
 {
@@ -93,7 +95,8 @@ inline ::testing::AssertionResult CompareDyNDArrays(const char *expr1,
             }
             return ::testing::AssertionFailure()
                    << "DYND ASSERTION INTERNAL ERROR: One of the subarrays "
-                      "should have compared unequal";
+                      "should have compared unequal\n" << expr1 << " has value "
+                   << val1 << ",\n" << expr2 << " has value " << val2 << ".";
         } else {
             return ::testing::AssertionFailure()
                    << "The values of " << expr1 << " and " << expr2
@@ -104,15 +107,74 @@ inline ::testing::AssertionResult CompareDyNDArrays(const char *expr1,
 }
 
 inline ::testing::AssertionResult
+CompareDyNDArrayValues(const char *expr1, const char *expr2,
+                       const dynd::nd::array &val1, const dynd::nd::array &val2)
+{
+  using namespace dynd;
+  ndt::type common_tp;
+  try {
+    common_tp = promote_types_arithmetic(val1.get_type(), val2.get_type());
+  } catch(const type_error&) {
+    return ::testing::AssertionFailure()
+           << "The types of " << expr1 << " and " << expr2
+           << " do not have mutually promotable types\n" << expr1
+           << " has type " << val1.get_type() << ",\n" << expr2 << " has type "
+           << val2.get_type() << ".";
+  }
+  nd::array v1 = nd::empty(common_tp), v2 = nd::empty(common_tp);
+  v1.vals() = val1;
+  v2.vals() = val2;
+  return CompareDyNDArrays(expr1, expr2, v1, v2);
+}
+
+inline ::testing::AssertionResult
 CompareDyNDArrayToJSON(const char *expr1, const char *expr2,
                        const char *json, const dynd::nd::array &b)
 {
     using namespace dynd;
-    dimvector shape(b.get_ndim());
-    b.get_shape(shape.get());
-    nd::array a(nd::typed_empty(b.get_ndim(), shape.get(), b.get_type()));
+    nd::array a(nd::empty(b.get_type()));
     parse_json(a, json);
     return CompareDyNDArrays(expr1, expr2, a, b);
+}
+
+inline ::testing::AssertionResult MatchNdtTypes(const char *expr1,
+                                                const char *expr2,
+                                                const dynd::ndt::type &pattern,
+                                                const dynd::ndt::type &actual)
+{
+  if (dynd::ndt::pattern_match(actual, pattern)) {
+    return ::testing::AssertionSuccess();
+  } else {
+    return ::testing::AssertionFailure()
+           << "The type of " << expr2 << " does not match pattern " << expr1
+           << "\n" << expr1 << " has value " << pattern << ",\n" << expr2
+           << " has value " << actual << ".";
+  }
+}
+
+inline ::testing::AssertionResult MatchNdtTypes(const char *expr1,
+                                                const char *expr2,
+                                                const char *pattern,
+                                                const dynd::ndt::type &actual)
+{
+  return MatchNdtTypes(expr1, expr2, dynd::ndt::type(pattern), actual);
+}
+
+inline ::testing::AssertionResult MatchNdtTypes(const char *expr1,
+                                                const char *expr2,
+                                                const dynd::ndt::type &pattern,
+                                                const char *actual)
+{
+  return MatchNdtTypes(expr1, expr2, pattern, dynd::ndt::type(actual));
+}
+
+inline ::testing::AssertionResult MatchNdtTypes(const char *expr1,
+                                                const char *expr2,
+                                                const char *pattern,
+                                                const char *actual)
+{
+  return MatchNdtTypes(expr1, expr2, dynd::ndt::type(pattern),
+                       dynd::ndt::type(actual));
 }
 
 /**
@@ -125,7 +187,11 @@ CompareDyNDArrayToJSON(const char *expr1, const char *expr2,
  * EXPECT_ARR_EQ(b, a);
  */
 #define EXPECT_ARR_EQ(expected, actual) \
-  ASSERT_PRED_FORMAT2(CompareDyNDArrays, \
+  EXPECT_PRED_FORMAT2(CompareDyNDArrays, \
+                      expected, actual)
+
+#define EXPECT_ARR_VALS_EQ(expected, actual) \
+  EXPECT_PRED_FORMAT2(CompareDyNDArrayValues, \
                       expected, actual)
 
 /**
@@ -137,8 +203,12 @@ CompareDyNDArrayToJSON(const char *expr1, const char *expr2,
  * EXPECT_JSON_EQ_ARR("[1, 2, 3]", a);
  */
 #define EXPECT_JSON_EQ_ARR(expected, actual) \
-  ASSERT_PRED_FORMAT2(CompareDyNDArrayToJSON, \
+  EXPECT_PRED_FORMAT2(CompareDyNDArrayToJSON, \
                       expected, actual)
+
+#define EXPECT_TYPE_MATCHES(pattern, actual) \
+  EXPECT_PRED_FORMAT2(MatchNdtTypes, \
+                      pattern, actual)
 
 inline float rel_error(float expected, float actual)
 {

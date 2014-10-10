@@ -59,8 +59,10 @@ public:
 
     bool is_expression() const;
     bool is_unique_data_owner(const char *arrmeta) const;
-    void transform_child_types(type_transform_fn_t transform_fn, void *extra,
-                    ndt::type& out_transformed_tp, bool& out_was_transformed) const;
+    void transform_child_types(type_transform_fn_t transform_fn,
+                               intptr_t arrmeta_offset, void *extra,
+                               ndt::type &out_transformed_tp,
+                               bool &out_was_transformed) const;
     ndt::type get_canonical_type() const;
 
     ndt::type apply_linear_index(intptr_t nindices, const irange *indices,
@@ -85,15 +87,26 @@ public:
 
     ndt::type with_replaced_storage_type(const ndt::type& replacement_type) const;
 
-    void arrmeta_default_construct(char *arrmeta, intptr_t ndim, const intptr_t* shape) const;
+    void arrmeta_default_construct(char *arrmeta, bool blockref_alloc) const;
     void arrmeta_copy_construct(char *dst_arrmeta, const char *src_arrmeta, memory_block_data *embedded_reference) const;
     void arrmeta_reset_buffers(char *arrmeta) const;
     void arrmeta_finalize_buffers(char *arrmeta) const;
     void arrmeta_destruct(char *arrmeta) const;
     void arrmeta_debug_print(const char *arrmeta, std::ostream& o, const std::string& indent) const;
 
+    size_t make_assignment_kernel(ckernel_builder *ckb, intptr_t ckb_offset,
+                                  const ndt::type &dst_tp,
+                                  const char *dst_arrmeta,
+                                  const ndt::type &src_tp,
+                                  const char *src_arrmeta,
+                                  kernel_request_t kernreq,
+                                  const eval::eval_context *ectx) const;
+
     void get_dynamic_type_properties(
                     const std::pair<std::string, gfunc::callable> **out_properties,
+                    size_t *out_count) const;
+    void get_dynamic_array_functions(
+                    const std::pair<std::string, gfunc::callable> **out_functions,
                     size_t *out_count) const;
 };
 

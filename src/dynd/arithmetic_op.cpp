@@ -11,7 +11,6 @@
 #include <dynd/kernels/expr_kernel_generator.hpp>
 #include <dynd/kernels/elwise_expr_kernels.hpp>
 #include <dynd/shape_tools.hpp>
-#include <dynd/types/strided_dim_type.hpp>
 #include <dynd/types/var_dim_type.hpp>
 #include <dynd/types/expr_type.hpp>
 #include <dynd/types/string_type.hpp>
@@ -292,7 +291,7 @@ nd::array nd::operator+(const nd::array& op1, const nd::array& op2)
 
         // The signature is (T, T) -> T, so we don't use the original types
         return apply_binary_operator<ckernel_prefix_with_init>(
-            ops, rdt, rdt, rdt, func_ptr, "addition").eval_immutable();
+            ops, rdt, rdt, rdt, func_ptr, "addition").eval();
     } else if (op1dt.get_kind() == string_kind && op2dt.get_kind() == string_kind) {
         ndt::type rdt = ndt::make_string();
         func_ptr.single = &kernels::string_concatenation_kernel::single;
@@ -302,7 +301,7 @@ nd::array nd::operator+(const nd::array& op1, const nd::array& op2)
         nd::array tmp = apply_binary_operator<kernels::string_concatenation_kernel>(
             ops, rdt, rdt, rdt, func_ptr, "string_concat");
 
-        return tmp.eval_immutable();
+        return tmp.eval();
     } else {
         stringstream ss;
         ss << "Addition is not supported for dynd types ";
@@ -327,7 +326,7 @@ nd::array nd::operator-(const nd::array& op1, const nd::array& op2)
 
     nd::array ops[2] = {op1, op2};
     return apply_binary_operator<ckernel_prefix_with_init>(
-        ops, rdt, rdt, rdt, func_ptr, "subtraction").eval_immutable();
+        ops, rdt, rdt, rdt, func_ptr, "subtraction").eval();
 }
 
 nd::array nd::operator*(const nd::array& op1, const nd::array& op2)
@@ -346,7 +345,7 @@ nd::array nd::operator*(const nd::array& op1, const nd::array& op2)
 
     nd::array ops[2] = {op1, op2};
     return apply_binary_operator<ckernel_prefix_with_init>(
-        ops, rdt, rdt, rdt, func_ptr, "multiplication").eval_immutable();
+        ops, rdt, rdt, rdt, func_ptr, "multiplication").eval();
 }
 
 nd::array nd::operator/(const nd::array& op1, const nd::array& op2)
@@ -365,5 +364,5 @@ nd::array nd::operator/(const nd::array& op1, const nd::array& op2)
 
     nd::array ops[2] = {op1, op2};
     return apply_binary_operator<ckernel_prefix_with_init>(
-        ops, rdt, rdt, rdt, func_ptr, "division").eval_immutable();
+        ops, rdt, rdt, rdt, func_ptr, "division").eval();
 }
