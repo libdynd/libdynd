@@ -121,6 +121,7 @@ TYPED_TEST_P(ElwiseCallRetRes, CallRetRes) {
     EXPECT_EQ(6, res.as<TypeParam>());
 }
 
+/*
 #ifdef DYND_CXX_LAMBDAS
 TEST(ElWise, LambdaFunc) {
     nd::array a, b, res;
@@ -143,6 +144,7 @@ TEST(ElWise, LambdaFunc) {
     EXPECT_JSON_EQ_ARR("[18.25,23.25,34.5]", res);
 }
 #endif
+*/
 
 typedef ::testing::Types<int, float, long, double> test_types;
 

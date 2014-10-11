@@ -33,12 +33,12 @@ DYND_PP_JOIN_MAP(FUNC_WRAPPER, (), DYND_PP_RANGE(1, DYND_PP_INC(DYND_ARG_MAX)))
 
 #undef FUNC_WRAPPER
 
-template <typename mem_func_type>
+template <typename mem_func_type, bool copy>
 class mem_func_wrapper;
 
 #define MEM_FUNC_WRAPPER(N) \
   template <typename T, typename R, DYND_PP_JOIN_MAP_1(DYND_PP_META_TYPENAME, (,), DYND_PP_META_NAME_RANGE(A, N))> \
-  class mem_func_wrapper<R (T::*) DYND_PP_META_NAME_RANGE(A, N) const> { \
+  class mem_func_wrapper<R (T::*) DYND_PP_META_NAME_RANGE(A, N) const, true> { \
     typedef R (T::*mem_func_type) DYND_PP_META_NAME_RANGE(A, N) const; \
 \
     T m_obj; \
@@ -50,6 +50,22 @@ class mem_func_wrapper;
 \
     R operator() DYND_PP_ELWISE_1(DYND_PP_META_DECL, DYND_PP_META_NAME_RANGE(A, N), DYND_PP_META_NAME_RANGE(a, N)) const { \
       return (m_obj.*m_mem_func)DYND_PP_META_NAME_RANGE(a, N); \
+    } \
+  }; \
+\
+  template <typename T, typename R, DYND_PP_JOIN_MAP_1(DYND_PP_META_TYPENAME, (,), DYND_PP_META_NAME_RANGE(A, N))> \
+  class mem_func_wrapper<R (T::*) DYND_PP_META_NAME_RANGE(A, N) const, false> { \
+    typedef R (T::*mem_func_type) DYND_PP_META_NAME_RANGE(A, N) const; \
+\
+    const T *m_obj; \
+    mem_func_type m_mem_func; \
+\
+  public: \
+    mem_func_wrapper(const T &obj, mem_func_type mem_func) : m_obj(&obj), m_mem_func(mem_func) { \
+    } \
+\
+    R operator() DYND_PP_ELWISE_1(DYND_PP_META_DECL, DYND_PP_META_NAME_RANGE(A, N), DYND_PP_META_NAME_RANGE(a, N)) const { \
+      return (m_obj->*m_mem_func)DYND_PP_META_NAME_RANGE(a, N); \
     } \
   };
 
@@ -139,8 +155,11 @@ arrfunc make_functor_arrfunc(const func_type &func, bool copy = true) {
 template <typename obj_type, typename mem_func_type>
 void make_functor_arrfunc(arrfunc_type_data *out_af, const obj_type &obj, mem_func_type mem_func, bool copy) {
     if (copy) {
-        typedef detail::mem_func_wrapper<mem_func_type> wrapper_type;
+        typedef detail::mem_func_wrapper<mem_func_type, true> wrapper_type;
         detail::functor_arrfunc_from<wrapper_type, true, false>::make(wrapper_type(obj, mem_func), out_af);
+    } else {
+        typedef detail::mem_func_wrapper<mem_func_type, false> wrapper_type;
+        detail::functor_arrfunc_from<wrapper_type, false, false>::make(wrapper_type(obj, mem_func), out_af);
     }
 }
 
