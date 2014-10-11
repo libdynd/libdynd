@@ -50,6 +50,7 @@ private:
     R (*m_func)(A0);
 public:
     Callable(R (*func)(A0)) : m_func(func) {}
+
     R operator ()(A0 a0) const {
         return (*m_func)(a0);
     }
@@ -59,7 +60,9 @@ class Callable<R (*)(A0, A1)> {
 private:
     R (*m_func)(A0, A1);
 public:
-    Callable(R (*func)(A0, A1)) : m_func(func) {}
+    Callable(R (*func)(A0, A1)) : m_func(func) {
+    }
+
     R operator ()(A0 a0, A1 a1) const {
         return (*m_func)(a0, a1);
     }

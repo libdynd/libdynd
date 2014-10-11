@@ -96,7 +96,7 @@ private:
     void (*m_func)(R &, A0);
 public:
     FuncWrapper(void (*func)(R &, A0)) : m_func(func) {}
-    void meth(R &res, A0 a0) {
+    void meth(R &res, A0 a0) const {
         (*m_func)(res, a0);
     }
 };
@@ -106,7 +106,7 @@ private:
     void (*m_func)(R &, A0, A1);
 public:
     FuncWrapper(void (*func)(R &, A0, A1)) : m_func(func) {}
-    void meth(R &res, A0 a0, A1 a1) {
+    void meth(R &res, A0 a0, A1 a1) const {
         (*m_func)(res, a0, a1);
     }
 };

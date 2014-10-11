@@ -361,6 +361,19 @@ namespace kernels {
       return self_type::init(rawself, kernreq);
     }
 
+    template <typename A0>
+    static inline self_type *create(ckernel_builder *ckb,
+                                    kernel_request_t kernreq,
+                                    intptr_t &inout_ckb_offset,
+                                    const A0 &a0)
+    {
+      intptr_t ckb_offset = inout_ckb_offset;
+      kernels::inc_ckb_offset<self_type>(inout_ckb_offset);
+      ckb->ensure_capacity(inout_ckb_offset);
+      ckernel_prefix *rawself = ckb->get_at<ckernel_prefix>(ckb_offset);
+      return self_type::init(rawself, kernreq, a0);
+    }
+
     /**
      * Creates the ckernel, and increments ``inckb_offset``
      * to the position after it.
@@ -391,6 +404,29 @@ namespace kernels {
 
       // Call the constructor in-place
       self_type *self = new (rawself) self_type();
+      // Double check that the C++ struct layout is as we expect
+      if (self != get_self(rawself)) {
+        throw std::runtime_error(
+            "internal ckernel error: struct layout is not valid");
+      }
+      self->base.destructor = &self_type::destruct;
+      // A child class must implement this to fill in self->base.function
+      self->init_kernfunc(kernreq);
+      return self;
+    }
+
+    template <typename A0>
+    static inline self_type *init(ckernel_prefix *rawself,
+                                  kernel_request_t kernreq,
+                                  const A0 &a0)
+    {
+      // Alignment requirement of the type
+      DYND_STATIC_ASSERT((size_t)scalar_align_of<self_type>::value <=
+                             (size_t)scalar_align_of<uint64_t>::value,
+                         "ckernel types require alignment <= 64 bits");
+
+      // Call the constructor in-place
+      self_type *self = new (rawself) self_type(a0);
       // Double check that the C++ struct layout is as we expect
       if (self != get_self(rawself)) {
         throw std::runtime_error(

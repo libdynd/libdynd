@@ -24,7 +24,6 @@ class ElwiseCallRefRes : public ::testing::Test {
 
 TYPED_TEST_CASE_P(ElwiseCallRefRes);
 
-
 template <typename T>
 int func0(T x, const T &y) {
     return static_cast<int>(2 * (x - y));

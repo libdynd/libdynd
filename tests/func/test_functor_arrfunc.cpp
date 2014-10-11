@@ -571,7 +571,7 @@ private:
     R (*m_func)(A0);
 public:
     FuncWrapper(R (*func)(A0)) : m_func(func) {}
-    R meth(A0 a0) {
+    R meth(A0 a0) const {
         return (*m_func)(a0);
     }
 };
@@ -581,11 +581,8 @@ private:
     R (*m_func)(A0, A1);
 public:
     FuncWrapper(R (*func)(A0, A1)) : m_func(func) {}
-    R meth(A0 a0, A1 a1) {
+    R meth(A0 a0, A1 a1) const {
         return (*m_func)(a0, a1);
-    }
-    void help() const {
-        std::cout << "help" << std::endl;
     }
 
 };
@@ -595,7 +592,7 @@ private:
     void (*m_func)(R &, A0);
 public:
     FuncWrapper(void (*func)(R &, A0)) : m_func(func) {}
-    void meth(R &res, A0 a0) {
+    void meth(R &res, A0 a0) const {
         (*m_func)(res, a0);
     }
 };
@@ -605,7 +602,7 @@ private:
     void (*m_func)(R &, A0, A1);
 public:
     FuncWrapper(void (*func)(R &, A0, A1)) : m_func(func) {}
-    void meth(R &res, A0 a0, A1 a1) {
+    void meth(R &res, A0 a0, A1 a1) const {
         (*m_func)(res, a0, a1);
     }
 };
