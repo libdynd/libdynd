@@ -24,7 +24,6 @@ class ElwiseMethRetRes : public ::testing::Test {
 
 TYPED_TEST_CASE_P(ElwiseMethRetRes);
 
-
 template <typename T>
 int func0(T x, const T &y) {
     return static_cast<int>(2 * (x - y));
@@ -51,7 +50,7 @@ private:
     R (*m_func)(A0);
 public:
     FuncWrapper(R (*func)(A0)) : m_func(func) {}
-    R meth(A0 a0) {
+    R meth(A0 a0) const {
         return (*m_func)(a0);
     }
 };
@@ -61,7 +60,7 @@ private:
     R (*m_func)(A0, A1);
 public:
     FuncWrapper(R (*func)(A0, A1)) : m_func(func) {}
-    R meth(A0 a0, A1 a1) {
+    R meth(A0 a0, A1 a1) const {
         return (*m_func)(a0, a1);
     }
 };

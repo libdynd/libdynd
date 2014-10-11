@@ -49,6 +49,10 @@
 #  define DYND_CXX_TR1_TYPE_TRAITS
 #endif
 
+#if __has_feature(cxx_variadic_templates)
+#  define DYND_CXX_VARIADIC_TEMPLATES
+#endif
+
 #include <cmath>
 
 // Ran into some weird issues with
@@ -80,6 +84,7 @@ inline bool DYND_ISNAN(long double x) {
 // Use static_assert on gcc >= 4.7
 #  define DYND_STATIC_ASSERT(value, message) static_assert(value, message)
 #  define DYND_CXX_TYPE_TRAITS
+#  define DYND_CXX_VARIADIC_TEMPLATES
 #else
 // Don't use constexpr on gcc < 4.7
 #  define DYND_CONSTEXPR
@@ -117,6 +122,7 @@ inline bool DYND_ISNAN(long double x) {
 # define DYND_RVALUE_REFS
 # define DYND_STATIC_ASSERT(value, message) static_assert(value, message)
 # define DYND_CXX_LAMBDAS
+# define DYND_CXX_VARIADIC_TEMPLATES
 
 #if _MSC_VER < 1700
 // Older than MSVC 2012
