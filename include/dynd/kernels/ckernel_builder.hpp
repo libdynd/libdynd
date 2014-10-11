@@ -11,6 +11,8 @@
 
 #include <dynd/config.hpp>
 #include <dynd/kernels/ckernel_prefix.hpp>
+#include <dynd/pp/list.hpp>
+#include <dynd/pp/meta.hpp>
 #include <dynd/types/type_id.hpp>
 
 namespace dynd {
@@ -346,47 +348,40 @@ namespace kernels {
       return ckb->get_at<self_type>(ckb_offset);
     }
 
+#ifdef DYND_CXX_VARIADIC_TEMPLATES
+
     /**
      * Creates the ckernel, and increments ``inckb_offset``
      * to the position after it.
      */
-    static inline self_type *create(ckernel_builder *ckb,
-                                    kernel_request_t kernreq,
-                                    intptr_t &inout_ckb_offset)
-    {
-      intptr_t ckb_offset = inout_ckb_offset;
-      kernels::inc_ckb_offset<self_type>(inout_ckb_offset);
-      ckb->ensure_capacity(inout_ckb_offset);
-      ckernel_prefix *rawself = ckb->get_at<ckernel_prefix>(ckb_offset);
-      return self_type::init(rawself, kernreq);
-    }
-
-    template <typename A0>
+    template <typename... A>
     static inline self_type *create(ckernel_builder *ckb,
                                     kernel_request_t kernreq,
                                     intptr_t &inout_ckb_offset,
-                                    const A0 &a0)
+                                    const A &... args)
     {
       intptr_t ckb_offset = inout_ckb_offset;
       kernels::inc_ckb_offset<self_type>(inout_ckb_offset);
       ckb->ensure_capacity(inout_ckb_offset);
       ckernel_prefix *rawself = ckb->get_at<ckernel_prefix>(ckb_offset);
-      return self_type::init(rawself, kernreq, a0);
+      return self_type::init(rawself, kernreq, args...);
     }
 
     /**
      * Creates the ckernel, and increments ``inckb_offset``
      * to the position after it.
      */
+    template <typename... A>
     static inline self_type *create_leaf(ckernel_builder *ckb,
                                          kernel_request_t kernreq,
-                                         intptr_t &inout_ckb_offset)
+                                         intptr_t &inout_ckb_offset,
+                                         const A &... args)
     {
       intptr_t ckb_offset = inout_ckb_offset;
       kernels::inc_ckb_offset<self_type>(inout_ckb_offset);
       ckb->ensure_capacity_leaf(inout_ckb_offset);
       ckernel_prefix *rawself = ckb->get_at<ckernel_prefix>(ckb_offset);
-      return self_type::init(rawself, kernreq);
+      return self_type::init(rawself, kernreq, args...);
     }
 
     /**
@@ -394,31 +389,10 @@ namespace kernels {
      * kernel request. This calls the constructor in-place, and initializes
      * the base function and destructor
      */
-    static inline self_type *init(ckernel_prefix *rawself,
-                                  kernel_request_t kernreq)
-    {
-      // Alignment requirement of the type
-      DYND_STATIC_ASSERT((size_t)scalar_align_of<self_type>::value <=
-                             (size_t)scalar_align_of<uint64_t>::value,
-                         "ckernel types require alignment <= 64 bits");
-
-      // Call the constructor in-place
-      self_type *self = new (rawself) self_type();
-      // Double check that the C++ struct layout is as we expect
-      if (self != get_self(rawself)) {
-        throw std::runtime_error(
-            "internal ckernel error: struct layout is not valid");
-      }
-      self->base.destructor = &self_type::destruct;
-      // A child class must implement this to fill in self->base.function
-      self->init_kernfunc(kernreq);
-      return self;
-    }
-
-    template <typename A0>
+    template <typename... A>
     static inline self_type *init(ckernel_prefix *rawself,
                                   kernel_request_t kernreq,
-                                  const A0 &a0)
+                                  const A &... args)
     {
       // Alignment requirement of the type
       DYND_STATIC_ASSERT((size_t)scalar_align_of<self_type>::value <=
@@ -426,7 +400,7 @@ namespace kernels {
                          "ckernel types require alignment <= 64 bits");
 
       // Call the constructor in-place
-      self_type *self = new (rawself) self_type(a0);
+      self_type *self = new (rawself) self_type(args...);
       // Double check that the C++ struct layout is as we expect
       if (self != get_self(rawself)) {
         throw std::runtime_error(
@@ -437,6 +411,71 @@ namespace kernels {
       self->init_kernfunc(kernreq);
       return self;
     }
+
+#else
+
+#define CREATE(N) \
+    DYND_PP_IF(N)(template <DYND_PP_JOIN_MAP_1(DYND_PP_META_TYPENAME, (,), DYND_PP_META_NAME_RANGE(A, N))>) \
+    static inline self_type *create DYND_PP_PREPEND(ckernel_builder *ckb, \
+        DYND_PP_PREPEND(kernel_request_t kernreq, DYND_PP_PREPEND(intptr_t &inout_ckb_offset, \
+        DYND_PP_ELWISE_1(DYND_PP_META_DECL_CONST_REF, DYND_PP_META_NAME_RANGE(A, N), DYND_PP_META_NAME_RANGE(a, N))))) \
+    { \
+      intptr_t ckb_offset = inout_ckb_offset; \
+      kernels::inc_ckb_offset<self_type>(inout_ckb_offset); \
+      ckb->ensure_capacity(inout_ckb_offset); \
+      ckernel_prefix *rawself = ckb->get_at<ckernel_prefix>(ckb_offset); \
+      return self_type::init DYND_PP_PREPEND(rawself, DYND_PP_PREPEND(kernreq, DYND_PP_META_NAME_RANGE(a, N))); \
+    }
+
+DYND_PP_JOIN_MAP(CREATE, (), DYND_PP_RANGE(DYND_PP_INC(DYND_ARG_MAX)))
+
+#undef CREATE
+
+#define CREATE_LEAF(N) \
+    DYND_PP_IF(N)(template <DYND_PP_JOIN_MAP_1(DYND_PP_META_TYPENAME, (,), DYND_PP_META_NAME_RANGE(A, N))>) \
+    static inline self_type *create_leaf DYND_PP_PREPEND(ckernel_builder *ckb, \
+        DYND_PP_PREPEND(kernel_request_t kernreq, DYND_PP_PREPEND(intptr_t &inout_ckb_offset, \
+        DYND_PP_ELWISE_1(DYND_PP_META_DECL_CONST_REF, DYND_PP_META_NAME_RANGE(A, N), DYND_PP_META_NAME_RANGE(a, N))))) \
+    { \
+      intptr_t ckb_offset = inout_ckb_offset; \
+      kernels::inc_ckb_offset<self_type>(inout_ckb_offset); \
+      ckb->ensure_capacity_leaf(inout_ckb_offset); \
+      ckernel_prefix *rawself = ckb->get_at<ckernel_prefix>(ckb_offset); \
+      return self_type::init DYND_PP_PREPEND(rawself, DYND_PP_PREPEND(kernreq, DYND_PP_META_NAME_RANGE(a, N))); \
+    }
+
+DYND_PP_JOIN_MAP(CREATE_LEAF, (), DYND_PP_RANGE(DYND_PP_INC(DYND_ARG_MAX)))
+
+#undef CREATE_LEAF
+
+#define INIT(N) \
+    DYND_PP_IF(N)(template <DYND_PP_JOIN_MAP_1(DYND_PP_META_TYPENAME, (,), DYND_PP_META_NAME_RANGE(A, N))>) \
+    static inline self_type *init DYND_PP_PREPEND(ckernel_prefix *rawself, DYND_PP_PREPEND(kernel_request_t kernreq, \
+        DYND_PP_ELWISE_1(DYND_PP_META_DECL_CONST_REF, DYND_PP_META_NAME_RANGE(A, N), DYND_PP_META_NAME_RANGE(a, N)))) \
+    { \
+      /* Alignment requirement of the type */ \
+      DYND_STATIC_ASSERT((size_t)scalar_align_of<self_type>::value <= \
+                             (size_t)scalar_align_of<uint64_t>::value, \
+                         "ckernel types require alignment <= 64 bits"); \
+\
+      /* Call the constructor in-place */ \
+      self_type *self = new (rawself) self_type DYND_PP_META_NAME_RANGE(a, N); \
+      /* Double check that the C++ struct layout is as we expect */ \
+      if (self != get_self(rawself)) { \
+        throw std::runtime_error( \
+            "internal ckernel error: struct layout is not valid"); \
+      } \
+      self->base.destructor = &self_type::destruct; \
+      /* A child class must implement this to fill in self->base.function */ \
+      self->init_kernfunc(kernreq); \
+      return self; \
+    }
+
+DYND_PP_JOIN_MAP(INIT, (), DYND_PP_RANGE(DYND_PP_INC(DYND_ARG_MAX)))
+
+#undef INIT
+
+#endif
 
     /**
      * The ckernel destructor function, which is placed in
