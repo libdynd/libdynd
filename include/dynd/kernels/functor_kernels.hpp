@@ -149,6 +149,9 @@ struct functor_ck;
             DYND_PP_META_NAME_RANGE(D, N), DYND_PP_META_NAME_RANGE(from_src, N)); \
         char buffer[sizeof(buffer_type)]; \
 \
+        functor_ck(const func_type &func) : func(func) { \
+        } \
+\
         inline void single(char *dst, const char *const *src) { \
             *reinterpret_cast<R *>(dst) = this->func(DYND_PP_JOIN_ELWISE_1(PASS, (,), \
                 DYND_PP_META_NAME_RANGE(this->from_src, N), DYND_PP_META_AT_RANGE(src, N)), reinterpret_cast<buffer_type *>(this->buffer)); \
@@ -191,8 +194,7 @@ struct functor_ck;
                 throw type_error(ss.str()); \
             } \
 \
-            self_type *e = self_type::create(ckb, kernreq, ckb_offset); \
-            e->func = *af_self->get_data_as<func_type>(); \
+            self_type *e = self_type::create(ckb, kernreq, ckb_offset, *af_self->get_data_as<func_type>()); \
             DYND_PP_JOIN_ELWISE_1(INIT_TYPED_PARAM_FROM_BYTES, (;), DYND_PP_META_NAME_RANGE(e->from_src, N), \
                 DYND_PP_META_AT_RANGE(src_tp, N), DYND_PP_META_AT_RANGE(src_arrmeta, N)); \
             new (e->buffer) buffer_type(kwds); \
@@ -289,6 +291,9 @@ DYND_PP_JOIN_MAP(FUNCTOR_CK, (), DYND_PP_RANGE(1, DYND_PP_INC(DYND_SRC_MAX)))
             DYND_PP_META_NAME_RANGE(D, N), DYND_PP_META_NAME_RANGE(from_src, N)); \
         char buffer[sizeof(buffer_type)]; \
 \
+        functor_ck(const func_type &func) : func(func) { \
+        } \
+\
         inline void single(char *dst, const char *const *src) { \
             this->func(PASS(this->from_dst, dst), DYND_PP_JOIN_ELWISE_1(PASS, (,), \
                 DYND_PP_META_NAME_RANGE(this->from_src, N), DYND_PP_META_AT_RANGE(src, N)), reinterpret_cast<buffer_type *>(this->buffer)); \
@@ -331,8 +336,7 @@ DYND_PP_JOIN_MAP(FUNCTOR_CK, (), DYND_PP_RANGE(1, DYND_PP_INC(DYND_SRC_MAX)))
                 throw type_error(ss.str()); \
             } \
 \
-            self_type *e = self_type::create(ckb, kernreq, ckb_offset); \
-            e->func = *af_self->get_data_as<func_type>(); \
+            self_type *e = self_type::create(ckb, kernreq, ckb_offset, *af_self->get_data_as<func_type>()); \
             INIT_TYPED_PARAM_FROM_BYTES(e->from_dst, dst_tp, dst_arrmeta); \
             DYND_PP_JOIN_ELWISE_1(INIT_TYPED_PARAM_FROM_BYTES, (;), DYND_PP_META_NAME_RANGE(e->from_src, N), \
                 DYND_PP_META_AT_RANGE(src_tp, N), DYND_PP_META_AT_RANGE(src_arrmeta, N)); \
