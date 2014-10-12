@@ -90,7 +90,7 @@ struct functor_arrfunc_from<funcproto_type *, copy, true> {
 
 template <typename funcproto_type, bool copy>
 struct functor_arrfunc_from<funcproto_type, copy, true> {
-    static void make(const funcproto_type &func, arrfunc_type_data *out_af) {
+    static void make(funcproto_type &func, arrfunc_type_data *out_af) {
         functor_arrfunc_from<funcproto_type *, copy, true>::make(&func, out_af);
     }
 };
