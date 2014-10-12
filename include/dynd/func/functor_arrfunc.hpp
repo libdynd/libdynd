@@ -159,7 +159,7 @@ void make_functor_arrfunc(arrfunc_type_data *out_af, const obj_type &obj, mem_fu
         detail::functor_arrfunc_from<wrapper_type, true, false>::make(wrapper_type(obj, mem_func), out_af);
     } else {
         typedef detail::mem_func_wrapper<mem_func_type, false> wrapper_type;
-        detail::functor_arrfunc_from<wrapper_type, false, false>::make(wrapper_type(obj, mem_func), out_af);
+        detail::functor_arrfunc_from<wrapper_type, true, false>::make(wrapper_type(obj, mem_func), out_af);
     }
 }
 
