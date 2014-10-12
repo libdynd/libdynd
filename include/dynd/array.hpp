@@ -687,11 +687,12 @@ public:
     array replace_dtype(const ndt::type& replacement_tp, intptr_t replace_ndim = 0) const;
 
     /**
-     * Inserts a new strided dimension into the array.
+     * Inserts new fixed dimensions into the array.
      *
-     * \param i  The axis of the new strided dimension.
+     * \param i  The axis at which the new fixed dimensions start.
+     * \param new_ndim  The number of array dimensions to insert.
      */
-    array new_axis(intptr_t i) const;
+    array new_axis(intptr_t i, intptr_t new_ndim = 1) const;
 
     /**
      * Views the array's memory as another type, where such an operation

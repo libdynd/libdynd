@@ -9,8 +9,10 @@
 #include <cmath>
 
 #include "inc_gtest.hpp"
+#include "../dynd_assertions.hpp"
 #include "../test_memory.hpp"
 
+#include <dynd/array_range.hpp>
 #include <dynd/types/bytes_type.hpp>
 #include <dynd/types/var_dim_type.hpp>
 #include <dynd/json_parser.hpp>
@@ -214,63 +216,33 @@ TEST(View, StringAsBytes) {
 }
 
 TEST(View, NewAxis) {
-    nd::array a = nd::empty("int32");
-    for (int i = 0; i <= a.get_ndim(); ++i) {
-        nd::array b = a.new_axis(i);
-        EXPECT_EQ(a.get_ndim() + 1, b.get_ndim());
-        for (int j = 0; j <= a.get_ndim(); ++j) {
-            if (j < i) {
-                EXPECT_EQ(a.get_shape()[j], b.get_shape()[j]);
-            } else if (j == i) {
-                EXPECT_EQ(1, b.get_shape()[j]);
-            } else {
-                EXPECT_EQ(a.get_shape()[j - 1], b.get_shape()[j]);
-            }
-        }
-    }
+    nd::array a;
 
-    a = nd::empty("3 * int32");
-    for (int i = 0; i <= a.get_ndim(); ++i) {
-        nd::array b = a.new_axis(i);
-        EXPECT_EQ(a.get_ndim() + 1, b.get_ndim());
-        for (int j = 0; j <= a.get_ndim(); ++j) {
-            if (j < i) {
-                EXPECT_EQ(a.get_shape()[j], b.get_shape()[j]);
-            } else if (j == i) {
-                EXPECT_EQ(1, b.get_shape()[j]);
-            } else {
-                EXPECT_EQ(a.get_shape()[j - 1], b.get_shape()[j]);
-            }
-        }
-    }
+    a = parse_json("int", "1");
+    EXPECT_JSON_EQ_ARR("[1]", a.new_axis(0));
 
-    a = nd::empty("5 * 3 * int32");
-    for (int i = 0; i <= a.get_ndim(); ++i) {
-        nd::array b = a.new_axis(i);
-        EXPECT_EQ(a.get_ndim() + 1, b.get_ndim());
-        for (int j = 0; j <= a.get_ndim(); ++j) {
-            if (j < i) {
-                EXPECT_EQ(a.get_shape()[j], b.get_shape()[j]);
-            } else if (j == i) {
-                EXPECT_EQ(1, b.get_shape()[j]);
-            } else {
-                EXPECT_EQ(a.get_shape()[j - 1], b.get_shape()[j]);
-            }
-        }
-    }
+    a = parse_json("5 * int", "[0, 1, 2, 3, 4]");
+    EXPECT_JSON_EQ_ARR("[[0, 1, 2, 3, 4]]", a.new_axis(0));
+    EXPECT_JSON_EQ_ARR("[[0], [1], [2], [3], [4]]", a.new_axis(1));
 
-    a = nd::empty("7 * 5 * 3 * int32");
-    for (int i = 0; i <= a.get_ndim(); ++i) {
-        nd::array b = a.new_axis(i);
-        EXPECT_EQ(a.get_ndim() + 1, b.get_ndim());
-        for (int j = 0; j <= a.get_ndim(); ++j) {
-            if (j < i) {
-                EXPECT_EQ(a.get_shape()[j], b.get_shape()[j]);
-            } else if (j == i) {
-                EXPECT_EQ(1, b.get_shape()[j]);
-            } else {
-                EXPECT_EQ(a.get_shape()[j - 1], b.get_shape()[j]);
-            }
-        }
-    }
+    a = parse_json("4 * string", "[\"dynd\", \"string\", \"hello\", \"world\"]");
+    EXPECT_JSON_EQ_ARR("[[\"dynd\", \"string\", \"hello\", \"world\"]]", a.new_axis(0));
+    EXPECT_JSON_EQ_ARR("[[\"dynd\"], [\"string\"], [\"hello\"], [\"world\"]]", a.new_axis(1));
+
+    a = parse_json("2 * 3 * int", "[[0, 1, 2], [3, 4, 5]]");
+    EXPECT_JSON_EQ_ARR("[[[0, 1, 2], [3, 4, 5]]]", a.new_axis(0));
+    EXPECT_JSON_EQ_ARR("[[[0, 1, 2]], [[3, 4, 5]]]", a.new_axis(1));
+    EXPECT_JSON_EQ_ARR("[[[0], [1], [2]], [[3], [4], [5]]]", a.new_axis(2));
+
+    a = parse_json("4 * 3 * 2 * int",
+        "[[[0, 1], [2, 3], [4, 5]], [[6, 7], [8, 9], [10, 11]],"
+        "[[12, 13], [14, 15], [16, 17]], [[18, 19], [20, 21], [22, 23]]]");
+    EXPECT_JSON_EQ_ARR("[[[[0, 1], [2, 3], [4, 5]], [[6, 7], [8, 9], [10, 11]],"
+        "[[12, 13], [14, 15], [16, 17]], [[18, 19], [20, 21], [22, 23]]]]", a.new_axis(0));
+    EXPECT_JSON_EQ_ARR("[[[[0, 1], [2, 3], [4, 5]]], [[[6, 7], [8, 9], [10, 11]]],"
+        "[[[12, 13], [14, 15], [16, 17]]], [[[18, 19], [20, 21], [22, 23]]]]", a.new_axis(1));
+    EXPECT_JSON_EQ_ARR("[[[[0, 1]], [[2, 3]], [[4, 5]]], [[[6, 7]], [[8, 9]], [[10, 11]]],"
+        "[[[12, 13]], [[14, 15]], [[16, 17]]], [[[18, 19]], [[20, 21]], [[22, 23]]]]", a.new_axis(2));
+    EXPECT_JSON_EQ_ARR("[[[[0], [1]], [[2], [3]], [[4], [5]]], [[[6], [7]], [[8], [9]], [[10], [11]]],"
+        "[[[12], [13]], [[14], [15]], [[16], [17]]], [[[18], [19]], [[20], [21]], [[22], [23]]]]", a.new_axis(3));
 }

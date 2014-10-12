@@ -1496,33 +1496,38 @@ nd::array nd::array::replace_dtype(const ndt::type& replacement_tp, intptr_t rep
     }
 }
 
-nd::array nd::array::new_axis(intptr_t i) const
+nd::array nd::array::new_axis(intptr_t i, intptr_t new_ndim) const
 {
-    ndt::type tp = get_type(), el_tp;
-    ndt::type new_tp = tp.with_new_axis(i, el_tp);
+    ndt::type src_tp = get_type();
+    ndt::type dst_tp = src_tp.with_new_axis(i, new_ndim);
 
-    size_t el_arrmeta_size = el_tp.get_arrmeta_size();
-    size_t arrmeta_diff = tp.get_arrmeta_size() - el_arrmeta_size;
-
-    nd::array res(make_array_memory_block(new_tp.get_arrmeta_size()));
-    // Copy the fields
+    // This is taken from view_concrete in view.cpp
+    nd::array res(make_array_memory_block(dst_tp.get_arrmeta_size()));
     res.get_ndo()->m_data_pointer = get_ndo()->m_data_pointer;
     if (get_ndo()->m_data_reference == NULL) {
-        // Embedded data, need reference to the array
         res.get_ndo()->m_data_reference = get_memblock().release();
     } else {
-        // Use the same data reference, avoid producing a chain
         res.get_ndo()->m_data_reference = get_data_memblock().release();
     }
-    res.get_ndo()->m_type = new_tp.release();
+    res.get_ndo()->m_type = ndt::type(dst_tp).release();
     res.get_ndo()->m_flags = get_ndo()->m_flags;
-    // Copy the arrmeta, including setting the appropriate shape and strides of the new arrmeta
-    DYND_MEMCPY(res.get_arrmeta(), get_arrmeta(), arrmeta_diff);
-    size_stride_t *smd = reinterpret_cast<size_stride_t *>(res.get_arrmeta() + arrmeta_diff);
-    smd->dim_size = 1;
-    smd->stride = 0;
-    DYND_MEMCPY(smd + 1, get_arrmeta() + arrmeta_diff, el_tp.get_strided_ndim() * sizeof(size_stride_t));
-    DYND_MEMCPY(res.get_arrmeta() + arrmeta_diff + sizeof(size_stride_t), get_arrmeta() + arrmeta_diff, el_arrmeta_size);
+
+    char *src_arrmeta = get_ndo()->get_arrmeta();
+    char *dst_arrmeta = res.get_arrmeta();
+    for (intptr_t j = 0; j < i; ++j) {
+        dst_tp.tcast<base_dim_type>()->arrmeta_copy_construct_onedim(dst_arrmeta, src_arrmeta, NULL);
+        src_tp = src_tp.get_type_at_dimension(&src_arrmeta, 1);
+        dst_tp = dst_tp.get_type_at_dimension(&dst_arrmeta, 1);
+    }
+    for (intptr_t j = 0; j < new_ndim; ++j) {
+        size_stride_t *smd = reinterpret_cast<size_stride_t *>(dst_arrmeta);
+        smd->dim_size = 1;
+        smd->stride = 0; // Should this not be zero?
+        dst_tp = dst_tp.get_type_at_dimension(&dst_arrmeta, 1);
+    }
+    if (!dst_tp.is_builtin()) {
+        dst_tp.extended()->arrmeta_copy_construct(dst_arrmeta, src_arrmeta, NULL);
+    }
 
     return res;
 }
