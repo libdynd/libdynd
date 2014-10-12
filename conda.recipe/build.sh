@@ -7,8 +7,10 @@ CC=cc
 CXX=c++
 
 echo Creating build directory...
+cd ..
 mkdir build
 cd build
+pwd
 echo Configuring build with cmake...
 cmake \
     -DCMAKE_C_COMPILER=$CC \
