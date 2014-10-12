@@ -134,19 +134,25 @@ struct arrfunc_type_data {
   template <typename T>
   inline T *get_data_as()
   {
-    DYND_STATIC_ASSERT(sizeof(T) <= sizeof(data), "data does not fit");
-    DYND_STATIC_ASSERT((int)scalar_align_of<T>::value <=
-                           (int)scalar_align_of<uint64_t>::value,
-                       "data requires stronger alignment");
+    if (sizeof(T) > sizeof(data)) {
+      throw std::runtime_error("data does not fit");
+    }
+    if ((int)scalar_align_of<T>::value >
+                           (int)scalar_align_of<uint64_t>::value) {
+      throw std::runtime_error("data requires stronger alignment");
+    }
     return reinterpret_cast<T *>(data);
   }
   template <typename T>
   inline const T *get_data_as() const
   {
-    DYND_STATIC_ASSERT(sizeof(T) <= sizeof(data), "data does not fit");
-    DYND_STATIC_ASSERT((int)scalar_align_of<T>::value <=
-                           (int)scalar_align_of<uint64_t>::value,
-                       "data requires stronger alignment");
+    if (sizeof(T) > sizeof(data)) {
+      throw std::runtime_error("data does not fit");
+    }
+    if ((int)scalar_align_of<T>::value >
+                           (int)scalar_align_of<uint64_t>::value) {
+      throw std::runtime_error("data requires stronger alignment");
+    }
     return reinterpret_cast<const T *>(data);
   }
 
