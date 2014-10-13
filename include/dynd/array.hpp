@@ -139,6 +139,12 @@ public:
     template<int N>
     array(const ndt::type (&rhs)[N]);
 
+    /**
+     * Constructs a 1D array from a pointer and a size.
+     */
+    template<class T>
+    array(const T *rhs, intptr_t dim_size);
+
 #ifdef DYND_INIT_LIST
     /** Constructs an array from a 1D initializer list */
     template<class T>
@@ -815,8 +821,8 @@ public:
     /** Does a value-assignment from the rhs C++ scalar. */
     template<class T>
     typename enable_if<is_dynd_scalar<T>::value, array_vals&>::type operator=(const T& rhs) {
-        m_arr.val_assign(ndt::make_type<T>(), NULL, (const char *)&rhs);
-        return *this;
+      m_arr.val_assign(ndt::make_exact_type<T>(), NULL, (const char *)&rhs);
+      return *this;
     }
     /**
      * Does a value-assignment from the rhs C++ boolean scalar.
@@ -828,9 +834,10 @@ public:
      */
     template<class T>
     typename enable_if<is_type_bool<T>::value, array_vals&>::type  operator=(const T& rhs) {
-        dynd_bool v = rhs;
-        m_arr.val_assign(ndt::make_type<dynd_bool>(), NULL, (const char *)&v);
-        return *this;
+      dynd_bool v = rhs;
+      m_arr.val_assign(ndt::make_exact_type<dynd_bool>(), NULL,
+                       (const char *)&v);
+      return *this;
     }
 
     // TODO: Could also do +=, -=, *=, etc.
@@ -872,8 +879,8 @@ public:
     /** Does a value-assignment from the rhs C++ scalar. */
     template<class T>
     typename enable_if<is_dynd_scalar<T>::value, array_vals_at&>::type operator=(const T& rhs) {
-        m_arr.val_assign(ndt::make_type<T>(), NULL, (const char *)&rhs);
-        return *this;
+      m_arr.val_assign(ndt::make_exact_type<T>(), NULL, (const char *)&rhs);
+      return *this;
     }
     /**
      * Does a value-assignment from the rhs C++ boolean scalar.
@@ -883,11 +890,14 @@ public:
      * enable_if to only allow bools here instead of just accepting "const bool&"
      * as would seem obvious.
      */
-    template<class T>
-    typename enable_if<is_type_bool<T>::value, array_vals_at&>::type  operator=(const T& rhs) {
-        dynd_bool v = rhs;
-        m_arr.val_assign(ndt::make_type<dynd_bool>(), NULL, (const char *)&v);
-        return *this;
+    template <class T>
+    typename enable_if<is_type_bool<T>::value, array_vals_at &>::type
+    operator=(const T &rhs)
+    {
+      dynd_bool v = rhs;
+      m_arr.val_assign(ndt::make_exact_type<dynd_bool>(), NULL,
+                       (const char *)&v);
+      return *this;
     }
 
     // TODO: Could also do +=, -=, *=, etc.
@@ -1277,6 +1287,15 @@ array concatenate(const nd::array &x, const nd::array &y);
  */
 array reshape(const array &a, const array &shape);
 
+/**
+ * Reshapes an array into the new shape. This is currently a prototype and should only be used
+ * with contiguous arrays of built-in dtypes.
+ */
+inline array reshape(const array &a, intptr_t ndim, const intptr_t *shape)
+{
+  return reshape(a, nd::array(shape, ndim));
+}
+
 ///////////// Initializer list constructor implementation /////////////////////////
 #ifdef DYND_INIT_LIST
 namespace detail {
@@ -1360,8 +1379,8 @@ dynd::nd::array::array(std::initializer_list<T> il)
     : m_memblock()
 {
     intptr_t dim0 = il.size();
-    *this = make_strided_array(ndt::make_type<T>(),
-                    1, &dim0, nd::default_access_flags, NULL);
+    *this = make_strided_array(ndt::make_exact_type<T>(), 1, &dim0,
+                               nd::default_access_flags, NULL);
     DYND_MEMCPY(get_ndo()->m_data_pointer, il.begin(), sizeof(T) * dim0);
 }
 template<class T>
@@ -1373,7 +1392,7 @@ dynd::nd::array::array(std::initializer_list<std::initializer_list<T> > il)
 
     // Get and validate that the shape is regular
     detail::initializer_list_shape<S>::compute(shape, il);
-    *this = make_strided_array(ndt::make_type<T>(),
+    *this = make_strided_array(ndt::make_exact_type<T>(),
                     2, shape, nd::default_access_flags, NULL);
     T *dataptr = reinterpret_cast<T *>(get_ndo()->m_data_pointer);
     detail::initializer_list_shape<S>::copy_data(&dataptr, il);
@@ -1388,8 +1407,8 @@ dynd::nd::array::array(std::initializer_list<std::initializer_list<std::initiali
 
     // Get and validate that the shape is regular
     detail::initializer_list_shape<S>::compute(shape, il);
-    *this = make_strided_array(ndt::make_type<T>(),
-                    3, shape, nd::default_access_flags, NULL);
+    *this = make_strided_array(ndt::make_exact_type<T>(), 3, shape,
+                               nd::default_access_flags, NULL);
     T *dataptr = reinterpret_cast<T *>(get_ndo()->m_data_pointer);
     detail::initializer_list_shape<S>::copy_data(&dataptr, il);
 }
@@ -1431,12 +1450,12 @@ template<int N>
 nd::array::array(const ndt::type (&rhs)[N])
     : m_memblock()
 {
-    nd::empty(N, ndt::make_type()).swap(*this);
-    ndt::type *out = reinterpret_cast<ndt::type *>(get_ndo()->m_data_pointer);
-    for (int i = 0; i < N; ++i) {
-        out[i] = rhs[i];
-    }
-    flag_as_immutable();
+  nd::empty(N, ndt::make_type()).swap(*this);
+  ndt::type *out = reinterpret_cast<ndt::type *>(get_ndo()->m_data_pointer);
+  for (int i = 0; i < N; ++i) {
+    out[i] = rhs[i];
+  }
+  flag_as_immutable();
 }
 
 template<int N>
@@ -1458,6 +1477,14 @@ inline nd::array::array(const std::string *(&rhs)[N])
     make_strided_string_array(rhs, N).swap(*this);
 }
 
+template <class T>
+inline nd::array::array(const T *rhs, intptr_t dim_size)
+{
+  nd::empty(dim_size, ndt::make_exact_type<T>()).swap(*this);
+  DYND_MEMCPY(get_ndo()->m_data_pointer, reinterpret_cast<const void *>(&rhs),
+              dim_size * sizeof(T));
+}
+
 ///////////// std::vector constructor implementation /////////////////////////
 namespace detail {
     template <class T>
@@ -1465,31 +1492,31 @@ namespace detail {
         inline static typename enable_if<is_dynd_scalar<T>::value, array>::type
                         make(const std::vector<T>& vec)
         {
-            array result = nd::empty(vec.size(), ndt::make_type<T>());
-            if (!vec.empty()) {
-                memcpy(result.get_readwrite_originptr(), &vec[0], vec.size() * sizeof(T));
-            }
-            return result;
+          array result = nd::empty(vec.size(), ndt::make_exact_type<T>());
+          if (!vec.empty()) {
+            DYND_MEMCPY(result.get_readwrite_originptr(), &vec[0],
+                        vec.size() * sizeof(T));
+          }
+          return result;
         }
     };
 
     template <>
     struct make_from_vec<ndt::type> {
-        static array make(const std::vector<ndt::type>& vec);
+      static array make(const std::vector<ndt::type> &vec);
     };
 
     template <>
     struct make_from_vec<std::string> {
-        static array make(const std::vector<std::string>& vec);
+      static array make(const std::vector<std::string> &vec);
     };
 } // namespace detail
 
-template<class T>
-array::array(const std::vector<T>& vec)
+template <class T>
+array::array(const std::vector<T> &vec)
 {
-   detail::make_from_vec<T>::make(vec).swap(*this);
+  detail::make_from_vec<T>::make(vec).swap(*this);
 }
-
 
 ///////////// The array.as<type>() templated function /////////////////////////
 namespace detail {
@@ -1498,13 +1525,15 @@ namespace detail {
         inline static typename enable_if<is_dynd_scalar<T>::value, T>::type
         as(const array &lhs, const eval::eval_context *ectx)
         {
-            T result;
-            if (!lhs.is_scalar()) {
-                throw std::runtime_error("can only convert arrays with 0 dimensions to scalars");
-            }
-            typed_data_assign(ndt::make_type<T>(), NULL, (char *)&result,
-                        lhs.get_type(), lhs.get_arrmeta(), lhs.get_ndo()->m_data_pointer, ectx);
-            return result;
+          T result;
+          if (!lhs.is_scalar()) {
+            throw std::runtime_error(
+                "can only convert arrays with 0 dimensions to scalars");
+          }
+          typed_data_assign(ndt::make_exact_type<T>(), NULL, (char *)&result,
+                            lhs.get_type(), lhs.get_arrmeta(),
+                            lhs.get_ndo()->m_data_pointer, ectx);
+          return result;
         }
     };
 
