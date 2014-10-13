@@ -230,7 +230,7 @@ TEST(ArrayViews, TwoDimPermute) {
 TEST(ArrayViews, NDimPermute) {
     const intptr_t ndim0 = 4;
     intptr_t shape0[ndim0] = {7, 10, 15, 23};
-    nd::array a = nd::dtyped_rand(ndim0, shape0, ndt::type("float64"));
+    nd::array a = nd::rand(ndt::make_type(ndim0, shape0, "float64"));
 
     intptr_t axes0[ndim0] = {2, 3, 1, 0};
     nd::array b = a.permute(ndim0, axes0);
@@ -253,7 +253,7 @@ TEST(ArrayViews, NDimPermute) {
 
     const intptr_t ndim1 = 5;
     intptr_t shape1[ndim1] = {5, 8, 3, 4, 2};
-    a = nd::dtyped_rand(ndim1, shape1, ndt::type("float64"));
+    a = nd::rand(ndt::make_type(ndim1, shape1, "float64"));
 
     intptr_t axes1[ndim1] = {1, 0, 2, 3, 4};
     b = a.permute(2, axes1);
