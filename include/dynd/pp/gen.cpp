@@ -478,6 +478,8 @@ int main(int argc, char **argv) {
             fout << "(MAC, SEP, " << args("A", ary) << ")";
             fout << " DYND_PP_PASTE(DYND_PP__JOIN_ELWISE_" << dep << "_" << ary << "_, DYND_PP_LEN(A0))";
             fout << "(MAC, SEP, " << args("A", ary) << ")" << endl;
+            fout << "#define DYND_PP__JOIN_ELWISE_" << dep << "_" << ary << "_" << 0;
+            fout << "(MAC, SEP, " << args("A", ary) << ")" << endl;
             fout << "#define DYND_PP__JOIN_ELWISE_" << dep << "_" << ary << "_" << 1;
             fout << "(MAC, SEP, " << args("A", ary) << ") MAC(" << args("A", &pp_first, ary) << ")" << endl;
             for (int len = 2; len <= pp_len_max; len++) {
@@ -551,15 +553,6 @@ int main(int argc, char **argv) {
             }
             delete[] curr;
         }
-    }
-
-    fout << endl;
-
-    fout << "#define DYND_PP_ARRAY_DIMS(A) DYND_PP_PASTE(DYND_PP_ARRAY_DIMS_, DYND_PP_LEN(A))(DYND_PP_ID(A))" << endl;
-    fout << "#define DYND_PP_ARRAY_DIMS_1(A) [DYND_PP_FIRST(A)]" << endl;
-    for (int i = 2; i <= pp_len_max; i++) {
-        fout << "#define DYND_PP_ARRAY_DIMS_" << i << "(A) [DYND_PP_FIRST(A)]";
-        fout << "DYND_PP_ARRAY_DIMS_" << i - 1 << "(DYND_PP_POP_FIRST(A))" << endl;
     }
 
     fout << endl;

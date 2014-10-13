@@ -1496,6 +1496,42 @@ nd::array nd::array::replace_dtype(const ndt::type& replacement_tp, intptr_t rep
     }
 }
 
+nd::array nd::array::new_axis(intptr_t i, intptr_t new_ndim) const
+{
+    ndt::type src_tp = get_type();
+    ndt::type dst_tp = src_tp.with_new_axis(i, new_ndim);
+
+    // This is taken from view_concrete in view.cpp
+    nd::array res(make_array_memory_block(dst_tp.get_arrmeta_size()));
+    res.get_ndo()->m_data_pointer = get_ndo()->m_data_pointer;
+    if (get_ndo()->m_data_reference == NULL) {
+        res.get_ndo()->m_data_reference = get_memblock().release();
+    } else {
+        res.get_ndo()->m_data_reference = get_data_memblock().release();
+    }
+    res.get_ndo()->m_type = ndt::type(dst_tp).release();
+    res.get_ndo()->m_flags = get_ndo()->m_flags;
+
+    char *src_arrmeta = get_ndo()->get_arrmeta();
+    char *dst_arrmeta = res.get_arrmeta();
+    for (intptr_t j = 0; j < i; ++j) {
+        dst_tp.tcast<base_dim_type>()->arrmeta_copy_construct_onedim(dst_arrmeta, src_arrmeta, NULL);
+        src_tp = src_tp.get_type_at_dimension(&src_arrmeta, 1);
+        dst_tp = dst_tp.get_type_at_dimension(&dst_arrmeta, 1);
+    }
+    for (intptr_t j = 0; j < new_ndim; ++j) {
+        size_stride_t *smd = reinterpret_cast<size_stride_t *>(dst_arrmeta);
+        smd->dim_size = 1;
+        smd->stride = 0; // Should this not be zero?
+        dst_tp = dst_tp.get_type_at_dimension(&dst_arrmeta, 1);
+    }
+    if (!dst_tp.is_builtin()) {
+        dst_tp.extended()->arrmeta_copy_construct(dst_arrmeta, src_arrmeta, NULL);
+    }
+
+    return res;
+}
+
 namespace {
 static void view_scalar_types(const ndt::type &dt,
                               intptr_t DYND_UNUSED(arrmeta_offset), void *extra,
@@ -1844,39 +1880,44 @@ nd::array nd::concatenate(const nd::array &x, const nd::array &y) {
     return res;
 }
 
-nd::array nd::reshape(const nd::array &a, const nd::array &shape) {
-    intptr_t ndim = shape.get_dim_size();
+nd::array nd::reshape(const nd::array &a, const nd::array &shape)
+{
+  intptr_t ndim = shape.get_dim_size();
 
-    intptr_t old_ndim = a.get_ndim();
-    dimvector old_shape(old_ndim);
-    a.get_shape(old_shape.get());
+  intptr_t old_ndim = a.get_ndim();
+  dimvector old_shape(old_ndim);
+  a.get_shape(old_shape.get());
 
-    intptr_t old_size = 1;
-    for (intptr_t i = 0; i < old_ndim; ++i) {
-        old_size *= old_shape[i];
-    }
-    intptr_t size = 1;
-    for (intptr_t i = 0; i < ndim; ++i) {
-        size *= shape(i).as<intptr_t>();
-    }
+  intptr_t old_size = 1;
+  for (intptr_t i = 0; i < old_ndim; ++i) {
+    old_size *= old_shape[i];
+  }
+  intptr_t size = 1;
+  for (intptr_t i = 0; i < ndim; ++i) {
+    size *= shape(i).as<intptr_t>();
+  }
 
-    if (old_size != size) {
-        throw std::runtime_error("reshape: total size of new array must be unchanged");
-    }
+  if (old_size != size) {
+    stringstream ss;
+    ss << "dynd reshape: cannot reshape to a different total number of "
+          "elements, from " << old_size << " to " << size;
+    throw invalid_argument(ss.str());
+  }
 
-    dimvector strides(ndim);
-    strides[ndim - 1] = a.get_dtype().get_data_size();
-    for (intptr_t i = ndim - 2; i >= 0; --i) {
-        strides[i] = shape(i + 1).as<intptr_t>() * strides[i + 1];
-    }
+  dimvector strides(ndim);
+  strides[ndim - 1] = a.get_dtype().get_data_size();
+  for (intptr_t i = ndim - 2; i >= 0; --i) {
+    strides[i] = shape(i + 1).as<intptr_t>() * strides[i + 1];
+  }
 
-    dimvector shape_copy(ndim);
-    for (intptr_t i = 0; i < ndim; ++i) {
-        shape_copy[i] = shape(i).as<intptr_t>();
-    }
+  dimvector shape_copy(ndim);
+  for (intptr_t i = 0; i < ndim; ++i) {
+    shape_copy[i] = shape(i).as<intptr_t>();
+  }
 
-    return make_strided_array_from_data(a.get_dtype(), ndim, shape_copy.get(), strides.get(),
-        a.get_flags(), a.get_readwrite_originptr(), a.get_memblock(), NULL);
+  return make_strided_array_from_data(
+      a.get_dtype(), ndim, shape_copy.get(), strides.get(), a.get_flags(),
+      a.get_readwrite_originptr(), a.get_memblock(), NULL);
 }
 
 nd::array nd::memmap(const std::string& filename,

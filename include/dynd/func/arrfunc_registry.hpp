@@ -11,6 +11,13 @@
 namespace dynd { namespace func {
 
 /**
+ * Returns a reference to the map of registered arrfuncs.
+ * NOTE: The internal representation will change, this
+ *       function will change.
+ */
+const std::map<nd::string, nd::arrfunc>& get_regfunctions();
+
+/**
   * Looks up a named arrfunc from the registry.
   */
 nd::arrfunc get_regfunction(const nd::string &name);

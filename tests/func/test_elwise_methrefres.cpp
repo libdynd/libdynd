@@ -12,7 +12,8 @@
 #include "dynd_assertions.hpp"
 
 #include <dynd/array.hpp>
-#include <dynd/func/elwise_methrefres.hpp>
+#include <dynd/func/elwise.hpp>
+#include <dynd/types/cfixed_dim_type.hpp>
 
 using namespace std;
 using namespace dynd;
@@ -32,7 +33,7 @@ T func1(const T (&x)[3]) {
     return x[0] + x[1] + x[2];
 }
 template <typename T>
-T func2(const T (&x)[3], const float (&y)[3]) {
+T func2(const T (&x)[3], const T (&y)[3]) {
     return static_cast<T>(x[0] * y[0] + x[1] * y[1] + x[2] * y[2]);
 }
 template <typename T>
@@ -48,7 +49,7 @@ void func1(T &res, const T (&x)[3]) {
     res = func1(x);
 }
 template <typename T>
-void func2(T &res, const T (&x)[3], const float (&y)[3]) {
+void func2(T &res, const T (&x)[3], const T (&y)[3]) {
     res = func2(x, y);
 }
 template <typename T>
@@ -113,7 +114,7 @@ public:
 TYPED_TEST_P(ElwiseMethRefRes, MethRefRes) {
     typedef FuncWrapper<void (*)(int &, TypeParam, const TypeParam &)> FuncWrapper0;
     typedef FuncWrapper<void (*)(TypeParam &, const TypeParam (&)[3])> FuncWrapper1;
-    typedef FuncWrapper<void (*)(TypeParam &, const TypeParam (&)[3], const float (&)[3])> FuncWrapper2;
+    typedef FuncWrapper<void (*)(TypeParam &, const TypeParam (&)[3], const TypeParam (&)[3])> FuncWrapper2;
     typedef FuncWrapper<void (*)(TypeParam &, const TypeParam (&)[2][3])> FuncWrapper3;
     typedef FuncWrapper<void (*)(TypeParam (&)[2], TypeParam, TypeParam)> FuncWrapper4;
     typedef FuncWrapper<void (*)(TypeParam (&)[3], const TypeParam(&)[3][3], const TypeParam(&)[3])> FuncWrapper5;
@@ -122,8 +123,8 @@ TYPED_TEST_P(ElwiseMethRefRes, MethRefRes) {
 
     nd::array res, a, b;
 
-    a = 10;
-    b = 20;
+    a = static_cast<TypeParam>(10);
+    b = static_cast<TypeParam>(20);
 
     res = nd::elwise(FuncWrapper0(&func0), &FuncWrapper0::meth, a, b);
     EXPECT_EQ(-20, res.as<int>());
@@ -133,7 +134,7 @@ TYPED_TEST_P(ElwiseMethRefRes, MethRefRes) {
     EXPECT_EQ(20, res(0).as<TypeParam>());
     EXPECT_EQ(10, res(1).as<TypeParam>());
 
-    a = 1;
+    a = static_cast<TypeParam>(1);
 
     res = nd::elwise(FuncWrapper6(&func6), &FuncWrapper6::meth, a);
     EXPECT_EQ(ndt::type("cfixed[2] * cfixed[2] * float64"), res.get_type());

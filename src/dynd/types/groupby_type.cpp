@@ -12,7 +12,6 @@
 #include <dynd/types/cfixed_dim_type.hpp>
 #include <dynd/types/var_dim_type.hpp>
 #include <dynd/types/categorical_type.hpp>
-#include <dynd/array_iter.hpp>
 #include <dynd/func/make_callable.hpp>
 
 using namespace std;
@@ -161,9 +160,12 @@ namespace {
 
             // Get a strided representation of by_values for processing
             intptr_t by_values_stride, by_values_size;
-            by_values_tp.get_as_strided(by_values_arrmeta, &by_values_size,
+            if (!by_values_tp.get_as_strided(by_values_arrmeta, &by_values_size,
                                         &by_values_stride, &by_values_tp,
-                                        &by_values_arrmeta);
+                                        &by_values_arrmeta)) {
+              throw runtime_error(
+                  "groupby: failed to get by_values as a strided array");
+            }
 
             const ndt::type& result_tp = gd->get_value_type();
             const cfixed_dim_type *fad = result_tp.tcast<cfixed_dim_type>();
@@ -212,18 +214,26 @@ namespace {
             // copying the data to the right place in the output
             ckernel_prefix *echild = e->base.get_child_ckernel(sizeof(extra_type));
             expr_single_t opchild = echild->get_function<expr_single_t>();
-            array_iter<0, 1> iter(data_values_tp, data_values_arrmeta, data_values_data, 1);
-            if (!iter.empty()) {
-                by_values_ptr = by_values_data;
-                do {
-                    UIntType value = *reinterpret_cast<const UIntType *>(by_values_ptr);
-                    char *&cp = cat_pointers[value];
-                    const char *data_ptr = iter.data();
-                    opchild(cp, &data_ptr, echild);
-                    // Advance the pointer inside the cat_pointers array
-                    cp += vad_stride;
-                    by_values_ptr += by_values_stride;
-                } while (iter.next());
+            intptr_t dvit_dim_size, dvit_stride;
+            ndt::type dvit_el_tp;
+            const char *dvit_el_arrmeta;
+            if (!data_values_tp.get_as_strided(data_values_arrmeta, &dvit_dim_size,
+                                          &dvit_stride, &dvit_el_tp,
+                                          &dvit_el_arrmeta)) {
+              throw runtime_error(
+                  "groupby: failed to get data_values as a strided array");
+            }
+            const char *dvit_data = data_values_data;
+            by_values_ptr = by_values_data;
+            for (intptr_t i = 0; i < dvit_dim_size; ++i) {
+              UIntType value =
+                  *reinterpret_cast<const UIntType *>(by_values_ptr);
+              char *&cp = cat_pointers[value];
+              opchild(cp, &dvit_data, echild);
+              // Advance the pointer inside the cat_pointers array
+              cp += vad_stride;
+              by_values_ptr += by_values_stride;
+              dvit_data += dvit_stride;
             }
         }
 

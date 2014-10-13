@@ -4,16 +4,17 @@
 //
 
 #include <cstring>
+#include <map>
 #include <set>
 
 #include <dynd/auxiliary_data.hpp>
-#include <dynd/array_iter.hpp>
 #include <dynd/types/categorical_type.hpp>
 #include <dynd/kernels/assignment_kernels.hpp>
 #include <dynd/kernels/comparison_kernels.hpp>
 #include <dynd/types/fixed_dim_type.hpp>
 #include <dynd/types/convert_type.hpp>
 #include <dynd/func/make_callable.hpp>
+#include <dynd/array_range.hpp>
 
 using namespace dynd;
 using namespace std;
@@ -225,13 +226,9 @@ categorical_type::categorical_type(const nd::array& categories, bool presorted)
         m_category_tp = m_categories.get_type().at(0);
 
         category_count = categories.get_dim_size();
-        m_value_to_category_index.resize(category_count);
-        m_category_index_to_value.resize(category_count);
-        for (size_t i = 0; i != (size_t)category_count; ++i) {
-            m_value_to_category_index[i] = i;
-            m_category_index_to_value[i] = i;
-        }
-
+        m_value_to_category_index = nd::range(category_count);
+        m_value_to_category_index.flag_as_immutable();
+        m_category_index_to_value = m_value_to_category_index;
     } else {
         // Process the categories array to make sure it's valid
         const ndt::type& cdt = categories.get_type();
@@ -248,7 +245,8 @@ categorical_type::categorical_type(const nd::array& categories, bool presorted)
             reinterpret_cast<const fixed_dim_type_arrmeta *>(
                 categories.get_arrmeta())->stride;
 
-        const char *categories_element_arrmeta = categories.get_arrmeta() + sizeof(fixed_dim_type_arrmeta);
+        const char *categories_element_arrmeta =
+            categories.get_arrmeta() + sizeof(fixed_dim_type_arrmeta);
         comparison_ckernel_builder k;
         ::make_comparison_kernel(&k, 0,
                         m_category_tp, categories_element_arrmeta,
@@ -258,12 +256,14 @@ categorical_type::categorical_type(const nd::array& categories, bool presorted)
         cmp less(k.get_function(), k.get());
         set<const char *, cmp> uniques(less);
 
-        m_value_to_category_index.resize(category_count);
-        m_category_index_to_value.resize(category_count);
+        m_value_to_category_index =
+            nd::empty(category_count, ndt::make_type<intptr_t>());
+        m_category_index_to_value =
+            nd::empty(category_count, ndt::make_type<intptr_t>());
 
         // create the mapping from indices of (to be lexicographically sorted) categories to values
         for (size_t i = 0; i != (size_t)category_count; ++i) {
-            m_category_index_to_value[i] = i;
+            unchecked_fixed_dim_get_rw<intptr_t>(m_category_index_to_value, i) = i;
             const char *category_value = categories.get_readonly_originptr() +
                             i * categories_stride;
 
@@ -279,17 +279,23 @@ categorical_type::categorical_type(const nd::array& categories, bool presorted)
         }
         // TODO: Putting everything in a set already caused a sort operation to occur,
         //       there's no reason we should need a second sort.
-        std::sort(m_category_index_to_value.begin(), m_category_index_to_value.end(),
-                        sorter(categories.get_readonly_originptr(), categories_stride,
-                            k.get_function(), k.get()));
+        std::sort(
+            &unchecked_fixed_dim_get_rw<intptr_t>(m_category_index_to_value, 0),
+            &unchecked_fixed_dim_get_rw<intptr_t>(m_category_index_to_value,
+                                                  category_count),
+            sorter(categories.get_readonly_originptr(), categories_stride,
+                   k.get_function(), k.get()));
 
         // invert the m_category_index_to_value permutation
-        for (uint32_t i = 0; i < m_category_index_to_value.size(); ++i) {
-            m_value_to_category_index[m_category_index_to_value[i]] = i;
+        for (intptr_t i = 0; i < category_count; ++i) {
+          unchecked_fixed_dim_get_rw<intptr_t>(
+              m_value_to_category_index,
+              unchecked_fixed_dim_get<intptr_t>(m_category_index_to_value, i)) =
+              i;
         }
 
         m_categories = make_sorted_categories(uniques, m_category_tp,
-                        categories_element_arrmeta);
+                                              categories_element_arrmeta);
     }
 
     // Use the number of categories to set which underlying integer storage to use
@@ -306,6 +312,7 @@ categorical_type::categorical_type(const nd::array& categories, bool presorted)
 
 void categorical_type::print_data(std::ostream& o, const char *DYND_UNUSED(arrmeta), const char *data) const
 {
+  intptr_t category_count = m_categories.get_dim_size();
   uint32_t value;
   switch (m_storage_type.get_type_id()) {
   case uint8_type_id:
@@ -320,7 +327,7 @@ void categorical_type::print_data(std::ostream& o, const char *DYND_UNUSED(arrme
   default:
     throw runtime_error("internal error in categorical_type::print_data");
   }
-  if (value < m_value_to_category_index.size()) {
+  if ((intptr_t)value < category_count) {
     m_category_tp.print_data(o, get_category_arrmeta(),
                              get_category_data_from_value(value));
   } else {
@@ -366,7 +373,8 @@ uint32_t categorical_type::get_value_from_category(const char *category_arrmeta,
         ss << " assigning to dynd type " << ndt::type(this, true);
         throw std::runtime_error(ss.str());
     } else {
-        return (uint32_t)m_category_index_to_value[i];
+      return (uint32_t)unchecked_fixed_dim_get<intptr_t>(
+          m_category_index_to_value, i);
     }
 }
 
@@ -395,18 +403,18 @@ nd::array categorical_type::get_categories() const
     // TODO: store categories in their original order
     //       so this is simply "return m_categories".
     nd::array categories = nd::empty(get_category_count(), m_category_tp);
-    array_iter<1,0> iter(categories);
+    intptr_t dim_size, stride;
+    ndt::type el_tp;
+    const char *el_arrmeta;
+    categories.get_type().get_as_strided(categories.get_arrmeta(), &dim_size,
+                                         &stride, &el_tp, &el_arrmeta);
     unary_ckernel_builder k;
-    ::make_assignment_kernel(&k, 0, iter.get_uniform_dtype(), iter.arrmeta(),
-                             m_category_tp, get_category_arrmeta(),
-                             kernel_request_single,
+    ::make_assignment_kernel(&k, 0, m_category_tp, el_arrmeta, el_tp,
+                             get_category_arrmeta(), kernel_request_single,
                              &eval::default_eval_context);
-    if (!iter.empty()) {
-        uint32_t i = 0;
-        do {
-            k(iter.data(), get_category_data_from_value(i));
-            ++i;
-        } while(iter.next());
+    for (intptr_t i = 0; i < dim_size; ++i) {
+      k(categories.get_readwrite_originptr() + i * stride,
+        get_category_data_from_value((uint32_t)i));
     }
     return categories;
 }
@@ -532,11 +540,16 @@ bool categorical_type::operator==(const base_type& rhs) const
         return true;
     if (rhs.get_type_id() != categorical_type_id)
         return false;
-    if (!m_categories.equals_exact(static_cast<const categorical_type&>(rhs).m_categories))
+    if (!m_categories.equals_exact(
+            static_cast<const categorical_type &>(rhs).m_categories))
         return false;
-    if (static_cast<const categorical_type&>(rhs).m_category_index_to_value != m_category_index_to_value)
+    if (!m_category_index_to_value.equals_exact(
+            static_cast<const categorical_type &>(rhs)
+                .m_category_index_to_value))
         return false;
-    if (static_cast<const categorical_type&>(rhs).m_value_to_category_index != m_value_to_category_index)
+    if (!m_value_to_category_index.equals_exact(
+            static_cast<const categorical_type &>(rhs)
+                .m_value_to_category_index))
         return false;
 
     return true;
@@ -572,28 +585,30 @@ ndt::type dynd::ndt::factor_categorical(const nd::array& values)
     // Do the factor operation on a concrete version of the values
     // TODO: Some cases where we don't want to do this?
     nd::array values_eval = values.eval();
-    array_iter<0, 1> iter(values_eval);
+
+    intptr_t dim_size, stride;
+    ndt::type el_tp;
+    const char *el_arrmeta;
+    values_eval.get_type().get_as_strided(values_eval.get_arrmeta(), &dim_size,
+                                          &stride, &el_tp, &el_arrmeta);
 
     comparison_ckernel_builder k;
-    ::make_comparison_kernel(&k, 0,
-                    iter.get_uniform_dtype(), iter.arrmeta(),
-                    iter.get_uniform_dtype(), iter.arrmeta(),
-                    comparison_type_sorting_less, &eval::default_eval_context);
+    ::make_comparison_kernel(&k, 0, el_tp, el_arrmeta, el_tp, el_arrmeta,
+                             comparison_type_sorting_less,
+                             &eval::default_eval_context);
 
     cmp less(k.get_function(), k.get());
     set<const char *, cmp> uniques(less);
 
-    if (!iter.empty()) {
-        do {
-            if (uniques.find(iter.data()) == uniques.end()) {
-                uniques.insert(iter.data());
-            }
-        } while (iter.next());
+    for (intptr_t i = 0; i < dim_size; ++i) {
+      const char *data = values_eval.get_readonly_originptr() + i * stride;
+      if (uniques.find(data) == uniques.end()) {
+        uniques.insert(data);
+      }
     }
 
     // Copy the values (now sorted and unique) into a new nd::array
-    nd::array categories = make_sorted_categories(uniques,
-                    iter.get_uniform_dtype(), iter.arrmeta());
+    nd::array categories = make_sorted_categories(uniques, el_tp, el_arrmeta);
 
     return ndt::type(new categorical_type(categories, true), false);
 }

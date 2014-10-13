@@ -225,6 +225,11 @@ ndt::type ndt::type::with_replaced_dtype(const ndt::type &replacement_tp,
     return result;
 }
 
+ndt::type ndt::type::with_new_axis(intptr_t i, intptr_t new_ndim) const
+{
+    return with_replaced_dtype(ndt::make_fixed_dim(1, get_type_at_dimension(NULL, i), new_ndim), get_ndim() - i);
+}
+
 intptr_t ndt::type::get_dim_size(const char *arrmeta, const char *data) const
 {
     if (get_kind() == dim_kind) {

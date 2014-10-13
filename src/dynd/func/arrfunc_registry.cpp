@@ -267,6 +267,11 @@ void init::arrfunc_registry_cleanup()
   registry = NULL;
 }
 
+const std::map<nd::string, nd::arrfunc> &func::get_regfunctions()
+{
+  return *registry;
+}
+
 nd::arrfunc func::get_regfunction(const nd::string &name)
 {
   map<nd::string, nd::arrfunc>::const_iterator it = registry->find(name);

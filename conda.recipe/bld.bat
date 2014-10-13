@@ -1,5 +1,7 @@
+cd ..
 mkdir build
 cd build
+echo %CD%
 
 REM Override cmake generator to visual studio 2010
 if "%ARCH%" == "32" set CMAKE_GENERATOR=Visual Studio 10

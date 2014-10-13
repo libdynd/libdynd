@@ -9,8 +9,10 @@
 #include <cmath>
 
 #include "inc_gtest.hpp"
+#include "../dynd_assertions.hpp"
 #include "../test_memory.hpp"
 
+#include <dynd/array_range.hpp>
 #include <dynd/types/bytes_type.hpp>
 #include <dynd/types/var_dim_type.hpp>
 #include <dynd/json_parser.hpp>
@@ -211,4 +213,36 @@ TEST(View, StringAsBytes) {
   EXPECT_EQ('\xA4', btd->begin[1]);
   EXPECT_EQ('\xAD', btd->begin[2]);
   EXPECT_EQ('\xA2', btd->begin[3]);
+}
+
+TEST(View, NewAxis) {
+    nd::array a;
+
+    a = parse_json("int", "1");
+    EXPECT_JSON_EQ_ARR("[1]", a.new_axis(0));
+
+    a = parse_json("5 * int", "[0, 1, 2, 3, 4]");
+    EXPECT_JSON_EQ_ARR("[[0, 1, 2, 3, 4]]", a.new_axis(0));
+    EXPECT_JSON_EQ_ARR("[[0], [1], [2], [3], [4]]", a.new_axis(1));
+
+    a = parse_json("4 * string", "[\"dynd\", \"string\", \"hello\", \"world\"]");
+    EXPECT_JSON_EQ_ARR("[[\"dynd\", \"string\", \"hello\", \"world\"]]", a.new_axis(0));
+    EXPECT_JSON_EQ_ARR("[[\"dynd\"], [\"string\"], [\"hello\"], [\"world\"]]", a.new_axis(1));
+
+    a = parse_json("2 * 3 * int", "[[0, 1, 2], [3, 4, 5]]");
+    EXPECT_JSON_EQ_ARR("[[[0, 1, 2], [3, 4, 5]]]", a.new_axis(0));
+    EXPECT_JSON_EQ_ARR("[[[0, 1, 2]], [[3, 4, 5]]]", a.new_axis(1));
+    EXPECT_JSON_EQ_ARR("[[[0], [1], [2]], [[3], [4], [5]]]", a.new_axis(2));
+
+    a = parse_json("4 * 3 * 2 * int",
+        "[[[0, 1], [2, 3], [4, 5]], [[6, 7], [8, 9], [10, 11]],"
+        "[[12, 13], [14, 15], [16, 17]], [[18, 19], [20, 21], [22, 23]]]");
+    EXPECT_JSON_EQ_ARR("[[[[0, 1], [2, 3], [4, 5]], [[6, 7], [8, 9], [10, 11]],"
+        "[[12, 13], [14, 15], [16, 17]], [[18, 19], [20, 21], [22, 23]]]]", a.new_axis(0));
+    EXPECT_JSON_EQ_ARR("[[[[0, 1], [2, 3], [4, 5]]], [[[6, 7], [8, 9], [10, 11]]],"
+        "[[[12, 13], [14, 15], [16, 17]]], [[[18, 19], [20, 21], [22, 23]]]]", a.new_axis(1));
+    EXPECT_JSON_EQ_ARR("[[[[0, 1]], [[2, 3]], [[4, 5]]], [[[6, 7]], [[8, 9]], [[10, 11]]],"
+        "[[[12, 13]], [[14, 15]], [[16, 17]]], [[[18, 19]], [[20, 21]], [[22, 23]]]]", a.new_axis(2));
+    EXPECT_JSON_EQ_ARR("[[[[0], [1]], [[2], [3]], [[4], [5]]], [[[6], [7]], [[8], [9]], [[10], [11]]],"
+        "[[[12], [13]], [[14], [15]], [[16], [17]]], [[[18], [19]], [[20], [21]], [[22], [23]]]]", a.new_axis(3));
 }
