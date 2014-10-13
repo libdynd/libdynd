@@ -21,7 +21,7 @@ struct strided_rolling_ck : public kernels::unary_ck<strided_rolling_ck> {
     size_t m_window_op_offset;
     arrmeta_holder m_src_winop_meta;
 
-    inline void single(char *dst, const char *src)
+    inline void single(char *dst, char *src)
     {
         ckernel_prefix *nachild = get_child_ckernel();
         ckernel_prefix *wopchild = get_child_ckernel(m_window_op_offset);
@@ -58,7 +58,7 @@ struct var_rolling_ck : public kernels::unary_ck<var_rolling_ck> {
     const char *m_dst_meta;
     size_t m_window_op_offset;
 
-    inline void single(char *dst, const char *src)
+    inline void single(char *dst, char *src)
     {
         // Get the child ckernels
         ckernel_prefix *nachild = get_child_ckernel();
@@ -71,9 +71,9 @@ struct var_rolling_ck : public kernels::unary_ck<var_rolling_ck> {
         var_dim_type_data *dst_dat = reinterpret_cast<var_dim_type_data *>(dst);
         intptr_t dst_stride =
             reinterpret_cast<const var_dim_type_arrmeta *>(m_dst_meta)->stride;
-        const var_dim_type_data *src_dat =
-            reinterpret_cast<const var_dim_type_data *>(src);
-        const char *src_arr_ptr = src_dat->begin + m_src_offset;
+        var_dim_type_data *src_dat =
+            reinterpret_cast<var_dim_type_data *>(src);
+        char *src_arr_ptr = src_dat->begin + m_src_offset;
         intptr_t dim_size = src_dat->size;
         // Allocate the output data
         ndt::var_dim_element_initialize(m_dst_tp, m_dst_meta, dst, dim_size);

@@ -61,7 +61,7 @@ base_tuple_type::~base_tuple_type() {
 }
 
 void base_tuple_type::print_data(std::ostream &o, const char *arrmeta,
-                                 const char *data) const
+                                 char *data) const
 {
   const uintptr_t *arrmeta_offsets = reinterpret_cast<const uintptr_t *>(
       m_arrmeta_offsets.get_readonly_originptr());

@@ -22,19 +22,19 @@ using namespace std;
 namespace {
 
     class sorter {
-        const char *m_originptr;
+        char *m_originptr;
         intptr_t m_stride;
         const expr_predicate_t m_less;
         ckernel_prefix *m_less_self;
     public:
-      sorter(const char *originptr, intptr_t stride,
+      sorter(char *originptr, intptr_t stride,
              const expr_predicate_t less, ckernel_prefix *less_self)
           : m_originptr(originptr), m_stride(stride), m_less(less),
             m_less_self(less_self)
       {
       }
         bool operator()(intptr_t i, intptr_t j) const {
-            const char *s[2] = {m_originptr + i * m_stride,
+            char *s[2] = {m_originptr + i * m_stride,
                                 m_originptr + j * m_stride};
             return m_less(s, m_less_self) != 0;
         }
@@ -48,9 +48,9 @@ namespace {
           : m_less(less), m_less_self(less_self)
         {
         }
-        bool operator()(const char *a, const char *b) const
+        bool operator()(char *a, char *b) const
         {
-            const char *s[2] = {a, b};
+            char *s[2] = {a, b};
             bool result = m_less(s, m_less_self) != 0;
             return result;
         }
@@ -64,30 +64,30 @@ namespace {
         const categorical_type *src_cat_tp;
 
         template<typename UIntType>
-        inline static void single(char *dst, const char *src, ckernel_prefix *extra)
+        inline static void single(char *dst, char *src, ckernel_prefix *extra)
         {
           extra_type *e = reinterpret_cast<extra_type *>(extra);
           ckernel_prefix *echild = extra->get_child_ckernel(sizeof(extra_type));
           expr_single_t opchild = echild->get_function<expr_single_t>();
 
           uint32_t value = *reinterpret_cast<const UIntType *>(src);
-          const char *src_val =
+          char *src_val =
               e->src_cat_tp->get_category_data_from_value(value);
           opchild(dst, &src_val, echild);
         }
 
         // Some compilers are finicky about getting single<T> as a function pointer, so this...
-        static void single_uint8(char *dst, const char *const *src,
+        static void single_uint8(char *dst, char **src,
                                  ckernel_prefix *extra)
         {
             single<uint8_t>(dst, *src, extra);
         }
-        static void single_uint16(char *dst, const char *const *src,
+        static void single_uint16(char *dst, char **src,
                                   ckernel_prefix *extra)
         {
             single<uint16_t>(dst, *src, extra);
         }
-        static void single_uint32(char *dst, const char *const *src,
+        static void single_uint32(char *dst, char **src,
                                   ckernel_prefix *extra)
         {
             single<uint32_t>(dst, *src, extra);
@@ -112,7 +112,7 @@ namespace {
 
         // Assign from an input matching the category type to a categorical type
         template <typename UIntType>
-        inline static void single(char *dst, const char *src,
+        inline static void single(char *dst, char *src,
                                   ckernel_prefix *self)
         {
             self_type *e = reinterpret_cast<self_type *>(self);
@@ -122,17 +122,17 @@ namespace {
         }
 
         // Some compilers are finicky about getting single<T> as a function pointer, so this...
-        static void single_uint8(char *dst, const char *const *src,
+        static void single_uint8(char *dst, char **src,
                                  ckernel_prefix *self)
         {
             single<uint8_t>(dst, *src, self);
         }
-        static void single_uint16(char *dst, const char *const *src,
+        static void single_uint16(char *dst, char **src,
                                   ckernel_prefix *self)
         {
             single<uint16_t>(dst, *src, self);
         }
-        static void single_uint32(char *dst, const char *const *src,
+        static void single_uint32(char *dst, char **src,
                                   ckernel_prefix *self)
         {
             single<uint32_t>(dst, *src, self);
@@ -191,7 +191,7 @@ namespace {
 } // anoymous namespace
 
 /** This function converts the set of char* pointers into a strided immutable nd::array of the categories */
-static nd::array make_sorted_categories(const set<const char *, cmp> &uniques,
+static nd::array make_sorted_categories(const set<char *, cmp> &uniques,
                                         const ndt::type &element_tp,
                                         const char *arrmeta)
 {
@@ -204,7 +204,7 @@ static nd::array make_sorted_categories(const set<const char *, cmp> &uniques,
 
     intptr_t stride = reinterpret_cast<const fixed_dim_type_arrmeta *>(categories.get_arrmeta())->stride;
     char *dst_ptr = categories.get_readwrite_originptr();
-    for (set<const char *, cmp>::const_iterator it = uniques.begin(); it != uniques.end(); ++it) {
+    for (set<char *, cmp>::const_iterator it = uniques.begin(); it != uniques.end(); ++it) {
         k(dst_ptr, *it);
         dst_ptr += stride;
     }
@@ -254,7 +254,7 @@ categorical_type::categorical_type(const nd::array& categories, bool presorted)
                         comparison_type_sorting_less, &eval::default_eval_context);
 
         cmp less(k.get_function(), k.get());
-        set<const char *, cmp> uniques(less);
+        set<char *, cmp> uniques(less);
 
         m_value_to_category_index =
             nd::empty(category_count, ndt::make_type<intptr_t>());
@@ -264,7 +264,7 @@ categorical_type::categorical_type(const nd::array& categories, bool presorted)
         // create the mapping from indices of (to be lexicographically sorted) categories to values
         for (size_t i = 0; i != (size_t)category_count; ++i) {
             unchecked_fixed_dim_get_rw<intptr_t>(m_category_index_to_value, i) = i;
-            const char *category_value = categories.get_readonly_originptr() +
+            char *category_value = categories.get_readonly_originptr() +
                             i * categories_stride;
 
             if (uniques.find(category_value) == uniques.end()) {
@@ -310,7 +310,7 @@ categorical_type::categorical_type(const nd::array& categories, bool presorted)
     m_members.data_alignment = (uint8_t)m_storage_type.get_data_alignment();
 }
 
-void categorical_type::print_data(std::ostream& o, const char *DYND_UNUSED(arrmeta), const char *data) const
+void categorical_type::print_data(std::ostream& o, const char *DYND_UNUSED(arrmeta), char *data) const
 {
   intptr_t category_count = m_categories.get_dim_size();
   uint32_t value;
@@ -365,7 +365,7 @@ void dynd::categorical_type::get_shape(intptr_t ndim, intptr_t i, intptr_t *out_
 
 uint32_t categorical_type::get_value_from_category(const char *category_arrmeta, const char *category_data) const
 {
-    intptr_t i = nd::binary_search(m_categories, category_arrmeta, category_data);
+    intptr_t i = nd::binary_search(m_categories, const_cast<char *>(category_arrmeta), const_cast<char *>(category_data)); // TODO: CHECK THIS
     if (i < 0) {
         stringstream ss;
         ss << "Unrecognized category value ";
@@ -598,10 +598,10 @@ ndt::type dynd::ndt::factor_categorical(const nd::array& values)
                              &eval::default_eval_context);
 
     cmp less(k.get_function(), k.get());
-    set<const char *, cmp> uniques(less);
+    set<char *, cmp> uniques(less);
 
     for (intptr_t i = 0; i < dim_size; ++i) {
-      const char *data = values_eval.get_readonly_originptr() + i * stride;
+      char *data = values_eval.get_readonly_originptr() + i * stride;
       if (uniques.find(data) == uniques.end()) {
         uniques.insert(data);
       }

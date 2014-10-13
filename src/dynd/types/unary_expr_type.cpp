@@ -28,7 +28,7 @@ unary_expr_type::~unary_expr_type()
 }
 
 void unary_expr_type::print_data(std::ostream& DYND_UNUSED(o),
-                const char *DYND_UNUSED(arrmeta), const char *DYND_UNUSED(data)) const
+                const char *DYND_UNUSED(arrmeta), char *DYND_UNUSED(data)) const
 {
     throw runtime_error("internal error: unary_expr_type::print_data isn't supposed to be called");
 }

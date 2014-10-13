@@ -205,7 +205,7 @@ public:
      * \param arrmeta  Pointer to the type arrmeta of the data element to print.
      * \param data  Pointer to the data element to print.
      */
-    virtual void print_data(std::ostream& o, const char *arrmeta, const char *data) const = 0;
+    virtual void print_data(std::ostream& o, const char *arrmeta, char *data) const = 0;
 
     /**
      * Print a representation of the type itself
@@ -370,7 +370,7 @@ public:
      * \returns  The type that results from the indexing operation.
      */
     virtual ndt::type at_single(intptr_t i0, const char **inout_arrmeta,
-                                const char **inout_data) const;
+                                char **inout_data) const;
 
     /**
      * Retrieves the type starting at the requested dimension. This is

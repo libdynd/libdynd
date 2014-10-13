@@ -33,7 +33,7 @@ view_type::~view_type()
 {
 }
 
-void view_type::print_data(std::ostream& o, const char *arrmeta, const char *data) const
+void view_type::print_data(std::ostream& o, const char *arrmeta, char *data) const
 {
     // Allow calling print_data in the special case that the view
     // is being used just to align the data

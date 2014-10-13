@@ -19,10 +19,10 @@ struct buffered_ck : public kernels::general_ck<buffered_ck> {
   vector<intptr_t> m_src_buf_ck_offsets;
   vector<buffer_storage> m_bufs;
 
-  static void single(char *dst, const char *const *src, ckernel_prefix *rawself)
+  static void single(char *dst, char **src, ckernel_prefix *rawself)
   {
     self_type *self = get_self(rawself);
-    vector<const char *> buf_src(self->m_nsrc);
+    vector<char *> buf_src(self->m_nsrc);
     for (intptr_t i = 0; i < self->m_nsrc; ++i) {
       if (!self->m_bufs[i].is_null()) {
         self->m_bufs[i].reset_arrmeta();
@@ -40,12 +40,12 @@ struct buffered_ck : public kernels::general_ck<buffered_ck> {
     child_fn(dst, &buf_src[0], child);
   }
 
-  static void strided(char *dst, intptr_t dst_stride, const char *const *src,
+  static void strided(char *dst, intptr_t dst_stride, char **src,
                       const intptr_t *src_stride, size_t count,
                       ckernel_prefix *rawself)
   {
     self_type *self = get_self(rawself);
-    vector<const char *> buf_src(self->m_nsrc);
+    vector<char *> buf_src(self->m_nsrc);
     vector<intptr_t> buf_stride(self->m_nsrc);
     ckernel_prefix *child = self->get_child_ckernel();
     expr_strided_t child_fn = child->get_function<expr_strided_t>();

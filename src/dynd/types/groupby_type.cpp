@@ -50,7 +50,7 @@ groupby_type::~groupby_type()
 }
 
 void groupby_type::print_data(std::ostream& DYND_UNUSED(o),
-                const char *DYND_UNUSED(arrmeta), const char *DYND_UNUSED(data)) const
+                const char *DYND_UNUSED(arrmeta), char *DYND_UNUSED(data)) const
 {
     throw runtime_error("internal error: groupby_type::print_data isn't supposed to be called");
 }
@@ -126,26 +126,28 @@ namespace {
         const char *src_arrmeta, *dst_arrmeta;
 
         template<typename UIntType>
-        inline static void single(char *dst, const char *src, ckernel_prefix *extra)
+        inline static void single(char *dst, char *src, ckernel_prefix *extra)
         {
             extra_type *e = reinterpret_cast<extra_type *>(extra);
             const groupby_type *gd = e->src_groupby_tp;
 
             // Get the data_values raw nd::array
             ndt::type data_values_tp = gd->get_operand_type();
-            const char *data_values_arrmeta = e->src_arrmeta, *data_values_data = src;
+            const char *data_values_arrmeta = e->src_arrmeta;
+            char *data_values_data = src;
             data_values_tp = data_values_tp.extended()->at_single(0, &data_values_arrmeta, &data_values_data);
             data_values_tp = data_values_tp.tcast<pointer_type>()->get_target_type();
             data_values_arrmeta += sizeof(pointer_type_arrmeta);
-            data_values_data = *reinterpret_cast<const char * const *>(data_values_data);
+            data_values_data = *reinterpret_cast<char **>(data_values_data);
 
             // Get the by_values raw nd::array
             ndt::type by_values_tp = gd->get_operand_type();
-            const char *by_values_arrmeta = e->src_arrmeta, *by_values_data = src;
+            const char *by_values_arrmeta = e->src_arrmeta;
+            char *by_values_data = src;
             by_values_tp = by_values_tp.extended()->at_single(1, &by_values_arrmeta, &by_values_data);
             by_values_tp = by_values_tp.tcast<pointer_type>()->get_target_type();
             by_values_arrmeta += sizeof(pointer_type_arrmeta);
-            by_values_data = *reinterpret_cast<const char * const *>(by_values_data);
+            by_values_data = *reinterpret_cast<char **>(by_values_data);
 
             // If by_values is an expression, evaluate it since we're doing two
             // passes through it
@@ -223,7 +225,7 @@ namespace {
               throw runtime_error(
                   "groupby: failed to get data_values as a strided array");
             }
-            const char *dvit_data = data_values_data;
+            char *dvit_data = data_values_data;
             by_values_ptr = by_values_data;
             for (intptr_t i = 0; i < dvit_dim_size; ++i) {
               UIntType value =
@@ -238,17 +240,17 @@ namespace {
         }
 
         // Some compilers are finicky about getting single<T> as a function pointer, so this...
-        static void single_uint8(char *dst, const char *const *src,
+        static void single_uint8(char *dst, char **src,
                                  ckernel_prefix *extra)
         {
             single<uint8_t>(dst, *src, extra);
         }
-        static void single_uint16(char *dst, const char *const *src,
+        static void single_uint16(char *dst, char **src,
                                   ckernel_prefix *extra)
         {
             single<uint16_t>(dst, *src, extra);
         }
-        static void single_uint32(char *dst, const char *const *src,
+        static void single_uint32(char *dst, char **src,
                                   ckernel_prefix *extra)
         {
             single<uint32_t>(dst, *src, extra);

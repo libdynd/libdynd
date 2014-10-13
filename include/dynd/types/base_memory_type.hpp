@@ -54,7 +54,7 @@ public:
 
     virtual size_t get_default_data_size() const;
 
-    virtual void print_data(std::ostream& o, const char *arrmeta, const char *data) const;
+    virtual void print_data(std::ostream& o, const char *arrmeta, char *data) const;
 
     virtual bool is_lossless_assignment(const ndt::type& dst_tp, const ndt::type& src_tp) const;
 

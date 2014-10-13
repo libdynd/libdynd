@@ -27,7 +27,7 @@ typevar_type::typevar_type(const nd::string &name)
 
 void typevar_type::print_data(std::ostream &DYND_UNUSED(o),
                                 const char *DYND_UNUSED(arrmeta),
-                                const char *DYND_UNUSED(data)) const
+                                char *DYND_UNUSED(data)) const
 {
     throw type_error("Cannot store data of typevar type");
 }

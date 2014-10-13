@@ -25,14 +25,14 @@ namespace {
         // After this are field_count sorting_less kernel offsets, for
         // src#.field_i < src#.field_i with each 0 <= i < field_count
 
-        static int sorting_less(const char *const *src, ckernel_prefix *extra)
+        static int sorting_less(char **src, ckernel_prefix *extra)
         {
             char *eraw = reinterpret_cast<char *>(extra);
             extra_type *e = reinterpret_cast<extra_type *>(extra);
             size_t field_count = e->field_count;
             const size_t *src_data_offsets = e->src_data_offsets;
             const size_t *kernel_offsets = reinterpret_cast<const size_t *>(e + 1);
-            const char *child_src[2];
+            char *child_src[2];
             for (size_t i = 0; i != field_count; ++i) {
                 ckernel_prefix *sorting_less_kdp =
                     reinterpret_cast<ckernel_prefix *>(eraw +
@@ -78,14 +78,14 @@ namespace {
         // src0.field_i < src1.field_i and src1.field_i < src0.field_i
         // with each 0 <= i < field_count
 
-        static int sorting_less(const char *const *src, ckernel_prefix *extra) {
+        static int sorting_less(char **src, ckernel_prefix *extra) {
             char *eraw = reinterpret_cast<char *>(extra);
             extra_type *e = reinterpret_cast<extra_type *>(extra);
             size_t field_count = e->field_count;
             const size_t *src0_data_offsets = e->src0_data_offsets;
             const size_t *src1_data_offsets = e->src1_data_offsets;
             const size_t *kernel_offsets = reinterpret_cast<const size_t *>(e + 1);
-            const char *child_src[2];
+            char *child_src[2];
             for (size_t i = 0; i != field_count; ++i) {
                 ckernel_prefix *src0_sorting_less_src1 =
                                 reinterpret_cast<ckernel_prefix *>(eraw + kernel_offsets[2*i]);
@@ -132,14 +132,14 @@ namespace {
         // src0.field_i <op> src1.field_i
         // with each 0 <= i < field_count
 
-        static int equal(const char *const *src, ckernel_prefix *extra) {
+        static int equal(char **src, ckernel_prefix *extra) {
             char *eraw = reinterpret_cast<char *>(extra);
             extra_type *e = reinterpret_cast<extra_type *>(extra);
             size_t field_count = e->field_count;
             const size_t *src0_data_offsets = e->src0_data_offsets;
             const size_t *src1_data_offsets = e->src1_data_offsets;
             const size_t *kernel_offsets = reinterpret_cast<const size_t *>(e + 1);
-            const char *child_src[2];
+            char *child_src[2];
             for (size_t i = 0; i != field_count; ++i) {
                 ckernel_prefix *echild =
                                 reinterpret_cast<ckernel_prefix *>(eraw + kernel_offsets[i]);
@@ -155,14 +155,14 @@ namespace {
             return true;
         }
 
-        static int not_equal(const char *const *src, ckernel_prefix *extra) {
+        static int not_equal(char **src, ckernel_prefix *extra) {
             char *eraw = reinterpret_cast<char *>(extra);
             extra_type *e = reinterpret_cast<extra_type *>(extra);
             size_t field_count = e->field_count;
             const size_t *src0_data_offsets = e->src0_data_offsets;
             const size_t *src1_data_offsets = e->src1_data_offsets;
             const size_t *kernel_offsets = reinterpret_cast<const size_t *>(e + 1);
-            const char *child_src[2];
+            char *child_src[2];
             for (size_t i = 0; i != field_count; ++i) {
                 ckernel_prefix *echild =
                                 reinterpret_cast<ckernel_prefix *>(eraw + kernel_offsets[i]);

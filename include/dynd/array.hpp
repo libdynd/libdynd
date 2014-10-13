@@ -277,7 +277,7 @@ public:
         }
     }
 
-    inline const char *get_readonly_originptr() const {
+    inline char *get_readonly_originptr() const {
         return get_ndo()->m_data_pointer;
     }
 
@@ -1614,12 +1614,12 @@ array memmap(const std::string& filename,
  *
  * \returns  The index of the found element, or -1 if not found.
  */
-intptr_t binary_search(const array &n, const char *data, const char *arrmeta);
+intptr_t binary_search(const array &n, const char *arrmeta, char *data);
 
 array groupby(const array& data_values, const array& by,
                 const ndt::type& groups = ndt::type());
 
-bool is_scalar_avail(const ndt::type &tp, const char *arrmeta, const char *data,
+bool is_scalar_avail(const ndt::type &tp, const char *arrmeta, char *data,
                      const eval::eval_context *ectx);
 
 /**

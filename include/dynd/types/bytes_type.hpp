@@ -44,7 +44,7 @@ public:
         return m_alignment;
     }
 
-    void print_data(std::ostream& o, const char *arrmeta, const char *data) const;
+    void print_data(std::ostream& o, const char *arrmeta, char *data) const;
 
     void print_type(std::ostream& o) const;
 

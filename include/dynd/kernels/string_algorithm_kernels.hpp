@@ -41,9 +41,9 @@ struct string_concatenation_kernel {
      */
     void init(size_t nop, const char *dst_arrmeta, const char **src_arrmeta);
 
-    static void single(char *dst, const char *const *src,
+    static void single(char *dst, char **src,
                        ckernel_prefix *extra);
-    static void strided(char *dst, intptr_t dst_stride, const char *const *src,
+    static void strided(char *dst, intptr_t dst_stride, char **src,
                         const intptr_t *src_stride, size_t count,
                         ckernel_prefix *extra);
 };
@@ -78,9 +78,9 @@ struct string_find_kernel {
 
     static void destruct(ckernel_prefix *extra);
 
-    static void single(char *dst, const char *const *src,
+    static void single(char *dst, char **src,
                        ckernel_prefix *extra);
-    static void strided(char *dst, intptr_t dst_stride, const char *const *src,
+    static void strided(char *dst, intptr_t dst_stride, char **src,
                         const intptr_t *src_stride, size_t count,
                         ckernel_prefix *extra);
 };

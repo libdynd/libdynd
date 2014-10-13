@@ -38,7 +38,7 @@ char_type::~char_type()
 {
 }
 
-uint32_t char_type::get_code_point(const char *data) const
+uint32_t char_type::get_code_point(char *data) const
 {
     next_unicode_codepoint_t next_fn;
     next_fn = get_next_unicode_codepoint_function(m_encoding, assign_error_nocheck);
@@ -52,7 +52,7 @@ void char_type::set_code_point(char *out_data, uint32_t cp)
     append_fn(cp, out_data, out_data + get_data_size());
 }
 
-void char_type::print_data(std::ostream& o, const char *DYND_UNUSED(arrmeta), const char *data) const
+void char_type::print_data(std::ostream& o, const char *DYND_UNUSED(arrmeta), char *data) const
 {
     // Print as an escaped string
     o << "\"";

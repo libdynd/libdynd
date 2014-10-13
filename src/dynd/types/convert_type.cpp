@@ -34,7 +34,7 @@ convert_type::~convert_type()
 
 void convert_type::print_data(std::ostream &DYND_UNUSED(o),
                               const char *DYND_UNUSED(arrmeta),
-                              const char *DYND_UNUSED(data)) const
+                              char *DYND_UNUSED(data)) const
 {
     throw runtime_error(
         "internal error: convert_type::print_data isn't supposed to be called");

@@ -42,7 +42,7 @@ size_t fixed_sym_dim_type::get_default_data_size() const
 
 void fixed_sym_dim_type::print_data(std::ostream &DYND_UNUSED(o),
                                     const char *DYND_UNUSED(arrmeta),
-                                    const char *DYND_UNUSED(data)) const
+                                    char *DYND_UNUSED(data)) const
 {
   throw type_error("Cannot store data of symbolic fixed_dim type");
 }
@@ -89,7 +89,7 @@ ndt::type fixed_sym_dim_type::get_canonical_type() const
 ndt::type
 fixed_sym_dim_type::at_single(intptr_t DYND_UNUSED(i0),
                               const char **DYND_UNUSED(inout_arrmeta),
-                              const char **DYND_UNUSED(inout_data)) const
+                              char **DYND_UNUSED(inout_data)) const
 {
   return m_element_tp;
 }

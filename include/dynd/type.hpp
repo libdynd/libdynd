@@ -265,7 +265,7 @@ public:
      *
      * \returns  The type that results from the indexing operation.
      */
-    inline type at_single(intptr_t i0, const char **inout_arrmeta = NULL, const char **inout_data = NULL) const {
+    inline type at_single(intptr_t i0, const char **inout_arrmeta = NULL, char **inout_data = NULL) const {
         if (!is_builtin()) {
             return m_extended->at_single(i0, inout_arrmeta, inout_data);
         } else {

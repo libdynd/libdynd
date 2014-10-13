@@ -65,7 +65,7 @@ void json_type::set_from_utf8_string(const char *arrmeta, char *dst,
 }
 
 void json_type::print_data(std::ostream &o, const char *DYND_UNUSED(arrmeta),
-                           const char *data) const
+                           char *data) const
 {
     uint32_t cp;
     next_unicode_codepoint_t next_fn;
@@ -205,7 +205,7 @@ struct string_to_json_ck
     const char *m_dst_arrmeta;
     bool m_validate;
 
-    inline void single(char *dst, const char *src)
+    inline void single(char *dst, char *src)
     {
         const json_type_arrmeta *md =
             reinterpret_cast<const json_type_arrmeta *>(m_dst_arrmeta);

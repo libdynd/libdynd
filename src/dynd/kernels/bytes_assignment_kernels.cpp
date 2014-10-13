@@ -26,15 +26,15 @@ namespace {
         const bytes_type_arrmeta *dst_arrmeta, *src_arrmeta;
 
         /** Does a single blockref-string copy */
-        static void single(char *dst, const char *const *src,
+        static void single(char *dst, char **src,
                            ckernel_prefix *extra)
         {
             extra_type *e = reinterpret_cast<extra_type *>(extra);
             const bytes_type_arrmeta *dst_md = e->dst_arrmeta;
             const bytes_type_arrmeta *src_md = e->src_arrmeta;
             bytes_type_data *dst_d = reinterpret_cast<bytes_type_data *>(dst);
-            const bytes_type_data *src_d =
-                *reinterpret_cast<const bytes_type_data *const *>(src);
+            bytes_type_data *src_d =
+                *reinterpret_cast<bytes_type_data **>(src);
 
             if (dst_d->begin != NULL) {
                 throw runtime_error("Cannot assign to an already initialized dynd string");
@@ -47,8 +47,8 @@ namespace {
             // If the blockrefs are different, require a copy operation
             if (dst_md->blockref != src_md->blockref) {
                 char *dst_begin = NULL, *dst_end = NULL;
-                const char *src_begin = src_d->begin;
-                const char *src_end = src_d->end;
+                char *src_begin = src_d->begin;
+                char *src_end = src_d->end;
                 memory_block_pod_allocator_api *allocator = get_memory_block_pod_allocator_api(dst_md->blockref);
 
                 allocator->allocate(dst_md->blockref, src_end - src_begin,
@@ -100,7 +100,7 @@ namespace {
         const bytes_type_arrmeta *dst_arrmeta;
 
         /** Does a single fixed-bytes copy */
-        static void single(char *dst, const char *const *src,
+        static void single(char *dst, char **src,
                            ckernel_prefix *extra)
         {
             extra_type *e = reinterpret_cast<extra_type *>(extra);
@@ -108,8 +108,8 @@ namespace {
             // TODO: With some additional mechanism to track the source memory block, could
             //       avoid copying the bytes data.
             char *dst_begin = NULL, *dst_end = NULL;
-            const char *src_begin = src[0];
-            const char *src_end = src_begin + e->src_data_size;
+            char *src_begin = src[0];
+            char *src_end = src_begin + e->src_data_size;
             bytes_type_data *dst_d = reinterpret_cast<bytes_type_data *>(dst);
 
             if (dst_d->begin != NULL) {

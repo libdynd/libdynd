@@ -68,7 +68,7 @@ namespace {
             
         }
 
-        static void single(char *dst, const char *const *src,
+        static void single(char *dst, char **src,
                            ckernel_prefix *extra)
         {
             char *eraw = reinterpret_cast<char *>(extra);
@@ -97,7 +97,7 @@ namespace {
             }
         }
         static void strided(char *dst, intptr_t dst_stride,
-                            const char *const *src, const intptr_t *src_stride,
+                            char **src, const intptr_t *src_stride,
                             size_t count, ckernel_prefix *extra)
         {
             char *eraw = reinterpret_cast<char *>(extra);
@@ -113,7 +113,7 @@ namespace {
 
             opchild_first = echild_first->get_function<expr_strided_t>();
             opchild_second = echild_second->get_function<expr_strided_t>();
-            const char *src0 = src[0];
+            char *src0 = src[0];
             intptr_t src0_stride = src_stride[0];
             while (count > 0) {
                 size_t chunk_size = min(count, (size_t)DYND_BUFFER_CHUNK_SIZE);

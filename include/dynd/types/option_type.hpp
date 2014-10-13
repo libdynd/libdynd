@@ -56,7 +56,7 @@ public:
                  const eval::eval_context *ectx) const;
 
   /** Returns true if the value is available */
-  bool is_avail(const char *arrmeta, const char *data,
+  bool is_avail(const char *arrmeta, char *data,
                 const eval::eval_context *ectx) const;
 
   const arrfunc_type_data *get_is_avail_arrfunc() const
@@ -72,7 +72,7 @@ public:
            1;
   }
 
-  void print_data(std::ostream &o, const char *arrmeta, const char *data) const;
+  void print_data(std::ostream &o, const char *arrmeta, char *data) const;
 
   void print_type(std::ostream &o) const;
 

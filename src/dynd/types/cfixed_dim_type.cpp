@@ -79,7 +79,7 @@ cfixed_dim_type::~cfixed_dim_type()
 }
 
 void cfixed_dim_type::print_data(std::ostream &o, const char *arrmeta,
-                                 const char *data) const
+                                 char *data) const
 {
   strided_array_summarized(o, get_element_type(),
                            arrmeta + sizeof(cfixed_dim_type_arrmeta), data,
@@ -239,7 +239,7 @@ intptr_t cfixed_dim_type::apply_linear_index(
 }
 
 ndt::type cfixed_dim_type::at_single(intptr_t i0, const char **inout_arrmeta,
-                                     const char **inout_data) const
+                                     char **inout_data) const
 {
     // Bounds-checking of the index
     i0 = apply_single_index(i0, m_dim_size, NULL);

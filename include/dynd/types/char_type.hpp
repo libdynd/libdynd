@@ -37,11 +37,11 @@ public:
     }
 
     // Retrieves the character as a unicode code point
-    uint32_t get_code_point(const char *data) const;
+    uint32_t get_code_point(char *data) const;
     // Sets the character as a unicode code point
     void set_code_point(char *out_data, uint32_t cp);
 
-    void print_data(std::ostream& o, const char *arrmeta, const char *data) const;
+    void print_data(std::ostream& o, const char *arrmeta, char *data) const;
 
     void print_type(std::ostream& o) const;
 

@@ -240,7 +240,7 @@ struct struct_property_getter_ck
   : public kernels::unary_ck<struct_property_getter_ck> {
     size_t m_field_offset;
 
-    inline void single(char *dst, const char *src)
+    inline void single(char *dst, char *src)
     {
         ckernel_prefix *child = get_child_ckernel();
         expr_single_t child_fn = child->get_function<expr_single_t>();
@@ -248,7 +248,7 @@ struct struct_property_getter_ck
         child_fn(dst, &src, child);
     }
 
-    inline void strided(char *dst, intptr_t dst_stride, const char *src,
+    inline void strided(char *dst, intptr_t dst_stride, char *src,
                         intptr_t src_stride, size_t count)
     {
         ckernel_prefix *child = get_child_ckernel();

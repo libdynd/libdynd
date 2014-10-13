@@ -38,7 +38,7 @@ public:
     }
 
     void print_data(std::ostream &o, const char *arrmeta,
-                    const char *data) const;
+                    char *data) const;
 
     void print_type(std::ostream& o) const;
 
@@ -69,7 +69,7 @@ public:
                                      const char *category_data) const;
     uint32_t get_value_from_category(const nd::array &category) const;
 
-    const char *get_category_data_from_value(uint32_t value) const {
+    char *get_category_data_from_value(uint32_t value) const {
       if (value >= get_category_count()) {
         throw std::runtime_error("category value is out of bounds");
       }

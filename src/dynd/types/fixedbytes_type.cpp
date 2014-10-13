@@ -48,7 +48,7 @@ void fixedbytes_type::get_bytes_range(const char **out_begin, const char**out_en
     *out_end = data + get_data_size();
 }
 
-void fixedbytes_type::print_data(std::ostream& o, const char *DYND_UNUSED(arrmeta), const char *data) const
+void fixedbytes_type::print_data(std::ostream& o, const char *DYND_UNUSED(arrmeta), char *data) const
 {
   hexadecimal_print_summarized(o, data, get_data_size(), 80);
 }

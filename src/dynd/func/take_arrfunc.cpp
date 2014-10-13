@@ -21,13 +21,13 @@ struct masked_take_ck : public kernels::expr_ck<masked_take_ck, 2> {
     const char *m_dst_meta;
     intptr_t m_dim_size, m_src0_stride, m_mask_stride;
 
-    inline void single(char *dst, const char * const *src)
+    inline void single(char *dst, char **src)
     {
         ckernel_prefix *child = get_child_ckernel();
         expr_strided_t child_fn =
                      child->get_function<expr_strided_t>();
-        const char *src0 = src[0];
-        const char *mask = src[1];
+        char *src0 = src[0];
+        char *mask = src[1];
         intptr_t dim_size = m_dim_size, src0_stride = m_src0_stride,
                  mask_stride = m_mask_stride;
         // Start with the dst matching the dim size. (Maybe better to
@@ -77,12 +77,12 @@ struct indexed_take_ck : public kernels::expr_ck<indexed_take_ck, 2> {
     intptr_t m_dst_dim_size, m_dst_stride, m_index_stride;
     intptr_t m_src0_dim_size, m_src0_stride;
 
-    inline void single(char *dst, const char * const *src)
+    inline void single(char *dst, char **src)
     {
         ckernel_prefix *child = get_child_ckernel();
         expr_single_t child_fn =
                      child->get_function<expr_single_t>();
-        const char *src0 = src[0];
+        char *src0 = src[0];
         const char *index = src[1];
         intptr_t dst_dim_size = m_dst_dim_size, src0_dim_size = m_src0_dim_size,
                  dst_stride = m_dst_stride, src0_stride = m_src0_stride,
@@ -92,7 +92,7 @@ struct indexed_take_ck : public kernels::expr_ck<indexed_take_ck, 2> {
             // Handle Python-style negative index, bounds checking
             ix = apply_single_index(ix, src0_dim_size, NULL);
             // Copy one element at a time
-            const char *child_src0 = src0 + ix * src0_stride;
+            char *child_src0 = src0 + ix * src0_stride;
             child_fn(dst, &child_src0, child);
             dst += dst_stride;
             index += index_stride;

@@ -38,7 +38,7 @@ public:
     }
 
     /** Calls the function to do the assignment */
-    inline void operator()(char *dst, const char *src) const {
+    inline void operator()(char *dst, char *src) const {
         ckernel_prefix *kdp = get();
         expr_single_t fn = kdp->get_function<expr_single_t>();
         fn(dst, &src, kdp);
@@ -69,7 +69,7 @@ public:
 
     /** Calls the function to do the assignment */
     inline void operator()(char *dst, intptr_t dst_stride,
-                const char *src, intptr_t src_stride, size_t count) const {
+                char *src, intptr_t src_stride, size_t count) const {
         ckernel_prefix *kdp = get();
         expr_strided_t fn = kdp->get_function<expr_strided_t>();
         fn(dst, dst_stride, &src, &src_stride, count, kdp);
@@ -108,15 +108,14 @@ namespace kernels {
             }
         }
 
-        static void single_wrapper(char *dst, const char *const *src,
+        static void single_wrapper(char *dst, char **src,
                                    ckernel_prefix *rawself)
         {
             return parent_type::get_self(rawself)->single(dst, *src);
         }
 
         static void strided_wrapper(char *dst, intptr_t dst_stride,
-                                    const char *const *src,
-                                    const intptr_t *src_stride, size_t count,
+                                    char **src, const intptr_t *src_stride, size_t count,
                                     ckernel_prefix *rawself)
         {
             return parent_type::get_self(rawself)
@@ -124,7 +123,7 @@ namespace kernels {
         }
 
         template<class R, class T0>
-        inline void call_single_typed(char *dst, const char *src, R (self_type::*)(T0))
+        inline void call_single_typed(char *dst, char *src, R (self_type::*)(T0))
         {
             *reinterpret_cast<R *>(dst) =
                 static_cast<self_type *>(this)
@@ -138,7 +137,7 @@ namespace kernels {
          * This can also be implemented directly in self_type to provide
          * more controlled behavior or for non-trivial types.
          */
-        inline void single(char *dst, const char *src)
+        inline void single(char *dst, char *src)
         {
             call_single_typed(dst, src, &self_type::operator());
         }
@@ -146,7 +145,7 @@ namespace kernels {
         /**
          * Default strided implementation calls single repeatedly.
          */
-        inline void strided(char *dst, intptr_t dst_stride, const char *src,
+        inline void strided(char *dst, intptr_t dst_stride, char *src,
                             intptr_t src_stride, size_t count)
         {
             self_type *self = parent_type::get_self(&this->base);
@@ -244,14 +243,14 @@ struct strided_assign_ck : public kernels::unary_ck<strided_assign_ck> {
     intptr_t m_size;
     intptr_t m_dst_stride, m_src_stride;
 
-    inline void single(char *dst, const char *src)
+    inline void single(char *dst, char *src)
     {
         ckernel_prefix *child = get_child_ckernel();
         expr_strided_t child_fn = child->get_function<expr_strided_t>();
         child_fn(dst, m_dst_stride, &src, &m_src_stride, m_size, child);
     }
 
-    inline void strided(char *dst, intptr_t dst_stride, const char *src,
+    inline void strided(char *dst, intptr_t dst_stride, char *src,
                         intptr_t src_stride, size_t count)
     {
         ckernel_prefix *child = get_child_ckernel();

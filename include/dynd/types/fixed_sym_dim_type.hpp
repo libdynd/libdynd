@@ -24,7 +24,7 @@ public:
 
   size_t get_default_data_size() const;
 
-  void print_data(std::ostream &o, const char *arrmeta, const char *data) const;
+  void print_data(std::ostream &o, const char *arrmeta, char *data) const;
 
   void print_type(std::ostream &o) const;
 
@@ -38,7 +38,7 @@ public:
 
 
   ndt::type at_single(intptr_t i0, const char **inout_arrmeta,
-                      const char **inout_data) const;
+                      char **inout_data) const;
 
   ndt::type get_type_at_dimension(char **inout_arrmeta, intptr_t i,
                                   intptr_t total_ndim = 0) const;

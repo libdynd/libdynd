@@ -52,7 +52,7 @@ namespace {
             }
         }
 
-        inline const char *buffer_operand(const single_buffer& b, const char *src)
+        inline char *buffer_operand(const single_buffer& b, char *src)
         {
             char *eraw = reinterpret_cast<char *>(this);
             char *dst = eraw + b.data_offset;
@@ -73,9 +73,9 @@ namespace {
             return dst;
         }
 
-        static int kernel(const char *const *src, ckernel_prefix *extra)
+        static int kernel(char **src, ckernel_prefix *extra)
         {
-            const char *src_buffered[2];
+            char *src_buffered[2];
             char *eraw = reinterpret_cast<char *>(extra);
             extra_type *e = reinterpret_cast<extra_type *>(extra);
             // Buffer the first operand if necessary

@@ -143,7 +143,7 @@ ndt::type cstruct_type::get_canonical_type() const
 }
 
 ndt::type cstruct_type::at_single(intptr_t i0,
-                const char **inout_arrmeta, const char **inout_data) const
+                const char **inout_arrmeta, char **inout_data) const
 {
     // Bounds-checking of the index
     i0 = apply_single_index(i0, m_field_count, NULL);

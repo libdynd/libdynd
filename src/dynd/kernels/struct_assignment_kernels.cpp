@@ -27,7 +27,7 @@ struct tuple_unary_op_item {
 struct tuple_unary_op_ck : public kernels::unary_ck<tuple_unary_op_ck> {
   vector<tuple_unary_op_item> m_fields;
 
-  inline void single(char *dst, const char *src)
+  inline void single(char *dst, char *src)
   {
     const tuple_unary_op_item *fi = &m_fields[0];
     intptr_t field_count = m_fields.size();
@@ -38,7 +38,7 @@ struct tuple_unary_op_ck : public kernels::unary_ck<tuple_unary_op_ck> {
       const tuple_unary_op_item &item = fi[i];
       child = get_child_ckernel(item.child_kernel_offset);
       child_fn = child->get_function<expr_single_t>();
-      const char *child_src = src + item.src_data_offset;
+      char *child_src = src + item.src_data_offset;
       child_fn(dst + item.dst_data_offset, &child_src, child);
     }
   }

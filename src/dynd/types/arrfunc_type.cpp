@@ -41,7 +41,7 @@ static void print_arrfunc(std::ostream& o, const arrfunc_type_data *af)
 }
 
 void arrfunc_type::print_data(std::ostream &o, const char *DYND_UNUSED(arrmeta),
-                              const char *data) const
+                              char *data) const
 {
   const arrfunc_type_data *af =
       reinterpret_cast<const arrfunc_type_data *>(data);
@@ -230,7 +230,7 @@ static array_preamble *function___call__(const array_preamble *params, void *DYN
                          nd::array(), &eval::default_eval_context);
     // Call the ckernel
     expr_single_t usngo = ckb.get()->get_function<expr_single_t>();
-    const char *in_ptrs[max_args];
+    char *in_ptrs[max_args];
     for (int i = 0; i < nargs - 1; ++i) {
         in_ptrs[i] = args[i+1].get_readonly_originptr();
     }

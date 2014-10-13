@@ -26,22 +26,22 @@ struct assign_na;
 
 template<>
 struct is_avail<dynd_bool> {
-    static void single(char *dst, const char *const *src,
+    static void single(char *dst, char **src,
                        ckernel_prefix *DYND_UNUSED(self))
     {
         // Available if the value is 0 or 1
-        *dst = **reinterpret_cast<const unsigned char *const *>(src) <= 1;
+        *dst = **reinterpret_cast<unsigned char **>(src) <= 1;
     }
 
-    static void strided(char *dst, intptr_t dst_stride, const char *const *src,
+    static void strided(char *dst, intptr_t dst_stride, char **src,
                         const intptr_t *src_stride, size_t count,
                         ckernel_prefix *DYND_UNUSED(self))
     {
         // Available if the value is 0 or 1
-        const char *src0 = src[0];
+        char *src0 = src[0];
         intptr_t src0_stride = src_stride[0];
         for (size_t i = 0; i != count; ++i) {
-            *dst = *reinterpret_cast<const unsigned char *>(src) <= 1;
+            *dst = *reinterpret_cast<unsigned char *>(src) <= 1;
             dst += dst_stride;
             src0 += src0_stride;
         }
@@ -50,14 +50,14 @@ struct is_avail<dynd_bool> {
 
 template<>
 struct assign_na<dynd_bool> {
-    static void single(char *dst, const char *const* DYND_UNUSED(src),
+    static void single(char *dst, char ** DYND_UNUSED(src),
                                 ckernel_prefix *DYND_UNUSED(strided))
     {
         *dst = 2;
     }
 
     static void strided(char *dst, intptr_t dst_stride,
-                                  const char *const *DYND_UNUSED(src),
+                                  char **DYND_UNUSED(src),
                                   const intptr_t *DYND_UNUSED(src_stride),
                                   size_t count,
                                   ckernel_prefix *DYND_UNUSED(strided))
@@ -78,21 +78,21 @@ struct assign_na<dynd_bool> {
 
 template<class T>
 struct int_is_avail {
-    static void single(char *dst, const char *const *src,
+    static void single(char *dst, char **src,
                        ckernel_prefix *DYND_UNUSED(self))
     {
-        *dst = **reinterpret_cast<const T *const *>(src) !=
+        *dst = **reinterpret_cast<T **>(src) !=
                numeric_limits<T>::min();
     }
 
-    static void strided(char *dst, intptr_t dst_stride, const char *const *src,
+    static void strided(char *dst, intptr_t dst_stride, char **src,
                         const intptr_t *src_stride, size_t count,
                         ckernel_prefix *DYND_UNUSED(self))
     {
-        const char *src0 = src[0];
+        char *src0 = src[0];
         intptr_t src0_stride = src_stride[0];
         for (size_t i = 0; i != count; ++i) {
-            *dst = *reinterpret_cast<const T *>(src0) != numeric_limits<T>::min();
+            *dst = *reinterpret_cast<T *>(src0) != numeric_limits<T>::min();
             dst += dst_stride;
             src0 += src0_stride;
         }
@@ -112,14 +112,14 @@ struct is_avail<dynd_int128> : public int_is_avail<dynd_int128> {};
 
 template<class T>
 struct int_assign_na {
-    static void single(char *dst, const char *const* DYND_UNUSED(src),
+    static void single(char *dst, char ** DYND_UNUSED(src),
                                 ckernel_prefix *DYND_UNUSED(strided))
     {
         *reinterpret_cast<T *>(dst) = numeric_limits<T>::min();
     }
 
     static void strided(char *dst, intptr_t dst_stride,
-                                  const char *const *DYND_UNUSED(src),
+                                  char **DYND_UNUSED(src),
                                   const intptr_t *DYND_UNUSED(src_stride),
                                   size_t count,
                                   ckernel_prefix *DYND_UNUSED(strided))
@@ -147,21 +147,21 @@ struct assign_na<dynd_int128> : public int_assign_na<dynd_int128> {};
 
 template<>
 struct is_avail<float> {
-    static void single(char *dst, const char *const *src,
+    static void single(char *dst, char **src,
                        ckernel_prefix *DYND_UNUSED(self))
     {
-        *dst = **reinterpret_cast<const uint32_t *const *>(src) !=
+        *dst = **reinterpret_cast<uint32_t **>(src) !=
                DYND_FLOAT32_NA_AS_UINT;
     }
 
-    static void strided(char *dst, intptr_t dst_stride, const char *const *src,
+    static void strided(char *dst, intptr_t dst_stride, char **src,
                         const intptr_t *src_stride, size_t count,
                         ckernel_prefix *DYND_UNUSED(self))
     {
-        const char *src0 = src[0];
+        char *src0 = src[0];
         intptr_t src0_stride = src_stride[0];
         for (size_t i = 0; i != count; ++i) {
-            *dst = *reinterpret_cast<const uint32_t *>(src0) != DYND_FLOAT32_NA_AS_UINT;
+            *dst = *reinterpret_cast<uint32_t *>(src0) != DYND_FLOAT32_NA_AS_UINT;
             dst += dst_stride;
             src0 += src0_stride;
         }
@@ -170,14 +170,14 @@ struct is_avail<float> {
 
 template<>
 struct assign_na<float> {
-    static void single(char *dst, const char *const* DYND_UNUSED(src),
+    static void single(char *dst, char ** DYND_UNUSED(src),
                                 ckernel_prefix *DYND_UNUSED(strided))
     {
         *reinterpret_cast<uint32_t *>(dst) = DYND_FLOAT32_NA_AS_UINT;
     }
 
     static void strided(char *dst, intptr_t dst_stride,
-                                  const char *const *DYND_UNUSED(src),
+                                  char **DYND_UNUSED(src),
                                   const intptr_t *DYND_UNUSED(src_stride),
                                   size_t count,
                                   ckernel_prefix *DYND_UNUSED(strided))
@@ -194,21 +194,21 @@ struct assign_na<float> {
 
 template<>
 struct is_avail<double> {
-    static void single(char *dst, const char *const *src,
+    static void single(char *dst, char **src,
                        ckernel_prefix *DYND_UNUSED(self))
     {
-        *dst = **reinterpret_cast<const uint64_t *const *>(src) !=
+        *dst = **reinterpret_cast<uint64_t **>(src) !=
                DYND_FLOAT64_NA_AS_UINT;
     }
 
-    static void strided(char *dst, intptr_t dst_stride, const char *const *src,
+    static void strided(char *dst, intptr_t dst_stride, char **src,
                         const intptr_t *src_stride, size_t count,
                         ckernel_prefix *DYND_UNUSED(self))
     {
-        const char *src0 = src[0];
+        char *src0 = src[0];
         intptr_t src0_stride = src_stride[0];
         for (size_t i = 0; i != count; ++i) {
-            *dst = *reinterpret_cast<const uint64_t *>(src0) != DYND_FLOAT64_NA_AS_UINT;
+            *dst = *reinterpret_cast<uint64_t *>(src0) != DYND_FLOAT64_NA_AS_UINT;
             dst += dst_stride;
             src0 += src0_stride;
         }
@@ -217,14 +217,14 @@ struct is_avail<double> {
 
 template<>
 struct assign_na<double> {
-    static void single(char *dst, const char *const* DYND_UNUSED(src),
+    static void single(char *dst, char **DYND_UNUSED(src),
                                 ckernel_prefix *DYND_UNUSED(strided))
     {
         *reinterpret_cast<uint64_t *>(dst) = DYND_FLOAT64_NA_AS_UINT;
     }
 
     static void strided(char *dst, intptr_t dst_stride,
-                                  const char *const *DYND_UNUSED(src),
+                                  char **DYND_UNUSED(src),
                                   const intptr_t *DYND_UNUSED(src_stride),
                                   size_t count,
                                   ckernel_prefix *DYND_UNUSED(strided))
@@ -241,25 +241,25 @@ struct assign_na<double> {
 
 template<>
 struct is_avail<dynd_complex<float> > {
-    static void single(char *dst, const char *const *src,
+    static void single(char *dst, char **src,
                        ckernel_prefix *DYND_UNUSED(self))
     {
-        *dst = (*reinterpret_cast<const uint32_t *const *>(src))[0] !=
+        *dst = (*reinterpret_cast<uint32_t **>(src))[0] !=
                    DYND_FLOAT32_NA_AS_UINT &&
-               (*reinterpret_cast<const uint32_t *const *>(src))[1] !=
+               (*reinterpret_cast<uint32_t **>(src))[1] !=
                    DYND_FLOAT32_NA_AS_UINT;
     }
 
-    static void strided(char *dst, intptr_t dst_stride, const char *const *src,
+    static void strided(char *dst, intptr_t dst_stride, char **src,
                         const intptr_t *src_stride, size_t count,
                         ckernel_prefix *DYND_UNUSED(self))
     {
-        const char *src0 = src[0];
+        char *src0 = src[0];
         intptr_t src0_stride = src_stride[0];
         for (size_t i = 0; i != count; ++i) {
-            *dst = reinterpret_cast<const uint32_t *>(src0)[0] !=
+            *dst = reinterpret_cast<uint32_t *>(src0)[0] !=
                        DYND_FLOAT32_NA_AS_UINT &&
-                   reinterpret_cast<const uint32_t *>(src0)[1] !=
+                   reinterpret_cast<uint32_t *>(src0)[1] !=
                        DYND_FLOAT32_NA_AS_UINT;
             dst += dst_stride;
             src0 += src0_stride;
@@ -269,7 +269,7 @@ struct is_avail<dynd_complex<float> > {
 
 template<>
 struct assign_na<dynd_complex<float> > {
-    static void single(char *dst, const char *const* DYND_UNUSED(src),
+    static void single(char *dst, char **DYND_UNUSED(src),
                                 ckernel_prefix *DYND_UNUSED(strided))
     {
         reinterpret_cast<uint32_t *>(dst)[0] = DYND_FLOAT32_NA_AS_UINT;
@@ -277,7 +277,7 @@ struct assign_na<dynd_complex<float> > {
     }
 
     static void strided(char *dst, intptr_t dst_stride,
-                                  const char *const *DYND_UNUSED(src),
+                                  char **DYND_UNUSED(src),
                                   const intptr_t *DYND_UNUSED(src_stride),
                                   size_t count,
                                   ckernel_prefix *DYND_UNUSED(strided))
@@ -295,26 +295,26 @@ struct assign_na<dynd_complex<float> > {
 
 template<>
 struct is_avail<dynd_complex<double> > {
-    static void single(char *dst, const char *const *src,
+    static void single(char *dst, char **src,
                        ckernel_prefix *DYND_UNUSED(self))
     {
-        *dst = (*reinterpret_cast<const uint64_t *const *>(src))[0] !=
+        *dst = (*reinterpret_cast<uint64_t **>(src))[0] !=
                    DYND_FLOAT64_NA_AS_UINT &&
-               (*reinterpret_cast<const uint64_t *const *>(src))[1] !=
+               (*reinterpret_cast<uint64_t **>(src))[1] !=
                    DYND_FLOAT64_NA_AS_UINT;
     }
 
-    static void strided(char *dst, intptr_t dst_stride, const char *const *src,
+    static void strided(char *dst, intptr_t dst_stride, char **src,
                         const intptr_t *src_stride, size_t count,
                         ckernel_prefix *DYND_UNUSED(self))
     {
         // Available if the value is 0 or 1
-        const char *src0 = src[0];
+        char *src0 = src[0];
         intptr_t src0_stride = src_stride[0];
         for (size_t i = 0; i != count; ++i) {
-            *dst = reinterpret_cast<const uint64_t *>(src0)[0] !=
+            *dst = reinterpret_cast<uint64_t *>(src0)[0] !=
                        DYND_FLOAT64_NA_AS_UINT &&
-                   reinterpret_cast<const uint64_t *>(src0)[1] !=
+                   reinterpret_cast<uint64_t *>(src0)[1] !=
                        DYND_FLOAT64_NA_AS_UINT;
             dst += dst_stride;
             src0 += src0_stride;
@@ -324,7 +324,7 @@ struct is_avail<dynd_complex<double> > {
 
 template<>
 struct assign_na<dynd_complex<double> > {
-    static void single(char *dst, const char *const* DYND_UNUSED(src),
+    static void single(char *dst, char **DYND_UNUSED(src),
                                 ckernel_prefix *DYND_UNUSED(strided))
     {
         reinterpret_cast<uint64_t *>(dst)[0] = DYND_FLOAT64_NA_AS_UINT;
@@ -332,7 +332,7 @@ struct assign_na<dynd_complex<double> > {
     }
 
     static void strided(char *dst, intptr_t dst_stride,
-                                  const char *const *DYND_UNUSED(src),
+                                  char **DYND_UNUSED(src),
                                   const intptr_t *DYND_UNUSED(src_stride),
                                   size_t count,
                                   ckernel_prefix *DYND_UNUSED(strided))

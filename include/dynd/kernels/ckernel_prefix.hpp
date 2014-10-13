@@ -16,13 +16,12 @@ namespace dynd {
 
 struct ckernel_prefix;
 
-typedef void (*expr_single_t)(char *dst, const char *const *src,
+typedef void (*expr_single_t)(char *dst, char **src,
                               ckernel_prefix *self);
 typedef void (*expr_strided_t)(char *dst, intptr_t dst_stride,
-                               const char *const *src,
-                               const intptr_t *src_stride, size_t count,
+                               char **src, const intptr_t *src_stride, size_t count,
                                ckernel_prefix *self);
-typedef int (*expr_predicate_t)(const char *const *src, ckernel_prefix *self);
+typedef int (*expr_predicate_t)(char **src, ckernel_prefix *self);
 
 /**
  * Definition for kernel request parameters.

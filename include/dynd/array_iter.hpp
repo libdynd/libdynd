@@ -122,12 +122,12 @@ class array_iter<0, 1> {
     size_t m_iter_ndim;
     dimvector m_iterindex;
     dimvector m_itershape;
-    const char *m_data;
+    char *m_data;
     const char *m_arrmeta;
     iterdata_common *m_iterdata;
     ndt::type m_array_tp, m_uniform_tp;
 
-    inline void init(const ndt::type& tp0, const char *arrmeta0, const char *data0, size_t ndim)
+    inline void init(const ndt::type& tp0, const char *arrmeta0, char *data0, size_t ndim)
     {
         m_array_tp = tp0;
         m_iter_ndim = ndim ? ndim : m_array_tp.get_ndim();
@@ -160,7 +160,7 @@ class array_iter<0, 1> {
     }
 
 public:
-    array_iter(const ndt::type& tp0, const char *arrmeta0, const char *data0, size_t ndim = 0) {
+    array_iter(const ndt::type& tp0, const char *arrmeta0, char *data0, size_t ndim = 0) {
         init(tp0, arrmeta0, data0, ndim);
     }
 
@@ -200,7 +200,7 @@ public:
         return false;
     }
 
-    const char *data() {
+    char *data() {
         return m_data;
     }
 
@@ -362,7 +362,7 @@ public:
      * Provide const access to all the operands.
      */
     template<int K>
-    inline typename enable_if<detail::is_value_within_bounds<K, 0, 2>::value, const char *>::type data() const {
+    inline typename enable_if<detail::is_value_within_bounds<K, 0, 2>::value, char *>::type data() const {
         return m_data[K];
     }
 
@@ -467,7 +467,7 @@ public:
      * Provide const access to all the operands.
      */
     template<int K>
-    inline typename enable_if<detail::is_value_within_bounds<K, 0, 2>::value, const char *>::type data() const {
+    inline typename enable_if<detail::is_value_within_bounds<K, 0, 2>::value, char *>::type data() const {
         return m_data[K];
     }
 
@@ -594,7 +594,7 @@ public:
      * Provide const access to all the operands.
      */
     template<int K>
-    inline typename enable_if<detail::is_value_within_bounds<K, 0, 4>::value, const char *>::type data() const {
+    inline typename enable_if<detail::is_value_within_bounds<K, 0, 4>::value, char *>::type data() const {
         return m_data[K];
     }
 

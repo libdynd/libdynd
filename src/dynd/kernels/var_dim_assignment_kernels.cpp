@@ -25,7 +25,7 @@ namespace {
         intptr_t m_dst_target_alignment;
         const var_dim_type_arrmeta *m_dst_md;
 
-        inline void single(char *dst, const char *src)
+        inline void single(char *dst, char *src)
         {
             var_dim_type_data *dst_d = reinterpret_cast<var_dim_type_data *>(dst);
             ckernel_prefix *child = get_child_ckernel();
@@ -103,10 +103,10 @@ namespace {
         intptr_t m_dst_target_alignment;
         const var_dim_type_arrmeta *m_dst_md, *m_src_md;
 
-        inline void single(char *dst, const char *src)
+        inline void single(char *dst, char *src)
         {
             var_dim_type_data *dst_d = reinterpret_cast<var_dim_type_data *>(dst);
-            const var_dim_type_data *src_d = reinterpret_cast<const var_dim_type_data *>(src);
+            var_dim_type_data *src_d = reinterpret_cast<var_dim_type_data *>(src);
             ckernel_prefix *child = get_child_ckernel();
             expr_strided_t child_fn = child->get_function<expr_strided_t>();
             if (dst_d->begin == NULL) {
@@ -215,7 +215,7 @@ namespace {
         const var_dim_type_arrmeta *m_dst_md;
         intptr_t m_src_stride, m_src_dim_size;
 
-        inline void single(char *dst, const char *src)
+        inline void single(char *dst, char *src)
         {
             var_dim_type_data *dst_d = reinterpret_cast<var_dim_type_data *>(dst);
             ckernel_prefix *child = get_child_ckernel();
@@ -307,9 +307,9 @@ namespace {
         intptr_t m_dst_stride, m_dst_dim_size;
         const var_dim_type_arrmeta *m_src_md;
 
-        inline void single(char *dst, const char *src)
+        inline void single(char *dst, char *src)
         {
-            const var_dim_type_data *src_d = reinterpret_cast<const var_dim_type_data *>(src);
+            var_dim_type_data *src_d = reinterpret_cast<var_dim_type_data *>(src);
             ckernel_prefix *child = get_child_ckernel();
             expr_strided_t child_fn = child->get_function<expr_strided_t>();
             if (src_d->begin == NULL) {

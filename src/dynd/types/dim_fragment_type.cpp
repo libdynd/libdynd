@@ -176,7 +176,7 @@ ndt::type dim_fragment_type::apply_to_dtype(const ndt::type& dtp) const
 
 void dim_fragment_type::print_data(std::ostream &DYND_UNUSED(o),
                                 const char *DYND_UNUSED(arrmeta),
-                                const char *DYND_UNUSED(data)) const
+                                char *DYND_UNUSED(data)) const
 {
     throw type_error("Cannot store data of dim_fragment type");
 }

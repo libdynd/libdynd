@@ -1956,7 +1956,7 @@ nd::array nd::memmap(const std::string& filename,
     return result;
 }
 
-intptr_t nd::binary_search(const nd::array& n, const char *arrmeta, const char *data)
+intptr_t nd::binary_search(const nd::array& n, const char *arrmeta, char *data)
 {
     if (n.get_ndim() == 0) {
         stringstream ss;
@@ -1983,12 +1983,12 @@ intptr_t nd::binary_search(const nd::array& n, const char *arrmeta, const char *
             throw runtime_error(ss.str());
         }
 
-        const char *n_data = n.get_readonly_originptr();
+        char *n_data = n.get_readonly_originptr();
         intptr_t n_stride = reinterpret_cast<const fixed_dim_type_arrmeta *>(n.get_arrmeta())->stride;
         intptr_t first = 0, last = n.get_dim_size();
         while (first < last) {
             intptr_t trial = first + (last - first) / 2;
-            const char *trial_data = n_data + trial * n_stride;
+            char *trial_data = n_data + trial * n_stride;
 
             // In order for the data to always match up with the arrmeta, need to have
             // trial_data first and data second in the comparison operations.
@@ -2025,12 +2025,12 @@ intptr_t nd::binary_search(const nd::array& n, const char *arrmeta, const char *
             throw runtime_error(ss.str());
         }
 
-        const char *n_data = n.get_readonly_originptr();
+        char *n_data = n.get_readonly_originptr();
         intptr_t n_stride = reinterpret_cast<const fixed_dim_type_arrmeta *>(n.get_arrmeta())->stride;
         intptr_t first = 0, last = n.get_dim_size();
         while (first < last) {
             intptr_t trial = first + (last - first) / 2;
-            const char *trial_data = n_data + trial * n_stride;
+            char *trial_data = n_data + trial * n_stride;
 
             // In order for the data to always match up with the arrmeta, need to have
             // trial_data first and data second in the comparison operations.
@@ -2128,7 +2128,7 @@ nd::array nd::groupby(const nd::array& data_values, const nd::array& by_values, 
 }
 
 bool nd::is_scalar_avail(const ndt::type &tp, const char *arrmeta,
-                      const char *data, const eval::eval_context *ectx)
+                      char *data, const eval::eval_context *ectx)
 {
     if (tp.is_scalar()) {
         if (tp.get_type_id() == option_type_id) {

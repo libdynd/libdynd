@@ -32,7 +32,7 @@ struct strided_expr_kernel_extra {
     intptr_t size;
     intptr_t dst_stride, src_stride[N];
 
-    static void single(char *dst, const char * const *src,
+    static void single(char *dst, char **src,
                     ckernel_prefix *extra)
     {
         extra_type *e = reinterpret_cast<extra_type *>(extra);
@@ -42,7 +42,7 @@ struct strided_expr_kernel_extra {
     }
 
     static void strided(char *dst, intptr_t dst_stride,
-                    const char * const *src, const intptr_t *src_stride,
+                    char **src, const intptr_t *src_stride,
                     size_t count, ckernel_prefix *extra)
     {
         extra_type *e = reinterpret_cast<extra_type *>(extra);
@@ -50,7 +50,7 @@ struct strided_expr_kernel_extra {
         expr_strided_t opchild = echild->get_function<expr_strided_t>();
         intptr_t inner_size = e->size, inner_dst_stride = e->dst_stride;
         const intptr_t *inner_src_stride = e->src_stride;
-        const char *src_loop[N];
+        char *src_loop[N];
         memcpy(src_loop, src, sizeof(src_loop));
         for (size_t i = 0; i != count; ++i) {
             opchild(dst, inner_dst_stride, src_loop, inner_src_stride, inner_size, echild);
@@ -207,7 +207,7 @@ struct strided_or_var_to_strided_expr_kernel_extra {
     intptr_t dst_stride, src_stride[N], src_offset[N];
     bool is_src_var[N];
 
-    static void single(char *dst, const char * const *src,
+    static void single(char *dst, char **src,
                     ckernel_prefix *extra)
     {
         extra_type *e = reinterpret_cast<extra_type *>(extra);
@@ -215,11 +215,11 @@ struct strided_or_var_to_strided_expr_kernel_extra {
         expr_strided_t opchild = echild->get_function<expr_strided_t>();
         // Broadcast all the src 'var' dimensions to dst
         intptr_t dim_size = e->size;
-        const char *modified_src[N];
+        char *modified_src[N];
         intptr_t modified_src_stride[N];
         for (int i = 0; i < N; ++i) {
             if (e->is_src_var[i]) {
-                const var_dim_type_data *vddd = reinterpret_cast<const var_dim_type_data *>(src[i]);
+                var_dim_type_data *vddd = reinterpret_cast<var_dim_type_data *>(src[i]);
                 modified_src[i] = vddd->begin + e->src_offset[i];
                 if (vddd->size == 1) {
                     modified_src_stride[i] = 0;
@@ -238,10 +238,10 @@ struct strided_or_var_to_strided_expr_kernel_extra {
     }
 
     static void strided(char *dst, intptr_t dst_stride,
-                    const char * const *src, const intptr_t *src_stride,
+                    char **src, const intptr_t *src_stride,
                     size_t count, ckernel_prefix *extra)
     {
-        const char *src_loop[N];
+        char *src_loop[N];
         memcpy(src_loop, src, sizeof(src_loop));
         for (size_t i = 0; i != count; ++i) {
             single(dst, src_loop, extra);
@@ -411,7 +411,7 @@ struct strided_or_var_to_var_expr_kernel_extra {
     intptr_t dst_stride, dst_offset, src_stride[N], src_offset[N], src_size[N];
     bool is_src_var[N];
 
-    static void single(char *dst, const char * const *src,
+    static void single(char *dst, char **src,
                     ckernel_prefix *extra)
     {
         extra_type *e = reinterpret_cast<extra_type *>(extra);
@@ -421,7 +421,7 @@ struct strided_or_var_to_var_expr_kernel_extra {
         char *modified_dst;
         intptr_t modified_dst_stride = 0;
         intptr_t dim_size;
-        const char *modified_src[N];
+        char *modified_src[N];
         intptr_t modified_src_stride[N];
         if (dst_vddd->begin != NULL) {
             // If the destination already has allocated data, broadcast to that data
@@ -430,7 +430,7 @@ struct strided_or_var_to_var_expr_kernel_extra {
             dim_size = dst_vddd->size;
             for (int i = 0; i < N; ++i) {
                 if (e->is_src_var[i]) {
-                    const var_dim_type_data *vddd = reinterpret_cast<const var_dim_type_data *>(src[i]);
+                    var_dim_type_data *vddd = reinterpret_cast<var_dim_type_data *>(src[i]);
                     modified_src[i] = vddd->begin + e->src_offset[i];
                     if (vddd->size == 1) {
                         modified_src_stride[i] = 0;
@@ -458,7 +458,7 @@ struct strided_or_var_to_var_expr_kernel_extra {
             dim_size = 1;
             for (int i = 0; i < N; ++i) {
                 if (e->is_src_var[i]) {
-                    const var_dim_type_data *vddd = reinterpret_cast<const var_dim_type_data *>(src[i]);
+                    var_dim_type_data *vddd = reinterpret_cast<var_dim_type_data *>(src[i]);
                     modified_src[i] = vddd->begin + e->src_offset[i];
                     if (vddd->size == 1) {
                         modified_src_stride[i] = 0;
@@ -513,10 +513,10 @@ struct strided_or_var_to_var_expr_kernel_extra {
     }
 
     static void strided(char *dst, intptr_t dst_stride,
-                    const char * const *src, const intptr_t *src_stride,
+                    char **src, const intptr_t *src_stride,
                     size_t count, ckernel_prefix *extra)
     {
-        const char *src_loop[N];
+        char *src_loop[N];
         memcpy(src_loop, src, sizeof(src_loop));
         for (size_t i = 0; i != count; ++i) {
             single(dst, src_loop, extra);
