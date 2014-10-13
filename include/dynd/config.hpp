@@ -122,7 +122,6 @@ inline bool DYND_ISNAN(long double x) {
 # define DYND_RVALUE_REFS
 # define DYND_STATIC_ASSERT(value, message) static_assert(value, message)
 # define DYND_CXX_LAMBDAS
-# define DYND_CXX_VARIADIC_TEMPLATES
 
 #if _MSC_VER < 1700
 // Older than MSVC 2012
@@ -169,11 +168,12 @@ inline int signbit(double x)
 
 #if _MSC_VER >= 1700
 // MSVC 2012 and later
-#define DYND_USE_STD_ATOMIC
+# define DYND_USE_STD_ATOMIC
 #endif
 
 #if _MSC_VER >= 1800
 // MSVC 2013 and later
+# define DYND_CXX_VARIADIC_TEMPLATES
 
 // MSVC 2013 doesn't appear to support nested initializer lists
 // https://stackoverflow.com/questions/23965565/how-to-do-nested-initializer-lists-in-visual-c-2013
