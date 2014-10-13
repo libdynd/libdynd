@@ -4,11 +4,8 @@
 //
 // The categorical type always represents categorical data
 //
-#ifndef _DYND__CATEGORICAL_TYPE_HPP_
-#define _DYND__CATEGORICAL_TYPE_HPP_
-
-#include <map>
-#include <vector>
+#ifndef DYND__TYPES_CATEGORICAL_TYPE_HPP
+#define DYND__TYPES_CATEGORICAL_TYPE_HPP
 
 #include <dynd/type.hpp>
 #include <dynd/array.hpp>
@@ -30,9 +27,9 @@ class categorical_type : public base_type {
     // list of categories, in sorted order
     nd::array m_categories;
     // mapping from category indices to values
-    std::vector<intptr_t> m_category_index_to_value;
+    nd::array m_category_index_to_value;
     // mapping from values to category indices
-    std::vector<intptr_t> m_value_to_category_index;
+    nd::array m_value_to_category_index;
 
 public:
     categorical_type(const nd::array &categories, bool presorted = false);
@@ -72,14 +69,15 @@ public:
                                      const char *category_data) const;
     uint32_t get_value_from_category(const nd::array &category) const;
 
-    const char *get_category_data_from_value(size_t value) const {
-        if (value >= get_category_count()) {
-            throw std::runtime_error("category value is out of bounds");
-        }
-        return m_categories.get_readonly_originptr() +
-               m_value_to_category_index[value] *
-                   reinterpret_cast<const fixed_dim_type_arrmeta *>(
-                       m_categories.get_arrmeta())->stride;
+    const char *get_category_data_from_value(uint32_t value) const {
+      if (value >= get_category_count()) {
+        throw std::runtime_error("category value is out of bounds");
+      }
+      return m_categories.get_readonly_originptr() +
+             unchecked_fixed_dim_get<intptr_t>(m_value_to_category_index,
+                                               value) *
+                 reinterpret_cast<const fixed_dim_type_arrmeta *>(
+                     m_categories.get_arrmeta())->stride;
     }
     /** Returns the arrmeta corresponding to data from get_category_data_from_value */
     const char *get_category_arrmeta() const;
@@ -135,4 +133,4 @@ namespace init {
 
 } // namespace dynd
 
-#endif // _DYND__CATEGORICAL_TYPE_HPP_
+#endif // DYND__TYPES_CATEGORICAL_TYPE_HPP

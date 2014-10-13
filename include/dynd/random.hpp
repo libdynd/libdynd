@@ -4,33 +4,32 @@
 //
 
 #include <dynd/array.hpp>
-#include <dynd/array_iter.hpp>
 #include <dynd/types/dynd_complex.hpp>
 
 namespace dynd { namespace nd {
 
-/**
- * Primitive function to construct an nd::array with each element initialized
- * to a random value. This is used only for testing right now, and it should be 
- * completely redone at some point. Variable dimensions are supported. Only a dtype
- * of double is currently supported.
- */
-nd::array dtyped_rand(intptr_t ndim, const intptr_t *shape, const ndt::type &tp);
+  /**
+   * Primitive function to construct an nd::array with each element initialized
+   * to a random value. This is used only for testing right now, and it should
+   * be completely redone at some point.
+   */
+  nd::array rand(const ndt::type &tp);
 
-inline nd::array rand(intptr_t dim0, const ndt::type &tp) {
-    intptr_t dims[1] = {dim0};
+  inline nd::array rand(intptr_t dim0, const ndt::type &tp)
+  {
+    return rand(ndt::make_fixed_dim(dim0, tp));
+  }
 
-    return dtyped_rand(1, dims, tp);
-}
-inline nd::array rand(intptr_t dim0, intptr_t dim1, const ndt::type &tp) {
-    intptr_t dims[2] = {dim0, dim1};
+  inline nd::array rand(intptr_t dim0, intptr_t dim1, const ndt::type &tp)
+  {
+    return rand(ndt::make_fixed_dim(dim0, ndt::make_fixed_dim(dim1, tp)));
+  }
 
-    return dtyped_rand(2, dims, tp);
-}
-inline nd::array rand(intptr_t dim0, intptr_t dim1, intptr_t dim2, const ndt::type &tp) {
-    intptr_t dims[3] = {dim0, dim1, dim2};
-
-    return dtyped_rand(3, dims, tp);
-}
+  inline nd::array rand(intptr_t dim0, intptr_t dim1, intptr_t dim2,
+                        const ndt::type &tp)
+  {
+    return rand(ndt::make_fixed_dim(
+        dim0, ndt::make_fixed_dim(dim1, ndt::make_fixed_dim(dim2, tp))));
+  }
 
 }} // namespace dynd::nd

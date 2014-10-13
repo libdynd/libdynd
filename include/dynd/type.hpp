@@ -738,47 +738,77 @@ public:
     friend std::ostream& operator<<(std::ostream& o, const type& rhs);
 };
 
-template <typename T>
-struct type_from;
-
-template <typename T>
-struct type_from {
-    static type make() {
-        return type(static_cast<type_id_t>(type_id_of<T>::value));
-    }
-};
-
 // Forward declarations
-type make_pointer(const type& target_tp);
-type make_cfixed_dim(size_t size, const type& element_tp);
+type make_pointer(const type &target_tp);
+type make_cfixed_dim(size_t size, const type &element_tp);
 
-template <typename T>
-struct type_from<T *> {
-    static type make() {
-        return make_pointer(type_from<T>::make());
+namespace detail {
+  template <typename T>
+  struct exact_type_from;
+
+  template <typename T>
+  struct exact_type_from {
+    static type make()
+    {
+      return type(static_cast<type_id_t>(type_id_of<T>::value));
     }
-};
+  };
 
-template <typename T, int N>
-struct type_from<T[N]> {
-    static type make() {
-        return make_cfixed_dim(N, type_from<T>::make());
+  template <typename T>
+  struct exact_type_from<T *> {
+    static type make() { return make_pointer(exact_type_from<T>::make()); }
+  };
+
+  template <typename T, int N>
+  struct exact_type_from<T[N]> {
+    static type make()
+    {
+      return make_cfixed_dim(N, exact_type_from<T>::make());
     }
-};
+  };
 
-template <typename T, int N>
-struct type_from<nd::strided_vals<T, N> > {
-  static type make() { return make_fixed_sym_dim(type_from<T>::make(), N); }
-};
+  // The default implementation of type_from is exact_type_from, after
+  // which we add additional overloads
+  template <typename T>
+  struct type_from : public exact_type_from<T> {
+  };
+
+  template <>
+  struct type_from<bool> {
+    static type make() { return type(bool_type_id); }
+  };
+
+  template <typename T, int N>
+  struct type_from<nd::strided_vals<T, N> > {
+    static type make() { return make_fixed_sym_dim(type_from<T>::make(), N); }
+  };
+
+  template <typename T, int N>
+  struct type_from<T[N]> {
+    static type make()
+    {
+      return make_cfixed_dim(N, type_from<T>::make());
+    }
+  };
+
+} // namespace detail
 
 /**
  * Convenience function which makes an ndt::type
- * object from a template parameter.
+ * object from a template parameter. This includes
+ * convenience cases, where the memory layout of the given
+ * type may not precisely match that of T.
  */
 template<class T>
 type make_type()
 {
-    return type_from<T>::make();
+  return detail::type_from<T>::make();
+}
+
+template<class T>
+type make_exact_type()
+{
+  return detail::exact_type_from<T>::make();
 }
 
 /**
@@ -791,7 +821,24 @@ type make_type()
  * \param shape  The shape of the array type to create.
  * \param dtype  The data type of each array element.
  */
-type make_type(intptr_t ndim, const intptr_t *shape, const ndt::type& dtype);
+type make_type(intptr_t ndim, const intptr_t *shape, const ndt::type &dtype);
+
+/**
+ * Constructs an array type from a shape and
+ * a data type specified as a string. Each dimension >= 0 is made
+ * using a fixed_dim type, and each dimension == -1
+ * is made using a var_dim type.
+ *
+ * \param ndim   The number of dimensions in the shape
+ * \param shape  The shape of the array type to create.
+ * \param dtype  The data type of each array element.
+ */
+template <int N>
+inline type make_type(intptr_t ndim, const intptr_t *shape,
+                      const char (&dtype)[N])
+{
+  return make_type(ndim, shape, ndt::type(dtype));
+}
 
 /**
 * Constructs an array type from a shape and
@@ -807,7 +854,8 @@ type make_type(intptr_t ndim, const intptr_t *shape, const ndt::type& dtype);
 *                     is encountered, it is untouched, so the caller
 *                     should initialize it to false.
 */
-type make_type(intptr_t ndim, const intptr_t *shape, const ndt::type& dtype, bool& out_any_var);
+type make_type(intptr_t ndim, const intptr_t *shape, const ndt::type &dtype,
+               bool &out_any_var);
 
 /**
  * A static array of the builtin types and void.

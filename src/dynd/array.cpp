@@ -1880,39 +1880,44 @@ nd::array nd::concatenate(const nd::array &x, const nd::array &y) {
     return res;
 }
 
-nd::array nd::reshape(const nd::array &a, const nd::array &shape) {
-    intptr_t ndim = shape.get_dim_size();
+nd::array nd::reshape(const nd::array &a, const nd::array &shape)
+{
+  intptr_t ndim = shape.get_dim_size();
 
-    intptr_t old_ndim = a.get_ndim();
-    dimvector old_shape(old_ndim);
-    a.get_shape(old_shape.get());
+  intptr_t old_ndim = a.get_ndim();
+  dimvector old_shape(old_ndim);
+  a.get_shape(old_shape.get());
 
-    intptr_t old_size = 1;
-    for (intptr_t i = 0; i < old_ndim; ++i) {
-        old_size *= old_shape[i];
-    }
-    intptr_t size = 1;
-    for (intptr_t i = 0; i < ndim; ++i) {
-        size *= shape(i).as<intptr_t>();
-    }
+  intptr_t old_size = 1;
+  for (intptr_t i = 0; i < old_ndim; ++i) {
+    old_size *= old_shape[i];
+  }
+  intptr_t size = 1;
+  for (intptr_t i = 0; i < ndim; ++i) {
+    size *= shape(i).as<intptr_t>();
+  }
 
-    if (old_size != size) {
-        throw std::runtime_error("reshape: total size of new array must be unchanged");
-    }
+  if (old_size != size) {
+    stringstream ss;
+    ss << "dynd reshape: cannot reshape to a different total number of "
+          "elements, from " << old_size << " to " << size;
+    throw invalid_argument(ss.str());
+  }
 
-    dimvector strides(ndim);
-    strides[ndim - 1] = a.get_dtype().get_data_size();
-    for (intptr_t i = ndim - 2; i >= 0; --i) {
-        strides[i] = shape(i + 1).as<intptr_t>() * strides[i + 1];
-    }
+  dimvector strides(ndim);
+  strides[ndim - 1] = a.get_dtype().get_data_size();
+  for (intptr_t i = ndim - 2; i >= 0; --i) {
+    strides[i] = shape(i + 1).as<intptr_t>() * strides[i + 1];
+  }
 
-    dimvector shape_copy(ndim);
-    for (intptr_t i = 0; i < ndim; ++i) {
-        shape_copy[i] = shape(i).as<intptr_t>();
-    }
+  dimvector shape_copy(ndim);
+  for (intptr_t i = 0; i < ndim; ++i) {
+    shape_copy[i] = shape(i).as<intptr_t>();
+  }
 
-    return make_strided_array_from_data(a.get_dtype(), ndim, shape_copy.get(), strides.get(),
-        a.get_flags(), a.get_readwrite_originptr(), a.get_memblock(), NULL);
+  return make_strided_array_from_data(
+      a.get_dtype(), ndim, shape_copy.get(), strides.get(), a.get_flags(),
+      a.get_readwrite_originptr(), a.get_memblock(), NULL);
 }
 
 nd::array nd::memmap(const std::string& filename,

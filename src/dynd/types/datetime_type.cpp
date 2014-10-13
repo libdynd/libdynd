@@ -285,32 +285,8 @@ static nd::array function_type_construct(const ndt::type& DYND_UNUSED(dt),
                 const nd::array& DYND_UNUSED(month),
                 const nd::array& DYND_UNUSED(day))
 {
-    throw runtime_error("dynd type datetime __construct__");
-    /*
-    // TODO proper buffering
-    nd::array year_as_int = year.ucast(ndt::make_type<int32_t>()).eval();
-    nd::array month_as_int = month.ucast(ndt::make_type<int32_t>()).eval();
-    nd::array day_as_int = day.ucast(ndt::make_type<int32_t>()).eval();
-    nd::array result;
-
-    array_iter<1,3> iter(ndt::make_datetime(), result, year_as_int, month_as_int, day_as_int);
-    if (!iter.empty()) {
-        datetime_struct dts;
-        do {
-            ymd.year = *reinterpret_cast<const int32_t *>(iter.data<1>());
-            ymd.month = *reinterpret_cast<const int32_t *>(iter.data<2>());
-            ymd.day = *reinterpret_cast<const int32_t *>(iter.data<3>());
-            if (!ymd.is_valid()) {
-                stringstream ss;
-                ss << "invalid year/month/day " << ymd.year << "/" << ymd.month << "/" << ymd.day;
-                throw runtime_error(ss.str());
-            }
-            *reinterpret_cast<int64_t *>(iter.data<0>()) = dts.to_ticks();
-        } while (iter.next());
-    }
-
-    return result;
-    */
+  throw runtime_error("dynd type datetime __construct__");
+  // Make this like the date version
 }
 
 void datetime_type::get_dynamic_type_functions(const std::pair<std::string, gfunc::callable> **out_functions, size_t *out_count) const
