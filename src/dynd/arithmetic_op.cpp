@@ -6,7 +6,6 @@
 #include <sstream>
 
 #include <dynd/array.hpp>
-#include <dynd/array_iter.hpp>
 #include <dynd/type_promotion.hpp>
 #include <dynd/kernels/expr_kernel_generator.hpp>
 #include <dynd/kernels/elwise_expr_kernels.hpp>

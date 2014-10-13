@@ -20,6 +20,8 @@
 #include <dynd/kernels/string_assignment_kernels.hpp>
 #include <dynd/kernels/assignment_kernels.hpp>
 #include <dynd/kernels/date_adapter_kernels.hpp>
+#include <dynd/func/lift_arrfunc.hpp>
+#include <dynd/func/functor_arrfunc.hpp>
 #include <dynd/exceptions.hpp>
 #include <dynd/func/make_callable.hpp>
 #include <dynd/array_iter.hpp>
@@ -205,32 +207,33 @@ static nd::array function_type_today(const ndt::type& dt) {
     return result;
 }
 
+static int32_t date_from_ymd(int year, int month, int day)
+{
+  date_ymd ymd;
+  ymd.year = year;
+  ymd.month = month;
+  ymd.day = day;
+  if (!ymd.is_valid()) {
+    stringstream ss;
+    ss << "invalid year/month/day " << ymd.year << "/" << ymd.month << "/"
+       << ymd.day;
+    throw runtime_error(ss.str());
+  }
+  return ymd.to_days();
+}
+
 static nd::array function_type_construct(const ndt::type& DYND_UNUSED(dt),
                 const nd::array& year, const nd::array& month, const nd::array& day)
 {
-    // TODO proper buffering
-    nd::array year_as_int = year.ucast(ndt::make_type<int32_t>()).eval();
-    nd::array month_as_int = month.ucast(ndt::make_type<int32_t>()).eval();
-    nd::array day_as_int = day.ucast(ndt::make_type<int32_t>()).eval();
-    nd::array result;
+  // TODO proper buffering
+  nd::array year_as_int = year.ucast(ndt::make_type<int32_t>()).eval();
+  nd::array month_as_int = month.ucast(ndt::make_type<int32_t>()).eval();
+  nd::array day_as_int = day.ucast(ndt::make_type<int32_t>()).eval();
 
-    array_iter<1,3> iter(ndt::make_date(), result, year_as_int, month_as_int, day_as_int);
-    if (!iter.empty()) {
-        date_ymd ymd;
-        do {
-            ymd.year = *reinterpret_cast<const int32_t *>(iter.data<1>());
-            ymd.month = *reinterpret_cast<const int32_t *>(iter.data<2>());
-            ymd.day = *reinterpret_cast<const int32_t *>(iter.data<3>());
-            if (!ymd.is_valid()) {
-                stringstream ss;
-                ss << "invalid year/month/day " << ymd.year << "/" << ymd.month << "/" << ymd.day;
-                throw runtime_error(ss.str());
-            }
-            *reinterpret_cast<int32_t *>(iter.data<0>()) = ymd.to_days();
-        } while (iter.next());
-    }
+  nd::arrfunc af = lift_arrfunc(nd::make_functor_arrfunc(date_from_ymd));
 
-    return result;
+  return af(year_as_int, month_as_int, day_as_int)
+      .view_scalars(ndt::make_date());
 }
 
 void date_type::get_dynamic_type_functions(const std::pair<std::string, gfunc::callable> **out_functions, size_t *out_count) const
