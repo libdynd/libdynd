@@ -370,7 +370,7 @@ public:
      * \returns  The type that results from the indexing operation.
      */
     virtual ndt::type at_single(intptr_t i0, const char **inout_arrmeta,
-                                char **inout_data) const;
+                                const char **inout_data) const;
 
     /**
      * Retrieves the type starting at the requested dimension. This is

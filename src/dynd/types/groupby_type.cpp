@@ -135,7 +135,7 @@ namespace {
             ndt::type data_values_tp = gd->get_operand_type();
             const char *data_values_arrmeta = e->src_arrmeta;
             char *data_values_data = src;
-            data_values_tp = data_values_tp.extended()->at_single(0, &data_values_arrmeta, &data_values_data);
+            data_values_tp = data_values_tp.extended()->at_single(0, &data_values_arrmeta, const_cast<const char **>(&data_values_data));
             data_values_tp = data_values_tp.tcast<pointer_type>()->get_target_type();
             data_values_arrmeta += sizeof(pointer_type_arrmeta);
             data_values_data = *reinterpret_cast<char **>(data_values_data);
@@ -144,7 +144,7 @@ namespace {
             ndt::type by_values_tp = gd->get_operand_type();
             const char *by_values_arrmeta = e->src_arrmeta;
             char *by_values_data = src;
-            by_values_tp = by_values_tp.extended()->at_single(1, &by_values_arrmeta, &by_values_data);
+            by_values_tp = by_values_tp.extended()->at_single(1, &by_values_arrmeta, const_cast<const char **>(&by_values_data));
             by_values_tp = by_values_tp.tcast<pointer_type>()->get_target_type();
             by_values_arrmeta += sizeof(pointer_type_arrmeta);
             by_values_data = *reinterpret_cast<char **>(by_values_data);

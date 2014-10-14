@@ -147,7 +147,7 @@ intptr_t pointer_type::apply_linear_index(
 }
 
 ndt::type pointer_type::at_single(intptr_t i0, const char **inout_arrmeta,
-                                  char **inout_data) const
+                                  const char **inout_data) const
 {
     // If arrmeta/data is provided, follow the pointer and call the target
     // type's at_single
@@ -159,7 +159,7 @@ ndt::type pointer_type::at_single(intptr_t i0, const char **inout_arrmeta,
         // If requested, modify the data pointer
         if (inout_data) {
             *inout_data =
-                *reinterpret_cast<char **>(inout_data) + md->offset;
+                *reinterpret_cast<const char *const *>(inout_data) + md->offset;
         }
     }
     // In at_single, we can't maintain a pointer wrapper, this would result in

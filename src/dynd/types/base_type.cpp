@@ -96,7 +96,7 @@ intptr_t base_type::apply_linear_index(
 
 ndt::type base_type::at_single(intptr_t DYND_UNUSED(i0),
                                const char **DYND_UNUSED(inout_arrmeta),
-                               char **DYND_UNUSED(inout_data)) const
+                               const char **DYND_UNUSED(inout_data)) const
 {
     // Default to scalar behavior
     throw too_many_indices(ndt::type(this, true), 1, 0);

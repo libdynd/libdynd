@@ -89,7 +89,7 @@ ndt::type fixed_sym_dim_type::get_canonical_type() const
 ndt::type
 fixed_sym_dim_type::at_single(intptr_t DYND_UNUSED(i0),
                               const char **DYND_UNUSED(inout_arrmeta),
-                              char **DYND_UNUSED(inout_data)) const
+                              const char **DYND_UNUSED(inout_data)) const
 {
   return m_element_tp;
 }

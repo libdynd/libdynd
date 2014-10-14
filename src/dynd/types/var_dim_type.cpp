@@ -284,7 +284,7 @@ intptr_t var_dim_type::apply_linear_index(intptr_t nindices, const irange *indic
     }
 }
 
-ndt::type var_dim_type::at_single(intptr_t i0, const char **inout_arrmeta, char **inout_data) const
+ndt::type var_dim_type::at_single(intptr_t i0, const char **inout_arrmeta, const char **inout_data) const
 {
     if (inout_arrmeta) {
         const var_dim_type_arrmeta *md = reinterpret_cast<const var_dim_type_arrmeta *>(*inout_arrmeta);
