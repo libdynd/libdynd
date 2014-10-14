@@ -81,6 +81,7 @@ set(tests_SRC
     func/test_rolling.cpp
     func/test_special.cpp
     func/test_take.cpp
+	func/test_take_by_pointer.cpp
     array/test_array.cpp
     array/test_array_range.cpp
     array/test_array_assign.cpp

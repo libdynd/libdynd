@@ -1,5 +1,5 @@
 //
-// Copyright (C) 2011-14 Mark Wiebe, DyND Developers
+// Copyright (C) 2011-14 Mark Wiebe, Irwin Zaid, DyND Developers
 // BSD 2-Clause License, see LICENSE.txt
 //
 
@@ -17,6 +17,7 @@
 #define _DYND__POINTER_TYPE_HPP_
 
 #include <dynd/type.hpp>
+#include <dynd/kernels/pointer_assignment_kernels.hpp>
 #include <dynd/types/void_pointer_type.hpp>
 
 namespace dynd {

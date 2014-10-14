@@ -325,6 +325,7 @@ set(libdynd_SRC
     src/dynd/func/multidispatch_arrfunc.cpp
     src/dynd/func/rolling_arrfunc.cpp
     src/dynd/func/take_arrfunc.cpp
+    src/dynd/func/take_by_pointer_arrfunc.cpp
     include/dynd/func/arrfunc.hpp
     include/dynd/func/arrfunc_registry.hpp
     include/dynd/func/callable.hpp
@@ -343,6 +344,7 @@ set(libdynd_SRC
     include/dynd/func/multidispatch_arrfunc.hpp
     include/dynd/func/rolling_arrfunc.hpp
     include/dynd/func/take_arrfunc.hpp
+    include/dynd/func/take_by_pointer_arrfunc.hpp
     # Iter
     src/dynd/iter/string_iter.cpp
     include/dynd/iter/string_iter.hpp
@@ -368,6 +370,7 @@ set(libdynd_SRC
     src/dynd/kernels/make_lifted_reduction_ckernel.cpp
     src/dynd/kernels/option_assignment_kernels.cpp
     src/dynd/kernels/option_kernels.cpp
+    src/dynd/kernels/pointer_assignment_kernels.cpp
     src/dynd/kernels/reduction_kernels.cpp
     src/dynd/kernels/string_assignment_kernels.cpp
     src/dynd/kernels/string_algorithm_kernels.cpp
@@ -407,6 +410,7 @@ set(libdynd_SRC
     include/dynd/kernels/make_lifted_reduction_ckernel.hpp
     include/dynd/kernels/option_assignment_kernels.hpp
     include/dynd/kernels/option_kernels.hpp
+    include/dynd/kernels/pointer_assignment_kernels.hpp
     include/dynd/kernels/reduction_kernels.hpp
     include/dynd/kernels/string_assignment_kernels.hpp
     include/dynd/kernels/string_algorithm_kernels.hpp
