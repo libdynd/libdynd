@@ -46,7 +46,7 @@ TEST(ArrFunc, Assignment) {
     char str_in[16] = "3251";
     const char *str_in_ptr = str_in;
     expr_single_t usngo = ckb.get()->get_function<expr_single_t>();
-    usngo(reinterpret_cast<char *>(&int_out), const_cast<char **>(&str_in_ptr), ckb.get()); // TODO: CHECK THIS
+    usngo(reinterpret_cast<char *>(&int_out), const_cast<char **>(&str_in_ptr), ckb.get());
     EXPECT_EQ(3251, int_out);
 
     // Instantiate a strided ckernel
@@ -59,7 +59,7 @@ TEST(ArrFunc, Assignment) {
     const char *strs_in_ptr = strs_in[0];
     expr_strided_t ustro = ckb.get()->get_function<expr_strided_t>();
     intptr_t strs_in_stride = sizeof(strs_in[0]);
-    ustro(reinterpret_cast<char *>(&ints_out), sizeof(int), const_cast<char **>(&strs_in_ptr), // TODO: CHECK THIS
+    ustro(reinterpret_cast<char *>(&ints_out), sizeof(int), const_cast<char **>(&strs_in_ptr),
           &strs_in_stride, 3, ckb.get());
     EXPECT_EQ(123, ints_out[0]);
     EXPECT_EQ(4567, ints_out[1]);
@@ -114,7 +114,7 @@ TEST(ArrFunc, Property) {
     int date_in = date_ymd::to_days(2013, 12, 30);
     const char *date_in_ptr = reinterpret_cast<const char *>(&date_in);
     expr_single_t usngo = ckb.get()->get_function<expr_single_t>();
-    usngo(reinterpret_cast<char *>(&int_out), const_cast<char **>(&date_in_ptr), ckb.get()); // TODO: CHECK THIS
+    usngo(reinterpret_cast<char *>(&int_out), const_cast<char **>(&date_in_ptr), ckb.get());
     EXPECT_EQ(2013, int_out);
 }
 
