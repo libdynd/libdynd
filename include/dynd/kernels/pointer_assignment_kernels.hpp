@@ -27,5 +27,5 @@ size_t make_value_to_pointer_assignment_kernel(
 
 } // namespace dynd
 
-#endif // _DYND__DATE_ASSIGNMENT_KERNELS_HPP_
+#endif // _DYND__POINTER_ASSIGNMENT_KERNELS_HPP_
 
