@@ -297,7 +297,7 @@ struct strided_inner_reduction_kernel_extra {
     intptr_t src_stride;
     size_t dst_init_kernel_offset;
     // For the case with a reduction identity
-    char *ident_data;
+    const char *ident_data;
     memory_block_data *ident_ref;
 
     inline ckernel_prefix& base() {
@@ -337,7 +337,7 @@ struct strided_inner_reduction_kernel_extra {
             echild_ident->get_function<expr_single_t>();
         expr_strided_t opchild_reduce =
             echild_reduce->get_function<expr_strided_t>();
-        opchild_ident(dst, &e->ident_data, echild_ident);
+        opchild_ident(dst, const_cast<char **>(&e->ident_data), echild_ident);
         // All the followup calls to accumulate at the "dst" address
         opchild_reduce(dst, 0, src, &e->src_stride, e->size,
                        &echild_reduce->base());
@@ -402,14 +402,14 @@ struct strided_inner_reduction_kernel_extra {
                             reinterpret_cast<char *>(extra) + e->dst_init_kernel_offset);
         expr_single_t opchild_ident = echild_ident->get_function<expr_single_t>();
         expr_strided_t opchild_reduce = echild_reduce->get_function<expr_strided_t>();
-        char *ident_data = e->ident_data;
+        const char *ident_data = e->ident_data;
         intptr_t inner_size = e->size;
         intptr_t inner_src_stride = e->src_stride;
         char *src0 = src[0];
         intptr_t src0_stride = src_stride[0];
         if (dst_stride == 0) {
             // With a zero stride, we initialize "dst" once, then do many accumulations
-            opchild_ident(dst, &ident_data, echild_ident);
+            opchild_ident(dst, const_cast<char **>(&ident_data), echild_ident);
             for (intptr_t i = 0; i < (intptr_t)count; ++i) {
                 opchild_reduce(dst, 0, &src0, &inner_src_stride, inner_size,
                                &echild_reduce->base());
@@ -420,7 +420,7 @@ struct strided_inner_reduction_kernel_extra {
             // With a non-zero stride, each iteration of the outer loop has to
             // initialize then reduce
             for (size_t i = 0; i != count; ++i) {
-                opchild_ident(dst, &ident_data, echild_ident);
+                opchild_ident(dst, const_cast<char **>(&ident_data), echild_ident);
                 opchild_reduce(dst, 0, &src0, &inner_src_stride, inner_size,
                                &echild_reduce->base());
                 dst += dst_stride;
@@ -486,7 +486,7 @@ struct strided_inner_broadcast_kernel_extra {
     intptr_t dst_stride, src_stride;
     size_t dst_init_kernel_offset;
     // For the case with a reduction identity
-    char *ident_data;
+    const char *ident_data;
     memory_block_data *ident_ref;
 
     inline ckernel_prefix& base() {
@@ -519,7 +519,7 @@ struct strided_inner_broadcast_kernel_extra {
         // First initialize the dst values (TODO: Do we want to do initialize/reduce in
         // blocks instead of just one then the other?)
         intptr_t zero_stride = 0;
-        opchild_ident(dst, e->dst_stride, &e->ident_data, &zero_stride, e->size,
+        opchild_ident(dst, e->dst_stride, const_cast<char **>(&e->ident_data), &zero_stride, e->size,
                       echild_ident);
         // Then do the accumulation
         opchild_reduce(dst, e->dst_stride, src, &e->src_stride, e->size,
@@ -584,7 +584,7 @@ struct strided_inner_broadcast_kernel_extra {
             // With a zero stride, we initialize "dst" once, then do many
             // accumulations
             intptr_t zero_stride = 0;
-            opchild_ident(dst, inner_dst_stride, &e->ident_data, &zero_stride,
+            opchild_ident(dst, inner_dst_stride, const_cast<char **>(&e->ident_data), &zero_stride,
                           e->size, echild_ident);
             for (intptr_t i = 0; i < (intptr_t)count; ++i) {
                 opchild_reduce(dst, inner_dst_stride, &src0, &inner_src_stride,
@@ -595,7 +595,7 @@ struct strided_inner_broadcast_kernel_extra {
             intptr_t zero_stride = 0;
             // With a non-zero stride, every iteration is an initialization
             for (size_t i = 0; i != count; ++i) {
-                opchild_ident(dst, inner_dst_stride, &e->ident_data,
+                opchild_ident(dst, inner_dst_stride, const_cast<char **>(&e->ident_data),
                               &zero_stride, inner_size, echild_ident);
                 opchild_reduce(dst, inner_dst_stride, &src0, &inner_src_stride,
                                inner_size, echild_reduce);
@@ -786,7 +786,7 @@ static size_t make_strided_inner_reduction_dimension_kernel(
       ss << dst_tp;
       throw runtime_error(ss.str());
     }
-    e->ident_data = const_cast<char *>(reduction_identity.get_readonly_originptr());
+    e->ident_data = reduction_identity.get_readonly_originptr();
     e->ident_ref = reduction_identity.get_memblock().release();
   }
   // The function pointer for followup accumulation calls
@@ -917,7 +917,7 @@ static size_t make_strided_inner_broadcast_dimension_kernel(
       ss << dst_tp;
       throw runtime_error(ss.str());
     }
-    e->ident_data = const_cast<char *>(reduction_identity.get_readonly_originptr());
+    e->ident_data = reduction_identity.get_readonly_originptr();
     e->ident_ref = reduction_identity.get_memblock().release();
   }
   // The function pointer for followup accumulation calls
