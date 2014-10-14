@@ -52,7 +52,7 @@ namespace {
             }
         }
 
-        inline char *buffer_operand(const single_buffer& b, char *src)
+        inline const char *buffer_operand(const single_buffer& b, const char *src)
         {
             char *eraw = reinterpret_cast<char *>(this);
             char *dst = eraw + b.data_offset;
@@ -67,15 +67,15 @@ namespace {
             expr_single_t opchild;
             echild = reinterpret_cast<ckernel_prefix *>(eraw + b.kernel_offset);
             opchild = echild->get_function<expr_single_t>();
-            opchild(dst, &src, echild);
+            opchild(dst, const_cast<char **>(&src), echild);
 
             // Return the buffer
             return dst;
         }
 
-        static int kernel(char **src, ckernel_prefix *extra)
+        static int kernel(const char *const *src, ckernel_prefix *extra)
         {
-            char *src_buffered[2];
+            const char *src_buffered[2];
             char *eraw = reinterpret_cast<char *>(extra);
             extra_type *e = reinterpret_cast<extra_type *>(extra);
             // Buffer the first operand if necessary

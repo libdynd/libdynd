@@ -157,7 +157,7 @@ namespace {
                                                 by_values_data);
               by_values_tp = by_values_tmp.get_type();
               by_values_arrmeta = by_values_tmp.get_arrmeta();
-              by_values_data = by_values_tmp.get_readonly_originptr();
+              by_values_data = const_cast<char *>(by_values_tmp.get_readonly_originptr());
             }
 
             // Get a strided representation of by_values for processing

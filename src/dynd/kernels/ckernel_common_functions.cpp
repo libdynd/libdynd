@@ -61,7 +61,7 @@ size_t kernels::make_constant_value_assignment_ckernel(
   self_type *self = self_type::create(ckb, kernreq, ckb_offset);
   // Store the constant data
   self->m_constant = constant.cast(dst_tp).eval_immutable(ectx);
-  self->m_constant_data = self->m_constant.get_readonly_originptr();
+  self->m_constant_data = const_cast<char *>(self->m_constant.get_readonly_originptr());
   // Create the child assignment ckernel
   return make_assignment_kernel(ckb, ckb_offset, dst_tp, dst_arrmeta,
                                 self->m_constant.get_type(),

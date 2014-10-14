@@ -238,7 +238,7 @@ TEST(VarArrayDType, AssignKernel) {
     make_assignment_kernel(&k, 0, a.get_type(), a.get_arrmeta(), b.get_type(),
                            b.get_arrmeta(), kernel_request_single,
                            &eval::default_eval_context);
-    k(a.get_readwrite_originptr(), b.get_readonly_originptr());
+    k(a.get_readwrite_originptr(), const_cast<char *>(b.get_readonly_originptr()));
     ASSERT_EQ(1, a(irange()).get_shape()[0]);
     EXPECT_EQ(9, a(0).as<int>());
     k.reset();
@@ -251,7 +251,7 @@ TEST(VarArrayDType, AssignKernel) {
     make_assignment_kernel(&k, 0, a.get_type(), a.get_arrmeta(), b.get_type(),
                            b.get_arrmeta(), kernel_request_single,
                            &eval::default_eval_context);
-    k(a.get_readwrite_originptr(), b.get_readonly_originptr());
+    k(a.get_readwrite_originptr(), const_cast<char *>(b.get_readonly_originptr()));
     ASSERT_EQ(3, a(irange()).get_shape()[0]);
     EXPECT_EQ(9, a(0).as<int>());
     EXPECT_EQ(9, a(1).as<int>());
@@ -266,7 +266,7 @@ TEST(VarArrayDType, AssignKernel) {
     make_assignment_kernel(&k, 0, a.get_type(), a.get_arrmeta(), b.get_type(),
                            b.get_arrmeta(), kernel_request_single,
                            &eval::default_eval_context);
-    k(a.get_readwrite_originptr(), b.get_readonly_originptr());
+    k(a.get_readwrite_originptr(), const_cast<char *>(b.get_readonly_originptr()));
     ASSERT_EQ(3, a(irange()).get_shape()[0]);
     EXPECT_EQ(3, a(0).as<int>());
     EXPECT_EQ(5, a(1).as<int>());
@@ -282,7 +282,7 @@ TEST(VarArrayDType, AssignKernel) {
     make_assignment_kernel(&k, 0, a.get_type(), a.get_arrmeta(), b.get_type(),
                            b.get_arrmeta(), kernel_request_single,
                            &eval::default_eval_context);
-    k(a.get_readwrite_originptr(), b.get_readonly_originptr());
+    k(a.get_readwrite_originptr(), const_cast<char *>(b.get_readonly_originptr()));
     ASSERT_EQ(3, a(irange()).get_shape()[0]);
     EXPECT_EQ(3, a(0).as<int>());
     EXPECT_EQ(5, a(1).as<int>());
@@ -298,7 +298,7 @@ TEST(VarArrayDType, AssignKernel) {
     make_assignment_kernel(&k, 0, a.get_type(), a.get_arrmeta(), b.get_type(),
                            b.get_arrmeta(), kernel_request_single,
                            &eval::default_eval_context);
-    k(a.get_readwrite_originptr(), b.get_readonly_originptr());
+    k(a.get_readwrite_originptr(), const_cast<char *>(b.get_readonly_originptr()));
     ASSERT_EQ(3, a(irange()).get_shape()[0]);
     EXPECT_EQ(9, a(0).as<int>());
     EXPECT_EQ(9, a(1).as<int>());
@@ -313,7 +313,7 @@ TEST(VarArrayDType, AssignKernel) {
     make_assignment_kernel(&k, 0, a.get_type(), a.get_arrmeta(), b.get_type(),
                            b.get_arrmeta(), kernel_request_single,
                            &eval::default_eval_context);
-    k(a.get_readwrite_originptr(), b.get_readonly_originptr());
+    k(a.get_readwrite_originptr(), const_cast<char *>(b.get_readonly_originptr()));
     // No error, a is still uninitialized
     k.reset();
 
@@ -337,7 +337,7 @@ TEST(VarArrayDType, AssignKernel) {
                            b.get_arrmeta(), kernel_request_single,
                            &eval::default_eval_context);
     EXPECT_THROW(k(a.get_readwrite_originptr(),
-                        b.get_readonly_originptr()),
+                        const_cast<char *>(b.get_readonly_originptr())),
                     broadcast_error);
     k.reset();
 }
@@ -355,7 +355,7 @@ TEST(VarArrayDType, AssignVarStridedKernel) {
     make_assignment_kernel(&k, 0, a.get_type(), a.get_arrmeta(), b.get_type(),
                            b.get_arrmeta(), kernel_request_single,
                            &eval::default_eval_context);
-    k(a.get_readwrite_originptr(), b.get_readonly_originptr());
+    k(a.get_readwrite_originptr(), const_cast<char *>(b.get_readonly_originptr()));
     ASSERT_EQ(3, a(irange()).get_shape()[0]);
     EXPECT_EQ(3, a(0).as<int>());
     EXPECT_EQ(5, a(1).as<int>());
@@ -371,7 +371,7 @@ TEST(VarArrayDType, AssignVarStridedKernel) {
     make_assignment_kernel(&k, 0, a.get_type(), a.get_arrmeta(), b.get_type(),
                            b.get_arrmeta(), kernel_request_single,
                            &eval::default_eval_context);
-    k(a.get_readwrite_originptr(), b.get_readonly_originptr());
+    k(a.get_readwrite_originptr(), const_cast<char *>(b.get_readonly_originptr()));
     ASSERT_EQ(3, a(irange()).get_shape()[0]);
     EXPECT_EQ(3, a(0).as<int>());
     EXPECT_EQ(5, a(1).as<int>());
@@ -388,7 +388,7 @@ TEST(VarArrayDType, AssignVarStridedKernel) {
                            b.get_arrmeta(), kernel_request_single,
                            &eval::default_eval_context);
     EXPECT_THROW(k(a.get_readwrite_originptr(),
-                        b.get_readonly_originptr()),
+                        const_cast<char *>(b.get_readonly_originptr())),
                     broadcast_error);
     k.reset();
 
@@ -401,7 +401,7 @@ TEST(VarArrayDType, AssignVarStridedKernel) {
     make_assignment_kernel(&k, 0, a.get_type(), a.get_arrmeta(), b.get_type(),
                            b.get_arrmeta(), kernel_request_single,
                            &eval::default_eval_context);
-    k(a.get_readwrite_originptr(), b.get_readonly_originptr());
+    k(a.get_readwrite_originptr(), const_cast<char *>(b.get_readonly_originptr()));
     EXPECT_EQ(3, a(0).as<int>());
     EXPECT_EQ(5, a(1).as<int>());
     EXPECT_EQ(7, a(2).as<int>());
@@ -417,7 +417,7 @@ TEST(VarArrayDType, AssignVarStridedKernel) {
                            b.get_arrmeta(), kernel_request_single,
                            &eval::default_eval_context);
     EXPECT_THROW(k(a.get_readwrite_originptr(),
-                        b.get_readonly_originptr()),
+                        const_cast<char *>(b.get_readonly_originptr())),
                     broadcast_error);
     k.reset();
 
@@ -431,7 +431,7 @@ TEST(VarArrayDType, AssignVarStridedKernel) {
                            b.get_arrmeta(), kernel_request_single,
                            &eval::default_eval_context);
     EXPECT_THROW(k(a.get_readwrite_originptr(),
-                        b.get_readonly_originptr()),
+                        const_cast<char *>(b.get_readonly_originptr())),
                     runtime_error);
     k.reset();
 }
@@ -448,7 +448,7 @@ TEST(VarArrayDType, AssignVarFixedKernel) {
     make_assignment_kernel(&k, 0, a.get_type(), a.get_arrmeta(), b.get_type(),
                            b.get_arrmeta(), kernel_request_single,
                            &eval::default_eval_context);
-    k(a.get_readwrite_originptr(), b.get_readonly_originptr());
+    k(a.get_readwrite_originptr(), const_cast<char *>(b.get_readonly_originptr()));
     ASSERT_EQ(3, a(irange()).get_shape()[0]);
     EXPECT_EQ(3, a(0).as<int>());
     EXPECT_EQ(5, a(1).as<int>());
@@ -464,7 +464,7 @@ TEST(VarArrayDType, AssignVarFixedKernel) {
     make_assignment_kernel(&k, 0, a.get_type(), a.get_arrmeta(), b.get_type(),
                            b.get_arrmeta(), kernel_request_single,
                            &eval::default_eval_context);
-    k(a.get_readwrite_originptr(), b.get_readonly_originptr());
+    k(a.get_readwrite_originptr(), const_cast<char *>(b.get_readonly_originptr()));
     ASSERT_EQ(3, a(irange()).get_shape()[0]);
     EXPECT_EQ(3, a(0).as<int>());
     EXPECT_EQ(5, a(1).as<int>());
@@ -481,7 +481,7 @@ TEST(VarArrayDType, AssignVarFixedKernel) {
                            b.get_arrmeta(), kernel_request_single,
                            &eval::default_eval_context);
     EXPECT_THROW(k(a.get_readwrite_originptr(),
-                        b.get_readonly_originptr()),
+                        const_cast<char *>(b.get_readonly_originptr())),
                     broadcast_error);
     k.reset();
 
@@ -494,7 +494,7 @@ TEST(VarArrayDType, AssignVarFixedKernel) {
     make_assignment_kernel(&k, 0, a.get_type(), a.get_arrmeta(), b.get_type(),
                            b.get_arrmeta(), kernel_request_single,
                            &eval::default_eval_context);
-    k(a.get_readwrite_originptr(), b.get_readonly_originptr());
+    k(a.get_readwrite_originptr(), const_cast<char *>(b.get_readonly_originptr()));
     EXPECT_EQ(3, a(0).as<int>());
     EXPECT_EQ(5, a(1).as<int>());
     EXPECT_EQ(7, a(2).as<int>());
@@ -510,7 +510,7 @@ TEST(VarArrayDType, AssignVarFixedKernel) {
                            b.get_arrmeta(), kernel_request_single,
                            &eval::default_eval_context);
     EXPECT_THROW(k(a.get_readwrite_originptr(),
-                        b.get_readonly_originptr()),
+                        const_cast<char *>(b.get_readonly_originptr())),
                     broadcast_error);
     k.reset();
 
@@ -524,7 +524,7 @@ TEST(VarArrayDType, AssignVarFixedKernel) {
                            b.get_arrmeta(), kernel_request_single,
                            &eval::default_eval_context);
     EXPECT_THROW(k(a.get_readwrite_originptr(),
-                        b.get_readonly_originptr()),
+                        const_cast<char *>(b.get_readonly_originptr())),
                     runtime_error);
     k.reset();
 }

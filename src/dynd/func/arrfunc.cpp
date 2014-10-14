@@ -180,7 +180,7 @@ nd::array nd::arrfunc::call(intptr_t arg_count, const nd::array *args, const aux
   }
   std::vector<char *> src_data(arg_count);
   for (intptr_t i = 0; i < arg_count; ++i) {
-    src_data[i] = args[i].get_readonly_originptr();
+    src_data[i] = const_cast<char *>(args[i].get_readonly_originptr());
   }
 
   nd::array result = nd::empty(dst_tp);
@@ -216,7 +216,7 @@ void nd::arrfunc::call_out(intptr_t arg_count, const nd::array *args, const aux:
   }
   std::vector<char *> src_data(arg_count);
   for (intptr_t i = 0; i < arg_count; ++i) {
-    src_data[i] = args[i].get_readonly_originptr();
+    src_data[i] = const_cast<char *>(args[i].get_readonly_originptr());
   }
 
   // Generate and evaluate the ckernel

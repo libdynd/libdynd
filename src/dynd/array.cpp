@@ -1054,7 +1054,7 @@ bool nd::array::op_sorting_less(const array& rhs) const
                     rhs.get_type(), rhs.get_arrmeta(),
                     comparison_type_sorting_less,
                     &eval::default_eval_context);
-    return k(get_readonly_originptr(), rhs.get_readonly_originptr());
+    return k(const_cast<char *>(get_readonly_originptr()), const_cast<char *>(rhs.get_readonly_originptr())); // TODO: CHECK THIS
 }
 
 bool nd::array::operator<(const array& rhs) const
@@ -1064,7 +1064,7 @@ bool nd::array::operator<(const array& rhs) const
                     rhs.get_type(), rhs.get_arrmeta(),
                     comparison_type_less,
                     &eval::default_eval_context);
-    return k(get_readonly_originptr(), rhs.get_readonly_originptr());
+    return k(const_cast<char *>(get_readonly_originptr()), const_cast<char *>(rhs.get_readonly_originptr())); // TODO: CHECK THIS
 }
 
 bool nd::array::operator<=(const array& rhs) const
@@ -1074,7 +1074,7 @@ bool nd::array::operator<=(const array& rhs) const
                     rhs.get_type(), rhs.get_arrmeta(),
                     comparison_type_less_equal,
                     &eval::default_eval_context);
-    return k(get_readonly_originptr(), rhs.get_readonly_originptr());
+    return k(const_cast<char *>(get_readonly_originptr()), const_cast<char *>(rhs.get_readonly_originptr())); // TODO: CHECK THIS
 }
 
 bool nd::array::operator==(const array& rhs) const
@@ -1084,7 +1084,7 @@ bool nd::array::operator==(const array& rhs) const
                     rhs.get_type(), rhs.get_arrmeta(),
                     comparison_type_equal,
                     &eval::default_eval_context);
-    return k(get_readonly_originptr(), rhs.get_readonly_originptr());
+    return k(const_cast<char *>(get_readonly_originptr()), const_cast<char *>(rhs.get_readonly_originptr())); // TODO: CHECK THIS
 }
 
 bool nd::array::operator!=(const array& rhs) const
@@ -1094,7 +1094,7 @@ bool nd::array::operator!=(const array& rhs) const
                     rhs.get_type(), rhs.get_arrmeta(),
                     comparison_type_not_equal,
                     &eval::default_eval_context);
-    return k(get_readonly_originptr(), rhs.get_readonly_originptr());
+    return k(const_cast<char *>(get_readonly_originptr()), const_cast<char *>(rhs.get_readonly_originptr())); // TODO: CHECK THIS
 }
 
 bool nd::array::operator>=(const array& rhs) const
@@ -1104,7 +1104,7 @@ bool nd::array::operator>=(const array& rhs) const
                     rhs.get_type(), rhs.get_arrmeta(),
                     comparison_type_greater_equal,
                     &eval::default_eval_context);
-    return k(get_readonly_originptr(), rhs.get_readonly_originptr());
+    return k(const_cast<char *>(get_readonly_originptr()), const_cast<char *>(rhs.get_readonly_originptr())); // TODO: CHECK THIS
 }
 
 bool nd::array::operator>(const array& rhs) const
@@ -1114,7 +1114,7 @@ bool nd::array::operator>(const array& rhs) const
                     rhs.get_type(), rhs.get_arrmeta(),
                     comparison_type_greater,
                     &eval::default_eval_context);
-    return k(get_readonly_originptr(), rhs.get_readonly_originptr());
+    return k(const_cast<char *>(get_readonly_originptr()), const_cast<char *>(rhs.get_readonly_originptr())); // TODO: CHECK THIS
 }
 
 bool nd::array::equals_exact(const array& rhs) const
@@ -1129,7 +1129,7 @@ bool nd::array::equals_exact(const array& rhs) const
                         get_type(), get_arrmeta(),
                         rhs.get_type(), rhs.get_arrmeta(),
                         comparison_type_equal, &eval::default_eval_context);
-        return k(get_readonly_originptr(), rhs.get_readonly_originptr());
+        return k(const_cast<char *>(get_readonly_originptr()), const_cast<char *>(rhs.get_readonly_originptr())); // TODO: CHECK THIS
     } else if (get_type().get_type_id() == var_dim_type_id) {
       // If there's a leading var dimension, convert it to strided and compare
       // (Note: this is an inefficient hack)
@@ -1155,7 +1155,7 @@ bool nd::array::equals_exact(const array& rhs) const
                                 iter.get_uniform_dtype<1>(), iter.arrmeta<1>(),
                                 comparison_type_not_equal, &eval::default_eval_context);
                 do {
-                    if (k(iter.data<0>(), iter.data<1>())) {
+                    if (k(const_cast<char *>(iter.data<0>()), const_cast<char *>(iter.data<1>()))) { // TODO: CHECK THIS
                         return false;
                     }
                 } while (iter.next());

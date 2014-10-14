@@ -54,10 +54,10 @@ public:
     }
 
     /** Calls the function to do the comparison */
-    inline bool operator()(char *src0, char *src1) {
+    inline bool operator()(const char *src0, const char *src1) {
         ckernel_prefix *kdp = get();
         expr_predicate_t fn = kdp->get_function<expr_predicate_t>();
-        char *src[2] = {src0, src1};
+        const char *const src[2] = {src0, src1};
         return fn(src, kdp) != 0;
     }
 };

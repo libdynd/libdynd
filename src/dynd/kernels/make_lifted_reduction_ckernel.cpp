@@ -786,7 +786,7 @@ static size_t make_strided_inner_reduction_dimension_kernel(
       ss << dst_tp;
       throw runtime_error(ss.str());
     }
-    e->ident_data = reduction_identity.get_readonly_originptr();
+    e->ident_data = const_cast<char *>(reduction_identity.get_readonly_originptr());
     e->ident_ref = reduction_identity.get_memblock().release();
   }
   // The function pointer for followup accumulation calls
@@ -917,7 +917,7 @@ static size_t make_strided_inner_broadcast_dimension_kernel(
       ss << dst_tp;
       throw runtime_error(ss.str());
     }
-    e->ident_data = reduction_identity.get_readonly_originptr();
+    e->ident_data = const_cast<char *>(reduction_identity.get_readonly_originptr());
     e->ident_ref = reduction_identity.get_memblock().release();
   }
   // The function pointer for followup accumulation calls

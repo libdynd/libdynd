@@ -212,19 +212,19 @@ size_t type_type::make_assignment_kernel(
   throw dynd::type_error(ss.str());
 }
 
-static int equal_comparison(char **src,
+static int equal_comparison(const char *const *src,
                             ckernel_prefix *DYND_UNUSED(self))
 {
-    const ndt::type *da = reinterpret_cast<ndt::type **>(src)[0];
-    const ndt::type *db = reinterpret_cast<ndt::type **>(src)[1];
+    const ndt::type *da = reinterpret_cast<const ndt::type *const *>(src)[0];
+    const ndt::type *db = reinterpret_cast<const ndt::type *const *>(src)[1];
     return *da == *db;
 }
 
-static int not_equal_comparison(char **src,
+static int not_equal_comparison(const char *const *src,
                                 ckernel_prefix *DYND_UNUSED(self))
 {
-    const ndt::type *da = reinterpret_cast<ndt::type **>(src)[0];
-    const ndt::type *db = reinterpret_cast<ndt::type **>(src)[1];
+    const ndt::type *da = reinterpret_cast<const ndt::type *const *>(src)[0];
+    const ndt::type *db = reinterpret_cast<const ndt::type *const *>(src)[1];
     return *da != *db;
 }
 

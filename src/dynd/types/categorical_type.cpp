@@ -264,7 +264,7 @@ categorical_type::categorical_type(const nd::array& categories, bool presorted)
         // create the mapping from indices of (to be lexicographically sorted) categories to values
         for (size_t i = 0; i != (size_t)category_count; ++i) {
             unchecked_fixed_dim_get_rw<intptr_t>(m_category_index_to_value, i) = i;
-            char *category_value = categories.get_readonly_originptr() +
+            char *category_value = const_cast<char *>(categories.get_readonly_originptr()) + // TODO: CHECK THIS
                             i * categories_stride;
 
             if (uniques.find(category_value) == uniques.end()) {
@@ -283,7 +283,7 @@ categorical_type::categorical_type(const nd::array& categories, bool presorted)
             &unchecked_fixed_dim_get_rw<intptr_t>(m_category_index_to_value, 0),
             &unchecked_fixed_dim_get_rw<intptr_t>(m_category_index_to_value,
                                                   category_count),
-            sorter(categories.get_readonly_originptr(), categories_stride,
+            sorter(const_cast<char *>(categories.get_readonly_originptr()), categories_stride, // TODO: CHECK THIS
                    k.get_function(), k.get()));
 
         // invert the m_category_index_to_value permutation
@@ -601,7 +601,7 @@ ndt::type dynd::ndt::factor_categorical(const nd::array& values)
     set<char *, cmp> uniques(less);
 
     for (intptr_t i = 0; i < dim_size; ++i) {
-      char *data = values_eval.get_readonly_originptr() + i * stride;
+      char *data = const_cast<char *>(values_eval.get_readonly_originptr()) + i * stride; // TODO: CHECK THIS
       if (uniques.find(data) == uniques.end()) {
         uniques.insert(data);
       }
