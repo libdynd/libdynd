@@ -16,11 +16,11 @@ struct take_by_pointer_outer_ck : kernels::expr_ck<take_by_pointer_outer_ck, 2> 
       : dst_size(dst_size), dst_stride(dst_stride), src1_stride(src1_stride) {
     }
 
-    void single(char *dst, const char *const *src) {
+    void single(char *dst, char **src) {
         ckernel_prefix *child = get_child_ckernel();
         expr_single_t child_fn = child->get_function<expr_single_t>();
 
-        const char *src_copy[2] = {src[0], src[1]};
+        char *src_copy[2] = {src[0], src[1]};
         for (intptr_t i = 0; i < dst_size; ++i) {
             child_fn(dst, src_copy, child);
             dst += dst_stride;
@@ -37,12 +37,12 @@ struct take_by_pointer_ck : kernels::expr_ck<take_by_pointer_ck, 2> {
       : src0_size(src0_size), src0_stride(src0_stride), src1_inner_stride(src1_inner_stride) {
     }
 
-    void single(char *dst, const char *const *src) {
+    void single(char *dst, char **src) {
         ckernel_prefix *child = get_child_ckernel();
         expr_single_t child_fn = child->get_function<expr_single_t>();
 
         intptr_t i = apply_single_index(*reinterpret_cast<const intptr_t *>(src[1]), src0_size, NULL);
-        const char *src_copy[2] = {src[0] + i * src0_stride, src[1] + src1_inner_stride};
+        char *src_copy[2] = {src[0] + i * src0_stride, src[1] + src1_inner_stride};
         child_fn(dst, src_copy, child);
     }
 };
