@@ -1,5 +1,5 @@
 //
-// Copyright (C) 2011-14 Mark Wiebe, DyND Developers
+// Copyright (C) 2011-14 Mark Wiebe, Irwin Zaid, DyND Developers
 // BSD 2-Clause License, see LICENSE.txt
 //
 
@@ -335,20 +335,15 @@ size_t pointer_type::make_assignment_kernel(
     kernel_request_t kernreq, const eval::eval_context *ectx) const
 {
     if (dst_tp.get_type_id() == pointer_type_id) {
-        ndt::type dst_target_tp = dst_tp.tcast<pointer_type>()->get_target_type();
-        if (src_tp.get_type_id() == pointer_type_id) {
+        if (dst_tp == src_tp) {
+            return make_pod_typed_data_assignment_kernel(ckb, ckb_offset, get_data_size(), get_data_alignment(), kernreq);
         } else {
+            ndt::type dst_target_tp = dst_tp.tcast<pointer_type>()->get_target_type();
             if (dst_target_tp == src_tp) {
                 return make_value_to_pointer_assignment_kernel(ckb, ckb_offset,
                     dst_target_tp, kernreq);
             }
         }
-    } else {
-
-    }
-
-    if (*this == *src_tp.extended()) {
-        return make_pod_typed_data_assignment_kernel(ckb, ckb_offset, get_data_size(), get_data_alignment(), kernreq);
     }
 
     return base_expr_type::make_assignment_kernel(ckb, ckb_offset,
