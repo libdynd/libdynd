@@ -9,49 +9,47 @@
 #include <cmath>
 
 #include "inc_gtest.hpp"
+#include "../dynd_assertions.hpp"
 
 #include <dynd/array.hpp>
 #include <dynd/json_parser.hpp>
-#include <dynd/func/lift_arrfunc.hpp>
 #include <dynd/func/take_by_pointer_arrfunc.hpp>
-#include <dynd/types/pointer_type.hpp>
 
 using namespace std;
 using namespace dynd;
 
 TEST(TakeByPointer, Simple) {
-    nd::array a = parse_json("4 * int",
-        "[0, 1, 2, 3]");
-    nd::array idx = parse_json("4 * int64",
-        "[2, 1, 0, 3]");
-
     nd::arrfunc af = make_take_by_pointer_arrfunc();
+    nd::array a, idx, res;
 
-    nd::array res = nd::empty(4, ndt::make_pointer(ndt::make_type<int>()));
-    std::cout << af.get()->func_proto << std::endl;
+    a = parse_json("4 * int", "[0, 1, 2, 3]");
+    idx = parse_json("4 * int64", "[2, 1, 0, 3]");
+    res = af(a, idx);
+    EXPECT_EQ(2, *res(0).as<int *>());
+    EXPECT_EQ(1, *res(1).as<int *>());
+    EXPECT_EQ(0, *res(2).as<int *>());
+    EXPECT_EQ(3, *res(3).as<int *>());
 
-    af.call_out(a, idx, res);
-    std::cout << res << std::endl;
+    a = parse_json("2 * 4 * float64",
+        "[[-4.5, 1, 2.1, 3.5], [-32.7, 15.3, 6.9, 7]]");
+    idx = parse_json("3 * 2 * int64",
+        "[[0, 2], [1, 0], [1, 1]]");
+    res = af(a, idx);
+    EXPECT_EQ(2.1, *res(0).as<double *>());
+    EXPECT_EQ(-32.7, *res(1).as<double *>());
+    EXPECT_EQ(15.3, *res(2).as<double *>());
 
-    a = parse_json("2 * 4 * int",
-        "[[0, 1, 2, 3], [4, 5, 6, 7]]");
-    idx = parse_json("2 * 2 * int64",
-        "[[1, 0], [1, 1]]");
-    res = nd::empty(2, 4, ndt::make_pointer(ndt::make_type<int>()));
-    af.call_out(a, idx, res);
-
-/*
-    std::cout << res << std::endl;
-*/
-
-
-//    std::cout << func_proto << std::endl;
-
-//    nd::array a = parse_json("3 * 2 * int",
-  //      "[[0, 1], [2, 3], [4, 5]]");
-    //nd::array idx = parse_
-
-//    std::exit(-1);
-
-    std::exit(-1);
+    a = parse_json("4 * 4 * 4 * int",
+        "[[[0, 1, 2, 3], [4, 5, 6, 7], [8, 9, 10, 11], [12, 13, 14, 15]],"
+        "[[16, 17, 18, 19], [20, 21, 22, 23], [24, 25, 26, 27], [28, 29, 30, 31]],"
+        "[[32, 33, 34, 35], [36, 37, 38, 39], [40, 41, 42, 43], [44, 45, 46, 47]],"
+        "[[48, 49, 50, 51], [52, 53, 54, 55], [56, 57, 58, 59], [60, 61, 62, 63]]]");
+    idx = parse_json("5 * 3 * int64",
+        "[[3, 2, 1], [1, 0, 1], [2, 1, 2], [3, 3, 3], [0, 2, 1]]");
+    res = af(a, idx);
+    EXPECT_EQ(57, *res(0).as<int *>());
+    EXPECT_EQ(17, *res(1).as<int *>());
+    EXPECT_EQ(38, *res(2).as<int *>());
+    EXPECT_EQ(63, *res(3).as<int *>());
+    EXPECT_EQ(9, *res(4).as<int *>());
 }

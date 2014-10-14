@@ -334,6 +334,19 @@ size_t pointer_type::make_assignment_kernel(
     const char *dst_arrmeta, const ndt::type &src_tp, const char *src_arrmeta,
     kernel_request_t kernreq, const eval::eval_context *ectx) const
 {
+    if (dst_tp.get_type_id() == pointer_type_id) {
+        ndt::type dst_target_tp = dst_tp.tcast<pointer_type>()->get_target_type();
+        if (src_tp.get_type_id() == pointer_type_id) {
+        } else {
+            if (dst_target_tp == src_tp) {
+                return make_value_to_pointer_assignment_kernel(ckb, ckb_offset,
+                    dst_target_tp, kernreq);
+            }
+        }
+    } else {
+
+    }
+
     if (*this == *src_tp.extended()) {
         return make_pod_typed_data_assignment_kernel(ckb, ckb_offset, get_data_size(), get_data_alignment(), kernreq);
     }

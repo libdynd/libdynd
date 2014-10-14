@@ -17,6 +17,7 @@
 #define _DYND__POINTER_TYPE_HPP_
 
 #include <dynd/type.hpp>
+#include <dynd/kernels/pointer_assignment_kernels.hpp>
 #include <dynd/types/void_pointer_type.hpp>
 
 namespace dynd {

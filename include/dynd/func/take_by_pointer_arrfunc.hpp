@@ -3,12 +3,13 @@
 // BSD 2-Clause License, see LICENSE.txt
 //
 
-#ifndef DYND_FUNC_APPLY_ARRFUNC_HPP
-#define DYND_FUNC_APPLY_ARRFUNC_HPP
+#ifndef DYND_FUNC_TAKE_BY_POINTER_ARRFUNC_HPP
+#define DYND_FUNC_TAKE_BY_POINTER_ARRFUNC_HPP
 
+#include <dynd/shape_tools.hpp>
 #include <dynd/func/arrfunc.hpp>
-#include <dynd/kernels/ckernel_common_functions.hpp>
-#include <dynd/kernels/expr_kernels.hpp>
+#include <dynd/kernels/assignment_kernels.hpp>
+#include <dynd/types/pointer_type.hpp>
 
 namespace dynd {
 
@@ -18,4 +19,4 @@ nd::arrfunc make_take_by_pointer_arrfunc();
 
 } // namespace dynd
 
-#endif // DYND_FUNC_APPLY_ARRFUNC_HPP
+#endif // DYND_FUNC_TAKE_BY_POINTER_ARRFUNC_HPP
