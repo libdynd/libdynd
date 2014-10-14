@@ -27,7 +27,7 @@ type_type::~type_type()
 }
 
 void type_type::print_data(std::ostream& o,
-                const char *DYND_UNUSED(arrmeta), char *data) const
+                const char *DYND_UNUSED(arrmeta), const char *data) const
 {
     const type_type_data *ddd = reinterpret_cast<const type_type_data *>(data);
     // This tests avoids the atomic increment/decrement of

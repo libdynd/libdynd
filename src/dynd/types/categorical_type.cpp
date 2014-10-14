@@ -310,7 +310,7 @@ categorical_type::categorical_type(const nd::array& categories, bool presorted)
     m_members.data_alignment = (uint8_t)m_storage_type.get_data_alignment();
 }
 
-void categorical_type::print_data(std::ostream& o, const char *DYND_UNUSED(arrmeta), char *data) const
+void categorical_type::print_data(std::ostream& o, const char *DYND_UNUSED(arrmeta), const char *data) const
 {
   intptr_t category_count = m_categories.get_dim_size();
   uint32_t value;

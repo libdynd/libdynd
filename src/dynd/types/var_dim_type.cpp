@@ -44,7 +44,7 @@ var_dim_type::~var_dim_type()
 {
 }
 
-void var_dim_type::print_data(std::ostream& o, const char *arrmeta, char *data) const
+void var_dim_type::print_data(std::ostream& o, const char *arrmeta, const char *data) const
 {
   const var_dim_type_arrmeta *md =
       reinterpret_cast<const var_dim_type_arrmeta *>(arrmeta);

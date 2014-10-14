@@ -11,9 +11,9 @@ using namespace dynd;
 
 void ndarrayarg_type::print_data(std::ostream &o,
                                  const char *DYND_UNUSED(arrmeta),
-                                 char *data) const
+                                 const char *data) const
 {
-    o << *reinterpret_cast<nd::array *>(data);
+    o << *reinterpret_cast<const nd::array *>(data);
 }
 
 void ndarrayarg_type::print_type(std::ostream& o) const

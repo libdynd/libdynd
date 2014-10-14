@@ -114,13 +114,13 @@ void fixedstring_type::set_from_utf8_string(const char *DYND_UNUSED(arrmeta),
 
 void fixedstring_type::print_data(std::ostream &o,
                                   const char *DYND_UNUSED(arrmeta),
-                                  char *data) const
+                                  const char *data) const
 {
     uint32_t cp;
     next_unicode_codepoint_t next_fn;
     next_fn =
         get_next_unicode_codepoint_function(m_encoding, assign_error_nocheck);
-    char *data_end = data + get_data_size();
+    const char *data_end = data + get_data_size();
 
     // Print as an escaped string
     o << "\"";

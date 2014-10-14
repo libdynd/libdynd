@@ -65,8 +65,7 @@ public:
         return unchecked_fixed_dim_get<uintptr_t>(m_arrmeta_offsets, i);
     }
 
-
-    void print_data(std::ostream& o, const char *arrmeta, char *data) const;
+    void print_data(std::ostream& o, const char *arrmeta, const char *data) const;
     bool is_expression() const;
     bool is_unique_data_owner(const char *arrmeta) const;
 

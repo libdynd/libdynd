@@ -70,7 +70,7 @@ public:
     void print_workweek(std::ostream& o) const;
     void print_holidays(std::ostream& o) const;
 
-    void print_data(std::ostream& o, const char *arrmeta, char *data) const;
+    void print_data(std::ostream& o, const char *arrmeta, const char *data) const;
 
     void print_type(std::ostream& o) const;
 

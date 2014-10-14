@@ -49,7 +49,7 @@ public:
                     int32_t &out_year, int32_t &out_month, int32_t &out_day,
                     int32_t &out_hour, int32_t &out_min, int32_t &out_sec, int32_t &out_tick) const;
 
-    void print_data(std::ostream& o, const char *arrmeta, char *data) const;
+    void print_data(std::ostream& o, const char *arrmeta, const char *data) const;
 
     void print_type(std::ostream& o) const;
 

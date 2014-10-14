@@ -65,7 +65,7 @@ void json_type::set_from_utf8_string(const char *arrmeta, char *dst,
 }
 
 void json_type::print_data(std::ostream &o, const char *DYND_UNUSED(arrmeta),
-                           char *data) const
+                           const char *data) const
 {
     uint32_t cp;
     next_unicode_codepoint_t next_fn;

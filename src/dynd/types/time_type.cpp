@@ -72,7 +72,7 @@ time_hmst time_type::get_time(const char *DYND_UNUSED(arrmeta),
     return hmst;
 }
 
-void time_type::print_data(std::ostream& o, const char *DYND_UNUSED(arrmeta), char *data) const
+void time_type::print_data(std::ostream& o, const char *DYND_UNUSED(arrmeta), const char *data) const
 {
     time_hmst hmst;
     hmst.set_from_ticks(*reinterpret_cast<const int64_t *>(data));

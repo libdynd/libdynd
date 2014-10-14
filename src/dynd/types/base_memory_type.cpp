@@ -22,7 +22,7 @@ size_t base_memory_type::get_default_data_size() const {
 }
 
 void base_memory_type::print_data(std::ostream &o, const char *arrmeta,
-                                  char *data) const
+                                  const char *data) const
 {
   m_storage_tp.print_data(o, arrmeta + m_storage_arrmeta_offset, data);
 }

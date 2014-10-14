@@ -41,7 +41,7 @@ static void print_arrfunc(std::ostream& o, const arrfunc_type_data *af)
 }
 
 void arrfunc_type::print_data(std::ostream &o, const char *DYND_UNUSED(arrmeta),
-                              char *data) const
+                              const char *data) const
 {
   const arrfunc_type_data *af =
       reinterpret_cast<const arrfunc_type_data *>(data);

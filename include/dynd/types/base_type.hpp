@@ -205,7 +205,7 @@ public:
      * \param arrmeta  Pointer to the type arrmeta of the data element to print.
      * \param data  Pointer to the data element to print.
      */
-    virtual void print_data(std::ostream& o, const char *arrmeta, char *data) const = 0;
+    virtual void print_data(std::ostream& o, const char *arrmeta, const char *data) const = 0;
 
     /**
      * Print a representation of the type itself

@@ -44,7 +44,7 @@ byteswap_type::~byteswap_type()
 {
 }
 
-void byteswap_type::print_data(std::ostream& DYND_UNUSED(o), const char *DYND_UNUSED(arrmeta), char *DYND_UNUSED(data)) const
+void byteswap_type::print_data(std::ostream& DYND_UNUSED(o), const char *DYND_UNUSED(arrmeta), const char *DYND_UNUSED(data)) const
 {
   throw runtime_error(
       "internal error: byteswap_type::print_data isn't supposed to be called");

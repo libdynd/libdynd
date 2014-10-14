@@ -178,9 +178,9 @@ void option_type::assign_na(const char *arrmeta, char *data,
 }
 
 void option_type::print_data(std::ostream &o, const char *arrmeta,
-                             char *data) const
+                             const char *data) const
 {
-  if (is_avail(arrmeta, data, &eval::default_eval_context)) {
+  if (is_avail(arrmeta, const_cast<char *>(data), &eval::default_eval_context)) { // TODO: CHECK THIS
     m_value_tp.print_data(o, arrmeta, data);
   } else {
     o << "NA";

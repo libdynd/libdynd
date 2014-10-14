@@ -73,7 +73,7 @@ date_ymd date_type::get_ymd(const char *DYND_UNUSED(arrmeta), const char *data) 
     return ymd;
 }
 
-void date_type::print_data(std::ostream& o, const char *DYND_UNUSED(arrmeta), char *data) const
+void date_type::print_data(std::ostream& o, const char *DYND_UNUSED(arrmeta), const char *data) const
 {
     date_ymd ymd;
     ymd.set_from_days(*reinterpret_cast<const int32_t *>(data));

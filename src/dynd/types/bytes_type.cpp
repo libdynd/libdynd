@@ -60,7 +60,7 @@ void bytes_type::set_bytes_data(const char *arrmeta, char *data,
 }
 
 void bytes_type::print_data(std::ostream &o, const char *DYND_UNUSED(arrmeta),
-                            char *data) const
+                            const char *data) const
 {
   const char *begin = reinterpret_cast<const char *const *>(data)[0];
   const char *end = reinterpret_cast<const char *const *>(data)[1];

@@ -33,7 +33,7 @@ namespace {
             uint32_t cp = 0;
 
             while (src < src_end && dst < dst_end) {
-                cp = next_fn(src, src_end);
+                cp = next_fn(const_cast<const char *&>(src), src_end);
                 // The fixedstring type uses null-terminated strings
                 if (cp == 0) {
                     // Null-terminate the destination string, and we're done

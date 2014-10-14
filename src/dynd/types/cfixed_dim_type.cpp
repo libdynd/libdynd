@@ -79,7 +79,7 @@ cfixed_dim_type::~cfixed_dim_type()
 }
 
 void cfixed_dim_type::print_data(std::ostream &o, const char *arrmeta,
-                                 char *data) const
+                                 const char *data) const
 {
   strided_array_summarized(o, get_element_type(),
                            arrmeta + sizeof(cfixed_dim_type_arrmeta), data,

@@ -50,7 +50,7 @@ groupby_type::~groupby_type()
 }
 
 void groupby_type::print_data(std::ostream& DYND_UNUSED(o),
-                const char *DYND_UNUSED(arrmeta), char *DYND_UNUSED(data)) const
+                const char *DYND_UNUSED(arrmeta), const char *DYND_UNUSED(data)) const
 {
     throw runtime_error("internal error: groupby_type::print_data isn't supposed to be called");
 }

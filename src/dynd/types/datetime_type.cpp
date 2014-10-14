@@ -129,7 +129,7 @@ void datetime_type::get_cal(const char *DYND_UNUSED(arrmeta), const char *data,
 }
 
 void datetime_type::print_data(std::ostream& o,
-                const char *DYND_UNUSED(arrmeta), char *data) const
+                const char *DYND_UNUSED(arrmeta), const char *data) const
 {
     datetime_struct dts;
     dts.set_from_ticks(*reinterpret_cast<const int64_t *>(data));

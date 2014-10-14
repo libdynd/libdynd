@@ -25,7 +25,6 @@ TEST(CategoricalDType, Create) {
 
     ndt::type d;
     d = ndt::make_categorical(a);
-/*
     EXPECT_EQ(categorical_type_id, d.get_type_id());
     EXPECT_EQ(custom_kind, d.get_kind());
     EXPECT_EQ(1u, d.get_data_alignment());
@@ -61,7 +60,6 @@ TEST(CategoricalDType, Create) {
     EXPECT_EQ(4u, d.get_data_size());
     EXPECT_EQ(ndt::make_type<uint32_t>(), d.p("storage_type").as<ndt::type>());
     EXPECT_EQ(ndt::make_type<int32_t>(), d.p("category_type").as<ndt::type>());
-*/
 }
 
 TEST(CategoricalDType, Convert) {

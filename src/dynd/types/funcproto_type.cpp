@@ -35,7 +35,7 @@ funcproto_type::funcproto_type(const nd::array &param_types,
 
 void funcproto_type::print_data(std::ostream &DYND_UNUSED(o),
                                 const char *DYND_UNUSED(arrmeta),
-                                char *DYND_UNUSED(data)) const
+                                const char *DYND_UNUSED(data)) const
 {
     throw type_error("Cannot store data of funcproto type");
 }

@@ -45,7 +45,7 @@ size_t fixed_dim_type::get_default_data_size() const
 }
 
 
-void fixed_dim_type::print_data(std::ostream& o, const char *arrmeta, char *data) const
+void fixed_dim_type::print_data(std::ostream& o, const char *arrmeta, const char *data) const
 {
   const fixed_dim_type_arrmeta *md =
       reinterpret_cast<const fixed_dim_type_arrmeta *>(arrmeta);

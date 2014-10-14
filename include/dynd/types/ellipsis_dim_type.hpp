@@ -32,7 +32,7 @@ public:
         return m_name.is_null() ? "" : m_name.str();
     }
 
-    void print_data(std::ostream& o, const char *arrmeta, char *data) const;
+    void print_data(std::ostream& o, const char *arrmeta, const char *data) const;
 
     void print_type(std::ostream& o) const;
 

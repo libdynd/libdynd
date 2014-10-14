@@ -42,7 +42,7 @@ size_t fixed_sym_dim_type::get_default_data_size() const
 
 void fixed_sym_dim_type::print_data(std::ostream &DYND_UNUSED(o),
                                     const char *DYND_UNUSED(arrmeta),
-                                    char *DYND_UNUSED(data)) const
+                                    const char *DYND_UNUSED(data)) const
 {
   throw type_error("Cannot store data of symbolic fixed_dim type");
 }
