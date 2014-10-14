@@ -1956,7 +1956,7 @@ nd::array nd::memmap(const std::string& filename,
     return result;
 }
 
-intptr_t nd::binary_search(const nd::array& n, const char *arrmeta, char *data)
+intptr_t nd::binary_search(const nd::array& n, const char *arrmeta, const char *data)
 {
     if (n.get_ndim() == 0) {
         stringstream ss;
@@ -1983,19 +1983,19 @@ intptr_t nd::binary_search(const nd::array& n, const char *arrmeta, char *data)
             throw runtime_error(ss.str());
         }
 
-        char *n_data = n.get_readonly_originptr();
+        const char *n_data = const_cast<const char *>(n.get_readonly_originptr()); // TODO: CHECK THIS
         intptr_t n_stride = reinterpret_cast<const fixed_dim_type_arrmeta *>(n.get_arrmeta())->stride;
         intptr_t first = 0, last = n.get_dim_size();
         while (first < last) {
             intptr_t trial = first + (last - first) / 2;
-            char *trial_data = n_data + trial * n_stride;
+            const char *trial_data = n_data + trial * n_stride;
 
             // In order for the data to always match up with the arrmeta, need to have
             // trial_data first and data second in the comparison operations.
-            if (k_n_less_d(data, trial_data)) {
+            if (k_n_less_d(const_cast<char *>(data), const_cast<char *>(trial_data))) {
                 // value < arr[trial]
                 last = trial;
-            } else if (k_n_less_d(trial_data, data)) {
+            } else if (k_n_less_d(const_cast<char *>(trial_data), const_cast<char *>(data))) {
                 // value > arr[trial]
                 first = trial + 1;
             } else {
@@ -2025,19 +2025,19 @@ intptr_t nd::binary_search(const nd::array& n, const char *arrmeta, char *data)
             throw runtime_error(ss.str());
         }
 
-        char *n_data = n.get_readonly_originptr();
+        const char *n_data = const_cast<const char *>(n.get_readonly_originptr()); // TODO: CHECK THIS
         intptr_t n_stride = reinterpret_cast<const fixed_dim_type_arrmeta *>(n.get_arrmeta())->stride;
         intptr_t first = 0, last = n.get_dim_size();
         while (first < last) {
             intptr_t trial = first + (last - first) / 2;
-            char *trial_data = n_data + trial * n_stride;
+            const char *trial_data = n_data + trial * n_stride;
 
             // In order for the data to always match up with the arrmeta, need to have
             // trial_data first and data second in the comparison operations.
-            if (k_d_less_n(data, trial_data)) {
+            if (k_d_less_n(const_cast<char *>(data), const_cast<char *>(trial_data))) {
                 // value < arr[trial]
                 last = trial;
-            } else if (k_n_less_d(trial_data, data)) {
+            } else if (k_n_less_d(const_cast<char *>(trial_data), const_cast<char *>(data))) {
                 // value > arr[trial]
                 first = trial + 1;
             } else {
@@ -2128,7 +2128,7 @@ nd::array nd::groupby(const nd::array& data_values, const nd::array& by_values, 
 }
 
 bool nd::is_scalar_avail(const ndt::type &tp, const char *arrmeta,
-                      char *data, const eval::eval_context *ectx)
+                      const char *data, const eval::eval_context *ectx)
 {
     if (tp.is_scalar()) {
         if (tp.get_type_id() == option_type_id) {

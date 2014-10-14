@@ -191,7 +191,7 @@ static void format_json_option(output_data &out, const ndt::type &dt,
                                const char *arrmeta, const char *data)
 {
   const option_type *ot = dt.tcast<option_type>();
-  if (ot->is_avail(arrmeta, const_cast<char *>(data), &eval::default_eval_context)) { // TODO: CHECK THIS
+  if (ot->is_avail(arrmeta, data, &eval::default_eval_context)) {
     format_json(out, ot->get_value_type(), arrmeta, data);
   } else {
     out.write("null");

@@ -1614,12 +1614,12 @@ array memmap(const std::string& filename,
  *
  * \returns  The index of the found element, or -1 if not found.
  */
-intptr_t binary_search(const array &n, const char *arrmeta, char *data);
+intptr_t binary_search(const array &n, const char *arrmeta, const char *data);
 
 array groupby(const array& data_values, const array& by,
                 const ndt::type& groups = ndt::type());
 
-bool is_scalar_avail(const ndt::type &tp, const char *arrmeta, char *data,
+bool is_scalar_avail(const ndt::type &tp, const char *arrmeta, const char *data,
                      const eval::eval_context *ectx);
 
 /**

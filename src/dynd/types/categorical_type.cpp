@@ -72,7 +72,7 @@ namespace {
 
           uint32_t value = *reinterpret_cast<const UIntType *>(src);
           char *src_val =
-              e->src_cat_tp->get_category_data_from_value(value);
+              const_cast<char *>(e->src_cat_tp->get_category_data_from_value(value));
           opchild(dst, &src_val, echild);
         }
 
@@ -414,7 +414,7 @@ nd::array categorical_type::get_categories() const
                              &eval::default_eval_context);
     for (intptr_t i = 0; i < dim_size; ++i) {
       k(categories.get_readwrite_originptr() + i * stride,
-        get_category_data_from_value((uint32_t)i));
+        const_cast<char *>(get_category_data_from_value((uint32_t)i))); // TODO: CHECK THIS
     }
     return categories;
 }
