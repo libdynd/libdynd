@@ -1983,7 +1983,7 @@ intptr_t nd::binary_search(const nd::array& n, const char *arrmeta, const char *
             throw runtime_error(ss.str());
         }
 
-        const char *n_data = const_cast<const char *>(n.get_readonly_originptr()); // TODO: CHECK THIS
+        const char *n_data = n.get_readonly_originptr();
         intptr_t n_stride = reinterpret_cast<const fixed_dim_type_arrmeta *>(n.get_arrmeta())->stride;
         intptr_t first = 0, last = n.get_dim_size();
         while (first < last) {
@@ -1992,10 +1992,10 @@ intptr_t nd::binary_search(const nd::array& n, const char *arrmeta, const char *
 
             // In order for the data to always match up with the arrmeta, need to have
             // trial_data first and data second in the comparison operations.
-            if (k_n_less_d(const_cast<char *>(data), const_cast<char *>(trial_data))) {
+            if (k_n_less_d(data, trial_data)) {
                 // value < arr[trial]
                 last = trial;
-            } else if (k_n_less_d(const_cast<char *>(trial_data), const_cast<char *>(data))) {
+            } else if (k_n_less_d(trial_data, data)) {
                 // value > arr[trial]
                 first = trial + 1;
             } else {
@@ -2025,7 +2025,7 @@ intptr_t nd::binary_search(const nd::array& n, const char *arrmeta, const char *
             throw runtime_error(ss.str());
         }
 
-        const char *n_data = const_cast<const char *>(n.get_readonly_originptr()); // TODO: CHECK THIS
+        const char *n_data = n.get_readonly_originptr();
         intptr_t n_stride = reinterpret_cast<const fixed_dim_type_arrmeta *>(n.get_arrmeta())->stride;
         intptr_t first = 0, last = n.get_dim_size();
         while (first < last) {
@@ -2034,10 +2034,10 @@ intptr_t nd::binary_search(const nd::array& n, const char *arrmeta, const char *
 
             // In order for the data to always match up with the arrmeta, need to have
             // trial_data first and data second in the comparison operations.
-            if (k_d_less_n(const_cast<char *>(data), const_cast<char *>(trial_data))) {
+            if (k_d_less_n(data, trial_data)) {
                 // value < arr[trial]
                 last = trial;
-            } else if (k_n_less_d(const_cast<char *>(trial_data), const_cast<char *>(data))) {
+            } else if (k_n_less_d(trial_data, data)) {
                 // value > arr[trial]
                 first = trial + 1;
             } else {
