@@ -654,7 +654,6 @@ if (DYND_SHARED_LIB OR (NOT DYND_INSTALL_LIB))
     target_link_libraries(libdynd ${DYND_LINK_LIBS})
 endif()
 
-# add_subdirectory(basic_kernels)
 if(DYND_BUILD_TESTS)
     add_subdirectory(tests)
 endif()
