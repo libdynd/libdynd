@@ -22,19 +22,19 @@ using namespace std;
 namespace {
 
     class sorter {
-        char *m_originptr;
+        const char *m_originptr;
         intptr_t m_stride;
         const expr_predicate_t m_less;
         ckernel_prefix *m_less_self;
     public:
-      sorter(char *originptr, intptr_t stride,
+      sorter(const char *originptr, intptr_t stride,
              const expr_predicate_t less, ckernel_prefix *less_self)
           : m_originptr(originptr), m_stride(stride), m_less(less),
             m_less_self(less_self)
       {
       }
         bool operator()(intptr_t i, intptr_t j) const {
-            char *s[2] = {m_originptr + i * m_stride,
+            const char *s[2] = {m_originptr + i * m_stride,
                                 m_originptr + j * m_stride};
             return m_less(s, m_less_self) != 0;
         }
@@ -48,9 +48,9 @@ namespace {
           : m_less(less), m_less_self(less_self)
         {
         }
-        bool operator()(char *a, char *b) const
+        bool operator()(const char *a, const char *b) const
         {
-            char *s[2] = {a, b};
+            const char *s[2] = {a, b};
             bool result = m_less(s, m_less_self) != 0;
             return result;
         }
@@ -191,7 +191,7 @@ namespace {
 } // anoymous namespace
 
 /** This function converts the set of char* pointers into a strided immutable nd::array of the categories */
-static nd::array make_sorted_categories(const set<char *, cmp> &uniques,
+static nd::array make_sorted_categories(const set<const char *, cmp> &uniques,
                                         const ndt::type &element_tp,
                                         const char *arrmeta)
 {
@@ -204,8 +204,8 @@ static nd::array make_sorted_categories(const set<char *, cmp> &uniques,
 
     intptr_t stride = reinterpret_cast<const fixed_dim_type_arrmeta *>(categories.get_arrmeta())->stride;
     char *dst_ptr = categories.get_readwrite_originptr();
-    for (set<char *, cmp>::const_iterator it = uniques.begin(); it != uniques.end(); ++it) {
-        k(dst_ptr, *it);
+    for (set<const char *, cmp>::const_iterator it = uniques.begin(); it != uniques.end(); ++it) {
+        k(dst_ptr, const_cast<char *>(*it));
         dst_ptr += stride;
     }
     categories.get_type().extended()->arrmeta_finalize_buffers(categories.get_arrmeta());
@@ -254,7 +254,7 @@ categorical_type::categorical_type(const nd::array& categories, bool presorted)
                         comparison_type_sorting_less, &eval::default_eval_context);
 
         cmp less(k.get_function(), k.get());
-        set<char *, cmp> uniques(less);
+        set<const char *, cmp> uniques(less);
 
         m_value_to_category_index =
             nd::empty(category_count, ndt::make_type<intptr_t>());
@@ -264,7 +264,7 @@ categorical_type::categorical_type(const nd::array& categories, bool presorted)
         // create the mapping from indices of (to be lexicographically sorted) categories to values
         for (size_t i = 0; i != (size_t)category_count; ++i) {
             unchecked_fixed_dim_get_rw<intptr_t>(m_category_index_to_value, i) = i;
-            char *category_value = const_cast<char *>(categories.get_readonly_originptr()) + // TODO: CHECK THIS
+            const char *category_value = categories.get_readonly_originptr() +
                             i * categories_stride;
 
             if (uniques.find(category_value) == uniques.end()) {
@@ -283,7 +283,7 @@ categorical_type::categorical_type(const nd::array& categories, bool presorted)
             &unchecked_fixed_dim_get_rw<intptr_t>(m_category_index_to_value, 0),
             &unchecked_fixed_dim_get_rw<intptr_t>(m_category_index_to_value,
                                                   category_count),
-            sorter(const_cast<char *>(categories.get_readonly_originptr()), categories_stride, // TODO: CHECK THIS
+            sorter(categories.get_readonly_originptr(), categories_stride,
                    k.get_function(), k.get()));
 
         // invert the m_category_index_to_value permutation
@@ -365,7 +365,7 @@ void dynd::categorical_type::get_shape(intptr_t ndim, intptr_t i, intptr_t *out_
 
 uint32_t categorical_type::get_value_from_category(const char *category_arrmeta, const char *category_data) const
 {
-    intptr_t i = nd::binary_search(m_categories, const_cast<char *>(category_arrmeta), const_cast<char *>(category_data)); // TODO: CHECK THIS
+    intptr_t i = nd::binary_search(m_categories, category_arrmeta, category_data);
     if (i < 0) {
         stringstream ss;
         ss << "Unrecognized category value ";
@@ -414,7 +414,7 @@ nd::array categorical_type::get_categories() const
                              &eval::default_eval_context);
     for (intptr_t i = 0; i < dim_size; ++i) {
       k(categories.get_readwrite_originptr() + i * stride,
-        const_cast<char *>(get_category_data_from_value((uint32_t)i))); // TODO: CHECK THIS
+        const_cast<char *>(get_category_data_from_value((uint32_t)i)));
     }
     return categories;
 }
@@ -598,10 +598,10 @@ ndt::type dynd::ndt::factor_categorical(const nd::array& values)
                              &eval::default_eval_context);
 
     cmp less(k.get_function(), k.get());
-    set<char *, cmp> uniques(less);
+    set<const char *, cmp> uniques(less);
 
     for (intptr_t i = 0; i < dim_size; ++i) {
-      char *data = const_cast<char *>(values_eval.get_readonly_originptr()) + i * stride; // TODO: CHECK THIS
+      const char *data = values_eval.get_readonly_originptr() + i * stride;
       if (uniques.find(data) == uniques.end()) {
         uniques.insert(data);
       }

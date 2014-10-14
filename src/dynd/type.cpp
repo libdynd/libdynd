@@ -783,6 +783,6 @@ void ndt::type::print_data(std::ostream &o, const char *arrmeta,
   if (is_builtin()) {
     print_builtin_scalar(get_type_id(), o, data);
   } else {
-    extended()->print_data(o, arrmeta, const_cast<char *>(data)); // TODO: CHECK THIS
+    extended()->print_data(o, arrmeta, data);
   }
 }
