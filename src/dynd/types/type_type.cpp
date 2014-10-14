@@ -92,14 +92,14 @@ void type_type::data_destruct_strided(const char *DYND_UNUSED(arrmeta), char *da
 }
 
 static void
-typed_data_assignment_kernel_single(char *dst, const char *const *src,
+typed_data_assignment_kernel_single(char *dst, char **src,
                                     ckernel_prefix *DYND_UNUSED(self))
 {
     // Free the destination reference
     base_type_xdecref(reinterpret_cast<const type_type_data *>(dst)->tp);
     // Copy the pointer and count the reference
     const base_type *bd =
-        (*reinterpret_cast<const type_type_data *const *>(src))->tp;
+        (*reinterpret_cast<type_type_data **>(src))->tp;
     reinterpret_cast<type_type_data *>(dst)->tp = bd;
     base_type_xincref(bd);
 }
@@ -113,7 +113,7 @@ namespace {
         const char *src_arrmeta;
         assign_error_mode errmode;
 
-        static void single(char *dst, const char *const *src,
+        static void single(char *dst, char **src,
                            ckernel_prefix *extra)
         {
             extra_type *e = reinterpret_cast<extra_type *>(extra);
@@ -137,12 +137,12 @@ namespace {
         const char *dst_arrmeta;
         eval::eval_context ectx;
 
-        static void single(char *dst, const char *const *src,
+        static void single(char *dst, char **src,
                            ckernel_prefix *extra)
         {
             extra_type *e = reinterpret_cast<extra_type *>(extra);
             const base_type *bd =
-                (*reinterpret_cast<const type_type_data *const *>(src))->tp;
+                (*reinterpret_cast<type_type_data **>(src))->tp;
             stringstream ss;
             if (is_builtin_type(bd)) {
                 ss << ndt::type(bd, true);

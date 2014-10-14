@@ -14,22 +14,22 @@ using namespace dynd;
 namespace {
     template<class T>
     struct aligned_fixed_size_copy_assign_type {
-        static void single(char *dst, const char *const *src,
+        static void single(char *dst, char **src,
                            ckernel_prefix *DYND_UNUSED(self))
         {
             *reinterpret_cast<T *>(dst) =
-                **reinterpret_cast<const T *const *>(src);
+                **reinterpret_cast<T **>(src);
         }
 
         static void strided(char *dst, intptr_t dst_stride,
-                            const char *const *src, const intptr_t *src_stride,
+                            char **src, const intptr_t *src_stride,
                             size_t count, ckernel_prefix *DYND_UNUSED(self))
         {
-            const char *src0 = *src;
+            char *src0 = *src;
             intptr_t src0_stride = *src_stride;
             for (size_t i = 0; i != count; ++i) {
                 *reinterpret_cast<T *>(dst) =
-                    *reinterpret_cast<const T *>(src0);
+                    *reinterpret_cast<T *>(src0);
                 dst += dst_stride;
                 src0 += src0_stride;
             }
@@ -40,17 +40,17 @@ namespace {
     struct aligned_fixed_size_copy_assign;
     template<>
     struct aligned_fixed_size_copy_assign<1> {
-        static void single(char *dst, const char *const*src,
+        static void single(char *dst, char **src,
                            ckernel_prefix *DYND_UNUSED(self))
         {
             *dst = **src;
         }
 
         static void strided(char *dst, intptr_t dst_stride,
-                            const char *const *src, const intptr_t *src_stride,
+                            char **src, const intptr_t *src_stride,
                             size_t count, ckernel_prefix *DYND_UNUSED(self))
         {
-            const char *src0 = *src;
+            char *src0 = *src;
             intptr_t src0_stride = *src_stride;
             for (size_t i = 0; i != count; ++i) {
                 *dst = *src0;
@@ -68,17 +68,17 @@ namespace {
 
     template<int N>
     struct unaligned_fixed_size_copy_assign {
-        static void single(char *dst, const char *const *src,
+        static void single(char *dst, char **src,
                            ckernel_prefix *DYND_UNUSED(self))
         {
             memcpy(dst, *src, N);
         }
 
         static void strided(char *dst, intptr_t dst_stride,
-                            const char *const *src, const intptr_t *src_stride,
+                            char **src, const intptr_t *src_stride,
                             size_t count, ckernel_prefix *DYND_UNUSED(self))
         {
-            const char *src0 = *src;
+            char *src0 = *src;
             intptr_t src0_stride = *src_stride;
             for (size_t i = 0; i != count; ++i) {
                 memcpy(dst, src0, N);
@@ -92,7 +92,7 @@ struct unaligned_copy_ck {
     ckernel_prefix base;
     size_t data_size;
 };
-static void unaligned_copy_single(char *dst, const char *const *src,
+static void unaligned_copy_single(char *dst, char **src,
                                   ckernel_prefix *self)
 {
     size_t data_size =
@@ -100,12 +100,12 @@ static void unaligned_copy_single(char *dst, const char *const *src,
     memcpy(dst, *src, data_size);
 }
 static void unaligned_copy_strided(char *dst, intptr_t dst_stride,
-                                   const char *const *src,
+                                   char **src,
                                    const intptr_t *src_stride, size_t count,
                                    ckernel_prefix *self)
 {
     size_t data_size = reinterpret_cast<unaligned_copy_ck *>(self)->data_size;
-    const char *src0 = *src;
+    char *src0 = *src;
     intptr_t src0_stride = *src_stride;
     for (size_t i = 0; i != count; ++i) {
         memcpy(dst, src0, data_size);
@@ -266,12 +266,12 @@ size_t dynd::make_pod_typed_data_assignment_kernel(ckernel_builder *ckb,
 namespace {
 template<class dst_type, class src_type, assign_error_mode errmode>
 struct single_assigner_as_expr_single {
-  static void single(char *dst, const char *const *src,
+  static void single(char *dst, char **src,
                      ckernel_prefix *DYND_UNUSED(self))
   {
     single_assigner_builtin<dst_type, src_type, errmode>::assign(
         reinterpret_cast<dst_type *>(dst),
-        reinterpret_cast<const src_type *>(*src));
+        reinterpret_cast<src_type *>(*src));
   }
 };
 } // anonymous namespace
@@ -335,15 +335,15 @@ namespace {
     struct multiple_assignment_builtin {
         static void strided_assign(
                         char *dst, intptr_t dst_stride,
-                        const char *const *src, const intptr_t *src_stride,
+                        char **src, const intptr_t *src_stride,
                         size_t count, ckernel_prefix *DYND_UNUSED(self))
         {
-            const char *src0 = src[0];
+            char *src0 = src[0];
             intptr_t src0_stride = src_stride[0];
             for (size_t i = 0; i != count; ++i) {
                 single_assigner_builtin<dst_type, src_type, errmode>::assign(
                     reinterpret_cast<dst_type *>(dst),
-                    reinterpret_cast<const src_type *>(src0));
+                    reinterpret_cast<src_type *>(src0));
                 dst += dst_stride;
                 src0 += src0_stride;
             }
@@ -353,15 +353,15 @@ namespace {
     struct multiple_assignment_builtin<dst_type, src_type, assign_error_nocheck> {
          DYND_CUDA_HOST_DEVICE static void strided_assign(
                         char *dst, intptr_t dst_stride,
-                        const char *const *src, const intptr_t *src_stride,
+                        char **src, const intptr_t *src_stride,
                         size_t count, ckernel_prefix *DYND_UNUSED(self))
         {
-            const char *src0 = src[0];
+            char *src0 = src[0];
             intptr_t src0_stride = src_stride[0];
             for (size_t i = 0; i != count; ++i) {
                 single_assigner_builtin<dst_type, src_type, assign_error_nocheck>::
                     assign(reinterpret_cast<dst_type *>(dst),
-                           reinterpret_cast<const src_type *>(src0));
+                           reinterpret_cast<src_type *>(src0));
                 dst += dst_stride;
                 src0 += src0_stride;
             }
@@ -463,13 +463,13 @@ size_t dynd::make_builtin_type_assignment_kernel(
 namespace {
 template<int N>
 struct wrap_single_as_strided_fixedcount_ck {
-    static void strided(char *dst, intptr_t dst_stride, const char *const *src,
+    static void strided(char *dst, intptr_t dst_stride, char **src,
                         const intptr_t *src_stride, size_t count,
                         ckernel_prefix *self)
     {
         ckernel_prefix *echild = self->get_child_ckernel(sizeof(ckernel_prefix));
         expr_single_t opchild = echild->get_function<expr_single_t>();
-        const char *src_copy[N];
+        char *src_copy[N];
         for (int j = 0; j < N; ++j) {
             src_copy[j] = src[j];
         }
@@ -486,7 +486,7 @@ struct wrap_single_as_strided_fixedcount_ck {
 template<>
 struct wrap_single_as_strided_fixedcount_ck<0> {
   static void strided(char *dst, intptr_t dst_stride,
-                      const char *const *DYND_UNUSED(src),
+                      char **DYND_UNUSED(src),
                       const intptr_t *DYND_UNUSED(src_stride), size_t count,
                       ckernel_prefix *self)
   {
@@ -520,11 +520,11 @@ struct wrap_single_as_strided_ck {
   intptr_t nsrc;
 
   static inline void strided(char *dst, intptr_t dst_stride,
-                             const char *const *src, const intptr_t *src_stride,
+                             char **src, const intptr_t *src_stride,
                              size_t count, ckernel_prefix *self)
   {
     intptr_t nsrc = reinterpret_cast<self_type *>(self)->nsrc;
-    shortvector<const char *> src_copy(nsrc, src);
+    shortvector<char *> src_copy(nsrc, src);
     ckernel_prefix *child = self->get_child_ckernel(sizeof(self_type));
     expr_single_t child_fn = child->get_function<expr_single_t>();
     for (size_t i = 0; i != count; ++i) {

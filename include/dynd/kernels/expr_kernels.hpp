@@ -42,15 +42,14 @@ namespace kernels {
             }
         }
 
-        static void single_wrapper(char *dst, const char *const *src,
+        static void single_wrapper(char *dst, char **src,
                                    ckernel_prefix *rawself)
         {
             return parent_type::get_self(rawself)->single(dst, src);
         }
 
         static void strided_wrapper(char *dst, intptr_t dst_stride,
-                                    const char *const *src,
-                                    const intptr_t *src_stride, size_t count,
+                                    char **src, const intptr_t *src_stride, size_t count,
                                     ckernel_prefix *rawself)
         {
             return parent_type::get_self(rawself)
@@ -61,11 +60,11 @@ namespace kernels {
          * Default strided implementation calls single repeatedly.
          */
         inline void strided(char *dst, intptr_t dst_stride,
-                            const char *const *src, const intptr_t *src_stride,
+                            char **src, const intptr_t *src_stride,
                             size_t count)
         {
             self_type *self = parent_type::get_self(&this->base);
-            const char *src_copy[Nsrc];
+            char *src_copy[Nsrc];
             memcpy(src_copy, src, sizeof(src_copy));
             for (size_t i = 0; i != count; ++i) {
                 self->single(dst, src_copy);

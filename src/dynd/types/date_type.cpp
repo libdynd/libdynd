@@ -333,34 +333,34 @@ void date_type::get_dynamic_array_functions(
 ///////// property accessor kernels (used by property_type)
 
 namespace {
-void get_property_kernel_year_single(char *dst, const char *const *src,
+void get_property_kernel_year_single(char *dst, char **src,
                                      ckernel_prefix *DYND_UNUSED(self))
 {
     date_ymd ymd;
-    ymd.set_from_days(**reinterpret_cast<const int32_t *const *>(src));
+    ymd.set_from_days(**reinterpret_cast<int32_t **>(src));
     *reinterpret_cast<int32_t *>(dst) = ymd.year;
 }
 
-void get_property_kernel_month_single(char *dst, const char *const *src,
+void get_property_kernel_month_single(char *dst, char **src,
                                       ckernel_prefix *DYND_UNUSED(self))
 {
     date_ymd ymd;
-    ymd.set_from_days(**reinterpret_cast<const int32_t *const *>(src));
+    ymd.set_from_days(**reinterpret_cast<int32_t **>(src));
     *reinterpret_cast<int32_t *>(dst) = ymd.month;
 }
 
-void get_property_kernel_day_single(char *dst, const char *const *src,
+void get_property_kernel_day_single(char *dst, char **src,
                                     ckernel_prefix *DYND_UNUSED(self))
 {
     date_ymd ymd;
-    ymd.set_from_days(**reinterpret_cast<const int32_t *const *>(src));
+    ymd.set_from_days(**reinterpret_cast<int32_t **>(src));
     *reinterpret_cast<int32_t *>(dst) = ymd.day;
 }
 
-void get_property_kernel_weekday_single(char *dst, const char *const *src,
+void get_property_kernel_weekday_single(char *dst, char **src,
                                         ckernel_prefix *DYND_UNUSED(self))
 {
-    int32_t days = **reinterpret_cast<const int32_t *const *>(src);
+    int32_t days = **reinterpret_cast<int32_t **>(src);
     // 1970-01-05 is Monday
     int weekday = (int)((days - 4) % 7);
     if (weekday < 0) {
@@ -369,17 +369,17 @@ void get_property_kernel_weekday_single(char *dst, const char *const *src,
     *reinterpret_cast<int32_t *>(dst) = weekday;
 }
 
-void get_property_kernel_struct_single(char *dst, const char *const *src,
+void get_property_kernel_struct_single(char *dst, char **src,
                                        ckernel_prefix *DYND_UNUSED(self))
 {
     date_ymd *dst_struct = reinterpret_cast<date_ymd *>(dst);
-    dst_struct->set_from_days(**reinterpret_cast<const int32_t *const *>(src));
+    dst_struct->set_from_days(**reinterpret_cast<int32_t **>(src));
 }
 
-void set_property_kernel_struct_single(char *dst, const char *const*src,
+void set_property_kernel_struct_single(char *dst, char **src,
                 ckernel_prefix *DYND_UNUSED(self))
 {
-    const date_ymd *src_struct = *reinterpret_cast<const date_ymd *const *>(src);
+    const date_ymd *src_struct = *reinterpret_cast<date_ymd **>(src);
     *reinterpret_cast<int32_t *>(dst) = src_struct->to_days();
 }
 } // anonymous namespace
@@ -493,14 +493,14 @@ size_t date_type::make_elwise_property_setter_kernel(
 
 namespace {
 struct date_is_avail_ck {
-  static void single(char *dst, const char *const *src,
+  static void single(char *dst, char **src,
                      ckernel_prefix *DYND_UNUSED(self))
   {
-    int32_t date = **reinterpret_cast<const int32_t *const *>(src);
+    int32_t date = **reinterpret_cast<int32_t **>(src);
     *dst = date != DYND_DATE_NA;
   }
 
-  static void strided(char *dst, intptr_t dst_stride, const char *const *src,
+  static void strided(char *dst, intptr_t dst_stride, char **src,
                       const intptr_t *src_stride, size_t count,
                       ckernel_prefix *DYND_UNUSED(self))
   {
@@ -542,14 +542,14 @@ struct date_is_avail_ck {
 };
 
 struct date_assign_na_ck {
-  static void single(char *dst, const char *const *DYND_UNUSED(src),
+  static void single(char *dst, char **DYND_UNUSED(src),
                      ckernel_prefix *DYND_UNUSED(self))
   {
     *reinterpret_cast<int32_t *>(dst) = DYND_DATE_NA;
   }
 
   static void strided(char *dst, intptr_t dst_stride,
-                      const char *const *DYND_UNUSED(src),
+                      char **DYND_UNUSED(src),
                       const intptr_t *DYND_UNUSED(src_stride), size_t count,
                       ckernel_prefix *DYND_UNUSED(self))
   {

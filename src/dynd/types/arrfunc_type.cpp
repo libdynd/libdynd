@@ -230,9 +230,9 @@ static array_preamble *function___call__(const array_preamble *params, void *DYN
                          nd::array(), &eval::default_eval_context);
     // Call the ckernel
     expr_single_t usngo = ckb.get()->get_function<expr_single_t>();
-    const char *in_ptrs[max_args];
+    char *in_ptrs[max_args];
     for (int i = 0; i < nargs - 1; ++i) {
-        in_ptrs[i] = args[i+1].get_readonly_originptr();
+        in_ptrs[i] = const_cast<char *>(args[i+1].get_readonly_originptr());
     }
     usngo(args[0].get_readwrite_originptr(), in_ptrs, ckb.get());
     // Return void

@@ -121,7 +121,7 @@ TEST(Reduction, BuiltinSum_Lift0D_NoIdentity) {
                         nd::array(), &eval::default_eval_context);
 
     // Call it on the data
-    ckb(b.get_readwrite_originptr(), a.get_readonly_originptr());
+    ckb(b.get_readwrite_originptr(), const_cast<char *>(a.get_readonly_originptr()));
     EXPECT_EQ(1.25f, b.as<float>());
 }
 
@@ -153,7 +153,7 @@ TEST(Reduction, BuiltinSum_Lift0D_WithIdentity) {
                         nd::array(), &eval::default_eval_context);
 
     // Call it on the data
-    ckb(b.get_readwrite_originptr(), a.get_readonly_originptr());
+    ckb(b.get_readwrite_originptr(), const_cast<char *>(a.get_readonly_originptr()));
     EXPECT_EQ(100.f + 1.25f, b.as<float>());
 }
 
@@ -185,7 +185,7 @@ TEST(Reduction, BuiltinSum_Lift1D_NoIdentity) {
                         nd::array(), &eval::default_eval_context);
 
     // Call it on the data
-    ckb(b.get_readwrite_originptr(), a.get_readonly_originptr());
+    ckb(b.get_readwrite_originptr(), const_cast<char *>(a.get_readonly_originptr()));
     EXPECT_EQ(vals0[0] + vals0[1] + vals0[2] + vals0[3] + vals0[4], b.as<float>());
 
     // Instantiate it again with some different data
@@ -199,7 +199,7 @@ TEST(Reduction, BuiltinSum_Lift1D_NoIdentity) {
                         nd::array(), &eval::default_eval_context);
 
     // Call it on the data
-    ckb(b.get_readwrite_originptr(), a.get_readonly_originptr());
+    ckb(b.get_readwrite_originptr(), const_cast<char *>(a.get_readonly_originptr()));
     EXPECT_EQ(vals1[0], b.as<float>());
 }
 
@@ -232,7 +232,7 @@ TEST(Reduction, BuiltinSum_Lift1D_WithIdentity) {
                         nd::array(), &eval::default_eval_context);
 
     // Call it on the data
-    ckb(b.get_readwrite_originptr(), a.get_readonly_originptr());
+    ckb(b.get_readwrite_originptr(), const_cast<char *>(a.get_readonly_originptr()));
     EXPECT_EQ(100.f + vals0[0] + vals0[1] + vals0[2] + vals0[3] + vals0[4], b.as<float>());
 }
 
@@ -263,7 +263,7 @@ TEST(Reduction, BuiltinSum_Lift2D_StridedStrided_ReduceReduce) {
                         nd::array(), &eval::default_eval_context);
 
     // Call it on the data
-    ckb(b.get_readwrite_originptr(), a.get_readonly_originptr());
+    ckb(b.get_readwrite_originptr(), const_cast<char *>(a.get_readonly_originptr()));
     EXPECT_EQ(1.5f + 2.f + 7.f - 2.25f + 7.f + 2.125f, b.as<float>());
 
     // Instantiate it again with some different data
@@ -277,7 +277,7 @@ TEST(Reduction, BuiltinSum_Lift2D_StridedStrided_ReduceReduce) {
                         nd::array(), &eval::default_eval_context);
 
     // Call it on the data
-    ckb(b.get_readwrite_originptr(), a.get_readonly_originptr());
+    ckb(b.get_readwrite_originptr(), const_cast<char *>(a.get_readonly_originptr()));
     EXPECT_EQ(1.5f - 2.f, b.as<float>());
 }
 
@@ -308,7 +308,7 @@ TEST(Reduction, BuiltinSum_Lift2D_StridedStrided_ReduceReduce_KeepDim) {
                         nd::array(), &eval::default_eval_context);
 
     // Call it on the data
-    ckb(b.get_readwrite_originptr(), a.get_readonly_originptr());
+    ckb(b.get_readwrite_originptr(), const_cast<char *>(a.get_readonly_originptr()));
     EXPECT_EQ(1.5f + 2.f + 7.f - 2.25f + 7.f + 2.125f, b(0, 0).as<float>());
 }
 
@@ -340,7 +340,7 @@ TEST(Reduction, BuiltinSum_Lift2D_StridedStrided_BroadcastReduce) {
                         nd::array(), &eval::default_eval_context);
 
     // Call it on the data
-    ckb(b.get_readwrite_originptr(), a.get_readonly_originptr());
+    ckb(b.get_readwrite_originptr(), const_cast<char *>(a.get_readonly_originptr()));
     ASSERT_EQ(2, b.get_shape()[0]);
     EXPECT_EQ(1.5f + 2.f + 7.f, b(0).as<float>());
     EXPECT_EQ(-2.25f + 7 + 2.125f, b(1).as<float>());
@@ -357,7 +357,7 @@ TEST(Reduction, BuiltinSum_Lift2D_StridedStrided_BroadcastReduce) {
                         nd::array(), &eval::default_eval_context);
 
     // Call it on the data
-    ckb(b.get_readwrite_originptr(), a.get_readonly_originptr());
+    ckb(b.get_readwrite_originptr(), const_cast<char *>(a.get_readonly_originptr()));
     ASSERT_EQ(1, b.get_shape()[0]);
     EXPECT_EQ(1.5f - 2.f, b(0).as<float>());
 }
@@ -390,7 +390,7 @@ TEST(Reduction, BuiltinSum_Lift2D_StridedStrided_BroadcastReduce_KeepDim) {
                         nd::array(), &eval::default_eval_context);
 
     // Call it on the data
-    ckb(b.get_readwrite_originptr(), a.get_readonly_originptr());
+    ckb(b.get_readwrite_originptr(), const_cast<char *>(a.get_readonly_originptr()));
     ASSERT_EQ(2, b.get_shape()[0]);
     EXPECT_EQ(1.5f + 2.f + 7.f, b(0, 0).as<float>());
     EXPECT_EQ(-2.25f + 7 + 2.125f, b(1, 0).as<float>());
@@ -424,7 +424,7 @@ TEST(Reduction, BuiltinSum_Lift2D_StridedStrided_ReduceBroadcast) {
                         nd::array(), &eval::default_eval_context);
 
     // Call it on the data
-    ckb(b.get_readwrite_originptr(), a.get_readonly_originptr());
+    ckb(b.get_readwrite_originptr(), const_cast<char *>(a.get_readonly_originptr()));
     ASSERT_EQ(3, b.get_shape()[0]);
     EXPECT_EQ(1.5f - 2.25f, b(0).as<float>());
     EXPECT_EQ(2.f + 7.f, b(1).as<float>());
@@ -442,7 +442,7 @@ TEST(Reduction, BuiltinSum_Lift2D_StridedStrided_ReduceBroadcast) {
                         nd::array(), &eval::default_eval_context);
 
     // Call it on the data
-    ckb(b.get_readwrite_originptr(), a.get_readonly_originptr());
+    ckb(b.get_readwrite_originptr(), const_cast<char *>(a.get_readonly_originptr()));
     ASSERT_EQ(2, b.get_shape()[0]);
     EXPECT_EQ(1.5f, b(0).as<float>());
     EXPECT_EQ(-2.f, b(1).as<float>());
@@ -476,7 +476,7 @@ TEST(Reduction, BuiltinSum_Lift2D_StridedStrided_ReduceBroadcast_KeepDim) {
                         nd::array(), &eval::default_eval_context);
 
     // Call it on the data
-    ckb(b.get_readwrite_originptr(), a.get_readonly_originptr());
+    ckb(b.get_readwrite_originptr(), const_cast<char *>(a.get_readonly_originptr()));
     ASSERT_EQ(3, b.get_shape()[1]);
     EXPECT_EQ(1.5f - 2.25f, b(0, 0).as<float>());
     EXPECT_EQ(2.f + 7.f, b(0, 1).as<float>());
@@ -511,7 +511,7 @@ TEST(Reduction, BuiltinSum_Lift3D_StridedStridedStrided_ReduceReduceReduce) {
                         nd::array(), &eval::default_eval_context);
 
     // Call it on the data
-    ckb(b.get_readwrite_originptr(), a.get_readonly_originptr());
+    ckb(b.get_readwrite_originptr(), const_cast<char *>(a.get_readonly_originptr()));
     EXPECT_EQ(1.5f - 2.375f + 2.f + 1.25f + 7.f - 0.5f -
               2.25f + 1.f + 7.f + 2.125f + 0.25f,
               b.as<float>());
@@ -545,7 +545,7 @@ TEST(Reduction, BuiltinSum_Lift3D_StridedStridedStrided_BroadcastReduceReduce) {
                         nd::array(), &eval::default_eval_context);
 
     // Call it on the data
-    ckb(b.get_readwrite_originptr(), a.get_readonly_originptr());
+    ckb(b.get_readwrite_originptr(), const_cast<char *>(a.get_readonly_originptr()));
     ASSERT_EQ(2, b.get_shape()[0]);
     EXPECT_EQ(1.5f - 2.375f + 2.f + 1.25f + 7.f - 0.5f,
               b(0).as<float>());
@@ -582,7 +582,7 @@ TEST(Reduction, BuiltinSum_Lift3D_StridedStridedStrided_ReduceBroadcastReduce) {
                         nd::array(), &eval::default_eval_context);
 
     // Call it on the data
-    ckb(b.get_readwrite_originptr(), a.get_readonly_originptr());
+    ckb(b.get_readwrite_originptr(), const_cast<char *>(a.get_readonly_originptr()));
     ASSERT_EQ(3, b.get_shape()[0]);
     EXPECT_EQ(1.5f - 2.375f -2.25f + 1.f,
               b(0).as<float>());

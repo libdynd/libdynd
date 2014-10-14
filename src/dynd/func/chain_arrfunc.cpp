@@ -21,7 +21,7 @@ struct unary_heap_chain_ck : public kernels::general_ck<unary_heap_chain_ck> {
   arrmeta_holder m_buf_arrmeta;
   vector<intptr_t> m_buf_shape;
 
-  static void single(char *dst, const char *const *src, ckernel_prefix *rawself)
+  static void single(char *dst, char **src, ckernel_prefix *rawself)
   {
     self_type *self = get_self(rawself);
     // Allocate a temporary buffer on the heap
@@ -35,7 +35,7 @@ struct unary_heap_chain_ck : public kernels::general_ck<unary_heap_chain_ck> {
     second_fn(dst, &buf_data, second);
   }
 
-  static void strided(char *dst, intptr_t dst_stride, const char *const *src,
+  static void strided(char *dst, intptr_t dst_stride, char **src,
                       const intptr_t *src_stride, size_t count,
                       ckernel_prefix *rawself)
   {
@@ -49,7 +49,7 @@ struct unary_heap_chain_ck : public kernels::general_ck<unary_heap_chain_ck> {
     expr_strided_t first_fn = first->get_function<expr_strided_t>();
     ckernel_prefix *second = self->get_child_ckernel(self->m_second_offset);
     expr_strided_t second_fn = second->get_function<expr_strided_t>();
-    const char *src0 = src[0];
+    char *src0 = src[0];
     intptr_t src0_stride = src_stride[0];
 
     size_t chunk_size = std::min(count, (size_t)DYND_BUFFER_CHUNK_SIZE);

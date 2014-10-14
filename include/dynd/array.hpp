@@ -1614,7 +1614,7 @@ array memmap(const std::string& filename,
  *
  * \returns  The index of the found element, or -1 if not found.
  */
-intptr_t binary_search(const array &n, const char *data, const char *arrmeta);
+intptr_t binary_search(const array &n, const char *arrmeta, const char *data);
 
 array groupby(const array& data_values, const array& by,
                 const ndt::type& groups = ndt::type());

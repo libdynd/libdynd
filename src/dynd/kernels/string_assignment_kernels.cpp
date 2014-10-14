@@ -24,7 +24,7 @@ namespace {
         intptr_t m_dst_data_size, m_src_data_size;
         bool m_overflow_check;
 
-        inline void single(char *dst, const char *src)
+        inline void single(char *dst, char *src)
         {
             char *dst_end = dst + m_dst_data_size;
             const char *src_end = src + m_src_data_size;
@@ -33,7 +33,7 @@ namespace {
             uint32_t cp = 0;
 
             while (src < src_end && dst < dst_end) {
-                cp = next_fn(src, src_end);
+                cp = next_fn(const_cast<const char *&>(src), src_end);
                 // The fixedstring type uses null-terminated strings
                 if (cp == 0) {
                     // Null-terminate the destination string, and we're done
@@ -82,7 +82,7 @@ namespace {
         append_unicode_codepoint_t m_append_fn;
         const string_type_arrmeta *m_dst_arrmeta, *m_src_arrmeta;
 
-        inline void single(char *dst, const char *src)
+        inline void single(char *dst, char *src)
         {
             const string_type_arrmeta *dst_md = m_dst_arrmeta;
             const string_type_arrmeta *src_md = m_src_arrmeta;
@@ -178,7 +178,7 @@ namespace {
         append_unicode_codepoint_t m_append_fn;
         const string_type_arrmeta *m_dst_arrmeta;
 
-        inline void single(char *dst, const char *src)
+        inline void single(char *dst, char *src)
         {
             const string_type_arrmeta *dst_md = m_dst_arrmeta;
             string_type_data *dst_d = reinterpret_cast<string_type_data *>(dst);
@@ -260,7 +260,7 @@ namespace {
         intptr_t m_dst_data_size, m_src_element_size;
         bool m_overflow_check;
 
-        inline void single(char *dst, const char *src)
+        inline void single(char *dst, char *src)
         {
             char *dst_end = dst + m_dst_data_size;
             const string_type_data *src_d = reinterpret_cast<const string_type_data *>(src);
@@ -310,7 +310,7 @@ struct date_to_string_ck : public kernels::unary_ck<date_to_string_ck> {
   const char *m_src_arrmeta;
   eval::eval_context m_ectx;
 
-  inline void single(char *dst, const char *src)
+  inline void single(char *dst, char *src)
   {
     stringstream ss;
     m_src_tp.extended()->print_data(ss, m_src_arrmeta, src);

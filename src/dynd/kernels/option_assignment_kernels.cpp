@@ -24,7 +24,7 @@ struct option_to_option_ck
     size_t m_dst_assign_na_offset;
     size_t m_value_assign_offset;
 
-    inline void single(char *dst, const char *src)
+    inline void single(char *dst, char *src)
     {
         // Check whether the value is available
         // TODO: Would be nice to do this as a predicate
@@ -51,7 +51,7 @@ struct option_to_option_ck
         }
     }
 
-    inline void strided(char *dst, intptr_t dst_stride, const char *src,
+    inline void strided(char *dst, intptr_t dst_stride, char *src,
                         intptr_t src_stride, size_t count)
     {
         // Three child ckernels
@@ -133,7 +133,7 @@ struct option_to_value_ck
     // The default child is the src_is_avail ckernel
     size_t m_value_assign_offset;
 
-    inline void single(char *dst, const char *src)
+    inline void single(char *dst, char *src)
     {
         ckernel_prefix *src_is_avail = get_child_ckernel();
         expr_single_t src_is_avail_fn =
@@ -153,7 +153,7 @@ struct option_to_value_ck
         value_assign_fn(dst, &src, value_assign);
     }
 
-    inline void strided(char *dst, intptr_t dst_stride, const char *src,
+    inline void strided(char *dst, intptr_t dst_stride, char *src,
                         intptr_t src_stride, size_t count)
     {
         // Two child ckernels
@@ -270,10 +270,10 @@ struct string_to_option_bool_ck
     : public kernels::unary_ck<string_to_option_bool_ck> {
   assign_error_mode m_errmode;
 
-  inline void single(char *dst, const char *src)
+  inline void single(char *dst, char *src)
   {
     const string_type_data *std =
-        reinterpret_cast<const string_type_data *>(src);
+        reinterpret_cast<string_type_data *>(src);
     parse::string_to_bool(dst, std->begin, std->end, true, m_errmode);
   }
 };
@@ -282,10 +282,10 @@ struct string_to_option_number_ck : public kernels::unary_ck<string_to_option_nu
     type_id_t m_tid;
     assign_error_mode m_errmode;
 
-    inline void single(char *dst, const char *src)
+    inline void single(char *dst, char *src)
     {
         const string_type_data *std =
-            reinterpret_cast<const string_type_data *>(src);
+            reinterpret_cast<string_type_data *>(src);
         parse::string_to_number(dst, m_tid, std->begin, std->end, true,
                                 m_errmode);
     }
@@ -294,10 +294,10 @@ struct string_to_option_number_ck : public kernels::unary_ck<string_to_option_nu
 struct string_to_option_tp_ck : public kernels::unary_ck<string_to_option_tp_ck> {
     intptr_t m_dst_assign_na_offset;
 
-    inline void single(char *dst, const char *src)
+    inline void single(char *dst, char *src)
     {
         const string_type_data *std =
-            reinterpret_cast<const string_type_data *>(src);
+            reinterpret_cast<string_type_data *>(src);
         if (parse::matches_option_type_na_token(std->begin, std->end)) {
           // It's not available, assign an NA
           ckernel_prefix *dst_assign_na =

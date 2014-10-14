@@ -273,57 +273,57 @@ void time_type::get_dynamic_array_functions(
 ///////// property accessor kernels (used by property_type)
 
 namespace {
-void get_property_kernel_hour_single(char *dst, const char *const *src,
+void get_property_kernel_hour_single(char *dst, char **src,
                                      ckernel_prefix *DYND_UNUSED(self))
 {
-    int64_t ticks = **reinterpret_cast<const int64_t *const *>(src);
+    int64_t ticks = **reinterpret_cast<int64_t **>(src);
     *reinterpret_cast<int32_t *>(dst) =
         static_cast<int32_t>(ticks / DYND_TICKS_PER_HOUR);
 }
 
-void get_property_kernel_minute_single(char *dst, const char *const *src,
+void get_property_kernel_minute_single(char *dst, char **src,
                                        ckernel_prefix *DYND_UNUSED(self))
 {
-    int64_t ticks = **reinterpret_cast<const int64_t *const *>(src);
+    int64_t ticks = **reinterpret_cast<int64_t **>(src);
     *reinterpret_cast<int32_t *>(dst) =
         static_cast<int32_t>((ticks / DYND_TICKS_PER_MINUTE) % 60);
 }
 
-void get_property_kernel_second_single(char *dst, const char *const *src,
+void get_property_kernel_second_single(char *dst, char **src,
                                        ckernel_prefix *DYND_UNUSED(self))
 {
-    int64_t ticks = **reinterpret_cast<const int64_t *const *>(src);
+    int64_t ticks = **reinterpret_cast<int64_t **>(src);
     *reinterpret_cast<int32_t *>(dst) =
         static_cast<int32_t>((ticks / DYND_TICKS_PER_SECOND) % 60);
 }
 
-void get_property_kernel_microsecond_single(char *dst, const char *const *src,
+void get_property_kernel_microsecond_single(char *dst, char **src,
                                             ckernel_prefix *DYND_UNUSED(self))
 {
-    int64_t ticks = **reinterpret_cast<const int64_t *const *>(src);
+    int64_t ticks = **reinterpret_cast<int64_t **>(src);
     *reinterpret_cast<int32_t *>(dst) =
         static_cast<int32_t>((ticks / DYND_TICKS_PER_MICROSECOND) % 1000000);
 }
 
-void get_property_kernel_tick_single(char *dst, const char *const *src,
+void get_property_kernel_tick_single(char *dst, char **src,
                                      ckernel_prefix *DYND_UNUSED(self))
 {
-    int64_t ticks = **reinterpret_cast<const int64_t *const *>(src);
+    int64_t ticks = **reinterpret_cast<int64_t **>(src);
     *reinterpret_cast<int32_t *>(dst) = static_cast<int32_t>(ticks % 10000000);
 }
 
-void get_property_kernel_struct_single(char *dst, const char *const *src,
+void get_property_kernel_struct_single(char *dst, char **src,
                                        ckernel_prefix *DYND_UNUSED(self))
 {
     time_hmst *dst_struct = reinterpret_cast<time_hmst *>(dst);
-    dst_struct->set_from_ticks(**reinterpret_cast<const int64_t *const *>(src));
+    dst_struct->set_from_ticks(**reinterpret_cast<int64_t **>(src));
 }
 
-void set_property_kernel_struct_single(char *dst, const char *const *src,
+void set_property_kernel_struct_single(char *dst, char **src,
                                        ckernel_prefix *DYND_UNUSED(self))
 {
-    const time_hmst *src_struct =
-        *reinterpret_cast<const time_hmst *const *>(src);
+    time_hmst *src_struct =
+        *reinterpret_cast<time_hmst **>(src);
     *reinterpret_cast<int64_t *>(dst) = src_struct->to_ticks();
 }
 } // anonymous namespace
@@ -442,21 +442,21 @@ size_t time_type::make_elwise_property_setter_kernel(
 
 namespace {
 struct time_is_avail_ck {
-    static void single(char *dst, const char *const *src,
+    static void single(char *dst, char **src,
                        ckernel_prefix *DYND_UNUSED(self))
     {
-        int64_t v = **reinterpret_cast<const int64_t *const *>(src);
+        int64_t v = **reinterpret_cast<int64_t **>(src);
         *dst = v != DYND_TIME_NA;
     }
 
-    static void strided(char *dst, intptr_t dst_stride, const char *const *src,
+    static void strided(char *dst, intptr_t dst_stride, char **src,
                         const intptr_t *src_stride, size_t count,
                         ckernel_prefix *DYND_UNUSED(self))
     {
-        const char *src0 = src[0];
+        char *src0 = src[0];
         intptr_t src0_stride = src_stride[0];
         for (size_t i = 0; i != count; ++i) {
-            int64_t v = *reinterpret_cast<const int64_t *>(src0);
+            int64_t v = *reinterpret_cast<int64_t *>(src0);
             *dst = v != DYND_TIME_NA;
             dst += dst_stride;
             src0 += src0_stride;
@@ -491,14 +491,14 @@ struct time_is_avail_ck {
 };
 
 struct time_assign_na_ck {
-    static void single(char *dst, const char *const *DYND_UNUSED(src),
+    static void single(char *dst, char **DYND_UNUSED(src),
                        ckernel_prefix *DYND_UNUSED(self))
     {
         *reinterpret_cast<int64_t *>(dst) = DYND_TIME_NA;
     }
 
     static void strided(char *dst, intptr_t dst_stride,
-                        const char *const *DYND_UNUSED(src),
+                        char **DYND_UNUSED(src),
                         const intptr_t *DYND_UNUSED(src_stride), size_t count,
                         ckernel_prefix *DYND_UNUSED(self))
     {

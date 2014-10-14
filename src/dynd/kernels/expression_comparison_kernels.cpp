@@ -67,7 +67,7 @@ namespace {
             expr_single_t opchild;
             echild = reinterpret_cast<ckernel_prefix *>(eraw + b.kernel_offset);
             opchild = echild->get_function<expr_single_t>();
-            opchild(dst, &src, echild);
+            opchild(dst, const_cast<char **>(&src), echild);
 
             // Return the buffer
             return dst;

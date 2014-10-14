@@ -130,7 +130,7 @@ static void raise_string_cast_overflow_error(const ndt::type &dst_tp,
     throw overflow_error(ss.str());
 }
 
-static void string_to_bool_single(char *dst, const char *const *src,
+static void string_to_bool_single(char *dst, char **src,
                                   ckernel_prefix *extra)
 {
     string_to_builtin_kernel_extra *e =
@@ -174,7 +174,7 @@ template <> struct overflow_check<uint64_t> { inline static bool is_overflow(uin
 }};
 
 namespace { template<typename T> struct string_to_int {
-    static void single(char *dst, const char *const *src, 
+    static void single(char *dst, char **src, 
                         ckernel_prefix *extra)
     {
         string_to_builtin_kernel_extra *e = reinterpret_cast<string_to_builtin_kernel_extra *>(extra);
@@ -213,7 +213,7 @@ namespace { template<typename T> struct string_to_int {
 };}
 
 namespace { template<typename T> struct string_to_uint {
-    static void single(char *dst, const char *const *src, 
+    static void single(char *dst, char **src, 
                         ckernel_prefix *extra)
     {
         string_to_builtin_kernel_extra *e = reinterpret_cast<string_to_builtin_kernel_extra *>(extra);
@@ -249,7 +249,7 @@ namespace { template<typename T> struct string_to_uint {
     }
 };}
 
-static void string_to_int128_single(char *dst, const char *const *src,
+static void string_to_int128_single(char *dst, char **src,
                                     ckernel_prefix *extra)
 {
     string_to_builtin_kernel_extra *e =
@@ -287,7 +287,7 @@ static void string_to_int128_single(char *dst, const char *const *src,
     *reinterpret_cast<dynd_int128 *>(dst) = result;
 }
 
-static void string_to_uint128_single(char *dst, const char *const *src,
+static void string_to_uint128_single(char *dst, char **src,
                                      ckernel_prefix *extra)
 {
     string_to_builtin_kernel_extra *e =
@@ -321,7 +321,7 @@ static void string_to_uint128_single(char *dst, const char *const *src,
     *reinterpret_cast<dynd_uint128 *>(dst) = result;
 }
 
-static void string_to_float32_single(char *dst, const char *const *src,
+static void string_to_float32_single(char *dst, char **src,
                                      ckernel_prefix *extra)
 {
     string_to_builtin_kernel_extra *e =
@@ -357,7 +357,7 @@ static void string_to_float32_single(char *dst, const char *const *src,
     }
 }
 
-static void string_to_float64_single(char *dst, const char *const *src,
+static void string_to_float64_single(char *dst, char **src,
                         ckernel_prefix *extra)
 {
     string_to_builtin_kernel_extra *e = reinterpret_cast<string_to_builtin_kernel_extra *>(extra);
@@ -370,7 +370,7 @@ static void string_to_float64_single(char *dst, const char *const *src,
     *reinterpret_cast<double *>(dst) = value;
 }
 
-static void string_to_float16_single(char *dst, const char *const *src,
+static void string_to_float16_single(char *dst, char **src,
                         ckernel_prefix *extra)
 {
     string_to_builtin_kernel_extra *e =
@@ -381,7 +381,7 @@ static void string_to_float16_single(char *dst, const char *const *src,
 }
 
 static void string_to_float128_single(char *DYND_UNUSED(dst),
-                                      const char *const *DYND_UNUSED(src),
+                                      char **DYND_UNUSED(src),
                                       ckernel_prefix *DYND_UNUSED(self))
 {
     throw std::runtime_error("TODO: implement string_to_float128_single");
@@ -389,7 +389,7 @@ static void string_to_float128_single(char *DYND_UNUSED(dst),
 
 static void
 string_to_complex_float32_single(char *DYND_UNUSED(dst),
-                                 const char *const *DYND_UNUSED(src),
+                                 char **DYND_UNUSED(src),
                                  ckernel_prefix *DYND_UNUSED(self))
 {
     throw std::runtime_error("TODO: implement string_to_complex_float32_single");
@@ -397,7 +397,7 @@ string_to_complex_float32_single(char *DYND_UNUSED(dst),
 
 static void
 string_to_complex_float64_single(char *DYND_UNUSED(dst),
-                                 const char *const *DYND_UNUSED(src),
+                                 char **DYND_UNUSED(src),
                                  ckernel_prefix *DYND_UNUSED(self))
 {
     throw std::runtime_error("TODO: implement string_to_complex_float64_single");
@@ -470,7 +470,7 @@ namespace {
         eval::eval_context ectx;
         const char *dst_arrmeta;
 
-        static void single(char *dst, const char *const *src,
+        static void single(char *dst, char **src,
                             ckernel_prefix *extra)
         {
             extra_type *e = reinterpret_cast<extra_type *>(extra);
@@ -541,5 +541,5 @@ void dynd::assign_utf8_string_to_builtin(type_id_t dst_type_id, char *dst,
     make_string_to_builtin_assignment_kernel(
         &k, 0, dst_type_id, dt, reinterpret_cast<const char *>(&md),
         kernel_request_single, ectx);
-    k(dst, reinterpret_cast<const char *>(&d));
+    k(dst, reinterpret_cast<char *>(&d));
 }

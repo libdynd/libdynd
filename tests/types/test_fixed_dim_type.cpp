@@ -114,7 +114,7 @@ TEST(FixedDimType, AssignKernel_ScalarToFixed) {
     make_assignment_kernel(&k, 0, a.get_type(), a.get_arrmeta(), b.get_type(),
                            b.get_arrmeta(), kernel_request_single,
                            &eval::default_eval_context);
-    k(a.get_readwrite_originptr(), b.get_readonly_originptr());
+    k(a.get_readwrite_originptr(), const_cast<char *>(b.get_readonly_originptr()));
     EXPECT_EQ(9, a(0).as<int>());
     EXPECT_EQ(9, a(1).as<int>());
     EXPECT_EQ(9, a(2).as<int>());
@@ -133,7 +133,7 @@ TEST(FixedDimType, AssignKernel_FixedToFixed) {
     make_assignment_kernel(&k, 0, a.get_type(), a.get_arrmeta(), b.get_type(),
                            b.get_arrmeta(), kernel_request_single,
                            &eval::default_eval_context);
-    k(a.get_readwrite_originptr(), b.get_readonly_originptr());
+    k(a.get_readwrite_originptr(), const_cast<char *>(b.get_readonly_originptr()));
     EXPECT_EQ(3, a(0).as<int>());
     EXPECT_EQ(5, a(1).as<int>());
     EXPECT_EQ(7, a(2).as<int>());

@@ -15,30 +15,30 @@ using namespace dynd;
 namespace {
     template<class T, class Accum>
     struct sum_reduction {
-        static void single(char *dst, const char *const *src,
+        static void single(char *dst, char **src,
                            ckernel_prefix *DYND_UNUSED(self))
         {
             *reinterpret_cast<T *>(dst) =
                 *reinterpret_cast<T *>(dst) +
-                **reinterpret_cast<const T *const *>(src);
+                **reinterpret_cast<T **>(src);
         }
 
         static void strided(char *dst, intptr_t dst_stride,
-                            const char *const *src, const intptr_t *src_stride,
+                            char **src, const intptr_t *src_stride,
                             size_t count, ckernel_prefix *DYND_UNUSED(self))
         {
-            const char *src0 = src[0];
+            char *src0 = src[0];
             intptr_t src0_stride = src_stride[0];
             if (dst_stride == 0) {
                 Accum s = 0;
                 for (size_t i = 0; i < count; ++i) {
-                    s = s + *reinterpret_cast<const T *>(src0);
+                    s = s + *reinterpret_cast<T *>(src0);
                     src0 += src0_stride;
                 }
-                *reinterpret_cast<T *>(dst) = static_cast<T>(*reinterpret_cast<const T *>(dst) + s);
+                *reinterpret_cast<T *>(dst) = static_cast<T>(*reinterpret_cast<T *>(dst) + s);
             } else {
                 for (size_t i = 0; i < count; ++i) {
-                    *reinterpret_cast<T *>(dst) = *reinterpret_cast<T *>(dst) + *reinterpret_cast<const T *>(src0);
+                    *reinterpret_cast<T *>(dst) = *reinterpret_cast<T *>(dst) + *reinterpret_cast<T *>(src0);
                     dst += dst_stride;
                     src0 += src0_stride;
                 }
@@ -139,13 +139,13 @@ namespace {
         intptr_t m_minp;
         intptr_t m_src_dim_size, m_src_stride;
 
-        inline void single(char *dst, const char *src)
+        inline void single(char *dst, char *src)
         {
             intptr_t minp = m_minp, countp = 0;
             intptr_t src_dim_size = m_src_dim_size, src_stride = m_src_stride;
             double result = 0;
             for (intptr_t i = 0; i < src_dim_size; ++i) {
-                double v = *reinterpret_cast<const double *>(src);
+                double v = *reinterpret_cast<double *>(src);
                 if (!DYND_ISNAN(v)) {
                     result += v;
                     ++countp;

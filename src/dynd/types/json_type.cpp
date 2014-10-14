@@ -205,7 +205,7 @@ struct string_to_json_ck
     const char *m_dst_arrmeta;
     bool m_validate;
 
-    inline void single(char *dst, const char *src)
+    inline void single(char *dst, char *src)
     {
         const json_type_arrmeta *md =
             reinterpret_cast<const json_type_arrmeta *>(m_dst_arrmeta);

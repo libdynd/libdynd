@@ -216,12 +216,12 @@ namespace {
         size_t offsets[N];
 
         // Only the single kernel is needed for this one
-        static void single(char *dst, const char * const *src,
+        static void single(char *dst, char **src,
                         ckernel_prefix *extra)
         {
             extra_type *e = reinterpret_cast<extra_type *>(extra);
             const size_t *offsets = e->offsets;
-            const char *src_modified[N];
+            char *src_modified[N];
             for (int i = 0; i < N; ++i) {
                 src_modified[i] = src[i] + offsets[i];
             }
@@ -244,13 +244,13 @@ namespace {
         // After this are src_count size_t offsets
 
        // Only the single kernel is needed for this one
-        static void single(char *dst, const char * const *src,
+        static void single(char *dst, char **src,
                         ckernel_prefix *extra)
         {
             extra_type *e = reinterpret_cast<extra_type *>(extra);
             size_t src_count = e->src_count;
             const size_t *offsets = reinterpret_cast<const size_t *>(e + 1);
-            shortvector<const char *> src_modified(src_count);
+            shortvector<char *> src_modified(src_count);
             for (size_t i = 0; i != src_count; ++i) {
                 src_modified[i] = src[i] + offsets[i];
             }
@@ -314,12 +314,12 @@ static size_t make_expr_type_offset_applier(
     }   
 }
 
-static void src_deref_single(char *dst, const char *const *src,
+static void src_deref_single(char *dst, char **src,
                              ckernel_prefix *self)
 {
     ckernel_prefix *child = self->get_child_ckernel(sizeof(ckernel_prefix));
     expr_single_t child_fn = child->get_function<expr_single_t>();
-    child_fn(dst, reinterpret_cast<const char *const *>(*src), child);
+    child_fn(dst, reinterpret_cast<char **>(*src), child);
 }
 
 static size_t make_src_deref_ckernel(ckernel_builder *ckb, intptr_t ckb_offset) {

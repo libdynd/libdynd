@@ -115,7 +115,7 @@ bool option_type::is_avail(const char *arrmeta, const char *data,
                     &arrmeta, kernel_request_single, nd::array(), ectx);
     ckernel_prefix *ckp = ckb.get();
     char result;
-    ckp->get_function<expr_single_t>()(&result, &data, ckp);
+    ckp->get_function<expr_single_t>()(&result, const_cast<char **>(&data), ckp);
     return result != 0;
   }
 }

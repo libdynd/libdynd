@@ -26,11 +26,11 @@ struct neighborhood_ck : kernels::expr_ck<neighborhood_ck<N>, N> {
     // local index of first in of bounds element in the neighborhood
     // local index of first out of bounds element in the neighborhood
 
-    inline void single(char *dst, const char *const *src) {
+    inline void single(char *dst, char **src) {
         ckernel_prefix *child = self_type::get_child_ckernel();
         expr_single_t child_fn = child->get_function<expr_single_t>();
 
-        const char *src_copy[N];
+        char *src_copy[N];
         memcpy(src_copy, src, sizeof(src_copy));
         for (intptr_t j = 0; j < N; ++j) {
             src_copy[j] += src_offset[j];

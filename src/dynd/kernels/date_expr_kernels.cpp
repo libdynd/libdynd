@@ -40,14 +40,14 @@ namespace {
         const char *format;
         const string_type_arrmeta *dst_arrmeta;
 
-        static void single_unary(char *dst, const char *const *src,
+        static void single_unary(char *dst, char **src,
                                  ckernel_prefix *extra)
         {
             extra_type *e = reinterpret_cast<extra_type *>(extra);
             const string_type_arrmeta *dst_md = e->dst_arrmeta;
 
             struct tm tm_val;
-            int32_t date = **reinterpret_cast<const int32_t *const *>(src);
+            int32_t date = **reinterpret_cast<int32_t **>(src);
             // Convert the date to a 'struct tm'
             date_ymd ymd;
             ymd.set_from_days(date);
@@ -84,7 +84,7 @@ namespace {
         }
 
         static void strided_unary(char *dst, intptr_t dst_stride,
-                                  const char *const *src,
+                                  char **src,
                                   const intptr_t *src_stride, size_t count,
                                   ckernel_prefix *extra)
         {
@@ -100,11 +100,11 @@ namespace {
             disable_invalid_parameter_handler raii;
 #endif
             memory_block_pod_allocator_api *allocator = get_memory_block_pod_allocator_api(dst_md->blockref);
-            const char *src0 = src[0];
+            char *src0 = src[0];
             intptr_t src0_stride = src_stride[0];
             for (size_t i = 0; i != count; ++i) {
                 string_type_data *dst_d = reinterpret_cast<string_type_data *>(dst);
-                int32_t date = *reinterpret_cast<const int32_t *>(src0);
+                int32_t date = *reinterpret_cast<int32_t *>(src0);
                 // Convert the date to a 'struct tm'
                 date_ymd ymd;
                 ymd.set_from_days(date);
@@ -220,13 +220,13 @@ namespace {
         ckernel_prefix base;
         int32_t year, month, day;
 
-        static void single_unary(char *dst, const char *const *src,
+        static void single_unary(char *dst, char **src,
                                  ckernel_prefix *extra)
         {
             extra_type *e = reinterpret_cast<extra_type *>(extra);
             int32_t year = e->year, month = e->month, day = e->day;
 
-            int32_t date = **reinterpret_cast<const int32_t *const *>(src);
+            int32_t date = **reinterpret_cast<int32_t **>(src);
             // Convert the date to YMD form
             date_ymd ymd;
             ymd.set_from_days(date);
@@ -275,7 +275,7 @@ namespace {
             *reinterpret_cast<int32_t *>(dst) = ymd.to_days();
         }
         static void strided_unary(char *dst, intptr_t dst_stride,
-                                  const char *const *src,
+                                  char **src,
                                   const intptr_t *src_stride, size_t count,
                                   ckernel_prefix *extra)
         {

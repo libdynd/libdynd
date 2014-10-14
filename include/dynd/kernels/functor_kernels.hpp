@@ -87,16 +87,16 @@ struct functor_ck;
         functor_ck(const func_type &func) : func(func) { \
         } \
 \
-        inline void single(char *dst, const char *const *src) { \
+        inline void single(char *dst, char **src) { \
             *reinterpret_cast<R *>(dst) = this->func(DYND_PP_JOIN_ELWISE_1(PASS, (,), \
                 DYND_PP_META_NAME_RANGE(this->from_src, N), DYND_PP_META_AT_RANGE(src, N))); \
         } \
 \
         inline void strided(char *dst, intptr_t dst_stride, \
-                            const char *const *src, const intptr_t *src_stride, \
+                            char **src, const intptr_t *src_stride, \
                             size_t count) { \
             DYND_PP_JOIN_ELWISE_1(DYND_PP_META_DECL_ASGN, (;), \
-                DYND_PP_REPEAT_1(const char *, N), DYND_PP_META_NAME_RANGE(src, N), DYND_PP_META_AT_RANGE(src, N)); \
+                DYND_PP_REPEAT_1(char *, N), DYND_PP_META_NAME_RANGE(src, N), DYND_PP_META_AT_RANGE(src, N)); \
             DYND_PP_JOIN_ELWISE_1(DYND_PP_META_DECL_ASGN, (;), \
                 DYND_PP_REPEAT_1(intptr_t, N), DYND_PP_META_NAME_RANGE(src_stride, N), DYND_PP_META_AT_RANGE(src_stride, N)); \
             for (size_t i = 0; i < count; ++i) { \
@@ -152,16 +152,16 @@ struct functor_ck;
         functor_ck(const func_type &func, const nd::array &kwds) : func(func), buffer(kwds) { \
         } \
 \
-        inline void single(char *dst, const char *const *src) { \
+        inline void single(char *dst, char **src) { \
             *reinterpret_cast<R *>(dst) = this->func(DYND_PP_JOIN_ELWISE_1(PASS, (,), \
                 DYND_PP_META_NAME_RANGE(this->from_src, N), DYND_PP_META_AT_RANGE(src, N)), &this->buffer); \
         } \
 \
         inline void strided(char *dst, intptr_t dst_stride, \
-                            const char *const *src, const intptr_t *src_stride, \
+                            char **src, const intptr_t *src_stride, \
                             size_t count) { \
             DYND_PP_JOIN_ELWISE_1(DYND_PP_META_DECL_ASGN, (;), \
-                DYND_PP_REPEAT_1(const char *, N), DYND_PP_META_NAME_RANGE(src, N), DYND_PP_META_AT_RANGE(src, N)); \
+                DYND_PP_REPEAT_1(char *, N), DYND_PP_META_NAME_RANGE(src, N), DYND_PP_META_AT_RANGE(src, N)); \
             DYND_PP_JOIN_ELWISE_1(DYND_PP_META_DECL_ASGN, (;), \
                 DYND_PP_REPEAT_1(intptr_t, N), DYND_PP_META_NAME_RANGE(src_stride, N), DYND_PP_META_AT_RANGE(src_stride, N)); \
             for (size_t i = 0; i < count; ++i) { \
@@ -226,16 +226,16 @@ DYND_PP_JOIN_MAP(FUNCTOR_CK, (), DYND_PP_RANGE(1, DYND_PP_INC(DYND_SRC_MAX)))
         functor_ck(const func_type &func) : func(func) { \
         } \
 \
-        inline void single(char *dst, const char *const *src) { \
+        inline void single(char *dst, char **src) { \
             this->func(PASS(this->from_dst, dst), DYND_PP_JOIN_ELWISE_1(PASS, (,), \
                 DYND_PP_META_NAME_RANGE(this->from_src, N), DYND_PP_META_AT_RANGE(src, N))); \
         } \
 \
         inline void strided(char *dst, intptr_t dst_stride, \
-                            const char *const *src, const intptr_t *src_stride, \
+                            char **src, const intptr_t *src_stride, \
                             size_t count) { \
             DYND_PP_JOIN_ELWISE_1(DYND_PP_META_DECL_ASGN, (;), \
-                DYND_PP_REPEAT_1(const char *, N), DYND_PP_META_NAME_RANGE(src, N), DYND_PP_META_AT_RANGE(src, N)); \
+                DYND_PP_REPEAT_1(char *, N), DYND_PP_META_NAME_RANGE(src, N), DYND_PP_META_AT_RANGE(src, N)); \
             DYND_PP_JOIN_ELWISE_1(DYND_PP_META_DECL_ASGN, (;), \
                 DYND_PP_REPEAT_1(intptr_t, N), DYND_PP_META_NAME_RANGE(src_stride, N), DYND_PP_META_AT_RANGE(src_stride, N)); \
             for (size_t i = 0; i < count; ++i) { \
@@ -293,16 +293,16 @@ DYND_PP_JOIN_MAP(FUNCTOR_CK, (), DYND_PP_RANGE(1, DYND_PP_INC(DYND_SRC_MAX)))
         functor_ck(const func_type &func, const nd::array &kwds) : func(func), buffer(kwds) { \
         } \
 \
-        inline void single(char *dst, const char *const *src) { \
+        inline void single(char *dst, char **src) { \
             this->func(PASS(this->from_dst, dst), DYND_PP_JOIN_ELWISE_1(PASS, (,), \
                 DYND_PP_META_NAME_RANGE(this->from_src, N), DYND_PP_META_AT_RANGE(src, N)), &this->buffer); \
         } \
 \
         inline void strided(char *dst, intptr_t dst_stride, \
-                            const char *const *src, const intptr_t *src_stride, \
+                            char **src, const intptr_t *src_stride, \
                             size_t count) { \
             DYND_PP_JOIN_ELWISE_1(DYND_PP_META_DECL_ASGN, (;), \
-                DYND_PP_REPEAT_1(const char *, N), DYND_PP_META_NAME_RANGE(src, N), DYND_PP_META_AT_RANGE(src, N)); \
+                DYND_PP_REPEAT_1(char *, N), DYND_PP_META_NAME_RANGE(src, N), DYND_PP_META_AT_RANGE(src, N)); \
             DYND_PP_JOIN_ELWISE_1(DYND_PP_META_DECL_ASGN, (;), \
                 DYND_PP_REPEAT_1(intptr_t, N), DYND_PP_META_NAME_RANGE(src_stride, N), DYND_PP_META_AT_RANGE(src_stride, N)); \
             for (size_t i = 0; i < count; ++i) { \

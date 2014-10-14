@@ -323,23 +323,23 @@ void string_type::make_string_iter(dim_iter *out_di, string_encoding_t encoding,
 
 namespace {
 struct string_is_avail_ck {
-    static void single(char *dst, const char *const *src,
+    static void single(char *dst, char **src,
                        ckernel_prefix *DYND_UNUSED(self))
     {
-        const string_type_data *std =
-            *reinterpret_cast<const string_type_data *const *>(src);
+        string_type_data *std =
+            *reinterpret_cast<string_type_data **>(src);
         *dst = std->begin != NULL;
     }
 
-    static void strided(char *dst, intptr_t dst_stride, const char *const *src,
+    static void strided(char *dst, intptr_t dst_stride, char **src,
                         const intptr_t *src_stride, size_t count,
                         ckernel_prefix *DYND_UNUSED(self))
     {
-        const char *src0 = src[0];
+        char *src0 = src[0];
         intptr_t src0_stride = src_stride[0];
         for (size_t i = 0; i != count; ++i) {
-            const string_type_data *std =
-                reinterpret_cast<const string_type_data *>(src0);
+            string_type_data *std =
+                reinterpret_cast<string_type_data *>(src0);
             *dst = std->begin != NULL;
             dst += dst_stride;
             src0 += src0_stride;
@@ -374,11 +374,11 @@ struct string_is_avail_ck {
 };
 
 struct string_assign_na_ck {
-    static void single(char *dst, const char *const *DYND_UNUSED(src),
+    static void single(char *dst, char **DYND_UNUSED(src),
                        ckernel_prefix *DYND_UNUSED(self))
     {
-        const string_type_data *std =
-            reinterpret_cast<const string_type_data *>(dst);
+        string_type_data *std =
+            reinterpret_cast<string_type_data *>(dst);
         if (std->begin != NULL) {
             throw invalid_argument("Cannot assign an NA to a dynd string after "
                                    "it has been allocated");
@@ -386,13 +386,13 @@ struct string_assign_na_ck {
     }
 
     static void strided(char *dst, intptr_t dst_stride,
-                        const char *const *DYND_UNUSED(src),
+                        char **DYND_UNUSED(src),
                         const intptr_t *DYND_UNUSED(src_stride), size_t count,
                         ckernel_prefix *DYND_UNUSED(self))
     {
         for (size_t i = 0; i != count; ++i, dst += dst_stride) {
-            const string_type_data *std =
-                reinterpret_cast<const string_type_data *>(dst);
+            string_type_data *std =
+                reinterpret_cast<string_type_data *>(dst);
             if (std->begin != NULL) {
                 throw invalid_argument(
                     "Cannot assign an NA to a dynd string after "

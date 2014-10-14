@@ -42,7 +42,7 @@ pointer_type::~pointer_type()
 void pointer_type::print_data(std::ostream& o, const char *arrmeta, const char *data) const
 {
     const pointer_type_arrmeta *md = reinterpret_cast<const pointer_type_arrmeta *>(arrmeta);
-    const char *target_data = *reinterpret_cast<const char * const *>(data) + md->offset;
+    const char *target_data = *reinterpret_cast<const char *const *>(data) + md->offset;
     m_target_tp.print_data(o, arrmeta + sizeof(pointer_type_arrmeta), target_data);
 }
 
