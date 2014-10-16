@@ -39,3 +39,17 @@ class neighborhood_arrfunc : arrfunc {
 then I would do
 
 nd::arrfunc neighborhood_calc = make_neighborhood_arrfunc(strided_calc);
+
+## Low-level C++ access
+
+Most functions that we make arrfuncs from in DyND, like sin(x), cos(x), ..., should be available as pure C++ function as well as arrfuncs. This would allow users of the library to simply call those functions easily within their own C++ functions that may be passed to functor_arrfuncs. Right now, many of these functions are in source (*.cpp) files, which makes that impossible.
+
+Because we want to support CUDA, this access probably needs to be in a proper function definition, not through an instance of arrfunc.
+
+## Callable versus Arrfunc
+
+DyND currently has both callables and arrfuncs. What is the purpose of one versus the other?
+
+## Pluggable types
+
+If someone implements a new type, like float4096, how an arrfuncs like sin(x) be extended to take advantage of that?
