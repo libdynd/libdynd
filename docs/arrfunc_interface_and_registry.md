@@ -44,6 +44,8 @@ nd::array operator ()(const nd::array &a0, ..., const nd::array &an, const K0 &k
 };
 ```
 
+(Actually, we probably don't even have to restrict arrfuncs to a fixed number of srcs, we just need to query different prototypes.)
+
 ## Low-level C++ access
 
 Most functions that we make arrfuncs from in DyND, like sin(x), cos(x), ..., should be available as pure C++ function as well as arrfuncs. This would allow users of the library to simply call those functions easily within their own C++ functions that may be passed to functor_arrfuncs. Right now, many of these functions are in source (*.cpp) files, which makes that impossible.
