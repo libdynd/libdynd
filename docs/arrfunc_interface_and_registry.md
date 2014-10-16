@@ -46,16 +46,24 @@ nd::array operator ()(const nd::array &a0, ..., const nd::array &an, const K0 &k
 
 (Actually, we probably don't even have to restrict arrfuncs to a fixed number of srcs, we just need to query different prototypes.)
 
-## Low-level C++ access
+## Default Keyword Arguments
+
+Keyword arguments need to have default values. Also, we need to be able to set it up so that keyword arguments can take values computed using other arrfuncs. An example is a keyword argument like "val_max", being the maximum value in an array. The arrfunc should be able to call max to work this out by default.
+
+## Low-Level C++ Access
 
 Most functions that we make arrfuncs from in DyND, like sin(x), cos(x), ..., should be available as pure C++ function as well as arrfuncs. This would allow users of the library to simply call those functions easily within their own C++ functions that may be passed to functor_arrfuncs. Right now, many of these functions are in source (*.cpp) files, which makes that impossible.
 
 Because we want to support CUDA, this access probably needs to be in a proper function definition, not through an instance of arrfunc.
 
+## Arrfuncs Composed Entirely of Other Arrfuncs
+
+How does one define an arrfunc that is very simple, being composed just of other arrfuncs. Maybe I want an arrfunc like (x * y - z), where x, y, z are all arrays. I should be able to very easily define that as an arrfunc.
+
 ## Callable versus Arrfunc
 
 DyND currently has both callables and arrfuncs. What is the purpose of one versus the other?
 
-## Pluggable types
+## Pluggable Types
 
 If someone implements a new type, like float4096, how an arrfuncs like sin(x) be extended to take advantage of that?
