@@ -69,10 +69,10 @@ public:
 }; // class pow_dimsym_type
 
 namespace ndt {
-  /** Makes a typevar type with the specified name and element type */
-  inline ndt::type make_typevar_dim_pow(const ndt::type &base_tp,
-                                        const nd::string &exponent,
-                                        const ndt::type &element_type)
+  /** Makes a dimensional power type with the specified base and exponent */
+  inline ndt::type make_pow_dimsym(const ndt::type &base_tp,
+                                   const nd::string &exponent,
+                                   const ndt::type &element_type)
   {
     return ndt::type(new pow_dimsym_type(base_tp, exponent, element_type),
                      false);

@@ -80,15 +80,15 @@ public:
 };
 
 namespace ndt {
-  ndt::type make_fixed_sym_dim(const ndt::type &element_tp);
+  ndt::type make_fixed_dimsym(const ndt::type &element_tp);
 
-  inline ndt::type make_fixed_sym_dim(const ndt::type &uniform_tp,
+  inline ndt::type make_fixed_dimsym(const ndt::type &uniform_tp,
                                       intptr_t ndim)
   {
     if (ndim > 0) {
-      ndt::type result = make_fixed_sym_dim(uniform_tp);
+      ndt::type result = make_fixed_dimsym(uniform_tp);
       for (intptr_t i = 1; i < ndim; ++i) {
-        result = make_fixed_sym_dim(result);
+        result = make_fixed_dimsym(result);
       }
       return result;
     }

@@ -326,7 +326,7 @@ namespace {
     };
 } // anonymous namespace
 
-ndt::type ndt::make_fixed_sym_dim(const ndt::type &element_tp)
+ndt::type ndt::make_fixed_dimsym(const ndt::type &element_tp)
 {
   // Static instances of the types, which have a reference
   // count > 0 for the lifetime of the program. This static

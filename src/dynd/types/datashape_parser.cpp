@@ -955,7 +955,7 @@ static ndt::type parse_datashape_nooption(const char *&rbegin, const char *end,
                 }
                 else if (parse::compare_range_to_literal(bbegin, bend,
                                                          "fixed")) {
-                  result = make_fixed_sym_dim(element_tp, exponent);
+                  result = make_fixed_dimsym(element_tp, exponent);
                 }
                 else if (isupper(*bbegin)) {
                   result = make_typevar_dim(nd::string(bbegin, bend),
@@ -973,24 +973,24 @@ static ndt::type parse_datashape_nooption(const char *&rbegin, const char *end,
                   if ('0' <= *bbegin && *bbegin <= '9') {
                     intptr_t dim_size =
                         parse::checked_string_to_intptr(bbegin, bend);
-                    result = ndt::make_typevar_dim_pow(
+                    result = ndt::make_pow_dimsym(
                         ndt::make_fixed_dim(dim_size, ndt::make_type<void>()),
                         exponent_name, parse_datashape(begin, end, symtable));
                   }
                   else if (parse::compare_range_to_literal(bbegin, bend,
                                                            "var")) {
-                    result = ndt::make_typevar_dim_pow(
+                    result = ndt::make_pow_dimsym(
                         ndt::make_var_dim(ndt::make_type<void>()),
                         exponent_name, parse_datashape(begin, end, symtable));
                   }
                   else if (parse::compare_range_to_literal(bbegin, bend,
                                                            "fixed")) {
-                    result = ndt::make_typevar_dim_pow(
-                        ndt::make_fixed_sym_dim(ndt::make_type<void>()),
+                    result = ndt::make_pow_dimsym(
+                        ndt::make_fixed_dimsym(ndt::make_type<void>()),
                         exponent_name, parse_datashape(begin, end, symtable));
                   }
                   else if (isupper(*bbegin)) {
-                    result = ndt::make_typevar_dim_pow(
+                    result = ndt::make_pow_dimsym(
                         ndt::make_typevar_dim(nd::string(bbegin, bend),
                                               ndt::make_type<void>()),
                         exponent_name, parse_datashape(begin, end, symtable));
@@ -1024,7 +1024,7 @@ static ndt::type parse_datashape_nooption(const char *&rbegin, const char *end,
                 result = ndt::make_var_dim(element_tp);
             } else if (parse::compare_range_to_literal(nbegin, nend,
                                                        "fixed")) {
-                result = ndt::make_fixed_sym_dim(element_tp);
+                result = ndt::make_fixed_dimsym(element_tp);
             } else if (isupper(*nbegin)) {
                 result = ndt::make_typevar_dim(nd::string(nbegin, nend),
                                              element_tp);

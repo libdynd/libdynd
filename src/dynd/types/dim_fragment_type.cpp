@@ -161,7 +161,7 @@ ndt::type dim_fragment_type::apply_to_dtype(const ndt::type& dtp) const
                     tp = ndt::make_var_dim(tp);
                     break;
                 case dim_fragment_fixed_sym:
-                    tp = ndt::make_fixed_sym_dim(tp);
+                    tp = ndt::make_fixed_dimsym(tp);
                     break;
                 default:
                     tp = ndt::make_fixed_dim(m_tagged_dims[i], tp);

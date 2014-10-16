@@ -128,7 +128,7 @@ nd::arrfunc kernels::make_builtin_sum1d_arrfunc(type_id_t tid)
     bool reduction_dimflags[1] = {true};
     lift_reduction_arrfunc(
         reinterpret_cast<arrfunc_type_data *>(sum_1d.get_readwrite_originptr()),
-        sum_ew, ndt::make_fixed_sym_dim(ndt::type(tid)), nd::array(), false, 1,
+        sum_ew, ndt::make_fixed_dimsym(ndt::type(tid)), nd::array(), false, 1,
         reduction_dimflags, true, true, false, 0);
     sum_1d.flag_as_immutable();
     return sum_1d;
@@ -221,7 +221,7 @@ nd::arrfunc kernels::make_builtin_mean1d_arrfunc(type_id_t tid, intptr_t minp)
     arrfunc_type_data *out_af =
         reinterpret_cast<arrfunc_type_data *>(mean1d.get_readwrite_originptr());
     out_af->func_proto =
-        ndt::make_funcproto(ndt::make_fixed_sym_dim(ndt::make_type<double>()),
+        ndt::make_funcproto(ndt::make_fixed_dimsym(ndt::make_type<double>()),
                             ndt::make_type<double>());
     mean1d_arrfunc_data *data = new mean1d_arrfunc_data;
     data->minp = minp;
