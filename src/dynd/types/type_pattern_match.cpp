@@ -129,8 +129,8 @@ static bool recursive_match(const ndt::type &concrete, const ndt::type &pattern,
         return false;
       }
     } else {
-      // Matching a scalar vs dimension, only case which makes sense
-      // is an ellipsis_dim
+      // Matching a scalar vs dimension, only cases which makes sense
+      // are an ellipsis_dim or a pow_dimsym
       if (pattern.get_type_id() == ellipsis_dim_type_id) {
         const nd::string &tv_name =
             pattern.tcast<ellipsis_dim_type>()->get_name();
@@ -156,7 +156,37 @@ static bool recursive_match(const ndt::type &concrete, const ndt::type &pattern,
         return recursive_match(
             concrete, pattern.tcast<ellipsis_dim_type>()->get_element_type(),
             typevars);
-      } else {
+      }
+      else if (pattern.get_type_id() == pow_dimsym_type_id) {
+        if (pattern.tcast<pow_dimsym_type>()->get_element_type().get_ndim() ==
+            0) {
+          // Look up to see if the exponent typevar is already matched
+          ndt::type &tv_type =
+              typevars[pattern.tcast<pow_dimsym_type>()->get_exponent()];
+          if (tv_type.is_null()) {
+            // Fill in the exponent by the number of dimensions left
+            tv_type = ndt::make_fixed_dim(0, ndt::make_type<void>());
+          }
+          else if (tv_type.get_type_id() == fixed_dim_type_id) {
+            // Make sure the exponent already seen matches the number of
+            // dimensions left in the concrete type
+            if (tv_type.tcast<fixed_dim_type>()->get_fixed_dim_size() != 0) {
+              return false;
+            }
+          }
+          else {
+            // The exponent is always the dim_size inside a fixed_dim_type
+            return false;
+          }
+          return recursive_match(
+              concrete, pattern.tcast<pow_dimsym_type>()->get_element_type(),
+              typevars);
+        }
+        else {
+          return false;
+        }
+      }
+      else {
         return false;
       }
     }
@@ -186,6 +216,34 @@ static bool recursive_match(const ndt::type &concrete, const ndt::type &pattern,
                    concrete.tcast<base_dim_type>()->get_element_type(),
                    pattern.tcast<base_dim_type>()->get_element_type(),
                    typevars);
+      case pow_dimsym_type_id:
+        if (recursive_match(concrete.tcast<pow_dimsym_type>()->get_base_type(),
+                            pattern.tcast<pow_dimsym_type>()->get_base_type(),
+                            typevars) &&
+            recursive_match(
+                concrete.tcast<pow_dimsym_type>()->get_element_type(),
+                pattern.tcast<pow_dimsym_type>()->get_element_type(),
+                typevars)) {
+          ndt::type &tv_type =
+              typevars[pattern.tcast<pow_dimsym_type>()->get_exponent()];
+          if (tv_type.is_null()) {
+            // This typevar hasn't been seen yet
+            tv_type = ndt::make_typevar_dim(
+                pattern.tcast<pow_dimsym_type>()->get_exponent(),
+                ndt::make_type<void>());
+            return true;
+          }
+          else {
+            // Make sure the type matches previous
+            // instances of the type var
+            return tv_type.get_type_id() == typevar_dim_type_id &&
+                   tv_type.tcast<typevar_dim_type>()->get_name() ==
+                       pattern.tcast<pow_dimsym_type>()->get_exponent();
+          }
+        }
+        else {
+          return false;
+        }
       default:
         break;
       }
@@ -229,10 +287,8 @@ static bool recursive_match(const ndt::type &concrete, const ndt::type &pattern,
             // a dim fragment of the given size.
             tv_type = ndt::make_dim_fragment(matched_ndim, concrete);
           } else {
-            // Make sure the type matches previous
-            // instances of the type var, which in
-            // this case means they should broadcast
-            // together.
+            // Make sure the type matches previous  instances of the type var,
+            // which in this case means they should broadcast together.
             if (tv_type.get_type_id() == dim_fragment_type_id) {
               ndt::type result =
                   tv_type.tcast<dim_fragment_type>()->broadcast_with_type(
@@ -293,8 +349,110 @@ static bool recursive_match(const ndt::type &concrete, const ndt::type &pattern,
             pattern.tcast<typevar_dim_type>()->get_element_type(), typevars);
       }
     } else if (pattern.get_type_id() == pow_dimsym_type_id) {
-      throw runtime_error("TODO: pow_dimsym_type pattern match");
-    } else {
+      // Look up to see if the exponent typevar is already matched
+      ndt::type &tv_type =
+          typevars[pattern.tcast<pow_dimsym_type>()->get_exponent()];
+      intptr_t exponent;
+      if (tv_type.is_null()) {
+        // Fill in the exponent by the number of dimensions left
+        exponent =
+            concrete.get_ndim() -
+            pattern.tcast<pow_dimsym_type>()->get_element_type().get_ndim();
+        tv_type = ndt::make_fixed_dim(exponent, ndt::make_type<void>());
+      }
+      else if (tv_type.get_type_id() == fixed_dim_type_id) {
+        // Make sure the exponent already seen matches the number of
+        // dimensions left in the concrete type
+        exponent = tv_type.tcast<fixed_dim_type>()->get_fixed_dim_size();
+        if (exponent !=
+            concrete.get_ndim() -
+                pattern.tcast<pow_dimsym_type>()
+                    ->get_element_type()
+                    .get_ndim()) {
+          return false;
+        }
+      } else {
+        // The exponent is always the dim_size inside a fixed_dim_type
+        return false;
+      }
+      // If the exponent is zero, the base doesn't matter, just match the rest
+      if (exponent == 0) {
+        return recursive_match(
+            concrete, pattern.tcast<pow_dimsym_type>()->get_element_type(),
+            typevars);
+      } else if (exponent < 0) {
+        return false;
+      }
+      // Get the base type
+      ndt::type base_tp = pattern.tcast<pow_dimsym_type>()->get_base_type();
+      if (base_tp.get_type_id() == typevar_dim_type_id) {
+        ndt::type &btv_type =
+            typevars[base_tp.tcast<typevar_dim_type>()->get_name()];
+        if (btv_type.is_null()) {
+          // We haven't seen this typevar yet, set it to the concrete's
+          // dimension type
+          btv_type = concrete;
+          base_tp = concrete;
+        }
+        else if (btv_type.get_ndim() > 0 &&
+                 btv_type.get_type_id() != dim_fragment_type_id) {
+          // Continue matching after substituting in the typevar for
+          // the base type
+          base_tp = btv_type;
+        }
+        else {
+          // Doesn't match if the typevar has a dim fragment or dtype in it
+          return false;
+        }
+      }
+      // Now make sure the base_tp is repeated the right number of times
+      ndt::type concrete_subtype = concrete;
+      switch (base_tp.get_type_id()) {
+        case fixed_dimsym_type_id:
+          for (intptr_t i = 0; i < exponent; ++i) {
+            switch (concrete_subtype.get_type_id()) {
+            case fixed_dimsym_type_id:
+            case fixed_dim_type_id:
+            case cfixed_dim_type_id:
+              concrete_subtype =
+                  concrete_subtype.tcast<base_dim_type>()->get_element_type();
+              break;
+            default:
+              return false;
+            }
+          }
+          break;
+        case fixed_dim_type_id: {
+          intptr_t dim_size =
+              base_tp.tcast<fixed_dim_type>()->get_fixed_dim_size();
+          for (intptr_t i = 0; i < exponent; ++i) {
+            if (concrete_subtype.get_type_id() == fixed_dim_type_id &&
+                concrete_subtype.tcast<fixed_dim_type>()
+                        ->get_fixed_dim_size() == dim_size) {
+              concrete_subtype =
+                  concrete_subtype.tcast<base_dim_type>()->get_element_type();
+            } else {
+              return false;
+            }
+          }
+          break;
+        }
+        case var_dim_type_id:
+          for (intptr_t i = 0; i < exponent; ++i) {
+            if (concrete_subtype.get_type_id() == var_dim_type_id) {
+              concrete_subtype =
+                  concrete_subtype.tcast<base_dim_type>()->get_element_type();
+            }
+          }
+          break;
+        default:
+          return false;
+      }
+      return recursive_match(
+          concrete_subtype,
+          pattern.tcast<pow_dimsym_type>()->get_element_type(), typevars);
+    }
+    else {
       return false;
     }
   }

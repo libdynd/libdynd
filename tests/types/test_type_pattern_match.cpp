@@ -130,3 +130,41 @@ TEST(TypePatternMatch, Strided) {
   EXPECT_FALSE(ndt::pattern_match(ndt::type("cfixed[3] * int32"),
                                   ndt::type("4 * int32")));
 }
+
+TEST(TypePatternMatch, Pow) {
+  // Match pow_dimsym against itself
+  EXPECT_TRUE(ndt::pattern_match(ndt::type("fixed**N * int32"),
+                                 ndt::type("fixed**N * int32")));
+  EXPECT_TRUE(ndt::pattern_match(ndt::type("fixed**N * int32"),
+                                 ndt::type("fixed**M * int32")));
+  // Match fixed_dim against fixed_dimsym within the power's base
+  EXPECT_TRUE(ndt::pattern_match(ndt::type("3**N * int32"),
+                                 ndt::type("fixed**N * int32")));
+  EXPECT_TRUE(ndt::pattern_match(ndt::type("3**N * int32"),
+                                 ndt::type("fixed**M * int32")));
+  // Ensure that the typevar D is constrained in the power's base
+  EXPECT_TRUE(ndt::pattern_match(ndt::type("fixed * fixed * fixed * int32"),
+                                 ndt::type("D * D**N * int32")));
+  EXPECT_TRUE(ndt::pattern_match(ndt::type("3 * 3 * 3 * int32"),
+                                 ndt::type("D * D**N * int32")));
+  EXPECT_FALSE(ndt::pattern_match(ndt::type("2 * 3 * 3 * int32"),
+                                  ndt::type("D * D**N * int32")));
+  EXPECT_FALSE(ndt::pattern_match(ndt::type("2 * 2 * 3 * int32"),
+                                  ndt::type("D * D**N * int32")));
+  // Make sure an exponent of zero works as expected
+  EXPECT_TRUE(ndt::pattern_match(ndt::type("5 * int32"),
+                                 ndt::type("D**N * fixed * int32")));
+  EXPECT_TRUE(ndt::pattern_match(ndt::type("2 * int32"),
+                                 ndt::type("3**N * fixed * int32")));
+  EXPECT_TRUE(
+      ndt::pattern_match(ndt::type("int32"), ndt::type("D**N * int32")));
+  EXPECT_TRUE(
+      ndt::pattern_match(ndt::type("int32"), ndt::type("3**N * int32")));
+  EXPECT_TRUE(ndt::pattern_match(ndt::type("3 * 4 * int32"),
+                                 ndt::type("D**N * 3 * D * int32")));
+  EXPECT_TRUE(ndt::pattern_match(ndt::type("0 * 4 * int32"),
+                                 ndt::type("D**N * N * D * int32")));
+  // Can't have a negative exponent
+  EXPECT_FALSE(
+      ndt::pattern_match(ndt::type("int32"), ndt::type("D**N * E * int32")));
+}
