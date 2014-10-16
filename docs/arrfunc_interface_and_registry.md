@@ -28,17 +28,17 @@ that I'd like an elwise version of. It seems we should be able to do something l
 
 nd::arrfunc elwise_calc = make_elwise_arrfunc(calc);
 
-A bit less trivial is something like neighborhood that has keyword arguments like shape and offset. In that case, if I have some function strided_calc, I should be able to have an arrfunc with a simple interface with those arguments unpacked. For example, perhaps a subclass like
+A bit less trivial is something like neighborhood that has keyword arguments like shape and offset. In that case, if I have some function strided_calc, I should be able to have an arrfunc with a simple interface with those arguments unpacked. I think this is easy enough to do if we restrict each argument to a fixed number of source argument (e.g., multiple dispatch is for different types, not variable number of sources). As the function signatures should know the keyword names, we can add methods like
 
-class neighborhood_arrfunc : arrfunc {
-  nd::array operator ()(nd::array a0, ..., nd::array shape, nd::array offset) {
-    // package shape and offset into kwds, then call operator () in arrfunc
+template <typename K0, ..., typename KN>
+nd::array operator ()(const nd::array &a0, ..., const nd::array &an, const K0 &k0, ..., const KN &kn) {
+    if (n != number_of_fixed_src) {
+      raise error
+    } else {
+      package k0, ..., kn into kwds, then call the arrfunc
+    }
   }
 };
-
-then I would do
-
-nd::arrfunc neighborhood_calc = make_neighborhood_arrfunc(strided_calc);
 
 ## Low-level C++ access
 
