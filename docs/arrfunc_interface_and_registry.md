@@ -20,9 +20,11 @@ parameters.
 
 We need a way to create simple instances of arrfuncs like the above given a C++ function. For instance, I may have a function 
 
+```
 int calc(int x, int y) {
   return x + 2 * y;
 }
+```
 
 that I'd like an elwise version of. It seems we should be able to do something like
 
@@ -30,6 +32,7 @@ nd::arrfunc elwise_calc = make_elwise_arrfunc(calc);
 
 A bit less trivial is something like neighborhood that has keyword arguments like shape and offset. In that case, if I have some function strided_calc, I should be able to have an arrfunc with a simple interface with those arguments unpacked. I think this is easy enough to do if we restrict each argument to a fixed number of source argument (e.g., multiple dispatch is for different types, not variable number of sources). As the function signatures should know the keyword names, we can add methods like
 
+```
 template <typename K0, ..., typename KN>
 nd::array operator ()(const nd::array &a0, ..., const nd::array &an, const K0 &k0, ..., const KN &kn) {
     if (n != number_of_fixed_src) {
@@ -39,6 +42,7 @@ nd::array operator ()(const nd::array &a0, ..., const nd::array &an, const K0 &k
     }
   }
 };
+```
 
 ## Low-level C++ access
 
