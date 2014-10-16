@@ -13,7 +13,7 @@
 #include <dynd/buffer.hpp>
 #include <dynd/funcproto.hpp>
 #include <dynd/pp/meta.hpp>
-#include <dynd/types/fixed_sym_dim_type.hpp>
+#include <dynd/types/fixed_dimsym_type.hpp>
 
 namespace dynd {
 

@@ -110,7 +110,7 @@ void dynd::lift_reduction_arrfunc(arrfunc_type_data *out_ar,
         } else {
             ndt::type subtype = lifted_arr_type.get_type_at_dimension(NULL, i);
             switch (subtype.get_type_id()) {
-            case fixed_sym_dim_type_id:
+            case fixed_dimsym_type_id:
               lifted_dst_type = ndt::make_fixed_sym_dim(lifted_dst_type);
               break;
             case fixed_dim_type_id:

@@ -16,11 +16,11 @@
 
 namespace dynd {
 
-class fixed_sym_dim_type : public base_dim_type {
+class fixed_dimsym_type : public base_dim_type {
 public:
-  fixed_sym_dim_type(const ndt::type &element_tp);
+  fixed_dimsym_type(const ndt::type &element_tp);
 
-  virtual ~fixed_sym_dim_type();
+  virtual ~fixed_dimsym_type();
 
   size_t get_default_data_size() const;
 

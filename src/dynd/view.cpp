@@ -4,7 +4,7 @@
 //
 
 #include <dynd/view.hpp>
-#include <dynd/types/fixed_sym_dim_type.hpp>
+#include <dynd/types/fixed_dimsym_type.hpp>
 #include <dynd/types/fixed_dim_type.hpp>
 #include <dynd/types/cfixed_dim_type.hpp>
 #include <dynd/types/var_dim_type.hpp>
@@ -350,7 +350,7 @@ static nd::array view_from_bytes(const nd::array &arr, const ndt::type &tp)
     }
   }
   else if (tp.get_type_id() == fixed_dim_type_id ||
-           tp.get_type_id() == fixed_sym_dim_type_id) {
+           tp.get_type_id() == fixed_dimsym_type_id) {
     ndt::type arr_tp = tp;
     ndt::type el_tp = arr_tp.tcast<base_dim_type>()->get_element_type();
     size_t el_data_size = el_tp.get_data_size();

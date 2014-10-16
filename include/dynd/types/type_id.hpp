@@ -113,7 +113,7 @@ enum type_id_t {
     json_type_id,
 
     // An unnamed symbolic fixed array dimension type
-    fixed_sym_dim_type_id,
+    fixed_dimsym_type_id,
     // A fixed-sized strided array dimension type
     fixed_dim_type_id,
     // A fixed-sized, fixed-stride array dimension type

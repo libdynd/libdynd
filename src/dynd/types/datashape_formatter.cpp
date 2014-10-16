@@ -5,7 +5,7 @@
 
 #include <dynd/types/datashape_formatter.hpp>
 #include <dynd/types/base_struct_type.hpp>
-#include <dynd/types/fixed_sym_dim_type.hpp>
+#include <dynd/types/fixed_dimsym_type.hpp>
 #include <dynd/types/fixed_dim_type.hpp>
 #include <dynd/types/cfixed_dim_type.hpp>
 #include <dynd/types/var_dim_type.hpp>
@@ -58,7 +58,7 @@ static void format_dim_datashape(std::ostream &o, const ndt::type &tp,
                                  const std::string &indent, bool multiline)
 {
   switch (tp.get_type_id()) {
-  case fixed_sym_dim_type_id: {
+  case fixed_dimsym_type_id: {
     // A symbolic type, so arrmeta/data can't exist
     o << "fixed * ";
     format_datashape(o, tp.tcast<base_dim_type>()->get_element_type(), NULL,

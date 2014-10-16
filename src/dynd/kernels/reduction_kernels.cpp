@@ -6,7 +6,7 @@
 #include <dynd/kernels/reduction_kernels.hpp>
 #include <dynd/array.hpp>
 #include <dynd/types/arrfunc_type.hpp>
-#include <dynd/types/fixed_sym_dim_type.hpp>
+#include <dynd/types/fixed_dimsym_type.hpp>
 #include <dynd/func/lift_reduction_arrfunc.hpp>
 
 using namespace std;

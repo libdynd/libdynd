@@ -164,7 +164,7 @@ static bool recursive_match(const ndt::type &concrete, const ndt::type &pattern,
     // Matching a dimension vs dimension
     if (concrete.get_type_id() == pattern.get_type_id()) {
       switch (concrete.get_type_id()) {
-      case fixed_sym_dim_type_id:
+      case fixed_dimsym_type_id:
       case offset_dim_type_id:
       case var_dim_type_id:
         return recursive_match(
@@ -194,7 +194,7 @@ static bool recursive_match(const ndt::type &concrete, const ndt::type &pattern,
          << " and " << pattern << " is not yet implemented";
       throw type_error(ss.str());
     }
-    else if (pattern.get_type_id() == fixed_sym_dim_type_id) {
+    else if (pattern.get_type_id() == fixed_dimsym_type_id) {
       // fixed[N] and cfixed[M] matches against fixed (symbolic fixed)
       if (concrete.get_type_id() == fixed_dim_type_id ||
           concrete.get_type_id() == cfixed_dim_type_id) {

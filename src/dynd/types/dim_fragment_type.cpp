@@ -6,7 +6,7 @@
 #include <dynd/types/dim_fragment_type.hpp>
 #include <dynd/types/fixed_dim_type.hpp>
 #include <dynd/types/var_dim_type.hpp>
-#include <dynd/types/fixed_sym_dim_type.hpp>
+#include <dynd/types/fixed_dimsym_type.hpp>
 #include <dynd/types/typevar_type.hpp>
 #include <dynd/func/make_callable.hpp>
 
@@ -34,7 +34,7 @@ static inline ndt::type get_tagged_dims_from_type(intptr_t ndim,
             case cfixed_dim_type_id:
                 out_tagged_dims[i] = tp.tcast<fixed_dim_type>()->get_fixed_dim_size();
                 break;
-            case fixed_sym_dim_type_id:
+            case fixed_dimsym_type_id:
             case offset_dim_type_id:
                 out_tagged_dims[i] = -2;
                 break;
@@ -75,7 +75,7 @@ static inline bool broadcast_tagged_dims_from_type(intptr_t ndim, ndt::type tp,
                     return false;
                 }
                 break;
-            case fixed_sym_dim_type_id:
+            case fixed_dimsym_type_id:
             case offset_dim_type_id:
                 if (tagged_dim < 0) {
                     out_tagged_dims[i] = -2;
