@@ -31,9 +31,9 @@ pow_dimsym_type::pow_dimsym_type(const ndt::type &base_tp, const nd::string &exp
   }
   else if (!is_valid_typevar_name(m_exponent.begin(), m_exponent.end())) {
     stringstream ss;
-    ss << "dynd typevar name \"";
+    ss << "dynd typevar name ";
     print_escaped_utf8_string(ss, m_exponent.begin(), m_exponent.end());
-    ss << "\" is not valid, it must be alphanumeric and begin with a capital";
+    ss << " is not valid, it must be alphanumeric and begin with a capital";
     throw type_error(ss.str());
   }
 }
@@ -119,8 +119,7 @@ bool pow_dimsym_type::operator==(const base_type& rhs) const
 }
 
 void pow_dimsym_type::arrmeta_default_construct(
-    char *DYND_UNUSED(arrmeta), intptr_t DYND_UNUSED(ndim),
-    const intptr_t *DYND_UNUSED(shape), bool DYND_UNUSED(blockref_alloc)) const
+    char *DYND_UNUSED(arrmeta), bool DYND_UNUSED(blockref_alloc)) const
 {
   throw type_error("Cannot store data of typevar type");
 }

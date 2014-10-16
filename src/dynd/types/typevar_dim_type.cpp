@@ -20,9 +20,9 @@ typevar_dim_type::typevar_dim_type(const nd::string &name,
         throw type_error("dynd typevar name cannot be null");
     } else if(!is_valid_typevar_name(m_name.begin(), m_name.end())) {
         stringstream ss;
-        ss << "dynd typevar name \"";
+        ss << "dynd typevar name ";
         print_escaped_utf8_string(ss, m_name.begin(), m_name.end());
-        ss << "\" is not valid, it must be alphanumeric and begin with a capital";
+        ss << " is not valid, it must be alphanumeric and begin with a capital";
         throw type_error(ss.str());
     }
 }

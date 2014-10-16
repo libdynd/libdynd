@@ -29,7 +29,7 @@ using namespace dynd;
  */
 static nd::array
 substitute_type_array(const nd::array &type_array,
-                      std::map<nd::string, ndt::type> &typevars,
+                      const std::map<nd::string, ndt::type> &typevars,
                       bool concrete)
 {
   intptr_t field_count = type_array.get_dim_size();
@@ -45,10 +45,9 @@ substitute_type_array(const nd::array &type_array,
   return tmp_field_types;
 }
 
-ndt::type
-ndt::detail::internal_substitute(const ndt::type &pattern,
-                                 std::map<nd::string, ndt::type> &typevars,
-                                 bool concrete)
+ndt::type ndt::detail::internal_substitute(
+    const ndt::type &pattern, const std::map<nd::string, ndt::type> &typevars,
+    bool concrete)
 {
   // This function assumes that ``pattern`` is symbolic, so does not
   // have to check types that are always concrete
@@ -206,26 +205,29 @@ ndt::detail::internal_substitute(const ndt::type &pattern,
       // Look up to the exponent typevar
       nd::string exponent_name =
           pattern.tcast<pow_dimsym_type>()->get_exponent();
-      ndt::type &tv_type = typevars[exponent_name];
+      map<nd::string, ndt::type>::const_iterator tv_type =
+          typevars.find(exponent_name);
       intptr_t exponent = -1;
-      if (!tv_type.is_null()) {
-        if (tv_type.get_type_id() == fixed_dim_type_id) {
-          exponent = tv_type.tcast<fixed_dim_type>()->get_fixed_dim_size();
+      if (tv_type != typevars.end()) {
+        if (tv_type->second.get_type_id() == fixed_dim_type_id) {
+          exponent =
+              tv_type->second.tcast<fixed_dim_type>()->get_fixed_dim_size();
         }
-        else if (tv_type.get_type_id() == typevar_dim_type_id) {
+        else if (tv_type->second.get_type_id() == typevar_dim_type_id) {
           // If it's a typevar, substitute the new name in
-          exponent_name = tv_type.tcast<typevar_dim_type>()->get_name();
+          exponent_name = tv_type->second.tcast<typevar_dim_type>()->get_name();
           if (concrete) {
             stringstream ss;
             ss << "The substitution for dynd typevar " << exponent_name.str()
-               << ", " << tv_type << ", is not concrete as required";
+               << ", " << tv_type->second << ", is not concrete as required";
             throw invalid_argument(ss.str());
           }
         }
         else {
           stringstream ss;
           ss << "The substitution for dynd typevar " << exponent_name.str()
-             << ", " << tv_type << ", is not a fixed_dim integer as required";
+             << ", " << tv_type->second
+             << ", is not a fixed_dim integer as required";
           throw invalid_argument(ss.str());
         }
       }
@@ -238,7 +240,7 @@ ndt::detail::internal_substitute(const ndt::type &pattern,
       // Get the base type
       ndt::type base_tp = pattern.tcast<pow_dimsym_type>()->get_base_type();
       if (base_tp.get_type_id() == typevar_dim_type_id) {
-        map<nd::string, ndt::type>::const_iterator &btv_type =
+        map<nd::string, ndt::type>::const_iterator btv_type =
             typevars.find(base_tp.tcast<typevar_dim_type>()->get_name());
         if (btv_type == typevars.end()) {
           // We haven't seen this typevar yet, check if concrete
