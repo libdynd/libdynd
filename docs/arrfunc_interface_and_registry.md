@@ -1,4 +1,4 @@
-﻿# DyND Array Functions (ArrFuncs)
+﻿# DyND Array Functions (ArrFuncs) Interface
 
 DyND arrfuncs are a recipe for computation in DyND. They are constructed with a make function, unique for each kind of arrfunc, which
 may have arguments itself. A DyND arrfunc is called with array arguments and a special array, possibly null, called "kwds" that
@@ -30,7 +30,7 @@ that I'd like an elwise version of. It seems we should be able to do something l
 
 nd::arrfunc elwise_calc = make_elwise_arrfunc(calc);
 
-A bit less trivial is something like neighborhood that has keyword arguments like shape and offset. In that case, if I have some function strided_calc, I should be able to have an arrfunc with a simple interface with those arguments unpacked. I think this is easy enough to do if we restrict each argument to a fixed number of source argument (e.g., multiple dispatch is for different types, not variable number of sources). As the function signatures should know the keyword names, we can add methods like
+A bit less trivial is something like neighborhood that has keyword arguments like shape and offset. In that case, if I have some function strided_calc, I should be able to have an arrfunc with a simple interface with those arguments unpacked. I think this is easy enough to do if we restrict each argument to a fixed number of source argument (e.g., multiple dispatch is for different types, not variable number of sources). As the function prototypes will know the keyword names, we can add methods like
 
 ```
 template <typename K0, ..., typename KN>
@@ -52,7 +52,7 @@ Keyword arguments need to have default values. Also, we need to be able to set i
 
 ## Low-Level C++ Access
 
-Most functions that we make arrfuncs from in DyND, like sin(x), cos(x), ..., should be available as pure C++ function as well as arrfuncs. This would allow users of the library to simply call those functions easily within their own C++ functions that may be passed to functor_arrfuncs. Right now, many of these functions are in source (*.cpp) files, which makes that impossible.
+Most functions that we make arrfuncs from in DyND, like sin(x), cos(x), ..., should be available as pure C++ functions operating on static types, as well as arrfuncs. This would allow users of the library to simply call those functions easily within their own C++ functions that may be passed to functor_arrfuncs. Right now, many of these functions are in source (*.cpp) files, which makes that impossible.
 
 Because we want to support CUDA, this access probably needs to be in a proper function definition, not through an instance of arrfunc.
 
@@ -66,7 +66,7 @@ DyND currently has both callables and arrfuncs. What is the purpose of one versu
 
 ## Pluggable Types
 
-If someone implements a new type, like float4096, how an arrfuncs like sin(x) be extended to take advantage of that?
+If someone implements a new type, like float4096, how can an arrfunc like sin(x) be extended to take advantage of that?
 
 ## Arrfuncs in Python
 
