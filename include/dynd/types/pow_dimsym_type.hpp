@@ -15,14 +15,14 @@
 
 namespace dynd {
 
-class typevar_dim_pow_type : public base_dim_type {
+class pow_dimsym_type : public base_dim_type {
     ndt::type m_base_tp;
     nd::string m_pow;
 
 public:
-    typevar_dim_pow_type(const ndt::type &base_tp, const nd::string &pow, const ndt::type &element_type);
+    pow_dimsym_type(const ndt::type &base_tp, const nd::string &pow, const ndt::type &element_type);
 
-    virtual ~typevar_dim_pow_type() {}
+    virtual ~pow_dimsym_type() {}
 
     inline const ndt::type& get_base_type() const {
         return m_base_tp;
@@ -69,14 +69,14 @@ public:
 //    void get_dynamic_type_properties(
   //      const std::pair<std::string, gfunc::callable> **out_properties,
     //    size_t *out_count) const;
-}; // class typevar_dim_pow_type
+}; // class pow_dimsym_type
 
 namespace ndt {
     /** Makes a typevar type with the specified name and element type */
     inline ndt::type make_typevar_dim_pow(const ndt::type &base_tp, const nd::string &pow,
                                   const ndt::type &element_type)
     {
-        return ndt::type(new typevar_dim_pow_type(base_tp, pow, element_type), false);
+        return ndt::type(new pow_dimsym_type(base_tp, pow, element_type), false);
     }
 } // namespace ndt
 

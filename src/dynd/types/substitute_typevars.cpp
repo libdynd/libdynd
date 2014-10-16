@@ -12,7 +12,7 @@
 #include <dynd/types/cfixed_dim_type.hpp>
 #include <dynd/types/typevar_type.hpp>
 #include <dynd/types/typevar_dim_type.hpp>
-#include <dynd/types/typevar_dim_pow_type.hpp>
+#include <dynd/types/pow_dimsym_type.hpp>
 #include <dynd/types/ellipsis_dim_type.hpp>
 #include <dynd/types/dim_fragment_type.hpp>
 #include <dynd/types/var_dim_type.hpp>
@@ -202,9 +202,9 @@ ndt::detail::internal_substitute(const ndt::type &pattern,
         }
       }
     }
-    case typevar_dim_pow_type_id: {
+    case pow_dimsym_type_id: {
       throw runtime_error(
-          "TODO: Implement substitute for typevar_dim_pow_type");
+          "TODO: Implement substitute for pow_dimsym_type");
     }
     case ellipsis_dim_type_id: {
       const nd::string &name = pattern.tcast<ellipsis_dim_type>()->get_name();

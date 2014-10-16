@@ -12,7 +12,7 @@
 #include <dynd/types/cfixed_dim_type.hpp>
 #include <dynd/types/typevar_type.hpp>
 #include <dynd/types/typevar_dim_type.hpp>
-#include <dynd/types/typevar_dim_pow_type.hpp>
+#include <dynd/types/pow_dimsym_type.hpp>
 #include <dynd/types/ellipsis_dim_type.hpp>
 #include <dynd/types/dim_fragment_type.hpp>
 
@@ -292,8 +292,8 @@ static bool recursive_match(const ndt::type &concrete, const ndt::type &pattern,
             concrete.get_type_at_dimension(NULL, 1),
             pattern.tcast<typevar_dim_type>()->get_element_type(), typevars);
       }
-    } else if (pattern.get_type_id() == typevar_dim_pow_type_id) {
-      throw runtime_error("TODO: typevar_dim_pow_type pattern match");
+    } else if (pattern.get_type_id() == pow_dimsym_type_id) {
+      throw runtime_error("TODO: pow_dimsym_type pattern match");
     } else {
       return false;
     }

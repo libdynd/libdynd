@@ -36,7 +36,7 @@
 #include <dynd/types/funcproto_type.hpp>
 #include <dynd/types/typevar_type.hpp>
 #include <dynd/types/typevar_dim_type.hpp>
-#include <dynd/types/typevar_dim_pow_type.hpp>
+#include <dynd/types/pow_dimsym_type.hpp>
 #include <dynd/types/ellipsis_dim_type.hpp>
 #include <dynd/types/option_type.hpp>
 #include <dynd/types/adapt_type.hpp>

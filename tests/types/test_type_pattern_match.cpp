@@ -8,7 +8,7 @@
 #include "inc_gtest.hpp"
 
 #include <dynd/types/type_pattern_match.hpp>
-#include <dynd/types/typevar_dim_pow_type.hpp>
+#include <dynd/types/pow_dimsym_type.hpp>
 
 using namespace std;
 using namespace dynd;
