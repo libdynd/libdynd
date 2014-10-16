@@ -67,3 +67,7 @@ DyND currently has both callables and arrfuncs. What is the purpose of one versu
 ## Pluggable Types
 
 If someone implements a new type, like float4096, how an arrfuncs like sin(x) be extended to take advantage of that?
+
+## Arrfuncs in Python
+
+It should be very easy to take a C++ arrfunc and bring it to the Python level. Perhaps we can have two interfaces to this, one through the standard Python C API and the other through Cython.
