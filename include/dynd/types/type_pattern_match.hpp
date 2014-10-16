@@ -1,5 +1,5 @@
 //
-// Copyright (C) 2011-14 Mark Wiebe, DyND Developers
+// Copyright (C) 2011-14 Mark Wiebe, Irwin Zaid, DyND Developers
 // BSD 2-Clause License, see LICENSE.txt
 //
 
@@ -30,7 +30,7 @@ namespace dynd { namespace ndt {
  *                  dimension of the type only is what is relevant.
  */
 bool pattern_match(const ndt::type &concrete, const ndt::type &pattern,
-                    std::map<nd::string, ndt::type> &typevars);
+                   std::map<nd::string, ndt::type> &typevars);
 
 /**
  * Matches the provided concrete type against the pattern type, which may

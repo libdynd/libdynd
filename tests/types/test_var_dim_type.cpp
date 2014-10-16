@@ -71,8 +71,8 @@ TEST(VarArrayDType, DTypeSubscriptSimpleSlice) {
     // Slicing does not collapse the leading dimension to a strided array (as it used to)
     EXPECT_EQ(ndt::make_var_dim(ndt::make_type<int>()), n(irange()).get_type());
     /* TODO: var dim indexing needs more work
-    EXPECT_EQ(ndt::make_fixed_sym_dim(ndt::make_type<int>()), n(irange().by(-1)).get_type());
-    EXPECT_EQ(ndt::make_fixed_sym_dim(ndt::make_type<int>()), n(1 <= irange() < 3).get_type());
+    EXPECT_EQ(ndt::make_fixed_dimsym(ndt::make_type<int>()), n(irange().by(-1)).get_type());
+    EXPECT_EQ(ndt::make_fixed_dimsym(ndt::make_type<int>()), n(1 <= irange() < 3).get_type());
 
     EXPECT_EQ(2, n(1 <= irange() < 3).get_shape()[0]);
     EXPECT_EQ(4, n(1 <= irange() < 3)(0).as<int>());

@@ -10,7 +10,7 @@
 
 #include <dynd/types/datashape_formatter.hpp>
 #include <dynd/types/var_dim_type.hpp>
-#include <dynd/types/fixed_sym_dim_type.hpp>
+#include <dynd/types/fixed_dimsym_type.hpp>
 #include <dynd/types/fixed_dim_type.hpp>
 #include <dynd/types/cfixed_dim_type.hpp>
 #include <dynd/types/struct_type.hpp>
@@ -128,7 +128,7 @@ TEST(DataShapeFormatter, DTypeUniformArrays)
 {
   EXPECT_EQ(
       "fixed * fixed * fixed * int32",
-      format_datashape(ndt::make_fixed_sym_dim(ndt::make_type<int32_t>(), 3),
+      format_datashape(ndt::make_fixed_dimsym(ndt::make_type<int32_t>(), 3),
                        "", false));
   EXPECT_EQ("var * int32",
             format_datashape(ndt::make_var_dim(ndt::make_type<int32_t>()), "",
@@ -142,7 +142,7 @@ TEST(DataShapeFormatter, DTypeUniformArrays)
                                  3, ndt::make_type<int32_t>())),
                              "", false));
   EXPECT_EQ("var * fixed * int32",
-            format_datashape(ndt::make_var_dim(ndt::make_fixed_sym_dim(
+            format_datashape(ndt::make_var_dim(ndt::make_fixed_dimsym(
                                  ndt::make_type<int32_t>())),
                              "", false));
 }
@@ -176,10 +176,10 @@ TEST(DataShapeFormatter, DTypeStructs) {
     EXPECT_EQ(
         "{x: fixed * {a: int32, b: int8}, y: var * fixed * uint8}",
         format_datashape(
-            ndt::make_struct(ndt::make_fixed_sym_dim(ndt::make_cstruct(
+            ndt::make_struct(ndt::make_fixed_dimsym(ndt::make_cstruct(
                                  ndt::make_type<int32_t>(), "a",
                                  ndt::make_type<int8_t>(), "b")),
-                             "x", ndt::make_var_dim(ndt::make_fixed_sym_dim(
+                             "x", ndt::make_var_dim(ndt::make_fixed_dimsym(
                                       ndt::make_type<uint8_t>())),
                              "y"),
             "", false));

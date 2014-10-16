@@ -12,6 +12,7 @@
 #include <dynd/types/cfixed_dim_type.hpp>
 #include <dynd/types/typevar_type.hpp>
 #include <dynd/types/typevar_dim_type.hpp>
+#include <dynd/types/pow_dimsym_type.hpp>
 #include <dynd/types/ellipsis_dim_type.hpp>
 #include <dynd/types/dim_fragment_type.hpp>
 #include <dynd/types/var_dim_type.hpp>
@@ -28,7 +29,8 @@ using namespace dynd;
  */
 static nd::array
 substitute_type_array(const nd::array &type_array,
-                      std::map<nd::string, ndt::type> &typevars, bool concrete)
+                      const std::map<nd::string, ndt::type> &typevars,
+                      bool concrete)
 {
   intptr_t field_count = type_array.get_dim_size();
   const ndt::type *field_types =
@@ -43,10 +45,9 @@ substitute_type_array(const nd::array &type_array,
   return tmp_field_types;
 }
 
-ndt::type
-ndt::detail::internal_substitute(const ndt::type &pattern,
-                                 std::map<nd::string, ndt::type> &typevars,
-                                 bool concrete)
+ndt::type ndt::detail::internal_substitute(
+    const ndt::type &pattern, const std::map<nd::string, ndt::type> &typevars,
+    bool concrete)
 {
   // This function assumes that ``pattern`` is symbolic, so does not
   // have to check types that are always concrete
@@ -55,9 +56,9 @@ ndt::detail::internal_substitute(const ndt::type &pattern,
       return ndt::make_pointer(
           ndt::substitute(pattern.tcast<pointer_type>()->get_target_type(),
                           typevars, concrete));
-    case fixed_sym_dim_type_id:
+    case fixed_dimsym_type_id:
       if (!concrete) {
-        return ndt::make_fixed_sym_dim(
+        return ndt::make_fixed_dimsym(
             ndt::substitute(pattern.tcast<base_dim_type>()->get_element_type(),
                             typevars, concrete));
       } else {
@@ -152,8 +153,8 @@ ndt::detail::internal_substitute(const ndt::type &pattern,
         }
         if (!concrete || !it->second.is_symbolic()) {
           switch (it->second.get_type_id()) {
-          case fixed_sym_dim_type_id:
-            return ndt::make_fixed_sym_dim(ndt::substitute(
+          case fixed_dimsym_type_id:
+            return ndt::make_fixed_dimsym(ndt::substitute(
                 pattern.tcast<typevar_dim_type>()->get_element_type(), typevars,
                 concrete));
           case fixed_dim_type_id:
@@ -197,6 +198,121 @@ ndt::detail::internal_substitute(const ndt::type &pattern,
               ndt::substitute(
                   pattern.tcast<typevar_dim_type>()->get_element_type(),
                   typevars, concrete));
+        }
+      }
+    }
+    case pow_dimsym_type_id: {
+      // Look up to the exponent typevar
+      nd::string exponent_name =
+          pattern.tcast<pow_dimsym_type>()->get_exponent();
+      map<nd::string, ndt::type>::const_iterator tv_type =
+          typevars.find(exponent_name);
+      intptr_t exponent = -1;
+      if (tv_type != typevars.end()) {
+        if (tv_type->second.get_type_id() == fixed_dim_type_id) {
+          exponent =
+              tv_type->second.tcast<fixed_dim_type>()->get_fixed_dim_size();
+        }
+        else if (tv_type->second.get_type_id() == typevar_dim_type_id) {
+          // If it's a typevar, substitute the new name in
+          exponent_name = tv_type->second.tcast<typevar_dim_type>()->get_name();
+          if (concrete) {
+            stringstream ss;
+            ss << "The substitution for dynd typevar " << exponent_name.str()
+               << ", " << tv_type->second << ", is not concrete as required";
+            throw invalid_argument(ss.str());
+          }
+        }
+        else {
+          stringstream ss;
+          ss << "The substitution for dynd typevar " << exponent_name.str()
+             << ", " << tv_type->second
+             << ", is not a fixed_dim integer as required";
+          throw invalid_argument(ss.str());
+        }
+      }
+      // If the exponent is zero, just substitute the rest of the type
+      if (exponent == 0) {
+        return ndt::substitute(
+            pattern.tcast<pow_dimsym_type>()->get_element_type(), typevars,
+            concrete);
+      }
+      // Get the base type
+      ndt::type base_tp = pattern.tcast<pow_dimsym_type>()->get_base_type();
+      if (base_tp.get_type_id() == typevar_dim_type_id) {
+        map<nd::string, ndt::type>::const_iterator btv_type =
+            typevars.find(base_tp.tcast<typevar_dim_type>()->get_name());
+        if (btv_type == typevars.end()) {
+          // We haven't seen this typevar yet, check if concrete
+          // is required
+          if (concrete) {
+            stringstream ss;
+            ss << "No substitution type for dynd typevar " << base_tp
+               << " was available";
+            throw invalid_argument(ss.str());
+          }
+        }
+        else if (btv_type->second.get_ndim() > 0 &&
+                 btv_type->second.get_type_id() != dim_fragment_type_id) {
+          // Swap in for the base type
+          base_tp = btv_type->second;
+        }
+        else {
+            stringstream ss;
+            ss << "The substitution for dynd typevar " << base_tp << ", "
+               << btv_type->second << ", is not a substitutable dimension type";
+            throw invalid_argument(ss.str());
+        }
+      }
+      // Substitute the element type, then apply the exponent
+      ndt::type result =
+          ndt::substitute(pattern.tcast<pow_dimsym_type>()->get_element_type(),
+                          typevars, concrete);
+      if (exponent == 0) {
+        return result;
+      }
+      else if (exponent < 0) {
+        return ndt::make_pow_dimsym(base_tp, exponent_name, result);
+      } else {
+        switch(base_tp.get_type_id()) {
+          case fixed_dimsym_type_id:
+            if (concrete) {
+              stringstream ss;
+              ss << "The base for a dimensional power type, 'fixed ** "
+                 << exponent << "', is not concrete as required";
+              throw invalid_argument(ss.str());
+            }
+            for (intptr_t i = 0; i < exponent; ++i) {
+              result = ndt::make_fixed_dimsym(result);
+            }
+            return result;
+          case fixed_dim_type_id: {
+            intptr_t dim_size =
+                base_tp.tcast<fixed_dim_type>()->get_fixed_dim_size();
+            for (intptr_t i = 0; i < exponent; ++i) {
+              result = ndt::make_fixed_dim(dim_size, result);
+            }
+            return result;
+          }
+          case var_dim_type_id:
+            for (intptr_t i = 0; i < exponent; ++i) {
+              result = ndt::make_var_dim(result);
+            }
+            return result;
+          case typevar_dim_type_id: {
+            const nd::string &tvname =
+                base_tp.tcast<typevar_dim_type>()->get_name();
+            for (intptr_t i = 0; i < exponent; ++i) {
+              result = ndt::make_typevar_dim(tvname, result);
+            }
+            return result;
+          }
+          default: {
+            stringstream ss;
+            ss << "Cannot substitute " << base_tp
+               << " as the base of a dynd dimensional power type";
+            throw invalid_argument(ss.str());
+          }
         }
       }
     }

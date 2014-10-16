@@ -200,7 +200,7 @@ set(libdynd_SRC
     src/dynd/types/ellipsis_dim_type.cpp
     src/dynd/types/expr_type.cpp
     src/dynd/types/fixed_dim_type.cpp
-    src/dynd/types/fixed_sym_dim_type.cpp
+    src/dynd/types/fixed_dimsym_type.cpp
     src/dynd/types/fixedbytes_type.cpp
     src/dynd/types/fixedstring_type.cpp
     src/dynd/types/funcproto_type.cpp
@@ -224,6 +224,7 @@ set(libdynd_SRC
     src/dynd/types/type_pattern_match.cpp
     src/dynd/types/type_type.cpp
     src/dynd/types/typevar_dim_type.cpp
+    src/dynd/types/pow_dimsym_type.cpp
     src/dynd/types/typevar_type.cpp
     src/dynd/types/unary_expr_type.cpp
     src/dynd/types/var_dim_type.cpp
@@ -268,7 +269,7 @@ set(libdynd_SRC
     include/dynd/types/dynd_uint128.hpp
     include/dynd/types/expr_type.hpp
     include/dynd/types/fixed_dim_type.hpp
-    include/dynd/types/fixed_sym_dim_type.hpp
+    include/dynd/types/fixed_dimsym_type.hpp
     include/dynd/types/fixedbytes_type.hpp
     include/dynd/types/fixedstring_type.hpp
     include/dynd/types/property_type.hpp
@@ -293,6 +294,7 @@ set(libdynd_SRC
     include/dynd/types/type_id.hpp
     include/dynd/types/type_pattern_match.hpp
     include/dynd/types/typevar_dim_type.hpp
+    include/dynd/types/pow_dimsym_type.hpp
     include/dynd/types/typevar_type.hpp
     include/dynd/types/unary_expr_type.hpp
     include/dynd/types/var_dim_type.hpp

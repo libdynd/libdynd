@@ -124,7 +124,7 @@ static intptr_t instantiate_neighborhood(
 
     // Synthesize the arrmeta for the src[0] passed to the neighborhood op
     ndt::type nh_src_tp[1];
-    nh_src_tp[0] = ndt::make_fixed_sym_dim(src0_el_tp, ndim);
+    nh_src_tp[0] = ndt::make_fixed_dimsym(src0_el_tp, ndim);
     arrmeta_holder nh_arrmeta;
     arrmeta_holder(nh_src_tp[0]).swap(nh_arrmeta);
     size_stride_t *nh_src0_arrmeta = reinterpret_cast<size_stride_t *>(nh_arrmeta.get());

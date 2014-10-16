@@ -3,7 +3,7 @@
 // BSD 2-Clause License, see LICENSE.txt
 //
 
-#include <dynd/types/fixed_sym_dim_type.hpp>
+#include <dynd/types/fixed_dimsym_type.hpp>
 #include <dynd/types/cfixed_dim_type.hpp>
 #include <dynd/types/type_alignment.hpp>
 #include <dynd/shape_tools.hpp>
@@ -17,8 +17,8 @@
 using namespace std;
 using namespace dynd;
 
-fixed_sym_dim_type::fixed_sym_dim_type(const ndt::type &element_tp)
-    : base_dim_type(fixed_sym_dim_type_id, element_tp, 0,
+fixed_dimsym_type::fixed_dimsym_type(const ndt::type &element_tp)
+    : base_dim_type(fixed_dimsym_type_id, element_tp, 0,
                     element_tp.get_data_alignment(), sizeof(size_stride_t),
                     type_flag_symbolic, true)
 {
@@ -29,40 +29,40 @@ fixed_sym_dim_type::fixed_sym_dim_type(const ndt::type &element_tp)
         ~type_flag_scalar));
 }
 
-fixed_sym_dim_type::~fixed_sym_dim_type()
+fixed_dimsym_type::~fixed_dimsym_type()
 {
 }
 
-size_t fixed_sym_dim_type::get_default_data_size() const
+size_t fixed_dimsym_type::get_default_data_size() const
 {
   stringstream ss;
   ss << "Cannot get default data size of type " << ndt::type(this, true);
   throw runtime_error(ss.str());
 }
 
-void fixed_sym_dim_type::print_data(std::ostream &DYND_UNUSED(o),
+void fixed_dimsym_type::print_data(std::ostream &DYND_UNUSED(o),
                                     const char *DYND_UNUSED(arrmeta),
                                     const char *DYND_UNUSED(data)) const
 {
   throw type_error("Cannot store data of symbolic fixed_dim type");
 }
 
-void fixed_sym_dim_type::print_type(std::ostream &o) const
+void fixed_dimsym_type::print_type(std::ostream &o) const
 {
   o << "fixed * " << m_element_tp;
 }
 
-bool fixed_sym_dim_type::is_expression() const
+bool fixed_dimsym_type::is_expression() const
 {
   return m_element_tp.is_expression();
 }
 
-bool fixed_sym_dim_type::is_unique_data_owner(const char *DYND_UNUSED(arrmeta)) const
+bool fixed_dimsym_type::is_unique_data_owner(const char *DYND_UNUSED(arrmeta)) const
 {
   return false;
 }
 
-void fixed_sym_dim_type::transform_child_types(type_transform_fn_t transform_fn,
+void fixed_dimsym_type::transform_child_types(type_transform_fn_t transform_fn,
                                                intptr_t arrmeta_offset,
                                                void *extra,
                                                ndt::type &out_transformed_tp,
@@ -72,7 +72,7 @@ void fixed_sym_dim_type::transform_child_types(type_transform_fn_t transform_fn,
   bool was_transformed = false;
   transform_fn(m_element_tp, arrmeta_offset, extra, tmp_tp, was_transformed);
   if (was_transformed) {
-    out_transformed_tp = ndt::type(new fixed_sym_dim_type(tmp_tp), false);
+    out_transformed_tp = ndt::type(new fixed_dimsym_type(tmp_tp), false);
     out_was_transformed = true;
   }
   else {
@@ -80,21 +80,21 @@ void fixed_sym_dim_type::transform_child_types(type_transform_fn_t transform_fn,
   }
 }
 
-ndt::type fixed_sym_dim_type::get_canonical_type() const
+ndt::type fixed_dimsym_type::get_canonical_type() const
 {
-  return ndt::type(new fixed_sym_dim_type(m_element_tp.get_canonical_type()),
+  return ndt::type(new fixed_dimsym_type(m_element_tp.get_canonical_type()),
                    false);
 }
 
 ndt::type
-fixed_sym_dim_type::at_single(intptr_t DYND_UNUSED(i0),
+fixed_dimsym_type::at_single(intptr_t DYND_UNUSED(i0),
                               const char **DYND_UNUSED(inout_arrmeta),
                               const char **DYND_UNUSED(inout_data)) const
 {
   return m_element_tp;
 }
 
-ndt::type fixed_sym_dim_type::get_type_at_dimension(char **DYND_UNUSED(inout_arrmeta),
+ndt::type fixed_dimsym_type::get_type_at_dimension(char **DYND_UNUSED(inout_arrmeta),
                                                     intptr_t i,
                                                     intptr_t total_ndim) const
 {
@@ -106,13 +106,13 @@ ndt::type fixed_sym_dim_type::get_type_at_dimension(char **DYND_UNUSED(inout_arr
   }
 }
 
-intptr_t fixed_sym_dim_type::get_dim_size(const char *DYND_UNUSED(arrmeta),
+intptr_t fixed_dimsym_type::get_dim_size(const char *DYND_UNUSED(arrmeta),
                                           const char *DYND_UNUSED(data)) const
 {
   return -1;
 }
 
-void fixed_sym_dim_type::get_shape(intptr_t ndim, intptr_t i,
+void fixed_dimsym_type::get_shape(intptr_t ndim, intptr_t i,
                                    intptr_t *out_shape,
                                    const char *DYND_UNUSED(arrmeta),
                                    const char *DYND_UNUSED(data)) const
@@ -132,28 +132,28 @@ void fixed_sym_dim_type::get_shape(intptr_t ndim, intptr_t i,
   }
 }
 
-bool fixed_sym_dim_type::is_lossless_assignment(const ndt::type &DYND_UNUSED(dst_tp),
+bool fixed_dimsym_type::is_lossless_assignment(const ndt::type &DYND_UNUSED(dst_tp),
                                                 const ndt::type &DYND_UNUSED(src_tp)) const
 {
   return false;
 }
 
-bool fixed_sym_dim_type::operator==(const base_type &rhs) const
+bool fixed_dimsym_type::operator==(const base_type &rhs) const
 {
   if (this == &rhs) {
     return true;
   }
-  else if (rhs.get_type_id() != fixed_sym_dim_type_id) {
+  else if (rhs.get_type_id() != fixed_dimsym_type_id) {
     return false;
   }
   else {
-    const fixed_sym_dim_type *dt =
-        static_cast<const fixed_sym_dim_type *>(&rhs);
+    const fixed_dimsym_type *dt =
+        static_cast<const fixed_dimsym_type *>(&rhs);
     return m_element_tp == dt->m_element_tp;
   }
 }
 
-void fixed_sym_dim_type::arrmeta_default_construct(
+void fixed_dimsym_type::arrmeta_default_construct(
     char *DYND_UNUSED(arrmeta), bool DYND_UNUSED(blockref_alloc)) const
 {
   stringstream ss;
@@ -162,7 +162,7 @@ void fixed_sym_dim_type::arrmeta_default_construct(
   throw runtime_error(ss.str());
 }
 
-void fixed_sym_dim_type::arrmeta_copy_construct(
+void fixed_dimsym_type::arrmeta_copy_construct(
     char *DYND_UNUSED(dst_arrmeta), const char *DYND_UNUSED(src_arrmeta),
     memory_block_data *DYND_UNUSED(embedded_reference)) const
 {
@@ -172,7 +172,7 @@ void fixed_sym_dim_type::arrmeta_copy_construct(
   throw runtime_error(ss.str());
 }
 
-size_t fixed_sym_dim_type::arrmeta_copy_construct_onedim(
+size_t fixed_dimsym_type::arrmeta_copy_construct_onedim(
     char *DYND_UNUSED(dst_arrmeta), const char *DYND_UNUSED(src_arrmeta),
     memory_block_data *DYND_UNUSED(embedded_reference)) const
 {
@@ -182,18 +182,18 @@ size_t fixed_sym_dim_type::arrmeta_copy_construct_onedim(
   throw runtime_error(ss.str());
 }
 
-void fixed_sym_dim_type::arrmeta_reset_buffers(char *DYND_UNUSED(arrmeta)) const
+void fixed_dimsym_type::arrmeta_reset_buffers(char *DYND_UNUSED(arrmeta)) const
 {
 }
 
 void
-fixed_sym_dim_type::arrmeta_finalize_buffers(char *DYND_UNUSED(arrmeta)) const
+fixed_dimsym_type::arrmeta_finalize_buffers(char *DYND_UNUSED(arrmeta)) const
 {
 }
 
-void fixed_sym_dim_type::arrmeta_destruct(char *DYND_UNUSED(arrmeta)) const {}
+void fixed_dimsym_type::arrmeta_destruct(char *DYND_UNUSED(arrmeta)) const {}
 
-void fixed_sym_dim_type::arrmeta_debug_print(
+void fixed_dimsym_type::arrmeta_debug_print(
     const char *DYND_UNUSED(arrmeta), std::ostream &DYND_UNUSED(o),
     const std::string &DYND_UNUSED(indent)) const
 {
@@ -202,7 +202,7 @@ void fixed_sym_dim_type::arrmeta_debug_print(
   throw runtime_error(ss.str());
 }
 
-void fixed_sym_dim_type::data_destruct(const char *DYND_UNUSED(arrmeta),
+void fixed_dimsym_type::data_destruct(const char *DYND_UNUSED(arrmeta),
                                        char *DYND_UNUSED(data)) const
 {
   stringstream ss;
@@ -210,7 +210,7 @@ void fixed_sym_dim_type::data_destruct(const char *DYND_UNUSED(arrmeta),
   throw runtime_error(ss.str());
 }
 
-void fixed_sym_dim_type::data_destruct_strided(const char *DYND_UNUSED(arrmeta),
+void fixed_dimsym_type::data_destruct_strided(const char *DYND_UNUSED(arrmeta),
                                                char *DYND_UNUSED(data),
                                                intptr_t DYND_UNUSED(stride),
                                                size_t DYND_UNUSED(count)) const
@@ -221,22 +221,22 @@ void fixed_sym_dim_type::data_destruct_strided(const char *DYND_UNUSED(arrmeta),
 }
 
 static ndt::type get_element_type(const ndt::type& dt) {
-    return dt.tcast<fixed_sym_dim_type>()->get_element_type();
+    return dt.tcast<fixed_dimsym_type>()->get_element_type();
 }
 
-void fixed_sym_dim_type::get_dynamic_type_properties(
+void fixed_dimsym_type::get_dynamic_type_properties(
                 const std::pair<std::string, gfunc::callable> **out_properties,
                 size_t *out_count) const
 {
-    static pair<string, gfunc::callable> fixed_sym_dim_type_properties[] = {
+    static pair<string, gfunc::callable> fixed_dimsym_type_properties[] = {
         pair<string, gfunc::callable>(
             "element_type", gfunc::make_callable(&::get_element_type, "self"))};
 
-    *out_properties = fixed_sym_dim_type_properties;
-    *out_count = sizeof(fixed_sym_dim_type_properties) / sizeof(fixed_sym_dim_type_properties[0]);
+    *out_properties = fixed_dimsym_type_properties;
+    *out_count = sizeof(fixed_dimsym_type_properties) / sizeof(fixed_dimsym_type_properties[0]);
 }
 
-void fixed_sym_dim_type::get_dynamic_array_properties(
+void fixed_dimsym_type::get_dynamic_array_properties(
     const std::pair<std::string, gfunc::callable> **out_properties,
     size_t *out_count) const
 {
@@ -248,7 +248,7 @@ void fixed_sym_dim_type::get_dynamic_array_properties(
     }
 }
 
-void fixed_sym_dim_type::get_dynamic_array_functions(
+void fixed_dimsym_type::get_dynamic_array_functions(
     const std::pair<std::string, gfunc::callable> **out_functions,
     size_t *out_count) const
 {
@@ -263,24 +263,24 @@ namespace {
     // TODO: use the PP meta stuff, but DYND_PP_LEN_MAX is set to 8 right now,
     // would need to be 19
     struct static_strided_dims {
-        fixed_sym_dim_type bt1;
-        fixed_sym_dim_type bt2;
-        fixed_sym_dim_type bt3;
-        fixed_sym_dim_type bt4;
-        fixed_sym_dim_type bt5;
-        fixed_sym_dim_type bt6;
-        fixed_sym_dim_type bt7;
-        fixed_sym_dim_type bt8;
-        fixed_sym_dim_type bt9;
-        fixed_sym_dim_type bt10;
-        fixed_sym_dim_type bt11;
-        fixed_sym_dim_type bt12;
-        fixed_sym_dim_type bt13;
-        fixed_sym_dim_type bt14;
-        fixed_sym_dim_type bt15;
-        fixed_sym_dim_type bt16;
-        fixed_sym_dim_type bt17;
-        fixed_sym_dim_type bt18;
+        fixed_dimsym_type bt1;
+        fixed_dimsym_type bt2;
+        fixed_dimsym_type bt3;
+        fixed_dimsym_type bt4;
+        fixed_dimsym_type bt5;
+        fixed_dimsym_type bt6;
+        fixed_dimsym_type bt7;
+        fixed_dimsym_type bt8;
+        fixed_dimsym_type bt9;
+        fixed_dimsym_type bt10;
+        fixed_dimsym_type bt11;
+        fixed_dimsym_type bt12;
+        fixed_dimsym_type bt13;
+        fixed_dimsym_type bt14;
+        fixed_dimsym_type bt15;
+        fixed_dimsym_type bt16;
+        fixed_dimsym_type bt17;
+        fixed_dimsym_type bt18;
 
         ndt::type static_builtins_instance[builtin_type_id_count];
 
@@ -326,7 +326,7 @@ namespace {
     };
 } // anonymous namespace
 
-ndt::type ndt::make_fixed_sym_dim(const ndt::type &element_tp)
+ndt::type ndt::make_fixed_dimsym(const ndt::type &element_tp)
 {
   // Static instances of the types, which have a reference
   // count > 0 for the lifetime of the program. This static
@@ -338,6 +338,6 @@ ndt::type ndt::make_fixed_sym_dim(const ndt::type &element_tp)
     return ssd.static_builtins_instance[element_tp.get_type_id()];
   }
   else {
-    return ndt::type(new fixed_sym_dim_type(element_tp), false);
+    return ndt::type(new fixed_dimsym_type(element_tp), false);
   }
 }
