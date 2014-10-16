@@ -24,7 +24,18 @@ int calc(int x, int y) {
   return x + 2 * y;
 }
 
-that I'd like an elwise version of. We should be able to do something like
+that I'd like an elwise version of. It seems we should be able to do something like
 
-nd::arrfunc elwise_calc = elwise(calc);
+nd::arrfunc elwise_calc = make_elwise_arrfunc(calc);
 
+A bit less trivial is something like neighborhood that has keyword arguments like shape and offset. In that case, if I have some function strided_calc, I should be able to have an arrfunc with a simple interface with those arguments unpacked. For example, perhaps a subclass like
+
+class neighborhood_arrfunc : arrfunc {
+  nd::array operator ()(nd::array a0, ..., nd::array shape, nd::array offset) {
+    // package shape and offset into kwds, then call operator () in arrfunc
+  }
+};
+
+then I would do
+
+nd::arrfunc neighborhood_calc = make_neighborhood_arrfunc(strided_calc);
