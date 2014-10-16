@@ -28,18 +28,9 @@ namespace dynd { namespace ndt {
  *                  is a dim_fragment, it is an ellipsis type var match,
  *                  otherwise it is a dim type var match, and the first
  *                  dimension of the type only is what is relevant.
- * \param vals  A map of names to matched integer vals.
  */
 bool pattern_match(const ndt::type &concrete, const ndt::type &pattern,
-                   std::map<nd::string, ndt::type> &typevars,
-                   std::map<nd::string, intptr_t> &vals);
-
-inline bool pattern_match(const ndt::type &concrete, const ndt::type &pattern,
-                          std::map<nd::string, ndt::type> &typevars)
-{
-    std::map<nd::string, intptr_t> vals;
-    return pattern_match(concrete, pattern, typevars, vals);
-}
+                   std::map<nd::string, ndt::type> &typevars);
 
 /**
  * Matches the provided concrete type against the pattern type, which may
@@ -51,8 +42,7 @@ inline bool pattern_match(const ndt::type &concrete, const ndt::type &pattern)
     return true;
   } else {
     std::map<nd::string, ndt::type> typevars;
-    std::map<nd::string, intptr_t> vals;
-    return pattern_match(concrete, pattern, typevars, vals);
+    return pattern_match(concrete, pattern, typevars);
   }
 }
 }} // namespace dynd::ndt

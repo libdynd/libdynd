@@ -20,8 +20,7 @@ using namespace std;
 using namespace dynd;
 
 static bool recursive_match(const ndt::type &concrete, const ndt::type &pattern,
-                            std::map<nd::string, ndt::type> &typevars,
-                            std::map<nd::string, intptr_t> &vals)
+                            std::map<nd::string, ndt::type> &typevars)
 {
   if (concrete.get_ndim() == 0) {
     if (pattern.get_ndim() == 0) {
@@ -43,7 +42,7 @@ static bool recursive_match(const ndt::type &concrete, const ndt::type &pattern,
         case pointer_type_id:
           return recursive_match(
               concrete.tcast<pointer_type>()->get_target_type(),
-              pattern.tcast<pointer_type>()->get_target_type(), typevars, vals);
+              pattern.tcast<pointer_type>()->get_target_type(), typevars);
         case struct_type_id:
         case cstruct_type_id:
           if (concrete.tcast<base_struct_type>()
@@ -60,7 +59,7 @@ static bool recursive_match(const ndt::type &concrete, const ndt::type &pattern,
                 pattern.tcast<base_struct_type>()->get_field_types_raw();
             for (size_t i = 0; i != field_count; ++i) {
               if (!recursive_match(concrete_fields[i], pattern_fields[i],
-                                   typevars, vals)) {
+                                   typevars)) {
                 return false;
               }
             }
@@ -81,7 +80,7 @@ static bool recursive_match(const ndt::type &concrete, const ndt::type &pattern,
                 pattern.tcast<base_tuple_type>()->get_field_types_raw();
             for (size_t i = 0; i != field_count; ++i) {
               if (!recursive_match(concrete_fields[i], pattern_fields[i],
-                                   typevars, vals)) {
+                                   typevars)) {
                 return false;
               }
             }
@@ -92,12 +91,12 @@ static bool recursive_match(const ndt::type &concrete, const ndt::type &pattern,
         case option_type_id:
           return recursive_match(
               concrete.tcast<option_type>()->get_value_type(),
-              pattern.tcast<option_type>()->get_value_type(), typevars, vals);
+              pattern.tcast<option_type>()->get_value_type(), typevars);
         case cuda_host_type_id:
         case cuda_device_type_id:
           return recursive_match(
               concrete.tcast<base_memory_type>()->get_storage_type(),
-              pattern.tcast<base_memory_type>()->get_storage_type(), typevars, vals);
+              pattern.tcast<base_memory_type>()->get_storage_type(), typevars);
         case funcproto_type_id:
           if (concrete.tcast<funcproto_type>()->get_param_count() ==
               pattern.tcast<funcproto_type>()->get_param_count()) {
@@ -105,7 +104,7 @@ static bool recursive_match(const ndt::type &concrete, const ndt::type &pattern,
             if (!recursive_match(
                     concrete.tcast<funcproto_type>()->get_return_type(),
                     pattern.tcast<funcproto_type>()->get_return_type(),
-                    typevars, vals)) {
+                    typevars)) {
               return false;
             }
             // Then match all the parameters
@@ -115,7 +114,7 @@ static bool recursive_match(const ndt::type &concrete, const ndt::type &pattern,
               if (!recursive_match(
                       concrete.tcast<funcproto_type>()->get_param_type(i),
                       pattern.tcast<funcproto_type>()->get_param_type(i),
-                      typevars, vals)) {
+                      typevars)) {
                 return false;
               }
             }
@@ -156,7 +155,7 @@ static bool recursive_match(const ndt::type &concrete, const ndt::type &pattern,
         }
         return recursive_match(
             concrete, pattern.tcast<ellipsis_dim_type>()->get_element_type(),
-            typevars, vals);
+            typevars);
       } else {
         return false;
       }
@@ -170,14 +169,14 @@ static bool recursive_match(const ndt::type &concrete, const ndt::type &pattern,
       case var_dim_type_id:
         return recursive_match(
             concrete.tcast<base_dim_type>()->get_element_type(),
-            pattern.tcast<base_dim_type>()->get_element_type(), typevars, vals);
+            pattern.tcast<base_dim_type>()->get_element_type(), typevars);
       case fixed_dim_type_id:
         return concrete.tcast<fixed_dim_type>()->get_fixed_dim_size() ==
                    pattern.tcast<fixed_dim_type>()->get_fixed_dim_size() &&
                recursive_match(
                    concrete.tcast<base_dim_type>()->get_element_type(),
                    pattern.tcast<base_dim_type>()->get_element_type(),
-                   typevars, vals);
+                   typevars);
       case cfixed_dim_type_id:
         return concrete.tcast<cfixed_dim_type>()->get_fixed_dim_size() ==
                    pattern.tcast<cfixed_dim_type>()->get_fixed_dim_size() &&
@@ -186,7 +185,7 @@ static bool recursive_match(const ndt::type &concrete, const ndt::type &pattern,
                recursive_match(
                    concrete.tcast<base_dim_type>()->get_element_type(),
                    pattern.tcast<base_dim_type>()->get_element_type(),
-                   typevars, vals);
+                   typevars);
       default:
         break;
       }
@@ -201,7 +200,7 @@ static bool recursive_match(const ndt::type &concrete, const ndt::type &pattern,
           concrete.get_type_id() == cfixed_dim_type_id) {
         return recursive_match(
             concrete.tcast<base_dim_type>()->get_element_type(),
-            pattern.tcast<base_dim_type>()->get_element_type(), typevars, vals);
+            pattern.tcast<base_dim_type>()->get_element_type(), typevars);
       } else {
         return false;
       }
@@ -212,7 +211,7 @@ static bool recursive_match(const ndt::type &concrete, const ndt::type &pattern,
               concrete.tcast<cfixed_dim_type>()->get_fixed_dim_size()) {
         return recursive_match(
             concrete.tcast<base_dim_type>()->get_element_type(),
-            pattern.tcast<base_dim_type>()->get_element_type(), typevars, vals);
+            pattern.tcast<base_dim_type>()->get_element_type(), typevars);
       } else {
         return false;
       }
@@ -252,7 +251,7 @@ static bool recursive_match(const ndt::type &concrete, const ndt::type &pattern,
         }
         return recursive_match(
             concrete.get_type_at_dimension(NULL, matched_ndim),
-            pattern.tcast<ellipsis_dim_type>()->get_element_type(), typevars, vals);
+            pattern.tcast<ellipsis_dim_type>()->get_element_type(), typevars);
       } else {
         // There are not enough dimensions in the concrete type
         // to match
@@ -266,7 +265,7 @@ static bool recursive_match(const ndt::type &concrete, const ndt::type &pattern,
         tv_type = concrete;
         return recursive_match(
             concrete.get_type_at_dimension(NULL, 1),
-            pattern.tcast<typevar_dim_type>()->get_element_type(), typevars, vals);
+            pattern.tcast<typevar_dim_type>()->get_element_type(), typevars);
       } else {
         // Make sure the type matches previous
         // instances of the type var
@@ -291,46 +290,10 @@ static bool recursive_match(const ndt::type &concrete, const ndt::type &pattern,
         }
         return recursive_match(
             concrete.get_type_at_dimension(NULL, 1),
-            pattern.tcast<typevar_dim_type>()->get_element_type(), typevars, vals);
+            pattern.tcast<typevar_dim_type>()->get_element_type(), typevars);
       }
     } else if (pattern.get_type_id() == typevar_dim_pow_type_id) {
-      ndt::type base_type =
-          pattern.tcast<typevar_dim_pow_type>()->get_base_type();
-      ndt::type &tv_type = (base_type.get_type_id() == typevar_dim_type_id)
-          ? typevars[base_type.tcast<typevar_dim_type>()->get_name()] : base_type;
-      intptr_t &val =
-          vals[pattern.tcast<typevar_dim_pow_type>()->get_pow()];
-      if (tv_type.is_null()) {
-        // This typevar hasn't been seen yet
-        tv_type = concrete;
-        val = 1;
-      } else {
-        // Make sure the type matches previous
-        // instances of the type var
-        if (concrete.get_type_id() != tv_type.get_type_id()) {
-          return false;
-        }
-        switch (concrete.get_type_id()) {
-        case fixed_dim_type_id:
-          if (concrete.tcast<fixed_dim_type>()->get_fixed_dim_size() !=
-              tv_type.tcast<fixed_dim_type>()->get_fixed_dim_size()) {
-            return false;
-          }
-          break;
-        case cfixed_dim_type_id:
-          if (concrete.tcast<cfixed_dim_type>()->get_fixed_dim_size() !=
-              tv_type.tcast<cfixed_dim_type>()->get_fixed_dim_size()) {
-            return false;
-          }
-          break;
-        default:
-          break;
-        }
-        val += 1;
-      }
-      ndt::type concrete_el_tp = concrete.get_type_at_dimension(NULL, 1);
-      return recursive_match(concrete_el_tp, pattern, typevars, vals)
-        || recursive_match(concrete_el_tp, pattern.tcast<typevar_dim_pow_type>()->get_element_type(), typevars, vals);
+      throw runtime_error("TODO: typevar_dim_pow_type pattern match");
     } else {
       return false;
     }

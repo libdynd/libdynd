@@ -16,7 +16,6 @@ namespace dynd { namespace ndt {
 namespace detail {
 ndt::type internal_substitute(const ndt::type &pattern,
                               std::map<nd::string, ndt::type> &typevars,
-                              std::map<nd::string, intptr_t> &vals,
                               bool concrete);
 }
 
@@ -29,7 +28,6 @@ ndt::type internal_substitute(const ndt::type &pattern,
  */
 inline ndt::type substitute(const ndt::type &pattern,
                             std::map<nd::string, ndt::type> &typevars,
-                            std::map<nd::string, intptr_t> &vals,
                             bool concrete)
 {
   // This check for whether ``pattern`` is symbolic is put here in
@@ -37,18 +35,9 @@ inline ndt::type substitute(const ndt::type &pattern,
   if (!pattern.is_symbolic()) {
     return pattern;
   } else {
-    return detail::internal_substitute(pattern, typevars, vals, concrete);
+    return detail::internal_substitute(pattern, typevars, concrete);
   }
 }
-
-inline ndt::type substitute(const ndt::type &pattern,
-                            std::map<nd::string, ndt::type> &typevars,
-                            bool concrete)
-{
-    std::map<nd::string, intptr_t> vals;
-    return substitute(pattern, typevars, vals, concrete);
-}
-
 
 }} // namespace dynd::ndt
 

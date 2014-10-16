@@ -48,7 +48,6 @@ substitute_type_array(const nd::array &type_array,
 ndt::type
 ndt::detail::internal_substitute(const ndt::type &pattern,
                                  std::map<nd::string, ndt::type> &typevars,
-                                 std::map<nd::string, intptr_t> &vals,
                                  bool concrete)
 {
   // This function assumes that ``pattern`` is symbolic, so does not
@@ -204,88 +203,8 @@ ndt::detail::internal_substitute(const ndt::type &pattern,
       }
     }
     case typevar_dim_pow_type_id: {
-      map<nd::string, ndt::type>::const_iterator it =
-          typevars.find(pattern.tcast<typevar_dim_pow_type>()->get_base_type().tcast<typevar_dim_type>()->get_name());
-      if (it != typevars.end()) {
-        if (it->second.get_ndim() == 0) {
-          stringstream ss;
-          ss << "The substitution for dynd type var " << pattern << ", "
-             << it->second << ", is a dtype, expected a dimension";
-          throw invalid_argument(ss.str());
-        }
-        map<nd::string, intptr_t>::const_iterator vit =
-          vals.find(pattern.tcast<typevar_dim_pow_type>()->get_pow());
-        if (vit == vals.end()) {
-            // error
-        }
-        if (!concrete || !it->second.is_symbolic()) {
-          switch (it->second.get_type_id()) {
-          case strided_dim_type_id: {
-            ndt::type res = ndt::substitute(
-                pattern.tcast<typevar_dim_pow_type>()->get_element_type(), typevars, vals,
-                concrete);
-            for (intptr_t pow = vit->second; pow > 0; --pow) {
-                res = ndt::make_strided_dim(res);
-            }
-            return res;
-          }
-          case fixed_dim_type_id: {
-            ndt::type res = ndt::substitute(
-                pattern.tcast<typevar_dim_pow_type>()->get_element_type(), typevars, vals,
-                concrete);
-            intptr_t size = it->second.tcast<fixed_dim_type>()->get_fixed_dim_size();
-            for (intptr_t pow = vit->second; pow > 0; --pow) {
-                res = ndt::make_fixed_dim(size, res);
-            }
-            return res;
-          }
-          case cfixed_dim_type_id: {
-            ndt::type res = ndt::substitute(
-                pattern.tcast<typevar_dim_pow_type>()->get_element_type(), typevars, vals,
-                concrete);
-            intptr_t size = it->second.tcast<cfixed_dim_type>()->get_fixed_dim_size();
-            for (intptr_t pow = vit->second; pow > 0; --pow) {
-                res = ndt::make_cfixed_dim(size, res);
-            }
-            return res;
-          }
-          case var_dim_type_id: {
-            ndt::type res = ndt::substitute(
-                pattern.tcast<typevar_dim_pow_type>()->get_element_type(), typevars, vals,
-                concrete);
-            for (intptr_t pow = vit->second; pow > 0; --pow) {
-                res = ndt::make_var_dim(res);
-            }
-            return res;
-          }
-          default: {
-            stringstream ss;
-            ss << "The substitution for dynd type var " << pattern << ", "
-               << it->second << ", is not a substitutable dimension type";
-            throw invalid_argument(ss.str());
-          }
-          }
-        } else {
-          stringstream ss;
-          ss << "The substitution for dynd type var " << pattern << ", "
-             << it->second << ", is not concrete as required";
-          throw invalid_argument(ss.str());
-        }
-      } else {
-        if (concrete) {
-          stringstream ss;
-          ss << "No substitution type for dynd type var " << pattern
-             << " was available";
-          throw invalid_argument(ss.str());
-        } else {
-          return ndt::make_typevar_dim_pow(
-              pattern.tcast<typevar_dim_pow_type>()->get_base_type(),
-              pattern.tcast<typevar_dim_pow_type>()->get_pow(),
-              ndt::substitute(
-                  pattern.tcast<typevar_dim_pow_type>()->get_element_type(),
-                  typevars, concrete));
-        }
-      }
+      throw runtime_error(
+          "TODO: Implement substitute for typevar_dim_pow_type");
     }
     case ellipsis_dim_type_id: {
       const nd::string &name = pattern.tcast<ellipsis_dim_type>()->get_name();

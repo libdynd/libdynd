@@ -26,12 +26,12 @@ TEST(TypePatternMatch, Simple) {
                                       ndt::type("A... * 4 * M")));
   EXPECT_TRUE(ndt::pattern_match(ndt::type("3 * int32"),
                                       ndt::type("3 * A... * M")));
-  EXPECT_TRUE(ndt::pattern_match(ndt::type("strided**3 * int32"),
-                                      ndt::type("strided**N * int32")));
-  EXPECT_TRUE(ndt::pattern_match(ndt::type("strided**2 * var * int32"),
+  EXPECT_TRUE(ndt::pattern_match(ndt::type("fixed**3 * int32"),
+                                      ndt::type("fixed**N * int32")));
+  EXPECT_TRUE(ndt::pattern_match(ndt::type("fixed**2 * var * int32"),
                                       ndt::type("A**N * var * int32")));
-  EXPECT_TRUE(ndt::pattern_match(ndt::type("strided * int32"),
-                                      ndt::type("strided**N * int32")));
+  EXPECT_TRUE(ndt::pattern_match(ndt::type("fixed * int32"),
+                                      ndt::type("fixed**N * int32")));
   EXPECT_TRUE(ndt::pattern_match(ndt::type("4 * 4 * 3 * int32"),
                                       ndt::type("4**N * 3 * int32")));
   EXPECT_TRUE(ndt::pattern_match(ndt::type("4 * 4 * 2 * int32"),
@@ -47,11 +47,11 @@ TEST(TypePatternMatch, Simple) {
                                         ndt::type("A... * int32")));
   EXPECT_FALSE(ndt::pattern_match(ndt::type("4 * int32"),
                                         ndt::type("A... * 3 * M")));
-  EXPECT_FALSE(ndt::pattern_match(ndt::type("strided**3 * int32"),
-                                      ndt::type("strided**N * var * int32")));
-  EXPECT_FALSE(ndt::pattern_match(ndt::type("var * strided**3 * int32"),
-                                      ndt::type("strided**N * int32")));
-  EXPECT_FALSE(ndt::pattern_match(ndt::type("strided**3 * var * int32"),
+  EXPECT_FALSE(ndt::pattern_match(ndt::type("fixed**3 * int32"),
+                                      ndt::type("fixed**N * var * int32")));
+  EXPECT_FALSE(ndt::pattern_match(ndt::type("var * fixed**3 * int32"),
+                                      ndt::type("fixed**N * int32")));
+  EXPECT_FALSE(ndt::pattern_match(ndt::type("fixed**3 * var * int32"),
                                       ndt::type("A**N * A * int32")));
   EXPECT_FALSE(ndt::pattern_match(ndt::type("4 * 4 * 3 * int32"),
                                       ndt::type("4**N * N * int32")));
