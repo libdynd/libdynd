@@ -250,6 +250,22 @@ Python code would look like
 This is another function which would support viewing the
 input data.
 
+### Gradient/Hessian
+
+Gradient and Hessian are natural numeric operations
+to represent on a grid. With an extension to datashape
+to allow constrained typevars as ``(A: <constraint>)``,
+one can represent their signatures as
+
+```
+((Dims: fixed**N) * T) -> Dims... * N * T
+((Dims: fixed**N) * T) -> Dims... * N * N * T
+```
+
+It might also be natural for these functions to have
+an additional dynamic parameter specifying the method
+of approximation.
+
 ## Datashape Function Signature Limitations
 
 Datashape function signatures as presently defined don't
