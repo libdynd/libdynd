@@ -1,3 +1,5 @@
+cd %RECIPE_DIR%
+
 cd ..
 mkdir build
 cd build
