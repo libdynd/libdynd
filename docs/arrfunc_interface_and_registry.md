@@ -4,6 +4,8 @@ DyND arrfuncs are a recipe for computation in DyND. They are constructed with a 
 may have arguments itself. A DyND arrfunc is called with array arguments and a special array, possibly null, called "kwds" that
 represents dynamic keyword arguments.
 
+Arrfunc execution happens in two stages. The first stage, instantiation, gets the type/arrmeta of the array arguments and the values of the dynamic keyword arguments, and has the opportunity to bake that information down into a "ckernel" that will repeatedly run on multiple sets of array arguments. The second stage executes that ckernel on a set of pointers to array data.
+
 ## Make Arguments versus Keyword Arguments
 
 Most arguments to an arrfunc could be either arguments to make or passed to operator() as keywords. Our design choice is that there should
