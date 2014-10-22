@@ -19,32 +19,37 @@ namespace dynd {
 
 class funcproto_type : public base_type {
     intptr_t m_param_count;
+    intptr_t m_aux_param_count;
     // This is always a contiguous immutable "N * type" array
     nd::array m_param_types;
     ndt::type m_return_type;
 
 public:
-    funcproto_type(const nd::array &param_types, const ndt::type &return_type);
+    funcproto_type(const nd::array &param_types, const ndt::type &return_type, intptr_t aux_param_count = 0);
 
     virtual ~funcproto_type() {}
 
-    inline intptr_t get_param_count() const {
+    intptr_t get_param_count() const {
         return m_param_count;
     }
 
-    inline const nd::array& get_param_types() const {
+    intptr_t get_aux_param_count() const {
+        return m_aux_param_count;
+    }
+
+    const nd::array& get_param_types() const {
         return m_param_types;
     }
 
-    inline const ndt::type *get_param_types_raw() const {
+    const ndt::type *get_param_types_raw() const {
         return reinterpret_cast<const ndt::type *>(
             m_param_types.get_readonly_originptr());
     }
-    inline const ndt::type &get_param_type(intptr_t i) const {
+    const ndt::type &get_param_type(intptr_t i) const {
         return get_param_types_raw()[i];
     }
 
-    inline const ndt::type& get_return_type() const {
+    const ndt::type& get_return_type() const {
         return m_return_type;
     }
 
@@ -83,10 +88,11 @@ public:
 namespace ndt {
     /** Makes a funcproto type with the specified types */
     inline ndt::type make_funcproto(const nd::array &param_types,
-                                    const ndt::type &return_type)
+                                    const ndt::type &return_type,
+                                    intptr_t aux_param_count = 0)
     {
         return ndt::type(
-            new funcproto_type(param_types, return_type), false);
+            new funcproto_type(param_types, return_type, aux_param_count), false);
     }
 
     /** Makes a funcproto type with the specified types */

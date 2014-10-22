@@ -870,9 +870,12 @@ static ndt::type parse_struct(const char *&rbegin, const char *end,
 // funcproto : tuple -> type
 static ndt::type parse_tuple_or_funcproto(const char *&rbegin, const char *end, map<string, ndt::type>& symtable)
 {
+    std::cout << "parse_tuple_or_funcproto" << std::endl;
+
     const char *begin = rbegin;
     vector<ndt::type> field_type_list;
     bool cprefixed = false;
+    intptr_t semicolon_pos = -1;
 
     if (!parse_token_ds(begin, end, '(')) {
         if (parse_token_ds(begin, end, "c(")) {
@@ -895,10 +898,12 @@ static ndt::type parse_tuple_or_funcproto(const char *&rbegin, const char *end, 
                         parse_token_ds(begin, end, ')')) {
                     break;
                 }
+            } else if (parse_token_ds(begin, end, ';')) {
+                semicolon_pos = field_type_list.size();
             } else if (parse_token_ds(begin, end, ')')) {
                 break;
             } else {
-                throw datashape_parse_error(begin, "expected ',' or ')'");
+                throw datashape_parse_error(begin, "expected ',', ';' or ')'");
             }
         }
     }
@@ -918,7 +923,7 @@ static ndt::type parse_tuple_or_funcproto(const char *&rbegin, const char *end, 
             throw datashape_parse_error(begin, "expected function prototype return type");
         }
         rbegin = begin;
-        return ndt::make_funcproto(field_type_list, return_type);
+        return ndt::make_funcproto(field_type_list, return_type, field_type_list.size() - semicolon_pos);
     }
 }
 
