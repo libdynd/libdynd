@@ -170,6 +170,8 @@ namespace ndt {
     }
 } // namespace ndt
 
+nd::array pack(intptr_t field_count, const nd::array *field_vals);
+
 } // namespace dynd
 
 #endif // _DYND__TUPLE_TYPE_HPP_

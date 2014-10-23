@@ -161,6 +161,26 @@ struct arrfunc_type_data {
     return func_proto.tcast<funcproto_type>()->get_param_count();
   }
 
+  inline intptr_t get_aux_param_count() const
+  {
+    return func_proto.tcast<funcproto_type>()->get_aux_param_count();
+  }
+
+  intptr_t get_nsrc() const
+  {
+    return func_proto.tcast<funcproto_type>()->get_nsrc();
+  }
+
+  intptr_t get_naux() const
+  {
+    return func_proto.tcast<funcproto_type>()->get_naux();
+  }
+
+  intptr_t get_narg() const
+  {
+    return func_proto.tcast<funcproto_type>()->get_narg();
+  }
+
   inline const ndt::type *get_param_types() const
   {
     return func_proto.tcast<funcproto_type>()->get_param_types_raw();

@@ -17,8 +17,8 @@ SET(DYND_SRC_MAX 4 CACHE STRING
     "Build a libdynd library with functor arrfuncs that support the specified maximum number of arguments")
 # TODO: Check that the preprocessor can handle this number
 # -DDYND_ARG_MAX, the maximum number of arguments that functor arrfuncs must support,
-# which is DYND_SRC_MAX + ?reference_dst + ?aux_buffer + ?thread_aux_buffer
-MATH(EXPR DYND_ARG_MAX "${DYND_SRC_MAX} + 3")
+# which is DYND_SRC_MAX + ?reference_dst
+MATH(EXPR DYND_ARG_MAX "${DYND_SRC_MAX} + 1")
 
 # Only add these options if this is the top level CMakeLists.txt
 if("${CMAKE_SOURCE_DIR}" STREQUAL "${CMAKE_CURRENT_SOURCE_DIR}")

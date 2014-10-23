@@ -20,6 +20,7 @@
 using namespace std;
 using namespace dynd;
 
+/*
 template <int N>
 int sum(const nd::strided_vals<int, N> &nh) {
     typedef nd::strided_vals<int, N> nh_type;
@@ -170,6 +171,7 @@ TEST(Neighborhood, Sum3D) {
         "[[false, true, false], [true, false, true], [false, true, false]],"
         "[[true, false, true], [false, true, false], [true, false, true]]]"), "offset", parse_json("3 * int", "[-1, -1, -1]"))));
 }
+*/
 
 /*
     Todo: Make this 3D test pass.

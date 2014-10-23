@@ -202,3 +202,22 @@ void tuple_type::get_dynamic_type_properties(const std::pair<std::string, gfunc:
     *out_properties = type_properties;
     *out_count = sizeof(type_properties) / sizeof(type_properties[0]);
 }
+
+nd::array dynd::pack(intptr_t field_count, const nd::array *field_vals)
+{
+    if (field_count == 0) {
+        return nd::array();
+    }
+
+    vector<ndt::type> field_types(field_count);
+    for (intptr_t i = 0; i < field_count; ++i) {
+        field_types[i] = field_vals[i].get_type();
+    }
+
+    nd::array res = nd::empty(ndt::make_tuple(field_types));
+    for (intptr_t i = 0; i < field_count; ++i) {
+        res(i).val_assign(field_vals[i]);
+    }
+
+    return res;
+}

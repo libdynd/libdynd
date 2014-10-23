@@ -9,6 +9,7 @@
 #include <dynd/kernels/expr_kernels.hpp>
 #include <dynd/types/expr_type.hpp>
 #include <dynd/types/base_struct_type.hpp>
+#include <dynd/types/tuple_type.hpp>
 #include <dynd/types/property_type.hpp>
 #include <dynd/type.hpp>
 
@@ -161,38 +162,41 @@ nd::arrfunc::arrfunc(const nd::array &rhs)
     }
 }
 
-nd::array nd::arrfunc::call(intptr_t arg_count, const nd::array *args, const aux::kwds &kwds,
+nd::array nd::arrfunc::call(intptr_t narg, const nd::array *args, const aux::kwds &DYND_UNUSED(kwds),
                             const eval::eval_context *ectx) const
 {
   const arrfunc_type_data *af = get();
-  std::vector<ndt::type> src_tp(arg_count);
-  for (intptr_t i = 0; i < arg_count; ++i) {
-    src_tp[i] = args[i].get_type();
+
+  std::vector<ndt::type> arg_tp(narg);
+  for (intptr_t i = 0; i < narg; ++i) {
+    arg_tp[i] = args[i].get_type();
   }
 
-  // Resolve the destination type
-  ndt::type dst_tp =
-      af->resolve(arg_count, arg_count ? &src_tp[0] : NULL, kwds.get());
-
-  std::vector<const char *> src_arrmeta(arg_count);
-  for (intptr_t i = 0; i < arg_count; ++i) {
+  std::vector<const char *> src_arrmeta(af->get_nsrc());
+  for (intptr_t i = 0; i < af->get_nsrc(); ++i) {
     src_arrmeta[i] = args[i].get_arrmeta();
   }
-  std::vector<char *> src_data(arg_count);
-  for (intptr_t i = 0; i < arg_count; ++i) {
+  std::vector<char *> src_data(af->get_nsrc());
+  for (intptr_t i = 0; i < af->get_nsrc(); ++i) {
     src_data[i] = const_cast<char *>(args[i].get_readonly_originptr());
   }
 
-  nd::array result = nd::empty(dst_tp);
+  // Pack the auxiliary arguments
+  nd::array aux = pack(af->get_naux(), args + af->get_nsrc());
+
+  // Resolve the destination type
+  ndt::type dst_tp = af->resolve(narg, narg ? &arg_tp[0] : NULL, aux);
+
+  // Construct the destination array
+  nd::array res = nd::empty(dst_tp);
 
   // Generate and evaluate the ckernel
   ckernel_builder ckb;
-  af->instantiate(af, &ckb, 0, dst_tp, result.get_arrmeta(), &src_tp[0],
-                  &src_arrmeta[0], kernel_request_single, kwds.get(), ectx);
+  af->instantiate(af, &ckb, 0, dst_tp, res.get_arrmeta(), &arg_tp[0],
+                  &src_arrmeta[0], kernel_request_single, aux, ectx);
   expr_single_t fn = ckb.get()->get_function<expr_single_t>();
-  fn(result.get_readwrite_originptr(), src_data.empty() ? NULL : &src_data[0],
-     ckb.get());
-  return result;
+  fn(res.get_readwrite_originptr(), src_data.empty() ? NULL : &src_data[0], ckb.get());
+  return res;
 }
 
 void nd::arrfunc::call_out(intptr_t arg_count, const nd::array *args, const aux::kwds &kwds,
