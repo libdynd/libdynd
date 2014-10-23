@@ -16,7 +16,10 @@
 /**
  * Expands to A without its enclosing parentheses.
  */
-#define DYND_PP_FLATTEN(A) DYND_PP_ID A
+#define ID(...) __VA_ARGS__
+#define DYND_PP_FLATTEN(A) DYND_PP_PASTE(DYND_PP__FLATTEN_, DYND_PP_BOOL(DYND_PP_LEN(A)))(A)
+#define DYND_PP__FLATTEN_0(A) 
+#define DYND_PP__FLATTEN_1(A) ID A
 
 #define DYND_PP_LIFT(...) (__VA_ARGS__)
 

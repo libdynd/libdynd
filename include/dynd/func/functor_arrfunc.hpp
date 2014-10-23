@@ -168,7 +168,7 @@ void make_functor_arrfunc(arrfunc_type_data *out_af, const obj_type &obj, mem_fu
     }
 }
 
-template <typename obj_type, typename mem_func_type, int aux_param_count = 0>
+template <typename obj_type, typename mem_func_type>
 arrfunc make_functor_arrfunc(const obj_type &obj, mem_func_type mem_func, bool copy = true) {
     array af = empty(ndt::make_arrfunc());
     make_functor_arrfunc(reinterpret_cast<arrfunc_type_data *>(af.get_readwrite_originptr()),

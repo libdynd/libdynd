@@ -197,11 +197,16 @@ DYND_PP_JOIN_MAP(FUNCPROTO_TYPE_FROM, (), DYND_PP_RANGE(1, DYND_PP_INC(DYND_ARG_
 
 } // namespace detail
 
-template <typename func_type, int aux_param_count = 0>
+template <typename func_type, int aux_param_count>
 inline ndt::type make_funcproto() {
     typedef typename funcproto_from<func_type>::type funcproto_type;
 
     return detail::funcproto_type_from<funcproto_type, aux_param_count>::make();
+}
+
+template <typename func_type>
+inline ndt::type make_funcproto() {
+    return make_funcproto<func_type, 0>();
 }
 
 ndt::type make_generic_funcproto(intptr_t nargs);
