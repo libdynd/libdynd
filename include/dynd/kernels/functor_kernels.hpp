@@ -6,13 +6,13 @@
 #ifndef DYND__KERNELS_FUNCTOR_KERNELS_HPP
 #define DYND__KERNELS_FUNCTOR_KERNELS_HPP
 
-#include <dynd/strided_vals.hpp>
-#include <dynd/kernels/ckernel_common_functions.hpp>
-#include <dynd/kernels/expr_kernels.hpp>
+//#include <dynd/strided_vals.hpp>
+//#include <dynd/kernels/ckernel_common_functions.hpp>
+//#include <dynd/kernels/expr_kernels.hpp>
 #include <dynd/pp/meta.hpp>
 #include <dynd/pp/list.hpp>
-#include <dynd/types/funcproto_type.hpp>
-#include <dynd/types/base_struct_type.hpp>
+//#include <dynd/types/funcproto_type.hpp>
+//#include <dynd/types/base_struct_type.hpp>
 
 namespace dynd { namespace nd { namespace detail {
 
@@ -147,7 +147,6 @@ struct functor_ck;
             return ckb_offset; \
         } \
     };
-
 
 DYND_PP_JOIN_MAP(FUNCTOR_CK, (), DYND_PP_RANGE(1, DYND_PP_INC(DYND_ARG_MAX)))
 

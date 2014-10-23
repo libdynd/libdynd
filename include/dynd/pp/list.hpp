@@ -16,17 +16,15 @@
 /**
  * Expands to A without its enclosing parentheses.
  */
-#define ID(...) __VA_ARGS__
-#define DYND_PP_FLATTEN(A) DYND_PP_PASTE(DYND_PP__FLATTEN_, DYND_PP_BOOL(DYND_PP_LEN(A)))(A)
-#define DYND_PP__FLATTEN_0(A) 
-#define DYND_PP__FLATTEN_1(A) ID A
+#define DYND_PP_FLATTEN(A) DYND_PP_ID A
 
 #define DYND_PP_LIFT(...) (__VA_ARGS__)
 
 /**
  * Expands to 1 if A is a pair of parentheses enclosing whitespace. Otherwise 0.
  */
-#define DYND_PP_IS_EMPTY(A) DYND_PP_IS_NULL(DYND_PP_FLATTEN(A))
+// #define DYND_PP_IS_EMPTY(A) DYND_PP_BOOL(DYND_PP_LEN(A))
+#define DYND_PP_IS_EMPTY(A) DYND_PP_IS_NULL A
 
 /**
  * Expands to the first token in A if A is not empty. Otherwise expands to whitespace.
