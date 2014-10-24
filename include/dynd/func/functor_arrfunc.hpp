@@ -83,7 +83,7 @@ struct functor_arrfunc_from<aux_param_count, funcproto_type *, copy, true> {
     static void make(const func_type &func, arrfunc_type_data *out_af) {
         out_af->func_proto = ndt::make_funcproto<funcproto_type, aux_param_count>();
         *out_af->get_data_as<func_type>() = func;
-        out_af->instantiate = &nd::functor_ck<func_type, funcproto_type, aux_param_count>::instantiate;
+        out_af->instantiate = &functor_ck<func_type, funcproto_type, aux_param_count>::instantiate;
         out_af->free_func = NULL;
     }
 };
@@ -107,7 +107,7 @@ struct functor_arrfunc_from<aux_param_count, obj_type, true, false> {
 
         out_af->func_proto = ndt::make_funcproto<funcproto_type, aux_param_count>();
         *out_af->get_data_as<obj_type>() = obj;
-        out_af->instantiate = &nd::functor_ck<obj_type, funcproto_type, aux_param_count>::instantiate;
+        out_af->instantiate = &functor_ck<obj_type, funcproto_type, aux_param_count>::instantiate;
         out_af->free_func = NULL;
     }
 };
@@ -125,7 +125,7 @@ struct functor_arrfunc_from<aux_param_count, obj_type, false, false> {
 
         out_af->func_proto = ndt::make_funcproto<funcproto_type, aux_param_count>();
         *out_af->get_data_as<wrapper_type>() = wrapper_type(obj);
-        out_af->instantiate = &nd::functor_ck<wrapper_type, funcproto_type, aux_param_count>::instantiate;
+        out_af->instantiate = &functor_ck<wrapper_type, funcproto_type, aux_param_count>::instantiate;
         out_af->free_func = NULL;
     }
 };
