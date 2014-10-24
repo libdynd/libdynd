@@ -17,26 +17,35 @@
 namespace dynd { namespace nd { namespace detail {
 
 template <typename T>
-class typed_param_from_bytes {
+class typed_arg {
 public:
+    typed_arg() {
+    }
+
+    typed_arg(const ndt::type &DYND_UNUSED(tp), const char *DYND_UNUSED(arrmeta), const nd::array &DYND_UNUSED(kwds)) {
+    }
+
     void init(const ndt::type &DYND_UNUSED(tp), const char *DYND_UNUSED(arrmeta), const nd::array &DYND_UNUSED(kwds)) {
     }
 
     T &val(char *data) {
         return *reinterpret_cast<T *>(data);
     }
-
-    const T &val(const char *data) {
-        return *reinterpret_cast<const T *>(data);
-    }
 };
 
 template <typename T, int N>
-class typed_param_from_bytes<nd::strided_vals<T, N> > {
+class typed_arg<nd::strided_vals<T, N> > {
 private:
     nd::strided_vals<T, N> m_strided;
 
 public:
+    typed_arg() {
+    }
+
+    typed_arg(const ndt::type &tp, const char *arrmeta, const nd::array &kwds) {
+        init(tp, arrmeta, kwds);
+    }
+
     void init(const ndt::type &DYND_UNUSED(tp), const char *arrmeta, const nd::array &kwds) {
         m_strided.set_data(NULL, reinterpret_cast<const size_stride_t *>(arrmeta),
             reinterpret_cast<start_stop_t *>(kwds.p("start_stop").as<intptr_t>()));
@@ -54,19 +63,15 @@ public:
         m_strided.set_data(data);
         return m_strided;
     }
-
-    const nd::strided_vals<T, N> &val(const char *data) {
-        m_strided.set_data(data);
-        return m_strided;
-    }
 };
 
-#define DECL_TYPED_PARAM_FROM_BYTES(TYPENAME, NAME) DYND_PP_META_DECL(typed_param_from_bytes<TYPENAME>, NAME)
+#define DECL_TYPED_ARG(TYPENAME, NAME) DYND_PP_META_DECL(typed_arg<TYPENAME>, NAME)
 #define INIT_TYPED_PARAM_FROM_BYTES(NAME, TP, ARRMETA) NAME.init(TP, ARRMETA, kwds)
 #define PARTIAL_DECAY(TYPENAME) std::remove_cv<typename std::remove_reference<TYPENAME>::type>::type
 #define PASS(NAME, ARG) NAME.val(ARG)
 #define AS(NAME, TYPE) NAME.as<TYPE>()
 #define COPY_CONSTRUCT(NAME) NAME(NAME)
+#define CONSTRUCT_TYPED_ARG(TYPENAME, TP, ARRMETA) typed_arg<TYPENAME>(TP, ARRMETA, kwds)
 
 template <typename func_type, typename funcproto_type, int aux_param_count>
 struct functor_ck;
@@ -87,21 +92,27 @@ struct functor_ck;
             DYND_PP_MAP_2(PARTIAL_DECAY, DYND_PP_META_NAME_RANGE(A, NSRC)), DYND_PP_META_NAME_RANGE(D, NSRC)); \
 \
         func_type func; \
-        DYND_PP_JOIN_ELWISE_2(DECL_TYPED_PARAM_FROM_BYTES, (;), \
-            DYND_PP_META_NAME_RANGE(D, NSRC), DYND_PP_META_NAME_RANGE(from_src, NSRC)); \
+        DYND_PP_JOIN_ELWISE_2(DECL_TYPED_ARG, (;), \
+            DYND_PP_META_NAME_RANGE(D, NSRC), DYND_PP_META_NAME_RANGE(src, NSRC)); \
         DYND_PP_JOIN_ELWISE_2(DYND_PP_META_DECL, (;), \
             DYND_PP_META_NAME_RANGE(A, NSRC, NARG), DYND_PP_META_NAME_RANGE(aux, NAUX)); \
 \
-        functor_ck DYND_PP_PREPEND(const func_type &func, DYND_PP_ELWISE_2(DYND_PP_META_DECL, \
-            DYND_PP_META_NAME_RANGE(A, NSRC, NARG), DYND_PP_META_NAME_RANGE(aux, NAUX))) \
+        functor_ck DYND_PP_CHAIN((const func_type &func), \
+            DYND_PP_ELWISE_2(DECL_TYPED_ARG, \
+                DYND_PP_META_NAME_RANGE(D, NSRC), DYND_PP_META_NAME_RANGE(src, NSRC)), \
+            DYND_PP_ELWISE_2(DYND_PP_META_DECL, \
+                DYND_PP_META_NAME_RANGE(A, NSRC, NARG), DYND_PP_META_NAME_RANGE(aux, NAUX)) \
+        ) \
           : DYND_PP_JOIN_MAP_2(COPY_CONSTRUCT, (,), \
-            DYND_PP_PREPEND(func, DYND_PP_META_NAME_RANGE(aux, NAUX))) { \
+                DYND_PP_CHAIN((func), DYND_PP_META_NAME_RANGE(src, NSRC), DYND_PP_META_NAME_RANGE(aux, NAUX))) { \
         } \
 \
         void single(char *dst, char **src) { \
-            *reinterpret_cast<R *>(dst) = this->func DYND_PP_MERGE(DYND_PP_ELWISE_2(PASS, \
-                DYND_PP_META_NAME_RANGE(this->from_src, NSRC), DYND_PP_META_AT_RANGE(src, NSRC)), \
-                DYND_PP_META_NAME_RANGE(aux, NAUX)); \
+            *reinterpret_cast<R *>(dst) = func DYND_PP_CHAIN( \
+                DYND_PP_ELWISE_2(PASS, \
+                    DYND_PP_META_NAME_RANGE(src, NSRC), DYND_PP_META_AT_RANGE(src, NSRC)), \
+                DYND_PP_META_NAME_RANGE(aux, NAUX) \
+            ); \
         } \
 \
         void strided(char *dst, intptr_t dst_stride, char **src, const intptr_t *src_stride, size_t count) { \
@@ -110,8 +121,11 @@ struct functor_ck;
             DYND_PP_JOIN_ELWISE_2(DYND_PP_META_DECL_ASGN, (;), \
                 DYND_PP_REPEAT_1(intptr_t, NSRC), DYND_PP_META_NAME_RANGE(src_stride, NSRC), DYND_PP_META_AT_RANGE(src_stride, NSRC)); \
             for (size_t i = 0; i < count; ++i) { \
-                *reinterpret_cast<R *>(dst) = this->func DYND_PP_MERGE(DYND_PP_ELWISE_2(PASS, \
-                    DYND_PP_META_NAME_RANGE(this->from_src, NSRC), DYND_PP_META_NAME_RANGE(src, NSRC)), DYND_PP_META_NAME_RANGE(aux, NAUX)); \
+                *reinterpret_cast<R *>(dst) = func DYND_PP_CHAIN( \
+                    DYND_PP_ELWISE_2(PASS, \
+                        DYND_PP_META_NAME_RANGE(this->src, NSRC), DYND_PP_META_NAME_RANGE(src, NSRC)), \
+                    DYND_PP_META_NAME_RANGE(aux, NAUX) \
+                ); \
                 dst += dst_stride; \
                 DYND_PP_JOIN_ELWISE_2(DYND_PP_META_ADD_ASGN, (;), \
                     DYND_PP_META_NAME_RANGE(src, NSRC), DYND_PP_META_NAME_RANGE(src_stride, NSRC)); \
@@ -139,19 +153,19 @@ struct functor_ck;
                 throw type_error(ss.str()); \
             } \
 \
-            self_type *e = self_type::create DYND_PP_PREPEND(ckb, DYND_PP_PREPEND(kernreq, DYND_PP_PREPEND(ckb_offset, \
-                DYND_PP_PREPEND(*af_self->get_data_as<func_type>(), DYND_PP_ELWISE_2(AS, \
-                DYND_PP_META_CALL_RANGE(args, NAUX), DYND_PP_META_NAME_RANGE(A, NSRC, DYND_PP_INC(NARG))))))); \
-            DYND_PP_JOIN_ELWISE_2(INIT_TYPED_PARAM_FROM_BYTES, (;), DYND_PP_META_NAME_RANGE(e->from_src, NSRC), \
-                DYND_PP_META_AT_RANGE(src_tp, NSRC), DYND_PP_META_AT_RANGE(src_arrmeta, NSRC)); \
-\
+            self_type::create DYND_PP_CHAIN((ckb, kernreq, ckb_offset, *af_self->get_data_as<func_type>()), \
+                DYND_PP_ELWISE_2(CONSTRUCT_TYPED_ARG, \
+                    DYND_PP_META_NAME_RANGE(D, NSRC), DYND_PP_META_AT_RANGE(src_tp, NSRC), DYND_PP_META_AT_RANGE(src_arrmeta, NSRC)), \
+                DYND_PP_ELWISE_2(AS, \
+                    DYND_PP_META_CALL_RANGE(args, NAUX), DYND_PP_META_NAME_RANGE(A, NSRC, DYND_PP_INC(NARG))) \
+            ); \
             return ckb_offset; \
         } \
     };
 
 DYND_PP_JOIN_MAP(FUNCTOR_CK, (), DYND_PP_RANGE(1, DYND_PP_INC(DYND_ARG_MAX)))
 
-#undef __FUNCTOR_CK
+//#undef __FUNCTOR_CK
 #undef FUNCTOR_CK
 
 /**
@@ -167,16 +181,15 @@ DYND_PP_JOIN_MAP(FUNCTOR_CK, (), DYND_PP_RANGE(1, DYND_PP_INC(DYND_ARG_MAX)))
             DYND_PP_MAP_1(PARTIAL_DECAY, DYND_PP_META_NAME_RANGE(A, N)), DYND_PP_META_NAME_RANGE(D, N)); \
 \
         func_type func; \
-        DECL_TYPED_PARAM_FROM_BYTES(R, from_dst); \
-        DYND_PP_JOIN_ELWISE_1(DECL_TYPED_PARAM_FROM_BYTES, (;), \
-            DYND_PP_META_NAME_RANGE(D, N), DYND_PP_META_NAME_RANGE(from_src, N)); \
+        DYND_PP_JOIN_ELWISE_1(DECL_TYPED_ARG, (;), \
+            DYND_PP_PREPEND(R, DYND_PP_META_NAME_RANGE(D, N)), DYND_PP_PREPEND(dst, DYND_PP_META_NAME_RANGE(src, N))); \
 \
         functor_ck(const func_type &func) : func(func) { \
         } \
 \
         inline void single(char *dst, char **src) { \
-            this->func(PASS(this->from_dst, dst), DYND_PP_JOIN_ELWISE_1(PASS, (,), \
-                DYND_PP_META_NAME_RANGE(this->from_src, N), DYND_PP_META_AT_RANGE(src, N))); \
+            this->func(PASS(this->dst, dst), DYND_PP_JOIN_ELWISE_1(PASS, (,), \
+                DYND_PP_META_NAME_RANGE(this->src, N), DYND_PP_META_AT_RANGE(src, N))); \
         } \
 \
         inline void strided(char *dst, intptr_t dst_stride, \
@@ -187,8 +200,8 @@ DYND_PP_JOIN_MAP(FUNCTOR_CK, (), DYND_PP_RANGE(1, DYND_PP_INC(DYND_ARG_MAX)))
             DYND_PP_JOIN_ELWISE_1(DYND_PP_META_DECL_ASGN, (;), \
                 DYND_PP_REPEAT_1(intptr_t, N), DYND_PP_META_NAME_RANGE(src_stride, N), DYND_PP_META_AT_RANGE(src_stride, N)); \
             for (size_t i = 0; i < count; ++i) { \
-                this->func(PASS(this->from_dst, dst), DYND_PP_JOIN_ELWISE_1(PASS, (,), \
-                    DYND_PP_META_NAME_RANGE(this->from_src, N), DYND_PP_META_NAME_RANGE(src, N))); \
+                this->func(PASS(this->dst, dst), DYND_PP_JOIN_ELWISE_1(PASS, (,), \
+                    DYND_PP_META_NAME_RANGE(this->src, N), DYND_PP_META_NAME_RANGE(src, N))); \
                 dst += dst_stride; \
                 DYND_PP_JOIN_ELWISE_1(DYND_PP_META_ADD_ASGN, (;), \
                     DYND_PP_META_NAME_RANGE(src, N), DYND_PP_META_NAME_RANGE(src_stride, N)); \
@@ -217,8 +230,8 @@ DYND_PP_JOIN_MAP(FUNCTOR_CK, (), DYND_PP_RANGE(1, DYND_PP_INC(DYND_ARG_MAX)))
             } \
 \
             self_type *e = self_type::create(ckb, kernreq, ckb_offset, *af_self->get_data_as<func_type>()); \
-            INIT_TYPED_PARAM_FROM_BYTES(e->from_dst, dst_tp, dst_arrmeta); \
-            DYND_PP_JOIN_ELWISE_1(INIT_TYPED_PARAM_FROM_BYTES, (;), DYND_PP_META_NAME_RANGE(e->from_src, N), \
+            INIT_TYPED_PARAM_FROM_BYTES(e->dst, dst_tp, dst_arrmeta); \
+            DYND_PP_JOIN_ELWISE_1(INIT_TYPED_PARAM_FROM_BYTES, (;), DYND_PP_META_NAME_RANGE(e->src, N), \
                 DYND_PP_META_AT_RANGE(src_tp, N), DYND_PP_META_AT_RANGE(src_arrmeta, N)); \
 \
             return ckb_offset; \
@@ -229,7 +242,7 @@ DYND_PP_JOIN_MAP(FUNCTOR_CK, (), DYND_PP_RANGE(1, DYND_PP_INC(DYND_SRC_MAX)))
 
 #undef FUNCTOR_CK
 
-#undef DECL_TYPED_PARAM_FROM_BYTES
+#undef DECL_TYPED_ARG
 #undef INIT_TYPED_PARAM_FROM_BYTES
 #undef PARTIAL_DECAY
 #undef PASS
