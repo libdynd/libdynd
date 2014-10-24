@@ -14,7 +14,8 @@ instantiate_copy(const arrfunc_type_data *DYND_UNUSED(af_self), dynd::ckernel_bu
                  intptr_t ckb_offset, const ndt::type &dst_tp,
                  const char *dst_arrmeta, const ndt::type *src_tp,
                  const char *const *src_arrmeta, kernel_request_t kernreq,
-                 const nd::array &DYND_UNUSED(aux), const eval::eval_context *ectx)
+                 const nd::array &DYND_UNUSED(args), const nd::array &DYND_UNUSED(kwds),
+                 const eval::eval_context *ectx)
 {
   if (dst_tp.is_builtin()) {
     if (src_tp[0].is_builtin()) {
