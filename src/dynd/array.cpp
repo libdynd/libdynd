@@ -874,19 +874,21 @@ void nd::array::flag_as_immutable()
 
 nd::array nd::array::p(const char *property_name) const
 {
-    ndt::type dt = get_type();
-    const std::pair<std::string, gfunc::callable> *properties;
-    size_t count;
-    if (!dt.is_builtin()) {
-        dt.extended()->get_dynamic_array_properties(&properties, &count);
-    } else {
-        get_builtin_type_dynamic_array_properties(dt.get_type_id(), &properties, &count);
-    }
-    // TODO: We probably want to make some kind of acceleration structure for the name lookup
-    if (count > 0) {
-        for (size_t i = 0; i < count; ++i) {
-            if (properties[i].first == property_name) {
-                return properties[i].second.call(*this);
+    if (!is_null()) {
+        ndt::type dt = get_type();
+        const std::pair<std::string, gfunc::callable> *properties;
+        size_t count;
+        if (!dt.is_builtin()) {
+            dt.extended()->get_dynamic_array_properties(&properties, &count);
+        } else {
+            get_builtin_type_dynamic_array_properties(dt.get_type_id(), &properties, &count);
+        }
+        // TODO: We probably want to make some kind of acceleration structure for the name lookup
+        if (count > 0) {
+            for (size_t i = 0; i < count; ++i) {
+                if (properties[i].first == property_name) {
+                    return properties[i].second.call(*this);
+                }
             }
         }
     }
@@ -898,19 +900,21 @@ nd::array nd::array::p(const char *property_name) const
 
 nd::array nd::array::p(const std::string& property_name) const
 {
-    ndt::type dt = get_type();
-    const std::pair<std::string, gfunc::callable> *properties;
-    size_t count;
-    if (!dt.is_builtin()) {
-        dt.extended()->get_dynamic_array_properties(&properties, &count);
-    } else {
-        get_builtin_type_dynamic_array_properties(dt.get_type_id(), &properties, &count);
-    }
-    // TODO: We probably want to make some kind of acceleration structure for the name lookup
-    if (count > 0) {
-        for (size_t i = 0; i < count; ++i) {
-            if (properties[i].first == property_name) {
-                return properties[i].second.call(*this);
+    if (!is_null()) {
+        ndt::type dt = get_type();
+        const std::pair<std::string, gfunc::callable> *properties;
+        size_t count;
+        if (!dt.is_builtin()) {
+            dt.extended()->get_dynamic_array_properties(&properties, &count);
+        } else {
+            get_builtin_type_dynamic_array_properties(dt.get_type_id(), &properties, &count);
+        }
+        // TODO: We probably want to make some kind of acceleration structure for the name lookup
+        if (count > 0) {
+            for (size_t i = 0; i < count; ++i) {
+                if (properties[i].first == property_name) {
+                    return properties[i].second.call(*this);
+                }
             }
         }
     }
