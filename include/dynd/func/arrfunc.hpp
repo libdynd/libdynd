@@ -6,7 +6,6 @@
 #ifndef DYND__FUNC_ARRFUNC_HPP
 #define DYND__FUNC_ARRFUNC_HPP
 
-#include <dynd/buffer.hpp>
 #include <dynd/config.hpp>
 #include <dynd/eval/eval_context.hpp>
 #include <dynd/types/base_type.hpp>

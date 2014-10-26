@@ -38,7 +38,7 @@ TEST(Aux, Simple) {
     EXPECT_EQ(2, af.get()->get_naux());
     EXPECT_EQ(8, af(3, 5, 7).as<int>());
 
-    af = nd::make_functor_arrfunc<cls, int, int>();
+    af = nd::make_functor_arrfunc<int, int, cls>();
     EXPECT_EQ(1, af.get()->get_nsrc());
     EXPECT_EQ(2, af.get()->get_naux());
     EXPECT_EQ(8, af(7, 1, 2).as<int>());

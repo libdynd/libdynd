@@ -10,7 +10,6 @@
 #include <string>
 
 #include <dynd/array.hpp>
-#include <dynd/buffer.hpp>
 #include <dynd/funcproto.hpp>
 #include <dynd/pp/comparison.hpp>
 #include <dynd/pp/list.hpp>
@@ -99,106 +98,98 @@ public:
         size_t *out_count) const;
 }; // class typevar_type
 
-namespace ndt {
-    /** Makes a funcproto type with the specified types */
-    inline ndt::type make_funcproto(const nd::array &param_types,
-                                    const ndt::type &return_type,
-                                    intptr_t aux_param_count = 0)
-    {
-        return ndt::type(
-            new funcproto_type(param_types, return_type, aux_param_count), false);
-    }
-
-    /** Makes a funcproto type with the specified types */
-    inline ndt::type make_funcproto(intptr_t param_count,
-                                    const ndt::type *param_types,
-                                    const ndt::type &return_type)
-    {
-        nd::array tmp = nd::empty(param_count, ndt::make_type());
-        ndt::type *tmp_vals =
-            reinterpret_cast<ndt::type *>(tmp.get_readwrite_originptr());
-        for (intptr_t i = 0; i != param_count; ++i) {
-            tmp_vals[i] = param_types[i];
-        }
-        tmp.flag_as_immutable();
-        return ndt::type(
-            new funcproto_type(tmp, return_type), false);
-    }
-
-    /** Makes a unary funcproto type with the specified types */
-    inline ndt::type make_funcproto(const ndt::type& single_param_type,
-                                    const ndt::type &return_type)
-    {
-        ndt::type param_types[1] = {single_param_type};
-        return ndt::type(
-            new funcproto_type(param_types, return_type), false);
-    }
-
-namespace detail {
+namespace ndt { namespace detail {
 
 #define PARTIAL_DECAY(TYPENAME) std::remove_cv<typename std::remove_reference<TYPENAME>::type>::type
 #define MAKE_TYPE(TYPENAME) make_type<TYPENAME>()
 
-template <typename func_type>
+template <typename funcproto_type>
 struct funcproto_type_factory;
 
-#define FUNCPROTO_TYPE_FACTORY_MAKE(OLD_NARG, NEW_NARG) \
-    DYND_PP_IF(DYND_PP_NE(NEW_NARG, OLD_NARG))(template <DYND_PP_JOIN_MAP_2(DYND_PP_META_TYPENAME, (,), DYND_PP_META_NAME_RANGE(A, OLD_NARG, NEW_NARG))>) \
-    static ndt::type make(intptr_t naux) { \
-        DYND_PP_JOIN_ELWISE_2(DYND_PP_META_TYPEDEF_TYPENAME, (;), \
-            DYND_PP_MAP_2(PARTIAL_DECAY, DYND_PP_META_NAME_RANGE(A, NEW_NARG)), DYND_PP_META_NAME_RANGE(D, NEW_NARG)); \
-        DYND_PP_IF_ELSE(NEW_NARG)( \
-            ndt::type arg_tp[NEW_NARG] = {DYND_PP_JOIN_MAP_2(MAKE_TYPE, (,), DYND_PP_META_NAME_RANGE(D, NEW_NARG))}; \
-        )( \
-            nd::array arg_tp = nd::empty(0, ndt::make_type()); \
-            arg_tp.flag_as_immutable(); \
-        ) \
-        return make_funcproto(arg_tp, make_type<R>(), naux); \
-    }
-
-#define FUNCPROTO_TYPE_FACTORY(OLD_NARG) \
-    template <DYND_PP_JOIN_MAP_1(DYND_PP_META_TYPENAME, (,), DYND_PP_PREPEND(R, DYND_PP_META_NAME_RANGE(A, OLD_NARG)))> \
-    struct funcproto_type_factory<R DYND_PP_META_NAME_RANGE(A, OLD_NARG)> { \
-        DYND_PP_JOIN_ELWISE_1(FUNCPROTO_TYPE_FACTORY_MAKE, (), \
-            DYND_PP_REPEAT_1(OLD_NARG, DYND_PP_INC(DYND_PP_SUB(DYND_ARG_MAX, OLD_NARG))), DYND_PP_RANGE(OLD_NARG, DYND_PP_INC(DYND_ARG_MAX))) \
+#define FUNCPROTO_TYPE_FACTORY(NARG) \
+    template <DYND_PP_JOIN_MAP_1(DYND_PP_META_TYPENAME, (,), DYND_PP_PREPEND(R, DYND_PP_META_NAME_RANGE(A, NARG)))> \
+    struct funcproto_type_factory<R DYND_PP_META_NAME_RANGE(A, NARG)> { \
+        static ndt::type make(intptr_t naux) { \
+            DYND_PP_JOIN_ELWISE_1(DYND_PP_META_TYPEDEF_TYPENAME, (;), \
+                DYND_PP_MAP_1(PARTIAL_DECAY, DYND_PP_META_NAME_RANGE(A, NARG)), DYND_PP_META_NAME_RANGE(D, NARG)); \
+            DYND_PP_IF_ELSE(NARG)( \
+                ndt::type arg_tp[NARG] = {DYND_PP_JOIN_MAP_1(MAKE_TYPE, (,), DYND_PP_META_NAME_RANGE(D, NARG))}; \
+            )( \
+                nd::array arg_tp = nd::empty(0, ndt::make_type()); \
+                arg_tp.flag_as_immutable(); \
+            ) \
+            return make_funcproto(arg_tp, make_type<R>(), naux); \
+        } \
     };
 
 DYND_PP_JOIN_MAP(FUNCPROTO_TYPE_FACTORY, (), DYND_PP_RANGE(DYND_PP_INC(DYND_ARG_MAX)))
 
 #undef FUNCPROTO_TYPE_FACTORY
 
-#define FUNCPROTO_TYPE_FACTORY(OLD_NARG) \
-    template <DYND_PP_JOIN_MAP_1(DYND_PP_META_TYPENAME, (,), DYND_PP_PREPEND(R, DYND_PP_META_NAME_RANGE(A, OLD_NARG)))> \
-    struct funcproto_type_factory<void DYND_PP_PREPEND(R &, DYND_PP_META_NAME_RANGE(A, OLD_NARG))> { \
-        DYND_PP_JOIN_ELWISE_1(FUNCPROTO_TYPE_FACTORY_MAKE, (), \
-            DYND_PP_REPEAT_1(OLD_NARG, DYND_PP_INC(DYND_PP_SUB(DYND_ARG_MAX, OLD_NARG))), DYND_PP_RANGE(OLD_NARG, DYND_PP_INC(DYND_ARG_MAX))) \
+#define FUNCPROTO_TYPE_FACTORY(NARG) \
+    template <DYND_PP_JOIN_MAP_1(DYND_PP_META_TYPENAME, (,), DYND_PP_PREPEND(R, DYND_PP_META_NAME_RANGE(A, NARG)))> \
+    struct funcproto_type_factory<void DYND_PP_PREPEND(R &, DYND_PP_META_NAME_RANGE(A, NARG))> { \
+        static ndt::type make(intptr_t naux) { \
+            DYND_PP_JOIN_ELWISE_1(DYND_PP_META_TYPEDEF_TYPENAME, (;), \
+                DYND_PP_MAP_1(PARTIAL_DECAY, DYND_PP_META_NAME_RANGE(A, NARG)), DYND_PP_META_NAME_RANGE(D, NARG)); \
+            DYND_PP_IF_ELSE(NARG)( \
+                ndt::type arg_tp[NARG] = {DYND_PP_JOIN_MAP_1(MAKE_TYPE, (,), DYND_PP_META_NAME_RANGE(D, NARG))}; \
+            )( \
+                nd::array arg_tp = nd::empty(0, ndt::make_type()); \
+                arg_tp.flag_as_immutable(); \
+            ) \
+            return make_funcproto(arg_tp, make_type<R>(), naux); \
+        } \
     };
 
 DYND_PP_JOIN_MAP(FUNCPROTO_TYPE_FACTORY, (), DYND_PP_RANGE(DYND_PP_INC(DYND_ARG_MAX)))
 
 #undef FUNCPROTO_TYPE_FACTORY
-
-#undef FUNCPROTO_TYPE_FACTORY_MAKE
 
 #undef PARTIAL_DECAY
 #undef MAKE_TYPE
 
-} // namespace detail
+} // namespace ndt::detail
 
-template <typename func_type>
-ndt::type make_funcproto(intptr_t naux = 0) {
-    return detail::funcproto_type_factory<func_type>::make(naux);
+/** Makes a funcproto type with the specified types */
+inline ndt::type make_funcproto(const nd::array &param_types,
+                                const ndt::type &return_type,
+                                intptr_t naux = 0)
+{
+    return ndt::type(
+        new funcproto_type(param_types, return_type, naux), false);
 }
 
-#define MAKE_FUNCPROTO(NARG) \
-    template <DYND_PP_JOIN_MAP_1(DYND_PP_META_TYPENAME, (,), DYND_PP_PREPEND(func_type, DYND_PP_META_NAME_RANGE(A, NARG)))> \
-    ndt::type make_funcproto(intptr_t naux = 0) { \
-        return detail::funcproto_type_factory<func_type>::template make<DYND_PP_JOIN_1((,), DYND_PP_META_NAME_RANGE(A, NARG))>(naux); \
+/** Makes a funcproto type with the specified types */
+inline ndt::type make_funcproto(intptr_t param_count,
+                                const ndt::type *param_types,
+                                const ndt::type &return_type)
+{
+    nd::array tmp = nd::empty(param_count, ndt::make_type());
+    ndt::type *tmp_vals =
+        reinterpret_cast<ndt::type *>(tmp.get_readwrite_originptr());
+    for (intptr_t i = 0; i != param_count; ++i) {
+        tmp_vals[i] = param_types[i];
     }
+    tmp.flag_as_immutable();
+    return ndt::type(
+        new funcproto_type(tmp, return_type), false);
+}
 
-DYND_PP_JOIN_MAP(MAKE_FUNCPROTO, (), DYND_PP_RANGE(1, DYND_PP_INC(DYND_ARG_MAX)))
+/** Makes a unary funcproto type with the specified types */
+inline ndt::type make_funcproto(const ndt::type& single_param_type,
+                                const ndt::type &return_type)
+{
+    ndt::type param_types[1] = {single_param_type};
+    return ndt::type(
+        new funcproto_type(param_types, return_type), false);
+}
 
-#undef MAKE_FUNCPROTO
+/** Makes a funcproto type from the C++ function type */
+template <typename funcproto_type>
+ndt::type make_funcproto(intptr_t naux = 0) {
+    return detail::funcproto_type_factory<funcproto_type>::make(naux);
+}
 
 ndt::type make_generic_funcproto(intptr_t nargs);
 
