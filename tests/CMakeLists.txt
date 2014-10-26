@@ -64,6 +64,7 @@ set(tests_SRC
     types/test_var_dim_type.cpp
     func/special_vals.hpp
     func/test_arrfunc.cpp
+	func/test_aux.cpp
     func/test_callable.cpp
     func/test_chain_arrfunc.cpp
     func/test_elwise_funcretres.cpp
@@ -96,7 +97,6 @@ set(tests_SRC
     array/test_view.cpp
     vm/test_elwise_program.cpp
     test_arithmetic_op.cpp
-    test_buffer.cpp
     test_fft.cpp
     test_shape_tools.cpp
     test_platform.cpp

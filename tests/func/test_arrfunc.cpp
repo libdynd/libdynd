@@ -41,7 +41,8 @@ TEST(ArrFunc, Assignment) {
     ckernel_builder ckb;
     af.instantiate(&af, &ckb, 0, af.get_return_type(), NULL,
                         af.get_param_types(), src_arrmeta,
-                        kernel_request_single, nd::array(), nd::array(), &eval::default_eval_context);
+                        kernel_request_single, &eval::default_eval_context,
+                        nd::array(), nd::array());
     int int_out = 0;
     char str_in[16] = "3251";
     const char *str_in_ptr = str_in;
@@ -53,7 +54,8 @@ TEST(ArrFunc, Assignment) {
     ckb.reset();
     af.instantiate(&af, &ckb, 0, af.get_return_type(), NULL,
                         af.get_param_types(), src_arrmeta,
-                        kernel_request_strided, nd::array(), nd::array(), &eval::default_eval_context);
+                        kernel_request_strided, &eval::default_eval_context,
+                        nd::array(), nd::array());
     int ints_out[3] = {0, 0, 0};
     char strs_in[3][16] = {"123", "4567", "891029"};
     const char *strs_in_ptr = strs_in[0];
@@ -109,7 +111,8 @@ TEST(ArrFunc, Property) {
     ckernel_builder ckb;
     af.instantiate(&af, &ckb, 0, af.get_return_type(), NULL,
                         af.get_param_types(), src_arrmeta,
-                        kernel_request_single, nd::array(), nd::array(), &eval::default_eval_context);
+                        kernel_request_single, &eval::default_eval_context,
+                        nd::array(), nd::array());
     int int_out = 0;
     int date_in = date_ymd::to_days(2013, 12, 30);
     const char *date_in_ptr = reinterpret_cast<const char *>(&date_in);
@@ -135,7 +138,7 @@ TEST(ArrFunc, AssignmentAsExpr) {
     ckernel_builder ckb;
     af.instantiate(&af, &ckb, 0, af.get_return_type(), NULL,
                    af.get_param_types(), src_arrmeta, kernel_request_single,
-                   nd::array(), nd::array(), &eval::default_eval_context);
+                   &eval::default_eval_context, nd::array(), nd::array());
     int int_out = 0;
     char str_in[16] = "3251";
     char *str_in_ptr = str_in;
@@ -147,7 +150,7 @@ TEST(ArrFunc, AssignmentAsExpr) {
     ckb.reset();
     af.instantiate(&af, &ckb, 0, af.get_return_type(), NULL,
                    af.get_param_types(), src_arrmeta, kernel_request_strided,
-                   nd::array(), nd::array(), &eval::default_eval_context);
+                   &eval::default_eval_context, nd::array(), nd::array());
     int ints_out[3] = {0, 0, 0};
     char strs_in[3][16] = {"123", "4567", "891029"};
     char *strs_in_ptr = strs_in[0];

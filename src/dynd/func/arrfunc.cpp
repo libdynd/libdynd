@@ -25,8 +25,8 @@ static intptr_t instantiate_assignment_ckernel(
     const arrfunc_type_data *self, dynd::ckernel_builder *ckb,
     intptr_t ckb_offset, const ndt::type &dst_tp, const char *dst_arrmeta,
     const ndt::type *src_tp, const char *const *src_arrmeta,
-    kernel_request_t kernreq, const nd::array &DYND_UNUSED(aux), const nd::array &DYND_UNUSED(kwds),
-    const eval::eval_context *ectx)
+    kernel_request_t kernreq, const eval::eval_context *ectx,
+    const nd::array &DYND_UNUSED(aux), const nd::array &DYND_UNUSED(kwds))
 {
   try
   {
@@ -72,8 +72,8 @@ static intptr_t instantiate_property_ckernel(
     const arrfunc_type_data *self, dynd::ckernel_builder *ckb,
     intptr_t ckb_offset, const ndt::type &dst_tp, const char *dst_arrmeta,
     const ndt::type *src_tp, const char *const *src_arrmeta,
-    kernel_request_t kernreq, const nd::array &DYND_UNUSED(args), const nd::array &DYND_UNUSED(kwds),
-    const eval::eval_context *ectx)
+    kernel_request_t kernreq, const eval::eval_context *ectx,
+    const nd::array &DYND_UNUSED(args), const nd::array &DYND_UNUSED(kwds))
 {
   ndt::type prop_src_tp(*self->get_data_as<const base_type *>(), true);
 
@@ -195,7 +195,7 @@ nd::array nd::arrfunc::call(intptr_t narg, const nd::array *args, const kwds &kw
   // Generate and evaluate the ckernel
   ckernel_builder ckb;
   af->instantiate(af, &ckb, 0, dst_tp, res.get_arrmeta(), &arg_tp[0],
-                  &src_arrmeta[0], kernel_request_single, aux, kwds.get(), ectx);
+                  &src_arrmeta[0], kernel_request_single, ectx, aux, kwds.get());
   expr_single_t fn = ckb.get()->get_function<expr_single_t>();
   fn(res.get_readwrite_originptr(), src_data.empty() ? NULL : &src_data[0], ckb.get());
   return res;
@@ -228,7 +228,7 @@ void nd::arrfunc::call_out(intptr_t arg_count, const nd::array *args, const kwds
   // Generate and evaluate the ckernel
   ckernel_builder ckb;
   af->instantiate(af, &ckb, 0, out.get_type(), out.get_arrmeta(), &src_tp[0],
-                  &src_arrmeta[0], kernel_request_single, nd::array(), kwds.get(), ectx);
+                  &src_arrmeta[0], kernel_request_single, ectx, nd::array(), kwds.get());
   expr_single_t fn = ckb.get()->get_function<expr_single_t>();
   fn(out.get_readwrite_originptr(), src_data.empty() ? NULL : &src_data[0],
      ckb.get());

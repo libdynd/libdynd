@@ -112,7 +112,7 @@ bool option_type::is_avail(const char *arrmeta, const char *data,
     const arrfunc_type_data *af = get_is_avail_arrfunc();
     ndt::type src_tp[1] = {ndt::type(this, true)};
     af->instantiate(af, &ckb, 0, ndt::make_type<dynd_bool>(), NULL, src_tp,
-                    &arrmeta, kernel_request_single, nd::array(), nd::array(), ectx);
+                    &arrmeta, kernel_request_single, ectx, nd::array(), nd::array());
     ckernel_prefix *ckp = ckb.get();
     char result;
     ckp->get_function<expr_single_t>()(&result, const_cast<char **>(&data), ckp);
@@ -171,7 +171,7 @@ void option_type::assign_na(const char *arrmeta, char *data,
     ckernel_builder ckb;
     const arrfunc_type_data *af = get_assign_na_arrfunc();
     af->instantiate(af, &ckb, 0, ndt::type(this, true), arrmeta, NULL, NULL,
-                    kernel_request_single, nd::array(), nd::array(), ectx);
+                    kernel_request_single, ectx, nd::array(), nd::array());
     ckernel_prefix *ckp = ckb.get();
     ckp->get_function<expr_single_t>()(data, NULL, ckp);
   }

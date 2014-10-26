@@ -81,9 +81,9 @@ struct functor_arrfunc_from<aux_param_count, funcproto_type *, copy, true> {
     typedef funcproto_type *func_type;
 
     static void make(const func_type &func, arrfunc_type_data *out_af) {
-        out_af->func_proto = ndt::make_funcproto<funcproto_type, aux_param_count>();
+        out_af->func_proto = ndt::make_funcproto<funcproto_type>(aux_param_count);
         *out_af->get_data_as<func_type>() = func;
-        out_af->instantiate = &functor_ck<func_type, funcproto_type, aux_param_count>::instantiate;
+        out_af->instantiate = &functor_ck<func_type, funcproto_type, aux_param_count, false>::instantiate;
         out_af->free_func = NULL;
     }
 };
@@ -105,9 +105,9 @@ struct functor_arrfunc_from<aux_param_count, obj_type, true, false> {
     static void make(const obj_type &obj, func_type, arrfunc_type_data *out_af) {
         typedef typename funcproto_from<func_type>::type funcproto_type;
 
-        out_af->func_proto = ndt::make_funcproto<funcproto_type, aux_param_count>();
+        out_af->func_proto = ndt::make_funcproto<funcproto_type>(aux_param_count);
         *out_af->get_data_as<obj_type>() = obj;
-        out_af->instantiate = &functor_ck<obj_type, funcproto_type, aux_param_count>::instantiate;
+        out_af->instantiate = &functor_ck<obj_type, funcproto_type, aux_param_count, false>::instantiate;
         out_af->free_func = NULL;
     }
 };
@@ -123,12 +123,68 @@ struct functor_arrfunc_from<aux_param_count, obj_type, false, false> {
         typedef typename funcproto_from<func_type>::type funcproto_type;
         typedef func_wrapper<obj_type, funcproto_type> wrapper_type;
 
-        out_af->func_proto = ndt::make_funcproto<funcproto_type, aux_param_count>();
+        out_af->func_proto = ndt::make_funcproto<funcproto_type>(aux_param_count);
         *out_af->get_data_as<wrapper_type>() = wrapper_type(obj);
-        out_af->instantiate = &functor_ck<wrapper_type, funcproto_type, aux_param_count>::instantiate;
+        out_af->instantiate = &functor_ck<wrapper_type, funcproto_type, aux_param_count, false>::instantiate;
         out_af->free_func = NULL;
     }
 };
+
+/*
+template <typename obj_type>
+struct functor_arrfunc_factory {
+    template <typename func_type>
+    static void make(arrfunc_type_data *out_af, func_type) {
+};
+*/
+
+template <typename funcproto_type>
+struct functor_arrfunc_factory;
+
+#define FUNCTOR_ARRFUNC_FACTORY_MAKE(OLD_NARG, NEW_NARG) \
+    template <DYND_PP_JOIN_2((,), DYND_PP_PREPEND(typename func_type, \
+        DYND_PP_APPEND(intptr_t naux, DYND_PP_MAP_2(DYND_PP_META_TYPENAME, DYND_PP_META_NAME_RANGE(A, OLD_NARG, NEW_NARG)))))> \
+    static void make(arrfunc_type_data *out_af) { \
+        typedef R (funcproto_type)DYND_PP_META_NAME_RANGE(A, NEW_NARG); \
+\
+        out_af->func_proto = ndt::make_funcproto<funcproto_type>(naux); \
+        out_af->instantiate = &functor_ck<func_type, funcproto_type, naux, true>::instantiate; \
+        out_af->free_func = NULL; \
+    }
+
+#define FUNCTOR_ARRFUNC_FACTORY(OLD_NARG) \
+    template <DYND_PP_JOIN_MAP_1(DYND_PP_META_TYPENAME, (,), DYND_PP_PREPEND(R, DYND_PP_META_NAME_RANGE(A, OLD_NARG)))> \
+    struct functor_arrfunc_factory<R DYND_PP_META_NAME_RANGE(A, OLD_NARG)> { \
+        DYND_PP_JOIN_ELWISE_1(FUNCTOR_ARRFUNC_FACTORY_MAKE, (), \
+            DYND_PP_REPEAT_1(OLD_NARG, DYND_PP_INC(DYND_PP_SUB(DYND_ARG_MAX, OLD_NARG))), DYND_PP_RANGE(OLD_NARG, DYND_PP_INC(DYND_ARG_MAX))) \
+    };
+
+DYND_PP_JOIN_MAP(FUNCTOR_ARRFUNC_FACTORY, (), DYND_PP_RANGE(DYND_PP_INC(DYND_ARG_MAX)))
+
+#undef FUNCTOR_ARRFUNC_FACTORY_MAKE
+#undef FUNCTOR_ARRFUNC_FACTORY
+
+#define FUNCTOR_ARRFUNC_FACTORY_DISPATCHER_MAKE(NARG) \
+    template <DYND_PP_JOIN_1((,), DYND_PP_APPEND(typename func_type, DYND_PP_APPEND(intptr_t naux, \
+        DYND_PP_MAP_1(DYND_PP_META_TYPENAME, DYND_PP_PREPEND(obj_type, DYND_PP_META_NAME_RANGE(A, NARG))))))> \
+    static void make(arrfunc_type_data *out_af, func_type) { \
+        typedef typename funcproto_from<func_type>::type funcproto_type; \
+\
+        functor_arrfunc_factory<funcproto_type>::template make<DYND_PP_JOIN_1((,), \
+            DYND_PP_PREPEND(obj_type, DYND_PP_APPEND(naux, DYND_PP_META_NAME_RANGE(A, NARG))))>(out_af); \
+    } \
+\
+    template <DYND_PP_JOIN_1((,), DYND_PP_PREPEND(typename obj_type, \
+        DYND_PP_APPEND(intptr_t naux, DYND_PP_MAP_1(DYND_PP_META_TYPENAME, DYND_PP_META_NAME_RANGE(A, NARG)))))> \
+    static void make(arrfunc_type_data *out_af) { \
+        make<obj_type, DYND_PP_JOIN_1((,), DYND_PP_APPEND(naux, DYND_PP_META_NAME_RANGE(A, NARG)))>(out_af, &obj_type::operator ()); \
+    }
+
+struct functor_arrfunc_factory_dispatcher {
+    DYND_PP_JOIN_MAP(FUNCTOR_ARRFUNC_FACTORY_DISPATCHER_MAKE, (), DYND_PP_RANGE(DYND_PP_INC(DYND_ARG_MAX)))
+};
+
+#undef FUNCTOR_ARRFUNC_FACTORY_DISPATCHER
 
 } // namespace detail
 
@@ -156,6 +212,31 @@ template <typename func_type>
 arrfunc make_functor_arrfunc(const func_type &func, bool copy = true) {
     return make_functor_arrfunc<0>(func, copy);
 }
+
+#define MAKE_FUNCTOR_ARRFUNC(NAUX) \
+    template <DYND_PP_JOIN_MAP_1(DYND_PP_META_TYPENAME, (,), DYND_PP_PREPEND(func_type, DYND_PP_META_NAME_RANGE(A, NAUX)))> \
+    void make_functor_arrfunc(arrfunc_type_data *out_af) { \
+        detail::functor_arrfunc_factory_dispatcher::template make<DYND_PP_JOIN((,), \
+            DYND_PP_PREPEND(func_type, DYND_PP_APPEND(NAUX, DYND_PP_META_NAME_RANGE(A, NAUX))))>(out_af); \
+    }
+
+DYND_PP_JOIN_MAP(MAKE_FUNCTOR_ARRFUNC, (), DYND_PP_RANGE(DYND_PP_INC(DYND_ARG_MAX)))
+
+#undef MAKE_FUNCTOR_ARRFUNC
+
+#define MAKE_FUNCTOR_ARRFUNC(NAUX) \
+    template <DYND_PP_JOIN_MAP_1(DYND_PP_META_TYPENAME, (,), DYND_PP_PREPEND(func_type, DYND_PP_META_NAME_RANGE(A, NAUX)))> \
+    arrfunc make_functor_arrfunc() { \
+        array af = empty(ndt::make_arrfunc()); \
+        make_functor_arrfunc<DYND_PP_JOIN((,), DYND_PP_PREPEND(func_type, \
+            DYND_PP_META_NAME_RANGE(A, NAUX)))>(reinterpret_cast<arrfunc_type_data *>(af.get_readwrite_originptr())); \
+        af.flag_as_immutable(); \
+        return af; \
+    }
+
+DYND_PP_JOIN_MAP(MAKE_FUNCTOR_ARRFUNC, (), DYND_PP_RANGE(DYND_PP_INC(DYND_ARG_MAX)))
+
+#undef MAKE_FUNCTOR_ARRFUNC
 
 template <typename obj_type, typename mem_func_type>
 void make_functor_arrfunc(arrfunc_type_data *out_af, const obj_type &obj, mem_func_type mem_func, bool copy) {

@@ -89,12 +89,12 @@ intptr_t kernels::make_builtin_sum_reduction_ckernel(
 }
 
 static intptr_t instantiate_builtin_sum_reduction_arrfunc(
-    const arrfunc_type_data *DYND_UNUSED(self_data_ptr), dynd::ckernel_builder *ckb,
-    intptr_t ckb_offset, const ndt::type &dst_tp,
-    const char *DYND_UNUSED(dst_arrmeta), const ndt::type *src_tp,
-    const char *const *DYND_UNUSED(src_arrmeta), kernel_request_t kernreq,
-    const nd::array &DYND_UNUSED(args), const nd::array &DYND_UNUSED(kwds),
-    const eval::eval_context *DYND_UNUSED(ectx))
+    const arrfunc_type_data *DYND_UNUSED(self_data_ptr),
+    dynd::ckernel_builder *ckb, intptr_t ckb_offset,
+    const ndt::type &dst_tp, const char *DYND_UNUSED(dst_arrmeta),
+    const ndt::type *src_tp, const char *const *DYND_UNUSED(src_arrmeta),
+    kernel_request_t kernreq, const eval::eval_context *DYND_UNUSED(ectx),
+    const nd::array &DYND_UNUSED(args), const nd::array &DYND_UNUSED(kwds))
 {
     if (dst_tp != src_tp[0]) {
         stringstream ss;
@@ -169,12 +169,12 @@ namespace {
         }
 
         static intptr_t
-        instantiate(const arrfunc_type_data *af_self, dynd::ckernel_builder *ckb,
-                    intptr_t ckb_offset, const ndt::type &dst_tp,
-                    const char *DYND_UNUSED(dst_arrmeta), const ndt::type *src_tp,
-                    const char *const *src_arrmeta, kernel_request_t kernreq,
-                    const nd::array &DYND_UNUSED(args), const nd::array &DYND_UNUSED(kwds),
-                    const eval::eval_context *DYND_UNUSED(ectx))
+        instantiate(const arrfunc_type_data *af_self,
+                    dynd::ckernel_builder *ckb, intptr_t ckb_offset,
+                    const ndt::type &dst_tp, const char *DYND_UNUSED(dst_arrmeta),
+                    const ndt::type *src_tp, const char *const *src_arrmeta,
+                    kernel_request_t kernreq, const eval::eval_context *DYND_UNUSED(ectx),
+                    const nd::array &DYND_UNUSED(args), const nd::array &DYND_UNUSED(kwds))
         {
             typedef double_mean1d_ck self_type;
             mean1d_arrfunc_data *data = *af_self->get_data_as<mean1d_arrfunc_data *>();

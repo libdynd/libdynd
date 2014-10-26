@@ -51,14 +51,16 @@ public:
     }
 };
 
-#define DECL_TYPED_ARG(TYPENAME, NAME) DYND_PP_META_DECL(typed_arg<TYPENAME>, NAME)
+} // namespace detail
+
+#define DECL_TYPED_ARG(TYPENAME, NAME) DYND_PP_META_DECL(detail::typed_arg<TYPENAME>, NAME)
 #define PARTIAL_DECAY(TYPENAME) std::remove_cv<typename std::remove_reference<TYPENAME>::type>::type
 #define PASS(NAME, ARG) NAME.val(ARG)
 #define AS(NAME, TYPE) NAME.as<TYPE>()
 #define COPY_CONSTRUCT(NAME) NAME(NAME)
-#define CONSTRUCT_TYPED_ARG(TYPENAME, TP, ARRMETA) typed_arg<TYPENAME>(TP, ARRMETA, kwds)
+#define CONSTRUCT_TYPED_ARG(TYPENAME, TP, ARRMETA) detail::typed_arg<TYPENAME>(TP, ARRMETA, kwds)
 
-template <typename func_type, typename funcproto_type, int aux_param_count>
+template <typename func_type, typename funcproto_type, int naux, bool construct>
 struct functor_ck;
 
 #define FUNCTOR_CK(NARG) DYND_PP_JOIN_ELWISE_1(_FUNCTOR_CK, (), \
@@ -71,8 +73,8 @@ struct functor_ck;
  */
 #define __FUNCTOR_CK(NSRC, NAUX, NARG) \
     template <typename func_type, DYND_PP_JOIN_MAP_2(DYND_PP_META_TYPENAME, (,), DYND_PP_PREPEND(R, DYND_PP_META_NAME_RANGE(A, NARG)))> \
-    struct functor_ck<func_type, R DYND_PP_META_NAME_RANGE(A, NARG), NAUX> \
-      : kernels::expr_ck<functor_ck<func_type, R DYND_PP_META_NAME_RANGE(A, NARG), NAUX>, NARG> { \
+    struct functor_ck<func_type, R DYND_PP_META_NAME_RANGE(A, NARG), NAUX, false> \
+      : kernels::expr_ck<functor_ck<func_type, R DYND_PP_META_NAME_RANGE(A, NARG), NAUX, false>, NARG> { \
         typedef functor_ck self_type; \
         DYND_PP_JOIN_ELWISE_2(DYND_PP_META_TYPEDEF_TYPENAME, (;), \
             DYND_PP_MAP_2(PARTIAL_DECAY, DYND_PP_META_NAME_RANGE(A, NSRC)), DYND_PP_META_NAME_RANGE(D, NSRC)); \
@@ -123,8 +125,8 @@ struct functor_ck;
                                     dynd::ckernel_builder *ckb, intptr_t ckb_offset, \
                                     const ndt::type &dst_tp, const char *DYND_UNUSED(dst_arrmeta), \
                                     const ndt::type *src_tp, const char *const *DYND_PP_IF(NSRC)(src_arrmeta), \
-                                    kernel_request_t kernreq, const nd::array &DYND_PP_IF(NAUX)(args), const nd::array &DYND_PP_IF(NSRC)(kwds), \
-                                    const eval::eval_context *DYND_UNUSED(ectx)) { \
+                                    kernel_request_t kernreq, const eval::eval_context *DYND_UNUSED(ectx), \
+                                    const nd::array &DYND_PP_IF(NAUX)(args), const nd::array &DYND_PP_IF(NSRC)(kwds)) { \
             for (intptr_t i = 0; i < NSRC; ++i) { \
                 if (src_tp[i] != af_self->get_param_type(i)) { \
                     std::stringstream ss; \
@@ -154,14 +156,91 @@ DYND_PP_JOIN_MAP(FUNCTOR_CK, (), DYND_PP_RANGE(DYND_PP_INC(DYND_ARG_MAX)))
 
 #undef __FUNCTOR_CK
 
+#define __FUNCTOR_CK(NSRC, NAUX, NARG) \
+    template <typename func_type, DYND_PP_JOIN_MAP_2(DYND_PP_META_TYPENAME, (,), DYND_PP_PREPEND(R, DYND_PP_META_NAME_RANGE(A, NARG)))> \
+    struct functor_ck<func_type, R DYND_PP_META_NAME_RANGE(A, NARG), NAUX, true> \
+      : kernels::expr_ck<functor_ck<func_type, R DYND_PP_META_NAME_RANGE(A, NARG), NAUX, true>, NARG> { \
+        typedef functor_ck self_type; \
+        DYND_PP_JOIN_ELWISE_2(DYND_PP_META_TYPEDEF_TYPENAME, (;), \
+            DYND_PP_MAP_2(PARTIAL_DECAY, DYND_PP_META_NAME_RANGE(A, NSRC)), DYND_PP_META_NAME_RANGE(D, NSRC)); \
+\
+        func_type func; \
+        DYND_PP_JOIN_ELWISE_2(DECL_TYPED_ARG, (;), \
+            DYND_PP_META_NAME_RANGE(D, NSRC), DYND_PP_META_NAME_RANGE(src, NSRC)); \
+\
+        functor_ck DYND_PP_CHAIN( \
+            DYND_PP_ELWISE_2(DECL_TYPED_ARG, \
+                DYND_PP_META_NAME_RANGE(D, NSRC), DYND_PP_META_NAME_RANGE(src, NSRC)), \
+            DYND_PP_ELWISE_2(DYND_PP_META_DECL, \
+                DYND_PP_META_NAME_RANGE(A, NSRC, NARG), DYND_PP_META_NAME_RANGE(aux, NAUX)) \
+        ) \
+          : DYND_PP_JOIN_2((,), DYND_PP_PREPEND(func DYND_PP_META_NAME_RANGE(aux, NAUX), \
+                DYND_PP_MAP_2(COPY_CONSTRUCT, DYND_PP_META_NAME_RANGE(src, NSRC)))) { \
+        } \
+\
+        void single(char *dst, char **DYND_PP_IF(NSRC)(src)) { \
+            *reinterpret_cast<R *>(dst) = func DYND_PP_ELWISE_2(PASS, \
+                    DYND_PP_META_NAME_RANGE(src, NSRC), DYND_PP_META_AT_RANGE(src, NSRC)); \
+        } \
+\
+        void strided(char *dst, intptr_t dst_stride, \
+                     char **DYND_PP_IF(NSRC)(src), const intptr_t *DYND_PP_IF(NSRC)(src_stride), size_t count) { \
+            DYND_PP_JOIN_ELWISE_2(DYND_PP_META_DECL_ASGN, (;), \
+                DYND_PP_REPEAT_2(char *, NSRC), DYND_PP_META_NAME_RANGE(src, NSRC), DYND_PP_META_AT_RANGE(src, NSRC)); \
+            DYND_PP_JOIN_ELWISE_2(DYND_PP_META_DECL_ASGN, (;), \
+                DYND_PP_REPEAT_1(intptr_t, NSRC), DYND_PP_META_NAME_RANGE(src_stride, NSRC), DYND_PP_META_AT_RANGE(src_stride, NSRC)); \
+            for (size_t i = 0; i < count; ++i) { \
+                *reinterpret_cast<R *>(dst) = func DYND_PP_ELWISE_2(PASS, \
+                        DYND_PP_META_NAME_RANGE(this->src, NSRC), DYND_PP_META_NAME_RANGE(src, NSRC)); \
+                dst += dst_stride; \
+                DYND_PP_JOIN_ELWISE_2(DYND_PP_META_ADD_ASGN, (;), \
+                    DYND_PP_META_NAME_RANGE(src, NSRC), DYND_PP_META_NAME_RANGE(src_stride, NSRC)); \
+            } \
+        } \
+\
+        static intptr_t instantiate(const arrfunc_type_data *af_self, \
+                                    dynd::ckernel_builder *ckb, intptr_t ckb_offset, \
+                                    const ndt::type &dst_tp, const char *DYND_UNUSED(dst_arrmeta), \
+                                    const ndt::type *src_tp, const char *const *DYND_PP_IF(NSRC)(src_arrmeta), \
+                                    kernel_request_t kernreq, const eval::eval_context *DYND_UNUSED(ectx), \
+                                    const nd::array &DYND_PP_IF(NAUX)(args), const nd::array &DYND_PP_IF(NSRC)(kwds)) { \
+            for (intptr_t i = 0; i < NSRC; ++i) { \
+                if (src_tp[i] != af_self->get_param_type(i)) { \
+                    std::stringstream ss; \
+                    ss << "Provided types " << ndt::make_funcproto(NSRC, src_tp, dst_tp) \
+                       << " do not match the arrfunc proto " << af_self->func_proto; \
+                    throw type_error(ss.str()); \
+                } \
+            } \
+            if (dst_tp != af_self->get_return_type()) { \
+                std::stringstream ss; \
+                ss << "Provided types " << ndt::make_funcproto(NSRC, src_tp, dst_tp) \
+                   << " do not match the arrfunc proto " << af_self->func_proto; \
+                throw type_error(ss.str()); \
+            } \
+\
+            self_type::create DYND_PP_CHAIN((ckb, kernreq, ckb_offset), \
+                DYND_PP_ELWISE_2(CONSTRUCT_TYPED_ARG, \
+                    DYND_PP_META_NAME_RANGE(D, NSRC), DYND_PP_META_AT_RANGE(src_tp, NSRC), DYND_PP_META_AT_RANGE(src_arrmeta, NSRC)), \
+                DYND_PP_ELWISE_2(AS, \
+                    DYND_PP_META_CALL_RANGE(args, NAUX), DYND_PP_META_NAME_RANGE(A, NSRC, DYND_PP_INC(NARG))) \
+            ); \
+            return ckb_offset; \
+        } \
+    };
+
+DYND_PP_JOIN_MAP(FUNCTOR_CK, (), DYND_PP_RANGE(DYND_PP_INC(DYND_ARG_MAX)))
+
+#undef __FUNCTOR_CK
+
 /**
  * This generates code to instantiate a ckernel calling a C++ function
  * object which returns a value in the first parameter as an output reference.
  */
 #define __FUNCTOR_CK(NSRC, NAUX, NARG) \
     template <typename func_type, DYND_PP_JOIN_MAP_2(DYND_PP_META_TYPENAME, (,), DYND_PP_PREPEND(R, DYND_PP_META_NAME_RANGE(A, NARG)))> \
-    struct functor_ck<func_type, void DYND_PP_PREPEND(R &, DYND_PP_META_NAME_RANGE(A, NARG)), NAUX> \
-      : kernels::expr_ck<functor_ck<func_type, void DYND_PP_PREPEND(R &, DYND_PP_META_NAME_RANGE(A, NARG)), NAUX>, NARG> { \
+    struct functor_ck<func_type, void DYND_PP_PREPEND(R &, DYND_PP_META_NAME_RANGE(A, NARG)), NAUX, false> \
+      : kernels::expr_ck<functor_ck<func_type, void DYND_PP_PREPEND(R &, DYND_PP_META_NAME_RANGE(A, NARG)), NAUX, false>, NARG> { \
         typedef functor_ck self_type; \
         DYND_PP_JOIN_ELWISE_2(DYND_PP_META_TYPEDEF_TYPENAME, (;), \
             DYND_PP_MAP_2(PARTIAL_DECAY, DYND_PP_META_NAME_RANGE(A, NSRC)), DYND_PP_META_NAME_RANGE(D, NSRC)); \
@@ -212,8 +291,8 @@ DYND_PP_JOIN_MAP(FUNCTOR_CK, (), DYND_PP_RANGE(DYND_PP_INC(DYND_ARG_MAX)))
                                     dynd::ckernel_builder *ckb, intptr_t ckb_offset, \
                                     const ndt::type &dst_tp, const char *dst_arrmeta, \
                                     const ndt::type *src_tp, const char *const *DYND_PP_IF(NSRC)(src_arrmeta), \
-                                    kernel_request_t kernreq, const nd::array &DYND_PP_IF(NAUX)(args), const nd::array &kwds, \
-                                    const eval::eval_context *DYND_UNUSED(ectx)) { \
+                                    kernel_request_t kernreq, const eval::eval_context *DYND_UNUSED(ectx), \
+                                    const nd::array &DYND_PP_IF(NAUX)(args), const nd::array &kwds) { \
             for (intptr_t i = 0; i < NSRC; ++i) { \
                 if (src_tp[i] != af_self->get_param_type(i)) { \
                     std::stringstream ss; \
@@ -229,7 +308,7 @@ DYND_PP_JOIN_MAP(FUNCTOR_CK, (), DYND_PP_RANGE(DYND_PP_INC(DYND_ARG_MAX)))
                 throw type_error(ss.str()); \
             } \
 \
-            self_type::create DYND_PP_CHAIN((ckb, kernreq, ckb_offset, *af_self->get_data_as<func_type>(), typed_arg<R>(dst_tp, dst_arrmeta, kwds)), \
+            self_type::create DYND_PP_CHAIN((ckb, kernreq, ckb_offset, *af_self->get_data_as<func_type>(), detail::typed_arg<R>(dst_tp, dst_arrmeta, kwds)), \
                 DYND_PP_ELWISE_2(CONSTRUCT_TYPED_ARG, \
                     DYND_PP_META_NAME_RANGE(D, NSRC), DYND_PP_META_AT_RANGE(src_tp, NSRC), DYND_PP_META_AT_RANGE(src_arrmeta, NSRC)), \
                 DYND_PP_ELWISE_2(AS, \
@@ -249,12 +328,6 @@ DYND_PP_JOIN_MAP(FUNCTOR_CK, (), DYND_PP_RANGE(DYND_PP_INC(DYND_ARG_MAX)))
 #undef INIT_TYPED_PARAM_FROM_BYTES
 #undef PARTIAL_DECAY
 #undef PASS
-
-} // namespace dynd::detail
-
-template <typename func_type, typename funcproto_type, int aux_param_count>
-struct functor_ck : detail::functor_ck<func_type, funcproto_type, aux_param_count> {
-};
 
 } // namespace dynd
 
