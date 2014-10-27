@@ -75,7 +75,8 @@ typedef intptr_t (*arrfunc_instantiate_t)(
  */
 typedef int (*arrfunc_resolve_dst_type_t)(
     const arrfunc_type_data *self, intptr_t nsrc, const ndt::type *src_tp,
-    const nd::array &dyn_params, int throw_on_error, ndt::type &out_dst_tp);
+    int throw_on_error, ndt::type &out_dst_tp,
+    const nd::array &args, const nd::array &kwds);
 
 /**
  * This is a struct designed for interoperability at
@@ -157,16 +158,6 @@ struct arrfunc_type_data {
     return reinterpret_cast<const T *>(data);
   }
 
-  inline intptr_t get_param_count() const
-  {
-    return func_proto.tcast<funcproto_type>()->get_param_count();
-  }
-
-  inline intptr_t get_aux_param_count() const
-  {
-    return func_proto.tcast<funcproto_type>()->get_aux_param_count();
-  }
-
   intptr_t get_nsrc() const
   {
     return func_proto.tcast<funcproto_type>()->get_nsrc();
@@ -198,16 +189,16 @@ struct arrfunc_type_data {
   }
 
   inline ndt::type resolve(intptr_t nsrc, const ndt::type *src_tp,
-                           const nd::array &dyn_params) const
+                           const nd::array &args, const nd::array kwds) const
   {
     if (resolve_dst_type != NULL) {
       ndt::type result;
-      resolve_dst_type(this, nsrc, src_tp, dyn_params, true, result);
+      resolve_dst_type(this, nsrc, src_tp, true, result, args, kwds);
       return result;
     } else {
-      if (nsrc != get_param_count()) {
+      if (nsrc != get_nsrc()) {
         std::stringstream ss;
-        ss << "arrfunc expected " << get_param_count()
+        ss << "arrfunc expected " << get_nsrc()
            << " parameters, but received " << nsrc;
         throw std::invalid_argument(ss.str());
       }

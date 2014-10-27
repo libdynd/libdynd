@@ -31,7 +31,7 @@ TEST(ArrFunc, Assignment) {
                                  ndt::make_fixedstring(16),
                                  assign_error_default, af);
     // Validate that its types, etc are set right
-    ASSERT_EQ(1, af.get_param_count());
+    ASSERT_EQ(1, af.get_narg());
     ASSERT_EQ(ndt::make_type<int>(), af.get_return_type());
     ASSERT_EQ(ndt::make_fixedstring(16), af.get_param_type(0));
 
@@ -101,7 +101,7 @@ TEST(ArrFunc, Property) {
     // Create an arrfunc for getting the year from a date
     make_arrfunc_from_property(ndt::make_date(), "year", af);
     // Validate that its types, etc are set right
-    ASSERT_EQ(1, af.get_param_count());
+    ASSERT_EQ(1, af.get_narg());
     ASSERT_EQ(ndt::make_type<int>(), af.get_return_type());
     ASSERT_EQ(ndt::make_date(), af.get_param_type(0));
 
@@ -128,7 +128,7 @@ TEST(ArrFunc, AssignmentAsExpr) {
                                  ndt::make_fixedstring(16),
                                  assign_error_default, af);
     // Validate that its types, etc are set right
-    ASSERT_EQ(1, af.get_param_count());
+    ASSERT_EQ(1, af.get_narg());
     ASSERT_EQ(ndt::make_type<int>(), af.get_return_type());
     ASSERT_EQ(ndt::make_fixedstring(16), af.get_param_type(0));
 
@@ -173,7 +173,7 @@ TEST(ArrFunc, Expr) {
                     expr_operation_funcproto, assign_error_default, af);
     // Validate that its types, etc are set right
     ASSERT_EQ(expr_operation_funcproto, (arrfunc_proto_t)af.ckernel_funcproto);
-    ASSERT_EQ(2, af.get_param_count());
+    ASSERT_EQ(2, af.get_narg());
     ASSERT_EQ(ndt::make_type<int>(), af.get_return_type());
     ASSERT_EQ(ndt::make_type<int>(), af.get_param_type(0));
     ASSERT_EQ(ndt::make_type<int>(), af.get_param_type(1));

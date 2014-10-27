@@ -45,8 +45,8 @@ instantiate_copy(const arrfunc_type_data *DYND_UNUSED(af_self),
 
 static int resolve_dst_copy_type(const arrfunc_type_data *DYND_UNUSED(self),
                                  intptr_t nsrc, const ndt::type *src_tp,
-                                 const nd::array &DYND_UNUSED(dyn_params),
-                                 int throw_on_error, ndt::type &out_dst_tp)
+                                 int throw_on_error, ndt::type &out_dst_tp,
+                                 const nd::array &DYND_UNUSED(args), const nd::array &DYND_UNUSED(kwds))
 {
   if (nsrc != 1) {
     if (throw_on_error) {

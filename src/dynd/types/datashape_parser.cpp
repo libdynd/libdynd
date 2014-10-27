@@ -377,7 +377,7 @@ static ndt::type parse_adapt_parameters(const char *&rbegin, const char *end,
   const char *saved_begin = begin;
   ndt::type proto_tp = parse_datashape(begin, end, symtable);
   if (proto_tp.is_null() || proto_tp.get_type_id() != funcproto_type_id ||
-      proto_tp.tcast<funcproto_type>()->get_param_count() != 1) {
+      proto_tp.tcast<funcproto_type>()->get_narg() != 1) {
     throw datashape_parse_error(saved_begin, "expected a unary function signature");
   }
   if (!parse_token_ds(begin, end, ',')) {
@@ -923,7 +923,11 @@ static ndt::type parse_tuple_or_funcproto(const char *&rbegin, const char *end, 
             throw datashape_parse_error(begin, "expected function prototype return type");
         }
         rbegin = begin;
-        return ndt::make_funcproto(field_type_list, return_type, field_type_list.size() - semicolon_pos);
+        if (semicolon_pos == -1) {
+            return ndt::make_funcproto(field_type_list, return_type);
+        } else {
+            return ndt::make_funcproto(field_type_list, return_type, field_type_list.size() - semicolon_pos);
+        }
     }
 }
 

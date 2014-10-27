@@ -94,7 +94,7 @@ intptr_t dynd::make_chain_buf_tp_ckernel(
     const char *const *src_arrmeta, kernel_request_t kernreq,
     const eval::eval_context *ectx)
 {
-  if (first->get_param_count() == 1) {
+  if (first->get_nsrc() == 1) {
     intptr_t root_ckb_offset = ckb_offset;
     unary_heap_chain_ck *self = unary_heap_chain_ck::create(ckb, kernreq, ckb_offset);
     self->m_buf_tp = buf_tp;
@@ -141,7 +141,7 @@ void dynd::make_chain_arrfunc(const nd::arrfunc &first,
                                const ndt::type &buf_tp,
                                arrfunc_type_data *out_af)
 {
-  if (second.get()->func_proto.tcast<funcproto_type>()->get_param_count() !=
+  if (second.get()->func_proto.tcast<funcproto_type>()->get_nsrc() !=
       1) {
     stringstream ss;
     ss << "Cannot chain functions " << first << " and " << second

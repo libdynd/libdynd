@@ -375,10 +375,10 @@ struct nafunc {
     }
 
     static int resolve_is_avail_dst_type(
-        const arrfunc_type_data *DYND_UNUSED(self), intptr_t DYND_UNUSED(nsrc),
-        const ndt::type *DYND_UNUSED(src_tp),
-        const nd::array &DYND_UNUSED(dyn_params),
-        int DYND_UNUSED(throw_on_error), ndt::type &out_dst_tp)
+        const arrfunc_type_data *DYND_UNUSED(self),
+        intptr_t DYND_UNUSED(nsrc), const ndt::type *DYND_UNUSED(src_tp),
+        int DYND_UNUSED(throw_on_error), ndt::type &out_dst_tp,
+        const nd::array &DYND_UNUSED(args), const nd::array &DYND_UNUSED(kwds))
     {
         out_dst_tp = ndt::make_type<dynd_bool>();
         return 1;

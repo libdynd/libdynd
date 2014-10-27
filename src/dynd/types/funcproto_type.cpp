@@ -14,10 +14,10 @@ using namespace dynd;
 
 funcproto_type::funcproto_type(const nd::array &param_types,
                                const ndt::type &return_type,
-                               intptr_t aux_param_count)
+                               intptr_t naux)
     : base_type(funcproto_type_id, symbolic_kind, 0, 1, type_flag_none, 0, 0,
                 0),
-      m_aux_param_count(aux_param_count), m_param_types(param_types), m_return_type(return_type)
+      m_naux(naux), m_param_types(param_types), m_return_type(return_type)
 {
     if (!nd::ensure_immutable_contig<ndt::type>(m_param_types)) {
         stringstream ss;
@@ -46,7 +46,7 @@ void funcproto_type::print_type(std::ostream& o) const
     const ndt::type *param_types = get_param_types_raw();
     // Use the function prototype datashape syntax
     o << "(";
-    for (intptr_t i = 0, i_aux = m_param_count - m_aux_param_count, i_end = m_param_count; i != i_end; ++i) {
+    for (intptr_t i = 0, i_aux = get_nsrc(), i_end = m_param_count; i != i_end; ++i) {
         if (i != 0) {
             if (i != i_aux) {
                 o << ", ";
@@ -159,7 +159,8 @@ bool funcproto_type::operator==(const base_type& rhs) const
         return false;
     } else {
         const funcproto_type *fpt = static_cast<const funcproto_type *>(&rhs);
-        return m_param_types.equals_exact(fpt->m_param_types) && m_return_type == fpt->m_return_type;
+        return m_param_types.equals_exact(fpt->m_param_types) && m_return_type == fpt->m_return_type
+            && m_naux == fpt->m_naux;
     }
 }
 

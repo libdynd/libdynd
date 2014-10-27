@@ -107,10 +107,10 @@ struct indexed_take_ck : public kernels::expr_ck<indexed_take_ck, 2> {
 };
 } // anonymous namespace
 
-static int resolve_take_dst_type(const arrfunc_type_data *af_self, intptr_t nsrc,
-                                 const ndt::type *src_tp,
-                                 const nd::array &DYND_UNUSED(dyn_params),
-                                 int throw_on_error, ndt::type &out_dst_tp)
+static int resolve_take_dst_type(const arrfunc_type_data *af_self,
+                                 intptr_t nsrc, const ndt::type *src_tp,
+                                 int throw_on_error, ndt::type &out_dst_tp,
+                                 const nd::array &DYND_UNUSED(args), const nd::array &DYND_UNUSED(kwds))
 {
     if (nsrc != 2) {
       if (throw_on_error) {

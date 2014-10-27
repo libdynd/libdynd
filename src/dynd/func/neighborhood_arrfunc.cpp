@@ -173,16 +173,15 @@ static intptr_t instantiate_neighborhood(
 
 static int resolve_neighborhood_dst_type(const arrfunc_type_data *self,
                                          intptr_t nsrc, const ndt::type *src_tp,
-                                         const nd::array &DYND_UNUSED(dyn_params),
-                                         int DYND_UNUSED(throw_on_error),
-                                         ndt::type &out_dst_tp)
+                                         int DYND_UNUSED(throw_on_error), ndt::type &out_dst_tp,
+                                         const nd::array &DYND_UNUSED(args), const nd::array &DYND_UNUSED(kwds))
 {
   // TODO: Should be able to express the match/subsitution without special code
 
   // This is basically resolve() from arrfunc.hpp
-  if (nsrc != self->get_param_count()) {
+  if (nsrc != self->get_nsrc()) {
     std::stringstream ss;
-    ss << "arrfunc expected " << self->get_param_count()
+    ss << "arrfunc expected " << self->get_nsrc()
        << " parameters, but received " << nsrc;
     throw std::invalid_argument(ss.str());
   }

@@ -115,8 +115,9 @@ static void free_rolling_arrfunc_data(arrfunc_type_data *self_af) {
 
 static int resolve_rolling_dst_type(const arrfunc_type_data *af_self,
                                     intptr_t nsrc, const ndt::type *src_tp,
-                                    const nd::array &dyn_params,
-                                    int throw_on_error, ndt::type &out_dst_tp)
+                                    int throw_on_error, ndt::type &out_dst_tp,
+                                    const nd::array &args, const nd::array &kwds)
+
 {
   if (nsrc != 1) {
     if (throw_on_error) {
@@ -136,8 +137,9 @@ static int resolve_rolling_dst_type(const arrfunc_type_data *af_self,
   if (child_af->resolve_dst_type) {
     ndt::type child_src_tp = ndt::make_fixed_dim(
         data->window_size, src_tp[0].get_type_at_dimension(NULL, 1));
-    if (!child_af->resolve_dst_type(child_af, 1, &child_src_tp, dyn_params,
-                                    throw_on_error, child_dst_tp)) {
+    if (!child_af->resolve_dst_type(child_af, 1, &child_src_tp,
+                                    throw_on_error, child_dst_tp,
+                                    args, kwds)) {
       return 0;
     }
   }
@@ -237,7 +239,7 @@ void dynd::make_rolling_arrfunc(arrfunc_type_data *out_af,
         throw invalid_argument("make_rolling_arrfunc() 'window_op' cannot be null");
     }
     const arrfunc_type_data *window_af = window_op.get();
-    if (window_af->get_param_count() != 1) {
+    if (window_af->get_nsrc() != 1) {
         stringstream ss;
         ss << "To make a rolling window arrfunc, an operation with one "
               "argument is required, got " << window_af->func_proto;

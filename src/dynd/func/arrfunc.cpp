@@ -187,7 +187,7 @@ nd::array nd::arrfunc::call(intptr_t narg, const nd::array *args, const kwds &kw
   nd::array aux = pack(af->get_naux(), args + af->get_nsrc());
 
   // Resolve the destination type
-  ndt::type dst_tp = af->resolve(narg, narg ? &arg_tp[0] : NULL, aux);
+  ndt::type dst_tp = af->resolve(af->get_nsrc(), af->get_nsrc() ? &arg_tp[0] : NULL, aux, kwds.get());
 
   // Construct the destination array
   nd::array res = nd::empty(dst_tp);
@@ -201,35 +201,33 @@ nd::array nd::arrfunc::call(intptr_t narg, const nd::array *args, const kwds &kw
   return res;
 }
 
-void nd::arrfunc::call_out(intptr_t arg_count, const nd::array *args, const kwds &kwds,
+void nd::arrfunc::call_out(intptr_t narg, const nd::array *args, const kwds &kwds,
                            const nd::array &out, const eval::eval_context *ectx)
     const
 {
   const arrfunc_type_data *af = get();
-  if (arg_count != af->get_param_count()) {
-    stringstream ss;
-    ss << "Wrong number of arguments to arrfunc with prototype ";
-    ss << af->func_proto << ", got " << arg_count << " arguments";
-    throw invalid_argument(ss.str());
+
+  std::vector<ndt::type> arg_tp(narg);
+  for (intptr_t i = 0; i < narg; ++i) {
+    arg_tp[i] = args[i].get_type();
   }
-  std::vector<ndt::type> src_tp(arg_count);
-  for (intptr_t i = 0; i < arg_count; ++i) {
-    src_tp[i] = args[i].get_type();
-  }
-  std::vector<const char *> src_arrmeta(arg_count);
-  for (intptr_t i = 0; i < arg_count; ++i) {
+
+  std::vector<const char *> src_arrmeta(af->get_nsrc());
+  for (intptr_t i = 0; i < af->get_nsrc(); ++i) {
     src_arrmeta[i] = args[i].get_arrmeta();
   }
-  std::vector<char *> src_data(arg_count);
-  for (intptr_t i = 0; i < arg_count; ++i) {
+  std::vector<char *> src_data(af->get_nsrc());
+  for (intptr_t i = 0; i < af->get_nsrc(); ++i) {
     src_data[i] = const_cast<char *>(args[i].get_readonly_originptr());
   }
 
+  // Pack the auxiliary arguments
+  nd::array aux = pack(af->get_naux(), args + af->get_nsrc());
+
   // Generate and evaluate the ckernel
   ckernel_builder ckb;
-  af->instantiate(af, &ckb, 0, out.get_type(), out.get_arrmeta(), &src_tp[0],
-                  &src_arrmeta[0], kernel_request_single, ectx, nd::array(), kwds.get());
+  af->instantiate(af, &ckb, 0, out.get_type(), out.get_arrmeta(), &arg_tp[0],
+                  &src_arrmeta[0], kernel_request_single, ectx, aux, kwds.get());
   expr_single_t fn = ckb.get()->get_function<expr_single_t>();
-  fn(out.get_readwrite_originptr(), src_data.empty() ? NULL : &src_data[0],
-     ckb.get());
+  fn(out.get_readwrite_originptr(), src_data.empty() ? NULL : &src_data[0], ckb.get());
 }

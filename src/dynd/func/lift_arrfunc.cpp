@@ -29,7 +29,7 @@ static intptr_t instantiate_lifted_expr_arrfunc_data(
   const array_preamble *data = *self->get_data_as<const array_preamble *>();
   const arrfunc_type_data *child_af =
       reinterpret_cast<const arrfunc_type_data *>(data->m_data_pointer);
-  intptr_t src_count = child_af->get_param_count();
+  intptr_t src_count = child_af->get_nsrc();
   dimvector src_ndim(src_count);
   for (int i = 0; i < src_count; ++i) {
     src_ndim[i] = src_tp[i].get_ndim() - child_af->get_param_type(i).get_ndim();
@@ -41,12 +41,12 @@ static intptr_t instantiate_lifted_expr_arrfunc_data(
       static_cast<dynd::kernel_request_t>(kernreq), ectx);
 }
 
-static int resolve_lifted_dst_type(const arrfunc_type_data *self, intptr_t nsrc,
-                                   const ndt::type *src_tp,
-                                   const nd::array &dyn_params,
-                                   int throw_on_error, ndt::type &out_dst_tp)
+static int resolve_lifted_dst_type(const arrfunc_type_data *self,
+                                   intptr_t nsrc, const ndt::type *src_tp,
+                                   int throw_on_error, ndt::type &out_dst_tp,
+                                   const nd::array &args, const nd::array &kwds)
 {
-    if (nsrc != self->get_param_count()) {
+    if (nsrc != self->get_nsrc()) {
       if (throw_on_error) {
         stringstream ss;
         ss << "Wrong number of arguments to arrfunc with prototype ";
@@ -74,8 +74,8 @@ static int resolve_lifted_dst_type(const arrfunc_type_data *self, intptr_t nsrc,
             }
         }
         if (!child_af->resolve_dst_type(child_af, nsrc, &child_src_tp[0],
-                                        dyn_params, throw_on_error,
-                                        child_dst_tp)) {
+                                        throw_on_error, child_dst_tp,
+                                        args, kwds)) {
             return 0;
         }
     } else {
@@ -164,13 +164,16 @@ static ndt::type lift_proto(const ndt::type& proto)
 {
     const funcproto_type *p = proto.tcast<funcproto_type>();
     const ndt::type *param_types = p->get_param_types_raw();
-    intptr_t param_count = p->get_param_count();
+    intptr_t param_count = p->get_narg();
     nd::array out_param_types = nd::empty(param_count, ndt::make_type());
     nd::string dimsname("Dims");
     ndt::type *pt = reinterpret_cast<ndt::type *>(
         out_param_types.get_readwrite_originptr());
-    for (intptr_t i = 0, i_end = p->get_param_count(); i != i_end; ++i) {
+    for (intptr_t i = 0, i_end = p->get_nsrc(); i != i_end; ++i) {
         pt[i] = ndt::make_ellipsis_dim(dimsname, param_types[i]);
+    }
+    for (intptr_t i = p->get_nsrc(), i_end = p->get_narg(); i != i_end; ++i) {
+        pt[i] = param_types[i];
     }
     return ndt::make_funcproto(
         out_param_types,

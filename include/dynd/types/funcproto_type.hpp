@@ -20,7 +20,7 @@ namespace dynd {
 
 class funcproto_type : public base_type {
     intptr_t m_param_count;
-    intptr_t m_aux_param_count;
+    intptr_t m_naux;
     // This is always a contiguous immutable "N * type" array
     nd::array m_param_types;
     ndt::type m_return_type;
@@ -30,24 +30,16 @@ public:
 
     virtual ~funcproto_type() {}
 
-    intptr_t get_param_count() const {
-        return m_param_count;
-    }
-
     intptr_t get_nsrc() const {
-        return m_param_count - m_aux_param_count;
+        return m_param_count - m_naux;
     }
 
     intptr_t get_naux() const {
-        return m_aux_param_count;
+        return m_naux;
     }
 
     intptr_t get_narg() const {
         return m_param_count;
-    }
-
-    intptr_t get_aux_param_count() const {
-        return m_aux_param_count;
     }
 
     const nd::array& get_param_types() const {
