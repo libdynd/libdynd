@@ -78,7 +78,7 @@ static intptr_t instantiate_int_offset_arrfunc(
     if (dst_tp !=
                 self_af->func_proto.tcast<funcproto_type>()->get_return_type() ||
             src_tp[0] !=
-                self_af->func_proto.tcast<funcproto_type>()->get_param_type(0)) {
+                self_af->func_proto.tcast<funcproto_type>()->get_arg_type(0)) {
         stringstream ss;
         ss << "Cannot instantiate arrfunc with signature ";
         ss << self_af->func_proto << " with types (";

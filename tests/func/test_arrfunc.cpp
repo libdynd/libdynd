@@ -33,14 +33,14 @@ TEST(ArrFunc, Assignment) {
     // Validate that its types, etc are set right
     ASSERT_EQ(1, af.get_narg());
     ASSERT_EQ(ndt::make_type<int>(), af.get_return_type());
-    ASSERT_EQ(ndt::make_fixedstring(16), af.get_param_type(0));
+    ASSERT_EQ(ndt::make_fixedstring(16), af.get_arg_type(0));
 
     const char *src_arrmeta[1] = {NULL};
 
     // Instantiate a single ckernel
     ckernel_builder ckb;
     af.instantiate(&af, &ckb, 0, af.get_return_type(), NULL,
-                        af.get_param_types(), src_arrmeta,
+                        af.get_arg_types(), src_arrmeta,
                         kernel_request_single, &eval::default_eval_context,
                         nd::array(), nd::array());
     int int_out = 0;
@@ -53,7 +53,7 @@ TEST(ArrFunc, Assignment) {
     // Instantiate a strided ckernel
     ckb.reset();
     af.instantiate(&af, &ckb, 0, af.get_return_type(), NULL,
-                        af.get_param_types(), src_arrmeta,
+                        af.get_arg_types(), src_arrmeta,
                         kernel_request_strided, &eval::default_eval_context,
                         nd::array(), nd::array());
     int ints_out[3] = {0, 0, 0};
@@ -103,14 +103,14 @@ TEST(ArrFunc, Property) {
     // Validate that its types, etc are set right
     ASSERT_EQ(1, af.get_narg());
     ASSERT_EQ(ndt::make_type<int>(), af.get_return_type());
-    ASSERT_EQ(ndt::make_date(), af.get_param_type(0));
+    ASSERT_EQ(ndt::make_date(), af.get_arg_type(0));
 
     const char *src_arrmeta[1] = {NULL};
 
     // Instantiate a single ckernel
     ckernel_builder ckb;
     af.instantiate(&af, &ckb, 0, af.get_return_type(), NULL,
-                        af.get_param_types(), src_arrmeta,
+                        af.get_arg_types(), src_arrmeta,
                         kernel_request_single, &eval::default_eval_context,
                         nd::array(), nd::array());
     int int_out = 0;
@@ -130,14 +130,14 @@ TEST(ArrFunc, AssignmentAsExpr) {
     // Validate that its types, etc are set right
     ASSERT_EQ(1, af.get_narg());
     ASSERT_EQ(ndt::make_type<int>(), af.get_return_type());
-    ASSERT_EQ(ndt::make_fixedstring(16), af.get_param_type(0));
+    ASSERT_EQ(ndt::make_fixedstring(16), af.get_arg_type(0));
 
     const char *src_arrmeta[1] = {NULL};
 
     // Instantiate a single ckernel
     ckernel_builder ckb;
     af.instantiate(&af, &ckb, 0, af.get_return_type(), NULL,
-                   af.get_param_types(), src_arrmeta, kernel_request_single,
+                   af.get_arg_types(), src_arrmeta, kernel_request_single,
                    &eval::default_eval_context, nd::array(), nd::array());
     int int_out = 0;
     char str_in[16] = "3251";
@@ -149,7 +149,7 @@ TEST(ArrFunc, AssignmentAsExpr) {
     // Instantiate a strided ckernel
     ckb.reset();
     af.instantiate(&af, &ckb, 0, af.get_return_type(), NULL,
-                   af.get_param_types(), src_arrmeta, kernel_request_strided,
+                   af.get_arg_types(), src_arrmeta, kernel_request_strided,
                    &eval::default_eval_context, nd::array(), nd::array());
     int ints_out[3] = {0, 0, 0};
     char strs_in[3][16] = {"123", "4567", "891029"};
@@ -175,15 +175,15 @@ TEST(ArrFunc, Expr) {
     ASSERT_EQ(expr_operation_funcproto, (arrfunc_proto_t)af.ckernel_funcproto);
     ASSERT_EQ(2, af.get_narg());
     ASSERT_EQ(ndt::make_type<int>(), af.get_return_type());
-    ASSERT_EQ(ndt::make_type<int>(), af.get_param_type(0));
-    ASSERT_EQ(ndt::make_type<int>(), af.get_param_type(1));
+    ASSERT_EQ(ndt::make_type<int>(), af.get_arg_type(0));
+    ASSERT_EQ(ndt::make_type<int>(), af.get_arg_type(1));
 
     const char *src_arrmeta[2] = {NULL, NULL};
 
     // Instantiate a single ckernel
     ckernel_builder ckb;
     af.instantiate(&af, &ckb, 0, af.get_return_type(), NULL,
-                        af.get_param_types(), src_arrmeta,
+                        af.get_arg_types(), src_arrmeta,
                         kernel_request_single, &eval::default_eval_context);
     int int_out = 0;
     int int_in1 = 1, int_in2 = 3;
@@ -196,7 +196,7 @@ TEST(ArrFunc, Expr) {
     // Instantiate a strided ckernel
     ckb.reset();
     af.instantiate(&af, &ckb, 0, af.get_return_type(), NULL,
-                        af.get_param_types(), src_arrmeta,
+                        af.get_arg_types(), src_arrmeta,
                         kernel_request_strided, &eval::default_eval_context);
     int ints_out[3] = {0, 0, 0};
     int ints_in1[3] = {1,2,3}, ints_in2[3] = {5,-210,1234};

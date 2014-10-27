@@ -33,11 +33,11 @@ adapt_type::adapt_type(const ndt::type &operand_type,
 
   // If the operand is an expression, make a buffering arrfunc
   if (m_operand_type.get_kind() == expr_kind && !m_forward.is_null() &&
-      m_operand_type != m_forward.get()->get_param_type(0)) {
+      m_operand_type != m_forward.get()->get_arg_type(0)) {
     m_forward = make_chain_arrfunc(
-        make_arrfunc_from_assignment(m_forward.get()->get_param_type(0),
+        make_arrfunc_from_assignment(m_forward.get()->get_arg_type(0),
                                      m_operand_type, assign_error_default),
-        m_forward, m_forward.get()->get_param_type(0));
+        m_forward, m_forward.get()->get_arg_type(0));
   }
 }
 

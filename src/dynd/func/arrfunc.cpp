@@ -32,7 +32,7 @@ static intptr_t instantiate_assignment_ckernel(
   {
     assign_error_mode errmode = *self->get_data_as<assign_error_mode>();
     if (dst_tp == self->get_return_type() &&
-        src_tp[0] == self->get_param_type(0)) {
+        src_tp[0] == self->get_arg_type(0)) {
       if (errmode == ectx->errmode) {
         return make_assignment_kernel(ckb, ckb_offset, dst_tp, dst_arrmeta,
                                       src_tp[0], src_arrmeta[0],
@@ -47,7 +47,7 @@ static intptr_t instantiate_assignment_ckernel(
     } else {
       stringstream ss;
       ss << "Cannot instantiate arrfunc for assigning from ";
-      ss << self->get_param_type(0) << " to " << self->get_return_type();
+      ss << self->get_arg_type(0) << " to " << self->get_return_type();
       ss << " using input type " << src_tp[0];
       ss << " and output type " << dst_tp;
       throw type_error(ss.str());
@@ -92,7 +92,7 @@ static intptr_t instantiate_property_ckernel(
 
   stringstream ss;
   ss << "Cannot instantiate arrfunc for assigning from ";
-  ss << self->get_param_type(0) << " to " << self->get_return_type();
+  ss << self->get_arg_type(0) << " to " << self->get_return_type();
   ss << " using input type " << src_tp[0];
   ss << " and output type " << dst_tp;
   throw type_error(ss.str());

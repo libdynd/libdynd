@@ -19,19 +19,30 @@
 namespace dynd {
 
 class funcproto_type : public base_type {
-    intptr_t m_param_count;
-    intptr_t m_naux;
     // This is always a contiguous immutable "N * type" array
-    nd::array m_param_types;
+    nd::array m_arg_types;
+    intptr_t m_narg, m_nsrc, m_naux;
     ndt::type m_return_type;
 
 public:
-    funcproto_type(const nd::array &param_types, const ndt::type &return_type, intptr_t aux_param_count = 0);
+    funcproto_type(const nd::array &arg_types, const ndt::type &return_type, intptr_t naux = 0);
 
     virtual ~funcproto_type() {}
 
+    const nd::array& get_arg_types() const {
+        return m_arg_types;
+    }
+
+    const ndt::type *get_arg_types_raw() const {
+        return reinterpret_cast<const ndt::type *>(
+            m_arg_types.get_readonly_originptr());
+    }
+    const ndt::type &get_arg_type(intptr_t i) const {
+        return get_arg_types_raw()[i];
+    }
+
     intptr_t get_nsrc() const {
-        return m_param_count - m_naux;
+        return m_nsrc;
     }
 
     intptr_t get_naux() const {
@@ -39,19 +50,7 @@ public:
     }
 
     intptr_t get_narg() const {
-        return m_param_count;
-    }
-
-    const nd::array& get_param_types() const {
-        return m_param_types;
-    }
-
-    const ndt::type *get_param_types_raw() const {
-        return reinterpret_cast<const ndt::type *>(
-            m_param_types.get_readonly_originptr());
-    }
-    const ndt::type &get_param_type(intptr_t i) const {
-        return get_param_types_raw()[i];
+        return m_narg;
     }
 
     const ndt::type& get_return_type() const {
@@ -144,24 +143,24 @@ DYND_PP_JOIN_MAP(FUNCPROTO_TYPE_FACTORY, (), DYND_PP_RANGE(DYND_PP_INC(DYND_ARG_
 } // namespace ndt::detail
 
 /** Makes a funcproto type with the specified types */
-inline ndt::type make_funcproto(const nd::array &param_types,
+inline ndt::type make_funcproto(const nd::array &arg_types,
                                 const ndt::type &return_type,
                                 intptr_t naux = 0)
 {
     return ndt::type(
-        new funcproto_type(param_types, return_type, naux), false);
+        new funcproto_type(arg_types, return_type, naux), false);
 }
 
 /** Makes a funcproto type with the specified types */
-inline ndt::type make_funcproto(intptr_t param_count,
-                                const ndt::type *param_types,
+inline ndt::type make_funcproto(intptr_t narg,
+                                const ndt::type *arg_types,
                                 const ndt::type &return_type)
 {
-    nd::array tmp = nd::empty(param_count, ndt::make_type());
+    nd::array tmp = nd::empty(narg, ndt::make_type());
     ndt::type *tmp_vals =
         reinterpret_cast<ndt::type *>(tmp.get_readwrite_originptr());
-    for (intptr_t i = 0; i != param_count; ++i) {
-        tmp_vals[i] = param_types[i];
+    for (intptr_t i = 0; i != narg; ++i) {
+        tmp_vals[i] = arg_types[i];
     }
     tmp.flag_as_immutable();
     return ndt::type(
@@ -169,12 +168,12 @@ inline ndt::type make_funcproto(intptr_t param_count,
 }
 
 /** Makes a unary funcproto type with the specified types */
-inline ndt::type make_funcproto(const ndt::type& single_param_type,
+inline ndt::type make_funcproto(const ndt::type& single_arg_type,
                                 const ndt::type &return_type)
 {
-    ndt::type param_types[1] = {single_param_type};
+    ndt::type arg_types[1] = {single_arg_type};
     return ndt::type(
-        new funcproto_type(param_types, return_type), false);
+        new funcproto_type(arg_types, return_type), false);
 }
 
 /** Makes a funcproto type from the C++ function type */

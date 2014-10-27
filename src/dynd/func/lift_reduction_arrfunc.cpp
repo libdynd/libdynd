@@ -73,9 +73,9 @@ void dynd::lift_reduction_arrfunc(arrfunc_type_data *out_ar,
     const arrfunc_type_data *elwise_reduction = elwise_reduction_arr.get();
     if (elwise_reduction->get_nsrc() != 1 &&
             !(elwise_reduction->get_nsrc() == 2 &&
-              elwise_reduction->get_param_type(0) ==
-                  elwise_reduction->get_param_type(1) &&
-              elwise_reduction->get_param_type(0) ==
+              elwise_reduction->get_arg_type(0) ==
+                  elwise_reduction->get_arg_type(1) &&
+              elwise_reduction->get_arg_type(0) ==
                   elwise_reduction->get_return_type())) {
         stringstream ss;
         ss << "lift_reduction_arrfunc: 'elwise_reduction' must contain a"

@@ -185,7 +185,7 @@ static int resolve_neighborhood_dst_type(const arrfunc_type_data *self,
        << " parameters, but received " << nsrc;
     throw std::invalid_argument(ss.str());
   }
-  const ndt::type *param_types = self->get_param_types();
+  const ndt::type *param_types = self->get_arg_types();
   std::map<nd::string, ndt::type> typevars;
   for (intptr_t i = 0; i != nsrc; ++i) {
     if (!ndt::pattern_match(src_tp[i].value_type(), param_types[i], typevars)) {

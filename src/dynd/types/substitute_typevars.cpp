@@ -108,7 +108,7 @@ ndt::type ndt::detail::internal_substitute(
     case funcproto_type_id:
       return ndt::make_funcproto(
           substitute_type_array(
-              pattern.tcast<funcproto_type>()->get_param_types(), typevars,
+              pattern.tcast<funcproto_type>()->get_arg_types(), typevars,
               concrete),
           substitute(pattern.tcast<funcproto_type>()->get_return_type(),
                      typevars, concrete));

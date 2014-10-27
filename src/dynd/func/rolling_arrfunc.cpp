@@ -245,7 +245,7 @@ void dynd::make_rolling_arrfunc(arrfunc_type_data *out_af,
               "argument is required, got " << window_af->func_proto;
         throw invalid_argument(ss.str());
     }
-    const ndt::type &window_src_tp = window_af->get_param_type(0);
+    const ndt::type &window_src_tp = window_af->get_arg_type(0);
     if (window_src_tp.get_ndim() < 1) {
         stringstream ss;
         ss << "To make a rolling window arrfunc, an operation with which "

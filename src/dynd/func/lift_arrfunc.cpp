@@ -32,7 +32,7 @@ static intptr_t instantiate_lifted_expr_arrfunc_data(
   intptr_t src_count = child_af->get_nsrc();
   dimvector src_ndim(src_count);
   for (int i = 0; i < src_count; ++i) {
-    src_ndim[i] = src_tp[i].get_ndim() - child_af->get_param_type(i).get_ndim();
+    src_ndim[i] = src_tp[i].get_ndim() - child_af->get_arg_type(i).get_ndim();
   }
   return make_lifted_expr_ckernel(
       child_af, ckb, ckb_offset,
@@ -65,7 +65,7 @@ static int resolve_lifted_dst_type(const arrfunc_type_data *self,
     if (child_af->resolve_dst_type) {
         std::vector<ndt::type> child_src_tp(nsrc);
         for (intptr_t i = 0; i < nsrc; ++i) {
-            intptr_t child_ndim_i = child_af->get_param_type(i).get_ndim();
+            intptr_t child_ndim_i = child_af->get_arg_type(i).get_ndim();
             if (child_ndim_i < src_tp[i].get_ndim()) {
               child_src_tp[i] = src_tp[i].get_dtype(child_ndim_i);
               ndim = std::max(ndim, src_tp[i].get_ndim() - child_ndim_i);
@@ -82,7 +82,7 @@ static int resolve_lifted_dst_type(const arrfunc_type_data *self,
         // TODO: Should pattern match the source types here
         for (intptr_t i = 0; i < nsrc; ++i) {
             ndim = std::max(ndim, src_tp[i].get_ndim() -
-                                      child_af->get_param_type(i).get_ndim());
+                                      child_af->get_arg_type(i).get_ndim());
         }
         child_dst_tp = child_af->get_return_type();
     }
@@ -94,7 +94,7 @@ static int resolve_lifted_dst_type(const arrfunc_type_data *self,
         }
         for (intptr_t i = 0; i < nsrc; ++i) {
             intptr_t ndim_i =
-                src_tp[i].get_ndim() - child_af->get_param_type(i).get_ndim();
+                src_tp[i].get_ndim() - child_af->get_arg_type(i).get_ndim();
             if (ndim_i > 0) {
                 ndt::type tp = src_tp[i];
                 intptr_t *shape_i = shape.get() + (ndim - ndim_i);
@@ -163,7 +163,7 @@ static int resolve_lifted_dst_type(const arrfunc_type_data *self,
 static ndt::type lift_proto(const ndt::type& proto)
 {
     const funcproto_type *p = proto.tcast<funcproto_type>();
-    const ndt::type *param_types = p->get_param_types_raw();
+    const ndt::type *param_types = p->get_arg_types_raw();
     intptr_t param_count = p->get_narg();
     nd::array out_param_types = nd::empty(param_count, ndt::make_type());
     nd::string dimsname("Dims");

@@ -128,7 +128,7 @@ struct functor_ck;
                                     kernel_request_t kernreq, const eval::eval_context *DYND_UNUSED(ectx), \
                                     const nd::array &DYND_PP_IF(NAUX)(args), const nd::array &DYND_PP_IF(NSRC)(kwds)) { \
             for (intptr_t i = 0; i < NSRC; ++i) { \
-                if (src_tp[i] != af_self->get_param_type(i)) { \
+                if (src_tp[i] != af_self->get_arg_type(i)) { \
                     std::stringstream ss; \
                     ss << "Provided types " << ndt::make_funcproto(NSRC, src_tp, dst_tp) \
                        << " do not match the arrfunc proto " << af_self->func_proto; \
@@ -205,7 +205,7 @@ DYND_PP_JOIN_MAP(FUNCTOR_CK, (), DYND_PP_RANGE(DYND_PP_INC(DYND_ARG_MAX)))
                                     kernel_request_t kernreq, const eval::eval_context *DYND_UNUSED(ectx), \
                                     const nd::array &DYND_PP_IF(NAUX)(args), const nd::array &DYND_PP_IF(NSRC)(kwds)) { \
             for (intptr_t i = 0; i < NSRC; ++i) { \
-                if (src_tp[i] != af_self->get_param_type(i)) { \
+                if (src_tp[i] != af_self->get_arg_type(i)) { \
                     std::stringstream ss; \
                     ss << "Provided types " << ndt::make_funcproto(NSRC, src_tp, dst_tp) \
                        << " do not match the arrfunc proto " << af_self->func_proto; \
@@ -294,7 +294,7 @@ DYND_PP_JOIN_MAP(FUNCTOR_CK, (), DYND_PP_RANGE(DYND_PP_INC(DYND_ARG_MAX)))
                                     kernel_request_t kernreq, const eval::eval_context *DYND_UNUSED(ectx), \
                                     const nd::array &DYND_PP_IF(NAUX)(args), const nd::array &kwds) { \
             for (intptr_t i = 0; i < NSRC; ++i) { \
-                if (src_tp[i] != af_self->get_param_type(i)) { \
+                if (src_tp[i] != af_self->get_arg_type(i)) { \
                     std::stringstream ss; \
                     ss << "Provided types " << ndt::make_funcproto(NSRC, src_tp, dst_tp) \
                        << " do not match the arrfunc proto " << af_self->func_proto; \

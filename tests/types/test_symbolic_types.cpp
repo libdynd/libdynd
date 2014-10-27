@@ -29,9 +29,9 @@ TEST(SymbolicTypes, CreateFuncProto) {
     EXPECT_FALSE(tp.is_pod());
     fpt = tp.tcast<funcproto_type>();
     ASSERT_EQ(3, fpt->get_narg());
-    EXPECT_EQ(ndt::make_type<float>(), fpt->get_param_type(0));
-    EXPECT_EQ(ndt::make_type<int32_t>(), fpt->get_param_type(1));
-    EXPECT_EQ(ndt::make_type<double>(), fpt->get_param_type(2));
+    EXPECT_EQ(ndt::make_type<float>(), fpt->get_arg_type(0));
+    EXPECT_EQ(ndt::make_type<int32_t>(), fpt->get_arg_type(1));
+    EXPECT_EQ(ndt::make_type<double>(), fpt->get_arg_type(2));
     EXPECT_EQ(ndt::make_type<int64_t>(), fpt->get_return_type());
     // Roundtripping through a string
     EXPECT_EQ(tp, ndt::type(tp.str()));
@@ -39,7 +39,7 @@ TEST(SymbolicTypes, CreateFuncProto) {
 
     // Dynamic type properties
     EXPECT_EQ(ndt::make_type<int64_t>(), tp.p("return_type").as<ndt::type>());
-    nd::array ptp = tp.p("param_types");
+    nd::array ptp = tp.p("arg_types");
     EXPECT_EQ(ndt::type("3 * type"), ptp.get_type());
     ASSERT_EQ(3, ptp.get_dim_size());
     EXPECT_EQ(ndt::make_type<float>(), ptp(0).as<ndt::type>());
@@ -56,14 +56,14 @@ TEST(SymbolicTypes, CreateFuncProto) {
     fpt = tp.tcast<funcproto_type>();
     ASSERT_EQ(1, fpt->get_narg());
     EXPECT_EQ(ndt::make_type<int16_t>(), fpt->get_return_type());
-    EXPECT_EQ(ndt::make_type<int32_t>(), fpt->get_param_type(0));
+    EXPECT_EQ(ndt::make_type<int32_t>(), fpt->get_arg_type(0));
 
     tp = ndt::make_funcproto<int16_t (int32_t, int64_t)>();
     fpt = tp.tcast<funcproto_type>();
     ASSERT_EQ(2, fpt->get_narg());
     EXPECT_EQ(ndt::make_type<int16_t>(), fpt->get_return_type());
-    EXPECT_EQ(ndt::make_type<int32_t>(), fpt->get_param_type(0));
-    EXPECT_EQ(ndt::make_type<int64_t>(), fpt->get_param_type(1));
+    EXPECT_EQ(ndt::make_type<int32_t>(), fpt->get_arg_type(0));
+    EXPECT_EQ(ndt::make_type<int64_t>(), fpt->get_arg_type(1));
 }
 
 TEST(SymbolicTypes, CreateTypeVar) {

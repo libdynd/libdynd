@@ -60,8 +60,8 @@ static bool supercedes(const nd::arrfunc &lhs, const nd::arrfunc &rhs)
   intptr_t nargs = lhs.get()->get_narg();
   if (nargs == rhs.get()->get_narg()) {
     for(intptr_t i = 0; i < nargs; ++i) {
-      const ndt::type &lpt = lhs.get()->get_param_type(i);
-      const ndt::type &rpt = rhs.get()->get_param_type(i);
+      const ndt::type &lpt = lhs.get()->get_arg_type(i);
+      const ndt::type &rpt = rhs.get()->get_arg_type(i);
       if (!can_implicitly_convert(lpt, rpt)) {
         return false;
       }
@@ -83,8 +83,8 @@ static bool toposort_edge(const nd::arrfunc &lhs, const nd::arrfunc &rhs)
   intptr_t nargs = lhs.get()->get_narg();
   if (nargs == rhs.get()->get_narg()) {
     for(intptr_t i = 0; i < nargs; ++i) {
-      const ndt::type &lpt = lhs.get()->get_param_type(i);
-      const ndt::type &rpt = rhs.get()->get_param_type(i);
+      const ndt::type &lpt = lhs.get()->get_arg_type(i);
+      const ndt::type &rpt = rhs.get()->get_arg_type(i);
       if (lpt.get_kind() >= rpt.get_kind() &&
           !can_implicitly_convert(lpt, rpt)) {
         return false;
@@ -107,8 +107,8 @@ static bool ambiguous(const nd::arrfunc &lhs, const nd::arrfunc &rhs)
   if (nargs == rhs.get()->get_narg()) {
     intptr_t lsupercount = 0, rsupercount = 0;
     for (intptr_t i = 0; i < nargs; ++i) {
-      const ndt::type &lpt = lhs.get()->get_param_type(i);
-      const ndt::type &rpt = rhs.get()->get_param_type(i);
+      const ndt::type &lpt = lhs.get()->get_arg_type(i);
+      const ndt::type &rpt = rhs.get()->get_arg_type(i);
       bool either = false;
       if (can_implicitly_convert(lpt, rpt)) {
         lsupercount++;
@@ -259,14 +259,14 @@ static intptr_t instantiate_multidispatch_af(
     intptr_t isrc, nsrc = af.get()->get_nsrc();
     for (isrc = 0; isrc < nsrc; ++isrc) {
       if (!can_implicitly_convert(src_tp[isrc],
-                                  af.get()->get_param_type(isrc))) {
+                                  af.get()->get_arg_type(isrc))) {
         break;
       }
     }
     if (isrc == nsrc) {
       intptr_t j;
       for (j = 0; j < nsrc; ++j) {
-        if (src_tp[j] != af.get()->get_param_type(j)) {
+        if (src_tp[j] != af.get()->get_arg_type(j)) {
           break;
         }
       }
@@ -277,7 +277,7 @@ static intptr_t instantiate_multidispatch_af(
       } else {
         return make_buffered_ckernel(
             af.get(), ckb, ckb_offset, dst_tp, dst_arrmeta, nsrc, src_tp,
-            af.get()->get_param_types(), src_arrmeta, kernreq, ectx);
+            af.get()->get_arg_types(), src_arrmeta, kernreq, ectx);
       }
     }
   }
@@ -300,7 +300,7 @@ resolve_multidispatch_dst_type(const arrfunc_type_data *af_self,
       intptr_t isrc;
       for (isrc = 0; isrc < nsrc; ++isrc) {
         if (!can_implicitly_convert(src_tp[isrc],
-                                    af.get()->get_param_type(isrc))) {
+                                    af.get()->get_arg_type(isrc))) {
           break;
         }
       }

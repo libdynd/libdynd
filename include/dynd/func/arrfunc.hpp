@@ -173,14 +173,14 @@ struct arrfunc_type_data {
     return func_proto.tcast<funcproto_type>()->get_narg();
   }
 
-  inline const ndt::type *get_param_types() const
+  inline const ndt::type *get_arg_types() const
   {
-    return func_proto.tcast<funcproto_type>()->get_param_types_raw();
+    return func_proto.tcast<funcproto_type>()->get_arg_types_raw();
   }
 
-  inline const ndt::type &get_param_type(intptr_t i) const
+  inline const ndt::type &get_arg_type(intptr_t i) const
   {
-    return get_param_types()[i];
+    return get_arg_types()[i];
   }
 
   inline const ndt::type &get_return_type() const
@@ -202,7 +202,7 @@ struct arrfunc_type_data {
            << " parameters, but received " << nsrc;
         throw std::invalid_argument(ss.str());
       }
-      const ndt::type *param_types = get_param_types();
+      const ndt::type *param_types = get_arg_types();
       std::map<nd::string, ndt::type> typevars;
       for (intptr_t i = 0; i != nsrc; ++i) {
         if (!ndt::pattern_match(src_tp[i].value_type(), param_types[i],

@@ -150,7 +150,7 @@ void dynd::make_chain_arrfunc(const nd::arrfunc &first,
   }
   out_af->free_func = &free_chain_arrfunc;
   out_af->func_proto = ndt::make_funcproto(
-      first.get()->func_proto.tcast<funcproto_type>()->get_param_types(),
+      first.get()->func_proto.tcast<funcproto_type>()->get_arg_types(),
       second.get()->func_proto.tcast<funcproto_type>()->get_return_type());
   if (buf_tp.get_type_id() == uninitialized_type_id) {
     //out_af->resolve_dst_type = &resolve_chain_dst_type;

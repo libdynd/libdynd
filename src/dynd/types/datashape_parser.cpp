@@ -394,7 +394,7 @@ static ndt::type parse_adapt_parameters(const char *&rbegin, const char *end,
   // TODO catch errors, convert them to datashape_parse_error so the position is
   // shown
   rbegin = begin;
-  return ndt::make_adapt(proto_tp.tcast<funcproto_type>()->get_param_type(0),
+  return ndt::make_adapt(proto_tp.tcast<funcproto_type>()->get_arg_type(0),
                          proto_tp.tcast<funcproto_type>()->get_return_type(),
                          adapt_op);
 }
@@ -870,8 +870,6 @@ static ndt::type parse_struct(const char *&rbegin, const char *end,
 // funcproto : tuple -> type
 static ndt::type parse_tuple_or_funcproto(const char *&rbegin, const char *end, map<string, ndt::type>& symtable)
 {
-    std::cout << "parse_tuple_or_funcproto" << std::endl;
-
     const char *begin = rbegin;
     vector<ndt::type> field_type_list;
     bool cprefixed = false;
