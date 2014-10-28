@@ -146,7 +146,7 @@ static size_t make_elwise_strided_dimension_expr_kernel_for_N(
   // Instantiate the elementwise handler
   return elwise_handler->instantiate(
       elwise_handler, ckb, ckb_offset, child_dst_tp, child_dst_arrmeta,
-      child_src_tp, child_src_arrmeta, kernel_request_strided, nd::array(), ectx);
+      child_src_tp, child_src_arrmeta, kernel_request_strided, ectx, nd::array(), nd::array());
 }
 
 inline static size_t make_elwise_strided_dimension_expr_kernel(
@@ -349,7 +349,7 @@ static size_t make_elwise_strided_or_var_to_strided_dimension_expr_kernel_for_N(
   // Instantiate the elementwise handler
   return elwise_handler->instantiate(
       elwise_handler, ckb, ckb_offset, child_dst_tp, child_dst_arrmeta,
-      child_src_tp, child_src_arrmeta, kernel_request_strided, nd::array(), ectx);
+      child_src_tp, child_src_arrmeta, kernel_request_strided, ectx, nd::array(), nd::array());
 }
 
 static size_t make_elwise_strided_or_var_to_strided_dimension_expr_kernel(
@@ -622,7 +622,7 @@ static size_t make_elwise_strided_or_var_to_var_dimension_expr_kernel_for_N(
   // All the types matched, so instantiate the elementwise handler
   return elwise_handler->instantiate(
       elwise_handler, ckb, ckb_offset, child_dst_tp, child_dst_arrmeta,
-      child_src_tp, child_src_arrmeta, kernel_request_strided, nd::array(), ectx);
+      child_src_tp, child_src_arrmeta, kernel_request_strided, ectx, nd::array(), nd::array());
 }
 
 static size_t make_elwise_strided_or_var_to_var_dimension_expr_kernel(
@@ -671,7 +671,7 @@ size_t dynd::make_lifted_expr_ckernel(
     const eval::eval_context *ectx)
 
 {
-  intptr_t src_count = elwise_handler->get_param_count();
+  intptr_t src_count = elwise_handler->get_nsrc();
 
   // Check if no lifting is required
   if (dst_ndim == 0) {
@@ -685,7 +685,7 @@ size_t dynd::make_lifted_expr_ckernel(
       // No dimensions to lift, call the elementwise instantiate directly
       return elwise_handler->instantiate(elwise_handler, ckb, ckb_offset,
                                          dst_tp, dst_arrmeta, src_tp,
-                                         src_arrmeta, kernreq, nd::array(), ectx);
+                                         src_arrmeta, kernreq, ectx, nd::array(), nd::array());
     } else {
       stringstream ss;
       ss << "Trying to broadcast " << src_ndim[i] << " dimensions of "

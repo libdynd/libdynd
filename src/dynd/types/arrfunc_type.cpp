@@ -209,9 +209,9 @@ static array_preamble *function___call__(const array_preamble *params, void *DYN
     nargs -= 1;
 
     // Validate the number of arguments
-    if (nargs != proto->get_param_count() + 1) {
+    if (nargs != proto->get_narg() + 1) {
         stringstream ss;
-        ss << "arrfunc expected " << (proto->get_param_count() + 1) << " arguments, got " << nargs;
+        ss << "arrfunc expected " << (proto->get_narg() + 1) << " arguments, got " << nargs;
         throw runtime_error(ss.str());
     }
     // Instantiate the ckernel
@@ -224,10 +224,11 @@ static array_preamble *function___call__(const array_preamble *params, void *DYN
         dynd_arrmeta[i] = args[i + 1].get_arrmeta();
     }
     ckernel_builder ckb;
-    af->instantiate(af, &ckb, 0, args[0].get_type(),
-                         args[0].get_arrmeta(), src_tp,
-                         dynd_arrmeta, kernel_request_single,
-                         nd::array(), &eval::default_eval_context);
+    af->instantiate(af, &ckb, 0,
+                         args[0].get_type(), args[0].get_arrmeta(),
+                         src_tp, dynd_arrmeta,
+                         kernel_request_single, &eval::default_eval_context,
+                         nd::array(), nd::array());
     // Call the ckernel
     expr_single_t usngo = ckb.get()->get_function<expr_single_t>();
     char *in_ptrs[max_args];

@@ -57,11 +57,11 @@ static bool can_implicitly_convert(const ndt::type &src, const ndt::type &dst)
  */
 static bool supercedes(const nd::arrfunc &lhs, const nd::arrfunc &rhs)
 {
-  intptr_t nargs = lhs.get()->get_param_count();
-  if (nargs == rhs.get()->get_param_count()) {
+  intptr_t nargs = lhs.get()->get_narg();
+  if (nargs == rhs.get()->get_narg()) {
     for(intptr_t i = 0; i < nargs; ++i) {
-      const ndt::type &lpt = lhs.get()->get_param_type(i);
-      const ndt::type &rpt = rhs.get()->get_param_type(i);
+      const ndt::type &lpt = lhs.get()->get_arg_type(i);
+      const ndt::type &rpt = rhs.get()->get_arg_type(i);
       if (!can_implicitly_convert(lpt, rpt)) {
         return false;
       }
@@ -80,11 +80,11 @@ static bool supercedes(const nd::arrfunc &lhs, const nd::arrfunc &rhs)
  */
 static bool toposort_edge(const nd::arrfunc &lhs, const nd::arrfunc &rhs)
 {
-  intptr_t nargs = lhs.get()->get_param_count();
-  if (nargs == rhs.get()->get_param_count()) {
+  intptr_t nargs = lhs.get()->get_narg();
+  if (nargs == rhs.get()->get_narg()) {
     for(intptr_t i = 0; i < nargs; ++i) {
-      const ndt::type &lpt = lhs.get()->get_param_type(i);
-      const ndt::type &rpt = rhs.get()->get_param_type(i);
+      const ndt::type &lpt = lhs.get()->get_arg_type(i);
+      const ndt::type &rpt = rhs.get()->get_arg_type(i);
       if (lpt.get_kind() >= rpt.get_kind() &&
           !can_implicitly_convert(lpt, rpt)) {
         return false;
@@ -103,12 +103,12 @@ static bool toposort_edge(const nd::arrfunc &lhs, const nd::arrfunc &rhs)
  */
 static bool ambiguous(const nd::arrfunc &lhs, const nd::arrfunc &rhs)
 {
-  intptr_t nargs = lhs.get()->get_param_count();
-  if (nargs == rhs.get()->get_param_count()) {
+  intptr_t nargs = lhs.get()->get_narg();
+  if (nargs == rhs.get()->get_narg()) {
     intptr_t lsupercount = 0, rsupercount = 0;
     for (intptr_t i = 0; i < nargs; ++i) {
-      const ndt::type &lpt = lhs.get()->get_param_type(i);
-      const ndt::type &rpt = rhs.get()->get_param_type(i);
+      const ndt::type &lpt = lhs.get()->get_arg_type(i);
+      const ndt::type &rpt = rhs.get()->get_arg_type(i);
       bool either = false;
       if (can_implicitly_convert(lpt, rpt)) {
         lsupercount++;
@@ -250,33 +250,34 @@ static intptr_t instantiate_multidispatch_af(
     const arrfunc_type_data *af_self, dynd::ckernel_builder *ckb,
     intptr_t ckb_offset, const ndt::type &dst_tp, const char *dst_arrmeta,
     const ndt::type *src_tp, const char *const *src_arrmeta,
-    kernel_request_t kernreq, const nd::array &aux, const eval::eval_context *ectx)
+    kernel_request_t kernreq, const eval::eval_context *ectx,
+    const nd::array &args, const nd::array &kwds)
 {
   const vector<nd::arrfunc> *icd = af_self->get_data_as<vector<nd::arrfunc> >();
   for (intptr_t i = 0; i < (intptr_t)icd->size(); ++i) {
     const nd::arrfunc &af = (*icd)[i];
-    intptr_t isrc, nsrc = af.get()->get_param_count();
+    intptr_t isrc, nsrc = af.get()->get_nsrc();
     for (isrc = 0; isrc < nsrc; ++isrc) {
       if (!can_implicitly_convert(src_tp[isrc],
-                                  af.get()->get_param_type(isrc))) {
+                                  af.get()->get_arg_type(isrc))) {
         break;
       }
     }
     if (isrc == nsrc) {
       intptr_t j;
       for (j = 0; j < nsrc; ++j) {
-        if (src_tp[j] != af.get()->get_param_type(j)) {
+        if (src_tp[j] != af.get()->get_arg_type(j)) {
           break;
         }
       }
       if (j == nsrc) {
         return af.get()->instantiate(af.get(), ckb, ckb_offset, dst_tp,
-                                     dst_arrmeta, src_tp, src_arrmeta, kernreq,
-                                     aux, ectx);
+                                     dst_arrmeta, src_tp, src_arrmeta, kernreq, ectx,
+                                     args, kwds);
       } else {
         return make_buffered_ckernel(
             af.get(), ckb, ckb_offset, dst_tp, dst_arrmeta, nsrc, src_tp,
-            af.get()->get_param_types(), src_arrmeta, kernreq, ectx);
+            af.get()->get_arg_types(), src_arrmeta, kernreq, ectx);
       }
     }
   }
@@ -287,19 +288,19 @@ static intptr_t instantiate_multidispatch_af(
 }
 
 static int
-resolve_multidispatch_dst_type(const arrfunc_type_data *af_self, intptr_t nsrc,
-                               const ndt::type *src_tp,
-                               const nd::array &DYND_UNUSED(dyn_params),
-                               int throw_on_error, ndt::type &out_dst_tp)
+resolve_multidispatch_dst_type(const arrfunc_type_data *af_self,
+                               intptr_t nsrc, const ndt::type *src_tp,
+                               int throw_on_error, ndt::type &out_dst_tp,
+                               const nd::array &DYND_UNUSED(args), const nd::array &DYND_UNUSED(kwds))
 {
   const vector<nd::arrfunc> *icd = af_self->get_data_as<vector<nd::arrfunc> >();
   for (intptr_t i = 0; i < (intptr_t)icd->size(); ++i) {
     const nd::arrfunc &af = (*icd)[i];
-    if (nsrc == af.get()->get_param_count()) {
+    if (nsrc == af.get()->get_nsrc()) {
       intptr_t isrc;
       for (isrc = 0; isrc < nsrc; ++isrc) {
         if (!can_implicitly_convert(src_tp[isrc],
-                                    af.get()->get_param_type(isrc))) {
+                                    af.get()->get_arg_type(isrc))) {
           break;
         }
       }
@@ -335,9 +336,9 @@ void dynd::make_multidispatch_arrfunc(arrfunc_type_data *out_af, intptr_t naf,
         "Require one or more functions to create a multidispatch arrfunc");
   }
   // Number of parameters must be the same across all
-  intptr_t nargs = af[0].get()->get_param_count();
+  intptr_t nargs = af[0].get()->get_narg();
   for (intptr_t i = 1; i < naf; ++i) {
-    if (nargs != af[i].get()->get_param_count()) {
+    if (nargs != af[i].get()->get_narg()) {
       stringstream ss;
       ss << "All child arrfuncs must have the same number of arguments to "
             "generate a multidispatch arrfunc, differing: "

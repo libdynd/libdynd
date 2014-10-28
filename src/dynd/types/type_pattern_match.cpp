@@ -98,8 +98,8 @@ static bool recursive_match(const ndt::type &concrete, const ndt::type &pattern,
               concrete.tcast<base_memory_type>()->get_storage_type(),
               pattern.tcast<base_memory_type>()->get_storage_type(), typevars);
         case funcproto_type_id:
-          if (concrete.tcast<funcproto_type>()->get_param_count() ==
-              pattern.tcast<funcproto_type>()->get_param_count()) {
+          if (concrete.tcast<funcproto_type>()->get_narg() ==
+              pattern.tcast<funcproto_type>()->get_narg()) {
             // First match the return type
             if (!recursive_match(
                     concrete.tcast<funcproto_type>()->get_return_type(),
@@ -109,11 +109,11 @@ static bool recursive_match(const ndt::type &concrete, const ndt::type &pattern,
             }
             // Then match all the parameters
             size_t param_count =
-                concrete.tcast<funcproto_type>()->get_param_count();
+                concrete.tcast<funcproto_type>()->get_narg();
             for (size_t i = 0; i != param_count; ++i) {
               if (!recursive_match(
-                      concrete.tcast<funcproto_type>()->get_param_type(i),
-                      pattern.tcast<funcproto_type>()->get_param_type(i),
+                      concrete.tcast<funcproto_type>()->get_arg_type(i),
+                      pattern.tcast<funcproto_type>()->get_arg_type(i),
                       typevars)) {
                 return false;
               }

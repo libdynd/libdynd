@@ -377,7 +377,7 @@ static ndt::type parse_adapt_parameters(const char *&rbegin, const char *end,
   const char *saved_begin = begin;
   ndt::type proto_tp = parse_datashape(begin, end, symtable);
   if (proto_tp.is_null() || proto_tp.get_type_id() != funcproto_type_id ||
-      proto_tp.tcast<funcproto_type>()->get_param_count() != 1) {
+      proto_tp.tcast<funcproto_type>()->get_narg() != 1) {
     throw datashape_parse_error(saved_begin, "expected a unary function signature");
   }
   if (!parse_token_ds(begin, end, ',')) {
@@ -394,7 +394,7 @@ static ndt::type parse_adapt_parameters(const char *&rbegin, const char *end,
   // TODO catch errors, convert them to datashape_parse_error so the position is
   // shown
   rbegin = begin;
-  return ndt::make_adapt(proto_tp.tcast<funcproto_type>()->get_param_type(0),
+  return ndt::make_adapt(proto_tp.tcast<funcproto_type>()->get_arg_type(0),
                          proto_tp.tcast<funcproto_type>()->get_return_type(),
                          adapt_op);
 }
@@ -873,6 +873,7 @@ static ndt::type parse_tuple_or_funcproto(const char *&rbegin, const char *end, 
     const char *begin = rbegin;
     vector<ndt::type> field_type_list;
     bool cprefixed = false;
+    intptr_t semicolon_pos = -1;
 
     if (!parse_token_ds(begin, end, '(')) {
         if (parse_token_ds(begin, end, "c(")) {
@@ -895,10 +896,12 @@ static ndt::type parse_tuple_or_funcproto(const char *&rbegin, const char *end, 
                         parse_token_ds(begin, end, ')')) {
                     break;
                 }
+            } else if (parse_token_ds(begin, end, ';')) {
+                semicolon_pos = field_type_list.size();
             } else if (parse_token_ds(begin, end, ')')) {
                 break;
             } else {
-                throw datashape_parse_error(begin, "expected ',' or ')'");
+                throw datashape_parse_error(begin, "expected ',', ';' or ')'");
             }
         }
     }
@@ -918,7 +921,11 @@ static ndt::type parse_tuple_or_funcproto(const char *&rbegin, const char *end, 
             throw datashape_parse_error(begin, "expected function prototype return type");
         }
         rbegin = begin;
-        return ndt::make_funcproto(field_type_list, return_type);
+        if (semicolon_pos == -1) {
+            return ndt::make_funcproto(field_type_list, return_type);
+        } else {
+            return ndt::make_funcproto(field_type_list, return_type, field_type_list.size() - semicolon_pos);
+        }
     }
 }
 

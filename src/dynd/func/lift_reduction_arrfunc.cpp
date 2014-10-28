@@ -37,10 +37,10 @@ static void delete_lifted_reduction_arrfunc_data(arrfunc_type_data *self_af)
 
 static intptr_t instantiate_lifted_reduction_arrfunc_data(
     const arrfunc_type_data *af_self, dynd::ckernel_builder *ckb, intptr_t ckb_offset,
-    const ndt::type &dst_tp, const char *dst_arrmeta, const ndt::type *src_tp,
-    const char *const *src_arrmeta, kernel_request_t kernreq,
-    const nd::array &DYND_UNUSED(aux), const eval::eval_context *ectx)
-
+    const ndt::type &dst_tp, const char *dst_arrmeta,
+    const ndt::type *src_tp, const char *const *src_arrmeta,
+    kernel_request_t kernreq, const eval::eval_context *ectx,
+    const nd::array &DYND_UNUSED(args), const nd::array &DYND_UNUSED(kwds))
 {
   lifted_reduction_arrfunc_data *data =
       *af_self->get_data_as<lifted_reduction_arrfunc_data *>();
@@ -71,11 +71,11 @@ void dynd::lift_reduction_arrfunc(arrfunc_type_data *out_ar,
         throw runtime_error("lift_reduction_arrfunc: 'elwise_reduction' may not be empty");
     }
     const arrfunc_type_data *elwise_reduction = elwise_reduction_arr.get();
-    if (elwise_reduction->get_param_count() != 1 &&
-            !(elwise_reduction->get_param_count() == 2 &&
-              elwise_reduction->get_param_type(0) ==
-                  elwise_reduction->get_param_type(1) &&
-              elwise_reduction->get_param_type(0) ==
+    if (elwise_reduction->get_nsrc() != 1 &&
+            !(elwise_reduction->get_nsrc() == 2 &&
+              elwise_reduction->get_arg_type(0) ==
+                  elwise_reduction->get_arg_type(1) &&
+              elwise_reduction->get_arg_type(0) ==
                   elwise_reduction->get_return_type())) {
         stringstream ss;
         ss << "lift_reduction_arrfunc: 'elwise_reduction' must contain a"

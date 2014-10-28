@@ -714,7 +714,7 @@ static void check_dst_initialization(const arrfunc_type_data *dst_initialization
         ss << ", expected " << dst_tp;
         throw type_error(ss.str());
     }
-    if (dst_initialization->get_param_type(0) != src_tp) {
+    if (dst_initialization->get_arg_type(0) != src_tp) {
         stringstream ss;
         ss << "make_lifted_reduction_ckernel: dst initialization ckernel ";
         ss << "src type is " << dst_initialization->get_return_type();
@@ -797,8 +797,8 @@ static size_t make_strided_inner_reduction_dimension_kernel(
   e->size = src_size;
   // Validate that the provided arrfuncs are unary operations,
   // and have the correct types
-  if (elwise_reduction->get_param_count() != 1 &&
-      elwise_reduction->get_param_count() != 2) {
+  if (elwise_reduction->get_nsrc() != 1 &&
+      elwise_reduction->get_nsrc() != 2) {
     stringstream ss;
     ss << "make_lifted_reduction_ckernel: elwise reduction ckernel ";
     ss << "funcproto must be unary or a binary expr with all equal types";
@@ -811,7 +811,7 @@ static size_t make_strided_inner_reduction_dimension_kernel(
     ss << ", expected " << dst_tp;
     throw type_error(ss.str());
   }
-  if (elwise_reduction->get_param_type(0) != src_tp) {
+  if (elwise_reduction->get_arg_type(0) != src_tp) {
     stringstream ss;
     ss << "make_lifted_reduction_ckernel: elwise reduction ckernel ";
     ss << "src type is " << elwise_reduction->get_return_type();
@@ -821,18 +821,18 @@ static size_t make_strided_inner_reduction_dimension_kernel(
   if (dst_initialization != NULL) {
     check_dst_initialization(dst_initialization, dst_tp, src_tp);
   }
-  if (elwise_reduction->get_param_count() == 2) {
+  if (elwise_reduction->get_nsrc() == 2) {
     ckb_offset = kernels::wrap_binary_as_unary_reduction_ckernel(
         ckb, ckb_offset, right_associative, kernel_request_strided);
     ndt::type src_tp_doubled[2] = {src_tp, src_tp};
     const char *src_arrmeta_doubled[2] = {src_arrmeta, src_arrmeta};
     ckb_offset = elwise_reduction->instantiate(
         elwise_reduction, ckb, ckb_offset, dst_tp, dst_arrmeta, src_tp_doubled,
-        src_arrmeta_doubled, kernel_request_strided, nd::array(), ectx);
+        src_arrmeta_doubled, kernel_request_strided, ectx, nd::array(), nd::array());
   } else {
     ckb_offset = elwise_reduction->instantiate(
         elwise_reduction, ckb, ckb_offset, dst_tp, dst_arrmeta, &src_tp,
-        &src_arrmeta, kernel_request_strided, nd::array(), ectx);
+        &src_arrmeta, kernel_request_strided, ectx, nd::array(), nd::array());
   }
   // Make sure there's capacity for the next ckernel
   ckb->ensure_capacity(ckb_offset);
@@ -842,7 +842,7 @@ static size_t make_strided_inner_reduction_dimension_kernel(
   if (dst_initialization != NULL) {
     ckb_offset = dst_initialization->instantiate(
         dst_initialization, ckb, ckb_offset, dst_tp, dst_arrmeta, &src_tp,
-        &src_arrmeta, kernel_request_single, nd::array(), ectx);
+        &src_arrmeta, kernel_request_single, ectx, nd::array(), nd::array());
   } else if (reduction_identity.is_null()) {
     ckb_offset =
         make_assignment_kernel(ckb, ckb_offset, dst_tp, dst_arrmeta, src_tp,
@@ -929,8 +929,8 @@ static size_t make_strided_inner_broadcast_dimension_kernel(
   e->size = src_size;
   // Validate that the provided arrfuncs are unary operations,
   // and have the correct types
-  if (elwise_reduction->get_param_count() != 1 &&
-      elwise_reduction->get_param_count() != 2) {
+  if (elwise_reduction->get_nsrc() != 1 &&
+      elwise_reduction->get_nsrc() != 2) {
     stringstream ss;
     ss << "make_lifted_reduction_ckernel: elwise reduction ckernel ";
     ss << "funcproto must be unary or a binary expr with all equal types";
@@ -943,7 +943,7 @@ static size_t make_strided_inner_broadcast_dimension_kernel(
     ss << ", expected " << dst_tp;
     throw type_error(ss.str());
   }
-  if (elwise_reduction->get_param_type(0) != src_tp) {
+  if (elwise_reduction->get_arg_type(0) != src_tp) {
     stringstream ss;
     ss << "make_lifted_reduction_ckernel: elwise reduction ckernel ";
     ss << "src type is " << elwise_reduction->get_return_type();
@@ -953,18 +953,18 @@ static size_t make_strided_inner_broadcast_dimension_kernel(
   if (dst_initialization != NULL) {
     check_dst_initialization(dst_initialization, dst_tp, src_tp);
   }
-  if (elwise_reduction->get_param_count() == 2) {
+  if (elwise_reduction->get_nsrc() == 2) {
     ckb_offset = kernels::wrap_binary_as_unary_reduction_ckernel(
         ckb, ckb_offset, right_associative, kernel_request_strided);
     ndt::type src_tp_doubled[2] = {src_tp, src_tp};
     const char *src_arrmeta_doubled[2] = {src_arrmeta, src_arrmeta};
     ckb_offset = elwise_reduction->instantiate(
         elwise_reduction, ckb, ckb_offset, dst_tp, dst_arrmeta, src_tp_doubled,
-        src_arrmeta_doubled, kernel_request_strided, nd::array(), ectx);
+        src_arrmeta_doubled, kernel_request_strided, ectx, nd::array(), nd::array());
   } else {
     ckb_offset = elwise_reduction->instantiate(
         elwise_reduction, ckb, ckb_offset, dst_tp, dst_arrmeta, &src_tp,
-        &src_arrmeta, kernel_request_strided, nd::array(), ectx);
+        &src_arrmeta, kernel_request_strided, ectx, nd::array(), nd::array());
   }
   // Make sure there's capacity for the next ckernel
   ckb->ensure_capacity(ckb_offset);
@@ -974,7 +974,7 @@ static size_t make_strided_inner_broadcast_dimension_kernel(
   if (dst_initialization != NULL) {
     ckb_offset = dst_initialization->instantiate(
         dst_initialization, ckb, ckb_offset, dst_tp, dst_arrmeta, &src_tp,
-        &src_arrmeta, kernel_request_strided, nd::array(), ectx);
+        &src_arrmeta, kernel_request_strided, ectx, nd::array(), nd::array());
   } else if (reduction_identity.is_null()) {
     ckb_offset =
         make_assignment_kernel(ckb, ckb_offset, dst_tp, dst_arrmeta, src_tp,
@@ -1010,7 +1010,7 @@ size_t dynd::make_lifted_reduction_ckernel(
             if (dst_initialization != NULL) {
                 return dst_initialization->instantiate(
                     dst_initialization, ckb, ckb_offset, dst_tp,
-                    dst_arrmeta, &src_tp, &src_arrmeta, kernreq, nd::array(), ectx);
+                    dst_arrmeta, &src_tp, &src_arrmeta, kernreq, ectx, nd::array(), nd::array());
             } else if (reduction_identity.is_null()) {
                 return make_assignment_kernel(ckb, ckb_offset, dst_tp,
                                               dst_arrmeta, src_tp, src_arrmeta,
@@ -1036,7 +1036,7 @@ size_t dynd::make_lifted_reduction_ckernel(
     }
 
     ndt::type dst_el_tp = elwise_reduction->get_return_type();
-    ndt::type src_el_tp = elwise_reduction->get_param_type(0);
+    ndt::type src_el_tp = elwise_reduction->get_arg_type(0);
 
     // This is the number of dimensions being processed by the reduction
     if (reduction_ndim != src_tp.get_ndim() - src_el_tp.get_ndim()) {

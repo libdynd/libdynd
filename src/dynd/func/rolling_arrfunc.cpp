@@ -115,8 +115,9 @@ static void free_rolling_arrfunc_data(arrfunc_type_data *self_af) {
 
 static int resolve_rolling_dst_type(const arrfunc_type_data *af_self,
                                     intptr_t nsrc, const ndt::type *src_tp,
-                                    const nd::array &dyn_params,
-                                    int throw_on_error, ndt::type &out_dst_tp)
+                                    int throw_on_error, ndt::type &out_dst_tp,
+                                    const nd::array &args, const nd::array &kwds)
+
 {
   if (nsrc != 1) {
     if (throw_on_error) {
@@ -136,8 +137,9 @@ static int resolve_rolling_dst_type(const arrfunc_type_data *af_self,
   if (child_af->resolve_dst_type) {
     ndt::type child_src_tp = ndt::make_fixed_dim(
         data->window_size, src_tp[0].get_type_at_dimension(NULL, 1));
-    if (!child_af->resolve_dst_type(child_af, 1, &child_src_tp, dyn_params,
-                                    throw_on_error, child_dst_tp)) {
+    if (!child_af->resolve_dst_type(child_af, 1, &child_src_tp,
+                                    throw_on_error, child_dst_tp,
+                                    args, kwds)) {
       return 0;
     }
   }
@@ -158,11 +160,12 @@ static int resolve_rolling_dst_type(const arrfunc_type_data *af_self,
 
 // TODO This should handle both strided and var cases
 static intptr_t
-instantiate_strided(const arrfunc_type_data *af_self, dynd::ckernel_builder *ckb,
-                    intptr_t ckb_offset, const ndt::type &dst_tp,
-                    const char *dst_arrmeta, const ndt::type *src_tp,
-                    const char *const *src_arrmeta, kernel_request_t kernreq,
-                    const nd::array &aux, const eval::eval_context *ectx)
+instantiate_strided(const arrfunc_type_data *af_self,
+                    dynd::ckernel_builder *ckb, intptr_t ckb_offset,
+                    const ndt::type &dst_tp, const char *dst_arrmeta,
+                    const ndt::type *src_tp, const char *const *src_arrmeta,
+                    kernel_request_t kernreq, const eval::eval_context *ectx,
+                    const nd::array &args, const nd::array &kwds)
 {
     typedef strided_rolling_ck self_type;
     rolling_arrfunc_data *data = *af_self->get_data_as<rolling_arrfunc_data *>();
@@ -224,7 +227,7 @@ instantiate_strided(const arrfunc_type_data *af_self, dynd::ckernel_builder *ckb
     return window_af->instantiate(
         window_af, ckb, ckb_offset, dst_el_tp, dst_el_arrmeta,
         &self->m_src_winop_meta.get_type(), &src_winop_meta,
-        kernel_request_strided, aux, ectx);
+        kernel_request_strided, ectx, args, kwds);
 }
 
 void dynd::make_rolling_arrfunc(arrfunc_type_data *out_af,
@@ -236,13 +239,13 @@ void dynd::make_rolling_arrfunc(arrfunc_type_data *out_af,
         throw invalid_argument("make_rolling_arrfunc() 'window_op' cannot be null");
     }
     const arrfunc_type_data *window_af = window_op.get();
-    if (window_af->get_param_count() != 1) {
+    if (window_af->get_nsrc() != 1) {
         stringstream ss;
         ss << "To make a rolling window arrfunc, an operation with one "
               "argument is required, got " << window_af->func_proto;
         throw invalid_argument(ss.str());
     }
-    const ndt::type &window_src_tp = window_af->get_param_type(0);
+    const ndt::type &window_src_tp = window_af->get_arg_type(0);
     if (window_src_tp.get_ndim() < 1) {
         stringstream ss;
         ss << "To make a rolling window arrfunc, an operation with which "
