@@ -3,8 +3,7 @@
 // BSD 2-Clause License, see LICENSE.txt
 //
 
-#ifndef _DYND__DTYPE_ASSIGN_HPP_
-#define _DYND__DTYPE_ASSIGN_HPP_
+#pragma once
 
 #include <utility>
 #include <iostream>
@@ -82,5 +81,3 @@ typed_data_assign(const ndt::type &dst_tp, const char *dst_arrmeta,
                   const eval::eval_context *ectx = &eval::default_eval_context);
 
 } // namespace dynd
-
-#endif // _DYND__DTYPE_ASSIGN_HPP_

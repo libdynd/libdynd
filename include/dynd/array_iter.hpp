@@ -3,8 +3,7 @@
 // BSD 2-Clause License, see LICENSE.txt
 //
 
-#ifndef _NDOBJECT_ITER_HPP_
-#define _NDOBJECT_ITER_HPP_
+#pragma once
 
 #include <algorithm>
 
@@ -610,5 +609,3 @@ public:
 };
 
 } // namespace dynd
-
-#endif // _NDOBJECT_ITER_HPP_

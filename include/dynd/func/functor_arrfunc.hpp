@@ -3,8 +3,7 @@
 // BSD 2-Clause License, see LICENSE.txt
 //
 
-#ifndef DYND__FUNC_FUNCTOR_ARRFUNC_HPP
-#define DYND__FUNC_FUNCTOR_ARRFUNC_HPP
+#pragma once
 
 #include <dynd/func/arrfunc.hpp>
 #include <dynd/kernels/functor_kernels.hpp>
@@ -249,5 +248,3 @@ arrfunc make_functor_arrfunc(const obj_type &obj, mem_func_type mem_func, bool c
 }
 
 }} // namespace dynd::nd
-
-#endif // DYND__FUNC_FUNCTOR_ARRFUNC_HPP

@@ -3,8 +3,7 @@
 // BSD 2-Clause License, see LICENSE.txt
 //
 
-#ifndef _DYND__ELWISE_EXPR_KERNELS_HPP_
-#define _DYND__ELWISE_EXPR_KERNELS_HPP_
+#pragma once
 
 #include <dynd/kernels/expr_kernel_generator.hpp>
 
@@ -17,5 +16,3 @@ size_t make_elwise_dimension_expr_kernel(ckernel_builder *ckb, intptr_t ckb_offs
                 const expr_kernel_generator *elwise_handler);
 
 } // namespace dynd
-
-#endif // _DYND__ELWISE_EXPR_KERNELS_HPP_

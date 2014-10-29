@@ -3,8 +3,7 @@
 // BSD 2-Clause License, see LICENSE.txt
 //
 
-#ifndef _DYND__JSON_PARSER_HPP_
-#define _DYND__JSON_PARSER_HPP_
+#pragma once
 
 #include <dynd/array.hpp>
 
@@ -91,6 +90,3 @@ parse_json(const char (&dt)[M], const char (&json)[N],
 }
 
 } // namespace dynd
-
-#endif // _DYND__JSON_PARSER_HPP_
-

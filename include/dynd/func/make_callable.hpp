@@ -3,8 +3,7 @@
 // BSD 2-Clause License, see LICENSE.txt
 //
 
-#ifndef _DYND__MAKE_CALLABLE_HPP_
-#define _DYND__MAKE_CALLABLE_HPP_
+#pragma once
 
 #include <dynd/func/callable.hpp>
 #include <dynd/types/cstruct_type.hpp>
@@ -505,5 +504,3 @@ inline callable make_callable(FN *f, const char *name0, const char *name1, const
 }
 
 }} // namespace dynd::gfunc
-
-#endif // _DYND__MAKE_CALLABLE_HPP_

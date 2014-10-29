@@ -3,8 +3,7 @@
 // BSD 2-Clause License, see LICENSE.txt
 //
 
-#ifndef _DYND__ELLIPSIS_DIM_TYPE_HPP_
-#define _DYND__ELLIPSIS_DIM_TYPE_HPP_
+#pragma once
 
 #include <vector>
 #include <string>
@@ -81,5 +80,3 @@ namespace ndt {
 } // namespace ndt
 
 } // namespace dynd
-
-#endif // _DYND__ELLIPSIS_DIM_TYPE_HPP_

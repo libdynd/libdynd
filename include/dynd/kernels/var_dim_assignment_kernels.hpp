@@ -3,8 +3,7 @@
 // BSD 2-Clause License, see LICENSE.txt
 //
 
-#ifndef _DYND__VAR_DIM_ASSIGNMENT_KERNELS_HPP_
-#define _DYND__VAR_DIM_ASSIGNMENT_KERNELS_HPP_
+#pragma once
 
 #include <dynd/type.hpp>
 #include <dynd/kernels/assignment_kernels.hpp>
@@ -49,5 +48,3 @@ size_t make_var_to_fixed_dim_assignment_kernel(
     kernel_request_t kernreq, const eval::eval_context *ectx);
 
 } // namespace dynd
-
-#endif // _DYND__VAR_DIM_ASSIGNMENT_KERNELS_HPP_

@@ -12,8 +12,7 @@
  * of cycle collection.
  */
 
-#ifndef DYND__TYPES_NDARRAYARG_TYPE_HPP
-#define DYND__TYPES_NDARRAYARG_TYPE_HPP
+#pragma once
 
 #include <dynd/array.hpp>
 #include <dynd/types/static_type_instances.hpp>
@@ -79,6 +78,3 @@ namespace ndt {
 } // namespace ndt
 
 } // namespace dynd
-
-#endif // DYND__TYPES_NDARRAYARG_TYPE_HPP
- 

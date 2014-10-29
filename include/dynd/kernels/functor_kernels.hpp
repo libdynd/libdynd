@@ -3,8 +3,7 @@
 // BSD 2-Clause License, see LICENSE.txt
 //
 
-#ifndef DYND__KERNELS_FUNCTOR_KERNELS_HPP
-#define DYND__KERNELS_FUNCTOR_KERNELS_HPP
+#pragma once
 
 #include <dynd/strided_vals.hpp>
 #include <dynd/kernels/ckernel_common_functions.hpp>
@@ -330,5 +329,3 @@ DYND_PP_JOIN_MAP(FUNCTOR_CK, (), DYND_PP_RANGE(DYND_PP_INC(DYND_ARG_MAX)))
 #undef PASS
 
 } // namespace dynd
-
-#endif

@@ -3,8 +3,7 @@
 // BSD 2-Clause License, see LICENSE.txt
 //
 
-#ifndef _DYND__PP_LOGICAL_HPP_
-#define _DYND__PP_LOGICAL_HPP_
+#pragma once
 
 #include <dynd/pp/comparison.hpp>
 #include <dynd/pp/token.hpp>
@@ -30,5 +29,3 @@
 #define DYND_PP_OR_1_1 1
 
 #define DYND_PP_XOR(A, B) DYND_PP_EQ(DYND_PP_NOT(A), DYND_PP_BOOL(B))
-
-#endif

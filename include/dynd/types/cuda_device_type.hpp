@@ -3,8 +3,7 @@
 // BSD 2-Clause License, see LICENSE.txt
 //
 
-#ifndef _DYND__CUDA_DEVICE_TYPE_HPP_
-#define _DYND__CUDA_DEVICE_TYPE_HPP_
+#pragma once
 
 #ifdef DYND_CUDA
 
@@ -56,5 +55,3 @@ namespace ndt {
 } // namespace dynd
 
 #endif // DYND_CUDA
-
-#endif // _DYND__CUDA_DEVICE_TYPE_HPP_

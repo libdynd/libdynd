@@ -3,8 +3,7 @@
 // BSD 2-Clause License, see LICENSE.txt
 //
 
-#ifndef DYND__FUNC_ARRFUNC_REGISTRY_HPP
-#define DYND__FUNC_ARRFUNC_REGISTRY_HPP
+#pragma once
 
 #include <dynd/func/arrfunc.hpp>
 
@@ -34,5 +33,3 @@ void arrfunc_registry_cleanup();
 } // namespace init
 
 } // namespace dynd
-
-#endif // DYND__FUNC_ARRFUNC_REGISTRY_HPP

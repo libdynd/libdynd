@@ -3,8 +3,7 @@
 // BSD 2-Clause License, see LICENSE.txt
 //
 
-#ifndef _DYND__STRUCT_ASSIGNMENT_KERNELS_HPP_
-#define _DYND__STRUCT_ASSIGNMENT_KERNELS_HPP_
+#pragma once
 
 #include <dynd/types/struct_type.hpp>
 #include <dynd/types/cstruct_type.hpp>
@@ -101,5 +100,3 @@ size_t make_broadcast_to_struct_assignment_kernel(
     kernel_request_t kernreq, const eval::eval_context *ectx);
 
 } // namespace dynd
-
-#endif // _DYND__STRUCT_ASSIGNMENT_KERNELS_HPP_

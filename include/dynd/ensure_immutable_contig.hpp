@@ -3,8 +3,7 @@
 // BSD 2-Clause License, see LICENSE.txt
 //
 
-#ifndef DYND_ENSURE_IMMUTABLE_CONTIG_HPP
-#define DYND_ENSURE_IMMUTABLE_CONTIG_HPP
+#pragma once
 
 #include <dynd/array.hpp>
 #include <dynd/types/fixed_dim_type.hpp>
@@ -138,5 +137,3 @@ bool ensure_immutable_contig(nd::array& a)
 }
 
 }} // namespace dynd::nd
-
-#endif // DYND_ENSURE_IMMUTABLE_CONTIG_HPP

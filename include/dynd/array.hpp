@@ -3,8 +3,7 @@
 // BSD 2-Clause License, see LICENSE.txt
 //
 
-#ifndef _DYND__ARRAY_HPP_
-#define _DYND__ARRAY_HPP_
+#pragma once
 
 #include <iostream> // FOR DEBUG
 #include <stdexcept>
@@ -1654,5 +1653,3 @@ assign_na(array &out,
 array combine_into_tuple(size_t field_count, const array *field_values);
 
 }} // namespace dynd::nd
-
-#endif // _DYND__ARRAY_HPP_

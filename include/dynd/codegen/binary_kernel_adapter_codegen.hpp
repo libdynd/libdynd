@@ -3,8 +3,7 @@
 // BSD 2-Clause License, see LICENSE.txt
 //
 
-#ifndef _DYND__BINARY_KERNEL_ADAPTER_CODEGEN_HPP_
-#define _DYND__BINARY_KERNEL_ADAPTER_CODEGEN_HPP_
+#pragma once
 
 #include <dynd/type.hpp>
 #include <dynd/memblock/memory_block.hpp>
@@ -57,5 +56,3 @@ std::string get_binary_function_adapter_unique_id_string(uint64_t unique_id);
 //                    const ndt::type& arg0type, const ndt::type& arg1type, calling_convention_t callconv);
 
 } // namespace dynd
-
-#endif // _DYND__BINARY_KERNEL_ADAPTER_CODEGEN_HPP_

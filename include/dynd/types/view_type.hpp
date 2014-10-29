@@ -5,8 +5,8 @@
 // The view type reinterprets the bytes of
 // one type as another.
 //
-#ifndef _DYND__VIEW_TYPE_HPP_
-#define _DYND__VIEW_TYPE_HPP_
+
+#pragma once
 
 #include <dynd/type.hpp>
 
@@ -87,5 +87,3 @@ namespace ndt {
 } // namespace ndt
 
 } // namespace dynd
-
-#endif // _DYND__VIEW_TYPE_HPP_

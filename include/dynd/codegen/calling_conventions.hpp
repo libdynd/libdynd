@@ -3,8 +3,7 @@
 // BSD 2-Clause License, see LICENSE.txt
 //
 
-#ifndef _DYND__CALLING_CONVENTIONS_HPP_
-#define _DYND__CALLING_CONVENTIONS_HPP_
+#pragma once
 
 #include <iostream>
 
@@ -32,5 +31,3 @@ inline std::ostream& operator <<(std::ostream& o, calling_convention_t cc) {
 }
 
 } // namespace pydynd
-
-#endif // _DYND__CALLING_CONVENTIONS_HPP_

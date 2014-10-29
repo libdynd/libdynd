@@ -3,8 +3,7 @@
 // BSD 2-Clause License, see LICENSE.txt
 //
 
-#ifndef _DYND__FLOAT16_H__
-#define _DYND__FLOAT16_H__
+#pragma once
 
 #include <dynd/config.hpp>
 #include <dynd/typed_data_assign.hpp>
@@ -248,5 +247,3 @@ DYND_CUDA_HOST_DEVICE inline dynd_float16 float16_from_bits(uint16_t bits) {
 }
 
 } // namespace dynd
-
-#endif // _DYND__FLOAT16_H__

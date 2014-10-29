@@ -3,8 +3,7 @@
 // BSD 2-Clause License, see LICENSE.txt
 //
 
-#ifndef _DYND__FUNCPROTO_TYPE_HPP_
-#define _DYND__FUNCPROTO_TYPE_HPP_
+#pragma once
 
 #include <vector>
 #include <string>
@@ -187,5 +186,3 @@ ndt::type make_generic_funcproto(intptr_t nargs);
 } // namespace ndt
 
 } // namespace dynd
-
-#endif // _DYND__FUNCPROTO_TYPE_HPP_

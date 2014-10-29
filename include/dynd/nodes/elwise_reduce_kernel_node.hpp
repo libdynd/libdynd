@@ -4,8 +4,7 @@
 //
 // DEPRECATED
 
-#ifndef _DYND__ELWISE_REDUCE_KERNEL_NODE_HPP_
-#define _DYND__ELWISE_REDUCE_KERNEL_NODE_HPP_
+#pragma once
 
 #include <dynd/nodes/ndarray_node.hpp>
 #include <dynd/kernels/kernel_instance.hpp>
@@ -129,5 +128,3 @@ ndarray_node_ptr make_elwise_reduce_kernel_node_steal_kernel(const dtype& dt, co
                                             kernel_instance<unary_operation_t>& kernel);
 
 } // namespace dynd
-
-#endif // _DYND__ELWISE_REDUCE_KERNEL_NODE_HPP_

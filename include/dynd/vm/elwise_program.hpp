@@ -3,8 +3,7 @@
 // BSD 2-Clause License, see LICENSE.txt
 //
 
-#ifndef _DYND__ELWISE_PROGRAM_HPP_
-#define _DYND__ELWISE_PROGRAM_HPP_
+#pragma once
 
 #include <vector>
 
@@ -94,6 +93,3 @@ public:
 };
 
 }} // namespace dynd::vm
-
-#endif // _DYND__ELWISE_PROGRAM_HPP_
-

@@ -9,8 +9,8 @@
 // through the type interface, except for the "kind" which
 // is expr_kind to signal that the value_type must be examined.
 //
-#ifndef _DYND__CONVERT_TYPE_HPP_
-#define _DYND__CONVERT_TYPE_HPP_
+
+#pragma once
 
 #include <dynd/type.hpp>
 #include <dynd/typed_data_assign.hpp>
@@ -123,5 +123,3 @@ namespace ndt {
 } // namespace ndt
 
 } // namespace dynd
-
-#endif // _DYND__CONVERT_TYPE_HPP_

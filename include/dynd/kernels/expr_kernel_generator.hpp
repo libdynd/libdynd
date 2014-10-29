@@ -3,8 +3,7 @@
 // BSD 2-Clause License, see LICENSE.txt
 //
 
-#ifndef _DYND__EXPR_KERNEL_GENERATOR_HPP_
-#define _DYND__EXPR_KERNEL_GENERATOR_HPP_
+#pragma once
 
 #include <dynd/config.hpp>
 #include <dynd/atomic_refcount.hpp>
@@ -78,5 +77,3 @@ inline void expr_kernel_generator_decref(const expr_kernel_generator *ed)
 }
 
 } // namespace dynd
-
-#endif // _DYND__EXPR_KERNEL_GENERATOR_HPP_

@@ -6,8 +6,8 @@
 // a particular encoding, stored in a fixed-size
 // buffer.
 //
-#ifndef _DYND__FIXEDSTRING_TYPE_HPP_
-#define _DYND__FIXEDSTRING_TYPE_HPP_
+
+#pragma once
 
 #include <dynd/type.hpp>
 #include <dynd/typed_data_assign.hpp>
@@ -87,5 +87,3 @@ namespace ndt {
 } // namespace ndt
 
 } // namespace dynd
-
-#endif // _DYND__FIXEDSTRING_TYPE_HPP_

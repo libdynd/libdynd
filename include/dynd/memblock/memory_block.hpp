@@ -3,8 +3,7 @@
 // BSD 2-Clause License, see LICENSE.txt
 //
 
-#ifndef _DYND__MEMORY_BLOCK_HPP_
-#define _DYND__MEMORY_BLOCK_HPP_
+#pragma once
 
 #include <iostream>
 
@@ -318,5 +317,3 @@ inline bool operator!=(const memory_block_data *memblock, const memory_block_ptr
 }
 
 } // namespace dynd
-
-#endif // _DYND__MEMORY_BLOCK_HPP_

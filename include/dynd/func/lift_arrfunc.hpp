@@ -3,8 +3,7 @@
 // BSD 2-Clause License, see LICENSE.txt
 //
 
-#ifndef _DYND__LIFT_ARRFUNC_HPP_
-#define _DYND__LIFT_ARRFUNC_HPP_
+#pragma once
 
 #include <dynd/config.hpp>
 #include <dynd/array.hpp>
@@ -31,5 +30,3 @@ inline nd::arrfunc lift_arrfunc(const nd::arrfunc &af)
 }
 
 } // namespace dynd
-
-#endif // _DYND__LIFT_ARRFUNC_HPP_

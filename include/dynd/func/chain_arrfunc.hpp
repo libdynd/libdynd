@@ -3,8 +3,7 @@
 // BSD 2-Clause License, see LICENSE.txt
 //
 
-#ifndef DYND_FUNC_CHAIN_ARRFUNC_HPP
-#define DYND_FUNC_CHAIN_ARRFUNC_HPP
+#pragma once
 
 #include <dynd/func/arrfunc.hpp>
 
@@ -34,5 +33,3 @@ intptr_t make_chain_buf_tp_ckernel(
     const eval::eval_context *ectx);
 
 } // namespace dynd
-
-#endif // DYND_FUNC_CHAIN_ARRFUNC_HPP

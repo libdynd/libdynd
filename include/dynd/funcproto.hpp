@@ -3,8 +3,7 @@
 // BSD 2-Clause License, see LICENSE.txt
 //
 
-#ifndef _DYND__FUNCPROTO_HPP_
-#define _DYND__FUNCPROTO_HPP_
+#pragma once
 
 #include <dynd/config.hpp>
 #include <dynd/pp/list.hpp>
@@ -55,5 +54,3 @@ DYND_PP_JOIN_MAP(FUNCPROTO_FROM, (), DYND_PP_RANGE(1, DYND_PP_INC(DYND_ARG_MAX))
 #undef FUNCPROTO_FROM
 
 } // namespace dynd
-
-#endif // _DYND__FUNCPROTO_HPP_

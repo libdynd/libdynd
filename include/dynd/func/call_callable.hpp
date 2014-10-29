@@ -3,8 +3,7 @@
 // BSD 2-Clause License, see LICENSE.txt
 //
 
-#ifndef _DYND__CALL_CALLABLE_HPP_
-#define _DYND__CALL_CALLABLE_HPP_
+#pragma once
 
 #include <dynd/func/callable.hpp>
 #include <dynd/types/cstruct_type.hpp>
@@ -342,5 +341,3 @@ inline nd::array nd::array::f(const char *function_name, const T0& p0, const T1&
 
 
 } // namespace dynd
-
-#endif // _DYND__CALL_CALLABLE_HPP_

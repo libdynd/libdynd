@@ -3,8 +3,7 @@
 // BSD 2-Clause License, see LICENSE.txt
 //
 
-#ifndef DYND__KERNELS_BUFFERED_KERNELS_HPP
-#define DYND__KERNELS_BUFFERED_KERNELS_HPP
+#pragma once
 
 #include <dynd/config.hpp>
 #include <dynd/array.hpp>
@@ -26,5 +25,3 @@ size_t make_buffered_ckernel(const arrfunc_type_data *af,
                              const eval::eval_context *ectx);
 
 } // namespace dynd
-
-#endif // DYND__KERNELS_BUFFERED_KERNELS_HPP

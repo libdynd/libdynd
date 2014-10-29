@@ -3,8 +3,7 @@
 // BSD 2-Clause License, see LICENSE.txt
 //
 
-#ifndef _DYND__COMPLEX_H__
-#define _DYND__COMPLEX_H__
+#pragma once
 
 #include <cmath>
 #include <complex>
@@ -363,5 +362,3 @@ dynd_complex<T> sin(dynd_complex<T> z) {
 }
 
 } // namespace dynd
-
-#endif // _DYND__COMPLEX_H__

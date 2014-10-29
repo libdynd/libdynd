@@ -2,9 +2,7 @@
 // Copyright (C) 2011-14 Mark Wiebe, DyND Developers
 // BSD 2-Clause License, see LICENSE.txt
 
-
-#ifndef _DYND__UNARY_EXPR_TYPE_HPP_
-#define _DYND__UNARY_EXPR_TYPE_HPP_
+#pragma once
 
 #include <dynd/type.hpp>
 #include <dynd/kernels/expr_kernel_generator.hpp>
@@ -88,5 +86,3 @@ namespace ndt {
 }
 
 } // namespace dynd
-
-#endif // _DYND__UNARY_EXPR_TYPE_HPP_

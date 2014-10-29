@@ -3,8 +3,7 @@
 // BSD 2-Clause License, see LICENSE.txt
 //
 
-#ifndef _DYND__TIME_UTIL_HPP_
-#define _DYND__TIME_UTIL_HPP_
+#pragma once
 
 #include <algorithm>
 #include <limits>
@@ -125,5 +124,3 @@ struct time_hmst {
 };
 
 } // namespace dynd
- 
-#endif // _DYND__TIME_UTIL_HPP_

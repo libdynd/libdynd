@@ -9,8 +9,7 @@
  * as expression types.
  */
 
-#ifndef _DYND__VOID_POINTER_TYPE_HPP_
-#define _DYND__VOID_POINTER_TYPE_HPP_
+#pragma once
 
 #include <dynd/type.hpp>
 
@@ -53,5 +52,3 @@ public:
 };
 
 } // namespace dynd
-
-#endif // _DYND__VOID_POINTER_TYPE_HPP_

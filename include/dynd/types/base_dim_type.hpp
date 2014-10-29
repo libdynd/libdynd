@@ -3,8 +3,7 @@
 // BSD 2-Clause License, see LICENSE.txt
 //
 
-#ifndef DYND__TYPES__BASE_DIM_TYPE_HPP
-#define DYND__TYPES__BASE_DIM_TYPE_HPP
+#pragma once
 
 #include <dynd/types/base_type.hpp>
 #include <dynd/type.hpp>
@@ -89,7 +88,4 @@ public:
                     memory_block_data *embedded_reference) const = 0;
 };
 
-
 } // namespace dynd
-
-#endif // DYND__TYPES__BASE_DIM_TYPE_HPP

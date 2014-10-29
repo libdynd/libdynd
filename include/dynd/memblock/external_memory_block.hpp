@@ -3,8 +3,7 @@
 // BSD 2-Clause License, see LICENSE.txt
 //
 
-#ifndef _DYND__EXTERNAL_MEMORY_BLOCK_HPP_
-#define _DYND__EXTERNAL_MEMORY_BLOCK_HPP_
+#pragma once
 
 #include <dynd/memblock/memory_block.hpp>
 
@@ -20,5 +19,3 @@ memory_block_ptr make_external_memory_block(void *object, external_memory_block_
 void external_memory_block_debug_print(const memory_block_data *memblock, std::ostream& o, const std::string& indent);
 
 } // namespace dynd
-
-#endif // _DYND__EXTERNAL_MEMORY_BLOCK_HPP_

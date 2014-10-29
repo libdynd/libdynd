@@ -3,8 +3,7 @@
 // BSD 2-Clause License, see LICENSE.txt
 //
 
-#ifndef _DYND__DATASHAPE_PARSER_HPP_
-#define _DYND__DATASHAPE_PARSER_HPP_
+#pragma once
 
 #include <dynd/type.hpp>
 
@@ -44,6 +43,3 @@ void datashape_parser_cleanup();
 }
 
 } // namespace dynd
-
-#endif // _DYND__DATASHAPE_PARSER_HPP_
-

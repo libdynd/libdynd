@@ -3,8 +3,7 @@
 // BSD 2-Clause License, see LICENSE.txt
 //
 
-#ifndef DYND_FUNC_NEIGHBORHOOD_ARRFUNC_HPP
-#define DYND_FUNC_NEIGHBORHOOD_ARRFUNC_HPP
+#pragma once
 
 #include <dynd/strided_vals.hpp>
 #include <dynd/func/arrfunc.hpp>
@@ -36,5 +35,3 @@ inline nd::arrfunc make_neighborhood_arrfunc(const nd::arrfunc &neighborhood_op,
 inline nd::arrfunc make_neighborhood_arrfunc(const nd::arrfunc &neighborhood_op, const nd::array &mask);
 
 } // namespace dynd
-
-#endif // DYND_FUNC_NEIGHBORHOOD_ARRFUNC_HPP

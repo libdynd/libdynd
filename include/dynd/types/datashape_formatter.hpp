@@ -3,8 +3,7 @@
 // BSD 2-Clause License, see LICENSE.txt
 //
 
-#ifndef _DYND__DATASHAPE_FORMATTER_HPP_
-#define _DYND__DATASHAPE_FORMATTER_HPP_
+#pragma once
 
 #include <dynd/array.hpp>
 
@@ -52,5 +51,3 @@ void format_datashape(std::ostream& o, const ndt::type& tp,
 
 
 } // namespace dynd
-
-#endif // _DYND__DATASHAPE_FORMATTER_HPP_

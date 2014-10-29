@@ -3,8 +3,7 @@
 // BSD 2-Clause License, see LICENSE.txt
 //
 
-#ifndef _DYND__CLING_ALL_HPP_
-#define _DYND__CLING_ALL_HPP_
+#pragma once
 
 // When CLING is enabled, we avoid certain glibc operations
 // that generate inline assembly, unsupported by the LLVM JIT.
@@ -15,5 +14,3 @@
 
 using namespace std;
 using namespace dynd;
-
-#endif // _DYND__CLING_ALL_HPP_

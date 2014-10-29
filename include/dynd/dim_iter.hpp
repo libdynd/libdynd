@@ -3,8 +3,7 @@
 // BSD 2-Clause License, see LICENSE.txt
 //
 
-#ifndef _DYND__DIM_ITER_HPP_
-#define _DYND__DIM_ITER_HPP_
+#pragma once
 
 #include <dynd/config.hpp>
 #include <dynd/types/base_type.hpp>
@@ -150,5 +149,3 @@ inline void make_empty_dim_iter(
 }
 
 } // namespace dynd
-
-#endif // _DYND__DIM_ITER_HPP_

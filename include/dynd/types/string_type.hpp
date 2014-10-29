@@ -5,8 +5,8 @@
 // The string type uses memory_block references to store
 // arbitrarily sized strings.
 //
-#ifndef _DYND__STRING_TYPE_HPP_
-#define _DYND__STRING_TYPE_HPP_
+
+#pragma once
 
 #include <dynd/type.hpp>
 #include <dynd/typed_data_assign.hpp>
@@ -111,5 +111,3 @@ namespace ndt {
 } // namespace ndt
 
 } // namespace dynd
-
-#endif // _DYND__STRING_TYPE_HPP_

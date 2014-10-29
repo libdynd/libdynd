@@ -3,8 +3,7 @@
 // BSD 2-Clause License, see LICENSE.txt
 //
 
-#ifndef _DYND__EVAL_CONTEXT_HPP_
-#define _DYND__EVAL_CONTEXT_HPP_
+#pragma once
 
 #include <dynd/config.hpp>
 
@@ -71,5 +70,3 @@ struct eval_context {
 extern eval_context default_eval_context;
 
 }} // namespace dynd::eval
-
-#endif // _DYND__EVAL_CONTEXT_HPP_

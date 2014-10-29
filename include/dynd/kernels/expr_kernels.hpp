@@ -3,8 +3,7 @@
 // BSD 2-Clause License, see LICENSE.txt
 //
 
-#ifndef _DYND__EXPR_KERNELS_HPP_
-#define _DYND__EXPR_KERNELS_HPP_
+#pragma once
 
 #include <dynd/func/arrfunc.hpp>
 
@@ -92,5 +91,3 @@ size_t make_expression_type_expr_kernel(ckernel_builder *ckb, intptr_t ckb_offse
                 const expr_kernel_generator *handler);
 
 } // namespace dynd
-
-#endif // _DYND__EXPR_KERNELS_HPP_

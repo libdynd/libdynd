@@ -3,8 +3,7 @@
 // BSD 2-Clause License, see LICENSE.txt
 //
 
-#ifndef _DYND__EVAL_ELWISE_VM_HPP_
-#define _DYND__EVAL_ELWISE_VM_HPP_
+#pragma once
 
 #include <dynd/config.hpp>
 #include <dynd/array.hpp>
@@ -18,5 +17,3 @@ nd::array evaluate_elwise_vm(const vm::elwise_program& ep, std::vector<nd::array
                     const eval::eval_context *ectx = &eval::default_eval_context);
 
 }} // namespace dynd::eval
-
-#endif // _DYND__EVAL_ELWISE_VM_HPP_

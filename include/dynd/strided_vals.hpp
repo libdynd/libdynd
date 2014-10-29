@@ -3,8 +3,7 @@
 // BSD 2-Clause License, see LICENSE.txt
 //
 
-#ifndef _DYND__STRIDED_VALS_HPP_
-#define _DYND__STRIDED_VALS_HPP_
+#pragma once
 
 namespace dynd {
 
@@ -290,5 +289,3 @@ public:
 };
 
 }} // namespace dynd::nd
-
-#endif

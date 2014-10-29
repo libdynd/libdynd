@@ -3,8 +3,7 @@
 // BSD 2-Clause License, see LICENSE.txt
 //
 
-#ifndef DYND_ASSERTIONS_HPP
-#define DYND_ASSERTIONS_HPP
+#pragma once
 
 #include "inc_gtest.hpp"
 
@@ -297,7 +296,3 @@ inline ::testing::AssertionResult AssertRelErrorLE(const char *expected_expr, co
 #define EXPECT_EQ_RELERR(expected, actual, rel_error_max) \
   ASSERT_PRED_FORMAT3(AssertRelErrorLE, \
                       expected, actual, rel_error_max)
-
-
-
-#endif // DYND_ASSERTIONS_HPP

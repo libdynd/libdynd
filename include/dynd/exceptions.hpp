@@ -3,8 +3,7 @@
 // BSD 2-Clause License, see LICENSE.txt
 //
 
-#ifndef _DYND__EXCEPTIONS_HPP_
-#define _DYND__EXCEPTIONS_HPP_
+#pragma once
 
 #include <string>
 #include <stdexcept>
@@ -251,5 +250,3 @@ inline void throw_if_not_cuda_success(cudaError_t error = cudaPeekAtLastError())
 #endif // DYND_CUDA
 
 } // namespace dynd
-
-#endif // _DYND__EXCEPTIONS_HPP_

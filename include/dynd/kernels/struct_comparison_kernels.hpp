@@ -3,8 +3,7 @@
 // BSD 2-Clause License, see LICENSE.txt
 //
 
-#ifndef _DYND__STRUCT_COMPARISON_KERNELS_HPP_
-#define _DYND__STRUCT_COMPARISON_KERNELS_HPP_
+#pragma once
 
 #include <dynd/kernels/comparison_kernels.hpp>
 #include <dynd/typed_data_assign.hpp>
@@ -34,5 +33,3 @@ size_t make_general_struct_comparison_kernel(
                 const eval::eval_context *ectx);
 
 } // namespace dynd
-
-#endif // _DYND__STRUCT_COMPARISON_KERNELS_HPP_

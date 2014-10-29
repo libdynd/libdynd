@@ -3,8 +3,7 @@
 // BSD 2-Clause License, see LICENSE.txt
 //
 
-#ifndef _DYND__BYTES_ASSIGNMENT_KERNELS_HPP_
-#define _DYND__BYTES_ASSIGNMENT_KERNELS_HPP_
+#pragma once
 
 #include <dynd/kernels/assignment_kernels.hpp>
 #include <dynd/typed_data_assign.hpp>
@@ -30,5 +29,3 @@ size_t make_fixedbytes_to_blockref_bytes_assignment_kernel(
                 kernel_request_t kernreq, const eval::eval_context *ectx);
 
 } // namespace dynd
-
-#endif // _DYND__BYTES_ASSIGNMENT_KERNELS_HPP_

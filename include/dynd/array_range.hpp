@@ -3,8 +3,7 @@
 // BSD 2-Clause License, see LICENSE.txt
 //
 
-#ifndef _DYND__NDOBJECT_ARANGE_HPP_
-#define _DYND__NDOBJECT_ARANGE_HPP_
+#pragma once
 
 #include <dynd/array.hpp>
 
@@ -89,5 +88,3 @@ typename enable_if<dynd_kind_of<T>::value == int_kind ||
 }
 
 }} // namespace dynd::nd
-
-#endif // _DYND__NDOBJECT_ARANGE_HPP_

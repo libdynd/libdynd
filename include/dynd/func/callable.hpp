@@ -3,8 +3,7 @@
 // BSD 2-Clause License, see LICENSE.txt
 //
 
-#ifndef _DYND__CALLABLE_HPP_
-#define _DYND__CALLABLE_HPP_
+#pragma once
 
 #include <dynd/array.hpp>
 
@@ -130,5 +129,3 @@ public:
 
 
 }} // namespace dynd::gfunc
-
-#endif // _DYND__CALLABLE_HPP_

@@ -7,8 +7,7 @@
  * The option type represents data which may or may not be there.
  */
 
-#ifndef _DYND__OPTION_TYPE_HPP_
-#define _DYND__OPTION_TYPE_HPP_
+#pragma once
 
 #include <dynd/type.hpp>
 #include <dynd/func/arrfunc.hpp>
@@ -123,5 +122,3 @@ namespace ndt {
 } // namespace ndt
 
 } // namespace dynd
-
-#endif // _DYND__OPTION_TYPE_HPP_

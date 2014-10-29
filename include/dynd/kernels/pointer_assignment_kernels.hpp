@@ -3,8 +3,7 @@
 // BSD 2-Clause License, see LICENSE.txt
 //
 
-#ifndef _DYND__POINTER_ASSIGNMENT_KERNELS_HPP_
-#define _DYND__POINTER_ASSIGNMENT_KERNELS_HPP_
+#pragma once
 
 #include <dynd/kernels/assignment_kernels.hpp>
 #include <dynd/kernels/expr_kernels.hpp>
@@ -26,6 +25,3 @@ size_t make_value_to_pointer_assignment_kernel(
     kernel_request_t kernreq);
 
 } // namespace dynd
-
-#endif // _DYND__POINTER_ASSIGNMENT_KERNELS_HPP_
-

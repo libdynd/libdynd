@@ -3,8 +3,7 @@
 // BSD 2-Clause License, see LICENSE.txt
 //
 
-#ifndef _DYND__VIEW_HPP_
-#define _DYND__VIEW_HPP_
+#pragma once
 
 #include <dynd/array.hpp>
 
@@ -32,5 +31,3 @@ inline array view(const array& arr, const char (&tp)[N])
 }
 
 }} // namespace dynd::nd
-
-#endif // _DYND__VIEW_HPP_

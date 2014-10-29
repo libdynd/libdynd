@@ -3,8 +3,7 @@
 // BSD 2-Clause License, see LICENSE.txt
 //
 
-#ifndef _DYND__LIFT_REDUCTION_ARRFUNC_HPP_
-#define _DYND__LIFT_REDUCTION_ARRFUNC_HPP_
+#pragma once
 
 #include <dynd/config.hpp>
 #include <dynd/array.hpp>
@@ -74,5 +73,3 @@ inline nd::arrfunc lift_reduction_arrfunc(
 }
 
 } // namespace dynd
-
-#endif // _DYND__LIFT_REDUCTION_ARRFUNC_HPP_

@@ -3,8 +3,7 @@
 // BSD 2-Clause License, see LICENSE.txt
 //
 
-#ifndef DYND__FUNC_MULTIDISPATCH_ARRFUNC_HPP
-#define DYND__FUNC_MULTIDISPATCH_ARRFUNC_HPP
+#pragma once
 
 #include <dynd/config.hpp>
 #include <dynd/array.hpp>
@@ -35,5 +34,3 @@ inline nd::arrfunc make_multidispatch_arrfunc(intptr_t naf,
 }
 
 } // namespace dynd
-
-#endif // DYND__FUNC_MULTIDISPATCH_ARRFUNC_HPP

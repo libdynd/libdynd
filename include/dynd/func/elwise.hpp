@@ -3,8 +3,7 @@
 // BSD 2-Clause License, see LICENSE.txt
 //
 
-#ifndef _DYND__ELWISE_HPP_
-#define _DYND__ELWISE_HPP_
+#pragma once
 
 #include <dynd/func/functor_arrfunc.hpp>
 #include <dynd/func/lift_arrfunc.hpp>
@@ -48,5 +47,3 @@ DYND_PP_JOIN_MAP(ELWISE, (), DYND_PP_RANGE(1, DYND_PP_INC(DYND_SRC_MAX)))
 #undef ELWISE
 
 }} // namespace dynd::nd
-
-#endif // _DYND__ELWISE_HPP_

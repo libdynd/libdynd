@@ -3,8 +3,7 @@
 // BSD 2-Clause License, see LICENSE.txt
 //
 
-#ifndef _DYND__CUDA_CONFIG_HPP_
-#define _DYND__CUDA_CONFIG_HPP_
+#pragma once
 
 #include <assert.h>
 #include <cmath>
@@ -101,5 +100,3 @@ namespace dynd {
 } // namespace dynd
 
 #endif // DYND_CUDA
-
-#endif // _DYND__CUDA_CONFIG_HPP_

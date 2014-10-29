@@ -3,8 +3,7 @@
 // BSD 2-Clause License, see LICENSE.txt
 //
 
-#ifndef _DYND__PP_TOKEN_HPP_
-#define _DYND__PP_TOKEN_HPP_
+#pragma once
 
 #include <dynd/pp/gen.hpp>
 
@@ -46,5 +45,3 @@
 #define DYND_PP__IS_NULL_1_1_0_1 DYND_PP__IS_NULL_1_1_0_1
 #define DYND_PP__IS_NULL_1_1_1_0 DYND_PP__IS_NULL_1_1_1_0
 #define DYND_PP__IS_NULL_1_1_1_1 DYND_PP__IS_NULL_1_1_1_1
-
-#endif

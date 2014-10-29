@@ -3,8 +3,7 @@
 // BSD 2-Clause License, see LICENSE.txt
 //
 
-#ifndef _DYND__JSON_TYPE_HPP_
-#define _DYND__JSON_TYPE_HPP_
+#pragma once
 
 #include <dynd/types/string_type.hpp>
 
@@ -72,6 +71,3 @@ namespace ndt {
 } // namespace ndt
 
 } // namespace dynd
-
-#endif // _DYND__JSON_TYPE_HPP_
-

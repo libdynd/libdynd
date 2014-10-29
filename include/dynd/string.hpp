@@ -3,8 +3,7 @@
 // BSD 2-Clause License, see LICENSE.txt
 //
 
-#ifndef _DYND__STRING_HPP_
-#define _DYND__STRING_HPP_
+#pragma once
 
 #include <dynd/array.hpp>
 
@@ -65,5 +64,3 @@ public:
 };
 
 }} // namespace dynd::nd
-
-#endif // _DYND__STRING_HPP_

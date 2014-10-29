@@ -3,8 +3,7 @@
 // BSD 2-Clause License, see LICENSE.txt
 //
 
-#ifndef _DYND__ELWISE_GFUNC_HPP_
-#define _DYND__ELWISE_GFUNC_HPP_
+#pragma once
 
 #include <sstream>
 #include <deque>
@@ -63,5 +62,3 @@ public:
 };
 
 }} // namespace dynd::gfunc
-
-#endif // _DYND__ELWISE_GFUNC_HPP_
