@@ -3,8 +3,7 @@
 // BSD 2-Clause License, see LICENSE.txt
 //
 
-#ifndef _DYND__IRANGE_HPP_
-#define _DYND__IRANGE_HPP_
+#pragma once
 
 #include <limits>
 
@@ -163,5 +162,3 @@ inline DYND_CONSTEXPR irange operator>=(intptr_t start, const irange& i) {
 }
 
 } // namespace dynd
-
-#endif // _DYND__IRANGE_HPP_

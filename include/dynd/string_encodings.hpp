@@ -3,8 +3,7 @@
 // BSD 2-Clause License, see LICENSE.txt
 //
 
-#ifndef _DYND__STRING_ENCODINGS_HPP_
-#define _DYND__STRING_ENCODINGS_HPP_
+#pragma once
 
 #include <iostream>
 #include <string>
@@ -146,5 +145,3 @@ void append_utf8_codepoint(uint32_t cp, std::string& out_str);
 ndt::type char_type_of_encoding(string_encoding_t encoding);
 
 } // namespace dynd
-
-#endif // _DYND__STRING_ENCODINGS_HPP_

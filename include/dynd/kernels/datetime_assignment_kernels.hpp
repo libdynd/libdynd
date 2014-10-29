@@ -3,8 +3,7 @@
 // BSD 2-Clause License, see LICENSE.txt
 //
 
-#ifndef _DYND__DATETIME_ASSIGNMENT_KERNELS_HPP_
-#define _DYND__DATETIME_ASSIGNMENT_KERNELS_HPP_
+#pragma once
 
 #include <dynd/kernels/assignment_kernels.hpp>
 #include <dynd/types/date_type.hpp>
@@ -30,6 +29,3 @@ size_t make_datetime_to_string_assignment_kernel(
     const eval::eval_context *ectx);
 
 } // namespace dynd
-
-#endif // _DYND__DATETIME_ASSIGNMENT_KERNELS_HPP_
-

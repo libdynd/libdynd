@@ -223,8 +223,7 @@ int main(int argc, char **argv) {
 
     fout << endl;
 
-    fout << "#ifndef _DYND__PP_GEN_HPP_" << endl;
-    fout << "#define _DYND__PP_GEN_HPP_" << endl;
+    fout << "#pragma once" << endl;
 
     fout << endl;
 
@@ -590,10 +589,6 @@ int main(int argc, char **argv) {
     for (int i = 10; i <= pp_len_max; i++) {
         fout << "#define DYND_PP_" << i << "_EQ_" << i << endl;
     }
-
-    fout << endl;
-
-    fout << "#endif" << endl;
 
     fout.close();
 

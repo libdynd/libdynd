@@ -3,8 +3,7 @@
 // BSD 2-Clause License, see LICENSE.txt
 //
 
-#ifndef _DYND__PARSER_UTIL_HPP_
-#define _DYND__PARSER_UTIL_HPP_
+#pragma once
 
 #include <string>
 #include <stdexcept>
@@ -711,5 +710,3 @@ struct overflow_check<uint32_t> {
   }
 };
 }} // namespace dynd::parse
-
-#endif // _DYND__PARSER_UTIL_HPP_

@@ -5,8 +5,7 @@
 
 // Implement a number of string algorithms. Note that the initial 
 
-#ifndef _DYND__STRING_ALGORITHM_KERNELS_HPP_
-#define _DYND__STRING_ALGORITHM_KERNELS_HPP_
+#pragma once
 
 #include <dynd/kernels/ckernel_builder.hpp>
 #include <dynd/typed_data_assign.hpp>
@@ -87,5 +86,3 @@ struct string_find_kernel {
 
 
 }} // namespace dynd::kernels
-
-#endif // _DYND__STRING_ALGORITHM_KERNELS_HPP_

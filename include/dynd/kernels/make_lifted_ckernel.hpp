@@ -3,8 +3,7 @@
 // BSD 2-Clause License, see LICENSE.txt
 //
 
-#ifndef _DYND__MAKE_LIFTED_CKERNEL_HPP_
-#define _DYND__MAKE_LIFTED_CKERNEL_HPP_
+#pragma once
 
 #include <dynd/config.hpp>
 #include <dynd/array.hpp>
@@ -39,5 +38,3 @@ size_t make_lifted_expr_ckernel(
     const eval::eval_context *ectx);
 
 } // namespace dynd
-
-#endif // _DYND__MAKE_LIFTED_CKERNEL_HPP_

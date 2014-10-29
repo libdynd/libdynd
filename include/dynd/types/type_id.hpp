@@ -3,8 +3,7 @@
 // BSD 2-Clause License, see LICENSE.txt
 //
 
-#ifndef _DYND__TYPE_ID_HPP_
-#define _DYND__TYPE_ID_HPP_
+#pragma once
 
 #include <iostream>
 #include <complex>
@@ -388,5 +387,3 @@ template<> struct is_type_bool<bool> {enum {value = true};};
 
 
 } // namespace dynd
-
-#endif // _DYND__TYPE_ID_HPP_

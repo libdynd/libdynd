@@ -3,8 +3,7 @@
 // BSD 2-Clause License, see LICENSE.txt
 //
 
-#ifndef _DYND__EXECUTABLE_MEMORY_BLOCK_HPP_
-#define _DYND__EXECUTABLE_MEMORY_BLOCK_HPP_
+#pragma once
 
 #include <dynd/memblock/memory_block.hpp>
 
@@ -48,5 +47,3 @@ void resize_executable_memory(memory_block_data *self, intptr_t size_bytes, char
 void executable_memory_block_debug_print(const memory_block_data *memblock, std::ostream& o, const std::string& indent);
 
 } // namespace dynd
-
-#endif // _DYND__EXECUTABLE_MEMORY_BLOCK_HPP_

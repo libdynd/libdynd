@@ -13,8 +13,7 @@
  * copies the data to/from the pointer targets.
  */
 
-#ifndef _DYND__POINTER_TYPE_HPP_
-#define _DYND__POINTER_TYPE_HPP_
+#pragma once
 
 #include <dynd/type.hpp>
 #include <dynd/kernels/pointer_assignment_kernels.hpp>
@@ -121,5 +120,3 @@ namespace ndt {
 } // namespace ndt
 
 } // namespace dynd
-
-#endif // _DYND__POINTER_TYPE_HPP_

@@ -3,8 +3,7 @@
 // BSD 2-Clause License, see LICENSE.txt
 //
 
-#ifndef _DYND__DTYPE_PROMOTION_HPP_
-#define _DYND__DTYPE_PROMOTION_HPP_
+#pragma once
 
 #include <dynd/type.hpp>
 
@@ -24,5 +23,3 @@ namespace dynd {
 ndt::type promote_types_arithmetic(const ndt::type& tp0, const ndt::type& tp1);
 
 } // namespace dynd
-
-#endif // _DYND__DTYPE_PROMOTION_HPP_

@@ -3,8 +3,7 @@
 // BSD 2-Clause License, see LICENSE.txt
 //
 
-#ifndef _DYND__ROLLING_ARRFUNC_HPP_
-#define _DYND__ROLLING_ARRFUNC_HPP_
+#pragma once
 
 #include <dynd/config.hpp>
 #include <dynd/array.hpp>
@@ -38,5 +37,3 @@ inline nd::arrfunc make_rolling_arrfunc(const nd::arrfunc &window_op,
 }
 
 } // namespace dynd
-
-#endif // _DYND__ROLLING_ARRFUNC_HPP_

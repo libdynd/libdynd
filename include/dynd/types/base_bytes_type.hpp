@@ -3,8 +3,7 @@
 // BSD 2-Clause License, see LICENSE.txt
 //
 
-#ifndef _DYND__BASE_BYTES_TYPE_HPP_
-#define _DYND__BASE_BYTES_TYPE_HPP_
+#pragma once
 
 #include <dynd/types/base_type.hpp>
 
@@ -33,7 +32,4 @@ public:
     size_t get_iterdata_size(intptr_t ndim) const;
 };
 
-
 } // namespace dynd
-
-#endif // _DYND__BASE_BYTES_TYPE_HPP_

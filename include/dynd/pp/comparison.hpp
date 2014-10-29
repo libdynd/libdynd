@@ -3,8 +3,7 @@
 // BSD 2-Clause License, see LICENSE.txt
 //
 
-#ifndef _DYND__PP_COMPARISON_HPP_
-#define _DYND__PP_COMPARISON_HPP_
+#pragma once
 
 #include <dynd/pp/gen.hpp>
 #include <dynd/pp/list.hpp>
@@ -56,5 +55,3 @@
  * between 0 and DYND_PP_LEN_MAX inclusively.
  */
 #define DYND_PP_GT(A, B) DYND_PP_LT(B, A)
-
-#endif

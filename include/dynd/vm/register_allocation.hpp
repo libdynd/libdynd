@@ -3,8 +3,7 @@
 // BSD 2-Clause License, see LICENSE.txt
 //
 
-#ifndef _DYND__REGISTER_ALLOCATION_HPP_
-#define _DYND__REGISTER_ALLOCATION_HPP_
+#pragma once
 
 #include <vector>
 
@@ -31,6 +30,3 @@ public:
 };
 
 }} // namespace dynd::vm
-
-#endif // _DYND__REGISTER_ALLOCATION_HPP_
-

@@ -6,8 +6,8 @@
 // Its canonical type, datashape "char" is a unicode codepoint stored
 // as a 32-bit integer (effectively UTF-32).
 //
-#ifndef _DYND__CHAR_TYPE_HPP_
-#define _DYND__CHAR_TYPE_HPP_
+
+#pragma once
 
 #include <dynd/type.hpp>
 #include <dynd/typed_data_assign.hpp>
@@ -94,5 +94,3 @@ namespace ndt {
 } // namespace ndt
 
 } // namespace dynd
-
-#endif // _DYND__CHAR_TYPE_HPP_

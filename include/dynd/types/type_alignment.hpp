@@ -3,8 +3,7 @@
 // BSD 2-Clause License, see LICENSE.txt
 //
 
-#ifndef _DYND__TYPE_ALIGNMENT_HPP_
-#define _DYND__TYPE_ALIGNMENT_HPP_
+#pragma once
 
 #include <dynd/type.hpp>
 
@@ -26,5 +25,3 @@ ndt::type make_unaligned()
 }
 
 }} // namespace dynd::ndt
-
-#endif // _DYND__TYPE_ALIGNMENT_HPP_

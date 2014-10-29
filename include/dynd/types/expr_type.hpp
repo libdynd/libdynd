@@ -2,9 +2,7 @@
 // Copyright (C) 2011-14 Mark Wiebe, DyND Developers
 // BSD 2-Clause License, see LICENSE.txt
 
-
-#ifndef _DYND__EXPR_TYPE_HPP_
-#define _DYND__EXPR_TYPE_HPP_
+#pragma once
 
 #include <dynd/type.hpp>
 #include <dynd/types/pointer_type.hpp>
@@ -104,5 +102,3 @@ namespace ndt {
 } // namespace ndt
 
 } // namespace dynd
-
-#endif // _DYND__EXPR_TYPE_HPP_

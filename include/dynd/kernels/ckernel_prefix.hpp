@@ -3,8 +3,7 @@
 // BSD 2-Clause License, see LICENSE.txt
 //
 
-#ifndef _DYND__CKERNEL_PREFIX_HPP_
-#define _DYND__CKERNEL_PREFIX_HPP_
+#pragma once
 
 #include <iostream>
 #include <sstream>
@@ -156,5 +155,3 @@ struct ckernel_prefix {
 };
 
 } // namespace dynd
-
-#endif // _DYND__CKERNEL_PREFIX_HPP_

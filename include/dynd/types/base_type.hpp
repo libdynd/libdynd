@@ -3,8 +3,7 @@
 // BSD 2-Clause License, see LICENSE.txt
 //
 
-#ifndef _DYND__BASE_TYPE_HPP_
-#define _DYND__BASE_TYPE_HPP_
+#pragma once
 
 #include <vector>
 
@@ -802,5 +801,3 @@ inline size_t get_base_type_alignment(const base_type *bt)
 }
 
 } // namespace dynd
-
-#endif // _DYND__BASE_TYPE_HPP_

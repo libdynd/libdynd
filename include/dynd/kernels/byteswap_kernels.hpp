@@ -3,8 +3,7 @@
 // BSD 2-Clause License, see LICENSE.txt
 //
 
-#ifndef _DYND__BYTESWAP_KERNELS_HPP_
-#define _DYND__BYTESWAP_KERNELS_HPP_
+#pragma once
 
 #include <dynd/kernels/assignment_kernels.hpp>
 
@@ -60,5 +59,3 @@ size_t make_pairwise_byteswap_assignment_function(
                 kernel_request_t kernreq);
 
 } // namespace dynd
-
-#endif // _DYND__BYTESWAP_KERNELS_HPP_

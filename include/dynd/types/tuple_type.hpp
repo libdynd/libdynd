@@ -3,8 +3,7 @@
 // BSD 2-Clause License, see LICENSE.txt
 //
 
-#ifndef _DYND__TUPLE_TYPE_HPP_
-#define _DYND__TUPLE_TYPE_HPP_
+#pragma once
 
 #include <vector>
 #include <string>
@@ -173,5 +172,3 @@ namespace ndt {
 nd::array pack(intptr_t field_count, const nd::array *field_vals);
 
 } // namespace dynd
-
-#endif // _DYND__TUPLE_TYPE_HPP_

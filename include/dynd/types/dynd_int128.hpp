@@ -3,8 +3,7 @@
 // BSD 2-Clause License, see LICENSE.txt
 //
 
-#ifndef _DYND__INT128_H__
-#define _DYND__INT128_H__
+#pragma once
 
 #include <dynd/config.hpp>
 #include <dynd/typed_data_assign.hpp>
@@ -324,6 +323,3 @@ public:
 } // namespace std
 
 #endif // !defined(DYND_HAS_INT128)
-
-
-#endif // _DYND__INT128_H__

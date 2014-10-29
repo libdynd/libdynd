@@ -3,8 +3,7 @@
 // BSD 2-Clause License, see LICENSE.txt
 //
 
-#ifndef _DYND__MEMMAP_MEMORY_BLOCK_HPP_
-#define _DYND__MEMMAP_MEMORY_BLOCK_HPP_
+#pragma once
 
 #include <iostream>
 #include <string>
@@ -38,5 +37,3 @@ memory_block_ptr make_memmap_memory_block(const std::string& filename,
 void memmap_memory_block_debug_print(const memory_block_data *memblock, std::ostream& o, const std::string& indent);
 
 } // namespace dynd
-
-#endif // _DYND__MEMMAP_MEMORY_BLOCK_HPP_

@@ -10,8 +10,8 @@
 //       be added, which this type would use to
 //       do the actual swapping.
 //
-#ifndef _DYND__BYTESWAP_TYPE_HPP_
-#define _DYND__BYTESWAP_TYPE_HPP_
+
+#pragma once
 
 #include <dynd/type.hpp>
 #include <dynd/typed_data_assign.hpp>
@@ -73,5 +73,3 @@ namespace ndt {
 } // namespace ndt
 
 } // namespace dynd
-
-#endif // _DYND__BYTESWAP_TYPE_HPP_

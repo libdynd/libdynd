@@ -3,8 +3,7 @@
 // BSD 2-Clause License, see LICENSE.txt
 //
 
-#ifndef _DYND__STRING_ASSIGNMENT_KERNELS_HPP_
-#define _DYND__STRING_ASSIGNMENT_KERNELS_HPP_
+#pragma once
 
 #include <dynd/kernels/assignment_kernels.hpp>
 #include <dynd/string_encodings.hpp>
@@ -65,5 +64,3 @@ size_t make_any_to_string_assignment_kernel(
     kernel_request_t kernreq, const eval::eval_context *ectx);
 
 } // namespace dynd
-
-#endif // _DYND__STRING_ASSIGNMENT_KERNELS_HPP_

@@ -3,8 +3,7 @@
 // BSD 2-Clause License, see LICENSE.txt
 //
 
-#ifndef _DYND__BASE_STRUCT_TYPE_HPP_
-#define _DYND__BASE_STRUCT_TYPE_HPP_
+#pragma once
 
 #include <dynd/types/base_type.hpp>
 #include <dynd/types/base_tuple_type.hpp>
@@ -86,5 +85,3 @@ public:
 
 
 } // namespace dynd
-
-#endif // _DYND__BASE_STRUCT_TYPE_HPP_

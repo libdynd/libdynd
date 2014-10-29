@@ -3,6 +3,8 @@
 // BSD 2-Clause License, see LICENSE.txt
 //
 
+#pragma once
+
 #include <dynd/array.hpp>
 #include <dynd/types/dynd_complex.hpp>
 

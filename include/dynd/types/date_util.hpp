@@ -3,8 +3,7 @@
 // BSD 2-Clause License, see LICENSE.txt
 //
 
-#ifndef _DYND__DATE_UTIL_HPP_
-#define _DYND__DATE_UTIL_HPP_
+#pragma once
 
 #include <algorithm>
 #include <limits>
@@ -257,5 +256,3 @@ struct date_ymd {
 };
 
 } // namespace dynd
- 
-#endif // _DYND__DATE_UTIL_HPP_

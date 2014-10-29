@@ -3,8 +3,7 @@
 // BSD 2-Clause License, see LICENSE.txt
 //
 
-#ifndef _DYND__CEPHES_HPP_
-#define _DYND__CEPHES_HPP_
+#pragma once
 
 namespace dynd { extern "C" {
 
@@ -12,5 +11,3 @@ namespace dynd { extern "C" {
 #include "dynd/cephes/protos.h"
 
 }} // namespace dynd::cephes
-
-#endif // _DYND__CEPHES_HPP_

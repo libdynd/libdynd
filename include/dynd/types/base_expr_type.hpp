@@ -3,8 +3,7 @@
 // BSD 2-Clause License, see LICENSE.txt
 //
 
-#ifndef DYND__TYPES__BASE_EXPR_TYPE_HPP
-#define DYND__TYPES__BASE_EXPR_TYPE_HPP
+#pragma once
 
 #include <dynd/types/base_type.hpp>
 
@@ -102,5 +101,3 @@ public:
 };
 
 } // namespace dynd
-
-#endif // DYND__TYPES__BASE_EXPR_TYPE_HPP

@@ -3,8 +3,7 @@
 // BSD 2-Clause License, see LICENSE.txt
 //
 
-#ifndef _DYND__DATETIME_PARSER_HPP_
-#define _DYND__DATETIME_PARSER_HPP_
+#pragma once
 
 #include <dynd/config.hpp>
 #include <dynd/types/date_parser.hpp>
@@ -72,5 +71,3 @@ namespace parse {
 } // namespace parse
 
 } // namespace parse
-
-#endif // _DYND__DATETIME_PARSER_HPP_

@@ -3,8 +3,7 @@
 // BSD 2-Clause License, see LICENSE.txt
 //
 
-#ifndef _DYND__EXPRESSION_COMPARISON_KERNELS_HPP_
-#define _DYND__EXPRESSION_COMPARISON_KERNELS_HPP_
+#pragma once
 
 #include <dynd/kernels/comparison_kernels.hpp>
 
@@ -23,6 +22,3 @@ size_t make_expression_comparison_kernel(
                 const eval::eval_context *ectx);
 
 } // namespace dynd
-
-#endif // _DYND__EXPRESSION_COMPARISON_KERNELS_HPP_
-

@@ -3,8 +3,7 @@
 // BSD 2-Clause License, see LICENSE.txt
 //
 
-#ifndef _DYND__STRING_ITER_HPP_
-#define _DYND__STRING_ITER_HPP_
+#pragma once
 
 #include <dynd/dim_iter.hpp>
 #include <dynd/string_encodings.hpp>
@@ -35,6 +34,3 @@ void make_string_iter(
     const eval::eval_context *ectx = &eval::default_eval_context);
 
 }} // namespace dynd::iter
-
-#endif // _DYND__STRING_ITER_HPP_
-

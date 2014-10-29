@@ -12,8 +12,7 @@
 //  http://www.boost.org/LICENSE_1_0.txt)
 //
 
-#ifndef _DYND__ATOMIC_REFCOUNT_HPP_
-#define _DYND__ATOMIC_REFCOUNT_HPP_
+#pragma once
 
 #include <dynd/config.hpp>
 
@@ -124,5 +123,3 @@ namespace dynd {
     };
 } // namespace dynd
 #endif
-
-#endif // _DYND__ATOMIC_REFCOUNT_HPP_

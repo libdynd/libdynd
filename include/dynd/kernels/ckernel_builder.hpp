@@ -3,8 +3,7 @@
 // BSD 2-Clause License, see LICENSE.txt
 //
 
-#ifndef _DYND__CKERNEL_BUILDER_HPP_
-#define _DYND__CKERNEL_BUILDER_HPP_
+#pragma once
 
 #include <new>
 #include <algorithm>
@@ -514,5 +513,3 @@ DYND_PP_JOIN_MAP(INIT, (), DYND_PP_RANGE(DYND_PP_INC(DYND_ARG_MAX)))
 } // namespace kernels
 
 } // namespace dynd
-
-#endif // _DYND__CKERNEL_BUILDER_HPP_

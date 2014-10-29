@@ -3,8 +3,7 @@
 // BSD 2-Clause License, see LICENSE.txt
 //
 
-#ifndef _DYND__EVAL_ENGINE_HPP_
-#define _DYND__EVAL_ENGINE_HPP_
+#pragma once
 
 #include <dynd/eval/eval_context.hpp>
 
@@ -30,5 +29,3 @@ ndarray_node_ptr evaluate(ndarray_node *node, const eval::eval_context *ectx = &
 void process_access_flags(uint32_t &dst_access_flags, uint32_t src_access_flags, bool &inout_copy_required);
 
 }} // namespace dynd::eval
-
-#endif // _DYND__EVAL_ENGINE_HPP_

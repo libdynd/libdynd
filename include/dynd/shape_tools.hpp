@@ -3,8 +3,7 @@
 // BSD 2-Clause License, see LICENSE.txt
 //
 
-#ifndef _DYND__SHAPE_TOOLS_HPP_
-#define _DYND__SHAPE_TOOLS_HPP_
+#pragma once
 
 #include <iostream>
 
@@ -292,5 +291,3 @@ enum shape_signal_t {
 };
 
 } // namespace dynd
-
-#endif // _DYND__SHAPE_TOOLS_HPP_

@@ -3,8 +3,7 @@
 // BSD 2-Clause License, see LICENSE.txt
 //
 
-#ifndef _DYND__REDUCTION_KERNELS_HPP_
-#define _DYND__REDUCTION_KERNELS_HPP_
+#pragma once
 
 #include <dynd/kernels/ckernel_builder.hpp>
 #include <dynd/kernels/assignment_kernels.hpp>
@@ -59,5 +58,3 @@ intptr_t make_strided_reduction_ckernel(ckernel_builder *ckb, intptr_t ckb_offse
 nd::arrfunc make_strided_reduction_arrfunc();
 
 }} // namespace dynd::kernels
-
-#endif // _DYND__REDUCTION_KERNELS_HPP_

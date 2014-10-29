@@ -3,8 +3,7 @@
 // BSD 2-Clause License, see LICENSE.txt
 //
 
-#ifndef _DYND__UNARY_ELWISE_EVAL_HPP_
-#define _DYND__UNARY_ELWISE_EVAL_HPP_
+#pragma once
 
 #include <deque>
 
@@ -35,5 +34,3 @@ ndarray_node *push_front_node_unary_kernels(ndarray_node* node,
                     std::deque<intptr_t>& out_element_sizes);
 
 }} // namespace dynd::eval
-
-#endif // _DYND__UNARY_ELWISE_EVAL_HPP_

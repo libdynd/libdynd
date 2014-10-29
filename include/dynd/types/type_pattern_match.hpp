@@ -3,8 +3,7 @@
 // BSD 2-Clause License, see LICENSE.txt
 //
 
-#ifndef _DYND__TYPE_PATTERN_MATCH_HPP_
-#define _DYND__TYPE_PATTERN_MATCH_HPP_
+#pragma once
 
 #include <map>
 
@@ -46,5 +45,3 @@ inline bool pattern_match(const ndt::type &concrete, const ndt::type &pattern)
   }
 }
 }} // namespace dynd::ndt
-
-#endif // _DYND__TYPE_PATTERN_MATCH_HPP_

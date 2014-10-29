@@ -3,8 +3,7 @@
 // BSD 2-Clause License, see LICENSE.txt
 //
 
-#ifndef DYND_KERNELS_DATETIME_ADAPTER_KERNELS_HPP
-#define DYND_KERNELS_DATETIME_ADAPTER_KERNELS_HPP
+#pragma once
 
 #include <dynd/kernels/assignment_kernels.hpp>
 #include <dynd/types/datetime_type.hpp>
@@ -21,6 +20,3 @@ bool make_datetime_adapter_arrfunc(const ndt::type &value_tp,
                                    nd::arrfunc &out_reverse);
 
 } // namespace dynd
-
-#endif // DYND_KERNELS_DATETIME_ADAPTER_KERNELS_HPP
-

@@ -3,8 +3,7 @@
 // BSD 2-Clause License, see LICENSE.txt
 //
 
-#ifndef _DYND__ASSIGNMENT_KERNELS_HPP_
-#define _DYND__ASSIGNMENT_KERNELS_HPP_
+#pragma once
 
 #include <stdexcept>
 
@@ -343,5 +342,3 @@ size_t make_cuda_builtin_type_assignment_kernel(
                 kernel_request_t kernreq, assign_error_mode errmode);
 #endif
 } // namespace dynd
-
-#endif // _DYND__ASSIGNMENT_KERNELS_HPP_

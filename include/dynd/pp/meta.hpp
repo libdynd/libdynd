@@ -3,8 +3,7 @@
 // BSD 2-Clause License, see LICENSE.txt
 //
 
-#ifndef _DYND__PP_META_HPP_
-#define _DYND__PP_META_HPP_
+#pragma once
 
 #define DYND_PP_META_ASGN(NAME, A) NAME = A
 
@@ -98,6 +97,3 @@
 
 #define DYND_PP_META_CALL_RANGE(NAME, ...) DYND_PP_META__CALL_RANGE(NAME, DYND_PP_RANGE(__VA_ARGS__))
 #define DYND_PP_META__CALL_RANGE(NAME, LIST) DYND_PP_ELWISE_2(DYND_PP_META_CALL, DYND_PP_REPEAT_2(NAME, DYND_PP_LEN(LIST)), LIST)
-
-
-#endif

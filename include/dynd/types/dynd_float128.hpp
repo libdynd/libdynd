@@ -3,8 +3,7 @@
 // BSD 2-Clause License, see LICENSE.txt
 //
 
-#ifndef _DYND__FLOAT128_H__
-#define _DYND__FLOAT128_H__
+#pragma once
 
 #include <dynd/config.hpp>
 #include <dynd/diagnostics.hpp>
@@ -239,5 +238,3 @@ inline std::ostream& operator<<(std::ostream& o, const dynd_float128& DYND_UNUSE
 } // namespace dynd
 
 #endif // !defined(DYND_HAS_FLOAT128)
-
-#endif // _DYND__FLOAT128_H__

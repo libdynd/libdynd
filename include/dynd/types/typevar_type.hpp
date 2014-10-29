@@ -3,8 +3,7 @@
 // BSD 2-Clause License, see LICENSE.txt
 //
 
-#ifndef _DYND__TYPEVAR_TYPE_HPP_
-#define _DYND__TYPEVAR_TYPE_HPP_
+#pragma once
 
 #include <vector>
 #include <string>
@@ -73,5 +72,3 @@ namespace ndt {
 bool is_valid_typevar_name(const char *begin, const char *end);
 
 } // namespace dynd
-
-#endif // _DYND__TYPEVAR_TYPE_HPP_

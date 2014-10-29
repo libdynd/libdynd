@@ -3,8 +3,7 @@
 // BSD 2-Clause License, see LICENSE.txt
 //
 
-#ifndef _FPSTATUS_HPP_
-#define _FPSTATUS_HPP_
+#pragma once
 
 #if defined(_MSC_VER)
 #include <float.h>
@@ -45,5 +44,3 @@ inline bool is_inexact_fp_status() {
 } // namespace dynd
 
 #endif
-
-#endif // _FPSTATUS_HPP_

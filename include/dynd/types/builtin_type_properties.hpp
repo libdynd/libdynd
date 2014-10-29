@@ -3,8 +3,7 @@
 // BSD 2-Clause License, see LICENSE.txt
 //
 
-#ifndef _DYND__BUILTIN_DTYPE_PROPERTIES_HPP_
-#define _DYND__BUILTIN_DTYPE_PROPERTIES_HPP_
+#pragma once
 
 #include <dynd/types/type_id.hpp>
 #include <dynd/func/callable.hpp>
@@ -45,5 +44,3 @@ namespace init {
 } // namespace init
 
 } // namespace dynd
-
-#endif // _DYND__BUILTIN_DTYPE_PROPERTIES_HPP_

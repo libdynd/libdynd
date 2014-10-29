@@ -3,8 +3,7 @@
 // BSD 2-Clause License, see LICENSE.txt
 //
 
-#ifndef _DYND__JSON_FORMATTER_HPP_
-#define _DYND__JSON_FORMATTER_HPP_
+#pragma once
 
 #include <dynd/array.hpp>
 
@@ -20,5 +19,3 @@ namespace dynd {
 nd::array format_json(const nd::array &a, bool struct_as_list = false);
 
 } // namespace dynd
-
-#endif // _DYND__JSON_FORMATTER_HPP_

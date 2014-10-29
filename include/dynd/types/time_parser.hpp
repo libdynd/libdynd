@@ -3,8 +3,7 @@
 // BSD 2-Clause License, see LICENSE.txt
 //
 
-#ifndef _DYND__TIME_PARSER_HPP_
-#define _DYND__TIME_PARSER_HPP_
+#pragma once
 
 #include <dynd/config.hpp>
 
@@ -87,5 +86,3 @@ namespace parse {
 } // namespace parse
 
 } // namespace parse
-
-#endif // _DYND__TIME_PARSER_HPP_

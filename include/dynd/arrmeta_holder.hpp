@@ -3,8 +3,7 @@
 // BSD 2-Clause License, see LICENSE.txt
 //
 
-#ifndef _DYND__ARRMETA_HOLDER_HPP_
-#define _DYND__ARRMETA_HOLDER_HPP_
+#pragma once
 
 #include <dynd/type.hpp>
 
@@ -88,5 +87,3 @@ public:
 };
 
 } // namespace dynd
-
-#endif // _DYND__ARRMETA_HOLDER_HPP_

@@ -3,8 +3,7 @@
 // BSD 2-Clause License, see LICENSE.txt
 //
 
-#ifndef _DYND__SHORTVECTOR_HPP_
-#define _DYND__SHORTVECTOR_HPP_
+#pragma once
 
 #include <algorithm>
 #include <dynd/config.hpp>
@@ -246,5 +245,3 @@ public:
 typedef shortvector<intptr_t> dimvector;
 
 } // namespace dynd
-
-#endif // _DYND__SHORTVECTOR_HPP_

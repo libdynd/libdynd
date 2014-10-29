@@ -3,8 +3,7 @@
 // BSD 2-Clause License, see LICENSE.txt
 //
 
-#ifndef _DYND__FFT_HPP_
-#define _DYND__FFT_HPP_
+#pragma once
 
 #include <dynd/array.hpp>
 #include <dynd/array_range.hpp>
@@ -223,5 +222,3 @@ nd::array ifftshift(const nd::array &x);
 nd::array fftspace(intptr_t count, double step = 1.0);
 
 } // namespace dynd
-
-#endif // _DYND__FFT_HPP_

@@ -3,8 +3,7 @@
 // BSD 2-Clause License, see LICENSE.txt
 //
 
-#ifndef _DYND__STRUCT_TYPE_HPP_
-#define _DYND__STRUCT_TYPE_HPP_
+#pragma once
 
 #include <vector>
 #include <string>
@@ -305,5 +304,3 @@ DYND_PP_JOIN_MAP(PACK, (), DYND_PP_RANGE(1, DYND_PP_INC(DYND_ARG_MAX)))
 #undef PACK_ARG
 
 } // namespace dynd
-
-#endif // _DYND__STRUCT_TYPE_HPP_

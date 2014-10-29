@@ -3,10 +3,7 @@
 // BSD 2-Clause License, see LICENSE.txt
 //
 
-#ifndef _DYND__FLOAT128_CU__
-#define _DYND__FLOAT128_CU__
+#pragma once
 
 #include "dynd_float16.cu"
 #include "dynd_float128.cpp"
-
-#endif

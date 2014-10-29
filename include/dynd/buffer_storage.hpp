@@ -3,8 +3,7 @@
 // BSD 2-Clause License, see LICENSE.txt
 //
 
-#ifndef _DYND__BUFFER_STORAGE_HPP_
-#define _DYND__BUFFER_STORAGE_HPP_
+#pragma once
 
 #include <dynd/array.hpp>
 #include <dynd/types/fixed_dim_type.hpp>
@@ -130,5 +129,3 @@ public:
 };
 
 } // namespace dynd
-
-#endif // _DYND__BUFFER_STORAGE_HPP_

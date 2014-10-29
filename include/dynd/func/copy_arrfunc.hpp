@@ -3,8 +3,7 @@
 // BSD 2-Clause License, see LICENSE.txt
 //
 
-#ifndef DYND_FUNC_COPY_ARRFUNC_HPP
-#define DYND_FUNC_COPY_ARRFUNC_HPP
+#pragma once
 
 #include <dynd/func/arrfunc.hpp>
 
@@ -23,5 +22,3 @@ const nd::arrfunc& make_copy_arrfunc();
 const nd::arrfunc& make_broadcast_copy_arrfunc();
 
 } // namespace dynd
-
-#endif // DYND_FUNC_COPY_ARRFUNC_HPP

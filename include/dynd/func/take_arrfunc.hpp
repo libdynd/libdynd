@@ -3,8 +3,7 @@
 // BSD 2-Clause License, see LICENSE.txt
 //
 
-#ifndef _DYND__TAKE_ARRFUNC_HPP_
-#define _DYND__TAKE_ARRFUNC_HPP_
+#pragma once
 
 #include <dynd/config.hpp>
 #include <dynd/array.hpp>
@@ -32,5 +31,3 @@ inline nd::arrfunc make_take_arrfunc()
 }
 
 }} // namespace dynd::kernels
-
-#endif // _DYND__TAKE_ARRFUNC_HPP_

@@ -4,8 +4,8 @@
 //
 // The categorical type always represents categorical data
 //
-#ifndef DYND__TYPES_CATEGORICAL_TYPE_HPP
-#define DYND__TYPES_CATEGORICAL_TYPE_HPP
+
+#pragma once
 
 #include <dynd/type.hpp>
 #include <dynd/array.hpp>
@@ -132,5 +132,3 @@ namespace init {
 } // namespace init
 
 } // namespace dynd
-
-#endif // DYND__TYPES_CATEGORICAL_TYPE_HPP

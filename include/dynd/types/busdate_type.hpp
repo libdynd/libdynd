@@ -3,8 +3,7 @@
 // BSD 2-Clause License, see LICENSE.txt
 //
 
-#ifndef _DYND__BUSDATE_TYPE_HPP_
-#define _DYND__BUSDATE_TYPE_HPP_
+#pragma once
 
 #include <dynd/type.hpp>
 #include <dynd/array.hpp>
@@ -98,5 +97,3 @@ namespace ndt {
 } // namespace ndt
 
 } // namespace dynd
-
-#endif // _DYND__BUSDATE_TYPE_HPP_

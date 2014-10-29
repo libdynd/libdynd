@@ -3,8 +3,7 @@
 // BSD 2-Clause License, see LICENSE.txt
 //
 
-#ifndef _DYND__DYND_MATH_HPP_
-#define _DYND__DYND_MATH_HPP_
+#pragma once
 
 #include <dynd/types/dynd_complex.hpp>
 
@@ -193,5 +192,3 @@ inline dynd_complex<double> dynd_i<double>() {
 }
 
 } // namespace dynd
-
-#endif

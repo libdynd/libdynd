@@ -3,8 +3,7 @@
 // BSD 2-Clause License, see LICENSE.txt
 //
 
-#ifndef _DYND__COMPARISON_KERNELS_HPP_
-#define _DYND__COMPARISON_KERNELS_HPP_
+#pragma once
 
 #include <dynd/types/type_id.hpp>
 #include <dynd/kernels/ckernel_builder.hpp>
@@ -109,5 +108,3 @@ size_t make_builtin_type_comparison_kernel(ckernel_builder *ckb,
                                            comparison_type_t comptype);
 
 } // namespace dynd
-
-#endif // _DYND__COMPARISON_KERNELS_HPP_

@@ -3,8 +3,7 @@
 // BSD 2-Clause License, see LICENSE.txt
 //
 
-#ifndef _DYND__ZEROINIT_MEMORY_BLOCK_HPP_
-#define _DYND__ZEROINIT_MEMORY_BLOCK_HPP_
+#pragma once
 
 #include <iostream>
 #include <string>
@@ -24,5 +23,3 @@ memory_block_ptr make_zeroinit_memory_block(intptr_t initial_capacity_bytes = 20
 void zeroinit_memory_block_debug_print(const memory_block_data *memblock, std::ostream& o, const std::string& indent);
 
 } // namespace dynd
-
-#endif // _DYND__ZEROINIT_MEMORY_BLOCK_HPP_

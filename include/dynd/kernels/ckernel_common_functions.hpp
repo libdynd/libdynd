@@ -3,8 +3,7 @@
 // BSD 2-Clause License, see LICENSE.txt
 //
 
-#ifndef _DYND__CKERNEL_COMMON_FUNCTIONS_HPP_
-#define _DYND__CKERNEL_COMMON_FUNCTIONS_HPP_
+#pragma once
 
 #include <dynd/config.hpp>
 #include <dynd/kernels/ckernel_builder.hpp>
@@ -99,5 +98,3 @@ intptr_t wrap_binary_as_unary_reduction_ckernel(
 } // namespace kernels
 
 } // namespace dynd
-
-#endif // _DYND__CKERNEL_COMMON_FUNCTIONS_HPP_

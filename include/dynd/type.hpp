@@ -3,8 +3,7 @@
 // BSD 2-Clause License, see LICENSE.txt
 //
 
-#ifndef _DYND__TYPE_HPP_
-#define _DYND__TYPE_HPP_
+#pragma once
 
 #include <iostream>
 #include <stdexcept>
@@ -887,5 +886,3 @@ void print_indented(std::ostream &o, const std::string &indent,
                     const std::string &s, bool skipfirstline = false);
 
 } // namespace dynd
-
-#endif // _DYND__TYPE_HPP_

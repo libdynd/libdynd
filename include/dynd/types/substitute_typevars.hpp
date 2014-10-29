@@ -3,8 +3,7 @@
 // BSD 2-Clause License, see LICENSE.txt
 //
 
-#ifndef DYND_TYPES_TYPE_SUBSTITUTE_HPP
-#define DYND_TYPES_TYPE_SUBSTITUTE_HPP
+#pragma once
 
 #include <map>
 
@@ -40,5 +39,3 @@ inline ndt::type substitute(const ndt::type &pattern,
 }
 
 }} // namespace dynd::ndt
-
-#endif // DYND_TYPES_TYPE_SUBSTITUTE_HPP

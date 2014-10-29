@@ -3,8 +3,7 @@
 // BSD 2-Clause License, see LICENSE.txt
 //
 
-#ifndef DYND__TYPES_SUBSTITUTE_SHAPE_HPP
-#define DYND__TYPES_SUBSTITUTE_SHAPE_HPP
+#pragma once
 
 #include <map>
 
@@ -27,5 +26,3 @@ ndt::type substitute_shape(const ndt::type &pattern, intptr_t ndim,
                            const intptr_t *shape);
 
 }} // namespace dynd::ndt
-
-#endif // DYND__TYPES_SUBSTITUTE_SHAPE_HPP

@@ -3,8 +3,7 @@
 // BSD 2-Clause License, see LICENSE.txt
 //
 
-#ifndef _DYND__BINARY_REDUCE_KERNEL_ADAPTER_CODEGEN_HPP_
-#define _DYND__BINARY_REDUCE_KERNEL_ADAPTER_CODEGEN_HPP_
+#pragma once
 
 #include <dynd/type.hpp>
 #include <dynd/kernels/kernel_instance.hpp>
@@ -78,5 +77,3 @@ unary_operation_pair_t codegen_right_associative_binary_reduce_function_adapter(
                     const ndt::type& reduce_type,calling_convention_t callconv);
 
 } // namespace dynd
-
-#endif // _DYND__BINARY_REDUCE_KERNEL_ADAPTER_CODEGEN_HPP_

@@ -3,8 +3,7 @@
 // BSD 2-Clause License, see LICENSE.txt
 //
 
-#ifndef _DYND__AUXILIARY_DATA_HPP_
-#define _DYND__AUXILIARY_DATA_HPP_
+#pragma once
 
 #include <new>
 #include <algorithm>
@@ -299,7 +298,4 @@ inline uintptr_t get_raw_auxiliary_data(const AuxDataBase *auxdata)
     return reinterpret_cast<uintptr_t>(auxdata);
 }
 
-
 } // namespace dynd
-
-#endif // _DYND__AUXILIARY_DATA_HPP_

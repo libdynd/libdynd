@@ -3,8 +3,7 @@
 // BSD 2-Clause License, see LICENSE.txt
 //
 
-#ifndef __PLATFORM_DEFINITIONS_H_
-#define __PLATFORM_DEFINITIONS_H_
+#pragma once
 
 // platform macros
 // based on info found in
@@ -87,6 +86,3 @@
 // this one contains posix version macros
 #   include <unistd.h>
 #endif
-
-
-#endif // _PLATFORM_DEFINITIONS_H_

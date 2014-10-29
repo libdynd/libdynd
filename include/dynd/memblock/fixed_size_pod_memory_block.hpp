@@ -3,8 +3,7 @@
 // BSD 2-Clause License, see LICENSE.txt
 //
 
-#ifndef _DYND__FIXED_SIZE_POD_MEMORY_BLOCK_HPP_
-#define _DYND__FIXED_SIZE_POD_MEMORY_BLOCK_HPP_
+#pragma once
 
 #include <iostream>
 #include <string>
@@ -22,5 +21,3 @@ memory_block_ptr make_fixed_size_pod_memory_block(intptr_t size_bytes, intptr_t 
 void fixed_size_pod_memory_block_debug_print(const memory_block_data *memblock, std::ostream& o, const std::string& indent);
 
 } // namespace dynd
-
-#endif // _DYND__FIXED_SIZE_POD_MEMORY_BLOCK_HPP_

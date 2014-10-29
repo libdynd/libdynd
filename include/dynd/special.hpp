@@ -3,8 +3,7 @@
 // BSD 2-Clause License, see LICENSE.txt
 //
 
-#ifndef _DYND__SPECIAL_HPP_
-#define _DYND__SPECIAL_HPP_
+#pragma once
 
 #include <dynd/array.hpp>
 #include <dynd/cephes.hpp>
@@ -124,5 +123,3 @@ double assoc_legendre_p_next(int l, int m, double x, double pl, double pls1);
 double assoc_legendre_p(int l, int m, double x);
 
 } // namespace dynd
-
-#endif // _DYND__SPECIAL_HPP_

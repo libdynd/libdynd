@@ -3,8 +3,7 @@
 // BSD 2-Clause License, see LICENSE.txt
 //
 
-#ifndef _DYND__BASE_MEMORY_TYPE_HPP_
-#define _DYND__BASE_MEMORY_TYPE_HPP_
+#pragma once
 
 #include <dynd/types/base_type.hpp>
 #include <dynd/type.hpp>
@@ -87,5 +86,3 @@ public:
 };
 
 } // namespace dynd
-
-#endif // _DYND__BASE_MEMORY_TYPE_HPP_

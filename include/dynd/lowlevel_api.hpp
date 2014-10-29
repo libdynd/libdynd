@@ -3,8 +3,7 @@
 // BSD 2-Clause License, see LICENSE.txt
 //
 
-#ifndef _DYND__LOWLEVEL_API_HPP_
-#define _DYND__LOWLEVEL_API_HPP_
+#pragma once
 
 #include <dynd/memblock/memory_block.hpp>
 #include <dynd/types/base_type.hpp>
@@ -46,5 +45,3 @@ struct lowlevel_api_t {
  * Returns a pointer to the static low level API structure.
  */
 extern "C" const void *dynd_get_lowlevel_api();
-
-#endif // _DYND__LOWLEVEL_API_HPP_

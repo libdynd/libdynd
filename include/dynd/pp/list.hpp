@@ -3,8 +3,7 @@
 // BSD 2-Clause License, see LICENSE.txt
 //
 
-#ifndef _DYND__PP_LIST_HPP_
-#define _DYND__PP_LIST_HPP_
+#pragma once
 
 #include <dynd/pp/arithmetic.hpp>
 #include <dynd/pp/comparison.hpp>
@@ -112,5 +111,3 @@
 
 #define DYND_PP_ALL_GT(A, B) DYND_PP_ALL(DYND_PP_ELWISE(DYND_PP_GT, A, B))
 #define DYND_PP_ANY_GT(A, B) DYND_PP_ANY(DYND_PP_ELWISE(DYND_PP_GT, A, B))
-
-#endif

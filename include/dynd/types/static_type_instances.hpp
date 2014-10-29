@@ -3,8 +3,7 @@
 // BSD 2-Clause License, see LICENSE.txt
 //
 
-#ifndef DYND__TYPES_STATIC_TYPE_INSTANCES_HPP
-#define DYND__TYPES_STATIC_TYPE_INSTANCES_HPP
+#pragma once
 
 #include <dynd/types/base_type.hpp>
 
@@ -29,5 +28,3 @@ extern base_type *type_tp;
 } // namespace ndt
 
 } // namespace dynd
-
-#endif // DYND__TYPES_STATIC_TYPE_INSTANCES_HPP

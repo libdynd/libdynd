@@ -3,8 +3,7 @@
 // BSD 2-Clause License, see LICENSE.txt
 //
 
-#ifndef _DYND__DIAGNOSTICS_HPP_
-#define _DYND__DIAGNOSTICS_HPP_
+#pragma once
 
 #include <string>
 
@@ -87,5 +86,3 @@ inline std::string which_diagnostics_enabled()
 }
 
 } // namespace dynd
-
-#endif // _DYND__DIAGNOSTICS_HPP_

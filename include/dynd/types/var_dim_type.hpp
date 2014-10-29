@@ -3,8 +3,7 @@
 // BSD 2-Clause License, see LICENSE.txt
 //
 
-#ifndef DYND_TYPES_VAR_DIM_TYPE_HPP
-#define DYND_TYPES_VAR_DIM_TYPE_HPP
+#pragma once
 
 #include <dynd/type.hpp>
 #include <dynd/types/base_dim_type.hpp>
@@ -159,5 +158,3 @@ namespace ndt {
 } // namespace ndt
 
 } // namespace dynd
-
-#endif // DYND_TYPES_VAR_DIM_TYPE_HPP
