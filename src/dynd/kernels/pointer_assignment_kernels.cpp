@@ -1,3 +1,8 @@
+//
+// Copyright (C) 2011-14 DyND Developers
+// BSD 2-Clause License, see LICENSE.txt
+//
+
 #include <dynd/kernels/pointer_assignment_kernels.hpp>
 
 using namespace std;
