@@ -1,5 +1,5 @@
 //
-// Copyright (C) 2011-14 Irwin Zaid, DyND Developers
+// Copyright (C) 2011-14 DyND Developers
 // BSD 2-Clause License, see LICENSE.txt
 //
 
@@ -217,7 +217,7 @@ int main(int argc, char **argv) {
     ofstream fout(filename.c_str());
 
     fout << "//" << endl;
-    fout << "// Copyright (C) 2011-14 Irwin Zaid, DyND Developers" << endl;
+    fout << "// Copyright (C) 2011-14 DyND Developers" << endl;
     fout << "// BSD 2-Clause License, see LICENSE.txt" << endl;
     fout << "//" << endl;
 

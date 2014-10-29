@@ -1,5 +1,9 @@
-#include <dynd/random.hpp>
+//
+// Copyright (C) 2011-14 DyND Developers
+// BSD 2-Clause License, see LICENSE.txt
+//
 
+#include <dynd/random.hpp>
 
 using namespace std;
 using namespace dynd;

@@ -1,5 +1,5 @@
 //
-// Copyright (C) 2011-2012, Dynamic NDArray Developers
+// Copyright (C) 2011-14 DyND Developers
 // BSD 2-Clause License, see LICENSE.txt
 //
 // DEPRECATED, but being kept around until the equivalent

@@ -1,5 +1,5 @@
 //
-// Copyright (C) 2010-13 Irwin Zaid, Mark Wiebe, DyND Developers
+// Copyright (C) 2011-14 DyND Developers
 // BSD 2-Clause License, see LICENSE.txt
 //
 
