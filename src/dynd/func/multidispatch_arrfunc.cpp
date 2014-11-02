@@ -25,11 +25,21 @@ using namespace dynd;
  * real -> complex, where the size of the real component is nondecreasing
  *
  */
-static bool can_implicitly_convert(const ndt::type &src, const ndt::type &dst)
+static bool can_implicitly_convert(const ndt::type &src, const ndt::type &dst,
+                                   std::map<nd::string, ndt::type> &typevars)
 {
   if (src == dst) {
     return true;
   }
+  if (src.get_ndim() > 0 || dst.get_ndim() > 0) {
+    ndt::type src_dtype, dst_dtype;
+    if (ndt::pattern_match_dims(src, dst, typevars, src_dtype, dst_dtype)) {
+      return can_implicitly_convert(src_dtype, dst_dtype, typevars);
+    } else {
+      return false;
+    }
+  }
+
   if (src.get_kind() == uint_kind &&
       (dst.get_kind() == uint_kind || dst.get_kind() == int_kind ||
        dst.get_kind() == real_kind)) {
@@ -62,7 +72,8 @@ static bool supercedes(const nd::arrfunc &lhs, const nd::arrfunc &rhs)
     for(intptr_t i = 0; i < nargs; ++i) {
       const ndt::type &lpt = lhs.get()->get_arg_type(i);
       const ndt::type &rpt = rhs.get()->get_arg_type(i);
-      if (!can_implicitly_convert(lpt, rpt)) {
+      std::map<nd::string, ndt::type> typevars;
+      if (!can_implicitly_convert(lpt, rpt, typevars)) {
         return false;
       }
     }
@@ -85,8 +96,9 @@ static bool toposort_edge(const nd::arrfunc &lhs, const nd::arrfunc &rhs)
     for(intptr_t i = 0; i < nargs; ++i) {
       const ndt::type &lpt = lhs.get()->get_arg_type(i);
       const ndt::type &rpt = rhs.get()->get_arg_type(i);
+      std::map<nd::string, ndt::type> typevars;
       if (lpt.get_kind() >= rpt.get_kind() &&
-          !can_implicitly_convert(lpt, rpt)) {
+          !can_implicitly_convert(lpt, rpt, typevars)) {
         return false;
       }
     }
@@ -110,11 +122,13 @@ static bool ambiguous(const nd::arrfunc &lhs, const nd::arrfunc &rhs)
       const ndt::type &lpt = lhs.get()->get_arg_type(i);
       const ndt::type &rpt = rhs.get()->get_arg_type(i);
       bool either = false;
-      if (can_implicitly_convert(lpt, rpt)) {
+      std::map<nd::string, ndt::type> typevars;
+      if (can_implicitly_convert(lpt, rpt, typevars)) {
         lsupercount++;
         either = true;
       }
-      if (can_implicitly_convert(rpt, lpt)) {
+      typevars.clear();
+      if (can_implicitly_convert(rpt, lpt, typevars)) {
         rsupercount++;
         either = true;
       }
@@ -257,16 +271,18 @@ static intptr_t instantiate_multidispatch_af(
   for (intptr_t i = 0; i < (intptr_t)icd->size(); ++i) {
     const nd::arrfunc &af = (*icd)[i];
     intptr_t isrc, nsrc = af.get()->get_nsrc();
+    std::map<nd::string, ndt::type> typevars;
     for (isrc = 0; isrc < nsrc; ++isrc) {
-      if (!can_implicitly_convert(src_tp[isrc],
-                                  af.get()->get_arg_type(isrc))) {
+      if (!can_implicitly_convert(src_tp[isrc], af.get()->get_arg_type(isrc),
+                                  typevars)) {
         break;
       }
     }
     if (isrc == nsrc) {
       intptr_t j;
       for (j = 0; j < nsrc; ++j) {
-        if (src_tp[j] != af.get()->get_arg_type(j)) {
+        const ndt::type &arg_tp = af.get()->get_arg_type(j);
+        if (!arg_tp.is_symbolic() && src_tp[j] != arg_tp) {
           break;
         }
       }
@@ -298,14 +314,16 @@ resolve_multidispatch_dst_type(const arrfunc_type_data *af_self,
     const nd::arrfunc &af = (*icd)[i];
     if (nsrc == af.get()->get_nsrc()) {
       intptr_t isrc;
+      std::map<nd::string, ndt::type> typevars;
       for (isrc = 0; isrc < nsrc; ++isrc) {
-        if (!can_implicitly_convert(src_tp[isrc],
-                                    af.get()->get_arg_type(isrc))) {
+        if (!can_implicitly_convert(src_tp[isrc], af.get()->get_arg_type(isrc),
+                                    typevars)) {
           break;
         }
       }
       if (isrc == nsrc) {
-        out_dst_tp = af.get()->get_return_type();
+        out_dst_tp =
+            ndt::substitute(af.get()->get_return_type(), typevars, true);
         return 1;
       }
     }

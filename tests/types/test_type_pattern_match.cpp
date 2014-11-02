@@ -55,6 +55,9 @@ TEST(TypePatternMatch, Simple) {
                                       ndt::type("A**N * A * int32")));
   EXPECT_FALSE(ndt::pattern_match(ndt::type("4 * 4 * 3 * int32"),
                                       ndt::type("4**N * N * int32")));
+
+  EXPECT_TRUE(
+      ndt::pattern_match(ndt::type("... * int32"), ndt::type("... * T")));
 }
 
 TEST(TypePatternMatch, Struct) {
@@ -167,4 +170,14 @@ TEST(TypePatternMatch, Pow) {
   // Can't have a negative exponent
   EXPECT_FALSE(
       ndt::pattern_match(ndt::type("int32"), ndt::type("D**N * E * int32")));
+}
+
+TEST(TypePatternMatchDims, Simple) {
+  std::map<nd::string, ndt::type> typevars;
+  ndt::type cdt, pdt;
+  EXPECT_TRUE(ndt::pattern_match_dims(ndt::type("3 * 4 * fixed * int32"),
+                                      ndt::type("fixed * 4 * fixed * {x: int}"),
+                                      typevars, cdt, pdt));
+  EXPECT_EQ(ndt::type("int32"), cdt);
+  EXPECT_EQ(ndt::type("{x: int}"), pdt);
 }

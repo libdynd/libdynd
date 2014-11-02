@@ -87,9 +87,9 @@ TEST(MultiDispatchArrfunc, Values) {
   funcs.push_back(nd::make_functor_arrfunc(&manip1));
   nd::arrfunc af =
       lift_arrfunc(make_multidispatch_arrfunc(funcs.size(), &funcs[0]));
+  nd::array a, b, c;
 
   // Exactly match (int, int) -> real
-  nd::array a, b, c;
   a = parse_json("3 * int", "[1, 3, 5]");
   b = parse_json("3 * int", "[2, 5, 1]");
   c = af(a, b);
@@ -116,4 +116,22 @@ TEST(MultiDispatchArrfunc, Values) {
   c = af(a, b);
   EXPECT_EQ(ndt::type("3 * float64"), c.get_type());
   EXPECT_JSON_EQ_ARR("[-1, -2, 4]", c);
+}
+
+TEST(MultiDispatchArrfunc, Dims)
+{
+  vector<nd::arrfunc> funcs;
+  // Instead of making a multidispatch arrfunc, then lifting it,
+  // we lift multiple arrfuncs, then make a multidispatch arrfunc from them.
+  funcs.push_back(lift_arrfunc(nd::make_functor_arrfunc(&manip0)));
+  funcs.push_back(lift_arrfunc(nd::make_functor_arrfunc(&manip1)));
+  nd::arrfunc af = make_multidispatch_arrfunc(funcs.size(), &funcs[0]);
+  nd::array a, b, c;
+
+  // Exactly match (int, int) -> real
+  a = parse_json("3 * int", "[1, 3, 5]");
+  b = parse_json("3 * int", "[2, 5, 1]");
+  c = af(a, b);
+  EXPECT_EQ(ndt::type("3 * float64"), c.get_type());
+  EXPECT_JSON_EQ_ARR("[3, 8, 6]", c);
 }
