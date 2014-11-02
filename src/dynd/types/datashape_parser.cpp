@@ -871,6 +871,7 @@ static ndt::type parse_struct(const char *&rbegin, const char *end,
 static ndt::type parse_tuple_or_funcproto(const char *&rbegin, const char *end, map<string, ndt::type>& symtable)
 {
     const char *begin = rbegin;
+    vector<string> field_name_list[2];
     vector<ndt::type> field_type_list;
     bool cprefixed = false;
     intptr_t semicolon_pos = -1;
@@ -884,7 +885,16 @@ static ndt::type parse_tuple_or_funcproto(const char *&rbegin, const char *end, 
     }
     if (!parse_token_ds(begin, end, ')')) {
         for (;;) {
-            ndt::type tp = parse_datashape(begin, end, symtable);
+            ndt::type tp;
+            try {
+                tp = parse_datashape(begin, end, symtable);
+            } catch (datashape_parse_error) {
+                string name;
+                if (parse_struct_item(begin, end, symtable, name, tp)) {
+                    field_name_list[semicolon_pos != -1].push_back(name);
+                }
+            }
+
             if (tp.get_type_id() != uninitialized_type_id) {
                 field_type_list.push_back(tp);
             } else {
@@ -922,9 +932,11 @@ static ndt::type parse_tuple_or_funcproto(const char *&rbegin, const char *end, 
         }
         rbegin = begin;
         if (semicolon_pos == -1) {
-            return ndt::make_funcproto(field_type_list, return_type);
+            return ndt::make_funcproto(field_name_list[0], field_name_list[1],
+                field_type_list, return_type);
         } else {
-            return ndt::make_funcproto(field_type_list, return_type, field_type_list.size() - semicolon_pos);
+            return ndt::make_funcproto(field_name_list[0], field_name_list[1],
+                field_type_list, return_type, field_type_list.size() - semicolon_pos);
         }
     }
 }

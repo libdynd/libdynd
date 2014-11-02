@@ -12,14 +12,65 @@
 using namespace std;
 using namespace dynd;
 
-funcproto_type::funcproto_type(const nd::array &arg_types,
+static bool is_simple_identifier_name(const char *begin, const char *end)
+{
+    if (begin == end) {
+        return false;
+    } else {
+        char c = *begin++;
+        if (!(('a' <= c && c <= 'z') || ('A' <= c && c <= 'Z') || c == '_')) {
+            return false;
+        }
+        while (begin < end) {
+            c = *begin++;
+            if (!(('0' <= c && c <= '9') || ('a' <= c && c <= 'z')
+                            || ('A' <= c && c <= 'Z') || c == '_')) {
+                return false;
+            }
+        }
+        return true;
+    }
+}
+
+funcproto_type::funcproto_type(const nd::array &src_names,
+                               const nd::array &aux_names,
+                               const nd::array &arg_types,
                                const ndt::type &return_type,
                                intptr_t naux)
     : base_type(funcproto_type_id, symbolic_kind, 0, 1, type_flag_none, 0, 0,
                 0),
-      m_arg_types(arg_types), m_narg(arg_types.get_dim_size()), m_nsrc(m_narg - naux), m_naux(naux),
+      m_src_names(src_names), m_aux_names(aux_names), m_arg_types(arg_types),
+      m_narg(arg_types.get_dim_size()), m_nsrc(m_narg - naux), m_naux(naux),
       m_return_type(return_type)
 {
+    if (!m_src_names.is_null()) {
+        if (!nd::ensure_immutable_contig<nd::string>(m_src_names)) {
+            stringstream ss;
+            ss << "dynd funcproto src names requires an array of strings, got an "
+                  "array with type " << m_src_names.get_type();
+            throw invalid_argument(ss.str());
+        }
+        if (m_src_names.get_dim_size() > m_nsrc) {
+            stringstream ss;
+            ss << "dynd funcproto src names is larger than src types";
+            throw invalid_argument(ss.str());
+        }
+    }
+
+    if (!m_aux_names.is_null()) {
+        if (!nd::ensure_immutable_contig<nd::string>(m_aux_names)) {
+            stringstream ss;
+            ss << "dynd funcproto aux names requires an array of strings, got an "
+                  "array with type " << m_aux_names.get_type();
+            throw invalid_argument(ss.str());
+        }
+        if (m_aux_names.get_dim_size() > m_naux) {
+            stringstream ss;
+            ss << "dynd funcproto aux names is larger than aux types";
+            throw invalid_argument(ss.str());
+        }
+    }
+
     if (!nd::ensure_immutable_contig<ndt::type>(m_arg_types)) {
         stringstream ss;
         ss << "dynd funcproto arg types requires an array of types, got an "
@@ -44,18 +95,49 @@ void funcproto_type::print_data(std::ostream &DYND_UNUSED(o),
 void funcproto_type::print_type(std::ostream& o) const
 {
     const ndt::type *arg_types = get_arg_types_raw();
-    // Use the function prototype datashape syntax
+
     o << "(";
-    for (intptr_t i = 0, i_aux = get_nsrc(), i_end = m_narg; i != i_end; ++i) {
-        if (i != 0) {
-            if (i != i_aux) {
-                o << ", ";
+
+    intptr_t i_kwds = m_src_names.is_null() ? m_nsrc : (m_nsrc - m_src_names.get_dim_size());
+    for (intptr_t i = 0, i_end = m_nsrc; i != i_end; ++i) {
+        if (i > 0) {
+            o << ", ";
+        }
+
+        if (i >= i_kwds) {
+            const string_type_data& an = get_src_name_raw(i - i_kwds);
+            if (is_simple_identifier_name(an.begin, an.end)) {
+                o.write(an.begin, an.end - an.begin);
             } else {
-                o << "; ";
+                print_escaped_utf8_string(o, an.begin, an.end, true);
             }
+            o << ": ";
         }
         o << arg_types[i];
     }
+
+    if (m_naux > 0) {
+        o << "; ";
+    }
+
+    i_kwds = m_aux_names.is_null() ? m_narg : (m_narg - m_aux_names.get_dim_size());
+    for (intptr_t i = m_nsrc, i_end = m_narg; i != i_end; ++i) {
+        if (i > m_nsrc) {
+            o << ", ";
+        }
+
+        if (i >= i_kwds) {
+            const string_type_data& an = get_aux_name_raw(i - i_kwds);
+            if (is_simple_identifier_name(an.begin, an.end)) {
+                o.write(an.begin, an.end - an.begin);
+            } else {
+                print_escaped_utf8_string(o, an.begin, an.end, true);
+            }
+            o << ": ";
+        }
+        o << arg_types[i];
+    }
+
     o << ") -> " << m_return_type;
 }
 

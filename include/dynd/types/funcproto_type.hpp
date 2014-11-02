@@ -13,25 +13,35 @@
 #include <dynd/pp/comparison.hpp>
 #include <dynd/pp/list.hpp>
 #include <dynd/pp/meta.hpp>
+#include <dynd/types/fixed_dim_type.hpp>
 #include <dynd/types/fixed_dimsym_type.hpp>
+#include <dynd/types/string_type.hpp>
 
 namespace dynd {
 
 class funcproto_type : public base_type {
-    // This is always a contiguous immutable "N * type" array
+    nd::array m_src_names;
+    nd::array m_aux_names;
     nd::array m_arg_types;
     intptr_t m_narg, m_nsrc, m_naux;
     ndt::type m_return_type;
 
 public:
-    funcproto_type(const nd::array &arg_types, const ndt::type &return_type, intptr_t naux = 0);
+    funcproto_type(const nd::array &src_names, const nd::array &aux_names,
+        const nd::array &arg_types, const ndt::type &ret_type, intptr_t naux = 0);
 
     virtual ~funcproto_type() {}
+
+    const string_type_data& get_src_name_raw(intptr_t i) const {
+        return unchecked_fixed_dim_get<string_type_data>(m_src_names, i);
+    }
+    const string_type_data& get_aux_name_raw(intptr_t i) const {
+        return unchecked_fixed_dim_get<string_type_data>(m_aux_names, i);
+    }
 
     const nd::array& get_arg_types() const {
         return m_arg_types;
     }
-
     const ndt::type *get_arg_types_raw() const {
         return reinterpret_cast<const ndt::type *>(
             m_arg_types.get_readonly_originptr());
@@ -147,7 +157,17 @@ inline ndt::type make_funcproto(const nd::array &arg_types,
                                 intptr_t naux = 0)
 {
     return ndt::type(
-        new funcproto_type(arg_types, return_type, naux), false);
+        new funcproto_type(nd::array(), nd::array(), arg_types, return_type, naux), false);
+}
+
+inline ndt::type make_funcproto(const nd::array &src_names,
+                                const nd::array &aux_names,
+                                const nd::array &arg_types,
+                                const ndt::type &return_type,
+                                intptr_t naux = 0)
+{
+    return ndt::type(
+        new funcproto_type(src_names, aux_names, arg_types, return_type, naux), false);
 }
 
 /** Makes a funcproto type with the specified types */
@@ -163,7 +183,7 @@ inline ndt::type make_funcproto(intptr_t narg,
     }
     tmp.flag_as_immutable();
     return ndt::type(
-        new funcproto_type(tmp, return_type), false);
+        new funcproto_type(nd::array(), nd::array(), tmp, return_type), false);
 }
 
 /** Makes a unary funcproto type with the specified types */
@@ -172,7 +192,7 @@ inline ndt::type make_funcproto(const ndt::type& single_arg_type,
 {
     ndt::type arg_types[1] = {single_arg_type};
     return ndt::type(
-        new funcproto_type(arg_types, return_type), false);
+        new funcproto_type(nd::array(), nd::array(), arg_types, return_type), false);
 }
 
 /** Makes a funcproto type from the C++ function type */
