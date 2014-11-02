@@ -142,6 +142,7 @@ ndt::type dim_fragment_type::broadcast_with_type(intptr_t ndim,
         return ndt::make_dim_fragment(this_ndim, shape.get());
     } else {
         dimvector shape(ndim);
+        memcpy(shape.get(), get_tagged_dims(), this_ndim * sizeof(intptr_t));
         if (!broadcast_tagged_dims_from_type(ndim, tp, get_tagged_dims(),
                                              shape.get())) {
             return ndt::type();

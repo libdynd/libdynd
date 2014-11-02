@@ -55,6 +55,9 @@ TEST(TypePatternMatch, Simple) {
                                       ndt::type("A**N * A * int32")));
   EXPECT_FALSE(ndt::pattern_match(ndt::type("4 * 4 * 3 * int32"),
                                       ndt::type("4**N * N * int32")));
+
+  EXPECT_TRUE(
+      ndt::pattern_match(ndt::type("... * int32"), ndt::type("... * T")));
 }
 
 TEST(TypePatternMatch, Struct) {

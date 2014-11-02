@@ -242,6 +242,11 @@ bool ndt::pattern_match_dims(const ndt::type &concrete,
                    concrete.tcast<base_dim_type>()->get_element_type(),
                    pattern.tcast<base_dim_type>()->get_element_type(), typevars,
                    out_concrete_dtype, out_pattern_dtype);
+      case ellipsis_dim_type_id:
+        return pattern_match_dims(
+            concrete.tcast<ellipsis_dim_type>()->get_element_type(),
+            pattern.tcast<ellipsis_dim_type>()->get_element_type(), typevars,
+            out_concrete_dtype, out_pattern_dtype);
       case pow_dimsym_type_id:
         if (pattern_match_dims(
                 concrete.tcast<pow_dimsym_type>()->get_base_type(),
