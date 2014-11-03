@@ -144,14 +144,14 @@ struct assign_na<dynd_int128> : public int_assign_na<dynd_int128> {};
 //////////////////////////////////////
 // option[float]
 // NA is 0x7f8007a2
+// Special rule adopted from R: Any NaN is NA
 
 template<>
 struct is_avail<float> {
     static void single(char *dst, char **src,
                        ckernel_prefix *DYND_UNUSED(self))
     {
-        *dst = **reinterpret_cast<uint32_t **>(src) !=
-               DYND_FLOAT32_NA_AS_UINT;
+      *dst = DYND_ISNAN(**reinterpret_cast<float **>(src)) == 0;
     }
 
     static void strided(char *dst, intptr_t dst_stride, char **src,
@@ -161,9 +161,9 @@ struct is_avail<float> {
         char *src0 = src[0];
         intptr_t src0_stride = src_stride[0];
         for (size_t i = 0; i != count; ++i) {
-            *dst = *reinterpret_cast<uint32_t *>(src0) != DYND_FLOAT32_NA_AS_UINT;
-            dst += dst_stride;
-            src0 += src0_stride;
+          *dst = DYND_ISNAN(*reinterpret_cast<float *>(src0)) == 0;
+          dst += dst_stride;
+          src0 += src0_stride;
         }
     }
 };
@@ -191,14 +191,14 @@ struct assign_na<float> {
 //////////////////////////////////////
 // option[double]
 // NA is 0x7ff00000000007a2ULL
+// Special rule adopted from R: Any NaN is NA
 
 template<>
 struct is_avail<double> {
     static void single(char *dst, char **src,
                        ckernel_prefix *DYND_UNUSED(self))
     {
-        *dst = **reinterpret_cast<uint64_t **>(src) !=
-               DYND_FLOAT64_NA_AS_UINT;
+      *dst = DYND_ISNAN(**reinterpret_cast<double **>(src)) == 0;
     }
 
     static void strided(char *dst, intptr_t dst_stride, char **src,
@@ -208,9 +208,9 @@ struct is_avail<double> {
         char *src0 = src[0];
         intptr_t src0_stride = src_stride[0];
         for (size_t i = 0; i != count; ++i) {
-            *dst = *reinterpret_cast<uint64_t *>(src0) != DYND_FLOAT64_NA_AS_UINT;
-            dst += dst_stride;
-            src0 += src0_stride;
+          *dst = DYND_ISNAN(*reinterpret_cast<double *>(src0)) == 0;
+          dst += dst_stride;
+          src0 += src0_stride;
         }
     }
 };

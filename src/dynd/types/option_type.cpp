@@ -89,11 +89,9 @@ bool option_type::is_avail(const char *arrmeta, const char *data,
     case int128_type_id:
       return *reinterpret_cast<const dynd_int128 *>(data) != DYND_INT128_NA;
     case float32_type_id:
-      return *reinterpret_cast<const uint32_t *>(data) !=
-             DYND_FLOAT32_NA_AS_UINT;
+      return !DYND_ISNAN(*reinterpret_cast<const float *>(data));
     case float64_type_id:
-      return *reinterpret_cast<const uint64_t *>(data) !=
-             DYND_FLOAT64_NA_AS_UINT;
+      return !DYND_ISNAN(*reinterpret_cast<const double *>(data));
     case complex_float32_type_id:
       return reinterpret_cast<const uint32_t *>(data)[0] !=
                  DYND_FLOAT32_NA_AS_UINT ||
