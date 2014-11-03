@@ -96,6 +96,33 @@ TEST(OptionType, Cast) {
                 nd::view(b, "3 * int"));
 }
 
+TEST(OptionType, FloatNAvsNaN) {
+  nd::array a = nd::empty("3 * ?float64");
+
+  parse_json(a, "[0, null, \"nan\"]");
+  // This is matching R's behavior with floating point NaN
+  EXPECT_TRUE(nd::is_scalar_avail(a(0)));
+  EXPECT_FALSE(nd::is_scalar_avail(a(1)));
+  EXPECT_FALSE(nd::is_scalar_avail(a(2)));
+  // TODO: An isnan arrfunc should return false, NA, true
+}
+
+TEST(OptionType, Float) {
+  nd::array a = nd::empty("5 * float64");
+
+  parse_json(a, "[12, 0, \"nan\", -99, \"nan\"]");
+
+  // Assigning from a float NaN value to an ?int type converts NaN
+  // to NA values
+  nd::array b = nd::empty(5, "?int");
+  b.vals() = a;
+  EXPECT_EQ(12, b(0).as<int>());
+  EXPECT_EQ(0, b(1).as<int>());
+  EXPECT_FALSE(nd::is_scalar_avail(b(2)));
+  EXPECT_EQ(-99, b(3).as<int>());
+  EXPECT_FALSE(nd::is_scalar_avail(b(4)));
+}
+
 TEST(OptionType, Date) {
   nd::array a = nd::empty("5 * ?date");
 
