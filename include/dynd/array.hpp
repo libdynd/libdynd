@@ -1058,9 +1058,19 @@ namespace detail {
 } // namespace detail
 
 /**
- * Constructs an uninitialized array of the given dtype.
+ * Constructs an uninitialized array of the given dtype. This is
+ * the usual function to use for allocating such an array.
  */
 array empty(const ndt::type &tp);
+
+/**
+ * Constructs an uninitialized array with uninitialized arrmeta of the
+ * given dtype.
+ *
+ * IMPORTANT: You should use nd::empty normally. If you use this function,
+ *            you must manually initialize the arrmeta as well.
+ */
+array empty_shell(const ndt::type &tp);
 
 /**
  * Constructs an uninitialized array of the given dtype, with ndim/shape

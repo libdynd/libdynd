@@ -95,6 +95,30 @@ public:
 
     void foreach_leading(const char *arrmeta, char *data, foreach_fn_t callback,
                          void *callback_data) const;
+
+    /**
+     * Fills in the array of default data offsets based on the data sizes
+     * and alignments of the types.
+     */
+    static void fill_default_data_offsets(intptr_t n, const ndt::type *tps,
+                                          uintptr_t *out_data_offsets)
+    {
+      size_t offs = 0;
+      if (n > 0) {
+        out_data_offsets[0] = 0;
+        for (intptr_t i = 1; i < n; ++i) {
+          const ndt::type &tp = tps[i - 1];
+          if (!tp.is_builtin()) {
+            offs += tp.extended()->get_default_data_size();
+          }
+          else {
+            offs += tp.get_data_size();
+          }
+          offs = inc_to_alignment(offs, tps[i].get_data_alignment());
+          out_data_offsets[i] = offs;
+        }
+      }
+    }
 };
 
 

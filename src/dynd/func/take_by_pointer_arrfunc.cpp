@@ -4,6 +4,7 @@
 //
 
 #include <dynd/func/take_by_pointer_arrfunc.hpp>
+#include <dynd/kernels/expr_kernels.hpp>
 
 using namespace std;
 using namespace dynd;

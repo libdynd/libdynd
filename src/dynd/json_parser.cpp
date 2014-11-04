@@ -845,12 +845,11 @@ void dynd::parse_json(nd::array &out, const char *json_begin,
 nd::array dynd::parse_json(const ndt::type &tp, const char *json_begin,
                            const char *json_end, const eval::eval_context *ectx)
 {
-    nd::array result;
-    result = nd::empty(tp);
-    parse_json(result, json_begin, json_end, ectx);
-    if (!tp.is_builtin()) {
-        tp.extended()->arrmeta_finalize_buffers(result.get_arrmeta());
-    }
-    result.flag_as_immutable();
-    return result;
+  nd::array result;
+  result = nd::empty(tp);
+  parse_json(result, json_begin, json_end, ectx);
+  if (!tp.is_builtin()) {
+    tp.extended()->arrmeta_finalize_buffers(result.get_arrmeta());
+  }
+  return result;
 }

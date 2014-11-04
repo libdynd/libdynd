@@ -273,3 +273,106 @@ void struct_type::get_dynamic_array_properties(const std::pair<std::string, gfun
     *out_properties = m_array_properties.empty() ? NULL : &m_array_properties[0];
     *out_count = (int)m_array_properties.size();
 }
+
+nd::array dynd::struct_concat(nd::array lhs, nd::array rhs)
+{
+  nd::array res;
+  if (lhs.is_null()) {
+    res = rhs;
+    return res;
+  }
+  if (rhs.is_null()) {
+    res = lhs;
+    return res;
+  }
+  const ndt::type &lhs_tp = lhs.get_type(), &rhs_tp = rhs.get_type();
+  if (lhs_tp.get_kind() != struct_kind) {
+    stringstream ss;
+    ss << "Cannot concatenate array with type " << lhs_tp << " as a struct";
+    throw invalid_argument(ss.str());
+  }
+  if (rhs_tp.get_kind() != struct_kind) {
+    stringstream ss;
+    ss << "Cannot concatenate array with type " << rhs_tp << " as a struct";
+    throw invalid_argument(ss.str());
+  }
+
+  // Make an empty shell struct by concatenating the fields together
+  intptr_t lhs_n = lhs_tp.tcast<base_struct_type>()->get_field_count();
+  intptr_t rhs_n = rhs_tp.tcast<base_struct_type>()->get_field_count();
+  intptr_t res_n = lhs_n + rhs_n;
+  nd::array res_field_names = nd::empty(res_n, ndt::make_string());
+  nd::array res_field_types = nd::empty(res_n, ndt::make_type());
+  res_field_names(irange(0, lhs_n)).vals() =
+      lhs_tp.tcast<base_struct_type>()->get_field_names();
+  res_field_names(irange(lhs_n, res_n)).vals() =
+      rhs_tp.tcast<base_struct_type>()->get_field_names();
+  res_field_types(irange(0, lhs_n)).vals() =
+      lhs_tp.tcast<base_struct_type>()->get_field_types();
+  res_field_types(irange(lhs_n, res_n)).vals() =
+      rhs_tp.tcast<base_struct_type>()->get_field_types();
+  ndt::type res_tp = ndt::make_struct(res_field_names, res_field_types);
+  const ndt::type *res_field_tps =
+      res_tp.tcast<base_struct_type>()->get_field_types_raw();
+  res = nd::empty_shell(res_tp);
+
+  // Initialize the default data offsets for the struct arrmeta
+  struct_type::fill_default_data_offsets(
+      res_n, res_tp.tcast<base_struct_type>()->get_field_types_raw(),
+      reinterpret_cast<uintptr_t *>(res.get_arrmeta()));
+  // Get information about the arrmeta layout of the input and res
+  const uintptr_t *lhs_arrmeta_offsets =
+      lhs_tp.tcast<base_struct_type>()->get_arrmeta_offsets_raw();
+  const uintptr_t *rhs_arrmeta_offsets =
+      rhs_tp.tcast<base_struct_type>()->get_arrmeta_offsets_raw();
+  const uintptr_t *res_arrmeta_offsets =
+      res_tp.tcast<base_struct_type>()->get_arrmeta_offsets_raw();
+  const char *lhs_arrmeta = lhs.get_arrmeta();
+  const char *rhs_arrmeta = rhs.get_arrmeta();
+  char *res_arrmeta = res.get_arrmeta();
+  // Copy the arrmeta from the input arrays
+  for (intptr_t i = 0; i < lhs_n; ++i) {
+    const ndt::type &tp = res_field_tps[i];
+    if (!tp.is_builtin()) {
+      tp.extended()->arrmeta_copy_construct(
+          res_arrmeta + res_arrmeta_offsets[i],
+          lhs_arrmeta + lhs_arrmeta_offsets[i], lhs.get_data_memblock().get());
+    }
+  }
+  for (intptr_t i = 0; i < rhs_n; ++i) {
+    const ndt::type &tp = res_field_tps[i + lhs_n];
+    if (!tp.is_builtin()) {
+      tp.extended()->arrmeta_copy_construct(
+          res_arrmeta + res_arrmeta_offsets[i + lhs_n],
+          rhs_arrmeta + rhs_arrmeta_offsets[i], rhs.get_data_memblock().get());
+    }
+  }
+
+  // Get information about the data layout of the input and res
+  const uintptr_t *lhs_data_offsets =
+      lhs_tp.tcast<base_struct_type>()->get_data_offsets(lhs.get_arrmeta());
+  const uintptr_t *rhs_data_offsets =
+      rhs_tp.tcast<base_struct_type>()->get_data_offsets(rhs.get_arrmeta());
+  const uintptr_t *res_data_offsets =
+      res_tp.tcast<base_struct_type>()->get_data_offsets(res.get_arrmeta());
+  const char *lhs_data = lhs.get_readonly_originptr();
+  const char *rhs_data = rhs.get_readonly_originptr();
+  char *res_data = res.get_readwrite_originptr();
+  // Copy the data from the input arrays
+  for (intptr_t i = 0; i < lhs_n; ++i) {
+    const ndt::type &tp = res_field_tps[i];
+    typed_data_copy(tp, res_arrmeta + res_arrmeta_offsets[i],
+                    res_data + res_data_offsets[i],
+                    lhs_arrmeta + lhs_arrmeta_offsets[i],
+                    lhs_data + lhs_data_offsets[i]);
+  }
+  for (intptr_t i = 0; i < rhs_n; ++i) {
+    const ndt::type &tp = res_field_tps[i + lhs_n];
+    typed_data_copy(tp, res_arrmeta + res_arrmeta_offsets[i + lhs_n],
+                    res_data + res_data_offsets[i + lhs_n],
+                    rhs_arrmeta + rhs_arrmeta_offsets[i],
+                    rhs_data + rhs_data_offsets[i]);
+  }
+
+  return res;
+}
