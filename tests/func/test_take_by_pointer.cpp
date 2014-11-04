@@ -23,7 +23,7 @@ TEST(TakeByPointer, Simple) {
     nd::array a, idx, res;
 
     a = parse_json("4 * int", "[0, 1, 2, 3]");
-    idx = parse_json("4 * int64", "[2, 1, 0, 3]");
+    idx = parse_json("4 * intptr", "[2, 1, 0, 3]");
     res = af(a, idx);
     EXPECT_EQ(4, res.get_dim_size());
     EXPECT_EQ(ndt::make_type<int *>(), res.get_dtype());
@@ -34,7 +34,7 @@ TEST(TakeByPointer, Simple) {
 
     a = parse_json("2 * 4 * float64",
         "[[-4.5, 1, 2.1, 3.5], [-32.7, 15.3, 6.9, 7]]");
-    idx = parse_json("3 * 2 * int64",
+    idx = parse_json("3 * 2 * intptr",
         "[[0, 2], [1, 0], [1, 1]]");
     res = af(a, idx);
     EXPECT_EQ(3, res.get_dim_size());
@@ -48,7 +48,7 @@ TEST(TakeByPointer, Simple) {
         "[[16, 17, 18, 19], [20, 21, 22, 23], [24, 25, 26, 27], [28, 29, 30, 31]],"
         "[[32, 33, 34, 35], [36, 37, 38, 39], [40, 41, 42, 43], [44, 45, 46, 47]],"
         "[[48, 49, 50, 51], [52, 53, 54, 55], [56, 57, 58, 59], [60, 61, 62, 63]]]");
-    idx = parse_json("5 * 3 * int64",
+    idx = parse_json("5 * 3 * intptr",
         "[[3, 2, 1], [1, 0, 1], [2, 1, 2], [3, 3, 3], [0, 2, 1]]");
     res = af(a, idx);
     EXPECT_EQ(5, res.get_dim_size());
@@ -58,6 +58,4 @@ TEST(TakeByPointer, Simple) {
     EXPECT_EQ(38, *res(2).as<int *>());
     EXPECT_EQ(63, *res(3).as<int *>());
     EXPECT_EQ(9, *res(4).as<int *>());
-
-
 }
