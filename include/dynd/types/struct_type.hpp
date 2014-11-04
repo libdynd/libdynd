@@ -286,6 +286,37 @@ struct pack<nd::array> {
 };
 
 template <typename T>
+struct pack<std::vector<T> > {
+  static ndt::type make_type(const std::vector<T> &val)
+  {
+    // Depending on the data size, store the data by value or as a pointer
+    // to an nd::array
+    if (sizeof(T) * val.size() > 32) {
+      return ndt::make_pointer(
+          ndt::make_fixed_dim(val.size(), ndt::make_exact_type<T>()));
+    }
+    else {
+      return ndt::make_fixed_dim(val.size(), ndt::make_exact_type<T>());
+    }
+  }
+
+  static void insert(const std::vector<T> &val, const ndt::type &tp,
+                     char *out_arrmeta, char *out_data)
+  {
+    if (tp.get_type_id() == pointer_type_id) {
+      pack<nd::array>::insert(val, tp, out_arrmeta, out_data);
+    } else {
+      if (!tp.is_builtin()) {
+        tp.extended()->arrmeta_default_construct(out_arrmeta, true);
+      }
+      if (!val.empty()) {
+        memcpy(out_data, &val[0], sizeof(T) * val.size());
+      }
+    }
+  }
+};
+
+template <typename T>
 void pack_insert(const T &val, const ndt::type &tp, char *out_arrmeta,
                  char *out_data)
 {

@@ -506,8 +506,30 @@ TEST(StructType, Pack)
   EXPECT_EQ(a.get_type(),
             ndt::make_struct(ndt::make_type<int>(), "val0",
                              ndt::make_pointer(b.get_type()), "val1"));
-  EXPECT_EQ(a.p("val0").as<int>(), 5);
+  EXPECT_EQ(5, a.p("val0").as<int>());
   EXPECT_EQ(*reinterpret_cast<const char *const *>(
                 a.p("val1").get_readonly_originptr()),
             b.get_readonly_originptr());
+
+  // Check that the reference for `b` was tracked right
+  b = nd::array();
+  EXPECT_JSON_EQ_ARR("[0, 1, 2, 3]", a.p("val1").f("dereference"));
+}
+
+TEST(StructType, PackStdVector)
+{
+  vector<float> v1;
+  v1.push_back(1.5f);
+  v1.push_back(-2.25f);
+  vector<int64_t> v2;
+  for (int i = 0; i < 10; ++i) {
+    v2.push_back(i);
+  }
+
+  nd::array a = pack("first", v1, "second", v2);
+  EXPECT_EQ(ndt::type("{first: 2 * float32, second: pointer[10 * int64]}"),
+            a.get_type());
+  EXPECT_JSON_EQ_ARR("[1.5, -2.25]", a.p("first"));
+  EXPECT_JSON_EQ_ARR("[0, 1, 2, 3, 4, 5, 6, 7, 8, 9]",
+                     a.p("second").f("dereference"));
 }
