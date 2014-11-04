@@ -468,40 +468,68 @@ TEST(StructType, SingleCompareDifferentArrmeta) {
     EXPECT_THROW((b > a), not_comparable_error);
 }
 
-TEST(StructType, Pack) {
-    nd::array a, b;
+TEST(StructType, Pack)
+{
+  nd::array a, b;
 
-    a = pack("val", 5);
-    EXPECT_EQ(a.get_type(),
-        ndt::make_struct(ndt::make_type<int>(), "val"));
-    EXPECT_EQ(a.p("val").as<int>(), 5);
+  a = pack("val", 5);
+  EXPECT_EQ(a.get_type(), ndt::make_struct(ndt::make_type<int>(), "val"));
+  EXPECT_EQ(a.p("val").as<int>(), 5);
 
-    a = pack("val0", -3, "val1", 7.5);
-    EXPECT_EQ(a.get_type(),
-        ndt::make_struct(ndt::make_type<int>(), "val0", ndt::make_type<double>(), "val1"));
-    EXPECT_EQ(a.p("val0").as<int>(), -3);
-    EXPECT_EQ(a.p("val1").as<double>(), 7.5);
+  a = pack("val0", -3, "val1", 7.5);
+  EXPECT_EQ(a.get_type(), ndt::make_struct(ndt::make_type<int>(), "val0",
+                                           ndt::make_type<double>(), "val1"));
+  EXPECT_EQ(a.p("val0").as<int>(), -3);
+  EXPECT_EQ(a.p("val1").as<double>(), 7.5);
 
-    a = pack(a, "val2", 10);
-    EXPECT_EQ(a.get_type(),
-        ndt::make_struct(ndt::make_type<int>(), "val0", ndt::make_type<double>(), "val1", ndt::make_type<int>(), "val2"));
-    EXPECT_EQ(a.p("val0").as<int>(), -3);
-    EXPECT_EQ(a.p("val1").as<double>(), 7.5);
-    EXPECT_EQ(a.p("val2").as<int>(), 10);
+  a = pack(a, "val2", 10);
+  EXPECT_EQ(a.get_type(), ndt::make_struct(ndt::make_type<int>(), "val0",
+                                           ndt::make_type<double>(), "val1",
+                                           ndt::make_type<int>(), "val2"));
+  EXPECT_EQ(a.p("val0").as<int>(), -3);
+  EXPECT_EQ(a.p("val1").as<double>(), 7.5);
+  EXPECT_EQ(a.p("val2").as<int>(), 10);
 
-    a = pack("val0", 2.3, "val1", 7.5f, "val2", std::complex<double>(0.0, 1.0));
-    EXPECT_EQ(a.get_type(),
-        ndt::make_struct(ndt::make_type<double>(), "val0", ndt::make_type<float>(), "val1", ndt::make_type<std::complex<double> >(), "val2"));
-    EXPECT_EQ(a.p("val0").as<double>(), 2.3);
-    EXPECT_EQ(a.p("val1").as<float>(), 7.5f);
-    EXPECT_EQ(a.p("val2").as<std::complex<double> >(), std::complex<double>(0.0, 1.0));
+  a = pack("val0", 2.3, "val1", 7.5f, "val2", std::complex<double>(0.0, 1.0));
+  EXPECT_EQ(a.get_type(),
+            ndt::make_struct(ndt::make_type<double>(), "val0",
+                             ndt::make_type<float>(), "val1",
+                             ndt::make_type<std::complex<double> >(), "val2"));
+  EXPECT_EQ(a.p("val0").as<double>(), 2.3);
+  EXPECT_EQ(a.p("val1").as<float>(), 7.5f);
+  EXPECT_EQ(a.p("val2").as<std::complex<double> >(),
+            std::complex<double>(0.0, 1.0));
 
-    b = parse_json("4 * int", "[0, 1, 2, 3]");
+  b = parse_json("4 * int", "[0, 1, 2, 3]");
 
-    a = pack("val0", 5, "val1", b);
-    EXPECT_EQ(a.get_type(),
-        ndt::make_struct(ndt::make_type<int>(), "val0", ndt::make_pointer(b.get_type()), "val1"));
-    EXPECT_EQ(a.p("val0").as<int>(), 5);
-    EXPECT_EQ(*reinterpret_cast<const char *const *>(a.p("val1").get_readonly_originptr()),
-        b.get_readonly_originptr());
+  a = pack("val0", 5, "val1", b);
+  EXPECT_EQ(a.get_type(),
+            ndt::make_struct(ndt::make_type<int>(), "val0",
+                             ndt::make_pointer(b.get_type()), "val1"));
+  EXPECT_EQ(5, a.p("val0").as<int>());
+  EXPECT_EQ(*reinterpret_cast<const char *const *>(
+                a.p("val1").get_readonly_originptr()),
+            b.get_readonly_originptr());
+
+  // Check that the reference for `b` was tracked right
+  b = nd::array();
+  EXPECT_JSON_EQ_ARR("[0, 1, 2, 3]", a.p("val1").f("dereference"));
+}
+
+TEST(StructType, PackStdVector)
+{
+  vector<float> v1;
+  v1.push_back(1.5f);
+  v1.push_back(-2.25f);
+  vector<int64_t> v2;
+  for (int i = 0; i < 10; ++i) {
+    v2.push_back(i);
+  }
+
+  nd::array a = pack("first", v1, "second", v2);
+  EXPECT_EQ(ndt::type("{first: 2 * float32, second: pointer[10 * int64]}"),
+            a.get_type());
+  EXPECT_JSON_EQ_ARR("[1.5, -2.25]", a.p("first"));
+  EXPECT_JSON_EQ_ARR("[0, 1, 2, 3, 4, 5, 6, 7, 8, 9]",
+                     a.p("second").f("dereference"));
 }

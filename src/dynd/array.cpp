@@ -1768,7 +1768,7 @@ nd::array nd::eval_raw_copy(const ndt::type& dt, const char *arrmeta, const char
     return result;
 }
 
-nd::array nd::empty(const ndt::type &tp)
+nd::array nd::empty_shell(const ndt::type &tp)
 {
   if (tp.is_builtin()) {
     char *data_ptr = NULL;
@@ -1813,8 +1813,6 @@ nd::array nd::empty(const ndt::type &tp)
     }
     array_preamble *preamble = reinterpret_cast<array_preamble *>(result.get());
     preamble->m_type = ndt::type(tp).release();
-    preamble->m_type->arrmeta_default_construct(
-        reinterpret_cast<char *>(preamble + 1), true);
     preamble->m_data_pointer = data_ptr;
     preamble->m_data_reference = NULL;
     preamble->m_flags = nd::read_access_flag | nd::write_access_flag;
@@ -1824,6 +1822,19 @@ nd::array nd::empty(const ndt::type &tp)
     ss << "Cannot create a dynd array with symbolic type " << tp;
     throw type_error(ss.str());
   }
+}
+
+nd::array nd::empty(const ndt::type &tp)
+{
+  // Create an empty shell
+  nd::array res = nd::empty_shell(tp);
+  // Construct the arrmeta with default settings
+  if (tp.get_arrmeta_size() > 0) {
+    array_preamble *preamble = res.get_ndo();
+    preamble->m_type->arrmeta_default_construct(
+        reinterpret_cast<char *>(preamble + 1), true);
+  }
+  return res;
 }
 
 nd::array nd::empty_like(const nd::array& rhs, const ndt::type& uniform_tp)

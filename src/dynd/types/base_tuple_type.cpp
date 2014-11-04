@@ -102,20 +102,22 @@ bool base_tuple_type::is_unique_data_owner(const char *arrmeta) const
 
 size_t base_tuple_type::get_default_data_size() const
 {
-    intptr_t field_count = get_field_count();
-    // Default layout is to match the field order - could reorder the elements for more efficient packing
-    size_t s = 0;
-    for (intptr_t i = 0; i != field_count; ++i) {
-        const ndt::type& ft = get_field_type(i);
-        s = inc_to_alignment(s, ft.get_data_alignment());
-        if (!ft.is_builtin()) {
-            s += ft.extended()->get_default_data_size();
-        } else {
-            s += ft.get_data_size();
-        }
+  intptr_t field_count = get_field_count();
+  // Default layout is to match the field order - could reorder the elements for
+  // more efficient packing
+  size_t s = 0;
+  for (intptr_t i = 0; i != field_count; ++i) {
+    const ndt::type &ft = get_field_type(i);
+    s = inc_to_alignment(s, ft.get_data_alignment());
+    if (!ft.is_builtin()) {
+      s += ft.extended()->get_default_data_size();
     }
-    s = inc_to_alignment(s, m_members.data_alignment);
-    return s;
+    else {
+      s += ft.get_data_size();
+    }
+  }
+  s = inc_to_alignment(s, m_members.data_alignment);
+  return s;
 }
 
 void base_tuple_type::get_shape(intptr_t ndim, intptr_t i, intptr_t *out_shape,
@@ -248,45 +250,34 @@ intptr_t base_tuple_type::apply_linear_index(intptr_t nindices, const irange *in
     }
 }
 
-void base_tuple_type::arrmeta_default_construct(char *arrmeta, bool blockref_alloc) const
+void base_tuple_type::arrmeta_default_construct(char *arrmeta,
+                                                bool blockref_alloc) const
 {
   const uintptr_t *arrmeta_offsets = get_arrmeta_offsets_raw();
   uintptr_t *data_offsets = get_arrmeta_data_offsets(arrmeta);
-  if (data_offsets == NULL) {
-    for (intptr_t i = 0, i_end = get_field_count(); i != i_end; ++i) {
-      const ndt::type &field_dt = get_field_type(i);
-      if (!field_dt.is_builtin()) {
-        field_dt.extended()->arrmeta_default_construct(
-            arrmeta + arrmeta_offsets[i], blockref_alloc);
+  const ndt::type *field_tps = get_field_types_raw();
+  // If the arrmeta has data offsets, fill them in
+  if (data_offsets != NULL) {
+    fill_default_data_offsets(get_field_count(), field_tps, data_offsets);
+  }
+  // Default construct the arrmeta for all the fields
+  for (intptr_t i = 0, i_end = get_field_count(); i != i_end; ++i) {
+    const ndt::type &tp = field_tps[i];
+    if (!tp.is_builtin()) {
+      try {
+        tp.extended()->arrmeta_default_construct(arrmeta + arrmeta_offsets[i],
+                                                 blockref_alloc);
       }
-    }
-  } else {
-    size_t offs = 0;
-    for (intptr_t i = 0, i_end = get_field_count(); i != i_end; ++i) {
-      const ndt::type &field_dt = get_field_type(i);
-      offs = inc_to_alignment(offs, field_dt.get_data_alignment());
-      data_offsets[i] = offs;
-      if (!field_dt.is_builtin()) {
-        try
-        {
-          field_dt.extended()->arrmeta_default_construct(
-              arrmeta + arrmeta_offsets[i], blockref_alloc);
-        }
-        catch (...)
-        {
-          // Since we're explicitly controlling the memory, need to manually do
-          // the cleanup too
-          for (intptr_t j = 0; j < i; ++j) {
-            const ndt::type &ft = get_field_type(j);
-            if (!ft.is_builtin()) {
-              ft.extended()->arrmeta_destruct(arrmeta + arrmeta_offsets[i]);
-            }
+      catch (...) {
+        // Since we're explicitly controlling the memory, need to manually do
+        // the cleanup too
+        for (intptr_t j = 0; j < i; ++j) {
+          const ndt::type &ft = get_field_type(j);
+          if (!ft.is_builtin()) {
+            ft.extended()->arrmeta_destruct(arrmeta + arrmeta_offsets[i]);
           }
-          throw;
         }
-        offs += field_dt.extended()->get_default_data_size();
-      } else {
-        offs += field_dt.get_data_size();
+        throw;
       }
     }
   }

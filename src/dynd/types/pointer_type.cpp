@@ -8,6 +8,7 @@
 #include <dynd/memblock/pod_memory_block.hpp>
 #include <dynd/kernels/string_assignment_kernels.hpp>
 #include <dynd/kernels/assignment_kernels.hpp>
+#include <dynd/kernels/pointer_assignment_kernels.hpp>
 #include <dynd/func/make_callable.hpp>
 #include <dynd/pp/list.hpp>
 
