@@ -729,6 +729,10 @@ public:
     array to_cuda_device() const;
 #endif // DYND_CUDA
 
+    bool is_missing() const;
+
+    void assign_na();
+
     /** Sorting comparison between two arrays. (Returns a bool, does not broadcast) */
     bool op_sorting_less(const array& rhs) const;
     /** Less than comparison between two arrays. (Returns a bool, does not broadcast) */

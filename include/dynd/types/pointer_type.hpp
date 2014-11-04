@@ -76,7 +76,7 @@ public:
 
     ndt::type get_type_at_dimension(char **inout_arrmeta, intptr_t i, intptr_t total_ndim = 0) const;
 
-        void get_shape(intptr_t ndim, intptr_t i, intptr_t *out_shape, const char *arrmeta, const char *data) const;
+    void get_shape(intptr_t ndim, intptr_t i, intptr_t *out_shape, const char *arrmeta, const char *data) const;
 
     axis_order_classification_t classify_axis_order(const char *arrmeta) const;
 
@@ -100,6 +100,8 @@ public:
                                   const char *src_arrmeta,
                                   kernel_request_t kernreq,
                                   const eval::eval_context *ectx) const;
+
+    nd::array get_option_nafunc() const;
 
     void get_dynamic_type_properties(
                     const std::pair<std::string, gfunc::callable> **out_properties,

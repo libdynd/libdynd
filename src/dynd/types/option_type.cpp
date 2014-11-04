@@ -248,6 +248,14 @@ void option_type::set_from_utf8_string(const char *arrmeta, char *data,
   }
 }
 
+ndt::type option_type::get_type_at_dimension(char **inout_arrmeta, intptr_t i, intptr_t total_ndim) const {
+    if (i == 0) {
+        return ndt::type(this, true);
+    } else {
+        return m_value_tp.get_type_at_dimension(inout_arrmeta, i, total_ndim);
+    }
+}
+
 bool option_type::is_lossless_assignment(const ndt::type &dst_tp,
                                          const ndt::type &src_tp) const
 {

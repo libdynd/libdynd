@@ -8,6 +8,7 @@
 #include <dynd/memblock/pod_memory_block.hpp>
 #include <dynd/kernels/string_assignment_kernels.hpp>
 #include <dynd/kernels/assignment_kernels.hpp>
+#include <dynd/kernels/option_kernels.hpp>
 #include <dynd/kernels/pointer_assignment_kernels.hpp>
 #include <dynd/func/make_callable.hpp>
 #include <dynd/pp/list.hpp>
@@ -350,6 +351,11 @@ size_t pointer_type::make_assignment_kernel(
     return base_expr_type::make_assignment_kernel(ckb, ckb_offset,
                     dst_tp, dst_arrmeta, src_tp, src_arrmeta,
                     kernreq, ectx);
+}
+
+nd::array pointer_type::get_option_nafunc() const
+{
+    return kernels::get_option_builtin_pointer_nafunc(get_value_type().get_type_id());
 }
 
 static ndt::type property_get_target_type(const ndt::type &tp)

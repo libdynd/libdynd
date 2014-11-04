@@ -1051,6 +1051,27 @@ nd::array nd::array::to_cuda_device() const
 }
 #endif
 
+bool nd::array::is_missing() const
+{
+    ndt::type tp = get_type();
+    if (tp.get_type_id() == option_type_id) {
+       return !tp.tcast<option_type>()->is_avail(get_arrmeta(), get_readonly_originptr(),
+            &eval::default_eval_context);
+    }
+
+    std::cout << "no opt type" << std::endl;
+    return false;
+}
+
+void nd::array::assign_na()
+{
+    ndt::type tp = get_type();
+    if (tp.get_type_id() == option_type_id) {
+        tp.tcast<option_type>()->assign_na(get_arrmeta(), get_readwrite_originptr(),
+            &eval::default_eval_context);
+    }
+}
+
 bool nd::array::op_sorting_less(const array& rhs) const
 {
     comparison_ckernel_builder k;

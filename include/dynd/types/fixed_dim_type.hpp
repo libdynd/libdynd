@@ -98,6 +98,8 @@ public:
                                   kernel_request_t kernreq,
                                   const eval::eval_context *ectx) const;
 
+    nd::array get_option_nafunc() const;
+
     void foreach_leading(const char *arrmeta, char *data,
                          foreach_fn_t callback, void *callback_data) const;
 
