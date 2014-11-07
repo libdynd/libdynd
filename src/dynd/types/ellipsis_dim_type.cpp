@@ -125,11 +125,11 @@ void ellipsis_dim_type::arrmeta_destruct(char *DYND_UNUSED(arrmeta)) const
 }
 
 static nd::array property_get_name(const ndt::type& tp) {
-    return tp.tcast<ellipsis_dim_type>()->get_name();
+    return tp.extended<ellipsis_dim_type>()->get_name();
 }
 
 static ndt::type property_get_element_type(const ndt::type& dt) {
-    return dt.tcast<ellipsis_dim_type>()->get_element_type();
+    return dt.extended<ellipsis_dim_type>()->get_element_type();
 }
 
 void ellipsis_dim_type::get_dynamic_type_properties(

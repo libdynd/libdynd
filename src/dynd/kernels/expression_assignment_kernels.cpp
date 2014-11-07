@@ -162,7 +162,7 @@ size_t dynd::make_expression_assignment_kernel(
 {
     intptr_t root_ckb_offset = ckb_offset;
     if (dst_tp.get_kind() == expr_kind) {
-        const base_expr_type *dst_bed = dst_tp.tcast<base_expr_type>();
+        const base_expr_type *dst_bed = dst_tp.extended<base_expr_type>();
         if (src_tp == dst_bed->get_value_type()) {
             // In this case, it's just a chain of value -> operand on the dst side
             const ndt::type& opdt = dst_bed->get_operand_type();
@@ -233,7 +233,7 @@ size_t dynd::make_expression_assignment_kernel(
                             kernreq, ectx);
         }
     } else {
-        const base_expr_type *src_bed = src_tp.tcast<base_expr_type>();
+        const base_expr_type *src_bed = src_tp.extended<base_expr_type>();
         if (dst_tp == src_bed->get_value_type()) {
             // In this case, it's just a chain of operand -> value on the src side
             const ndt::type& opdt = src_bed->get_operand_type();

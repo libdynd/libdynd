@@ -27,7 +27,7 @@ TEST(SymbolicTypes, CreateFuncProto) {
     EXPECT_EQ(0u, tp.get_data_size());
     EXPECT_EQ(1u, tp.get_data_alignment());
     EXPECT_FALSE(tp.is_pod());
-    fpt = tp.tcast<funcproto_type>();
+    fpt = tp.extended<funcproto_type>();
     ASSERT_EQ(3, fpt->get_narg());
     EXPECT_EQ(ndt::make_type<float>(), fpt->get_arg_type(0));
     EXPECT_EQ(ndt::make_type<int32_t>(), fpt->get_arg_type(1));
@@ -48,18 +48,18 @@ TEST(SymbolicTypes, CreateFuncProto) {
 
     // Exercise a few different variations
     tp = ndt::make_funcproto<int8_t ()>();
-    fpt = tp.tcast<funcproto_type>();
+    fpt = tp.extended<funcproto_type>();
     ASSERT_EQ(0, fpt->get_narg());
     EXPECT_EQ(ndt::make_type<int8_t>(), fpt->get_return_type());
 
     tp = ndt::make_funcproto<int16_t (int32_t)>();
-    fpt = tp.tcast<funcproto_type>();
+    fpt = tp.extended<funcproto_type>();
     ASSERT_EQ(1, fpt->get_narg());
     EXPECT_EQ(ndt::make_type<int16_t>(), fpt->get_return_type());
     EXPECT_EQ(ndt::make_type<int32_t>(), fpt->get_arg_type(0));
 
     tp = ndt::make_funcproto<int16_t (int32_t, int64_t)>();
-    fpt = tp.tcast<funcproto_type>();
+    fpt = tp.extended<funcproto_type>();
     ASSERT_EQ(2, fpt->get_narg());
     EXPECT_EQ(ndt::make_type<int16_t>(), fpt->get_return_type());
     EXPECT_EQ(ndt::make_type<int32_t>(), fpt->get_arg_type(0));
@@ -76,7 +76,7 @@ TEST(SymbolicTypes, CreateTypeVar) {
     EXPECT_EQ(0u, tp.get_data_size());
     EXPECT_EQ(1u, tp.get_data_alignment());
     EXPECT_FALSE(tp.is_pod());
-    tvt = tp.tcast<typevar_type>();
+    tvt = tp.extended<typevar_type>();
     EXPECT_EQ("Blah", tvt->get_name_str());
     // Roundtripping through a string
     EXPECT_EQ(tp, ndt::type(tp.str()));
@@ -104,7 +104,7 @@ TEST(SymbolicTypes, CreateTypeVarDim) {
     EXPECT_EQ(0u, tp.get_data_size());
     EXPECT_EQ(1u, tp.get_data_alignment());
     EXPECT_FALSE(tp.is_pod());
-    tvt = tp.tcast<typevar_dim_type>();
+    tvt = tp.extended<typevar_dim_type>();
     EXPECT_EQ("Blah", tvt->get_name_str());
     EXPECT_EQ(ndt::make_type<int>(), tvt->get_element_type());
     // Roundtripping through a string
@@ -139,7 +139,7 @@ TEST(SymbolicTypes, CreateEllipsisDim) {
     EXPECT_EQ(1u, tp.get_data_alignment());
     EXPECT_FALSE(tp.is_pod());
     EXPECT_TRUE(tp.is_symbolic());
-    et = tp.tcast<ellipsis_dim_type>();
+    et = tp.extended<ellipsis_dim_type>();
     EXPECT_EQ("Blah", et->get_name_str());
     EXPECT_EQ(ndt::make_type<int>(), et->get_element_type());
     // Roundtripping through a string
@@ -156,7 +156,7 @@ TEST(SymbolicTypes, CreateEllipsisDim) {
     EXPECT_EQ(1u, tp.get_data_alignment());
     EXPECT_FALSE(tp.is_pod());
     EXPECT_TRUE(tp.is_symbolic());
-    et = tp.tcast<ellipsis_dim_type>();
+    et = tp.extended<ellipsis_dim_type>();
     EXPECT_TRUE(et->get_name().is_null());
     EXPECT_EQ(ndt::make_type<int>(), et->get_element_type());
     // Roundtripping through a string

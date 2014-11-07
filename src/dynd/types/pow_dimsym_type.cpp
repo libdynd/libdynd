@@ -19,7 +19,7 @@ pow_dimsym_type::pow_dimsym_type(const ndt::type &base_tp, const nd::string &exp
       m_base_tp(base_tp), m_exponent(exponent)
 {
   if (base_tp.get_kind() != dim_kind ||
-      base_tp.tcast<base_dim_type>()->get_element_type().get_type_id() !=
+      base_tp.extended<base_dim_type>()->get_element_type().get_type_id() !=
           void_type_id) {
     stringstream ss;
     ss << "dynd base type for dimensional power symbolic type is not valid: "
@@ -49,10 +49,10 @@ void pow_dimsym_type::print_type(std::ostream& o) const
 {
   switch (m_base_tp.get_type_id()) {
   case fixed_dim_type_id:
-    o << m_base_tp.tcast<fixed_dim_type>()->get_fixed_dim_size();
+    o << m_base_tp.extended<fixed_dim_type>()->get_fixed_dim_size();
     break;
   case cfixed_dim_type_id:
-    o << m_base_tp.tcast<cfixed_dim_type>()->get_fixed_dim_size();
+    o << m_base_tp.extended<cfixed_dim_type>()->get_fixed_dim_size();
     break;
   case fixed_dimsym_type_id:
     o << "fixed";
@@ -61,7 +61,7 @@ void pow_dimsym_type::print_type(std::ostream& o) const
     o << "var";
     break;
   case typevar_dim_type_id:
-    o << m_base_tp.tcast<typevar_dim_type>()->get_name_str();
+    o << m_base_tp.extended<typevar_dim_type>()->get_name_str();
     break;
   default:
     break;
@@ -145,11 +145,11 @@ void pow_dimsym_type::arrmeta_destruct(char *DYND_UNUSED(arrmeta)) const
 
 /*
 static nd::array property_get_name(const ndt::type& tp) {
-    return tp.tcast<typevar_dim_type>()->get_name();
+    return tp.extended<typevar_dim_type>()->get_name();
 }
 
 static ndt::type property_get_element_type(const ndt::type& dt) {
-    return dt.tcast<typevar_dim_type>()->get_element_type();
+    return dt.extended<typevar_dim_type>()->get_element_type();
 }
 
 void typevar_dim_type::get_dynamic_type_properties(

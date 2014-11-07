@@ -180,7 +180,7 @@ static void format_json_encoded_string(output_data &out, const char *begin,
 static void format_json_string(output_data &out, const ndt::type &dt,
                                const char *arrmeta, const char *data)
 {
-  const base_string_type *bsd = dt.tcast<base_string_type>();
+  const base_string_type *bsd = dt.extended<base_string_type>();
   string_encoding_t encoding = bsd->get_encoding();
   const char *begin = NULL, *end = NULL;
   bsd->get_string_range(&begin, &end, arrmeta, data);
@@ -190,7 +190,7 @@ static void format_json_string(output_data &out, const ndt::type &dt,
 static void format_json_option(output_data &out, const ndt::type &dt,
                                const char *arrmeta, const char *data)
 {
-  const option_type *ot = dt.tcast<option_type>();
+  const option_type *ot = dt.extended<option_type>();
   if (ot->is_avail(arrmeta, data, &eval::default_eval_context)) {
     format_json(out, ot->get_value_type(), arrmeta, data);
   } else {
@@ -237,7 +237,7 @@ static void format_json_datetime(output_data &out, const ndt::type &dt,
 static void format_json_struct(output_data &out, const ndt::type &dt,
                                const char *arrmeta, const char *data)
 {
-  const base_struct_type *bsd = dt.tcast<base_struct_type>();
+  const base_struct_type *bsd = dt.extended<base_struct_type>();
   intptr_t field_count = bsd->get_field_count();
   const size_t *data_offsets = bsd->get_data_offsets(arrmeta);
   const size_t *arrmeta_offsets = bsd->get_arrmeta_offsets_raw();
@@ -275,7 +275,7 @@ static void format_json_dim(output_data& out, const ndt::type& dt, const char *a
   switch (dt.get_type_id()) {
   case cfixed_dim_type_id:
   case fixed_dim_type_id: {
-    const base_dim_type *sad = dt.tcast<base_dim_type>();
+    const base_dim_type *sad = dt.extended<base_dim_type>();
     const fixed_dim_type_arrmeta *md =
         reinterpret_cast<const fixed_dim_type_arrmeta *>(arrmeta);
     ndt::type element_tp = sad->get_element_type();
@@ -290,7 +290,7 @@ static void format_json_dim(output_data& out, const ndt::type& dt, const char *a
     break;
   }
   case var_dim_type_id: {
-    const var_dim_type *vad = dt.tcast<var_dim_type>();
+    const var_dim_type *vad = dt.extended<var_dim_type>();
     const var_dim_type_arrmeta *md =
         reinterpret_cast<const var_dim_type_arrmeta *>(arrmeta);
     const var_dim_type_data *d =

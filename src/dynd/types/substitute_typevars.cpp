@@ -54,12 +54,12 @@ ndt::type ndt::detail::internal_substitute(
   switch (pattern.get_type_id()) {
     case pointer_type_id:
       return ndt::make_pointer(
-          ndt::substitute(pattern.tcast<pointer_type>()->get_target_type(),
+          ndt::substitute(pattern.extended<pointer_type>()->get_target_type(),
                           typevars, concrete));
     case fixed_dimsym_type_id:
       if (!concrete) {
         return ndt::make_fixed_dimsym(
-            ndt::substitute(pattern.tcast<base_dim_type>()->get_element_type(),
+            ndt::substitute(pattern.extended<base_dim_type>()->get_element_type(),
                             typevars, concrete));
       } else {
         throw invalid_argument("The dynd pattern type includes a symbolic "
@@ -68,53 +68,53 @@ ndt::type ndt::detail::internal_substitute(
       }
     case fixed_dim_type_id:
       return ndt::make_fixed_dim(
-          pattern.tcast<fixed_dim_type>()->get_fixed_dim_size(),
-          ndt::substitute(pattern.tcast<fixed_dim_type>()->get_element_type(),
+          pattern.extended<fixed_dim_type>()->get_fixed_dim_size(),
+          ndt::substitute(pattern.extended<fixed_dim_type>()->get_element_type(),
                           typevars, concrete));
     case cfixed_dim_type_id:
       return ndt::make_cfixed_dim(
-          pattern.tcast<cfixed_dim_type>()->get_fixed_dim_size(),
-          ndt::substitute(pattern.tcast<cfixed_dim_type>()->get_element_type(),
+          pattern.extended<cfixed_dim_type>()->get_fixed_dim_size(),
+          ndt::substitute(pattern.extended<cfixed_dim_type>()->get_element_type(),
                           typevars, concrete));
     case var_dim_type_id:
       return ndt::make_var_dim(
-          ndt::substitute(pattern.tcast<var_dim_type>()->get_element_type(),
+          ndt::substitute(pattern.extended<var_dim_type>()->get_element_type(),
                           typevars, concrete));
     case struct_type_id:
       return ndt::make_struct(
-          pattern.tcast<struct_type>()->get_field_names(),
+          pattern.extended<struct_type>()->get_field_names(),
           substitute_type_array(
-              pattern.tcast<base_tuple_type>()->get_field_types(), typevars,
+              pattern.extended<base_tuple_type>()->get_field_types(), typevars,
               concrete));
     case cstruct_type_id:
       return ndt::make_cstruct(
-          pattern.tcast<cstruct_type>()->get_field_names(),
+          pattern.extended<cstruct_type>()->get_field_names(),
           substitute_type_array(
-              pattern.tcast<base_tuple_type>()->get_field_types(), typevars,
+              pattern.extended<base_tuple_type>()->get_field_types(), typevars,
               concrete));
     case tuple_type_id:
       return ndt::make_tuple(
           substitute_type_array(
-              pattern.tcast<base_tuple_type>()->get_field_types(), typevars,
+              pattern.extended<base_tuple_type>()->get_field_types(), typevars,
               concrete));
     case ctuple_type_id:
       return ndt::make_ctuple(
           substitute_type_array(
-              pattern.tcast<base_tuple_type>()->get_field_types(), typevars,
+              pattern.extended<base_tuple_type>()->get_field_types(), typevars,
               concrete));
     case option_type_id:
       return ndt::make_option(ndt::substitute(
-          pattern.tcast<option_type>()->get_value_type(), typevars, concrete));
+          pattern.extended<option_type>()->get_value_type(), typevars, concrete));
     case funcproto_type_id:
       return ndt::make_funcproto(
           substitute_type_array(
-              pattern.tcast<funcproto_type>()->get_arg_types(), typevars,
+              pattern.extended<funcproto_type>()->get_arg_types(), typevars,
               concrete),
-          substitute(pattern.tcast<funcproto_type>()->get_return_type(),
+          substitute(pattern.extended<funcproto_type>()->get_return_type(),
                      typevars, concrete));
     case typevar_type_id: {
       map<nd::string, ndt::type>::const_iterator it =
-          typevars.find(pattern.tcast<typevar_type>()->get_name());
+          typevars.find(pattern.extended<typevar_type>()->get_name());
       if (it != typevars.end()) {
         if (it->second.get_ndim() != 0) {
           stringstream ss;
@@ -143,7 +143,7 @@ ndt::type ndt::detail::internal_substitute(
     }
     case typevar_dim_type_id: {
       map<nd::string, ndt::type>::const_iterator it =
-          typevars.find(pattern.tcast<typevar_dim_type>()->get_name());
+          typevars.find(pattern.extended<typevar_dim_type>()->get_name());
       if (it != typevars.end()) {
         if (it->second.get_ndim() == 0) {
           stringstream ss;
@@ -155,23 +155,23 @@ ndt::type ndt::detail::internal_substitute(
           switch (it->second.get_type_id()) {
           case fixed_dimsym_type_id:
             return ndt::make_fixed_dimsym(ndt::substitute(
-                pattern.tcast<typevar_dim_type>()->get_element_type(), typevars,
+                pattern.extended<typevar_dim_type>()->get_element_type(), typevars,
                 concrete));
           case fixed_dim_type_id:
             return ndt::make_fixed_dim(
-                it->second.tcast<fixed_dim_type>()->get_fixed_dim_size(),
+                it->second.extended<fixed_dim_type>()->get_fixed_dim_size(),
                 ndt::substitute(
-                    pattern.tcast<typevar_dim_type>()->get_element_type(),
+                    pattern.extended<typevar_dim_type>()->get_element_type(),
                     typevars, concrete));
           case cfixed_dim_type_id:
             return ndt::make_cfixed_dim(
-                it->second.tcast<cfixed_dim_type>()->get_fixed_dim_size(),
+                it->second.extended<cfixed_dim_type>()->get_fixed_dim_size(),
                 ndt::substitute(
-                    pattern.tcast<typevar_dim_type>()->get_element_type(),
+                    pattern.extended<typevar_dim_type>()->get_element_type(),
                     typevars, concrete));
           case var_dim_type_id:
             return ndt::make_var_dim(ndt::substitute(
-                pattern.tcast<typevar_dim_type>()->get_element_type(), typevars,
+                pattern.extended<typevar_dim_type>()->get_element_type(), typevars,
                 concrete));
           default: {
             stringstream ss;
@@ -194,9 +194,9 @@ ndt::type ndt::detail::internal_substitute(
           throw invalid_argument(ss.str());
         } else {
           return ndt::make_typevar_dim(
-              pattern.tcast<typevar_dim_type>()->get_name(),
+              pattern.extended<typevar_dim_type>()->get_name(),
               ndt::substitute(
-                  pattern.tcast<typevar_dim_type>()->get_element_type(),
+                  pattern.extended<typevar_dim_type>()->get_element_type(),
                   typevars, concrete));
         }
       }
@@ -204,18 +204,18 @@ ndt::type ndt::detail::internal_substitute(
     case pow_dimsym_type_id: {
       // Look up to the exponent typevar
       nd::string exponent_name =
-          pattern.tcast<pow_dimsym_type>()->get_exponent();
+          pattern.extended<pow_dimsym_type>()->get_exponent();
       map<nd::string, ndt::type>::const_iterator tv_type =
           typevars.find(exponent_name);
       intptr_t exponent = -1;
       if (tv_type != typevars.end()) {
         if (tv_type->second.get_type_id() == fixed_dim_type_id) {
           exponent =
-              tv_type->second.tcast<fixed_dim_type>()->get_fixed_dim_size();
+              tv_type->second.extended<fixed_dim_type>()->get_fixed_dim_size();
         }
         else if (tv_type->second.get_type_id() == typevar_dim_type_id) {
           // If it's a typevar, substitute the new name in
-          exponent_name = tv_type->second.tcast<typevar_dim_type>()->get_name();
+          exponent_name = tv_type->second.extended<typevar_dim_type>()->get_name();
           if (concrete) {
             stringstream ss;
             ss << "The substitution for dynd typevar " << exponent_name.str()
@@ -234,14 +234,14 @@ ndt::type ndt::detail::internal_substitute(
       // If the exponent is zero, just substitute the rest of the type
       if (exponent == 0) {
         return ndt::substitute(
-            pattern.tcast<pow_dimsym_type>()->get_element_type(), typevars,
+            pattern.extended<pow_dimsym_type>()->get_element_type(), typevars,
             concrete);
       }
       // Get the base type
-      ndt::type base_tp = pattern.tcast<pow_dimsym_type>()->get_base_type();
+      ndt::type base_tp = pattern.extended<pow_dimsym_type>()->get_base_type();
       if (base_tp.get_type_id() == typevar_dim_type_id) {
         map<nd::string, ndt::type>::const_iterator btv_type =
-            typevars.find(base_tp.tcast<typevar_dim_type>()->get_name());
+            typevars.find(base_tp.extended<typevar_dim_type>()->get_name());
         if (btv_type == typevars.end()) {
           // We haven't seen this typevar yet, check if concrete
           // is required
@@ -266,7 +266,7 @@ ndt::type ndt::detail::internal_substitute(
       }
       // Substitute the element type, then apply the exponent
       ndt::type result =
-          ndt::substitute(pattern.tcast<pow_dimsym_type>()->get_element_type(),
+          ndt::substitute(pattern.extended<pow_dimsym_type>()->get_element_type(),
                           typevars, concrete);
       if (exponent == 0) {
         return result;
@@ -288,7 +288,7 @@ ndt::type ndt::detail::internal_substitute(
             return result;
           case fixed_dim_type_id: {
             intptr_t dim_size =
-                base_tp.tcast<fixed_dim_type>()->get_fixed_dim_size();
+                base_tp.extended<fixed_dim_type>()->get_fixed_dim_size();
             for (intptr_t i = 0; i < exponent; ++i) {
               result = ndt::make_fixed_dim(dim_size, result);
             }
@@ -301,7 +301,7 @@ ndt::type ndt::detail::internal_substitute(
             return result;
           case typevar_dim_type_id: {
             const nd::string &tvname =
-                base_tp.tcast<typevar_dim_type>()->get_name();
+                base_tp.extended<typevar_dim_type>()->get_name();
             for (intptr_t i = 0; i < exponent; ++i) {
               result = ndt::make_typevar_dim(tvname, result);
             }
@@ -317,15 +317,15 @@ ndt::type ndt::detail::internal_substitute(
       }
     }
     case ellipsis_dim_type_id: {
-      const nd::string &name = pattern.tcast<ellipsis_dim_type>()->get_name();
+      const nd::string &name = pattern.extended<ellipsis_dim_type>()->get_name();
       if (!name.is_null()) {
         map<nd::string, ndt::type>::const_iterator it =
-            typevars.find(pattern.tcast<typevar_dim_type>()->get_name());
+            typevars.find(pattern.extended<typevar_dim_type>()->get_name());
         if (it != typevars.end()) {
           if (it->second.get_type_id() == dim_fragment_type_id) {
-            return it->second.tcast<dim_fragment_type>()->apply_to_dtype(
+            return it->second.extended<dim_fragment_type>()->apply_to_dtype(
                 ndt::substitute(
-                    pattern.tcast<ellipsis_dim_type>()->get_element_type(),
+                    pattern.extended<ellipsis_dim_type>()->get_element_type(),
                     typevars, concrete));
           } else {
             stringstream ss;
@@ -341,9 +341,9 @@ ndt::type ndt::detail::internal_substitute(
             throw invalid_argument(ss.str());
           } else {
             return ndt::make_ellipsis_dim(
-                pattern.tcast<ellipsis_dim_type>()->get_name(),
+                pattern.extended<ellipsis_dim_type>()->get_name(),
                 ndt::substitute(
-                    pattern.tcast<ellipsis_dim_type>()->get_element_type(),
+                    pattern.extended<ellipsis_dim_type>()->get_element_type(),
                     typevars, concrete));
           }
         }

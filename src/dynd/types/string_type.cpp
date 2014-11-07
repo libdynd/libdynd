@@ -243,14 +243,14 @@ size_t string_type::make_assignment_kernel(
             case string_type_id: {
                 return make_blockref_string_assignment_kernel(
                     ckb, ckb_offset, dst_arrmeta, get_encoding(), src_arrmeta,
-                    src_tp.tcast<base_string_type>()->get_encoding(), kernreq,
+                    src_tp.extended<base_string_type>()->get_encoding(), kernreq,
                     ectx);
             }
             case fixedstring_type_id: {
                 return make_fixedstring_to_blockref_string_assignment_kernel(
                     ckb, ckb_offset, dst_arrmeta, get_encoding(),
                     src_tp.get_data_size(),
-                    src_tp.tcast<base_string_type>()->get_encoding(), kernreq,
+                    src_tp.extended<base_string_type>()->get_encoding(), kernreq,
                     ectx);
             }
             default: {
@@ -358,7 +358,7 @@ struct string_is_avail_ck {
                                 const nd::array &DYND_UNUSED(kwds))
     {
         if (src_tp[0].get_type_id() != option_type_id ||
-                src_tp[0].tcast<option_type>()->get_value_type().get_type_id() !=
+                src_tp[0].extended<option_type>()->get_value_type().get_type_id() !=
                     string_type_id) {
             stringstream ss;
             ss << "Expected source type ?string, got " << src_tp[0];
@@ -415,7 +415,7 @@ struct string_assign_na_ck {
                                 const nd::array &DYND_UNUSED(kwds))
     {
         if (dst_tp.get_type_id() != option_type_id ||
-                dst_tp.tcast<option_type>()->get_value_type().get_type_id() !=
+                dst_tp.extended<option_type>()->get_value_type().get_type_id() !=
                     string_type_id) {
             stringstream ss;
             ss << "Expected destination type ?string, got " << dst_tp;

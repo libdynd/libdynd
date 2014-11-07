@@ -28,7 +28,7 @@ expr_type::expr_type(const ndt::type& value_type, const ndt::type& operand_type,
         ss << operand_type;
         throw runtime_error(ss.str());
     }
-    const ctuple_type *fsd = operand_type.tcast<ctuple_type>();
+    const ctuple_type *fsd = operand_type.extended<ctuple_type>();
     size_t field_count = fsd->get_field_count();
     if (field_count == 1) {
         throw runtime_error("expr_type is for 2 or more operands, use unary_expr_type for 1 operand");
@@ -57,7 +57,7 @@ void expr_type::print_data(std::ostream& DYND_UNUSED(o),
 
 void expr_type::print_type(std::ostream& o) const
 {
-    const ctuple_type *fsd = m_operand_type.tcast<ctuple_type>();
+    const ctuple_type *fsd = m_operand_type.extended<ctuple_type>();
     size_t field_count = fsd->get_field_count();
     o << "expr<";
     o << m_value_type;
@@ -76,7 +76,7 @@ ndt::type expr_type::apply_linear_index(intptr_t nindices, const irange *indices
 {
     if (m_kgen->is_elwise()) {
         intptr_t undim = get_ndim();
-        const ctuple_type *fsd = m_operand_type.tcast<ctuple_type>();
+        const ctuple_type *fsd = m_operand_type.extended<ctuple_type>();
         size_t field_count = fsd->get_field_count();
 
         ndt::type result_value_dt = m_value_type.apply_linear_index(nindices, indices,
@@ -112,15 +112,15 @@ intptr_t expr_type::apply_linear_index(intptr_t nindices, const irange *indices,
 {
     if (m_kgen->is_elwise()) {
         intptr_t undim = get_ndim();
-        const expr_type *out_ed = result_tp.tcast<expr_type>();
-        const ctuple_type *fsd = m_operand_type.tcast<ctuple_type>();
+        const expr_type *out_ed = result_tp.extended<expr_type>();
+        const ctuple_type *fsd = m_operand_type.extended<ctuple_type>();
         const ctuple_type *out_fsd = static_cast<const ctuple_type *>(out_ed->m_operand_type.extended());
         const size_t *arrmeta_offsets = fsd->get_arrmeta_offsets_raw();
         const size_t *out_arrmeta_offsets = out_fsd->get_arrmeta_offsets_raw();
         size_t field_count = fsd->get_field_count();
         // Apply the portion of the indexing to each of the src operand types
         for (size_t i = 0; i != field_count; ++i) {
-            const pointer_type *pd = fsd->get_field_type(i).tcast<pointer_type>();
+            const pointer_type *pd = fsd->get_field_type(i).extended<pointer_type>();
             intptr_t field_undim = pd->get_ndim();
             if (nindices + field_undim <= undim) {
                 pd->arrmeta_copy_construct(out_arrmeta + out_arrmeta_offsets[i],
@@ -156,7 +156,7 @@ void expr_type::get_shape(intptr_t ndim, intptr_t i, intptr_t *out_shape,
 
     // Get each operand shape, and broadcast them together
     dimvector shape(undim);
-    const ctuple_type *fsd = m_operand_type.tcast<ctuple_type>();
+    const ctuple_type *fsd = m_operand_type.extended<ctuple_type>();
     const uintptr_t *arrmeta_offsets = fsd->get_arrmeta_offsets_raw();
     size_t field_count = fsd->get_field_count();
     for (size_t fi = 0; fi != field_count; ++fi) {
@@ -334,7 +334,7 @@ size_t expr_type::make_operand_to_value_assignment_kernel(
                 const char *dst_arrmeta, const char *src_arrmeta,
                 kernel_request_t kernreq, const eval::eval_context *ectx) const
 {
-    const ctuple_type *fsd = m_operand_type.tcast<ctuple_type>();
+    const ctuple_type *fsd = m_operand_type.extended<ctuple_type>();
 
     ckb_offset =
         make_kernreq_to_single_kernel_adapter(ckb, ckb_offset, 1, kernreq);

@@ -226,7 +226,7 @@ void bytes_type::arrmeta_debug_print(const char *arrmeta, std::ostream& o, const
 }
 
 static size_t property_get_target_alignment(const ndt::type& dt) {
-    const bytes_type *pd = dt.tcast<bytes_type>();
+    const bytes_type *pd = dt.extended<bytes_type>();
     return pd->get_target_alignment();
 }
 

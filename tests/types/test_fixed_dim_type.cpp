@@ -37,7 +37,7 @@ TEST(FixedDimType, Create) {
     EXPECT_EQ(ndt::make_type<int32_t>(), d.at(0));
     EXPECT_EQ(ndt::make_type<int32_t>(), d.at(1));
     EXPECT_EQ(ndt::make_type<int32_t>(), d.at(2));
-    fad = d.tcast<fixed_dim_type>();
+    fad = d.extended<fixed_dim_type>();
     EXPECT_EQ(3, fad->get_fixed_dim_size());
     // Roundtripping through a string
     EXPECT_EQ(d, ndt::type(d.str()));
@@ -48,7 +48,7 @@ TEST(FixedDimType, Create) {
     EXPECT_EQ(4u, d.get_data_alignment());
     EXPECT_EQ(0u, d.get_data_size());
     EXPECT_FALSE(d.is_expression());
-    fad = d.tcast<fixed_dim_type>();
+    fad = d.extended<fixed_dim_type>();
     EXPECT_EQ(1, fad->get_fixed_dim_size());
     // Roundtripping through a string
     EXPECT_EQ(d, ndt::type(d.str()));

@@ -350,13 +350,13 @@ size_t option_type::make_assignment_kernel(
 
 static ndt::type property_get_value_type(const ndt::type &tp)
 {
-  const option_type *pd = tp.tcast<option_type>();
+  const option_type *pd = tp.extended<option_type>();
   return pd->get_value_type();
 }
 
 static nd::array property_get_nafunc(const ndt::type &tp)
 {
-  const option_type *pd = tp.tcast<option_type>();
+  const option_type *pd = tp.extended<option_type>();
   return pd->get_nafunc();
 }
 

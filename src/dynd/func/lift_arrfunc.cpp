@@ -102,7 +102,7 @@ static int resolve_lifted_dst_type(const arrfunc_type_data *self,
                 for (intptr_t j = 0; j < ndim_i; ++j) {
                     switch (tp.get_type_id()) {
                         case fixed_dim_type_id:
-                            shape_at_j = tp.tcast<fixed_dim_type>()->get_fixed_dim_size();
+                            shape_at_j = tp.extended<fixed_dim_type>()->get_fixed_dim_size();
                             if (shape_i[j] < 0 || shape_i[j] == 1) {
                                 if (shape_at_j != 1) {
                                     shape_i[j] = shape_at_j;
@@ -117,7 +117,7 @@ static int resolve_lifted_dst_type(const arrfunc_type_data *self,
                             }
                             break;
                         case cfixed_dim_type_id:
-                            shape_at_j = tp.tcast<cfixed_dim_type>()->get_fixed_dim_size();
+                            shape_at_j = tp.extended<cfixed_dim_type>()->get_fixed_dim_size();
                             if (shape_i[j] < 0 || shape_i[j] == 1) {
                                 if (shape_at_j != 1) {
                                     shape_i[j] = shape_at_j;
@@ -162,7 +162,7 @@ static int resolve_lifted_dst_type(const arrfunc_type_data *self,
 /** Prepends "Dims..." to all the types in the proto */
 static ndt::type lift_proto(const ndt::type& proto)
 {
-    const funcproto_type *p = proto.tcast<funcproto_type>();
+    const funcproto_type *p = proto.extended<funcproto_type>();
     const ndt::type *param_types = p->get_arg_types_raw();
     intptr_t param_count = p->get_narg();
     nd::array out_param_types = nd::empty(param_count, ndt::make_type());

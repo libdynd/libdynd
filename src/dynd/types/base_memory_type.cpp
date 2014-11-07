@@ -86,7 +86,7 @@ void base_memory_type::arrmeta_destruct(char *arrmeta) const
 }
 
 static ndt::type property_get_storage_type(const ndt::type& tp) {
-    const base_memory_type *md = tp.tcast<base_memory_type>();
+    const base_memory_type *md = tp.extended<base_memory_type>();
     return md->get_storage_type();
 }
 

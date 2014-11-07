@@ -178,13 +178,13 @@ size_t fixedstring_type::make_assignment_kernel(
     if (this == dst_tp.extended()) {
         switch (src_tp.get_type_id()) {
             case fixedstring_type_id: {
-                const fixedstring_type *src_fs = src_tp.tcast<fixedstring_type>();
+                const fixedstring_type *src_fs = src_tp.extended<fixedstring_type>();
                 return make_fixedstring_assignment_kernel(
                     ckb, ckb_offset, get_data_size(), m_encoding,
                     src_fs->get_data_size(), src_fs->m_encoding, kernreq, ectx);
             }
             case string_type_id: {
-                const base_string_type *src_fs = src_tp.tcast<base_string_type>();
+                const base_string_type *src_fs = src_tp.extended<base_string_type>();
                 return make_blockref_string_to_fixedstring_assignment_kernel(
                     ckb, ckb_offset, get_data_size(), m_encoding,
                     src_fs->get_encoding(), kernreq, ectx);

@@ -137,7 +137,7 @@ intptr_t pointer_type::apply_linear_index(
     memory_block_incref(out_md->blockref);
     out_md->offset = md->offset;
     if (!m_target_tp.is_builtin()) {
-        const pointer_type *pdt = result_tp.tcast<pointer_type>();
+        const pointer_type *pdt = result_tp.extended<pointer_type>();
         // The indexing may cause a change to the arrmeta offset
         out_md->offset += m_target_tp.extended()->apply_linear_index(nindices, indices,
                         arrmeta + sizeof(pointer_type_arrmeta),
@@ -340,7 +340,7 @@ size_t pointer_type::make_assignment_kernel(
         if (dst_tp == src_tp) {
             return make_pod_typed_data_assignment_kernel(ckb, ckb_offset, get_data_size(), get_data_alignment(), kernreq);
         } else {
-            ndt::type dst_target_tp = dst_tp.tcast<pointer_type>()->get_target_type();
+            ndt::type dst_target_tp = dst_tp.extended<pointer_type>()->get_target_type();
             if (dst_target_tp == src_tp) {
                 return make_value_to_pointer_assignment_kernel(ckb, ckb_offset,
                     dst_target_tp, kernreq);
@@ -360,7 +360,7 @@ nd::array pointer_type::get_option_nafunc() const
 
 static ndt::type property_get_target_type(const ndt::type &tp)
 {
-    const pointer_type *pd = tp.tcast<pointer_type>();
+    const pointer_type *pd = tp.extended<pointer_type>();
     return pd->get_target_type();
 }
 
@@ -391,7 +391,7 @@ static nd::array array_function_dereference(const nd::array &self)
 
     while (dt.get_type_id() == pointer_type_id) {
         const pointer_type_arrmeta *md = reinterpret_cast<const pointer_type_arrmeta *>(arrmeta);
-        dt = dt.tcast<pointer_type>()->get_target_type();
+        dt = dt.extended<pointer_type>()->get_target_type();
         arrmeta += sizeof(pointer_type_arrmeta);
         data = *reinterpret_cast<char **>(data) + md->offset;
         dataref = md->blockref;

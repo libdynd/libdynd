@@ -578,7 +578,7 @@ axis_order_classification_t dynd::classify_strided_axis_order(intptr_t current_s
 {
     switch (element_tp.get_type_id()) {
         case cfixed_dim_type_id: {
-            const cfixed_dim_type *edt = element_tp.tcast<cfixed_dim_type>();
+            const cfixed_dim_type *edt = element_tp.extended<cfixed_dim_type>();
             intptr_t estride = intptr_abs(edt->get_fixed_stride());
             if (estride != 0) {
                 axis_order_classification_t aoc;
@@ -611,7 +611,7 @@ axis_order_classification_t dynd::classify_strided_axis_order(intptr_t current_s
             }
         }
         case fixed_dim_type_id: {
-            const fixed_dim_type *edt = element_tp.tcast<fixed_dim_type>();
+            const fixed_dim_type *edt = element_tp.extended<fixed_dim_type>();
             const fixed_dim_type_arrmeta *emd =
                 reinterpret_cast<const fixed_dim_type_arrmeta *>(
                     element_arrmeta);

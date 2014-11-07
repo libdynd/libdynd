@@ -396,7 +396,7 @@ struct nafunc {
         const nd::array &DYND_UNUSED(args), const nd::array &DYND_UNUSED(kwds))
     {
         if (src_tp[0].get_type_id() != option_type_id ||
-                src_tp[0].tcast<option_type>()->get_value_type().get_type_id() !=
+                src_tp[0].extended<option_type>()->get_value_type().get_type_id() !=
                     (type_id_t)type_id_of<nafunc_type>::value) {
             stringstream ss;
             ss << "Expected source type ?" << ndt::make_type<nafunc_type>()
@@ -432,7 +432,7 @@ struct nafunc {
         const nd::array &DYND_UNUSED(args), const nd::array &DYND_UNUSED(kwds))
     {
         if (dst_tp.get_type_id() != option_type_id ||
-                dst_tp.tcast<option_type>()->get_value_type().get_type_id() !=
+                dst_tp.extended<option_type>()->get_value_type().get_type_id() !=
                     (type_id_t)type_id_of<nafunc_type>::value) {
             stringstream ss;
             ss << "Expected dst type " << ndt::make_type<nafunc_type>()

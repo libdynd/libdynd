@@ -37,7 +37,7 @@ TEST(CFixedDimType, Create) {
     EXPECT_EQ(ndt::make_type<int32_t>(), d.at(0));
     EXPECT_EQ(ndt::make_type<int32_t>(), d.at(1));
     EXPECT_EQ(ndt::make_type<int32_t>(), d.at(2));
-    fad = d.tcast<cfixed_dim_type>();
+    fad = d.extended<cfixed_dim_type>();
     EXPECT_EQ(4, fad->get_fixed_stride());
     EXPECT_EQ(3, fad->get_fixed_dim_size());
     // Roundtripping through a string
@@ -49,7 +49,7 @@ TEST(CFixedDimType, Create) {
     EXPECT_EQ(4u, d.get_data_alignment());
     EXPECT_EQ(4u, d.get_data_size());
     EXPECT_FALSE(d.is_expression());
-    fad = d.tcast<cfixed_dim_type>();
+    fad = d.extended<cfixed_dim_type>();
     EXPECT_EQ(0, fad->get_fixed_stride());
     EXPECT_EQ(1, fad->get_fixed_dim_size());
     // Roundtripping through a string
@@ -62,7 +62,7 @@ TEST(CFixedDimType, Create) {
     EXPECT_EQ(4u, d.get_data_alignment());
     EXPECT_EQ(20u, d.get_data_size());
     EXPECT_FALSE(d.is_expression());
-    fad = d.tcast<cfixed_dim_type>();
+    fad = d.extended<cfixed_dim_type>();
     EXPECT_EQ(8, fad->get_fixed_stride());
     EXPECT_EQ(3, fad->get_fixed_dim_size());
     // Roundtripping through a string
@@ -79,8 +79,8 @@ TEST(CFixedDimType, CreateCOrder) {
     EXPECT_EQ(ndt::make_cfixed_dim(1, shape+2, ndt::make_type<int16_t>(), NULL), d.at(0,0));
     EXPECT_EQ(ndt::make_type<int16_t>(), d.at(0,0,0));
     // Check that the shape is right and the strides are in F-order
-    EXPECT_EQ(2, d.tcast<cfixed_dim_type>()->get_fixed_dim_size());
-    EXPECT_EQ(24, d.tcast<cfixed_dim_type>()->get_fixed_stride());
+    EXPECT_EQ(2, d.extended<cfixed_dim_type>()->get_fixed_dim_size());
+    EXPECT_EQ(24, d.extended<cfixed_dim_type>()->get_fixed_stride());
     EXPECT_EQ(3, static_cast<const cfixed_dim_type *>(d.at(0).extended())->get_fixed_dim_size());
     EXPECT_EQ(8, static_cast<const cfixed_dim_type *>(d.at(0).extended())->get_fixed_stride());
     EXPECT_EQ(4, static_cast<const cfixed_dim_type *>(d.at(0,0).extended())->get_fixed_dim_size());
@@ -99,8 +99,8 @@ TEST(CFixedDimType, CreateFOrder) {
     EXPECT_EQ(cfixed_dim_type_id, d.at(0,0).get_type_id());
     EXPECT_EQ(int16_type_id, d.at(0,0,0).get_type_id());
     // Check that the shape is right and the strides are in F-order
-    EXPECT_EQ(2, d.tcast<cfixed_dim_type>()->get_fixed_dim_size());
-    EXPECT_EQ(2, d.tcast<cfixed_dim_type>()->get_fixed_stride());
+    EXPECT_EQ(2, d.extended<cfixed_dim_type>()->get_fixed_dim_size());
+    EXPECT_EQ(2, d.extended<cfixed_dim_type>()->get_fixed_stride());
     EXPECT_EQ(3, static_cast<const cfixed_dim_type *>(d.at(0).extended())->get_fixed_dim_size());
     EXPECT_EQ(4, static_cast<const cfixed_dim_type *>(d.at(0).extended())->get_fixed_stride());
     EXPECT_EQ(4, static_cast<const cfixed_dim_type *>(d.at(0,0).extended())->get_fixed_dim_size());

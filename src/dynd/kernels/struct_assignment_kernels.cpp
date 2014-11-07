@@ -123,7 +123,7 @@ size_t dynd::make_struct_identical_assignment_kernel(
         val_struct_tp.get_data_alignment(), kernreq);
   }
 
-  const base_struct_type *sd = val_struct_tp.tcast<base_struct_type>();
+  const base_struct_type *sd = val_struct_tp.extended<base_struct_type>();
   intptr_t field_count = sd->get_field_count();
   const uintptr_t *arrmeta_offsets = sd->get_arrmeta_offsets_raw();
   shortvector<const char *> dst_fields_arrmeta(field_count);
@@ -163,8 +163,8 @@ size_t dynd::make_struct_assignment_kernel(
        << dst_struct_tp << " is not of struct kind";
     throw runtime_error(ss.str());
   }
-  const base_struct_type *dst_sd = dst_struct_tp.tcast<base_struct_type>();
-  const base_struct_type *src_sd = src_struct_tp.tcast<base_struct_type>();
+  const base_struct_type *dst_sd = dst_struct_tp.extended<base_struct_type>();
+  const base_struct_type *src_sd = src_struct_tp.extended<base_struct_type>();
   intptr_t field_count = dst_sd->get_field_count();
 
   if (field_count != src_sd->get_field_count()) {
@@ -229,7 +229,7 @@ size_t dynd::make_broadcast_to_struct_assignment_kernel(
        << dst_struct_tp << " is not of struct kind";
     throw runtime_error(ss.str());
   }
-  const base_struct_type *dst_sd = dst_struct_tp.tcast<base_struct_type>();
+  const base_struct_type *dst_sd = dst_struct_tp.extended<base_struct_type>();
   intptr_t field_count = dst_sd->get_field_count();
 
   const uintptr_t *dst_arrmeta_offsets = dst_sd->get_arrmeta_offsets_raw();

@@ -224,7 +224,7 @@ intptr_t cfixed_dim_type::apply_linear_index(
             out_md->stride = m_stride * index_stride;
             out_md->dim_size = dimension_size;
             if (!m_element_tp.is_builtin()) {
-                const fixed_dim_type *result_etp = result_tp.tcast<fixed_dim_type>();
+                const fixed_dim_type *result_etp = result_tp.extended<fixed_dim_type>();
                 offset += m_element_tp.extended()->apply_linear_index(
                     nindices - 1, indices + 1,
                     arrmeta + sizeof(cfixed_dim_type_arrmeta),
@@ -634,15 +634,15 @@ ndt::type dynd::ndt::make_cfixed_dim(intptr_t ndim, const intptr_t *shape,
 }
 
 static intptr_t get_fixed_dim_size(const ndt::type& dt) {
-    return  dt.tcast<cfixed_dim_type>()->get_fixed_dim_size();
+    return  dt.extended<cfixed_dim_type>()->get_fixed_dim_size();
 }
 
 static intptr_t get_fixed_dim_stride(const ndt::type& dt) {
-    return dt.tcast<cfixed_dim_type>()->get_fixed_stride();
+    return dt.extended<cfixed_dim_type>()->get_fixed_stride();
 }
 
 static ndt::type get_element_type(const ndt::type& dt) {
-    return dt.tcast<cfixed_dim_type>()->get_element_type();
+    return dt.extended<cfixed_dim_type>()->get_element_type();
 }
 
 void cfixed_dim_type::get_dynamic_type_properties(

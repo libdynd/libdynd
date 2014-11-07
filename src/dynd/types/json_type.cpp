@@ -262,13 +262,13 @@ size_t json_type::make_assignment_kernel(
                     return make_blockref_string_assignment_kernel(
                         ckb, ckb_offset, dst_arrmeta, string_encoding_utf_8,
                         src_arrmeta,
-                        src_tp.tcast<base_string_type>()->get_encoding(),
+                        src_tp.extended<base_string_type>()->get_encoding(),
                         kernel_request_single, ectx);
                 } else {
                     return make_fixedstring_to_blockref_string_assignment_kernel(
                         ckb, ckb_offset, dst_arrmeta, string_encoding_utf_8,
                         src_tp.get_data_size(),
-                        src_tp.tcast<base_string_type>()->get_encoding(),
+                        src_tp.extended<base_string_type>()->get_encoding(),
                         kernel_request_single, ectx);
                 }
             }
@@ -292,12 +292,12 @@ size_t json_type::make_assignment_kernel(
         } else if(dst_tp.get_type_id() == string_type_id) {
             return make_blockref_string_assignment_kernel(
                 ckb, ckb_offset, dst_arrmeta,
-                dst_tp.tcast<base_string_type>()->get_encoding(), src_arrmeta,
+                dst_tp.extended<base_string_type>()->get_encoding(), src_arrmeta,
                 string_encoding_utf_8, kernreq, ectx);
         } else if(dst_tp.get_type_id() == fixedstring_type_id) {
             return make_blockref_string_to_fixedstring_assignment_kernel(
                 ckb, ckb_offset, dst_tp.get_data_size(),
-                dst_tp.tcast<base_string_type>()->get_encoding(),
+                dst_tp.extended<base_string_type>()->get_encoding(),
                 string_encoding_utf_8, kernreq, ectx);
         } else {
             stringstream ss;

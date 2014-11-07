@@ -111,7 +111,7 @@ namespace {
                 reinterpret_cast<const arrfunc_type_data *>(src);
             stringstream ss;
             print_arrfunc(ss, af);
-            m_dst_string_dt.tcast<base_string_type>()->set_from_utf8_string(
+            m_dst_string_dt.extended<base_string_type>()->set_from_utf8_string(
                 m_dst_arrmeta, dst, ss.str(), &m_ectx);
         }
     };
@@ -204,7 +204,7 @@ static array_preamble *function___call__(const array_preamble *params, void *DYN
 
     const arrfunc_type_data *af = reinterpret_cast<const arrfunc_type_data *>(
         par_arrs[0].get_readonly_originptr());
-    const funcproto_type *proto = af->func_proto.tcast<funcproto_type>();
+    const funcproto_type *proto = af->func_proto.extended<funcproto_type>();
 
     nargs -= 1;
 

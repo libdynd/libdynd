@@ -19,7 +19,7 @@ namespace detail {
       const ndt::type &tp = a.get_type();
       if (a.is_immutable() && tp.get_type_id() == fixed_dim_type_id) {
         // It's immutable and "N * <something>"
-        const ndt::type &et = tp.tcast<fixed_dim_type>()->get_element_type();
+        const ndt::type &et = tp.extended<fixed_dim_type>()->get_element_type();
         const fixed_dim_type_arrmeta *md =
             reinterpret_cast<const fixed_dim_type_arrmeta *>(a.get_arrmeta());
         if (et.get_type_id() == type_id_of<T>::value &&
@@ -55,11 +55,11 @@ namespace detail {
       const ndt::type &tp = a.get_type();
       if (a.is_immutable() && tp.get_type_id() == fixed_dim_type_id) {
         // It's immutable and "N * <something>"
-        const ndt::type &et = tp.tcast<fixed_dim_type>()->get_element_type();
+        const ndt::type &et = tp.extended<fixed_dim_type>()->get_element_type();
         const fixed_dim_type_arrmeta *md =
             reinterpret_cast<const fixed_dim_type_arrmeta *>(a.get_arrmeta());
         if (et.get_type_id() == string_type_id &&
-            et.tcast<string_type>()->get_encoding() == string_encoding_utf_8 &&
+            et.extended<string_type>()->get_encoding() == string_encoding_utf_8 &&
             md->stride == sizeof(string_type_data)) {
           // It also has the right type and is contiguous,
           // so no modification necessary.
@@ -92,7 +92,7 @@ namespace detail {
       const ndt::type &tp = a.get_type();
       if (a.is_immutable() && tp.get_type_id() == fixed_dim_type_id) {
         // It's immutable and "N * <something>"
-        const ndt::type &et = tp.tcast<fixed_dim_type>()->get_element_type();
+        const ndt::type &et = tp.extended<fixed_dim_type>()->get_element_type();
         const fixed_dim_type_arrmeta *md =
             reinterpret_cast<const fixed_dim_type_arrmeta *>(a.get_arrmeta());
         if (et.get_type_id() == type_type_id &&

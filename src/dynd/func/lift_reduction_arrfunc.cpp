@@ -115,12 +115,12 @@ void dynd::lift_reduction_arrfunc(arrfunc_type_data *out_ar,
               break;
             case fixed_dim_type_id:
               lifted_dst_type = ndt::make_fixed_dim(
-                  subtype.tcast<fixed_dim_type>()->get_fixed_dim_size(),
+                  subtype.extended<fixed_dim_type>()->get_fixed_dim_size(),
                   lifted_dst_type);
               break;
             case cfixed_dim_type_id:
               lifted_dst_type = ndt::make_fixed_dim(
-                  subtype.tcast<cfixed_dim_type>()->get_fixed_dim_size(),
+                  subtype.extended<cfixed_dim_type>()->get_fixed_dim_size(),
                   lifted_dst_type);
               break;
             case var_dim_type_id:

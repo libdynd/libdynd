@@ -81,7 +81,7 @@ nd::array nd::make_strided_array(const ndt::type &dtp, intptr_t ndim,
     char *data_ptr = NULL;
     if (dtp.get_kind() == memory_kind) {
         result = make_array_memory_block(array_tp.get_arrmeta_size());
-        dtp.tcast<base_memory_type>()->data_alloc(&data_ptr, data_size);
+        dtp.extended<base_memory_type>()->data_alloc(&data_ptr, data_size);
     } else {
         // Allocate the array arrmeta and data in one memory block
         result = make_array_memory_block(array_tp.get_arrmeta_size(),
@@ -90,7 +90,7 @@ nd::array nd::make_strided_array(const ndt::type &dtp, intptr_t ndim,
 
     if (array_tp.get_flags()&type_flag_zeroinit) {
         if (dtp.get_kind() == memory_kind) {
-            dtp.tcast<base_memory_type>()->data_zeroinit(data_ptr, data_size);
+            dtp.extended<base_memory_type>()->data_zeroinit(data_ptr, data_size);
         }
         else {
             memset(data_ptr, 0, data_size);
@@ -957,7 +957,7 @@ nd::array nd::array::eval(const eval::eval_context *ectx) const
         array result(nd::empty(dt));
         if (dt.get_type_id() == fixed_dim_type_id) {
           // Reorder strides of output strided dimensions in a KEEPORDER fashion
-          dt.tcast<fixed_dim_type>()->reorder_default_constructed_strides(
+          dt.extended<fixed_dim_type>()->reorder_default_constructed_strides(
               result.get_arrmeta(), get_type(), get_arrmeta());
         }
         result.val_assign(*this, ectx);
@@ -977,7 +977,7 @@ nd::array nd::array::eval_immutable(const eval::eval_context *ectx) const
         array result(nd::empty(dt));
         if (dt.get_type_id() == fixed_dim_type_id) {
           // Reorder strides of output strided dimensions in a KEEPORDER fashion
-          dt.tcast<fixed_dim_type>()->reorder_default_constructed_strides(
+          dt.extended<fixed_dim_type>()->reorder_default_constructed_strides(
               result.get_arrmeta(), get_type(), get_arrmeta());
         }
         result.val_assign(*this, ectx);
@@ -993,7 +993,7 @@ nd::array nd::array::eval_copy(uint32_t access_flags, const eval::eval_context *
     array result(nd::empty(dt));
     if (dt.get_type_id() == fixed_dim_type_id) {
       // Reorder strides of output strided dimensions in a KEEPORDER fashion
-      dt.tcast<fixed_dim_type>()->reorder_default_constructed_strides(
+      dt.extended<fixed_dim_type>()->reorder_default_constructed_strides(
           result.get_arrmeta(), get_type(), get_arrmeta());
     }
     result.val_assign(*this, ectx);
@@ -1013,7 +1013,7 @@ nd::array nd::array::to_host() const
 {
     ndt::type dt = get_type().get_dtype();
     if (dt.get_kind() == memory_kind) {
-        dt = dt.tcast<base_memory_type>()->get_storage_type();
+        dt = dt.extended<base_memory_type>()->get_storage_type();
     }
 
     array result = empty_like(*this, dt);
@@ -1027,7 +1027,7 @@ nd::array nd::array::to_cuda_host(unsigned int cuda_host_flags) const
 {
     ndt::type dt = get_type().get_dtype();
     if (dt.get_kind() == memory_kind) {
-        dt = dt.tcast<base_memory_type>()->get_storage_type();
+        dt = dt.extended<base_memory_type>()->get_storage_type();
     }
 
     array result = empty_like(*this, make_cuda_host(dt, cuda_host_flags));
@@ -1041,7 +1041,7 @@ nd::array nd::array::to_cuda_device() const
 {
     ndt::type dt = get_type().get_dtype();
     if (dt.get_kind() == memory_kind) {
-        dt = dt.tcast<base_memory_type>()->get_storage_type();
+        dt = dt.extended<base_memory_type>()->get_storage_type();
     }
 
     array result = empty_like(*this, make_cuda_device(dt));
@@ -1160,7 +1160,7 @@ bool nd::array::equals_exact(const array& rhs) const
       // (Note: this is an inefficient hack)
       ndt::type tp = ndt::make_fixed_dim(
           get_shape()[0],
-          get_type().tcast<base_dim_type>()->get_element_type());
+          get_type().extended<base_dim_type>()->get_element_type());
       return nd::view(*this, tp).equals_exact(nd::view(rhs, tp));
     } else {
         // First compare the shape, to avoid triggering an exception in common cases
@@ -1228,7 +1228,7 @@ namespace {
                     ndt::type child_dt, child_replacement_tp;
                     switch (dt.get_type_id()) {
                         case cfixed_dim_type_id: {
-                            const cfixed_dim_type *dt_fdd = dt.tcast<cfixed_dim_type>();
+                            const cfixed_dim_type *dt_fdd = dt.extended<cfixed_dim_type>();
                             const cfixed_dim_type *r_fdd = static_cast<const cfixed_dim_type *>(e->replacement_tp.extended());
                             if (dt_fdd->get_fixed_dim_size() == r_fdd->get_fixed_dim_size() &&
                                     dt_fdd->get_fixed_stride() == r_fdd->get_fixed_stride()) {
@@ -1240,7 +1240,7 @@ namespace {
                         }
                         case var_dim_type_id: {
                             const base_dim_type *dt_budd =
-                                            dt.tcast<base_dim_type>();
+                                            dt.extended<base_dim_type>();
                             const base_dim_type *r_budd =
                                             static_cast<const base_dim_type *>(e->replacement_tp.extended());
                             can_keep_dim = true;
@@ -1348,9 +1348,9 @@ static void permute_type_dims(const ndt::type &tp, intptr_t arrmeta_offset,
       ss << "Cannot permute non-strided dimensions in type " << tp;
       throw invalid_argument(ss.str());
     }
-    ndt::type subtp = tp.tcast<base_dim_type>()->get_element_type();
+    ndt::type subtp = tp.extended<base_dim_type>()->get_element_type();
     for (loop_i = i + 1; loop_i <= max_i; ++loop_i) {
-      subtp = subtp.tcast<base_dim_type>()->get_element_type();
+      subtp = subtp.extended<base_dim_type>()->get_element_type();
     }
     intptr_t perm_ndim = max_i - i + 1;
     // If there are more permutation axes left, process the subtype
@@ -1540,7 +1540,7 @@ nd::array nd::array::new_axis(intptr_t i, intptr_t new_ndim) const
     char *src_arrmeta = get_ndo()->get_arrmeta();
     char *dst_arrmeta = res.get_arrmeta();
     for (intptr_t j = 0; j < i; ++j) {
-        dst_tp.tcast<base_dim_type>()->arrmeta_copy_construct_onedim(dst_arrmeta, src_arrmeta, NULL);
+        dst_tp.extended<base_dim_type>()->arrmeta_copy_construct_onedim(dst_arrmeta, src_arrmeta, NULL);
         src_tp = src_tp.get_type_at_dimension(&src_arrmeta, 1);
         dst_tp = dst_tp.get_type_at_dimension(&dst_arrmeta, 1);
     }
@@ -1617,7 +1617,7 @@ nd::array nd::array::view_scalars(const ndt::type& scalar_tp) const
     // First check if we're dealing with a simple one dimensional block of memory we can reinterpret
     // at will.
     if (uniform_ndim == 1 && array_type.get_type_id() == fixed_dim_type_id) {
-        const fixed_dim_type *sad = array_type.tcast<fixed_dim_type>();
+        const fixed_dim_type *sad = array_type.extended<fixed_dim_type>();
         const fixed_dim_type_arrmeta *md =
             reinterpret_cast<const fixed_dim_type_arrmeta *>(get_arrmeta());
         const ndt::type& edt = sad->get_element_type();
@@ -1775,7 +1775,7 @@ nd::array nd::eval_raw_copy(const ndt::type& dt, const char *arrmeta, const char
         result = nd::empty(cdt);
         // Reorder strides of output strided dimensions in a KEEPORDER fashion
         if (cdt.get_type_id() == fixed_dim_type_id) {
-          cdt.tcast<fixed_dim_type>()->reorder_default_constructed_strides(
+          cdt.extended<fixed_dim_type>()->reorder_default_constructed_strides(
               result.get_arrmeta(), dt, arrmeta);
         }
     } else {
@@ -1870,7 +1870,7 @@ nd::array nd::empty_like(const nd::array& rhs, const ndt::type& uniform_tp)
         // Reorder strides of output strided dimensions in a KEEPORDER fashion
         if (result.get_type().get_type_id() == fixed_dim_type_id) {
           result.get_type()
-              .tcast<fixed_dim_type>()
+              .extended<fixed_dim_type>()
               ->reorder_default_constructed_strides(
                   result.get_arrmeta(), rhs.get_type(), rhs.get_arrmeta());
         }
@@ -1897,7 +1897,7 @@ nd::array nd::empty_like(const nd::array& rhs)
         // Reorder strides of output strided dimensions in a KEEPORDER fashion
         if (result.get_type().get_type_id() == fixed_dim_type_id) {
           result.get_type()
-              .tcast<fixed_dim_type>()
+              .extended<fixed_dim_type>()
               ->reorder_default_constructed_strides(
                   result.get_arrmeta(), rhs.get_type(), rhs.get_arrmeta());
         }
@@ -2123,7 +2123,7 @@ nd::array nd::groupby(const nd::array& data_values, const nd::array& by_values, 
     array by_values_as_groups = by_values.ucast(groups_final);
 
     ndt::type gbdt = ndt::make_groupby(data_values.get_type(), by_values_as_groups.get_type());
-    const groupby_type *gbdt_ext = gbdt.tcast<groupby_type>();
+    const groupby_type *gbdt_ext = gbdt.extended<groupby_type>();
     char *data_ptr = NULL;
 
     array result(make_array_memory_block(gbdt.extended()->get_arrmeta_size(),
@@ -2173,12 +2173,12 @@ bool nd::is_scalar_avail(const ndt::type &tp, const char *arrmeta,
 {
     if (tp.is_scalar()) {
         if (tp.get_type_id() == option_type_id) {
-            return tp.tcast<option_type>()->is_avail(arrmeta, data, ectx);
+            return tp.extended<option_type>()->is_avail(arrmeta, data, ectx);
         } else if (tp.get_kind() == expr_kind &&
                    tp.value_type().get_type_id() == option_type_id) {
             nd::array tmp = nd::empty(tp.value_type());
             tmp.val_assign(tp, arrmeta, data, ectx);
-            return tmp.get_type().tcast<option_type>()->is_avail(arrmeta, data,
+            return tmp.get_type().extended<option_type>()->is_avail(arrmeta, data,
                                                                  ectx);
         } else {
             return true;
@@ -2192,12 +2192,12 @@ void nd::assign_na(const ndt::type &tp, const char *arrmeta, char *data,
                    const eval::eval_context *ectx)
 {
     if (tp.get_type_id() == option_type_id) {
-        tp.tcast<option_type>()->assign_na(arrmeta, data, ectx);
+        tp.extended<option_type>()->assign_na(arrmeta, data, ectx);
     } else {
         const ndt::type& dtp = tp.get_dtype().value_type();
         if (dtp.get_type_id() == option_type_id) {
             const arrfunc_type_data *af =
-                dtp.tcast<option_type>()->get_assign_na_arrfunc();
+                dtp.extended<option_type>()->get_assign_na_arrfunc();
             ckernel_builder ckb;
             make_lifted_expr_ckernel(af, &ckb, 0, tp.get_ndim(), tp, arrmeta,
                                      NULL, NULL, NULL, kernel_request_single,
@@ -2229,7 +2229,7 @@ nd::array nd::combine_into_tuple(size_t field_count, const array *field_values)
     }
 
     ndt::type result_type = ndt::make_ctuple(field_types);
-    const ctuple_type *fsd = result_type.tcast<ctuple_type>();
+    const ctuple_type *fsd = result_type.extended<ctuple_type>();
     char *data_ptr = NULL;
 
     array result(make_array_memory_block(fsd->get_arrmeta_size(),

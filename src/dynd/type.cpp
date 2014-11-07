@@ -256,7 +256,7 @@ bool ndt::type::get_as_strided(const char *arrmeta, intptr_t *out_dim_size,
   if (get_strided_ndim() >= 1) {
     *out_dim_size = reinterpret_cast<const size_stride_t *>(arrmeta)->dim_size;
     *out_stride = reinterpret_cast<const size_stride_t *>(arrmeta)->stride;
-    *out_el_tp = tcast<base_dim_type>()->get_element_type();
+    *out_el_tp = extended<base_dim_type>()->get_element_type();
     *out_el_arrmeta = arrmeta + sizeof(fixed_dim_type_arrmeta);
     return true;
   } else {
@@ -274,7 +274,7 @@ bool ndt::type::get_as_strided(const char *arrmeta, intptr_t ndim,
     *out_el_arrmeta = arrmeta + ndim * sizeof(fixed_dim_type_arrmeta);
     *out_el_tp = *this;
     while (ndim-- > 0) {
-      *out_el_tp = out_el_tp->tcast<base_dim_type>()->get_element_type();
+      *out_el_tp = out_el_tp->extended<base_dim_type>()->get_element_type();
     }
     return true;
   } else {
@@ -322,7 +322,7 @@ bool ndt::type::data_layout_compatible_with(const ndt::type& rhs) const
           if (rhs.get_type_id() == cfixed_dim_type_id) {
             const cfixed_dim_type *fdd =
                 static_cast<const cfixed_dim_type *>(extended());
-            const cfixed_dim_type *rhs_fdd = rhs.tcast<cfixed_dim_type>();
+            const cfixed_dim_type *rhs_fdd = rhs.extended<cfixed_dim_type>();
             return fdd->get_fixed_dim_size() == rhs_fdd->get_fixed_dim_size() &&
                    fdd->get_fixed_stride() == rhs_fdd->get_fixed_stride() &&
                    fdd->get_element_type().data_layout_compatible_with(
@@ -331,12 +331,12 @@ bool ndt::type::data_layout_compatible_with(const ndt::type& rhs) const
           break;
         case fixed_dim_type_id:
           if (rhs.get_type_id() == fixed_dim_type_id) {
-            return tcast<fixed_dim_type>()->get_fixed_dim_size() ==
-                       rhs.tcast<fixed_dim_type>()->get_fixed_dim_size() &&
-                   tcast<fixed_dim_type>()
+            return extended<fixed_dim_type>()->get_fixed_dim_size() ==
+                       rhs.extended<fixed_dim_type>()->get_fixed_dim_size() &&
+                   extended<fixed_dim_type>()
                        ->get_element_type()
                        .data_layout_compatible_with(
-                           rhs.tcast<fixed_dim_type>()->get_element_type());
+                           rhs.extended<fixed_dim_type>()->get_element_type());
           }
           break;
         case var_dim_type_id:
@@ -345,7 +345,7 @@ bool ndt::type::data_layout_compatible_with(const ndt::type& rhs) const
           if (rhs.get_type_id() == var_dim_type_id) {
             const base_dim_type *budd =
                 static_cast<const base_dim_type *>(extended());
-            const base_dim_type *rhs_budd = rhs.tcast<base_dim_type>();
+            const base_dim_type *rhs_budd = rhs.extended<base_dim_type>();
             return budd->get_element_type().data_layout_compatible_with(
                 rhs_budd->get_element_type());
           }

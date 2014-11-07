@@ -174,7 +174,7 @@ intptr_t fixed_dim_type::apply_linear_index(
             out_md->stride = md->stride * index_stride;
             out_md->dim_size = dimension_size;
             if (!m_element_tp.is_builtin()) {
-                const fixed_dim_type *result_etp = result_tp.tcast<fixed_dim_type>();
+                const fixed_dim_type *result_etp = result_tp.extended<fixed_dim_type>();
                 offset += m_element_tp.extended()->apply_linear_index(
                     nindices - 1, indices + 1,
                     arrmeta + sizeof(fixed_dim_type_arrmeta),
@@ -608,7 +608,7 @@ void fixed_dim_type::reorder_default_constructed_strides(
     // do the reordering starting from where they match, to
     // follow the broadcasting rules.
     if (m_element_tp.get_type_id() == fixed_dim_type_id) {
-      const fixed_dim_type *sdd = m_element_tp.tcast<fixed_dim_type>();
+      const fixed_dim_type *sdd = m_element_tp.extended<fixed_dim_type>();
       sdd->reorder_default_constructed_strides(
           dst_arrmeta + sizeof(fixed_dim_type_arrmeta), src_tp, src_arrmeta);
     }
@@ -622,7 +622,7 @@ void fixed_dim_type::reorder_default_constructed_strides(
   ndt::type last_dt = m_element_tp;
   do {
     ++ndim;
-    last_dt = last_dt.tcast<fixed_dim_type>()->get_element_type();
+    last_dt = last_dt.extended<fixed_dim_type>()->get_element_type();
   } while (last_dt.get_type_id() == fixed_dim_type_id);
 
   dimvector strides(ndim);
@@ -639,7 +639,7 @@ void fixed_dim_type::reorder_default_constructed_strides(
       const fixed_dim_type_arrmeta *md =
           reinterpret_cast<const fixed_dim_type_arrmeta *>(src_arrmeta);
       stride = md->stride;
-      last_src_tp = last_src_tp.tcast<base_dim_type>()->get_element_type();
+      last_src_tp = last_src_tp.extended<base_dim_type>()->get_element_type();
       src_arrmeta += sizeof(fixed_dim_type_arrmeta);
       break;
     }
@@ -717,11 +717,11 @@ void fixed_dim_type::reorder_default_constructed_strides(
 }
 
 static intptr_t get_fixed_dim_size(const ndt::type& dt) {
-    return  dt.tcast<fixed_dim_type>()->get_fixed_dim_size();
+    return  dt.extended<fixed_dim_type>()->get_fixed_dim_size();
 }
 
 static ndt::type get_element_type(const ndt::type& dt) {
-    return dt.tcast<fixed_dim_type>()->get_element_type();
+    return dt.extended<fixed_dim_type>()->get_element_type();
 }
 
 void fixed_dim_type::get_dynamic_type_properties(
