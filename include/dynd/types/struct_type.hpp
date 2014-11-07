@@ -355,9 +355,9 @@ ndt::type make_pack_type(const T &val) {
     struct_type::fill_default_data_offsets(                                    \
         N, field_types, reinterpret_cast<uintptr_t *>(res.get_arrmeta()));     \
     const uintptr_t *field_arrmeta_offsets =                                   \
-        res.get_type().tcast<base_struct_type>()->get_arrmeta_offsets_raw();   \
+        res.get_type().extended<base_struct_type>()->get_arrmeta_offsets_raw();   \
     const uintptr_t *field_data_offsets =                                      \
-        res.get_type().tcast<base_struct_type>()->get_data_offsets(            \
+        res.get_type().extended<base_struct_type>()->get_data_offsets(            \
             res.get_arrmeta());                                                \
     char *res_arrmeta = res.get_arrmeta();                                     \
     char *res_data = res.get_readwrite_originptr();                            \

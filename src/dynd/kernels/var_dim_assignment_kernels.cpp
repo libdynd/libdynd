@@ -82,7 +82,7 @@ size_t dynd::make_broadcast_to_var_dim_assignment_kernel(
               "destination type " << dst_var_dim_tp << " is not a var_dim";
         throw runtime_error(ss.str());
     }
-    const var_dim_type *dst_vad = dst_var_dim_tp.tcast<var_dim_type>();
+    const var_dim_type *dst_vad = dst_var_dim_tp.extended<var_dim_type>();
     const var_dim_type_arrmeta *dst_md =
                     reinterpret_cast<const var_dim_type_arrmeta *>(dst_arrmeta);
 
@@ -188,8 +188,8 @@ size_t dynd::make_var_dim_assignment_kernel(
               "source type " << src_var_dim_tp << " is not a var_dim";
         throw runtime_error(ss.str());
     }
-    const var_dim_type *dst_vad = dst_var_dim_tp.tcast<var_dim_type>();
-    const var_dim_type *src_vad = src_var_dim_tp.tcast<var_dim_type>();
+    const var_dim_type *dst_vad = dst_var_dim_tp.extended<var_dim_type>();
+    const var_dim_type *src_vad = src_var_dim_tp.extended<var_dim_type>();
     const var_dim_type_arrmeta *dst_md =
         reinterpret_cast<const var_dim_type_arrmeta *>(dst_arrmeta);
     const var_dim_type_arrmeta *src_md =
@@ -283,7 +283,7 @@ size_t dynd::make_strided_to_var_dim_assignment_kernel(
               "type " << dst_var_dim_tp << " is not a var_dim";
         throw runtime_error(ss.str());
     }
-    const var_dim_type *dst_vad = dst_var_dim_tp.tcast<var_dim_type>();
+    const var_dim_type *dst_vad = dst_var_dim_tp.extended<var_dim_type>();
     const var_dim_type_arrmeta *dst_md =
                     reinterpret_cast<const var_dim_type_arrmeta *>(dst_arrmeta);
 
@@ -351,7 +351,7 @@ size_t dynd::make_var_to_fixed_dim_assignment_kernel(
         ss << "make_var_to_fixed_dim_assignment_kernel: provided source type " << src_var_dim_tp << " is not a var_dim";
         throw runtime_error(ss.str());
     }
-    const var_dim_type *src_vad = src_var_dim_tp.tcast<var_dim_type>();
+    const var_dim_type *src_vad = src_var_dim_tp.extended<var_dim_type>();
     const var_dim_type_arrmeta *src_md =
         reinterpret_cast<const var_dim_type_arrmeta *>(src_arrmeta);
 

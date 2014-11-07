@@ -615,7 +615,7 @@ ndt::type dynd::ndt::factor_categorical(const nd::array& values)
 
 static nd::array property_ndo_get_ints(const nd::array& n) {
     ndt::type udt = n.get_dtype().value_type();
-    const categorical_type *cd = udt.tcast<categorical_type>();
+    const categorical_type *cd = udt.extended<categorical_type>();
     return n.view_scalars(cd->get_storage_type());
 }
 
@@ -630,17 +630,17 @@ void categorical_type::get_dynamic_array_properties(
 }
 
 static nd::array property_type_get_categories(const ndt::type& d) {
-    const categorical_type *cd = d.tcast<categorical_type>();
+    const categorical_type *cd = d.extended<categorical_type>();
     return cd->get_categories();
 }
 
 static ndt::type property_type_get_storage_type(const ndt::type& d) {
-    const categorical_type *cd = d.tcast<categorical_type>();
+    const categorical_type *cd = d.extended<categorical_type>();
     return cd->get_storage_type();
 }
 
 static ndt::type property_type_get_category_type(const ndt::type& d) {
-    const categorical_type *cd = d.tcast<categorical_type>();
+    const categorical_type *cd = d.extended<categorical_type>();
     return cd->get_category_type();
 }
 

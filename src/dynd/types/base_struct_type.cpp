@@ -192,7 +192,7 @@ intptr_t base_struct_type::apply_linear_index(
             return offset;
         } else {
             intptr_t *out_offsets = reinterpret_cast<intptr_t *>(out_arrmeta);
-            const struct_type *result_e_dt = result_tp.tcast<struct_type>();
+            const struct_type *result_e_dt = result_tp.extended<struct_type>();
             for (intptr_t i = 0; i < dimension_size; ++i) {
                 intptr_t idx = start_index + i * index_stride;
                 out_offsets[i] = offsets[idx];

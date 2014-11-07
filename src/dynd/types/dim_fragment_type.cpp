@@ -29,10 +29,10 @@ static inline ndt::type get_tagged_dims_from_type(intptr_t ndim,
     for (int i = 0; i < ndim; ++i) {
         switch (dtp.get_type_id()) {
             case fixed_dim_type_id:
-                out_tagged_dims[i] = dtp.tcast<fixed_dim_type>()->get_fixed_dim_size();
+                out_tagged_dims[i] = dtp.extended<fixed_dim_type>()->get_fixed_dim_size();
                 break;
             case cfixed_dim_type_id:
-                out_tagged_dims[i] = tp.tcast<fixed_dim_type>()->get_fixed_dim_size();
+                out_tagged_dims[i] = tp.extended<fixed_dim_type>()->get_fixed_dim_size();
                 break;
             case fixed_dimsym_type_id:
             case offset_dim_type_id:
@@ -47,7 +47,7 @@ static inline ndt::type get_tagged_dims_from_type(intptr_t ndim,
                 throw type_error(ss.str());
             }    
         }
-        dtp = dtp.tcast<base_dim_type>()->get_element_type();
+        dtp = dtp.extended<base_dim_type>()->get_element_type();
     }
     return dtp;
 }
@@ -60,7 +60,7 @@ static inline bool broadcast_tagged_dims_from_type(intptr_t ndim, ndt::type tp,
         intptr_t tagged_dim = tagged_dims[i], dim_size;
         switch (tp.get_type_id()) {
             case fixed_dim_type_id:
-                dim_size = tp.tcast<fixed_dim_type>()->get_fixed_dim_size();
+                dim_size = tp.extended<fixed_dim_type>()->get_fixed_dim_size();
                 if (tagged_dim < 0 || tagged_dim == 1) {
                     out_tagged_dims[i] = dim_size;
                 } else if (tagged_dim != dim_size) {
@@ -68,7 +68,7 @@ static inline bool broadcast_tagged_dims_from_type(intptr_t ndim, ndt::type tp,
                 }
                 break;
             case cfixed_dim_type_id:
-                dim_size = tp.tcast<fixed_dim_type>()->get_fixed_dim_size();
+                dim_size = tp.extended<fixed_dim_type>()->get_fixed_dim_size();
                 if (tagged_dim < 0 || tagged_dim == 1) {
                     out_tagged_dims[i] = dim_size;
                 } else if (tagged_dim != dim_size) {
@@ -90,7 +90,7 @@ static inline bool broadcast_tagged_dims_from_type(intptr_t ndim, ndt::type tp,
                 throw type_error(ss.str());
             }    
         }
-        tp = tp.tcast<base_dim_type>()->get_element_type();
+        tp = tp.extended<base_dim_type>()->get_element_type();
     }
     return true;
 }

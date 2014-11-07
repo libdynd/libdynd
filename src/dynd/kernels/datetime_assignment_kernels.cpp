@@ -81,7 +81,7 @@ namespace {
             string s = dts.to_str();
             if (s.empty()) {
                 s = "NA";
-            } else if (m_src_datetime_tp.tcast<datetime_type>()
+            } else if (m_src_datetime_tp.extended<datetime_type>()
                            ->get_timezone() == tz_utc) {
                 s += "Z";
             }

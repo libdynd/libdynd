@@ -256,7 +256,7 @@ ndt::type property_type::with_replaced_storage_type(const ndt::type& replacement
 {
     if (m_operand_tp.get_kind() == expr_kind) {
         return ndt::type(new property_type(
-                        m_operand_tp.tcast<base_expr_type>()->with_replaced_storage_type(replacement_type),
+                        m_operand_tp.extended<base_expr_type>()->with_replaced_storage_type(replacement_type),
                         m_property_name), false);
     } else {
         if (m_operand_tp != replacement_type.value_type()) {

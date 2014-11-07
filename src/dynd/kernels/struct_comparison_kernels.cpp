@@ -198,7 +198,7 @@ size_t dynd::make_struct_comparison_kernel(
                 const eval::eval_context *ectx)
 {
   intptr_t root_ckb_offset = ckb_offset;
-  const base_struct_type *bsd = src_tp.tcast<base_struct_type>();
+  const base_struct_type *bsd = src_tp.extended<base_struct_type>();
   size_t field_count = bsd->get_field_count();
   if (comptype == comparison_type_sorting_less) {
     if (src0_arrmeta == src1_arrmeta || src_tp.get_arrmeta_size() == 0 ||

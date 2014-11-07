@@ -221,7 +221,7 @@ void fixed_dimsym_type::data_destruct_strided(const char *DYND_UNUSED(arrmeta),
 }
 
 static ndt::type get_element_type(const ndt::type& dt) {
-    return dt.tcast<fixed_dimsym_type>()->get_element_type();
+    return dt.extended<fixed_dimsym_type>()->get_element_type();
 }
 
 void fixed_dimsym_type::get_dynamic_type_properties(

@@ -99,11 +99,11 @@ void typevar_dim_type::arrmeta_destruct(char *DYND_UNUSED(arrmeta)) const
 }
 
 static nd::array property_get_name(const ndt::type& tp) {
-    return tp.tcast<typevar_dim_type>()->get_name();
+    return tp.extended<typevar_dim_type>()->get_name();
 }
 
 static ndt::type property_get_element_type(const ndt::type& dt) {
-    return dt.tcast<typevar_dim_type>()->get_element_type();
+    return dt.extended<typevar_dim_type>()->get_element_type();
 }
 
 void typevar_dim_type::get_dynamic_type_properties(

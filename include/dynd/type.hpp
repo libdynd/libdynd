@@ -94,7 +94,6 @@ namespace ndt {
  *
  */
 class type {
-private:
     const base_type *m_extended;
 
     /**
@@ -104,7 +103,7 @@ private:
      *
      * \param type_id  The type id to validate.
      */
-    static inline const base_type *validate_builtin_type_id(type_id_t type_id)
+    static const base_type *validate_builtin_type_id(type_id_t type_id)
     {
         // 0 <= type_id < builtin_type_id_count
         if ((unsigned int)type_id < builtin_type_id_count) {
@@ -123,7 +122,7 @@ public:
      * Constructor from a base_type. This claims ownership of the 'extended'
      * reference if incref is false, be careful!
      */
-    inline explicit type(const base_type *extended, bool incref)
+    explicit type(const base_type *extended, bool incref)
         : m_extended(extended)
     {
         if (incref && !is_builtin_type(extended)) {
@@ -185,17 +184,6 @@ public:
     }
 
     /**
-     * Casts to the specified <x>_type class using static_cast.
-     * This does not validate the type id to make sure this is
-     * a valid cast, the caller MUST check this itself.
-     */
-    template<class TTYPE>
-    inline const TTYPE *tcast() const {
-        // TODO: In debug mode, assert the type id
-        return static_cast<const TTYPE *>(m_extended);
-    }
-
-    /**
      * The type class operates as a smart pointer for dynamically
      * allocated base_type instances, with raw storage of type id
      * for the built-in types. This function gives away the held
@@ -215,16 +203,16 @@ public:
         std::swap(m_extended, rhs);
     }
 
-    inline bool operator==(const type& rhs) const {
+    bool operator==(const type& rhs) const {
         return m_extended == rhs.m_extended ||
                (!is_builtin() && !rhs.is_builtin() &&
                 *m_extended == *rhs.m_extended);
     }
-    inline bool operator!=(const type& rhs) const {
+    bool operator!=(const type& rhs) const {
         return !(operator==(rhs));
     }
 
-    inline bool is_null() const {
+    bool is_null() const {
         return m_extended == NULL;
     }
 
@@ -233,7 +221,7 @@ public:
      * means the type id is encoded directly in the m_extended
      * pointer.
      */
-    inline bool is_builtin() const {
+    bool is_builtin() const {
         return is_builtin_type(m_extended);
     }
 
@@ -264,7 +252,7 @@ public:
      *
      * \returns  The type that results from the indexing operation.
      */
-    inline type at_single(intptr_t i0, const char **inout_arrmeta = NULL, const char **inout_data = NULL) const {
+    type at_single(intptr_t i0, const char **inout_arrmeta = NULL, const char **inout_data = NULL) const {
         if (!is_builtin()) {
             return m_extended->at_single(i0, inout_arrmeta, inout_data);
         } else {
@@ -280,23 +268,23 @@ public:
      *       e.g. convert a var_dim to a strided_dim, or collapsing pointers.
      *       If you do not want this collapsing behavior, use the 'at_single' function.
      */
-    inline type at(const irange& i0) const {
+    type at(const irange& i0) const {
         return at_array(1, &i0);
     }
 
     /** Indexing with two index values */
-    inline type at(const irange& i0, const irange& i1) const {
+    type at(const irange& i0, const irange& i1) const {
         irange i[2] = {i0, i1};
         return at_array(2, i);
     }
 
     /** Indexing with three index values */
-    inline type at(const irange& i0, const irange& i1, const irange& i2) const {
+    type at(const irange& i0, const irange& i1, const irange& i2) const {
         irange i[3] = {i0, i1, i2};
         return at_array(3, i);
     }
     /** Indexing with four index values */
-    inline type at(const irange& i0, const irange& i1, const irange& i2, const irange& i3) const {
+    type at(const irange& i0, const irange& i1, const irange& i2, const irange& i3) const {
         irange i[4] = {i0, i1, i2, i3};
         return at_array(4, i);
     }
@@ -399,17 +387,17 @@ public:
     }
 
     /** The alignment of the type */
-    inline size_t get_data_alignment() const {
+    size_t get_data_alignment() const {
         return get_base_type_alignment(m_extended);
     }
 
     /** The element size of the type */
-    inline size_t get_data_size() const {
+    size_t get_data_size() const {
         return get_base_type_data_size(m_extended);
     }
 
     /** The element size of the type when default-constructed */
-    inline size_t get_default_data_size() const
+    size_t get_default_data_size() const
     {
       if (is_builtin_type(m_extended)) {
         return static_cast<intptr_t>(
@@ -420,7 +408,7 @@ public:
       }
     }
 
-    inline size_t get_arrmeta_size() const {
+    size_t get_arrmeta_size() const {
         if (is_builtin()) {
             return 0;
         } else {
@@ -444,7 +432,7 @@ public:
      *
      * \param subarray_tp  Testing if it is a subarray of 'this'.
      */
-    inline bool is_type_subarray(const ndt::type& subarray_tp) const
+    bool is_type_subarray(const ndt::type& subarray_tp) const
     {
         if (is_builtin()) {
             return *this == subarray_tp;
@@ -457,7 +445,7 @@ public:
      * Returns true if the type represents a chunk of
      * consecutive memory of raw data.
      */
-    inline bool is_pod() const {
+    bool is_pod() const {
         if (is_builtin()) {
             return true;
         } else {
@@ -467,7 +455,7 @@ public:
         }
     }
 
-    inline bool is_scalar() const {
+    bool is_scalar() const {
         return is_builtin() || m_extended->is_scalar();
     }
 
@@ -475,7 +463,7 @@ public:
      * Returns true if the type contains any expression
      * type within it somewhere.
      */
-    inline bool is_expression() const {
+    bool is_expression() const {
         if (is_builtin()) {
             return false;
         } else {
@@ -487,7 +475,7 @@ public:
      * Returns true if the type constains a symbolic construct
      * like a type var.
      */
-    inline bool is_symbolic() const {
+    bool is_symbolic() const {
         return !is_builtin() &&
                (m_extended->get_flags() & type_flag_symbolic) != 0;
     }
@@ -523,7 +511,7 @@ public:
      * whereever appropriate. For example, an offset-based uniform array
      * would be replaced by a strided uniform array.
      */
-    inline type get_canonical_type() const {
+    type get_canonical_type() const {
         if (is_builtin()) {
             return *this;
         } else {
@@ -531,7 +519,7 @@ public:
         }
     }
 
-    inline base_type::flags_type get_flags() const
+    base_type::flags_type get_flags() const
     {
       if (is_builtin()) {
         return type_flag_scalar;
@@ -543,7 +531,7 @@ public:
     /**
      * Gets the number of array dimensions in the type.
      */
-    inline intptr_t get_ndim() const
+    intptr_t get_ndim() const
     {
       if (is_builtin()) {
         return 0;
@@ -557,7 +545,7 @@ public:
      * The initial arrmeta for this type begins with this many
      * strided_dim_type_arrmeta instances.
      */
-    inline intptr_t get_strided_ndim() const
+    intptr_t get_strided_ndim() const
     {
       if (is_builtin()) {
         return 0;
@@ -573,7 +561,7 @@ public:
      * \param inout_arrmeta  If non-NULL, is a pointer to arrmeta to advance
      *                       in place.
      */
-    inline type get_dtype(size_t include_ndim = 0,
+    type get_dtype(size_t include_ndim = 0,
                           char **inout_arrmeta = NULL) const
     {
       size_t ndim = get_ndim();
@@ -591,14 +579,14 @@ public:
       }
     }
 
-    inline type get_dtype(size_t include_ndim, const char **inout_arrmeta) const
+    type get_dtype(size_t include_ndim, const char **inout_arrmeta) const
     {
       return get_dtype(include_ndim, const_cast<char **>(inout_arrmeta));
     }
 
     intptr_t get_dim_size(const char *arrmeta, const char *data) const;
 
-    inline type get_type_at_dimension(char **inout_arrmeta, intptr_t i, intptr_t total_ndim = 0) const {
+    type get_type_at_dimension(char **inout_arrmeta, intptr_t i, intptr_t total_ndim = 0) const {
         if (!is_builtin()) {
             return m_extended->get_type_at_dimension(inout_arrmeta, i, total_ndim);
         } else if (i == 0) {
@@ -614,8 +602,19 @@ public:
      * type information exists. The returned pointer is only valid during
      * the lifetime of the type.
      */
-    inline const base_type* extended() const {
+    const base_type* extended() const {
         return m_extended;
+    }
+
+    /**
+     * Casts to the specified <x>_type class using static_cast.
+     * This does not validate the type id to make sure this is
+     * a valid cast, the caller MUST check this itself.
+     */
+    template <class T>
+    const T *extended() const {
+        // TODO: In debug mode, assert the type id
+        return static_cast<const T *>(m_extended);
     }
 
     /**
@@ -652,7 +651,7 @@ public:
                         const char **out_el_arrmeta) const;
 
     /** The size of the data required for uniform iteration */
-    inline size_t get_iterdata_size(intptr_t ndim) const {
+    size_t get_iterdata_size(intptr_t ndim) const {
         if (is_builtin()) {
             return 0;
         } else {
@@ -669,7 +668,7 @@ public:
      * \param shape     The iteration shape.
      * \param out_uniform_type  This is populated with the type of each iterated element
      */
-    inline void iterdata_construct(iterdata_common *iterdata, const char **inout_arrmeta,
+    void iterdata_construct(iterdata_common *iterdata, const char **inout_arrmeta,
                     intptr_t ndim, const intptr_t* shape, type& out_uniform_type) const
     {
         if (!is_builtin()) {
@@ -678,14 +677,14 @@ public:
     }
 
     /** Destructs any references or other state contained in the iterdata */
-    inline void iterdata_destruct(iterdata_common *iterdata, intptr_t ndim) const
+    void iterdata_destruct(iterdata_common *iterdata, intptr_t ndim) const
     {
         if (!is_builtin()) {
             m_extended->iterdata_destruct(iterdata, ndim);
         }
     }
 
-    inline size_t get_broadcasted_iterdata_size(intptr_t ndim) const {
+    size_t get_broadcasted_iterdata_size(intptr_t ndim) const {
         if (is_builtin()) {
             return sizeof(iterdata_broadcasting_terminator);
         } else {
@@ -703,7 +702,7 @@ public:
      * \param shape     The iteration shape.
      * \param out_uniform_tp  This is populated with the type of each iterated element
      */
-    inline void broadcasted_iterdata_construct(iterdata_common *iterdata, const char **inout_arrmeta,
+    void broadcasted_iterdata_construct(iterdata_common *iterdata, const char **inout_arrmeta,
                     intptr_t ndim, const intptr_t* shape, type& out_uniform_tp) const
     {
         size_t size;
@@ -728,7 +727,7 @@ public:
      */
     void print_data(std::ostream& o, const char *arrmeta, const char *data) const;
 
-    inline std::string str() const {
+    std::string str() const {
         std::stringstream ss;
         ss << *this;
         return ss.str();

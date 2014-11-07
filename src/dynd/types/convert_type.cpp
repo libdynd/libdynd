@@ -89,7 +89,7 @@ ndt::type convert_type::with_replaced_storage_type(const ndt::type& replacement_
         return ndt::type(
             new convert_type(
                 m_value_type,
-                m_operand_type.tcast<base_expr_type>()
+                m_operand_type.extended<base_expr_type>()
                     ->with_replaced_storage_type(replacement_type)),
             false);
     } else {

@@ -159,22 +159,22 @@ struct arrfunc_type_data {
 
   intptr_t get_nsrc() const
   {
-    return func_proto.tcast<funcproto_type>()->get_nsrc();
+    return func_proto.extended<funcproto_type>()->get_nsrc();
   }
 
   intptr_t get_naux() const
   {
-    return func_proto.tcast<funcproto_type>()->get_naux();
+    return func_proto.extended<funcproto_type>()->get_naux();
   }
 
   intptr_t get_narg() const
   {
-    return func_proto.tcast<funcproto_type>()->get_narg();
+    return func_proto.extended<funcproto_type>()->get_narg();
   }
 
   inline const ndt::type *get_arg_types() const
   {
-    return func_proto.tcast<funcproto_type>()->get_arg_types_raw();
+    return func_proto.extended<funcproto_type>()->get_arg_types_raw();
   }
 
   inline const ndt::type &get_arg_type(intptr_t i) const
@@ -184,7 +184,7 @@ struct arrfunc_type_data {
 
   inline const ndt::type &get_return_type() const
   {
-    return func_proto.tcast<funcproto_type>()->get_return_type();
+    return func_proto.extended<funcproto_type>()->get_return_type();
   }
 
   inline ndt::type resolve(intptr_t nsrc, const ndt::type *src_tp,

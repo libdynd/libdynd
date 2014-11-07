@@ -196,7 +196,7 @@ size_t datetime_type::make_assignment_kernel(
             return make_pod_typed_data_assignment_kernel(ckb, ckb_offset,
                             get_data_size(), get_data_alignment(), kernreq);
         } else if (src_tp.get_type_id() == datetime_type_id) {
-            if (src_tp.tcast<datetime_type>()->get_timezone() == tz_abstract) {
+            if (src_tp.extended<datetime_type>()->get_timezone() == tz_abstract) {
                 // TODO: If the destination timezone is not UTC, do an
                 //       appropriate transformation
                 if (get_timezone() == tz_utc) {
@@ -213,7 +213,7 @@ size_t datetime_type::make_assignment_kernel(
             } else if (ectx->errmode == assign_error_nocheck) {
                 // TODO: If the source timezone is not UTC, do an appropriate
                 //       transformation
-                if (src_tp.tcast<datetime_type>()->get_timezone() == tz_utc) {
+                if (src_tp.extended<datetime_type>()->get_timezone() == tz_utc) {
                     return make_pod_typed_data_assignment_kernel(
                         ckb, ckb_offset, get_data_size(), get_data_alignment(),
                         kernreq);
@@ -815,7 +815,7 @@ struct datetime_is_avail_ck {
                               const nd::array &DYND_UNUSED(kwds))
   {
     if (src_tp[0].get_type_id() != option_type_id ||
-        src_tp[0].tcast<option_type>()->get_value_type().get_type_id() !=
+        src_tp[0].extended<option_type>()->get_value_type().get_type_id() !=
             datetime_type_id) {
       stringstream ss;
       ss << "Expected source type ?datetime, got " << src_tp[0];
@@ -861,7 +861,7 @@ struct datetime_assign_na_ck {
                               const nd::array &DYND_UNUSED(kwds))
   {
     if (dst_tp.get_type_id() != option_type_id ||
-        dst_tp.tcast<option_type>()->get_value_type().get_type_id() !=
+        dst_tp.extended<option_type>()->get_value_type().get_type_id() !=
             datetime_type_id) {
       stringstream ss;
       ss << "Expected destination type ?datetime, got " << dst_tp;

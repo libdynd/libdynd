@@ -18,7 +18,7 @@ nd::string::string(const nd::array& rhs)
     if (!rhs.is_null()) {
         if (rhs.is_immutable() &&
                 rhs.get_type().get_type_id() == string_type_id &&
-                rhs.get_type().tcast<string_type>()->get_encoding() ==
+                rhs.get_type().extended<string_type>()->get_encoding() ==
                     string_encoding_utf_8) {
             // It's already immutable and the right type
             m_value = rhs;

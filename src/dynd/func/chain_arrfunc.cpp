@@ -141,7 +141,7 @@ void dynd::make_chain_arrfunc(const nd::arrfunc &first,
                                const ndt::type &buf_tp,
                                arrfunc_type_data *out_af)
 {
-  if (second.get()->func_proto.tcast<funcproto_type>()->get_nsrc() !=
+  if (second.get()->func_proto.extended<funcproto_type>()->get_nsrc() !=
       1) {
     stringstream ss;
     ss << "Cannot chain functions " << first << " and " << second
@@ -150,8 +150,8 @@ void dynd::make_chain_arrfunc(const nd::arrfunc &first,
   }
   out_af->free_func = &free_chain_arrfunc;
   out_af->func_proto = ndt::make_funcproto(
-      first.get()->func_proto.tcast<funcproto_type>()->get_arg_types(),
-      second.get()->func_proto.tcast<funcproto_type>()->get_return_type());
+      first.get()->func_proto.extended<funcproto_type>()->get_arg_types(),
+      second.get()->func_proto.extended<funcproto_type>()->get_return_type());
   if (buf_tp.get_type_id() == uninitialized_type_id) {
     //out_af->resolve_dst_type = &resolve_chain_dst_type;
     //out_af->instantiate = &instantiate_chain_resolve;

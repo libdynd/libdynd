@@ -232,7 +232,7 @@ intptr_t base_tuple_type::apply_linear_index(intptr_t nindices, const irange *in
             return offset;
         } else {
             intptr_t *out_offsets = reinterpret_cast<intptr_t *>(out_arrmeta);
-            const tuple_type *result_e_dt = result_tp.tcast<tuple_type>();
+            const tuple_type *result_e_dt = result_tp.extended<tuple_type>();
             for (intptr_t i = 0; i < dimension_size; ++i) {
                 intptr_t idx = start_index + i * index_stride;
                 out_offsets[i] = offsets[idx];

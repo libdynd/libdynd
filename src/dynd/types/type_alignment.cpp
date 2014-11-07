@@ -22,7 +22,7 @@ ndt::type ndt::make_unaligned(const ndt::type& value_type)
     } else {
       const ndt::type &sdt = value_type.storage_type();
       return ndt::type(
-          value_type.tcast<base_expr_type>()->with_replaced_storage_type(
+          value_type.extended<base_expr_type>()->with_replaced_storage_type(
               ndt::make_view(sdt,
                              ndt::make_fixedbytes(sdt.get_data_size(), 1))));
     }

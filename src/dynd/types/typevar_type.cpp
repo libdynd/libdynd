@@ -101,7 +101,7 @@ void typevar_type::arrmeta_destruct(char *DYND_UNUSED(arrmeta)) const
 }
 
 static nd::array property_get_name(const ndt::type& tp) {
-    return tp.tcast<typevar_type>()->get_name();
+    return tp.extended<typevar_type>()->get_name();
 }
 
 void typevar_type::get_dynamic_type_properties(const std::pair<std::string, gfunc::callable> **out_properties, size_t *out_count) const

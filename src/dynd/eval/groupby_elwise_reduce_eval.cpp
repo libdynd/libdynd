@@ -80,7 +80,7 @@ ndarray_node_ptr dynd::eval::evaluate_groupby_elwise_reduce(ndarray_node *node, 
 
     const ndt::type& result_dt = rnode->get_type().value_type();
     const ndt::type& groups_dt = gnode->get_groups();
-    const categorical_type *groups = groups_dt.tcast<categorical_type>();
+    const categorical_type *groups = groups_dt.extended<categorical_type>();
     intptr_t num_groups = groups->get_category_count();
 
 

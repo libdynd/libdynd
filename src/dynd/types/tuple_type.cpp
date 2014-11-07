@@ -182,11 +182,11 @@ void tuple_type::arrmeta_debug_print(const char *arrmeta, std::ostream& o, const
 }
 
 static nd::array property_get_field_types(const ndt::type& tp) {
-    return tp.tcast<tuple_type>()->get_field_types();
+    return tp.extended<tuple_type>()->get_field_types();
 }
 
 static nd::array property_get_arrmeta_offsets(const ndt::type& tp) {
-    return tp.tcast<tuple_type>()->get_arrmeta_offsets();
+    return tp.extended<tuple_type>()->get_arrmeta_offsets();
 }
 
 void tuple_type::get_dynamic_type_properties(const std::pair<std::string, gfunc::callable> **out_properties, size_t *out_count) const

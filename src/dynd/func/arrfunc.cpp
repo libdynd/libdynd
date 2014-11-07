@@ -84,7 +84,7 @@ static intptr_t instantiate_property_ckernel(
     } else if (src_tp[0].value_type() == prop_src_tp.operand_type()) {
       return make_assignment_kernel(
           ckb, ckb_offset, dst_tp, dst_arrmeta,
-          prop_src_tp.tcast<base_expr_type>()->with_replaced_storage_type(
+          prop_src_tp.extended<base_expr_type>()->with_replaced_storage_type(
               src_tp[0]),
           src_arrmeta[0], kernreq, ectx);
     }

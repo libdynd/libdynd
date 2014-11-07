@@ -265,11 +265,11 @@ void funcproto_type::arrmeta_destruct(char *DYND_UNUSED(arrmeta)) const
 }
 
 static nd::array property_get_arg_types(const ndt::type& dt) {
-    return dt.tcast<funcproto_type>()->get_arg_types();
+    return dt.extended<funcproto_type>()->get_arg_types();
 }
 
 static nd::array property_get_return_type(const ndt::type& dt) {
-    return dt.tcast<funcproto_type>()->get_return_type();
+    return dt.extended<funcproto_type>()->get_return_type();
 }
 
 void funcproto_type::get_dynamic_type_properties(const std::pair<std::string, gfunc::callable> **out_properties, size_t *out_count) const

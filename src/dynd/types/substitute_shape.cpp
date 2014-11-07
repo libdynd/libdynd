@@ -50,7 +50,7 @@ static void substitute_shape_visitor(const ndt::type &tp,
   intptr_t ndim = ssd->ndim, i = ssd->i;
   if (tp.get_kind() == dim_kind) {
     intptr_t dim_size = ssd->shape[i];
-    ndt::type subtp = tp.tcast<base_dim_type>()->get_element_type();
+    ndt::type subtp = tp.extended<base_dim_type>()->get_element_type();
     if (i + 1 < ndim) {
       ssd->i = i + 1;
       substitute_shape_visitor(subtp, 0, extra, subtp, out_was_transformed);
@@ -67,13 +67,13 @@ static void substitute_shape_visitor(const ndt::type &tp,
       return;
     case fixed_dim_type_id:
       if (dim_size < 0 ||
-          dim_size == tp.tcast<fixed_dim_type>()->get_fixed_dim_size()) {
+          dim_size == tp.extended<fixed_dim_type>()->get_fixed_dim_size()) {
         if (!out_was_transformed) {
           out_transformed_tp = tp;
         }
         else {
           out_transformed_tp = ndt::make_fixed_dim(
-              tp.tcast<fixed_dim_type>()->get_fixed_dim_size(), subtp);
+              tp.extended<fixed_dim_type>()->get_fixed_dim_size(), subtp);
         }
       }
       else {
@@ -82,7 +82,7 @@ static void substitute_shape_visitor(const ndt::type &tp,
       break;
     case cfixed_dim_type_id:
       if (dim_size < 0 ||
-          dim_size == tp.tcast<cfixed_dim_type>()->get_fixed_dim_size()) {
+          dim_size == tp.extended<cfixed_dim_type>()->get_fixed_dim_size()) {
         // If nothing was transformed, it's all good!
         if (!out_was_transformed) {
           out_transformed_tp = tp;
@@ -90,12 +90,12 @@ static void substitute_shape_visitor(const ndt::type &tp,
         // Can only substitute here if the size of the data type remained the
         // same
         else if (subtp.get_data_size() ==
-                 tp.tcast<cfixed_dim_type>()
+                 tp.extended<cfixed_dim_type>()
                      ->get_element_type()
                      .get_data_size()) {
           out_transformed_tp = ndt::make_cfixed_dim(
-              tp.tcast<cfixed_dim_type>()->get_fixed_dim_size(), subtp,
-              tp.tcast<cfixed_dim_type>()->get_fixed_stride());
+              tp.extended<cfixed_dim_type>()->get_fixed_dim_size(), subtp,
+              tp.extended<cfixed_dim_type>()->get_fixed_stride());
         }
         else {
           ssd->throw_error();

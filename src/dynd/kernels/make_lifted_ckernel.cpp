@@ -569,7 +569,7 @@ static size_t make_elwise_strided_or_var_to_var_dimension_expr_kernel_for_N(
   }
   e->base.destructor = strided_or_var_to_var_expr_kernel_extra<N>::destruct;
   // The dst var parameters
-  const var_dim_type *dst_vdd = dst_tp.tcast<var_dim_type>();
+  const var_dim_type *dst_vdd = dst_tp.extended<var_dim_type>();
   const var_dim_type_arrmeta *dst_md =
       reinterpret_cast<const var_dim_type_arrmeta *>(dst_arrmeta);
   e->dst_memblock = dst_md->blockref;

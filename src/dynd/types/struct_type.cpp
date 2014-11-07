@@ -204,15 +204,15 @@ void struct_type::arrmeta_debug_print(const char *arrmeta, std::ostream &o,
 }
 
 static nd::array property_get_field_names(const ndt::type& tp) {
-    return tp.tcast<struct_type>()->get_field_names();
+    return tp.extended<struct_type>()->get_field_names();
 }
 
 static nd::array property_get_field_types(const ndt::type& tp) {
-    return tp.tcast<struct_type>()->get_field_types();
+    return tp.extended<struct_type>()->get_field_types();
 }
 
 static nd::array property_get_arrmeta_offsets(const ndt::type& tp) {
-    return tp.tcast<struct_type>()->get_arrmeta_offsets();
+    return tp.extended<struct_type>()->get_arrmeta_offsets();
 }
 
 void struct_type::get_dynamic_type_properties(const std::pair<std::string, gfunc::callable> **out_properties, size_t *out_count) const
@@ -241,7 +241,7 @@ static array_preamble *property_get_array_field(const array_preamble *params, vo
     ndt::type udt = n.get_dtype();
     if (udt.get_kind() == expr_kind) {
         string field_name =
-            udt.value_type().tcast<struct_type>()->get_field_name(i);
+            udt.value_type().extended<struct_type>()->get_field_name(i);
         return n.replace_dtype(ndt::make_property(udt, field_name, i))
             .release();
     } else {
@@ -298,35 +298,35 @@ nd::array dynd::struct_concat(nd::array lhs, nd::array rhs)
   }
 
   // Make an empty shell struct by concatenating the fields together
-  intptr_t lhs_n = lhs_tp.tcast<base_struct_type>()->get_field_count();
-  intptr_t rhs_n = rhs_tp.tcast<base_struct_type>()->get_field_count();
+  intptr_t lhs_n = lhs_tp.extended<base_struct_type>()->get_field_count();
+  intptr_t rhs_n = rhs_tp.extended<base_struct_type>()->get_field_count();
   intptr_t res_n = lhs_n + rhs_n;
   nd::array res_field_names = nd::empty(res_n, ndt::make_string());
   nd::array res_field_types = nd::empty(res_n, ndt::make_type());
   res_field_names(irange(0, lhs_n)).vals() =
-      lhs_tp.tcast<base_struct_type>()->get_field_names();
+      lhs_tp.extended<base_struct_type>()->get_field_names();
   res_field_names(irange(lhs_n, res_n)).vals() =
-      rhs_tp.tcast<base_struct_type>()->get_field_names();
+      rhs_tp.extended<base_struct_type>()->get_field_names();
   res_field_types(irange(0, lhs_n)).vals() =
-      lhs_tp.tcast<base_struct_type>()->get_field_types();
+      lhs_tp.extended<base_struct_type>()->get_field_types();
   res_field_types(irange(lhs_n, res_n)).vals() =
-      rhs_tp.tcast<base_struct_type>()->get_field_types();
+      rhs_tp.extended<base_struct_type>()->get_field_types();
   ndt::type res_tp = ndt::make_struct(res_field_names, res_field_types);
   const ndt::type *res_field_tps =
-      res_tp.tcast<base_struct_type>()->get_field_types_raw();
+      res_tp.extended<base_struct_type>()->get_field_types_raw();
   res = nd::empty_shell(res_tp);
 
   // Initialize the default data offsets for the struct arrmeta
   struct_type::fill_default_data_offsets(
-      res_n, res_tp.tcast<base_struct_type>()->get_field_types_raw(),
+      res_n, res_tp.extended<base_struct_type>()->get_field_types_raw(),
       reinterpret_cast<uintptr_t *>(res.get_arrmeta()));
   // Get information about the arrmeta layout of the input and res
   const uintptr_t *lhs_arrmeta_offsets =
-      lhs_tp.tcast<base_struct_type>()->get_arrmeta_offsets_raw();
+      lhs_tp.extended<base_struct_type>()->get_arrmeta_offsets_raw();
   const uintptr_t *rhs_arrmeta_offsets =
-      rhs_tp.tcast<base_struct_type>()->get_arrmeta_offsets_raw();
+      rhs_tp.extended<base_struct_type>()->get_arrmeta_offsets_raw();
   const uintptr_t *res_arrmeta_offsets =
-      res_tp.tcast<base_struct_type>()->get_arrmeta_offsets_raw();
+      res_tp.extended<base_struct_type>()->get_arrmeta_offsets_raw();
   const char *lhs_arrmeta = lhs.get_arrmeta();
   const char *rhs_arrmeta = rhs.get_arrmeta();
   char *res_arrmeta = res.get_arrmeta();
@@ -350,11 +350,11 @@ nd::array dynd::struct_concat(nd::array lhs, nd::array rhs)
 
   // Get information about the data layout of the input and res
   const uintptr_t *lhs_data_offsets =
-      lhs_tp.tcast<base_struct_type>()->get_data_offsets(lhs.get_arrmeta());
+      lhs_tp.extended<base_struct_type>()->get_data_offsets(lhs.get_arrmeta());
   const uintptr_t *rhs_data_offsets =
-      rhs_tp.tcast<base_struct_type>()->get_data_offsets(rhs.get_arrmeta());
+      rhs_tp.extended<base_struct_type>()->get_data_offsets(rhs.get_arrmeta());
   const uintptr_t *res_data_offsets =
-      res_tp.tcast<base_struct_type>()->get_data_offsets(res.get_arrmeta());
+      res_tp.extended<base_struct_type>()->get_data_offsets(res.get_arrmeta());
   const char *lhs_data = lhs.get_readonly_originptr();
   const char *rhs_data = rhs.get_readonly_originptr();
   char *res_data = res.get_readwrite_originptr();
