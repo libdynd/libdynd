@@ -22,7 +22,7 @@ namespace {
 // Functions for the unary assignment as an arrfunc
 
 static intptr_t instantiate_assignment_ckernel(
-    const arrfunc_type_data *self, dynd::ckernel_builder *ckb,
+    const arrfunc_old_type_data *self, dynd::ckernel_builder *ckb,
     intptr_t ckb_offset, const ndt::type &dst_tp, const char *dst_arrmeta,
     const ndt::type *src_tp, const char *const *src_arrmeta,
     kernel_request_t kernreq, const eval::eval_context *ectx,
@@ -63,13 +63,13 @@ static intptr_t instantiate_assignment_ckernel(
 ////////////////////////////////////////////////////////////////
 // Functions for property access as an arrfunc
 
-static void delete_property_arrfunc_data(arrfunc_type_data *self_af)
+static void delete_property_arrfunc_data(arrfunc_old_type_data *self_af)
 {
     base_type_xdecref(*self_af->get_data_as<const base_type *>());
 }
 
 static intptr_t instantiate_property_ckernel(
-    const arrfunc_type_data *self, dynd::ckernel_builder *ckb,
+    const arrfunc_old_type_data *self, dynd::ckernel_builder *ckb,
     intptr_t ckb_offset, const ndt::type &dst_tp, const char *dst_arrmeta,
     const ndt::type *src_tp, const char *const *src_arrmeta,
     kernel_request_t kernreq, const eval::eval_context *ectx,
@@ -103,9 +103,9 @@ static intptr_t instantiate_property_ckernel(
 void dynd::make_arrfunc_from_assignment(const ndt::type &dst_tp,
                                         const ndt::type &src_tp,
                                         assign_error_mode errmode,
-                                        arrfunc_type_data &out_af)
+                                        arrfunc_old_type_data &out_af)
 {
-  memset(&out_af, 0, sizeof(arrfunc_type_data));
+  memset(&out_af, 0, sizeof(arrfunc_old_type_data));
   *out_af.get_data_as<assign_error_mode>() = errmode;
   out_af.free_func = NULL;
   out_af.instantiate = &instantiate_assignment_ckernel;
@@ -114,7 +114,7 @@ void dynd::make_arrfunc_from_assignment(const ndt::type &dst_tp,
 
 void dynd::make_arrfunc_from_property(const ndt::type &tp,
                                       const std::string &propname,
-                                      arrfunc_type_data &out_af)
+                                      arrfunc_old_type_data &out_af)
 {
     if (tp.get_kind() == expr_kind) {
         stringstream ss;
@@ -132,10 +132,10 @@ void dynd::make_arrfunc_from_property(const ndt::type &tp,
 nd::arrfunc::arrfunc(const nd::array &rhs)
 {
     if (!rhs.is_null()) {
-        if (rhs.get_type().get_type_id() == arrfunc_type_id) {
+        if (rhs.get_type().get_type_id() == arrfunc_old_type_id) {
             if (rhs.is_immutable()) {
-                const arrfunc_type_data *af =
-                    reinterpret_cast<const arrfunc_type_data *>(
+                const arrfunc_old_type_data *af =
+                    reinterpret_cast<const arrfunc_old_type_data *>(
                         rhs.get_readonly_originptr());
                 if (af->instantiate != NULL) {
                     // It's valid: immutable, arrfunc type, contains
@@ -167,7 +167,7 @@ nd::arrfunc::arrfunc(const nd::array &rhs)
 nd::array nd::arrfunc::call(intptr_t narg, const nd::array *args, const kwds &kwds,
                             const eval::eval_context *ectx) const
 {
-  const arrfunc_type_data *af = get();
+  const arrfunc_old_type_data *af = get();
 
   std::vector<ndt::type> arg_tp(narg);
   for (intptr_t i = 0; i < narg; ++i) {
@@ -205,7 +205,7 @@ void nd::arrfunc::call_out(intptr_t narg, const nd::array *args, const kwds &kwd
                            const nd::array &out, const eval::eval_context *ectx)
     const
 {
-  const arrfunc_type_data *af = get();
+  const arrfunc_old_type_data *af = get();
 
   std::vector<ndt::type> arg_tp(narg);
   for (intptr_t i = 0; i < narg; ++i) {

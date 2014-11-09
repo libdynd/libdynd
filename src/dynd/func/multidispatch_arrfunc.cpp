@@ -256,12 +256,12 @@ get_ambiguous_pairs(intptr_t naf, const nd::arrfunc *af,
   }
 }
 
-static void free_multidispatch_af_data(arrfunc_type_data *self_af) {
+static void free_multidispatch_af_data(arrfunc_old_type_data *self_af) {
   self_af->get_data_as<vector<nd::arrfunc> >()->~vector();
 }
 
 static intptr_t instantiate_multidispatch_af(
-    const arrfunc_type_data *af_self, dynd::ckernel_builder *ckb,
+    const arrfunc_old_type_data *af_self, dynd::ckernel_builder *ckb,
     intptr_t ckb_offset, const ndt::type &dst_tp, const char *dst_arrmeta,
     const ndt::type *src_tp, const char *const *src_arrmeta,
     kernel_request_t kernreq, const eval::eval_context *ectx,
@@ -304,7 +304,7 @@ static intptr_t instantiate_multidispatch_af(
 }
 
 static int
-resolve_multidispatch_dst_type(const arrfunc_type_data *af_self,
+resolve_multidispatch_dst_type(const arrfunc_old_type_data *af_self,
                                intptr_t nsrc, const ndt::type *src_tp,
                                int throw_on_error, ndt::type &out_dst_tp,
                                const nd::array &DYND_UNUSED(args), const nd::array &DYND_UNUSED(kwds))
@@ -346,7 +346,7 @@ resolve_multidispatch_dst_type(const arrfunc_type_data *af_self,
   }
 }
 
-void dynd::make_multidispatch_arrfunc(arrfunc_type_data *out_af, intptr_t naf,
+void dynd::make_multidispatch_arrfunc(arrfunc_old_type_data *out_af, intptr_t naf,
                                       const nd::arrfunc *af)
 {
   if (naf <= 0) {

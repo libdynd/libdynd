@@ -10,7 +10,7 @@
 #include <dynd/kernels/expr_kernels.hpp>
 #include <dynd/pp/meta.hpp>
 #include <dynd/pp/list.hpp>
-#include <dynd/types/funcproto_type.hpp>
+#include <dynd/types/arrfunc_type.hpp>
 #include <dynd/types/base_struct_type.hpp>
 
 namespace dynd { namespace detail {
@@ -59,7 +59,7 @@ public:
 #define COPY_CONSTRUCT(NAME) NAME(NAME)
 #define CONSTRUCT_TYPED_ARG(TYPENAME, TP, ARRMETA) detail::typed_arg<TYPENAME>(TP, ARRMETA, kwds)
 
-template <typename func_type, typename funcproto_type, int naux, bool construct>
+template <typename func_type, typename arrfunc_type, int naux, bool construct>
 struct functor_ck;
 
 #define FUNCTOR_CK(NARG) DYND_PP_JOIN_ELWISE_1(_FUNCTOR_CK, (), \
@@ -120,7 +120,7 @@ struct functor_ck;
             } \
         } \
 \
-        static intptr_t instantiate(const arrfunc_type_data *af_self, \
+        static intptr_t instantiate(const arrfunc_old_type_data *af_self, \
                                     dynd::ckernel_builder *ckb, intptr_t ckb_offset, \
                                     const ndt::type &dst_tp, const char *DYND_UNUSED(dst_arrmeta), \
                                     const ndt::type *src_tp, const char *const *DYND_PP_IF(NSRC)(src_arrmeta), \
@@ -197,7 +197,7 @@ DYND_PP_JOIN_MAP(FUNCTOR_CK, (), DYND_PP_RANGE(DYND_PP_INC(DYND_ARG_MAX)))
             } \
         } \
 \
-        static intptr_t instantiate(const arrfunc_type_data *af_self, \
+        static intptr_t instantiate(const arrfunc_old_type_data *af_self, \
                                     dynd::ckernel_builder *ckb, intptr_t ckb_offset, \
                                     const ndt::type &dst_tp, const char *DYND_UNUSED(dst_arrmeta), \
                                     const ndt::type *src_tp, const char *const *DYND_PP_IF(NSRC)(src_arrmeta), \
@@ -286,7 +286,7 @@ DYND_PP_JOIN_MAP(FUNCTOR_CK, (), DYND_PP_RANGE(DYND_PP_INC(DYND_ARG_MAX)))
             } \
         } \
 \
-        static intptr_t instantiate(const arrfunc_type_data *af_self, \
+        static intptr_t instantiate(const arrfunc_old_type_data *af_self, \
                                     dynd::ckernel_builder *ckb, intptr_t ckb_offset, \
                                     const ndt::type &dst_tp, const char *dst_arrmeta, \
                                     const ndt::type *src_tp, const char *const *DYND_PP_IF(NSRC)(src_arrmeta), \

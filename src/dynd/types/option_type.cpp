@@ -5,7 +5,7 @@
 
 #include <dynd/array.hpp>
 #include <dynd/types/option_type.hpp>
-#include <dynd/types/arrfunc_type.hpp>
+#include <dynd/types/arrfunc_old_type.hpp>
 #include <dynd/kernels/option_assignment_kernels.hpp>
 #include <dynd/kernels/option_kernels.hpp>
 #include <dynd/memblock/pod_memory_block.hpp>
@@ -107,7 +107,7 @@ bool option_type::is_avail(const char *arrmeta, const char *data,
     }
   } else {
     ckernel_builder ckb;
-    const arrfunc_type_data *af = get_is_avail_arrfunc();
+    const arrfunc_old_type_data *af = get_is_avail_arrfunc();
     ndt::type src_tp[1] = {ndt::type(this, true)};
     af->instantiate(af, &ckb, 0, ndt::make_type<dynd_bool>(), NULL, src_tp,
                     &arrmeta, kernel_request_single, ectx, nd::array(), nd::array());
@@ -167,7 +167,7 @@ void option_type::assign_na(const char *arrmeta, char *data,
     }
   } else {
     ckernel_builder ckb;
-    const arrfunc_type_data *af = get_assign_na_arrfunc();
+    const arrfunc_old_type_data *af = get_assign_na_arrfunc();
     af->instantiate(af, &ckb, 0, ndt::type(this, true), arrmeta, NULL, NULL,
                     kernel_request_single, ectx, nd::array(), nd::array());
     ckernel_prefix *ckp = ckb.get();

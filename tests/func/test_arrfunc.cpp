@@ -11,7 +11,7 @@
 #include "inc_gtest.hpp"
 
 #include <dynd/types/fixedstring_type.hpp>
-#include <dynd/types/arrfunc_type.hpp>
+#include <dynd/types/arrfunc_old_type.hpp>
 #include <dynd/types/date_type.hpp>
 #include <dynd/func/arrfunc.hpp>
 #include <dynd/kernels/assignment_kernels.hpp>
@@ -25,7 +25,7 @@ using namespace std;
 using namespace dynd;
 
 TEST(ArrFunc, Assignment) {
-    arrfunc_type_data af;
+    arrfunc_old_type_data af;
     // Create an arrfunc for converting string to int
     make_arrfunc_from_assignment(ndt::make_type<int>(),
                                  ndt::make_fixedstring(16),
@@ -97,7 +97,7 @@ TEST(ArrFunc, Assignment_CallInterface) {
 }
 
 TEST(ArrFunc, Property) {
-    arrfunc_type_data af;
+    arrfunc_old_type_data af;
     // Create an arrfunc for getting the year from a date
     make_arrfunc_from_property(ndt::make_date(), "year", af);
     // Validate that its types, etc are set right
@@ -122,7 +122,7 @@ TEST(ArrFunc, Property) {
 }
 
 TEST(ArrFunc, AssignmentAsExpr) {
-    arrfunc_type_data af;
+    arrfunc_old_type_data af;
     // Create an arrfunc for converting string to int
     make_arrfunc_from_assignment(ndt::make_type<int>(),
                                  ndt::make_fixedstring(16),
@@ -165,7 +165,7 @@ TEST(ArrFunc, AssignmentAsExpr) {
 /*
 // TODO Reenable once there's a convenient way to make the binary arrfunc
 TEST(ArrFunc, Expr) {
-    arrfunc_type_data af;
+    arrfunc_old_type_data af;
     // Create an arrfunc for adding two ints
     ndt::type add_ints_type = (nd::array((int)0) + nd::array((int)0)).get_type();
     make_arrfunc_from_assignment(

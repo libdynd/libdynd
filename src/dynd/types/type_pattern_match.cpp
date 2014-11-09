@@ -97,22 +97,22 @@ static bool recursive_match(const ndt::type &concrete, const ndt::type &pattern,
         return recursive_match(
             concrete.extended<base_memory_type>()->get_storage_type(),
             pattern.extended<base_memory_type>()->get_storage_type(), typevars);
-      case funcproto_type_id:
-        if (concrete.extended<funcproto_type>()->get_narg() ==
-            pattern.extended<funcproto_type>()->get_narg()) {
+      case arrfunc_type_id:
+        if (concrete.extended<arrfunc_type>()->get_narg() ==
+            pattern.extended<arrfunc_type>()->get_narg()) {
           // First match the return type
           if (!recursive_match(
-                  concrete.extended<funcproto_type>()->get_return_type(),
-                  pattern.extended<funcproto_type>()->get_return_type(),
+                  concrete.extended<arrfunc_type>()->get_return_type(),
+                  pattern.extended<arrfunc_type>()->get_return_type(),
                   typevars)) {
             return false;
           }
           // Then match all the parameters
-          size_t param_count = concrete.extended<funcproto_type>()->get_narg();
+          size_t param_count = concrete.extended<arrfunc_type>()->get_narg();
           for (size_t i = 0; i != param_count; ++i) {
             if (!recursive_match(
-                    concrete.extended<funcproto_type>()->get_arg_type(i),
-                    pattern.extended<funcproto_type>()->get_arg_type(i),
+                    concrete.extended<arrfunc_type>()->get_arg_type(i),
+                    pattern.extended<arrfunc_type>()->get_arg_type(i),
                     typevars)) {
               return false;
             }

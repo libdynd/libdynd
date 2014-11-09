@@ -11,7 +11,7 @@
 #include "inc_gtest.hpp"
 
 #include <dynd/types/fixedstring_type.hpp>
-#include <dynd/types/arrfunc_type.hpp>
+#include <dynd/types/arrfunc_old_type.hpp>
 #include <dynd/func/arrfunc.hpp>
 #include <dynd/kernels/assignment_kernels.hpp>
 #include <dynd/kernels/expr_kernel_generator.hpp>
@@ -88,7 +88,7 @@ TEST(LiftArrFunc, UnaryExpr_StridedToVarDim) {
         ndt::make_type<int>(), ndt::make_fixedstring(16), assign_error_default);
 
     // Lift the kernel to particular fixed dim arrays
-    arrfunc_type_data af;
+    arrfunc_old_type_data af;
     lift_arrfunc(&af, af_base);
 
     // Test it on some data
@@ -124,7 +124,7 @@ TEST(LiftArrFunc, UnaryExpr_VarToVarDim) {
         ndt::make_type<int>(), ndt::make_fixedstring(16), assign_error_default);
 
     // Lift the kernel to particular fixed dim arrays
-    arrfunc_type_data af;
+    arrfunc_old_type_data af;
     lift_arrfunc(&af, af_base);
 
     // Test it on some data

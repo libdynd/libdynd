@@ -151,9 +151,9 @@ std::ostream& dynd::operator<<(std::ostream& o, type_id_t tid)
             return (o << "groupby");
         case type_type_id:
             return (o << "type");
-        case arrfunc_type_id:
+        case arrfunc_old_type_id:
             return (o << "arrfunc");
-        case funcproto_type_id:
+        case arrfunc_type_id:
             return (o << "funcproto");
         case typevar_type_id:
             return (o << "typevar");

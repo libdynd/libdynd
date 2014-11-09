@@ -25,7 +25,7 @@
 #include <dynd/types/fixedbytes_type.hpp>
 #include <dynd/types/bytes_type.hpp>
 #include <dynd/types/type_type.hpp>
-#include <dynd/types/arrfunc_type.hpp>
+#include <dynd/types/arrfunc_old_type.hpp>
 #include <dynd/types/type_alignment.hpp>
 #include <dynd/types/pointer_type.hpp>
 #include <dynd/types/char_type.hpp>
@@ -33,7 +33,7 @@
 #include <dynd/types/cuda_host_type.hpp>
 #include <dynd/types/cuda_device_type.hpp>
 #include <dynd/types/ndarrayarg_type.hpp>
-#include <dynd/types/funcproto_type.hpp>
+#include <dynd/types/arrfunc_type.hpp>
 #include <dynd/types/typevar_type.hpp>
 #include <dynd/types/typevar_dim_type.hpp>
 #include <dynd/types/pow_dimsym_type.hpp>
@@ -376,8 +376,8 @@ static ndt::type parse_adapt_parameters(const char *&rbegin, const char *end,
   }
   const char *saved_begin = begin;
   ndt::type proto_tp = parse_datashape(begin, end, symtable);
-  if (proto_tp.is_null() || proto_tp.get_type_id() != funcproto_type_id ||
-      proto_tp.extended<funcproto_type>()->get_narg() != 1) {
+  if (proto_tp.is_null() || proto_tp.get_type_id() != arrfunc_type_id ||
+      proto_tp.extended<arrfunc_type>()->get_narg() != 1) {
     throw datashape_parse_error(saved_begin, "expected a unary function signature");
   }
   if (!parse_token_ds(begin, end, ',')) {
@@ -394,8 +394,8 @@ static ndt::type parse_adapt_parameters(const char *&rbegin, const char *end,
   // TODO catch errors, convert them to datashape_parse_error so the position is
   // shown
   rbegin = begin;
-  return ndt::make_adapt(proto_tp.extended<funcproto_type>()->get_arg_type(0),
-                         proto_tp.extended<funcproto_type>()->get_return_type(),
+  return ndt::make_adapt(proto_tp.extended<arrfunc_type>()->get_arg_type(0),
+                         proto_tp.extended<arrfunc_type>()->get_return_type(),
                          adapt_op);
 }
 

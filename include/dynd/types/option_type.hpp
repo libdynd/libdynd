@@ -58,15 +58,15 @@ public:
   bool is_avail(const char *arrmeta, const char *data,
                 const eval::eval_context *ectx) const;
 
-  const arrfunc_type_data *get_is_avail_arrfunc() const
+  const arrfunc_old_type_data *get_is_avail_arrfunc() const
   {
-    return reinterpret_cast<const arrfunc_type_data *>(
+    return reinterpret_cast<const arrfunc_old_type_data *>(
         m_nafunc.get_readonly_originptr());
   }
 
-  const arrfunc_type_data *get_assign_na_arrfunc() const
+  const arrfunc_old_type_data *get_assign_na_arrfunc() const
   {
-    return reinterpret_cast<const arrfunc_type_data *>(
+    return reinterpret_cast<const arrfunc_old_type_data *>(
                m_nafunc.get_readonly_originptr()) +
            1;
   }

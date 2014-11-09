@@ -388,7 +388,7 @@ struct nafunc {
     typedef typename std::remove_pointer<T>::type nafunc_type;
 
     static intptr_t instantiate_is_avail(
-        const arrfunc_type_data *DYND_UNUSED(self),
+        const arrfunc_old_type_data *DYND_UNUSED(self),
         dynd::ckernel_builder *ckb, intptr_t ckb_offset,
         const ndt::type &dst_tp, const char *DYND_UNUSED(dst_arrmeta),
         const ndt::type *src_tp, const char *const *DYND_UNUSED(src_arrmeta),
@@ -414,7 +414,7 @@ struct nafunc {
     }
 
     static int resolve_is_avail_dst_type(
-        const arrfunc_type_data *DYND_UNUSED(self),
+        const arrfunc_old_type_data *DYND_UNUSED(self),
         intptr_t DYND_UNUSED(nsrc), const ndt::type *DYND_UNUSED(src_tp),
         int DYND_UNUSED(throw_on_error), ndt::type &out_dst_tp,
         const nd::array &DYND_UNUSED(args), const nd::array &DYND_UNUSED(kwds))
@@ -424,7 +424,7 @@ struct nafunc {
     }
 
     static intptr_t instantiate_assign_na(
-        const arrfunc_type_data *DYND_UNUSED(self),
+        const arrfunc_old_type_data *DYND_UNUSED(self),
         dynd::ckernel_builder *ckb, intptr_t ckb_offset,
         const ndt::type &dst_tp, const char *DYND_UNUSED(dst_arrmeta),
         const ndt::type *DYND_UNUSED(src_tp), const char *const *DYND_UNUSED(src_arrmeta),
@@ -447,9 +447,9 @@ struct nafunc {
     static nd::array get()
     {
         nd::array naf = nd::empty(option_type::make_nafunc_type());
-        arrfunc_type_data *is_avail =
-            reinterpret_cast<arrfunc_type_data *>(naf.get_ndo()->m_data_pointer);
-        arrfunc_type_data *assign_na = is_avail + 1;
+        arrfunc_old_type_data *is_avail =
+            reinterpret_cast<arrfunc_old_type_data *>(naf.get_ndo()->m_data_pointer);
+        arrfunc_old_type_data *assign_na = is_avail + 1;
 
         // Use a typevar instead of option[T] to avoid a circular dependency
         is_avail->func_proto =
@@ -466,7 +466,7 @@ struct nafunc {
 
 } // anonymous namespace
 
-intptr_t kernels::fixed_dim_is_avail_ck::instantiate(const arrfunc_type_data *DYND_UNUSED(self),
+intptr_t kernels::fixed_dim_is_avail_ck::instantiate(const arrfunc_old_type_data *DYND_UNUSED(self),
                                                      dynd::ckernel_builder *ckb, intptr_t ckb_offset,
                                                      const ndt::type &DYND_UNUSED(dst_tp),
                                                      const char *DYND_UNUSED(dst_arrmeta),
@@ -516,7 +516,7 @@ intptr_t kernels::fixed_dim_is_avail_ck::instantiate(const arrfunc_type_data *DY
     return ckb_offset;
 }
 
-intptr_t kernels::fixed_dim_assign_na_ck::instantiate(const arrfunc_type_data *DYND_UNUSED(self),
+intptr_t kernels::fixed_dim_assign_na_ck::instantiate(const arrfunc_old_type_data *DYND_UNUSED(self),
                                                       dynd::ckernel_builder *ckb, intptr_t ckb_offset,
                                                       const ndt::type &dst_tp,
                                                       const char *DYND_UNUSED(dst_arrmeta),

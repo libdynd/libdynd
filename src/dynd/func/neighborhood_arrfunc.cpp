@@ -75,7 +75,7 @@ struct neighborhood {
 
 template <int N>
 static intptr_t instantiate_neighborhood(
-    const arrfunc_type_data *af_self,
+    const arrfunc_old_type_data *af_self,
     dynd::ckernel_builder *ckb, intptr_t ckb_offset,
     const ndt::type &dst_tp, const char *dst_arrmeta,
     const ndt::type *src_tp, const char *const *src_arrmeta,
@@ -171,7 +171,7 @@ static intptr_t instantiate_neighborhood(
     return ckb_offset;
 }
 
-static int resolve_neighborhood_dst_type(const arrfunc_type_data *self,
+static int resolve_neighborhood_dst_type(const arrfunc_old_type_data *self,
                                          intptr_t nsrc, const ndt::type *src_tp,
                                          int DYND_UNUSED(throw_on_error), ndt::type &out_dst_tp,
                                          const nd::array &DYND_UNUSED(args), const nd::array &DYND_UNUSED(kwds))
@@ -206,13 +206,13 @@ static int resolve_neighborhood_dst_type(const arrfunc_type_data *self,
   return 1;
 }
 
-static void free_neighborhood(arrfunc_type_data *self_af) {
+static void free_neighborhood(arrfunc_old_type_data *self_af) {
     neighborhood *nh = *self_af->get_data_as<neighborhood *>();
     free(nh->start_stop);
     delete nh;
 }
 
-void dynd::make_neighborhood_arrfunc(arrfunc_type_data *out_af,
+void dynd::make_neighborhood_arrfunc(arrfunc_old_type_data *out_af,
                                      const nd::arrfunc &neighborhood_op,
                                      intptr_t nh_ndim)
 {

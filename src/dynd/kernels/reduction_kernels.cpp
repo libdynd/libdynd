@@ -5,7 +5,7 @@
 
 #include <dynd/kernels/reduction_kernels.hpp>
 #include <dynd/array.hpp>
-#include <dynd/types/arrfunc_type.hpp>
+#include <dynd/types/arrfunc_old_type.hpp>
 #include <dynd/types/fixed_dimsym_type.hpp>
 #include <dynd/func/lift_reduction_arrfunc.hpp>
 
@@ -89,7 +89,7 @@ intptr_t kernels::make_builtin_sum_reduction_ckernel(
 }
 
 static intptr_t instantiate_builtin_sum_reduction_arrfunc(
-    const arrfunc_type_data *DYND_UNUSED(self_data_ptr),
+    const arrfunc_old_type_data *DYND_UNUSED(self_data_ptr),
     dynd::ckernel_builder *ckb, intptr_t ckb_offset,
     const ndt::type &dst_tp, const char *DYND_UNUSED(dst_arrmeta),
     const ndt::type *src_tp, const char *const *DYND_UNUSED(src_arrmeta),
@@ -107,7 +107,7 @@ static intptr_t instantiate_builtin_sum_reduction_arrfunc(
 }
 
 void kernels::make_builtin_sum_reduction_arrfunc(
-                arrfunc_type_data *out_af,
+                arrfunc_old_type_data *out_af,
                 type_id_t tid)
 {
     if (tid < 0 || tid >= builtin_type_id_count) {
@@ -128,7 +128,7 @@ nd::arrfunc kernels::make_builtin_sum1d_arrfunc(type_id_t tid)
     nd::array sum_1d = nd::empty(ndt::make_arrfunc());
     bool reduction_dimflags[1] = {true};
     lift_reduction_arrfunc(
-        reinterpret_cast<arrfunc_type_data *>(sum_1d.get_readwrite_originptr()),
+        reinterpret_cast<arrfunc_old_type_data *>(sum_1d.get_readwrite_originptr()),
         sum_ew, ndt::make_fixed_dimsym(ndt::type(tid)), nd::array(), false, 1,
         reduction_dimflags, true, true, false, 0);
     sum_1d.flag_as_immutable();
@@ -164,12 +164,12 @@ namespace {
     struct mean1d_arrfunc_data {
         intptr_t minp;
 
-        static void free(arrfunc_type_data *self_af) {
+        static void free(arrfunc_old_type_data *self_af) {
           delete *self_af->get_data_as<mean1d_arrfunc_data *>();
         }
 
         static intptr_t
-        instantiate(const arrfunc_type_data *af_self,
+        instantiate(const arrfunc_old_type_data *af_self,
                     dynd::ckernel_builder *ckb, intptr_t ckb_offset,
                     const ndt::type &dst_tp, const char *DYND_UNUSED(dst_arrmeta),
                     const ndt::type *src_tp, const char *const *src_arrmeta,
@@ -220,8 +220,8 @@ nd::arrfunc kernels::make_builtin_mean1d_arrfunc(type_id_t tid, intptr_t minp)
         throw type_error(ss.str());
     }
     nd::array mean1d = nd::empty(ndt::make_arrfunc());
-    arrfunc_type_data *out_af =
-        reinterpret_cast<arrfunc_type_data *>(mean1d.get_readwrite_originptr());
+    arrfunc_old_type_data *out_af =
+        reinterpret_cast<arrfunc_old_type_data *>(mean1d.get_readwrite_originptr());
     out_af->func_proto =
         ndt::make_funcproto(ndt::make_fixed_dimsym(ndt::make_type<double>()),
                             ndt::make_type<double>());

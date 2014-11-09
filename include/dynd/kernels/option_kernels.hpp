@@ -10,7 +10,7 @@
 namespace dynd { namespace kernels {
 
 struct fixed_dim_is_avail_ck {
-  static intptr_t instantiate(const arrfunc_type_data *self,
+  static intptr_t instantiate(const arrfunc_old_type_data *self,
                               dynd::ckernel_builder *ckb, intptr_t ckb_offset,
                               const ndt::type &dst_tp,
                               const char *dst_arrmeta,
@@ -23,7 +23,7 @@ struct fixed_dim_is_avail_ck {
 };
 
 struct fixed_dim_assign_na_ck {
-  static intptr_t instantiate(const arrfunc_type_data *self,
+  static intptr_t instantiate(const arrfunc_old_type_data *self,
                               dynd::ckernel_builder *ckb, intptr_t ckb_offset,
                               const ndt::type &dst_tp,
                               const char *dst_arrmeta,

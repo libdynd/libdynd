@@ -158,10 +158,10 @@ enum type_id_t {
     type_type_id,
 
     // Instances of this type are arrfunc objects
-    arrfunc_type_id,
+    arrfunc_old_type_id,
 
     // Symbolic types
-    funcproto_type_id,
+    arrfunc_type_id,
     typevar_type_id,
     typevar_dim_type_id,
     pow_dimsym_type_id,
