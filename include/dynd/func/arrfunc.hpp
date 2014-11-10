@@ -36,13 +36,14 @@ struct arrfunc_old_type_data;
  *                different from the one in the function prototype, but must
  *                match its pattern.
  * \param dst_arrmeta  The destination arrmeta.
- * \param src_tp  An array of the source types of the ckernel to generate. These may be
- *                different from the ones in the function prototype, but must
- *                match the patterns.
+ * \param src_tp  An array of the source types of the ckernel to generate. These
+ *                may be different from the ones in the function prototype, but
+ *                must match the patterns.
  * \param src_arrmeta  An array of dynd arrmeta pointers,
  *                     corresponding to the source types.
- * \param kernreq  What kind of C function prototype the resulting ckernel should
- *                 follow. Defined by the enum with kernel_request_* values.
+ * \param kernreq  What kind of C function prototype the resulting ckernel
+ *                 should follow. Defined by the enum with kernel_request_*
+ *                 values.
  * \param ectx  The evaluation context.
  * \param args  A tuple array of unnamed auxiliary arguments.
  * \param kwds  A struct array of named auxiliary arguments.
@@ -50,8 +51,8 @@ struct arrfunc_old_type_data;
  * \returns  The offset into ``ckb`` immediately after the instantiated ckernel.
  */
 typedef intptr_t (*arrfunc_instantiate_t)(
-    const arrfunc_old_type_data *self, dynd::ckernel_builder *ckb, intptr_t ckb_offset,
-    const ndt::type &dst_tp, const char *dst_arrmeta,
+    const arrfunc_old_type_data *self, dynd::ckernel_builder *ckb,
+    intptr_t ckb_offset, const ndt::type &dst_tp, const char *dst_arrmeta,
     const ndt::type *src_tp, const char *const *src_arrmeta,
     kernel_request_t kernreq, const eval::eval_context *ectx,
     const nd::array &args, const nd::array &kwds);
@@ -74,8 +75,8 @@ typedef intptr_t (*arrfunc_instantiate_t)(
  */
 typedef int (*arrfunc_resolve_dst_type_t)(
     const arrfunc_old_type_data *self, intptr_t nsrc, const ndt::type *src_tp,
-    int throw_on_error, ndt::type &out_dst_tp,
-    const nd::array &args, const nd::array &kwds);
+    int throw_on_error, ndt::type &out_dst_tp, const nd::array &args,
+    const nd::array &kwds);
 
 /**
  * This is a struct designed for interoperability at
@@ -139,7 +140,7 @@ struct arrfunc_old_type_data {
       throw std::runtime_error("data does not fit");
     }
     if ((int)scalar_align_of<T>::value >
-                           (int)scalar_align_of<uint64_t>::value) {
+        (int)scalar_align_of<uint64_t>::value) {
       throw std::runtime_error("data requires stronger alignment");
     }
     return reinterpret_cast<T *>(data);
@@ -151,7 +152,7 @@ struct arrfunc_old_type_data {
       throw std::runtime_error("data does not fit");
     }
     if ((int)scalar_align_of<T>::value >
-                           (int)scalar_align_of<uint64_t>::value) {
+        (int)scalar_align_of<uint64_t>::value) {
       throw std::runtime_error("data requires stronger alignment");
     }
     return reinterpret_cast<const T *>(data);
@@ -194,18 +195,19 @@ struct arrfunc_old_type_data {
       ndt::type result;
       resolve_dst_type(this, nsrc, src_tp, true, result, args, kwds);
       return result;
-    } else {
+    }
+    else {
       if (nsrc != get_nsrc()) {
         std::stringstream ss;
-        ss << "arrfunc expected " << get_nsrc()
-           << " parameters, but received " << nsrc;
+        ss << "arrfunc expected " << get_nsrc() << " parameters, but received "
+           << nsrc;
         throw std::invalid_argument(ss.str());
       }
       const ndt::type *param_types = get_arg_types();
       std::map<nd::string, ndt::type> typevars;
       for (intptr_t i = 0; i != nsrc; ++i) {
         if (!ndt::pattern_match(src_tp[i].value_type(), param_types[i],
-                                     typevars)) {
+                                typevars)) {
           std::stringstream ss;
           ss << "parameter " << (i + 1) << " to arrfunc does not match, ";
           ss << "expected " << param_types[i] << ", received " << src_tp[i];
@@ -218,41 +220,48 @@ struct arrfunc_old_type_data {
 };
 
 class kwds {
-    nd::array m_kwds;
+  nd::array m_kwds;
 
 public:
-    kwds() {
-    }
+  kwds() {}
 
-    template <typename A0>
-    kwds(const std::string &name0, const A0 &a0)
-        : m_kwds(pack(name0, a0)) {
-    }
+  template <typename A0>
+  kwds(const std::string &name0, const A0 &a0)
+      : m_kwds(pack(name0, a0))
+  {
+  }
 
-    template <typename A0, typename A1>
-    kwds(const std::string &name0, const A0 &a0, const std::string &name1, const A1 &a1)
-        : m_kwds(pack(name0, a0, name1, a1)) {
-    }
+  template <typename A0, typename A1>
+  kwds(const std::string &name0, const A0 &a0, const std::string &name1,
+       const A1 &a1)
+      : m_kwds(pack(name0, a0, name1, a1))
+  {
+  }
 
-    template <typename A0, typename A1, typename A2>
-    kwds(const std::string &name0, const A0 &a0, const std::string &name1, const A1 &a1, const std::string &name2, const A2 &a2)
-        : m_kwds(pack(name0, a0, name1, a1, name2, a2)) {
-    }
+  template <typename A0, typename A1, typename A2>
+  kwds(const std::string &name0, const A0 &a0, const std::string &name1,
+       const A1 &a1, const std::string &name2, const A2 &a2)
+      : m_kwds(pack(name0, a0, name1, a1, name2, a2))
+  {
+  }
 
-    template <typename A0, typename A1, typename A2, typename A3>
-    kwds(const std::string &name0, const A0 &a0, const std::string &name1, const A1 &a1, const std::string &name2, const A2 &a2,
-        const std::string &name3, const A3 &a3)
-        : m_kwds(pack(name0, a0, name1, a1, name2, a2, name3, a3)) {
-    }
+  template <typename A0, typename A1, typename A2, typename A3>
+  kwds(const std::string &name0, const A0 &a0, const std::string &name1,
+       const A1 &a1, const std::string &name2, const A2 &a2,
+       const std::string &name3, const A3 &a3)
+      : m_kwds(pack(name0, a0, name1, a1, name2, a2, name3, a3))
+  {
+  }
 
-    template <typename A0, typename A1, typename A2, typename A3, typename A4>
-    kwds(const std::string &name0, const A0 &a0, const std::string &name1, const A1 &a1, const std::string &name2, const A2 &a2,
-        const std::string &name3, const A3 &a3, const std::string &name4, const A4 &a4)
-        : m_kwds(pack(name0, a0, name1, a1, name2, a2, name3, a3, name4, a4)) {
-    }
-    const nd::array &get() const {
-        return m_kwds;
-    }
+  template <typename A0, typename A1, typename A2, typename A3, typename A4>
+  kwds(const std::string &name0, const A0 &a0, const std::string &name1,
+       const A1 &a1, const std::string &name2, const A2 &a2,
+       const std::string &name3, const A3 &a3, const std::string &name4,
+       const A4 &a4)
+      : m_kwds(pack(name0, a0, name1, a1, name2, a2, name3, a3, name4, a4))
+  {
+  }
+  const nd::array &get() const { return m_kwds; }
 };
 
 namespace nd {
@@ -305,26 +314,30 @@ public:
   {
     return call(0, NULL, &eval::default_eval_context);
   }
-  inline nd::array operator()(const nd::array &a0, const kwds &kwds = dynd::kwds()) const
+  inline nd::array operator()(const nd::array &a0,
+                              const kwds &kwds = dynd::kwds()) const
   {
     return call(1, &a0, kwds, &eval::default_eval_context);
   }
-  inline nd::array operator()(const nd::array &a0, const nd::array &a1, const kwds &kwds = dynd::kwds()) const
+  inline nd::array operator()(const nd::array &a0, const nd::array &a1,
+                              const kwds &kwds = dynd::kwds()) const
   {
     nd::array args[2] = {a0, a1};
     return call(2, args, kwds, &eval::default_eval_context);
   }
   inline nd::array operator()(const nd::array &a0, const nd::array &a1,
-                              const nd::array &a2, const kwds &kwds = dynd::kwds()) const
+                              const nd::array &a2,
+                              const kwds &kwds = dynd::kwds()) const
   {
     nd::array args[3] = {a0, a1, a2};
     return call(3, args, kwds, &eval::default_eval_context);
   }
 
   /** Implements the general call operator with output parameter */
-  void call_out(intptr_t arg_count, const nd::array *args, const kwds &kwds, const nd::array &out,
-                const eval::eval_context *ectx) const;
-  inline void call_out(intptr_t arg_count, const nd::array *args, const nd::array &out,
+  void call_out(intptr_t arg_count, const nd::array *args, const kwds &kwds,
+                const nd::array &out, const eval::eval_context *ectx) const;
+  inline void call_out(intptr_t arg_count, const nd::array *args,
+                       const nd::array &out,
                        const eval::eval_context *ectx) const
   {
     call_out(arg_count, args, dynd::kwds(), out, ectx);
@@ -335,24 +348,28 @@ public:
   {
     call_out(0, NULL, out, &eval::default_eval_context);
   }
-  inline void call_out(const nd::array &a0, const nd::array &out, const kwds &kwds = dynd::kwds()) const
+  inline void call_out(const nd::array &a0, const nd::array &out,
+                       const kwds &kwds = dynd::kwds()) const
   {
     call_out(1, &a0, kwds, out, &eval::default_eval_context);
   }
   inline void call_out(const nd::array &a0, const nd::array &a1,
-                       const nd::array &out, const kwds &kwds = dynd::kwds()) const
+                       const nd::array &out,
+                       const kwds &kwds = dynd::kwds()) const
   {
     nd::array args[2] = {a0, a1};
     call_out(2, args, kwds, out, &eval::default_eval_context);
   }
   inline void call_out(const nd::array &a0, const nd::array &a1,
-                       const nd::array &a2, const nd::array &out, const kwds &kwds = dynd::kwds()) const
+                       const nd::array &a2, const nd::array &out,
+                       const kwds &kwds = dynd::kwds()) const
   {
     nd::array args[3] = {a0, a1, a2};
     call_out(3, args, kwds, out, &eval::default_eval_context);
   }
   inline void call_out(const nd::array &a0, const nd::array &a1,
-                       const nd::array &a2, const nd::array &a3, nd::array &out, const kwds &kwds = dynd::kwds()) const
+                       const nd::array &a2, const nd::array &a3, nd::array &out,
+                       const kwds &kwds = dynd::kwds()) const
   {
     nd::array args[4] = {a0, a1, a2, a3};
     call_out(4, args, kwds, out, &eval::default_eval_context);
@@ -414,12 +431,12 @@ inline nd::arrfunc make_arrfunc_from_assignment(const ndt::type &dst_tp,
                                                 const ndt::type &src_tp,
                                                 assign_error_mode errmode)
 {
-    nd::array af = nd::empty(ndt::make_arrfunc());
-    make_arrfunc_from_assignment(
-        dst_tp, src_tp, errmode,
-        *reinterpret_cast<arrfunc_old_type_data *>(af.get_readwrite_originptr()));
-    af.flag_as_immutable();
-    return af;
+  nd::array af = nd::empty(ndt::make_arrfunc());
+  make_arrfunc_from_assignment(
+      dst_tp, src_tp, errmode,
+      *reinterpret_cast<arrfunc_old_type_data *>(af.get_readwrite_originptr()));
+  af.flag_as_immutable();
+  return af;
 }
 
 /**
@@ -437,12 +454,12 @@ void make_arrfunc_from_property(const ndt::type &tp,
 inline nd::arrfunc make_arrfunc_from_property(const ndt::type &tp,
                                               const std::string &propname)
 {
-    nd::array af = nd::empty(ndt::make_arrfunc());
-    make_arrfunc_from_property(
-        tp, propname,
-        *reinterpret_cast<arrfunc_old_type_data *>(af.get_readwrite_originptr()));
-    af.flag_as_immutable();
-    return af;
+  nd::array af = nd::empty(ndt::make_arrfunc());
+  make_arrfunc_from_property(
+      tp, propname,
+      *reinterpret_cast<arrfunc_old_type_data *>(af.get_readwrite_originptr()));
+  af.flag_as_immutable();
+  return af;
 }
 
 } // namespace dynd
