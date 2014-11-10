@@ -6,6 +6,7 @@
 #pragma once
 
 #include <dynd/func/arrfunc.hpp>
+#include <dynd/func/funcproto.hpp>
 #include <dynd/kernels/functor_kernels.hpp>
 #include <dynd/types/arrfunc_type.hpp>
 

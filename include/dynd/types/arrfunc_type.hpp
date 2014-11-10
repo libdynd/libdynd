@@ -9,7 +9,6 @@
 #include <string>
 
 #include <dynd/array.hpp>
-#include <dynd/funcproto.hpp>
 #include <dynd/pp/comparison.hpp>
 #include <dynd/pp/list.hpp>
 #include <dynd/pp/meta.hpp>
@@ -126,21 +125,27 @@ DYND_PP_JOIN_MAP(FUNCPROTO_TYPE_FACTORY, (), DYND_PP_RANGE(DYND_PP_INC(DYND_ARG_
 
 #undef FUNCPROTO_TYPE_FACTORY
 
-#define FUNCPROTO_TYPE_FACTORY(NARG) \
-    template <DYND_PP_JOIN_MAP_1(DYND_PP_META_TYPENAME, (,), DYND_PP_PREPEND(R, DYND_PP_META_NAME_RANGE(A, NARG)))> \
-    struct arrfunc_type_factory<void DYND_PP_PREPEND(R &, DYND_PP_META_NAME_RANGE(A, NARG))> { \
-        static ndt::type make(intptr_t naux) { \
-            DYND_PP_JOIN_ELWISE_1(DYND_PP_META_TYPEDEF_TYPENAME, (;), \
-                DYND_PP_MAP_1(PARTIAL_DECAY, DYND_PP_META_NAME_RANGE(A, NARG)), DYND_PP_META_NAME_RANGE(D, NARG)); \
-            DYND_PP_IF_ELSE(NARG)( \
-                ndt::type arg_tp[NARG] = {DYND_PP_JOIN_MAP_1(MAKE_TYPE, (,), DYND_PP_META_NAME_RANGE(D, NARG))}; \
-            )( \
-                nd::array arg_tp = nd::empty(0, ndt::make_type()); \
-                arg_tp.flag_as_immutable(); \
-            ) \
-            return make_funcproto(arg_tp, make_type<R>(), naux); \
-        } \
-    };
+#define FUNCPROTO_TYPE_FACTORY(NARG)                                           \
+  template <DYND_PP_JOIN_MAP_1(                                                \
+      DYND_PP_META_TYPENAME, (, ),                                             \
+      DYND_PP_PREPEND(R, DYND_PP_META_NAME_RANGE(A, NARG)))>                   \
+  struct arrfunc_type_factory<void DYND_PP_PREPEND(                            \
+      R &, DYND_PP_META_NAME_RANGE(A, NARG))> {                                \
+    static ndt::type make(intptr_t naux)                                       \
+    {                                                                          \
+      DYND_PP_JOIN_ELWISE_1(                                                   \
+          DYND_PP_META_TYPEDEF_TYPENAME, (;),                                  \
+          DYND_PP_MAP_1(PARTIAL_DECAY, DYND_PP_META_NAME_RANGE(A, NARG)),      \
+          DYND_PP_META_NAME_RANGE(D, NARG));                                   \
+      DYND_PP_IF_ELSE(NARG)(                                                   \
+          ndt::type arg_tp[NARG] = {DYND_PP_JOIN_MAP_1(                        \
+              MAKE_TYPE, (, ), DYND_PP_META_NAME_RANGE(D, NARG))};)(           \
+          nd::array arg_tp = nd::empty(0, ndt::make_type());                   \
+          arg_tp.flag_as_immutable();) return make_funcproto(arg_tp,           \
+                                                             make_type<R>(),   \
+                                                             naux);            \
+    }                                                                          \
+  };
 
 DYND_PP_JOIN_MAP(FUNCPROTO_TYPE_FACTORY, (), DYND_PP_RANGE(DYND_PP_INC(DYND_ARG_MAX)))
 

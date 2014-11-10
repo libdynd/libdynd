@@ -337,6 +337,7 @@ set(libdynd_SRC
     include/dynd/func/elwise_gfunc.hpp
     include/dynd/func/elwise_reduce_gfunc.hpp
     include/dynd/func/functor_arrfunc.hpp
+    include/dynd/func/funcproto.hpp
     include/dynd/func/make_callable.hpp
     include/dynd/func/lift_arrfunc.hpp
     include/dynd/func/lift_reduction_arrfunc.hpp
@@ -487,7 +488,6 @@ set(libdynd_SRC
     include/dynd/ensure_immutable_contig.hpp
     include/dynd/random.hpp
     include/dynd/fft.hpp
-    include/dynd/funcproto.hpp
     include/dynd/type.hpp
     include/dynd/typed_data_assign.hpp
     include/dynd/type_promotion.hpp
