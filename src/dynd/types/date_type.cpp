@@ -515,16 +515,14 @@ struct date_is_avail_ck {
     }
   }
 
-  static intptr_t instantiate(const arrfunc_type_data *DYND_UNUSED(self),
-                              dynd::ckernel_builder *ckb, intptr_t ckb_offset,
-                              const ndt::type &dst_tp,
-                              const char *DYND_UNUSED(dst_arrmeta),
-                              const ndt::type *src_tp,
-                              const char *const *DYND_UNUSED(src_arrmeta),
-                              kernel_request_t kernreq,
-                              const eval::eval_context *DYND_UNUSED(ectx),
-                              const nd::array &DYND_UNUSED(args), 
-                              const nd::array &DYND_UNUSED(kwds))
+  static intptr_t instantiate(
+      const arrfunc_type_data *DYND_UNUSED(self),
+      const arrfunc_type *DYND_UNUSED(af_tp), dynd::ckernel_builder *ckb,
+      intptr_t ckb_offset, const ndt::type &dst_tp,
+      const char *DYND_UNUSED(dst_arrmeta), const ndt::type *src_tp,
+      const char *const *DYND_UNUSED(src_arrmeta), kernel_request_t kernreq,
+      const eval::eval_context *DYND_UNUSED(ectx),
+      const nd::array &DYND_UNUSED(args), const nd::array &DYND_UNUSED(kwds))
   {
     if (src_tp[0].get_type_id() != option_type_id ||
         src_tp[0].extended<option_type>()->get_value_type().get_type_id() !=
@@ -562,6 +560,7 @@ struct date_assign_na_ck {
   }
 
   static intptr_t instantiate(const arrfunc_type_data *DYND_UNUSED(self),
+                              const arrfunc_type *DYND_UNUSED(af_tp),
                               dynd::ckernel_builder *ckb, intptr_t ckb_offset,
                               const ndt::type &dst_tp,
                               const char *DYND_UNUSED(dst_arrmeta),
@@ -588,16 +587,13 @@ struct date_assign_na_ck {
 
 nd::array date_type::get_option_nafunc() const
 {
+  // Use a typevar instead of option[T] to avoid a circular dependency
   nd::array naf = nd::empty(option_type::make_nafunc_type());
   arrfunc_type_data *is_avail =
       reinterpret_cast<arrfunc_type_data *>(naf.get_ndo()->m_data_pointer);
   arrfunc_type_data *assign_na = is_avail + 1;
 
-  // Use a typevar instead of option[T] to avoid a circular dependency
-  is_avail->func_proto =
-      ndt::make_funcproto(ndt::make_typevar("T"), ndt::make_type<dynd_bool>());
   is_avail->instantiate = &date_is_avail_ck::instantiate;
-  assign_na->func_proto = ndt::make_funcproto(0, NULL, ndt::make_typevar("T"));
   assign_na->instantiate = &date_assign_na_ck::instantiate;
   naf.flag_as_immutable();
   return naf;
