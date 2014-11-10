@@ -8,6 +8,7 @@
 #include <dynd/func/make_callable.hpp>
 #include <dynd/ensure_immutable_contig.hpp>
 #include <dynd/types/typevar_type.hpp>
+#include <dynd/func/arrfunc.hpp>
 
 using namespace std;
 using namespace dynd;
@@ -258,19 +259,35 @@ void
 arrfunc_type::arrmeta_default_construct(char *DYND_UNUSED(arrmeta),
                                         bool DYND_UNUSED(blockref_alloc)) const
 {
-  throw type_error("Cannot store data of funcproto type");
 }
 
 void arrfunc_type::arrmeta_copy_construct(
     char *DYND_UNUSED(dst_arrmeta), const char *DYND_UNUSED(src_arrmeta),
     memory_block_data *DYND_UNUSED(embedded_reference)) const
 {
-  throw type_error("Cannot store data of funcproto type");
 }
 
-void arrfunc_type::arrmeta_destruct(char *DYND_UNUSED(arrmeta)) const
+void arrfunc_type::arrmeta_reset_buffers(char *DYND_UNUSED(arrmeta)) const {}
+
+void arrfunc_type::arrmeta_finalize_buffers(char *DYND_UNUSED(arrmeta)) const {}
+
+void arrfunc_type::arrmeta_destruct(char *DYND_UNUSED(arrmeta)) const {}
+
+void arrfunc_type::data_destruct(const char *DYND_UNUSED(arrmeta),
+                                 char *data) const
 {
-  throw type_error("Cannot store data of funcproto type");
+  const arrfunc_type_data *d = reinterpret_cast<arrfunc_type_data *>(data);
+  d->~arrfunc_type_data();
+}
+
+void arrfunc_type::data_destruct_strided(const char *DYND_UNUSED(arrmeta),
+                                         char *data, intptr_t stride,
+                                         size_t count) const
+{
+  for (size_t i = 0; i != count; ++i, data += stride) {
+    const arrfunc_type_data *d = reinterpret_cast<arrfunc_type_data *>(data);
+    d->~arrfunc_type_data();
+  }
 }
 
 static nd::array property_get_arg_types(const ndt::type &dt)

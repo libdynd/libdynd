@@ -20,7 +20,7 @@ using namespace std;
 using namespace dynd;
 
 arrfunc_old_type::arrfunc_old_type()
-    : base_type(arrfunc_old_type_id, custom_kind, sizeof(arrfunc_old_type_data),
+    : base_type(arrfunc_old_type_id, custom_kind, sizeof(arrfunc_type_data),
                     scalar_align_of<uint64_t>::value,
                     type_flag_scalar|type_flag_zeroinit|type_flag_destructor,
                     0, 0, 0)
@@ -31,7 +31,7 @@ arrfunc_old_type::~arrfunc_old_type()
 {
 }
 
-static void print_arrfunc(std::ostream& o, const arrfunc_old_type_data *af)
+static void print_arrfunc(std::ostream& o, const arrfunc_type_data *af)
 {
     if (af->instantiate == NULL) {
         o << "<uninitialized arrfunc>";
@@ -43,8 +43,8 @@ static void print_arrfunc(std::ostream& o, const arrfunc_old_type_data *af)
 void arrfunc_old_type::print_data(std::ostream &o, const char *DYND_UNUSED(arrmeta),
                               const char *data) const
 {
-  const arrfunc_old_type_data *af =
-      reinterpret_cast<const arrfunc_old_type_data *>(data);
+  const arrfunc_type_data *af =
+      reinterpret_cast<const arrfunc_type_data *>(data);
   print_arrfunc(o, af);
 }
 
@@ -83,16 +83,16 @@ void arrfunc_old_type::arrmeta_destruct(char *DYND_UNUSED(arrmeta)) const
 
 void arrfunc_old_type::data_destruct(const char *DYND_UNUSED(arrmeta), char *data) const
 {
-    const arrfunc_old_type_data *d = reinterpret_cast<arrfunc_old_type_data *>(data);
-    d->~arrfunc_old_type_data();
+    const arrfunc_type_data *d = reinterpret_cast<arrfunc_type_data *>(data);
+    d->~arrfunc_type_data();
 }
 
 void arrfunc_old_type::data_destruct_strided(const char *DYND_UNUSED(arrmeta), char *data,
                 intptr_t stride, size_t count) const
 {
     for (size_t i = 0; i != count; ++i, data += stride) {
-        const arrfunc_old_type_data *d = reinterpret_cast<arrfunc_old_type_data *>(data);
-        d->~arrfunc_old_type_data();
+        const arrfunc_type_data *d = reinterpret_cast<arrfunc_type_data *>(data);
+        d->~arrfunc_type_data();
     }
 }
 
@@ -107,8 +107,8 @@ namespace {
 
         inline void single(char *dst, const char *src)
         {
-            const arrfunc_old_type_data *af =
-                reinterpret_cast<const arrfunc_old_type_data *>(src);
+            const arrfunc_type_data *af =
+                reinterpret_cast<const arrfunc_type_data *>(src);
             stringstream ss;
             print_arrfunc(ss, af);
             m_dst_string_dt.extended<base_string_type>()->set_from_utf8_string(
@@ -158,8 +158,8 @@ static nd::array property_ndo_get_proto(const nd::array& n) {
     if (n.get_type().get_type_id() != arrfunc_old_type_id) {
         throw runtime_error("arrfunc property 'types' only works on scalars presently");
     }
-    const arrfunc_old_type_data *af =
-        reinterpret_cast<const arrfunc_old_type_data *>(n.get_readonly_originptr());
+    const arrfunc_type_data *af =
+        reinterpret_cast<const arrfunc_type_data *>(n.get_readonly_originptr());
     return af->func_proto;
 }
 
@@ -202,7 +202,7 @@ static array_preamble *function___call__(const array_preamble *params, void *DYN
         }
     }
 
-    const arrfunc_old_type_data *af = reinterpret_cast<const arrfunc_old_type_data *>(
+    const arrfunc_type_data *af = reinterpret_cast<const arrfunc_type_data *>(
         par_arrs[0].get_readonly_originptr());
     const arrfunc_type *proto = af->func_proto.extended<arrfunc_type>();
 

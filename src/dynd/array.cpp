@@ -2198,7 +2198,7 @@ void nd::assign_na(const ndt::type &tp, const char *arrmeta, char *data,
     } else {
         const ndt::type& dtp = tp.get_dtype().value_type();
         if (dtp.get_type_id() == option_type_id) {
-            const arrfunc_old_type_data *af =
+            const arrfunc_type_data *af =
                 dtp.extended<option_type>()->get_assign_na_arrfunc();
             ckernel_builder ckb;
             make_lifted_expr_ckernel(af, &ckb, 0, tp.get_ndim(), tp, arrmeta,

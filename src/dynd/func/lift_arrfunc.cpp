@@ -14,21 +14,21 @@
 using namespace std;
 using namespace dynd;
 
-static void delete_lifted_expr_arrfunc_data(arrfunc_old_type_data *self_af)
+static void delete_lifted_expr_arrfunc_data(arrfunc_type_data *self_af)
 {
     memory_block_decref(*self_af->get_data_as<memory_block_data *>());
 }
 
 static intptr_t instantiate_lifted_expr_arrfunc_data(
-    const arrfunc_old_type_data *self, dynd::ckernel_builder *ckb,
+    const arrfunc_type_data *self, dynd::ckernel_builder *ckb,
     intptr_t ckb_offset, const ndt::type &dst_tp, const char *dst_arrmeta,
     const ndt::type *src_tp, const char *const *src_arrmeta,
     kernel_request_t kernreq, const eval::eval_context *ectx,
     const nd::array &DYND_UNUSED(args), const nd::array &DYND_UNUSED(kwds))
 {
   const array_preamble *data = *self->get_data_as<const array_preamble *>();
-  const arrfunc_old_type_data *child_af =
-      reinterpret_cast<const arrfunc_old_type_data *>(data->m_data_pointer);
+  const arrfunc_type_data *child_af =
+      reinterpret_cast<const arrfunc_type_data *>(data->m_data_pointer);
   intptr_t src_count = child_af->get_nsrc();
   dimvector src_ndim(src_count);
   for (int i = 0; i < src_count; ++i) {
@@ -41,7 +41,7 @@ static intptr_t instantiate_lifted_expr_arrfunc_data(
       static_cast<dynd::kernel_request_t>(kernreq), ectx);
 }
 
-static int resolve_lifted_dst_type(const arrfunc_old_type_data *self,
+static int resolve_lifted_dst_type(const arrfunc_type_data *self,
                                    intptr_t nsrc, const ndt::type *src_tp,
                                    int throw_on_error, ndt::type &out_dst_tp,
                                    const nd::array &args, const nd::array &kwds)
@@ -57,8 +57,8 @@ static int resolve_lifted_dst_type(const arrfunc_old_type_data *self,
       }
     }
     const array_preamble *data = *self->get_data_as<const array_preamble *>();
-    const arrfunc_old_type_data *child_af =
-        reinterpret_cast<const arrfunc_old_type_data *>(data->m_data_pointer);
+    const arrfunc_type_data *child_af =
+        reinterpret_cast<const arrfunc_type_data *>(data->m_data_pointer);
     intptr_t ndim = 0;
     // First get the type for the child arrfunc
     ndt::type child_dst_tp;
@@ -180,9 +180,9 @@ static ndt::type lift_proto(const ndt::type& proto)
         ndt::make_ellipsis_dim(dimsname, p->get_return_type()));
 }
 
-void dynd::lift_arrfunc(arrfunc_old_type_data *out_af, const nd::arrfunc &af)
+void dynd::lift_arrfunc(arrfunc_type_data *out_af, const nd::arrfunc &af)
 {
-    const arrfunc_old_type_data *af_ptr = af.get();
+    const arrfunc_type_data *af_ptr = af.get();
     out_af->free_func = &delete_lifted_expr_arrfunc_data;
     *out_af->get_data_as<const array_preamble *>() = nd::array(af).release();
     out_af->instantiate = &instantiate_lifted_expr_arrfunc_data;

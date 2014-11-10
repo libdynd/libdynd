@@ -48,7 +48,7 @@ struct take_by_pointer_ck : kernels::expr_ck<take_by_pointer_ck, 2> {
     }
 };
 
-static intptr_t instantiate_take_by_pointer(const arrfunc_old_type_data *DYND_UNUSED(af_self),
+static intptr_t instantiate_take_by_pointer(const arrfunc_type_data *DYND_UNUSED(af_self),
                                   dynd::ckernel_builder *ckb, intptr_t ckb_offset,
                                   const ndt::type &dst_tp, const char *dst_arrmeta,
                                   const ndt::type *src_tp, const char *const *src_arrmeta,
@@ -94,7 +94,7 @@ static intptr_t instantiate_take_by_pointer(const arrfunc_old_type_data *DYND_UN
                                   kernel_request_single, ectx);
 }
 
-static int resolve_take_by_pointer_dst_type(const arrfunc_old_type_data *af_self,
+static int resolve_take_by_pointer_dst_type(const arrfunc_type_data *af_self,
                                             intptr_t nsrc, const ndt::type *src_tp, 
                                             int throw_on_error, ndt::type &out_dst_tp,
                                             const nd::array &DYND_UNUSED(args), const nd::array &DYND_UNUSED(kwds))
@@ -128,7 +128,7 @@ static int resolve_take_by_pointer_dst_type(const arrfunc_old_type_data *af_self
     return 1;
 }
 
-void dynd::make_take_by_pointer_arrfunc(arrfunc_old_type_data *out_af)
+void dynd::make_take_by_pointer_arrfunc(arrfunc_type_data *out_af)
 {
     static ndt::type param_types[2] = {ndt::type("M * T"), ndt::type("N * Ix")};
     static ndt::type func_proto = ndt::make_funcproto(param_types, ndt::type("R * pointer[T]"));
@@ -141,7 +141,7 @@ void dynd::make_take_by_pointer_arrfunc(arrfunc_old_type_data *out_af)
 nd::arrfunc dynd::make_take_by_pointer_arrfunc()
 {
     nd::array af = nd::empty(ndt::make_arrfunc());
-    make_take_by_pointer_arrfunc(reinterpret_cast<arrfunc_old_type_data *>(af.get_readwrite_originptr()));
+    make_take_by_pointer_arrfunc(reinterpret_cast<arrfunc_type_data *>(af.get_readwrite_originptr()));
     af.flag_as_immutable();
     return af;
 }

@@ -17,7 +17,7 @@
 
 namespace dynd {
 
-struct arrfunc_old_type_data;
+struct arrfunc_type_data;
 
 /**
  * Function prototype for instantiating a ckernel from an
@@ -51,7 +51,7 @@ struct arrfunc_old_type_data;
  * \returns  The offset into ``ckb`` immediately after the instantiated ckernel.
  */
 typedef intptr_t (*arrfunc_instantiate_t)(
-    const arrfunc_old_type_data *self, dynd::ckernel_builder *ckb,
+    const arrfunc_type_data *self, dynd::ckernel_builder *ckb,
     intptr_t ckb_offset, const ndt::type &dst_tp, const char *dst_arrmeta,
     const ndt::type *src_tp, const char *const *src_arrmeta,
     kernel_request_t kernreq, const eval::eval_context *ectx,
@@ -74,7 +74,7 @@ typedef intptr_t (*arrfunc_instantiate_t)(
  * \returns  True on success, false on error (if throw_on_error was false).
  */
 typedef int (*arrfunc_resolve_dst_type_t)(
-    const arrfunc_old_type_data *self, intptr_t nsrc, const ndt::type *src_tp,
+    const arrfunc_type_data *self, intptr_t nsrc, const ndt::type *src_tp,
     int throw_on_error, ndt::type &out_dst_tp, const nd::array &args,
     const nd::array &kwds);
 
@@ -89,7 +89,7 @@ typedef int (*arrfunc_resolve_dst_type_t)(
  * operation and a strided operation, or constructing
  * with different array arrmeta.
  */
-struct arrfunc_old_type_data {
+struct arrfunc_type_data {
   /**
    * Some memory for the arrfunc to use. If this is not
    * enough space to hold all the data by value, should allocate
@@ -113,17 +113,17 @@ struct arrfunc_old_type_data {
    * A function which deallocates the memory behind data_ptr after
    * freeing any additional resources it might contain.
    */
-  void (*free_func)(arrfunc_old_type_data *self_data_ptr);
+  void (*free_func)(arrfunc_type_data *self_data_ptr);
 
   // Default to all NULL, so the destructor works correctly
-  inline arrfunc_old_type_data() : func_proto(), instantiate(0), free_func(0)
+  inline arrfunc_type_data() : func_proto(), instantiate(0), free_func(0)
   {
-    DYND_STATIC_ASSERT((sizeof(arrfunc_old_type_data) & 7) == 0,
-                       "arrfunc_old_type_data must have size divisible by 8");
+    DYND_STATIC_ASSERT((sizeof(arrfunc_type_data) & 7) == 0,
+                       "arrfunc_type_data must have size divisible by 8");
   }
 
   // If it contains an arrfunc, free it
-  inline ~arrfunc_old_type_data()
+  inline ~arrfunc_type_data()
   {
     if (free_func) {
       free_func(this);
@@ -289,9 +289,9 @@ public:
 
   inline bool is_null() const { return m_value.is_null(); }
 
-  inline const arrfunc_old_type_data *get() const
+  inline const arrfunc_type_data *get() const
   {
-    return !m_value.is_null() ? reinterpret_cast<const arrfunc_old_type_data *>(
+    return !m_value.is_null() ? reinterpret_cast<const arrfunc_type_data *>(
                                     m_value.get_readonly_originptr())
                               : NULL;
   }
@@ -391,7 +391,7 @@ struct pod_arrfunc {
     return *reinterpret_cast<const nd::arrfunc *>(&m_memblock);
   }
 
-  inline const arrfunc_old_type_data *get() const
+  inline const arrfunc_type_data *get() const
   {
     return reinterpret_cast<const nd::arrfunc *>(&m_memblock)->get();
   }
@@ -425,7 +425,7 @@ struct pod_arrfunc {
 void make_arrfunc_from_assignment(const ndt::type &dst_tp,
                                   const ndt::type &src_tp,
                                   assign_error_mode errmode,
-                                  arrfunc_old_type_data &out_af);
+                                  arrfunc_type_data &out_af);
 
 inline nd::arrfunc make_arrfunc_from_assignment(const ndt::type &dst_tp,
                                                 const ndt::type &src_tp,
@@ -434,7 +434,7 @@ inline nd::arrfunc make_arrfunc_from_assignment(const ndt::type &dst_tp,
   nd::array af = nd::empty(ndt::make_arrfunc());
   make_arrfunc_from_assignment(
       dst_tp, src_tp, errmode,
-      *reinterpret_cast<arrfunc_old_type_data *>(af.get_readwrite_originptr()));
+      *reinterpret_cast<arrfunc_type_data *>(af.get_readwrite_originptr()));
   af.flag_as_immutable();
   return af;
 }
@@ -449,7 +449,7 @@ inline nd::arrfunc make_arrfunc_from_assignment(const ndt::type &dst_tp,
  */
 void make_arrfunc_from_property(const ndt::type &tp,
                                 const std::string &propname,
-                                arrfunc_old_type_data &out_af);
+                                arrfunc_type_data &out_af);
 
 inline nd::arrfunc make_arrfunc_from_property(const ndt::type &tp,
                                               const std::string &propname)
@@ -457,7 +457,7 @@ inline nd::arrfunc make_arrfunc_from_property(const ndt::type &tp,
   nd::array af = nd::empty(ndt::make_arrfunc());
   make_arrfunc_from_property(
       tp, propname,
-      *reinterpret_cast<arrfunc_old_type_data *>(af.get_readwrite_originptr()));
+      *reinterpret_cast<arrfunc_type_data *>(af.get_readwrite_originptr()));
   af.flag_as_immutable();
   return af;
 }

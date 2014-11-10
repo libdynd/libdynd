@@ -88,7 +88,7 @@ struct instantiate_chain_data {
 };
 
 intptr_t dynd::make_chain_buf_tp_ckernel(
-    const arrfunc_old_type_data *first, const arrfunc_old_type_data *second,
+    const arrfunc_type_data *first, const arrfunc_type_data *second,
     const ndt::type &buf_tp, dynd::ckernel_builder *ckb, intptr_t ckb_offset,
     const ndt::type &dst_tp, const char *dst_arrmeta, const ndt::type *src_tp,
     const char *const *src_arrmeta, kernel_request_t kernreq,
@@ -118,7 +118,7 @@ intptr_t dynd::make_chain_buf_tp_ckernel(
 }
 
 static intptr_t instantiate_chain_buf_tp(
-    const arrfunc_old_type_data *af_self, dynd::ckernel_builder *ckb,
+    const arrfunc_type_data *af_self, dynd::ckernel_builder *ckb,
     intptr_t ckb_offset, const ndt::type &dst_tp, const char *dst_arrmeta,
     const ndt::type *src_tp, const char *const *src_arrmeta,
     kernel_request_t kernreq, const eval::eval_context *ectx,
@@ -131,7 +131,7 @@ static intptr_t instantiate_chain_buf_tp(
       dst_arrmeta, src_tp, src_arrmeta, kernreq, ectx);
 }
 
-static void free_chain_arrfunc(arrfunc_old_type_data *self_af)
+static void free_chain_arrfunc(arrfunc_type_data *self_af)
 {
   self_af->get_data_as<instantiate_chain_data>()->~instantiate_chain_data();
 }
@@ -139,7 +139,7 @@ static void free_chain_arrfunc(arrfunc_old_type_data *self_af)
 void dynd::make_chain_arrfunc(const nd::arrfunc &first,
                                const nd::arrfunc &second,
                                const ndt::type &buf_tp,
-                               arrfunc_old_type_data *out_af)
+                               arrfunc_type_data *out_af)
 {
   if (second.get()->func_proto.extended<arrfunc_type>()->get_nsrc() !=
       1) {
@@ -173,7 +173,7 @@ nd::arrfunc dynd::make_chain_arrfunc(const nd::arrfunc &first,
   nd::array af = nd::empty(ndt::make_arrfunc());
   make_chain_arrfunc(
       first, second, buf_tp,
-      reinterpret_cast<arrfunc_old_type_data *>(af.get_readwrite_originptr()));
+      reinterpret_cast<arrfunc_type_data *>(af.get_readwrite_originptr()));
   af.flag_as_immutable();
   return af;
 }

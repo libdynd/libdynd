@@ -104,7 +104,7 @@ size_t adapt_type::make_operand_to_value_assignment_kernel(
     const char *src_arrmeta, kernel_request_t kernreq,
     const eval::eval_context *ectx) const
 {
-  const arrfunc_old_type_data *af = m_forward.get();
+  const arrfunc_type_data *af = m_forward.get();
   if (af != NULL) {
     return af->instantiate(af, ckb, ckb_offset, m_value_type, dst_arrmeta,
                            &m_operand_type, &src_arrmeta, kernreq, ectx, nd::array(), nd::array());
@@ -122,7 +122,7 @@ size_t adapt_type::make_value_to_operand_assignment_kernel(
     const char *src_arrmeta, kernel_request_t kernreq,
     const eval::eval_context *ectx) const
 {
-  const arrfunc_old_type_data *af = m_reverse.get();
+  const arrfunc_type_data *af = m_reverse.get();
   if (af != NULL) {
     return af->instantiate(af, ckb, ckb_offset, m_operand_type, src_arrmeta,
                            &m_value_type, &dst_arrmeta, kernreq, ectx, nd::array(), nd::array());

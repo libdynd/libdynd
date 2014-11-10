@@ -107,7 +107,7 @@ struct indexed_take_ck : public kernels::expr_ck<indexed_take_ck, 2> {
 };
 } // anonymous namespace
 
-static int resolve_take_dst_type(const arrfunc_old_type_data *af_self,
+static int resolve_take_dst_type(const arrfunc_type_data *af_self,
                                  intptr_t nsrc, const ndt::type *src_tp,
                                  int throw_on_error, ndt::type &out_dst_tp,
                                  const nd::array &DYND_UNUSED(args), const nd::array &DYND_UNUSED(kwds))
@@ -147,7 +147,7 @@ static int resolve_take_dst_type(const arrfunc_old_type_data *af_self,
 }
 
 static intptr_t
-instantiate_masked_take(const arrfunc_old_type_data *DYND_UNUSED(self_data_ptr),
+instantiate_masked_take(const arrfunc_type_data *DYND_UNUSED(self_data_ptr),
                         dynd::ckernel_builder *ckb, intptr_t ckb_offset,
                         const ndt::type &dst_tp, const char *dst_arrmeta,
                         const ndt::type *src_tp, const char *const *src_arrmeta,
@@ -210,7 +210,7 @@ instantiate_masked_take(const arrfunc_old_type_data *DYND_UNUSED(self_data_ptr),
 }
 
 static intptr_t
-instantiate_indexed_take(const arrfunc_old_type_data *DYND_UNUSED(self_data_ptr),
+instantiate_indexed_take(const arrfunc_type_data *DYND_UNUSED(self_data_ptr),
                          dynd::ckernel_builder *ckb, intptr_t ckb_offset,
                          const ndt::type &dst_tp, const char *dst_arrmeta,
                          const ndt::type *src_tp, const char *const *src_arrmeta,
@@ -270,7 +270,7 @@ instantiate_indexed_take(const arrfunc_old_type_data *DYND_UNUSED(self_data_ptr)
 }
 
 static intptr_t
-instantiate_take(const arrfunc_old_type_data *af_self,
+instantiate_take(const arrfunc_type_data *af_self,
                  dynd::ckernel_builder *ckb, intptr_t ckb_offset,
                  const ndt::type &dst_tp, const char *dst_arrmeta,
                  const ndt::type *src_tp, const char *const *src_arrmeta,
@@ -295,7 +295,7 @@ instantiate_take(const arrfunc_old_type_data *af_self,
     }
 }
 
-void kernels::make_take_arrfunc(arrfunc_old_type_data *out_af)
+void kernels::make_take_arrfunc(arrfunc_type_data *out_af)
 {
     // Masked take: (M * T, M * bool) -> var * T
     // Indexed take: (M * T, N * intptr) -> N * T

@@ -43,7 +43,7 @@ namespace dynd {
  * \param reduction_identity  If not a NULL nd::array, this is the identity
  *                            value for the accumulator.
  */
-void lift_reduction_arrfunc(arrfunc_old_type_data *out_af,
+void lift_reduction_arrfunc(arrfunc_type_data *out_af,
                 const nd::arrfunc& elwise_reduction,
                 const ndt::type& lifted_arr_type,
                 const nd::arrfunc& dst_initialization,
@@ -64,7 +64,7 @@ inline nd::arrfunc lift_reduction_arrfunc(
 {
     nd::array out_af = nd::empty(ndt::make_arrfunc());
     lift_reduction_arrfunc(
-        reinterpret_cast<arrfunc_old_type_data *>(out_af.get_readwrite_originptr()),
+        reinterpret_cast<arrfunc_type_data *>(out_af.get_readwrite_originptr()),
         elwise_reduction, lifted_arr_type, dst_initialization, keepdims,
         reduction_ndim, reduction_dimflags, associative, commutative,
         right_associative, reduction_identity);

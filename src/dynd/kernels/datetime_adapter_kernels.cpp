@@ -103,7 +103,7 @@ struct int_multiply_and_offset_ck
 
 template <class Tsrc, class Tdst>
 static intptr_t instantiate_int_multiply_and_offset_arrfunc(
-    const arrfunc_old_type_data *self_af,
+    const arrfunc_type_data *self_af,
     dynd::ckernel_builder *ckb, intptr_t ckb_offset,
     const ndt::type &dst_tp, const char *DYND_UNUSED(dst_arrmeta),
     const ndt::type *src_tp, const char *const *DYND_UNUSED(src_arrmeta),
@@ -131,8 +131,8 @@ nd::arrfunc make_int_multiply_and_offset_arrfunc(Tdst factor, Tdst offset,
                                                  const ndt::type &func_proto)
 {
   nd::array out_af = nd::empty(ndt::make_arrfunc());
-  arrfunc_old_type_data *af =
-      reinterpret_cast<arrfunc_old_type_data *>(out_af.get_readwrite_originptr());
+  arrfunc_type_data *af =
+      reinterpret_cast<arrfunc_type_data *>(out_af.get_readwrite_originptr());
   af->func_proto = func_proto;
   *af->get_data_as<pair<Tdst, Tdst> >() = make_pair(factor, offset);
   af->instantiate = &instantiate_int_multiply_and_offset_arrfunc<Tsrc, Tdst>;
@@ -158,7 +158,7 @@ struct int_offset_and_divide_ck
 
 template <class Tsrc, class Tdst>
 static intptr_t instantiate_int_offset_and_divide_arrfunc(
-    const arrfunc_old_type_data *self_af,
+    const arrfunc_type_data *self_af,
     dynd::ckernel_builder *ckb, intptr_t ckb_offset,
     const ndt::type &dst_tp, const char *DYND_UNUSED(dst_arrmeta),
     const ndt::type *src_tp, const char *const *DYND_UNUSED(src_arrmeta),
@@ -186,8 +186,8 @@ nd::arrfunc make_int_offset_and_divide_arrfunc(Tdst offset, Tdst divisor,
                                                const ndt::type &func_proto)
 {
   nd::array out_af = nd::empty(ndt::make_arrfunc());
-  arrfunc_old_type_data *af =
-      reinterpret_cast<arrfunc_old_type_data *>(out_af.get_readwrite_originptr());
+  arrfunc_type_data *af =
+      reinterpret_cast<arrfunc_type_data *>(out_af.get_readwrite_originptr());
   af->func_proto = func_proto;
   *af->get_data_as<pair<Tdst, Tdst> >() = make_pair(offset, divisor);
   af->instantiate = &instantiate_int_offset_and_divide_arrfunc<Tsrc, Tdst>;
