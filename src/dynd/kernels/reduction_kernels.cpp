@@ -90,10 +90,11 @@ intptr_t kernels::make_builtin_sum_reduction_ckernel(
 
 static intptr_t instantiate_builtin_sum_reduction_arrfunc(
     const arrfunc_type_data *DYND_UNUSED(self_data_ptr),
-    dynd::ckernel_builder *ckb, intptr_t ckb_offset,
-    const ndt::type &dst_tp, const char *DYND_UNUSED(dst_arrmeta),
-    const ndt::type *src_tp, const char *const *DYND_UNUSED(src_arrmeta),
-    kernel_request_t kernreq, const eval::eval_context *DYND_UNUSED(ectx),
+    const arrfunc_type *DYND_UNUSED(af_tp), dynd::ckernel_builder *ckb,
+    intptr_t ckb_offset, const ndt::type &dst_tp,
+    const char *DYND_UNUSED(dst_arrmeta), const ndt::type *src_tp,
+    const char *const *DYND_UNUSED(src_arrmeta), kernel_request_t kernreq,
+    const eval::eval_context *DYND_UNUSED(ectx),
     const nd::array &DYND_UNUSED(args), const nd::array &DYND_UNUSED(kwds))
 {
     if (dst_tp != src_tp[0]) {
@@ -106,130 +107,129 @@ static intptr_t instantiate_builtin_sum_reduction_arrfunc(
         ckb, ckb_offset, dst_tp.get_type_id(), kernreq);
 }
 
-void kernels::make_builtin_sum_reduction_arrfunc(
-                arrfunc_type_data *out_af,
-                type_id_t tid)
+nd::arrfunc kernels::make_builtin_sum_reduction_arrfunc(type_id_t tid)
 {
-    if (tid < 0 || tid >= builtin_type_id_count) {
-        stringstream ss;
-        ss << "make_builtin_sum_reduction_ckernel: data type ";
-        ss << ndt::type(tid) << " is not supported";
-        throw type_error(ss.str());
-    }
-    out_af->func_proto = ndt::make_funcproto(ndt::type(tid), ndt::type(tid));
-    *out_af->get_data_as<type_id_t>() = tid;
-    out_af->instantiate = &instantiate_builtin_sum_reduction_arrfunc;
-    out_af->free_func = NULL;
+  if (tid < 0 || tid >= builtin_type_id_count) {
+    stringstream ss;
+    ss << "make_builtin_sum_reduction_ckernel: data type ";
+    ss << ndt::type(tid) << " is not supported";
+    throw type_error(ss.str());
+  }
+  nd::array af = nd::empty(ndt::make_funcproto(ndt::type(tid), ndt::type(tid)));
+  arrfunc_type_data *out_af =
+      reinterpret_cast<arrfunc_type_data *>(af.get_readwrite_originptr());
+  *out_af->get_data_as<type_id_t>() = tid;
+  out_af->instantiate = &instantiate_builtin_sum_reduction_arrfunc;
+  out_af->free_func = NULL;
+  af.flag_as_immutable();
+  return af;
 }
 
 nd::arrfunc kernels::make_builtin_sum1d_arrfunc(type_id_t tid)
 {
-    nd::arrfunc sum_ew = kernels::make_builtin_sum_reduction_arrfunc(tid);
-    nd::array sum_1d = nd::empty(ndt::make_arrfunc());
-    bool reduction_dimflags[1] = {true};
-    lift_reduction_arrfunc(
-        reinterpret_cast<arrfunc_type_data *>(sum_1d.get_readwrite_originptr()),
-        sum_ew, ndt::make_fixed_dimsym(ndt::type(tid)), nd::array(), false, 1,
-        reduction_dimflags, true, true, false, 0);
-    sum_1d.flag_as_immutable();
-    return sum_1d;
+  nd::arrfunc sum_ew = kernels::make_builtin_sum_reduction_arrfunc(tid);
+  bool reduction_dimflags[1] = {true};
+  return lift_reduction_arrfunc(sum_ew, ndt::make_fixed_dimsym(ndt::type(tid)),
+                                nd::array(), false, 1, reduction_dimflags, true,
+                                true, false, 0);
 }
 
 namespace {
-    struct double_mean1d_ck : public kernels::unary_ck<double_mean1d_ck> {
-        intptr_t m_minp;
-        intptr_t m_src_dim_size, m_src_stride;
+struct double_mean1d_ck : public kernels::unary_ck<double_mean1d_ck> {
+  intptr_t m_minp;
+  intptr_t m_src_dim_size, m_src_stride;
 
-        inline void single(char *dst, char *src)
-        {
-            intptr_t minp = m_minp, countp = 0;
-            intptr_t src_dim_size = m_src_dim_size, src_stride = m_src_stride;
-            double result = 0;
-            for (intptr_t i = 0; i < src_dim_size; ++i) {
-                double v = *reinterpret_cast<double *>(src);
-                if (!DYND_ISNAN(v)) {
-                    result += v;
-                    ++countp;
-                }
-                src += src_stride;
-            }
-            if (countp >= minp) {
-                *reinterpret_cast<double *>(dst) = result / countp;
-            } else {
-                *reinterpret_cast<double *>(dst) = numeric_limits<double>::quiet_NaN();
-            }
-        }
-    };
+  inline void single(char *dst, char *src)
+  {
+    intptr_t minp = m_minp, countp = 0;
+    intptr_t src_dim_size = m_src_dim_size, src_stride = m_src_stride;
+    double result = 0;
+    for (intptr_t i = 0; i < src_dim_size; ++i) {
+      double v = *reinterpret_cast<double *>(src);
+      if (!DYND_ISNAN(v)) {
+        result += v;
+        ++countp;
+      }
+      src += src_stride;
+    }
+    if (countp >= minp) {
+      *reinterpret_cast<double *>(dst) = result / countp;
+    }
+    else {
+      *reinterpret_cast<double *>(dst) = numeric_limits<double>::quiet_NaN();
+    }
+  }
+};
 
-    struct mean1d_arrfunc_data {
-        intptr_t minp;
+struct mean1d_arrfunc_data {
+  intptr_t minp;
 
-        static void free(arrfunc_type_data *self_af) {
-          delete *self_af->get_data_as<mean1d_arrfunc_data *>();
-        }
+  static void free(arrfunc_type_data *self_af)
+  {
+    delete *self_af->get_data_as<mean1d_arrfunc_data *>();
+  }
 
-        static intptr_t
-        instantiate(const arrfunc_type_data *af_self,
-                    dynd::ckernel_builder *ckb, intptr_t ckb_offset,
-                    const ndt::type &dst_tp, const char *DYND_UNUSED(dst_arrmeta),
-                    const ndt::type *src_tp, const char *const *src_arrmeta,
-                    kernel_request_t kernreq, const eval::eval_context *DYND_UNUSED(ectx),
-                    const nd::array &DYND_UNUSED(args), const nd::array &DYND_UNUSED(kwds))
-        {
-            typedef double_mean1d_ck self_type;
-            mean1d_arrfunc_data *data = *af_self->get_data_as<mean1d_arrfunc_data *>();
-            self_type *self = self_type::create_leaf(ckb, kernreq, ckb_offset);
-            intptr_t src_dim_size, src_stride;
-            ndt::type src_el_tp;
-            const char *src_el_arrmeta;
-            if (!src_tp[0].get_as_strided(src_arrmeta[0], &src_dim_size,
-                                          &src_stride, &src_el_tp,
-                                          &src_el_arrmeta)) {
-                stringstream ss;
-                ss << "mean1d: could not process type " << src_tp[0];
-                ss << " as a strided dimension";
-                throw type_error(ss.str());
-            }
-            if (src_el_tp.get_type_id() != float64_type_id ||
-                    dst_tp.get_type_id() != float64_type_id) {
-                stringstream ss;
-                ss << "mean1d: input element type and output type must be "
-                      "float64, got " << src_el_tp << " and " << dst_tp;
-                throw invalid_argument(ss.str());
-            }
-            self->m_minp = data->minp;
-            if (self->m_minp <= 0) {
-                if (self->m_minp <= -src_dim_size) {
-                    throw invalid_argument("minp parameter is too large of a negative number");
-                }
-                self->m_minp += src_dim_size;
-            }
-            self->m_src_dim_size = src_dim_size;
-            self->m_src_stride = src_stride;
-            return ckb_offset;
-        }
-    };
+  static intptr_t instantiate(
+      const arrfunc_type_data *af_self, const arrfunc_type *DYND_UNUSED(af_tp),
+      dynd::ckernel_builder *ckb, intptr_t ckb_offset, const ndt::type &dst_tp,
+      const char *DYND_UNUSED(dst_arrmeta), const ndt::type *src_tp,
+      const char *const *src_arrmeta, kernel_request_t kernreq,
+      const eval::eval_context *DYND_UNUSED(ectx),
+      const nd::array &DYND_UNUSED(args), const nd::array &DYND_UNUSED(kwds))
+  {
+    typedef double_mean1d_ck self_type;
+    mean1d_arrfunc_data *data = *af_self->get_data_as<mean1d_arrfunc_data *>();
+    self_type *self = self_type::create_leaf(ckb, kernreq, ckb_offset);
+    intptr_t src_dim_size, src_stride;
+    ndt::type src_el_tp;
+    const char *src_el_arrmeta;
+    if (!src_tp[0].get_as_strided(src_arrmeta[0], &src_dim_size, &src_stride,
+                                  &src_el_tp, &src_el_arrmeta)) {
+      stringstream ss;
+      ss << "mean1d: could not process type " << src_tp[0];
+      ss << " as a strided dimension";
+      throw type_error(ss.str());
+    }
+    if (src_el_tp.get_type_id() != float64_type_id ||
+        dst_tp.get_type_id() != float64_type_id) {
+      stringstream ss;
+      ss << "mean1d: input element type and output type must be "
+            "float64, got " << src_el_tp << " and " << dst_tp;
+      throw invalid_argument(ss.str());
+    }
+    self->m_minp = data->minp;
+    if (self->m_minp <= 0) {
+      if (self->m_minp <= -src_dim_size) {
+        throw invalid_argument(
+            "minp parameter is too large of a negative number");
+      }
+      self->m_minp += src_dim_size;
+    }
+    self->m_src_dim_size = src_dim_size;
+    self->m_src_stride = src_stride;
+    return ckb_offset;
+  }
+};
 } // anonymous namespace
 
 nd::arrfunc kernels::make_builtin_mean1d_arrfunc(type_id_t tid, intptr_t minp)
 {
-    if (tid != float64_type_id) {
-        stringstream ss;
-        ss << "make_builtin_mean1d_arrfunc: data type ";
-        ss << ndt::type(tid) << " is not supported";
-        throw type_error(ss.str());
-    }
-    nd::array mean1d = nd::empty(ndt::make_arrfunc());
-    arrfunc_type_data *out_af =
-        reinterpret_cast<arrfunc_type_data *>(mean1d.get_readwrite_originptr());
-    out_af->func_proto =
-        ndt::make_funcproto(ndt::make_fixed_dimsym(ndt::make_type<double>()),
-                            ndt::make_type<double>());
-    mean1d_arrfunc_data *data = new mean1d_arrfunc_data;
-    data->minp = minp;
-    *out_af->get_data_as<mean1d_arrfunc_data *>() = data;
-    out_af->instantiate = &mean1d_arrfunc_data::instantiate;
-    out_af->free_func = &mean1d_arrfunc_data::free;
-    mean1d.flag_as_immutable();
-    return mean1d;
+  if (tid != float64_type_id) {
+    stringstream ss;
+    ss << "make_builtin_mean1d_arrfunc: data type ";
+    ss << ndt::type(tid) << " is not supported";
+    throw type_error(ss.str());
+  }
+  nd::array mean1d = nd::empty(
+      ndt::make_funcproto(ndt::make_fixed_dimsym(ndt::make_type<double>()),
+                          ndt::make_type<double>()));
+  arrfunc_type_data *out_af =
+      reinterpret_cast<arrfunc_type_data *>(mean1d.get_readwrite_originptr());
+  mean1d_arrfunc_data *data = new mean1d_arrfunc_data;
+  data->minp = minp;
+  *out_af->get_data_as<mean1d_arrfunc_data *>() = data;
+  out_af->instantiate = &mean1d_arrfunc_data::instantiate;
+  out_af->free_func = &mean1d_arrfunc_data::free;
+  mean1d.flag_as_immutable();
+  return mean1d;
 }

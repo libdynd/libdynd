@@ -16,10 +16,7 @@ namespace dynd {
  * Create an arrfunc which applies an indexed take/"fancy indexing" operation,
  * but stores the pointers.
  *
- * \param out_af  The arrfunc to fill.
  */
-void make_take_by_pointer_arrfunc(arrfunc_type_data *out_af);
-
 nd::arrfunc make_take_by_pointer_arrfunc();
 
 } // namespace dynd

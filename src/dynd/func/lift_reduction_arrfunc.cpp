@@ -46,10 +46,13 @@ static intptr_t instantiate_lifted_reduction_arrfunc_data(
   lifted_reduction_arrfunc_data *data =
       *af_self->get_data_as<lifted_reduction_arrfunc_data *>();
   return make_lifted_reduction_ckernel(
-      data->child_elwise_reduction.get(), data->child_dst_initialization.get(),
-      ckb, ckb_offset, dst_tp, dst_arrmeta, src_tp[0], src_arrmeta[0],
-      data->reduction_ndim, data->reduction_dimflags.get(), data->associative,
-      data->commutative, data->right_associative, data->reduction_identity,
+      data->child_elwise_reduction.get(),
+      data->child_elwise_reduction.get_type(),
+      data->child_dst_initialization.get(),
+      data->child_dst_initialization.get_type(), ckb, ckb_offset, dst_tp,
+      dst_arrmeta, src_tp[0], src_arrmeta[0], data->reduction_ndim,
+      data->reduction_dimflags.get(), data->associative, data->commutative,
+      data->right_associative, data->reduction_identity,
       static_cast<dynd::kernel_request_t>(kernreq), ectx);
 }
 

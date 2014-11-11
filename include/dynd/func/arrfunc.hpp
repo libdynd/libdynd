@@ -368,9 +368,14 @@ struct pod_arrfunc {
     return *reinterpret_cast<const nd::arrfunc *>(&m_memblock);
   }
 
-  inline const arrfunc_type_data *get() const
+  const arrfunc_type_data *get() const
   {
     return reinterpret_cast<const nd::arrfunc *>(&m_memblock)->get();
+  }
+
+  const arrfunc_type *get_type() const
+  {
+    return reinterpret_cast<const nd::arrfunc *>(&m_memblock)->get_type();
   }
 
   void init(const nd::arrfunc &rhs)

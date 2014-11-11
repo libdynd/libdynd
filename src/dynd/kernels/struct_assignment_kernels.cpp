@@ -53,12 +53,12 @@ struct tuple_unary_op_ck : public kernels::unary_ck<tuple_unary_op_ck> {
 } // anonymous namespace
 
 intptr_t dynd::make_tuple_unary_op_ckernel(
-    const arrfunc_type_data *af, dynd::ckernel_builder *ckb,
-    intptr_t ckb_offset, intptr_t field_count, const uintptr_t *dst_offsets,
-    const ndt::type *dst_tp, const char *const *dst_arrmeta,
-    const uintptr_t *src_offsets, const ndt::type *src_tp,
-    const char *const *src_arrmeta, kernel_request_t kernreq,
-    const eval::eval_context *ectx)
+    const arrfunc_type_data *af, const arrfunc_type *af_tp,
+    dynd::ckernel_builder *ckb, intptr_t ckb_offset, intptr_t field_count,
+    const uintptr_t *dst_offsets, const ndt::type *dst_tp,
+    const char *const *dst_arrmeta, const uintptr_t *src_offsets,
+    const ndt::type *src_tp, const char *const *src_arrmeta,
+    kernel_request_t kernreq, const eval::eval_context *ectx)
 {
   intptr_t root_ckb_offset = ckb_offset;
   tuple_unary_op_ck *self = tuple_unary_op_ck::create(ckb, kernreq, ckb_offset);
@@ -70,20 +70,20 @@ intptr_t dynd::make_tuple_unary_op_ckernel(
     field.child_kernel_offset = ckb_offset - root_ckb_offset;
     field.dst_data_offset = dst_offsets[i];
     field.src_data_offset = src_offsets[i];
-    ckb_offset = af->instantiate(af, ckb, ckb_offset, dst_tp[i], dst_arrmeta[i],
-                                 &src_tp[i], &src_arrmeta[i],
-                                 kernel_request_single, ectx, nd::array(), nd::array());
+    ckb_offset = af->instantiate(
+        af, af_tp, ckb, ckb_offset, dst_tp[i], dst_arrmeta[i], &src_tp[i],
+        &src_arrmeta[i], kernel_request_single, ectx, nd::array(), nd::array());
   }
   return ckb_offset;
 }
 
 intptr_t dynd::make_tuple_unary_op_ckernel(
-    const arrfunc_type_data *const *af, dynd::ckernel_builder *ckb,
-    intptr_t ckb_offset, intptr_t field_count, const uintptr_t *dst_offsets,
-    const ndt::type *dst_tp, const char *const *dst_arrmeta,
-    const uintptr_t *src_offsets, const ndt::type *src_tp,
-    const char *const *src_arrmeta, kernel_request_t kernreq,
-    const eval::eval_context *ectx)
+    const arrfunc_type_data *const *af, const arrfunc_type *const *af_tp,
+    dynd::ckernel_builder *ckb, intptr_t ckb_offset, intptr_t field_count,
+    const uintptr_t *dst_offsets, const ndt::type *dst_tp,
+    const char *const *dst_arrmeta, const uintptr_t *src_offsets,
+    const ndt::type *src_tp, const char *const *src_arrmeta,
+    kernel_request_t kernreq, const eval::eval_context *ectx)
 {
   intptr_t root_ckb_offset = ckb_offset;
   tuple_unary_op_ck *self = tuple_unary_op_ck::create(ckb, kernreq, ckb_offset);
@@ -95,9 +95,9 @@ intptr_t dynd::make_tuple_unary_op_ckernel(
     field.child_kernel_offset = ckb_offset - root_ckb_offset;
     field.dst_data_offset = dst_offsets[i];
     field.src_data_offset = src_offsets[i];
-    ckb_offset = af[i]->instantiate(af[i], ckb, ckb_offset, dst_tp[i],
-                                    dst_arrmeta[i], &src_tp[i], &src_arrmeta[i],
-                                    kernel_request_single, ectx, nd::array(), nd::array());
+    ckb_offset = af[i]->instantiate(
+        af[i], af_tp[i], ckb, ckb_offset, dst_tp[i], dst_arrmeta[i], &src_tp[i],
+        &src_arrmeta[i], kernel_request_single, ectx, nd::array(), nd::array());
   }
   return ckb_offset;
 }
@@ -136,10 +136,11 @@ size_t dynd::make_struct_identical_assignment_kernel(
   }
 
   return make_tuple_unary_op_ckernel(
-      make_copy_arrfunc().get(), ckb, ckb_offset, field_count,
-      sd->get_data_offsets(dst_arrmeta), sd->get_field_types_raw(),
-      dst_fields_arrmeta.get(), sd->get_data_offsets(src_arrmeta),
-      sd->get_field_types_raw(), src_fields_arrmeta.get(), kernreq, ectx);
+      make_copy_arrfunc().get(), make_copy_arrfunc().get_type(), ckb,
+      ckb_offset, field_count, sd->get_data_offsets(dst_arrmeta),
+      sd->get_field_types_raw(), dst_fields_arrmeta.get(),
+      sd->get_data_offsets(src_arrmeta), sd->get_field_types_raw(),
+      src_fields_arrmeta.get(), kernreq, ectx);
 }
 
 /////////////////////////////////////////
@@ -205,10 +206,11 @@ size_t dynd::make_struct_assignment_kernel(
   }
 
   return make_tuple_unary_op_ckernel(
-      make_copy_arrfunc().get(), ckb, ckb_offset, field_count,
-      dst_sd->get_data_offsets(dst_arrmeta), dst_sd->get_field_types_raw(),
-      dst_fields_arrmeta.get(), src_data_offsets.get(),
-      &src_fields_tp[0], src_fields_arrmeta.get(), kernreq, ectx);
+      make_copy_arrfunc().get(), make_copy_arrfunc().get_type(), ckb,
+      ckb_offset, field_count, dst_sd->get_data_offsets(dst_arrmeta),
+      dst_sd->get_field_types_raw(), dst_fields_arrmeta.get(),
+      src_data_offsets.get(), &src_fields_tp[0], src_fields_arrmeta.get(),
+      kernreq, ectx);
 }
 
 /////////////////////////////////////////
@@ -242,8 +244,9 @@ size_t dynd::make_broadcast_to_struct_assignment_kernel(
   vector<uintptr_t> src_data_offsets(field_count, 0);
 
   return make_tuple_unary_op_ckernel(
-      make_copy_arrfunc().get(), ckb, ckb_offset, field_count,
-      dst_sd->get_data_offsets(dst_arrmeta), dst_sd->get_field_types_raw(),
-      dst_fields_arrmeta.get(), &src_data_offsets[0], &src_fields_tp[0],
-      &src_fields_arrmeta[0], kernreq, ectx);
+      make_copy_arrfunc().get(), make_copy_arrfunc().get_type(), ckb,
+      ckb_offset, field_count, dst_sd->get_data_offsets(dst_arrmeta),
+      dst_sd->get_field_types_raw(), dst_fields_arrmeta.get(),
+      &src_data_offsets[0], &src_fields_tp[0], &src_fields_arrmeta[0], kernreq,
+      ectx);
 }

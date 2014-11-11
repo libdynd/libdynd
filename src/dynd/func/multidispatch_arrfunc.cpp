@@ -292,9 +292,10 @@ static intptr_t instantiate_multidispatch_af(
                                      dst_tp, dst_arrmeta, src_tp, src_arrmeta,
                                      kernreq, ectx, args, kwds);
       } else {
-        return make_buffered_ckernel(
-            af.get(), ckb, ckb_offset, dst_tp, dst_arrmeta, nsrc, src_tp,
-            af.get_type()->get_arg_types_raw(), src_arrmeta, kernreq, ectx);
+        return make_buffered_ckernel(af.get(), af.get_type(), ckb, ckb_offset,
+                                     dst_tp, dst_arrmeta, nsrc, src_tp,
+                                     af.get_type()->get_arg_types_raw(),
+                                     src_arrmeta, kernreq, ectx);
       }
     }
   }

@@ -108,51 +108,56 @@ struct indexed_take_ck : public kernels::expr_ck<indexed_take_ck, 2> {
 } // anonymous namespace
 
 static int resolve_take_dst_type(const arrfunc_type_data *af_self,
-                                 intptr_t nsrc, const ndt::type *src_tp,
-                                 int throw_on_error, ndt::type &out_dst_tp,
-                                 const nd::array &DYND_UNUSED(args), const nd::array &DYND_UNUSED(kwds))
+                                 const arrfunc_type *af_tp, intptr_t nsrc,
+                                 const ndt::type *src_tp, int throw_on_error,
+                                 ndt::type &out_dst_tp,
+                                 const nd::array &DYND_UNUSED(args),
+                                 const nd::array &DYND_UNUSED(kwds))
 {
-    if (nsrc != 2) {
-      if (throw_on_error) {
-        stringstream ss;
-        ss << "Wrong number of arguments to take arrfunc with prototype ";
-        ss << af_self->func_proto << ", got " << nsrc << " arguments";
-        throw invalid_argument(ss.str());
-      } else {
-        return 0;
-      }
+  if (nsrc != 2) {
+    if (throw_on_error) {
+      stringstream ss;
+      ss << "Wrong number of arguments to take arrfunc with prototype " << af_tp
+         << ", got " << nsrc << " arguments";
+      throw invalid_argument(ss.str());
     }
-    ndt::type mask_el_tp = src_tp[1].get_type_at_dimension(NULL, 1);
-    if (mask_el_tp.get_type_id() == bool_type_id) {
-        out_dst_tp = ndt::make_var_dim(
-            src_tp[0].get_type_at_dimension(NULL, 1).get_canonical_type());
-    } else if (mask_el_tp.get_type_id() ==
-               (type_id_t)type_id_of<intptr_t>::value) {
-        if (src_tp[1].get_type_id() == var_dim_type_id) {
-            out_dst_tp = ndt::make_var_dim(
-                src_tp[0].get_type_at_dimension(NULL, 1).get_canonical_type());
-        } else {
-          out_dst_tp = ndt::make_fixed_dim(
-              src_tp[1].get_dim_size(NULL, NULL),
-              src_tp[0].get_type_at_dimension(NULL, 1).get_canonical_type());
-        }
-    } else {
-        stringstream ss;
-        ss << "take: unsupported type for the index " << mask_el_tp
-           << ", need bool or intptr";
-        throw invalid_argument(ss.str());
+    else {
+      return 0;
     }
+  }
+  ndt::type mask_el_tp = src_tp[1].get_type_at_dimension(NULL, 1);
+  if (mask_el_tp.get_type_id() == bool_type_id) {
+    out_dst_tp = ndt::make_var_dim(
+        src_tp[0].get_type_at_dimension(NULL, 1).get_canonical_type());
+  }
+  else if (mask_el_tp.get_type_id() == (type_id_t)type_id_of<intptr_t>::value) {
+    if (src_tp[1].get_type_id() == var_dim_type_id) {
+      out_dst_tp = ndt::make_var_dim(
+          src_tp[0].get_type_at_dimension(NULL, 1).get_canonical_type());
+    }
+    else {
+      out_dst_tp = ndt::make_fixed_dim(
+          src_tp[1].get_dim_size(NULL, NULL),
+          src_tp[0].get_type_at_dimension(NULL, 1).get_canonical_type());
+    }
+  }
+  else {
+    stringstream ss;
+    ss << "take: unsupported type for the index " << mask_el_tp
+       << ", need bool or intptr";
+    throw invalid_argument(ss.str());
+  }
 
-    return 1;
+  return 1;
 }
 
-static intptr_t
-instantiate_masked_take(const arrfunc_type_data *DYND_UNUSED(self_data_ptr),
-                        dynd::ckernel_builder *ckb, intptr_t ckb_offset,
-                        const ndt::type &dst_tp, const char *dst_arrmeta,
-                        const ndt::type *src_tp, const char *const *src_arrmeta,
-                        kernel_request_t kernreq, const eval::eval_context *ectx,
-                        const nd::array &DYND_UNUSED(args), const nd::array &DYND_UNUSED(kwds))
+static intptr_t instantiate_masked_take(
+    const arrfunc_type_data *DYND_UNUSED(af_self),
+    const arrfunc_type *DYND_UNUSED(af_tp), dynd::ckernel_builder *ckb,
+    intptr_t ckb_offset, const ndt::type &dst_tp, const char *dst_arrmeta,
+    const ndt::type *src_tp, const char *const *src_arrmeta,
+    kernel_request_t kernreq, const eval::eval_context *ectx,
+    const nd::array &DYND_UNUSED(args), const nd::array &DYND_UNUSED(kwds))
 {
   typedef masked_take_ck self_type;
 
@@ -209,102 +214,108 @@ instantiate_masked_take(const arrfunc_type_data *DYND_UNUSED(self_data_ptr),
                                 kernel_request_strided, ectx);
 }
 
-static intptr_t
-instantiate_indexed_take(const arrfunc_type_data *DYND_UNUSED(self_data_ptr),
-                         dynd::ckernel_builder *ckb, intptr_t ckb_offset,
-                         const ndt::type &dst_tp, const char *dst_arrmeta,
-                         const ndt::type *src_tp, const char *const *src_arrmeta,
-                         kernel_request_t kernreq, const eval::eval_context *ectx,
-                         const nd::array &DYND_UNUSED(args), const nd::array &DYND_UNUSED(kwds))
+static intptr_t instantiate_indexed_take(
+    const arrfunc_type_data *DYND_UNUSED(af_self),
+    const arrfunc_type *DYND_UNUSED(af_tp), dynd::ckernel_builder *ckb,
+    intptr_t ckb_offset, const ndt::type &dst_tp, const char *dst_arrmeta,
+    const ndt::type *src_tp, const char *const *src_arrmeta,
+    kernel_request_t kernreq, const eval::eval_context *ectx,
+    const nd::array &DYND_UNUSED(args), const nd::array &DYND_UNUSED(kwds))
 {
-    typedef indexed_take_ck self_type;
+  typedef indexed_take_ck self_type;
 
-    self_type *self = self_type::create(ckb, kernreq, ckb_offset);
+  self_type *self = self_type::create(ckb, kernreq, ckb_offset);
 
-    ndt::type dst_el_tp;
-    const char *dst_el_meta;
-    if (!dst_tp.get_as_strided(dst_arrmeta, &self->m_dst_dim_size,
-                               &self->m_dst_stride, &dst_el_tp, &dst_el_meta)) {
-        stringstream ss;
-        ss << "indexed take arrfunc: could not process type " << dst_tp;
-        ss << " as a strided dimension";
-        throw type_error(ss.str());
-    }
+  ndt::type dst_el_tp;
+  const char *dst_el_meta;
+  if (!dst_tp.get_as_strided(dst_arrmeta, &self->m_dst_dim_size,
+                             &self->m_dst_stride, &dst_el_tp, &dst_el_meta)) {
+    stringstream ss;
+    ss << "indexed take arrfunc: could not process type " << dst_tp;
+    ss << " as a strided dimension";
+    throw type_error(ss.str());
+  }
 
-    intptr_t index_dim_size;
-    ndt::type src0_el_tp, index_el_tp;
-    const char *src0_el_meta, *index_el_meta;
-    if (!src_tp[0].get_as_strided(src_arrmeta[0], &self->m_src0_dim_size,
-                                  &self->m_src0_stride, &src0_el_tp,
-                                  &src0_el_meta)) {
-        stringstream ss;
-        ss << "indexed take arrfunc: could not process type " << src_tp[0];
-        ss << " as a strided dimension";
-        throw type_error(ss.str());
-    }
-    if (!src_tp[1].get_as_strided(src_arrmeta[1], &index_dim_size,
-                                  &self->m_index_stride, &index_el_tp,
-                                  &index_el_meta)) {
-        stringstream ss;
-        ss << "take arrfunc: could not process type " << src_tp[1];
-        ss << " as a strided dimension";
-        throw type_error(ss.str());
-    }
-    if (self->m_dst_dim_size != index_dim_size) {
-        stringstream ss;
-        ss << "indexed take arrfunc: index data and dest have different sizes, ";
-        ss << index_dim_size << " and " << self->m_dst_dim_size;
-        throw invalid_argument(ss.str());
-    }
-    if (index_el_tp.get_type_id() != (type_id_t)type_id_of<intptr_t>::value) {
-        stringstream ss;
-        ss << "indexed take arrfunc: index type should be intptr, not ";
-        ss << index_el_tp;
-        throw type_error(ss.str());
-    }
+  intptr_t index_dim_size;
+  ndt::type src0_el_tp, index_el_tp;
+  const char *src0_el_meta, *index_el_meta;
+  if (!src_tp[0].get_as_strided(src_arrmeta[0], &self->m_src0_dim_size,
+                                &self->m_src0_stride, &src0_el_tp,
+                                &src0_el_meta)) {
+    stringstream ss;
+    ss << "indexed take arrfunc: could not process type " << src_tp[0];
+    ss << " as a strided dimension";
+    throw type_error(ss.str());
+  }
+  if (!src_tp[1].get_as_strided(src_arrmeta[1], &index_dim_size,
+                                &self->m_index_stride, &index_el_tp,
+                                &index_el_meta)) {
+    stringstream ss;
+    ss << "take arrfunc: could not process type " << src_tp[1];
+    ss << " as a strided dimension";
+    throw type_error(ss.str());
+  }
+  if (self->m_dst_dim_size != index_dim_size) {
+    stringstream ss;
+    ss << "indexed take arrfunc: index data and dest have different sizes, ";
+    ss << index_dim_size << " and " << self->m_dst_dim_size;
+    throw invalid_argument(ss.str());
+  }
+  if (index_el_tp.get_type_id() != (type_id_t)type_id_of<intptr_t>::value) {
+    stringstream ss;
+    ss << "indexed take arrfunc: index type should be intptr, not ";
+    ss << index_el_tp;
+    throw type_error(ss.str());
+  }
 
-    // Create the child element assignment ckernel
-    return make_assignment_kernel(ckb, ckb_offset, dst_el_tp, dst_el_meta,
-                                  src0_el_tp, src0_el_meta,
-                                  kernel_request_single, ectx);
+  // Create the child element assignment ckernel
+  return make_assignment_kernel(ckb, ckb_offset, dst_el_tp, dst_el_meta,
+                                src0_el_tp, src0_el_meta, kernel_request_single,
+                                ectx);
 }
 
 static intptr_t
-instantiate_take(const arrfunc_type_data *af_self,
+instantiate_take(const arrfunc_type_data *af_self, const arrfunc_type *af_tp,
                  dynd::ckernel_builder *ckb, intptr_t ckb_offset,
                  const ndt::type &dst_tp, const char *dst_arrmeta,
                  const ndt::type *src_tp, const char *const *src_arrmeta,
                  kernel_request_t kernreq, const eval::eval_context *ectx,
                  const nd::array &args, const nd::array &kwds)
 {
-    ndt::type mask_el_tp = src_tp[1].get_type_at_dimension(NULL, 1);
-    if (mask_el_tp.get_type_id() == bool_type_id) {
-        return instantiate_masked_take(af_self, ckb, ckb_offset, dst_tp,
-                                       dst_arrmeta, src_tp, src_arrmeta,
-                                       kernreq, ectx, args, kwds);
-    } else if (mask_el_tp.get_type_id() ==
-               (type_id_t)type_id_of<intptr_t>::value) {
-        return instantiate_indexed_take(af_self, ckb, ckb_offset, dst_tp,
-                                       dst_arrmeta, src_tp, src_arrmeta,
-                                       kernreq, ectx, args, kwds);
-    } else {
-        stringstream ss;
-        ss << "take: unsupported type for the index " << mask_el_tp
-           << ", need bool or intptr";
-        throw invalid_argument(ss.str());
-    }
+  ndt::type mask_el_tp = src_tp[1].get_type_at_dimension(NULL, 1);
+  if (mask_el_tp.get_type_id() == bool_type_id) {
+    return instantiate_masked_take(af_self, af_tp, ckb, ckb_offset, dst_tp,
+                                   dst_arrmeta, src_tp, src_arrmeta, kernreq,
+                                   ectx, args, kwds);
+  }
+  else if (mask_el_tp.get_type_id() == (type_id_t)type_id_of<intptr_t>::value) {
+    return instantiate_indexed_take(af_self, af_tp, ckb, ckb_offset, dst_tp,
+                                    dst_arrmeta, src_tp, src_arrmeta, kernreq,
+                                    ectx, args, kwds);
+  }
+  else {
+    stringstream ss;
+    ss << "take: unsupported type for the index " << mask_el_tp
+       << ", need bool or intptr";
+    throw invalid_argument(ss.str());
+  }
 }
 
-void kernels::make_take_arrfunc(arrfunc_type_data *out_af)
+nd::arrfunc kernels::make_take_arrfunc()
 {
-    // Masked take: (M * T, M * bool) -> var * T
-    // Indexed take: (M * T, N * intptr) -> N * T
-    // Combined: (M * T, N * Ix) -> R * T
-    static ndt::type param_types[2] = {ndt::type("M * T"), ndt::type("N * Ix")};
-    static ndt::type func_proto = ndt::make_funcproto(param_types, ndt::type("R * T"));
-    // Create the data for the arrfunc
-    out_af->free_func = NULL;
-    out_af->func_proto = func_proto;
-    out_af->resolve_dst_type = &resolve_take_dst_type;
-    out_af->instantiate = &instantiate_take;
+  // Masked take: (M * T, M * bool) -> var * T
+  // Indexed take: (M * T, N * intptr) -> N * T
+  // Combined: (M * T, N * Ix) -> R * T
+  static ndt::type param_types[2] = {ndt::type("M * T"), ndt::type("N * Ix")};
+  static ndt::type func_proto =
+      ndt::make_funcproto(param_types, ndt::type("R * T"));
+  nd::array af = nd::empty(func_proto);
+  arrfunc_type_data *out_af =
+      reinterpret_cast<arrfunc_type_data *>(af.get_readwrite_originptr());
+  // Create the data for the arrfunc
+  out_af->free_func = NULL;
+  out_af->resolve_dst_type = &resolve_take_dst_type;
+  out_af->instantiate = &instantiate_take;
+  af.flag_as_immutable();
+  return af;
 }

@@ -39,7 +39,7 @@ static intptr_t instantiate_lifted_expr_arrfunc_data(
         src_tp[i].get_ndim() - child_af_tp->get_arg_type(i).get_ndim();
   }
   return make_lifted_expr_ckernel(
-      child_af, ckb, ckb_offset,
+      child_af, child_af_tp, ckb, ckb_offset,
       dst_tp.get_ndim() - child_af_tp->get_return_type().get_ndim(), dst_tp,
       dst_arrmeta, src_ndim.get(), src_tp, src_arrmeta,
       static_cast<dynd::kernel_request_t>(kernreq), ectx);
