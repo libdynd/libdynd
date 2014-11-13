@@ -38,7 +38,10 @@ arrfunc_type::arrfunc_type(const nd::array &src_names,
                            const nd::array &aux_names,
                            const nd::array &arg_types,
                            const ndt::type &return_type, intptr_t naux)
-    : base_type(arrfunc_type_id, symbolic_kind, 0, 1, type_flag_none, 0, 0, 0),
+    : base_type(arrfunc_type_id, function_kind, sizeof(arrfunc_type_data),
+                scalar_align_of<uint64_t>::value,
+                type_flag_scalar | type_flag_zeroinit | type_flag_destructor, 0,
+                0, 0),
       m_src_names(src_names), m_aux_names(aux_names), m_arg_types(arg_types),
       m_narg(arg_types.get_dim_size()), m_nsrc(m_narg - naux), m_naux(naux),
       m_return_type(return_type)
@@ -78,10 +81,9 @@ arrfunc_type::arrfunc_type(const nd::array &src_names,
     throw invalid_argument(ss.str());
   }
 
-  m_members.flags |= return_type.get_flags() & type_flags_value_inherited;
-  for (intptr_t i = 0; i != m_narg; ++i) {
-    m_members.flags |= get_arg_type(i).get_flags() & type_flags_value_inherited;
-  }
+  // Note that we don't base the flags of this type on that of its arguments
+  // and return types, because it is something the can be instantiated, even
+  // for arguments that are symbolic.
 }
 
 void arrfunc_type::print_data(std::ostream &DYND_UNUSED(o),

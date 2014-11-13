@@ -242,7 +242,7 @@ struct functor_arrfunc_factory_dispatcher {
 } // namespace detail
 
 template <int aux_param_count, typename func_type>
-nd::arrfunc make_functor_arrfunc(const func_type &func, bool copy)
+nd::arrfunc make_functor_arrfunc(const func_type &func, bool copy = true)
 {
   if (copy) {
     return detail::functor_arrfunc_from < aux_param_count, func_type, true,
@@ -257,7 +257,7 @@ nd::arrfunc make_functor_arrfunc(const func_type &func, bool copy)
 }
 
 template <typename func_type>
-arrfunc make_functor_arrfunc(const func_type &func, bool copy = true)
+nd::arrfunc make_functor_arrfunc(const func_type &func, bool copy = true)
 {
   return make_functor_arrfunc<0>(func, copy);
 }
@@ -280,7 +280,7 @@ DYND_PP_JOIN_MAP(MAKE_FUNCTOR_ARRFUNC, (),
 
 template <typename obj_type, typename mem_func_type>
 nd::arrfunc make_functor_arrfunc(const obj_type &obj, mem_func_type mem_func,
-                                 bool copy)
+                                 bool copy = true)
 {
   if (copy) {
     typedef detail::mem_func_wrapper<mem_func_type, true> wrapper_type;
