@@ -109,7 +109,7 @@ nd::arrfunc dynd::make_arrfunc_from_assignment(const ndt::type &dst_tp,
   nd::array af = nd::empty(ndt::make_funcproto(src_tp, dst_tp));
   arrfunc_type_data *out_af =
       reinterpret_cast<arrfunc_type_data *>(af.get_readwrite_originptr());
-  memset(&out_af, 0, sizeof(arrfunc_type_data));
+  memset(out_af, 0, sizeof(arrfunc_type_data));
   *out_af->get_data_as<assign_error_mode>() = errmode;
   out_af->free_func = NULL;
   out_af->instantiate = &instantiate_assignment_ckernel;

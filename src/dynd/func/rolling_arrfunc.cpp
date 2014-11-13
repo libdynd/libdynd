@@ -145,7 +145,7 @@ static int resolve_rolling_dst_type(const arrfunc_type_data *af_self,
     }
   }
   else {
-    child_dst_tp = af_tp->get_return_type();
+    child_dst_tp = data->window_op.get_type()->get_return_type();
   }
 
   if (src_tp[0].get_type_id() == var_dim_type_id) {

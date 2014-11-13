@@ -488,9 +488,9 @@ struct option_arrfunc_list {
   inline intptr_t size() const { return sizeof(af) / sizeof(af[0]); }
 
   const arrfunc_type_data *get() const { return af; }
-  const arrfunc_type *get_type() const
+  const arrfunc_type *const *get_type() const
   {
-    return af_tp[0].extended<arrfunc_type>();
+    return reinterpret_cast<const arrfunc_type *const *>(af_tp);
   }
 };
 } // anonymous namespace
@@ -503,13 +503,13 @@ size_t kernels::make_option_assignment_kernel(
   static option_arrfunc_list afl;
   intptr_t size = afl.size();
   const arrfunc_type_data *af = afl.get();
-  const arrfunc_type *af_tp = afl.get_type();
+  const arrfunc_type *const *af_tp = afl.get_type();
   map<nd::string, ndt::type> typevars;
   for (intptr_t i = 0; i < size; ++i, ++af_tp, ++af) {
     typevars.clear();
-    if (ndt::pattern_match(src_tp, af_tp->get_arg_type(0), typevars) &&
-        ndt::pattern_match(dst_tp, af_tp->get_return_type(), typevars)) {
-      return af->instantiate(af, af_tp, ckb, ckb_offset, dst_tp, dst_arrmeta,
+    if (ndt::pattern_match(src_tp, (*af_tp)->get_arg_type(0), typevars) &&
+        ndt::pattern_match(dst_tp, (*af_tp)->get_return_type(), typevars)) {
+      return af->instantiate(af, *af_tp, ckb, ckb_offset, dst_tp, dst_arrmeta,
                              &src_tp, &src_arrmeta, kernreq, ectx, nd::array(),
                              nd::array());
     }

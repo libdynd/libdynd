@@ -31,7 +31,8 @@ arrfunc_old_type::~arrfunc_old_type()
 {
 }
 
-static void print_arrfunc(std::ostream& o, const arrfunc_type_data *af)
+static void print_arrfunc(std::ostream &o,
+                          const arrfunc_type_data *DYND_UNUSED(af))
 {
   o << "arrfunc_old deprecated";
 }

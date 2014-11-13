@@ -263,10 +263,10 @@ DYND_PP_JOIN_MAP(FUNCTOR_CK, (), DYND_PP_RANGE(DYND_PP_INC(DYND_ARG_MAX)))
     }                                                                          \
                                                                                \
     static intptr_t                                                            \
-    instantiate(const arrfunc_type_data *af_self, const arrfunc_type *af_tp,   \
-                dynd::ckernel_builder *ckb, intptr_t ckb_offset,               \
-                const ndt::type &dst_tp, const char *DYND_UNUSED(dst_arrmeta), \
-                const ndt::type *src_tp,                                       \
+    instantiate(const arrfunc_type_data *DYND_UNUSED(af_self),                 \
+                const arrfunc_type *af_tp, dynd::ckernel_builder *ckb,         \
+                intptr_t ckb_offset, const ndt::type &dst_tp,                  \
+                const char *DYND_UNUSED(dst_arrmeta), const ndt::type *src_tp, \
                 const char *const *DYND_PP_IF(NSRC)(src_arrmeta),              \
                 kernel_request_t kernreq,                                      \
                 const eval::eval_context *DYND_UNUSED(ectx),                   \

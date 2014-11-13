@@ -179,13 +179,11 @@ static intptr_t instantiate_neighborhood(
   return ckb_offset;
 }
 
-static int resolve_neighborhood_dst_type(const arrfunc_type_data *self,
-                                         const arrfunc_type *af_tp,
-                                         intptr_t nsrc, const ndt::type *src_tp,
-                                         int DYND_UNUSED(throw_on_error),
-                                         ndt::type &out_dst_tp,
-                                         const nd::array &DYND_UNUSED(args),
-                                         const nd::array &DYND_UNUSED(kwds))
+static int resolve_neighborhood_dst_type(
+    const arrfunc_type_data *DYND_UNUSED(self), const arrfunc_type *af_tp,
+    intptr_t nsrc, const ndt::type *src_tp, int DYND_UNUSED(throw_on_error),
+    ndt::type &out_dst_tp, const nd::array &DYND_UNUSED(args),
+    const nd::array &DYND_UNUSED(kwds))
 {
   // TODO: Should be able to express the match/subsitution without special code
 
