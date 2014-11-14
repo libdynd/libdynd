@@ -7,7 +7,7 @@
 #include <dynd/parser_util.hpp>
 #include <dynd/types/datetime_parser.hpp>
 #include <dynd/types/datetime_type.hpp>
-#include <dynd/types/funcproto_type.hpp>
+#include <dynd/types/arrfunc_type.hpp>
 #include <dynd/func/arrfunc.hpp>
 #include <dynd/string.hpp>
 
@@ -103,21 +103,19 @@ struct int_multiply_and_offset_ck
 
 template <class Tsrc, class Tdst>
 static intptr_t instantiate_int_multiply_and_offset_arrfunc(
-    const arrfunc_type_data *self_af,
-    dynd::ckernel_builder *ckb, intptr_t ckb_offset,
-    const ndt::type &dst_tp, const char *DYND_UNUSED(dst_arrmeta),
-    const ndt::type *src_tp, const char *const *DYND_UNUSED(src_arrmeta),
-    kernel_request_t kernreq, const eval::eval_context *DYND_UNUSED(ectx),
+    const arrfunc_type_data *self_af, const arrfunc_type *af_tp,
+    dynd::ckernel_builder *ckb, intptr_t ckb_offset, const ndt::type &dst_tp,
+    const char *DYND_UNUSED(dst_arrmeta), const ndt::type *src_tp,
+    const char *const *DYND_UNUSED(src_arrmeta), kernel_request_t kernreq,
+    const eval::eval_context *DYND_UNUSED(ectx),
     const nd::array &DYND_UNUSED(args), const nd::array &DYND_UNUSED(kwds))
 {
   typedef int_multiply_and_offset_ck<Tsrc, Tdst> self_type;
-  if (dst_tp !=
-          self_af->func_proto.extended<funcproto_type>()->get_return_type() ||
-      src_tp[0] !=
-          self_af->func_proto.extended<funcproto_type>()->get_arg_type(0)) {
+  if (dst_tp != af_tp->get_return_type() ||
+      src_tp[0] != af_tp->get_arg_type(0)) {
     stringstream ss;
     ss << "Cannot instantiate arrfunc with signature ";
-    ss << self_af->func_proto << " with types (";
+    ss << af_tp << " with types (";
     ss << src_tp[0] << ") -> " << dst_tp;
     throw type_error(ss.str());
   }
@@ -130,10 +128,9 @@ template <class Tsrc, class Tdst>
 nd::arrfunc make_int_multiply_and_offset_arrfunc(Tdst factor, Tdst offset,
                                                  const ndt::type &func_proto)
 {
-  nd::array out_af = nd::empty(ndt::make_arrfunc());
+  nd::array out_af = nd::empty(func_proto);
   arrfunc_type_data *af =
       reinterpret_cast<arrfunc_type_data *>(out_af.get_readwrite_originptr());
-  af->func_proto = func_proto;
   *af->get_data_as<pair<Tdst, Tdst> >() = make_pair(factor, offset);
   af->instantiate = &instantiate_int_multiply_and_offset_arrfunc<Tsrc, Tdst>;
   out_af.flag_as_immutable();
@@ -158,21 +155,19 @@ struct int_offset_and_divide_ck
 
 template <class Tsrc, class Tdst>
 static intptr_t instantiate_int_offset_and_divide_arrfunc(
-    const arrfunc_type_data *self_af,
-    dynd::ckernel_builder *ckb, intptr_t ckb_offset,
-    const ndt::type &dst_tp, const char *DYND_UNUSED(dst_arrmeta),
-    const ndt::type *src_tp, const char *const *DYND_UNUSED(src_arrmeta),
-    kernel_request_t kernreq, const eval::eval_context *DYND_UNUSED(ectx),
+    const arrfunc_type_data *self_af, const arrfunc_type *af_tp,
+    dynd::ckernel_builder *ckb, intptr_t ckb_offset, const ndt::type &dst_tp,
+    const char *DYND_UNUSED(dst_arrmeta), const ndt::type *src_tp,
+    const char *const *DYND_UNUSED(src_arrmeta), kernel_request_t kernreq,
+    const eval::eval_context *DYND_UNUSED(ectx),
     const nd::array &DYND_UNUSED(args), const nd::array &DYND_UNUSED(kwds))
 {
   typedef int_offset_and_divide_ck<Tsrc, Tdst> self_type;
-  if (dst_tp !=
-          self_af->func_proto.extended<funcproto_type>()->get_return_type() ||
-      src_tp[0] !=
-          self_af->func_proto.extended<funcproto_type>()->get_arg_type(0)) {
+  if (dst_tp != af_tp->get_return_type() ||
+      src_tp[0] != af_tp->get_arg_type(0)) {
     stringstream ss;
     ss << "Cannot instantiate arrfunc with signature ";
-    ss << self_af->func_proto << " with types (";
+    ss << af_tp << " with types (";
     ss << src_tp[0] << ") -> " << dst_tp;
     throw type_error(ss.str());
   }
@@ -185,10 +180,9 @@ template <class Tsrc, class Tdst>
 nd::arrfunc make_int_offset_and_divide_arrfunc(Tdst offset, Tdst divisor,
                                                const ndt::type &func_proto)
 {
-  nd::array out_af = nd::empty(ndt::make_arrfunc());
+  nd::array out_af = nd::empty(func_proto);
   arrfunc_type_data *af =
       reinterpret_cast<arrfunc_type_data *>(out_af.get_readwrite_originptr());
-  af->func_proto = func_proto;
   *af->get_data_as<pair<Tdst, Tdst> >() = make_pair(offset, divisor);
   af->instantiate = &instantiate_int_offset_and_divide_arrfunc<Tsrc, Tdst>;
   out_af.flag_as_immutable();

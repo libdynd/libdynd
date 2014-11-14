@@ -5,7 +5,8 @@
 
 #include <dynd/array.hpp>
 #include <dynd/types/option_type.hpp>
-#include <dynd/types/arrfunc_type.hpp>
+#include <dynd/types/arrfunc_old_type.hpp>
+#include <dynd/types/typevar_type.hpp>
 #include <dynd/kernels/option_assignment_kernels.hpp>
 #include <dynd/kernels/option_kernels.hpp>
 #include <dynd/memblock/pod_memory_block.hpp>
@@ -60,7 +61,9 @@ option_type::~option_type()
 const ndt::type &option_type::make_nafunc_type()
 {
   static ndt::type static_instance = ndt::make_cstruct(
-      ndt::make_arrfunc(), "is_avail", ndt::make_arrfunc(), "assign_na");
+      ndt::make_funcproto(ndt::make_typevar("T"), ndt::make_type<dynd_bool>()),
+      "is_avail", ndt::make_funcproto(0, NULL, ndt::make_typevar("T")),
+      "assign_na");
   return static_instance;
 }
 
@@ -109,11 +112,13 @@ bool option_type::is_avail(const char *arrmeta, const char *data,
     ckernel_builder ckb;
     const arrfunc_type_data *af = get_is_avail_arrfunc();
     ndt::type src_tp[1] = {ndt::type(this, true)};
-    af->instantiate(af, &ckb, 0, ndt::make_type<dynd_bool>(), NULL, src_tp,
-                    &arrmeta, kernel_request_single, ectx, nd::array(), nd::array());
+    af->instantiate(af, get_is_avail_arrfunc_type(), &ckb, 0,
+                    ndt::make_type<dynd_bool>(), NULL, src_tp, &arrmeta,
+                    kernel_request_single, ectx, nd::array(), nd::array());
     ckernel_prefix *ckp = ckb.get();
     char result;
-    ckp->get_function<expr_single_t>()(&result, const_cast<char **>(&data), ckp);
+    ckp->get_function<expr_single_t>()(&result, const_cast<char **>(&data),
+                                       ckp);
     return result != 0;
   }
 }
@@ -165,10 +170,12 @@ void option_type::assign_na(const char *arrmeta, char *data,
     default:
       break;
     }
-  } else {
+  }
+  else {
     ckernel_builder ckb;
     const arrfunc_type_data *af = get_assign_na_arrfunc();
-    af->instantiate(af, &ckb, 0, ndt::type(this, true), arrmeta, NULL, NULL,
+    af->instantiate(af, get_assign_na_arrfunc_type(), &ckb, 0,
+                    ndt::type(this, true), arrmeta, NULL, NULL,
                     kernel_request_single, ectx, nd::array(), nd::array());
     ckernel_prefix *ckp = ckb.get();
     ckp->get_function<expr_single_t>()(data, NULL, ckp);

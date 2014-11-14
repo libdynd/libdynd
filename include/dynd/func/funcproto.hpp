@@ -12,8 +12,8 @@
 namespace dynd {
 
 /**
- * A metaprogram that decays a function pointer, or a member function pointer, to
- * a function (proto)type.
+ * A metaprogram that transforms a function pointer or a
+ * member function pointer to a function prototype.
  */
 template <typename T>
 struct funcproto_from;

@@ -64,11 +64,27 @@ public:
         m_nafunc.get_readonly_originptr());
   }
 
+  const arrfunc_type *get_is_avail_arrfunc_type() const
+  {
+    return m_nafunc.get_type()
+        .extended<base_tuple_type>()
+        ->get_field_type(0)
+        .extended<arrfunc_type>();
+  }
+
   const arrfunc_type_data *get_assign_na_arrfunc() const
   {
     return reinterpret_cast<const arrfunc_type_data *>(
                m_nafunc.get_readonly_originptr()) +
            1;
+  }
+
+  const arrfunc_type *get_assign_na_arrfunc_type() const
+  {
+    return m_nafunc.get_type()
+        .extended<base_tuple_type>()
+        ->get_field_type(1)
+        .extended<arrfunc_type>();
   }
 
   void print_data(std::ostream &o, const char *arrmeta, const char *data) const;

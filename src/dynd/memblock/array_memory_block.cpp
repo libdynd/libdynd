@@ -65,20 +65,25 @@ memory_block_ptr dynd::make_array_memory_block(size_t arrmeta_size)
     return memory_block_ptr(new (result) memory_block_data(1, array_memory_block_type), false);
 }
 
-memory_block_ptr dynd::make_array_memory_block(size_t arrmeta_size, size_t extra_size,
-                    size_t extra_alignment, char **out_extra_ptr)
+memory_block_ptr dynd::make_array_memory_block(size_t arrmeta_size,
+                                               size_t extra_size,
+                                               size_t extra_alignment,
+                                               char **out_extra_ptr)
 {
-    size_t extra_offset = inc_to_alignment(sizeof(memory_block_data) + sizeof(array_preamble) + arrmeta_size,
-                                        extra_alignment);
-    char *result = (char *)malloc(extra_offset + extra_size);
-    if (result == 0) {
-        throw bad_alloc();
-    }
-    // Zero out all the arrmeta to start
-    memset(result + sizeof(memory_block_data), 0, sizeof(array_preamble) + arrmeta_size);
-    // Return a pointer to the extra allocated memory
-    *out_extra_ptr = result + extra_offset;
-    return memory_block_ptr(new (result) memory_block_data(1, array_memory_block_type), false);
+  size_t extra_offset = inc_to_alignment(
+      sizeof(memory_block_data) + sizeof(array_preamble) + arrmeta_size,
+      extra_alignment);
+  char *result = (char *)malloc(extra_offset + extra_size);
+  if (result == 0) {
+    throw bad_alloc();
+  }
+  // Zero out all the arrmeta to start
+  memset(result + sizeof(memory_block_data), 0,
+         sizeof(array_preamble) + arrmeta_size);
+  // Return a pointer to the extra allocated memory
+  *out_extra_ptr = result + extra_offset;
+  return memory_block_ptr(
+      new (result) memory_block_data(1, array_memory_block_type), false);
 }
 
 memory_block_ptr dynd::shallow_copy_array_memory_block(const memory_block_ptr& ndo)

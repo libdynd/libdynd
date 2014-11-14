@@ -261,14 +261,16 @@ size_t base_type::make_assignment_kernel(
     kernel_request_t DYND_UNUSED(kernreq),
     const eval::eval_context *DYND_UNUSED(ectx)) const
 {
-    stringstream ss;
-    ss << "make_assignment_kernel has not been implemented for ";
-    if (this == dst_tp.extended()) {
-        ss << dst_tp;
-    } else {
-        ss << src_tp;
-    }
-    throw std::runtime_error(ss.str());
+  stringstream ss;
+  ss << "make_assignment_kernel has not been implemented for type '";
+  if (this == dst_tp.extended()) {
+    ss << dst_tp;
+  }
+  else {
+    ss << src_tp;
+  }
+  ss << "'";
+  throw std::runtime_error(ss.str());
 }
 
 size_t base_type::make_comparison_kernel(

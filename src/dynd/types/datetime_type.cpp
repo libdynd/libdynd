@@ -269,7 +269,7 @@ void datetime_type::get_dynamic_type_properties(const std::pair<std::string, gfu
 
 ///////// functions on the type
 
-static nd::array function_type_now(const ndt::type& DYND_UNUSED(dt)) {
+static nd::array fn_type_now(const ndt::type& DYND_UNUSED(dt)) {
     throw runtime_error("TODO: implement datetime.now function");
     //datetime_struct dts;
     //fill_current_local_datetime(&fields);
@@ -280,10 +280,10 @@ static nd::array function_type_now(const ndt::type& DYND_UNUSED(dt)) {
     //return result;
 }
 
-static nd::array function_type_construct(const ndt::type& DYND_UNUSED(dt),
-                const nd::array& DYND_UNUSED(year),
-                const nd::array& DYND_UNUSED(month),
-                const nd::array& DYND_UNUSED(day))
+static nd::array fn_type_construct(const ndt::type &DYND_UNUSED(dt),
+                                   const nd::array &DYND_UNUSED(year),
+                                   const nd::array &DYND_UNUSED(month),
+                                   const nd::array &DYND_UNUSED(day))
 {
   throw runtime_error("dynd type datetime __construct__");
   // Make this like the date version
@@ -293,10 +293,10 @@ void datetime_type::get_dynamic_type_functions(const std::pair<std::string, gfun
 {
     static pair<string, gfunc::callable> datetime_type_functions[] = {
         pair<string, gfunc::callable>(
-            "now", gfunc::make_callable(&function_type_now, "self")),
+            "now", gfunc::make_callable(&fn_type_now, "self")),
         pair<string, gfunc::callable>(
             "__construct__",
-            gfunc::make_callable(&function_type_construct, "self", "year",
+            gfunc::make_callable(&fn_type_construct, "self", "year",
                                  "month", "day"))};
 
     *out_functions = datetime_type_functions;
@@ -803,16 +803,14 @@ struct datetime_is_avail_ck {
     }
   }
 
-  static intptr_t instantiate(const arrfunc_type_data *DYND_UNUSED(self),
-                              dynd::ckernel_builder *ckb, intptr_t ckb_offset,
-                              const ndt::type &dst_tp,
-                              const char *DYND_UNUSED(dst_arrmeta),
-                              const ndt::type *src_tp,
-                              const char *const *DYND_UNUSED(src_arrmeta),
-                              kernel_request_t kernreq,
-                              const eval::eval_context *DYND_UNUSED(ectx),
-                              const nd::array &DYND_UNUSED(args),
-                              const nd::array &DYND_UNUSED(kwds))
+  static intptr_t instantiate(
+      const arrfunc_type_data *DYND_UNUSED(self),
+      const arrfunc_type *DYND_UNUSED(af_tp), dynd::ckernel_builder *ckb,
+      intptr_t ckb_offset, const ndt::type &dst_tp,
+      const char *DYND_UNUSED(dst_arrmeta), const ndt::type *src_tp,
+      const char *const *DYND_UNUSED(src_arrmeta), kernel_request_t kernreq,
+      const eval::eval_context *DYND_UNUSED(ectx),
+      const nd::array &DYND_UNUSED(args), const nd::array &DYND_UNUSED(kwds))
   {
     if (src_tp[0].get_type_id() != option_type_id ||
         src_tp[0].extended<option_type>()->get_value_type().get_type_id() !=
@@ -850,6 +848,7 @@ struct datetime_assign_na_ck {
   }
 
   static intptr_t instantiate(const arrfunc_type_data *DYND_UNUSED(self),
+                              const arrfunc_type *DYND_UNUSED(af_tp),
                               dynd::ckernel_builder *ckb, intptr_t ckb_offset,
                               const ndt::type &dst_tp,
                               const char *DYND_UNUSED(dst_arrmeta),
@@ -876,20 +875,16 @@ struct datetime_assign_na_ck {
 
 nd::array datetime_type::get_option_nafunc() const
 {
-    nd::array naf = nd::empty(option_type::make_nafunc_type());
-    arrfunc_type_data *is_avail =
-        reinterpret_cast<arrfunc_type_data *>(naf.get_ndo()->m_data_pointer);
-    arrfunc_type_data *assign_na = is_avail + 1;
+  nd::array naf = nd::empty(option_type::make_nafunc_type());
+  arrfunc_type_data *is_avail =
+      reinterpret_cast<arrfunc_type_data *>(naf.get_ndo()->m_data_pointer);
+  arrfunc_type_data *assign_na = is_avail + 1;
 
-    // Use a typevar instead of option[T] to avoid a circular dependency
-    is_avail->func_proto = ndt::make_funcproto(ndt::make_typevar("T"),
-                                               ndt::make_type<dynd_bool>());
-    is_avail->instantiate = &datetime_is_avail_ck::instantiate;
-    assign_na->func_proto =
-        ndt::make_funcproto(0, NULL, ndt::make_typevar("T"));
-    assign_na->instantiate = &datetime_assign_na_ck::instantiate;
-    naf.flag_as_immutable();
-    return naf;
+  // Use a typevar instead of option[T] to avoid a circular dependency
+  is_avail->instantiate = &datetime_is_avail_ck::instantiate;
+  assign_na->instantiate = &datetime_assign_na_ck::instantiate;
+  naf.flag_as_immutable();
+  return naf;
 }
 
 bool datetime_type::adapt_type(const ndt::type &operand_tp,

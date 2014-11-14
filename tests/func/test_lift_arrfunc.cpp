@@ -11,7 +11,7 @@
 #include "inc_gtest.hpp"
 
 #include <dynd/types/fixedstring_type.hpp>
-#include <dynd/types/arrfunc_type.hpp>
+#include <dynd/types/arrfunc_old_type.hpp>
 #include <dynd/func/arrfunc.hpp>
 #include <dynd/kernels/assignment_kernels.hpp>
 #include <dynd/kernels/expr_kernel_generator.hpp>
@@ -82,71 +82,71 @@ TEST(LiftArrFunc, UnaryExpr_VarDim) {
     EXPECT_EQ(284, out(4).as<int>());
 }
 
-TEST(LiftArrFunc, UnaryExpr_StridedToVarDim) {
-    // Create an arrfunc for converting string to int
-    nd::arrfunc af_base = make_arrfunc_from_assignment(
-        ndt::make_type<int>(), ndt::make_fixedstring(16), assign_error_default);
+TEST(LiftArrFunc, UnaryExpr_StridedToVarDim)
+{
+  // Create an arrfunc for converting string to int
+  nd::arrfunc af_base = make_arrfunc_from_assignment(
+      ndt::make_type<int>(), ndt::make_fixedstring(16), assign_error_default);
 
-    // Lift the kernel to particular fixed dim arrays
-    arrfunc_type_data af;
-    lift_arrfunc(&af, af_base);
+  // Lift the kernel to particular fixed dim arrays
+  nd::arrfunc af = lift_arrfunc(af_base);
 
-    // Test it on some data
-    ndt::type dst_tp("var * int32");
-    ndt::type src_tp("5 * string[16]");
-    ckernel_builder ckb;
-    nd::array in = nd::empty(src_tp);
-    nd::array out = nd::empty(dst_tp);
-    in(0).vals() = "172";
-    in(1).vals() = "-139";
-    in(2).vals() = "12345";
-    in(3).vals() = "-1111";
-    in(4).vals() = "284";
-    const char *in_ptr = in.get_readonly_originptr();
-    const char *src_arrmeta[1] = {in.get_arrmeta()};
-    af.instantiate(&af, &ckb, 0, dst_tp,
+  // Test it on some data
+  ndt::type dst_tp("var * int32");
+  ndt::type src_tp("5 * string[16]");
+  ckernel_builder ckb;
+  nd::array in = nd::empty(src_tp);
+  nd::array out = nd::empty(dst_tp);
+  in(0).vals() = "172";
+  in(1).vals() = "-139";
+  in(2).vals() = "12345";
+  in(3).vals() = "-1111";
+  in(4).vals() = "284";
+  const char *in_ptr = in.get_readonly_originptr();
+  const char *src_arrmeta[1] = {in.get_arrmeta()};
+  af.get()->instantiate(af.get(), af.get_type(), &ckb, 0, dst_tp,
                         out.get_arrmeta(), &src_tp, src_arrmeta,
                         kernel_request_single, &eval::default_eval_context,
                         nd::array(), nd::array());
-    expr_single_t usngo = ckb.get()->get_function<expr_single_t>();
-    usngo(out.get_readwrite_originptr(), const_cast<char **>(&in_ptr), ckb.get());
-    EXPECT_EQ(5, out.get_shape()[0]);
-    EXPECT_EQ(172, out(0).as<int>());
-    EXPECT_EQ(-139, out(1).as<int>());
-    EXPECT_EQ(12345, out(2).as<int>());
-    EXPECT_EQ(-1111, out(3).as<int>());
-    EXPECT_EQ(284, out(4).as<int>());
+  expr_single_t usngo = ckb.get()->get_function<expr_single_t>();
+  usngo(out.get_readwrite_originptr(), const_cast<char **>(&in_ptr), ckb.get());
+  EXPECT_EQ(5, out.get_shape()[0]);
+  EXPECT_EQ(172, out(0).as<int>());
+  EXPECT_EQ(-139, out(1).as<int>());
+  EXPECT_EQ(12345, out(2).as<int>());
+  EXPECT_EQ(-1111, out(3).as<int>());
+  EXPECT_EQ(284, out(4).as<int>());
 }
 
-TEST(LiftArrFunc, UnaryExpr_VarToVarDim) {
-    // Create an arrfunc for converting string to int
-    nd::arrfunc af_base = make_arrfunc_from_assignment(
-        ndt::make_type<int>(), ndt::make_fixedstring(16), assign_error_default);
+TEST(LiftArrFunc, UnaryExpr_VarToVarDim)
+{
+  // Create an arrfunc for converting string to int
+  nd::arrfunc af_base = make_arrfunc_from_assignment(
+      ndt::make_type<int>(), ndt::make_fixedstring(16), assign_error_default);
 
-    // Lift the kernel to particular fixed dim arrays
-    arrfunc_type_data af;
-    lift_arrfunc(&af, af_base);
+  // Lift the kernel to particular fixed dim arrays
+  nd::arrfunc af = lift_arrfunc(af_base);
 
-    // Test it on some data
-    ckernel_builder ckb;
-    nd::array in = nd::empty("var * string[16]");
-    nd::array out = nd::empty("var * int32");
-    const char *in_vals[] = {"172", "-139", "12345", "-1111", "284"};
-    in.vals() = in_vals;
-    const char *in_ptr = in.get_readonly_originptr();
-    const char *src_arrmeta[1] = {in.get_arrmeta()};
-    af.instantiate(&af, &ckb, 0, out.get_type(),
+  // Test it on some data
+  ckernel_builder ckb;
+  nd::array in = nd::empty("var * string[16]");
+  nd::array out = nd::empty("var * int32");
+  const char *in_vals[] = {"172", "-139", "12345", "-1111", "284"};
+  in.vals() = in_vals;
+  const char *in_ptr = in.get_readonly_originptr();
+  const char *src_arrmeta[1] = {in.get_arrmeta()};
+  af.get()->instantiate(af.get(), af.get_type(), &ckb, 0, out.get_type(),
                         out.get_arrmeta(), &in.get_type(), src_arrmeta,
                         kernel_request_single, &eval::default_eval_context,
                         nd::array(), nd::array());
-    expr_single_t usngo = ckb.get()->get_function<expr_single_t>();
-    usngo(out.get_readwrite_originptr(), const_cast<char **>(&in_ptr), ckb.get());
-    EXPECT_EQ(5, out.get_shape()[0]);
-    EXPECT_EQ(172, out(0).as<int>());
-    EXPECT_EQ(-139, out(1).as<int>());
-    EXPECT_EQ(12345, out(2).as<int>());
-    EXPECT_EQ(-1111, out(3).as<int>());
-    EXPECT_EQ(284, out(4).as<int>());
+  expr_single_t usngo = ckb.get()->get_function<expr_single_t>();
+  usngo(out.get_readwrite_originptr(), const_cast<char **>(&in_ptr), ckb.get());
+  EXPECT_EQ(5, out.get_shape()[0]);
+  EXPECT_EQ(172, out(0).as<int>());
+  EXPECT_EQ(-139, out(1).as<int>());
+  EXPECT_EQ(12345, out(2).as<int>());
+  EXPECT_EQ(-1111, out(3).as<int>());
+  EXPECT_EQ(284, out(4).as<int>());
 }
 
 TEST(LiftArrFunc, UnaryExpr_MultiDimVarToVarDim) {

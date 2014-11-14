@@ -2193,29 +2193,30 @@ bool nd::is_scalar_avail(const ndt::type &tp, const char *arrmeta,
 void nd::assign_na(const ndt::type &tp, const char *arrmeta, char *data,
                    const eval::eval_context *ectx)
 {
-    if (tp.get_type_id() == option_type_id) {
-        tp.extended<option_type>()->assign_na(arrmeta, data, ectx);
-    } else {
-        const ndt::type& dtp = tp.get_dtype().value_type();
-        if (dtp.get_type_id() == option_type_id) {
-            const arrfunc_type_data *af =
-                dtp.extended<option_type>()->get_assign_na_arrfunc();
-            ckernel_builder ckb;
-            make_lifted_expr_ckernel(af, &ckb, 0, tp.get_ndim(), tp, arrmeta,
-                                     NULL, NULL, NULL, kernel_request_single,
-                                     ectx);
-            ckernel_prefix *ckp = ckb.get();
-            expr_single_t ckp_fn =
-                ckp->get_function<expr_single_t>();
-            ckp_fn(data, NULL, ckp);
-        } else {
-            stringstream ss;
-            ss << "Cannot assign missing value token NA to dtype " << dtp;
-            throw invalid_argument(ss.str());
-        }
+  if (tp.get_type_id() == option_type_id) {
+    tp.extended<option_type>()->assign_na(arrmeta, data, ectx);
+  }
+  else {
+    const ndt::type &dtp = tp.get_dtype().value_type();
+    if (dtp.get_type_id() == option_type_id) {
+      const arrfunc_type_data *af =
+          dtp.extended<option_type>()->get_assign_na_arrfunc();
+      const arrfunc_type *af_tp =
+          dtp.extended<option_type>()->get_assign_na_arrfunc_type();
+      ckernel_builder ckb;
+      make_lifted_expr_ckernel(af, af_tp, &ckb, 0, tp.get_ndim(), tp, arrmeta,
+                               NULL, NULL, NULL, kernel_request_single, ectx);
+      ckernel_prefix *ckp = ckb.get();
+      expr_single_t ckp_fn = ckp->get_function<expr_single_t>();
+      ckp_fn(data, NULL, ckp);
     }
+    else {
+      stringstream ss;
+      ss << "Cannot assign missing value token NA to dtype " << dtp;
+      throw invalid_argument(ss.str());
+    }
+  }
 }
-
 
 nd::array nd::combine_into_tuple(size_t field_count, const array *field_values)
 {

@@ -31,7 +31,7 @@ inline ndt::type substitute(const ndt::type &pattern,
 {
   // This check for whether ``pattern`` is symbolic is put here in
   // the inline function to avoid the call overhead in this case
-  if (!pattern.is_symbolic()) {
+  if (!pattern.is_symbolic() && pattern.get_type_id() != arrfunc_type_id) {
     return pattern;
   } else {
     return detail::internal_substitute(pattern, typevars, concrete);

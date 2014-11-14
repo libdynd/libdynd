@@ -195,8 +195,8 @@ struct option_to_value_ck
 
 static intptr_t instantiate_option_to_option_assignment_kernel(
     const arrfunc_type_data *DYND_UNUSED(self),
-    dynd::ckernel_builder *ckb, intptr_t ckb_offset,
-    const ndt::type &dst_tp, const char *dst_arrmeta,
+    const arrfunc_type *DYND_UNUSED(af_tp), dynd::ckernel_builder *ckb,
+    intptr_t ckb_offset, const ndt::type &dst_tp, const char *dst_arrmeta,
     const ndt::type *src_tp, const char *const *src_arrmeta,
     kernel_request_t kernreq, const eval::eval_context *ectx,
     const nd::array &args, const nd::array &kwds)
@@ -217,15 +217,19 @@ static intptr_t instantiate_option_to_option_assignment_kernel(
   // instantiate src_is_avail
   const arrfunc_type_data *af =
       src_tp[0].extended<option_type>()->get_is_avail_arrfunc();
-  ckb_offset = af->instantiate(af, ckb, ckb_offset, ndt::make_type<dynd_bool>(),
-                               NULL, src_tp, src_arrmeta, kernreq, ectx, args, kwds);
+  const arrfunc_type *af_tp =
+      src_tp[0].extended<option_type>()->get_is_avail_arrfunc_type();
+  ckb_offset =
+      af->instantiate(af, af_tp, ckb, ckb_offset, ndt::make_type<dynd_bool>(),
+                      NULL, src_tp, src_arrmeta, kernreq, ectx, args, kwds);
   // instantiate dst_assign_na
   ckb->ensure_capacity_leaf(ckb_offset);
   self = ckb->get_at<self_type>(root_ckb_offset);
   self->m_dst_assign_na_offset = ckb_offset - root_ckb_offset;
   af = dst_tp.extended<option_type>()->get_assign_na_arrfunc();
-  ckb_offset = af->instantiate(af, ckb, ckb_offset, dst_tp, dst_arrmeta, NULL,
-                               NULL, kernreq, ectx, args, kwds);
+  af_tp = dst_tp.extended<option_type>()->get_assign_na_arrfunc_type();
+  ckb_offset = af->instantiate(af, af_tp, ckb, ckb_offset, dst_tp, dst_arrmeta,
+                               NULL, NULL, kernreq, ectx, args, kwds);
   // instantiate value_assign
   ckb->ensure_capacity(ckb_offset);
   self = ckb->get_at<self_type>(root_ckb_offset);
@@ -238,8 +242,8 @@ static intptr_t instantiate_option_to_option_assignment_kernel(
 
 static intptr_t instantiate_option_to_value_assignment_kernel(
     const arrfunc_type_data *DYND_UNUSED(self),
-    dynd::ckernel_builder *ckb, intptr_t ckb_offset,
-    const ndt::type &dst_tp, const char *dst_arrmeta,
+    const arrfunc_type *DYND_UNUSED(af_tp), dynd::ckernel_builder *ckb,
+    intptr_t ckb_offset, const ndt::type &dst_tp, const char *dst_arrmeta,
     const ndt::type *src_tp, const char *const *src_arrmeta,
     kernel_request_t kernreq, const eval::eval_context *ectx,
     const nd::array &args, const nd::array &kwds)
@@ -259,8 +263,11 @@ static intptr_t instantiate_option_to_value_assignment_kernel(
   // instantiate src_is_avail
   const arrfunc_type_data *af =
       src_tp[0].extended<option_type>()->get_is_avail_arrfunc();
-  ckb_offset = af->instantiate(af, ckb, ckb_offset, ndt::make_type<dynd_bool>(),
-                               NULL, src_tp, src_arrmeta, kernreq, ectx, args, kwds);
+  const arrfunc_type *af_tp =
+      src_tp[0].extended<option_type>()->get_is_avail_arrfunc_type();
+  ckb_offset =
+      af->instantiate(af, af_tp, ckb, ckb_offset, ndt::make_type<dynd_bool>(),
+                      NULL, src_tp, src_arrmeta, kernreq, ectx, args, kwds);
   // instantiate value_assign
   ckb->ensure_capacity_leaf(ckb_offset);
   self = ckb->get_at<self_type>(root_ckb_offset);
@@ -330,8 +337,8 @@ struct string_to_option_tp_ck : public kernels::unary_ck<string_to_option_tp_ck>
 
 static intptr_t instantiate_string_to_option_assignment_kernel(
     const arrfunc_type_data *DYND_UNUSED(self),
-    dynd::ckernel_builder *ckb, intptr_t ckb_offset,
-    const ndt::type &dst_tp, const char *dst_arrmeta,
+    const arrfunc_type *DYND_UNUSED(af_tp), dynd::ckernel_builder *ckb,
+    intptr_t ckb_offset, const ndt::type &dst_tp, const char *dst_arrmeta,
     const ndt::type *src_tp, const char *const *src_arrmeta,
     kernel_request_t kernreq, const eval::eval_context *ectx,
     const nd::array &args, const nd::array &kwds)
@@ -396,31 +403,33 @@ static intptr_t instantiate_string_to_option_assignment_kernel(
   self->m_dst_assign_na_offset = ckb_offset - root_ckb_offset;
   const arrfunc_type_data *af =
       dst_tp.extended<option_type>()->get_assign_na_arrfunc();
-  ckb_offset = af->instantiate(af, ckb, ckb_offset, dst_tp, dst_arrmeta, NULL,
-                               NULL, kernreq, ectx, args, kwds);
+  const arrfunc_type *af_tp =
+      dst_tp.extended<option_type>()->get_assign_na_arrfunc_type();
+  ckb_offset = af->instantiate(af, af_tp, ckb, ckb_offset, dst_tp, dst_arrmeta,
+                               NULL, NULL, kernreq, ectx, args, kwds);
   return ckb_offset;
-
 }
 
 static intptr_t instantiate_float_to_option_assignment_kernel(
-    const arrfunc_type_data *self, dynd::ckernel_builder *ckb,
-    intptr_t ckb_offset, const ndt::type &dst_tp, const char *dst_arrmeta,
-    const ndt::type *src_tp, const char *const *src_arrmeta,
-    kernel_request_t kernreq, const eval::eval_context *ectx,
-    const nd::array &args, const nd::array &kwds)
+    const arrfunc_type_data *self, const arrfunc_type *af_tp,
+    dynd::ckernel_builder *ckb, intptr_t ckb_offset, const ndt::type &dst_tp,
+    const char *dst_arrmeta, const ndt::type *src_tp,
+    const char *const *src_arrmeta, kernel_request_t kernreq,
+    const eval::eval_context *ectx, const nd::array &args,
+    const nd::array &kwds)
 {
   // Deal with some float32 to option[T] conversions where any NaN is interpreted
   // as NA.
   ndt::type src_tp_as_option = ndt::make_option(src_tp[0]);
   return instantiate_option_to_option_assignment_kernel(
-      self, ckb, ckb_offset, dst_tp, dst_arrmeta, &src_tp_as_option,
+      self, af_tp, ckb, ckb_offset, dst_tp, dst_arrmeta, &src_tp_as_option,
       src_arrmeta, kernreq, ectx, args, kwds);
 }
 
 static intptr_t instantiate_option_as_value_assignment_kernel(
     const arrfunc_type_data *DYND_UNUSED(self),
-    dynd::ckernel_builder *ckb, intptr_t ckb_offset,
-    const ndt::type &dst_tp, const char *dst_arrmeta,
+    const arrfunc_type *DYND_UNUSED(af_tp), dynd::ckernel_builder *ckb,
+    intptr_t ckb_offset, const ndt::type &dst_tp, const char *dst_arrmeta,
     const ndt::type *src_tp, const char *const *src_arrmeta,
     kernel_request_t kernreq, const eval::eval_context *ectx,
     const nd::array &DYND_UNUSED(args), const nd::array &DYND_UNUSED(kwds))
@@ -437,9 +446,10 @@ static intptr_t instantiate_option_as_value_assignment_kernel(
   ndt::type val_dst_tp = dst_tp.get_type_id() == option_type_id
                              ? dst_tp.extended<option_type>()->get_value_type()
                              : dst_tp;
-  ndt::type val_src_tp = src_tp[0].get_type_id() == option_type_id
-                             ? src_tp[0].extended<option_type>()->get_value_type()
-                             : src_tp[0];
+  ndt::type val_src_tp =
+      src_tp[0].get_type_id() == option_type_id
+          ? src_tp[0].extended<option_type>()->get_value_type()
+          : src_tp[0];
   return ::make_assignment_kernel(ckb, ckb_offset, val_dst_tp, dst_arrmeta,
                                   val_src_tp, src_arrmeta[0], kernreq, ectx);
 }
@@ -447,39 +457,41 @@ static intptr_t instantiate_option_as_value_assignment_kernel(
 namespace {
 
 struct option_arrfunc_list {
-    arrfunc_type_data af[7];
+  ndt::type af_tp[7];
+  arrfunc_type_data af[7];
 
-    option_arrfunc_list() {
-        int i = 0;
-        af[i].func_proto = ndt::type("(?string) -> ?S");
-        af[i].instantiate = &instantiate_string_to_option_assignment_kernel;
-        ++i;
-        af[i].func_proto = ndt::type("(?T) -> ?S");
-        af[i].instantiate = &instantiate_option_to_option_assignment_kernel;
-        ++i;
-        af[i].func_proto = ndt::type("(?T) -> S");
-        af[i].instantiate = &instantiate_option_to_value_assignment_kernel;
-        ++i;
-        af[i].func_proto = ndt::type("(string) -> ?S");
-        af[i].instantiate = &instantiate_string_to_option_assignment_kernel;
-        ++i;
-        af[i].func_proto = ndt::type("(float32) -> ?S");
-        af[i].instantiate = &instantiate_float_to_option_assignment_kernel;
-        ++i;
-        af[i].func_proto = ndt::type("(float64) -> ?S");
-        af[i].instantiate = &instantiate_float_to_option_assignment_kernel;
-        ++i;
-        af[i].func_proto = ndt::type("(T) -> S");
-        af[i].instantiate = &instantiate_option_as_value_assignment_kernel;
-    }
+  option_arrfunc_list()
+  {
+    int i = 0;
+    af_tp[i] = ndt::type("(?string) -> ?S");
+    af[i].instantiate = &instantiate_string_to_option_assignment_kernel;
+    ++i;
+    af_tp[i] = ndt::type("(?T) -> ?S");
+    af[i].instantiate = &instantiate_option_to_option_assignment_kernel;
+    ++i;
+    af_tp[i] = ndt::type("(?T) -> S");
+    af[i].instantiate = &instantiate_option_to_value_assignment_kernel;
+    ++i;
+    af_tp[i] = ndt::type("(string) -> ?S");
+    af[i].instantiate = &instantiate_string_to_option_assignment_kernel;
+    ++i;
+    af_tp[i] = ndt::type("(float32) -> ?S");
+    af[i].instantiate = &instantiate_float_to_option_assignment_kernel;
+    ++i;
+    af_tp[i] = ndt::type("(float64) -> ?S");
+    af[i].instantiate = &instantiate_float_to_option_assignment_kernel;
+    ++i;
+    af_tp[i] = ndt::type("(T) -> S");
+    af[i].instantiate = &instantiate_option_as_value_assignment_kernel;
+  }
 
-    inline intptr_t size() const {
-        return sizeof(af) / sizeof(af[0]);
-    }
+  inline intptr_t size() const { return sizeof(af) / sizeof(af[0]); }
 
-    const arrfunc_type_data *get() const {
-        return af;
-    }
+  const arrfunc_type_data *get() const { return af; }
+  const arrfunc_type *const *get_type() const
+  {
+    return reinterpret_cast<const arrfunc_type *const *>(af_tp);
+  }
 };
 } // anonymous namespace
 
@@ -488,21 +500,23 @@ size_t kernels::make_option_assignment_kernel(
     const char *dst_arrmeta, const ndt::type &src_tp, const char *src_arrmeta,
     kernel_request_t kernreq, const eval::eval_context *ectx)
 {
-    static option_arrfunc_list afl;
-    intptr_t size = afl.size();
-    const arrfunc_type_data *af = afl.get();
-    map<nd::string, ndt::type> typevars;
-    for (intptr_t i = 0; i < size; ++i, ++af) {
-        typevars.clear();
-        if (ndt::pattern_match(src_tp, af->get_arg_type(0), typevars) &&
-                ndt::pattern_match(dst_tp, af->get_return_type(), typevars)) {
-            return af->instantiate(af, ckb, ckb_offset, dst_tp, dst_arrmeta,
-                                   &src_tp, &src_arrmeta, kernreq, ectx, nd::array(), nd::array());
-        }
+  static option_arrfunc_list afl;
+  intptr_t size = afl.size();
+  const arrfunc_type_data *af = afl.get();
+  const arrfunc_type *const *af_tp = afl.get_type();
+  map<nd::string, ndt::type> typevars;
+  for (intptr_t i = 0; i < size; ++i, ++af_tp, ++af) {
+    typevars.clear();
+    if (ndt::pattern_match(src_tp, (*af_tp)->get_arg_type(0), typevars) &&
+        ndt::pattern_match(dst_tp, (*af_tp)->get_return_type(), typevars)) {
+      return af->instantiate(af, *af_tp, ckb, ckb_offset, dst_tp, dst_arrmeta,
+                             &src_tp, &src_arrmeta, kernreq, ectx, nd::array(),
+                             nd::array());
     }
+  }
 
-    stringstream ss;
-    ss << "Could not instantiate option assignment kernel from " << src_tp
-       << " to " << dst_tp;
-    throw invalid_argument(ss.str());
+  stringstream ss;
+  ss << "Could not instantiate option assignment kernel from " << src_tp
+     << " to " << dst_tp;
+  throw invalid_argument(ss.str());
 }

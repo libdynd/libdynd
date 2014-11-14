@@ -45,6 +45,8 @@ enum type_kind_t {
     option_kind,
     // For types that specify a memory space
     memory_kind,
+    // For arrfuncs
+    function_kind,
     // For types containing type vars, or function prototypes that can't be
     // instantiated
     symbolic_kind,
@@ -158,10 +160,10 @@ enum type_id_t {
     type_type_id,
 
     // Instances of this type are arrfunc objects
-    arrfunc_type_id,
+    arrfunc_old_type_id,
 
     // Symbolic types
-    funcproto_type_id,
+    arrfunc_type_id,
     typevar_type_id,
     typevar_dim_type_id,
     pow_dimsym_type_id,

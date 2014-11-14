@@ -114,16 +114,18 @@ static void free_rolling_arrfunc_data(arrfunc_type_data *self_af) {
 } // anonymous namespace
 
 static int resolve_rolling_dst_type(const arrfunc_type_data *af_self,
-                                    intptr_t nsrc, const ndt::type *src_tp,
-                                    int throw_on_error, ndt::type &out_dst_tp,
-                                    const nd::array &args, const nd::array &kwds)
+                                    const arrfunc_type *af_tp, intptr_t nsrc,
+                                    const ndt::type *src_tp, int throw_on_error,
+                                    ndt::type &out_dst_tp,
+                                    const nd::array &args,
+                                    const nd::array &kwds)
 
 {
   if (nsrc != 1) {
     if (throw_on_error) {
       stringstream ss;
       ss << "Wrong number of arguments to rolling arrfunc with prototype ";
-      ss << af_self->func_proto << ", got " << nsrc << " arguments";
+      ss << af_tp << ", got " << nsrc << " arguments";
       throw invalid_argument(ss.str());
     }
     else {
@@ -137,14 +139,13 @@ static int resolve_rolling_dst_type(const arrfunc_type_data *af_self,
   if (child_af->resolve_dst_type) {
     ndt::type child_src_tp = ndt::make_fixed_dim(
         data->window_size, src_tp[0].get_type_at_dimension(NULL, 1));
-    if (!child_af->resolve_dst_type(child_af, 1, &child_src_tp,
-                                    throw_on_error, child_dst_tp,
-                                    args, kwds)) {
+    if (!child_af->resolve_dst_type(child_af, af_tp, 1, &child_src_tp,
+                                    throw_on_error, child_dst_tp, args, kwds)) {
       return 0;
     }
   }
   else {
-    child_dst_tp = child_af->get_return_type();
+    child_dst_tp = data->window_op.get_type()->get_return_type();
   }
 
   if (src_tp[0].get_type_id() == var_dim_type_id) {
@@ -161,6 +162,7 @@ static int resolve_rolling_dst_type(const arrfunc_type_data *af_self,
 // TODO This should handle both strided and var cases
 static intptr_t
 instantiate_strided(const arrfunc_type_data *af_self,
+                    const arrfunc_type *DYND_UNUSED(af_tp),
                     dynd::ckernel_builder *ckb, intptr_t ckb_offset,
                     const ndt::type &dst_tp, const char *dst_arrmeta,
                     const ndt::type *src_tp, const char *const *src_arrmeta,
@@ -173,6 +175,7 @@ instantiate_strided(const arrfunc_type_data *af_self,
     intptr_t root_ckb_offset = ckb_offset;
     self_type *self = self_type::create(ckb, kernreq, ckb_offset);
     const arrfunc_type_data *window_af = data->window_op.get();
+    const arrfunc_type *window_af_tp = data->window_op.get_type();
     ndt::type dst_el_tp, src_el_tp;
     const char *dst_el_arrmeta, *src_el_arrmeta;
     if (!dst_tp.get_as_strided(dst_arrmeta, &self->m_dim_size,
@@ -225,46 +228,51 @@ instantiate_strided(const arrfunc_type_data *af_self,
 
     const char *src_winop_meta = self->m_src_winop_meta.get();
     return window_af->instantiate(
-        window_af, ckb, ckb_offset, dst_el_tp, dst_el_arrmeta,
+        window_af, window_af_tp, ckb, ckb_offset, dst_el_tp, dst_el_arrmeta,
         &self->m_src_winop_meta.get_type(), &src_winop_meta,
         kernel_request_strided, ectx, args, kwds);
 }
 
-void dynd::make_rolling_arrfunc(arrfunc_type_data *out_af,
-                                const nd::arrfunc &window_op,
-                                intptr_t window_size)
+nd::arrfunc dynd::make_rolling_arrfunc(const nd::arrfunc &window_op,
+                                       intptr_t window_size)
 {
-    // Validate the input arrfunc
-    if (window_op.is_null()) {
-        throw invalid_argument("make_rolling_arrfunc() 'window_op' cannot be null");
-    }
-    const arrfunc_type_data *window_af = window_op.get();
-    if (window_af->get_nsrc() != 1) {
-        stringstream ss;
-        ss << "To make a rolling window arrfunc, an operation with one "
-              "argument is required, got " << window_af->func_proto;
-        throw invalid_argument(ss.str());
-    }
-    const ndt::type &window_src_tp = window_af->get_arg_type(0);
-    if (window_src_tp.get_ndim() < 1) {
-        stringstream ss;
-        ss << "To make a rolling window arrfunc, an operation with which "
-              "accepts a dimension is required, got " << window_af->func_proto;
-        throw invalid_argument(ss.str());
-    }
+  // Validate the input arrfunc
+  if (window_op.is_null()) {
+    throw invalid_argument("make_rolling_arrfunc() 'window_op' cannot be null");
+  }
+  const arrfunc_type *window_af_tp = window_op.get_type();
+  if (window_af_tp->get_nsrc() != 1) {
+    stringstream ss;
+    ss << "To make a rolling window arrfunc, an operation with one "
+          "argument is required, got " << window_af_tp;
+    throw invalid_argument(ss.str());
+  }
+  const ndt::type &window_src_tp = window_af_tp->get_arg_type(0);
+  if (window_src_tp.get_ndim() < 1) {
+    stringstream ss;
+    ss << "To make a rolling window arrfunc, an operation with which "
+          "accepts a dimension is required, got " << window_af_tp;
+    throw invalid_argument(ss.str());
+  }
 
-    nd::string rolldimname("RollDim");
-    ndt::type roll_src_tp = ndt::make_typevar_dim(
-        rolldimname, window_src_tp.get_type_at_dimension(NULL, 1));
-    ndt::type roll_dst_tp = ndt::make_typevar_dim(rolldimname, window_af->get_return_type());
+  nd::string rolldimname("RollDim");
+  ndt::type roll_src_tp = ndt::make_typevar_dim(
+      rolldimname, window_src_tp.get_type_at_dimension(NULL, 1));
+  ndt::type roll_dst_tp =
+      ndt::make_typevar_dim(rolldimname, window_af_tp->get_return_type());
 
-    // Create the data for the arrfunc
-    rolling_arrfunc_data *data = new rolling_arrfunc_data;
-    *out_af->get_data_as<rolling_arrfunc_data *>() = data;
-    out_af->free_func = &free_rolling_arrfunc_data;
-    out_af->func_proto = ndt::make_funcproto(roll_src_tp, roll_dst_tp);
-    out_af->resolve_dst_type = &resolve_rolling_dst_type;
-    out_af->instantiate = &instantiate_strided;
-    data->window_size = window_size;
-    data->window_op = window_op;
+  nd::array af = nd::empty(ndt::make_funcproto(roll_src_tp, roll_dst_tp));
+  arrfunc_type_data *out_af =
+      reinterpret_cast<arrfunc_type_data *>(af.get_readwrite_originptr());
+
+  // Create the data for the arrfunc
+  rolling_arrfunc_data *data = new rolling_arrfunc_data;
+  *out_af->get_data_as<rolling_arrfunc_data *>() = data;
+  out_af->free_func = &free_rolling_arrfunc_data;
+  out_af->resolve_dst_type = &resolve_rolling_dst_type;
+  out_af->instantiate = &instantiate_strided;
+  data->window_size = window_size;
+  data->window_op = window_op;
+  af.flag_as_immutable();
+  return af;
 }

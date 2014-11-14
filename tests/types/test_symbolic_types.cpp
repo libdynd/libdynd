@@ -9,7 +9,8 @@
 #include "inc_gtest.hpp"
 
 #include <dynd/array.hpp>
-#include <dynd/types/funcproto_type.hpp>
+#include <dynd/func/arrfunc.hpp>
+#include <dynd/types/arrfunc_type.hpp>
 #include <dynd/types/typevar_type.hpp>
 #include <dynd/types/typevar_dim_type.hpp>
 #include <dynd/types/ellipsis_dim_type.hpp>
@@ -17,53 +18,57 @@
 using namespace std;
 using namespace dynd;
 
-TEST(SymbolicTypes, CreateFuncProto) {
-    ndt::type tp;
-    const funcproto_type *fpt;
+TEST(SymbolicTypes, CreateFuncProto)
+{
+  ndt::type tp;
+  const arrfunc_type *fpt;
 
-    // Function prototype from C++ template parameter
-    tp = ndt::make_funcproto<int64_t (float, int32_t, double)>();
-    EXPECT_EQ(funcproto_type_id, tp.get_type_id());
-    EXPECT_EQ(0u, tp.get_data_size());
-    EXPECT_EQ(1u, tp.get_data_alignment());
-    EXPECT_FALSE(tp.is_pod());
-    fpt = tp.extended<funcproto_type>();
-    ASSERT_EQ(3, fpt->get_narg());
-    EXPECT_EQ(ndt::make_type<float>(), fpt->get_arg_type(0));
-    EXPECT_EQ(ndt::make_type<int32_t>(), fpt->get_arg_type(1));
-    EXPECT_EQ(ndt::make_type<double>(), fpt->get_arg_type(2));
-    EXPECT_EQ(ndt::make_type<int64_t>(), fpt->get_return_type());
-    // Roundtripping through a string
-    EXPECT_EQ(tp, ndt::type(tp.str()));
-    EXPECT_EQ("(float32, int32, float64) -> int64", tp.str());
+  // Function prototype from C++ template parameter
+  tp = ndt::make_funcproto<int64_t(float, int32_t, double)>();
+  EXPECT_EQ(arrfunc_type_id, tp.get_type_id());
+  EXPECT_EQ(sizeof(arrfunc_type_data), tp.get_data_size());
+  EXPECT_EQ(8u, tp.get_data_alignment());
+  EXPECT_FALSE(tp.is_pod());
+  // function prototype is not actually symbolic, it is
+  // used to store arrfunc objects
+  EXPECT_FALSE(tp.is_symbolic());
+  fpt = tp.extended<arrfunc_type>();
+  ASSERT_EQ(3, fpt->get_narg());
+  EXPECT_EQ(ndt::make_type<float>(), fpt->get_arg_type(0));
+  EXPECT_EQ(ndt::make_type<int32_t>(), fpt->get_arg_type(1));
+  EXPECT_EQ(ndt::make_type<double>(), fpt->get_arg_type(2));
+  EXPECT_EQ(ndt::make_type<int64_t>(), fpt->get_return_type());
+  // Roundtripping through a string
+  EXPECT_EQ(tp, ndt::type(tp.str()));
+  EXPECT_EQ("(float32, int32, float64) -> int64", tp.str());
 
-    // Dynamic type properties
-    EXPECT_EQ(ndt::make_type<int64_t>(), tp.p("return_type").as<ndt::type>());
-    nd::array ptp = tp.p("arg_types");
-    EXPECT_EQ(ndt::type("3 * type"), ptp.get_type());
-    ASSERT_EQ(3, ptp.get_dim_size());
-    EXPECT_EQ(ndt::make_type<float>(), ptp(0).as<ndt::type>());
-    EXPECT_EQ(ndt::make_type<int32_t>(), ptp(1).as<ndt::type>());
-    EXPECT_EQ(ndt::make_type<double>(), ptp(2).as<ndt::type>());
+  // Dynamic type properties
+  EXPECT_EQ(ndt::make_type<int64_t>(), tp.p("return_type").as<ndt::type>());
+  nd::array ptp = tp.p("arg_types");
+  EXPECT_EQ(ndt::type("3 * type"), ptp.get_type());
+  ASSERT_EQ(3, ptp.get_dim_size());
+  EXPECT_EQ(ndt::make_type<float>(), ptp(0).as<ndt::type>());
+  EXPECT_EQ(ndt::make_type<int32_t>(), ptp(1).as<ndt::type>());
+  EXPECT_EQ(ndt::make_type<double>(), ptp(2).as<ndt::type>());
 
-    // Exercise a few different variations
-    tp = ndt::make_funcproto<int8_t ()>();
-    fpt = tp.extended<funcproto_type>();
-    ASSERT_EQ(0, fpt->get_narg());
-    EXPECT_EQ(ndt::make_type<int8_t>(), fpt->get_return_type());
+  // Exercise a few different variations
+  tp = ndt::make_funcproto<int8_t()>();
+  fpt = tp.extended<arrfunc_type>();
+  ASSERT_EQ(0, fpt->get_narg());
+  EXPECT_EQ(ndt::make_type<int8_t>(), fpt->get_return_type());
 
-    tp = ndt::make_funcproto<int16_t (int32_t)>();
-    fpt = tp.extended<funcproto_type>();
-    ASSERT_EQ(1, fpt->get_narg());
-    EXPECT_EQ(ndt::make_type<int16_t>(), fpt->get_return_type());
-    EXPECT_EQ(ndt::make_type<int32_t>(), fpt->get_arg_type(0));
+  tp = ndt::make_funcproto<int16_t(int32_t)>();
+  fpt = tp.extended<arrfunc_type>();
+  ASSERT_EQ(1, fpt->get_narg());
+  EXPECT_EQ(ndt::make_type<int16_t>(), fpt->get_return_type());
+  EXPECT_EQ(ndt::make_type<int32_t>(), fpt->get_arg_type(0));
 
-    tp = ndt::make_funcproto<int16_t (int32_t, int64_t)>();
-    fpt = tp.extended<funcproto_type>();
-    ASSERT_EQ(2, fpt->get_narg());
-    EXPECT_EQ(ndt::make_type<int16_t>(), fpt->get_return_type());
-    EXPECT_EQ(ndt::make_type<int32_t>(), fpt->get_arg_type(0));
-    EXPECT_EQ(ndt::make_type<int64_t>(), fpt->get_arg_type(1));
+  tp = ndt::make_funcproto<int16_t(int32_t, int64_t)>();
+  fpt = tp.extended<arrfunc_type>();
+  ASSERT_EQ(2, fpt->get_narg());
+  EXPECT_EQ(ndt::make_type<int16_t>(), fpt->get_return_type());
+  EXPECT_EQ(ndt::make_type<int32_t>(), fpt->get_arg_type(0));
+  EXPECT_EQ(ndt::make_type<int64_t>(), fpt->get_arg_type(1));
 }
 
 TEST(SymbolicTypes, CreateTypeVar) {

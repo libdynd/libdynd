@@ -105,12 +105,12 @@ ndt::type ndt::detail::internal_substitute(
     case option_type_id:
       return ndt::make_option(ndt::substitute(
           pattern.extended<option_type>()->get_value_type(), typevars, concrete));
-    case funcproto_type_id:
+    case arrfunc_type_id:
       return ndt::make_funcproto(
           substitute_type_array(
-              pattern.extended<funcproto_type>()->get_arg_types(), typevars,
+              pattern.extended<arrfunc_type>()->get_arg_types(), typevars,
               concrete),
-          substitute(pattern.extended<funcproto_type>()->get_return_type(),
+          substitute(pattern.extended<arrfunc_type>()->get_return_type(),
                      typevars, concrete));
     case typevar_type_id: {
       map<nd::string, ndt::type>::const_iterator it =

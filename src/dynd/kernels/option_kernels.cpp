@@ -389,257 +389,252 @@ struct nafunc {
 
     static intptr_t instantiate_is_avail(
         const arrfunc_type_data *DYND_UNUSED(self),
-        dynd::ckernel_builder *ckb, intptr_t ckb_offset,
-        const ndt::type &dst_tp, const char *DYND_UNUSED(dst_arrmeta),
-        const ndt::type *src_tp, const char *const *DYND_UNUSED(src_arrmeta),
-        kernel_request_t kernreq, const eval::eval_context *DYND_UNUSED(ectx),
+        const arrfunc_type *DYND_UNUSED(af_tp), dynd::ckernel_builder *ckb,
+        intptr_t ckb_offset, const ndt::type &dst_tp,
+        const char *DYND_UNUSED(dst_arrmeta), const ndt::type *src_tp,
+        const char *const *DYND_UNUSED(src_arrmeta), kernel_request_t kernreq,
+        const eval::eval_context *DYND_UNUSED(ectx),
         const nd::array &DYND_UNUSED(args), const nd::array &DYND_UNUSED(kwds))
     {
-        if (src_tp[0].get_type_id() != option_type_id ||
-                src_tp[0].extended<option_type>()->get_value_type().get_type_id() !=
-                    (type_id_t)type_id_of<nafunc_type>::value) {
-            stringstream ss;
-            ss << "Expected source type ?" << ndt::make_type<nafunc_type>()
-               << ", got " << src_tp[0];
-            throw type_error(ss.str());
-        }
-        if (dst_tp.get_type_id() != bool_type_id) {
-            stringstream ss;
-            ss << "Expected destination type bool, got " << dst_tp;
-            throw type_error(ss.str());
-        }
-        ckernel_prefix *ckp = ckb->alloc_ck_leaf<ckernel_prefix>(ckb_offset);
-        ckp->set_expr_function< ::is_avail<T> >(kernreq);
-        return ckb_offset;
+      if (src_tp[0].get_type_id() != option_type_id ||
+          src_tp[0].extended<option_type>()->get_value_type().get_type_id() !=
+              (type_id_t)type_id_of<nafunc_type>::value) {
+        stringstream ss;
+        ss << "Expected source type ?" << ndt::make_type<nafunc_type>()
+           << ", got " << src_tp[0];
+        throw type_error(ss.str());
+      }
+      if (dst_tp.get_type_id() != bool_type_id) {
+        stringstream ss;
+        ss << "Expected destination type bool, got " << dst_tp;
+        throw type_error(ss.str());
+      }
+      ckernel_prefix *ckp = ckb->alloc_ck_leaf<ckernel_prefix>(ckb_offset);
+      ckp->set_expr_function< ::is_avail<T> >(kernreq);
+      return ckb_offset;
     }
 
     static int resolve_is_avail_dst_type(
         const arrfunc_type_data *DYND_UNUSED(self),
-        intptr_t DYND_UNUSED(nsrc), const ndt::type *DYND_UNUSED(src_tp),
-        int DYND_UNUSED(throw_on_error), ndt::type &out_dst_tp,
-        const nd::array &DYND_UNUSED(args), const nd::array &DYND_UNUSED(kwds))
+        const arrfunc_type *DYND_UNUSED(af_tp), intptr_t DYND_UNUSED(nsrc),
+        const ndt::type *DYND_UNUSED(src_tp), int DYND_UNUSED(throw_on_error),
+        ndt::type &out_dst_tp, const nd::array &DYND_UNUSED(args),
+        const nd::array &DYND_UNUSED(kwds))
     {
-        out_dst_tp = ndt::make_type<dynd_bool>();
-        return 1;
+      out_dst_tp = ndt::make_type<dynd_bool>();
+      return 1;
     }
 
     static intptr_t instantiate_assign_na(
         const arrfunc_type_data *DYND_UNUSED(self),
-        dynd::ckernel_builder *ckb, intptr_t ckb_offset,
-        const ndt::type &dst_tp, const char *DYND_UNUSED(dst_arrmeta),
-        const ndt::type *DYND_UNUSED(src_tp), const char *const *DYND_UNUSED(src_arrmeta),
-        kernel_request_t kernreq, const eval::eval_context *DYND_UNUSED(ectx),
+        const arrfunc_type *DYND_UNUSED(af_tp), dynd::ckernel_builder *ckb,
+        intptr_t ckb_offset, const ndt::type &dst_tp,
+        const char *DYND_UNUSED(dst_arrmeta),
+        const ndt::type *DYND_UNUSED(src_tp),
+        const char *const *DYND_UNUSED(src_arrmeta), kernel_request_t kernreq,
+        const eval::eval_context *DYND_UNUSED(ectx),
         const nd::array &DYND_UNUSED(args), const nd::array &DYND_UNUSED(kwds))
     {
-        if (dst_tp.get_type_id() != option_type_id ||
-                dst_tp.extended<option_type>()->get_value_type().get_type_id() !=
-                    (type_id_t)type_id_of<nafunc_type>::value) {
-            stringstream ss;
-            ss << "Expected dst type " << ndt::make_type<nafunc_type>()
-               << ", got " << dst_tp;
-            throw type_error(ss.str());
-        }
-        ckernel_prefix *ckp = ckb->alloc_ck_leaf<ckernel_prefix>(ckb_offset);
-        ckp->set_expr_function< ::assign_na<T> >(kernreq);
-        return ckb_offset;
+      if (dst_tp.get_type_id() != option_type_id ||
+          dst_tp.extended<option_type>()->get_value_type().get_type_id() !=
+              (type_id_t)type_id_of<nafunc_type>::value) {
+        stringstream ss;
+        ss << "Expected dst type " << ndt::make_type<nafunc_type>() << ", got "
+           << dst_tp;
+        throw type_error(ss.str());
+      }
+      ckernel_prefix *ckp = ckb->alloc_ck_leaf<ckernel_prefix>(ckb_offset);
+      ckp->set_expr_function< ::assign_na<T> >(kernreq);
+      return ckb_offset;
     }
 
     static nd::array get()
     {
-        nd::array naf = nd::empty(option_type::make_nafunc_type());
-        arrfunc_type_data *is_avail =
-            reinterpret_cast<arrfunc_type_data *>(naf.get_ndo()->m_data_pointer);
-        arrfunc_type_data *assign_na = is_avail + 1;
+      nd::array naf = nd::empty(option_type::make_nafunc_type());
+      arrfunc_type_data *is_avail =
+          reinterpret_cast<arrfunc_type_data *>(naf.get_ndo()->m_data_pointer);
+      arrfunc_type_data *assign_na = is_avail + 1;
 
-        // Use a typevar instead of option[T] to avoid a circular dependency
-        is_avail->func_proto =
-            ndt::make_funcproto(ndt::make_typevar("T"), ndt::make_type<dynd_bool>());
-        is_avail->instantiate = &nafunc::instantiate_is_avail;
-        is_avail->resolve_dst_type = &nafunc::resolve_is_avail_dst_type;
-        assign_na->func_proto =
-            ndt::make_funcproto(0, NULL, ndt::make_typevar("T"));
-        assign_na->instantiate = &nafunc::instantiate_assign_na;
-        naf.flag_as_immutable();
-        return naf;
+      is_avail->instantiate = &nafunc::instantiate_is_avail;
+      is_avail->resolve_dst_type = &nafunc::resolve_is_avail_dst_type;
+      assign_na->instantiate = &nafunc::instantiate_assign_na;
+      naf.flag_as_immutable();
+      return naf;
     }
 };
 
 } // anonymous namespace
 
-intptr_t kernels::fixed_dim_is_avail_ck::instantiate(const arrfunc_type_data *DYND_UNUSED(self),
-                                                     dynd::ckernel_builder *ckb, intptr_t ckb_offset,
-                                                     const ndt::type &DYND_UNUSED(dst_tp),
-                                                     const char *DYND_UNUSED(dst_arrmeta),
-                                                     const ndt::type *src_tp,
-                                                     const char *const *DYND_UNUSED(src_arrmeta),
-                                                     kernel_request_t kernreq,
-                                                     const eval::eval_context *DYND_UNUSED(ectx),
-                                                     const nd::array &DYND_UNUSED(args),
-                                                     const nd::array &DYND_UNUSED(kwds))
+intptr_t kernels::fixed_dim_is_avail_ck::instantiate(
+    const arrfunc_type_data *DYND_UNUSED(self),
+    const arrfunc_type *DYND_UNUSED(af_tp), dynd::ckernel_builder *ckb,
+    intptr_t ckb_offset, const ndt::type &DYND_UNUSED(dst_tp),
+    const char *DYND_UNUSED(dst_arrmeta), const ndt::type *src_tp,
+    const char *const *DYND_UNUSED(src_arrmeta), kernel_request_t kernreq,
+    const eval::eval_context *DYND_UNUSED(ectx),
+    const nd::array &DYND_UNUSED(args), const nd::array &DYND_UNUSED(kwds))
 {
-    ckernel_prefix *ckp = ckb->alloc_ck_leaf<ckernel_prefix>(ckb_offset);
-    switch (src_tp->get_dtype().get_type_id()) {
-    case bool_type_id:
-        ckp->set_expr_function<is_avail<dynd_bool> >(kernreq);
-        break;
-    case int8_type_id:
-        ckp->set_expr_function<is_avail<int8_t> >(kernreq);
-        break;
-    case int16_type_id:
-        ckp->set_expr_function<is_avail<int16_t> >(kernreq);
-        break;
-    case int32_type_id:
-        ckp->set_expr_function<is_avail<int32_t> >(kernreq);
-        break;
-    case int64_type_id:
-        ckp->set_expr_function<is_avail<int64_t> >(kernreq);
-        break;
-    case int128_type_id:
-        ckp->set_expr_function<is_avail<dynd_int128> >(kernreq);
-        break;
-    case float32_type_id:
-        ckp->set_expr_function<is_avail<float> >(kernreq);
-        break;
-    case float64_type_id:
-        ckp->set_expr_function<is_avail<double> >(kernreq);
-        break;
-    case complex_float32_type_id:
-        ckp->set_expr_function<is_avail<dynd_complex<float> > >(kernreq);
-        break;
-    case complex_float64_type_id:
-        ckp->set_expr_function<is_avail<dynd_complex<double> > >(kernreq);
-        break;
-    default:
-        throw type_error("fixed_dim_is_avail: expected built-in type");
-        break;
-    }
-    return ckb_offset;
+  ckernel_prefix *ckp = ckb->alloc_ck_leaf<ckernel_prefix>(ckb_offset);
+  switch (src_tp->get_dtype().get_type_id()) {
+  case bool_type_id:
+    ckp->set_expr_function<is_avail<dynd_bool> >(kernreq);
+    break;
+  case int8_type_id:
+    ckp->set_expr_function<is_avail<int8_t> >(kernreq);
+    break;
+  case int16_type_id:
+    ckp->set_expr_function<is_avail<int16_t> >(kernreq);
+    break;
+  case int32_type_id:
+    ckp->set_expr_function<is_avail<int32_t> >(kernreq);
+    break;
+  case int64_type_id:
+    ckp->set_expr_function<is_avail<int64_t> >(kernreq);
+    break;
+  case int128_type_id:
+    ckp->set_expr_function<is_avail<dynd_int128> >(kernreq);
+    break;
+  case float32_type_id:
+    ckp->set_expr_function<is_avail<float> >(kernreq);
+    break;
+  case float64_type_id:
+    ckp->set_expr_function<is_avail<double> >(kernreq);
+    break;
+  case complex_float32_type_id:
+    ckp->set_expr_function<is_avail<dynd_complex<float> > >(kernreq);
+    break;
+  case complex_float64_type_id:
+    ckp->set_expr_function<is_avail<dynd_complex<double> > >(kernreq);
+    break;
+  default:
+    throw type_error("fixed_dim_is_avail: expected built-in type");
+    break;
+  }
+  return ckb_offset;
 }
 
-intptr_t kernels::fixed_dim_assign_na_ck::instantiate(const arrfunc_type_data *DYND_UNUSED(self),
-                                                      dynd::ckernel_builder *ckb, intptr_t ckb_offset,
-                                                      const ndt::type &dst_tp,
-                                                      const char *DYND_UNUSED(dst_arrmeta),
-                                                      const ndt::type *DYND_UNUSED(src_tp),
-                                                      const char *const *DYND_UNUSED(src_arrmeta),
-                                                      kernel_request_t kernreq,
-                                                      const eval::eval_context *DYND_UNUSED(ectx),
-                                                      const nd::array &DYND_UNUSED(args),
-                                                      const nd::array &DYND_UNUSED(kwds))
+intptr_t kernels::fixed_dim_assign_na_ck::instantiate(
+    const arrfunc_type_data *DYND_UNUSED(self),
+    const arrfunc_type *DYND_UNUSED(af_tp), dynd::ckernel_builder *ckb,
+    intptr_t ckb_offset, const ndt::type &dst_tp,
+    const char *DYND_UNUSED(dst_arrmeta), const ndt::type *DYND_UNUSED(src_tp),
+    const char *const *DYND_UNUSED(src_arrmeta), kernel_request_t kernreq,
+    const eval::eval_context *DYND_UNUSED(ectx),
+    const nd::array &DYND_UNUSED(args), const nd::array &DYND_UNUSED(kwds))
 {
-    ckernel_prefix *ckp = ckb->alloc_ck_leaf<ckernel_prefix>(ckb_offset);
-    switch (dst_tp.get_dtype().get_type_id()) {
-    case bool_type_id:
-        ckp->set_expr_function<assign_na<dynd_bool> >(kernreq);
-        break;
-    case int8_type_id:
-        ckp->set_expr_function<assign_na<int8_t> >(kernreq);
-        break;
-    case int16_type_id:
-        ckp->set_expr_function<assign_na<int16_t> >(kernreq);
-        break;
-    case int32_type_id:
-        ckp->set_expr_function<assign_na<int32_t> >(kernreq);
-        break;
-    case int64_type_id:
-        ckp->set_expr_function<assign_na<int64_t> >(kernreq);
-        break;
-    case int128_type_id:
-        ckp->set_expr_function<assign_na<dynd_int128> >(kernreq);
-        break;
-    case float32_type_id:
-        ckp->set_expr_function<assign_na<float> >(kernreq);
-        break;
-    case float64_type_id:
-        ckp->set_expr_function<assign_na<double> >(kernreq);
-        break;
-    case complex_float32_type_id:
-        ckp->set_expr_function<assign_na<dynd_complex<float> > >(kernreq);
-        break;
-    case complex_float64_type_id:
-        ckp->set_expr_function<assign_na<dynd_complex<double> > >(kernreq);
-        break;
-    default:
-        throw type_error("fixed_dim_assign_na: expected built-in type");
-        break;
-    }
-    return ckb_offset;
+  ckernel_prefix *ckp = ckb->alloc_ck_leaf<ckernel_prefix>(ckb_offset);
+  switch (dst_tp.get_dtype().get_type_id()) {
+  case bool_type_id:
+    ckp->set_expr_function<assign_na<dynd_bool> >(kernreq);
+    break;
+  case int8_type_id:
+    ckp->set_expr_function<assign_na<int8_t> >(kernreq);
+    break;
+  case int16_type_id:
+    ckp->set_expr_function<assign_na<int16_t> >(kernreq);
+    break;
+  case int32_type_id:
+    ckp->set_expr_function<assign_na<int32_t> >(kernreq);
+    break;
+  case int64_type_id:
+    ckp->set_expr_function<assign_na<int64_t> >(kernreq);
+    break;
+  case int128_type_id:
+    ckp->set_expr_function<assign_na<dynd_int128> >(kernreq);
+    break;
+  case float32_type_id:
+    ckp->set_expr_function<assign_na<float> >(kernreq);
+    break;
+  case float64_type_id:
+    ckp->set_expr_function<assign_na<double> >(kernreq);
+    break;
+  case complex_float32_type_id:
+    ckp->set_expr_function<assign_na<dynd_complex<float> > >(kernreq);
+    break;
+  case complex_float64_type_id:
+    ckp->set_expr_function<assign_na<dynd_complex<double> > >(kernreq);
+    break;
+  default:
+    throw type_error("fixed_dim_assign_na: expected built-in type");
+    break;
+  }
+  return ckb_offset;
 }
 
 const nd::array &kernels::get_option_builtin_nafunc(type_id_t tid)
 {
-    static nd::array bna = nafunc<dynd_bool>::get();
-    static nd::array i8na = nafunc<int8_t>::get();
-    static nd::array i16na = nafunc<int16_t>::get();
-    static nd::array i32na = nafunc<int32_t>::get();
-    static nd::array i64na = nafunc<int64_t>::get();
-    static nd::array i128na = nafunc<dynd_int128>::get();
-    static nd::array f32na = nafunc<float>::get();
-    static nd::array f64na = nafunc<double>::get();
-    static nd::array cf32na = nafunc<dynd_complex<float> >::get();
-    static nd::array cf64na = nafunc<dynd_complex<double> >::get();
-    static nd::array nullarr;
-    switch (tid) {
-    case bool_type_id:
-        return bna;
-    case int8_type_id:
-        return i8na;
-    case int16_type_id:
-        return i16na;
-    case int32_type_id:
-        return i32na;
-    case int64_type_id:
-        return i64na;
-    case int128_type_id:
-        return i128na;
-    case float32_type_id:
-        return f32na;
-    case float64_type_id:
-        return f64na;
-    case complex_float32_type_id:
-        return cf32na;
-    case complex_float64_type_id:
-        return cf64na;
-    default:
-        return nullarr;
-    }
+  static nd::array bna = nafunc<dynd_bool>::get();
+  static nd::array i8na = nafunc<int8_t>::get();
+  static nd::array i16na = nafunc<int16_t>::get();
+  static nd::array i32na = nafunc<int32_t>::get();
+  static nd::array i64na = nafunc<int64_t>::get();
+  static nd::array i128na = nafunc<dynd_int128>::get();
+  static nd::array f32na = nafunc<float>::get();
+  static nd::array f64na = nafunc<double>::get();
+  static nd::array cf32na = nafunc<dynd_complex<float> >::get();
+  static nd::array cf64na = nafunc<dynd_complex<double> >::get();
+  static nd::array nullarr;
+  switch (tid) {
+  case bool_type_id:
+    return bna;
+  case int8_type_id:
+    return i8na;
+  case int16_type_id:
+    return i16na;
+  case int32_type_id:
+    return i32na;
+  case int64_type_id:
+    return i64na;
+  case int128_type_id:
+    return i128na;
+  case float32_type_id:
+    return f32na;
+  case float64_type_id:
+    return f64na;
+  case complex_float32_type_id:
+    return cf32na;
+  case complex_float64_type_id:
+    return cf64na;
+  default:
+    return nullarr;
+  }
 }
 
 const nd::array &kernels::get_option_builtin_pointer_nafunc(type_id_t tid)
 {
-    static nd::array bna = nafunc<dynd_bool *>::get();
-    static nd::array i8na = nafunc<int8_t *>::get();
-    static nd::array i16na = nafunc<int16_t *>::get();
-    static nd::array i32na = nafunc<int32_t *>::get();
-    static nd::array i64na = nafunc<int64_t *>::get();
-    static nd::array i128na = nafunc<dynd_int128 *>::get();
-    static nd::array f32na = nafunc<float *>::get();
-    static nd::array f64na = nafunc<double *>::get();
-    static nd::array cf32na = nafunc<dynd_complex<float> *>::get();
-    static nd::array cf64na = nafunc<dynd_complex<double> *>::get();
-    static nd::array nullarr;
-    switch (tid) {
-    case bool_type_id:
-        return bna;
-    case int8_type_id:
-        return i8na;
-    case int16_type_id:
-        return i16na;
-    case int32_type_id:
-        return i32na;
-    case int64_type_id:
-        return i64na;
-    case int128_type_id:
-        return i128na;
-    case float32_type_id:
-        return f32na;
-    case float64_type_id:
-        return f64na;
-    case complex_float32_type_id:
-        return cf32na;
-    case complex_float64_type_id:
-        return cf64na;
-    default:
-        return nullarr;
-    }
+  static nd::array bna = nafunc<dynd_bool *>::get();
+  static nd::array i8na = nafunc<int8_t *>::get();
+  static nd::array i16na = nafunc<int16_t *>::get();
+  static nd::array i32na = nafunc<int32_t *>::get();
+  static nd::array i64na = nafunc<int64_t *>::get();
+  static nd::array i128na = nafunc<dynd_int128 *>::get();
+  static nd::array f32na = nafunc<float *>::get();
+  static nd::array f64na = nafunc<double *>::get();
+  static nd::array cf32na = nafunc<dynd_complex<float> *>::get();
+  static nd::array cf64na = nafunc<dynd_complex<double> *>::get();
+  static nd::array nullarr;
+  switch (tid) {
+  case bool_type_id:
+    return bna;
+  case int8_type_id:
+    return i8na;
+  case int16_type_id:
+    return i16na;
+  case int32_type_id:
+    return i32na;
+  case int64_type_id:
+    return i64na;
+  case int128_type_id:
+    return i128na;
+  case float32_type_id:
+    return f32na;
+  case float64_type_id:
+    return f64na;
+  case complex_float32_type_id:
+    return cf32na;
+  case complex_float64_type_id:
+    return cf64na;
+  default:
+    return nullarr;
+  }
 }

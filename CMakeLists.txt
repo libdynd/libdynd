@@ -176,7 +176,7 @@ set(libdynd_SRC
     src/dynd/types/categorical_type.cpp
     src/dynd/types/cfixed_dim_type.cpp
     src/dynd/types/char_type.cpp
-    src/dynd/types/arrfunc_type.cpp
+    src/dynd/types/arrfunc_old_type.cpp
     src/dynd/types/convert_type.cpp
     src/dynd/types/cstruct_type.cpp
     src/dynd/types/ctuple_type.cpp
@@ -202,7 +202,7 @@ set(libdynd_SRC
     src/dynd/types/fixed_dimsym_type.cpp
     src/dynd/types/fixedbytes_type.cpp
     src/dynd/types/fixedstring_type.cpp
-    src/dynd/types/funcproto_type.cpp
+    src/dynd/types/arrfunc_type.cpp
     src/dynd/types/groupby_type.cpp
     src/dynd/types/json_type.cpp
     src/dynd/types/ndarrayarg_type.cpp
@@ -244,7 +244,7 @@ set(libdynd_SRC
     include/dynd/types/byteswap_type.hpp
     include/dynd/types/categorical_type.hpp
     include/dynd/types/char_type.hpp
-    include/dynd/types/arrfunc_type.hpp
+    include/dynd/types/arrfunc_old_type.hpp
     include/dynd/types/convert_type.hpp
     include/dynd/types/ctuple_type.hpp
     include/dynd/types/cuda_host_type.hpp
@@ -259,7 +259,7 @@ set(libdynd_SRC
     include/dynd/types/datetime_util.hpp
     include/dynd/types/dim_fragment_type.hpp
     include/dynd/types/ellipsis_dim_type.hpp
-    include/dynd/types/funcproto_type.hpp
+    include/dynd/types/arrfunc_type.hpp
     include/dynd/types/type_type.hpp
     include/dynd/types/dynd_complex.hpp
     include/dynd/types/dynd_float16.hpp
@@ -337,6 +337,7 @@ set(libdynd_SRC
     include/dynd/func/elwise_gfunc.hpp
     include/dynd/func/elwise_reduce_gfunc.hpp
     include/dynd/func/functor_arrfunc.hpp
+    include/dynd/func/funcproto.hpp
     include/dynd/func/make_callable.hpp
     include/dynd/func/lift_arrfunc.hpp
     include/dynd/func/lift_reduction_arrfunc.hpp
@@ -487,7 +488,6 @@ set(libdynd_SRC
     include/dynd/ensure_immutable_contig.hpp
     include/dynd/random.hpp
     include/dynd/fft.hpp
-    include/dynd/funcproto.hpp
     include/dynd/type.hpp
     include/dynd/typed_data_assign.hpp
     include/dynd/type_promotion.hpp

@@ -5,7 +5,7 @@
 
 #include <dynd/types/static_type_instances.hpp>
 #include <dynd/type.hpp>
-#include <dynd/types/arrfunc_type.hpp>
+#include <dynd/types/arrfunc_old_type.hpp>
 #include <dynd/types/bytes_type.hpp>
 #include <dynd/types/char_type.hpp>
 #include <dynd/types/date_type.hpp>
@@ -33,7 +33,7 @@ base_type *type_tp;
 
 void dynd::init::static_types_init()
 {
-  static arrfunc_type aft;
+  static arrfunc_old_type aft;
   types::arrfunc_tp = &aft;
   static bytes_type bt(1);
   types::bytes_tp = &bt;

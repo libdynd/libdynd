@@ -552,20 +552,16 @@ size_t fixed_dim_type::make_assignment_kernel(
 
 nd::array fixed_dim_type::get_option_nafunc() const
 {
-    nd::array naf = nd::empty(option_type::make_nafunc_type());
-    arrfunc_type_data *is_avail =
-        reinterpret_cast<arrfunc_type_data *>(naf.get_ndo()->m_data_pointer);
-    arrfunc_type_data *assign_na = is_avail + 1;
+  nd::array naf = nd::empty(option_type::make_nafunc_type());
+  arrfunc_type_data *is_avail =
+      reinterpret_cast<arrfunc_type_data *>(naf.get_ndo()->m_data_pointer);
+  arrfunc_type_data *assign_na = is_avail + 1;
 
-    // Use a typevar instead of option[T] to avoid a circular dependency
-    is_avail->func_proto = ndt::make_funcproto(ndt::make_typevar("T"),
-                                               ndt::make_type<dynd_bool>());
-    is_avail->instantiate = &kernels::fixed_dim_is_avail_ck::instantiate;
-    assign_na->func_proto =
-        ndt::make_funcproto(0, NULL, ndt::make_typevar("T"));
-    assign_na->instantiate = &kernels::fixed_dim_assign_na_ck::instantiate;
-    naf.flag_as_immutable();
-    return naf;
+  // Use a typevar instead of option[T] to avoid a circular dependency
+  is_avail->instantiate = &kernels::fixed_dim_is_avail_ck::instantiate;
+  assign_na->instantiate = &kernels::fixed_dim_assign_na_ck::instantiate;
+  naf.flag_as_immutable();
+  return naf;
 }
 
 void fixed_dim_type::foreach_leading(const char *arrmeta, char *data,
