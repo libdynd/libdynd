@@ -1023,6 +1023,7 @@ nd::array nd::array::to_host() const
 }
 
 #ifdef DYND_CUDA
+
 nd::array nd::array::to_cuda_host(unsigned int cuda_host_flags) const
 {
     ndt::type dt = get_type().get_dtype();
@@ -1049,7 +1050,8 @@ nd::array nd::array::to_cuda_device() const
 
     return result;
 }
-#endif
+
+#endif // DYND_CUDA
 
 bool nd::array::is_missing() const
 {

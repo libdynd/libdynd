@@ -1,4 +1,5 @@
 #cmakedefine DYND_CUDA
+#cmakedefine DYND_CUDA2
 #define DYND_SRC_MAX @DYND_SRC_MAX@
 #define DYND_ARG_MAX @DYND_ARG_MAX@
 #define DYND_ELWISE_MAX DYND_SRC_MAX

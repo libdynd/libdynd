@@ -30,15 +30,6 @@
 #define DYND_CUDA_HOST_DEVICE
 
 namespace dynd {
-// Prevent from nvcc clashing with cmath
-template <typename T>
-inline bool isfinite(T arg) {
-#ifndef _MSC_VER
-  return (std::isfinite)(arg);
-#else
-  return _finite(arg) != 0;
-#endif
-}
 template <typename T>
 inline bool isinf(T arg) {
 #ifndef _MSC_VER
@@ -52,10 +43,22 @@ inline bool isinf(T arg) {
 
 #endif // __CUDACC_
 
+namespace dynd {
+
+// Prevent from nvcc clashing with cmath
+template <typename T>
+inline bool isfinite(T arg) {
+#ifndef _MSC_VER
+  return (std::isfinite)(arg);
+#else
+  return _finite(arg) != 0;
+#endif
+}
+}
+
 #ifdef DYND_CUDA
 
 namespace dynd {
-
     /**
      * Configuration of threads in a CUDA kernel, specialized to the number of grid
      * and block dimensions for efficiency.

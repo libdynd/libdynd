@@ -22,6 +22,7 @@
 #include <vector>
 #include <algorithm>
 #include <stdexcept>
+#include <cstddef>
 
 #include <assert.h>
 #include <errno.h>

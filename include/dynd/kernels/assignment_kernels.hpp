@@ -340,5 +340,5 @@ size_t make_cuda_builtin_type_assignment_kernel(
                 bool dst_device, type_id_t dst_type_id,
                 bool src_device, type_id_t src_type_id,
                 kernel_request_t kernreq, assign_error_mode errmode);
-#endif
+#endif // DYND_CUDA
 } // namespace dynd

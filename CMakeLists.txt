@@ -96,9 +96,8 @@ else()
         if (NOT "${CMAKE_CXX_COMPILER_VERSION}" VERSION_LESS "4.6")
             set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fmax-errors=20")
         endif()
-        # Enable C++11 features for gcc >= 4.7 when CUDA support is disabled
-        if (NOT "${CMAKE_CXX_COMPILER_VERSION}" VERSION_LESS "4.7" AND
-                NOT ${DYND_CUDA})
+        # Enable C++11 features for gcc >= 4.7
+        if (NOT "${CMAKE_CXX_COMPILER_VERSION}" VERSION_LESS "4.7")
             set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11")
         endif()
     elseif("${CMAKE_CXX_COMPILER_ID}" STREQUAL "Clang")
@@ -535,7 +534,7 @@ source_group("VM Headers" REGULAR_EXPRESSION "include/dynd/vm/.*hpp")
 source_group("Internal Headers" REGULAR_EXPRESSION "src/dynd/.*hpp")
 
 if (DYND_CUDA)
-    # Replace some source files with their CUDA versions
+        # Replace some source files with their CUDA versions
     list(REMOVE_ITEM libdynd_SRC
         src/dynd/types/dynd_complex.cpp
         src/dynd/types/dynd_float16.cpp
@@ -543,10 +542,12 @@ if (DYND_CUDA)
         src/dynd/types/dynd_int128.cpp
         src/dynd/types/dynd_uint128.cpp
         src/dynd/kernels/assignment_kernels.cpp
-        )        
+        )
     list(APPEND libdynd_SRC
         src/dynd/kernels/assignment_kernels.cu
         )
+
+    set(CUDA_NVCC_FLAGS ${CUDA_NVCC_FLAGS};-std=c++11;-Xcompiler;-fPIC)
 
     # Disable warnings about "controlling expression is constant"
     set(CUDA_NVCC_FLAGS ${CUDA_NVCC_FLAGS};-Xcudafe;--diag_suppress=boolean_controlling_expr_is_constant)
@@ -582,11 +583,7 @@ include_directories(${CMAKE_CURRENT_BINARY_DIR}/include)
 
 if (DYND_SHARED_LIB)
     if (DYND_CUDA)
-        set(CUDA_OPTIONS "-arch=compute_20")
-        if (NOT WIN32)
-            set(CUDA_OPTIONS ${CUDA_OPTIONS}  "-Xcompiler" "-fPIC")
-        endif()
-        cuda_add_library(libdynd SHARED ${libdynd_SRC} OPTIONS ${CUDA_OPTIONS})
+        cuda_add_library(libdynd SHARED ${libdynd_SRC})
     else()
         add_library(libdynd SHARED ${libdynd_SRC})
     endif()
@@ -597,11 +594,7 @@ if (DYND_SHARED_LIB)
         )
 else()
     if (DYND_CUDA)
-        set(CUDA_OPTIONS "-arch=compute_20")
-        if (NOT WIN32)
-            set(CUDA_OPTIONS ${CUDA_OPTIONS}  "-Xcompiler" "-fPIC")
-        endif()
-        cuda_add_library(libdynd STATIC ${libdynd_SRC} OPTIONS ${CUDA_OPTIONS})
+        cuda_add_library(libdynd STATIC ${libdynd_SRC})
     else()
         add_library(libdynd STATIC ${libdynd_SRC})
     endif()
