@@ -294,7 +294,7 @@ static expr_single_t assign_table_single_cuda_device_to_host_kernel[builtin_type
 };
 
 template <typename dst_type, typename src_type, assign_error_mode errmode>
-DYND_CUDA_GLOBAL void single_cuda_global_assign_builtin(dst_type *dst, src_type *src, ckernel_prefix *extra) {
+DYND_CUDA_GLOBAL void single_cuda_global_assign_builtin(dst_type *dst, src_type *src, ckernel_prefix *DYND_UNUSED(extra)) {
     single_assigner_builtin<dst_type, src_type, errmode>::assign(dst, src);
 }
 

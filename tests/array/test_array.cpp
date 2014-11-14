@@ -19,7 +19,6 @@
 using namespace std;
 using namespace dynd;
 
-
 template <typename T>
 class Array : public Memory<T> {
 };

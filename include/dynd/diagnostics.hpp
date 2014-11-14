@@ -33,8 +33,12 @@
 # define DYND_ASSERT_ALIGNED(ptr, stride, alignment, extra_info) {}
 #endif
 
-#define DYND_TRIGGER_ASSERT(message) assert(!message)
-#define DYND_TRIGGER_ASSERT_RETURN_ZERO(message) assert(!message); return 0
+#ifdef __APPLE__
+# define DYND_TRIGGER_ASSERT(message)
+#else
+# define DYND_TRIGGER_ASSERT(message) assert(!message)
+#endif
+#define DYND_TRIGGER_ASSERT_RETURN_ZERO(message) DYND_TRIGGER_ASSERT(message); return 0
 
 #if DYND_ASSIGNMENT_TRACING && !defined(__CUDA_ARCH__)
 #include <iostream>

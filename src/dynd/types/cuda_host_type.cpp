@@ -71,3 +71,4 @@ size_t cuda_host_type::make_assignment_kernel(
 }
 
 #endif // DYND_CUDA
+

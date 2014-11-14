@@ -7,8 +7,6 @@
 
 #ifdef DYND_CUDA
 
-#include <cuda_runtime.h>
-
 #include <dynd/type.hpp>
 #include <dynd/types/base_memory_type.hpp>
 #include <dynd/types/cuda_device_type.hpp>
