@@ -21,9 +21,9 @@ matrix:
       env: PYTHON=ON DYND_FFTW=ON DYND_BUILD_TESTS=OFF
 
 before_script:
-  - sudo add-apt-repository ppa:ubuntu-toolchain-r/test
+  - sudo add-apt-repository ppa:ubuntu-toolchain-r/test -y
   - sudo apt-get update
-  - sudo apt-get install -q gcc-4.7 g++-4.7
+  - sudo apt-get -qq install gcc-4.7 g++-4.7
   - if [ "$CC" = "gcc" ]; then export CC="gcc-4.7"; fi
   - if [ "$CXX" = "g++" ]; then export CXX="g++-4.7"; fi
   - if [ "$VALGRIND" == "ON" ]; then sudo apt-get -qq install valgrind; fi
