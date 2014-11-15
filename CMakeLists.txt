@@ -96,14 +96,10 @@ if(WIN32)
 else()
     set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -g -fomit-frame-pointer -fstrict-aliasing -fPIC -Wall -Wextra -Werror -Wno-missing-field-initializers")
     if ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "GNU")
-        # The '-fmax-errors' flag was first supported in gcc 4.6
-#        if (NOT "${CMAKE_CXX_COMPILER_VERSION}" VERSION_LESS "4.6")
-            set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fmax-errors=20")
- #       endif()
-        # Enable C++11 features for gcc >= 4.7
-  #      if (NOT "${CMAKE_CXX_COMPILER_VERSION}" VERSION_LESS "4.7")
-            set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11")
-   #     endif()
+        if ("${CMAKE_CXX_COMPILER_VERSION}" VERSION_LESS "4.7")
+            message(FATAL_ERROR "Only GCC 4.7 and later are supported by LibDyND. Found version ${CMAKE_CXX_COMPILER_VERSION}.")
+        endif()
+        set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fmax-errors=20 -std=c++11")
     elseif("${CMAKE_CXX_COMPILER_ID}" STREQUAL "Clang")
         set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -ferror-limit=20")
         # Apple has done this weird thing where its Clang reports a different
