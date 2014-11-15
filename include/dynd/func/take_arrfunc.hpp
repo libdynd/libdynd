@@ -16,8 +16,6 @@ namespace dynd { namespace kernels {
 /**
  * Create an arrfunc which applies either a boolean masked or
  * an indexed take/"fancy indexing" operation.
- *
- * \param out_af  The arrfunc to fill.
  */
 nd::arrfunc make_take_arrfunc();
 

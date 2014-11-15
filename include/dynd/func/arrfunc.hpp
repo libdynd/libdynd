@@ -67,9 +67,6 @@ typedef intptr_t (*arrfunc_instantiate_t)(
  * \param af_tp  The function prototype of the arrfunc.
  * \param nsrc  The number of source parameters.
  * \param src_tp  An array of the source types.
- * \param dyn_params  Dynamic parameters, generally a struct of parameters
- *                    whose full values are passed to all phases of
- *                    arrfunc execution.
  * \param throw_on_error  If true, should throw when there's an error, if
  *                        false, should return 0 when there's an error.
  * \param out_dst_tp  To be filled with the destination type.

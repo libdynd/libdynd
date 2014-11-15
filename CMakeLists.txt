@@ -94,29 +94,14 @@ if(WIN32)
         endif ()
     endif()
 else()
-    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -g -fomit-frame-pointer -fstrict-aliasing -fPIC -Wall -Wextra -Werror -Wno-missing-field-initializers")
+    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11 -g -fomit-frame-pointer -fstrict-aliasing -fPIC -Wall -Wextra -Werror -Wno-missing-field-initializers")
     if ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "GNU")
 #        if ("${CMAKE_CXX_COMPILER_VERSION}" VERSION_LESS "4.7")
 #            message(FATAL_ERROR "Only GCC 4.7 and later are supported by LibDyND. Found version ${CMAKE_CXX_COMPILER_VERSION}.")
 #        endif()
-        set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fmax-errors=20 -std=c++11")
+        set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fmax-errors=20")
     elseif("${CMAKE_CXX_COMPILER_ID}" STREQUAL "Clang")
-        set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -ferror-limit=20")
-        # Apple has done this weird thing where its Clang reports a different
-        # version than the official Clang.
-        # TODO: someone more OS X-savvy will have to fine-tune this.
-        if (APPLE OR "${CMAKE_CXX_COMPILER_VERSION}" VERSION_LESS "3.2")
-            # Enable C++11 features when CUDA support is disabled
-            if (NOT ${DYND_CUDA})
-                set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++0x")
-            endif()
-        else()
-            # Enable C++11 features when CUDA support is disabled
-            if (NOT ${DYND_CUDA})
-                set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11")
-            endif()
-            set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wdocumentation")
-        endif()
+        set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -ferror-limit=20 -Wdocumentation")
     endif()
 endif()
 

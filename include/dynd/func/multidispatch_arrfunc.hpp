@@ -15,7 +15,6 @@ namespace dynd {
  * Creates a multiple dispatch arrfunc out of a set of arrfuncs. The
  * input arrfuncs must have concrete signatures.
  *
- * \param out_af  The output arrfunc which is filled.
  * \param naf  The number of arrfuncs provided.
  * \param af  The array of input arrfuncs, sized ``naf``.
  */
