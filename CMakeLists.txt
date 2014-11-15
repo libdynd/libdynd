@@ -96,6 +96,8 @@ if(WIN32)
 else()
     set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -g -fomit-frame-pointer -fstrict-aliasing -fPIC -Wall -Wextra -Werror -Wno-missing-field-initializers")
     if ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "GNU")
+        MESSAGE(${CMAKE_CXX_COMPILER_ID})
+        MESSAGE(${CMAKE_CXX_COMPILER_VERSION})
         # The '-fmax-errors' flag was first supported in gcc 4.6
         if (NOT "${CMAKE_CXX_COMPILER_VERSION}" VERSION_LESS "4.6")
             set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fmax-errors=20")
