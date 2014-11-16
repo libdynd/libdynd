@@ -15,23 +15,18 @@ namespace dynd { namespace nd { namespace detail {
 template <typename func_type, typename arrfunc_type>
 class func_wrapper;
 
-#define FUNC_WRAPPER(N) \
-  template <typename func_type, typename R, DYND_PP_JOIN_MAP_1(DYND_PP_META_TYPENAME, (,), DYND_PP_META_NAME_RANGE(A, N))> \
-  class func_wrapper<func_type, R DYND_PP_META_NAME_RANGE(A, N)> { \
-    const func_type *m_func; \
-\
-  public: \
-    func_wrapper(const func_type &func) : m_func(&func) { \
-    } \
-\
-    R operator() DYND_PP_ELWISE_1(DYND_PP_META_DECL, DYND_PP_META_NAME_RANGE(A, N), DYND_PP_META_NAME_RANGE(a, N)) const { \
-        return (*m_func) DYND_PP_META_NAME_RANGE(a, N); \
-    } \
-  };
+template <typename func_type, typename R, typename... A>
+class func_wrapper<func_type, R (A...)> {
+  const func_type *m_func;
 
-DYND_PP_JOIN_MAP(FUNC_WRAPPER, (), DYND_PP_RANGE(1, DYND_PP_INC(DYND_ARG_MAX)))
+public:
+  func_wrapper(const func_type &func) : m_func(&func) {
+  }
 
-#undef FUNC_WRAPPER
+  R operator()(A... a) {
+    return (*m_func)(a...);
+  }
+};
 
 template <typename mem_func_type, bool copy>
 class mem_func_wrapper;
