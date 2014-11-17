@@ -7,8 +7,6 @@
 cmake_minimum_required(VERSION 2.8.7)
 project(libdynd)
 
-find_package(CUDA)
-
 set(LIB_SUFFIX "" CACHE STRING
     "Typically an empty string or 64. Controls installation to lib or lib64")
 
@@ -67,6 +65,12 @@ if("${CMAKE_SOURCE_DIR}" STREQUAL "${CMAKE_CURRENT_SOURCE_DIR}")
         ON)
 #
 ################################################
+endif()
+
+if(DYND_CUDA)
+    # CUDA 6.5, which has experimental C++11 support,
+    # is the minimum required
+    find_package(CUDA 6.5 REQUIRED)
 endif()
 
 list(APPEND CMAKE_MODULE_PATH
