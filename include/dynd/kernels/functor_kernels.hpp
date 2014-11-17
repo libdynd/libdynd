@@ -88,7 +88,7 @@ struct arg {
 };
 
 template <typename T, int N, size_t I>
-struct arg<nd::strided_vals<T, N>, I> {
+struct arg<const nd::strided_vals<T, N> &, I> {
   nd::strided_vals<T, N> m_vals;
 
   arg(const ndt::type &DYND_UNUSED(tp), const char *arrmeta,
@@ -118,6 +118,7 @@ struct arg<nd::strided_vals<T, N>, I> {
   }
 };
 
+/*
 template <typename T, int N, size_t I>
 struct arg<nd::strided_vals<T, N> &, I> : arg<nd::strided_vals<T, N>, I> {
   using arg<nd::strided_vals<T, N>, I>::arg;
@@ -126,6 +127,7 @@ template <typename T, int N, size_t I>
 struct arg<const nd::strided_vals<T, N> &, I> : arg<nd::strided_vals<T, N>, I> {
   using arg<nd::strided_vals<T, N>, I>::arg;
 };
+*/
 
 template <typename T, size_t I>
 struct kwd {

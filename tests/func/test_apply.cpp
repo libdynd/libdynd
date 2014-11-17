@@ -29,21 +29,23 @@ double func1(double x, int y)
   return x + 2.6 * y;
 }
 
+/*
 void func2(float x)
 {
   x = 5.0f;
 }
+*/
 
 TEST(Apply, Function)
 {
 	nd::arrfunc af;
 
-	af = nd::make_apply_arrfunc<decltype(func0), func0>();
+	af = nd::make_apply_arrfunc<decltype(&func0), &func0>();
 	EXPECT_EQ(4, af(5, 3).as<int>());
 	af = nd::make_apply_arrfunc(func0);
 	EXPECT_EQ(4, af(5, 3).as<int>());
 
-	af = nd::make_apply_arrfunc<decltype(func1), func1>();
+	af = nd::make_apply_arrfunc<decltype(&func1), &func1>();
 	EXPECT_EQ(53.15, af(3.75, 19).as<double>());
 	af = nd::make_apply_arrfunc(func1);
 	EXPECT_EQ(53.15, af(3.75, 19).as<double>());

@@ -9,9 +9,6 @@
 #include <string>
 
 #include <dynd/array.hpp>
-#include <dynd/pp/comparison.hpp>
-#include <dynd/pp/list.hpp>
-#include <dynd/pp/meta.hpp>
 #include <dynd/types/fixed_dim_type.hpp>
 #include <dynd/types/fixed_dimsym_type.hpp>
 #include <dynd/types/string_type.hpp>

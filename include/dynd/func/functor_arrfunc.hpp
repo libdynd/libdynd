@@ -25,7 +25,7 @@ struct apply_arrfunc_factory<R (A...)>
   {
     nd::array af = nd::empty(ndt::make_funcproto<R (A...)>());
     arrfunc_type_data *out_af = reinterpret_cast<arrfunc_type_data *>(af.get_readwrite_originptr());
-    out_af->instantiate = &kernels::apply_ck<R (A...), func, R,
+    out_af->instantiate = &kernels::apply_ck<R (*)(A...), func, R,
       args, make_index_sequence<args::size>, kwds, make_index_sequence<kwds::size> >::instantiate;
     af.flag_as_immutable();
 
@@ -41,6 +41,21 @@ struct apply_arrfunc_factory<R (A...)>
 template <typename R, typename... A>
 struct apply_arrfunc_factory<R (*)(A...)>
 {
+  typedef typename to<sizeof...(A) - 0, A...>::type args;
+  typedef typename from<sizeof...(A) - 0, A...>::type kwds;
+
+  template <R (*func)(A...)>
+  static nd::arrfunc make()
+  {
+    nd::array af = nd::empty(ndt::make_funcproto<R (A...)>());
+    arrfunc_type_data *out_af = reinterpret_cast<arrfunc_type_data *>(af.get_readwrite_originptr());
+    out_af->instantiate = &kernels::apply_ck<R (*)(A...), func, R,
+      args, make_index_sequence<args::size>, kwds, make_index_sequence<kwds::size> >::instantiate;
+    af.flag_as_immutable();
+
+    return af;
+  }
+
   typedef R (funcproto_type)(A...);
   typedef funcproto_type *func_type;
 
@@ -126,25 +141,5 @@ nd::arrfunc make_apply_arrfunc()
 {
   return detail::apply_arrfunc_factory<func_type>::template make<K...>();
 }
-
-
-
-/*
-template <typename obj_type, typename mem_func_type>
-nd::arrfunc make_functor_arrfunc(const obj_type &obj, mem_func_type mem_func,
-                                 bool copy = true)
-{
-  if (copy) {
-    typedef detail::mem_func_wrapper<mem_func_type, true> wrapper_type;
-    return detail::functor_arrfunc_from<0, wrapper_type, true, false>::make(
-        wrapper_type(obj, mem_func));
-  }
-  else {
-    typedef detail::mem_func_wrapper<mem_func_type, false> wrapper_type;
-    return detail::functor_arrfunc_from<0, wrapper_type, true, false>::make(
-        wrapper_type(obj, mem_func));
-  }
-}
-*/
 
 }} // namespace dynd::nd
