@@ -369,6 +369,64 @@ struct to<n, type_sequence<T...> > {
     typedef typename to<n, T...>::type type;
 };
 
+template <int i, typename... T>
+struct at;
+
+template <typename T0, typename... T>
+struct at<0, T0, T...> {
+    typedef T0 type;
+};
+
+template <int i, typename T0, typename... T>
+struct at<i, T0, T...> {
+    typedef typename at<i - 1, T...>::type type;
+};
+
+template<typename T, T... I>
+struct integer_sequence {
+    static_assert(std::is_integral<T>::value, "Integral type" );
+
+    static constexpr T size = sizeof...(I);
+
+    using type = T;
+
+    template<T N>
+    using append = integer_sequence<T, I..., N>;
+
+    using next = append<size>;
+};
+
+template<typename T, T... I>
+constexpr T integer_sequence<T, I...>::size;
+
+template<std::size_t... I>
+using index_sequence = integer_sequence<std::size_t, I...>;
+
+namespace detail {
+
+template <typename T, T Nt, std::size_t N>
+struct iota {
+    static_assert( Nt >= 0, "N cannot be negative" );
+
+    using type = typename iota<T, Nt-1, N-1>::type::next;
+};
+
+template <typename T, T Nt>
+struct iota<T, Nt, 0ul> {
+    using type = integer_sequence<T>;
+};
+
+} // namespace detail
+
+template <typename T, T N>
+using make_integer_sequence = typename detail::iota<T, N, N>::type;
+
+template <size_t N>
+using make_index_sequence = make_integer_sequence<size_t, N>;
+
+template <typename... T>
+using index_sequence_for = make_index_sequence<sizeof...(T)>;
+
 } // namespace dynd
 
 

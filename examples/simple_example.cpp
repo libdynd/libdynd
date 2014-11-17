@@ -29,7 +29,7 @@ double myfunc(int x, float y)
 int main()
 {
   try {
-    nd::arrfunc af = nd::make_functor_arrfunc(myfunc);
+    nd::arrfunc af = nd::make_apply_arrfunc(myfunc);
     cout << af(3, 1.1f) << endl;
   }
   catch (const std::exception &e)

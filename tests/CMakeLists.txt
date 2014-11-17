@@ -63,6 +63,7 @@ set(tests_SRC
     types/test_type_promotion.cpp
     types/test_var_dim_type.cpp
     func/special_vals.hpp
+    func/test_apply.cpp
     func/test_arrfunc.cpp
 	func/test_aux.cpp
     func/test_callable.cpp
@@ -74,7 +75,6 @@ set(tests_SRC
     func/test_elwise_callretres.cpp
     func/test_elwise_callrefres.cpp
     func/test_functor_arrfunc.cpp
-    func/test_functor_arrfunc_new.cpp
     func/test_lift_arrfunc.cpp
     func/test_neighborhood.cpp
     func/test_multidispatch_arrfunc.cpp

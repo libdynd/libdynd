@@ -231,7 +231,7 @@ static nd::array fn_type_construct(const ndt::type &DYND_UNUSED(dt),
   nd::array month_as_int = month.ucast(ndt::make_type<int32_t>()).eval();
   nd::array day_as_int = day.ucast(ndt::make_type<int32_t>()).eval();
 
-  nd::arrfunc af = lift_arrfunc(nd::make_functor_arrfunc(date_from_ymd));
+  nd::arrfunc af = lift_arrfunc(nd::make_apply_arrfunc(date_from_ymd));
 
   return af(year_as_int, month_as_int, day_as_int)
       .view_scalars(ndt::make_date());
