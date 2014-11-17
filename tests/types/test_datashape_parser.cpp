@@ -232,8 +232,10 @@ TEST(DataShapeParser, RecordTwoFields) {
 }
 
 TEST(DataShapeParser, FuncProto) {
- //   std::cout << ndt::type("(int, int) -> int") << std::endl;
-   // std::cout << ndt::type("(int, x: int) -> int") << std::endl;
+    std::cout << ndt::type("(int, int) -> int") << std::endl;
+    std::cout << ndt::type("(int, x: int) -> int") << std::endl;
+
+    std::cout << ndt::make_funcproto<int (int, int)>("x", "y") << std::endl;
 
 //    std::exit(-1);
 }

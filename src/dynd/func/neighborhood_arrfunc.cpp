@@ -188,9 +188,9 @@ static int resolve_neighborhood_dst_type(
   // TODO: Should be able to express the match/subsitution without special code
 
   // This is basically resolve() from arrfunc.hpp
-  if (nsrc != af_tp->get_nsrc()) {
+  if (nsrc != af_tp->get_npos()) {
     std::stringstream ss;
-    ss << "arrfunc expected " << af_tp->get_nsrc()
+    ss << "arrfunc expected " << af_tp->get_npos()
        << " parameters, but received " << nsrc;
     throw std::invalid_argument(ss.str());
   }

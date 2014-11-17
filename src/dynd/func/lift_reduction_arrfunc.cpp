@@ -71,8 +71,8 @@ nd::arrfunc dynd::lift_reduction_arrfunc(
         "lift_reduction_arrfunc: 'elwise_reduction' may not be empty");
   }
   const arrfunc_type *elwise_reduction_tp = elwise_reduction_arr.get_type();
-  if (elwise_reduction_tp->get_nsrc() != 1 &&
-      !(elwise_reduction_tp->get_nsrc() == 2 &&
+  if (elwise_reduction_tp->get_npos() != 1 &&
+      !(elwise_reduction_tp->get_npos() == 2 &&
         elwise_reduction_tp->get_arg_type(0) ==
             elwise_reduction_tp->get_arg_type(1) &&
         elwise_reduction_tp->get_arg_type(0) ==

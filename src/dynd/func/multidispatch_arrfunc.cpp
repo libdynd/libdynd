@@ -271,7 +271,7 @@ static intptr_t instantiate_multidispatch_af(
   const vector<nd::arrfunc> *icd = af_self->get_data_as<vector<nd::arrfunc> >();
   for (intptr_t i = 0; i < (intptr_t)icd->size(); ++i) {
     const nd::arrfunc &af = (*icd)[i];
-    intptr_t isrc, nsrc = af.get_type()->get_nsrc();
+    intptr_t isrc, nsrc = af.get_type()->get_npos();
     std::map<nd::string, ndt::type> typevars;
     for (isrc = 0; isrc < nsrc; ++isrc) {
       if (!can_implicitly_convert(src_tp[isrc], af.get_type()->get_arg_type(isrc),
@@ -314,7 +314,7 @@ static int resolve_multidispatch_dst_type(
   const vector<nd::arrfunc> *icd = af_self->get_data_as<vector<nd::arrfunc> >();
   for (intptr_t i = 0; i < (intptr_t)icd->size(); ++i) {
     const nd::arrfunc &af = (*icd)[i];
-    if (nsrc == af.get_type()->get_nsrc()) {
+    if (nsrc == af.get_type()->get_npos()) {
       intptr_t isrc;
       std::map<nd::string, ndt::type> typevars;
       for (isrc = 0; isrc < nsrc; ++isrc) {

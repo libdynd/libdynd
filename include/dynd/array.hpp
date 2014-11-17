@@ -175,7 +175,6 @@ public:
     }
 #endif // DYND_INIT_LIST
 
-
     /**
      * Constructs an array from a std::vector.
      */

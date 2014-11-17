@@ -186,22 +186,22 @@ nd::array nd::arrfunc::call(intptr_t narg, const nd::array *args,
     arg_tp[i] = args[i].get_type();
   }
 
-  std::vector<const char *> src_arrmeta(af_tp->get_nsrc());
-  for (intptr_t i = 0; i < af_tp->get_nsrc(); ++i) {
+  std::vector<const char *> src_arrmeta(af_tp->get_npos());
+  for (intptr_t i = 0; i < af_tp->get_npos(); ++i) {
     src_arrmeta[i] = args[i].get_arrmeta();
   }
-  std::vector<char *> src_data(af_tp->get_nsrc());
-  for (intptr_t i = 0; i < af_tp->get_nsrc(); ++i) {
+  std::vector<char *> src_data(af_tp->get_npos());
+  for (intptr_t i = 0; i < af_tp->get_npos(); ++i) {
     src_data[i] = const_cast<char *>(args[i].get_readonly_originptr());
   }
 
   // Pack the auxiliary arguments
-  nd::array aux = pack(af_tp->get_naux(), args + af_tp->get_nsrc());
+  nd::array aux = nd::array(); //pack(af_tp->get_naux(), args + af_tp->get_npos());
 
   // Resolve the destination type
   ndt::type dst_tp =
-      af->resolve(af_tp, af_tp->get_nsrc(),
-                  af_tp->get_nsrc() ? &arg_tp[0] : NULL, aux, kwds.get());
+      af->resolve(af_tp, af_tp->get_npos(),
+                  af_tp->get_npos() ? &arg_tp[0] : NULL, aux, kwds.get());
 
   // Construct the destination array
   nd::array res = nd::empty(dst_tp);
@@ -229,17 +229,17 @@ void nd::arrfunc::call_out(intptr_t narg, const nd::array *args,
     arg_tp[i] = args[i].get_type();
   }
 
-  std::vector<const char *> src_arrmeta(af_tp->get_nsrc());
-  for (intptr_t i = 0; i < af_tp->get_nsrc(); ++i) {
+  std::vector<const char *> src_arrmeta(af_tp->get_npos());
+  for (intptr_t i = 0; i < af_tp->get_npos(); ++i) {
     src_arrmeta[i] = args[i].get_arrmeta();
   }
-  std::vector<char *> src_data(af_tp->get_nsrc());
-  for (intptr_t i = 0; i < af_tp->get_nsrc(); ++i) {
+  std::vector<char *> src_data(af_tp->get_npos());
+  for (intptr_t i = 0; i < af_tp->get_npos(); ++i) {
     src_data[i] = const_cast<char *>(args[i].get_readonly_originptr());
   }
 
   // Pack the auxiliary arguments
-  nd::array aux = pack(af_tp->get_naux(), args + af_tp->get_nsrc());
+  nd::array aux = nd::array(); //pack(af_tp->get_naux(), args + af_tp->get_npos());
 
   // Generate and evaluate the ckernel
   ckernel_builder ckb;

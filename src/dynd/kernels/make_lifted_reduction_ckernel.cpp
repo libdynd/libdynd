@@ -799,8 +799,8 @@ static size_t make_strided_inner_reduction_dimension_kernel(
   e->size = src_size;
   // Validate that the provided arrfuncs are unary operations,
   // and have the correct types
-  if (elwise_reduction_tp->get_nsrc() != 1 &&
-      elwise_reduction_tp->get_nsrc() != 2) {
+  if (elwise_reduction_tp->get_npos() != 1 &&
+      elwise_reduction_tp->get_npos() != 2) {
     stringstream ss;
     ss << "make_lifted_reduction_ckernel: elwise reduction ckernel ";
     ss << "funcproto must be unary or a binary expr with all equal types";
@@ -823,7 +823,7 @@ static size_t make_strided_inner_reduction_dimension_kernel(
   if (dst_initialization != NULL) {
     check_dst_initialization(dst_initialization_tp, dst_tp, src_tp);
   }
-  if (elwise_reduction_tp->get_nsrc() == 2) {
+  if (elwise_reduction_tp->get_npos() == 2) {
     ckb_offset = kernels::wrap_binary_as_unary_reduction_ckernel(
         ckb, ckb_offset, right_associative, kernel_request_strided);
     ndt::type src_tp_doubled[2] = {src_tp, src_tp};
@@ -936,8 +936,8 @@ static size_t make_strided_inner_broadcast_dimension_kernel(
   e->size = src_size;
   // Validate that the provided arrfuncs are unary operations,
   // and have the correct types
-  if (elwise_reduction_tp->get_nsrc() != 1 &&
-      elwise_reduction_tp->get_nsrc() != 2) {
+  if (elwise_reduction_tp->get_npos() != 1 &&
+      elwise_reduction_tp->get_npos() != 2) {
     stringstream ss;
     ss << "make_lifted_reduction_ckernel: elwise reduction ckernel ";
     ss << "funcproto must be unary or a binary expr with all equal types";
@@ -960,7 +960,7 @@ static size_t make_strided_inner_broadcast_dimension_kernel(
   if (dst_initialization != NULL) {
     check_dst_initialization(dst_initialization_tp, dst_tp, src_tp);
   }
-  if (elwise_reduction_tp->get_nsrc() == 2) {
+  if (elwise_reduction_tp->get_npos() == 2) {
     ckb_offset = kernels::wrap_binary_as_unary_reduction_ckernel(
         ckb, ckb_offset, right_associative, kernel_request_strided);
     ndt::type src_tp_doubled[2] = {src_tp, src_tp};

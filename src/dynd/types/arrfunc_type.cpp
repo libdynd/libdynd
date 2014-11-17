@@ -35,52 +35,26 @@ static bool is_simple_identifier_name(const char *begin, const char *end)
   }
 }
 
-arrfunc_type::arrfunc_type(const nd::array &src_names,
-                           const nd::array &aux_names,
-                           const nd::array &arg_types,
-                           const ndt::type &return_type, intptr_t naux)
+
+arrfunc_type::arrfunc_type(const ndt::type &return_type, const nd::array &arg_types, const nd::array &arg_names)
     : base_type(arrfunc_type_id, function_kind, sizeof(arrfunc_type_data),
                 scalar_align_of<uint64_t>::value,
                 type_flag_scalar | type_flag_zeroinit | type_flag_destructor, 0,
-                0, 0),
-      m_src_names(src_names), m_aux_names(aux_names), m_arg_types(arg_types),
-      m_narg(arg_types.get_dim_size()), m_nsrc(m_narg - naux), m_naux(naux),
-      m_return_type(return_type)
+                0, 0), m_return_type(return_type), m_arg_types(arg_types), m_arg_names(arg_names)
 {
-  if (!m_src_names.is_null()) {
-    if (!nd::ensure_immutable_contig<nd::string>(m_src_names)) {
-      stringstream ss;
-      ss << "dynd funcproto src names requires an array of strings, got an "
-            "array with type " << m_src_names.get_type();
-      throw invalid_argument(ss.str());
+    if (!nd::ensure_immutable_contig<ndt::type>(m_arg_types)) {
+        stringstream ss;
+        ss << "dynd funcproto arg types requires an array of types, got an "
+              "array with type " << m_arg_types.get_type();
+        throw invalid_argument(ss.str());
     }
-    if (m_src_names.get_dim_size() > m_nsrc) {
-      stringstream ss;
-      ss << "dynd funcproto src names is larger than src types";
-      throw invalid_argument(ss.str());
-    }
-  }
 
-  if (!m_aux_names.is_null()) {
-    if (!nd::ensure_immutable_contig<nd::string>(m_aux_names)) {
-      stringstream ss;
-      ss << "dynd funcproto aux names requires an array of strings, got an "
-            "array with type " << m_aux_names.get_type();
-      throw invalid_argument(ss.str());
+    if (!m_arg_names.is_null() && !nd::ensure_immutable_contig<nd::string>(m_arg_names)) {
+        stringstream ss;
+        ss << "dynd funcproto arg names requires an array of strings, got an "
+              "array with type " << m_arg_names.get_type();
+        throw invalid_argument(ss.str());
     }
-    if (m_aux_names.get_dim_size() > m_naux) {
-      stringstream ss;
-      ss << "dynd funcproto aux names is larger than aux types";
-      throw invalid_argument(ss.str());
-    }
-  }
-
-  if (!nd::ensure_immutable_contig<ndt::type>(m_arg_types)) {
-    stringstream ss;
-    ss << "dynd funcproto arg types requires an array of types, got an "
-          "array with type " << m_arg_types.get_type();
-    throw invalid_argument(ss.str());
-  }
 
   // Note that we don't base the flags of this type on that of its arguments
   // and return types, because it is something the can be instantiated, even
@@ -101,57 +75,36 @@ void arrfunc_type::print_data(std::ostream &o, const char *DYND_UNUSED(arrmeta),
   print_arrfunc(o, this, af);
 }
 
-void arrfunc_type::print_type(std::ostream &o) const
+void arrfunc_type::print_type(std::ostream& o) const
 {
-  const ndt::type *arg_types = get_arg_types_raw();
+    const ndt::type *arg_types = get_arg_types_raw();
+    intptr_t npos = get_npos();
+    intptr_t narg = get_narg();
 
-  o << "(";
+    o << "(";
 
-  intptr_t i_kwds =
-      m_src_names.is_null() ? m_nsrc : (m_nsrc - m_src_names.get_dim_size());
-  for (intptr_t i = 0, i_end = m_nsrc; i != i_end; ++i) {
-    if (i > 0) {
-      o << ", ";
+    for (intptr_t i = 0; i < npos; ++i) {
+        if (i > 0) {
+            o << ", ";
+        }
+
+        o << arg_types[i];
+    }
+    for (intptr_t i = npos; i < narg; ++i) {
+        if (i > 0) {
+            o << ", ";
+        }
+
+        const string_type_data& an = get_arg_name_raw(i - npos);
+        if (is_simple_identifier_name(an.begin, an.end)) {
+            o.write(an.begin, an.end - an.begin);
+        } else {
+            print_escaped_utf8_string(o, an.begin, an.end, true);
+        }
+        o << ": " << arg_types[i];
     }
 
-    if (i >= i_kwds) {
-      const string_type_data &an = get_src_name_raw(i - i_kwds);
-      if (is_simple_identifier_name(an.begin, an.end)) {
-        o.write(an.begin, an.end - an.begin);
-      }
-      else {
-        print_escaped_utf8_string(o, an.begin, an.end, true);
-      }
-      o << ": ";
-    }
-    o << arg_types[i];
-  }
-
-  if (m_naux > 0) {
-    o << "; ";
-  }
-
-  i_kwds =
-      m_aux_names.is_null() ? m_narg : (m_narg - m_aux_names.get_dim_size());
-  for (intptr_t i = m_nsrc, i_end = m_narg; i != i_end; ++i) {
-    if (i > m_nsrc) {
-      o << ", ";
-    }
-
-    if (i >= i_kwds) {
-      const string_type_data &an = get_aux_name_raw(i - i_kwds);
-      if (is_simple_identifier_name(an.begin, an.end)) {
-        o.write(an.begin, an.end - an.begin);
-      }
-      else {
-        print_escaped_utf8_string(o, an.begin, an.end, true);
-      }
-      o << ": ";
-    }
-    o << arg_types[i];
-  }
-
-  o << ") -> " << m_return_type;
+    o << ") -> " << m_return_type;
 }
 
 void arrfunc_type::transform_child_types(type_transform_fn_t transform_fn,
@@ -160,11 +113,11 @@ void arrfunc_type::transform_child_types(type_transform_fn_t transform_fn,
                                          bool &out_was_transformed) const
 {
   const ndt::type *arg_types = get_arg_types_raw();
-  std::vector<ndt::type> tmp_arg_types(m_narg);
+  std::vector<ndt::type> tmp_arg_types(get_narg());
   ndt::type tmp_return_type;
 
   bool was_transformed = false;
-  for (size_t i = 0, i_end = m_narg; i != i_end; ++i) {
+  for (size_t i = 0, i_end = get_narg(); i != i_end; ++i) {
     transform_fn(arg_types[i], arrmeta_offset, extra, tmp_arg_types[i],
                  was_transformed);
   }
@@ -182,10 +135,10 @@ void arrfunc_type::transform_child_types(type_transform_fn_t transform_fn,
 ndt::type arrfunc_type::get_canonical_type() const
 {
   const ndt::type *arg_types = get_arg_types_raw();
-  std::vector<ndt::type> tmp_arg_types(m_narg);
+  std::vector<ndt::type> tmp_arg_types(get_narg());
   ndt::type return_type;
 
-  for (size_t i = 0, i_end = m_narg; i != i_end; ++i) {
+  for (size_t i = 0, i_end = get_narg(); i != i_end; ++i) {
     tmp_arg_types[i] = arg_types[i].get_canonical_type();
   }
   return_type = m_return_type.get_canonical_type();
@@ -228,6 +181,31 @@ bool arrfunc_type::is_lossless_assignment(const ndt::type &dst_tp,
   return false;
 }
 
+intptr_t arrfunc_type::get_arg_index(const char *arg_name_begin,
+                                       const char *arg_name_end) const
+{
+    size_t size = arg_name_end - arg_name_begin;
+    if (size > 0) {
+        char firstchar = *arg_name_begin;
+        intptr_t narg = get_narg();
+        const char *fn_ptr = m_arg_names.get_readonly_originptr();
+        intptr_t fn_stride =
+            reinterpret_cast<const fixed_dim_type_arrmeta *>(
+                m_arg_names.get_arrmeta())->stride;
+        for (intptr_t i = 0; i != narg; ++i, fn_ptr += fn_stride) {
+            const string_type_data *fn = reinterpret_cast<const string_type_data *>(fn_ptr);
+            const char *begin = fn->begin, *end = fn->end;
+            if ((size_t)(end - begin) == size && *begin == firstchar) {
+                if (memcmp(fn->begin, arg_name_begin, size) == 0) {
+                    return i;
+                }
+            }
+        }
+    }
+
+    return -1;
+}
+
 /*
 size_t arrfunc_type::make_assignment_kernel(
                 ckernel_builder *DYND_UNUSED(ckb), size_t DYND_UNUSED(ckb_offset),
@@ -260,8 +238,8 @@ bool arrfunc_type::operator==(const base_type &rhs) const
   }
   else {
     const arrfunc_type *fpt = static_cast<const arrfunc_type *>(&rhs);
-    return m_arg_types.equals_exact(fpt->m_arg_types) &&
-           m_return_type == fpt->m_return_type && m_naux == fpt->m_naux;
+    return m_return_type == fpt->m_return_type && m_arg_types.equals_exact(fpt->m_arg_types);
+//            && m_arg_names.equals_exact(fpt->m_arg_names);
   }
 }
 

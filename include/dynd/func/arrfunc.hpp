@@ -166,9 +166,9 @@ struct arrfunc_type_data {
       return result;
     }
     else {
-      if (nsrc != af_tp->get_nsrc()) {
+      if (nsrc != af_tp->get_npos()) {
         std::stringstream ss;
-        ss << "arrfunc expected " << af_tp->get_nsrc()
+        ss << "arrfunc expected " << af_tp->get_npos()
            << " parameters, but received " << nsrc;
         throw std::invalid_argument(ss.str());
       }

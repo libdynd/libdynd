@@ -32,7 +32,7 @@ static intptr_t instantiate_lifted_expr_arrfunc_data(
       reinterpret_cast<const arrfunc_type_data *>(data->m_data_pointer);
   const arrfunc_type *child_af_tp =
       reinterpret_cast<const arrfunc_type *>(data->m_type);
-  intptr_t src_count = child_af_tp->get_nsrc();
+  intptr_t src_count = child_af_tp->get_npos();
   dimvector src_ndim(src_count);
   for (int i = 0; i < src_count; ++i) {
     src_ndim[i] =
@@ -51,7 +51,7 @@ static int resolve_lifted_dst_type(const arrfunc_type_data *self,
                                    int throw_on_error, ndt::type &out_dst_tp,
                                    const nd::array &args, const nd::array &kwds)
 {
-  if (nsrc != af_tp->get_nsrc()) {
+  if (nsrc != af_tp->get_npos()) {
     if (throw_on_error) {
       stringstream ss;
       ss << "Wrong number of arguments to arrfunc with prototype ";
@@ -180,10 +180,10 @@ static ndt::type lift_proto(const arrfunc_type *p)
   nd::string dimsname("Dims");
   ndt::type *pt =
       reinterpret_cast<ndt::type *>(out_param_types.get_readwrite_originptr());
-  for (intptr_t i = 0, i_end = p->get_nsrc(); i != i_end; ++i) {
+  for (intptr_t i = 0, i_end = p->get_npos(); i != i_end; ++i) {
     pt[i] = ndt::make_ellipsis_dim(dimsname, param_types[i]);
   }
-  for (intptr_t i = p->get_nsrc(), i_end = p->get_narg(); i != i_end; ++i) {
+  for (intptr_t i = p->get_npos(), i_end = p->get_narg(); i != i_end; ++i) {
     pt[i] = param_types[i];
   }
   return ndt::make_funcproto(

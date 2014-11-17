@@ -95,7 +95,7 @@ intptr_t dynd::make_chain_buf_tp_ckernel(
     const char *const *src_arrmeta, kernel_request_t kernreq,
     const eval::eval_context *ectx)
 {
-  if (first_tp->get_nsrc() == 1) {
+  if (first_tp->get_npos() == 1) {
     intptr_t root_ckb_offset = ckb_offset;
     unary_heap_chain_ck *self =
         unary_heap_chain_ck::create(ckb, kernreq, ckb_offset);
@@ -145,7 +145,7 @@ nd::arrfunc dynd::make_chain_arrfunc(const nd::arrfunc &first,
                                      const nd::arrfunc &second,
                                      const ndt::type &buf_tp)
 {
-  if (second.get_type()->get_nsrc() != 1) {
+  if (second.get_type()->get_npos() != 1) {
     stringstream ss;
     ss << "Cannot chain functions " << first << " and " << second
        << ", because the second function is not unary";

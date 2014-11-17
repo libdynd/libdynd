@@ -678,7 +678,7 @@ size_t dynd::make_lifted_expr_ckernel(
     const eval::eval_context *ectx)
 
 {
-  intptr_t src_count = elwise_handler_tp->get_nsrc();
+  intptr_t src_count = elwise_handler_tp->get_npos();
 
   // Check if no lifting is required
   if (dst_ndim == 0) {
