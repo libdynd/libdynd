@@ -488,10 +488,7 @@ struct option_arrfunc_list {
   inline intptr_t size() const { return sizeof(af) / sizeof(af[0]); }
 
   const arrfunc_type_data *get() const { return af; }
-  const arrfunc_type *const *get_type() const
-  {
-    return reinterpret_cast<const arrfunc_type *const *>(&af_tp);
-  }
+  const ndt::type *get_type() const { return af_tp; }
 };
 } // anonymous namespace
 
@@ -503,7 +500,8 @@ size_t kernels::make_option_assignment_kernel(
   static option_arrfunc_list afl;
   intptr_t size = afl.size();
   const arrfunc_type_data *af = afl.get();
-  const arrfunc_type *const *af_tp = afl.get_type();
+  const arrfunc_type *const *af_tp =
+      reinterpret_cast<const arrfunc_type *const *>(afl.get_type());
   map<nd::string, ndt::type> typevars;
   for (intptr_t i = 0; i < size; ++i, ++af_tp, ++af) {
     typevars.clear();
