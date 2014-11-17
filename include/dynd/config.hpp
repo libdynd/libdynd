@@ -390,10 +390,16 @@ struct integer_sequence {
 
     using type = T;
 
-    template<T N>
-    using append = integer_sequence<T, I..., N>;
+//    template<T N>
+  //  using append = integer_sequence<T, I..., N>;
+//        using next = typename append<size>::type;
 
-    using next = append<size>;
+    template <T J>
+    struct append {
+        typedef integer_sequence<T, I..., J> type;
+    };
+
+    typedef typename append<size>::type next;
 };
 
 template<typename T, T... I>
@@ -424,8 +430,10 @@ using make_integer_sequence = typename detail::iota<T, N, N>::type;
 template <size_t N>
 using make_index_sequence = make_integer_sequence<size_t, N>;
 
+/*
 template <typename... T>
 using index_sequence_for = make_index_sequence<sizeof...(T)>;
+*/
 
 } // namespace dynd
 

@@ -118,17 +118,6 @@ struct arg<const nd::strided_vals<T, N> &, I> {
   }
 };
 
-/*
-template <typename T, int N, size_t I>
-struct arg<nd::strided_vals<T, N> &, I> : arg<nd::strided_vals<T, N>, I> {
-  using arg<nd::strided_vals<T, N>, I>::arg;
-};
-template <typename T, int N, size_t I>
-struct arg<const nd::strided_vals<T, N> &, I> : arg<nd::strided_vals<T, N>, I> {
-  using arg<nd::strided_vals<T, N>, I>::arg;
-};
-*/
-
 template <typename T, size_t I>
 struct kwd {
   kwd(T) {
