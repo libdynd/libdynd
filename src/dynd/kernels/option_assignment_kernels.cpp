@@ -490,7 +490,7 @@ struct option_arrfunc_list {
   const arrfunc_type_data *get() const { return af; }
   const arrfunc_type *const *get_type() const
   {
-    return reinterpret_cast<const arrfunc_type *const *>(af_tp);
+    return reinterpret_cast<const arrfunc_type *const *>(&af_tp);
   }
 };
 } // anonymous namespace
