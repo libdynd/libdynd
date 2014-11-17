@@ -11,49 +11,6 @@
 
 namespace dynd { namespace nd { namespace detail {
 
-template <typename mem_func_type, bool copy>
-class mem_func_wrapper;
-
-template <typename T, typename R, typename... A>
-class mem_func_wrapper<R (T::*)(A...) const, true>
-{
-  typedef R (T::*mem_func_type)(A...) const;
-
-  T m_obj;
-  mem_func_type m_mem_func;
-
-public:
-  mem_func_wrapper(const T &obj, mem_func_type mem_func)
-    : m_obj(obj), m_mem_func(mem_func)
-  {
-  }
-
-  R operator ()(A... a) const
-  {
-    return (m_obj.*m_mem_func)(a...);
-  }
-};
-
-template <typename T, typename R, typename... A>
-class mem_func_wrapper<R (T::*)(A...) const, false>
-{
-  typedef R (T::*mem_func_type)(A...) const;
-
-  const T *m_obj;
-  mem_func_type m_mem_func;
-
-public:
-  mem_func_wrapper(const T &obj, mem_func_type mem_func)
-    : m_obj(&obj), m_mem_func(mem_func)
-  {
-  }
-
-  R operator ()(A... a) const
-  {
-    return (m_obj->*m_mem_func)(a...);
-  }
-};
-
 template <typename func_type>
 struct apply_arrfunc_factory;
 

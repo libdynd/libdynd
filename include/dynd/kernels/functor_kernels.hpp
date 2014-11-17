@@ -10,8 +10,7 @@
 #include <dynd/kernels/expr_kernels.hpp>
 #include <dynd/types/arrfunc_type.hpp>
 
-namespace dynd
-{
+namespace dynd {
 
 template <typename func_type, typename arrfunc_type>
 class func_wrapper;
@@ -29,9 +28,50 @@ public:
   }
 };
 
-}
+template <typename mem_func_type, bool copy>
+class mem_func_wrapper;
 
-namespace dynd { namespace kernels { namespace detail {
+template <typename T, typename R, typename... A>
+class mem_func_wrapper<R (T::*)(A...) const, true>
+{
+  typedef R (T::*mem_func_type)(A...) const;
+
+  T m_obj;
+  mem_func_type m_mem_func;
+
+public:
+  mem_func_wrapper(const T &obj, mem_func_type mem_func)
+    : m_obj(obj), m_mem_func(mem_func)
+  {
+  }
+
+  R operator ()(A... a) const
+  {
+    return (m_obj.*m_mem_func)(a...);
+  }
+};
+
+template <typename T, typename R, typename... A>
+class mem_func_wrapper<R (T::*)(A...) const, false>
+{
+  typedef R (T::*mem_func_type)(A...) const;
+
+  const T *m_obj;
+  mem_func_type m_mem_func;
+
+public:
+  mem_func_wrapper(const T &obj, mem_func_type mem_func)
+    : m_obj(&obj), m_mem_func(mem_func)
+  {
+  }
+
+  R operator ()(A... a) const
+  {
+    return (m_obj->*m_mem_func)(a...);
+  }
+};
+
+namespace kernels { namespace detail {
 
 template <typename A, size_t I>
 struct arg {
