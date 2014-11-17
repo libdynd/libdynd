@@ -27,7 +27,7 @@ TEST(SymbolicTypes, CreateFuncProto)
   tp = ndt::make_funcproto<int64_t(float, int32_t, double)>();
   EXPECT_EQ(arrfunc_type_id, tp.get_type_id());
   EXPECT_EQ(sizeof(arrfunc_type_data), tp.get_data_size());
-  EXPECT_EQ(8u, tp.get_data_alignment());
+  EXPECT_EQ((size_t)scalar_align_of<int64_t>::value, tp.get_data_alignment());
   EXPECT_FALSE(tp.is_pod());
   // function prototype is not actually symbolic, it is
   // used to store arrfunc objects
