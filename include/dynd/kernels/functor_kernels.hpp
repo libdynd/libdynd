@@ -9,7 +9,6 @@
 #include <dynd/kernels/ckernel_common_functions.hpp>
 #include <dynd/kernels/expr_kernels.hpp>
 #include <dynd/types/arrfunc_type.hpp>
-#include <dynd/types/base_struct_type.hpp>
 
 namespace dynd
 {
@@ -31,11 +30,6 @@ public:
 };
 
 }
-
-
-  /// A type that represents a parameter pack of zero or more integers.
-
-
 
 namespace dynd { namespace kernels { namespace detail {
 

@@ -322,7 +322,6 @@ set(libdynd_SRC
     include/dynd/func/elwise_gfunc.hpp
     include/dynd/func/elwise_reduce_gfunc.hpp
     include/dynd/func/functor_arrfunc.hpp
-    include/dynd/func/funcproto.hpp
     include/dynd/func/make_callable.hpp
     include/dynd/func/lift_arrfunc.hpp
     include/dynd/func/lift_reduction_arrfunc.hpp
