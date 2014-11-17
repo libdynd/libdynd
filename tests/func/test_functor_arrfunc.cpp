@@ -814,8 +814,10 @@ INSTANTIATE_TYPED_TEST_CASE_P(Builtin, FunctorArrfunc_CallRetRes, test_types);
 REGISTER_TYPED_TEST_CASE_P(FunctorArrfunc_CallRefRes, CallRefRes);
 INSTANTIATE_TYPED_TEST_CASE_P(Builtin, FunctorArrfunc_CallRefRes, test_types);
 
+/*
 REGISTER_TYPED_TEST_CASE_P(FunctorArrfunc_MethRetRes, MethRetRes);
 INSTANTIATE_TYPED_TEST_CASE_P(Builtin, FunctorArrfunc_MethRetRes, test_types);
 
 REGISTER_TYPED_TEST_CASE_P(FunctorArrfunc_MethRefRes, MethRefRes);
 INSTANTIATE_TYPED_TEST_CASE_P(Builtin, FunctorArrfunc_MethRefRes, test_types);
+*/

@@ -12,75 +12,48 @@
 
 namespace dynd { namespace nd { namespace detail {
 
-template <typename func_type, typename arrfunc_type>
-class func_wrapper;
-
-template <typename func_type, typename R, typename... A>
-class func_wrapper<func_type, R (A...)> {
-  const func_type *m_func;
-
-public:
-  func_wrapper(const func_type &func) : m_func(&func) {
-  }
-
-  R operator()(A... a) {
-    return (*m_func)(a...);
-  }
-};
-
 template <typename mem_func_type, bool copy>
 class mem_func_wrapper;
 
-#define MEM_FUNC_WRAPPER(N)                                                    \
-  template <typename T, typename R,                                            \
-            DYND_PP_JOIN_MAP_1(DYND_PP_META_TYPENAME, (, ),                    \
-                               DYND_PP_META_NAME_RANGE(A, N))>                 \
-  class mem_func_wrapper<R(T::*) DYND_PP_META_NAME_RANGE(A, N) const, true> {  \
-    typedef R(T::*mem_func_type) DYND_PP_META_NAME_RANGE(A, N) const;          \
-                                                                               \
-    T m_obj;                                                                   \
-    mem_func_type m_mem_func;                                                  \
-                                                                               \
-  public:                                                                      \
-    mem_func_wrapper(const T &obj, mem_func_type mem_func)                     \
-        : m_obj(obj), m_mem_func(mem_func)                                     \
-    {                                                                          \
-    }                                                                          \
-                                                                               \
-    R operator()                                                               \
-        DYND_PP_ELWISE_1(DYND_PP_META_DECL, DYND_PP_META_NAME_RANGE(A, N),     \
-                         DYND_PP_META_NAME_RANGE(a, N)) const                  \
-    {                                                                          \
-      return (m_obj.*m_mem_func)DYND_PP_META_NAME_RANGE(a, N);                 \
-    }                                                                          \
-  };                                                                           \
-                                                                               \
-  template <typename T, typename R,                                            \
-            DYND_PP_JOIN_MAP_1(DYND_PP_META_TYPENAME, (, ),                    \
-                               DYND_PP_META_NAME_RANGE(A, N))>                 \
-  class mem_func_wrapper<R(T::*) DYND_PP_META_NAME_RANGE(A, N) const, false> { \
-    typedef R(T::*mem_func_type) DYND_PP_META_NAME_RANGE(A, N) const;          \
-                                                                               \
-    const T *m_obj;                                                            \
-    mem_func_type m_mem_func;                                                  \
-                                                                               \
-  public:                                                                      \
-    mem_func_wrapper(const T &obj, mem_func_type mem_func)                     \
-        : m_obj(&obj), m_mem_func(mem_func)                                    \
-    {                                                                          \
-    }                                                                          \
-                                                                               \
-    R operator()                                                               \
-        DYND_PP_ELWISE_1(DYND_PP_META_DECL, DYND_PP_META_NAME_RANGE(A, N),     \
-                         DYND_PP_META_NAME_RANGE(a, N)) const                  \
-    {                                                                          \
-      return (m_obj->*m_mem_func)DYND_PP_META_NAME_RANGE(a, N);                \
-    }                                                                          \
-  };
+template <typename T, typename R, typename... A>
+class mem_func_wrapper<R (T::*)(A...) const, true>
+{
+  typedef R (T::*mem_func_type)(A...) const;
 
-DYND_PP_JOIN_MAP(MEM_FUNC_WRAPPER, (), DYND_PP_RANGE(1, DYND_PP_INC(DYND_ARG_MAX)))
+  T m_obj;
+  mem_func_type m_mem_func;
 
-#undef MEM_FUNC_WRAPPER
+public:
+  mem_func_wrapper(const T &obj, mem_func_type mem_func)
+    : m_obj(obj), m_mem_func(mem_func)
+  {
+  }
+
+  R operator ()(A... a) const
+  {
+    return (m_obj.*m_mem_func)(a...);
+  }
+};
+
+template <typename T, typename R, typename... A>
+class mem_func_wrapper<R (T::*)(A...) const, false>
+{
+  typedef R (T::*mem_func_type)(A...) const;
+
+  const T *m_obj;
+  mem_func_type m_mem_func;
+
+public:
+  mem_func_wrapper(const T &obj, mem_func_type mem_func)
+    : m_obj(&obj), m_mem_func(mem_func)
+  {
+  }
+
+  R operator ()(A... a) const
+  {
+    return (m_obj->*m_mem_func)(a...);
+  }
+};
 
 template <int aux_param_count, typename func_type, bool copy, bool func_or_func_pointer>
 struct functor_arrfunc_from;
@@ -251,28 +224,134 @@ nd::arrfunc make_functor_arrfunc(const func_type &func, bool copy = true)
   }
 }
 
+namespace detail
+{
+
+template <typename func_type>
+struct apply_arrfunc_factory;
+
+template <typename R, typename... A>
+struct apply_arrfunc_factory<R (A...)>
+{
+  typedef typename to<sizeof...(A) - 0, A...>::type args;
+  typedef typename from<sizeof...(A) - 0, A...>::type kwds;
+
+  template <R (func)(A...)>
+  static nd::arrfunc make()
+  {
+    nd::array af = nd::empty(ndt::make_funcproto<R (A...)>());
+    arrfunc_type_data *out_af = reinterpret_cast<arrfunc_type_data *>(af.get_readwrite_originptr());
+    out_af->instantiate = &kernels::apply_ck<R (A...), func, R,
+      args, make_index_sequence<args::size>, kwds, make_index_sequence<kwds::size> >::instantiate;
+    af.flag_as_immutable();
+
+    return af;
+  }
+
+  static nd::arrfunc make(R (func)(A...))
+  {
+    return apply_arrfunc_factory<R (*)(A...)>::make(func);
+  }
+};
+
+template <typename R, typename... A>
+struct apply_arrfunc_factory<R (*)(A...)>
+{
+  typedef R (funcproto_type)(A...);
+  typedef funcproto_type *func_type;
+
+  static nd::arrfunc make(func_type func)
+  {
+    nd::array af = nd::empty(ndt::make_funcproto<funcproto_type>());
+    arrfunc_type_data *out_af = reinterpret_cast<arrfunc_type_data *>(af.get_readwrite_originptr());
+    out_af->instantiate = &kernels::apply_callable_ck<func_type, R,
+      type_sequence<A...>, make_index_sequence<sizeof...(A)>, type_sequence<>, make_index_sequence<0> >::instantiate;
+    *out_af->get_data_as<func_type>() = func;
+    af.flag_as_immutable();
+
+    return af;
+  }
+};
+
+template <typename func_type>
+struct apply_arrfunc_factory
+{
+  template <typename R, typename... A>
+  static nd::arrfunc make(R (func_type::*)(A...) const)
+  {
+    typedef R (funcproto_type)(A...);
+
+    nd::array af = nd::empty(ndt::make_funcproto<funcproto_type>());
+    arrfunc_type_data *out_af = reinterpret_cast<arrfunc_type_data *>(af.get_readwrite_originptr());
+    out_af->instantiate = &kernels::construct_and_apply_callable_ck<func_type, R,
+      type_sequence<A...>, make_index_sequence<sizeof...(A)>, type_sequence<>, make_index_sequence<0> >::instantiate;
+    af.flag_as_immutable();
+    return af;
+  }
+
+  template <typename... K>
+  static nd::arrfunc make()
+  {
+    return make(&func_type::operator ());
+  }
+
+  static nd::arrfunc make(const func_type &func, bool copy)
+  {
+    return make(func, &func_type::operator (), copy);
+  }
+
+  template <typename R, typename... A>
+  static nd::arrfunc make(const func_type &func, R (func_type::*)(A...) const, bool DYND_UNUSED(copy))
+  {
+    typedef R (funcproto_type)(A...);
+
+    nd::array af = nd::empty(ndt::make_funcproto<funcproto_type>());
+    arrfunc_type_data *out_af = reinterpret_cast<arrfunc_type_data *>(af.get_readwrite_originptr());
+    *out_af->get_data_as<func_type>() = func;
+    out_af->instantiate = &kernels::apply_callable_ck<func_type, R,
+      type_sequence<A...>, make_index_sequence<sizeof...(A)>, type_sequence<>, make_index_sequence<0> >::instantiate;
+    af.flag_as_immutable();
+    return af;
+  }
+};
+
+} // detail
+
+template <typename func_type, func_type func>
+nd::arrfunc make_apply_arrfunc()
+{
+  return detail::apply_arrfunc_factory<func_type>::template make<func>();
+}
+
+template <typename func_type>
+typename std::enable_if<std::is_function<func_type>::value || is_function_pointer<func_type>::value,
+  nd::arrfunc>::type make_apply_arrfunc(const func_type &func)
+{
+  return detail::apply_arrfunc_factory<func_type>::make(func);
+}
+
+template <typename func_type>
+typename std::enable_if<!std::is_function<func_type>::value && !is_function_pointer<func_type>::value,
+  nd::arrfunc>::type make_apply_arrfunc(const func_type &func, bool copy = true)
+{
+  return detail::apply_arrfunc_factory<func_type>::make(func, copy);    
+}
+
+template <typename func_type, typename... K>
+nd::arrfunc make_apply_arrfunc()
+{
+  return detail::apply_arrfunc_factory<func_type>::template make<K...>();
+}
+
+
+
 template <typename func_type>
 nd::arrfunc make_functor_arrfunc(const func_type &func, bool copy = true)
 {
   return make_functor_arrfunc<0>(func, copy);
 }
 
-#define MAKE_FUNCTOR_ARRFUNC(NAUX)                                             \
-  template <DYND_PP_JOIN_MAP_1(                                                \
-      DYND_PP_META_TYPENAME, (, ),                                             \
-      DYND_PP_APPEND(func_type, DYND_PP_META_NAME_RANGE(A, NAUX)))>            \
-  nd::arrfunc make_functor_arrfunc()                                           \
-  {                                                                            \
-    return detail::functor_arrfunc_factory_dispatcher::template make<          \
-        DYND_PP_JOIN((, ), DYND_PP_APPEND(func_type, DYND_PP_META_NAME_RANGE(  \
-                                                         A, NAUX)))>();        \
-  }
-
-DYND_PP_JOIN_MAP(MAKE_FUNCTOR_ARRFUNC, (),
-                 DYND_PP_RANGE(DYND_PP_INC(DYND_ARG_MAX)))
-
-#undef MAKE_FUNCTOR_ARRFUNC
-
+/*
 template <typename obj_type, typename mem_func_type>
 nd::arrfunc make_functor_arrfunc(const obj_type &obj, mem_func_type mem_func,
                                  bool copy = true)
@@ -288,5 +367,6 @@ nd::arrfunc make_functor_arrfunc(const obj_type &obj, mem_func_type mem_func,
         wrapper_type(obj, mem_func));
   }
 }
+*/
 
 }} // namespace dynd::nd

@@ -308,6 +308,67 @@ struct remove_all_pointers<T *> {
     typedef typename remove_all_pointers<typename std::remove_cv<T>::type>::type type;
 };
 
+template <typename... T>
+struct type_sequence {
+    static constexpr size_t size = sizeof...(T);
+};
+
+template <typename U, typename... T>
+struct prepend {
+    typedef type_sequence<U, T...> type;
+};
+
+template <typename U, typename... T>
+struct prepend<U, type_sequence<T...> > {
+    typedef typename prepend<U, T...>::type type;
+};
+
+template <typename U, typename... T>
+struct append {
+    typedef type_sequence<T..., U> type;
+};
+
+template <typename U, typename... T>
+struct append<U, type_sequence<T...> > {
+    typedef typename append<T..., U>::type type;
+};
+
+template <int n, typename... T>
+struct from;
+
+template <typename... T>
+struct from<0, T...> {
+    typedef type_sequence<T...> type;
+};
+
+template <int n, typename T0, typename... T>
+struct from<n, T0, T...> {
+    typedef typename from<n - 1, T...>::type type;
+};
+
+template <int n, typename... T>
+struct from<n, type_sequence<T...> > {
+    typedef typename from<n, T...>::type type;
+};
+
+template <int n, typename... T>
+struct to;
+
+template <typename... T>
+struct to<0, T...> {
+    typedef type_sequence<> type;
+};
+
+template <int n, typename T0, typename... T>
+struct to<n, T0, T...> {
+    typedef typename prepend<T0, typename to<n - 1, T...>::type>::type type;
+};
+
+template <int n, typename... T>
+struct to<n, type_sequence<T...> > {
+    typedef typename to<n, T...>::type type;
+};
+
 } // namespace dynd
 
 

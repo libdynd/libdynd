@@ -74,6 +74,7 @@ set(tests_SRC
     func/test_elwise_callretres.cpp
     func/test_elwise_callrefres.cpp
     func/test_functor_arrfunc.cpp
+    func/test_functor_arrfunc_new.cpp
     func/test_lift_arrfunc.cpp
     func/test_neighborhood.cpp
     func/test_multidispatch_arrfunc.cpp
