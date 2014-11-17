@@ -119,6 +119,8 @@ ValueError: Out of bounds nanosecond timestamp: 1492-01-01 00:00:00
 
 ### Resources
 
+* https://today.java.net/pub/a/today/2008/09/18/jsr-310-new-java-date-time-api.html
+ * http://blog.joda.org/2009/11/why-jsr-310-isn-joda-time_4941.html
 * http://nodatime.org/
 * http://www.joda.org/joda-time/
 * http://www.boost.org/doc/libs/1_55_0/doc/html/date_time/local_time.html
