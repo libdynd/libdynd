@@ -119,12 +119,15 @@ struct arg<const nd::strided_vals<T, N> &, I> {
 };
 
 template <typename T, size_t I>
-struct kwd {
-  kwd(T) {
+class kwd {
+  T m_val;
+
+public:
+  kwd(T val) : m_val(val) {
   }
 
   T get() {
-    return 0;
+    return m_val;
   }
 };
 
@@ -135,13 +138,13 @@ struct apply_ck;
 
 template <typename func_type, func_type func, typename R, typename... A, size_t... I, typename... K, size_t... J>
 struct apply_ck<func_type, func, R, type_sequence<A...>, index_sequence<I...>, type_sequence<K...>, index_sequence<J...> >
-  : detail::arg<A, I>..., detail::kwd<K, J>..., kernels::expr_ck<apply_ck<func_type, func,
-    R, type_sequence<A...>, index_sequence<I...>, type_sequence<K...>, index_sequence<J...> >, sizeof...(A)>
+  : kernels::expr_ck<apply_ck<func_type, func, R, type_sequence<A...>, index_sequence<I...>, type_sequence<K...>, index_sequence<J...> >, sizeof...(A)>,
+    detail::arg<A, I>..., detail::kwd<K, J>...
 {
   typedef apply_ck<func_type, func,
     R, type_sequence<A...>, index_sequence<I...>, type_sequence<K...>, index_sequence<J...> > self_type;
 
-  apply_ck(detail::arg<A, I>... args, detail::kwd<K, J>... kwds)
+  apply_ck(detail::arg<A, I>... args, const detail::kwd<K, J> &... kwds)
     : detail::arg<A, I>(args)..., detail::kwd<K, J>(kwds)...
   {
   }
@@ -174,7 +177,7 @@ struct apply_ck<func_type, func, R, type_sequence<A...>, index_sequence<I...>, t
     }
 
     self_type::create(ckb, kernreq, ckb_offset,
-      detail::arg<A, I>(src_tp[I], src_arrmeta[I], kwds)..., detail::kwd<K, J>()...);
+      detail::arg<A, I>(src_tp[I], src_arrmeta[I], kwds)..., detail::kwd<K, J>(kwds(J).as<K>())...);
     return ckb_offset;
   }
 };

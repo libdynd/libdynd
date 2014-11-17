@@ -51,14 +51,17 @@ TEST(Apply, Function)
 //  af = nd::make_apply_arrfunc<decltype(funce2)
 }
 
-/*
 TEST(Apply, FunctionWithKeywords)
 {
   nd::arrfunc af;
 
-  af = nd::make_apply_arrfunc<decltype(func0), func0>("y");
+  af = nd::make_apply_arrfunc<decltype(&func0), &func0>("y");
+  EXPECT_EQ(4, af(5, kwds("y", 3)).as<int>());
+  af = nd::make_apply_arrfunc(func0, "y");
+
+  af = nd::make_apply_arrfunc<decltype(&func1), &func1>("y");
+  EXPECT_EQ(53.15, af(3.75, kwds("y", 19)).as<double>());
 }
-*/
 
 struct callable0
 {

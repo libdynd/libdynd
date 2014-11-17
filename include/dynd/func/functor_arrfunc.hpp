@@ -17,13 +17,13 @@ struct apply_arrfunc_factory;
 template <typename R, typename... A>
 struct apply_arrfunc_factory<R (A...)>
 {
-  typedef typename to<sizeof...(A) - 0, A...>::type args;
-  typedef typename from<sizeof...(A) - 0, A...>::type kwds;
-
-  template <R (func)(A...)>
-  static nd::arrfunc make()
+  template <R (func)(A...), typename... T>
+  static nd::arrfunc make(T... names)
   {
-    nd::array af = nd::empty(ndt::make_funcproto<R (A...)>());
+    typedef typename to<sizeof...(A) - sizeof...(T), A...>::type args;
+    typedef typename from<sizeof...(A) - sizeof...(T), A...>::type kwds;
+
+    nd::array af = nd::empty(ndt::make_funcproto<R (A...)>(names...));
     arrfunc_type_data *out_af = reinterpret_cast<arrfunc_type_data *>(af.get_readwrite_originptr());
     out_af->instantiate = &kernels::apply_ck<R (*)(A...), func, R,
       args, make_index_sequence<args::size>, kwds, make_index_sequence<kwds::size> >::instantiate;
@@ -32,22 +32,23 @@ struct apply_arrfunc_factory<R (A...)>
     return af;
   }
 
-  static nd::arrfunc make(R (func)(A...))
+  template <typename... T>
+  static nd::arrfunc make(R (func)(A...), T... names)
   {
-    return apply_arrfunc_factory<R (*)(A...)>::make(func);
+    return apply_arrfunc_factory<R (*)(A...)>::make(func, names...);
   }
 };
 
 template <typename R, typename... A>
 struct apply_arrfunc_factory<R (*)(A...)>
 {
-  typedef typename to<sizeof...(A) - 0, A...>::type args;
-  typedef typename from<sizeof...(A) - 0, A...>::type kwds;
-
-  template <R (*func)(A...)>
-  static nd::arrfunc make()
+  template <R (*func)(A...), typename... T>
+  static nd::arrfunc make(T... names)
   {
-    nd::array af = nd::empty(ndt::make_funcproto<R (A...)>());
+    typedef typename to<sizeof...(A) - sizeof...(T), A...>::type args;
+    typedef typename from<sizeof...(A) - sizeof...(T), A...>::type kwds;
+
+    nd::array af = nd::empty(ndt::make_funcproto<R (A...)>(names...));
     arrfunc_type_data *out_af = reinterpret_cast<arrfunc_type_data *>(af.get_readwrite_originptr());
     out_af->instantiate = &kernels::apply_ck<R (*)(A...), func, R,
       args, make_index_sequence<args::size>, kwds, make_index_sequence<kwds::size> >::instantiate;
@@ -59,9 +60,13 @@ struct apply_arrfunc_factory<R (*)(A...)>
   typedef R (funcproto_type)(A...);
   typedef funcproto_type *func_type;
 
-  static nd::arrfunc make(func_type func)
+  template <typename... T>
+  static nd::arrfunc make(func_type func, T... names)
   {
-    nd::array af = nd::empty(ndt::make_funcproto<funcproto_type>());
+    typedef typename to<sizeof...(A) - sizeof...(T), A...>::type args;
+    typedef typename from<sizeof...(A) - sizeof...(T), A...>::type kwds;
+
+    nd::array af = nd::empty(ndt::make_funcproto<funcproto_type>(names...));
     arrfunc_type_data *out_af = reinterpret_cast<arrfunc_type_data *>(af.get_readwrite_originptr());
     out_af->instantiate = &kernels::apply_callable_ck<func_type, R,
       type_sequence<A...>, make_index_sequence<sizeof...(A)>, type_sequence<>, make_index_sequence<0> >::instantiate;
@@ -116,17 +121,17 @@ struct apply_arrfunc_factory
 
 } // detail
 
-template <typename func_type, func_type func>
-nd::arrfunc make_apply_arrfunc()
+template <typename func_type, func_type func, typename... T>
+nd::arrfunc make_apply_arrfunc(T... names)
 {
-  return detail::apply_arrfunc_factory<func_type>::template make<func>();
+  return detail::apply_arrfunc_factory<func_type>::template make<func>(names...);
 }
 
-template <typename func_type>
+template <typename func_type, typename... T>
 typename std::enable_if<std::is_function<func_type>::value || is_function_pointer<func_type>::value,
-  nd::arrfunc>::type make_apply_arrfunc(const func_type &func)
+  nd::arrfunc>::type make_apply_arrfunc(const func_type &func, T... names)
 {
-  return detail::apply_arrfunc_factory<func_type>::make(func);
+  return detail::apply_arrfunc_factory<func_type>::make(func, names...);
 }
 
 template <typename func_type>
