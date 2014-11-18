@@ -132,8 +132,6 @@ public:
   }
 };
 
-} // detail
-
 // apply_function_ck
 // apply_callable_ck
 // construct_then_apply_callable_ck
@@ -185,6 +183,7 @@ struct apply_function_ck<func_type, func, R, type_sequence<A...>, index_sequence
     return ckb_offset;
   }
 };
+
 
 template <typename func_type, typename R, typename A, typename I, typename K, typename J>
 struct apply_callable_ck;
@@ -282,5 +281,21 @@ struct construct_then_apply_callable_ck<func_type, R, type_sequence<P...>, index
       return ckb_offset;
     }
 };
+
+} // detail
+
+template <typename func_type, func_type func, int N, typename R, typename... A>
+using apply_function_ck = detail::apply_function_ck<func_type, func, R,
+  typename to<N, A...>::type, make_index_sequence<N>,
+  typename from<N, A...>::type, make_index_sequence<sizeof...(A) - N> >;
+
+template <typename func_type, int N, typename R, typename... A>
+using apply_callable_ck = detail::apply_callable_ck<func_type, R,
+  typename to<N, A...>::type, make_index_sequence<N>,
+  typename from<N, A...>::type, make_index_sequence<sizeof...(A) - N> >;
+
+template <typename func_type, typename R, typename A, typename K>
+using construct_then_apply_callable_ck = detail::construct_then_apply_callable_ck<func_type,
+  R, A, make_index_sequence<A::size>, K, make_index_sequence<K::size> >;
 
 }} // namespace dynd::kernels

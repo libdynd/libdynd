@@ -390,6 +390,28 @@ struct pod_arrfunc {
   }
 };
 
+inline arrfunc make_arrfunc(ndt::type af_tp, arrfunc_instantiate_t instantiate)
+{
+  array af = empty(af_tp);
+  arrfunc_type_data *out_af = reinterpret_cast<arrfunc_type_data *>(af.get_readwrite_originptr());
+  out_af->instantiate = instantiate;
+  af.flag_as_immutable();
+
+  return af;
+}
+
+template <typename T>
+arrfunc make_arrfunc(ndt::type af_tp, arrfunc_instantiate_t instantiate, T &&data)
+{
+  array af = empty(af_tp);
+  arrfunc_type_data *out_af = reinterpret_cast<arrfunc_type_data *>(af.get_readwrite_originptr());
+  out_af->instantiate = instantiate;
+  *out_af->get_data_as<T>() = data;
+  af.flag_as_immutable();
+
+  return af;
+}
+
 } // namespace nd
 
 /**

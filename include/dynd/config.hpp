@@ -395,6 +395,19 @@ struct at<i, T0, T...> {
     typedef typename at<i - 1, T...>::type type;
 };
 
+template <int i, typename... T>
+struct at<i, type_sequence<T...> > {
+    typedef typename at<i, T...>::type type;
+};
+
+template <typename T>
+struct flatten;
+
+template <typename R, typename... A>
+struct flatten<R (A...)> {
+  typedef type_sequence<R, A...> type;
+};
+
 template<typename T, T... I>
 struct integer_sequence {
     static_assert(std::is_integral<T>::value, "Integral type" );

@@ -53,6 +53,10 @@ public:
     return get_narg() - get_nkwd();
   }
 
+  intptr_t get_nsrc() const {
+    return get_npos();
+  }
+
   intptr_t get_nkwd() const {
     if (m_arg_names.is_null()) {
       return 0;
