@@ -289,7 +289,7 @@ struct construct_and_apply_callable_ck<func_type, R, type_sequence<P...>, index_
     func_type func;
 
     construct_and_apply_callable_ck(detail::arg<P, I>... args, detail::kwd<K, J>... kwds)
-      : detail::arg<P, I>(args)..., func(detail::kwd<K, J>(kwds)...) {
+      : detail::arg<P, I>(args)..., func(kwds.get()...) {
     }
 
     void single(char *dst, char **src) {
@@ -319,7 +319,7 @@ struct construct_and_apply_callable_ck<func_type, R, type_sequence<P...>, index_
       }
 
       self_type::create(ckb, kernreq, ckb_offset,
-        detail::arg<P, I>(src_tp[I], src_arrmeta[I], kwds)..., detail::kwd<K, J>()...);
+        detail::arg<P, I>(src_tp[I], src_arrmeta[I], kwds)..., detail::kwd<K, J>(kwds(J).as<K>())...);
       return ckb_offset;
     }
 };

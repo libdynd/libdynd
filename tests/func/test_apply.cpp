@@ -67,7 +67,7 @@ struct callable0
 {
   int operator ()(int x, int y) const
   {
-	return func0(x, y);
+	 return func0(x, y);
   }
 };
 
@@ -76,6 +76,19 @@ struct callable1
   double operator ()(double x, int y) const
   {
 	return func1(x, y);
+  }
+};
+
+struct callable2
+{
+  int m_y;
+
+  callable2(int y) : m_y(y) {
+  }
+
+  int operator ()(int x) const
+  {
+   return func0(x, m_y);
   }
 };
 
@@ -92,6 +105,14 @@ TEST(Apply, Callable)
   EXPECT_EQ(53.15, af(3.75, 19).as<double>());
   af = nd::make_apply_arrfunc(callable1());
   EXPECT_EQ(53.15, af(3.75, 19).as<double>());
+}
+
+TEST(Apply, CallableWithKeywords)
+{
+  nd::arrfunc af;
+
+  af = nd::make_apply_arrfunc<callable2, int>("y");
+  EXPECT_EQ(4, af(5, kwds("y", 3)).as<int>());
 }
 
 TEST(Apply, MemberFunction)
