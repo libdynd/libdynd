@@ -44,7 +44,7 @@ struct apply_arrfunc_factory<R (*)(A...)>
     nd::array af = nd::empty(ndt::make_funcproto<R (A...)>(names...));
     arrfunc_type_data *out_af = reinterpret_cast<arrfunc_type_data *>(af.get_readwrite_originptr());
     out_af->instantiate = &kernels::apply_callable_ck<func_type, R,
-      type_sequence<A...>, make_index_sequence<sizeof...(A)>, type_sequence<>, make_index_sequence<0> >::instantiate;
+      args, make_index_sequence<args::size>, kwds, make_index_sequence<kwds::size> >::instantiate;
     *out_af->get_data_as<func_type>() = func;
     af.flag_as_immutable();
 

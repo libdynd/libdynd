@@ -11,7 +11,7 @@
 #include <dynd/types/arrfunc_type.hpp>
 
 namespace dynd {
-
+/*
 template <typename func_type, typename arrfunc_type>
 class func_wrapper;
 
@@ -70,6 +70,7 @@ public:
     return (m_obj->*m_mem_func)(a...);
   }
 };
+*/
 
 namespace kernels { namespace detail {
 
@@ -228,24 +229,24 @@ struct apply_ck<func_type, func, void, type_sequence<A...>, index_sequence<I...>
   }
 };
 
-template <typename func_type, typename ret_type, typename ps_arg_type, typename args, typename kw_type, typename kw>
+template <typename func_type, typename R, typename A, typename I, typename K, typename J>
 struct apply_callable_ck;
 
-template <typename func_type, typename R, typename... P, size_t... I, typename... K, size_t... J>
-struct apply_callable_ck<func_type, R, type_sequence<P...>, index_sequence<I...>, type_sequence<K...>, index_sequence<J...> >
-  : kernels::expr_ck<apply_callable_ck<func_type, R, type_sequence<P...>, index_sequence<I...>, type_sequence<K...>, index_sequence<J...> >,
-    sizeof...(P)>, detail::arg<P, I>..., detail::kwd<K, J>...
+template <typename func_type, typename R, typename... A, size_t... I, typename... K, size_t... J>
+struct apply_callable_ck<func_type, R, type_sequence<A...>, index_sequence<I...>, type_sequence<K...>, index_sequence<J...> >
+  : kernels::expr_ck<apply_callable_ck<func_type, R, type_sequence<A...>, index_sequence<I...>, type_sequence<K...>, index_sequence<J...> >,
+    sizeof...(A)>, detail::arg<A, I>..., detail::kwd<K, J>...
 {
-    typedef apply_callable_ck<func_type, R, type_sequence<P...>, index_sequence<I...>, type_sequence<K...>, index_sequence<J...> > self_type;
+    typedef apply_callable_ck<func_type, R, type_sequence<A...>, index_sequence<I...>, type_sequence<K...>, index_sequence<J...> > self_type;
 
     func_type func;
 
-    apply_callable_ck(const func_type &func, detail::arg<P, I>... args, detail::kwd<K, J>... kwds)
-      : detail::arg<P, I>(args)..., detail::kwd<K, J>(kwds)..., func(func) {
+    apply_callable_ck(const func_type &func, detail::arg<A, I>... args, detail::kwd<K, J>... kwds)
+      : detail::arg<A, I>(args)..., detail::kwd<K, J>(kwds)..., func(func) {
     }
 
     void single(char *dst, char **src) {
-      *reinterpret_cast<R *>(dst) = func(detail::arg<P, I>::get(src[I])..., detail::kwd<K, J>::get()...);
+      *reinterpret_cast<R *>(dst) = func(detail::arg<A, I>::get(src[I])..., detail::kwd<K, J>::get()...);
     }
 
     static intptr_t instantiate(const arrfunc_type_data *af_self, const arrfunc_type *af_tp,
@@ -255,23 +256,23 @@ struct apply_callable_ck<func_type, R, type_sequence<P...>, index_sequence<I...>
       kernel_request_t kernreq, const eval::eval_context *DYND_UNUSED(ectx),
       const nd::array &DYND_UNUSED(args), const nd::array &kwds)
     {
-      for (size_t i = 0; i < sizeof...(P); ++i) {
+      for (size_t i = 0; i < sizeof...(A); ++i) {
         if (src_tp[i] != af_tp->get_arg_type(i)) {
           std::stringstream ss;
-          ss << "Provided types " << ndt::make_funcproto(sizeof...(P), src_tp, dst_tp)
+          ss << "Provided types " << ndt::make_funcproto(sizeof...(A), src_tp, dst_tp)
              << " do not match the arrfunc proto " << af_tp;
           throw type_error(ss.str());
         }
       }
       if (dst_tp != af_tp->get_return_type()) {
         std::stringstream ss;
-        ss << "Provided types " << ndt::make_funcproto(sizeof...(P), src_tp, dst_tp)
+        ss << "Provided types " << ndt::make_funcproto(sizeof...(A), src_tp, dst_tp)
            << " do not match the arrfunc proto " << af_tp;
         throw type_error(ss.str());
       }
 
       self_type::create(ckb, kernreq, ckb_offset, *af_self->get_data_as<func_type>(),
-        detail::arg<P, I>(src_tp[I], src_arrmeta[I], kwds)..., detail::kwd<K, J>()...);
+        detail::arg<A, I>(src_tp[I], src_arrmeta[I], kwds)..., detail::kwd<K, J>(kwds(J).as<K>())...);
       return ckb_offset;
     }
 };

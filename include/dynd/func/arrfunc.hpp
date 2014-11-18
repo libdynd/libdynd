@@ -287,9 +287,9 @@ public:
   }
 
   /** Convenience call operators */
-  nd::array operator()() const
+  nd::array operator()(const kwds &kwds = dynd::kwds()) const
   {
-    return call(0, NULL, &eval::default_eval_context);
+    return call(0, NULL, kwds, &eval::default_eval_context);
   }
   nd::array operator()(const nd::array &a0,
                        const kwds &kwds = dynd::kwds()) const
