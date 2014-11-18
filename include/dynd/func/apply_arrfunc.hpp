@@ -6,7 +6,7 @@
 #pragma once
 
 #include <dynd/func/arrfunc.hpp>
-#include <dynd/kernels/functor_kernels.hpp>
+#include <dynd/kernels/apply_kernels.hpp>
 #include <dynd/types/arrfunc_type.hpp>
 
 namespace dynd { namespace nd { namespace detail {

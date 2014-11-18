@@ -373,6 +373,7 @@ set(libdynd_SRC
     src/dynd/kernels/single_assigner_builtin_float16.hpp
     src/dynd/kernels/single_assigner_builtin_float128.hpp
     src/dynd/kernels/single_comparer_builtin.hpp
+    include/dynd/kernels/apply_kernels.hpp
     include/dynd/kernels/assignment_kernels.hpp
     include/dynd/kernels/var_dim_assignment_kernels.hpp
     include/dynd/kernels/buffered_kernels.hpp
@@ -392,7 +393,6 @@ set(libdynd_SRC
     include/dynd/kernels/expr_kernel_generator.hpp
     include/dynd/kernels/expression_assignment_kernels.hpp
     include/dynd/kernels/expression_comparison_kernels.hpp
-    include/dynd/kernels/functor_kernels.hpp
     include/dynd/kernels/make_lifted_ckernel.hpp
     include/dynd/kernels/make_lifted_reduction_ckernel.hpp
     include/dynd/kernels/option_assignment_kernels.hpp
