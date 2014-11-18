@@ -6,10 +6,9 @@ bindings. The instructions for this can be found here:
 
     https://github.com/ContinuumIO/dynd-python/blob/master/BUILD_INSTALL.md
 
-This library requires a C++98 or C++11 compiler. On Windows, Visual
-Studio 2010 is the minimum supported compiler. On Mac OS X, clang
-is the recommended compiler. On Linux, gcc 4.6.1 and 4.7.0 have
-been tested.
+This library requires a C++11 compiler. On Windows, Visual
+Studio 2013 is the minimum supported compiler. Clang 3.4 or gcc
+4.7 or newer is recommended on other platforms.
 
  * CMake >= 2.8.11
 
