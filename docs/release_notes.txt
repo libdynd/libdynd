@@ -5,6 +5,45 @@ DyND is a C++ library for array programming with a dynamic
 type system. It is currently in a preview state, and nothing
 about the API or the ABI is guaranteed to stay the same.
 
+Version 0.6.6
+-------------
+
+Commits by author since last release:
+
+   171  Irwin Zaid
+   121  Mark Wiebe
+     3  Wesley Emeneker
+
+- Allow struct field names to have spaces, like "{'a label': int32}".
+- Create arrfunc for processing every neighborhood in an array.
+- Create functor_arrfunc which creates an arrfunc from a C++ function
+  or function object.
+- Add support for powers of a dimension in the type system, like
+  "fixed**3 * int32" or the symbolic "fixed**N * int32".
+- Add prototype of an arrfunc registry, populate it with some math
+  functions to start.
+- Make nd::range work with the int128 type.
+- Rename "strided" dimension type to "fixed', and make it symbolic.
+  Now concrete arrays use concrete fixed dimensions like "3 * 5 * int32"
+  instead of "fixed * fixed * int32" with the shape only in the arrmeta.
+- Implement ndt::substitute_shape function, which replaces symbolic
+  dimension types with concrete sizes from a provided array shape.
+- Allow ndt::make_type<T>() to create types with different memory layout
+  than T, and introduce ndt::make_exact_type<T>() which satisfies this
+  property.
+- Remove const from the input parameters of arrfuncs/ckernels, to pave
+  the way towards input/out as well as input parameters in arrfuncs.
+- Reorganize the arrfunc calling convention into array parameters
+  and positional+keyword auxiliary parameters. Function prototype separates
+  array and auxiliary parameters with a ;, like
+  "(int32, float32; param: string) -> int32". The details of this are
+  still a work in progress.
+- Added simple dimension handling for the multiple dispatch arrfunc.
+- Make float## to ?T conversion change NaN to NA, following the convention
+  from R.
+- Rename type::tcast<some_type>() to type::extended<some_type>(), so it's
+  consistent with type::extended() which returns the base_type pointer.
+
 Version 0.6.5
 -------------
 
