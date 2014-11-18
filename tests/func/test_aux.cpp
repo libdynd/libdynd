@@ -10,7 +10,7 @@
 
 #include "inc_gtest.hpp"
 
-#include <dynd/func/functor_arrfunc.hpp>
+#include <dynd/func/apply_arrfunc.hpp>
 
 using namespace std;
 using namespace dynd;

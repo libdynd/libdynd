@@ -21,7 +21,7 @@
 #include <dynd/kernels/assignment_kernels.hpp>
 #include <dynd/kernels/date_adapter_kernels.hpp>
 #include <dynd/func/lift_arrfunc.hpp>
-#include <dynd/func/functor_arrfunc.hpp>
+#include <dynd/func/apply_arrfunc.hpp>
 #include <dynd/exceptions.hpp>
 #include <dynd/func/make_callable.hpp>
 #include <dynd/array_iter.hpp>

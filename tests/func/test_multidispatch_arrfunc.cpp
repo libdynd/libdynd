@@ -13,7 +13,7 @@
 
 #include <dynd/array.hpp>
 #include <dynd/func/multidispatch_arrfunc.hpp>
-#include <dynd/func/functor_arrfunc.hpp>
+#include <dynd/func/apply_arrfunc.hpp>
 #include <dynd/func/lift_arrfunc.hpp>
 
 using namespace std;

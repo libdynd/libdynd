@@ -12,7 +12,7 @@
 #include "../dynd_assertions.hpp"
 
 #include <dynd/json_parser.hpp>
-#include <dynd/func/functor_arrfunc.hpp>
+#include <dynd/func/apply_arrfunc.hpp>
 #include <dynd/func/neighborhood_arrfunc.hpp>
 #include <dynd/types/struct_type.hpp>
 #include <dynd/func/call_callable.hpp>

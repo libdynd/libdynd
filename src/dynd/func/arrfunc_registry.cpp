@@ -8,7 +8,7 @@
 
 #include <dynd/func/arrfunc.hpp>
 #include <dynd/func/arrfunc_registry.hpp>
-#include <dynd/func/functor_arrfunc.hpp>
+#include <dynd/func/apply_arrfunc.hpp>
 #include <dynd/func/multidispatch_arrfunc.hpp>
 #include <dynd/func/lift_arrfunc.hpp>
 

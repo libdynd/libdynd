@@ -12,7 +12,7 @@
 #include "dynd_assertions.hpp"
 
 #include <dynd/array.hpp>
-#include <dynd/func/functor_arrfunc.hpp>
+#include <dynd/func/apply_arrfunc.hpp>
 #include <dynd/func/lift_arrfunc.hpp>
 #include <dynd/types/cfixed_dim_type.hpp>
 

@@ -10,7 +10,7 @@
 #include <math.h>
 
 // TODO: Move elsewhere
-#include <dynd/func/functor_arrfunc.hpp>
+#include <dynd/func/apply_arrfunc.hpp>
 #include <dynd/types/datashape_parser.hpp>
 #include <dynd/func/arrfunc_registry.hpp>
 
