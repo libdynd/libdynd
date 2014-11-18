@@ -73,6 +73,9 @@ inline bool DYND_ISNAN(long double x) {
 
 #if __GNUC__ > 4 || \
               (__GNUC__ == 4 && (__GNUC_MINOR__ >= 7))
+
+#define DYND_CONDITIONAL_UNUSED(NAME) NAME  __attribute__((unused))
+
 // Use initializer lists on gcc >= 4.7
 #  define DYND_INIT_LIST
 // Use constexpr on gcc >= 4.7
@@ -498,6 +501,10 @@ namespace dynd {
  * warnings for them.
  */
 #define DYND_UNUSED(x)
+
+#ifndef DYND_CONDITIONAL_UNUSED
+#define DYND_CONDITIONAL_UNUSED(NAME) NAME
+#endif
 
 namespace dynd {
     // These are defined in git_version.cpp, generated from

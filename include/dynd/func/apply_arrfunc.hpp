@@ -25,7 +25,7 @@ struct apply_arrfunc_factory<R (*)(A...)>
 
     nd::array af = nd::empty(ndt::make_funcproto<R (A...)>(names...));
     arrfunc_type_data *out_af = reinterpret_cast<arrfunc_type_data *>(af.get_readwrite_originptr());
-    out_af->instantiate = &kernels::apply_ck<R (*)(A...), func, R,
+    out_af->instantiate = &kernels::apply_function_ck<R (*)(A...), func, R,
       args, make_index_sequence<args::size>, kwds, make_index_sequence<kwds::size> >::instantiate;
     af.flag_as_immutable();
 
@@ -63,7 +63,7 @@ struct apply_arrfunc_factory
 
     nd::array af = nd::empty(ndt::make_funcproto<R (A..., K...)>(std::forward<T>(names)...));
     arrfunc_type_data *out_af = reinterpret_cast<arrfunc_type_data *>(af.get_readwrite_originptr());
-    out_af->instantiate = &kernels::construct_and_apply_callable_ck<func_type, R,
+    out_af->instantiate = &kernels::construct_then_apply_callable_ck<func_type, R,
       args, make_index_sequence<args::size>, kwds, make_index_sequence<kwds::size> >::instantiate;
     af.flag_as_immutable();
     return af;
