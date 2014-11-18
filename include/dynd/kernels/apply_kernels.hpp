@@ -286,16 +286,16 @@ struct construct_then_apply_callable_ck<func_type, R, type_sequence<P...>, index
 
 template <typename func_type, func_type func, int N, typename R, typename... A>
 using apply_function_ck = detail::apply_function_ck<func_type, func, R,
-  typename to<N, A...>::type, make_index_sequence<N>,
-  typename from<N, A...>::type, make_index_sequence<sizeof...(A) - N> >;
+  typename to<N, A...>::type, typename make_index_sequence<N>::type,
+  typename from<N, A...>::type, typename make_index_sequence<sizeof...(A) - N>::type>;
 
 template <typename func_type, int N, typename R, typename... A>
 using apply_callable_ck = detail::apply_callable_ck<func_type, R,
-  typename to<N, A...>::type, make_index_sequence<N>,
-  typename from<N, A...>::type, make_index_sequence<sizeof...(A) - N> >;
+  typename to<N, A...>::type, typename make_index_sequence<N>::type,
+  typename from<N, A...>::type, typename make_index_sequence<sizeof...(A) - N>::type>;
 
 template <typename func_type, typename R, typename A, typename K>
 using construct_then_apply_callable_ck = detail::construct_then_apply_callable_ck<func_type,
-  R, A, make_index_sequence<A::size>, K, make_index_sequence<K::size> >;
+  R, A, typename make_index_sequence<A::size>::type, K, typename make_index_sequence<K::size>::type>;
 
 }} // namespace dynd::kernels

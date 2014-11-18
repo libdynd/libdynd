@@ -313,7 +313,7 @@ struct remove_all_pointers<T *> {
 
 template <typename... T>
 struct type_sequence {
-    static constexpr size_t size = sizeof...(T);
+    static const size_t size = sizeof...(T);
 };
 
 template <typename U, typename... T>
@@ -412,9 +412,9 @@ template<typename T, T... I>
 struct integer_sequence {
     static_assert(std::is_integral<T>::value, "Integral type" );
 
-    static constexpr T size = sizeof...(I);
+    static const T size = sizeof...(I);
 
-    using type = T;
+    typedef T type;
 
 //    template<T N>
   //  using append = integer_sequence<T, I..., N>;
@@ -428,11 +428,28 @@ struct integer_sequence {
     typedef typename append<size>::type next;
 };
 
-template<typename T, T... I>
-constexpr T integer_sequence<T, I...>::size;
-
+/*
 template<std::size_t... I>
 using index_sequence = integer_sequence<std::size_t, I...>;
+*/
+
+template<size_t... I>
+struct index_sequence {
+    static const size_t size = sizeof...(I);
+
+    typedef size_t type;
+
+//    template<T N>
+  //  using append = integer_sequence<T, I..., N>;
+//        using next = typename append<size>::type;
+
+    template <size_t J>
+    struct append {
+        typedef index_sequence<I..., J> type;
+    };
+
+    typedef typename append<size>::type next;
+};
 
 namespace detail {
 
@@ -440,21 +457,40 @@ template <typename T, T Nt, std::size_t N>
 struct iota {
     static_assert( Nt >= 0, "N cannot be negative" );
 
-    using type = typename iota<T, Nt-1, N-1>::type::next;
+    typedef typename iota<T, Nt-1, N-1>::type::next type;
+};
+
+template <size_t Nt>
+struct iota<size_t, Nt, 0ul> {
+    typedef index_sequence<> type;
 };
 
 template <typename T, T Nt>
 struct iota<T, Nt, 0ul> {
-    using type = integer_sequence<T>;
+    typedef integer_sequence<T> type;
 };
 
 } // namespace detail
 
+/*
 template <typename T, T N>
 using make_integer_sequence = typename detail::iota<T, N, N>::type;
+*/
 
+template <typename T, T N>
+struct make_integer_sequence {
+    typedef typename detail::iota<T, N, N>::type type;
+};
+
+/*
 template <size_t N>
 using make_index_sequence = make_integer_sequence<size_t, N>;
+*/
+
+template <size_t N>
+struct make_index_sequence {
+    typedef typename make_integer_sequence<size_t, N>::type type;
+};
 
 /*
 template <typename... T>
