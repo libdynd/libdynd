@@ -123,19 +123,9 @@ public:
       if (requested_capacity < grown_capacity) {
         requested_capacity = grown_capacity;
       }
-      char *new_data;
-      if (m_data == NULL) {
-        // If we were previously using the static data, do a malloc
-        new_data = reinterpret_cast<char *>(CKBT::alloc(16 * 8 + requested_capacity));
-        // If the allocation succeeded, copy the old data as the realloc would
-        if (new_data != NULL) {
-          CKBT::copy(new_data, m_data, m_capacity);
-        }
-      } else {
-        // Otherwise do a realloc
-        new_data = reinterpret_cast<char *>(
-            CKBT::realloc(m_data, requested_capacity));
-      }
+      // Do a realloc
+      char *new_data = reinterpret_cast<char *>(
+          CKBT::realloc(m_data, requested_capacity));
       if (new_data == NULL) {
         destroy();
         m_data = NULL;
