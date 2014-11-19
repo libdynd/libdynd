@@ -572,6 +572,10 @@ public:
         return at_array(5, i);
     }
 
+    array at(const irange& i0) const {
+        return at_array(1, &i0);
+    }
+
     /** Does a value-assignment from the rhs array. */
     void val_assign(const array &rhs, const eval::eval_context *ectx =
                                           &eval::default_eval_context) const;

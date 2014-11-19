@@ -283,31 +283,31 @@ public:
   nd::array call(intptr_t arg_count, const nd::array *args,
                  const eval::eval_context *ectx) const
   {
-    return call(arg_count, args, dynd::kwds(), ectx);
+    return call(arg_count, args, kwds(), ectx);
   }
 
   /** Convenience call operators */
-  nd::array operator()(const kwds &kwds = dynd::kwds()) const
+  nd::array operator()(const kwds &kwds_ = kwds()) const
   {
-    return call(0, NULL, kwds, &eval::default_eval_context);
+    return call(0, NULL, kwds_, &eval::default_eval_context);
   }
   nd::array operator()(const nd::array &a0,
-                       const kwds &kwds = dynd::kwds()) const
+                       const kwds &kwds_ = kwds()) const
   {
-    return call(1, &a0, kwds, &eval::default_eval_context);
+    return call(1, &a0, kwds_, &eval::default_eval_context);
   }
   nd::array operator()(const nd::array &a0, const nd::array &a1,
-                       const kwds &kwds = dynd::kwds()) const
+                       const kwds &kwds_ = kwds()) const
   {
     nd::array args[2] = {a0, a1};
-    return call(2, args, kwds, &eval::default_eval_context);
+    return call(2, args, kwds_, &eval::default_eval_context);
   }
   nd::array operator()(const nd::array &a0, const nd::array &a1,
                        const nd::array &a2,
-                       const kwds &kwds = dynd::kwds()) const
+                       const kwds &kwds_ = kwds()) const
   {
     nd::array args[3] = {a0, a1, a2};
-    return call(3, args, kwds, &eval::default_eval_context);
+    return call(3, args, kwds_, &eval::default_eval_context);
   }
 
   /** Implements the general call operator with output parameter */
@@ -316,7 +316,7 @@ public:
   void call_out(intptr_t arg_count, const nd::array *args, const nd::array &out,
                 const eval::eval_context *ectx) const
   {
-    call_out(arg_count, args, dynd::kwds(), out, ectx);
+    call_out(arg_count, args, kwds(), out, ectx);
   }
 
   /** Convenience call operators with output parameter */
@@ -325,28 +325,28 @@ public:
     call_out(0, NULL, out, &eval::default_eval_context);
   }
   void call_out(const nd::array &a0, const nd::array &out,
-                const kwds &kwds = dynd::kwds()) const
+                const kwds &kwds_ = kwds()) const
   {
-    call_out(1, &a0, kwds, out, &eval::default_eval_context);
+    call_out(1, &a0, kwds_, out, &eval::default_eval_context);
   }
   void call_out(const nd::array &a0, const nd::array &a1, const nd::array &out,
-                const kwds &kwds = dynd::kwds()) const
+                const kwds &kwds_ = kwds()) const
   {
     nd::array args[2] = {a0, a1};
-    call_out(2, args, kwds, out, &eval::default_eval_context);
+    call_out(2, args, kwds_, out, &eval::default_eval_context);
   }
   void call_out(const nd::array &a0, const nd::array &a1, const nd::array &a2,
-                const nd::array &out, const kwds &kwds = dynd::kwds()) const
+                const nd::array &out, const kwds &kwds_ = kwds()) const
   {
     nd::array args[3] = {a0, a1, a2};
-    call_out(3, args, kwds, out, &eval::default_eval_context);
+    call_out(3, args, kwds_, out, &eval::default_eval_context);
   }
   void call_out(const nd::array &a0, const nd::array &a1, const nd::array &a2,
                 const nd::array &a3, nd::array &out,
-                const kwds &kwds = dynd::kwds()) const
+                const kwds &kwds_ = kwds()) const
   {
     nd::array args[4] = {a0, a1, a2, a3};
-    call_out(4, args, kwds, out, &eval::default_eval_context);
+    call_out(4, args, kwds_, out, &eval::default_eval_context);
   }
 };
 

@@ -83,7 +83,7 @@ struct arg {
   {
   }
 
-  D &get(char *data) {
+  DYND_CUDA_HOST_DEVICE D &get(char *data) {
     return *reinterpret_cast<D *>(data);
   }
 };
@@ -127,7 +127,7 @@ public:
   kwd(T val) : m_val(val) {
   }
 
-  T get() {
+  DYND_CUDA_HOST_DEVICE T get() {
     return m_val;
   }
 };
@@ -146,18 +146,18 @@ struct apply_function_ck<func_type, func, R, type_sequence<A...>, index_sequence
 {
   typedef apply_function_ck<func_type, func, R, type_sequence<A...>, index_sequence<I...>, type_sequence<K...>, index_sequence<J...> > self_type;
 
-  apply_function_ck(detail::arg<A, I>... args, const detail::kwd<K, J> &... kwds)
+  DYND_CUDA_HOST_DEVICE apply_function_ck(detail::arg<A, I>... args, const detail::kwd<K, J> &... kwds)
     : detail::arg<A, I>(args)..., detail::kwd<K, J>(kwds)...
   {
   }
 
-  void single(char *dst, char **DYND_CONDITIONAL_UNUSED(src))
+  DYND_CUDA_HOST_DEVICE void single(char *dst, char **DYND_CONDITIONAL_UNUSED(src))
   {
     *reinterpret_cast<R *>(dst) = func(detail::arg<A, I>::get(src[I])..., detail::kwd<K, J>::get()...);
   }
 
   static intptr_t instantiate(const arrfunc_type_data *DYND_UNUSED(af_self), const arrfunc_type *af_tp,
-    dynd::ckernel_builder *ckb, intptr_t ckb_offset,
+    ckernel_builder *ckb, intptr_t ckb_offset,
     const ndt::type &dst_tp, const char *DYND_UNUSED(dst_arrmeta),
     const ndt::type *src_tp, const char *const *DYND_CONDITIONAL_UNUSED(src_arrmeta),
     kernel_request_t kernreq, const eval::eval_context *DYND_UNUSED(ectx),
@@ -179,11 +179,10 @@ struct apply_function_ck<func_type, func, R, type_sequence<A...>, index_sequence
     }
 
     self_type::create(ckb, kernreq, ckb_offset,
-      detail::arg<A, I>(src_tp[I], src_arrmeta[I], kwds)..., detail::kwd<K, J>(kwds(J).as<K>())...);
+      arg<A, I>(src_tp[I], src_arrmeta[I], kwds)..., kwd<K, J>(kwds.at(J).as<K>())...);
     return ckb_offset;
   }
 };
-
 
 template <typename func_type, typename R, typename A, typename I, typename K, typename J>
 struct apply_callable_ck;
@@ -228,7 +227,7 @@ struct apply_callable_ck<func_type, R, type_sequence<A...>, index_sequence<I...>
       }
 
       self_type::create(ckb, kernreq, ckb_offset, *af_self->get_data_as<func_type>(),
-        detail::arg<A, I>(src_tp[I], src_arrmeta[I], kwds)..., detail::kwd<K, J>(kwds(J).as<K>())...);
+        detail::arg<A, I>(src_tp[I], src_arrmeta[I], kwds)..., detail::kwd<K, J>(kwds.at(J).as<K>())...);
       return ckb_offset;
     }
 };
@@ -277,7 +276,7 @@ struct construct_then_apply_callable_ck<func_type, R, type_sequence<P...>, index
       }
 
       self_type::create(ckb, kernreq, ckb_offset,
-        detail::arg<P, I>(src_tp[I], src_arrmeta[I], kwds)..., detail::kwd<K, J>(kwds(J).as<K>())...);
+        detail::arg<P, I>(src_tp[I], src_arrmeta[I], kwds)..., detail::kwd<K, J>(kwds.at(J).as<K>())...);
       return ckb_offset;
     }
 };

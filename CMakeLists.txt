@@ -527,9 +527,11 @@ if (DYND_CUDA)
         src/dynd/types/dynd_int128.cpp
         src/dynd/types/dynd_uint128.cpp
         src/dynd/kernels/assignment_kernels.cpp
+ #       include/dynd/kernels/apply_kernels.hpp
         )
     list(APPEND libdynd_SRC
         src/dynd/kernels/assignment_kernels.cu
+#        include/dynd/kernels/apply_kernels.cu
         )
 
     set(CUDA_NVCC_FLAGS ${CUDA_NVCC_FLAGS};-std=c++11;-Xcompiler;-fPIC)

@@ -64,6 +64,7 @@ set(tests_SRC
     types/test_var_dim_type.cpp
     func/special_vals.hpp
     func/test_apply.cpp
+    func/test_apply.cu
     func/test_arrfunc.cpp
     func/test_callable.cpp
     func/test_chain_arrfunc.cpp
@@ -116,7 +117,11 @@ source_group("Types Tests" REGULAR_EXPRESSION "\\/types\\/test_[^\\/]*\\.cpp$")
 source_group("Func Tests" REGULAR_EXPRESSION "\\/func\\/test_[^\\/]*\\.cpp$")
 source_group("VM Tests" REGULAR_EXPRESSION "\\/vm\\/test_[^\\/]*\\.cpp$")
 
-add_executable(test_libdynd ${tests_SRC})
+if (DYND_CUDA)
+    cuda_add_executable(test_libdynd ${tests_SRC})
+else()
+    add_executable(test_libdynd ${tests_SRC})
+endif()
 
 if(WIN32)
     target_link_libraries(test_libdynd
