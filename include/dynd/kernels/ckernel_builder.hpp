@@ -49,8 +49,164 @@ namespace kernels {
  * be relocatable with a memcpy, it must not rely on its
  * own address.
  */
+template <typename CKBT, size_t N = 16 * 8>
+class base_ckernel_builder;
+
 template <typename CKBT>
+class base_ckernel_builder<CKBT, 0> {
+protected:
+  // Pointer to the kernel function pointers + data
+  char *m_data;
+  intptr_t m_capacity;
+
+  bool using_static_data() const {
+    return false;
+  }
+
+  void destroy()
+  {
+    if (m_data != NULL) {
+      ckernel_prefix *self = reinterpret_cast<ckernel_prefix *>(m_data);
+      // Destroy whatever was created
+      self->destroy();
+      // Free the memory
+      CKBT::free(self);
+    }
+  }
+
+public:
+  base_ckernel_builder()
+  {
+    m_data = reinterpret_cast<char *>(CKBT::alloc(16 * 8));
+    m_capacity = 16 * 8;
+    CKBT::set(m_data, 0, 16 * 8);
+  }
+
+  ~base_ckernel_builder() { destroy(); }
+
+  void reset()
+  {
+    destroy();
+    m_data = reinterpret_cast<char *>(CKBT::alloc(16 * 8));
+    m_capacity = 16 * 8;
+    CKBT::set(m_data, 0, 16 * 8);
+  }
+
+  /**
+   * This function ensures that the ckernel's data
+   * is at least the required number of bytes. It
+   * should only be called during the construction phase
+   * of the kernel.
+   *
+   * NOTE: This function ensures that there is room for
+   *       another base at the end, so if you are sure
+   *       that you're a leaf kernel, use ensure_capacity_leaf
+   *       instead.
+   */
+  void ensure_capacity(intptr_t requested_capacity)
+  {
+    ensure_capacity_leaf(requested_capacity + sizeof(ckernel_prefix));
+  }
+
+  /**
+   * This function ensures that the ckernel's data
+   * is at least the required number of bytes. It
+   * should only be called during the construction phase
+   * of the kernel when constructing a leaf kernel.
+   */
+  void ensure_capacity_leaf(intptr_t requested_capacity)
+  {
+    if (m_capacity < requested_capacity) {
+      // Grow by a factor of 1.5
+      // https://github.com/facebook/folly/blob/master/folly/docs/FBVector.md
+      intptr_t grown_capacity = m_capacity * 3 / 2;
+      if (requested_capacity < grown_capacity) {
+        requested_capacity = grown_capacity;
+      }
+      char *new_data;
+      if (m_data == NULL) {
+        // If we were previously using the static data, do a malloc
+        new_data = reinterpret_cast<char *>(CKBT::alloc(16 * 8 + requested_capacity));
+        // If the allocation succeeded, copy the old data as the realloc would
+        if (new_data != NULL) {
+          CKBT::copy(new_data, m_data, m_capacity);
+        }
+      } else {
+        // Otherwise do a realloc
+        new_data = reinterpret_cast<char *>(
+            CKBT::realloc(m_data, requested_capacity));
+      }
+      if (new_data == NULL) {
+        destroy();
+        m_data = NULL;
+        throw std::bad_alloc();
+      }
+      // Zero out the newly allocated capacity
+      CKBT::set(reinterpret_cast<char *>(new_data) + m_capacity, 0,
+             requested_capacity - m_capacity);
+      m_data = new_data;
+      m_capacity = requested_capacity;
+    }
+  }
+
+  /**
+   * For use during construction. This function ensures that the
+   * ckernel_builder has enough capacity (including a child), increments the
+   * provided offset appropriately based on the size of T, and returns a pointer
+   * to the allocated ckernel.
+   */
+  template <class T>
+  T *alloc_ck(intptr_t &inout_ckb_offset)
+  {
+    intptr_t ckb_offset = inout_ckb_offset;
+    kernels::inc_ckb_offset<T>(inout_ckb_offset);
+    ensure_capacity(inout_ckb_offset);
+    return reinterpret_cast<T *>(m_data + ckb_offset);
+  }
+
+  /**
+   * For use during construction. This function ensures that the
+   * ckernel_builder has enough capacity, increments the provided
+   * offset appropriately based on the size of T, and returns a pointer
+   * to the allocated ckernel.
+   */
+  template <class T>
+  T *alloc_ck_leaf(intptr_t &inout_ckb_offset)
+  {
+    intptr_t ckb_offset = inout_ckb_offset;
+    kernels::inc_ckb_offset<T>(inout_ckb_offset);
+    ensure_capacity_leaf(inout_ckb_offset);
+    return reinterpret_cast<T *>(m_data + ckb_offset);
+  }
+
+  /**
+   * For use during construction, gets the ckernel component
+   * at the requested offset.
+   */
+  template <class T>
+  T *get_at(size_t offset)
+  {
+    return reinterpret_cast<T *>(m_data + offset);
+  }
+
+  ckernel_prefix *get() const
+  {
+    return reinterpret_cast<ckernel_prefix *>(m_data);
+  }
+
+  void swap(base_ckernel_builder &rhs)
+  {
+    (std::swap)(m_data, rhs.m_data);
+    (std::swap)(m_capacity, rhs.m_capacity);
+  }
+
+  /** For debugging/informational purposes */
+  intptr_t get_capacity() const { return m_capacity; }
+};
+
+template <typename CKBT, size_t N>
 class base_ckernel_builder {
+protected:
   // Pointer to the kernel function pointers + data
   char *m_data;
   intptr_t m_capacity;
@@ -226,12 +382,9 @@ public:
 
   /** For debugging/informational purposes */
   intptr_t get_capacity() const { return m_capacity; }
-
-  friend int ckernel_builder_ensure_capacity_leaf(void *ckb,
-                                                  intptr_t requested_capacity);
 };
 
-class ckernel_builder : public base_ckernel_builder<ckernel_builder> {
+class ckernel_builder : public base_ckernel_builder<ckernel_builder, 0> {
 public:
   static void *alloc(size_t size) {
     return std::malloc(size);
@@ -252,6 +405,9 @@ public:
   static void *set(void *dst, int value, size_t size) {
     return std::memset(dst, value, size);
   }
+
+  friend int ckernel_builder_ensure_capacity_leaf(void *ckb,
+                                                  intptr_t requested_capacity);
 };
 
 /**
