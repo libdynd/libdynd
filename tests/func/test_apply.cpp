@@ -88,10 +88,12 @@ TEST(Apply, Function)
   EXPECT_DOUBLE_EQ(166.765, af(nd::array({9.14, -2.7, 15.32}).view(ndt::make_type<double[3]>()),
     nd::array({0.0, 0.65, 11.0}).view(ndt::make_type<double[3]>())).as<double>());
 
+/*
   af = nd::make_apply_arrfunc<decltype(&func5), &func5>();
   EXPECT_EQ(1251L, af(nd::array({{1242L, 23L, -5L}, {925L, -836L, -14L}}).view(ndt::make_type<long[2][3]>())).as<long>());
   af = nd::make_apply_arrfunc(&func5);
   EXPECT_EQ(1251L, af(nd::array({{1242L, 23L, -5L}, {925L, -836L, -14L}}).view(ndt::make_type<long[2][3]>())).as<long>());
+*/
 
   af = nd::make_apply_arrfunc<decltype(&func6), &func6>();
   EXPECT_EQ(8, af(3, 5, 7).as<int>());
@@ -104,6 +106,7 @@ TEST(Apply, Function)
   EXPECT_EQ(36.3, af(38, 5, 12.1).as<double>());
 }
 
+/*
 TEST(Apply, FunctionWithKeywords)
 {
   nd::arrfunc af;
@@ -160,6 +163,7 @@ TEST(Apply, FunctionWithKeywords)
   af = nd::make_apply_arrfunc(&func7, "x", "y", "z");
   EXPECT_EQ(36.3, af(kwds("x", 38, "y", 5, "z", 12.1)).as<double>());
 }
+*/
 
 template <typename func_type, func_type func>
 class func_wrapper;
@@ -243,10 +247,12 @@ TEST(Apply, Callable)
   EXPECT_DOUBLE_EQ(166.765, af(nd::array({9.14, -2.7, 15.32}).view(ndt::make_type<double[3]>()),
     nd::array({0.0, 0.65, 11.0}).view(ndt::make_type<double[3]>())).as<double>());
 
+/*
   af = nd::make_apply_arrfunc<func5_as_callable>();
   EXPECT_EQ(1251L, af(nd::array({{1242L, 23L, -5L}, {925L, -836L, -14L}}).view(ndt::make_type<long[2][3]>())).as<long>());
   af = nd::make_apply_arrfunc(func5_as_callable());
   EXPECT_EQ(1251L, af(nd::array({{1242L, 23L, -5L}, {925L, -836L, -14L}}).view(ndt::make_type<long[2][3]>())).as<long>());
+*/
 
   af = nd::make_apply_arrfunc<func6_as_callable>();
   EXPECT_EQ(8, af(3, 5, 7).as<int>());
@@ -267,6 +273,7 @@ TEST(Apply, Callable)
   EXPECT_EQ(8, af(5, 3).as<int>());
 }
 
+/*
 TEST(Apply, CallableWithKeywords)
 {
   nd::arrfunc af;
@@ -321,3 +328,4 @@ TEST(Apply, CallableWithKeywords)
   af = nd::make_apply_arrfunc<callable1, int, int>("x", "y");
   EXPECT_EQ(28, af(2, kwds("x", 1, "y", 7)).as<int>());
 }
+*/

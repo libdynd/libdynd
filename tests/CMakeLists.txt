@@ -118,6 +118,16 @@ source_group("Func Tests" REGULAR_EXPRESSION "\\/func\\/test_[^\\/]*\\.cpp$")
 source_group("VM Tests" REGULAR_EXPRESSION "\\/vm\\/test_[^\\/]*\\.cpp$")
 
 if (DYND_CUDA)
+    # Replace some source files with their CUDA versions
+    list(REMOVE_ITEM tests_SRC
+        func/test_apply.cpp
+        )
+    list(APPEND tests_SRC
+        func/test_apply.cu
+        )
+endif()
+
+if (DYND_CUDA)
     cuda_add_executable(test_libdynd ${tests_SRC})
 else()
     add_executable(test_libdynd ${tests_SRC})

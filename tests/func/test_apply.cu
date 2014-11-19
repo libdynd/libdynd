@@ -3,26 +3,14 @@
 // BSD 2-Clause License, see LICENSE.txt
 //
 
-#include <iostream>
-#include <stdexcept>
-#include <algorithm>
-#include <cmath>
+#include "test_apply.cpp"
 
-#include "inc_gtest.hpp"
-#include "dynd_assertions.hpp"
-
-#include <dynd/array.hpp>
-#include <dynd/func/arrfunc.hpp>
-#include <dynd/kernels/apply_kernels.hpp>
-
-using namespace std;
-using namespace dynd;
-
-__device__ int func(int x, int y)
+TEST(Apply, CUDAFunction)
 {
-	return x + y;
+
 }
 
+/*
 __global__ void kern()
 {
 	typedef kernels::apply_function_ck<decltype(&func), &func, 2, int, int, int> ck_type;
@@ -31,7 +19,11 @@ __global__ void kern()
 
 TEST(Apply, CUDAFunction)
 {
-	kern<<<1, 1>>>();
+	nd::arrfunc af;
+
+	af = nd::make_apply_arrfunc<decltype(&func0), &func0>();
+//	EXPECT_EQ(4, af(5, 3).as<int>());
 
 //	std::exit(-1);
 }
+*/

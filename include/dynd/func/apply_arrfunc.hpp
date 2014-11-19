@@ -81,6 +81,18 @@ arrfunc make_apply_arrfunc(T &&... names)
   return detail::apply_arrfunc_factory<func_type>::template make<func>(std::forward<T>(names)...);
 }
 
+template <typename func_type, func_type func, typename... T>
+arrfunc make_apply_arrfunc(kernel_request_t kernreq, T &&... names)
+{
+  switch (kernreq)
+  {
+    default:
+      break;
+  }
+
+  return nd::array();
+}
+
 template <typename func_type, typename... T>
 typename std::enable_if<is_function_pointer<func_type>::value, arrfunc>::type 
   make_apply_arrfunc(func_type func, T &&... names)
