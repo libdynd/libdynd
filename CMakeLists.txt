@@ -85,7 +85,6 @@ include_directories(thirdparty/datetime/include)
 
 set(DYND_LINK_LIBS cephes datetime)
 
-MESSAGE(${CMAKE_VERSION})
 if(WIN32)
     # Treat warnings as errors (-WX does this)
     set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -WX -EHsc")

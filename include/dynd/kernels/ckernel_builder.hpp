@@ -35,10 +35,6 @@ namespace kernels {
   }
 } // namespace kernels
 
-// base_ck_builder
-// cuda_device_ck_builder
-// cuda_d
-
 /**
  * Function pointers + data for a hierarchical
  * kernel which operates on type/arrmeta in
@@ -66,11 +62,10 @@ protected:
   void destroy()
   {
     if (m_data != NULL) {
-      ckernel_prefix *self = reinterpret_cast<ckernel_prefix *>(m_data);
       // Destroy whatever was created
-      self->destroy();
+      CKBT::destroy2(reinterpret_cast<ckernel_prefix *>(m_data));
       // Free the memory
-      CKBT::free(self);
+      CKBT::free(m_data);
     }
   }
 
@@ -123,9 +118,9 @@ public:
       if (requested_capacity < grown_capacity) {
         requested_capacity = grown_capacity;
       }
-      // Do a realloc
+      // Do a malloc
       char *new_data = reinterpret_cast<char *>(
-          CKBT::realloc(m_data, requested_capacity));
+          CKBT::realloc(m_data, m_capacity, requested_capacity));
       if (new_data == NULL) {
         destroy();
         m_data = NULL;
@@ -211,12 +206,11 @@ protected:
   void destroy()
   {
     if (m_data != NULL) {
-      ckernel_prefix *self = reinterpret_cast<ckernel_prefix *>(m_data);
       // Destroy whatever was created
-      self->destroy();
+      CKBT::destroy2(reinterpret_cast<ckernel_prefix *>(m_data));
       if (!using_static_data()) {
         // Free the memory
-        CKBT::free(self);
+        CKBT::free(m_data);
       }
     }
   }
@@ -281,7 +275,7 @@ public:
       } else {
         // Otherwise do a realloc
         new_data = reinterpret_cast<char *>(
-            CKBT::realloc(m_data, requested_capacity));
+            CKBT::realloc(m_data, m_capacity, requested_capacity));
       }
       if (new_data == NULL) {
         destroy();
@@ -374,31 +368,91 @@ public:
   intptr_t get_capacity() const { return m_capacity; }
 };
 
-class ckernel_builder : public base_ckernel_builder<ckernel_builder, 0> {
-public:
-  static void *alloc(size_t size) {
-    return std::malloc(size);
-  }
+template <kernel_request_t kernreq>
+class ext_ckernel_builder;
 
-  static void *realloc(void *ptr, size_t new_size) {
+template <>
+class ext_ckernel_builder<kernel_request_host>
+    : public base_ckernel_builder<ext_ckernel_builder<kernel_request_host>, 0> {
+public:
+  static void *alloc(size_t size) { return std::malloc(size); }
+
+  static void *realloc(void *ptr, size_t DYND_UNUSED(old_size), size_t new_size)
+  {
     return std::realloc(ptr, new_size);
   }
 
-  static void free(void *ptr) {
-    std::free(ptr);
-  }
+  static void free(void *ptr) { std::free(ptr); }
 
-  static void *copy(void *dst, const void *src, size_t size) {
+  static void *copy(void *dst, const void *src, size_t size)
+  {
     return std::memcpy(dst, src, size);
   }
 
-  static void *set(void *dst, int value, size_t size) {
+  static void *set(void *dst, int value, size_t size)
+  {
     return std::memset(dst, value, size);
+  }
+
+  static void destroy2(ckernel_prefix *self)
+  {
+    self->destroy();
   }
 
   friend int ckernel_builder_ensure_capacity_leaf(void *ckb,
                                                   intptr_t requested_capacity);
 };
+
+typedef ext_ckernel_builder<kernel_request_host> ckernel_builder;
+
+#ifdef __CUDACC__
+
+__global__ void cuda_device_destroy(ckernel_prefix *self)
+{
+  self->destroy();
+}
+
+void throw_if_not_cuda_success(cudaError_t);
+
+class cuda_device_ckernel_builder : public base_ckernel_builder<cuda_device_ckernel_builder, 0> {
+public:
+  static void *alloc(size_t size) {
+    void *ptr;
+    throw_if_not_cuda_success(cudaMalloc(&ptr, size));
+    return ptr;
+  }
+
+  static void *realloc(void *old_ptr, size_t old_size,
+                       size_t new_size)
+  {
+    void *new_ptr = alloc(new_size);
+    copy(new_ptr, old_ptr, old_size);
+    free(old_ptr);
+    return new_ptr;
+  }
+
+  static void free(void *ptr) {
+    throw_if_not_cuda_success(cudaFree(ptr));
+  }
+
+  static void *copy(void *dst, const void *src, size_t size) {
+    throw_if_not_cuda_success(cudaMemcpy(dst, src, size, cudaMemcpyDeviceToDevice));
+    return dst;
+  }
+
+  static void *set(void *dst, int value, size_t size) {
+    throw_if_not_cuda_success(cudaMemset(dst, value, size));
+    return dst;
+  }
+
+  static void destroy2(ckernel_prefix *self)
+  {
+    cuda_device_destroy<<<1, 1>>>(self);
+    cudaDeviceSynchronize();
+  }
+};
+
+#endif
 
 /**
  * C API function for constructing a ckernel_builder object
@@ -527,18 +581,18 @@ namespace kernels {
    * (curiously recurring template pattern) base class to help
    * create ckernels.
    */
-  template <class CKT>
+  template <class CKT, kernel_request_t kernreq2 = kernel_request_host>
   struct general_ck {
     typedef CKT self_type;
 
     ckernel_prefix base;
 
-    static self_type *get_self(ckernel_prefix *rawself)
+    DYND_CUDA_HOST_DEVICE static self_type *get_self(ckernel_prefix *rawself)
     {
       return reinterpret_cast<self_type *>(rawself);
     }
 
-    static const self_type *get_self(const ckernel_prefix *rawself)
+    DYND_CUDA_HOST_DEVICE static const self_type *get_self(const ckernel_prefix *rawself)
     {
       return reinterpret_cast<const self_type *>(rawself);
     }
@@ -553,7 +607,7 @@ namespace kernels {
      * to the position after it.
      */
     template <typename... A>
-    static inline self_type *create(ckernel_builder *ckb,
+    static self_type *create(ckernel_builder *ckb,
                                     kernel_request_t kernreq,
                                     intptr_t &inout_ckb_offset,
                                     const A &... args)
@@ -570,7 +624,7 @@ namespace kernels {
      * to the position after it.
      */
     template <typename... A>
-    static inline self_type *create_leaf(ckernel_builder *ckb,
+    static self_type *create_leaf(ckernel_builder *ckb,
                                          kernel_request_t kernreq,
                                          intptr_t &inout_ckb_offset,
                                          const A &... args)
@@ -588,7 +642,7 @@ namespace kernels {
      * the base function and destructor
      */
     template <typename... A>
-    static inline self_type *init(ckernel_prefix *rawself,
+    static self_type *init(ckernel_prefix *rawself,
                                   kernel_request_t kernreq,
                                   const A &... args)
     {
@@ -626,12 +680,12 @@ namespace kernels {
     /**
      * Default implementation of destruct_children does nothing.
      */
-    inline void destruct_children() {}
+    void destruct_children() {}
 
     /**
      * Returns the child ckernel immediately following this one.
      */
-    inline ckernel_prefix *get_child_ckernel()
+    ckernel_prefix *get_child_ckernel()
     {
       return get_child_ckernel(sizeof(self_type));
     }
@@ -639,7 +693,7 @@ namespace kernels {
     /**
      * Returns the child ckernel at the specified offset.
      */
-    inline ckernel_prefix *get_child_ckernel(intptr_t offset)
+    ckernel_prefix *get_child_ckernel(intptr_t offset)
     {
       return base.get_child_ckernel(ckernel_prefix::align_offset(offset));
     }

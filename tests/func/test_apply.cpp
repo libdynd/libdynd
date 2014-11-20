@@ -17,42 +17,42 @@
 using namespace std;
 using namespace dynd;
 
-int func0(int x, int y)
+DYND_CUDA_HOST_DEVICE int func0(int x, int y)
 {
 	return 2 * (x - y);
 }
 
-double func1(double x, int y)
+DYND_CUDA_HOST_DEVICE double func1(double x, int y)
 {
   return x + 2.6 * y;
 }
 
-float func2(const float (&x)[3])
+DYND_CUDA_HOST_DEVICE float func2(const float (&x)[3])
 {
     return x[0] + x[1] + x[2];
 }
 
-unsigned int func3()
+DYND_CUDA_HOST_DEVICE unsigned int func3()
 {
   return 12U;
 }
 
-double func4(const double (&x)[3], const double (&y)[3])
+DYND_CUDA_HOST_DEVICE double func4(const double (&x)[3], const double (&y)[3])
 {
     return x[0] * y[0] + x[1] * y[1] + x[2] * y[2];
 }
 
-long func5(const long (&x)[2][3])
+DYND_CUDA_HOST_DEVICE long func5(const long (&x)[2][3])
 {
     return x[0][0] + x[0][1] + x[1][2];
 }
 
-int func6(int x, int y, int z)
+DYND_CUDA_HOST_DEVICE int func6(int x, int y, int z)
 {
     return x * y - z;
 }
 
-double func7(int x, int y, double z)
+DYND_CUDA_HOST_DEVICE double func7(int x, int y, double z)
 {
   return (x % y) * z;
 }
@@ -172,7 +172,7 @@ template <typename R, typename... A, R (*func)(A...)>
 class func_wrapper<R (*)(A...), func>
 {
 public:
-  R operator ()(A... a) const {
+  DYND_CUDA_HOST_DEVICE R operator ()(A... a) const {
     return (*func)(a...);
   }
 };

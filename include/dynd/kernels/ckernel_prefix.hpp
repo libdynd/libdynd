@@ -34,7 +34,9 @@ enum {
     kernel_request_predicate = 2,
 
     /** Y */
-    kernel_request_cuda_device = 8
+    kernel_request_host = 8,
+    /** Y */
+    kernel_request_cuda_device = 9
 };
 typedef uint32_t kernel_request_t;
 
@@ -61,14 +63,14 @@ struct ckernel_prefix {
      * begin with a ckernel_prefix can define this
      * base() function which returns that ckernel_prefix.
      */
-    inline ckernel_prefix& base() {
+    ckernel_prefix& base() {
         return *this;
     }
 
     /**
      * Aligns an offset as required by ckernels.
      */
-    inline static size_t align_offset(size_t offset) {
+    static size_t align_offset(size_t offset) {
       return (offset + size_t(7)) & ~size_t(7);
     }
 
@@ -79,16 +81,16 @@ struct ckernel_prefix {
      *      kdp->get_function<expr_single_t>()
      */
     template<typename T>
-    inline T get_function() const {
+    T get_function() const {
         return reinterpret_cast<T>(function);
     }
 
     template<typename T>
-    inline void set_function(T fnptr) {
+    void set_function(T fnptr) {
         function = reinterpret_cast<void *>(fnptr);
     }
 
-    inline void set_expr_function(kernel_request_t kernreq,
+    void set_expr_function(kernel_request_t kernreq,
                                   expr_single_t single,
                                   expr_strided_t strided)
     {
@@ -113,10 +115,12 @@ struct ckernel_prefix {
      * Calls the destructor of the ckernel if it is
      * non-NULL.
      */
-    inline void destroy() {
+    DYND_CUDA_HOST_DEVICE void destroy() {
+#ifdef __CUDA_ARCH__
         if (destructor != NULL) {
             destructor(this);
         }
+#endif
     }
 
     /**

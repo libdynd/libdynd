@@ -9,6 +9,7 @@
 #include <string>
 
 #include <dynd/array.hpp>
+#include <dynd/types/cuda_device_type.hpp>
 #include <dynd/types/fixed_dim_type.hpp>
 #include <dynd/types/fixed_dimsym_type.hpp>
 #include <dynd/types/string_type.hpp>
@@ -129,11 +130,11 @@ public:
 
 namespace ndt { namespace detail {
 
-template <typename funcproto_type>
+template <kernel_request_t kernreq, typename funcproto_type>
 struct funcproto_factory;
 
 template <typename R>
-struct funcproto_factory<R ()> {
+struct funcproto_factory<kernel_request_host, R ()> {
   static ndt::type make()
   {
     nd::array arg_tp = nd::empty(0, ndt::make_type());
@@ -142,8 +143,18 @@ struct funcproto_factory<R ()> {
   }
 };
 
+template <typename R>
+struct funcproto_factory<kernel_request_cuda_device, R ()> {
+  static ndt::type make()
+  {
+    nd::array arg_tp = nd::empty(0, ndt::make_type());
+    arg_tp.flag_as_immutable();
+    return make_funcproto(arg_tp, make_cuda_device(make_type<R>()));
+  }
+};
+
 template <typename R, typename... A>
-struct funcproto_factory<R (A...)> {
+struct funcproto_factory<kernel_request_host, R (A...)> {
   static ndt::type make()
   {
     ndt::type arg_tp[sizeof...(A)] = {make_type<typename std::remove_cv<typename std::remove_reference<A>::type>::type>()...};
@@ -151,7 +162,25 @@ struct funcproto_factory<R (A...)> {
   }
 
   template <typename... T>
-  static ndt::type make(const T &... names)
+  static ndt::type make(T &&... names)
+  {
+    const char *raw_names[] = {names...};
+
+    ndt::type arg_tp[sizeof...(A)] = {make_type<typename std::remove_cv<typename std::remove_reference<A>::type>::type>()...};
+    return make_funcproto(arg_tp, make_type<R>(), raw_names);
+  }
+};
+
+template <typename R, typename... A>
+struct funcproto_factory<kernel_request_cuda_device, R (A...)> {
+  static ndt::type make()
+  {
+    ndt::type arg_tp[sizeof...(A)] = {make_cuda_device(make_type<typename std::remove_cv<typename std::remove_reference<A>::type>::type>())...};
+    return make_funcproto(arg_tp, make_cuda_device(make_type<R>()));
+  }
+
+  template <typename... T>
+  static ndt::type make(T &&... names)
   {
     const char *raw_names[] = {names...};
 
@@ -201,9 +230,14 @@ inline ndt::type make_funcproto(const ndt::type& single_arg_type,
 }
 
 /** Makes a funcproto type from the C++ function type */
+template <kernel_request_t kernreq, typename funcproto_type, typename... T>
+ndt::type make_funcproto(T &&... names) {
+    return detail::funcproto_factory<kernreq, funcproto_type>::make(std::forward<T>(names)...);
+}
+
 template <typename funcproto_type, typename... T>
-ndt::type make_funcproto(const T &... names) {
-    return detail::funcproto_factory<funcproto_type>::make(names...);
+ndt::type make_funcproto(T &&... names) {
+    return make_funcproto<kernel_request_host, funcproto_type>(std::forward<T>(names)...);
 }
 
 ndt::type make_generic_funcproto(intptr_t nargs);

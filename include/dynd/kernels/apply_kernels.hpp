@@ -136,15 +136,15 @@ public:
 // apply_callable_ck
 // construct_then_apply_callable_ck
 
-template <typename func_type, func_type func, typename R, typename A, typename I, typename K, typename J>
+template <kernel_request_t kernreq, typename func_type, func_type func, typename R, typename A, typename I, typename K, typename J>
 struct apply_function_ck;
 
 template <typename func_type, func_type func, typename R, typename... A, size_t... I, typename... K, size_t... J>
-struct apply_function_ck<func_type, func, R, type_sequence<A...>, index_sequence<I...>, type_sequence<K...>, index_sequence<J...> >
-  : kernels::expr_ck<apply_function_ck<func_type, func, R, type_sequence<A...>, index_sequence<I...>, type_sequence<K...>, index_sequence<J...> >, sizeof...(A)>,
+struct apply_function_ck<kernel_request_host, func_type, func, R, type_sequence<A...>, index_sequence<I...>, type_sequence<K...>, index_sequence<J...> >
+  : kernels::expr_ck<apply_function_ck<kernel_request_host, func_type, func, R, type_sequence<A...>, index_sequence<I...>, type_sequence<K...>, index_sequence<J...> >, sizeof...(A)>,
     detail::arg<A, I>..., detail::kwd<K, J>...
 {
-  typedef apply_function_ck<func_type, func, R, type_sequence<A...>, index_sequence<I...>, type_sequence<K...>, index_sequence<J...> > self_type;
+  typedef apply_function_ck<kernel_request_host, func_type, func, R, type_sequence<A...>, index_sequence<I...>, type_sequence<K...>, index_sequence<J...> > self_type;
 
   DYND_CUDA_HOST_DEVICE apply_function_ck(detail::arg<A, I>... args, const detail::kwd<K, J> &... kwds)
     : detail::arg<A, I>(args)..., detail::kwd<K, J>(kwds)...
@@ -232,59 +232,145 @@ struct apply_callable_ck<func_type, R, type_sequence<A...>, index_sequence<I...>
     }
 };
 
-template <typename func_type, typename R, typename A, typename I, typename K, typename J>
+template <kernel_request_t kernreq, typename func_type, typename R, typename A,
+          typename I, typename K, typename J>
 struct construct_then_apply_callable_ck;
 
-template <typename func_type, typename R, typename... P, size_t... I, typename... K, size_t... J>
-struct construct_then_apply_callable_ck<func_type, R, type_sequence<P...>, index_sequence<I...>, type_sequence<K...>, index_sequence<J...> >
-  : kernels::expr_ck<construct_then_apply_callable_ck<func_type, R, type_sequence<P...>, index_sequence<I...>, type_sequence<K...>, index_sequence<J...> >,
-    sizeof...(P)>, detail::arg<P, I>...
-{
-    typedef construct_then_apply_callable_ck<func_type, R, type_sequence<P...>, index_sequence<I...>, type_sequence<K...>, index_sequence<J...> > self_type;
+template <typename func_type, typename R, typename... A, size_t... I,
+          typename... K, size_t... J>
+struct construct_then_apply_callable_ck<
+    kernel_request_host, func_type, R, type_sequence<A...>,
+    index_sequence<I...>, type_sequence<K...>, index_sequence<J...>>
+    : kernels::expr_ck<
+          construct_then_apply_callable_ck<
+              kernel_request_host, func_type, R, type_sequence<A...>,
+              index_sequence<I...>, type_sequence<K...>, index_sequence<J...>>,
+          sizeof...(A)>,
+      detail::arg<A, I>... {
+  typedef construct_then_apply_callable_ck<
+      kernel_request_host, func_type, R, type_sequence<A...>,
+      index_sequence<I...>, type_sequence<K...>,
+      index_sequence<J...>> self_type;
 
-    func_type func;
+  func_type func;
 
-    construct_then_apply_callable_ck(detail::arg<P, I>... args, detail::kwd<K, J>... kwds)
-      : detail::arg<P, I>(args)..., func(kwds.get()...)
-    {
-    }
+  construct_then_apply_callable_ck(detail::arg<A, I>... args,
+                                   detail::kwd<K, J>... kwds)
+      : detail::arg<A, I>(args)..., func(kwds.get()...)
+  {
+  }
 
-    void single(char *dst, char **DYND_CONDITIONAL_UNUSED(src)) {
-      *reinterpret_cast<R *>(dst) = func(detail::arg<P, I>::get(src[I])...);
-    }
+  void single(char *dst, char **DYND_CONDITIONAL_UNUSED(src))
+  {
+    *reinterpret_cast<R *>(dst) = func(detail::arg<A, I>::get(src[I])...);
+  }
 
-    static intptr_t instantiate(const arrfunc_type_data *DYND_UNUSED(af_self), const arrfunc_type *af_tp,
-      dynd::ckernel_builder *ckb, intptr_t ckb_offset,
-      const ndt::type &dst_tp, const char *DYND_UNUSED(dst_arrmeta),
-      const ndt::type *src_tp, const char *const *DYND_CONDITIONAL_UNUSED(src_arrmeta),
+  static intptr_t instantiate(
+      const arrfunc_type_data *DYND_UNUSED(af_self), const arrfunc_type *af_tp,
+      dynd::ckernel_builder *ckb, intptr_t ckb_offset, const ndt::type &dst_tp,
+      const char *DYND_UNUSED(dst_arrmeta), const ndt::type *src_tp,
+      const char *const *DYND_CONDITIONAL_UNUSED(src_arrmeta),
       kernel_request_t kernreq, const eval::eval_context *DYND_UNUSED(ectx),
       const nd::array &DYND_UNUSED(args), const nd::array &kwds)
-    {
-      for (intptr_t i = 0; i < af_tp->get_npos(); ++i) {
-        if (src_tp[i] != af_tp->get_arg_type(i)) {
-          std::stringstream ss;
-          ss << "Provided types " << ndt::make_funcproto(sizeof...(P), src_tp, dst_tp)
-             << " do not match the arrfunc proto " << af_tp;
-          throw type_error(ss.str());
-        }
-      }
-      if (dst_tp != af_tp->get_return_type()) {
+  {
+    for (intptr_t i = 0; i < af_tp->get_npos(); ++i) {
+      if (src_tp[i] != af_tp->get_arg_type(i)) {
         std::stringstream ss;
-        ss << "Provided types " << ndt::make_funcproto(sizeof...(P), src_tp, dst_tp)
+        ss << "Provided types "
+           << ndt::make_funcproto(sizeof...(A), src_tp, dst_tp)
            << " do not match the arrfunc proto " << af_tp;
         throw type_error(ss.str());
       }
-
-      self_type::create(ckb, kernreq, ckb_offset,
-        detail::arg<P, I>(src_tp[I], src_arrmeta[I], kwds)..., detail::kwd<K, J>(kwds.at(J).as<K>())...);
-      return ckb_offset;
     }
+    if (dst_tp != af_tp->get_return_type()) {
+      std::stringstream ss;
+      ss << "Provided types "
+         << ndt::make_funcproto(sizeof...(A), src_tp, dst_tp)
+         << " do not match the arrfunc proto " << af_tp;
+      throw type_error(ss.str());
+    }
+
+    self_type::create(ckb, kernreq, ckb_offset,
+                      detail::arg<A, I>(src_tp[I], src_arrmeta[I], kwds)...,
+                      detail::kwd<K, J>(kwds.at(J).as<K>())...);
+    return ckb_offset;
+  }
 };
+
+#ifdef __CUDACC__
+
+template <typename func_type, typename R, typename... A, size_t... I,
+          typename... K, size_t... J>
+struct construct_then_apply_callable_ck<
+    kernel_request_cuda_device, func_type, R, type_sequence<A...>,
+    index_sequence<I...>, type_sequence<K...>, index_sequence<J...>>
+    : kernels::expr_ck<
+          construct_then_apply_callable_ck<
+              kernel_request_cuda_device, func_type, R, type_sequence<A...>,
+              index_sequence<I...>, type_sequence<K...>, index_sequence<J...>>,
+          sizeof...(A)>,
+      detail::arg<A, I>... {
+  typedef construct_then_apply_callable_ck<
+      kernel_request_cuda_device, func_type, R, type_sequence<A...>,
+      index_sequence<I...>, type_sequence<K...>,
+      index_sequence<J...>> self_type;
+
+  func_type func;
+
+  __device__ construct_then_apply_callable_ck(detail::arg<A, I>... args,
+                                              detail::kwd<K, J>... kwds)
+      : detail::arg<A, I>(args)..., func(kwds.get()...)
+  {
+  }
+
+  __device__ void single(char *dst, char **DYND_CONDITIONAL_UNUSED(src))
+  {
+    *reinterpret_cast<R *>(dst) = func(detail::arg<A, I>::get(src[I])...);
+  }
+
+  static intptr_t instantiate(
+      const arrfunc_type_data *DYND_UNUSED(af_self), const arrfunc_type *af_tp,
+      dynd::ckernel_builder *ckb, intptr_t ckb_offset, const ndt::type &dst_tp,
+      const char *DYND_UNUSED(dst_arrmeta), const ndt::type *src_tp,
+      const char *const *DYND_CONDITIONAL_UNUSED(src_arrmeta),
+      kernel_request_t kernreq, const eval::eval_context *DYND_UNUSED(ectx),
+      const nd::array &DYND_UNUSED(args), const nd::array &kwds)
+  {
+    for (intptr_t i = 0; i < af_tp->get_npos(); ++i) {
+      if (src_tp[i] != af_tp->get_arg_type(i)) {
+        std::stringstream ss;
+        ss << "Provided types "
+           << ndt::make_funcproto(sizeof...(A), src_tp, dst_tp)
+           << " do not match the arrfunc proto " << af_tp;
+        throw type_error(ss.str());
+      }
+    }
+    if (dst_tp != af_tp->get_return_type()) {
+      std::stringstream ss;
+      ss << "Provided types "
+         << ndt::make_funcproto(sizeof...(A), src_tp, dst_tp)
+         << " do not match the arrfunc proto " << af_tp;
+      throw type_error(ss.str());
+    }
+
+    cuda_device_ckernel_builder cuda_device_ckb;
+
+    if (false) {
+    }
+
+    self_type::create(ckb, kernreq, ckb_offset,
+                      detail::arg<A, I>(src_tp[I], src_arrmeta[I], kwds)...,
+                      detail::kwd<K, J>(kwds.at(J).as<K>())...);
+    return ckb_offset;
+  }
+};
+
+#endif
 
 } // detail
 
 template <typename func_type, func_type func, int N, typename R, typename... A>
-using apply_function_ck = detail::apply_function_ck<func_type, func, R,
+using apply_function_ck = detail::apply_function_ck<kernel_request_host, func_type, func, R,
   typename to<N, A...>::type, typename make_index_sequence<N>::type,
   typename from<N, A...>::type, typename make_index_sequence<sizeof...(A) - N>::type>;
 
@@ -293,8 +379,8 @@ using apply_callable_ck = detail::apply_callable_ck<func_type, R,
   typename to<N, A...>::type, typename make_index_sequence<N>::type,
   typename from<N, A...>::type, typename make_index_sequence<sizeof...(A) - N>::type>;
 
-template <typename func_type, typename R, typename A, typename K>
-using construct_then_apply_callable_ck = detail::construct_then_apply_callable_ck<func_type,
+template <kernel_request_t kernreq, typename func_type, typename R, typename A, typename K>
+using construct_then_apply_callable_ck = detail::construct_then_apply_callable_ck<kernreq, func_type,
   R, A, typename make_index_sequence<A::size>::type, K, typename make_index_sequence<K::size>::type>;
 
 }} // namespace dynd::kernels
