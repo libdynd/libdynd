@@ -81,7 +81,7 @@ struct ckernel_prefix {
      *      kdp->get_function<expr_single_t>()
      */
     template<typename T>
-    T get_function() const {
+    DYND_CUDA_HOST_DEVICE T get_function() const {
         return reinterpret_cast<T>(function);
     }
 
