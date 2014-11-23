@@ -14,13 +14,13 @@ namespace kernels {
      * A CRTP (curiously recurring template pattern) base class to help
      * create ckernels.
      */
-    template <class CKT, int Nsrc, kernel_request_t kernreq = kernel_request_host>
+    template <class CKT, int Nsrc, class CKBT = ckernel_builder>
     struct expr_ck;
 
     template <class CKT, int Nsrc>
-    struct expr_ck<CKT, Nsrc, kernel_request_host> : public general_ck<CKT> {
+    struct expr_ck<CKT, Nsrc, ckernel_builder> : public general_ck<CKT, ckernel_builder> {
         typedef CKT self_type;
-        typedef general_ck<CKT> parent_type;
+        typedef general_ck<CKT, ckernel_builder> parent_type;
 
         /**
          * Initializes just the base.function member
@@ -81,14 +81,14 @@ namespace kernels {
 #ifdef __CUDACC__
 
     template <class CKT, int Nsrc>
-    struct expr_ck<CKT, Nsrc, kernel_request_cuda_device> : public general_ck<CKT> {
+    struct expr_ck<CKT, Nsrc, cuda_device_ckernel_builder> : public general_ck<CKT, cuda_device_ckernel_builder> {
         typedef CKT self_type;
-        typedef general_ck<CKT> parent_type;
+        typedef general_ck<CKT, cuda_device_ckernel_builder> parent_type;
 
         /**
          * Initializes just the base.function member
          */
-        void init_kernfunc(kernel_request_t kernreq)
+        __device__ void init_kernfunc(kernel_request_t kernreq)
         {
             switch (kernreq) {
             case kernel_request_single:
@@ -100,9 +100,10 @@ namespace kernels {
                     &self_type::strided_wrapper);
                 break;
             default: {
-                std::stringstream ss;
-                ss << "expr ckernel init: unrecognized ckernel request " << (int)kernreq;
-                throw std::invalid_argument(ss.str());
+                printf("error\n");
+//                std::stringstream ss;
+  //              ss << "expr ckernel init: unrecognized ckernel request " << (int)kernreq;
+    //            throw std::invalid_argument(ss.str());
             }
             }
         }

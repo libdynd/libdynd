@@ -191,6 +191,9 @@ public:
   intptr_t get_capacity() const { return m_capacity; }
 };
 
+template <kernel_request_t kernreq>
+struct ckernel_builder_for;
+
 class ckernel_builder : public base_ckernel_builder<ckernel_builder> {
   // When the amount of data is small, this static data is used,
   // otherwise dynamic memory is allocated when it gets too big
@@ -292,23 +295,50 @@ public:
                                                   intptr_t requested_capacity);
 };
 
+template <>
+struct ckernel_builder_for<kernel_request_host> {
+  typedef ckernel_builder type;
+};
+
 #ifdef __CUDACC__
+
+template <typename self_type, typename... A>
+__global__ void cuda_device_init(ckernel_prefix *rawself,
+                                 kernel_request_t kernreq, A... args)
+{
+  self_type *self = new (rawself) self_type(args...);
+  if (self != self_type::get_self(rawself)) {
+    printf("error\n");
+    // throw std::runtime_error(
+    //      "internal ckernel error: struct layout is not valid");
+  }
+  //  self->base.destructor = &self_type::destruct;
+  self->base.destructor = NULL;
+  self->init_kernfunc(kernreq);
+}
 
 __global__ void cuda_device_destroy(ckernel_prefix *self) { self->destroy(); }
 
 void throw_if_not_cuda_success(cudaError_t);
 
 class cuda_device_ckernel_builder
-    : public base_ckernel_builder<cuda_device_ckernel_builder, 0> {
+    : public base_ckernel_builder<cuda_device_ckernel_builder> {
 public:
-  static void *alloc(size_t size)
+  void init()
+  {
+    m_data = reinterpret_cast<char *>(alloc(16 * 8));
+    m_capacity = 16 * 8;
+    set(m_data, 0, 16 * 8);
+  }
+
+  void *alloc(size_t size)
   {
     void *ptr;
     throw_if_not_cuda_success(cudaMalloc(&ptr, size));
     return ptr;
   }
 
-  static void *realloc(void *old_ptr, size_t old_size, size_t new_size)
+  void *realloc(void *old_ptr, size_t old_size, size_t new_size)
   {
     void *new_ptr = alloc(new_size);
     copy(new_ptr, old_ptr, old_size);
@@ -316,32 +346,56 @@ public:
     return new_ptr;
   }
 
-  static void free(void *ptr) { throw_if_not_cuda_success(cudaFree(ptr)); }
+  void free(void *ptr) { throw_if_not_cuda_success(cudaFree(ptr)); }
 
-  static void *copy(void *dst, const void *src, size_t size)
+  void *copy(void *dst, const void *src, size_t size)
   {
     throw_if_not_cuda_success(
         cudaMemcpy(dst, src, size, cudaMemcpyDeviceToDevice));
     return dst;
   }
 
-  static void *set(void *dst, int value, size_t size)
+  void *set(void *dst, int value, size_t size)
   {
     throw_if_not_cuda_success(cudaMemset(dst, value, size));
     return dst;
   }
 
-  template <typename CKT>
-  static void init(ckernel_prefix *DYND_UNUSED(self),
-                   kernel_request_t DYND_UNUSED(kernreq))
+  template <typename self_type, typename... A>
+  self_type *init(ckernel_prefix *rawself, kernel_request_t kernreq,
+                  A &&... args)
   {
+    cuda_device_init<self_type> << <1, 1>>>
+        (rawself, kernreq, std::forward<A>(args)...);
+    throw_if_not_cuda_success(cudaDeviceSynchronize());
+    //    self_type *self = new (rawself) self_type(std::forward<A>(args)...);
+    // Double check that the C++ struct layout is as we expect
+    //  if (self != self_type::get_self(rawself)) {
+    // throw std::runtime_error(
+    //      "internal ckernel error: struct layout is not valid");
+    //  }
+    //    self->base.destructor = &self_type::destruct;
+    //  self->init_kernfunc(kernreq);
+    //    return self;
+
+    return self_type::get_self(rawself);
   }
 
-  static void destroy2(ckernel_prefix *self)
+  void destroy()
+  {
+    base_ckernel_builder<cuda_device_ckernel_builder>::destroy();
+  }
+
+  void destroy(ckernel_prefix *self)
   {
     cuda_device_destroy << <1, 1>>> (self);
     cudaDeviceSynchronize();
   }
+};
+
+template <>
+struct ckernel_builder_for<kernel_request_cuda_device> {
+  typedef cuda_device_ckernel_builder type;
 };
 
 #endif

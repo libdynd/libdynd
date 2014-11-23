@@ -13,13 +13,13 @@
 
 namespace dynd { namespace kernels { namespace detail {
 
-__global__ void cuda_parallel_single(char *DYND_UNUSED(dst), char *DYND_UNUSED(src0), char *DYND_UNUSED(src1),
-                                     ckernel_prefix *DYND_UNUSED(self))
+__global__ void cuda_parallel_single(char *dst, char *src0, char *src1,
+                                     ckernel_prefix *self)
 {
-//  char *src[2] = {src0, src1};
+  char *src[2] = {src0, src1};
 
-  //expr_single_t func = self->get_function<expr_single_t>();
-//  func(dst, src, self);
+  expr_single_t func = self->get_function<expr_single_t>();
+  func(dst, src, self);
 }
 
 }
@@ -37,8 +37,8 @@ public:
   {
   }
 
-  cuda_device_ckernel_builder get_ckb() const {
-    return m_ckb;
+  cuda_device_ckernel_builder *get_ckb() {
+    return &m_ckb;
   }
 
   void single(char *dst, char **src)

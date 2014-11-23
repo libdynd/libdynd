@@ -103,7 +103,7 @@ nd::arrfunc make_apply_arrfunc(R (func_type::*)(A...) const, T &&... names)
   typedef type_sequence<K...> kwds;
 
   return make_arrfunc(ndt::make_funcproto<kernreq, R (A..., K...)>(std::forward<T>(names)...),
-    &kernels::construct_then_apply_callable_ck<kernreq, func_type, R, args, kwds>::instantiate);
+    &kernels::construct_then_apply_callable_ck<typename ckernel_builder_for<kernreq>::type, func_type, R, args, kwds>::instantiate);
 }
 
 } // namespace detail

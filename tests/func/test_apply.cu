@@ -10,9 +10,9 @@ TEST(Apply, CUDADeviceFunction)
 	nd::arrfunc af;
 
 	af = nd::make_apply_arrfunc<kernel_request_cuda_device, func0_as_callable>();
-//	af(nd::array(5).to_cuda_device(), nd::array(3).to_cuda_device());
+	std::cout << af(nd::array(5).to_cuda_device(), nd::array(3).to_cuda_device()).as<int>() << std::endl;
 
-//	std::exit(-1);
+	std::exit(-1);
 }
 
 /*
