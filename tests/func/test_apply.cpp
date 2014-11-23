@@ -17,9 +17,36 @@
 using namespace std;
 using namespace dynd;
 
+template <typename T>
+class Apply;
+
+template <>
+class Apply<integral_constant<kernel_request_t, kernel_request_host>>
+    : public ::testing::Test {
+public:
+  static const kernel_request_t KernelRequest = kernel_request_host;
+
+  static nd::array To(const nd::array &a) { return a; }
+};
+
+#ifdef DYND_CUDA
+
+template <>
+class Apply<integral_constant<kernel_request_t, kernel_request_cuda_device>>
+    : public ::testing::Test {
+public:
+  static const kernel_request_t KernelRequest = kernel_request_cuda_device;
+
+  static nd::array To(const nd::array &a) { return a.to_cuda_device(); }
+};
+
+#endif
+
+TYPED_TEST_CASE_P(Apply);
+
 DYND_CUDA_HOST_DEVICE int func0(int x, int y)
 {
-	return 2 * (x - y);
+  return 2 * (x - y);
 }
 
 DYND_CUDA_HOST_DEVICE double func1(double x, int y)
@@ -59,17 +86,17 @@ DYND_CUDA_HOST_DEVICE double func7(int x, int y, double z)
 
 TEST(Apply, Function)
 {
-	nd::arrfunc af;
+  nd::arrfunc af;
 
-	af = nd::make_apply_arrfunc<decltype(&func0), &func0>();
-	EXPECT_EQ(4, af(5, 3).as<int>());
-	af = nd::make_apply_arrfunc(&func0);
-	EXPECT_EQ(4, af(5, 3).as<int>());
+  af = nd::make_apply_arrfunc<decltype(&func0), &func0>();
+  EXPECT_EQ(4, af(5, 3).as<int>());
+  af = nd::make_apply_arrfunc(&func0);
+  EXPECT_EQ(4, af(5, 3).as<int>());
 
-	af = nd::make_apply_arrfunc<decltype(&func1), &func1>();
-	EXPECT_EQ(53.15, af(3.75, 19).as<double>());
-	af = nd::make_apply_arrfunc(&func1);
-	EXPECT_EQ(53.15, af(3.75, 19).as<double>());
+  af = nd::make_apply_arrfunc<decltype(&func1), &func1>();
+  EXPECT_EQ(53.15, af(3.75, 19).as<double>());
+  af = nd::make_apply_arrfunc(&func1);
+  EXPECT_EQ(53.15, af(3.75, 19).as<double>());
 
   af = nd::make_apply_arrfunc<decltype(&func2), &func2>();
   EXPECT_FLOAT_EQ(13.2, af(nd::array({3.9f, -7.0f, 16.3f}).view(ndt::make_type<float[3]>())).as<float>());
@@ -191,11 +218,11 @@ class callable0
   int m_z;
 
 public:
-  callable0(int z = 7) : m_z(z)
+  DYND_CUDA_HOST_DEVICE callable0(int z = 7) : m_z(z)
   {
   }
 
-  int operator ()(int x, int y) const
+  DYND_CUDA_HOST_DEVICE int operator ()(int x, int y) const
   {
     return 2 * (x - y) + m_z;
   }  
@@ -216,26 +243,26 @@ public:
   }
 };
 
-TEST(Apply, Callable)
+TYPED_TEST_P(Apply, Callable)
 {
   nd::arrfunc af;
 
-  af = nd::make_apply_arrfunc<func0_as_callable>();
-  EXPECT_EQ(4, af(5, 3).as<int>());
+  af = nd::make_apply_arrfunc<TestFixture::KernelRequest, func0_as_callable>();
+  EXPECT_EQ(4, af(TestFixture::To(5), TestFixture::To(3)).template as<int>());
   af = nd::make_apply_arrfunc(func0_as_callable());
   EXPECT_EQ(4, af(5, 3).as<int>());
 
-  af = nd::make_apply_arrfunc<func1_as_callable>();
-  EXPECT_EQ(53.15, af(3.75, 19).as<double>());
+  af = nd::make_apply_arrfunc<TestFixture::KernelRequest, func1_as_callable>();
+  EXPECT_EQ(53.15, af(TestFixture::To(3.75), TestFixture::To(19)).template as<double>());
   af = nd::make_apply_arrfunc(func1_as_callable());
   EXPECT_EQ(53.15, af(3.75, 19).as<double>());
 
   af = nd::make_apply_arrfunc<func2_as_callable>();
-  EXPECT_FLOAT_EQ(13.2, af(nd::array({3.9f, -7.0f, 16.3f}).view(ndt::make_type<float[3]>())).as<float>());
+  EXPECT_FLOAT_EQ(13.2f, af(nd::array({3.9f, -7.0f, 16.3f}).view(ndt::make_type<float[3]>())).as<float>());
   af = nd::make_apply_arrfunc(func2_as_callable());
-  EXPECT_FLOAT_EQ(13.2, af(nd::array({3.9f, -7.0f, 16.3f}).view(ndt::make_type<float[3]>())).as<float>());
+  EXPECT_FLOAT_EQ(13.2f, af(nd::array({3.9f, -7.0f, 16.3f}).view(ndt::make_type<float[3]>())).as<float>());
 
-  af = nd::make_apply_arrfunc<func3_as_callable>();
+  af = nd::make_apply_arrfunc<TestFixture::KernelRequest, func3_as_callable>();
   EXPECT_EQ(12U, af().as<unsigned int>());
   af = nd::make_apply_arrfunc(func3_as_callable());
   EXPECT_EQ(12U, af().as<unsigned int>());
@@ -254,18 +281,18 @@ TEST(Apply, Callable)
   EXPECT_EQ(1251L, af(nd::array({{1242L, 23L, -5L}, {925L, -836L, -14L}}).view(ndt::make_type<long[2][3]>())).as<long>());
 */
 
-  af = nd::make_apply_arrfunc<func6_as_callable>();
-  EXPECT_EQ(8, af(3, 5, 7).as<int>());
+  af = nd::make_apply_arrfunc<TestFixture::KernelRequest, func6_as_callable>();
+  EXPECT_EQ(8, af(TestFixture::To(3), TestFixture::To(5), TestFixture::To(7)).template as<int>());
   af = nd::make_apply_arrfunc(func6_as_callable());
   EXPECT_EQ(8, af(3, 5, 7).as<int>());
 
-  af = nd::make_apply_arrfunc<func7_as_callable>();
-  EXPECT_EQ(36.3, af(38, 5, 12.1).as<double>());
+  af = nd::make_apply_arrfunc<TestFixture::KernelRequest, func7_as_callable>();
+  EXPECT_EQ(36.3, af(TestFixture::To(38), TestFixture::To(5), TestFixture::To(12.1)).template as<double>());
   af = nd::make_apply_arrfunc(func7_as_callable());
   EXPECT_EQ(36.3, af(38, 5, 12.1).as<double>());
 
-  af = nd::make_apply_arrfunc<callable0>();
-  EXPECT_EQ(11, af(5, 3).as<int>());
+  af = nd::make_apply_arrfunc<TestFixture::KernelRequest, callable0>();
+  EXPECT_EQ(11, af(TestFixture::To(5), TestFixture::To(3)).template as<int>());
   af = nd::make_apply_arrfunc(callable0());
   EXPECT_EQ(11, af(5, 3).as<int>());
 
@@ -329,3 +356,13 @@ TEST(Apply, CallableWithKeywords)
   EXPECT_EQ(28, af(2, kwds("x", 1, "y", 7)).as<int>());
 }
 */
+
+typedef integral_constant<kernel_request_t, kernel_request_host> kernel_request_host_type;
+typedef integral_constant<kernel_request_t, kernel_request_cuda_device> kernel_request_cuda_device_type;
+
+REGISTER_TYPED_TEST_CASE_P(Apply, Callable);
+
+INSTANTIATE_TYPED_TEST_CASE_P(HostMemory, Apply, kernel_request_host_type);
+#ifdef DYND_CUDA
+INSTANTIATE_TYPED_TEST_CASE_P(CUDADeviceMemory, Apply, kernel_request_cuda_device_type);
+#endif

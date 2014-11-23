@@ -130,8 +130,8 @@ namespace kernels {
                             size_t count)
         {
             self_type *self = parent_type::get_self(&this->base);
-            char *src_copy[Nsrc];
-            memcpy(src_copy, src, sizeof(src_copy));
+            char *src_copy[Nsrc + 1];
+            memcpy(src_copy, src, sizeof(src_copy) - 1);
             for (size_t i = 0; i != count; ++i) {
                 self->single(dst, src_copy);
                 dst += dst_stride;

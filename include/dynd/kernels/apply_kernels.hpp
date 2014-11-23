@@ -366,9 +366,6 @@ namespace kernels {
                                            detail::kwd<K, J>... kwds)
           : detail::arg<A, I>(args)..., func(kwds.get()...)
       {
-        #ifdef __CUDA_ARCH__
-        printf("constructing on the device\n");
-        #endif
       }
 
       DYND_CUDA_HOST_DEVICE void single(char *dst, char **DYND_CONDITIONAL_UNUSED(src))
@@ -381,7 +378,7 @@ namespace kernels {
                   const arrfunc_type *af_tp, dynd::ckernel_builder *ckb,
                   intptr_t ckb_offset, const ndt::type &dst_tp,
                   const char *DYND_UNUSED(dst_arrmeta), const ndt::type *src_tp,
-                  const char *const *src_arrmeta, kernel_request_t kernreq,
+                  const char *const *DYND_CONDITIONAL_UNUSED(src_arrmeta), kernel_request_t kernreq,
                   const eval::eval_context *DYND_UNUSED(ectx),
                   const nd::array &DYND_UNUSED(args), const nd::array &kwds)
       {
@@ -403,18 +400,13 @@ namespace kernels {
         }
 
         if ((kernreq & kernel_request_cuda_device) == false) {
-          cuda_parallel_ck *self = cuda_parallel_ck::create(ckb, kernreq, ckb_offset, 1, 1);
+          kernels::cuda_parallel_ck<sizeof...(A)> *self = kernels::cuda_parallel_ck<sizeof...(A)>::create(ckb, kernreq, ckb_offset, 1, 1);
           ckb_offset = 0;
           self_type::create(
               self->get_ckb(), kernreq, ckb_offset,
               detail::arg<A, I>(src_tp[I], src_arrmeta[I], kwds)...,
               detail::kwd<K, J>(kwds.at(J).as<K>())...);
         }
-
-        //   self_type::create(ckb, kernreq, ckb_offset,
-        //                   detail::arg<A, I>(src_tp[I], src_arrmeta[I],
-        //                   kwds)...,
-        //                 detail::kwd<K, J>(kwds.at(J).as<K>())...);
         return ckb_offset;
       }
     };
