@@ -354,6 +354,11 @@ struct from<n, T0, T...> {
     typedef typename from<n - 1, T...>::type type;
 };
 
+template <typename... T>
+struct from<0, type_sequence<T...>> {
+    typedef type_sequence<T...> type;
+};
+
 template <int n, typename... T>
 struct from<n, type_sequence<T...> > {
     typedef typename from<n, T...>::type type;
@@ -377,8 +382,13 @@ struct to<n, T0, T...> {
     typedef typename prepend<T0, typename to<n - 1, T...>::type>::type type;
 };
 
+template <typename... T>
+struct to<0, type_sequence<T...>> {
+    typedef type_sequence<> type;
+};
+
 template <int n, typename... T>
-struct to<n, type_sequence<T...> > {
+struct to<n, type_sequence<T...>> {
     typedef typename to<n, T...>::type type;
 };
 

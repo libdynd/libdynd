@@ -401,7 +401,7 @@ inline arrfunc make_arrfunc(ndt::type af_tp, arrfunc_instantiate_t instantiate)
 }
 
 template <typename T>
-arrfunc make_arrfunc(ndt::type af_tp, arrfunc_instantiate_t instantiate, T &&data)
+arrfunc make_arrfunc(ndt::type af_tp, arrfunc_instantiate_t instantiate, const T &data)
 {
   array af = empty(af_tp);
   arrfunc_type_data *out_af = reinterpret_cast<arrfunc_type_data *>(af.get_readwrite_originptr());
