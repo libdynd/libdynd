@@ -91,10 +91,18 @@ TEST(TypePatternMatch, Option)
       ndt::type("M * {x: T, y: T, u: S, v: S}")));
 }
 
-TEST(TypePatternMatch, FuncProto)
+TEST(TypePatternMatch, ArrFuncProto)
 {
   EXPECT_TRUE(
       ndt::pattern_match(ndt::type("() -> void"), ndt::type("() -> void")));
+  EXPECT_TRUE(
+      ndt::pattern_match(ndt::type("() -> void"), ndt::type("() -> T")));
+  EXPECT_FALSE(
+      ndt::pattern_match(ndt::type("() -> void"), ndt::type("() -> int32")));
+  EXPECT_FALSE(ndt::pattern_match(ndt::type("() -> void"),
+                                  ndt::type("(int32) -> void")));
+  EXPECT_FALSE(ndt::pattern_match(ndt::type("(int32) -> void"),
+                                  ndt::type("() -> void")));
   EXPECT_TRUE(
       ndt::pattern_match(ndt::type("() -> float32"), ndt::type("() -> T")));
   EXPECT_TRUE(ndt::pattern_match(ndt::type("(float32) -> float32"),
@@ -114,6 +122,26 @@ TEST(TypePatternMatch, FuncProto)
   EXPECT_FALSE(
       ndt::pattern_match(ndt::type("(int32, 5 * var * 2 * int16) -> float32"),
                          ndt::type("(S, M * 2 * int16) -> T")));
+
+}
+
+TEST(TypePatternMatch, NestedArrFuncProto)
+{
+  EXPECT_TRUE(ndt::pattern_match(
+      ndt::type("(3 * int32, (2 * int32) -> float64) -> 3 * float64"),
+      ndt::type("(N * S, (M * S) -> T) -> N * T")));
+  EXPECT_FALSE(ndt::pattern_match(
+      ndt::type("(3 * int32, (2 * float64) -> float64) -> 3 * float64"),
+      ndt::type("(N * S, (M * S) -> T) -> N * T")));
+  EXPECT_FALSE(ndt::pattern_match(
+      ndt::type("(3 * int32, (2 * int32) -> float64) -> 2 * float64"),
+      ndt::type("(N * S, (M * S) -> T) -> N * T")));
+  EXPECT_TRUE(ndt::pattern_match(
+      ndt::type("(3 * int32, (2 * int32) -> float64) -> 3 * int32"),
+      ndt::type("(N * S, (M * S) -> T) -> N * T")));
+  EXPECT_TRUE(ndt::pattern_match(
+      ndt::type("(3 * int32; (2 * int32) -> float64) -> 3 * float64"),
+      ndt::type("(N * S; (M * S) -> T) -> N * T")));
 }
 
 TEST(TypePatternMatch, Strided)
@@ -174,6 +202,8 @@ TEST(TypePatternMatch, Pow)
 
 TEST(TypePatternMatchDims, Simple)
 {
+  // ndt::pattern_match_dims just matches the dims, it does not match the dtype,
+  // and as part of the matching, it returns the two dtypes.
   std::map<nd::string, ndt::type> typevars;
   ndt::type cdt, pdt;
   EXPECT_TRUE(ndt::pattern_match_dims(ndt::type("3 * 4 * fixed * int32"),
