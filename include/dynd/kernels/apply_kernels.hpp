@@ -155,18 +155,32 @@ namespace kernels {
       DYND_CUDA_HOST_DEVICE const func_type &get() { return m_func; }
     };
 
-    template <typename func_type, typename... A, size_t... I, typename... K,
-              size_t... J>
-    DYND_CUDA_HOST_DEVICE void
-    apply(func<func_type, type_sequence<K...>, index_sequence<J...>> *func,
-          args<type_sequence<A...>, index_sequence<I...>> *DYND_CONDITIONAL_UNUSED(args), char *dst,
-          char **DYND_CONDITIONAL_UNUSED(src))
-    {
-      typedef typename return_of<funcproto_for<func_type>>::type R;
+    template <typename CKBT>
+    struct apply;
 
-      *reinterpret_cast<R *>(dst) =
-          func->get()(static_cast<arg<A, I> *>(args)->get(src[I])...);
-    }
+#define APPLY(CKBT, ...)                                                       \
+  template <>                                                                  \
+  struct apply<CKBT> {                                                         \
+                                                                               \
+    template <typename func_type, typename... A, size_t... I, typename... K,   \
+              size_t... J>                                                     \
+    __VA_ARGS__ static void                                                    \
+    single(func<func_type, type_sequence<K...>, index_sequence<J...>> *func,   \
+           args<type_sequence<A...>, index_sequence<I...>> *                   \
+               DYND_CONDITIONAL_UNUSED(args),                                  \
+           char *dst, char **DYND_CONDITIONAL_UNUSED(src))                     \
+    {                                                                          \
+      typedef typename return_of<funcproto_for<func_type>>::type R;            \
+                                                                               \
+      *reinterpret_cast<R *>(dst) =                                            \
+          func->get()(static_cast<arg<A, I> *>(args)->get(src[I])...);         \
+    }                                                                          \
+  };
+
+APPLY(ckernel_builder)
+#ifdef __CUDACC__
+APPLY(cuda_device_ckernel_builder, __device__)
+#endif
   }
 
   template <typename funcproto_type>
@@ -360,7 +374,10 @@ namespace kernels {
     {
     }
 
-    void single(char *dst, char **src) { detail::apply(this, this, dst, src); }
+    void single(char *dst, char **src)
+    {
+      detail::apply<host_ckb>::single(this, this, dst, src);
+    }
 
     static intptr_t
     instantiate(const arrfunc_type_data *DYND_UNUSED(af_self),
@@ -421,7 +438,7 @@ namespace kernels {
 
     __device__ void single(char *dst, char **src)
     {
-      detail::apply(this, this, dst, src);
+      detail::apply<cuda_device_ckb>::single(this, this, dst, src);
     }
 
     static intptr_t

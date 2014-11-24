@@ -315,7 +315,7 @@ __global__ void cuda_device_init(ckernel_prefix *rawself,
   //  self->base.destructor = &self_type::destruct;
   self->base.destructor = NULL;
   self->init_kernfunc(kernreq);
-}
+-}
 
 __global__ void cuda_device_destroy(ckernel_prefix *self) { self->destroy(); }
 
@@ -527,7 +527,7 @@ namespace kernels {
    * (curiously recurring template pattern) base class to help
    * create ckernels.
    */
-  template <class CKT, class CKBT = ckernel_builder>
+  template <class CKBT, class CKT>
   struct general_ck {
     typedef CKT self_type;
 

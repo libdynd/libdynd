@@ -23,14 +23,14 @@ namespace kernels {
 #define THROW_INVALID_ARGUMENT(KERNREQ)                                        \
   std::stringstream ss;                                                        \
   ss << "expr ckernel init: unrecognized ckernel request " << (int)KERNREQ;    \
-  throw std::invalid_argument(ss.str());
+  throw std::invalid_argument(ss.str())
 #endif
 
 #define EXPR_CK(CKBT, ...)                                                     \
   template <class CKT, int Nsrc>                                               \
-  struct expr_ck<CKT, Nsrc, CKBT> : public general_ck<CKT, CKBT> {             \
+  struct expr_ck<CKT, Nsrc, CKBT> : public general_ck<CKBT, CKT> {             \
     typedef CKT self_type;                                                     \
-    typedef general_ck<CKT, CKBT> parent_type;                                 \
+    typedef general_ck<CKBT, CKT> parent_type;                                 \
                                                                                \
     /** Initializes just the base.function member. */                          \
     __VA_ARGS__ void init_kernfunc(kernel_request_t kernreq)                   \
@@ -45,7 +45,7 @@ namespace kernels {
             &self_type::strided_wrapper);                                      \
         break;                                                                 \
       default: {                                                               \
-        THROW_INVALID_ARGUMENT(kernreq)                                        \
+        THROW_INVALID_ARGUMENT(kernreq);                                       \
       }                                                                        \
       }                                                                        \
     }                                                                          \
@@ -66,7 +66,7 @@ namespace kernels {
           ->strided(dst, dst_stride, src, src_stride, count);                  \
     }                                                                          \
                                                                                \
-    /* Default strided implementation calls single repeatedly. */              \
+    /** Default strided implementation calls single repeatedly. */             \
     __VA_ARGS__ void strided(char *dst, intptr_t dst_stride, char **src,       \
                              const intptr_t *src_stride, size_t count)         \
     {                                                                          \
