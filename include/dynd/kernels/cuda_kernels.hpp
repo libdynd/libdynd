@@ -22,7 +22,7 @@ namespace kernels {
     }
 
     template <typename... T>
-    __global__ void cuda_parallel_single(ckernel_prefix *self, char *dst, T... xsrc
+    __global__ void cuda_parallel_single(ckernel_prefix *DYND_CONDITIONAL_UNUSED(self), char *DYND_CONDITIONAL_UNUSED(dst), T... DYND_CONDITIONAL_UNUSED(xsrc)
                                          )
     {
       char *src[sizeof...(T)] = {xsrc...};
@@ -36,7 +36,7 @@ namespace kernels {
 
     template <size_t... I>
     class cuda_parallel_ck<index_sequence<I...>>
-        : public expr_ck<cuda_parallel_ck<index_sequence<I...>>, sizeof...(I)> {
+        : public expr_ck<cuda_parallel_ck<index_sequence<I...>>, kernel_request_host, sizeof...(I)> {
       typedef cuda_parallel_ck<index_sequence<I...>> self_type;
 
       cuda_device_ckernel_builder m_ckb;

@@ -9,7 +9,7 @@ using namespace std;
 
 namespace {
     template <typename T>
-    struct value_to_pointer_ck : dynd::kernels::expr_ck<value_to_pointer_ck<T>, 1> {
+    struct value_to_pointer_ck : dynd::kernels::expr_ck<value_to_pointer_ck<T>, kernel_request_host, 1> {
         void single(char *dst, const char *const *src) {
             *reinterpret_cast<T **>(dst) = const_cast<T *>(*reinterpret_cast<const T *const *>(src));
         }

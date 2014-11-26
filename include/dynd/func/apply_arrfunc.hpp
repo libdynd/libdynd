@@ -57,8 +57,7 @@ namespace nd {
             typename... T>
   arrfunc make_apply_arrfunc(T &&... names)
   {
-    typedef kernels::construct_then_apply_callable_ck<
-        typename ckernel_builder_for<kernreq>::type, func_type,
+    typedef kernels::construct_then_apply_callable_ck<kernreq, func_type,
         K...> ck_type;
 
     return make_arrfunc(

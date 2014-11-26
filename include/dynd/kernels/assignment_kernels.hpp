@@ -83,9 +83,9 @@ namespace kernels {
      * create ckernels.
      */
     template<class CKT>
-    struct unary_ck : public general_ck<CKT> {
+    struct unary_ck : public general_ck<CKT, kernel_request_host> {
         typedef CKT self_type;
-        typedef general_ck<CKT> parent_type;
+        typedef general_ck<CKT, kernel_request_host> parent_type;
 
         /**
          * Initializes just the base.function member

@@ -137,25 +137,40 @@ namespace kernels {
       kwds(const nd::array &kwds) : kwd<K, J>(kwds.at(J).as<K>())... {}
     };
 
-    template <typename func_type, typename K, typename J>
+    template <kernel_request_t kernreq, typename func_type, typename K, typename J>
     class func;
 
     template <typename func_type, typename... K, size_t... J>
-    class func<func_type, type_sequence<K...>, index_sequence<J...>> {
+    class func<kernel_request_host, func_type, type_sequence<K...>, index_sequence<J...>> {
     public:
       func_type m_func;
 
-      DYND_CUDA_HOST_DEVICE
+      
       func(detail::kwds<type_sequence<K...>, index_sequence<J...>>
                DYND_CONDITIONAL_UNUSED(kwds))
           : m_func(static_cast<detail::kwd<K, J> *>(&kwds)->get()...)
       {
       }
 
-      DYND_CUDA_HOST_DEVICE const func_type &get() { return m_func; }
+      const func_type &get() { return m_func; }
     };
 
-    template <typename CKBT>
+    template <typename func_type, typename... K, size_t... J>
+    class func<kernel_request_cuda_device, func_type, type_sequence<K...>, index_sequence<J...>> {
+    public:
+      func_type m_func;
+
+      __device__
+      func(detail::kwds<type_sequence<K...>, index_sequence<J...>>
+               DYND_CONDITIONAL_UNUSED(kwds))
+          : m_func(static_cast<detail::kwd<K, J> *>(&kwds)->get()...)
+      {
+      }
+
+      __device__ const func_type &get() { return m_func; }
+    };
+
+    template <kernel_request_t kernreq>
     struct apply;
 
 #define APPLY(CKBT, ...)                                                       \
@@ -165,7 +180,7 @@ namespace kernels {
     template <typename func_type, typename... A, size_t... I, typename... K,   \
               size_t... J>                                                     \
     __VA_ARGS__ static void                                                    \
-    single(func<func_type, type_sequence<K...>, index_sequence<J...>> *func,   \
+    single(func<CKBT, func_type, type_sequence<K...>, index_sequence<J...>> *func,   \
            args<type_sequence<A...>, index_sequence<I...>> *                   \
                DYND_CONDITIONAL_UNUSED(args),                                  \
            char *dst, char **DYND_CONDITIONAL_UNUSED(src))                     \
@@ -177,9 +192,9 @@ namespace kernels {
     }                                                                          \
   };
 
-APPLY(ckernel_builder)
+APPLY(kernel_request_host)
 #ifdef __CUDACC__
-APPLY(cuda_device_ckernel_builder, __device__)
+APPLY(kernel_request_cuda_device, __device__)
 #endif
   }
 
@@ -217,14 +232,14 @@ APPLY(cuda_device_ckernel_builder, __device__)
   template <typename func_type, int N>
   using kwds_for = typename xkwds<func_type, N>::type;
 
-  template <typename func_type, typename... K>
+  template <kernel_request_t kernreq, typename func_type, typename... K>
   using func_for =
-      detail::func<func_type, type_sequence<K...>,
+      detail::func<kernreq, func_type, type_sequence<K...>,
                    typename make_index_sequence<sizeof...(K)>::type>;
 
   template <typename func_type, func_type func, int N>
   class apply_function_ck
-      : public expr_ck<apply_function_ck<func_type, func, N>, N>,
+      : public expr_ck<apply_function_ck<func_type, func, N>, kernel_request_host, N>,
         args_for<func_type, N>,
         kwds_for<func_type, N> {
     typedef apply_function_ck<func_type, func, N> self_type;
@@ -284,7 +299,7 @@ APPLY(cuda_device_ckernel_builder, __device__)
   };
 
   template <typename func_type, int N>
-  class apply_callable_ck : public expr_ck<apply_callable_ck<func_type, N>, N>,
+  class apply_callable_ck : public expr_ck<apply_callable_ck<func_type, N>, kernel_request_host, N>,
                             args_for<func_type, N>,
                             kwds_for<func_type, N> {
     typedef apply_callable_ck<func_type, N> self_type;
@@ -355,28 +370,28 @@ APPLY(cuda_device_ckernel_builder, __device__)
 
   typedef ckernel_builder host_ckb;
 
-  template <typename CKBT, typename func_type, typename... K>
+  template <kernel_request_t kernreq, typename func_type, typename... K>
   struct construct_then_apply_callable_ck;
 
   template <typename func_type, typename... K>
-  struct construct_then_apply_callable_ck<host_ckb, func_type, K...>
+  struct construct_then_apply_callable_ck<kernel_request_host, func_type, K...>
       : public expr_ck<
-            construct_then_apply_callable_ck<host_ckb, func_type, K...>,
+            construct_then_apply_callable_ck<kernel_request_host, func_type, K...>, kernel_request_host,
             args_of<funcproto_for<func_type>>::type::size>,
         public args_for<func_type>,
-        public func_for<func_type, K...> {
-    typedef construct_then_apply_callable_ck<host_ckb, func_type, K...>
+        public func_for<kernel_request_host, func_type, K...> {
+    typedef construct_then_apply_callable_ck<kernel_request_host, func_type, K...>
         self_type;
 
     construct_then_apply_callable_ck(args_for<func_type> a,
                                      kwds<type_sequence<K...>> k)
-        : func_for<func_type, K...>(k), args_for<func_type>(a)
+        : func_for<kernel_request_host, func_type, K...>(k), args_for<func_type>(a)
     {
     }
 
     void single(char *dst, char **src)
     {
-      detail::apply<host_ckb>::single(this, this, dst, src);
+      detail::apply<kernel_request_host>::single(this, this, dst, src);
     }
 
     static intptr_t
@@ -421,24 +436,24 @@ APPLY(cuda_device_ckernel_builder, __device__)
   typedef cuda_device_ckernel_builder cuda_device_ckb;
 
   template <typename func_type, typename... K>
-  struct construct_then_apply_callable_ck<cuda_device_ckb, func_type, K...>
+  struct construct_then_apply_callable_ck<kernel_request_cuda_device, func_type, K...>
       : public expr_ck<
-            construct_then_apply_callable_ck<cuda_device_ckb, func_type, K...>,
-            args_of<funcproto_for<func_type>>::type::size, cuda_device_ckb>,
+            construct_then_apply_callable_ck<kernel_request_cuda_device, func_type, K...>, kernel_request_cuda_device,
+            args_of<funcproto_for<func_type>>::type::size>,
         args_for<func_type>,
-        func_for<func_type, K...> {
-    typedef construct_then_apply_callable_ck<cuda_device_ckb, func_type, K...>
+        func_for<kernel_request_cuda_device, func_type, K...> {
+    typedef construct_then_apply_callable_ck<kernel_request_cuda_device, func_type, K...>
         self_type;
 
     __device__ construct_then_apply_callable_ck(args_for<func_type> args,
                                                 kwds<type_sequence<K...>> k)
-        : func_for<func_type, K...>(k), args_for<func_type>(args)
+        : func_for<kernel_request_cuda_device, func_type, K...>(k), args_for<func_type>(args)
     {
     }
 
     __device__ void single(char *dst, char **src)
     {
-      detail::apply<cuda_device_ckb>::single(this, this, dst, src);
+      detail::apply<kernel_request_cuda_device>::single(this, this, dst, src);
     }
 
     static intptr_t

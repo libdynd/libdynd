@@ -13,7 +13,7 @@ using namespace dynd;
 
 namespace {
 
-struct buffered_ck : public kernels::general_ck<buffered_ck> {
+struct buffered_ck : public kernels::general_ck<buffered_ck, kernel_request_host> {
   typedef buffered_ck self_type;
   intptr_t m_nsrc;
   vector<intptr_t> m_src_buf_ck_offsets;

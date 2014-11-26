@@ -35,7 +35,7 @@ enum {
   /** Y */
   kernel_request_host = 8,
   /** Y */
-  kernel_request_cuda_device = 9
+  kernel_request_cuda_device = 16
 };
 typedef uint32_t kernel_request_t;
 

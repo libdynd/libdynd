@@ -14,7 +14,7 @@ namespace kernels {
    * A CRTP (curiously recurring template pattern) base class to help
    * create ckernels.
    */
-  template <class CKT, int Nsrc, class CKBT = ckernel_builder>
+  template <class CKT, kernel_request_t kernreq, int Nsrc>
   struct expr_ck;
 
 #ifdef __CUDA_ARCH__
@@ -26,11 +26,11 @@ namespace kernels {
   throw std::invalid_argument(ss.str())
 #endif
 
-#define EXPR_CK(CKBT, ...)                                                     \
+#define EXPR_CK(KERNREQ, ...)                                                  \
   template <class CKT, int Nsrc>                                               \
-  struct expr_ck<CKT, Nsrc, CKBT> : public general_ck<CKBT, CKT> {             \
+  struct expr_ck<CKT, KERNREQ, Nsrc> : public general_ck<CKT, KERNREQ> {       \
     typedef CKT self_type;                                                     \
-    typedef general_ck<CKBT, CKT> parent_type;                                 \
+    typedef general_ck<CKT, KERNREQ> parent_type;                              \
                                                                                \
     /** Initializes just the base.function member. */                          \
     __VA_ARGS__ void init_kernfunc(kernel_request_t kernreq)                   \
@@ -83,9 +83,12 @@ namespace kernels {
     }                                                                          \
   };
 
-  EXPR_CK(ckernel_builder)
+  EXPR_CK(kernel_request_host)
+
 #ifdef __CUDACC__
-  EXPR_CK(cuda_device_ckernel_builder, __device__)
+
+  EXPR_CK(kernel_request_cuda_device, __device__)
+
 #endif
 
 #undef EXPR_CK

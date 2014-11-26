@@ -18,7 +18,7 @@ void kernels::destroy_trivial_parent_ckernel(ckernel_prefix *self)
 }
 
 namespace {
-    struct constant_value_assignment_ck : public kernels::expr_ck<constant_value_assignment_ck, 0> {
+    struct constant_value_assignment_ck : public kernels::expr_ck<constant_value_assignment_ck, kernel_request_host, 0> {
         // Pointer to the array inside of `constant`
         const char *m_constant_data;
         // Reference which owns the constant value to assign

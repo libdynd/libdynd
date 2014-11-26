@@ -13,7 +13,7 @@ using namespace std;
 using namespace dynd;
 
 template <int N>
-struct neighborhood_ck : kernels::expr_ck<neighborhood_ck<N>, N> {
+struct neighborhood_ck : kernels::expr_ck<neighborhood_ck<N>, kernel_request_host, N> {
     typedef neighborhood_ck<N> self_type;
 
     intptr_t dst_stride;
