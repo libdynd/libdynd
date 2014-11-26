@@ -17,15 +17,6 @@ namespace kernels {
   template <class CKT, kernel_request_t kernreq, int Nsrc>
   struct expr_ck;
 
-#ifdef __CUDA_ARCH__
-#define THROW_INVALID_ARGUMENT(KERNREQ)
-#else
-#define THROW_INVALID_ARGUMENT(KERNREQ)                                        \
-  std::stringstream ss;                                                        \
-  ss << "expr ckernel init: unrecognized ckernel request " << (int)KERNREQ;    \
-  throw std::invalid_argument(ss.str())
-#endif
-
 #define EXPR_CK(KERNREQ, ...)                                                  \
   template <class CKT, int Nsrc>                                               \
   struct expr_ck<CKT, KERNREQ, Nsrc> : public general_ck<CKT, KERNREQ> {       \
@@ -44,9 +35,9 @@ namespace kernels {
         this->base.template set_function<expr_strided_t>(                      \
             &self_type::strided_wrapper);                                      \
         break;                                                                 \
-      default: {                                                               \
-        THROW_INVALID_ARGUMENT(kernreq);                                       \
-      }                                                                        \
+      default:                                                                 \
+        DYND_THROW(std::invalid_argument,                                      \
+                   "expr ckernel init: unrecognized ckernel request");         \
       }                                                                        \
     }                                                                          \
                                                                                \
@@ -88,11 +79,11 @@ namespace kernels {
 #ifdef __CUDACC__
 
   EXPR_CK(kernel_request_cuda_device, __device__)
+  EXPR_CK(kernel_request_host | kernel_request_cuda_device, __host__ __device__)
 
 #endif
 
 #undef EXPR_CK
-#undef THROW_INVALID_ARGUMENT
 
 } // namespace kernels
 

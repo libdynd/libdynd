@@ -191,9 +191,6 @@ public:
   intptr_t get_capacity() const { return m_capacity; }
 };
 
-template <kernel_request_t kernreq>
-struct ckernel_builder_for;
-
 class ckernel_builder : public base_ckernel_builder<ckernel_builder> {
   // When the amount of data is small, this static data is used,
   // otherwise dynamic memory is allocated when it gets too big
@@ -287,11 +284,6 @@ public:
                                                   intptr_t requested_capacity);
 };
 
-template <>
-struct ckernel_builder_for<kernel_request_host> {
-  typedef ckernel_builder type;
-};
-
 #ifdef __CUDACC__
 
 template <typename self_type, typename... A>
@@ -366,11 +358,6 @@ public:
     cuda_device_destroy << <1, 1>>> (self);
     cudaDeviceSynchronize();
   }
-};
-
-template <>
-struct ckernel_builder_for<kernel_request_cuda_device> {
-  typedef cuda_device_ckernel_builder type;
 };
 
 #endif
@@ -536,72 +523,65 @@ namespace kernels {
   template <class CKT, kernel_request_t kernreq>
   struct general_ck;
 
-#ifdef __CUDACC__
-#define THROW_RUNTIME_ERROR()
+#ifdef __CUDA_ARCH__
+#define DYND_THROW(EXCEPTION, MESSAGE)
 #else
-#define THROW_RUNTIME_ERROR()                                                  \
-  throw std::runtime_error(                                                    \
-      "internal ckernel error: struct layout is not valid");
+#define DYND_THROW(EXCEPTION, MESSAGE) throw EXCEPTION(MESSAGE)
 #endif
 
-#define INIT()                                                                 \
-  self_type *self = new (rawself) self_type(args...);                          \
-  self->base.destructor = &self_type::destruct;                                \
-  self->init_kernfunc(kernreq);                                                \
-                                                                               \
-  return self;
-
-#define GENERAL_CK(KERNREQ, GET_SELF_QUALIFIERS, INIT_QUALIFIERS,              \
-                   DESTRUCT_QUALIFIERS)                                        \
-  template <class CKT>                                                         \
+#define GENERAL_CK(KERNREQ, ...)                                               \
+  template <typename CKT>                                                      \
   struct general_ck<CKT, KERNREQ> {                                            \
     typedef CKT self_type;                                                     \
-    typedef typename ckernel_builder_for<KERNREQ>::type CKBT;                  \
                                                                                \
     ckernel_prefix base;                                                       \
                                                                                \
-    GET_SELF_QUALIFIERS static self_type *get_self(ckernel_prefix *rawself)    \
+    DYND_CUDA_HOST_DEVICE static self_type *get_self(ckernel_prefix *rawself)  \
     {                                                                          \
       return reinterpret_cast<self_type *>(rawself);                           \
     }                                                                          \
                                                                                \
-    GET_SELF_QUALIFIERS static const self_type *                               \
+    DYND_CUDA_HOST_DEVICE static const self_type *                             \
     get_self(const ckernel_prefix *rawself)                                    \
     {                                                                          \
       return reinterpret_cast<const self_type *>(rawself);                     \
     }                                                                          \
                                                                                \
+    template <typename CKBT>                                                   \
     static self_type *get_self(CKBT *ckb, intptr_t ckb_offset)                 \
     {                                                                          \
       return ckb->template get_at<self_type>(ckb_offset);                      \
     }                                                                          \
                                                                                \
-    template <typename... A>                                                   \
+    template <typename CKBT, typename... A>                                    \
     static self_type *create(CKBT *ckb, kernel_request_t kernreq,              \
                              intptr_t &inout_ckb_offset, A &&... args)         \
     {                                                                          \
       intptr_t ckb_offset = inout_ckb_offset;                                  \
       kernels::inc_ckb_offset<self_type>(inout_ckb_offset);                    \
       ckb->ensure_capacity(inout_ckb_offset);                                  \
-      return ckb->template init<self_type>(                                    \
-          ckb->template get_at<ckernel_prefix>(ckb_offset), kernreq,           \
-          std::forward<A>(args)...);                                           \
+      ckernel_prefix *rawself =                                                \
+          ckb->template get_at<ckernel_prefix>(ckb_offset);                    \
+      return ckb->template init<self_type>(rawself, kernreq,                   \
+                                           std::forward<A>(args)...);          \
     }                                                                          \
                                                                                \
-    template <typename... A>                                                   \
+    template <typename CKBT, typename... A>                                    \
     static self_type *create_leaf(CKBT *ckb, kernel_request_t kernreq,         \
                                   intptr_t &inout_ckb_offset, A &&... args)    \
     {                                                                          \
       intptr_t ckb_offset = inout_ckb_offset;                                  \
       kernels::inc_ckb_offset<self_type>(inout_ckb_offset);                    \
       ckb->ensure_capacity_leaf(inout_ckb_offset);                             \
-      return ckb->template init<self_type>(                                    \
-          ckb->template get_at<ckernel_prefix>(ckb_offset), kernreq,           \
-          std::forward<A>(args)...);                                           \
+      ckernel_prefix *rawself =                                                \
+          ckb->template get_at<ckernel_prefix>(ckb_offset);                    \
+      return ckb->template init<self_type>(rawself, kernreq,                   \
+                                           std::forward<A>(args)...);          \
     }                                                                          \
+                                                                               \
     template <typename... A>                                                   \
-    INIT_QUALIFIERS static self_type *                                         \
-    init(ckernel_prefix *rawself, kernel_request_t kernreq, A &&... args)      \
+    __VA_ARGS__ static self_type *init(ckernel_prefix *rawself,                \
+                                       kernel_request_t kernreq, A &&... args) \
     {                                                                          \
       /* Alignment requirement of the type */                                  \
       DYND_STATIC_ASSERT((size_t)scalar_align_of<self_type>::value <=          \
@@ -612,6 +592,8 @@ namespace kernels {
       self_type *self = new (rawself) self_type(args...);                      \
       /* Double check that the C++ struct layout is as we expect */            \
       if (self != get_self(rawself)) {                                         \
+        DYND_THROW(std::runtime_error,                                         \
+                   "internal ckernel error: struct layout is not valid");      \
       }                                                                        \
       self->base.destructor = &self_type::destruct;                            \
       /* A child class must implement this to fill in self->base.function */   \
@@ -619,14 +601,11 @@ namespace kernels {
       return self;                                                             \
     }                                                                          \
                                                                                \
-    DESTRUCT_QUALIFIERS static void destruct(ckernel_prefix *rawself)          \
+    __VA_ARGS__ static void destruct(ckernel_prefix *rawself)                  \
     {                                                                          \
       self_type *self = get_self(rawself);                                     \
-      self->destruct_children();                                               \
       self->~self_type();                                                      \
     }                                                                          \
-                                                                               \
-    DYND_CUDA_HOST_DEVICE void destruct_children() {}                          \
                                                                                \
     ckernel_prefix *get_child_ckernel()                                        \
     {                                                                          \
@@ -639,31 +618,17 @@ namespace kernels {
     }                                                                          \
   };
 
-#define GET_SELF_QUALIFIERS
-#define INIT_QUALIFIERS
-#define DESTRUCT_QUALIFIERS
-
-  GENERAL_CK(kernel_request_host, GET_SELF_QUALIFIERS, INIT_QUALIFIERS,
-             DESTRUCT_QUALIFIERS)
-
-#undef GET_SELF_QUALIFIERS
-#undef INIT_QUALIFIERS
-#undef DESTRUCT_QUALIFIERS
+  GENERAL_CK(kernel_request_host);
 
 #ifdef __CUDACC__
 
-#define GET_SELF_QUALIFIERS __host__ __device__
-#define INIT_QUALIFIERS __device__
-#define DESTRUCT_QUALIFIERS __device__
-
-  GENERAL_CK(kernel_request_cuda_device, GET_SELF_QUALIFIERS, INIT_QUALIFIERS,
-             DESTRUCT_QUALIFIERS)
-
-#undef GET_SELF_QUALIFIERS
-#undef INIT_QUALIFIERS
-#undef DESTRUCT_QUALIFIERS
+  GENERAL_CK(kernel_request_cuda_device, __device__);
+  GENERAL_CK(kernel_request_host | kernel_request_cuda_device,
+             __host__ __device__);
 
 #endif
+
+#undef GENERAL_CK
 } // namespace kernels
 
 } // namespace dynd
