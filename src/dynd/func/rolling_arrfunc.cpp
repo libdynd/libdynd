@@ -163,7 +163,7 @@ static int resolve_rolling_dst_type(const arrfunc_type_data *af_self,
 static intptr_t
 instantiate_strided(const arrfunc_type_data *af_self,
                     const arrfunc_type *DYND_UNUSED(af_tp),
-                    dynd::ckernel_builder *ckb, intptr_t ckb_offset,
+                    void *ckb, intptr_t ckb_offset,
                     const ndt::type &dst_tp, const char *dst_arrmeta,
                     const ndt::type *src_tp, const char *const *src_arrmeta,
                     kernel_request_t kernreq, const eval::eval_context *ectx,
@@ -209,7 +209,7 @@ instantiate_strided(const arrfunc_type_data *af_self,
         ckb, ckb_offset, dst_el_tp, dst_el_arrmeta,
         numeric_limits<double>::quiet_NaN(), kernel_request_strided, ectx);
     // Re-retrieve the self pointer, because it may be at a new memory location now
-    self = ckb->get_at<self_type>(root_ckb_offset);
+    self = reinterpret_cast<ckernel_builder<kernel_request_host> *>(ckb)->get_at<self_type>(root_ckb_offset);
     // Create the window op child ckernel
     self->m_window_op_offset = ckb_offset - root_ckb_offset;
     // We construct array arrmeta for the window op ckernel to use,

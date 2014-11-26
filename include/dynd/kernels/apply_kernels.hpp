@@ -269,7 +269,7 @@ APPLY(kernel_request_cuda_device, __device__)
 
     static intptr_t
     instantiate(const arrfunc_type_data *DYND_UNUSED(af_self),
-                const arrfunc_type *af_tp, ckernel_builder *ckb,
+                const arrfunc_type *af_tp, void *ckb,
                 intptr_t ckb_offset, const ndt::type &dst_tp,
                 const char *DYND_UNUSED(dst_arrmeta), const ndt::type *src_tp,
                 const char *const *src_arrmeta, kernel_request_t kernreq,
@@ -335,7 +335,7 @@ APPLY(kernel_request_cuda_device, __device__)
 
     static intptr_t
     instantiate(const arrfunc_type_data *af_self, const arrfunc_type *af_tp,
-                dynd::ckernel_builder *ckb, intptr_t ckb_offset,
+                void *ckb, intptr_t ckb_offset,
                 const ndt::type &dst_tp, const char *DYND_UNUSED(dst_arrmeta),
                 const ndt::type *src_tp,
                 const char *const *DYND_CONDITIONAL_UNUSED(src_arrmeta),
@@ -368,7 +368,7 @@ APPLY(kernel_request_cuda_device, __device__)
 
   // func_type, type_sequence<K...>, CKBT
 
-  typedef ckernel_builder host_ckb;
+  typedef ckernel_builder<kernel_request_host> host_ckb;
 
   template <kernel_request_t kernreq, typename func_type, typename... K>
   struct construct_then_apply_callable_ck;
@@ -396,7 +396,7 @@ APPLY(kernel_request_cuda_device, __device__)
 
     static intptr_t
     instantiate(const arrfunc_type_data *DYND_UNUSED(af_self),
-                const arrfunc_type *af_tp, dynd::ckernel_builder *ckb,
+                const arrfunc_type *af_tp, void *ckb,
                 intptr_t ckb_offset, const ndt::type &dst_tp,
                 const char *DYND_UNUSED(dst_arrmeta), const ndt::type *src_tp,
                 const char *const *DYND_CONDITIONAL_UNUSED(src_arrmeta),
@@ -433,7 +433,7 @@ APPLY(kernel_request_cuda_device, __device__)
 
 #ifdef __CUDACC__
 
-  typedef cuda_device_ckernel_builder cuda_device_ckb;
+  typedef ckernel_builder<kernel_request_cuda_device> cuda_device_ckb;
 
   template <typename func_type, typename... K>
   struct construct_then_apply_callable_ck<kernel_request_cuda_device, func_type, K...>
@@ -458,7 +458,7 @@ APPLY(kernel_request_cuda_device, __device__)
 
     static intptr_t
     instantiate(const arrfunc_type_data *DYND_UNUSED(af_self),
-                const arrfunc_type *af_tp, dynd::ckernel_builder *ckb,
+                const arrfunc_type *af_tp, void *ckb,
                 intptr_t ckb_offset, const ndt::type &dst_tp,
                 const char *DYND_UNUSED(dst_arrmeta), const ndt::type *src_tp,
                 const char *const *DYND_CONDITIONAL_UNUSED(src_arrmeta),

@@ -55,7 +55,7 @@ namespace {
 } // anonymous namespace
 
 size_t dynd::make_fixedstring_assignment_kernel(
-                ckernel_builder *ckb, intptr_t ckb_offset,
+                void *ckb, intptr_t ckb_offset,
                 intptr_t dst_data_size, string_encoding_t dst_encoding,
                 intptr_t src_data_size, string_encoding_t src_encoding,
                 kernel_request_t kernreq,
@@ -150,7 +150,7 @@ namespace {
 } // anonymous namespace
 
 size_t dynd::make_blockref_string_assignment_kernel(
-    ckernel_builder *ckb, intptr_t ckb_offset, const char *dst_arrmeta,
+    void *ckb, intptr_t ckb_offset, const char *dst_arrmeta,
     string_encoding_t dst_encoding, const char *src_arrmeta,
     string_encoding_t src_encoding, kernel_request_t kernreq,
     const eval::eval_context *ectx)
@@ -233,7 +233,7 @@ namespace {
 } // anonymous namespace
 
 size_t dynd::make_fixedstring_to_blockref_string_assignment_kernel(
-    ckernel_builder *ckb, intptr_t ckb_offset, const char *dst_arrmeta,
+    void *ckb, intptr_t ckb_offset, const char *dst_arrmeta,
     string_encoding_t dst_encoding, intptr_t src_element_size,
     string_encoding_t src_encoding, kernel_request_t kernreq,
     const eval::eval_context *ectx)
@@ -288,7 +288,7 @@ namespace {
 } // anonymous namespace
 
 size_t dynd::make_blockref_string_to_fixedstring_assignment_kernel(
-    ckernel_builder *ckb, intptr_t ckb_offset, intptr_t dst_data_size,
+    void *ckb, intptr_t ckb_offset, intptr_t dst_data_size,
     string_encoding_t dst_encoding, string_encoding_t src_encoding,
     kernel_request_t kernreq, const eval::eval_context *ectx)
 {
@@ -322,7 +322,7 @@ struct date_to_string_ck : public kernels::unary_ck<date_to_string_ck> {
 } // anonymous namespace
 
 size_t dynd::make_any_to_string_assignment_kernel(
-    ckernel_builder *ckb, intptr_t ckb_offset,
+    void *ckb, intptr_t ckb_offset,
     const ndt::type &dst_tp, const char *dst_arrmeta,
     const ndt::type &src_tp, const char *src_arrmeta,
     kernel_request_t kernreq, const eval::eval_context *ectx)

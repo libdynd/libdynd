@@ -191,7 +191,7 @@ namespace {
 } // anonymous namespace
 
 size_t dynd::make_struct_comparison_kernel(
-                ckernel_builder *ckb, intptr_t ckb_offset,
+                void *ckb, intptr_t ckb_offset,
                 const ndt::type& src_tp,
                 const char *src0_arrmeta, const char *src1_arrmeta,
                 comparison_type_t comptype,
@@ -209,9 +209,9 @@ size_t dynd::make_struct_comparison_kernel(
           ckb_offset,
           sizeof(struct_compare_sorting_less_matching_arrmeta_kernel) +
               field_count * sizeof(size_t));
-      ckb->ensure_capacity(ckb_offset);
+      reinterpret_cast<ckernel_builder<kernel_request_host> *>(ckb)->ensure_capacity(ckb_offset);
       struct_compare_sorting_less_matching_arrmeta_kernel *e =
-          ckb->get_at<struct_compare_sorting_less_matching_arrmeta_kernel>(
+          reinterpret_cast<ckernel_builder<kernel_request_host> *>(ckb)->get_at<struct_compare_sorting_less_matching_arrmeta_kernel>(
               root_ckb_offset);
       e->base.set_function<expr_predicate_t>(
           &struct_compare_sorting_less_matching_arrmeta_kernel::sorting_less);
@@ -226,8 +226,8 @@ size_t dynd::make_struct_comparison_kernel(
         // field comparison kernel. Have to re-get
         // the pointer because creating the field comparison kernel may
         // move the memory.
-        ckb->ensure_capacity(ckb_offset);
-        e = ckb->get_at<struct_compare_sorting_less_matching_arrmeta_kernel>(
+        reinterpret_cast<ckernel_builder<kernel_request_host> *>(ckb)->ensure_capacity(ckb_offset);
+        e = reinterpret_cast<ckernel_builder<kernel_request_host> *>(ckb)->get_at<struct_compare_sorting_less_matching_arrmeta_kernel>(
             root_ckb_offset);
         field_kernel_offsets = reinterpret_cast<size_t *>(e + 1);
         field_kernel_offsets[i] = ckb_offset - root_ckb_offset;
@@ -244,9 +244,9 @@ size_t dynd::make_struct_comparison_kernel(
       kernels::inc_ckb_offset(
           ckb_offset, sizeof(struct_compare_sorting_less_diff_arrmeta_kernel) +
                           2 * field_count * sizeof(size_t));
-      ckb->ensure_capacity(ckb_offset);
+      reinterpret_cast<ckernel_builder<kernel_request_host> *>(ckb)->ensure_capacity(ckb_offset);
       struct_compare_sorting_less_diff_arrmeta_kernel *e =
-          ckb->get_at<struct_compare_sorting_less_diff_arrmeta_kernel>(
+          reinterpret_cast<ckernel_builder<kernel_request_host> *>(ckb)->get_at<struct_compare_sorting_less_diff_arrmeta_kernel>(
               root_ckb_offset);
       e->base.set_function<expr_predicate_t>(
           &struct_compare_sorting_less_diff_arrmeta_kernel::sorting_less);
@@ -263,8 +263,8 @@ size_t dynd::make_struct_comparison_kernel(
         // field comparison kernel. Have to re-get
         // the pointer because creating the field comparison kernel may
         // move the memory.
-        ckb->ensure_capacity(ckb_offset);
-        e = ckb->get_at<struct_compare_sorting_less_diff_arrmeta_kernel>(
+        reinterpret_cast<ckernel_builder<kernel_request_host> *>(ckb)->ensure_capacity(ckb_offset);
+        e = reinterpret_cast<ckernel_builder<kernel_request_host> *>(ckb)->get_at<struct_compare_sorting_less_diff_arrmeta_kernel>(
             root_ckb_offset);
         field_kernel_offsets = reinterpret_cast<size_t *>(e + 1);
         field_kernel_offsets[2 * i] = ckb_offset - root_ckb_offset;
@@ -273,8 +273,8 @@ size_t dynd::make_struct_comparison_kernel(
             src1_arrmeta + arrmeta_offsets[i], comparison_type_sorting_less,
             ectx);
         // Repeat for comparing the other way
-        ckb->ensure_capacity(ckb_offset);
-        e = ckb->get_at<struct_compare_sorting_less_diff_arrmeta_kernel>(
+        reinterpret_cast<ckernel_builder<kernel_request_host> *>(ckb)->ensure_capacity(ckb_offset);
+        e = reinterpret_cast<ckernel_builder<kernel_request_host> *>(ckb)->get_at<struct_compare_sorting_less_diff_arrmeta_kernel>(
             root_ckb_offset);
         field_kernel_offsets = reinterpret_cast<size_t *>(e + 1);
         field_kernel_offsets[2 * i + 1] = ckb_offset - root_ckb_offset;
@@ -289,9 +289,9 @@ size_t dynd::make_struct_comparison_kernel(
              comptype == comparison_type_not_equal) {
     kernels::inc_ckb_offset(ckb_offset, sizeof(struct_compare_equality_kernel) +
                                             field_count * sizeof(size_t));
-    ckb->ensure_capacity(ckb_offset);
+    reinterpret_cast<ckernel_builder<kernel_request_host> *>(ckb)->ensure_capacity(ckb_offset);
     struct_compare_equality_kernel *e =
-        ckb->get_at<struct_compare_equality_kernel>(root_ckb_offset);
+        reinterpret_cast<ckernel_builder<kernel_request_host> *>(ckb)->get_at<struct_compare_equality_kernel>(root_ckb_offset);
     if (comptype == comparison_type_equal) {
       e->base.set_function<expr_predicate_t>(
           &struct_compare_equality_kernel::equal);
@@ -311,8 +311,8 @@ size_t dynd::make_struct_comparison_kernel(
       // field comparison kernel. Have to re-get
       // the pointer because creating the field comparison kernel may
       // move the memory.
-      ckb->ensure_capacity(ckb_offset);
-      e = ckb->get_at<struct_compare_equality_kernel>(root_ckb_offset);
+      reinterpret_cast<ckernel_builder<kernel_request_host> *>(ckb)->ensure_capacity(ckb_offset);
+      e = reinterpret_cast<ckernel_builder<kernel_request_host> *>(ckb)->get_at<struct_compare_equality_kernel>(root_ckb_offset);
       field_kernel_offsets = reinterpret_cast<size_t *>(e + 1);
       field_kernel_offsets[i] = ckb_offset - root_ckb_offset;
       const char *field_arrmeta = src0_arrmeta + arrmeta_offsets[i];
@@ -326,7 +326,7 @@ size_t dynd::make_struct_comparison_kernel(
 }
 
 size_t dynd::make_general_struct_comparison_kernel(
-                ckernel_builder *DYND_UNUSED(ckb), intptr_t DYND_UNUSED(ckb_offset),
+                void *DYND_UNUSED(ckb), intptr_t DYND_UNUSED(ckb_offset),
                 const ndt::type& DYND_UNUSED(src0_dt), const char *DYND_UNUSED(src0_arrmeta),
                 const ndt::type& DYND_UNUSED(src1_dt), const char *DYND_UNUSED(src1_arrmeta),
                 comparison_type_t DYND_UNUSED(comptype),

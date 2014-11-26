@@ -52,12 +52,11 @@ struct arrfunc_type_data;
  * \returns  The offset into ``ckb`` immediately after the instantiated ckernel.
  */
 typedef intptr_t (*arrfunc_instantiate_t)(
-    const arrfunc_type_data *self, const arrfunc_type *af_tp,
-    dynd::ckernel_builder *ckb, intptr_t ckb_offset, const ndt::type &dst_tp,
-    const char *dst_arrmeta, const ndt::type *src_tp,
-    const char *const *src_arrmeta, kernel_request_t kernreq,
-    const eval::eval_context *ectx, const nd::array &args,
-    const nd::array &kwds);
+    const arrfunc_type_data *self, const arrfunc_type *af_tp, void *ckb,
+    intptr_t ckb_offset, const ndt::type &dst_tp, const char *dst_arrmeta,
+    const ndt::type *src_tp, const char *const *src_arrmeta,
+    kernel_request_t kernreq, const eval::eval_context *ectx,
+    const nd::array &args, const nd::array &kwds);
 
 /**
  * Resolves the destination type for this arrfunc based on the types
@@ -164,8 +163,7 @@ struct arrfunc_type_data {
       ndt::type result;
       resolve_dst_type(this, af_tp, nsrc, src_tp, true, result, args, kwds);
       return result;
-    }
-    else {
+    } else {
       if (nsrc != af_tp->get_npos()) {
         std::stringstream ss;
         ss << "arrfunc expected " << af_tp->get_npos()
@@ -234,183 +232,186 @@ public:
 };
 
 namespace nd {
-/**
- * Holds a single instance of an arrfunc in an immutable nd::array,
- * providing some more direct convenient interface.
- */
-class arrfunc {
-  nd::array m_value;
-
-public:
-  arrfunc() : m_value() {}
-  arrfunc(const arrfunc &rhs) : m_value(rhs.m_value) {}
   /**
-    * Constructor from an nd::array. Validates that the input
-    * has "arrfunc" type and is immutable.
-    */
-  arrfunc(const nd::array &rhs);
+   * Holds a single instance of an arrfunc in an immutable nd::array,
+   * providing some more direct convenient interface.
+   */
+  class arrfunc {
+    nd::array m_value;
 
-  arrfunc &operator=(const arrfunc &rhs)
-  {
-    m_value = rhs.m_value;
-    return *this;
-  }
+  public:
+    arrfunc() : m_value() {}
+    arrfunc(const arrfunc &rhs) : m_value(rhs.m_value) {}
+    /**
+      * Constructor from an nd::array. Validates that the input
+      * has "arrfunc" type and is immutable.
+      */
+    arrfunc(const nd::array &rhs);
 
-  bool is_null() const { return m_value.is_null(); }
-
-  const arrfunc_type_data *get() const
-  {
-    return !m_value.is_null() ? reinterpret_cast<const arrfunc_type_data *>(
-                                    m_value.get_readonly_originptr())
-                              : NULL;
-  }
-
-  const arrfunc_type *get_type() const
-  {
-    return !m_value.is_null() ? m_value.get_type().extended<arrfunc_type>()
-                              : NULL;
-  }
-
-  const ndt::type &get_array_type() const { return m_value.get_type(); }
-
-  operator nd::array() const { return m_value; }
-
-  void swap(nd::arrfunc &rhs) { m_value.swap(rhs.m_value); }
-
-  /** Implements the general call operator */
-  nd::array call(intptr_t arg_count, const nd::array *args, const kwds &kwds,
-                 const eval::eval_context *ectx) const;
-  nd::array call(intptr_t arg_count, const nd::array *args,
-                 const eval::eval_context *ectx) const
-  {
-    return call(arg_count, args, kwds(), ectx);
-  }
-
-  /** Convenience call operators */
-  nd::array operator()(const kwds &kwds_ = kwds()) const
-  {
-    return call(0, NULL, kwds_, &eval::default_eval_context);
-  }
-  nd::array operator()(const nd::array &a0,
-                       const kwds &kwds_ = kwds()) const
-  {
-    return call(1, &a0, kwds_, &eval::default_eval_context);
-  }
-  nd::array operator()(const nd::array &a0, const nd::array &a1,
-                       const kwds &kwds_ = kwds()) const
-  {
-    nd::array args[2] = {a0, a1};
-    return call(2, args, kwds_, &eval::default_eval_context);
-  }
-  nd::array operator()(const nd::array &a0, const nd::array &a1,
-                       const nd::array &a2,
-                       const kwds &kwds_ = kwds()) const
-  {
-    nd::array args[3] = {a0, a1, a2};
-    return call(3, args, kwds_, &eval::default_eval_context);
-  }
-
-  /** Implements the general call operator with output parameter */
-  void call_out(intptr_t arg_count, const nd::array *args, const kwds &kwds,
-                const nd::array &out, const eval::eval_context *ectx) const;
-  void call_out(intptr_t arg_count, const nd::array *args, const nd::array &out,
-                const eval::eval_context *ectx) const
-  {
-    call_out(arg_count, args, kwds(), out, ectx);
-  }
-
-  /** Convenience call operators with output parameter */
-  void call_out(const nd::array &out) const
-  {
-    call_out(0, NULL, out, &eval::default_eval_context);
-  }
-  void call_out(const nd::array &a0, const nd::array &out,
-                const kwds &kwds_ = kwds()) const
-  {
-    call_out(1, &a0, kwds_, out, &eval::default_eval_context);
-  }
-  void call_out(const nd::array &a0, const nd::array &a1, const nd::array &out,
-                const kwds &kwds_ = kwds()) const
-  {
-    nd::array args[2] = {a0, a1};
-    call_out(2, args, kwds_, out, &eval::default_eval_context);
-  }
-  void call_out(const nd::array &a0, const nd::array &a1, const nd::array &a2,
-                const nd::array &out, const kwds &kwds_ = kwds()) const
-  {
-    nd::array args[3] = {a0, a1, a2};
-    call_out(3, args, kwds_, out, &eval::default_eval_context);
-  }
-  void call_out(const nd::array &a0, const nd::array &a1, const nd::array &a2,
-                const nd::array &a3, nd::array &out,
-                const kwds &kwds_ = kwds()) const
-  {
-    nd::array args[4] = {a0, a1, a2, a3};
-    call_out(4, args, kwds_, out, &eval::default_eval_context);
-  }
-};
-
-/**
- * This is a helper class for creating static nd::arrfunc instances
- * whose lifetime is managed by init/cleanup functions. When declared
- * as a global static variable, because it is a POD type, this will begin with
- * the value NULL. It can generally be treated just like an nd::arrfunc, though
- * its internals are not protected from meddling.
- */
-struct pod_arrfunc {
-  memory_block_data *m_memblock;
-
-  operator const nd::arrfunc &()
-  {
-    return *reinterpret_cast<const nd::arrfunc *>(&m_memblock);
-  }
-
-  const arrfunc_type_data *get() const
-  {
-    return reinterpret_cast<const nd::arrfunc *>(&m_memblock)->get();
-  }
-
-  const arrfunc_type *get_type() const
-  {
-    return reinterpret_cast<const nd::arrfunc *>(&m_memblock)->get_type();
-  }
-
-  void init(const nd::arrfunc &rhs)
-  {
-    m_memblock = nd::array(rhs).get_memblock().get();
-    memory_block_incref(m_memblock);
-  }
-
-  void cleanup()
-  {
-    if (m_memblock) {
-      memory_block_decref(m_memblock);
-      m_memblock = NULL;
+    arrfunc &operator=(const arrfunc &rhs)
+    {
+      m_value = rhs.m_value;
+      return *this;
     }
+
+    bool is_null() const { return m_value.is_null(); }
+
+    const arrfunc_type_data *get() const
+    {
+      return !m_value.is_null() ? reinterpret_cast<const arrfunc_type_data *>(
+                                      m_value.get_readonly_originptr())
+                                : NULL;
+    }
+
+    const arrfunc_type *get_type() const
+    {
+      return !m_value.is_null() ? m_value.get_type().extended<arrfunc_type>()
+                                : NULL;
+    }
+
+    const ndt::type &get_array_type() const { return m_value.get_type(); }
+
+    operator nd::array() const { return m_value; }
+
+    void swap(nd::arrfunc &rhs) { m_value.swap(rhs.m_value); }
+
+    /** Implements the general call operator */
+    nd::array call(intptr_t arg_count, const nd::array *args, const kwds &kwds,
+                   const eval::eval_context *ectx) const;
+    nd::array call(intptr_t arg_count, const nd::array *args,
+                   const eval::eval_context *ectx) const
+    {
+      return call(arg_count, args, kwds(), ectx);
+    }
+
+    /** Convenience call operators */
+    nd::array operator()(const kwds &kwds_ = kwds()) const
+    {
+      return call(0, NULL, kwds_, &eval::default_eval_context);
+    }
+    nd::array operator()(const nd::array &a0, const kwds &kwds_ = kwds()) const
+    {
+      return call(1, &a0, kwds_, &eval::default_eval_context);
+    }
+    nd::array operator()(const nd::array &a0, const nd::array &a1,
+                         const kwds &kwds_ = kwds()) const
+    {
+      nd::array args[2] = {a0, a1};
+      return call(2, args, kwds_, &eval::default_eval_context);
+    }
+    nd::array operator()(const nd::array &a0, const nd::array &a1,
+                         const nd::array &a2, const kwds &kwds_ = kwds()) const
+    {
+      nd::array args[3] = {a0, a1, a2};
+      return call(3, args, kwds_, &eval::default_eval_context);
+    }
+
+    /** Implements the general call operator with output parameter */
+    void call_out(intptr_t arg_count, const nd::array *args, const kwds &kwds,
+                  const nd::array &out, const eval::eval_context *ectx) const;
+    void call_out(intptr_t arg_count, const nd::array *args,
+                  const nd::array &out, const eval::eval_context *ectx) const
+    {
+      call_out(arg_count, args, kwds(), out, ectx);
+    }
+
+    /** Convenience call operators with output parameter */
+    void call_out(const nd::array &out) const
+    {
+      call_out(0, NULL, out, &eval::default_eval_context);
+    }
+    void call_out(const nd::array &a0, const nd::array &out,
+                  const kwds &kwds_ = kwds()) const
+    {
+      call_out(1, &a0, kwds_, out, &eval::default_eval_context);
+    }
+    void call_out(const nd::array &a0, const nd::array &a1,
+                  const nd::array &out, const kwds &kwds_ = kwds()) const
+    {
+      nd::array args[2] = {a0, a1};
+      call_out(2, args, kwds_, out, &eval::default_eval_context);
+    }
+    void call_out(const nd::array &a0, const nd::array &a1, const nd::array &a2,
+                  const nd::array &out, const kwds &kwds_ = kwds()) const
+    {
+      nd::array args[3] = {a0, a1, a2};
+      call_out(3, args, kwds_, out, &eval::default_eval_context);
+    }
+    void call_out(const nd::array &a0, const nd::array &a1, const nd::array &a2,
+                  const nd::array &a3, nd::array &out,
+                  const kwds &kwds_ = kwds()) const
+    {
+      nd::array args[4] = {a0, a1, a2, a3};
+      call_out(4, args, kwds_, out, &eval::default_eval_context);
+    }
+  };
+
+  /**
+   * This is a helper class for creating static nd::arrfunc instances
+   * whose lifetime is managed by init/cleanup functions. When declared
+   * as a global static variable, because it is a POD type, this will begin with
+   * the value NULL. It can generally be treated just like an nd::arrfunc,
+   * though
+   * its internals are not protected from meddling.
+   */
+  struct pod_arrfunc {
+    memory_block_data *m_memblock;
+
+    operator const nd::arrfunc &()
+    {
+      return *reinterpret_cast<const nd::arrfunc *>(&m_memblock);
+    }
+
+    const arrfunc_type_data *get() const
+    {
+      return reinterpret_cast<const nd::arrfunc *>(&m_memblock)->get();
+    }
+
+    const arrfunc_type *get_type() const
+    {
+      return reinterpret_cast<const nd::arrfunc *>(&m_memblock)->get_type();
+    }
+
+    void init(const nd::arrfunc &rhs)
+    {
+      m_memblock = nd::array(rhs).get_memblock().get();
+      memory_block_incref(m_memblock);
+    }
+
+    void cleanup()
+    {
+      if (m_memblock) {
+        memory_block_decref(m_memblock);
+        m_memblock = NULL;
+      }
+    }
+  };
+
+  inline arrfunc make_arrfunc(ndt::type af_tp,
+                              arrfunc_instantiate_t instantiate)
+  {
+    array af = empty(af_tp);
+    arrfunc_type_data *out_af =
+        reinterpret_cast<arrfunc_type_data *>(af.get_readwrite_originptr());
+    out_af->instantiate = instantiate;
+    af.flag_as_immutable();
+
+    return af;
   }
-};
 
-inline arrfunc make_arrfunc(ndt::type af_tp, arrfunc_instantiate_t instantiate)
-{
-  array af = empty(af_tp);
-  arrfunc_type_data *out_af = reinterpret_cast<arrfunc_type_data *>(af.get_readwrite_originptr());
-  out_af->instantiate = instantiate;
-  af.flag_as_immutable();
+  template <typename T>
+  arrfunc make_arrfunc(ndt::type af_tp, arrfunc_instantiate_t instantiate,
+                       const T &data)
+  {
+    array af = empty(af_tp);
+    arrfunc_type_data *out_af =
+        reinterpret_cast<arrfunc_type_data *>(af.get_readwrite_originptr());
+    out_af->instantiate = instantiate;
+    *out_af->get_data_as<T>() = data;
+    af.flag_as_immutable();
 
-  return af;
-}
-
-template <typename T>
-arrfunc make_arrfunc(ndt::type af_tp, arrfunc_instantiate_t instantiate, const T &data)
-{
-  array af = empty(af_tp);
-  arrfunc_type_data *out_af = reinterpret_cast<arrfunc_type_data *>(af.get_readwrite_originptr());
-  out_af->instantiate = instantiate;
-  *out_af->get_data_as<T>() = data;
-  af.flag_as_immutable();
-
-  return af;
-}
+    return af;
+  }
 
 } // namespace nd
 

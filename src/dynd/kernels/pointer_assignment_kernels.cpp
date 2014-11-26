@@ -17,7 +17,7 @@ namespace {
 } // anonymous namespace
 
 size_t dynd::make_builtin_value_to_pointer_assignment_kernel(
-                ckernel_builder *ckb, intptr_t ckb_offset,
+                void *ckb, intptr_t ckb_offset,
                 type_id_t tp_id, kernel_request_t kernreq)
 {
     switch (tp_id) {
@@ -83,7 +83,7 @@ size_t dynd::make_builtin_value_to_pointer_assignment_kernel(
 }
 
 size_t dynd::make_value_to_pointer_assignment_kernel(
-                ckernel_builder *ckb, intptr_t ckb_offset,
+                void *ckb, intptr_t ckb_offset,
                 const ndt::type &tp, kernel_request_t kernreq)
 {
     if (tp.is_builtin()) {

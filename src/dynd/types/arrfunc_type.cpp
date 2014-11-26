@@ -208,7 +208,7 @@ intptr_t arrfunc_type::get_arg_index(const char *arg_name_begin,
 
 /*
 size_t arrfunc_type::make_assignment_kernel(
-                ckernel_builder *DYND_UNUSED(ckb), size_t DYND_UNUSED(ckb_offset),
+                void *DYND_UNUSED(ckb), size_t DYND_UNUSED(ckb_offset),
                 const ndt::type& dst_tp, const char *DYND_UNUSED(dst_arrmeta),
                 const ndt::type& src_tp, const char *DYND_UNUSED(src_arrmeta),
                 kernel_request_t DYND_UNUSED(kernreq), assign_error_mode DYND_UNUSED(errmode),
@@ -218,7 +218,7 @@ size_t arrfunc_type::make_assignment_kernel(
 }
 
 size_t arrfunc_type::make_comparison_kernel(
-                ckernel_builder *DYND_UNUSED(ckb), intptr_t DYND_UNUSED(ckb_offset),
+                void *DYND_UNUSED(ckb), intptr_t DYND_UNUSED(ckb_offset),
                 const ndt::type& src0_tp, const char *DYND_UNUSED(src0_arrmeta),
                 const ndt::type& src1_tp, const char *DYND_UNUSED(src1_arrmeta),
                 comparison_type_t comptype,
@@ -300,7 +300,7 @@ struct arrfunc_to_string_ck : public kernels::unary_ck<arrfunc_to_string_ck> {
 } // anonymous namespace
 
 static intptr_t make_arrfunc_to_string_assignment_kernel(
-    ckernel_builder *ckb, intptr_t ckb_offset, const ndt::type &dst_string_dt,
+    void *ckb, intptr_t ckb_offset, const ndt::type &dst_string_dt,
     const char *dst_arrmeta, const ndt::type &src_tp, kernel_request_t kernreq,
     const eval::eval_context *ectx)
 {
@@ -315,7 +315,7 @@ static intptr_t make_arrfunc_to_string_assignment_kernel(
 }
 
 size_t arrfunc_type::make_assignment_kernel(
-    ckernel_builder *ckb, intptr_t ckb_offset, const ndt::type &dst_tp,
+    void *ckb, intptr_t ckb_offset, const ndt::type &dst_tp,
     const char *dst_arrmeta, const ndt::type &src_tp,
     const char *DYND_UNUSED(src_arrmeta), kernel_request_t kernreq,
     const eval::eval_context *ectx) const
@@ -418,7 +418,7 @@ static array_preamble *function___call__(const array_preamble *params,
   for (int i = 0; i < nargs - 1; ++i) {
     dynd_arrmeta[i] = args[i + 1].get_arrmeta();
   }
-  ckernel_builder ckb;
+  ckernel_builder<kernel_request_host> ckb;
   af->instantiate(af, af_tp, &ckb, 0, args[0].get_type(), args[0].get_arrmeta(),
                   src_tp, dynd_arrmeta, kernel_request_single,
                   &eval::default_eval_context, nd::array(), nd::array());

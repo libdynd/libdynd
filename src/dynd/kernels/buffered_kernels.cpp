@@ -102,7 +102,7 @@ struct buffered_ck : public kernels::general_ck<buffered_ck, kernel_request_host
 
 size_t dynd::make_buffered_ckernel(
     const arrfunc_type_data *af, const arrfunc_type *af_tp,
-    dynd::ckernel_builder *ckb, intptr_t ckb_offset, const ndt::type &dst_tp,
+    void *ckb, intptr_t ckb_offset, const ndt::type &dst_tp,
     const char *dst_arrmeta, intptr_t nsrc, const ndt::type *src_tp,
     const ndt::type *src_tp_for_af, const char *const *src_arrmeta,
     kernel_request_t kernreq, const eval::eval_context *ectx)
@@ -128,8 +128,10 @@ size_t dynd::make_buffered_ckernel(
   ckb_offset = af->instantiate(af, af_tp, ckb, ckb_offset, dst_tp, dst_arrmeta,
                                src_tp_for_af, &buffered_arrmeta[0], kernreq,
                                ectx, nd::array(), nd::array());
-  ckb->ensure_capacity(ckb_offset);
-  self = ckb->get_at<self_type>(root_ckb_offset);
+  reinterpret_cast<ckernel_builder<kernel_request_host> *>(ckb)
+      ->ensure_capacity(ckb_offset);
+  self = reinterpret_cast<ckernel_builder<kernel_request_host> *>(ckb)
+             ->get_at<self_type>(root_ckb_offset);
   // Instantiate assignments for all the buffered operands
   for (intptr_t i = 0; i < nsrc; ++i) {
     if (!self->m_bufs[i].is_null()) {
@@ -137,9 +139,11 @@ size_t dynd::make_buffered_ckernel(
       ckb_offset = make_assignment_kernel(
           ckb, ckb_offset, src_tp_for_af[i], self->m_bufs[i].get_arrmeta(),
           src_tp[i], src_arrmeta[i], kernreq, ectx);
-      ckb->ensure_capacity(ckb_offset);
+      reinterpret_cast<ckernel_builder<kernel_request_host> *>(ckb)
+          ->ensure_capacity(ckb_offset);
       if (i < nsrc - 1) {
-        self = ckb->get_at<self_type>(root_ckb_offset);
+        self = reinterpret_cast<ckernel_builder<kernel_request_host> *>(ckb)
+                   ->get_at<self_type>(root_ckb_offset);
       }
     }
   }

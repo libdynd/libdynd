@@ -23,7 +23,7 @@ namespace {
 
 static intptr_t instantiate_assignment_ckernel(
     const arrfunc_type_data *self, const arrfunc_type *af_tp,
-    dynd::ckernel_builder *ckb, intptr_t ckb_offset, const ndt::type &dst_tp,
+    void *ckb, intptr_t ckb_offset, const ndt::type &dst_tp,
     const char *dst_arrmeta, const ndt::type *src_tp,
     const char *const *src_arrmeta, kernel_request_t kernreq,
     const eval::eval_context *ectx, const nd::array &DYND_UNUSED(aux),
@@ -70,7 +70,7 @@ static void delete_property_arrfunc_data(arrfunc_type_data *self_af)
 
 static intptr_t instantiate_property_ckernel(
     const arrfunc_type_data *self, const arrfunc_type *af_tp,
-    dynd::ckernel_builder *ckb, intptr_t ckb_offset, const ndt::type &dst_tp,
+    void *ckb, intptr_t ckb_offset, const ndt::type &dst_tp,
     const char *dst_arrmeta, const ndt::type *src_tp,
     const char *const *src_arrmeta, kernel_request_t kernreq,
     const eval::eval_context *ectx, const nd::array &DYND_UNUSED(args),
@@ -207,7 +207,7 @@ nd::array nd::arrfunc::call(intptr_t narg, const nd::array *args,
   nd::array res = nd::empty(dst_tp);
 
   // Generate and evaluate the ckernel
-  ckernel_builder ckb;
+  ckernel_builder<kernel_request_host> ckb;
   af->instantiate(af, af_tp, &ckb, 0, dst_tp, res.get_arrmeta(), &arg_tp[0],
                   &src_arrmeta[0], kernel_request_single, ectx, aux,
                   kwds.get());
@@ -242,7 +242,7 @@ void nd::arrfunc::call_out(intptr_t narg, const nd::array *args,
   nd::array aux = nd::array(); //pack(af_tp->get_naux(), args + af_tp->get_npos());
 
   // Generate and evaluate the ckernel
-  ckernel_builder ckb;
+  ckernel_builder<kernel_request_host> ckb;
   af->instantiate(af, af_tp, &ckb, 0, out.get_type(), out.get_arrmeta(),
                   &arg_tp[0], &src_arrmeta[0], kernel_request_single, ectx, aux,
                   kwds.get());

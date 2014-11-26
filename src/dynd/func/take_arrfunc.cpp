@@ -153,7 +153,7 @@ static int resolve_take_dst_type(const arrfunc_type_data *DYND_UNUSED(af_self),
 
 static intptr_t instantiate_masked_take(
     const arrfunc_type_data *DYND_UNUSED(af_self),
-    const arrfunc_type *DYND_UNUSED(af_tp), dynd::ckernel_builder *ckb,
+    const arrfunc_type *DYND_UNUSED(af_tp), void *ckb,
     intptr_t ckb_offset, const ndt::type &dst_tp, const char *dst_arrmeta,
     const ndt::type *src_tp, const char *const *src_arrmeta,
     kernel_request_t kernreq, const eval::eval_context *ectx,
@@ -216,7 +216,7 @@ static intptr_t instantiate_masked_take(
 
 static intptr_t instantiate_indexed_take(
     const arrfunc_type_data *DYND_UNUSED(af_self),
-    const arrfunc_type *DYND_UNUSED(af_tp), dynd::ckernel_builder *ckb,
+    const arrfunc_type *DYND_UNUSED(af_tp), void *ckb,
     intptr_t ckb_offset, const ndt::type &dst_tp, const char *dst_arrmeta,
     const ndt::type *src_tp, const char *const *src_arrmeta,
     kernel_request_t kernreq, const eval::eval_context *ectx,
@@ -276,7 +276,7 @@ static intptr_t instantiate_indexed_take(
 
 static intptr_t
 instantiate_take(const arrfunc_type_data *af_self, const arrfunc_type *af_tp,
-                 dynd::ckernel_builder *ckb, intptr_t ckb_offset,
+                 void *ckb, intptr_t ckb_offset,
                  const ndt::type &dst_tp, const char *dst_arrmeta,
                  const ndt::type *src_tp, const char *const *src_arrmeta,
                  kernel_request_t kernreq, const eval::eval_context *ectx,

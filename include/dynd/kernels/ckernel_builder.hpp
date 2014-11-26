@@ -191,7 +191,11 @@ public:
   intptr_t get_capacity() const { return m_capacity; }
 };
 
-class ckernel_builder : public base_ckernel_builder<ckernel_builder> {
+template <kernel_request_t kernreq>
+class ckernel_builder;
+
+template <>
+class ckernel_builder<kernel_request_host> : public base_ckernel_builder<ckernel_builder<kernel_request_host>> {
   // When the amount of data is small, this static data is used,
   // otherwise dynamic memory is allocated when it gets too big
   char m_static_data[16 * 8];
@@ -213,7 +217,7 @@ public:
     return self_type::init(rawself, kernreq, std::forward<A>(args)...);
   }
 
-  void destroy() { base_ckernel_builder<ckernel_builder>::destroy(); }
+  void destroy() { base_ckernel_builder<ckernel_builder<kernel_request_host>>::destroy(); }
 
   void destroy(ckernel_prefix *self) { self->destroy(); }
 
@@ -251,7 +255,7 @@ public:
     return std::memset(dst, value, size);
   }
 
-  void swap(ckernel_builder &rhs)
+  void swap(ckernel_builder<kernel_request_host> &rhs)
   {
     if (using_static_data()) {
       if (rhs.using_static_data()) {
@@ -297,8 +301,9 @@ __global__ void cuda_device_destroy(ckernel_prefix *self) { self->destroy(); }
 
 void throw_if_not_cuda_success(cudaError_t);
 
-class cuda_device_ckernel_builder
-    : public base_ckernel_builder<cuda_device_ckernel_builder> {
+template <>
+class ckernel_builder<kernel_request_cuda_device>
+    : public base_ckernel_builder<ckernel_builder<kernel_request_cuda_device>> {
 public:
   void init()
   {
@@ -350,7 +355,7 @@ public:
 
   void destroy()
   {
-    base_ckernel_builder<cuda_device_ckernel_builder>::destroy();
+    base_ckernel_builder<ckernel_builder<kernel_request_cuda_device>>::destroy();
   }
 
   void destroy(ckernel_prefix *self)
@@ -379,7 +384,7 @@ public:
 inline void ckernel_builder_construct(void *ckb)
 {
   // Use the placement new operator to initialize in-place
-  new (ckb) ckernel_builder();
+  new (ckb) ckernel_builder<kernel_request_host>();
 }
 
 /**
@@ -392,8 +397,8 @@ inline void ckernel_builder_construct(void *ckb)
 inline void ckernel_builder_destruct(void *ckb)
 {
   // Call the destructor
-  ckernel_builder *ckb_ptr = reinterpret_cast<ckernel_builder *>(ckb);
-  ckb_ptr->~ckernel_builder();
+  ckernel_builder<kernel_request_host> *ckb_ptr = reinterpret_cast<ckernel_builder<kernel_request_host> *>(ckb);
+  ckb_ptr->~ckernel_builder<kernel_request_host>();
 }
 
 /**
@@ -404,7 +409,7 @@ inline void ckernel_builder_destruct(void *ckb)
  */
 inline void ckernel_builder_reset(void *ckb)
 {
-  ckernel_builder *ckb_ptr = reinterpret_cast<ckernel_builder *>(ckb);
+  ckernel_builder<kernel_request_host> *ckb_ptr = reinterpret_cast<ckernel_builder<kernel_request_host> *>(ckb);
   ckb_ptr->reset();
 }
 
@@ -425,7 +430,7 @@ inline void ckernel_builder_reset(void *ckb)
 inline int ckernel_builder_ensure_capacity_leaf(void *ckb,
                                                 intptr_t requested_capacity)
 {
-  ckernel_builder *ckb_ptr = reinterpret_cast<ckernel_builder *>(ckb);
+  ckernel_builder<kernel_request_host> *ckb_ptr = reinterpret_cast<ckernel_builder<kernel_request_host> *>(ckb);
   if (ckb_ptr->m_capacity < requested_capacity) {
     // Grow by a factor of 1.5
     // https://github.com/facebook/folly/blob/master/folly/docs/FBVector.md
@@ -566,6 +571,10 @@ namespace kernels {
                                            std::forward<A>(args)...);          \
     }                                                                          \
                                                                                \
+    template <typename... A>                                                   \
+    static self_type *create(void *ckb, kernel_request_t kernreq,              \
+                             intptr_t &inout_ckb_offset, A &&... args);        \
+                                                                               \
     template <typename CKBT, typename... A>                                    \
     static self_type *create_leaf(CKBT *ckb, kernel_request_t kernreq,         \
                                   intptr_t &inout_ckb_offset, A &&... args)    \
@@ -578,6 +587,10 @@ namespace kernels {
       return ckb->template init<self_type>(rawself, kernreq,                   \
                                            std::forward<A>(args)...);          \
     }                                                                          \
+                                                                               \
+    template <typename... A>                                                   \
+    static self_type *create_leaf(void *ckb, kernel_request_t kernreq,         \
+                                  intptr_t &inout_ckb_offset, A &&... args);   \
                                                                                \
     template <typename... A>                                                   \
     __VA_ARGS__ static self_type *init(ckernel_prefix *rawself,                \
@@ -620,9 +633,59 @@ namespace kernels {
 
   GENERAL_CK(kernel_request_host);
 
+  template <typename CKT>
+  template <typename... A>
+  typename general_ck<CKT, kernel_request_host>::self_type *
+  general_ck<CKT, kernel_request_host>::create(void *ckb,
+                                               kernel_request_t kernreq,
+                                               intptr_t &inout_ckb_offset,
+                                               A &&... args)
+  {
+    return self_type::create(reinterpret_cast<ckernel_builder<kernel_request_host> *>(ckb), kernreq,
+                             inout_ckb_offset, std::forward<A>(args)...);
+  }
+
+  template <typename CKT>
+  template <typename... A>
+  typename general_ck<CKT, kernel_request_host>::self_type *
+  general_ck<CKT, kernel_request_host>::create_leaf(void *ckb,
+                                                    kernel_request_t kernreq,
+                                                    intptr_t &inout_ckb_offset,
+                                                    A &&... args)
+  {
+    return self_type::create_leaf(reinterpret_cast<ckernel_builder<kernel_request_host> *>(ckb),
+                                  kernreq, inout_ckb_offset,
+                                  std::forward<A>(args)...);
+  }
+
 #ifdef __CUDACC__
 
   GENERAL_CK(kernel_request_cuda_device, __device__);
+
+  template <typename CKT>
+  template <typename... A>
+  typename general_ck<CKT, kernel_request_cuda_device>::self_type *
+  general_ck<CKT, kernel_request_cuda_device>::create(
+      void *ckb, kernel_request_t kernreq, intptr_t &inout_ckb_offset,
+      A &&... args)
+  {
+    return self_type::create(
+        reinterpret_cast<ckernel_builder<kernel_request_cuda_device> *>(ckb), kernreq,
+        inout_ckb_offset, std::forward<A>(args)...);
+  }
+
+  template <typename CKT>
+  template <typename... A>
+  typename general_ck<CKT, kernel_request_cuda_device>::self_type *
+  general_ck<CKT, kernel_request_cuda_device>::create_leaf(
+      void *ckb, kernel_request_t kernreq, intptr_t &inout_ckb_offset,
+      A &&... args)
+  {
+    return self_type::create_leaf(
+        reinterpret_cast<ckernel_builder<kernel_request_cuda_device> *>(ckb), kernreq,
+        inout_ckb_offset, std::forward<A>(args)...);
+  }
+
   GENERAL_CK(kernel_request_host | kernel_request_cuda_device,
              __host__ __device__);
 

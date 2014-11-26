@@ -130,7 +130,7 @@ static int buffered_strided_dim_iter_next(dim_iter *self)
         // Copy the data into the buffer
         const char *data_ptr = reinterpret_cast<const char *>(self->custom[2]);
         intptr_t stride = static_cast<intptr_t>(self->custom[3]);
-        ckernel_builder *ckb = reinterpret_cast<ckernel_builder *>(self->custom[4]);
+        ckernel_builder<kernel_request_host> *ckb = reinterpret_cast<ckernel_builder<kernel_request_host> *>(self->custom[4]);
         ckernel_prefix *kdp = ckb->get();
         expr_strided_t fn = kdp->get_function<expr_strided_t>();
         const char *child_data_ptr = data_ptr + i * stride;
@@ -198,7 +198,7 @@ void dynd::make_buffered_strided_dim_iter(
     intptr_t buffer_stride = reinterpret_cast<const fixed_dim_type_arrmeta *>(
                                  buf.get_arrmeta())->stride;
     // Make the ckernel that copies data to the buffer
-    ckernel_builder k;
+    ckernel_builder<kernel_request_host> k;
     make_assignment_kernel(&k, 0, val_tp,
                            buf.get_arrmeta() + sizeof(fixed_dim_type_arrmeta),
                            mem_tp, mem_arrmeta, kernel_request_strided, ectx);
@@ -231,7 +231,7 @@ void dynd::make_buffered_strided_dim_iter(
     out_di->custom[1] = static_cast<uintptr_t>(size);
     out_di->custom[2] = reinterpret_cast<uintptr_t>(data_ptr);
     out_di->custom[3] = static_cast<uintptr_t>(stride);
-    ckernel_builder *ckb = new ckernel_builder;
+    ckernel_builder<kernel_request_host> *ckb = new ckernel_builder<kernel_request_host>;
     k.swap(*ckb);
     out_di->custom[4] = reinterpret_cast<uintptr_t>(ckb);
     memory_block_incref(buf.get_memblock().get());

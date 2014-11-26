@@ -269,28 +269,37 @@ namespace {
 } // anonymous namespace
 
 static size_t make_expr_type_offset_applier(
-                ckernel_builder *ckb, intptr_t ckb_offset,
+                void *ckb, intptr_t ckb_offset,
                 size_t src_count, const intptr_t *src_data_offsets)
 {
     // A few specializations with fixed size, and a general case version
     // NOTE: src_count == 1 must never happen here, it is handled by the unary_expr type
     switch (src_count) {
         case 2: {
-            expr_type_offset_applier_extra<2> *e = ckb->alloc_ck_leaf<expr_type_offset_applier_extra<2> >(ckb_offset);
+          expr_type_offset_applier_extra<2> *e =
+              reinterpret_cast<ckernel_builder<kernel_request_host> *>(ckb)
+                  ->alloc_ck_leaf<expr_type_offset_applier_extra<2>>(
+                      ckb_offset);
             memcpy(e->offsets, src_data_offsets, sizeof(e->offsets));
             e->base.set_function<expr_single_t>(&expr_type_offset_applier_extra<2>::single);
             e->base.destructor = &expr_type_offset_applier_extra<2>::destruct;
             return ckb_offset;
         }
         case 3: {
-            expr_type_offset_applier_extra<3> *e = ckb->alloc_ck_leaf<expr_type_offset_applier_extra<3> >(ckb_offset);
+          expr_type_offset_applier_extra<3> *e =
+              reinterpret_cast<ckernel_builder<kernel_request_host> *>(ckb)
+                  ->alloc_ck_leaf<expr_type_offset_applier_extra<3>>(
+                      ckb_offset);
             memcpy(e->offsets, src_data_offsets, sizeof(e->offsets));
             e->base.set_function<expr_single_t>(&expr_type_offset_applier_extra<3>::single);
             e->base.destructor = &expr_type_offset_applier_extra<3>::destruct;
             return ckb_offset;
         }
         case 4: {
-            expr_type_offset_applier_extra<4> *e = ckb->alloc_ck_leaf<expr_type_offset_applier_extra<4> >(ckb_offset);
+          expr_type_offset_applier_extra<4> *e =
+              reinterpret_cast<ckernel_builder<kernel_request_host> *>(ckb)
+                  ->alloc_ck_leaf<expr_type_offset_applier_extra<4>>(
+                      ckb_offset);
             memcpy(e->offsets, src_data_offsets, sizeof(e->offsets));
             e->base.set_function<expr_single_t>(&expr_type_offset_applier_extra<4>::single);
             e->base.destructor = &expr_type_offset_applier_extra<4>::destruct;
@@ -301,9 +310,12 @@ static size_t make_expr_type_offset_applier(
             kernels::inc_ckb_offset(
                 ckb_offset, sizeof(expr_type_offset_applier_general_extra) +
                                 src_count * sizeof(size_t));
-            ckb->ensure_capacity(ckb_offset);
+            reinterpret_cast<ckernel_builder<kernel_request_host> *>(ckb)
+                ->ensure_capacity(ckb_offset);
             expr_type_offset_applier_general_extra *e =
-                ckb->get_at<expr_type_offset_applier_general_extra>(root_ckb_offset);
+                reinterpret_cast<ckernel_builder<kernel_request_host> *>(ckb)
+                    ->get_at<expr_type_offset_applier_general_extra>(
+                        root_ckb_offset);
             e->src_count = src_count;
             size_t *out_offsets = reinterpret_cast<size_t *>(e + 1);
             memcpy(out_offsets, src_data_offsets, src_count * sizeof(size_t));
@@ -322,15 +334,17 @@ static void src_deref_single(char *dst, char **src,
     child_fn(dst, reinterpret_cast<char **>(*src), child);
 }
 
-static size_t make_src_deref_ckernel(ckernel_builder *ckb, intptr_t ckb_offset) {
-    ckernel_prefix *self = ckb->alloc_ck_leaf<ckernel_prefix>(ckb_offset);
+static size_t make_src_deref_ckernel(void *ckb, intptr_t ckb_offset) {
+  ckernel_prefix *self =
+      reinterpret_cast<ckernel_builder<kernel_request_host> *>(ckb)
+          ->alloc_ck_leaf<ckernel_prefix>(ckb_offset);
     self->set_function<expr_single_t>(&src_deref_single);
     self->destructor = &kernels::destroy_trivial_parent_ckernel;
     return ckb_offset;
 }
 
 size_t expr_type::make_operand_to_value_assignment_kernel(
-                ckernel_builder *ckb, intptr_t ckb_offset,
+                void *ckb, intptr_t ckb_offset,
                 const char *dst_arrmeta, const char *src_arrmeta,
                 kernel_request_t kernreq, const eval::eval_context *ectx) const
 {
@@ -373,7 +387,7 @@ size_t expr_type::make_operand_to_value_assignment_kernel(
 }
 
 size_t expr_type::make_value_to_operand_assignment_kernel(
-                ckernel_builder *DYND_UNUSED(ckb), intptr_t DYND_UNUSED(ckb_offset),
+                void *DYND_UNUSED(ckb), intptr_t DYND_UNUSED(ckb_offset),
                 const char *DYND_UNUSED(dst_arrmeta), const char *DYND_UNUSED(src_arrmeta),
                 kernel_request_t DYND_UNUSED(kernreq), const eval::eval_context *DYND_UNUSED(ectx)) const
 {

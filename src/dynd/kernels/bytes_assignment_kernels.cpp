@@ -69,7 +69,7 @@ namespace {
 } // anonymous namespace
 
 size_t dynd::make_blockref_bytes_assignment_kernel(
-    ckernel_builder *ckb, intptr_t ckb_offset, size_t dst_alignment,
+    void *ckb, intptr_t ckb_offset, size_t dst_alignment,
     const char *dst_arrmeta, size_t src_alignment, const char *src_arrmeta,
     kernel_request_t kernreq, const eval::eval_context *DYND_UNUSED(ectx))
 {
@@ -77,7 +77,8 @@ size_t dynd::make_blockref_bytes_assignment_kernel(
   ckb_offset =
       make_kernreq_to_single_kernel_adapter(ckb, ckb_offset, 1, kernreq);
   blockref_bytes_kernel_extra *e =
-      ckb->alloc_ck_leaf<blockref_bytes_kernel_extra>(ckb_offset);
+      reinterpret_cast<ckernel_builder<kernel_request_host> *>(ckb)
+          ->alloc_ck_leaf<blockref_bytes_kernel_extra>(ckb_offset);
   e->base.set_function<expr_single_t>(&blockref_bytes_kernel_extra::single);
   e->dst_alignment = dst_alignment;
   e->src_alignment = src_alignment;
@@ -130,7 +131,7 @@ namespace {
 } // anonymous namespace
 
 size_t dynd::make_fixedbytes_to_blockref_bytes_assignment_kernel(
-    ckernel_builder *ckb, intptr_t ckb_offset, size_t dst_alignment,
+    void *ckb, intptr_t ckb_offset, size_t dst_alignment,
     const char *dst_arrmeta, intptr_t src_data_size, size_t src_alignment,
     kernel_request_t kernreq, const eval::eval_context *DYND_UNUSED(ectx))
 {
@@ -138,7 +139,9 @@ size_t dynd::make_fixedbytes_to_blockref_bytes_assignment_kernel(
   ckb_offset =
       make_kernreq_to_single_kernel_adapter(ckb, ckb_offset, 1, kernreq);
   fixedbytes_to_blockref_bytes_kernel_extra *e =
-      ckb->alloc_ck_leaf<fixedbytes_to_blockref_bytes_kernel_extra>(ckb_offset);
+      reinterpret_cast<ckernel_builder<kernel_request_host> *>(ckb)
+          ->alloc_ck_leaf<fixedbytes_to_blockref_bytes_kernel_extra>(
+              ckb_offset);
   e->base.set_function<expr_single_t>(
       &fixedbytes_to_blockref_bytes_kernel_extra::single);
   e->dst_alignment = dst_alignment;

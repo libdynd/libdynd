@@ -39,7 +39,7 @@ namespace kernels {
         : public expr_ck<cuda_parallel_ck<index_sequence<I...>>, kernel_request_host, sizeof...(I)> {
       typedef cuda_parallel_ck<index_sequence<I...>> self_type;
 
-      cuda_device_ckernel_builder m_ckb;
+      ckernel_builder<kernel_request_cuda_device> m_ckb;
       dim3 m_blocks;
       dim3 m_threads;
 
@@ -49,7 +49,7 @@ namespace kernels {
       {
       }
 
-      cuda_device_ckernel_builder *get_ckb() { return &m_ckb; }
+      ckernel_builder<kernel_request_cuda_device> *get_ckb() { return &m_ckb; }
 
       void single(char *dst, char **DYND_CONDITIONAL_UNUSED(src))
       {
@@ -60,7 +60,7 @@ namespace kernels {
 
       static intptr_t instantiate(const arrfunc_type_data *DYND_UNUSED(af_self),
                                   const arrfunc_type *DYND_UNUSED(af_tp),
-                                  ckernel_builder *ckb, intptr_t ckb_offset,
+                                  void *ckb, intptr_t ckb_offset,
                                   const ndt::type &DYND_UNUSED(dst_tp),
                                   const char *DYND_UNUSED(dst_arrmeta),
                                   const ndt::type *DYND_UNUSED(src_tp),

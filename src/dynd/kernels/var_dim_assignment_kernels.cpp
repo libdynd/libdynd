@@ -71,7 +71,7 @@ namespace {
 } // anonymous namespace
 
 size_t dynd::make_broadcast_to_var_dim_assignment_kernel(
-    ckernel_builder *ckb, intptr_t ckb_offset, const ndt::type &dst_var_dim_tp,
+    void *ckb, intptr_t ckb_offset, const ndt::type &dst_var_dim_tp,
     const char *dst_arrmeta, const ndt::type &src_tp, const char *src_arrmeta,
     kernel_request_t kernreq, const eval::eval_context *ectx)
 {
@@ -170,7 +170,7 @@ namespace {
 } // anonymous namespace
 
 size_t dynd::make_var_dim_assignment_kernel(
-    ckernel_builder *ckb, intptr_t ckb_offset, const ndt::type &dst_var_dim_tp,
+    void *ckb, intptr_t ckb_offset, const ndt::type &dst_var_dim_tp,
     const char *dst_arrmeta, const ndt::type &src_var_dim_tp,
     const char *src_arrmeta, kernel_request_t kernreq,
     const eval::eval_context *ectx)
@@ -271,7 +271,7 @@ namespace {
 } // anonymous namespace
 
 size_t dynd::make_strided_to_var_dim_assignment_kernel(
-    ckernel_builder *ckb, intptr_t ckb_offset, const ndt::type &dst_var_dim_tp,
+    void *ckb, intptr_t ckb_offset, const ndt::type &dst_var_dim_tp,
     const char *dst_arrmeta, intptr_t src_dim_size, intptr_t src_stride,
     const ndt::type &src_el_tp, const char *src_el_arrmeta,
     kernel_request_t kernreq, const eval::eval_context *ectx)
@@ -340,7 +340,7 @@ namespace {
 } // anonymous namespace
 
 size_t dynd::make_var_to_fixed_dim_assignment_kernel(
-    ckernel_builder *ckb, intptr_t ckb_offset,
+    void *ckb, intptr_t ckb_offset,
     const ndt::type &dst_strided_dim_tp, const char *dst_arrmeta,
     const ndt::type &src_var_dim_tp, const char *src_arrmeta,
     kernel_request_t kernreq, const eval::eval_context *ectx)

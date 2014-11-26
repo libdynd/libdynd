@@ -2203,7 +2203,7 @@ void nd::assign_na(const ndt::type &tp, const char *arrmeta, char *data,
           dtp.extended<option_type>()->get_assign_na_arrfunc();
       const arrfunc_type *af_tp =
           dtp.extended<option_type>()->get_assign_na_arrfunc_type();
-      ckernel_builder ckb;
+      ckernel_builder<kernel_request_host> ckb;
       make_lifted_expr_ckernel(af, af_tp, &ckb, 0, tp.get_ndim(), tp, arrmeta,
                                NULL, NULL, NULL, kernel_request_single, ectx);
       ckernel_prefix *ckp = ckb.get();

@@ -265,7 +265,7 @@ struct struct_property_getter_ck
 } // anonymous namespace
 
 size_t base_struct_type::make_elwise_property_getter_kernel(
-    ckernel_builder *ckb, intptr_t ckb_offset, const char *dst_arrmeta,
+    void *ckb, intptr_t ckb_offset, const char *dst_arrmeta,
     const char *src_arrmeta, size_t src_elwise_property_index,
     kernel_request_t kernreq, const eval::eval_context *ectx) const
 {
@@ -289,7 +289,7 @@ size_t base_struct_type::make_elwise_property_getter_kernel(
 }
 
 size_t base_struct_type::make_elwise_property_setter_kernel(
-                ckernel_builder *DYND_UNUSED(ckb), intptr_t DYND_UNUSED(ckb_offset),
+                void *DYND_UNUSED(ckb), intptr_t DYND_UNUSED(ckb_offset),
                 const char *DYND_UNUSED(dst_arrmeta), size_t dst_elwise_property_index,
                 const char *DYND_UNUSED(src_arrmeta),
                 kernel_request_t DYND_UNUSED(kernreq), const eval::eval_context *DYND_UNUSED(ectx)) const

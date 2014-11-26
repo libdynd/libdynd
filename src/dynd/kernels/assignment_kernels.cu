@@ -83,7 +83,7 @@ static const ndt::type& get_storage_type(const ndt::type& tp) {
 }
 
 size_t dynd::make_cuda_assignment_kernel(
-                ckernel_builder *ckb, intptr_t ckb_offset,
+                void *ckb, intptr_t ckb_offset,
                 const ndt::type& dst_tp, const char *dst_arrmeta,
                 const ndt::type& src_tp, const char *src_arrmeta,
                 kernel_request_t kernreq, const eval::eval_context *ectx)
@@ -514,7 +514,7 @@ static expr_strided_t assign_table_strided_cuda_device_to_device_kernel[builtin_
 
 // This is meant to reflect make_builtin_type_assignment_kernel
 size_t dynd::make_cuda_builtin_type_assignment_kernel(
-                ckernel_builder *out, intptr_t offset_out,
+                void *out, intptr_t offset_out,
                 bool dst_device, type_id_t dst_type_id,
                 bool src_device, type_id_t src_type_id,
                 kernel_request_t kernreq, assign_error_mode errmode)
@@ -522,7 +522,7 @@ size_t dynd::make_cuda_builtin_type_assignment_kernel(
     if (dst_type_id >= bool_type_id && dst_type_id <= complex_float64_type_id &&
                     src_type_id >= bool_type_id && src_type_id <= complex_float64_type_id &&
                     errmode != assign_error_default) {
-        ckernel_prefix *result = out->get_at<ckernel_prefix>(offset_out);
+        ckernel_prefix *result = reinterpret_cast<ckernel_builder<kernel_request_host> *>(out)->get_at<ckernel_prefix>(offset_out);
         switch (kernreq) {
             case kernel_request_single:
                 if (dst_device) {
@@ -555,7 +555,7 @@ size_t dynd::make_cuda_builtin_type_assignment_kernel(
                                                         [src_type_id-bool_type_id][errmode]);
                     } else {
                         offset_out = make_kernreq_to_single_kernel_adapter(out, offset_out, 1, kernreq);
-                        result = out->get_at<ckernel_prefix>(offset_out);
+                        result = reinterpret_cast<ckernel_builder<kernel_request_host> *>(out)->get_at<ckernel_prefix>(offset_out);
                         result->set_function<expr_single_t>(
                                         assign_table_single_cuda_host_to_device_kernel[dst_type_id-bool_type_id]
                                                         [src_type_id-bool_type_id][errmode]);
@@ -563,7 +563,7 @@ size_t dynd::make_cuda_builtin_type_assignment_kernel(
                 } else {
                     if (src_device) {
                         offset_out = make_kernreq_to_single_kernel_adapter(out, offset_out, 1, kernreq);
-                        result = out->get_at<ckernel_prefix>(offset_out);
+                        result = reinterpret_cast<ckernel_builder<kernel_request_host> *>(out)->get_at<ckernel_prefix>(offset_out);
                         result->set_function<expr_single_t>(
                                         assign_table_single_cuda_device_to_host_kernel[dst_type_id-bool_type_id]
                                                         [src_type_id-bool_type_id][errmode]);
@@ -597,7 +597,7 @@ size_t dynd::make_cuda_builtin_type_assignment_kernel(
 
 // This is meant to reflect make_pod_typed_data_assignment_kernel
 size_t dynd::make_cuda_pod_typed_data_assignment_kernel(
-                ckernel_builder *out, intptr_t offset_out,
+                void *out, intptr_t offset_out,
                 bool dst_device, bool src_device,
                 size_t data_size, size_t data_alignment,
                 kernel_request_t kernreq)
@@ -611,8 +611,8 @@ size_t dynd::make_cuda_pod_typed_data_assignment_kernel(
 
     if (dst_device) {
         if (src_device) {
-            out->ensure_capacity_leaf(offset_out + sizeof(unaligned_copy_ck));
-            ckernel_prefix *result = out->get_at<ckernel_prefix>(offset_out);
+            reinterpret_cast<ckernel_builder<kernel_request_host> *>(out)->ensure_capacity_leaf(offset_out + sizeof(unaligned_copy_ck));
+            ckernel_prefix *result = reinterpret_cast<ckernel_builder<kernel_request_host> *>(out)->get_at<ckernel_prefix>(offset_out);
             if (single) {
                 result->set_function<expr_single_t>(&unaligned_copy_single_cuda_device_to_device);
             } else {
@@ -621,8 +621,8 @@ size_t dynd::make_cuda_pod_typed_data_assignment_kernel(
             reinterpret_cast<unaligned_copy_ck *>(result)->data_size = data_size;
             return offset_out + sizeof(unaligned_copy_ck);
         } else {
-            out->ensure_capacity_leaf(offset_out + sizeof(unaligned_copy_ck));
-            ckernel_prefix *result = out->get_at<ckernel_prefix>(offset_out);
+            reinterpret_cast<ckernel_builder<kernel_request_host> *>(out)->ensure_capacity_leaf(offset_out + sizeof(unaligned_copy_ck));
+            ckernel_prefix *result = reinterpret_cast<ckernel_builder<kernel_request_host> *>(out)->get_at<ckernel_prefix>(offset_out);
             if (single) {
                 result->set_function<expr_single_t>(&unaligned_copy_single_cuda_host_to_device);
             } else {
@@ -633,8 +633,8 @@ size_t dynd::make_cuda_pod_typed_data_assignment_kernel(
         }
     } else {
         if (src_device) {
-            out->ensure_capacity_leaf(offset_out + sizeof(unaligned_copy_ck));
-            ckernel_prefix *result = out->get_at<ckernel_prefix>(offset_out);
+            reinterpret_cast<ckernel_builder<kernel_request_host> *>(out)->ensure_capacity_leaf(offset_out + sizeof(unaligned_copy_ck));
+            ckernel_prefix *result = reinterpret_cast<ckernel_builder<kernel_request_host> *>(out)->get_at<ckernel_prefix>(offset_out);
             if (single) {
                 result->set_function<expr_single_t>(&unaligned_copy_single_cuda_device_to_host);
             } else {

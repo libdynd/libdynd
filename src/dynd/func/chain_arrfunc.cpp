@@ -90,7 +90,7 @@ struct instantiate_chain_data {
 intptr_t dynd::make_chain_buf_tp_ckernel(
     const arrfunc_type_data *first, const arrfunc_type *first_tp,
     const arrfunc_type_data *second, const arrfunc_type *second_tp,
-    const ndt::type &buf_tp, dynd::ckernel_builder *ckb, intptr_t ckb_offset,
+    const ndt::type &buf_tp, void *ckb, intptr_t ckb_offset,
     const ndt::type &dst_tp, const char *dst_arrmeta, const ndt::type *src_tp,
     const char *const *src_arrmeta, kernel_request_t kernreq,
     const eval::eval_context *ectx)
@@ -106,8 +106,8 @@ intptr_t dynd::make_chain_buf_tp_ckernel(
     ckb_offset = first->instantiate(
         first, first_tp, ckb, ckb_offset, buf_tp, self->m_buf_arrmeta.get(),
         src_tp, src_arrmeta, kernreq, ectx, nd::array(), nd::array());
-    ckb->ensure_capacity(ckb_offset);
-    self = ckb->get_at<unary_heap_chain_ck>(root_ckb_offset);
+    reinterpret_cast<ckernel_builder<kernel_request_host> *>(ckb)->ensure_capacity(ckb_offset);
+    self = reinterpret_cast<ckernel_builder<kernel_request_host> *>(ckb)->get_at<unary_heap_chain_ck>(root_ckb_offset);
     self->m_second_offset = ckb_offset - root_ckb_offset;
     const char *buf_arrmeta = self->m_buf_arrmeta.get();
     ckb_offset = second->instantiate(second, second_tp, ckb, ckb_offset, dst_tp,
@@ -122,7 +122,7 @@ intptr_t dynd::make_chain_buf_tp_ckernel(
 
 static intptr_t instantiate_chain_buf_tp(
     const arrfunc_type_data *af_self, const arrfunc_type *DYND_UNUSED(af_tp),
-    dynd::ckernel_builder *ckb, intptr_t ckb_offset, const ndt::type &dst_tp,
+    void *ckb, intptr_t ckb_offset, const ndt::type &dst_tp,
     const char *dst_arrmeta, const ndt::type *src_tp,
     const char *const *src_arrmeta, kernel_request_t kernreq,
     const eval::eval_context *ectx, const nd::array &DYND_UNUSED(aux),

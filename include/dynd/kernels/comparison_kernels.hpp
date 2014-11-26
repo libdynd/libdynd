@@ -41,10 +41,10 @@ enum comparison_type_t {
  * a comparison between one type/arrmeta value
  * and a different type/arrmeta value.
  */
-class comparison_ckernel_builder : public ckernel_builder {
+class comparison_ckernel_builder : public ckernel_builder<kernel_request_host> {
 public:
     comparison_ckernel_builder()
-        : ckernel_builder()
+        : ckernel_builder<kernel_request_host>()
     {
     }
 
@@ -83,7 +83,7 @@ public:
  * \returns  The offset within 'out' immediately after the
  *           created kernel.
  */
-size_t make_comparison_kernel(ckernel_builder *ckb, intptr_t ckb_offset,
+size_t make_comparison_kernel(void *ckb, intptr_t ckb_offset,
                               const ndt::type &src0_dt,
                               const char *src0_arrmeta,
                               const ndt::type &src1_dt,
@@ -101,7 +101,7 @@ size_t make_comparison_kernel(ckernel_builder *ckb, intptr_t ckb_offset,
  * \param src1_type_id  The second dynd type id.
  * \param comptype  The type of comparison to do.
  */
-size_t make_builtin_type_comparison_kernel(ckernel_builder *ckb,
+size_t make_builtin_type_comparison_kernel(void *ckb,
                                            intptr_t ckb_offset,
                                            type_id_t src0_type_id,
                                            type_id_t src1_type_id,

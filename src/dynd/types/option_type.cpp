@@ -109,7 +109,7 @@ bool option_type::is_avail(const char *arrmeta, const char *data,
       return false;
     }
   } else {
-    ckernel_builder ckb;
+    ckernel_builder<kernel_request_host> ckb;
     const arrfunc_type_data *af = get_is_avail_arrfunc();
     ndt::type src_tp[1] = {ndt::type(this, true)};
     af->instantiate(af, get_is_avail_arrfunc_type(), &ckb, 0,
@@ -172,7 +172,7 @@ void option_type::assign_na(const char *arrmeta, char *data,
     }
   }
   else {
-    ckernel_builder ckb;
+    ckernel_builder<kernel_request_host> ckb;
     const arrfunc_type_data *af = get_assign_na_arrfunc();
     af->instantiate(af, get_assign_na_arrfunc_type(), &ckb, 0,
                     ndt::type(this, true), arrmeta, NULL, NULL,
@@ -340,7 +340,7 @@ void option_type::arrmeta_debug_print(const char *arrmeta, std::ostream &o,
 }
 
 size_t option_type::make_assignment_kernel(
-    ckernel_builder *ckb, intptr_t ckb_offset, const ndt::type &dst_tp,
+    void *ckb, intptr_t ckb_offset, const ndt::type &dst_tp,
     const char *dst_arrmeta, const ndt::type &src_tp, const char *src_arrmeta,
     kernel_request_t kernreq, const eval::eval_context *ectx) const
 {

@@ -49,7 +49,7 @@ TEST(LiftArrFunc, UnaryExpr_StridedDim) {
     nd::arrfunc af = lift_arrfunc(af_base);
 
     // Test it on some data
-    ckernel_builder ckb;
+    ckernel_builder<kernel_request_host> ckb;
     nd::array in = nd::empty(3, "string[16]");
     in(0).vals() = "172";
     in(1).vals() = "-139";
@@ -94,7 +94,7 @@ TEST(LiftArrFunc, UnaryExpr_StridedToVarDim)
   // Test it on some data
   ndt::type dst_tp("var * int32");
   ndt::type src_tp("5 * string[16]");
-  ckernel_builder ckb;
+  ckernel_builder<kernel_request_host> ckb;
   nd::array in = nd::empty(src_tp);
   nd::array out = nd::empty(dst_tp);
   in(0).vals() = "172";
@@ -128,7 +128,7 @@ TEST(LiftArrFunc, UnaryExpr_VarToVarDim)
   nd::arrfunc af = lift_arrfunc(af_base);
 
   // Test it on some data
-  ckernel_builder ckb;
+  ckernel_builder<kernel_request_host> ckb;
   nd::array in = nd::empty("var * string[16]");
   nd::array out = nd::empty("var * int32");
   const char *in_vals[] = {"172", "-139", "12345", "-1111", "284"};
