@@ -856,6 +856,32 @@ type make_type(intptr_t ndim, const intptr_t *shape, const ndt::type &dtype,
                bool &out_any_var);
 
 /**
+ * Returns the type to use for packing this specific value. The value
+ * is allowed to affect the type, e.g. for packing a std::vector
+ */
+template <typename T>
+type make_packed_type(const T &DYND_UNUSED(val))
+{
+  // Default case is for when T and the ndt::type have identical
+  // memory layout, which is guaranteed by make_exact_type<T>().
+  return make_exact_type<T>();
+}
+
+template <typename T>
+type make_packed_type(const std::vector<T> &val)
+{
+  // Depending on the data size, store the data by value or as a pointer
+  // to an nd::array
+  if (sizeof(T) * val.size() > 32) {
+    return make_pointer(make_fixed_dim(val.size(), make_exact_type<T>()));
+  } else {
+    return make_fixed_dim(val.size(), make_exact_type<T>());
+  }
+}
+
+type make_packed_type(const nd::array &val);
+
+/**
  * A static array of the builtin types and void.
  * If code is specialized just for a builtin type, like int, it can use
  * static_builtin_types[type_id_of<int>::value] as a fast

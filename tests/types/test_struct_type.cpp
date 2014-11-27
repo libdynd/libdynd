@@ -482,7 +482,7 @@ TEST(StructType, Pack)
   EXPECT_EQ(a.p("val0").as<int>(), -3);
   EXPECT_EQ(a.p("val1").as<double>(), 7.5);
 
-  a = pack(a, "val2", 10);
+  a = struct_concat(a, pack("val2", 10));
   EXPECT_EQ(a.get_type(), ndt::make_struct(ndt::make_type<int>(), "val0",
                                            ndt::make_type<double>(), "val1",
                                            ndt::make_type<int>(), "val2"));

@@ -476,8 +476,8 @@ TYPED_TEST_P(Apply, CallableWithKeywords)
   af = nd::make_apply_arrfunc<callable0, int>("z");
   EXPECT_EQ(8, af(5, 3, kwds("z", 4)).as<int>());
 
-  af = nd::make_apply_arrfunc<callable1, int, int>("x", "y");
-  EXPECT_EQ(28, af(2, kwds("x", 1, "y", 7)).as<int>());
+//  af = nd::make_apply_arrfunc<TestFixture::KernelRequest, callable1, int, int>("x", "y");
+  //EXPECT_EQ(28, af(TestFixture::To(2), kwds("x", TestFixture::To(1), "y", TestFixture::To(7))).template as<int>());
 }
 
 typedef integral_constant<kernel_request_t, kernel_request_host>

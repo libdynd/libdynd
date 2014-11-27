@@ -16,6 +16,7 @@
 #include <dynd/shortvector.hpp>
 #include <dynd/irange.hpp>
 #include <dynd/memblock/array_memory_block.hpp>
+#include <dynd/types/pointer_type.hpp>
 #include <dynd/types/type_type.hpp>
 
 namespace dynd {
@@ -1597,6 +1598,57 @@ T array::as(assign_error_mode errmode) const {
         tmp_ectx.errmode = errmode;
         return detail::array_as_helper<T>::as(*this, &tmp_ectx);
     }
+}
+
+namespace detail {
+  /**
+   * Packs a value into memory allocated to store it via the ``make_type(val)``
+   * call. Because the destination arrmeta is guaranteed to be for only one
+   * data element
+   */
+  template <typename T>
+  void as_packed_array(const T &src, const ndt::type &DYND_UNUSED(dst_tp),
+                       char *DYND_UNUSED(dst_arrmeta), char *dst)
+  {
+    *reinterpret_cast<T *>(dst) = src;
+  }
+
+  void as_packed_array(const nd::array &val, const ndt::type &DYND_UNUSED(tp),
+                       char *out_arrmeta, char *out_data);
+
+  template <typename T>
+  void as_packed_array(const std::vector<T> &val, const ndt::type &tp,
+                       char *out_arrmeta, char *out_data)
+  {
+    if (tp.get_type_id() == pointer_type_id) {
+      as_packed_array(array(val), tp, out_arrmeta, out_data);
+    } else {
+      if (!tp.is_builtin()) {
+        tp.extended()->arrmeta_default_construct(out_arrmeta, true);
+      }
+      if (!val.empty()) {
+        memcpy(out_data, &val[0], sizeof(T) * val.size());
+      }
+    }
+  }
+}
+
+/**
+  * A struct with some metafunctions to help packing values into structs and
+  * tuples. For each value to pack into the struct/tuple, one first calls
+  *     tp = pack<T>::make_type(val)
+  * to get the ndt::type packing will use, then
+  *     pack<T>::insert(val, tp, arrmeta, data);
+  * which must initialize the output arrmeta if it is non-empty,
+  * and copy the value into the target of the data pointer.
+  */
+template <typename T>
+array as_packed_array(const T &val)
+{
+    array res = empty_shell(ndt::make_packed_type(val));
+    detail::as_packed_array(val, res.get_type(), res.get_arrmeta(), res.get_readwrite_originptr());
+
+    return res;
 }
 
 /** 
