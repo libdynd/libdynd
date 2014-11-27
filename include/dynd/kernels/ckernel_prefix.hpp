@@ -10,6 +10,7 @@
 #include <stdexcept>
 
 #include <dynd/config.hpp>
+#include <dynd/diagnostics.hpp>
 
 namespace dynd {
 
@@ -62,12 +63,12 @@ struct ckernel_prefix {
    * begin with a ckernel_prefix can define this
    * base() function which returns that ckernel_prefix.
    */
-  ckernel_prefix &base() { return *this; }
+  DYND_CUDA_HOST_DEVICE ckernel_prefix &base() { return *this; }
 
   /**
    * Aligns an offset as required by ckernels.
    */
-  static size_t align_offset(size_t offset)
+  DYND_CUDA_HOST_DEVICE static size_t align_offset(size_t offset)
   {
     return (offset + size_t(7)) & ~size_t(7);
   }
@@ -90,22 +91,22 @@ struct ckernel_prefix {
     function = reinterpret_cast<void *>(fnptr);
   }
 
-  void set_expr_function(kernel_request_t kernreq, expr_single_t single,
-                         expr_strided_t strided)
+  DYND_CUDA_HOST_DEVICE void set_expr_function(kernel_request_t kernreq,
+                                               expr_single_t single,
+                                               expr_strided_t strided)
   {
     if (kernreq == kernel_request_single) {
       function = reinterpret_cast<void *>(single);
     } else if (kernreq == kernel_request_strided) {
       function = reinterpret_cast<void *>(strided);
     } else {
-      std::stringstream ss;
-      ss << "unrecognized dynd kernel request " << kernreq;
-      throw std::runtime_error(ss.str());
+      DYND_HOST_THROW(std::runtime_error, "unrecognized dynd kernel request " +
+                                              std::to_string(kernreq));
     }
   }
 
   template <class T>
-  inline void set_expr_function(kernel_request_t kernreq)
+  void set_expr_function(kernel_request_t kernreq)
   {
     set_expr_function(kernreq, &T::single, &T::strided);
   }
@@ -125,7 +126,7 @@ struct ckernel_prefix {
    * Returns the pointer to a child ckernel at the provided
    * offset.
    */
-  inline ckernel_prefix *get_child_ckernel(intptr_t offset)
+  DYND_CUDA_HOST_DEVICE ckernel_prefix *get_child_ckernel(intptr_t offset)
   {
     return reinterpret_cast<ckernel_prefix *>(
         reinterpret_cast<char *>(this) + ckernel_prefix::align_offset(offset));
@@ -135,7 +136,7 @@ struct ckernel_prefix {
    * If the provided offset is non-zero, destroys
    * a ckernel at the given offset from `this`.
    */
-  inline void destroy_child_ckernel(size_t offset)
+  void destroy_child_ckernel(size_t offset)
   {
     if (offset != 0) {
       ckernel_prefix *child = get_child_ckernel(offset);

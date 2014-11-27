@@ -36,8 +36,9 @@ namespace kernels {
             &self_type::strided_wrapper);                                      \
         break;                                                                 \
       default:                                                                 \
-        DYND_THROW(std::invalid_argument,                                      \
-                   "expr ckernel init: unrecognized ckernel request");         \
+        DYND_HOST_THROW(std::invalid_argument,                                 \
+                        "expr ckernel init: unrecognized ckernel request " +   \
+                            std::to_string(kernreq));                          \
       }                                                                        \
     }                                                                          \
                                                                                \

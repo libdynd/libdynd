@@ -137,15 +137,16 @@ namespace kernels {
       kwds(const nd::array &kwds) : kwd<K, J>(kwds.at(J).as<K>())... {}
     };
 
-    template <kernel_request_t kernreq, typename func_type, typename K, typename J>
+    template <kernel_request_t kernreq, typename func_type, typename K,
+              typename J>
     class func;
 
     template <typename func_type, typename... K, size_t... J>
-    class func<kernel_request_host, func_type, type_sequence<K...>, index_sequence<J...>> {
+    class func<kernel_request_host, func_type, type_sequence<K...>,
+               index_sequence<J...>> {
     public:
       func_type m_func;
 
-      
       func(detail::kwds<type_sequence<K...>, index_sequence<J...>>
                DYND_CONDITIONAL_UNUSED(kwds))
           : m_func(static_cast<detail::kwd<K, J> *>(&kwds)->get()...)
@@ -155,20 +156,24 @@ namespace kernels {
       const func_type &get() { return m_func; }
     };
 
+#ifdef __CUDACC__
+
     template <typename func_type, typename... K, size_t... J>
-    class func<kernel_request_cuda_device, func_type, type_sequence<K...>, index_sequence<J...>> {
+    class func<kernel_request_cuda_device, func_type, type_sequence<K...>,
+               index_sequence<J...>> {
     public:
       func_type m_func;
 
-      __device__
-      func(detail::kwds<type_sequence<K...>, index_sequence<J...>>
-               DYND_CONDITIONAL_UNUSED(kwds))
+      __device__ func(detail::kwds<type_sequence<K...>, index_sequence<J...>>
+                          DYND_CONDITIONAL_UNUSED(kwds))
           : m_func(static_cast<detail::kwd<K, J> *>(&kwds)->get()...)
       {
       }
 
       __device__ const func_type &get() { return m_func; }
     };
+
+#endif
 
     template <kernel_request_t kernreq>
     struct apply;
@@ -180,7 +185,8 @@ namespace kernels {
     template <typename func_type, typename... A, size_t... I, typename... K,   \
               size_t... J>                                                     \
     __VA_ARGS__ static void                                                    \
-    single(func<CKBT, func_type, type_sequence<K...>, index_sequence<J...>> *func,   \
+    single(func<CKBT, func_type, type_sequence<K...>, index_sequence<J...>> *  \
+               func,                                                           \
            args<type_sequence<A...>, index_sequence<I...>> *                   \
                DYND_CONDITIONAL_UNUSED(args),                                  \
            char *dst, char **DYND_CONDITIONAL_UNUSED(src))                     \
@@ -192,9 +198,9 @@ namespace kernels {
     }                                                                          \
   };
 
-APPLY(kernel_request_host)
+    APPLY(kernel_request_host)
 #ifdef __CUDACC__
-APPLY(kernel_request_cuda_device, __device__)
+    APPLY(kernel_request_cuda_device, __device__)
 #endif
   }
 
@@ -237,184 +243,210 @@ APPLY(kernel_request_cuda_device, __device__)
       detail::func<kernreq, func_type, type_sequence<K...>,
                    typename make_index_sequence<sizeof...(K)>::type>;
 
-  template <typename func_type, func_type func, int N>
-  class apply_function_ck
-      : public expr_ck<apply_function_ck<func_type, func, N>, kernel_request_host, N>,
-        args_for<func_type, N>,
-        kwds_for<func_type, N> {
-    typedef apply_function_ck<func_type, func, N> self_type;
+  template <kernel_request_t kernreq, typename func_type, func_type func, int N>
+  class apply_function_ck;
 
-  public:
-    apply_function_ck(args_for<func_type, N> args, kwds_for<func_type, N> kwds)
-        : args_for<func_type, N>(args), kwds_for<func_type, N>(kwds)
-    {
-    }
+#define APPLY_FUNCTION_CK(KERNREQ, ...)                                        \
+  template <typename func_type, func_type func, int N>                         \
+  class apply_function_ck<KERNREQ, func_type, func, N>                         \
+      : public expr_ck<apply_function_ck<KERNREQ, func_type, func, N>,         \
+                       KERNREQ, N>,                                            \
+        args_for<func_type, N>,                                                \
+        kwds_for<func_type, N> {                                               \
+    typedef apply_function_ck<KERNREQ, func_type, func, N> self_type;          \
+                                                                               \
+  public:                                                                      \
+    __VA_ARGS__ apply_function_ck(args_for<func_type, N> args,                 \
+                                  kwds_for<func_type, N> kwds)                 \
+        : args_for<func_type, N>(args), kwds_for<func_type, N>(kwds)           \
+    {                                                                          \
+    }                                                                          \
+                                                                               \
+    __VA_ARGS__ void single(char *dst, char **src)                             \
+    {                                                                          \
+      single(dst, src, this, this);                                            \
+    }                                                                          \
+                                                                               \
+    template <typename... A, size_t... I, typename... K, size_t... J>          \
+    static void                                                                \
+    single(char *dst, char **DYND_CONDITIONAL_UNUSED(src),                     \
+           detail::args<type_sequence<A...>, index_sequence<I...>> *           \
+               DYND_CONDITIONAL_UNUSED(args),                                  \
+           detail::kwds<type_sequence<K...>, index_sequence<J...>> *           \
+               DYND_CONDITIONAL_UNUSED(kwds))                                  \
+    {                                                                          \
+      typedef typename return_of<                                              \
+          typename std::remove_pointer<func_type>::type>::type R;              \
+                                                                               \
+      *reinterpret_cast<R *>(dst) =                                            \
+          func(static_cast<detail::arg<A, I> *>(args)->get(src[I])...,         \
+               static_cast<detail::kwd<K, J> *>(kwds)->get()...);              \
+    }                                                                          \
+                                                                               \
+    static intptr_t                                                            \
+    instantiate(const arrfunc_type_data *DYND_UNUSED(af_self),                 \
+                const arrfunc_type *af_tp, void *ckb, intptr_t ckb_offset,     \
+                const ndt::type &dst_tp, const char *DYND_UNUSED(dst_arrmeta), \
+                const ndt::type *src_tp, const char *const *src_arrmeta,       \
+                kernel_request_t kernreq,                                      \
+                const eval::eval_context *DYND_UNUSED(ectx),                   \
+                const nd::array &DYND_UNUSED(a), const nd::array &kwds)        \
+    {                                                                          \
+      for (intptr_t i = 0; i < af_tp->get_npos(); ++i) {                       \
+        if (src_tp[i] != af_tp->get_arg_type(i)) {                             \
+          std::stringstream ss;                                                \
+          ss << "Provided types " << ndt::make_funcproto(N, src_tp, dst_tp)    \
+             << " do not match the arrfunc proto " << af_tp;                   \
+          throw type_error(ss.str());                                          \
+        }                                                                      \
+      }                                                                        \
+      if (dst_tp != af_tp->get_return_type()) {                                \
+        std::stringstream ss;                                                  \
+        ss << "Provided types " << ndt::make_funcproto(N, src_tp, dst_tp)      \
+           << " do not match the arrfunc proto " << af_tp;                     \
+        throw type_error(ss.str());                                            \
+      }                                                                        \
+                                                                               \
+      self_type::create(ckb, kernreq, ckb_offset,                              \
+                        args_for<func_type, N>(src_tp, src_arrmeta, kwds),     \
+                        kwds_for<func_type, N>(kwds));                         \
+      return ckb_offset;                                                       \
+    }                                                                          \
+  }
 
-    void single(char *dst, char **src) { single(dst, src, this, this); }
+  APPLY_FUNCTION_CK(kernel_request_host);
 
-    template <typename... A, size_t... I, typename... K, size_t... J>
-    static void single(char *dst, char **DYND_CONDITIONAL_UNUSED(src),
-                       detail::args<type_sequence<A...>, index_sequence<I...>> *
-                           DYND_CONDITIONAL_UNUSED(args),
-                       detail::kwds<type_sequence<K...>, index_sequence<J...>> *
-                           DYND_CONDITIONAL_UNUSED(kwds))
-    {
-      typedef typename return_of<
-          typename std::remove_pointer<func_type>::type>::type R;
+#undef APPLY_FUNCTION_CK
 
-      *reinterpret_cast<R *>(dst) =
-          func(static_cast<detail::arg<A, I> *>(args)->get(src[I])...,
-               static_cast<detail::kwd<K, J> *>(kwds)->get()...);
-    }
+  template <kernel_request_t kernreq, typename func_type, int N>
+  class apply_callable_ck;
 
-    static intptr_t
-    instantiate(const arrfunc_type_data *DYND_UNUSED(af_self),
-                const arrfunc_type *af_tp, void *ckb,
-                intptr_t ckb_offset, const ndt::type &dst_tp,
-                const char *DYND_UNUSED(dst_arrmeta), const ndt::type *src_tp,
-                const char *const *src_arrmeta, kernel_request_t kernreq,
-                const eval::eval_context *DYND_UNUSED(ectx),
-                const nd::array &DYND_UNUSED(a), const nd::array &kwds)
-    {
-      for (intptr_t i = 0; i < af_tp->get_npos(); ++i) {
-        if (src_tp[i] != af_tp->get_arg_type(i)) {
-          std::stringstream ss;
-          ss << "Provided types " << ndt::make_funcproto(N, src_tp, dst_tp)
-             << " do not match the arrfunc proto " << af_tp;
-          throw type_error(ss.str());
-        }
-      }
-      if (dst_tp != af_tp->get_return_type()) {
-        std::stringstream ss;
-        ss << "Provided types " << ndt::make_funcproto(N, src_tp, dst_tp)
-           << " do not match the arrfunc proto " << af_tp;
-        throw type_error(ss.str());
-      }
+#define APPLY_CALLABLE_CK(KERNREQ, ...)                                        \
+  template <typename func_type, int N>                                         \
+  class apply_callable_ck<KERNREQ, func_type, N>                               \
+      : public expr_ck<apply_callable_ck<KERNREQ, func_type, N>, KERNREQ, N>,  \
+        args_for<func_type, N>,                                                \
+        kwds_for<func_type, N> {                                               \
+    typedef apply_callable_ck<KERNREQ, func_type, N> self_type;                \
+                                                                               \
+    func_type func;                                                            \
+                                                                               \
+  public:                                                                      \
+    __VA_ARGS__ apply_callable_ck(const func_type &func,                       \
+                                  args_for<func_type, N> args,                 \
+                                  kwds_for<func_type, N> kwds)                 \
+        : args_for<func_type, N>(args), kwds_for<func_type, N>(kwds),          \
+          func(func)                                                           \
+    {                                                                          \
+    }                                                                          \
+                                                                               \
+    template <typename... A, size_t... I, typename... K, size_t... J>          \
+    __VA_ARGS__ static void                                                    \
+    single(char *dst, char **DYND_CONDITIONAL_UNUSED(src),                     \
+           const func_type &func,                                              \
+           detail::args<type_sequence<A...>, index_sequence<I...>> *           \
+               DYND_CONDITIONAL_UNUSED(args),                                  \
+           detail::kwds<type_sequence<K...>, index_sequence<J...>> *           \
+               DYND_CONDITIONAL_UNUSED(kwds))                                  \
+    {                                                                          \
+      typedef typename return_of<funcproto_for<func_type>>::type RR;           \
+                                                                               \
+      *reinterpret_cast<RR *>(dst) =                                           \
+          func(static_cast<detail::arg<A, I> *>(args)->get(src[I])...,         \
+               static_cast<detail::kwd<K, J> *>(kwds)->get()...);              \
+    }                                                                          \
+                                                                               \
+    __VA_ARGS__ void single(char *dst, char **src)                             \
+    {                                                                          \
+      single(dst, src, func, this, this);                                      \
+    }                                                                          \
+                                                                               \
+    static intptr_t                                                            \
+    instantiate(const arrfunc_type_data *af_self, const arrfunc_type *af_tp,   \
+                void *ckb, intptr_t ckb_offset, const ndt::type &dst_tp,       \
+                const char *DYND_UNUSED(dst_arrmeta), const ndt::type *src_tp, \
+                const char *const *DYND_CONDITIONAL_UNUSED(src_arrmeta),       \
+                kernel_request_t kernreq,                                      \
+                const eval::eval_context *DYND_UNUSED(ectx),                   \
+                const nd::array &DYND_UNUSED(args), const nd::array &kwds)     \
+    {                                                                          \
+      for (intptr_t i = 0; i < af_tp->get_npos(); ++i) {                       \
+        if (src_tp[i] != af_tp->get_arg_type(i)) {                             \
+          std::stringstream ss;                                                \
+          ss << "Provided types " << ndt::make_funcproto(N, src_tp, dst_tp)    \
+             << " do not match the arrfunc proto " << af_tp;                   \
+          throw type_error(ss.str());                                          \
+        }                                                                      \
+      }                                                                        \
+      if (dst_tp != af_tp->get_return_type()) {                                \
+        std::stringstream ss;                                                  \
+        ss << "Provided types " << ndt::make_funcproto(N, src_tp, dst_tp)      \
+           << " do not match the arrfunc proto " << af_tp;                     \
+        throw type_error(ss.str());                                            \
+      }                                                                        \
+                                                                               \
+      self_type::create(ckb, kernreq, ckb_offset,                              \
+                        *af_self->get_data_as<func_type>(),                    \
+                        args_for<func_type, N>(src_tp, src_arrmeta, kwds),     \
+                        kwds_for<func_type, N>(kwds));                         \
+      return ckb_offset;                                                       \
+    }                                                                          \
+  }
 
-      self_type::create(ckb, kernreq, ckb_offset,
-                        args_for<func_type, N>(src_tp, src_arrmeta, kwds),
-                        kwds_for<func_type, N>(kwds));
-      return ckb_offset;
-    }
-  };
+  APPLY_CALLABLE_CK(kernel_request_host);
 
-  template <typename func_type, int N>
-  class apply_callable_ck : public expr_ck<apply_callable_ck<func_type, N>, kernel_request_host, N>,
-                            args_for<func_type, N>,
-                            kwds_for<func_type, N> {
-    typedef apply_callable_ck<func_type, N> self_type;
-
-    func_type func;
-
-  public:
-    apply_callable_ck(const func_type &func, args_for<func_type, N> args,
-                      kwds_for<func_type, N> kwds)
-        : args_for<func_type, N>(args), kwds_for<func_type, N>(kwds), func(func)
-    {
-    }
-
-    template <typename... A, size_t... I, typename... K, size_t... J>
-    static void single(char *dst, char **DYND_CONDITIONAL_UNUSED(src),
-                       const func_type &func,
-                       detail::args<type_sequence<A...>, index_sequence<I...>> *
-                           DYND_CONDITIONAL_UNUSED(args),
-                       detail::kwds<type_sequence<K...>, index_sequence<J...>> *
-                           DYND_CONDITIONAL_UNUSED(kwds))
-    {
-      //      typedef typename detail::return_of<
-      //        typename std::remove_pointer<func_type>::type>::type R;
-
-      typedef typename return_of<funcproto_for<func_type>>::type RR;
-
-      *reinterpret_cast<RR *>(dst) =
-          func(static_cast<detail::arg<A, I> *>(args)->get(src[I])...,
-               static_cast<detail::kwd<K, J> *>(kwds)->get()...);
-    }
-
-    void single(char *dst, char **src) { single(dst, src, func, this, this); }
-
-    static intptr_t
-    instantiate(const arrfunc_type_data *af_self, const arrfunc_type *af_tp,
-                void *ckb, intptr_t ckb_offset,
-                const ndt::type &dst_tp, const char *DYND_UNUSED(dst_arrmeta),
-                const ndt::type *src_tp,
-                const char *const *DYND_CONDITIONAL_UNUSED(src_arrmeta),
-                kernel_request_t kernreq,
-                const eval::eval_context *DYND_UNUSED(ectx),
-                const nd::array &DYND_UNUSED(args), const nd::array &kwds)
-    {
-      for (intptr_t i = 0; i < af_tp->get_npos(); ++i) {
-        if (src_tp[i] != af_tp->get_arg_type(i)) {
-          std::stringstream ss;
-          ss << "Provided types " << ndt::make_funcproto(N, src_tp, dst_tp)
-             << " do not match the arrfunc proto " << af_tp;
-          throw type_error(ss.str());
-        }
-      }
-      if (dst_tp != af_tp->get_return_type()) {
-        std::stringstream ss;
-        ss << "Provided types " << ndt::make_funcproto(N, src_tp, dst_tp)
-           << " do not match the arrfunc proto " << af_tp;
-        throw type_error(ss.str());
-      }
-
-      self_type::create(ckb, kernreq, ckb_offset,
-                        *af_self->get_data_as<func_type>(),
-                        args_for<func_type, N>(src_tp, src_arrmeta, kwds),
-                        kwds_for<func_type, N>(kwds));
-      return ckb_offset;
-    }
-  };
-
-  // func_type, type_sequence<K...>, CKBT
-
-  typedef ckernel_builder<kernel_request_host> host_ckb;
+#undef APPLY_CALLABLE_CK
 
   template <kernel_request_t kernreq, typename func_type, typename... K>
   struct construct_then_apply_callable_ck;
 
+#define CONSTRUCT_THEN_APPLY_CALLABLE_CK(KERNREQ, ...)                         \
+  template <typename func_type, typename... K>                                 \
+  struct construct_then_apply_callable_ck<KERNREQ, func_type, K...>            \
+      : public expr_ck<                                                        \
+            construct_then_apply_callable_ck<KERNREQ, func_type, K...>,        \
+            KERNREQ, args_of<funcproto_for<func_type>>::type::size>,           \
+        public args_for<func_type>,                                            \
+        public func_for<KERNREQ, func_type, K...> {                            \
+    typedef construct_then_apply_callable_ck<KERNREQ, func_type, K...>         \
+        self_type;                                                             \
+                                                                               \
+    __VA_ARGS__ construct_then_apply_callable_ck(args_for<func_type> a,        \
+                                                 kwds<type_sequence<K...>> k)  \
+        : args_for<func_type>(a), func_for<KERNREQ, func_type, K...>(k)        \
+    {                                                                          \
+    }                                                                          \
+                                                                               \
+    __VA_ARGS__ void single(char *dst, char **src)                             \
+    {                                                                          \
+      detail::apply<KERNREQ>::single(this, this, dst, src);                    \
+    }                                                                          \
+                                                                               \
+    static intptr_t                                                            \
+    instantiate(const arrfunc_type_data *af_self, const arrfunc_type *af_tp,   \
+                void *ckb, intptr_t ckb_offset, const ndt::type &dst_tp,       \
+                const char *dst_arrmeta, const ndt::type *src_tp,              \
+                const char *const *src_arrmeta, kernel_request_t kernreq,      \
+                const eval::eval_context *ectx, const nd::array &args,         \
+                const nd::array &kwds);                                        \
+  };
+
+  CONSTRUCT_THEN_APPLY_CALLABLE_CK(kernel_request_host)
+
   template <typename func_type, typename... K>
-  struct construct_then_apply_callable_ck<kernel_request_host, func_type, K...>
-      : public expr_ck<
-            construct_then_apply_callable_ck<kernel_request_host, func_type, K...>, kernel_request_host,
-            args_of<funcproto_for<func_type>>::type::size>,
-        public args_for<func_type>,
-        public func_for<kernel_request_host, func_type, K...> {
-    typedef construct_then_apply_callable_ck<kernel_request_host, func_type, K...>
-        self_type;
-
-    construct_then_apply_callable_ck(args_for<func_type> a,
-                                     kwds<type_sequence<K...>> k)
-        : func_for<kernel_request_host, func_type, K...>(k), args_for<func_type>(a)
-    {
-    }
-
-    void single(char *dst, char **src)
-    {
-      detail::apply<kernel_request_host>::single(this, this, dst, src);
-    }
-
-    static intptr_t
-    instantiate(const arrfunc_type_data *DYND_UNUSED(af_self),
-                const arrfunc_type *af_tp, void *ckb,
-                intptr_t ckb_offset, const ndt::type &dst_tp,
-                const char *DYND_UNUSED(dst_arrmeta), const ndt::type *src_tp,
-                const char *const *DYND_CONDITIONAL_UNUSED(src_arrmeta),
-                kernel_request_t kernreq,
-                const eval::eval_context *DYND_UNUSED(ectx),
-                const nd::array &DYND_UNUSED(args), const nd::array &kwds_)
-    {
-      for (intptr_t i = 0; i < af_tp->get_npos(); ++i) {
-        if (src_tp[i] != af_tp->get_arg_type(i)) {
-          std::stringstream ss;
-          ss << "Provided types "
-             << ndt::make_funcproto(
-                    args_of<funcproto_for<func_type>>::type::size, src_tp,
-                    dst_tp) << " do not match the arrfunc proto " << af_tp;
-          throw type_error(ss.str());
-        }
-      }
-      if (dst_tp != af_tp->get_return_type()) {
+  intptr_t
+  construct_then_apply_callable_ck<kernel_request_host, func_type, K...>::
+      instantiate(const arrfunc_type_data *DYND_UNUSED(af_self),
+                  const arrfunc_type *af_tp, void *ckb, intptr_t ckb_offset,
+                  const ndt::type &dst_tp, const char *DYND_UNUSED(dst_arrmeta),
+                  const ndt::type *src_tp,
+                  const char *const *DYND_CONDITIONAL_UNUSED(src_arrmeta),
+                  kernel_request_t kernreq,
+                  const eval::eval_context *DYND_UNUSED(ectx),
+                  const nd::array &DYND_UNUSED(args), const nd::array &kwds_)
+  {
+    for (intptr_t i = 0; i < af_tp->get_npos(); ++i) {
+      if (src_tp[i] != af_tp->get_arg_type(i)) {
         std::stringstream ss;
         ss << "Provided types "
            << ndt::make_funcproto(args_of<funcproto_for<func_type>>::type::size,
@@ -422,61 +454,43 @@ APPLY(kernel_request_cuda_device, __device__)
            << " do not match the arrfunc proto " << af_tp;
         throw type_error(ss.str());
       }
-
-      self_type::create(
-          ckb, kernreq, ckb_offset,
-          kernels::args_for<func_type>(src_tp, src_arrmeta, kwds_),
-          kernels::kwds<type_sequence<K...>>(kwds_));
-      return ckb_offset;
     }
-  };
+    if (dst_tp != af_tp->get_return_type()) {
+      std::stringstream ss;
+      ss << "Provided types "
+         << ndt::make_funcproto(args_of<funcproto_for<func_type>>::type::size,
+                                src_tp, dst_tp)
+         << " do not match the arrfunc proto " << af_tp;
+      throw type_error(ss.str());
+    }
+
+    self_type::create(ckb, kernreq, ckb_offset,
+                      kernels::args_for<func_type>(src_tp, src_arrmeta, kwds_),
+                      kernels::kwds<type_sequence<K...>>(kwds_));
+    return ckb_offset;
+  }
 
 #ifdef __CUDACC__
 
-  typedef ckernel_builder<kernel_request_cuda_device> cuda_device_ckb;
+  CONSTRUCT_THEN_APPLY_CALLABLE_CK(kernel_request_cuda_device, __device__)
 
   template <typename func_type, typename... K>
-  struct construct_then_apply_callable_ck<kernel_request_cuda_device, func_type, K...>
-      : public expr_ck<
-            construct_then_apply_callable_ck<kernel_request_cuda_device, func_type, K...>, kernel_request_cuda_device,
-            args_of<funcproto_for<func_type>>::type::size>,
-        args_for<func_type>,
-        func_for<kernel_request_cuda_device, func_type, K...> {
-    typedef construct_then_apply_callable_ck<kernel_request_cuda_device, func_type, K...>
-        self_type;
-
-    __device__ construct_then_apply_callable_ck(args_for<func_type> args,
-                                                kwds<type_sequence<K...>> k)
-        : func_for<kernel_request_cuda_device, func_type, K...>(k), args_for<func_type>(args)
-    {
-    }
-
-    __device__ void single(char *dst, char **src)
-    {
-      detail::apply<kernel_request_cuda_device>::single(this, this, dst, src);
-    }
-
-    static intptr_t
-    instantiate(const arrfunc_type_data *DYND_UNUSED(af_self),
-                const arrfunc_type *af_tp, void *ckb,
-                intptr_t ckb_offset, const ndt::type &dst_tp,
-                const char *DYND_UNUSED(dst_arrmeta), const ndt::type *src_tp,
-                const char *const *DYND_CONDITIONAL_UNUSED(src_arrmeta),
-                kernel_request_t kernreq,
-                const eval::eval_context *DYND_UNUSED(ectx),
-                const nd::array &DYND_UNUSED(args), const nd::array &kwds_)
-    {
-      for (intptr_t i = 0; i < af_tp->get_npos(); ++i) {
-        if (src_tp[i] != af_tp->get_arg_type(i)) {
-          std::stringstream ss;
-          ss << "Provided types "
-             << ndt::make_funcproto(
-                    args_of<funcproto_for<func_type>>::type::size, src_tp,
-                    dst_tp) << " do not match the arrfunc proto " << af_tp;
-          throw type_error(ss.str());
-        }
-      }
-      if (dst_tp != af_tp->get_return_type()) {
+  intptr_t construct_then_apply_callable_ck<
+      kernel_request_cuda_device, func_type,
+      K...>::instantiate(const arrfunc_type_data *DYND_UNUSED(af_self),
+                         const arrfunc_type *af_tp, void *ckb,
+                         intptr_t ckb_offset, const ndt::type &dst_tp,
+                         const char *DYND_UNUSED(dst_arrmeta),
+                         const ndt::type *src_tp,
+                         const char *const *DYND_CONDITIONAL_UNUSED(
+                             src_arrmeta),
+                         kernel_request_t kernreq,
+                         const eval::eval_context *DYND_UNUSED(ectx),
+                         const nd::array &DYND_UNUSED(args),
+                         const nd::array &kwds_)
+  {
+    for (intptr_t i = 0; i < af_tp->get_npos(); ++i) {
+      if (src_tp[i] != af_tp->get_arg_type(i)) {
         std::stringstream ss;
         ss << "Provided types "
            << ndt::make_funcproto(args_of<funcproto_for<func_type>>::type::size,
@@ -484,21 +498,33 @@ APPLY(kernel_request_cuda_device, __device__)
            << " do not match the arrfunc proto " << af_tp;
         throw type_error(ss.str());
       }
-
-      if ((kernreq & kernel_request_cuda_device) == false) {
-        cuda_parallel_ck<args_of<funcproto_for<func_type>>::type::size> *self =
-            cuda_parallel_ck<args_of<funcproto_for<func_type>>::type::size>::
-                create(ckb, kernreq, ckb_offset, 1, 1);
-        ckb_offset = 0;
-        self_type::create(
-            self->get_ckb(), kernreq, ckb_offset,
-            kernels::args_for<func_type>(src_tp, src_arrmeta, kwds_),
-            kernels::kwds<type_sequence<K...>>(kwds_));
-      }
-      return ckb_offset;
     }
-  };
+    if (dst_tp != af_tp->get_return_type()) {
+      std::stringstream ss;
+      ss << "Provided types "
+         << ndt::make_funcproto(args_of<funcproto_for<func_type>>::type::size,
+                                src_tp, dst_tp)
+         << " do not match the arrfunc proto " << af_tp;
+      throw type_error(ss.str());
+    }
+
+    if ((kernreq & kernel_request_cuda_device) == false) {
+      cuda_parallel_ck<args_of<funcproto_for<func_type>>::type::size> *self =
+          cuda_parallel_ck<
+              args_of<funcproto_for<func_type>>::type::size>::create(ckb,
+                                                                     kernreq,
+                                                                     ckb_offset,
+                                                                     1, 1);
+      ckb_offset = 0;
+      self_type::create(self->get_ckb(), kernreq, ckb_offset,
+                        args_for<func_type>(src_tp, src_arrmeta, kwds_),
+                        kwds<type_sequence<K...>>(kwds_));
+    }
+    return ckb_offset;
+  }
 
 #endif
+
+#undef CONSTRUCT_THEN_APPLY_CALLABLE_CK
 }
 } // namespace dynd::kernels

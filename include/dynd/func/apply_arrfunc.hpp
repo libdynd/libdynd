@@ -16,7 +16,7 @@ namespace nd {
   {
     typedef funcproto_for<func_type> funcproto_type;
     typedef kernels::apply_function_ck<
-        func_type, func,
+        kernel_request_host, func_type, func,
         kernels::args_of<funcproto_type>::type::size - sizeof...(T)> ck_type;
 
     return make_arrfunc(
@@ -27,7 +27,7 @@ namespace nd {
   template <typename R, typename... A, typename... T>
   arrfunc make_apply_arrfunc(R (*func)(A...), T &&... names)
   {
-    typedef kernels::apply_callable_ck<R (*)(A...), sizeof...(A) - sizeof...(T)>
+    typedef kernels::apply_callable_ck<kernel_request_host, R (*)(A...), sizeof...(A) - sizeof...(T)>
         ck_type;
 
     return make_arrfunc(ndt::make_funcproto<R(A...)>(names...),
@@ -38,7 +38,7 @@ namespace nd {
   arrfunc make_apply_arrfunc(const func_type &func, T &&... names)
   {
     typedef funcproto_for<func_type> funcproto_type;
-    typedef kernels::apply_callable_ck<
+    typedef kernels::apply_callable_ck<kernel_request_host,
         func_type, kernels::args_of<funcproto_type>::type::size - sizeof...(T)>
         ck_type;
 
@@ -57,8 +57,8 @@ namespace nd {
             typename... T>
   arrfunc make_apply_arrfunc(T &&... names)
   {
-    typedef kernels::construct_then_apply_callable_ck<kernreq, func_type,
-        K...> ck_type;
+    typedef kernels::construct_then_apply_callable_ck<kernreq, func_type, K...>
+        ck_type;
 
     return make_arrfunc(
         ndt::make_funcproto<kernreq, funcproto_for<func_type, K...>>(

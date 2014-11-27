@@ -52,6 +52,12 @@
 # define DYND_TRACE_ASSIGNMENT(dst_value, dst_type, src_value, src_type) {}
 #endif
 
+#ifdef __CUDA_ARCH__
+#define DYND_HOST_THROW(EXCEPTION, MESSAGE)
+#else
+#define DYND_HOST_THROW(EXCEPTION, MESSAGE) throw EXCEPTION(MESSAGE)
+#endif
+
 namespace dynd {
 
 #define DYND_ANY_DIAGNOSTICS_ENABLED ((DYND_ALIGNMENT_ASSERTIONS != 0) || (DYND_ASSIGNMENT_TRACING != 0))

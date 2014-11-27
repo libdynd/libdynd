@@ -66,7 +66,7 @@ protected:
 public:
   base_ckernel_builder() { reinterpret_cast<CKBT *>(this)->init(); }
 
-  ~base_ckernel_builder() { destroy(); }
+  ~base_ckernel_builder() { reinterpret_cast<CKBT *>(this)->destroy(); }
 
   /**
    * Initializes an instance of this ckernel in-place according to the
@@ -83,7 +83,7 @@ public:
 
   void reset()
   {
-    destroy();
+    reinterpret_cast<CKBT *>(this)->destroy();
     reinterpret_cast<CKBT *>(this)->init();
   }
 
@@ -123,7 +123,7 @@ public:
           reinterpret_cast<char *>(reinterpret_cast<CKBT *>(this)->realloc(
               m_data, m_capacity, requested_capacity));
       if (new_data == NULL) {
-        destroy();
+        reinterpret_cast<CKBT *>(this)->destroy();
         m_data = NULL;
         throw std::bad_alloc();
       }
@@ -195,7 +195,8 @@ template <kernel_request_t kernreq>
 class ckernel_builder;
 
 template <>
-class ckernel_builder<kernel_request_host> : public base_ckernel_builder<ckernel_builder<kernel_request_host>> {
+class ckernel_builder<kernel_request_host>
+    : public base_ckernel_builder<ckernel_builder<kernel_request_host>> {
   // When the amount of data is small, this static data is used,
   // otherwise dynamic memory is allocated when it gets too big
   char m_static_data[16 * 8];
@@ -217,7 +218,10 @@ public:
     return self_type::init(rawself, kernreq, std::forward<A>(args)...);
   }
 
-  void destroy() { base_ckernel_builder<ckernel_builder<kernel_request_host>>::destroy(); }
+  void destroy()
+  {
+    base_ckernel_builder<ckernel_builder<kernel_request_host>>::destroy();
+  }
 
   void destroy(ckernel_prefix *self) { self->destroy(); }
 
@@ -355,7 +359,8 @@ public:
 
   void destroy()
   {
-    base_ckernel_builder<ckernel_builder<kernel_request_cuda_device>>::destroy();
+    base_ckernel_builder<
+        ckernel_builder<kernel_request_cuda_device>>::destroy();
   }
 
   void destroy(ckernel_prefix *self)
@@ -397,7 +402,8 @@ inline void ckernel_builder_construct(void *ckb)
 inline void ckernel_builder_destruct(void *ckb)
 {
   // Call the destructor
-  ckernel_builder<kernel_request_host> *ckb_ptr = reinterpret_cast<ckernel_builder<kernel_request_host> *>(ckb);
+  ckernel_builder<kernel_request_host> *ckb_ptr =
+      reinterpret_cast<ckernel_builder<kernel_request_host> *>(ckb);
   ckb_ptr->~ckernel_builder<kernel_request_host>();
 }
 
@@ -409,7 +415,8 @@ inline void ckernel_builder_destruct(void *ckb)
  */
 inline void ckernel_builder_reset(void *ckb)
 {
-  ckernel_builder<kernel_request_host> *ckb_ptr = reinterpret_cast<ckernel_builder<kernel_request_host> *>(ckb);
+  ckernel_builder<kernel_request_host> *ckb_ptr =
+      reinterpret_cast<ckernel_builder<kernel_request_host> *>(ckb);
   ckb_ptr->reset();
 }
 
@@ -430,7 +437,8 @@ inline void ckernel_builder_reset(void *ckb)
 inline int ckernel_builder_ensure_capacity_leaf(void *ckb,
                                                 intptr_t requested_capacity)
 {
-  ckernel_builder<kernel_request_host> *ckb_ptr = reinterpret_cast<ckernel_builder<kernel_request_host> *>(ckb);
+  ckernel_builder<kernel_request_host> *ckb_ptr =
+      reinterpret_cast<ckernel_builder<kernel_request_host> *>(ckb);
   if (ckb_ptr->m_capacity < requested_capacity) {
     // Grow by a factor of 1.5
     // https://github.com/facebook/folly/blob/master/folly/docs/FBVector.md
@@ -605,8 +613,8 @@ namespace kernels {
       self_type *self = new (rawself) self_type(args...);                      \
       /* Double check that the C++ struct layout is as we expect */            \
       if (self != get_self(rawself)) {                                         \
-        DYND_THROW(std::runtime_error,                                         \
-                   "internal ckernel error: struct layout is not valid");      \
+        DYND_HOST_THROW(std::runtime_error,                                    \
+                        "internal ckernel error: struct layout is not valid"); \
       }                                                                        \
       self->base.destructor = &self_type::destruct;                            \
       /* A child class must implement this to fill in self->base.function */   \
@@ -641,8 +649,9 @@ namespace kernels {
                                                intptr_t &inout_ckb_offset,
                                                A &&... args)
   {
-    return self_type::create(reinterpret_cast<ckernel_builder<kernel_request_host> *>(ckb), kernreq,
-                             inout_ckb_offset, std::forward<A>(args)...);
+    return self_type::create(
+        reinterpret_cast<ckernel_builder<kernel_request_host> *>(ckb), kernreq,
+        inout_ckb_offset, std::forward<A>(args)...);
   }
 
   template <typename CKT>
@@ -653,9 +662,9 @@ namespace kernels {
                                                     intptr_t &inout_ckb_offset,
                                                     A &&... args)
   {
-    return self_type::create_leaf(reinterpret_cast<ckernel_builder<kernel_request_host> *>(ckb),
-                                  kernreq, inout_ckb_offset,
-                                  std::forward<A>(args)...);
+    return self_type::create_leaf(
+        reinterpret_cast<ckernel_builder<kernel_request_host> *>(ckb), kernreq,
+        inout_ckb_offset, std::forward<A>(args)...);
   }
 
 #ifdef __CUDACC__
@@ -670,8 +679,8 @@ namespace kernels {
       A &&... args)
   {
     return self_type::create(
-        reinterpret_cast<ckernel_builder<kernel_request_cuda_device> *>(ckb), kernreq,
-        inout_ckb_offset, std::forward<A>(args)...);
+        reinterpret_cast<ckernel_builder<kernel_request_cuda_device> *>(ckb),
+        kernreq, inout_ckb_offset, std::forward<A>(args)...);
   }
 
   template <typename CKT>
@@ -682,8 +691,8 @@ namespace kernels {
       A &&... args)
   {
     return self_type::create_leaf(
-        reinterpret_cast<ckernel_builder<kernel_request_cuda_device> *>(ckb), kernreq,
-        inout_ckb_offset, std::forward<A>(args)...);
+        reinterpret_cast<ckernel_builder<kernel_request_cuda_device> *>(ckb),
+        kernreq, inout_ckb_offset, std::forward<A>(args)...);
   }
 
   GENERAL_CK(kernel_request_host | kernel_request_cuda_device,
