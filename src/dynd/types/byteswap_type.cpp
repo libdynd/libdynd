@@ -94,7 +94,7 @@ ndt::type byteswap_type::with_replaced_storage_type(const ndt::type& replacement
 }
 
 size_t byteswap_type::make_operand_to_value_assignment_kernel(
-                ckernel_builder *ckb, intptr_t ckb_offset,
+                void *ckb, intptr_t ckb_offset,
                 const char *DYND_UNUSED(dst_arrmeta), const char *DYND_UNUSED(src_arrmeta),
                 kernel_request_t kernreq, const eval::eval_context *DYND_UNUSED(ectx)) const
 {
@@ -110,7 +110,7 @@ size_t byteswap_type::make_operand_to_value_assignment_kernel(
 }
 
 size_t byteswap_type::make_value_to_operand_assignment_kernel(
-                ckernel_builder *ckb, intptr_t ckb_offset,
+                void *ckb, intptr_t ckb_offset,
                 const char *DYND_UNUSED(dst_arrmeta), const char *DYND_UNUSED(src_arrmeta),
                 kernel_request_t kernreq, const eval::eval_context *DYND_UNUSED(ectx)) const
 {

@@ -94,7 +94,7 @@ void arrfunc_old_type::data_destruct_strided(const char *DYND_UNUSED(arrmeta), c
 }
 
 size_t arrfunc_old_type::make_assignment_kernel(
-    ckernel_builder *DYND_UNUSED(ckb), intptr_t DYND_UNUSED(ckb_offset),
+    void *DYND_UNUSED(ckb), intptr_t DYND_UNUSED(ckb_offset),
     const ndt::type &dst_tp, const char *DYND_UNUSED(dst_arrmeta),
     const ndt::type &src_tp, const char *DYND_UNUSED(src_arrmeta),
     kernel_request_t DYND_UNUSED(kernreq),

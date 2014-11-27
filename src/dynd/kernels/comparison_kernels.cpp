@@ -10,7 +10,7 @@
 using namespace std;
 using namespace dynd;
 
-size_t dynd::make_comparison_kernel(ckernel_builder *ckb, intptr_t ckb_offset,
+size_t dynd::make_comparison_kernel(void *ckb, intptr_t ckb_offset,
                                     const ndt::type &src0_dt,
                                     const char *src0_arrmeta,
                                     const ndt::type &src1_dt,
@@ -90,7 +90,7 @@ static expr_predicate_t compare_kernel_table[builtin_type_id_count-2][builtin_ty
 };
 
 size_t dynd::make_builtin_type_comparison_kernel(
-                ckernel_builder *ckb, intptr_t ckb_offset,
+                void *ckb, intptr_t ckb_offset,
                 type_id_t src0_type_id, type_id_t src1_type_id,
                 comparison_type_t comptype)
 {
@@ -99,7 +99,9 @@ size_t dynd::make_builtin_type_comparison_kernel(
       src1_type_id >= bool_type_id && src1_type_id <= complex_float64_type_id &&
       comptype >= 0 && comptype <= comparison_type_greater) {
     // No need to reserve more space, the space for a leaf is already there
-    ckernel_prefix *result = ckb->alloc_ck_leaf<ckernel_prefix>(ckb_offset);
+    ckernel_prefix *result =
+        reinterpret_cast<ckernel_builder<kernel_request_host> *>(ckb)
+            ->alloc_ck_leaf<ckernel_prefix>(ckb_offset);
     result->set_function<expr_predicate_t>(
         compare_kernel_table[src0_type_id - bool_type_id]
                             [src1_type_id - bool_type_id][comptype]);

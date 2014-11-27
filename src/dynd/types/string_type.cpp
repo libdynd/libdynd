@@ -234,7 +234,7 @@ void string_type::arrmeta_debug_print(const char *arrmeta, std::ostream& o, cons
 }
 
 size_t string_type::make_assignment_kernel(
-    ckernel_builder *ckb, intptr_t ckb_offset, const ndt::type &dst_tp,
+    void *ckb, intptr_t ckb_offset, const ndt::type &dst_tp,
     const char *dst_arrmeta, const ndt::type &src_tp, const char *src_arrmeta,
     kernel_request_t kernreq, const eval::eval_context *ectx) const
 {
@@ -279,7 +279,7 @@ size_t string_type::make_assignment_kernel(
 }
 
 size_t string_type::make_comparison_kernel(
-    ckernel_builder *ckb, intptr_t ckb_offset, const ndt::type &src0_dt,
+    void *ckb, intptr_t ckb_offset, const ndt::type &src0_dt,
     const char *src0_arrmeta, const ndt::type &src1_dt,
     const char *src1_arrmeta, comparison_type_t comptype,
     const eval::eval_context *ectx) const
@@ -348,7 +348,7 @@ struct string_is_avail_ck {
 
     static intptr_t instantiate(
         const arrfunc_type_data *DYND_UNUSED(self),
-        const arrfunc_type *DYND_UNUSED(af_tp), dynd::ckernel_builder *ckb,
+        const arrfunc_type *DYND_UNUSED(af_tp), void *ckb,
         intptr_t ckb_offset, const ndt::type &dst_tp,
         const char *DYND_UNUSED(dst_arrmeta), const ndt::type *src_tp,
         const char *const *DYND_UNUSED(src_arrmeta), kernel_request_t kernreq,
@@ -367,7 +367,7 @@ struct string_is_avail_ck {
         ss << "Expected destination type bool, got " << dst_tp;
         throw type_error(ss.str());
       }
-      ckernel_prefix *ckp = ckb->alloc_ck_leaf<ckernel_prefix>(ckb_offset);
+      ckernel_prefix *ckp = reinterpret_cast<ckernel_builder<kernel_request_host> *>(ckb)->alloc_ck_leaf<ckernel_prefix>(ckb_offset);
       ckp->set_expr_function<string_is_avail_ck>(kernreq);
       return ckb_offset;
     }
@@ -403,7 +403,7 @@ struct string_assign_na_ck {
 
     static intptr_t instantiate(const arrfunc_type_data *DYND_UNUSED(self),
                                 const arrfunc_type *DYND_UNUSED(af_tp),
-                                dynd::ckernel_builder *ckb, intptr_t ckb_offset,
+                                void *ckb, intptr_t ckb_offset,
                                 const ndt::type &dst_tp,
                                 const char *DYND_UNUSED(dst_arrmeta),
                                 const ndt::type *DYND_UNUSED(src_tp),
@@ -420,7 +420,7 @@ struct string_assign_na_ck {
         ss << "Expected destination type ?string, got " << dst_tp;
         throw type_error(ss.str());
       }
-      ckernel_prefix *ckp = ckb->alloc_ck_leaf<ckernel_prefix>(ckb_offset);
+      ckernel_prefix *ckp = reinterpret_cast<ckernel_builder<kernel_request_host> *>(ckb)->alloc_ck_leaf<ckernel_prefix>(ckb_offset);
       ckp->set_expr_function<string_assign_na_ck>(kernreq);
       return ckb_offset;
     }

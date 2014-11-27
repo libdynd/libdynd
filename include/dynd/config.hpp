@@ -73,6 +73,9 @@ inline bool DYND_ISNAN(long double x) {
 
 #if __GNUC__ > 4 || \
               (__GNUC__ == 4 && (__GNUC_MINOR__ >= 7))
+
+#define DYND_CONDITIONAL_UNUSED(NAME) NAME  __attribute__((unused))
+
 // Use initializer lists on gcc >= 4.7
 #  define DYND_INIT_LIST
 // Use constexpr on gcc >= 4.7
@@ -308,6 +311,202 @@ struct remove_all_pointers<T *> {
     typedef typename remove_all_pointers<typename std::remove_cv<T>::type>::type type;
 };
 
+template <typename... T>
+struct type_sequence {
+    static const size_t size = sizeof...(T);
+};
+
+template <typename U, typename... T>
+struct prepend {
+    typedef type_sequence<U, T...> type;
+};
+
+template <typename U, typename... T>
+struct prepend<U, type_sequence<T...> > {
+    typedef typename prepend<U, T...>::type type;
+};
+
+template <typename U, typename... T>
+struct append {
+    typedef type_sequence<T..., U> type;
+};
+
+template <typename U, typename... T>
+struct append<U, type_sequence<T...> > {
+    typedef typename append<T..., U>::type type;
+};
+
+template <int n, typename... T>
+struct from;
+
+template <typename... T>
+struct from<0, T...> {
+    typedef type_sequence<T...> type;
+};
+
+template <typename T0, typename... T>
+struct from<0, T0, T...> {
+    typedef type_sequence<T0, T...> type;
+};
+
+template <int n, typename T0, typename... T>
+struct from<n, T0, T...> {
+    typedef typename from<n - 1, T...>::type type;
+};
+
+template <typename... T>
+struct from<0, type_sequence<T...>> {
+    typedef type_sequence<T...> type;
+};
+
+template <int n, typename... T>
+struct from<n, type_sequence<T...> > {
+    typedef typename from<n, T...>::type type;
+};
+
+template <int n, typename... T>
+struct to;
+
+template <typename... T>
+struct to<0, T...> {
+    typedef type_sequence<> type;
+};
+
+template <typename T0, typename... T>
+struct to<0, T0, T...> {
+    typedef type_sequence<> type;
+};
+
+template <int n, typename T0, typename... T>
+struct to<n, T0, T...> {
+    typedef typename prepend<T0, typename to<n - 1, T...>::type>::type type;
+};
+
+template <typename... T>
+struct to<0, type_sequence<T...>> {
+    typedef type_sequence<> type;
+};
+
+template <int n, typename... T>
+struct to<n, type_sequence<T...>> {
+    typedef typename to<n, T...>::type type;
+};
+
+template <int i, typename... T>
+struct at;
+
+template <typename T0, typename... T>
+struct at<0, T0, T...> {
+    typedef T0 type;
+};
+
+template <int i, typename T0, typename... T>
+struct at<i, T0, T...> {
+    typedef typename at<i - 1, T...>::type type;
+};
+
+template <int i, typename... T>
+struct at<i, type_sequence<T...> > {
+    typedef typename at<i, T...>::type type;
+};
+
+template <typename T>
+struct flatten;
+
+template <typename R, typename... A>
+struct flatten<R (A...)> {
+  typedef type_sequence<R, A...> type;
+};
+
+template<typename T, T... I>
+struct integer_sequence {
+    static_assert(std::is_integral<T>::value, "Integral type" );
+
+    static const T size = sizeof...(I);
+
+    typedef T type;
+
+//    template<T N>
+  //  using append = integer_sequence<T, I..., N>;
+//        using next = typename append<size>::type;
+
+    template <T J>
+    struct append {
+        typedef integer_sequence<T, I..., J> type;
+    };
+
+    typedef typename append<size>::type next;
+};
+
+/*
+template<std::size_t... I>
+using index_sequence = integer_sequence<std::size_t, I...>;
+*/
+
+template<size_t... I>
+struct index_sequence {
+    static const size_t size = sizeof...(I);
+
+    typedef size_t type;
+
+//    template<T N>
+  //  using append = integer_sequence<T, I..., N>;
+//        using next = typename append<size>::type;
+
+    template <size_t J>
+    struct append {
+        typedef index_sequence<I..., J> type;
+    };
+
+    typedef typename append<size>::type next;
+};
+
+namespace detail {
+
+template <typename T, T Nt, std::size_t N>
+struct iota {
+    static_assert( Nt >= 0, "N cannot be negative" );
+
+    typedef typename iota<T, Nt-1, N-1>::type::next type;
+};
+
+template <size_t Nt>
+struct iota<size_t, Nt, 0ul> {
+    typedef index_sequence<> type;
+};
+
+template <typename T, T Nt>
+struct iota<T, Nt, 0ul> {
+    typedef integer_sequence<T> type;
+};
+
+} // namespace detail
+
+/*
+template <typename T, T N>
+using make_integer_sequence = typename detail::iota<T, N, N>::type;
+*/
+
+template <typename T, T N>
+struct make_integer_sequence {
+    typedef typename detail::iota<T, N, N>::type type;
+};
+
+/*
+template <size_t N>
+using make_index_sequence = make_integer_sequence<size_t, N>;
+*/
+
+template <size_t N>
+struct make_index_sequence {
+    typedef typename make_integer_sequence<size_t, N>::type type;
+};
+
+/*
+template <typename... T>
+using index_sequence_for = make_index_sequence<sizeof...(T)>;
+*/
+
 } // namespace dynd
 
 
@@ -361,6 +560,10 @@ namespace dynd {
  * warnings for them.
  */
 #define DYND_UNUSED(x)
+
+#ifndef DYND_CONDITIONAL_UNUSED
+#define DYND_CONDITIONAL_UNUSED(NAME) NAME
+#endif
 
 namespace dynd {
     // These are defined in git_version.cpp, generated from

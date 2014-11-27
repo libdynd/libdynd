@@ -162,7 +162,7 @@ namespace {
 } // anonymous namespace
 
 size_t type_type::make_assignment_kernel(
-    ckernel_builder *ckb, intptr_t ckb_offset, const ndt::type &dst_tp,
+    void *ckb, intptr_t ckb_offset, const ndt::type &dst_tp,
     const char *dst_arrmeta, const ndt::type &src_tp, const char *src_arrmeta,
     kernel_request_t kernreq, const eval::eval_context *ectx) const
 {
@@ -171,13 +171,16 @@ size_t type_type::make_assignment_kernel(
 
   if (this == dst_tp.extended()) {
     if (src_tp.get_type_id() == type_type_id) {
-      ckernel_prefix *e = ckb->alloc_ck_leaf<ckernel_prefix>(ckb_offset);
+      ckernel_prefix *e =
+          reinterpret_cast<ckernel_builder<kernel_request_host> *>(ckb)
+              ->alloc_ck_leaf<ckernel_prefix>(ckb_offset);
       e->set_function<expr_single_t>(typed_data_assignment_kernel_single);
       return ckb_offset;
     } else if (src_tp.get_kind() == string_kind) {
       // String to type
       string_to_type_kernel_extra *e =
-          ckb->alloc_ck_leaf<string_to_type_kernel_extra>(ckb_offset);
+          reinterpret_cast<ckernel_builder<kernel_request_host> *>(ckb)
+              ->alloc_ck_leaf<string_to_type_kernel_extra>(ckb_offset);
       e->base.set_function<expr_single_t>(&string_to_type_kernel_extra::single);
       e->base.destructor = &string_to_type_kernel_extra::destruct;
       // The kernel data owns a reference to this type
@@ -195,7 +198,8 @@ size_t type_type::make_assignment_kernel(
     if (dst_tp.get_kind() == string_kind) {
       // Type to string
       type_to_string_kernel_extra *e =
-          ckb->alloc_ck_leaf<type_to_string_kernel_extra>(ckb_offset);
+          reinterpret_cast<ckernel_builder<kernel_request_host> *>(ckb)
+              ->alloc_ck_leaf<type_to_string_kernel_extra>(ckb_offset);
       e->base.set_function<expr_single_t>(&type_to_string_kernel_extra::single);
       e->base.destructor = &type_to_string_kernel_extra::destruct;
       // The kernel data owns a reference to this type
@@ -229,14 +233,16 @@ static int not_equal_comparison(const char *const *src,
 }
 
 size_t type_type::make_comparison_kernel(
-    ckernel_builder *ckb, intptr_t ckb_offset, const ndt::type &src0_dt,
+    void *ckb, intptr_t ckb_offset, const ndt::type &src0_dt,
     const char *DYND_UNUSED(src0_arrmeta), const ndt::type &src1_dt,
     const char *DYND_UNUSED(src1_arrmeta), comparison_type_t comptype,
     const eval::eval_context *DYND_UNUSED(ectx)) const
 {
   if (this == src0_dt.extended()) {
     if (*this == *src1_dt.extended()) {
-      ckernel_prefix *e = ckb->alloc_ck_leaf<ckernel_prefix>(ckb_offset);
+      ckernel_prefix *e =
+          reinterpret_cast<ckernel_builder<kernel_request_host> *>(ckb)
+              ->alloc_ck_leaf<ckernel_prefix>(ckb_offset);
       if (comptype == comparison_type_equal) {
         e->set_function<expr_predicate_t>(equal_comparison);
       } else if (comptype == comparison_type_not_equal) {

@@ -26,14 +26,6 @@
 using namespace std;
 using namespace dynd;
 
-/*
-TEST(DataShapeParser, FuncProto) {
-    std::cout << ndt::type("(int; int) -> int") << std::endl;
-
-    std::exit(-1);
-}
-*/
-
 TEST(DataShapeParser, Basic) {
     EXPECT_EQ(ndt::make_type<void>(), type_from_datashape("void"));
     EXPECT_EQ(ndt::make_type<dynd_bool>(), type_from_datashape("bool"));
@@ -237,6 +229,15 @@ TEST(DataShapeParser, RecordTwoFields) {
                         "    val: float32,\n"
                         "    id: int64,\n"
                         "}\n"));
+}
+
+TEST(DataShapeParser, FuncProto) {
+    std::cout << ndt::type("(int, int) -> int") << std::endl;
+    std::cout << ndt::type("(int, x: int) -> int") << std::endl;
+
+    std::cout << ndt::make_funcproto<int (int, int)>("x", "y") << std::endl;
+
+//    std::exit(-1);
 }
 
 TEST(DataShapeParser, ErrorBasic) {

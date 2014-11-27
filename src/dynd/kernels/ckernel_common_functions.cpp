@@ -18,7 +18,7 @@ void kernels::destroy_trivial_parent_ckernel(ckernel_prefix *self)
 }
 
 namespace {
-    struct constant_value_assignment_ck : public kernels::expr_ck<constant_value_assignment_ck, 0> {
+    struct constant_value_assignment_ck : public kernels::expr_ck<constant_value_assignment_ck, kernel_request_host, 0> {
         // Pointer to the array inside of `constant`
         const char *m_constant_data;
         // Reference which owns the constant value to assign
@@ -52,7 +52,7 @@ namespace {
 } // anonymous namespace
 
 size_t kernels::make_constant_value_assignment_ckernel(
-    ckernel_builder *ckb, intptr_t ckb_offset, const ndt::type &dst_tp,
+    void *ckb, intptr_t ckb_offset, const ndt::type &dst_tp,
     const char *dst_arrmeta, const nd::array &constant,
     kernel_request_t kernreq, const eval::eval_context *ectx)
 {
@@ -121,13 +121,15 @@ static void binary_as_unary_left_associative_reduction_adapter_strided_ckernel(
 }
 
 intptr_t kernels::wrap_binary_as_unary_reduction_ckernel(
-                dynd::ckernel_builder *ckb, intptr_t ckb_offset,
+                void *ckb, intptr_t ckb_offset,
                 bool right_associative,
                 kernel_request_t kernreq)
 {
   // Add an adapter kernel which converts the binary expr kernel to an expr
   // kernel
-  ckernel_prefix *ckp = ckb->alloc_ck<ckernel_prefix>(ckb_offset);
+  ckernel_prefix *ckp =
+      reinterpret_cast<ckernel_builder<kernel_request_host> *>(ckb)
+          ->alloc_ck<ckernel_prefix>(ckb_offset);
   ckp->destructor = &kernels::destroy_trivial_parent_ckernel;
   if (right_associative) {
     ckp->set_expr_function(

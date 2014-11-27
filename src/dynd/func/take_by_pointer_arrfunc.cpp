@@ -9,7 +9,7 @@
 using namespace std;
 using namespace dynd;
 
-struct take_by_pointer_outer_ck : kernels::expr_ck<take_by_pointer_outer_ck, 2> {
+struct take_by_pointer_outer_ck : kernels::expr_ck<take_by_pointer_outer_ck, kernel_request_host, 2> {
     const intptr_t dst_size, dst_stride;
     const intptr_t src1_stride;
 
@@ -30,7 +30,7 @@ struct take_by_pointer_outer_ck : kernels::expr_ck<take_by_pointer_outer_ck, 2> 
     }
 };
 
-struct take_by_pointer_ck : kernels::expr_ck<take_by_pointer_ck, 2> {
+struct take_by_pointer_ck : kernels::expr_ck<take_by_pointer_ck, kernel_request_host, 2> {
     const intptr_t src0_size, src0_stride;
     const intptr_t src1_inner_stride;
 
@@ -50,7 +50,7 @@ struct take_by_pointer_ck : kernels::expr_ck<take_by_pointer_ck, 2> {
 
 static intptr_t instantiate_take_by_pointer(
     const arrfunc_type_data *DYND_UNUSED(af_self),
-    const arrfunc_type *DYND_UNUSED(af_tp), dynd::ckernel_builder *ckb,
+    const arrfunc_type *DYND_UNUSED(af_tp), void *ckb,
     intptr_t ckb_offset, const ndt::type &dst_tp, const char *dst_arrmeta,
     const ndt::type *src_tp, const char *const *src_arrmeta,
     kernel_request_t kernreq, const eval::eval_context *ectx,

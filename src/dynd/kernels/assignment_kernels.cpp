@@ -115,7 +115,7 @@ static void unaligned_copy_strided(char *dst, intptr_t dst_stride,
 }
 
 size_t dynd::make_assignment_kernel(
-    ckernel_builder *ckb, intptr_t ckb_offset, const ndt::type &dst_tp,
+    void *ckb, intptr_t ckb_offset, const ndt::type &dst_tp,
     const char *dst_arrmeta, const ndt::type &src_tp, const char *src_arrmeta,
     kernel_request_t kernreq, const eval::eval_context *ectx)
 {
@@ -144,7 +144,7 @@ size_t dynd::make_assignment_kernel(
     }
 }
 
-size_t dynd::make_pod_typed_data_assignment_kernel(ckernel_builder *ckb,
+size_t dynd::make_pod_typed_data_assignment_kernel(void *ckb,
                                                    intptr_t ckb_offset,
                                                    size_t data_size,
                                                    size_t data_alignment,
@@ -164,7 +164,8 @@ size_t dynd::make_pod_typed_data_assignment_kernel(ckernel_builder *ckb,
     // is already there
     switch (data_size) {
     case 1:
-      result = ckb->alloc_ck_leaf<ckernel_prefix>(ckb_offset);
+      result = reinterpret_cast<ckernel_builder<kernel_request_host> *>(ckb)
+                   ->alloc_ck_leaf<ckernel_prefix>(ckb_offset);
       if (single) {
         result->set_function<expr_single_t>(
             &aligned_fixed_size_copy_assign<1>::single);
@@ -174,7 +175,8 @@ size_t dynd::make_pod_typed_data_assignment_kernel(ckernel_builder *ckb,
       }
       return ckb_offset;
     case 2:
-      result = ckb->alloc_ck_leaf<ckernel_prefix>(ckb_offset);
+      result = reinterpret_cast<ckernel_builder<kernel_request_host> *>(ckb)
+                   ->alloc_ck_leaf<ckernel_prefix>(ckb_offset);
       if (single) {
         result->set_function<expr_single_t>(
             &aligned_fixed_size_copy_assign<2>::single);
@@ -184,7 +186,8 @@ size_t dynd::make_pod_typed_data_assignment_kernel(ckernel_builder *ckb,
       }
       return ckb_offset;
     case 4:
-      result = ckb->alloc_ck_leaf<ckernel_prefix>(ckb_offset);
+      result = reinterpret_cast<ckernel_builder<kernel_request_host> *>(ckb)
+                   ->alloc_ck_leaf<ckernel_prefix>(ckb_offset);
       if (single) {
         result->set_function<expr_single_t>(
             &aligned_fixed_size_copy_assign<4>::single);
@@ -194,7 +197,8 @@ size_t dynd::make_pod_typed_data_assignment_kernel(ckernel_builder *ckb,
       }
       return ckb_offset;
     case 8:
-      result = ckb->alloc_ck_leaf<ckernel_prefix>(ckb_offset);
+      result = reinterpret_cast<ckernel_builder<kernel_request_host> *>(ckb)
+                   ->alloc_ck_leaf<ckernel_prefix>(ckb_offset);
       if (single) {
         result->set_function<expr_single_t>(
             &aligned_fixed_size_copy_assign<8>::single);
@@ -205,7 +209,8 @@ size_t dynd::make_pod_typed_data_assignment_kernel(ckernel_builder *ckb,
       return ckb_offset;
     default: {
       unaligned_copy_ck *self =
-          ckb->alloc_ck_leaf<unaligned_copy_ck>(ckb_offset);
+          reinterpret_cast<ckernel_builder<kernel_request_host> *>(ckb)
+              ->alloc_ck_leaf<unaligned_copy_ck>(ckb_offset);
       if (single) {
         self->base.set_function<expr_single_t>(&unaligned_copy_single);
       } else {
@@ -219,7 +224,8 @@ size_t dynd::make_pod_typed_data_assignment_kernel(ckernel_builder *ckb,
     // Unaligned specialization tables
     switch (data_size) {
     case 2:
-      result = ckb->alloc_ck_leaf<ckernel_prefix>(ckb_offset);
+      result = reinterpret_cast<ckernel_builder<kernel_request_host> *>(ckb)
+                   ->alloc_ck_leaf<ckernel_prefix>(ckb_offset);
       if (single) {
         result->set_function<expr_single_t>(
             unaligned_fixed_size_copy_assign<2>::single);
@@ -229,7 +235,8 @@ size_t dynd::make_pod_typed_data_assignment_kernel(ckernel_builder *ckb,
       }
       return ckb_offset;
     case 4:
-      result = ckb->alloc_ck_leaf<ckernel_prefix>(ckb_offset);
+      result = reinterpret_cast<ckernel_builder<kernel_request_host> *>(ckb)
+                   ->alloc_ck_leaf<ckernel_prefix>(ckb_offset);
       if (single) {
         result->set_function<expr_single_t>(
             unaligned_fixed_size_copy_assign<4>::single);
@@ -239,7 +246,8 @@ size_t dynd::make_pod_typed_data_assignment_kernel(ckernel_builder *ckb,
       }
       return ckb_offset;
     case 8:
-      result = ckb->alloc_ck_leaf<ckernel_prefix>(ckb_offset);
+      result = reinterpret_cast<ckernel_builder<kernel_request_host> *>(ckb)
+                   ->alloc_ck_leaf<ckernel_prefix>(ckb_offset);
       if (single) {
         result->set_function<expr_single_t>(
             unaligned_fixed_size_copy_assign<8>::single);
@@ -250,7 +258,8 @@ size_t dynd::make_pod_typed_data_assignment_kernel(ckernel_builder *ckb,
       return ckb_offset;
     default: {
       unaligned_copy_ck *self =
-          ckb->alloc_ck_leaf<unaligned_copy_ck>(ckb_offset);
+          reinterpret_cast<ckernel_builder<kernel_request_host> *>(ckb)
+              ->alloc_ck_leaf<unaligned_copy_ck>(ckb_offset);
       if (single) {
         self->base.set_function<expr_single_t>(&unaligned_copy_single);
       } else {
@@ -424,7 +433,7 @@ static expr_strided_t assign_table_strided_kernel[builtin_type_id_count-2][built
 };
 
 size_t dynd::make_builtin_type_assignment_kernel(
-                ckernel_builder *ckb, intptr_t ckb_offset,
+                void *ckb, intptr_t ckb_offset,
                 type_id_t dst_type_id, type_id_t src_type_id,
                 kernel_request_t kernreq, assign_error_mode errmode)
 {
@@ -433,7 +442,9 @@ size_t dynd::make_builtin_type_assignment_kernel(
                     src_type_id >= bool_type_id && src_type_id <= complex_float64_type_id &&
                     errmode != assign_error_default) {
         // No need to reserve more space, the space for a leaf is already there
-        ckernel_prefix *result = ckb->get_at<ckernel_prefix>(ckb_offset);
+      ckernel_prefix *result =
+          reinterpret_cast<ckernel_builder<kernel_request_host> *>(ckb)
+              ->get_at<ckernel_prefix>(ckb_offset);
         kernels::inc_ckb_offset<ckernel_prefix>(ckb_offset);
         switch (kernreq) {
             case kernel_request_single:
@@ -544,7 +555,7 @@ struct wrap_single_as_strided_ck {
 
 } // anonymous namespace
 
-size_t dynd::make_kernreq_to_single_kernel_adapter(ckernel_builder *ckb,
+size_t dynd::make_kernreq_to_single_kernel_adapter(void *ckb,
                                                    intptr_t ckb_offset, int nsrc,
                                                    kernel_request_t kernreq)
 {
@@ -556,13 +567,16 @@ size_t dynd::make_kernreq_to_single_kernel_adapter(ckernel_builder *ckb,
     if (nsrc >= 0 &&
         nsrc < (int)(sizeof(wrap_single_as_strided_fixedcount) /
                      sizeof(wrap_single_as_strided_fixedcount[0]))) {
-      ckernel_prefix *e = ckb->alloc_ck<ckernel_prefix>(ckb_offset);
+      ckernel_prefix *e =
+          reinterpret_cast<ckernel_builder<kernel_request_host> *>(ckb)
+              ->alloc_ck<ckernel_prefix>(ckb_offset);
       e->set_function<expr_strided_t>(wrap_single_as_strided_fixedcount[nsrc]);
       e->destructor = &simple_wrapper_kernel_destruct;
       return ckb_offset;
     } else {
       wrap_single_as_strided_ck *e =
-          ckb->alloc_ck<wrap_single_as_strided_ck>(ckb_offset);
+          reinterpret_cast<ckernel_builder<kernel_request_host> *>(ckb)
+              ->alloc_ck<wrap_single_as_strided_ck>(ckb_offset);
       e->base.set_function<expr_strided_t>(&wrap_single_as_strided_ck::strided);
       e->base.destructor = &wrap_single_as_strided_ck::destruct;
       e->nsrc = nsrc;

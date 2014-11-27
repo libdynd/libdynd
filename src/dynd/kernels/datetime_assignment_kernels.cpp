@@ -41,7 +41,7 @@ namespace {
 } // anonymous namespace
 
 size_t dynd::make_string_to_datetime_assignment_kernel(
-    ckernel_builder *ckb, intptr_t ckb_offset,
+    void *ckb, intptr_t ckb_offset,
     const ndt::type &dst_datetime_tp, const char *DYND_UNUSED(dst_arrmeta),
     const ndt::type &src_string_tp, const char *src_arrmeta,
     kernel_request_t kernreq, const eval::eval_context *ectx)
@@ -92,7 +92,7 @@ namespace {
 } // anonymous namespace
 
 size_t dynd::make_datetime_to_string_assignment_kernel(
-                ckernel_builder *ckb, intptr_t ckb_offset,
+                void *ckb, intptr_t ckb_offset,
                 const ndt::type& dst_string_tp, const char *dst_arrmeta,
                 const ndt::type& src_datetime_tp, const char *DYND_UNUSED(src_arrmeta),
                 kernel_request_t kernreq,

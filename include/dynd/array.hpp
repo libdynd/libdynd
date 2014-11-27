@@ -175,7 +175,6 @@ public:
     }
 #endif // DYND_INIT_LIST
 
-
     /**
      * Constructs an array from a std::vector.
      */
@@ -571,6 +570,10 @@ public:
     array operator()(const irange& i0, const irange& i1, const irange& i2, const irange& i3, const irange& i4) const {
         irange i[5] = {i0, i1, i2, i3, i4};
         return at_array(5, i);
+    }
+
+    array at(const irange& i0) const {
+        return at_array(1, &i0);
     }
 
     /** Does a value-assignment from the rhs array. */

@@ -15,6 +15,7 @@
 #include <dynd/func/elwise.hpp>
 #include <dynd/types/cfixed_dim_type.hpp>
 
+/*
 using namespace std;
 using namespace dynd;
 
@@ -201,3 +202,4 @@ typedef ::testing::Types<int, float, long, double> test_types;
 
 REGISTER_TYPED_TEST_CASE_P(ElwiseFuncRefRes, FuncRefRes);
 INSTANTIATE_TYPED_TEST_CASE_P(Builtin, ElwiseFuncRefRes, test_types);
+*/

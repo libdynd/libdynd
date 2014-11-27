@@ -8,7 +8,7 @@
 
 #include <dynd/func/arrfunc.hpp>
 #include <dynd/func/arrfunc_registry.hpp>
-#include <dynd/func/functor_arrfunc.hpp>
+#include <dynd/func/apply_arrfunc.hpp>
 #include <dynd/func/multidispatch_arrfunc.hpp>
 #include <dynd/func/lift_arrfunc.hpp>
 
@@ -22,8 +22,8 @@ static map<nd::string, nd::arrfunc> *registry;
 template<typename T0, typename T1>
 static nd::arrfunc make_ufunc(T0 f0, T1 f1)
 {
-  nd::arrfunc af[2] = {nd::make_functor_arrfunc(f0),
-                       nd::make_functor_arrfunc(f1)};
+  nd::arrfunc af[2] = {nd::make_apply_arrfunc(f0),
+                       nd::make_apply_arrfunc(f1)};
   return lift_arrfunc(
       make_multidispatch_arrfunc(sizeof(af) / sizeof(af[0]), af));
 }
@@ -31,9 +31,9 @@ static nd::arrfunc make_ufunc(T0 f0, T1 f1)
 template<typename T0, typename T1, typename T2>
 static nd::arrfunc make_ufunc(T0 f0, T1 f1, T2 f2)
 {
-  nd::arrfunc af[3] = {nd::make_functor_arrfunc(f0),
-                       nd::make_functor_arrfunc(f1),
-                       nd::make_functor_arrfunc(f2)};
+  nd::arrfunc af[3] = {nd::make_apply_arrfunc(f0),
+                       nd::make_apply_arrfunc(f1),
+                       nd::make_apply_arrfunc(f2)};
   return lift_arrfunc(
       make_multidispatch_arrfunc(sizeof(af) / sizeof(af[0]), af));
 }
@@ -42,9 +42,9 @@ template <typename T0, typename T1, typename T2, typename T3, typename T4>
 static nd::arrfunc make_ufunc(T0 f0, T1 f1, T2 f2, T3 f3, T4 f4)
 {
   nd::arrfunc af[5] = {
-      nd::make_functor_arrfunc(f0), nd::make_functor_arrfunc(f1),
-      nd::make_functor_arrfunc(f2), nd::make_functor_arrfunc(f3),
-      nd::make_functor_arrfunc(f4)};
+      nd::make_apply_arrfunc(f0), nd::make_apply_arrfunc(f1),
+      nd::make_apply_arrfunc(f2), nd::make_apply_arrfunc(f3),
+      nd::make_apply_arrfunc(f4)};
   return lift_arrfunc(
       make_multidispatch_arrfunc(sizeof(af) / sizeof(af[0]), af));
 }
@@ -54,10 +54,10 @@ template <typename T0, typename T1, typename T2, typename T3, typename T4,
 static nd::arrfunc make_ufunc(T0 f0, T1 f1, T2 f2, T3 f3, T4 f4, T5 f5, T6 f6)
 {
   nd::arrfunc af[7] = {
-      nd::make_functor_arrfunc(f0), nd::make_functor_arrfunc(f1),
-      nd::make_functor_arrfunc(f2), nd::make_functor_arrfunc(f3),
-      nd::make_functor_arrfunc(f4), nd::make_functor_arrfunc(f5),
-      nd::make_functor_arrfunc(f6)};
+      nd::make_apply_arrfunc(f0), nd::make_apply_arrfunc(f1),
+      nd::make_apply_arrfunc(f2), nd::make_apply_arrfunc(f3),
+      nd::make_apply_arrfunc(f4), nd::make_apply_arrfunc(f5),
+      nd::make_apply_arrfunc(f6)};
   return lift_arrfunc(
       make_multidispatch_arrfunc(sizeof(af) / sizeof(af[0]), af));
 }
@@ -68,10 +68,10 @@ static nd::arrfunc make_ufunc(T0 f0, T1 f1, T2 f2, T3 f3, T4 f4, T5 f5, T6 f6,
                               T7 f7)
 {
   nd::arrfunc af[8] = {
-      nd::make_functor_arrfunc(f0), nd::make_functor_arrfunc(f1),
-      nd::make_functor_arrfunc(f2), nd::make_functor_arrfunc(f3),
-      nd::make_functor_arrfunc(f4), nd::make_functor_arrfunc(f5),
-      nd::make_functor_arrfunc(f6), nd::make_functor_arrfunc(f7)};
+      nd::make_apply_arrfunc(f0), nd::make_apply_arrfunc(f1),
+      nd::make_apply_arrfunc(f2), nd::make_apply_arrfunc(f3),
+      nd::make_apply_arrfunc(f4), nd::make_apply_arrfunc(f5),
+      nd::make_apply_arrfunc(f6), nd::make_apply_arrfunc(f7)};
   return lift_arrfunc(
       make_multidispatch_arrfunc(sizeof(af) / sizeof(af[0]), af));
 }
@@ -82,11 +82,11 @@ static nd::arrfunc make_ufunc(T0 f0, T1 f1, T2 f2, T3 f3, T4 f4, T5 f5, T6 f6,
                               T7 f7, T8 f8, T9 f9)
 {
   nd::arrfunc af[10] = {
-      nd::make_functor_arrfunc(f0), nd::make_functor_arrfunc(f1),
-      nd::make_functor_arrfunc(f2), nd::make_functor_arrfunc(f3),
-      nd::make_functor_arrfunc(f4), nd::make_functor_arrfunc(f5),
-      nd::make_functor_arrfunc(f6), nd::make_functor_arrfunc(f7),
-      nd::make_functor_arrfunc(f8), nd::make_functor_arrfunc(f9)};
+      nd::make_apply_arrfunc(f0), nd::make_apply_arrfunc(f1),
+      nd::make_apply_arrfunc(f2), nd::make_apply_arrfunc(f3),
+      nd::make_apply_arrfunc(f4), nd::make_apply_arrfunc(f5),
+      nd::make_apply_arrfunc(f6), nd::make_apply_arrfunc(f7),
+      nd::make_apply_arrfunc(f8), nd::make_apply_arrfunc(f9)};
   return lift_arrfunc(
       make_multidispatch_arrfunc(sizeof(af) / sizeof(af[0]), af));
 }

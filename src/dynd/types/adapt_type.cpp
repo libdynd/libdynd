@@ -100,7 +100,7 @@ adapt_type::with_replaced_storage_type(const ndt::type &replacement_type) const
 }
 
 size_t adapt_type::make_operand_to_value_assignment_kernel(
-    ckernel_builder *ckb, intptr_t ckb_offset, const char *dst_arrmeta,
+    void *ckb, intptr_t ckb_offset, const char *dst_arrmeta,
     const char *src_arrmeta, kernel_request_t kernreq,
     const eval::eval_context *ectx) const
 {
@@ -119,7 +119,7 @@ size_t adapt_type::make_operand_to_value_assignment_kernel(
 }
 
 size_t adapt_type::make_value_to_operand_assignment_kernel(
-    ckernel_builder *ckb, intptr_t ckb_offset, const char *dst_arrmeta,
+    void *ckb, intptr_t ckb_offset, const char *dst_arrmeta,
     const char *src_arrmeta, kernel_request_t kernreq,
     const eval::eval_context *ectx) const
 {

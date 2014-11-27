@@ -187,7 +187,7 @@ bool datetime_type::operator==(const base_type& rhs) const
 }
 
 size_t datetime_type::make_assignment_kernel(
-    ckernel_builder *ckb, intptr_t ckb_offset, const ndt::type &dst_tp,
+    void *ckb, intptr_t ckb_offset, const ndt::type &dst_tp,
     const char *dst_arrmeta, const ndt::type &src_tp, const char *src_arrmeta,
     kernel_request_t kernreq, const eval::eval_context *ectx) const
 {
@@ -698,7 +698,7 @@ ndt::type datetime_type::get_elwise_property_type(size_t property_index,
 }
 
 size_t datetime_type::make_elwise_property_getter_kernel(
-    ckernel_builder *ckb, intptr_t ckb_offset,
+    void *ckb, intptr_t ckb_offset,
     const char *DYND_UNUSED(dst_arrmeta), const char *DYND_UNUSED(src_arrmeta),
     size_t src_property_index, kernel_request_t kernreq,
     const eval::eval_context *DYND_UNUSED(ectx)) const
@@ -706,7 +706,8 @@ size_t datetime_type::make_elwise_property_getter_kernel(
   ckb_offset =
       make_kernreq_to_single_kernel_adapter(ckb, ckb_offset, 1, kernreq);
   datetime_property_kernel_extra *e =
-      ckb->alloc_ck_leaf<datetime_property_kernel_extra>(ckb_offset);
+      reinterpret_cast<ckernel_builder<kernel_request_host> *>(ckb)
+          ->alloc_ck_leaf<datetime_property_kernel_extra>(ckb_offset);
   switch (src_property_index) {
   case datetimeprop_struct:
     e->base.set_function<expr_single_t>(&get_property_kernel_struct_single);
@@ -755,7 +756,7 @@ size_t datetime_type::make_elwise_property_getter_kernel(
 }
 
 size_t datetime_type::make_elwise_property_setter_kernel(
-    ckernel_builder *ckb, intptr_t ckb_offset,
+    void *ckb, intptr_t ckb_offset,
     const char *DYND_UNUSED(dst_arrmeta), size_t dst_property_index,
     const char *DYND_UNUSED(src_arrmeta), kernel_request_t kernreq,
     const eval::eval_context *DYND_UNUSED(ectx)) const
@@ -763,7 +764,8 @@ size_t datetime_type::make_elwise_property_setter_kernel(
   ckb_offset =
       make_kernreq_to_single_kernel_adapter(ckb, ckb_offset, 1, kernreq);
   datetime_property_kernel_extra *e =
-      ckb->alloc_ck_leaf<datetime_property_kernel_extra>(ckb_offset);
+      reinterpret_cast<ckernel_builder<kernel_request_host> *>(ckb)
+          ->alloc_ck_leaf<datetime_property_kernel_extra>(ckb_offset);
   switch (dst_property_index) {
   case datetimeprop_struct:
     e->base.set_function<expr_single_t>(&set_property_kernel_struct_single);
@@ -805,7 +807,7 @@ struct datetime_is_avail_ck {
 
   static intptr_t instantiate(
       const arrfunc_type_data *DYND_UNUSED(self),
-      const arrfunc_type *DYND_UNUSED(af_tp), dynd::ckernel_builder *ckb,
+      const arrfunc_type *DYND_UNUSED(af_tp), void *ckb,
       intptr_t ckb_offset, const ndt::type &dst_tp,
       const char *DYND_UNUSED(dst_arrmeta), const ndt::type *src_tp,
       const char *const *DYND_UNUSED(src_arrmeta), kernel_request_t kernreq,
@@ -824,7 +826,9 @@ struct datetime_is_avail_ck {
       ss << "Expected destination type bool, got " << dst_tp;
       throw type_error(ss.str());
     }
-    ckernel_prefix *ckp = ckb->alloc_ck_leaf<ckernel_prefix>(ckb_offset);
+    ckernel_prefix *ckp =
+        reinterpret_cast<ckernel_builder<kernel_request_host> *>(ckb)
+            ->alloc_ck_leaf<ckernel_prefix>(ckb_offset);
     ckp->set_expr_function<datetime_is_avail_ck>(kernreq);
     return ckb_offset;
   }
@@ -849,7 +853,7 @@ struct datetime_assign_na_ck {
 
   static intptr_t instantiate(const arrfunc_type_data *DYND_UNUSED(self),
                               const arrfunc_type *DYND_UNUSED(af_tp),
-                              dynd::ckernel_builder *ckb, intptr_t ckb_offset,
+                              void *ckb, intptr_t ckb_offset,
                               const ndt::type &dst_tp,
                               const char *DYND_UNUSED(dst_arrmeta),
                               const ndt::type *DYND_UNUSED(src_tp),
@@ -866,7 +870,9 @@ struct datetime_assign_na_ck {
       ss << "Expected destination type ?datetime, got " << dst_tp;
       throw type_error(ss.str());
     }
-    ckernel_prefix *ckp = ckb->alloc_ck_leaf<ckernel_prefix>(ckb_offset);
+    ckernel_prefix *ckp =
+        reinterpret_cast<ckernel_builder<kernel_request_host> *>(ckb)
+            ->alloc_ck_leaf<ckernel_prefix>(ckb_offset);
     ckp->set_expr_function<datetime_assign_na_ck>(kernreq);
     return ckb_offset;
   }

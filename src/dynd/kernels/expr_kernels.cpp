@@ -21,7 +21,7 @@ struct expression_type_expr_kernel_extra {
 
 } // anonymous namespace
 
-size_t dynd::make_expression_type_expr_kernel(ckernel_builder *DYND_UNUSED(ckb), intptr_t DYND_UNUSED(ckb_offset),
+size_t dynd::make_expression_type_expr_kernel(void *DYND_UNUSED(ckb), intptr_t DYND_UNUSED(ckb_offset),
                 const ndt::type& DYND_UNUSED(dst_tp), const char *DYND_UNUSED(dst_arrmeta),
                 size_t DYND_UNUSED(src_count), const ndt::type *DYND_UNUSED(src_tp), const char **DYND_UNUSED(src_arrmeta),
                 kernel_request_t DYND_UNUSED(kernreq), const eval::eval_context *DYND_UNUSED(ectx),

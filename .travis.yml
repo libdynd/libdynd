@@ -21,7 +21,10 @@ matrix:
       env: PYTHON=ON DYND_FFTW=ON DYND_BUILD_TESTS=OFF
 
 before_script:
+  - sudo add-apt-repository -y ppa:ubuntu-toolchain-r/test
   - sudo apt-get update
+  - if [ "$CC" = "gcc" ]; then sudo apt-get -qq install gcc-4.7; sudo update-alternatives --install /usr/bin/gcc gcc /usr/bin/gcc-4.7 90; export CC="gcc-4.7"; fi
+  - if [ "$CXX" = "g++" ]; then sudo apt-get -qq install g++-4.7; sudo update-alternatives --install /usr/bin/g++ g++ /usr/bin/g++-4.7 90; export CXX="g++-4.7"; fi
   - if [ "$VALGRIND" == "ON" ]; then sudo apt-get -qq install valgrind; fi
   - if [ "$DYND_FFTW" == "ON" ]; then sudo apt-get -qq install libfftw3-dev; fi
   - if [ "$PYTHON" == "ON" ]; then sudo pip install numpy cython; fi

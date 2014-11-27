@@ -4,7 +4,7 @@
 //
 
 #pragma once
-
+/*
 #include <dynd/func/functor_arrfunc.hpp>
 #include <dynd/func/lift_arrfunc.hpp>
 #include <dynd/pp/list.hpp>
@@ -47,3 +47,4 @@ DYND_PP_JOIN_MAP(ELWISE, (), DYND_PP_RANGE(1, DYND_PP_INC(DYND_SRC_MAX)))
 #undef ELWISE
 
 }} // namespace dynd::nd
+*/

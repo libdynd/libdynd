@@ -49,11 +49,11 @@ namespace {
 
 
 intptr_t kernels::make_builtin_sum_reduction_ckernel(
-                dynd::ckernel_builder *ckb, intptr_t ckb_offset,
+                void *ckb, intptr_t ckb_offset,
                 type_id_t tid,
                 kernel_request_t kernreq)
 {
-    ckernel_prefix *ckp = ckb->alloc_ck_leaf<ckernel_prefix>(ckb_offset);
+    ckernel_prefix *ckp = reinterpret_cast<ckernel_builder<kernel_request_host> *>(ckb)->alloc_ck_leaf<ckernel_prefix>(ckb_offset);
     switch (tid) {
         case int32_type_id:
             ckp->set_expr_function<sum_reduction<int32_t, int32_t> >(kernreq);
@@ -90,7 +90,7 @@ intptr_t kernels::make_builtin_sum_reduction_ckernel(
 
 static intptr_t instantiate_builtin_sum_reduction_arrfunc(
     const arrfunc_type_data *DYND_UNUSED(self_data_ptr),
-    const arrfunc_type *DYND_UNUSED(af_tp), dynd::ckernel_builder *ckb,
+    const arrfunc_type *DYND_UNUSED(af_tp), void *ckb,
     intptr_t ckb_offset, const ndt::type &dst_tp,
     const char *DYND_UNUSED(dst_arrmeta), const ndt::type *src_tp,
     const char *const *DYND_UNUSED(src_arrmeta), kernel_request_t kernreq,
@@ -171,7 +171,7 @@ struct mean1d_arrfunc_data {
 
   static intptr_t instantiate(
       const arrfunc_type_data *af_self, const arrfunc_type *DYND_UNUSED(af_tp),
-      dynd::ckernel_builder *ckb, intptr_t ckb_offset, const ndt::type &dst_tp,
+      void *ckb, intptr_t ckb_offset, const ndt::type &dst_tp,
       const char *DYND_UNUSED(dst_arrmeta), const ndt::type *src_tp,
       const char *const *src_arrmeta, kernel_request_t kernreq,
       const eval::eval_context *DYND_UNUSED(ectx),

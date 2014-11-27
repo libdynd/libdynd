@@ -268,14 +268,15 @@ namespace {
 } // anonymous namespace
 
 size_t groupby_type::make_operand_to_value_assignment_kernel(
-    ckernel_builder *ckb, intptr_t ckb_offset, const char *dst_arrmeta,
+    void *ckb, intptr_t ckb_offset, const char *dst_arrmeta,
     const char *src_arrmeta, kernel_request_t kernreq,
     const eval::eval_context *ectx) const
 {
   ckb_offset =
       make_kernreq_to_single_kernel_adapter(ckb, ckb_offset, 1, kernreq);
   groupby_to_value_assign_extra *e =
-      ckb->alloc_ck<groupby_to_value_assign_extra>(ckb_offset);
+      reinterpret_cast<ckernel_builder<kernel_request_host> *>(ckb)
+          ->alloc_ck<groupby_to_value_assign_extra>(ckb_offset);
   const categorical_type *cd = m_groups_type.extended<categorical_type>();
   switch (cd->get_storage_type().get_type_id()) {
   case uint8_type_id:
@@ -326,7 +327,7 @@ size_t groupby_type::make_operand_to_value_assignment_kernel(
 }
 
 size_t groupby_type::make_value_to_operand_assignment_kernel(
-    ckernel_builder *DYND_UNUSED(ckb), intptr_t DYND_UNUSED(ckb_offset),
+    void *DYND_UNUSED(ckb), intptr_t DYND_UNUSED(ckb_offset),
     const char *DYND_UNUSED(dst_arrmeta), const char *DYND_UNUSED(src_arrmeta),
     kernel_request_t DYND_UNUSED(kernreq),
     const eval::eval_context *DYND_UNUSED(ectx)) const

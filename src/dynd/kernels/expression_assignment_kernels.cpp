@@ -156,7 +156,7 @@ namespace {
 } // anonymous namespace
 
 size_t dynd::make_expression_assignment_kernel(
-    ckernel_builder *ckb, intptr_t ckb_offset, const ndt::type &dst_tp,
+    void *ckb, intptr_t ckb_offset, const ndt::type &dst_tp,
     const char *dst_arrmeta, const ndt::type &src_tp, const char *src_arrmeta,
     kernel_request_t kernreq, const eval::eval_context *ectx)
 {
@@ -174,7 +174,9 @@ size_t dynd::make_expression_assignment_kernel(
                 // Chain case, buffer one segment of the chain
                 const ndt::type& buffer_tp = static_cast<const base_expr_type *>(
                                     opdt.extended())->get_value_type();
-                buffered_kernel_extra *e = ckb->alloc_ck<buffered_kernel_extra>(ckb_offset);
+                buffered_kernel_extra *e =
+                    reinterpret_cast<ckernel_builder<kernel_request_host> *>(
+                        ckb)->alloc_ck<buffered_kernel_extra>(ckb_offset);
                 e->init(buffer_tp, kernreq);
                 // Construct the first kernel (src -> buffer)
                 e->first_kernel_offset = ckb_offset - root_ckb_offset;
@@ -186,9 +188,11 @@ size_t dynd::make_expression_assignment_kernel(
                                               buffer_tp.get_data_alignment());
                 intptr_t buffer_data_offset = ckb_offset;
                 kernels::inc_ckb_offset(ckb_offset, e->buffer_data_size);
-                ckb->ensure_capacity(ckb_offset);
+                reinterpret_cast<ckernel_builder<kernel_request_host> *>(ckb)
+                    ->ensure_capacity(ckb_offset);
                 // This may have invalidated the 'e' pointer, so get it again!
-                e = ckb->get_at<buffered_kernel_extra>(root_ckb_offset);
+                e = reinterpret_cast<ckernel_builder<kernel_request_host> *>(
+                        ckb)->get_at<buffered_kernel_extra>(root_ckb_offset);
                 e->buffer_data_offset = buffer_data_offset - root_ckb_offset;
                 // Construct the second kernel (buffer -> dst)
                 e->second_kernel_offset = ckb_offset - root_ckb_offset;
@@ -209,7 +213,8 @@ size_t dynd::make_expression_assignment_kernel(
                 buffer_tp = src_tp.value_type();
             }
             buffered_kernel_extra *e =
-                ckb->alloc_ck<buffered_kernel_extra>(ckb_offset);
+                reinterpret_cast<ckernel_builder<kernel_request_host> *>(ckb)
+                    ->alloc_ck<buffered_kernel_extra>(ckb_offset);
             e->init(buffer_tp, kernreq);
             // Construct the first kernel (src -> buffer)
             e->first_kernel_offset = ckb_offset - root_ckb_offset;
@@ -221,9 +226,11 @@ size_t dynd::make_expression_assignment_kernel(
             // Allocate the buffer data
             intptr_t buffer_data_offset = ckb_offset;
             kernels::inc_ckb_offset(ckb_offset, e->buffer_data_size);
-            ckb->ensure_capacity(ckb_offset);
+            reinterpret_cast<ckernel_builder<kernel_request_host> *>(ckb)
+                ->ensure_capacity(ckb_offset);
             // This may have invalidated the 'e' pointer, so get it again!
-            e = ckb->get_at<buffered_kernel_extra>(root_ckb_offset);
+            e = reinterpret_cast<ckernel_builder<kernel_request_host> *>(ckb)
+                    ->get_at<buffered_kernel_extra>(root_ckb_offset);
             e->buffer_data_offset = buffer_data_offset - root_ckb_offset;
             // Construct the second kernel (buffer -> dst)
             e->second_kernel_offset = ckb_offset - root_ckb_offset;
@@ -245,7 +252,9 @@ size_t dynd::make_expression_assignment_kernel(
                 // Chain case, buffer one segment of the chain
                 const ndt::type& buffer_tp = static_cast<const base_expr_type *>(
                                 opdt.extended())->get_value_type();
-                buffered_kernel_extra *e = ckb->alloc_ck<buffered_kernel_extra>(ckb_offset);
+                buffered_kernel_extra *e =
+                    reinterpret_cast<ckernel_builder<kernel_request_host> *>(
+                        ckb)->alloc_ck<buffered_kernel_extra>(ckb_offset);
                 e->init(buffer_tp, kernreq);
                 size_t buffer_data_size = e->buffer_data_size;
                 // Construct the first kernel (src -> buffer)
@@ -257,9 +266,11 @@ size_t dynd::make_expression_assignment_kernel(
                 ckb_offset = inc_to_alignment(ckb_offset, buffer_tp.get_data_alignment());
                 size_t buffer_data_offset = ckb_offset;
                 kernels::inc_ckb_offset(ckb_offset, buffer_data_size);
-                ckb->ensure_capacity(ckb_offset);
+                reinterpret_cast<ckernel_builder<kernel_request_host> *>(ckb)
+                    ->ensure_capacity(ckb_offset);
                 // This may have invalidated the 'e' pointer, so get it again!
-                e = ckb->get_at<buffered_kernel_extra>(root_ckb_offset);
+                e = reinterpret_cast<ckernel_builder<kernel_request_host> *>(
+                        ckb)->get_at<buffered_kernel_extra>(root_ckb_offset);
                 e->buffer_data_offset = buffer_data_offset - root_ckb_offset;
                 // Construct the second kernel (buffer -> dst)
                 e->second_kernel_offset = ckb_offset - root_ckb_offset;
@@ -271,7 +282,9 @@ size_t dynd::make_expression_assignment_kernel(
             // Put together the src expression chain and the src value type
             // to dst value type conversion
             const ndt::type& buffer_tp = src_tp.value_type();
-            buffered_kernel_extra *e = ckb->alloc_ck<buffered_kernel_extra>(ckb_offset);
+            buffered_kernel_extra *e =
+                reinterpret_cast<ckernel_builder<kernel_request_host> *>(ckb)
+                    ->alloc_ck<buffered_kernel_extra>(ckb_offset);
             e->init(buffer_tp, kernreq);
             size_t buffer_data_size = e->buffer_data_size;
             // Construct the first kernel (src -> buffer)
@@ -284,9 +297,11 @@ size_t dynd::make_expression_assignment_kernel(
                 inc_to_alignment(ckb_offset, buffer_tp.get_data_alignment());
             size_t buffer_data_offset = ckb_offset;
             kernels::inc_ckb_offset(ckb_offset, buffer_data_size);
-            ckb->ensure_capacity(ckb_offset);
+            reinterpret_cast<ckernel_builder<kernel_request_host> *>(ckb)
+                ->ensure_capacity(ckb_offset);
             // This may have invalidated the 'e' pointer, so get it again!
-            e = ckb->get_at<buffered_kernel_extra>(root_ckb_offset);
+            e = reinterpret_cast<ckernel_builder<kernel_request_host> *>(ckb)
+                    ->get_at<buffered_kernel_extra>(root_ckb_offset);
             e->buffer_data_offset = buffer_data_offset - root_ckb_offset;
             // Construct the second kernel (buffer -> dst)
             e->second_kernel_offset = ckb_offset - root_ckb_offset;

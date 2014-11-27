@@ -9,7 +9,7 @@ using namespace std;
 
 namespace {
     template <typename T>
-    struct value_to_pointer_ck : dynd::kernels::expr_ck<value_to_pointer_ck<T>, 1> {
+    struct value_to_pointer_ck : dynd::kernels::expr_ck<value_to_pointer_ck<T>, dynd::kernel_request_host, 1> {
         void single(char *dst, const char *const *src) {
             *reinterpret_cast<T **>(dst) = const_cast<T *>(*reinterpret_cast<const T *const *>(src));
         }
@@ -17,7 +17,7 @@ namespace {
 } // anonymous namespace
 
 size_t dynd::make_builtin_value_to_pointer_assignment_kernel(
-                ckernel_builder *ckb, intptr_t ckb_offset,
+                void *ckb, intptr_t ckb_offset,
                 type_id_t tp_id, kernel_request_t kernreq)
 {
     switch (tp_id) {
@@ -83,7 +83,7 @@ size_t dynd::make_builtin_value_to_pointer_assignment_kernel(
 }
 
 size_t dynd::make_value_to_pointer_assignment_kernel(
-                ckernel_builder *ckb, intptr_t ckb_offset,
+                void *ckb, intptr_t ckb_offset,
                 const ndt::type &tp, kernel_request_t kernreq)
 {
     if (tp.is_builtin()) {

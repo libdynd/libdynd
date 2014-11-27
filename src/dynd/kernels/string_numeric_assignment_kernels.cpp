@@ -424,7 +424,7 @@ static expr_single_t static_string_to_builtin_kernels[builtin_type_id_count-2] =
     };
 
 size_t dynd::make_string_to_builtin_assignment_kernel(
-    ckernel_builder *ckb, intptr_t ckb_offset, type_id_t dst_type_id,
+    void *ckb, intptr_t ckb_offset, type_id_t dst_type_id,
     const ndt::type &src_string_tp, const char *src_arrmeta,
     kernel_request_t kernreq, const eval::eval_context *ectx)
 {
@@ -439,7 +439,7 @@ size_t dynd::make_string_to_builtin_assignment_kernel(
         ckb_offset =
             make_kernreq_to_single_kernel_adapter(ckb, ckb_offset, 1, kernreq);
         string_to_builtin_kernel_extra *e =
-            ckb->alloc_ck<string_to_builtin_kernel_extra>(ckb_offset);
+            reinterpret_cast<ckernel_builder<kernel_request_host> *>(ckb)->alloc_ck<string_to_builtin_kernel_extra>(ckb_offset);
         e->base.set_function<expr_single_t>(
             static_string_to_builtin_kernels[dst_type_id - bool_type_id]);
         e->base.destructor = &string_to_builtin_kernel_extra::destruct;
@@ -496,7 +496,7 @@ namespace {
 } // anonymous namespace
 
 size_t dynd::make_builtin_to_string_assignment_kernel(
-    ckernel_builder *ckb, intptr_t ckb_offset, const ndt::type &dst_string_tp,
+    void *ckb, intptr_t ckb_offset, const ndt::type &dst_string_tp,
     const char *dst_arrmeta, type_id_t src_type_id, kernel_request_t kernreq,
     const eval::eval_context *ectx)
 {
@@ -509,7 +509,7 @@ size_t dynd::make_builtin_to_string_assignment_kernel(
     if (src_type_id >= 0 && src_type_id < builtin_type_id_count) {
         ckb_offset = make_kernreq_to_single_kernel_adapter(ckb, ckb_offset, 1, kernreq);
         builtin_to_string_kernel_extra *e =
-            ckb->alloc_ck_leaf<builtin_to_string_kernel_extra>(ckb_offset);
+            reinterpret_cast<ckernel_builder<kernel_request_host> *>(ckb)->alloc_ck_leaf<builtin_to_string_kernel_extra>(ckb_offset);
         e->base.set_function<expr_single_t>(builtin_to_string_kernel_extra::single);
         e->base.destructor = builtin_to_string_kernel_extra::destruct;
         // The kernel data owns this reference

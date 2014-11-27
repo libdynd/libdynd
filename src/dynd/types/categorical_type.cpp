@@ -436,7 +436,7 @@ bool categorical_type::is_lossless_assignment(const ndt::type& dst_tp, const ndt
 }
 
 size_t categorical_type::make_assignment_kernel(
-    ckernel_builder *ckb, intptr_t ckb_offset, const ndt::type &dst_tp,
+    void *ckb, intptr_t ckb_offset, const ndt::type &dst_tp,
     const char *dst_arrmeta, const ndt::type &src_tp, const char *src_arrmeta,
     kernel_request_t kernreq, const eval::eval_context *ectx) const
 {
@@ -459,7 +459,8 @@ size_t categorical_type::make_assignment_kernel(
       ckb_offset =
           make_kernreq_to_single_kernel_adapter(ckb, ckb_offset, 1, kernreq);
       category_to_categorical_kernel_extra *e =
-          ckb->alloc_ck_leaf<category_to_categorical_kernel_extra>(ckb_offset);
+          reinterpret_cast<ckernel_builder<kernel_request_host> *>(ckb)
+              ->alloc_ck_leaf<category_to_categorical_kernel_extra>(ckb_offset);
       switch (m_storage_type.get_type_id()) {
       case uint8_type_id:
         e->base.set_function<expr_single_t>(
@@ -501,7 +502,8 @@ size_t categorical_type::make_assignment_kernel(
       ckb_offset =
           make_kernreq_to_single_kernel_adapter(ckb, ckb_offset, 1, kernreq);
       categorical_to_other_kernel_extra *e =
-          ckb->alloc_ck<categorical_to_other_kernel_extra>(ckb_offset);
+          reinterpret_cast<ckernel_builder<kernel_request_host> *>(ckb)
+              ->alloc_ck<categorical_to_other_kernel_extra>(ckb_offset);
       switch (m_storage_type.get_type_id()) {
       case uint8_type_id:
         e->base.set_function<expr_single_t>(

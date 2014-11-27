@@ -149,7 +149,7 @@ public:
     virtual ~date_strftime_kernel_generator() {
     }
 
-    size_t make_expr_kernel(ckernel_builder *ckb, intptr_t ckb_offset,
+    size_t make_expr_kernel(void *ckb, intptr_t ckb_offset,
                             const ndt::type &dst_tp, const char *dst_arrmeta,
                             size_t src_count, const ndt::type *src_tp,
                             const char *const *src_arrmeta,
@@ -174,7 +174,8 @@ public:
         }
 
         date_strftime_kernel_extra *e =
-            ckb->alloc_ck_leaf<date_strftime_kernel_extra>(ckb_offset);
+            reinterpret_cast<ckernel_builder<kernel_request_host> *>(ckb)
+                ->alloc_ck_leaf<date_strftime_kernel_extra>(ckb_offset);
         switch (kernreq) {
             case kernel_request_single:
                 e->base.set_function<expr_single_t>(&date_strftime_kernel_extra::single_unary);
@@ -301,7 +302,7 @@ public:
     virtual ~date_replace_kernel_generator() {
     }
 
-    size_t make_expr_kernel(ckernel_builder *ckb, intptr_t ckb_offset,
+    size_t make_expr_kernel(void *ckb, intptr_t ckb_offset,
                             const ndt::type &dst_tp, const char *dst_arrmeta,
                             size_t src_count, const ndt::type *src_tp,
                             const char *const *src_arrmeta,
@@ -326,7 +327,8 @@ public:
       }
 
       date_replace_kernel_extra *e =
-          ckb->alloc_ck_leaf<date_replace_kernel_extra>(ckb_offset);
+          reinterpret_cast<ckernel_builder<kernel_request_host> *>(ckb)
+              ->alloc_ck_leaf<date_replace_kernel_extra>(ckb_offset);
       switch (kernreq) {
       case kernel_request_single:
         e->base.set_function<expr_single_t>(

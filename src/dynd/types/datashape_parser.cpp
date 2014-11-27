@@ -867,14 +867,15 @@ static ndt::type parse_struct(const char *&rbegin, const char *end,
 
 // tuple : LPAREN tuple_item tuple_item* RPAREN
 // ctuple : 'c(' tuple_item tuple_item* RPAREN
+// funcproto : tuple -> type// tuple : LPAREN tuple_item tuple_item* RPAREN
+// ctuple : 'c(' tuple_item tuple_item* RPAREN
 // funcproto : tuple -> type
 static ndt::type parse_tuple_or_funcproto(const char *&rbegin, const char *end, map<string, ndt::type>& symtable)
 {
     const char *begin = rbegin;
-    vector<string> field_name_list[2];
+    vector<string> field_name_list;
     vector<ndt::type> field_type_list;
     bool cprefixed = false;
-    intptr_t semicolon_pos = -1;
 
     if (!parse_token_ds(begin, end, '(')) {
         if (parse_token_ds(begin, end, "c(")) {
@@ -891,7 +892,7 @@ static ndt::type parse_tuple_or_funcproto(const char *&rbegin, const char *end, 
             } catch (datashape_parse_error) {
                 string name;
                 if (parse_struct_item(begin, end, symtable, name, tp)) {
-                    field_name_list[semicolon_pos != -1].push_back(name);
+                    field_name_list.push_back(name);
                 }
             }
 
@@ -906,12 +907,10 @@ static ndt::type parse_tuple_or_funcproto(const char *&rbegin, const char *end, 
                         parse_token_ds(begin, end, ')')) {
                     break;
                 }
-            } else if (parse_token_ds(begin, end, ';')) {
-                semicolon_pos = field_type_list.size();
             } else if (parse_token_ds(begin, end, ')')) {
                 break;
             } else {
-                throw datashape_parse_error(begin, "expected ',', ';' or ')'");
+                throw datashape_parse_error(begin, "expected ',' or ')'");
             }
         }
     }
@@ -931,13 +930,7 @@ static ndt::type parse_tuple_or_funcproto(const char *&rbegin, const char *end, 
             throw datashape_parse_error(begin, "expected function prototype return type");
         }
         rbegin = begin;
-        if (semicolon_pos == -1) {
-            return ndt::make_funcproto(field_name_list[0], field_name_list[1],
-                field_type_list, return_type);
-        } else {
-            return ndt::make_funcproto(field_name_list[0], field_name_list[1],
-                field_type_list, return_type, field_type_list.size() - semicolon_pos);
-        }
+        return ndt::make_funcproto(field_type_list, return_type, field_name_list);
     }
 }
 

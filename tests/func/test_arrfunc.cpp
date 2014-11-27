@@ -37,7 +37,7 @@ TEST(ArrFunc, Assignment)
   const char *src_arrmeta[1] = {NULL};
 
   // Instantiate a single ckernel
-  ckernel_builder ckb;
+  ckernel_builder<kernel_request_host> ckb;
   af.get()->instantiate(
       af.get(), af.get_type(), &ckb, 0, af.get_type()->get_return_type(), NULL,
       af.get_type()->get_arg_types_raw(), src_arrmeta, kernel_request_single,
@@ -109,7 +109,7 @@ TEST(ArrFunc, Property)
   const char *src_arrmeta[1] = {NULL};
 
   // Instantiate a single ckernel
-  ckernel_builder ckb;
+  ckernel_builder<kernel_request_host> ckb;
   af.get()->instantiate(
       af.get(), af.get_type(), &ckb, 0, af.get_type()->get_return_type(), NULL,
       af.get_type()->get_arg_types_raw(), src_arrmeta, kernel_request_single,
@@ -136,7 +136,7 @@ TEST(ArrFunc, AssignmentAsExpr)
   const char *src_arrmeta[1] = {NULL};
 
   // Instantiate a single ckernel
-  ckernel_builder ckb;
+  ckernel_builder<kernel_request_host> ckb;
   af.get()->instantiate(
       af.get(), af.get_type(), &ckb, 0, af.get_type()->get_return_type(), NULL,
       af.get_type()->get_arg_types_raw(), src_arrmeta, kernel_request_single,

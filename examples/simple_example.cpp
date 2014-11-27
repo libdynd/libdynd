@@ -14,7 +14,7 @@
 #include <dynd/array_range.hpp>
 #include <dynd/kernels/assignment_kernels.hpp>
 #include <dynd/json_parser.hpp>
-#include <dynd/func/functor_arrfunc.hpp>
+#include <dynd/func/apply_arrfunc.hpp>
 #include <dynd/func/lift_reduction_arrfunc.hpp>
 #include <dynd/kernels/reduction_kernels.hpp>
 
@@ -29,7 +29,7 @@ double myfunc(int x, float y)
 int main()
 {
   try {
-    nd::arrfunc af = nd::make_functor_arrfunc(myfunc);
+    nd::arrfunc af = nd::make_apply_arrfunc(myfunc);
     cout << af(3, 1.1f) << endl;
   }
   catch (const std::exception &e)

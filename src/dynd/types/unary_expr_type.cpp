@@ -103,7 +103,7 @@ bool unary_expr_type::operator==(const base_type& rhs) const
 }
 
 size_t unary_expr_type::make_operand_to_value_assignment_kernel(
-                ckernel_builder *ckb, intptr_t ckb_offset,
+                void *ckb, intptr_t ckb_offset,
                 const char *dst_arrmeta, const char *src_arrmeta,
                 kernel_request_t kernreq, const eval::eval_context *ectx) const
 {
@@ -118,7 +118,7 @@ size_t unary_expr_type::make_operand_to_value_assignment_kernel(
 }
 
 size_t unary_expr_type::make_value_to_operand_assignment_kernel(
-                ckernel_builder *DYND_UNUSED(ckb), intptr_t DYND_UNUSED(ckb_offset),
+                void *DYND_UNUSED(ckb), intptr_t DYND_UNUSED(ckb_offset),
                 const char *DYND_UNUSED(dst_arrmeta), const char *DYND_UNUSED(src_arrmeta),
                 kernel_request_t DYND_UNUSED(kernreq), const eval::eval_context *DYND_UNUSED(ectx)) const
 {

@@ -130,7 +130,7 @@ bool time_type::operator==(const base_type& rhs) const
 }
 
 size_t time_type::make_assignment_kernel(
-    ckernel_builder *ckb, intptr_t ckb_offset, const ndt::type &dst_tp,
+    void *ckb, intptr_t ckb_offset, const ndt::type &dst_tp,
     const char *dst_arrmeta, const ndt::type &src_tp, const char *src_arrmeta,
     kernel_request_t kernreq, const eval::eval_context *ectx) const
 {
@@ -173,7 +173,7 @@ size_t time_type::make_assignment_kernel(
 }
 
 size_t time_type::make_comparison_kernel(
-                ckernel_builder *ckb, intptr_t ckb_offset,
+                void *ckb, intptr_t ckb_offset,
                 const ndt::type& src0_tp, const char *src0_arrmeta,
                 const ndt::type& src1_tp, const char *src1_arrmeta,
                 comparison_type_t comptype,
@@ -385,14 +385,16 @@ ndt::type time_type::get_elwise_property_type(size_t property_index,
 }
 
 size_t time_type::make_elwise_property_getter_kernel(
-    ckernel_builder *ckb, intptr_t ckb_offset,
+    void *ckb, intptr_t ckb_offset,
     const char *DYND_UNUSED(dst_arrmeta), const char *DYND_UNUSED(src_arrmeta),
     size_t src_property_index, kernel_request_t kernreq,
     const eval::eval_context *DYND_UNUSED(ectx)) const
 {
     ckb_offset =
         make_kernreq_to_single_kernel_adapter(ckb, ckb_offset, 1, kernreq);
-    ckernel_prefix *e = ckb->alloc_ck_leaf<ckernel_prefix>(ckb_offset);
+    ckernel_prefix *e =
+        reinterpret_cast<ckernel_builder<kernel_request_host> *>(ckb)
+            ->alloc_ck_leaf<ckernel_prefix>(ckb_offset);
     switch (src_property_index) {
         case timeprop_hour:
             e->set_function<expr_single_t>(&get_property_kernel_hour_single);
@@ -420,14 +422,15 @@ size_t time_type::make_elwise_property_getter_kernel(
 }
 
 size_t time_type::make_elwise_property_setter_kernel(
-    ckernel_builder *ckb, intptr_t ckb_offset,
+    void *ckb, intptr_t ckb_offset,
     const char *DYND_UNUSED(dst_arrmeta), size_t dst_property_index,
     const char *DYND_UNUSED(src_arrmeta), kernel_request_t kernreq,
     const eval::eval_context *DYND_UNUSED(ectx)) const
 {
   ckb_offset =
       make_kernreq_to_single_kernel_adapter(ckb, ckb_offset, 1, kernreq);
-  ckernel_prefix *e = ckb->alloc_ck_leaf<ckernel_prefix>(ckb_offset);
+  ckernel_prefix *e = reinterpret_cast<ckernel_builder<kernel_request_host> *>(
+                          ckb)->alloc_ck_leaf<ckernel_prefix>(ckb_offset);
   switch (dst_property_index) {
   case timeprop_struct:
     e->set_function<expr_single_t>(&set_property_kernel_struct_single);
@@ -465,7 +468,7 @@ struct time_is_avail_ck {
 
     static intptr_t instantiate(
         const arrfunc_type_data *DYND_UNUSED(self),
-        const arrfunc_type *DYND_UNUSED(af_tp), dynd::ckernel_builder *ckb,
+        const arrfunc_type *DYND_UNUSED(af_tp), void *ckb,
         intptr_t ckb_offset, const ndt::type &dst_tp,
         const char *DYND_UNUSED(dst_arrmeta), const ndt::type *src_tp,
         const char *const *DYND_UNUSED(src_arrmeta), kernel_request_t kernreq,
@@ -484,7 +487,9 @@ struct time_is_avail_ck {
         ss << "Expected destination type bool, got " << dst_tp;
         throw type_error(ss.str());
       }
-      ckernel_prefix *ckp = ckb->alloc_ck_leaf<ckernel_prefix>(ckb_offset);
+      ckernel_prefix *ckp =
+          reinterpret_cast<ckernel_builder<kernel_request_host> *>(ckb)
+              ->alloc_ck_leaf<ckernel_prefix>(ckb_offset);
       ckp->set_expr_function<time_is_avail_ck>(kernreq);
       return ckb_offset;
     }
@@ -509,7 +514,7 @@ struct time_assign_na_ck {
 
     static intptr_t instantiate(const arrfunc_type_data *DYND_UNUSED(self),
                                 const arrfunc_type *DYND_UNUSED(af_tp),
-                                dynd::ckernel_builder *ckb, intptr_t ckb_offset,
+                                void *ckb, intptr_t ckb_offset,
                                 const ndt::type &dst_tp,
                                 const char *DYND_UNUSED(dst_arrmeta),
                                 const ndt::type *DYND_UNUSED(src_tp),
@@ -526,7 +531,9 @@ struct time_assign_na_ck {
         ss << "Expected destination type ?time, got " << dst_tp;
         throw type_error(ss.str());
       }
-      ckernel_prefix *ckp = ckb->alloc_ck_leaf<ckernel_prefix>(ckb_offset);
+      ckernel_prefix *ckp =
+          reinterpret_cast<ckernel_builder<kernel_request_host> *>(ckb)
+              ->alloc_ck_leaf<ckernel_prefix>(ckb_offset);
       ckp->set_expr_function<time_assign_na_ck>(kernreq);
       return ckb_offset;
     }

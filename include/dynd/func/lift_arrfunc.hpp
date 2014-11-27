@@ -14,8 +14,7 @@ namespace dynd {
 /**
  * Lifts the provided arrfunc, so it broadcasts all the arguments.
  *
- * \param out_af  The output arrfunc which is filled.
- * \param af  The arrfunc to be lifted.
+ * \param child_af  The arrfunc to be lifted.
  */
 nd::arrfunc lift_arrfunc(const nd::arrfunc &child_af);
 

@@ -84,7 +84,7 @@ bool tuple_type::is_lossless_assignment(const ndt::type& dst_tp, const ndt::type
 }
 
 size_t tuple_type::make_assignment_kernel(
-    ckernel_builder *DYND_UNUSED(ckb), intptr_t DYND_UNUSED(ckb_offset),
+    void *DYND_UNUSED(ckb), intptr_t DYND_UNUSED(ckb_offset),
     const ndt::type &dst_tp, const char *DYND_UNUSED(dst_arrmeta),
     const ndt::type &src_tp, const char *DYND_UNUSED(src_arrmeta),
     kernel_request_t DYND_UNUSED(kernreq),
@@ -122,7 +122,7 @@ size_t tuple_type::make_assignment_kernel(
 }
 
 size_t tuple_type::make_comparison_kernel(
-                ckernel_builder *DYND_UNUSED(ckb), intptr_t DYND_UNUSED(ckb_offset),
+                void *DYND_UNUSED(ckb), intptr_t DYND_UNUSED(ckb_offset),
                 const ndt::type& src0_tp, const char *DYND_UNUSED(src0_arrmeta),
                 const ndt::type& src1_tp, const char *DYND_UNUSED(src1_arrmeta),
                 comparison_type_t comptype,
