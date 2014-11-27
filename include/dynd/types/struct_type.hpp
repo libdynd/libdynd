@@ -18,6 +18,14 @@
 
 namespace dynd {
 
+namespace nd {
+  namespace detail {
+    template <typename T>
+    void as_packed_array(const T &val, const ndt::type &tp,
+                         char *arrmeta, char *data);
+  }
+}
+
 class struct_type : public base_struct_type {
     std::vector<std::pair<std::string, gfunc::callable> > m_array_properties;
 
@@ -218,118 +226,6 @@ namespace ndt {
  */
 nd::array struct_concat(nd::array lhs, nd::array rhs);
 
-namespace detail {
-
-/**
-  * A struct with some metafunctions to help packing values into structs and
-  * tuples. For each value to pack into the struct/tuple, one first calls
-  *     tp = pack<T>::make_type(val)
-  * to get the ndt::type packing will use, then
-  *     pack<T>::insert(val, tp, arrmeta, data);
-  * which must initialize the output arrmeta if it is non-empty,
-  * and copy the value into the target of the data pointer.
-  */
-template <typename T>
-struct pack {
-  /**
-   * Returns the type to use for packing this specific value. The value
-   * is allowed to affect the type, e.g. for packing a std::vector
-   */
-  static ndt::type make_type(const T &DYND_UNUSED(val))
-  {
-    // Default case is for when T and the ndt::type have identical
-    // memory layout, which is guaranteed by make_exact_type<T>().
-    return ndt::make_exact_type<T>();
-  }
-
-  /**
-   * Packs a value into memory allocated to store it via the ``make_type(val)``
-   * call. Because the destination arrmeta is guaranteed to be for only one
-   * data element
-   */
-  static void insert(const T &val, const ndt::type &DYND_UNUSED(tp),
-                     char *DYND_UNUSED(out_arrmeta), char *out_data)
-  {
-    *reinterpret_cast<T *>(out_data) = val;
-  }
-};
-
-template <>
-struct pack<nd::array> {
-  static ndt::type make_type(const nd::array &val)
-  {
-    if ((val.get_access_flags()&nd::write_access_flag) == 0) {
-      throw std::runtime_error("TODO: how to handle readonly/immutable arrays "
-                               "in struct/tuple packing");
-    }
-    return ndt::make_pointer(val.get_type());
-  }
-
-  static void insert(const nd::array &val, const ndt::type &DYND_UNUSED(tp),
-                     char *out_arrmeta, char *out_data)
-  {
-    pointer_type_arrmeta *am =
-        reinterpret_cast<pointer_type_arrmeta *>(out_arrmeta);
-    // Insert the reference in the destination pointer's arrmeta
-    am->blockref = val.get_data_memblock().get();
-    memory_block_incref(am->blockref);
-    // Copy the rest of the arrmeta after the pointer's arrmeta
-    const ndt::type &val_tp = val.get_type();
-    if (val_tp.get_arrmeta_size() > 0) {
-      val_tp.extended()->arrmeta_copy_construct(
-          out_arrmeta + sizeof(pointer_type_arrmeta), val.get_arrmeta(),
-          val.get_memblock().get());
-    }
-    // Copy the pointer
-    *reinterpret_cast<char **>(out_data) = val.get_readwrite_originptr();
-  }
-};
-
-template <typename T>
-struct pack<std::vector<T> > {
-  static ndt::type make_type(const std::vector<T> &val)
-  {
-    // Depending on the data size, store the data by value or as a pointer
-    // to an nd::array
-    if (sizeof(T) * val.size() > 32) {
-      return ndt::make_pointer(
-          ndt::make_fixed_dim(val.size(), ndt::make_exact_type<T>()));
-    }
-    else {
-      return ndt::make_fixed_dim(val.size(), ndt::make_exact_type<T>());
-    }
-  }
-
-  static void insert(const std::vector<T> &val, const ndt::type &tp,
-                     char *out_arrmeta, char *out_data)
-  {
-    if (tp.get_type_id() == pointer_type_id) {
-      pack<nd::array>::insert(val, tp, out_arrmeta, out_data);
-    } else {
-      if (!tp.is_builtin()) {
-        tp.extended()->arrmeta_default_construct(out_arrmeta, true);
-      }
-      if (!val.empty()) {
-        memcpy(out_data, &val[0], sizeof(T) * val.size());
-      }
-    }
-  }
-};
-
-template <typename T>
-void pack_insert(const T &val, const ndt::type &tp, char *out_arrmeta,
-                 char *out_data)
-{
-  pack<T>::insert(val, tp, out_arrmeta, out_data);
-}
-
-} // namespace detail
-
-template <typename T>
-ndt::type make_pack_type(const T &val) {
-    return detail::pack<T>::make_type(val);
-}
-
 #define PACK_ARG(N)                                                            \
   DYND_PP_ELWISE_1(DYND_PP_ID,                                                 \
                    DYND_PP_MAP_1(DYND_PP_META_DECL_CONST_STR_REF,              \
@@ -346,7 +242,7 @@ ndt::type make_pack_type(const T &val) {
     const std::string *field_names[N] = {                                      \
         DYND_PP_JOIN_1((, ), DYND_PP_META_NAME_RANGE(&name, N))};              \
     const ndt::type field_types[N] = {DYND_PP_JOIN_MAP_1(                      \
-        make_pack_type, (, ), DYND_PP_META_NAME_RANGE(a, N))};                 \
+        ndt::make_packed_type, (, ), DYND_PP_META_NAME_RANGE(a, N))};                 \
                                                                                \
     /* Allocate res with empty_shell, leaves unconstructed arrmeta */          \
     nd::array res =                                                            \
@@ -363,7 +259,7 @@ ndt::type make_pack_type(const T &val) {
     char *res_data = res.get_readwrite_originptr();                            \
     /* Each pack_insert initializes the arrmeta and the data */                \
     DYND_PP_JOIN_ELWISE_1(                                                     \
-        detail::pack_insert, (;), DYND_PP_META_NAME_RANGE(a, N),               \
+        nd::detail::as_packed_array, (;), DYND_PP_META_NAME_RANGE(a, N),               \
         DYND_PP_META_AT_RANGE(field_types, N),                                 \
         DYND_PP_ELWISE_1(DYND_PP_META_ADD, DYND_PP_REPEAT_1(res_arrmeta, N),   \
                          DYND_PP_META_AT_RANGE(field_arrmeta_offsets, N)),     \
@@ -371,21 +267,6 @@ ndt::type make_pack_type(const T &val) {
                          DYND_PP_META_AT_RANGE(field_data_offsets, N)));       \
                                                                                \
     return res;                                                                \
-  }
-
-DYND_PP_JOIN_MAP(PACK, (), DYND_PP_RANGE(1, DYND_PP_INC(DYND_ARG_MAX)))
-
-#undef PACK
-
-#define PACK(N)                                                                \
-  template <DYND_PP_JOIN_MAP_1(DYND_PP_META_TYPENAME, (, ),                    \
-                               DYND_PP_META_NAME_RANGE(A, N))>                 \
-  nd::array pack DYND_PP_PREPEND(const nd::array &aux, PACK_ARG(N))            \
-  {                                                                            \
-    return struct_concat(                                                      \
-        aux,                                                                   \
-        pack DYND_PP_ELWISE_1(DYND_PP_ID, DYND_PP_META_NAME_RANGE(name, N),    \
-                              DYND_PP_META_NAME_RANGE(a, N)));                 \
   }
 
 DYND_PP_JOIN_MAP(PACK, (), DYND_PP_RANGE(1, DYND_PP_INC(DYND_ARG_MAX)))

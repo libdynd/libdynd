@@ -518,7 +518,7 @@ source_group("VM Headers" REGULAR_EXPRESSION "include/dynd/vm/.*hpp")
 source_group("Internal Headers" REGULAR_EXPRESSION "src/dynd/.*hpp")
 
 if (DYND_CUDA)
-        # Replace some source files with their CUDA versions
+    # Replace some source files with their CUDA versions
     list(REMOVE_ITEM libdynd_SRC
         src/dynd/types/dynd_complex.cpp
         src/dynd/types/dynd_float16.cpp
@@ -526,17 +526,17 @@ if (DYND_CUDA)
         src/dynd/types/dynd_int128.cpp
         src/dynd/types/dynd_uint128.cpp
         src/dynd/kernels/assignment_kernels.cpp
- #       include/dynd/kernels/apply_kernels.hpp
         )
     list(APPEND libdynd_SRC
         src/dynd/kernels/assignment_kernels.cu
-#        include/dynd/kernels/apply_kernels.cu
         )
 
     set(CUDA_NVCC_FLAGS ${CUDA_NVCC_FLAGS};-std=c++11;-Xcompiler;-fPIC)
 
-    # Disable warnings about "controlling expression is constant"
-    set(CUDA_NVCC_FLAGS ${CUDA_NVCC_FLAGS};-Xcudafe;--diag_suppress=boolean_controlling_expr_is_constant)
+    # Make some warnings into errors and inhibit other warnings
+    set(CUDA_NVCC_FLAGS ${CUDA_NVCC_FLAGS};-Werror=cross-execution-space-call;
+        -Xcudafe;--diag_suppress=boolean_controlling_expr_is_constant;
+        -Xcudafe;--diag_suppress=cc_clobber_ignored)
 
 #    set(CUDA_SEPARABLE_COMPILATION ON)
 endif()

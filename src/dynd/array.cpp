@@ -2271,3 +2271,23 @@ nd::array nd::combine_into_tuple(size_t field_count, const array *field_values)
     }
     return result;
 }
+
+void nd::detail::as_packed_array(const nd::array &val,
+                                 const ndt::type &DYND_UNUSED(tp),
+                                 char *out_arrmeta, char *out_data)
+{
+  pointer_type_arrmeta *am =
+      reinterpret_cast<pointer_type_arrmeta *>(out_arrmeta);
+  // Insert the reference in the destination pointer's arrmeta
+  am->blockref = val.get_data_memblock().get();
+  memory_block_incref(am->blockref);
+  // Copy the rest of the arrmeta after the pointer's arrmeta
+  const ndt::type &val_tp = val.get_type();
+  if (val_tp.get_arrmeta_size() > 0) {
+    val_tp.extended()->arrmeta_copy_construct(
+        out_arrmeta + sizeof(pointer_type_arrmeta), val.get_arrmeta(),
+        val.get_memblock().get());
+  }
+  // Copy the pointer
+  *reinterpret_cast<char **>(out_data) = val.get_readwrite_originptr();
+}
