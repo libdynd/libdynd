@@ -6,10 +6,10 @@ compiler:
 
 env:
   - VALGRIND=ON DYND_CUDA=OFF DYND_FFTW=OFF
+  - DYND_CUDA=ON DYND_FFTW=OFF DYND_BUILD_TESTS=OFF
   - DYND_CUDA=OFF DYND_FFTW=ON
   - ASAN=ON DYND_CUDA=OFF DYND_FFTW=ON
   - PYTHON=ON DYND_CUDA=OFF DYND_FFTW=ON DYND_BUILD_TESTS=OFF
-  - DYND_CUDA=ON DYND_FFTW=OFF
 #  - MSAN=ON DYND_CUDA=OFF DYND_FFTW=ON
 
 matrix:
@@ -21,7 +21,7 @@ matrix:
     - compiler: gcc
       env: PYTHON=ON DYND_CUDA=OFF DYND_FFTW=ON DYND_BUILD_TESTS=OFF
     - compiler: clang
-      env: DYND_CUDA=ON DYND_FFTW=OFF
+      env: DYND_CUDA=ON DYND_FFTW=OFF DYND_BUILD_TESTS=OFF
 
 before_script:
   # For newer cmake
@@ -33,7 +33,8 @@ before_script:
   - if [ "$CC" = "gcc" ]; then sudo apt-get -qq install gcc-4.7; sudo update-alternatives --install /usr/bin/gcc gcc /usr/bin/gcc-4.7 90; export CC="gcc-4.7"; fi
   - if [ "$CXX" = "g++" ]; then sudo apt-get -qq install g++-4.7; sudo update-alternatives --install /usr/bin/g++ g++ /usr/bin/g++-4.7 90; export CXX="g++-4.7"; fi
   - if [ "$VALGRIND" == "ON" ]; then sudo apt-get -qq install valgrind; fi
-  - if [ "$DYND_CUDA" == "ON" ]; then wget http://developer.download.nvidia.com/compute/cuda/repos/ubuntu1204/x86_64/cuda-repo-ubuntu1204_6.5-14_amd64.deb; sudo dpkg -i cuda-repo-ubuntu1204_6.5-14_amd64.deb; sudo apt-get update; sudo apt-get -qq install cuda; fi
+  - if [ "$DYND_CUDA" == "ON" ]; then wget http://developer.download.nvidia.com/compute/cuda/repos/ubuntu1204/x86_64/cuda-repo-ubuntu1204_6.5-14_amd64.deb;
+    sudo dpkg -i cuda-repo-ubuntu1204_6.5-14_amd64.deb; sudo apt-get update; sudo apt-get -qq install cuda; fi
   - if [ "$DYND_FFTW" == "ON" ]; then sudo apt-get -qq install libfftw3-dev; fi
   - if [ "$PYTHON" == "ON" ]; then sudo pip install numpy cython; fi
   - if [ "$ASAN" == "ON" ]; then export CXXFLAGS='-fsanitize=address -fno-omit-frame-pointer'; fi
