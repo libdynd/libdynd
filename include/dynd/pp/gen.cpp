@@ -493,22 +493,6 @@ int main(int argc, char **argv) {
 
     fout << endl;
 
-    fout << "#define DYND_PP_OUTER DYND_PP_OUTER_0" << endl;
-    for (int dep = 0; dep < pp_dep_max; dep++) {
-        fout << "#define DYND_PP_OUTER_" << dep << "(...) ";
-        fout << "DYND_PP_ID(DYND_PP__OUTER_" << dep << "(__VA_ARGS__))" << endl;
-        fout << "#define DYND_PP__OUTER_" << dep << "(...) ";
-        fout << "DYND_PP_ID(DYND_PP_PASTE(DYND_PP__OUTER_" << dep << "_, DYND_PP_DEC(DYND_PP_LEN((__VA_ARGS__))))(__VA_ARGS__))" << endl;
-        for (int ary = 2; ary <= pp_ary_max; ary++) {
-            fout << "#define DYND_PP__OUTER_" << dep << "_" << ary << "(MAC, " << args("A", ary) << ")";
-            fout << " ";
-            fout << "(DYND_PP__JOIN_OUTER_" << dep << "_" << ary << "(MAC, (,), " << args("A", ary) << "))";
-            fout << endl;
-        }
-    }
-
-    fout << endl;
-
     fout << "#define DYND_PP_JOIN_OUTER DYND_PP_JOIN_OUTER_0" << endl;
     for (int dep = 0; dep < pp_dep_max; dep++) {
         fout << "#define DYND_PP_JOIN_OUTER_" << dep << "(...)";
