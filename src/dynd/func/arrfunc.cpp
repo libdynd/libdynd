@@ -22,12 +22,11 @@ namespace {
 // Functions for the unary assignment as an arrfunc
 
 static intptr_t instantiate_assignment_ckernel(
-    const arrfunc_type_data *self, const arrfunc_type *af_tp,
-    void *ckb, intptr_t ckb_offset, const ndt::type &dst_tp,
-    const char *dst_arrmeta, const ndt::type *src_tp,
-    const char *const *src_arrmeta, kernel_request_t kernreq,
-    const eval::eval_context *ectx, const nd::array &DYND_UNUSED(aux),
-    const nd::array &DYND_UNUSED(kwds))
+    const arrfunc_type_data *self, const arrfunc_type *af_tp, void *ckb,
+    intptr_t ckb_offset, const ndt::type &dst_tp, const char *dst_arrmeta,
+    const ndt::type *src_tp, const char *const *src_arrmeta,
+    kernel_request_t kernreq, const eval::eval_context *ectx,
+    const nd::array &DYND_UNUSED(aux), const nd::array &DYND_UNUSED(kwds))
 {
   try {
     assign_error_mode errmode = *self->get_data_as<assign_error_mode>();
@@ -36,16 +35,14 @@ static intptr_t instantiate_assignment_ckernel(
       if (errmode == ectx->errmode) {
         return make_assignment_kernel(ckb, ckb_offset, dst_tp, dst_arrmeta,
                                       src_tp[0], src_arrmeta[0], kernreq, ectx);
-      }
-      else {
+      } else {
         eval::eval_context ectx_tmp(*ectx);
         ectx_tmp.errmode = errmode;
         return make_assignment_kernel(ckb, ckb_offset, dst_tp, dst_arrmeta,
                                       src_tp[0], src_arrmeta[0], kernreq,
                                       &ectx_tmp);
       }
-    }
-    else {
+    } else {
       stringstream ss;
       ss << "Cannot instantiate arrfunc for assigning from ";
       ss << af_tp->get_arg_type(0) << " to " << af_tp->get_return_type();
@@ -69,12 +66,11 @@ static void delete_property_arrfunc_data(arrfunc_type_data *self_af)
 }
 
 static intptr_t instantiate_property_ckernel(
-    const arrfunc_type_data *self, const arrfunc_type *af_tp,
-    void *ckb, intptr_t ckb_offset, const ndt::type &dst_tp,
-    const char *dst_arrmeta, const ndt::type *src_tp,
-    const char *const *src_arrmeta, kernel_request_t kernreq,
-    const eval::eval_context *ectx, const nd::array &DYND_UNUSED(args),
-    const nd::array &DYND_UNUSED(kwds))
+    const arrfunc_type_data *self, const arrfunc_type *af_tp, void *ckb,
+    intptr_t ckb_offset, const ndt::type &dst_tp, const char *dst_arrmeta,
+    const ndt::type *src_tp, const char *const *src_arrmeta,
+    kernel_request_t kernreq, const eval::eval_context *ectx,
+    const nd::array &DYND_UNUSED(args), const nd::array &DYND_UNUSED(kwds))
 {
   ndt::type prop_src_tp(*self->get_data_as<const base_type *>(), true);
 
@@ -82,8 +78,7 @@ static intptr_t instantiate_property_ckernel(
     if (src_tp[0] == prop_src_tp.operand_type()) {
       return make_assignment_kernel(ckb, ckb_offset, dst_tp, dst_arrmeta,
                                     prop_src_tp, src_arrmeta[0], kernreq, ectx);
-    }
-    else if (src_tp[0].value_type() == prop_src_tp.operand_type()) {
+    } else if (src_tp[0].value_type() == prop_src_tp.operand_type()) {
       return make_assignment_kernel(
           ckb, ckb_offset, dst_tp, dst_arrmeta,
           prop_src_tp.extended<base_expr_type>()->with_replaced_storage_type(
@@ -103,8 +98,8 @@ static intptr_t instantiate_property_ckernel(
 } // anonymous namespace
 
 nd::arrfunc dynd::make_arrfunc_from_assignment(const ndt::type &dst_tp,
-                                                const ndt::type &src_tp,
-                                                assign_error_mode errmode)
+                                               const ndt::type &src_tp,
+                                               assign_error_mode errmode)
 {
   nd::array af = nd::empty(ndt::make_funcproto(src_tp, dst_tp));
   arrfunc_type_data *out_af =
@@ -149,14 +144,12 @@ nd::arrfunc::arrfunc(const nd::array &rhs)
           // It's valid: immutable, arrfunc type, contains
           // instantiate function.
           m_value = rhs;
-        }
-        else {
+        } else {
           throw invalid_argument("Require a non-empty arrfunc, "
                                  "provided arrfunc has NULL "
                                  "instantiate function");
         }
-      }
-      else {
+      } else {
         stringstream ss;
         ss << "Require an immutable arrfunc, provided arrfunc";
         rhs.get_type().extended()->print_data(ss, rhs.get_arrmeta(),
@@ -164,8 +157,7 @@ nd::arrfunc::arrfunc(const nd::array &rhs)
         ss << " is not immutable";
         throw invalid_argument(ss.str());
       }
-    }
-    else {
+    } else {
       stringstream ss;
       ss << "Cannot implicitly convert nd::array of type "
          << rhs.get_type().value_type() << " to  arrfunc";
@@ -196,7 +188,8 @@ nd::array nd::arrfunc::call(intptr_t narg, const nd::array *args,
   }
 
   // Pack the auxiliary arguments
-  nd::array aux = nd::array(); //pack(af_tp->get_naux(), args + af_tp->get_npos());
+  nd::array aux =
+      nd::array(); // pack(af_tp->get_naux(), args + af_tp->get_npos());
 
   // Resolve the destination type
   ndt::type dst_tp =
@@ -239,7 +232,8 @@ void nd::arrfunc::call_out(intptr_t narg, const nd::array *args,
   }
 
   // Pack the auxiliary arguments
-  nd::array aux = nd::array(); //pack(af_tp->get_naux(), args + af_tp->get_npos());
+  nd::array aux =
+      nd::array(); // pack(af_tp->get_naux(), args + af_tp->get_npos());
 
   // Generate and evaluate the ckernel
   ckernel_builder<kernel_request_host> ckb;

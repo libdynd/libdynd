@@ -22,8 +22,10 @@ namespace kernels {
     }
 
     template <typename... T>
-    __global__ void cuda_parallel_single(ckernel_prefix *DYND_CONDITIONAL_UNUSED(self), char *DYND_CONDITIONAL_UNUSED(dst), T... DYND_CONDITIONAL_UNUSED(xsrc)
-                                         )
+    __global__ void
+    cuda_parallel_single(ckernel_prefix *DYND_CONDITIONAL_UNUSED(self),
+                         char *DYND_CONDITIONAL_UNUSED(dst),
+                         T... DYND_CONDITIONAL_UNUSED(xsrc))
     {
       char *src[sizeof...(T)] = {xsrc...};
 
@@ -36,7 +38,8 @@ namespace kernels {
 
     template <size_t... I>
     class cuda_parallel_ck<index_sequence<I...>>
-        : public expr_ck<cuda_parallel_ck<index_sequence<I...>>, kernel_request_host, sizeof...(I)> {
+        : public expr_ck<cuda_parallel_ck<index_sequence<I...>>,
+                         kernel_request_host, sizeof...(I)> {
       typedef cuda_parallel_ck<index_sequence<I...>> self_type;
 
       ckernel_builder<kernel_request_cuda_device> m_ckb;
@@ -53,7 +56,7 @@ namespace kernels {
 
       void single(char *dst, char **DYND_CONDITIONAL_UNUSED(src))
       {
-        detail::cuda_parallel_single<< <m_blocks, m_threads>>>
+        detail::cuda_parallel_single << <m_blocks, m_threads>>>
             (m_ckb.get(), dst, src[I]...);
         throw_if_not_cuda_success(cudaDeviceSynchronize());
       }
@@ -68,9 +71,11 @@ namespace kernels {
                                   kernel_request_t kernreq,
                                   const eval::eval_context *DYND_UNUSED(ectx),
                                   const nd::array &DYND_UNUSED(args),
-                                  const nd::array &DYND_UNUSED(kwds))
+                                  const nd::array &kwds)
       {
-        self_type::create(ckb, kernreq, ckb_offset, 1, 1);
+        self_type::create(ckb, kernreq, ckb_offset,
+                          kwds.p("grids").as<intptr_t>(),
+                          kwds.p("blocks").as<intptr_t>());
         return ckb_offset;
       }
     };

@@ -243,6 +243,11 @@ namespace kernels {
       detail::func<kernreq, func_type, type_sequence<K...>,
                    typename make_index_sequence<sizeof...(K)>::type>;
 
+  template <typename func_type>
+  struct arity {
+    static const intptr_t value = args_of<funcproto_for<func_type>>::type::size;
+  };
+
   template <kernel_request_t kernreq, typename func_type, func_type func, int N>
   class apply_function_ck;
 
@@ -285,28 +290,13 @@ namespace kernels {
                                                                                \
     static intptr_t                                                            \
     instantiate(const arrfunc_type_data *DYND_UNUSED(af_self),                 \
-                const arrfunc_type *af_tp, void *ckb, intptr_t ckb_offset,     \
-                const ndt::type &dst_tp, const char *DYND_UNUSED(dst_arrmeta), \
-                const ndt::type *src_tp, const char *const *src_arrmeta,       \
-                kernel_request_t kernreq,                                      \
+                const arrfunc_type *DYND_UNUSED(af_tp), void *ckb,             \
+                intptr_t ckb_offset, const ndt::type &DYND_UNUSED(dst_tp),     \
+                const char *DYND_UNUSED(dst_arrmeta), const ndt::type *src_tp, \
+                const char *const *src_arrmeta, kernel_request_t kernreq,      \
                 const eval::eval_context *DYND_UNUSED(ectx),                   \
                 const nd::array &DYND_UNUSED(a), const nd::array &kwds)        \
     {                                                                          \
-      for (intptr_t i = 0; i < af_tp->get_npos(); ++i) {                       \
-        if (src_tp[i] != af_tp->get_arg_type(i)) {                             \
-          std::stringstream ss;                                                \
-          ss << "Provided types " << ndt::make_funcproto(N, src_tp, dst_tp)    \
-             << " do not match the arrfunc proto " << af_tp;                   \
-          throw type_error(ss.str());                                          \
-        }                                                                      \
-      }                                                                        \
-      if (dst_tp != af_tp->get_return_type()) {                                \
-        std::stringstream ss;                                                  \
-        ss << "Provided types " << ndt::make_funcproto(N, src_tp, dst_tp)      \
-           << " do not match the arrfunc proto " << af_tp;                     \
-        throw type_error(ss.str());                                            \
-      }                                                                        \
-                                                                               \
       self_type::create(ckb, kernreq, ckb_offset,                              \
                         args_for<func_type, N>(src_tp, src_arrmeta, kwds),     \
                         kwds_for<func_type, N>(kwds));                         \
@@ -362,29 +352,14 @@ namespace kernels {
     }                                                                          \
                                                                                \
     static intptr_t                                                            \
-    instantiate(const arrfunc_type_data *af_self, const arrfunc_type *af_tp,   \
-                void *ckb, intptr_t ckb_offset, const ndt::type &dst_tp,       \
+    instantiate(const arrfunc_type_data *af_self,                              \
+                const arrfunc_type *DYND_UNUSED(af_tp), void *ckb,             \
+                intptr_t ckb_offset, const ndt::type &DYND_UNUSED(dst_tp),     \
                 const char *DYND_UNUSED(dst_arrmeta), const ndt::type *src_tp, \
-                const char *const *DYND_CONDITIONAL_UNUSED(src_arrmeta),       \
-                kernel_request_t kernreq,                                      \
+                const char *const *src_arrmeta, kernel_request_t kernreq,      \
                 const eval::eval_context *DYND_UNUSED(ectx),                   \
                 const nd::array &DYND_UNUSED(args), const nd::array &kwds)     \
     {                                                                          \
-      for (intptr_t i = 0; i < af_tp->get_npos(); ++i) {                       \
-        if (src_tp[i] != af_tp->get_arg_type(i)) {                             \
-          std::stringstream ss;                                                \
-          ss << "Provided types " << ndt::make_funcproto(N, src_tp, dst_tp)    \
-             << " do not match the arrfunc proto " << af_tp;                   \
-          throw type_error(ss.str());                                          \
-        }                                                                      \
-      }                                                                        \
-      if (dst_tp != af_tp->get_return_type()) {                                \
-        std::stringstream ss;                                                  \
-        ss << "Provided types " << ndt::make_funcproto(N, src_tp, dst_tp)      \
-           << " do not match the arrfunc proto " << af_tp;                     \
-        throw type_error(ss.str());                                            \
-      }                                                                        \
-                                                                               \
       self_type::create(ckb, kernreq, ckb_offset,                              \
                         *af_self->get_data_as<func_type>(),                    \
                         args_for<func_type, N>(src_tp, src_arrmeta, kwds),     \
@@ -405,7 +380,7 @@ namespace kernels {
   struct construct_then_apply_callable_ck<KERNREQ, func_type, K...>            \
       : public expr_ck<                                                        \
             construct_then_apply_callable_ck<KERNREQ, func_type, K...>,        \
-            KERNREQ, args_of<funcproto_for<func_type>>::type::size>,           \
+            KERNREQ, arity<func_type>::value>,                                 \
         public args_for<func_type>,                                            \
         public func_for<KERNREQ, func_type, K...> {                            \
     typedef construct_then_apply_callable_ck<KERNREQ, func_type, K...>         \
@@ -437,33 +412,13 @@ namespace kernels {
   intptr_t
   construct_then_apply_callable_ck<kernel_request_host, func_type, K...>::
       instantiate(const arrfunc_type_data *DYND_UNUSED(af_self),
-                  const arrfunc_type *af_tp, void *ckb, intptr_t ckb_offset,
-                  const ndt::type &dst_tp, const char *DYND_UNUSED(dst_arrmeta),
-                  const ndt::type *src_tp,
-                  const char *const *DYND_CONDITIONAL_UNUSED(src_arrmeta),
-                  kernel_request_t kernreq,
+                  const arrfunc_type *DYND_UNUSED(af_tp), void *ckb,
+                  intptr_t ckb_offset, const ndt::type &DYND_UNUSED(dst_tp),
+                  const char *DYND_UNUSED(dst_arrmeta), const ndt::type *src_tp,
+                  const char *const *src_arrmeta, kernel_request_t kernreq,
                   const eval::eval_context *DYND_UNUSED(ectx),
                   const nd::array &DYND_UNUSED(args), const nd::array &kwds_)
   {
-    for (intptr_t i = 0; i < af_tp->get_npos(); ++i) {
-      if (src_tp[i] != af_tp->get_arg_type(i)) {
-        std::stringstream ss;
-        ss << "Provided types "
-           << ndt::make_funcproto(args_of<funcproto_for<func_type>>::type::size,
-                                  src_tp, dst_tp)
-           << " do not match the arrfunc proto " << af_tp;
-        throw type_error(ss.str());
-      }
-    }
-    if (dst_tp != af_tp->get_return_type()) {
-      std::stringstream ss;
-      ss << "Provided types "
-         << ndt::make_funcproto(args_of<funcproto_for<func_type>>::type::size,
-                                src_tp, dst_tp)
-         << " do not match the arrfunc proto " << af_tp;
-      throw type_error(ss.str());
-    }
-
     self_type::create(ckb, kernreq, ckb_offset,
                       kernels::args_for<func_type>(src_tp, src_arrmeta, kwds_),
                       kernels::kwds<type_sequence<K...>>(kwds_));
@@ -478,48 +433,27 @@ namespace kernels {
   intptr_t construct_then_apply_callable_ck<
       kernel_request_cuda_device, func_type,
       K...>::instantiate(const arrfunc_type_data *DYND_UNUSED(af_self),
-                         const arrfunc_type *af_tp, void *ckb,
-                         intptr_t ckb_offset, const ndt::type &dst_tp,
+                         const arrfunc_type *DYND_UNUSED(af_tp), void *ckb,
+                         intptr_t ckb_offset,
+                         const ndt::type &DYND_UNUSED(dst_tp),
                          const char *DYND_UNUSED(dst_arrmeta),
                          const ndt::type *src_tp,
-                         const char *const *DYND_CONDITIONAL_UNUSED(
-                             src_arrmeta),
+                         const char *const *src_arrmeta,
                          kernel_request_t kernreq,
                          const eval::eval_context *DYND_UNUSED(ectx),
                          const nd::array &DYND_UNUSED(args),
                          const nd::array &kwds_)
   {
-    for (intptr_t i = 0; i < af_tp->get_npos(); ++i) {
-      if (src_tp[i] != af_tp->get_arg_type(i)) {
-        std::stringstream ss;
-        ss << "Provided types "
-           << ndt::make_funcproto(args_of<funcproto_for<func_type>>::type::size,
-                                  src_tp, dst_tp)
-           << " do not match the arrfunc proto " << af_tp;
-        throw type_error(ss.str());
-      }
-    }
-    if (dst_tp != af_tp->get_return_type()) {
-      std::stringstream ss;
-      ss << "Provided types "
-         << ndt::make_funcproto(args_of<funcproto_for<func_type>>::type::size,
-                                src_tp, dst_tp)
-         << " do not match the arrfunc proto " << af_tp;
-      throw type_error(ss.str());
+    if ((kernreq & kernel_request_cuda_device) == false) {
+      typedef cuda_parallel_ck<arity<func_type>::value> self_type;
+      self_type *self = self_type::create(ckb, kernreq, ckb_offset, 1, 1);
+      ckb = self->get_ckb();
+      ckb_offset = 0;
     }
 
-    if ((kernreq & kernel_request_cuda_device) == false) {
-      cuda_parallel_ck<args_of<funcproto_for<func_type>>::type::size> *self =
-          cuda_parallel_ck<
-              args_of<funcproto_for<func_type>>::type::size>::create(ckb,
-                                                                     kernreq,
-                                                                     ckb_offset,
-                                                                     1, 1);
-      ckb_offset = 0;
-      self_type::create(self->get_ckb(), kernreq, ckb_offset,
-                        args_for<func_type>(src_tp, src_arrmeta, kwds_),
-                        kwds<type_sequence<K...>>(kwds_));
-    }
+    self_type::create(ckb, kernreq, ckb_offset,
+                      args_for<func_type>(src_tp, src_arrmeta, kwds_),
+                      kwds<type_sequence<K...>>(kwds_));
     return ckb_offset;
   }
 
