@@ -304,7 +304,7 @@ TEST(ArrayViews, NDimPermute_BadPerms) {
   EXPECT_THROW(a.permute(ndim1 + 1, axes5), invalid_argument);
 }
 
-#ifdef DYND_INIT_LIST
+#ifndef DYND_NESTED_INIT_LIST_BUG
 TEST(ArrayViews, Reshape) {
     EXPECT_ARR_EQ(nd::array({{0, 1}, {2, 3}}),
         nd::reshape(nd::range(4), {2, 2}));
@@ -336,4 +336,4 @@ TEST(ArrayViews, Reshape) {
     EXPECT_ARR_EQ(nd::range(24),
         nd::reshape({{{0, 1}, {2, 3}, {4, 5}}, {{6, 7}, {8, 9}, {10, 11}}, {{12, 13}, {14, 15}, {16, 17}}, {{18, 19}, {20, 21}, {22, 23}}}, {24}));
 }
-#endif
+#endif // DYND_NESTED_INIT_LIST_BUG

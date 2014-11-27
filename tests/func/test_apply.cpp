@@ -102,11 +102,12 @@ TEST(Apply, Function)
 #endif
 
   af = nd::make_apply_arrfunc<decltype(&func2), &func2>();
-  EXPECT_FLOAT_EQ(13.2, af(nd::array({3.9f, -7.0f, 16.3f})
-                               .view(ndt::make_type<float[3]>())).as<float>());
+  float x = af(nd::array({3.9f, -7.0f, 16.3f}).view(ndt::make_type<float[3]>()))
+                .as<float>();
+  EXPECT_FLOAT_EQ(13.2f, x);
   af = nd::make_apply_arrfunc(&func2);
-  EXPECT_FLOAT_EQ(13.2, af(nd::array({3.9f, -7.0f, 16.3f})
-                               .view(ndt::make_type<float[3]>())).as<float>());
+  EXPECT_FLOAT_EQ(13.2f, af(nd::array({3.9f, -7.0f, 16.3f})
+                                .view(ndt::make_type<float[3]>())).as<float>());
 
   af = nd::make_apply_arrfunc<decltype(&func3), &func3>();
   EXPECT_EQ(12U, af().as<unsigned int>());
@@ -215,11 +216,37 @@ TEST(Apply, FunctionWithKeywords)
 template <kernel_request_t kernreq, typename func_type, func_type func>
 struct func_wrapper;
 
+#if !(defined(_MSC_VER) && _MSC_VER == 1800)
 #define FUNC_WRAPPER(KERNREQ, ...)                                             \
   template <typename R, typename... A, R (*func)(A...)>                        \
   struct func_wrapper<KERNREQ, R (*)(A...), func> {                            \
     __VA_ARGS__ R operator()(A... a) const { return (*func)(a...); }           \
   }
+#else
+// Workaround for MSVC 2013 variadic template bug
+// https://connect.microsoft.com/VisualStudio/Feedback/Details/1034062
+#define FUNC_WRAPPER(KERNREQ, ...)                                             \
+  template <typename R, R (*func)()>                                           \
+  struct func_wrapper<KERNREQ, R (*)(), func> {                                \
+    __VA_ARGS__ R operator()() const { return (*func)(); }                     \
+  };                                                                           \
+  template <typename R, typename A0, R (*func)(A0)>                            \
+  struct func_wrapper<KERNREQ, R (*)(A0), func> {                              \
+    __VA_ARGS__ R operator()(A0 a0) const { return (*func)(a0); }              \
+  };                                                                           \
+  template <typename R, typename A0, typename A1, R (*func)(A0, A1)>           \
+  struct func_wrapper<KERNREQ, R (*)(A0, A1), func> {                          \
+    __VA_ARGS__ R operator()(A0 a0, A1 a1) const { return (*func)(a0, a1); }   \
+  };                                                                           \
+  template <typename R, typename A0, typename A1, typename A2,                 \
+            R (*func)(A0, A1, A2)>                                             \
+  struct func_wrapper<KERNREQ, R (*)(A0, A1, A2), func> {                      \
+    __VA_ARGS__ R operator()(A0 a0, A1 a1, A2 a2) const                        \
+    {                                                                          \
+      return (*func)(a0, a1, a2);                                              \
+    }                                                                          \
+  }
+#endif
 
 FUNC_WRAPPER(kernel_request_host);
 
@@ -373,11 +400,11 @@ TYPED_TEST_P(Apply, CallableWithKeywords)
   typedef func_wrapper<kernel_request_host, decltype(&func0), &func0>
       func0_as_callable;
 
-    af = nd::make_apply_arrfunc(func0_as_callable(), "y");
-    EXPECT_EQ(4, af(5, kwds("y", 3)).as<int>());
+  af = nd::make_apply_arrfunc(func0_as_callable(), "y");
+  EXPECT_EQ(4, af(5, kwds("y", 3)).as<int>());
 
-    af = nd::make_apply_arrfunc(func0_as_callable(), "x", "y");
-    EXPECT_EQ(4, af(5, kwds("x", 5, "y", 3)).as<int>());
+  af = nd::make_apply_arrfunc(func0_as_callable(), "x", "y");
+  EXPECT_EQ(4, af(5, kwds("x", 5, "y", 3)).as<int>());
 
 #ifdef __CUDACC__
 
@@ -394,49 +421,49 @@ TYPED_TEST_P(Apply, CallableWithKeywords)
 
 #endif
 
-    // TODO: Enable tests with reference types as keywords
+  // TODO: Enable tests with reference types as keywords
 
-    typedef func_wrapper<kernel_request_host, decltype(&func6), &func6>
-  func6_as_callable;
+  typedef func_wrapper<kernel_request_host, decltype(&func6), &func6>
+      func6_as_callable;
 
-    af = nd::make_apply_arrfunc(func6_as_callable(), "z");
-    EXPECT_EQ(8, af(3, 5, kwds("z", 7)).as<int>());
+  af = nd::make_apply_arrfunc(func6_as_callable(), "z");
+  EXPECT_EQ(8, af(3, 5, kwds("z", 7)).as<int>());
 
-    af = nd::make_apply_arrfunc(func6_as_callable(), "y", "z");
-    EXPECT_EQ(8, af(3, kwds("y", 5, "z", 7)).as<int>());
+  af = nd::make_apply_arrfunc(func6_as_callable(), "y", "z");
+  EXPECT_EQ(8, af(3, kwds("y", 5, "z", 7)).as<int>());
 
-    af = nd::make_apply_arrfunc(func6_as_callable(), "x", "y", "z");
-    EXPECT_EQ(8, af(kwds("x", 3, "y", 5, "z", 7)).as<int>());
+  af = nd::make_apply_arrfunc(func6_as_callable(), "x", "y", "z");
+  EXPECT_EQ(8, af(kwds("x", 3, "y", 5, "z", 7)).as<int>());
 
-    typedef func_wrapper<kernel_request_host, decltype(&func7), &func7>
-  func7_as_callable;
+  typedef func_wrapper<kernel_request_host, decltype(&func7), &func7>
+      func7_as_callable;
 
-    af = nd::make_apply_arrfunc(func7_as_callable(), "z");
-    EXPECT_EQ(36.3, af(38, 5, kwds("z", 12.1)).as<double>());
+  af = nd::make_apply_arrfunc(func7_as_callable(), "z");
+  EXPECT_EQ(36.3, af(38, 5, kwds("z", 12.1)).as<double>());
 
-    af = nd::make_apply_arrfunc(func7_as_callable(), "y", "z");
-    EXPECT_EQ(36.3, af(38, kwds("y", 5, "z", 12.1)).as<double>());
+  af = nd::make_apply_arrfunc(func7_as_callable(), "y", "z");
+  EXPECT_EQ(36.3, af(38, kwds("y", 5, "z", 12.1)).as<double>());
 
-    af = nd::make_apply_arrfunc(func7_as_callable(), "x", "y", "z");
-    EXPECT_EQ(36.3, af(kwds("x", 38, "y", 5, "z", 12.1)).as<double>());
+  af = nd::make_apply_arrfunc(func7_as_callable(), "x", "y", "z");
+  EXPECT_EQ(36.3, af(kwds("x", 38, "y", 5, "z", 12.1)).as<double>());
 
-    af = nd::make_apply_arrfunc(callable0(), "y");
-    EXPECT_EQ(11, af(5, kwds("y", 3)).as<int>());
+  af = nd::make_apply_arrfunc(callable0(), "y");
+  EXPECT_EQ(11, af(5, kwds("y", 3)).as<int>());
 
-    af = nd::make_apply_arrfunc(callable0(), "x", "y");
-    EXPECT_EQ(11, af(kwds("x", 5, "y", 3)).as<int>());
+  af = nd::make_apply_arrfunc(callable0(), "x", "y");
+  EXPECT_EQ(11, af(kwds("x", 5, "y", 3)).as<int>());
 
-    af = nd::make_apply_arrfunc(callable0(4), "y");
-    EXPECT_EQ(8, af(5, kwds("y", 3)).as<int>());
+  af = nd::make_apply_arrfunc(callable0(4), "y");
+  EXPECT_EQ(8, af(5, kwds("y", 3)).as<int>());
 
-    af = nd::make_apply_arrfunc(callable0(4), "x", "y");
-    EXPECT_EQ(8, af(kwds("x", 5, "y", 3)).as<int>());
+  af = nd::make_apply_arrfunc(callable0(4), "x", "y");
+  EXPECT_EQ(8, af(kwds("x", 5, "y", 3)).as<int>());
 
-    af = nd::make_apply_arrfunc<callable0, int>("z");
-    EXPECT_EQ(8, af(5, 3, kwds("z", 4)).as<int>());
+  af = nd::make_apply_arrfunc<callable0, int>("z");
+  EXPECT_EQ(8, af(5, 3, kwds("z", 4)).as<int>());
 
-    af = nd::make_apply_arrfunc<callable1, int, int>("x", "y");
-    EXPECT_EQ(28, af(2, kwds("x", 1, "y", 7)).as<int>());
+  af = nd::make_apply_arrfunc<callable1, int, int>("x", "y");
+  EXPECT_EQ(28, af(2, kwds("x", 1, "y", 7)).as<int>());
 }
 
 typedef integral_constant<kernel_request_t, kernel_request_host>

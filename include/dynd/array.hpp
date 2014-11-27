@@ -144,7 +144,6 @@ public:
     template<class T>
     array(const T *rhs, intptr_t dim_size);
 
-#ifdef DYND_INIT_LIST
     /** Constructs an array from a 1D initializer list */
     template<class T>
     array(std::initializer_list<T> il);
@@ -173,7 +172,6 @@ public:
         array(il).swap(*this);
         return *this;
     }
-#endif // DYND_INIT_LIST
 
     /**
      * Constructs an array from a std::vector.
@@ -1321,7 +1319,6 @@ inline array reshape(const array &a, intptr_t ndim, const intptr_t *shape)
 }
 
 ///////////// Initializer list constructor implementation /////////////////////////
-#ifdef DYND_INIT_LIST
 namespace detail {
     // Computes the number of dimensions in a nested initializer list constructor
     template<class T>
@@ -1436,7 +1433,6 @@ dynd::nd::array::array(std::initializer_list<std::initializer_list<std::initiali
     T *dataptr = reinterpret_cast<T *>(get_ndo()->m_data_pointer);
     detail::initializer_list_shape<S>::copy_data(&dataptr, il);
 }
-#endif // DYND_INIT_LIST
 
 ///////////// C-style array constructor implementation /////////////////////////
 
