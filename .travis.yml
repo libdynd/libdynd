@@ -6,7 +6,7 @@ compiler:
 
 env:
   - VALGRIND=ON DYND_CUDA=OFF DYND_FFTW=OFF
-  - DYND_CUDA=ON DYND_FFTW=OFF DYND_BUILD_TESTS=OFF
+  - DYND_CUDA=ON DYND_FFTW=OFF
   - DYND_CUDA=OFF DYND_FFTW=ON
   - ASAN=ON DYND_CUDA=OFF DYND_FFTW=ON
   - PYTHON=ON DYND_CUDA=OFF DYND_FFTW=ON DYND_BUILD_TESTS=OFF
@@ -21,7 +21,7 @@ matrix:
     - compiler: gcc
       env: PYTHON=ON DYND_CUDA=OFF DYND_FFTW=ON DYND_BUILD_TESTS=OFF
     - compiler: clang
-      env: DYND_CUDA=ON DYND_FFTW=OFF DYND_BUILD_TESTS=OFF
+      env: DYND_CUDA=ON DYND_FFTW=OFF
 
 before_script:
   # For newer cmake
@@ -46,7 +46,8 @@ before_script:
 
 script:
   - make
-  - if [ "$DYND_BUILD_TESTS" == "ON" ]; then ./tests/test_libdynd; fi
+  - if [ "$DYND_CUDA" == "ON" ]; then exit; fi
+  - if [ "$DYND_BUILD_TESTS" == "ON"]; then ./tests/test_libdynd; fi
   - if [ "$VALGRIND" == "ON" ]; then valgrind --tool=memcheck --leak-check=yes --show-reachable=yes --error-exitcode=123 ./tests/test_libdynd; fi
   - if [ "$PYTHON" == "ON" ]; then sudo make install; sudo ldconfig; fi
   - if [ "$PYTHON" == "ON" ]; then git clone https://github.com/ContinuumIO/dynd-python.git; fi
