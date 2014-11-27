@@ -493,53 +493,6 @@ int main(int argc, char **argv) {
 
     fout << endl;
 
-    fout << "#define DYND_PP_JOIN_OUTER DYND_PP_JOIN_OUTER_0" << endl;
-    for (int dep = 0; dep < pp_dep_max; dep++) {
-        fout << "#define DYND_PP_JOIN_OUTER_" << dep << "(...)";
-        fout << " ";
-        fout << "DYND_PP_ID(DYND_PP__JOIN_OUTER_" << dep << "(__VA_ARGS__))" << endl;
-        fout << "#define DYND_PP__JOIN_OUTER_" << dep << "(...)";
-        fout << " ";
-        fout << "DYND_PP_ID(DYND_PP_PASTE(DYND_PP__JOIN_OUTER_" << dep << "_, ";
-        fout << "DYND_PP_DEC(DYND_PP_DEC(DYND_PP_LEN((__VA_ARGS__)))))(__VA_ARGS__))" << endl;
-        for (int ary = 2; ary <= pp_ary_max; ary++) {
-            fout << "#define DYND_PP__JOIN_OUTER_" << dep << "_" << ary << "(MAC, SEP, " << args("A", ary) << ")";
-            fout << " DYND_PP_CAT((DYND_PP__JOIN_OUTER_" << dep << "_" << ary << "_, " << args("A", pp_dec_len, ", _, ", ary) << "))(MAC, SEP, " << args("A", ary) << ")" << endl;
-            fout << "#define DYND_PP__JOIN_OUTER_" << dep << "_" << ary << "_" << repeat("0", "_", ary);
-            fout << "(MAC, SEP, " << args("A", ary) << ") MAC(" << args("A", pp_first, ary) << ")" << endl;
-            int *curr = new int[ary];
-            fill(curr, curr + ary, 0);
-            for (int cnt = (int) pow((double) pp_len_max, ary) - 1; cnt > 0; cnt--) {
-                int *prev = new int[ary];
-                for (int i = 0; i < ary; i++) {
-                    prev[i] = curr[i];
-                }
-//                copy(curr, curr + ary, prev);
-                int idx = next(curr, pp_len_max, ary);
-                fout << "#define DYND_PP__JOIN_OUTER_" << dep << "_" << ary << "_" << args("", "_", curr, curr + ary);
-                fout << "(MAC, SEP, " << args("A", ary) << ") MAC(" << args("A", &pp_first, ary) << ")";
-                fout << " DYND_PP_ID SEP ";
-                if (idx > 0) {
-                    fout << "DYND_PP_CAT((";
-                }
-                fout << "DYND_PP__JOIN_OUTER_" << dep << "_" << ary << "_" << join("_", prev, prev + ary - idx);
-                if (idx > 0) {
-                    fout << ", _, ";
-                }
-                fout << args("A", &pp_dec_len, ", _, ", ary - idx, ary);
-                if (idx > 0) {
-                    fout << "))";
-                }
-                fout << "(MAC, SEP" << args(", A", "", ary - idx - 1);
-                fout << ", " << args("A", &pp_shuffle, ", ", ary - idx - 1, ary) << ")" << endl;
-                delete[] prev;
-            }
-            delete[] curr;
-        }
-    }
-
-    fout << endl;
-
     fout << "#define DYND_PP_JOIN DYND_PP_JOIN_0" << endl;
     for (int depth = 0; depth <= pp_dep_max; depth++) {
         fout << "#define DYND_PP_JOIN_" << depth << "(SEP, A) ";
