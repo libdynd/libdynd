@@ -536,12 +536,6 @@ namespace kernels {
   template <class CKT, kernel_request_t kernreq>
   struct general_ck;
 
-#ifdef __CUDA_ARCH__
-#define DYND_THROW(EXCEPTION, MESSAGE)
-#else
-#define DYND_THROW(EXCEPTION, MESSAGE) throw EXCEPTION(MESSAGE)
-#endif
-
 #define GENERAL_CK(KERNREQ, ...)                                               \
   template <typename CKT>                                                      \
   struct general_ck<CKT, KERNREQ> {                                            \
@@ -625,8 +619,12 @@ namespace kernels {
     __VA_ARGS__ static void destruct(ckernel_prefix *rawself)                  \
     {                                                                          \
       self_type *self = get_self(rawself);                                     \
+      self->destruct_children();                                               \
       self->~self_type();                                                      \
     }                                                                          \
+                                                                               \
+    /** Default implementation of destruct_children does nothing. */           \
+    __VA_ARGS__ void destruct_children() {}                                    \
                                                                                \
     ckernel_prefix *get_child_ckernel()                                        \
     {                                                                          \
