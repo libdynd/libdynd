@@ -308,6 +308,8 @@ TYPED_TEST_P(Apply, Callable)
     EXPECT_EQ(4, af(5, 3).as<int>());
   }
 
+#ifdef __CUDACC__
+
   if (TestFixture::KernelRequest == kernel_request_cuda_device) {
     typedef func_wrapper<kernel_request_cuda_device, decltype(&func1), &func1>
         func1_as_callable;
@@ -316,6 +318,8 @@ TYPED_TEST_P(Apply, Callable)
     EXPECT_EQ(53.15, af(TestFixture::To(3.75), TestFixture::To(19))
                          .template as<double>());
   }
+
+#endif
   /*
     af = nd::make_apply_arrfunc(func1_as_callable());
     EXPECT_EQ(53.15, af(3.75, 19).as<double>());
