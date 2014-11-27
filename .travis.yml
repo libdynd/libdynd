@@ -9,6 +9,7 @@ env:
   - DYND_FFTW=ON
   - ASAN=ON DYND_FFTW=ON
   - PYTHON=ON DYND_FFTW=ON DYND_BUILD_TESTS=OFF
+  - DYND_CUDA=ON DYND_FFTW=OFF
 #  - MSAN=ON DYND_FFTW=ON
 
 matrix:
@@ -19,6 +20,8 @@ matrix:
       env: MSAN=ON DYND_FFTW=ON
     - compiler: gcc
       env: PYTHON=ON DYND_FFTW=ON DYND_BUILD_TESTS=OFF
+    - compiler: clang
+      env: DYND_CUDA=ON DYND_FFTW=OFF
 
 before_script:
   # For newer cmake
