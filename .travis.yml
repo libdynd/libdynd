@@ -15,11 +15,11 @@ env:
 matrix:
   exclude:
     - compiler: gcc
-      env: ASAN=ON DYND_FFTW=ON
+      env: ASAN=ON DYND_CUDA=OFF DYND_FFTW=ON
     - compiler: gcc
-      env: MSAN=ON DYND_FFTW=ON
+      env: MSAN=ON DYND_CUDA=OFF DYND_FFTW=ON
     - compiler: gcc
-      env: PYTHON=ON DYND_FFTW=ON DYND_BUILD_TESTS=OFF
+      env: PYTHON=ON DYND_CUDA=OFF DYND_FFTW=ON DYND_BUILD_TESTS=OFF
     - compiler: clang
       env: DYND_CUDA=ON DYND_FFTW=OFF
 
