@@ -35,7 +35,7 @@ namespace nd {
    * indirectly, so is less efficient than the make_apply_arrfunc which accepts
    * the function pointer as a template argument.
    */
-  template <typename R, typename... A, typename... T>
+  template <kernel_request_t kernreq, typename R, typename... A, typename... T>
   arrfunc make_apply_arrfunc(R (*func)(A...), T &&... names)
   {
     typedef kernels::apply_callable_ck<kernel_request_host, R (*)(A...),
@@ -43,6 +43,12 @@ namespace nd {
 
     return make_arrfunc(ndt::make_funcproto<R(A...)>(names...),
                         &ck_type::instantiate, std::forward<R (*)(A...)>(func));
+  }
+
+  template <typename R, typename... A, typename... T>
+  arrfunc make_apply_arrfunc(R (*func)(A...), T &&... names)
+  {
+    return make_apply_arrfunc<kernel_request_host>(func, std::forward<T>(names)...);
   }
 
   /**
