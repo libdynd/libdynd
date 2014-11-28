@@ -15,7 +15,7 @@
    version="1.1"
    inkscape:version="0.91pre2 r13516"
    viewBox="0 0 400 280"
-   sodipodi:docname="dynd_array_of_float_stride_in_type.svg">
+   sodipodi:docname="dynd_array_of_float_type_contains_stride.svg">
   <defs
      id="defs4">
     <marker
@@ -164,7 +164,7 @@
      inkscape:pageopacity="0.0"
      inkscape:pageshadow="2"
      inkscape:zoom="1.4142136"
-     inkscape:cx="190.36371"
+     inkscape:cx="80.055055"
      inkscape:cy="95.554202"
      inkscape:document-units="px"
      inkscape:current-layer="layer1"
@@ -188,7 +188,7 @@
         <dc:format>image/svg+xml</dc:format>
         <dc:type
            rdf:resource="http://purl.org/dc/dcmitype/StillImage" />
-        <dc:title></dc:title>
+        <dc:title />
       </cc:Work>
     </rdf:RDF>
   </metadata>
@@ -272,7 +272,7 @@
          y="927.659">DataPtr</tspan></text>
     <path
        style="fill:none;fill-rule:evenodd;stroke:#000000;stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1;marker-end:url(#marker5809)"
-       d="m 120,922.31373 c 20,0 50,1.51829 50,1.51829"
+       d="m 120,922.31373 c 20,0 34.44365,0.81118 50,1.51829"
        id="path6143"
        inkscape:connector-curvature="0"
        sodipodi:nodetypes="cc" />
@@ -528,8 +528,9 @@
        sodipodi:nodetypes="csc" />
     <path
        style="fill:none;fill-rule:evenodd;stroke:#000000;stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1;marker-end:url(#marker9213)"
-       d="m 120,882.31373 c 70,-30 140,-50 140,-50"
+       d="m 120,882.31373 c 57.27208,-24.34315 95.45227,-38.68629 140,-50"
        id="path9205"
-       inkscape:connector-curvature="0" />
+       inkscape:connector-curvature="0"
+       sodipodi:nodetypes="cc" />
   </g>
 </svg>

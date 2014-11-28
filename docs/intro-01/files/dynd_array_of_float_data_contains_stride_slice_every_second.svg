@@ -178,8 +178,8 @@
      inkscape:pageopacity="0.0"
      inkscape:pageshadow="2"
      inkscape:zoom="1"
-     inkscape:cx="230.79412"
-     inkscape:cy="142.10914"
+     inkscape:cx="89.091661"
+     inkscape:cy="147.58948"
      inkscape:document-units="px"
      inkscape:current-layer="layer1"
      showgrid="true"
@@ -202,7 +202,7 @@
         <dc:format>image/svg+xml</dc:format>
         <dc:type
            rdf:resource="http://purl.org/dc/dcmitype/StillImage" />
-        <dc:title></dc:title>
+        <dc:title />
       </cc:Work>
     </rdf:RDF>
   </metadata>
@@ -286,7 +286,7 @@
          y="927.659">DataPtr</tspan></text>
     <path
        style="fill:none;fill-rule:evenodd;stroke:#000000;stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1;marker-end:url(#marker5809)"
-       d="m 120,922.31373 c 20,0 50,1.51829 50,1.51829"
+       d="m 120,922.31373 c 20,0 34,0.51829 50,1.51829"
        id="path6143"
        inkscape:connector-curvature="0"
        sodipodi:nodetypes="cc" />
@@ -542,9 +542,10 @@
        sodipodi:nodetypes="csc" />
     <path
        style="fill:none;fill-rule:evenodd;stroke:#000000;stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1;marker-end:url(#marker9213)"
-       d="m 120,882.31373 c 70,-30 140,-50 140,-50"
+       d="m 120,882.31373 c 44,-18 93,-36 140,-50"
        id="path9205"
-       inkscape:connector-curvature="0" />
+       inkscape:connector-curvature="0"
+       sodipodi:nodetypes="cc" />
     <rect
        y="913.81195"
        x="171.10982"
@@ -599,7 +600,7 @@
          id="tspan4973">8 and 16</tspan></text>
     <path
        style="fill:none;fill-rule:evenodd;stroke:#000000;stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1;marker-end:url(#Arrow1Mend)"
-       d="m 227.375,887.9872 c 10,10 -0.75,25.75 -2.25,28"
+       d="m 227.375,887.9872 c 10,10 1.25,23.25 -2.25,28"
        id="path4979"
        inkscape:connector-curvature="0"
        sodipodi:nodetypes="cc" />
