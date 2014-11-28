@@ -132,7 +132,7 @@
      inkscape:pageopacity="0.0"
      inkscape:pageshadow="2"
      inkscape:zoom="1"
-     inkscape:cx="145.69082"
+     inkscape:cx="-10.30918"
      inkscape:cy="203.96857"
      inkscape:document-units="px"
      inkscape:current-layer="layer1"
@@ -156,7 +156,7 @@
         <dc:format>image/svg+xml</dc:format>
         <dc:type
            rdf:resource="http://purl.org/dc/dcmitype/StillImage" />
-        <dc:title></dc:title>
+        <dc:title />
       </cc:Work>
     </rdf:RDF>
   </metadata>
@@ -176,7 +176,7 @@
            height="30"
            x="280"
            y="42.362183" /></flowRegion><flowPara
-         id="flowPara4496"></flowPara></flowRoot>    <rect
+         id="flowPara4496" /></flowRoot>    <rect
        y="692.47906"
        x="20.139977"
        height="80"
@@ -541,7 +541,7 @@
     </g>
     <path
        style="fill:none;fill-rule:evenodd;stroke:#000000;stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1;marker-end:url(#marker5809)"
-       d="m 120,792.3622 c 20,-40 78.99138,-60 78.99138,-60"
+       d="m 120,792.3622 c 20,-40 43.99138,-51 78.99138,-60"
        id="path6143"
        inkscape:connector-curvature="0"
        sodipodi:nodetypes="cc" />
