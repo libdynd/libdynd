@@ -26,7 +26,7 @@ cuda_device_type::~cuda_device_type()
 {
 }
 
-void cuda_device_type::print_type(std::ostream& o) const
+void cuda_device_type::print_type(ostream &o) const
 {
     o << "cuda_device[" << m_storage_tp << "]";
 }

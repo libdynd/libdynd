@@ -467,11 +467,19 @@ ndt::type ndt::make_type(intptr_t ndim, const intptr_t *shape, const ndt::type& 
 
 ndt::type ndt::make_packed_type(const nd::array &val)
 {
+/*
   if ((val.get_access_flags() & nd::write_access_flag) == 0) {
     throw std::runtime_error("TODO: how to handle readonly/immutable arrays "
                              "in struct/tuple packing");
   }
-  return make_pointer(val.get_type());
+*/
+
+  ndt::type tp = val.get_type();
+  if (tp.is_builtin()) {
+    return tp;
+  }
+
+  return make_pointer(tp);
 }
 
 template<class T, class Tas>
