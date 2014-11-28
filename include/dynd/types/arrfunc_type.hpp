@@ -184,8 +184,8 @@ struct funcproto_factory<kernel_request_cuda_device, R (A...)> {
   {
     const char *raw_names[] = {names...};
 
-    ndt::type arg_tp[sizeof...(A)] = {make_type<typename std::remove_cv<typename std::remove_reference<A>::type>::type>()...};
-    return make_funcproto(arg_tp, make_type<R>(), raw_names);
+    ndt::type arg_tp[sizeof...(A)] = {make_cuda_device(make_type<typename std::remove_cv<typename std::remove_reference<A>::type>::type>())...};
+    return make_funcproto(arg_tp, make_cuda_device(make_type<R>()), raw_names);
   }
 };
 

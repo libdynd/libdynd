@@ -1748,17 +1748,17 @@ std::ostream& nd::operator<<(std::ostream& o, const array& rhs)
     if (!rhs.is_null()) {
         o << "array(";
         array v = rhs.eval();
+        if (!v.get_ndo()->is_builtin_type() && v.get_ndo()->m_type->get_flags() & type_flag_not_host_readable) {
+          v = v.to_host();
+        }
         if (v.get_ndo()->is_builtin_type()) {
           print_builtin_scalar(v.get_ndo()->get_builtin_type_id(), o,
                                v.get_ndo()->m_data_pointer);
         } else {
-            if (v.get_ndo()->m_type->get_flags() & type_flag_not_host_readable) {
-                v = v.to_host();
-            }
-            stringstream ss;
-            v.get_ndo()->m_type->print_data(ss, v.get_arrmeta(),
-                                            v.get_ndo()->m_data_pointer);
-            print_indented(o, "      ", ss.str(), true);
+          stringstream ss;
+          v.get_ndo()->m_type->print_data(ss, v.get_arrmeta(),
+                                          v.get_ndo()->m_data_pointer);
+          print_indented(o, "      ", ss.str(), true);
         }
         o << ",\n      type=\"" << rhs.get_type() << "\")";
     } else {
@@ -2272,22 +2272,26 @@ nd::array nd::combine_into_tuple(size_t field_count, const array *field_values)
     return result;
 }
 
-void nd::detail::as_packed_array(const nd::array &val,
-                                 const ndt::type &DYND_UNUSED(tp),
+void nd::detail::as_packed_array(const nd::array &val, const ndt::type &tp,
                                  char *out_arrmeta, char *out_data)
 {
-  pointer_type_arrmeta *am =
-      reinterpret_cast<pointer_type_arrmeta *>(out_arrmeta);
-  // Insert the reference in the destination pointer's arrmeta
-  am->blockref = val.get_data_memblock().get();
-  memory_block_incref(am->blockref);
-  // Copy the rest of the arrmeta after the pointer's arrmeta
-  const ndt::type &val_tp = val.get_type();
-  if (val_tp.get_arrmeta_size() > 0) {
-    val_tp.extended()->arrmeta_copy_construct(
-        out_arrmeta + sizeof(pointer_type_arrmeta), val.get_arrmeta(),
-        val.get_memblock().get());
+  if (tp.is_builtin()) {
+    memcpy(out_data, val.get_readonly_originptr(), tp.get_data_size());
+  } else {
+    pointer_type_arrmeta *am =
+        reinterpret_cast<pointer_type_arrmeta *>(out_arrmeta);
+    // Insert the reference in the destination pointer's arrmeta
+    am->blockref = val.get_data_memblock().get();
+    memory_block_incref(am->blockref);
+    // Copy the rest of the arrmeta after the pointer's arrmeta
+    const ndt::type &val_tp = val.get_type();
+    if (val_tp.get_arrmeta_size() > 0) {
+      val_tp.extended()->arrmeta_copy_construct(
+          out_arrmeta + sizeof(pointer_type_arrmeta), val.get_arrmeta(),
+          val.get_memblock().get());
+    }
+    // Copy the pointer
+    *reinterpret_cast<char **>(out_data) =
+        const_cast<char *>(val.get_readonly_originptr());
   }
-  // Copy the pointer
-  *reinterpret_cast<char **>(out_data) = val.get_readwrite_originptr();
 }
