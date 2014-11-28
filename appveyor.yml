@@ -1,0 +1,32 @@
+# TODO: How to automatically use the version string
+#       produced by the build?
+version: 0.6.6.{build}
+
+# branches to build
+branches:
+  only:
+    - master
+
+# Do not build on tags (GitHub only)
+skip_tags: true
+
+# Operating system (build VM template)
+os: Windows Server 2012
+
+matrix:
+  fast_finish: true     # immediately finish build once one of the jobs fails.
+
+platform: x64
+
+configuration: Release
+
+
+build_script:
+  - mkdir build
+  - cd build
+  - cmake .. -G "Visual Studio 12 Win64"
+  - cmake --build . --config Release
+
+test_script:
+  - .\tests\Release\test_libdynd.exe  --gtest_output=xml:../test_results.xml
+
