@@ -109,7 +109,13 @@ inline bool DYND_ISNAN(long double x) {
 // important, and it reorders instructions
 // so as to make them useless. On MSVC, there
 // is #pragma fenv_access(on), which works.
-# define DYND_USE_FPSTATUS
+//
+// Update 2014-11-29: Found on 32-bit Windows, MSVC 2013 does not respect
+//                    pragma fenv_access(on), and reorders incorrectly, so
+//                    disabling this on 32-bit.
+# ifdef _WIN64
+#  define DYND_USE_FPSTATUS
+# endif
 
 # define DYND_CXX_TYPE_TRAITS
 # define DYND_USE_TR1_ENABLE_IF

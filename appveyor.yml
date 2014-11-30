@@ -16,15 +16,17 @@ os: Windows Server 2012
 matrix:
   fast_finish: true     # immediately finish build once one of the jobs fails.
 
-platform: x64
+platform:
+  - Win32
+  - x64
 
 configuration: Release
-
 
 build_script:
   - mkdir build
   - cd build
-  - cmake .. -G "Visual Studio 12 Win64"
+  - if "%platform%"=="Win32" cmake .. -G "Visual Studio 12"
+  - if "%platform%"=="x64" cmake .. -G "Visual Studio 12 Win64"
   - cmake --build . --config Release
 
 test_script:
