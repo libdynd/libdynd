@@ -1,6 +1,8 @@
 The DyND Library
 ================
 
+TravisCI: [![Build Status](https://api.travis-ci.org/ContinuumIO/libdynd.svg?branch=master)](https://travis-ci.org/ContinuumIO/libdynd) AppVeyor: [![Build Status](https://ci.appveyor.com/api/projects/status/fbds4gsjnoxw5m96/branch/master?svg=true)](https://ci.appveyor.com/project/mwiebe/libdynd)
+
 LibDyND, a component of [the Blaze project](http://blaze.pydata.org/),
 is a C++ library for dynamic, multidimensional arrays. It is inspired
 by NumPy, the Python array programming library at the core of the
