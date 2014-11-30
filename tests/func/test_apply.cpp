@@ -13,6 +13,8 @@
 
 #include <dynd/array.hpp>
 #include <dynd/func/apply_arrfunc.hpp>
+#include <dynd/func/call_callable.hpp>
+#include <dynd/types/cfixed_dim_type.hpp>
 
 #ifdef __CUDACC__
 #define CUDA_DEVICE_IF_CUDA_ELSE_HOST __device__
