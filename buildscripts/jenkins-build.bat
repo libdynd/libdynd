@@ -36,7 +36,7 @@ if "%COMPILER_VERSION%" == "MSVC2013" set CMAKE_BUILD_TARGET=Visual Studio 12
 if "%CMAKE_BUILD_TARGET%" == "" exit /b 1
 
 REM Create variables for the various pieces
-if NOT "%COMPILER_3264%" == "64" goto :amd64
+if NOT "%COMPILER_3264%" == "64" goto :notamd64
  set CMAKE_BUILD_TARGET=%CMAKE_BUILD_TARGET% Win64
 :notamd64
 
