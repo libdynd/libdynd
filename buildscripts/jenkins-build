@@ -16,6 +16,13 @@
 #     directory as buildscripts/jenkins-build
 #   - Use a user-defined axis to select compiler versions with COMPILER_VERSION
 #
+#   - This script is currently hacked for centos5,
+#     with http://people.centos.org/tru/devtools-2/
+#     (a newer gcc) installed.
+#
+
+# Set options to echo every command and exit on error
+set -xe
 
 # Require a compiler version to be selected
 if [ "${COMPILER_VERSION}" == "" ]; then
@@ -37,14 +44,16 @@ if [ `uname` == Darwin ]; then
  fi
 else
  if [ "${COMPILER_VERSION}" == "gcc" ]; then
+  # Enable devtoolset-2, a newer gcc toolchain
+  . /opt/rh/devtoolset-2/enable
+  # Statically link the standard C/C++ library, because
+  # we are building on an old centos5 machine.
+  export LDFLAGS="-static-libgcc -static-libstdc++"
   export CC=gcc
   export CXX=g++
  elif [ "${COMPILER_VERSION}" == "clang" ]; then
   export CC=clang
   export CXX=clang++
- elif [ "${COMPILER_VERSION}" == "gcc44" ]; then
-  export CC=gcc44
-  export CXX=g++44
  else
   echo Invalid compiler version on `uname`: ${COMPILER_VERSION}
   exit 1
