@@ -44,11 +44,13 @@ if [ `uname` == Darwin ]; then
  fi
 else
  if [ "${COMPILER_VERSION}" == "gcc" ]; then
-  # Enable devtoolset-2, a newer gcc toolchain
-  . /opt/rh/devtoolset-2/enable
-  # Statically link the standard C/C++ library, because
-  # we are building on an old centos5 machine.
-  export LDFLAGS="-static-libgcc -static-libstdc++"
+  if [ -f /opt/rh/devtoolset-2/enable ]; then
+   # Enable devtoolset-2, a newer gcc toolchain
+   . /opt/rh/devtoolset-2/enable
+   # Statically link the standard C/C++ library, because
+   # we are building on an old centos5 machine.
+   export LDFLAGS="-static-libgcc -static-libstdc++"
+  fi
   export CC=gcc
   export CXX=g++
  elif [ "${COMPILER_VERSION}" == "clang" ]; then
