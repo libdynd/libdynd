@@ -283,13 +283,13 @@ struct at<I, type_sequence<T0, T...>> {
 };
 
 template <int I, typename A0, typename... A>
-typename std::enable_if<I == 0, A0 &&>::type get(A0 &&a0, A &&...) {
+typename std::enable_if<I == 0, A0>::type get(A0 &&a0, A &&...) {
     return a0;
 }
 
 template <int I, typename A0, typename... A>
 typename std::enable_if<I != 0,
-                        typename at<I, type_sequence<A0, A...>>::type &&>::type
+                        typename at<I, type_sequence<A0, A...>>::type>::type
 get(A0 &&, A &&... a)
 {
   return get<I - 1>(std::forward<A>(a)...);

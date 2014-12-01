@@ -15,92 +15,6 @@
 #include <dynd/types/type_pattern_match.hpp>
 #include <dynd/types/substitute_typevars.hpp>
 
-namespace dynd {
-
-template <typename... A>
-void wrap(A &&... DYND_UNUSED(a))
-{
-}
-
-class test_type {
-public:
-  template <typename... T>  
-  static void *apply(T...) {
-
-    return NULL;
-  }
-};
-
-template <typename I>
-struct index_ops;
-
-template <size_t... I>
-struct index_ops<index_sequence<I...>> {
-
-/*
-  template <typename A, typename... B>
-  static void expand_then_apply(void (*func)(A, B...), A a[sizeof...(I)], std::tuple<B...> b) {
-    (*func)(a, std::get<I>(b)...);
-  }
-*/
-
-  template <typename T>
-  static const ndt::type &get_type(ndt::type &tp, const T &val) {
-    tp = ndt::get_type(val);
-    return tp;
-  }
-
-  template <typename A, typename... B>
-  static void get_types(A a[sizeof...(I)], std::tuple<B...> b) {
-    wrap(get_type(a[I], std::get<I>(b))...);
-  }
-
-  template <typename T>
-  static void *forward_as_array(const ndt::type &tp, char *arrmeta,
-                                char *data, const T &val)
-  {
-    nd::detail::as_packed_array(val, tp, arrmeta, data);
-    return NULL;
-  }
-
-/*
-  template <typename... A>
-  static void *forward_as_array(A &&... a) {
-    forward_as_array(get<I>(std::forward<A>(a)...)...);
-    return NULL;
-  }
-*/
-
-  template <typename... B>
-  static void forward_as_array(intptr_t perm[sizeof...(I)], ndt::type *tp,
-                               char *arrmeta, const uintptr_t *arrmeta_offsets,
-                               char *data, const uintptr_t *data_offsets,
-                               const std::tuple<B...> &b)
-  {
-    // 0, ...sizeof(I)
-    // sizeof(I), ...
-    typedef typename zip<index_sequence<0, 1>, index_sequence<0, 1>, index_sequence<0, 1>, index_sequence<0, 1>>::type type;
-    wrap(forward_as_array(tp[perm[I]], arrmeta + arrmeta_offsets[perm[I]],
-                          data + data_offsets[perm[I]], std::get<I>(b))...);
-  }
-
-//  template <typename... A, typename... B>
-  //static void expand_then_apply(void (*)(A..., B...), A &&..., const std::tuple<B...> &) {
-//    (*func)(std::forward<A>(a)..., std::get<I>(b)...);
- // }
-
-/*
-  template <typename R, typename... A, typename... B>
-  static R expand_then_apply(R (*func)(A..., B...), A &&... a, const std::tuple<B...> &b) {
-    return (*func)(std::forward<A>(a)..., std::get<I>(b)...);
-  }
-*/
-};
-
-
-
-}
-
 namespace dynd { namespace ndt {
 
 template <typename I>
@@ -150,6 +64,14 @@ public:
   operator nd::array() const {
     return nd::array();
   }
+
+  const char *get_name(intptr_t DYND_UNUSED(i)) const {
+    throw std::runtime_error("");
+  }
+
+  ndt::type get_type(intptr_t DYND_UNUSED(i)) const {
+    throw std::runtime_error("");
+  }
 };
 
 template <typename... T>
@@ -165,6 +87,10 @@ public:
       : m_names{names...}, m_vals(std::forward<T>(vals)...)
   {
     index_ops<J>::template get_types(m_types, m_vals);
+  }
+
+  operator nd::array() const {
+    return nd::array();
   }
 
   const char *(&get_names() const)[sizeof...(T)] {
@@ -183,6 +109,41 @@ public:
     return m_vals;
   }
 };
+
+template <typename... A>
+nd::array forward_as_array(const nd::array &names, const nd::array &types, const std::tuple<A...> &vals, const intptr_t *perm)
+{
+  typedef typename make_index_sequence<0, sizeof...(A)>::type I;
+
+  nd::array res = nd::empty_shell(ndt::make_struct(names, types));
+  struct_type::fill_default_data_offsets(
+      res.get_dim_size(),
+      reinterpret_cast<const ndt::type *>(types.get_readonly_originptr()),
+      reinterpret_cast<uintptr_t *>(res.get_arrmeta()));
+  nd::index_ops<I>::template forward_as_array(
+      reinterpret_cast<const ndt::type *>(types.get_readonly_originptr()),
+      res.get_arrmeta(),
+      res.get_type().extended<base_struct_type>()->get_arrmeta_offsets_raw(),
+      res.get_readwrite_originptr(),
+      res.get_type().extended<base_struct_type>()->get_data_offsets(
+          res.get_arrmeta()),
+      vals, perm);
+
+  return res;
+}
+
+inline nd::array forward_as_array(const nd::array &DYND_UNUSED(names), const nd::array &DYND_UNUSED(types),
+                           const kwds<> &DYND_UNUSED(kwds), const intptr_t *DYND_UNUSED(perm))
+{
+  return nd::array();
+}
+
+template <typename... K>
+nd::array forward_as_array(const nd::array &names, const nd::array &types,
+                           const kwds<K...> &kwds, const intptr_t *perm)
+{
+  return forward_as_array(names, types, kwds.get_vals(), perm);
+}
 
 template <typename... T>
 using kwds_for = typename instantiate<
@@ -336,45 +297,11 @@ struct arrfunc_type_data {
     return reinterpret_cast<const T *>(data);
   }
 
-  ndt::type resolve(const arrfunc_type *af_tp, intptr_t nsrc,
-                    const ndt::type *src_tp, const nd::array &args,
-                    const nd::detail::kwds<> &DYND_UNUSED(kwds), nd::array &kwd_as_fwd) const
-  {
-    if (resolve_dst_type != NULL) {
-      ndt::type result;
-      resolve_dst_type(this, af_tp, nsrc, src_tp, true, result, args, nd::array());
-      return result;
-    } else {
-      if (nsrc != af_tp->get_npos()) {
-        std::stringstream ss;
-        ss << "arrfunc expected " << af_tp->get_npos()
-           << " parameters, but received " << nsrc;
-        throw std::invalid_argument(ss.str());
-      }
-      const ndt::type *param_types = af_tp->get_arg_types_raw();
-      std::map<nd::string, ndt::type> typevars;
-      for (intptr_t i = 0; i != nsrc; ++i) {
-        if (!ndt::pattern_match(src_tp[i].value_type(), param_types[i],
-                                typevars)) {
-          std::stringstream ss;
-          ss << "parameter " << (i + 1) << " to arrfunc does not match, ";
-          ss << "expected " << param_types[i] << ", received " << src_tp[i];
-          throw std::invalid_argument(ss.str());
-        }
-      }
-
-      kwd_as_fwd = nd::array();
-      return ndt::substitute(af_tp->get_return_type(), typevars, true);
-    }
-  }
-
   template <typename... K>
   ndt::type resolve(const arrfunc_type *af_tp, intptr_t nsrc,
                     const ndt::type *src_tp, const nd::array &args,
                     const nd::detail::kwds<K...> &kwds, nd::array &kwd_as_fwd) const
   {
-    typedef typename make_index_sequence<0, sizeof...(K)>::type J;
-
     if (resolve_dst_type != NULL) {
       ndt::type result;
       resolve_dst_type(this, af_tp, nsrc, src_tp, true, result, args, nd::array());
@@ -399,7 +326,7 @@ struct arrfunc_type_data {
       }
 
       std::vector<ndt::type> kwd_tp(af_tp->get_nkwd());
-      intptr_t kwd_perm[sizeof...(K)];
+      std::vector<intptr_t> kwd_perm(sizeof...(K));
       for (intptr_t i = 0; i != sizeof...(K); i++) {
         kwd_perm[i] = af_tp->get_arg_index(kwds.get_name(i));
         ndt::type tp = kwds.get_type(i);
@@ -414,22 +341,7 @@ struct arrfunc_type_data {
         kwd_perm[i] -= af_tp->get_npos();
       }
 
-      nd::array kwd_f = nd::empty_shell(ndt::make_struct(
-          nd::make_strided_string_array(
-              const_cast<const char **>(&kwds.m_names[0]), sizeof...(K)),
-          nd::array(kwd_tp)));
-      struct_type::fill_default_data_offsets(                                    
-        kwd_f.get_dim_size(), &kwd_tp[0], reinterpret_cast<uintptr_t *>(kwd_f.get_arrmeta()));
-      const uintptr_t *field_arrmeta_offsets = kwd_f.get_type()
-                                                   .extended<base_struct_type>()
-                                                   ->get_arrmeta_offsets_raw();
-      const uintptr_t *field_data_offsets =
-          kwd_f.get_type().extended<base_struct_type>()->get_data_offsets(
-              kwd_f.get_arrmeta());
-      index_ops<J>::template forward_as_array(
-          kwd_perm, &kwd_tp[0], kwd_f.get_arrmeta(), field_arrmeta_offsets,
-          kwd_f.get_readwrite_originptr(), field_data_offsets, kwds.get_vals());
-      kwd_as_fwd = kwd_f;
+      kwd_as_fwd = nd::detail::forward_as_array(af_tp->get_arg_names(), kwd_tp, kwds, &kwd_perm[0]);
 
       return ndt::substitute(af_tp->get_return_type(), typevars, true);
     }

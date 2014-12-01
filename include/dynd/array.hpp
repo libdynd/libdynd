@@ -1635,6 +1635,70 @@ namespace detail {
   }
 }
 
+template <typename... A>
+void wrap(A &&... DYND_UNUSED(a))
+{
+}
+
+template <typename T>
+void forward_as_array(const ndt::type &tp, char *arrmeta, char *data,
+                      const T &val)
+{
+  nd::detail::as_packed_array(val, tp, arrmeta, data);
+}
+
+template <typename T, typename... A>
+void forward_as_array(const ndt::type &tp, char *arrmeta, char *data,
+                      const T &val, A &&... a)
+{
+  forward_as_array(tp, arrmeta, data, val);
+  forward_as_array(std::forward<A>(a)...);
+}
+
+template <typename I>
+struct index_ops;
+
+template <size_t... I>
+struct index_ops<index_sequence<I...>> {
+  template <typename T>
+  static const ndt::type &get_type(ndt::type &tp, const T &val)
+  {
+    tp = ndt::get_type(val);
+    return tp;
+  }
+
+  template <typename A, typename... B>
+  static void get_types(A a[sizeof...(I)], std::tuple<B...> b)
+  {
+    wrap(get_type(a[I], std::get<I>(b))...);
+  }
+
+  template <typename... A>
+  static void forward_as_array(A &&... a)
+  {
+    dynd::nd::forward_as_array(get<I>(std::forward<A>(a)...)...);
+  }
+
+  template <typename... A>
+  static void forward_as_array(const ndt::type *tp, char *arrmeta,
+                               const uintptr_t *arrmeta_offsets, char *data,
+                               const uintptr_t *data_offsets,
+                               const std::tuple<A...> &vals, const intptr_t *perm)
+  {
+    typedef typename make_index_sequence<sizeof...(I), 2 * sizeof...(I)>::type
+        J;
+    typedef typename make_index_sequence<2 * sizeof...(I),
+                                         3 * sizeof...(I)>::type K;
+    typedef typename make_index_sequence<3 * sizeof...(I),
+                                         4 * sizeof...(I)>::type L;
+
+    typedef typename zip<index_sequence<I...>, J, K, L>::type II;
+    index_ops<II>::template forward_as_array(
+        tp[perm[I]]..., arrmeta + arrmeta_offsets[perm[I]]...,
+        data + data_offsets[perm[I]]..., std::get<I>(vals)...);
+  }
+};
+
 /**
   * A struct with some metafunctions to help packing values into structs and
   * tuples. For each value to pack into the struct/tuple, one first calls
