@@ -65,39 +65,19 @@ inline bool DYND_ISNAN(long double x) {
 
 #elif defined(__GNUC__)
 
-
-#if __GNUC__ > 4 || \
-              (__GNUC__ == 4 && (__GNUC_MINOR__ >= 7))
+// Hack trying to work around gcc isfinite problems
+#if !defined(_GNU_SOURCE)
+#define _GNU_SOURCE
+#endif
 
 #define DYND_CONDITIONAL_UNUSED(NAME) NAME  __attribute__((unused))
 
-// Use constexpr on gcc >= 4.7
 #  define DYND_CONSTEXPR constexpr
-// Use rvalue references on gcc >= 4.7
 #  define DYND_RVALUE_REFS
 #  define DYND_ISNAN(x) (std::isnan(x))
-// Use static_assert on gcc >= 4.7
 #  define DYND_STATIC_ASSERT(value, message) static_assert(value, message)
 #  define DYND_CXX_TYPE_TRAITS
 #  define DYND_CXX_VARIADIC_TEMPLATES
-#else
-// Don't use constexpr on gcc < 4.7
-#  define DYND_CONSTEXPR
-#  define DYND_ISNAN(x) isnan(x)
-#  define DYND_CXX_TR1_TYPE_TRAITS
-#endif
-
-
-// Check for __float128 (added in gcc 4.6)
-// #if __GNUC__ > 4 || (__GNUC__ == 4 && (__GNUC_MINOR__ >= 6))
-// #include <iostream>
-// #define DYND_HAS_FLOAT128
-// typedef __float128 dynd_float128;
-// inline std::ostream& operator<<(std::ostream& o, const __float128&)
-// {
-//     return (o << "<unimplemented float128 printing>");
-// }
-// #endif
 
 #elif defined(_MSC_VER)
 
