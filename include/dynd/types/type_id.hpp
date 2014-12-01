@@ -240,8 +240,9 @@ enum {
 // Forward declaration so we can make the is_builtin_type function here
 class base_type;
 
-inline bool is_builtin_type(const base_type *dt) {
-    return (reinterpret_cast<uintptr_t>(dt)&(~static_cast<uintptr_t>(builtin_type_id_mask))) == 0;
+inline bool is_builtin_type(const base_type *dt)
+{
+  return reinterpret_cast<uintptr_t>(dt) < builtin_type_id_count;
 }
 
 // A boolean class for dynamicndarray which is one-byte big
