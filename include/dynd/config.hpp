@@ -197,6 +197,7 @@ inline void DYND_MEMCPY(char *dst, const char *src, intptr_t count)
 #define DYND_STATIC_ASSERT(value, message) // do { enum { dynd_static_assertion = 1 / (int)(value) }; } while (0)
 #endif
 
+#include <tuple>
 #if defined(DYND_CXX_TYPE_TRAITS)
 #include <type_traits>
 #elif defined(DYND_CXX_TR1_TYPE_TRAITS)
@@ -258,10 +259,79 @@ struct remove_all_pointers<T *> {
     typedef typename remove_all_pointers<typename std::remove_cv<T>::type>::type type;
 };
 
+template <int I, typename T>
+struct at;
+
 template <typename... T>
 struct type_sequence {
     static const size_t size = sizeof...(T);
+
+    template <typename U>
+    struct append {
+        typedef type_sequence<T..., U> type;
+    };
 };
+
+template <typename T0, typename... T>
+struct at<0, type_sequence<T0, T...>> {
+    typedef T0 type;
+};
+
+template <int I, typename T0, typename... T>
+struct at<I, type_sequence<T0, T...>> {
+    typedef typename at<I - 1, type_sequence<T...>>::type type;
+};
+
+template <int I, typename A0, typename... A>
+typename std::enable_if<I == 0, A0 &&>::type get(A0 &&a0, A &&...) {
+    return a0;
+}
+
+template <int I, typename A0, typename... A>
+typename std::enable_if<I != 0,
+                        typename at<I, type_sequence<A0, A...>>::type &&>::type
+get(A0 &&, A &&... a)
+{
+  return get<I - 1>(std::forward<A>(a)...);
+}
+
+template <typename T, T... I>
+struct integer_sequence {
+    static_assert(std::is_integral<T>::value, "Integral type" );
+
+    static const T size = sizeof...(I);
+
+    typedef T type;
+
+//    template<T N>
+  //  using append = integer_sequence<T, I..., N>;
+//        using next = typename append<size>::type;
+
+    template <T J>
+    struct prepend {
+        typedef integer_sequence<T, J, I...> type;
+    };
+
+    template <T J>
+    struct append {
+        typedef integer_sequence<T, I..., J> type;
+    };
+
+    template <typename R, typename... A>
+    static R make(A &&... args) {
+        return R(std::forward<typename at<I, type_sequence<A...>>::type>(get<I>(args...))...);
+    }
+
+    template <typename R, typename... A, typename... B>
+    static R apply(R (*func)(A..., B...), A &&... a, std::tuple<B...> b) {
+        return (*func)(std::forward<A>(a)..., std::get<I>(b)...);
+    }
+
+    typedef typename append<size>::type next;
+};
+
+template <size_t... I>
+using index_sequence = integer_sequence<size_t, I...>;
 
 template <typename U, typename... T>
 struct prepend {
@@ -273,14 +343,36 @@ struct prepend<U, type_sequence<T...> > {
     typedef typename prepend<U, T...>::type type;
 };
 
-template <typename U, typename... T>
-struct append {
-    typedef type_sequence<T..., U> type;
+template <typename T, typename U>
+struct concatenate;
+
+template <typename... T, typename... U>
+struct concatenate<type_sequence<T...>, type_sequence<U...>> {
+    typedef type_sequence<T..., U...> type;
 };
 
-template <typename U, typename... T>
-struct append<U, type_sequence<T...> > {
-    typedef typename append<T..., U>::type type;
+template <typename T, T... I, T... J>
+struct concatenate<integer_sequence<T, I...>, integer_sequence<T, J...>> {
+    typedef integer_sequence<T, I..., J...> type;
+};
+
+template <typename... T>
+struct zip;
+
+template <typename T>
+struct zip<integer_sequence<T>, integer_sequence<T>,
+           integer_sequence<T>, integer_sequence<T>> {
+    typedef integer_sequence<T> type;
+};
+
+template <typename T, T I0, T... I, T J0, T... J, T K0, T... K, T L0, T... L>
+struct zip<integer_sequence<T, I0, I...>, integer_sequence<T, J0, J...>,
+           integer_sequence<T, K0, K...>, integer_sequence<T, L0, L...>> {
+  typedef typename concatenate<
+      integer_sequence<T, I0, J0, K0, L0>,
+      typename zip<integer_sequence<T, I...>, integer_sequence<T, J...>,
+                   integer_sequence<T, K...>,
+                   integer_sequence<T, L...>>::type>::type type;
 };
 
 template <int n, typename... T>
@@ -339,120 +431,58 @@ struct to<n, type_sequence<T...>> {
     typedef typename to<n, T...>::type type;
 };
 
-template <int i, typename... T>
-struct at;
-
-template <typename T0, typename... T>
-struct at<0, T0, T...> {
-    typedef T0 type;
+template <typename T, T J0, T... J>
+struct at<0, integer_sequence<T, J0, J...>> {
+    static const T value = J0;
 };
 
-template <int i, typename T0, typename... T>
-struct at<i, T0, T...> {
-    typedef typename at<i - 1, T...>::type type;
+template <int I, typename T, T J0, T... J>
+struct at<I, integer_sequence<T, J0, J...>> {
+    static const T value = at<I - 1, integer_sequence<T, J...>>::value;
 };
 
-template <int i, typename... T>
-struct at<i, type_sequence<T...> > {
-    typedef typename at<i, T...>::type type;
+
+template <typename I, typename T>
+struct take;
+
+template <size_t... I, typename T>
+struct take<index_sequence<I...>, T> {
+    typedef type_sequence<typename at<I, T>::type...> type;
 };
 
-template <typename T>
-struct flatten;
+template <template <typename...> class C, typename T>
+struct instantiate;
 
-template <typename R, typename... A>
-struct flatten<R (A...)> {
-  typedef type_sequence<R, A...> type;
-};
-
-template<typename T, T... I>
-struct integer_sequence {
-    static_assert(std::is_integral<T>::value, "Integral type" );
-
-    static const T size = sizeof...(I);
-
-    typedef T type;
-
-//    template<T N>
-  //  using append = integer_sequence<T, I..., N>;
-//        using next = typename append<size>::type;
-
-    template <T J>
-    struct append {
-        typedef integer_sequence<T, I..., J> type;
-    };
-
-    typedef typename append<size>::type next;
-};
-
-/*
-template<std::size_t... I>
-using index_sequence = integer_sequence<std::size_t, I...>;
-*/
-
-template<size_t... I>
-struct index_sequence {
-    static const size_t size = sizeof...(I);
-
-    typedef size_t type;
-
-//    template<T N>
-  //  using append = integer_sequence<T, I..., N>;
-//        using next = typename append<size>::type;
-
-    template <size_t J>
-    struct append {
-        typedef index_sequence<I..., J> type;
-    };
-
-    typedef typename append<size>::type next;
+template <template <typename...> class C, typename... T>
+struct instantiate<C, type_sequence<T...>> {
+  typedef C<T...> type;  
 };
 
 namespace detail {
 
-template <typename T, T Nt, std::size_t N>
-struct iota {
-    static_assert( Nt >= 0, "N cannot be negative" );
+template <typename T, T Start, T Stop, T Step, bool Empty = Start >= Stop>
+struct make_integer_sequence;
 
-    typedef typename iota<T, Nt-1, N-1>::type::next type;
+template <typename T, T Start, T Stop, T Step>
+struct make_integer_sequence<T, Start, Stop, Step, false> {
+  typedef typename make_integer_sequence<
+      T, Start + Step, Stop, Step>::type::template prepend<Start>::type type;
 };
 
-template <size_t Nt>
-struct iota<size_t, Nt, 0ul> {
-    typedef index_sequence<> type;
-};
-
-template <typename T, T Nt>
-struct iota<T, Nt, 0ul> {
+template <typename T, T Start, T Stop, T Step>
+struct make_integer_sequence<T, Start, Stop, Step, true> {
     typedef integer_sequence<T> type;
 };
 
 } // namespace detail
 
-/*
-template <typename T, T N>
-using make_integer_sequence = typename detail::iota<T, N, N>::type;
-*/
-
-template <typename T, T N>
+template <typename T, T Start, T Stop, T Step = 1>
 struct make_integer_sequence {
-    typedef typename detail::iota<T, N, N>::type type;
+    typedef typename detail::make_integer_sequence<T, Start, Stop, Step>::type type;
 };
 
-/*
-template <size_t N>
-using make_index_sequence = make_integer_sequence<size_t, N>;
-*/
-
-template <size_t N>
-struct make_index_sequence {
-    typedef typename make_integer_sequence<size_t, N>::type type;
-};
-
-/*
-template <typename... T>
-using index_sequence_for = make_index_sequence<sizeof...(T)>;
-*/
+template <size_t Start, size_t Stop, size_t Step = 1>
+using make_index_sequence = make_integer_sequence<size_t, Start, Stop, Step>;
 
 } // namespace dynd
 
@@ -465,11 +495,11 @@ namespace dynd {
 #else
 // These are small templates, so we just replicate them here
 namespace dynd {
-	template<bool B, class T = void>
-	struct enable_if {};
+    template<bool B, class T = void>
+    struct enable_if {};
  
-	template<class T>
-	struct enable_if<true, T> { typedef T type; };
+    template<class T>
+    struct enable_if<true, T> { typedef T type; };
 }
 #endif
 

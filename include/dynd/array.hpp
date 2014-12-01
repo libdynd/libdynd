@@ -1601,6 +1601,8 @@ T array::as(assign_error_mode errmode) const {
 }
 
 namespace detail {
+    // forward_as_array
+
   /**
    * Packs a value into memory allocated to store it via the ``make_type(val)``
    * call. Because the destination arrmeta is guaranteed to be for only one

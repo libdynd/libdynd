@@ -803,6 +803,15 @@ type make_type()
   return detail::type_from<T>::make();
 }
 
+ndt::type get_type(const nd::array &val);
+
+template <class T>
+ndt::type get_type(T &&DYND_UNUSED(val))
+{
+  return make_type<
+      typename std::remove_cv<typename std::remove_reference<T>::type>::type>();
+}
+
 template<class T>
 type make_exact_type()
 {

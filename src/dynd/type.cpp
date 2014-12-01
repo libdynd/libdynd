@@ -465,6 +465,11 @@ ndt::type ndt::make_type(intptr_t ndim, const intptr_t *shape, const ndt::type& 
     }
 }
 
+ndt::type ndt::get_type(const nd::array &val)
+{
+  return val.get_type();
+}
+
 ndt::type ndt::make_packed_type(const nd::array &val)
 {
 /*
@@ -474,12 +479,7 @@ ndt::type ndt::make_packed_type(const nd::array &val)
   }
 */
 
-  ndt::type tp = val.get_type();
-  if (tp.is_builtin()) {
-    return tp;
-  }
-
-  return make_pointer(tp);
+  return make_pointer(val.get_type());
 }
 
 template<class T, class Tas>

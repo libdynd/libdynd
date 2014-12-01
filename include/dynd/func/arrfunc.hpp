@@ -17,6 +17,187 @@
 
 namespace dynd {
 
+template <typename... A>
+void wrap(A &&... DYND_UNUSED(a))
+{
+}
+
+class test_type {
+public:
+  template <typename... T>  
+  static void *apply(T...) {
+
+    return NULL;
+  }
+};
+
+template <typename I>
+struct index_ops;
+
+template <size_t... I>
+struct index_ops<index_sequence<I...>> {
+
+/*
+  template <typename A, typename... B>
+  static void expand_then_apply(void (*func)(A, B...), A a[sizeof...(I)], std::tuple<B...> b) {
+    (*func)(a, std::get<I>(b)...);
+  }
+*/
+
+  template <typename T>
+  static const ndt::type &get_type(ndt::type &tp, const T &val) {
+    tp = ndt::get_type(val);
+    return tp;
+  }
+
+  template <typename A, typename... B>
+  static void get_types(A a[sizeof...(I)], std::tuple<B...> b) {
+    wrap(get_type(a[I], std::get<I>(b))...);
+  }
+
+  template <typename T>
+  static void *forward_as_array(const ndt::type &tp, char *arrmeta,
+                                char *data, const T &val)
+  {
+    nd::detail::as_packed_array(val, tp, arrmeta, data);
+    return NULL;
+  }
+
+/*
+  template <typename... A>
+  static void *forward_as_array(A &&... a) {
+    forward_as_array(get<I>(std::forward<A>(a)...)...);
+    return NULL;
+  }
+*/
+
+  template <typename... B>
+  static void forward_as_array(intptr_t perm[sizeof...(I)], ndt::type *tp,
+                               char *arrmeta, const uintptr_t *arrmeta_offsets,
+                               char *data, const uintptr_t *data_offsets,
+                               const std::tuple<B...> &b)
+  {
+    // 0, ...sizeof(I)
+    // sizeof(I), ...
+    typedef typename zip<index_sequence<0, 1>, index_sequence<0, 1>, index_sequence<0, 1>, index_sequence<0, 1>>::type type;
+    wrap(forward_as_array(tp[perm[I]], arrmeta + arrmeta_offsets[perm[I]],
+                          data + data_offsets[perm[I]], std::get<I>(b))...);
+  }
+
+//  template <typename... A, typename... B>
+  //static void expand_then_apply(void (*)(A..., B...), A &&..., const std::tuple<B...> &) {
+//    (*func)(std::forward<A>(a)..., std::get<I>(b)...);
+ // }
+
+/*
+  template <typename R, typename... A, typename... B>
+  static R expand_then_apply(R (*func)(A..., B...), A &&... a, const std::tuple<B...> &b) {
+    return (*func)(std::forward<A>(a)..., std::get<I>(b)...);
+  }
+*/
+};
+
+
+
+}
+
+namespace dynd { namespace ndt {
+
+template <typename I>
+struct index_forward;
+
+template <size_t... I>
+struct index_forward<index_sequence<I...>> {
+  static void get_types(ndt::type *DYND_UNUSED(tp)) {
+  }
+
+  template <typename... A>
+  static void get_types(ndt::type *tp, const std::tuple<A...> &a) {
+    get_types(tp, std::get<I>(a)...);
+  }
+
+  template <typename A0>
+  static void get_types(ndt::type *tp, A0 &&a0) {
+    *tp = ndt::get_type(a0);
+  }
+
+  template <typename A0, typename... A>
+  static void get_types(ndt::type *tp, A0 &&a0, A &&... a) {
+    get_types(tp, a0);
+    get_types(tp + 1, a...);
+  }
+};
+
+template <typename... A>
+void get_types(ndt::type *, A...) {
+}
+
+}
+
+template <typename T, typename U>
+struct as {
+  typedef U type;
+};
+
+namespace nd { namespace detail {
+
+template <typename... T>
+class kwds;
+
+template <>
+class kwds<> {
+public:
+  operator nd::array() const {
+    return nd::array();
+  }
+};
+
+template <typename... T>
+class kwds {
+public:
+  typedef typename make_index_sequence<0, sizeof...(T)>::type J;
+
+  const char *m_names[sizeof...(T)];
+  ndt::type m_types[sizeof...(T)];
+  std::tuple<T...> m_vals;
+
+  kwds(typename as<T, const char *>::type &&... names, T &&... vals)
+      : m_names{names...}, m_vals(std::forward<T>(vals)...)
+  {
+    index_ops<J>::template get_types(m_types, m_vals);
+  }
+
+  const char *(&get_names() const)[sizeof...(T)] {
+    return m_names;
+  }
+
+  const char *get_name(intptr_t i) const {
+    return m_names[i];
+  }
+
+  ndt::type get_type(intptr_t i) const {
+    return m_types[i];
+  }
+
+  const std::tuple<T...> &get_vals() const {
+    return m_vals;
+  }
+};
+
+template <typename... T>
+using kwds_for = typename instantiate<
+    kwds, typename take<typename make_index_sequence<1, sizeof...(T), 2>::type,
+                         type_sequence<T...>>::type>::type;
+}
+
+} // namespace nd
+
+template <typename... T>
+nd::detail::kwds_for<T...> kwds(T &&... args) {
+  return concatenate<typename make_index_sequence<0, sizeof...(T), 2>::type,
+                     typename make_index_sequence<1, sizeof...(T), 2>::type>::type::template make<nd::detail::kwds_for<T...>>(std::forward<T>(args)...);
+}
+
 struct arrfunc_type_data;
 
 /**
@@ -157,11 +338,11 @@ struct arrfunc_type_data {
 
   ndt::type resolve(const arrfunc_type *af_tp, intptr_t nsrc,
                     const ndt::type *src_tp, const nd::array &args,
-                    const nd::array kwds) const
+                    const nd::detail::kwds<> &DYND_UNUSED(kwds), nd::array &kwd_as_fwd) const
   {
     if (resolve_dst_type != NULL) {
       ndt::type result;
-      resolve_dst_type(this, af_tp, nsrc, src_tp, true, result, args, kwds);
+      resolve_dst_type(this, af_tp, nsrc, src_tp, true, result, args, nd::array());
       return result;
     } else {
       if (nsrc != af_tp->get_npos()) {
@@ -181,54 +362,78 @@ struct arrfunc_type_data {
           throw std::invalid_argument(ss.str());
         }
       }
+
+      kwd_as_fwd = nd::array();
       return ndt::substitute(af_tp->get_return_type(), typevars, true);
     }
   }
-};
 
-class kwds {
-  nd::array m_kwds;
-
-public:
-  kwds() {}
-
-  template <typename A0>
-  kwds(const std::string &name0, const A0 &a0)
-      : m_kwds(pack(name0, a0))
+  template <typename... K>
+  ndt::type resolve(const arrfunc_type *af_tp, intptr_t nsrc,
+                    const ndt::type *src_tp, const nd::array &args,
+                    const nd::detail::kwds<K...> &kwds, nd::array &kwd_as_fwd) const
   {
-  }
+    typedef typename make_index_sequence<0, sizeof...(K)>::type J;
 
-  template <typename A0, typename A1>
-  kwds(const std::string &name0, const A0 &a0, const std::string &name1,
-       const A1 &a1)
-      : m_kwds(pack(name0, a0, name1, a1))
-  {
-  }
+    if (resolve_dst_type != NULL) {
+      ndt::type result;
+      resolve_dst_type(this, af_tp, nsrc, src_tp, true, result, args, nd::array());
+      return result;
+    } else {
+      if (nsrc != af_tp->get_npos()) {
+        std::stringstream ss;
+        ss << "arrfunc expected " << af_tp->get_npos()
+           << " parameters, but received " << nsrc;
+        throw std::invalid_argument(ss.str());
+      }
+      const ndt::type *param_types = af_tp->get_arg_types_raw();
+      std::map<nd::string, ndt::type> typevars;
+      for (intptr_t i = 0; i != nsrc; ++i) {
+        if (!ndt::pattern_match(src_tp[i].value_type(), param_types[i],
+                                typevars)) {
+          std::stringstream ss;
+          ss << "parameter " << (i + 1) << " to arrfunc does not match, ";
+          ss << "expected " << param_types[i] << ", received " << src_tp[i];
+          throw std::invalid_argument(ss.str());
+        }
+      }
 
-  template <typename A0, typename A1, typename A2>
-  kwds(const std::string &name0, const A0 &a0, const std::string &name1,
-       const A1 &a1, const std::string &name2, const A2 &a2)
-      : m_kwds(pack(name0, a0, name1, a1, name2, a2))
-  {
-  }
+      std::vector<ndt::type> kwd_tp(af_tp->get_nkwd());
+      intptr_t kwd_perm[sizeof...(K)];
+      for (intptr_t i = 0; i != sizeof...(K); i++) {
+        kwd_perm[i] = af_tp->get_arg_index(kwds.get_name(i));
+        ndt::type tp = kwds.get_type(i);
+        if (!ndt::pattern_match(tp.value_type(), param_types[kwd_perm[i]],
+                                typevars)) {
+          std::stringstream ss;
+          ss << "keyword parameter \"" << kwds.get_name(i) << "\" to arrfunc does not match, ";
+          ss << "expected " << param_types[kwd_perm[i]] << ", received " << tp;
+          throw std::invalid_argument(ss.str());
+        }
+        kwd_tp[kwd_perm[i] - af_tp->get_npos()] = tp;
+        kwd_perm[i] -= af_tp->get_npos();
+      }
 
-  template <typename A0, typename A1, typename A2, typename A3>
-  kwds(const std::string &name0, const A0 &a0, const std::string &name1,
-       const A1 &a1, const std::string &name2, const A2 &a2,
-       const std::string &name3, const A3 &a3)
-      : m_kwds(pack(name0, a0, name1, a1, name2, a2, name3, a3))
-  {
-  }
+      nd::array kwd_f = nd::empty_shell(ndt::make_struct(
+          nd::make_strided_string_array(
+              const_cast<const char **>(&kwds.m_names[0]), sizeof...(K)),
+          nd::array(kwd_tp)));
+      struct_type::fill_default_data_offsets(                                    
+        kwd_f.get_dim_size(), &kwd_tp[0], reinterpret_cast<uintptr_t *>(kwd_f.get_arrmeta()));
+      const uintptr_t *field_arrmeta_offsets = kwd_f.get_type()
+                                                   .extended<base_struct_type>()
+                                                   ->get_arrmeta_offsets_raw();
+      const uintptr_t *field_data_offsets =
+          kwd_f.get_type().extended<base_struct_type>()->get_data_offsets(
+              kwd_f.get_arrmeta());
+      index_ops<J>::template forward_as_array(
+          kwd_perm, &kwd_tp[0], kwd_f.get_arrmeta(), field_arrmeta_offsets,
+          kwd_f.get_readwrite_originptr(), field_data_offsets, kwds.get_vals());
+      kwd_as_fwd = kwd_f;
 
-  template <typename A0, typename A1, typename A2, typename A3, typename A4>
-  kwds(const std::string &name0, const A0 &a0, const std::string &name1,
-       const A1 &a1, const std::string &name2, const A2 &a2,
-       const std::string &name3, const A3 &a3, const std::string &name4,
-       const A4 &a4)
-      : m_kwds(pack(name0, a0, name1, a1, name2, a2, name3, a3, name4, a4))
-  {
+      return ndt::substitute(af_tp->get_return_type(), typevars, true);
+    }
   }
-  const nd::array &get() const { return m_kwds; }
 };
 
 namespace nd {
@@ -276,8 +481,47 @@ namespace nd {
     void swap(nd::arrfunc &rhs) { m_value.swap(rhs.m_value); }
 
     /** Implements the general call operator */
-    nd::array call(intptr_t arg_count, const nd::array *args, const kwds &kwds,
-                   const eval::eval_context *ectx) const;
+    template <typename... K>
+    array call(intptr_t narg, const nd::array *args, const detail::kwds<K...> &kwds,
+               const eval::eval_context *ectx) const
+    {
+      const arrfunc_type_data *af = get();
+      const arrfunc_type *af_tp = m_value.get_type().extended<arrfunc_type>();
+
+      std::vector<ndt::type> arg_tp(narg);
+      for (intptr_t i = 0; i < narg; ++i) {
+        arg_tp[i] = args[i].get_type();
+      }
+
+      std::vector<const char *> src_arrmeta(af_tp->get_npos());
+      for (intptr_t i = 0; i < af_tp->get_npos(); ++i) {
+        src_arrmeta[i] = args[i].get_arrmeta();
+      }
+      std::vector<char *> src_data(af_tp->get_npos());
+      for (intptr_t i = 0; i < af_tp->get_npos(); ++i) {
+        src_data[i] = const_cast<char *>(args[i].get_readonly_originptr());
+      }
+
+      // Resolve the destination type
+      nd::array kwds_to_fwd;
+      ndt::type dst_tp =
+          af->resolve(af_tp, af_tp->get_npos(),
+                      af_tp->get_npos() ? &arg_tp[0] : NULL, nd::array(), kwds, kwds_to_fwd);
+
+      // Construct the destination array
+      nd::array res = nd::empty(dst_tp);
+
+      // Generate and evaluate the ckernel
+      ckernel_builder<kernel_request_host> ckb;
+      af->instantiate(af, af_tp, &ckb, 0, dst_tp, res.get_arrmeta(), &arg_tp[0],
+                      &src_arrmeta[0], kernel_request_single, ectx, nd::array(),
+                      kwds_to_fwd);
+      expr_single_t fn = ckb.get()->get_function<expr_single_t>();
+      fn(res.get_readwrite_originptr(), src_data.empty() ? NULL : &src_data[0],
+         ckb.get());
+      return res;
+    }
+
     nd::array call(intptr_t arg_count, const nd::array *args,
                    const eval::eval_context *ectx) const
     {
@@ -285,30 +529,62 @@ namespace nd {
     }
 
     /** Convenience call operators */
-    nd::array operator()(const kwds &kwds_ = kwds()) const
+    template <typename... K>
+    nd::array operator()(const detail::kwds<K...> &kwds_ = kwds()) const
     {
       return call(0, NULL, kwds_, &eval::default_eval_context);
     }
-    nd::array operator()(const nd::array &a0, const kwds &kwds_ = kwds()) const
+    template <typename... K>
+    nd::array operator()(const nd::array &a0, const detail::kwds<K...> &kwds_ = kwds()) const
     {
       return call(1, &a0, kwds_, &eval::default_eval_context);
     }
+    template <typename... K>
     nd::array operator()(const nd::array &a0, const nd::array &a1,
-                         const kwds &kwds_ = kwds()) const
+                         const detail::kwds<K...> &kwds_ = kwds()) const
     {
       nd::array args[2] = {a0, a1};
       return call(2, args, kwds_, &eval::default_eval_context);
     }
+    template <typename... K>
     nd::array operator()(const nd::array &a0, const nd::array &a1,
-                         const nd::array &a2, const kwds &kwds_ = kwds()) const
+                         const nd::array &a2, const detail::kwds<K...> &kwds_ = kwds()) const
     {
       nd::array args[3] = {a0, a1, a2};
       return call(3, args, kwds_, &eval::default_eval_context);
     }
 
     /** Implements the general call operator with output parameter */
-    void call_out(intptr_t arg_count, const nd::array *args, const kwds &kwds,
-                  const nd::array &out, const eval::eval_context *ectx) const;
+    template <typename... K>
+    void call_out(intptr_t narg, const nd::array *args, const detail::kwds<K...> &kwds,
+                  const nd::array &out, const eval::eval_context *ectx) const
+    {
+      const arrfunc_type_data *af = get();
+      const arrfunc_type *af_tp = m_value.get_type().extended<arrfunc_type>();
+
+      std::vector<ndt::type> arg_tp(narg);
+      for (intptr_t i = 0; i < narg; ++i) {
+        arg_tp[i] = args[i].get_type();
+      }
+
+      std::vector<const char *> src_arrmeta(af_tp->get_npos());
+      for (intptr_t i = 0; i < af_tp->get_npos(); ++i) {
+        src_arrmeta[i] = args[i].get_arrmeta();
+      }
+      std::vector<char *> src_data(af_tp->get_npos());
+      for (intptr_t i = 0; i < af_tp->get_npos(); ++i) {
+        src_data[i] = const_cast<char *>(args[i].get_readonly_originptr());
+      }
+
+      // Generate and evaluate the ckernel
+      ckernel_builder<kernel_request_host> ckb;
+      af->instantiate(af, af_tp, &ckb, 0, out.get_type(), out.get_arrmeta(),
+                      &arg_tp[0], &src_arrmeta[0], kernel_request_single, ectx,
+                      nd::array(), kwds);
+      expr_single_t fn = ckb.get()->get_function<expr_single_t>();
+      fn(out.get_readwrite_originptr(), src_data.empty() ? NULL : &src_data[0],
+         ckb.get());
+    }
     void call_out(intptr_t arg_count, const nd::array *args,
                   const nd::array &out, const eval::eval_context *ectx) const
     {
@@ -320,26 +596,30 @@ namespace nd {
     {
       call_out(0, NULL, out, &eval::default_eval_context);
     }
+    template <typename... K>
     void call_out(const nd::array &a0, const nd::array &out,
-                  const kwds &kwds_ = kwds()) const
+                  const detail::kwds<K...> &kwds_ = kwds()) const
     {
       call_out(1, &a0, kwds_, out, &eval::default_eval_context);
     }
+    template <typename... K>
     void call_out(const nd::array &a0, const nd::array &a1,
-                  const nd::array &out, const kwds &kwds_ = kwds()) const
+                  const nd::array &out, const detail::kwds<K...> &kwds_ = kwds()) const
     {
       nd::array args[2] = {a0, a1};
       call_out(2, args, kwds_, out, &eval::default_eval_context);
     }
+    template <typename... K>
     void call_out(const nd::array &a0, const nd::array &a1, const nd::array &a2,
-                  const nd::array &out, const kwds &kwds_ = kwds()) const
+                  const nd::array &out, const detail::kwds<K...> &kwds_ = kwds()) const
     {
       nd::array args[3] = {a0, a1, a2};
       call_out(3, args, kwds_, out, &eval::default_eval_context);
     }
+    template <typename... K>
     void call_out(const nd::array &a0, const nd::array &a1, const nd::array &a2,
                   const nd::array &a3, nd::array &out,
-                  const kwds &kwds_ = kwds()) const
+                  const detail::kwds<K...> &kwds_ = kwds()) const
     {
       nd::array args[4] = {a0, a1, a2, a3};
       call_out(4, args, kwds_, out, &eval::default_eval_context);

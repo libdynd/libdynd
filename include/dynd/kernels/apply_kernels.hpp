@@ -125,7 +125,7 @@ namespace kernels {
   };
 
   template <typename A,
-            typename I = typename make_index_sequence<A::size>::type>
+            typename I = typename make_index_sequence<0, A::size>::type>
   struct args;
 
   template <typename... A, size_t... I>
@@ -162,7 +162,7 @@ namespace kernels {
   };
 
   template <typename K,
-            typename J = typename make_index_sequence<K::size>::type>
+            typename J = typename make_index_sequence<0, K::size>::type>
   struct kwds;
 
   template <typename... K, size_t... J>
