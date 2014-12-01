@@ -7,7 +7,7 @@
 #include <dynd/types/static_type_instances.hpp>
 #include <dynd/fft.hpp>
 
-#include <math.h>
+#include <cmath>
 
 // TODO: Move elsewhere
 #include <dynd/func/apply_arrfunc.hpp>

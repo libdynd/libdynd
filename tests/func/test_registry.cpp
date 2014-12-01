@@ -6,7 +6,7 @@
 #include <iostream>
 #include <stdexcept>
 #include <algorithm>
-#include <math.h>
+#include <cmath>
 
 #include "inc_gtest.hpp"
 

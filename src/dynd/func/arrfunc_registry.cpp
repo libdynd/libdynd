@@ -4,7 +4,7 @@
 //
 
 #include <map>
-#include <math.h>
+#include <cmath>
 
 #include <dynd/func/arrfunc.hpp>
 #include <dynd/func/arrfunc_registry.hpp>
