@@ -234,7 +234,7 @@ nd::array struct_concat(nd::array lhs, nd::array rhs);
     const std::string *field_names[N] = {                                      \
         DYND_PP_JOIN_1((, ), DYND_PP_META_NAME_RANGE(&name, N))};              \
     const ndt::type field_types[N] = {DYND_PP_JOIN_MAP_1(                      \
-        ndt::make_packed_type, (, ), DYND_PP_META_NAME_RANGE(a, N))};          \
+        ndt::get_forward_type, (, ), DYND_PP_META_NAME_RANGE(a, N))};          \
                                                                                \
     /* Allocate res with empty_shell, leaves unconstructed arrmeta */          \
     nd::array res =                                                            \

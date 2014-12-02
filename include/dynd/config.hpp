@@ -317,16 +317,6 @@ struct integer_sequence {
         typedef integer_sequence<T, I..., J> type;
     };
 
-    template <typename R, typename... A>
-    static R make(A &&... args) {
-        return R(std::forward<typename at<I, type_sequence<A...>>::type>(get<I>(args...))...);
-    }
-
-    template <typename R, typename... A, typename... B>
-    static R apply(R (*func)(A..., B...), A &&... a, std::tuple<B...> b) {
-        return (*func)(std::forward<A>(a)..., std::get<I>(b)...);
-    }
-
     typedef typename append<size>::type next;
 };
 
@@ -454,7 +444,7 @@ struct at<I, integer_sequence<T, J0, J...>> {
 };
 
 template <typename T, typename U>
-struct as {
+struct as_ {
   typedef U type;
 };
 
@@ -499,6 +489,26 @@ struct make_integer_sequence {
 
 template <size_t Start, size_t Stop, size_t Step = 1>
 using make_index_sequence = make_integer_sequence<size_t, Start, Stop, Step>;
+
+template <typename I>
+struct index_proxy;
+
+template <size_t... I>
+struct index_proxy<index_sequence<I...>> {
+  enum { size = index_sequence<I...>::size };
+
+  template <typename R, typename... A>
+  static R apply(R (*func)(A...), A &&... a)
+  {
+    return (*func)(get<I>(std::forward<A>(a)...)...);
+  }
+
+  template <typename R, typename... A>
+  static R make(A &&... a)
+  {
+    return R(get<I>(std::forward<A>(a)...)...);
+  }
+};
 
 } // namespace dynd
 

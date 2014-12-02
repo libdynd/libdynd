@@ -83,7 +83,7 @@ namespace kernels {
 
   template <int N>
   using cuda_parallel_ck =
-      detail::cuda_parallel_ck<typename make_index_sequence<N>::type>;
+      detail::cuda_parallel_ck<typename make_index_sequence<0, N>::type>;
 }
 }
 

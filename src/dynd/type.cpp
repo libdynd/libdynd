@@ -470,7 +470,7 @@ ndt::type ndt::get_type(const nd::array &val)
   return val.get_type();
 }
 
-ndt::type ndt::make_packed_type(const nd::array &val)
+ndt::type ndt::get_forward_type(const nd::array &val)
 {
 /*
   if ((val.get_access_flags() & nd::write_access_flag) == 0) {

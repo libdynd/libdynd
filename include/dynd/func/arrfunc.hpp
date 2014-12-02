@@ -16,126 +16,6 @@
 #include <dynd/types/substitute_typevars.hpp>
 
 namespace dynd {
-namespace nd {
-
-  inline nd::array forward_as_array(const nd::array &DYND_UNUSED(names),
-                                    const nd::array &DYND_UNUSED(types),
-                                    const std::tuple<> &DYND_UNUSED(vals),
-                                    const intptr_t *DYND_UNUSED(perm) = NULL)
-  {
-    return nd::array();
-  }
-
-  template <typename... A>
-  nd::array forward_as_array(const nd::array &names, const nd::array &types,
-                             const std::tuple<A...> &vals,
-                             const intptr_t *perm = NULL)
-  {
-    typedef typename make_index_sequence<0, sizeof...(A)>::type I;
-
-    nd::array res = nd::empty_shell(ndt::make_struct(names, types));
-    struct_type::fill_default_data_offsets(
-        res.get_dim_size(),
-        reinterpret_cast<const ndt::type *>(types.get_readonly_originptr()),
-        reinterpret_cast<uintptr_t *>(res.get_arrmeta()));
-    nd::index_proxy<I>::template forward_as_array(
-        reinterpret_cast<const ndt::type *>(types.get_readonly_originptr()),
-        res.get_arrmeta(),
-        res.get_type().extended<base_struct_type>()->get_arrmeta_offsets_raw(),
-        res.get_readwrite_originptr(),
-        res.get_type().extended<base_struct_type>()->get_data_offsets(
-            res.get_arrmeta()),
-        vals, perm);
-
-    return res;
-  }
-
-  namespace detail {
-
-    template <typename... T>
-    class kwds;
-
-template <>
-class kwds<> {
-  std::tuple<> m_vals;
-
-public:
-  const char *get_name(intptr_t DYND_UNUSED(i)) const {
-    throw std::runtime_error("");
-  }
-
-  ndt::type get_type(intptr_t DYND_UNUSED(i)) const {
-    throw std::runtime_error("");
-  }
-
-  array get_names() const {
-    return array();
-  }
-
-  array get_types() const {
-    return array();
-  }
-
-  const std::tuple<> &get_vals() const {
-    return m_vals;
-  }
-};
-
-template <typename... T>
-class kwds {
-  const char *m_names[sizeof...(T)];
-  ndt::type m_types[sizeof...(T)];
-  std::tuple<T...> m_vals;
-
-public:
-  kwds(typename as<T, const char *>::type &&... names, T &&... vals)
-      : m_names{names...}, m_vals(std::forward<T>(vals)...)
-  {
-    typedef typename make_index_sequence<0, sizeof...(T)>::type I;
-
-    index_proxy<I>::template get_types(m_types, get_vals());
-  }
-
-/*
-  const char *(&get_names() const)[sizeof...(T)] {
-    return nd::make_strided_string_array(sizeof...(T), m_names);
-  }
-*/
-
-  nd::array get_names() const {
-    return nd::make_strided_string_array(const_cast<const char **>(m_names), sizeof...(T));
-  }
-
-  const char *get_name(intptr_t i) const {
-    return m_names[i];
-  }
-
-  ndt::type get_type(intptr_t i) const {
-    return m_types[i];
-  }
-
-  ndt::type (&get_types() const)[sizeof...(T)] {
-    return m_types;
-  }
-
-  const std::tuple<T...> &get_vals() const {
-    return m_vals;
-  }
-};
-
-template <typename... T>
-using kwds_for = typename instantiate<
-    kwds, typename take<typename make_index_sequence<1, sizeof...(T), 2>::type,
-                         type_sequence<T...>>::type>::type;
-}
-
-} // namespace nd
-
-template <typename... T>
-nd::detail::kwds_for<T...> kwds(T &&... args) {
-  return concatenate<typename make_index_sequence<0, sizeof...(T), 2>::type,
-                     typename make_index_sequence<1, sizeof...(T), 2>::type>::type::template make<nd::detail::kwds_for<T...>>(std::forward<T>(args)...);
-}
 
 struct arrfunc_type_data;
 
@@ -277,6 +157,127 @@ struct arrfunc_type_data {
 };
 
 namespace nd {
+  inline nd::array forward_as_array(const nd::array &DYND_UNUSED(names),
+                                    const nd::array &DYND_UNUSED(types),
+                                    const std::tuple<> &DYND_UNUSED(vals),
+                                    const intptr_t *DYND_UNUSED(perm) = NULL)
+  {
+    return nd::array();
+  }
+
+  template <typename... A>
+  nd::array forward_as_array(const nd::array &names, const nd::array &types,
+                             const std::tuple<A...> &vals,
+                             const intptr_t *perm = NULL)
+  {
+    typedef typename make_index_sequence<0, sizeof...(A)>::type I;
+
+    nd::array res = nd::empty_shell(ndt::make_struct(names, types));
+    struct_type::fill_default_data_offsets(
+        res.get_dim_size(),
+        reinterpret_cast<const ndt::type *>(types.get_readonly_originptr()),
+        reinterpret_cast<uintptr_t *>(res.get_arrmeta()));
+    nd::index_proxy<I>::template forward_as_array(
+        reinterpret_cast<const ndt::type *>(types.get_readonly_originptr()),
+        res.get_arrmeta(),
+        res.get_type().extended<base_struct_type>()->get_arrmeta_offsets_raw(),
+        res.get_readwrite_originptr(),
+        res.get_type().extended<base_struct_type>()->get_data_offsets(
+            res.get_arrmeta()),
+        vals, perm);
+
+    return res;
+  }
+
+  namespace detail {
+    template <typename... T>
+    class kwds;
+
+    template <>
+    class kwds<> {
+      std::tuple<> m_vals;
+
+    public:
+      const char *get_name(intptr_t DYND_UNUSED(i)) const
+      {
+        throw std::runtime_error("");
+      }
+
+      ndt::type get_type(intptr_t DYND_UNUSED(i)) const
+      {
+        throw std::runtime_error("");
+      }
+
+      array get_names() const { return array(); }
+
+      array get_types() const { return array(); }
+
+      const std::tuple<> &get_vals() const { return m_vals; }
+    };
+
+    template <typename... T>
+    class kwds {
+      const char *m_names[sizeof...(T)];
+      ndt::type m_types[sizeof...(T)];
+      std::tuple<T...> m_vals;
+
+    public:
+      kwds(const typename as_<T, const char *>::type &... names, T &&... vals)
+          : m_names{names...}, m_vals(std::forward<T>(vals)...)
+      {
+        typedef typename make_index_sequence<0, sizeof...(T)>::type I;
+
+        ndt::index_proxy<I>::template get_types(m_types, get_vals());
+      }
+
+      /*
+        const char *(&get_names() const)[sizeof...(T)] {
+          return nd::make_strided_string_array(sizeof...(T), m_names);
+        }
+      */
+
+      nd::array get_names() const
+      {
+        return nd::make_strided_string_array(const_cast<const char **>(m_names),
+                                             sizeof...(T));
+      }
+
+      const char *get_name(intptr_t i) const { return m_names[i]; }
+
+      ndt::type get_type(intptr_t i) const { return m_types[i]; }
+
+      ndt::type (&get_types() const)[sizeof...(T)] { return m_types; }
+
+      const std::tuple<T...> &get_vals() const { return m_vals; }
+    };
+
+/*
+    template <typename... T>
+    using kwds_for = typename instantiate<
+        detail::kwds,
+        typename take<typename make_index_sequence<1, sizeof...(T), 2>::type,
+                      type_sequence<T...>>::type>::type;
+*/
+  }
+} // namespace nd
+
+template <typename... T>
+typename instantiate<
+        nd::detail::kwds,
+        typename take<typename make_index_sequence<1, sizeof...(T), 2>::type,
+                      type_sequence<T...>>::type>::type kwds(T &&... args)
+{
+  typedef typename make_index_sequence<0, sizeof...(T), 2>::type I;
+  typedef typename make_index_sequence<1, sizeof...(T), 2>::type J;
+
+  return index_proxy<typename concatenate<I, J>::type>::template make<
+      typename instantiate<
+        nd::detail::kwds,
+        typename take<typename make_index_sequence<1, sizeof...(T), 2>::type,
+                      type_sequence<T...>>::type>::type>(std::forward<T>(args)...);
+}
+
+namespace nd {
   /**
    * Holds a single instance of an arrfunc in an immutable nd::array,
    * providing some more direct convenient interface.
@@ -330,7 +331,7 @@ namespace nd {
 
       if (af->resolve_dst_type != NULL) {
         kwds_as_array = forward_as_array(
-            kwds.get_names(), ndt::make_forward_types(kwds.get_vals()),
+            kwds.get_names(), ndt::get_forward_types(kwds.get_vals()),
             kwds.get_vals());
 
         ndt::type dst_tp;
@@ -377,7 +378,7 @@ namespace nd {
         kwd_perm[i] -= af_tp->get_npos();
       }
 
-      ndt::make_forward_types(kwd_tp2, kwds.get_vals(), &kwd_perm[0]);
+      ndt::get_forward_types(kwd_tp2, kwds.get_vals(), &kwd_perm[0]);
       kwds_as_array = forward_as_array(af_tp->get_arg_names(), kwd_tp2,
                                        kwds.get_vals(), &kwd_perm[0]);
 
