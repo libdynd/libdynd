@@ -50,9 +50,16 @@ else
    # Statically link the standard C/C++ library, because
    # we are building on an old centos5 machine.
    export LDFLAGS="-static-libgcc -static-libstdc++"
+   export CC=gcc
+   export CXX=g++
+  elif [ -f /usr/bin/gcc-4.9 ]; then
+   # On the nvidia1 build machine, need to use gcc 4.9 instead of gcc
+   export CC=gcc-4.9
+   export CXX=g++-4.9
+  else
+   export CC=gcc
+   export CXX=g++
   fi
-  export CC=gcc
-  export CXX=g++
  elif [ "${COMPILER_VERSION}" == "clang" ]; then
   export CC=clang
   export CXX=clang++
