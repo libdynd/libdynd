@@ -210,7 +210,7 @@ namespace nd {
 
       array get_names() const { return array(); }
 
-      array get_types() const { return array(); }
+//      array get_types() const { return array(); }
 
       const std::tuple<> &get_vals() const { return m_vals; }
     };
@@ -246,7 +246,7 @@ namespace nd {
 
       ndt::type get_type(intptr_t i) const { return m_types[i]; }
 
-      ndt::type (&get_types() const)[sizeof...(T)] { return m_types; }
+//      ndt::type (&get_types() const)[sizeof...(T)] { return m_types; }
 
       const std::tuple<T...> &get_vals() const { return m_vals; }
     };
