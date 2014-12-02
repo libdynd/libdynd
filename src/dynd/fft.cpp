@@ -12,11 +12,11 @@ using namespace std;
 using namespace dynd;
 
 #ifdef DYND_FFTW
-#include <tr1/tuple>
+#include <tuple>
 
 namespace dynd { namespace fftw {
 
-typedef tr1::tuple<vector<intptr_t>, vector<intptr_t>, type_id_t, vector<intptr_t>, int,
+typedef std::tuple<vector<intptr_t>, vector<intptr_t>, type_id_t, vector<intptr_t>, int,
     type_id_t, vector<intptr_t>, int, int, unsigned int> key_type;
 typedef map<key_type, void *> plans_map_type;
 // This is declared as a pointer instead of a static map so
@@ -35,7 +35,7 @@ void init::fft_cleanup()
 {
   for (map<dynd::fftw::key_type, void *>::iterator iter = fftw::plans->begin();
        iter != fftw::plans->end(); ++iter) {
-    switch (tr1::get<2>(iter->first)) {
+    switch (std::get<2>(iter->first)) {
     case float32_type_id:
     case complex_float32_type_id:
       fftwf_destroy_plan(reinterpret_cast<fftwf_plan>(iter->second));
