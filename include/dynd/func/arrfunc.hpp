@@ -261,7 +261,7 @@ namespace nd {
   }
 } // namespace nd
 
-nd::detail::kwds<> kwds()
+inline nd::detail::kwds<> kwds()
 {
   return nd::detail::kwds<>();
 }
