@@ -261,6 +261,11 @@ namespace nd {
   }
 } // namespace nd
 
+nd::detail::kwds<> kwds()
+{
+  return nd::detail::kwds<>();
+}
+
 template <typename... T>
 typename instantiate<
         nd::detail::kwds,
