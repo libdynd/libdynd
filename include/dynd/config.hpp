@@ -272,6 +272,10 @@ struct type_sequence {
     };
 };
 
+template <int I>
+struct at<I, type_sequence<>> {
+};
+
 template <typename T0, typename... T>
 struct at<0, type_sequence<T0, T...>> {
     typedef T0 type;

@@ -268,18 +268,20 @@ inline nd::detail::kwds<> kwds()
 
 template <typename... T>
 typename instantiate<
-        nd::detail::kwds,
-        typename take<typename make_index_sequence<1, sizeof...(T), 2>::type,
-                      type_sequence<T...>>::type>::type kwds(T &&... args)
+    nd::detail::kwds,
+    typename take<typename make_index_sequence<1, sizeof...(T), 2>::type,
+                  type_sequence<T...>>::type>::type
+kwds(T &&... args)
 {
   typedef typename make_index_sequence<0, sizeof...(T), 2>::type I;
   typedef typename make_index_sequence<1, sizeof...(T), 2>::type J;
 
   return index_proxy<typename concatenate<I, J>::type>::template make<
       typename instantiate<
-        nd::detail::kwds,
-        typename take<typename make_index_sequence<1, sizeof...(T), 2>::type,
-                      type_sequence<T...>>::type>::type>(std::forward<T>(args)...);
+          nd::detail::kwds,
+          typename take<typename make_index_sequence<1, sizeof...(T), 2>::type,
+                        type_sequence<T...>>::type>::type>(
+      std::forward<T>(args)...);
 }
 
 namespace nd {
