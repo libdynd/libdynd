@@ -1600,51 +1600,61 @@ T array::as(assign_error_mode errmode) const {
     }
 }
 
-namespace detail {
-    // forward_as_array
-
-  /**
-   * Packs a value into memory allocated to store it via the ``make_type(val)``
-   * call. Because the destination arrmeta is guaranteed to be for only one
-   * data element
-   */
-  template <typename T>
-  void as_packed_array(const T &src, const ndt::type &DYND_UNUSED(dst_tp),
-                       char *DYND_UNUSED(dst_arrmeta), char *dst)
-  {
-    *reinterpret_cast<T *>(dst) = src;
-  }
-
-  void as_packed_array(const nd::array &val, const ndt::type &DYND_UNUSED(tp),
-                       char *out_arrmeta, char *out_data);
-
-  template <typename T>
-  void as_packed_array(const std::vector<T> &val, const ndt::type &tp,
-                       char *out_arrmeta, char *out_data)
-  {
-    if (tp.get_type_id() == pointer_type_id) {
-      as_packed_array(array(val), tp, out_arrmeta, out_data);
-    } else {
-      if (!tp.is_builtin()) {
-        tp.extended()->arrmeta_default_construct(out_arrmeta, true);
-      }
-      if (!val.empty()) {
-        memcpy(out_data, &val[0], sizeof(T) * val.size());
-      }
-    }
-  }
+template <typename T>
+void get_types(ndt::type &tp, const T &val)
+{
+    tp = ndt::get_type(val);
 }
 
-template <typename... A>
-void wrap(A &&... DYND_UNUSED(a))
+template <typename T, typename... A>
+void get_types(ndt::type &tp, const T &val, A &&... a)
 {
+    get_types(tp, val);
+    get_types(std::forward<A>(a)...);
 }
 
 template <typename T>
-void forward_as_array(const ndt::type &tp, char *arrmeta, char *data,
-                      const T &val)
+void make_forward_types(ndt::type &tp, const T &val)
 {
-  nd::detail::as_packed_array(val, tp, arrmeta, data);
+    tp = ndt::make_packed_type(val);
+}
+
+template <typename T, typename... A>
+void make_forward_types(ndt::type &tp, const T &val, A &&... a)
+{
+    make_forward_types(tp, val);
+    make_forward_types(std::forward<A>(a)...);
+}
+
+/**
+ * Packs a value into memory allocated to store it via the ``make_type(val)``
+ * call. Because the destination arrmeta is guaranteed to be for only one
+ * data element
+ */
+template <typename T>
+void forward_as_array(const ndt::type &DYND_UNUSED(tp),
+                      char *DYND_UNUSED(arrmeta), char *data, const T &val)
+{
+  *reinterpret_cast<T *>(data) = val;
+}
+
+void forward_as_array(const ndt::type &DYND_UNUSED(tp), char *arrmeta,
+                      char *out_data, const nd::array &val);
+
+template <typename T>
+void forward_as_array(const ndt::type &tp, char *arrmeta, char *data,
+                      const std::vector<T> &val)
+{
+  if (tp.get_type_id() == pointer_type_id) {
+    forward_as_array(tp, arrmeta, data, array(val));
+  } else {
+    if (!tp.is_builtin()) {
+      tp.extended()->arrmeta_default_construct(arrmeta, true);
+    }
+    if (!val.empty()) {
+      memcpy(data, &val[0], sizeof(T) * val.size());
+    }
+  }
 }
 
 template <typename T, typename... A>
@@ -1656,21 +1666,53 @@ void forward_as_array(const ndt::type &tp, char *arrmeta, char *data,
 }
 
 template <typename I>
-struct index_ops;
+struct index_proxy;
 
 template <size_t... I>
-struct index_ops<index_sequence<I...>> {
-  template <typename T>
-  static const ndt::type &get_type(ndt::type &tp, const T &val)
+struct index_proxy<index_sequence<I...>> {
+  enum { size = index_sequence<I...>::size };
+
+  template <typename... A>
+  static void get_types(A &&... a)
   {
-    tp = ndt::get_type(val);
-    return tp;
+    dynd::nd::get_types(get<I>(std::forward<A>(a)...)...);
   }
 
-  template <typename A, typename... B>
-  static void get_types(A a[sizeof...(I)], std::tuple<B...> b)
+  template <typename... T>
+  static void get_types(ndt::type *tp, const std::tuple<T...> &vals,
+                        const intptr_t *perm = NULL)
   {
-    wrap(get_type(a[I], std::get<I>(b))...);
+    typedef typename make_index_sequence<size, 2 * size>::type J;
+
+    if (perm == NULL) {
+      index_proxy<typename zip<index_sequence<I...>, J>::type>::
+          template get_types(tp[I]..., std::get<I>(vals)...);
+    } else {
+      index_proxy<typename zip<index_sequence<I...>, J>::type>::
+          template get_types(tp[perm[I]]..., std::get<I>(vals)...);
+    }
+  }
+
+  template <typename... A>
+  static void make_forward_types(A &&... a)
+  {
+    dynd::nd::make_forward_types(get<I>(std::forward<A>(a)...)...);
+  }
+
+  template <typename... T>
+  static void make_forward_types(ndt::type *tp,
+                                 const std::tuple<T...> &vals,
+                                 const intptr_t *perm = NULL)
+  {
+    typedef typename make_index_sequence<size, 2 * size>::type J;
+
+    if (perm == NULL) {
+      index_proxy<typename zip<index_sequence<I...>, J>::type>::
+          template make_forward_types(tp[I]..., std::get<I>(vals)...);
+    } else {
+      index_proxy<typename zip<index_sequence<I...>, J>::type>::
+          template make_forward_types(tp[perm[I]]..., std::get<I>(vals)...);
+    }
   }
 
   template <typename... A>
@@ -1679,23 +1721,28 @@ struct index_ops<index_sequence<I...>> {
     dynd::nd::forward_as_array(get<I>(std::forward<A>(a)...)...);
   }
 
-  template <typename... A>
+  template <typename... T>
   static void forward_as_array(const ndt::type *tp, char *arrmeta,
                                const uintptr_t *arrmeta_offsets, char *data,
                                const uintptr_t *data_offsets,
-                               const std::tuple<A...> &vals, const intptr_t *perm)
+                               const std::tuple<T...> &vals,
+                               const intptr_t *perm = NULL)
   {
-    typedef typename make_index_sequence<sizeof...(I), 2 * sizeof...(I)>::type
-        J;
-    typedef typename make_index_sequence<2 * sizeof...(I),
-                                         3 * sizeof...(I)>::type K;
-    typedef typename make_index_sequence<3 * sizeof...(I),
-                                         4 * sizeof...(I)>::type L;
+    typedef typename make_index_sequence<size, 2 * size>::type J;
+    typedef typename make_index_sequence<2 * size, 3 * size>::type K;
+    typedef typename make_index_sequence<3 * size, 4 * size>::type L;
 
-    typedef typename zip<index_sequence<I...>, J, K, L>::type II;
-    index_ops<II>::template forward_as_array(
-        tp[perm[I]]..., arrmeta + arrmeta_offsets[perm[I]]...,
-        data + data_offsets[perm[I]]..., std::get<I>(vals)...);
+    if (perm == NULL) {
+      index_proxy<typename zip<index_sequence<I...>, J, K, L>::type>::
+          template forward_as_array(tp[I]..., arrmeta + arrmeta_offsets[I]...,
+                                    data + data_offsets[I]...,
+                                    std::get<I>(vals)...);
+    } else {
+      index_proxy<typename zip<index_sequence<I...>, J, K, L>::type>::
+          template forward_as_array(
+              tp[perm[I]]..., arrmeta + arrmeta_offsets[perm[I]]...,
+              data + data_offsets[perm[I]]..., std::get<I>(vals)...);
+    }
   }
 };
 
@@ -1708,14 +1755,6 @@ struct index_ops<index_sequence<I...>> {
   * which must initialize the output arrmeta if it is non-empty,
   * and copy the value into the target of the data pointer.
   */
-template <typename T>
-array as_packed_array(const T &val)
-{
-    array res = empty_shell(ndt::make_packed_type(val));
-    detail::as_packed_array(val, res.get_type(), res.get_arrmeta(), res.get_readwrite_originptr());
-
-    return res;
-}
 
 /** 
  * Given the type/arrmeta/data of an array (or sub-component of an array),
@@ -1783,4 +1822,38 @@ assign_na(array &out,
  */
 array combine_into_tuple(size_t field_count, const array *field_values);
 
-}} // namespace dynd::nd
+} // namespace dynd::nd
+
+namespace ndt {
+
+  inline void make_forward_types(nd::array &DYND_UNUSED(tp),
+                                 const std::tuple<> &DYND_UNUSED(vals),
+                                 const intptr_t *DYND_UNUSED(perm) = NULL)
+  {
+  }
+
+  inline nd::array make_forward_types(const std::tuple<> &DYND_UNUSED(vals))
+  {
+    return nd::array();
+  }
+
+  template <typename... T>
+  void make_forward_types(nd::array &tp, const std::tuple<T...> &vals, const intptr_t *perm = NULL)
+  {
+    nd::index_proxy<typename make_index_sequence<0, sizeof...(T)>::type>::
+        template make_forward_types(
+            reinterpret_cast<type *>(tp.get_readwrite_originptr()), vals, perm);
+  }
+
+  template <typename... T>
+  nd::array make_forward_types(const std::tuple<T...> &vals)
+  {
+    nd::array tp = nd::empty(sizeof...(T), ndt::make_type());;
+
+    nd::index_proxy<typename make_index_sequence<0, sizeof...(
+        T)>::type>::template make_forward_types(reinterpret_cast<type *>(tp.get_readwrite_originptr()),
+                                                vals);
+
+    return tp;
+  }
+}} // namespace dynd::ndt

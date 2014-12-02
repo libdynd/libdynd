@@ -360,6 +360,18 @@ template <typename... T>
 struct zip;
 
 template <typename T>
+struct zip<integer_sequence<T>, integer_sequence<T>> {
+    typedef integer_sequence<T> type;
+};
+
+template <typename T, T I0, T... I, T J0, T... J>
+struct zip<integer_sequence<T, I0, I...>, integer_sequence<T, J0, J...>> {
+  typedef typename concatenate<
+      integer_sequence<T, I0, J0>,
+      typename zip<integer_sequence<T, I...>, integer_sequence<T, J...>>::type>::type type;
+};
+
+template <typename T>
 struct zip<integer_sequence<T>, integer_sequence<T>,
            integer_sequence<T>, integer_sequence<T>> {
     typedef integer_sequence<T> type;
@@ -441,6 +453,10 @@ struct at<I, integer_sequence<T, J0, J...>> {
     static const T value = at<I - 1, integer_sequence<T, J...>>::value;
 };
 
+template <typename T, typename U>
+struct as {
+  typedef U type;
+};
 
 template <typename I, typename T>
 struct take;

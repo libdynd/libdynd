@@ -17,7 +17,6 @@
 #include <dynd/types/struct_type.hpp>
 #include <dynd/func/call_callable.hpp>
 
-/*
 using namespace std;
 using namespace dynd;
 
@@ -171,7 +170,6 @@ TEST(Neighborhood, Sum3D) {
         "[[false, true, false], [true, false, true], [false, true, false]],"
         "[[true, false, true], [false, true, false], [true, false, true]]]"), "offset", parse_json("3 * int", "[-1, -1, -1]"))));
 }
-*/
 
 /*
     Todo: Make this 3D test pass.

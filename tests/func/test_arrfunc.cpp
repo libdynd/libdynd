@@ -216,12 +216,3 @@ nd::array((int)0)).get_type();
     EXPECT_EQ(1237, ints_out[2]);
 }
 */
-
-//TEST(Arrfunc, Keywords)
-//{
-//  auto k = kwds2("x", 3, "y", 4);
-//
-//  std::cout << k.get() << std::endl;
-//
-//  std::exit(-1);
-//}

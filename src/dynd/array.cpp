@@ -2272,8 +2272,8 @@ nd::array nd::combine_into_tuple(size_t field_count, const array *field_values)
     return result;
 }
 
-void nd::detail::as_packed_array(const nd::array &val, const ndt::type &tp,
-                                 char *out_arrmeta, char *out_data)
+void nd::forward_as_array(const ndt::type &tp,
+                                 char *out_arrmeta, char *out_data, const nd::array &val)
 {
   if (tp.is_builtin()) {
     memcpy(out_data, val.get_readonly_originptr(), tp.get_data_size());
