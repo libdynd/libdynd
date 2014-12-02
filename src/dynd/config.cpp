@@ -5,7 +5,7 @@
 
 #include <dynd/config.hpp>
 #include <dynd/types/static_type_instances.hpp>
-#include <dynd/fft.hpp>
+//#include <dynd/fft.hpp>
 
 #include <math.h>
 
@@ -31,7 +31,7 @@ int dynd::libdynd_init()
   dynd::init::datashape_parser_init();
   dynd::init::arrfunc_registry_init();
 #ifdef DYND_FFTW
-  dynd::init::fft_init();
+//  dynd::init::fft_init();
 #endif
 
   return 0;
@@ -40,7 +40,7 @@ int dynd::libdynd_init()
 void dynd::libdynd_cleanup()
 {
 #ifdef DYND_FFTW
-  dynd::init::fft_cleanup();
+//  dynd::init::fft_cleanup();
 #endif
   dynd::init::arrfunc_registry_cleanup();
   dynd::init::datashape_parser_cleanup();
