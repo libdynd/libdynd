@@ -48,7 +48,7 @@ dimensions can be specified as part of datashapes, the
 
 ### Overloading
 
-* https://github.com/ContinuumIO/libdynd/issues/97
+* https://github.com/libdynd/libdynd/issues/97
 
 The concept for overloading is that an overloaded arrfunc
 contains an array of arrfuncs with simple signatures,

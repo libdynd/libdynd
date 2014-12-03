@@ -200,7 +200,7 @@ A previous incarnation of DyND included some
 development towards this, with per-kernel customization
 of the associativity flag, commutativity flag, and
 identity element.
-https://github.com/ContinuumIO/dynd-python/blob/master/doc/source/gfunc.rst#creating-elementwise-reduction-gfuncs
+https://github.com/libdynd/dynd-python/blob/master/doc/source/gfunc.rst#creating-elementwise-reduction-gfuncs
 
 Elementwise Reductions
 ----------------------

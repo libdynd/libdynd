@@ -14,6 +14,6 @@ test:
     - test_libdynd
 
 about:
-  home: https://github.com/ContinuumIO/libdynd
+  home: https://github.com/libdynd/libdynd
   license: BSD
 

@@ -50,7 +50,7 @@ script:
   - if [ "$DYND_BUILD_TESTS" == "ON"]; then ./tests/test_libdynd; fi
   - if [ "$VALGRIND" == "ON" ]; then valgrind --tool=memcheck --leak-check=yes --show-reachable=yes --error-exitcode=123 ./tests/test_libdynd; fi
   - if [ "$PYTHON" == "ON" ]; then sudo make install; sudo ldconfig; fi
-  - if [ "$PYTHON" == "ON" ]; then git clone https://github.com/ContinuumIO/dynd-python.git; fi
+  - if [ "$PYTHON" == "ON" ]; then git clone https://github.com/libdynd/dynd-python.git; fi
   - if [ "$PYTHON" == "ON" ]; then cd dynd-python && mkdir build && cd build && cmake .. && make; fi
   - if [ "$PYTHON" == "ON" ]; then sudo make install; fi
   - if [ "$PYTHON" == "ON" ]; then python -c 'import dynd;dynd.test(exit=True)'; fi

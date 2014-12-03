@@ -25,7 +25,7 @@ the Python bindings and build and run both simultaneously. The
 instructions to get the source code and build it is available
 in the document
 
-    https://github.com/ContinuumIO/dynd-python/blob/master/BUILD_INSTALL.md
+    https://github.com/libdynd/dynd-python/blob/master/BUILD_INSTALL.md
 
 Running The Tests
 -----------------
@@ -87,7 +87,7 @@ The code which consumes and produces Blaze datashapes is in
 ``include/dtypes/datashape_parser.hpp`` and
 ``include/dtypes/datashape_formatter.hpp``.
 
-See https://github.com/ContinuumIO/datashape/tree/master/docs/source
+See https://github.com/libdynd/datashape/tree/master/docs/source
 for more general information aboud datashape.
 
 ### Kernels Source
