@@ -77,7 +77,7 @@ at evaluation time, to avoid requiring multiple passes through
 the array data.
 
 Consider the two arrays A = [[1], [2, 3]] and B = [[4], [5]].
-Their shapes are respectively (2, VarDim) and (2, 2), so
+Their shapes are respectively (2, VarDim) and (2, 1), so
 the broadcasting occurs as:
 
 ```
