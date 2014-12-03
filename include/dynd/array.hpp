@@ -47,8 +47,40 @@ template <size_t... I>
 struct index_proxy<index_sequence<I...>> {
   enum { size = index_sequence<I...>::size };
 
+#if !(defined(_MSC_VER) && _MSC_VER == 1800)
   template <typename... A>
   static void forward_as_array(A &&... a);
+#else
+  static void forward_as_array();
+  template <typename A0>
+  static void forward_as_array(A0 &&a0);
+  template <typename A0, typename A1>
+  static void forward_as_array(A0 &&a0, A1 &&a1);
+  template <typename A0, typename A1, typename A2>
+  static void forward_as_array(A0 &&a0, A1 &&a1, A2 &&a2);
+  template <typename A0, typename A1, typename A2, typename A3>
+  static void forward_as_array(A0 &&a0, A1 &&a1, A2 &&a2, A3 &&a3);
+  template <typename A0, typename A1, typename A2, typename A3, typename A4>
+  static void forward_as_array(A0 &&a0, A1 &&a1, A2 &&a2, A3 &&a3, A4 &&a4);
+  template <typename A0, typename A1, typename A2, typename A3, typename A4,
+            typename A5>
+  static void forward_as_array(A0 &&a0, A1 &&a1, A2 &&a2, A3 &&a3, A4 &&a4,
+                               A5 &&a5);
+  template <typename A0, typename A1, typename A2, typename A3, typename A4,
+            typename A5, typename A6>
+  static void forward_as_array(A0 &&a0, A1 &&a1, A2 &&a2, A3 &&a3, A4 &&a4,
+                               A5 &&a5, A6 &&a6);
+  template <typename A0, typename A1, typename A2, typename A3, typename A4,
+            typename A5, typename A6, typename A7>
+  static void forward_as_array(A0 &&a0, A1 &&a1, A2 &&a2, A3 &&a3, A4 &&a4,
+                               A5 &&a5, A6 &&a6, A7 &&a7);
+  template <typename A0, typename A1, typename A2, typename A3, typename A4,
+            typename A5, typename A6, typename A7, typename A8, typename A9,
+            typename A10, typename A11>
+  static void forward_as_array(A0 &&a0, A1 &&a1, A2 &&a2, A3 &&a3, A4 &&a4,
+                               A5 &&a5, A6 &&a6, A7 &&a7, A8 &&a8, A9 &&a9,
+                               A10 &&a10, A11 &&a11);
+#endif
 
   template <typename... T>
   static void forward_as_array(const ndt::type *tp, char *arrmeta,
@@ -1723,12 +1755,112 @@ void forward_as_array(const ndt::type &tp, char *arrmeta, char *data,
   forward_as_array(std::forward<A>(a)...);
 }
 
+#if !(defined(_MSC_VER) && _MSC_VER == 1800)
 template <size_t... I>
 template <typename... A>
 void index_proxy<index_sequence<I...>>::forward_as_array(A &&... a)
 {
   dynd::nd::forward_as_array(get<I>(std::forward<A>(a)...)...);
 }
+#else
+// Workaround for MSVC 2013 compiler bug reported here:
+// https://connect.microsoft.com/VisualStudio/feedback/details/1045260/unpacking-std-forward-a-a-fails-when-nested-with-another-unpacking
+template <size_t... I>
+void index_proxy<index_sequence<I...>>::forward_as_array()
+{
+  dynd::nd::forward_as_array(get<I>()...);
+}
+template <size_t... I>
+template <typename A0>
+void index_proxy<index_sequence<I...>>::forward_as_array(A0 &&a0)
+{
+  dynd::nd::forward_as_array(get<I>(std::forward<A0>(a0))...);
+}
+template <size_t... I>
+template <typename A0, typename A1>
+void index_proxy<index_sequence<I...>>::forward_as_array(A0 &&a0, A1 &&a1)
+{
+  dynd::nd::forward_as_array(
+      get<I>(std::forward<A0>(a0), std::forward<A1>(a1))...);
+}
+template <size_t... I>
+template <typename A0, typename A1, typename A2>
+void index_proxy<index_sequence<I...>>::forward_as_array(A0 &&a0, A1 &&a1, A2 &&a2)
+{
+  dynd::nd::forward_as_array(get<I>(std::forward<A0>(a0), std::forward<A1>(a1),
+                                    std::forward<A2>(a2))...);
+}
+template <size_t... I>
+template <typename A0, typename A1, typename A2, typename A3>
+void index_proxy<index_sequence<I...>>::forward_as_array(A0 &&a0, A1 &&a1,
+                                                         A2 &&a2, A3 &&a3)
+{
+  dynd::nd::forward_as_array(get<I>(std::forward<A0>(a0), std::forward<A1>(a1),
+                                    std::forward<A2>(a2),
+                                    std::forward<A3>(a3))...);
+}
+template <size_t... I>
+template <typename A0, typename A1, typename A2, typename A3, typename A4>
+void index_proxy<index_sequence<I...>>::forward_as_array(A0 &&a0, A1 &&a1,
+                                                         A2 &&a2, A3 &&a3,
+                                                         A4 &&a4)
+{
+  dynd::nd::forward_as_array(get<I>(std::forward<A0>(a0), std::forward<A1>(a1),
+                                    std::forward<A2>(a2), std::forward<A3>(a3),
+                                    std::forward<A4>(a4))...);
+}
+template <size_t... I>
+template <typename A0, typename A1, typename A2, typename A3, typename A4,
+          typename A5>
+void index_proxy<index_sequence<I...>>::forward_as_array(A0 &&a0, A1 &&a1,
+                                                         A2 &&a2, A3 &&a3,
+                                                         A4 &&a4, A5 &&a5)
+{
+  dynd::nd::forward_as_array(get<I>(
+      std::forward<A0>(a0), std::forward<A1>(a1), std::forward<A2>(a2),
+      std::forward<A3>(a3), std::forward<A4>(a4), std::forward<A5>(a5))...);
+}
+template <size_t... I>
+template <typename A0, typename A1, typename A2, typename A3, typename A4,
+          typename A5, typename A6>
+void index_proxy<index_sequence<I...>>::forward_as_array(A0 &&a0, A1 &&a1,
+                                                         A2 &&a2, A3 &&a3,
+                                                         A4 &&a4, A5 &&a5,
+                                                         A6 &&a6)
+{
+  dynd::nd::forward_as_array(get<I>(std::forward<A0>(a0), std::forward<A1>(a1),
+                                    std::forward<A2>(a2), std::forward<A3>(a3),
+                                    std::forward<A4>(a4), std::forward<A5>(a5),
+                                    std::forward<A6>(a6))...);
+}
+template <size_t... I>
+template <typename A0, typename A1, typename A2, typename A3, typename A4,
+          typename A5, typename A6, typename A7>
+void index_proxy<index_sequence<I...>>::forward_as_array(A0 &&a0, A1 &&a1,
+                                                         A2 &&a2, A3 &&a3,
+                                                         A4 &&a4, A5 &&a5,
+                                                         A6 &&a6, A7 &&a7)
+{
+  dynd::nd::forward_as_array(
+      get<I>(std::forward<A0>(a0), std::forward<A1>(a1), std::forward<A2>(a2),
+             std::forward<A3>(a3), std::forward<A4>(a4), std::forward<A5>(a5),
+             std::forward<A6>(a6), std::forward<A7>(a7))...);
+}
+template <size_t... I>
+template <typename A0, typename A1, typename A2, typename A3, typename A4,
+          typename A5, typename A6, typename A7, typename A8, typename A9,
+          typename A10, typename A11>
+void index_proxy<index_sequence<I...>>::forward_as_array(
+    A0 &&a0, A1 &&a1, A2 &&a2, A3 &&a3, A4 &&a4, A5 &&a5, A6 &&a6, A7 &&a7,
+    A8 &&a8, A9 &&a9, A10 &&a10, A11 &&a11)
+{
+  dynd::nd::forward_as_array(get<I>(
+      std::forward<A0>(a0), std::forward<A1>(a1), std::forward<A2>(a2),
+      std::forward<A3>(a3), std::forward<A4>(a4), std::forward<A5>(a5),
+      std::forward<A6>(a6), std::forward<A7>(a7), std::forward<A8>(a8),
+      std::forward<A9>(a9), std::forward<A10>(a10), std::forward<A11>(a11))...);
+}
+#endif
 
 template <size_t... I>
 template <typename... T>
