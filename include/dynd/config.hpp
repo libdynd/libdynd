@@ -380,6 +380,16 @@ struct zip<integer_sequence<T>, integer_sequence<T>,
     typedef integer_sequence<T> type;
 };
 
+#if defined(_MSC_VER) && _MSC_VER == 1800
+// This case shouldn't be necessary, but was added to work around bug:
+// https://connect.microsoft.com/VisualStudio/feedback/details/1045397/recursive-variadic-template-metaprogram-ice-when-pack-gets-to-empty-size
+template <typename T, T I0, T J0, T K0, T L0>
+struct zip<integer_sequence<T, I0>, integer_sequence<T, J0>,
+           integer_sequence<T, K0>, integer_sequence<T, L0>> {
+  typedef integer_sequence<T, I0, J0, K0, L0> type;
+};
+#endif
+
 template <typename T, T I0, T... I, T J0, T... J, T K0, T... K, T L0, T... L>
 struct zip<integer_sequence<T, I0, I...>, integer_sequence<T, J0, J...>,
            integer_sequence<T, K0, K...>, integer_sequence<T, L0, L...>> {
