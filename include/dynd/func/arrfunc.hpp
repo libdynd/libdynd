@@ -221,6 +221,7 @@ namespace nd {
       ndt::type m_types[sizeof...(T)];
       std::tuple<T...> m_vals;
 
+#if !(defined(_MSC_VER) && _MSC_VER == 1800)
     public:
       kwds(const typename as_<T, const char *>::type &... names, T &&... vals)
           : m_names{names...}, m_vals(std::forward<T>(vals)...)
@@ -229,6 +230,29 @@ namespace nd {
 
         ndt::index_proxy<I>::template get_types(m_types, get_vals());
       }
+#else
+      template <size_t I>
+      void assign_names()
+      {
+      }
+
+      template <size_t I, typename T0, typename... T>
+      void assign_names(T0 &&t0, T &&... t)
+      {
+        m_names[I] = t0;
+        assign_names<I + 1>(std::forward<T>(t)...);
+      }
+
+    public:
+      kwds(const typename as_<T, const char *>::type &... names, T &&... vals)
+          : m_vals(std::forward<T>(vals)...)
+      {
+        typedef typename make_index_sequence<0, sizeof...(T)>::type I;
+
+        assign_names<0>(names...);
+        ndt::index_proxy<I>::template get_types(m_types, get_vals());
+      }
+#endif
 
       /*
         const char *(&get_names() const)[sizeof...(T)] {
