@@ -259,7 +259,7 @@ struct remove_all_pointers<T *> {
     typedef typename remove_all_pointers<typename std::remove_cv<T>::type>::type type;
 };
 
-template <int I, typename T>
+template <size_t I, typename T>
 struct at;
 
 template <typename... T>
@@ -272,7 +272,7 @@ struct type_sequence {
     };
 };
 
-template <int I>
+template <size_t I>
 struct at<I, type_sequence<>> {
 };
 
@@ -281,17 +281,17 @@ struct at<0, type_sequence<T0, T...>> {
     typedef T0 type;
 };
 
-template <int I, typename T0, typename... T>
+template <size_t I, typename T0, typename... T>
 struct at<I, type_sequence<T0, T...>> {
     typedef typename at<I - 1, type_sequence<T...>>::type type;
 };
 
-template <int I, typename A0, typename... A>
+template <size_t I, typename A0, typename... A>
 typename std::enable_if<I == 0, A0>::type get(A0 &&a0, A &&...) {
     return a0;
 }
 
-template <int I, typename A0, typename... A>
+template <size_t I, typename A0, typename... A>
 typename std::enable_if<I != 0,
                         typename at<I, type_sequence<A0, A...>>::type>::type
 get(A0 &&, A &&... a)
@@ -381,7 +381,7 @@ struct zip<integer_sequence<T, I0, I...>, integer_sequence<T, J0, J...>,
                    integer_sequence<T, L...>>::type>::type type;
 };
 
-template <int n, typename... T>
+template <size_t n, typename... T>
 struct from;
 
 template <typename... T>
@@ -394,7 +394,7 @@ struct from<0, T0, T...> {
     typedef type_sequence<T0, T...> type;
 };
 
-template <int n, typename T0, typename... T>
+template <size_t n, typename T0, typename... T>
 struct from<n, T0, T...> {
     typedef typename from<n - 1, T...>::type type;
 };
@@ -404,12 +404,12 @@ struct from<0, type_sequence<T...>> {
     typedef type_sequence<T...> type;
 };
 
-template <int n, typename... T>
+template <size_t n, typename... T>
 struct from<n, type_sequence<T...> > {
     typedef typename from<n, T...>::type type;
 };
 
-template <int n, typename... T>
+template <size_t n, typename... T>
 struct to;
 
 template <typename... T>
@@ -422,7 +422,7 @@ struct to<0, T0, T...> {
     typedef type_sequence<> type;
 };
 
-template <int n, typename T0, typename... T>
+template <size_t n, typename T0, typename... T>
 struct to<n, T0, T...> {
     typedef typename prepend<T0, typename to<n - 1, T...>::type>::type type;
 };
@@ -432,7 +432,7 @@ struct to<0, type_sequence<T...>> {
     typedef type_sequence<> type;
 };
 
-template <int n, typename... T>
+template <size_t n, typename... T>
 struct to<n, type_sequence<T...>> {
     typedef typename to<n, T...>::type type;
 };
@@ -442,7 +442,7 @@ struct at<0, integer_sequence<T, J0, J...>> {
     static const T value = J0;
 };
 
-template <int I, typename T, T J0, T... J>
+template <size_t I, typename T, T J0, T... J>
 struct at<I, integer_sequence<T, J0, J...>> {
     static const T value = at<I - 1, integer_sequence<T, J...>>::value;
 };
@@ -507,11 +507,68 @@ struct index_proxy<index_sequence<I...>> {
     return (*func)(get<I>(std::forward<A>(a)...)...);
   }
 
+#if !(defined(_MSC_VER) && _MSC_VER == 1800)
   template <typename R, typename... A>
   static R make(A &&... a)
   {
     return R(get<I>(std::forward<A>(a)...)...);
   }
+#else
+  // Workaround for MSVC 2013 compiler bug reported here:
+  // https://connect.microsoft.com/VisualStudio/feedback/details/1045260/unpacking-std-forward-a-a-fails-when-nested-with-another-unpacking
+  template <typename R>
+  static R make()
+  {
+    return R(get<I>()...);
+  }
+  template <typename R, typename A0>
+  static R make(A0 &&a0)
+  {
+    return R(get<I>(std::forward<A0>(a0))...);
+  }
+  template <typename R, typename A0, typename A1>
+  static R make(A0 &&a0, A1 &&a1)
+  {
+    return R(get<I>(std::forward<A0>(a0), std::forward<A1>(a1))...);
+  }
+  template <typename R, typename A0, typename A1, typename A2>
+  static R make(A0 &&a0, A1 &&a1, A2 &&a2)
+  {
+    return R(get<I>(std::forward<A0>(a0), std::forward<A1>(a1),
+                    std::forward<A2>(a2))...);
+  }
+  template <typename R, typename A0, typename A1, typename A2, typename A3>
+  static R make(A0 &&a0, A1 &&a1, A2 &&a2, A3 &&a3)
+  {
+    return R(get<I>(std::forward<A0>(a0), std::forward<A1>(a1),
+                    std::forward<A2>(a2), std::forward<A3>(a3))...);
+  }
+  template <typename R, typename A0, typename A1, typename A2, typename A3,
+            typename A4>
+  static R make(A0 &&a0, A1 &&a1, A2 &&a2, A3 &&a3, A4 &&a4)
+  {
+    return R(get<I>(std::forward<A0>(a0), std::forward<A1>(a1),
+                    std::forward<A2>(a2), std::forward<A3>(a3),
+                    std::forward<A4>(a4))...);
+  }
+  template <typename R, typename A0, typename A1, typename A2, typename A3,
+            typename A4, typename A5>
+  static R make(A0 &&a0, A1 &&a1, A2 &&a2, A3 &&a3, A4 &&a4, A5 &&a5)
+  {
+    return R(get<I>(std::forward<A0>(a0), std::forward<A1>(a1),
+                    std::forward<A2>(a2), std::forward<A3>(a3),
+                    std::forward<A4>(a4), std::forward<A5>(a5))...);
+  }
+  template <typename R, typename A0, typename A1, typename A2, typename A3,
+            typename A4, typename A5, typename A6>
+  static R make(A0 &&a0, A1 &&a1, A2 &&a2, A3 &&a3, A4 &&a4, A5 &&a5, A6 &&a6)
+  {
+    return R(get<I>(std::forward<A0>(a0), std::forward<A1>(a1),
+                    std::forward<A2>(a2), std::forward<A3>(a3),
+                    std::forward<A4>(a4), std::forward<A5>(a5),
+                    std::forward<A6>(a6))...);
+  }
+#endif
 };
 
 } // namespace dynd

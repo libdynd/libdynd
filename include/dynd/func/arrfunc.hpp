@@ -273,15 +273,18 @@ typename instantiate<
                   type_sequence<T...>>::type>::type
 kwds(T &&... args)
 {
+  // Sequence of even integers, for extracting the keyword names
   typedef typename make_index_sequence<0, sizeof...(T), 2>::type I;
+  // Sequence of odd integers, for extracting the values
   typedef typename make_index_sequence<1, sizeof...(T), 2>::type J;
+  // Sequence of evens followed by odds
+  typedef typename concatenate<I, J>::type IJ;
+  // Type sequence of the values' types
+  typedef typename take<J, type_sequence<T...>>::type ValuesTypes;
+  // The kwds<...> type instantiated with the values' types
+  typedef typename instantiate<nd::detail::kwds, ValuesTypes>::type KwdsType;
 
-  return index_proxy<typename concatenate<I, J>::type>::template make<
-      typename instantiate<
-          nd::detail::kwds,
-          typename take<typename make_index_sequence<1, sizeof...(T), 2>::type,
-                        type_sequence<T...>>::type>::type>(
-      std::forward<T>(args)...);
+  return index_proxy<IJ>::template make<KwdsType>(std::forward<T>(args)...);
 }
 
 namespace nd {
