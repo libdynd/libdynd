@@ -161,7 +161,7 @@ TEST(Apply, FunctionWithKeywords)
   nd::arrfunc af;
 
   af = nd::make_apply_arrfunc<decltype(&func0), &func0>("y");
-  EXPECT_EQ(4, af(5, kwds("y", 3)).as<int>());
+  EXPECT_EQ(4, af(5, dynd::kwds("y", 3)).as<int>());
 
   af = nd::make_apply_arrfunc(&func0, "y");
   EXPECT_EQ(4, af(5, kwds("y", 3)).as<int>());
@@ -407,7 +407,6 @@ TYPED_TEST_P(Apply, Callable)
 
 TYPED_TEST_P(Apply, CallableWithKeywords)
 {
-
   nd::arrfunc af;
 
   typedef func_wrapper<kernel_request_host, decltype(&func0), &func0>

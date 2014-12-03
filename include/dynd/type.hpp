@@ -80,6 +80,62 @@ namespace nd {
 
 namespace ndt {
 
+template <typename I>
+struct index_proxy;
+
+template <size_t... I>
+struct index_proxy<index_sequence<I...>> {
+  enum { size = index_sequence<I...>::size };
+
+#if !(defined(_MSC_VER) && _MSC_VER == 1800)
+  template <typename... A>
+  static void get_types(A &&... a);
+#else
+  static void get_types();
+  template <typename A0>
+  static void get_types(A0 &&a0);
+  template <typename A0, typename A1>
+  static void get_types(A0 &&a0, A1 &&a1);
+  template <typename A0, typename A1, typename A2>
+  static void get_types(A0 &&a0, A1 &&a1, A2 &&a2);
+  template <typename A0, typename A1, typename A2, typename A3>
+  static void get_types(A0 &&a0, A1 &&a1, A2 &&a2, A3 &&a3);
+  template <typename A0, typename A1, typename A2, typename A3, typename A4>
+  static void get_types(A0 &&a0, A1 &&a1, A2 &&a2, A3 &&a3, A4 &&a4);
+  template <typename A0, typename A1, typename A2, typename A3, typename A4,
+            typename A5>
+  static void get_types(A0 &&a0, A1 &&a1, A2 &&a2, A3 &&a3, A4 &&a4, A5 &&a5);
+#endif
+
+  template <typename... T>
+  static void get_types(type *tp, const std::tuple<T...> &vals,
+                        const intptr_t *perm = NULL);
+
+#if !(defined(_MSC_VER) && _MSC_VER == 1800)
+  template <typename... A>
+  static void get_forward_types(A &&... a);
+#else
+  static void get_forward_types();
+  template <typename A0>
+  static void get_forward_types(A0 &&a0);
+  template <typename A0, typename A1>
+  static void get_forward_types(A0 &&a0, A1 &&a1);
+  template <typename A0, typename A1, typename A2>
+  static void get_forward_types(A0 &&a0, A1 &&a1, A2 &&a2);
+  template <typename A0, typename A1, typename A2, typename A3>
+  static void get_forward_types(A0 &&a0, A1 &&a1, A2 &&a2, A3 &&a3);
+  template <typename A0, typename A1, typename A2, typename A3, typename A4>
+  static void get_forward_types(A0 &&a0, A1 &&a1, A2 &&a2, A3 &&a3, A4 &&a4);
+  template <typename A0, typename A1, typename A2, typename A3, typename A4,
+            typename A5>
+  static void get_forward_types(A0 &&a0, A1 &&a1, A2 &&a2, A3 &&a3, A4 &&a4, A5 &&a5);
+#endif
+
+  template <typename... T>
+  static void get_forward_types(type *tp, const std::tuple<T...> &vals,
+                                const intptr_t *perm = NULL);
+};
+
 /**
  * This class represents a data type.
  *
@@ -855,12 +911,113 @@ inline type make_type(intptr_t ndim, const intptr_t *shape,
 type make_type(intptr_t ndim, const intptr_t *shape, const ndt::type &dtype,
                bool &out_any_var);
 
+template <typename T>
+type get_type(const T &DYND_UNUSED(val))
+{
+  return make_type<T>();
+}
+
+type get_type(const nd::array &val);
+
+template <typename T>
+void get_types(type &tp, const T &val)
+{
+  tp = ndt::get_type(val);
+}
+
+template <typename T, typename... A>
+void get_types(type &tp, const T &val, A &&... a)
+{
+  get_types(tp, val);
+  get_types(std::forward<A>(a)...);
+}
+
+#if !(defined(_MSC_VER) && _MSC_VER == 1800)
+template <size_t... I>
+template <typename... A>
+void index_proxy<index_sequence<I...>>::get_types(A &&... a)
+{
+  ndt::get_types(get<I>(std::forward<A>(a)...)...);
+}
+#else
+// Workaround for MSVC 2013 compiler bug reported here:
+// https://connect.microsoft.com/VisualStudio/feedback/details/1045260/unpacking-std-forward-a-a-fails-when-nested-with-another-unpacking
+template <size_t... I>
+void index_proxy<index_sequence<I...>>::get_types()
+{
+  ndt::get_types(get<I>()...);
+}
+template <size_t... I>
+template <typename A0>
+void index_proxy<index_sequence<I...>>::get_types(A0 &&a0)
+{
+  ndt::get_types(get<I>(std::forward<A0>(a0))...);
+}
+template <size_t... I>
+template <typename A0, typename A1>
+void index_proxy<index_sequence<I...>>::get_types(A0 &&a0, A1 &&a1)
+{
+  ndt::get_types(get<I>(std::forward<A0>(a0), std::forward<A1>(a1))...);
+}
+template <size_t... I>
+template <typename A0, typename A1, typename A2>
+void index_proxy<index_sequence<I...>>::get_types(A0 &&a0, A1 &&a1, A2 &&a2)
+{
+  ndt::get_types(get<I>(std::forward<A0>(a0), std::forward<A1>(a1),
+                        std::forward<A2>(a2))...);
+}
+template <size_t... I>
+template <typename A0, typename A1, typename A2, typename A3>
+void index_proxy<index_sequence<I...>>::get_types(A0 &&a0, A1 &&a1, A2 &&a2,
+                                                  A3 &&a3)
+{
+  ndt::get_types(get<I>(std::forward<A0>(a0), std::forward<A1>(a1),
+                        std::forward<A2>(a2), std::forward<A3>(a3))...);
+}
+template <size_t... I>
+template <typename A0, typename A1, typename A2, typename A3, typename A4>
+void index_proxy<index_sequence<I...>>::get_types(A0 &&a0, A1 &&a1, A2 &&a2,
+                                                  A3 &&a3, A4 &&a4)
+{
+  ndt::get_types(get<I>(std::forward<A0>(a0), std::forward<A1>(a1),
+                        std::forward<A2>(a2), std::forward<A3>(a3),
+                        std::forward<A4>(a4))...);
+}
+template <size_t... I>
+template <typename A0, typename A1, typename A2, typename A3, typename A4,
+          typename A5>
+void index_proxy<index_sequence<I...>>::get_types(A0 &&a0, A1 &&a1, A2 &&a2,
+                                                  A3 &&a3, A4 &&a4, A5 &&a5)
+{
+  ndt::get_types(get<I>(std::forward<A0>(a0), std::forward<A1>(a1),
+                        std::forward<A2>(a2), std::forward<A3>(a3),
+                        std::forward<A4>(a4), std::forward<A5>(a5))...);
+}
+#endif
+
+template <size_t... I>
+template <typename... T>
+void index_proxy<index_sequence<I...>>::get_types(type *tp,
+                                                  const std::tuple<T...> &vals,
+                                                  const intptr_t *perm)
+{
+  typedef typename make_index_sequence<size, 2 * size>::type J;
+
+  if (perm == NULL) {
+    index_proxy<typename zip<index_sequence<I...>, J>::type>::
+        template get_types(tp[I]..., std::get<I>(vals)...);
+  } else {
+    index_proxy<typename zip<index_sequence<I...>, J>::type>::
+        template get_types(tp[perm[I]]..., std::get<I>(vals)...);
+  }
+}
+
 /**
  * Returns the type to use for packing this specific value. The value
  * is allowed to affect the type, e.g. for packing a std::vector
  */
 template <typename T>
-type make_packed_type(const T &DYND_UNUSED(val))
+type get_forward_type(const T &DYND_UNUSED(val))
 {
   // Default case is for when T and the ndt::type have identical
   // memory layout, which is guaranteed by make_exact_type<T>().
@@ -868,7 +1025,7 @@ type make_packed_type(const T &DYND_UNUSED(val))
 }
 
 template <typename T>
-type make_packed_type(const std::vector<T> &val)
+type get_forward_type(const std::vector<T> &val)
 {
   // Depending on the data size, store the data by value or as a pointer
   // to an nd::array
@@ -879,7 +1036,99 @@ type make_packed_type(const std::vector<T> &val)
   }
 }
 
-type make_packed_type(const nd::array &val);
+type get_forward_type(const nd::array &val);
+
+template <typename T>
+void get_forward_types(type &tp, const T &val)
+{
+    tp = get_forward_type(val);
+}
+
+template <typename T, typename... A>
+void get_forward_types(type &tp, const T &val, A &&... a)
+{
+    get_forward_types(tp, val);
+    get_forward_types(std::forward<A>(a)...);
+}
+
+#if !(defined(_MSC_VER) && _MSC_VER == 1800)
+template <size_t... I>
+template <typename... A>
+void index_proxy<index_sequence<I...>>::get_forward_types(A &&... a)
+{
+  ndt::get_forward_types(get<I>(std::forward<A>(a)...)...);
+}
+#else
+// Workaround for MSVC 2013 compiler bug reported here:
+// https://connect.microsoft.com/VisualStudio/feedback/details/1045260/unpacking-std-forward-a-a-fails-when-nested-with-another-unpacking
+template <size_t... I>
+void index_proxy<index_sequence<I...>>::get_forward_types()
+{
+  ndt::get_forward_types(get<I>()...);
+}
+template <size_t... I>
+template <typename A0>
+void index_proxy<index_sequence<I...>>::get_forward_types(A0 &&a0)
+{
+  ndt::get_forward_types(get<I>(std::forward<A0>(a0))...);
+}
+template <size_t... I>
+template <typename A0, typename A1>
+void index_proxy<index_sequence<I...>>::get_forward_types(A0 &&a0, A1 &&a1)
+{
+  ndt::get_forward_types(get<I>(std::forward<A0>(a0), std::forward<A1>(a1))...);
+}
+template <size_t... I>
+template <typename A0, typename A1, typename A2>
+void index_proxy<index_sequence<I...>>::get_forward_types(A0 &&a0, A1 &&a1, A2 &&a2)
+{
+  ndt::get_forward_types(get<I>(std::forward<A0>(a0), std::forward<A1>(a1),
+                        std::forward<A2>(a2))...);
+}
+template <size_t... I>
+template <typename A0, typename A1, typename A2, typename A3>
+void index_proxy<index_sequence<I...>>::get_forward_types(A0 &&a0, A1 &&a1, A2 &&a2,
+                                                  A3 &&a3)
+{
+  ndt::get_forward_types(get<I>(std::forward<A0>(a0), std::forward<A1>(a1),
+                        std::forward<A2>(a2), std::forward<A3>(a3))...);
+}
+template <size_t... I>
+template <typename A0, typename A1, typename A2, typename A3, typename A4>
+void index_proxy<index_sequence<I...>>::get_forward_types(A0 &&a0, A1 &&a1, A2 &&a2,
+                                                  A3 &&a3, A4 &&a4)
+{
+  ndt::get_forward_types(get<I>(std::forward<A0>(a0), std::forward<A1>(a1),
+                        std::forward<A2>(a2), std::forward<A3>(a3),
+                        std::forward<A4>(a4))...);
+}
+template <size_t... I>
+template <typename A0, typename A1, typename A2, typename A3, typename A4,
+          typename A5>
+void index_proxy<index_sequence<I...>>::get_forward_types(A0 &&a0, A1 &&a1, A2 &&a2,
+                                                  A3 &&a3, A4 &&a4, A5 &&a5)
+{
+  ndt::get_forward_types(get<I>(std::forward<A0>(a0), std::forward<A1>(a1),
+                        std::forward<A2>(a2), std::forward<A3>(a3),
+                        std::forward<A4>(a4), std::forward<A5>(a5))...);
+}
+#endif
+
+template <size_t... I>
+template <typename... T>
+void index_proxy<index_sequence<I...>>::get_forward_types(
+    type *tp, const std::tuple<T...> &vals, const intptr_t *perm)
+{
+  typedef typename make_index_sequence<size, 2 * size>::type J;
+
+  if (perm == NULL) {
+    index_proxy<typename zip<index_sequence<I...>, J>::type>::
+        template get_forward_types(tp[I]..., std::get<I>(vals)...);
+  } else {
+    index_proxy<typename zip<index_sequence<I...>, J>::type>::
+        template get_forward_types(tp[perm[I]]..., std::get<I>(vals)...);
+  }
+}
 
 /**
  * A static array of the builtin types and void.

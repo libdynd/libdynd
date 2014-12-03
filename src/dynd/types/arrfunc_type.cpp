@@ -187,17 +187,16 @@ intptr_t arrfunc_type::get_arg_index(const char *arg_name_begin,
     size_t size = arg_name_end - arg_name_begin;
     if (size > 0) {
         char firstchar = *arg_name_begin;
-        intptr_t narg = get_narg();
         const char *fn_ptr = m_arg_names.get_readonly_originptr();
         intptr_t fn_stride =
             reinterpret_cast<const fixed_dim_type_arrmeta *>(
                 m_arg_names.get_arrmeta())->stride;
-        for (intptr_t i = 0; i != narg; ++i, fn_ptr += fn_stride) {
+        for (intptr_t i = 0; i != get_nkwd(); ++i, fn_ptr += fn_stride) {
             const string_type_data *fn = reinterpret_cast<const string_type_data *>(fn_ptr);
             const char *begin = fn->begin, *end = fn->end;
             if ((size_t)(end - begin) == size && *begin == firstchar) {
                 if (memcmp(fn->begin, arg_name_begin, size) == 0) {
-                    return i;
+                    return i + get_npos();
                 }
             }
         }

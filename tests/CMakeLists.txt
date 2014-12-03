@@ -98,7 +98,7 @@ set(tests_SRC
     array/test_view.cpp
     vm/test_elwise_program.cpp
     test_arithmetic_op.cpp
-    test_fft.cpp
+#    test_fft.cpp
     test_shape_tools.cpp
     test_platform.cpp
     ../thirdparty/gtest/gtest-all.cc

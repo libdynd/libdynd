@@ -434,7 +434,7 @@ set(libdynd_SRC
     # Main
     src/dynd/arithmetic_op.cpp
     src/dynd/array.cpp
-    src/dynd/fft.cpp
+#    src/dynd/fft.cpp
     src/dynd/array_range.cpp
     src/dynd/config.cpp
     src/dynd/dim_iter.cpp
@@ -471,7 +471,7 @@ set(libdynd_SRC
     include/dynd/dynd_math.hpp
     include/dynd/ensure_immutable_contig.hpp
     include/dynd/random.hpp
-    include/dynd/fft.hpp
+#    include/dynd/fft.hpp
     include/dynd/type.hpp
     include/dynd/typed_data_assign.hpp
     include/dynd/type_promotion.hpp
