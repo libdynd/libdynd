@@ -23,6 +23,13 @@
 //#  define DYND_RVALUE_REFS
 //#endif
 
+// On OSX build machine, there is no <initializer_list> header.
+// TODO: Remove this build workaround once this is resolved
+#if !(__has_feature(cxx_generalized_initializers) &&                           \
+      __has_include(<initializer_list>))
+#  define DYND_DISABLE_INIT_LIST
+#endif
+
 #if __has_feature(cxx_constexpr)
 #  define DYND_CONSTEXPR constexpr
 #else
@@ -152,7 +159,9 @@ public:
 #endif
 
 // If Initializer Lists are supported
+#ifndef DYND_DISABLE_INIT_LIST
 #include <initializer_list>
+#endif
 
 // If being run from the CLING C++ interpreter
 #ifdef DYND_CLING

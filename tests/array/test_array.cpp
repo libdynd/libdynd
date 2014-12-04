@@ -524,6 +524,7 @@ TEST(Array, ConstructorMemoryLayouts) {
     }
 }
 
+#if !defined(DYND_DISABLE_INIT_LIST)
 TEST(Array, InitFromInitializerLists) {
     nd::array a = {1, 2, 3, 4, 5};
     EXPECT_EQ(ndt::make_type<int>(), a.get_dtype());
@@ -584,6 +585,7 @@ TEST(Array, InitFromInitializerLists) {
     EXPECT_THROW((a = {{{1},{2},{3}}, {{1},{2},{3, 4}}}), runtime_error);
 #endif // DYND_NESTED_INIT_LIST_BUG
 }
+#endif // !defined(DYND_DISABLE_INIT_LIST)
 
 TEST(Array, InitFromNestedCArray) {
     int i0[2][3] = {{1,2,3}, {4,5,6}};
