@@ -9,8 +9,10 @@ CXX=c++
 
 if [ `uname` == Darwin ]; then
     CPPFLAGS="-stdlib=libc++ "
+    OSX_DEPLOYMENT_TARGET="-DCMAKE_OSX_DEPLOYMENT_TARGET=10.8"
 else
     CPPFLAGS=
+    OSX_DEPLOYMENT_TARGET=
 fi
 
 echo Creating build directory...
@@ -20,6 +22,7 @@ cd build
 pwd
 echo Configuring build with cmake...
 cmake \
+    $OSX_DEPLOYMENT_TARGET \
     -DCMAKE_C_COMPILER=$CC \
     -DCMAKE_CXX_COMPILER="$CXX"  \
     -DCMAKE_CXX_FLAGS="$CPPFLAGS" \
