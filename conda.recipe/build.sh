@@ -5,7 +5,7 @@ cd $RECIPE_DIR
 
 echo Setting the compiler...
 CC=cc
-CXX=c++ -stdlib=libc++
+CXX="c++ -stdlib=libc++"
 
 # For proper C++11 support on OSX, looks like
 # we need to set this.
