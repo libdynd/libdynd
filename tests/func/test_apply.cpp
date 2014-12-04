@@ -92,7 +92,6 @@ DYND_CUDA_HOST_DEVICE double func7(int x, int y, double z)
   return (x % y) * z;
 }
 
-#if !defined(DYND_DISABLE_INIT_LIST)
 TEST(Apply, Function)
 {
   nd::arrfunc af;
@@ -156,7 +155,6 @@ TEST(Apply, Function)
   af = nd::make_apply_arrfunc(&func7);
   EXPECT_EQ(36.3, af(38, 5, 12.1).as<double>());
 }
-#endif // !defined(DYND_DISABLE_INIT_LIST)
 
 TEST(Apply, FunctionWithKeywords)
 {
