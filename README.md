@@ -3,6 +3,12 @@ The DyND Library
 
 TravisCI: [![Build Status](https://api.travis-ci.org/libdynd/libdynd.svg?branch=master)](https://travis-ci.org/libdynd/libdynd) AppVeyor: [![Build status](https://ci.appveyor.com/api/projects/status/qu6mth15w2gbe8v4?svg=true)](https://ci.appveyor.com/project/mwiebe/libdynd)
 
+The core DyND developer team consists of
+[Mark Wiebe](https://github.com/mwiebe) and
+[Irwin Zaid](https://github.com/izaid). Much of the funding that made this
+project possible came through [Continuum Analytics](http://continuum.io/)
+and [DARPA-BAA-12-38](https://www.fbo.gov/index?s=opportunity&mode=form&id=7a77846c73ffc5cb22f9295ffe6cdd55&tab=core&_cview=0),
+part of [XDATA](http://www.darpa.mil/Our_Work/I2O/Programs/XDATA.aspx).
 
 LibDyND, a component of [the Blaze project](http://blaze.pydata.org/),
 is a C++ library for dynamic, multidimensional arrays. It is inspired
@@ -26,6 +32,38 @@ a high level perspective. See
 
 To discuss the development of this library, subscribe to the
 [LibDyND Development List](https://groups.google.com/forum/#!forum/libdynd-dev).
+
+A Brief History Of DyND
+=======================
+
+DyND was started in the autumn of 2011 by
+[Mark Wiebe](https://github.com/mwiebe), as a private project to begin
+dabbling in ideas for how a dynamic multi-dimensional array library
+could be structured in C++. During the early formation of
+[Continuum Analytics](http://continuum.io/about-continuum), DyND was
+open sourced and brought into the company as a part of the
+[Blaze project](http://blaze.pydata.org/).
+
+Continuum secured funding for the Blaze project through DARPA's
+[XDATA program](http://www.darpa.mil/Our_Work/I2O/Programs/XDATA.aspx),
+giving the project space and time to develop as it needed and providing
+real data sets and challenge problems to tackle and measure against.
+
+DyND attracted its first major outside contributor,
+[Irwin Zaid](https://github.com/izaid), from across the Atlantic during
+the cold of winter in 2014. Warmed by the heat of a GPU, Irwin began
+by contributing early [CUDA](https://developer.nvidia.com/about-cuda)
+support to the library, playing a gradually increasing role in the
+design and goals of the project.
+
+DyND is still in an experimental mode, with some mature components and
+others severely lacking. Current focus is on the completion of the
+[ArrFunc object](docs/arrfuncs.md) to represent array functions and to
+flesh out a basic set of functionality modeled after
+[NumPy](http://www.numpy.org/). New contributors are welcome, so if you
+have the patience to collaborate on a maturing code base, and enjoy C++,
+array-oriented, and numeric programming, DyND might be the the open source
+project you're looking for.
 
 Building
 ========
