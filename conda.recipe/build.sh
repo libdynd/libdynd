@@ -8,7 +8,7 @@ CC=cc
 CXX=c++
 
 if [ `uname` == Darwin ]; then
-    CPPFLAGS="-stdlib=libc++ "
+    CPPFLAGS="-stdlib=libc++"
     EXTRAOPTIONS="-DCMAKE_OSX_DEPLOYMENT_TARGET=10.8"
     MACOSX_DEPLOYMENT_TARGET=10.8
 else

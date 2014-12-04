@@ -42,6 +42,7 @@ if [ `uname` == Darwin ]; then
   echo Invalid compiler version on `uname`: ${COMPILER_VERSION}
   exit 1
  fi
+ export MACOSX_DEPLOYMENT_TARGET=10.8
 else
  if [ "${COMPILER_VERSION}" == "gcc" ]; then
   if [ -f /opt/rh/devtoolset-2/enable ]; then
@@ -73,7 +74,7 @@ rm -rf build
 
 if [ `uname` == 'Darwin' ]; then
     # On OSX, use @rpath for relative linking
-    export EXTRA=-DUSE_RELATIVE_RPATH=ON
+    export EXTRA="-DUSE_RELATIVE_RPATH=ON -DCMAKE_CXX_FLAGS=-stdlib=libc++"
 else
     export EXTRA=
 fi
@@ -84,7 +85,11 @@ fi
 
 mkdir build
 cd build
-cmake ${EXTRA} -DCMAKE_INSTALL_PREFIX=install -DCMAKE_C_COMPILER=${CC} -DCMAKE_CXX_COMPILER=${CXX} .. || exit 1
+cmake \
+    ${EXTRA} \
+    -DCMAKE_INSTALL_PREFIX=install \
+    -DCMAKE_C_COMPILER=${CC} \
+    -DCMAKE_CXX_COMPILER=${CXX} .. || exit 1
 make -j5
 
 ./tests/test_libdynd  --gtest_output=xml:../test_results.xml || exit 1
