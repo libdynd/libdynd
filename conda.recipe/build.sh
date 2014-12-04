@@ -9,6 +9,8 @@ CXX=c++
 
 if [ `uname` == Darwin ]; then
     CPPFLAGS="-stdlib=libc++ "
+else
+    CPPFLAGS=
 fi
 
 echo Creating build directory...
@@ -20,6 +22,7 @@ echo Configuring build with cmake...
 cmake \
     -DCMAKE_C_COMPILER=$CC \
     -DCMAKE_CXX_COMPILER="$CXX"  \
+    -DCMAKE_CXX_FLAGS="$CPPFLAGS" \
     -DCMAKE_BUILD_TYPE=Release  \
     -DDYND_SHARED_LIB=ON \
     -DDYND_INSTALL_LIB=ON \
