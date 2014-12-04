@@ -7,6 +7,10 @@ echo Setting the compiler...
 CC=cc
 CXX=c++
 
+# For proper C++11 support on OSX, looks like
+# we need to set this.
+export CMAKE_OSX_DEPLOYMENT_TARGET=10.9
+
 echo Creating build directory...
 cd ..
 mkdir build
