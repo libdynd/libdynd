@@ -89,13 +89,20 @@ static size_t make_elwise_strided_dimension_expr_kernel_for_N(
     return make_lifted_expr_ckernel(
         elwise_handler, elwise_handler_tp, ckb, ckb_offset, dst_ndim - 1,
         child_dst_tp, child_dst_arrmeta, child_src_ndim, child_src_tp,
-        child_src_arrmeta, kernel_request_strided, ectx);
+        child_src_arrmeta,
+        kernel_request_strided |
+            ((kernreq & kernel_request_cuda_device) ? kernel_request_cuda_device
+                                                    : 0),
+        ectx);
   }
   // Instantiate the elementwise handler
   return elwise_handler->instantiate(
       elwise_handler, elwise_handler_tp, ckb, ckb_offset, child_dst_tp,
       child_dst_arrmeta, child_src_tp, child_src_arrmeta,
-      kernel_request_strided, ectx, nd::array(), nd::array());
+      kernel_request_strided |
+          ((kernreq & kernel_request_cuda_device) ? kernel_request_cuda_device
+                                                  : 0),
+      ectx, nd::array(), nd::array());
 }
 
 inline static size_t make_elwise_strided_dimension_expr_kernel(
