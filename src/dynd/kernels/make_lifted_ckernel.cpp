@@ -10,6 +10,7 @@
 #include <dynd/types/var_dim_type.hpp>
 #include <dynd/kernels/expr_kernel_generator.hpp>
 #include <dynd/kernels/elwise.hpp>
+#include <dynd/kernels/cuda_kernels.hpp>
 
 using namespace std;
 using namespace dynd;
@@ -34,8 +35,8 @@ static size_t make_elwise_strided_dimension_expr_kernel_for_N(
   ndt::type child_src_tp[N];
 
   intptr_t size, dst_stride, src_stride[N];
-  if (!dst_tp.get_as_strided(dst_arrmeta, &size, &dst_stride,
-                             &child_dst_tp, &child_dst_arrmeta)) {
+  if (!dst_tp.get_as_strided(dst_arrmeta, &size, &dst_stride, &child_dst_tp,
+                             &child_dst_arrmeta)) {
     stringstream ss;
     ss << "make_elwise_strided_dimension_expr_kernel: error processing "
           "type " << dst_tp << " as strided";
@@ -70,7 +71,18 @@ static size_t make_elwise_strided_dimension_expr_kernel_for_N(
     finished = finished && child_src_ndim[i] == 0;
   }
 
-  self_type::create(ckb, kernreq, ckb_offset, size, dst_stride, src_stride);
+#ifdef __CUDACC__
+  if (dst_tp.get_dtype().get_type_id() == cuda_device_type_id &&
+      (kernreq & kernel_request_cuda_device) == false) {
+    typedef kernels::cuda_parallel_ck<N> self_type;
+    self_type *self = self_type::create(ckb, kernreq, ckb_offset, 1, 1);
+    ckb = self->get_ckb();
+    kernreq |= kernel_request_cuda_device;
+    ckb_offset = 0;
+  }
+#endif
+  self_type::create(ckb, kernreq, ckb_offset, size, dst_stride,
+                    kernels::array_wrapper<intptr_t, N>(src_stride));
 
   // If there are still dimensions to broadcast, recursively lift more
   if (!finished) {

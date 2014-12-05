@@ -296,7 +296,7 @@ __global__ void cuda_device_init(ckernel_prefix *rawself,
   self_type::init(rawself, kernreq, args...);
 }
 
-__global__ void cuda_device_destroy(ckernel_prefix *self) { self->destroy(); }
+void cuda_device_destroy(ckernel_prefix *self);
 
 void throw_if_not_cuda_success(cudaError_t);
 
@@ -358,11 +358,7 @@ public:
         ckernel_builder<kernel_request_cuda_device>>::destroy();
   }
 
-  void destroy(ckernel_prefix *self)
-  {
-    cuda_device_destroy << <1, 1>>> (self);
-    cudaDeviceSynchronize();
-  }
+  void destroy(ckernel_prefix *self) { cuda_device_destroy(self); }
 };
 
 #endif
@@ -614,7 +610,7 @@ namespace kernels {
     /**                                                                        \
      * Returns the child ckernel immediately following this one.               \
      */                                                                        \
-    ckernel_prefix *get_child_ckernel()                                        \
+    __VA_ARGS__ ckernel_prefix *get_child_ckernel()                            \
     {                                                                          \
       return get_child_ckernel(sizeof(self_type));                             \
     }                                                                          \
@@ -622,7 +618,7 @@ namespace kernels {
     /**                                                                        \
      * Returns the child ckernel at the specified offset.                      \
      */                                                                        \
-    ckernel_prefix *get_child_ckernel(intptr_t offset)                         \
+    __VA_ARGS__ ckernel_prefix *get_child_ckernel(intptr_t offset)             \
     {                                                                          \
       return base.get_child_ckernel(ckernel_prefix::align_offset(offset));     \
     }                                                                          \
@@ -669,7 +665,8 @@ namespace kernels {
   {
     return self_type::create(
         reinterpret_cast<ckernel_builder<kernel_request_cuda_device> *>(ckb),
-        kernreq, inout_ckb_offset, std::forward<A>(args)...);
+        kernreq & ~kernel_request_cuda_device, inout_ckb_offset,
+        std::forward<A>(args)...);
   }
 
   template <typename CKT>
@@ -681,11 +678,49 @@ namespace kernels {
   {
     return self_type::create_leaf(
         reinterpret_cast<ckernel_builder<kernel_request_cuda_device> *>(ckb),
-        kernreq, inout_ckb_offset, std::forward<A>(args)...);
+        kernreq & ~kernel_request_cuda_device, inout_ckb_offset,
+        std::forward<A>(args)...);
   }
 
   GENERAL_CK(kernel_request_host | kernel_request_cuda_device,
              __host__ __device__);
+
+  template <typename CKT>
+  template <typename... A>
+  typename general_ck<CKT, kernel_request_host |
+                               kernel_request_cuda_device>::self_type *
+  general_ck<CKT, kernel_request_host | kernel_request_cuda_device>::create(
+      void *ckb, kernel_request_t kernreq, intptr_t &inout_ckb_offset,
+      A &&... args)
+  {
+    if (kernreq & kernel_request_cuda_device) {
+      return self_type::create(
+          reinterpret_cast<ckernel_builder<kernel_request_cuda_device> *>(ckb),
+          kernreq & ~kernel_request_cuda_device, inout_ckb_offset,
+          std::forward<A>(args)...);
+    }
+    return self_type::create(
+        reinterpret_cast<ckernel_builder<kernel_request_host> *>(ckb), kernreq,
+        inout_ckb_offset, std::forward<A>(args)...);
+  }
+
+  template <typename CKT>
+  template <typename... A>
+  typename general_ck<CKT, kernel_request_host |
+                               kernel_request_cuda_device>::self_type *
+  general_ck<CKT, kernel_request_host | kernel_request_cuda_device>::
+      create_leaf(void *ckb, kernel_request_t kernreq,
+                  intptr_t &inout_ckb_offset, A &&... args)
+  {
+    if (kernreq & kernel_request_cuda_device) {
+      return self_type::create_leaf(
+          reinterpret_cast<ckernel_builder<kernel_request_cuda_device> *>(ckb),
+          kernreq, inout_ckb_offset, std::forward<A>(args)...);
+    }
+    return self_type::create_leaf(
+        reinterpret_cast<ckernel_builder<kernel_request_host> *>(ckb), kernreq,
+        inout_ckb_offset, std::forward<A>(args)...);
+  }
 
 #endif
 

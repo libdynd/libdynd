@@ -64,7 +64,6 @@ set(tests_SRC
     types/test_var_dim_type.cpp
     func/special_vals.hpp
     func/test_apply.cpp
-    func/test_apply.cu
     func/test_arrfunc.cpp
     func/test_callable.cpp
     func/test_chain_arrfunc.cpp
@@ -121,9 +120,11 @@ if (DYND_CUDA)
     # Replace some source files with their CUDA versions
     list(REMOVE_ITEM tests_SRC
         func/test_apply.cpp
+        func/test_lift_arrfunc.cpp
         )
     list(APPEND tests_SRC
         func/test_apply.cu
+        func/test_lift_arrfunc.cu
         )
 endif()
 

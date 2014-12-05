@@ -529,7 +529,10 @@ if (DYND_CUDA)
         )
     list(APPEND libdynd_SRC
         src/dynd/kernels/assignment_kernels.cu
+        src/dynd/kernels/ckernel_builder.cu
         )
+
+    set(CUDA_SEPARABLE_COMPILATION ON)
 
     set(CUDA_NVCC_FLAGS ${CUDA_NVCC_FLAGS};-std=c++11;-Xcompiler;-fPIC)
 
@@ -537,8 +540,6 @@ if (DYND_CUDA)
     set(CUDA_NVCC_FLAGS ${CUDA_NVCC_FLAGS};-Werror=cross-execution-space-call;
         -Xcudafe;--diag_suppress=boolean_controlling_expr_is_constant;
         -Xcudafe;--diag_suppress=cc_clobber_ignored)
-
-#    set(CUDA_SEPARABLE_COMPILATION ON)
 endif()
 
 if (DYND_FFTW)
