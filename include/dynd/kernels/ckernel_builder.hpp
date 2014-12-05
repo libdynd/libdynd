@@ -719,7 +719,7 @@ namespace kernels {
     if (kernreq & kernel_request_cuda_device) {
       return self_type::create_leaf(
           reinterpret_cast<ckernel_builder<kernel_request_cuda_device> *>(ckb),
-          kernreq, inout_ckb_offset, std::forward<A>(args)...);
+          kernreq & ~kernel_request_cuda_device, inout_ckb_offset, std::forward<A>(args)...);
     }
     return self_type::create_leaf(
         reinterpret_cast<ckernel_builder<kernel_request_host> *>(ckb), kernreq,

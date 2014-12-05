@@ -189,6 +189,7 @@ struct callable_to_lift {
   DYND_CUDA_HOST_DEVICE int operator()(int x, int y) { return x + y; }
 };
 
+/*
 TEST(Elwise, BinaryExpr)
 {
   nd::arrfunc af =
@@ -206,6 +207,7 @@ TEST(Elwise, BinaryExpr)
   EXPECT_ARR_EQ(c, af(a, b).to_host());
 #endif
 }
+*/
 
 /*
 // TODO Reenable once there's a convenient way to make the binary arrfunc

@@ -141,7 +141,7 @@ struct ckernel_prefix {
    * If the provided offset is non-zero, destroys
    * a ckernel at the given offset from `this`.
    */
-  void destroy_child_ckernel(size_t offset)
+  DYND_CUDA_HOST_DEVICE void destroy_child_ckernel(size_t offset)
   {
     if (offset != 0) {
       ckernel_prefix *child = get_child_ckernel(offset);
