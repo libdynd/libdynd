@@ -296,7 +296,7 @@ __global__ void cuda_device_init(ckernel_prefix *rawself,
   self_type::init(rawself, kernreq, args...);
 }
 
-void cuda_device_destroy(ckernel_prefix *self);
+__global__ void cuda_device_destroy(ckernel_prefix *self);
 
 void throw_if_not_cuda_success(cudaError_t);
 
@@ -358,7 +358,11 @@ public:
         ckernel_builder<kernel_request_cuda_device>>::destroy();
   }
 
-  void destroy(ckernel_prefix *self) { cuda_device_destroy(self); }
+  void destroy(ckernel_prefix *self)
+  {
+    cuda_device_destroy<<<1, 1>>>(self);
+    throw_if_not_cuda_success(cudaDeviceSynchronize());
+  }
 };
 
 #endif
