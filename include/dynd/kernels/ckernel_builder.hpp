@@ -10,8 +10,6 @@
 
 #include <dynd/config.hpp>
 #include <dynd/kernels/ckernel_prefix.hpp>
-#include <dynd/pp/list.hpp>
-#include <dynd/pp/meta.hpp>
 #include <dynd/types/type_id.hpp>
 
 namespace dynd {
