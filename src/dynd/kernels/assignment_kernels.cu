@@ -17,14 +17,14 @@
 static void unaligned_copy_single_cuda_host_to_device(char *dst, char **src,
                 ckernel_prefix *extra)
 {
-    size_t data_size = reinterpret_cast<unaligned_copy_ck *>(extra)->data_size;
+    size_t data_size = reinterpret_cast<kernels::unaligned_copy_ck *>(extra)->data_size;
     throw_if_not_cuda_success(cudaMemcpy(dst, *src, data_size, cudaMemcpyHostToDevice));
 }
 static void unaligned_copy_strided_cuda_host_to_device(char *dst, intptr_t dst_stride,
                         char **src, const intptr_t *src_stride,
                         size_t count, ckernel_prefix *extra)
 {
-    size_t data_size = reinterpret_cast<unaligned_copy_ck *>(extra)->data_size;
+    size_t data_size = reinterpret_cast<kernels::unaligned_copy_ck *>(extra)->data_size;
 
     char *src0 = *src;
     intptr_t src0_stride = *src_stride;
@@ -37,14 +37,14 @@ static void unaligned_copy_strided_cuda_host_to_device(char *dst, intptr_t dst_s
 static void unaligned_copy_single_cuda_device_to_host(char *dst, char **src,
                 ckernel_prefix *extra)
 {
-    size_t data_size = reinterpret_cast<unaligned_copy_ck *>(extra)->data_size;
+    size_t data_size = reinterpret_cast<kernels::unaligned_copy_ck *>(extra)->data_size;
     throw_if_not_cuda_success(cudaMemcpy(dst, *src, data_size, cudaMemcpyDeviceToHost));
 }
 static void unaligned_copy_strided_cuda_device_to_host(char *dst, intptr_t dst_stride,
                         char **src, const intptr_t *src_stride,
                         size_t count, ckernel_prefix *extra)
 {
-    size_t data_size = reinterpret_cast<unaligned_copy_ck *>(extra)->data_size;
+    size_t data_size = reinterpret_cast<kernels::unaligned_copy_ck *>(extra)->data_size;
 
     char *src0 = *src;
     intptr_t src0_stride = *src_stride;
@@ -57,14 +57,14 @@ static void unaligned_copy_strided_cuda_device_to_host(char *dst, intptr_t dst_s
 static void unaligned_copy_single_cuda_device_to_device(char *dst, char **src,
                 ckernel_prefix *extra)
 {
-    size_t data_size = reinterpret_cast<unaligned_copy_ck *>(extra)->data_size;
+    size_t data_size = reinterpret_cast<kernels::unaligned_copy_ck *>(extra)->data_size;
     throw_if_not_cuda_success(cudaMemcpy(dst, *src, data_size, cudaMemcpyDeviceToDevice));
 }
 static void unaligned_copy_strided_cuda_device_to_device(char *dst, intptr_t dst_stride,
                         char **src, const intptr_t *src_stride,
                         size_t count, ckernel_prefix *extra)
 {
-    size_t data_size = reinterpret_cast<unaligned_copy_ck *>(extra)->data_size;
+    size_t data_size = reinterpret_cast<kernels::unaligned_copy_ck *>(extra)->data_size;
 
     char *src0 = *src;
     intptr_t src0_stride = *src_stride;
@@ -611,37 +611,37 @@ size_t dynd::make_cuda_pod_typed_data_assignment_kernel(
 
     if (dst_device) {
         if (src_device) {
-            reinterpret_cast<ckernel_builder<kernel_request_host> *>(out)->ensure_capacity_leaf(offset_out + sizeof(unaligned_copy_ck));
+            reinterpret_cast<ckernel_builder<kernel_request_host> *>(out)->ensure_capacity_leaf(offset_out + sizeof(kernels::unaligned_copy_ck));
             ckernel_prefix *result = reinterpret_cast<ckernel_builder<kernel_request_host> *>(out)->get_at<ckernel_prefix>(offset_out);
             if (single) {
                 result->set_function<expr_single_t>(&unaligned_copy_single_cuda_device_to_device);
             } else {
                 result->set_function<expr_strided_t>(&unaligned_copy_strided_cuda_device_to_device);
             }
-            reinterpret_cast<unaligned_copy_ck *>(result)->data_size = data_size;
-            return offset_out + sizeof(unaligned_copy_ck);
+            reinterpret_cast<kernels::unaligned_copy_ck *>(result)->data_size = data_size;
+            return offset_out + sizeof(kernels::unaligned_copy_ck);
         } else {
-            reinterpret_cast<ckernel_builder<kernel_request_host> *>(out)->ensure_capacity_leaf(offset_out + sizeof(unaligned_copy_ck));
+            reinterpret_cast<ckernel_builder<kernel_request_host> *>(out)->ensure_capacity_leaf(offset_out + sizeof(kernels::unaligned_copy_ck));
             ckernel_prefix *result = reinterpret_cast<ckernel_builder<kernel_request_host> *>(out)->get_at<ckernel_prefix>(offset_out);
             if (single) {
                 result->set_function<expr_single_t>(&unaligned_copy_single_cuda_host_to_device);
             } else {
                 result->set_function<expr_strided_t>(&unaligned_copy_strided_cuda_host_to_device);
             }
-            reinterpret_cast<unaligned_copy_ck *>(result)->data_size = data_size;
-            return offset_out + sizeof(unaligned_copy_ck);
+            reinterpret_cast<kernels::unaligned_copy_ck *>(result)->data_size = data_size;
+            return offset_out + sizeof(kernels::unaligned_copy_ck);
         }
     } else {
         if (src_device) {
-            reinterpret_cast<ckernel_builder<kernel_request_host> *>(out)->ensure_capacity_leaf(offset_out + sizeof(unaligned_copy_ck));
+            reinterpret_cast<ckernel_builder<kernel_request_host> *>(out)->ensure_capacity_leaf(offset_out + sizeof(kernels::unaligned_copy_ck));
             ckernel_prefix *result = reinterpret_cast<ckernel_builder<kernel_request_host> *>(out)->get_at<ckernel_prefix>(offset_out);
             if (single) {
                 result->set_function<expr_single_t>(&unaligned_copy_single_cuda_device_to_host);
             } else {
                 result->set_function<expr_strided_t>(&unaligned_copy_strided_cuda_device_to_host);
             }
-            reinterpret_cast<unaligned_copy_ck *>(result)->data_size = data_size;
-            return offset_out + sizeof(unaligned_copy_ck);
+            reinterpret_cast<kernels::unaligned_copy_ck *>(result)->data_size = data_size;
+            return offset_out + sizeof(kernels::unaligned_copy_ck);
         } else {
             return make_pod_typed_data_assignment_kernel(out, offset_out, data_size, data_alignment, kernreq);
         }
