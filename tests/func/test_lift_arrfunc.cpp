@@ -191,7 +191,6 @@ struct callable_to_lift {
 
 TEST(Elwise, BinaryExpr)
 {
-/*
   nd::arrfunc af =
       lift_arrfunc(nd::make_apply_arrfunc<kernel_request_host, callable_to_lift>());
   nd::array a = parse_json("3 * int", "[0, 1, 2]");
@@ -206,7 +205,6 @@ TEST(Elwise, BinaryExpr)
   b = b.to_cuda_device();
   EXPECT_ARR_EQ(c, af(a, b).to_host());
 #endif
-*/
 }
 
 /*
