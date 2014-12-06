@@ -15,10 +15,13 @@
 #include <dynd/func/arrfunc.hpp>
 #include <dynd/kernels/assignment_kernels.hpp>
 #include <dynd/kernels/expr_kernel_generator.hpp>
+#include <dynd/func/apply_arrfunc.hpp>
 #include <dynd/func/lift_arrfunc.hpp>
 #include <dynd/func/take_arrfunc.hpp>
 #include <dynd/func/call_callable.hpp>
 #include <dynd/array.hpp>
+#include <dynd/json_parser.hpp>
+#include "../dynd_assertions.hpp"
 
 using namespace std;
 using namespace dynd;
@@ -180,6 +183,28 @@ TEST(LiftArrFunc, UnaryExpr_MultiDimVarToVarDim) {
     EXPECT_EQ(1, out(2, 0).as<int>());
     EXPECT_EQ(2, out(2, 1).as<int>());
     EXPECT_EQ(4, out(2, 2).as<int>());
+}
+
+struct callable_to_lift {
+  DYND_CUDA_HOST_DEVICE int operator()(int x, int y) { return x + y; }
+};
+
+TEST(Elwise, BinaryExpr)
+{
+  nd::arrfunc af =
+      lift_arrfunc(nd::make_apply_arrfunc<kernel_request_host, callable_to_lift>());
+  nd::array a = parse_json("3 * int", "[0, 1, 2]");
+  nd::array b = parse_json("3 * int", "[3, 4, 5]");
+  nd::array c = parse_json("3 * int", "[3, 5, 7]");
+  EXPECT_ARR_EQ(c, af(a, b));
+
+#ifdef DYND_CUDA
+  af = lift_arrfunc(
+      nd::make_apply_arrfunc<kernel_request_cuda_device, callable_to_lift>());
+  a = a.to_cuda_device();
+  b = b.to_cuda_device();
+  EXPECT_ARR_EQ(c, af(a, b).to_host());
+#endif
 }
 
 /*

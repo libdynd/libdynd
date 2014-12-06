@@ -36,7 +36,12 @@ enum {
   /** Y */
   kernel_request_host = 8,
   /** Y */
-  kernel_request_cuda_device = 16
+  kernel_request_cuda_device = 16,
+#ifdef __CUDACC__
+  kernel_request_cuda_host_device = kernel_request_host | kernel_request_cuda_device
+#else
+  kernel_request_cuda_host_device = kernel_request_host
+#endif
 };
 typedef uint32_t kernel_request_t;
 
@@ -136,7 +141,7 @@ struct ckernel_prefix {
    * If the provided offset is non-zero, destroys
    * a ckernel at the given offset from `this`.
    */
-  void destroy_child_ckernel(size_t offset)
+  DYND_CUDA_HOST_DEVICE void destroy_child_ckernel(size_t offset)
   {
     if (offset != 0) {
       ckernel_prefix *child = get_child_ckernel(offset);
