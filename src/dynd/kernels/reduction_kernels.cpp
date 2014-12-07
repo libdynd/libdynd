@@ -15,16 +15,16 @@ using namespace dynd;
 namespace {
     template<class T, class Accum>
     struct sum_reduction {
-        static void single(char *dst, char **src,
+        static void single(char *dst, char *const *src,
                            ckernel_prefix *DYND_UNUSED(self))
         {
             *reinterpret_cast<T *>(dst) =
                 *reinterpret_cast<T *>(dst) +
-                **reinterpret_cast<T **>(src);
+                **reinterpret_cast<T *const *>(src);
         }
 
         static void strided(char *dst, intptr_t dst_stride,
-                            char **src, const intptr_t *src_stride,
+                            char *const *src, const intptr_t *src_stride,
                             size_t count, ckernel_prefix *DYND_UNUSED(self))
         {
             char *src0 = src[0];
@@ -95,7 +95,7 @@ static intptr_t instantiate_builtin_sum_reduction_arrfunc(
     const char *DYND_UNUSED(dst_arrmeta), const ndt::type *src_tp,
     const char *const *DYND_UNUSED(src_arrmeta), kernel_request_t kernreq,
     const eval::eval_context *DYND_UNUSED(ectx),
-    const nd::array &DYND_UNUSED(args), const nd::array &DYND_UNUSED(kwds))
+    const nd::array &DYND_UNUSED(kwds))
 {
     if (dst_tp != src_tp[0]) {
         stringstream ss;
@@ -175,7 +175,7 @@ struct mean1d_arrfunc_data {
       const char *DYND_UNUSED(dst_arrmeta), const ndt::type *src_tp,
       const char *const *src_arrmeta, kernel_request_t kernreq,
       const eval::eval_context *DYND_UNUSED(ectx),
-      const nd::array &DYND_UNUSED(args), const nd::array &DYND_UNUSED(kwds))
+      const nd::array &DYND_UNUSED(kwds))
   {
     typedef double_mean1d_ck self_type;
     mean1d_arrfunc_data *data = *af_self->get_data_as<mean1d_arrfunc_data *>();

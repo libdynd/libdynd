@@ -29,7 +29,7 @@ namespace kernels {
       memcpy(this->src_stride, src_stride, sizeof(this->src_stride));
     }
 
-    DYND_CUDA_HOST_DEVICE void single(char *dst, char **src)
+    DYND_CUDA_HOST_DEVICE void single(char *dst, char *const *src)
     {
       ckernel_prefix *child = this->get_child_ckernel();
       expr_strided_t opchild = child->get_function<expr_strided_t>();
@@ -37,7 +37,7 @@ namespace kernels {
     }
 
     DYND_CUDA_HOST_DEVICE void strided(char *dst, intptr_t dst_stride,
-                                       char **src, const intptr_t *src_stride,
+                                       char *const *src, const intptr_t *src_stride,
                                        size_t count)
     {
       ckernel_prefix *child = this->get_child_ckernel();

@@ -21,7 +21,7 @@ struct unary_heap_chain_ck : public kernels::general_ck<unary_heap_chain_ck, ker
   arrmeta_holder m_buf_arrmeta;
   vector<intptr_t> m_buf_shape;
 
-  static void single(char *dst, char **src, ckernel_prefix *rawself)
+  static void single(char *dst, char *const *src, ckernel_prefix *rawself)
   {
     self_type *self = get_self(rawself);
     // Allocate a temporary buffer on the heap
@@ -35,7 +35,7 @@ struct unary_heap_chain_ck : public kernels::general_ck<unary_heap_chain_ck, ker
     second_fn(dst, &buf_data, second);
   }
 
-  static void strided(char *dst, intptr_t dst_stride, char **src,
+  static void strided(char *dst, intptr_t dst_stride, char *const *src,
                       const intptr_t *src_stride, size_t count,
                       ckernel_prefix *rawself)
   {
@@ -105,14 +105,14 @@ intptr_t dynd::make_chain_buf_tp_ckernel(
     self->m_buf_shape.push_back(DYND_BUFFER_CHUNK_SIZE);
     ckb_offset = first->instantiate(
         first, first_tp, ckb, ckb_offset, buf_tp, self->m_buf_arrmeta.get(),
-        src_tp, src_arrmeta, kernreq, ectx, nd::array(), nd::array());
+        src_tp, src_arrmeta, kernreq, ectx, nd::array());
     reinterpret_cast<ckernel_builder<kernel_request_host> *>(ckb)->ensure_capacity(ckb_offset);
     self = reinterpret_cast<ckernel_builder<kernel_request_host> *>(ckb)->get_at<unary_heap_chain_ck>(root_ckb_offset);
     self->m_second_offset = ckb_offset - root_ckb_offset;
     const char *buf_arrmeta = self->m_buf_arrmeta.get();
     ckb_offset = second->instantiate(second, second_tp, ckb, ckb_offset, dst_tp,
                                      dst_arrmeta, &buf_tp, &buf_arrmeta,
-                                     kernreq, ectx, nd::array(), nd::array());
+                                     kernreq, ectx, nd::array());
     return ckb_offset;
   }
   else {
@@ -125,7 +125,7 @@ static intptr_t instantiate_chain_buf_tp(
     void *ckb, intptr_t ckb_offset, const ndt::type &dst_tp,
     const char *dst_arrmeta, const ndt::type *src_tp,
     const char *const *src_arrmeta, kernel_request_t kernreq,
-    const eval::eval_context *ectx, const nd::array &DYND_UNUSED(aux),
+    const eval::eval_context *ectx,
     const nd::array &DYND_UNUSED(kwds))
 {
   const instantiate_chain_data *icd =

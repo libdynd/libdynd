@@ -26,7 +26,7 @@ struct neighborhood_ck : kernels::expr_ck<neighborhood_ck<N>, kernel_request_hos
     // local index of first in of bounds element in the neighborhood
     // local index of first out of bounds element in the neighborhood
 
-    inline void single(char *dst, char **src) {
+    inline void single(char *dst, char *const *src) {
         ckernel_prefix *child = self_type::get_child_ckernel();
         expr_single_t child_fn = child->get_function<expr_single_t>();
 
@@ -79,7 +79,7 @@ static intptr_t instantiate_neighborhood(
     void *ckb, intptr_t ckb_offset, const ndt::type &dst_tp,
     const char *dst_arrmeta, const ndt::type *src_tp,
     const char *const *src_arrmeta, kernel_request_t kernreq,
-    const eval::eval_context *ectx, const nd::array &args,
+    const eval::eval_context *ectx,
     const nd::array &kwds)
 {
   neighborhood *nh = *af_self->get_data_as<neighborhood *>();
@@ -174,7 +174,7 @@ static intptr_t instantiate_neighborhood(
 
   ckb_offset = nh_op.get()->instantiate(
       nh_op.get(), nh_op.get_type(), ckb, ckb_offset, nh_dst_tp, nh_dst_arrmeta,
-      nh_src_tp, nh_src_arrmeta, kernel_request_single, ectx, args,
+      nh_src_tp, nh_src_arrmeta, kernel_request_single, ectx,
       struct_concat(kwds, pack("start_stop", reinterpret_cast<intptr_t>(nh->start_stop))));
   return ckb_offset;
 }
@@ -182,7 +182,7 @@ static intptr_t instantiate_neighborhood(
 static int resolve_neighborhood_dst_type(
     const arrfunc_type_data *DYND_UNUSED(self), const arrfunc_type *af_tp,
     intptr_t nsrc, const ndt::type *src_tp, int DYND_UNUSED(throw_on_error),
-    ndt::type &out_dst_tp, const nd::array &DYND_UNUSED(args),
+    ndt::type &out_dst_tp,
     const nd::array &DYND_UNUSED(kwds))
 {
   // TODO: Should be able to express the match/subsitution without special code

@@ -17,12 +17,12 @@ namespace kernels {
   struct aligned_fixed_size_copy_assign_type
       : expr_ck<aligned_fixed_size_copy_assign_type<T>, kernel_request_host,
                 1> {
-    void single(char *dst, char **src)
+    void single(char *dst, char *const *src)
     {
-      *reinterpret_cast<T *>(dst) = **reinterpret_cast<T **>(src);
+      *reinterpret_cast<T *>(dst) = **reinterpret_cast<T *const *>(src);
     }
 
-    void strided(char *dst, intptr_t dst_stride, char **src,
+    void strided(char *dst, intptr_t dst_stride, char *const *src,
                  const intptr_t *src_stride, size_t count)
     {
       char *src0 = *src;
@@ -41,9 +41,9 @@ namespace kernels {
   template <>
   struct aligned_fixed_size_copy_assign<1>
       : expr_ck<aligned_fixed_size_copy_assign<1>, kernel_request_host, 1> {
-    void single(char *dst, char **src) { *dst = **src; }
+    void single(char *dst, char *const *src) { *dst = **src; }
 
-    void strided(char *dst, intptr_t dst_stride, char **src,
+    void strided(char *dst, intptr_t dst_stride, char *const *src,
                  const intptr_t *src_stride, size_t count)
     {
       char *src0 = *src;
@@ -74,9 +74,9 @@ namespace kernels {
   template <int N>
   struct unaligned_fixed_size_copy_assign
       : expr_ck<unaligned_fixed_size_copy_assign<N>, kernel_request_host, 1> {
-    static void single(char *dst, char **src) { memcpy(dst, *src, N); }
+    static void single(char *dst, char *const *src) { memcpy(dst, *src, N); }
 
-    static void strided(char *dst, intptr_t dst_stride, char **src,
+    static void strided(char *dst, intptr_t dst_stride, char *const *src,
                         const intptr_t *src_stride, size_t count)
     {
       char *src0 = *src;
@@ -95,9 +95,9 @@ namespace kernels {
 
     unaligned_copy_ck(size_t data_size) : data_size(data_size) {}
 
-    void single(char *dst, char **src) { memcpy(dst, *src, data_size); }
+    void single(char *dst, char *const *src) { memcpy(dst, *src, data_size); }
 
-    void strided(char *dst, intptr_t dst_stride, char **src,
+    void strided(char *dst, intptr_t dst_stride, char *const *src,
                  const intptr_t *src_stride, size_t count)
     {
       char *src0 = *src;
@@ -115,7 +115,7 @@ namespace kernels {
   struct cuda_host_to_device_assign_ck
       : expr_ck<cuda_host_to_device_assign_ck<dst_type, src_type, errmode>,
                 kernel_request_host, 1> {
-    void single(char *dst, char **src)
+    void single(char *dst, char *const *src)
     {
       dst_type tmp;
       single_assigner_builtin<dst_type, src_type, errmode>::assign(
@@ -129,7 +129,7 @@ namespace kernels {
   struct cuda_host_to_device_assign_ck<same_type, same_type, errmode>
       : expr_ck<cuda_host_to_device_assign_ck<same_type, same_type, errmode>,
                 kernel_request_host, 1> {
-    void single(char *dst, char **src)
+    void single(char *dst, char *const *src)
     {
       throw_if_not_cuda_success(
           cudaMemcpy(dst, *src, sizeof(same_type), cudaMemcpyHostToDevice));
@@ -142,7 +142,7 @@ namespace kernels {
 
     cuda_host_to_device_copy_ck(size_t data_size) : data_size(data_size) {}
 
-    void single(char *dst, char **src)
+    void single(char *dst, char *const *src)
     {
       throw_if_not_cuda_success(
           cudaMemcpy(dst, *src, data_size, cudaMemcpyHostToDevice));
@@ -153,7 +153,7 @@ namespace kernels {
   struct cuda_device_to_host_assign_ck
       : expr_ck<cuda_device_to_host_assign_ck<dst_type, src_type, errmode>,
                 kernel_request_host, 1> {
-    void single(char *dst, char **src)
+    void single(char *dst, char *const *src)
     {
       src_type tmp;
       throw_if_not_cuda_success(
@@ -167,7 +167,7 @@ namespace kernels {
   struct cuda_device_to_host_assign_ck<same_type, same_type, errmode>
       : expr_ck<cuda_device_to_host_assign_ck<same_type, same_type, errmode>,
                 kernel_request_host, 1> {
-    void single(char *dst, char **src)
+    void single(char *dst, char *const *src)
     {
       throw_if_not_cuda_success(
           cudaMemcpy(dst, *src, sizeof(same_type), cudaMemcpyDeviceToHost));
@@ -180,7 +180,7 @@ namespace kernels {
 
     cuda_device_to_host_copy_ck(size_t data_size) : data_size(data_size) {}
 
-    void single(char *dst, char **src)
+    void single(char *dst, char *const *src)
     {
       throw_if_not_cuda_success(
           cudaMemcpy(dst, *src, data_size, cudaMemcpyDeviceToHost));
@@ -222,7 +222,7 @@ namespace kernels {
   struct cuda_device_to_device_assign_ck
       : expr_ck<cuda_device_to_device_assign_ck<dst_type, src_type, errmode>,
                 kernel_request_host, 1> {
-    void single(char *dst, char **src)
+    void single(char *dst, char *const *src)
     {
       single_cuda_device_to_device_assigner_builtin<
           dst_type, src_type,
@@ -237,7 +237,7 @@ namespace kernels {
 
     cuda_device_to_device_copy_ck(size_t data_size) : data_size(data_size) {}
 
-    void single(char *dst, char **src)
+    void single(char *dst, char *const *src)
     {
       throw_if_not_cuda_success(
           cudaMemcpy(dst, *src, data_size, cudaMemcpyDeviceToDevice));
@@ -248,7 +248,7 @@ namespace kernels {
   template <class dst_type, class src_type, assign_error_mode errmode>
   struct assign_ck : expr_ck<assign_ck<dst_type, src_type, errmode>,
                              kernel_request_host, 1> {
-    void single(char *dst, char **src)
+    void single(char *dst, char *const *src)
     {
       single_assigner_builtin<dst_type, src_type, errmode>::assign(
           reinterpret_cast<dst_type *>(dst),
@@ -413,7 +413,7 @@ size_t dynd::make_builtin_type_assignment_kernel(void *ckb, intptr_t ckb_offset,
 namespace {
 template <int N>
 struct wrap_single_as_strided_fixedcount_ck {
-  static void strided(char *dst, intptr_t dst_stride, char **src,
+  static void strided(char *dst, intptr_t dst_stride, char *const *src,
                       const intptr_t *src_stride, size_t count,
                       ckernel_prefix *self)
   {
@@ -435,7 +435,7 @@ struct wrap_single_as_strided_fixedcount_ck {
 
 template <>
 struct wrap_single_as_strided_fixedcount_ck<0> {
-  static void strided(char *dst, intptr_t dst_stride, char **DYND_UNUSED(src),
+  static void strided(char *dst, intptr_t dst_stride, char *const *DYND_UNUSED(src),
                       const intptr_t *DYND_UNUSED(src_stride), size_t count,
                       ckernel_prefix *self)
   {
@@ -468,7 +468,7 @@ struct wrap_single_as_strided_ck {
   ckernel_prefix base;
   intptr_t nsrc;
 
-  static inline void strided(char *dst, intptr_t dst_stride, char **src,
+  static inline void strided(char *dst, intptr_t dst_stride, char *const *src,
                              const intptr_t *src_stride, size_t count,
                              ckernel_prefix *self)
   {

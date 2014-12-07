@@ -16,8 +16,9 @@ namespace dynd {
 
 struct ckernel_prefix;
 
-typedef void (*expr_single_t)(char *dst, char **src, ckernel_prefix *self);
-typedef void (*expr_strided_t)(char *dst, intptr_t dst_stride, char **src,
+typedef void (*expr_single_t)(char *dst, char *const *src,
+                              ckernel_prefix *self);
+typedef void (*expr_strided_t)(char *dst, intptr_t dst_stride, char *const *src,
                                const intptr_t *src_stride, size_t count,
                                ckernel_prefix *self);
 typedef int (*expr_predicate_t)(const char *const *src, ckernel_prefix *self);
@@ -38,7 +39,8 @@ enum {
   /** Y */
   kernel_request_cuda_device = 16,
 #ifdef __CUDACC__
-  kernel_request_cuda_host_device = kernel_request_host | kernel_request_cuda_device
+  kernel_request_cuda_host_device =
+      kernel_request_host | kernel_request_cuda_device
 #else
   kernel_request_cuda_host_device = kernel_request_host
 #endif

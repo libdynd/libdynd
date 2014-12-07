@@ -110,7 +110,7 @@ TEST(LiftArrFunc, UnaryExpr_StridedToVarDim)
   af.get()->instantiate(af.get(), af.get_type(), &ckb, 0, dst_tp,
                         out.get_arrmeta(), &src_tp, src_arrmeta,
                         kernel_request_single, &eval::default_eval_context,
-                        nd::array(), nd::array());
+                        nd::array());
   expr_single_t usngo = ckb.get()->get_function<expr_single_t>();
   usngo(out.get_readwrite_originptr(), const_cast<char **>(&in_ptr), ckb.get());
   EXPECT_EQ(5, out.get_shape()[0]);
@@ -141,7 +141,7 @@ TEST(LiftArrFunc, UnaryExpr_VarToVarDim)
   af.get()->instantiate(af.get(), af.get_type(), &ckb, 0, out.get_type(),
                         out.get_arrmeta(), &in.get_type(), src_arrmeta,
                         kernel_request_single, &eval::default_eval_context,
-                        nd::array(), nd::array());
+                        nd::array());
   expr_single_t usngo = ckb.get()->get_function<expr_single_t>();
   usngo(out.get_readwrite_originptr(), const_cast<char **>(&in_ptr), ckb.get());
   EXPECT_EQ(5, out.get_shape()[0]);

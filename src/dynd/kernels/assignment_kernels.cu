@@ -290,7 +290,7 @@ static expr_strided_t assign_table_strided_cuda_device_to_device_kernel[builtin_
 namespace {
 template <typename dst_type, typename src_type, assign_error_mode errmode>
 struct multiple_assignment_builtin {
-  static void strided_assign(char *dst, intptr_t dst_stride, char **src,
+  static void strided_assign(char *dst, intptr_t dst_stride, char *const *src,
                              const intptr_t *src_stride, size_t count,
                              ckernel_prefix *DYND_UNUSED(self))
   {
@@ -308,7 +308,7 @@ struct multiple_assignment_builtin {
 template <typename dst_type, typename src_type>
 struct multiple_assignment_builtin<dst_type, src_type, assign_error_nocheck> {
   DYND_CUDA_HOST_DEVICE static void
-  strided_assign(char *dst, intptr_t dst_stride, char **src,
+  strided_assign(char *dst, intptr_t dst_stride, char *const *src,
                  const intptr_t *src_stride, size_t count,
                  ckernel_prefix *DYND_UNUSED(self))
   {

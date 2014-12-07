@@ -17,7 +17,7 @@ struct take_by_pointer_outer_ck : kernels::expr_ck<take_by_pointer_outer_ck, ker
       : dst_size(dst_size), dst_stride(dst_stride), src1_stride(src1_stride) {
     }
 
-    void single(char *dst, char **src) {
+    void single(char *dst, char *const *src) {
         ckernel_prefix *child = get_child_ckernel();
         expr_single_t child_fn = child->get_function<expr_single_t>();
 
@@ -38,7 +38,7 @@ struct take_by_pointer_ck : kernels::expr_ck<take_by_pointer_ck, kernel_request_
       : src0_size(src0_size), src0_stride(src0_stride), src1_inner_stride(src1_inner_stride) {
     }
 
-    void single(char *dst, char **src) {
+    void single(char *dst, char *const *src) {
         ckernel_prefix *child = get_child_ckernel();
         expr_single_t child_fn = child->get_function<expr_single_t>();
 
@@ -54,7 +54,7 @@ static intptr_t instantiate_take_by_pointer(
     intptr_t ckb_offset, const ndt::type &dst_tp, const char *dst_arrmeta,
     const ndt::type *src_tp, const char *const *src_arrmeta,
     kernel_request_t kernreq, const eval::eval_context *ectx,
-    const nd::array &DYND_UNUSED(args), const nd::array &DYND_UNUSED(kwds))
+    const nd::array &DYND_UNUSED(kwds))
 {
   intptr_t ndim = src_tp[0].get_ndim();
 
@@ -101,7 +101,7 @@ static intptr_t instantiate_take_by_pointer(
 static int resolve_take_by_pointer_dst_type(
     const arrfunc_type_data *DYND_UNUSED(af_self), const arrfunc_type *af_tp,
     intptr_t nsrc, const ndt::type *src_tp, int throw_on_error,
-    ndt::type &out_dst_tp, const nd::array &DYND_UNUSED(args),
+    ndt::type &out_dst_tp,
     const nd::array &DYND_UNUSED(kwds))
 {
   if (nsrc != 2) {

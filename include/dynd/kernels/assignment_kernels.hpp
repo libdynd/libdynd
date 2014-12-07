@@ -88,12 +88,12 @@ namespace kernels {
     typedef CKT self_type;
     typedef expr_ck<CKT, kernel_request_host, 1> parent_type;
 
-    static void single_wrapper(char *dst, char **src, ckernel_prefix *rawself)
+    static void single_wrapper(char *dst, char *const *src, ckernel_prefix *rawself)
     {
       return parent_type::get_self(rawself)->single(dst, *src);
     }
 
-    static void strided_wrapper(char *dst, intptr_t dst_stride, char **src,
+    static void strided_wrapper(char *dst, intptr_t dst_stride, char *const *src,
                                 const intptr_t *src_stride, size_t count,
                                 ckernel_prefix *rawself)
     {

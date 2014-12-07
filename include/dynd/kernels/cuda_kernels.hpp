@@ -76,14 +76,14 @@ namespace kernels {
 
     ckernel_builder<kernel_request_cuda_device> *get_ckb() { return &m_ckb; }
 
-    void single(char *dst, char **src)
+    void single(char *dst, char *const *src)
     {
       cuda_parallel_single << <m_blocks, m_threads, 1024>>>
           (dst, array_wrapper<char *, Nsrc>(src), m_ckb.get());
       throw_if_not_cuda_success(cudaDeviceSynchronize());
     }
 
-    void strided(char *dst, intptr_t dst_stride, char **src,
+    void strided(char *dst, intptr_t dst_stride, char *const *src,
                  const intptr_t *src_stride, size_t count)
     {
       cuda_parallel_strided << <m_blocks, m_threads>>>

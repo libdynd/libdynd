@@ -54,7 +54,7 @@ inline void concat_one_string(
 }
 
 void kernels::string_concatenation_kernel::single(
-                char *dst, char **src,
+                char *dst, char *const *src,
                 ckernel_prefix *extra)
 {
     const extra_type *e = reinterpret_cast<const extra_type *>(extra);
@@ -67,7 +67,7 @@ void kernels::string_concatenation_kernel::single(
 
 void kernels::string_concatenation_kernel::strided(
                 char *dst, intptr_t dst_stride,
-                char **src, const intptr_t *src_stride,
+                char *const *src, const intptr_t *src_stride,
                 size_t count, ckernel_prefix *extra)
 {
     const extra_type *e = reinterpret_cast<const extra_type *>(extra);
@@ -159,7 +159,7 @@ inline void find_one_string(
 }
 
 void kernels::string_find_kernel::single(
-                char *dst, char **src,
+                char *dst, char *const *src,
                 ckernel_prefix *extra)
 {
     const extra_type *e = reinterpret_cast<const extra_type *>(extra);
@@ -181,7 +181,7 @@ void kernels::string_find_kernel::single(
 
 void kernels::string_find_kernel::strided(
                 char *dst, intptr_t dst_stride,
-                char **src, const intptr_t *src_stride,
+                char *const *src, const intptr_t *src_stride,
                 size_t count, ckernel_prefix *extra)
 {
     const extra_type *e = reinterpret_cast<const extra_type *>(extra);

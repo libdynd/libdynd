@@ -113,51 +113,51 @@ ndt::type dynd::get_builtin_type_elwise_property_type(
 }
 
 static void
-get_property_kernel_complex_float32_real(char *dst, char **src,
+get_property_kernel_complex_float32_real(char *dst, char *const *src,
                                          ckernel_prefix *DYND_UNUSED(self))
 {
     *reinterpret_cast<uint32_t *>(dst) =
-        (*reinterpret_cast<uint32_t **>(src))[0];
+        (*reinterpret_cast<uint32_t *const *>(src))[0];
 }
 
 static void
-get_property_kernel_complex_float32_imag(char *dst, char **src,
+get_property_kernel_complex_float32_imag(char *dst, char *const *src,
                                          ckernel_prefix *DYND_UNUSED(self))
 {
     *reinterpret_cast<uint32_t *>(dst) =
-        (*reinterpret_cast<uint32_t **>(src))[1];
+        (*reinterpret_cast<uint32_t *const *>(src))[1];
 }
 
 static void
-get_property_kernel_complex_float64_real(char *dst, char **src,
+get_property_kernel_complex_float64_real(char *dst, char *const *src,
                                          ckernel_prefix *DYND_UNUSED(self))
 {
     *reinterpret_cast<uint64_t *>(dst) =
-        (*reinterpret_cast<uint64_t **>(src))[0];
+        (*reinterpret_cast<uint64_t *const *>(src))[0];
 }
 
 static void
-get_property_kernel_complex_float64_imag(char *dst, char **src,
+get_property_kernel_complex_float64_imag(char *dst, char *const *src,
                                          ckernel_prefix *DYND_UNUSED(self))
 {
     *reinterpret_cast<uint64_t *>(dst) =
-        (*reinterpret_cast<uint64_t **>(src))[1];
+        (*reinterpret_cast<uint64_t *const *>(src))[1];
 }
 
 static void get_or_set_property_kernel_complex_float32_conj(
-    char *dst, char **src, ckernel_prefix *DYND_UNUSED(self))
+    char *dst, char *const *src, ckernel_prefix *DYND_UNUSED(self))
 {
     dynd_complex<float> value =
-        **reinterpret_cast<dynd_complex<float> **>(src);
+        **reinterpret_cast<dynd_complex<float> *const *>(src);
     *reinterpret_cast<dynd_complex<float> *>(dst) =
         dynd_complex<float>(value.real(), -value.imag());
 }
 
 static void get_or_set_property_kernel_complex_float64_conj(
-    char *dst, char **src, ckernel_prefix *DYND_UNUSED(self))
+    char *dst, char *const *src, ckernel_prefix *DYND_UNUSED(self))
 {
     dynd_complex<double> value =
-        **reinterpret_cast<dynd_complex<double> **>(src);
+        **reinterpret_cast<dynd_complex<double> *const *>(src);
     *reinterpret_cast<dynd_complex<double> *>(dst) =
         dynd_complex<double>(value.real(), -value.imag());
 }

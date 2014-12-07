@@ -24,7 +24,7 @@ static intptr_t instantiate_lifted_expr_arrfunc_data(
     void *ckb, intptr_t ckb_offset, const ndt::type &dst_tp,
     const char *dst_arrmeta, const ndt::type *src_tp,
     const char *const *src_arrmeta, kernel_request_t kernreq,
-    const eval::eval_context *ectx, const nd::array &DYND_UNUSED(args),
+    const eval::eval_context *ectx,
     const nd::array &DYND_UNUSED(kwds))
 {
   const array_preamble *data = *self->get_data_as<const array_preamble *>();
@@ -49,7 +49,7 @@ static int resolve_lifted_dst_type(const arrfunc_type_data *self,
                                    const arrfunc_type *af_tp,
                                    intptr_t nsrc, const ndt::type *src_tp,
                                    int throw_on_error, ndt::type &out_dst_tp,
-                                   const nd::array &args, const nd::array &kwds)
+                                   const nd::array &kwds)
 {
   if (nsrc != af_tp->get_npos()) {
     if (throw_on_error) {
@@ -84,7 +84,7 @@ static int resolve_lifted_dst_type(const arrfunc_type_data *self,
     }
     if (!child_af->resolve_dst_type(child_af, child_af_tp, nsrc,
                                     &child_src_tp[0], throw_on_error,
-                                    child_dst_tp, args, kwds)) {
+                                    child_dst_tp, kwds)) {
       return 0;
     }
   }

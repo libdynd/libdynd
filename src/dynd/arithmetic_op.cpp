@@ -21,7 +21,7 @@ using namespace dynd;
 namespace {
     template<class OP>
     struct binary_single_kernel {
-        static void func(char *dst, char **src,
+        static void func(char *dst, char *const *src,
                         ckernel_prefix *DYND_UNUSED(self))
         {
             typedef typename OP::type T;
@@ -39,7 +39,7 @@ namespace {
     template<class OP>
     struct binary_strided_kernel {
         static void func(char *dst, intptr_t dst_stride,
-                        char **src, const intptr_t *src_stride,
+                        char *const *src, const intptr_t *src_stride,
                         size_t count, ckernel_prefix *DYND_UNUSED(self))
         {
             typedef typename OP::type T;

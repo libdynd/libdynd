@@ -15,7 +15,7 @@ namespace {
 
 template<typename T>
 struct aligned_fixed_size_byteswap {
-    static void single(char *dst, char **src,
+    static void single(char *dst, char *const *src,
                        ckernel_prefix *DYND_UNUSED(self))
     {
         DYND_ASSERT_ALIGNED(dst, 0, sizeof(T),
@@ -23,9 +23,9 @@ struct aligned_fixed_size_byteswap {
         DYND_ASSERT_ALIGNED(src, 0, sizeof(T),
                             "type: " << ndt::type(dynd::type_id_of<T>::value));
         *reinterpret_cast<T *>(dst) =
-            byteswap_value(**reinterpret_cast<T **>(src));
+            byteswap_value(**reinterpret_cast<T *const *>(src));
     }
-    static void strided(char *dst, intptr_t dst_stride, char **src,
+    static void strided(char *dst, intptr_t dst_stride, char *const *src,
                         const intptr_t *src_stride, size_t count,
                         ckernel_prefix *DYND_UNUSED(self))
     {
@@ -46,7 +46,7 @@ struct aligned_fixed_size_byteswap {
 
 template<typename T>
 struct aligned_fixed_size_pairwise_byteswap_kernel {
-    static void single(char *dst, char **src,
+    static void single(char *dst, char *const *src,
                        ckernel_prefix *DYND_UNUSED(self))
     {
         DYND_ASSERT_ALIGNED(dst, 0, sizeof(T),
@@ -54,11 +54,11 @@ struct aligned_fixed_size_pairwise_byteswap_kernel {
         DYND_ASSERT_ALIGNED(src, 0, sizeof(T),
                             "type: " << ndt::type(dynd::type_id_of<T>::value));
         *reinterpret_cast<T *>(dst) =
-            byteswap_value(**reinterpret_cast<T **>(src));
+            byteswap_value(**reinterpret_cast<T *const *>(src));
         *(reinterpret_cast<T *>(dst) + 1) =
-            byteswap_value(*(*reinterpret_cast<T **>(src) + 1));
+            byteswap_value(*(*reinterpret_cast<T *const *>(src) + 1));
     }
-    static void strided(char *dst, intptr_t dst_stride, char **src,
+    static void strided(char *dst, intptr_t dst_stride, char *const *src,
                         const intptr_t *src_stride, size_t count,
                         ckernel_prefix *DYND_UNUSED(self))
     {
@@ -70,9 +70,9 @@ struct aligned_fixed_size_pairwise_byteswap_kernel {
         intptr_t src0_stride = src_stride[0];
         for (size_t i = 0; i != count; ++i) {
             *reinterpret_cast<T *>(dst) =
-                byteswap_value(**reinterpret_cast<T **>(src0));
+                byteswap_value(**reinterpret_cast<T *const *>(src0));
             *(reinterpret_cast<T *>(dst) + 1) =
-                byteswap_value(*(*reinterpret_cast<T **>(src0) + 1));
+                byteswap_value(*(*reinterpret_cast<T *const *>(src0) + 1));
             dst += dst_stride;
             src0 += src0_stride;
         }

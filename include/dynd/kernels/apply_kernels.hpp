@@ -194,7 +194,7 @@ namespace kernels {
     {                                                                          \
     }                                                                          \
                                                                                \
-    __VA_ARGS__ void single(char *dst, char **src)                             \
+    __VA_ARGS__ void single(char *dst, char *const *src)                       \
     {                                                                          \
       single<typename return_of<func_type>::type>(dst, src, this, this);       \
     }                                                                          \
@@ -206,7 +206,7 @@ namespace kernels {
                 const char *DYND_UNUSED(dst_arrmeta), const ndt::type *src_tp, \
                 const char *const *src_arrmeta, kernel_request_t kernreq,      \
                 const eval::eval_context *DYND_UNUSED(ectx),                   \
-                const nd::array &DYND_UNUSED(a), const nd::array &kwds)        \
+                const nd::array &kwds)                                         \
     {                                                                          \
       self_type::create(ckb, kernreq, ckb_offset,                              \
                         args_for<func_type, Nsrc>(src_tp, src_arrmeta, kwds),  \
@@ -219,7 +219,7 @@ namespace kernels {
               size_t... J>                                                     \
     __VA_ARGS__ typename std::enable_if<std::is_same<R, void>::value,          \
                                         void>::type                            \
-    single(char *DYND_UNUSED(dst), char **DYND_CONDITIONAL_UNUSED(src),        \
+    single(char *DYND_UNUSED(dst), char *const *DYND_CONDITIONAL_UNUSED(src),  \
            args<type_sequence<A...>, index_sequence<I...>> *DYND_UNUSED(args), \
            kwds<type_sequence<K...>, index_sequence<J...>> *DYND_UNUSED(kwds)) \
     {                                                                          \
@@ -230,7 +230,7 @@ namespace kernels {
               size_t... J>                                                     \
     __VA_ARGS__ typename std::enable_if<!std::is_same<R, void>::value,         \
                                         void>::type                            \
-    single(char *dst, char **DYND_CONDITIONAL_UNUSED(src),                     \
+    single(char *dst, char *const *DYND_CONDITIONAL_UNUSED(src),               \
            args<type_sequence<A...>, index_sequence<I...>> *DYND_UNUSED(args), \
            kwds<type_sequence<K...>, index_sequence<J...>> *DYND_UNUSED(kwds)) \
     {                                                                          \
@@ -264,7 +264,7 @@ namespace kernels {
     {                                                                          \
     }                                                                          \
                                                                                \
-    __VA_ARGS__ void single(char *dst, char **src)                             \
+    __VA_ARGS__ void single(char *dst, char *const *src)                       \
     {                                                                          \
       single<typename return_of<func_type>::type>(dst, src, this, this);       \
     }                                                                          \
@@ -274,15 +274,14 @@ namespace kernels {
                 void *ckb, intptr_t ckb_offset, const ndt::type &dst_tp,       \
                 const char *dst_arrmeta, const ndt::type *src_tp,              \
                 const char *const *src_arrmeta, kernel_request_t kernreq,      \
-                const eval::eval_context *ectx, const nd::array &args,         \
-                const nd::array &kwds);                                        \
+                const eval::eval_context *ectx, const nd::array &kwds);        \
                                                                                \
   private:                                                                     \
     template <typename R, typename... A, size_t... I, typename... K,           \
               size_t... J>                                                     \
     __VA_ARGS__ typename std::enable_if<std::is_same<R, void>::value,          \
                                         void>::type                            \
-    single(char *DYND_UNUSED(dst), char **DYND_CONDITIONAL_UNUSED(src),        \
+    single(char *DYND_UNUSED(dst), char *const *DYND_CONDITIONAL_UNUSED(src),  \
            args<type_sequence<A...>, index_sequence<I...>> *DYND_UNUSED(args), \
            kwds<type_sequence<K...>, index_sequence<J...>> *DYND_UNUSED(kwds)) \
     {                                                                          \
@@ -293,7 +292,7 @@ namespace kernels {
               size_t... J>                                                     \
     __VA_ARGS__ typename std::enable_if<!std::is_same<R, void>::value,         \
                                         void>::type                            \
-    single(char *dst, char **DYND_CONDITIONAL_UNUSED(src),                     \
+    single(char *dst, char *const *DYND_CONDITIONAL_UNUSED(src),               \
            args<type_sequence<A...>, index_sequence<I...>> *DYND_UNUSED(args), \
            kwds<type_sequence<K...>, index_sequence<J...>> *DYND_UNUSED(kwds)) \
     {                                                                          \
@@ -310,8 +309,7 @@ namespace kernels {
       void *ckb, intptr_t ckb_offset, const ndt::type &DYND_UNUSED(dst_tp),
       const char *DYND_UNUSED(dst_arrmeta), const ndt::type *src_tp,
       const char *const *src_arrmeta, kernel_request_t kernreq,
-      const eval::eval_context *DYND_UNUSED(ectx),
-      const nd::array &DYND_UNUSED(args), const nd::array &kwds)
+      const eval::eval_context *DYND_UNUSED(ectx), const nd::array &kwds)
   {
     self_type::create(ckb, kernreq, ckb_offset,
                       *af_self->get_data_as<func_type>(),
@@ -331,8 +329,7 @@ namespace kernels {
       void *ckb, intptr_t ckb_offset, const ndt::type &DYND_UNUSED(dst_tp),
       const char *DYND_UNUSED(dst_arrmeta), const ndt::type *src_tp,
       const char *const *src_arrmeta, kernel_request_t kernreq,
-      const eval::eval_context *DYND_UNUSED(ectx),
-      const nd::array &DYND_UNUSED(args), const nd::array &kwds)
+      const eval::eval_context *DYND_UNUSED(ectx), const nd::array &kwds)
   {
     if ((kernreq & kernel_request_cuda_device) == false) {
       typedef cuda_parallel_ck<arity_of<func_type>::value> self_type;
@@ -375,7 +372,7 @@ namespace kernels {
     {                                                                          \
     }                                                                          \
                                                                                \
-    __VA_ARGS__ void single(char *dst, char **src)                             \
+    __VA_ARGS__ void single(char *dst, char *const *src)                       \
     {                                                                          \
       single<typename return_of<func_type>::type>(dst, src, this);             \
     }                                                                          \
@@ -385,14 +382,13 @@ namespace kernels {
                 void *ckb, intptr_t ckb_offset, const ndt::type &dst_tp,       \
                 const char *dst_arrmeta, const ndt::type *src_tp,              \
                 const char *const *src_arrmeta, kernel_request_t kernreq,      \
-                const eval::eval_context *ectx, const nd::array &args,         \
-                const nd::array &kwds);                                        \
+                const eval::eval_context *ectx, const nd::array &kwds);        \
                                                                                \
   private:                                                                     \
     template <typename R, typename... A, size_t... I>                          \
     __VA_ARGS__ typename std::enable_if<std::is_same<R, void>::value,          \
                                         void>::type                            \
-    single(char *DYND_UNUSED(dst), char **DYND_CONDITIONAL_UNUSED(src),        \
+    single(char *DYND_UNUSED(dst), char *const *DYND_CONDITIONAL_UNUSED(src),  \
            args<type_sequence<A...>, index_sequence<I...>> *DYND_UNUSED(args)) \
     {                                                                          \
       func(arg<A, I>::get(src[I])...);                                         \
@@ -401,7 +397,7 @@ namespace kernels {
     template <typename R, typename... A, size_t... I>                          \
     __VA_ARGS__ typename std::enable_if<!std::is_same<R, void>::value,         \
                                         void>::type                            \
-    single(char *dst, char **DYND_CONDITIONAL_UNUSED(src),                     \
+    single(char *dst, char *const *DYND_CONDITIONAL_UNUSED(src),               \
            args<type_sequence<A...>, index_sequence<I...>> *DYND_UNUSED(args)) \
     {                                                                          \
       *reinterpret_cast<R *>(dst) = func(arg<A, I>::get(src[I])...);           \
@@ -419,7 +415,7 @@ namespace kernels {
                   const char *DYND_UNUSED(dst_arrmeta), const ndt::type *src_tp,
                   const char *const *src_arrmeta, kernel_request_t kernreq,
                   const eval::eval_context *DYND_UNUSED(ectx),
-                  const nd::array &DYND_UNUSED(args), const nd::array &kwds)
+                  const nd::array &kwds)
   {
     self_type::create(ckb, kernreq, ckb_offset,
                       args_for<func_type>(src_tp, src_arrmeta, kwds),
@@ -443,7 +439,6 @@ namespace kernels {
                          const char *const *src_arrmeta,
                          kernel_request_t kernreq,
                          const eval::eval_context *DYND_UNUSED(ectx),
-                         const nd::array &DYND_UNUSED(args),
                          const nd::array &kwds)
   {
     if ((kernreq & kernel_request_cuda_device) == false) {

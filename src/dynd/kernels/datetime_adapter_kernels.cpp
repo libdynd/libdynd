@@ -108,7 +108,7 @@ static intptr_t instantiate_int_multiply_and_offset_arrfunc(
     const char *DYND_UNUSED(dst_arrmeta), const ndt::type *src_tp,
     const char *const *DYND_UNUSED(src_arrmeta), kernel_request_t kernreq,
     const eval::eval_context *DYND_UNUSED(ectx),
-    const nd::array &DYND_UNUSED(args), const nd::array &DYND_UNUSED(kwds))
+    const nd::array &DYND_UNUSED(kwds))
 {
   typedef int_multiply_and_offset_ck<Tsrc, Tdst> self_type;
   if (dst_tp != af_tp->get_return_type() ||
@@ -160,7 +160,7 @@ static intptr_t instantiate_int_offset_and_divide_arrfunc(
     const char *DYND_UNUSED(dst_arrmeta), const ndt::type *src_tp,
     const char *const *DYND_UNUSED(src_arrmeta), kernel_request_t kernreq,
     const eval::eval_context *DYND_UNUSED(ectx),
-    const nd::array &DYND_UNUSED(args), const nd::array &DYND_UNUSED(kwds))
+    const nd::array &DYND_UNUSED(kwds))
 {
   typedef int_offset_and_divide_ck<Tsrc, Tdst> self_type;
   if (dst_tp != af_tp->get_return_type() ||
