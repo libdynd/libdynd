@@ -340,8 +340,8 @@ size_t dynd::make_pod_typed_data_assignment_kernel(void *ckb,
 
 typedef void *(*create_t)(void *, kernel_request_t, intptr_t &);
 
-static kernels::create_t assign_create[builtin_type_id_count - 2][builtin_type_id_count -
-                                                         2][4] = {
+static kernels::create_t assign_create[builtin_type_id_count -
+                                       2][builtin_type_id_count - 2][4] = {
 #define SINGLE_OPERATION_PAIR_LEVEL(dst_type, src_type, errmode)               \
   &kernels::assign_ck<dst_type, src_type, errmode>::create_opaque
 
