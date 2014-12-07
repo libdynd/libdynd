@@ -110,10 +110,144 @@ namespace kernels {
     }
   };
 
-  template <class dst_type, class src_type, assign_error_mode errmode>
-  struct single_assigner_as_expr_single
-      : expr_ck<single_assigner_as_expr_single<dst_type, src_type, errmode>,
+#ifdef DYND_CUDA
+  template <typename dst_type, typename src_type, assign_error_mode errmode>
+  struct cuda_host_to_device_assign_ck
+      : expr_ck<cuda_host_to_device_assign_ck<dst_type, src_type, errmode>,
                 kernel_request_host, 1> {
+    void single(char *dst, char **src)
+    {
+      dst_type tmp;
+      single_assigner_builtin<dst_type, src_type, errmode>::assign(
+          &tmp, reinterpret_cast<src_type *>(*src));
+      throw_if_not_cuda_success(
+          cudaMemcpy(dst, &tmp, sizeof(dst_type), cudaMemcpyHostToDevice));
+    }
+  };
+
+  template <typename same_type, assign_error_mode errmode>
+  struct cuda_host_to_device_assign_ck<same_type, same_type, errmode>
+      : expr_ck<cuda_host_to_device_assign_ck<same_type, same_type, errmode>,
+                kernel_request_host, 1> {
+    void single(char *dst, char **src)
+    {
+      throw_if_not_cuda_success(
+          cudaMemcpy(dst, *src, sizeof(same_type), cudaMemcpyHostToDevice));
+    }
+  };
+
+  struct cuda_host_to_device_copy_ck
+      : expr_ck<cuda_host_to_device_copy_ck, kernel_request_host, 1> {
+    size_t data_size;
+
+    cuda_host_to_device_copy_ck(size_t data_size) : data_size(data_size) {}
+
+    void single(char *dst, char **src)
+    {
+      throw_if_not_cuda_success(
+          cudaMemcpy(dst, *src, data_size, cudaMemcpyHostToDevice));
+    }
+  };
+
+  template <typename dst_type, typename src_type, assign_error_mode errmode>
+  struct cuda_device_to_host_assign_ck
+      : expr_ck<cuda_device_to_host_assign_ck<dst_type, src_type, errmode>,
+                kernel_request_host, 1> {
+    void single(char *dst, char **src)
+    {
+      src_type tmp;
+      throw_if_not_cuda_success(
+          cudaMemcpy(&tmp, *src, sizeof(src_type), cudaMemcpyDeviceToHost));
+      single_assigner_builtin<dst_type, src_type, errmode>::assign(
+          reinterpret_cast<dst_type *>(dst), &tmp);
+    }
+  };
+
+  template <typename same_type, assign_error_mode errmode>
+  struct cuda_device_to_host_assign_ck<same_type, same_type, errmode>
+      : expr_ck<cuda_device_to_host_assign_ck<same_type, same_type, errmode>,
+                kernel_request_host, 1> {
+    void single(char *dst, char **src)
+    {
+      throw_if_not_cuda_success(
+          cudaMemcpy(dst, *src, sizeof(same_type), cudaMemcpyDeviceToHost));
+    }
+  };
+
+  struct cuda_device_to_host_copy_ck
+      : expr_ck<cuda_device_to_host_copy_ck, kernel_request_host, 1> {
+    size_t data_size;
+
+    cuda_device_to_host_copy_ck(size_t data_size) : data_size(data_size) {}
+
+    void single(char *dst, char **src)
+    {
+      throw_if_not_cuda_success(
+          cudaMemcpy(dst, *src, data_size, cudaMemcpyDeviceToHost));
+    }
+  };
+
+  template <typename dst_type, typename src_type, assign_error_mode errmode>
+  DYND_CUDA_GLOBAL void single_cuda_global_assign_builtin(dst_type *dst,
+                                                          src_type *src)
+  {
+    single_assigner_builtin<dst_type, src_type, errmode>::assign(dst, src);
+  }
+
+  template <typename dst_type, typename src_type, assign_error_mode errmode>
+  struct single_cuda_device_to_device_assigner_builtin {
+    static void assign(dst_type *DYND_UNUSED(dst), src_type *DYND_UNUSED(src))
+    {
+      std::stringstream ss;
+      ss << "assignment from " << ndt::make_type<src_type>()
+         << " in CUDA global memory to ";
+      ss << ndt::make_type<dst_type>() << " in CUDA global memory ";
+      ss << "with error mode " << errmode << " is not implemented";
+      throw std::runtime_error(ss.str());
+    }
+  };
+  template <typename dst_type, typename src_type>
+  struct single_cuda_device_to_device_assigner_builtin<dst_type, src_type,
+                                                       assign_error_nocheck> {
+    static void assign(dst_type *dst, src_type *src)
+    {
+      single_cuda_global_assign_builtin<dst_type, src_type, assign_error_nocheck> << <
+          1, 1>>>
+          (dst, src);
+      throw_if_not_cuda_success(cudaDeviceSynchronize());
+    }
+  };
+
+  template <class dst_type, class src_type, assign_error_mode errmode>
+  struct cuda_device_to_device_assign_ck
+      : expr_ck<cuda_device_to_device_assign_ck<dst_type, src_type, errmode>,
+                kernel_request_host, 1> {
+    void single(char *dst, char **src)
+    {
+      single_cuda_device_to_device_assigner_builtin<
+          dst_type, src_type,
+          errmode>::assign(reinterpret_cast<dst_type *>(dst),
+                           reinterpret_cast<src_type *>(*src));
+    }
+  };
+
+  struct cuda_device_to_device_copy_ck
+      : expr_ck<cuda_device_to_device_copy_ck, kernel_request_host, 1> {
+    size_t data_size;
+
+    cuda_device_to_device_copy_ck(size_t data_size) : data_size(data_size) {}
+
+    void single(char *dst, char **src)
+    {
+      throw_if_not_cuda_success(
+          cudaMemcpy(dst, *src, data_size, cudaMemcpyDeviceToDevice));
+    }
+  };
+#endif
+
+  template <class dst_type, class src_type, assign_error_mode errmode>
+  struct assign_ck : expr_ck<assign_ck<dst_type, src_type, errmode>,
+                             kernel_request_host, 1> {
     void single(char *dst, char **src)
     {
       single_assigner_builtin<dst_type, src_type, errmode>::assign(
@@ -204,12 +338,12 @@ size_t dynd::make_pod_typed_data_assignment_kernel(void *ckb,
   }
 }
 
-static expr_single_t assign_table_single_kernel[builtin_type_id_count -
-                                                2][builtin_type_id_count -
-                                                   2][4] = {
+typedef void *(*create_t)(void *, kernel_request_t, intptr_t &);
+
+static kernels::create_t assign_create[builtin_type_id_count - 2][builtin_type_id_count -
+                                                         2][4] = {
 #define SINGLE_OPERATION_PAIR_LEVEL(dst_type, src_type, errmode)               \
-  &kernels::single_assigner_as_expr_single<dst_type, src_type,                 \
-                                           errmode>::single_wrapper
+  &kernels::assign_ck<dst_type, src_type, errmode>::create_opaque
 
 #define ERROR_MODE_LEVEL(dst_type, src_type)                                   \
   {                                                                            \
@@ -296,7 +430,7 @@ static expr_strided_t assign_table_strided_kernel[builtin_type_id_count -
                                                   2][builtin_type_id_count -
                                                      2][4] = {
 #define STRIDED_OPERATION_PAIR_LEVEL(dst_type, src_type, errmode)              \
-  &multiple_assignment_builtin<dst_type, src_type, errmode>::strided_assign
+  &kernels::assign_ck<dst_type, src_type, errmode>::strided_wrapper
 
 #define ERROR_MODE_LEVEL(dst_type, src_type)                                   \
   {                                                                            \
@@ -351,31 +485,9 @@ size_t dynd::make_builtin_type_assignment_kernel(void *ckb, intptr_t ckb_offset,
   if (dst_type_id >= bool_type_id && dst_type_id <= complex_float64_type_id &&
       src_type_id >= bool_type_id && src_type_id <= complex_float64_type_id &&
       errmode != assign_error_default) {
-    // No need to reserve more space, the space for a leaf is already there
-    ckernel_prefix *result =
-        reinterpret_cast<ckernel_builder<kernel_request_host> *>(ckb)
-            ->get_at<ckernel_prefix>(ckb_offset);
-    kernels::inc_ckb_offset<ckernel_prefix>(ckb_offset);
-    switch (kernreq) {
-    case kernel_request_single:
-      result->set_function<expr_single_t>(
-          assign_table_single_kernel[dst_type_id -
-                                     bool_type_id][src_type_id -
-                                                   bool_type_id][errmode]);
-      break;
-    case kernel_request_strided:
-      result->set_function<expr_strided_t>(
-          assign_table_strided_kernel[dst_type_id -
-                                      bool_type_id][src_type_id -
-                                                    bool_type_id][errmode]);
-      break;
-    default: {
-      stringstream ss;
-      ss << "make_builtin_type_assignment_function: unrecognized request "
-         << (int)kernreq;
-      throw runtime_error(ss.str());
-    }
-    }
+    (*assign_create[dst_type_id - bool_type_id][src_type_id -
+                                                bool_type_id][errmode])(
+        ckb, kernreq, ckb_offset);
     return ckb_offset;
   } else {
     stringstream ss;

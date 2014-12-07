@@ -358,7 +358,7 @@ public:
 
   void destroy(ckernel_prefix *self)
   {
-    cuda_device_destroy<<<1, 1>>>(self);
+    cuda_device_destroy << <1, 1>>> (self);
     throw_if_not_cuda_success(cudaDeviceSynchronize());
   }
 };
@@ -543,6 +543,12 @@ namespace kernels {
     static self_type *create(void *ckb, kernel_request_t kernreq,              \
                              intptr_t &inout_ckb_offset, A &&... args);        \
                                                                                \
+    static void *create_opaque(void *ckb, kernel_request_t kernreq,            \
+                               intptr_t &inout_ckb_offset)                     \
+    {                                                                          \
+      return create(ckb, kernreq, inout_ckb_offset);                                 \
+    }                                                                          \
+                                                                               \
     /**                                                                        \
      * Creates the ckernel, and increments ``inckb_offset``                    \
      * to the position after it.                                               \
@@ -717,7 +723,8 @@ namespace kernels {
     if (kernreq & kernel_request_cuda_device) {
       return self_type::create_leaf(
           reinterpret_cast<ckernel_builder<kernel_request_cuda_device> *>(ckb),
-          kernreq & ~kernel_request_cuda_device, inout_ckb_offset, std::forward<A>(args)...);
+          kernreq & ~kernel_request_cuda_device, inout_ckb_offset,
+          std::forward<A>(args)...);
     }
     return self_type::create_leaf(
         reinterpret_cast<ckernel_builder<kernel_request_host> *>(ckb), kernreq,
@@ -727,6 +734,14 @@ namespace kernels {
 #endif
 
 #undef GENERAL_CK
-} // namespace kernels
 
+  typedef void *(*create_t)(void *, kernel_request_t, intptr_t &);
+
+  template <typename CKT>
+  void *create(void *ckb, kernel_request_t kernreq, intptr_t &inout_ckb_offset)
+  {
+    return CKT::create(ckb, kernreq, inout_ckb_offset);
+  }
+
+} // namespace kernels
 } // namespace dynd
