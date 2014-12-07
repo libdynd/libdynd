@@ -17,7 +17,7 @@ struct take_by_pointer_outer_ck : kernels::expr_ck<take_by_pointer_outer_ck, ker
       : dst_size(dst_size), dst_stride(dst_stride), src1_stride(src1_stride) {
     }
 
-    void single(char *dst, char **src) {
+    void single(char *dst, char *const *src) {
         ckernel_prefix *child = get_child_ckernel();
         expr_single_t child_fn = child->get_function<expr_single_t>();
 
@@ -38,7 +38,7 @@ struct take_by_pointer_ck : kernels::expr_ck<take_by_pointer_ck, kernel_request_
       : src0_size(src0_size), src0_stride(src0_stride), src1_inner_stride(src1_inner_stride) {
     }
 
-    void single(char *dst, char **src) {
+    void single(char *dst, char *const *src) {
         ckernel_prefix *child = get_child_ckernel();
         expr_single_t child_fn = child->get_function<expr_single_t>();
 

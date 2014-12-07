@@ -323,15 +323,15 @@ void string_type::make_string_iter(dim_iter *out_di, string_encoding_t encoding,
 
 namespace {
 struct string_is_avail_ck {
-    static void single(char *dst, char **src,
+    static void single(char *dst, char *const *src,
                        ckernel_prefix *DYND_UNUSED(self))
     {
         string_type_data *std =
-            *reinterpret_cast<string_type_data **>(src);
+            *reinterpret_cast<string_type_data *const *>(src);
         *dst = std->begin != NULL;
     }
 
-    static void strided(char *dst, intptr_t dst_stride, char **src,
+    static void strided(char *dst, intptr_t dst_stride, char *const *src,
                         const intptr_t *src_stride, size_t count,
                         ckernel_prefix *DYND_UNUSED(self))
     {
@@ -374,7 +374,7 @@ struct string_is_avail_ck {
 };
 
 struct string_assign_na_ck {
-    static void single(char *dst, char **DYND_UNUSED(src),
+    static void single(char *dst, char *const *DYND_UNUSED(src),
                        ckernel_prefix *DYND_UNUSED(self))
     {
         string_type_data *std =
@@ -386,7 +386,7 @@ struct string_assign_na_ck {
     }
 
     static void strided(char *dst, intptr_t dst_stride,
-                        char **DYND_UNUSED(src),
+                        char *const *DYND_UNUSED(src),
                         const intptr_t *DYND_UNUSED(src_stride), size_t count,
                         ckernel_prefix *DYND_UNUSED(self))
     {

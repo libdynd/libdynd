@@ -26,7 +26,7 @@ struct neighborhood_ck : kernels::expr_ck<neighborhood_ck<N>, kernel_request_hos
     // local index of first in of bounds element in the neighborhood
     // local index of first out of bounds element in the neighborhood
 
-    inline void single(char *dst, char **src) {
+    inline void single(char *dst, char *const *src) {
         ckernel_prefix *child = self_type::get_child_ckernel();
         expr_single_t child_fn = child->get_function<expr_single_t>();
 

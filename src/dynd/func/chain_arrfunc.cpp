@@ -21,7 +21,7 @@ struct unary_heap_chain_ck : public kernels::general_ck<unary_heap_chain_ck, ker
   arrmeta_holder m_buf_arrmeta;
   vector<intptr_t> m_buf_shape;
 
-  static void single(char *dst, char **src, ckernel_prefix *rawself)
+  static void single(char *dst, char *const *src, ckernel_prefix *rawself)
   {
     self_type *self = get_self(rawself);
     // Allocate a temporary buffer on the heap
@@ -35,7 +35,7 @@ struct unary_heap_chain_ck : public kernels::general_ck<unary_heap_chain_ck, ker
     second_fn(dst, &buf_data, second);
   }
 
-  static void strided(char *dst, intptr_t dst_stride, char **src,
+  static void strided(char *dst, intptr_t dst_stride, char *const *src,
                       const intptr_t *src_stride, size_t count,
                       ckernel_prefix *rawself)
   {

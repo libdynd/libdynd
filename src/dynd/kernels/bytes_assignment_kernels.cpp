@@ -26,7 +26,7 @@ namespace {
         const bytes_type_arrmeta *dst_arrmeta, *src_arrmeta;
 
         /** Does a single blockref-string copy */
-        static void single(char *dst, char **src,
+        static void single(char *dst, char *const *src,
                            ckernel_prefix *extra)
         {
             extra_type *e = reinterpret_cast<extra_type *>(extra);
@@ -34,7 +34,7 @@ namespace {
             const bytes_type_arrmeta *src_md = e->src_arrmeta;
             bytes_type_data *dst_d = reinterpret_cast<bytes_type_data *>(dst);
             bytes_type_data *src_d =
-                *reinterpret_cast<bytes_type_data **>(src);
+                *reinterpret_cast<bytes_type_data *const *>(src);
 
             if (dst_d->begin != NULL) {
                 throw runtime_error("Cannot assign to an already initialized dynd string");
@@ -101,7 +101,7 @@ namespace {
         const bytes_type_arrmeta *dst_arrmeta;
 
         /** Does a single fixed-bytes copy */
-        static void single(char *dst, char **src,
+        static void single(char *dst, char *const *src,
                            ckernel_prefix *extra)
         {
             extra_type *e = reinterpret_cast<extra_type *>(extra);

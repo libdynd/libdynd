@@ -19,7 +19,7 @@ struct buffered_ck : public kernels::general_ck<buffered_ck, kernel_request_host
   vector<intptr_t> m_src_buf_ck_offsets;
   vector<buffer_storage> m_bufs;
 
-  static void single(char *dst, char **src, ckernel_prefix *rawself)
+  static void single(char *dst, char *const *src, ckernel_prefix *rawself)
   {
     self_type *self = get_self(rawself);
     vector<char *> buf_src(self->m_nsrc);
@@ -40,7 +40,7 @@ struct buffered_ck : public kernels::general_ck<buffered_ck, kernel_request_host
     child_fn(dst, &buf_src[0], child);
   }
 
-  static void strided(char *dst, intptr_t dst_stride, char **src,
+  static void strided(char *dst, intptr_t dst_stride, char *const *src,
                       const intptr_t *src_stride, size_t count,
                       ckernel_prefix *rawself)
   {

@@ -40,14 +40,14 @@ namespace {
         const char *format;
         const string_type_arrmeta *dst_arrmeta;
 
-        static void single_unary(char *dst, char **src,
+        static void single_unary(char *dst, char *const *src,
                                  ckernel_prefix *extra)
         {
             extra_type *e = reinterpret_cast<extra_type *>(extra);
             const string_type_arrmeta *dst_md = e->dst_arrmeta;
 
             struct tm tm_val;
-            int32_t date = **reinterpret_cast<int32_t **>(src);
+            int32_t date = **reinterpret_cast<int32_t *const *>(src);
             // Convert the date to a 'struct tm'
             date_ymd ymd;
             ymd.set_from_days(date);
@@ -84,7 +84,7 @@ namespace {
         }
 
         static void strided_unary(char *dst, intptr_t dst_stride,
-                                  char **src,
+                                  char *const *src,
                                   const intptr_t *src_stride, size_t count,
                                   ckernel_prefix *extra)
         {
@@ -221,13 +221,13 @@ namespace {
         ckernel_prefix base;
         int32_t year, month, day;
 
-        static void single_unary(char *dst, char **src,
+        static void single_unary(char *dst, char *const *src,
                                  ckernel_prefix *extra)
         {
             extra_type *e = reinterpret_cast<extra_type *>(extra);
             int32_t year = e->year, month = e->month, day = e->day;
 
-            int32_t date = **reinterpret_cast<int32_t **>(src);
+            int32_t date = **reinterpret_cast<int32_t *const *>(src);
             // Convert the date to YMD form
             date_ymd ymd;
             ymd.set_from_days(date);
@@ -276,7 +276,7 @@ namespace {
             *reinterpret_cast<int32_t *>(dst) = ymd.to_days();
         }
         static void strided_unary(char *dst, intptr_t dst_stride,
-                                  char **src,
+                                  char *const *src,
                                   const intptr_t *src_stride, size_t count,
                                   ckernel_prefix *extra)
         {

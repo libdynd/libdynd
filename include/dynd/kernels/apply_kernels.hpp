@@ -194,7 +194,7 @@ namespace kernels {
     {                                                                          \
     }                                                                          \
                                                                                \
-    __VA_ARGS__ void single(char *dst, char **src)                             \
+    __VA_ARGS__ void single(char *dst, char *const *src)                       \
     {                                                                          \
       single<typename return_of<func_type>::type>(dst, src, this, this);       \
     }                                                                          \
@@ -219,7 +219,7 @@ namespace kernels {
               size_t... J>                                                     \
     __VA_ARGS__ typename std::enable_if<std::is_same<R, void>::value,          \
                                         void>::type                            \
-    single(char *DYND_UNUSED(dst), char **DYND_CONDITIONAL_UNUSED(src),        \
+    single(char *DYND_UNUSED(dst), char *const *DYND_CONDITIONAL_UNUSED(src),  \
            args<type_sequence<A...>, index_sequence<I...>> *DYND_UNUSED(args), \
            kwds<type_sequence<K...>, index_sequence<J...>> *DYND_UNUSED(kwds)) \
     {                                                                          \
@@ -230,7 +230,7 @@ namespace kernels {
               size_t... J>                                                     \
     __VA_ARGS__ typename std::enable_if<!std::is_same<R, void>::value,         \
                                         void>::type                            \
-    single(char *dst, char **DYND_CONDITIONAL_UNUSED(src),                     \
+    single(char *dst, char *const *DYND_CONDITIONAL_UNUSED(src),               \
            args<type_sequence<A...>, index_sequence<I...>> *DYND_UNUSED(args), \
            kwds<type_sequence<K...>, index_sequence<J...>> *DYND_UNUSED(kwds)) \
     {                                                                          \
@@ -264,7 +264,7 @@ namespace kernels {
     {                                                                          \
     }                                                                          \
                                                                                \
-    __VA_ARGS__ void single(char *dst, char **src)                             \
+    __VA_ARGS__ void single(char *dst, char *const *src)                       \
     {                                                                          \
       single<typename return_of<func_type>::type>(dst, src, this, this);       \
     }                                                                          \
@@ -282,7 +282,7 @@ namespace kernels {
               size_t... J>                                                     \
     __VA_ARGS__ typename std::enable_if<std::is_same<R, void>::value,          \
                                         void>::type                            \
-    single(char *DYND_UNUSED(dst), char **DYND_CONDITIONAL_UNUSED(src),        \
+    single(char *DYND_UNUSED(dst), char *const *DYND_CONDITIONAL_UNUSED(src),  \
            args<type_sequence<A...>, index_sequence<I...>> *DYND_UNUSED(args), \
            kwds<type_sequence<K...>, index_sequence<J...>> *DYND_UNUSED(kwds)) \
     {                                                                          \
@@ -293,7 +293,7 @@ namespace kernels {
               size_t... J>                                                     \
     __VA_ARGS__ typename std::enable_if<!std::is_same<R, void>::value,         \
                                         void>::type                            \
-    single(char *dst, char **DYND_CONDITIONAL_UNUSED(src),                     \
+    single(char *dst, char *const *DYND_CONDITIONAL_UNUSED(src),               \
            args<type_sequence<A...>, index_sequence<I...>> *DYND_UNUSED(args), \
            kwds<type_sequence<K...>, index_sequence<J...>> *DYND_UNUSED(kwds)) \
     {                                                                          \
@@ -375,7 +375,7 @@ namespace kernels {
     {                                                                          \
     }                                                                          \
                                                                                \
-    __VA_ARGS__ void single(char *dst, char **src)                             \
+    __VA_ARGS__ void single(char *dst, char *const *src)                       \
     {                                                                          \
       single<typename return_of<func_type>::type>(dst, src, this);             \
     }                                                                          \
@@ -392,7 +392,7 @@ namespace kernels {
     template <typename R, typename... A, size_t... I>                          \
     __VA_ARGS__ typename std::enable_if<std::is_same<R, void>::value,          \
                                         void>::type                            \
-    single(char *DYND_UNUSED(dst), char **DYND_CONDITIONAL_UNUSED(src),        \
+    single(char *DYND_UNUSED(dst), char *const *DYND_CONDITIONAL_UNUSED(src),  \
            args<type_sequence<A...>, index_sequence<I...>> *DYND_UNUSED(args)) \
     {                                                                          \
       func(arg<A, I>::get(src[I])...);                                         \
@@ -401,7 +401,7 @@ namespace kernels {
     template <typename R, typename... A, size_t... I>                          \
     __VA_ARGS__ typename std::enable_if<!std::is_same<R, void>::value,         \
                                         void>::type                            \
-    single(char *dst, char **DYND_CONDITIONAL_UNUSED(src),                     \
+    single(char *dst, char *const *DYND_CONDITIONAL_UNUSED(src),               \
            args<type_sequence<A...>, index_sequence<I...>> *DYND_UNUSED(args)) \
     {                                                                          \
       *reinterpret_cast<R *>(dst) = func(arg<A, I>::get(src[I])...);           \

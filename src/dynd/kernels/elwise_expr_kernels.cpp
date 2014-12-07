@@ -29,7 +29,7 @@ struct strided_expr_kernel_extra {
     intptr_t size;
     intptr_t dst_stride, src_stride[N];
 
-    static void single(char *dst, char **src,
+    static void single(char *dst, char *const *src,
                     ckernel_prefix *extra)
     {
         extra_type *e = reinterpret_cast<extra_type *>(extra);
@@ -39,7 +39,7 @@ struct strided_expr_kernel_extra {
     }
 
     static void strided(char *dst, intptr_t dst_stride,
-                    char **src, const intptr_t *src_stride,
+                    char *const *src, const intptr_t *src_stride,
                     size_t count, ckernel_prefix *extra)
     {
         extra_type *e = reinterpret_cast<extra_type *>(extra);
@@ -187,7 +187,7 @@ struct strided_or_var_to_strided_expr_kernel_extra {
     intptr_t dst_stride, src_stride[N], src_offset[N];
     bool is_src_var[N];
 
-    static void single(char *dst, char **src,
+    static void single(char *dst, char *const *src,
                     ckernel_prefix *extra)
     {
         extra_type *e = reinterpret_cast<extra_type *>(extra);
@@ -218,7 +218,7 @@ struct strided_or_var_to_strided_expr_kernel_extra {
     }
 
     static void strided(char *dst, intptr_t dst_stride,
-                    char **src, const intptr_t *src_stride,
+                    char *const *src, const intptr_t *src_stride,
                     size_t count, ckernel_prefix *extra)
     {
         char *src_loop[N];
@@ -377,7 +377,7 @@ struct strided_or_var_to_var_expr_kernel_extra {
     intptr_t dst_stride, dst_offset, src_stride[N], src_offset[N];
     bool is_src_var[N];
 
-    static void single(char *dst, char **src,
+    static void single(char *dst, char *const *src,
                     ckernel_prefix *extra)
     {
         extra_type *e = reinterpret_cast<extra_type *>(extra);
@@ -466,7 +466,7 @@ struct strided_or_var_to_var_expr_kernel_extra {
     }
 
     static void strided(char *dst, intptr_t dst_stride,
-                    char **src, const intptr_t *src_stride,
+                    char *const *src, const intptr_t *src_stride,
                     size_t count, ckernel_prefix *extra)
     {
         char *src_loop[N];

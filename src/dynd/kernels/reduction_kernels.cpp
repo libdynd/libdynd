@@ -15,16 +15,16 @@ using namespace dynd;
 namespace {
     template<class T, class Accum>
     struct sum_reduction {
-        static void single(char *dst, char **src,
+        static void single(char *dst, char *const *src,
                            ckernel_prefix *DYND_UNUSED(self))
         {
             *reinterpret_cast<T *>(dst) =
                 *reinterpret_cast<T *>(dst) +
-                **reinterpret_cast<T **>(src);
+                **reinterpret_cast<T *const *>(src);
         }
 
         static void strided(char *dst, intptr_t dst_stride,
-                            char **src, const intptr_t *src_stride,
+                            char *const *src, const intptr_t *src_stride,
                             size_t count, ckernel_prefix *DYND_UNUSED(self))
         {
             char *src0 = src[0];

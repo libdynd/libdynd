@@ -163,7 +163,7 @@ struct strided_or_var_to_strided_expr_kernel_extra {
   intptr_t dst_stride, src_stride[N], src_offset[N];
   bool is_src_var[N];
 
-  static void single(char *dst, char **src, ckernel_prefix *extra)
+  static void single(char *dst, char *const *src, ckernel_prefix *extra)
   {
     extra_type *e = reinterpret_cast<extra_type *>(extra);
     ckernel_prefix *echild = e->base.get_child_ckernel(sizeof(extra_type));
@@ -193,7 +193,7 @@ struct strided_or_var_to_strided_expr_kernel_extra {
             echild);
   }
 
-  static void strided(char *dst, intptr_t dst_stride, char **src,
+  static void strided(char *dst, intptr_t dst_stride, char *const *src,
                       const intptr_t *src_stride, size_t count,
                       ckernel_prefix *extra)
   {
@@ -369,7 +369,7 @@ struct strided_or_var_to_var_expr_kernel_extra {
   intptr_t dst_stride, dst_offset, src_stride[N], src_offset[N], src_size[N];
   bool is_src_var[N];
 
-  static void single(char *dst, char **src, ckernel_prefix *extra)
+  static void single(char *dst, char *const *src, ckernel_prefix *extra)
   {
     extra_type *e = reinterpret_cast<extra_type *>(extra);
     ckernel_prefix *echild = e->base.get_child_ckernel(sizeof(extra_type));
@@ -474,7 +474,7 @@ struct strided_or_var_to_var_expr_kernel_extra {
             modified_src_stride, dim_size, echild);
   }
 
-  static void strided(char *dst, intptr_t dst_stride, char **src,
+  static void strided(char *dst, intptr_t dst_stride, char *const *src,
                       const intptr_t *src_stride, size_t count,
                       ckernel_prefix *extra)
   {

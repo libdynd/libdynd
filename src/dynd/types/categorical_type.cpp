@@ -77,17 +77,17 @@ namespace {
         }
 
         // Some compilers are finicky about getting single<T> as a function pointer, so this...
-        static void single_uint8(char *dst, char **src,
+        static void single_uint8(char *dst, char *const *src,
                                  ckernel_prefix *extra)
         {
             single<uint8_t>(dst, *src, extra);
         }
-        static void single_uint16(char *dst, char **src,
+        static void single_uint16(char *dst, char *const *src,
                                   ckernel_prefix *extra)
         {
             single<uint16_t>(dst, *src, extra);
         }
-        static void single_uint32(char *dst, char **src,
+        static void single_uint32(char *dst, char *const *src,
                                   ckernel_prefix *extra)
         {
             single<uint32_t>(dst, *src, extra);
@@ -122,17 +122,17 @@ namespace {
         }
 
         // Some compilers are finicky about getting single<T> as a function pointer, so this...
-        static void single_uint8(char *dst, char **src,
+        static void single_uint8(char *dst, char *const *src,
                                  ckernel_prefix *self)
         {
             single<uint8_t>(dst, *src, self);
         }
-        static void single_uint16(char *dst, char **src,
+        static void single_uint16(char *dst, char *const *src,
                                   ckernel_prefix *self)
         {
             single<uint16_t>(dst, *src, self);
         }
-        static void single_uint32(char *dst, char **src,
+        static void single_uint32(char *dst, char *const *src,
                                   ckernel_prefix *self)
         {
             single<uint32_t>(dst, *src, self);

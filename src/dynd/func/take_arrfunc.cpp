@@ -21,7 +21,7 @@ struct masked_take_ck : public kernels::expr_ck<masked_take_ck, kernel_request_h
     const char *m_dst_meta;
     intptr_t m_dim_size, m_src0_stride, m_mask_stride;
 
-    inline void single(char *dst, char **src)
+    inline void single(char *dst, char *const *src)
     {
         ckernel_prefix *child = get_child_ckernel();
         expr_strided_t child_fn =
@@ -77,7 +77,7 @@ struct indexed_take_ck : public kernels::expr_ck<indexed_take_ck, kernel_request
     intptr_t m_dst_dim_size, m_dst_stride, m_index_stride;
     intptr_t m_src0_dim_size, m_src0_stride;
 
-    inline void single(char *dst, char **src)
+    inline void single(char *dst, char *const *src)
     {
         ckernel_prefix *child = get_child_ckernel();
         expr_single_t child_fn =
