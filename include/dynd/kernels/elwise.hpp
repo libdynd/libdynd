@@ -16,14 +16,14 @@ namespace kernels {
    * kernel_request_strided type of kernel.
    */
   template <int N>
-  struct elwise : expr_ck<elwise<N>, kernel_request_cuda_host_device, N> {
-    typedef elwise self_type;
+  struct elwise_ck : expr_ck<elwise_ck<N>, kernel_request_cuda_host_device, N> {
+    typedef elwise_ck<N> self_type;
 
     intptr_t size;
     intptr_t dst_stride, src_stride[N];
 
-    DYND_CUDA_HOST_DEVICE elwise(intptr_t size, intptr_t dst_stride,
-                                 const intptr_t *src_stride)
+    DYND_CUDA_HOST_DEVICE elwise_ck(intptr_t size, intptr_t dst_stride,
+                                    const intptr_t *src_stride)
         : size(size), dst_stride(dst_stride)
     {
       memcpy(this->src_stride, src_stride, sizeof(this->src_stride));
