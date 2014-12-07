@@ -27,7 +27,7 @@ static size_t make_elwise_strided_dimension_expr_kernel_for_N(
     const arrfunc_type_data *elwise_handler,
     const arrfunc_type *elwise_handler_tp, const eval::eval_context *ectx)
 {
-  typedef kernels::elwise<N> self_type;
+  typedef kernels::elwise_ck<N> self_type;
 
   const char *child_dst_arrmeta;
   const char *child_src_arrmeta[N];
