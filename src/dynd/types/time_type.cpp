@@ -473,7 +473,7 @@ struct time_is_avail_ck {
         const char *DYND_UNUSED(dst_arrmeta), const ndt::type *src_tp,
         const char *const *DYND_UNUSED(src_arrmeta), kernel_request_t kernreq,
         const eval::eval_context *DYND_UNUSED(ectx),
-        const nd::array &DYND_UNUSED(args), const nd::array &DYND_UNUSED(kwds))
+        const nd::array &DYND_UNUSED(kwds))
     {
       if (src_tp[0].get_type_id() != option_type_id ||
           src_tp[0].extended<option_type>()->get_value_type().get_type_id() !=
@@ -521,7 +521,6 @@ struct time_assign_na_ck {
                                 const char *const *DYND_UNUSED(src_arrmeta),
                                 kernel_request_t kernreq,
                                 const eval::eval_context *DYND_UNUSED(ectx),
-                                const nd::array &DYND_UNUSED(args),
                                 const nd::array &DYND_UNUSED(kwds))
     {
       if (dst_tp.get_type_id() != option_type_id ||

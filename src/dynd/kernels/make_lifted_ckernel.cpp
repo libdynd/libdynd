@@ -102,7 +102,7 @@ static size_t make_elwise_strided_dimension_expr_kernel_for_N(
       kernel_request_strided |
           ((kernreq & kernel_request_cuda_device) ? kernel_request_cuda_device
                                                   : 0),
-      ectx, nd::array(), nd::array());
+      ectx, nd::array());
 }
 
 inline static size_t make_elwise_strided_dimension_expr_kernel(
@@ -307,7 +307,7 @@ static size_t make_elwise_strided_or_var_to_strided_dimension_expr_kernel_for_N(
   return elwise_handler->instantiate(
       elwise_handler, elwise_handler_tp, ckb, ckb_offset, child_dst_tp,
       child_dst_arrmeta, child_src_tp, child_src_arrmeta,
-      kernel_request_strided, ectx, nd::array(), nd::array());
+      kernel_request_strided, ectx, nd::array());
 }
 
 static size_t make_elwise_strided_or_var_to_strided_dimension_expr_kernel(
@@ -586,7 +586,7 @@ static size_t make_elwise_strided_or_var_to_var_dimension_expr_kernel_for_N(
   return elwise_handler->instantiate(
       elwise_handler, elwise_handler_tp, ckb, ckb_offset, child_dst_tp,
       child_dst_arrmeta, child_src_tp, child_src_arrmeta,
-      kernel_request_strided, ectx, nd::array(), nd::array());
+      kernel_request_strided, ectx, nd::array());
 }
 
 static size_t make_elwise_strided_or_var_to_var_dimension_expr_kernel(
@@ -651,7 +651,7 @@ size_t dynd::make_lifted_expr_ckernel(
       return elwise_handler->instantiate(elwise_handler, elwise_handler_tp, ckb,
                                          ckb_offset, dst_tp, dst_arrmeta,
                                          src_tp, src_arrmeta, kernreq, ectx,
-                                         nd::array(), nd::array());
+                                         nd::array());
     } else {
       stringstream ss;
       ss << "Trying to broadcast " << src_ndim[i] << " dimensions of "

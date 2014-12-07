@@ -206,7 +206,7 @@ namespace kernels {
                 const char *DYND_UNUSED(dst_arrmeta), const ndt::type *src_tp, \
                 const char *const *src_arrmeta, kernel_request_t kernreq,      \
                 const eval::eval_context *DYND_UNUSED(ectx),                   \
-                const nd::array &DYND_UNUSED(a), const nd::array &kwds)        \
+                const nd::array &kwds)                                         \
     {                                                                          \
       self_type::create(ckb, kernreq, ckb_offset,                              \
                         args_for<func_type, Nsrc>(src_tp, src_arrmeta, kwds),  \
@@ -274,8 +274,7 @@ namespace kernels {
                 void *ckb, intptr_t ckb_offset, const ndt::type &dst_tp,       \
                 const char *dst_arrmeta, const ndt::type *src_tp,              \
                 const char *const *src_arrmeta, kernel_request_t kernreq,      \
-                const eval::eval_context *ectx, const nd::array &args,         \
-                const nd::array &kwds);                                        \
+                const eval::eval_context *ectx, const nd::array &kwds);        \
                                                                                \
   private:                                                                     \
     template <typename R, typename... A, size_t... I, typename... K,           \
@@ -310,8 +309,7 @@ namespace kernels {
       void *ckb, intptr_t ckb_offset, const ndt::type &DYND_UNUSED(dst_tp),
       const char *DYND_UNUSED(dst_arrmeta), const ndt::type *src_tp,
       const char *const *src_arrmeta, kernel_request_t kernreq,
-      const eval::eval_context *DYND_UNUSED(ectx),
-      const nd::array &DYND_UNUSED(args), const nd::array &kwds)
+      const eval::eval_context *DYND_UNUSED(ectx), const nd::array &kwds)
   {
     self_type::create(ckb, kernreq, ckb_offset,
                       *af_self->get_data_as<func_type>(),
@@ -331,8 +329,7 @@ namespace kernels {
       void *ckb, intptr_t ckb_offset, const ndt::type &DYND_UNUSED(dst_tp),
       const char *DYND_UNUSED(dst_arrmeta), const ndt::type *src_tp,
       const char *const *src_arrmeta, kernel_request_t kernreq,
-      const eval::eval_context *DYND_UNUSED(ectx),
-      const nd::array &DYND_UNUSED(args), const nd::array &kwds)
+      const eval::eval_context *DYND_UNUSED(ectx), const nd::array &kwds)
   {
     if ((kernreq & kernel_request_cuda_device) == false) {
       typedef cuda_parallel_ck<arity_of<func_type>::value> self_type;
@@ -385,8 +382,7 @@ namespace kernels {
                 void *ckb, intptr_t ckb_offset, const ndt::type &dst_tp,       \
                 const char *dst_arrmeta, const ndt::type *src_tp,              \
                 const char *const *src_arrmeta, kernel_request_t kernreq,      \
-                const eval::eval_context *ectx, const nd::array &args,         \
-                const nd::array &kwds);                                        \
+                const eval::eval_context *ectx, const nd::array &kwds);        \
                                                                                \
   private:                                                                     \
     template <typename R, typename... A, size_t... I>                          \
@@ -419,7 +415,7 @@ namespace kernels {
                   const char *DYND_UNUSED(dst_arrmeta), const ndt::type *src_tp,
                   const char *const *src_arrmeta, kernel_request_t kernreq,
                   const eval::eval_context *DYND_UNUSED(ectx),
-                  const nd::array &DYND_UNUSED(args), const nd::array &kwds)
+                  const nd::array &kwds)
   {
     self_type::create(ckb, kernreq, ckb_offset,
                       args_for<func_type>(src_tp, src_arrmeta, kwds),
@@ -443,7 +439,6 @@ namespace kernels {
                          const char *const *src_arrmeta,
                          kernel_request_t kernreq,
                          const eval::eval_context *DYND_UNUSED(ectx),
-                         const nd::array &DYND_UNUSED(args),
                          const nd::array &kwds)
   {
     if ((kernreq & kernel_request_cuda_device) == false) {

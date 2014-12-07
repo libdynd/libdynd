@@ -117,7 +117,6 @@ static int resolve_rolling_dst_type(const arrfunc_type_data *af_self,
                                     const arrfunc_type *af_tp, intptr_t nsrc,
                                     const ndt::type *src_tp, int throw_on_error,
                                     ndt::type &out_dst_tp,
-                                    const nd::array &args,
                                     const nd::array &kwds)
 
 {
@@ -140,7 +139,7 @@ static int resolve_rolling_dst_type(const arrfunc_type_data *af_self,
     ndt::type child_src_tp = ndt::make_fixed_dim(
         data->window_size, src_tp[0].get_type_at_dimension(NULL, 1));
     if (!child_af->resolve_dst_type(child_af, af_tp, 1, &child_src_tp,
-                                    throw_on_error, child_dst_tp, args, kwds)) {
+                                    throw_on_error, child_dst_tp, kwds)) {
       return 0;
     }
   }
@@ -167,7 +166,7 @@ instantiate_strided(const arrfunc_type_data *af_self,
                     const ndt::type &dst_tp, const char *dst_arrmeta,
                     const ndt::type *src_tp, const char *const *src_arrmeta,
                     kernel_request_t kernreq, const eval::eval_context *ectx,
-                    const nd::array &args, const nd::array &kwds)
+                    const nd::array &kwds)
 {
     typedef strided_rolling_ck self_type;
     rolling_arrfunc_data *data = *af_self->get_data_as<rolling_arrfunc_data *>();
@@ -230,7 +229,7 @@ instantiate_strided(const arrfunc_type_data *af_self,
     return window_af->instantiate(
         window_af, window_af_tp, ckb, ckb_offset, dst_el_tp, dst_el_arrmeta,
         &self->m_src_winop_meta.get_type(), &src_winop_meta,
-        kernel_request_strided, ectx, args, kwds);
+        kernel_request_strided, ectx, kwds);
 }
 
 nd::arrfunc dynd::make_rolling_arrfunc(const nd::arrfunc &window_op,

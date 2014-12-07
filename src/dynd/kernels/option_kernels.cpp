@@ -394,7 +394,7 @@ struct nafunc {
         const char *DYND_UNUSED(dst_arrmeta), const ndt::type *src_tp,
         const char *const *DYND_UNUSED(src_arrmeta), kernel_request_t kernreq,
         const eval::eval_context *DYND_UNUSED(ectx),
-        const nd::array &DYND_UNUSED(args), const nd::array &DYND_UNUSED(kwds))
+        const nd::array &DYND_UNUSED(kwds))
     {
       if (src_tp[0].get_type_id() != option_type_id ||
           src_tp[0].extended<option_type>()->get_value_type().get_type_id() !=
@@ -418,7 +418,7 @@ struct nafunc {
         const arrfunc_type_data *DYND_UNUSED(self),
         const arrfunc_type *DYND_UNUSED(af_tp), intptr_t DYND_UNUSED(nsrc),
         const ndt::type *DYND_UNUSED(src_tp), int DYND_UNUSED(throw_on_error),
-        ndt::type &out_dst_tp, const nd::array &DYND_UNUSED(args),
+        ndt::type &out_dst_tp,
         const nd::array &DYND_UNUSED(kwds))
     {
       out_dst_tp = ndt::make_type<dynd_bool>();
@@ -433,7 +433,7 @@ struct nafunc {
         const ndt::type *DYND_UNUSED(src_tp),
         const char *const *DYND_UNUSED(src_arrmeta), kernel_request_t kernreq,
         const eval::eval_context *DYND_UNUSED(ectx),
-        const nd::array &DYND_UNUSED(args), const nd::array &DYND_UNUSED(kwds))
+        const nd::array &DYND_UNUSED(kwds))
     {
       if (dst_tp.get_type_id() != option_type_id ||
           dst_tp.extended<option_type>()->get_value_type().get_type_id() !=
@@ -472,7 +472,7 @@ intptr_t kernels::fixed_dim_is_avail_ck::instantiate(
     const char *DYND_UNUSED(dst_arrmeta), const ndt::type *src_tp,
     const char *const *DYND_UNUSED(src_arrmeta), kernel_request_t kernreq,
     const eval::eval_context *DYND_UNUSED(ectx),
-    const nd::array &DYND_UNUSED(args), const nd::array &DYND_UNUSED(kwds))
+    const nd::array &DYND_UNUSED(kwds))
 {
   ckernel_prefix *ckp = reinterpret_cast<ckernel_builder<kernel_request_host> *>(ckb)->alloc_ck_leaf<ckernel_prefix>(ckb_offset);
   switch (src_tp->get_dtype().get_type_id()) {
@@ -520,7 +520,7 @@ intptr_t kernels::fixed_dim_assign_na_ck::instantiate(
     const char *DYND_UNUSED(dst_arrmeta), const ndt::type *DYND_UNUSED(src_tp),
     const char *const *DYND_UNUSED(src_arrmeta), kernel_request_t kernreq,
     const eval::eval_context *DYND_UNUSED(ectx),
-    const nd::array &DYND_UNUSED(args), const nd::array &DYND_UNUSED(kwds))
+    const nd::array &DYND_UNUSED(kwds))
 {
   ckernel_prefix *ckp = reinterpret_cast<ckernel_builder<kernel_request_host> *>(ckb)->alloc_ck_leaf<ckernel_prefix>(ckb_offset);
   switch (dst_tp.get_dtype().get_type_id()) {

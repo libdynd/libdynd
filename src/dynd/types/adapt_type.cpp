@@ -108,7 +108,7 @@ size_t adapt_type::make_operand_to_value_assignment_kernel(
   if (af != NULL) {
     return af->instantiate(
         af, m_forward.get_type(), ckb, ckb_offset, m_value_type, dst_arrmeta,
-        &m_operand_type, &src_arrmeta, kernreq, ectx, nd::array(), nd::array());
+        &m_operand_type, &src_arrmeta, kernreq, ectx, nd::array());
   } else {
     stringstream ss;
     ss << "Cannot apply ";
@@ -127,7 +127,7 @@ size_t adapt_type::make_value_to_operand_assignment_kernel(
   if (af != NULL) {
     return af->instantiate(
         af, m_reverse.get_type(), ckb, ckb_offset, m_operand_type, src_arrmeta,
-        &m_value_type, &dst_arrmeta, kernreq, ectx, nd::array(), nd::array());
+        &m_value_type, &dst_arrmeta, kernreq, ectx, nd::array());
   } else {
     stringstream ss;
     ss << "Cannot apply ";
