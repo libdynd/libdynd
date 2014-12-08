@@ -576,6 +576,47 @@ static void parse_datetime_json(const ndt::type &tp, const char *arrmeta,
     rbegin = begin;
 }
 
+static void parse_type(const ndt::type &tp, const char *DYND_UNUSED(arrmeta),
+                       char *out_data, const char *&rbegin, const char *end,
+                       bool option, const eval::eval_context *DYND_UNUSED(ectx))
+{
+  const char *begin = rbegin;
+  begin = skip_whitespace(begin, end);
+  const char *strbegin, *strend;
+  bool escaped;
+  if (option && parse_token(begin, end, "null")) {
+    switch (tp.get_type_id()) {
+    case type_type_id:
+      *reinterpret_cast<ndt::type *>(out_data) = ndt::type();
+      return;
+    default:
+      break;
+    }
+    stringstream ss;
+    ss << "Unrecognized type type \"" << tp << "\"";
+    throw runtime_error(ss.str());
+  }
+  else if (parse::parse_doublequote_string_no_ws(begin, end, strbegin, strend,
+                                                 escaped)) {
+    string val;
+    if (escaped) {
+      parse::unescape_string(strbegin, strend, val);
+      strbegin = val.data();
+      strend = strbegin + val.size();
+    }
+    try {
+      *reinterpret_cast<ndt::type *>(out_data) = ndt::type(strbegin, strend);
+    }
+    catch (const std::exception &e) {
+      throw json_parse_error(skip_whitespace(rbegin, begin), e.what(), tp);
+    }
+  }
+  else {
+    throw json_parse_error(begin, "expected a string", tp);
+  }
+  rbegin = begin;
+}
+
 static void parse_dim_json(const ndt::type& tp, const char *arrmeta, char *out_data,
                 const char *&begin, const char *end, const eval::eval_context *ectx)
 {
@@ -589,7 +630,8 @@ static void parse_dim_json(const ndt::type& tp, const char *arrmeta, char *out_d
             break;
         default: {
             stringstream ss;
-            ss << "parse_json: unsupported dynd array type " << tp;
+            ss << "parse_json: unsupported dynd dimension type \"" << tp
+               << "\"";
             throw runtime_error(ss.str());
         }
     }
@@ -666,7 +708,7 @@ static void parse_option_json(const ndt::type &tp, const char *arrmeta,
     }
 
     stringstream ss;
-    ss << "parse_json: unsupported dynd type " << tp;
+    ss << "parse_json: unsupported dynd type \"" << tp << "\"";
     throw runtime_error(ss.str());
 }
 
@@ -700,6 +742,9 @@ static void parse_json(const ndt::type &tp, const char *arrmeta, char *out_data,
             parse_datetime_json(tp, arrmeta, out_data, begin, end,
                                 false, ectx);
             return;
+        case type_kind:
+          parse_type(tp, arrmeta, out_data, begin, end, false, ectx);
+          return;
         case option_kind:
             parse_option_json(tp, arrmeta, out_data, begin, end, ectx);
             return;
@@ -716,7 +761,7 @@ static void parse_json(const ndt::type &tp, const char *arrmeta, char *out_data,
     }
 
     stringstream ss;
-    ss << "parse_json: unsupported dynd type " << tp;
+    ss << "parse_json: unsupported dynd type \"" << tp << "\"";
     throw runtime_error(ss.str());
 }
 

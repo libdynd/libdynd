@@ -357,7 +357,7 @@ ndt::type ndt::detail::internal_substitute(
   }
 
   stringstream ss;
-  ss << "Unsupported dynd type " << pattern
-     << " encountered for substituting typevars";
+  ss << "Unsupported dynd type \"" << pattern
+     << "\" encountered for substituting typevars";
   throw invalid_argument(ss.str());
 }

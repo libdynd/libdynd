@@ -45,7 +45,7 @@ before_script:
   - cmake -DDYND_CUDA=${DYND_CUDA} -DDYND_FFTW=${DYND_FFTW} -DDYND_BUILD_TESTS=${DYND_BUILD_TESTS} ..
 
 script:
-  - make
+  - make || exit 1
   - if [ "$DYND_CUDA" == "ON" ]; then exit; fi
   - if [ "$DYND_BUILD_TESTS" == "ON"]; then ./tests/test_libdynd; fi
   - if [ "$VALGRIND" == "ON" ]; then valgrind --tool=memcheck --leak-check=yes --show-reachable=yes --error-exitcode=123 ./tests/test_libdynd; fi

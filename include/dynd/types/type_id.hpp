@@ -29,6 +29,8 @@ enum type_kind_t {
     bytes_kind,
     void_kind,
     datetime_kind,
+    // For type_type_id and other types that themselves represent types
+    type_kind,
     // For any dimension types which have elements of all the same type
     dim_kind,
     // For struct_type_id and cstruct_type_id
