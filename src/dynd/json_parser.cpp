@@ -576,10 +576,9 @@ static void parse_datetime_json(const ndt::type &tp, const char *arrmeta,
     rbegin = begin;
 }
 
-static void parse_type(const ndt::type &tp, const char *arrmeta,
-                                char *out_data, const char *&rbegin,
-                                const char *end, bool option,
-                                const eval::eval_context *ectx)
+static void parse_type(const ndt::type &tp, const char *DYND_UNUSED(arrmeta),
+                       char *out_data, const char *&rbegin, const char *end,
+                       bool option, const eval::eval_context *DYND_UNUSED(ectx))
 {
   const char *begin = rbegin;
   begin = skip_whitespace(begin, end);
