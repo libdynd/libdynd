@@ -335,9 +335,14 @@ size_t arrfunc_type::make_assignment_kernel(
   throw dynd::type_error(ss.str());
 }
 
-static nd::array property_get_arg_types(const ndt::type &dt)
+static nd::array property_get_arg_types(const ndt::type &tp)
 {
-  return dt.extended<arrfunc_type>()->get_arg_types();
+  return tp.extended<arrfunc_type>()->get_arg_types();
+}
+
+static nd::array property_get_arg_names(const ndt::type &tp)
+{
+  return tp.extended<arrfunc_type>()->get_arg_names();
 }
 
 static nd::array property_get_return_type(const ndt::type &dt)
@@ -352,6 +357,8 @@ void arrfunc_type::get_dynamic_type_properties(
   static pair<string, gfunc::callable> type_properties[] = {
       pair<string, gfunc::callable>(
           "arg_types", gfunc::make_callable(&property_get_arg_types, "self")),
+      pair<string, gfunc::callable>(
+          "arg_names", gfunc::make_callable(&property_get_arg_names, "self")),
       pair<string, gfunc::callable>(
           "return_type",
           gfunc::make_callable(&property_get_return_type, "self"))};
