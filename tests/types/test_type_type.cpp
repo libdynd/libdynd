@@ -22,7 +22,7 @@ TEST(DTypeDType, Create) {
     // Strings with various encodings and sizes
     d = ndt::make_type();
     EXPECT_EQ(type_type_id, d.get_type_id());
-    EXPECT_EQ(custom_kind, d.get_kind());
+    EXPECT_EQ(type_kind, d.get_kind());
     EXPECT_EQ(ndt::type("type"), d);
     EXPECT_EQ(sizeof(const base_type *), d.get_data_alignment());
     EXPECT_EQ(sizeof(const base_type *), d.get_data_size());

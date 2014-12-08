@@ -29,6 +29,8 @@ std::ostream &dynd::operator<<(std::ostream &o, type_kind_t kind)
     return (o << "void");
   case datetime_kind:
     return (o << "datetime");
+  case type_kind:
+    return (o << "type");
   case dim_kind:
     return (o << "dim");
   case struct_kind:
