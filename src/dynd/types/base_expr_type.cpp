@@ -84,10 +84,12 @@ size_t base_expr_type::make_value_to_operand_assignment_kernel(
     throw dynd::type_error(ss.str());
 }
 
-size_t base_expr_type::make_assignment_kernel(
-    void *ckb, intptr_t ckb_offset, const ndt::type &dst_tp,
-    const char *dst_arrmeta, const ndt::type &src_tp, const char *src_arrmeta,
-    kernel_request_t kernreq, const eval::eval_context *ectx) const
+intptr_t base_expr_type::make_assignment_kernel(
+    const arrfunc_type_data *DYND_UNUSED(self),
+    const arrfunc_type *DYND_UNUSED(af_tp), void *ckb, intptr_t ckb_offset,
+    const ndt::type &dst_tp, const char *dst_arrmeta, const ndt::type &src_tp,
+    const char *src_arrmeta, kernel_request_t kernreq,
+    const eval::eval_context *ectx, const nd::array &DYND_UNUSED(kwds)) const
 {
     return make_expression_assignment_kernel(ckb, ckb_offset,
                     dst_tp, dst_arrmeta, src_tp, src_arrmeta,

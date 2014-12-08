@@ -331,10 +331,11 @@ void pointer_type::arrmeta_debug_print(const char *arrmeta, std::ostream &o,
     }
 }
 
-size_t pointer_type::make_assignment_kernel(
-    void *ckb, intptr_t ckb_offset, const ndt::type &dst_tp,
-    const char *dst_arrmeta, const ndt::type &src_tp, const char *src_arrmeta,
-    kernel_request_t kernreq, const eval::eval_context *ectx) const
+intptr_t pointer_type::make_assignment_kernel(
+    const arrfunc_type_data *self, const arrfunc_type *af_tp, void *ckb,
+    intptr_t ckb_offset, const ndt::type &dst_tp, const char *dst_arrmeta,
+    const ndt::type &src_tp, const char *src_arrmeta, kernel_request_t kernreq,
+    const eval::eval_context *ectx, const nd::array &kwds) const
 {
     if (dst_tp.get_type_id() == pointer_type_id) {
         if (dst_tp == src_tp) {
@@ -348,9 +349,9 @@ size_t pointer_type::make_assignment_kernel(
         }
     }
 
-    return base_expr_type::make_assignment_kernel(ckb, ckb_offset,
+    return base_expr_type::make_assignment_kernel(self, af_tp, ckb, ckb_offset,
                     dst_tp, dst_arrmeta, src_tp, src_arrmeta,
-                    kernreq, ectx);
+                    kernreq, ectx, kwds);
 }
 
 nd::array pointer_type::get_option_nafunc() const

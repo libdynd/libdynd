@@ -128,12 +128,12 @@ bool ctuple_type::is_lossless_assignment(const ndt::type& dst_tp, const ndt::typ
     return false;
 }
 
-size_t ctuple_type::make_assignment_kernel(
-    void *DYND_UNUSED(ckb), intptr_t DYND_UNUSED(ckb_offset),
-    const ndt::type &dst_tp, const char *DYND_UNUSED(dst_arrmeta),
-    const ndt::type &src_tp, const char *DYND_UNUSED(src_arrmeta),
-    kernel_request_t DYND_UNUSED(kernreq),
-    const eval::eval_context *DYND_UNUSED(ectx)) const
+intptr_t ctuple_type::make_assignment_kernel(
+    const arrfunc_type_data *DYND_UNUSED(self), const arrfunc_type *DYND_UNUSED(af_tp),
+    void *DYND_UNUSED(ckb), intptr_t DYND_UNUSED(ckb_offset), const ndt::type &dst_tp,
+    const char *DYND_UNUSED(dst_arrmeta), const ndt::type &src_tp, const char *DYND_UNUSED(src_arrmeta),
+    kernel_request_t DYND_UNUSED(kernreq), const eval::eval_context *DYND_UNUSED(ectx),
+    const nd::array &DYND_UNUSED(kwds)) const
 {
     /*
     if (this == dst_tp.extended()) {

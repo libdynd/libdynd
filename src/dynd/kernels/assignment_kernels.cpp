@@ -259,10 +259,11 @@ namespace kernels {
 } // namespace kernels
 } // namespace dynd
 
-size_t dynd::make_assignment_kernel(
+intptr_t dynd::make_assignment_kernel(
+    const arrfunc_type_data *self, const arrfunc_type *af_tp,
     void *ckb, intptr_t ckb_offset, const ndt::type &dst_tp,
     const char *dst_arrmeta, const ndt::type &src_tp, const char *src_arrmeta,
-    kernel_request_t kernreq, const eval::eval_context *ectx)
+    kernel_request_t kernreq, const eval::eval_context *ectx, const nd::array &kwds)
 {
   if (dst_tp.is_builtin()) {
     if (src_tp.is_builtin()) {
@@ -277,13 +278,13 @@ size_t dynd::make_assignment_kernel(
       }
     } else {
       return src_tp.extended()->make_assignment_kernel(
-          ckb, ckb_offset, dst_tp, dst_arrmeta, src_tp, src_arrmeta, kernreq,
-          ectx);
+          self, af_tp, ckb, ckb_offset, dst_tp, dst_arrmeta, src_tp, src_arrmeta, kernreq,
+          ectx, kwds);
     }
   } else {
     return dst_tp.extended()->make_assignment_kernel(
-        ckb, ckb_offset, dst_tp, dst_arrmeta, src_tp, src_arrmeta, kernreq,
-        ectx);
+        self, af_tp, ckb, ckb_offset, dst_tp, dst_arrmeta, src_tp, src_arrmeta, kernreq,
+        ectx, kwds);
   }
 }
 
