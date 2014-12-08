@@ -23,7 +23,7 @@ namespace detail {
         const fixed_dim_type_arrmeta *md =
             reinterpret_cast<const fixed_dim_type_arrmeta *>(a.get_arrmeta());
         if (et.get_type_id() == type_id_of<T>::value &&
-            md->stride == sizeof(T)) {
+            (md->stride == 0 || md->stride == sizeof(T))) {
           // It also has the right type and is contiguous,
           // so no modification necessary.
           return true;
@@ -60,7 +60,7 @@ namespace detail {
             reinterpret_cast<const fixed_dim_type_arrmeta *>(a.get_arrmeta());
         if (et.get_type_id() == string_type_id &&
             et.extended<string_type>()->get_encoding() == string_encoding_utf_8 &&
-            md->stride == sizeof(string_type_data)) {
+            (md->stride == 0 || md->stride == sizeof(string_type_data))) {
           // It also has the right type and is contiguous,
           // so no modification necessary.
           return true;
@@ -96,7 +96,7 @@ namespace detail {
         const fixed_dim_type_arrmeta *md =
             reinterpret_cast<const fixed_dim_type_arrmeta *>(a.get_arrmeta());
         if (et.get_type_id() == type_type_id &&
-            md->stride == sizeof(ndt::type)) {
+            (md->stride == 0 || md->stride == sizeof(ndt::type))) {
           // It also has the right type and is contiguous,
           // so no modification necessary.
           return true;
