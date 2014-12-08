@@ -234,6 +234,27 @@ static void format_json_datetime(output_data &out, const ndt::type &dt,
   }
 }
 
+static void format_json_type(output_data &out, const ndt::type &dt,
+                             const char *arrmeta, const char *data)
+{
+  switch (dt.get_type_id()) {
+  case type_type_id: {
+    stringstream ss;
+    dt.print_data(ss, arrmeta, data);
+    string s = ss.str();
+    format_json_encoded_string(out, s.data(), s.data() + s.size(),
+                               string_encoding_ascii);
+    break;
+  }
+  default: {
+    stringstream ss;
+    ss << "Formatting dynd type \"" << dt
+       << "\" as JSON is not implemented yet";
+    throw runtime_error(ss.str());
+  }
+  }
+}
+
 static void format_json_struct(output_data &out, const ndt::type &dt,
                                const char *arrmeta, const char *data)
 {
@@ -333,6 +354,9 @@ static void format_json(output_data& out, const ndt::type& dt, const char *arrme
     break;
   case datetime_kind:
     format_json_datetime(out, dt, arrmeta, data);
+    break;
+  case type_kind:
+    format_json_type(out, dt, arrmeta, data);
     break;
   case struct_kind:
     format_json_struct(out, dt, arrmeta, data);
