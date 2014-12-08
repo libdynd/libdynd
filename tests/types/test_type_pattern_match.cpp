@@ -140,8 +140,8 @@ TEST(TypePatternMatch, NestedArrFuncProto)
       ndt::type("(3 * int32, (2 * int32) -> float64) -> 3 * int32"),
       ndt::type("(N * S, (M * S) -> T) -> N * T")));
   EXPECT_TRUE(ndt::pattern_match(
-      ndt::type("(3 * int32; (2 * int32) -> float64) -> 3 * float64"),
-      ndt::type("(N * S; (M * S) -> T) -> N * T")));
+      ndt::type("(3 * int32, func: (2 * int32) -> float64) -> 3 * float64"),
+      ndt::type("(N * S, func: (M * S) -> T) -> N * T")));
 }
 
 TEST(TypePatternMatch, Strided)
