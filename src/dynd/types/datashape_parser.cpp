@@ -846,16 +846,9 @@ static bool parse_struct_item(const char *&rbegin, const char *end,
   if (!parse_token_ds(begin, end, ':')) {
     throw datashape_parse_error(begin, "expected ':' after record item name");
   }
-  bool parens = false;
-  if (parse_token_ds(begin, end, '(')) {
-    parens = true;
-  }
   out_field_type = parse_datashape(begin, end, symtable);
   if (out_field_type.is_null()) {
     throw datashape_parse_error(begin, "expected a data type");
-  }
-  if (parens && !parse_token_ds(begin, end, ')')) {
-    throw datashape_parse_error(begin, "expected closing ')'");
   }
 
   if (!quoted_name) {
