@@ -54,7 +54,7 @@ static intptr_t instantiate_take_by_pointer(
     intptr_t ckb_offset, const ndt::type &dst_tp, const char *dst_arrmeta,
     const ndt::type *src_tp, const char *const *src_arrmeta,
     kernel_request_t kernreq, const eval::eval_context *ectx,
-    const nd::array &DYND_UNUSED(kwds))
+    const nd::array &kwds)
 {
   intptr_t ndim = src_tp[0].get_ndim();
 
@@ -93,9 +93,9 @@ static intptr_t instantiate_take_by_pointer(
         src_size_stride[0][i].stride, src_size_stride[1][1].stride);
   }
 
-  return make_assignment_kernel(ckb, ckb_offset, dst_el_tp, dst_el_meta,
+  return make_assignment_kernel(NULL, NULL, ckb, ckb_offset, dst_el_tp, dst_el_meta,
                                 src_el_tp[0], src_el_meta[0],
-                                kernel_request_single, ectx);
+                                kernel_request_single, ectx, kwds);
 }
 
 static int resolve_take_by_pointer_dst_type(

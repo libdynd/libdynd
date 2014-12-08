@@ -501,10 +501,11 @@ void fixed_dim_type::data_destruct_strided(const char *arrmeta, char *data,
   }
 }
 
-size_t fixed_dim_type::make_assignment_kernel(
-    void *ckb, intptr_t ckb_offset, const ndt::type &dst_tp,
-    const char *dst_arrmeta, const ndt::type &src_tp, const char *src_arrmeta,
-    kernel_request_t kernreq, const eval::eval_context *ectx) const
+intptr_t fixed_dim_type::make_assignment_kernel(
+    const arrfunc_type_data *self, const arrfunc_type *af_tp, void *ckb,
+    intptr_t ckb_offset, const ndt::type &dst_tp, const char *dst_arrmeta,
+    const ndt::type &src_tp, const char *src_arrmeta, kernel_request_t kernreq,
+    const eval::eval_context *ectx, const nd::array &kwds) const
 {
   if (this == dst_tp.extended()) {
     const fixed_dim_type_arrmeta *dst_md =
@@ -520,9 +521,9 @@ size_t fixed_dim_type::make_assignment_kernel(
                                     &src_stride);
 
       return ::make_assignment_kernel(
-          ckb, ckb_offset, m_element_tp,
+          self, af_tp, ckb, ckb_offset, m_element_tp,
           dst_arrmeta + sizeof(fixed_dim_type_arrmeta), src_tp, src_arrmeta,
-          kernel_request_strided, ectx);
+          kernel_request_strided, ectx, kwds);
     } else if (src_tp.get_as_strided(src_arrmeta, &src_size, &src_stride,
                                      &src_el_tp, &src_el_arrmeta)) {
       kernels::elwise_ck<1>::create(ckb, kernreq, ckb_offset,
@@ -535,14 +536,14 @@ size_t fixed_dim_type::make_assignment_kernel(
       }
 
       return ::make_assignment_kernel(
-          ckb, ckb_offset, m_element_tp,
+          self, af_tp, ckb, ckb_offset, m_element_tp,
           dst_arrmeta + sizeof(fixed_dim_type_arrmeta), src_el_tp,
-          src_el_arrmeta, kernel_request_strided, ectx);
+          src_el_arrmeta, kernel_request_strided, ectx, kwds);
     } else if (!src_tp.is_builtin()) {
       // Give the src type a chance to make a kernel
       return src_tp.extended()->make_assignment_kernel(
-          ckb, ckb_offset, dst_tp, dst_arrmeta, src_tp, src_arrmeta, kernreq,
-          ectx);
+          self, af_tp, ckb, ckb_offset, dst_tp, dst_arrmeta, src_tp, src_arrmeta, kernreq,
+          ectx, kwds);
     } else {
       stringstream ss;
       ss << "Cannot assign from " << src_tp << " to " << dst_tp;

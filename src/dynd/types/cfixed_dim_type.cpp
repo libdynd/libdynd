@@ -534,10 +534,11 @@ void cfixed_dim_type::data_destruct_strided(const char *arrmeta, char *data,
   }
 }
 
-size_t cfixed_dim_type::make_assignment_kernel(
-    void *ckb, intptr_t ckb_offset, const ndt::type &dst_tp,
-    const char *dst_arrmeta, const ndt::type &src_tp, const char *src_arrmeta,
-    kernel_request_t kernreq, const eval::eval_context *ectx) const
+intptr_t cfixed_dim_type::make_assignment_kernel(
+    const arrfunc_type_data *self, const arrfunc_type *af_tp, void *ckb,
+    intptr_t ckb_offset, const ndt::type &dst_tp, const char *dst_arrmeta,
+    const ndt::type &src_tp, const char *src_arrmeta, kernel_request_t kernreq,
+    const eval::eval_context *ectx, const nd::array &kwds) const
 {
   if (this == dst_tp.extended()) {
     intptr_t src_size, src_stride;
@@ -545,37 +546,37 @@ size_t cfixed_dim_type::make_assignment_kernel(
     const char *src_el_arrmeta;
 
     if (src_tp.get_ndim() < dst_tp.get_ndim()) {
-      kernels::strided_assign_ck *self =
+      kernels::strided_assign_ck *ck_self =
           kernels::strided_assign_ck::create(ckb, kernreq, ckb_offset);
-      self->m_size = get_fixed_dim_size();
-      self->m_dst_stride = get_fixed_stride();
+      ck_self->m_size = get_fixed_dim_size();
+      ck_self->m_dst_stride = get_fixed_stride();
       // If the src has fewer dimensions, broadcast it across this one
-      self->m_src_stride = 0;
+      ck_self->m_src_stride = 0;
       return ::make_assignment_kernel(
-          ckb, ckb_offset, m_element_tp,
+          self, af_tp, ckb, ckb_offset, m_element_tp,
           dst_arrmeta + sizeof(cfixed_dim_type_arrmeta), src_tp, src_arrmeta,
-          kernel_request_strided, ectx);
+          kernel_request_strided, ectx, kwds);
     } else if (src_tp.get_as_strided(src_arrmeta, &src_size, &src_stride,
                                          &src_el_tp, &src_el_arrmeta)) {
-      kernels::strided_assign_ck *self =
+      kernels::strided_assign_ck *ck_self =
           kernels::strided_assign_ck::create(ckb, kernreq, ckb_offset);
-      self->m_size = get_fixed_dim_size();
-      self->m_dst_stride = get_fixed_stride();
-      self->m_src_stride = src_stride;
+      ck_self->m_size = get_fixed_dim_size();
+      ck_self->m_dst_stride = get_fixed_stride();
+      ck_self->m_src_stride = src_stride;
       // Check for a broadcasting error
       if (src_size != 1 && get_fixed_dim_size() != src_size) {
         throw broadcast_error(dst_tp, dst_arrmeta, src_tp, src_arrmeta);
       }
 
       return ::make_assignment_kernel(
-          ckb, ckb_offset, m_element_tp,
+          self, af_tp, ckb, ckb_offset, m_element_tp,
           dst_arrmeta + sizeof(cfixed_dim_type_arrmeta), src_el_tp,
-          src_el_arrmeta, kernel_request_strided, ectx);
+          src_el_arrmeta, kernel_request_strided, ectx, kwds);
     } else if (!src_tp.is_builtin()) {
       // Give the src type a chance to make a kernel
       return src_tp.extended()->make_assignment_kernel(
-          ckb, ckb_offset, dst_tp, dst_arrmeta, src_tp, src_arrmeta,
-          kernreq, ectx);
+          self, af_tp, ckb, ckb_offset, dst_tp, dst_arrmeta, src_tp, src_arrmeta,
+          kernreq, ectx, kwds);
     } else {
       stringstream ss;
       ss << "Cannot assign from " << src_tp << " to " << dst_tp;

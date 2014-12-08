@@ -63,9 +63,9 @@ size_t kernels::make_constant_value_assignment_ckernel(
   self->m_constant = constant.cast(dst_tp).eval_immutable(ectx);
   self->m_constant_data = self->m_constant.get_readonly_originptr();
   // Create the child assignment ckernel
-  return make_assignment_kernel(ckb, ckb_offset, dst_tp, dst_arrmeta,
+  return make_assignment_kernel(NULL, NULL, ckb, ckb_offset, dst_tp, dst_arrmeta,
                                 self->m_constant.get_type(),
-                                self->m_constant.get_arrmeta(), kernreq, ectx);
+                                self->m_constant.get_arrmeta(), kernreq, ectx, nd::array());
 }
 
 static void binary_as_unary_right_associative_reduction_adapter_single_ckernel(

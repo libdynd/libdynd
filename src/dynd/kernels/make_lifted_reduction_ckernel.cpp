@@ -857,12 +857,12 @@ static size_t make_strided_inner_reduction_dimension_kernel(
         nd::array());
   } else if (reduction_identity.is_null()) {
     ckb_offset =
-        make_assignment_kernel(ckb, ckb_offset, dst_tp, dst_arrmeta, src_tp,
-                               src_arrmeta, kernel_request_single, ectx);
+        make_assignment_kernel(NULL, NULL, ckb, ckb_offset, dst_tp, dst_arrmeta, src_tp,
+                               src_arrmeta, kernel_request_single, ectx, nd::array());
   } else {
-    ckb_offset = make_assignment_kernel(
+    ckb_offset = make_assignment_kernel(NULL, NULL,
         ckb, ckb_offset, dst_tp, dst_arrmeta, reduction_identity.get_type(),
-        reduction_identity.get_arrmeta(), kernel_request_single, ectx);
+        reduction_identity.get_arrmeta(), kernel_request_single, ectx, nd::array());
   }
 
   return ckb_offset;
@@ -997,12 +997,12 @@ static size_t make_strided_inner_broadcast_dimension_kernel(
         nd::array());
   } else if (reduction_identity.is_null()) {
     ckb_offset =
-        make_assignment_kernel(ckb, ckb_offset, dst_tp, dst_arrmeta, src_tp,
-                               src_arrmeta, kernel_request_strided, ectx);
+        make_assignment_kernel(NULL, NULL, ckb, ckb_offset, dst_tp, dst_arrmeta, src_tp,
+                               src_arrmeta, kernel_request_strided, ectx, nd::array());
   } else {
-    ckb_offset = make_assignment_kernel(
+    ckb_offset = make_assignment_kernel(NULL, NULL,
         ckb, ckb_offset, dst_tp, dst_arrmeta, reduction_identity.get_type(),
-        reduction_identity.get_arrmeta(), kernel_request_strided, ectx);
+        reduction_identity.get_arrmeta(), kernel_request_strided, ectx, nd::array());
   }
 
   return ckb_offset;
@@ -1036,8 +1036,8 @@ size_t dynd::make_lifted_reduction_ckernel(
             nd::array());
       }
       else if (reduction_identity.is_null()) {
-        return make_assignment_kernel(ckb, ckb_offset, dst_tp, dst_arrmeta,
-                                      src_tp, src_arrmeta, kernreq, ectx);
+        return make_assignment_kernel(NULL, NULL, ckb, ckb_offset, dst_tp, dst_arrmeta,
+                                      src_tp, src_arrmeta, kernreq, ectx, nd::array());
       }
       else {
         // Create the kernel which copies the identity and then

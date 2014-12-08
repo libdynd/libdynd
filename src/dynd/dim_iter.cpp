@@ -199,9 +199,9 @@ void dynd::make_buffered_strided_dim_iter(
                                  buf.get_arrmeta())->stride;
     // Make the ckernel that copies data to the buffer
     ckernel_builder<kernel_request_host> k;
-    make_assignment_kernel(&k, 0, val_tp,
+    make_assignment_kernel(NULL, NULL, &k, 0, val_tp,
                            buf.get_arrmeta() + sizeof(fixed_dim_type_arrmeta),
-                           mem_tp, mem_arrmeta, kernel_request_strided, ectx);
+                           mem_tp, mem_arrmeta, kernel_request_strided, ectx, nd::array());
 
     if (buffer_elcount == size) {
         // If the buffer is big enough for all the data, just make a copy and

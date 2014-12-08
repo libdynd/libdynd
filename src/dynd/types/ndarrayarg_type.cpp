@@ -53,11 +53,12 @@ namespace {
     };
 } // anonymous namespace
 
-size_t ndarrayarg_type::make_assignment_kernel(
+intptr_t ndarrayarg_type::make_assignment_kernel(
+    const arrfunc_type_data *DYND_UNUSED(self), const arrfunc_type *DYND_UNUSED(af_tp),
     void *ckb, intptr_t ckb_offset, const ndt::type &dst_tp,
     const char *DYND_UNUSED(dst_arrmeta), const ndt::type &src_tp,
     const char *DYND_UNUSED(src_arrmeta), kernel_request_t kernreq,
-    const eval::eval_context *DYND_UNUSED(ectx)) const
+    const eval::eval_context *DYND_UNUSED(ectx), const nd::array &DYND_UNUSED(kwds)) const
 {
     if (this == dst_tp.extended() && src_tp.get_type_id() == ndarrayarg_type_id) {
         ndarrayarg_assign_ck::create_leaf(ckb, kernreq, ckb_offset);

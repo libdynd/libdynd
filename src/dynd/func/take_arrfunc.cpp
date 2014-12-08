@@ -156,7 +156,7 @@ static intptr_t instantiate_masked_take(
     intptr_t ckb_offset, const ndt::type &dst_tp, const char *dst_arrmeta,
     const ndt::type *src_tp, const char *const *src_arrmeta,
     kernel_request_t kernreq, const eval::eval_context *ectx,
-    const nd::array &DYND_UNUSED(kwds))
+    const nd::array &kwds)
 {
   typedef masked_take_ck self_type;
 
@@ -208,9 +208,9 @@ static intptr_t instantiate_masked_take(
   }
 
   // Create the child element assignment ckernel
-  return make_assignment_kernel(ckb, ckb_offset, dst_el_tp, dst_el_meta,
+  return make_assignment_kernel(NULL, NULL, ckb, ckb_offset, dst_el_tp, dst_el_meta,
                                 src0_el_tp, src0_el_meta,
-                                kernel_request_strided, ectx);
+                                kernel_request_strided, ectx, kwds);
 }
 
 static intptr_t instantiate_indexed_take(
@@ -219,7 +219,7 @@ static intptr_t instantiate_indexed_take(
     intptr_t ckb_offset, const ndt::type &dst_tp, const char *dst_arrmeta,
     const ndt::type *src_tp, const char *const *src_arrmeta,
     kernel_request_t kernreq, const eval::eval_context *ectx,
-    const nd::array &DYND_UNUSED(kwds))
+    const nd::array &kwds)
 {
   typedef indexed_take_ck self_type;
 
@@ -268,9 +268,9 @@ static intptr_t instantiate_indexed_take(
   }
 
   // Create the child element assignment ckernel
-  return make_assignment_kernel(ckb, ckb_offset, dst_el_tp, dst_el_meta,
+  return make_assignment_kernel(NULL, NULL, ckb, ckb_offset, dst_el_tp, dst_el_meta,
                                 src0_el_tp, src0_el_meta, kernel_request_single,
-                                ectx);
+                                ectx, kwds);
 }
 
 static intptr_t

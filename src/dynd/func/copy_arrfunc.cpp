@@ -10,12 +10,12 @@ using namespace std;
 using namespace dynd;
 
 static intptr_t instantiate_copy(
-    const arrfunc_type_data *DYND_UNUSED(af_self),
-    const arrfunc_type *DYND_UNUSED(af_tp), void *ckb,
+    const arrfunc_type_data *self,
+    const arrfunc_type *af_tp, void *ckb,
     intptr_t ckb_offset, const ndt::type &dst_tp, const char *dst_arrmeta,
     const ndt::type *src_tp, const char *const *src_arrmeta,
     kernel_request_t kernreq, const eval::eval_context *ectx,
-    const nd::array &DYND_UNUSED(kwds))
+    const nd::array &kwds)
 {
   if (dst_tp.is_builtin()) {
     if (src_tp[0].is_builtin()) {
@@ -35,14 +35,14 @@ static intptr_t instantiate_copy(
     }
     else {
       return src_tp[0].extended()->make_assignment_kernel(
-          ckb, ckb_offset, dst_tp, dst_arrmeta, src_tp[0], src_arrmeta[0],
-          kernreq, ectx);
+          self, af_tp, ckb, ckb_offset, dst_tp, dst_arrmeta, src_tp[0], src_arrmeta[0],
+          kernreq, ectx, kwds);
     }
   }
   else {
     return dst_tp.extended()->make_assignment_kernel(
-        ckb, ckb_offset, dst_tp, dst_arrmeta, src_tp[0], src_arrmeta[0],
-        kernreq, ectx);
+        self, af_tp, ckb, ckb_offset, dst_tp, dst_arrmeta, src_tp[0], src_arrmeta[0],
+        kernreq, ectx, kwds);
   }
 }
 

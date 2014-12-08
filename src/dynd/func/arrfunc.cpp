@@ -26,21 +26,21 @@ static intptr_t instantiate_assignment_ckernel(
     intptr_t ckb_offset, const ndt::type &dst_tp, const char *dst_arrmeta,
     const ndt::type *src_tp, const char *const *src_arrmeta,
     kernel_request_t kernreq, const eval::eval_context *ectx,
-    const nd::array &DYND_UNUSED(kwds))
+    const nd::array &kwds)
 {
   try {
     assign_error_mode errmode = *self->get_data_as<assign_error_mode>();
     if (dst_tp == af_tp->get_return_type() &&
         src_tp[0] == af_tp->get_arg_type(0)) {
       if (errmode == ectx->errmode) {
-        return make_assignment_kernel(ckb, ckb_offset, dst_tp, dst_arrmeta,
-                                      src_tp[0], src_arrmeta[0], kernreq, ectx);
+        return make_assignment_kernel(self, af_tp, ckb, ckb_offset, dst_tp, dst_arrmeta,
+                                      src_tp[0], src_arrmeta[0], kernreq, ectx, kwds);
       } else {
         eval::eval_context ectx_tmp(*ectx);
         ectx_tmp.errmode = errmode;
-        return make_assignment_kernel(ckb, ckb_offset, dst_tp, dst_arrmeta,
+        return make_assignment_kernel(self, af_tp, ckb, ckb_offset, dst_tp, dst_arrmeta,
                                       src_tp[0], src_arrmeta[0], kernreq,
-                                      &ectx_tmp);
+                                      &ectx_tmp, kwds);
       }
     } else {
       stringstream ss;
@@ -70,20 +70,20 @@ static intptr_t instantiate_property_ckernel(
     intptr_t ckb_offset, const ndt::type &dst_tp, const char *dst_arrmeta,
     const ndt::type *src_tp, const char *const *src_arrmeta,
     kernel_request_t kernreq, const eval::eval_context *ectx,
-    const nd::array &DYND_UNUSED(kwds))
+    const nd::array &kwds)
 {
   ndt::type prop_src_tp(*self->get_data_as<const base_type *>(), true);
 
   if (dst_tp.value_type() == prop_src_tp.value_type()) {
     if (src_tp[0] == prop_src_tp.operand_type()) {
-      return make_assignment_kernel(ckb, ckb_offset, dst_tp, dst_arrmeta,
-                                    prop_src_tp, src_arrmeta[0], kernreq, ectx);
+      return make_assignment_kernel(NULL, NULL, ckb, ckb_offset, dst_tp, dst_arrmeta,
+                                    prop_src_tp, src_arrmeta[0], kernreq, ectx, kwds);
     } else if (src_tp[0].value_type() == prop_src_tp.operand_type()) {
       return make_assignment_kernel(
-          ckb, ckb_offset, dst_tp, dst_arrmeta,
+          NULL, NULL, ckb, ckb_offset, dst_tp, dst_arrmeta,
           prop_src_tp.extended<base_expr_type>()->with_replaced_storage_type(
               src_tp[0]),
-          src_arrmeta[0], kernreq, ectx);
+          src_arrmeta[0], kernreq, ectx, kwds);
     }
   }
 

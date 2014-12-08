@@ -322,8 +322,8 @@ size_t groupby_type::make_operand_to_value_assignment_kernel(
       src_element_tp.extended()->at_single(0, &src_element_arrmeta, NULL);
 
   return ::make_assignment_kernel(
-      ckb, ckb_offset, dst_element_tp, dst_element_arrmeta, src_element_tp,
-      src_element_arrmeta, kernel_request_single, ectx);
+      NULL, NULL, ckb, ckb_offset, dst_element_tp, dst_element_arrmeta, src_element_tp,
+      src_element_arrmeta, kernel_request_single, ectx, nd::array());
 }
 
 size_t groupby_type::make_value_to_operand_assignment_kernel(
