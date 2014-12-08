@@ -23,10 +23,12 @@ static const ndt::type& get_storage_type(const ndt::type& tp) {
 }
 
 size_t dynd::make_cuda_assignment_kernel(
+                const arrfunc_type_data *self, const arrfunc_type *af_tp,
                 void *ckb, intptr_t ckb_offset,
                 const ndt::type& dst_tp, const char *dst_arrmeta,
                 const ndt::type& src_tp, const char *src_arrmeta,
-                kernel_request_t kernreq, const eval::eval_context *ectx)
+                kernel_request_t kernreq, const eval::eval_context *ectx,
+                const nd::array &kwds)
 {
     assign_error_mode errmode;
     if (dst_tp.get_type_id() == cuda_device_type_id && src_tp.get_type_id() == cuda_device_type_id) {
@@ -56,16 +58,16 @@ size_t dynd::make_cuda_assignment_kernel(
                                 kernreq, errmode);
             }
         } else {
-            return src_tp.extended()->make_assignment_kernel(ckb, ckb_offset,
+            return src_tp.extended()->make_assignment_kernel(self, af_tp, ckb, ckb_offset,
                             dst_tp, dst_arrmeta,
                             src_tp, src_arrmeta,
-                            kernreq, ectx);
+                            kernreq, ectx, kwds);
         }
     } else {
-        return dst_tp.extended()->make_assignment_kernel(ckb, ckb_offset,
+        return dst_tp.extended()->make_assignment_kernel(self, af_tp, ckb, ckb_offset,
                         dst_tp, dst_arrmeta,
                         src_tp, src_arrmeta,
-                        kernreq, ectx);
+                        kernreq, ectx, kwds);
     }
 }
 
