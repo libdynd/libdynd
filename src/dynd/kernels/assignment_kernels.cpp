@@ -109,30 +109,25 @@ namespace kernels {
       }
     }
   };
-
-#ifdef DYND_CUDA
-  template <typename dst_type, typename src_type, assign_error_mode errmode>
-  struct cuda_host_to_device_assign_ck
-      : expr_ck<cuda_host_to_device_assign_ck<dst_type, src_type, errmode>,
-                kernel_request_host, 1> {
-    void single(char *dst, char *const *src)
-    {
+/*
       dst_type tmp;
       single_assigner_builtin<dst_type, src_type, errmode>::assign(
           &tmp, reinterpret_cast<src_type *>(*src));
-      throw_if_not_cuda_success(
-          cudaMemcpy(dst, &tmp, sizeof(dst_type), cudaMemcpyHostToDevice));
-    }
-  };
+*/
 
-  template <typename same_type, assign_error_mode errmode>
-  struct cuda_host_to_device_assign_ck<same_type, same_type, errmode>
-      : expr_ck<cuda_host_to_device_assign_ck<same_type, same_type, errmode>,
-                kernel_request_host, 1> {
+#ifdef DYND_CUDA
+  template <int N>
+  struct cuda_host_to_device_assign_ck
+      : expr_ck<cuda_host_to_device_assign_ck<N>, kernel_request_host, 1> {
     void single(char *dst, char *const *src)
     {
+      ckernel_prefix *child = this->get_child_ckernel();
+      expr_single_t single = child->get_function<expr_single_t>();
+
+      char tmp[N];
+      single(tmp, src, child);
       throw_if_not_cuda_success(
-          cudaMemcpy(dst, *src, sizeof(same_type), cudaMemcpyHostToDevice));
+          cudaMemcpy(dst, &tmp, N, cudaMemcpyHostToDevice));
     }
   };
 
@@ -149,28 +144,19 @@ namespace kernels {
     }
   };
 
-  template <typename dst_type, typename src_type, assign_error_mode errmode>
+  template <int N>
   struct cuda_device_to_host_assign_ck
-      : expr_ck<cuda_device_to_host_assign_ck<dst_type, src_type, errmode>,
-                kernel_request_host, 1> {
+      : expr_ck<cuda_device_to_host_assign_ck<N>, kernel_request_host, 1> {
     void single(char *dst, char *const *src)
     {
-      src_type tmp;
-      throw_if_not_cuda_success(
-          cudaMemcpy(&tmp, *src, sizeof(src_type), cudaMemcpyDeviceToHost));
-      single_assigner_builtin<dst_type, src_type, errmode>::assign(
-          reinterpret_cast<dst_type *>(dst), &tmp);
-    }
-  };
+      ckernel_prefix *child = this->get_child_ckernel();
+      expr_single_t single = child->get_function<expr_single_t>();
 
-  template <typename same_type, assign_error_mode errmode>
-  struct cuda_device_to_host_assign_ck<same_type, same_type, errmode>
-      : expr_ck<cuda_device_to_host_assign_ck<same_type, same_type, errmode>,
-                kernel_request_host, 1> {
-    void single(char *dst, char *const *src)
-    {
+      char tmp[N];
       throw_if_not_cuda_success(
-          cudaMemcpy(dst, *src, sizeof(same_type), cudaMemcpyDeviceToHost));
+          cudaMemcpy(tmp, *src, N, cudaMemcpyDeviceToHost));
+      char *src_copy = tmp;
+      single(dst, &src_copy, child);
     }
   };
 
@@ -184,50 +170,6 @@ namespace kernels {
     {
       throw_if_not_cuda_success(
           cudaMemcpy(dst, *src, data_size, cudaMemcpyDeviceToHost));
-    }
-  };
-
-  template <typename dst_type, typename src_type, assign_error_mode errmode>
-  DYND_CUDA_GLOBAL void single_cuda_global_assign_builtin(dst_type *dst,
-                                                          src_type *src)
-  {
-    single_assigner_builtin<dst_type, src_type, errmode>::assign(dst, src);
-  }
-
-  template <typename dst_type, typename src_type, assign_error_mode errmode>
-  struct single_cuda_device_to_device_assigner_builtin {
-    static void assign(dst_type *DYND_UNUSED(dst), src_type *DYND_UNUSED(src))
-    {
-      std::stringstream ss;
-      ss << "assignment from " << ndt::make_type<src_type>()
-         << " in CUDA global memory to ";
-      ss << ndt::make_type<dst_type>() << " in CUDA global memory ";
-      ss << "with error mode " << errmode << " is not implemented";
-      throw std::runtime_error(ss.str());
-    }
-  };
-  template <typename dst_type, typename src_type>
-  struct single_cuda_device_to_device_assigner_builtin<dst_type, src_type,
-                                                       assign_error_nocheck> {
-    static void assign(dst_type *dst, src_type *src)
-    {
-      single_cuda_global_assign_builtin<dst_type, src_type, assign_error_nocheck> << <
-          1, 1>>>
-          (dst, src);
-      throw_if_not_cuda_success(cudaDeviceSynchronize());
-    }
-  };
-
-  template <class dst_type, class src_type, assign_error_mode errmode>
-  struct cuda_device_to_device_assign_ck
-      : expr_ck<cuda_device_to_device_assign_ck<dst_type, src_type, errmode>,
-                kernel_request_host, 1> {
-    void single(char *dst, char *const *src)
-    {
-      single_cuda_device_to_device_assigner_builtin<
-          dst_type, src_type,
-          errmode>::assign(reinterpret_cast<dst_type *>(dst),
-                           reinterpret_cast<src_type *>(*src));
     }
   };
 
@@ -256,14 +198,25 @@ namespace kernels {
     }
   };
 
+  template <class dst_type, class src_type>
+  struct assign_ck<dst_type, src_type, assign_error_nocheck> : expr_ck<assign_ck<dst_type, src_type, assign_error_nocheck>,
+                             kernel_request_cuda_host_device, 1> {
+    DYND_CUDA_HOST_DEVICE void single(char *dst, char *const *src)
+    {
+      single_assigner_builtin<dst_type, src_type, assign_error_nocheck>::assign(
+          reinterpret_cast<dst_type *>(dst),
+          reinterpret_cast<src_type *>(*src));
+    }
+  };
+
 } // namespace kernels
 } // namespace dynd
 
 intptr_t dynd::make_assignment_kernel(
-    const arrfunc_type_data *self, const arrfunc_type *af_tp,
-    void *ckb, intptr_t ckb_offset, const ndt::type &dst_tp,
-    const char *dst_arrmeta, const ndt::type &src_tp, const char *src_arrmeta,
-    kernel_request_t kernreq, const eval::eval_context *ectx, const nd::array &kwds)
+    const arrfunc_type_data *self, const arrfunc_type *af_tp, void *ckb,
+    intptr_t ckb_offset, const ndt::type &dst_tp, const char *dst_arrmeta,
+    const ndt::type &src_tp, const char *src_arrmeta, kernel_request_t kernreq,
+    const eval::eval_context *ectx, const nd::array &kwds)
 {
   if (dst_tp.is_builtin()) {
     if (src_tp.is_builtin()) {
@@ -278,13 +231,13 @@ intptr_t dynd::make_assignment_kernel(
       }
     } else {
       return src_tp.extended()->make_assignment_kernel(
-          self, af_tp, ckb, ckb_offset, dst_tp, dst_arrmeta, src_tp, src_arrmeta, kernreq,
-          ectx, kwds);
+          self, af_tp, ckb, ckb_offset, dst_tp, dst_arrmeta, src_tp,
+          src_arrmeta, kernreq, ectx, kwds);
     }
   } else {
     return dst_tp.extended()->make_assignment_kernel(
-        self, af_tp, ckb, ckb_offset, dst_tp, dst_arrmeta, src_tp, src_arrmeta, kernreq,
-        ectx, kwds);
+        self, af_tp, ckb, ckb_offset, dst_tp, dst_arrmeta, src_tp, src_arrmeta,
+        kernreq, ectx, kwds);
   }
 }
 
@@ -436,7 +389,8 @@ struct wrap_single_as_strided_fixedcount_ck {
 
 template <>
 struct wrap_single_as_strided_fixedcount_ck<0> {
-  static void strided(char *dst, intptr_t dst_stride, char *const *DYND_UNUSED(src),
+  static void strided(char *dst, intptr_t dst_stride,
+                      char *const *DYND_UNUSED(src),
                       const intptr_t *DYND_UNUSED(src_stride), size_t count,
                       ckernel_prefix *self)
   {
