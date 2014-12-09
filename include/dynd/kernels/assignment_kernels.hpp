@@ -381,36 +381,6 @@ namespace kernels {
 
 #ifdef DYND_CUDA
 /**
- * Creates an assignment kernel for one data value from the
- * src type/arrmeta to the dst type/arrmeta. This adds the
- * kernel at the 'ckb_offset' position in 'ckb's data, as part
- * of a hierarchy matching the dynd type's hierarchy. At least
- * one of the types should be a CUDA type.
- *
- * This function should always be called with this == dst_tp first,
- * and types which don't support the particular assignment should
- * then call the corresponding function with this == src_dt.
- *
- * \param ckb  The hierarchical assignment kernel being constructed.
- * \param ckb_offset  The offset within 'ckb'.
- * \param dst_tp  The destination dynd type.
- * \param dst_arrmeta  Arrmeta for the destination data.
- * \param src_tp  The source dynd type.
- * \param src_arrmeta  Arrmeta for the source data
- * \param kernreq  What kind of kernel must be placed in 'ckb'.
- * \param errmode  The error mode to use for assignments.
- * \param ectx  DyND evaluation context.
- *
- * \returns  The offset within 'ckb' immediately after the
- *           created kernel.
- */
-size_t make_cuda_assignment_kernel(
-    const arrfunc_type_data *self, const arrfunc_type *af_tp, void *ckb,
-    intptr_t ckb_offset, const ndt::type &dst_tp, const char *dst_arrmeta,
-    const ndt::type &src_tp, const char *src_arrmeta, kernel_request_t kernreq,
-    const eval::eval_context *ectx, const nd::array &kwds);
-
-/**
  * Creates an assignment kernel when the src and the dst are the same, but
  * can be in a CUDA memory space, and are POD (plain old data).
  *
@@ -447,5 +417,13 @@ size_t make_cuda_builtin_type_assignment_kernel(
     void *ckb, intptr_t ckb_offset, bool dst_device, type_id_t dst_type_id,
     size_t dst_size, bool src_device, type_id_t src_type_id, size_t src_size,
     kernel_request_t kernreq, assign_error_mode errmode);
+
+intptr_t make_cuda_builtin_type_assignment_kernel(
+    const arrfunc_type_data *self, const arrfunc_type *af_tp, void *ckb,
+    intptr_t ckb_offset, const ndt::type &dst_tp, const char *dst_arrmeta,
+    const ndt::type *src_tp, const char *const *src_arrmeta,
+    kernel_request_t kernreq, const eval::eval_context *ectx,
+    const nd::array &kwds);
+
 #endif // DYND_CUDA
 } // namespace dynd

@@ -67,10 +67,10 @@ intptr_t cuda_device_type::make_assignment_kernel(
     const ndt::type &src_tp, const char *src_arrmeta, kernel_request_t kernreq,
     const eval::eval_context *ectx, const nd::array &kwds) const
 {
-//    std::cout << "(cuda_device_type::make_assignment_kernel) dst_tp = " <<
+  //    std::cout << "(cuda_device_type::make_assignment_kernel) dst_tp = " <<
   //  dst_tp << std::endl;
-    //std::cout << "(cuda_device_type::make_assignment_kernel) src_tp = " <<
-    //src_tp << std::endl;
+  // std::cout << "(cuda_device_type::make_assignment_kernel) src_tp = " <<
+  // src_tp << std::endl;
 
   /*
     bool dst_cuda_device, src_cuda_device;
@@ -88,7 +88,8 @@ intptr_t cuda_device_type::make_assignment_kernel(
   if (dst_tp.get_ndim() >= src_tp.get_ndim() && dst_tp.get_ndim() > 0) {
     ndt::type af_tp = ndt::make_funcproto(src_tp.storage_type().get_dtype(),
                                           dst_tp.storage_type().get_dtype());
-    nd::arrfunc child_af = nd::make_arrfunc(af_tp, ::make_assignment_kernel);
+    nd::arrfunc child_af =
+        nd::make_arrfunc(af_tp, make_cuda_builtin_type_assignment_kernel);
     intptr_t src_ndim = src_tp.get_ndim();
     return make_lifted_expr_ckernel(
         child_af.get(), af_tp.extended<arrfunc_type>(), ckb, ckb_offset,
@@ -96,11 +97,9 @@ intptr_t cuda_device_type::make_assignment_kernel(
         &src_arrmeta, kernreq, ectx);
   }
 
-  // i
-
-  return make_cuda_assignment_kernel(self, af_tp, ckb, ckb_offset, dst_tp,
-                                     dst_arrmeta, src_tp, src_arrmeta, kernreq,
-                                     ectx, kwds);
+  return make_cuda_builtin_type_assignment_kernel(
+      self, af_tp, ckb, ckb_offset, dst_tp, dst_arrmeta, &src_tp, &src_arrmeta,
+      kernreq, ectx, kwds);
 }
 
 #endif // DYND_CUDA

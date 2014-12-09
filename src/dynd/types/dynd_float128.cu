@@ -3,7 +3,4 @@
 // BSD 2-Clause License, see LICENSE.txt
 //
 
-#pragma once
-
-#include "dynd_float16.cu"
 #include "dynd_float128.cpp"

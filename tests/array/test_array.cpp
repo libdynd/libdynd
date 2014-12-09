@@ -455,19 +455,27 @@ TYPED_TEST_P(Array, AsScalar) {
     a.val_assign(3.14f);
     EXPECT_EQ(3.14f, a.as<float>());
     EXPECT_EQ(3.14f, a.as<double>());
-    EXPECT_THROW(a.as<int64_t>(), runtime_error);
+    if (!TestFixture::IsTypeID(cuda_device_type_id)) {
+        EXPECT_THROW(a.as<int64_t>(), runtime_error);
+    }
     EXPECT_EQ(3, a.as<int64_t>(assign_error_overflow));
-    EXPECT_THROW(a.as<dynd_bool>(), runtime_error);
-    EXPECT_THROW(a.as<dynd_bool>(assign_error_overflow), runtime_error);
+    if (!TestFixture::IsTypeID(cuda_device_type_id)) {
+        EXPECT_THROW(a.as<dynd_bool>(), runtime_error);
+        EXPECT_THROW(a.as<dynd_bool>(assign_error_overflow), runtime_error);
+    }
     EXPECT_EQ(true, a.as<dynd_bool>(assign_error_nocheck));
-    EXPECT_THROW(a.as<bool>(), runtime_error);
-    EXPECT_THROW(a.as<bool>(assign_error_overflow), runtime_error);
+    if (!TestFixture::IsTypeID(cuda_device_type_id)) {
+        EXPECT_THROW(a.as<bool>(), runtime_error);
+        EXPECT_THROW(a.as<bool>(assign_error_overflow), runtime_error);
+    }
     EXPECT_EQ(true, a.as<bool>(assign_error_nocheck));
 
     a = nd::empty(TestFixture::MakeType(ndt::make_type<double>()));
     a.val_assign(3.141592653589);
     EXPECT_EQ(3.141592653589, a.as<double>());
-    EXPECT_THROW(a.as<float>(assign_error_inexact), runtime_error);
+    if (!TestFixture::IsTypeID(cuda_device_type_id)) {
+        EXPECT_THROW(a.as<float>(assign_error_inexact), runtime_error);
+    }
     EXPECT_EQ(3.141592653589f, a.as<float>());
 }
 
