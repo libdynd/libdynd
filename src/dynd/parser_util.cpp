@@ -9,7 +9,7 @@
 #include <dynd/parser_util.hpp>
 #include <dynd/string_encodings.hpp>
 #include <dynd/types/option_type.hpp>
-#include "kernels/single_assigner_builtin.hpp"
+#include <dynd/kernels/single_assigner_builtin.hpp>
 
 
 using namespace std;

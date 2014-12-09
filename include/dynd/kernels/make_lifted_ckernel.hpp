@@ -5,7 +5,6 @@
 
 #pragma once
 
-#include <dynd/config.hpp>
 #include <dynd/array.hpp>
 #include <dynd/func/arrfunc.hpp>
 
