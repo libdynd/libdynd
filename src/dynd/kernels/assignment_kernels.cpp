@@ -6,7 +6,6 @@
 #include <dynd/type.hpp>
 #include <dynd/kernels/assignment_kernels.hpp>
 #include <dynd/shortvector.hpp>
-#include "single_assigner_builtin.hpp"
 
 using namespace std;
 using namespace dynd;
@@ -109,122 +108,6 @@ namespace kernels {
       }
     }
   };
-/*
-      dst_type tmp;
-      single_assigner_builtin<dst_type, src_type, errmode>::assign(
-          &tmp, reinterpret_cast<src_type *>(*src));
-*/
-
-#ifdef DYND_CUDA
-  struct cuda_host_to_device_assign_ck
-      : expr_ck<cuda_host_to_device_assign_ck, kernel_request_host, 1> {
-    size_t data_size;
-    char *dst;
-
-    cuda_host_to_device_assign_ck(size_t data_size)
-        : data_size(data_size), dst(new char[data_size])
-    {
-    }
-
-    ~cuda_host_to_device_assign_ck() { delete[] dst; }
-
-    void single(char *dst, char *const *src)
-    {
-      ckernel_prefix *child = this->get_child_ckernel();
-      expr_single_t single = child->get_function<expr_single_t>();
-
-      single(this->dst, src, child);
-      throw_if_not_cuda_success(
-          cudaMemcpy(dst, this->dst, data_size, cudaMemcpyHostToDevice));
-    }
-  };
-
-  struct cuda_host_to_device_copy_ck
-      : expr_ck<cuda_host_to_device_copy_ck, kernel_request_host, 1> {
-    size_t data_size;
-
-    cuda_host_to_device_copy_ck(size_t data_size) : data_size(data_size) {}
-
-    void single(char *dst, char *const *src)
-    {
-      throw_if_not_cuda_success(
-          cudaMemcpy(dst, *src, data_size, cudaMemcpyHostToDevice));
-    }
-  };
-
-  struct cuda_device_to_host_assign_ck
-      : expr_ck<cuda_device_to_host_assign_ck, kernel_request_host, 1> {
-    size_t data_size;
-    char *src;
-
-    cuda_device_to_host_assign_ck(size_t data_size)
-        : data_size(data_size), src(new char[data_size])
-    {
-    }
-
-    ~cuda_device_to_host_assign_ck() { delete[] src; }
-
-    void single(char *dst, char *const *src)
-    {
-      ckernel_prefix *child = this->get_child_ckernel();
-      expr_single_t single = child->get_function<expr_single_t>();
-
-      throw_if_not_cuda_success(
-          cudaMemcpy(this->src, *src, data_size, cudaMemcpyDeviceToHost));
-      single(dst, &this->src, child);
-    }
-  };
-
-  struct cuda_device_to_host_copy_ck
-      : expr_ck<cuda_device_to_host_copy_ck, kernel_request_host, 1> {
-    size_t data_size;
-
-    cuda_device_to_host_copy_ck(size_t data_size) : data_size(data_size) {}
-
-    void single(char *dst, char *const *src)
-    {
-      throw_if_not_cuda_success(
-          cudaMemcpy(dst, *src, data_size, cudaMemcpyDeviceToHost));
-    }
-  };
-
-  struct cuda_device_to_device_copy_ck
-      : expr_ck<cuda_device_to_device_copy_ck, kernel_request_host, 1> {
-    size_t data_size;
-
-    cuda_device_to_device_copy_ck(size_t data_size) : data_size(data_size) {}
-
-    void single(char *dst, char *const *src)
-    {
-      throw_if_not_cuda_success(
-          cudaMemcpy(dst, *src, data_size, cudaMemcpyDeviceToDevice));
-    }
-  };
-#endif
-
-  template <class dst_type, class src_type, assign_error_mode errmode>
-  struct assign_ck : expr_ck<assign_ck<dst_type, src_type, errmode>,
-                             kernel_request_host, 1> {
-    void single(char *dst, char *const *src)
-    {
-      single_assigner_builtin<dst_type, src_type, errmode>::assign(
-          reinterpret_cast<dst_type *>(dst),
-          reinterpret_cast<src_type *>(*src));
-    }
-  };
-
-  template <class dst_type, class src_type>
-  struct assign_ck<dst_type, src_type, assign_error_nocheck>
-      : expr_ck<assign_ck<dst_type, src_type, assign_error_nocheck>,
-                kernel_request_cuda_host_device, 1> {
-    DYND_CUDA_HOST_DEVICE void single(char *dst, char *const *src)
-    {
-      single_assigner_builtin<dst_type, src_type, assign_error_nocheck>::assign(
-          reinterpret_cast<dst_type *>(dst),
-          reinterpret_cast<src_type *>(*src));
-    }
-  };
-
 } // namespace kernels
 } // namespace dynd
 
@@ -500,13 +383,13 @@ size_t dynd::make_kernreq_to_single_kernel_adapter(void *ckb,
   }
 }
 
+#ifdef DYND_CUDA
+
 #include "../types/dynd_complex.cu"
 #include "../types/dynd_float16.cu"
 #include "../types/dynd_float128.cu"
 #include "../types/dynd_int128.cu"
 #include "../types/dynd_uint128.cu"
-
-#ifdef DYND_CUDA
 
 size_t dynd::make_cuda_assignment_kernel(
     const arrfunc_type_data *self, const arrfunc_type *af_tp, void *ckb,
