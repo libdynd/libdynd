@@ -23,7 +23,7 @@ if("${CMAKE_SOURCE_DIR}" STREQUAL "${CMAKE_CURRENT_SOURCE_DIR}")
 # Some options configurable from the CMAKE command execution
 #
 # -DDYND_SHARED_LIB=ON/OFF, whether to build a shared or a static library.
-    if(WIN32)
+    if(WIN32 OR DYND_CUDA) # TODO: Does it make sense to generate a shared library with CUDA separable compilation? Should we try to make that work?
         option(DYND_SHARED_LIB
             "Build a libdynd shared library instead of a static library"
             OFF)
