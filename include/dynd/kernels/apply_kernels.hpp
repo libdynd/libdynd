@@ -334,7 +334,7 @@ namespace kernels {
     if ((kernreq & kernel_request_cuda_device) == false) {
       typedef cuda_parallel_ck<arity_of<func_type>::value> self_type;
       self_type *self = self_type::create(ckb, kernreq, ckb_offset, 1, 1);
-      ckb = self->get_ckb();
+      ckb = &self->ckb;
       ckb_offset = 0;
     }
 
@@ -444,7 +444,7 @@ namespace kernels {
     if ((kernreq & kernel_request_cuda_device) == false) {
       typedef cuda_parallel_ck<arity_of<func_type>::value> self_type;
       self_type *self = self_type::create(ckb, kernreq, ckb_offset, 1, 1);
-      ckb = self->get_ckb();
+      ckb = &self->ckb;
       ckb_offset = 0;
     }
 

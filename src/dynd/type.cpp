@@ -5,6 +5,7 @@
 
 #include <dynd/type.hpp>
 #include <dynd/types/base_dim_type.hpp>
+#include <dynd/types/base_memory_type.hpp>
 #include <dynd/types/fixed_dim_type.hpp>
 #include <dynd/types/var_dim_type.hpp>
 #include <dynd/exceptions.hpp>
@@ -223,6 +224,15 @@ ndt::type ndt::type::with_replaced_dtype(const ndt::type &replacement_tp,
     replace_dtype_extra extra(replacement_tp, replace_ndim);
     replace_dtype(*this, 0, &extra, result, was_transformed);
     return result;
+}
+
+ndt::type ndt::type::without_memory_type() const
+{
+  if (get_kind() == memory_kind) {
+    return extended<base_memory_type>()->get_storage_type();
+  } else {
+    return *this;
+  }
 }
 
 ndt::type ndt::type::with_new_axis(intptr_t i, intptr_t new_ndim) const

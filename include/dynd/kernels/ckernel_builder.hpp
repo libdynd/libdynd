@@ -543,12 +543,6 @@ namespace kernels {
     static self_type *create(void *ckb, kernel_request_t kernreq,              \
                              intptr_t &inout_ckb_offset, A &&... args);        \
                                                                                \
-    static void *create_opaque(void *ckb, kernel_request_t kernreq,            \
-                               intptr_t &inout_ckb_offset)                     \
-    {                                                                          \
-      return create(ckb, kernreq, inout_ckb_offset);                                 \
-    }                                                                          \
-                                                                               \
     /**                                                                        \
      * Creates the ckernel, and increments ``inckb_offset``                    \
      * to the position after it.                                               \

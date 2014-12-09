@@ -65,30 +65,28 @@ namespace kernels {
       : expr_ck<cuda_parallel_ck<Nsrc>, kernel_request_host, Nsrc> {
     typedef cuda_parallel_ck<Nsrc> self_type;
 
-    ckernel_builder<kernel_request_cuda_device> m_ckb;
-    dim3 m_blocks;
-    dim3 m_threads;
+    ckernel_builder<kernel_request_cuda_device> ckb;
+    dim3 blocks;
+    dim3 threads;
 
     cuda_parallel_ck(dim3 blocks, dim3 threads)
-        : m_blocks(blocks), m_threads(threads)
+        : blocks(blocks), threads(threads)
     {
     }
 
-    ckernel_builder<kernel_request_cuda_device> *get_ckb() { return &m_ckb; }
-
     void single(char *dst, char *const *src)
     {
-      cuda_parallel_single << <m_blocks, m_threads>>>
-          (dst, array_wrapper<char *, Nsrc>(src), m_ckb.get());
+      cuda_parallel_single << <blocks, threads>>>
+          (dst, array_wrapper<char *, Nsrc>(src), ckb.get());
       throw_if_not_cuda_success(cudaDeviceSynchronize());
     }
 
     void strided(char *dst, intptr_t dst_stride, char *const *src,
                  const intptr_t *src_stride, size_t count)
     {
-      cuda_parallel_strided << <m_blocks, m_threads>>>
+      cuda_parallel_strided << <blocks, threads>>>
           (dst, dst_stride, array_wrapper<char *, Nsrc>(src),
-           array_wrapper<intptr_t, Nsrc>(src_stride), count, m_ckb.get());
+           array_wrapper<intptr_t, Nsrc>(src_stride), count, ckb.get());
       throw_if_not_cuda_success(cudaDeviceSynchronize());
     }
 
