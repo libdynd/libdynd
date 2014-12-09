@@ -117,6 +117,9 @@ intptr_t dynd::make_assignment_kernel(
     const ndt::type &src_tp, const char *src_arrmeta, kernel_request_t kernreq,
     const eval::eval_context *ectx, const nd::array &kwds)
 {
+//  std::cout << "(make_assignment_kernel) dst_tp = " << dst_tp << std::endl;
+//  std::cout << "(make_assignment_kernel) src_tp = " << src_tp << std::endl;
+
   if (dst_tp.is_builtin()) {
     if (src_tp.is_builtin()) {
       if (dst_tp.extended() == src_tp.extended()) {
@@ -397,6 +400,9 @@ size_t dynd::make_cuda_assignment_kernel(
     const ndt::type &src_tp, const char *src_arrmeta, kernel_request_t kernreq,
     const eval::eval_context *ectx, const nd::array &kwds)
 {
+//  std::cout << "(make_cuda_assignment_kernel) dst_tp = " << dst_tp << std::endl;
+//  std::cout << "(make_cuda_assignment_kernel) src_tp = " << src_tp << std::endl;
+
   assign_error_mode errmode;
   if (dst_tp.get_type_id() == cuda_device_type_id &&
       src_tp.get_type_id() == cuda_device_type_id) {
@@ -404,6 +410,9 @@ size_t dynd::make_cuda_assignment_kernel(
   } else {
     errmode = ectx->errmode;
   }
+
+//  std::cout << "dst_tp = " << dst_tp << std::endl;
+//  std::cout << "src_tp = " << src_tp << std::endl;
 
   if (dst_tp.without_memory_type().is_builtin()) {
     if (src_tp.without_memory_type().is_builtin()) {

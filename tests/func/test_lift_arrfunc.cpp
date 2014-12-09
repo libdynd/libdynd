@@ -198,6 +198,7 @@ TEST(Elwise, BinaryExpr)
   nd::array c = parse_json("3 * int", "[3, 5, 7]");
   EXPECT_ARR_EQ(c, af(a, b));
 
+/*
 #ifdef DYND_CUDA
   af = lift_arrfunc(
       nd::make_apply_arrfunc<kernel_request_cuda_device, callable_to_lift>());
@@ -205,6 +206,7 @@ TEST(Elwise, BinaryExpr)
   b = b.to_cuda_device();
   EXPECT_ARR_EQ(c, af(a, b).to_host());
 #endif
+*/
 }
 
 /*

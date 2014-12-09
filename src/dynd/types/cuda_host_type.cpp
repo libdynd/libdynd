@@ -15,8 +15,8 @@ cuda_host_type::cuda_host_type(const ndt::type &element_tp,
                                unsigned int cuda_host_flags)
     : base_memory_type(cuda_host_type_id, element_tp,
                        element_tp.get_data_size(),
-                       get_cuda_device_data_alignment(element_tp.get_dtype()), 0,
-                       element_tp.get_flags()),
+                       get_cuda_device_data_alignment(element_tp.get_dtype()),
+                       0, element_tp.get_flags()),
       m_cuda_host_flags(cuda_host_flags)
 {
 }
@@ -68,9 +68,24 @@ intptr_t cuda_host_type::make_assignment_kernel(
     const ndt::type &src_tp, const char *src_arrmeta, kernel_request_t kernreq,
     const eval::eval_context *ectx, const nd::array &kwds) const
 {
-  return make_cuda_assignment_kernel(self, af_tp, ckb, ckb_offset, dst_tp,
-                                     dst_arrmeta, src_tp, src_arrmeta, kernreq,
-                                     ectx, kwds);
+  //  std::cout << "(cuda_host_type::make_assignment_kernel) dst_tp = " <<
+  //  dst_tp << std::endl;
+  //  std::cout << "(cuda_host_type::make_assignment_kernel) src_tp = " <<
+  //  src_tp << std::endl;
+
+  if (this == dst_tp.extended()) {
+    return ::make_assignment_kernel(self, af_tp, ckb, ckb_offset,
+                                    dst_tp.without_memory_type(), dst_arrmeta,
+                                    src_tp, src_arrmeta, kernreq, ectx, kwds);
+  } else if (this == src_tp.extended()) {
+    return ::make_assignment_kernel(self, af_tp, ckb, ckb_offset, dst_tp,
+                                    dst_arrmeta, src_tp.without_memory_type(),
+                                    src_arrmeta, kernreq, ectx, kwds);
+  } else {
+    stringstream ss;
+    ss << "Cannot assign from " << src_tp << " to " << dst_tp;
+    throw dynd::type_error(ss.str());
+  }
 }
 
 #endif // DYND_CUDA

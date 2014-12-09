@@ -72,7 +72,7 @@ static size_t make_elwise_strided_dimension_expr_kernel_for_N(
   }
 
 #ifdef __CUDACC__
-  if (dst_tp.get_dtype().get_type_id() == cuda_device_type_id &&
+  if (dst_tp.get_type_id() == cuda_device_type_id && src_tp[0].get_type_id() == cuda_device_type_id &&
       (kernreq & kernel_request_cuda_device) == false) {
     typedef kernels::cuda_parallel_ck<N> self_type;
     self_type *self = self_type::create(ckb, kernreq, ckb_offset, 1, 1);
@@ -664,7 +664,7 @@ size_t dynd::make_lifted_expr_ckernel(
   // Do a pass through the src types to classify them
   bool src_all_strided = true, src_all_strided_or_var = true;
   for (intptr_t i = 0; i < src_count; ++i) {
-    switch (src_tp[i].get_type_id()) {
+    switch (src_tp[i].without_memory_type().get_type_id()) {
     case fixed_dim_type_id:
     case cfixed_dim_type_id:
       break;
@@ -683,7 +683,7 @@ size_t dynd::make_lifted_expr_ckernel(
 
   // Call to some special-case functions based on the
   // destination type
-  switch (dst_tp.get_type_id()) {
+  switch (dst_tp.without_memory_type().get_type_id()) {
   case fixed_dim_type_id:
   case cfixed_dim_type_id:
     if (src_all_strided) {
