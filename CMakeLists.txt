@@ -365,11 +365,6 @@ set(libdynd_SRC
     src/dynd/kernels/struct_comparison_kernels.cpp
     src/dynd/kernels/time_assignment_kernels.cpp
     src/dynd/kernels/kernels_for_disassembly.cpp
-    src/dynd/kernels/single_assigner_builtin.hpp
-    src/dynd/kernels/single_assigner_builtin_int128.hpp
-    src/dynd/kernels/single_assigner_builtin_uint128.hpp
-    src/dynd/kernels/single_assigner_builtin_float16.hpp
-    src/dynd/kernels/single_assigner_builtin_float128.hpp
     src/dynd/kernels/single_comparer_builtin.hpp
     include/dynd/kernels/apply_kernels.hpp
     include/dynd/kernels/assignment_kernels.hpp
@@ -398,6 +393,11 @@ set(libdynd_SRC
     include/dynd/kernels/option_kernels.hpp
     include/dynd/kernels/pointer_assignment_kernels.hpp
     include/dynd/kernels/reduction_kernels.hpp
+    include/dynd/kernels/single_assigner_builtin.hpp
+    include/dynd/kernels/single_assigner_builtin_int128.hpp
+    include/dynd/kernels/single_assigner_builtin_uint128.hpp
+    include/dynd/kernels/single_assigner_builtin_float16.hpp
+    include/dynd/kernels/single_assigner_builtin_float128.hpp
     include/dynd/kernels/string_assignment_kernels.hpp
     include/dynd/kernels/string_algorithm_kernels.hpp
     include/dynd/kernels/string_numeric_assignment_kernels.hpp

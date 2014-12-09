@@ -14,7 +14,7 @@
 #include <dynd/eval/eval_context.hpp>
 #include <dynd/typed_data_assign.hpp>
 #include <dynd/types/type_id.hpp>
-#include "../../src/dynd/kernels/single_assigner_builtin.hpp"
+#include <dynd/kernels/single_assigner_builtin.hpp>
 
 namespace dynd {
 /**
