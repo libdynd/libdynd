@@ -279,6 +279,18 @@ make_assignment_kernel(const arrfunc_type_data *self, const arrfunc_type *af_tp,
                        const char *src_arrmeta, kernel_request_t kernreq,
                        const eval::eval_context *ectx, const nd::array &kwds);
 
+inline intptr_t
+make_assignment_kernel(const arrfunc_type_data *self, const arrfunc_type *af_tp,
+                       void *ckb, intptr_t ckb_offset, const ndt::type &dst_tp,
+                       const char *dst_arrmeta, const ndt::type *src_tp,
+                       const char *const *src_arrmeta, kernel_request_t kernreq,
+                       const eval::eval_context *ectx, const nd::array &kwds)
+{
+  return make_assignment_kernel(self, af_tp, ckb, ckb_offset, dst_tp,
+                                dst_arrmeta, *src_tp, *src_arrmeta, kernreq,
+                                ectx, kwds);
+}
+
 /**
  * Creates an assignment kernel when the src and the dst are the same,
  * and are POD (plain old data).

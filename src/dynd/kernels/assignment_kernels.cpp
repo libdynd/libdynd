@@ -400,8 +400,8 @@ size_t dynd::make_cuda_assignment_kernel(
     const ndt::type &src_tp, const char *src_arrmeta, kernel_request_t kernreq,
     const eval::eval_context *ectx, const nd::array &kwds)
 {
-//  std::cout << "(make_cuda_assignment_kernel) dst_tp = " << dst_tp << std::endl;
-//  std::cout << "(make_cuda_assignment_kernel) src_tp = " << src_tp << std::endl;
+  std::cout << "(make_cuda_assignment_kernel) dst_tp = " << dst_tp << std::endl;
+  std::cout << "(make_cuda_assignment_kernel) src_tp = " << src_tp << std::endl;
 
   assign_error_mode errmode;
   if (dst_tp.get_type_id() == cuda_device_type_id &&
@@ -422,7 +422,7 @@ size_t dynd::make_cuda_assignment_kernel(
       }
 
       if (dst_tp.without_memory_type().extended() ==
-          src_tp.without_memory_type().extended()) {
+          src_tp.without_memory_type().extended() && dst_tp.get_type_id() != src_tp.get_type_id()) {
         return make_cuda_pod_typed_data_assignment_kernel(
             ckb, ckb_offset, dst_tp.get_type_id() == cuda_device_type_id,
             src_tp.get_type_id() == cuda_device_type_id, dst_tp.get_data_size(),
@@ -458,12 +458,15 @@ size_t dynd::make_cuda_builtin_type_assignment_kernel(
       errmode != assign_error_default) {
     if (dst_device) {
       if (src_device) {
-        kernels::cuda_parallel_ck<1> *self =
-            kernels::cuda_parallel_ck<1>::create(ckb, kernreq, ckb_offset, 1,
+        
+        if ((kernreq & kernel_request_cuda_device) == 0) {
+          kernels::cuda_parallel_ck<1> *self =
+              kernels::cuda_parallel_ck<1>::create(ckb, kernreq, ckb_offset, 1,
                                                  1);
         ckb = &self->ckb;
         kernreq |= kernel_request_cuda_device;
         ckb_offset = 0;
+        }
       } else {
         kernels::cuda_host_to_device_assign_ck::create(ckb, kernreq, ckb_offset,
                                                        dst_size);
