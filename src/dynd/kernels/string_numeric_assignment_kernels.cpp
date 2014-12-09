@@ -12,7 +12,6 @@
 #include <dynd/diagnostics.hpp>
 #include <dynd/kernels/string_numeric_assignment_kernels.hpp>
 #include <dynd/parser_util.hpp>
-#include "single_assigner_builtin.hpp"
 
 using namespace std;
 using namespace dynd;

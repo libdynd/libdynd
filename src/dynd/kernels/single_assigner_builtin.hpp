@@ -24,6 +24,18 @@ namespace dynd {
 
 template<class dst_type, class src_type, assign_error_mode errmode>
 struct single_assigner_builtin_base_error {
+    static void assign(dst_type *DYND_UNUSED(dst), const src_type *DYND_UNUSED(src)) {
+        //DYND_TRACE_ASSIGNMENT(static_cast<float>(*src), float, *src, double);
+
+        std::stringstream ss;
+        ss << "assignment from " << ndt::make_type<src_type>() << " to " << ndt::make_type<dst_type>();
+        ss << "with error mode " << errmode << " is not implemented";
+        throw std::runtime_error(ss.str());
+    }
+};
+
+template<class dst_type, class src_type>
+struct single_assigner_builtin_base_error<dst_type, src_type, assign_error_nocheck> {
     DYND_CUDA_HOST_DEVICE static void assign(dst_type *DYND_UNUSED(dst), const src_type *DYND_UNUSED(src)) {
         //DYND_TRACE_ASSIGNMENT(static_cast<float>(*src), float, *src, double);
 
@@ -32,7 +44,7 @@ struct single_assigner_builtin_base_error {
 #else
         std::stringstream ss;
         ss << "assignment from " << ndt::make_type<src_type>() << " to " << ndt::make_type<dst_type>();
-        ss << "with error mode " << errmode << " is not implemented";
+        ss << "with error mode " << assign_error_nocheck << " is not implemented";
         throw std::runtime_error(ss.str());
 #endif
     }

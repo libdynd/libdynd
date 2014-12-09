@@ -555,6 +555,11 @@ public:
                              intptr_t replace_ndim = 0) const;
 
     /**
+     * Returns this type without the leading memory type, if there is one.
+     */
+    type without_memory_type() const;
+
+    /**
      * Returns this type with a new strided dimension.
      *
      * \param i  The axis of the new strided dimension.
