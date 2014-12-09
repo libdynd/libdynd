@@ -146,8 +146,8 @@ TYPED_TEST_P(Array, ScalarConstructor) {
 
 TYPED_TEST_P(Array, OneDimConstructor) {
     // One-dimensional strided nd::array with one element
-    nd::array a = nd::empty(1, TestFixture::MakeType(ndt::make_type<float>()));
-    EXPECT_EQ(ndt::make_fixed_dim(1, TestFixture::MakeType(ndt::make_type<float>())), a.get_type());
+    nd::array a = nd::empty(TestFixture::MakeType(ndt::make_fixed_dim(1, ndt::make_type<float>())));
+    EXPECT_EQ(TestFixture::MakeType(ndt::make_fixed_dim(1, ndt::make_type<float>())), a.get_type());
     EXPECT_EQ(ndt::make_fixed_dim(1, ndt::make_type<float>()), a.get_type().get_canonical_type());
     EXPECT_FALSE(a.is_scalar());
     EXPECT_EQ(1u, a.get_shape().size());
@@ -157,8 +157,8 @@ TYPED_TEST_P(Array, OneDimConstructor) {
     EXPECT_EQ(0, a.get_strides()[0]);
 
     // One-dimensional nd::array
-    a = nd::empty(3, TestFixture::MakeType(ndt::make_type<float>()));
-    EXPECT_EQ(ndt::make_fixed_dim(3, TestFixture::MakeType(ndt::make_type<float>())), a.get_type());
+    a = nd::empty(TestFixture::MakeType(ndt::make_fixed_dim(3, ndt::make_type<float>())));
+    EXPECT_EQ(TestFixture::MakeType(ndt::make_fixed_dim(3, ndt::make_type<float>())), a.get_type());
     EXPECT_EQ(ndt::make_fixed_dim(3, ndt::make_type<float>()), a.get_type().get_canonical_type());
     EXPECT_FALSE(a.is_scalar());
     EXPECT_EQ(1u, a.get_shape().size());
@@ -170,8 +170,8 @@ TYPED_TEST_P(Array, OneDimConstructor) {
 
 TYPED_TEST_P(Array, TwoDimConstructor) {
     // Two-dimensional nd::array with a size-one dimension
-    nd::array a = nd::empty(3, 1, TestFixture::MakeType(ndt::make_type<float>()));
-    EXPECT_EQ(ndt::make_fixed_dim(3, ndt::make_fixed_dim(1, TestFixture::MakeType(ndt::make_type<float>()))), a.get_type());
+    nd::array a = nd::empty(TestFixture::MakeType(ndt::make_fixed_dim(3, ndt::make_fixed_dim(1, ndt::make_type<float>()))));
+    EXPECT_EQ(TestFixture::MakeType(ndt::make_fixed_dim(3, ndt::make_fixed_dim(1, ndt::make_type<float>()))), a.get_type());
     EXPECT_EQ(ndt::make_fixed_dim(3, ndt::make_fixed_dim(1, ndt::make_type<float>())), a.get_type().get_canonical_type());
     EXPECT_FALSE(a.is_scalar());
     EXPECT_EQ(2u, a.get_shape().size());
@@ -184,8 +184,8 @@ TYPED_TEST_P(Array, TwoDimConstructor) {
     EXPECT_EQ(0, a.get_strides()[1]);
 
     // Two-dimensional nd::array with a size-one dimension
-    a = nd::empty(1, 3, TestFixture::MakeType(ndt::make_type<float>()));
-    EXPECT_EQ(ndt::make_fixed_dim(1, ndt::make_fixed_dim(3, TestFixture::MakeType(ndt::make_type<float>()))), a.get_type());
+    a = nd::empty(TestFixture::MakeType(ndt::make_fixed_dim(1, ndt::make_fixed_dim(3, ndt::make_type<float>()))));
+    EXPECT_EQ(TestFixture::MakeType(ndt::make_fixed_dim(1, ndt::make_fixed_dim(3, ndt::make_type<float>()))), a.get_type());
     EXPECT_EQ(ndt::make_fixed_dim(1, ndt::make_fixed_dim(3, ndt::make_type<float>())), a.get_type().get_canonical_type());
     EXPECT_FALSE(a.is_scalar());
     EXPECT_EQ(2u, a.get_shape().size());
@@ -198,8 +198,8 @@ TYPED_TEST_P(Array, TwoDimConstructor) {
     EXPECT_EQ(sizeof(float), (unsigned)a.get_strides()[1]);
 
     // Two-dimensional nd::array
-    a = nd::empty(3, 5, TestFixture::MakeType(ndt::make_type<float>()));
-    EXPECT_EQ(ndt::make_fixed_dim(3, ndt::make_fixed_dim(5, TestFixture::MakeType(ndt::make_type<float>()))), a.get_type());
+    a = nd::empty(TestFixture::MakeType(ndt::make_fixed_dim(3, ndt::make_fixed_dim(5, ndt::make_type<float>()))));
+    EXPECT_EQ(TestFixture::MakeType(ndt::make_fixed_dim(3, ndt::make_fixed_dim(5, ndt::make_type<float>()))), a.get_type());
     EXPECT_EQ(ndt::make_fixed_dim(3, ndt::make_fixed_dim(5, ndt::make_type<float>())), a.get_type().get_canonical_type());
     EXPECT_FALSE(a.is_scalar());
     EXPECT_EQ(2u, a.get_shape().size());
@@ -214,9 +214,11 @@ TYPED_TEST_P(Array, TwoDimConstructor) {
 
 TYPED_TEST_P(Array, ThreeDimConstructor) {
     // Three-dimensional nd::array with size-one dimension
-    nd::array a = nd::empty(1, 5, 4, TestFixture::MakeType(ndt::make_type<float>()));
-    EXPECT_EQ(ndt::make_fixed_dim(1, ndt::make_fixed_dim(5,
-                ndt::make_fixed_dim(4, TestFixture::MakeType(ndt::make_type<float>())))), a.get_type());
+    nd::array a = nd::empty(TestFixture::MakeType(ndt::make_fixed_dim(
+        1, ndt::make_fixed_dim(
+            5, ndt::make_fixed_dim(4, ndt::make_type<float>())))));
+    EXPECT_EQ(TestFixture::MakeType(ndt::make_fixed_dim(1, ndt::make_fixed_dim(5,
+            ndt::make_fixed_dim(4, ndt::make_type<float>())))), a.get_type());
     EXPECT_EQ(ndt::make_fixed_dim(1, ndt::make_fixed_dim(5, ndt::make_fixed_dim(4, ndt::make_type<float>()))),
                 a.get_type().get_canonical_type());
     EXPECT_FALSE(a.is_scalar());
@@ -233,9 +235,11 @@ TYPED_TEST_P(Array, ThreeDimConstructor) {
     EXPECT_EQ(sizeof(float), (unsigned)a.get_strides()[2]);
 
     // Three-dimensional nd::array with size-one dimension
-    a = nd::empty(3, 1, 4, TestFixture::MakeType(ndt::make_type<float>()));
-    EXPECT_EQ(ndt::make_fixed_dim(3, ndt::make_fixed_dim(1,
-                ndt::make_fixed_dim(4, TestFixture::MakeType(ndt::make_type<float>())))), a.get_type());
+    a = nd::empty(TestFixture::MakeType(ndt::make_fixed_dim(
+        3, ndt::make_fixed_dim(
+            1, ndt::make_fixed_dim(4, ndt::make_type<float>())))));
+    EXPECT_EQ(TestFixture::MakeType(ndt::make_fixed_dim(3, ndt::make_fixed_dim(1,
+            ndt::make_fixed_dim(4, ndt::make_type<float>())))), a.get_type());
     EXPECT_EQ(ndt::make_fixed_dim(3, ndt::make_fixed_dim(1, ndt::make_fixed_dim(4, ndt::make_type<float>()))),
                 a.get_type().get_canonical_type());
     EXPECT_FALSE(a.is_scalar());
@@ -252,9 +256,11 @@ TYPED_TEST_P(Array, ThreeDimConstructor) {
     EXPECT_EQ(sizeof(float), (unsigned)a.get_strides()[2]);
 
     // Three-dimensional nd::array with size-one dimension
-    a = nd::empty(3, 5, 1, TestFixture::MakeType(ndt::make_type<float>()));
-    EXPECT_EQ(ndt::make_fixed_dim(3, ndt::make_fixed_dim(5,
-                ndt::make_fixed_dim(1, TestFixture::MakeType(ndt::make_type<float>())))), a.get_type());
+    a = nd::empty(TestFixture::MakeType(ndt::make_fixed_dim(
+        3, ndt::make_fixed_dim(
+            5, ndt::make_fixed_dim(1, ndt::make_type<float>())))));
+    EXPECT_EQ(TestFixture::MakeType(ndt::make_fixed_dim(3, ndt::make_fixed_dim(5,
+        ndt::make_fixed_dim(1, ndt::make_type<float>())))), a.get_type());
     EXPECT_EQ(ndt::make_fixed_dim(3, ndt::make_fixed_dim(5, ndt::make_fixed_dim(1, ndt::make_type<float>()))),
                 a.get_type().get_canonical_type());
     EXPECT_FALSE(a.is_scalar());
@@ -271,9 +277,11 @@ TYPED_TEST_P(Array, ThreeDimConstructor) {
     EXPECT_EQ(0, a.get_strides()[2]);
 
     // Three-dimensional nd::array
-    a = nd::empty(3, 5, 4, TestFixture::MakeType(ndt::make_type<float>()));
-    EXPECT_EQ(ndt::make_fixed_dim(3, ndt::make_fixed_dim(5,
-                ndt::make_fixed_dim(4, TestFixture::MakeType(ndt::make_type<float>())))), a.get_type());
+    a = nd::empty(TestFixture::MakeType(ndt::make_fixed_dim(
+        3, ndt::make_fixed_dim(
+            5, ndt::make_fixed_dim(4, ndt::make_type<float>())))));
+    EXPECT_EQ(TestFixture::MakeType(ndt::make_fixed_dim(3, ndt::make_fixed_dim(5,
+        ndt::make_fixed_dim(4, ndt::make_type<float>())))), a.get_type());
     EXPECT_EQ(ndt::make_fixed_dim(3, ndt::make_fixed_dim(5, ndt::make_fixed_dim(4, ndt::make_type<float>()))),
                 a.get_type().get_canonical_type());
     EXPECT_FALSE(a.is_scalar());
@@ -447,19 +455,27 @@ TYPED_TEST_P(Array, AsScalar) {
     a.val_assign(3.14f);
     EXPECT_EQ(3.14f, a.as<float>());
     EXPECT_EQ(3.14f, a.as<double>());
-    EXPECT_THROW(a.as<int64_t>(), runtime_error);
+    if (!TestFixture::IsTypeID(cuda_device_type_id)) {
+        EXPECT_THROW(a.as<int64_t>(), runtime_error);
+    }
     EXPECT_EQ(3, a.as<int64_t>(assign_error_overflow));
-    EXPECT_THROW(a.as<dynd_bool>(), runtime_error);
-    EXPECT_THROW(a.as<dynd_bool>(assign_error_overflow), runtime_error);
+    if (!TestFixture::IsTypeID(cuda_device_type_id)) {
+        EXPECT_THROW(a.as<dynd_bool>(), runtime_error);
+        EXPECT_THROW(a.as<dynd_bool>(assign_error_overflow), runtime_error);
+    }
     EXPECT_EQ(true, a.as<dynd_bool>(assign_error_nocheck));
-    EXPECT_THROW(a.as<bool>(), runtime_error);
-    EXPECT_THROW(a.as<bool>(assign_error_overflow), runtime_error);
+    if (!TestFixture::IsTypeID(cuda_device_type_id)) {
+        EXPECT_THROW(a.as<bool>(), runtime_error);
+        EXPECT_THROW(a.as<bool>(assign_error_overflow), runtime_error);
+    }
     EXPECT_EQ(true, a.as<bool>(assign_error_nocheck));
 
     a = nd::empty(TestFixture::MakeType(ndt::make_type<double>()));
     a.val_assign(3.141592653589);
     EXPECT_EQ(3.141592653589, a.as<double>());
-    EXPECT_THROW(a.as<float>(assign_error_inexact), runtime_error);
+    if (!TestFixture::IsTypeID(cuda_device_type_id)) {
+        EXPECT_THROW(a.as<float>(assign_error_inexact), runtime_error);
+    }
     EXPECT_EQ(3.141592653589f, a.as<float>());
 }
 

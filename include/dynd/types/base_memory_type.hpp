@@ -25,64 +25,94 @@ namespace dynd {
  */
 class base_memory_type : public base_type {
 protected:
-    ndt::type m_storage_tp;
-    size_t m_storage_arrmeta_offset;
+  ndt::type m_element_tp;
+  size_t m_storage_arrmeta_offset;
+
 public:
-  inline base_memory_type(type_id_t type_id, const ndt::type &storage_tp,
-                          size_t data_size, size_t alignment,
-                          size_t storage_arrmeta_offset, flags_type flags)
+  base_memory_type(type_id_t type_id, const ndt::type &element_tp,
+                   size_t data_size, size_t alignment,
+                   size_t storage_arrmeta_offset, flags_type flags)
       : base_type(type_id, memory_kind, data_size, alignment, flags,
-                  storage_arrmeta_offset + storage_tp.get_arrmeta_size(),
-                  storage_tp.get_ndim(), 0),
-        m_storage_tp(storage_tp),
+                  storage_arrmeta_offset + element_tp.get_arrmeta_size(),
+                  element_tp.get_ndim(), 0),
+        m_element_tp(element_tp),
         m_storage_arrmeta_offset(storage_arrmeta_offset)
-    {
-        if (storage_tp.get_kind() == dim_kind || storage_tp.get_kind() == memory_kind
-                    || storage_tp.get_kind() == symbolic_kind) {
-            stringstream ss;
-            ss << "a memory space cannot be specified for type " << storage_tp;
-            throw runtime_error(ss.str());
-        }
+  {
+    if (element_tp.get_kind() == memory_kind ||
+        element_tp.get_kind() == symbolic_kind) {
+      stringstream ss;
+      ss << "a memory space cannot be specified for type " << element_tp;
+      throw runtime_error(ss.str());
     }
+  }
 
-    virtual ~base_memory_type();
+  virtual ~base_memory_type();
 
-    inline const ndt::type& get_storage_type() const {
-        return m_storage_tp;
-    }
+  inline const ndt::type &get_element_type() const { return m_element_tp; }
 
-    virtual size_t get_default_data_size() const;
+  virtual size_t get_default_data_size() const;
 
-    virtual void print_data(std::ostream& o, const char *arrmeta, const char *data) const;
+  virtual void print_data(std::ostream &o, const char *arrmeta,
+                          const char *data) const;
 
-    virtual bool is_lossless_assignment(const ndt::type& dst_tp, const ndt::type& src_tp) const;
+  void get_shape(intptr_t ndim, intptr_t i, intptr_t *out_shape,
+                 const char *arrmeta, const char *data) const;
 
-    virtual bool operator==(const base_type& rhs) const = 0;
+  void get_strides(size_t i, intptr_t *out_strides, const char *arrmeta) const;
 
-    inline bool is_type_subarray(const ndt::type& subarray_tp) const {
-        return (!subarray_tp.is_builtin() && (*this) == (*subarray_tp.extended())) ||
-                        m_storage_tp.is_type_subarray(subarray_tp);
-    }
+  ndt::type apply_linear_index(intptr_t nindices, const irange *indices,
+                               size_t current_i, const ndt::type &root_tp,
+                               bool leading_dimension) const;
 
-    virtual void transform_child_types(type_transform_fn_t transform_fn,
-                                       intptr_t arrmeta_offset, void *extra,
-                                       ndt::type &out_transformed_tp,
-                                       bool &out_was_transformed) const;
-    virtual ndt::type get_canonical_type() const;
+  intptr_t apply_linear_index(intptr_t nindices, const irange *indices,
+                              const char *arrmeta, const ndt::type &result_type,
+                              char *out_arrmeta,
+                              memory_block_data *embedded_reference,
+                              size_t current_i, const ndt::type &root_tp,
+                              bool leading_dimension, char **inout_data,
+                              memory_block_data **inout_dataref) const;
 
-    virtual ndt::type with_replaced_storage_type(const ndt::type& storage_tp) const = 0;
+  ndt::type at_single(intptr_t i0, const char **inout_arrmeta,
+                      const char **inout_data) const;
 
-    virtual void arrmeta_default_construct(char *arrmeta, bool blockref_alloc) const;
-    virtual void arrmeta_copy_construct(char *dst_arrmeta, const char *src_arrmeta, memory_block_data *embedded_reference) const;
-    virtual void arrmeta_destruct(char *arrmeta) const;
+  ndt::type get_type_at_dimension(char **inout_arrmeta, intptr_t i,
+                                  intptr_t total_ndim = 0) const;
 
-    virtual void data_alloc(char **data, size_t size) const = 0;
-    virtual void data_zeroinit(char *data, size_t size) const = 0;
-    virtual void data_free(char *data) const = 0;
+  virtual bool is_lossless_assignment(const ndt::type &dst_tp,
+                                      const ndt::type &src_tp) const;
 
-    virtual void get_dynamic_type_properties(
-                    const std::pair<std::string, gfunc::callable> **out_properties,
-                    size_t *out_count) const;
+  virtual bool operator==(const base_type &rhs) const = 0;
+
+  inline bool is_type_subarray(const ndt::type &subarray_tp) const
+  {
+    return (!subarray_tp.is_builtin() &&
+            (*this) == (*subarray_tp.extended())) ||
+           m_element_tp.is_type_subarray(subarray_tp);
+  }
+
+  virtual void transform_child_types(type_transform_fn_t transform_fn,
+                                     intptr_t arrmeta_offset, void *extra,
+                                     ndt::type &out_transformed_tp,
+                                     bool &out_was_transformed) const;
+  virtual ndt::type get_canonical_type() const;
+
+  virtual ndt::type
+  with_replaced_storage_type(const ndt::type &storage_tp) const = 0;
+
+  virtual void arrmeta_default_construct(char *arrmeta,
+                                         bool blockref_alloc) const;
+  virtual void
+  arrmeta_copy_construct(char *dst_arrmeta, const char *src_arrmeta,
+                         memory_block_data *embedded_reference) const;
+  virtual void arrmeta_destruct(char *arrmeta) const;
+
+  virtual void data_alloc(char **data, size_t size) const = 0;
+  virtual void data_zeroinit(char *data, size_t size) const = 0;
+  virtual void data_free(char *data) const = 0;
+
+  virtual void get_dynamic_type_properties(
+      const std::pair<std::string, gfunc::callable> **out_properties,
+      size_t *out_count) const;
 };
 
 } // namespace dynd

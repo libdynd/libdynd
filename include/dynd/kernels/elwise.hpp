@@ -37,8 +37,8 @@ namespace kernels {
     }
 
     DYND_CUDA_HOST_DEVICE void strided(char *dst, intptr_t dst_stride,
-                                       char *const *src, const intptr_t *src_stride,
-                                       size_t count)
+                                       char *const *src,
+                                       const intptr_t *src_stride, size_t count)
     {
       ckernel_prefix *child = this->get_child_ckernel();
       expr_strided_t opchild = child->get_function<expr_strided_t>();

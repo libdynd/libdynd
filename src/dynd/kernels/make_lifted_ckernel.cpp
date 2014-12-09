@@ -43,6 +43,11 @@ static size_t make_elwise_strided_dimension_expr_kernel_for_N(
     throw type_error(ss.str());
   }
 
+  bool src_all_device = true;
+  for (int i = 0; i < N; ++i) {
+    src_all_device = src_all_device && (src_tp[i].get_type_id() == cuda_device_type_id);
+  }
+
   intptr_t child_src_ndim[N];
   bool finished = dst_ndim == 1;
   for (int i = 0; i < N; ++i) {
@@ -71,12 +76,12 @@ static size_t make_elwise_strided_dimension_expr_kernel_for_N(
     finished = finished && child_src_ndim[i] == 0;
   }
 
-#ifdef __CUDACC__
-  if (dst_tp.get_dtype().get_type_id() == cuda_device_type_id &&
-      (kernreq & kernel_request_cuda_device) == false) {
+#ifdef DYND_CUDA
+  if ((dst_tp.get_type_id() == cuda_device_type_id) && src_all_device &&
+      ((kernreq & kernel_request_cuda_device) == false)) {
     typedef kernels::cuda_parallel_ck<N> self_type;
     self_type *self = self_type::create(ckb, kernreq, ckb_offset, 1, 1);
-    ckb = self->get_ckb();
+    ckb = &self->ckb;
     kernreq |= kernel_request_cuda_device;
     ckb_offset = 0;
   }
@@ -95,6 +100,7 @@ static size_t make_elwise_strided_dimension_expr_kernel_for_N(
                                                     : 0),
         ectx);
   }
+
   // Instantiate the elementwise handler
   return elwise_handler->instantiate(
       elwise_handler, elwise_handler_tp, ckb, ckb_offset, child_dst_tp,
@@ -664,7 +670,7 @@ size_t dynd::make_lifted_expr_ckernel(
   // Do a pass through the src types to classify them
   bool src_all_strided = true, src_all_strided_or_var = true;
   for (intptr_t i = 0; i < src_count; ++i) {
-    switch (src_tp[i].get_type_id()) {
+    switch (src_tp[i].without_memory_type().get_type_id()) {
     case fixed_dim_type_id:
     case cfixed_dim_type_id:
       break;
@@ -683,7 +689,7 @@ size_t dynd::make_lifted_expr_ckernel(
 
   // Call to some special-case functions based on the
   // destination type
-  switch (dst_tp.get_type_id()) {
+  switch (dst_tp.without_memory_type().get_type_id()) {
   case fixed_dim_type_id:
   case cfixed_dim_type_id:
     if (src_all_strided) {

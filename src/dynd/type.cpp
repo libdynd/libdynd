@@ -229,7 +229,7 @@ ndt::type ndt::type::with_replaced_dtype(const ndt::type &replacement_tp,
 ndt::type ndt::type::without_memory_type() const
 {
   if (get_kind() == memory_kind) {
-    return extended<base_memory_type>()->get_storage_type();
+    return extended<base_memory_type>()->get_element_type();
   } else {
     return *this;
   }
@@ -263,6 +263,12 @@ bool ndt::type::get_as_strided(const char *arrmeta, intptr_t *out_dim_size,
                                intptr_t *out_stride, ndt::type *out_el_tp,
                                const char **out_el_arrmeta) const
 {
+    if (get_kind() == memory_kind) {
+        bool res = without_memory_type().get_as_strided(arrmeta, out_dim_size, out_stride, out_el_tp, out_el_arrmeta);
+        *out_el_tp = extended<base_memory_type>()->with_replaced_storage_type(*out_el_tp);
+        return res;
+    }
+
   if (get_strided_ndim() >= 1) {
     *out_dim_size = reinterpret_cast<const size_stride_t *>(arrmeta)->dim_size;
     *out_stride = reinterpret_cast<const size_stride_t *>(arrmeta)->stride;

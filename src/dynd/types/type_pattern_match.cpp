@@ -95,8 +95,8 @@ static bool recursive_match(const ndt::type &concrete, const ndt::type &pattern,
       case cuda_host_type_id:
       case cuda_device_type_id:
         return recursive_match(
-            concrete.extended<base_memory_type>()->get_storage_type(),
-            pattern.extended<base_memory_type>()->get_storage_type(), typevars);
+            concrete.extended<base_memory_type>()->get_element_type(),
+            pattern.extended<base_memory_type>()->get_element_type(), typevars);
       case arrfunc_type_id:
         if (concrete.extended<arrfunc_type>()->get_narg() ==
                 pattern.extended<arrfunc_type>()->get_narg() &&

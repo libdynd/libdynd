@@ -117,6 +117,9 @@ intptr_t dynd::make_assignment_kernel(
     const ndt::type &src_tp, const char *src_arrmeta, kernel_request_t kernreq,
     const eval::eval_context *ectx, const nd::array &kwds)
 {
+  //  std::cout << "(make_assignment_kernel) dst_tp = " << dst_tp << std::endl;
+  //  std::cout << "(make_assignment_kernel) src_tp = " << src_tp << std::endl;
+
   if (dst_tp.is_builtin()) {
     if (src_tp.is_builtin()) {
       if (dst_tp.extended() == src_tp.extended()) {
@@ -385,102 +388,61 @@ size_t dynd::make_kernreq_to_single_kernel_adapter(void *ckb,
 
 #ifdef DYND_CUDA
 
-#include "../types/dynd_complex.cu"
-#include "../types/dynd_float16.cu"
-#include "../types/dynd_float128.cu"
-#include "../types/dynd_int128.cu"
-#include "../types/dynd_uint128.cu"
-
-size_t dynd::make_cuda_assignment_kernel(
-    const arrfunc_type_data *self, const arrfunc_type *af_tp, void *ckb,
-    intptr_t ckb_offset, const ndt::type &dst_tp, const char *dst_arrmeta,
-    const ndt::type &src_tp, const char *src_arrmeta, kernel_request_t kernreq,
-    const eval::eval_context *ectx, const nd::array &kwds)
+intptr_t dynd::make_cuda_builtin_type_assignment_kernel(
+    const arrfunc_type_data *DYND_UNUSED(self),
+    const arrfunc_type *DYND_UNUSED(af_tp), void *ckb, intptr_t ckb_offset,
+    const ndt::type &dst_tp, const char *DYND_UNUSED(dst_arrmeta),
+    const ndt::type *src_tp, const char *const *DYND_UNUSED(src_arrmeta),
+    kernel_request_t kernreq, const eval::eval_context *ectx,
+    const nd::array &DYND_UNUSED(kwds))
 {
   assign_error_mode errmode;
   if (dst_tp.get_type_id() == cuda_device_type_id &&
-      src_tp.get_type_id() == cuda_device_type_id) {
+      src_tp->get_type_id() == cuda_device_type_id) {
     errmode = ectx->cuda_device_errmode;
   } else {
     errmode = ectx->errmode;
   }
 
-  if (dst_tp.without_memory_type().is_builtin()) {
-    if (src_tp.without_memory_type().is_builtin()) {
-      if (errmode != assign_error_nocheck &&
-          is_lossless_assignment(dst_tp, src_tp)) {
-        errmode = assign_error_nocheck;
-      }
-
-      if (dst_tp.without_memory_type().extended() ==
-          src_tp.without_memory_type().extended()) {
-        return make_cuda_pod_typed_data_assignment_kernel(
-            ckb, ckb_offset, dst_tp.get_type_id() == cuda_device_type_id,
-            src_tp.get_type_id() == cuda_device_type_id, dst_tp.get_data_size(),
-            dst_tp.get_data_alignment(), kernreq);
-      } else {
-        return make_cuda_builtin_type_assignment_kernel(
-            ckb, ckb_offset, dst_tp.get_type_id() == cuda_device_type_id,
-            dst_tp.without_memory_type().get_type_id(), dst_tp.get_data_size(),
-            src_tp.get_type_id() == cuda_device_type_id,
-            src_tp.without_memory_type().get_type_id(), src_tp.get_data_size(),
-            kernreq, errmode);
-      }
-    } else {
-      return src_tp.extended()->make_assignment_kernel(
-          self, af_tp, ckb, ckb_offset, dst_tp, dst_arrmeta, src_tp,
-          src_arrmeta, kernreq, ectx, kwds);
-    }
-  } else {
-    return dst_tp.extended()->make_assignment_kernel(
-        self, af_tp, ckb, ckb_offset, dst_tp, dst_arrmeta, src_tp, src_arrmeta,
-        kernreq, ectx, kwds);
+  if (errmode != assign_error_nocheck &&
+      is_lossless_assignment(dst_tp, *src_tp)) {
+    errmode = assign_error_nocheck;
   }
-}
 
-// This is meant to reflect make_builtin_type_assignment_kernel
-size_t dynd::make_cuda_builtin_type_assignment_kernel(
-    void *ckb, intptr_t ckb_offset, bool dst_device, type_id_t dst_type_id,
-    size_t dst_size, bool src_device, type_id_t src_type_id, size_t src_size,
-    kernel_request_t kernreq, assign_error_mode errmode)
-{
-  if (dst_type_id >= bool_type_id && dst_type_id <= complex_float64_type_id &&
-      src_type_id >= bool_type_id && src_type_id <= complex_float64_type_id &&
-      errmode != assign_error_default) {
-    if (dst_device) {
-      if (src_device) {
+  if (!dst_tp.without_memory_type().is_builtin() ||
+      !src_tp->without_memory_type().is_builtin() ||
+      errmode == assign_error_default) {
+    stringstream ss;
+    ss << "cannot assign from " << *src_tp << " to " << dst_tp;
+    throw runtime_error(ss.str());
+  }
+
+  if (dst_tp.get_type_id() == cuda_device_type_id) {
+    if (src_tp->get_type_id() == cuda_device_type_id) {
+      if ((kernreq & kernel_request_cuda_device) == 0) {
         kernels::cuda_parallel_ck<1> *self =
             kernels::cuda_parallel_ck<1>::create(ckb, kernreq, ckb_offset, 1,
                                                  1);
         ckb = &self->ckb;
         kernreq |= kernel_request_cuda_device;
         ckb_offset = 0;
-      } else {
-        kernels::cuda_host_to_device_assign_ck::create(ckb, kernreq, ckb_offset,
-                                                       dst_size);
-        kernreq = kernel_request_single;
       }
     } else {
-      if (src_device) {
-        kernels::cuda_device_to_host_assign_ck::create(ckb, kernreq, ckb_offset,
-                                                       src_size);
-        kernreq = kernel_request_single;
-      }
+      kernels::cuda_host_to_device_assign_ck::create(ckb, kernreq, ckb_offset,
+                                                     dst_tp.get_data_size());
+      kernreq = kernel_request_single;
     }
-    return make_builtin_type_assignment_kernel(ckb, ckb_offset, dst_type_id,
-                                               src_type_id, kernreq, errmode);
   } else {
-    stringstream ss;
-    ss << "Cannot assign from " << ndt::type(src_type_id);
-    if (src_device) {
-      ss << " in CUDA global memory";
+    if (src_tp->get_type_id() == cuda_device_type_id) {
+      kernels::cuda_device_to_host_assign_ck::create(ckb, kernreq, ckb_offset,
+                                                     src_tp->get_data_size());
+      kernreq = kernel_request_single;
     }
-    ss << " to " << ndt::type(dst_type_id);
-    if (dst_device) {
-      ss << " in CUDA global memory";
-    }
-    throw runtime_error(ss.str());
   }
+  return make_builtin_type_assignment_kernel(
+      ckb, ckb_offset, dst_tp.without_memory_type().get_type_id(),
+      src_tp->without_memory_type().get_type_id(), kernreq,
+      assign_error_nocheck);
 }
 
 // This is meant to reflect make_pod_typed_data_assignment_kernel

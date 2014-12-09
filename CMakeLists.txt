@@ -526,10 +526,17 @@ if (DYND_CUDA)
         src/dynd/types/dynd_int128.cpp
         src/dynd/types/dynd_uint128.cpp
         src/dynd/kernels/assignment_kernels.cpp
+        src/dynd/kernels/make_lifted_ckernel.cpp
         )
     list(APPEND libdynd_SRC
         src/dynd/kernels/assignment_kernels.cu
+        src/dynd/kernels/make_lifted_ckernel.cu
         src/dynd/kernels/ckernel_builder.cu
+        src/dynd/types/dynd_complex.cu
+        src/dynd/types/dynd_float16.cu
+        src/dynd/types/dynd_float128.cu
+        src/dynd/types/dynd_int128.cu
+        src/dynd/types/dynd_uint128.cu
         )
 
     set(CUDA_SEPARABLE_COMPILATION ON)
