@@ -116,18 +116,26 @@ namespace kernels {
 */
 
 #ifdef DYND_CUDA
-  template <int N>
   struct cuda_host_to_device_assign_ck
-      : expr_ck<cuda_host_to_device_assign_ck<N>, kernel_request_host, 1> {
+      : expr_ck<cuda_host_to_device_assign_ck, kernel_request_host, 1> {
+    size_t data_size;
+    char *dst;
+
+    cuda_host_to_device_assign_ck(size_t data_size)
+        : data_size(data_size), dst(new char[data_size])
+    {
+    }
+
+    ~cuda_host_to_device_assign_ck() { delete[] dst; }
+
     void single(char *dst, char *const *src)
     {
       ckernel_prefix *child = this->get_child_ckernel();
       expr_single_t single = child->get_function<expr_single_t>();
 
-      char tmp[N];
-      single(tmp, src, child);
+      single(this->dst, src, child);
       throw_if_not_cuda_success(
-          cudaMemcpy(dst, &tmp, N, cudaMemcpyHostToDevice));
+          cudaMemcpy(dst, this->dst, data_size, cudaMemcpyHostToDevice));
     }
   };
 
@@ -144,19 +152,26 @@ namespace kernels {
     }
   };
 
-  template <int N>
   struct cuda_device_to_host_assign_ck
-      : expr_ck<cuda_device_to_host_assign_ck<N>, kernel_request_host, 1> {
+      : expr_ck<cuda_device_to_host_assign_ck, kernel_request_host, 1> {
+    size_t data_size;
+    char *src;
+
+    cuda_device_to_host_assign_ck(size_t data_size)
+        : data_size(data_size), src(new char[data_size])
+    {
+    }
+
+    ~cuda_device_to_host_assign_ck() { delete[] src; }
+
     void single(char *dst, char *const *src)
     {
       ckernel_prefix *child = this->get_child_ckernel();
       expr_single_t single = child->get_function<expr_single_t>();
 
-      char tmp[N];
       throw_if_not_cuda_success(
-          cudaMemcpy(tmp, *src, N, cudaMemcpyDeviceToHost));
-      char *src_copy = tmp;
-      single(dst, &src_copy, child);
+          cudaMemcpy(this->src, *src, data_size, cudaMemcpyDeviceToHost));
+      single(dst, &this->src, child);
     }
   };
 
@@ -199,8 +214,9 @@ namespace kernels {
   };
 
   template <class dst_type, class src_type>
-  struct assign_ck<dst_type, src_type, assign_error_nocheck> : expr_ck<assign_ck<dst_type, src_type, assign_error_nocheck>,
-                             kernel_request_cuda_host_device, 1> {
+  struct assign_ck<dst_type, src_type, assign_error_nocheck>
+      : expr_ck<assign_ck<dst_type, src_type, assign_error_nocheck>,
+                kernel_request_cuda_host_device, 1> {
     DYND_CUDA_HOST_DEVICE void single(char *dst, char *const *src)
     {
       single_assigner_builtin<dst_type, src_type, assign_error_nocheck>::assign(

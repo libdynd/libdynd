@@ -320,8 +320,8 @@ size_t make_cuda_pod_typed_data_assignment_kernel(
  * \param errmode  The error mode to use for assignments.
  */
 size_t make_cuda_builtin_type_assignment_kernel(
-    void *ckb, intptr_t ckb_offset, bool dst_device, type_id_t dst_type_id,
-    bool src_device, type_id_t src_type_id, kernel_request_t kernreq,
+    void *ckb, intptr_t ckb_offset, bool dst_device, type_id_t dst_type_id, size_t dst_size,
+    bool src_device, type_id_t src_type_id, size_t src_size, kernel_request_t kernreq,
     assign_error_mode errmode);
 #endif // DYND_CUDA
 } // namespace dynd

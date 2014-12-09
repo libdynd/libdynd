@@ -78,7 +78,7 @@ namespace kernels {
 
     void single(char *dst, char *const *src)
     {
-      cuda_parallel_single << <m_blocks, m_threads, 1024>>>
+      cuda_parallel_single << <m_blocks, m_threads>>>
           (dst, array_wrapper<char *, Nsrc>(src), m_ckb.get());
       throw_if_not_cuda_success(cudaDeviceSynchronize());
     }
