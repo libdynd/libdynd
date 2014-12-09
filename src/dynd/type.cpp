@@ -229,7 +229,7 @@ ndt::type ndt::type::with_replaced_dtype(const ndt::type &replacement_tp,
 ndt::type ndt::type::without_memory_type() const
 {
   if (get_kind() == memory_kind) {
-    return extended<base_memory_type>()->get_storage_type();
+    return extended<base_memory_type>()->get_element_type();
   } else {
     return *this;
   }

@@ -79,9 +79,9 @@ nd::array nd::make_strided_array(const ndt::type &dtp, intptr_t ndim,
 
     memory_block_ptr result;
     char *data_ptr = NULL;
-    if (dtp.get_kind() == memory_kind) {
+    if (array_tp.get_kind() == memory_kind) {
         result = make_array_memory_block(array_tp.get_arrmeta_size());
-        dtp.extended<base_memory_type>()->data_alloc(&data_ptr, data_size);
+        array_tp.extended<base_memory_type>()->data_alloc(&data_ptr, data_size);
     } else {
         // Allocate the array arrmeta and data in one memory block
         result = make_array_memory_block(array_tp.get_arrmeta_size(),
@@ -89,8 +89,8 @@ nd::array nd::make_strided_array(const ndt::type &dtp, intptr_t ndim,
     }
 
     if (array_tp.get_flags()&type_flag_zeroinit) {
-        if (dtp.get_kind() == memory_kind) {
-            dtp.extended<base_memory_type>()->data_zeroinit(data_ptr, data_size);
+        if (array_tp.get_kind() == memory_kind) {
+            array_tp.extended<base_memory_type>()->data_zeroinit(data_ptr, data_size);
         }
         else {
             memset(data_ptr, 0, data_size);
@@ -1011,12 +1011,7 @@ nd::array nd::array::eval_copy(uint32_t access_flags, const eval::eval_context *
 
 nd::array nd::array::to_host() const
 {
-    ndt::type dt = get_type().get_dtype();
-    if (dt.get_kind() == memory_kind) {
-        dt = dt.extended<base_memory_type>()->get_storage_type();
-    }
-
-    array result = empty_like(*this, dt);
+    array result = empty(get_type().without_memory_type());
     result.val_assign(*this);
 
     return result;
@@ -1026,12 +1021,7 @@ nd::array nd::array::to_host() const
 
 nd::array nd::array::to_cuda_host(unsigned int cuda_host_flags) const
 {
-    ndt::type dt = get_type().get_dtype();
-    if (dt.get_kind() == memory_kind) {
-        dt = dt.extended<base_memory_type>()->get_storage_type();
-    }
-
-    array result = empty_like(*this, make_cuda_host(dt, cuda_host_flags));
+    array result = empty(make_cuda_host(get_type().without_memory_type(), cuda_host_flags));
     result.val_assign(*this);
 
     return result;
@@ -1040,12 +1030,7 @@ nd::array nd::array::to_cuda_host(unsigned int cuda_host_flags) const
 
 nd::array nd::array::to_cuda_device() const
 {
-    ndt::type dt = get_type().get_dtype();
-    if (dt.get_kind() == memory_kind) {
-        dt = dt.extended<base_memory_type>()->get_storage_type();
-    }
-
-    array result = empty_like(*this, make_cuda_device(dt));
+    array result = empty(make_cuda_device(get_type().without_memory_type()));
     result.val_assign(*this);
 
     return result;
@@ -1816,8 +1801,7 @@ nd::array nd::empty_shell(const ndt::type &tp)
     size_t arrmeta_size = tp.extended()->get_arrmeta_size();
     size_t data_size = tp.extended()->get_default_data_size();
     memory_block_ptr result;
-    const ndt::type &dtp = tp.get_dtype();
-    if (dtp.get_kind() != memory_kind) {
+    if (tp.get_kind() != memory_kind) {
       // Allocate memory the default way
       result = make_array_memory_block(
           arrmeta_size, data_size, tp.get_data_alignment(), &data_ptr);
@@ -1827,11 +1811,9 @@ nd::array nd::empty_shell(const ndt::type &tp)
     } else {
       // Allocate memory based on the memory_kind type
       result = make_array_memory_block(arrmeta_size);
-      static_cast<const base_memory_type *>(dtp.extended())
-          ->data_alloc(&data_ptr, data_size);
+      tp.extended<base_memory_type>()->data_alloc(&data_ptr, data_size);
       if (tp.get_flags() & type_flag_zeroinit) {
-        static_cast<const base_memory_type *>(dtp.extended())
-            ->data_zeroinit(data_ptr, data_size);
+        tp.extended<base_memory_type>()->data_zeroinit(data_ptr, data_size);
       }
     }
     array_preamble *preamble = reinterpret_cast<array_preamble *>(result.get());

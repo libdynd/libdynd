@@ -373,8 +373,9 @@ TYPED_TEST_P(ArrayAssign, ScalarAssignment_Complex_Float64)
 
 TYPED_TEST_P(ArrayAssign, BroadcastAssign)
 {
-  nd::array a =
-      nd::empty(2, 3, 4, TestFixture::First::MakeType(ndt::make_type<float>()));
+  nd::array a = nd::empty(TestFixture::First::MakeType(ndt::make_fixed_dim(
+      2, ndt::make_fixed_dim(
+             3, ndt::make_fixed_dim(4, ndt::make_type<float>())))));
   int v0[4] = {3, 4, 5, 6};
   nd::array b = TestFixture::Second::To(v0);
 
