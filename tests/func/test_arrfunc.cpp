@@ -14,6 +14,7 @@
 #include <dynd/types/arrfunc_old_type.hpp>
 #include <dynd/types/date_type.hpp>
 #include <dynd/func/arrfunc.hpp>
+#include <dynd/func/apply_arrfunc.hpp>
 #include <dynd/kernels/assignment_kernels.hpp>
 #include <dynd/kernels/expr_kernel_generator.hpp>
 #include <dynd/func/lift_arrfunc.hpp>
@@ -66,6 +67,30 @@ TEST(ArrFunc, Assignment)
   EXPECT_EQ(123, ints_out[0]);
   EXPECT_EQ(4567, ints_out[1]);
   EXPECT_EQ(891029, ints_out[2]);
+}
+
+int func(int x, int y) { return x + y; }
+
+void func_resolve_option_types(const arrfunc_type_data *DYND_UNUSED(self),
+                               const arrfunc_type *DYND_UNUSED(af_tp),
+                               intptr_t DYND_UNUSED(nsrc),
+                               const ndt::type *DYND_UNUSED(src_tp),
+                               nd::array &DYND_UNUSED(kwds))
+{
+}
+
+TEST(ArrFunc, Option) {
+  nd::arrfunc af = nd::make_apply_arrfunc(&func, "x");
+  std::cout << "(begin) call without option" << std::endl;
+  std::cout << af(1, kwds("x", 4)) << std::endl;
+  std::cout << "(end) call without option" << std::endl;
+
+  af.set_as_option(&func_resolve_option_types, "x");
+  std::cout << "(begin) call with option" << std::endl;
+  std::cout << af(1, kwds("x", 4)) << std::endl;
+  std::cout << "(end) call with option" << std::endl;
+
+  std::exit(-1);
 }
 
 TEST(ArrFunc, Assignment_CallInterface)
