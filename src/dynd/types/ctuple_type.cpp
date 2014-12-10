@@ -11,7 +11,7 @@
 #include <dynd/exceptions.hpp>
 #include <dynd/func/make_callable.hpp>
 #include <dynd/kernels/assignment_kernels.hpp>
-#include <dynd/kernels/struct_assignment_kernels.hpp>
+#include <dynd/kernels/tuple_assignment_kernels.hpp>
 #include <dynd/kernels/struct_comparison_kernels.hpp>
 
 using namespace std;
@@ -129,40 +129,35 @@ bool ctuple_type::is_lossless_assignment(const ndt::type& dst_tp, const ndt::typ
 }
 
 intptr_t ctuple_type::make_assignment_kernel(
-    const arrfunc_type_data *DYND_UNUSED(self), const arrfunc_type *DYND_UNUSED(af_tp),
-    void *DYND_UNUSED(ckb), intptr_t DYND_UNUSED(ckb_offset), const ndt::type &dst_tp,
-    const char *DYND_UNUSED(dst_arrmeta), const ndt::type &src_tp, const char *DYND_UNUSED(src_arrmeta),
-    kernel_request_t DYND_UNUSED(kernreq), const eval::eval_context *DYND_UNUSED(ectx),
-    const nd::array &DYND_UNUSED(kwds)) const
+    const arrfunc_type_data *self, const arrfunc_type *af_tp, void *ckb,
+    intptr_t ckb_offset, const ndt::type &dst_tp, const char *dst_arrmeta,
+    const ndt::type &src_tp, const char *src_arrmeta, kernel_request_t kernreq,
+    const eval::eval_context *ectx, const nd::array &kwds) const
 {
-    /*
-    if (this == dst_tp.extended()) {
-        if (this == src_tp.extended()) {
-            return make_tuple_identical_assignment_kernel(
-                ckb, ckb_offset, dst_tp, dst_arrmeta, src_arrmeta,
-                kernreq, errmode, ectx);
-        } else if (src_tp.get_kind() == struct_kind) {
-            return make_tuple_assignment_kernel(ckb, ckb_offset,
-                            dst_tp, dst_arrmeta,
-                            src_tp, src_arrmeta,
-                            kernreq, errmode, ectx);
-        } else if (src_tp.is_builtin()) {
-            return make_broadcast_to_tuple_assignment_kernel(ckb, ckb_offset,
-                            dst_tp, dst_arrmeta,
-                            src_tp, src_arrmeta,
-                            kernreq, errmode, ectx);
-        } else {
-            return src_tp.extended()->make_assignment_kernel(ckb, ckb_offset,
-                            dst_tp, dst_arrmeta,
-                            src_tp, src_arrmeta,
-                            kernreq, errmode, ectx);
-        }
+  if (this == dst_tp.extended()) {
+    if (this == src_tp.extended()) {
+      return make_tuple_identical_assignment_kernel(
+          ckb, ckb_offset, dst_tp, dst_arrmeta, src_arrmeta, kernreq, ectx);
     }
-    */
+    else if (src_tp.get_kind() == struct_kind) {
+      return make_tuple_assignment_kernel(ckb, ckb_offset, dst_tp, dst_arrmeta,
+                                          src_tp, src_arrmeta, kernreq, ectx);
+    }
+    else if (src_tp.is_builtin()) {
+      return make_broadcast_to_tuple_assignment_kernel(
+          ckb, ckb_offset, dst_tp, dst_arrmeta, src_tp, src_arrmeta, kernreq,
+          ectx);
+    }
+    else {
+      return src_tp.extended()->make_assignment_kernel(
+          self, af_tp, ckb, ckb_offset, dst_tp, dst_arrmeta, src_tp,
+          src_arrmeta, kernreq, ectx, kwds);
+    }
+  }
 
-    stringstream ss;
-    ss << "Cannot assign from " << src_tp << " to " << dst_tp;
-    throw dynd::type_error(ss.str());
+  stringstream ss;
+  ss << "Cannot assign from " << src_tp << " to " << dst_tp;
+  throw dynd::type_error(ss.str());
 }
 
 size_t ctuple_type::make_comparison_kernel(

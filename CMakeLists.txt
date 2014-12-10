@@ -366,6 +366,7 @@ set(libdynd_SRC
     src/dynd/kernels/time_assignment_kernels.cpp
     src/dynd/kernels/kernels_for_disassembly.cpp
     src/dynd/kernels/single_comparer_builtin.hpp
+    src/dynd/kernels/tuple_assignment_kernels.cpp
     include/dynd/kernels/apply_kernels.hpp
     include/dynd/kernels/assignment_kernels.hpp
     include/dynd/kernels/var_dim_assignment_kernels.hpp
@@ -405,6 +406,7 @@ set(libdynd_SRC
     include/dynd/kernels/struct_assignment_kernels.hpp
     include/dynd/kernels/struct_comparison_kernels.hpp
     include/dynd/kernels/time_assignment_kernels.hpp
+    include/dynd/kernels/tuple_assignment_kernels.hpp
     # MemBlock
     src/dynd/memblock/memory_block.cpp
     src/dynd/memblock/executable_memory_block_windows_x64.cpp
