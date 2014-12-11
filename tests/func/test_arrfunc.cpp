@@ -75,11 +75,14 @@ void func_resolve_option_types(const arrfunc_type_data *DYND_UNUSED(self),
                                const arrfunc_type *DYND_UNUSED(af_tp),
                                intptr_t DYND_UNUSED(nsrc),
                                const ndt::type *DYND_UNUSED(src_tp),
-                               nd::array &DYND_UNUSED(kwds))
+                               nd::array &kwds)
 {
+  std::cout << "func_resolve_option_types" << std::endl;
+  std::cout << kwds << std::endl;
 }
 
-TEST(ArrFunc, Option) {
+TEST(ArrFunc, Option)
+{
   nd::arrfunc af = nd::make_apply_arrfunc(&func, "x");
   std::cout << "(begin) call without option" << std::endl;
   std::cout << af(1, kwds("x", 4)) << std::endl;
@@ -87,7 +90,7 @@ TEST(ArrFunc, Option) {
 
   af.set_as_option(&func_resolve_option_types, "x");
   std::cout << "(begin) call with option" << std::endl;
-  std::cout << af(1, kwds("x", 4)) << std::endl;
+  std::cout << af(1) << std::endl;
   std::cout << "(end) call with option" << std::endl;
 
   std::exit(-1);
