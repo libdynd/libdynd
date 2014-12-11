@@ -73,22 +73,22 @@ static double func(int x, double y) { return 2.0 * x + y; }
 
 TEST(ArrFunc, Construction)
 {
-  nd::arrfunc af0(&func);
+  nd::arrfunc af0 = nd::apply::make(&func);
   EXPECT_EQ(4.5, af0(1, 2.5).as<double>());
 
-  nd::arrfunc af1(&func, "y");
+  nd::arrfunc af1 = nd::apply::make(&func, "y");
   EXPECT_EQ(4.5, af1(1, kwds("y", 2.5)).as<double>());
 
-  nd::arrfunc af2([](int x, int y) { return x - y; });
+  nd::arrfunc af2 = nd::apply::make([](int x, int y) { return x - y; });
   EXPECT_EQ(-4, af2(3, 7).as<int>());
 
-  nd::arrfunc af3([](int x, int y) { return x - y; }, "y");
+  nd::arrfunc af3 = nd::apply::make([](int x, int y) { return x - y; }, "y");
   EXPECT_EQ(-4, af3(3, kwds("y", 7)).as<int>());
 }
 
 TEST(ArrFunc, KeywordParsing)
 {
-  nd::arrfunc af0([](int x, int y) { return x + y; }, "y");
+  nd::arrfunc af0 = nd::apply::make([](int x, int y) { return x + y; }, "y");
   EXPECT_EQ(5, af0(1, kwds("y", 4)).as<int>());
   EXPECT_THROW(af0(1, kwds("z", 4)).as<int>(), std::invalid_argument);
   EXPECT_THROW(af0(1, kwds("Y", 4)).as<int>(), std::invalid_argument);

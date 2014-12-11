@@ -397,25 +397,7 @@ kwds(T &&... args)
   return index_proxy<IJ>::template make<KwdsType>(std::forward<T>(args)...);
 }
 
-template <typename T, typename = void>
-struct is_callable : std::is_function<T> {
-};
-
-template <typename T>
-struct is_callable<T, typename std::enable_if<std::is_same<
-                          decltype(void(&T::operator())), void>::value>::type>
-    : std::true_type {
-};
-
 namespace nd {
-  namespace apply {
-    template <typename R, typename... A, typename... T>
-    arrfunc make(R (*func)(A...), T &&... names);
-
-    template <typename func_type, typename... T>
-    arrfunc make(const func_type &func, T &&... names);
-  }
-
   /**
    * Holds a single instance of an arrfunc in an immutable nd::array,
    * providing some more direct convenient interface.
@@ -440,20 +422,6 @@ namespace nd {
       * has "arrfunc" type and is immutable.
       */
     arrfunc(const nd::array &rhs);
-
-    template <typename R, typename... A, typename... T>
-    arrfunc(R (*func)(A...), T &&... names)
-        : m_value(apply::make(func, std::forward<T>(names)...))
-    {
-    }
-
-    template <
-        typename func_type, typename... T,
-        typename = typename std::enable_if<is_callable<func_type>::value>::type>
-    arrfunc(const func_type &func, T &&... names)
-        : m_value(apply::make(func, std::forward<T>(names)...))
-    {
-    }
 
     arrfunc &operator=(const arrfunc &rhs)
     {
@@ -808,5 +776,4 @@ nd::arrfunc make_arrfunc_from_property(const ndt::type &tp,
 
 } // namespace dynd
 
-#include <dynd/func/apply_arrfunc.hpp>
 #include <dynd/types/option_type.hpp>
