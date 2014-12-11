@@ -58,9 +58,9 @@ arrfunc_type::arrfunc_type(const ndt::type &return_type,
     throw invalid_argument(ss.str());
   }
 
-  for (intptr_t i = 0; i < arg_types.get_dim_size(); ++i) {
+  for (intptr_t i = 0; i < get_narg(); ++i) {
     if (m_arg_types(i).as<ndt::type>().get_type_id() == option_type_id) {
-      m_option_arg_indices.push_back(i);
+      m_opt_indices.push_back(i);
     }
   }
 
