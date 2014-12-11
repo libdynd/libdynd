@@ -7,11 +7,13 @@
 #include <sstream>
 #include <stdexcept>
 #include "inc_gtest.hpp"
+#include "dynd_assertions.hpp"
 
 #include <dynd/array.hpp>
 #include <dynd/types/tuple_type.hpp>
 #include <dynd/types/ctuple_type.hpp>
 #include <dynd/types/fixedstring_type.hpp>
+#include <dynd/json_parser.hpp>
 #include <dynd/func/callable.hpp>
 
 using namespace std;
@@ -48,4 +50,14 @@ TEST(TupleType, CreateSimple)
   EXPECT_EQ(ndt::make_type<double>(), tt->get_field_type(1));
   // Roundtripping through a string
   EXPECT_EQ(tp, ndt::type(tp.str()));
+}
+
+TEST(TupleType, Assign)
+{
+  nd::array a, b;
+
+  a = parse_json("(int32, float64, string)", "[12, 2.5, \"test\"]");
+  b = nd::empty("(float64, float32, string)");
+  b.vals() = a;
+  EXPECT_JSON_EQ_ARR("[12, 2.5, \"test\"]", b);
 }
