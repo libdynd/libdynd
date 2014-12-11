@@ -93,7 +93,8 @@ intptr_t tuple_type::make_assignment_kernel(
       return make_tuple_identical_assignment_kernel(
           ckb, ckb_offset, dst_tp, dst_arrmeta, src_arrmeta, kernreq, ectx);
     }
-    else if (src_tp.get_kind() == struct_kind) {
+    else if (src_tp.get_kind() == tuple_kind ||
+             src_tp.get_kind() == struct_kind) {
       return make_tuple_assignment_kernel(ckb, ckb_offset, dst_tp, dst_arrmeta,
                                           src_tp, src_arrmeta, kernreq, ectx);
     }
