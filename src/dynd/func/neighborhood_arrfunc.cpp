@@ -248,7 +248,7 @@ nd::arrfunc dynd::make_neighborhood_arrfunc(const nd::arrfunc &neighborhood_op,
   (*nh)->start_stop = (start_stop_t *)malloc(nh_ndim * sizeof(start_stop_t));
   out_af->instantiate = &instantiate_neighborhood<1>;
   out_af->resolve_dst_type = &resolve_neighborhood_dst_type;
-  out_af->free_func = &free_neighborhood;
+  out_af->free = &free_neighborhood;
   af.flag_as_immutable();
   return af;
 }

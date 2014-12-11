@@ -127,7 +127,7 @@ nd::arrfunc dynd::lift_reduction_arrfunc(
       reinterpret_cast<arrfunc_type_data *>(af.get_readwrite_originptr());
   lifted_reduction_arrfunc_data *self = new lifted_reduction_arrfunc_data;
   *out_af->get_data_as<lifted_reduction_arrfunc_data *>() = self;
-  out_af->free_func = &delete_lifted_reduction_arrfunc_data;
+  out_af->free = &delete_lifted_reduction_arrfunc_data;
   self->child_elwise_reduction = elwise_reduction_arr;
   self->child_dst_initialization = dst_initialization_arr;
   if (!reduction_identity.is_null()) {
