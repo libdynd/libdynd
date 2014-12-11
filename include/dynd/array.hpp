@@ -104,7 +104,6 @@ namespace nd {
                                  const intptr_t *missing = NULL);
   };
 
-
   class array;
 
   enum array_access_flags {
@@ -2040,9 +2039,8 @@ namespace nd {
 
   inline void index_proxy<index_sequence<>>::forward_as_array(
       intptr_t ntp, const ndt::type *tp, char *arrmeta,
-      const uintptr_t *arrmeta_offsets, char *DYND_UNUSED(data),
-      const uintptr_t *DYND_UNUSED(data_offsets),
-      const std::tuple<> &DYND_UNUSED(vals),
+      const uintptr_t *arrmeta_offsets, char *data,
+      const uintptr_t *data_offsets, const std::tuple<> &DYND_UNUSED(vals),
       const intptr_t *DYND_UNUSED(available), const intptr_t *missing)
   {
     for (intptr_t i = 0; i < ntp; ++i) {
@@ -2050,6 +2048,8 @@ namespace nd {
       if (!tp[j].is_builtin()) {
         tp[j].extended()->arrmeta_default_construct(
             arrmeta + arrmeta_offsets[j], true);
+        assign_na(tp[j], arrmeta + arrmeta_offsets[j], data + data_offsets[j],
+                  &eval::default_eval_context);
       }
     }
   }

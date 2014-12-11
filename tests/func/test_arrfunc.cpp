@@ -69,31 +69,28 @@ TEST(ArrFunc, Assignment)
   EXPECT_EQ(891029, ints_out[2]);
 }
 
-int func(int x, int y) { return x + y; }
-
-void func_resolve_option_types(const arrfunc_type_data *DYND_UNUSED(self),
-                               const arrfunc_type *DYND_UNUSED(af_tp),
-                               intptr_t DYND_UNUSED(nsrc),
-                               const ndt::type *DYND_UNUSED(src_tp),
-                               nd::array &kwds)
-{
-  kwds.p("x").vals() = 4;
-  std::cout << kwds.p("x").is_missing() << std::endl;
-}
-
 TEST(ArrFunc, Option)
 {
-  nd::arrfunc af = nd::make_apply_arrfunc(&func, "x");
-  std::cout << "(begin) call without option" << std::endl;
-  std::cout << af(1, kwds("x", 4)) << std::endl;
-  std::cout << "(end) call without option" << std::endl;
+  struct callable {
+    int operator()(int x, int y) { return x + y; }
 
-  af.set_as_option(&func_resolve_option_types, "x");
-  std::cout << "(begin) call with option" << std::endl;
-  std::cout << af(1) << std::endl;
-  std::cout << "(end) call with option" << std::endl;
+    static void resolve_option_types(const arrfunc_type_data *DYND_UNUSED(self),
+                                     const arrfunc_type *DYND_UNUSED(self_tp),
+                                     intptr_t DYND_UNUSED(nsrc),
+                                     const ndt::type *DYND_UNUSED(src_tp),
+                                     nd::array &kwds)
+    {
+      if (kwds.p("x").is_missing()) {
+        kwds.p("x").vals() = 4;
+      }
+    }
+  };
 
-  std::exit(-1);
+  nd::arrfunc af = nd::make_apply_arrfunc(callable(), "x");
+  EXPECT_EQ(5, af(1, kwds("x", 4)).as<int>());
+
+  af.set_as_option(&callable::resolve_option_types, "x");
+  EXPECT_EQ(5, af(1).as<int>());
 }
 
 TEST(ArrFunc, Assignment_CallInterface)
