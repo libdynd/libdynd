@@ -371,16 +371,16 @@ static bool parse_struct_json_from_object(const ndt::type &tp,
   return true;
 }
 
-static bool parse_struct_json_from_list(const ndt::type &tp,
-                                        const char *arrmeta, char *out_data,
-                                        const char *&begin, const char *end,
-                                        const eval::eval_context *ectx)
+static bool parse_tuple_json_from_list(const ndt::type &tp, const char *arrmeta,
+                                       char *out_data, const char *&begin,
+                                       const char *end,
+                                       const eval::eval_context *ectx)
 {
   if (!parse_token(begin, end, "[")) {
     return false;
   }
 
-  const base_struct_type *fsd = tp.extended<base_struct_type>();
+  auto fsd = tp.extended<base_tuple_type>();
   intptr_t field_count = fsd->get_field_count();
   const size_t *data_offsets = fsd->get_data_offsets(arrmeta);
   const size_t *arrmeta_offsets = fsd->get_arrmeta_offsets_raw();
@@ -408,8 +408,20 @@ static void parse_struct_json(const ndt::type &tp, const char *arrmeta,
 {
   if (parse_struct_json_from_object(tp, arrmeta, out_data, begin, end, ectx)) {
   }
-  else if (parse_struct_json_from_list(tp, arrmeta, out_data, begin, end,
-                                       ectx)) {
+  else if (parse_tuple_json_from_list(tp, arrmeta, out_data, begin, end,
+                                      ectx)) {
+  }
+  else {
+    throw json_parse_error(
+        begin, "expected object dict starting with '{' or list with '['", tp);
+  }
+}
+
+static void parse_tuple_json(const ndt::type &tp, const char *arrmeta,
+                             char *out_data, const char *&begin,
+                             const char *end, const eval::eval_context *ectx)
+{
+  if (parse_tuple_json_from_list(tp, arrmeta, out_data, begin, end, ectx)) {
   }
   else {
     throw json_parse_error(
@@ -773,6 +785,9 @@ static void parse_json(const ndt::type &tp, const char *arrmeta, char *out_data,
     return;
   case struct_kind:
     parse_struct_json(tp, arrmeta, out_data, begin, end, ectx);
+    return;
+  case tuple_kind:
+    parse_tuple_json(tp, arrmeta, out_data, begin, end, ectx);
     return;
   case bool_kind:
     parse_bool_json(tp, arrmeta, out_data, begin, end, false, ectx);
