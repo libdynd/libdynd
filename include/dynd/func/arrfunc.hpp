@@ -465,7 +465,7 @@ namespace nd {
           reinterpret_cast<ndt::type *>(kwd_tp2.get_readwrite_originptr());
 
       std::vector<intptr_t> available(sizeof...(K));
-      std::vector<intptr_t> missing(af_tp->get_nkwd() - sizeof...(K));
+      std::vector<intptr_t> missing;
 
       for (size_t i = 0; i < available.size(); i++) {
         available[i] = af_tp->get_arg_index(kwds.get_name(i));
@@ -498,11 +498,16 @@ namespace nd {
           forward_as_array(af_tp->get_arg_names(), kwd_tp2, kwds.get_vals(),
                            available.empty() ? NULL : available.data(),
                            missing.empty() ? NULL : missing.data());
-//      std::cout << kwd_tp2 << std::endl;
-  //    std::cout << kwds_as_array << std::endl;
+      std::cout << kwd_tp2 << std::endl;
+      std::cout << kwds_as_array << std::endl;
+      std::cout << missing.size() << std::endl;
       for (size_t i = 0; i < missing.size(); ++i) {
         std::cout << kwds_as_array(missing[i]).get_type() << std::endl;
 //        kwds_as_array(missing[i]).assign_na();
+      }
+
+      if (af->resolve_option_types != NULL) {
+        af->resolve_option_types(af, af_tp, nsrc, src_tp, kwds_as_array);
       }
 
       return ndt::substitute(af_tp->get_return_type(), typevars, true);

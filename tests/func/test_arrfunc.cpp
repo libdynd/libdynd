@@ -77,8 +77,8 @@ void func_resolve_option_types(const arrfunc_type_data *DYND_UNUSED(self),
                                const ndt::type *DYND_UNUSED(src_tp),
                                nd::array &kwds)
 {
-  std::cout << "func_resolve_option_types" << std::endl;
-  std::cout << kwds << std::endl;
+  kwds.p("x").vals() = 4;
+  std::cout << kwds.p("x").is_missing() << std::endl;
 }
 
 TEST(ArrFunc, Option)
