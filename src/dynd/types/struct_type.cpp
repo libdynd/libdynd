@@ -11,7 +11,7 @@
 #include <dynd/func/make_callable.hpp>
 #include <dynd/kernels/tuple_assignment_kernels.hpp>
 #include <dynd/kernels/struct_assignment_kernels.hpp>
-#include <dynd/kernels/struct_comparison_kernels.hpp>
+#include <dynd/kernels/tuple_comparison_kernels.hpp>
 
 using namespace std;
 using namespace dynd;
@@ -154,13 +154,11 @@ size_t struct_type::make_comparison_kernel(void *ckb, intptr_t ckb_offset,
 {
   if (this == src0_dt.extended()) {
     if (*this == *src1_dt.extended()) {
-      return make_struct_comparison_kernel(
+      return make_tuple_comparison_kernel(
           ckb, ckb_offset, src0_dt, src0_arrmeta, src1_arrmeta, comptype, ectx);
     }
     else if (src1_dt.get_kind() == struct_kind) {
-      return make_general_struct_comparison_kernel(
-          ckb, ckb_offset, src0_dt, src0_arrmeta, src1_dt, src1_arrmeta,
-          comptype, ectx);
+      // TODO
     }
   }
 

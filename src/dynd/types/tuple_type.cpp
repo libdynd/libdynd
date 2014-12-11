@@ -9,7 +9,7 @@
 #include <dynd/exceptions.hpp>
 #include <dynd/func/make_callable.hpp>
 #include <dynd/kernels/tuple_assignment_kernels.hpp>
-#include <dynd/kernels/struct_comparison_kernels.hpp>
+#include <dynd/kernels/tuple_comparison_kernels.hpp>
 
 using namespace std;
 using namespace dynd;
@@ -115,27 +115,23 @@ intptr_t tuple_type::make_assignment_kernel(
   throw dynd::type_error(ss.str());
 }
 
-size_t tuple_type::make_comparison_kernel(
-    void *DYND_UNUSED(ckb), intptr_t DYND_UNUSED(ckb_offset),
-    const ndt::type &src0_tp, const char *DYND_UNUSED(src0_arrmeta),
-    const ndt::type &src1_tp, const char *DYND_UNUSED(src1_arrmeta),
-    comparison_type_t comptype,
-    const eval::eval_context *DYND_UNUSED(ectx)) const
+size_t tuple_type::make_comparison_kernel(void *ckb, intptr_t ckb_offset,
+                                          const ndt::type &src0_tp,
+                                          const char *src0_arrmeta,
+                                          const ndt::type &src1_tp,
+                                          const char *src1_arrmeta,
+                                          comparison_type_t comptype,
+                                          const eval::eval_context *ectx) const
 {
-  /*
-  if (this == src0_dt.extended()) {
-      if (*this == *src1_dt.extended()) {
-          return make_tuple_comparison_kernel(ckb, ckb_offset,
-                          src0_dt, src0_arrmeta, src1_arrmeta,
-                          comptype, ectx);
-      } else if (src1_dt.get_kind() == struct_kind) {
-          return make_general_tuple_comparison_kernel(ckb, ckb_offset,
-                          src0_dt, src0_arrmeta,
-                          src1_dt, src1_arrmeta,
-                          comptype, ectx);
-      }
+  if (this == src0_tp.extended()) {
+    if (*this == *src1_tp.extended()) {
+      return make_tuple_comparison_kernel(
+          ckb, ckb_offset, src0_tp, src0_arrmeta, src1_arrmeta, comptype, ectx);
+    }
+    else if (src1_tp.get_kind() == tuple_kind) {
+      // TODO
+    }
   }
-  */
 
   throw not_comparable_error(src0_tp, src1_tp, comptype);
 }
