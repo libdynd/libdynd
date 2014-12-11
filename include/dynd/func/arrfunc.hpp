@@ -215,7 +215,8 @@ namespace nd {
         res.get_dim_size(),
         reinterpret_cast<const ndt::type *>(types.get_readonly_originptr()),
         reinterpret_cast<uintptr_t *>(res.get_arrmeta()));
-    nd::index_proxy<I>::forward_as_array(types.get_dim_size(),
+    nd::index_proxy<I>::forward_as_array(
+        types.get_dim_size(),
         reinterpret_cast<const ndt::type *>(types.get_readonly_originptr()),
         res.get_arrmeta(),
         res.get_type().extended<base_struct_type>()->get_arrmeta_offsets_raw(),
@@ -455,55 +456,53 @@ namespace nd {
         }
       }
 
-      if (af_tp->get_nkwd() == 0) {
-        return ndt::substitute(af_tp->get_return_type(), typevars, true);
-      }
+//      if (af_tp->get_nkwd() 
 
-      nd::array kwd_tp2 = nd::empty(af_tp->get_nkwd(), ndt::make_type());
+      if (af_tp->get_nkwd() > 0) {
+        nd::array kwd_tp2 = nd::empty(af_tp->get_nkwd(), ndt::make_type());
 
-      ndt::type *kwd_tp =
-          reinterpret_cast<ndt::type *>(kwd_tp2.get_readwrite_originptr());
+        ndt::type *kwd_tp =
+            reinterpret_cast<ndt::type *>(kwd_tp2.get_readwrite_originptr());
 
-      std::vector<intptr_t> available(sizeof...(K));
-      std::vector<intptr_t> missing;
+        std::vector<intptr_t> available(sizeof...(K));
+        std::vector<intptr_t> missing;
 
-      for (size_t i = 0; i < available.size(); i++) {
-        available[i] = af_tp->get_arg_index(kwds.get_name(i));
-        ndt::type tp = kwds.get_type(i);
-        ndt::type expected = param_types[available[i]];
-        if (expected.get_type_id() == option_type_id) {
-          expected = expected.p("value_type").as<ndt::type>();
+        for (size_t i = 0; i < available.size(); i++) {
+          available[i] = af_tp->get_arg_index(kwds.get_name(i));
+          ndt::type tp = kwds.get_type(i);
+          ndt::type expected = param_types[available[i]];
+          if (expected.get_type_id() == option_type_id) {
+            expected = expected.p("value_type").as<ndt::type>();
+          }
+          if (!ndt::pattern_match(tp.value_type(), expected, typevars)) {
+            std::stringstream ss;
+            ss << "keyword parameter \"" << kwds.get_name(i)
+               << "\" to arrfunc does not match, ";
+            ss << "expected " << param_types[available[i]] << ", received "
+               << tp;
+            throw std::invalid_argument(ss.str());
+          }
+          kwd_tp[available[i] - af_tp->get_npos()] = tp;
+          available[i] -= af_tp->get_npos();
         }
-        if (!ndt::pattern_match(tp.value_type(), expected, typevars)) {
-          std::stringstream ss;
-          ss << "keyword parameter \"" << kwds.get_name(i)
-             << "\" to arrfunc does not match, ";
-          ss << "expected " << param_types[available[i]] << ", received " << tp;
-          throw std::invalid_argument(ss.str());
+
+        ndt::get_forward_types(kwd_tp2, kwds.get_vals(),
+                               available.empty() ? NULL : available.data());
+        for (intptr_t i = 0; i < kwd_tp2.get_dim_size(); ++i) {
+          if (kwd_tp2(i).as<ndt::type>().is_null()) {
+            kwd_tp2(i).val_assign(af_tp->get_arg_type(i + af_tp->get_npos()));
+            missing.push_back(i);
+          }
         }
-        kwd_tp[available[i] - af_tp->get_npos()] = tp;
-        available[i] -= af_tp->get_npos();
-      }
 
-      ndt::get_forward_types(kwd_tp2, kwds.get_vals(),
-                             available.empty() ? NULL : available.data());
-      for (intptr_t i = 0; i < kwd_tp2.get_dim_size(); ++i) {
-        if (kwd_tp2(i).as<ndt::type>().is_null()) {
-          kwd_tp2(i).val_assign(af_tp->get_arg_type(i + af_tp->get_npos()));
-          missing.push_back(i);
+        kwds_as_array =
+            forward_as_array(af_tp->get_arg_names(), kwd_tp2, kwds.get_vals(),
+                             available.empty() ? NULL : available.data(),
+                             missing.empty() ? NULL : missing.data());
+
+        if (af->resolve_option_types != NULL) {
+          af->resolve_option_types(af, af_tp, nsrc, src_tp, kwds_as_array);
         }
-      }
-
-      kwds_as_array =
-          forward_as_array(af_tp->get_arg_names(), kwd_tp2, kwds.get_vals(),
-                           available.empty() ? NULL : available.data(),
-                           missing.empty() ? NULL : missing.data());
-//      for (size_t i = 0; i < missing.size(); ++i) {
-  //      std::cout << kwds_as_array(missing[i]).get_type() << std::endl;
-    //  }
-
-      if (af->resolve_option_types != NULL) {
-        af->resolve_option_types(af, af_tp, nsrc, src_tp, kwds_as_array);
       }
 
       return ndt::substitute(af_tp->get_return_type(), typevars, true);
