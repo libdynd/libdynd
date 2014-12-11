@@ -20,6 +20,7 @@ class arrfunc_type : public base_type {
   ndt::type m_return_type;
   nd::array m_arg_types;
   nd::array m_arg_names;
+  std::vector<intptr_t> m_option_arg_indices;
 
 public:
   arrfunc_type(const ndt::type &ret_type, const nd::array &arg_types, const nd::array &arg_names);
@@ -46,16 +47,16 @@ public:
   }
   intptr_t get_arg_index(const char *arg_name_begin, const char *arg_name_end) const;
 
+  std::vector<intptr_t> get_option_arg_indices() const {
+    return m_option_arg_indices;
+  }
+
   const nd::array &get_arg_names() const {
     return m_arg_names;
   }
 
   intptr_t get_npos() const {
     return get_narg() - get_nkwd();
-  }
-
-  intptr_t get_nsrc() const {
-    return get_npos();
   }
 
   intptr_t get_nkwd() const {

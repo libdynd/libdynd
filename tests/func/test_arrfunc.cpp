@@ -69,6 +69,25 @@ TEST(ArrFunc, Assignment)
   EXPECT_EQ(891029, ints_out[2]);
 }
 
+TEST(ArrFunc, Construction)
+{
+  nd::arrfunc af0([](int x, int y) { return x + y; });
+  EXPECT_EQ(5, af0(1, 4).as<int>());
+
+  nd::arrfunc af1([](int x, int y) { return x + y; }, "y");
+  EXPECT_EQ(5, af1(1, kwds("y", 4)).as<int>());
+}
+
+TEST(ArrFunc, KeywordParsing)
+{
+  nd::arrfunc af0([](int x, int y) { return x + y; }, "y");
+  EXPECT_EQ(5, af0(1, kwds("y", 4)).as<int>());
+  EXPECT_THROW(af0(1, kwds("z", 4)).as<int>(), std::invalid_argument);
+  EXPECT_THROW(af0(1, kwds("Y", 4)).as<int>(), std::invalid_argument);
+  EXPECT_THROW(af0(1, kwds("y", 2.5)).as<int>(), std::invalid_argument);
+  EXPECT_THROW(af0(1, kwds("y", 4, "y", 2.5)).as<int>(), std::invalid_argument);
+}
+
 TEST(ArrFunc, Option)
 {
   struct callable {

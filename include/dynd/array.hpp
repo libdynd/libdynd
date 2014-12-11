@@ -349,6 +349,21 @@ namespace nd {
       return get_ndo()->m_data_pointer;
     }
 
+    char *get_data()
+    {
+      if (get_ndo()->m_flags & write_access_flag) {
+        return get_ndo()->m_data_pointer;
+      } else {
+        throw std::runtime_error(
+            "tried to write to a dynd array that is not writable");
+      }
+    }
+
+    const char *get_data() const
+    {
+      return get_ndo()->m_data_pointer;
+    }
+
     inline uint32_t get_access_flags() const
     {
       return get_ndo()->m_flags &
