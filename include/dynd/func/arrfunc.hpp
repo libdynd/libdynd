@@ -108,13 +108,16 @@ struct arrfunc_type_data {
    * char data[4 * 8 + ((sizeof(void *) == 4) ? 4 : 0)];
    * to ensure the total struct size is divisible by 64.
    */
-  char data[4 * 8 + ((sizeof(void *) == 4) ? 4 : 0)];
+  char data[4 * 8];
+
   /**
    * The function which instantiates a ckernel. See the documentation
    * for the function typedef for more details.
    */
   arrfunc_instantiate_t instantiate;
+
   arrfunc_resolve_option_vals_t resolve_option_vals;
+
   arrfunc_resolve_dst_type_t resolve_dst_type;
 
   /**
