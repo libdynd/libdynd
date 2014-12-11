@@ -17,6 +17,10 @@
 
 namespace dynd {
 
+namespace ndt {
+  ndt::type make_option(const ndt::type &value_tp);
+}
+
 struct arrfunc_type_data;
 
 /**
@@ -76,6 +80,12 @@ typedef int (*arrfunc_resolve_dst_type_t)(
     const ndt::type *src_tp, int throw_on_error, ndt::type &out_dst_tp,
     const nd::array &kwds);
 
+typedef void (*arrfunc_resolve_option_vals_t)(const arrfunc_type_data *self,
+                                              const arrfunc_type *af_tp,
+                                              intptr_t nsrc,
+                                              const ndt::type *src_tp,
+                                              nd::array &kwds);
+
 /**
  * This is a struct designed for interoperability at
  * the C ABI level. It contains enough information
@@ -98,13 +108,18 @@ struct arrfunc_type_data {
    * char data[4 * 8 + ((sizeof(void *) == 4) ? 4 : 0)];
    * to ensure the total struct size is divisible by 64.
    */
-  char data[4 * 8 + ((sizeof(void *) == 4) ? 4 : 0)];
+  char data[4 * 8];
+
   /**
    * The function which instantiates a ckernel. See the documentation
    * for the function typedef for more details.
    */
   arrfunc_instantiate_t instantiate;
+
+  arrfunc_resolve_option_vals_t resolve_option_vals;
+
   arrfunc_resolve_dst_type_t resolve_dst_type;
+
   /**
    * A function which deallocates the memory behind data_ptr after
    * freeing any additional resources it might contain.
@@ -156,34 +171,62 @@ struct arrfunc_type_data {
 };
 
 namespace nd {
-  inline nd::array forward_as_array(const nd::array &DYND_UNUSED(names),
-                                    const nd::array &DYND_UNUSED(types),
-                                    const std::tuple<> &DYND_UNUSED(vals),
-                                    const intptr_t *DYND_UNUSED(perm) = NULL)
+  inline array
+  make_arrfunc(ndt::type af_tp, arrfunc_instantiate_t instantiate,
+               arrfunc_resolve_option_vals_t resolve_option_vals = NULL)
   {
-    return nd::array();
+    array af = empty(af_tp);
+    arrfunc_type_data *out_af =
+        reinterpret_cast<arrfunc_type_data *>(af.get_readwrite_originptr());
+    out_af->instantiate = instantiate;
+    out_af->resolve_option_vals = resolve_option_vals;
+    af.flag_as_immutable();
+
+    return af;
+  }
+
+  template <typename T>
+  array make_arrfunc(ndt::type af_tp, const T &data,
+                     arrfunc_instantiate_t instantiate,
+                     arrfunc_resolve_option_vals_t resolve_option_vals = NULL)
+  {
+    array af = empty(af_tp);
+    arrfunc_type_data *out_af =
+        reinterpret_cast<arrfunc_type_data *>(af.get_readwrite_originptr());
+    new (out_af->get_data_as<T>()) T(data);
+    out_af->instantiate = instantiate;
+    out_af->resolve_option_vals = resolve_option_vals;
+    af.flag_as_immutable();
+
+    return af;
   }
 
   template <typename... A>
   nd::array forward_as_array(const nd::array &names, const nd::array &types,
                              const std::tuple<A...> &vals,
-                             const intptr_t *perm = NULL)
+                             const intptr_t *available = NULL,
+                             const intptr_t *missing = NULL)
   {
     typedef typename make_index_sequence<0, sizeof...(A)>::type I;
+
+    if (types.is_null() || (types.get_dim_size() == 0)) {
+      return nd::array();
+    }
 
     nd::array res = nd::empty_shell(ndt::make_struct(names, types));
     struct_type::fill_default_data_offsets(
         res.get_dim_size(),
         reinterpret_cast<const ndt::type *>(types.get_readonly_originptr()),
         reinterpret_cast<uintptr_t *>(res.get_arrmeta()));
-    nd::index_proxy<I>::template forward_as_array(
+    nd::index_proxy<I>::forward_as_array(
+        types.get_dim_size(),
         reinterpret_cast<const ndt::type *>(types.get_readonly_originptr()),
         res.get_arrmeta(),
         res.get_type().extended<base_struct_type>()->get_arrmeta_offsets_raw(),
         res.get_readwrite_originptr(),
         res.get_type().extended<base_struct_type>()->get_data_offsets(
             res.get_arrmeta()),
-        vals, perm);
+        vals, available, missing);
 
     return res;
   }
@@ -200,6 +243,13 @@ namespace nd {
       const char *get_name(intptr_t DYND_UNUSED(i)) const
       {
         throw std::runtime_error("");
+      }
+
+      std::vector<intptr_t> resolve_available_types(
+          const arrfunc_type *DYND_UNUSED(self_tp), ndt::type *DYND_UNUSED(tp),
+          std::map<nd::string, ndt::type> &DYND_UNUSED(typevars)) const
+      {
+        return std::vector<intptr_t>();
       }
 
       ndt::type get_type(intptr_t DYND_UNUSED(i)) const
@@ -259,6 +309,49 @@ namespace nd {
         }
       */
 
+      std::vector<intptr_t>
+      resolve_available_types(const arrfunc_type *self_tp,
+                              ndt::type *kwd_tp_data,
+                              std::map<nd::string, ndt::type> &typevars) const
+      {
+        std::vector<intptr_t> available;
+
+        for (size_t i = 0; i < sizeof...(T); i++) {
+          intptr_t j = self_tp->get_arg_index(get_name(i));
+          if (j == -1) {
+            std::stringstream ss;
+            ss << "arrfunc passed an unexpected keyword \"" << get_name(i)
+               << "\"";
+            throw std::invalid_argument(ss.str());
+          }
+
+          ndt::type &actual_tp = kwd_tp_data[j - self_tp->get_npos()];
+          if (!actual_tp.is_null()) {
+            std::stringstream ss;
+            ss << "arrfunc passed keyword \"" << get_name(i)
+               << "\" more than once";
+            throw std::invalid_argument(ss.str());
+          }
+          actual_tp = get_type(i);
+          available.push_back(j - self_tp->get_npos());
+
+          ndt::type expected_tp = self_tp->get_arg_type(j);
+          if (expected_tp.get_type_id() == option_type_id) {
+            expected_tp = expected_tp.p("value_type").as<ndt::type>();
+          }
+          if (!ndt::pattern_match(actual_tp.value_type(), expected_tp,
+                                  typevars)) {
+            std::stringstream ss;
+            ss << "keyword \"" << get_name(i) << "\" does not match, ";
+            ss << "arrfunc expected " << expected_tp << " but passed "
+               << actual_tp;
+            throw std::invalid_argument(ss.str());
+          }
+        }
+
+        return available;
+      }
+
       nd::array get_names() const
       {
         return nd::make_strided_string_array(const_cast<const char **>(m_names),
@@ -309,6 +402,9 @@ kwds(T &&... args)
 }
 
 namespace nd {
+  template <typename func_type, typename... T>
+  arrfunc make_apply_arrfunc(const func_type &func, T &&... names);
+
   /**
    * Holds a single instance of an arrfunc in an immutable nd::array,
    * providing some more direct convenient interface.
@@ -324,6 +420,12 @@ namespace nd {
       * has "arrfunc" type and is immutable.
       */
     arrfunc(const nd::array &rhs);
+
+    template <typename func_type, typename... T>
+    arrfunc(const func_type &func, T &&... names)
+        : m_value(make_apply_arrfunc(func, std::forward<T>(names)...))
+    {
+    }
 
     arrfunc &operator=(const arrfunc &rhs)
     {
@@ -352,68 +454,115 @@ namespace nd {
 
     void swap(nd::arrfunc &rhs) { m_value.swap(rhs.m_value); }
 
+    template <typename... T>
+    void set_as_option(arrfunc_resolve_option_vals_t resolve_option_vals,
+                       T &&... names)
+    {
+      intptr_t missing[sizeof...(T)] = {get_type()->get_arg_index(names)...};
+
+      nd::array tp = get_type()->get_arg_types().eval_copy();
+      for (size_t i = 0; i < sizeof...(T); ++i) {
+        tp(missing[i]).val_assign(
+            ndt::make_option(tp(missing[i]).template as<ndt::type>()));
+      }
+
+      ndt::type self_tp = ndt::make_funcproto(tp, get_type()->get_return_type(),
+                                              get_type()->get_arg_names());
+
+      array af = empty(self_tp);
+      arrfunc_type_data *self =
+          reinterpret_cast<arrfunc_type_data *>(af.get_readwrite_originptr());
+      memcpy(self->data, get()->data, sizeof(self->data));
+      self->instantiate = get()->instantiate;
+      self->resolve_option_vals = resolve_option_vals;
+      af.flag_as_immutable();
+
+      m_value = af;
+    }
+
+    std::vector<intptr_t> resolve_missing_types(
+        ndt::type *kwd_tp,
+        std::map<nd::string, ndt::type> &DYND_UNUSED(typevars)) const
+    {
+      std::vector<intptr_t> missing;
+
+      const arrfunc_type *self_tp = m_value.get_type().extended<arrfunc_type>();
+
+      const std::vector<intptr_t> &option = self_tp->get_option_arg_indices();
+      for (size_t i = 0; i < option.size(); ++i) {
+        intptr_t j = option[i];
+
+        ndt::type &actual_tp = kwd_tp[j - self_tp->get_npos()];
+        if (actual_tp.is_null()) {
+          actual_tp = self_tp->get_arg_type(j);
+          missing.push_back(j - self_tp->get_npos());
+        }
+      }
+
+      return missing;
+    }
+
     template <typename... K>
     ndt::type resolve(intptr_t nsrc, const ndt::type *src_tp,
                       const detail::kwds<K...> &kwds,
                       array &kwds_as_array) const
     {
-      const arrfunc_type_data *af = get();
-      const arrfunc_type *af_tp = m_value.get_type().extended<arrfunc_type>();
+      const arrfunc_type_data *self = get();
+      const arrfunc_type *self_tp = m_value.get_type().extended<arrfunc_type>();
 
-      if (af->resolve_dst_type != NULL) {
+      if (self->resolve_dst_type != NULL) {
         kwds_as_array = forward_as_array(
             kwds.get_names(), ndt::get_forward_types(kwds.get_vals()),
             kwds.get_vals());
 
         ndt::type dst_tp;
-        af->resolve_dst_type(af, af_tp, nsrc, src_tp, true, dst_tp, kwds_as_array);
-
+        self->resolve_dst_type(self, self_tp, nsrc, src_tp, true, dst_tp,
+                               kwds_as_array);
         return dst_tp;
       }
 
-      if (nsrc != af_tp->get_npos()) {
+      if (nsrc != self_tp->get_npos()) {
         std::stringstream ss;
-        ss << "arrfunc expected " << af_tp->get_npos()
+        ss << "arrfunc expected " << self_tp->get_npos()
            << " parameters, but received " << nsrc;
         throw std::invalid_argument(ss.str());
       }
-      const ndt::type *param_types = af_tp->get_arg_types_raw();
+      const ndt::type *param_types = self_tp->get_arg_types_raw();
       std::map<nd::string, ndt::type> typevars;
       for (intptr_t i = 0; i != nsrc; ++i) {
-        if (!ndt::pattern_match(src_tp[i].value_type(), param_types[i],
+        ndt::type expected_tp = param_types[i];
+        if (!ndt::pattern_match(src_tp[i].value_type(), expected_tp,
                                 typevars)) {
           std::stringstream ss;
           ss << "parameter " << (i + 1) << " to arrfunc does not match, ";
-          ss << "expected " << param_types[i] << ", received " << src_tp[i];
+          ss << "expected " << expected_tp << ", received " << src_tp[i];
           throw std::invalid_argument(ss.str());
         }
       }
 
-      nd::array kwd_tp2 = nd::empty(af_tp->get_nkwd(), ndt::make_type());
+      if (self_tp->get_nkwd() > 0) {
+        nd::array kwd_tp = nd::empty(self_tp->get_nkwd(), ndt::make_type());
+        std::vector<intptr_t> available = kwds.resolve_available_types(
+            self_tp, reinterpret_cast<ndt::type *>(kwd_tp.get_data()),
+            typevars);
+        std::vector<intptr_t> missing = resolve_missing_types(
+            reinterpret_cast<ndt::type *>(kwd_tp.get_data()), typevars);
 
-      ndt::type *kwd_tp =
-          reinterpret_cast<ndt::type *>(kwd_tp2.get_readwrite_originptr());
-      std::vector<intptr_t> kwd_perm(sizeof...(K));
-      for (intptr_t i = 0; i != sizeof...(K); i++) {
-        kwd_perm[i] = af_tp->get_arg_index(kwds.get_name(i));
-        ndt::type tp = kwds.get_type(i);
-        if (!ndt::pattern_match(tp.value_type(), param_types[kwd_perm[i]],
-                                typevars)) {
-          std::stringstream ss;
-          ss << "keyword parameter \"" << kwds.get_name(i)
-             << "\" to arrfunc does not match, ";
-          ss << "expected " << param_types[kwd_perm[i]] << ", received " << tp;
-          throw std::invalid_argument(ss.str());
+        // check that we have the exact number of available parameters
+
+        ndt::get_forward_types(kwd_tp, kwds.get_vals(),
+                               available.empty() ? NULL : available.data());
+        kwds_as_array =
+            forward_as_array(self_tp->get_arg_names(), kwd_tp, kwds.get_vals(),
+                             available.empty() ? NULL : available.data(),
+                             missing.empty() ? NULL : missing.data());
+
+        if (self->resolve_option_vals != NULL) {
+          self->resolve_option_vals(self, self_tp, nsrc, src_tp, kwds_as_array);
         }
-        kwd_tp[kwd_perm[i] - af_tp->get_npos()] = tp;
-        kwd_perm[i] -= af_tp->get_npos();
       }
 
-      ndt::get_forward_types(kwd_tp2, kwds.get_vals(), &kwd_perm[0]);
-      kwds_as_array = forward_as_array(af_tp->get_arg_names(), kwd_tp2,
-                                       kwds.get_vals(), &kwd_perm[0]);
-
-      return ndt::substitute(af_tp->get_return_type(), typevars, true);
+      return ndt::substitute(self_tp->get_return_type(), typevars, true);
     }
 
     /** Implements the general call operator */
@@ -452,7 +601,8 @@ namespace nd {
       // Generate and evaluate the ckernel
       ckernel_builder<kernel_request_host> ckb;
       af->instantiate(af, af_tp, &ckb, 0, dst_tp, res.get_arrmeta(), &arg_tp[0],
-                      &src_arrmeta[0], kernel_request_single, ectx, kwds_as_array);
+                      &src_arrmeta[0], kernel_request_single, ectx,
+                      kwds_as_array);
       expr_single_t fn = ckb.get()->get_function<expr_single_t>();
       fn(res.get_readwrite_originptr(), src_data.empty() ? NULL : &src_data[0],
          ckb.get());
@@ -608,33 +758,6 @@ namespace nd {
       }
     }
   };
-
-  inline arrfunc make_arrfunc(ndt::type af_tp,
-                              arrfunc_instantiate_t instantiate)
-  {
-    array af = empty(af_tp);
-    arrfunc_type_data *out_af =
-        reinterpret_cast<arrfunc_type_data *>(af.get_readwrite_originptr());
-    out_af->instantiate = instantiate;
-    af.flag_as_immutable();
-
-    return af;
-  }
-
-  template <typename T>
-  arrfunc make_arrfunc(ndt::type af_tp, arrfunc_instantiate_t instantiate,
-                       const T &data)
-  {
-    array af = empty(af_tp);
-    arrfunc_type_data *out_af =
-        reinterpret_cast<arrfunc_type_data *>(af.get_readwrite_originptr());
-    out_af->instantiate = instantiate;
-    *out_af->get_data_as<T>() = data;
-    af.flag_as_immutable();
-
-    return af;
-  }
-
 } // namespace nd
 
 /**
@@ -660,3 +783,6 @@ nd::arrfunc make_arrfunc_from_property(const ndt::type &tp,
                                        const std::string &propname);
 
 } // namespace dynd
+
+#include <dynd/func/apply_arrfunc.hpp>
+#include <dynd/types/option_type.hpp>

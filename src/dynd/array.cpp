@@ -1046,7 +1046,6 @@ bool nd::array::is_missing() const
             &eval::default_eval_context);
     }
 
-    std::cout << "no opt type" << std::endl;
     return false;
 }
 

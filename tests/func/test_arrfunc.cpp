@@ -14,6 +14,7 @@
 #include <dynd/types/arrfunc_old_type.hpp>
 #include <dynd/types/date_type.hpp>
 #include <dynd/func/arrfunc.hpp>
+#include <dynd/func/apply_arrfunc.hpp>
 #include <dynd/kernels/assignment_kernels.hpp>
 #include <dynd/kernels/expr_kernel_generator.hpp>
 #include <dynd/func/lift_arrfunc.hpp>
@@ -66,6 +67,49 @@ TEST(ArrFunc, Assignment)
   EXPECT_EQ(123, ints_out[0]);
   EXPECT_EQ(4567, ints_out[1]);
   EXPECT_EQ(891029, ints_out[2]);
+}
+
+TEST(ArrFunc, Construction)
+{
+  nd::arrfunc af0([](int x, int y) { return x + y; });
+  EXPECT_EQ(5, af0(1, 4).as<int>());
+
+  nd::arrfunc af1([](int x, int y) { return x + y; }, "y");
+  EXPECT_EQ(5, af1(1, kwds("y", 4)).as<int>());
+}
+
+TEST(ArrFunc, KeywordParsing)
+{
+  nd::arrfunc af0([](int x, int y) { return x + y; }, "y");
+  EXPECT_EQ(5, af0(1, kwds("y", 4)).as<int>());
+  EXPECT_THROW(af0(1, kwds("z", 4)).as<int>(), std::invalid_argument);
+  EXPECT_THROW(af0(1, kwds("Y", 4)).as<int>(), std::invalid_argument);
+  EXPECT_THROW(af0(1, kwds("y", 2.5)).as<int>(), std::invalid_argument);
+  EXPECT_THROW(af0(1, kwds("y", 4, "y", 2.5)).as<int>(), std::invalid_argument);
+}
+
+TEST(ArrFunc, Option)
+{
+  struct callable {
+    int operator()(int x, int y) { return x + y; }
+
+    static void resolve_option_vals(const arrfunc_type_data *DYND_UNUSED(self),
+                                     const arrfunc_type *DYND_UNUSED(self_tp),
+                                     intptr_t DYND_UNUSED(nsrc),
+                                     const ndt::type *DYND_UNUSED(src_tp),
+                                     nd::array &kwds)
+    {
+      if (kwds.p("x").is_missing()) {
+        kwds.p("x").vals() = 4;
+      }
+    }
+  };
+
+  nd::arrfunc af = nd::make_apply_arrfunc(callable(), "x");
+  EXPECT_EQ(5, af(1, kwds("x", 4)).as<int>());
+
+  af.set_as_option(&callable::resolve_option_vals, "x");
+  EXPECT_EQ(5, af(1).as<int>());
 }
 
 TEST(ArrFunc, Assignment_CallInterface)

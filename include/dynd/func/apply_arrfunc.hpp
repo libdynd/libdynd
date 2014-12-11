@@ -42,7 +42,7 @@ namespace nd {
                                        sizeof...(A) - sizeof...(T)> ck_type;
 
     return make_arrfunc(ndt::make_funcproto<kernreq, R(A...)>(names...),
-                        &ck_type::instantiate, std::forward<R (*)(A...)>(func));
+                        std::forward<R (*)(A...)>(func), &ck_type::instantiate);
   }
 
   template <typename R, typename... A, typename... T>
@@ -67,7 +67,7 @@ namespace nd {
     return make_arrfunc(
         ndt::make_funcproto<typename funcproto_of<func_type>::type>(
             std::forward<T>(names)...),
-        &ck_type::instantiate, func);
+        func, &ck_type::instantiate);
   }
 
   /**

@@ -18,8 +18,7 @@ static bool is_simple_identifier_name(const char *begin, const char *end)
 {
   if (begin == end) {
     return false;
-  }
-  else {
+  } else {
     char c = *begin++;
     if (!(('a' <= c && c <= 'z') || ('A' <= c && c <= 'Z') || c == '_')) {
       return false;
@@ -35,26 +34,35 @@ static bool is_simple_identifier_name(const char *begin, const char *end)
   }
 }
 
-
-arrfunc_type::arrfunc_type(const ndt::type &return_type, const nd::array &arg_types, const nd::array &arg_names)
+arrfunc_type::arrfunc_type(const ndt::type &return_type,
+                           const nd::array &arg_types,
+                           const nd::array &arg_names)
     : base_type(arrfunc_type_id, function_kind, sizeof(arrfunc_type_data),
                 scalar_align_of<uint64_t>::value,
                 type_flag_scalar | type_flag_zeroinit | type_flag_destructor, 0,
-                0, 0), m_return_type(return_type), m_arg_types(arg_types), m_arg_names(arg_names)
+                0, 0),
+      m_return_type(return_type), m_arg_types(arg_types), m_arg_names(arg_names)
 {
-    if (!nd::ensure_immutable_contig<ndt::type>(m_arg_types)) {
-        stringstream ss;
-        ss << "dynd funcproto arg types requires an array of types, got an "
-              "array with type " << m_arg_types.get_type();
-        throw invalid_argument(ss.str());
-    }
+  if (!nd::ensure_immutable_contig<ndt::type>(m_arg_types)) {
+    stringstream ss;
+    ss << "dynd funcproto arg types requires an array of types, got an "
+          "array with type " << m_arg_types.get_type();
+    throw invalid_argument(ss.str());
+  }
 
-    if (!m_arg_names.is_null() && !nd::ensure_immutable_contig<nd::string>(m_arg_names)) {
-        stringstream ss;
-        ss << "dynd funcproto arg names requires an array of strings, got an "
-              "array with type " << m_arg_names.get_type();
-        throw invalid_argument(ss.str());
+  if (!m_arg_names.is_null() &&
+      !nd::ensure_immutable_contig<nd::string>(m_arg_names)) {
+    stringstream ss;
+    ss << "dynd funcproto arg names requires an array of strings, got an "
+          "array with type " << m_arg_names.get_type();
+    throw invalid_argument(ss.str());
+  }
+
+  for (intptr_t i = 0; i < get_narg(); ++i) {
+    if (m_arg_types(i).as<ndt::type>().get_type_id() == option_type_id) {
+      m_opt_indices.push_back(i);
     }
+  }
 
   // Note that we don't base the flags of this type on that of its arguments
   // and return types, because it is something the can be instantiated, even
@@ -75,36 +83,36 @@ void arrfunc_type::print_data(std::ostream &o, const char *DYND_UNUSED(arrmeta),
   print_arrfunc(o, this, af);
 }
 
-void arrfunc_type::print_type(std::ostream& o) const
+void arrfunc_type::print_type(std::ostream &o) const
 {
-    const ndt::type *arg_types = get_arg_types_raw();
-    intptr_t npos = get_npos();
-    intptr_t narg = get_narg();
+  const ndt::type *arg_types = get_arg_types_raw();
+  intptr_t npos = get_npos();
+  intptr_t narg = get_narg();
 
-    o << "(";
+  o << "(";
 
-    for (intptr_t i = 0; i < npos; ++i) {
-        if (i > 0) {
-            o << ", ";
-        }
-
-        o << arg_types[i];
-    }
-    for (intptr_t i = npos; i < narg; ++i) {
-        if (i > 0) {
-            o << ", ";
-        }
-
-        const string_type_data& an = get_arg_name_raw(i - npos);
-        if (is_simple_identifier_name(an.begin, an.end)) {
-            o.write(an.begin, an.end - an.begin);
-        } else {
-            print_escaped_utf8_string(o, an.begin, an.end, true);
-        }
-        o << ": " << arg_types[i];
+  for (intptr_t i = 0; i < npos; ++i) {
+    if (i > 0) {
+      o << ", ";
     }
 
-    o << ") -> " << m_return_type;
+    o << arg_types[i];
+  }
+  for (intptr_t i = npos; i < narg; ++i) {
+    if (i > 0) {
+      o << ", ";
+    }
+
+    const string_type_data &an = get_arg_name_raw(i - npos);
+    if (is_simple_identifier_name(an.begin, an.end)) {
+      o.write(an.begin, an.end - an.begin);
+    } else {
+      print_escaped_utf8_string(o, an.begin, an.end, true);
+    }
+    o << ": " << arg_types[i];
+  }
+
+  o << ") -> " << m_return_type;
 }
 
 void arrfunc_type::transform_child_types(type_transform_fn_t transform_fn,
@@ -126,8 +134,7 @@ void arrfunc_type::transform_child_types(type_transform_fn_t transform_fn,
   if (was_transformed) {
     out_transformed_tp = ndt::make_funcproto(tmp_arg_types, tmp_return_type);
     out_was_transformed = true;
-  }
-  else {
+  } else {
     out_transformed_tp = ndt::type(this, true);
   }
 }
@@ -172,8 +179,7 @@ bool arrfunc_type::is_lossless_assignment(const ndt::type &dst_tp,
   if (dst_tp.extended() == this) {
     if (src_tp.extended() == this) {
       return true;
-    }
-    else if (src_tp.get_type_id() == arrfunc_type_id) {
+    } else if (src_tp.get_type_id() == arrfunc_type_id) {
       return *dst_tp.extended() == *src_tp.extended();
     }
   }
@@ -182,27 +188,27 @@ bool arrfunc_type::is_lossless_assignment(const ndt::type &dst_tp,
 }
 
 intptr_t arrfunc_type::get_arg_index(const char *arg_name_begin,
-                                       const char *arg_name_end) const
+                                     const char *arg_name_end) const
 {
-    size_t size = arg_name_end - arg_name_begin;
-    if (size > 0) {
-        char firstchar = *arg_name_begin;
-        const char *fn_ptr = m_arg_names.get_readonly_originptr();
-        intptr_t fn_stride =
-            reinterpret_cast<const fixed_dim_type_arrmeta *>(
-                m_arg_names.get_arrmeta())->stride;
-        for (intptr_t i = 0; i != get_nkwd(); ++i, fn_ptr += fn_stride) {
-            const string_type_data *fn = reinterpret_cast<const string_type_data *>(fn_ptr);
-            const char *begin = fn->begin, *end = fn->end;
-            if ((size_t)(end - begin) == size && *begin == firstchar) {
-                if (memcmp(fn->begin, arg_name_begin, size) == 0) {
-                    return i + get_npos();
-                }
-            }
+  size_t size = arg_name_end - arg_name_begin;
+  if (size > 0) {
+    char firstchar = *arg_name_begin;
+    const char *fn_ptr = m_arg_names.get_readonly_originptr();
+    intptr_t fn_stride = reinterpret_cast<const fixed_dim_type_arrmeta *>(
+                             m_arg_names.get_arrmeta())->stride;
+    for (intptr_t i = 0; i != get_nkwd(); ++i, fn_ptr += fn_stride) {
+      const string_type_data *fn =
+          reinterpret_cast<const string_type_data *>(fn_ptr);
+      const char *begin = fn->begin, *end = fn->end;
+      if ((size_t)(end - begin) == size && *begin == firstchar) {
+        if (memcmp(fn->begin, arg_name_begin, size) == 0) {
+          return i + get_npos();
         }
+      }
     }
+  }
 
-    return -1;
+  return -1;
 }
 
 /*
@@ -210,7 +216,8 @@ size_t arrfunc_type::make_assignment_kernel(
                 void *DYND_UNUSED(ckb), size_t DYND_UNUSED(ckb_offset),
                 const ndt::type& dst_tp, const char *DYND_UNUSED(dst_arrmeta),
                 const ndt::type& src_tp, const char *DYND_UNUSED(src_arrmeta),
-                kernel_request_t DYND_UNUSED(kernreq), assign_error_mode DYND_UNUSED(errmode),
+                kernel_request_t DYND_UNUSED(kernreq), assign_error_mode
+DYND_UNUSED(errmode),
                 const eval::eval_context *DYND_UNUSED(ectx)) const
 {
     throw type_error("Cannot store data of funcproto type");
@@ -231,14 +238,13 @@ bool arrfunc_type::operator==(const base_type &rhs) const
 {
   if (this == &rhs) {
     return true;
-  }
-  else if (rhs.get_type_id() != arrfunc_type_id) {
+  } else if (rhs.get_type_id() != arrfunc_type_id) {
     return false;
-  }
-  else {
+  } else {
     const arrfunc_type *fpt = static_cast<const arrfunc_type *>(&rhs);
-    return m_return_type == fpt->m_return_type && m_arg_types.equals_exact(fpt->m_arg_types);
-//            && m_arg_names.equals_exact(fpt->m_arg_names);
+    return m_return_type == fpt->m_return_type &&
+           m_arg_types.equals_exact(fpt->m_arg_types);
+    //            && m_arg_names.equals_exact(fpt->m_arg_names);
   }
 }
 
@@ -314,14 +320,14 @@ static intptr_t make_arrfunc_to_string_assignment_kernel(
 }
 
 intptr_t arrfunc_type::make_assignment_kernel(
-    const arrfunc_type_data *DYND_UNUSED(self), const arrfunc_type *DYND_UNUSED(af_tp),
-    void *ckb, intptr_t ckb_offset, const ndt::type &dst_tp, const char *dst_arrmeta,
-    const ndt::type &src_tp, const char *DYND_UNUSED(src_arrmeta), kernel_request_t kernreq,
+    const arrfunc_type_data *DYND_UNUSED(self),
+    const arrfunc_type *DYND_UNUSED(af_tp), void *ckb, intptr_t ckb_offset,
+    const ndt::type &dst_tp, const char *dst_arrmeta, const ndt::type &src_tp,
+    const char *DYND_UNUSED(src_arrmeta), kernel_request_t kernreq,
     const eval::eval_context *ectx, const nd::array &DYND_UNUSED(kwds)) const
 {
   if (this == dst_tp.extended()) {
-  }
-  else {
+  } else {
     if (dst_tp.get_kind() == string_kind) {
       // Assignment to strings
       return make_arrfunc_to_string_assignment_kernel(
@@ -399,8 +405,7 @@ static array_preamble *function___call__(const array_preamble *params,
     // Stop at the first NULL arg (means it was default)
     if (par_arrs[nargs].get_ndo() == NULL) {
       break;
-    }
-    else {
+    } else {
       args[nargs - 1] = par_arrs[nargs];
     }
   }
