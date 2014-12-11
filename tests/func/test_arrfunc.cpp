@@ -93,7 +93,7 @@ TEST(ArrFunc, Option)
   struct callable {
     int operator()(int x, int y) { return x + y; }
 
-    static void resolve_option_types(const arrfunc_type_data *DYND_UNUSED(self),
+    static void resolve_option_vals(const arrfunc_type_data *DYND_UNUSED(self),
                                      const arrfunc_type *DYND_UNUSED(self_tp),
                                      intptr_t DYND_UNUSED(nsrc),
                                      const ndt::type *DYND_UNUSED(src_tp),
@@ -108,7 +108,7 @@ TEST(ArrFunc, Option)
   nd::arrfunc af = nd::make_apply_arrfunc(callable(), "x");
   EXPECT_EQ(5, af(1, kwds("x", 4)).as<int>());
 
-  af.set_as_option(&callable::resolve_option_types, "x");
+  af.set_as_option(&callable::resolve_option_vals, "x");
   EXPECT_EQ(5, af(1).as<int>());
 }
 
