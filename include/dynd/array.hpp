@@ -376,12 +376,24 @@ namespace nd {
     }
 
     /** Returns true if the object is a scalar */
-    inline bool is_scalar() const { return get_type().is_scalar(); }
+    inline bool is_scalar() const { 
+      std::cout << "array::is_scalar" << std::endl;
+      std::cout << "array::is_scalar, get_type() = " << get_type() << std::endl;
+
+
+return get_type().is_scalar(); }
 
     /** The type */
-    inline const ndt::type &get_type() const
+    const ndt::type &get_type() const
     {
-      return *reinterpret_cast<const ndt::type *>(&get_ndo()->m_type);
+      std::cout << "array::get_type (start)" << std::endl;
+
+      const ndt::type &tp = *reinterpret_cast<const ndt::type *>(&get_ndo()->m_type);
+
+      std::cout << tp << std::endl;
+      std::cout << "array::get_type (stop)" << std::endl;
+
+      return tp;
     }
 
     inline intptr_t get_ndim() const
