@@ -83,11 +83,6 @@ intptr_t cuda_device_type::make_assignment_kernel(
     const ndt::type &src_tp, const char *src_arrmeta, kernel_request_t kernreq,
     const eval::eval_context *ectx, const nd::array &kwds) const
 {
-  //    std::cout << "(cuda_device_type::make_assignment_kernel) dst_tp = " <<
-  //  dst_tp << std::endl;
-  // std::cout << "(cuda_device_type::make_assignment_kernel) src_tp = " <<
-  // src_tp << std::endl;
-
   /*
     bool dst_cuda_device, src_cuda_device;
     if (this == dst_tp.extended()) {

@@ -775,16 +775,12 @@ nd::array nd::array::storage() const
 
 nd::array nd::array::at_array(intptr_t nindices, const irange *indices, bool collapse_leading) const
 {
-    std::cout << "array::at_array" << std::endl;
-    std::cout << "array::at_array, is_scalar() = " << is_scalar() << std::endl;
-
     if (is_scalar()) {
         if (nindices != 0) {
             throw too_many_indices(get_type(), nindices, 0);
         }
         return *this;
     } else {
-        std::cout << "array::at_array, (not scalar)" << std::endl;
         ndt::type this_dt(get_ndo()->m_type, true);
         ndt::type dt = get_ndo()->m_type->apply_linear_index(nindices, indices,
                         0, this_dt, collapse_leading);
@@ -2277,6 +2273,4 @@ void nd::forward_as_array(const ndt::type &tp, char *arrmeta, char *data,
     *reinterpret_cast<char **>(data) =
         const_cast<char *>(val.get_readonly_originptr());
   }
-
-  std::cout << "data = " << reinterpret_cast<intptr_t>(*reinterpret_cast<char **>(data)) << std::endl;
 }

@@ -313,19 +313,6 @@ TYPED_TEST_P(Apply, CallableWithKeywords)
                   af(kwds("x", TestFixture::To(5), "y", TestFixture::To(3))));
   }
 
-
-  nd::array a = nd::empty(ndt::make_cuda_device(ndt::make_type<int>()));
-  std::cout << a << std::endl;
-
-//  std::cout << a.f("address_of") << std::endl;
-
-//  ndt::type tp = ndt::make_pointer(ndt::make_cuda_device(ndt::make_type<int>()));
-  //std::cout << tp << std::endl;
-
-//  nd::array a = nd::empty(tp);
-  //std::cout << "made array" << std::endl;
-
-
 #ifdef __CUDACC__
   if (TestFixture::KernelRequest == kernel_request_cuda_device) {
     af = nd::apply::make<kernel_request_cuda_device>(

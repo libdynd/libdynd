@@ -117,8 +117,6 @@ ndt::type pointer_type::apply_linear_index(intptr_t nindices,
                                            const ndt::type &root_tp,
                                            bool leading_dimension) const
 {
-  std::cout << "pointer_type::apply_linear_index" << std::endl;
-
   if (nindices == 0) {
     return ndt::type(this, true);
   } else {
@@ -140,8 +138,6 @@ intptr_t pointer_type::apply_linear_index(
     char **DYND_UNUSED(inout_data),
     memory_block_data **DYND_UNUSED(inout_dataref)) const
 {
-  std::cout << "pointer_type::apply_linear_index" << std::endl;
-
   const pointer_type_arrmeta *md =
       reinterpret_cast<const pointer_type_arrmeta *>(arrmeta);
   pointer_type_arrmeta *out_md =
@@ -164,8 +160,6 @@ intptr_t pointer_type::apply_linear_index(
 ndt::type pointer_type::at_single(intptr_t i0, const char **inout_arrmeta,
                                   const char **inout_data) const
 {
-  std::cout << "pointer_type::at_single" << std::endl;
-
   // If arrmeta/data is provided, follow the pointer and call the target
   // type's at_single
   if (inout_arrmeta) {

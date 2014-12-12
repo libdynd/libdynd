@@ -224,7 +224,6 @@ public:
      * but the simplicity seems to probably be worth it.
      */
     inline bool is_scalar() const {
-        std::cout << "base_type::is_scalar" << std::endl;
         return (m_members.flags & type_flag_scalar) != 0;
     }
 

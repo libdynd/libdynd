@@ -359,10 +359,7 @@ namespace nd {
       }
     }
 
-    const char *get_data() const
-    {
-      return get_ndo()->m_data_pointer;
-    }
+    const char *get_data() const { return get_ndo()->m_data_pointer; }
 
     inline uint32_t get_access_flags() const
     {
@@ -376,24 +373,12 @@ namespace nd {
     }
 
     /** Returns true if the object is a scalar */
-    inline bool is_scalar() const { 
-      std::cout << "array::is_scalar" << std::endl;
-      std::cout << "array::is_scalar, get_type() = " << get_type() << std::endl;
-
-
-return get_type().is_scalar(); }
+    inline bool is_scalar() const { return get_type().is_scalar(); }
 
     /** The type */
     const ndt::type &get_type() const
     {
-      std::cout << "array::get_type (start)" << std::endl;
-
-      const ndt::type &tp = *reinterpret_cast<const ndt::type *>(&get_ndo()->m_type);
-
-      std::cout << tp << std::endl;
-      std::cout << "array::get_type (stop)" << std::endl;
-
-      return tp;
+      return *reinterpret_cast<const ndt::type *>(&get_ndo()->m_type);
     }
 
     inline intptr_t get_ndim() const
@@ -2049,16 +2034,10 @@ return get_type().is_scalar(); }
                                     data + data_offsets[I]...,
                                     std::get<I>(vals)...);
     } else {
-    for (size_t i = 0; i < sizeof...(I); ++i) {
-      std::cout << perm[i] << std::endl;
-    }
-
       index_proxy<typename zip<index_sequence<I...>, J, K, L>::type>::
           template forward_as_array(
               tp[perm[I]]..., arrmeta + arrmeta_offsets[perm[I]]...,
               data + data_offsets[perm[I]]..., std::get<I>(vals)...);
-
-      std::cout << "tp[0] = " << tp[0] << std::endl;
     }
 
     for (size_t i = 0; i < (ntp - sizeof...(T)); ++i) {
