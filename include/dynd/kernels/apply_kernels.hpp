@@ -165,6 +165,11 @@ namespace kernels {
             typename J = typename make_index_sequence<0, K::size>::type>
   struct kwds;
 
+  template <>
+  struct kwds<type_sequence<>, index_sequence<>> {
+    kwds(const nd::array &DYND_UNUSED(kwds)) {}
+  };
+
   template <typename... K, size_t... J>
   struct kwds<type_sequence<K...>, index_sequence<J...>> : kwd<K, J>... {
     kwds(const nd::array &kwds) : kwd<K, J>(kwds.at(J))... {}
@@ -174,6 +179,12 @@ namespace kernels {
   using kwds_for =
       kwds<typename from<Nsrc, typename args_of<typename funcproto_of<
                                    func_type>::type>::type>::type>;
+
+  template <typename func_type, int Nsrc>
+  struct kwds_for_ex {
+    typedef kwds<typename from<Nsrc, typename args_of<typename funcproto_of<
+                                         func_type>::type>::type>::type> type;
+  };
 
   template <kernel_request_t kernreq, typename func_type, func_type func,
             int Nsrc>
@@ -335,6 +346,7 @@ namespace kernels {
       typedef cuda_parallel_ck<arity_of<func_type>::value> self_type;
       self_type *self = self_type::create(ckb, kernreq, ckb_offset, 1, 1);
       ckb = &self->ckb;
+      kernreq |= kernel_request_cuda_device;
       ckb_offset = 0;
     }
 

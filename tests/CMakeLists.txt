@@ -123,8 +123,8 @@ if (DYND_CUDA)
         func/test_lift_arrfunc.cpp
         )
     list(APPEND tests_SRC
-#        func/test_apply.cu
-        func/test_lift_arrfunc.cu
+        func/test_apply.cu
+#        func/test_lift_arrfunc.cu
         )
 endif()
 

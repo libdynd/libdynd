@@ -200,8 +200,8 @@ namespace nd {
   template <typename... A>
   nd::array forward_as_array(const nd::array &names, const nd::array &types,
                              const std::tuple<A...> &vals,
-                             const intptr_t *available = NULL,
-                             const intptr_t *missing = NULL)
+                             const intptr_t *available,
+                             const intptr_t *missing)
   {
     typedef typename make_index_sequence<0, sizeof...(A)>::type I;
 
@@ -504,7 +504,7 @@ namespace nd {
       if (self->resolve_dst_type != NULL) {
         kwds_as_array = forward_as_array(
             kwds.get_names(), ndt::get_forward_types(kwds.get_vals()),
-            kwds.get_vals());
+            kwds.get_vals(), NULL, NULL);
 
         ndt::type dst_tp;
         self->resolve_dst_type(self, self_tp, nsrc, src_tp, true, dst_tp,
@@ -541,12 +541,17 @@ namespace nd {
 
         // check that we have the exact number of available parameters
 
+        std::cout << "(before forward) " << kwd_tp << std::endl;
         ndt::get_forward_types(kwd_tp, kwds.get_vals(),
                                available.empty() ? NULL : available.data());
+        std::cout << "(after forward) " << kwd_tp << std::endl;
+
         kwds_as_array =
             forward_as_array(self_tp->get_arg_names(), kwd_tp, kwds.get_vals(),
                              available.empty() ? NULL : available.data(),
                              missing.empty() ? NULL : missing.data());
+        std::cout << "kwds_as_array.get_type() = " << kwds_as_array.get_type() << std::endl;
+        std::cout << kwds_as_array << std::endl;
 
         if (self->resolve_option_values != NULL) {
           self->resolve_option_values(self, self_tp, nsrc, src_tp,
@@ -554,6 +559,7 @@ namespace nd {
         }
       }
 
+      std::cout << "about to substitute" << std::endl;
       return ndt::substitute(self_tp->get_return_type(), typevars, true);
     }
 
@@ -586,15 +592,24 @@ namespace nd {
       ndt::type dst_tp =
           resolve(af_tp->get_npos(), af_tp->get_npos() ? &arg_tp[0] : NULL,
                   kwds, kwds_as_array);
+      std::cout << "printing kwds_as_array" << std::endl;
+      std::cout << kwds_as_array << std::endl;
+      std::cout << "printed kwds_as_array" << std::endl;
+
+      std::cout << "printing kwds_as_array(0)" << std::endl;
+      std::cout << kwds_as_array(0) << std::endl;
+      std::cout << "printed kwds_as_array(0)" << std::endl;
 
       // Construct the destination array
       nd::array res = nd::empty(dst_tp);
+      std::cout << "created res" << std::endl;
 
       // Generate and evaluate the ckernel
       ckernel_builder<kernel_request_host> ckb;
       af->instantiate(af, af_tp, &ckb, 0, dst_tp, res.get_arrmeta(), &arg_tp[0],
                       &src_arrmeta[0], kernel_request_single, ectx,
                       kwds_as_array);
+      std::cout << "instantiated" << std::endl;
       expr_single_t fn = ckb.get()->get_function<expr_single_t>();
       fn(res.get_readwrite_originptr(), src_data.empty() ? NULL : &src_data[0],
          ckb.get());

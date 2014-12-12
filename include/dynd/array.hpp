@@ -2037,10 +2037,16 @@ namespace nd {
                                     data + data_offsets[I]...,
                                     std::get<I>(vals)...);
     } else {
+    for (size_t i = 0; i < sizeof...(I); ++i) {
+      std::cout << perm[i] << std::endl;
+    }
+
       index_proxy<typename zip<index_sequence<I...>, J, K, L>::type>::
           template forward_as_array(
               tp[perm[I]]..., arrmeta + arrmeta_offsets[perm[I]]...,
               data + data_offsets[perm[I]]..., std::get<I>(vals)...);
+
+      std::cout << "tp[0] = " << tp[0] << std::endl;
     }
 
     for (size_t i = 0; i < (ntp - sizeof...(T)); ++i) {

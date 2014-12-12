@@ -1732,9 +1732,6 @@ std::ostream& nd::operator<<(std::ostream& o, const array& rhs)
     if (!rhs.is_null()) {
         o << "array(";
         array v = rhs.eval();
-        if (!v.get_ndo()->is_builtin_type() && v.get_ndo()->m_type->get_flags() & type_flag_not_host_readable) {
-          v = v.to_host();
-        }
         if (v.get_ndo()->is_builtin_type()) {
           print_builtin_scalar(v.get_ndo()->get_builtin_type_id(), o,
                                v.get_ndo()->m_data_pointer);
@@ -2256,6 +2253,7 @@ nd::array nd::combine_into_tuple(size_t field_count, const array *field_values)
 void nd::forward_as_array(const ndt::type &tp, char *arrmeta, char *data,
                           const nd::array &val)
 {
+
   if (tp.is_builtin()) {
     memcpy(data, val.get_readonly_originptr(), tp.get_data_size());
   } else {
@@ -2275,4 +2273,6 @@ void nd::forward_as_array(const ndt::type &tp, char *arrmeta, char *data,
     *reinterpret_cast<char **>(data) =
         const_cast<char *>(val.get_readonly_originptr());
   }
+
+  std::cout << "data = " << reinterpret_cast<intptr_t>(*reinterpret_cast<char **>(data)) << std::endl;
 }
