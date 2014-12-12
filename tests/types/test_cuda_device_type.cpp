@@ -43,17 +43,6 @@ TEST(CUDADeviceType, Simple)
   EXPECT_THROW(ndt::make_cuda_device(ndt::make_pointer<char>()), runtime_error);
 }
 
-/*
-
-  ndt::type p = ndt::make_pointer(d);
-
-  nd::array a = nd::empty(p);
-  std::cout << a.is_builtin() << std::endl;
-
-  std::exit(-1);
-
-*/
-
 TEST(CUDADeviceType, BuiltIn)
 {
   ndt::type d = ndt::make_cuda_device(ndt::make_type<float>());

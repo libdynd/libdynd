@@ -320,7 +320,6 @@ TYPED_TEST_P(Apply, CallableWithKeywords)
     EXPECT_ARR_EQ(TestFixture::To(58.25),
                   af(TestFixture::To(3.25), kwds("y", TestFixture::To(20))));
 
-/*
     af = nd::apply::make<kernel_request_cuda_device>(
         get_func1<kernel_request_cuda_device>(), "x", "y");
     EXPECT_ARR_EQ(TestFixture::To(58.25), af(kwds("x", TestFixture::To(3.25),
@@ -331,6 +330,7 @@ TYPED_TEST_P(Apply, CallableWithKeywords)
     EXPECT_ARR_EQ(TestFixture::To(58.25),
                   af(TestFixture::To(3.25), kwds("y", TestFixture::To(20))));
 
+/*
     af = nd::apply::make<kernel_request_cuda_device>(
         func1_as_callable<kernel_request_cuda_device>(), "x", "y");
     EXPECT_ARR_EQ(TestFixture::To(58.25), af(kwds("x", TestFixture::To(3.25),

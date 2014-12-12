@@ -556,6 +556,9 @@ namespace nd {
                     << std::endl;
           std::cout << kwds_as_array << std::endl;
           std::cout << kwds_as_array(0) << std::endl;
+          try {
+            std::cout << kwds_as_array(1) << std::endl;
+          } catch (...) {}
         }
 
         if (self->resolve_option_values != NULL) {
