@@ -71,7 +71,7 @@ static nd::arrfunc make_copy_arrfunc_instance()
   nd::array af = nd::empty(ndt::type("(A... * S) -> B... * T"));
   arrfunc_type_data *out_af =
       reinterpret_cast<arrfunc_type_data *>(af.get_readwrite_originptr());
-  out_af->free_func = NULL;
+  out_af->free = NULL;
   out_af->resolve_dst_type = &resolve_dst_copy_type;
   out_af->instantiate = &instantiate_copy;
   af.flag_as_immutable();

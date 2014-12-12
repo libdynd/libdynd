@@ -155,7 +155,7 @@ nd::arrfunc dynd::make_chain_arrfunc(const nd::arrfunc &first,
       first.get_type()->get_arg_types(), second.get_type()->get_return_type()));
   arrfunc_type_data *out_af =
       reinterpret_cast<arrfunc_type_data *>(af.get_readwrite_originptr());
-  out_af->free_func = &free_chain_arrfunc;
+  out_af->free = &free_chain_arrfunc;
   if (buf_tp.get_type_id() == uninitialized_type_id) {
     // out_af->resolve_dst_type = &resolve_chain_dst_type;
     // out_af->instantiate = &instantiate_chain_resolve;

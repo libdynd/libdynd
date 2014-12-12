@@ -192,7 +192,7 @@ struct callable_to_lift {
 TEST(Elwise, BinaryExpr)
 {
   nd::arrfunc af =
-      lift_arrfunc(nd::make_apply_arrfunc<kernel_request_host, callable_to_lift>());
+      lift_arrfunc(nd::apply::make<kernel_request_host, callable_to_lift>());
   nd::array a = parse_json("3 * int", "[0, 1, 2]");
   nd::array b = parse_json("3 * int", "[3, 4, 5]");
   nd::array c = parse_json("3 * int", "[3, 5, 7]");

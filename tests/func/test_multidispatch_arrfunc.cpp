@@ -31,26 +31,26 @@ double manip1(double x, double y) { return x - y;};
 
 TEST(MultiDispatchArrfunc, Ambiguous) {
   vector<nd::arrfunc> funcs;
-  funcs.push_back(nd::make_apply_arrfunc(&func0));
-  funcs.push_back(nd::make_apply_arrfunc(&func1));
-  funcs.push_back(nd::make_apply_arrfunc(&func2));
-  funcs.push_back(nd::make_apply_arrfunc(&func3));
-  funcs.push_back(nd::make_apply_arrfunc(&func4));
+  funcs.push_back(nd::apply::make(&func0));
+  funcs.push_back(nd::apply::make(&func1));
+  funcs.push_back(nd::apply::make(&func2));
+  funcs.push_back(nd::apply::make(&func3));
+  funcs.push_back(nd::apply::make(&func4));
 
   EXPECT_THROW(make_multidispatch_arrfunc(funcs.size(), &funcs[0]),
                invalid_argument);
 
-  funcs.push_back(nd::make_apply_arrfunc(&func5));
+  funcs.push_back(nd::apply::make(&func5));
 }
 
 TEST(MultiDispatchArrfunc, ExactSignatures) {
   vector<nd::arrfunc> funcs;
-  funcs.push_back(nd::make_apply_arrfunc(&func0));
-  funcs.push_back(nd::make_apply_arrfunc(&func1));
-  funcs.push_back(nd::make_apply_arrfunc(&func2));
-  funcs.push_back(nd::make_apply_arrfunc(&func3));
-  funcs.push_back(nd::make_apply_arrfunc(&func4));
-  funcs.push_back(nd::make_apply_arrfunc(&func5));
+  funcs.push_back(nd::apply::make(&func0));
+  funcs.push_back(nd::apply::make(&func1));
+  funcs.push_back(nd::apply::make(&func2));
+  funcs.push_back(nd::apply::make(&func3));
+  funcs.push_back(nd::apply::make(&func4));
+  funcs.push_back(nd::apply::make(&func5));
 
   nd::arrfunc af = make_multidispatch_arrfunc(funcs.size(), &funcs[0]);
 
@@ -64,12 +64,12 @@ TEST(MultiDispatchArrfunc, ExactSignatures) {
 
 TEST(MultiDispatchArrfunc, PromoteToSignature) {
   vector<nd::arrfunc> funcs;
-  funcs.push_back(nd::make_apply_arrfunc(&func0));
-  funcs.push_back(nd::make_apply_arrfunc(&func1));
-  funcs.push_back(nd::make_apply_arrfunc(&func2));
-  funcs.push_back(nd::make_apply_arrfunc(&func3));
-  funcs.push_back(nd::make_apply_arrfunc(&func4));
-  funcs.push_back(nd::make_apply_arrfunc(&func5));
+  funcs.push_back(nd::apply::make(&func0));
+  funcs.push_back(nd::apply::make(&func1));
+  funcs.push_back(nd::apply::make(&func2));
+  funcs.push_back(nd::apply::make(&func3));
+  funcs.push_back(nd::apply::make(&func4));
+  funcs.push_back(nd::apply::make(&func5));
 
   nd::arrfunc af = make_multidispatch_arrfunc(funcs.size(), &funcs[0]);
 
@@ -83,8 +83,8 @@ TEST(MultiDispatchArrfunc, PromoteToSignature) {
 
 TEST(MultiDispatchArrfunc, Values) {
   vector<nd::arrfunc> funcs;
-  funcs.push_back(nd::make_apply_arrfunc(&manip0));
-  funcs.push_back(nd::make_apply_arrfunc(&manip1));
+  funcs.push_back(nd::apply::make(&manip0));
+  funcs.push_back(nd::apply::make(&manip1));
   nd::arrfunc af =
       lift_arrfunc(make_multidispatch_arrfunc(funcs.size(), &funcs[0]));
   nd::array a, b, c;
@@ -123,8 +123,8 @@ TEST(MultiDispatchArrfunc, Dims)
   vector<nd::arrfunc> funcs;
   // Instead of making a multidispatch arrfunc, then lifting it,
   // we lift multiple arrfuncs, then make a multidispatch arrfunc from them.
-  funcs.push_back(lift_arrfunc(nd::make_apply_arrfunc(&manip0)));
-  funcs.push_back(lift_arrfunc(nd::make_apply_arrfunc(&manip1)));
+  funcs.push_back(lift_arrfunc(nd::apply::make(&manip0)));
+  funcs.push_back(lift_arrfunc(nd::apply::make(&manip1)));
   nd::arrfunc af = make_multidispatch_arrfunc(funcs.size(), &funcs[0]);
   nd::array a, b, c;
 

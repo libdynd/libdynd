@@ -405,7 +405,7 @@ nd::arrfunc dynd::make_multidispatch_arrfunc(intptr_t naf,
       reinterpret_cast<arrfunc_type_data *>(af.get_readwrite_originptr());
   vector<nd::arrfunc> *af_data =
       new (out_af->get_data_as<char>()) vector<nd::arrfunc>();
-  out_af->free_func = &free_multidispatch_af_data;
+  out_af->free = &free_multidispatch_af_data;
   af_data->swap(sorted_af);
   out_af->instantiate = &instantiate_multidispatch_af;
   out_af->resolve_dst_type = &resolve_multidispatch_dst_type;

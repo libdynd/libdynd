@@ -33,7 +33,7 @@ struct arrfunc_type_data;
  * or 'var' dimension types, the arrmeta must be provided as well.
  *
  * \param self  The arrfunc.
- * \param af_tp  The function prototype of the arrfunc.
+ * \param self_tp  The function prototype of the arrfunc.
  * \param ckb  A ckernel_builder instance where the kernel is placed.
  * \param ckb_offset  The offset into the output ckernel_builder `ckb`
  *                    where the kernel should be placed.
@@ -55,7 +55,7 @@ struct arrfunc_type_data;
  * \returns  The offset into ``ckb`` immediately after the instantiated ckernel.
  */
 typedef intptr_t (*arrfunc_instantiate_t)(
-    const arrfunc_type_data *self, const arrfunc_type *af_tp, void *ckb,
+    const arrfunc_type_data *self, const arrfunc_type *self_tp, void *ckb,
     intptr_t ckb_offset, const ndt::type &dst_tp, const char *dst_arrmeta,
     const ndt::type *src_tp, const char *const *src_arrmeta,
     kernel_request_t kernreq, const eval::eval_context *ectx,
@@ -80,11 +80,27 @@ typedef int (*arrfunc_resolve_dst_type_t)(
     const ndt::type *src_tp, int throw_on_error, ndt::type &out_dst_tp,
     const nd::array &kwds);
 
-typedef void (*arrfunc_resolve_option_vals_t)(const arrfunc_type_data *self,
-                                              const arrfunc_type *af_tp,
-                                              intptr_t nsrc,
-                                              const ndt::type *src_tp,
-                                              nd::array &kwds);
+/**
+ * Resolves any missing keyword arguments for this arrfunc based on
+ * the types of the positional arguments and the available keywords arguments.
+ *
+ * \param self    The arrfunc.
+ * \param self_tp The function prototype of the arrfunc.
+ * \param npos    The number of positional arguments.
+ * \param pos_tp  An array of the source types.
+ * \param kwds    An array of the.
+ */
+typedef void (*arrfunc_resolve_option_values_t)(const arrfunc_type_data *self,
+                                                const arrfunc_type *self_tp,
+                                                intptr_t npos,
+                                                const ndt::type *pos_tp,
+                                                nd::array &kwds);
+
+/**
+ * A function which deallocates the memory behind data_ptr after
+ * freeing any additional resources it might contain.
+ */
+typedef void (*arrfunc_free_t)(arrfunc_type_data *self);
 
 /**
  * This is a struct designed for interoperability at
@@ -101,43 +117,53 @@ struct arrfunc_type_data {
   /**
    * Some memory for the arrfunc to use. If this is not
    * enough space to hold all the data by value, should allocate
-   * space on the heap, and free it when free_func is called.
+   * space on the heap, and free it when free is called.
    *
    * On 32-bit platforms, if the size changes, it may be
    * necessary to use
    * char data[4 * 8 + ((sizeof(void *) == 4) ? 4 : 0)];
-   * to ensure the total struct size is divisible by 64.
+   * to ensure the total struct size is divisible by 64 bits.
    */
   char data[4 * 8];
 
-  /**
-   * The function which instantiates a ckernel. See the documentation
-   * for the function typedef for more details.
-   */
   arrfunc_instantiate_t instantiate;
-
-  arrfunc_resolve_option_vals_t resolve_option_vals;
-
+  arrfunc_resolve_option_values_t resolve_option_values;
   arrfunc_resolve_dst_type_t resolve_dst_type;
+  arrfunc_free_t free;
 
-  /**
-   * A function which deallocates the memory behind data_ptr after
-   * freeing any additional resources it might contain.
-   */
-  void (*free_func)(arrfunc_type_data *self_data_ptr);
-
-  // Default to all NULL, so the destructor works correctly
-  arrfunc_type_data() : instantiate(0), free_func(0)
+  arrfunc_type_data()
+      : instantiate(NULL), resolve_option_values(NULL), resolve_dst_type(NULL),
+        free(NULL)
   {
     DYND_STATIC_ASSERT((sizeof(arrfunc_type_data) & 7) == 0,
                        "arrfunc_type_data must have size divisible by 8");
   }
 
-  // If it contains an arrfunc, free it
+  arrfunc_type_data(arrfunc_instantiate_t instantiate,
+                    arrfunc_resolve_option_values_t resolve_option_values,
+                    arrfunc_resolve_dst_type_t resolve_dst_type,
+                    arrfunc_free_t free)
+      : instantiate(instantiate), resolve_option_values(resolve_option_values),
+        resolve_dst_type(resolve_dst_type), free(free)
+  {
+  }
+
+  template <typename T>
+  arrfunc_type_data(const T &data, arrfunc_instantiate_t instantiate,
+                    arrfunc_resolve_option_values_t resolve_option_values,
+                    arrfunc_resolve_dst_type_t resolve_dst_type,
+                    arrfunc_free_t free)
+      : instantiate(instantiate), resolve_option_values(resolve_option_values),
+        resolve_dst_type(resolve_dst_type), free(free)
+  {
+    new (this->data) T(data);
+  }
+
   ~arrfunc_type_data()
   {
-    if (free_func) {
-      free_func(this);
+    // Call the free function, if it exists
+    if (free != NULL) {
+      free(this);
     }
   }
 
@@ -171,36 +197,6 @@ struct arrfunc_type_data {
 };
 
 namespace nd {
-  inline array
-  make_arrfunc(ndt::type af_tp, arrfunc_instantiate_t instantiate,
-               arrfunc_resolve_option_vals_t resolve_option_vals = NULL)
-  {
-    array af = empty(af_tp);
-    arrfunc_type_data *out_af =
-        reinterpret_cast<arrfunc_type_data *>(af.get_readwrite_originptr());
-    out_af->instantiate = instantiate;
-    out_af->resolve_option_vals = resolve_option_vals;
-    af.flag_as_immutable();
-
-    return af;
-  }
-
-  template <typename T>
-  array make_arrfunc(ndt::type af_tp, const T &data,
-                     arrfunc_instantiate_t instantiate,
-                     arrfunc_resolve_option_vals_t resolve_option_vals = NULL)
-  {
-    array af = empty(af_tp);
-    arrfunc_type_data *out_af =
-        reinterpret_cast<arrfunc_type_data *>(af.get_readwrite_originptr());
-    new (out_af->get_data_as<T>()) T(data);
-    out_af->instantiate = instantiate;
-    out_af->resolve_option_vals = resolve_option_vals;
-    af.flag_as_immutable();
-
-    return af;
-  }
-
   template <typename... A>
   nd::array forward_as_array(const nd::array &names, const nd::array &types,
                              const std::tuple<A...> &vals,
@@ -402,9 +398,6 @@ kwds(T &&... args)
 }
 
 namespace nd {
-  template <typename func_type, typename... T>
-  arrfunc make_apply_arrfunc(const func_type &func, T &&... names);
-
   /**
    * Holds a single instance of an arrfunc in an immutable nd::array,
    * providing some more direct convenient interface.
@@ -413,19 +406,22 @@ namespace nd {
     nd::array m_value;
 
   public:
-    arrfunc() : m_value() {}
+    arrfunc() {}
+
+    arrfunc(const arrfunc_type_data *self, const ndt::type &self_tp)
+        : m_value(empty(self_tp))
+    {
+      *reinterpret_cast<arrfunc_type_data *>(
+          m_value.get_readwrite_originptr()) = *self;
+    }
+
     arrfunc(const arrfunc &rhs) : m_value(rhs.m_value) {}
+
     /**
       * Constructor from an nd::array. Validates that the input
       * has "arrfunc" type and is immutable.
       */
     arrfunc(const nd::array &rhs);
-
-    template <typename func_type, typename... T>
-    arrfunc(const func_type &func, T &&... names)
-        : m_value(make_apply_arrfunc(func, std::forward<T>(names)...))
-    {
-    }
 
     arrfunc &operator=(const arrfunc &rhs)
     {
@@ -455,7 +451,7 @@ namespace nd {
     void swap(nd::arrfunc &rhs) { m_value.swap(rhs.m_value); }
 
     template <typename... T>
-    void set_as_option(arrfunc_resolve_option_vals_t resolve_option_vals,
+    void set_as_option(arrfunc_resolve_option_values_t resolve_option_values,
                        T &&... names)
     {
       intptr_t missing[sizeof...(T)] = {get_type()->get_arg_index(names)...};
@@ -466,18 +462,13 @@ namespace nd {
             ndt::make_option(tp(missing[i]).template as<ndt::type>()));
       }
 
+      arrfunc_type_data self(get()->instantiate, resolve_option_values,
+                             get()->resolve_dst_type, get()->free);
+      std::memcpy(self.data, get()->data, sizeof(get()->data));
       ndt::type self_tp = ndt::make_funcproto(tp, get_type()->get_return_type(),
                                               get_type()->get_arg_names());
 
-      array af = empty(self_tp);
-      arrfunc_type_data *self =
-          reinterpret_cast<arrfunc_type_data *>(af.get_readwrite_originptr());
-      memcpy(self->data, get()->data, sizeof(self->data));
-      self->instantiate = get()->instantiate;
-      self->resolve_option_vals = resolve_option_vals;
-      af.flag_as_immutable();
-
-      m_value = af;
+      *this = arrfunc(&self, self_tp);
     }
 
     std::vector<intptr_t> resolve_missing_types(
@@ -557,8 +548,9 @@ namespace nd {
                              available.empty() ? NULL : available.data(),
                              missing.empty() ? NULL : missing.data());
 
-        if (self->resolve_option_vals != NULL) {
-          self->resolve_option_vals(self, self_tp, nsrc, src_tp, kwds_as_array);
+        if (self->resolve_option_values != NULL) {
+          self->resolve_option_values(self, self_tp, nsrc, src_tp,
+                                      kwds_as_array);
         }
       }
 
@@ -784,5 +776,4 @@ nd::arrfunc make_arrfunc_from_property(const ndt::type &tp,
 
 } // namespace dynd
 
-#include <dynd/func/apply_arrfunc.hpp>
 #include <dynd/types/option_type.hpp>

@@ -69,18 +69,26 @@ TEST(ArrFunc, Assignment)
   EXPECT_EQ(891029, ints_out[2]);
 }
 
+static double func(int x, double y) { return 2.0 * x + y; }
+
 TEST(ArrFunc, Construction)
 {
-  nd::arrfunc af0([](int x, int y) { return x + y; });
-  EXPECT_EQ(5, af0(1, 4).as<int>());
+  nd::arrfunc af0 = nd::apply::make(&func);
+  EXPECT_EQ(4.5, af0(1, 2.5).as<double>());
 
-  nd::arrfunc af1([](int x, int y) { return x + y; }, "y");
-  EXPECT_EQ(5, af1(1, kwds("y", 4)).as<int>());
+  nd::arrfunc af1 = nd::apply::make(&func, "y");
+  EXPECT_EQ(4.5, af1(1, kwds("y", 2.5)).as<double>());
+
+  nd::arrfunc af2 = nd::apply::make([](int x, int y) { return x - y; });
+  EXPECT_EQ(-4, af2(3, 7).as<int>());
+
+  nd::arrfunc af3 = nd::apply::make([](int x, int y) { return x - y; }, "y");
+  EXPECT_EQ(-4, af3(3, kwds("y", 7)).as<int>());
 }
 
 TEST(ArrFunc, KeywordParsing)
 {
-  nd::arrfunc af0([](int x, int y) { return x + y; }, "y");
+  nd::arrfunc af0 = nd::apply::make([](int x, int y) { return x + y; }, "y");
   EXPECT_EQ(5, af0(1, kwds("y", 4)).as<int>());
   EXPECT_THROW(af0(1, kwds("z", 4)).as<int>(), std::invalid_argument);
   EXPECT_THROW(af0(1, kwds("Y", 4)).as<int>(), std::invalid_argument);
@@ -94,10 +102,10 @@ TEST(ArrFunc, Option)
     int operator()(int x, int y) { return x + y; }
 
     static void resolve_option_vals(const arrfunc_type_data *DYND_UNUSED(self),
-                                     const arrfunc_type *DYND_UNUSED(self_tp),
-                                     intptr_t DYND_UNUSED(nsrc),
-                                     const ndt::type *DYND_UNUSED(src_tp),
-                                     nd::array &kwds)
+                                    const arrfunc_type *DYND_UNUSED(self_tp),
+                                    intptr_t DYND_UNUSED(nsrc),
+                                    const ndt::type *DYND_UNUSED(src_tp),
+                                    nd::array &kwds)
     {
       if (kwds.p("x").is_missing()) {
         kwds.p("x").vals() = 4;
@@ -105,7 +113,7 @@ TEST(ArrFunc, Option)
     }
   };
 
-  nd::arrfunc af = nd::make_apply_arrfunc(callable(), "x");
+  nd::arrfunc af = nd::apply::make(callable(), "x");
   EXPECT_EQ(5, af(1, kwds("x", 4)).as<int>());
 
   af.set_as_option(&callable::resolve_option_vals, "x");

@@ -312,7 +312,7 @@ nd::arrfunc kernels::make_take_arrfunc()
   arrfunc_type_data *out_af =
       reinterpret_cast<arrfunc_type_data *>(af.get_readwrite_originptr());
   // Create the data for the arrfunc
-  out_af->free_func = NULL;
+  out_af->free = NULL;
   out_af->resolve_dst_type = &resolve_take_dst_type;
   out_af->instantiate = &instantiate_take;
   af.flag_as_immutable();

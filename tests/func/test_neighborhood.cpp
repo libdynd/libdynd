@@ -33,7 +33,7 @@ int sum(const nd::strided_vals<int, N> &nh) {
 }
 
 TEST(Neighborhood, Sum1D) {
-    nd::arrfunc af = make_neighborhood_arrfunc(nd::make_apply_arrfunc(sum<1>), 1);
+    nd::arrfunc af = make_neighborhood_arrfunc(nd::apply::make(sum<1>), 1);
     nd::array a;
 
     a = parse_json("4 * int",
@@ -74,7 +74,7 @@ TEST(Neighborhood, Sum1D) {
 }
 
 TEST(Neighborhood, Sum2D) {
-    nd::arrfunc af = make_neighborhood_arrfunc(nd::make_apply_arrfunc(sum<2>), 2);
+    nd::arrfunc af = make_neighborhood_arrfunc(nd::apply::make(sum<2>), 2);
     nd::array a;
 
     a = parse_json("4 * 4 * int",
@@ -133,7 +133,7 @@ TEST(Neighborhood, Sum2D) {
 }
 
 TEST(Neighborhood, Sum3D) {
-    nd::arrfunc af = make_neighborhood_arrfunc(nd::make_apply_arrfunc(sum<3>), 3);
+    nd::arrfunc af = make_neighborhood_arrfunc(nd::apply::make(sum<3>), 3);
     nd::array a;
 
     a = parse_json("4 * 4 * 4 * int",

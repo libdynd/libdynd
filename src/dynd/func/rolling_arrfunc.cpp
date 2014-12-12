@@ -267,7 +267,7 @@ nd::arrfunc dynd::make_rolling_arrfunc(const nd::arrfunc &window_op,
   // Create the data for the arrfunc
   rolling_arrfunc_data *data = new rolling_arrfunc_data;
   *out_af->get_data_as<rolling_arrfunc_data *>() = data;
-  out_af->free_func = &free_rolling_arrfunc_data;
+  out_af->free = &free_rolling_arrfunc_data;
   out_af->resolve_dst_type = &resolve_rolling_dst_type;
   out_af->instantiate = &instantiate_strided;
   data->window_size = window_size;

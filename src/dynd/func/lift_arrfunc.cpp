@@ -195,7 +195,7 @@ nd::arrfunc dynd::lift_arrfunc(const nd::arrfunc &child_af)
   nd::array af = nd::empty(lift_proto(child_af.get_type()));
   arrfunc_type_data *out_af =
       reinterpret_cast<arrfunc_type_data *>(af.get_readwrite_originptr());
-  out_af->free_func = &delete_lifted_expr_arrfunc_data;
+  out_af->free = &delete_lifted_expr_arrfunc_data;
   *out_af->get_data_as<const array_preamble *>() =
       nd::array(child_af).release();
   out_af->instantiate = &instantiate_lifted_expr_arrfunc_data;
