@@ -6,6 +6,7 @@
 #pragma once
 
 #include <dynd/kernels/expr_kernels.hpp>
+#include <dynd/kernels/cuda_kernels.hpp>
 
 namespace dynd {
 namespace kernels {

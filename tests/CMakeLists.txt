@@ -124,7 +124,7 @@ if (DYND_CUDA)
         )
     list(APPEND tests_SRC
         func/test_apply.cu
-#        func/test_lift_arrfunc.cu
+        func/test_lift_arrfunc.cu
         )
 endif()
 

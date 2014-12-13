@@ -540,26 +540,12 @@ namespace nd {
 
         // check that we have the exact number of available parameters
 
-        std::cout << "(before forward) " << kwd_tp << std::endl;
         ndt::get_forward_types(kwd_tp, kwds.get_vals(),
                                available.empty() ? NULL : available.data());
-        std::cout << "(after forward) " << kwd_tp << std::endl;
-
         kwds_as_array =
             forward_as_array(self_tp->get_arg_names(), kwd_tp, kwds.get_vals(),
                              available.empty() ? NULL : available.data(),
                              missing.empty() ? NULL : missing.data());
-        if (kwds_as_array.is_null()) {
-          std::cout << "kwds_as_array = NULL" << std::endl;
-        } else {
-          std::cout << "kwds_as_array.get_type() = " << kwds_as_array.get_type()
-                    << std::endl;
-          std::cout << kwds_as_array << std::endl;
-          std::cout << kwds_as_array(0) << std::endl;
-          try {
-            std::cout << kwds_as_array(1) << std::endl;
-          } catch (...) {}
-        }
 
         if (self->resolve_option_values != NULL) {
           self->resolve_option_values(self, self_tp, nsrc, src_tp,
@@ -600,19 +586,9 @@ namespace nd {
       ndt::type dst_tp =
           resolve(af_tp->get_npos(), af_tp->get_npos() ? &arg_tp[0] : NULL,
                   kwds, kwds_as_array);
-      /*
-            std::cout << "printing kwds_as_array" << std::endl;
-            std::cout << kwds_as_array << std::endl;
-            std::cout << "printed kwds_as_array" << std::endl;
-
-            std::cout << "printing kwds_as_array(0)" << std::endl;
-            std::cout << kwds_as_array(0) << std::endl;
-            std::cout << "printed kwds_as_array(0)" << std::endl;
-      */
 
       // Construct the destination array
       nd::array res = nd::empty(dst_tp);
-      //      std::cout << "created res" << std::endl;
 
       // Generate and evaluate the ckernel
       ckernel_builder<kernel_request_host> ckb;
