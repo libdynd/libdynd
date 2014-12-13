@@ -79,39 +79,38 @@ struct func_wrapper;
 // Workaround for MSVC 2013 variadic template bug
 // https://connect.microsoft.com/VisualStudio/Feedback/Details/1034062
 #define FUNC_WRAPPER(KERNREQ, ...)                                             \
-  template <typename R, R (*func)()>                                           \
+  template <typename R>                                                        \
   struct func_wrapper<KERNREQ, R (*)()> {                                      \
     R (*func)();                                                               \
                                                                                \
-    func_wrapper(R (*func)()) : func(func) {}                                  \
+    DYND_CUDA_HOST_DEVICE func_wrapper(R (*func)()) : func(func) {}            \
                                                                                \
     __VA_ARGS__ R operator()() const { return (*func)(); }                     \
   };                                                                           \
                                                                                \
-  template <typename R, typename A0, R (*func)(A0)>                            \
+  template <typename R, typename A0>                                           \
   struct func_wrapper<KERNREQ, R (*)(A0)> {                                    \
     R (*func)(A0);                                                             \
                                                                                \
-    func_wrapper(R (*func)(A0)) : func(func) {}                                \
+    DYND_CUDA_HOST_DEVICE func_wrapper(R (*func)(A0)) : func(func) {}          \
                                                                                \
     __VA_ARGS__ R operator()(A0 a0) const { return (*func)(a0); }              \
   };                                                                           \
                                                                                \
-  template <typename R, typename A0, typename A1, R (*func)(A0, A1)>           \
+  template <typename R, typename A0, typename A1>                              \
   struct func_wrapper<KERNREQ, R (*)(A0, A1)> {                                \
     R (*func)(A0, A1);                                                         \
                                                                                \
-    func_wrapper(R (*func)(A0, A1)) : func(func) {}                            \
+    DYND_CUDA_HOST_DEVICE func_wrapper(R (*func)(A0, A1)) : func(func) {}      \
                                                                                \
     __VA_ARGS__ R operator()(A0 a0, A1 a1) const { return (*func)(a0, a1); }   \
   };                                                                           \
                                                                                \
-  template <typename R, typename A0, typename A1, typename A2,                 \
-            R (*func)(A0, A1, A2)>                                             \
+  template <typename R, typename A0, typename A1, typename A2>                 \
   struct func_wrapper<KERNREQ, R (*)(A0, A1, A2)> {                            \
     R (*func)(A0, A1, A2);                                                     \
                                                                                \
-    func_wrapper(R (*func)(A0, A1, A2)) : func(func) {}                        \
+    DYND_CUDA_HOST_DEVICE func_wrapper(R (*func)(A0, A1, A2)) : func(func) {}  \
                                                                                \
     __VA_ARGS__ R operator()(A0 a0, A1 a1, A2 a2) const                        \
     {                                                                          \
@@ -173,9 +172,8 @@ FUNC_WRAPPER(kernel_request_cuda_device, __device__);
   }                                                                            \
                                                                                \
   template <kernel_request_t kernreq>                                          \
-  typename std::enable_if<                               \
-      kernreq == kernel_request_cuda_device, decltype(&NAME)>::type            \
-      get_##NAME()                                                             \
+  typename std::enable_if<kernreq == kernel_request_cuda_device,               \
+                          decltype(&NAME)>::type get_##NAME()                  \
   {                                                                            \
     GET_CUDA_DEVICE_FUNC_BODY(NAME)                                            \
   }
@@ -187,7 +185,7 @@ FUNC_WRAPPER(kernel_request_cuda_device, __device__);
   template <>                                                                  \
   struct NAME##_as_callable<kernel_request_cuda_device>                        \
       : func_wrapper<kernel_request_cuda_device, decltype(&NAME)> {            \
-    NAME##_as_callable()                                 \
+    NAME##_as_callable()                                                       \
         : func_wrapper<kernel_request_cuda_device, decltype(&NAME)>(           \
               get_##NAME<kernel_request_cuda_device>())                        \
     {                                                                          \
@@ -250,8 +248,7 @@ TYPED_TEST_P(Apply, Callable)
   nd::arrfunc af;
 
   if (TestFixture::KernelRequest == kernel_request_host) {
-    af = nd::apply::make<kernel_request_host>(
-        get_func0<kernel_request_host>());
+    af = nd::apply::make<kernel_request_host>(get_func0<kernel_request_host>());
     EXPECT_ARR_EQ(TestFixture::To(4),
                   af(TestFixture::To(5), TestFixture::To(3)));
 
@@ -261,7 +258,7 @@ TYPED_TEST_P(Apply, Callable)
                   af(TestFixture::To(5), TestFixture::To(3)));
 
     af = nd::apply::make<kernel_request_host,
-                                func0_as_callable<kernel_request_host>>();
+                         func0_as_callable<kernel_request_host>>();
     EXPECT_ARR_EQ(TestFixture::To(4),
                   af(TestFixture::To(5), TestFixture::To(3)));
   }
@@ -278,13 +275,13 @@ TYPED_TEST_P(Apply, Callable)
     EXPECT_ARR_EQ(TestFixture::To(58.25),
                   af(TestFixture::To(3.25), TestFixture::To(20)));
 
-/*
-    af =
-        nd::apply::make<kernel_request_cuda_device,
-                               func1_as_callable<kernel_request_cuda_device>>();
-    EXPECT_ARR_EQ(TestFixture::To(58.25),
-                  af(TestFixture::To(3.25), TestFixture::To(20)));
-*/
+    /*
+        af =
+            nd::apply::make<kernel_request_cuda_device,
+                                   func1_as_callable<kernel_request_cuda_device>>();
+        EXPECT_ARR_EQ(TestFixture::To(58.25),
+                      af(TestFixture::To(3.25), TestFixture::To(20)));
+    */
   }
 #endif
 }
@@ -294,21 +291,20 @@ TYPED_TEST_P(Apply, CallableWithKeywords)
   nd::arrfunc af;
 
   if (TestFixture::KernelRequest == kernel_request_host) {
-    af = nd::apply::make<kernel_request_host>(
-        get_func0<kernel_request_host>(), "y");
+    af = nd::apply::make<kernel_request_host>(get_func0<kernel_request_host>(),
+                                              "y");
     EXPECT_ARR_EQ(TestFixture::To(4),
                   af(TestFixture::To(5), kwds("y", TestFixture::To(3))));
 
-    af = nd::apply::make<kernel_request_host>(
-        get_func0<kernel_request_host>(), "x", "y");
+    af = nd::apply::make<kernel_request_host>(get_func0<kernel_request_host>(),
+                                              "x", "y");
     EXPECT_ARR_EQ(TestFixture::To(4),
                   af(kwds("x", TestFixture::To(5), "y", TestFixture::To(3))));
 
     af = nd::apply::make(func0_as_callable<kernel_request_host>(), "y");
     EXPECT_ARR_EQ(TestFixture::To(4), af(5, kwds("y", TestFixture::To(3))));
 
-    af = nd::apply::make(func0_as_callable<kernel_request_host>(), "x",
-                                "y");
+    af = nd::apply::make(func0_as_callable<kernel_request_host>(), "x", "y");
     EXPECT_ARR_EQ(TestFixture::To(4),
                   af(kwds("x", TestFixture::To(5), "y", TestFixture::To(3))));
   }
