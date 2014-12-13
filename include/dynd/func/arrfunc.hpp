@@ -200,8 +200,7 @@ namespace nd {
   template <typename... A>
   nd::array forward_as_array(const nd::array &names, const nd::array &types,
                              const std::tuple<A...> &vals,
-                             const intptr_t *available = NULL,
-                             const intptr_t *missing = NULL)
+                             const intptr_t *available, const intptr_t *missing)
   {
     typedef typename make_index_sequence<0, sizeof...(A)>::type I;
 
@@ -504,7 +503,7 @@ namespace nd {
       if (self->resolve_dst_type != NULL) {
         kwds_as_array = forward_as_array(
             kwds.get_names(), ndt::get_forward_types(kwds.get_vals()),
-            kwds.get_vals());
+            kwds.get_vals(), NULL, NULL);
 
         ndt::type dst_tp;
         self->resolve_dst_type(self, self_tp, nsrc, src_tp, true, dst_tp,
@@ -554,6 +553,7 @@ namespace nd {
         }
       }
 
+      //      std::cout << "about to substitute" << std::endl;
       return ndt::substitute(self_tp->get_return_type(), typevars, true);
     }
 

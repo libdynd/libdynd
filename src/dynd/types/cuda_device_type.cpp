@@ -23,6 +23,22 @@ cuda_device_type::cuda_device_type(const ndt::type &element_tp)
 
 cuda_device_type::~cuda_device_type() {}
 
+void cuda_device_type::print_data(std::ostream &o, const char *arrmeta,
+                                  const char *data) const
+{
+  nd::array a = nd::empty(m_element_tp);
+  typed_data_assign(a.get_type(), a.get_arrmeta(), a.get_readwrite_originptr(),
+                    ndt::type(this, true), arrmeta, data);
+
+  if (m_element_tp.is_builtin()) {
+    print_builtin_scalar(m_element_tp.get_type_id(), o,
+                         a.get_readonly_originptr());
+  } else {
+    m_element_tp.extended()->print_data(o, a.get_arrmeta(),
+                                        a.get_readonly_originptr());
+  }
+}
+
 void cuda_device_type::print_type(ostream &o) const
 {
   o << "cuda_device[" << m_element_tp << "]";
@@ -67,11 +83,6 @@ intptr_t cuda_device_type::make_assignment_kernel(
     const ndt::type &src_tp, const char *src_arrmeta, kernel_request_t kernreq,
     const eval::eval_context *ectx, const nd::array &kwds) const
 {
-  //    std::cout << "(cuda_device_type::make_assignment_kernel) dst_tp = " <<
-  //  dst_tp << std::endl;
-  // std::cout << "(cuda_device_type::make_assignment_kernel) src_tp = " <<
-  // src_tp << std::endl;
-
   /*
     bool dst_cuda_device, src_cuda_device;
     if (this == dst_tp.extended()) {
@@ -86,15 +97,15 @@ intptr_t cuda_device_type::make_assignment_kernel(
   */
 
   if (dst_tp.get_ndim() >= src_tp.get_ndim() && dst_tp.get_ndim() > 0) {
-    ndt::type af_tp = ndt::make_funcproto(src_tp.storage_type().get_dtype(),
-                                          dst_tp.storage_type().get_dtype());
-    nd::arrfunc child_af =
-        nd::make_arrfunc(af_tp, make_cuda_builtin_type_assignment_kernel);
+    arrfunc_type_data child = arrfunc_type_data(
+        &make_cuda_builtin_type_assignment_kernel, NULL, NULL, NULL);
+    ndt::type child_tp = ndt::make_funcproto(src_tp.storage_type().get_dtype(),
+                                             dst_tp.storage_type().get_dtype());
     intptr_t src_ndim = src_tp.get_ndim();
-    return make_lifted_expr_ckernel(
-        child_af.get(), af_tp.extended<arrfunc_type>(), ckb, ckb_offset,
-        dst_tp.get_ndim(), dst_tp, dst_arrmeta, &src_ndim, &src_tp,
-        &src_arrmeta, kernreq, ectx);
+    return make_lifted_expr_ckernel(&child, child_tp.extended<arrfunc_type>(),
+                                    ckb, ckb_offset, dst_tp.get_ndim(), dst_tp,
+                                    dst_arrmeta, &src_ndim, &src_tp,
+                                    &src_arrmeta, kernreq, ectx);
   }
 
   return make_cuda_builtin_type_assignment_kernel(

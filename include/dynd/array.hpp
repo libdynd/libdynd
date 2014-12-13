@@ -359,10 +359,7 @@ namespace nd {
       }
     }
 
-    const char *get_data() const
-    {
-      return get_ndo()->m_data_pointer;
-    }
+    const char *get_data() const { return get_ndo()->m_data_pointer; }
 
     inline uint32_t get_access_flags() const
     {
@@ -379,7 +376,7 @@ namespace nd {
     inline bool is_scalar() const { return get_type().is_scalar(); }
 
     /** The type */
-    inline const ndt::type &get_type() const
+    const ndt::type &get_type() const
     {
       return *reinterpret_cast<const ndt::type *>(&get_ndo()->m_type);
     }

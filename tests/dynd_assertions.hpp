@@ -32,6 +32,11 @@ inline ::testing::AssertionResult CompareDyNDArrays(const char *expr1,
                                                     const dynd::nd::array &val2)
 {
     using namespace dynd;
+
+    if (val1.get_type().get_type_id() == cuda_device_type_id && val2.get_type().get_type_id() == cuda_device_type_id) {
+      return CompareDyNDArrays(expr1, expr2, val1.to_host(), val2.to_host());
+    }
+
     if (val1.equals_exact(val2)) {
         return ::testing::AssertionSuccess();
     } else {

@@ -659,8 +659,7 @@ REGISTER_TYPED_TEST_CASE_P(
     ScalarAssignment_Uint64,
     ScalarAssignment_Uint64_LargeNumbers, // This one is excluded on 32-bit
                                           // windows
-    ScalarAssignment_Complex_Float32, ScalarAssignment_Complex_Float64,
-    BroadcastAssign, Overflow);
+    ScalarAssignment_Complex_Float32, ScalarAssignment_Complex_Float64, BroadcastAssign, Overflow); 
 #else
 REGISTER_TYPED_TEST_CASE_P(ArrayAssign, ScalarAssignment_Bool,
                            ScalarAssignment_Int8, ScalarAssignment_UInt16,

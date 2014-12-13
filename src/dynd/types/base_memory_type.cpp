@@ -44,7 +44,6 @@ ndt::type base_memory_type::apply_linear_index(intptr_t nindices,
                                                const ndt::type &root_tp,
                                                bool leading_dimension) const
 {
-
   return with_replaced_storage_type(m_element_tp.extended()->apply_linear_index(
       nindices, indices, current_i, root_tp, leading_dimension));
 }
@@ -56,6 +55,10 @@ intptr_t base_memory_type::apply_linear_index(
     const ndt::type &root_tp, bool leading_dimension, char **inout_data,
     memory_block_data **inout_dataref) const
 {
+  if (m_element_tp.is_builtin()) {
+    return 0;
+  }
+
   return m_element_tp.extended()->apply_linear_index(
       nindices, indices, arrmeta,
       result_type.extended<base_memory_type>()->get_element_type(), out_arrmeta,
