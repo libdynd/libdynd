@@ -121,7 +121,10 @@ struct func_wrapper;
 #endif
 
 FUNC_WRAPPER(kernel_request_host);
+
+#ifdef DYND_CUDA
 FUNC_WRAPPER(kernel_request_cuda_device, __device__);
+#endif
 
 #undef FUNC_WRAPPER
 
