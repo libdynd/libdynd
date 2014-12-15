@@ -27,23 +27,26 @@ typedef int (*expr_predicate_t)(const char *const *src, ckernel_prefix *self);
  * Definition for kernel request parameters.
  */
 enum {
-  /** Kernel function expr_single_t, "(T1, T2, ...) -> R" */
-  kernel_request_single = 0,
-  /** Kernel function expr_strided_t, "(T1, T2, ...) -> R" */
-  kernel_request_strided = 1,
-  /** Kernel function expr_predicate_t, "(T1, T2, ...) -> bool" */
-  kernel_request_predicate = 2,
-
-  /** Y */
-  kernel_request_host = 8,
-  /** Y */
-  kernel_request_cuda_device = 16,
+  /** Kernel function in host memory */
+  kernel_request_host = 0x00000000,
+  /** Kernel function in CUDA device memory */
+  kernel_request_cuda_device = 0x00000001,
+  /** Kernel function in both host memory and CUDA device memory */
 #ifdef __CUDACC__
-  kernel_request_cuda_host_device =
-      kernel_request_host | kernel_request_cuda_device
+  kernel_request_cuda_host_device = 0x00000002,
 #else
-  kernel_request_cuda_host_device = kernel_request_host
+  kernel_request_cuda_host_device = kernel_request_host,
 #endif
+
+  /** Kernel function expr_single_t, "(T1, T2, ...) -> R" */
+  kernel_request_single = 0x00000008,
+  /** Kernel function expr_strided_t, "(T1, T2, ...) -> R" */
+  kernel_request_strided = 0x00000010,
+  /** Kernel function expr_predicate_t, "(T1, T2, ...) -> bool" */
+  kernel_request_predicate = 0x00000020,
+
+  /** ... */
+  kernel_request_memory = 0x00000007,
 };
 typedef uint32_t kernel_request_t;
 
