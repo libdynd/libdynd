@@ -342,7 +342,7 @@ namespace kernels {
       const char *const *src_arrmeta, kernel_request_t kernreq,
       const eval::eval_context *DYND_UNUSED(ectx), const nd::array &kwds)
   {
-    if ((kernreq & kernel_request_cuda_device) == false) {
+    if ((kernreq & kernel_request_memory) == kernel_request_host) {
       typedef cuda_parallel_ck<Nsrc> self_type;
       self_type *self = self_type::create(ckb, kernreq, ckb_offset, 1, 1);
       ckb = &self->ckb;
@@ -453,10 +453,11 @@ namespace kernels {
                          const eval::eval_context *DYND_UNUSED(ectx),
                          const nd::array &kwds)
   {
-    if ((kernreq & kernel_request_cuda_device) == false) {
+    if ((kernreq & kernel_request_memory) == kernel_request_host) {
       typedef cuda_parallel_ck<arity_of<func_type>::value> self_type;
       self_type *self = self_type::create(ckb, kernreq, ckb_offset, 1, 1);
       ckb = &self->ckb;
+      kernreq |= kernel_request_cuda_device;
       ckb_offset = 0;
     }
 

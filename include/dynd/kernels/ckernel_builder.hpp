@@ -636,9 +636,14 @@ namespace kernels {
                                                intptr_t &inout_ckb_offset,
                                                A &&... args)
   {
-    return self_type::create(
-        reinterpret_cast<ckernel_builder<kernel_request_host> *>(ckb), kernreq,
-        inout_ckb_offset, std::forward<A>(args)...);
+    switch (kernreq & kernel_request_memory) {
+    case kernel_request_host:
+      return self_type::create(
+          reinterpret_cast<ckernel_builder<kernel_request_host> *>(ckb),
+          kernreq, inout_ckb_offset, std::forward<A>(args)...);
+    default:
+      throw std::invalid_argument("unrecognized ckernel request");
+    }
   }
 
   template <typename CKT>
@@ -649,9 +654,14 @@ namespace kernels {
                                                     intptr_t &inout_ckb_offset,
                                                     A &&... args)
   {
-    return self_type::create_leaf(
-        reinterpret_cast<ckernel_builder<kernel_request_host> *>(ckb), kernreq,
-        inout_ckb_offset, std::forward<A>(args)...);
+    switch (kernreq & kernel_request_memory) {
+    case kernel_request_host:
+      return self_type::create_leaf(
+          reinterpret_cast<ckernel_builder<kernel_request_host> *>(ckb),
+          kernreq, inout_ckb_offset, std::forward<A>(args)...);
+    default:
+      throw std::invalid_argument("unrecognized ckernel request");
+    }
   }
 
 #ifdef __CUDACC__
@@ -665,10 +675,15 @@ namespace kernels {
       void *ckb, kernel_request_t kernreq, intptr_t &inout_ckb_offset,
       A &&... args)
   {
-    return self_type::create(
-        reinterpret_cast<ckernel_builder<kernel_request_cuda_device> *>(ckb),
-        kernreq & ~kernel_request_cuda_device, inout_ckb_offset,
-        std::forward<A>(args)...);
+    switch (kernreq & kernel_request_memory) {
+    case kernel_request_cuda_device:
+      return self_type::create(
+          reinterpret_cast<ckernel_builder<kernel_request_cuda_device> *>(ckb),
+          kernreq & ~kernel_request_cuda_device, inout_ckb_offset,
+          std::forward<A>(args)...);
+    default:
+      throw std::invalid_argument("unrecognized ckernel request");
+    }
   }
 
   template <typename CKT>
@@ -678,51 +693,61 @@ namespace kernels {
       void *ckb, kernel_request_t kernreq, intptr_t &inout_ckb_offset,
       A &&... args)
   {
-    return self_type::create_leaf(
-        reinterpret_cast<ckernel_builder<kernel_request_cuda_device> *>(ckb),
-        kernreq & ~kernel_request_cuda_device, inout_ckb_offset,
-        std::forward<A>(args)...);
-  }
-
-  GENERAL_CK(kernel_request_host | kernel_request_cuda_device,
-             __host__ __device__);
-
-  template <typename CKT>
-  template <typename... A>
-  typename general_ck<CKT, kernel_request_host |
-                               kernel_request_cuda_device>::self_type *
-  general_ck<CKT, kernel_request_host | kernel_request_cuda_device>::create(
-      void *ckb, kernel_request_t kernreq, intptr_t &inout_ckb_offset,
-      A &&... args)
-  {
-    if (kernreq & kernel_request_cuda_device) {
-      return self_type::create(
-          reinterpret_cast<ckernel_builder<kernel_request_cuda_device> *>(ckb),
-          kernreq & ~kernel_request_cuda_device, inout_ckb_offset,
-          std::forward<A>(args)...);
-    }
-    return self_type::create(
-        reinterpret_cast<ckernel_builder<kernel_request_host> *>(ckb), kernreq,
-        inout_ckb_offset, std::forward<A>(args)...);
-  }
-
-  template <typename CKT>
-  template <typename... A>
-  typename general_ck<CKT, kernel_request_host |
-                               kernel_request_cuda_device>::self_type *
-  general_ck<CKT, kernel_request_host | kernel_request_cuda_device>::
-      create_leaf(void *ckb, kernel_request_t kernreq,
-                  intptr_t &inout_ckb_offset, A &&... args)
-  {
-    if (kernreq & kernel_request_cuda_device) {
+    switch (kernreq & kernel_request_memory) {
+    case kernel_request_cuda_device:
       return self_type::create_leaf(
           reinterpret_cast<ckernel_builder<kernel_request_cuda_device> *>(ckb),
           kernreq & ~kernel_request_cuda_device, inout_ckb_offset,
           std::forward<A>(args)...);
+    default:
+      throw std::invalid_argument("unrecognized ckernel request");
     }
-    return self_type::create_leaf(
-        reinterpret_cast<ckernel_builder<kernel_request_host> *>(ckb), kernreq,
-        inout_ckb_offset, std::forward<A>(args)...);
+  }
+
+  GENERAL_CK(kernel_request_cuda_host_device, __host__ __device__);
+
+  template <typename CKT>
+  template <typename... A>
+  typename general_ck<CKT, kernel_request_cuda_host_device>::self_type *
+  general_ck<CKT, kernel_request_cuda_host_device>::create(
+      void *ckb, kernel_request_t kernreq, intptr_t &inout_ckb_offset,
+      A &&... args)
+  {
+    switch (kernreq & kernel_request_memory) {
+    case kernel_request_host:
+      return self_type::create(
+          reinterpret_cast<ckernel_builder<kernel_request_host> *>(ckb),
+          kernreq, inout_ckb_offset, std::forward<A>(args)...);
+    case kernel_request_cuda_device:
+      return self_type::create(
+          reinterpret_cast<ckernel_builder<kernel_request_cuda_device> *>(ckb),
+          kernreq & ~kernel_request_cuda_device, inout_ckb_offset,
+          std::forward<A>(args)...);
+    default:
+      throw std::invalid_argument("unrecognized ckernel request");
+    }
+  }
+
+  template <typename CKT>
+  template <typename... A>
+  typename general_ck<CKT, kernel_request_cuda_host_device>::self_type *
+  general_ck<CKT, kernel_request_cuda_host_device>::create_leaf(
+      void *ckb, kernel_request_t kernreq, intptr_t &inout_ckb_offset,
+      A &&... args)
+  {
+    switch (kernreq & kernel_request_memory) {
+    case kernel_request_host:
+      return self_type::create_leaf(
+          reinterpret_cast<ckernel_builder<kernel_request_host> *>(ckb),
+          kernreq, inout_ckb_offset, std::forward<A>(args)...);
+    case kernel_request_cuda_device:
+      return self_type::create_leaf(
+          reinterpret_cast<ckernel_builder<kernel_request_cuda_device> *>(ckb),
+          kernreq & ~kernel_request_cuda_device, inout_ckb_offset,
+          std::forward<A>(args)...);
+    default:
+      throw std::invalid_argument("unrecognized ckernel request");
+    }
   }
 
 #endif

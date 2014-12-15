@@ -45,7 +45,8 @@ static size_t make_elwise_strided_dimension_expr_kernel_for_N(
 
   bool src_all_device = true;
   for (int i = 0; i < N; ++i) {
-    src_all_device = src_all_device && (src_tp[i].get_type_id() == cuda_device_type_id);
+    src_all_device =
+        src_all_device && (src_tp[i].get_type_id() == cuda_device_type_id);
   }
 
   intptr_t child_src_ndim[N];
@@ -76,9 +77,9 @@ static size_t make_elwise_strided_dimension_expr_kernel_for_N(
     finished = finished && child_src_ndim[i] == 0;
   }
 
-#ifdef DYND_CUDA
+#ifdef __CUDACC__
   if ((dst_tp.get_type_id() == cuda_device_type_id) && src_all_device &&
-      ((kernreq & kernel_request_cuda_device) == false)) {
+      ((kernreq & kernel_request_memory) == kernel_request_host)) {
     typedef kernels::cuda_parallel_ck<N> self_type;
     self_type *self = self_type::create(ckb, kernreq, ckb_offset, 1, 1);
     ckb = &self->ckb;
@@ -88,27 +89,21 @@ static size_t make_elwise_strided_dimension_expr_kernel_for_N(
 #endif
   self_type::create(ckb, kernreq, ckb_offset, size, dst_stride,
                     kernels::array_wrapper<intptr_t, N>(src_stride));
+  kernreq = (kernreq & kernel_request_memory) | kernel_request_strided;
 
   // If there are still dimensions to broadcast, recursively lift more
   if (!finished) {
     return make_lifted_expr_ckernel(
         elwise_handler, elwise_handler_tp, ckb, ckb_offset, dst_ndim - 1,
         child_dst_tp, child_dst_arrmeta, child_src_ndim, child_src_tp,
-        child_src_arrmeta,
-        kernel_request_strided |
-            ((kernreq & kernel_request_cuda_device) ? kernel_request_cuda_device
-                                                    : 0),
-        ectx);
+        child_src_arrmeta, kernreq, ectx);
   }
 
   // Instantiate the elementwise handler
   return elwise_handler->instantiate(
       elwise_handler, elwise_handler_tp, ckb, ckb_offset, child_dst_tp,
-      child_dst_arrmeta, child_src_tp, child_src_arrmeta,
-      kernel_request_strided |
-          ((kernreq & kernel_request_cuda_device) ? kernel_request_cuda_device
-                                                  : 0),
-      ectx, nd::array());
+      child_dst_arrmeta, child_src_tp, child_src_arrmeta, kernreq, ectx,
+      nd::array());
 }
 
 inline static size_t make_elwise_strided_dimension_expr_kernel(
@@ -654,10 +649,9 @@ size_t dynd::make_lifted_expr_ckernel(
     }
     if (i == src_count) {
       // No dimensions to lift, call the elementwise instantiate directly
-      return elwise_handler->instantiate(elwise_handler, elwise_handler_tp, ckb,
-                                         ckb_offset, dst_tp, dst_arrmeta,
-                                         src_tp, src_arrmeta, kernreq, ectx,
-                                         nd::array());
+      return elwise_handler->instantiate(
+          elwise_handler, elwise_handler_tp, ckb, ckb_offset, dst_tp,
+          dst_arrmeta, src_tp, src_arrmeta, kernreq, ectx, nd::array());
     } else {
       stringstream ss;
       ss << "Trying to broadcast " << src_ndim[i] << " dimensions of "
