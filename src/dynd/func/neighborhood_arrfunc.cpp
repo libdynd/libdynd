@@ -178,21 +178,11 @@ static intptr_t instantiate_neighborhood(
 }
 
 static void resolve_neighborhood_option_values(const arrfunc_type_data *DYND_UNUSED(self),
-                                               const arrfunc_type *self_tp,
+                                               const arrfunc_type *DYND_UNUSED(self_tp),
                                                intptr_t DYND_UNUSED(nsrc),
                                                const ndt::type *DYND_UNUSED(src_tp),
-                                               nd::array &kwds)
+                                               nd::array &DYND_UNUSED(kwds))
 {
-  std::cout << ndt::type(self_tp, true) << std::endl;
-  std::cout << kwds << std::endl;
-
-  std::cout << kwds.p("offset") << std::endl;
-  std::cout << "missing offset = " << kwds.p("offset").is_missing() << std::endl;
-  std::cout << "missing mask = " << kwds.p("mask").is_missing() << std::endl;
-
-//  if (kwds.p("offset").is_missing()) {
-  //  kwds.p("offset").vals() = 0;
- // }
 }
 
 static int resolve_neighborhood_dst_type(
