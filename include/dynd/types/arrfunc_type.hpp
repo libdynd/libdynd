@@ -53,10 +53,7 @@ public:
   intptr_t get_arg_index(const char *arg_name_begin,
                          const char *arg_name_end) const;
 
-  std::vector<intptr_t> get_option_arg_indices() const
-  {
-    return m_opt_indices;
-  }
+  std::vector<intptr_t> get_option_arg_indices() const { return m_opt_indices; }
 
   const nd::array &get_arg_names() const { return m_arg_names; }
 
