@@ -381,6 +381,7 @@ nd::array dynd::struct_concat(nd::array lhs, nd::array rhs)
                     lhs_arrmeta + lhs_arrmeta_offsets[i],
                     lhs_data + lhs_data_offsets[i]);
   }
+
   for (intptr_t i = 0; i < rhs_n; ++i) {
     const ndt::type &tp = res_field_tps[i + lhs_n];
     typed_data_copy(tp, res_arrmeta + res_arrmeta_offsets[i + lhs_n],

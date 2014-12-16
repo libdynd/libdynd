@@ -13,64 +13,66 @@ using namespace std;
 using namespace dynd;
 
 template <int N>
-struct neighborhood_ck : kernels::expr_ck<neighborhood_ck<N>, kernel_request_host, N> {
-    typedef neighborhood_ck<N> self_type;
+struct neighborhood_ck
+    : kernels::expr_ck<neighborhood_ck<N>, kernel_request_host, N> {
+  typedef neighborhood_ck<N> self_type;
 
-    intptr_t dst_stride;
-    intptr_t src_offset[N];
-    intptr_t src_stride[N];
-    intptr_t count[3];
-    intptr_t nh_size;
-    start_stop_t *nh_start_stop;
+  intptr_t dst_stride;
+  intptr_t src_offset[N];
+  intptr_t src_stride[N];
+  intptr_t count[3];
+  intptr_t nh_size;
+  start_stop_t *nh_start_stop;
 
-    // local index of first in of bounds element in the neighborhood
-    // local index of first out of bounds element in the neighborhood
+  // local index of first in of bounds element in the neighborhood
+  // local index of first out of bounds element in the neighborhood
 
-    inline void single(char *dst, char *const *src) {
-        ckernel_prefix *child = self_type::get_child_ckernel();
-        expr_single_t child_fn = child->get_function<expr_single_t>();
+  inline void single(char *dst, char *const *src)
+  {
+    ckernel_prefix *child = self_type::get_child_ckernel();
+    expr_single_t child_fn = child->get_function<expr_single_t>();
 
-        char *src_copy[N];
-        memcpy(src_copy, src, sizeof(src_copy));
-        for (intptr_t j = 0; j < N; ++j) {
-            src_copy[j] += src_offset[j];
-        }
-
-        nh_start_stop->start = count[0];
-        nh_start_stop->stop = nh_size; // min(nh_size, dst_size)
-        for (intptr_t i = 0; i < count[0]; ++i) {
-            child_fn(dst, src_copy, child);
-            --(nh_start_stop->start);
-            dst += dst_stride;
-            for (intptr_t j = 0; j < N; ++j) {
-                src_copy[j] += src_stride[j];
-            }
-        }
-      //  *nh_start = 0;
-    //    *nh_stop = nh_size;
-        for (intptr_t i = 0; i < count[1]; ++i) {
-            child_fn(dst, src_copy, child);
-            dst += dst_stride;
-            for (intptr_t j = 0; j < N; ++j) {
-                src_copy[j] += src_stride[j];
-            }
-        }
-  //      *nh_start = 0;
-//        *nh_stop = count[2]; // 0 if count[2] > 
-        for (intptr_t i = 0; i < count[2]; ++i) {
-            --(nh_start_stop->stop);
-            child_fn(dst, src_copy, child);
-            dst += dst_stride;
-            for (intptr_t j = 0; j < N; ++j) {
-                src_copy[j] += src_stride[j];
-            }
-        }
+    char *src_copy[N];
+    memcpy(src_copy, src, sizeof(src_copy));
+    for (intptr_t j = 0; j < N; ++j) {
+      src_copy[j] += src_offset[j];
     }
+
+    nh_start_stop->start = count[0];
+    nh_start_stop->stop = nh_size; // min(nh_size, dst_size)
+    for (intptr_t i = 0; i < count[0]; ++i) {
+      child_fn(dst, src_copy, child);
+      --(nh_start_stop->start);
+      dst += dst_stride;
+      for (intptr_t j = 0; j < N; ++j) {
+        src_copy[j] += src_stride[j];
+      }
+    }
+    //  *nh_start = 0;
+    //    *nh_stop = nh_size;
+    for (intptr_t i = 0; i < count[1]; ++i) {
+      child_fn(dst, src_copy, child);
+      dst += dst_stride;
+      for (intptr_t j = 0; j < N; ++j) {
+        src_copy[j] += src_stride[j];
+      }
+    }
+    //      *nh_start = 0;
+    //        *nh_stop = count[2]; // 0 if count[2] >
+    for (intptr_t i = 0; i < count[2]; ++i) {
+      --(nh_start_stop->stop);
+      child_fn(dst, src_copy, child);
+      dst += dst_stride;
+      for (intptr_t j = 0; j < N; ++j) {
+        src_copy[j] += src_stride[j];
+      }
+    }
+  }
 };
 
 struct neighborhood {
-    nd::arrfunc op;
-    start_stop_t *start_stop;
+  nd::arrfunc op;
+  start_stop_t *start_stop;
 };
 
 template <int N>
@@ -79,8 +81,7 @@ static intptr_t instantiate_neighborhood(
     void *ckb, intptr_t ckb_offset, const ndt::type &dst_tp,
     const char *dst_arrmeta, const ndt::type *src_tp,
     const char *const *src_arrmeta, kernel_request_t kernreq,
-    const eval::eval_context *ectx,
-    const nd::array &kwds)
+    const eval::eval_context *ectx, const nd::array &kwds)
 {
   neighborhood *nh = *af_self->get_data_as<neighborhood *>();
   nd::arrfunc nh_op = nh->op;
@@ -97,11 +98,8 @@ static intptr_t instantiate_neighborhood(
   intptr_t ndim = shape.get_dim_size();
 
   nd::array offset;
-  // TODO: Eliminate all try/catch(...)
-  try {
+  if (!kwds.p("offset").is_missing()) {
     offset = kwds.p("offset").f("dereference");
-  }
-  catch (...) {
   }
 
   // Process the dst array striding/types
@@ -154,16 +152,14 @@ static intptr_t instantiate_neighborhood(
     self->count[0] = offset.is_null() ? 0 : -offset(i).as<intptr_t>();
     if (self->count[0] < 0) {
       self->count[0] = 0;
-    }
-    else if (self->count[0] > dst_shape[i].dim_size) {
+    } else if (self->count[0] > dst_shape[i].dim_size) {
       self->count[0] = dst_shape[i].dim_size;
     }
     self->count[2] = shape(i).as<intptr_t>() +
                      (offset.is_null() ? 0 : offset(i).as<intptr_t>()) - 1;
     if (self->count[2] < 0) {
       self->count[2] = 0;
-    }
-    else if (self->count[2] > (dst_shape[i].dim_size - self->count[0])) {
+    } else if (self->count[2] > (dst_shape[i].dim_size - self->count[0])) {
       self->count[2] = dst_shape[i].dim_size - self->count[0];
     }
     self->count[1] = dst_shape[i].dim_size - self->count[0] - self->count[2];
@@ -175,19 +171,39 @@ static intptr_t instantiate_neighborhood(
   ckb_offset = nh_op.get()->instantiate(
       nh_op.get(), nh_op.get_type(), ckb, ckb_offset, nh_dst_tp, nh_dst_arrmeta,
       nh_src_tp, nh_src_arrmeta, kernel_request_single, ectx,
-      struct_concat(kwds, pack("start_stop", reinterpret_cast<intptr_t>(nh->start_stop))));
+      struct_concat(kwds, pack("start_stop",
+                               reinterpret_cast<intptr_t>(nh->start_stop))));
+
   return ckb_offset;
 }
 
+static void resolve_neighborhood_option_values(const arrfunc_type_data *DYND_UNUSED(self),
+                                               const arrfunc_type *self_tp,
+                                               intptr_t DYND_UNUSED(nsrc),
+                                               const ndt::type *DYND_UNUSED(src_tp),
+                                               nd::array &kwds)
+{
+  std::cout << ndt::type(self_tp, true) << std::endl;
+  std::cout << kwds << std::endl;
+
+  std::cout << kwds.p("offset") << std::endl;
+  std::cout << "missing offset = " << kwds.p("offset").is_missing() << std::endl;
+  std::cout << "missing mask = " << kwds.p("mask").is_missing() << std::endl;
+
+//  if (kwds.p("offset").is_missing()) {
+  //  kwds.p("offset").vals() = 0;
+ // }
+}
+
 static int resolve_neighborhood_dst_type(
-    const arrfunc_type_data *DYND_UNUSED(self), const arrfunc_type *af_tp,
-    intptr_t nsrc, const ndt::type *src_tp, int DYND_UNUSED(throw_on_error),
-    ndt::type &out_dst_tp,
-    const nd::array &DYND_UNUSED(kwds))
+    const arrfunc_type_data *DYND_UNUSED(self), const arrfunc_type *self_tp,
+    intptr_t , const ndt::type *src_tp, int DYND_UNUSED(throw_on_error),
+    ndt::type &out_dst_tp, const nd::array &DYND_UNUSED(kwds))
 {
   // TODO: Should be able to express the match/subsitution without special code
 
   // This is basically resolve() from arrfunc.hpp
+/*
   if (nsrc != af_tp->get_npos()) {
     std::stringstream ss;
     ss << "arrfunc expected " << af_tp->get_npos()
@@ -204,7 +220,11 @@ static int resolve_neighborhood_dst_type(
       throw std::invalid_argument(ss.str());
     }
   }
-  out_dst_tp = ndt::substitute(af_tp->get_return_type(), typevars, false);
+*/
+//  out_dst_tp = ndt::substitute(af_tp->get_return_type(), typevars, false);
+
+
+  out_dst_tp = self_tp->get_return_type();
 
   // swap in the input dimension values for the fixed**N
   intptr_t ndim = src_tp[0].get_ndim();
@@ -212,18 +232,35 @@ static int resolve_neighborhood_dst_type(
   src_tp[0].extended()->get_shape(ndim, 0, shape.get(), NULL, NULL);
   out_dst_tp = ndt::substitute_shape(out_dst_tp, ndim, shape.get());
 
-  return 1;
+  return 0;
 }
 
-static void free_neighborhood(arrfunc_type_data *self_af) {
-    neighborhood *nh = *self_af->get_data_as<neighborhood *>();
-    free(nh->start_stop);
-    delete nh;
+static void free_neighborhood(arrfunc_type_data *self_af)
+{
+  neighborhood *nh = *self_af->get_data_as<neighborhood *>();
+  free(nh->start_stop);
+  delete nh;
 }
 
 nd::arrfunc dynd::make_neighborhood_arrfunc(const nd::arrfunc &neighborhood_op,
                                             intptr_t nh_ndim)
 {
+  const arrfunc_type *funcproto_tp =
+      neighborhood_op.get_array_type().extended<arrfunc_type>();
+
+  nd::array arg_tp = nd::empty(funcproto_tp->get_narg() + 3, ndt::make_type());
+  arg_tp(0).vals() = funcproto_tp->get_arg_type(0);
+  arg_tp(1).vals() = ndt::type("?" + std::to_string(nh_ndim) + " * int");
+  arg_tp(2).vals() = ndt::type("?" + std::to_string(nh_ndim) + " * int");
+  arg_tp(3).vals() = ndt::type("?" + std::to_string(nh_ndim) + " * bool");
+  std::vector<std::string> arg_names;
+  arg_names.push_back("shape");
+  arg_names.push_back("offset");
+  arg_names.push_back("mask");
+  ndt::type ret_tp = arg_tp(0).as<ndt::type>().with_replaced_dtype(
+      funcproto_tp->get_return_type());
+  ndt::type self_tp = ndt::make_funcproto(arg_tp, ret_tp, arg_names);
+
   std::ostringstream oss;
   oss << "fixed**" << nh_ndim;
   ndt::type nhop_pattern("(" + oss.str() + " * NH) -> OUT");
@@ -239,7 +276,7 @@ nd::arrfunc dynd::make_neighborhood_arrfunc(const nd::arrfunc &neighborhood_op,
     throw invalid_argument(ss.str());
   }
 
-  nd::array af = nd::empty(ndt::substitute(result_pattern, typevars, false));
+  nd::array af = nd::empty(self_tp);
   arrfunc_type_data *out_af =
       reinterpret_cast<arrfunc_type_data *>(af.get_readwrite_originptr());
   neighborhood **nh = out_af->get_data_as<neighborhood *>();
@@ -247,6 +284,7 @@ nd::arrfunc dynd::make_neighborhood_arrfunc(const nd::arrfunc &neighborhood_op,
   (*nh)->op = neighborhood_op;
   (*nh)->start_stop = (start_stop_t *)malloc(nh_ndim * sizeof(start_stop_t));
   out_af->instantiate = &instantiate_neighborhood<1>;
+  out_af->resolve_option_values = &resolve_neighborhood_option_values;
   out_af->resolve_dst_type = &resolve_neighborhood_dst_type;
   out_af->free = &free_neighborhood;
   af.flag_as_immutable();

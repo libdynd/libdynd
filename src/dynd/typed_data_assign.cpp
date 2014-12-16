@@ -12,6 +12,7 @@
 
 #include <dynd/typed_data_assign.hpp>
 #include <dynd/types/convert_type.hpp>
+#include <dynd/types/option_type.hpp>
 #include <dynd/kernels/assignment_kernels.hpp>
 #include <dynd/diagnostics.hpp>
 #include <dynd/array.hpp>
@@ -171,6 +172,12 @@ void dynd::typed_data_copy(const ndt::type& tp,
                 const char *dst_arrmeta, char *dst_data,
                 const char *src_arrmeta, const char *src_data)
 {
+    if (tp.get_type_id() == option_type_id) {
+        return typed_data_copy(tp.extended<option_type>()->get_value_type(),
+            dst_arrmeta, dst_data,
+            src_arrmeta, src_data); 
+    }
+
     size_t data_size = tp.get_data_size();
     if (tp.is_pod()) {
         memcpy(dst_data, src_data, data_size);

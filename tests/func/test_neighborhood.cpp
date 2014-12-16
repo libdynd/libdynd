@@ -32,10 +32,6 @@ int sum(const nd::strided_vals<int, N> &nh) {
     return res;
 }
 
-/**
-TODO: This test broken when the order of resolve_option_values and resolve_dst_type changed.
-      It needs to be fixed.
-
 TEST(Neighborhood, Sum1D) {
     nd::arrfunc af = make_neighborhood_arrfunc(nd::apply::make(sum<1>), 1);
     nd::array a;
@@ -46,9 +42,12 @@ TEST(Neighborhood, Sum1D) {
     EXPECT_JSON_EQ_ARR("[3, 6, 5, 3]",
         af(a, kwds("shape", parse_json("1 * int", "[3]"))));
 
-    EXPECT_JSON_EQ_ARR("[1, 3, 6, 5]",
-        af(a, kwds("shape", parse_json("1 * int", "[3]"), "offset", parse_json("1 * int", "[-1]"))));
+    std::exit(-1);
 
+//    EXPECT_JSON_EQ_ARR("[1, 3, 6, 5]",
+  //      af(a, kwds("shape", parse_json("1 * int", "[3]"), "offset", parse_json("1 * int", "[-1]"))));
+
+/*
     EXPECT_JSON_EQ_ARR("[3, 1, 2, 3]",
         af(a, kwds("mask", parse_json("4 * bool", "[true, false, false, true]"))));
 
@@ -60,23 +59,29 @@ TEST(Neighborhood, Sum1D) {
 
     EXPECT_JSON_EQ_ARR("[1, 3, 5, 3]",
         af(a, kwds("mask", parse_json("4 * bool", "[false, true, true, false]"), "offset", parse_json("1 * int", "[-1]"))));
+*/
 
-    a = parse_json("10 * int",
-        "[0, 1, 2, 3, 4, 5, 6, 7, 8, 9]");
+    //a = parse_json("10 * int",
+      //  "[0, 1, 2, 3, 4, 5, 6, 7, 8, 9]");
 
-    EXPECT_JSON_EQ_ARR("[15, 21, 27, 33, 39, 35, 30, 24, 17, 9]",
-        af(a, kwds("shape", parse_json("1 * int", "[6]"))));
+//    EXPECT_JSON_EQ_ARR("[15, 21, 27, 33, 39, 35, 30, 24, 17, 9]",
+  //      af(a, kwds("shape", parse_json("1 * int", "[6]"))));
 
+/*
     EXPECT_JSON_EQ_ARR("[6, 9, 12, 15, 18, 21, 14, 16, 8, 9]",
         af(a, kwds("mask", parse_json("6 * bool", "[true, false, true, false, true, false]"))));
+*/
 
-    EXPECT_JSON_EQ_ARR("[10, 15, 21, 27, 33, 39, 35, 30, 24, 17]",
-        af(a, kwds("shape", parse_json("1 * int", "[6]"), "offset", parse_json("1 * int", "[-1]"))));
+//    EXPECT_JSON_EQ_ARR("[10, 15, 21, 27, 33, 39, 35, 30, 24, 17]",
+  //      af(a, kwds("shape", parse_json("1 * int", "[6]"), "offset", parse_json("1 * int", "[-1]"))));
 
+/*
     EXPECT_JSON_EQ_ARR("[3, 5, 7, 9, 11, 13, 15, 17, 9, 0]",
         af(a, kwds("mask", parse_json("6 * bool", "[false, false, true, true, false, false]"), "offset", parse_json("1 * int", "[-1]"))));
+*/
 }
 
+/*
 TEST(Neighborhood, Sum2D) {
     nd::arrfunc af = make_neighborhood_arrfunc(nd::apply::make(sum<2>), 2);
     nd::array a;

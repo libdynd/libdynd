@@ -2042,10 +2042,10 @@ namespace nd {
 
     for (size_t i = 0; i < (ntp - sizeof...(T)); ++i) {
       intptr_t j = missing[i];
-      if (!tp[j].is_builtin()) {
-        tp[j].extended()->arrmeta_default_construct(
-            arrmeta + arrmeta_offsets[j], true);
-      }
+      tp[j].extended()->arrmeta_default_construct(arrmeta + arrmeta_offsets[j],
+                                                  true);
+      assign_na(tp[j], arrmeta + arrmeta_offsets[j], data + data_offsets[j],
+                &eval::default_eval_context);
     }
   }
 
@@ -2057,12 +2057,10 @@ namespace nd {
   {
     for (intptr_t i = 0; i < ntp; ++i) {
       intptr_t j = missing[i];
-      if (!tp[j].is_builtin()) {
-        tp[j].extended()->arrmeta_default_construct(
-            arrmeta + arrmeta_offsets[j], true);
-        assign_na(tp[j], arrmeta + arrmeta_offsets[j], data + data_offsets[j],
-                  &eval::default_eval_context);
-      }
+      tp[j].extended()->arrmeta_default_construct(arrmeta + arrmeta_offsets[j],
+                                                  true);
+      assign_na(tp[j], arrmeta + arrmeta_offsets[j], data + data_offsets[j],
+                &eval::default_eval_context);
     }
   }
 
