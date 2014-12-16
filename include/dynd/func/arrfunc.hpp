@@ -500,16 +500,18 @@ namespace nd {
       const arrfunc_type_data *self = get();
       const arrfunc_type *self_tp = m_value.get_type().extended<arrfunc_type>();
 
-      if (self->resolve_dst_type != NULL) {
-        kwds_as_array = forward_as_array(
-            kwds.get_names(), ndt::get_forward_types(kwds.get_vals()),
-            kwds.get_vals(), NULL, NULL);
+      /*
+            if (self->resolve_dst_type != NULL) {
+              kwds_as_array = forward_as_array(
+                  kwds.get_names(), ndt::get_forward_types(kwds.get_vals()),
+                  kwds.get_vals(), NULL, NULL);
 
-        ndt::type dst_tp;
-        self->resolve_dst_type(self, self_tp, nsrc, src_tp, true, dst_tp,
-                               kwds_as_array);
-        return dst_tp;
-      }
+              ndt::type dst_tp;
+              self->resolve_dst_type(self, self_tp, nsrc, src_tp, true, dst_tp,
+                                     kwds_as_array);
+              return dst_tp;
+            }
+      */
 
       if (nsrc != self_tp->get_npos()) {
         std::stringstream ss;
@@ -553,7 +555,13 @@ namespace nd {
         }
       }
 
-      //      std::cout << "about to substitute" << std::endl;
+      if (self->resolve_dst_type != NULL) {
+        ndt::type dst_tp;
+        self->resolve_dst_type(self, self_tp, nsrc, src_tp, true, dst_tp,
+                               kwds_as_array);
+        return dst_tp;
+      }
+
       return ndt::substitute(self_tp->get_return_type(), typevars, true);
     }
 
