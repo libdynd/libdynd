@@ -5,7 +5,6 @@
 
 #include <dynd/array.hpp>
 #include <dynd/types/option_type.hpp>
-#include <dynd/types/arrfunc_old_type.hpp>
 #include <dynd/types/typevar_type.hpp>
 #include <dynd/kernels/option_assignment_kernels.hpp>
 #include <dynd/kernels/option_kernels.hpp>

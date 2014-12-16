@@ -15,7 +15,6 @@ void static_types_cleanup();
 } // namespace init
 
 namespace types {
-extern base_type *arrfunc_tp;
 extern base_type *bytes_tp;
 extern base_type *char_tp;
 extern base_type *date_tp;

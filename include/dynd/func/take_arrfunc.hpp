@@ -8,7 +8,6 @@
 #include <dynd/config.hpp>
 #include <dynd/array.hpp>
 #include <dynd/func/arrfunc.hpp>
-#include <dynd/types/arrfunc_old_type.hpp>
 #include <dynd/kernels/expr_kernels.hpp>
 
 namespace dynd { namespace kernels {

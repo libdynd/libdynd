@@ -9,7 +9,6 @@
 #include <dynd/eval/eval_context.hpp>
 #include <dynd/types/base_type.hpp>
 #include <dynd/types/arrfunc_type.hpp>
-#include <dynd/types/arrfunc_old_type.hpp>
 #include <dynd/kernels/ckernel_builder.hpp>
 #include <dynd/types/struct_type.hpp>
 #include <dynd/types/type_pattern_match.hpp>

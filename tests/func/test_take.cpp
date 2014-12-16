@@ -13,7 +13,6 @@
 #include <dynd/array.hpp>
 #include <dynd/func/take_arrfunc.hpp>
 #include <dynd/kernels/reduction_kernels.hpp>
-#include <dynd/types/arrfunc_old_type.hpp>
 #include <dynd/func/lift_reduction_arrfunc.hpp>
 #include <dynd/func/call_callable.hpp>
 

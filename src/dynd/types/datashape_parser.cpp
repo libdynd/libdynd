@@ -25,7 +25,6 @@
 #include <dynd/types/fixedbytes_type.hpp>
 #include <dynd/types/bytes_type.hpp>
 #include <dynd/types/type_type.hpp>
-#include <dynd/types/arrfunc_old_type.hpp>
 #include <dynd/types/type_alignment.hpp>
 #include <dynd/types/pointer_type.hpp>
 #include <dynd/types/char_type.hpp>
@@ -102,7 +101,6 @@ void init::datashape_parser_init()
   bit["datetime"] = ndt::make_datetime();
   bit["bytes"] = ndt::make_bytes(1);
   bit["type"] = ndt::make_type();
-  bit["arrfunc"] = ndt::make_arrfunc();
   bit["ndarrayarg"] = ndt::make_ndarrayarg();
   // Transfer to the heap for the builtin_types variable
   map<string, ndt::type> *bit_ptr = new map<string, ndt::type>();

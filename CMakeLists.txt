@@ -160,7 +160,6 @@ set(libdynd_SRC
     src/dynd/types/categorical_type.cpp
     src/dynd/types/cfixed_dim_type.cpp
     src/dynd/types/char_type.cpp
-    src/dynd/types/arrfunc_old_type.cpp
     src/dynd/types/convert_type.cpp
     src/dynd/types/cstruct_type.cpp
     src/dynd/types/ctuple_type.cpp
@@ -228,7 +227,6 @@ set(libdynd_SRC
     include/dynd/types/byteswap_type.hpp
     include/dynd/types/categorical_type.hpp
     include/dynd/types/char_type.hpp
-    include/dynd/types/arrfunc_old_type.hpp
     include/dynd/types/convert_type.hpp
     include/dynd/types/ctuple_type.hpp
     include/dynd/types/cuda_host_type.hpp
