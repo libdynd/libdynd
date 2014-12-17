@@ -15,6 +15,44 @@
 #include <dynd/types/type_pattern_match.hpp>
 #include <dynd/types/substitute_typevars.hpp>
 
+#define DYND_HAS_MEM_FUNC(NAME)                                                \
+  template <typename T, typename S>                                            \
+  class DYND_PP_PASTE(has_, NAME) {                                            \
+    template <typename U, U>                                                   \
+    struct test_type;                                                          \
+    typedef char true_type[1];                                                 \
+    typedef char false_type[2];                                                \
+                                                                               \
+    template <typename U>                                                      \
+    static true_type &test(test_type<S, &U::NAME> *);                          \
+    template <typename>                                                        \
+    static false_type &test(...);                                              \
+                                                                               \
+  public:                                                                      \
+    static bool const value = sizeof(test<T>(0)) == sizeof(true_type);         \
+  }
+#define DYND_GET_MEM_FUNC(TYPE, NAME)                                          \
+  template <typename T, bool DYND_PP_PASTE(has_, NAME)>                        \
+  typename std::enable_if<DYND_PP_PASTE(has_, NAME), TYPE>::type               \
+      DYND_PP_PASTE(get_, NAME)()                                              \
+  {                                                                            \
+    return DYND_PP_META_SCOPE(T, NAME);                                        \
+  }                                                                            \
+                                                                               \
+  template <typename T, bool DYND_PP_PASTE(has_, NAME)>                        \
+  typename std::enable_if<!DYND_PP_PASTE(has_, NAME), TYPE>::type              \
+      DYND_PP_PASTE(get_, NAME)()                                              \
+  {                                                                            \
+    return NULL;                                                               \
+  }                                                                            \
+                                                                               \
+  template <typename T>                                                        \
+  TYPE DYND_PP_PASTE(get_, NAME)()                                             \
+  {                                                                            \
+    return DYND_PP_PASTE(                                                      \
+        get_, NAME)<T, DYND_PP_PASTE(has_, NAME)<T, TYPE>::value>();           \
+  }
+
 namespace dynd {
 
 namespace ndt {
@@ -101,6 +139,21 @@ typedef void (*arrfunc_resolve_option_values_t)(const arrfunc_type_data *self,
  * freeing any additional resources it might contain.
  */
 typedef void (*arrfunc_free_t)(arrfunc_type_data *self);
+
+typedef ndt::type (*arrfunc_make_funcproto_t)();
+
+namespace detail {
+  DYND_HAS_MEM_FUNC(make_funcproto);
+  DYND_HAS_MEM_FUNC(instantiate);
+  DYND_HAS_MEM_FUNC(resolve_option_values);
+  DYND_HAS_MEM_FUNC(resolve_dst_type);
+  DYND_HAS_MEM_FUNC(free);
+  DYND_GET_MEM_FUNC(arrfunc_make_funcproto_t, make_funcproto);
+  DYND_GET_MEM_FUNC(arrfunc_instantiate_t, instantiate);
+  DYND_GET_MEM_FUNC(arrfunc_resolve_option_values_t, resolve_option_values);
+  DYND_GET_MEM_FUNC(arrfunc_resolve_dst_type_t, resolve_dst_type);
+  DYND_GET_MEM_FUNC(arrfunc_free_t, free);
+} // namespace dynd::detail
 
 /**
  * This is a struct designed for interoperability at
@@ -758,6 +811,16 @@ namespace nd {
       }
     }
   };
+
+  template <typename T>
+  arrfunc make_arrfunc()
+  {
+    arrfunc_type_data self(dynd::detail::get_instantiate<T>(),
+                           dynd::detail::get_resolve_option_values<T>(),
+                           dynd::detail::get_resolve_dst_type<T>(),
+                           dynd::detail::get_free<T>());
+    return arrfunc(&self, T::make_funcproto());
+  }
 } // namespace nd
 
 /**
@@ -781,6 +844,47 @@ nd::arrfunc make_arrfunc_from_assignment(const ndt::type &dst_tp,
  */
 nd::arrfunc make_arrfunc_from_property(const ndt::type &tp,
                                        const std::string &propname);
+
+namespace decl {
+  namespace nd {
+    namespace detail {
+      template <typename T, bool is_like_ck>
+      struct arrfunc_factory;
+      template <typename T>
+      struct arrfunc_factory<T, true> {
+        static dynd::nd::arrfunc make() { return dynd::nd::make_arrfunc<T>(); }
+      };
+      template <typename T>
+      struct arrfunc_factory<T, false> {
+        static dynd::nd::arrfunc make() { return T::make(); }
+      };
+    } // namespace dynd::decl::nd::detail
+    template <typename T>
+    class arrfunc {
+      typedef detail::arrfunc_factory<
+          T, dynd::detail::has_make_funcproto<
+                 T, arrfunc_make_funcproto_t>::value &&
+                 dynd::detail::has_instantiate<T, arrfunc_instantiate_t>::value>
+          factory_type;
+      dynd::nd::arrfunc &get()
+      {
+        static dynd::nd::arrfunc af = factory_type::make();
+        return af;
+      }
+
+    public:
+      operator const dynd::nd::arrfunc &() { return get(); }
+      const ndt::type &get_funcproto() { return get()->get_array_type(); }
+
+      template <typename... K>
+      dynd::nd::array operator()(const dynd::nd::array &a0,
+                                 const dynd::nd::detail::kwds<K...> &kwds = dynd::kwds())
+      {
+        return get()(a0, kwds);
+      }
+    };
+  }
+} // namespace dynd::decl::nd
 
 } // namespace dynd
 
