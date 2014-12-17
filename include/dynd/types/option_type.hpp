@@ -43,6 +43,10 @@ public:
 
   virtual ~option_type();
 
+  size_t get_default_data_size() const {
+    return m_value_tp.get_default_data_size();
+  }
+
   /** Returns the type that m_nafunc has */
   static const ndt::type &make_nafunc_type();
 
