@@ -879,8 +879,9 @@ namespace decl {
       }
 
     public:
+
       operator const dynd::nd::arrfunc &() { return get(); }
-      const ndt::type &get_funcproto() { return get()->get_array_type(); }
+      const ndt::type &get_funcproto() { return get().get_array_type(); }
 
       template <typename... K>
       dynd::nd::array operator()(const dynd::nd::array &a0,
