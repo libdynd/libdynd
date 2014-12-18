@@ -426,6 +426,12 @@ namespace nd {
   }
 } // namespace nd
 
+
+template <typename T>
+struct builtin_or_array {
+  typedef nd::array type;
+};
+
 inline nd::detail::kwds<> kwds() { return nd::detail::kwds<>(); }
 
 template <typename... T>

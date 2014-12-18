@@ -165,7 +165,8 @@ struct fftw_ck : kernels::expr_ck<fftw_ck<fftw_dst_type, fftw_src_type, sign>,
   static ndt::type make_funcproto()
   {
     return ndt::type("(fixed**N * complex[float64], shape: ?N * int64, axes: "
-                     "?N * int64, flags: ?int32) -> fixed**N * complex[float64]");
+                     "?N * int64, flags: ?int32) -> fixed**N * "
+                     "complex[float64]");
   }
 
   static void resolve_option_values(const arrfunc_type_data *DYND_UNUSED(self),
@@ -175,10 +176,8 @@ struct fftw_ck : kernels::expr_ck<fftw_ck<fftw_dst_type, fftw_src_type, sign>,
                                     nd::array &kwds)
   {
     if (kwds.p("flags").is_missing()) {
-        kwds.p("flags").vals() = FFTW_ESTIMATE;
+      kwds.p("flags").vals() = FFTW_ESTIMATE;
     }
-
-    std::cout << kwds << std::endl;
   }
 
   static intptr_t instantiate(
@@ -194,9 +193,9 @@ struct fftw_ck : kernels::expr_ck<fftw_ck<fftw_dst_type, fftw_src_type, sign>,
       shape = kwds.p("shape");
     }
 
-    nd::array axes = kwds.p("axes");
+    nd::array axes;
     if (!kwds.p("axes").is_missing()) {
-      axes = kwds.p("axes");
+      axes = kwds.p("axes").f("dereference");
     } else {
       axes = nd::range(src_tp[0].get_ndim());
     }
@@ -237,6 +236,7 @@ struct fftw_ck : kernels::expr_ck<fftw_ck<fftw_dst_type, fftw_src_type, sign>,
             reinterpret_cast<fftw_src_type *>(src.get_readwrite_originptr()),
             reinterpret_cast<fftw_dst_type *>(dst.get_readwrite_originptr()),
             sign, kwds.p("flags").as<int>()));
+
     return ckb_offset;
   }
 

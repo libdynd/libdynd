@@ -420,11 +420,11 @@ TYPED_TEST_P(FFT2D, Linear)
     }
   }
 
-  vector<intptr_t> axes;
-  axes.push_back(0);
+//  vector<intptr_t> axes;
+  //axes.push_back(0);
 
-  //    y0 = nd::fft(x0, kwds("shape", x0.get_shape(), "axes", axes));
-  y0 = nd::fft(x0, kwds("shape", x0.get_shape()));
+//      y0 = nd::fft(x0, kwds("shape", nd::array(x0.get_shape()), "axes", nd::array(axes)));
+//  y0 = nd::fft(x0, kwds("shape", x0.get_shape()));
 
 /*
   std::exit(-1);
