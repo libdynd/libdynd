@@ -9,6 +9,8 @@
 #include <dynd/func/multidispatch_arrfunc.hpp>
 #include <dynd/kernels/fft.hpp>
 
+#ifdef DYND_FFTW
+
 namespace dynd {
 namespace decl {
   namespace nd {
@@ -93,3 +95,5 @@ namespace nd {
   extern decl::nd::irfft irfft;
 }
 } // namespace dynd::nd
+
+#endif

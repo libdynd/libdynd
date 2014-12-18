@@ -8,11 +8,16 @@
 using namespace std;
 using namespace dynd;
 
+#ifdef DYND_FFTW
+
 decl::nd::fftw nd::fftw;
 decl::nd::rfftw nd::rfftw;
 decl::nd::ifftw nd::ifftw;
 decl::nd::irfftw nd::irfftw;
+
 decl::nd::fft nd::fft;
 decl::nd::rfft nd::rfft;
 decl::nd::ifft nd::ifft;
 decl::nd::irfft nd::irfft;
+
+#endif

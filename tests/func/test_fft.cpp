@@ -18,6 +18,8 @@
 using namespace std;
 using namespace dynd;
 
+#ifdef DYND_FFTW
+
 template <typename T>
 class FFT1D;
 
@@ -779,7 +781,7 @@ TYPED_TEST_P(RFFT2D, KroneckerDelta)
 }
 */
 
-#ifdef DYND_FFTW // For now, only test FFTs if we built DYND with FFTW
+ // For now, only test FFTs if we built DYND with FFTW
 
 /** TODO: A few of the single-precision tests fail, even at what should be
  * reasonable relative error.

@@ -12,7 +12,6 @@
 
 #ifdef DYND_FFTW
 #include <fftw3.h>
-#endif
 
 namespace dynd {
 
@@ -296,3 +295,5 @@ struct fftw_ck : kernels::expr_ck<fftw_ck<fftw_dst_type, fftw_src_type, sign>,
 };
 
 } // namespace dynd
+
+#endif
