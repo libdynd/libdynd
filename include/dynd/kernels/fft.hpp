@@ -147,6 +147,7 @@ struct fftw_ck : kernels::expr_ck<fftw_ck<fftw_dst_type, fftw_src_type, sign>,
 
   typedef typename detail::fftw_plan<fftw_dst_type, fftw_src_type>::type
       plan_type;
+  typedef fftw_ck<fftw_dst_type, fftw_src_type, sign> self_type;
 
   plan_type plan;
 
@@ -156,27 +157,28 @@ struct fftw_ck : kernels::expr_ck<fftw_ck<fftw_dst_type, fftw_src_type, sign>,
 
   void single(char *dst, char *const *src)
   {
-    detail::fftw_execute_dft(plan, *reinterpret_cast<fftw_src_type *const *>(src),
+    detail::fftw_execute_dft(plan,
+                             *reinterpret_cast<fftw_src_type *const *>(src),
                              reinterpret_cast<fftw_dst_type *>(dst));
   }
 
   static ndt::type make_funcproto()
   {
-    std::cout << "make_funcproto" << std::endl;
-
-    return ndt::type("(Dims... * complex[float64], shape: fixed * int64, axes: "
-                     "?2 * int64) -> Dims... * complex[float64]");
+    return ndt::type("(fixed**N * complex[float64], shape: ?N * int64, axes: "
+                     "?N * int64, flags: ?int32) -> fixed**N * complex[float64]");
   }
 
   static void resolve_option_values(const arrfunc_type_data *DYND_UNUSED(self),
-                                  const arrfunc_type *DYND_UNUSED(self_tp),
-                                  intptr_t DYND_UNUSED(nsrc),
-                                  const ndt::type *DYND_UNUSED(src_tp),
-                                  nd::array &kwds)
+                                    const arrfunc_type *DYND_UNUSED(self_tp),
+                                    intptr_t DYND_UNUSED(nsrc),
+                                    const ndt::type *DYND_UNUSED(src_tp),
+                                    nd::array &kwds)
   {
-    std::cout << "resolve_option_values" << std::endl;
-    std::cout << kwds << std::endl;
+    if (kwds.p("flags").is_missing()) {
+        kwds.p("flags").vals() = FFTW_ESTIMATE;
+    }
 
+    std::cout << kwds << std::endl;
   }
 
   static intptr_t instantiate(
@@ -188,26 +190,15 @@ struct fftw_ck : kernels::expr_ck<fftw_ck<fftw_dst_type, fftw_src_type, sign>,
   {
 
     nd::array shape;
-    try {
+    if (!kwds.p("shape").is_missing()) {
       shape = kwds.p("shape");
     }
-    catch (...) {
-    }
 
-    nd::array axes;
-    try {
+    nd::array axes = kwds.p("axes");
+    if (!kwds.p("axes").is_missing()) {
       axes = kwds.p("axes");
-    }
-    catch (...) {
+    } else {
       axes = nd::range(src_tp[0].get_ndim());
-    }
-
-    int flags;
-    try {
-      flags = kwds.p("flags").as<int>();
-    }
-    catch (...) {
-      flags = FFTW_ESTIMATE;
     }
 
     const size_stride_t *src_size_stride =
@@ -245,16 +236,17 @@ struct fftw_ck : kernels::expr_ck<fftw_ck<fftw_dst_type, fftw_src_type, sign>,
             rank, dims.get(), howmany_rank, howmany_dims.get(),
             reinterpret_cast<fftw_src_type *>(src.get_readwrite_originptr()),
             reinterpret_cast<fftw_dst_type *>(dst.get_readwrite_originptr()),
-            sign, flags));
+            sign, kwds.p("flags").as<int>()));
     return ckb_offset;
   }
 
   template <bool real_to_complex>
   static typename enable_if<real_to_complex, int>::type
   resolve_dst_type(const arrfunc_type_data *DYND_UNUSED(self),
+                   const arrfunc_type *DYND_UNUSED(self_tp),
                    intptr_t DYND_UNUSED(nsrc), const ndt::type *src_tp,
                    int DYND_UNUSED(throw_on_error), ndt::type &dst_tp,
-                   const nd::array &DYND_UNUSED(args), const nd::array &kwds)
+                   const nd::array &kwds)
   {
     nd::array shape;
     try {
@@ -279,29 +271,27 @@ struct fftw_ck : kernels::expr_ck<fftw_ck<fftw_dst_type, fftw_src_type, sign>,
   template <bool real_to_complex>
   static typename enable_if<!real_to_complex, int>::type
   resolve_dst_type(const arrfunc_type_data *DYND_UNUSED(self),
+                   const arrfunc_type *DYND_UNUSED(self_tp),
                    intptr_t DYND_UNUSED(nsrc), const ndt::type *src_tp,
                    int DYND_UNUSED(throw_on_error), ndt::type &dst_tp,
-                   const nd::array &DYND_UNUSED(args), const nd::array &kwds)
+                   const nd::array &kwds)
   {
-    nd::array shape;
-    try {
-      shape = kwds.p("shape");
+    if (kwds.p("shape").is_missing()) {
+      dst_tp = src_tp[0];
+    } else {
+      nd::array shape = kwds.p("shape");
     }
-    catch (...) {
-    }
-
-    dst_tp = src_tp[0];
 
     return 0;
   }
 
-  static int resolve_dst_type(const arrfunc_type_data *self, intptr_t nsrc,
+  static int resolve_dst_type(const arrfunc_type_data *self,
+                              const arrfunc_type *self_tp, intptr_t nsrc,
                               const ndt::type *src_tp, int throw_on_error,
-                              ndt::type &dst_tp, const nd::array &args,
-                              const nd::array &kwds)
+                              ndt::type &dst_tp, const nd::array &kwds)
   {
     return resolve_dst_type<std::is_same<fftw_src_type, double>::value>(
-        self, nsrc, src_tp, throw_on_error, dst_tp, args, kwds);
+        self, self_tp, nsrc, src_tp, throw_on_error, dst_tp, kwds);
   }
 };
 

@@ -54,7 +54,17 @@ namespace decl {
 
     class fft : public arrfunc<fft> {
     public:
-      static dynd::nd::arrfunc make() { return dynd::nd::fftw; }
+      static dynd::nd::arrfunc make()
+      {
+		std::cout << "arrfunc::make" << std::endl;
+        std::cout
+            << (dynd::detail::get_resolve_option_values<
+                    fftw_ck<fftw_complex, fftw_complex, FFTW_FORWARD>>() ==
+                NULL) << std::endl;
+		std::cout << "arrfunc::make" << std::endl;
+
+        return dynd::nd::fftw;
+      }
     };
 
     class rfft : public arrfunc<rfft> {

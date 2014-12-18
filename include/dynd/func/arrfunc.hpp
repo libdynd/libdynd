@@ -525,7 +525,7 @@ namespace nd {
 
     std::vector<intptr_t> resolve_missing_types(
         ndt::type *kwd_tp,
-        std::map<nd::string, ndt::type> &DYND_UNUSED(typevars)) const
+        std::map<nd::string, ndt::type> &typevars) const
     {
       std::vector<intptr_t> missing;
 
@@ -537,7 +537,7 @@ namespace nd {
 
         ndt::type &actual_tp = kwd_tp[j - self_tp->get_npos()];
         if (actual_tp.is_null()) {
-          actual_tp = self_tp->get_arg_type(j);
+          actual_tp = ndt::substitute(self_tp->get_arg_type(j), typevars, true);
           missing.push_back(j - self_tp->get_npos());
         }
       }
@@ -601,7 +601,7 @@ namespace nd {
             forward_as_array(self_tp->get_arg_names(), kwd_tp, kwds.get_vals(),
                              available.empty() ? NULL : available.data(),
                              missing.empty() ? NULL : missing.data());
-
+        
         if (self->resolve_option_values != NULL) {
           self->resolve_option_values(self, self_tp, nsrc, src_tp,
                                       kwds_as_array);
