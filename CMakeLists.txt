@@ -304,6 +304,7 @@ set(libdynd_SRC
     src/dynd/func/chain_arrfunc.cpp
     src/dynd/func/elwise_gfunc.cpp
     src/dynd/func/elwise_reduce_gfunc.cpp
+    src/dynd/func/fft.cpp
     src/dynd/func/lift_arrfunc.cpp
     src/dynd/func/lift_reduction_arrfunc.cpp
     src/dynd/func/neighborhood_arrfunc.cpp
@@ -320,6 +321,7 @@ set(libdynd_SRC
     include/dynd/func/elwise.hpp
     include/dynd/func/elwise_gfunc.hpp
     include/dynd/func/elwise_reduce_gfunc.hpp
+    include/dynd/func/fft.hpp
     include/dynd/func/apply_arrfunc.hpp
     include/dynd/func/make_callable.hpp
     include/dynd/func/lift_arrfunc.hpp
@@ -351,6 +353,7 @@ set(libdynd_SRC
     src/dynd/kernels/expr_kernels.cpp
     src/dynd/kernels/expression_assignment_kernels.cpp
     src/dynd/kernels/expression_comparison_kernels.cpp
+    src/dynd/kernels/fft.cpp
     src/dynd/kernels/make_lifted_ckernel.cpp
     src/dynd/kernels/make_lifted_reduction_ckernel.cpp
     src/dynd/kernels/option_assignment_kernels.cpp
@@ -388,6 +391,7 @@ set(libdynd_SRC
     include/dynd/kernels/expr_kernel_generator.hpp
     include/dynd/kernels/expression_assignment_kernels.hpp
     include/dynd/kernels/expression_comparison_kernels.hpp
+    include/dynd/func/fft.hpp
     include/dynd/kernels/make_lifted_ckernel.hpp
     include/dynd/kernels/make_lifted_reduction_ckernel.hpp
     include/dynd/kernels/option_assignment_kernels.hpp
@@ -436,7 +440,6 @@ set(libdynd_SRC
     # Main
     src/dynd/arithmetic_op.cpp
     src/dynd/array.cpp
-#    src/dynd/fft.cpp
     src/dynd/array_range.cpp
     src/dynd/config.cpp
     src/dynd/dim_iter.cpp
@@ -473,7 +476,6 @@ set(libdynd_SRC
     include/dynd/dynd_math.hpp
     include/dynd/ensure_immutable_contig.hpp
     include/dynd/random.hpp
-#    include/dynd/fft.hpp
     include/dynd/type.hpp
     include/dynd/typed_data_assign.hpp
     include/dynd/type_promotion.hpp
