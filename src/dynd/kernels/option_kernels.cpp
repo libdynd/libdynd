@@ -449,7 +449,7 @@ struct nafunc {
     ckernel_prefix *ckp =
         reinterpret_cast<ckernel_builder<kernel_request_host> *>(ckb)
             ->alloc_ck_leaf<ckernel_prefix>(ckb_offset);
-    ckp->set_expr_function<::is_avail<T>>(kernreq);
+    ckp->set_expr_function< ::is_avail<T> >(kernreq);
     return ckb_offset;
   }
 
