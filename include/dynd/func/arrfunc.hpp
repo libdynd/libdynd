@@ -543,7 +543,10 @@ namespace nd {
 
         ndt::type &actual_tp = kwd_tp[j - self_tp->get_npos()];
         if (actual_tp.is_null()) {
-          actual_tp = ndt::substitute(self_tp->get_arg_type(j), typevars, true);
+          actual_tp = ndt::substitute(self_tp->get_arg_type(j), typevars, false);
+          if (actual_tp.is_symbolic()) {
+            actual_tp = ndt::make_option(ndt::make_type<void>());
+          }
           missing.push_back(j - self_tp->get_npos());
         }
       }

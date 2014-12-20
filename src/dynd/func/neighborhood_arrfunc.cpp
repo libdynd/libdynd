@@ -242,7 +242,7 @@ nd::arrfunc dynd::make_neighborhood_arrfunc(const nd::arrfunc &neighborhood_op,
   arg_tp(0).vals() = funcproto_tp->get_arg_type(0);
   arg_tp(1).vals() = ndt::type("?" + std::to_string(nh_ndim) + " * int");
   arg_tp(2).vals() = ndt::type("?" + std::to_string(nh_ndim) + " * int");
-  arg_tp(3).vals() = ndt::type("?" + std::to_string(nh_ndim) + " * bool");
+  arg_tp(3).vals() = ndt::type("?fixed**" + std::to_string(nh_ndim) + " * bool");
   std::vector<std::string> arg_names;
   arg_names.push_back("shape");
   arg_names.push_back("offset");
