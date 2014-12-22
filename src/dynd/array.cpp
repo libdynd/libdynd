@@ -1051,7 +1051,7 @@ nd::array nd::array::to_cuda_host(unsigned int cuda_host_flags) const
 
 nd::array nd::array::to_cuda_device() const
 {
-      array result = empty(make_cuda_device(get_type().without_memory_type()));
+  array result = empty(make_cuda_device(get_type().without_memory_type()));
   result.val_assign(*this);
 
   return result;
@@ -2212,8 +2212,8 @@ void nd::assign_na(const ndt::type &tp, const char *arrmeta, char *data,
       const arrfunc_type *af_tp =
           dtp.extended<option_type>()->get_assign_na_arrfunc_type();
       ckernel_builder<kernel_request_host> ckb;
-      make_lifted_expr_ckernel(af, af_tp, &ckb, 0, tp.get_ndim(), tp, arrmeta,
-                               NULL, NULL, NULL, kernel_request_single, ectx);
+      make_lifted_expr_ckernel(af, af_tp, &ckb, tp.get_ndim(), tp, arrmeta,
+                               NULL, NULL, kernel_request_single, ectx);
       ckernel_prefix *ckp = ckb.get();
       expr_single_t ckp_fn = ckp->get_function<expr_single_t>();
       ckp_fn(data, NULL, ckp);

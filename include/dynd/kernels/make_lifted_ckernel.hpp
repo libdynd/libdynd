@@ -25,15 +25,15 @@ namespace dynd {
  * \param src_ndim  The number of dimensions to lift for each source type.
  * \param src_tp  The source types to lift to.
  * \param src_arrmeta  The source arrmetas to lift to.
- * \param kernreq  Either dynd::kernel_request_single or dynd::kernel_request_strided,
+ * \param kernreq  Either dynd::kernel_request_single or
+ *dynd::kernel_request_strided,
  *                  as required by the caller.
  * \param ectx  The evaluation context.
  */
 size_t make_lifted_expr_ckernel(
     const arrfunc_type_data *elwise_handler,
-    const arrfunc_type *elwise_handler_tp, void *ckb,
-    intptr_t ckb_offset, intptr_t dst_ndim, const ndt::type &dst_tp,
-    const char *dst_arrmeta, const intptr_t *src_ndim, const ndt::type *src_tp,
+    const arrfunc_type *elwise_handler_tp, void *ckb, intptr_t ckb_offset,
+    const ndt::type &dst_tp, const char *dst_arrmeta, const ndt::type *src_tp,
     const char *const *src_arrmeta, dynd::kernel_request_t kernreq,
     const eval::eval_context *ectx);
 
