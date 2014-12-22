@@ -8,6 +8,8 @@
 #include <dynd/kernels/expr_kernels.hpp>
 #include <dynd/kernels/cuda_kernels.hpp>
 #include <dynd/types/var_dim_type.hpp>
+#include <dynd/array.hpp>
+#include <dynd/func/arrfunc.hpp>
 
 namespace dynd {
 namespace kernels {
@@ -69,8 +71,8 @@ namespace kernels {
       self->destroy_child_ckernel(sizeof(self_type));
     }
 
-    static size_t instantiate(const arrfunc_type_data *elwise_handler,
-                              const arrfunc_type *elwise_handler_tp, void *ckb,
+    static size_t instantiate(const arrfunc_type_data *child,
+                              const arrfunc_type *child_tp, void *ckb,
                               intptr_t ckb_offset, const ndt::type &dst_tp,
                               const char *dst_arrmeta, const ndt::type *src_tp,
                               const char *const *src_arrmeta,
@@ -78,7 +80,7 @@ namespace kernels {
                               const eval::eval_context *ectx)
     {
       intptr_t dst_ndim =
-          dst_tp.get_ndim() - elwise_handler_tp->get_return_type().get_ndim();
+          dst_tp.get_ndim() - child_tp->get_return_type().get_ndim();
 
       const char *child_dst_arrmeta;
       const char *child_src_arrmeta[N];
@@ -102,8 +104,8 @@ namespace kernels {
 
       bool finished = dst_ndim == 1;
       for (int i = 0; i < N; ++i) {
-        intptr_t src_ndim = src_tp[i].get_ndim() -
-                            elwise_handler_tp->get_arg_type(i).get_ndim();
+        intptr_t src_ndim =
+            src_tp[i].get_ndim() - child_tp->get_arg_type(i).get_ndim();
         intptr_t src_size;
         if (src_ndim < dst_ndim) {
           // This src value is getting broadcasted
@@ -145,15 +147,14 @@ namespace kernels {
       // If there are still dimensions to broadcast, recursively lift more
       if (!finished) {
         return make_lifted_expr_ckernel(
-            elwise_handler, elwise_handler_tp, ckb, ckb_offset, child_dst_tp,
-            child_dst_arrmeta, child_src_tp, child_src_arrmeta, kernreq, ectx);
+            child, child_tp, ckb, ckb_offset, child_dst_tp, child_dst_arrmeta,
+            child_src_tp, child_src_arrmeta, kernreq, ectx);
       }
 
       // Instantiate the elementwise handler
-      return elwise_handler->instantiate(
-          elwise_handler, elwise_handler_tp, ckb, ckb_offset, child_dst_tp,
-          child_dst_arrmeta, child_src_tp, child_src_arrmeta, kernreq, ectx,
-          nd::array());
+      return child->instantiate(child, child_tp, ckb, ckb_offset, child_dst_tp,
+                                child_dst_arrmeta, child_src_tp,
+                                child_src_arrmeta, kernreq, ectx, nd::array());
     }
   };
 
@@ -232,8 +233,8 @@ namespace kernels {
       self->destroy_child_ckernel(sizeof(self_type));
     }
 
-    static size_t instantiate(const arrfunc_type_data *elwise_handler,
-                              const arrfunc_type *elwise_handler_tp, void *ckb,
+    static size_t instantiate(const arrfunc_type_data *child,
+                              const arrfunc_type *child_tp, void *ckb,
                               intptr_t ckb_offset, const ndt::type &dst_tp,
                               const char *dst_arrmeta, const ndt::type *src_tp,
                               const char *const *src_arrmeta,
@@ -241,7 +242,7 @@ namespace kernels {
                               const eval::eval_context *ectx)
     {
       intptr_t dst_ndim =
-          dst_tp.get_ndim() - elwise_handler_tp->get_return_type().get_ndim();
+          dst_tp.get_ndim() - child_tp->get_return_type().get_ndim();
 
       const char *child_dst_arrmeta;
       const char *child_src_arrmeta[N];
@@ -262,8 +263,8 @@ namespace kernels {
       bool finished = dst_ndim == 1;
       for (int i = 0; i < N; ++i) {
         intptr_t src_size;
-        intptr_t src_ndim = src_tp[i].get_ndim() -
-                            elwise_handler_tp->get_arg_type(i).get_ndim();
+        intptr_t src_ndim =
+            src_tp[i].get_ndim() - child_tp->get_arg_type(i).get_ndim();
         // The src[i] strided parameters
         if (src_ndim < dst_ndim) {
           // This src value is getting broadcasted
@@ -304,15 +305,14 @@ namespace kernels {
       // If there are still dimensions to broadcast, recursively lift more
       if (!finished) {
         return make_lifted_expr_ckernel(
-            elwise_handler, elwise_handler_tp, ckb, ckb_offset, child_dst_tp,
-            child_dst_arrmeta, child_src_tp, child_src_arrmeta,
-            kernel_request_strided, ectx);
+            child, child_tp, ckb, ckb_offset, child_dst_tp, child_dst_arrmeta,
+            child_src_tp, child_src_arrmeta, kernel_request_strided, ectx);
       }
       // Instantiate the elementwise handler
-      return elwise_handler->instantiate(
-          elwise_handler, elwise_handler_tp, ckb, ckb_offset, child_dst_tp,
-          child_dst_arrmeta, child_src_tp, child_src_arrmeta,
-          kernel_request_strided, ectx, nd::array());
+      return child->instantiate(child, child_tp, ckb, ckb_offset, child_dst_tp,
+                                child_dst_arrmeta, child_src_tp,
+                                child_src_arrmeta, kernel_request_strided, ectx,
+                                nd::array());
     }
   };
 
@@ -473,8 +473,8 @@ namespace kernels {
       self->destroy_child_ckernel(sizeof(self_type));
     }
 
-    static size_t instantiate(const arrfunc_type_data *elwise_handler,
-                              const arrfunc_type *elwise_handler_tp, void *ckb,
+    static size_t instantiate(const arrfunc_type_data *child,
+                              const arrfunc_type *child_tp, void *ckb,
                               intptr_t ckb_offset, const ndt::type &dst_tp,
                               const char *dst_arrmeta, const ndt::type *src_tp,
                               const char *const *src_arrmeta,
@@ -482,7 +482,7 @@ namespace kernels {
                               const eval::eval_context *ectx)
     {
       intptr_t dst_ndim =
-          dst_tp.get_ndim() - elwise_handler_tp->get_return_type().get_ndim();
+          dst_tp.get_ndim() - child_tp->get_return_type().get_ndim();
 
       const char *child_dst_arrmeta;
       const char *child_src_arrmeta[N];
@@ -503,8 +503,8 @@ namespace kernels {
       bool finished = dst_ndim == 1;
       for (int i = 0; i < N; ++i) {
         // The src[i] strided parameters
-        intptr_t src_ndim = src_tp[i].get_ndim() -
-                            elwise_handler_tp->get_arg_type(i).get_ndim();
+        intptr_t src_ndim =
+            src_tp[i].get_ndim() - child_tp->get_arg_type(i).get_ndim();
         if (src_ndim < dst_ndim) {
           // This src value is getting broadcasted
           src_stride[i] = 0;
@@ -542,15 +542,14 @@ namespace kernels {
       // If there are still dimensions to broadcast, recursively lift more
       if (!finished) {
         return make_lifted_expr_ckernel(
-            elwise_handler, elwise_handler_tp, ckb, ckb_offset, child_dst_tp,
-            child_dst_arrmeta, child_src_tp, child_src_arrmeta,
-            kernel_request_strided, ectx);
+            child, child_tp, ckb, ckb_offset, child_dst_tp, child_dst_arrmeta,
+            child_src_tp, child_src_arrmeta, kernel_request_strided, ectx);
       }
       // All the types matched, so instantiate the elementwise handler
-      return elwise_handler->instantiate(
-          elwise_handler, elwise_handler_tp, ckb, ckb_offset, child_dst_tp,
-          child_dst_arrmeta, child_src_tp, child_src_arrmeta,
-          kernel_request_strided, ectx, nd::array());
+      return child->instantiate(child, child_tp, ckb, ckb_offset, child_dst_tp,
+                                child_dst_arrmeta, child_src_tp,
+                                child_src_arrmeta, kernel_request_strided, ectx,
+                                nd::array());
     }
   };
 
@@ -560,39 +559,39 @@ namespace kernels {
   };
 
   template <type_id_t dst_dim_id, type_id_t src_dim_id>
-  size_t instantiate_elwise_ck(const arrfunc_type_data *elwise_handler,
-                               const arrfunc_type *elwise_handler_tp, void *ckb,
+  size_t instantiate_elwise_ck(const arrfunc_type_data *child,
+                               const arrfunc_type *child_tp, void *ckb,
                                intptr_t ckb_offset, const ndt::type &dst_tp,
                                const char *dst_arrmeta, const ndt::type *src_tp,
                                const char *const *src_arrmeta,
                                kernel_request_t kernreq,
                                const eval::eval_context *ectx)
   {
-    switch (elwise_handler_tp->get_npos()) {
+    switch (child_tp->get_npos()) {
     case 1:
       return elwise_ck<dst_dim_id, src_dim_id, 1>::instantiate(
-          elwise_handler, elwise_handler_tp, ckb, ckb_offset, dst_tp,
-          dst_arrmeta, src_tp, src_arrmeta, kernreq, ectx);
+          child, child_tp, ckb, ckb_offset, dst_tp, dst_arrmeta, src_tp,
+          src_arrmeta, kernreq, ectx);
     case 2:
       return elwise_ck<dst_dim_id, src_dim_id, 2>::instantiate(
-          elwise_handler, elwise_handler_tp, ckb, ckb_offset, dst_tp,
-          dst_arrmeta, src_tp, src_arrmeta, kernreq, ectx);
+          child, child_tp, ckb, ckb_offset, dst_tp, dst_arrmeta, src_tp,
+          src_arrmeta, kernreq, ectx);
     case 3:
       return elwise_ck<dst_dim_id, src_dim_id, 3>::instantiate(
-          elwise_handler, elwise_handler_tp, ckb, ckb_offset, dst_tp,
-          dst_arrmeta, src_tp, src_arrmeta, kernreq, ectx);
+          child, child_tp, ckb, ckb_offset, dst_tp, dst_arrmeta, src_tp,
+          src_arrmeta, kernreq, ectx);
     case 4:
       return elwise_ck<dst_dim_id, src_dim_id, 4>::instantiate(
-          elwise_handler, elwise_handler_tp, ckb, ckb_offset, dst_tp,
-          dst_arrmeta, src_tp, src_arrmeta, kernreq, ectx);
+          child, child_tp, ckb, ckb_offset, dst_tp, dst_arrmeta, src_tp,
+          src_arrmeta, kernreq, ectx);
     case 5:
       return elwise_ck<dst_dim_id, src_dim_id, 5>::instantiate(
-          elwise_handler, elwise_handler_tp, ckb, ckb_offset, dst_tp,
-          dst_arrmeta, src_tp, src_arrmeta, kernreq, ectx);
+          child, child_tp, ckb, ckb_offset, dst_tp, dst_arrmeta, src_tp,
+          src_arrmeta, kernreq, ectx);
     case 6:
       return elwise_ck<dst_dim_id, src_dim_id, 6>::instantiate(
-          elwise_handler, elwise_handler_tp, ckb, ckb_offset, dst_tp,
-          dst_arrmeta, src_tp, src_arrmeta, kernreq, ectx);
+          child, child_tp, ckb, ckb_offset, dst_tp, dst_arrmeta, src_tp,
+          src_arrmeta, kernreq, ectx);
     default:
       throw runtime_error("make_elwise_strided_dimension_expr_kernel with "
                           "src_count > 6 not implemented yet");
@@ -600,4 +599,32 @@ namespace kernels {
   }
 
 } // namespace kernels
+
+/**
+ * Lifts the provided ckernel, broadcasting it as necessary to execute
+ * across the additional dimensions in the ``lifted_types`` array.
+ *
+ * This version is for 'expr' ckernels.
+ *
+ * \param elwise_handler  The arrfunc being lifted
+ * \param ckb  The ckernel_builder into which to place the ckernel.
+ * \param ckb_offset  Where within the ckernel_builder to place the ckernel.
+ * \param dst_ndim  The number of destination dimensions to lift.
+ * \param dst_tp  The destination type to lift to.
+ * \param dst_arrmeta  The destination arrmeta to lift to.
+ * \param src_ndim  The number of dimensions to lift for each source type.
+ * \param src_tp  The source types to lift to.
+ * \param src_arrmeta  The source arrmetas to lift to.
+ * \param kernreq  Either dynd::kernel_request_single or
+ *dynd::kernel_request_strided,
+ *                  as required by the caller.
+ * \param ectx  The evaluation context.
+ */
+size_t make_lifted_expr_ckernel(
+    const arrfunc_type_data *elwise_handler,
+    const arrfunc_type *elwise_handler_tp, void *ckb, intptr_t ckb_offset,
+    const ndt::type &dst_tp, const char *dst_arrmeta, const ndt::type *src_tp,
+    const char *const *src_arrmeta, dynd::kernel_request_t kernreq,
+    const eval::eval_context *ectx);
+
 } // namespace dynd
