@@ -26,7 +26,7 @@ namespace nd {
 
       arrfunc_type_data self(&ck_type::instantiate, NULL, NULL, NULL);
       ndt::type self_tp =
-          ndt::make_funcproto<typename funcproto_of<func_type>::type>(
+          ndt::make_arrfunc<typename funcproto_of<func_type>::type>(
               std::forward<T>(names)...);
 
       return arrfunc(&self, self_tp);
@@ -56,7 +56,7 @@ namespace nd {
 
       arrfunc_type_data self(func, &ck_type::instantiate, NULL, NULL, NULL);
       ndt::type self_tp =
-          ndt::make_funcproto<kernreq, R(A...)>(std::forward<T>(names)...);
+          ndt::make_arrfunc<kernreq, R(A...)>(std::forward<T>(names)...);
 
       return arrfunc(&self, self_tp);
     }
@@ -83,7 +83,7 @@ namespace nd {
 
       arrfunc_type_data self(func, &ck_type::instantiate, NULL, NULL, NULL);
       ndt::type self_tp =
-          ndt::make_funcproto<kernreq, typename funcproto_of<func_type>::type>(
+          ndt::make_arrfunc<kernreq, typename funcproto_of<func_type>::type>(
               std::forward<T>(names)...);
 
       return arrfunc(&self, self_tp);
@@ -109,7 +109,7 @@ namespace nd {
                                                         K...> ck_type;
 
       arrfunc_type_data self(&ck_type::instantiate, NULL, NULL, NULL);
-      ndt::type self_tp = ndt::make_funcproto<
+      ndt::type self_tp = ndt::make_arrfunc<
           kernreq, typename funcproto_of<func_type, K...>::type>(
           std::forward<T>(names)...);
 

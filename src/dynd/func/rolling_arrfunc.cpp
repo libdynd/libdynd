@@ -246,7 +246,7 @@ nd::arrfunc dynd::make_rolling_arrfunc(const nd::arrfunc &window_op,
           "argument is required, got " << window_af_tp;
     throw invalid_argument(ss.str());
   }
-  const ndt::type &window_src_tp = window_af_tp->get_arg_type(0);
+  const ndt::type &window_src_tp = window_af_tp->get_pos_type(0);
   if (window_src_tp.get_ndim() < 1) {
     stringstream ss;
     ss << "To make a rolling window arrfunc, an operation with which "
@@ -260,7 +260,7 @@ nd::arrfunc dynd::make_rolling_arrfunc(const nd::arrfunc &window_op,
   ndt::type roll_dst_tp =
       ndt::make_typevar_dim(rolldimname, window_af_tp->get_return_type());
 
-  nd::array af = nd::empty(ndt::make_funcproto(roll_src_tp, roll_dst_tp));
+  nd::array af = nd::empty(ndt::make_arrfunc(roll_src_tp, roll_dst_tp));
   arrfunc_type_data *out_af =
       reinterpret_cast<arrfunc_type_data *>(af.get_readwrite_originptr());
 

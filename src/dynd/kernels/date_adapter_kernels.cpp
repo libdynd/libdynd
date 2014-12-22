@@ -76,7 +76,7 @@ static intptr_t instantiate_int_offset_arrfunc(
 {
   typedef int_offset_ck<Tsrc, Tdst> self_type;
   if (dst_tp != af_tp->get_return_type() ||
-      src_tp[0] != af_tp->get_arg_type(0)) {
+      src_tp[0] != af_tp->get_pos_type(0)) {
     stringstream ss;
     ss << "Cannot instantiate arrfunc with signature ";
     ss << af_tp << " with types (";
@@ -111,20 +111,20 @@ bool dynd::make_date_adapter_arrfunc(const ndt::type &operand_tp,
         switch (operand_tp.get_type_id()) {
             case int32_type_id:
                 out_forward = make_int_offset_arrfunc<int32_t, int32_t>(
-                    epoch_date, ndt::make_funcproto(ndt::make_type<int32_t>(),
+                    epoch_date, ndt::make_arrfunc(ndt::make_type<int32_t>(),
                                                     ndt::make_date()));
                 out_reverse = make_int_offset_arrfunc<int32_t, int32_t>(
                     -epoch_date,
-                    ndt::make_funcproto(ndt::make_date(),
+                    ndt::make_arrfunc(ndt::make_date(),
                                         ndt::make_type<int32_t>()));
                 return true;
             case int64_type_id:
                 out_forward = make_int_offset_arrfunc<int64_t, int32_t>(
-                    epoch_date, ndt::make_funcproto(ndt::make_type<int64_t>(),
+                    epoch_date, ndt::make_arrfunc(ndt::make_type<int64_t>(),
                                                     ndt::make_date()));
                 out_reverse = make_int_offset_arrfunc<int32_t, int64_t>(
                     -epoch_date,
-                    ndt::make_funcproto(ndt::make_date(),
+                    ndt::make_arrfunc(ndt::make_date(),
                                         ndt::make_type<int64_t>()));
                 return true;
             default:

@@ -32,7 +32,7 @@ TEST(ArrFunc, Assignment)
   // Validate that its types, etc are set right
   ASSERT_EQ(1, af.get_type()->get_narg());
   ASSERT_EQ(ndt::make_type<int>(), af.get_type()->get_return_type());
-  ASSERT_EQ(ndt::make_fixedstring(16), af.get_type()->get_arg_type(0));
+  ASSERT_EQ(ndt::make_fixedstring(16), af.get_type()->get_pos_type(0));
 
   const char *src_arrmeta[1] = {NULL};
 
@@ -40,7 +40,7 @@ TEST(ArrFunc, Assignment)
   ckernel_builder<kernel_request_host> ckb;
   af.get()->instantiate(
       af.get(), af.get_type(), &ckb, 0, af.get_type()->get_return_type(), NULL,
-      af.get_type()->get_arg_types_raw(), src_arrmeta, kernel_request_single,
+      af.get_type()->get_pos_types_raw(), src_arrmeta, kernel_request_single,
       &eval::default_eval_context, nd::array());
   int int_out = 0;
   char str_in[16] = "3251";
@@ -54,7 +54,7 @@ TEST(ArrFunc, Assignment)
   ckb.reset();
   af.get()->instantiate(
       af.get(), af.get_type(), &ckb, 0, af.get_type()->get_return_type(), NULL,
-      af.get_type()->get_arg_types_raw(), src_arrmeta, kernel_request_strided,
+      af.get_type()->get_pos_types_raw(), src_arrmeta, kernel_request_strided,
       &eval::default_eval_context, nd::array());
   int ints_out[3] = {0, 0, 0};
   char strs_in[3][16] = {"123", "4567", "891029"};
@@ -155,7 +155,7 @@ TEST(ArrFunc, Property)
   // Validate that its types, etc are set right
   ASSERT_EQ(1, af.get_type()->get_narg());
   ASSERT_EQ(ndt::make_type<int>(), af.get_type()->get_return_type());
-  ASSERT_EQ(ndt::make_date(), af.get_type()->get_arg_type(0));
+  ASSERT_EQ(ndt::make_date(), af.get_type()->get_pos_type(0));
 
   const char *src_arrmeta[1] = {NULL};
 
@@ -163,7 +163,7 @@ TEST(ArrFunc, Property)
   ckernel_builder<kernel_request_host> ckb;
   af.get()->instantiate(
       af.get(), af.get_type(), &ckb, 0, af.get_type()->get_return_type(), NULL,
-      af.get_type()->get_arg_types_raw(), src_arrmeta, kernel_request_single,
+      af.get_type()->get_pos_types_raw(), src_arrmeta, kernel_request_single,
       &eval::default_eval_context, nd::array());
   int int_out = 0;
   int date_in = date_ymd::to_days(2013, 12, 30);
@@ -182,7 +182,7 @@ TEST(ArrFunc, AssignmentAsExpr)
   // Validate that its types, etc are set right
   ASSERT_EQ(1, af.get_type()->get_narg());
   ASSERT_EQ(ndt::make_type<int>(), af.get_type()->get_return_type());
-  ASSERT_EQ(ndt::make_fixedstring(16), af.get_type()->get_arg_type(0));
+  ASSERT_EQ(ndt::make_fixedstring(16), af.get_type()->get_pos_type(0));
 
   const char *src_arrmeta[1] = {NULL};
 
@@ -190,7 +190,7 @@ TEST(ArrFunc, AssignmentAsExpr)
   ckernel_builder<kernel_request_host> ckb;
   af.get()->instantiate(
       af.get(), af.get_type(), &ckb, 0, af.get_type()->get_return_type(), NULL,
-      af.get_type()->get_arg_types_raw(), src_arrmeta, kernel_request_single,
+      af.get_type()->get_pos_types_raw(), src_arrmeta, kernel_request_single,
       &eval::default_eval_context, nd::array());
   int int_out = 0;
   char str_in[16] = "3251";
@@ -203,7 +203,7 @@ TEST(ArrFunc, AssignmentAsExpr)
   ckb.reset();
   af.get()->instantiate(
       af.get(), af.get_type(), &ckb, 0, af.get_type()->get_return_type(), NULL,
-      af.get_type()->get_arg_types_raw(), src_arrmeta, kernel_request_strided,
+      af.get_type()->get_pos_types_raw(), src_arrmeta, kernel_request_strided,
       &eval::default_eval_context, nd::array());
   int ints_out[3] = {0, 0, 0};
   char strs_in[3][16] = {"123", "4567", "891029"};

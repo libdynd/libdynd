@@ -307,7 +307,7 @@ nd::arrfunc kernels::make_take_arrfunc()
   // Combined: (M * T, N * Ix) -> R * T
   static ndt::type param_types[2] = {ndt::type("M * T"), ndt::type("N * Ix")};
   static ndt::type func_proto =
-      ndt::make_funcproto(param_types, ndt::type("R * T"));
+      ndt::make_arrfunc(param_types, ndt::type("R * T"));
   nd::array af = nd::empty(func_proto);
   arrfunc_type_data *out_af =
       reinterpret_cast<arrfunc_type_data *>(af.get_readwrite_originptr());

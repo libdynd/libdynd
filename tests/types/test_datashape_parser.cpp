@@ -253,11 +253,11 @@ TEST(DataShapeParser, ArrFunc)
 {
   ndt::type tp;
 
-  EXPECT_EQ(ndt::make_funcproto<int(int, int)>(),
+  EXPECT_EQ(ndt::make_arrfunc<int(int, int)>(),
             ndt::type("(int, int) -> int"));
-  EXPECT_EQ(ndt::make_funcproto<int(int, int)>("x"),
+  EXPECT_EQ(ndt::make_arrfunc<int(int, int)>("x"),
             ndt::type("(int, x: int) -> int"));
-  EXPECT_EQ(ndt::make_funcproto<int(int, int)>("x", "y"),
+  EXPECT_EQ(ndt::make_arrfunc<int(int, int)>("x", "y"),
             ndt::type("(x: int, y: int) -> int"));
 
   tp = ndt::type("(N * S, func: (M * S) -> T) -> N * T");

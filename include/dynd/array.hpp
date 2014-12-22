@@ -207,6 +207,7 @@ namespace nd {
      */
     template <class T>
     array(const T *rhs, intptr_t dim_size);
+    array(const ndt::type *rhs, intptr_t dim_size);
 
     /** Constructs an array from a 1D initializer list */
     template <class T>
@@ -1701,6 +1702,15 @@ namespace nd {
     nd::empty(dim_size, ndt::make_exact_type<T>()).swap(*this);
     DYND_MEMCPY(get_ndo()->m_data_pointer, reinterpret_cast<const void *>(&rhs),
                 dim_size * sizeof(T));
+  }
+
+  inline nd::array::array(const ndt::type *rhs, intptr_t dim_size)
+  {
+    nd::empty(dim_size, ndt::make_type()).swap(*this);
+    auto lhs = reinterpret_cast<ndt::type *>(get_ndo()->m_data_pointer);
+    for (intptr_t i = 0; i < dim_size; ++i) {
+      lhs[i] = rhs[i];
+    }
   }
 
   ///////////// std::vector constructor implementation /////////////////////////

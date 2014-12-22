@@ -386,7 +386,8 @@ static ndt::type parse_adapt_parameters(const char *&rbegin, const char *end,
   const char *saved_begin = begin;
   ndt::type proto_tp = parse_datashape(begin, end, symtable);
   if (proto_tp.is_null() || proto_tp.get_type_id() != arrfunc_type_id ||
-      proto_tp.extended<arrfunc_type>()->get_narg() != 1) {
+      proto_tp.extended<arrfunc_type>()->get_npos() != 1 ||
+      proto_tp.extended<arrfunc_type>()->get_nkwd() != 0) {
     throw datashape_parse_error(saved_begin,
                                 "expected a unary function signature");
   }
@@ -404,7 +405,7 @@ static ndt::type parse_adapt_parameters(const char *&rbegin, const char *end,
   // TODO catch errors, convert them to datashape_parse_error so the position is
   // shown
   rbegin = begin;
-  return ndt::make_adapt(proto_tp.extended<arrfunc_type>()->get_arg_type(0),
+  return ndt::make_adapt(proto_tp.extended<arrfunc_type>()->get_pos_type(0),
                          proto_tp.extended<arrfunc_type>()->get_return_type(),
                          adapt_op);
 }
@@ -812,10 +813,43 @@ static ndt::type parse_pointer_parameters(const char *&rbegin, const char *end,
   return ndt::make_pointer(tp);
 }
 
-// record_item : NAME COLON rhs_expression
-static bool parse_struct_item(const char *&rbegin, const char *end,
-                              map<string, ndt::type> &symtable,
-                              string &out_field_name, ndt::type &out_field_type)
+// record_item_bare : BARENAME COLON rhs_expression
+static bool parse_struct_item_bare(const char *&rbegin, const char *end,
+                                   map<string, ndt::type> &symtable,
+                                   string &out_field_name,
+                                   ndt::type &out_field_type)
+{
+  const char *begin = rbegin;
+  const char *field_name_begin, *field_name_end;
+  parse::skip_whitespace_and_pound_comments(begin, end);
+  if (parse::parse_name_no_ws(begin, end, field_name_begin, field_name_end)) {
+    // We successfully parsed a name with no whitespace
+    // We don't need to do anything else, because field_name_begin
+  }
+  else {
+    // This struct item cannot be parsed. Ergo, we return false for failure.
+    return false;
+  }
+  if (!parse_token_ds(begin, end, ':')) {
+    throw datashape_parse_error(begin, "expected ':' after record item name");
+  }
+  out_field_type = parse_datashape(begin, end, symtable);
+  if (out_field_type.is_null()) {
+    throw datashape_parse_error(begin, "expected a data type");
+  }
+
+  out_field_name.assign(field_name_begin, field_name_end);
+  rbegin = begin;
+  return true;
+}
+
+
+// record_item_general : record_item_bare |
+//               QUOTEDNAME COLON rhs_expression
+static bool parse_struct_item_general(const char *&rbegin, const char *end,
+                                      map<string, ndt::type> &symtable,
+                                      string &out_field_name,
+                                      ndt::type &out_field_type)
 {
   const char *begin = rbegin;
   const char *field_name_begin, *field_name_end;
@@ -887,7 +921,8 @@ static ndt::type parse_struct(const char *&rbegin, const char *end,
   for (;;) {
     const char *saved_begin = begin;
     parse::skip_whitespace_and_pound_comments(begin, end);
-    if (parse_struct_item(begin, end, symtable, field_name, field_type)) {
+    if (parse_struct_item_general(begin, end, symtable, field_name,
+                                  field_type)) {
       field_name_list.push_back(field_name);
       field_type_list.push_back(field_type);
     }
@@ -917,6 +952,44 @@ static ndt::type parse_struct(const char *&rbegin, const char *end,
   }
 }
 
+// funcproto_kwds : record_item, record_item*
+static ndt::type parse_funcproto_kwds(const char *&rbegin, const char *end,
+                                      map<string, ndt::type> &symtable)
+{
+  const char *begin = rbegin;
+  vector<string> field_name_list;
+  vector<ndt::type> field_type_list;
+  string field_name;
+  ndt::type field_type;
+
+  for (;;) {
+    const char *saved_begin = begin;
+    parse::skip_whitespace_and_pound_comments(begin, end);
+    if (parse_struct_item_bare(begin, end, symtable, field_name, field_type)) {
+      field_name_list.push_back(field_name);
+      field_type_list.push_back(field_type);
+    }
+    else {
+      throw datashape_parse_error(saved_begin, "expected a kwd arg");
+    }
+
+    if (parse_token_ds(begin, end, ',')) {
+      if (!field_name_list.empty() && parse_token_ds(begin, end, '}')) {
+        break;
+      }
+    }
+    else if (parse_token_ds(begin, end, ')')) {
+      break;
+    }
+    else {
+      throw datashape_parse_error(begin, "expected ',' or '}'");
+    }
+  }
+
+  rbegin = begin;
+  return ndt::make_struct(field_name_list, field_type_list);
+}
+
 // tuple : LPAREN tuple_item tuple_item* RPAREN
 // ctuple : 'c(' tuple_item tuple_item* RPAREN
 // funcproto : tuple -> type// tuple : LPAREN tuple_item tuple_item* RPAREN
@@ -926,7 +999,6 @@ static ndt::type parse_tuple_or_funcproto(const char *&rbegin, const char *end,
                                           map<string, ndt::type> &symtable)
 {
   const char *begin = rbegin;
-  vector<string> field_name_list;
   vector<ndt::type> field_type_list;
   bool cprefixed = false;
 
@@ -941,15 +1013,45 @@ static ndt::type parse_tuple_or_funcproto(const char *&rbegin, const char *end,
   if (!parse_token_ds(begin, end, ')')) {
     for (;;) {
       ndt::type tp;
-      try {
-        tp = parse_datashape(begin, end, symtable);
-      }
-      catch (datashape_parse_error) {
-        string name;
-        if (parse_struct_item(begin, end, symtable, name, tp)) {
-          field_name_list.push_back(name);
+      if (!cprefixed) {
+        // Look ahead to see if we've got BARENAME: coming next,
+        // and if so, parse the keyword arguments.
+        const char *saved_begin = begin;
+        const char *field_name_begin, *field_name_end;
+        if (parse::parse_name_no_ws(begin, end, field_name_begin,
+                                    field_name_end)) {
+          if (parse_token_ds(begin, end, ':')) {
+            // process the keyword arguments
+            ndt::type funcproto_kwd;
+            begin = saved_begin;
+            funcproto_kwd = parse_funcproto_kwds(begin, end, symtable);
+            if (!funcproto_kwd.is_null()) {
+              if (!parse_token_ds(begin, end, ')')) {
+                throw datashape_parse_error(begin, "expected closing ')'");
+              }
+              if (!parse_token_ds(begin, end, "->")) {
+                rbegin = begin;
+                return ndt::make_tuple(field_type_list);
+              }
+
+              ndt::type return_type = parse_datashape(begin, end, symtable);
+              if (return_type.is_null()) {
+                throw datashape_parse_error(
+                    begin, "expected function prototype return type");
+              }
+              rbegin = begin;
+              return ndt::make_arrfunc(ndt::make_tuple(field_type_list),
+                                       funcproto_kwd, return_type);
+            } else {
+              throw datashape_parse_error(
+                  begin, "expected funcproto keyword arguments");
+            }
+          }
         }
+         begin = saved_begin;
       }
+
+      tp = parse_datashape(begin, end, symtable);
 
       if (tp.get_type_id() != uninitialized_type_id) {
         field_type_list.push_back(tp);
@@ -989,7 +1091,7 @@ static ndt::type parse_tuple_or_funcproto(const char *&rbegin, const char *end,
                                   "expected function prototype return type");
     }
     rbegin = begin;
-    return ndt::make_funcproto(field_type_list, return_type, field_name_list);
+    return ndt::make_arrfunc(ndt::make_tuple(field_type_list), return_type);
   }
 }
 

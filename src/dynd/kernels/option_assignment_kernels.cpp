@@ -505,7 +505,7 @@ size_t kernels::make_option_assignment_kernel(
   map<nd::string, ndt::type> typevars;
   for (intptr_t i = 0; i < size; ++i, ++af_tp, ++af) {
     typevars.clear();
-    if (ndt::pattern_match(src_tp, (*af_tp)->get_arg_type(0), typevars) &&
+    if (ndt::pattern_match(src_tp, (*af_tp)->get_pos_type(0), typevars) &&
         ndt::pattern_match(dst_tp, (*af_tp)->get_return_type(), typevars)) {
       return af->instantiate(af, *af_tp, ckb, ckb_offset, dst_tp, dst_arrmeta,
                              &src_tp, &src_arrmeta, kernreq, ectx,

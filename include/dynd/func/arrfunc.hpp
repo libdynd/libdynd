@@ -364,7 +364,7 @@ namespace nd {
         std::vector<intptr_t> available;
 
         for (size_t i = 0; i < sizeof...(T); i++) {
-          intptr_t j = self_tp->get_arg_index(get_name(i));
+          intptr_t j = self_tp->get_kwd_index(get_name(i));
           if (j == -1) {
             std::stringstream ss;
             ss << "arrfunc passed an unexpected keyword \"" << get_name(i)
@@ -372,7 +372,7 @@ namespace nd {
             throw std::invalid_argument(ss.str());
           }
 
-          ndt::type &actual_tp = kwd_tp_data[j - self_tp->get_npos()];
+          ndt::type &actual_tp = kwd_tp_data[j];
           if (!actual_tp.is_null()) {
             std::stringstream ss;
             ss << "arrfunc passed keyword \"" << get_name(i)
@@ -380,11 +380,11 @@ namespace nd {
             throw std::invalid_argument(ss.str());
           }
           actual_tp = get_type(i);
-          available.push_back(j - self_tp->get_npos());
+          available.push_back(j);
 
-          ndt::type expected_tp = self_tp->get_arg_type(j);
+          ndt::type expected_tp = self_tp->get_kwd_type(j);
           if (expected_tp.get_type_id() == option_type_id) {
-            expected_tp = expected_tp.p("value_type").as<ndt::type>();
+            expected_tp = expected_tp.extended<option_type>()->get_value_type();
           }
           if (!ndt::pattern_match(actual_tp.value_type(), expected_tp,
                                   typevars)) {
@@ -511,19 +511,23 @@ namespace nd {
     void set_as_option(arrfunc_resolve_option_values_t resolve_option_values,
                        T &&... names)
     {
-      intptr_t missing[sizeof...(T)] = {get_type()->get_arg_index(names)...};
+      intptr_t missing[sizeof...(T)] = {get_type()->get_kwd_index(names)...};
 
-      nd::array tp = get_type()->get_arg_types().eval_copy();
+      nd::array tp = get_type()->get_kwd_types().eval_copy();
+      auto tp_raw_ptr =
+          reinterpret_cast<ndt::type *>(tp.get_readwrite_originptr());
       for (size_t i = 0; i < sizeof...(T); ++i) {
-        tp(missing[i]).val_assign(
-            ndt::make_option(tp(missing[i]).template as<ndt::type>()));
+        tp_raw_ptr[missing[i]] = ndt::make_option(tp_raw_ptr[missing[i]]);
       }
+      tp.flag_as_immutable();
 
       arrfunc_type_data self(get()->instantiate, resolve_option_values,
                              get()->resolve_dst_type, get()->free);
       std::memcpy(self.data, get()->data, sizeof(get()->data));
-      ndt::type self_tp = ndt::make_funcproto(tp, get_type()->get_return_type(),
-                                              get_type()->get_arg_names());
+      ndt::type self_tp =
+          ndt::make_arrfunc(get_type()->get_pos_tuple(),
+                            ndt::make_struct(get_type()->get_kwd_names(), tp),
+                            get_type()->get_return_type());
 
       *this = arrfunc(&self, self_tp);
     }
@@ -536,13 +540,13 @@ namespace nd {
 
       const arrfunc_type *self_tp = m_value.get_type().extended<arrfunc_type>();
 
-      const std::vector<intptr_t> &option = self_tp->get_option_arg_indices();
+      const std::vector<intptr_t> &option = self_tp->get_option_kwd_indices();
       for (size_t i = 0; i < option.size(); ++i) {
         intptr_t j = option[i];
 
         ndt::type &actual_tp = kwd_tp[j - self_tp->get_npos()];
         if (actual_tp.is_null()) {
-          actual_tp = ndt::substitute(self_tp->get_arg_type(j), typevars, false);
+          actual_tp = ndt::substitute(self_tp->get_kwd_type(j), typevars, false);
           if (actual_tp.is_symbolic()) {
             actual_tp = ndt::make_option(ndt::make_type<void>());
           }
@@ -580,7 +584,7 @@ namespace nd {
            << " parameters, but received " << nsrc;
         throw std::invalid_argument(ss.str());
       }
-      const ndt::type *param_types = self_tp->get_arg_types_raw();
+      const ndt::type *param_types = self_tp->get_pos_types_raw();
       std::map<nd::string, ndt::type> typevars;
       for (intptr_t i = 0; i != nsrc; ++i) {
         ndt::type expected_tp = param_types[i];
@@ -606,7 +610,7 @@ namespace nd {
         ndt::get_forward_types(kwd_tp, kwds.get_vals(),
                                available.empty() ? NULL : available.data());
         kwds_as_array =
-            forward_as_array(self_tp->get_arg_names(), kwd_tp, kwds.get_vals(),
+            forward_as_array(self_tp->get_kwd_names(), kwd_tp, kwds.get_vals(),
                              available.empty() ? NULL : available.data(),
                              missing.empty() ? NULL : missing.data());
         

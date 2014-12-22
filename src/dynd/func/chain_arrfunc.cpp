@@ -151,8 +151,8 @@ nd::arrfunc dynd::make_chain_arrfunc(const nd::arrfunc &first,
        << ", because the second function is not unary";
     throw invalid_argument(ss.str());
   }
-  nd::array af = nd::empty(ndt::make_funcproto(
-      first.get_type()->get_arg_types(), second.get_type()->get_return_type()));
+  nd::array af = nd::empty(ndt::make_arrfunc(
+      first.get_type()->get_pos_types(), second.get_type()->get_return_type()));
   arrfunc_type_data *out_af =
       reinterpret_cast<arrfunc_type_data *>(af.get_readwrite_originptr());
   out_af->free = &free_chain_arrfunc;
