@@ -36,215 +36,219 @@
 using namespace std;
 using namespace dynd;
 
-nd::array::array()
-    : m_memblock()
-{
-}
+nd::array::array() : m_memblock() {}
 
-void nd::array::swap(array& rhs)
-{
-    m_memblock.swap(rhs.m_memblock);
-}
+void nd::array::swap(array &rhs) { m_memblock.swap(rhs.m_memblock); }
 
-template<class T>
-inline typename dynd::enable_if<is_dynd_scalar<T>::value, memory_block_ptr>::type
-make_builtin_scalar_array(const T& value, uint64_t flags)
+template <class T>
+inline typename dynd::enable_if<is_dynd_scalar<T>::value,
+                                memory_block_ptr>::type
+make_builtin_scalar_array(const T &value, uint64_t flags)
 {
-    char *data_ptr = NULL;
-    memory_block_ptr result = make_array_memory_block(0, sizeof(T), scalar_align_of<T>::value, &data_ptr);
-    *reinterpret_cast<T *>(data_ptr) = value;
-    array_preamble *ndo = reinterpret_cast<array_preamble *>(result.get());
-    ndo->m_type = reinterpret_cast<base_type *>(type_id_of<T>::value);
-    ndo->m_data_pointer = data_ptr;
-    ndo->m_data_reference = NULL;
-    ndo->m_flags = flags;
-    return result;
+  char *data_ptr = NULL;
+  memory_block_ptr result = make_array_memory_block(
+      0, sizeof(T), scalar_align_of<T>::value, &data_ptr);
+  *reinterpret_cast<T *>(data_ptr) = value;
+  array_preamble *ndo = reinterpret_cast<array_preamble *>(result.get());
+  ndo->m_type = reinterpret_cast<base_type *>(type_id_of<T>::value);
+  ndo->m_data_pointer = data_ptr;
+  ndo->m_data_reference = NULL;
+  ndo->m_flags = flags;
+  return result;
 }
 
 nd::array nd::make_strided_array(const ndt::type &dtp, intptr_t ndim,
                                  const intptr_t *shape, int64_t access_flags,
                                  const int *axis_perm)
 {
-    // Create the type of the result
-    bool any_variable_dims = false;
-    ndt::type array_tp = ndt::make_type(ndim, shape, dtp, any_variable_dims);
+  // Create the type of the result
+  bool any_variable_dims = false;
+  ndt::type array_tp = ndt::make_type(ndim, shape, dtp, any_variable_dims);
 
-    // Determine the total data size
-    size_t data_size;
-    if (array_tp.is_builtin()) {
-        data_size = array_tp.get_data_size();
-    } else {
-        data_size = array_tp.extended()->get_default_data_size();
-    }
+  // Determine the total data size
+  size_t data_size;
+  if (array_tp.is_builtin()) {
+    data_size = array_tp.get_data_size();
+  } else {
+    data_size = array_tp.extended()->get_default_data_size();
+  }
 
-    memory_block_ptr result;
-    char *data_ptr = NULL;
+  memory_block_ptr result;
+  char *data_ptr = NULL;
+  if (array_tp.get_kind() == memory_kind) {
+    result = make_array_memory_block(array_tp.get_arrmeta_size());
+    array_tp.extended<base_memory_type>()->data_alloc(&data_ptr, data_size);
+  } else {
+    // Allocate the array arrmeta and data in one memory block
+    result = make_array_memory_block(array_tp.get_arrmeta_size(), data_size,
+                                     array_tp.get_data_alignment(), &data_ptr);
+  }
+
+  if (array_tp.get_flags() & type_flag_zeroinit) {
     if (array_tp.get_kind() == memory_kind) {
-        result = make_array_memory_block(array_tp.get_arrmeta_size());
-        array_tp.extended<base_memory_type>()->data_alloc(&data_ptr, data_size);
+      array_tp.extended<base_memory_type>()->data_zeroinit(data_ptr, data_size);
     } else {
-        // Allocate the array arrmeta and data in one memory block
-        result = make_array_memory_block(array_tp.get_arrmeta_size(),
-                    data_size, array_tp.get_data_alignment(), &data_ptr);
+      memset(data_ptr, 0, data_size);
     }
+  }
 
-    if (array_tp.get_flags()&type_flag_zeroinit) {
-        if (array_tp.get_kind() == memory_kind) {
-            array_tp.extended<base_memory_type>()->data_zeroinit(data_ptr, data_size);
-        }
-        else {
-            memset(data_ptr, 0, data_size);
-        }
+  // Fill in the preamble arrmeta
+  array_preamble *ndo = reinterpret_cast<array_preamble *>(result.get());
+  ndo->m_type = array_tp.release();
+  ndo->m_data_pointer = data_ptr;
+  ndo->m_data_reference = NULL;
+  ndo->m_flags = access_flags;
+
+  if (!any_variable_dims) {
+    // Fill in the array arrmeta with strides and sizes
+    fixed_dim_type_arrmeta *meta =
+        reinterpret_cast<fixed_dim_type_arrmeta *>(ndo + 1);
+    // Use the default construction to handle the uniform_tp's arrmeta
+    intptr_t stride = dtp.get_data_size();
+    if (stride == 0) {
+      stride = dtp.extended()->get_default_data_size();
     }
-
-    // Fill in the preamble arrmeta
-    array_preamble *ndo = reinterpret_cast<array_preamble *>(result.get());
-    ndo->m_type = array_tp.release();
-    ndo->m_data_pointer = data_ptr;
-    ndo->m_data_reference = NULL;
-    ndo->m_flags = access_flags;
-
-    if (!any_variable_dims) {
-        // Fill in the array arrmeta with strides and sizes
-        fixed_dim_type_arrmeta *meta = reinterpret_cast<fixed_dim_type_arrmeta *>(ndo + 1);
-        // Use the default construction to handle the uniform_tp's arrmeta
-        intptr_t stride = dtp.get_data_size();
-        if (stride == 0) {
-            stride = dtp.extended()->get_default_data_size();
-        }
-        if (!dtp.is_builtin()) {
-          dtp.extended()->arrmeta_default_construct(
-              reinterpret_cast<char *>(meta + ndim), true);
-        }
-        if (axis_perm == NULL) {
-            for (ptrdiff_t i = (ptrdiff_t)ndim - 1; i >= 0; --i) {
-                intptr_t dim_size = shape[i];
-                meta[i].stride = dim_size > 1 ? stride : 0;
-                meta[i].dim_size = dim_size;
-                stride *= dim_size;
-            }
-        } else {
-            for (intptr_t i = 0; i < ndim; ++i) {
-                int i_perm = axis_perm[i];
-                intptr_t dim_size = shape[i_perm];
-                meta[i_perm].stride = dim_size > 1 ? stride : 0;
-                meta[i_perm].dim_size = dim_size;
-                stride *= dim_size;
-            }
-        }
-    } else {
-        if (axis_perm != NULL) {
-            // Maybe force C-order in this case?
-            throw runtime_error("dynd presently only supports C-order with variable-sized arrays");
-        }
-        // Fill in the array arrmeta with strides and sizes
-        char *meta = reinterpret_cast<char *>(ndo + 1);
-        ndo->m_type->arrmeta_default_construct(meta, true);
+    if (!dtp.is_builtin()) {
+      dtp.extended()->arrmeta_default_construct(
+          reinterpret_cast<char *>(meta + ndim), true);
     }
-
-    return array(result);
-}
-
-nd::array nd::make_strided_array_from_data(const ndt::type& uniform_tp, intptr_t ndim, const intptr_t *shape,
-                const intptr_t *strides, int64_t access_flags, char *data_ptr,
-                const memory_block_ptr& data_reference, char **out_uniform_arrmeta)
-{
-    if (out_uniform_arrmeta == NULL && !uniform_tp.is_builtin() && uniform_tp.extended()->get_arrmeta_size() > 0) {
-        stringstream ss;
-        ss << "Cannot make a strided array with type " << uniform_tp << " from a preexisting data pointer";
-        throw runtime_error(ss.str());
-    }
-
-    ndt::type array_type = ndt::make_fixed_dim(ndim, shape, uniform_tp);
-
-    // Allocate the array arrmeta and data in one memory block
-    memory_block_ptr result =
-        make_array_memory_block(array_type.get_arrmeta_size());
-
-    // Fill in the preamble arrmeta
-    array_preamble *ndo = reinterpret_cast<array_preamble *>(result.get());
-    ndo->m_type = array_type.release();
-    ndo->m_data_pointer = data_ptr;
-    ndo->m_data_reference = data_reference.get();
-    memory_block_incref(ndo->m_data_reference);
-    ndo->m_flags = access_flags;
-
-    // Fill in the array arrmeta with the shape and strides
-    fixed_dim_type_arrmeta *meta = reinterpret_cast<fixed_dim_type_arrmeta *>(ndo + 1);
-    for (intptr_t i = 0; i < ndim; ++i) {
+    if (axis_perm == NULL) {
+      for (ptrdiff_t i = (ptrdiff_t)ndim - 1; i >= 0; --i) {
         intptr_t dim_size = shape[i];
-        meta[i].stride = dim_size > 1 ? strides[i] : 0;
+        meta[i].stride = dim_size > 1 ? stride : 0;
         meta[i].dim_size = dim_size;
+        stride *= dim_size;
+      }
+    } else {
+      for (intptr_t i = 0; i < ndim; ++i) {
+        int i_perm = axis_perm[i];
+        intptr_t dim_size = shape[i_perm];
+        meta[i_perm].stride = dim_size > 1 ? stride : 0;
+        meta[i_perm].dim_size = dim_size;
+        stride *= dim_size;
+      }
     }
-
-    // Return a pointer to the arrmeta for uniform_tp.
-    if (out_uniform_arrmeta != NULL) {
-        *out_uniform_arrmeta = reinterpret_cast<char *>(meta + ndim);
+  } else {
+    if (axis_perm != NULL) {
+      // Maybe force C-order in this case?
+      throw runtime_error(
+          "dynd presently only supports C-order with variable-sized arrays");
     }
+    // Fill in the array arrmeta with strides and sizes
+    char *meta = reinterpret_cast<char *>(ndo + 1);
+    ndo->m_type->arrmeta_default_construct(meta, true);
+  }
 
-    return nd::array(result);
+  return array(result);
 }
 
-nd::array nd::make_pod_array(const ndt::type& pod_dt, const void *data)
+nd::array nd::make_strided_array_from_data(
+    const ndt::type &uniform_tp, intptr_t ndim, const intptr_t *shape,
+    const intptr_t *strides, int64_t access_flags, char *data_ptr,
+    const memory_block_ptr &data_reference, char **out_uniform_arrmeta)
 {
-    size_t size = pod_dt.get_data_size();
-    if (!pod_dt.is_pod()) {
-        stringstream ss;
-        ss << "Cannot make a dynd array from raw data using non-POD type " << pod_dt;
-        throw runtime_error(ss.str());
-    } else if (pod_dt.get_arrmeta_size() != 0) {
-        stringstream ss;
-        ss << "Cannot make a dynd array from raw data using type " << pod_dt;
-        ss << " because it has non-empty dynd arrmeta";
-        throw runtime_error(ss.str());
-    }
+  if (out_uniform_arrmeta == NULL && !uniform_tp.is_builtin() &&
+      uniform_tp.extended()->get_arrmeta_size() > 0) {
+    stringstream ss;
+    ss << "Cannot make a strided array with type " << uniform_tp
+       << " from a preexisting data pointer";
+    throw runtime_error(ss.str());
+  }
 
-    // Allocate the array arrmeta and data in one memory block
-    char *data_ptr = NULL;
-    memory_block_ptr result = make_array_memory_block(
-        0, size, pod_dt.get_data_alignment(), &data_ptr);
+  ndt::type array_type = ndt::make_fixed_dim(ndim, shape, uniform_tp);
 
-    // Fill in the preamble arrmeta
-    array_preamble *ndo = reinterpret_cast<array_preamble *>(result.get());
-    if (pod_dt.is_builtin()) {
-        ndo->m_type = reinterpret_cast<const base_type *>(pod_dt.get_type_id());
-    } else {
-        ndo->m_type = pod_dt.extended();
-        base_type_incref(ndo->m_type);
-    }
-    ndo->m_data_pointer = data_ptr;
-    ndo->m_data_reference = NULL;
-    ndo->m_flags = nd::read_access_flag | nd::immutable_access_flag;
+  // Allocate the array arrmeta and data in one memory block
+  memory_block_ptr result =
+      make_array_memory_block(array_type.get_arrmeta_size());
 
-    memcpy(data_ptr, data, size);
+  // Fill in the preamble arrmeta
+  array_preamble *ndo = reinterpret_cast<array_preamble *>(result.get());
+  ndo->m_type = array_type.release();
+  ndo->m_data_pointer = data_ptr;
+  ndo->m_data_reference = data_reference.get();
+  memory_block_incref(ndo->m_data_reference);
+  ndo->m_flags = access_flags;
 
-    return nd::array(result);
+  // Fill in the array arrmeta with the shape and strides
+  fixed_dim_type_arrmeta *meta =
+      reinterpret_cast<fixed_dim_type_arrmeta *>(ndo + 1);
+  for (intptr_t i = 0; i < ndim; ++i) {
+    intptr_t dim_size = shape[i];
+    meta[i].stride = dim_size > 1 ? strides[i] : 0;
+    meta[i].dim_size = dim_size;
+  }
+
+  // Return a pointer to the arrmeta for uniform_tp.
+  if (out_uniform_arrmeta != NULL) {
+    *out_uniform_arrmeta = reinterpret_cast<char *>(meta + ndim);
+  }
+
+  return nd::array(result);
+}
+
+nd::array nd::make_pod_array(const ndt::type &pod_dt, const void *data)
+{
+  size_t size = pod_dt.get_data_size();
+  if (!pod_dt.is_pod()) {
+    stringstream ss;
+    ss << "Cannot make a dynd array from raw data using non-POD type "
+       << pod_dt;
+    throw runtime_error(ss.str());
+  } else if (pod_dt.get_arrmeta_size() != 0) {
+    stringstream ss;
+    ss << "Cannot make a dynd array from raw data using type " << pod_dt;
+    ss << " because it has non-empty dynd arrmeta";
+    throw runtime_error(ss.str());
+  }
+
+  // Allocate the array arrmeta and data in one memory block
+  char *data_ptr = NULL;
+  memory_block_ptr result =
+      make_array_memory_block(0, size, pod_dt.get_data_alignment(), &data_ptr);
+
+  // Fill in the preamble arrmeta
+  array_preamble *ndo = reinterpret_cast<array_preamble *>(result.get());
+  if (pod_dt.is_builtin()) {
+    ndo->m_type = reinterpret_cast<const base_type *>(pod_dt.get_type_id());
+  } else {
+    ndo->m_type = pod_dt.extended();
+    base_type_incref(ndo->m_type);
+  }
+  ndo->m_data_pointer = data_ptr;
+  ndo->m_data_reference = NULL;
+  ndo->m_flags = nd::read_access_flag | nd::immutable_access_flag;
+
+  memcpy(data_ptr, data, size);
+
+  return nd::array(result);
 }
 
 nd::array nd::make_bytes_array(const char *data, size_t len, size_t alignment)
 {
-    char *data_ptr = NULL, *bytes_data_ptr;
-    ndt::type dt = ndt::make_bytes(alignment);
-    nd::array result(
-        make_array_memory_block(dt.extended()->get_arrmeta_size(),
-                                dt.get_data_size() + len + alignment - 1,
-                                dt.get_data_alignment(), &data_ptr));
-    // Set the string extents
-    bytes_data_ptr = inc_to_alignment(data_ptr + dt.get_data_size(), alignment);
-    ((char **)data_ptr)[0] = bytes_data_ptr;
-    ((char **)data_ptr)[1] = bytes_data_ptr + len;
-    // Copy the string data
-    memcpy(bytes_data_ptr, data, len);
-    // Set the array arrmeta
-    array_preamble *ndo = result.get_ndo();
-    ndo->m_type = dt.release();
-    ndo->m_data_pointer = data_ptr;
-    ndo->m_data_reference = NULL;
-    ndo->m_flags = nd::read_access_flag | nd::immutable_access_flag;
-    // Set the bytes arrmeta, telling the system that the bytes data was embedded in the array memory
-    bytes_type_arrmeta *ndo_meta = reinterpret_cast<bytes_type_arrmeta *>(result.get_arrmeta());
-    ndo_meta->blockref = NULL;
-    return result;
+  char *data_ptr = NULL, *bytes_data_ptr;
+  ndt::type dt = ndt::make_bytes(alignment);
+  nd::array result(
+      make_array_memory_block(dt.extended()->get_arrmeta_size(),
+                              dt.get_data_size() + len + alignment - 1,
+                              dt.get_data_alignment(), &data_ptr));
+  // Set the string extents
+  bytes_data_ptr = inc_to_alignment(data_ptr + dt.get_data_size(), alignment);
+  ((char **)data_ptr)[0] = bytes_data_ptr;
+  ((char **)data_ptr)[1] = bytes_data_ptr + len;
+  // Copy the string data
+  memcpy(bytes_data_ptr, data, len);
+  // Set the array arrmeta
+  array_preamble *ndo = result.get_ndo();
+  ndo->m_type = dt.release();
+  ndo->m_data_pointer = data_ptr;
+  ndo->m_data_reference = NULL;
+  ndo->m_flags = nd::read_access_flag | nd::immutable_access_flag;
+  // Set the bytes arrmeta, telling the system that the bytes data was embedded
+  // in the array memory
+  bytes_type_arrmeta *ndo_meta =
+      reinterpret_cast<bytes_type_arrmeta *>(result.get_arrmeta());
+  ndo_meta->blockref = NULL;
+  return result;
 }
 
 nd::array nd::make_string_array(const char *str, size_t len,
@@ -361,358 +365,367 @@ nd::array nd::make_strided_string_array(const std::string **str_array,
  * Clones the arrmeta and swaps in a new type. The type must
  * have identical arrmeta, but this function doesn't check that.
  */
-static nd::array make_array_clone_with_new_type(const nd::array& n, const ndt::type& new_dt)
+static nd::array make_array_clone_with_new_type(const nd::array &n,
+                                                const ndt::type &new_dt)
 {
-    nd::array result(shallow_copy_array_memory_block(n.get_memblock()));
-    array_preamble *preamble = result.get_ndo();
-    // Swap in the type
-    if (!preamble->is_builtin_type()) {
-        base_type_decref(preamble->m_type);
-    }
-    preamble->m_type = new_dt.extended();
-    if(!new_dt.is_builtin()) {
-        base_type_incref(preamble->m_type);
-    }
-    return result;
+  nd::array result(shallow_copy_array_memory_block(n.get_memblock()));
+  array_preamble *preamble = result.get_ndo();
+  // Swap in the type
+  if (!preamble->is_builtin_type()) {
+    base_type_decref(preamble->m_type);
+  }
+  preamble->m_type = new_dt.extended();
+  if (!new_dt.is_builtin()) {
+    base_type_incref(preamble->m_type);
+  }
+  return result;
 }
-
 
 // Constructors from C++ scalars
 nd::array::array(dynd_bool value)
-    : m_memblock(make_builtin_scalar_array(value,
-                nd::read_access_flag | nd::immutable_access_flag))
+    : m_memblock(make_builtin_scalar_array(
+          value, nd::read_access_flag | nd::immutable_access_flag))
 {
 }
 nd::array::array(bool value)
-    : m_memblock(make_builtin_scalar_array(dynd_bool(value),
-                nd::read_access_flag | nd::immutable_access_flag))
+    : m_memblock(make_builtin_scalar_array(
+          dynd_bool(value), nd::read_access_flag | nd::immutable_access_flag))
 {
 }
 nd::array::array(signed char value)
-    : m_memblock(make_builtin_scalar_array(value,
-                nd::read_access_flag | nd::immutable_access_flag))
+    : m_memblock(make_builtin_scalar_array(
+          value, nd::read_access_flag | nd::immutable_access_flag))
 {
 }
 nd::array::array(short value)
-    : m_memblock(make_builtin_scalar_array(value,
-                nd::read_access_flag | nd::immutable_access_flag))
+    : m_memblock(make_builtin_scalar_array(
+          value, nd::read_access_flag | nd::immutable_access_flag))
 {
 }
 nd::array::array(int value)
-    : m_memblock(make_builtin_scalar_array(value,
-                nd::read_access_flag | nd::immutable_access_flag))
+    : m_memblock(make_builtin_scalar_array(
+          value, nd::read_access_flag | nd::immutable_access_flag))
 {
 }
 nd::array::array(long value)
-    : m_memblock(make_builtin_scalar_array(value,
-                nd::read_access_flag | nd::immutable_access_flag))
+    : m_memblock(make_builtin_scalar_array(
+          value, nd::read_access_flag | nd::immutable_access_flag))
 {
 }
 nd::array::array(long long value)
-    : m_memblock(make_builtin_scalar_array(value,
-                nd::read_access_flag | nd::immutable_access_flag))
+    : m_memblock(make_builtin_scalar_array(
+          value, nd::read_access_flag | nd::immutable_access_flag))
 {
 }
-nd::array::array(const dynd_int128& value)
-    : m_memblock(make_builtin_scalar_array(value,
-                nd::read_access_flag | nd::immutable_access_flag))
+nd::array::array(const dynd_int128 &value)
+    : m_memblock(make_builtin_scalar_array(
+          value, nd::read_access_flag | nd::immutable_access_flag))
 {
 }
 nd::array::array(unsigned char value)
-    : m_memblock(make_builtin_scalar_array(value,
-                nd::read_access_flag | nd::immutable_access_flag))
+    : m_memblock(make_builtin_scalar_array(
+          value, nd::read_access_flag | nd::immutable_access_flag))
 {
 }
 nd::array::array(unsigned short value)
-    : m_memblock(make_builtin_scalar_array(value,
-                nd::read_access_flag | nd::immutable_access_flag))
+    : m_memblock(make_builtin_scalar_array(
+          value, nd::read_access_flag | nd::immutable_access_flag))
 {
 }
 nd::array::array(unsigned int value)
-    : m_memblock(make_builtin_scalar_array(value,
-                nd::read_access_flag | nd::immutable_access_flag))
+    : m_memblock(make_builtin_scalar_array(
+          value, nd::read_access_flag | nd::immutable_access_flag))
 {
 }
 nd::array::array(unsigned long value)
-    : m_memblock(make_builtin_scalar_array(value,
-                nd::read_access_flag | nd::immutable_access_flag))
+    : m_memblock(make_builtin_scalar_array(
+          value, nd::read_access_flag | nd::immutable_access_flag))
 {
 }
 nd::array::array(unsigned long long value)
-    : m_memblock(make_builtin_scalar_array(value,
-                nd::read_access_flag | nd::immutable_access_flag))
+    : m_memblock(make_builtin_scalar_array(
+          value, nd::read_access_flag | nd::immutable_access_flag))
 {
 }
-nd::array::array(const dynd_uint128& value)
-    : m_memblock(make_builtin_scalar_array(value,
-                nd::read_access_flag | nd::immutable_access_flag))
+nd::array::array(const dynd_uint128 &value)
+    : m_memblock(make_builtin_scalar_array(
+          value, nd::read_access_flag | nd::immutable_access_flag))
 {
 }
 nd::array::array(dynd_float16 value)
-    : m_memblock(make_builtin_scalar_array(value,
-                nd::read_access_flag | nd::immutable_access_flag))
+    : m_memblock(make_builtin_scalar_array(
+          value, nd::read_access_flag | nd::immutable_access_flag))
 {
 }
 nd::array::array(float value)
-    : m_memblock(make_builtin_scalar_array(value,
-                nd::read_access_flag | nd::immutable_access_flag))
+    : m_memblock(make_builtin_scalar_array(
+          value, nd::read_access_flag | nd::immutable_access_flag))
 {
 }
 nd::array::array(double value)
-    : m_memblock(make_builtin_scalar_array(value,
-                nd::read_access_flag | nd::immutable_access_flag))
+    : m_memblock(make_builtin_scalar_array(
+          value, nd::read_access_flag | nd::immutable_access_flag))
 {
 }
-nd::array::array(const dynd_float128& value)
-    : m_memblock(make_builtin_scalar_array(value,
-                nd::read_access_flag | nd::immutable_access_flag))
+nd::array::array(const dynd_float128 &value)
+    : m_memblock(make_builtin_scalar_array(
+          value, nd::read_access_flag | nd::immutable_access_flag))
 {
 }
 nd::array::array(dynd_complex<float> value)
-    : m_memblock(make_builtin_scalar_array(value,
-                nd::read_access_flag | nd::immutable_access_flag))
+    : m_memblock(make_builtin_scalar_array(
+          value, nd::read_access_flag | nd::immutable_access_flag))
 {
 }
 nd::array::array(dynd_complex<double> value)
-    : m_memblock(make_builtin_scalar_array(value,
-                nd::read_access_flag | nd::immutable_access_flag))
+    : m_memblock(make_builtin_scalar_array(
+          value, nd::read_access_flag | nd::immutable_access_flag))
 {
 }
 nd::array::array(std::complex<float> value)
-    : m_memblock(make_builtin_scalar_array(value,
-                nd::read_access_flag | nd::immutable_access_flag))
+    : m_memblock(make_builtin_scalar_array(
+          value, nd::read_access_flag | nd::immutable_access_flag))
 {
 }
 nd::array::array(std::complex<double> value)
-    : m_memblock(make_builtin_scalar_array(value,
-                nd::read_access_flag | nd::immutable_access_flag))
+    : m_memblock(make_builtin_scalar_array(
+          value, nd::read_access_flag | nd::immutable_access_flag))
 {
 }
-nd::array::array(const std::string& value)
+nd::array::array(const std::string &value)
 {
-    array temp = make_string_array(value.c_str(), value.size(),
-                    string_encoding_utf_8, nd::read_access_flag | nd::immutable_access_flag);
-    temp.swap(*this);
+  array temp =
+      make_string_array(value.c_str(), value.size(), string_encoding_utf_8,
+                        nd::read_access_flag | nd::immutable_access_flag);
+  temp.swap(*this);
 }
 nd::array::array(const char *cstr)
 {
-    array temp = make_string_array(cstr, strlen(cstr),
-                    string_encoding_utf_8, nd::read_access_flag | nd::immutable_access_flag);
-    temp.swap(*this);
+  array temp =
+      make_string_array(cstr, strlen(cstr), string_encoding_utf_8,
+                        nd::read_access_flag | nd::immutable_access_flag);
+  temp.swap(*this);
 }
 nd::array::array(const char *str, size_t size)
 {
-    array temp = make_string_array(str, size,
-                    string_encoding_utf_8, nd::read_access_flag | nd::immutable_access_flag);
-    temp.swap(*this);
+  array temp =
+      make_string_array(str, size, string_encoding_utf_8,
+                        nd::read_access_flag | nd::immutable_access_flag);
+  temp.swap(*this);
 }
-nd::array::array(const ndt::type& tp)
+nd::array::array(const ndt::type &tp)
 {
-    array temp(nd::empty(ndt::make_type()));
-    temp.swap(*this);
-    ndt::type(tp).swap(reinterpret_cast<type_type_data *>(get_ndo()->m_data_pointer)->tp);
-    get_ndo()->m_flags = nd::read_access_flag | nd::immutable_access_flag;
+  array temp(nd::empty(ndt::make_type()));
+  temp.swap(*this);
+  ndt::type(tp)
+      .swap(reinterpret_cast<type_type_data *>(get_ndo()->m_data_pointer)->tp);
+  get_ndo()->m_flags = nd::read_access_flag | nd::immutable_access_flag;
 }
 
 nd::array nd::array_rw(dynd_bool value)
 {
-    return nd::array(make_builtin_scalar_array(value,
-                    nd::readwrite_access_flags));
+  return nd::array(
+      make_builtin_scalar_array(value, nd::readwrite_access_flags));
 }
 nd::array nd::array_rw(bool value)
 {
-    return nd::array(make_builtin_scalar_array(dynd_bool(value),
-                    nd::readwrite_access_flags));
+  return nd::array(
+      make_builtin_scalar_array(dynd_bool(value), nd::readwrite_access_flags));
 }
 nd::array nd::array_rw(signed char value)
 {
-    return nd::array(make_builtin_scalar_array(value,
-                    nd::readwrite_access_flags));
+  return nd::array(
+      make_builtin_scalar_array(value, nd::readwrite_access_flags));
 }
 nd::array nd::array_rw(short value)
 {
-    return nd::array(make_builtin_scalar_array(value,
-                    nd::readwrite_access_flags));
+  return nd::array(
+      make_builtin_scalar_array(value, nd::readwrite_access_flags));
 }
 nd::array nd::array_rw(int value)
 {
-    return nd::array(make_builtin_scalar_array(value,
-                    nd::readwrite_access_flags));
+  return nd::array(
+      make_builtin_scalar_array(value, nd::readwrite_access_flags));
 }
 nd::array nd::array_rw(long value)
 {
-    return nd::array(make_builtin_scalar_array(value,
-                    nd::readwrite_access_flags));
+  return nd::array(
+      make_builtin_scalar_array(value, nd::readwrite_access_flags));
 }
 nd::array nd::array_rw(long long value)
 {
-    return nd::array(make_builtin_scalar_array(value,
-                    nd::readwrite_access_flags));
+  return nd::array(
+      make_builtin_scalar_array(value, nd::readwrite_access_flags));
 }
-nd::array nd::array_rw(const dynd_int128& value)
+nd::array nd::array_rw(const dynd_int128 &value)
 {
-    return nd::array(make_builtin_scalar_array(value,
-                    nd::readwrite_access_flags));
+  return nd::array(
+      make_builtin_scalar_array(value, nd::readwrite_access_flags));
 }
 nd::array nd::array_rw(unsigned char value)
 {
-    return nd::array(make_builtin_scalar_array(value,
-                    nd::readwrite_access_flags));
+  return nd::array(
+      make_builtin_scalar_array(value, nd::readwrite_access_flags));
 }
 nd::array nd::array_rw(unsigned short value)
 {
-    return nd::array(make_builtin_scalar_array(value,
-                    nd::readwrite_access_flags));
+  return nd::array(
+      make_builtin_scalar_array(value, nd::readwrite_access_flags));
 }
 nd::array nd::array_rw(unsigned int value)
 {
-    return nd::array(make_builtin_scalar_array(value,
-                    nd::readwrite_access_flags));
+  return nd::array(
+      make_builtin_scalar_array(value, nd::readwrite_access_flags));
 }
 nd::array nd::array_rw(unsigned long value)
 {
-    return nd::array(make_builtin_scalar_array(value,
-                    nd::readwrite_access_flags));
+  return nd::array(
+      make_builtin_scalar_array(value, nd::readwrite_access_flags));
 }
 nd::array nd::array_rw(unsigned long long value)
 {
-    return nd::array(make_builtin_scalar_array(value,
-                    nd::readwrite_access_flags));
+  return nd::array(
+      make_builtin_scalar_array(value, nd::readwrite_access_flags));
 }
-nd::array nd::array_rw(const dynd_uint128& value)
+nd::array nd::array_rw(const dynd_uint128 &value)
 {
-    return nd::array(make_builtin_scalar_array(value,
-                    nd::readwrite_access_flags));
+  return nd::array(
+      make_builtin_scalar_array(value, nd::readwrite_access_flags));
 }
 nd::array nd::array_rw(dynd_float16 value)
 {
-    return nd::array(make_builtin_scalar_array(value,
-                    nd::readwrite_access_flags));
+  return nd::array(
+      make_builtin_scalar_array(value, nd::readwrite_access_flags));
 }
 nd::array nd::array_rw(float value)
 {
-    return nd::array(make_builtin_scalar_array(value,
-                    nd::readwrite_access_flags));
+  return nd::array(
+      make_builtin_scalar_array(value, nd::readwrite_access_flags));
 }
 nd::array nd::array_rw(double value)
 {
-    return nd::array(make_builtin_scalar_array(value,
-                    nd::readwrite_access_flags));
+  return nd::array(
+      make_builtin_scalar_array(value, nd::readwrite_access_flags));
 }
-nd::array nd::array_rw(const dynd_float128& value)
+nd::array nd::array_rw(const dynd_float128 &value)
 {
-    return nd::array(make_builtin_scalar_array(value,
-                    nd::readwrite_access_flags));
+  return nd::array(
+      make_builtin_scalar_array(value, nd::readwrite_access_flags));
 }
 nd::array nd::array_rw(dynd_complex<float> value)
 {
-    return nd::array(make_builtin_scalar_array(value,
-                    nd::readwrite_access_flags));
+  return nd::array(
+      make_builtin_scalar_array(value, nd::readwrite_access_flags));
 }
 nd::array nd::array_rw(dynd_complex<double> value)
 {
-    return nd::array(make_builtin_scalar_array(value,
-                    nd::readwrite_access_flags));
+  return nd::array(
+      make_builtin_scalar_array(value, nd::readwrite_access_flags));
 }
 nd::array nd::array_rw(std::complex<float> value)
 {
-    return nd::array(make_builtin_scalar_array(value,
-                    nd::readwrite_access_flags));
+  return nd::array(
+      make_builtin_scalar_array(value, nd::readwrite_access_flags));
 }
 nd::array nd::array_rw(std::complex<double> value)
 {
-    return nd::array(make_builtin_scalar_array(value,
-                    nd::readwrite_access_flags));
+  return nd::array(
+      make_builtin_scalar_array(value, nd::readwrite_access_flags));
 }
-nd::array nd::array_rw(const std::string& value)
+nd::array nd::array_rw(const std::string &value)
 {
-    return make_string_array(value.c_str(), value.size(),
-                    string_encoding_utf_8, nd::readwrite_access_flags);
+  return make_string_array(value.c_str(), value.size(), string_encoding_utf_8,
+                           nd::readwrite_access_flags);
 }
 /** Construct a string from a NULL-terminated UTF8 string */
 nd::array nd::array_rw(const char *cstr)
 {
-    return make_string_array(cstr, strlen(cstr),
-                    string_encoding_utf_8, nd::readwrite_access_flags);
+  return make_string_array(cstr, strlen(cstr), string_encoding_utf_8,
+                           nd::readwrite_access_flags);
 }
 /** Construct a string from a UTF8 buffer and specified buffer size */
 nd::array nd::array_rw(const char *str, size_t size)
 {
-    return make_string_array(str, size,
-                    string_encoding_utf_8, nd::readwrite_access_flags);
+  return make_string_array(str, size, string_encoding_utf_8,
+                           nd::readwrite_access_flags);
 }
-nd::array nd::array_rw(const ndt::type& tp)
+nd::array nd::array_rw(const ndt::type &tp)
 {
   array temp = array(nd::empty(ndt::make_type()));
-    ndt::type(tp).swap(reinterpret_cast<type_type_data *>(temp.get_ndo()->m_data_pointer)->tp);
-    return temp;
+  ndt::type(tp).swap(
+      reinterpret_cast<type_type_data *>(temp.get_ndo()->m_data_pointer)->tp);
+  return temp;
 }
 
-nd::array nd::detail::make_from_vec<ndt::type>::make(const std::vector<ndt::type>& vec)
+nd::array
+nd::detail::make_from_vec<ndt::type>::make(const std::vector<ndt::type> &vec)
 {
-    ndt::type dt = ndt::make_fixed_dim(vec.size(), ndt::make_type());
-    char *data_ptr = NULL;
-    array result(make_array_memory_block(dt.extended()->get_arrmeta_size(),
-                    sizeof(type_type_data) * vec.size(),
-                    dt.get_data_alignment(), &data_ptr));
-    // The main array arrmeta
-    array_preamble *preamble = result.get_ndo();
-    preamble->m_data_pointer = data_ptr;
-    preamble->m_data_reference = NULL;
-    preamble->m_type = dt.release();
-    preamble->m_flags = read_access_flag | immutable_access_flag;
-    // The arrmeta for the strided and type parts of the type
-    fixed_dim_type_arrmeta *sa_md = reinterpret_cast<fixed_dim_type_arrmeta *>(
-                                            result.get_arrmeta());
-    sa_md->dim_size = vec.size();
-    sa_md->stride = vec.empty() ? 0 : sizeof(type_type_data);
-    // The data
-    type_type_data *data = reinterpret_cast<type_type_data *>(data_ptr);
-    for (size_t i = 0, i_end = vec.size(); i != i_end; ++i) {
-        data[i].tp = ndt::type(vec[i]).release();
-    }
-    return result;
+  ndt::type dt = ndt::make_fixed_dim(vec.size(), ndt::make_type());
+  char *data_ptr = NULL;
+  array result(make_array_memory_block(dt.extended()->get_arrmeta_size(),
+                                       sizeof(type_type_data) * vec.size(),
+                                       dt.get_data_alignment(), &data_ptr));
+  // The main array arrmeta
+  array_preamble *preamble = result.get_ndo();
+  preamble->m_data_pointer = data_ptr;
+  preamble->m_data_reference = NULL;
+  preamble->m_type = dt.release();
+  preamble->m_flags = read_access_flag | immutable_access_flag;
+  // The arrmeta for the strided and type parts of the type
+  fixed_dim_type_arrmeta *sa_md =
+      reinterpret_cast<fixed_dim_type_arrmeta *>(result.get_arrmeta());
+  sa_md->dim_size = vec.size();
+  sa_md->stride = vec.empty() ? 0 : sizeof(type_type_data);
+  // The data
+  type_type_data *data = reinterpret_cast<type_type_data *>(data_ptr);
+  for (size_t i = 0, i_end = vec.size(); i != i_end; ++i) {
+    data[i].tp = ndt::type(vec[i]).release();
+  }
+  return result;
 }
 
-nd::array nd::detail::make_from_vec<std::string>::make(const std::vector<std::string>& vec)
+nd::array nd::detail::make_from_vec<std::string>::make(
+    const std::vector<std::string> &vec)
 {
-    // Constructor detail for making an array from a vector of strings
-    size_t total_string_size = 0;
-    for (size_t i = 0, i_end = vec.size(); i != i_end; ++i) {
-        total_string_size += vec[i].size();
-    }
+  // Constructor detail for making an array from a vector of strings
+  size_t total_string_size = 0;
+  for (size_t i = 0, i_end = vec.size(); i != i_end; ++i) {
+    total_string_size += vec[i].size();
+  }
 
-    ndt::type dt = ndt::make_fixed_dim(vec.size(), ndt::make_string());
-    char *data_ptr = NULL;
-    // Make an array memory block which contains both the string pointers and
-    // the string data
-    array result(make_array_memory_block(dt.extended()->get_arrmeta_size(),
-                    sizeof(string_type_data) * vec.size() + total_string_size,
-                    dt.get_data_alignment(), &data_ptr));
-    char *string_ptr = data_ptr + sizeof(string_type_data) * vec.size();
-    // The main array arrmeta
-    array_preamble *preamble = result.get_ndo();
-    preamble->m_data_pointer = data_ptr;
-    preamble->m_data_reference = NULL;
-    preamble->m_type = dt.release();
-    preamble->m_flags = read_access_flag | immutable_access_flag;
-    // The arrmeta for the fixed_dim and string parts of the type
-    fixed_dim_type_arrmeta *sa_md = reinterpret_cast<fixed_dim_type_arrmeta *>(
-                                            result.get_arrmeta());
-    sa_md->dim_size = vec.size();
-    sa_md->stride = vec.empty() ? 0 : sizeof(string_type_data);
-    string_type_arrmeta *s_md = reinterpret_cast<string_type_arrmeta *>(sa_md + 1);
-    s_md->blockref = NULL;
-    // The string pointers and data
-    string_type_data *data = reinterpret_cast<string_type_data *>(data_ptr);
-    for (size_t i = 0, i_end = vec.size(); i != i_end; ++i) {
-        size_t size = vec[i].size();
-        memcpy(string_ptr, vec[i].data(), size);
-        data[i].begin = string_ptr;
-        string_ptr += size;
-        data[i].end = string_ptr;
-    }
-    return result;
+  ndt::type dt = ndt::make_fixed_dim(vec.size(), ndt::make_string());
+  char *data_ptr = NULL;
+  // Make an array memory block which contains both the string pointers and
+  // the string data
+  array result(make_array_memory_block(dt.extended()->get_arrmeta_size(),
+                                       sizeof(string_type_data) * vec.size() +
+                                           total_string_size,
+                                       dt.get_data_alignment(), &data_ptr));
+  char *string_ptr = data_ptr + sizeof(string_type_data) * vec.size();
+  // The main array arrmeta
+  array_preamble *preamble = result.get_ndo();
+  preamble->m_data_pointer = data_ptr;
+  preamble->m_data_reference = NULL;
+  preamble->m_type = dt.release();
+  preamble->m_flags = read_access_flag | immutable_access_flag;
+  // The arrmeta for the fixed_dim and string parts of the type
+  fixed_dim_type_arrmeta *sa_md =
+      reinterpret_cast<fixed_dim_type_arrmeta *>(result.get_arrmeta());
+  sa_md->dim_size = vec.size();
+  sa_md->stride = vec.empty() ? 0 : sizeof(string_type_data);
+  string_type_arrmeta *s_md =
+      reinterpret_cast<string_type_arrmeta *>(sa_md + 1);
+  s_md->blockref = NULL;
+  // The string pointers and data
+  string_type_data *data = reinterpret_cast<string_type_data *>(data_ptr);
+  for (size_t i = 0, i_end = vec.size(); i != i_end; ++i) {
+    size_t size = vec[i].size();
+    memcpy(string_ptr, vec[i].data(), size);
+    data[i].begin = string_ptr;
+    string_ptr += size;
+    data[i].end = string_ptr;
+  }
+  return result;
 }
 
 namespace {
@@ -730,31 +743,26 @@ static void as_storage_type(const ndt::type &dt,
       out_transformed_tp = ndt::make_fixedbytes(
           storage_dt.get_data_size(), storage_dt.get_data_alignment());
       out_was_transformed = true;
-    }
-    else if (storage_dt.is_pod() &&
-             storage_dt.extended()->get_arrmeta_size() == 0) {
+    } else if (storage_dt.is_pod() &&
+               storage_dt.extended()->get_arrmeta_size() == 0) {
       out_transformed_tp = ndt::make_fixedbytes(
           storage_dt.get_data_size(), storage_dt.get_data_alignment());
       out_was_transformed = true;
-    }
-    else if (storage_dt.get_type_id() == string_type_id) {
+    } else if (storage_dt.get_type_id() == string_type_id) {
       out_transformed_tp =
           ndt::make_bytes(static_cast<const string_type *>(
                               storage_dt.extended())->get_target_alignment());
       out_was_transformed = true;
-    }
-    else {
+    } else {
       if (dt.get_kind() == expr_kind) {
         out_transformed_tp = storage_dt;
         out_was_transformed = true;
-      }
-      else {
+      } else {
         // No transformation
         out_transformed_tp = dt;
       }
     }
-  }
-  else {
+  } else {
     dt.extended()->transform_child_types(
         &as_storage_type, 0, NULL, out_transformed_tp, out_was_transformed);
   }
@@ -763,57 +771,58 @@ static void as_storage_type(const ndt::type &dt,
 
 nd::array nd::array::storage() const
 {
-    ndt::type storage_dt = get_type();
-    bool was_transformed = false;
-    as_storage_type(get_type(), 0, NULL, storage_dt, was_transformed);
-    if (was_transformed) {
-        return make_array_clone_with_new_type(*this, storage_dt);
-    } else {
-        return *this;
-    }
+  ndt::type storage_dt = get_type();
+  bool was_transformed = false;
+  as_storage_type(get_type(), 0, NULL, storage_dt, was_transformed);
+  if (was_transformed) {
+    return make_array_clone_with_new_type(*this, storage_dt);
+  } else {
+    return *this;
+  }
 }
 
-nd::array nd::array::at_array(intptr_t nindices, const irange *indices, bool collapse_leading) const
+nd::array nd::array::at_array(intptr_t nindices, const irange *indices,
+                              bool collapse_leading) const
 {
-    if (is_scalar()) {
-        if (nindices != 0) {
-            throw too_many_indices(get_type(), nindices, 0);
-        }
-        return *this;
-    } else {
-        ndt::type this_dt(get_ndo()->m_type, true);
-        ndt::type dt = get_ndo()->m_type->apply_linear_index(nindices, indices,
-                        0, this_dt, collapse_leading);
-        array result;
-        if (!dt.is_builtin()) {
-            result.set(make_array_memory_block(dt.extended()->get_arrmeta_size()));
-            result.get_ndo()->m_type = dt.extended();
-            base_type_incref(result.get_ndo()->m_type);
-        } else {
-            result.set(make_array_memory_block(0));
-            result.get_ndo()->m_type = reinterpret_cast<const base_type *>(dt.get_type_id());
-        }
-        result.get_ndo()->m_data_pointer = get_ndo()->m_data_pointer;
-        if (get_ndo()->m_data_reference) {
-            result.get_ndo()->m_data_reference = get_ndo()->m_data_reference;
-        } else {
-            // If the data reference is NULL, the data is embedded in the array itself
-            result.get_ndo()->m_data_reference = m_memblock.get();
-        }
-        memory_block_incref(result.get_ndo()->m_data_reference);
-        intptr_t offset = get_ndo()->m_type->apply_linear_index(nindices, indices,
-                        get_arrmeta(), dt, result.get_arrmeta(),
-                        m_memblock.get(), 0, this_dt,
-                        collapse_leading,
-                        &result.get_ndo()->m_data_pointer, &result.get_ndo()->m_data_reference);
-        result.get_ndo()->m_data_pointer += offset;
-        result.get_ndo()->m_flags = get_ndo()->m_flags;
-        return result;
+  if (is_scalar()) {
+    if (nindices != 0) {
+      throw too_many_indices(get_type(), nindices, 0);
     }
+    return *this;
+  } else {
+    ndt::type this_dt(get_ndo()->m_type, true);
+    ndt::type dt = get_ndo()->m_type->apply_linear_index(
+        nindices, indices, 0, this_dt, collapse_leading);
+    array result;
+    if (!dt.is_builtin()) {
+      result.set(make_array_memory_block(dt.extended()->get_arrmeta_size()));
+      result.get_ndo()->m_type = dt.extended();
+      base_type_incref(result.get_ndo()->m_type);
+    } else {
+      result.set(make_array_memory_block(0));
+      result.get_ndo()->m_type =
+          reinterpret_cast<const base_type *>(dt.get_type_id());
+    }
+    result.get_ndo()->m_data_pointer = get_ndo()->m_data_pointer;
+    if (get_ndo()->m_data_reference) {
+      result.get_ndo()->m_data_reference = get_ndo()->m_data_reference;
+    } else {
+      // If the data reference is NULL, the data is embedded in the array itself
+      result.get_ndo()->m_data_reference = m_memblock.get();
+    }
+    memory_block_incref(result.get_ndo()->m_data_reference);
+    intptr_t offset = get_ndo()->m_type->apply_linear_index(
+        nindices, indices, get_arrmeta(), dt, result.get_arrmeta(),
+        m_memblock.get(), 0, this_dt, collapse_leading,
+        &result.get_ndo()->m_data_pointer, &result.get_ndo()->m_data_reference);
+    result.get_ndo()->m_data_pointer += offset;
+    result.get_ndo()->m_flags = get_ndo()->m_flags;
+    return result;
+  }
 }
 
-void nd::array::val_assign(const array &rhs, const eval::eval_context *ectx)
-    const
+void nd::array::val_assign(const array &rhs,
+                           const eval::eval_context *ectx) const
 {
   // Verify read access permission
   if (!(rhs.get_flags() & read_access_flag)) {
@@ -826,170 +835,145 @@ void nd::array::val_assign(const array &rhs, const eval::eval_context *ectx)
 }
 
 void nd::array::val_assign(const ndt::type &rhs_dt, const char *rhs_arrmeta,
-                           const char *rhs_data, const eval::eval_context *ectx)
-    const
+                           const char *rhs_data,
+                           const eval::eval_context *ectx) const
 {
-    typed_data_assign(get_type(), get_arrmeta(), get_readwrite_originptr(),
-                      rhs_dt, rhs_arrmeta, rhs_data, ectx);
+  typed_data_assign(get_type(), get_arrmeta(), get_readwrite_originptr(),
+                    rhs_dt, rhs_arrmeta, rhs_data, ectx);
 }
 
 void nd::array::flag_as_immutable()
 {
-    // If it's already immutable, everything's ok
-    if ((get_flags()&immutable_access_flag) != 0) {
-        return;
-    }
+  // If it's already immutable, everything's ok
+  if ((get_flags() & immutable_access_flag) != 0) {
+    return;
+  }
 
-    // Check that nobody else is peeking into our data
-    bool ok = true;
-    if (m_memblock.get()->m_use_count != 1) {
-        // More than one reference to the array itself
-        ok = false;
-    } else if (get_ndo()->m_data_reference != NULL &&
-            (get_ndo()->m_data_reference->m_use_count != 1 ||
-             !(get_ndo()->m_data_reference->m_type == fixed_size_pod_memory_block_type ||
-               get_ndo()->m_data_reference->m_type == pod_memory_block_type))) {
-        // More than one reference to the array's data, or the reference is to something
-        // other than a memblock owning its data, such as an external memblock.
-        ok = false;
-    } else if (!get_ndo()->is_builtin_type() &&
-            !get_ndo()->m_type->is_unique_data_owner(get_arrmeta())) {
-        ok = false;
-    }
+  // Check that nobody else is peeking into our data
+  bool ok = true;
+  if (m_memblock.get()->m_use_count != 1) {
+    // More than one reference to the array itself
+    ok = false;
+  } else if (get_ndo()->m_data_reference != NULL &&
+             (get_ndo()->m_data_reference->m_use_count != 1 ||
+              !(get_ndo()->m_data_reference->m_type ==
+                    fixed_size_pod_memory_block_type ||
+                get_ndo()->m_data_reference->m_type ==
+                    pod_memory_block_type))) {
+    // More than one reference to the array's data, or the reference is to
+    // something
+    // other than a memblock owning its data, such as an external memblock.
+    ok = false;
+  } else if (!get_ndo()->is_builtin_type() &&
+             !get_ndo()->m_type->is_unique_data_owner(get_arrmeta())) {
+    ok = false;
+  }
 
-    if (ok) {
-        // Finalize any allocated data in the arrmeta
-        if (!is_builtin_type(get_ndo()->m_type)) {
-            get_ndo()->m_type->arrmeta_finalize_buffers(get_arrmeta());
-        }
-        // Clear the write flag, and set the immutable flag
-        get_ndo()->m_flags = (get_ndo()->m_flags&~(uint64_t)write_access_flag)|immutable_access_flag;
-    } else {
-        stringstream ss;
-        ss << "Unable to flag array of type " << get_type() << " as immutable, because ";
-        ss << "it does not uniquely own all of its data";
-        throw runtime_error(ss.str());
+  if (ok) {
+    // Finalize any allocated data in the arrmeta
+    if (!is_builtin_type(get_ndo()->m_type)) {
+      get_ndo()->m_type->arrmeta_finalize_buffers(get_arrmeta());
     }
+    // Clear the write flag, and set the immutable flag
+    get_ndo()->m_flags = (get_ndo()->m_flags & ~(uint64_t)write_access_flag) |
+                         immutable_access_flag;
+  } else {
+    stringstream ss;
+    ss << "Unable to flag array of type " << get_type()
+       << " as immutable, because ";
+    ss << "it does not uniquely own all of its data";
+    throw runtime_error(ss.str());
+  }
 }
 
 nd::array nd::array::p(const char *property_name) const
 {
-    if (!is_null()) {
-        ndt::type dt = get_type();
-        const std::pair<std::string, gfunc::callable> *properties;
-        size_t count;
-        if (!dt.is_builtin()) {
-            dt.extended()->get_dynamic_array_properties(&properties, &count);
-        } else {
-            get_builtin_type_dynamic_array_properties(dt.get_type_id(), &properties, &count);
-        }
-        // TODO: We probably want to make some kind of acceleration structure for the name lookup
-        if (count > 0) {
-            for (size_t i = 0; i < count; ++i) {
-                if (properties[i].first == property_name) {
-                    return properties[i].second.call(*this);
-                }
-            }
-        }
-    }
-
-    stringstream ss;
-    ss << "dynd array does not have property " << property_name;
-    throw runtime_error(ss.str());
-}
-
-nd::array nd::array::p(const std::string& property_name) const
-{
-    if (!is_null()) {
-        ndt::type dt = get_type();
-        const std::pair<std::string, gfunc::callable> *properties;
-        size_t count;
-        if (!dt.is_builtin()) {
-            dt.extended()->get_dynamic_array_properties(&properties, &count);
-        } else {
-            get_builtin_type_dynamic_array_properties(dt.get_type_id(), &properties, &count);
-        }
-        // TODO: We probably want to make some kind of acceleration structure for the name lookup
-        if (count > 0) {
-            for (size_t i = 0; i < count; ++i) {
-                if (properties[i].first == property_name) {
-                    return properties[i].second.call(*this);
-                }
-            }
-        }
-    }
-
-    stringstream ss;
-    ss << "dynd array does not have property " << property_name;
-    throw runtime_error(ss.str());
-}
-
-const gfunc::callable& nd::array::find_dynamic_function(const char *function_name) const
-{
+  if (!is_null()) {
     ndt::type dt = get_type();
+    const std::pair<std::string, gfunc::callable> *properties;
+    size_t count;
     if (!dt.is_builtin()) {
-        const std::pair<std::string, gfunc::callable> *properties;
-        size_t count;
-        dt.extended()->get_dynamic_array_functions(&properties, &count);
-        // TODO: We probably want to make some kind of acceleration structure for the name lookup
-        if (count > 0) {
-            for (size_t i = 0; i < count; ++i) {
-                if (properties[i].first == function_name) {
-                    return properties[i].second;
-                }
-            }
-        }
+      dt.extended()->get_dynamic_array_properties(&properties, &count);
+    } else {
+      get_builtin_type_dynamic_array_properties(dt.get_type_id(), &properties,
+                                                &count);
     }
+    // TODO: We probably want to make some kind of acceleration structure for
+    // the name lookup
+    if (count > 0) {
+      for (size_t i = 0; i < count; ++i) {
+        if (properties[i].first == property_name) {
+          return properties[i].second.call(*this);
+        }
+      }
+    }
+  }
 
-    stringstream ss;
-    ss << "dynd array does not have function " << function_name;
-    throw runtime_error(ss.str());
+  stringstream ss;
+  ss << "dynd array does not have property " << property_name;
+  throw runtime_error(ss.str());
+}
+
+nd::array nd::array::p(const std::string &property_name) const
+{
+  if (!is_null()) {
+    ndt::type dt = get_type();
+    const std::pair<std::string, gfunc::callable> *properties;
+    size_t count;
+    if (!dt.is_builtin()) {
+      dt.extended()->get_dynamic_array_properties(&properties, &count);
+    } else {
+      get_builtin_type_dynamic_array_properties(dt.get_type_id(), &properties,
+                                                &count);
+    }
+    // TODO: We probably want to make some kind of acceleration structure for
+    // the name lookup
+    if (count > 0) {
+      for (size_t i = 0; i < count; ++i) {
+        if (properties[i].first == property_name) {
+          return properties[i].second.call(*this);
+        }
+      }
+    }
+  }
+
+  stringstream ss;
+  ss << "dynd array does not have property " << property_name;
+  throw runtime_error(ss.str());
+}
+
+const gfunc::callable &
+nd::array::find_dynamic_function(const char *function_name) const
+{
+  ndt::type dt = get_type();
+  if (!dt.is_builtin()) {
+    const std::pair<std::string, gfunc::callable> *properties;
+    size_t count;
+    dt.extended()->get_dynamic_array_functions(&properties, &count);
+    // TODO: We probably want to make some kind of acceleration structure for
+    // the name lookup
+    if (count > 0) {
+      for (size_t i = 0; i < count; ++i) {
+        if (properties[i].first == function_name) {
+          return properties[i].second;
+        }
+      }
+    }
+  }
+
+  stringstream ss;
+  ss << "dynd array does not have function " << function_name;
+  throw runtime_error(ss.str());
 }
 
 nd::array nd::array::eval(const eval::eval_context *ectx) const
 {
-    const ndt::type& current_tp = get_type();
-    if (!current_tp.is_expression()) {
-        return *this;
-    } else {
-        // Create a canonical type for the result
-        const ndt::type& dt = current_tp.get_canonical_type();
-        array result(nd::empty(dt));
-        if (dt.get_type_id() == fixed_dim_type_id) {
-          // Reorder strides of output strided dimensions in a KEEPORDER fashion
-          dt.extended<fixed_dim_type>()->reorder_default_constructed_strides(
-              result.get_arrmeta(), get_type(), get_arrmeta());
-        }
-        result.val_assign(*this, ectx);
-        return result;
-    }
-}
-
-nd::array nd::array::eval_immutable(const eval::eval_context *ectx) const
-{
-    const ndt::type& current_tp = get_type();
-    if ((get_access_flags()&immutable_access_flag) &&
-                    !current_tp.is_expression()) {
-        return *this;
-    } else {
-        // Create a canonical type for the result
-        const ndt::type& dt = current_tp.get_canonical_type();
-        array result(nd::empty(dt));
-        if (dt.get_type_id() == fixed_dim_type_id) {
-          // Reorder strides of output strided dimensions in a KEEPORDER fashion
-          dt.extended<fixed_dim_type>()->reorder_default_constructed_strides(
-              result.get_arrmeta(), get_type(), get_arrmeta());
-        }
-        result.val_assign(*this, ectx);
-        result.get_ndo()->m_flags = immutable_access_flag|read_access_flag;
-        return result;
-    }
-}
-
-nd::array nd::array::eval_copy(uint32_t access_flags, const eval::eval_context *ectx) const
-{
-    const ndt::type& current_tp = get_type();
-    const ndt::type& dt = current_tp.get_canonical_type();
+  const ndt::type &current_tp = get_type();
+  if (!current_tp.is_expression()) {
+    return *this;
+  } else {
+    // Create a canonical type for the result
+    const ndt::type &dt = current_tp.get_canonical_type();
     array result(nd::empty(dt));
     if (dt.get_type_id() == fixed_dim_type_id) {
       // Reorder strides of output strided dimensions in a KEEPORDER fashion
@@ -997,268 +981,297 @@ nd::array nd::array::eval_copy(uint32_t access_flags, const eval::eval_context *
           result.get_arrmeta(), get_type(), get_arrmeta());
     }
     result.val_assign(*this, ectx);
-    // If the access_flags are 0, use the defaults
-    access_flags = access_flags ? access_flags
-                                : (int32_t)nd::default_access_flags;
-    // If the access_flags are just readonly, add immutable
-    // because we just created a unique instance
-    access_flags = (access_flags != nd::read_access_flag)
-                    ? access_flags
-                    : (nd::read_access_flag|nd::immutable_access_flag);
-    result.get_ndo()->m_flags = access_flags;
     return result;
+  }
+}
+
+nd::array nd::array::eval_immutable(const eval::eval_context *ectx) const
+{
+  const ndt::type &current_tp = get_type();
+  if ((get_access_flags() & immutable_access_flag) &&
+      !current_tp.is_expression()) {
+    return *this;
+  } else {
+    // Create a canonical type for the result
+    const ndt::type &dt = current_tp.get_canonical_type();
+    array result(nd::empty(dt));
+    if (dt.get_type_id() == fixed_dim_type_id) {
+      // Reorder strides of output strided dimensions in a KEEPORDER fashion
+      dt.extended<fixed_dim_type>()->reorder_default_constructed_strides(
+          result.get_arrmeta(), get_type(), get_arrmeta());
+    }
+    result.val_assign(*this, ectx);
+    result.get_ndo()->m_flags = immutable_access_flag | read_access_flag;
+    return result;
+  }
+}
+
+nd::array nd::array::eval_copy(uint32_t access_flags,
+                               const eval::eval_context *ectx) const
+{
+  const ndt::type &current_tp = get_type();
+  const ndt::type &dt = current_tp.get_canonical_type();
+  array result(nd::empty(dt));
+  if (dt.get_type_id() == fixed_dim_type_id) {
+    // Reorder strides of output strided dimensions in a KEEPORDER fashion
+    dt.extended<fixed_dim_type>()->reorder_default_constructed_strides(
+        result.get_arrmeta(), get_type(), get_arrmeta());
+  }
+  result.val_assign(*this, ectx);
+  // If the access_flags are 0, use the defaults
+  access_flags =
+      access_flags ? access_flags : (int32_t)nd::default_access_flags;
+  // If the access_flags are just readonly, add immutable
+  // because we just created a unique instance
+  access_flags = (access_flags != nd::read_access_flag)
+                     ? access_flags
+                     : (nd::read_access_flag | nd::immutable_access_flag);
+  result.get_ndo()->m_flags = access_flags;
+  return result;
 }
 
 nd::array nd::array::to_host() const
 {
-    array result = empty(get_type().without_memory_type());
-    result.val_assign(*this);
+  array result = empty(get_type().without_memory_type());
+  result.val_assign(*this);
 
-    return result;
+  return result;
 }
 
 #ifdef DYND_CUDA
 
 nd::array nd::array::to_cuda_host(unsigned int cuda_host_flags) const
 {
-    array result = empty(make_cuda_host(get_type().without_memory_type(), cuda_host_flags));
-    result.val_assign(*this);
+  array result =
+      empty(make_cuda_host(get_type().without_memory_type(), cuda_host_flags));
+  result.val_assign(*this);
 
-    return result;
-
+  return result;
 }
 
 nd::array nd::array::to_cuda_device() const
 {
-    array result = empty(make_cuda_device(get_type().without_memory_type()));
-    result.val_assign(*this);
+      array result = empty(make_cuda_device(get_type().without_memory_type()));
+  result.val_assign(*this);
 
-    return result;
+  return result;
 }
 
 #endif // DYND_CUDA
 
 bool nd::array::is_missing() const
 {
-    ndt::type tp = get_type();
-    if (tp.get_type_id() == option_type_id) {
-       return !tp.extended<option_type>()->is_avail(get_arrmeta(), get_readonly_originptr(),
-            &eval::default_eval_context);
-    }
+  ndt::type tp = get_type();
+  if (tp.get_type_id() == option_type_id) {
+    return !tp.extended<option_type>()->is_avail(
+        get_arrmeta(), get_readonly_originptr(), &eval::default_eval_context);
+  }
 
-    return false;
+  return false;
 }
 
 void nd::array::assign_na()
 {
-    ndt::type tp = get_type();
-    if (tp.get_type_id() == option_type_id) {
-        tp.extended<option_type>()->assign_na(get_arrmeta(), get_readwrite_originptr(),
-            &eval::default_eval_context);
+  ndt::type tp = get_type();
+  if (tp.get_type_id() == option_type_id) {
+    tp.extended<option_type>()->assign_na(
+        get_arrmeta(), get_readwrite_originptr(), &eval::default_eval_context);
+  }
+}
+
+bool nd::array::op_sorting_less(const array &rhs) const
+{
+  comparison_ckernel_builder k;
+  make_comparison_kernel(&k, 0, get_type(), get_arrmeta(), rhs.get_type(),
+                         rhs.get_arrmeta(), comparison_type_sorting_less,
+                         &eval::default_eval_context);
+  return k(get_readonly_originptr(), rhs.get_readonly_originptr());
+}
+
+bool nd::array::operator<(const array &rhs) const
+{
+  comparison_ckernel_builder k;
+  make_comparison_kernel(&k, 0, get_type(), get_arrmeta(), rhs.get_type(),
+                         rhs.get_arrmeta(), comparison_type_less,
+                         &eval::default_eval_context);
+  return k(get_readonly_originptr(), rhs.get_readonly_originptr());
+}
+
+bool nd::array::operator<=(const array &rhs) const
+{
+  comparison_ckernel_builder k;
+  make_comparison_kernel(&k, 0, get_type(), get_arrmeta(), rhs.get_type(),
+                         rhs.get_arrmeta(), comparison_type_less_equal,
+                         &eval::default_eval_context);
+  return k(get_readonly_originptr(), rhs.get_readonly_originptr());
+}
+
+bool nd::array::operator==(const array &rhs) const
+{
+  comparison_ckernel_builder k;
+  make_comparison_kernel(&k, 0, get_type(), get_arrmeta(), rhs.get_type(),
+                         rhs.get_arrmeta(), comparison_type_equal,
+                         &eval::default_eval_context);
+  return k(get_readonly_originptr(), rhs.get_readonly_originptr());
+}
+
+bool nd::array::operator!=(const array &rhs) const
+{
+  comparison_ckernel_builder k;
+  make_comparison_kernel(&k, 0, get_type(), get_arrmeta(), rhs.get_type(),
+                         rhs.get_arrmeta(), comparison_type_not_equal,
+                         &eval::default_eval_context);
+  return k(get_readonly_originptr(), rhs.get_readonly_originptr());
+}
+
+bool nd::array::operator>=(const array &rhs) const
+{
+  comparison_ckernel_builder k;
+  make_comparison_kernel(&k, 0, get_type(), get_arrmeta(), rhs.get_type(),
+                         rhs.get_arrmeta(), comparison_type_greater_equal,
+                         &eval::default_eval_context);
+  return k(get_readonly_originptr(), rhs.get_readonly_originptr());
+}
+
+bool nd::array::operator>(const array &rhs) const
+{
+  comparison_ckernel_builder k;
+  make_comparison_kernel(&k, 0, get_type(), get_arrmeta(), rhs.get_type(),
+                         rhs.get_arrmeta(), comparison_type_greater,
+                         &eval::default_eval_context);
+  return k(get_readonly_originptr(), rhs.get_readonly_originptr());
+}
+
+bool nd::array::equals_exact(const array &rhs) const
+{
+  if (get_ndo() == rhs.get_ndo()) {
+    return true;
+  } else if (get_type() != rhs.get_type()) {
+    return false;
+  } else if (get_ndim() == 0) {
+    comparison_ckernel_builder k;
+    make_comparison_kernel(&k, 0, get_type(), get_arrmeta(), rhs.get_type(),
+                           rhs.get_arrmeta(), comparison_type_equal,
+                           &eval::default_eval_context);
+    return k(get_readonly_originptr(), rhs.get_readonly_originptr());
+  } else if (get_type().get_type_id() == var_dim_type_id) {
+    // If there's a leading var dimension, convert it to strided and compare
+    // (Note: this is an inefficient hack)
+    ndt::type tp = ndt::make_fixed_dim(
+        get_shape()[0],
+        get_type().extended<base_dim_type>()->get_element_type());
+    return nd::view(*this, tp).equals_exact(nd::view(rhs, tp));
+  } else {
+    // First compare the shape, to avoid triggering an exception in common cases
+    size_t ndim = get_ndim();
+    dimvector shape0(ndim), shape1(ndim);
+    get_shape(shape0.get());
+    rhs.get_shape(shape1.get());
+    if (memcmp(shape0.get(), shape1.get(), ndim * sizeof(intptr_t)) != 0) {
+      return false;
     }
-}
-
-bool nd::array::op_sorting_less(const array& rhs) const
-{
-    comparison_ckernel_builder k;
-    make_comparison_kernel(&k, 0, get_type(), get_arrmeta(),
-                    rhs.get_type(), rhs.get_arrmeta(),
-                    comparison_type_sorting_less,
-                    &eval::default_eval_context);
-    return k(get_readonly_originptr(), rhs.get_readonly_originptr());
-}
-
-bool nd::array::operator<(const array& rhs) const
-{
-    comparison_ckernel_builder k;
-    make_comparison_kernel(&k, 0, get_type(), get_arrmeta(),
-                    rhs.get_type(), rhs.get_arrmeta(),
-                    comparison_type_less,
-                    &eval::default_eval_context);
-    return k(get_readonly_originptr(), rhs.get_readonly_originptr());
-}
-
-bool nd::array::operator<=(const array& rhs) const
-{
-    comparison_ckernel_builder k;
-    make_comparison_kernel(&k, 0, get_type(), get_arrmeta(),
-                    rhs.get_type(), rhs.get_arrmeta(),
-                    comparison_type_less_equal,
-                    &eval::default_eval_context);
-    return k(get_readonly_originptr(), rhs.get_readonly_originptr());
-}
-
-bool nd::array::operator==(const array& rhs) const
-{
-    comparison_ckernel_builder k;
-    make_comparison_kernel(&k, 0, get_type(), get_arrmeta(),
-                    rhs.get_type(), rhs.get_arrmeta(),
-                    comparison_type_equal,
-                    &eval::default_eval_context);
-    return k(get_readonly_originptr(), rhs.get_readonly_originptr());
-}
-
-bool nd::array::operator!=(const array& rhs) const
-{
-    comparison_ckernel_builder k;
-    make_comparison_kernel(&k, 0, get_type(), get_arrmeta(),
-                    rhs.get_type(), rhs.get_arrmeta(),
-                    comparison_type_not_equal,
-                    &eval::default_eval_context);
-    return k(get_readonly_originptr(), rhs.get_readonly_originptr());
-}
-
-bool nd::array::operator>=(const array& rhs) const
-{
-    comparison_ckernel_builder k;
-    make_comparison_kernel(&k, 0, get_type(), get_arrmeta(),
-                    rhs.get_type(), rhs.get_arrmeta(),
-                    comparison_type_greater_equal,
-                    &eval::default_eval_context);
-    return k(get_readonly_originptr(), rhs.get_readonly_originptr());
-}
-
-bool nd::array::operator>(const array& rhs) const
-{
-    comparison_ckernel_builder k;
-    make_comparison_kernel(&k, 0, get_type(), get_arrmeta(),
-                    rhs.get_type(), rhs.get_arrmeta(),
-                    comparison_type_greater,
-                    &eval::default_eval_context);
-    return k(get_readonly_originptr(), rhs.get_readonly_originptr());
-}
-
-bool nd::array::equals_exact(const array& rhs) const
-{
-    if (get_ndo() == rhs.get_ndo()) {
-        return true;
-    } else if (get_type() != rhs.get_type()) {
-        return false;
-    } else if (get_ndim() == 0) {
+    try {
+      array_iter<0, 2> iter(*this, rhs);
+      if (!iter.empty()) {
         comparison_ckernel_builder k;
-        make_comparison_kernel(&k, 0,
-                        get_type(), get_arrmeta(),
-                        rhs.get_type(), rhs.get_arrmeta(),
-                        comparison_type_equal, &eval::default_eval_context);
-        return k(get_readonly_originptr(), rhs.get_readonly_originptr());
-    } else if (get_type().get_type_id() == var_dim_type_id) {
-      // If there's a leading var dimension, convert it to strided and compare
-      // (Note: this is an inefficient hack)
-      ndt::type tp = ndt::make_fixed_dim(
-          get_shape()[0],
-          get_type().extended<base_dim_type>()->get_element_type());
-      return nd::view(*this, tp).equals_exact(nd::view(rhs, tp));
-    } else {
-        // First compare the shape, to avoid triggering an exception in common cases
-        size_t ndim = get_ndim();
-        dimvector shape0(ndim), shape1(ndim);
-        get_shape(shape0.get());
-        rhs.get_shape(shape1.get());
-        if (memcmp(shape0.get(), shape1.get(), ndim * sizeof(intptr_t)) != 0) {
+        make_comparison_kernel(&k, 0, iter.get_uniform_dtype<0>(),
+                               iter.arrmeta<0>(), iter.get_uniform_dtype<1>(),
+                               iter.arrmeta<1>(), comparison_type_not_equal,
+                               &eval::default_eval_context);
+        do {
+          if (k(iter.data<0>(), iter.data<1>())) {
             return false;
-        }
-        try {
-            array_iter<0,2> iter(*this, rhs);
-            if (!iter.empty()) {
-                comparison_ckernel_builder k;
-                make_comparison_kernel(&k, 0,
-                                iter.get_uniform_dtype<0>(), iter.arrmeta<0>(),
-                                iter.get_uniform_dtype<1>(), iter.arrmeta<1>(),
-                                comparison_type_not_equal, &eval::default_eval_context);
-                do {
-                    if (k(iter.data<0>(), iter.data<1>())) {
-                        return false;
-                    }
-                } while (iter.next());
-            }
-            return true;
-        } catch(const broadcast_error&) {
-            // If there's a broadcast error in a variable-sized dimension, return false for it too
-            return false;
-        }
+          }
+        } while (iter.next());
+      }
+      return true;
     }
+    catch (const broadcast_error &) {
+      // If there's a broadcast error in a variable-sized dimension, return
+      // false for it too
+      return false;
+    }
+  }
 }
 
-nd::array nd::array::cast(const ndt::type& tp) const
+nd::array nd::array::cast(const ndt::type &tp) const
 {
-    // Use the ucast function specifying to replace all dimensions
-    return ucast(tp, get_type().get_ndim());
+  // Use the ucast function specifying to replace all dimensions
+  return ucast(tp, get_type().get_ndim());
 }
 
 namespace {
-    struct cast_dtype_extra {
-        cast_dtype_extra(const ndt::type& tp, size_t ru)
-            : replacement_tp(tp), replace_ndim(ru), out_can_view_data(true)
-        {
+struct cast_dtype_extra {
+  cast_dtype_extra(const ndt::type &tp, size_t ru)
+      : replacement_tp(tp), replace_ndim(ru), out_can_view_data(true)
+  {
+  }
+  const ndt::type &replacement_tp;
+  intptr_t replace_ndim;
+  bool out_can_view_data;
+};
+static void cast_dtype(const ndt::type &dt,
+                       intptr_t DYND_UNUSED(arrmeta_offset), void *extra,
+                       ndt::type &out_transformed_tp, bool &out_was_transformed)
+{
+  cast_dtype_extra *e = reinterpret_cast<cast_dtype_extra *>(extra);
+  intptr_t replace_ndim = e->replace_ndim;
+  if (dt.get_ndim() > replace_ndim) {
+    dt.extended()->transform_child_types(
+        &cast_dtype, 0, extra, out_transformed_tp, out_was_transformed);
+  } else {
+    if (replace_ndim > 0) {
+      // If the dimension we're replacing doesn't change, then
+      // avoid creating the convert type at this level
+      if (dt.get_type_id() == e->replacement_tp.get_type_id()) {
+        bool can_keep_dim = false;
+        ndt::type child_dt, child_replacement_tp;
+        switch (dt.get_type_id()) {
+        case cfixed_dim_type_id: {
+          const cfixed_dim_type *dt_fdd = dt.extended<cfixed_dim_type>();
+          const cfixed_dim_type *r_fdd = static_cast<const cfixed_dim_type *>(
+              e->replacement_tp.extended());
+          if (dt_fdd->get_fixed_dim_size() == r_fdd->get_fixed_dim_size() &&
+              dt_fdd->get_fixed_stride() == r_fdd->get_fixed_stride()) {
+            can_keep_dim = true;
+            child_dt = dt_fdd->get_element_type();
+            child_replacement_tp = r_fdd->get_element_type();
+          }
+          break;
         }
-        const ndt::type& replacement_tp;
-        intptr_t replace_ndim;
-        bool out_can_view_data;
-    };
-    static void cast_dtype(const ndt::type &dt,
-                           intptr_t DYND_UNUSED(arrmeta_offset), void *extra,
-                           ndt::type &out_transformed_tp,
-                           bool &out_was_transformed)
-    {
-        cast_dtype_extra *e = reinterpret_cast<cast_dtype_extra *>(extra);
-        intptr_t replace_ndim = e->replace_ndim;
-        if (dt.get_ndim() > replace_ndim) {
-          dt.extended()->transform_child_types(
-              &cast_dtype, 0, extra, out_transformed_tp, out_was_transformed);
-        } else {
-            if (replace_ndim > 0) {
-                // If the dimension we're replacing doesn't change, then
-                // avoid creating the convert type at this level
-                if (dt.get_type_id() == e->replacement_tp.get_type_id()) {
-                    bool can_keep_dim = false;
-                    ndt::type child_dt, child_replacement_tp;
-                    switch (dt.get_type_id()) {
-                        case cfixed_dim_type_id: {
-                            const cfixed_dim_type *dt_fdd = dt.extended<cfixed_dim_type>();
-                            const cfixed_dim_type *r_fdd = static_cast<const cfixed_dim_type *>(e->replacement_tp.extended());
-                            if (dt_fdd->get_fixed_dim_size() == r_fdd->get_fixed_dim_size() &&
-                                    dt_fdd->get_fixed_stride() == r_fdd->get_fixed_stride()) {
-                                can_keep_dim = true;
-                                child_dt = dt_fdd->get_element_type();
-                                child_replacement_tp = r_fdd->get_element_type();
-                            }
-                            break;
-                        }
-                        case var_dim_type_id: {
-                            const base_dim_type *dt_budd =
-                                            dt.extended<base_dim_type>();
-                            const base_dim_type *r_budd =
-                                            static_cast<const base_dim_type *>(e->replacement_tp.extended());
-                            can_keep_dim = true;
-                            child_dt = dt_budd->get_element_type();
-                            child_replacement_tp = r_budd->get_element_type();
-                            break;
-                        }
-                        default:
-                            break;
-                    }
-                    if (can_keep_dim) {
-                        cast_dtype_extra extra_child(child_replacement_tp,
-                                                     replace_ndim - 1);
-                        dt.extended()->transform_child_types(
-                            &cast_dtype, 0, &extra_child, out_transformed_tp,
-                            out_was_transformed);
-                        return;
-                    }
-                }
-            }
-            out_transformed_tp = ndt::make_convert(e->replacement_tp, dt);
-            // Only flag the transformation if this actually created a convert type
-            if (out_transformed_tp.extended() != e->replacement_tp.extended()) {
-                out_was_transformed= true;
-                e->out_can_view_data = false;
-            }
+        case var_dim_type_id: {
+          const base_dim_type *dt_budd = dt.extended<base_dim_type>();
+          const base_dim_type *r_budd =
+              static_cast<const base_dim_type *>(e->replacement_tp.extended());
+          can_keep_dim = true;
+          child_dt = dt_budd->get_element_type();
+          child_replacement_tp = r_budd->get_element_type();
+          break;
         }
+        default:
+          break;
+        }
+        if (can_keep_dim) {
+          cast_dtype_extra extra_child(child_replacement_tp, replace_ndim - 1);
+          dt.extended()->transform_child_types(&cast_dtype, 0, &extra_child,
+                                               out_transformed_tp,
+                                               out_was_transformed);
+          return;
+        }
+      }
     }
+    out_transformed_tp = ndt::make_convert(e->replacement_tp, dt);
+    // Only flag the transformation if this actually created a convert type
+    if (out_transformed_tp.extended() != e->replacement_tp.extended()) {
+      out_was_transformed = true;
+      e->out_can_view_data = false;
+    }
+  }
+}
 } // anonymous namespace
 
-nd::array nd::array::ucast(const ndt::type &scalar_tp, intptr_t replace_ndim)
-    const
+nd::array nd::array::ucast(const ndt::type &scalar_tp,
+                           intptr_t replace_ndim) const
 {
   // This creates a type which has a convert type for every scalar of different
   // type.
@@ -1276,18 +1289,19 @@ nd::array nd::array::ucast(const ndt::type &scalar_tp, intptr_t replace_ndim)
   }
 }
 
-nd::array nd::array::view(const ndt::type& tp) const
+nd::array nd::array::view(const ndt::type &tp) const
 {
   return nd::view(*this, tp);
 }
 
-nd::array nd::array::uview(const ndt::type& uniform_dt, intptr_t replace_ndim) const
+nd::array nd::array::uview(const ndt::type &uniform_dt,
+                           intptr_t replace_ndim) const
 {
   // Use the view function specifying to replace all dimensions
   return view(get_type().with_replaced_dtype(uniform_dt, replace_ndim));
 }
 
-nd::array nd::array::adapt(const ndt::type& tp, const nd::string& adapt_op)
+nd::array nd::array::adapt(const ndt::type &tp, const nd::string &adapt_op)
 {
   return uview(ndt::make_adapt(get_dtype(), tp, adapt_op), 0);
 }
@@ -1318,8 +1332,7 @@ static void permute_type_dims(const ndt::type &tp, intptr_t arrmeta_offset,
                                            out_was_transformed);
       pdd->i = i;
     }
-  }
-  else {
+  } else {
     // Find the smallest interval of mutually permuted axes
     intptr_t max_i = pdd->axes[i], loop_i = i + 1;
     while (loop_i <= max_i && loop_i < pdd->ndim) {
@@ -1378,7 +1391,7 @@ nd::array nd::array::permute(intptr_t ndim, const intptr_t *axes) const
     stringstream ss;
     ss << "Invalid permutation provided to dynd axis permute: [";
     for (intptr_t i = 0; i < ndim; ++i) {
-      ss << axes[i] << (i != ndim-1 ? " " : "");
+      ss << axes[i] << (i != ndim - 1 ? " " : "");
     }
     ss << "]";
     throw invalid_argument(ss.str());
@@ -1409,138 +1422,137 @@ nd::array nd::array::permute(intptr_t ndim, const intptr_t *axes) const
 
 nd::array nd::array::rotate(intptr_t to, intptr_t from) const
 {
-    if (from < to) {
-        intptr_t ndim = to + 1;
-        dimvector axes(ndim);
-        for (intptr_t i = 0; i < from; ++i) {
-            axes[i] = i;
-        }
-        for (intptr_t i = from; i < to; ++i) {
-            axes[i] = i + 1;
-        }
-        axes[to] = from;
+  if (from < to) {
+    intptr_t ndim = to + 1;
+    dimvector axes(ndim);
+    for (intptr_t i = 0; i < from; ++i) {
+      axes[i] = i;
+    }
+    for (intptr_t i = from; i < to; ++i) {
+      axes[i] = i + 1;
+    }
+    axes[to] = from;
 
-        return permute(ndim, axes.get());
+    return permute(ndim, axes.get());
+  }
+
+  if (from > to) {
+    intptr_t ndim = from + 1;
+    dimvector axes(ndim);
+    for (intptr_t i = 0; i < to; ++i) {
+      axes[i] = i;
+    }
+    axes[to] = from;
+    for (intptr_t i = to + 1; i <= from; ++i) {
+      axes[i] = i - 1;
     }
 
-    if (from > to) {
-        intptr_t ndim = from + 1;
-        dimvector axes(ndim);
-        for (intptr_t i = 0; i < to; ++i) {
-            axes[i] = i;
-        }
-        axes[to] = from;
-        for (intptr_t i = to + 1; i <= from; ++i) {
-            axes[i] = i - 1;
-        }
+    return permute(ndim, axes.get());
+  }
 
-        return permute(ndim, axes.get());
-    }
-
-    return *this;
+  return *this;
 }
 
 nd::array nd::array::transpose() const
 {
-    intptr_t ndim = get_ndim();
-    dimvector axes(ndim);
-    for (intptr_t i = 0; i < ndim; ++i) {
-        axes[i] = ndim - i - 1;
-    }
+  intptr_t ndim = get_ndim();
+  dimvector axes(ndim);
+  for (intptr_t i = 0; i < ndim; ++i) {
+    axes[i] = ndim - i - 1;
+  }
 
-    return permute(ndim, axes.get());
+  return permute(ndim, axes.get());
 }
 
 namespace {
-    struct replace_compatible_dtype_extra {
-        replace_compatible_dtype_extra(const ndt::type& tp,
-                        intptr_t replace_ndim_)
-            : replacement_tp(tp), replace_ndim(replace_ndim_)
-        {
-        }
-        const ndt::type& replacement_tp;
-        intptr_t replace_ndim;
-    };
-    static void replace_compatible_dtype(const ndt::type &tp,
-                                         intptr_t DYND_UNUSED(arrmeta_offset),
-                                         void *extra,
-                                         ndt::type &out_transformed_tp,
-                                         bool &out_was_transformed)
-    {
-        const replace_compatible_dtype_extra *e =
-                        reinterpret_cast<const replace_compatible_dtype_extra *>(extra);
-        const ndt::type& replacement_tp = e->replacement_tp;
-        if (tp.get_ndim() == e->replace_ndim) {
-            if (tp != replacement_tp) {
-                if (!tp.data_layout_compatible_with(replacement_tp)) {
-                    stringstream ss;
-                    ss << "The dynd type " << tp << " is not ";
-                    ss << " data layout compatible with " << replacement_tp;
-                    ss << ", so a substitution cannot be made.";
-                    throw runtime_error(ss.str());
-                }
-                out_transformed_tp = replacement_tp;
-                out_was_transformed= true;
-            }
-        } else {
-          tp.extended()->transform_child_types(&replace_compatible_dtype, 0,
-                                               extra, out_transformed_tp,
-                                               out_was_transformed);
-        }
+struct replace_compatible_dtype_extra {
+  replace_compatible_dtype_extra(const ndt::type &tp, intptr_t replace_ndim_)
+      : replacement_tp(tp), replace_ndim(replace_ndim_)
+  {
+  }
+  const ndt::type &replacement_tp;
+  intptr_t replace_ndim;
+};
+static void replace_compatible_dtype(const ndt::type &tp,
+                                     intptr_t DYND_UNUSED(arrmeta_offset),
+                                     void *extra, ndt::type &out_transformed_tp,
+                                     bool &out_was_transformed)
+{
+  const replace_compatible_dtype_extra *e =
+      reinterpret_cast<const replace_compatible_dtype_extra *>(extra);
+  const ndt::type &replacement_tp = e->replacement_tp;
+  if (tp.get_ndim() == e->replace_ndim) {
+    if (tp != replacement_tp) {
+      if (!tp.data_layout_compatible_with(replacement_tp)) {
+        stringstream ss;
+        ss << "The dynd type " << tp << " is not ";
+        ss << " data layout compatible with " << replacement_tp;
+        ss << ", so a substitution cannot be made.";
+        throw runtime_error(ss.str());
+      }
+      out_transformed_tp = replacement_tp;
+      out_was_transformed = true;
     }
+  } else {
+    tp.extended()->transform_child_types(&replace_compatible_dtype, 0, extra,
+                                         out_transformed_tp,
+                                         out_was_transformed);
+  }
+}
 } // anonymous namespace
 
-nd::array nd::array::replace_dtype(const ndt::type& replacement_tp, intptr_t replace_ndim) const
+nd::array nd::array::replace_dtype(const ndt::type &replacement_tp,
+                                   intptr_t replace_ndim) const
 {
-    // This creates a type which swaps in the new dtype for
-    // the existing one. It raises an error if the data layout
-    // is incompatible
-    ndt::type replaced_tp;
-    bool was_transformed = false;
-    replace_compatible_dtype_extra extra(replacement_tp, replace_ndim);
-    replace_compatible_dtype(get_type(), 0, &extra, replaced_tp,
-                             was_transformed);
-    if (was_transformed) {
-        return make_array_clone_with_new_type(*this, replaced_tp);
-    } else {
-        return *this;
-    }
+  // This creates a type which swaps in the new dtype for
+  // the existing one. It raises an error if the data layout
+  // is incompatible
+  ndt::type replaced_tp;
+  bool was_transformed = false;
+  replace_compatible_dtype_extra extra(replacement_tp, replace_ndim);
+  replace_compatible_dtype(get_type(), 0, &extra, replaced_tp, was_transformed);
+  if (was_transformed) {
+    return make_array_clone_with_new_type(*this, replaced_tp);
+  } else {
+    return *this;
+  }
 }
 
 nd::array nd::array::new_axis(intptr_t i, intptr_t new_ndim) const
 {
-    ndt::type src_tp = get_type();
-    ndt::type dst_tp = src_tp.with_new_axis(i, new_ndim);
+  ndt::type src_tp = get_type();
+  ndt::type dst_tp = src_tp.with_new_axis(i, new_ndim);
 
-    // This is taken from view_concrete in view.cpp
-    nd::array res(make_array_memory_block(dst_tp.get_arrmeta_size()));
-    res.get_ndo()->m_data_pointer = get_ndo()->m_data_pointer;
-    if (get_ndo()->m_data_reference == NULL) {
-        res.get_ndo()->m_data_reference = get_memblock().release();
-    } else {
-        res.get_ndo()->m_data_reference = get_data_memblock().release();
-    }
-    res.get_ndo()->m_type = ndt::type(dst_tp).release();
-    res.get_ndo()->m_flags = get_ndo()->m_flags;
+  // This is taken from view_concrete in view.cpp
+  nd::array res(make_array_memory_block(dst_tp.get_arrmeta_size()));
+  res.get_ndo()->m_data_pointer = get_ndo()->m_data_pointer;
+  if (get_ndo()->m_data_reference == NULL) {
+    res.get_ndo()->m_data_reference = get_memblock().release();
+  } else {
+    res.get_ndo()->m_data_reference = get_data_memblock().release();
+  }
+  res.get_ndo()->m_type = ndt::type(dst_tp).release();
+  res.get_ndo()->m_flags = get_ndo()->m_flags;
 
-    char *src_arrmeta = get_ndo()->get_arrmeta();
-    char *dst_arrmeta = res.get_arrmeta();
-    for (intptr_t j = 0; j < i; ++j) {
-        dst_tp.extended<base_dim_type>()->arrmeta_copy_construct_onedim(dst_arrmeta, src_arrmeta, NULL);
-        src_tp = src_tp.get_type_at_dimension(&src_arrmeta, 1);
-        dst_tp = dst_tp.get_type_at_dimension(&dst_arrmeta, 1);
-    }
-    for (intptr_t j = 0; j < new_ndim; ++j) {
-        size_stride_t *smd = reinterpret_cast<size_stride_t *>(dst_arrmeta);
-        smd->dim_size = 1;
-        smd->stride = 0; // Should this not be zero?
-        dst_tp = dst_tp.get_type_at_dimension(&dst_arrmeta, 1);
-    }
-    if (!dst_tp.is_builtin()) {
-        dst_tp.extended()->arrmeta_copy_construct(dst_arrmeta, src_arrmeta, NULL);
-    }
+  char *src_arrmeta = get_ndo()->get_arrmeta();
+  char *dst_arrmeta = res.get_arrmeta();
+  for (intptr_t j = 0; j < i; ++j) {
+    dst_tp.extended<base_dim_type>()->arrmeta_copy_construct_onedim(
+        dst_arrmeta, src_arrmeta, NULL);
+    src_tp = src_tp.get_type_at_dimension(&src_arrmeta, 1);
+    dst_tp = dst_tp.get_type_at_dimension(&dst_arrmeta, 1);
+  }
+  for (intptr_t j = 0; j < new_ndim; ++j) {
+    size_stride_t *smd = reinterpret_cast<size_stride_t *>(dst_arrmeta);
+    smd->dim_size = 1;
+    smd->stride = 0; // Should this not be zero?
+    dst_tp = dst_tp.get_type_at_dimension(&dst_arrmeta, 1);
+  }
+  if (!dst_tp.is_builtin()) {
+    dst_tp.extended()->arrmeta_copy_construct(dst_arrmeta, src_arrmeta, NULL);
+  }
 
-    return res;
+  return res;
 }
 
 namespace {
@@ -1581,207 +1593,217 @@ static void view_scalar_types(const ndt::type &dt,
       }
       out_transformed_tp = ndt::make_view(*e, dt);
       out_was_transformed = true;
-    }
-    else {
+    } else {
       out_transformed_tp = *e;
       if (dt != *e) {
         out_was_transformed = true;
       }
     }
-  }
-  else {
+  } else {
     dt.extended()->transform_child_types(
         &view_scalar_types, 0, extra, out_transformed_tp, out_was_transformed);
   }
 }
 } // anonymous namespace
 
-nd::array nd::array::view_scalars(const ndt::type& scalar_tp) const
+nd::array nd::array::view_scalars(const ndt::type &scalar_tp) const
 {
-    const ndt::type& array_type = get_type();
-    size_t uniform_ndim = array_type.get_ndim();
-    // First check if we're dealing with a simple one dimensional block of memory we can reinterpret
-    // at will.
-    if (uniform_ndim == 1 && array_type.get_type_id() == fixed_dim_type_id) {
-        const fixed_dim_type *sad = array_type.extended<fixed_dim_type>();
-        const fixed_dim_type_arrmeta *md =
-            reinterpret_cast<const fixed_dim_type_arrmeta *>(get_arrmeta());
-        const ndt::type& edt = sad->get_element_type();
-        if (edt.is_pod() && (intptr_t)edt.get_data_size() == md->stride &&
-                    sad->get_element_type().get_kind() != expr_kind) {
-            intptr_t nbytes = md->dim_size * edt.get_data_size();
-            // Make sure the element size divides into the # of bytes
-            if (nbytes % scalar_tp.get_data_size() != 0) {
-                std::stringstream ss;
-                ss << "cannot view array with " << nbytes << " bytes as type ";
-                ss << scalar_tp << ", because its element size " << scalar_tp.get_data_size();
-                ss << " doesn't divide evenly into the total array size " << nbytes;
-                throw std::runtime_error(ss.str());
-            }
-            // Create the result array, adjusting the type if the data isn't aligned correctly
-            char *data_ptr = get_ndo()->m_data_pointer;
-            ndt::type result_tp;
-            intptr_t dim_size = nbytes / scalar_tp.get_data_size();
-            if ((((uintptr_t)data_ptr)&(scalar_tp.get_data_alignment()-1)) == 0) {
-                result_tp = ndt::make_fixed_dim(dim_size, scalar_tp);
-            } else {
-                result_tp = ndt::make_fixed_dim(dim_size, make_unaligned(scalar_tp));
-            }
-            array result(make_array_memory_block(result_tp.extended()->get_arrmeta_size()));
-            // Copy all the array arrmeta fields
-            result.get_ndo()->m_data_pointer = get_ndo()->m_data_pointer;
-            if (get_ndo()->m_data_reference) {
-                result.get_ndo()->m_data_reference = get_ndo()->m_data_reference;
-            } else {
-                result.get_ndo()->m_data_reference = m_memblock.get();
-            }
-            memory_block_incref(result.get_ndo()->m_data_reference);
-            result.get_ndo()->m_type = result_tp.release();
-            result.get_ndo()->m_flags = get_ndo()->m_flags;
-            // The result has one strided ndarray field
-            fixed_dim_type_arrmeta *result_md =
-                reinterpret_cast<fixed_dim_type_arrmeta *>(
-                    result.get_arrmeta());
-            result_md->dim_size = dim_size;
-            result_md->stride = scalar_tp.get_data_size();
-            return result;
-        }
+  const ndt::type &array_type = get_type();
+  size_t uniform_ndim = array_type.get_ndim();
+  // First check if we're dealing with a simple one dimensional block of memory
+  // we can reinterpret
+  // at will.
+  if (uniform_ndim == 1 && array_type.get_type_id() == fixed_dim_type_id) {
+    const fixed_dim_type *sad = array_type.extended<fixed_dim_type>();
+    const fixed_dim_type_arrmeta *md =
+        reinterpret_cast<const fixed_dim_type_arrmeta *>(get_arrmeta());
+    const ndt::type &edt = sad->get_element_type();
+    if (edt.is_pod() && (intptr_t)edt.get_data_size() == md->stride &&
+        sad->get_element_type().get_kind() != expr_kind) {
+      intptr_t nbytes = md->dim_size * edt.get_data_size();
+      // Make sure the element size divides into the # of bytes
+      if (nbytes % scalar_tp.get_data_size() != 0) {
+        std::stringstream ss;
+        ss << "cannot view array with " << nbytes << " bytes as type ";
+        ss << scalar_tp << ", because its element size "
+           << scalar_tp.get_data_size();
+        ss << " doesn't divide evenly into the total array size " << nbytes;
+        throw std::runtime_error(ss.str());
+      }
+      // Create the result array, adjusting the type if the data isn't aligned
+      // correctly
+      char *data_ptr = get_ndo()->m_data_pointer;
+      ndt::type result_tp;
+      intptr_t dim_size = nbytes / scalar_tp.get_data_size();
+      if ((((uintptr_t)data_ptr) & (scalar_tp.get_data_alignment() - 1)) == 0) {
+        result_tp = ndt::make_fixed_dim(dim_size, scalar_tp);
+      } else {
+        result_tp = ndt::make_fixed_dim(dim_size, make_unaligned(scalar_tp));
+      }
+      array result(
+          make_array_memory_block(result_tp.extended()->get_arrmeta_size()));
+      // Copy all the array arrmeta fields
+      result.get_ndo()->m_data_pointer = get_ndo()->m_data_pointer;
+      if (get_ndo()->m_data_reference) {
+        result.get_ndo()->m_data_reference = get_ndo()->m_data_reference;
+      } else {
+        result.get_ndo()->m_data_reference = m_memblock.get();
+      }
+      memory_block_incref(result.get_ndo()->m_data_reference);
+      result.get_ndo()->m_type = result_tp.release();
+      result.get_ndo()->m_flags = get_ndo()->m_flags;
+      // The result has one strided ndarray field
+      fixed_dim_type_arrmeta *result_md =
+          reinterpret_cast<fixed_dim_type_arrmeta *>(result.get_arrmeta());
+      result_md->dim_size = dim_size;
+      result_md->stride = scalar_tp.get_data_size();
+      return result;
     }
+  }
 
-    // Transform the scalars into view types
-    ndt::type viewed_tp;
-    bool was_transformed = false;
-    view_scalar_types(
-        get_type(), 0,
-        const_cast<void *>(reinterpret_cast<const void *>(&scalar_tp)),
-        viewed_tp, was_transformed);
-    return make_array_clone_with_new_type(*this, viewed_tp);
+  // Transform the scalars into view types
+  ndt::type viewed_tp;
+  bool was_transformed = false;
+  view_scalar_types(
+      get_type(), 0,
+      const_cast<void *>(reinterpret_cast<const void *>(&scalar_tp)), viewed_tp,
+      was_transformed);
+  return make_array_clone_with_new_type(*this, viewed_tp);
 }
 
-std::string nd::detail::array_as_string(const nd::array& lhs, assign_error_mode errmode)
+std::string nd::detail::array_as_string(const nd::array &lhs,
+                                        assign_error_mode errmode)
 {
-    if (!lhs.is_scalar()) {
-        throw std::runtime_error("can only convert arrays with 0 dimensions to scalars");
-    }
+  if (!lhs.is_scalar()) {
+    throw std::runtime_error(
+        "can only convert arrays with 0 dimensions to scalars");
+  }
 
-    nd::array temp = lhs;
-    if (temp.get_type().get_kind() != string_kind) {
-        temp = temp.ucast(ndt::make_string()).eval();
-    }
-    const base_string_type *esd =
-                    static_cast<const base_string_type *>(temp.get_type().extended());
-    return esd->get_utf8_string(temp.get_arrmeta(), temp.get_ndo()->m_data_pointer, errmode);
+  nd::array temp = lhs;
+  if (temp.get_type().get_kind() != string_kind) {
+    temp = temp.ucast(ndt::make_string()).eval();
+  }
+  const base_string_type *esd =
+      static_cast<const base_string_type *>(temp.get_type().extended());
+  return esd->get_utf8_string(temp.get_arrmeta(),
+                              temp.get_ndo()->m_data_pointer, errmode);
 }
 
-ndt::type nd::detail::array_as_type(const nd::array& lhs)
+ndt::type nd::detail::array_as_type(const nd::array &lhs)
 {
-    if (!lhs.is_scalar()) {
-        throw std::runtime_error("can only convert arrays with 0 dimensions to scalars");
-    }
+  if (!lhs.is_scalar()) {
+    throw std::runtime_error(
+        "can only convert arrays with 0 dimensions to scalars");
+  }
 
-    nd::array temp = lhs;
-    if (temp.get_type().get_type_id() != type_type_id) {
-        temp = temp.ucast(ndt::make_type()).eval();
-    }
-    return ndt::type(reinterpret_cast<const type_type_data *>(temp.get_readonly_originptr())->tp, true);
+  nd::array temp = lhs;
+  if (temp.get_type().get_type_id() != type_type_id) {
+    temp = temp.ucast(ndt::make_type()).eval();
+  }
+  return ndt::type(reinterpret_cast<const type_type_data *>(
+                       temp.get_readonly_originptr())->tp,
+                   true);
 }
 
-void nd::array::debug_print(std::ostream& o, const std::string& indent) const
+void nd::array::debug_print(std::ostream &o, const std::string &indent) const
 {
-    o << indent << "------ array\n";
-    if (m_memblock.get()) {
-        const array_preamble *ndo = get_ndo();
-        o << " address: " << (void *)m_memblock.get() << "\n";
-        o << " refcount: " << ndo->m_memblockdata.m_use_count << "\n";
-        o << " type:\n";
-        o << "  pointer: " << (void *)ndo->m_type << "\n";
-        o << "  type: " << get_type() << "\n";
-        if (!get_type().is_builtin()) {
-          o << "  type refcount: " << get_type().extended()->get_use_count()
-            << "\n";
-        }
-        o << " arrmeta:\n";
-        o << "  flags: " << ndo->m_flags << " (";
-        if (ndo->m_flags & read_access_flag) o << "read_access ";
-        if (ndo->m_flags & write_access_flag) o << "write_access ";
-        if (ndo->m_flags & immutable_access_flag) o << "immutable ";
-        o << ")\n";
-        if (!ndo->is_builtin_type()) {
-            o << "  type-specific arrmeta:\n";
-            ndo->m_type->arrmeta_debug_print(get_arrmeta(), o, indent + "   ");
-        }
-        o << " data:\n";
-        o << "   pointer: " << (void *)ndo->m_data_pointer << "\n";
-        o << "   reference: " << (void *)ndo->m_data_reference;
-        if (ndo->m_data_reference == NULL) {
-            o << " (embedded in array memory)\n";
-        } else {
-            o << "\n";
-        }
-        if (ndo->m_data_reference != NULL) {
-            memory_block_debug_print(ndo->m_data_reference, o, "    ");
-        }
+  o << indent << "------ array\n";
+  if (m_memblock.get()) {
+    const array_preamble *ndo = get_ndo();
+    o << " address: " << (void *)m_memblock.get() << "\n";
+    o << " refcount: " << ndo->m_memblockdata.m_use_count << "\n";
+    o << " type:\n";
+    o << "  pointer: " << (void *)ndo->m_type << "\n";
+    o << "  type: " << get_type() << "\n";
+    if (!get_type().is_builtin()) {
+      o << "  type refcount: " << get_type().extended()->get_use_count()
+        << "\n";
+    }
+    o << " arrmeta:\n";
+    o << "  flags: " << ndo->m_flags << " (";
+    if (ndo->m_flags & read_access_flag)
+      o << "read_access ";
+    if (ndo->m_flags & write_access_flag)
+      o << "write_access ";
+    if (ndo->m_flags & immutable_access_flag)
+      o << "immutable ";
+    o << ")\n";
+    if (!ndo->is_builtin_type()) {
+      o << "  type-specific arrmeta:\n";
+      ndo->m_type->arrmeta_debug_print(get_arrmeta(), o, indent + "   ");
+    }
+    o << " data:\n";
+    o << "   pointer: " << (void *)ndo->m_data_pointer << "\n";
+    o << "   reference: " << (void *)ndo->m_data_reference;
+    if (ndo->m_data_reference == NULL) {
+      o << " (embedded in array memory)\n";
     } else {
-        o << indent << "NULL\n";
+      o << "\n";
     }
-    o << indent << "------" << endl;
+    if (ndo->m_data_reference != NULL) {
+      memory_block_debug_print(ndo->m_data_reference, o, "    ");
+    }
+  } else {
+    o << indent << "NULL\n";
+  }
+  o << indent << "------" << endl;
 }
 
-std::ostream& nd::operator<<(std::ostream& o, const array& rhs)
+std::ostream &nd::operator<<(std::ostream &o, const array &rhs)
 {
-    if (!rhs.is_null()) {
-        o << "array(";
-        array v = rhs.eval();
-        if (v.get_ndo()->is_builtin_type()) {
-          print_builtin_scalar(v.get_ndo()->get_builtin_type_id(), o,
-                               v.get_ndo()->m_data_pointer);
-        } else {
-          stringstream ss;
-          v.get_ndo()->m_type->print_data(ss, v.get_arrmeta(),
-                                          v.get_ndo()->m_data_pointer);
-          print_indented(o, "      ", ss.str(), true);
-        }
-        o << ",\n      type=\"" << rhs.get_type() << "\")";
+  if (!rhs.is_null()) {
+    o << "array(";
+    array v = rhs.eval();
+    if (v.get_ndo()->is_builtin_type()) {
+      print_builtin_scalar(v.get_ndo()->get_builtin_type_id(), o,
+                           v.get_ndo()->m_data_pointer);
     } else {
-        o << "array()";
+      stringstream ss;
+      v.get_ndo()->m_type->print_data(ss, v.get_arrmeta(),
+                                      v.get_ndo()->m_data_pointer);
+      print_indented(o, "      ", ss.str(), true);
     }
-    return o;
+    o << ",\n      type=\"" << rhs.get_type() << "\")";
+  } else {
+    o << "array()";
+  }
+  return o;
 }
 
-nd::array nd::eval_raw_copy(const ndt::type& dt, const char *arrmeta, const char *data)
+nd::array nd::eval_raw_copy(const ndt::type &dt, const char *arrmeta,
+                            const char *data)
 {
-    // Allocate an output array with the canonical version of the type
-    ndt::type cdt = dt.get_canonical_type();
-    size_t ndim = dt.get_ndim();
-    array result;
-    if (ndim > 0) {
-        result = nd::empty(cdt);
-        // Reorder strides of output strided dimensions in a KEEPORDER fashion
-        if (cdt.get_type_id() == fixed_dim_type_id) {
-          cdt.extended<fixed_dim_type>()->reorder_default_constructed_strides(
-              result.get_arrmeta(), dt, arrmeta);
-        }
-    } else {
-        result = nd::empty(cdt);
+  // Allocate an output array with the canonical version of the type
+  ndt::type cdt = dt.get_canonical_type();
+  size_t ndim = dt.get_ndim();
+  array result;
+  if (ndim > 0) {
+    result = nd::empty(cdt);
+    // Reorder strides of output strided dimensions in a KEEPORDER fashion
+    if (cdt.get_type_id() == fixed_dim_type_id) {
+      cdt.extended<fixed_dim_type>()->reorder_default_constructed_strides(
+          result.get_arrmeta(), dt, arrmeta);
     }
+  } else {
+    result = nd::empty(cdt);
+  }
 
-    typed_data_assign(cdt, result.get_arrmeta(),
-                      result.get_readwrite_originptr(), dt, arrmeta, data,
-                      &eval::default_eval_context);
+  typed_data_assign(cdt, result.get_arrmeta(), result.get_readwrite_originptr(),
+                    dt, arrmeta, data, &eval::default_eval_context);
 
-    return result;
+  return result;
 }
 
 nd::array nd::empty_shell(const ndt::type &tp)
 {
   if (tp.is_builtin()) {
     char *data_ptr = NULL;
-    intptr_t data_size =
-        static_cast<intptr_t>(dynd::detail::builtin_data_sizes
-                                  [reinterpret_cast<uintptr_t>(tp.extended())]);
-    intptr_t data_alignment =
-        static_cast<intptr_t>(dynd::detail::builtin_data_alignments
-                                  [reinterpret_cast<uintptr_t>(tp.extended())]);
+    intptr_t data_size = static_cast<intptr_t>(
+        dynd::detail::builtin_data_sizes[reinterpret_cast<uintptr_t>(
+            tp.extended())]);
+    intptr_t data_alignment = static_cast<intptr_t>(
+        dynd::detail::builtin_data_alignments[reinterpret_cast<uintptr_t>(
+            tp.extended())]);
     memory_block_ptr result(
         make_array_memory_block(0, data_size, data_alignment, &data_ptr));
     array_preamble *preamble = reinterpret_cast<array_preamble *>(result.get());
@@ -1791,16 +1813,15 @@ nd::array nd::empty_shell(const ndt::type &tp)
     preamble->m_data_reference = NULL;
     preamble->m_flags = nd::read_access_flag | nd::write_access_flag;
     return nd::array(DYND_MOVE(result));
-  }
-  else if (!tp.is_symbolic()) {
+  } else if (!tp.is_symbolic()) {
     char *data_ptr = NULL;
     size_t arrmeta_size = tp.extended()->get_arrmeta_size();
     size_t data_size = tp.extended()->get_default_data_size();
     memory_block_ptr result;
     if (tp.get_kind() != memory_kind) {
       // Allocate memory the default way
-      result = make_array_memory_block(
-          arrmeta_size, data_size, tp.get_data_alignment(), &data_ptr);
+      result = make_array_memory_block(arrmeta_size, data_size,
+                                       tp.get_data_alignment(), &data_ptr);
       if (tp.get_flags() & type_flag_zeroinit) {
         memset(data_ptr, 0, data_size);
       }
@@ -1838,67 +1859,68 @@ nd::array nd::empty(const ndt::type &tp)
   return res;
 }
 
-nd::array nd::empty_like(const nd::array& rhs, const ndt::type& uniform_tp)
+nd::array nd::empty_like(const nd::array &rhs, const ndt::type &uniform_tp)
 {
-    if (rhs.get_ndim() == 0) {
-        return nd::empty(uniform_tp);
-    } else {
-        size_t ndim = rhs.get_type().extended()->get_ndim();
-        dimvector shape(ndim);
-        rhs.get_shape(shape.get());
-        array result(make_strided_array(uniform_tp, ndim, shape.get()));
-        // Reorder strides of output strided dimensions in a KEEPORDER fashion
-        if (result.get_type().get_type_id() == fixed_dim_type_id) {
-          result.get_type()
-              .extended<fixed_dim_type>()
-              ->reorder_default_constructed_strides(
-                  result.get_arrmeta(), rhs.get_type(), rhs.get_arrmeta());
-        }
-        return result;
+  if (rhs.get_ndim() == 0) {
+    return nd::empty(uniform_tp);
+  } else {
+    size_t ndim = rhs.get_type().extended()->get_ndim();
+    dimvector shape(ndim);
+    rhs.get_shape(shape.get());
+    array result(make_strided_array(uniform_tp, ndim, shape.get()));
+    // Reorder strides of output strided dimensions in a KEEPORDER fashion
+    if (result.get_type().get_type_id() == fixed_dim_type_id) {
+      result.get_type()
+          .extended<fixed_dim_type>()
+          ->reorder_default_constructed_strides(
+              result.get_arrmeta(), rhs.get_type(), rhs.get_arrmeta());
     }
+    return result;
+  }
 }
 
-nd::array nd::empty_like(const nd::array& rhs)
+nd::array nd::empty_like(const nd::array &rhs)
 {
-    ndt::type dt;
-    if (rhs.get_ndo()->is_builtin_type()) {
-        dt = ndt::type(rhs.get_ndo()->get_builtin_type_id());
-    } else {
-        dt = rhs.get_ndo()->m_type->get_canonical_type();
-    }
+  ndt::type dt;
+  if (rhs.get_ndo()->is_builtin_type()) {
+    dt = ndt::type(rhs.get_ndo()->get_builtin_type_id());
+  } else {
+    dt = rhs.get_ndo()->m_type->get_canonical_type();
+  }
 
-    if (rhs.is_scalar()) {
-        return nd::empty(dt);
-    } else {
-        intptr_t ndim = dt.extended()->get_ndim();
-        dimvector shape(ndim);
-        rhs.get_shape(shape.get());
-        nd::array result(make_strided_array(dt.get_dtype(), ndim, shape.get()));
-        // Reorder strides of output strided dimensions in a KEEPORDER fashion
-        if (result.get_type().get_type_id() == fixed_dim_type_id) {
-          result.get_type()
-              .extended<fixed_dim_type>()
-              ->reorder_default_constructed_strides(
-                  result.get_arrmeta(), rhs.get_type(), rhs.get_arrmeta());
-        }
-        return result;
+  if (rhs.is_scalar()) {
+    return nd::empty(dt);
+  } else {
+    intptr_t ndim = dt.extended()->get_ndim();
+    dimvector shape(ndim);
+    rhs.get_shape(shape.get());
+    nd::array result(make_strided_array(dt.get_dtype(), ndim, shape.get()));
+    // Reorder strides of output strided dimensions in a KEEPORDER fashion
+    if (result.get_type().get_type_id() == fixed_dim_type_id) {
+      result.get_type()
+          .extended<fixed_dim_type>()
+          ->reorder_default_constructed_strides(
+              result.get_arrmeta(), rhs.get_type(), rhs.get_arrmeta());
     }
+    return result;
+  }
 }
 
-nd::array nd::concatenate(const nd::array &x, const nd::array &y) {
-    if (x.get_ndim() != 1 || y.get_ndim() != 1) {
-        throw runtime_error("TODO: nd::concatenate is WIP");
-    }
+nd::array nd::concatenate(const nd::array &x, const nd::array &y)
+{
+  if (x.get_ndim() != 1 || y.get_ndim() != 1) {
+    throw runtime_error("TODO: nd::concatenate is WIP");
+  }
 
-    if (x.get_dtype() != y.get_dtype()) {
-        throw runtime_error("dtypes must be the same for concatenate");
-    }
+  if (x.get_dtype() != y.get_dtype()) {
+    throw runtime_error("dtypes must be the same for concatenate");
+  }
 
-    nd::array res = nd::empty(x.get_dim_size() + y.get_dim_size(), x.get_dtype());
-    res(irange(0, x.get_dim_size())).val_assign(x);
-    res(irange(x.get_dim_size(), res.get_dim_size())).val_assign(y);
+  nd::array res = nd::empty(x.get_dim_size() + y.get_dim_size(), x.get_dtype());
+  res(irange(0, x.get_dim_size())).val_assign(x);
+  res(irange(x.get_dim_size(), res.get_dim_size())).val_assign(y);
 
-    return res;
+  return res;
 }
 
 nd::array nd::reshape(const nd::array &a, const nd::array &shape)
@@ -1941,231 +1963,240 @@ nd::array nd::reshape(const nd::array &a, const nd::array &shape)
       a.get_readwrite_originptr(), a.get_memblock(), NULL);
 }
 
-nd::array nd::memmap(const std::string& filename,
-    intptr_t begin,
-    intptr_t end,
-    uint32_t access)
+nd::array nd::memmap(const std::string &filename, intptr_t begin, intptr_t end,
+                     uint32_t access)
 {
-    if (access == 0) {
-        access = nd::default_access_flags;
-    }
+  if (access == 0) {
+    access = nd::default_access_flags;
+  }
 
-    char *mm_ptr = NULL;
-    intptr_t mm_size = 0;
-    // Create a memory mapped memblock of the file
-    memory_block_ptr mm = make_memmap_memory_block(
-        filename, access, &mm_ptr, &mm_size, begin, end);
-    // Create a bytes array referring to the data.
-    ndt::type dt = ndt::make_bytes(1);
-    char *data_ptr = 0;
-    nd::array result(make_array_memory_block(dt.extended()->get_arrmeta_size(),
-                        dt.get_data_size(), dt.get_data_alignment(), &data_ptr));
-    // Set the bytes extents
-    ((char **)data_ptr)[0] = mm_ptr;
-    ((char **)data_ptr)[1] = mm_ptr + mm_size;
-    // Set the array arrmeta
-    array_preamble *ndo = result.get_ndo();
-    ndo->m_type = dt.release();
-    ndo->m_data_pointer = data_ptr;
-    ndo->m_data_reference = NULL;
-    ndo->m_flags = access;
-    // Set the bytes arrmeta, telling the system
-    // about the memmapped memblock
-    bytes_type_arrmeta *ndo_meta =
-        reinterpret_cast<bytes_type_arrmeta *>(result.get_arrmeta());
-    ndo_meta->blockref = mm.release();
-    return result;
+  char *mm_ptr = NULL;
+  intptr_t mm_size = 0;
+  // Create a memory mapped memblock of the file
+  memory_block_ptr mm =
+      make_memmap_memory_block(filename, access, &mm_ptr, &mm_size, begin, end);
+  // Create a bytes array referring to the data.
+  ndt::type dt = ndt::make_bytes(1);
+  char *data_ptr = 0;
+  nd::array result(make_array_memory_block(dt.extended()->get_arrmeta_size(),
+                                           dt.get_data_size(),
+                                           dt.get_data_alignment(), &data_ptr));
+  // Set the bytes extents
+  ((char **)data_ptr)[0] = mm_ptr;
+  ((char **)data_ptr)[1] = mm_ptr + mm_size;
+  // Set the array arrmeta
+  array_preamble *ndo = result.get_ndo();
+  ndo->m_type = dt.release();
+  ndo->m_data_pointer = data_ptr;
+  ndo->m_data_reference = NULL;
+  ndo->m_flags = access;
+  // Set the bytes arrmeta, telling the system
+  // about the memmapped memblock
+  bytes_type_arrmeta *ndo_meta =
+      reinterpret_cast<bytes_type_arrmeta *>(result.get_arrmeta());
+  ndo_meta->blockref = mm.release();
+  return result;
 }
 
-intptr_t nd::binary_search(const nd::array& n, const char *arrmeta, const char *data)
+intptr_t nd::binary_search(const nd::array &n, const char *arrmeta,
+                           const char *data)
 {
-    if (n.get_ndim() == 0) {
-        stringstream ss;
-        ss << "cannot do a dynd binary_search on array with type " << n.get_type() << " without a leading array dimension";
-        throw runtime_error(ss.str());
+  if (n.get_ndim() == 0) {
+    stringstream ss;
+    ss << "cannot do a dynd binary_search on array with type " << n.get_type()
+       << " without a leading array dimension";
+    throw runtime_error(ss.str());
+  }
+  const char *n_arrmeta = n.get_arrmeta();
+  ndt::type element_tp = n.get_type().at_single(0, &n_arrmeta);
+  if (element_tp.get_arrmeta_size() == 0 || n_arrmeta == arrmeta ||
+      memcmp(n_arrmeta, arrmeta, element_tp.get_arrmeta_size()) == 0) {
+    // First, a version where the arrmeta is identical, so we can
+    // make do with only a single comparison kernel
+    comparison_ckernel_builder k_n_less_d;
+    make_comparison_kernel(&k_n_less_d, 0, element_tp, n_arrmeta, element_tp,
+                           n_arrmeta, comparison_type_sorting_less,
+                           &eval::default_eval_context);
+
+    // TODO: support any type of array dimension
+    if (n.get_type().get_type_id() != fixed_dim_type_id) {
+      stringstream ss;
+      ss << "TODO: binary_search on array with type " << n.get_type()
+         << " is not implemented";
+      throw runtime_error(ss.str());
     }
-    const char *n_arrmeta = n.get_arrmeta();
-    ndt::type element_tp = n.get_type().at_single(0, &n_arrmeta);
-    if (element_tp.get_arrmeta_size() == 0 || n_arrmeta == arrmeta ||
-                    memcmp(n_arrmeta, arrmeta, element_tp.get_arrmeta_size()) == 0) {
-        // First, a version where the arrmeta is identical, so we can
-        // make do with only a single comparison kernel
-        comparison_ckernel_builder k_n_less_d;
-        make_comparison_kernel(&k_n_less_d, 0,
-                        element_tp, n_arrmeta,
-                        element_tp, n_arrmeta,
-                        comparison_type_sorting_less,
-                        &eval::default_eval_context);
 
-        // TODO: support any type of array dimension
-        if (n.get_type().get_type_id() != fixed_dim_type_id) {
-            stringstream ss;
-            ss << "TODO: binary_search on array with type " << n.get_type() << " is not implemented";
-            throw runtime_error(ss.str());
-        }
+    const char *n_data = n.get_readonly_originptr();
+    intptr_t n_stride = reinterpret_cast<const fixed_dim_type_arrmeta *>(
+                            n.get_arrmeta())->stride;
+    intptr_t first = 0, last = n.get_dim_size();
+    while (first < last) {
+      intptr_t trial = first + (last - first) / 2;
+      const char *trial_data = n_data + trial * n_stride;
 
-        const char *n_data = n.get_readonly_originptr();
-        intptr_t n_stride = reinterpret_cast<const fixed_dim_type_arrmeta *>(n.get_arrmeta())->stride;
-        intptr_t first = 0, last = n.get_dim_size();
-        while (first < last) {
-            intptr_t trial = first + (last - first) / 2;
-            const char *trial_data = n_data + trial * n_stride;
-
-            // In order for the data to always match up with the arrmeta, need to have
-            // trial_data first and data second in the comparison operations.
-            if (k_n_less_d(data, trial_data)) {
-                // value < arr[trial]
-                last = trial;
-            } else if (k_n_less_d(trial_data, data)) {
-                // value > arr[trial]
-                first = trial + 1;
-            } else {
-                return trial;
-            }
-        }
-        return -1;
-    } else {
-        // Second, a version where the arrmeta are different, so
-        // we need to get a kernel for each comparison direction.
-        comparison_ckernel_builder k_n_less_d, k_d_less_n;
-        make_comparison_kernel(&k_n_less_d, 0,
-                        element_tp, n_arrmeta,
-                        element_tp, arrmeta,
-                        comparison_type_sorting_less,
-                        &eval::default_eval_context);
-        make_comparison_kernel(&k_d_less_n, 0,
-                        element_tp, arrmeta,
-                        element_tp, n_arrmeta,
-                        comparison_type_sorting_less,
-                        &eval::default_eval_context);
-
-        // TODO: support any type of array dimension
-        if (n.get_type().get_type_id() != fixed_dim_type_id) {
-            stringstream ss;
-            ss << "TODO: binary_search on array with type " << n.get_type() << " is not implemented";
-            throw runtime_error(ss.str());
-        }
-
-        const char *n_data = n.get_readonly_originptr();
-        intptr_t n_stride = reinterpret_cast<const fixed_dim_type_arrmeta *>(n.get_arrmeta())->stride;
-        intptr_t first = 0, last = n.get_dim_size();
-        while (first < last) {
-            intptr_t trial = first + (last - first) / 2;
-            const char *trial_data = n_data + trial * n_stride;
-
-            // In order for the data to always match up with the arrmeta, need to have
-            // trial_data first and data second in the comparison operations.
-            if (k_d_less_n(data, trial_data)) {
-                // value < arr[trial]
-                last = trial;
-            } else if (k_n_less_d(trial_data, data)) {
-                // value > arr[trial]
-                first = trial + 1;
-            } else {
-                return trial;
-            }
-        }
-        return -1;
+      // In order for the data to always match up with the arrmeta, need to have
+      // trial_data first and data second in the comparison operations.
+      if (k_n_less_d(data, trial_data)) {
+        // value < arr[trial]
+        last = trial;
+      } else if (k_n_less_d(trial_data, data)) {
+        // value > arr[trial]
+        first = trial + 1;
+      } else {
+        return trial;
+      }
     }
+    return -1;
+  } else {
+    // Second, a version where the arrmeta are different, so
+    // we need to get a kernel for each comparison direction.
+    comparison_ckernel_builder k_n_less_d, k_d_less_n;
+    make_comparison_kernel(&k_n_less_d, 0, element_tp, n_arrmeta, element_tp,
+                           arrmeta, comparison_type_sorting_less,
+                           &eval::default_eval_context);
+    make_comparison_kernel(&k_d_less_n, 0, element_tp, arrmeta, element_tp,
+                           n_arrmeta, comparison_type_sorting_less,
+                           &eval::default_eval_context);
+
+    // TODO: support any type of array dimension
+    if (n.get_type().get_type_id() != fixed_dim_type_id) {
+      stringstream ss;
+      ss << "TODO: binary_search on array with type " << n.get_type()
+         << " is not implemented";
+      throw runtime_error(ss.str());
+    }
+
+    const char *n_data = n.get_readonly_originptr();
+    intptr_t n_stride = reinterpret_cast<const fixed_dim_type_arrmeta *>(
+                            n.get_arrmeta())->stride;
+    intptr_t first = 0, last = n.get_dim_size();
+    while (first < last) {
+      intptr_t trial = first + (last - first) / 2;
+      const char *trial_data = n_data + trial * n_stride;
+
+      // In order for the data to always match up with the arrmeta, need to have
+      // trial_data first and data second in the comparison operations.
+      if (k_d_less_n(data, trial_data)) {
+        // value < arr[trial]
+        last = trial;
+      } else if (k_n_less_d(trial_data, data)) {
+        // value > arr[trial]
+        first = trial + 1;
+      } else {
+        return trial;
+      }
+    }
+    return -1;
+  }
 }
 
-nd::array nd::groupby(const nd::array& data_values, const nd::array& by_values, const dynd::ndt::type& groups)
+nd::array nd::groupby(const nd::array &data_values, const nd::array &by_values,
+                      const dynd::ndt::type &groups)
 {
-    if (data_values.get_ndim() == 0) {
-        throw runtime_error("'data' values provided to dynd groupby must have at least one dimension");
-    }
-    if (by_values.get_ndim() == 0) {
-        throw runtime_error("'by' values provided to dynd groupby must have at least one dimension");
-    }
-    if (data_values.get_dim_size() != by_values.get_dim_size()) {
-        stringstream ss;
-        ss << "'data' and 'by' values provided to dynd groupby have different sizes, ";
-        ss << data_values.get_dim_size() << " and " << by_values.get_dim_size();
-        throw runtime_error(ss.str());
-    }
+  if (data_values.get_ndim() == 0) {
+    throw runtime_error("'data' values provided to dynd groupby must have at "
+                        "least one dimension");
+  }
+  if (by_values.get_ndim() == 0) {
+    throw runtime_error("'by' values provided to dynd groupby must have at "
+                        "least one dimension");
+  }
+  if (data_values.get_dim_size() != by_values.get_dim_size()) {
+    stringstream ss;
+    ss << "'data' and 'by' values provided to dynd groupby have different "
+          "sizes, ";
+    ss << data_values.get_dim_size() << " and " << by_values.get_dim_size();
+    throw runtime_error(ss.str());
+  }
 
-    // If no groups type is specified, determine one from 'by'
-    ndt::type groups_final;
-    if (groups.get_type_id() == uninitialized_type_id) {
-        ndt::type by_dt = by_values.get_dtype();
-        if (by_dt.value_type().get_type_id() == categorical_type_id) {
-            // If 'by' already has a categorical type, use that
-            groups_final = by_dt.value_type();
-        } else {
-            // Otherwise make a categorical type from the values
-            groups_final = ndt::factor_categorical(by_values);
-        }
+  // If no groups type is specified, determine one from 'by'
+  ndt::type groups_final;
+  if (groups.get_type_id() == uninitialized_type_id) {
+    ndt::type by_dt = by_values.get_dtype();
+    if (by_dt.value_type().get_type_id() == categorical_type_id) {
+      // If 'by' already has a categorical type, use that
+      groups_final = by_dt.value_type();
     } else {
-        groups_final = groups;
+      // Otherwise make a categorical type from the values
+      groups_final = ndt::factor_categorical(by_values);
     }
+  } else {
+    groups_final = groups;
+  }
 
-    // Make sure the 'by' values have the 'groups' type
-    array by_values_as_groups = by_values.ucast(groups_final);
+  // Make sure the 'by' values have the 'groups' type
+  array by_values_as_groups = by_values.ucast(groups_final);
 
-    ndt::type gbdt = ndt::make_groupby(data_values.get_type(), by_values_as_groups.get_type());
-    const groupby_type *gbdt_ext = gbdt.extended<groupby_type>();
-    char *data_ptr = NULL;
+  ndt::type gbdt =
+      ndt::make_groupby(data_values.get_type(), by_values_as_groups.get_type());
+  const groupby_type *gbdt_ext = gbdt.extended<groupby_type>();
+  char *data_ptr = NULL;
 
-    array result(make_array_memory_block(gbdt.extended()->get_arrmeta_size(),
-                    gbdt.extended()->get_data_size(), gbdt.extended()->get_data_alignment(), &data_ptr));
+  array result(make_array_memory_block(
+      gbdt.extended()->get_arrmeta_size(), gbdt.extended()->get_data_size(),
+      gbdt.extended()->get_data_alignment(), &data_ptr));
 
-    // Set the arrmeta for the data values
-    pointer_type_arrmeta *pmeta;
-    pmeta = gbdt_ext->get_data_values_pointer_arrmeta(result.get_arrmeta());
-    pmeta->offset = 0;
-    pmeta->blockref = data_values.get_ndo()->m_data_reference
-                    ? data_values.get_ndo()->m_data_reference
-                    : &data_values.get_ndo()->m_memblockdata;
-    memory_block_incref(pmeta->blockref);
-    data_values.get_type().extended()->arrmeta_copy_construct(reinterpret_cast<char *>(pmeta + 1),
-                    data_values.get_arrmeta(), &data_values.get_ndo()->m_memblockdata);
+  // Set the arrmeta for the data values
+  pointer_type_arrmeta *pmeta;
+  pmeta = gbdt_ext->get_data_values_pointer_arrmeta(result.get_arrmeta());
+  pmeta->offset = 0;
+  pmeta->blockref = data_values.get_ndo()->m_data_reference
+                        ? data_values.get_ndo()->m_data_reference
+                        : &data_values.get_ndo()->m_memblockdata;
+  memory_block_incref(pmeta->blockref);
+  data_values.get_type().extended()->arrmeta_copy_construct(
+      reinterpret_cast<char *>(pmeta + 1), data_values.get_arrmeta(),
+      &data_values.get_ndo()->m_memblockdata);
 
-    // Set the arrmeta for the by values
-    pmeta = gbdt_ext->get_by_values_pointer_arrmeta(result.get_arrmeta());
-    pmeta->offset = 0;
-    pmeta->blockref = by_values_as_groups.get_ndo()->m_data_reference
-                    ? by_values_as_groups.get_ndo()->m_data_reference
-                    : &by_values_as_groups.get_ndo()->m_memblockdata;
-    memory_block_incref(pmeta->blockref);
-    by_values_as_groups.get_type().extended()->arrmeta_copy_construct(reinterpret_cast<char *>(pmeta + 1),
-                    by_values_as_groups.get_arrmeta(), &by_values_as_groups.get_ndo()->m_memblockdata);
+  // Set the arrmeta for the by values
+  pmeta = gbdt_ext->get_by_values_pointer_arrmeta(result.get_arrmeta());
+  pmeta->offset = 0;
+  pmeta->blockref = by_values_as_groups.get_ndo()->m_data_reference
+                        ? by_values_as_groups.get_ndo()->m_data_reference
+                        : &by_values_as_groups.get_ndo()->m_memblockdata;
+  memory_block_incref(pmeta->blockref);
+  by_values_as_groups.get_type().extended()->arrmeta_copy_construct(
+      reinterpret_cast<char *>(pmeta + 1), by_values_as_groups.get_arrmeta(),
+      &by_values_as_groups.get_ndo()->m_memblockdata);
 
-    // Set the pointers to the data and by values data
-    groupby_type_data *groupby_data_ptr = reinterpret_cast<groupby_type_data *>(data_ptr);
-    groupby_data_ptr->data_values_pointer = data_values.get_readonly_originptr();
-    groupby_data_ptr->by_values_pointer = by_values_as_groups.get_readonly_originptr();
+  // Set the pointers to the data and by values data
+  groupby_type_data *groupby_data_ptr =
+      reinterpret_cast<groupby_type_data *>(data_ptr);
+  groupby_data_ptr->data_values_pointer = data_values.get_readonly_originptr();
+  groupby_data_ptr->by_values_pointer =
+      by_values_as_groups.get_readonly_originptr();
 
-    // Set the array properties
-    result.get_ndo()->m_type = gbdt.release();
-    result.get_ndo()->m_data_pointer = data_ptr;
-    result.get_ndo()->m_data_reference = NULL;
-    result.get_ndo()->m_flags = read_access_flag;
-    // If the inputs are immutable, the result is too
-    if ((data_values.get_access_flags()&immutable_access_flag) != 0 && 
-                    (by_values.get_access_flags()&immutable_access_flag) != 0) {
-        result.get_ndo()->m_flags |= immutable_access_flag;
-    }
-    return result;
+  // Set the array properties
+  result.get_ndo()->m_type = gbdt.release();
+  result.get_ndo()->m_data_pointer = data_ptr;
+  result.get_ndo()->m_data_reference = NULL;
+  result.get_ndo()->m_flags = read_access_flag;
+  // If the inputs are immutable, the result is too
+  if ((data_values.get_access_flags() & immutable_access_flag) != 0 &&
+      (by_values.get_access_flags() & immutable_access_flag) != 0) {
+    result.get_ndo()->m_flags |= immutable_access_flag;
+  }
+  return result;
 }
 
 bool nd::is_scalar_avail(const ndt::type &tp, const char *arrmeta,
-                      const char *data, const eval::eval_context *ectx)
+                         const char *data, const eval::eval_context *ectx)
 {
-    if (tp.is_scalar()) {
-        if (tp.get_type_id() == option_type_id) {
-            return tp.extended<option_type>()->is_avail(arrmeta, data, ectx);
-        } else if (tp.get_kind() == expr_kind &&
-                   tp.value_type().get_type_id() == option_type_id) {
-            nd::array tmp = nd::empty(tp.value_type());
-            tmp.val_assign(tp, arrmeta, data, ectx);
-            return tmp.get_type().extended<option_type>()->is_avail(arrmeta, data,
-                                                                 ectx);
-        } else {
-            return true;
-        }
+  if (tp.is_scalar()) {
+    if (tp.get_type_id() == option_type_id) {
+      return tp.extended<option_type>()->is_avail(arrmeta, data, ectx);
+    } else if (tp.get_kind() == expr_kind &&
+               tp.value_type().get_type_id() == option_type_id) {
+      nd::array tmp = nd::empty(tp.value_type());
+      tmp.val_assign(tp, arrmeta, data, ectx);
+      return tmp.get_type().extended<option_type>()->is_avail(arrmeta, data,
+                                                              ectx);
     } else {
-        return false;
+      return true;
     }
+  } else {
+    return false;
+  }
 }
 
 void nd::assign_na(const ndt::type &tp, const char *arrmeta, char *data,
@@ -2173,8 +2204,7 @@ void nd::assign_na(const ndt::type &tp, const char *arrmeta, char *data,
 {
   if (tp.get_type_id() == option_type_id) {
     tp.extended<option_type>()->assign_na(arrmeta, data, ectx);
-  }
-  else {
+  } else {
     const ndt::type &dtp = tp.get_dtype().value_type();
     if (dtp.get_type_id() == option_type_id) {
       const arrfunc_type_data *af =
@@ -2187,8 +2217,7 @@ void nd::assign_na(const ndt::type &tp, const char *arrmeta, char *data,
       ckernel_prefix *ckp = ckb.get();
       expr_single_t ckp_fn = ckp->get_function<expr_single_t>();
       ckp_fn(data, NULL, ckp);
-    }
-    else {
+    } else {
       stringstream ss;
       ss << "Cannot assign missing value token NA to dtype " << dtp;
       throw invalid_argument(ss.str());
@@ -2198,56 +2227,56 @@ void nd::assign_na(const ndt::type &tp, const char *arrmeta, char *data,
 
 nd::array nd::combine_into_tuple(size_t field_count, const array *field_values)
 {
-    // Make the pointer types
-    vector<ndt::type> field_types(field_count);
-    for (size_t i = 0; i != field_count; ++i) {
-        field_types[i] = ndt::make_pointer(field_values[i].get_type());
+  // Make the pointer types
+  vector<ndt::type> field_types(field_count);
+  for (size_t i = 0; i != field_count; ++i) {
+    field_types[i] = ndt::make_pointer(field_values[i].get_type());
+  }
+  // The flags are the intersection of all the input flags
+  uint64_t flags = field_values[0].get_flags();
+  for (size_t i = 1; i != field_count; ++i) {
+    flags &= field_values[i].get_flags();
+  }
+
+  ndt::type result_type = ndt::make_ctuple(field_types);
+  const ctuple_type *fsd = result_type.extended<ctuple_type>();
+  char *data_ptr = NULL;
+
+  array result(make_array_memory_block(fsd->get_arrmeta_size(),
+                                       fsd->get_data_size(),
+                                       fsd->get_data_alignment(), &data_ptr));
+  // Set the array properties
+  result.get_ndo()->m_type = result_type.release();
+  result.get_ndo()->m_data_pointer = data_ptr;
+  result.get_ndo()->m_data_reference = NULL;
+  result.get_ndo()->m_flags = flags;
+
+  // Copy all the needed arrmeta
+  const uintptr_t *arrmeta_offsets = fsd->get_arrmeta_offsets_raw();
+  for (size_t i = 0; i != field_count; ++i) {
+    pointer_type_arrmeta *pmeta;
+    pmeta = reinterpret_cast<pointer_type_arrmeta *>(result.get_arrmeta() +
+                                                     arrmeta_offsets[i]);
+    pmeta->offset = 0;
+    pmeta->blockref = field_values[i].get_ndo()->m_data_reference
+                          ? field_values[i].get_ndo()->m_data_reference
+                          : &field_values[i].get_ndo()->m_memblockdata;
+    memory_block_incref(pmeta->blockref);
+
+    const ndt::type &field_dt = field_values[i].get_type();
+    if (field_dt.get_arrmeta_size() > 0) {
+      field_dt.extended()->arrmeta_copy_construct(
+          reinterpret_cast<char *>(pmeta + 1), field_values[i].get_arrmeta(),
+          &field_values[i].get_ndo()->m_memblockdata);
     }
-    // The flags are the intersection of all the input flags
-    uint64_t flags = field_values[0].get_flags();
-    for (size_t i = 1; i != field_count; ++i) {
-        flags &= field_values[i].get_flags();
-    }
+  }
 
-    ndt::type result_type = ndt::make_ctuple(field_types);
-    const ctuple_type *fsd = result_type.extended<ctuple_type>();
-    char *data_ptr = NULL;
-
-    array result(make_array_memory_block(fsd->get_arrmeta_size(),
-                    fsd->get_data_size(),
-                    fsd->get_data_alignment(), &data_ptr));
-    // Set the array properties
-    result.get_ndo()->m_type = result_type.release();
-    result.get_ndo()->m_data_pointer = data_ptr;
-    result.get_ndo()->m_data_reference = NULL;
-    result.get_ndo()->m_flags = flags;
-
-    // Copy all the needed arrmeta
-    const uintptr_t *arrmeta_offsets = fsd->get_arrmeta_offsets_raw();
-    for (size_t i = 0; i != field_count; ++i) {
-        pointer_type_arrmeta *pmeta;
-        pmeta = reinterpret_cast<pointer_type_arrmeta *>(result.get_arrmeta() + arrmeta_offsets[i]);
-        pmeta->offset = 0;
-        pmeta->blockref = field_values[i].get_ndo()->m_data_reference
-                        ? field_values[i].get_ndo()->m_data_reference
-                        : &field_values[i].get_ndo()->m_memblockdata;
-        memory_block_incref(pmeta->blockref);
-
-        const ndt::type& field_dt = field_values[i].get_type();
-        if (field_dt.get_arrmeta_size() > 0) {
-            field_dt.extended()->arrmeta_copy_construct(
-                            reinterpret_cast<char *>(pmeta + 1),
-                            field_values[i].get_arrmeta(),
-                            &field_values[i].get_ndo()->m_memblockdata);
-        }
-    }
-
-    // Set the data pointers
-    const char **dp = reinterpret_cast<const char **>(data_ptr);
-    for (size_t i = 0; i != field_count; ++i) {
-        dp[i] = field_values[i].get_readonly_originptr();
-    }
-    return result;
+  // Set the data pointers
+  const char **dp = reinterpret_cast<const char **>(data_ptr);
+  for (size_t i = 0; i != field_count; ++i) {
+    dp[i] = field_values[i].get_readonly_originptr();
+  }
+  return result;
 }
 
 void nd::forward_as_array(const ndt::type &tp, char *arrmeta, char *data,

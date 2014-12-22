@@ -201,7 +201,7 @@ TEST(Elwise, BinaryExpr)
 /*
 #ifdef DYND_CUDA
   af = lift_arrfunc(
-      nd::make_apply_arrfunc<kernel_request_cuda_device, callable_to_lift>());
+      nd::apply::make<kernel_request_cuda_device, callable_to_lift>());
   a = a.to_cuda_device();
   b = b.to_cuda_device();
   EXPECT_ARR_EQ(c, af(a, b).to_host());
