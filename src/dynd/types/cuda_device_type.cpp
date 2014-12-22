@@ -103,7 +103,7 @@ intptr_t cuda_device_type::make_assignment_kernel(
                                              dst_tp.storage_type().get_dtype());
     return make_lifted_expr_ckernel(&child, child_tp.extended<arrfunc_type>(),
                                     ckb, ckb_offset, dst_tp, dst_arrmeta,
-                                    &src_tp, &src_arrmeta, kernreq, ectx);
+                                    &src_tp, &src_arrmeta, kernreq, ectx, kwds);
   }
 
   return make_cuda_builtin_type_assignment_kernel(

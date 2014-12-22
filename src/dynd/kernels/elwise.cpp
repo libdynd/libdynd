@@ -4,7 +4,8 @@ size_t dynd::make_lifted_expr_ckernel(
     const arrfunc_type_data *child, const arrfunc_type *child_tp, void *ckb,
     intptr_t ckb_offset, const ndt::type &dst_tp, const char *dst_arrmeta,
     const ndt::type *src_tp, const char *const *src_arrmeta,
-    dynd::kernel_request_t kernreq, const eval::eval_context *ectx)
+    dynd::kernel_request_t kernreq, const eval::eval_context *ectx,
+    const nd::array &kwds)
 {
   intptr_t src_count = child_tp->get_npos();
 
@@ -24,7 +25,7 @@ size_t dynd::make_lifted_expr_ckernel(
       // No dimensions to lift, call the elementwise instantiate directly
       return child->instantiate(child, child_tp, ckb, ckb_offset, dst_tp,
                                 dst_arrmeta, src_tp, src_arrmeta, kernreq, ectx,
-                                nd::array());
+                                kwds);
     } else {
       intptr_t src_ndim =
           src_tp[i].get_ndim() - child_tp->get_arg_type(i).get_ndim();
@@ -67,11 +68,11 @@ size_t dynd::make_lifted_expr_ckernel(
       return kernels::instantiate_elwise_ck<fixed_dim_type_id,
                                             fixed_dim_type_id>(
           child, child_tp, ckb, ckb_offset, dst_tp, dst_arrmeta, src_tp,
-          src_arrmeta, kernreq, ectx);
+          src_arrmeta, kernreq, ectx, kwds);
     } else if (src_all_strided_or_var) {
       return kernels::instantiate_elwise_ck<fixed_dim_type_id, var_dim_type_id>(
           child, child_tp, ckb, ckb_offset, dst_tp, dst_arrmeta, src_tp,
-          src_arrmeta, kernreq, ectx);
+          src_arrmeta, kernreq, ectx, kwds);
     } else {
       // TODO
     }
@@ -80,7 +81,7 @@ size_t dynd::make_lifted_expr_ckernel(
     if (src_all_strided_or_var) {
       return kernels::instantiate_elwise_ck<var_dim_type_id, fixed_dim_type_id>(
           child, child_tp, ckb, ckb_offset, dst_tp, dst_arrmeta, src_tp,
-          src_arrmeta, kernreq, ectx);
+          src_arrmeta, kernreq, ectx, kwds);
     } else {
       // TODO
     }

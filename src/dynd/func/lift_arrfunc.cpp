@@ -34,7 +34,7 @@ static intptr_t instantiate_lifted_expr_arrfunc_data(
 
   return make_lifted_expr_ckernel(
       child_af, child_af_tp, ckb, ckb_offset, dst_tp, dst_arrmeta, src_tp,
-      src_arrmeta, static_cast<dynd::kernel_request_t>(kernreq), ectx);
+      src_arrmeta, static_cast<dynd::kernel_request_t>(kernreq), ectx, nd::array());
 }
 
 static int resolve_lifted_dst_type(const arrfunc_type_data *self,
