@@ -106,8 +106,9 @@ TEST(ArrFunc, Option)
                                     const ndt::type *DYND_UNUSED(src_tp),
                                     nd::array &kwds)
     {
-      if (kwds.p("x").is_missing()) {
-        kwds.p("x").vals() = 4;
+      nd::array x = kwds.p("x");
+      if (x.is_missing()) {
+        x.vals() = 4;
       }
     }
   };
@@ -116,6 +117,7 @@ TEST(ArrFunc, Option)
   EXPECT_EQ(5, af(1, kwds("x", 4)).as<int>());
 
   af.set_as_option(&callable::resolve_option_vals, "x");
+  EXPECT_EQ(6, af(1, kwds("x", 5)).as<int>());
   EXPECT_EQ(5, af(1).as<int>());
 }
 

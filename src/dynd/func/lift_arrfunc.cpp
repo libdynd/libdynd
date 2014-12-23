@@ -168,8 +168,10 @@ static ndt::type lift_proto(const arrfunc_type *p)
   for (intptr_t i = p->get_npos(), i_end = p->get_narg(); i != i_end; ++i) {
     pt[i] = param_types[i];
   }
+  out_param_types.flag_as_immutable();
   return ndt::make_arrfunc(
-      out_param_types, ndt::make_ellipsis_dim(dimsname, p->get_return_type()));
+      ndt::make_tuple(out_param_types),
+      ndt::make_ellipsis_dim(dimsname, p->get_return_type()));
 }
 
 nd::arrfunc dynd::lift_arrfunc(const nd::arrfunc &child_af)

@@ -168,7 +168,7 @@ namespace ndt {
       {
         nd::array arg_tp = nd::empty(0, ndt::make_type());
         arg_tp.flag_as_immutable();
-        return make_arrfunc(arg_tp, make_type<R>());
+        return make_arrfunc(ndt::make_tuple(arg_tp), make_type<R>());
       }
     };
 
@@ -178,7 +178,8 @@ namespace ndt {
       {
         nd::array arg_tp = nd::empty(0, ndt::make_type());
         arg_tp.flag_as_immutable();
-        return make_arrfunc(arg_tp, make_cuda_device(make_type<R>()));
+        return make_arrfunc(ndt::make_tuple(arg_tp),
+                            make_cuda_device(make_type<R>()));
       }
     };
 
@@ -188,7 +189,7 @@ namespace ndt {
       {
         ndt::type arg_tp[sizeof...(A)] = {make_type<typename std::remove_cv<
             typename std::remove_reference<A>::type>::type>()...};
-        return make_arrfunc(arg_tp, make_type<R>());
+        return make_arrfunc(ndt::make_tuple(arg_tp), make_type<R>());
       }
 
       template <typename... T>
@@ -200,10 +201,10 @@ namespace ndt {
             typename std::remove_reference<A>::type>::type>()...};
         return make_arrfunc(
             ndt::make_tuple(nd::array(arg_tp, sizeof...(A) - sizeof...(T))),
-            make_type<R>(),
             ndt::make_struct(raw_names,
                              nd::array(arg_tp + (sizeof...(A) - sizeof...(T)),
-                                       sizeof...(T))));
+                                       sizeof...(T))),
+            make_type<R>());
       }
     };
 
@@ -214,7 +215,8 @@ namespace ndt {
         ndt::type arg_tp[sizeof...(A)] = {
             make_cuda_device(make_type<typename std::remove_cv<
                 typename std::remove_reference<A>::type>::type>())...};
-        return make_arrfunc(arg_tp, make_cuda_device(make_type<R>()));
+        return make_arrfunc(ndt::make_tuple(arg_tp),
+                            make_cuda_device(make_type<R>()));
       }
 
       template <typename... T>
@@ -225,19 +227,19 @@ namespace ndt {
         ndt::type arg_tp[sizeof...(A)] = {
             make_cuda_device(make_type<typename std::remove_cv<
                 typename std::remove_reference<A>::type>::type>())...};
-        return make_arrfunc(arg_tp, make_cuda_device(make_type<R>()),
-                            raw_names);
+        return make_arrfunc(ndt::make_tuple(arg_tp),
+                            make_cuda_device(make_type<R>()), raw_names);
       }
     };
 
   } // namespace ndt::detail
 
   /** Makes an arrfunc type with both positional and keyword arguments */
-  inline ndt::type make_arrfunc(const ndt::type &pos_types,
-                                const ndt::type &kwd_types,
+  inline ndt::type make_arrfunc(const ndt::type &pos_tuple,
+                                const ndt::type &kwd_struct,
                                 const ndt::type &return_type)
   {
-    return ndt::type(new arrfunc_type(pos_types, kwd_types, return_type),
+    return ndt::type(new arrfunc_type(pos_tuple, kwd_struct, return_type),
                      false);
   }
 
@@ -254,10 +256,10 @@ namespace ndt {
   }
 
   /** Makes an arrfunc type with just positional arguments */
-  inline ndt::type make_arrfunc(const nd::array &pos_types,
+  inline ndt::type make_arrfunc(const ndt::type &pos_tuple,
                                 const ndt::type &return_type)
   {
-    return ndt::type(new arrfunc_type(ndt::make_tuple(pos_types), return_type),
+    return ndt::type(new arrfunc_type(pos_tuple, return_type),
                      false);
   }
 
@@ -272,15 +274,7 @@ namespace ndt {
       tmp_vals[i] = arg_types[i];
     }
     tmp.flag_as_immutable();
-    return make_arrfunc(tmp, return_type);
-  }
-
-  /** Makes a unary funcproto type with the specified types */
-  inline ndt::type make_arrfunc(const ndt::type &single_arg_type,
-                                const ndt::type &return_type)
-  {
-    ndt::type arg_types[1] = {single_arg_type};
-    return make_arrfunc(1, arg_types, return_type);
+    return make_arrfunc(ndt::make_tuple(tmp), return_type);
   }
 
   /** Makes a funcproto type from the C++ function type */

@@ -261,8 +261,9 @@ TEST(DataShapeParser, ArrFunc)
             ndt::type("(x: int, y: int) -> int"));
 
   tp = ndt::type("(N * S, func: (M * S) -> T) -> N * T");
-  EXPECT_JSON_EQ_ARR("[\"N * S\", \"(M * S) -> T\"]", tp.p("arg_types"));
-  EXPECT_JSON_EQ_ARR("[\"func\"]", tp.p("arg_names"));
+  EXPECT_JSON_EQ_ARR("[\"N * S\"]", tp.p("pos_types"));
+  EXPECT_JSON_EQ_ARR("[\"(M * S) -> T\"]", tp.p("kwd_types"));
+  EXPECT_JSON_EQ_ARR("[\"func\"]", tp.p("kwd_names"));
   EXPECT_JSON_EQ_ARR("\"N * T\"", tp.p("return_type"));
 }
 
@@ -432,7 +433,7 @@ TEST(DataShapeParser, ErrorRecord)
     string msg = e.what();
     // The name field works as a funcproto until it hits the '}' token
     EXPECT_TRUE(msg.find("line 4, column 20") != string::npos);
-    EXPECT_TRUE(msg.find("expected a type") != string::npos);
+    EXPECT_TRUE(msg.find("expected a kwd arg in arrfunc prototype") != string::npos);
   }
 }
 

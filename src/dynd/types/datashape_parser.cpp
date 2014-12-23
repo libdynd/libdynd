@@ -970,11 +970,11 @@ static ndt::type parse_funcproto_kwds(const char *&rbegin, const char *end,
       field_type_list.push_back(field_type);
     }
     else {
-      throw datashape_parse_error(saved_begin, "expected a kwd arg");
+      throw datashape_parse_error(saved_begin, "expected a kwd arg in arrfunc prototype");
     }
 
     if (parse_token_ds(begin, end, ',')) {
-      if (!field_name_list.empty() && parse_token_ds(begin, end, '}')) {
+      if (!field_name_list.empty() && parse_token_ds(begin, end, ')')) {
         break;
       }
     }
@@ -982,7 +982,7 @@ static ndt::type parse_funcproto_kwds(const char *&rbegin, const char *end,
       break;
     }
     else {
-      throw datashape_parse_error(begin, "expected ',' or '}'");
+      throw datashape_parse_error(begin, "expected ',' or ')' in arrfunc prototype");
     }
   }
 
@@ -1018,6 +1018,7 @@ static ndt::type parse_tuple_or_funcproto(const char *&rbegin, const char *end,
         // and if so, parse the keyword arguments.
         const char *saved_begin = begin;
         const char *field_name_begin, *field_name_end;
+        parse::skip_whitespace_and_pound_comments(begin, end);
         if (parse::parse_name_no_ws(begin, end, field_name_begin,
                                     field_name_end)) {
           if (parse_token_ds(begin, end, ':')) {
@@ -1026,9 +1027,6 @@ static ndt::type parse_tuple_or_funcproto(const char *&rbegin, const char *end,
             begin = saved_begin;
             funcproto_kwd = parse_funcproto_kwds(begin, end, symtable);
             if (!funcproto_kwd.is_null()) {
-              if (!parse_token_ds(begin, end, ')')) {
-                throw datashape_parse_error(begin, "expected closing ')'");
-              }
               if (!parse_token_ds(begin, end, "->")) {
                 rbegin = begin;
                 return ndt::make_tuple(field_type_list);
@@ -1091,6 +1089,9 @@ static ndt::type parse_tuple_or_funcproto(const char *&rbegin, const char *end,
                                   "expected function prototype return type");
     }
     rbegin = begin;
+    // TODO: I suspect because of the change away from immutable default construction, and
+    //       the requirement that arrays into arrfunc constructors are immutable, that too
+    //       many copies may be occurring.
     return ndt::make_arrfunc(ndt::make_tuple(field_type_list), return_type);
   }
 }

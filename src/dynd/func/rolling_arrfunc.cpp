@@ -260,7 +260,8 @@ nd::arrfunc dynd::make_rolling_arrfunc(const nd::arrfunc &window_op,
   ndt::type roll_dst_tp =
       ndt::make_typevar_dim(rolldimname, window_af_tp->get_return_type());
 
-  nd::array af = nd::empty(ndt::make_arrfunc(roll_src_tp, roll_dst_tp));
+  nd::array af =
+      nd::empty(ndt::make_arrfunc(ndt::make_tuple(roll_src_tp), roll_dst_tp));
   arrfunc_type_data *out_af =
       reinterpret_cast<arrfunc_type_data *>(af.get_readwrite_originptr());
 

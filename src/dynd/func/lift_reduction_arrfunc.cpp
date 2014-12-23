@@ -121,8 +121,8 @@ nd::arrfunc dynd::lift_reduction_arrfunc(
     }
   }
 
-  nd::array af =
-      nd::empty(ndt::make_arrfunc(lifted_arr_type, lifted_dst_type));
+  nd::array af = nd::empty(
+      ndt::make_arrfunc(ndt::make_tuple(lifted_arr_type), lifted_dst_type));
   arrfunc_type_data *out_af =
       reinterpret_cast<arrfunc_type_data *>(af.get_readwrite_originptr());
   lifted_reduction_arrfunc_data *self = new lifted_reduction_arrfunc_data;

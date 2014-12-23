@@ -372,8 +372,8 @@ void arrfunc_type::get_dynamic_type_properties(
 
 ndt::type ndt::make_generic_funcproto(intptr_t nargs)
 {
-  vector<ndt::type> args;
-  ndt::make_typevar_range("T", nargs, args);
+  nd::array args = ndt::make_typevar_range("T", nargs);
+  args.flag_as_immutable();
   ndt::type ret = ndt::make_typevar("R");
   return ndt::make_arrfunc(ndt::make_tuple(args), ret);
 }

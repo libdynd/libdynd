@@ -101,7 +101,7 @@ nd::arrfunc dynd::make_arrfunc_from_assignment(const ndt::type &dst_tp,
                                                const ndt::type &src_tp,
                                                assign_error_mode errmode)
 {
-  nd::array af = nd::empty(ndt::make_arrfunc(src_tp, dst_tp));
+  nd::array af = nd::empty(ndt::make_arrfunc(ndt::make_tuple(src_tp), dst_tp));
   arrfunc_type_data *out_af =
       reinterpret_cast<arrfunc_type_data *>(af.get_readwrite_originptr());
   memset(out_af, 0, sizeof(arrfunc_type_data));
@@ -122,7 +122,8 @@ nd::arrfunc dynd::make_arrfunc_from_property(const ndt::type &tp,
     throw type_error(ss.str());
   }
   ndt::type prop_tp = ndt::make_property(tp, propname);
-  nd::array af = nd::empty(ndt::make_arrfunc(tp, prop_tp.value_type()));
+  nd::array af =
+      nd::empty(ndt::make_arrfunc(ndt::make_tuple(tp), prop_tp.value_type()));
   arrfunc_type_data *out_af =
       reinterpret_cast<arrfunc_type_data *>(af.get_readwrite_originptr());
   out_af->free = &delete_property_arrfunc_data;

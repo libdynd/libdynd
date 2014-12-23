@@ -54,7 +54,7 @@ namespace nd {
       typedef kernels::apply_callable_ck<kernreq, R (*)(A...),
                                          sizeof...(A) - sizeof...(T)> ck_type;
 
-      arrfunc_type_data self(func, &ck_type::instantiate, NULL, NULL, NULL);
+      arrfunc_type_data self(func, &ck_type::instantiate, NULL, NULL);
       ndt::type self_tp =
           ndt::make_arrfunc<kernreq, R(A...)>(std::forward<T>(names)...);
 
@@ -81,7 +81,7 @@ namespace nd {
                                          arity_of<func_type>::value -
                                              sizeof...(T)> ck_type;
 
-      arrfunc_type_data self(func, &ck_type::instantiate, NULL, NULL, NULL);
+      arrfunc_type_data self(func, &ck_type::instantiate, NULL, NULL);
       ndt::type self_tp =
           ndt::make_arrfunc<kernreq, typename funcproto_of<func_type>::type>(
               std::forward<T>(names)...);

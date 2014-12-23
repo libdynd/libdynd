@@ -114,7 +114,8 @@ nd::arrfunc kernels::make_builtin_sum_reduction_arrfunc(type_id_t tid)
     ss << ndt::type(tid) << " is not supported";
     throw type_error(ss.str());
   }
-  nd::array af = nd::empty(ndt::make_arrfunc(ndt::type(tid), ndt::type(tid)));
+  nd::array af = nd::empty(
+      ndt::make_arrfunc(ndt::make_tuple(ndt::type(tid)), ndt::type(tid)));
   arrfunc_type_data *out_af =
       reinterpret_cast<arrfunc_type_data *>(af.get_readwrite_originptr());
   *out_af->get_data_as<type_id_t>() = tid;
@@ -219,9 +220,9 @@ nd::arrfunc kernels::make_builtin_mean1d_arrfunc(type_id_t tid, intptr_t minp)
     ss << ndt::type(tid) << " is not supported";
     throw type_error(ss.str());
   }
-  nd::array mean1d = nd::empty(
-      ndt::make_arrfunc(ndt::make_fixed_dimsym(ndt::make_type<double>()),
-                          ndt::make_type<double>()));
+  nd::array mean1d = nd::empty(ndt::make_arrfunc(
+      ndt::make_tuple(ndt::make_fixed_dimsym(ndt::make_type<double>())),
+      ndt::make_type<double>()));
   arrfunc_type_data *out_af =
       reinterpret_cast<arrfunc_type_data *>(mean1d.get_readwrite_originptr());
   mean1d_arrfunc_data *data = new mean1d_arrfunc_data;

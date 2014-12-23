@@ -62,8 +62,7 @@ namespace ndt {
     return ndt::type(new typevar_type(name), false);
   }
 
-  void make_typevar_range(const char *name, intptr_t count,
-                          std::vector<ndt::type> &out);
+  nd::array make_typevar_range(const char *name, intptr_t count);
 } // namespace ndt
 
 /**

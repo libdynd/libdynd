@@ -44,7 +44,7 @@ TEST(SymbolicTypes, CreateFuncProto)
 
   // Dynamic type properties
   EXPECT_EQ(ndt::make_type<int64_t>(), tp.p("return_type").as<ndt::type>());
-  nd::array ptp = tp.p("arg_types");
+  nd::array ptp = tp.p("pos_types");
   EXPECT_EQ(ndt::type("3 * type"), ptp.get_type());
   ASSERT_EQ(3, ptp.get_dim_size());
   EXPECT_EQ(ndt::make_type<float>(), ptp(0).as<ndt::type>());
