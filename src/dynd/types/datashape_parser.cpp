@@ -8,6 +8,8 @@
 
 #include <dynd/types/datashape_parser.hpp>
 #include <dynd/parser_util.hpp>
+#include <dynd/func/arrfunc.hpp>
+#include <dynd/types/arrfunc_type.hpp>
 #include <dynd/types/fixed_dimsym_type.hpp>
 #include <dynd/types/var_dim_type.hpp>
 #include <dynd/types/fixed_dim_type.hpp>
@@ -32,7 +34,6 @@
 #include <dynd/types/cuda_host_type.hpp>
 #include <dynd/types/cuda_device_type.hpp>
 #include <dynd/types/ndarrayarg_type.hpp>
-#include <dynd/types/arrfunc_type.hpp>
 #include <dynd/types/typevar_type.hpp>
 #include <dynd/types/typevar_dim_type.hpp>
 #include <dynd/types/pow_dimsym_type.hpp>

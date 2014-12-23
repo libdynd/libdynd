@@ -16,7 +16,7 @@ size_t dynd::kernels::make_lifted_expr_ckernel(
     intptr_t i = 0;
     for (; i < src_count; ++i) {
       intptr_t src_ndim =
-          src_tp[i].get_ndim() - child_tp->get_arg_type(i).get_ndim();
+          src_tp[i].get_ndim() - child_tp->get_pos_type(i).get_ndim();
       if (src_ndim != 0) {
         break;
       }
@@ -28,7 +28,7 @@ size_t dynd::kernels::make_lifted_expr_ckernel(
                                 kwds);
     } else {
       intptr_t src_ndim =
-          src_tp[i].get_ndim() - child_tp->get_arg_type(i).get_ndim();
+          src_tp[i].get_ndim() - child_tp->get_pos_type(i).get_ndim();
       stringstream ss;
       ss << "Trying to broadcast " << src_ndim << " dimensions of " << src_tp[i]
          << " into 0 dimensions of " << dst_tp
@@ -41,7 +41,7 @@ size_t dynd::kernels::make_lifted_expr_ckernel(
   bool src_all_strided = true, src_all_strided_or_var = true;
   for (intptr_t i = 0; i < src_count; ++i) {
     intptr_t src_ndim =
-        src_tp[i].get_ndim() - child_tp->get_arg_type(i).get_ndim();
+        src_tp[i].get_ndim() - child_tp->get_pos_type(i).get_ndim();
     switch (src_tp[i].without_memory_type().get_type_id()) {
     case fixed_dim_type_id:
     case cfixed_dim_type_id:

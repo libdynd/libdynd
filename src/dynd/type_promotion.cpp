@@ -7,6 +7,7 @@
 #include <algorithm>
 
 #include <dynd/type_promotion.hpp>
+#include <dynd/func/arrfunc.hpp>
 #include <dynd/types/string_type.hpp>
 #include <dynd/types/option_type.hpp>
 

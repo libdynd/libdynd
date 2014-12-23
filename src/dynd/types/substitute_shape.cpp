@@ -4,6 +4,7 @@
 //
 
 #include <dynd/types/substitute_shape.hpp>
+#include <dynd/func/arrfunc.hpp>
 #include <dynd/shape_tools.hpp>
 #include <dynd/types/pointer_type.hpp>
 #include <dynd/types/base_struct_type.hpp>

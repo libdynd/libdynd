@@ -8,6 +8,7 @@
 #include <cerrno>
 #include <algorithm>
 
+#include <dynd/func/arrfunc.hpp>
 #include <dynd/types/datetime_type.hpp>
 #include <dynd/types/time_type.hpp>
 #include <dynd/types/date_util.hpp>

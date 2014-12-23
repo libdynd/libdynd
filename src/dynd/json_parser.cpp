@@ -4,6 +4,7 @@
 //
 
 #include <dynd/json_parser.hpp>
+#include <dynd/func/arrfunc.hpp>
 #include <dynd/types/base_bytes_type.hpp>
 #include <dynd/types/string_type.hpp>
 #include <dynd/types/json_type.hpp>

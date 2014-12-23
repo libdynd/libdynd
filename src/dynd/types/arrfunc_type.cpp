@@ -92,7 +92,8 @@ arrfunc_type::arrfunc_type(const ndt::type &pos_types,
   // for arguments that are symbolic.
 }
 
-static void print_arrfunc(std::ostream &o, const arrfunc_type *af_tp,
+static void print_arrfunc(std::ostream &o,
+                          const arrfunc_type *DYND_UNUSED(af_tp),
                           const arrfunc_type_data *af)
 {
   o << "<arrfunc at " << (void *)af << ">";

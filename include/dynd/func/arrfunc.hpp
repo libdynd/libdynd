@@ -369,45 +369,7 @@ namespace nd {
       std::vector<intptr_t>
       resolve_available_types(const arrfunc_type *self_tp,
                               ndt::type *kwd_tp_data,
-                              std::map<nd::string, ndt::type> &typevars) const
-      {
-        std::vector<intptr_t> available;
-
-        for (size_t i = 0; i < sizeof...(T); i++) {
-          intptr_t j = self_tp->get_kwd_index(get_name(i));
-          if (j == -1) {
-            std::stringstream ss;
-            ss << "passed an unexpected keyword \"" << get_name(i)
-               << "\" to arrfunc with type " << ndt::type(self_tp, true);
-            throw std::invalid_argument(ss.str());
-          }
-
-          ndt::type &actual_tp = kwd_tp_data[j];
-          if (!actual_tp.is_null()) {
-            std::stringstream ss;
-            ss << "arrfunc passed keyword \"" << get_name(i)
-               << "\" more than once";
-            throw std::invalid_argument(ss.str());
-          }
-          actual_tp = get_type(i);
-          available.push_back(j);
-
-          ndt::type expected_tp = self_tp->get_kwd_type(j);
-          if (expected_tp.get_type_id() == option_type_id) {
-            expected_tp = expected_tp.extended<option_type>()->get_value_type();
-          }
-          if (!ndt::pattern_match(actual_tp.value_type(), expected_tp,
-                                  typevars)) {
-            std::stringstream ss;
-            ss << "keyword \"" << get_name(i) << "\" does not match, ";
-            ss << "arrfunc expected " << expected_tp << " but passed "
-               << actual_tp << ". arrfunc signature " << ndt::type(self_tp, true);
-            throw std::invalid_argument(ss.str());
-          }
-        }
-
-        return available;
-      }
+                              std::map<nd::string, ndt::type> &typevars) const;
 
       nd::array get_names() const
       {
@@ -918,3 +880,45 @@ namespace decl {
 } // namespace dynd
 
 #include <dynd/types/option_type.hpp>
+
+template <typename... T>
+std::vector<intptr_t> dynd::nd::detail::kwds<T...>::resolve_available_types(
+    const arrfunc_type *self_tp, ndt::type *kwd_tp_data,
+    std::map<nd::string, ndt::type> &typevars) const
+{
+  std::vector<intptr_t> available;
+
+  for (size_t i = 0; i < sizeof...(T); i++) {
+    intptr_t j = self_tp->get_kwd_index(get_name(i));
+    if (j == -1) {
+      std::stringstream ss;
+      ss << "passed an unexpected keyword \"" << get_name(i)
+         << "\" to arrfunc with type " << ndt::type(self_tp, true);
+      throw std::invalid_argument(ss.str());
+    }
+
+    ndt::type &actual_tp = kwd_tp_data[j];
+    if (!actual_tp.is_null()) {
+      std::stringstream ss;
+      ss << "arrfunc passed keyword \"" << get_name(i) << "\" more than once";
+      throw std::invalid_argument(ss.str());
+    }
+    actual_tp = get_type(i);
+    available.push_back(j);
+
+    ndt::type expected_tp = self_tp->get_kwd_type(j);
+    if (expected_tp.get_type_id() == option_type_id) {
+      expected_tp =
+          expected_tp.extended< ::dynd::option_type>()->get_value_type();
+    }
+    if (!ndt::pattern_match(actual_tp.value_type(), expected_tp, typevars)) {
+      std::stringstream ss;
+      ss << "keyword \"" << get_name(i) << "\" does not match, ";
+      ss << "arrfunc expected " << expected_tp << " but passed " << actual_tp
+         << ". arrfunc signature " << ndt::type(self_tp, true);
+      throw std::invalid_argument(ss.str());
+    }
+  }
+
+  return available;
+}

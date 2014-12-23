@@ -9,6 +9,7 @@
 #include "inc_gtest.hpp"
 #include "dynd_assertions.hpp"
 
+#include <dynd/func/arrfunc.hpp>
 #include <dynd/types/datashape_parser.hpp>
 #include <dynd/types/fixed_dimsym_type.hpp>
 #include <dynd/types/fixed_dim_type.hpp>
