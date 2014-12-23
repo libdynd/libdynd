@@ -121,7 +121,7 @@ void arrfunc_type::print_type(std::ostream &o) const
     o << get_pos_type(i);
   }
   for (intptr_t i = 0; i < nkwd; ++i) {
-    if (i > 0) {
+    if (i > 0 || npos > 0) {
       o << ", ";
     }
 

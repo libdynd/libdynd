@@ -238,18 +238,19 @@ nd::arrfunc dynd::make_neighborhood_arrfunc(const nd::arrfunc &neighborhood_op,
   const arrfunc_type *funcproto_tp =
       neighborhood_op.get_array_type().extended<arrfunc_type>();
 
-  nd::array arg_tp = nd::empty(funcproto_tp->get_narg() + 3, ndt::make_type());
-  arg_tp(0).vals() = funcproto_tp->get_arg_type(0);
+  nd::array arg_tp = nd::empty(3, ndt::make_type());
+  arg_tp(0).vals() = ndt::type("?" + std::to_string(nh_ndim) + " * int");
   arg_tp(1).vals() = ndt::type("?" + std::to_string(nh_ndim) + " * int");
-  arg_tp(2).vals() = ndt::type("?" + std::to_string(nh_ndim) + " * int");
-  arg_tp(3).vals() = ndt::type("?fixed**" + std::to_string(nh_ndim) + " * bool");
+  arg_tp(2).vals() = ndt::type("?fixed**" + std::to_string(nh_ndim) + " * bool");
   std::vector<std::string> arg_names;
   arg_names.push_back("shape");
   arg_names.push_back("offset");
   arg_names.push_back("mask");
-  ndt::type ret_tp = arg_tp(0).as<ndt::type>().with_replaced_dtype(
-      funcproto_tp->get_return_type());
-  ndt::type self_tp = ndt::make_funcproto(arg_tp, ret_tp, arg_names);
+  ndt::type ret_tp = funcproto_tp->get_pos_type(0)
+                         .with_replaced_dtype(funcproto_tp->get_return_type());
+  ndt::type self_tp =
+      ndt::make_arrfunc(funcproto_tp->get_pos_tuple(),
+                        ndt::make_struct(arg_names, arg_tp), ret_tp);
 
   std::ostringstream oss;
   oss << "fixed**" << nh_ndim;

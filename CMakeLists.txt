@@ -617,6 +617,14 @@ set_source_files_properties(${CMAKE_CURRENT_BINARY_DIR}/include/dynd/pp/gen.hpp
                             PROPERTIES GENERATED true)
 add_dependencies(libdynd ppgen)
 
+# This file generates a huge number of inline functions, need to use /bigobj
+# on MSVC to allow this
+if(WIN32)
+    set_source_files_properties(src/dynd/kernels/assignment_kernels.cpp
+        PROPERTIES
+            COMPILE_FLAGS /bigobj)
+endif()
+
 # Copy the headers from cephes that need to be installed with libdynd
 file(COPY thirdparty/cephes/rename.h
      DESTINATION ${CMAKE_CURRENT_BINARY_DIR}/include/dynd/cephes)
