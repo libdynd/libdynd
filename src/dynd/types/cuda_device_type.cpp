@@ -5,7 +5,7 @@
 
 #include <dynd/types/cuda_device_type.hpp>
 #include <dynd/kernels/assignment_kernels.hpp>
-#include <dynd/kernels/make_lifted_ckernel.hpp>
+#include <dynd/kernels/elwise.hpp>
 #include <dynd/func/arrfunc.hpp>
 
 using namespace std;
@@ -101,11 +101,9 @@ intptr_t cuda_device_type::make_assignment_kernel(
         &make_cuda_builtin_type_assignment_kernel, NULL, NULL, NULL);
     ndt::type child_tp = ndt::make_funcproto(src_tp.storage_type().get_dtype(),
                                              dst_tp.storage_type().get_dtype());
-    intptr_t src_ndim = src_tp.get_ndim();
-    return make_lifted_expr_ckernel(&child, child_tp.extended<arrfunc_type>(),
-                                    ckb, ckb_offset, dst_tp.get_ndim(), dst_tp,
-                                    dst_arrmeta, &src_ndim, &src_tp,
-                                    &src_arrmeta, kernreq, ectx);
+    return kernels::make_lifted_expr_ckernel(
+        &child, child_tp.extended<arrfunc_type>(), ckb, ckb_offset, dst_tp,
+        dst_arrmeta, &src_tp, &src_arrmeta, kernreq, ectx, kwds);
   }
 
   return make_cuda_builtin_type_assignment_kernel(
