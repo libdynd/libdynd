@@ -1,6 +1,6 @@
 #include <dynd/kernels/elwise.hpp>
 
-size_t dynd::make_lifted_expr_ckernel(
+size_t dynd::kernels::make_lifted_expr_ckernel(
     const arrfunc_type_data *child, const arrfunc_type *child_tp, void *ckb,
     intptr_t ckb_offset, const ndt::type &dst_tp, const char *dst_arrmeta,
     const ndt::type *src_tp, const char *const *src_arrmeta,

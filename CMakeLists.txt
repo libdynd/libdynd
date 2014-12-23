@@ -393,7 +393,6 @@ set(libdynd_SRC
     include/dynd/kernels/expression_assignment_kernels.hpp
     include/dynd/kernels/expression_comparison_kernels.hpp
     include/dynd/func/fft.hpp
-    include/dynd/kernels/make_lifted_ckernel.hpp
     include/dynd/kernels/make_lifted_reduction_ckernel.hpp
     include/dynd/kernels/option_assignment_kernels.hpp
     include/dynd/kernels/option_kernels.hpp

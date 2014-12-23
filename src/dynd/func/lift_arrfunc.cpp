@@ -4,7 +4,7 @@
 //
 
 #include <dynd/func/lift_arrfunc.hpp>
-#include <dynd/kernels/make_lifted_ckernel.hpp>
+#include <dynd/kernels/elwise.hpp>
 #include <dynd/types/ellipsis_dim_type.hpp>
 #include <dynd/types/var_dim_type.hpp>
 #include <dynd/types/fixed_dim_type.hpp>
@@ -20,11 +20,11 @@ static void delete_lifted_expr_arrfunc_data(arrfunc_type_data *self_af)
 }
 
 static intptr_t instantiate_lifted_expr_arrfunc_data(
-    const arrfunc_type_data *self, const arrfunc_type *DYND_UNUSED(af_tp),
+    const arrfunc_type_data *self, const arrfunc_type *DYND_UNUSED(self_tp),
     void *ckb, intptr_t ckb_offset, const ndt::type &dst_tp,
     const char *dst_arrmeta, const ndt::type *src_tp,
     const char *const *src_arrmeta, kernel_request_t kernreq,
-    const eval::eval_context *ectx, const nd::array &DYND_UNUSED(kwds))
+    const eval::eval_context *ectx, const nd::array &kwds)
 {
   const array_preamble *data = *self->get_data_as<const array_preamble *>();
   const arrfunc_type_data *child_af =
@@ -32,9 +32,9 @@ static intptr_t instantiate_lifted_expr_arrfunc_data(
   const arrfunc_type *child_af_tp =
       reinterpret_cast<const arrfunc_type *>(data->m_type);
 
-  return make_lifted_expr_ckernel(
+  return kernels::make_lifted_expr_ckernel(
       child_af, child_af_tp, ckb, ckb_offset, dst_tp, dst_arrmeta, src_tp,
-      src_arrmeta, static_cast<dynd::kernel_request_t>(kernreq), ectx, nd::array());
+      src_arrmeta, kernreq, ectx, kwds);
 }
 
 static int resolve_lifted_dst_type(const arrfunc_type_data *self,
