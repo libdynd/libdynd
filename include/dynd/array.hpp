@@ -47,6 +47,9 @@ namespace nd {
     enum { size = index_sequence<I...>::size };
 
     template <typename... T>
+    static void get_arrmeta(const char **arrmeta, const std::tuple<T...> &values);
+
+    template <typename... T>
     static void get_data(char **data, const std::tuple<T...> &values);
 
 #if !(defined(_MSC_VER) && _MSC_VER == 1800)
@@ -2066,6 +2069,27 @@ namespace nd {
       assign_na(tp[j], arrmeta + arrmeta_offsets[j], data + data_offsets[j],
                 &eval::default_eval_context);
     }
+  }
+
+  inline void get_arrmeta(const char **arrmeta, nd::array &a) {
+    *arrmeta = a.get_arrmeta();
+  }
+
+  inline void get_arrmeta(const char ** arrmeta, const nd::array &a) {
+    *arrmeta = a.get_arrmeta();
+  }
+
+  template <typename A0, typename... A>
+  void get_arrmeta(const char **arrmeta, A0 &&a0, A &&... a) {
+    get_arrmeta(arrmeta, a0);
+    get_arrmeta(arrmeta + 1, std::forward<A>(a)...);
+  }
+
+  template <size_t... I>
+  template <typename... T>
+  void index_proxy<index_sequence<I...>>::get_arrmeta(const char **arrmeta, const std::tuple<T...> &values)
+  {
+    nd::get_arrmeta(arrmeta, std::get<I>(values)...);
   }
 
   inline void get_data(char **data, nd::array &a) {

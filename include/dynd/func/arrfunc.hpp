@@ -291,30 +291,19 @@ namespace nd {
   namespace detail {
     template <typename... A>
     class args {
-      nd::array vals[sizeof...(A)];
-
       std::tuple<A...> m_values;
       ndt::type m_types[sizeof...(A)];
       char *m_data[sizeof...(A)];
-      char *m_arrmeta[sizeof...(A)];
+      const char *m_arrmeta[sizeof...(A)];
 
     public:
-      args(A &&... a) : vals{a...}, m_values(std::forward<A>(a)...)
+      args(A &&... a) : m_values(std::forward<A>(a)...)
       {
         typedef typename make_index_sequence<0, sizeof...(A)>::type I;
 
         ndt::index_proxy<I>::template get_types(m_types, get_vals());
+        nd::index_proxy<I>::template get_arrmeta(m_arrmeta, get_vals());
         nd::index_proxy<I>::template get_data(m_data, get_vals());
-
-/*
-        for (size_t i = 0; i < sizeof...(A); ++i) {
-          m_data[i] = const_cast<char *>(vals[i].get_readonly_originptr());
-        }
-*/
-
-        for (size_t i = 0; i < sizeof...(A); ++i) {
-          m_arrmeta[i] = vals[i].get_arrmeta();
-        }
       }
 
       const std::tuple<A...> &get_vals() const { return m_values; }
@@ -323,7 +312,7 @@ namespace nd {
 
       char *const *get_data() const { return m_data; }
 
-      char *const *get_arrmeta() const { return m_arrmeta; }
+      const char *const *get_arrmeta() const { return m_arrmeta; }
     };
 
     template <>
@@ -333,7 +322,7 @@ namespace nd {
 
       char *const *get_data() const { return NULL; }
 
-      char *const *get_arrmeta() const { return NULL; }
+      const char *const *get_arrmeta() const { return NULL; }
     };
 
     template <typename... T>
