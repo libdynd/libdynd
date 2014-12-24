@@ -4,6 +4,7 @@
 //
 
 #include <dynd/types/type_pattern_match.hpp>
+#include <dynd/func/arrfunc.hpp>
 #include <dynd/types/pointer_type.hpp>
 #include <dynd/types/base_struct_type.hpp>
 #include <dynd/types/option_type.hpp>
@@ -109,24 +110,19 @@ static bool recursive_match(const ndt::type &concrete, const ndt::type &pattern,
                   typevars)) {
             return false;
           }
-          // Next match all the parameters
-          size_t param_count = concrete.extended<arrfunc_type>()->get_narg();
-          for (size_t i = 0; i != param_count; ++i) {
-            if (!recursive_match(
-                    concrete.extended<arrfunc_type>()->get_arg_type(i),
-                    pattern.extended<arrfunc_type>()->get_arg_type(i),
-                    typevars)) {
-              return false;
-            }
+          // Next match all the positional parameters
+          if (!recursive_match(
+                  concrete.extended<arrfunc_type>()->get_pos_tuple(),
+                  pattern.extended<arrfunc_type>()->get_pos_tuple(),
+                  typevars)) {
+            return false;
           }
-          // Finally match all the keyword names
-          if (!concrete.extended<arrfunc_type>()->get_arg_names().is_null()) {
-            if (!concrete.extended<arrfunc_type>()
-                     ->get_arg_names()
-                     .equals_exact(
-                         pattern.extended<arrfunc_type>()->get_arg_names())) {
-              return false;
-            }
+          // Finally match all the keyword parameters
+          if (!recursive_match(
+                  concrete.extended<arrfunc_type>()->get_kwd_struct(),
+                  pattern.extended<arrfunc_type>()->get_kwd_struct(),
+                  typevars)) {
+            return false;
           }
           return true;
         }

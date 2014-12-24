@@ -73,9 +73,9 @@ nd::arrfunc dynd::lift_reduction_arrfunc(
   const arrfunc_type *elwise_reduction_tp = elwise_reduction_arr.get_type();
   if (elwise_reduction_tp->get_npos() != 1 &&
       !(elwise_reduction_tp->get_npos() == 2 &&
-        elwise_reduction_tp->get_arg_type(0) ==
-            elwise_reduction_tp->get_arg_type(1) &&
-        elwise_reduction_tp->get_arg_type(0) ==
+        elwise_reduction_tp->get_pos_type(0) ==
+            elwise_reduction_tp->get_pos_type(1) &&
+        elwise_reduction_tp->get_pos_type(0) ==
             elwise_reduction_tp->get_return_type())) {
     stringstream ss;
     ss << "lift_reduction_arrfunc: 'elwise_reduction' must contain a"
@@ -121,8 +121,8 @@ nd::arrfunc dynd::lift_reduction_arrfunc(
     }
   }
 
-  nd::array af =
-      nd::empty(ndt::make_funcproto(lifted_arr_type, lifted_dst_type));
+  nd::array af = nd::empty(
+      ndt::make_arrfunc(ndt::make_tuple(lifted_arr_type), lifted_dst_type));
   arrfunc_type_data *out_af =
       reinterpret_cast<arrfunc_type_data *>(af.get_readwrite_originptr());
   lifted_reduction_arrfunc_data *self = new lifted_reduction_arrfunc_data;

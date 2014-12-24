@@ -4,6 +4,7 @@
 //
 
 #include <dynd/types/substitute_typevars.hpp>
+#include <dynd/func/arrfunc.hpp>
 #include <dynd/types/pointer_type.hpp>
 #include <dynd/types/base_struct_type.hpp>
 #include <dynd/types/option_type.hpp>
@@ -106,10 +107,11 @@ ndt::type ndt::detail::internal_substitute(
       return ndt::make_option(ndt::substitute(
           pattern.extended<option_type>()->get_value_type(), typevars, concrete));
     case arrfunc_type_id:
-      return ndt::make_funcproto(
-          substitute_type_array(
-              pattern.extended<arrfunc_type>()->get_arg_types(), typevars,
-              concrete),
+      return ndt::make_arrfunc(
+          substitute(pattern.extended<arrfunc_type>()->get_pos_tuple(),
+                     typevars, concrete),
+          substitute(pattern.extended<arrfunc_type>()->get_kwd_struct(),
+                     typevars, concrete),
           substitute(pattern.extended<arrfunc_type>()->get_return_type(),
                      typevars, concrete));
     case typevar_type_id: {

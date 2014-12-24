@@ -10,6 +10,7 @@
 #include <cstring>
 #include <limits>
 
+#include <dynd/func/arrfunc.hpp>
 #include <dynd/typed_data_assign.hpp>
 #include <dynd/types/convert_type.hpp>
 #include <dynd/types/option_type.hpp>

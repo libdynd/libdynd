@@ -9,6 +9,7 @@
 #include "inc_gtest.hpp"
 #include "dynd_assertions.hpp"
 
+#include <dynd/func/arrfunc.hpp>
 #include <dynd/types/datashape_parser.hpp>
 #include <dynd/types/fixed_dimsym_type.hpp>
 #include <dynd/types/fixed_dim_type.hpp>
@@ -253,16 +254,17 @@ TEST(DataShapeParser, ArrFunc)
 {
   ndt::type tp;
 
-  EXPECT_EQ(ndt::make_funcproto<int(int, int)>(),
+  EXPECT_EQ(ndt::make_arrfunc<int(int, int)>(),
             ndt::type("(int, int) -> int"));
-  EXPECT_EQ(ndt::make_funcproto<int(int, int)>("x"),
+  EXPECT_EQ(ndt::make_arrfunc<int(int, int)>("x"),
             ndt::type("(int, x: int) -> int"));
-  EXPECT_EQ(ndt::make_funcproto<int(int, int)>("x", "y"),
+  EXPECT_EQ(ndt::make_arrfunc<int(int, int)>("x", "y"),
             ndt::type("(x: int, y: int) -> int"));
 
   tp = ndt::type("(N * S, func: (M * S) -> T) -> N * T");
-  EXPECT_JSON_EQ_ARR("[\"N * S\", \"(M * S) -> T\"]", tp.p("arg_types"));
-  EXPECT_JSON_EQ_ARR("[\"func\"]", tp.p("arg_names"));
+  EXPECT_JSON_EQ_ARR("[\"N * S\"]", tp.p("pos_types"));
+  EXPECT_JSON_EQ_ARR("[\"(M * S) -> T\"]", tp.p("kwd_types"));
+  EXPECT_JSON_EQ_ARR("[\"func\"]", tp.p("kwd_names"));
   EXPECT_JSON_EQ_ARR("\"N * T\"", tp.p("return_type"));
 }
 
@@ -432,7 +434,7 @@ TEST(DataShapeParser, ErrorRecord)
     string msg = e.what();
     // The name field works as a funcproto until it hits the '}' token
     EXPECT_TRUE(msg.find("line 4, column 20") != string::npos);
-    EXPECT_TRUE(msg.find("expected a type") != string::npos);
+    EXPECT_TRUE(msg.find("expected a kwd arg in arrfunc prototype") != string::npos);
   }
 }
 

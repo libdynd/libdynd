@@ -135,17 +135,20 @@ bool dynd::is_valid_typevar_name(const char *begin, const char *end)
     }
 }
 
-void ndt::make_typevar_range(const char *name, intptr_t count,
-                                  std::vector<ndt::type> &out)
+nd::array ndt::make_typevar_range(const char *name, intptr_t count)
 {
+  nd::array result;
   string s(name);
   s += '0';
   if (count > 10) {
     throw runtime_error("TODO: extend make_typevar_range");
   }
-  out.resize(count);
+  result = nd::empty(count, ndt::make_type());
+  auto result_ptr =
+      reinterpret_cast<ndt::type *>(result.get_readwrite_originptr());
   for (int i = 0; i < count; ++i) {
-    out[i] = ndt::make_typevar(s);
+    result_ptr[i] = ndt::make_typevar(s);
     s[s.size() - 1]++;
   }
+  return move(result);
 }

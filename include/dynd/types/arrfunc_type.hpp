@@ -13,80 +13,96 @@
 #include <dynd/types/fixed_dim_type.hpp>
 #include <dynd/types/fixed_dimsym_type.hpp>
 #include <dynd/types/string_type.hpp>
+#include <dynd/types/tuple_type.hpp>
+#include <dynd/types/struct_type.hpp>
 
 namespace dynd {
 
 class arrfunc_type : public base_type {
   ndt::type m_return_type;
-  nd::array m_arg_types;
-  nd::array m_arg_names;
+  // Always a tuple type containing the types for positional args
+  ndt::type m_pos_tuple;
+  // Always a struct type containing the names and types for keyword args
+  ndt::type m_kwd_struct;
 
-  std::vector<intptr_t> m_opt_indices;
+  // Indices of the optional args
+  std::vector<intptr_t> m_opt_kwd_indices;
 
 public:
-  arrfunc_type(const ndt::type &ret_type, const nd::array &arg_types,
-               const nd::array &arg_names);
+  arrfunc_type(const ndt::type &pos_types, const ndt::type &ret_type);
+  arrfunc_type(const ndt::type &pos_types,
+               const ndt::type &kwd_types, const ndt::type &ret_type);
 
   virtual ~arrfunc_type() {}
 
-  const string_type_data &get_arg_name_raw(intptr_t i) const
+  const string_type_data &get_kwd_name_raw(intptr_t i) const
   {
-    return unchecked_fixed_dim_get<string_type_data>(m_arg_names, i);
+    return m_kwd_struct.extended<struct_type>()->get_field_name_raw(i);
   }
 
-  const nd::array &get_arg_types() const { return m_arg_types; }
+  const ndt::type &get_return_type() const { return m_return_type; }
 
-  const ndt::type *get_arg_types_raw() const
+  const ndt::type &get_pos_tuple() const { return m_pos_tuple; }
+
+  const nd::array &get_pos_types() const
   {
-    return reinterpret_cast<const ndt::type *>(
-        m_arg_types.get_readonly_originptr());
-  }
-  const ndt::type &get_arg_type(intptr_t i) const
-  {
-    return get_arg_types_raw()[i];
+    return m_pos_tuple.extended<tuple_type>()->get_field_types();
   }
 
-  intptr_t get_arg_index(const std::string &arg_name) const
-  {
-    return get_arg_index(arg_name.data(), arg_name.data() + arg_name.size());
-  }
-  intptr_t get_arg_index(const char *arg_name_begin,
-                         const char *arg_name_end) const;
+  const ndt::type &get_kwd_struct() const { return m_kwd_struct; }
 
-  std::vector<intptr_t> get_option_arg_indices() const
+  const nd::array &get_kwd_types() const
   {
-    return m_opt_indices;
+    return m_kwd_struct.extended<struct_type>()->get_field_types();
   }
 
-  const nd::array &get_arg_names() const { return m_arg_names; }
+  const nd::array &get_kwd_names() const
+  {
+    return m_kwd_struct.extended<struct_type>()->get_field_names();
+  }
+
+  const ndt::type *get_pos_types_raw() const
+  {
+    return m_pos_tuple.extended<tuple_type>()->get_field_types_raw();
+  }
+
+  const ndt::type &get_pos_type(intptr_t i) const
+  {
+    return m_pos_tuple.extended<tuple_type>()->get_field_type(i);
+  }
+
+  const ndt::type &get_kwd_type(intptr_t i) const
+  {
+    return m_kwd_struct.extended<struct_type>()->get_field_type(i);
+  }
+
+  intptr_t get_kwd_index(const std::string &arg_name) const
+  {
+    return m_kwd_struct.extended<struct_type>()->get_field_index(arg_name);
+  }
+
+  const std::vector<intptr_t> &get_option_kwd_indices() const
+  {
+    return m_opt_kwd_indices;
+  }
 
   /** Returns the number of arguments, both positional and keyword. */
-  intptr_t get_narg() const
-  {
-    if (m_arg_types.is_null()) {
-      return 0;
-    }
-
-    return m_arg_types.get_dim_size();
-  }
+  intptr_t get_narg() const { return get_npos() + get_nkwd(); }
 
   /** Returns the number of positional arguments. */
-  intptr_t get_npos() const { return get_narg() - get_nkwd(); }
+  intptr_t get_npos() const
+  {
+    return m_pos_tuple.extended<tuple_type>()->get_field_count();
+  }
 
   /** Returns the number of keyword arguments. */
   intptr_t get_nkwd() const
   {
-    if (m_arg_names.is_null()) {
-      return 0;
-    }
-
-    return m_arg_names.get_dim_size();
+    return m_kwd_struct.extended<tuple_type>()->get_field_count();
   }
 
   /** Returns the number of optional arguments. */
-  intptr_t get_nopt() const { return m_opt_indices.size(); }
-
-  const ndt::type &get_return_type() const { return m_return_type; }
+  intptr_t get_nopt() const { return m_opt_kwd_indices.size(); }
 
   void print_data(std::ostream &o, const char *arrmeta, const char *data) const;
 
@@ -152,7 +168,7 @@ namespace ndt {
       {
         nd::array arg_tp = nd::empty(0, ndt::make_type());
         arg_tp.flag_as_immutable();
-        return make_funcproto(arg_tp, make_type<R>());
+        return make_arrfunc(ndt::make_tuple(arg_tp), make_type<R>());
       }
     };
 
@@ -162,7 +178,8 @@ namespace ndt {
       {
         nd::array arg_tp = nd::empty(0, ndt::make_type());
         arg_tp.flag_as_immutable();
-        return make_funcproto(arg_tp, make_cuda_device(make_type<R>()));
+        return make_arrfunc(ndt::make_tuple(arg_tp),
+                            make_cuda_device(make_type<R>()));
       }
     };
 
@@ -172,7 +189,7 @@ namespace ndt {
       {
         ndt::type arg_tp[sizeof...(A)] = {make_type<typename std::remove_cv<
             typename std::remove_reference<A>::type>::type>()...};
-        return make_funcproto(arg_tp, make_type<R>());
+        return make_arrfunc(ndt::make_tuple(arg_tp), make_type<R>());
       }
 
       template <typename... T>
@@ -182,7 +199,12 @@ namespace ndt {
 
         ndt::type arg_tp[sizeof...(A)] = {make_type<typename std::remove_cv<
             typename std::remove_reference<A>::type>::type>()...};
-        return make_funcproto(arg_tp, make_type<R>(), raw_names);
+        return make_arrfunc(
+            ndt::make_tuple(nd::array(arg_tp, sizeof...(A) - sizeof...(T))),
+            ndt::make_struct(raw_names,
+                             nd::array(arg_tp + (sizeof...(A) - sizeof...(T)),
+                                       sizeof...(T))),
+            make_type<R>());
       }
     };
 
@@ -193,7 +215,8 @@ namespace ndt {
         ndt::type arg_tp[sizeof...(A)] = {
             make_cuda_device(make_type<typename std::remove_cv<
                 typename std::remove_reference<A>::type>::type>())...};
-        return make_funcproto(arg_tp, make_cuda_device(make_type<R>()));
+        return make_arrfunc(ndt::make_tuple(arg_tp),
+                            make_cuda_device(make_type<R>()));
       }
 
       template <typename... T>
@@ -204,31 +227,45 @@ namespace ndt {
         ndt::type arg_tp[sizeof...(A)] = {
             make_cuda_device(make_type<typename std::remove_cv<
                 typename std::remove_reference<A>::type>::type>())...};
-        return make_funcproto(arg_tp, make_cuda_device(make_type<R>()),
-                              raw_names);
+        return make_arrfunc(ndt::make_tuple(arg_tp),
+                            make_cuda_device(make_type<R>()), raw_names);
       }
     };
 
   } // namespace ndt::detail
 
-  /** Makes a funcproto type with the specified types */
-  inline ndt::type make_funcproto(const nd::array &arg_types,
-                                  const ndt::type &return_type,
-                                  const nd::array &arg_names)
+  /** Makes an arrfunc type with both positional and keyword arguments */
+  inline ndt::type make_arrfunc(const ndt::type &pos_tuple,
+                                const ndt::type &kwd_struct,
+                                const ndt::type &return_type)
   {
-    return ndt::type(new arrfunc_type(return_type, arg_types, arg_names),
+    return ndt::type(new arrfunc_type(pos_tuple, kwd_struct, return_type),
                      false);
   }
 
-  inline ndt::type make_funcproto(const nd::array &arg_types,
-                                  const ndt::type &return_type)
+  /** Makes an arrfunc type with both positional and keyword arguments */
+  inline ndt::type make_arrfunc(const nd::array &pos_types,
+                                const nd::array &kwd_names,
+                                const nd::array &kwd_types,
+                                const ndt::type &return_type)
   {
-    return make_funcproto(arg_types, return_type, nd::array());
+    return ndt::type(new arrfunc_type(ndt::make_tuple(pos_types),
+                                      ndt::make_struct(kwd_names, kwd_types),
+                                      return_type),
+                     false);
+  }
+
+  /** Makes an arrfunc type with just positional arguments */
+  inline ndt::type make_arrfunc(const ndt::type &pos_tuple,
+                                const ndt::type &return_type)
+  {
+    return ndt::type(new arrfunc_type(pos_tuple, return_type),
+                     false);
   }
 
   /** Makes a funcproto type with the specified types */
-  inline ndt::type make_funcproto(intptr_t narg, const ndt::type *arg_types,
-                                  const ndt::type &return_type)
+  inline ndt::type make_arrfunc(intptr_t narg, const ndt::type *arg_types,
+                                const ndt::type &return_type)
   {
     nd::array tmp = nd::empty(narg, ndt::make_type());
     ndt::type *tmp_vals =
@@ -237,29 +274,21 @@ namespace ndt {
       tmp_vals[i] = arg_types[i];
     }
     tmp.flag_as_immutable();
-    return make_funcproto(tmp, return_type);
-  }
-
-  /** Makes a unary funcproto type with the specified types */
-  inline ndt::type make_funcproto(const ndt::type &single_arg_type,
-                                  const ndt::type &return_type)
-  {
-    ndt::type arg_types[1] = {single_arg_type};
-    return make_funcproto(arg_types, return_type);
+    return make_arrfunc(ndt::make_tuple(tmp), return_type);
   }
 
   /** Makes a funcproto type from the C++ function type */
   template <kernel_request_t kernreq, typename funcproto_type, typename... T>
-  ndt::type make_funcproto(T &&... names)
+  ndt::type make_arrfunc(T &&... names)
   {
     return detail::funcproto_factory<kernreq, funcproto_type>::make(
         std::forward<T>(names)...);
   }
 
   template <typename funcproto_type, typename... T>
-  ndt::type make_funcproto(T &&... names)
+  ndt::type make_arrfunc(T &&... names)
   {
-    return make_funcproto<kernel_request_host, funcproto_type>(
+    return make_arrfunc<kernel_request_host, funcproto_type>(
         std::forward<T>(names)...);
   }
 

@@ -718,7 +718,7 @@ static void check_dst_initialization(const arrfunc_type *dst_initialization_tp,
     ss << ", expected " << dst_tp;
     throw type_error(ss.str());
   }
-  if (dst_initialization_tp->get_arg_type(0) != src_tp) {
+  if (dst_initialization_tp->get_pos_type(0) != src_tp) {
     stringstream ss;
     ss << "make_lifted_reduction_ckernel: dst initialization ckernel ";
     ss << "src type is " << dst_initialization_tp->get_return_type();
@@ -818,7 +818,7 @@ static size_t make_strided_inner_reduction_dimension_kernel(
     ss << ", expected " << dst_tp;
     throw type_error(ss.str());
   }
-  if (elwise_reduction_tp->get_arg_type(0) != src_tp) {
+  if (elwise_reduction_tp->get_pos_type(0) != src_tp) {
     stringstream ss;
     ss << "make_lifted_reduction_ckernel: elwise reduction ckernel ";
     ss << "src type is " << elwise_reduction_tp->get_return_type();
@@ -958,7 +958,7 @@ static size_t make_strided_inner_broadcast_dimension_kernel(
     ss << ", expected " << dst_tp;
     throw type_error(ss.str());
   }
-  if (elwise_reduction_tp->get_arg_type(0) != src_tp) {
+  if (elwise_reduction_tp->get_pos_type(0) != src_tp) {
     stringstream ss;
     ss << "make_lifted_reduction_ckernel: elwise reduction ckernel ";
     ss << "src type is " << elwise_reduction_tp->get_return_type();
@@ -1064,7 +1064,7 @@ size_t dynd::make_lifted_reduction_ckernel(
   }
 
   ndt::type dst_el_tp = elwise_reduction_tp->get_return_type();
-  ndt::type src_el_tp = elwise_reduction_tp->get_arg_type(0);
+  ndt::type src_el_tp = elwise_reduction_tp->get_pos_type(0);
 
   // This is the number of dimensions being processed by the reduction
   if (reduction_ndim != src_tp.get_ndim() - src_el_tp.get_ndim()) {

@@ -97,9 +97,10 @@ intptr_t cuda_device_type::make_assignment_kernel(
   */
 
   if (dst_tp.get_ndim() >= src_tp.get_ndim() && dst_tp.get_ndim() > 0) {
-    arrfunc_type_data child = arrfunc_type_data(
-        &make_cuda_builtin_type_assignment_kernel, NULL, NULL, NULL);
-    ndt::type child_tp = ndt::make_funcproto(src_tp.storage_type().get_dtype(),
+    arrfunc_type_data child(&make_cuda_builtin_type_assignment_kernel, NULL,
+                            NULL, NULL);
+    ndt::type child_tp =
+        ndt::make_arrfunc(ndt::make_tuple(src_tp.storage_type().get_dtype()),
                                              dst_tp.storage_type().get_dtype());
     return kernels::make_lifted_expr_ckernel(
         &child, child_tp.extended<arrfunc_type>(), ckb, ckb_offset, dst_tp,

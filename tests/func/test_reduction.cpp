@@ -12,7 +12,6 @@
 
 #include <dynd/array.hpp>
 #include <dynd/kernels/reduction_kernels.hpp>
-#include <dynd/types/arrfunc_old_type.hpp>
 #include <dynd/func/lift_reduction_arrfunc.hpp>
 #include <dynd/json_parser.hpp>
 
@@ -117,7 +116,7 @@ TEST(Reduction, BuiltinSum_Lift0D_NoIdentity)
 
   // Set up some data for the test reduction
   nd::array a = 1.25f;
-  ASSERT_EQ(af.get_type()->get_arg_type(0), a.get_type());
+  ASSERT_EQ(af.get_type()->get_pos_type(0), a.get_type());
   nd::array b = nd::empty(ndt::make_type<float>());
   ASSERT_EQ(af.get_type()->get_return_type(), b.get_type());
 
@@ -151,7 +150,7 @@ TEST(Reduction, BuiltinSum_Lift0D_WithIdentity)
 
   // Set up some data for the test reduction
   nd::array a = 1.25f;
-  ASSERT_EQ(af.get_type()->get_arg_type(0), a.get_type());
+  ASSERT_EQ(af.get_type()->get_pos_type(0), a.get_type());
   nd::array b = nd::empty(ndt::make_type<float>());
   ASSERT_EQ(af.get_type()->get_return_type(), b.get_type());
 
@@ -185,7 +184,7 @@ TEST(Reduction, BuiltinSum_Lift1D_NoIdentity)
   // Set up some data for the test reduction
   float vals0[5] = {1.5, -22., 3.75, 1.125, -3.375};
   nd::array a = vals0;
-  EXPECT_TYPE_MATCHES(af.get_type()->get_arg_type(0), a.get_type());
+  EXPECT_TYPE_MATCHES(af.get_type()->get_pos_type(0), a.get_type());
   nd::array b = nd::empty(ndt::make_type<float>());
   EXPECT_TYPE_MATCHES(af.get_type()->get_return_type(), b.get_type());
 
@@ -237,7 +236,7 @@ TEST(Reduction, BuiltinSum_Lift1D_WithIdentity)
   // Set up some data for the test reduction
   float vals0[5] = {1.5, -22., 3.75, 1.125, -3.375};
   nd::array a = vals0;
-  EXPECT_TYPE_MATCHES(af.get_type()->get_arg_type(0), a.get_type());
+  EXPECT_TYPE_MATCHES(af.get_type()->get_pos_type(0), a.get_type());
   nd::array b = nd::empty(ndt::make_type<float>());
   EXPECT_TYPE_MATCHES(af.get_type()->get_return_type(), b.get_type());
 
@@ -272,7 +271,7 @@ TEST(Reduction, BuiltinSum_Lift2D_StridedStrided_ReduceReduce)
   // Set up some data for the test reduction
   nd::array a =
       parse_json("2 * 3 * float32", "[[1.5, 2, 7], [-2.25, 7, 2.125]]");
-  EXPECT_TYPE_MATCHES(af.get_type()->get_arg_type(0), a.get_type());
+  EXPECT_TYPE_MATCHES(af.get_type()->get_pos_type(0), a.get_type());
   nd::array b = nd::empty(ndt::make_type<float>());
   EXPECT_TYPE_MATCHES(af.get_type()->get_return_type(), b.get_type());
 
@@ -321,7 +320,7 @@ TEST(Reduction, BuiltinSum_Lift2D_StridedStrided_ReduceReduce_KeepDim)
   // Set up some data for the test reduction
   nd::array a =
       parse_json("2 * 3 * float32", "[[1.5, 2, 7], [-2.25, 7, 2.125]]");
-  EXPECT_TYPE_MATCHES(af.get_type()->get_arg_type(0), a.get_type());
+  EXPECT_TYPE_MATCHES(af.get_type()->get_pos_type(0), a.get_type());
   nd::array b = nd::empty(1, 1, "float32");
   EXPECT_TYPE_MATCHES(af.get_type()->get_return_type(), b.get_type());
 
@@ -355,7 +354,7 @@ TEST(Reduction, BuiltinSum_Lift2D_StridedStrided_BroadcastReduce)
   // Set up some data for the test reduction
   nd::array a =
       parse_json("2 * 3 * float32", "[[1.5, 2, 7], [-2.25, 7, 2.125]]");
-  EXPECT_TYPE_MATCHES(af.get_type()->get_arg_type(0), a.get_type());
+  EXPECT_TYPE_MATCHES(af.get_type()->get_pos_type(0), a.get_type());
   nd::array b = nd::empty(2, "float32");
   EXPECT_TYPE_MATCHES(af.get_type()->get_return_type(), b.get_type());
 
@@ -408,7 +407,7 @@ TEST(Reduction, BuiltinSum_Lift2D_StridedStrided_BroadcastReduce_KeepDim)
   // Set up some data for the test reduction
   nd::array a =
       parse_json("2 * 3 * float32", "[[1.5, 2, 7], [-2.25, 7, 2.125]]");
-  EXPECT_TYPE_MATCHES(af.get_type()->get_arg_type(0), a.get_type());
+  EXPECT_TYPE_MATCHES(af.get_type()->get_pos_type(0), a.get_type());
   nd::array b = nd::empty(2, 1, "float32");
   EXPECT_TYPE_MATCHES(af.get_type()->get_return_type(), b.get_type());
 
@@ -444,7 +443,7 @@ TEST(Reduction, BuiltinSum_Lift2D_StridedStrided_ReduceBroadcast)
   // Set up some data for the test reduction
   nd::array a =
       parse_json("2 * 3 * float32", "[[1.5, 2, 7], [-2.25, 7, 2.125]]");
-  EXPECT_TYPE_MATCHES(af.get_type()->get_arg_type(0), a.get_type());
+  EXPECT_TYPE_MATCHES(af.get_type()->get_pos_type(0), a.get_type());
   nd::array b = nd::empty(3, "float32");
   EXPECT_TYPE_MATCHES(af.get_type()->get_return_type(), b.get_type());
 
@@ -499,7 +498,7 @@ TEST(Reduction, BuiltinSum_Lift2D_StridedStrided_ReduceBroadcast_KeepDim)
   // Set up some data for the test reduction
   nd::array a =
       parse_json("2 * 3 * float32", "[[1.5, 2, 7], [-2.25, 7, 2.125]]");
-  EXPECT_TYPE_MATCHES(af.get_type()->get_arg_type(0), a.get_type());
+  EXPECT_TYPE_MATCHES(af.get_type()->get_pos_type(0), a.get_type());
   nd::array b = nd::empty(1, 3, "float32");
   EXPECT_TYPE_MATCHES(af.get_type()->get_return_type(), b.get_type());
 
@@ -538,7 +537,7 @@ TEST(Reduction, BuiltinSum_Lift3D_StridedStridedStrided_ReduceReduceReduce)
   nd::array a = parse_json("2 * 3 * 2 * float32", "[[[1.5, -2.375], [2, 1.25], "
                                                   "[7, -0.5]], [[-2.25, 1], "
                                                   "[7, 0], [2.125, 0.25]]]");
-  EXPECT_TYPE_MATCHES(af.get_type()->get_arg_type(0), a.get_type());
+  EXPECT_TYPE_MATCHES(af.get_type()->get_pos_type(0), a.get_type());
   nd::array b = nd::empty("float32");
   EXPECT_TYPE_MATCHES(af.get_type()->get_return_type(), b.get_type());
 
@@ -576,7 +575,7 @@ TEST(Reduction, BuiltinSum_Lift3D_StridedStridedStrided_BroadcastReduceReduce)
   nd::array a = parse_json("2 * 3 * 2 * float32", "[[[1.5, -2.375], [2, 1.25], "
                                                   "[7, -0.5]], [[-2.25, 1], "
                                                   "[7, 0], [2.125, 0.25]]]");
-  EXPECT_TYPE_MATCHES(af.get_type()->get_arg_type(0), a.get_type());
+  EXPECT_TYPE_MATCHES(af.get_type()->get_pos_type(0), a.get_type());
   nd::array b = nd::empty(2, "float32");
   EXPECT_TYPE_MATCHES(af.get_type()->get_return_type(), b.get_type());
 
@@ -615,7 +614,7 @@ TEST(Reduction, BuiltinSum_Lift3D_StridedStridedStrided_ReduceBroadcastReduce)
                                                   "[7, -0.5]], [[-2.25, 1], "
                                                   "[7, 0], [2.125, 0.25]]]");
   a = a(irange(), irange(), irange());
-  EXPECT_TYPE_MATCHES(af.get_type()->get_arg_type(0), a.get_type());
+  EXPECT_TYPE_MATCHES(af.get_type()->get_pos_type(0), a.get_type());
   nd::array b = nd::empty(3, "float32");
   EXPECT_TYPE_MATCHES(af.get_type()->get_return_type(), b.get_type());
 

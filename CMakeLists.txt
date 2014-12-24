@@ -160,7 +160,6 @@ set(libdynd_SRC
     src/dynd/types/categorical_type.cpp
     src/dynd/types/cfixed_dim_type.cpp
     src/dynd/types/char_type.cpp
-    src/dynd/types/arrfunc_old_type.cpp
     src/dynd/types/convert_type.cpp
     src/dynd/types/cstruct_type.cpp
     src/dynd/types/ctuple_type.cpp
@@ -228,7 +227,6 @@ set(libdynd_SRC
     include/dynd/types/byteswap_type.hpp
     include/dynd/types/categorical_type.hpp
     include/dynd/types/char_type.hpp
-    include/dynd/types/arrfunc_old_type.hpp
     include/dynd/types/convert_type.hpp
     include/dynd/types/ctuple_type.hpp
     include/dynd/types/cuda_host_type.hpp
@@ -618,6 +616,14 @@ add_custom_command(OUTPUT ${CMAKE_CURRENT_BINARY_DIR}/include/dynd/pp/gen.hpp
 set_source_files_properties(${CMAKE_CURRENT_BINARY_DIR}/include/dynd/pp/gen.hpp
                             PROPERTIES GENERATED true)
 add_dependencies(libdynd ppgen)
+
+# This file generates a huge number of inline functions, need to use /bigobj
+# on MSVC to allow this
+if(WIN32)
+    set_source_files_properties(src/dynd/kernels/assignment_kernels.cpp
+        PROPERTIES
+            COMPILE_FLAGS /bigobj)
+endif()
 
 # Copy the headers from cephes that need to be installed with libdynd
 file(COPY thirdparty/cephes/rename.h

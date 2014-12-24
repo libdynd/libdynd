@@ -8,6 +8,7 @@
 #include <cerrno>
 #include <algorithm>
 
+#include <dynd/func/arrfunc.hpp>
 #include <dynd/types/date_type.hpp>
 #include <dynd/types/property_type.hpp>
 #include <dynd/types/cstruct_type.hpp>

@@ -112,7 +112,7 @@ static intptr_t instantiate_int_multiply_and_offset_arrfunc(
 {
   typedef int_multiply_and_offset_ck<Tsrc, Tdst> self_type;
   if (dst_tp != af_tp->get_return_type() ||
-      src_tp[0] != af_tp->get_arg_type(0)) {
+      src_tp[0] != af_tp->get_pos_type(0)) {
     stringstream ss;
     ss << "Cannot instantiate arrfunc with signature ";
     ss << af_tp << " with types (";
@@ -164,7 +164,7 @@ static intptr_t instantiate_int_offset_and_divide_arrfunc(
 {
   typedef int_offset_and_divide_ck<Tsrc, Tdst> self_type;
   if (dst_tp != af_tp->get_return_type() ||
-      src_tp[0] != af_tp->get_arg_type(0)) {
+      src_tp[0] != af_tp->get_pos_type(0)) {
     stringstream ss;
     ss << "Cannot instantiate arrfunc with signature ";
     ss << af_tp << " with types (";
@@ -210,17 +210,21 @@ bool dynd::make_datetime_adapter_arrfunc(const ndt::type &value_tp,
         //       avoid overflow issues.
         out_forward = make_int_offset_and_divide_arrfunc<int64_t, int64_t>(
             epoch_datetime * unit_divisor, unit_divisor,
-            ndt::make_funcproto(ndt::make_type<int64_t>(), value_tp));
+            ndt::make_arrfunc(ndt::make_tuple(ndt::make_type<int64_t>()),
+                              value_tp));
         out_reverse = make_int_multiply_and_offset_arrfunc<int64_t, int64_t>(
             unit_divisor, -epoch_datetime * unit_divisor,
-            ndt::make_funcproto(value_tp, ndt::make_type<int64_t>()));
+            ndt::make_arrfunc(ndt::make_tuple(value_tp),
+                              ndt::make_type<int64_t>()));
       } else {
         out_forward = make_int_multiply_and_offset_arrfunc<int64_t, int64_t>(
             unit_factor, epoch_datetime,
-            ndt::make_funcproto(ndt::make_type<int64_t>(), value_tp));
+            ndt::make_arrfunc(ndt::make_tuple(ndt::make_type<int64_t>()),
+                              value_tp));
         out_reverse = make_int_offset_and_divide_arrfunc<int64_t, int64_t>(
             -epoch_datetime, unit_factor,
-            ndt::make_funcproto(value_tp, ndt::make_type<int64_t>()));
+            ndt::make_arrfunc(ndt::make_tuple(value_tp),
+                              ndt::make_type<int64_t>()));
       }
       return true;
     default:

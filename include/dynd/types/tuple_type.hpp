@@ -70,7 +70,8 @@ public:
 namespace ndt {
     /** Makes a tuple type with the specified types */
     inline ndt::type make_tuple(const nd::array& field_types) {
-        return ndt::type(new tuple_type(field_types), false);
+      // field_types.flag_as_immutable();
+      return ndt::type(new tuple_type(field_types), false);
     }
 
     /** Makes a tuple type with the specified types */

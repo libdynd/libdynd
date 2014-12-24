@@ -127,7 +127,7 @@ namespace kernels {
       bool finished = dst_ndim == 1;
       for (int i = 0; i < N; ++i) {
         intptr_t src_ndim =
-            src_tp[i].get_ndim() - child_tp->get_arg_type(i).get_ndim();
+            src_tp[i].get_ndim() - child_tp->get_pos_type(i).get_ndim();
         intptr_t src_size;
         if (src_ndim < dst_ndim) {
           // This src value is getting broadcasted
@@ -285,7 +285,7 @@ namespace kernels {
       for (int i = 0; i < N; ++i) {
         intptr_t src_size;
         intptr_t src_ndim =
-            src_tp[i].get_ndim() - child_tp->get_arg_type(i).get_ndim();
+            src_tp[i].get_ndim() - child_tp->get_pos_type(i).get_ndim();
         // The src[i] strided parameters
         if (src_ndim < dst_ndim) {
           // This src value is getting broadcasted
@@ -524,7 +524,7 @@ namespace kernels {
       for (int i = 0; i < N; ++i) {
         // The src[i] strided parameters
         intptr_t src_ndim =
-            src_tp[i].get_ndim() - child_tp->get_arg_type(i).get_ndim();
+            src_tp[i].get_ndim() - child_tp->get_pos_type(i).get_ndim();
         if (src_ndim < dst_ndim) {
           // This src value is getting broadcasted
           src_stride[i] = 0;

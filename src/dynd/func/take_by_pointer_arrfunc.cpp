@@ -138,8 +138,8 @@ static int resolve_take_by_pointer_dst_type(
 nd::arrfunc dynd::make_take_by_pointer_arrfunc()
 {
   static ndt::type param_types[2] = {ndt::type("M * T"), ndt::type("N * Ix")};
-  static ndt::type func_proto =
-      ndt::make_funcproto(param_types, ndt::type("R * pointer[T]"));
+  static ndt::type func_proto = ndt::make_arrfunc(ndt::make_tuple(param_types),
+                                                  ndt::type("R * pointer[T]"));
 
   nd::array af = nd::empty(func_proto);
   arrfunc_type_data *out_af =

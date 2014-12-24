@@ -4,8 +4,8 @@
 //
 
 #include <dynd/array.hpp>
+#include <dynd/func/arrfunc.hpp>
 #include <dynd/types/option_type.hpp>
-#include <dynd/types/arrfunc_old_type.hpp>
 #include <dynd/types/typevar_type.hpp>
 #include <dynd/kernels/option_assignment_kernels.hpp>
 #include <dynd/kernels/option_kernels.hpp>
@@ -61,8 +61,9 @@ option_type::~option_type()
 const ndt::type &option_type::make_nafunc_type()
 {
   static ndt::type static_instance = ndt::make_cstruct(
-      ndt::make_funcproto(ndt::make_typevar("T"), ndt::make_type<dynd_bool>()),
-      "is_avail", ndt::make_funcproto(0, NULL, ndt::make_typevar("T")),
+      ndt::make_arrfunc(ndt::make_tuple(ndt::make_typevar("T")),
+                        ndt::make_type<dynd_bool>()),
+      "is_avail", ndt::make_arrfunc(0, NULL, ndt::make_typevar("T")),
       "assign_na");
   return static_instance;
 }

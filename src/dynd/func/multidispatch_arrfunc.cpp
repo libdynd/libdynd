@@ -67,11 +67,16 @@ static bool can_implicitly_convert(const ndt::type &src, const ndt::type &dst,
  */
 static bool supercedes(const nd::arrfunc &lhs, const nd::arrfunc &rhs)
 {
-  intptr_t nargs = lhs.get_type()->get_narg();
-  if (nargs == rhs.get_type()->get_narg()) {
-    for (intptr_t i = 0; i < nargs; ++i) {
-      const ndt::type &lpt = lhs.get_type()->get_arg_type(i);
-      const ndt::type &rpt = rhs.get_type()->get_arg_type(i);
+  // TODO: Deal with keyword args
+  if (lhs.get_type()->get_nkwd() > 0 || rhs.get_type()->get_nkwd() > 0) {
+    return false;
+  }
+
+  intptr_t npos = lhs.get_type()->get_npos();
+  if (npos == rhs.get_type()->get_npos()) {
+    for (intptr_t i = 0; i < npos; ++i) {
+      const ndt::type &lpt = lhs.get_type()->get_pos_type(i);
+      const ndt::type &rpt = rhs.get_type()->get_pos_type(i);
       std::map<nd::string, ndt::type> typevars;
       if (!can_implicitly_convert(lpt, rpt, typevars)) {
         return false;
@@ -91,11 +96,16 @@ static bool supercedes(const nd::arrfunc &lhs, const nd::arrfunc &rhs)
  */
 static bool toposort_edge(const nd::arrfunc &lhs, const nd::arrfunc &rhs)
 {
-  intptr_t nargs = lhs.get_type()->get_narg();
-  if (nargs == rhs.get_type()->get_narg()) {
-    for (intptr_t i = 0; i < nargs; ++i) {
-      const ndt::type &lpt = lhs.get_type()->get_arg_type(i);
-      const ndt::type &rpt = rhs.get_type()->get_arg_type(i);
+  // TODO: Deal with keyword args
+  if (lhs.get_type()->get_nkwd() > 0 || rhs.get_type()->get_nkwd() > 0) {
+    return false;
+  }
+
+  intptr_t npos = lhs.get_type()->get_npos();
+  if (npos == rhs.get_type()->get_npos()) {
+    for (intptr_t i = 0; i < npos; ++i) {
+      const ndt::type &lpt = lhs.get_type()->get_pos_type(i);
+      const ndt::type &rpt = rhs.get_type()->get_pos_type(i);
       std::map<nd::string, ndt::type> typevars;
       if (lpt.get_kind() >= rpt.get_kind() &&
           !can_implicitly_convert(lpt, rpt, typevars)) {
@@ -115,12 +125,17 @@ static bool toposort_edge(const nd::arrfunc &lhs, const nd::arrfunc &rhs)
  */
 static bool ambiguous(const nd::arrfunc &lhs, const nd::arrfunc &rhs)
 {
-  intptr_t nargs = lhs.get_type()->get_narg();
-  if (nargs == rhs.get_type()->get_narg()) {
+  // TODO: Deal with keyword args
+  if (lhs.get_type()->get_nkwd() > 0 || rhs.get_type()->get_nkwd() > 0) {
+    return false;
+  }
+
+  intptr_t npos = lhs.get_type()->get_npos();
+  if (npos == rhs.get_type()->get_npos()) {
     intptr_t lsupercount = 0, rsupercount = 0;
-    for (intptr_t i = 0; i < nargs; ++i) {
-      const ndt::type &lpt = lhs.get_type()->get_arg_type(i);
-      const ndt::type &rpt = rhs.get_type()->get_arg_type(i);
+    for (intptr_t i = 0; i < npos; ++i) {
+      const ndt::type &lpt = lhs.get_type()->get_pos_type(i);
+      const ndt::type &rpt = rhs.get_type()->get_pos_type(i);
       bool either = false;
       std::map<nd::string, ndt::type> typevars;
       if (can_implicitly_convert(lpt, rpt, typevars)) {
@@ -136,7 +151,7 @@ static bool ambiguous(const nd::arrfunc &lhs, const nd::arrfunc &rhs)
         return false;
       }
     }
-    return (lsupercount != nargs && rsupercount != nargs) ||
+    return (lsupercount != npos && rsupercount != npos) ||
            (lsupercount == rsupercount);
   }
   return false;
@@ -265,8 +280,7 @@ static intptr_t instantiate_multidispatch_af(
     void *ckb, intptr_t ckb_offset, const ndt::type &dst_tp,
     const char *dst_arrmeta, const ndt::type *src_tp,
     const char *const *src_arrmeta, kernel_request_t kernreq,
-    const eval::eval_context *ectx,
-    const nd::array &kwds)
+    const eval::eval_context *ectx, const nd::array &kwds)
 {
   const vector<nd::arrfunc> *icd = af_self->get_data_as<vector<nd::arrfunc> >();
   for (intptr_t i = 0; i < (intptr_t)icd->size(); ++i) {
@@ -274,15 +288,15 @@ static intptr_t instantiate_multidispatch_af(
     intptr_t isrc, nsrc = af.get_type()->get_npos();
     std::map<nd::string, ndt::type> typevars;
     for (isrc = 0; isrc < nsrc; ++isrc) {
-      if (!can_implicitly_convert(src_tp[isrc], af.get_type()->get_arg_type(isrc),
-                                  typevars)) {
+      if (!can_implicitly_convert(
+              src_tp[isrc], af.get_type()->get_pos_type(isrc), typevars)) {
         break;
       }
     }
     if (isrc == nsrc) {
       intptr_t j;
       for (j = 0; j < nsrc; ++j) {
-        const ndt::type &arg_tp = af.get_type()->get_arg_type(j);
+        const ndt::type &arg_tp = af.get_type()->get_pos_type(j);
         if (!arg_tp.is_symbolic() && src_tp[j] != arg_tp) {
           break;
         }
@@ -294,7 +308,7 @@ static intptr_t instantiate_multidispatch_af(
       } else {
         return make_buffered_ckernel(af.get(), af.get_type(), ckb, ckb_offset,
                                      dst_tp, dst_arrmeta, nsrc, src_tp,
-                                     af.get_type()->get_arg_types_raw(),
+                                     af.get_type()->get_pos_types_raw(),
                                      src_arrmeta, kernreq, ectx);
       }
     }
@@ -319,7 +333,7 @@ static int resolve_multidispatch_dst_type(
       std::map<nd::string, ndt::type> typevars;
       for (isrc = 0; isrc < nsrc; ++isrc) {
         if (!can_implicitly_convert(
-                src_tp[isrc], af.get_type()->get_arg_type(isrc), typevars)) {
+                src_tp[isrc], af.get_type()->get_pos_type(isrc), typevars)) {
           break;
         }
       }

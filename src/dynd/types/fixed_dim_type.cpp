@@ -3,6 +3,7 @@
 // BSD 2-Clause License, see LICENSE.txt
 //
 
+#include <dynd/func/arrfunc.hpp>
 #include <dynd/types/fixed_dim_type.hpp>
 #include <dynd/types/cfixed_dim_type.hpp>
 #include <dynd/types/option_type.hpp>

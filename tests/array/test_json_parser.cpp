@@ -12,6 +12,7 @@
 
 #include <dynd/view.hpp>
 #include <dynd/json_parser.hpp>
+#include <dynd/func/arrfunc.hpp>
 #include <dynd/types/var_dim_type.hpp>
 #include <dynd/types/cfixed_dim_type.hpp>
 #include <dynd/types/cstruct_type.hpp>

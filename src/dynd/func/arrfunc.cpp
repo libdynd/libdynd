@@ -31,7 +31,7 @@ static intptr_t instantiate_assignment_ckernel(
   try {
     assign_error_mode errmode = *self->get_data_as<assign_error_mode>();
     if (dst_tp == af_tp->get_return_type() &&
-        src_tp[0] == af_tp->get_arg_type(0)) {
+        src_tp[0] == af_tp->get_pos_type(0)) {
       if (errmode == ectx->errmode) {
         return make_assignment_kernel(self, af_tp, ckb, ckb_offset, dst_tp, dst_arrmeta,
                                       src_tp[0], src_arrmeta[0], kernreq, ectx, kwds);
@@ -45,7 +45,7 @@ static intptr_t instantiate_assignment_ckernel(
     } else {
       stringstream ss;
       ss << "Cannot instantiate arrfunc for assigning from ";
-      ss << af_tp->get_arg_type(0) << " to " << af_tp->get_return_type();
+      ss << af_tp->get_pos_type(0) << " to " << af_tp->get_return_type();
       ss << " using input type " << src_tp[0];
       ss << " and output type " << dst_tp;
       throw type_error(ss.str());
@@ -89,7 +89,7 @@ static intptr_t instantiate_property_ckernel(
 
   stringstream ss;
   ss << "Cannot instantiate arrfunc for assigning from ";
-  ss << af_tp->get_arg_type(0) << " to " << af_tp->get_return_type();
+  ss << af_tp->get_pos_type(0) << " to " << af_tp->get_return_type();
   ss << " using input type " << src_tp[0];
   ss << " and output type " << dst_tp;
   throw type_error(ss.str());
@@ -101,7 +101,7 @@ nd::arrfunc dynd::make_arrfunc_from_assignment(const ndt::type &dst_tp,
                                                const ndt::type &src_tp,
                                                assign_error_mode errmode)
 {
-  nd::array af = nd::empty(ndt::make_funcproto(src_tp, dst_tp));
+  nd::array af = nd::empty(ndt::make_arrfunc(ndt::make_tuple(src_tp), dst_tp));
   arrfunc_type_data *out_af =
       reinterpret_cast<arrfunc_type_data *>(af.get_readwrite_originptr());
   memset(out_af, 0, sizeof(arrfunc_type_data));
@@ -122,7 +122,8 @@ nd::arrfunc dynd::make_arrfunc_from_property(const ndt::type &tp,
     throw type_error(ss.str());
   }
   ndt::type prop_tp = ndt::make_property(tp, propname);
-  nd::array af = nd::empty(ndt::make_funcproto(tp, prop_tp.value_type()));
+  nd::array af =
+      nd::empty(ndt::make_arrfunc(ndt::make_tuple(tp), prop_tp.value_type()));
   arrfunc_type_data *out_af =
       reinterpret_cast<arrfunc_type_data *>(af.get_readwrite_originptr());
   out_af->free = &delete_property_arrfunc_data;
