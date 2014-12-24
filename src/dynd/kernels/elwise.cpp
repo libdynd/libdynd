@@ -32,7 +32,8 @@ size_t dynd::kernels::make_lifted_expr_ckernel(
       stringstream ss;
       ss << "Trying to broadcast " << src_ndim << " dimensions of " << src_tp[i]
          << " into 0 dimensions of " << dst_tp
-         << ", the destination dimension count must be greater";
+         << ", the destination dimension count must be greater. The element "
+            "arrfunc type is \"" << ndt::type(child_tp, true) << "\"";
       throw broadcast_error(ss.str());
     }
   }
