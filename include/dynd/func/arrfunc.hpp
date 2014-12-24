@@ -304,10 +304,13 @@ namespace nd {
         typedef typename make_index_sequence<0, sizeof...(A)>::type I;
 
         ndt::index_proxy<I>::template get_types(m_types, get_vals());
+        nd::index_proxy<I>::template get_data(m_data, get_vals());
 
+/*
         for (size_t i = 0; i < sizeof...(A); ++i) {
           m_data[i] = const_cast<char *>(vals[i].get_readonly_originptr());
         }
+*/
 
         for (size_t i = 0; i < sizeof...(A); ++i) {
           m_arrmeta[i] = vals[i].get_arrmeta();
@@ -753,7 +756,7 @@ namespace nd {
         nd::array>::type
     operator()(T &&... a) const
     {
-      detail::args<T...> arr(std::forward<T>(a)...);
+      detail::args<typename as_array<T>::type...> arr(std::forward<T>(a)...);
       return call(arr, kwds(), &eval::default_eval_context);
     }
 

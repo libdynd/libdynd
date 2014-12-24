@@ -121,8 +121,6 @@ TEST(ArrFunc, Option)
   EXPECT_EQ(5, af(1).as<int>());
 }
 
-/*
-  TODO: Fix this.
 TEST(ArrFunc, Assignment_CallInterface)
 {
   // Test with the unary operation prototype
@@ -151,7 +149,6 @@ TEST(ArrFunc, Assignment_CallInterface)
   EXPECT_THROW(af(12345), invalid_argument);
   EXPECT_THROW(af(false), invalid_argument);
 }
-*/
 
 TEST(ArrFunc, Property)
 {
