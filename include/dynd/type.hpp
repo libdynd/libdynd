@@ -111,6 +111,9 @@ struct index_proxy<index_sequence<I...>> {
   static void get_types(type *tp, const std::tuple<T...> &vals,
                         const intptr_t *perm = NULL);
 
+//  template <typename... T>
+  //static void get_data(char **data, const std::tuple<T...> &vals);
+
 #if !(defined(_MSC_VER) && _MSC_VER == 1800)
   template <typename... A>
   static void get_forward_types(A &&... a);
