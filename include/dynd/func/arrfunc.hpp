@@ -451,6 +451,21 @@ struct is_kwds<nd::detail::kwds<K...>> {
   static const bool value = true;
 };
 
+template <typename... K>
+struct is_kwds<const nd::detail::kwds<K...>> {
+  static const bool value = true;
+};
+
+template <typename... K>
+struct is_kwds<const nd::detail::kwds<K...> &> {
+  static const bool value = true;
+};
+
+template <typename... K>
+struct is_kwds<nd::detail::kwds<K...> &> {
+  static const bool value = true;
+};
+
 template <typename T>
 struct builtin_or_array {
   typedef nd::array type;
