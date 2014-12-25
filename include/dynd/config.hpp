@@ -292,16 +292,12 @@ struct integer_sequence {
 //        using next = typename append<size>::type;
 
     template <T J>
-    struct prepend {
-        typedef integer_sequence<T, J, I...> type;
-    };
+    using prepend = integer_sequence<T, J, I...>;
 
     template <T J>
-    struct append {
-        typedef integer_sequence<T, I..., J> type;
-    };
+    using append = integer_sequence<T, I..., J>;
 
-    typedef typename append<size>::type next;
+    typedef append<size> next;
 };
 
 template <size_t... I>
@@ -475,7 +471,7 @@ struct make_integer_sequence;
 template <typename T, T Start, T Stop, T Step>
 struct make_integer_sequence<T, Start, Stop, Step, false> {
   typedef typename make_integer_sequence<
-      T, Start + Step, Stop, Step>::type::template prepend<Start>::type type;
+      T, Start + Step, Stop, Step>::type::template prepend<Start> type;
 };
 
 template <typename T, T Start, T Stop, T Step>
