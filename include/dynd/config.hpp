@@ -248,6 +248,9 @@ template <typename T, size_t I>
 struct at;
 
 template <typename T, size_t I>
+struct from;
+
+template <typename T, size_t I>
 struct to;
 
 template <typename T, typename U>
@@ -256,11 +259,6 @@ struct join;
 template <typename... T>
 struct type_sequence {
   enum { size = sizeof...(T) };
-
-  template <typename U>
-  struct append {
-    typedef type_sequence<T..., U> type;
-  };
 };
 
 template <typename T0, typename... T>
@@ -273,19 +271,40 @@ struct at<type_sequence<T0, T...>, I> {
   typedef typename at<type_sequence<T...>, I - 1>::type type;
 };
 
+template <typename T0, typename... T>
+struct from<type_sequence<T0, T...>, 0> {
+  typedef type_sequence<T0, T...> type;
+};
+
+template <typename T0, typename... T>
+struct from<type_sequence<T0, T...>, 1> {
+  typedef type_sequence<T...> type;
+};
+
+template <typename T0, typename... T, size_t I>
+struct from<type_sequence<T0, T...>, I> {
+  typedef typename from<type_sequence<T...>, I - 1>::type type;
+};
+
+template <typename T0, typename... T>
+struct to<type_sequence<T0, T...>, 0> {
+  typedef type_sequence<> type;
+};
+
+template <typename T0, typename... T>
+struct to<type_sequence<T0, T...>, 1> {
+  typedef type_sequence<T0> type;
+};
+
+template <typename T0, typename... T, size_t I>
+struct to<type_sequence<T0, T...>, I> {
+  typedef typename join<type_sequence<T0>, typename to<type_sequence<T...>,
+                                                       I - 1>::type>::type type;
+};
+
 template <typename... T, typename... U>
 struct join<type_sequence<T...>, type_sequence<U...>> {
   typedef type_sequence<T..., U...> type;
-};
-
-template <typename U, typename... T>
-struct prepend {
-  typedef type_sequence<U, T...> type;
-};
-
-template <typename U, typename... T>
-struct prepend<U, type_sequence<T...>> {
-  typedef typename prepend<U, T...>::type type;
 };
 
 template <size_t I, typename A0, typename... A>
@@ -304,27 +323,25 @@ get(A0 &&, A &&... a)
 
 template <typename T, T... I>
 struct integer_sequence {
-  static_assert(std::is_integral<T>::value, "Integral type");
+  static_assert(std::is_integral<T>::value,
+                "integer_sequence must be instantiated with an integral type");
 
-  static const T size = sizeof...(I);
-
+  enum { size = sizeof...(I) };
   typedef T type;
-
-  //    template<T N>
-  //  using append = integer_sequence<T, I..., N>;
-  //        using next = typename append<size>::type;
-
-  template <T J>
-  using prepend = integer_sequence<T, J, I...>;
-
-  template <T J>
-  using append = integer_sequence<T, I..., J>;
-
-  typedef append<size> next;
 };
 
 template <size_t... I>
 using index_sequence = integer_sequence<size_t, I...>;
+
+template <typename T, T J0, T... J>
+struct at<integer_sequence<T, J0, J...>, 0> {
+  enum { value = J0 };
+};
+
+template <size_t I, typename T, T J0, T... J>
+struct at<integer_sequence<T, J0, J...>, I> {
+  enum { value = at<integer_sequence<T, J...>, I - 1>::value };
+};
 
 template <typename T, T... I, T... J>
 struct join<integer_sequence<T, I...>, integer_sequence<T, J...>> {
@@ -382,50 +399,6 @@ struct zip<integer_sequence<T, I0, I...>, integer_sequence<T, J0, J...>,
                    integer_sequence<T, L...>>::type>::type type;
 };
 
-template <typename T, size_t I>
-struct from;
-
-template <typename T0, typename... T>
-struct from<type_sequence<T0, T...>, 0> {
-  typedef type_sequence<T0, T...> type;
-};
-
-template <typename T0, typename... T>
-struct from<type_sequence<T0, T...>, 1> {
-  typedef type_sequence<T...> type;
-};
-
-template <typename T0, typename... T, size_t I>
-struct from<type_sequence<T0, T...>, I> {
-  typedef typename from<type_sequence<T...>, I - 1>::type type;
-};
-
-template <typename T0, typename... T>
-struct to<type_sequence<T0, T...>, 0> {
-  typedef type_sequence<> type;
-};
-
-template <typename T0, typename... T>
-struct to<type_sequence<T0, T...>, 1> {
-  typedef type_sequence<T0> type;
-};
-
-template <typename T0, typename... T, size_t I>
-struct to<type_sequence<T0, T...>, I> {
-  typedef typename prepend<
-      T0, typename to<type_sequence<T...>, I - 1>::type>::type type;
-};
-
-template <typename T, T J0, T... J>
-struct at<integer_sequence<T, J0, J...>, 0> {
-  enum { value = J0 };
-};
-
-template <size_t I, typename T, T J0, T... J>
-struct at<integer_sequence<T, J0, J...>, I> {
-  enum { value = at<integer_sequence<T, J...>, I - 1>::value };
-};
-
 template <typename T, typename U>
 struct as_ {
   typedef U type;
@@ -454,8 +427,9 @@ namespace detail {
 
   template <typename T, T Start, T Stop, T Step>
   struct make_integer_sequence<T, Start, Stop, Step, false> {
-    typedef typename make_integer_sequence<
-        T, Start + Step, Stop, Step>::type::template prepend<Start> type;
+    typedef typename join<integer_sequence<T, Start>,
+                          typename make_integer_sequence<
+                              T, Start + Step, Stop, Step>::type>::type type;
   };
 
   template <typename T, T Start, T Stop, T Step>
