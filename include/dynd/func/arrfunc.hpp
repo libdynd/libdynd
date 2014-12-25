@@ -477,7 +477,7 @@ kwds(T &&... args)
   // Sequence of odd integers, for extracting the values
   typedef typename make_index_sequence<1, sizeof...(T), 2>::type J;
 
-  return index_proxy<typename concatenate<I, J>::type>::template make<
+  return index_proxy<typename join<I, J>::type>::template make<
       decltype(kwds(std::forward<T>(args)...))>(std::forward<T>(args)...);
 }
 
@@ -740,9 +740,8 @@ namespace nd {
       typedef typename make_index_sequence<0, sizeof...(T)-1>::type I;
       typedef typename instantiate<
           detail::args,
-          typename to<sizeof...(T)-1,
-                      type_sequence<typename as_array<T>::type...>>::type>::type
-          args_type;
+          typename to<type_sequence<typename as_array<T>::type...>,
+                      sizeof...(T) - 1>::type>::type args_type;
 
       args_type arr =
           dynd::index_proxy<I>::template make<args_type>(std::forward<T>(a)...);

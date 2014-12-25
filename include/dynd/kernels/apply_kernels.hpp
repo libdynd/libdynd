@@ -141,9 +141,9 @@ namespace kernels {
   template <typename func_type,
             int Nsrc =
                 args_of<typename funcproto_of<func_type>::type>::type::size>
-  using args_for =
-      args<typename to<Nsrc, typename args_of<typename funcproto_of<
-                                 func_type>::type>::type>::type>;
+  using args_for = args<typename to<
+      typename args_of<typename funcproto_of<func_type>::type>::type,
+      Nsrc>::type>;
 
   template <typename T, size_t I>
   struct kwd {
@@ -177,14 +177,8 @@ namespace kernels {
 
   template <typename func_type, int Nsrc>
   using kwds_for =
-      kwds<typename from<Nsrc, typename args_of<typename funcproto_of<
-                                   func_type>::type>::type>::type>;
-
-  template <typename func_type, int Nsrc>
-  struct kwds_for_ex {
-    typedef kwds<typename from<Nsrc, typename args_of<typename funcproto_of<
-                                         func_type>::type>::type>::type> type;
-  };
+      kwds<typename from<typename args_of<typename funcproto_of<
+                                   func_type>::type>::type, Nsrc>::type>;
 
   template <kernel_request_t kernreq, typename func_type, func_type func,
             int Nsrc>
