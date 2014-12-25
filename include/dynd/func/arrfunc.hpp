@@ -476,18 +476,9 @@ kwds(T &&... args)
   typedef typename make_index_sequence<0, sizeof...(T), 2>::type I;
   // Sequence of odd integers, for extracting the values
   typedef typename make_index_sequence<1, sizeof...(T), 2>::type J;
-  // Sequence of evens followed by odds
-  typedef typename concatenate<I, J>::type IJ;
-  // Type sequence of the values' types
-  typedef typename take<J, type_sequence<T...>>::type ValuesTypes;
-  // The kwds<...> type instantiated with the values' types
-  typedef typename instantiate<nd::detail::kwds, ValuesTypes>::type KwdsType;
 
-  return index_proxy<IJ>::template make<
-      typename std::result_of<decltype (&kwds<T...>)(T &&...)>::type>(
-      std::forward<T>(args)...);
-
-  //  return index_proxy<IJ>::template make<KwdsType>(std::forward<T>(args)...);
+  return index_proxy<typename concatenate<I, J>::type>::template make<
+      decltype(kwds(std::forward<T>(args)...))>(std::forward<T>(args)...);
 }
 
 template <typename T>
