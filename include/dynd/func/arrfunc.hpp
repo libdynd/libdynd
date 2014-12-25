@@ -586,7 +586,7 @@ namespace nd {
     {
       // TODO: This function makes some assumptions about types not being option
       //       already, etc. We need this functionality, but probably can find
-      //       a better way later.
+      //       a better way later.    
 
       intptr_t missing[sizeof...(T)] = {get_type()->get_kwd_index(names)...};
 
