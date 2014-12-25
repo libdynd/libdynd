@@ -483,7 +483,11 @@ kwds(T &&... args)
   // The kwds<...> type instantiated with the values' types
   typedef typename instantiate<nd::detail::kwds, ValuesTypes>::type KwdsType;
 
-  return index_proxy<IJ>::template make<KwdsType>(std::forward<T>(args)...);
+  return index_proxy<IJ>::template make<
+      typename std::result_of<decltype (&kwds<T...>)(T &&...)>::type>(
+      std::forward<T>(args)...);
+
+  //  return index_proxy<IJ>::template make<KwdsType>(std::forward<T>(args)...);
 }
 
 template <typename T>
@@ -586,7 +590,7 @@ namespace nd {
     {
       // TODO: This function makes some assumptions about types not being option
       //       already, etc. We need this functionality, but probably can find
-      //       a better way later.    
+      //       a better way later.
 
       intptr_t missing[sizeof...(T)] = {get_type()->get_kwd_index(names)...};
 
