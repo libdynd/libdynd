@@ -39,13 +39,18 @@ namespace ndt {
 } // namespace ndt;
 
 namespace nd {
-
   template <typename I>
   struct index_proxy;
 
   template <size_t... I>
   struct index_proxy<index_sequence<I...>> {
     enum { size = index_sequence<I...>::size };
+
+    template <typename... T>
+    static void get_arrmeta(const char **arrmeta, const std::tuple<T...> &values);
+
+    template <typename... T>
+    static void get_data(char **data, const std::tuple<T...> &values);
 
 #if !(defined(_MSC_VER) && _MSC_VER == 1800)
     template <typename... A>
@@ -2066,6 +2071,47 @@ namespace nd {
     }
   }
 
+  inline void get_arrmeta(const char **arrmeta, nd::array &a) {
+    *arrmeta = a.get_arrmeta();
+  }
+
+  inline void get_arrmeta(const char ** arrmeta, const nd::array &a) {
+    *arrmeta = a.get_arrmeta();
+  }
+
+  template <typename A0, typename... A>
+  void get_arrmeta(const char **arrmeta, A0 &&a0, A &&... a) {
+    get_arrmeta(arrmeta, a0);
+    get_arrmeta(arrmeta + 1, std::forward<A>(a)...);
+  }
+
+  template <size_t... I>
+  template <typename... T>
+  void index_proxy<index_sequence<I...>>::get_arrmeta(const char **arrmeta, const std::tuple<T...> &values)
+  {
+    nd::get_arrmeta(arrmeta, std::get<I>(values)...);
+  }
+
+  inline void get_data(char **data, nd::array &a) {
+    *data = const_cast<char *>(a.get_readonly_originptr());
+  }
+
+  inline void get_data(char **data, const nd::array &a) {
+    *data = const_cast<char *>(a.get_readonly_originptr());
+  }
+
+  template <typename A0, typename... A>
+  void get_data(char **data, A0 &&a0, A &&... a) {
+    get_data(data, a0);
+    get_data(data + 1, std::forward<A>(a)...);
+  }
+
+  template <size_t... I>
+  template <typename... T>
+  void index_proxy<index_sequence<I...>>::get_data(char **data, const std::tuple<T...> &values)
+  {
+    nd::get_data(data, std::get<I>(values)...);
+  }
 } // namespace dynd::nd
 
 /**
