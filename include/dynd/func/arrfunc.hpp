@@ -264,7 +264,7 @@ namespace nd {
                              const std::tuple<A...> &vals,
                              const intptr_t *available, const intptr_t *missing)
   {
-    typedef make_index_sequence<0, sizeof...(A)> I;
+    typedef make_index_sequence<sizeof...(A)> I;
 
     if (types.is_null() || (types.get_dim_size() == 0)) {
       return nd::array();
@@ -299,7 +299,7 @@ namespace nd {
     public:
       args(A &&... a) : m_values(std::forward<A>(a)...)
       {
-        typedef make_index_sequence<0, sizeof...(A)> I;
+        typedef make_index_sequence<sizeof...(A)> I;
 
         ndt::index_proxy<I>::template get_types(m_types, get_vals());
         nd::index_proxy<I>::template get_arrmeta(m_arrmeta, get_vals());
@@ -368,7 +368,7 @@ namespace nd {
       kwds(const typename as_<T, const char *>::type &... names, T &&... vals)
           : m_names{names...}, m_vals(std::forward<T>(vals)...)
       {
-        typedef make_index_sequence<0, sizeof...(T)> I;
+        typedef make_index_sequence<sizeof...(T)> I;
 
         ndt::index_proxy<I>::template get_types(m_types, get_vals());
       }
@@ -389,7 +389,7 @@ namespace nd {
       kwds(const typename as_<T, const char *>::type &... names, T &&... vals)
           : m_vals(std::forward<T>(vals)...)
       {
-        typedef make_index_sequence<0, sizeof...(T)> I;
+        typedef make_index_sequence<sizeof...(T)> I;
 
         assign_names<0>(names...);
         ndt::index_proxy<I>::template get_types(m_types, get_vals());
@@ -737,7 +737,7 @@ namespace nd {
         nd::array>::type
     operator()(T &&... a) const
     {
-      typedef make_index_sequence<0, sizeof...(T)-1> I;
+      typedef make_index_sequence<sizeof...(T)-1> I;
       typedef typename instantiate<
           detail::args,
           typename to<type_sequence<typename as_array<T>::type...>,

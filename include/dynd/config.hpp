@@ -421,29 +421,49 @@ struct instantiate<C, type_sequence<T...>> {
 };
 
 namespace detail {
-
-  template <typename T, T Start, T Stop, T Step, bool Empty = Start >= Stop>
+  template <int Flags, typename T, T...>
   struct make_integer_sequence;
 
-  template <typename T, T Start, T Stop, T Step>
-  struct make_integer_sequence<T, Start, Stop, Step, false> {
-    typedef typename join<integer_sequence<T, Start>,
-                          typename make_integer_sequence<
-                              T, Start + Step, Stop, Step>::type>::type type;
+  template <typename T, T Stop>
+  struct make_integer_sequence<-1, T, Stop> {
+    typedef typename make_integer_sequence <
+        0 < Stop, T, 0, Stop, 1>::type type;
+  };
+
+  template <typename T, T Start, T Stop>
+  struct make_integer_sequence<-1, T, Start, Stop> {
+    typedef typename make_integer_sequence <
+        Start < Stop, T, Start, Stop, 1>::type type;
   };
 
   template <typename T, T Start, T Stop, T Step>
-  struct make_integer_sequence<T, Start, Stop, Step, true> {
+  struct make_integer_sequence<-1, T, Start, Stop, Step> {
+    typedef typename make_integer_sequence <
+        Start<Stop, T, Start, Stop, Step>::type type;
+  };
+
+  template <typename T, T Start, T Stop, T Step>
+  struct make_integer_sequence<1, T, Start, Stop, Step> {
+    enum { Next = Start + Step };
+
+    typedef typename join < integer_sequence<T, Start>,
+        typename make_integer_sequence<
+            Next<Stop, T, Next, Stop, Step>::type>::type type;
+  };
+
+  template <typename T, T Start, T Stop, T Step>
+  struct make_integer_sequence<0, T, Start, Stop, Step> {
     typedef integer_sequence<T> type;
   };
 
 } // namespace detail
 
-template <typename T, T Start, T Stop, T Step = 1>
-using make_integer_sequence = typename detail::make_integer_sequence<T, Start, Stop, Step>::type;
+template <typename T, T... I>
+using make_integer_sequence =
+    typename detail::make_integer_sequence<-1, T, I...>::type;
 
-template <size_t Start, size_t Stop, size_t Step = 1>
-using make_index_sequence = make_integer_sequence<size_t, Start, Stop, Step>;
+template <size_t... I>
+using make_index_sequence = make_integer_sequence<size_t, I...>;
 
 template <typename I>
 struct index_proxy;

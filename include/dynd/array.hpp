@@ -2135,7 +2135,7 @@ namespace ndt {
   void get_forward_types(nd::array &tp, const std::tuple<T...> &vals,
                          const intptr_t *perm = NULL)
   {
-    index_proxy<make_index_sequence<0, sizeof...(T)>>::
+    index_proxy<make_index_sequence<sizeof...(T)>>::
         template get_forward_types(
             reinterpret_cast<type *>(tp.get_readwrite_originptr()), vals, perm);
   }
