@@ -421,15 +421,6 @@ namespace nd {
 
       const std::tuple<T...> &get_vals() const { return m_vals; }
     };
-
-    /*
-        template <typename... T>
-        using kwds_for = typename instantiate<
-            detail::kwds,
-            typename take<typename make_index_sequence<1, sizeof...(T),
-       2>::type,
-                          type_sequence<T...>>::type>::type;
-    */
   }
 } // namespace nd
 
@@ -468,8 +459,8 @@ inline nd::detail::kwds<> kwds() { return nd::detail::kwds<>(); }
 template <typename... T>
 typename instantiate<
     nd::detail::kwds,
-    typename take<make_index_sequence<1, sizeof...(T), 2>,
-                  type_sequence<T...>>::type>::type
+    typename take<type_sequence<T...>,
+                  make_index_sequence<1, sizeof...(T), 2>>::type>::type
 kwds(T &&... args)
 {
   // Sequence of even integers, for extracting the keyword names
@@ -741,7 +732,7 @@ namespace nd {
       typedef typename instantiate<
           detail::args,
           typename to<type_sequence<typename as_array<T>::type...>,
-                      sizeof...(T) - 1>::type>::type args_type;
+                      sizeof...(T)-1>::type>::type args_type;
 
       args_type arr =
           dynd::index_proxy<I>::template make<args_type>(std::forward<T>(a)...);
