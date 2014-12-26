@@ -440,10 +440,7 @@ namespace detail {
 } // namespace detail
 
 template <typename T, T Start, T Stop, T Step = 1>
-struct make_integer_sequence {
-  typedef typename detail::make_integer_sequence<T, Start, Stop, Step>::type
-      type;
-};
+using make_integer_sequence = typename detail::make_integer_sequence<T, Start, Stop, Step>::type;
 
 template <size_t Start, size_t Stop, size_t Step = 1>
 using make_index_sequence = make_integer_sequence<size_t, Start, Stop, Step>;

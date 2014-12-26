@@ -264,7 +264,7 @@ namespace nd {
                              const std::tuple<A...> &vals,
                              const intptr_t *available, const intptr_t *missing)
   {
-    typedef typename make_index_sequence<0, sizeof...(A)>::type I;
+    typedef make_index_sequence<0, sizeof...(A)> I;
 
     if (types.is_null() || (types.get_dim_size() == 0)) {
       return nd::array();
@@ -299,7 +299,7 @@ namespace nd {
     public:
       args(A &&... a) : m_values(std::forward<A>(a)...)
       {
-        typedef typename make_index_sequence<0, sizeof...(A)>::type I;
+        typedef make_index_sequence<0, sizeof...(A)> I;
 
         ndt::index_proxy<I>::template get_types(m_types, get_vals());
         nd::index_proxy<I>::template get_arrmeta(m_arrmeta, get_vals());
@@ -368,7 +368,7 @@ namespace nd {
       kwds(const typename as_<T, const char *>::type &... names, T &&... vals)
           : m_names{names...}, m_vals(std::forward<T>(vals)...)
       {
-        typedef typename make_index_sequence<0, sizeof...(T)>::type I;
+        typedef make_index_sequence<0, sizeof...(T)> I;
 
         ndt::index_proxy<I>::template get_types(m_types, get_vals());
       }
@@ -389,7 +389,7 @@ namespace nd {
       kwds(const typename as_<T, const char *>::type &... names, T &&... vals)
           : m_vals(std::forward<T>(vals)...)
       {
-        typedef typename make_index_sequence<0, sizeof...(T)>::type I;
+        typedef make_index_sequence<0, sizeof...(T)> I;
 
         assign_names<0>(names...);
         ndt::index_proxy<I>::template get_types(m_types, get_vals());
@@ -468,14 +468,14 @@ inline nd::detail::kwds<> kwds() { return nd::detail::kwds<>(); }
 template <typename... T>
 typename instantiate<
     nd::detail::kwds,
-    typename take<typename make_index_sequence<1, sizeof...(T), 2>::type,
+    typename take<make_index_sequence<1, sizeof...(T), 2>,
                   type_sequence<T...>>::type>::type
 kwds(T &&... args)
 {
   // Sequence of even integers, for extracting the keyword names
-  typedef typename make_index_sequence<0, sizeof...(T), 2>::type I;
+  typedef make_index_sequence<0, sizeof...(T), 2> I;
   // Sequence of odd integers, for extracting the values
-  typedef typename make_index_sequence<1, sizeof...(T), 2>::type J;
+  typedef make_index_sequence<1, sizeof...(T), 2> J;
 
   return index_proxy<typename join<I, J>::type>::template make<
       decltype(kwds(std::forward<T>(args)...))>(std::forward<T>(args)...);
@@ -737,7 +737,7 @@ namespace nd {
         nd::array>::type
     operator()(T &&... a) const
     {
-      typedef typename make_index_sequence<0, sizeof...(T)-1>::type I;
+      typedef make_index_sequence<0, sizeof...(T)-1> I;
       typedef typename instantiate<
           detail::args,
           typename to<type_sequence<typename as_array<T>::type...>,

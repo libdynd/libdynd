@@ -1009,7 +1009,7 @@ void index_proxy<index_sequence<I...>>::get_types(type *tp,
                                                   const std::tuple<T...> &vals,
                                                   const intptr_t *perm)
 {
-  typedef typename make_index_sequence<size, 2 * size>::type J;
+  typedef make_index_sequence<size, 2 * size> J;
 
   if (perm == NULL) {
     index_proxy<typename zip<index_sequence<I...>, J>::type>::
@@ -1127,7 +1127,7 @@ template <typename... T>
 void index_proxy<index_sequence<I...>>::get_forward_types(
     type *tp, const std::tuple<T...> &vals, const intptr_t *perm)
 {
-  typedef typename make_index_sequence<size, 2 * size>::type J;
+  typedef make_index_sequence<size, 2 * size> J;
 
   if (perm == NULL) {
     index_proxy<typename zip<index_sequence<I...>, J>::type>::
