@@ -1009,13 +1009,13 @@ void index_proxy<index_sequence<I...>>::get_types(type *tp,
                                                   const std::tuple<T...> &vals,
                                                   const intptr_t *perm)
 {
-  typedef typename make_index_sequence<size, 2 * size>::type J;
+  typedef make_index_sequence<size, 2 * size> J;
 
   if (perm == NULL) {
-    index_proxy<typename zip<index_sequence<I...>, J>::type>::
+    index_proxy<typename alternate<index_sequence<I...>, J>::type>::
         template get_types(tp[I]..., std::get<I>(vals)...);
   } else {
-    index_proxy<typename zip<index_sequence<I...>, J>::type>::
+    index_proxy<typename alternate<index_sequence<I...>, J>::type>::
         template get_types(tp[perm[I]]..., std::get<I>(vals)...);
   }
 }
@@ -1114,7 +1114,7 @@ template <size_t... I>
 template <typename A0, typename A1, typename A2, typename A3, typename A4,
           typename A5>
 void index_proxy<index_sequence<I...>>::get_forward_types(A0 &&a0, A1 &&a1, A2 &&a2,
-                                                  A3 &&a3, A4 &&a4, A5 &&a5)
+                                                 A3 &&a3, A4 &&a4, A5 &&a5)
 {
   ndt::get_forward_types(get<I>(std::forward<A0>(a0), std::forward<A1>(a1),
                         std::forward<A2>(a2), std::forward<A3>(a3),
@@ -1127,13 +1127,13 @@ template <typename... T>
 void index_proxy<index_sequence<I...>>::get_forward_types(
     type *tp, const std::tuple<T...> &vals, const intptr_t *perm)
 {
-  typedef typename make_index_sequence<size, 2 * size>::type J;
+  typedef make_index_sequence<size, 2 * size> J;
 
   if (perm == NULL) {
-    index_proxy<typename zip<index_sequence<I...>, J>::type>::
+    index_proxy<typename alternate<index_sequence<I...>, J>::type>::
         template get_forward_types(tp[I]..., std::get<I>(vals)...);
   } else {
-    index_proxy<typename zip<index_sequence<I...>, J>::type>::
+    index_proxy<typename alternate<index_sequence<I...>, J>::type>::
         template get_forward_types(tp[perm[I]]..., std::get<I>(vals)...);
   }
 }

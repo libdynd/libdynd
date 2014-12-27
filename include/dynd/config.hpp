@@ -222,6 +222,8 @@ struct decay {
 } // namespace std
 #endif
 
+#include <dynd/type_sequence.hpp>
+
 // These are small templates 'missing' from the standard library
 namespace dynd {
 
@@ -244,172 +246,9 @@ struct remove_all_pointers<T *> {
       type;
 };
 
-template <typename T, size_t I>
-struct at;
-
-template <typename T, size_t I>
-struct from;
-
-template <typename T, size_t I>
-struct to;
-
-template <typename T, typename U>
-struct join;
-
-template <typename... T>
-struct type_sequence {
-  enum { size = sizeof...(T) };
-};
-
-template <typename T0, typename... T>
-struct at<type_sequence<T0, T...>, 0> {
-  typedef T0 type;
-};
-
-template <size_t I, typename T0, typename... T>
-struct at<type_sequence<T0, T...>, I> {
-  typedef typename at<type_sequence<T...>, I - 1>::type type;
-};
-
-template <typename T0, typename... T>
-struct from<type_sequence<T0, T...>, 0> {
-  typedef type_sequence<T0, T...> type;
-};
-
-template <typename T0, typename... T>
-struct from<type_sequence<T0, T...>, 1> {
-  typedef type_sequence<T...> type;
-};
-
-template <typename T0, typename... T, size_t I>
-struct from<type_sequence<T0, T...>, I> {
-  typedef typename from<type_sequence<T...>, I - 1>::type type;
-};
-
-template <typename T0, typename... T>
-struct to<type_sequence<T0, T...>, 0> {
-  typedef type_sequence<> type;
-};
-
-template <typename T0, typename... T>
-struct to<type_sequence<T0, T...>, 1> {
-  typedef type_sequence<T0> type;
-};
-
-template <typename T0, typename... T, size_t I>
-struct to<type_sequence<T0, T...>, I> {
-  typedef typename join<type_sequence<T0>, typename to<type_sequence<T...>,
-                                                       I - 1>::type>::type type;
-};
-
-template <typename... T, typename... U>
-struct join<type_sequence<T...>, type_sequence<U...>> {
-  typedef type_sequence<T..., U...> type;
-};
-
-template <size_t I, typename A0, typename... A>
-typename std::enable_if<I == 0, A0>::type get(A0 &&a0, A &&...)
-{
-  return a0;
-}
-
-template <size_t I, typename A0, typename... A>
-typename std::enable_if<I != 0,
-                        typename at<type_sequence<A0, A...>, I>::type>::type
-get(A0 &&, A &&... a)
-{
-  return get<I - 1>(std::forward<A>(a)...);
-}
-
-template <typename T, T... I>
-struct integer_sequence {
-  static_assert(std::is_integral<T>::value,
-                "integer_sequence must be instantiated with an integral type");
-
-  enum { size = sizeof...(I) };
-  typedef T type;
-};
-
-template <size_t... I>
-using index_sequence = integer_sequence<size_t, I...>;
-
-template <typename T, T J0, T... J>
-struct at<integer_sequence<T, J0, J...>, 0> {
-  enum { value = J0 };
-};
-
-template <size_t I, typename T, T J0, T... J>
-struct at<integer_sequence<T, J0, J...>, I> {
-  enum { value = at<integer_sequence<T, J...>, I - 1>::value };
-};
-
-template <typename T, T... I, T... J>
-struct join<integer_sequence<T, I...>, integer_sequence<T, J...>> {
-  typedef integer_sequence<T, I..., J...> type;
-};
-
-template <typename... T>
-struct zip;
-
-template <typename T>
-struct zip<integer_sequence<T>, integer_sequence<T>> {
-  typedef integer_sequence<T> type;
-};
-
-#if defined(_MSC_VER) && _MSC_VER == 1800
-// This case shouldn't be necessary, but was added to work around bug:
-// https://connect.microsoft.com/VisualStudio/feedback/details/1045397/recursive-variadic-template-metaprogram-ice-when-pack-gets-to-empty-size
-template <typename T, T I0, T J0>
-struct zip<integer_sequence<T, I0>, integer_sequence<T, J0>> {
-  typedef integer_sequence<T, I0, J0> type;
-};
-#endif
-
-template <typename T, T I0, T... I, T J0, T... J>
-struct zip<integer_sequence<T, I0, I...>, integer_sequence<T, J0, J...>> {
-  typedef typename join<integer_sequence<T, I0, J0>,
-                        typename zip<integer_sequence<T, I...>,
-                                     integer_sequence<T, J...>>::type>::type
-      type;
-};
-
-template <typename T>
-struct zip<integer_sequence<T>, integer_sequence<T>, integer_sequence<T>,
-           integer_sequence<T>> {
-  typedef integer_sequence<T> type;
-};
-
-#if defined(_MSC_VER) && _MSC_VER == 1800
-// This case shouldn't be necessary, but was added to work around bug:
-// https://connect.microsoft.com/VisualStudio/feedback/details/1045397/recursive-variadic-template-metaprogram-ice-when-pack-gets-to-empty-size
-template <typename T, T I0, T J0, T K0, T L0>
-struct zip<integer_sequence<T, I0>, integer_sequence<T, J0>,
-           integer_sequence<T, K0>, integer_sequence<T, L0>> {
-  typedef integer_sequence<T, I0, J0, K0, L0> type;
-};
-#endif
-
-template <typename T, T I0, T... I, T J0, T... J, T K0, T... K, T L0, T... L>
-struct zip<integer_sequence<T, I0, I...>, integer_sequence<T, J0, J...>,
-           integer_sequence<T, K0, K...>, integer_sequence<T, L0, L...>> {
-  typedef typename join<
-      integer_sequence<T, I0, J0, K0, L0>,
-      typename zip<integer_sequence<T, I...>, integer_sequence<T, J...>,
-                   integer_sequence<T, K...>,
-                   integer_sequence<T, L...>>::type>::type type;
-};
-
 template <typename T, typename U>
 struct as_ {
   typedef U type;
-};
-
-template <typename I, typename T>
-struct take;
-
-template <size_t... I, typename T>
-struct take<index_sequence<I...>, T> {
-  typedef type_sequence<typename at<T, I>::type...> type;
 };
 
 template <template <typename...> class C, typename T>
@@ -419,34 +258,6 @@ template <template <typename...> class C, typename... T>
 struct instantiate<C, type_sequence<T...>> {
   typedef C<T...> type;
 };
-
-namespace detail {
-
-  template <typename T, T Start, T Stop, T Step, bool Empty = Start >= Stop>
-  struct make_integer_sequence;
-
-  template <typename T, T Start, T Stop, T Step>
-  struct make_integer_sequence<T, Start, Stop, Step, false> {
-    typedef typename join<integer_sequence<T, Start>,
-                          typename make_integer_sequence<
-                              T, Start + Step, Stop, Step>::type>::type type;
-  };
-
-  template <typename T, T Start, T Stop, T Step>
-  struct make_integer_sequence<T, Start, Stop, Step, true> {
-    typedef integer_sequence<T> type;
-  };
-
-} // namespace detail
-
-template <typename T, T Start, T Stop, T Step = 1>
-struct make_integer_sequence {
-  typedef typename detail::make_integer_sequence<T, Start, Stop, Step>::type
-      type;
-};
-
-template <size_t Start, size_t Stop, size_t Step = 1>
-using make_index_sequence = make_integer_sequence<size_t, Start, Stop, Step>;
 
 template <typename I>
 struct index_proxy;

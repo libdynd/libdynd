@@ -2031,17 +2031,17 @@ namespace nd {
       const uintptr_t *data_offsets, const std::tuple<T...> &vals,
       const intptr_t *perm, const intptr_t *missing)
   {
-    typedef typename make_index_sequence<size, 2 * size>::type J;
-    typedef typename make_index_sequence<2 * size, 3 * size>::type K;
-    typedef typename make_index_sequence<3 * size, 4 * size>::type L;
+    typedef make_index_sequence<size, 2 * size> J;
+    typedef make_index_sequence<2 * size, 3 * size> K;
+    typedef make_index_sequence<3 * size, 4 * size> L;
 
     if (perm == NULL) {
-      index_proxy<typename zip<index_sequence<I...>, J, K, L>::type>::
+      index_proxy<typename alternate<index_sequence<I...>, J, K, L>::type>::
           template forward_as_array(tp[I]..., arrmeta + arrmeta_offsets[I]...,
                                     data + data_offsets[I]...,
                                     std::get<I>(vals)...);
     } else {
-      index_proxy<typename zip<index_sequence<I...>, J, K, L>::type>::
+      index_proxy<typename alternate<index_sequence<I...>, J, K, L>::type>::
           template forward_as_array(
               tp[perm[I]]..., arrmeta + arrmeta_offsets[perm[I]]...,
               data + data_offsets[perm[I]]..., std::get<I>(vals)...);
@@ -2135,7 +2135,7 @@ namespace ndt {
   void get_forward_types(nd::array &tp, const std::tuple<T...> &vals,
                          const intptr_t *perm = NULL)
   {
-    index_proxy<typename make_index_sequence<0, sizeof...(T)>::type>::
+    index_proxy<make_index_sequence<sizeof...(T)>>::
         template get_forward_types(
             reinterpret_cast<type *>(tp.get_readwrite_originptr()), vals, perm);
   }

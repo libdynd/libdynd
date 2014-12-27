@@ -475,6 +475,7 @@ set(libdynd_SRC
     include/dynd/ensure_immutable_contig.hpp
     include/dynd/random.hpp
     include/dynd/type.hpp
+    include/dynd/type_sequence.hpp
     include/dynd/typed_data_assign.hpp
     include/dynd/type_promotion.hpp
     include/dynd/exceptions.hpp

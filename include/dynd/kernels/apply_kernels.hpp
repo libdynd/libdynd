@@ -124,8 +124,7 @@ namespace kernels {
     }
   };
 
-  template <typename A,
-            typename I = typename make_index_sequence<0, A::size>::type>
+  template <typename A, typename I = make_index_sequence<A::size>>
   struct args;
 
   template <typename... A, size_t... I>
@@ -162,7 +161,7 @@ namespace kernels {
   };
 
   template <typename K,
-            typename J = typename make_index_sequence<0, K::size>::type>
+            typename J = make_index_sequence<K::size>>
   struct kwds;
 
   template <>
@@ -176,9 +175,9 @@ namespace kernels {
   };
 
   template <typename func_type, int Nsrc>
-  using kwds_for =
-      kwds<typename from<typename args_of<typename funcproto_of<
-                                   func_type>::type>::type, Nsrc>::type>;
+  using kwds_for = kwds<typename from<
+      typename args_of<typename funcproto_of<func_type>::type>::type,
+      Nsrc>::type>;
 
   template <kernel_request_t kernreq, typename func_type, func_type func,
             int Nsrc>
