@@ -22,6 +22,9 @@ struct join;
 template <typename I, typename J>
 struct take;
 
+template <typename... I>
+struct zip;
+
 template <typename T, T... I>
 struct integer_sequence {
   static_assert(std::is_integral<T>::value,
@@ -146,6 +149,58 @@ struct join<type_sequence<T...>, type_sequence<U...>> {
 template <typename... T, size_t... I>
 struct take<type_sequence<T...>, index_sequence<I...>> {
   typedef type_sequence<typename at<type_sequence<T...>, I>::type...> type;
+};
+
+template <typename T>
+struct zip<integer_sequence<T>, integer_sequence<T>> {
+  typedef integer_sequence<T> type;
+};
+
+/*
+#if defined(_MSC_VER) && _MSC_VER == 1800
+// This case shouldn't be necessary, but was added to work around bug:
+// https://connect.microsoft.com/VisualStudio/feedback/details/1045397/recursive-variadic-template-metaprogram-ice-when-pack-gets-to-empty-size
+template <typename T, T I0, T J0>
+struct zip<integer_sequence<T, I0>, integer_sequence<T, J0>> {
+  typedef integer_sequence<T, I0, J0> type;
+};
+#endif
+*/
+
+template <typename T, T I0, T... I, T J0, T... J>
+struct zip<integer_sequence<T, I0, I...>, integer_sequence<T, J0, J...>> {
+  typedef typename join<integer_sequence<T, I0, J0>,
+                        typename zip<integer_sequence<T, I...>,
+                                     integer_sequence<T, J...>>::type>::type
+      type;
+};
+
+template <typename T>
+struct zip<integer_sequence<T>, integer_sequence<T>, integer_sequence<T>,
+           integer_sequence<T>> {
+  typedef integer_sequence<T> type;
+};
+
+/*
+#if defined(_MSC_VER) && _MSC_VER == 1800
+// This case shouldn't be necessary, but was added to work around bug:
+// https://connect.microsoft.com/VisualStudio/feedback/details/1045397/recursive-variadic-template-metaprogram-ice-when-pack-gets-to-empty-size
+template <typename T, T I0, T J0, T K0, T L0>
+struct zip<integer_sequence<T, I0>, integer_sequence<T, J0>,
+           integer_sequence<T, K0>, integer_sequence<T, L0>> {
+  typedef integer_sequence<T, I0, J0, K0, L0> type;
+};
+#endif
+*/
+
+template <typename T, T I0, T... I, T J0, T... J, T K0, T... K, T L0, T... L>
+struct zip<integer_sequence<T, I0, I...>, integer_sequence<T, J0, J...>,
+           integer_sequence<T, K0, K...>, integer_sequence<T, L0, L...>> {
+  typedef typename join<
+      integer_sequence<T, I0, J0, K0, L0>,
+      typename zip<integer_sequence<T, I...>, integer_sequence<T, J...>,
+                   integer_sequence<T, K...>,
+                   integer_sequence<T, L...>>::type>::type type;
 };
 
 } // namespace dynd
