@@ -5,6 +5,8 @@
 
 #pragma once
 
+#include <type_traits>
+
 namespace dynd {
 
 template <typename T>
@@ -206,5 +208,19 @@ struct alternate<integer_sequence<T, I0, I...>, integer_sequence<T, J0, J...>,
                          integer_sequence<T, K...>,
                          integer_sequence<T, L...>>::type>::type type;
 };
+
+template <size_t I, typename A0, typename... A>
+typename std::enable_if<I == 0, A0>::type get(A0 &&a0, A &&...)
+{
+  return a0;
+}
+
+template <size_t I, typename A0, typename... A>
+typename std::enable_if<I != 0,
+                        typename at<type_sequence<A0, A...>, I>::type>::type
+get(A0 &&, A &&... a)
+{
+  return get<I - 1>(std::forward<A>(a)...);
+}
 
 } // namespace dynd
