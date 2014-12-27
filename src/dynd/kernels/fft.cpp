@@ -8,6 +8,8 @@
 using namespace std;
 using namespace dynd;
 
+#ifdef DYND_FFTW
+
 ::fftwf_plan detail::fftw_plan_guru_dft(int rank, const fftw_iodim *dims,
                                         int howmany_rank,
                                         const fftw_iodim *howmany_dims,
@@ -27,3 +29,5 @@ using namespace dynd;
   return ::fftw_plan_guru_dft(rank, dims, howmany_rank, howmany_dims, in, out,
                               sign, flags);
 }
+
+#endif
