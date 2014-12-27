@@ -499,17 +499,17 @@ struct as_array<nd::array &> {
 
 // TODO: Move this somewhere more appropriate
 namespace detail {
-  template <typename... S>
+  template <typename S>
   struct varpack_last;
 
   template <typename T>
-  struct varpack_last<T> {
+  struct varpack_last<type_sequence<T>> {
     typedef T type;
   };
 
   template <typename... S, typename T>
-  struct varpack_last<T, S...> {
-    typedef typename varpack_last<S...>::type type;
+  struct varpack_last<type_sequence<T, S...>> {
+    typedef typename varpack_last<type_sequence<S...>>::type type;
   };
 } // namespace detail
 
@@ -724,7 +724,7 @@ namespace nd {
 
     template <typename... T>
     typename std::enable_if<
-        is_kwds<typename dynd::detail::varpack_last<T...>::type>::value,
+        is_kwds<typename dynd::detail::varpack_last<type_sequence<T...>>::type>::value,
         nd::array>::type
     operator()(T &&... a) const
     {
@@ -742,7 +742,7 @@ namespace nd {
 
     template <typename... T>
     typename std::enable_if<
-        !is_kwds<typename dynd::detail::varpack_last<T...>::type>::value,
+        !is_kwds<typename dynd::detail::varpack_last<type_sequence<T...>>::type>::value,
         nd::array>::type
     operator()(T &&... a) const
     {
