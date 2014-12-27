@@ -421,14 +421,10 @@ TYPED_TEST_P(FFT2D, Linear)
     }
   }
 
-//  vector<intptr_t> axes;
-  //axes.push_back(0);
+  vector<intptr_t> axes;
+  axes.push_back(0);
 
-//      y0 = nd::fft(x0, kwds("shape", nd::array(x0.get_shape()), "axes", nd::array(axes)));
-//  y0 = nd::fft(x0, kwds("shape", x0.get_shape()));
-
-/*
-  std::exit(-1);
+  y0 = nd::fft(x0, kwds("shape", x0.get_shape(), "axes", axes));
   y1 = nd::fft(x1, kwds("shape", x1.get_shape(), "axes", axes));
   y = nd::fft(x, kwds("shape", x.get_shape(), "axes", axes));
 
@@ -440,9 +436,7 @@ TYPED_TEST_P(FFT2D, Linear)
                        rel_err_max<typename TestFixture::RealType>());
     }
   }
-*/
 
-/*
   axes.clear();
   axes.push_back(1);
 
@@ -458,10 +452,8 @@ TYPED_TEST_P(FFT2D, Linear)
                        rel_err_max<typename TestFixture::RealType>());
     }
   }
-*/
 }
 
-/*
 TYPED_TEST_P(FFT2D, Inverse)
 {
   nd::array x = nd::rand(TestFixture::SrcShape[0], TestFixture::SrcShape[1],
@@ -598,6 +590,7 @@ TYPED_TEST_P(FFT2D, KroneckerDelta)
   }
 }
 
+/*
 TEST(FFT2D, Shift)
 {
   double vals0[3][3] = {{0.0, 1.0, 2.0}, {3.0, 4.0, -4.0}, {-3.0, -2.0, -1.0}};
@@ -801,7 +794,7 @@ INSTANTIATE_TYPED_TEST_CASE_P(ComplexDouble, FFT1D,
 // INSTANTIATE_TYPED_TEST_CASE_P(ComplexDouble, RFFT1D,
 // FixedDim1D<double>::Types);
 
-REGISTER_TYPED_TEST_CASE_P(FFT2D, Linear); // , Inverse, Zeros, Ones, KroneckerDelta);
+REGISTER_TYPED_TEST_CASE_P(FFT2D, Linear, Inverse, Zeros, Ones, KroneckerDelta);
 // INSTANTIATE_TYPED_TEST_CASE_P(ComplexFloat, FFT2D,
 // FixedDim2D<dynd_complex<float> >::Types);
 INSTANTIATE_TYPED_TEST_CASE_P(ComplexDouble, FFT2D,

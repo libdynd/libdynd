@@ -903,34 +903,43 @@ inline type make_type(intptr_t ndim, const intptr_t *shape,
 }
 
 /**
-* Constructs an array type from a shape and
-* a data type. Each dimension >= 0 is made
-* using a fixed_dim type, and each dimension == -1
-* is made using a var_dim type.
-*
-* \param ndim   The number of dimensions in the shape
-* \param shape  The shape of the array type to create.
-* \param dtype  The data type of each array element.
-* \param out_any_var  This output variable is set to true if any var
-*                     dimension is in the shape. If no var dimension
-*                     is encountered, it is untouched, so the caller
-*                     should initialize it to false.
-*/
+ * Constructs an array type from a shape and
+ * a data type. Each dimension >= 0 is made
+ * using a fixed_dim type, and each dimension == -1
+ * is made using a var_dim type.
+ *
+ * \param ndim   The number of dimensions in the shape
+ * \param shape  The shape of the array type to create.
+ * \param dtype  The data type of each array element.
+ * \param out_any_var  This output variable is set to true if any var
+ *                     dimension is in the shape. If no var dimension
+ *                     is encountered, it is untouched, so the caller
+ *                     should initialize it to false.
+ */
 type make_type(intptr_t ndim, const intptr_t *shape, const ndt::type &dtype,
                bool &out_any_var);
 
+/**
+ * Returns the type of an array constructed from a value.
+ */
 template <typename T>
-type get_type(const T &DYND_UNUSED(val))
+type as_type(const T &DYND_UNUSED(value))
 {
   return make_type<T>();
 }
 
-type get_type(const nd::array &val);
+template <typename T>
+type as_type(const std::vector<T> &value)
+{
+  return make_fixed_dim(value.size(), make_type<T>());
+}
+
+type as_type(const nd::array &val);
 
 template <typename T>
 void get_types(type &tp, const T &val)
 {
-  tp = ndt::get_type(val);
+  tp = ndt::as_type(val);
 }
 
 template <typename T, typename... A>

@@ -33,11 +33,11 @@ namespace decl {
     };
     */
 
-    typedef arrfunc<fftw_ck<fftw_complex, fftw_complex, FFTW_FORWARD>> fftw;
-    typedef arrfunc<fftw_ck<fftw_complex, double>> rfftw;
+    typedef arrfunc<kernels::fftw_ck<fftw_complex, fftw_complex, FFTW_FORWARD>> fftw;
+    typedef arrfunc<kernels::fftw_ck<fftw_complex, double>> rfftw;
 
-    typedef arrfunc<fftw_ck<fftw_complex, fftw_complex, FFTW_BACKWARD>> ifftw;
-    typedef arrfunc<fftw_ck<double, fftw_complex>> irfftw;
+    typedef arrfunc<kernels::fftw_ck<fftw_complex, fftw_complex, FFTW_BACKWARD>> ifftw;
+    typedef arrfunc<kernels::fftw_ck<double, fftw_complex>> irfftw;
   }
 } // namespace dynd::decl::nd
 
@@ -58,13 +58,6 @@ namespace decl {
     public:
       static dynd::nd::arrfunc make()
       {
-		std::cout << "arrfunc::make" << std::endl;
-        std::cout
-            << (dynd::detail::get_resolve_option_values<
-                    fftw_ck<fftw_complex, fftw_complex, FFTW_FORWARD>>() ==
-                NULL) << std::endl;
-		std::cout << "arrfunc::make" << std::endl;
-
         return dynd::nd::fftw;
       }
     };
