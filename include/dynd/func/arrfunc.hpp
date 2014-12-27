@@ -417,37 +417,35 @@ namespace nd {
 
       ndt::type get_type(intptr_t i) const { return m_types[i]; }
 
-      //      ndt::type (&get_types() const)[sizeof...(T)] { return m_types; }
-
       const std::tuple<T...> &get_vals() const { return m_vals; }
+    };
+
+    template <typename T>
+    struct is_kwds {
+      static const bool value = false;
+    };
+
+    template <typename... K>
+    struct is_kwds<nd::detail::kwds<K...>> {
+      static const bool value = true;
+    };
+
+    template <typename... K>
+    struct is_kwds<const nd::detail::kwds<K...>> {
+      static const bool value = true;
+    };
+
+    template <typename... K>
+    struct is_kwds<const nd::detail::kwds<K...> &> {
+      static const bool value = true;
+    };
+
+    template <typename... K>
+    struct is_kwds<nd::detail::kwds<K...> &> {
+      static const bool value = true;
     };
   }
 } // namespace nd
-
-template <typename T>
-struct is_kwds {
-  static const bool value = false;
-};
-
-template <typename... K>
-struct is_kwds<nd::detail::kwds<K...>> {
-  static const bool value = true;
-};
-
-template <typename... K>
-struct is_kwds<const nd::detail::kwds<K...>> {
-  static const bool value = true;
-};
-
-template <typename... K>
-struct is_kwds<const nd::detail::kwds<K...> &> {
-  static const bool value = true;
-};
-
-template <typename... K>
-struct is_kwds<nd::detail::kwds<K...> &> {
-  static const bool value = true;
-};
 
 template <typename T>
 struct builtin_or_array {
@@ -708,8 +706,8 @@ namespace nd {
 
     template <typename... T>
     typename std::enable_if<
-        is_kwds<typename back<type_sequence<T...>>::type>::value,
-        nd::array>::type
+        detail::is_kwds<typename back<type_sequence<T...>>::type>::value,
+        array>::type
     operator()(T &&... a) const
     {
       typedef make_index_sequence<sizeof...(T)-1> I;
@@ -726,8 +724,8 @@ namespace nd {
 
     template <typename... T>
     typename std::enable_if<
-        !is_kwds<typename back<type_sequence<T...>>::type>::value,
-        nd::array>::type
+        !detail::is_kwds<typename back<type_sequence<T...>>::type>::value,
+        array>::type
     operator()(T &&... a) const
     {
       detail::args<typename as_array<T>::type...> arr(std::forward<T>(a)...);

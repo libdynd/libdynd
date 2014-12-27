@@ -42,25 +42,17 @@ namespace detail {
     typedef ::fftwf_plan type;
   };
 
-  inline fftwf_plan fftw_plan_guru_dft(int rank, const fftw_iodim *dims,
-                                         int howmany_rank,
-                                         const fftw_iodim *howmany_dims,
-                                         fftwf_complex *in, fftwf_complex *out,
-                                         int sign, unsigned flags)
-  {
-    return ::fftwf_plan_guru_dft(rank, dims, howmany_rank, howmany_dims, in,
-                                 out, sign, flags);
-  }
+  fftwf_plan fftw_plan_guru_dft(int rank, const fftw_iodim *dims,
+                                int howmany_rank,
+                                const fftw_iodim *howmany_dims,
+                                fftwf_complex *in, fftwf_complex *out, int sign,
+                                unsigned flags);
 
-  inline ::fftw_plan fftw_plan_guru_dft(int rank, const fftw_iodim *dims,
-                                        int howmany_rank,
-                                        const fftw_iodim *howmany_dims,
-                                        fftw_complex *in, fftw_complex *out,
-                                        int sign, unsigned flags)
-  {
-    return ::fftw_plan_guru_dft(rank, dims, howmany_rank, howmany_dims, in, out,
-                                sign, flags);
-  }
+  ::fftw_plan fftw_plan_guru_dft(int rank, const fftw_iodim *dims,
+                                 int howmany_rank,
+                                 const fftw_iodim *howmany_dims,
+                                 fftw_complex *in, fftw_complex *out, int sign,
+                                 unsigned flags);
 
   inline ::fftw_plan fftw_plan_guru_dft(int rank, const fftw_iodim *dims,
                                         int howmany_rank,
@@ -217,7 +209,7 @@ namespace kernels {
       for (intptr_t i = 0; i < rank; ++i) {
         intptr_t j = axes(i).as<intptr_t>();
         dims[i].n = shape.is_missing() ? src_size_stride[j].dim_size
-                                    : shape(j).as<intptr_t>();
+                                       : shape(j).as<intptr_t>();
         dims[i].is = src_size_stride[j].stride / sizeof(fftw_src_type);
         dims[i].os = dst_size_stride[j].stride / sizeof(fftw_dst_type);
       }
@@ -228,7 +220,7 @@ namespace kernels {
         for (; k < rank && j == axes(k).as<intptr_t>(); ++j, ++k) {
         }
         howmany_dims[i].n = shape.is_missing() ? src_size_stride[j].dim_size
-                                            : shape(j).as<intptr_t>();
+                                               : shape(j).as<intptr_t>();
         howmany_dims[i].is = src_size_stride[j].stride / sizeof(fftw_src_type);
         howmany_dims[i].os = dst_size_stride[j].stride / sizeof(fftw_dst_type);
       }
