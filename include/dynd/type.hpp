@@ -1012,10 +1012,10 @@ void index_proxy<index_sequence<I...>>::get_types(type *tp,
   typedef make_index_sequence<size, 2 * size> J;
 
   if (perm == NULL) {
-    index_proxy<typename zip<index_sequence<I...>, J>::type>::
+    index_proxy<typename alternate<index_sequence<I...>, J>::type>::
         template get_types(tp[I]..., std::get<I>(vals)...);
   } else {
-    index_proxy<typename zip<index_sequence<I...>, J>::type>::
+    index_proxy<typename alternate<index_sequence<I...>, J>::type>::
         template get_types(tp[perm[I]]..., std::get<I>(vals)...);
   }
 }
@@ -1130,10 +1130,10 @@ void index_proxy<index_sequence<I...>>::get_forward_types(
   typedef make_index_sequence<size, 2 * size> J;
 
   if (perm == NULL) {
-    index_proxy<typename zip<index_sequence<I...>, J>::type>::
+    index_proxy<typename alternate<index_sequence<I...>, J>::type>::
         template get_forward_types(tp[I]..., std::get<I>(vals)...);
   } else {
-    index_proxy<typename zip<index_sequence<I...>, J>::type>::
+    index_proxy<typename alternate<index_sequence<I...>, J>::type>::
         template get_forward_types(tp[perm[I]]..., std::get<I>(vals)...);
   }
 }

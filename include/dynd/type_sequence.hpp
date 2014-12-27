@@ -23,7 +23,7 @@ template <typename I, typename J>
 struct take;
 
 template <typename... I>
-struct zip;
+struct alternate;
 
 template <typename T, T... I>
 struct integer_sequence {
@@ -54,37 +54,37 @@ struct join<integer_sequence<T, I...>, integer_sequence<T, J...>> {
 
 namespace detail {
 
-template <int flags, typename T, T...>
-struct make_integer_sequence;
+  template <int flags, typename T, T...>
+  struct make_integer_sequence;
 
-template <int flags, typename T, T stop>
-struct make_integer_sequence<flags, T, stop>
-    : make_integer_sequence<flags, T, 0, stop> {
-};
+  template <int flags, typename T, T stop>
+  struct make_integer_sequence<flags, T, stop>
+      : make_integer_sequence<flags, T, 0, stop> {
+  };
 
-template <int flags, typename T, T start, T stop>
-struct make_integer_sequence<flags, T, start, stop>
-    : make_integer_sequence<flags, T, start, stop, 1> {
-};
+  template <int flags, typename T, T start, T stop>
+  struct make_integer_sequence<flags, T, start, stop>
+      : make_integer_sequence<flags, T, start, stop, 1> {
+  };
 
-template <typename T, T start, T stop, T step>
-    struct make_integer_sequence<-1, T, start, stop, step>
-    : make_integer_sequence < start<stop, T, start, stop, step> {
-};
+  template <typename T, T start, T stop, T step>
+      struct make_integer_sequence<-1, T, start, stop, step>
+      : make_integer_sequence < start<stop, T, start, stop, step> {
+  };
 
-template <typename T, T start, T stop, T step>
-struct make_integer_sequence<0, T, start, stop, step> {
-  typedef integer_sequence<T> type;
-};
+  template <typename T, T start, T stop, T step>
+  struct make_integer_sequence<0, T, start, stop, step> {
+    typedef integer_sequence<T> type;
+  };
 
-template <typename T, T start, T stop, T step>
-struct make_integer_sequence<1, T, start, stop, step> {
-  enum { next = start + step };
+  template <typename T, T start, T stop, T step>
+  struct make_integer_sequence<1, T, start, stop, step> {
+    enum { next = start + step };
 
-  typedef typename join < integer_sequence<T, start>,
-      typename make_integer_sequence<
-          next<stop, T, next, stop, step>::type>::type type;
-};
+    typedef typename join < integer_sequence<T, start>,
+        typename make_integer_sequence<
+            next<stop, T, next, stop, step>::type>::type type;
+  };
 
 } // namespace detail
 
@@ -152,53 +152,44 @@ struct take<type_sequence<T...>, index_sequence<I...>> {
 };
 
 template <typename T>
-struct zip<integer_sequence<T>, integer_sequence<T>> {
+struct alternate<integer_sequence<T>, integer_sequence<T>> {
   typedef integer_sequence<T> type;
 };
 
-/*
-#if defined(_MSC_VER) && _MSC_VER == 1800
 // This case shouldn't be necessary, but was added to work around bug:
 // https://connect.microsoft.com/VisualStudio/feedback/details/1045397/recursive-variadic-template-metaprogram-ice-when-pack-gets-to-empty-size
 template <typename T, T I0, T J0>
-struct zip<integer_sequence<T, I0>, integer_sequence<T, J0>> {
+struct alternate<integer_sequence<T, I0>, integer_sequence<T, J0>> {
   typedef integer_sequence<T, I0, J0> type;
 };
-#endif
-*/
 
 template <typename T, T I0, T... I, T J0, T... J>
-struct zip<integer_sequence<T, I0, I...>, integer_sequence<T, J0, J...>> {
+struct alternate<integer_sequence<T, I0, I...>, integer_sequence<T, J0, J...>> {
   typedef typename join<integer_sequence<T, I0, J0>,
-                        typename zip<integer_sequence<T, I...>,
+                        typename alternate<integer_sequence<T, I...>,
                                      integer_sequence<T, J...>>::type>::type
       type;
 };
 
 template <typename T>
-struct zip<integer_sequence<T>, integer_sequence<T>, integer_sequence<T>,
+struct alternate<integer_sequence<T>, integer_sequence<T>, integer_sequence<T>,
            integer_sequence<T>> {
   typedef integer_sequence<T> type;
 };
 
-/*
-#if defined(_MSC_VER) && _MSC_VER == 1800
-// This case shouldn't be necessary, but was added to work around bug:
-// https://connect.microsoft.com/VisualStudio/feedback/details/1045397/recursive-variadic-template-metaprogram-ice-when-pack-gets-to-empty-size
+// Another workaround
 template <typename T, T I0, T J0, T K0, T L0>
-struct zip<integer_sequence<T, I0>, integer_sequence<T, J0>,
+struct alternate<integer_sequence<T, I0>, integer_sequence<T, J0>,
            integer_sequence<T, K0>, integer_sequence<T, L0>> {
   typedef integer_sequence<T, I0, J0, K0, L0> type;
 };
-#endif
-*/
 
 template <typename T, T I0, T... I, T J0, T... J, T K0, T... K, T L0, T... L>
-struct zip<integer_sequence<T, I0, I...>, integer_sequence<T, J0, J...>,
+struct alternate<integer_sequence<T, I0, I...>, integer_sequence<T, J0, J...>,
            integer_sequence<T, K0, K...>, integer_sequence<T, L0, L...>> {
   typedef typename join<
       integer_sequence<T, I0, J0, K0, L0>,
-      typename zip<integer_sequence<T, I...>, integer_sequence<T, J...>,
+      typename alternate<integer_sequence<T, I...>, integer_sequence<T, J...>,
                    integer_sequence<T, K...>,
                    integer_sequence<T, L...>>::type>::type type;
 };

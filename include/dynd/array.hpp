@@ -2036,12 +2036,12 @@ namespace nd {
     typedef make_index_sequence<3 * size, 4 * size> L;
 
     if (perm == NULL) {
-      index_proxy<typename zip<index_sequence<I...>, J, K, L>::type>::
+      index_proxy<typename alternate<index_sequence<I...>, J, K, L>::type>::
           template forward_as_array(tp[I]..., arrmeta + arrmeta_offsets[I]...,
                                     data + data_offsets[I]...,
                                     std::get<I>(vals)...);
     } else {
-      index_proxy<typename zip<index_sequence<I...>, J, K, L>::type>::
+      index_proxy<typename alternate<index_sequence<I...>, J, K, L>::type>::
           template forward_as_array(
               tp[perm[I]]..., arrmeta + arrmeta_offsets[perm[I]]...,
               data + data_offsets[perm[I]]..., std::get<I>(vals)...);
