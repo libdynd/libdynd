@@ -497,22 +497,6 @@ struct as_array<nd::array &> {
   typedef nd::array &type;
 };
 
-// TODO: Move this somewhere more appropriate
-namespace detail {
-  template <typename S>
-  struct varpack_last;
-
-  template <typename T>
-  struct varpack_last<type_sequence<T>> {
-    typedef T type;
-  };
-
-  template <typename... S, typename T>
-  struct varpack_last<type_sequence<T, S...>> {
-    typedef typename varpack_last<type_sequence<S...>>::type type;
-  };
-} // namespace detail
-
 namespace nd {
   /**
    * Holds a single instance of an arrfunc in an immutable nd::array,
@@ -724,7 +708,7 @@ namespace nd {
 
     template <typename... T>
     typename std::enable_if<
-        is_kwds<typename dynd::detail::varpack_last<type_sequence<T...>>::type>::value,
+        is_kwds<typename back<type_sequence<T...>>::type>::value,
         nd::array>::type
     operator()(T &&... a) const
     {
@@ -742,7 +726,7 @@ namespace nd {
 
     template <typename... T>
     typename std::enable_if<
-        !is_kwds<typename dynd::detail::varpack_last<type_sequence<T...>>::type>::value,
+        !is_kwds<typename back<type_sequence<T...>>::type>::value,
         nd::array>::type
     operator()(T &&... a) const
     {

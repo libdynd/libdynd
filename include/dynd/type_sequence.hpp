@@ -7,6 +7,9 @@
 
 namespace dynd {
 
+template <typename T>
+struct back;
+
 template <typename I, size_t J>
 struct at;
 
@@ -100,6 +103,16 @@ struct type_sequence {
   enum { size = sizeof...(T) };
 };
 
+template <typename T>
+struct back<type_sequence<T>> {
+  typedef T type;
+};
+
+template <typename T0, typename... T>
+struct back<type_sequence<T0, T...>> {
+  typedef typename back<type_sequence<T...>>::type type;
+};
+
 template <typename T0, typename... T>
 struct at<type_sequence<T0, T...>, 0> {
   typedef T0 type;
@@ -165,33 +178,33 @@ struct alternate<integer_sequence<T, I0>, integer_sequence<T, J0>> {
 
 template <typename T, T I0, T... I, T J0, T... J>
 struct alternate<integer_sequence<T, I0, I...>, integer_sequence<T, J0, J...>> {
-  typedef typename join<integer_sequence<T, I0, J0>,
-                        typename alternate<integer_sequence<T, I...>,
-                                     integer_sequence<T, J...>>::type>::type
-      type;
+  typedef typename join<
+      integer_sequence<T, I0, J0>,
+      typename alternate<integer_sequence<T, I...>,
+                         integer_sequence<T, J...>>::type>::type type;
 };
 
 template <typename T>
 struct alternate<integer_sequence<T>, integer_sequence<T>, integer_sequence<T>,
-           integer_sequence<T>> {
+                 integer_sequence<T>> {
   typedef integer_sequence<T> type;
 };
 
 // Another workaround
 template <typename T, T I0, T J0, T K0, T L0>
 struct alternate<integer_sequence<T, I0>, integer_sequence<T, J0>,
-           integer_sequence<T, K0>, integer_sequence<T, L0>> {
+                 integer_sequence<T, K0>, integer_sequence<T, L0>> {
   typedef integer_sequence<T, I0, J0, K0, L0> type;
 };
 
 template <typename T, T I0, T... I, T J0, T... J, T K0, T... K, T L0, T... L>
 struct alternate<integer_sequence<T, I0, I...>, integer_sequence<T, J0, J...>,
-           integer_sequence<T, K0, K...>, integer_sequence<T, L0, L...>> {
+                 integer_sequence<T, K0, K...>, integer_sequence<T, L0, L...>> {
   typedef typename join<
       integer_sequence<T, I0, J0, K0, L0>,
       typename alternate<integer_sequence<T, I...>, integer_sequence<T, J...>,
-                   integer_sequence<T, K...>,
-                   integer_sequence<T, L...>>::type>::type type;
+                         integer_sequence<T, K...>,
+                         integer_sequence<T, L...>>::type>::type type;
 };
 
 } // namespace dynd
