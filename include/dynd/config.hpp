@@ -37,12 +37,6 @@
 #define DYND_CXX_LAMBDAS
 #endif
 
-#if __has_include(<type_traits>)
-#define DYND_CXX_TYPE_TRAITS
-#elif __has_include(<tr1 / type_traits>)
-#define DYND_CXX_TR1_TYPE_TRAITS
-#endif
-
 #if __has_feature(cxx_variadic_templates)
 #define DYND_CXX_VARIADIC_TEMPLATES
 #endif
@@ -70,7 +64,6 @@ inline bool DYND_ISNAN(long double x) { return std::isnan(x); }
 #define DYND_RVALUE_REFS
 #define DYND_ISNAN(x) (std::isnan(x))
 #define DYND_STATIC_ASSERT(value, message) static_assert(value, message)
-#define DYND_CXX_TYPE_TRAITS
 #define DYND_CXX_VARIADIC_TEMPLATES
 
 #elif defined(_MSC_VER)
@@ -91,8 +84,6 @@ inline bool DYND_ISNAN(long double x) { return std::isnan(x); }
 #define DYND_USE_FPSTATUS
 #endif
 
-#define DYND_CXX_TYPE_TRAITS
-#define DYND_USE_TR1_ENABLE_IF
 #define DYND_RVALUE_REFS
 #define DYND_STATIC_ASSERT(value, message) static_assert(value, message)
 #define DYND_CXX_LAMBDAS
@@ -180,47 +171,7 @@ inline void DYND_MEMCPY(char *dst, const char *src, intptr_t count)
 #endif
 
 #include <tuple>
-#if defined(DYND_CXX_TYPE_TRAITS)
 #include <type_traits>
-#elif defined(DYND_CXX_TR1_TYPE_TRAITS)
-#include <tr1/type_traits>
-namespace std {
-
-using std::tr1::add_pointer;
-using std::tr1::is_array;
-using std::tr1::is_base_of;
-using std::tr1::is_const;
-using std::tr1::is_function;
-using std::tr1::is_pointer;
-using std::tr1::is_reference;
-using std::tr1::remove_const;
-using std::tr1::remove_cv;
-using std::tr1::remove_extent;
-using std::tr1::remove_reference;
-using std::tr1::remove_pointer;
-
-template <bool B, typename T, typename F>
-struct conditional {
-  typedef T type;
-};
-
-template <typename T, typename F>
-struct conditional<false, T, F> {
-  typedef F type;
-};
-
-template <typename T>
-struct decay {
-  typedef typename std::remove_reference<T>::type U;
-  typedef typename std::conditional<
-      std::is_array<U>::value, typename std::remove_extent<U>::type *,
-      typename std::conditional<
-          std::is_function<U>::value, typename std::add_pointer<U>::type,
-          typename std::remove_cv<U>::type>::type>::type type;
-};
-
-} // namespace std
-#endif
 
 #include <dynd/type_sequence.hpp>
 
@@ -337,25 +288,6 @@ struct index_proxy<index_sequence<I...>> {
 };
 
 } // namespace dynd
-
-#ifdef DYND_USE_TR1_ENABLE_IF
-#include <type_traits>
-namespace dynd {
-using std::tr1::enable_if;
-}
-#else
-// These are small templates, so we just replicate them here
-namespace dynd {
-template <bool B, class T = void>
-struct enable_if {
-};
-
-template <class T>
-struct enable_if<true, T> {
-  typedef T type;
-};
-}
-#endif
 
 /////////////////////////////////////////
 // Diagnostic configurations

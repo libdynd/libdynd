@@ -353,7 +353,7 @@ public:
      * Provide non-const access to the 'write' operands.
      */
     template<int K>
-    inline typename enable_if<detail::is_value_within_bounds<K, 0, 1>::value, char *>::type data() {
+    inline typename std::enable_if<detail::is_value_within_bounds<K, 0, 1>::value, char *>::type data() {
         return m_data[K];
     }
 
@@ -361,17 +361,17 @@ public:
      * Provide const access to all the operands.
      */
     template<int K>
-    inline typename enable_if<detail::is_value_within_bounds<K, 0, 2>::value, const char *>::type data() const {
+    inline typename std::enable_if<detail::is_value_within_bounds<K, 0, 2>::value, const char *>::type data() const {
         return m_data[K];
     }
 
     template<int K>
-    inline typename enable_if<detail::is_value_within_bounds<K, 0, 2>::value, const char *>::type arrmeta() const {
+    inline typename std::enable_if<detail::is_value_within_bounds<K, 0, 2>::value, const char *>::type arrmeta() const {
         return m_arrmeta[K];
     }
 
     template<int K>
-    inline typename enable_if<detail::is_value_within_bounds<K, 0, 2>::value, const ndt::type&>::type get_uniform_dtype() const {
+    inline typename std::enable_if<detail::is_value_within_bounds<K, 0, 2>::value, const ndt::type&>::type get_uniform_dtype() const {
         return m_uniform_tp[K];
     }
 };
@@ -466,17 +466,17 @@ public:
      * Provide const access to all the operands.
      */
     template<int K>
-    inline typename enable_if<detail::is_value_within_bounds<K, 0, 2>::value, const char *>::type data() const {
+    inline typename std::enable_if<detail::is_value_within_bounds<K, 0, 2>::value, const char *>::type data() const {
         return m_data[K];
     }
 
     template<int K>
-    inline typename enable_if<detail::is_value_within_bounds<K, 0, 2>::value, const char *>::type arrmeta() const {
+    inline typename std::enable_if<detail::is_value_within_bounds<K, 0, 2>::value, const char *>::type arrmeta() const {
         return m_arrmeta[K];
     }
 
     template<int K>
-    inline typename enable_if<detail::is_value_within_bounds<K, 0, 2>::value, const ndt::type&>::type get_uniform_dtype() const {
+    inline typename std::enable_if<detail::is_value_within_bounds<K, 0, 2>::value, const ndt::type&>::type get_uniform_dtype() const {
         return m_uniform_tp[K];
     }
 };
@@ -585,7 +585,7 @@ public:
      * Provide non-const access to the 'write' operands.
      */
     template<int K>
-    inline typename enable_if<detail::is_value_within_bounds<K, 0, 1>::value, char *>::type data() {
+    inline typename std::enable_if<detail::is_value_within_bounds<K, 0, 1>::value, char *>::type data() {
         return m_data[K];
     }
 
@@ -593,17 +593,17 @@ public:
      * Provide const access to all the operands.
      */
     template<int K>
-    inline typename enable_if<detail::is_value_within_bounds<K, 0, 4>::value, const char *>::type data() const {
+    inline typename std::enable_if<detail::is_value_within_bounds<K, 0, 4>::value, const char *>::type data() const {
         return m_data[K];
     }
 
     template<int K>
-    inline typename enable_if<detail::is_value_within_bounds<K, 0, 4>::value, const char *>::type arrmeta() const {
+    inline typename std::enable_if<detail::is_value_within_bounds<K, 0, 4>::value, const char *>::type arrmeta() const {
         return m_arrmeta[K];
     }
 
     template<int K>
-    inline typename enable_if<detail::is_value_within_bounds<K, 0, 4>::value, const ndt::type&>::type get_uniform_dtype() const {
+    inline typename std::enable_if<detail::is_value_within_bounds<K, 0, 4>::value, const ndt::type&>::type get_uniform_dtype() const {
         return m_uniform_tp[K];
     }
 };

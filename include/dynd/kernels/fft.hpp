@@ -240,7 +240,7 @@ struct fftw_ck : kernels::expr_ck<fftw_ck<fftw_dst_type, fftw_src_type, sign>,
   }
 
   template <bool real_to_complex>
-  static typename enable_if<real_to_complex, int>::type
+  static typename std::enable_if<real_to_complex, int>::type
   resolve_dst_type(const arrfunc_type_data *DYND_UNUSED(self),
                    const arrfunc_type *DYND_UNUSED(self_tp),
                    intptr_t DYND_UNUSED(nsrc), const ndt::type *src_tp,
@@ -268,7 +268,7 @@ struct fftw_ck : kernels::expr_ck<fftw_ck<fftw_dst_type, fftw_src_type, sign>,
   }
 
   template <bool real_to_complex>
-  static typename enable_if<!real_to_complex, int>::type
+  static typename std::enable_if<!real_to_complex, int>::type
   resolve_dst_type(const arrfunc_type_data *DYND_UNUSED(self),
                    const arrfunc_type *DYND_UNUSED(self_tp),
                    intptr_t DYND_UNUSED(nsrc), const ndt::type *src_tp,

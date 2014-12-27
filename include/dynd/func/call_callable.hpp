@@ -17,7 +17,7 @@ namespace dynd { namespace gfunc {
 namespace detail {
     template<class T>
     struct callable_argument_setter {
-        static typename enable_if<is_dynd_scalar<T>::value, void>::type set(const ndt::type& paramtype, char *arrmeta, char *data, const T& value) {
+        static typename std::enable_if<is_dynd_scalar<T>::value, void>::type set(const ndt::type& paramtype, char *arrmeta, char *data, const T& value) {
             if (paramtype.get_type_id() == static_cast<type_id_t>(type_id_of<T>::value)) {
                 *reinterpret_cast<T *>(data) = value;
             } else {

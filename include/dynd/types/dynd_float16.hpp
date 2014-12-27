@@ -214,27 +214,27 @@ template <> struct is_float16_scalar<float> {enum {value = true};};
 template <> struct is_float16_scalar<double> {enum {value = true};};
 
 template<class T>
-inline typename enable_if<is_float16_scalar<T>::value, bool>::type operator<(const T& lhs, const dynd_float16& rhs) {
+inline typename std::enable_if<is_float16_scalar<T>::value, bool>::type operator<(const T& lhs, const dynd_float16& rhs) {
     return double(lhs) < double(rhs);
 }
 template<class T>
-inline typename enable_if<is_float16_scalar<T>::value, bool>::type operator>(const T& lhs, const dynd_float16& rhs) {
+inline typename std::enable_if<is_float16_scalar<T>::value, bool>::type operator>(const T& lhs, const dynd_float16& rhs) {
     return double(lhs) > double(rhs);
 }
 template<class T>
-inline typename enable_if<is_float16_scalar<T>::value, bool>::type operator<=(const T& lhs, const dynd_float16& rhs) {
+inline typename std::enable_if<is_float16_scalar<T>::value, bool>::type operator<=(const T& lhs, const dynd_float16& rhs) {
     return double(lhs) <= double(rhs);
 }
 template<class T>
-inline typename enable_if<is_float16_scalar<T>::value, bool>::type operator>=(const T& lhs, const dynd_float16& rhs) {
+inline typename std::enable_if<is_float16_scalar<T>::value, bool>::type operator>=(const T& lhs, const dynd_float16& rhs) {
     return double(lhs) >= double(rhs);
 }
 template<class T>
-inline typename enable_if<is_float16_scalar<T>::value, bool>::type operator==(const T& lhs, const dynd_float16& rhs) {
+inline typename std::enable_if<is_float16_scalar<T>::value, bool>::type operator==(const T& lhs, const dynd_float16& rhs) {
     return double(lhs) == double(rhs);
 }
 template<class T>
-inline typename enable_if<is_float16_scalar<T>::value, bool>::type operator!=(const T& lhs, const dynd_float16& rhs) {
+inline typename std::enable_if<is_float16_scalar<T>::value, bool>::type operator!=(const T& lhs, const dynd_float16& rhs) {
     return double(lhs) != double(rhs);
 }
 

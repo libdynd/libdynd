@@ -179,7 +179,7 @@ template <> struct is_complex_scalar<float> {enum {value = true};};
 template <> struct is_complex_scalar<double> {enum {value = true};};
 
 template<class T>
-inline typename enable_if<is_complex_scalar<T>::value, bool>::type operator==(const T& lhs, const dynd_complex<double>& rhs) {
+inline typename std::enable_if<is_complex_scalar<T>::value, bool>::type operator==(const T& lhs, const dynd_complex<double>& rhs) {
     return dynd_complex<double>(lhs) == dynd_complex<double>(rhs);
 }
 

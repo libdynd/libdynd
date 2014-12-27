@@ -42,7 +42,7 @@ nd::array::array() : m_memblock() {}
 void nd::array::swap(array &rhs) { m_memblock.swap(rhs.m_memblock); }
 
 template <class T>
-inline typename dynd::enable_if<is_dynd_scalar<T>::value,
+inline typename std::enable_if<is_dynd_scalar<T>::value,
                                 memory_block_ptr>::type
 make_builtin_scalar_array(const T &value, uint64_t flags)
 {

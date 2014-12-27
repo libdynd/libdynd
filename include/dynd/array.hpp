@@ -956,7 +956,7 @@ namespace nd {
 
     /** Does a value-assignment from the rhs C++ scalar. */
     template <class T>
-    typename enable_if<is_dynd_scalar<T>::value, array_vals &>::type
+    typename std::enable_if<is_dynd_scalar<T>::value, array_vals &>::type
     operator=(const T &rhs)
     {
       m_arr.val_assign(ndt::make_exact_type<T>(), NULL, (const char *)&rhs);
@@ -972,7 +972,7 @@ namespace nd {
      * as would seem obvious.
      */
     template <class T>
-    typename enable_if<is_type_bool<T>::value, array_vals &>::type
+    typename std::enable_if<is_type_bool<T>::value, array_vals &>::type
     operator=(const T &rhs)
     {
       dynd_bool v = rhs;
@@ -1017,7 +1017,7 @@ namespace nd {
 
     /** Does a value-assignment from the rhs C++ scalar. */
     template <class T>
-    typename enable_if<is_dynd_scalar<T>::value, array_vals_at &>::type
+    typename std::enable_if<is_dynd_scalar<T>::value, array_vals_at &>::type
     operator=(const T &rhs)
     {
       m_arr.val_assign(ndt::make_exact_type<T>(), NULL, (const char *)&rhs);
@@ -1033,7 +1033,7 @@ namespace nd {
      * as would seem obvious.
      */
     template <class T>
-    typename enable_if<is_type_bool<T>::value, array_vals_at &>::type
+    typename std::enable_if<is_type_bool<T>::value, array_vals_at &>::type
     operator=(const T &rhs)
     {
       dynd_bool v = rhs;
@@ -1714,7 +1714,7 @@ namespace nd {
   namespace detail {
     template <class T>
     struct make_from_vec {
-      inline static typename enable_if<is_dynd_scalar<T>::value, array>::type
+      inline static typename std::enable_if<is_dynd_scalar<T>::value, array>::type
       make(const std::vector<T> &vec)
       {
         array result = nd::empty(vec.size(), ndt::make_exact_type<T>());
@@ -1748,7 +1748,7 @@ namespace nd {
   namespace detail {
     template <class T>
     struct array_as_helper {
-      inline static typename enable_if<
+      inline static typename std::enable_if<
           is_dynd_scalar<T>::value || is_dynd_scalar_pointer<T>::value, T>::type
       as(const array &lhs, const eval::eval_context *ectx)
       {
