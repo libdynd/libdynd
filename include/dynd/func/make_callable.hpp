@@ -126,7 +126,7 @@ template <> struct make_parameter_type<std::string> {inline static ndt::type mak
     }};
 
 template <typename T> struct box_result {
-    inline static typename enable_if<is_dynd_scalar<T>::value, array_preamble *>::type box(const T& v) {
+    inline static typename std::enable_if<is_dynd_scalar<T>::value, array_preamble *>::type box(const T& v) {
         return nd::array(v).release();
     }
 };
@@ -150,7 +150,7 @@ template <> struct box_result<std::string> {
 };
 
 template <typename T> struct unbox_param {
-    inline static typename enable_if<is_dynd_scalar<T>::value, const T&>::type unbox(char *v) {
+    inline static typename std::enable_if<is_dynd_scalar<T>::value, const T&>::type unbox(char *v) {
         return *reinterpret_cast<T *>(v);
     }
 };

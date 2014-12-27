@@ -21,7 +21,7 @@ nd::array range(const ndt::type& scalar_tp, const void *beginval, const void *en
  * Version of range templated for C++ scalar types.
  */
 template<class T>
-typename enable_if<is_dynd_scalar<T>::value, nd::array>::type range(T beginval, T endval,
+typename std::enable_if<is_dynd_scalar<T>::value, nd::array>::type range(T beginval, T endval,
                                                                     T stepval = T(1)) {
     return range(ndt::make_type<T>(), &beginval, &endval, &stepval);
 }
@@ -30,7 +30,7 @@ typename enable_if<is_dynd_scalar<T>::value, nd::array>::type range(T beginval, 
  * Version of range templated for C++ scalar types, with just the end parameter.
  */
 template<class T>
-typename enable_if<is_dynd_scalar<T>::value, nd::array>::type range(T endval) {
+typename std::enable_if<is_dynd_scalar<T>::value, nd::array>::type range(T endval) {
     T beginval = T(0), stepval = T(1);
     return range(ndt::make_type<T>(), &beginval, &endval, &stepval);
 }
@@ -81,7 +81,7 @@ inline nd::array linspace(double start, double stop, intptr_t count = 50) {
 }
 
 template <class T>
-typename enable_if<dynd_kind_of<T>::value == int_kind ||
+typename std::enable_if<dynd_kind_of<T>::value == int_kind ||
                 dynd_kind_of<T>::value == uint_kind, nd::array>::type linspace(
                                                     T start, T stop, intptr_t count = 50) {
     return linspace((double)start, (double)stop, count);
