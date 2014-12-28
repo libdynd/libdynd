@@ -85,6 +85,36 @@ TEST(ArrFunc, Construction)
   EXPECT_EQ(-4, af3(3, kwds("y", 7)).as<int>());
 }
 
+TEST(ArrFunc, CallOperator)
+{
+  nd::arrfunc af = nd::apply::make(&func);
+  // Calling with positional arguments
+  EXPECT_EQ(4.5, af(1, 2.5).as<double>());
+  // Positional arguments and eval_context
+  EXPECT_EQ(7.5, af(2, 3.5, &eval::default_eval_context).as<double>());
+  // Wrong number of positional argumetns
+  EXPECT_THROW(af(2), invalid_argument);
+  EXPECT_THROW(af(2, 3.5, 7), invalid_argument);
+  // Extra keyword argument
+  EXPECT_THROW(af(2, 3.5, kwds("x", 10)), invalid_argument);
+  EXPECT_THROW(af(2, 3.5, kwds("x", 10), &eval::default_eval_context),
+               invalid_argument);
+
+  af = nd::apply::make(&func, "x");
+  // Calling with positional and keyword arguments
+  EXPECT_EQ(4.5, af(1, kwds("x", 2.5)).as<double>());
+  // Positional+keyword arguments and eval_context
+  EXPECT_EQ(7.5,
+            af(2, kwds("x", 3.5), &eval::default_eval_context).as<double>());
+  // Wrong number of positional arguments
+  EXPECT_THROW(af(2), invalid_argument);
+  EXPECT_THROW(af(2, 3.5, 7), invalid_argument);
+  // Extra keyword argument
+  EXPECT_THROW(af(2, kwds("x", 10, "y", 20)), invalid_argument);
+  EXPECT_THROW(af(2, 3.5, kwds("x", 10, "y", 20), &eval::default_eval_context),
+               invalid_argument);
+}
+
 TEST(ArrFunc, KeywordParsing)
 {
   nd::arrfunc af0 = nd::apply::make([](int x, int y) { return x + y; }, "y");
