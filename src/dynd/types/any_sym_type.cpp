@@ -18,8 +18,8 @@ using namespace std;
 using namespace dynd;
 
 any_sym_type::any_sym_type()
-    : base_type(any_sym_type_id, symbolic_kind, 0, 1, type_flag_symbolic, 0, 0,
-                0)
+    : base_type(any_sym_type_id, symbolic_kind, 0, 1,
+                type_flag_symbolic | type_flag_dim_variadic, 0, 0, 0)
 {
 }
 
