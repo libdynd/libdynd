@@ -15,7 +15,7 @@ namespace dynd { namespace ndt {
 /**
  * Substitutes a shape into a pattern type.
  *
- * For example, can combine a type "fixed * fixed * int32" with
+ * For example, can combine a type "Fixed * Fixed * int32" with
  * a shape (3, 6) to produce the type "3 * 6 * int32".
  *
  * \param pattern  A symbolic type within which to substitute the shape.

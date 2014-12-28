@@ -16,7 +16,7 @@ namespace dynd {
  *
  * \param neighborhood_op  An arrfunc object which transforms a neighborhood into
  *                         a single output value. Signature
- *                         '(fixed * fixed * NH, fixed * fixed * MSK) -> OUT',
+ *                         '(Fixed * Fixed * NH, Fixed * Fixed * MSK) -> OUT',
  */
 nd::arrfunc make_neighborhood_arrfunc(const nd::arrfunc &neighborhood_op,
                                       intptr_t nh_ndim);

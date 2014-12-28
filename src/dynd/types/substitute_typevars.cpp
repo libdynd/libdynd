@@ -280,7 +280,7 @@ ndt::type ndt::detail::internal_substitute(
           case fixed_dimsym_type_id:
             if (concrete) {
               stringstream ss;
-              ss << "The base for a dimensional power type, 'fixed ** "
+              ss << "The base for a dimensional power type, 'Fixed ** "
                  << exponent << "', is not concrete as required";
               throw invalid_argument(ss.str());
             }

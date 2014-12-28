@@ -222,7 +222,7 @@ TEST(LiftArrFunc, Expr_MultiDimVarToVarDim) {
     // Lift the kernel to particular arrays
     nd::array af_lifted = nd::empty(ndt::make_arrfunc());
     ndt::type src0_tp("3 * var * int32");
-    ndt::type src1_tp("fixed * int32");
+    ndt::type src1_tp("Fixed * int32");
 
     // Create some compatible values
     nd::array in0 = nd::empty(src0_tp);
@@ -237,7 +237,7 @@ TEST(LiftArrFunc, Expr_MultiDimVarToVarDim) {
     in1.vals() = in1_vals;
 
     nd::array out = af(in0, in1);
-    EXPECT_EQ(ndt::type("3 * fixed * int32"), out.get_type());
+    EXPECT_EQ(ndt::type("3 * Fixed * int32"), out.get_type());
     ASSERT_EQ(3, out.get_shape()[0]);
     ASSERT_EQ(3, out.get_shape()[1]);
     EXPECT_EQ(3, out(0, 0).as<int>());

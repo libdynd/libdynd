@@ -407,7 +407,7 @@ static nd::array view_concrete(const nd::array &arr, const ndt::type &tp)
   }
   result.get_ndo()->m_type = ndt::type(tp).release();
   result.get_ndo()->m_flags = arr.get_ndo()->m_flags;
-  // First handle a special case of viewing outermost "var" as "fixed"
+  // First handle a special case of viewing outermost "var" as "fixed[#]"
   if (arr.get_type().get_type_id() == var_dim_type_id &&
       tp.get_type_id() == fixed_dim_type_id) {
     const var_dim_type_arrmeta *in_am =
@@ -468,7 +468,7 @@ nd::array nd::view(const nd::array &arr, const ndt::type &tp)
       return result;
     }
   } else if (arr.get_ndim() == tp.get_ndim()) {
-    // If the type is symbolic, e.g. has a "fixed" symbolic dimension,
+    // If the type is symbolic, e.g. has a "Fixed" symbolic dimension,
     // first substitute in the shape from the array
     if (tp.is_symbolic()) {
       dimvector shape(arr.get_ndim());

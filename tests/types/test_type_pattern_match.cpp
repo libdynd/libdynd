@@ -24,12 +24,12 @@ TEST(TypePatternMatch, Simple)
       ndt::pattern_match(ndt::type("4 * int32"), ndt::type("A... * 4 * M")));
   EXPECT_TRUE(
       ndt::pattern_match(ndt::type("3 * int32"), ndt::type("3 * A... * M")));
-  EXPECT_TRUE(ndt::pattern_match(ndt::type("fixed**3 * int32"),
-                                 ndt::type("fixed**N * int32")));
-  EXPECT_TRUE(ndt::pattern_match(ndt::type("fixed**2 * var * int32"),
+  EXPECT_TRUE(ndt::pattern_match(ndt::type("Fixed**3 * int32"),
+                                 ndt::type("Fixed**N * int32")));
+  EXPECT_TRUE(ndt::pattern_match(ndt::type("Fixed**2 * var * int32"),
                                  ndt::type("A**N * var * int32")));
-  EXPECT_TRUE(ndt::pattern_match(ndt::type("fixed * int32"),
-                                 ndt::type("fixed**N * int32")));
+  EXPECT_TRUE(ndt::pattern_match(ndt::type("Fixed * int32"),
+                                 ndt::type("Fixed**N * int32")));
   EXPECT_TRUE(ndt::pattern_match(ndt::type("4 * 4 * 3 * int32"),
                                  ndt::type("4**N * 3 * int32")));
   EXPECT_TRUE(ndt::pattern_match(ndt::type("4 * 4 * 2 * int32"),
@@ -43,11 +43,11 @@ TEST(TypePatternMatch, Simple)
       ndt::pattern_match(ndt::type("int16"), ndt::type("A... * int32")));
   EXPECT_FALSE(
       ndt::pattern_match(ndt::type("4 * int32"), ndt::type("A... * 3 * M")));
-  EXPECT_FALSE(ndt::pattern_match(ndt::type("fixed**3 * int32"),
-                                  ndt::type("fixed**N * var * int32")));
-  EXPECT_FALSE(ndt::pattern_match(ndt::type("var * fixed**3 * int32"),
-                                  ndt::type("fixed**N * int32")));
-  EXPECT_FALSE(ndt::pattern_match(ndt::type("fixed**3 * var * int32"),
+  EXPECT_FALSE(ndt::pattern_match(ndt::type("Fixed**3 * int32"),
+                                  ndt::type("Fixed**N * var * int32")));
+  EXPECT_FALSE(ndt::pattern_match(ndt::type("var * Fixed**3 * int32"),
+                                  ndt::type("Fixed**N * int32")));
+  EXPECT_FALSE(ndt::pattern_match(ndt::type("Fixed**3 * var * int32"),
                                   ndt::type("A**N * A * int32")));
   EXPECT_FALSE(ndt::pattern_match(ndt::type("4 * 4 * 3 * int32"),
                                   ndt::type("4**N * N * int32")));
@@ -151,9 +151,9 @@ TEST(TypePatternMatch, Strided)
 {
   // cfixed and fixed can match against strided
   EXPECT_TRUE(ndt::pattern_match(ndt::type("cfixed[3] * int32"),
-                                 ndt::type("fixed * int32")));
+                                 ndt::type("Fixed * int32")));
   EXPECT_TRUE(
-      ndt::pattern_match(ndt::type("3 * int32"), ndt::type("fixed * int32")));
+      ndt::pattern_match(ndt::type("3 * int32"), ndt::type("Fixed * int32")));
   // cfixed can match against strided if the sizes match
   EXPECT_TRUE(ndt::pattern_match(ndt::type("cfixed[3] * int32"),
                                  ndt::type("3 * int32")));
@@ -167,17 +167,17 @@ TEST(TypePatternMatch, Strided)
 TEST(TypePatternMatch, Pow)
 {
   // Match pow_dimsym against itself
-  EXPECT_TRUE(ndt::pattern_match(ndt::type("fixed**N * int32"),
-                                 ndt::type("fixed**N * int32")));
-  EXPECT_TRUE(ndt::pattern_match(ndt::type("fixed**N * int32"),
-                                 ndt::type("fixed**M * int32")));
+  EXPECT_TRUE(ndt::pattern_match(ndt::type("Fixed**N * int32"),
+                                 ndt::type("Fixed**N * int32")));
+  EXPECT_TRUE(ndt::pattern_match(ndt::type("Fixed**N * int32"),
+                                 ndt::type("Fixed**M * int32")));
   // Match fixed_dim against fixed_dimsym within the power's base
   EXPECT_TRUE(ndt::pattern_match(ndt::type("3**N * int32"),
-                                 ndt::type("fixed**N * int32")));
+                                 ndt::type("Fixed**N * int32")));
   EXPECT_TRUE(ndt::pattern_match(ndt::type("3**N * int32"),
-                                 ndt::type("fixed**M * int32")));
+                                 ndt::type("Fixed**M * int32")));
   // Ensure that the typevar D is constrained in the power's base
-  EXPECT_TRUE(ndt::pattern_match(ndt::type("fixed * fixed * fixed * int32"),
+  EXPECT_TRUE(ndt::pattern_match(ndt::type("Fixed * Fixed * Fixed * int32"),
                                  ndt::type("D * D**N * int32")));
   EXPECT_TRUE(ndt::pattern_match(ndt::type("3 * 3 * 3 * int32"),
                                  ndt::type("D * D**N * int32")));
@@ -187,9 +187,9 @@ TEST(TypePatternMatch, Pow)
                                   ndt::type("D * D**N * int32")));
   // Make sure an exponent of zero works as expected
   EXPECT_TRUE(ndt::pattern_match(ndt::type("5 * int32"),
-                                 ndt::type("D**N * fixed * int32")));
+                                 ndt::type("D**N * Fixed * int32")));
   EXPECT_TRUE(ndt::pattern_match(ndt::type("2 * int32"),
-                                 ndt::type("3**N * fixed * int32")));
+                                 ndt::type("3**N * Fixed * int32")));
   EXPECT_TRUE(
       ndt::pattern_match(ndt::type("int32"), ndt::type("D**N * int32")));
   EXPECT_TRUE(
@@ -209,8 +209,8 @@ TEST(TypePatternMatchDims, Simple)
   // and as part of the matching, it returns the two dtypes.
   std::map<nd::string, ndt::type> typevars;
   ndt::type cdt, pdt;
-  EXPECT_TRUE(ndt::pattern_match_dims(ndt::type("3 * 4 * fixed * int32"),
-                                      ndt::type("fixed * 4 * fixed * {x: int}"),
+  EXPECT_TRUE(ndt::pattern_match_dims(ndt::type("3 * 4 * Fixed * int32"),
+                                      ndt::type("Fixed * 4 * Fixed * {x: int}"),
                                       typevars, cdt, pdt));
   EXPECT_EQ(ndt::type("int32"), cdt);
   EXPECT_EQ(ndt::type("{x: int}"), pdt);

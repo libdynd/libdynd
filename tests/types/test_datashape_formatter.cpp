@@ -127,7 +127,7 @@ TEST(DataShapeFormatter, ArrayUniformArrays) {
 TEST(DataShapeFormatter, DTypeUniformArrays)
 {
   EXPECT_EQ(
-      "fixed * fixed * fixed * int32",
+      "Fixed * Fixed * Fixed * int32",
       format_datashape(ndt::make_fixed_dimsym(ndt::make_type<int32_t>(), 3),
                        "", false));
   EXPECT_EQ("var * int32",
@@ -141,7 +141,7 @@ TEST(DataShapeFormatter, DTypeUniformArrays)
             format_datashape(ndt::make_var_dim(ndt::make_fixed_dim(
                                  3, ndt::make_type<int32_t>())),
                              "", false));
-  EXPECT_EQ("var * fixed * int32",
+  EXPECT_EQ("var * Fixed * int32",
             format_datashape(ndt::make_var_dim(ndt::make_fixed_dimsym(
                                  ndt::make_type<int32_t>())),
                              "", false));
@@ -174,7 +174,7 @@ TEST(DataShapeFormatter, DTypeStructs) {
                                     ndt::make_cfixed_dim(5, ndt::make_var_dim(
                                         ndt::make_type<uint8_t>())), "y"), "", false));
     EXPECT_EQ(
-        "{x: fixed * {a: int32, b: int8}, y: var * fixed * uint8}",
+        "{x: Fixed * {a: int32, b: int8}, y: var * Fixed * uint8}",
         format_datashape(
             ndt::make_struct(ndt::make_fixed_dimsym(ndt::make_cstruct(
                                  ndt::make_type<int32_t>(), "a",

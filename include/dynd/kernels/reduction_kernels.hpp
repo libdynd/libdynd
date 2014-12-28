@@ -28,13 +28,13 @@ nd::arrfunc make_builtin_sum_reduction_arrfunc(type_id_t tid);
 
 /**
  * Makes a 1D sum arrfunc.
- * (fixed * <tid>) -> <tid>
+ * (Fixed * <tid>) -> <tid>
  */
 nd::arrfunc make_builtin_sum1d_arrfunc(type_id_t tid);
 
 /**
  * Makes a 1D mean arrfunc.
- * (fixed * <tid>) -> <tid>
+ * (Fixed * <tid>) -> <tid>
  */
 nd::arrfunc make_builtin_mean1d_arrfunc(type_id_t tid, intptr_t minp);
 

@@ -60,7 +60,7 @@ static void format_dim_datashape(std::ostream &o, const ndt::type &tp,
   switch (tp.get_type_id()) {
   case fixed_dimsym_type_id: {
     // A symbolic type, so arrmeta/data can't exist
-    o << "fixed * ";
+    o << "Fixed * ";
     format_datashape(o, tp.extended<base_dim_type>()->get_element_type(), NULL,
                      NULL, indent, multiline);
     break;

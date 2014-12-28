@@ -216,7 +216,7 @@ static int resolve_neighborhood_dst_type(
 
   out_dst_tp = self_tp->get_return_type();
 
-  // swap in the input dimension values for the fixed**N
+  // swap in the input dimension values for the Fixed**N
   intptr_t ndim = src_tp[0].get_ndim();
   dimvector shape(ndim);
   src_tp[0].extended()->get_shape(ndim, 0, shape.get(), NULL, NULL);
@@ -241,7 +241,7 @@ nd::arrfunc dynd::make_neighborhood_arrfunc(const nd::arrfunc &neighborhood_op,
   nd::array arg_tp = nd::empty(3, ndt::make_type());
   arg_tp(0).vals() = ndt::type("?" + std::to_string(nh_ndim) + " * int");
   arg_tp(1).vals() = ndt::type("?" + std::to_string(nh_ndim) + " * int");
-  arg_tp(2).vals() = ndt::type("?fixed**" + std::to_string(nh_ndim) + " * bool");
+  arg_tp(2).vals() = ndt::type("?Fixed**" + std::to_string(nh_ndim) + " * bool");
   std::vector<std::string> arg_names;
   arg_names.push_back("shape");
   arg_names.push_back("offset");
@@ -253,7 +253,7 @@ nd::arrfunc dynd::make_neighborhood_arrfunc(const nd::arrfunc &neighborhood_op,
                         ndt::make_struct(arg_names, arg_tp), ret_tp);
 
   std::ostringstream oss;
-  oss << "fixed**" << nh_ndim;
+  oss << "Fixed**" << nh_ndim;
   ndt::type nhop_pattern("(" + oss.str() + " * NH) -> OUT");
   ndt::type result_pattern("(" + oss.str() + " * NH) -> " + oss.str() +
                            " * OUT");

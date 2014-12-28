@@ -1127,7 +1127,7 @@ static ndt::type parse_datashape_nooption(const char *&rbegin, const char *end,
           else if (parse::compare_range_to_literal(bbegin, bend, "var")) {
             result = make_var_dim(element_tp, exponent);
           }
-          else if (parse::compare_range_to_literal(bbegin, bend, "fixed")) {
+          else if (parse::compare_range_to_literal(bbegin, bend, "Fixed")) {
             result = make_fixed_dimsym(element_tp, exponent);
           }
           else if (isupper(*bbegin)) {
@@ -1153,7 +1153,7 @@ static ndt::type parse_datashape_nooption(const char *&rbegin, const char *end,
                   ndt::make_var_dim(ndt::make_type<void>()), exponent_name,
                   parse_datashape(begin, end, symtable));
             }
-            else if (parse::compare_range_to_literal(bbegin, bend, "fixed")) {
+            else if (parse::compare_range_to_literal(bbegin, bend, "Fixed")) {
               result = ndt::make_pow_dimsym(
                   ndt::make_fixed_dimsym(ndt::make_type<void>()), exponent_name,
                   parse_datashape(begin, end, symtable));
@@ -1194,7 +1194,7 @@ static ndt::type parse_datashape_nooption(const char *&rbegin, const char *end,
       else if (parse::compare_range_to_literal(nbegin, nend, "var")) {
         result = ndt::make_var_dim(element_tp);
       }
-      else if (parse::compare_range_to_literal(nbegin, nend, "fixed")) {
+      else if (parse::compare_range_to_literal(nbegin, nend, "Fixed")) {
         result = ndt::make_fixed_dimsym(element_tp);
       }
       else if (isupper(*nbegin)) {
