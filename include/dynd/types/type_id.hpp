@@ -115,8 +115,6 @@ enum type_id_t {
   // A UTF-8 encoded string type for holding JSON
   json_type_id,
 
-  // An unnamed symbolic fixed array dimension type
-  fixed_dimsym_type_id,
   // A fixed-sized strided array dimension type
   fixed_dim_type_id,
   // A fixed-sized, fixed-stride array dimension type
@@ -138,6 +136,12 @@ enum type_id_t {
   option_type_id,
 
   ndarrayarg_type_id,
+
+  // Named symbolic types
+  // "Fixed", an symbolic fixed array dimension type
+  fixed_dimsym_type_id,
+  // "Any", matching any type (dimensions and dtype)
+  any_sym_type_id,
 
   // Adapter types
   adapt_type_id,
