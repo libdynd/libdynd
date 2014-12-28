@@ -14,6 +14,7 @@
 #include <dynd/types/typevar_type.hpp>
 #include <dynd/types/typevar_dim_type.hpp>
 #include <dynd/types/ellipsis_dim_type.hpp>
+#include <dynd/types/any_sym_type.hpp>
 
 using namespace std;
 using namespace dynd;
@@ -32,6 +33,7 @@ TEST(SymbolicTypes, CreateFuncProto)
   // function prototype is not actually symbolic, it is
   // used to store arrfunc objects
   EXPECT_FALSE(tp.is_symbolic());
+  EXPECT_FALSE(tp.is_dim_variadic());
   fpt = tp.extended<arrfunc_type>();
   ASSERT_EQ(3, fpt->get_narg());
   EXPECT_EQ(ndt::make_type<float>(), fpt->get_pos_type(0));
@@ -71,116 +73,170 @@ TEST(SymbolicTypes, CreateFuncProto)
   EXPECT_EQ(ndt::make_type<int64_t>(), fpt->get_pos_type(1));
 }
 
-TEST(SymbolicTypes, CreateTypeVar) {
-    ndt::type tp;
-    const typevar_type *tvt;
+TEST(SymbolicTypes, CreateTypeVar)
+{
+  ndt::type tp;
+  const typevar_type *tvt;
 
-    // Simple TypeVar
-    tp = ndt::make_typevar("Blah");
-    EXPECT_EQ(typevar_type_id, tp.get_type_id());
-    EXPECT_EQ(0u, tp.get_data_size());
-    EXPECT_EQ(1u, tp.get_data_alignment());
-    EXPECT_FALSE(tp.is_pod());
-    tvt = tp.extended<typevar_type>();
-    EXPECT_EQ("Blah", tvt->get_name_str());
-    // Roundtripping through a string
-    EXPECT_EQ(tp, ndt::type(tp.str()));
-    EXPECT_EQ("Blah", tp.str());
+  // Simple TypeVar
+  tp = ndt::make_typevar("Blah");
+  EXPECT_EQ(typevar_type_id, tp.get_type_id());
+  EXPECT_EQ(0u, tp.get_data_size());
+  EXPECT_EQ(1u, tp.get_data_alignment());
+  EXPECT_FALSE(tp.is_pod());
+  EXPECT_TRUE(tp.is_symbolic());
+  EXPECT_FALSE(tp.is_dim_variadic());
+  tvt = tp.extended<typevar_type>();
+  EXPECT_EQ("Blah", tvt->get_name_str());
+  // Roundtripping through a string
+  EXPECT_EQ(tp, ndt::type(tp.str()));
+  EXPECT_EQ("Blah", tp.str());
 
-    // Dynamic type properties
-    EXPECT_EQ("Blah", tp.p("name").as<std::string>());
+  // Dynamic type properties
+  EXPECT_EQ("Blah", tp.p("name").as<std::string>());
 
-    // The typevar name must start with a capital
-    // and look like an identifier
-    EXPECT_THROW(ndt::make_typevar(""), type_error);
-    EXPECT_THROW(ndt::make_typevar("blah"), type_error);
-    EXPECT_THROW(ndt::make_typevar("T "), type_error);
-    EXPECT_THROW(ndt::make_typevar("123"), type_error);
-    EXPECT_THROW(ndt::make_typevar("Two+"), type_error);
+  // The typevar name must start with a capital
+  // and look like an identifier
+  EXPECT_THROW(ndt::make_typevar(""), type_error);
+  EXPECT_THROW(ndt::make_typevar("blah"), type_error);
+  EXPECT_THROW(ndt::make_typevar("T "), type_error);
+  EXPECT_THROW(ndt::make_typevar("123"), type_error);
+  EXPECT_THROW(ndt::make_typevar("Two+"), type_error);
 }
- 
-TEST(SymbolicTypes, CreateTypeVarDim) {
-    ndt::type tp;
-    const typevar_dim_type *tvt;
 
-    // Simple Dimension TypeVar
-    tp = ndt::make_typevar_dim("Blah", ndt::make_type<int>());
-    EXPECT_EQ(typevar_dim_type_id, tp.get_type_id());
-    EXPECT_EQ(0u, tp.get_data_size());
-    EXPECT_EQ(1u, tp.get_data_alignment());
-    EXPECT_FALSE(tp.is_pod());
-    tvt = tp.extended<typevar_dim_type>();
-    EXPECT_EQ("Blah", tvt->get_name_str());
-    EXPECT_EQ(ndt::make_type<int>(), tvt->get_element_type());
-    // Roundtripping through a string
-    EXPECT_EQ(tp, ndt::type(tp.str()));
-    EXPECT_EQ("Blah * int32", tp.str());
+TEST(SymbolicTypes, CreateTypeVarDim)
+{
+  ndt::type tp;
+  const typevar_dim_type *tvt;
 
-    // Dynamic type properties
-    EXPECT_EQ("Blah", tp.p("name").as<std::string>());
+  // Simple Dimension TypeVar
+  tp = ndt::make_typevar_dim("Blah", ndt::make_type<int>());
+  EXPECT_EQ(typevar_dim_type_id, tp.get_type_id());
+  EXPECT_EQ(0u, tp.get_data_size());
+  EXPECT_EQ(1u, tp.get_data_alignment());
+  EXPECT_FALSE(tp.is_pod());
+  EXPECT_TRUE(tp.is_symbolic());
+  EXPECT_FALSE(tp.is_dim_variadic());
+  tvt = tp.extended<typevar_dim_type>();
+  EXPECT_EQ("Blah", tvt->get_name_str());
+  EXPECT_EQ(ndt::make_type<int>(), tvt->get_element_type());
+  // Roundtripping through a string
+  EXPECT_EQ(tp, ndt::type(tp.str()));
+  EXPECT_EQ("Blah * int32", tp.str());
 
-    // The typevar name must start with a capital
-    // and look like an identifier
-    EXPECT_THROW(ndt::make_typevar_dim("", ndt::make_type<int>()),
-                 type_error);
-    EXPECT_THROW(ndt::make_typevar_dim("blah", ndt::make_type<int>()),
-                 type_error);
-    EXPECT_THROW(ndt::make_typevar_dim("T ", ndt::make_type<int>()),
-                 type_error);
-    EXPECT_THROW(ndt::make_typevar_dim("123", ndt::make_type<int>()),
-                 type_error);
-    EXPECT_THROW(ndt::make_typevar_dim("Two+", ndt::make_type<int>()),
-                 type_error);
+  // Dynamic type properties
+  EXPECT_EQ("Blah", tp.p("name").as<std::string>());
+
+  // The typevar name must start with a capital
+  // and look like an identifier
+  EXPECT_THROW(ndt::make_typevar_dim("", ndt::make_type<int>()), type_error);
+  EXPECT_THROW(ndt::make_typevar_dim("blah", ndt::make_type<int>()),
+               type_error);
+  EXPECT_THROW(ndt::make_typevar_dim("T ", ndt::make_type<int>()), type_error);
+  EXPECT_THROW(ndt::make_typevar_dim("123", ndt::make_type<int>()), type_error);
+  EXPECT_THROW(ndt::make_typevar_dim("Two+", ndt::make_type<int>()),
+               type_error);
 }
- 
-TEST(SymbolicTypes, CreateEllipsisDim) {
-    ndt::type tp;
-    const ellipsis_dim_type *et;
 
-    // Named Ellipsis Dimension
-    tp = ndt::make_ellipsis_dim("Blah", ndt::make_type<int>());
-    EXPECT_EQ(ellipsis_dim_type_id, tp.get_type_id());
-    EXPECT_EQ(0u, tp.get_data_size());
-    EXPECT_EQ(1u, tp.get_data_alignment());
-    EXPECT_FALSE(tp.is_pod());
-    EXPECT_TRUE(tp.is_symbolic());
-    et = tp.extended<ellipsis_dim_type>();
-    EXPECT_EQ("Blah", et->get_name_str());
-    EXPECT_EQ(ndt::make_type<int>(), et->get_element_type());
-    // Roundtripping through a string
-    EXPECT_EQ(tp, ndt::type(tp.str()));
-    EXPECT_EQ("Blah... * int32", tp.str());
+TEST(SymbolicTypes, CreateEllipsisDim)
+{
+  ndt::type tp;
+  const ellipsis_dim_type *et;
 
-    // Dynamic type properties
-    EXPECT_EQ("Blah", tp.p("name").as<std::string>());
+  // Named Ellipsis Dimension
+  tp = ndt::make_ellipsis_dim("Blah", ndt::make_type<int>());
+  EXPECT_EQ(ellipsis_dim_type_id, tp.get_type_id());
+  EXPECT_EQ(0u, tp.get_data_size());
+  EXPECT_EQ(1u, tp.get_data_alignment());
+  EXPECT_FALSE(tp.is_pod());
+  EXPECT_TRUE(tp.is_symbolic());
+  EXPECT_TRUE(tp.is_dim_variadic());
+  et = tp.extended<ellipsis_dim_type>();
+  EXPECT_EQ("Blah", et->get_name_str());
+  EXPECT_EQ(ndt::make_type<int>(), et->get_element_type());
+  // Roundtripping through a string
+  EXPECT_EQ(tp, ndt::type(tp.str()));
+  EXPECT_EQ("Blah... * int32", tp.str());
 
-    // Unnamed Ellipsis Dimension
-    tp = ndt::make_ellipsis_dim(ndt::make_type<int>());
-    EXPECT_EQ(ellipsis_dim_type_id, tp.get_type_id());
-    EXPECT_EQ(0u, tp.get_data_size());
-    EXPECT_EQ(1u, tp.get_data_alignment());
-    EXPECT_FALSE(tp.is_pod());
-    EXPECT_TRUE(tp.is_symbolic());
-    et = tp.extended<ellipsis_dim_type>();
-    EXPECT_TRUE(et->get_name().is_null());
-    EXPECT_EQ(ndt::make_type<int>(), et->get_element_type());
-    // Roundtripping through a string
-    EXPECT_EQ(tp, ndt::type(tp.str()));
-    EXPECT_EQ("... * int32", tp.str());
-    // Construction from empty string is ok
-    EXPECT_EQ(tp, ndt::make_ellipsis_dim("", ndt::make_type<int>()));
+  // Dynamic type properties
+  EXPECT_EQ("Blah", tp.p("name").as<std::string>());
 
-    // Dynamic type properties
-    EXPECT_TRUE(tp.p("name").is_null());
+  // Unnamed Ellipsis Dimension
+  tp = ndt::make_ellipsis_dim(ndt::make_type<int>());
+  EXPECT_EQ(ellipsis_dim_type_id, tp.get_type_id());
+  EXPECT_EQ(0u, tp.get_data_size());
+  EXPECT_EQ(1u, tp.get_data_alignment());
+  EXPECT_FALSE(tp.is_pod());
+  EXPECT_TRUE(tp.is_symbolic());
+  EXPECT_TRUE(tp.is_dim_variadic());
+  et = tp.extended<ellipsis_dim_type>();
+  EXPECT_TRUE(et->get_name().is_null());
+  EXPECT_EQ(ndt::make_type<int>(), et->get_element_type());
+  // Roundtripping through a string
+  EXPECT_EQ(tp, ndt::type(tp.str()));
+  EXPECT_EQ("... * int32", tp.str());
+  // Construction from empty string is ok
+  EXPECT_EQ(tp, ndt::make_ellipsis_dim("", ndt::make_type<int>()));
 
-    // The ellipsis name must start with a capital
-    // and look like an identifier
-    EXPECT_THROW(ndt::make_ellipsis_dim("blah", ndt::make_type<int>()),
-                 type_error);
-    EXPECT_THROW(ndt::make_ellipsis_dim("T ", ndt::make_type<int>()),
-                 type_error);
-    EXPECT_THROW(ndt::make_ellipsis_dim("123", ndt::make_type<int>()),
-                 type_error);
-    EXPECT_THROW(ndt::make_ellipsis_dim("Two+", ndt::make_type<int>()),
-                 type_error);
+  // Dynamic type properties
+  EXPECT_TRUE(tp.p("name").is_null());
+
+  // The ellipsis name must start with a capital
+  // and look like an identifier
+  EXPECT_THROW(ndt::make_ellipsis_dim("blah", ndt::make_type<int>()),
+               type_error);
+  EXPECT_THROW(ndt::make_ellipsis_dim("T ", ndt::make_type<int>()), type_error);
+  EXPECT_THROW(ndt::make_ellipsis_dim("123", ndt::make_type<int>()),
+               type_error);
+  EXPECT_THROW(ndt::make_ellipsis_dim("Two+", ndt::make_type<int>()),
+               type_error);
+}
+
+TEST(SymbolicTypes, AnySym)
+{
+  ndt::type tp;
+
+  tp = ndt::make_any_sym();
+  EXPECT_EQ(any_sym_type_id, tp.get_type_id());
+  EXPECT_EQ("Any", tp.str());
+  EXPECT_TRUE(tp.is_symbolic());
+  EXPECT_TRUE(tp.is_dim_variadic());
+  EXPECT_EQ(tp, ndt::type(tp.str()));
+
+  // The "Any" type's variadic-ness should propagate through dimension types
+  tp = ndt::type("3 * Any");
+  EXPECT_TRUE(tp.is_symbolic());
+  EXPECT_TRUE(tp.is_dim_variadic());
+  EXPECT_EQ(tp, ndt::type(tp.str()));
+
+  tp = ndt::type("var * Any");
+  EXPECT_TRUE(tp.is_symbolic());
+  EXPECT_TRUE(tp.is_dim_variadic());
+  EXPECT_EQ(tp, ndt::type(tp.str()));
+
+  tp = ndt::type("Fixed * Any");
+  EXPECT_TRUE(tp.is_symbolic());
+  EXPECT_TRUE(tp.is_dim_variadic());
+  EXPECT_EQ(tp, ndt::type(tp.str()));
+
+  tp = ndt::type("?3 * Any");
+  EXPECT_TRUE(tp.is_symbolic());
+  EXPECT_TRUE(tp.is_dim_variadic());
+  EXPECT_EQ(tp, ndt::type(tp.str()));
+
+  tp = ndt::type("pointer[3 * Any]");
+  EXPECT_TRUE(tp.is_symbolic());
+  EXPECT_TRUE(tp.is_dim_variadic());
+  EXPECT_EQ(tp, ndt::type(tp.str()));
+
+  // The "Any" type's variadic-ness should not propagate through struct/tuple types
+  tp = ndt::type("(Any, Any)");
+  EXPECT_TRUE(tp.is_symbolic());
+  EXPECT_FALSE(tp.is_dim_variadic());
+  EXPECT_EQ(tp, ndt::type(tp.str()));
+
+  tp = ndt::type("{x: Any, y: Any}");
+  EXPECT_TRUE(tp.is_symbolic());
+  EXPECT_FALSE(tp.is_dim_variadic());
+  EXPECT_EQ(tp, ndt::type(tp.str()));
 }

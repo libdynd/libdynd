@@ -133,10 +133,14 @@ static bool recursive_match(const ndt::type &concrete, const ndt::type &pattern,
         return pattern == concrete;
       }
     }
+    else if (pattern.get_type_id() == any_sym_type_id) {
+      return true;
+    }
     else {
       return false;
     }
-  } else {
+  }
+  else {
     // First match the dimensions, then the dtype
     ndt::type concrete_dtype, pattern_dtype;
     if (pattern_match_dims(concrete, pattern, typevars, concrete_dtype,
@@ -189,9 +193,17 @@ bool ndt::pattern_match_dims(const ndt::type &concrete,
             concrete, pattern.extended<ellipsis_dim_type>()->get_element_type(),
             typevars, out_concrete_dtype, out_pattern_dtype);
       }
+      else if (pattern.get_type_id() == any_sym_type_id) {
+        // "Any" consumes all the dimensions, and remains available to consume
+        // the dtype
+        out_concrete_dtype = concrete.get_dtype();
+        out_pattern_dtype = pattern;
+        return true;
+      }
       else if (pattern.get_type_id() == pow_dimsym_type_id) {
-        if (pattern.extended<pow_dimsym_type>()->get_element_type().get_ndim() ==
-            0) {
+        if (pattern.extended<pow_dimsym_type>()
+                ->get_element_type()
+                .get_ndim() == 0) {
           // Look up to see if the exponent typevar is already matched
           ndt::type &tv_type =
               typevars[pattern.extended<pow_dimsym_type>()->get_exponent()];
@@ -350,12 +362,14 @@ bool ndt::pattern_match_dims(const ndt::type &concrete,
             concrete.get_type_at_dimension(NULL, matched_ndim),
             pattern.extended<ellipsis_dim_type>()->get_element_type(), typevars,
             out_concrete_dtype, out_pattern_dtype);
-      } else {
+      }
+      else {
         // There are not enough dimensions in the concrete type
         // to match
         return false;
       }
-    } else if (pattern.get_type_id() == typevar_dim_type_id) {
+    }
+    else if (pattern.get_type_id() == typevar_dim_type_id) {
       ndt::type &tv_type =
           typevars[pattern.extended<typevar_dim_type>()->get_name()];
       if (tv_type.is_null()) {
@@ -496,6 +510,13 @@ bool ndt::pattern_match_dims(const ndt::type &concrete,
           concrete_subtype,
           pattern.extended<pow_dimsym_type>()->get_element_type(), typevars,
           out_concrete_dtype, out_pattern_dtype);
+    }
+    else if (pattern.get_type_id() == any_sym_type_id) {
+      // "Any" consumes all the dimensions, and remains available to consume
+      // the dtype
+      out_concrete_dtype = concrete.get_dtype();
+      out_pattern_dtype = pattern;
+      return true;
     }
     else {
       return false;

@@ -38,7 +38,10 @@ public:
 
     bool is_lossless_assignment(const ndt::type& dst_tp, const ndt::type& src_tp) const;
 
-    bool operator==(const base_type& rhs) const;
+    bool operator==(const base_type &rhs) const;
+
+    ndt::type get_type_at_dimension(char **inout_arrmeta, intptr_t i,
+                                    intptr_t total_ndim = 0) const;
 
     void arrmeta_default_construct(char *arrmeta, bool blockref_alloc) const;
     void arrmeta_copy_construct(char *dst_arrmeta, const char *src_arrmeta,

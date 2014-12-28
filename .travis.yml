@@ -47,7 +47,7 @@ before_script:
 script:
   - make || exit 1
   - if [ "$DYND_CUDA" == "ON" ]; then exit; fi
-  - if [ "$DYND_BUILD_TESTS" == "ON"]; then ./tests/test_libdynd; fi
+  - if [ "$DYND_BUILD_TESTS" == "ON" ]; then ./tests/test_libdynd; fi
   - if [ "$VALGRIND" == "ON" ]; then valgrind --tool=memcheck --leak-check=yes --show-reachable=yes --error-exitcode=123 ./tests/test_libdynd; fi
   - if [ "$PYTHON" == "ON" ]; then sudo make install; sudo ldconfig; fi
   - if [ "$PYTHON" == "ON" ]; then git clone https://github.com/libdynd/dynd-python.git; fi

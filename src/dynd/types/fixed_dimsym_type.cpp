@@ -94,9 +94,9 @@ fixed_dimsym_type::at_single(intptr_t DYND_UNUSED(i0),
   return m_element_tp;
 }
 
-ndt::type fixed_dimsym_type::get_type_at_dimension(char **DYND_UNUSED(inout_arrmeta),
-                                                    intptr_t i,
-                                                    intptr_t total_ndim) const
+ndt::type
+fixed_dimsym_type::get_type_at_dimension(char **DYND_UNUSED(inout_arrmeta),
+                                         intptr_t i, intptr_t total_ndim) const
 {
   if (i == 0) {
     return ndt::type(this, true);

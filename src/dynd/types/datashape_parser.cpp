@@ -41,6 +41,7 @@
 #include <dynd/types/option_type.hpp>
 #include <dynd/types/adapt_type.hpp>
 #include <dynd/func/callable.hpp>
+#include <dynd/types/any_sym_type.hpp>
 
 using namespace std;
 using namespace dynd;
@@ -1268,6 +1269,9 @@ static ndt::type parse_datashape_nooption(const char *&rbegin, const char *end,
       // Fall through to struct/tuple cases to allow "c{" and "c("
       // matching
       --begin;
+    }
+    else if (parse::compare_range_to_literal(nbegin, nend, "Any")) {
+      result = ndt::make_any_sym();
     }
     else if (isupper(*nbegin)) {
       result = ndt::make_typevar(nd::string(nbegin, nend));

@@ -534,9 +534,20 @@ public:
      * Returns true if the type constains a symbolic construct
      * like a type var.
      */
-    bool is_symbolic() const {
-        return !is_builtin() &&
-               (m_extended->get_flags() & type_flag_symbolic) != 0;
+    bool is_symbolic() const
+    {
+      return !is_builtin() &&
+             (m_extended->get_flags() & type_flag_symbolic) != 0;
+    }
+
+    /**
+     * Returns true if the type constains a symbolic dimension
+     * which matches a variadic number of dimensions.
+     */
+    bool is_dim_variadic() const
+    {
+      return !is_builtin() &&
+             (m_extended->get_flags() & type_flag_dim_variadic) != 0;
     }
 
     /**
