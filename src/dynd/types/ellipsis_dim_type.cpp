@@ -48,24 +48,6 @@ void ellipsis_dim_type::print_type(std::ostream& o) const
     o << "... * " << get_element_type();
 }
 
-ndt::type ellipsis_dim_type::apply_linear_index(
-    intptr_t DYND_UNUSED(nindices), const irange *DYND_UNUSED(indices),
-    size_t DYND_UNUSED(current_i), const ndt::type &DYND_UNUSED(root_tp),
-    bool DYND_UNUSED(leading_dimension)) const
-{
-    throw type_error("Cannot store data of ellipsis type");
-}
-
-intptr_t ellipsis_dim_type::apply_linear_index(
-    intptr_t DYND_UNUSED(nindices), const irange *DYND_UNUSED(indices),
-    const char *DYND_UNUSED(arrmeta), const ndt::type &DYND_UNUSED(result_tp),
-    char *DYND_UNUSED(out_arrmeta), memory_block_data *DYND_UNUSED(embedded_reference), size_t DYND_UNUSED(current_i),
-    const ndt::type &DYND_UNUSED(root_tp), bool DYND_UNUSED(leading_dimension), char **DYND_UNUSED(inout_data),
-    memory_block_data **DYND_UNUSED(inout_dataref)) const
-{
-    throw type_error("Cannot store data of ellipsis type");
-}
-
 intptr_t ellipsis_dim_type::get_dim_size(const char *DYND_UNUSED(arrmeta),
                                         const char *DYND_UNUSED(data)) const
 {
@@ -97,6 +79,22 @@ bool ellipsis_dim_type::operator==(const base_type& rhs) const
         return m_name == tvt->m_name &&
                m_element_tp == tvt->m_element_tp;
     }
+}
+
+ndt::type
+ellipsis_dim_type::get_type_at_dimension(char **DYND_UNUSED(inout_arrmeta),
+                                        intptr_t i, intptr_t total_ndim) const
+{
+  if (i == 0) {
+    return ndt::type(this, true);
+  }
+  else if (i <= m_element_tp.get_ndim()) {
+    return m_element_tp.get_type_at_dimension(NULL, i - 1, total_ndim + 1);
+  } else {
+    return m_element_tp.get_type_at_dimension(NULL, m_element_tp.get_ndim(),
+                                              total_ndim + 1 +
+                                                  m_element_tp.get_ndim());
+  }
 }
 
 void ellipsis_dim_type::arrmeta_default_construct(

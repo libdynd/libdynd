@@ -56,6 +56,33 @@ TEST(TypePatternMatch, Simple)
       ndt::pattern_match(ndt::type("... * int32"), ndt::type("... * T")));
 }
 
+TEST(TypePatternMatch, Any)
+{
+  // Match various dtypes against "Any"
+  EXPECT_TRUE(ndt::pattern_match(ndt::type("Any"), ndt::type("Any")));
+  EXPECT_TRUE(ndt::pattern_match(ndt::type("int32"), ndt::type("Any")));
+  EXPECT_TRUE(
+      ndt::pattern_match(ndt::type("(float32, Any)"), ndt::type("Any")));
+  EXPECT_TRUE(
+      ndt::pattern_match(ndt::type("{x: Any, y: bool}"), ndt::type("Any")));
+  EXPECT_TRUE(
+      ndt::pattern_match(ndt::type("pointer[complex]"), ndt::type("Any")));
+  EXPECT_TRUE(ndt::pattern_match(ndt::type("?float64"), ndt::type("Any")));
+
+  // Match various dimensions + dtypes against "Any"
+  EXPECT_TRUE(ndt::pattern_match(ndt::type("Fixed * T"), ndt::type("Any")));
+  EXPECT_TRUE(ndt::pattern_match(ndt::type("D * T"), ndt::type("Any")));
+  EXPECT_TRUE(ndt::pattern_match(ndt::type("... * T"), ndt::type("Any")));
+  EXPECT_TRUE(
+      ndt::pattern_match(ndt::type("Dims... * float64"), ndt::type("Any")));
+  EXPECT_TRUE(ndt::pattern_match(ndt::type("2 * 3 * complex[float32]"),
+                                 ndt::type("Any")));
+  EXPECT_TRUE(ndt::pattern_match(
+      ndt::type("3 * {x: 2 * int32, y: var * int16}"), ndt::type("Any")));
+  EXPECT_TRUE(ndt::pattern_match(
+      ndt::type("3 * 5 * var * (int32, float16, 2 * int8)"), ndt::type("Any")));
+}
+
 TEST(TypePatternMatch, Struct)
 {
   EXPECT_TRUE(

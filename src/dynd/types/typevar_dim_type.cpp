@@ -73,6 +73,18 @@ bool typevar_dim_type::operator==(const base_type& rhs) const
     }
 }
 
+ndt::type
+typevar_dim_type::get_type_at_dimension(char **DYND_UNUSED(inout_arrmeta),
+                                        intptr_t i, intptr_t total_ndim) const
+{
+  if (i == 0) {
+    return ndt::type(this, true);
+  }
+  else {
+    return m_element_tp.get_type_at_dimension(NULL, i - 1, total_ndim + 1);
+  }
+}
+
 void typevar_dim_type::arrmeta_default_construct(
     char *DYND_UNUSED(arrmeta), bool DYND_UNUSED(blockref_alloc)) const
 {
