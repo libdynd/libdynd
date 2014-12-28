@@ -333,6 +333,10 @@ namespace nd {
       std::tuple<> m_vals;
 
     public:
+      static intptr_t get_size() {
+        return 0;
+      }
+
       const char *get_name(intptr_t DYND_UNUSED(i)) const
       {
         throw std::runtime_error("");
@@ -395,6 +399,10 @@ namespace nd {
         ndt::index_proxy<I>::template get_types(m_types, get_vals());
       }
 #endif
+
+      static intptr_t get_size() {
+        return sizeof...(T);
+      }
 
       /*
         const char *(&get_names() const)[sizeof...(T)] {
@@ -628,7 +636,8 @@ namespace nd {
       if (nsrc != self_tp->get_npos()) {
         std::stringstream ss;
         ss << "arrfunc expected " << self_tp->get_npos()
-           << " parameters, but received " << nsrc;
+           << " parameters, but received " << nsrc << ". arrfunc signature is "
+           << ndt::type(self_tp, true);
         throw std::invalid_argument(ss.str());
       }
       const ndt::type *param_types = self_tp->get_pos_types_raw();
@@ -653,6 +662,14 @@ namespace nd {
             reinterpret_cast<ndt::type *>(kwd_tp.get_data()), typevars);
 
         // check that we have the exact number of available parameters
+        if (intptr_t(available.size() + missing.size()) < self_tp->get_nkwd()) {
+          std::stringstream ss;
+          // TODO: Provide the missing keyword parameter names in this error
+          //       message
+          ss << "arrfunc requires keyword parameters that were not provided. "
+                "arrfunc signature " << ndt::type(self_tp, true);
+          throw std::invalid_argument(ss.str());
+        }
 
         ndt::get_forward_types(kwd_tp, kwds.get_vals(),
                                available.empty() ? NULL : available.data());
@@ -665,6 +682,13 @@ namespace nd {
           self->resolve_option_values(self, self_tp, nsrc, src_tp,
                                       kwds_as_array);
         }
+      }
+      else if (kwds.get_size() != 0) {
+        stringstream ss;
+        ss << "arrfunc does not accept keyword arguments, but was provided "
+              "keyword arguments. arrfunc signature is "
+           << ndt::type(self_tp, true);
+        throw std::invalid_argument(ss.str());
       }
 
       if (self->resolve_dst_type != NULL) {
