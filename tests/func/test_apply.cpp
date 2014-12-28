@@ -30,13 +30,15 @@ class Apply<KernelRequestHost> : public ::testing::Test {
 public:
   static const kernel_request_t KernelRequest = KernelRequestHost::value;
 
+  // This is a workaround for a CUDA bug
   template <typename T>
-  static nd::array To(const std::initializer_list<T> &a)
-  {
+  static nd::array To(const std::initializer_list<T> &a) { 
     return nd::array(a);
   }
 
-  static nd::array To(nd::array a) { return a; }
+  static nd::array To(const nd::array &a) { 
+    return a;
+  }
 };
 
 #ifdef DYND_CUDA
@@ -51,6 +53,7 @@ public:
 
   static nd::array To(const nd::array &a) { return a.to_cuda_device(); }
 
+  // This is a workaround for a CUDA bug
   template <typename T>
   static nd::array To(const std::initializer_list<T> &a)
   {
@@ -238,6 +241,23 @@ DYND_CUDA_HOST_DEVICE unsigned int func3() { return 12U; }
 GET_CUDA_HOST_DEVICE_FUNC(func3)
 CUDA_HOST_DEVICE_FUNC_AS_CALLABLE(func3);
 
+DYND_CUDA_HOST_DEVICE double func4(const double (&x)[3], const double (&y)[3])
+{
+  return x[0] * y[0] + x[1] * y[1] + x[2] * y[2];
+}
+
+DYND_CUDA_HOST_DEVICE long func5(const long (&x)[2][3])
+{
+  return x[0][0] + x[0][1] + x[1][2];
+}
+
+DYND_CUDA_HOST_DEVICE int func6(int x, int y, int z) { return x * y - z; }
+
+DYND_CUDA_HOST_DEVICE double func7(int x, int y, double z)
+{
+  return (x % y) * z;
+}
+
 #undef GET_HOST_FUNC
 #undef HOST_FUNC_AS_CALLABLE
 
@@ -247,6 +267,9 @@ CUDA_HOST_DEVICE_FUNC_AS_CALLABLE(func3);
 #undef CUDA_DEVICE_FUNC_AS_CALLABLE
 
 #endif
+
+#undef GET_CUDA_HOST_DEVICE_FUNC
+#undef CUDA_HOST_DEVICE_FUNC_AS_CALLABLE
 
 TEST(Apply, Function)
 {
@@ -263,6 +286,25 @@ TEST(Apply, Function)
 
   af = nd::apply::make<kernel_request_host, decltype(&func3), &func3>();
   EXPECT_ARR_EQ(TestFixture::To(12U), af());
+
+  /*
+    af = nd::apply::make<kernel_request_host, decltype(&func4), &func4>();
+    EXPECT_ARR_EQ(TestFixture::To(166.765), af(nd::array({9.14, -2.7, 15.32}),
+                                               nd::array({0.0, 0.65, 11.0})));
+
+  af = nd::apply::make<kernel_request_host, decltype(&func5), &func5>();
+  EXPECT_EQ(1251L, af(nd::array({{1242L, 23L, -5L}, {925L, -836L, -14L}})
+                          .view(ndt::make_type<long[2][3]>())).as<long>());
+  */
+
+  af = nd::apply::make<kernel_request_host, decltype(&func6), &func6>();
+  EXPECT_ARR_EQ(TestFixture::To(8),
+                af(TestFixture::To(3), TestFixture::To(5), TestFixture::To(7)));
+
+  af = nd::apply::make<kernel_request_host, decltype(&func7), &func7>();
+  EXPECT_ARR_EQ(
+      TestFixture::To(36.3),
+      af(TestFixture::To(38), TestFixture::To(5), TestFixture::To(12.1)));
 }
 
 TEST(Apply, FunctionWithKeywords)
@@ -319,12 +361,12 @@ TYPED_TEST_P(Apply, Callable)
   }
 #endif
 
-/*
-  af = nd::apply::make<TestFixture::KernelRequest>(
-      get_func2<TestFixture::KernelRequest>());
-  EXPECT_ARR_EQ(TestFixture::To(13.6f),
-                af(TestFixture::To({3.9f, -7.0f, 16.7f})));
-*/
+  /*
+    af = nd::apply::make<TestFixture::KernelRequest>(
+        get_func2<TestFixture::KernelRequest>());
+    EXPECT_ARR_EQ(TestFixture::To(13.6f),
+                  af(TestFixture::To({3.9f, -7.0f, 16.7f})));
+  */
 
   af = nd::apply::make<TestFixture::KernelRequest>(
       get_func3<TestFixture::KernelRequest>());

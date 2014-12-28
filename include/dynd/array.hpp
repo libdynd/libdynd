@@ -221,14 +221,14 @@ namespace nd {
 
     /** Constructs an array from a 1D initializer list */
     template <class T>
-    array(std::initializer_list<T> il);
+    array(const std::initializer_list<T> &il);
     /** Constructs an array from a 2D initializer list */
     template <class T>
-    array(std::initializer_list<std::initializer_list<T>> il);
+    array(const std::initializer_list<std::initializer_list<T>> &il);
     /** Constructs an array from a 3D initializer list */
     template <class T>
-    array(std::initializer_list<std::initializer_list<std::initializer_list<T>>>
-              il);
+    array(const std::initializer_list<std::initializer_list<std::initializer_list<T>>>
+              &il);
 
     /** Assigns an array from a 1D initializer list */
     template <class T>
@@ -1595,7 +1595,7 @@ namespace nd {
 
   // Implementation of initializer list construction
   template <class T>
-  dynd::nd::array::array(std::initializer_list<T> il)
+  dynd::nd::array::array(const std::initializer_list<T> &il)
       : m_memblock()
   {
     intptr_t dim0 = il.size();
@@ -1604,7 +1604,7 @@ namespace nd {
     DYND_MEMCPY(get_ndo()->m_data_pointer, il.begin(), sizeof(T) * dim0);
   }
   template <class T>
-  dynd::nd::array::array(std::initializer_list<std::initializer_list<T>> il)
+  dynd::nd::array::array(const std::initializer_list<std::initializer_list<T>> &il)
       : m_memblock()
   {
     typedef std::initializer_list<std::initializer_list<T>> S;
@@ -1619,7 +1619,7 @@ namespace nd {
   }
   template <class T>
   dynd::nd::array::array(
-      std::initializer_list<std::initializer_list<std::initializer_list<T>>> il)
+      const std::initializer_list<std::initializer_list<std::initializer_list<T>>> &il)
       : m_memblock()
   {
     typedef std::initializer_list<
