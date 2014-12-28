@@ -149,6 +149,9 @@ FUNC_WRAPPER(kernel_request_cuda_device, __device__);
     }                                                                          \
   }
 
+#ifdef __CUDA_ARCH__
+#define GET_CUDA_DEVICE_FUNC_BODY(NAME) return &NAME;
+#else
 #define GET_CUDA_DEVICE_FUNC_BODY(NAME)                                        \
   decltype(&NAME) res;                                                         \
   decltype(&NAME) *func, *cuda_device_func;                                    \
@@ -162,6 +165,7 @@ FUNC_WRAPPER(kernel_request_cuda_device, __device__);
   throw_if_not_cuda_success(cudaFreeHost(func));                               \
                                                                                \
   return res;
+#endif
 
 #ifdef __CUDACC__
 
@@ -172,8 +176,9 @@ FUNC_WRAPPER(kernel_request_cuda_device, __device__);
   }                                                                            \
                                                                                \
   template <kernel_request_t kernreq>                                          \
-  typename std::enable_if<kernreq == kernel_request_cuda_device,               \
-                          decltype(&NAME)>::type get_##NAME()                  \
+  DYND_CUDA_HOST_DEVICE typename std::enable_if<                               \
+      kernreq == kernel_request_cuda_device, decltype(&NAME)>::type            \
+      get_##NAME()                                                             \
   {                                                                            \
     GET_CUDA_DEVICE_FUNC_BODY(NAME)                                            \
   }
@@ -185,13 +190,25 @@ FUNC_WRAPPER(kernel_request_cuda_device, __device__);
   template <>                                                                  \
   struct NAME##_as_callable<kernel_request_cuda_device>                        \
       : func_wrapper<kernel_request_cuda_device, decltype(&NAME)> {            \
-    NAME##_as_callable()                                                       \
+    DYND_CUDA_HOST_DEVICE NAME##_as_callable()                                 \
         : func_wrapper<kernel_request_cuda_device, decltype(&NAME)>(           \
               get_##NAME<kernel_request_cuda_device>())                        \
     {                                                                          \
     }                                                                          \
   }
 
+#endif
+
+#ifdef __CUDACC__
+#define GET_CUDA_HOST_DEVICE_FUNC(NAME)                                        \
+  GET_HOST_FUNC(NAME)                                                          \
+  GET_CUDA_DEVICE_FUNC(NAME)
+#define CUDA_HOST_DEVICE_FUNC_AS_CALLABLE(NAME)                                \
+  HOST_FUNC_AS_CALLABLE(NAME);                                                 \
+  CUDA_DEVICE_FUNC_AS_CALLABLE(NAME)
+#else
+#define GET_CUDA_HOST_DEVICE_FUNC GET_HOST_FUNC
+#define CUDA_HOST_DEVICE_FUNC_AS_CALLABLE HOST_FUNC_AS_CALLABLE
 #endif
 
 int func0(int x, int y) { return 2 * (x - y); }
@@ -207,6 +224,19 @@ GET_CUDA_DEVICE_FUNC(func1)
 CUDA_DEVICE_FUNC_AS_CALLABLE(func1);
 
 #endif
+
+DYND_CUDA_HOST_DEVICE float func2(const float (&x)[3])
+{
+  return x[0] + x[1] + x[2];
+}
+
+GET_CUDA_HOST_DEVICE_FUNC(func2)
+CUDA_HOST_DEVICE_FUNC_AS_CALLABLE(func2);
+
+DYND_CUDA_HOST_DEVICE unsigned int func3() { return 12U; }
+
+GET_CUDA_HOST_DEVICE_FUNC(func3)
+CUDA_HOST_DEVICE_FUNC_AS_CALLABLE(func3);
 
 #undef GET_HOST_FUNC
 #undef HOST_FUNC_AS_CALLABLE
@@ -226,6 +256,13 @@ TEST(Apply, Function)
 
   af = nd::apply::make<kernel_request_host, decltype(&func0), &func0>();
   EXPECT_ARR_EQ(TestFixture::To(4), af(TestFixture::To(5), TestFixture::To(3)));
+
+  af = nd::apply::make<kernel_request_host, decltype(&func2), &func2>();
+  EXPECT_ARR_EQ(TestFixture::To(13.6f),
+                af(TestFixture::To({3.9f, -7.0f, 16.7f})));
+
+  af = nd::apply::make<kernel_request_host, decltype(&func3), &func3>();
+  EXPECT_ARR_EQ(TestFixture::To(12U), af());
 }
 
 TEST(Apply, FunctionWithKeywords)
@@ -275,15 +312,31 @@ TYPED_TEST_P(Apply, Callable)
     EXPECT_ARR_EQ(TestFixture::To(58.25),
                   af(TestFixture::To(3.25), TestFixture::To(20)));
 
-    /*
-        af =
-            nd::apply::make<kernel_request_cuda_device,
-                                   func1_as_callable<kernel_request_cuda_device>>();
-        EXPECT_ARR_EQ(TestFixture::To(58.25),
-                      af(TestFixture::To(3.25), TestFixture::To(20)));
-    */
+    af = nd::apply::make<kernel_request_cuda_device,
+                         func1_as_callable<kernel_request_cuda_device>>();
+    EXPECT_ARR_EQ(TestFixture::To(58.25),
+                  af(TestFixture::To(3.25), TestFixture::To(20)));
   }
 #endif
+
+/*
+  af = nd::apply::make<TestFixture::KernelRequest>(
+      get_func2<TestFixture::KernelRequest>());
+  EXPECT_ARR_EQ(TestFixture::To(13.6f),
+                af(TestFixture::To({3.9f, -7.0f, 16.7f})));
+*/
+
+  af = nd::apply::make<TestFixture::KernelRequest>(
+      get_func3<TestFixture::KernelRequest>());
+  EXPECT_ARR_EQ(TestFixture::To(12U), af());
+
+  af = nd::apply::make<TestFixture::KernelRequest>(
+      func3_as_callable<TestFixture::KernelRequest>());
+  EXPECT_ARR_EQ(TestFixture::To(12U), af());
+
+  af = nd::apply::make<TestFixture::KernelRequest,
+                       func3_as_callable<TestFixture::KernelRequest>>();
+  EXPECT_ARR_EQ(TestFixture::To(12U), af());
 }
 
 TYPED_TEST_P(Apply, CallableWithKeywords)
@@ -311,27 +364,33 @@ TYPED_TEST_P(Apply, CallableWithKeywords)
 
 #ifdef __CUDACC__
   if (TestFixture::KernelRequest == kernel_request_cuda_device) {
-/*
-    af = nd::apply::make<kernel_request_cuda_device>(
-        get_func1<kernel_request_cuda_device>(), "y");
-    EXPECT_ARR_EQ(TestFixture::To(58.25),
-                  af(TestFixture::To(3.25), kwds("y", TestFixture::To(20))));
+    /*
+        af = nd::apply::make<kernel_request_cuda_device>(
+            get_func1<kernel_request_cuda_device>(), "y");
+        EXPECT_ARR_EQ(TestFixture::To(58.25),
+                      af(TestFixture::To(3.25), kwds("y",
+       TestFixture::To(20))));
 
-    af = nd::apply::make<kernel_request_cuda_device>(
-        get_func1<kernel_request_cuda_device>(), "x", "y");
-    EXPECT_ARR_EQ(TestFixture::To(58.25), af(kwds("x", TestFixture::To(3.25),
-                                                  "y", TestFixture::To(20))));
+        af = nd::apply::make<kernel_request_cuda_device>(
+            get_func1<kernel_request_cuda_device>(), "x", "y");
+        EXPECT_ARR_EQ(TestFixture::To(58.25), af(kwds("x",
+       TestFixture::To(3.25),
+                                                      "y",
+       TestFixture::To(20))));
 
-    af = nd::apply::make<kernel_request_cuda_device>(
-        func1_as_callable<kernel_request_cuda_device>(), "y");
-    EXPECT_ARR_EQ(TestFixture::To(58.25),
-                  af(TestFixture::To(3.25), kwds("y", TestFixture::To(20))));
+        af = nd::apply::make<kernel_request_cuda_device>(
+            func1_as_callable<kernel_request_cuda_device>(), "y");
+        EXPECT_ARR_EQ(TestFixture::To(58.25),
+                      af(TestFixture::To(3.25), kwds("y",
+       TestFixture::To(20))));
 
-    af = nd::apply::make<kernel_request_cuda_device>(
-        func1_as_callable<kernel_request_cuda_device>(), "x", "y");
-    EXPECT_ARR_EQ(TestFixture::To(58.25), af(kwds("x", TestFixture::To(3.25),
-                                                  "y", TestFixture::To(20))));
-*/
+        af = nd::apply::make<kernel_request_cuda_device>(
+            func1_as_callable<kernel_request_cuda_device>(), "x", "y");
+        EXPECT_ARR_EQ(TestFixture::To(58.25), af(kwds("x",
+       TestFixture::To(3.25),
+                                                      "y",
+       TestFixture::To(20))));
+    */
   }
 #endif
 }
