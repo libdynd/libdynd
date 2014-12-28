@@ -33,6 +33,7 @@ TEST(SymbolicTypes, CreateFuncProto)
   // function prototype is not actually symbolic, it is
   // used to store arrfunc objects
   EXPECT_FALSE(tp.is_symbolic());
+  EXPECT_FALSE(tp.is_dim_variadic());
   fpt = tp.extended<arrfunc_type>();
   ASSERT_EQ(3, fpt->get_narg());
   EXPECT_EQ(ndt::make_type<float>(), fpt->get_pos_type(0));
@@ -83,6 +84,8 @@ TEST(SymbolicTypes, CreateTypeVar)
   EXPECT_EQ(0u, tp.get_data_size());
   EXPECT_EQ(1u, tp.get_data_alignment());
   EXPECT_FALSE(tp.is_pod());
+  EXPECT_TRUE(tp.is_symbolic());
+  EXPECT_FALSE(tp.is_dim_variadic());
   tvt = tp.extended<typevar_type>();
   EXPECT_EQ("Blah", tvt->get_name_str());
   // Roundtripping through a string
@@ -112,6 +115,8 @@ TEST(SymbolicTypes, CreateTypeVarDim)
   EXPECT_EQ(0u, tp.get_data_size());
   EXPECT_EQ(1u, tp.get_data_alignment());
   EXPECT_FALSE(tp.is_pod());
+  EXPECT_TRUE(tp.is_symbolic());
+  EXPECT_FALSE(tp.is_dim_variadic());
   tvt = tp.extended<typevar_dim_type>();
   EXPECT_EQ("Blah", tvt->get_name_str());
   EXPECT_EQ(ndt::make_type<int>(), tvt->get_element_type());
@@ -145,6 +150,7 @@ TEST(SymbolicTypes, CreateEllipsisDim)
   EXPECT_EQ(1u, tp.get_data_alignment());
   EXPECT_FALSE(tp.is_pod());
   EXPECT_TRUE(tp.is_symbolic());
+  EXPECT_TRUE(tp.is_dim_variadic());
   et = tp.extended<ellipsis_dim_type>();
   EXPECT_EQ("Blah", et->get_name_str());
   EXPECT_EQ(ndt::make_type<int>(), et->get_element_type());
@@ -162,6 +168,7 @@ TEST(SymbolicTypes, CreateEllipsisDim)
   EXPECT_EQ(1u, tp.get_data_alignment());
   EXPECT_FALSE(tp.is_pod());
   EXPECT_TRUE(tp.is_symbolic());
+  EXPECT_TRUE(tp.is_dim_variadic());
   et = tp.extended<ellipsis_dim_type>();
   EXPECT_TRUE(et->get_name().is_null());
   EXPECT_EQ(ndt::make_type<int>(), et->get_element_type());
