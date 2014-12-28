@@ -729,6 +729,23 @@ namespace nd {
     }
 
     /**
+     * operator()()
+     */
+    nd::array operator()() const
+    {
+      return call(detail::args<>(), detail::kwds<>(),
+                  &eval::default_eval_context);
+    }
+
+    /**
+     * operator()(ectx)
+     */
+    nd::array operator()(const eval::eval_context *ectx) const
+    {
+      return call(detail::args<>(), detail::kwds<>(), ectx);
+    }
+
+    /**
      * operator()(a0, a1, ..., an, kwds<...>(...))
      */
     template <typename... T>

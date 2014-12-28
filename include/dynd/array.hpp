@@ -150,7 +150,7 @@ namespace nd {
     array() = default;
 
     /** Copy constructs an array */
-    array(const array &rhs) = default;
+    array(const array &) = default;
     /**
      * Move constructs an array (should be "= default", but MSVC 2013 does not
      * support that)
