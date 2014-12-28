@@ -481,9 +481,9 @@ ndt::type ndt::make_type(intptr_t ndim, const intptr_t *shape, const ndt::type& 
     }
 }
 
-ndt::type ndt::get_type(const nd::array &val)
+ndt::type ndt::as_type(const nd::array &value)
 {
-  return val.get_type();
+  return value.get_type();
 }
 
 ndt::type ndt::get_forward_type(const nd::array &val)
