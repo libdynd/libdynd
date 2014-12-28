@@ -259,8 +259,7 @@ TEST(Apply, Function)
 
   af = nd::apply::make<kernel_request_host, decltype(&func2), &func2>();
   EXPECT_ARR_EQ(TestFixture::To(13.6f),
-                af(TestFixture::To({3.9f, -7.0f, 16.7f})
-                       .view(ndt::make_type<float[3]>())));
+                af(TestFixture::To({3.9f, -7.0f, 16.7f})));
 
   af = nd::apply::make<kernel_request_host, decltype(&func3), &func3>();
   EXPECT_ARR_EQ(TestFixture::To(12U), af());
@@ -319,6 +318,13 @@ TYPED_TEST_P(Apply, Callable)
                   af(TestFixture::To(3.25), TestFixture::To(20)));
   }
 #endif
+
+/*
+  af = nd::apply::make<TestFixture::KernelRequest>(
+      get_func2<TestFixture::KernelRequest>());
+  EXPECT_ARR_EQ(TestFixture::To(13.6f),
+                af(TestFixture::To({3.9f, -7.0f, 16.7f})));
+*/
 
   af = nd::apply::make<TestFixture::KernelRequest>(
       get_func3<TestFixture::KernelRequest>());

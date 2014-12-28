@@ -32,8 +32,12 @@ public:
 
     size_t get_default_data_size() const;
 
-    inline intptr_t get_fixed_dim_size() const {
+    intptr_t get_fixed_dim_size() const {
         return m_dim_size;
+    }
+
+    intptr_t get_fixed_stride(const char *arrmeta) const {
+      return reinterpret_cast<const size_stride_t *>(arrmeta)->stride;
     }
 
     void print_data(std::ostream& o, const char *arrmeta, const char *data) const;

@@ -613,25 +613,12 @@ namespace nd {
     }
 
     template <typename... K>
-    ndt::type resolve(intptr_t nsrc, const ndt::type *src_tp,
+    ndt::type resolve(intptr_t nsrc, const ndt::type *src_tp, const char *const *src_arrmeta,
                       const detail::kwds<K...> &kwds,
                       array &kwds_as_array) const
     {
       const arrfunc_type_data *self = get();
       const arrfunc_type *self_tp = m_value.get_type().extended<arrfunc_type>();
-
-      /*
-            if (self->resolve_dst_type != NULL) {
-              kwds_as_array = forward_as_array(
-                  kwds.get_names(), ndt::get_forward_types(kwds.get_vals()),
-                  kwds.get_vals(), NULL, NULL);
-
-              ndt::type dst_tp;
-              self->resolve_dst_type(self, self_tp, nsrc, src_tp, true, dst_tp,
-                                     kwds_as_array);
-              return dst_tp;
-            }
-      */
 
       if (nsrc != self_tp->get_npos()) {
         std::stringstream ss;
@@ -644,7 +631,7 @@ namespace nd {
       std::map<nd::string, ndt::type> typevars;
       for (intptr_t i = 0; i != nsrc; ++i) {
         ndt::type expected_tp = param_types[i];
-        if (!ndt::pattern_match(src_tp[i].value_type(), expected_tp,
+        if (!ndt::pattern_match(src_tp[i].value_type(), src_arrmeta[i], expected_tp,
                                 typevars)) {
           std::stringstream ss;
           ss << "parameter " << (i + 1) << " to arrfunc does not match, ";
@@ -712,7 +699,7 @@ namespace nd {
       // Resolve the destination type
       const ndt::type *src_tp = args.get_types();
       nd::array kwds_as_array;
-      ndt::type dst_tp = resolve(sizeof...(A), src_tp, kwds, kwds_as_array);
+      ndt::type dst_tp = resolve(sizeof...(A), src_tp, args.get_arrmeta(), kwds, kwds_as_array);
 
       // Construct the destination array
       nd::array res = nd::empty(dst_tp);
