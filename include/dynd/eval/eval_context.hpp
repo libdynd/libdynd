@@ -17,6 +17,14 @@
 
 namespace dynd { namespace eval {
 
+/**
+ * Metafunction that returns true when the type is eval::eval_context
+ */
+template<typename T>
+struct is_eval_context {
+  static const bool value = false;
+};
+
 struct eval_context {
     // If the compiler supports atomics, use them for access
     // to the evaluation context settings, 
@@ -65,6 +73,26 @@ struct eval_context {
         return *this;
     }
 #endif
+};
+
+template <>
+struct is_eval_context<eval_context *> {
+  static const bool value = true;
+};
+
+template <>
+struct is_eval_context<const eval_context *> {
+  static const bool value = true;
+};
+
+template <>
+struct is_eval_context<eval_context *&> {
+  static const bool value = true;
+};
+
+template <>
+struct is_eval_context<const eval_context *&> {
+  static const bool value = true;
 };
 
 extern eval_context default_eval_context;

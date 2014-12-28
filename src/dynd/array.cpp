@@ -37,8 +37,6 @@
 using namespace std;
 using namespace dynd;
 
-nd::array::array() : m_memblock() {}
-
 void nd::array::swap(array &rhs) { m_memblock.swap(rhs.m_memblock); }
 
 template <class T>

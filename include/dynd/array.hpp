@@ -147,10 +147,15 @@ namespace nd {
 
   public:
     /** Constructs an array with no buffer (NULL state) */
-    array();
+    array() = default;
 
     /** Copy constructs an array */
-    inline array(const array &rhs) : m_memblock(rhs.m_memblock) {}
+    array(const array &rhs) = default;
+    /**
+     * Move constructs an array (should be "= default", but MSVC 2013 does not
+     * support that)
+     */
+    array(array &&rhs) : m_memblock(std::move(rhs.m_memblock)) {};
 
     /**
      * Constructs a zero-dimensional scalar from a C++ scalar.

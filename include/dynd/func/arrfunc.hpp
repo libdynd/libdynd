@@ -704,6 +704,9 @@ namespace nd {
       return res;
     }
 
+    /**
+     * operator()(a0, a1, ..., an, kwds<...>(...))
+     */
     template <typename... T>
     typename std::enable_if<
         detail::is_kwds<typename back<type_sequence<T...>>::type>::value,
@@ -722,14 +725,65 @@ namespace nd {
                   &eval::default_eval_context);
     }
 
+    /**
+     * operator()(a0, a1, ..., an)
+     */
     template <typename... T>
     typename std::enable_if<
-        !detail::is_kwds<typename back<type_sequence<T...>>::type>::value,
-        array>::type
+        !detail::is_kwds<typename back<type_sequence<T...>>::type>::value &&
+            !eval::is_eval_context<
+                typename back<type_sequence<T...>>::type>::value,
+        nd::array>::type
     operator()(T &&... a) const
     {
       detail::args<typename as_array<T>::type...> arr(std::forward<T>(a)...);
       return call(arr, kwds(), &eval::default_eval_context);
+    }
+
+    /**
+     * operator()(a0, a1, ..., an, kwds<...>(...), eval_ctx)
+     */
+    template <typename... T>
+    typename std::enable_if<
+        detail::is_kwds<typename second_back<type_sequence<T...>>::type>::value &&
+            eval::is_eval_context<
+                typename back<type_sequence<T...>>::type>::value,
+        nd::array>::type
+    operator()(T &&... a) const
+    {
+      typedef make_index_sequence<sizeof...(T)-2> I;
+      typedef typename instantiate<
+          detail::args,
+          typename to<type_sequence<typename as_array<T>::type...>,
+                      sizeof...(T)-2>::type>::type args_type;
+
+      args_type arr =
+          dynd::index_proxy<I>::template make<args_type>(std::forward<T>(a)...);
+      return call(arr, dynd::get<sizeof...(T)-2>(std::forward<T>(a)...),
+                  dynd::get<sizeof...(T)-1>(std::forward<T>(a)...));
+    }
+
+    /**
+     * operator()(a0, a1, ..., an, eval_ctx)
+     */
+    template <typename... T>
+    typename std::enable_if<
+        !detail::is_kwds<typename second_back<type_sequence<T...>>::type>::value &&
+            eval::is_eval_context<
+                typename back<type_sequence<T...>>::type>::value,
+        nd::array>::type
+    operator()(T &&... a) const
+    {
+      typedef make_index_sequence<sizeof...(T)-1> I;
+      typedef typename instantiate<
+          detail::args,
+          typename to<type_sequence<typename as_array<T>::type...>,
+                      sizeof...(T)-1>::type>::type args_type;
+
+      args_type arr =
+          dynd::index_proxy<I>::template make<args_type>(std::forward<T>(a)...);
+      return call(arr, kwds(),
+                  dynd::get<sizeof...(T)-1>(std::forward<T>(a)...));
     }
 
     /** Implements the general call operator with output parameter */

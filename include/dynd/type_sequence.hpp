@@ -9,8 +9,21 @@
 
 namespace dynd {
 
+/**
+ * Metafunction that returns the last type of a type_sequence<T...>.
+ *
+ * "back<type_sequence<int, float, double>>::type" is "double"
+ */
 template <typename T>
 struct back;
+
+/**
+ * Metafunction that returns the second last type of a type_sequence<T...>.
+ *
+ * "second_back<type_sequence<int, float, double>>::type" is "float"
+ */
+template <typename T>
+struct second_back;
 
 template <typename I, size_t J>
 struct at;
@@ -113,6 +126,16 @@ struct back<type_sequence<T>> {
 template <typename T0, typename... T>
 struct back<type_sequence<T0, T...>> {
   typedef typename back<type_sequence<T...>>::type type;
+};
+
+template <typename S, typename T>
+struct second_back<type_sequence<S, T>> {
+  typedef S type;
+};
+
+template <typename T0, typename T1, typename... T>
+struct second_back<type_sequence<T0, T1, T...>> {
+  typedef typename second_back<type_sequence<T1, T...>>::type type;
 };
 
 template <typename T0, typename... T>
