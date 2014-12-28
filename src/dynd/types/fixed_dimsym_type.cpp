@@ -49,7 +49,7 @@ void fixed_dimsym_type::print_data(std::ostream &DYND_UNUSED(o),
 
 void fixed_dimsym_type::print_type(std::ostream &o) const
 {
-  o << "fixed * " << m_element_tp;
+  o << "Fixed * " << m_element_tp;
 }
 
 bool fixed_dimsym_type::is_expression() const

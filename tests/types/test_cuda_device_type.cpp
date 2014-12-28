@@ -66,7 +66,7 @@ TEST(CUDADeviceType, FixedDim)
   // CUDA host type and CUDA device type have the same data alignment
   EXPECT_EQ(ndt::make_cuda_host(ndt::make_type<float>()).get_data_alignment(),
             d.get_data_alignment());
-  EXPECT_EQ(d, ndt::type("cuda_device[fixed * float32]"));
+  EXPECT_EQ(d, ndt::type("cuda_device[Fixed * float32]"));
 }
 
 TEST(CUDADeviceType, IsTypeSubarray)

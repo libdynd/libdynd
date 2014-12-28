@@ -543,11 +543,11 @@ TEST(VarDimDType, IsTypeSubarray) {
   EXPECT_FALSE(ndt::type("var * int32")
                    .is_type_subarray(ndt::type("var * var * int32")));
   EXPECT_FALSE(
-      ndt::type("var * int32").is_type_subarray(ndt::type("fixed * int32")));
+      ndt::type("var * int32").is_type_subarray(ndt::type("Fixed * int32")));
   EXPECT_FALSE(
       ndt::type("var * int32").is_type_subarray(ndt::type("3 * int32")));
   EXPECT_FALSE(
-      ndt::type("fixed * int32").is_type_subarray(ndt::type("var * int32")));
+      ndt::type("Fixed * int32").is_type_subarray(ndt::type("var * int32")));
   EXPECT_FALSE(
       ndt::type("3 * int32").is_type_subarray(ndt::type("var * int32")));
 }

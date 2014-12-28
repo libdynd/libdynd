@@ -122,7 +122,7 @@ std::ostream &dynd::operator<<(std::ostream &o, type_id_t tid)
   case json_type_id:
     return (o << "json");
   case fixed_dimsym_type_id:
-    return (o << "fixed_sym_dim");
+    return (o << "fixed_dimsym");
   case fixed_dim_type_id:
     return (o << "fixed_dim");
   case cfixed_dim_type_id:

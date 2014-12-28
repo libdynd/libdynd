@@ -190,7 +190,7 @@ void dim_fragment_type::print_type(std::ostream& o) const
         if (m_tagged_dims[i] == dim_fragment_var) {
             o << "var * ";
         } else if (m_tagged_dims[i] == dim_fragment_fixed_sym) {
-            o << "fixed * ";
+            o << "Fixed * ";
         } else {
             o << "fixed[" << m_tagged_dims[i] << "]";
         }

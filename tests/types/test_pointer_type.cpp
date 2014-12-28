@@ -51,7 +51,7 @@ TEST(PointerType, PointerToBuiltIn) {
 
 TEST(PointerType, IsTypeSubarray) {
     EXPECT_TRUE(ndt::type("pointer[int32]").is_type_subarray(ndt::type("pointer[int32]")));
-    EXPECT_TRUE(ndt::type("fixed * 3 * pointer[int32]").is_type_subarray(ndt::type("3 * pointer[int32]")));
+    EXPECT_TRUE(ndt::type("Fixed * 3 * pointer[int32]").is_type_subarray(ndt::type("3 * pointer[int32]")));
     EXPECT_TRUE(ndt::type("3 * 10 * pointer[int32]").is_type_subarray(ndt::type("pointer[int32]")));
     EXPECT_TRUE(ndt::type("pointer[int32]").is_type_subarray(ndt::make_type<int32_t>()));
     EXPECT_FALSE(ndt::make_type<int32_t>().is_type_subarray(ndt::type("pointer[int32]")));
