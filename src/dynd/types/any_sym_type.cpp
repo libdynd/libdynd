@@ -76,9 +76,10 @@ ndt::type any_sym_type::at_single(intptr_t DYND_UNUSED(i0),
   return ndt::type(this, true);
 }
 
-ndt::type any_sym_type::get_type_at_dimension(char **DYND_UNUSED(inout_arrmeta),
-                                              intptr_t i,
-                                              intptr_t total_ndim) const
+ndt::type
+any_sym_type::get_type_at_dimension(char **DYND_UNUSED(inout_arrmeta),
+                                    intptr_t DYND_UNUSED(i),
+                                    intptr_t DYND_UNUSED(total_ndim)) const
 {
   return ndt::type(this, true);
 }

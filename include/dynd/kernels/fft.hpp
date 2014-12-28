@@ -157,8 +157,8 @@ namespace kernels {
 
     static ndt::type make_funcproto()
     {
-      return ndt::type("(fixed**N * complex[float64], shape: ?N * int64, axes: "
-                       "?fixed * int64, flags: ?int32) -> fixed**N * "
+      return ndt::type("(Fixed**N * complex[float64], shape: ?N * int64, axes: "
+                       "?Fixed * int64, flags: ?int32) -> Fixed**N * "
                        "complex[float64]");
     }
 
