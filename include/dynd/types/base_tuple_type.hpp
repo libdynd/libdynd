@@ -49,10 +49,10 @@ public:
 
   /** The number of fields in the struct. This is the size of the other arrays.
    */
-  inline intptr_t get_field_count() const { return m_field_count; }
+  intptr_t get_field_count() const { return m_field_count; }
   /** The array of the field types */
-  inline const nd::array &get_field_types() const { return m_field_types; }
-  inline const ndt::type *get_field_types_raw() const
+  const nd::array &get_field_types() const { return m_field_types; }
+  const ndt::type *get_field_types_raw() const
   {
     return reinterpret_cast<const ndt::type *>(
         m_field_types.get_readonly_originptr());
@@ -60,24 +60,23 @@ public:
   /** The array of the field data offsets */
   virtual const uintptr_t *get_data_offsets(const char *arrmeta) const = 0;
   /** The array of the field arrmeta offsets */
-  inline const nd::array &get_arrmeta_offsets() const
-  {
-    return m_arrmeta_offsets;
-  }
-  inline const uintptr_t *get_arrmeta_offsets_raw() const
+  const nd::array &get_arrmeta_offsets() const { return m_arrmeta_offsets; }
+  const uintptr_t *get_arrmeta_offsets_raw() const
   {
     return reinterpret_cast<const uintptr_t *>(
         m_arrmeta_offsets.get_readonly_originptr());
   }
 
-  inline const ndt::type &get_field_type(intptr_t i) const
+  const ndt::type &get_field_type(intptr_t i) const
   {
     return unchecked_fixed_dim_get<ndt::type>(m_field_types, i);
   }
-  inline const uintptr_t &get_arrmeta_offset(intptr_t i) const
+  const uintptr_t &get_arrmeta_offset(intptr_t i) const
   {
     return unchecked_fixed_dim_get<uintptr_t>(m_arrmeta_offsets, i);
   }
+
+  bool is_variadic() const { return m_variadic; }
 
   void print_data(std::ostream &o, const char *arrmeta, const char *data) const;
   bool is_expression() const;
