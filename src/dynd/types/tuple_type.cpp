@@ -26,7 +26,12 @@ void tuple_type::print_type(std::ostream &o) const
     }
     o << get_field_type(i);
   }
-  o << ")";
+  if (m_variadic) {
+    o << ", ...)";
+  }
+  else {
+    o << ")";
+  }
 }
 
 void tuple_type::transform_child_types(type_transform_fn_t transform_fn,
@@ -45,7 +50,7 @@ void tuple_type::transform_child_types(type_transform_fn_t transform_fn,
   }
   if (was_transformed) {
     tmp_field_types.flag_as_immutable();
-    out_transformed_tp = ndt::make_tuple(tmp_field_types);
+    out_transformed_tp = ndt::make_tuple(tmp_field_types, m_variadic);
     out_was_transformed = true;
   }
   else {
@@ -64,7 +69,7 @@ ndt::type tuple_type::get_canonical_type() const
   }
 
   tmp_field_types.flag_as_immutable();
-  return ndt::make_tuple(tmp_field_types);
+  return ndt::make_tuple(tmp_field_types, m_variadic);
 }
 
 bool tuple_type::is_lossless_assignment(const ndt::type &dst_tp,
@@ -214,7 +219,7 @@ nd::array dynd::pack(intptr_t field_count, const nd::array *field_vals)
 
   nd::array res = nd::empty(ndt::make_tuple(field_types));
   for (intptr_t i = 0; i < field_count; ++i) {
-    res(i).val_assign(field_vals[i]);
+    res.vals_at(i) = field_vals[i];
   }
 
   return res;

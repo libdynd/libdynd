@@ -26,8 +26,9 @@ protected:
   }
 
 public:
-  inline tuple_type(const nd::array &field_types)
-      : base_tuple_type(tuple_type_id, field_types, type_flag_none, true)
+  inline tuple_type(const nd::array &field_types, bool variadic)
+      : base_tuple_type(tuple_type_id, field_types, type_flag_none, true,
+                        variadic)
   {
   }
 
@@ -76,10 +77,11 @@ public:
 
 namespace ndt {
   /** Makes a tuple type with the specified types */
-  inline ndt::type make_tuple(const nd::array &field_types)
+  inline ndt::type make_tuple(const nd::array &field_types,
+                              bool variadic = false)
   {
     // field_types.flag_as_immutable();
-    return ndt::type(new tuple_type(field_types), false);
+    return ndt::type(new tuple_type(field_types, variadic), false);
   }
 
   /** Makes a tuple type with the specified types */

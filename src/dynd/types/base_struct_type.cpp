@@ -21,8 +21,8 @@ using namespace dynd;
 base_struct_type::base_struct_type(type_id_t type_id,
                                    const nd::array &field_names,
                                    const nd::array &field_types,
-                                   flags_type flags, bool variable_layout)
-    : base_tuple_type(type_id, field_types, flags, variable_layout),
+                                   flags_type flags, bool layout_in_arrmeta)
+    : base_tuple_type(type_id, field_types, flags, layout_in_arrmeta, false),
       m_field_names(field_names)
 {
   if (!nd::ensure_immutable_contig<nd::string>(m_field_names)) {

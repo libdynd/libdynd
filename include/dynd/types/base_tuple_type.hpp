@@ -13,16 +13,28 @@
 namespace dynd {
 
 /**
- * Base class for all tuple types. If a type
- * has kind tuple_kind, it must be a subclass of
- * base_tuple_type.
+ * Base class for all tuple and struct types. If a type has kind tuple_kind or
+ * struct_kind, it must be a subclass of base_tuple_type.
  */
 class base_tuple_type : public base_type {
 protected:
+  /**
+   * The number of values in m_field_types and m_arrmeta_offsets.
+   */
   intptr_t m_field_count;
-  // m_field_types always has type "N * type",
-  // and m_arrmeta_offsets always has type "N * uintptr"
-  nd::array m_field_types, m_arrmeta_offsets;
+  /**
+   * Immutable contiguous array of field types. Always has type "N * type".
+   */
+  nd::array m_field_types;
+  /**
+   * Immutable contiguous array of arrmeta offsets. Always has type "N * intptr".
+   */
+  nd::array m_arrmeta_offsets;
+  /**
+   * If true, the tuple is variadic, which means it is symbolic, and matches
+   * against the beginning of a concrete tuple.
+   */
+  bool m_variadic;
 
   virtual uintptr_t *get_arrmeta_data_offsets(char *DYND_UNUSED(arrmeta)) const
   {
@@ -31,7 +43,7 @@ protected:
 
 public:
   base_tuple_type(type_id_t type_id, const nd::array &field_types,
-                  flags_type flags, bool layout_in_arrmeta);
+                  flags_type flags, bool layout_in_arrmeta, bool variadic);
 
   virtual ~base_tuple_type();
 

@@ -18,7 +18,8 @@ using namespace std;
 using namespace dynd;
 
 ctuple_type::ctuple_type(const nd::array &field_types)
-    : base_tuple_type(ctuple_type_id, field_types, type_flag_none, false),
+    : base_tuple_type(ctuple_type_id, field_types, type_flag_none, false,
+                      false),
       m_data_offsets(nd::empty(m_field_count, ndt::make_type<uintptr_t>()))
 {
   uintptr_t *data_offsets =

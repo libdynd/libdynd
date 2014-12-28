@@ -19,10 +19,12 @@ using namespace dynd;
 
 base_tuple_type::base_tuple_type(type_id_t type_id,
                                  const nd::array &field_types, flags_type flags,
-                                 bool layout_in_arrmeta)
-    : base_type(type_id, tuple_kind, 0, 1, flags, 0, 0, 0),
+                                 bool layout_in_arrmeta, bool variadic)
+    : base_type(type_id, tuple_kind, 0, 1,
+                flags | (variadic ? type_flag_symbolic : 0), 0, 0, 0),
       m_field_count(field_types.get_dim_size()), m_field_types(field_types),
-      m_arrmeta_offsets(nd::empty(m_field_count, ndt::make_type<uintptr_t>()))
+      m_arrmeta_offsets(nd::empty(m_field_count, ndt::make_type<uintptr_t>())),
+      m_variadic(variadic)
 {
   if (!nd::ensure_immutable_contig<ndt::type>(m_field_types)) {
     stringstream ss;
@@ -123,7 +125,7 @@ void base_tuple_type::get_shape(intptr_t ndim, intptr_t i, intptr_t *out_shape,
                                 const char *arrmeta,
                                 const char *DYND_UNUSED(data)) const
 {
-  out_shape[i] = get_field_count();
+  out_shape[i] = m_variadic ? -1 : get_field_count();
   if (i < ndim - 1) {
     const uintptr_t *arrmeta_offsets = get_arrmeta_offsets_raw();
     dimvector tmpshape(ndim);

@@ -26,7 +26,7 @@ protected:
 public:
   base_struct_type(type_id_t type_id, const nd::array &field_names,
                    const nd::array &field_types, flags_type flags,
-                   bool variable_layout);
+                   bool layout_in_arrmeta);
 
   virtual ~base_struct_type();
 
