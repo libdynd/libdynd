@@ -333,6 +333,10 @@ namespace nd {
       std::tuple<> m_vals;
 
     public:
+      static intptr_t get_size() {
+        return 0;
+      }
+
       const char *get_name(intptr_t DYND_UNUSED(i)) const
       {
         throw std::runtime_error("");
@@ -395,6 +399,10 @@ namespace nd {
         ndt::index_proxy<I>::template get_types(m_types, get_vals());
       }
 #endif
+
+      static intptr_t get_size() {
+        return sizeof...(T);
+      }
 
       /*
         const char *(&get_names() const)[sizeof...(T)] {
@@ -628,7 +636,8 @@ namespace nd {
       if (nsrc != self_tp->get_npos()) {
         std::stringstream ss;
         ss << "arrfunc expected " << self_tp->get_npos()
-           << " parameters, but received " << nsrc;
+           << " parameters, but received " << nsrc << ". arrfunc signature is "
+           << ndt::type(self_tp, true);
         throw std::invalid_argument(ss.str());
       }
       const ndt::type *param_types = self_tp->get_pos_types_raw();
@@ -653,6 +662,14 @@ namespace nd {
             reinterpret_cast<ndt::type *>(kwd_tp.get_data()), typevars);
 
         // check that we have the exact number of available parameters
+        if (intptr_t(available.size() + missing.size()) < self_tp->get_nkwd()) {
+          std::stringstream ss;
+          // TODO: Provide the missing keyword parameter names in this error
+          //       message
+          ss << "arrfunc requires keyword parameters that were not provided. "
+                "arrfunc signature " << ndt::type(self_tp, true);
+          throw std::invalid_argument(ss.str());
+        }
 
         ndt::get_forward_types(kwd_tp, kwds.get_vals(),
                                available.empty() ? NULL : available.data());
@@ -665,6 +682,13 @@ namespace nd {
           self->resolve_option_values(self, self_tp, nsrc, src_tp,
                                       kwds_as_array);
         }
+      }
+      else if (kwds.get_size() != 0) {
+        stringstream ss;
+        ss << "arrfunc does not accept keyword arguments, but was provided "
+              "keyword arguments. arrfunc signature is "
+           << ndt::type(self_tp, true);
+        throw std::invalid_argument(ss.str());
       }
 
       if (self->resolve_dst_type != NULL) {
@@ -704,6 +728,26 @@ namespace nd {
       return res;
     }
 
+    /**
+     * operator()()
+     */
+    nd::array operator()() const
+    {
+      return call(detail::args<>(), detail::kwds<>(),
+                  &eval::default_eval_context);
+    }
+
+    /**
+     * operator()(ectx)
+     */
+    nd::array operator()(const eval::eval_context *ectx) const
+    {
+      return call(detail::args<>(), detail::kwds<>(), ectx);
+    }
+
+    /**
+     * operator()(a0, a1, ..., an, kwds<...>(...))
+     */
     template <typename... T>
     typename std::enable_if<
         detail::is_kwds<typename back<type_sequence<T...>>::type>::value,
@@ -722,14 +766,65 @@ namespace nd {
                   &eval::default_eval_context);
     }
 
+    /**
+     * operator()(a0, a1, ..., an)
+     */
     template <typename... T>
     typename std::enable_if<
-        !detail::is_kwds<typename back<type_sequence<T...>>::type>::value,
-        array>::type
+        !detail::is_kwds<typename back<type_sequence<T...>>::type>::value &&
+            !eval::is_eval_context<
+                typename back<type_sequence<T...>>::type>::value,
+        nd::array>::type
     operator()(T &&... a) const
     {
       detail::args<typename as_array<T>::type...> arr(std::forward<T>(a)...);
       return call(arr, kwds(), &eval::default_eval_context);
+    }
+
+    /**
+     * operator()(a0, a1, ..., an, kwds<...>(...), eval_ctx)
+     */
+    template <typename... T>
+    typename std::enable_if<
+        detail::is_kwds<typename second_back<type_sequence<T...>>::type>::value &&
+            eval::is_eval_context<
+                typename back<type_sequence<T...>>::type>::value,
+        nd::array>::type
+    operator()(T &&... a) const
+    {
+      typedef make_index_sequence<sizeof...(T)-2> I;
+      typedef typename instantiate<
+          detail::args,
+          typename to<type_sequence<typename as_array<T>::type...>,
+                      sizeof...(T)-2>::type>::type args_type;
+
+      args_type arr =
+          dynd::index_proxy<I>::template make<args_type>(std::forward<T>(a)...);
+      return call(arr, dynd::get<sizeof...(T)-2>(std::forward<T>(a)...),
+                  dynd::get<sizeof...(T)-1>(std::forward<T>(a)...));
+    }
+
+    /**
+     * operator()(a0, a1, ..., an, eval_ctx)
+     */
+    template <typename... T>
+    typename std::enable_if<
+        !detail::is_kwds<typename second_back<type_sequence<T...>>::type>::value &&
+            eval::is_eval_context<
+                typename back<type_sequence<T...>>::type>::value,
+        nd::array>::type
+    operator()(T &&... a) const
+    {
+      typedef make_index_sequence<sizeof...(T)-1> I;
+      typedef typename instantiate<
+          detail::args,
+          typename to<type_sequence<typename as_array<T>::type...>,
+                      sizeof...(T)-1>::type>::type args_type;
+
+      args_type arr =
+          dynd::index_proxy<I>::template make<args_type>(std::forward<T>(a)...);
+      return call(arr, kwds(),
+                  dynd::get<sizeof...(T)-1>(std::forward<T>(a)...));
     }
 
     /** Implements the general call operator with output parameter */
