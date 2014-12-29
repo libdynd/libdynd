@@ -1908,8 +1908,11 @@ namespace nd {
     *reinterpret_cast<T *>(data) = val;
   }
 
-  void forward_as_array(const ndt::type &DYND_UNUSED(tp), char *arrmeta,
+  void forward_as_array(const ndt::type &tp, char *arrmeta,
                         char *out_data, const nd::array &val);
+
+  void forward_as_array(const ndt::type &tp, char *arrmeta,
+                        char *out_data, const nd::arrfunc &val);
 
   template <typename T>
   void forward_as_array(const ndt::type &tp, char *arrmeta, char *data,

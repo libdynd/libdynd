@@ -67,12 +67,14 @@ set(tests_SRC
     func/test_arrfunc.cpp
     func/test_callable.cpp
     func/test_chain_arrfunc.cpp
-    func/test_elwise_funcretres.cpp
-    func/test_elwise_funcrefres.cpp
-    func/test_elwise_methretres.cpp
-    func/test_elwise_methrefres.cpp
-    func/test_elwise_callretres.cpp
-    func/test_elwise_callrefres.cpp
+    func/test_elwise.cpp
+#    func/test_elwise_funcretres.cpp
+#    func/test_elwise_funcretres.cpp
+#    func/test_elwise_funcrefres.cpp
+#    func/test_elwise_methretres.cpp
+#    func/test_elwise_methrefres.cpp
+#    func/test_elwise_callretres.cpp
+#    func/test_elwise_callrefres.cpp
     func/test_fft.cpp
     func/test_functor_arrfunc.cpp
     func/test_lift_arrfunc.cpp

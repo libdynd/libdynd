@@ -14,6 +14,7 @@
 #include <dynd/kernels/assignment_kernels.hpp>
 #include <dynd/func/make_callable.hpp>
 #include <dynd/func/call_callable.hpp>
+#include <dynd/func/arrfunc.hpp>
 
 #include <dynd/types/convert_type.hpp>
 #include <dynd/types/datashape_parser.hpp>
@@ -486,8 +487,16 @@ ndt::type ndt::as_type(const nd::array &value)
   return value.get_type();
 }
 
+ndt::type ndt::as_type(const nd::arrfunc &value)
+{
+  return value.get_array_type();
+}
+
 ndt::type ndt::get_forward_type(const nd::array &val)
 {
+    if (val.get_type().get_type_id() == arrfunc_type_id) {
+        return val.get_type();
+    }
 /*
   if ((val.get_access_flags() & nd::write_access_flag) == 0) {
     throw std::runtime_error("TODO: how to handle readonly/immutable arrays "
@@ -496,6 +505,11 @@ ndt::type ndt::get_forward_type(const nd::array &val)
 */
 
   return make_pointer(val.get_type());
+}
+
+ndt::type ndt::get_forward_type(const nd::arrfunc &value)
+{
+    return value.get_array_type();
 }
 
 template<class T, class Tas>

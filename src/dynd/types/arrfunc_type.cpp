@@ -18,8 +18,7 @@ static bool is_simple_identifier_name(const char *begin, const char *end)
 {
   if (begin == end) {
     return false;
-  }
-  else {
+  } else {
     char c = *begin++;
     if (!(('a' <= c && c <= 'z') || ('A' <= c && c <= 'Z') || c == '_')) {
       return false;
@@ -131,8 +130,7 @@ void arrfunc_type::print_type(std::ostream &o) const
     const string_type_data &an = get_kwd_name_raw(i);
     if (is_simple_identifier_name(an.begin, an.end)) {
       o.write(an.begin, an.end - an.begin);
-    }
-    else {
+    } else {
       print_escaped_utf8_string(o, an.begin, an.end, true);
     }
     o << ": " << get_kwd_type(i);
@@ -159,8 +157,7 @@ void arrfunc_type::transform_child_types(type_transform_fn_t transform_fn,
     out_transformed_tp =
         ndt::make_arrfunc(tmp_pos_types, tmp_kwd_types, tmp_return_type);
     out_was_transformed = true;
-  }
-  else {
+  } else {
     out_transformed_tp = ndt::type(this, true);
   }
 }
@@ -201,8 +198,7 @@ bool arrfunc_type::is_lossless_assignment(const ndt::type &dst_tp,
   if (dst_tp.extended() == this) {
     if (src_tp.extended() == this) {
       return true;
-    }
-    else if (src_tp.get_type_id() == arrfunc_type_id) {
+    } else if (src_tp.get_type_id() == arrfunc_type_id) {
       return *dst_tp.extended() == *src_tp.extended();
     }
   }
@@ -214,19 +210,18 @@ bool arrfunc_type::operator==(const base_type &rhs) const
 {
   if (this == &rhs) {
     return true;
-  }
-  else if (rhs.get_type_id() != arrfunc_type_id) {
+  } else if (rhs.get_type_id() != arrfunc_type_id) {
     return false;
-  }
-  else {
+  } else {
     const arrfunc_type *fpt = static_cast<const arrfunc_type *>(&rhs);
     return m_return_type == fpt->m_return_type &&
            m_pos_tuple == fpt->m_pos_tuple && m_kwd_struct == fpt->m_kwd_struct;
   }
 }
 
-void arrfunc_type::arrmeta_default_construct(
-    char *DYND_UNUSED(arrmeta), bool DYND_UNUSED(blockref_alloc)) const
+void
+arrfunc_type::arrmeta_default_construct(char *DYND_UNUSED(arrmeta),
+                                        bool DYND_UNUSED(blockref_alloc)) const
 {
 }
 
@@ -303,8 +298,7 @@ intptr_t arrfunc_type::make_assignment_kernel(
     const eval::eval_context *ectx, const nd::array &DYND_UNUSED(kwds)) const
 {
   if (this == dst_tp.extended()) {
-  }
-  else {
+  } else {
     if (dst_tp.get_kind() == string_kind) {
       // Assignment to strings
       return make_arrfunc_to_string_assignment_kernel(
@@ -403,8 +397,7 @@ static array_preamble *function___call__(const array_preamble *params,
     // Stop at the first NULL arg (means it was default)
     if (par_arrs[nargs].get_ndo() == NULL) {
       break;
-    }
-    else {
+    } else {
       args[nargs - 1] = par_arrs[nargs];
     }
   }

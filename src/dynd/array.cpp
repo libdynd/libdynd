@@ -2282,7 +2282,7 @@ void nd::forward_as_array(const ndt::type &tp, char *arrmeta, char *data,
                           const nd::array &val)
 {
 
-  if (tp.is_builtin()) {
+  if (tp.is_builtin() || tp.get_type_id() == arrfunc_type_id) {
     memcpy(data, val.get_readonly_originptr(), tp.get_data_size());
   } else {
     pointer_type_arrmeta *am =
@@ -2301,4 +2301,10 @@ void nd::forward_as_array(const ndt::type &tp, char *arrmeta, char *data,
     *reinterpret_cast<char **>(data) =
         const_cast<char *>(val.get_readonly_originptr());
   }
+}
+
+void nd::forward_as_array(const ndt::type &tp, char *arrmeta, char *data,
+                          const nd::arrfunc &value)
+{
+  forward_as_array(tp, arrmeta, data, static_cast<nd::array>(value));
 }

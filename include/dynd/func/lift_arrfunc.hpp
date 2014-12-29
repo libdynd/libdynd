@@ -18,4 +18,9 @@ namespace dynd {
  */
 nd::arrfunc lift_arrfunc(const nd::arrfunc &child_af);
 
+int resolve_lifted_dst_type(const arrfunc_type_data *self,
+                            const arrfunc_type *af_tp, intptr_t nsrc,
+                            const ndt::type *src_tp, int throw_on_error,
+                            ndt::type &out_dst_tp, const nd::array &kwds);
+
 } // namespace dynd
