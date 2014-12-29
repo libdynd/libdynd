@@ -119,39 +119,31 @@ static bool recursive_match(const ndt::type &concrete,
             concrete.extended<base_memory_type>()->get_element_type(),
             concrete_arrmeta,
             pattern.extended<base_memory_type>()->get_element_type(), typevars);
-      case arrfunc_type_id:
-        if (concrete.extended<arrfunc_type>()->get_narg() ==
-                pattern.extended<arrfunc_type>()->get_narg() &&
-            concrete.extended<arrfunc_type>()->get_nkwd() ==
-                pattern.extended<arrfunc_type>()->get_nkwd()) {
-          // First match the return type
-          if (!recursive_match(
-                  concrete.extended<arrfunc_type>()->get_return_type(),
-                  concrete_arrmeta,
-                  pattern.extended<arrfunc_type>()->get_return_type(),
-                  typevars)) {
-            return false;
-          }
-          // Next match all the positional parameters
-          if (!recursive_match(
-                  concrete.extended<arrfunc_type>()->get_pos_tuple(),
-                  concrete_arrmeta,
-                  pattern.extended<arrfunc_type>()->get_pos_tuple(),
-                  typevars)) {
-            return false;
-          }
-          // Finally match all the keyword parameters
-          if (!recursive_match(
-                  concrete.extended<arrfunc_type>()->get_kwd_struct(),
-                  concrete_arrmeta,
-                  pattern.extended<arrfunc_type>()->get_kwd_struct(),
-                  typevars)) {
-            return false;
-          }
-          return true;
-        } else {
+      case arrfunc_type_id: {
+        // First match the return type
+        if (!recursive_match(
+                concrete.extended<arrfunc_type>()->get_return_type(),
+                concrete_arrmeta,
+                pattern.extended<arrfunc_type>()->get_return_type(),
+                typevars)) {
           return false;
         }
+        // Next match all the positional parameters
+        if (!recursive_match(concrete.extended<arrfunc_type>()->get_pos_tuple(),
+                             concrete_arrmeta,
+                             pattern.extended<arrfunc_type>()->get_pos_tuple(),
+                             typevars)) {
+          return false;
+        }
+        // Finally match all the keyword parameters
+        if (!recursive_match(
+                concrete.extended<arrfunc_type>()->get_kwd_struct(),
+                concrete_arrmeta,
+                pattern.extended<arrfunc_type>()->get_kwd_struct(), typevars)) {
+          return false;
+        }
+        return true;
+      }
       default:
         return pattern == concrete;
       }
