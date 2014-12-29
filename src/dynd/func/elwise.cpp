@@ -217,108 +217,24 @@ intptr_t decl::nd::elwise::instantiate(
   throw runtime_error(ss.str());
 }
 
-nd::arrfunc decl::nd::elwise::make()
+ndt::type decl::nd::elwise::make_lifted_type(const arrfunc_type *child_tp)
 {
-  arrfunc_instantiate_t instantiate = [](
-      const arrfunc_type_data *DYND_UNUSED(self),
-      const arrfunc_type *DYND_UNUSED(self_tp), void *ckb, intptr_t ckb_offset,
-      const ndt::type &dst_tp, const char *dst_arrmeta, const ndt::type *src_tp,
-      const char *const *src_arrmeta, kernel_request_t kernreq,
-      const eval::eval_context *ectx, const dynd::nd::array &kwds) {
-    const arrfunc_type_data *child =
-        reinterpret_cast<const arrfunc_type_data *>(
-            kwds.get_readonly_originptr());
-    const arrfunc_type *child_tp = kwds.get_type()
-                                       .extended<base_struct_type>()
-                                       ->get_field_type(0)
-                                       .extended<arrfunc_type>();
-
-    return elwise::instantiate(child, child_tp, ckb, ckb_offset, dst_tp,
-                               dst_arrmeta, src_tp, src_arrmeta, kernreq, ectx,
-                               kwds);
-  };
-
-  arrfunc_resolve_dst_type_t resolve_dst_type =
-      [](const arrfunc_type_data *DYND_UNUSED(self),
-         const arrfunc_type *DYND_UNUSED(self_tp), intptr_t nsrc,
-         const ndt::type *src_tp, int throw_on_error, ndt::type &out_dst_tp,
-         const dynd::nd::array &kwds) {
-    const arrfunc_type_data *child =
-        reinterpret_cast<const arrfunc_type_data *>(
-            kwds.get_readonly_originptr());
-    const arrfunc_type *child_tp = kwds.get_type()
-                                       .extended<base_struct_type>()
-                                       ->get_field_type(0)
-                                       .extended<arrfunc_type>();
-    return elwise::resolve_dst_type(child, child_tp, nsrc, src_tp,
-                                    throw_on_error, out_dst_tp, kwds);
-  };
-
-  arrfunc_type_data self(instantiate, NULL, resolve_dst_type, NULL);
-  ndt::type self_tp = ndt::type("(..., func: (...) -> Any) -> Any");
-
-  return dynd::nd::arrfunc(&self, self_tp);
-}
-
-static ndt::type lift_proto(const arrfunc_type *p)
-{
-  const ndt::type *param_types = p->get_pos_types_raw();
-  intptr_t param_count = p->get_narg();
-  nd::array out_param_types = nd::empty(param_count, ndt::make_type());
-  nd::string dimsname("Dims");
+  const ndt::type *param_types = child_tp->get_pos_types_raw();
+  intptr_t param_count = child_tp->get_narg();
+  dynd::nd::array out_param_types = dynd::nd::empty(param_count, ndt::make_type());
+  dynd::nd::string dimsname("Dims");
   ndt::type *pt =
       reinterpret_cast<ndt::type *>(out_param_types.get_readwrite_originptr());
-  for (intptr_t i = 0, i_end = p->get_npos(); i != i_end; ++i) {
+  for (intptr_t i = 0, i_end = child_tp->get_npos(); i != i_end; ++i) {
     pt[i] = ndt::make_ellipsis_dim(dimsname, param_types[i]);
   }
-  for (intptr_t i = p->get_npos(), i_end = p->get_narg(); i != i_end; ++i) {
+  for (intptr_t i = child_tp->get_npos(), i_end = child_tp->get_narg(); i != i_end; ++i) {
     pt[i] = param_types[i];
   }
   out_param_types.flag_as_immutable();
   return ndt::make_arrfunc(
       ndt::make_tuple(out_param_types),
-      ndt::make_ellipsis_dim(dimsname, p->get_return_type()));
-}
-
-static int bound_resolve_dst_type(const arrfunc_type_data *self,
-                                  const arrfunc_type *DYND_UNUSED(self_tp),
-                                  intptr_t nsrc, const ndt::type *src_tp,
-                                  int throw_on_error, ndt::type &dst_tp,
-                                  const dynd::nd::array &kwds)
-{
-  const arrfunc_type_data *child =
-      self->get_data_as<dynd::nd::arrfunc>()->get();
-  const arrfunc_type *child_tp =
-      self->get_data_as<dynd::nd::arrfunc>()->get_type();
-
-  return decl::nd::elwise::resolve_dst_type(child, child_tp, nsrc, src_tp,
-                                            throw_on_error, dst_tp, kwds);
-}
-
-static intptr_t
-bound_instantiate(const arrfunc_type_data *self, const arrfunc_type *DYND_UNUSED(self_tp),
-                  void *ckb, intptr_t ckb_offset, const ndt::type &dst_tp,
-                  const char *dst_arrmeta, const ndt::type *src_tp,
-                  const char *const *src_arrmeta,
-                  dynd::kernel_request_t kernreq,
-                  const eval::eval_context *ectx, const dynd::nd::array &kwds)
-{
-  const arrfunc_type_data *child =
-      self->get_data_as<dynd::nd::arrfunc>()->get();
-  const arrfunc_type *child_tp =
-      self->get_data_as<dynd::nd::arrfunc>()->get_type();
-
-  return decl::nd::elwise::instantiate(child, child_tp, ckb, ckb_offset, dst_tp,
-                                       dst_arrmeta, src_tp, src_arrmeta,
-                                       kernreq, ectx, kwds);
-}
-
-nd::arrfunc decl::nd::elwise::bind(const std::string &DYND_UNUSED(name),
-                                   const dynd::nd::arrfunc &af)
-{
-//  arrfunc_type_data self(af, &bound_instantiate, NULL, &bound_resolve_dst_type);
-
-  return dynd::nd::arrfunc(af, &bound_instantiate, &bound_resolve_dst_type, lift_proto(af.get_type()));
+      ndt::make_ellipsis_dim(dimsname, child_tp->get_return_type()));
 }
 
 decl::nd::elwise nd::elwise;

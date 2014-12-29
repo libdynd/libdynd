@@ -17,7 +17,7 @@
 namespace dynd {
 namespace decl {
   namespace nd {
-    class elwise : public arrfunc<elwise> {
+    class elwise : public lift<elwise> {
     public:
       static int resolve_dst_type(const arrfunc_type_data *child,
                                   const arrfunc_type *child_tp, intptr_t nsrc,
@@ -51,9 +51,7 @@ namespace decl {
                   dynd::kernel_request_t kernreq,
                   const eval::eval_context *ectx, const dynd::nd::array &kwds);
 
-      static dynd::nd::arrfunc make();
-
-      static dynd::nd::arrfunc bind(const std::string &name, const dynd::nd::arrfunc &af);
+      static dynd::ndt::type make_lifted_type(const arrfunc_type *child_tp);
     };
   } // namespace nd
 } // namespace decl
