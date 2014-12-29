@@ -98,6 +98,10 @@ namespace decl {
   } // namespace nd
 } // namespace decl
 
+namespace nd {
+  extern decl::nd::elwise elwise;
+} // namespace nd
+
 namespace kernels {
   /**
    * Generic expr kernel + destructor for a strided dimension with
@@ -231,7 +235,7 @@ namespace kernels {
 
       // If there are still dimensions to broadcast, recursively lift more
       if (!finished) {
-        return decl::nd::elwise::instantiate(
+        return nd::elwise.instantiate(
             child, child_tp, ckb, ckb_offset, child_dst_tp, child_dst_arrmeta,
             child_src_tp, child_src_arrmeta, kernreq, ectx, kwds);
       }
@@ -388,10 +392,10 @@ namespace kernels {
 
       // If there are still dimensions to broadcast, recursively lift more
       if (!finished) {
-        return decl::nd::elwise::instantiate(
-            child, child_tp, ckb, ckb_offset, child_dst_tp, child_dst_arrmeta,
-            child_src_tp, child_src_arrmeta, kernel_request_strided, ectx,
-            kwds);
+        return nd::elwise.instantiate(child, child_tp, ckb, ckb_offset,
+                                      child_dst_tp, child_dst_arrmeta,
+                                      child_src_tp, child_src_arrmeta,
+                                      kernel_request_strided, ectx, kwds);
       }
       // Instantiate the elementwise handler
       return child->instantiate(
@@ -624,7 +628,7 @@ namespace kernels {
 
       // If there are still dimensions to broadcast, recursively lift more
       if (!finished) {
-        return decl::nd::elwise::instantiate(
+        return nd::elwise.instantiate(
             child, child_tp, ckb, ckb_offset, child_dst_tp, child_dst_arrmeta,
             child_src_tp, child_src_arrmeta, kernel_request_strided, ectx,
             kwds);
@@ -641,9 +645,5 @@ namespace kernels {
       : elwise_ck<var_dim_type_id, fixed_dim_type_id, N> {
   };
 } // namespace kernels
-
-namespace nd {
-  extern decl::nd::elwise elwise;
-} // namespace nd
 
 } // namespace dynd
