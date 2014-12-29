@@ -6,6 +6,7 @@ version: 0.6.6.{build}
 branches:
   only:
     - master
+clone_depth: 1
 
 # Do not build on tags (GitHub only)
 skip_tags: true
