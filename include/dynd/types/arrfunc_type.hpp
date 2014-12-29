@@ -49,6 +49,11 @@ public:
     return m_pos_tuple.extended<tuple_type>()->get_field_types();
   }
 
+  bool is_pos_variadic() const
+  {
+    return m_pos_tuple.extended<tuple_type>()->is_variadic();
+  }
+
   const ndt::type &get_kwd_struct() const { return m_kwd_struct; }
 
   const nd::array &get_kwd_types() const

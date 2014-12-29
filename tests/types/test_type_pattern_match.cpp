@@ -178,6 +178,20 @@ TEST(TypePatternMatch, ArrFuncProto)
 
 }
 
+TEST(TypePatternMatch, VariadicArrFuncProto)
+{
+  EXPECT_TRUE(
+      ndt::pattern_match(ndt::type("() -> void"), ndt::type("(...) -> void")));
+  EXPECT_FALSE(ndt::pattern_match(ndt::type("(kw: int32) -> void"),
+                                  ndt::type("(...) -> void")));
+  EXPECT_TRUE(ndt::pattern_match(ndt::type("(int32, float32) -> float32"),
+                                 ndt::type("(S, ...) -> T")));
+  EXPECT_TRUE(ndt::pattern_match(
+      ndt::type(
+          "(2 * 3 * 4 * int32, float64, func: (3 * int32) -> bool) -> bool"),
+      ndt::type("(Fixed**N * T, ..., func: (N * T) -> R) -> R")));
+}
+
 TEST(TypePatternMatch, NestedArrFuncProto)
 {
   EXPECT_TRUE(ndt::pattern_match(
