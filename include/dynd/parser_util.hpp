@@ -88,7 +88,7 @@ public:
 inline void skip_whitespace(const char *&rbegin, const char *end)
 {
     const char *begin = rbegin;
-    while (begin < end && isspace(*begin)) {
+    while (begin < end && std::isspace(*begin)) {
         ++begin;
     }
     rbegin = begin;
@@ -103,7 +103,7 @@ inline void skip_whitespace(const char *&rbegin, const char *end)
 inline void skip_whitespace_and_pound_comments(const char *&rbegin, const char *end)
 {
     const char *begin = rbegin;
-    while (begin < end && isspace(*begin)) {
+    while (begin < end && std::isspace(*begin)) {
         ++begin;
     }
 
@@ -133,9 +133,9 @@ inline void skip_whitespace_and_pound_comments(const char *&rbegin, const char *
 inline bool skip_required_whitespace(const char *&rbegin, const char *end)
 {
     const char *begin = rbegin;
-    if (begin < end && isspace(*begin)) {
+    if (begin < end && std::isspace(*begin)) {
         ++begin;
-        while (begin < end && isspace(*begin)) {
+        while (begin < end && std::isspace(*begin)) {
             ++begin;
         }
         rbegin = begin;
@@ -573,7 +573,7 @@ inline bool parse_ci_alpha_str_named_value_no_ws(const char *&rbegin, const char
     if (!parse_alpha_name_no_ws(begin, end, strbegin, strend)) {
         return false;
     }
-    int strfirstchar = tolower(*strbegin);
+    int strfirstchar = std::tolower(*strbegin);
     // Search through the named value table for a matching string
     for (int i = 0; i < N; ++i) {
         const char *name = nvt[i].name;
@@ -582,7 +582,7 @@ inline bool parse_ci_alpha_str_named_value_no_ws(const char *&rbegin, const char
             const char *strptr = strbegin + 1;
             // Compare the rest of the characters
             while (*name != '\0' && strptr < strend &&
-                   *name == tolower(*strptr)) {
+                   *name == std::tolower(*strptr)) {
                 ++name; ++strptr;
             }
             if (*name == '\0' && strptr == strend) {
