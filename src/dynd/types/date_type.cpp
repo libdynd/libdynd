@@ -21,7 +21,7 @@
 #include <dynd/kernels/string_assignment_kernels.hpp>
 #include <dynd/kernels/assignment_kernels.hpp>
 #include <dynd/kernels/date_adapter_kernels.hpp>
-#include <dynd/func/lift_arrfunc.hpp>
+#include <dynd/func/elwise.hpp>
 #include <dynd/func/apply_arrfunc.hpp>
 #include <dynd/exceptions.hpp>
 #include <dynd/func/make_callable.hpp>
@@ -231,7 +231,7 @@ static nd::array fn_type_construct(const ndt::type &DYND_UNUSED(dt),
   nd::array month_as_int = month.ucast(ndt::make_type<int32_t>()).eval();
   nd::array day_as_int = day.ucast(ndt::make_type<int32_t>()).eval();
 
-  nd::arrfunc af = lift_arrfunc(nd::apply::make(date_from_ymd));
+  nd::arrfunc af = nd::elwise.bind("func", nd::apply::make(date_from_ymd));
 
   return af(year_as_int, month_as_int, day_as_int)
       .view_scalars(ndt::make_date());

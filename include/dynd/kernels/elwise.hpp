@@ -12,30 +12,93 @@
 
 namespace dynd {
 namespace kernels {
-  /**
-   * Lifts the provided ckernel, broadcasting it as necessary to execute
-   * across the additional dimensions in the ``lifted_types`` array.
-   *
-   * This version is for 'expr' ckernels.
-   *
-   * \param child  The arrfunc being lifted
-   * \param ckb  The ckernel_builder into which to place the ckernel.
-   * \param ckb_offset  Where within the ckernel_builder to place the ckernel.
-   * \param dst_tp  The destination type to lift to.
-   * \param dst_arrmeta  The destination arrmeta to lift to.
-   * \param src_tp  The source types to lift to.
-   * \param src_arrmeta  The source arrmetas to lift to.
-   * \param kernreq  Either kernel_request_single or kernel_request_strided,
-   *                 as required by the caller.
-   * \param ectx  The evaluation context.
-   */
-  size_t make_lifted_expr_ckernel(
-      const arrfunc_type_data *child, const arrfunc_type *child_tp, void *ckb,
-      intptr_t ckb_offset, const ndt::type &dst_tp, const char *dst_arrmeta,
-      const ndt::type *src_tp, const char *const *src_arrmeta,
-      dynd::kernel_request_t kernreq, const eval::eval_context *ectx,
-      const nd::array &kwds);
 
+  template <type_id_t dst_dim_type_id, type_id_t src_dim_type_id, int N>
+  struct elwise_ck;
+}
+
+namespace decl {
+  namespace nd {
+    class elwise : public lift<elwise> {
+    public:
+      static int resolve_dst_type(const arrfunc_type_data *child,
+                                  const arrfunc_type *child_tp, intptr_t nsrc,
+                                  const ndt::type *src_tp, int throw_on_error,
+                                  ndt::type &dst_tp,
+                                  const dynd::nd::array &kwds);
+
+      /**
+       * Lifts the provided ckernel, broadcasting it as necessary to execute
+       * across the additional dimensions in the ``lifted_types`` array.
+       *
+       * This version is for 'expr' ckernels.
+       *
+       * \param child  The arrfunc being lifted
+       * \param ckb  The ckernel_builder into which to place the ckernel.
+       * \param ckb_offset  Where within the ckernel_builder to place the
+       *ckernel.
+       * \param dst_tp  The destination type to lift to.
+       * \param dst_arrmeta  The destination arrmeta to lift to.
+       * \param src_tp  The source types to lift to.
+       * \param src_arrmeta  The source arrmetas to lift to.
+       * \param kernreq  Either kernel_request_single or kernel_request_strided,
+       *                 as required by the caller.
+       * \param ectx  The evaluation context.
+       */
+      static intptr_t
+      instantiate(const arrfunc_type_data *child, const arrfunc_type *child_tp,
+                  void *ckb, intptr_t ckb_offset, const ndt::type &dst_tp,
+                  const char *dst_arrmeta, const ndt::type *src_tp,
+                  const char *const *src_arrmeta,
+                  dynd::kernel_request_t kernreq,
+                  const eval::eval_context *ectx, const dynd::nd::array &kwds);
+
+      template <type_id_t dst_dim_id, type_id_t src_dim_id>
+      static intptr_t
+      instantiate(const arrfunc_type_data *child, const arrfunc_type *child_tp,
+                  void *ckb, intptr_t ckb_offset, const ndt::type &dst_tp,
+                  const char *dst_arrmeta, const ndt::type *src_tp,
+                  const char *const *src_arrmeta, kernel_request_t kernreq,
+                  const eval::eval_context *ectx, const dynd::nd::array &kwds)
+      {
+        switch (child_tp->get_npos()) {
+        case 1:
+          return kernels::elwise_ck<dst_dim_id, src_dim_id, 1>::instantiate(
+              child, child_tp, ckb, ckb_offset, dst_tp, dst_arrmeta, src_tp,
+              src_arrmeta, kernreq, ectx, kwds);
+        case 2:
+          return kernels::elwise_ck<dst_dim_id, src_dim_id, 2>::instantiate(
+              child, child_tp, ckb, ckb_offset, dst_tp, dst_arrmeta, src_tp,
+              src_arrmeta, kernreq, ectx, kwds);
+        case 3:
+          return kernels::elwise_ck<dst_dim_id, src_dim_id, 3>::instantiate(
+              child, child_tp, ckb, ckb_offset, dst_tp, dst_arrmeta, src_tp,
+              src_arrmeta, kernreq, ectx, kwds);
+        case 4:
+          return kernels::elwise_ck<dst_dim_id, src_dim_id, 4>::instantiate(
+              child, child_tp, ckb, ckb_offset, dst_tp, dst_arrmeta, src_tp,
+              src_arrmeta, kernreq, ectx, kwds);
+        case 5:
+          return kernels::elwise_ck<dst_dim_id, src_dim_id, 5>::instantiate(
+              child, child_tp, ckb, ckb_offset, dst_tp, dst_arrmeta, src_tp,
+              src_arrmeta, kernreq, ectx, kwds);
+        case 6:
+          return kernels::elwise_ck<dst_dim_id, src_dim_id, 6>::instantiate(
+              child, child_tp, ckb, ckb_offset, dst_tp, dst_arrmeta, src_tp,
+              src_arrmeta, kernreq, ectx, kwds);
+        default:
+          throw runtime_error("make_elwise_strided_dimension_expr_kernel with "
+                              "src_count > 6 not implemented yet");
+        }
+      }
+
+      /** Prepends "Dims..." to all the types in the proto */
+      static dynd::ndt::type make_lifted_type(const arrfunc_type *child_tp);
+    };
+  } // namespace nd
+} // namespace decl
+
+namespace kernels {
   /**
    * Generic expr kernel + destructor for a strided dimension with
    * a fixed number of src operands.
@@ -168,7 +231,7 @@ namespace kernels {
 
       // If there are still dimensions to broadcast, recursively lift more
       if (!finished) {
-        return make_lifted_expr_ckernel(
+        return decl::nd::elwise::instantiate(
             child, child_tp, ckb, ckb_offset, child_dst_tp, child_dst_arrmeta,
             child_src_tp, child_src_arrmeta, kernreq, ectx, kwds);
       }
@@ -325,10 +388,10 @@ namespace kernels {
 
       // If there are still dimensions to broadcast, recursively lift more
       if (!finished) {
-        return make_lifted_expr_ckernel(child, child_tp, ckb, ckb_offset,
-                                        child_dst_tp, child_dst_arrmeta,
-                                        child_src_tp, child_src_arrmeta,
-                                        kernel_request_strided, ectx, kwds);
+        return decl::nd::elwise::instantiate(
+            child, child_tp, ckb, ckb_offset, child_dst_tp, child_dst_arrmeta,
+            child_src_tp, child_src_arrmeta, kernel_request_strided, ectx,
+            kwds);
       }
       // Instantiate the elementwise handler
       return child->instantiate(
@@ -561,10 +624,10 @@ namespace kernels {
 
       // If there are still dimensions to broadcast, recursively lift more
       if (!finished) {
-        return make_lifted_expr_ckernel(child, child_tp, ckb, ckb_offset,
-                                        child_dst_tp, child_dst_arrmeta,
-                                        child_src_tp, child_src_arrmeta,
-                                        kernel_request_strided, ectx, kwds);
+        return decl::nd::elwise::instantiate(
+            child, child_tp, ckb, ckb_offset, child_dst_tp, child_dst_arrmeta,
+            child_src_tp, child_src_arrmeta, kernel_request_strided, ectx,
+            kwds);
       }
       // All the types matched, so instantiate the elementwise handler
       return child->instantiate(
@@ -577,46 +640,10 @@ namespace kernels {
   struct elwise_ck<var_dim_type_id, var_dim_type_id, N>
       : elwise_ck<var_dim_type_id, fixed_dim_type_id, N> {
   };
-
-  template <type_id_t dst_dim_id, type_id_t src_dim_id>
-  size_t instantiate_elwise_ck(const arrfunc_type_data *child,
-                               const arrfunc_type *child_tp, void *ckb,
-                               intptr_t ckb_offset, const ndt::type &dst_tp,
-                               const char *dst_arrmeta, const ndt::type *src_tp,
-                               const char *const *src_arrmeta,
-                               kernel_request_t kernreq,
-                               const eval::eval_context *ectx,
-                               const nd::array &kwds)
-  {
-    switch (child_tp->get_npos()) {
-    case 1:
-      return elwise_ck<dst_dim_id, src_dim_id, 1>::instantiate(
-          child, child_tp, ckb, ckb_offset, dst_tp, dst_arrmeta, src_tp,
-          src_arrmeta, kernreq, ectx, kwds);
-    case 2:
-      return elwise_ck<dst_dim_id, src_dim_id, 2>::instantiate(
-          child, child_tp, ckb, ckb_offset, dst_tp, dst_arrmeta, src_tp,
-          src_arrmeta, kernreq, ectx, kwds);
-    case 3:
-      return elwise_ck<dst_dim_id, src_dim_id, 3>::instantiate(
-          child, child_tp, ckb, ckb_offset, dst_tp, dst_arrmeta, src_tp,
-          src_arrmeta, kernreq, ectx, kwds);
-    case 4:
-      return elwise_ck<dst_dim_id, src_dim_id, 4>::instantiate(
-          child, child_tp, ckb, ckb_offset, dst_tp, dst_arrmeta, src_tp,
-          src_arrmeta, kernreq, ectx, kwds);
-    case 5:
-      return elwise_ck<dst_dim_id, src_dim_id, 5>::instantiate(
-          child, child_tp, ckb, ckb_offset, dst_tp, dst_arrmeta, src_tp,
-          src_arrmeta, kernreq, ectx, kwds);
-    case 6:
-      return elwise_ck<dst_dim_id, src_dim_id, 6>::instantiate(
-          child, child_tp, ckb, ckb_offset, dst_tp, dst_arrmeta, src_tp,
-          src_arrmeta, kernreq, ectx, kwds);
-    default:
-      throw runtime_error("make_elwise_strided_dimension_expr_kernel with "
-                          "src_count > 6 not implemented yet");
-    }
-  }
 } // namespace kernels
+
+namespace nd {
+  extern decl::nd::elwise elwise;
+} // namespace nd
+
 } // namespace dynd

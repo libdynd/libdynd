@@ -177,12 +177,11 @@ intptr_t decl::nd::elwise::instantiate(
   case fixed_dim_type_id:
   case cfixed_dim_type_id:
     if (src_all_strided) {
-      return kernels::instantiate_elwise_ck<fixed_dim_type_id,
-                                            fixed_dim_type_id>(
+      return instantiate<fixed_dim_type_id, fixed_dim_type_id>(
           child, child_tp, ckb, ckb_offset, dst_tp, dst_arrmeta, src_tp,
           src_arrmeta, kernreq, ectx, kwds);
     } else if (src_all_strided_or_var) {
-      return kernels::instantiate_elwise_ck<fixed_dim_type_id, var_dim_type_id>(
+      return instantiate<fixed_dim_type_id, var_dim_type_id>(
           child, child_tp, ckb, ckb_offset, dst_tp, dst_arrmeta, src_tp,
           src_arrmeta, kernreq, ectx, kwds);
     } else {
@@ -191,7 +190,7 @@ intptr_t decl::nd::elwise::instantiate(
     break;
   case var_dim_type_id:
     if (src_all_strided_or_var) {
-      return kernels::instantiate_elwise_ck<var_dim_type_id, fixed_dim_type_id>(
+      return instantiate<var_dim_type_id, fixed_dim_type_id>(
           child, child_tp, ckb, ckb_offset, dst_tp, dst_arrmeta, src_tp,
           src_arrmeta, kernreq, ectx, kwds);
     } else {
@@ -221,14 +220,16 @@ ndt::type decl::nd::elwise::make_lifted_type(const arrfunc_type *child_tp)
 {
   const ndt::type *param_types = child_tp->get_pos_types_raw();
   intptr_t param_count = child_tp->get_narg();
-  dynd::nd::array out_param_types = dynd::nd::empty(param_count, ndt::make_type());
+  dynd::nd::array out_param_types =
+      dynd::nd::empty(param_count, ndt::make_type());
   dynd::nd::string dimsname("Dims");
   ndt::type *pt =
       reinterpret_cast<ndt::type *>(out_param_types.get_readwrite_originptr());
   for (intptr_t i = 0, i_end = child_tp->get_npos(); i != i_end; ++i) {
     pt[i] = ndt::make_ellipsis_dim(dimsname, param_types[i]);
   }
-  for (intptr_t i = child_tp->get_npos(), i_end = child_tp->get_narg(); i != i_end; ++i) {
+  for (intptr_t i = child_tp->get_npos(), i_end = child_tp->get_narg();
+       i != i_end; ++i) {
     pt[i] = param_types[i];
   }
   out_param_types.flag_as_immutable();

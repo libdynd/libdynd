@@ -15,7 +15,7 @@
 #include <dynd/kernels/assignment_kernels.hpp>
 #include <dynd/kernels/expr_kernel_generator.hpp>
 #include <dynd/func/apply_arrfunc.hpp>
-#include <dynd/func/lift_arrfunc.hpp>
+#include <dynd/func/elwise.hpp>
 #include <dynd/func/take_arrfunc.hpp>
 #include <dynd/func/call_callable.hpp>
 #include <dynd/array.hpp>
@@ -30,7 +30,7 @@ TEST(LiftArrFunc, UnaryExpr_FixedDim) {
     nd::arrfunc af_base = make_arrfunc_from_assignment(
         ndt::make_type<int>(), ndt::make_string(), assign_error_default);
     // Lift the arrfunc
-    nd::arrfunc af = lift_arrfunc(af_base);
+    nd::arrfunc af = nd::elwise.bind("func", af_base);
 
     // Test it on some data
     const char *in[3] = {"172", "-139", "12345"};
@@ -48,7 +48,7 @@ TEST(LiftArrFunc, UnaryExpr_StridedDim) {
     nd::arrfunc af_base = make_arrfunc_from_assignment(
         ndt::make_type<int>(), ndt::make_fixedstring(16), assign_error_default);
     // Lift the arrfunc
-    nd::arrfunc af = lift_arrfunc(af_base);
+    nd::arrfunc af = nd::elwise.bind("func", af_base);
 
     // Test it on some data
     ckernel_builder<kernel_request_host> ckb;
@@ -68,7 +68,7 @@ TEST(LiftArrFunc, UnaryExpr_VarDim) {
     nd::arrfunc af_base = make_arrfunc_from_assignment(
         ndt::make_type<int>(), ndt::make_fixedstring(16), assign_error_default);
     // Lift the arrfunc
-    nd::arrfunc af = lift_arrfunc(af_base);
+    nd::arrfunc af = nd::elwise.bind("func", af_base);
 
     const char *in[5] = {"172", "-139", "12345", "-1111", "284"};
     nd::array a = nd::empty("var * string[16]");
@@ -91,7 +91,7 @@ TEST(LiftArrFunc, UnaryExpr_StridedToVarDim)
       ndt::make_type<int>(), ndt::make_fixedstring(16), assign_error_default);
 
   // Lift the kernel to particular fixed dim arrays
-  nd::arrfunc af = lift_arrfunc(af_base);
+  nd::arrfunc af = nd::elwise.bind("func", af_base);
 
   // Test it on some data
   ndt::type dst_tp("var * int32");
@@ -127,7 +127,7 @@ TEST(LiftArrFunc, UnaryExpr_VarToVarDim)
       ndt::make_type<int>(), ndt::make_fixedstring(16), assign_error_default);
 
   // Lift the kernel to particular fixed dim arrays
-  nd::arrfunc af = lift_arrfunc(af_base);
+  nd::arrfunc af = nd::elwise.bind("func", af_base);
 
   // Test it on some data
   ckernel_builder<kernel_request_host> ckb;
@@ -156,7 +156,7 @@ TEST(LiftArrFunc, UnaryExpr_MultiDimVarToVarDim) {
     nd::arrfunc af_base = make_arrfunc_from_assignment(
         ndt::make_type<int>(), ndt::make_fixedstring(16), assign_error_default);
     // Lift the arrfunc
-    nd::arrfunc af = lift_arrfunc(af_base);
+    nd::arrfunc af = nd::elwise.bind("func", af_base);
 
     // Test it on some data
     nd::array in = nd::empty("3 * var * string[16]");
@@ -191,7 +191,7 @@ struct callable_to_lift {
 TEST(Elwise, BinaryExpr)
 {
   nd::arrfunc af =
-      lift_arrfunc(nd::apply::make<kernel_request_host, callable_to_lift>());
+      nd::elwise.bind("func", nd::apply::make<kernel_request_host, callable_to_lift>());
   nd::array a = parse_json("3 * int", "[0, 1, 2]");
   nd::array b = parse_json("3 * int", "[3, 4, 5]");
   nd::array c = parse_json("3 * int", "[3, 5, 7]");

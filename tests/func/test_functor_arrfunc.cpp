@@ -13,7 +13,7 @@
 
 #include <dynd/array.hpp>
 #include <dynd/func/apply_arrfunc.hpp>
-#include <dynd/func/lift_arrfunc.hpp>
+#include <dynd/func/elwise.hpp>
 #include <dynd/types/cfixed_dim_type.hpp>
 
 using namespace std;
@@ -360,7 +360,7 @@ TYPED_TEST_P(FunctorArrfunc_CallRetRes, CallRetRes) {
   a = avals0;
   b = bvals0;
   af = nd::apply::make(Callable0(&func0));
-  af = lift_arrfunc(af);
+  af = nd::elwise.bind("func", af);
   res = af(a, b);
   EXPECT_EQ(ndt::type("2 * 3 * int"), res.get_type());
   EXPECT_JSON_EQ_ARR("[[-10,-2,-4], [0,8,6]]", res);
@@ -418,7 +418,7 @@ TEST(FunctorArrfunc, LambdaFunc) {
   b = 3.25;
   af = nd::apply::make([](double x, double y,
                                    int z) { return x * z + y; });
-  af = lift_arrfunc(af);
+  af = nd::elwise.bind("func", af);
   res = af(a, b, 10);
   EXPECT_EQ(ndt::type("3 * float64"), res.get_type());
   EXPECT_JSON_EQ_ARR("[18.25,23.25,34.5]", res);
