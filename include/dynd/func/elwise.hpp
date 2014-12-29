@@ -53,7 +53,7 @@ namespace decl {
 
       static dynd::nd::arrfunc make();
 
-      static dynd::nd::arrfunc bind(const std::string &name, dynd::nd::arrfunc af);
+      static dynd::nd::arrfunc bind(const std::string &name, const dynd::nd::arrfunc &af);
     };
   } // namespace nd
 } // namespace decl

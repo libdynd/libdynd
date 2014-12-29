@@ -11,6 +11,7 @@
 #include <dynd/func/apply_arrfunc.hpp>
 #include <dynd/func/multidispatch_arrfunc.hpp>
 #include <dynd/func/lift_arrfunc.hpp>
+#include <dynd/func/elwise.hpp>
 
 using namespace std;
 using namespace dynd;
@@ -24,7 +25,7 @@ static nd::arrfunc make_ufunc(T0 f0, T1 f1)
 {
   nd::arrfunc af[2] = {nd::apply::make(f0),
                        nd::apply::make(f1)};
-  return lift_arrfunc(
+  return nd::elwise.bind("func", 
       make_multidispatch_arrfunc(sizeof(af) / sizeof(af[0]), af));
 }
 

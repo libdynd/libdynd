@@ -27,7 +27,4 @@ TEST(Elwise, Untitled)
 
   af = nd::apply::make<anon_func>();
   EXPECT_ARR_EQ(nd::array({3, 5, 7}), nd::elwise(a, b, kwds("func", af)));
-
-  nd::arrfunc baf = nd::elwise.bind("func", af);
-  std::cout << baf(a, b) << std::endl;
 }

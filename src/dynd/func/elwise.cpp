@@ -314,7 +314,7 @@ bound_instantiate(const arrfunc_type_data *self, const arrfunc_type *DYND_UNUSED
 }
 
 nd::arrfunc decl::nd::elwise::bind(const std::string &DYND_UNUSED(name),
-                                   dynd::nd::arrfunc af)
+                                   const dynd::nd::arrfunc &af)
 {
   arrfunc_type_data self(af, &bound_instantiate, NULL, &bound_resolve_dst_type);
 
