@@ -3,10 +3,9 @@
 // BSD 2-Clause License, see LICENSE.txt
 //
 
-#include <dynd/types/cuda_device_type.hpp>
+#include <dynd/func/elwise.hpp>
 #include <dynd/kernels/assignment_kernels.hpp>
-#include <dynd/kernels/elwise.hpp>
-#include <dynd/func/arrfunc.hpp>
+#include <dynd/types/cuda_device_type.hpp>
 
 using namespace std;
 using namespace dynd;
