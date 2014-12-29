@@ -257,3 +257,13 @@ TEST(SymbolicTypes, VariadicTuple)
   EXPECT_TRUE(tp.extended<tuple_type>()->is_variadic());
   EXPECT_EQ(tp, ndt::type(tp.str()));
 }
+
+TEST(SymbolicTypes, VariadicArrfunc)
+{
+  ndt::type tp;
+
+  tp = ndt::type("(int32, ...) -> float32");
+  EXPECT_JSON_EQ_ARR("[\"int32\"]", tp.p("pos_types"));
+  EXPECT_TRUE(tp.extended<arrfunc_type>()->is_pos_variadic());
+  EXPECT_EQ(tp, ndt::type(tp.str()));
+}
