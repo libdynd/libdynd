@@ -1016,17 +1016,22 @@ static ndt::type parse_tuple_or_funcproto(const char *&rbegin, const char *end,
     for (;;) {
       ndt::type tp;
       if (!cprefixed) {
-        // Look ahead to see if we've got BARENAME: coming next,
-        // and if so, parse the keyword arguments and return.
-        const char *saved_begin = begin;
+        // Look ahead to see if we've got "BARENAME:" or "..., BARENAME:" coming
+        // next, and if so, parse the keyword arguments and return.
+        const char *saved_begin = begin, *kwds_begin = begin;
         const char *field_name_begin, *field_name_end;
+        if (parse_token_ds(begin, end, "...") &&
+            parse_token_ds(begin, end, ',')) {
+          variadic = true;
+          kwds_begin = begin;
+        }
         parse::skip_whitespace_and_pound_comments(begin, end);
         if (parse::parse_name_no_ws(begin, end, field_name_begin,
                                     field_name_end)) {
           if (parse_token_ds(begin, end, ':')) {
             // process the keyword arguments
             ndt::type funcproto_kwd;
-            begin = saved_begin;
+            begin = kwds_begin;
             funcproto_kwd = parse_funcproto_kwds(begin, end, symtable);
             if (!funcproto_kwd.is_null()) {
               if (!parse_token_ds(begin, end, "->")) {
@@ -1040,8 +1045,9 @@ static ndt::type parse_tuple_or_funcproto(const char *&rbegin, const char *end,
                     begin, "expected function prototype return type");
               }
               rbegin = begin;
-              return ndt::make_arrfunc(ndt::make_tuple(field_type_list),
-                                       funcproto_kwd, return_type);
+              return ndt::make_arrfunc(
+                  ndt::make_tuple(field_type_list, variadic), funcproto_kwd,
+                  return_type);
             } else {
               throw datashape_parse_error(
                   begin, "expected funcproto keyword arguments");
