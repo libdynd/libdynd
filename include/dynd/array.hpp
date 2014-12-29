@@ -227,27 +227,31 @@ namespace nd {
     array(const std::initializer_list<std::initializer_list<T>> &il);
     /** Constructs an array from a 3D initializer list */
     template <class T>
-    array(const std::initializer_list<std::initializer_list<std::initializer_list<T>>>
-              &il);
+    array(const std::initializer_list<
+        std::initializer_list<std::initializer_list<T>>> &il);
+
+    /** Constructs an array from a 1D ndt::type initializer list */
+    array(const std::initializer_list<ndt::type> &il);
 
     /** Assigns an array from a 1D initializer list */
     template <class T>
-    inline array operator=(std::initializer_list<T> il)
+    inline array operator=(const std::initializer_list<T> &il)
     {
       array(il).swap(*this);
       return *this;
     }
     /** Assigns an array from a 2D initializer list */
     template <class T>
-    inline array operator=(std::initializer_list<std::initializer_list<T>> il)
+    inline array
+    operator=(const std::initializer_list<std::initializer_list<T>> &il)
     {
       array(il).swap(*this);
       return *this;
     }
     /** Assigns an array from a 3D initializer list */
     template <class T>
-    inline array operator=(std::initializer_list<
-        std::initializer_list<std::initializer_list<T>>> il)
+    inline array operator=(const std::initializer_list<
+        std::initializer_list<std::initializer_list<T>>> &il)
     {
       array(il).swap(*this);
       return *this;
@@ -1599,8 +1603,8 @@ namespace nd {
       : m_memblock()
   {
     intptr_t dim0 = il.size();
-    *this = make_strided_array(ndt::make_exact_type<T>(), 1, &dim0,
-                               nd::default_access_flags, NULL);
+    make_strided_array(ndt::make_exact_type<T>(), 1, &dim0,
+                       nd::default_access_flags, NULL).swap(*this);
     DYND_MEMCPY(get_ndo()->m_data_pointer, il.begin(), sizeof(T) * dim0);
   }
   template <class T>
@@ -1612,8 +1616,8 @@ namespace nd {
 
     // Get and validate that the shape is regular
     detail::initializer_list_shape<S>::compute(shape, il);
-    *this = make_strided_array(ndt::make_exact_type<T>(), 2, shape,
-                               nd::default_access_flags, NULL);
+    make_strided_array(ndt::make_exact_type<T>(), 2, shape,
+                       nd::default_access_flags, NULL).swap(*this);
     T *dataptr = reinterpret_cast<T *>(get_ndo()->m_data_pointer);
     detail::initializer_list_shape<S>::copy_data(&dataptr, il);
   }
@@ -1628,10 +1632,22 @@ namespace nd {
 
     // Get and validate that the shape is regular
     detail::initializer_list_shape<S>::compute(shape, il);
-    *this = make_strided_array(ndt::make_exact_type<T>(), 3, shape,
-                               nd::default_access_flags, NULL);
+    make_strided_array(ndt::make_exact_type<T>(), 3, shape,
+                       nd::default_access_flags, NULL).swap(*this);
     T *dataptr = reinterpret_cast<T *>(get_ndo()->m_data_pointer);
     detail::initializer_list_shape<S>::copy_data(&dataptr, il);
+  }
+
+  inline dynd::nd::array::array(const std::initializer_list<ndt::type> &il)
+      : m_memblock()
+  {
+    intptr_t dim0 = il.size();
+    make_strided_array(ndt::make_type(), 1, &dim0, nd::default_access_flags,
+                       NULL).swap(*this);
+    auto data_ptr = reinterpret_cast<ndt::type *>(get_ndo()->m_data_pointer);
+    for (intptr_t i = 0; i < dim0; ++i) {
+      data_ptr[i] = *(il.begin() + i);
+    }
   }
 
   ///////////// C-style array constructor implementation
@@ -1645,9 +1661,9 @@ namespace nd {
     intptr_t shape[ndim];
     size_t size = detail::fill_shape<T[N]>::fill(shape);
 
-    *this = make_strided_array(
+    make_strided_array(
         ndt::type(static_cast<type_id_t>(detail::dtype_from_array<T>::type_id)),
-        ndim, shape, default_access_flags, NULL);
+        ndim, shape, default_access_flags, NULL).swap(*this);
     DYND_MEMCPY(get_ndo()->m_data_pointer, reinterpret_cast<const void *>(&rhs),
                 size);
   }

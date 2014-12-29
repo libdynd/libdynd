@@ -7,6 +7,7 @@
 #include <sstream>
 #include <stdexcept>
 #include "inc_gtest.hpp"
+#include "dynd_assertions.hpp"
 
 #include <dynd/array.hpp>
 #include <dynd/func/arrfunc.hpp>
@@ -238,5 +239,21 @@ TEST(SymbolicTypes, AnySym)
   tp = ndt::type("{x: Any, y: Any}");
   EXPECT_TRUE(tp.is_symbolic());
   EXPECT_FALSE(tp.is_dim_variadic());
+  EXPECT_EQ(tp, ndt::type(tp.str()));
+}
+
+TEST(SymbolicTypes, VariadicTuple)
+{
+  ndt::type tp;
+
+  tp = ndt::make_tuple({ndt::make_type<int>(), ndt::make_type<float>()}, true);
+  EXPECT_TRUE(tp.is_symbolic());
+  EXPECT_TRUE(tp.extended<tuple_type>()->is_variadic());
+  EXPECT_EQ(tp, ndt::type(tp.str()));
+
+  tp = ndt::type("(type, int32, T, ...)");
+  EXPECT_JSON_EQ_ARR("[\"type\", \"int32\", \"T\"]", tp.p("field_types"));
+  EXPECT_TRUE(tp.is_symbolic());
+  EXPECT_TRUE(tp.extended<tuple_type>()->is_variadic());
   EXPECT_EQ(tp, ndt::type(tp.str()));
 }

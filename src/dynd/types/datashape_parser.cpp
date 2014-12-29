@@ -1002,7 +1002,7 @@ static ndt::type parse_tuple_or_funcproto(const char *&rbegin, const char *end,
 {
   const char *begin = rbegin;
   vector<ndt::type> field_type_list;
-  bool cprefixed = false;
+  bool cprefixed = false, variadic = false;
 
   if (!parse_token_ds(begin, end, '(')) {
     if (parse_token_ds(begin, end, "c(")) {
@@ -1017,7 +1017,7 @@ static ndt::type parse_tuple_or_funcproto(const char *&rbegin, const char *end,
       ndt::type tp;
       if (!cprefixed) {
         // Look ahead to see if we've got BARENAME: coming next,
-        // and if so, parse the keyword arguments.
+        // and if so, parse the keyword arguments and return.
         const char *saved_begin = begin;
         const char *field_name_begin, *field_name_end;
         parse::skip_whitespace_and_pound_comments(begin, end);
@@ -1048,7 +1048,17 @@ static ndt::type parse_tuple_or_funcproto(const char *&rbegin, const char *end,
             }
           }
         }
-         begin = saved_begin;
+        begin = saved_begin;
+
+        // Look ahead again to see if the tuple ends with "...)", in which case
+        // it's a variadic tuple.
+        if (parse_token_ds(begin, end, "...")) {
+          if (parse_token_ds(begin, end, ')')) {
+            variadic = true;
+            break;
+          }
+        }
+        begin = saved_begin;
       }
 
       tp = parse_datashape(begin, end, symtable);
@@ -1082,7 +1092,7 @@ static ndt::type parse_tuple_or_funcproto(const char *&rbegin, const char *end,
     // It might be a function prototype, check for the "->" token
     if (!parse_token_ds(begin, end, "->")) {
       rbegin = begin;
-      return ndt::make_tuple(field_type_list);
+      return ndt::make_tuple(field_type_list, variadic);
     }
 
     ndt::type return_type = parse_datashape(begin, end, symtable);
@@ -1094,7 +1104,8 @@ static ndt::type parse_tuple_or_funcproto(const char *&rbegin, const char *end,
     // TODO: I suspect because of the change away from immutable default construction, and
     //       the requirement that arrays into arrfunc constructors are immutable, that too
     //       many copies may be occurring.
-    return ndt::make_arrfunc(ndt::make_tuple(field_type_list), return_type);
+    return ndt::make_arrfunc(ndt::make_tuple(field_type_list, variadic),
+                             return_type);
   }
 }
 
