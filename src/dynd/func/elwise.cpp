@@ -111,6 +111,45 @@ int decl::nd::elwise::resolve_dst_type(const arrfunc_type_data *child_af,
   return 1;
 }
 
+template <type_id_t dst_dim_id, type_id_t src_dim_id>
+intptr_t decl::nd::elwise::instantiate(
+    const arrfunc_type_data *child, const arrfunc_type *child_tp, void *ckb,
+    intptr_t ckb_offset, const ndt::type &dst_tp, const char *dst_arrmeta,
+    const ndt::type *src_tp, const char *const *src_arrmeta,
+    kernel_request_t kernreq, const eval::eval_context *ectx,
+    const dynd::nd::array &kwds)
+{
+  switch (child_tp->get_npos()) {
+  case 1:
+    return kernels::elwise_ck<dst_dim_id, src_dim_id, 1>::instantiate(
+        child, child_tp, ckb, ckb_offset, dst_tp, dst_arrmeta, src_tp,
+        src_arrmeta, kernreq, ectx, kwds);
+  case 2:
+    return kernels::elwise_ck<dst_dim_id, src_dim_id, 2>::instantiate(
+        child, child_tp, ckb, ckb_offset, dst_tp, dst_arrmeta, src_tp,
+        src_arrmeta, kernreq, ectx, kwds);
+  case 3:
+    return kernels::elwise_ck<dst_dim_id, src_dim_id, 3>::instantiate(
+        child, child_tp, ckb, ckb_offset, dst_tp, dst_arrmeta, src_tp,
+        src_arrmeta, kernreq, ectx, kwds);
+  case 4:
+    return kernels::elwise_ck<dst_dim_id, src_dim_id, 4>::instantiate(
+        child, child_tp, ckb, ckb_offset, dst_tp, dst_arrmeta, src_tp,
+        src_arrmeta, kernreq, ectx, kwds);
+  case 5:
+    return kernels::elwise_ck<dst_dim_id, src_dim_id, 5>::instantiate(
+        child, child_tp, ckb, ckb_offset, dst_tp, dst_arrmeta, src_tp,
+        src_arrmeta, kernreq, ectx, kwds);
+  case 6:
+    return kernels::elwise_ck<dst_dim_id, src_dim_id, 6>::instantiate(
+        child, child_tp, ckb, ckb_offset, dst_tp, dst_arrmeta, src_tp,
+        src_arrmeta, kernreq, ectx, kwds);
+  default:
+    throw runtime_error("make_elwise_strided_dimension_expr_kernel with "
+                        "src_count > 6 not implemented yet");
+  }
+}
+
 intptr_t decl::nd::elwise::instantiate(
     const arrfunc_type_data *child, const arrfunc_type *child_tp, void *ckb,
     intptr_t ckb_offset, const ndt::type &dst_tp, const char *dst_arrmeta,

@@ -6,6 +6,7 @@
 #include <dynd/array.hpp>
 #include <dynd/array_iter.hpp>
 #include <dynd/func/arrfunc.hpp>
+#include <dynd/func/elwise.hpp>
 #include <dynd/types/var_dim_type.hpp>
 #include <dynd/types/cfixed_dim_type.hpp>
 #include <dynd/types/fixed_dim_type.hpp>
@@ -31,7 +32,6 @@
 #include <dynd/types/categorical_type.hpp>
 #include <dynd/types/builtin_type_properties.hpp>
 #include <dynd/memblock/memmap_memory_block.hpp>
-#include <dynd/kernels/elwise.hpp>
 #include <dynd/view.hpp>
 
 using namespace std;

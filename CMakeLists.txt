@@ -347,7 +347,6 @@ set(libdynd_SRC
     src/dynd/kernels/datetime_assignment_kernels.cpp
     src/dynd/kernels/datetime_adapter_kernels.cpp
     src/dynd/kernels/date_expr_kernels.cpp
-    src/dynd/kernels/elwise.cpp
     src/dynd/kernels/elwise_expr_kernels.cpp
     src/dynd/kernels/expr_kernel_generator.cpp
     src/dynd/kernels/expr_kernels.cpp
@@ -385,7 +384,6 @@ set(libdynd_SRC
     include/dynd/kernels/datetime_assignment_kernels.hpp
     include/dynd/kernels/datetime_adapter_kernels.hpp
     include/dynd/kernels/date_expr_kernels.hpp
-    include/dynd/kernels/elwise.hpp
     include/dynd/kernels/elwise_expr_kernels.hpp
     include/dynd/kernels/expr_kernels.hpp
     include/dynd/kernels/expr_kernel_generator.hpp
@@ -530,11 +528,11 @@ if (DYND_CUDA)
         src/dynd/types/dynd_int128.cpp
         src/dynd/types/dynd_uint128.cpp
         src/dynd/kernels/assignment_kernels.cpp
-        src/dynd/kernels/elwise.cpp
+        src/dynd/func/elwise.cpp
         )
     list(APPEND libdynd_SRC
         src/dynd/kernels/assignment_kernels.cu
-        src/dynd/kernels/elwise.cu
+        src/dynd/func/elwise.cu
         src/dynd/kernels/ckernel_builder.cu
         src/dynd/types/dynd_complex.cu
         src/dynd/types/dynd_float16.cu
