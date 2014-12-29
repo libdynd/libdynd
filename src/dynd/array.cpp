@@ -6,6 +6,7 @@
 #include <dynd/array.hpp>
 #include <dynd/array_iter.hpp>
 #include <dynd/func/arrfunc.hpp>
+#include <dynd/func/elwise.hpp>
 #include <dynd/types/var_dim_type.hpp>
 #include <dynd/types/cfixed_dim_type.hpp>
 #include <dynd/types/fixed_dim_type.hpp>
@@ -31,7 +32,6 @@
 #include <dynd/types/categorical_type.hpp>
 #include <dynd/types/builtin_type_properties.hpp>
 #include <dynd/memblock/memmap_memory_block.hpp>
-#include <dynd/kernels/elwise.hpp>
 #include <dynd/view.hpp>
 
 using namespace std;
@@ -2211,7 +2211,7 @@ void nd::assign_na(const ndt::type &tp, const char *arrmeta, char *data,
       const arrfunc_type *af_tp =
           dtp.extended<option_type>()->get_assign_na_arrfunc_type();
       ckernel_builder<kernel_request_host> ckb;
-      kernels::make_lifted_expr_ckernel(af, af_tp, &ckb, tp.get_ndim(), tp, arrmeta,
+      decl::nd::elwise::instantiate(af, af_tp, &ckb, tp.get_ndim(), tp, arrmeta,
                                NULL, NULL, kernel_request_single, ectx, nd::array());
       ckernel_prefix *ckp = ckb.get();
       expr_single_t ckp_fn = ckp->get_function<expr_single_t>();
@@ -2282,7 +2282,7 @@ void nd::forward_as_array(const ndt::type &tp, char *arrmeta, char *data,
                           const nd::array &val)
 {
 
-  if (tp.is_builtin()) {
+  if (tp.is_builtin() || tp.get_type_id() == arrfunc_type_id) {
     memcpy(data, val.get_readonly_originptr(), tp.get_data_size());
   } else {
     pointer_type_arrmeta *am =
@@ -2301,4 +2301,10 @@ void nd::forward_as_array(const ndt::type &tp, char *arrmeta, char *data,
     *reinterpret_cast<char **>(data) =
         const_cast<char *>(val.get_readonly_originptr());
   }
+}
+
+void nd::forward_as_array(const ndt::type &tp, char *arrmeta, char *data,
+                          const nd::arrfunc &value)
+{
+  forward_as_array(tp, arrmeta, data, static_cast<nd::array>(value));
 }

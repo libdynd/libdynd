@@ -3,10 +3,9 @@
 // BSD 2-Clause License, see LICENSE.txt
 //
 
-#include <dynd/types/cuda_device_type.hpp>
+#include <dynd/func/elwise.hpp>
 #include <dynd/kernels/assignment_kernels.hpp>
-#include <dynd/kernels/elwise.hpp>
-#include <dynd/func/arrfunc.hpp>
+#include <dynd/types/cuda_device_type.hpp>
 
 using namespace std;
 using namespace dynd;
@@ -101,10 +100,10 @@ intptr_t cuda_device_type::make_assignment_kernel(
                             NULL, NULL);
     ndt::type child_tp =
         ndt::make_arrfunc(ndt::make_tuple(src_tp.storage_type().get_dtype()),
-                                             dst_tp.storage_type().get_dtype());
-    return kernels::make_lifted_expr_ckernel(
-        &child, child_tp.extended<arrfunc_type>(), ckb, ckb_offset, dst_tp,
-        dst_arrmeta, &src_tp, &src_arrmeta, kernreq, ectx, kwds);
+                          dst_tp.storage_type().get_dtype());
+    return nd::elwise.instantiate(&child, child_tp.extended<arrfunc_type>(),
+                                  ckb, ckb_offset, dst_tp, dst_arrmeta, &src_tp,
+                                  &src_arrmeta, kernreq, ectx, kwds);
   }
 
   return make_cuda_builtin_type_assignment_kernel(

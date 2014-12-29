@@ -14,7 +14,7 @@
 #include <dynd/array.hpp>
 #include <dynd/func/multidispatch_arrfunc.hpp>
 #include <dynd/func/apply_arrfunc.hpp>
-#include <dynd/func/lift_arrfunc.hpp>
+#include <dynd/func/elwise.hpp>
 
 using namespace std;
 using namespace dynd;
@@ -86,7 +86,7 @@ TEST(MultiDispatchArrfunc, Values) {
   funcs.push_back(nd::apply::make(&manip0));
   funcs.push_back(nd::apply::make(&manip1));
   nd::arrfunc af =
-      lift_arrfunc(make_multidispatch_arrfunc(funcs.size(), &funcs[0]));
+      nd::elwise.bind("func", make_multidispatch_arrfunc(funcs.size(), &funcs[0]));
   nd::array a, b, c;
 
   // Exactly match (int, int) -> real

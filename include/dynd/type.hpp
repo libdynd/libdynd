@@ -947,6 +947,8 @@ type as_type(const std::vector<T> &value)
 
 type as_type(const nd::array &val);
 
+type as_type(const nd::arrfunc &val);
+
 template <typename T>
 void get_types(type &tp, const T &val)
 {
@@ -1065,6 +1067,8 @@ type get_forward_type(const std::vector<T> &val)
 }
 
 type get_forward_type(const nd::array &val);
+
+type get_forward_type(const nd::arrfunc &val);
 
 template <typename T>
 void get_forward_types(type &tp, const T &val)

@@ -155,7 +155,7 @@ namespace kernels {
                                reinterpret_cast<fftw_dst_type *>(dst));
     }
 
-    static ndt::type make_funcproto()
+    static ndt::type make_type()
     {
       return ndt::type("(Fixed**N * complex[float64], shape: ?N * int64, axes: "
                        "?Fixed * int64, flags: ?int32) -> Fixed**N * "
