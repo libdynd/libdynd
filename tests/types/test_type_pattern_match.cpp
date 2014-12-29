@@ -83,6 +83,32 @@ TEST(TypePatternMatch, Any)
       ndt::type("3 * 5 * var * (int32, float16, 2 * int8)"), ndt::type("Any")));
 }
 
+TEST(TypePatternMatch, VariadicTuple)
+{
+  EXPECT_TRUE(ndt::pattern_match(ndt::type("(...)"), ndt::type("(...)")));
+  EXPECT_TRUE(ndt::pattern_match(ndt::type("()"), ndt::type("(...)")));
+  EXPECT_FALSE(ndt::pattern_match(ndt::type("(...)"), ndt::type("()")));
+  EXPECT_TRUE(ndt::pattern_match(ndt::type("(int32)"), ndt::type("(...)")));
+  EXPECT_FALSE(
+      ndt::pattern_match(ndt::type("(int32, ...)"), ndt::type("(int32)")));
+  EXPECT_TRUE(
+      ndt::pattern_match(ndt::type("(int32, int64)"), ndt::type("(...)")));
+  EXPECT_TRUE(ndt::pattern_match(ndt::type("(int32, int64, float32)"),
+                                 ndt::type("(...)")));
+  EXPECT_TRUE(ndt::pattern_match(ndt::type("(int32, int64, float32)"),
+                                 ndt::type("(int32, ...)")));
+  EXPECT_TRUE(ndt::pattern_match(ndt::type("(int32, int64, float32)"),
+                                 ndt::type("(int32, int64, ...)")));
+  EXPECT_TRUE(ndt::pattern_match(ndt::type("(int32, int64, float32)"),
+                                 ndt::type("(int32, int64, float32, ...)")));
+  EXPECT_TRUE(ndt::pattern_match(ndt::type("(int32, int64, float32)"),
+                                 ndt::type("(int32, T, ...)")));
+  EXPECT_FALSE(ndt::pattern_match(ndt::type("(int32, int64, float32)"),
+                                  ndt::type("(T, T, ...)")));
+  EXPECT_TRUE(ndt::pattern_match(ndt::type("(int32, int32, float32)"),
+                                 ndt::type("(T, T, ...)")));
+}
+
 TEST(TypePatternMatch, Struct)
 {
   EXPECT_TRUE(
