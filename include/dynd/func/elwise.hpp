@@ -52,6 +52,8 @@ namespace decl {
                   const eval::eval_context *ectx, const dynd::nd::array &kwds);
 
       static dynd::nd::arrfunc make();
+
+      static dynd::nd::arrfunc bind(const std::string &name, dynd::nd::arrfunc af);
     };
   } // namespace nd
 } // namespace decl
