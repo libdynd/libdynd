@@ -1005,6 +1005,9 @@ namespace decl {
 
       static dynd::nd::arrfunc make() { return dynd::nd::make_arrfunc<T>(); }
     };
+
+//    template <typename T>
+  //  class composition;
   }
 } // namespace dynd::decl::nd
 

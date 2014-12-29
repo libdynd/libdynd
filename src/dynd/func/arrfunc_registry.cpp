@@ -25,8 +25,15 @@ static nd::arrfunc make_ufunc(T0 f0, T1 f1)
 {
   nd::arrfunc af[2] = {nd::apply::make(f0),
                        nd::apply::make(f1)};
-  return nd::elwise.bind("func", 
+  return lift_arrfunc(
       make_multidispatch_arrfunc(sizeof(af) / sizeof(af[0]), af));
+
+//  nd::arrfunc out = nd::elwise.bind("func",
+  //    make_multidispatch_arrfunc(sizeof(af) / sizeof(af[0]), af));
+
+//  std::cout << out << std::endl;
+
+//  return out;
 }
 
 template<typename T0, typename T1, typename T2>
