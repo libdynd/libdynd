@@ -303,13 +303,8 @@ bound_instantiate(const arrfunc_type_data *self, const arrfunc_type *DYND_UNUSED
                   dynd::kernel_request_t kernreq,
                   const eval::eval_context *ectx, const dynd::nd::array &kwds)
 {
-	std::cout << "bound_instantiate" << std::endl;
-
   const arrfunc_type_data *child =
       self->get_data_as<dynd::nd::arrfunc>()->get();
-  std::cout << "got child" << std::endl;
-  std::cout << (child->instantiate == NULL) << std::endl;
-
   const arrfunc_type *child_tp =
       self->get_data_as<dynd::nd::arrfunc>()->get_type();
 
@@ -321,9 +316,9 @@ bound_instantiate(const arrfunc_type_data *self, const arrfunc_type *DYND_UNUSED
 nd::arrfunc decl::nd::elwise::bind(const std::string &DYND_UNUSED(name),
                                    const dynd::nd::arrfunc &af)
 {
-  arrfunc_type_data self(af, &bound_instantiate, NULL, &bound_resolve_dst_type);
+//  arrfunc_type_data self(af, &bound_instantiate, NULL, &bound_resolve_dst_type);
 
-  return dynd::nd::arrfunc(&self, lift_proto(af.get_type()));
+  return dynd::nd::arrfunc(af, &bound_instantiate, &bound_resolve_dst_type, lift_proto(af.get_type()));
 }
 
 decl::nd::elwise nd::elwise;

@@ -510,6 +510,16 @@ namespace nd {
   public:
     arrfunc() {}
 
+    template <typename T>
+    arrfunc(const T &data, arrfunc_instantiate_t instantiate,
+            arrfunc_resolve_dst_type_t resolve_dst_type,
+            const ndt::type &self_tp)
+        : m_value(empty(self_tp))
+    {
+      new (m_value.get_readwrite_originptr())
+          arrfunc_type_data(data, instantiate, NULL, resolve_dst_type);
+    }
+
     arrfunc(const arrfunc_type_data *self, const ndt::type &self_tp)
         : m_value(empty(self_tp))
     {
@@ -1006,8 +1016,8 @@ namespace decl {
       static dynd::nd::arrfunc make() { return dynd::nd::make_arrfunc<T>(); }
     };
 
-//    template <typename T>
-  //  class composition;
+    //    template <typename T>
+    //  class composition;
   }
 } // namespace dynd::decl::nd
 

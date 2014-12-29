@@ -10,7 +10,6 @@
 #include <dynd/func/arrfunc_registry.hpp>
 #include <dynd/func/apply_arrfunc.hpp>
 #include <dynd/func/multidispatch_arrfunc.hpp>
-#include <dynd/func/lift_arrfunc.hpp>
 #include <dynd/func/elwise.hpp>
 
 using namespace std;
@@ -25,15 +24,9 @@ static nd::arrfunc make_ufunc(T0 f0, T1 f1)
 {
   nd::arrfunc af[2] = {nd::apply::make(f0),
                        nd::apply::make(f1)};
-  return lift_arrfunc(
+
+  return nd::elwise.bind("func",
       make_multidispatch_arrfunc(sizeof(af) / sizeof(af[0]), af));
-
-//  nd::arrfunc out = nd::elwise.bind("func",
-  //    make_multidispatch_arrfunc(sizeof(af) / sizeof(af[0]), af));
-
-//  std::cout << out << std::endl;
-
-//  return out;
 }
 
 template<typename T0, typename T1, typename T2>
@@ -42,7 +35,7 @@ static nd::arrfunc make_ufunc(T0 f0, T1 f1, T2 f2)
   nd::arrfunc af[3] = {nd::apply::make(f0),
                        nd::apply::make(f1),
                        nd::apply::make(f2)};
-  return lift_arrfunc(
+  return nd::elwise.bind("func",
       make_multidispatch_arrfunc(sizeof(af) / sizeof(af[0]), af));
 }
 
@@ -53,7 +46,7 @@ static nd::arrfunc make_ufunc(T0 f0, T1 f1, T2 f2, T3 f3, T4 f4)
       nd::apply::make(f0), nd::apply::make(f1),
       nd::apply::make(f2), nd::apply::make(f3),
       nd::apply::make(f4)};
-  return lift_arrfunc(
+  return nd::elwise.bind("func",
       make_multidispatch_arrfunc(sizeof(af) / sizeof(af[0]), af));
 }
 
@@ -66,7 +59,7 @@ static nd::arrfunc make_ufunc(T0 f0, T1 f1, T2 f2, T3 f3, T4 f4, T5 f5, T6 f6)
       nd::apply::make(f2), nd::apply::make(f3),
       nd::apply::make(f4), nd::apply::make(f5),
       nd::apply::make(f6)};
-  return lift_arrfunc(
+  return nd::elwise.bind("func",
       make_multidispatch_arrfunc(sizeof(af) / sizeof(af[0]), af));
 }
 
@@ -80,7 +73,7 @@ static nd::arrfunc make_ufunc(T0 f0, T1 f1, T2 f2, T3 f3, T4 f4, T5 f5, T6 f6,
       nd::apply::make(f2), nd::apply::make(f3),
       nd::apply::make(f4), nd::apply::make(f5),
       nd::apply::make(f6), nd::apply::make(f7)};
-  return lift_arrfunc(
+  return nd::elwise.bind("func",
       make_multidispatch_arrfunc(sizeof(af) / sizeof(af[0]), af));
 }
 
@@ -95,7 +88,7 @@ static nd::arrfunc make_ufunc(T0 f0, T1 f1, T2 f2, T3 f3, T4 f4, T5 f5, T6 f6,
       nd::apply::make(f4), nd::apply::make(f5),
       nd::apply::make(f6), nd::apply::make(f7),
       nd::apply::make(f8), nd::apply::make(f9)};
-  return lift_arrfunc(
+  return nd::elwise.bind("func",
       make_multidispatch_arrfunc(sizeof(af) / sizeof(af[0]), af));
 }
 
