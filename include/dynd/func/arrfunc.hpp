@@ -744,7 +744,8 @@ namespace nd {
       }
 
       nd::array kwds_as_array;
-      ndt::type dst_tp = resolve(narg, src_tp.data(), src_arrmeta.data(),
+      ndt::type dst_tp = resolve(narg, (narg == 0) ? NULL : src_tp.data(),
+                                 (narg == 0) ? NULL : src_arrmeta.data(),
                                  kwds(), kwds_as_array);
 
       // Construct the destination array
@@ -753,10 +754,12 @@ namespace nd {
       // Generate and evaluate the ckernel
       ckernel_builder<kernel_request_host> ckb;
       self->instantiate(self, self_tp, &ckb, 0, dst_tp, res.get_arrmeta(),
-                        src_tp.data(), src_arrmeta.data(), kernel_request_single, ectx,
-                        kwds_as_array);
+                        (narg == 0) ? NULL : src_tp.data(),
+                        (narg == 0) ? NULL : src_arrmeta.data(),
+                        kernel_request_single, ectx, kwds_as_array);
       expr_single_t fn = ckb.get()->get_function<expr_single_t>();
-      fn(res.get_readwrite_originptr(), src_data.data(), ckb.get());
+      fn(res.get_readwrite_originptr(), (narg == 0) ? NULL : src_data.data(),
+         ckb.get());
 
       return res;
     }
