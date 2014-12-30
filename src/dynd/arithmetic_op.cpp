@@ -276,14 +276,17 @@ static kernels::create_t subtract_table[builtin_type_id_count - 2] = {
     &kernels::create<kernels::subtract_ck<dynd_complex<double>>>,
 };
 
-int resolve_dst_type_subtract(
-    const arrfunc_type_data *DYND_UNUSED(self), const arrfunc_type *DYND_UNUSED(self_tp), intptr_t DYND_UNUSED(nsrc),
-    const ndt::type *src_tp, int DYND_UNUSED(throw_on_error), ndt::type &out_dst_tp,
-    const nd::array &DYND_UNUSED(kwds))
+int resolve_dst_type_subtract(const arrfunc_type_data *DYND_UNUSED(self),
+                              const arrfunc_type *DYND_UNUSED(self_tp),
+                              intptr_t DYND_UNUSED(nsrc),
+                              const ndt::type *src_tp,
+                              int DYND_UNUSED(throw_on_error),
+                              ndt::type &out_dst_tp,
+                              const nd::array &DYND_UNUSED(kwds))
 {
 
-    out_dst_tp = promote_types_arithmetic(src_tp[0], src_tp[1]);
-    return 1;
+  out_dst_tp = promote_types_arithmetic(src_tp[0], src_tp[1]);
+  return 1;
 }
 
 intptr_t instantiate_subtract(const arrfunc_type_data *DYND_UNUSED(self),
@@ -406,12 +409,28 @@ nd::array nd::operator+(const nd::array &op1, const nd::array &op2)
   }
 }
 
+namespace dynd {
+namespace decl {
+  namespace nd {
+    class sub : public arrfunc<sub> {
+    public:
+      static dynd::nd::arrfunc make()
+      {
+        arrfunc_type_data child(&instantiate_subtract, NULL,
+                                &resolve_dst_type_subtract, NULL);
+        dynd::nd::arrfunc child_af(&child, ndt::type("(Any, Any) -> Any"));
+
+        return elwise::bind("func", child_af);
+      }
+    };
+  }
+}
+}
+
+decl::nd::sub sub;
+
 nd::array nd::operator-(const nd::array &op1, const nd::array &op2)
 {
-  arrfunc_type_data child(&instantiate_subtract, NULL, &resolve_dst_type_subtract, NULL);
-  nd::arrfunc child_af(&child, ndt::type("(Any, Any) -> Any"));
-
-  nd::arrfunc sub = nd::elwise.bind("func", child_af);
   return sub(op1, op2);
 }
 
