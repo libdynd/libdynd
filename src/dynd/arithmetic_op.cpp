@@ -284,8 +284,11 @@ int resolve_dst_type_subtract(const arrfunc_type_data *DYND_UNUSED(self),
                               ndt::type &out_dst_tp,
                               const nd::array &DYND_UNUSED(kwds))
 {
+  out_dst_tp = promote_types_arithmetic(src_tp[0].without_memory_type(), src_tp[1].without_memory_type());
+  if (src_tp[0].get_kind() == memory_kind) {
+    out_dst_tp = src_tp[0].extended<base_memory_type>()->with_replaced_storage_type(out_dst_tp);
+  }
 
-  out_dst_tp = promote_types_arithmetic(src_tp[0], src_tp[1]);
   return 1;
 }
 
