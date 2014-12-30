@@ -87,11 +87,12 @@ public:
  */
 inline void skip_whitespace(const char *&rbegin, const char *end)
 {
-    const char *begin = rbegin;
-    while (begin < end && std::isspace(*begin)) {
-        ++begin;
-    }
-    rbegin = begin;
+  using namespace std;
+  const char *begin = rbegin;
+  while (begin < end && isspace(*begin)) {
+    ++begin;
+  }
+  rbegin = begin;
 }
 
 /**
@@ -102,23 +103,25 @@ inline void skip_whitespace(const char *&rbegin, const char *end)
  */
 inline void skip_whitespace_and_pound_comments(const char *&rbegin, const char *end)
 {
-    const char *begin = rbegin;
-    while (begin < end && std::isspace(*begin)) {
-        ++begin;
-    }
+  using namespace std;
+  const char *begin = rbegin;
+  while (begin < end && isspace(*begin)) {
+    ++begin;
+  }
 
-    // Comments
-    if (begin < end && *begin == '#') {
-        const char *line_end = (const char *)memchr(begin, '\n', end - begin);
-        if (line_end == NULL) {
-            begin = end;
-        } else {
-            begin = line_end + 1;
-            skip_whitespace_and_pound_comments(begin, end);
-        }
+  // Comments
+  if (begin < end && *begin == '#') {
+    const char *line_end = (const char *)memchr(begin, '\n', end - begin);
+    if (line_end == NULL) {
+      begin = end;
     }
+    else {
+      begin = line_end + 1;
+      skip_whitespace_and_pound_comments(begin, end);
+    }
+  }
 
-    rbegin = begin;
+  rbegin = begin;
 }
 
 /**
@@ -132,17 +135,19 @@ inline void skip_whitespace_and_pound_comments(const char *&rbegin, const char *
  */
 inline bool skip_required_whitespace(const char *&rbegin, const char *end)
 {
-    const char *begin = rbegin;
-    if (begin < end && std::isspace(*begin)) {
-        ++begin;
-        while (begin < end && std::isspace(*begin)) {
-            ++begin;
-        }
-        rbegin = begin;
-        return true;
-    } else {
-        return false;
+  using namespace std;
+  const char *begin = rbegin;
+  if (begin < end && isspace(*begin)) {
+    ++begin;
+    while (begin < end && isspace(*begin)) {
+      ++begin;
     }
+    rbegin = begin;
+    return true;
+  }
+  else {
+    return false;
+  }
 }
 
 /**
@@ -562,38 +567,40 @@ struct named_value {
  *     }
  */
 template <int N>
-inline bool parse_ci_alpha_str_named_value_no_ws(const char *&rbegin, const char *end,
-                                  named_value (&nvt)[N], int &out_value)
+inline bool
+parse_ci_alpha_str_named_value_no_ws(const char *&rbegin, const char *end,
+                                     named_value(&nvt)[N], int &out_value)
 {
-    // TODO: Could specialize two implementations based on the size of N,
-    //       for small N do a linear search, big N do a binary search.
+  using namespace std;
+  // TODO: Could specialize two implementations based on the size of N,
+  //       for small N do a linear search, big N do a binary search.
 
-    const char *begin = rbegin;
-    const char *strbegin, *strend;
-    if (!parse_alpha_name_no_ws(begin, end, strbegin, strend)) {
-        return false;
-    }
-    int strfirstchar = std::tolower(*strbegin);
-    // Search through the named value table for a matching string
-    for (int i = 0; i < N; ++i) {
-        const char *name = nvt[i].name;
-        // Compare the first character
-        if (*name++ == strfirstchar) {
-            const char *strptr = strbegin + 1;
-            // Compare the rest of the characters
-            while (*name != '\0' && strptr < strend &&
-                   *name == std::tolower(*strptr)) {
-                ++name; ++strptr;
-            }
-            if (*name == '\0' && strptr == strend) {
-                out_value = nvt[i].value;
-                rbegin = begin;
-                return true;
-            }
-        }
-    }
-
+  const char *begin = rbegin;
+  const char *strbegin, *strend;
+  if (!parse_alpha_name_no_ws(begin, end, strbegin, strend)) {
     return false;
+  }
+  int strfirstchar = tolower(*strbegin);
+  // Search through the named value table for a matching string
+  for (int i = 0; i < N; ++i) {
+    const char *name = nvt[i].name;
+    // Compare the first character
+    if (*name++ == strfirstchar) {
+      const char *strptr = strbegin + 1;
+      // Compare the rest of the characters
+      while (*name != '\0' && strptr < strend && *name == tolower(*strptr)) {
+        ++name;
+        ++strptr;
+      }
+      if (*name == '\0' && strptr == strend) {
+        out_value = nvt[i].value;
+        rbegin = begin;
+        return true;
+      }
+    }
+  }
+
+  return false;
 }
 
 /**
