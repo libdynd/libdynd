@@ -22,14 +22,14 @@ using namespace dynd;
 namespace dynd {
 namespace kernels {
   template <typename T>
-  struct subtract_ck : expr_ck<subtract_ck<T>, kernel_request_host, 2> {
-    void single(char *dst, char *const *src)
+  struct subtract_ck : expr_ck<subtract_ck<T>, kernel_request_cuda_host_device, 2> {
+    DYND_CUDA_HOST_DEVICE void single(char *dst, char *const *src)
     {
       *reinterpret_cast<T *>(dst) =
           *reinterpret_cast<T *>(src[0]) - *reinterpret_cast<T *>(src[1]);
     }
 
-    void strided(char *dst, intptr_t dst_stride, char *const *src,
+    DYND_CUDA_HOST_DEVICE void strided(char *dst, intptr_t dst_stride, char *const *src,
                  const intptr_t *src_stride, size_t count)
     {
       char *src0 = src[0], *src1 = src[1];

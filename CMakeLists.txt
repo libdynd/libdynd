@@ -522,6 +522,7 @@ source_group("Internal Headers" REGULAR_EXPRESSION "src/dynd/.*hpp")
 if (DYND_CUDA)
     # Replace some source files with their CUDA versions
     list(REMOVE_ITEM libdynd_SRC
+        src/dynd/arithmetic_op.cpp
         src/dynd/types/dynd_complex.cpp
         src/dynd/types/dynd_float16.cpp
         src/dynd/types/dynd_float128.cpp
@@ -531,6 +532,7 @@ if (DYND_CUDA)
         src/dynd/func/elwise.cpp
         )
     list(APPEND libdynd_SRC
+        src/dynd/arithmetic_op.cu
         src/dynd/kernels/assignment_kernels.cu
         src/dynd/func/elwise.cu
         src/dynd/kernels/ckernel_builder.cu
