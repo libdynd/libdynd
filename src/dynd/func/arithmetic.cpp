@@ -3,6 +3,8 @@
 // BSD 2-Clause License, see LICENSE.txt
 //
 
+#include <dynd/func/arithmetic.hpp>
+
 #include <sstream>
 
 #include <dynd/array.hpp>
