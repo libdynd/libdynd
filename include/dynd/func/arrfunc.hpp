@@ -722,6 +722,48 @@ namespace nd {
       return res;
     }
 
+    array call(intptr_t narg, const nd::array *args,
+               const eval::eval_context *ectx) const
+    {
+      const arrfunc_type_data *self = get();
+      const arrfunc_type *self_tp = m_value.get_type().extended<arrfunc_type>();
+
+      std::vector<ndt::type> src_tp(narg);
+      for (intptr_t i = 0; i < narg; ++i) {
+        src_tp[i] = args[i].get_type();
+      }
+
+      std::vector<char *> src_data(narg);
+      for (intptr_t i = 0; i < narg; ++i) {
+        src_data[i] = const_cast<char *>(args[i].get_readonly_originptr());
+      }
+
+      std::vector<const char *> src_arrmeta(narg);
+      for (intptr_t i = 0; i < narg; ++i) {
+        src_arrmeta[i] = args[i].get_arrmeta();
+      }
+
+      nd::array kwds_as_array;
+      ndt::type dst_tp = resolve(narg, (narg == 0) ? NULL : src_tp.data(),
+                                 (narg == 0) ? NULL : src_arrmeta.data(),
+                                 kwds(), kwds_as_array);
+
+      // Construct the destination array
+      nd::array res = nd::empty(dst_tp);
+
+      // Generate and evaluate the ckernel
+      ckernel_builder<kernel_request_host> ckb;
+      self->instantiate(self, self_tp, &ckb, 0, dst_tp, res.get_arrmeta(),
+                        (narg == 0) ? NULL : src_tp.data(),
+                        (narg == 0) ? NULL : src_arrmeta.data(),
+                        kernel_request_single, ectx, kwds_as_array);
+      expr_single_t fn = ckb.get()->get_function<expr_single_t>();
+      fn(res.get_readwrite_originptr(), (narg == 0) ? NULL : src_data.data(),
+         ckb.get());
+
+      return res;
+    }
+
     /**
      * operator()()
      */
@@ -1161,21 +1203,3 @@ std::vector<intptr_t> dynd::nd::detail::kwds<T...>::resolve_available_types(
 
   return available;
 }
-
-/*
-      std::vector<ndt::type> arg_tp(narg);
-      for (intptr_t i = 0; i < narg; ++i) {
-        arg_tp[i] = args[i].get_type();
-      }
-
-
-std::vector<char *> src_data(af_tp->get_npos());
-for (intptr_t i = 0; i < af_tp->get_npos(); ++i) {
-  src_data[i] = const_cast<char *>(args[i].get_readonly_originptr());
-}
-
-std::vector<const char *> src_arrmeta(af_tp->get_npos());
-for (intptr_t i = 0; i < af_tp->get_npos(); ++i) {
-  src_arrmeta[i] = args[i].get_arrmeta();
-}
-*/
