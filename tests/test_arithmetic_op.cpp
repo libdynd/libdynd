@@ -75,12 +75,12 @@ TEST(ArithmeticOp, StridedScalarBroadcast) {
     EXPECT_EQ(4, c(0).as<int>());
     EXPECT_EQ(6, c(1).as<int>());
     EXPECT_EQ(8, c(2).as<int>());
-    c = (a - b).eval();
+    c = a - b;
     EXPECT_EQ(ndt::make_type<int>(), c.get_dtype());
     EXPECT_EQ(0, c(0).as<int>());
     EXPECT_EQ(2, c(1).as<int>());
     EXPECT_EQ(4, c(2).as<int>());
-    c = (b - a).eval();
+    c = b - a;
     EXPECT_EQ(ndt::make_type<int>(), c.get_dtype());
     EXPECT_EQ(0, c(0).as<int>());
     EXPECT_EQ(-2, c(1).as<int>());

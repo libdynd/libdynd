@@ -257,7 +257,7 @@ DYND_BUILTIN_DTYPE_BINARY_OP_TABLE_DEFS(division);
 // These operators are declared in nd::array.hpp
 
 static kernels::create_t subtract_table[builtin_type_id_count - 2] = {
-    &kernels::create<kernels::subtract_ck<bool>>,
+    NULL,
     &kernels::create<kernels::subtract_ck<int8_t>>,
     &kernels::create<kernels::subtract_ck<int16_t>>,
     &kernels::create<kernels::subtract_ck<int32_t>>,
