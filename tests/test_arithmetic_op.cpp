@@ -225,10 +225,6 @@ TEST(ArithmeticOp, ScalarOnTheLeft) {
     EXPECT_EQ(-6, c(0).as<int>());
     EXPECT_EQ(-3, c(1).as<int>());
     EXPECT_EQ(-2, c(2).as<int>());
-
-//    dynd_bool z = true;
-
-//    std::cout << (dynd_complex<double>(5.0) - z) << std::endl;
 }
 
 TEST(ArithmeticOp, ComplexScalar) {

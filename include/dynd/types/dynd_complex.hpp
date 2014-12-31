@@ -12,313 +12,332 @@
 #include <dynd/config.hpp>
 #include <dynd/typed_data_assign.hpp>
 
-template <typename T>
-struct is_builtin_real {
-  enum { value = false };
-};
-
-template <>
-struct is_builtin_real<float> {
-  enum { value = true };
-};
-
-template <>
-struct is_builtin_real<double> {
-  enum { value = true };
-};
-
 namespace dynd {
 
 template <typename T>
-class dynd_complex;
-
-template <>
-class dynd_complex<float> {
+class dynd_complex {
 public:
-  typedef float value_type;
-  float m_real, m_imag;
+  T m_real, m_imag;
+  typedef T value_type;
 
-  DYND_CUDA_HOST_DEVICE inline dynd_complex(float re = 0.0f, float im = 0.0f)
+  DYND_CUDA_HOST_DEVICE dynd_complex(T re = 0.0, T im = 0.0)
       : m_real(re), m_imag(im)
   {
   }
 
-  template <typename T>
-  DYND_CUDA_HOST_DEVICE inline dynd_complex(const dynd_complex<T> &rhs)
-      : m_real(static_cast<float>(rhs.m_real)),
-        m_imag(static_cast<float>(rhs.m_imag))
-  {
-  }
-
-  template <typename T>
-  inline dynd_complex(const std::complex<T> &rhs)
-      : m_real(rhs.real()), m_imag(rhs.imag())
-  {
-  }
-
-  DYND_CUDA_HOST_DEVICE inline float real() const { return m_real; }
-  DYND_CUDA_HOST_DEVICE inline float imag() const { return m_imag; }
-
-  DYND_CUDA_HOST_DEVICE inline bool
-  operator==(const dynd_complex<float> &rhs) const
-  {
-    return (real() == rhs.real()) && (imag() == rhs.imag());
-  }
-
-  DYND_CUDA_HOST_DEVICE inline bool
-  operator!=(const dynd_complex<float> &rhs) const
-  {
-    return !operator==(rhs);
-  }
-
-  DYND_CUDA_HOST_DEVICE inline dynd_complex<float>
-  operator+(const dynd_complex<float> &rhs) const
-  {
-    return dynd_complex<float>(m_real + rhs.m_real, m_imag + rhs.m_imag);
-  }
-
-  DYND_CUDA_HOST_DEVICE inline dynd_complex<float>
-  operator-(const dynd_complex<float> &rhs) const
-  {
-    return dynd_complex<float>(m_real - rhs.m_real, m_imag - rhs.m_imag);
-  }
-
-  DYND_CUDA_HOST_DEVICE inline dynd_complex<float>
-  operator*(const dynd_complex<float> &rhs) const
-  {
-    return dynd_complex<float>(m_real * rhs.m_real - m_imag * rhs.m_imag,
-                               m_real * rhs.m_imag + rhs.m_real * m_imag);
-  }
-
-  DYND_CUDA_HOST_DEVICE inline dynd_complex<float>
-  operator*(const float &rhs) const
-  {
-    return dynd_complex<float>(m_real * rhs, m_imag * rhs);
-  }
-
-  DYND_CUDA_HOST_DEVICE inline dynd_complex<float>
-  operator/(const dynd_complex<float> &rhs) const
-  {
-    float denom = rhs.m_real * rhs.m_real + rhs.m_imag + rhs.m_imag;
-    return dynd_complex<float>(
-        (m_real * rhs.m_real + m_imag * rhs.m_imag) / denom,
-        (rhs.m_real * m_imag - m_real * rhs.m_imag) / denom);
-  }
-
-  DYND_CUDA_HOST_DEVICE inline dynd_complex<float>
-  operator/(const float &rhs) const
-  {
-    return dynd_complex<float>(m_real / rhs, m_imag / rhs);
-  }
-
-  inline operator std::complex<float>() const
-  {
-    return std::complex<float>(m_real, m_imag);
-  }
-};
-
-DYND_CUDA_HOST_DEVICE inline dynd_complex<float> operator*(const float &lhs,
-                                     const dynd_complex<float> &rhs)
-{
-  return dynd_complex<float>(lhs * rhs.m_real, lhs * rhs.m_imag);
-}
-
-DYND_CUDA_HOST_DEVICE inline dynd_complex<float> operator/(const float &lhs,
-                                     const dynd_complex<float> &rhs)
-{
-  float denom = rhs.m_real * rhs.m_real + rhs.m_imag + rhs.m_imag;
-  return dynd_complex<float>((lhs * rhs.m_real) / denom,
-                             (-lhs * rhs.m_imag) / denom);
-}
-
-std::ostream &operator<<(std::ostream &out, const dynd_complex<float> &val);
-
-template <>
-class dynd_complex<double> {
-public:
-  typedef double value_type;
-  double m_real, m_imag;
-
-  DYND_CUDA_HOST_DEVICE inline dynd_complex(double re = 0.0, double im = 0.0)
-      : m_real(re), m_imag(im)
-  {
-  }
-
-  template <typename T>
-  DYND_CUDA_HOST_DEVICE inline dynd_complex(const dynd_complex<T> &rhs)
+  template <typename U>
+  DYND_CUDA_HOST_DEVICE dynd_complex(const dynd_complex<U> &rhs)
       : m_real(rhs.m_real), m_imag(rhs.m_imag)
   {
   }
 
-  template <typename T>
-  inline dynd_complex(const std::complex<T> &rhs)
+  dynd_complex(const std::complex<T> &rhs)
       : m_real(rhs.real()), m_imag(rhs.imag())
   {
   }
 
-  DYND_CUDA_HOST_DEVICE inline double real() const { return m_real; }
-  DYND_CUDA_HOST_DEVICE inline double imag() const { return m_imag; }
+  DYND_CUDA_HOST_DEVICE T real() const { return m_real; }
+  DYND_CUDA_HOST_DEVICE T imag() const { return m_imag; }
 
-  DYND_CUDA_HOST_DEVICE inline bool operator==(const double &rhs) const
+  DYND_CUDA_HOST_DEVICE dynd_complex<T> &operator+=(const dynd_complex<T> &rhs)
   {
-    return (real() == rhs) && (imag() == 0.0);
+    m_real += rhs.m_real;
+    m_imag += rhs.m_imag;
+
+    return *this;
   }
 
-  DYND_CUDA_HOST_DEVICE inline bool
-  operator==(const dynd_complex<double> &rhs) const
+  DYND_CUDA_HOST_DEVICE dynd_complex<T> &operator+=(const T &rhs)
   {
-    return (real() == rhs.real()) && (imag() == rhs.imag());
+    m_real += rhs;
+
+    return *this;
   }
 
-  DYND_CUDA_HOST_DEVICE inline bool
-  operator!=(const dynd_complex<double> &rhs) const
+  DYND_CUDA_HOST_DEVICE dynd_complex<T> &operator-=(const dynd_complex<T> &rhs)
   {
-    return !operator==(rhs);
+    m_real -= rhs.m_real;
+    m_imag -= rhs.m_imag;
+
+    return *this;
   }
 
-  DYND_CUDA_HOST_DEVICE dynd_complex<double>
-  operator+(const dynd_complex<double> &rhs) const
+  DYND_CUDA_HOST_DEVICE dynd_complex<T> &operator-=(const T &rhs)
   {
-    return dynd_complex<double>(m_real + rhs.m_real, m_imag + rhs.m_imag);
+    m_real -= rhs;
+
+    return *this;
   }
 
-  DYND_CUDA_HOST_DEVICE dynd_complex<double>
-  operator-(const dynd_complex<double> &rhs) const
+  DYND_CUDA_HOST_DEVICE dynd_complex<T> operator*=(const dynd_complex<T> &rhs)
   {
-    return dynd_complex<double>(m_real - rhs.m_real, m_imag - rhs.m_imag);
+    new (this) dynd_complex<T>(m_real * rhs.m_real - m_imag * rhs.m_imag,
+                               m_real * rhs.m_imag + rhs.m_real * m_imag);
+
+    return *this;
   }
 
-  DYND_CUDA_HOST_DEVICE dynd_complex<double>
-  operator*(const dynd_complex<double> &rhs) const
+  DYND_CUDA_HOST_DEVICE dynd_complex<T> operator*=(const T &rhs)
   {
-    return dynd_complex<double>(m_real * rhs.m_real - m_imag * rhs.m_imag,
-                                m_real * rhs.m_imag + rhs.m_real * m_imag);
+    m_real *= rhs;
+    m_imag *= rhs;
+
+    return *this;
   }
 
-  DYND_CUDA_HOST_DEVICE dynd_complex<double> operator*(const double &rhs) const
+  DYND_CUDA_HOST_DEVICE dynd_complex<T> &operator/=(const dynd_complex<T> &rhs)
   {
-    return dynd_complex<double>(m_real * rhs, m_imag * rhs);
+    T denom = rhs.m_real * rhs.m_real + rhs.m_imag * rhs.m_imag;
+    new (this)
+        dynd_complex<T>((m_real * rhs.m_real + m_imag * rhs.m_imag) / denom,
+                        (rhs.m_real * m_imag - m_real * rhs.m_imag) / denom);
+
+    return *this;
   }
 
-  DYND_CUDA_HOST_DEVICE dynd_complex<double>
-  operator/(const dynd_complex<double> &rhs) const
+  DYND_CUDA_HOST_DEVICE dynd_complex<T> &operator/=(const T &rhs)
   {
-    double denom = rhs.m_real * rhs.m_real + rhs.m_imag + rhs.m_imag;
-    return dynd_complex<double>(
-        (m_real * rhs.m_real + m_imag * rhs.m_imag) / denom,
-        (rhs.m_real * m_imag - m_real * rhs.m_imag) / denom);
+    m_real /= rhs;
+    m_imag /= rhs;
+
+    return *this;
   }
 
-  DYND_CUDA_HOST_DEVICE dynd_complex<double> operator/(const double &rhs) const
-  {
-    return dynd_complex<double>(m_real / rhs, m_imag / rhs);
-  }
+  operator std::complex<T>() const { return std::complex<T>(m_real, m_imag); }
 
-  inline operator std::complex<double>() const
-  {
-    return std::complex<double>(m_real, m_imag);
-  }
-};
-
-// Metaprogram for determining if a type is a valid C++ scalar
-// of a particular type.
-template <typename T>
-struct is_complex_scalar {
-  enum { value = false };
-};
-template <>
-struct is_complex_scalar<char> {
-  enum { value = true };
-};
-template <>
-struct is_complex_scalar<signed char> {
-  enum { value = true };
-};
-template <>
-struct is_complex_scalar<short> {
-  enum { value = true };
-};
-template <>
-struct is_complex_scalar<int> {
-  enum { value = true };
-};
-template <>
-struct is_complex_scalar<long> {
-  enum { value = true };
-};
-template <>
-struct is_complex_scalar<long long> {
-  enum { value = true };
-};
-template <>
-struct is_complex_scalar<unsigned char> {
-  enum { value = true };
-};
-template <>
-struct is_complex_scalar<unsigned short> {
-  enum { value = true };
-};
-template <>
-struct is_complex_scalar<unsigned int> {
-  enum { value = true };
-};
-template <>
-struct is_complex_scalar<unsigned long> {
-  enum { value = true };
-};
-template <>
-struct is_complex_scalar<unsigned long long> {
-  enum { value = true };
-};
-template <>
-struct is_complex_scalar<float> {
-  enum { value = true };
-};
-template <>
-struct is_complex_scalar<double> {
-  enum { value = true };
+  /*
+    template <typename U>
+    DYND_CUDA_HOST_DEVICE operator dynd_complex<U>() const
+    {
+      return dynd_complex<U>(m_real, m_imag);
+    }
+  */
 };
 
-template <class T>
-DYND_CUDA_HOST_DEVICE inline typename std::enable_if<is_complex_scalar<T>::value, bool>::type
-operator==(const T &lhs, const dynd_complex<double> &rhs)
+template <typename T, typename U>
+DYND_CUDA_HOST_DEVICE bool operator==(dynd_complex<T> lhs, dynd_complex<U> rhs)
 {
-  return dynd_complex<double>(lhs) == dynd_complex<double>(rhs);
+  return (lhs.m_real == rhs.m_real) && (lhs.m_imag == rhs.m_imag);
 }
 
-DYND_CUDA_HOST_DEVICE inline dynd_complex<double> operator+(const double &lhs,
-                                      const dynd_complex<double> &rhs)
+template <typename T, typename U>
+DYND_CUDA_HOST_DEVICE typename std::enable_if<
+    std::is_integral<U>::value || std::is_floating_point<U>::value, bool>::type
+operator==(dynd_complex<T> lhs, U rhs)
 {
-  return dynd_complex<double>(lhs + rhs.m_real, rhs.m_imag);
+  return (lhs.m_real == rhs) && !lhs.m_imag;
 }
 
-DYND_CUDA_HOST_DEVICE inline dynd_complex<double> operator-(const double &lhs,
-                                      const dynd_complex<double> &rhs)
+template <typename T, typename U>
+DYND_CUDA_HOST_DEVICE typename std::enable_if<
+    std::is_integral<T>::value || std::is_floating_point<T>::value, bool>::type
+operator==(T lhs, dynd_complex<U> rhs)
 {
-  return dynd_complex<double>(lhs - rhs.m_real, rhs.m_imag);
+  return rhs == lhs;
 }
 
 template <typename T>
-DYND_CUDA_HOST_DEVICE typename std::enable_if<std::is_same<T, float>::value ||
-                            std::is_same<T, double>::value,
-                        dynd_complex<double>>::type
-operator*(const T &lhs, const dynd_complex<double> &rhs)
+bool operator==(dynd_complex<T> lhs, std::complex<T> rhs)
 {
-  return dynd_complex<double>(lhs * rhs.m_real, lhs * rhs.m_imag);
+  return (lhs.m_real == rhs.real()) && (lhs.m_imag == rhs.imag());
 }
 
 template <typename T>
-DYND_CUDA_HOST_DEVICE typename std::enable_if<std::is_same<T, float>::value ||
-                            std::is_same<T, double>::value,
-                        dynd_complex<double>>::type
-operator/(const T &lhs, const dynd_complex<double> &rhs)
+bool operator==(std::complex<T> lhs, dynd_complex<T> rhs)
 {
-  double denom = rhs.m_real * rhs.m_real + rhs.m_imag + rhs.m_imag;
-  return dynd_complex<double>((lhs * rhs.m_real) / denom,
-                              (-lhs * rhs.m_imag) / denom);
+  return rhs == lhs;
 }
 
-std::ostream &operator<<(std::ostream &out, const dynd_complex<double> &val);
+template <typename T, typename U>
+DYND_CUDA_HOST_DEVICE bool operator!=(dynd_complex<T> lhs, dynd_complex<U> rhs)
+{
+  return !(lhs == rhs);
+}
+
+template <typename T>
+DYND_CUDA_HOST_DEVICE dynd_complex<T> operator-(const dynd_complex<T> &rhs)
+{
+  return dynd_complex<T>(-rhs.m_real, -rhs.m_imag);
+}
+
+template <typename T>
+DYND_CUDA_HOST_DEVICE dynd_complex<T> operator+(dynd_complex<T> lhs,
+                                                dynd_complex<T> rhs)
+{
+  return lhs += rhs;
+}
+
+template <typename T, typename U>
+DYND_CUDA_HOST_DEVICE dynd_complex<typename std::common_type<T, U>::type>
+operator+(dynd_complex<T> lhs, dynd_complex<U> rhs)
+{
+  return static_cast<dynd_complex<typename std::common_type<T, U>::type>>(lhs) +
+         static_cast<dynd_complex<typename std::common_type<T, U>::type>>(rhs);
+}
+
+template <typename T>
+DYND_CUDA_HOST_DEVICE dynd_complex<T> operator+(dynd_complex<T> lhs, T rhs)
+{
+  return lhs += rhs;
+}
+
+template <typename T, typename U>
+DYND_CUDA_HOST_DEVICE typename std::enable_if<
+    std::is_integral<U>::value || std::is_floating_point<U>::value,
+    dynd_complex<typename std::common_type<T, U>::type>>::type
+operator+(dynd_complex<T> lhs, U rhs)
+{
+  return static_cast<dynd_complex<typename std::common_type<T, U>::type>>(lhs) +
+         static_cast<typename std::common_type<T, U>::type>(rhs);
+}
+
+template <typename T>
+DYND_CUDA_HOST_DEVICE dynd_complex<T> operator+(T lhs, dynd_complex<T> rhs)
+{
+  return dynd_complex<T>(lhs + rhs.m_real, rhs.m_imag);
+}
+
+template <typename T, typename U>
+DYND_CUDA_HOST_DEVICE typename std::enable_if<
+    std::is_integral<T>::value || std::is_floating_point<T>::value,
+    dynd_complex<typename std::common_type<T, U>::type>>::type
+operator+(T lhs, dynd_complex<U> rhs)
+{
+  return static_cast<typename std::common_type<T, U>::type>(lhs) +
+         static_cast<dynd_complex<typename std::common_type<T, U>::type>>(rhs);
+}
+
+template <typename T>
+DYND_CUDA_HOST_DEVICE dynd_complex<T> operator-(dynd_complex<T> lhs,
+                                                dynd_complex<T> rhs)
+{
+  return lhs -= rhs;
+}
+
+template <typename T, typename U>
+DYND_CUDA_HOST_DEVICE dynd_complex<typename std::common_type<T, U>::type>
+operator-(dynd_complex<T> lhs, dynd_complex<U> rhs)
+{
+  return static_cast<dynd_complex<typename std::common_type<T, U>::type>>(lhs) -
+         static_cast<dynd_complex<typename std::common_type<T, U>::type>>(rhs);
+}
+
+template <typename T>
+DYND_CUDA_HOST_DEVICE dynd_complex<T> operator-(dynd_complex<T> lhs, T rhs)
+{
+  return lhs -= rhs;
+}
+
+template <typename T, typename U>
+DYND_CUDA_HOST_DEVICE typename std::enable_if<
+    std::is_integral<U>::value || std::is_floating_point<U>::value,
+    dynd_complex<typename std::common_type<T, U>::type>>::type
+operator-(dynd_complex<T> lhs, U rhs)
+{
+  return static_cast<dynd_complex<typename std::common_type<T, U>::type>>(lhs) -
+         static_cast<typename std::common_type<T, U>::type>(rhs);
+}
+
+template <typename T>
+DYND_CUDA_HOST_DEVICE dynd_complex<T> operator-(T lhs, dynd_complex<T> rhs)
+{
+  return dynd_complex<T>(lhs - rhs.m_real, -rhs.m_imag);
+}
+
+template <typename T, typename U>
+DYND_CUDA_HOST_DEVICE typename std::enable_if<
+    std::is_integral<T>::value || std::is_floating_point<T>::value,
+    dynd_complex<typename std::common_type<T, U>::type>>::type
+operator-(T lhs, dynd_complex<U> rhs)
+{
+  return static_cast<typename std::common_type<T, U>::type>(lhs) -
+         static_cast<dynd_complex<typename std::common_type<T, U>::type>>(rhs);
+}
+
+template <typename T>
+DYND_CUDA_HOST_DEVICE dynd_complex<T> operator*(dynd_complex<T> lhs,
+                                                dynd_complex<T> rhs)
+{
+  return lhs *= rhs;
+}
+
+template <typename T>
+DYND_CUDA_HOST_DEVICE dynd_complex<T> operator*(dynd_complex<T> lhs, T rhs)
+{
+  return lhs *= rhs;
+}
+
+template <typename T, typename U>
+DYND_CUDA_HOST_DEVICE typename std::enable_if<
+    std::is_integral<U>::value || std::is_floating_point<U>::value,
+    dynd_complex<typename std::common_type<T, U>::type>>::type
+operator*(dynd_complex<T> lhs, U rhs)
+{
+  return static_cast<dynd_complex<typename std::common_type<T, U>::type>>(lhs) *
+         static_cast<typename std::common_type<T, U>::type>(rhs);
+}
+
+template <typename T>
+DYND_CUDA_HOST_DEVICE dynd_complex<T> operator*(T lhs, dynd_complex<T> rhs)
+{
+  return dynd_complex<T>(lhs * rhs.m_real, lhs * rhs.m_imag);
+}
+
+template <typename T, typename U>
+DYND_CUDA_HOST_DEVICE typename std::enable_if<
+    std::is_integral<T>::value || std::is_floating_point<T>::value,
+    dynd_complex<typename std::common_type<T, U>::type>>::type
+operator*(T lhs, dynd_complex<U> rhs)
+{
+  return static_cast<typename std::common_type<T, U>::type>(lhs) *
+         static_cast<dynd_complex<typename std::common_type<T, U>::type>>(rhs);
+}
+
+template <typename T>
+DYND_CUDA_HOST_DEVICE dynd_complex<T> operator/(dynd_complex<T> lhs,
+                                                dynd_complex<T> rhs)
+{
+  return lhs /= rhs;
+}
+
+template <typename T>
+DYND_CUDA_HOST_DEVICE dynd_complex<T> operator/(dynd_complex<T> lhs, T rhs)
+{
+  return lhs /= rhs;
+}
+
+template <typename T, typename U>
+DYND_CUDA_HOST_DEVICE typename std::enable_if<
+    std::is_integral<U>::value || std::is_floating_point<U>::value,
+    dynd_complex<typename std::common_type<T, U>::type>>::type
+operator/(dynd_complex<T> lhs, U rhs)
+{
+  return static_cast<dynd_complex<typename std::common_type<T, U>::type>>(lhs) /
+         static_cast<typename std::common_type<T, U>::type>(rhs);
+}
+
+template <typename T>
+DYND_CUDA_HOST_DEVICE dynd_complex<T> operator/(T lhs, dynd_complex<T> rhs)
+{
+  T denom = rhs.m_real * rhs.m_real + rhs.m_imag * rhs.m_imag;
+  return dynd_complex<T>(lhs * rhs.m_real / denom, -lhs * rhs.m_imag / denom);
+}
+
+template <typename T, typename U>
+DYND_CUDA_HOST_DEVICE typename std::enable_if<
+    std::is_integral<T>::value || std::is_floating_point<T>::value,
+    dynd_complex<typename std::common_type<T, U>::type>>::type
+operator/(T lhs, dynd_complex<U> rhs)
+{
+  return static_cast<typename std::common_type<T, U>::type>(lhs) /
+         static_cast<dynd_complex<typename std::common_type<T, U>::type>>(rhs);
+}
+
+template <typename T>
+std::ostream &operator<<(std::ostream &out, const dynd_complex<T> &val)
+{
+  return (out << "(" << val.m_real << " + " << val.m_imag << "j)");
+}
 
 template <typename T>
 T abs(dynd_complex<T> z)

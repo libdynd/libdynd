@@ -19,7 +19,8 @@ using namespace dynd;
         &kernels::create<kernels::NAME<A0, uint32_t>>,                         \
         &kernels::create<kernels::NAME<A0, uint64_t>>, NULL, NULL,             \
         &kernels::create<kernels::NAME<A0, float>>,                            \
-        &kernels::create<kernels::NAME<A0, double>>, NULL, NULL, NULL,         \
+        &kernels::create<kernels::NAME<A0, double>>, NULL, NULL,               \
+        &kernels::create<kernels::NAME<A0, dynd_complex<double>>>,             \
   }
 
 #define BUILTIN_TABLE(NAME)                                                    \
@@ -42,7 +43,7 @@ using namespace dynd;
           BUILTIN_ROW(NAME##_ck, double),                                      \
           {NULL},                                                              \
           {NULL},                                                              \
-          {NULL}};
+          BUILTIN_ROW(NAME##_ck, dynd_complex<double>)};
 
 BUILTIN_TABLE(add);
 BUILTIN_TABLE(sub);
