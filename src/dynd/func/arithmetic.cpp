@@ -10,7 +10,7 @@ using namespace dynd;
 
 #define BUILTIN_ROW(NAME, A0)                                                  \
   {                                                                            \
-    &kernels::create<kernels::NAME<A0, dynd_bool>>,                            \
+    NULL,                            \
         &kernels::create<kernels::NAME<A0, int8_t>>,                           \
         &kernels::create<kernels::NAME<A0, int16_t>>,                          \
         &kernels::create<kernels::NAME<A0, int32_t>>,                          \
@@ -27,7 +27,7 @@ using namespace dynd;
   const kernels::create_t                                                      \
       decl::nd::NAME::builtin_table[builtin_type_id_count -                    \
                                     2][builtin_type_id_count - 2] = {          \
-          BUILTIN_ROW(NAME##_ck, dynd_bool),                                   \
+          {NULL},                                   \
           BUILTIN_ROW(NAME##_ck, int8_t),                                      \
           BUILTIN_ROW(NAME##_ck, int16_t),                                     \
           BUILTIN_ROW(NAME##_ck, int32_t),                                     \
