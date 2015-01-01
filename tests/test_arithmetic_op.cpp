@@ -228,8 +228,6 @@ TEST(ArithmeticOp, ScalarOnTheLeft) {
 }
 
 TEST(ArithmeticOp, ComplexScalar) {
-    return;
-
     nd::array a, c;
 
     // Two arrays with broadcasting
@@ -237,7 +235,6 @@ TEST(ArithmeticOp, ComplexScalar) {
     a = v0;
 
     // A complex scalar
-    (a + dynd_complex<double>(1, 2)).debug_print(cout);
     c = (a + dynd_complex<double>(1, 2)).eval();
     EXPECT_EQ(dynd_complex<double>(2,2), c(0).as<dynd_complex<double> >());
     EXPECT_EQ(dynd_complex<double>(3,2), c(1).as<dynd_complex<double> >());

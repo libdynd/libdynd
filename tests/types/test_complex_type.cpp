@@ -214,34 +214,20 @@ TEST(ComplexType, Properties)
 
 TYPED_TEST_P(ComplexType, Arithmetic)
 {
-  // std::cout << std::is_same<double, typename std::common_type<float,
-  // double>::type>::value << std::endl;
-  // std::cout << std::is_same<dynd_complex<float>, typename
-  // std::common_type<dynd_complex<float>, double>::type>::value << std::endl;
-  // std::cout << std::is_same<dynd_complex<float>, typename
-  // std::common_type<double, dynd_complex<float>>::type>::value << std::endl;
-
-//  auto z = 0.0 + 1.0f;
-//  std::cout << std::is_same<dynd_complex<double>, decltype(0.0 + dynd_complex<float>(1.0f, 3.0f))>::value << std::endl;
-  //std::cout << std::is_same<dynd_complex<double>, typename std::common_type<dynd_complex<double>, dynd_complex<float>>::type>::value << std::endl;
-
-
-//  std::exit(-1);
-
   EXPECT_EQ(std::complex<TypeParam>(1.5, 0.5) + static_cast<TypeParam>(1),
             dynd_complex<TypeParam>(1.5, 0.5) + 1);
   EXPECT_EQ(static_cast<TypeParam>(1) + std::complex<TypeParam>(1.5, 0.5),
             1 + dynd_complex<TypeParam>(1.5, 0.5));
 
-  EXPECT_EQ(std::complex<double>(1.3, 0.7) - 1.0,
-            dynd_complex<double>(1.3, 0.7) - 1.0);
-  EXPECT_EQ(1.0 - std::complex<double>(1.3, 0.7),
-            1.0 - dynd_complex<double>(1.3, 0.7));
+  EXPECT_EQ(std::complex<TypeParam>(1.3, 0.7) - 1.0,
+            dynd_complex<TypeParam>(1.3, 0.7) - 1.0);
+  EXPECT_EQ(1.0 - std::complex<TypeParam>(1.3, 0.7),
+            1.0 - dynd_complex<TypeParam>(1.3, 0.7));
 
-  EXPECT_EQ(std::complex<double>(1.5, 0.5) * 2.0,
-            dynd_complex<double>(1.5, 0.5) * 2.0);
-  EXPECT_EQ(2.0 * std::complex<double>(1.5, 0.5),
-            2.0 * dynd_complex<double>(1.5, 0.5));
+  EXPECT_EQ(std::complex<TypeParam>(1.5, 0.5) * 2.0,
+            dynd_complex<TypeParam>(1.5, 0.5) * 2.0);
+  EXPECT_EQ(2.0 * std::complex<TypeParam>(1.5, 0.5),
+            2.0 * dynd_complex<TypeParam>(1.5, 0.5));
 
   EXPECT_EQ(std::complex<TypeParam>(1.5, 0.5) / static_cast<TypeParam>(2),
             dynd_complex<TypeParam>(1.5, 0.5) / 2.0f);
@@ -252,5 +238,4 @@ TYPED_TEST_P(ComplexType, Arithmetic)
 
 REGISTER_TYPED_TEST_CASE_P(ComplexType, Arithmetic);
 
-INSTANTIATE_TYPED_TEST_CASE_P(Float, ComplexType, float);
 INSTANTIATE_TYPED_TEST_CASE_P(Double, ComplexType, double);

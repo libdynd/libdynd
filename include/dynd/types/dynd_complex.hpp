@@ -26,7 +26,7 @@ public:
   }
 
   template <typename U>
-  explicit DYND_CUDA_HOST_DEVICE dynd_complex(const dynd_complex<U> &rhs)
+  DYND_CUDA_HOST_DEVICE dynd_complex(const dynd_complex<U> &rhs)
       : m_real(static_cast<T>(rhs.m_real)), m_imag(static_cast<T>(rhs.m_imag))
   {
   }
@@ -112,14 +112,6 @@ public:
   }
 
   operator std::complex<T>() const { return std::complex<T>(m_real, m_imag); }
-
-  /*
-    template <typename U>
-    DYND_CUDA_HOST_DEVICE operator dynd_complex<U>() const
-    {
-      return dynd_complex<U>(m_real, m_imag);
-    }
-  */
 };
 
 template <typename T, typename U>
