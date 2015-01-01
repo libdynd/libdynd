@@ -222,8 +222,8 @@ TYPED_TEST_P(ComplexType, Arithmetic)
   // std::common_type<double, dynd_complex<float>>::type>::value << std::endl;
 
 //  auto z = 0.0 + 1.0f;
-  //std::cout << std::is_same<dynd_complex<double>, decltype(0.0 + dynd_complex<float>(1.0f, 3.0f))>::value << std::endl;
-  //std::cout << std::is_same<dynd_complex<double>, typename std::common_type<double, dynd_complex<float>>::type>::value << std::endl;
+//  std::cout << std::is_same<dynd_complex<double>, decltype(0.0 + dynd_complex<float>(1.0f, 3.0f))>::value << std::endl;
+  //std::cout << std::is_same<dynd_complex<double>, typename std::common_type<dynd_complex<double>, dynd_complex<float>>::type>::value << std::endl;
 
 
 //  std::exit(-1);

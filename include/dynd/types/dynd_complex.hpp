@@ -31,7 +31,7 @@ public:
   {
   }
 
-  dynd_complex(const std::complex<T> &rhs)
+  explicit dynd_complex(const std::complex<T> &rhs)
       : m_real(rhs.real()), m_imag(rhs.imag())
   {
   }
@@ -540,3 +540,22 @@ dynd_complex<T> sin(dynd_complex<T> z)
 }
 
 } // namespace dynd
+
+namespace std {
+
+template <typename T, typename U>
+struct common_type<dynd::dynd_complex<T>, dynd::dynd_complex<U>> {
+    typedef dynd::dynd_complex<typename std::common_type<T, U>::type> type;
+};
+
+template <typename T, typename U>
+struct common_type<T, dynd::dynd_complex<U>> {
+    typedef dynd::dynd_complex<typename std::common_type<T, U>::type> type;
+};
+
+template <typename T, typename U>
+struct common_type<dynd::dynd_complex<T>, U> {
+    typedef dynd::dynd_complex<typename std::common_type<T, U>::type> type;
+};
+
+}
