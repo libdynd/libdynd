@@ -254,6 +254,27 @@ size_t base_type::iterdata_destruct(iterdata_common *DYND_UNUSED(iterdata),
     throw std::runtime_error(ss.str());
 }
 
+intptr_t base_type::make_arithmetic_kernel(
+    const arrfunc_type_data *DYND_UNUSED(child),
+    const arrfunc_type *DYND_UNUSED(child_tp), void *DYND_UNUSED(ckb),
+    intptr_t DYND_UNUSED(ckb_offset), const ndt::type &dst_tp,
+    const char *DYND_UNUSED(dst_arrmeta), const ndt::type *src_tp,
+    const char *const *DYND_UNUSED(src_arrmeta),
+    kernel_request_t DYND_UNUSED(kernreq),
+    const eval::eval_context *DYND_UNUSED(ectx),
+    const nd::array &DYND_UNUSED(kwds)) const
+{
+  stringstream ss;
+  ss << "make_arithmetic_kernel has not been implemented for type '";
+  if (this == dst_tp.extended()) {
+    ss << dst_tp;
+  } else {
+    ss << src_tp[0];
+  }
+  ss << "'";
+  throw std::runtime_error(ss.str());
+}
+
 intptr_t base_type::make_assignment_kernel(
     const arrfunc_type_data *DYND_UNUSED(self),
     const arrfunc_type *DYND_UNUSED(af_tp), void *DYND_UNUSED(ckb),

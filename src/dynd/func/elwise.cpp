@@ -52,7 +52,7 @@ int decl::nd::elwise::resolve_dst_type(const arrfunc_type_data *child_af,
       intptr_t ndim_i =
           src_tp[i].get_ndim() - child_af_tp->get_pos_type(i).get_ndim();
       if (ndim_i > 0) {
-        ndt::type tp = src_tp[i];
+        ndt::type tp = src_tp[i].without_memory_type();
         intptr_t *shape_i = shape.get() + (ndim - ndim_i);
         intptr_t shape_at_j;
         for (intptr_t j = 0; j < ndim_i; ++j) {
@@ -98,12 +98,19 @@ int decl::nd::elwise::resolve_dst_type(const arrfunc_type_data *child_af,
         }
       }
     }
+
+    ndt::type tp = child_dst_tp.without_memory_type();
     for (intptr_t i = ndim - 1; i >= 0; --i) {
       if (shape[i] == -1) {
-        child_dst_tp = ndt::make_var_dim(child_dst_tp);
+        tp = ndt::make_var_dim(tp);
       } else {
-        child_dst_tp = ndt::make_fixed_dim(shape[i], child_dst_tp);
+        tp = ndt::make_fixed_dim(shape[i], tp);
       }
+    }
+    if (child_dst_tp.get_kind() == memory_kind) {
+      child_dst_tp = child_dst_tp.extended<base_memory_type>()->with_replaced_storage_type(tp);
+    } else {
+      child_dst_tp = tp;
     }
   }
   out_dst_tp = child_dst_tp;
@@ -266,7 +273,13 @@ ndt::type decl::nd::elwise::make_lifted_type(const arrfunc_type *child_tp)
   ndt::type *pt =
       reinterpret_cast<ndt::type *>(out_param_types.get_readwrite_originptr());
   for (intptr_t i = 0, i_end = child_tp->get_npos(); i != i_end; ++i) {
-    pt[i] = ndt::make_ellipsis_dim(dimsname, param_types[i]);
+    if (param_types[i].get_kind() == memory_kind) {
+      pt[i] = pt[i].extended<base_memory_type>()->with_replaced_storage_type(
+          ndt::make_ellipsis_dim(dimsname,
+                                 param_types[i].without_memory_type()));
+    } else {
+      pt[i] = ndt::make_ellipsis_dim(dimsname, param_types[i]);
+    }
   }
   for (intptr_t i = child_tp->get_npos(), i_end = child_tp->get_narg();
        i != i_end; ++i) {

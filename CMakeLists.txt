@@ -297,6 +297,7 @@ set(libdynd_SRC
     include/dynd/eval/groupby_elwise_reduce_eval.hpp
     include/dynd/eval/unary_elwise_eval.hpp
     # Func
+    src/dynd/func/arithmetic.cpp
     src/dynd/func/arrfunc.cpp
     src/dynd/func/arrfunc_registry.cpp
     src/dynd/func/callable.cpp
@@ -312,6 +313,7 @@ set(libdynd_SRC
     src/dynd/func/rolling_arrfunc.cpp
     src/dynd/func/take_arrfunc.cpp
     src/dynd/func/take_by_pointer_arrfunc.cpp
+    include/dynd/func/arithmetic.hpp
     include/dynd/func/arrfunc.hpp
     include/dynd/func/arrfunc_registry.hpp
     include/dynd/func/callable.hpp
@@ -435,7 +437,6 @@ set(libdynd_SRC
     include/dynd/vm/elwise_program.hpp
     include/dynd/vm/register_allocation.hpp
     # Main
-    src/dynd/arithmetic_op.cpp
     src/dynd/array.cpp
     src/dynd/array_range.cpp
     src/dynd/config.cpp
@@ -528,10 +529,12 @@ if (DYND_CUDA)
         src/dynd/types/dynd_int128.cpp
         src/dynd/types/dynd_uint128.cpp
         src/dynd/kernels/assignment_kernels.cpp
+        src/dynd/func/arithmetic.cpp
         src/dynd/func/elwise.cpp
         )
     list(APPEND libdynd_SRC
         src/dynd/kernels/assignment_kernels.cu
+        src/dynd/func/arithmetic.cu
         src/dynd/func/elwise.cu
         src/dynd/kernels/ckernel_builder.cu
         src/dynd/types/dynd_complex.cu
