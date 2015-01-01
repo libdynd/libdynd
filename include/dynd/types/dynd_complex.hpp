@@ -261,6 +261,14 @@ DYND_CUDA_HOST_DEVICE dynd_complex<T> operator*(dynd_complex<T> lhs,
   return lhs *= rhs;
 }
 
+template <typename T, typename U>
+DYND_CUDA_HOST_DEVICE dynd_complex<typename std::common_type<T, U>::type>
+operator*(dynd_complex<T> lhs, dynd_complex<U> rhs)
+{
+  return static_cast<dynd_complex<typename std::common_type<T, U>::type>>(lhs) *
+         static_cast<dynd_complex<typename std::common_type<T, U>::type>>(rhs);
+}
+
 template <typename T>
 DYND_CUDA_HOST_DEVICE dynd_complex<T> operator*(dynd_complex<T> lhs, T rhs)
 {
@@ -298,6 +306,14 @@ DYND_CUDA_HOST_DEVICE dynd_complex<T> operator/(dynd_complex<T> lhs,
                                                 dynd_complex<T> rhs)
 {
   return lhs /= rhs;
+}
+
+template <typename T, typename U>
+DYND_CUDA_HOST_DEVICE dynd_complex<typename std::common_type<T, U>::type>
+operator/(dynd_complex<T> lhs, dynd_complex<U> rhs)
+{
+  return static_cast<dynd_complex<typename std::common_type<T, U>::type>>(lhs) /
+         static_cast<dynd_complex<typename std::common_type<T, U>::type>>(rhs);
 }
 
 template <typename T>
