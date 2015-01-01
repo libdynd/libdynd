@@ -214,7 +214,19 @@ TEST(ComplexType, Properties)
 
 TYPED_TEST_P(ComplexType, Arithmetic)
 {
-    dynd_complex<float>(1.5, 0.5) - dynd_complex<double>(1.5, 0.5);
+  // std::cout << std::is_same<double, typename std::common_type<float,
+  // double>::type>::value << std::endl;
+  // std::cout << std::is_same<dynd_complex<float>, typename
+  // std::common_type<dynd_complex<float>, double>::type>::value << std::endl;
+  // std::cout << std::is_same<dynd_complex<float>, typename
+  // std::common_type<double, dynd_complex<float>>::type>::value << std::endl;
+
+//  auto z = 0.0 + 1.0f;
+  //std::cout << std::is_same<dynd_complex<double>, decltype(0.0 + dynd_complex<float>(1.0f, 3.0f))>::value << std::endl;
+  //std::cout << std::is_same<dynd_complex<double>, typename std::common_type<double, dynd_complex<float>>::type>::value << std::endl;
+
+
+//  std::exit(-1);
 
   EXPECT_EQ(std::complex<TypeParam>(1.5, 0.5) + static_cast<TypeParam>(1),
             dynd_complex<TypeParam>(1.5, 0.5) + 1);
@@ -233,7 +245,8 @@ TYPED_TEST_P(ComplexType, Arithmetic)
 
   EXPECT_EQ(std::complex<TypeParam>(1.5, 0.5) / static_cast<TypeParam>(2),
             dynd_complex<TypeParam>(1.5, 0.5) / 2.0f);
-  EXPECT_COMPLEX_DOUBLE_EQ(static_cast<TypeParam>(2) / std::complex<TypeParam>(1.5, 0.5),
+  EXPECT_COMPLEX_DOUBLE_EQ(static_cast<TypeParam>(2) /
+                               std::complex<TypeParam>(1.5, 0.5),
                            2.0f / dynd_complex<TypeParam>(1.5, 0.5));
 }
 

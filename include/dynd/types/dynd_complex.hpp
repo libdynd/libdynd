@@ -20,13 +20,13 @@ public:
   T m_real, m_imag;
   typedef T value_type;
 
-  DYND_CUDA_HOST_DEVICE dynd_complex(T re = 0.0, T im = 0.0)
+  DYND_CUDA_HOST_DEVICE dynd_complex(const T &re = 0.0, const T &im = 0.0)
       : m_real(re), m_imag(im)
   {
   }
 
   template <typename U>
-  DYND_CUDA_HOST_DEVICE dynd_complex(const dynd_complex<U> &rhs)
+  explicit DYND_CUDA_HOST_DEVICE dynd_complex(const dynd_complex<U> &rhs)
       : m_real(static_cast<T>(rhs.m_real)), m_imag(static_cast<T>(rhs.m_imag))
   {
   }

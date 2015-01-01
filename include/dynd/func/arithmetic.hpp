@@ -13,12 +13,10 @@ namespace dynd {
     template <typename A0, typename A1>                                        \
     struct NAME##_ck                                                           \
         : expr_ck<NAME##_ck<A0, A1>, kernel_request_cuda_host_device, 2> {     \
+      typedef decltype(declval<A0>() SYMBOL declval<A1>()) R;                  \
                                                                                \
       DYND_CUDA_HOST_DEVICE void single(char *dst, char *const *src)           \
       {                                                                        \
-        typedef decltype(*reinterpret_cast<A0 *>(src[0]) SYMBOL *              \
-                         reinterpret_cast<A1 *>(src[1])) R;                    \
-                                                                               \
         *reinterpret_cast<R *>(dst) = *reinterpret_cast<A0 *>(src[0]) SYMBOL * \
                                       reinterpret_cast<A1 *>(src[1]);          \
       }                                                                        \
@@ -28,9 +26,6 @@ namespace dynd {
                                          const intptr_t *src_stride,           \
                                          size_t count)                         \
       {                                                                        \
-        typedef decltype(*reinterpret_cast<A0 *>(src[0]) SYMBOL *              \
-                         reinterpret_cast<A1 *>(src[1])) R;                    \
-                                                                               \
         char *src0 = src[0], *src1 = src[1];                                   \
         intptr_t src0_stride = src_stride[0], src1_stride = src_stride[1];     \
         for (size_t i = 0; i != count; ++i) {                                  \
