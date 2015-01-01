@@ -27,7 +27,7 @@ public:
 
   template <typename U>
   DYND_CUDA_HOST_DEVICE dynd_complex(const dynd_complex<U> &rhs)
-      : m_real(static_cast<U>(rhs.m_real)), m_imag(static_cast<U>(rhs.m_imag))
+      : m_real(static_cast<T>(rhs.m_real)), m_imag(static_cast<T>(rhs.m_imag))
   {
   }
 
