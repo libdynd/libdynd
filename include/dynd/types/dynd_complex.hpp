@@ -39,8 +39,7 @@ public:
   DYND_CUDA_HOST_DEVICE T real() const { return m_real; }
   DYND_CUDA_HOST_DEVICE T imag() const { return m_imag; }
 
-  template <typename U>
-  DYND_CUDA_HOST_DEVICE dynd_complex<T> &operator=(const dynd_complex<U> &rhs)
+  DYND_CUDA_HOST_DEVICE dynd_complex<T> &operator=(const dynd_complex<T> &rhs)
   {
     m_real = rhs.m_real;
     m_imag = rhs.m_imag;
