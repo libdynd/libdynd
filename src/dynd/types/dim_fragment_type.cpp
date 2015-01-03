@@ -56,6 +56,7 @@ static inline bool broadcast_tagged_dims_from_type(intptr_t ndim, ndt::type tp,
                                                    const intptr_t *tagged_dims,
                                                    intptr_t *out_tagged_dims)
 {
+    tp = tp.without_memory_type();
     for (intptr_t i = 0; i < ndim; ++i) {
         intptr_t tagged_dim = tagged_dims[i], dim_size;
         switch (tp.get_type_id()) {

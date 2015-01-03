@@ -24,6 +24,11 @@ TEST(ArithmeticOp, SimpleBroadcast) {
     b = v1;
 
     c = a + b;
+
+    a.to_cuda_device() + b.to_cuda_device();
+
+
+    return;
     EXPECT_EQ(ndt::make_type<int>(), c.get_dtype());
     EXPECT_EQ(1, c(0,0).as<int>());
     EXPECT_EQ(3, c(0,1).as<int>());

@@ -77,8 +77,9 @@ namespace dynd {
                     const eval::eval_context *DYND_UNUSED(ectx),               \
                     const dynd::nd::array &DYND_UNUSED(kwds))                  \
         {                                                                      \
-          if (dst_tp.is_builtin()) {                                           \
-            if (src_tp[0].is_builtin() && src_tp[1].is_builtin()) {            \
+          if (dst_tp.without_memory_type().is_builtin()) {                     \
+            if (src_tp[0].without_memory_type().is_builtin() &&                \
+                src_tp[1].without_memory_type().is_builtin()) {                \
               kernels::create_t create =                                       \
                   builtin_table[src_tp[0].get_type_id() -                      \
                                 bool_type_id][src_tp[1].get_type_id() -        \
@@ -88,7 +89,8 @@ namespace dynd {
             }                                                                  \
           }                                                                    \
                                                                                \
-          throw std::runtime_error("error");                                   \
+          throw std::runtime_error(                                            \
+              "arithmetic is not yet implemented for these types");            \
         }                                                                      \
                                                                                \
         static dynd::nd::arrfunc make()                                        \
