@@ -108,7 +108,9 @@ int decl::nd::elwise::resolve_dst_type(const arrfunc_type_data *child_af,
       }
     }
     if (child_dst_tp.get_kind() == memory_kind) {
-      child_dst_tp = child_dst_tp.extended<base_memory_type>()->with_replaced_storage_type(tp);
+      child_dst_tp =
+          child_dst_tp.extended<base_memory_type>()->with_replaced_storage_type(
+              tp);
     } else {
       child_dst_tp = tp;
     }
