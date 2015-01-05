@@ -62,6 +62,10 @@ if("${CMAKE_SOURCE_DIR}" STREQUAL "${CMAKE_CURRENT_SOURCE_DIR}")
     option(DYND_BUILD_TESTS
         "Build the googletest unit tests for libdynd."
         ON)
+# -DDYND_BUILD_BENCHMARKS=ON/OFF, whether to build the Google benchmarks
+    option(DYND_BUILD_BENCHMARKS
+        "Build the Google benchmarks for libdynd."
+        ON)
 #
 ################################################
 endif()
@@ -91,6 +95,7 @@ if(WIN32)
         if (${CMAKE_CXX_COMPILER_VERSION} VERSION_LESS 16)
             message(FATAL_ERROR "Only MSVC 2010 (Version 16.0) and later are supported by LibDyND. Found version ${CMAKE_CXX_COMPILER_VERSION}.")
         endif ()
+        set(DYND_BUILD_BENCHMARKS OFF)
     endif()
 else()
     set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11 -g -fomit-frame-pointer -fstrict-aliasing -fPIC -Wall -Wextra -Werror -Wno-missing-field-initializers")
@@ -101,6 +106,7 @@ else()
         set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fmax-errors=20")
     elseif("${CMAKE_CXX_COMPILER_ID}" STREQUAL "Clang")
         set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -ferror-limit=20 -Wdocumentation")
+        set(DYND_BUILD_BENCHMARKS OFF)
     endif()
 endif()
 
@@ -661,6 +667,10 @@ endif()
 
 if(DYND_BUILD_TESTS)
     add_subdirectory(tests)
+endif()
+
+if(DYND_BUILD_BENCHMARKS)
+    add_subdirectory(benchmarks)
 endif()
 
 add_subdirectory(examples)
