@@ -43,7 +43,6 @@ elseif(APPLE)
 else()
     set_target_properties(benchmark_libdynd PROPERTIES
         COMPILE_FLAGS "-pthread")
-    #-Wno-unnamed-type-template-args 
 
     target_link_libraries(benchmark_libdynd
         libdynd

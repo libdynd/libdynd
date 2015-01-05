@@ -62,6 +62,10 @@ if("${CMAKE_SOURCE_DIR}" STREQUAL "${CMAKE_CURRENT_SOURCE_DIR}")
     option(DYND_BUILD_TESTS
         "Build the googletest unit tests for libdynd."
         ON)
+# -DDYND_BUILD_BENCHMARKS=ON/OFF, whether to build the Google benchmarks
+    option(DYND_BUILD_BENCHMARKS
+        "Build the Google benchmarks for libdynd."
+        ON)
 #
 ################################################
 endif()
@@ -663,7 +667,9 @@ if(DYND_BUILD_TESTS)
     add_subdirectory(tests)
 endif()
 
-add_subdirectory(benchmarks)
+if(DYND_BUILD_BENCHMARKS)
+    add_subdirectory(benchmarks)
+endif()
 
 add_subdirectory(examples)
 
