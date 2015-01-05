@@ -9,7 +9,7 @@ env:
   - DYND_CUDA=ON DYND_FFTW=OFF
   - DYND_CUDA=OFF DYND_FFTW=ON
   - ASAN=ON DYND_CUDA=OFF DYND_FFTW=ON
-  - PYTHON=ON DYND_CUDA=OFF DYND_FFTW=ON DYND_BUILD_TESTS=OFF
+  - PYTHON=ON DYND_CUDA=OFF DYND_FFTW=ON DYND_BUILD_TESTS=OFF DYND_BUILD_BENCHMARKS=OFF
 #  - MSAN=ON DYND_CUDA=OFF DYND_FFTW=ON
 
 matrix:
@@ -19,7 +19,7 @@ matrix:
     - compiler: gcc
       env: MSAN=ON DYND_CUDA=OFF DYND_FFTW=ON
     - compiler: gcc
-      env: PYTHON=ON DYND_CUDA=OFF DYND_FFTW=ON DYND_BUILD_TESTS=OFF
+      env: PYTHON=ON DYND_CUDA=OFF DYND_FFTW=ON DYND_BUILD_TESTS=OFF DYND_BUILD_BENCHMARKS=OFF
     - compiler: clang
       env: DYND_CUDA=ON DYND_FFTW=OFF
 
@@ -41,15 +41,17 @@ before_script:
   - if [ "$ASAN" == "ON" ]; then export CXXFLAGS='-fsanitize=address -fno-omit-frame-pointer'; fi
   - if [ "$MSAN" == "ON" ]; then export CXXFLAGS='-fsanitize=memory -fsanitize-memory-track-origins -fno-omit-frame-pointer'; fi
   - if [ "$DYND_BUILD_TESTS" == "" ]; then export DYND_BUILD_TESTS=ON; fi
+  - if [ "$DYND_BUILD_BENCHMARKS" == "" ]; then export DYND_BUILD_BENCHMARKS=ON; fi
   - mkdir build
   - cd build
-  - cmake -DDYND_CUDA=${DYND_CUDA} -DDYND_FFTW=${DYND_FFTW} -DDYND_BUILD_TESTS=${DYND_BUILD_TESTS} ..
+  - cmake -DDYND_CUDA=${DYND_CUDA} -DDYND_FFTW=${DYND_FFTW} -DDYND_BUILD_TESTS=${DYND_BUILD_TESTS} -DDYND_BUILD_BENCHMARKS=${DYND_BUILD_BENCHMARKS} ..
 
 script:
   - make || exit 1
   - if [ "$DYND_CUDA" == "ON" ]; then exit; fi
   - if [ "$DYND_BUILD_TESTS" == "ON" ]; then ./tests/test_libdynd; fi
   - if [ "$VALGRIND" == "ON" ]; then valgrind --tool=memcheck --leak-check=yes --show-reachable=yes --error-exitcode=123 ./tests/test_libdynd; fi
+  - if [ "$DYND_BUILD_BENCHMARKS" == "ON" ]; then ./benchmarks/benchmark_libdynd; fi
   - if [ "$PYTHON" == "ON" ]; then sudo make install; sudo ldconfig; fi
   - if [ "$PYTHON" == "ON" ]; then git clone https://github.com/libdynd/dynd-python.git; fi
   - if [ "$PYTHON" == "ON" ]; then cd dynd-python && mkdir build && cd build && cmake .. && make; fi
