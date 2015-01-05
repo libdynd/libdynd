@@ -43,8 +43,7 @@ namespace dynd {
     namespace nd {                                                             \
       class NAME : public arrfunc<NAME> {                                      \
         static const kernels::create_t                                         \
-            builtin_table[builtin_type_id_count - 2][builtin_type_id_count -   \
-                                                     2];                       \
+        builtin_table[builtin_type_id_count - 2][builtin_type_id_count - 2];   \
                                                                                \
       public:                                                                  \
         static int                                                             \
@@ -77,20 +76,22 @@ namespace dynd {
                     const eval::eval_context *DYND_UNUSED(ectx),               \
                     const dynd::nd::array &DYND_UNUSED(kwds))                  \
         {                                                                      \
-          if (dst_tp.without_memory_type().is_builtin()) {                     \
-            if (src_tp[0].without_memory_type().is_builtin() &&                \
-                src_tp[1].without_memory_type().is_builtin()) {                \
+          std::cout << "instantiate arithmetic (" << src_tp[0] << ", "         \
+                    << src_tp[1] << ") -> " << dst_tp << std::endl;            \
+          if (dst_tp.is_builtin()) {                                           \
+            if (src_tp[0].is_builtin() && src_tp[1].is_builtin()) {            \
               kernels::create_t create =                                       \
-                  builtin_table[src_tp[0].get_type_id() -                      \
-                                bool_type_id][src_tp[1].get_type_id() -        \
-                                              bool_type_id];                   \
+                  builtin_table[src_tp[0].get_type_id() - bool_type_id]        \
+                               [src_tp[1].get_type_id() - bool_type_id];       \
               create(ckb, kernreq, ckb_offset);                                \
               return ckb_offset;                                               \
             }                                                                  \
           }                                                                    \
                                                                                \
-          throw std::runtime_error(                                            \
-              "arithmetic is not yet implemented for these types");            \
+          std::stringstream ss;                                                \
+          ss << "arithmetic is not yet implemented for types " << src_tp[0]    \
+             << " and " << src_tp[1];                                          \
+          throw std::runtime_error(ss.str());                                  \
         }                                                                      \
                                                                                \
         static dynd::nd::arrfunc make()                                        \
@@ -122,3 +123,4 @@ ARITHMETIC_OPERATOR(div, / );
 #undef ARITHMETIC_OPERATOR
 
 } // namespace dynd
+

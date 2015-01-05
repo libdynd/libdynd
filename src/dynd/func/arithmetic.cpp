@@ -13,13 +13,17 @@ using namespace dynd;
     NULL, &kernels::create<kernels::NAME<A0, int8_t>>,                         \
         &kernels::create<kernels::NAME<A0, int16_t>>,                          \
         &kernels::create<kernels::NAME<A0, int32_t>>,                          \
-        &kernels::create<kernels::NAME<A0, int64_t>>, NULL,                    \
+        &kernels::create<kernels::NAME<A0, int64_t>>,                          \
+        NULL,                                                                  \
         &kernels::create<kernels::NAME<A0, uint8_t>>,                          \
         &kernels::create<kernels::NAME<A0, uint16_t>>,                         \
         &kernels::create<kernels::NAME<A0, uint32_t>>,                         \
-        &kernels::create<kernels::NAME<A0, uint64_t>>, NULL, NULL,             \
+        &kernels::create<kernels::NAME<A0, uint64_t>>,                         \
+        NULL,                                                                  \
+        NULL,                                                                  \
         &kernels::create<kernels::NAME<A0, float>>,                            \
-        &kernels::create<kernels::NAME<A0, double>>, NULL,                     \
+        &kernels::create<kernels::NAME<A0, double>>,                           \
+        NULL,                                                                  \
         &kernels::create<kernels::NAME<A0, dynd_complex<float>>>,              \
         &kernels::create<kernels::NAME<A0, dynd_complex<double>>>,             \
   }
@@ -58,3 +62,4 @@ decl::nd::add nd::add;
 decl::nd::sub nd::sub;
 decl::nd::mul nd::mul;
 decl::nd::div nd::div;
+
