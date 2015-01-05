@@ -663,6 +663,8 @@ if(DYND_BUILD_TESTS)
     add_subdirectory(tests)
 endif()
 
+add_subdirectory(benchmarks)
+
 add_subdirectory(examples)
 
 # Create a libdynd-config script
