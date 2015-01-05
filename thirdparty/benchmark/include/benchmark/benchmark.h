@@ -137,7 +137,6 @@ BENCHMARK(BM_MultiThreaded)->Threads(4);
 
 #include <stdint.h>
 
-#include <chrono> // TEST
 #include <functional>
 #include <memory>
 #include <string>
