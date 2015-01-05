@@ -387,9 +387,9 @@ namespace kernels {
  * \param ckb  The hierarchical assignment kernel being constructed.
  * \param ckb_offset  The offset within 'ckb'.
  * \param dst_device  If the destination data is on the CUDA device, true.
- *Otherwise false.
+ *                    Otherwise false.
  * \param src_device  If the source data is on the CUDA device, true. Otherwise
- *false.
+ *                    false.
  * \param data_size  The size of the data being assigned.
  * \param data_alignment  The alignment of the data being assigned.
  * \param kernreq  What kind of kernel must be placed in 'ckb'.
@@ -397,26 +397,6 @@ namespace kernels {
 size_t make_cuda_pod_typed_data_assignment_kernel(
     void *ckb, intptr_t ckb_offset, bool dst_device, bool src_device,
     size_t data_size, size_t data_alignment, kernel_request_t kernreq);
-
-/**
- * Creates an assignment kernel from the src to the dst built in
- * type ids. Either the src or the dst can be in a CUDA memory space.
- *
- * \param ckb  The hierarchical assignment kernel being constructed.
- * \param ckb_offset  The offset within 'ckb'.
- * \param dst_device  If the destination data is on the CUDA device, true.
- *Otherwise false.
- * \param dst_type_id  The destination dynd type id.
- * \param src_device  If the source data is on the CUDA device, true. Otherwise
- *false.
- * \param src_type_id  The source dynd type id.
- * \param kernreq  What kind of kernel must be placed in 'ckb'.
- * \param errmode  The error mode to use for assignments.
- */
-size_t make_cuda_builtin_type_assignment_kernel(
-    void *ckb, intptr_t ckb_offset, bool dst_device, type_id_t dst_type_id,
-    size_t dst_size, bool src_device, type_id_t src_type_id, size_t src_size,
-    kernel_request_t kernreq, assign_error_mode errmode);
 
 intptr_t make_cuda_builtin_type_assignment_kernel(
     const arrfunc_type_data *self, const arrfunc_type *af_tp, void *ckb,

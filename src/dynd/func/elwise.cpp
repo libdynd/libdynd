@@ -158,6 +158,46 @@ intptr_t decl::nd::elwise::instantiate(
   }
 }
 
+static void *create_cuda_device_trampoline(void *ckb, intptr_t ckb_offset,
+                                           intptr_t src_count,
+                                           dynd::kernel_request_t kernreq)
+{
+  switch (src_count) {
+  case 1: {
+    typedef kernels::cuda_parallel_ck<1> self_type;
+    self_type *self = self_type::create(ckb, kernreq, ckb_offset, 1, 1);
+    return &self->ckb;
+  }
+  case 2: {
+    typedef kernels::cuda_parallel_ck<2> self_type;
+    self_type *self = self_type::create(ckb, kernreq, ckb_offset, 1, 1);
+    return &self->ckb;
+  }
+  case 3: {
+    typedef kernels::cuda_parallel_ck<3> self_type;
+    self_type *self = self_type::create(ckb, kernreq, ckb_offset, 1, 1);
+    return &self->ckb;
+  }
+  case 4: {
+    typedef kernels::cuda_parallel_ck<4> self_type;
+    self_type *self = self_type::create(ckb, kernreq, ckb_offset, 1, 1);
+    return &self->ckb;
+  }
+  case 5: {
+    typedef kernels::cuda_parallel_ck<5> self_type;
+    self_type *self = self_type::create(ckb, kernreq, ckb_offset, 1, 1);
+    return &self->ckb;
+  }
+  case 6: {
+    typedef kernels::cuda_parallel_ck<6> self_type;
+    self_type *self = self_type::create(ckb, kernreq, ckb_offset, 1, 1);
+    return &self->ckb;
+  }
+  default:
+    throw runtime_error("elwise with src_count > 6 not implemented yet");
+  }
+}
+
 intptr_t decl::nd::elwise::instantiate(
     const arrfunc_type_data *child, const arrfunc_type *child_tp, void *ckb,
     intptr_t ckb_offset, const ndt::type &dst_tp, const char *dst_arrmeta,
@@ -166,6 +206,42 @@ intptr_t decl::nd::elwise::instantiate(
     const dynd::nd::array &kwds)
 {
   intptr_t src_count = child_tp->get_npos();
+
+#ifdef __CUDACC__
+  if (dst_tp.get_type_id() == cuda_device_type_id) {
+    // If everything is CUDA device memory, then instantiate a CUDA
+    // proxy ckernel, and add the cuda_device request flag to the kernreq.
+    bool src_all_device = true;
+    for (intptr_t i = 0; i < src_count; ++i) {
+      src_all_device =
+          src_all_device && (src_tp[i].get_type_id() == cuda_device_type_id);
+    }
+
+    if (src_all_device) {
+      if ((kernreq & kernel_request_memory) != kernel_request_host) {
+        throw invalid_argument(
+            "got CUDA device_types, but not kernel_request_host");
+      }
+      void *cuda_ckb =
+          create_cuda_device_trampoline(ckb, ckb_offset, src_count, kernreq);
+      ndt::type new_dst_tp =
+          dst_tp.extended<base_memory_type>()->get_element_type();
+      vector<ndt::type> new_src_tp(src_count);
+      for (intptr_t i = 0; i < src_count; ++i) {
+        new_src_tp[i] =
+            src_tp[i].extended<base_memory_type>()->get_element_type();
+        cout << "new_src_tp[" << i << "] is " << new_src_tp[i] << endl;
+      }
+      cout << "new_dst_tp is " << new_dst_tp << endl;
+      instantiate(child, child_tp, cuda_ckb, 0, new_dst_tp, dst_arrmeta,
+                  &new_src_tp[0], src_arrmeta,
+                  kernreq | kernel_request_cuda_device, ectx, kwds);
+      // The return is the ckb_offset for the ckb that was passed in,
+      // not the CUDA ckb we just created for the CUDA memory.
+      return ckb_offset;
+    }
+  }
+#endif // __CUDACC__
 
   // Check if no lifting is required
   intptr_t dst_ndim = dst_tp.get_ndim();
@@ -203,7 +279,7 @@ intptr_t decl::nd::elwise::instantiate(
   for (intptr_t i = 0; i < src_count; ++i) {
     intptr_t src_ndim =
         src_tp[i].get_ndim() - child_tp->get_pos_type(i).get_ndim();
-    switch (src_tp[i].without_memory_type().get_type_id()) {
+    switch (src_tp[i].get_type_id()) {
     case fixed_dim_type_id:
     case cfixed_dim_type_id:
       break;
@@ -222,7 +298,7 @@ intptr_t decl::nd::elwise::instantiate(
 
   // Call to some special-case functions based on the
   // destination type
-  switch (dst_tp.without_memory_type().get_type_id()) {
+  switch (dst_tp.get_type_id()) {
   case fixed_dim_type_id:
   case cfixed_dim_type_id:
     if (src_all_strided) {
