@@ -19,8 +19,9 @@ template <typename T>
 static void BM_Array_BuiltinEmpty(benchmark::State &state)
 {
   ndt::type tp = ndt::make_type<T>();
-  while (state.KeepRunning())
+  while (state.KeepRunning()) {
     nd::empty(tp);
+  }
 }
 BENCHMARK_TEMPLATE(BM_Array_BuiltinEmpty, int32_t);
 BENCHMARK_TEMPLATE(BM_Array_BuiltinEmpty, int64_t);
