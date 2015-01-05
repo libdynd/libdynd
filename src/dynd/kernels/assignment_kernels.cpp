@@ -388,6 +388,47 @@ size_t dynd::make_kernreq_to_single_kernel_adapter(void *ckb,
 
 #ifdef DYND_CUDA
 
+intptr_t dynd::make_cuda_device_builtin_type_assignment_kernel(
+    const arrfunc_type_data *DYND_UNUSED(self),
+    const arrfunc_type *DYND_UNUSED(af_tp), void *ckb, intptr_t ckb_offset,
+    const ndt::type &dst_tp, const char *DYND_UNUSED(dst_arrmeta),
+    const ndt::type *src_tp, const char *const *DYND_UNUSED(src_arrmeta),
+    kernel_request_t kernreq, const eval::eval_context *ectx,
+    const nd::array &kwds)
+{
+  assign_error_mode errmode = ectx->cuda_device_errmode;
+
+  if (errmode != assign_error_nocheck &&
+      is_lossless_assignment(dst_tp, *src_tp)) {
+    errmode = assign_error_nocheck;
+  }
+
+  if (!dst_tp..is_builtin() || !src_tp->is_builtin() ||
+      errmode == assign_error_default) {
+    stringstream ss;
+    ss << "cannot do cuda device assignment from " << *src_tp << " to "
+       << dst_tp;
+    throw runtime_error(ss.str());
+  }
+
+  if ((kernreq & kernel_request_cuda_device) == 0) {
+    // Create a trampoline ckernel from host to device
+    kernels::cuda_parallel_ck<1> *self =
+        kernels::cuda_parallel_ck<1>::create(ckb, kernreq, ckb_offset, 1, 1);
+    // Make the assignment on the device
+    make_cuda_device_builtin_type_assignment_kernel(
+        NULL, NULL, &self->ckb, 0, dst_tp, NULL, src_tp, NULL,
+        kernreq | kernel_request_cuda_device, ectx, kwds);
+    // Return the offset for the original ckb
+    return ckb_offset;
+  }
+
+  return make_builtin_type_assignment_kernel(
+      ckb, ckb_offset, dst_tp.get_type_id(), src_tp->get_type_id(), kernreq,
+      errmode);
+}
+
+
 intptr_t dynd::make_cuda_builtin_type_assignment_kernel(
     const arrfunc_type_data *DYND_UNUSED(self),
     const arrfunc_type *DYND_UNUSED(af_tp), void *ckb, intptr_t ckb_offset,
