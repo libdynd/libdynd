@@ -158,6 +158,7 @@ intptr_t decl::nd::elwise::instantiate(
   }
 }
 
+#ifdef __CUDACC__
 static void *create_cuda_device_trampoline(void *ckb, intptr_t ckb_offset,
                                            intptr_t src_count,
                                            dynd::kernel_request_t kernreq)
@@ -197,6 +198,7 @@ static void *create_cuda_device_trampoline(void *ckb, intptr_t ckb_offset,
     throw runtime_error("elwise with src_count > 6 not implemented yet");
   }
 }
+#endif // __CUDACC__
 
 intptr_t decl::nd::elwise::instantiate(
     const arrfunc_type_data *child, const arrfunc_type *child_tp, void *ckb,

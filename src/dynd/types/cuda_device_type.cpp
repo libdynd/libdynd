@@ -95,10 +95,14 @@ intptr_t cuda_device_type::make_assignment_kernel(
 
     } else {
       child.instantiate = &make_cuda_to_device_builtin_type_assignment_kernel;
+      ndt::type new_src_tp =
+          src_tp.get_type_id() == cuda_host_type_id
+              ? src_tp.extended<base_memory_type>()->get_element_type()
+              : src_tp;
       return nd::elwise.instantiate(
           &child, child_tp.extended<arrfunc_type>(), ckb, ckb_offset,
           dst_tp.extended<base_memory_type>()->get_element_type(), dst_arrmeta,
-          &src_tp, &src_arrmeta, kernreq, ectx, kwds);
+          &new_src_tp, &src_arrmeta, kernreq, ectx, kwds);
     }
   } else {
     child.instantiate = &make_cuda_from_device_builtin_type_assignment_kernel;
