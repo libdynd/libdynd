@@ -152,11 +152,6 @@ namespace kernels {
         throw type_error(ss.str());
       }
 
-      bool src_all_device = true;
-      for (int i = 0; i < N; ++i) {
-        src_all_device =
-            src_all_device && (src_tp[i].get_type_id() == cuda_device_type_id);
-      }
 
       bool finished = dst_ndim == 1;
       for (int i = 0; i < N; ++i) {
@@ -186,16 +181,6 @@ namespace kernels {
         }
       }
 
-#ifdef __CUDACC__
-      if ((dst_tp.get_type_id() == cuda_device_type_id) && src_all_device &&
-          ((kernreq & kernel_request_memory) == kernel_request_host)) {
-        typedef kernels::cuda_parallel_ck<N> self_type;
-        self_type *self = self_type::create(ckb, kernreq, ckb_offset, 1, 1);
-        ckb = &self->ckb;
-        kernreq |= kernel_request_cuda_device;
-        ckb_offset = 0;
-      }
-#endif
       self_type::create(ckb, kernreq, ckb_offset, size, dst_stride,
                         kernels::array_wrapper<intptr_t, N>(src_stride));
       kernreq = (kernreq & kernel_request_memory) | kernel_request_strided;

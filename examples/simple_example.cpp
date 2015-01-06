@@ -21,21 +21,28 @@
 using namespace std;
 using namespace dynd;
 
-double myfunc(int x, float y)
-{
-  return x + 2.5 * y;
-}
-
 int main()
 {
-  try {
-    nd::arrfunc af = nd::apply::make(myfunc);
-    cout << af(3, 1.1f) << endl;
-  }
-  catch (const std::exception &e)
-  {
-    cout << "Error: " << e.what() << "\n";
-    return 1;
-  }
+  dynd::libdynd_init();
+  atexit(&dynd::libdynd_cleanup);
+
+  nd::array a, b, c;
+
+  // a = 1;
+  // b = 2;
+  a = {1, 2, 3};
+  b = {3, 5, 2};
+
+  #ifdef DYND_CUDA
+  cout << "moving to CUDA device..." << endl;
+  a = a.to_cuda_device();
+  b = b.to_cuda_device();
+  #endif
+
+  cout << "a: " << a << endl;
+  cout << "b: " << b << endl;
+  c = a + b;
+  cout << "c: " << c << endl;
+
   return 0;
 }

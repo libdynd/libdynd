@@ -77,38 +77,41 @@ void cuda_device_type::data_free(char *data) const
 }
 
 intptr_t cuda_device_type::make_assignment_kernel(
-    const arrfunc_type_data *self, const arrfunc_type *af_tp, void *ckb,
-    intptr_t ckb_offset, const ndt::type &dst_tp, const char *dst_arrmeta,
-    const ndt::type &src_tp, const char *src_arrmeta, kernel_request_t kernreq,
+    const arrfunc_type_data *DYND_UNUSED(self),
+    const arrfunc_type *DYND_UNUSED(af_tp), void *ckb, intptr_t ckb_offset,
+    const ndt::type &dst_tp, const char *dst_arrmeta, const ndt::type &src_tp,
+    const char *src_arrmeta, kernel_request_t kernreq,
     const eval::eval_context *ectx, const nd::array &kwds) const
 {
-  /*
-    bool dst_cuda_device, src_cuda_device;
-    if (this == dst_tp.extended()) {
-      dst_cuda_device = true;
-      src_cuda_device = src_tp.get_type_id() == cuda_device_type_id;
-    } else if (this == src_tp.extended()) {
-      dst_cuda_device = dst_tp.get_type_id() == cuda_device_type_id;
-      src_cuda_device = true;
+  arrfunc_type_data child;
+  static ndt::type child_tp("(Any) -> Any");
+  if (this == dst_tp.extended()) {
+    if (src_tp.get_type_id() == cuda_device_type_id) {
+      child.instantiate = &make_cuda_device_builtin_type_assignment_kernel;
+      // elwise will create the trampoline into a device ckernel for us
+      return nd::elwise.instantiate(&child, child_tp.extended<arrfunc_type>(),
+                                    ckb, ckb_offset, dst_tp, dst_arrmeta,
+                                    &src_tp, &src_arrmeta, kernreq, ectx, kwds);
+
     } else {
-
+      child.instantiate = &make_cuda_to_device_builtin_type_assignment_kernel;
+      ndt::type new_src_tp =
+          src_tp.get_type_id() == cuda_host_type_id
+              ? src_tp.extended<base_memory_type>()->get_element_type()
+              : src_tp;
+      return nd::elwise.instantiate(
+          &child, child_tp.extended<arrfunc_type>(), ckb, ckb_offset,
+          dst_tp.extended<base_memory_type>()->get_element_type(), dst_arrmeta,
+          &new_src_tp, &src_arrmeta, kernreq, ectx, kwds);
     }
-  */
-
-  if (dst_tp.get_ndim() >= src_tp.get_ndim() && dst_tp.get_ndim() > 0) {
-    arrfunc_type_data child(&make_cuda_builtin_type_assignment_kernel, NULL,
-                            NULL, NULL);
-    ndt::type child_tp =
-        ndt::make_arrfunc(ndt::make_tuple(src_tp.storage_type().get_dtype()),
-                          dst_tp.storage_type().get_dtype());
-    return nd::elwise.instantiate(&child, child_tp.extended<arrfunc_type>(),
-                                  ckb, ckb_offset, dst_tp, dst_arrmeta, &src_tp,
-                                  &src_arrmeta, kernreq, ectx, kwds);
+  } else {
+    child.instantiate = &make_cuda_from_device_builtin_type_assignment_kernel;
+    ndt::type new_src_tp =
+        src_tp.extended<base_memory_type>()->get_element_type();
+    return nd::elwise.instantiate(
+        &child, child_tp.extended<arrfunc_type>(), ckb, ckb_offset, dst_tp,
+        dst_arrmeta, &new_src_tp, &src_arrmeta, kernreq, ectx, kwds);
   }
-
-  return make_cuda_builtin_type_assignment_kernel(
-      self, af_tp, ckb, ckb_offset, dst_tp, dst_arrmeta, &src_tp, &src_arrmeta,
-      kernreq, ectx, kwds);
 }
 
 #endif // DYND_CUDA
