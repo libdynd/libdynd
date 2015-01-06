@@ -76,8 +76,6 @@ namespace dynd {
                     const eval::eval_context *DYND_UNUSED(ectx),               \
                     const dynd::nd::array &DYND_UNUSED(kwds))                  \
         {                                                                      \
-          std::cout << "instantiate arithmetic (" << src_tp[0] << ", "         \
-                    << src_tp[1] << ") -> " << dst_tp << std::endl;            \
           if (dst_tp.is_builtin()) {                                           \
             if (src_tp[0].is_builtin() && src_tp[1].is_builtin()) {            \
               kernels::create_t create =                                       \

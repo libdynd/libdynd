@@ -33,12 +33,14 @@ int main()
   a = {1, 2, 3};
   b = {3, 5, 2};
 
+  #ifdef DYND_CUDA
+  cout << "moving to CUDA device..." << endl;
   a = a.to_cuda_device();
   b = b.to_cuda_device();
+  #endif
 
   cout << "a: " << a << endl;
   cout << "b: " << b << endl;
-  cout << "CUDA bug case:" << endl;
   c = a + b;
   cout << "c: " << c << endl;
 

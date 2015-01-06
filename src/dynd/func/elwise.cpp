@@ -230,9 +230,7 @@ intptr_t decl::nd::elwise::instantiate(
       for (intptr_t i = 0; i < src_count; ++i) {
         new_src_tp[i] =
             src_tp[i].extended<base_memory_type>()->get_element_type();
-        cout << "new_src_tp[" << i << "] is " << new_src_tp[i] << endl;
       }
-      cout << "new_dst_tp is " << new_dst_tp << endl;
       instantiate(child, child_tp, cuda_ckb, 0, new_dst_tp, dst_arrmeta,
                   &new_src_tp[0], src_arrmeta,
                   kernreq | kernel_request_cuda_device, ectx, kwds);
