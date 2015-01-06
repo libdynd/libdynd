@@ -504,27 +504,6 @@ include_directories(
     thirdparty/utf8/source
     )
 
-source_group("Main Source" REGULAR_EXPRESSION "src/dynd/.*cpp")
-source_group("Main Headers" REGULAR_EXPRESSION "include/dynd/.*hpp")
-source_group("CodeGen Source" REGULAR_EXPRESSION "src/dynd/codegen/.*cpp")
-source_group("CodeGen Headers" REGULAR_EXPRESSION "include/dynd/codegen/.*hpp")
-source_group("Types Source" REGULAR_EXPRESSION "src/dynd/types/.*cpp")
-source_group("Types Headers" REGULAR_EXPRESSION "include/dynd/types/.*hpp")
-source_group("Eval Source" REGULAR_EXPRESSION "src/dynd/eval/.*cpp")
-source_group("Eval Headers" REGULAR_EXPRESSION "include/dynd/eval/.*hpp")
-source_group("Func Source" REGULAR_EXPRESSION "src/dynd/func/.*cpp")
-source_group("Func Headers" REGULAR_EXPRESSION "include/dynd/func/.*hpp")
-source_group("Iter Source" REGULAR_EXPRESSION "src/dynd/iter/.*cpp")
-source_group("Iter Headers" REGULAR_EXPRESSION "include/dynd/iter/.*hpp")
-source_group("Kernels Source" REGULAR_EXPRESSION "src/dynd/kernels/.*cpp")
-source_group("Kernels Headers" REGULAR_EXPRESSION "include/dynd/kernels/.*hpp")
-source_group("MemBlock Source" REGULAR_EXPRESSION "src/dynd/memblock/.*cpp")
-source_group("MemBlock Headers" REGULAR_EXPRESSION "include/dynd/memblock/.*hpp")
-source_group("PP Headers" REGULAR_EXPRESSION "include/dynd/pp/.*hpp")
-source_group("VM Source" REGULAR_EXPRESSION "src/dynd/vm/.*cpp")
-source_group("VM Headers" REGULAR_EXPRESSION "include/dynd/vm/.*hpp")
-source_group("Internal Headers" REGULAR_EXPRESSION "src/dynd/.*hpp")
-
 if (DYND_CUDA)
     # Replace some source files with their CUDA versions
     list(REMOVE_ITEM libdynd_SRC
@@ -558,6 +537,27 @@ if (DYND_CUDA)
         -Xcudafe;--diag_suppress=boolean_controlling_expr_is_constant;
         -Xcudafe;--diag_suppress=cc_clobber_ignored)
 endif()
+
+source_group("Main Source" REGULAR_EXPRESSION "src/dynd/.*cpp")
+source_group("Main Headers" REGULAR_EXPRESSION "include/dynd/.*hpp")
+source_group("CodeGen Source" REGULAR_EXPRESSION "src/dynd/codegen/.*cpp")
+source_group("CodeGen Headers" REGULAR_EXPRESSION "include/dynd/codegen/.*hpp")
+source_group("Types Source" REGULAR_EXPRESSION "src/dynd/types/.*cpp")
+source_group("Types Headers" REGULAR_EXPRESSION "include/dynd/types/.*hpp")
+source_group("Eval Source" REGULAR_EXPRESSION "src/dynd/eval/.*cpp")
+source_group("Eval Headers" REGULAR_EXPRESSION "include/dynd/eval/.*hpp")
+source_group("Func Source" REGULAR_EXPRESSION "src/dynd/func/.*cpp")
+source_group("Func Headers" REGULAR_EXPRESSION "include/dynd/func/.*hpp")
+source_group("Iter Source" REGULAR_EXPRESSION "src/dynd/iter/.*cpp")
+source_group("Iter Headers" REGULAR_EXPRESSION "include/dynd/iter/.*hpp")
+source_group("Kernels Source" REGULAR_EXPRESSION "src/dynd/kernels/.*cpp")
+source_group("Kernels Headers" REGULAR_EXPRESSION "include/dynd/kernels/.*hpp")
+source_group("MemBlock Source" REGULAR_EXPRESSION "src/dynd/memblock/.*cpp")
+source_group("MemBlock Headers" REGULAR_EXPRESSION "include/dynd/memblock/.*hpp")
+source_group("PP Headers" REGULAR_EXPRESSION "include/dynd/pp/.*hpp")
+source_group("VM Source" REGULAR_EXPRESSION "src/dynd/vm/.*cpp")
+source_group("VM Headers" REGULAR_EXPRESSION "include/dynd/vm/.*hpp")
+source_group("Internal Headers" REGULAR_EXPRESSION "src/dynd/.*hpp")
 
 if (DYND_FFTW)
     find_path(FFTW_PATH fftw3.h)
@@ -620,10 +620,11 @@ add_executable(ppgen include/dynd/pp/gen.cpp)
 add_custom_command(OUTPUT ${CMAKE_CURRENT_BINARY_DIR}/include/dynd/pp/gen.hpp
         DEPENDS include/dynd/pp/gen.cpp
         COMMAND ppgen 8 3 ${CMAKE_CURRENT_BINARY_DIR}/include/dynd/pp)
-# Make libdynd depend on ppgen_run to make sure gen.hpp is there when it builds
+add_custom_target(libdynd_gen DEPENDS ${CMAKE_CURRENT_BINARY_DIR}/include/dynd/pp/gen.hpp)
+# Make libdynd depend on libdynd_gen to make sure gen.hpp is there when it builds
 set_source_files_properties(${CMAKE_CURRENT_BINARY_DIR}/include/dynd/pp/gen.hpp
                             PROPERTIES GENERATED true)
-add_dependencies(libdynd ppgen)
+add_dependencies(libdynd libdynd_gen)
 
 # This file generates a huge number of inline functions, need to use /bigobj
 # on MSVC to allow this
