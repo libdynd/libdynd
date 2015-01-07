@@ -32,7 +32,7 @@ enum {
   /** Kernel function in CUDA device memory */
   kernel_request_cuda_device = 0x00000001,
   /** Kernel function in both host memory and CUDA device memory */
-#ifdef __CUDACC__
+#ifdef DYND_CUDA
   kernel_request_cuda_host_device = 0x00000002,
 #else
   kernel_request_cuda_host_device = kernel_request_host,

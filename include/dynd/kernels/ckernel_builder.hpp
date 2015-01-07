@@ -704,7 +704,11 @@ namespace kernels {
     }
   }
 
-  GENERAL_CK(kernel_request_cuda_host_device, __host__ __device__);
+#endif
+
+#ifdef DYND_CUDA
+
+  GENERAL_CK(kernel_request_cuda_host_device, DYND_CUDA_HOST_DEVICE);
 
   template <typename CKT>
   template <typename... A>
@@ -718,11 +722,13 @@ namespace kernels {
       return self_type::create(
           reinterpret_cast<ckernel_builder<kernel_request_host> *>(ckb),
           kernreq, inout_ckb_offset, std::forward<A>(args)...);
+#ifdef __CUDACC__
     case kernel_request_cuda_device:
       return self_type::create(
           reinterpret_cast<ckernel_builder<kernel_request_cuda_device> *>(ckb),
           kernreq & ~kernel_request_cuda_device, inout_ckb_offset,
           std::forward<A>(args)...);
+#endif
     default:
       throw std::invalid_argument("unrecognized ckernel request");
     }
@@ -740,11 +746,13 @@ namespace kernels {
       return self_type::create_leaf(
           reinterpret_cast<ckernel_builder<kernel_request_host> *>(ckb),
           kernreq, inout_ckb_offset, std::forward<A>(args)...);
+#ifdef __CUDACC__
     case kernel_request_cuda_device:
       return self_type::create_leaf(
           reinterpret_cast<ckernel_builder<kernel_request_cuda_device> *>(ckb),
           kernreq & ~kernel_request_cuda_device, inout_ckb_offset,
           std::forward<A>(args)...);
+#endif
     default:
       throw std::invalid_argument("unrecognized ckernel request");
     }

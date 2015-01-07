@@ -80,7 +80,12 @@ namespace kernels {
 #ifdef __CUDACC__
 
   EXPR_CK(kernel_request_cuda_device, __device__)
-  EXPR_CK(kernel_request_cuda_host_device, __host__ __device__)
+
+#endif
+
+#ifdef DYND_CUDA
+
+  EXPR_CK(kernel_request_cuda_host_device, DYND_CUDA_HOST_DEVICE)
 
 #endif
 
