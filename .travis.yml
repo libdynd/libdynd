@@ -44,7 +44,7 @@ before_script:
   - if [ "$DYND_BUILD_BENCHMARKS" == "" ]; then export DYND_BUILD_BENCHMARKS=ON; fi
   - mkdir build
   - cd build
-  - cmake ([ "$DYND_CUDA" = "ON" ] && -DCMAKE_BUILD_TYPE=Release) -DDYND_CUDA=${DYND_CUDA} -DDYND_FFTW=${DYND_FFTW} -DDYND_BUILD_TESTS=${DYND_BUILD_TESTS} -DDYND_BUILD_BENCHMARKS=${DYND_BUILD_BENCHMARKS} ..
+  - cmake $(if [ $DYND_CUDA = ON ]; then echo -DCMAKE_BUILD_TYPE=RelWithDebInfo; fi) -DDYND_CUDA=${DYND_CUDA} -DDYND_FFTW=${DYND_FFTW} -DDYND_BUILD_TESTS=${DYND_BUILD_TESTS} -DDYND_BUILD_BENCHMARKS=${DYND_BUILD_BENCHMARKS} ..
 
 script:
   - make || exit 1

@@ -102,7 +102,7 @@ else()
     if (DYND_CUDA)
 	    # This is a workaround for a FindCUDA bug, which will be fixed in an upcoming version
         if ("${CMAKE_BUILD_TYPE}" STREQUAL "")
-	        message(FATAL_ERROR "CMake must be passed a build type to compile libdynd with CUDA. Run CMake again with, for example, \"-DCMAKE_BUILD_TYPE=Release\".")
+	        message(FATAL_ERROR "CMake must be passed a build type to compile libdynd with CUDA. Run CMake again with, for example, \"-DCMAKE_BUILD_TYPE=RelWithDebInfo\".")
 	    endif()
         string(TOUPPER ${CMAKE_BUILD_TYPE} CONFIG_UPPER)
         set(CMAKE_CXX_FLAGS_${CONFIG_UPPER} "${CMAKE_CXX_FLAGS_${CONFIG_UPPER}} -fPIC")
