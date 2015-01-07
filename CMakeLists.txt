@@ -23,7 +23,7 @@ if("${CMAKE_SOURCE_DIR}" STREQUAL "${CMAKE_CURRENT_SOURCE_DIR}")
 # Some options configurable from the CMAKE command execution
 #
 # -DDYND_SHARED_LIB=ON/OFF, whether to build a shared or a static library.
-    if(WIN32 OR DYND_CUDA) # TODO: Does it make sense to generate a shared library with CUDA separable compilation? Should we try to make that work?
+    if(WIN32)
         option(DYND_SHARED_LIB
             "Build a libdynd shared library instead of a static library"
             OFF)
@@ -98,7 +98,17 @@ if(WIN32)
         set(DYND_BUILD_BENCHMARKS OFF)
     endif()
 else()
-    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11 -g -fomit-frame-pointer -fstrict-aliasing -fPIC -Wall -Wextra -Werror -Wno-missing-field-initializers")
+    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11 -g -fomit-frame-pointer -fstrict-aliasing -Wall -Wextra -Werror -Wno-missing-field-initializers")
+    if (DYND_CUDA)
+	    # This is a workaround for a FindCUDA bug, which will be fixed in an upcoming version
+        if ("${CMAKE_BUILD_TYPE}" STREQUAL "")
+	        message(FATAL_ERROR "CMake must be passed a build type to compile libdynd with CUDA. Run CMake again with, for example, \"-DCMAKE_BUILD_TYPE=RelWithDebInfo\".")
+	    endif()
+        string(TOUPPER ${CMAKE_BUILD_TYPE} CONFIG_UPPER)
+        set(CMAKE_CXX_FLAGS_${CONFIG_UPPER} "${CMAKE_CXX_FLAGS_${CONFIG_UPPER}} -fPIC")
+     else ()
+	    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fPIC")
+     endif ()
     if ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "GNU")
         if ("${CMAKE_CXX_COMPILER_VERSION}" VERSION_LESS 4.7)
             message(FATAL_ERROR "Only GCC 4.7 and later are supported by LibDyND. Found version ${CMAKE_CXX_COMPILER_VERSION}.")
