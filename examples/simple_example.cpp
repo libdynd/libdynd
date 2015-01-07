@@ -21,10 +21,26 @@
 using namespace std;
 using namespace dynd;
 
+struct callable0 {
+  DYND_CUDA_HOST_DEVICE int operator()(int x, int y) { return x + y; }
+};
+
+/*
+__global__ void test_kernel() {
+  double res = 0;
+  for (intptr_t i = 0; i < 10000000; ++i) {
+    res += i;
+  }
+  printf("%lf\n", res);
+}
+*/
+
 int main()
 {
   dynd::libdynd_init();
   atexit(&dynd::libdynd_cleanup);
+
+  nd::arrfunc af = nd::apply::make<kernel_request_cuda_device, callable0>();
 
   nd::array a, b, c;
 
