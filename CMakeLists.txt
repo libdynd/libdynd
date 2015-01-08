@@ -22,7 +22,7 @@ if("${CMAKE_SOURCE_DIR}" STREQUAL "${CMAKE_CURRENT_SOURCE_DIR}")
 ################################################
 # Some options configurable from the CMAKE command execution
 #
-# -DDYND_SHARED_LIB=ON/OFF, whether to build a shared or a static librarfy.
+# -DDYND_SHARED_LIB=ON/OFF, whether to build a shared or a static library.
     if(WIN32)
         option(DYND_SHARED_LIB
             "Build a libdynd shared library instead of a static library"
