@@ -64,13 +64,13 @@ set(tests_SRC
     types/test_var_dim_type.cpp
     func/special_vals.hpp
     func/test_apply.cpp
+    func/test_arithmetic.cpp
     func/test_arrfunc.cpp
     func/test_callable.cpp
     func/test_chain_arrfunc.cpp
     func/test_elwise.cpp
     func/test_fft.cpp
     func/test_functor_arrfunc.cpp
-    func/test_lift_arrfunc.cpp
     func/test_neighborhood.cpp
     func/test_multidispatch_arrfunc.cpp
     func/test_reduction.cpp
@@ -92,7 +92,6 @@ set(tests_SRC
     array/test_memmap.cpp
     array/test_view.cpp
     vm/test_elwise_program.cpp
-    test_arithmetic_op.cpp
     test_shape_tools.cpp
     test_platform.cpp
     ../thirdparty/gtest/gtest-all.cc
@@ -115,11 +114,11 @@ if (DYND_CUDA)
     # Replace some source files with their CUDA versions
     list(REMOVE_ITEM tests_SRC
         func/test_apply.cpp
-        func/test_lift_arrfunc.cpp
+        func/test_elwise.cpp
         )
     list(APPEND tests_SRC
         func/test_apply.cu
-        func/test_lift_arrfunc.cu
+        func/test_elwise.cu
         )
 endif()
 

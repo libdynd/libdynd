@@ -30,8 +30,8 @@ class arrfunc_type : public base_type {
 
 public:
   arrfunc_type(const ndt::type &pos_types, const ndt::type &ret_type);
-  arrfunc_type(const ndt::type &pos_types,
-               const ndt::type &kwd_types, const ndt::type &ret_type);
+  arrfunc_type(const ndt::type &pos_types, const ndt::type &kwd_types,
+               const ndt::type &ret_type);
 
   virtual ~arrfunc_type() {}
 
@@ -232,8 +232,12 @@ namespace ndt {
         ndt::type arg_tp[sizeof...(A)] = {
             make_cuda_device(make_type<typename std::remove_cv<
                 typename std::remove_reference<A>::type>::type>())...};
-        return make_arrfunc(ndt::make_tuple(arg_tp),
-                            make_cuda_device(make_type<R>()), raw_names);
+        return make_arrfunc(
+            ndt::make_tuple(nd::array(arg_tp, sizeof...(A) - sizeof...(T))),
+            ndt::make_struct(raw_names,
+                             nd::array(arg_tp + (sizeof...(A) - sizeof...(T)),
+                                       sizeof...(T))),
+            make_cuda_device(make_type<R>()));
       }
     };
 
@@ -264,8 +268,7 @@ namespace ndt {
   inline ndt::type make_arrfunc(const ndt::type &pos_tuple,
                                 const ndt::type &return_type)
   {
-    return ndt::type(new arrfunc_type(pos_tuple, return_type),
-                     false);
+    return ndt::type(new arrfunc_type(pos_tuple, return_type), false);
   }
 
   /** Makes a funcproto type with the specified types */
