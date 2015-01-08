@@ -3,4 +3,4 @@
 // BSD 2-Clause License, see LICENSE.txt
 //
 
-#include "test_lift_arrfunc.cpp"
+#include "test_elwise.cpp"
