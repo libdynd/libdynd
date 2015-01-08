@@ -325,7 +325,7 @@ TEST(Apply, FunctionWithKeywords)
   EXPECT_ARR_EQ(TestFixture::To(4),
                 af(kwds("x", TestFixture::To(5), "y", TestFixture::To(3))));
 
-/*
+#ifndef _MSC_VER
   af = nd::apply::make<decltype(&func6), &func6>("z");
   EXPECT_ARR_EQ(TestFixture::To(8), af(TestFixture::To(3), TestFixture::To(5),
                                        kwds("z", TestFixture::To(7))));
@@ -354,7 +354,7 @@ TEST(Apply, FunctionWithKeywords)
   EXPECT_ARR_EQ(TestFixture::To(36.3),
                 af(kwds("x", TestFixture::To(38), "y", TestFixture::To(5), "z",
                         TestFixture::To(12.1))));
-*/
+#endif
 }
 
 TYPED_TEST_P(Apply, Callable)
@@ -519,6 +519,7 @@ TYPED_TEST_P(Apply, CallableWithKeywords)
   EXPECT_ARR_EQ(TestFixture::To(8), af(TestFixture::To(3), TestFixture::To(5),
                                        kwds("z", TestFixture::To(7))));
 
+#ifndef _MSC_VER
   af = nd::apply::make<TestFixture::KernelRequest>(
       get_func6<TestFixture::KernelRequest>(), "y", "z");
   EXPECT_ARR_EQ(TestFixture::To(8),
@@ -609,6 +610,7 @@ TYPED_TEST_P(Apply, CallableWithKeywords)
                        callable2<TestFixture::KernelRequest>, int>("z");
   EXPECT_ARR_EQ(TestFixture::To(8), af(TestFixture::To(5), TestFixture::To(3),
                                        kwds("z", TestFixture::To(4))));
+#endif
 }
 
 REGISTER_TYPED_TEST_CASE_P(Apply, Callable, CallableWithKeywords);
