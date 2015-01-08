@@ -209,10 +209,16 @@ DYND_CUDA_HOST_DEVICE double func4(const double (&x)[3], const double (&y)[3])
   return x[0] * y[0] + x[1] * y[1] + x[2] * y[2];
 }
 
+GET_CUDA_HOST_DEVICE_FUNC(func4);
+CUDA_HOST_DEVICE_FUNC_AS_CALLABLE(func4);
+
 DYND_CUDA_HOST_DEVICE long func5(const long (&x)[2][3])
 {
   return x[0][0] + x[0][1] + x[1][2];
 }
+
+GET_CUDA_HOST_DEVICE_FUNC(func5);
+CUDA_HOST_DEVICE_FUNC_AS_CALLABLE(func5);
 
 DYND_CUDA_HOST_DEVICE int func6(int x, int y, int z) { return x * y - z; }
 
