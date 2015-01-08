@@ -8,12 +8,18 @@
 #include <algorithm>
 #include <cmath>
 
+#include <dynd/config.hpp>
+
 #include <benchmark/benchmark.h>
 
 using namespace std;
+using namespace dynd;
 
 int main(int argc, const char *argv[])
 {
+  libdynd_init();
+  atexit(&libdynd_cleanup);
+
   benchmark::Initialize(&argc, argv);
   benchmark::RunSpecifiedBenchmarks();
 

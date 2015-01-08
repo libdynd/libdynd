@@ -10,9 +10,15 @@ include_directories(
     ../include
     )
 
+if (DYND_CUDA)
+cuda_add_executable(simple_example
+    simple_example.cu
+    )
+else ()
 add_executable(simple_example
     simple_example.cpp
     )
+endif ()
 
 target_link_libraries(simple_example
     libdynd

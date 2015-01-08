@@ -359,6 +359,7 @@ set(libdynd_SRC
     src/dynd/kernels/byteswap_kernels.cpp
     src/dynd/kernels/ckernel_common_functions.cpp
     src/dynd/kernels/comparison_kernels.cpp
+    src/dynd/kernels/cuda_kernels.cpp
     src/dynd/kernels/date_assignment_kernels.cpp
     src/dynd/kernels/date_adapter_kernels.cpp
     src/dynd/kernels/datetime_assignment_kernels.cpp
@@ -523,6 +524,7 @@ if (DYND_CUDA)
         src/dynd/types/dynd_int128.cpp
         src/dynd/types/dynd_uint128.cpp
         src/dynd/kernels/assignment_kernels.cpp
+        src/dynd/kernels/cuda_kernels.cpp
         src/dynd/func/arithmetic.cpp
         src/dynd/func/elwise.cpp
         )
@@ -531,6 +533,7 @@ if (DYND_CUDA)
         src/dynd/func/arithmetic.cu
         src/dynd/func/elwise.cu
         src/dynd/kernels/ckernel_builder.cu
+        src/dynd/kernels/cuda_kernels.cu
         src/dynd/types/dynd_complex.cu
         src/dynd/types/dynd_float16.cu
         src/dynd/types/dynd_float128.cu
