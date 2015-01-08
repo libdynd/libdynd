@@ -28,25 +28,10 @@ struct callable0 {
   }
 };
 
-/*
-__global__ void test_kernel() {
-  double res = 0;
-  for (intptr_t i = 0; i < 10000000; ++i) {
-    res += i;
-  }
-  printf("%lf\n", res);
-}
-*/
-
 int main()
 {
   dynd::libdynd_init();
   atexit(&dynd::libdynd_cleanup);
-
-  nd::arrfunc af =
-      nd::apply::make<kernel_request_cuda_device, callable0>();
-//  std::cout << af(nd::array(1).to_cuda_device(), nd::array(2).to_cuda_device(), nd::array(3).to_cuda_device(),
-  //    nd::array(4).to_cuda_device()) << std::endl;
 
   nd::array a, b, c;
 
@@ -56,6 +41,11 @@ int main()
   b = {3, 5, 2};
 
 #ifdef DYND_CUDA
+  nd::arrfunc af =
+      nd::apply::make<kernel_request_cuda_device, callable0>();
+//  std::cout << af(nd::array(1).to_cuda_device(), nd::array(2).to_cuda_device(), nd::array(3).to_cuda_device(),
+  //    nd::array(4).to_cuda_device()) << std::endl;
+
   cout << "moving to CUDA device..." << endl;
   a = a.to_cuda_device();
   b = b.to_cuda_device();

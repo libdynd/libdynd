@@ -10,6 +10,7 @@ using namespace dynd;
 
 #ifdef __CUDACC__
 
+/*
 __global__ void kernels::cuda_parallel_single(char *dst,
                                               array_wrapper<char *, 0> src,
                                               ckernel_prefix *self)
@@ -65,5 +66,6 @@ __global__ void kernels::cuda_parallel_single(char *dst,
   expr_single_t func = self->get_function<expr_single_t>();
   func(dst, src, self);
 }
+*/
 
 #endif
