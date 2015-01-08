@@ -22,7 +22,7 @@ if("${CMAKE_SOURCE_DIR}" STREQUAL "${CMAKE_CURRENT_SOURCE_DIR}")
 ################################################
 # Some options configurable from the CMAKE command execution
 #
-# -DDYND_SHARED_LIB=ON/OFF, whether to build a shared or a static library.
+# -DDYND_SHARED_LIB=ON/OFF, whether to build a shared or a static librarfy.
     if(WIN32)
         option(DYND_SHARED_LIB
             "Build a libdynd shared library instead of a static library"
@@ -359,6 +359,7 @@ set(libdynd_SRC
     src/dynd/kernels/byteswap_kernels.cpp
     src/dynd/kernels/ckernel_common_functions.cpp
     src/dynd/kernels/comparison_kernels.cpp
+    src/dynd/kernels/cuda_kernels.cpp
     src/dynd/kernels/date_assignment_kernels.cpp
     src/dynd/kernels/date_adapter_kernels.cpp
     src/dynd/kernels/datetime_assignment_kernels.cpp
@@ -523,6 +524,7 @@ if (DYND_CUDA)
         src/dynd/types/dynd_int128.cpp
         src/dynd/types/dynd_uint128.cpp
         src/dynd/kernels/assignment_kernels.cpp
+        src/dynd/kernels/cuda_kernels.cpp
         src/dynd/func/arithmetic.cpp
         src/dynd/func/elwise.cpp
         )
@@ -531,6 +533,7 @@ if (DYND_CUDA)
         src/dynd/func/arithmetic.cu
         src/dynd/func/elwise.cu
         src/dynd/kernels/ckernel_builder.cu
+        src/dynd/kernels/cuda_kernels.cu
         src/dynd/types/dynd_complex.cu
         src/dynd/types/dynd_float16.cu
         src/dynd/types/dynd_float128.cu

@@ -22,7 +22,10 @@ using namespace std;
 using namespace dynd;
 
 struct callable0 {
-  DYND_CUDA_HOST_DEVICE int operator()(int x, int y) { return x + y; }
+  DYND_CUDA_HOST_DEVICE int operator()(int x, int y)
+  {
+    return x + y;
+  }
 };
 
 /*
@@ -40,7 +43,10 @@ int main()
   dynd::libdynd_init();
   atexit(&dynd::libdynd_cleanup);
 
-  nd::arrfunc af = nd::apply::make<kernel_request_cuda_device, callable0>();
+  nd::arrfunc af =
+      nd::apply::make<kernel_request_cuda_device, callable0>();
+//  std::cout << af(nd::array(1).to_cuda_device(), nd::array(2).to_cuda_device(), nd::array(3).to_cuda_device(),
+  //    nd::array(4).to_cuda_device()) << std::endl;
 
   nd::array a, b, c;
 
@@ -49,11 +55,11 @@ int main()
   a = {1, 2, 3};
   b = {3, 5, 2};
 
-  #ifdef DYND_CUDA
+#ifdef DYND_CUDA
   cout << "moving to CUDA device..." << endl;
   a = a.to_cuda_device();
   b = b.to_cuda_device();
-  #endif
+#endif
 
   cout << "a: " << a << endl;
   cout << "b: " << b << endl;
