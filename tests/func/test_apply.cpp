@@ -325,6 +325,7 @@ TEST(Apply, FunctionWithKeywords)
   EXPECT_ARR_EQ(TestFixture::To(4),
                 af(kwds("x", TestFixture::To(5), "y", TestFixture::To(3))));
 
+/*
   af = nd::apply::make<decltype(&func6), &func6>("z");
   EXPECT_ARR_EQ(TestFixture::To(8), af(TestFixture::To(3), TestFixture::To(5),
                                        kwds("z", TestFixture::To(7))));
@@ -353,6 +354,7 @@ TEST(Apply, FunctionWithKeywords)
   EXPECT_ARR_EQ(TestFixture::To(36.3),
                 af(kwds("x", TestFixture::To(38), "y", TestFixture::To(5), "z",
                         TestFixture::To(12.1))));
+*/
 }
 
 TYPED_TEST_P(Apply, Callable)

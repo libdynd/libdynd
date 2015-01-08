@@ -259,6 +259,7 @@ namespace kernels {
     typedef apply_callable_ck<KERNREQ, func_type, Nsrc> self_type;             \
                                                                                \
     func_type func;                                                            \
+    static const bool value = std::is_same<func_type, double (*)(const double (&)[3], const double (&)[3])>::value; \
                                                                                \
     __VA_ARGS__ apply_callable_ck(const func_type &func,                       \
                                   args_for<func_type, Nsrc> args,              \
