@@ -9,6 +9,7 @@
 
 #include <dynd/types/type_pattern_match.hpp>
 #include <dynd/types/pow_dimsym_type.hpp>
+#include <dynd/types/sym_type_type.hpp>
 
 using namespace std;
 using namespace dynd;
