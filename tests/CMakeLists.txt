@@ -52,7 +52,6 @@ set(tests_SRC
     types/test_string_type.cpp
     types/test_struct_type.cpp
     types/test_symbolic_types.cpp
-    types/test_sym_type_type.cpp
     types/test_time_type.cpp
     types/test_tuple_type.cpp
     types/test_type.cpp

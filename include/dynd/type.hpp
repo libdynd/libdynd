@@ -247,7 +247,7 @@ namespace ndt {
     }
 
     /** Construct from a string representation */
-    type(const std::string &rep);
+    explicit type(const std::string &rep);
 
     /** Construct from a string representation */
     type(const char *rep_begin, const char *rep_end);

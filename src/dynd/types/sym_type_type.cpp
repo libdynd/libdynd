@@ -13,6 +13,9 @@ sym_type_type::sym_type_type(const ndt::type &sym_tp)
                 0),
       m_sym_tp(sym_tp)
 {
+  if (!m_sym_tp.is_symbolic()) {
+    throw type_error("a sym_type_type must be symbolic");
+  }
 }
 
 sym_type_type::~sym_type_type() {}
@@ -21,7 +24,7 @@ void sym_type_type::print_data(std::ostream &DYND_UNUSED(o),
                                const char *DYND_UNUSED(arrmeta),
                                const char *DYND_UNUSED(data)) const
 {
-  throw type_error("Cannot store data of typevar type");
+  throw type_error("Cannot store data of sym_type_type");
 }
 
 void sym_type_type::print_type(std::ostream &o) const

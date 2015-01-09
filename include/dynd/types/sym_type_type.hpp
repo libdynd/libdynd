@@ -12,8 +12,7 @@
 namespace dynd {
 
 /**
- * A dynd type whose nd::array instances themselves contain
- * dynd types.
+ * A type whose that represents a symbolic type.
  */
 class sym_type_type : public base_type {
   ndt::type m_sym_tp;
@@ -23,28 +22,15 @@ public:
 
   virtual ~sym_type_type();
 
+  const ndt::type &get_sym_type() const {
+    return m_sym_tp;
+  }
+
   void print_data(std::ostream &o, const char *arrmeta, const char *data) const;
 
   void print_type(std::ostream &o) const;
 
   bool operator==(const base_type &rhs) const;
-
-/*
-
-
-
-  void arrmeta_default_construct(char *arrmeta, bool blockref_alloc) const;
-  void arrmeta_copy_construct(char *dst_arrmeta, const char *src_arrmeta,
-                              memory_block_data *embedded_reference) const;
-  void arrmeta_reset_buffers(char *arrmeta) const;
-  void arrmeta_finalize_buffers(char *arrmeta) const;
-  void arrmeta_destruct(char *arrmeta) const;
-  void arrmeta_debug_print(const char *DYND_UNUSED(arrmeta),
-                           std::ostream &DYND_UNUSED(o),
-                           const std::string &DYND_UNUSED(indent)) const
-  {
-  }
-*/
 };
 
 namespace ndt {
