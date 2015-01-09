@@ -16,6 +16,7 @@
 #include <dynd/types/typevar_dim_type.hpp>
 #include <dynd/types/ellipsis_dim_type.hpp>
 #include <dynd/types/any_sym_type.hpp>
+#include <dynd/types/type_type.hpp>
 
 using namespace std;
 using namespace dynd;
@@ -230,7 +231,8 @@ TEST(SymbolicTypes, AnySym)
   EXPECT_TRUE(tp.is_dim_variadic());
   EXPECT_EQ(tp, ndt::type(tp.str()));
 
-  // The "Any" type's variadic-ness should not propagate through struct/tuple types
+  // The "Any" type's variadic-ness should not propagate through struct/tuple
+  // types
   tp = ndt::type("(Any, Any)");
   EXPECT_TRUE(tp.is_symbolic());
   EXPECT_FALSE(tp.is_dim_variadic());
@@ -240,6 +242,19 @@ TEST(SymbolicTypes, AnySym)
   EXPECT_TRUE(tp.is_symbolic());
   EXPECT_FALSE(tp.is_dim_variadic());
   EXPECT_EQ(tp, ndt::type(tp.str()));
+}
+
+TEST(SymbolicTypes, TypeTypeWithPattern)
+{
+  ndt::type tp;
+
+  tp = ndt::make_type(ndt::type("N * int32"));
+  EXPECT_FALSE(tp.is_symbolic());
+  EXPECT_EQ(ndt::type("N * int32"), tp.extended<type_type>()->get_pattern());
+  EXPECT_EQ(tp, ndt::type(tp.str()));
+
+  // The pattern type must be symbolic
+  EXPECT_THROW(ndt::type("type | 4 * int32"), type_error);
 }
 
 TEST(SymbolicTypes, VariadicTuple)
