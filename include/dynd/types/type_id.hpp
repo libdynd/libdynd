@@ -174,8 +174,6 @@ enum type_id_t {
   // A special type which holds a fragment of canonical dimensions
   // for the purpose of broadcasting together named ellipsis type vars.
   dim_fragment_type_id,
-  // Instances of this type are themselves symbolic types
-  sym_type_type_id,
 
   // The number of built-in, atomic types (including uninitialized and void)
   builtin_type_id_count = 19

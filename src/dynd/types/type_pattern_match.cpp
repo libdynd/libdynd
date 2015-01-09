@@ -16,24 +16,18 @@
 #include <dynd/types/pow_dimsym_type.hpp>
 #include <dynd/types/ellipsis_dim_type.hpp>
 #include <dynd/types/dim_fragment_type.hpp>
-#include <dynd/types/sym_type_type.hpp>
 
 using namespace std;
 using namespace dynd;
 
-// TODO: We need to properly add offsets to the concrete_arrmeta in every
-// function below.
+// TODO: We need to properly add offsets to the concrete_arrmeta in every function below.
 
 static bool recursive_match(const ndt::type &concrete,
                             const char *concrete_arrmeta,
                             const ndt::type &pattern,
                             std::map<nd::string, ndt::type> &typevars)
 {
-  if (pattern.get_type_id() == sym_type_type_id) {
-    return recursive_match(concrete, concrete_arrmeta,
-                           pattern.extended<sym_type_type>()->get_sym_type(),
-                           typevars);
-  } else if (concrete.get_ndim() == 0 && pattern.get_ndim() == 0) {
+  if (concrete.get_ndim() == 0 && pattern.get_ndim() == 0) {
     // Matching a scalar vs scalar
     if (pattern.get_type_id() == typevar_type_id) {
       ndt::type &tv_type =
@@ -109,7 +103,8 @@ static bool recursive_match(const ndt::type &concrete,
             }
           }
           return true;
-        } else {
+        }
+        else {
           return false;
         }
       }
