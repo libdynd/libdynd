@@ -29,7 +29,10 @@ class arrfunc_type : public base_type {
   std::vector<intptr_t> m_opt_kwd_indices;
 
 public:
+  arrfunc_type(const ndt::type &ret_type);
+
   arrfunc_type(const ndt::type &pos_types, const ndt::type &ret_type);
+
   arrfunc_type(const ndt::type &pos_types, const ndt::type &kwd_types,
                const ndt::type &ret_type);
 

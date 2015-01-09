@@ -84,6 +84,13 @@ namespace ndt {
     return ndt::type(new tuple_type(field_types, variadic), false);
   }
 
+  inline ndt::type make_empty_tuple()
+  {
+    // TODO: return a static instance
+    nd::array field_types = nd::empty(0, ndt::make_type());
+    return ndt::make_tuple(field_types);
+  }
+
   /** Makes a tuple type with the specified types */
   inline ndt::type make_tuple(const ndt::type &tp0)
   {

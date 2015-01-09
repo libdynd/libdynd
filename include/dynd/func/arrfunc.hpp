@@ -203,6 +203,14 @@ public:
 
   arrfunc_type_data(arrfunc_instantiate_t instantiate,
                     arrfunc_resolve_option_values_t resolve_option_values,
+                    arrfunc_resolve_dst_type_t resolve_dst_type)
+      : instantiate(instantiate), resolve_option_values(resolve_option_values),
+        resolve_dst_type(resolve_dst_type)
+  {
+  }
+
+  arrfunc_type_data(arrfunc_instantiate_t instantiate,
+                    arrfunc_resolve_option_values_t resolve_option_values,
                     arrfunc_resolve_dst_type_t resolve_dst_type,
                     arrfunc_free_t free)
       : instantiate(instantiate), resolve_option_values(resolve_option_values),
@@ -509,6 +517,16 @@ namespace nd {
 
   public:
     arrfunc() {}
+
+    arrfunc(arrfunc_instantiate_t instantiate,
+            arrfunc_resolve_option_values_t resolve_option_values,
+            arrfunc_resolve_dst_type_t resolve_dst_type,
+            const ndt::type &self_tp)
+        : m_value(empty(self_tp))
+    {
+      new (m_value.get_readwrite_originptr()) arrfunc_type_data(
+          instantiate, resolve_option_values, resolve_dst_type);
+    }
 
     template <typename T>
     arrfunc(const T &data, arrfunc_instantiate_t instantiate,
