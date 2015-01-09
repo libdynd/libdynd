@@ -213,7 +213,6 @@ set(libdynd_SRC
     src/dynd/types/struct_type.cpp
     src/dynd/types/substitute_shape.cpp
     src/dynd/types/substitute_typevars.cpp
-    src/dynd/types/sym_type_type.cpp
     src/dynd/types/time_parser.cpp
     src/dynd/types/time_type.cpp
     src/dynd/types/time_util.cpp
@@ -286,7 +285,6 @@ set(libdynd_SRC
     include/dynd/types/cstruct_type.hpp
     include/dynd/types/substitute_shape.hpp
     include/dynd/types/substitute_typevars.hpp
-    include/dynd/types/sym_type_type.hpp
     include/dynd/types/time_parser.hpp
     include/dynd/types/time_type.hpp
     include/dynd/types/time_util.hpp

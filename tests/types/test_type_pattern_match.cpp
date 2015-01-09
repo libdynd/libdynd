@@ -9,7 +9,6 @@
 
 #include <dynd/types/type_pattern_match.hpp>
 #include <dynd/types/pow_dimsym_type.hpp>
-#include <dynd/types/sym_type_type.hpp>
 
 using namespace std;
 using namespace dynd;
@@ -176,6 +175,7 @@ TEST(TypePatternMatch, ArrFuncProto)
   EXPECT_FALSE(
       ndt::pattern_match(ndt::type("(int32, 5 * var * 2 * int16) -> float32"),
                          ndt::type("(S, M * 2 * int16) -> T")));
+
 }
 
 TEST(TypePatternMatch, VariadicArrFuncProto)
@@ -268,25 +268,6 @@ TEST(TypePatternMatch, Pow)
   // Can't have a negative exponent
   EXPECT_FALSE(
       ndt::pattern_match(ndt::type("int32"), ndt::type("D**N * E * int32")));
-}
-
-TEST(TypePatternMatch, SymTypeType)
-{
-  EXPECT_TRUE(ndt::pattern_match(ndt::type("int32"), ndt::type("Type[T]")));
-  EXPECT_TRUE(ndt::pattern_match(ndt::type("float32"), ndt::type("Type[T]")));
-
-  EXPECT_TRUE(ndt::pattern_match(ndt::type("4 * int32"),
-                                 ndt::type("Type[Fixed * int32]")));
-  EXPECT_FALSE(ndt::pattern_match(ndt::type("4 * float32"),
-                                  ndt::type("Type[Fixed * int32]")));
-  EXPECT_TRUE(ndt::pattern_match(ndt::type("4 * 8 * int32"),
-                                 ndt::type("Type[Fixed * 8 * int32]")));
-  EXPECT_FALSE(ndt::pattern_match(ndt::type("4 * 2 * int32"),
-                                  ndt::type("Type[Fixed * 8 * int32]")));
-
-  EXPECT_TRUE(ndt::pattern_match(ndt::type("(int32)"), ndt::type("Type[(T)]")));
-  EXPECT_TRUE(
-      ndt::pattern_match(ndt::type("(float32)"), ndt::type("Type[(T)]")));
 }
 
 TEST(TypePatternMatchDims, Simple)
