@@ -20,17 +20,17 @@ struct type_type_data {
  * dynd types.
  */
 class type_type : public base_type {
-  ndt::type m_pattern;
+  ndt::type m_pattern_tp;
 
 public:
   type_type();
 
-  type_type(const ndt::type &pattern);
+  type_type(const ndt::type &pattern_tp);
 
   virtual ~type_type();
 
-  const ndt::type &get_pattern() const {
-    return m_pattern;
+  const ndt::type &get_pattern_type() const {
+    return m_pattern_tp;
   }
 
   void print_data(std::ostream &o, const char *arrmeta, const char *data) const;

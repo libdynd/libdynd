@@ -356,16 +356,16 @@ namespace nd {
         m_names[I] = name;
       }
 
-      static const struct {
+      struct {
         template <size_t I>
         void operator()(kwds<K...> *self,
-                        typename as<K, const char *>::type... names)
+                        typename as_<K, const char *>::type... names)
         {
           self->set_name<I>(get<I>(names...));
         }
       } set_names;
 
-      static const struct {
+      struct {
         template <size_t I>
         void operator()(const kwds<K...> *self,
                         std::vector<intptr_t> &available,
@@ -413,7 +413,7 @@ namespace nd {
       } resolve_available_type;
 
     public:
-      kwds(typename as<K, const char *>::type... names, K &&... values)
+      kwds(typename as_<K, const char *>::type... names, K &&... values)
           : m_values(std::forward<K>(values)...)
       {
         typedef make_index_sequence<sizeof...(K)> I;

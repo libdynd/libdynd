@@ -250,7 +250,7 @@ TEST(SymbolicTypes, TypeTypeWithPattern)
 
   tp = ndt::make_type(ndt::type("N * int32"));
   EXPECT_FALSE(tp.is_symbolic());
-  EXPECT_EQ(ndt::type("N * int32"), tp.extended<type_type>()->get_pattern());
+  EXPECT_EQ(ndt::type("N * int32"), tp.extended<type_type>()->get_pattern_type());
   EXPECT_EQ(tp, ndt::type(tp.str()));
 
   // The pattern type must be symbolic

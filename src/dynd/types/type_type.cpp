@@ -22,14 +22,14 @@ type_type::type_type()
 {
 }
 
-type_type::type_type(const ndt::type &pattern)
+type_type::type_type(const ndt::type &pattern_tp)
     : base_type(type_type_id, type_kind, sizeof(const base_type *),
                 sizeof(const base_type *),
                 type_flag_scalar | type_flag_zeroinit | type_flag_destructor, 0,
                 0, 0),
-      m_pattern(pattern)
+      m_pattern_tp(pattern_tp)
 {
-  if (!m_pattern.is_symbolic()) {
+  if (!m_pattern_tp.is_symbolic()) {
     throw type_error("type_type must have a symbolic type for a pattern");
   }
 }
@@ -52,14 +52,20 @@ void type_type::print_data(std::ostream &o, const char *DYND_UNUSED(arrmeta),
 void type_type::print_type(std::ostream &o) const
 {
   o << "type";
-  if (!m_pattern.is_null()) {
-    o << " | " << m_pattern;
+  if (!m_pattern_tp.is_null()) {
+    o << " | " << m_pattern_tp;
   }
 }
 
 bool type_type::operator==(const base_type &rhs) const
 {
-  return this == &rhs || rhs.get_type_id() == type_type_id;
+  if (this == &rhs) {
+    return true;
+  } else if (rhs.get_type_id() != type_type_id) {
+    return false;
+  } else {
+    return m_pattern_tp == static_cast<const type_type *>(&rhs)->m_pattern_tp;
+  }
 }
 
 void
