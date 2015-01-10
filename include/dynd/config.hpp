@@ -262,7 +262,7 @@ struct index_proxy<index_sequence<I0, I...>> {
   template <typename R>
   static R make()
   {
-    return R(get<I>()...);
+    return R();
   }
   template <typename R, typename A0>
   static R make(A0 &&a0)
@@ -331,8 +331,7 @@ struct index_proxy<index_sequence<I0, I...>> {
   static void for_each(F f, A &&... a)
   {
     f.template operator()<I0>(std::forward<A>(a)...);
-    index_proxy<index_sequence<I...>>::template for_each(f,
-                                                         std::forward<A>(a)...);
+    index_proxy<index_sequence<I...>>::for_each(f, std::forward<A>(a)...);
   }
 };
 

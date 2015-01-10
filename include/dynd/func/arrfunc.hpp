@@ -384,33 +384,7 @@ namespace nd {
 
       static intptr_t get_size() { return sizeof...(K); }
 
-      static const class {
-        template <typename T>
-        void try_match(const std::string &name, const T &value,
-                       ndt::type &actual_tp, ndt::type expected_tp,
-                       std::map<nd::string, ndt::type> &typevars) const
-        {
-          actual_tp = ndt::as_type(value);
-
-          switch (expected_tp.get_type_id()) {
-          case option_type_id:
-            expected_tp = expected_tp.p("value_type").as<ndt::type>();
-            break;
-          default:
-            break;
-          }
-
-          if (!ndt::pattern_match(actual_tp.value_type(), expected_tp,
-                                  typevars)) {
-            std::stringstream ss;
-            ss << "keyword \"" << name << "\" does not match, ";
-            ss << "arrfunc expected " << expected_tp << " but passed "
-               << actual_tp;
-            throw std::invalid_argument(ss.str());
-          }
-        }
-
-      public:
+      static const struct {
         template <size_t I>
         void operator()(const kwds<K...> &self,
                         std::vector<intptr_t> &available,
@@ -428,15 +402,32 @@ namespace nd {
             throw std::invalid_argument(ss.str());
           }
 
+          ndt::type expected_tp = af_tp->get_kwd_type(j);
+          switch (expected_tp.get_type_id()) {
+          case option_type_id:
+            expected_tp = expected_tp.p("value_type").as<ndt::type>();
+            break;
+          default:
+            break;
+          }
+
           ndt::type &actual_tp = kwd_tp_data[j];
           if (!actual_tp.is_null()) {
             std::stringstream ss;
             ss << "arrfunc passed keyword \"" << name << "\" more than once";
             throw std::invalid_argument(ss.str());
           }
-
-          try_match(name, value, actual_tp, af_tp->get_kwd_type(j), typevars);
+          actual_tp = ndt::as_type(value);
           available.push_back(j);
+
+          if (!ndt::pattern_match(actual_tp.value_type(), expected_tp,
+                                  typevars)) {
+            std::stringstream ss;
+            ss << "keyword \"" << name << "\" does not match, ";
+            ss << "arrfunc expected " << expected_tp << " but passed "
+               << actual_tp;
+            throw std::invalid_argument(ss.str());
+          }
         }
       } resolve_available_type;
 
