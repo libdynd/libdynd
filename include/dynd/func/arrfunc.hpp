@@ -335,11 +335,6 @@ namespace nd {
     public:
       static intptr_t get_size() { return 0; }
 
-      const char *get_name(intptr_t DYND_UNUSED(i)) const
-      {
-        throw std::runtime_error("");
-      }
-
       const std::tuple<> &get_vals() const { return m_vals; }
 
       std::vector<intptr_t> resolve_available_types(

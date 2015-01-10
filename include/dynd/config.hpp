@@ -330,7 +330,11 @@ struct index_proxy<index_sequence<I0, I...>> {
   template <typename F, typename... A>
   static void for_each(F f, A &&... a)
   {
+#ifdef _MSC_VER
+    f.operator()<I0>(std::forward<A>(a)...);
+#else
     f.template operator()<I0>(std::forward<A>(a)...);
+#endif
     index_proxy<index_sequence<I...>>::for_each(f, std::forward<A>(a)...);
   }
 };
