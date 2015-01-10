@@ -345,56 +345,57 @@ namespace nd {
       }
     };
 
-    struct resolve_available_type {
-      template <size_t I, typename... K>
-      void operator()(const kwds<K...> *self, std::vector<intptr_t> &available,
-                      const arrfunc_type *af_tp, ndt::type *kwd_tp_data,
-                      std::map<nd::string, ndt::type> &typevars) const
-      {
-        const std::string &name = self->template get_name<I>();
-        const auto &value = self->template get_value<I>();
-
-        intptr_t j = af_tp->get_kwd_index(name);
-        if (j == -1) {
-          std::stringstream ss;
-          ss << "passed an unexpected keyword \"" << name
-             << "\" to arrfunc with type " << ndt::type(af_tp, true);
-          throw std::invalid_argument(ss.str());
-        }
-
-        ndt::type expected_tp = af_tp->get_kwd_type(j);
-        switch (expected_tp.get_type_id()) {
-        case option_type_id:
-          expected_tp = expected_tp.p("value_type").as<ndt::type>();
-          break;
-        default:
-          break;
-        }
-
-        ndt::type &actual_tp = kwd_tp_data[j];
-        if (!actual_tp.is_null()) {
-          std::stringstream ss;
-          ss << "arrfunc passed keyword \"" << name << "\" more than once";
-          throw std::invalid_argument(ss.str());
-        }
-        actual_tp = ndt::as_type(value);
-        available.push_back(j);
-
-        if (!ndt::pattern_match(actual_tp.value_type(), expected_tp,
-                                typevars)) {
-          std::stringstream ss;
-          ss << "keyword \"" << name << "\" does not match, ";
-          ss << "arrfunc expected " << expected_tp << " but passed "
-             << actual_tp;
-          throw std::invalid_argument(ss.str());
-        }
-      }
-    };
-
     template <typename... K>
     class kwds {
       const char *m_names[sizeof...(K)];
       std::tuple<K...> m_vals;
+
+      static const struct {
+        template <size_t I>
+        void operator()(const kwds<K...> *self,
+                        std::vector<intptr_t> &available,
+                        const arrfunc_type *af_tp, ndt::type *kwd_tp_data,
+                        std::map<nd::string, ndt::type> &typevars) const
+        {
+          const std::string &name = self->template get_name<I>();
+          const auto &value = self->template get_value<I>();
+
+          intptr_t j = af_tp->get_kwd_index(name);
+          if (j == -1) {
+            std::stringstream ss;
+            ss << "passed an unexpected keyword \"" << name
+               << "\" to arrfunc with type " << ndt::type(af_tp, true);
+            throw std::invalid_argument(ss.str());
+          }
+
+          ndt::type expected_tp = af_tp->get_kwd_type(j);
+          switch (expected_tp.get_type_id()) {
+          case option_type_id:
+            expected_tp = expected_tp.p("value_type").as<ndt::type>();
+            break;
+          default:
+            break;
+          }
+
+          ndt::type &actual_tp = kwd_tp_data[j];
+          if (!actual_tp.is_null()) {
+            std::stringstream ss;
+            ss << "arrfunc passed keyword \"" << name << "\" more than once";
+            throw std::invalid_argument(ss.str());
+          }
+          actual_tp = ndt::as_type(value);
+          available.push_back(j);
+
+          if (!ndt::pattern_match(actual_tp.value_type(), expected_tp,
+                                  typevars)) {
+            std::stringstream ss;
+            ss << "keyword \"" << name << "\" does not match, ";
+            ss << "arrfunc expected " << expected_tp << " but passed "
+               << actual_tp;
+            throw std::invalid_argument(ss.str());
+          }
+        }
+      } resolve_available_type;
 
 #if !(defined(_MSC_VER) && _MSC_VER == 1800)
     public:
@@ -448,7 +449,7 @@ namespace nd {
         typedef make_index_sequence<sizeof...(K)> I;
 
         std::vector<intptr_t> available;
-        dynd::index_proxy<I>::for_each(resolve_available_type(), this, available,
+        dynd::index_proxy<I>::for_each(resolve_available_type, this, available,
                                        self_tp, kwd_tp_data, typevars);
         return available;
       }
