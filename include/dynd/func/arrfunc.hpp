@@ -340,39 +340,26 @@ namespace nd {
         throw std::runtime_error("");
       }
 
+      const std::tuple<> &get_vals() const { return m_vals; }
+
       std::vector<intptr_t> resolve_available_types(
           const arrfunc_type *DYND_UNUSED(self_tp), ndt::type *DYND_UNUSED(tp),
           std::map<nd::string, ndt::type> &DYND_UNUSED(typevars)) const
       {
         return std::vector<intptr_t>();
       }
-
-      ndt::type get_type(intptr_t DYND_UNUSED(i)) const
-      {
-        throw std::runtime_error("");
-      }
-
-      array get_names() const { return array(); }
-
-      //      array get_types() const { return array(); }
-
-      const std::tuple<> &get_vals() const { return m_vals; }
     };
 
-    template <typename... T>
+    template <typename... K>
     class kwds {
-      const char *m_names[sizeof...(T)];
-      ndt::type m_types[sizeof...(T)];
-      std::tuple<T...> m_vals;
+      const char *m_names[sizeof...(K)];
+      std::tuple<K...> m_vals;
 
 #if !(defined(_MSC_VER) && _MSC_VER == 1800)
     public:
-      kwds(const typename as_<T, const char *>::type &... names, T &&... vals)
-          : m_names{names...}, m_vals(std::forward<T>(vals)...)
+      kwds(const typename as_<K, const char *>::type &... names, K &&... vals)
+          : m_names{names...}, m_vals(std::forward<K>(vals)...)
       {
-        typedef make_index_sequence<sizeof...(T)> I;
-
-        ndt::index_proxy<I>::template get_types(m_types, get_vals());
       }
 #else
       template <size_t I>
@@ -380,38 +367,31 @@ namespace nd {
       {
       }
 
-      template <size_t I, typename T0, typename... T>
-      void assign_names(T0 &&t0, T &&... t)
+      template <size_t I, typename K0, typename... K>
+      void assign_names(K0 &&k0, K &&... k)
       {
-        m_names[I] = t0;
-        assign_names<I + 1>(std::forward<T>(t)...);
+        m_names[I] = k0;
+        assign_names<I + 1>(std::forward<K>(k)...);
       }
 
     public:
-      kwds(const typename as_<T, const char *>::type &... names, T &&... vals)
-          : m_vals(std::forward<T>(vals)...)
+      kwds(const typename as_<K, const char *>::type &... names, K &&... vals)
+          : m_vals(std::forward<K>(vals)...)
       {
-        typedef make_index_sequence<sizeof...(T)> I;
-
         assign_names<0>(names...);
-        ndt::index_proxy<I>::template get_types(m_types, get_vals());
       }
 #endif
 
-      static intptr_t get_size() { return sizeof...(T); }
+      static intptr_t get_size() { return sizeof...(K); }
 
-      /*
-        const char *(&get_names() const)[sizeof...(T)] {
-          return nd::make_strided_string_array(sizeof...(T), m_names);
-        }
-      */
-
-      struct {
-        template <size_t I>
-        void operator()(const std::string &name, const ndt::type &actual_tp,
-                        ndt::type expected_tp,
+      static const struct {
+        template <size_t I, typename T>
+        void operator()(const std::string &name, const T &value,
+                        ndt::type &actual_tp, ndt::type expected_tp,
                         std::map<nd::string, ndt::type> &typevars) const
         {
+          actual_tp = ndt::as_type(value);
+
           switch (expected_tp.get_type_id()) {
           case option_type_id:
             expected_tp = expected_tp.p("value_type").as<ndt::type>();
@@ -431,15 +411,17 @@ namespace nd {
         }
 
         template <size_t I>
-        void operator()(const kwds<T...> &self,
+        void operator()(const kwds<K...> &self,
                         std::vector<intptr_t> &available,
                         const arrfunc_type *af_tp, ndt::type *kwd_tp_data,
                         std::map<nd::string, ndt::type> &typevars) const
         {
-          intptr_t j = af_tp->get_kwd_index(self.get_name(I));
+          const std::string &name = self.get_name(I);
+
+          intptr_t j = af_tp->get_kwd_index(name);
           if (j == -1) {
             std::stringstream ss;
-            ss << "passed an unexpected keyword \"" << self.get_name(I)
+            ss << "passed an unexpected keyword \"" << name
                << "\" to arrfunc with type " << ndt::type(af_tp, true);
             throw std::invalid_argument(ss.str());
           }
@@ -447,15 +429,14 @@ namespace nd {
           ndt::type &actual_tp = kwd_tp_data[j];
           if (!actual_tp.is_null()) {
             std::stringstream ss;
-            ss << "arrfunc passed keyword \"" << self.get_name(I)
-               << "\" more than once";
+            ss << "arrfunc passed keyword \"" << name << "\" more than once";
             throw std::invalid_argument(ss.str());
           }
-          actual_tp = self.get_type(I);
-          available.push_back(j);
 
-          operator()<I>(self.get_name(I), actual_tp, af_tp->get_kwd_type(j),
-                        typevars);
+          operator()<I>(name, std::get<I>(self.get_vals()),
+                        actual_tp, af_tp->get_kwd_type(j), typevars);
+
+          available.push_back(j);
         }
       } resolve_available_type;
 
@@ -465,7 +446,7 @@ namespace nd {
                               std::map<nd::string, ndt::type> &typevars) const
       {
         std::vector<intptr_t> available;
-        dynd::index_proxy<make_index_sequence<sizeof...(T)>>::for_each(
+        dynd::index_proxy<make_index_sequence<sizeof...(K)>>::for_each(
             resolve_available_type, *this, available, self_tp, kwd_tp_data,
             typevars);
         return available;
@@ -474,14 +455,12 @@ namespace nd {
       nd::array get_names() const
       {
         return nd::make_strided_string_array(const_cast<const char **>(m_names),
-                                             sizeof...(T));
+                                             sizeof...(K));
       }
 
       const char *get_name(intptr_t i) const { return m_names[i]; }
 
-      ndt::type get_type(intptr_t i) const { return m_types[i]; }
-
-      const std::tuple<T...> &get_vals() const { return m_vals; }
+      const std::tuple<K...> &get_vals() const { return m_vals; }
     };
 
     template <typename T>
