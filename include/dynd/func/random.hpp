@@ -67,25 +67,22 @@ namespace decl {
         return ckb_offset;
       }
 
-      static intptr_t instantiate(const arrfunc_type_data *DYND_UNUSED(self),
-                                  const arrfunc_type *DYND_UNUSED(self_tp),
-                                  void *DYND_UNUSED(ckb), intptr_t ckb_offset,
-                                  const ndt::type &DYND_UNUSED(dst_tp),
-                                  const char *DYND_UNUSED(dst_arrmeta),
-                                  const ndt::type *DYND_UNUSED(src_tp),
-                                  const char *const *DYND_UNUSED(src_arrmeta),
-                                  kernel_request_t DYND_UNUSED(kernreq),
-                                  const eval::eval_context *DYND_UNUSED(ectx),
-                                  const dynd::nd::array &kwds)
+      static intptr_t
+      instantiate(const arrfunc_type_data *self, const arrfunc_type *self_tp,
+                  void *ckb, intptr_t ckb_offset, const ndt::type &dst_tp,
+                  const char *dst_arrmeta, const ndt::type *src_tp,
+                  const char *const *src_arrmeta, kernel_request_t kernreq,
+                  const eval::eval_context *ectx, const dynd::nd::array &kwds)
       {
-        ndt::type dtp = kwds.p("type").as<ndt::type>();
-
-        arrfunc_type_data self(&instantiate<int32_t>, &resolve_option_values<int32_t>, NULL);
-        return nd::elwise::instantiate
-
-        std::cout << tp << std::endl;
-
-        return ckb_offset;
+        ndt::type tp = kwds.p("tp").f("dereference").as<ndt::type>();
+        switch (tp.get_type_id()) {
+        case int32_type_id:
+          return instantiate<int32_t>(self, self_tp, ckb, ckb_offset, dst_tp,
+                                      dst_arrmeta, src_tp, src_arrmeta, kernreq,
+                                      ectx, kwds);
+        default:
+          throw std::runtime_error("error");
+        }
       }
 
       template <typename R>
@@ -124,7 +121,7 @@ namespace decl {
       {
         return dynd::nd::arrfunc(
             &instantiate, &resolve_option_values<int32_t>, NULL,
-            ndt::type("(type: type, a: ?int32, b: ?int32, engine: ?void) -> int32"));
+            ndt::type("(tp: type | R, a: ?R, b: ?R, engine: ?void) -> R"));
       }
     };
 

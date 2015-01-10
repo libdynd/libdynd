@@ -13,6 +13,7 @@
 #include <dynd/types/struct_type.hpp>
 #include <dynd/types/type_pattern_match.hpp>
 #include <dynd/types/substitute_typevars.hpp>
+#include <dynd/types/type_type.hpp>
 
 #define DYND_HAS_MEM_FUNC(NAME)                                                \
   template <typename T, typename S>                                            \
@@ -353,6 +354,19 @@ namespace nd {
       }
     };
 
+    template <typename T>
+    ndt::type do_type_stuff(const T &) {
+      return ndt::type();
+    }
+
+    inline ndt::type do_type_stuff(const nd::array &a) {
+      return a.as<ndt::type>();
+    }
+
+    inline ndt::type do_type_stuff(const ndt::type &tp) {
+      return tp;
+    }
+
     template <typename... K>
     class kwds {
       const char *m_names[sizeof...(K)];
@@ -391,23 +405,33 @@ namespace nd {
             throw std::invalid_argument(ss.str());
           }
 
-          ndt::type expected_tp = af_tp->get_kwd_type(j);
-          switch (expected_tp.get_type_id()) {
-          case option_type_id:
-            expected_tp = expected_tp.p("value_type").as<ndt::type>();
-            break;
-          default:
-            break;
-          }
-
           ndt::type &actual_tp = kwd_tp_data[j];
           if (!actual_tp.is_null()) {
             std::stringstream ss;
             ss << "arrfunc passed keyword \"" << name << "\" more than once";
             throw std::invalid_argument(ss.str());
           }
-          actual_tp = ndt::as_type(value);
           available.push_back(j);
+
+          ndt::type expected_tp = af_tp->get_kwd_type(j);
+          if (expected_tp.get_type_id() == type_type_id) {
+            ndt::type pattern_tp = expected_tp.extended<type_type>()->get_pattern_type();
+            if (pattern_tp.is_null()) {
+              actual_tp = ndt::as_type(value);
+            } else {
+              actual_tp = do_type_stuff(value);
+              expected_tp = pattern_tp;
+            }
+          } else {
+            switch (expected_tp.get_type_id()) {
+            case option_type_id:
+              expected_tp = expected_tp.p("value_type").as<ndt::type>();
+              break;
+            default:
+              break;
+            }
+            actual_tp = ndt::as_type(value);
+          }
 
           if (!ndt::pattern_match(actual_tp.value_type(), expected_tp,
                                   typevars)) {

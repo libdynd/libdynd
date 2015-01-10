@@ -18,15 +18,16 @@ using namespace dynd;
 
 TEST(Random, Uniform)
 {
-  std::cout << ((nd::arrfunc) nd::uniform).get_array_type() << std::endl;
+  ndt::type self_tp = ((nd::arrfunc) nd::uniform).get_array_type();
+  std::cout << self_tp << std::endl;
 
 
   ndt::type tp = ndt::make_type<int>();
-  std::cout << nd::uniform(kwds("type", nd::array(tp))) << std::endl;
-  std::cout << nd::uniform(kwds("type", nd::array(tp))) << std::endl;
-  std::cout << nd::uniform(kwds("type", nd::array(tp))) << std::endl;
-  std::cout << nd::uniform(kwds("type", nd::array(tp))) << std::endl;
-  std::cout << nd::uniform(kwds("type", nd::array(tp))) << std::endl;
+  std::cout << nd::uniform(kwds("tp", nd::array(tp))) << std::endl;
+  std::cout << nd::uniform(kwds("tp", nd::array(tp))) << std::endl;
+  std::cout << nd::uniform(kwds("tp", nd::array(tp))) << std::endl;
+  std::cout << nd::uniform(kwds("tp", nd::array(tp))) << std::endl;
+  std::cout << nd::uniform(kwds("tp", nd::array(tp))) << std::endl;
 
   std::exit(-1);
 }
