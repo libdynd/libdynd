@@ -78,9 +78,9 @@ namespace ndt {
     return *reinterpret_cast<const ndt::type *>(&types::type_tp);
   }
 
-  inline ndt::type make_type(const ndt::type &pattern)
+  inline ndt::type make_type(const ndt::type &pattern_tp)
   {
-    return ndt::type(new type_type(pattern), true);
+    return ndt::type(new type_type(pattern_tp), false);
   }
 } // namespace ndt
 
