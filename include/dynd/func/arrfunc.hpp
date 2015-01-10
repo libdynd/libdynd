@@ -348,7 +348,22 @@ namespace nd {
     template <typename... K>
     class kwds {
       const char *m_names[sizeof...(K)];
-      std::tuple<K...> m_vals;
+      std::tuple<K...> m_values;
+
+      template <size_t I>
+      void set_name(const char *name)
+      {
+        m_names[I] = name;
+      }
+
+      static const struct {
+        template <size_t I>
+        void operator()(kwds<K...> *self,
+                        typename as<K, const char *>::type... names)
+        {
+          self->set_name<I>(get<I>(names...));
+        }
+      } set_names;
 
       static const struct {
         template <size_t I>
@@ -357,8 +372,8 @@ namespace nd {
                         const arrfunc_type *af_tp, ndt::type *kwd_tp_data,
                         std::map<nd::string, ndt::type> &typevars) const
         {
-          const std::string &name = self->template get_name<I>();
-          const auto &value = self->template get_value<I>();
+          const std::string &name = self->get_name<I>();
+          const auto &value = self->get_value<I>();
 
           intptr_t j = af_tp->get_kwd_index(name);
           if (j == -1) {
@@ -397,32 +412,13 @@ namespace nd {
         }
       } resolve_available_type;
 
-#if !(defined(_MSC_VER) && _MSC_VER == 1800)
     public:
-      kwds(const typename as_<K, const char *>::type &... names, K &&... vals)
-          : m_names{names...}, m_vals(std::forward<K>(vals)...)
+      kwds(typename as<K, const char *>::type... names, K &&... values)
+          : m_values(std::forward<K>(values)...)
       {
+        typedef make_index_sequence<sizeof...(K)> I;
+        dynd::index_proxy<I>::for_each(set_names, this, names...);
       }
-#else
-      template <size_t I>
-      void assign_names()
-      {
-      }
-
-      template <size_t I, typename K0, typename... K>
-      void assign_names(K0 &&k0, K &&... k)
-      {
-        m_names[I] = k0;
-        assign_names<I + 1>(std::forward<K>(k)...);
-      }
-
-    public:
-      kwds(const typename as_<K, const char *>::type &... names, K &&... vals)
-          : m_vals(std::forward<K>(vals)...)
-      {
-        assign_names<0>(names...);
-      }
-#endif
 
       static intptr_t get_size() { return sizeof...(K); }
 
@@ -436,10 +432,10 @@ namespace nd {
       const typename std::tuple_element<I, std::tuple<K...>>::type &
       get_value() const
       {
-        return std::get<I>(m_vals);
+        return std::get<I>(m_values);
       }
 
-      const std::tuple<K...> &get_vals() const { return m_vals; }
+      const std::tuple<K...> &get_vals() const { return m_values; }
 
       std::vector<intptr_t>
       resolve_available_types(const arrfunc_type *self_tp,

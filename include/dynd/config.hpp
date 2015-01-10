@@ -198,7 +198,7 @@ struct remove_all_pointers<T *> {
 };
 
 template <typename T, typename U>
-struct as_ {
+struct as {
   typedef U type;
 };
 
