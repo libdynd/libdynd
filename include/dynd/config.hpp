@@ -267,30 +267,38 @@ struct index_proxy<index_sequence<I0, I...>> {
   template <typename R, typename A0>
   static R make(A0 &&a0)
   {
-    return R(get<I>(std::forward<A0>(a0))...);
+    return R(get<I0>(std::forward<A0>(a0))...);
   }
   template <typename R, typename A0, typename A1>
   static R make(A0 &&a0, A1 &&a1)
   {
-    return R(get<I>(std::forward<A0>(a0), std::forward<A1>(a1))...);
+    return R(get<I0>(std::forward<A0>(a0), std::forward<A1>(a1)),
+             get<I>(std::forward<A0>(a0), std::forward<A1>(a1))...);
   }
   template <typename R, typename A0, typename A1, typename A2>
   static R make(A0 &&a0, A1 &&a1, A2 &&a2)
   {
-    return R(get<I>(std::forward<A0>(a0), std::forward<A1>(a1),
+    return R(get<I0>(std::forward<A0>(a0), std::forward<A1>(a1),
+                     std::forward<A2>(a2)),
+             get<I>(std::forward<A0>(a0), std::forward<A1>(a1),
                     std::forward<A2>(a2))...);
   }
   template <typename R, typename A0, typename A1, typename A2, typename A3>
   static R make(A0 &&a0, A1 &&a1, A2 &&a2, A3 &&a3)
   {
-    return R(get<I>(std::forward<A0>(a0), std::forward<A1>(a1),
+    return R(get<I0>(std::forward<A0>(a0), std::forward<A1>(a1),
+                     std::forward<A2>(a2), std::forward<A3>(a3)),
+             get<I>(std::forward<A0>(a0), std::forward<A1>(a1),
                     std::forward<A2>(a2), std::forward<A3>(a3))...);
   }
   template <typename R, typename A0, typename A1, typename A2, typename A3,
             typename A4>
   static R make(A0 &&a0, A1 &&a1, A2 &&a2, A3 &&a3, A4 &&a4)
   {
-    return R(get<I>(std::forward<A0>(a0), std::forward<A1>(a1),
+    return R(get<I0>(std::forward<A0>(a0), std::forward<A1>(a1),
+                     std::forward<A2>(a2), std::forward<A3>(a3),
+                     std::forward<A4>(a4)),
+             get<I>(std::forward<A0>(a0), std::forward<A1>(a1),
                     std::forward<A2>(a2), std::forward<A3>(a3),
                     std::forward<A4>(a4))...);
   }
@@ -298,7 +306,10 @@ struct index_proxy<index_sequence<I0, I...>> {
             typename A4, typename A5>
   static R make(A0 &&a0, A1 &&a1, A2 &&a2, A3 &&a3, A4 &&a4, A5 &&a5)
   {
-    return R(get<I>(std::forward<A0>(a0), std::forward<A1>(a1),
+    return R(get<I0>(std::forward<A0>(a0), std::forward<A1>(a1),
+                     std::forward<A2>(a2), std::forward<A3>(a3),
+                     std::forward<A4>(a4), std::forward<A5>(a5)),
+             get<I>(std::forward<A0>(a0), std::forward<A1>(a1),
                     std::forward<A2>(a2), std::forward<A3>(a3),
                     std::forward<A4>(a4), std::forward<A5>(a5))...);
   }
@@ -306,7 +317,10 @@ struct index_proxy<index_sequence<I0, I...>> {
             typename A4, typename A5, typename A6>
   static R make(A0 &&a0, A1 &&a1, A2 &&a2, A3 &&a3, A4 &&a4, A5 &&a5, A6 &&a6)
   {
-    return R(get<I>(std::forward<A0>(a0), std::forward<A1>(a1),
+    return R(get<I0>(std::forward<A0>(a0), std::forward<A1>(a1),
+                     std::forward<A2>(a2), std::forward<A3>(a3),
+                     std::forward<A4>(a4), std::forward<A5>(a5)),
+             get<I>(std::forward<A0>(a0), std::forward<A1>(a1),
                     std::forward<A2>(a2), std::forward<A3>(a3),
                     std::forward<A4>(a4), std::forward<A5>(a5),
                     std::forward<A6>(a6))...);

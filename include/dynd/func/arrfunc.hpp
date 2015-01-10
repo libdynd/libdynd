@@ -384,11 +384,11 @@ namespace nd {
 
       static intptr_t get_size() { return sizeof...(K); }
 
-      static const struct {
-        template <size_t I, typename T>
-        void operator()(const std::string &name, const T &value,
-                        ndt::type &actual_tp, ndt::type expected_tp,
-                        std::map<nd::string, ndt::type> &typevars) const
+      static const class {
+        template <typename T>
+        void try_match(const std::string &name, const T &value,
+                       ndt::type &actual_tp, ndt::type expected_tp,
+                       std::map<nd::string, ndt::type> &typevars) const
         {
           actual_tp = ndt::as_type(value);
 
@@ -410,6 +410,7 @@ namespace nd {
           }
         }
 
+      public:
         template <size_t I>
         void operator()(const kwds<K...> &self,
                         std::vector<intptr_t> &available,
@@ -417,6 +418,7 @@ namespace nd {
                         std::map<nd::string, ndt::type> &typevars) const
         {
           const std::string &name = self.get_name(I);
+          const auto &value = std::get<I>(self.get_vals());
 
           intptr_t j = af_tp->get_kwd_index(name);
           if (j == -1) {
@@ -433,9 +435,7 @@ namespace nd {
             throw std::invalid_argument(ss.str());
           }
 
-          operator()<I>(name, std::get<I>(self.get_vals()),
-                        actual_tp, af_tp->get_kwd_type(j), typevars);
-
+          try_match(name, value, actual_tp, af_tp->get_kwd_type(j), typevars);
           available.push_back(j);
         }
       } resolve_available_type;
