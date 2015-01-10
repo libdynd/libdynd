@@ -1386,6 +1386,14 @@ static ndt::type parse_stmt(const char *&rbegin, const char *end,
         return ndt::type();
       }
     }
+    if (parse_token_ds(begin, end, '|')) {
+      ndt::type pattern = parse_datashape(begin, end, symtable);
+      if (pattern.is_null()) {
+        throw datashape_parse_error(begin, "expected a data type");
+      }
+      rbegin = begin;
+      return ndt::make_type(pattern);
+    }
     if (!parse::parse_name_no_ws(begin, end, tname_begin, tname_end)) {
       parse::skip_whitespace_and_pound_comments(begin, end);
       if (begin == end) {

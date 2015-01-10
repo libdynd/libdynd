@@ -22,31 +22,50 @@ type_type::type_type()
 {
 }
 
-type_type::~type_type()
+type_type::type_type(const ndt::type &pattern_tp)
+    : base_type(type_type_id, type_kind, sizeof(const base_type *),
+                sizeof(const base_type *),
+                type_flag_scalar | type_flag_zeroinit | type_flag_destructor, 0,
+                0, 0),
+      m_pattern_tp(pattern_tp)
 {
+  if (!m_pattern_tp.is_symbolic()) {
+    throw type_error("type_type must have a symbolic type for a pattern");
+  }
 }
 
-void type_type::print_data(std::ostream& o,
-                const char *DYND_UNUSED(arrmeta), const char *data) const
+type_type::~type_type() {}
+
+void type_type::print_data(std::ostream &o, const char *DYND_UNUSED(arrmeta),
+                           const char *data) const
 {
-    const type_type_data *ddd = reinterpret_cast<const type_type_data *>(data);
-    // This tests avoids the atomic increment/decrement of
-    // always constructing a type object
-    if (is_builtin_type(ddd->tp)) {
-        o << ndt::type(ddd->tp, true);
-    } else {
-        ddd->tp->print_type(o);
-    }
+  const type_type_data *ddd = reinterpret_cast<const type_type_data *>(data);
+  // This tests avoids the atomic increment/decrement of
+  // always constructing a type object
+  if (is_builtin_type(ddd->tp)) {
+    o << ndt::type(ddd->tp, true);
+  } else {
+    ddd->tp->print_type(o);
+  }
 }
 
-void type_type::print_type(std::ostream& o) const
+void type_type::print_type(std::ostream &o) const
 {
-    o << "type";
+  o << "type";
+  if (!m_pattern_tp.is_null()) {
+    o << " | " << m_pattern_tp;
+  }
 }
 
-bool type_type::operator==(const base_type& rhs) const
+bool type_type::operator==(const base_type &rhs) const
 {
-    return this == &rhs || rhs.get_type_id() == type_type_id;
+  if (this == &rhs) {
+    return true;
+  } else if (rhs.get_type_id() != type_type_id) {
+    return false;
+  } else {
+    return m_pattern_tp == static_cast<const type_type *>(&rhs)->m_pattern_tp;
+  }
 }
 
 void
@@ -55,110 +74,103 @@ type_type::arrmeta_default_construct(char *DYND_UNUSED(arrmeta),
 {
 }
 
-void type_type::arrmeta_copy_construct(char *DYND_UNUSED(dst_arrmeta),
-                const char *DYND_UNUSED(src_arrmeta), memory_block_data *DYND_UNUSED(embedded_reference)) const
+void type_type::arrmeta_copy_construct(
+    char *DYND_UNUSED(dst_arrmeta), const char *DYND_UNUSED(src_arrmeta),
+    memory_block_data *DYND_UNUSED(embedded_reference)) const
 {
 }
 
-void type_type::arrmeta_reset_buffers(char *DYND_UNUSED(arrmeta)) const
+void type_type::arrmeta_reset_buffers(char *DYND_UNUSED(arrmeta)) const {}
+
+void type_type::arrmeta_finalize_buffers(char *DYND_UNUSED(arrmeta)) const {}
+
+void type_type::arrmeta_destruct(char *DYND_UNUSED(arrmeta)) const {}
+
+void type_type::data_destruct(const char *DYND_UNUSED(arrmeta),
+                              char *data) const
 {
+  const base_type *bd = reinterpret_cast<type_type_data *>(data)->tp;
+  if (!is_builtin_type(bd)) {
+    base_type_decref(bd);
+  }
 }
 
-void type_type::arrmeta_finalize_buffers(char *DYND_UNUSED(arrmeta)) const
+void type_type::data_destruct_strided(const char *DYND_UNUSED(arrmeta),
+                                      char *data, intptr_t stride,
+                                      size_t count) const
 {
-}
-
-void type_type::arrmeta_destruct(char *DYND_UNUSED(arrmeta)) const
-{
-}
-
-void type_type::data_destruct(const char *DYND_UNUSED(arrmeta), char *data) const
-{
+  for (size_t i = 0; i != count; ++i, data += stride) {
     const base_type *bd = reinterpret_cast<type_type_data *>(data)->tp;
     if (!is_builtin_type(bd)) {
-        base_type_decref(bd);
+      base_type_decref(bd);
     }
-}
-
-void type_type::data_destruct_strided(const char *DYND_UNUSED(arrmeta), char *data,
-                intptr_t stride, size_t count) const
-{
-    for (size_t i = 0; i != count; ++i, data += stride) {
-        const base_type *bd = reinterpret_cast<type_type_data *>(data)->tp;
-        if (!is_builtin_type(bd)) {
-            base_type_decref(bd);
-        }
-    }
+  }
 }
 
 static void
 typed_data_assignment_kernel_single(char *dst, char *const *src,
                                     ckernel_prefix *DYND_UNUSED(self))
 {
-    // Free the destination reference
-    base_type_xdecref(reinterpret_cast<const type_type_data *>(dst)->tp);
-    // Copy the pointer and count the reference
-    const base_type *bd =
-        (*reinterpret_cast<type_type_data *const *>(src))->tp;
-    reinterpret_cast<type_type_data *>(dst)->tp = bd;
-    base_type_xincref(bd);
+  // Free the destination reference
+  base_type_xdecref(reinterpret_cast<const type_type_data *>(dst)->tp);
+  // Copy the pointer and count the reference
+  const base_type *bd = (*reinterpret_cast<type_type_data *const *>(src))->tp;
+  reinterpret_cast<type_type_data *>(dst)->tp = bd;
+  base_type_xincref(bd);
 }
 
 namespace {
-    struct string_to_type_kernel_extra {
-        typedef string_to_type_kernel_extra extra_type;
+struct string_to_type_kernel_extra {
+  typedef string_to_type_kernel_extra extra_type;
 
-        ckernel_prefix base;
-        const base_string_type *src_string_dt;
-        const char *src_arrmeta;
-        assign_error_mode errmode;
+  ckernel_prefix base;
+  const base_string_type *src_string_dt;
+  const char *src_arrmeta;
+  assign_error_mode errmode;
 
-        static void single(char *dst, char *const *src,
-                           ckernel_prefix *extra)
-        {
-            extra_type *e = reinterpret_cast<extra_type *>(extra);
-            const string &s = e->src_string_dt->get_utf8_string(
-                e->src_arrmeta, src[0], e->errmode);
-            ndt::type(s).swap(reinterpret_cast<type_type_data *>(dst)->tp);
-        }
+  static void single(char *dst, char *const *src, ckernel_prefix *extra)
+  {
+    extra_type *e = reinterpret_cast<extra_type *>(extra);
+    const string &s =
+        e->src_string_dt->get_utf8_string(e->src_arrmeta, src[0], e->errmode);
+    ndt::type(s).swap(reinterpret_cast<type_type_data *>(dst)->tp);
+  }
 
-        static void destruct(ckernel_prefix *extra)
-        {
-            extra_type *e = reinterpret_cast<extra_type *>(extra);
-            base_type_xdecref(e->src_string_dt);
-        }
-    };
+  static void destruct(ckernel_prefix *extra)
+  {
+    extra_type *e = reinterpret_cast<extra_type *>(extra);
+    base_type_xdecref(e->src_string_dt);
+  }
+};
 
-    struct type_to_string_kernel_extra {
-        typedef type_to_string_kernel_extra extra_type;
+struct type_to_string_kernel_extra {
+  typedef type_to_string_kernel_extra extra_type;
 
-        ckernel_prefix base;
-        const base_string_type *dst_string_dt;
-        const char *dst_arrmeta;
-        eval::eval_context ectx;
+  ckernel_prefix base;
+  const base_string_type *dst_string_dt;
+  const char *dst_arrmeta;
+  eval::eval_context ectx;
 
-        static void single(char *dst, char *const *src,
-                           ckernel_prefix *extra)
-        {
-            extra_type *e = reinterpret_cast<extra_type *>(extra);
-            const base_type *bd =
-                (*reinterpret_cast<type_type_data *const *>(src))->tp;
-            stringstream ss;
-            if (is_builtin_type(bd)) {
-                ss << ndt::type(bd, true);
-            } else {
-                bd->print_type(ss);
-            }
-            e->dst_string_dt->set_from_utf8_string(e->dst_arrmeta, dst,
-                                                   ss.str(), &e->ectx);
-        }
+  static void single(char *dst, char *const *src, ckernel_prefix *extra)
+  {
+    extra_type *e = reinterpret_cast<extra_type *>(extra);
+    const base_type *bd = (*reinterpret_cast<type_type_data *const *>(src))->tp;
+    stringstream ss;
+    if (is_builtin_type(bd)) {
+      ss << ndt::type(bd, true);
+    } else {
+      bd->print_type(ss);
+    }
+    e->dst_string_dt->set_from_utf8_string(e->dst_arrmeta, dst, ss.str(),
+                                           &e->ectx);
+  }
 
-        static void destruct(ckernel_prefix *extra)
-        {
-            extra_type *e = reinterpret_cast<extra_type *>(extra);
-            base_type_xdecref(e->dst_string_dt);
-        }
-    };
+  static void destruct(ckernel_prefix *extra)
+  {
+    extra_type *e = reinterpret_cast<extra_type *>(extra);
+    base_type_xdecref(e->dst_string_dt);
+  }
+};
 } // anonymous namespace
 
 intptr_t type_type::make_assignment_kernel(
@@ -192,8 +204,8 @@ intptr_t type_type::make_assignment_kernel(
       return ckb_offset;
     } else if (!src_tp.is_builtin()) {
       return src_tp.extended()->make_assignment_kernel(
-          self, af_tp, ckb, ckb_offset, dst_tp, dst_arrmeta, src_tp, src_arrmeta, kernreq,
-          ectx, kwds);
+          self, af_tp, ckb, ckb_offset, dst_tp, dst_arrmeta, src_tp,
+          src_arrmeta, kernreq, ectx, kwds);
     }
   } else {
     if (dst_tp.get_kind() == string_kind) {
@@ -220,17 +232,17 @@ intptr_t type_type::make_assignment_kernel(
 static int equal_comparison(const char *const *src,
                             ckernel_prefix *DYND_UNUSED(self))
 {
-    const ndt::type *da = reinterpret_cast<const ndt::type *const *>(src)[0];
-    const ndt::type *db = reinterpret_cast<const ndt::type *const *>(src)[1];
-    return *da == *db;
+  const ndt::type *da = reinterpret_cast<const ndt::type *const *>(src)[0];
+  const ndt::type *db = reinterpret_cast<const ndt::type *const *>(src)[1];
+  return *da == *db;
 }
 
 static int not_equal_comparison(const char *const *src,
                                 ckernel_prefix *DYND_UNUSED(self))
 {
-    const ndt::type *da = reinterpret_cast<const ndt::type *const *>(src)[0];
-    const ndt::type *db = reinterpret_cast<const ndt::type *const *>(src)[1];
-    return *da != *db;
+  const ndt::type *da = reinterpret_cast<const ndt::type *const *>(src)[0];
+  const ndt::type *db = reinterpret_cast<const ndt::type *const *>(src)[1];
+  return *da != *db;
 }
 
 size_t type_type::make_comparison_kernel(
