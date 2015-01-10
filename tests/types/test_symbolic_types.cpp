@@ -16,7 +16,7 @@
 #include <dynd/types/typevar_dim_type.hpp>
 #include <dynd/types/ellipsis_dim_type.hpp>
 #include <dynd/types/any_sym_type.hpp>
-#include <dynd/types/sym_type_type.hpp>
+#include <dynd/types/type_type.hpp>
 
 using namespace std;
 using namespace dynd;
@@ -194,20 +194,6 @@ TEST(SymbolicTypes, CreateEllipsisDim)
                type_error);
 }
 
-TEST(SymbolicTypes, SymTypeType)
-{
-  ndt::type tp;
-
-  tp = ndt::type("Type[N * int32]");
-  EXPECT_TRUE(tp.is_symbolic());
-  EXPECT_EQ(ndt::type("N * int32"),
-            tp.extended<sym_type_type>()->get_sym_type());
-  EXPECT_EQ(tp, ndt::type(tp.str()));
-
-  // The sym_type_type must be symbolic
-  EXPECT_THROW(ndt::type("Type[4 * int32]"), type_error);
-}
-
 TEST(SymbolicTypes, AnySym)
 {
   ndt::type tp;
@@ -256,6 +242,19 @@ TEST(SymbolicTypes, AnySym)
   EXPECT_TRUE(tp.is_symbolic());
   EXPECT_FALSE(tp.is_dim_variadic());
   EXPECT_EQ(tp, ndt::type(tp.str()));
+}
+
+TEST(SymbolicTypes, TypeTypeWithPattern)
+{
+  ndt::type tp;
+
+  tp = ndt::make_type(ndt::type("N * int32"));
+  EXPECT_FALSE(tp.is_symbolic());
+  EXPECT_EQ(ndt::type("N * int32"), tp.extended<type_type>()->get_pattern_type());
+  EXPECT_EQ(tp, ndt::type(tp.str()));
+
+  // The pattern type must be symbolic
+  EXPECT_THROW(ndt::type("type | 4 * int32"), type_error);
 }
 
 TEST(SymbolicTypes, VariadicTuple)

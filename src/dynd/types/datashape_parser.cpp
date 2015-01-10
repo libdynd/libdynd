@@ -42,7 +42,6 @@
 #include <dynd/types/adapt_type.hpp>
 #include <dynd/func/callable.hpp>
 #include <dynd/types/any_sym_type.hpp>
-#include <dynd/types/sym_type_type.hpp>
 
 using namespace std;
 using namespace dynd;
@@ -411,26 +410,6 @@ static ndt::type parse_adapt_parameters(const char *&rbegin, const char *end,
   return ndt::make_adapt(proto_tp.extended<arrfunc_type>()->get_pos_type(0),
                          proto_tp.extended<arrfunc_type>()->get_return_type(),
                          adapt_op);
-}
-
-static ndt::type parse_sym_type_type_parameters(const char *&rbegin, const char *end,
-                                         map<string, ndt::type> &symtable)
-{
-  const char *begin = rbegin;
-  if (!parse_token_ds(begin, end, '[')) {
-    throw datashape_parse_error(begin, "expected opening '[' after 'Type'");
-  }
-  ndt::type tp = parse_datashape(begin, end, symtable);
-  if (tp.is_null()) {
-    throw datashape_parse_error(begin, "expected a data type");
-  }
-  if (!parse_token_ds(begin, end, ']')) {
-    throw datashape_parse_error(begin, "expected closing ']'");
-  }
-  // TODO catch errors, convert them to datashape_parse_error so the position is
-  // shown
-  rbegin = begin;
-  return ndt::make_sym_type_type(tp);
 }
 
 static string_encoding_t string_to_encoding(const char *error_begin,
@@ -1311,9 +1290,6 @@ static ndt::type parse_datashape_nooption(const char *&rbegin, const char *end,
     else if (parse::compare_range_to_literal(nbegin, nend, "Any")) {
       result = ndt::make_any_sym();
     }
-    else if (parse::compare_range_to_literal(nbegin, nend, "Type")) {
-      result = parse_sym_type_type_parameters(begin, end, symtable);
-    }
     else if (isupper(*nbegin)) {
       result = ndt::make_typevar(nd::string(nbegin, nend));
     }
@@ -1409,6 +1385,14 @@ static ndt::type parse_stmt(const char *&rbegin, const char *end,
       else {
         return ndt::type();
       }
+    }
+    if (parse_token_ds(begin, end, '|')) {
+      ndt::type pattern = parse_datashape(begin, end, symtable);
+      if (pattern.is_null()) {
+        throw datashape_parse_error(begin, "expected a data type");
+      }
+      rbegin = begin;
+      return ndt::make_type(pattern);
     }
     if (!parse::parse_name_no_ws(begin, end, tname_begin, tname_end)) {
       parse::skip_whitespace_and_pound_comments(begin, end);

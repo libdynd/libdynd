@@ -9,6 +9,9 @@
 
 namespace dynd {
 
+template <typename T>
+struct front;
+
 /**
  * Metafunction that returns the last type of a type_sequence<T...>.
  *
@@ -112,6 +115,36 @@ using make_integer_sequence =
 
 template <size_t... I>
 using make_index_sequence = make_integer_sequence<size_t, I...>;
+
+template <typename T, T I0>
+struct front<integer_sequence<T, I0>> {
+  enum { value = I0 };
+};
+
+template <typename T, T I0, T... I>
+struct front<integer_sequence<T, I0, I...>> {
+  enum { value = front<integer_sequence<T, I...>>::value };
+};
+
+template <typename T, T I0, T... I>
+struct from<integer_sequence<T, I0, I...>, 0> {
+  typedef integer_sequence<T, I0, I...> type;
+};
+
+template <typename T>
+struct from<integer_sequence<T>, 0> {
+  typedef integer_sequence<T> type;
+};
+
+template <typename T, T I0, T... I>
+struct from<integer_sequence<T, I0, I...>, 1> {
+  typedef integer_sequence<T, I...> type;
+};
+
+template <typename T, T I0, T... I, size_t J>
+struct from<integer_sequence<T, I0, I...>, J> {
+  typedef typename from<integer_sequence<T, I...>, J - 1>::type type;
+};
 
 template <typename... T>
 struct type_sequence {
