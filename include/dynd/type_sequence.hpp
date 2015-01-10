@@ -126,6 +126,26 @@ struct front<integer_sequence<T, I0, I...>> {
   enum { value = front<integer_sequence<T, I...>>::value };
 };
 
+template <typename T, T I0, T... I>
+struct from<integer_sequence<T, I0, I...>, 0> {
+  typedef integer_sequence<T, I0, I...> type;
+};
+
+template <typename T>
+struct from<integer_sequence<T>, 0> {
+  typedef integer_sequence<T> type;
+};
+
+template <typename T, T I0, T... I>
+struct from<integer_sequence<T, I0, I...>, 1> {
+  typedef integer_sequence<T, I...> type;
+};
+
+template <typename T, T I0, T... I, size_t J>
+struct from<integer_sequence<T, I0, I...>, J> {
+  typedef typename from<integer_sequence<T, I...>, J - 1>::type type;
+};
+
 template <typename... T>
 struct type_sequence {
   enum { size = sizeof...(T) };

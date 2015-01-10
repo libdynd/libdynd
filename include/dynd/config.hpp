@@ -213,21 +213,48 @@ struct instantiate<C, type_sequence<T...>> {
 template <typename I>
 struct index_proxy;
 
-template <size_t... I>
-struct index_proxy<index_sequence<I...>> {
-  enum { size = index_sequence<I...>::size };
+template <>
+struct index_proxy<index_sequence<>> {
+  enum { size = 0 };
+
+  template <typename F, typename... A>
+  static void for_each(F, A &&...)
+  {
+  }
 
   template <typename R, typename... A>
-  static R apply(R (*func)(A...), A &&... a)
+  static R make(A &&...)
   {
-    return (*func)(get<I>(std::forward<A>(a)...)...);
+    return R();
   }
+};
+
+template <size_t I0>
+struct index_proxy<index_sequence<I0>> {
+  enum { size = 1 };
+
+  template <typename F, typename... A>
+  static void for_each(F f, A &&... a)
+  {
+    f.template operator()<I0>(std::forward<A>(a)...);
+  }
+
+  template <typename R, typename... A>
+  static R make(A &&... a)
+  {
+    return R(get<I0>(std::forward<A>(a)...));
+  }
+};
+
+template <size_t I0, size_t... I>
+struct index_proxy<index_sequence<I0, I...>> {
+  enum { size = index_sequence<I0, I...>::size };
 
 #if !(defined(_MSC_VER) && _MSC_VER == 1800)
   template <typename R, typename... A>
   static R make(A &&... a)
   {
-    return R(get<I>(std::forward<A>(a)...)...);
+    return R(get<I0>(std::forward<A>(a)...), get<I>(std::forward<A>(a)...)...);
   }
 #else
   // Workaround for MSVC 2013 compiler bug reported here:
@@ -289,22 +316,9 @@ struct index_proxy<index_sequence<I...>> {
   template <typename F, typename... A>
   static void for_each(F f, A &&... a)
   {
-    for_each<0>(f, std::forward<A>(a)...);
-  }
-
- private:
-  template <size_t J, typename F, typename... A>
-  static typename std::enable_if<J == sizeof...(I), void>::type
-  for_each(F, A &&...)
-  {
-  }
-
-  template <size_t J, typename F, typename... A>
-  static typename std::enable_if<J < sizeof...(I), void>::type
-  for_each(F f, A &&... a)
-  {
-    f.template operator()<J>(std::forward<A>(a)...);
-    for_each<J + 1>(f, std::forward<A>(a)...);
+    f.template operator()<I0>(std::forward<A>(a)...);
+    index_proxy<index_sequence<I...>>::template for_each(f,
+                                                         std::forward<A>(a)...);
   }
 };
 
