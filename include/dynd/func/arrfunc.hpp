@@ -406,10 +406,70 @@ namespace nd {
         }
       */
 
+      struct {
+        template <size_t I>
+        void operator()(const std::string &name, const ndt::type &actual_tp,
+                        ndt::type expected_tp,
+                        std::map<nd::string, ndt::type> &typevars) const
+        {
+          switch (expected_tp.get_type_id()) {
+          case option_type_id:
+            expected_tp = expected_tp.p("value_type").as<ndt::type>();
+            break;
+          default:
+            break;
+          }
+
+          if (!ndt::pattern_match(actual_tp.value_type(), expected_tp,
+                                  typevars)) {
+            std::stringstream ss;
+            ss << "keyword \"" << name << "\" does not match, ";
+            ss << "arrfunc expected " << expected_tp << " but passed "
+               << actual_tp;
+            throw std::invalid_argument(ss.str());
+          }
+        }
+
+        template <size_t I>
+        void operator()(const kwds<T...> &self,
+                        std::vector<intptr_t> &available,
+                        const arrfunc_type *af_tp, ndt::type *kwd_tp_data,
+                        std::map<nd::string, ndt::type> &typevars) const
+        {
+          intptr_t j = af_tp->get_kwd_index(self.get_name(I));
+          if (j == -1) {
+            std::stringstream ss;
+            ss << "passed an unexpected keyword \"" << self.get_name(I)
+               << "\" to arrfunc with type " << ndt::type(af_tp, true);
+            throw std::invalid_argument(ss.str());
+          }
+
+          ndt::type &actual_tp = kwd_tp_data[j];
+          if (!actual_tp.is_null()) {
+            std::stringstream ss;
+            ss << "arrfunc passed keyword \"" << self.get_name(I)
+               << "\" more than once";
+            throw std::invalid_argument(ss.str());
+          }
+          actual_tp = self.get_type(I);
+          available.push_back(j);
+
+          operator()<I>(self.get_name(I), actual_tp, af_tp->get_kwd_type(j),
+                        typevars);
+        }
+      } resolve_available_type;
+
       std::vector<intptr_t>
       resolve_available_types(const arrfunc_type *self_tp,
                               ndt::type *kwd_tp_data,
-                              std::map<nd::string, ndt::type> &typevars) const;
+                              std::map<nd::string, ndt::type> &typevars) const
+      {
+        std::vector<intptr_t> available;
+        dynd::index_proxy<make_index_sequence<sizeof...(T)>>::for_each(
+            resolve_available_type, *this, available, self_tp, kwd_tp_data,
+            typevars);
+        return available;
+      }
 
       nd::array get_names() const
       {
@@ -1160,46 +1220,3 @@ namespace decl {
 } // namespace dynd::decl::nd
 
 } // namespace dynd
-
-#include <dynd/types/option_type.hpp>
-
-template <typename... T>
-std::vector<intptr_t> dynd::nd::detail::kwds<T...>::resolve_available_types(
-    const arrfunc_type *self_tp, ndt::type *kwd_tp_data,
-    std::map<nd::string, ndt::type> &typevars) const
-{
-  std::vector<intptr_t> available;
-
-  for (size_t i = 0; i < sizeof...(T); i++) {
-    intptr_t j = self_tp->get_kwd_index(get_name(i));
-    if (j == -1) {
-      std::stringstream ss;
-      ss << "passed an unexpected keyword \"" << get_name(i)
-         << "\" to arrfunc with type " << ndt::type(self_tp, true);
-      throw std::invalid_argument(ss.str());
-    }
-
-    ndt::type &actual_tp = kwd_tp_data[j];
-    if (!actual_tp.is_null()) {
-      std::stringstream ss;
-      ss << "arrfunc passed keyword \"" << get_name(i) << "\" more than once";
-      throw std::invalid_argument(ss.str());
-    }
-    actual_tp = get_type(i);
-    available.push_back(j);
-
-    ndt::type expected_tp = self_tp->get_kwd_type(j);
-    if (expected_tp.get_type_id() == option_type_id) {
-      expected_tp = expected_tp.extended<dynd::option_type>()->get_value_type();
-    }
-    if (!ndt::pattern_match(actual_tp.value_type(), expected_tp, typevars)) {
-      std::stringstream ss;
-      ss << "keyword \"" << get_name(i) << "\" does not match, ";
-      ss << "arrfunc expected " << expected_tp << " but passed " << actual_tp
-         << ". arrfunc signature " << ndt::type(self_tp, true);
-      throw std::invalid_argument(ss.str());
-    }
-  }
-
-  return available;
-}

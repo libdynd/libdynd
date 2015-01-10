@@ -285,6 +285,27 @@ struct index_proxy<index_sequence<I...>> {
                     std::forward<A6>(a6))...);
   }
 #endif
+
+  template <typename F, typename... A>
+  static void for_each(F f, A &&... a)
+  {
+    for_each<0>(f, std::forward<A>(a)...);
+  }
+
+ private:
+  template <size_t J, typename F, typename... A>
+  static typename std::enable_if<J == sizeof...(I), void>::type
+  for_each(F, A &&...)
+  {
+  }
+
+  template <size_t J, typename F, typename... A>
+  static typename std::enable_if<J < sizeof...(I), void>::type
+  for_each(F f, A &&... a)
+  {
+    f.template operator()<J>(std::forward<A>(a)...);
+    for_each<J + 1>(f, std::forward<A>(a)...);
+  }
 };
 
 } // namespace dynd
