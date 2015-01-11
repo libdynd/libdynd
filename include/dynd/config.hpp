@@ -379,8 +379,8 @@ struct index_proxy<index_sequence<I0, I...>> {
  */
 #define DYND_UNUSED(x)
 
-#ifndef DYND_CONDITIONAL_UNUSED
-#define DYND_CONDITIONAL_UNUSED(NAME) NAME
+#ifndef DYND_IGNORE_UNUSED
+#define DYND_IGNORE_UNUSED(NAME) NAME
 #endif
 
 namespace dynd {
