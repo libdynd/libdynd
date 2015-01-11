@@ -5,30 +5,17 @@
 
 #include <dynd/kernels/expr_kernels.hpp>
 #include <dynd/func/arrfunc.hpp>
-#include <dynd/func/apply_arrfunc.hpp>
 #include <dynd/func/multidispatch_arrfunc.hpp>
 
 namespace dynd {
-
 namespace nd {
-  arrfunc default_random_engine()
-  {
-    return apply::make(new std::default_random_engine(),
-                       &delete_wrapper<std::default_random_engine>);
-  }
+  namespace random {
+    arrfunc default_random_engine();
 
-  arrfunc minstd_rand()
-  {
-    return apply::make(new std::minstd_rand(),
-                       &delete_wrapper<std::minstd_rand>);
-  }
-
-  arrfunc minstd_rand(std::minstd_rand::result_type seed)
-  {
-    return apply::make(new std::minstd_rand(seed),
-                       &delete_wrapper<std::minstd_rand>);
-  }
-}
+    arrfunc minstd_rand();
+    arrfunc minstd_rand(std::minstd_rand::result_type seed);
+  } // namespace dynd::nd::random
+} // namespace dynd::nd
 
 namespace kernels {
   template <kernel_request_t kernreq, typename... T>

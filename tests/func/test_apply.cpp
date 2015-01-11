@@ -13,7 +13,7 @@
 #include "../test_memory_new.hpp"
 
 #include <dynd/array.hpp>
-#include <dynd/func/apply_arrfunc.hpp>
+#include <dynd/func/apply.hpp>
 #include <dynd/func/call_callable.hpp>
 #include <dynd/types/cfixed_dim_type.hpp>
 
@@ -281,31 +281,31 @@ TEST(Apply, Function)
 
   nd::arrfunc af;
 
-  af = nd::apply::make<kernel_request_host, decltype(&func0), &func0>();
+  af = nd::functional::apply<kernel_request_host, decltype(&func0), &func0>();
   EXPECT_ARR_EQ(TestFixture::To(4), af(TestFixture::To(5), TestFixture::To(3)));
 
-  af = nd::apply::make<kernel_request_host, decltype(&func2), &func2>();
+  af = nd::functional::apply<kernel_request_host, decltype(&func2), &func2>();
   EXPECT_ARR_EQ(TestFixture::To(13.6f),
                 af(TestFixture::To({3.9f, -7.0f, 16.7f})));
 
-  af = nd::apply::make<kernel_request_host, decltype(&func3), &func3>();
+  af = nd::functional::apply<kernel_request_host, decltype(&func3), &func3>();
   EXPECT_ARR_EQ(TestFixture::To(12U), af());
 
   /*
-    af = nd::apply::make<kernel_request_host, decltype(&func4), &func4>();
+    af = nd::functional::apply<kernel_request_host, decltype(&func4), &func4>();
     EXPECT_ARR_EQ(TestFixture::To(166.765), af(nd::array({9.14, -2.7, 15.32}),
                                                nd::array({0.0, 0.65, 11.0})));
 
-  af = nd::apply::make<kernel_request_host, decltype(&func5), &func5>();
+  af = nd::functional::apply<kernel_request_host, decltype(&func5), &func5>();
   EXPECT_EQ(1251L, af(nd::array({{1242L, 23L, -5L}, {925L, -836L, -14L}})
                           .view(ndt::make_type<long[2][3]>())).as<long>());
   */
 
-  af = nd::apply::make<kernel_request_host, decltype(&func6), &func6>();
+  af = nd::functional::apply<kernel_request_host, decltype(&func6), &func6>();
   EXPECT_ARR_EQ(TestFixture::To(8),
                 af(TestFixture::To(3), TestFixture::To(5), TestFixture::To(7)));
 
-  af = nd::apply::make<kernel_request_host, decltype(&func7), &func7>();
+  af = nd::functional::apply<kernel_request_host, decltype(&func7), &func7>();
   EXPECT_ARR_EQ(
       TestFixture::To(36.3),
       af(TestFixture::To(38), TestFixture::To(5), TestFixture::To(12.1)));
@@ -317,40 +317,40 @@ TEST(Apply, FunctionWithKeywords)
 
   nd::arrfunc af;
 
-  af = nd::apply::make<decltype(&func0), &func0>("y");
+  af = nd::functional::apply<decltype(&func0), &func0>("y");
   EXPECT_ARR_EQ(TestFixture::To(4),
                 af(TestFixture::To(5), kwds("y", TestFixture::To(3))));
 
-  af = nd::apply::make<decltype(&func0), &func0>("x", "y");
+  af = nd::functional::apply<decltype(&func0), &func0>("x", "y");
   EXPECT_ARR_EQ(TestFixture::To(4),
                 af(kwds("x", TestFixture::To(5), "y", TestFixture::To(3))));
 
 #ifndef _MSC_VER
-  af = nd::apply::make<decltype(&func6), &func6>("z");
+  af = nd::functional::apply<decltype(&func6), &func6>("z");
   EXPECT_ARR_EQ(TestFixture::To(8), af(TestFixture::To(3), TestFixture::To(5),
                                        kwds("z", TestFixture::To(7))));
 
-  af = nd::apply::make<decltype(&func6), &func6>("y", "z");
+  af = nd::functional::apply<decltype(&func6), &func6>("y", "z");
   EXPECT_ARR_EQ(TestFixture::To(8),
                 af(TestFixture::To(3),
                    kwds("y", TestFixture::To(5), "z", TestFixture::To(7))));
 
-  af = nd::apply::make<decltype(&func6), &func6>("x", "y", "z");
+  af = nd::functional::apply<decltype(&func6), &func6>("x", "y", "z");
   EXPECT_ARR_EQ(TestFixture::To(8),
                 af(kwds("x", TestFixture::To(3), "y", TestFixture::To(5), "z",
                         TestFixture::To(7))));
 
-  af = nd::apply::make<decltype(&func7), &func7>("z");
+  af = nd::functional::apply<decltype(&func7), &func7>("z");
   EXPECT_ARR_EQ(TestFixture::To(36.3),
                 af(TestFixture::To(38), TestFixture::To(5),
                    kwds("z", TestFixture::To(12.1))));
 
-  af = nd::apply::make<decltype(&func7), &func7>("y", "z");
+  af = nd::functional::apply<decltype(&func7), &func7>("y", "z");
   EXPECT_ARR_EQ(TestFixture::To(36.3),
                 af(TestFixture::To(38),
                    kwds("y", TestFixture::To(5), "z", TestFixture::To(12.1))));
 
-  af = nd::apply::make<decltype(&func7), &func7>("x", "y", "z");
+  af = nd::functional::apply<decltype(&func7), &func7>("x", "y", "z");
   EXPECT_ARR_EQ(TestFixture::To(36.3),
                 af(kwds("x", TestFixture::To(38), "y", TestFixture::To(5), "z",
                         TestFixture::To(12.1))));
@@ -362,107 +362,108 @@ TYPED_TEST_P(Apply, Callable)
   nd::arrfunc af;
 
   if (TestFixture::KernelRequest == kernel_request_host) {
-    af = nd::apply::make<kernel_request_host>(get_func0<kernel_request_host>());
+    af = nd::functional::apply<kernel_request_host>(
+        get_func0<kernel_request_host>());
     EXPECT_ARR_EQ(TestFixture::To(4),
                   af(TestFixture::To(5), TestFixture::To(3)));
 
-    af = nd::apply::make<kernel_request_host>(
+    af = nd::functional::apply<kernel_request_host>(
         func0_as_callable<kernel_request_host>());
     EXPECT_ARR_EQ(TestFixture::To(4),
                   af(TestFixture::To(5), TestFixture::To(3)));
 
-    af = nd::apply::make<kernel_request_host,
-                         func0_as_callable<kernel_request_host>>();
+    af = nd::functional::apply<kernel_request_host,
+                               func0_as_callable<kernel_request_host>>();
     EXPECT_ARR_EQ(TestFixture::To(4),
                   af(TestFixture::To(5), TestFixture::To(3)));
   }
 
 #ifdef __CUDACC__
   if (TestFixture::KernelRequest == kernel_request_cuda_device) {
-    af = nd::apply::make<kernel_request_cuda_device>(
+    af = nd::functional::apply<kernel_request_cuda_device>(
         get_func1<kernel_request_cuda_device>());
     EXPECT_ARR_EQ(TestFixture::To(58.25),
                   af(TestFixture::To(3.25), TestFixture::To(20)));
 
-    af = nd::apply::make<kernel_request_cuda_device>(
+    af = nd::functional::apply<kernel_request_cuda_device>(
         func1_as_callable<kernel_request_cuda_device>());
     EXPECT_ARR_EQ(TestFixture::To(58.25),
                   af(TestFixture::To(3.25), TestFixture::To(20)));
 
-    af = nd::apply::make<kernel_request_cuda_device,
-                         func1_as_callable<kernel_request_cuda_device>>();
+    af = nd::functional::apply<kernel_request_cuda_device,
+                               func1_as_callable<kernel_request_cuda_device>>();
     EXPECT_ARR_EQ(TestFixture::To(58.25),
                   af(TestFixture::To(3.25), TestFixture::To(20)));
   }
 #endif
 
   /*
-    af = nd::apply::make<TestFixture::KernelRequest>(
+    af = nd::functional::apply<TestFixture::KernelRequest>(
         get_func2<TestFixture::KernelRequest>());
     EXPECT_ARR_EQ(TestFixture::To(13.6f),
                   af(TestFixture::To({3.9f, -7.0f, 16.7f})));
   */
 
-  af = nd::apply::make<TestFixture::KernelRequest>(
+  af = nd::functional::apply<TestFixture::KernelRequest>(
       get_func3<TestFixture::KernelRequest>());
   EXPECT_ARR_EQ(TestFixture::To(12U), af());
 
-  af = nd::apply::make<TestFixture::KernelRequest>(
+  af = nd::functional::apply<TestFixture::KernelRequest>(
       func3_as_callable<TestFixture::KernelRequest>());
   EXPECT_ARR_EQ(TestFixture::To(12U), af());
 
-  af = nd::apply::make<TestFixture::KernelRequest,
-                       func3_as_callable<TestFixture::KernelRequest>>();
+  af = nd::functional::apply<TestFixture::KernelRequest,
+                             func3_as_callable<TestFixture::KernelRequest>>();
   EXPECT_ARR_EQ(TestFixture::To(12U), af());
 
-  af = nd::apply::make<TestFixture::KernelRequest>(
+  af = nd::functional::apply<TestFixture::KernelRequest>(
       get_func6<TestFixture::KernelRequest>());
   EXPECT_ARR_EQ(TestFixture::To(8),
                 af(TestFixture::To(3), TestFixture::To(5), TestFixture::To(7)));
 
-  af = nd::apply::make<TestFixture::KernelRequest>(
+  af = nd::functional::apply<TestFixture::KernelRequest>(
       func6_as_callable<TestFixture::KernelRequest>());
   EXPECT_ARR_EQ(TestFixture::To(8),
                 af(TestFixture::To(3), TestFixture::To(5), TestFixture::To(7)));
 
-  af = nd::apply::make<TestFixture::KernelRequest,
-                       func6_as_callable<TestFixture::KernelRequest>>();
+  af = nd::functional::apply<TestFixture::KernelRequest,
+                             func6_as_callable<TestFixture::KernelRequest>>();
   EXPECT_ARR_EQ(TestFixture::To(8),
                 af(TestFixture::To(3), TestFixture::To(5), TestFixture::To(7)));
 
-  af = nd::apply::make<TestFixture::KernelRequest>(
+  af = nd::functional::apply<TestFixture::KernelRequest>(
       get_func7<TestFixture::KernelRequest>());
   EXPECT_ARR_EQ(
       TestFixture::To(36.3),
       af(TestFixture::To(38), TestFixture::To(5), TestFixture::To(12.1)));
 
-  af = nd::apply::make<TestFixture::KernelRequest>(
+  af = nd::functional::apply<TestFixture::KernelRequest>(
       func7_as_callable<TestFixture::KernelRequest>());
   EXPECT_ARR_EQ(
       TestFixture::To(36.3),
       af(TestFixture::To(38), TestFixture::To(5), TestFixture::To(12.1)));
 
-  af = nd::apply::make<TestFixture::KernelRequest,
-                       func7_as_callable<TestFixture::KernelRequest>>();
+  af = nd::functional::apply<TestFixture::KernelRequest,
+                             func7_as_callable<TestFixture::KernelRequest>>();
   EXPECT_ARR_EQ(
       TestFixture::To(36.3),
       af(TestFixture::To(38), TestFixture::To(5), TestFixture::To(12.1)));
 
-  af = nd::apply::make<TestFixture::KernelRequest>(
+  af = nd::functional::apply<TestFixture::KernelRequest>(
       callable0<TestFixture::KernelRequest>());
   EXPECT_ARR_EQ(TestFixture::To(475.0), af(TestFixture::To(47.5)));
 
-  af = nd::apply::make<TestFixture::KernelRequest,
-                       callable0<TestFixture::KernelRequest>>();
+  af = nd::functional::apply<TestFixture::KernelRequest,
+                             callable0<TestFixture::KernelRequest>>();
   EXPECT_ARR_EQ(TestFixture::To(475.0), af(TestFixture::To(47.5)));
 
-  af = nd::apply::make<TestFixture::KernelRequest>(
+  af = nd::functional::apply<TestFixture::KernelRequest>(
       callable2<TestFixture::KernelRequest>());
   EXPECT_ARR_EQ(TestFixture::To(11),
                 af(TestFixture::To(5), TestFixture::To(3)));
 
-  af = nd::apply::make<TestFixture::KernelRequest,
-                       callable2<TestFixture::KernelRequest>>();
+  af = nd::functional::apply<TestFixture::KernelRequest,
+                             callable2<TestFixture::KernelRequest>>();
   EXPECT_ARR_EQ(TestFixture::To(11),
                 af(TestFixture::To(5), TestFixture::To(3)));
 }
@@ -472,142 +473,143 @@ TYPED_TEST_P(Apply, CallableWithKeywords)
   nd::arrfunc af;
 
   if (TestFixture::KernelRequest == kernel_request_host) {
-    af = nd::apply::make<kernel_request_host>(get_func0<kernel_request_host>(),
-                                              "y");
+    af = nd::functional::apply<kernel_request_host>(
+        get_func0<kernel_request_host>(), "y");
     EXPECT_ARR_EQ(TestFixture::To(4),
                   af(TestFixture::To(5), kwds("y", TestFixture::To(3))));
 
-    af = nd::apply::make<kernel_request_host>(get_func0<kernel_request_host>(),
-                                              "x", "y");
+    af = nd::functional::apply<kernel_request_host>(
+        get_func0<kernel_request_host>(), "x", "y");
     EXPECT_ARR_EQ(TestFixture::To(4),
                   af(kwds("x", TestFixture::To(5), "y", TestFixture::To(3))));
 
-    af = nd::apply::make(func0_as_callable<kernel_request_host>(), "y");
+    af = nd::functional::apply(func0_as_callable<kernel_request_host>(), "y");
     EXPECT_ARR_EQ(TestFixture::To(4), af(5, kwds("y", TestFixture::To(3))));
 
-    af = nd::apply::make(func0_as_callable<kernel_request_host>(), "x", "y");
+    af = nd::functional::apply(func0_as_callable<kernel_request_host>(), "x",
+                               "y");
     EXPECT_ARR_EQ(TestFixture::To(4),
                   af(kwds("x", TestFixture::To(5), "y", TestFixture::To(3))));
   }
 
 #ifdef __CUDACC__
   if (TestFixture::KernelRequest == kernel_request_cuda_device) {
-    af = nd::apply::make<kernel_request_cuda_device>(
+    af = nd::functional::apply<kernel_request_cuda_device>(
         get_func1<kernel_request_cuda_device>(), "y");
     EXPECT_ARR_EQ(TestFixture::To(58.25),
                   af(TestFixture::To(3.25), kwds("y", TestFixture::To(20))));
 
-    af = nd::apply::make<kernel_request_cuda_device>(
+    af = nd::functional::apply<kernel_request_cuda_device>(
         get_func1<kernel_request_cuda_device>(), "x", "y");
     EXPECT_ARR_EQ(TestFixture::To(58.25), af(kwds("x", TestFixture::To(3.25),
                                                   "y", TestFixture::To(20))));
 
-    af = nd::apply::make<kernel_request_cuda_device>(
+    af = nd::functional::apply<kernel_request_cuda_device>(
         func1_as_callable<kernel_request_cuda_device>(), "y");
     EXPECT_ARR_EQ(TestFixture::To(58.25),
                   af(TestFixture::To(3.25), kwds("y", TestFixture::To(20))));
 
-    af = nd::apply::make<kernel_request_cuda_device>(
+    af = nd::functional::apply<kernel_request_cuda_device>(
         func1_as_callable<kernel_request_cuda_device>(), "x", "y");
     EXPECT_ARR_EQ(TestFixture::To(58.25), af(kwds("x", TestFixture::To(3.25),
                                                   "y", TestFixture::To(20))));
   }
 #endif
 
-  af = nd::apply::make<TestFixture::KernelRequest>(
+  af = nd::functional::apply<TestFixture::KernelRequest>(
       get_func6<TestFixture::KernelRequest>(), "z");
   EXPECT_ARR_EQ(TestFixture::To(8), af(TestFixture::To(3), TestFixture::To(5),
                                        kwds("z", TestFixture::To(7))));
 
 #ifndef _MSC_VER
-  af = nd::apply::make<TestFixture::KernelRequest>(
+  af = nd::functional::apply<TestFixture::KernelRequest>(
       get_func6<TestFixture::KernelRequest>(), "y", "z");
   EXPECT_ARR_EQ(TestFixture::To(8),
                 af(TestFixture::To(3),
                    kwds("y", TestFixture::To(5), "z", TestFixture::To(7))));
 
-  af = nd::apply::make<TestFixture::KernelRequest>(
+  af = nd::functional::apply<TestFixture::KernelRequest>(
       get_func6<TestFixture::KernelRequest>(), "x", "y", "z");
   EXPECT_ARR_EQ(TestFixture::To(8),
                 af(kwds("x", TestFixture::To(3), "y", TestFixture::To(5), "z",
                         TestFixture::To(7))));
 
-  af = nd::apply::make<TestFixture::KernelRequest>(
+  af = nd::functional::apply<TestFixture::KernelRequest>(
       func6_as_callable<TestFixture::KernelRequest>(), "z");
   EXPECT_ARR_EQ(TestFixture::To(8), af(TestFixture::To(3), TestFixture::To(5),
                                        kwds("z", TestFixture::To(7))));
 
-  af = nd::apply::make<TestFixture::KernelRequest>(
+  af = nd::functional::apply<TestFixture::KernelRequest>(
       func6_as_callable<TestFixture::KernelRequest>(), "y", "z");
   EXPECT_ARR_EQ(TestFixture::To(8),
                 af(TestFixture::To(3),
                    kwds("y", TestFixture::To(5), "z", TestFixture::To(7))));
 
-  af = nd::apply::make<TestFixture::KernelRequest>(
+  af = nd::functional::apply<TestFixture::KernelRequest>(
       func6_as_callable<TestFixture::KernelRequest>(), "x", "y", "z");
   EXPECT_ARR_EQ(TestFixture::To(8),
                 af(kwds("x", TestFixture::To(3), "y", TestFixture::To(5), "z",
                         TestFixture::To(7))));
 
-  af = nd::apply::make<TestFixture::KernelRequest>(
+  af = nd::functional::apply<TestFixture::KernelRequest>(
       get_func7<TestFixture::KernelRequest>(), "z");
   EXPECT_ARR_EQ(TestFixture::To(36.3),
                 af(TestFixture::To(38), TestFixture::To(5),
                    kwds("z", TestFixture::To(12.1))));
 
-  af = nd::apply::make<TestFixture::KernelRequest>(
+  af = nd::functional::apply<TestFixture::KernelRequest>(
       get_func7<TestFixture::KernelRequest>(), "y", "z");
   EXPECT_ARR_EQ(TestFixture::To(36.3),
                 af(TestFixture::To(38),
                    kwds("y", TestFixture::To(5), "z", TestFixture::To(12.1))));
 
-  af = nd::apply::make<TestFixture::KernelRequest>(
+  af = nd::functional::apply<TestFixture::KernelRequest>(
       get_func7<TestFixture::KernelRequest>(), "x", "y", "z");
   EXPECT_ARR_EQ(TestFixture::To(36.3),
                 af(kwds("x", TestFixture::To(38), "y", TestFixture::To(5), "z",
                         TestFixture::To(12.1))));
 
-  af = nd::apply::make<TestFixture::KernelRequest>(
+  af = nd::functional::apply<TestFixture::KernelRequest>(
       func7_as_callable<TestFixture::KernelRequest>(), "z");
   EXPECT_ARR_EQ(TestFixture::To(36.3),
                 af(TestFixture::To(38), TestFixture::To(5),
                    kwds("z", TestFixture::To(12.1))));
 
-  af = nd::apply::make<TestFixture::KernelRequest>(
+  af = nd::functional::apply<TestFixture::KernelRequest>(
       func7_as_callable<TestFixture::KernelRequest>(), "y", "z");
   EXPECT_ARR_EQ(TestFixture::To(36.3),
                 af(TestFixture::To(38),
                    kwds("y", TestFixture::To(5), "z", TestFixture::To(12.1))));
 
-  af = nd::apply::make<TestFixture::KernelRequest>(
+  af = nd::functional::apply<TestFixture::KernelRequest>(
       func7_as_callable<TestFixture::KernelRequest>(), "x", "y", "z");
   EXPECT_ARR_EQ(TestFixture::To(36.3),
                 af(kwds("x", TestFixture::To(38), "y", TestFixture::To(5), "z",
                         TestFixture::To(12.1))));
 
-  af = nd::apply::make<TestFixture::KernelRequest>(
+  af = nd::functional::apply<TestFixture::KernelRequest>(
       callable0<TestFixture::KernelRequest>(), "x");
   EXPECT_ARR_EQ(TestFixture::To(475.0), af(kwds("x", TestFixture::To(47.5))));
 
-  af = nd::apply::make<TestFixture::KernelRequest,
-                       callable1<TestFixture::KernelRequest>, int, int>("x",
-                                                                        "y");
+  af = nd::functional::apply<TestFixture::KernelRequest,
+                             callable1<TestFixture::KernelRequest>, int, int>(
+      "x", "y");
   EXPECT_ARR_EQ(TestFixture::To(28),
                 af(TestFixture::To(2),
                    kwds("x", TestFixture::To(1), "y", TestFixture::To(7))));
 
-  af = nd::apply::make<TestFixture::KernelRequest>(
+  af = nd::functional::apply<TestFixture::KernelRequest>(
       callable2<TestFixture::KernelRequest>(), "y");
   EXPECT_ARR_EQ(TestFixture::To(11),
                 af(TestFixture::To(5), kwds("y", TestFixture::To(3))));
 
-  af = nd::apply::make<TestFixture::KernelRequest>(
+  af = nd::functional::apply<TestFixture::KernelRequest>(
       callable2<TestFixture::KernelRequest>(), "x", "y");
   EXPECT_ARR_EQ(TestFixture::To(11),
                 af(kwds("x", TestFixture::To(5), "y", TestFixture::To(3))));
 
-  af = nd::apply::make<TestFixture::KernelRequest,
-                       callable2<TestFixture::KernelRequest>, int>("z");
+  af = nd::functional::apply<TestFixture::KernelRequest,
+                             callable2<TestFixture::KernelRequest>, int>("z");
   EXPECT_ARR_EQ(TestFixture::To(8), af(TestFixture::To(5), TestFixture::To(3),
                                        kwds("z", TestFixture::To(4))));
 #endif

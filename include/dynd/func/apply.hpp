@@ -10,7 +10,7 @@
 
 namespace dynd {
 namespace nd {
-  namespace apply {
+  namespace functional {
     /**
      * Makes an arrfunc out of function ``func``, using the provided keyword
      * parameter names. This function takes ``func`` as a template
@@ -18,7 +18,7 @@ namespace nd {
      */
     template <kernel_request_t kernreq, typename func_type, func_type func,
               typename... T>
-    arrfunc make(T &&... names)
+    arrfunc apply(T &&... names)
     {
       typedef kernels::apply_function_ck<kernreq, func_type, func,
                                          arity_of<func_type>::value -
@@ -33,9 +33,9 @@ namespace nd {
     }
 
     template <typename func_type, func_type func, typename... T>
-    arrfunc make(T &&... names)
+    arrfunc apply(T &&... names)
     {
-      return make<kernel_request_host, func_type, func>(
+      return apply<kernel_request_host, func_type, func>(
           std::forward<T>(names)...);
     }
 
@@ -45,9 +45,7 @@ namespace nd {
      * object.
      */
     template <kernel_request_t kernreq, typename func_type, typename... T>
-    typename std::enable_if<!is_function_pointer<func_type>::value,
-                            arrfunc>::type
-    make(const func_type &func, T &&... names)
+    arrfunc apply(const func_type &func, T &&... names)
     {
       typedef kernels::apply_callable_ck<kernreq, func_type,
                                          arity_of<func_type>::value -
@@ -61,13 +59,13 @@ namespace nd {
     }
 
     template <typename func_type, typename... T>
-    arrfunc make(const func_type &func, T &&... names)
+    arrfunc apply(const func_type &func, T &&... names)
     {
-      return make<kernel_request_host>(func, std::forward<T>(names)...);
+      return apply<kernel_request_host>(func, std::forward<T>(names)...);
     }
 
     template <kernel_request_t kernreq, typename func_type, typename... T>
-    arrfunc make(func_type *func, arrfunc_free_t free, T &&... names)
+    arrfunc apply(func_type *func, arrfunc_free_t free, T &&... names)
     {
       typedef kernels::apply_callable_ck<kernreq, func_type *,
                                          arity_of<func_type>::value -
@@ -81,22 +79,22 @@ namespace nd {
     }
 
     template <kernel_request_t kernreq, typename func_type, typename... T>
-    arrfunc make(func_type *func, T &&... names)
+    arrfunc apply(func_type *func, T &&... names)
     {
-      return make<kernreq>(func, static_cast<arrfunc_free_t>(NULL),
-                           std::forward<T>(names)...);
+      return apply<kernreq>(func, static_cast<arrfunc_free_t>(NULL),
+                            std::forward<T>(names)...);
     }
 
     template <typename func_type, typename... T>
-    arrfunc make(func_type *func, arrfunc_free_t free, T &&... names)
+    arrfunc apply(func_type *func, arrfunc_free_t free, T &&... names)
     {
-      return make<kernel_request_host>(func, free, std::forward<T>(names)...);
+      return apply<kernel_request_host>(func, free, std::forward<T>(names)...);
     }
 
     template <typename func_type, typename... T>
-    arrfunc make(func_type *func, T &&... names)
+    arrfunc apply(func_type *func, T &&... names)
     {
-      return make<kernel_request_host>(func, std::forward<T>(names)...);
+      return apply<kernel_request_host>(func, std::forward<T>(names)...);
     }
 
     /**
@@ -105,7 +103,7 @@ namespace nd {
      */
     template <kernel_request_t kernreq, typename func_type, typename... K,
               typename... T>
-    arrfunc make(T &&... names)
+    arrfunc apply(T &&... names)
     {
       typedef kernels::construct_then_apply_callable_ck<kernreq, func_type,
                                                         K...> ck_type;
@@ -123,11 +121,11 @@ namespace nd {
      * constructs and calls the function object on demand.
      */
     template <typename func_type, typename... K, typename... T>
-    arrfunc make(T &&... names)
+    arrfunc apply(T &&... names)
     {
-      return make<kernel_request_host, func_type, K...>(
+      return apply<kernel_request_host, func_type, K...>(
           std::forward<T>(names)...);
     }
-  } // namespace apply
+  } // namespace functional
 } // namespace nd
 } // namespace dynd

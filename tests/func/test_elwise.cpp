@@ -14,7 +14,7 @@
 #include <dynd/func/arrfunc.hpp>
 #include <dynd/kernels/assignment_kernels.hpp>
 #include <dynd/kernels/expr_kernel_generator.hpp>
-#include <dynd/func/apply_arrfunc.hpp>
+#include <dynd/func/apply.hpp>
 #include <dynd/func/elwise.hpp>
 #include <dynd/func/take_arrfunc.hpp>
 #include <dynd/func/call_callable.hpp>
@@ -244,7 +244,7 @@ TEST(Elwise, Simple)
   nd::array a = parse_json("3 * int", "[0, 1, 2]");
   nd::array b = parse_json("3 * int", "[3, 4, 5]");
 
-  af = nd::apply::make<callable0>();
+  af = nd::functional::apply<callable0>();
   EXPECT_ARR_EQ(nd::array({3, 5, 7}), nd::elwise(a, b, kwds("func", af)));
 
   baf = nd::elwise.bind("func", af);
@@ -254,7 +254,7 @@ TEST(Elwise, Simple)
 //  a = a.to_cuda_device();
 //  b = b.to_cuda_device();
 
-//  af = nd::apply::make<kernel_request_cuda_device, xcallable0>();
+//  af = nd::functional::apply<kernel_request_cuda_device, xcallable0>();
 //  std::cout << af << std::endl;
   //EXPECT_ARR_EQ(nd::array({3, 5, 7}).to_cuda_device(), nd::elwise(a, b, kwds("func", af)));
 
