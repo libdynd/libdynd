@@ -43,7 +43,8 @@ namespace dynd {
     namespace nd {                                                             \
       class NAME : public arrfunc<NAME> {                                      \
         static const kernels::create_t                                         \
-        builtin_table[builtin_type_id_count - 2][builtin_type_id_count - 2];   \
+            builtin_table[builtin_type_id_count - 2][builtin_type_id_count -   \
+                                                     2];                       \
                                                                                \
       public:                                                                  \
         static int                                                             \
@@ -79,8 +80,9 @@ namespace dynd {
           if (dst_tp.is_builtin()) {                                           \
             if (src_tp[0].is_builtin() && src_tp[1].is_builtin()) {            \
               kernels::create_t create =                                       \
-                  builtin_table[src_tp[0].get_type_id() - bool_type_id]        \
-                               [src_tp[1].get_type_id() - bool_type_id];       \
+                  builtin_table[src_tp[0].get_type_id() -                      \
+                                bool_type_id][src_tp[1].get_type_id() -        \
+                                              bool_type_id];                   \
               create(ckb, kernreq, ckb_offset);                                \
               return ckb_offset;                                               \
             }                                                                  \
@@ -94,9 +96,8 @@ namespace dynd {
                                                                                \
         static dynd::nd::arrfunc make()                                        \
         {                                                                      \
-          arrfunc_type_data child(&instantiate, NULL, &resolve_dst_type,       \
-                                  NULL);                                       \
-          dynd::nd::arrfunc child_af(&child, ndt::type("(Any, Any) -> Any"));  \
+          dynd::nd::arrfunc child_af(&instantiate, NULL, &resolve_dst_type,    \
+                                     ndt::type("(Any, Any) -> Any"));          \
                                                                                \
           return elwise::bind("func", child_af);                               \
         }                                                                      \
@@ -121,4 +122,3 @@ ARITHMETIC_OPERATOR(div, / );
 #undef ARITHMETIC_OPERATOR
 
 } // namespace dynd
-

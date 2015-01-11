@@ -583,6 +583,14 @@ namespace nd {
   class arrfunc {
     nd::array m_value;
 
+    // Todo: Delete this constructor. For now, make it private.
+    arrfunc(const arrfunc_type_data *self, const ndt::type &self_tp)
+        : m_value(empty(self_tp))
+    {
+      *reinterpret_cast<arrfunc_type_data *>(
+          m_value.get_readwrite_originptr()) = *self;
+    }
+
   public:
     arrfunc() {}
 
@@ -605,13 +613,6 @@ namespace nd {
     {
       new (m_value.get_readwrite_originptr()) arrfunc_type_data(
           data, instantiate, resolve_option_values, resolve_dst_type, free);
-    }
-
-    arrfunc(const arrfunc_type_data *self, const ndt::type &self_tp)
-        : m_value(empty(self_tp))
-    {
-      *reinterpret_cast<arrfunc_type_data *>(
-          m_value.get_readwrite_originptr()) = *self;
     }
 
     arrfunc(const arrfunc &rhs) : m_value(rhs.m_value) {}
@@ -1071,11 +1072,9 @@ namespace nd {
   template <typename T>
   arrfunc make_arrfunc()
   {
-    arrfunc_type_data self(dynd::detail::get_instantiate<T>(),
-                           dynd::detail::get_resolve_option_values<T>(),
-                           dynd::detail::get_resolve_dst_type<T>(),
-                           dynd::detail::get_free<T>());
-    return arrfunc(&self, T::make_type());
+    return arrfunc(dynd::detail::get_instantiate<T>(),
+                   dynd::detail::get_resolve_option_values<T>(),
+                   dynd::detail::get_resolve_dst_type<T>(), T::make_type());
   }
 } // namespace nd
 
@@ -1236,11 +1235,10 @@ namespace decl {
 
       static dynd::nd::arrfunc make()
       {
-        arrfunc_type_data self(&instantiate<false>, NULL,
-                               &resolve_dst_type<false>, NULL);
         ndt::type self_tp = ndt::type("(..., func: (...) -> Any) -> Any");
 
-        return dynd::nd::arrfunc(&self, self_tp);
+        return dynd::nd::arrfunc(&instantiate<false>, NULL,
+                                 &resolve_dst_type<false>, self_tp);
       }
     };
   }
