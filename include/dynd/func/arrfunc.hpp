@@ -13,6 +13,7 @@
 #include <dynd/types/struct_type.hpp>
 #include <dynd/types/type_pattern_match.hpp>
 #include <dynd/types/substitute_typevars.hpp>
+#include <dynd/types/type_type.hpp>
 
 #define DYND_HAS_MEM_FUNC(NAME)                                                \
   template <typename T, typename S>                                            \
@@ -154,6 +155,9 @@ namespace detail {
   DYND_GET_MEM_FUNC(arrfunc_free_t, free);
 } // namespace dynd::detail
 
+template <typename T>
+void destroy_wrapper(arrfunc_type_data *self);
+
 /**
  * This is a struct designed for interoperability at
  * the C ABI level. It contains enough information
@@ -166,12 +170,6 @@ namespace detail {
  * with different array arrmeta.
  */
 class arrfunc_type_data {
-  template <class T>
-  static void cpp_class_free(arrfunc_type_data *self)
-  {
-    self->get_data_as<T>()->~T();
-  }
-
   // non-copyable
   arrfunc_type_data(const arrfunc_type_data &) = delete;
 
@@ -203,6 +201,14 @@ public:
 
   arrfunc_type_data(arrfunc_instantiate_t instantiate,
                     arrfunc_resolve_option_values_t resolve_option_values,
+                    arrfunc_resolve_dst_type_t resolve_dst_type)
+      : instantiate(instantiate), resolve_option_values(resolve_option_values),
+        resolve_dst_type(resolve_dst_type)
+  {
+  }
+
+  arrfunc_type_data(arrfunc_instantiate_t instantiate,
+                    arrfunc_resolve_option_values_t resolve_option_values,
                     arrfunc_resolve_dst_type_t resolve_dst_type,
                     arrfunc_free_t free)
       : instantiate(instantiate), resolve_option_values(resolve_option_values),
@@ -213,12 +219,13 @@ public:
   template <typename T>
   arrfunc_type_data(const T &data, arrfunc_instantiate_t instantiate,
                     arrfunc_resolve_option_values_t resolve_option_values,
-                    arrfunc_resolve_dst_type_t resolve_dst_type)
+                    arrfunc_resolve_dst_type_t resolve_dst_type,
+                    arrfunc_free_t free = NULL)
       : instantiate(instantiate), resolve_option_values(resolve_option_values),
-        resolve_dst_type(resolve_dst_type), free(NULL)
+        resolve_dst_type(resolve_dst_type),
+        free(free == NULL ? &destroy_wrapper<T> : free)
   {
     new (this->data) T(data);
-    this->free = &arrfunc_type_data::cpp_class_free<T>;
   }
 
   ~arrfunc_type_data()
@@ -257,6 +264,24 @@ public:
     return reinterpret_cast<const T *>(data);
   }
 };
+
+template <typename T>
+void destroy_wrapper(arrfunc_type_data *self)
+{
+  self->get_data_as<T>()->~T();
+}
+
+template <typename T>
+void delete_wrapper(arrfunc_type_data *self)
+{
+  delete *self->get_data_as<T *>();
+}
+
+template <typename T, void (*free)(void *) = &std::free>
+void free_wrapper(arrfunc_type_data *self)
+{
+  free(*self->get_data_as<T *>());
+}
 
 namespace nd {
   template <typename... A>
@@ -345,6 +370,19 @@ namespace nd {
       }
     };
 
+    template <typename T>
+    ndt::type do_type_stuff(const T &)
+    {
+      return ndt::type();
+    }
+
+    inline ndt::type do_type_stuff(const nd::array &a)
+    {
+      return a.as<ndt::type>();
+    }
+
+    inline ndt::type do_type_stuff(const ndt::type &tp) { return tp; }
+
     template <typename... K>
     class kwds {
       const char *m_names[sizeof...(K)];
@@ -383,23 +421,34 @@ namespace nd {
             throw std::invalid_argument(ss.str());
           }
 
-          ndt::type expected_tp = af_tp->get_kwd_type(j);
-          switch (expected_tp.get_type_id()) {
-          case option_type_id:
-            expected_tp = expected_tp.p("value_type").as<ndt::type>();
-            break;
-          default:
-            break;
-          }
-
           ndt::type &actual_tp = kwd_tp_data[j];
           if (!actual_tp.is_null()) {
             std::stringstream ss;
             ss << "arrfunc passed keyword \"" << name << "\" more than once";
             throw std::invalid_argument(ss.str());
           }
-          actual_tp = ndt::as_type(value);
           available.push_back(j);
+
+          ndt::type expected_tp = af_tp->get_kwd_type(j);
+          if (expected_tp.get_type_id() == type_type_id) {
+            ndt::type pattern_tp =
+                expected_tp.extended<type_type>()->get_pattern_type();
+            if (pattern_tp.is_null()) {
+              actual_tp = ndt::as_type(value);
+            } else {
+              actual_tp = do_type_stuff(value);
+              expected_tp = pattern_tp;
+            }
+          } else {
+            switch (expected_tp.get_type_id()) {
+            case option_type_id:
+              expected_tp = expected_tp.p("value_type").as<ndt::type>();
+              break;
+            default:
+              break;
+            }
+            actual_tp = ndt::as_type(value);
+          }
 
           if (!ndt::pattern_match(actual_tp.value_type(), expected_tp,
                                   typevars)) {
@@ -537,14 +586,25 @@ namespace nd {
   public:
     arrfunc() {}
 
-    template <typename T>
-    arrfunc(const T &data, arrfunc_instantiate_t instantiate,
+    arrfunc(arrfunc_instantiate_t instantiate,
+            arrfunc_resolve_option_values_t resolve_option_values,
             arrfunc_resolve_dst_type_t resolve_dst_type,
             const ndt::type &self_tp)
         : m_value(empty(self_tp))
     {
-      new (m_value.get_readwrite_originptr())
-          arrfunc_type_data(data, instantiate, NULL, resolve_dst_type);
+      new (m_value.get_readwrite_originptr()) arrfunc_type_data(
+          instantiate, resolve_option_values, resolve_dst_type);
+    }
+
+    template <typename T>
+    arrfunc(const T &data, arrfunc_instantiate_t instantiate,
+            arrfunc_resolve_option_values_t resolve_option_values,
+            arrfunc_resolve_dst_type_t resolve_dst_type, arrfunc_free_t free,
+            const ndt::type &self_tp)
+        : m_value(empty(self_tp))
+    {
+      new (m_value.get_readwrite_originptr()) arrfunc_type_data(
+          data, instantiate, resolve_option_values, resolve_dst_type, free);
     }
 
     arrfunc(const arrfunc_type_data *self, const ndt::type &self_tp)
@@ -1169,8 +1229,8 @@ namespace decl {
       static dynd::nd::arrfunc bind(const std::string &DYND_UNUSED(name),
                                     const dynd::nd::arrfunc &child)
       {
-        return dynd::nd::arrfunc(child, &instantiate<true>,
-                                 &resolve_dst_type<true>,
+        return dynd::nd::arrfunc(child, &instantiate<true>, NULL,
+                                 &resolve_dst_type<true>, NULL,
                                  T::make_lifted_type(child.get_type()));
       }
 

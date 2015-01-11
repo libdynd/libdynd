@@ -129,8 +129,8 @@ namespace kernels {
 
   template <typename... A, size_t... I>
   struct args<type_sequence<A...>, index_sequence<I...>> : arg<A, I>... {
-    args(const ndt::type *DYND_CONDITIONAL_UNUSED(src_tp),
-         const char *const *DYND_CONDITIONAL_UNUSED(src_arrmeta),
+    args(const ndt::type *DYND_IGNORE_UNUSED(src_tp),
+         const char *const *DYND_IGNORE_UNUSED(src_arrmeta),
          const nd::array &kwds)
         : arg<A, I>(src_tp[I], src_arrmeta[I], kwds)...
     {
@@ -160,8 +160,7 @@ namespace kernels {
     DYND_CUDA_HOST_DEVICE T get() { return m_val; }
   };
 
-  template <typename K,
-            typename J = make_index_sequence<K::size>>
+  template <typename K, typename J = make_index_sequence<K::size>>
   struct kwds;
 
   template <>
@@ -200,7 +199,7 @@ namespace kernels {
                                                                                \
     __VA_ARGS__ void single(char *dst, char *const *src)                       \
     {                                                                          \
-      single<typename return_of<func_type>::type>(dst, src, this, this);       \
+      single<typename return_of<func_type>::type>(this, this, dst, src);       \
     }                                                                          \
                                                                                \
     static intptr_t                                                            \
@@ -223,23 +222,29 @@ namespace kernels {
               size_t... J>                                                     \
     __VA_ARGS__ typename std::enable_if<std::is_same<R, void>::value,          \
                                         void>::type                            \
-    single(char *DYND_UNUSED(dst), char *const *DYND_CONDITIONAL_UNUSED(src),  \
-           args<type_sequence<A...>, index_sequence<I...>> *DYND_UNUSED(args), \
-           kwds<type_sequence<K...>, index_sequence<J...>> *DYND_UNUSED(kwds)) \
+    single(args<type_sequence<A...>, index_sequence<I...>> *                   \
+               DYND_IGNORE_UNUSED(args),                                       \
+           kwds<type_sequence<K...>, index_sequence<J...>> *                   \
+               DYND_IGNORE_UNUSED(kwds),                                       \
+           char *DYND_UNUSED(dst), char *const *DYND_IGNORE_UNUSED(src))       \
     {                                                                          \
-      func(arg<A, I>::get(src[I])..., kwd<K, J>::get()...);                    \
+      func(static_cast<arg<A, I> *>(args)->get(src[I])...,                     \
+           static_cast<kwd<K, J> *>(kwds)->get()...);                          \
     }                                                                          \
                                                                                \
     template <typename R, typename... A, size_t... I, typename... K,           \
               size_t... J>                                                     \
     __VA_ARGS__ typename std::enable_if<!std::is_same<R, void>::value,         \
                                         void>::type                            \
-    single(char *dst, char *const *DYND_CONDITIONAL_UNUSED(src),               \
-           args<type_sequence<A...>, index_sequence<I...>> *DYND_UNUSED(args), \
-           kwds<type_sequence<K...>, index_sequence<J...>> *DYND_UNUSED(kwds)) \
+    single(args<type_sequence<A...>, index_sequence<I...>> *                   \
+               DYND_IGNORE_UNUSED(args),                                       \
+           kwds<type_sequence<K...>, index_sequence<J...>> *                   \
+               DYND_IGNORE_UNUSED(kwds),                                       \
+           char *dst, char *const *DYND_IGNORE_UNUSED(src))                    \
     {                                                                          \
       *reinterpret_cast<R *>(dst) =                                            \
-          func(arg<A, I>::get(src[I])..., kwd<K, J>::get()...);                \
+          func(static_cast<arg<A, I> *>(args)->get(src[I])...,                 \
+               static_cast<kwd<K, J> *>(kwds)->get()...);                      \
     }                                                                          \
   }
 
@@ -260,7 +265,7 @@ namespace kernels {
                                                                                \
     func_type func;                                                            \
                                                                                \
-    __VA_ARGS__ apply_callable_ck(const func_type &func,                       \
+    __VA_ARGS__ apply_callable_ck(func_type func,                              \
                                   args_for<func_type, Nsrc> args,              \
                                   kwds_for<func_type, Nsrc> kwds)              \
         : args_for<func_type, Nsrc>(args), kwds_for<func_type, Nsrc>(kwds),    \
@@ -270,7 +275,7 @@ namespace kernels {
                                                                                \
     __VA_ARGS__ void single(char *dst, char *const *src)                       \
     {                                                                          \
-      single<typename return_of<func_type>::type>(dst, src, this, this);       \
+      single<typename return_of<func_type>::type>(this, this, dst, src);       \
     }                                                                          \
                                                                                \
     static intptr_t                                                            \
@@ -285,23 +290,29 @@ namespace kernels {
               size_t... J>                                                     \
     __VA_ARGS__ typename std::enable_if<std::is_same<R, void>::value,          \
                                         void>::type                            \
-    single(char *DYND_UNUSED(dst), char *const *DYND_CONDITIONAL_UNUSED(src),  \
-           args<type_sequence<A...>, index_sequence<I...>> *DYND_UNUSED(args), \
-           kwds<type_sequence<K...>, index_sequence<J...>> *DYND_UNUSED(kwds)) \
+    single(args<type_sequence<A...>, index_sequence<I...>> *                   \
+               DYND_IGNORE_UNUSED(args),                                       \
+           kwds<type_sequence<K...>, index_sequence<J...>> *                   \
+               DYND_IGNORE_UNUSED(kwds),                                       \
+           char *DYND_UNUSED(dst), char *const *DYND_IGNORE_UNUSED(src))       \
     {                                                                          \
-      func(arg<A, I>::get(src[I])..., kwd<K, J>::get()...);                    \
+      func(static_cast<arg<A, I> *>(args)->get(src[I])...,                     \
+           static_cast<kwd<K, J> *>(kwds)->get()...);                          \
     }                                                                          \
                                                                                \
     template <typename R, typename... A, size_t... I, typename... K,           \
               size_t... J>                                                     \
     __VA_ARGS__ typename std::enable_if<!std::is_same<R, void>::value,         \
                                         void>::type                            \
-    single(char *dst, char *const *DYND_CONDITIONAL_UNUSED(src),               \
-           args<type_sequence<A...>, index_sequence<I...>> *DYND_UNUSED(args), \
-           kwds<type_sequence<K...>, index_sequence<J...>> *DYND_UNUSED(kwds)) \
+    single(args<type_sequence<A...>, index_sequence<I...>> *                   \
+               DYND_IGNORE_UNUSED(args),                                       \
+           kwds<type_sequence<K...>, index_sequence<J...>> *                   \
+               DYND_IGNORE_UNUSED(kwds),                                       \
+           char *dst, char *const *DYND_IGNORE_UNUSED(src))                    \
     {                                                                          \
       *reinterpret_cast<R *>(dst) =                                            \
-          func(arg<A, I>::get(src[I])..., kwd<K, J>::get()...);                \
+          func(static_cast<arg<A, I> *>(args)->get(src[I])...,                 \
+               static_cast<kwd<K, J> *>(kwds)->get()...);                      \
     }                                                                          \
   }
 
@@ -354,6 +365,87 @@ namespace kernels {
 
 #undef APPLY_CALLABLE_CK
 
+#define APPLY_CALLABLE_CK(KERNREQ, ...)                                        \
+  template <typename func_type, int Nsrc>                                      \
+  struct apply_callable_ck<KERNREQ, func_type *, Nsrc>                         \
+      : expr_ck<apply_callable_ck<KERNREQ, func_type *, Nsrc>, KERNREQ, Nsrc>, \
+        args_for<func_type, Nsrc>,                                             \
+        kwds_for<func_type, Nsrc> {                                            \
+    typedef apply_callable_ck self_type;                                       \
+                                                                               \
+    func_type *func;                                                           \
+                                                                               \
+    __VA_ARGS__ apply_callable_ck(func_type *func,                             \
+                                  args_for<func_type, Nsrc> args,              \
+                                  kwds_for<func_type, Nsrc> kwds)              \
+        : args_for<func_type, Nsrc>(args), kwds_for<func_type, Nsrc>(kwds),    \
+          func(func)                                                           \
+    {                                                                          \
+    }                                                                          \
+                                                                               \
+    __VA_ARGS__ void single(char *dst, char *const *src)                       \
+    {                                                                          \
+      single<typename return_of<func_type>::type>(this, this, dst, src);       \
+    }                                                                          \
+                                                                               \
+    static intptr_t                                                            \
+    instantiate(const arrfunc_type_data *af_self, const arrfunc_type *af_tp,   \
+                void *ckb, intptr_t ckb_offset, const ndt::type &dst_tp,       \
+                const char *dst_arrmeta, const ndt::type *src_tp,              \
+                const char *const *src_arrmeta, kernel_request_t kernreq,      \
+                const eval::eval_context *ectx, const nd::array &kwds);        \
+                                                                               \
+  private:                                                                     \
+    template <typename R, typename... A, size_t... I, typename... K,           \
+              size_t... J>                                                     \
+    __VA_ARGS__ typename std::enable_if<std::is_same<R, void>::value,          \
+                                        void>::type                            \
+    single(args<type_sequence<A...>, index_sequence<I...>> *                   \
+               DYND_IGNORE_UNUSED(args),                                       \
+           kwds<type_sequence<K...>, index_sequence<J...>> *                   \
+               DYND_IGNORE_UNUSED(kwds),                                       \
+           char *DYND_UNUSED(dst), char *const *DYND_IGNORE_UNUSED(src))       \
+    {                                                                          \
+      (*func)(static_cast<arg<A, I> *>(args)->get(src[I])...,                  \
+              static_cast<kwd<K, J> *>(kwds)->get()...);                       \
+    }                                                                          \
+                                                                               \
+    template <typename R, typename... A, size_t... I, typename... K,           \
+              size_t... J>                                                     \
+    __VA_ARGS__ typename std::enable_if<!std::is_same<R, void>::value,         \
+                                        void>::type                            \
+    single(args<type_sequence<A...>, index_sequence<I...>> *                   \
+               DYND_IGNORE_UNUSED(args),                                       \
+           kwds<type_sequence<K...>, index_sequence<J...>> *                   \
+               DYND_IGNORE_UNUSED(kwds),                                       \
+           char *dst, char *const *DYND_IGNORE_UNUSED(src))                    \
+    {                                                                          \
+      *reinterpret_cast<R *>(dst) =                                            \
+          (*func)(static_cast<arg<A, I> *>(args)->get(src[I])...,              \
+                  static_cast<kwd<K, J> *>(kwds)->get()...);                   \
+    }                                                                          \
+  }
+
+  APPLY_CALLABLE_CK(kernel_request_host);
+
+  template <typename func_type, int Nsrc>
+  intptr_t
+  apply_callable_ck<kernel_request_host, func_type *, Nsrc>::instantiate(
+      const arrfunc_type_data *self, const arrfunc_type *DYND_UNUSED(self_tp),
+      void *ckb, intptr_t ckb_offset, const ndt::type &DYND_UNUSED(dst_tp),
+      const char *DYND_UNUSED(dst_arrmeta), const ndt::type *src_tp,
+      const char *const *src_arrmeta, kernel_request_t kernreq,
+      const eval::eval_context *DYND_UNUSED(ectx), const nd::array &kwds)
+  {
+    self_type::create(ckb, kernreq, ckb_offset,
+                      *self->get_data_as<func_type *>(),
+                      args_for<func_type, Nsrc>(src_tp, src_arrmeta, kwds),
+                      kwds_for<func_type, Nsrc>(kwds));
+    return ckb_offset;
+  }
+
+#undef APPLY_CALLABLE_CK
+
   template <kernel_request_t kernreq, typename func_type, typename... K>
   struct construct_then_apply_callable_ck;
 
@@ -371,15 +463,15 @@ namespace kernels {
     template <size_t... J>                                                     \
     __VA_ARGS__ construct_then_apply_callable_ck(                              \
         args_for<func_type> args,                                              \
-        kwds<type_sequence<K...>, index_sequence<J...>>                        \
-            DYND_CONDITIONAL_UNUSED(kwds))                                     \
+        kwds<type_sequence<K...>, index_sequence<J...>> DYND_IGNORE_UNUSED(    \
+            kwds))                                                             \
         : args_for<func_type>(args), func(kwds.kwd<K, J>::get()...)            \
     {                                                                          \
     }                                                                          \
                                                                                \
     __VA_ARGS__ void single(char *dst, char *const *src)                       \
     {                                                                          \
-      single<typename return_of<func_type>::type>(dst, src, this);             \
+      single<typename return_of<func_type>::type>(this, dst, src);             \
     }                                                                          \
                                                                                \
     static intptr_t                                                            \
@@ -393,19 +485,22 @@ namespace kernels {
     template <typename R, typename... A, size_t... I>                          \
     __VA_ARGS__ typename std::enable_if<std::is_same<R, void>::value,          \
                                         void>::type                            \
-    single(char *DYND_UNUSED(dst), char *const *DYND_CONDITIONAL_UNUSED(src),  \
-           args<type_sequence<A...>, index_sequence<I...>> *DYND_UNUSED(args)) \
+    single(args<type_sequence<A...>, index_sequence<I...>> *                   \
+               DYND_IGNORE_UNUSED(args),                                       \
+           char *DYND_UNUSED(dst), char *const *DYND_IGNORE_UNUSED(src))       \
     {                                                                          \
-      func(arg<A, I>::get(src[I])...);                                         \
+      func(static_cast<arg<A, I> *>(args)->get(src[I])...);                    \
     }                                                                          \
                                                                                \
     template <typename R, typename... A, size_t... I>                          \
     __VA_ARGS__ typename std::enable_if<!std::is_same<R, void>::value,         \
                                         void>::type                            \
-    single(char *dst, char *const *DYND_CONDITIONAL_UNUSED(src),               \
-           args<type_sequence<A...>, index_sequence<I...>> *DYND_UNUSED(args)) \
+    single(args<type_sequence<A...>, index_sequence<I...>> *                   \
+               DYND_IGNORE_UNUSED(args),                                       \
+           char *dst, char *const *DYND_IGNORE_UNUSED(src))                    \
     {                                                                          \
-      *reinterpret_cast<R *>(dst) = func(arg<A, I>::get(src[I])...);           \
+      *reinterpret_cast<R *>(dst) =                                            \
+          func(static_cast<arg<A, I> *>(args)->get(src[I])...);                \
     }                                                                          \
   };
 

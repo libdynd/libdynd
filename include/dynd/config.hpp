@@ -58,7 +58,7 @@ inline bool DYND_ISNAN(long double x) { return std::isnan(x); }
 #define _GNU_SOURCE
 #endif
 
-#define DYND_CONDITIONAL_UNUSED(NAME) NAME __attribute__((unused))
+#define DYND_IGNORE_UNUSED(NAME) NAME __attribute__((unused))
 
 #define DYND_CONSTEXPR constexpr
 #define DYND_RVALUE_REFS
@@ -379,8 +379,8 @@ struct index_proxy<index_sequence<I0, I...>> {
  */
 #define DYND_UNUSED(x)
 
-#ifndef DYND_CONDITIONAL_UNUSED
-#define DYND_CONDITIONAL_UNUSED(NAME) NAME
+#ifndef DYND_IGNORE_UNUSED
+#define DYND_IGNORE_UNUSED(NAME) NAME
 #endif
 
 namespace dynd {

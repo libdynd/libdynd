@@ -33,6 +33,7 @@ static bool is_simple_identifier_name(const char *begin, const char *end)
     return true;
   }
 }
+
 arrfunc_type::arrfunc_type(const ndt::type &pos_types,
                            const ndt::type &ret_type)
     : base_type(arrfunc_type_id, function_kind, sizeof(arrfunc_type_data),

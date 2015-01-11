@@ -1237,6 +1237,9 @@ static ndt::type parse_datashape_nooption(const char *&rbegin, const char *end,
         throw datashape_parse_error(begin, "expected a '*'");
       }
     }
+    else if (parse_token_ds(begin, end, '|')) { // TYPE
+      result = ndt::make_type(parse_datashape(begin, end, symtable));
+    }
     else if (parse::compare_range_to_literal(nbegin, nend, "string")) {
       result = parse_string_parameters(begin, end);
     }
