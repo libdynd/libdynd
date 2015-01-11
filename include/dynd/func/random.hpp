@@ -11,6 +11,23 @@
 namespace dynd {
 
 namespace nd {
+  arrfunc default_random_engine()
+  {
+    return apply::make(new std::default_random_engine(),
+                       &delete_wrapper<std::default_random_engine>);
+  }
+
+  arrfunc minstd_rand()
+  {
+    return apply::make(new std::minstd_rand(),
+                       &delete_wrapper<std::minstd_rand>);
+  }
+
+  arrfunc minstd_rand(std::minstd_rand::result_type seed)
+  {
+    return apply::make(new std::minstd_rand(seed),
+                       &delete_wrapper<std::minstd_rand>);
+  }
 }
 
 namespace kernels {
@@ -40,6 +57,41 @@ namespace decl {
 
     class uniform : public arrfunc<uniform> {
     public:
+      template <typename R>
+      static void resolve_option_values(
+          const arrfunc_type_data *DYND_UNUSED(self),
+          const arrfunc_type *DYND_UNUSED(self_tp), intptr_t DYND_UNUSED(nsrc),
+          const ndt::type *DYND_UNUSED(src_tp), dynd::nd::array &kwds)
+      {
+        dynd::nd::array a = kwds.p("a");
+        if (a.is_missing()) {
+          a.val_assign(0);
+        }
+
+        dynd::nd::array b = kwds.p("b");
+        if (b.is_missing()) {
+          b.val_assign(std::numeric_limits<R>::max());
+        }
+      }
+
+      static void resolve_option_values(const arrfunc_type_data *self,
+                                        const arrfunc_type *self_tp,
+                                        intptr_t nsrc, const ndt::type *src_tp,
+                                        dynd::nd::array &kwds)
+      {
+        ndt::type tp = kwds.p("tp").f("dereference").as<ndt::type>();
+        switch (tp.get_type_id()) {
+        case int32_type_id:
+          resolve_option_values<int32_t>(self, self_tp, nsrc, src_tp, kwds);
+          break;
+        case int64_type_id:
+          resolve_option_values<int64_t>(self, self_tp, nsrc, src_tp, kwds);
+          break;
+        default:
+          throw std::runtime_error("error");
+        }
+      }
+
       template <typename R>
       static intptr_t instantiate(const arrfunc_type_data *DYND_UNUSED(self),
                                   const arrfunc_type *DYND_UNUSED(self_tp),
@@ -80,47 +132,19 @@ namespace decl {
           return instantiate<int32_t>(self, self_tp, ckb, ckb_offset, dst_tp,
                                       dst_arrmeta, src_tp, src_arrmeta, kernreq,
                                       ectx, kwds);
+        case int64_type_id:
+          return instantiate<int64_t>(self, self_tp, ckb, ckb_offset, dst_tp,
+                                      dst_arrmeta, src_tp, src_arrmeta, kernreq,
+                                      ectx, kwds);
         default:
           throw std::runtime_error("error");
         }
       }
 
-      template <typename R>
-      static void resolve_option_values(
-          const arrfunc_type_data *DYND_UNUSED(self),
-          const arrfunc_type *DYND_UNUSED(self_tp), intptr_t DYND_UNUSED(nsrc),
-          const ndt::type *DYND_UNUSED(src_tp), dynd::nd::array &kwds)
-      {
-        dynd::nd::array a = kwds.p("a");
-        if (a.is_missing()) {
-          a.val_assign(0);
-        }
-
-        dynd::nd::array b = kwds.p("b");
-        if (b.is_missing()) {
-          b.val_assign(std::numeric_limits<R>::max());
-        }
-      }
-
-      template <typename R>
-      static dynd::nd::arrfunc make()
-      {
-
-        ndt::type dtp = ndt::make_type<R>();
-        ndt::type kwds =
-            ndt::make_struct(ndt::make_type(), "type", ndt::make_option(dtp),
-                             "a", ndt::make_option(dtp), "b",
-                             ndt::make_option(ndt::type("void")), "engine");
-
-        return dynd::nd::arrfunc(
-            &instantiate<R>, &resolve_option_values<R>, NULL,
-            ndt::make_arrfunc(ndt::make_empty_tuple(), kwds, dtp));
-      }
-
       static dynd::nd::arrfunc make()
       {
         return dynd::nd::arrfunc(
-            &instantiate, &resolve_option_values<int32_t>, NULL,
+            &instantiate, &resolve_option_values, NULL,
             ndt::type("(tp: type | R, a: ?R, b: ?R, engine: ?void) -> R"));
       }
     };

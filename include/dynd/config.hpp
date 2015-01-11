@@ -58,7 +58,7 @@ inline bool DYND_ISNAN(long double x) { return std::isnan(x); }
 #define _GNU_SOURCE
 #endif
 
-#define DYND_CONDITIONAL_UNUSED(NAME) NAME __attribute__((unused))
+#define DYND_IGNORE_UNUSED(NAME) NAME __attribute__((unused))
 
 #define DYND_CONSTEXPR constexpr
 #define DYND_RVALUE_REFS

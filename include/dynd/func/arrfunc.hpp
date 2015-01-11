@@ -155,6 +155,9 @@ namespace detail {
   DYND_GET_MEM_FUNC(arrfunc_free_t, free);
 } // namespace dynd::detail
 
+template <typename T>
+void destroy_wrapper(arrfunc_type_data *self);
+
 /**
  * This is a struct designed for interoperability at
  * the C ABI level. It contains enough information
@@ -167,12 +170,6 @@ namespace detail {
  * with different array arrmeta.
  */
 class arrfunc_type_data {
-  template <class T>
-  static void cpp_class_free(arrfunc_type_data *self)
-  {
-    self->get_data_as<T>()->~T();
-  }
-
   // non-copyable
   arrfunc_type_data(const arrfunc_type_data &) = delete;
 
@@ -222,12 +219,13 @@ public:
   template <typename T>
   arrfunc_type_data(const T &data, arrfunc_instantiate_t instantiate,
                     arrfunc_resolve_option_values_t resolve_option_values,
-                    arrfunc_resolve_dst_type_t resolve_dst_type)
+                    arrfunc_resolve_dst_type_t resolve_dst_type,
+                    arrfunc_free_t free = NULL)
       : instantiate(instantiate), resolve_option_values(resolve_option_values),
-        resolve_dst_type(resolve_dst_type), free(NULL)
+        resolve_dst_type(resolve_dst_type),
+        free(free == NULL ? &destroy_wrapper<T> : free)
   {
     new (this->data) T(data);
-    this->free = &arrfunc_type_data::cpp_class_free<T>;
   }
 
   ~arrfunc_type_data()
@@ -266,6 +264,24 @@ public:
     return reinterpret_cast<const T *>(data);
   }
 };
+
+template <typename T>
+void destroy_wrapper(arrfunc_type_data *self)
+{
+  self->get_data_as<T>()->~T();
+}
+
+template <typename T>
+void delete_wrapper(arrfunc_type_data *self)
+{
+  delete *self->get_data_as<T *>();
+}
+
+template <typename T, void (*free)(void *) = &std::free>
+void free_wrapper(arrfunc_type_data *self)
+{
+  free(*self->get_data_as<T *>());
+}
 
 namespace nd {
   template <typename... A>
@@ -355,17 +371,17 @@ namespace nd {
     };
 
     template <typename T>
-    ndt::type do_type_stuff(const T &) {
+    ndt::type do_type_stuff(const T &)
+    {
       return ndt::type();
     }
 
-    inline ndt::type do_type_stuff(const nd::array &a) {
+    inline ndt::type do_type_stuff(const nd::array &a)
+    {
       return a.as<ndt::type>();
     }
 
-    inline ndt::type do_type_stuff(const ndt::type &tp) {
-      return tp;
-    }
+    inline ndt::type do_type_stuff(const ndt::type &tp) { return tp; }
 
     template <typename... K>
     class kwds {
@@ -415,7 +431,8 @@ namespace nd {
 
           ndt::type expected_tp = af_tp->get_kwd_type(j);
           if (expected_tp.get_type_id() == type_type_id) {
-            ndt::type pattern_tp = expected_tp.extended<type_type>()->get_pattern_type();
+            ndt::type pattern_tp =
+                expected_tp.extended<type_type>()->get_pattern_type();
             if (pattern_tp.is_null()) {
               actual_tp = ndt::as_type(value);
             } else {
@@ -581,12 +598,13 @@ namespace nd {
 
     template <typename T>
     arrfunc(const T &data, arrfunc_instantiate_t instantiate,
-            arrfunc_resolve_dst_type_t resolve_dst_type,
+            arrfunc_resolve_option_values_t resolve_option_values,
+            arrfunc_resolve_dst_type_t resolve_dst_type, arrfunc_free_t free,
             const ndt::type &self_tp)
         : m_value(empty(self_tp))
     {
-      new (m_value.get_readwrite_originptr())
-          arrfunc_type_data(data, instantiate, NULL, resolve_dst_type);
+      new (m_value.get_readwrite_originptr()) arrfunc_type_data(
+          data, instantiate, resolve_option_values, resolve_dst_type, free);
     }
 
     arrfunc(const arrfunc_type_data *self, const ndt::type &self_tp)
@@ -1211,8 +1229,8 @@ namespace decl {
       static dynd::nd::arrfunc bind(const std::string &DYND_UNUSED(name),
                                     const dynd::nd::arrfunc &child)
       {
-        return dynd::nd::arrfunc(child, &instantiate<true>,
-                                 &resolve_dst_type<true>,
+        return dynd::nd::arrfunc(child, &instantiate<true>, NULL,
+                                 &resolve_dst_type<true>, NULL,
                                  T::make_lifted_type(child.get_type()));
       }
 
