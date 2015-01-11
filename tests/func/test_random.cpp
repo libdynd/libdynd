@@ -18,6 +18,8 @@ using namespace dynd;
 
 TEST(Random, Uniform)
 {
+  nd::arrfunc af = nd::random::default_random_engine();
+
 /*
   ndt::type self_tp = ((nd::arrfunc) nd::uniform).get_array_type();
   std::cout << self_tp << std::endl;

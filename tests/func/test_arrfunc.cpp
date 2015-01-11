@@ -13,7 +13,7 @@
 #include <dynd/types/fixedstring_type.hpp>
 #include <dynd/types/date_type.hpp>
 #include <dynd/func/arrfunc.hpp>
-#include <dynd/func/apply_arrfunc.hpp>
+#include <dynd/func/apply.hpp>
 #include <dynd/kernels/assignment_kernels.hpp>
 #include <dynd/kernels/expr_kernel_generator.hpp>
 #include <dynd/func/elwise.hpp>
@@ -72,22 +72,22 @@ static double func(int x, double y) { return 2.0 * x + y; }
 
 TEST(ArrFunc, Construction)
 {
-  nd::arrfunc af0 = nd::apply::make(&func);
+  nd::arrfunc af0 = nd::functional::apply(&func);
   EXPECT_EQ(4.5, af0(1, 2.5).as<double>());
 
-  nd::arrfunc af1 = nd::apply::make(&func, "y");
+  nd::arrfunc af1 = nd::functional::apply(&func, "y");
   EXPECT_EQ(4.5, af1(1, kwds("y", 2.5)).as<double>());
 
-  nd::arrfunc af2 = nd::apply::make([](int x, int y) { return x - y; });
+  nd::arrfunc af2 = nd::functional::apply([](int x, int y) { return x - y; });
   EXPECT_EQ(-4, af2(3, 7).as<int>());
 
-  nd::arrfunc af3 = nd::apply::make([](int x, int y) { return x - y; }, "y");
+  nd::arrfunc af3 = nd::functional::apply([](int x, int y) { return x - y; }, "y");
   EXPECT_EQ(-4, af3(3, kwds("y", 7)).as<int>());
 }
 
 TEST(ArrFunc, CallOperator)
 {
-  nd::arrfunc af = nd::apply::make(&func);
+  nd::arrfunc af = nd::functional::apply(&func);
   // Calling with positional arguments
   EXPECT_EQ(4.5, af(1, 2.5).as<double>());
   // Positional arguments and eval_context
@@ -100,7 +100,7 @@ TEST(ArrFunc, CallOperator)
   EXPECT_THROW(af(2, 3.5, kwds("x", 10), &eval::default_eval_context),
                invalid_argument);
 
-  af = nd::apply::make(&func, "x");
+  af = nd::functional::apply(&func, "x");
   // Calling with positional and keyword arguments
   EXPECT_EQ(4.5, af(1, kwds("x", 2.5)).as<double>());
   // Positional+keyword arguments and eval_context
@@ -116,7 +116,7 @@ TEST(ArrFunc, CallOperator)
   EXPECT_THROW(af(2, 3.5, kwds("x", 10, "y", 20), &eval::default_eval_context),
                invalid_argument);
 
-  af = nd::apply::make([]() { return 10; });
+  af = nd::functional::apply([]() { return 10; });
   // Calling with no arguments
   EXPECT_EQ(10, af().as<int>());
   // Calling with empty keyword arguments
@@ -132,7 +132,7 @@ TEST(ArrFunc, CallOperator)
 
 TEST(ArrFunc, KeywordParsing)
 {
-  nd::arrfunc af0 = nd::apply::make([](int x, int y) { return x + y; }, "y");
+  nd::arrfunc af0 = nd::functional::apply([](int x, int y) { return x + y; }, "y");
   EXPECT_EQ(5, af0(1, kwds("y", 4)).as<int>());
   EXPECT_THROW(af0(1, kwds("z", 4)).as<int>(), std::invalid_argument);
   EXPECT_THROW(af0(1, kwds("Y", 4)).as<int>(), std::invalid_argument);
@@ -158,7 +158,7 @@ TEST(ArrFunc, Option)
     }
   };
 
-  nd::arrfunc af = nd::apply::make(callable(), "x");
+  nd::arrfunc af = nd::functional::apply(callable(), "x");
   EXPECT_EQ(5, af(1, kwds("x", 4)).as<int>());
 
   af.set_as_option(&callable::resolve_option_vals, "x");

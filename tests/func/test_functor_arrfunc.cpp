@@ -12,7 +12,7 @@
 #include "dynd_assertions.hpp"
 
 #include <dynd/array.hpp>
-#include <dynd/func/apply_arrfunc.hpp>
+#include <dynd/func/apply.hpp>
 #include <dynd/func/elwise.hpp>
 #include <dynd/types/cfixed_dim_type.hpp>
 
@@ -159,7 +159,7 @@ TYPED_TEST_P(FunctorArrfunc_FuncRetRes, FuncRetRes) {
   a = static_cast<TypeParam>(10);
   b = static_cast<TypeParam>(20);
 
-  af = nd::apply::make(
+  af = nd::functional::apply(
       static_cast<int (*)(TypeParam, const TypeParam &)>(&func0));
   res = af(a, b);
   EXPECT_EQ(-20, res.as<int>());
@@ -169,14 +169,14 @@ TYPED_TEST_P(FunctorArrfunc_FuncRetRes, FuncRetRes) {
   a = nd::empty(ndt::make_cfixed_dim(3, ndt::make_type<TypeParam>()));
 
   a.vals() = vals1[0];
-  af = nd::apply::make(
+  af = nd::functional::apply(
       static_cast<TypeParam (*)(const TypeParam(&)[3])>(&func1));
   res = af(a);
   EXPECT_EQ(ndt::make_type<TypeParam>(), res.get_type());
   EXPECT_EQ(3, res.as<TypeParam>());
 
   a.vals() = vals1[1];
-  af = nd::apply::make(
+  af = nd::functional::apply(
       static_cast<TypeParam (*)(const TypeParam(&)[3])>(&func1));
   res = af(a);
   EXPECT_EQ(ndt::make_type<TypeParam>(), res.get_type());
@@ -186,7 +186,7 @@ TYPED_TEST_P(FunctorArrfunc_FuncRetRes, FuncRetRes) {
 
   a.vals() = vals1[0];
   b.vals() = vals1[1];
-  af = nd::apply::make(
+  af = nd::functional::apply(
       static_cast<TypeParam (*)(const TypeParam(&)[3], const TypeParam(&)[3])>(
           &func2));
   res = af(a, b);
@@ -196,7 +196,7 @@ TYPED_TEST_P(FunctorArrfunc_FuncRetRes, FuncRetRes) {
   a = nd::empty(ndt::cfixed_dim_from_array<TypeParam[2][3]>::make());
 
   a.vals() = vals1;
-  af = nd::apply::make(
+  af = nd::functional::apply(
       static_cast<TypeParam (*)(const TypeParam(&)[2][3])>(&func3));
   res = af(a);
   EXPECT_EQ(ndt::make_type<TypeParam>(), res.get_type());
@@ -350,7 +350,7 @@ TYPED_TEST_P(FunctorArrfunc_CallRetRes, CallRetRes) {
   a = static_cast<TypeParam>(10);
   b = static_cast<TypeParam>(20);
 
-  af = nd::apply::make(Callable0(&func0));
+  af = nd::functional::apply(Callable0(&func0));
   res = af(a, b);
   EXPECT_EQ(-20, res.as<int>());
 
@@ -359,7 +359,7 @@ TYPED_TEST_P(FunctorArrfunc_CallRetRes, CallRetRes) {
 
   a = avals0;
   b = bvals0;
-  af = nd::apply::make(Callable0(&func0));
+  af = nd::functional::apply(Callable0(&func0));
   af = nd::elwise.bind("func", af);
   res = af(a, b);
   EXPECT_EQ(ndt::type("2 * 3 * int"), res.get_type());
@@ -370,13 +370,13 @@ TYPED_TEST_P(FunctorArrfunc_CallRetRes, CallRetRes) {
   a = nd::empty(ndt::make_cfixed_dim(3, ndt::make_type<TypeParam>()));
 
   a.vals() = vals1[0];
-  af = nd::apply::make(Callable1(&func1));
+  af = nd::functional::apply(Callable1(&func1));
   res = af(a);
   EXPECT_EQ(ndt::make_type<TypeParam>(), res.get_type());
   EXPECT_EQ(3, res.as<TypeParam>());
 
   a.vals() = vals1[1];
-  af = nd::apply::make(Callable1(&func1));
+  af = nd::functional::apply(Callable1(&func1));
   res = af(a);
   EXPECT_EQ(ndt::make_type<TypeParam>(), res.get_type());
   EXPECT_EQ(12, res.as<TypeParam>());
@@ -385,7 +385,7 @@ TYPED_TEST_P(FunctorArrfunc_CallRetRes, CallRetRes) {
 
   a.vals() = vals1[0];
   b.vals() = vals1[1];
-  af = nd::apply::make(Callable2(&func2));
+  af = nd::functional::apply(Callable2(&func2));
   res = af(a, b);
   EXPECT_EQ(ndt::make_type<TypeParam>(), res.get_type());
   EXPECT_EQ(14, res.as<TypeParam>());
@@ -393,7 +393,7 @@ TYPED_TEST_P(FunctorArrfunc_CallRetRes, CallRetRes) {
   a = nd::empty(ndt::cfixed_dim_from_array<TypeParam[2][3]>::make());
 
   a.vals() = vals1;
-  af = nd::apply::make(Callable3(&func3));
+  af = nd::functional::apply(Callable3(&func3));
   res = af(a);
   EXPECT_EQ(ndt::make_type<TypeParam>(), res.get_type());
   EXPECT_EQ(6, res.as<TypeParam>());
@@ -408,7 +408,7 @@ TEST(FunctorArrfunc, LambdaFunc) {
 
   a = 100;
   b = 1.5;
-  af = nd::apply::make([](int x, double y) { return (float)(x + y); });
+  af = nd::functional::apply([](int x, double y) { return (float)(x + y); });
   res = af(a, b);
   EXPECT_EQ(ndt::make_type<float>(), res.get_type());
   EXPECT_EQ(101.5f, res.as<float>());
@@ -416,7 +416,7 @@ TEST(FunctorArrfunc, LambdaFunc) {
   double a_val[3] = {1.5, 2.0, 3.125};
   a = a_val;
   b = 3.25;
-  af = nd::apply::make([](double x, double y,
+  af = nd::functional::apply([](double x, double y,
                                    int z) { return x * z + y; });
   af = nd::elwise.bind("func", af);
   res = af(a, b, 10);

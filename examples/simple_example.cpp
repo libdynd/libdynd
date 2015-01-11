@@ -14,19 +14,18 @@
 #include <dynd/array_range.hpp>
 #include <dynd/kernels/assignment_kernels.hpp>
 #include <dynd/json_parser.hpp>
-#include <dynd/func/apply_arrfunc.hpp>
+#include <dynd/func/apply.hpp>
 #include <dynd/func/lift_reduction_arrfunc.hpp>
 #include <dynd/kernels/reduction_kernels.hpp>
 
 using namespace std;
 using namespace dynd;
 
+namespace {
 struct callable0 {
-  DYND_CUDA_HOST_DEVICE int operator()(int x, int y)
-  {
-    return x + y;
-  }
+  DYND_CUDA_HOST_DEVICE int operator()(int x, int y) { return x + y; }
 };
+} // unnamed namespace
 
 int main()
 {
@@ -41,9 +40,9 @@ int main()
   b = {3, 5, 2};
 
 #ifdef DYND_CUDA
-  nd::arrfunc af =
-      nd::apply::make<kernel_request_cuda_device, callable0>();
-//  std::cout << af(nd::array(1).to_cuda_device(), nd::array(2).to_cuda_device(), nd::array(3).to_cuda_device(),
+  nd::arrfunc af = nd::functional::apply<kernel_request_cuda_device, callable0>();
+  //  std::cout << af(nd::array(1).to_cuda_device(),
+  //  nd::array(2).to_cuda_device(), nd::array(3).to_cuda_device(),
   //    nd::array(4).to_cuda_device()) << std::endl;
 
   cout << "moving to CUDA device..." << endl;
