@@ -846,8 +846,8 @@ static bool parse_struct_item_bare(const char *&rbegin, const char *end,
 }
 
 
-// record_item_general : record_item_bare |
-//               QUOTEDNAME COLON rhs_expression
+// struct_item_general : struct_item_bare |
+//                       QUOTEDNAME COLON rhs_expression
 static bool parse_struct_item_general(const char *&rbegin, const char *end,
                                       map<string, ndt::type> &symtable,
                                       string &out_field_name,
@@ -910,7 +910,7 @@ static ndt::type parse_struct(const char *&rbegin, const char *end,
   vector<ndt::type> field_type_list;
   string field_name;
   ndt::type field_type;
-  bool cprefixed = false;
+  bool cprefixed = false, variadic = false;
 
   if (!parse_token_ds(begin, end, '{')) {
     if (parse_token_ds(begin, end, "c{")) {
@@ -921,6 +921,14 @@ static ndt::type parse_struct(const char *&rbegin, const char *end,
     }
   }
   for (;;) {
+    if (!cprefixed && parse_token_ds(begin, end, "...")) {
+      if (!parse_token_ds(begin, end, '}')) {
+        throw datashape_parse_error(begin, "expected '}'");
+      }
+      variadic = true;
+      break;
+    }
+
     const char *saved_begin = begin;
     parse::skip_whitespace_and_pound_comments(begin, end);
     if (parse_struct_item_general(begin, end, symtable, field_name,
@@ -950,7 +958,7 @@ static ndt::type parse_struct(const char *&rbegin, const char *end,
     return ndt::make_cstruct(field_name_list, field_type_list);
   }
   else {
-    return ndt::make_struct(field_name_list, field_type_list);
+    return ndt::make_struct(field_name_list, field_type_list, variadic);
   }
 }
 
