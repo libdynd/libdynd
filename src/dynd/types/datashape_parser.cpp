@@ -980,8 +980,19 @@ static ndt::type parse_funcproto_kwds(const char *&rbegin, const char *end,
   vector<ndt::type> field_type_list;
   string field_name;
   ndt::type field_type;
+  bool variadic = false;
 
   for (;;) {
+    // Check for variadic ending
+    if (parse_token_ds(begin, end, "...")) {
+      if (!parse_token_ds(begin, end, ')')) {
+        throw datashape_parse_error(begin,
+                                    "expected ',' or ')' in arrfunc prototype");
+      }
+      variadic = true;
+      break;
+    }
+
     const char *saved_begin = begin;
     parse::skip_whitespace_and_pound_comments(begin, end);
     if (parse_struct_item_bare(begin, end, symtable, field_name, field_type)) {
@@ -1006,7 +1017,7 @@ static ndt::type parse_funcproto_kwds(const char *&rbegin, const char *end,
   }
 
   rbegin = begin;
-  return ndt::make_struct(field_name_list, field_type_list);
+  return ndt::make_struct(field_name_list, field_type_list, variadic);
 }
 
 // tuple : LPAREN tuple_item tuple_item* RPAREN

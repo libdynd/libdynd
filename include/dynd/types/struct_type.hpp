@@ -85,12 +85,13 @@ public:
 }; // class struct_type
 
 namespace ndt {
-  inline ndt::type make_empty_struct()
+  inline ndt::type make_empty_struct(bool variadic = false)
   {
     // TODO: return a static instance
     nd::array field_names = nd::empty(0, ndt::make_string());
     nd::array field_types = nd::empty(0, ndt::make_type());
-    return ndt::type(new struct_type(field_names, field_types, false), false);
+    return ndt::type(new struct_type(field_names, field_types, variadic),
+                     false);
   }
 
   /** Makes a struct type with the specified fields */

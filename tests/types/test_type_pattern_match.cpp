@@ -213,8 +213,19 @@ TEST(TypePatternMatch, VariadicArrFuncProto)
 {
   EXPECT_TRUE(
       ndt::pattern_match(ndt::type("() -> void"), ndt::type("(...) -> void")));
-  EXPECT_FALSE(ndt::pattern_match(ndt::type("(kw: int32) -> void"),
+  EXPECT_FALSE(
+      ndt::pattern_match(ndt::type("(...) -> void"), ndt::type("() -> void")));
+  EXPECT_TRUE(ndt::pattern_match(ndt::type("(kw: int32) -> void"),
                                   ndt::type("(...) -> void")));
+  EXPECT_TRUE(
+      ndt::pattern_match(ndt::type("(int32, kw: int32, x: float64) -> void"),
+                         ndt::type("(int32, kw: T, ...) -> void")));
+  EXPECT_FALSE(
+      ndt::pattern_match(ndt::type("(int32, kw: int32, x: float64) -> void"),
+                         ndt::type("(int32, wk: T, ...) -> void")));
+  EXPECT_TRUE(
+      ndt::pattern_match(ndt::type("(int32, ..., kw: int32, ...) -> void"),
+                         ndt::type("(...) -> void")));
   EXPECT_TRUE(ndt::pattern_match(ndt::type("(int32, float32) -> float32"),
                                  ndt::type("(S, ...) -> T")));
   EXPECT_TRUE(ndt::pattern_match(
