@@ -5,7 +5,7 @@
 
 #include <set>
 
-#include <dynd/func/multidispatch_arrfunc.hpp>
+#include <dynd/func/multidispatch.hpp>
 #include <dynd/kernels/buffered_kernels.hpp>
 
 using namespace std;
@@ -164,7 +164,7 @@ struct toposort_marker {
 } // anonymous namespace
 
 static void toposort_visit(intptr_t n, vector<toposort_marker> &marker,
-                           vector<vector<intptr_t> > &adjlist, intptr_t naf,
+                           vector<vector<intptr_t>> &adjlist, intptr_t naf,
                            const nd::arrfunc *af,
                            vector<nd::arrfunc> &sorted_af)
 {
@@ -188,7 +188,7 @@ static void toposort_visit(intptr_t n, vector<toposort_marker> &marker,
 /**
  * Does a DFS-based topological sort.
  */
-static void toposort(vector<vector<intptr_t> > &adjlist, intptr_t naf,
+static void toposort(vector<vector<intptr_t>> &adjlist, intptr_t naf,
                      const nd::arrfunc *af, vector<nd::arrfunc> &sorted_af)
 {
   vector<toposort_marker> marker(naf);
@@ -206,7 +206,7 @@ static void toposort(vector<vector<intptr_t> > &adjlist, intptr_t naf,
  * NOTE: Presently O(naf ** 2)
  */
 static void get_graph(intptr_t naf, const nd::arrfunc *af,
-                      vector<vector<intptr_t> > &adjlist)
+                      vector<vector<intptr_t>> &adjlist)
 {
   for (intptr_t i = 0; i < naf; ++i) {
     for (intptr_t j = 0; j < naf; ++j) {
@@ -228,7 +228,7 @@ static void get_graph(intptr_t naf, const nd::arrfunc *af,
 static void sort_arrfuncs(intptr_t naf, const nd::arrfunc *af,
                           vector<nd::arrfunc> &sorted_af)
 {
-  vector<vector<intptr_t> > adjlist(naf);
+  vector<vector<intptr_t>> adjlist(naf);
   get_graph(naf, af, adjlist);
 
   /*
@@ -252,7 +252,7 @@ static void sort_arrfuncs(intptr_t naf, const nd::arrfunc *af,
  */
 static void
 get_ambiguous_pairs(intptr_t naf, const nd::arrfunc *af,
-                    vector<pair<nd::arrfunc, nd::arrfunc> > &ambig_pairs)
+                    vector<pair<nd::arrfunc, nd::arrfunc>> &ambig_pairs)
 {
   for (intptr_t i = 0; i < naf; ++i) {
     for (intptr_t j = i + 1; j < naf; ++j) {
@@ -271,8 +271,9 @@ get_ambiguous_pairs(intptr_t naf, const nd::arrfunc *af,
   }
 }
 
-static void free_multidispatch_af_data(arrfunc_type_data *self_af) {
-  self_af->get_data_as<vector<nd::arrfunc> >()->~vector();
+static void free_multidispatch_af_data(arrfunc_type_data *self_af)
+{
+  self_af->get_data_as<vector<nd::arrfunc>>()->~vector();
 }
 
 static intptr_t instantiate_multidispatch_af(
@@ -282,7 +283,7 @@ static intptr_t instantiate_multidispatch_af(
     const char *const *src_arrmeta, kernel_request_t kernreq,
     const eval::eval_context *ectx, const nd::array &kwds)
 {
-  const vector<nd::arrfunc> *icd = af_self->get_data_as<vector<nd::arrfunc> >();
+  const vector<nd::arrfunc> *icd = af_self->get_data_as<vector<nd::arrfunc>>();
   for (intptr_t i = 0; i < (intptr_t)icd->size(); ++i) {
     const nd::arrfunc &af = (*icd)[i];
     intptr_t isrc, nsrc = af.get_type()->get_npos();
@@ -322,10 +323,9 @@ static intptr_t instantiate_multidispatch_af(
 static int resolve_multidispatch_dst_type(
     const arrfunc_type_data *af_self, const arrfunc_type *DYND_UNUSED(af_tp),
     intptr_t nsrc, const ndt::type *src_tp, int throw_on_error,
-    ndt::type &out_dst_tp,
-    const nd::array &DYND_UNUSED(kwds))
+    ndt::type &out_dst_tp, const nd::array &DYND_UNUSED(kwds))
 {
-  const vector<nd::arrfunc> *icd = af_self->get_data_as<vector<nd::arrfunc> >();
+  const vector<nd::arrfunc> *icd = af_self->get_data_as<vector<nd::arrfunc>>();
   for (intptr_t i = 0; i < (intptr_t)icd->size(); ++i) {
     const nd::arrfunc &af = (*icd)[i];
     if (nsrc == af.get_type()->get_npos()) {
@@ -357,14 +357,13 @@ static int resolve_multidispatch_dst_type(
     }
     ss << ")";
     throw type_error(ss.str());
-  }
-  else {
+  } else {
     return 0;
   }
 }
 
-nd::arrfunc dynd::make_multidispatch_arrfunc(intptr_t naf,
-                                             const nd::arrfunc *child_af)
+nd::arrfunc nd::functional::multidispatch(intptr_t naf,
+                                          const nd::arrfunc *child_af)
 {
   if (naf <= 0) {
     throw invalid_argument(
@@ -400,7 +399,7 @@ nd::arrfunc dynd::make_multidispatch_arrfunc(intptr_t naf,
   cout << endl;
   //*/
 
-  vector<pair<nd::arrfunc, nd::arrfunc> > ambig_pairs;
+  vector<pair<nd::arrfunc, nd::arrfunc>> ambig_pairs;
   get_ambiguous_pairs(naf, &sorted_af[0], ambig_pairs);
   if (!ambig_pairs.empty()) {
     stringstream ss;

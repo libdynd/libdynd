@@ -5,7 +5,7 @@
 
 #include <dynd/kernels/expr_kernels.hpp>
 #include <dynd/func/arrfunc.hpp>
-#include <dynd/func/multidispatch_arrfunc.hpp>
+#include <dynd/func/multidispatch.hpp>
 
 namespace dynd {
 namespace nd {

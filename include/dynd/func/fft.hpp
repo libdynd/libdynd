@@ -5,7 +5,7 @@
 
 #pragma once
 
-#include <dynd/func/multidispatch_arrfunc.hpp>
+#include <dynd/func/multidispatch.hpp>
 #include <dynd/kernels/fft.hpp>
 
 #ifdef DYND_FFTW
