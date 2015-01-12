@@ -920,6 +920,15 @@ static ndt::type parse_struct(const char *&rbegin, const char *end,
       return ndt::type(uninitialized_type_id);
     }
   }
+  if (parse_token_ds(begin, end, '}')) {
+    // Empty struct
+    rbegin = begin;
+    if (cprefixed) {
+      return ndt::make_empty_cstruct();
+    } else {
+      return ndt::make_empty_struct();
+    }
+  }
   for (;;) {
     if (!cprefixed && parse_token_ds(begin, end, "...")) {
       if (!parse_token_ds(begin, end, '}')) {

@@ -362,16 +362,6 @@ TEST(DataShapeParser, ErrorRecord)
 {
   try {
     ndt::type("{\n"
-              "}\n");
-    EXPECT_TRUE(false);
-  }
-  catch (const runtime_error &e) {
-    string msg = e.what();
-    EXPECT_TRUE(msg.find("line 1, column 2") != string::npos);
-    EXPECT_TRUE(msg.find("expected a record item") != string::npos);
-  }
-  try {
-    ndt::type("{\n"
               "   id: int64\n"
               "   name: string\n"
               "   amount: invalidtype\n"
