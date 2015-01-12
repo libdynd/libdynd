@@ -279,7 +279,7 @@ nd::array nd::make_string_array(const char *str, size_t len,
   return result;
 }
 
-nd::array nd::make_strided_string_array(const char **cstr_array,
+nd::array nd::make_strided_string_array(const char *const *cstr_array,
                                         size_t array_size)
 {
   size_t total_string_length = 0;
