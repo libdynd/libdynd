@@ -271,11 +271,6 @@ get_ambiguous_pairs(intptr_t naf, const nd::arrfunc *af,
   }
 }
 
-static void free_multidispatch_af_data(arrfunc_type_data *self_af)
-{
-  self_af->get_data_as<vector<nd::arrfunc>>()->~vector();
-}
-
 static intptr_t instantiate_multidispatch_af(
     const arrfunc_type_data *af_self, const arrfunc_type *DYND_UNUSED(af_tp),
     void *ckb, intptr_t ckb_offset, const ndt::type &dst_tp,
@@ -363,7 +358,7 @@ static int resolve_multidispatch_dst_type(
 }
 
 nd::arrfunc nd::functional::multidispatch(intptr_t naf,
-                                          const nd::arrfunc *child_af)
+                                          const arrfunc *child_af)
 {
   if (naf <= 0) {
     throw invalid_argument(
@@ -413,15 +408,7 @@ nd::arrfunc nd::functional::multidispatch(intptr_t naf,
   }
 
   // TODO: Component arrfuncs might be arrays, not just scalars
-  nd::array af = nd::empty(ndt::make_generic_funcproto(nargs));
-  arrfunc_type_data *out_af =
-      reinterpret_cast<arrfunc_type_data *>(af.get_readwrite_originptr());
-  vector<nd::arrfunc> *af_data =
-      new (out_af->get_data_as<char>()) vector<nd::arrfunc>();
-  out_af->free = &free_multidispatch_af_data;
-  af_data->swap(sorted_af);
-  out_af->instantiate = &instantiate_multidispatch_af;
-  out_af->resolve_dst_type = &resolve_multidispatch_dst_type;
-  af.flag_as_immutable();
-  return af;
+  return arrfunc(sorted_af, &instantiate_multidispatch_af, NULL,
+                 &resolve_multidispatch_dst_type, NULL,
+                 ndt::make_generic_funcproto(nargs));
 }

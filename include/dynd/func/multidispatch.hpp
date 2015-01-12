@@ -20,6 +20,13 @@ namespace nd {
      */
     arrfunc multidispatch(intptr_t naf, const arrfunc *af);
 
+    template <typename... A>
+    arrfunc multidispatch(arrfunc a0, A &&... a)
+    {
+      arrfunc af[1 + sizeof...(A)] = {a0, a...};
+      return multidispatch(1 + sizeof...(A), af);
+    }
+
   } // namespace dynd::nd::functional
 } // namespace dynd::nd
 } // namespace dynd

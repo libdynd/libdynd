@@ -18,48 +18,43 @@ using namespace dynd;
 // http://www.threadingbuildingblocks.org/docs/help/reference/containers_overview/concurrent_hash_map_cls.htm
 static map<nd::string, nd::arrfunc> *registry;
 
-template<typename T0, typename T1>
+template <typename T0, typename T1>
 static nd::arrfunc make_ufunc(T0 f0, T1 f1)
 {
-  nd::arrfunc af[2] = {nd::functional::apply(f0),
-                       nd::functional::apply(f1)};
-
-  return nd::elwise.bind("func",
-      nd::functional::multidispatch(sizeof(af) / sizeof(af[0]), af));
+  return nd::elwise.bind(
+      "func", nd::functional::multidispatch(nd::functional::apply(f0),
+                                            nd::functional::apply(f1)));
 }
 
-template<typename T0, typename T1, typename T2>
+template <typename T0, typename T1, typename T2>
 static nd::arrfunc make_ufunc(T0 f0, T1 f1, T2 f2)
 {
-  nd::arrfunc af[3] = {nd::functional::apply(f0),
-                       nd::functional::apply(f1),
-                       nd::functional::apply(f2)};
-  return nd::elwise.bind("func",
-      nd::functional::multidispatch(sizeof(af) / sizeof(af[0]), af));
+  return nd::elwise.bind(
+      "func", nd::functional::multidispatch(nd::functional::apply(f0),
+                                            nd::functional::apply(f1),
+                                            nd::functional::apply(f2)));
 }
 
 template <typename T0, typename T1, typename T2, typename T3, typename T4>
 static nd::arrfunc make_ufunc(T0 f0, T1 f1, T2 f2, T3 f3, T4 f4)
 {
-  nd::arrfunc af[5] = {
-      nd::functional::apply(f0), nd::functional::apply(f1),
-      nd::functional::apply(f2), nd::functional::apply(f3),
-      nd::functional::apply(f4)};
-  return nd::elwise.bind("func",
-      nd::functional::multidispatch(sizeof(af) / sizeof(af[0]), af));
+  return nd::elwise.bind(
+      "func", nd::functional::multidispatch(
+                  nd::functional::apply(f0), nd::functional::apply(f1),
+                  nd::functional::apply(f2), nd::functional::apply(f3),
+                  nd::functional::apply(f4)));
 }
 
 template <typename T0, typename T1, typename T2, typename T3, typename T4,
           typename T5, typename T6>
 static nd::arrfunc make_ufunc(T0 f0, T1 f1, T2 f2, T3 f3, T4 f4, T5 f5, T6 f6)
 {
-  nd::arrfunc af[7] = {
-      nd::functional::apply(f0), nd::functional::apply(f1),
-      nd::functional::apply(f2), nd::functional::apply(f3),
-      nd::functional::apply(f4), nd::functional::apply(f5),
-      nd::functional::apply(f6)};
-  return nd::elwise.bind("func",
-      nd::functional::multidispatch(sizeof(af) / sizeof(af[0]), af));
+  return nd::elwise.bind(
+      "func", nd::functional::multidispatch(
+                  nd::functional::apply(f0), nd::functional::apply(f1),
+                  nd::functional::apply(f2), nd::functional::apply(f3),
+                  nd::functional::apply(f4), nd::functional::apply(f5),
+                  nd::functional::apply(f6)));
 }
 
 template <typename T0, typename T1, typename T2, typename T3, typename T4,
@@ -67,13 +62,12 @@ template <typename T0, typename T1, typename T2, typename T3, typename T4,
 static nd::arrfunc make_ufunc(T0 f0, T1 f1, T2 f2, T3 f3, T4 f4, T5 f5, T6 f6,
                               T7 f7)
 {
-  nd::arrfunc af[8] = {
-      nd::functional::apply(f0), nd::functional::apply(f1),
-      nd::functional::apply(f2), nd::functional::apply(f3),
-      nd::functional::apply(f4), nd::functional::apply(f5),
-      nd::functional::apply(f6), nd::functional::apply(f7)};
-  return nd::elwise.bind("func",
-      nd::functional::multidispatch(sizeof(af) / sizeof(af[0]), af));
+  return nd::elwise.bind(
+      "func", nd::functional::multidispatch(
+                  nd::functional::apply(f0), nd::functional::apply(f1),
+                  nd::functional::apply(f2), nd::functional::apply(f3),
+                  nd::functional::apply(f4), nd::functional::apply(f5),
+                  nd::functional::apply(f6), nd::functional::apply(f7)));
 }
 
 template <typename T0, typename T1, typename T2, typename T3, typename T4,
@@ -81,14 +75,13 @@ template <typename T0, typename T1, typename T2, typename T3, typename T4,
 static nd::arrfunc make_ufunc(T0 f0, T1 f1, T2 f2, T3 f3, T4 f4, T5 f5, T6 f6,
                               T7 f7, T8 f8, T9 f9)
 {
-  nd::arrfunc af[10] = {
-      nd::functional::apply(f0), nd::functional::apply(f1),
-      nd::functional::apply(f2), nd::functional::apply(f3),
-      nd::functional::apply(f4), nd::functional::apply(f5),
-      nd::functional::apply(f6), nd::functional::apply(f7),
-      nd::functional::apply(f8), nd::functional::apply(f9)};
-  return nd::elwise.bind("func",
-      nd::functional::multidispatch(sizeof(af) / sizeof(af[0]), af));
+  return nd::elwise.bind(
+      "func", nd::functional::multidispatch(
+                  nd::functional::apply(f0), nd::functional::apply(f1),
+                  nd::functional::apply(f2), nd::functional::apply(f3),
+                  nd::functional::apply(f4), nd::functional::apply(f5),
+                  nd::functional::apply(f6), nd::functional::apply(f7),
+                  nd::functional::apply(f8), nd::functional::apply(f9)));
 }
 
 namespace {
@@ -179,36 +172,37 @@ void init::arrfunc_registry_init()
   func::set_regfunction(
       "add", make_ufunc(add<int32_t>(), add<int64_t>(), add<dynd_int128>(),
                         add<uint32_t>(), add<uint64_t>(), add<dynd_uint128>(),
-                        add<float>(), add<double>(), add<complex<float> >(),
-                        add<complex<double> >()));
+                        add<float>(), add<double>(), add<complex<float>>(),
+                        add<complex<double>>()));
   func::set_regfunction(
       "subtract",
       make_ufunc(subtract<int32_t>(), subtract<int64_t>(),
                  subtract<dynd_int128>(), subtract<float>(), subtract<double>(),
-                 subtract<complex<float> >(), subtract<complex<double> >()));
+                 subtract<complex<float>>(), subtract<complex<double>>()));
   func::set_regfunction(
       "multiply",
       make_ufunc(multiply<int32_t>(), multiply<int64_t>(),
                  /*multiply<dynd_int128>(),*/ multiply<uint32_t>(),
                  multiply<uint64_t>(), /*multiply<dynd_uint128>(),*/
                  multiply<float>(), multiply<double>(),
-                 multiply<complex<float> >(), multiply<complex<double> >()));
+                 multiply<complex<float>>(), multiply<complex<double>>()));
   func::set_regfunction(
       "divide",
       make_ufunc(
           divide<int32_t>(), divide<int64_t>(),   /*divide<dynd_int128>(),*/
           divide<uint32_t>(), divide<uint64_t>(), /*divide<dynd_uint128>(),*/
-          divide<float>(), divide<double>(), divide<complex<float> >(),
-          divide<complex<double> >()));
+          divide<float>(), divide<double>(), divide<complex<float>>(),
+          divide<complex<double>>()));
   func::set_regfunction(
       "negative",
       make_ufunc(negative<int32_t>(), negative<int64_t>(),
                  negative<dynd_int128>(), negative<float>(), negative<double>(),
-                 negative<complex<float> >(), negative<complex<double> >()));
+                 negative<complex<float>>(), negative<complex<double>>()));
   func::set_regfunction("sign", make_ufunc(sign<int32_t>(), sign<int64_t>(),
                                            sign<dynd_int128>(), sign<float>(),
                                            sign<double>()));
-  func::set_regfunction("conj", make_ufunc(conj_fn<complex<float> >(), conj_fn<complex<double> >()));
+  func::set_regfunction("conj", make_ufunc(conj_fn<complex<float>>(),
+                                           conj_fn<complex<double>>()));
 
 #if !(defined(_MSC_VER) && _MSC_VER < 1700)
   func::set_regfunction("logaddexp",
