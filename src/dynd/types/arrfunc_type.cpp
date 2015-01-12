@@ -40,8 +40,7 @@ arrfunc_type::arrfunc_type(const ndt::type &pos_types,
                 scalar_align_of<uint64_t>::value,
                 type_flag_scalar | type_flag_zeroinit | type_flag_destructor, 0,
                 0, 0),
-      m_return_type(ret_type), m_pos_tuple(pos_types),
-      m_kwd_struct(ndt::make_empty_struct())
+      m_return_type(ret_type), m_pos_tuple(pos_types)
 {
   if (m_pos_tuple.get_type_id() != tuple_type_id) {
     stringstream ss;
@@ -49,6 +48,8 @@ arrfunc_type::arrfunc_type(const ndt::type &pos_types,
           "type \"" << m_pos_tuple << "\"";
     throw invalid_argument(ss.str());
   }
+  m_kwd_struct =
+      ndt::make_empty_struct(m_pos_tuple.extended<tuple_type>()->is_variadic());
 
   // Note that we don't base the flags of this type on that of its arguments
   // and return types, because it is something the can be instantiated, even
@@ -121,6 +122,13 @@ void arrfunc_type::print_type(std::ostream &o) const
 
     o << get_pos_type(i);
   }
+  if (m_pos_tuple.extended<tuple_type>()->is_variadic()) {
+    if (npos > 0) {
+      o << ", ...";
+    } else {
+      o << "...";
+    }
+  }
   for (intptr_t i = 0; i < nkwd; ++i) {
     if (i > 0 || npos > 0) {
       o << ", ";
@@ -135,6 +143,9 @@ void arrfunc_type::print_type(std::ostream &o) const
       print_escaped_utf8_string(o, an.begin, an.end, true);
     }
     o << ": " << get_kwd_type(i);
+  }
+  if (nkwd > 0 && m_kwd_struct.extended<struct_type>()->is_variadic()) {
+    o << "...";
   }
 
   o << ") -> " << m_return_type;

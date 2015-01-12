@@ -846,8 +846,8 @@ static bool parse_struct_item_bare(const char *&rbegin, const char *end,
 }
 
 
-// record_item_general : record_item_bare |
-//               QUOTEDNAME COLON rhs_expression
+// struct_item_general : struct_item_bare |
+//                       QUOTEDNAME COLON rhs_expression
 static bool parse_struct_item_general(const char *&rbegin, const char *end,
                                       map<string, ndt::type> &symtable,
                                       string &out_field_name,
@@ -910,7 +910,7 @@ static ndt::type parse_struct(const char *&rbegin, const char *end,
   vector<ndt::type> field_type_list;
   string field_name;
   ndt::type field_type;
-  bool cprefixed = false;
+  bool cprefixed = false, variadic = false;
 
   if (!parse_token_ds(begin, end, '{')) {
     if (parse_token_ds(begin, end, "c{")) {
@@ -920,7 +920,24 @@ static ndt::type parse_struct(const char *&rbegin, const char *end,
       return ndt::type(uninitialized_type_id);
     }
   }
+  if (parse_token_ds(begin, end, '}')) {
+    // Empty struct
+    rbegin = begin;
+    if (cprefixed) {
+      return ndt::make_empty_cstruct();
+    } else {
+      return ndt::make_empty_struct();
+    }
+  }
   for (;;) {
+    if (!cprefixed && parse_token_ds(begin, end, "...")) {
+      if (!parse_token_ds(begin, end, '}')) {
+        throw datashape_parse_error(begin, "expected '}'");
+      }
+      variadic = true;
+      break;
+    }
+
     const char *saved_begin = begin;
     parse::skip_whitespace_and_pound_comments(begin, end);
     if (parse_struct_item_general(begin, end, symtable, field_name,
@@ -950,7 +967,7 @@ static ndt::type parse_struct(const char *&rbegin, const char *end,
     return ndt::make_cstruct(field_name_list, field_type_list);
   }
   else {
-    return ndt::make_struct(field_name_list, field_type_list);
+    return ndt::make_struct(field_name_list, field_type_list, variadic);
   }
 }
 
@@ -963,8 +980,19 @@ static ndt::type parse_funcproto_kwds(const char *&rbegin, const char *end,
   vector<ndt::type> field_type_list;
   string field_name;
   ndt::type field_type;
+  bool variadic = false;
 
   for (;;) {
+    // Check for variadic ending
+    if (parse_token_ds(begin, end, "...")) {
+      if (!parse_token_ds(begin, end, ')')) {
+        throw datashape_parse_error(begin,
+                                    "expected ',' or ')' in arrfunc prototype");
+      }
+      variadic = true;
+      break;
+    }
+
     const char *saved_begin = begin;
     parse::skip_whitespace_and_pound_comments(begin, end);
     if (parse_struct_item_bare(begin, end, symtable, field_name, field_type)) {
@@ -989,7 +1017,7 @@ static ndt::type parse_funcproto_kwds(const char *&rbegin, const char *end,
   }
 
   rbegin = begin;
-  return ndt::make_struct(field_name_list, field_type_list);
+  return ndt::make_struct(field_name_list, field_type_list, variadic);
 }
 
 // tuple : LPAREN tuple_item tuple_item* RPAREN

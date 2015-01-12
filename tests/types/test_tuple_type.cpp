@@ -54,6 +54,14 @@ TEST(TupleType, CreateSimple)
   EXPECT_EQ(tp, ndt::type(tp.str()));
 }
 
+TEST(TupleType, Equality)
+{
+  EXPECT_EQ(ndt::type("(int32, float16, int32)"),
+            ndt::type("(int32, float16, int32)"));
+  EXPECT_NE(ndt::type("(int32, float16, int32)"),
+            ndt::type("(int32, float16, int32, ...)"));
+}
+
 TEST(TupleType, Assign)
 {
   nd::array a, b;

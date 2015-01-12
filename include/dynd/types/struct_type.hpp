@@ -30,9 +30,10 @@ protected:
   }
 
 public:
-  inline struct_type(const nd::array &field_names, const nd::array &field_types)
+  inline struct_type(const nd::array &field_names, const nd::array &field_types,
+                     bool variadic)
       : base_struct_type(struct_type_id, field_names, field_types,
-                         type_flag_none, true)
+                         type_flag_none, true, variadic)
   {
     create_array_properties();
   }
@@ -84,19 +85,22 @@ public:
 }; // class struct_type
 
 namespace ndt {
-  inline ndt::type make_empty_struct()
+  inline ndt::type make_empty_struct(bool variadic = false)
   {
     // TODO: return a static instance
     nd::array field_names = nd::empty(0, ndt::make_string());
     nd::array field_types = nd::empty(0, ndt::make_type());
-    return ndt::type(new struct_type(field_names, field_types), false);
+    return ndt::type(new struct_type(field_names, field_types, variadic),
+                     false);
   }
 
   /** Makes a struct type with the specified fields */
   inline ndt::type make_struct(const nd::array &field_names,
-                               const nd::array &field_types)
+                               const nd::array &field_types,
+                               bool variadic = false)
   {
-    return ndt::type(new struct_type(field_names, field_types), false);
+    return ndt::type(new struct_type(field_names, field_types, variadic),
+                     false);
   }
 
   /** Makes a struct type with the specified fields */

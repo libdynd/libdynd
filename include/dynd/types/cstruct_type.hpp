@@ -102,6 +102,15 @@ public:
 }; // class cstruct_type
 
 namespace ndt {
+  inline ndt::type make_empty_cstruct()
+  {
+    // TODO: return a static instance
+    nd::array field_names = nd::empty(0, ndt::make_string());
+    nd::array field_types = nd::empty(0, ndt::make_type());
+    return ndt::type(new cstruct_type(field_names, field_types), false);
+  }
+
+
     /** Makes a cstruct type with the specified fields */
     inline ndt::type make_cstruct(const nd::array &field_names,
                                  const nd::array &field_types)

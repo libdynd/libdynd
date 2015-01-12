@@ -152,7 +152,8 @@ bool tuple_type::operator==(const base_type &rhs) const
   else {
     const tuple_type *dt = static_cast<const tuple_type *>(&rhs);
     return get_data_alignment() == dt->get_data_alignment() &&
-           m_field_types.equals_exact(dt->m_field_types);
+           m_field_types.equals_exact(dt->m_field_types) &&
+           m_variadic == dt->m_variadic;
   }
 }
 

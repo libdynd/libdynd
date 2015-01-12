@@ -56,7 +56,11 @@ void struct_type::print_type(std::ostream &o) const
     }
     o << " : " << get_field_type(i);
   }
-  o << "}";
+  if (m_variadic) {
+    o << ", ...}";
+  } else {
+    o << "}";
+  }
 }
 
 void struct_type::transform_child_types(type_transform_fn_t transform_fn,
@@ -75,7 +79,8 @@ void struct_type::transform_child_types(type_transform_fn_t transform_fn,
   }
   if (was_transformed) {
     tmp_field_types.flag_as_immutable();
-    out_transformed_tp = ndt::make_struct(m_field_names, tmp_field_types);
+    out_transformed_tp =
+        ndt::make_struct(m_field_names, tmp_field_types, m_variadic);
     out_was_transformed = true;
   }
   else {
@@ -94,7 +99,7 @@ ndt::type struct_type::get_canonical_type() const
   }
 
   tmp_field_types.flag_as_immutable();
-  return ndt::make_struct(m_field_names, tmp_field_types);
+  return ndt::make_struct(m_field_names, tmp_field_types, m_variadic);
 }
 
 bool struct_type::is_lossless_assignment(const ndt::type &dst_tp,
@@ -177,7 +182,8 @@ bool struct_type::operator==(const base_type &rhs) const
     const struct_type *dt = static_cast<const struct_type *>(&rhs);
     return get_data_alignment() == dt->get_data_alignment() &&
            m_field_types.equals_exact(dt->m_field_types) &&
-           m_field_names.equals_exact(dt->m_field_names);
+           m_field_names.equals_exact(dt->m_field_names) &&
+           m_variadic == dt->m_variadic;
   }
 }
 

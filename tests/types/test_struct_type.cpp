@@ -32,6 +32,16 @@ TEST(StructType, Basic) {
                     ndt::make_struct(ndt::make_type<int>(), "x"));
 }
 
+TEST(StructType, Equality)
+{
+  EXPECT_EQ(ndt::type("{x: int32, y: float16, z: int32}"),
+            ndt::type("{x: int32, y: float16, z: int32}"));
+  EXPECT_NE(ndt::type("{x: int32, y: float16, z: int32}"),
+            ndt::type("{x: int32, y: float16, z: int32, ...}"));
+}
+
+
+
 TEST(StructType, IOStream) {
     stringstream ss;
     ndt::type tp;

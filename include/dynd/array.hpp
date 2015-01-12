@@ -230,6 +230,9 @@ namespace nd {
     array(const std::initializer_list<
         std::initializer_list<std::initializer_list<T>>> &il);
 
+    /** Constructs an array from a 1D const char * (string) initializer list */
+    array(const std::initializer_list<const char *> &il);
+
     /** Constructs an array from a 1D ndt::type initializer list */
     array(const std::initializer_list<ndt::type> &il);
 
@@ -1164,7 +1167,7 @@ namespace nd {
    *
    * \returns  An array of type "N * string".
    */
-  array make_strided_string_array(const char **cstr_array, size_t array_size);
+  array make_strided_string_array(const char *const*cstr_array, size_t array_size);
   array make_strided_string_array(const std::string **str_array,
                                   size_t array_size);
 
@@ -1636,6 +1639,12 @@ namespace nd {
                        nd::default_access_flags, NULL).swap(*this);
     T *dataptr = reinterpret_cast<T *>(get_ndo()->m_data_pointer);
     detail::initializer_list_shape<S>::copy_data(&dataptr, il);
+  }
+
+  inline dynd::nd::array::array(const std::initializer_list<const char *> &il)
+      : m_memblock()
+  {
+    make_strided_string_array(il.begin(), il.size()).swap(*this);
   }
 
   inline dynd::nd::array::array(const std::initializer_list<ndt::type> &il)

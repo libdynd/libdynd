@@ -21,7 +21,7 @@ using namespace dynd;
 cstruct_type::cstruct_type(const nd::array &field_names,
                            const nd::array &field_types)
     : base_struct_type(cstruct_type_id, field_names, field_types,
-                       type_flag_none, false),
+                       type_flag_none, false, false),
       m_data_offsets(nd::empty(m_field_count, ndt::make_type<uintptr_t>()))
 {
     uintptr_t *data_offsets = reinterpret_cast<uintptr_t *>(
@@ -310,7 +310,7 @@ static nd::array make_self_types()
 
 cstruct_type::cstruct_type(int, int)
     : base_struct_type(cstruct_type_id, make_self_names(), make_self_types(),
-                       type_flag_none, false)
+                       type_flag_none, false, false)
 {
     // Equivalent to ndt::make_cstruct(ndt::make_ndarrayarg(), "self");
     // but hardcoded to break the dependency of cstruct_type::array_parameters_type
