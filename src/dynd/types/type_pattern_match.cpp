@@ -49,29 +49,48 @@ static bool recursive_match(const ndt::type &concrete,
             concrete_arrmeta,
             pattern.extended<pointer_type>()->get_target_type(), typevars);
       case struct_type_id:
-      case cstruct_type_id:
-        if (concrete.extended<base_struct_type>()
-                ->get_field_names()
-                .equals_exact(
+      case cstruct_type_id: {
+        intptr_t concrete_field_count =
+            concrete.extended<base_struct_type>()->get_field_count();
+        bool concrete_variadic =
+            concrete.extended<base_struct_type>()->is_variadic();
+        intptr_t pattern_field_count =
+            pattern.extended<base_struct_type>()->get_field_count();
+        bool pattern_variadic =
+            pattern.extended<base_struct_type>()->is_variadic();
+        if ((concrete_field_count == pattern_field_count &&
+             !concrete_variadic) ||
+            (concrete_field_count >= pattern_field_count && pattern_variadic)) {
+          // Compare the field names
+          if (concrete_field_count == pattern_field_count) {
+            if (!concrete.extended<base_struct_type>()
+                     ->get_field_names()
+                     .equals_exact(pattern.extended<base_struct_type>()
+                                       ->get_field_names())) {
+              return false;
+            }
+          } else {
+            nd::array leading_concrete_field_names =
+                concrete.extended<base_struct_type>()->get_field_names()(
+                    irange() < pattern_field_count);
+            if (!leading_concrete_field_names.equals_exact(
                     pattern.extended<base_struct_type>()->get_field_names())) {
-          // The names are all the same, now match against the
-          // types
-          size_t field_count =
-              concrete.extended<base_struct_type>()->get_field_count();
+              return false;
+            }
+          }
           const ndt::type *concrete_fields =
               concrete.extended<base_struct_type>()->get_field_types_raw();
           const ndt::type *pattern_fields =
               pattern.extended<base_struct_type>()->get_field_types_raw();
-          for (size_t i = 0; i != field_count; ++i) {
+          for (intptr_t i = 0; i < pattern_field_count; ++i) {
             if (!recursive_match(concrete_fields[i], concrete_arrmeta,
                                  pattern_fields[i], typevars)) {
               return false;
             }
           }
           return true;
-        } else {
-          return false;
         }
+      }
       case tuple_type_id:
       case ctuple_type_id: {
         intptr_t concrete_field_count =

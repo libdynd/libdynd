@@ -127,6 +127,37 @@ TEST(TypePatternMatch, Struct)
       ndt::type("M * {x: T, y: T, u: S, v: S}")));
 }
 
+TEST(TypePatternMatch, VariadicStruct)
+{
+  EXPECT_TRUE(ndt::pattern_match(ndt::type("{...}"), ndt::type("{...}")));
+  EXPECT_TRUE(ndt::pattern_match(ndt::type("{}"), ndt::type("{...}")));
+  EXPECT_FALSE(ndt::pattern_match(ndt::type("{...}"), ndt::type("{}")));
+  EXPECT_TRUE(ndt::pattern_match(ndt::type("{x: int32}"), ndt::type("{...}")));
+  EXPECT_FALSE(
+      ndt::pattern_match(ndt::type("{x: int32, ...}"), ndt::type("{x: int32}")));
+  EXPECT_TRUE(ndt::pattern_match(ndt::type("{x: int32, y: int64}"),
+                                 ndt::type("{...}")));
+  EXPECT_TRUE(ndt::pattern_match(ndt::type("{x: int32, y: int64, z: float32}"),
+                                 ndt::type("{...}")));
+  EXPECT_TRUE(ndt::pattern_match(ndt::type("{x: int32, y: int64, z: float32}"),
+                                 ndt::type("{x: int32, ...}")));
+  EXPECT_FALSE(ndt::pattern_match(ndt::type("{x: int32, y: int64, z: float32}"),
+                                  ndt::type("{y: int32, ...}")));
+  EXPECT_FALSE(ndt::pattern_match(ndt::type("{x: int32, y: int64, z: float32}"),
+                                  ndt::type("{y: int64, ...}")));
+  EXPECT_TRUE(ndt::pattern_match(ndt::type("{x: int32, y: int64, z: float32}"),
+                                 ndt::type("{x: int32, y: int64, ...}")));
+  EXPECT_TRUE(
+      ndt::pattern_match(ndt::type("{x: int32, y: int64, z: float32}"),
+                         ndt::type("{x: int32, y: int64, z: float32, ...}")));
+  EXPECT_TRUE(ndt::pattern_match(ndt::type("{x: int32, y: int64, z: float32}"),
+                                 ndt::type("{x: int32, y: T, ...}")));
+  EXPECT_FALSE(ndt::pattern_match(ndt::type("{x: int32, y: int64, z: float32}"),
+                                  ndt::type("{x: T, y: T, ...}")));
+  EXPECT_TRUE(ndt::pattern_match(ndt::type("{x: int32, y: int32, z: float32}"),
+                                 ndt::type("{x: T, y: T, ...}")));
+}
+
 TEST(TypePatternMatch, Option)
 {
   EXPECT_TRUE(ndt::pattern_match(ndt::type("?int32"), ndt::type("?int32")));
