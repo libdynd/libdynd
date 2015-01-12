@@ -323,8 +323,8 @@ set(libdynd_SRC
     src/dynd/func/elwise_reduce_gfunc.cpp
     src/dynd/func/fft.cpp
     src/dynd/func/lift_reduction_arrfunc.cpp
+    src/dynd/func/multidispatch.cpp
     src/dynd/func/neighborhood_arrfunc.cpp
-    src/dynd/func/multidispatch_arrfunc.cpp
     src/dynd/func/random.cpp
     src/dynd/func/rolling_arrfunc.cpp
     src/dynd/func/take_arrfunc.cpp
@@ -344,8 +344,8 @@ set(libdynd_SRC
     include/dynd/func/make_callable.hpp
     include/dynd/func/lift_reduction_arrfunc.hpp
     include/dynd/func/make_callable.hpp
+    include/dynd/func/multidispatch.hpp
     include/dynd/func/neighborhood_arrfunc.hpp
-    include/dynd/func/multidispatch_arrfunc.hpp
     include/dynd/func/random.hpp
     include/dynd/func/rolling_arrfunc.hpp
     include/dynd/func/take_arrfunc.hpp

@@ -12,9 +12,9 @@
 #include "dynd_assertions.hpp"
 
 #include <dynd/array.hpp>
-#include <dynd/func/multidispatch_arrfunc.hpp>
 #include <dynd/func/apply.hpp>
 #include <dynd/func/elwise.hpp>
+#include <dynd/func/multidispatch.hpp>
 
 using namespace std;
 using namespace dynd;
@@ -37,7 +37,7 @@ TEST(MultiDispatchArrfunc, Ambiguous) {
   funcs.push_back(nd::functional::apply(&func3));
   funcs.push_back(nd::functional::apply(&func4));
 
-  EXPECT_THROW(make_multidispatch_arrfunc(funcs.size(), &funcs[0]),
+  EXPECT_THROW(nd::functional::multidispatch(funcs.size(), &funcs[0]),
                invalid_argument);
 
   funcs.push_back(nd::functional::apply(&func5));
@@ -52,7 +52,7 @@ TEST(MultiDispatchArrfunc, ExactSignatures) {
   funcs.push_back(nd::functional::apply(&func4));
   funcs.push_back(nd::functional::apply(&func5));
 
-  nd::arrfunc af = make_multidispatch_arrfunc(funcs.size(), &funcs[0]);
+  nd::arrfunc af = nd::functional::multidispatch(funcs.size(), &funcs[0]);
 
   EXPECT_EQ(0, af(1, 1.f, 1.0).as<int>());
   EXPECT_EQ(1, af(1, 1.0, 1.0).as<int>());
@@ -71,7 +71,7 @@ TEST(MultiDispatchArrfunc, PromoteToSignature) {
   funcs.push_back(nd::functional::apply(&func4));
   funcs.push_back(nd::functional::apply(&func5));
 
-  nd::arrfunc af = make_multidispatch_arrfunc(funcs.size(), &funcs[0]);
+  nd::arrfunc af = nd::functional::multidispatch(funcs.size(), &funcs[0]);
 
   EXPECT_EQ(0, af(1, dynd_float16(1.f), 1.0).as<int>());
   EXPECT_EQ(1, af(1, 1.0, 1.f).as<int>());
@@ -86,7 +86,7 @@ TEST(MultiDispatchArrfunc, Values) {
   funcs.push_back(nd::functional::apply(&manip0));
   funcs.push_back(nd::functional::apply(&manip1));
   nd::arrfunc af =
-      nd::elwise.bind("func", make_multidispatch_arrfunc(funcs.size(), &funcs[0]));
+      nd::elwise.bind("func", nd::functional::multidispatch(funcs.size(), &funcs[0]));
   nd::array a, b, c;
 
   // Exactly match (int, int) -> real
