@@ -3,13 +3,40 @@
 // BSD 2-Clause License, see LICENSE.txt
 //
 
+#include <memory>
 #include <set>
+#include <unordered_map>
 
 #include <dynd/func/multidispatch.hpp>
 #include <dynd/kernels/buffered_kernels.hpp>
 
 using namespace std;
 using namespace dynd;
+
+namespace std {
+
+template <>
+struct hash<dynd::ndt::type> {
+  size_t operator()(const ndt::type &tp) const { return tp.get_type_id(); }
+};
+template <>
+struct hash<nd::string> {
+  size_t operator()(const nd::string &) const { return 0; }
+};
+template <>
+struct hash<std::vector<dynd::ndt::type>> {
+  size_t operator()(const std::vector<dynd::ndt::type> &v) const
+  {
+    std::hash<ndt::type> hash;
+    size_t value = 0;
+    for (dynd::ndt::type tp : v) {
+      value ^= hash(tp) + 0x9e3779b9 + (value << 6) + (value >> 2);
+    }
+    return value;
+  }
+};
+
+} // namespace std
 
 /**
  * Placeholder hard-coded function for determining allowable
@@ -276,7 +303,8 @@ static intptr_t instantiate_multidispatch_af(
     void *ckb, intptr_t ckb_offset, const ndt::type &dst_tp,
     const char *dst_arrmeta, const ndt::type *src_tp,
     const char *const *src_arrmeta, kernel_request_t kernreq,
-    const eval::eval_context *ectx, const nd::array &kwds, const std::map<dynd::nd::string, ndt::type> &tp_vars)
+    const eval::eval_context *ectx, const nd::array &kwds,
+    const std::map<dynd::nd::string, ndt::type> &tp_vars)
 {
   const vector<nd::arrfunc> *icd = af_self->get_data_as<vector<nd::arrfunc>>();
   for (intptr_t i = 0; i < (intptr_t)icd->size(); ++i) {
@@ -408,7 +436,97 @@ nd::arrfunc nd::functional::multidispatch(intptr_t naf, const arrfunc *child_af)
   }
 
   // TODO: Component arrfuncs might be arrays, not just scalars
-  return arrfunc(sorted_af, &instantiate_multidispatch_af, NULL,
-                 &resolve_multidispatch_dst_type, NULL,
-                 ndt::make_generic_funcproto(nargs));
+  return arrfunc(ndt::make_generic_funcproto(nargs), sorted_af,
+                 &instantiate_multidispatch_af, NULL,
+                 &resolve_multidispatch_dst_type, NULL);
+}
+
+namespace dynd {
+namespace nd {
+  namespace functional {
+
+    typedef std::unordered_map<std::vector<ndt::type>, arrfunc>
+        multidispatch_map_type;
+
+    static const arrfunc_type_data *
+    multidispatch_find(const arrfunc_type_data *self,
+                       const std::map<string, ndt::type> &tp_vars)
+    {
+      std::shared_ptr<multidispatch_map_type> map =
+          *self->get_data_as<std::shared_ptr<multidispatch_map_type>>();
+
+      std::vector<ndt::type> tp_vals;
+      for (auto pair : tp_vars) {
+        tp_vals.push_back(pair.second);
+      }
+
+      return (*map)[tp_vals].get();
+    }
+
+  } // namespace dynd::nd::functional
+} // namespace dynd::nd
+} // namespace dynd
+
+intptr_t nd::functional::multidispatch_instantiate(
+    const arrfunc_type_data *self, const arrfunc_type *self_tp, void *ckb,
+    intptr_t ckb_offset, const ndt::type &dst_tp, const char *dst_arrmeta,
+    const ndt::type *src_tp, const char *const *src_arrmeta,
+    kernel_request_t kernreq, const eval::eval_context *ectx, const array &kwds,
+    const std::map<string, ndt::type> &tp_vars)
+{
+  const arrfunc_type_data *child = multidispatch_find(self, tp_vars);
+  return child->instantiate(child, self_tp, ckb, ckb_offset, dst_tp,
+                            dst_arrmeta, src_tp, src_arrmeta, kernreq, ectx,
+                            kwds, tp_vars);
+}
+
+void nd::functional::multidispatch_resolve_option_values(
+    const arrfunc_type_data *self, const arrfunc_type *af_tp, intptr_t nsrc,
+    const ndt::type *src_tp, nd::array &kwds,
+    const std::map<nd::string, ndt::type> &tp_vars)
+{
+  const arrfunc_type_data *child = multidispatch_find(self, tp_vars);
+  if (child->resolve_option_values != NULL) {
+    child->resolve_option_values(child, af_tp, nsrc, src_tp, kwds, tp_vars);
+  }
+}
+
+int nd::functional::multidispatch_resolve_dst_type(
+    const arrfunc_type_data *self, const arrfunc_type *af_tp, intptr_t nsrc,
+    const ndt::type *src_tp, int throw_on_error, ndt::type &out_dst_tp,
+    const nd::array &kwds, const std::map<string, ndt::type> &tp_vars)
+{
+  const arrfunc_type_data *child = multidispatch_find(self, tp_vars);
+  if (child->resolve_dst_type != NULL) {
+    return child->resolve_dst_type(child, af_tp, nsrc, src_tp, throw_on_error,
+                                   out_dst_tp, kwds, tp_vars);
+  }
+
+  out_dst_tp = ndt::substitute(af_tp->get_return_type(), tp_vars, true);
+  return 1;
+}
+
+nd::arrfunc
+nd::functional::multidispatch(const ndt::type &self_tp,
+                              const std::initializer_list<string> &vars,
+                              const std::initializer_list<arrfunc> &children)
+{
+  std::shared_ptr<multidispatch_map_type> map(new multidispatch_map_type);
+  for (const arrfunc &child : children) {
+    std::map<string, ndt::type> tp_vars;
+    if (!ndt::pattern_match(child.get_array_type(), self_tp, tp_vars)) {
+      throw std::invalid_argument("could not match arrfuncs");
+    }
+
+    std::vector<ndt::type> tp_vals;
+    for (const string &var : vars) {
+      tp_vals.push_back(tp_vars[var]);
+    }
+
+    (*map)[tp_vals] = child;
+  }
+
+  return arrfunc(self_tp, map, &multidispatch_instantiate,
+                 &multidispatch_resolve_option_values,
+                 &multidispatch_resolve_dst_type);
 }

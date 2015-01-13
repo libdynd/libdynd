@@ -593,10 +593,9 @@ namespace nd {
   public:
     arrfunc() {}
 
-    arrfunc(arrfunc_instantiate_t instantiate,
+    arrfunc(const ndt::type &self_tp, arrfunc_instantiate_t instantiate,
             arrfunc_resolve_option_values_t resolve_option_values,
-            arrfunc_resolve_dst_type_t resolve_dst_type,
-            const ndt::type &self_tp)
+            arrfunc_resolve_dst_type_t resolve_dst_type)
         : m_value(empty(self_tp))
     {
       new (m_value.get_readwrite_originptr()) arrfunc_type_data(
@@ -604,10 +603,11 @@ namespace nd {
     }
 
     template <typename T>
-    arrfunc(const T &data, arrfunc_instantiate_t instantiate,
+    arrfunc(const ndt::type &self_tp, const T &data,
+            arrfunc_instantiate_t instantiate,
             arrfunc_resolve_option_values_t resolve_option_values,
-            arrfunc_resolve_dst_type_t resolve_dst_type, arrfunc_free_t free,
-            const ndt::type &self_tp)
+            arrfunc_resolve_dst_type_t resolve_dst_type,
+            arrfunc_free_t free = NULL)
         : m_value(empty(self_tp))
     {
       new (m_value.get_readwrite_originptr()) arrfunc_type_data(
@@ -1070,11 +1070,11 @@ namespace nd {
   };
 
   template <typename T>
-  arrfunc make_arrfunc()
+  arrfunc as_arrfunc()
   {
-    return arrfunc(dynd::detail::get_instantiate<T>(),
+    return arrfunc(T::make_type(), dynd::detail::get_instantiate<T>(),
                    dynd::detail::get_resolve_option_values<T>(),
-                   dynd::detail::get_resolve_dst_type<T>(), T::make_type());
+                   dynd::detail::get_resolve_dst_type<T>());
   }
 } // namespace nd
 
@@ -1107,7 +1107,7 @@ namespace decl {
       struct arrfunc_factory;
       template <typename T>
       struct arrfunc_factory<T, true> {
-        static dynd::nd::arrfunc make() { return dynd::nd::make_arrfunc<T>(); }
+        static dynd::nd::arrfunc make() { return dynd::nd::as_arrfunc<T>(); }
       };
       template <typename T>
       struct arrfunc_factory<T, false> {
@@ -1141,7 +1141,7 @@ namespace decl {
         throw std::runtime_error("not implemented");
       }
 
-      static dynd::nd::arrfunc make() { return dynd::nd::make_arrfunc<T>(); }
+      static dynd::nd::arrfunc make() { return dynd::nd::as_arrfunc<T>(); }
     };
 
     template <typename T>
@@ -1232,17 +1232,16 @@ namespace decl {
       static dynd::nd::arrfunc bind(const std::string &DYND_UNUSED(name),
                                     const dynd::nd::arrfunc &child)
       {
-        return dynd::nd::arrfunc(child, &instantiate<true>, NULL,
-                                 &resolve_dst_type<true>, NULL,
-                                 T::make_lifted_type(child.get_type()));
+        return dynd::nd::arrfunc(T::make_lifted_type(child.get_type()), child,
+                                 &instantiate<true>, NULL,
+                                 &resolve_dst_type<true>, NULL);
       }
 
       static dynd::nd::arrfunc make()
       {
-        ndt::type self_tp = ndt::type("(..., func: (...) -> Any) -> Any");
-
-        return dynd::nd::arrfunc(&instantiate<false>, NULL,
-                                 &resolve_dst_type<false>, self_tp);
+        return dynd::nd::arrfunc(ndt::type("(..., func: (...) -> Any) -> Any"),
+                                 &instantiate<false>, NULL,
+                                 &resolve_dst_type<false>);
       }
     };
   }

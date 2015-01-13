@@ -135,8 +135,8 @@ namespace decl {
       static dynd::nd::arrfunc make()
       {
         return dynd::nd::arrfunc(
-            &instantiate, &resolve_option_values, NULL,
-            ndt::type("(tp: type | R, a: ?R, b: ?R, engine: ?void) -> R"));
+            ndt::type("(tp: type | R, a: ?R, b: ?R, engine: ?void) -> R"),
+            &instantiate, &resolve_option_values, NULL);
       }
     };
 

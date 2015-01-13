@@ -96,8 +96,8 @@ namespace dynd {
                                                                                \
         static dynd::nd::arrfunc make()                                        \
         {                                                                      \
-          dynd::nd::arrfunc child_af(&instantiate, NULL, &resolve_dst_type,    \
-                                     ndt::type("(Any, Any) -> Any"));          \
+          dynd::nd::arrfunc child_af(ndt::type("(Any, Any) -> Any"),           \
+                                     &instantiate, NULL, &resolve_dst_type);   \
                                                                                \
           return elwise::bind("func", child_af);                               \
         }                                                                      \
