@@ -127,7 +127,7 @@ TEST(Reduction, BuiltinSum_Lift0D_NoIdentity)
   af.get()->instantiate(af.get(), af.get_type(), &ckb, 0, b.get_type(),
                         b.get_arrmeta(), src_tp, src_arrmeta,
                         kernel_request_single, &eval::default_eval_context,
-                        nd::array());
+                        nd::array(), std::map<nd::string, ndt::type>());
 
   // Call it on the data
   ckb(b.get_readwrite_originptr(),
@@ -161,7 +161,7 @@ TEST(Reduction, BuiltinSum_Lift0D_WithIdentity)
   af.get()->instantiate(af.get(), af.get_type(), &ckb, 0, b.get_type(),
                         b.get_arrmeta(), src_tp, src_arrmeta,
                         kernel_request_single, &eval::default_eval_context,
-                        nd::array());
+                        nd::array(), std::map<nd::string, ndt::type>());
 
   // Call it on the data
   ckb(b.get_readwrite_originptr(),
@@ -195,7 +195,7 @@ TEST(Reduction, BuiltinSum_Lift1D_NoIdentity)
   af.get()->instantiate(af.get(), af.get_type(), &ckb, 0, b.get_type(),
                         b.get_arrmeta(), src_tp, src_arrmeta,
                         kernel_request_single, &eval::default_eval_context,
-                        nd::array());
+                        nd::array(), std::map<nd::string, ndt::type>());
 
   // Call it on the data
   ckb(b.get_readwrite_originptr(),
@@ -212,7 +212,7 @@ TEST(Reduction, BuiltinSum_Lift1D_NoIdentity)
   af.get()->instantiate(af.get(), af.get_type(), &ckb, 0, b.get_type(),
                         b.get_arrmeta(), src_tp, src_arrmeta,
                         kernel_request_single, &eval::default_eval_context,
-                        nd::array());
+                        nd::array(), std::map<nd::string, ndt::type>());
 
   // Call it on the data
   ckb(b.get_readwrite_originptr(),
@@ -247,7 +247,7 @@ TEST(Reduction, BuiltinSum_Lift1D_WithIdentity)
   af.get()->instantiate(af.get(), af.get_type(), &ckb, 0, b.get_type(),
                         b.get_arrmeta(), src_tp, src_arrmeta,
                         kernel_request_single, &eval::default_eval_context,
-                        nd::array());
+                        nd::array(), std::map<nd::string, ndt::type>());
 
   // Call it on the data
   ckb(b.get_readwrite_originptr(),
@@ -282,7 +282,7 @@ TEST(Reduction, BuiltinSum_Lift2D_StridedStrided_ReduceReduce)
   af.get()->instantiate(af.get(), af.get_type(), &ckb, 0, b.get_type(),
                         b.get_arrmeta(), src_tp, src_arrmeta,
                         kernel_request_single, &eval::default_eval_context,
-                        nd::array());
+                        nd::array(), std::map<nd::string, ndt::type>());
 
   // Call it on the data
   ckb(b.get_readwrite_originptr(),
@@ -297,7 +297,7 @@ TEST(Reduction, BuiltinSum_Lift2D_StridedStrided_ReduceReduce)
   af.get()->instantiate(af.get(), af.get_type(), &ckb, 0, b.get_type(),
                         b.get_arrmeta(), src_tp, src_arrmeta,
                         kernel_request_single, &eval::default_eval_context,
-                        nd::array());
+                        nd::array(), std::map<nd::string, ndt::type>());
 
   // Call it on the data
   ckb(b.get_readwrite_originptr(),
@@ -331,7 +331,7 @@ TEST(Reduction, BuiltinSum_Lift2D_StridedStrided_ReduceReduce_KeepDim)
   af.get()->instantiate(af.get(), af.get_type(), &ckb, 0, b.get_type(),
                         b.get_arrmeta(), src_tp, src_arrmeta,
                         kernel_request_single, &eval::default_eval_context,
-                        nd::array());
+                        nd::array(), std::map<nd::string, ndt::type>());
 
   // Call it on the data
   ckb(b.get_readwrite_originptr(),
@@ -365,7 +365,7 @@ TEST(Reduction, BuiltinSum_Lift2D_StridedStrided_BroadcastReduce)
   af.get()->instantiate(af.get(), af.get_type(), &ckb, 0, b.get_type(),
                         b.get_arrmeta(), src_tp, src_arrmeta,
                         kernel_request_single, &eval::default_eval_context,
-                        nd::array());
+                        nd::array(), std::map<nd::string, ndt::type>());
 
   // Call it on the data
   ckb(b.get_readwrite_originptr(),
@@ -383,7 +383,7 @@ TEST(Reduction, BuiltinSum_Lift2D_StridedStrided_BroadcastReduce)
   af.get()->instantiate(af.get(), af.get_type(), &ckb, 0, b.get_type(),
                         b.get_arrmeta(), src_tp, src_arrmeta,
                         kernel_request_single, &eval::default_eval_context,
-                        nd::array());
+                        nd::array(), std::map<nd::string, ndt::type>());
 
   // Call it on the data
   ckb(b.get_readwrite_originptr(),
@@ -418,7 +418,7 @@ TEST(Reduction, BuiltinSum_Lift2D_StridedStrided_BroadcastReduce_KeepDim)
   af.get()->instantiate(af.get(), af.get_type(), &ckb, 0, b.get_type(),
                         b.get_arrmeta(), src_tp, src_arrmeta,
                         kernel_request_single, &eval::default_eval_context,
-                        nd::array());
+                        nd::array(), std::map<nd::string, ndt::type>());
 
   // Call it on the data
   ckb(b.get_readwrite_originptr(),
@@ -454,7 +454,7 @@ TEST(Reduction, BuiltinSum_Lift2D_StridedStrided_ReduceBroadcast)
   af.get()->instantiate(af.get(), af.get_type(), &ckb, 0, b.get_type(),
                         b.get_arrmeta(), src_tp, src_arrmeta,
                         kernel_request_single, &eval::default_eval_context,
-                        nd::array());
+                        nd::array(), std::map<nd::string, ndt::type>());
 
   // Call it on the data
   ckb(b.get_readwrite_originptr(),
@@ -473,7 +473,7 @@ TEST(Reduction, BuiltinSum_Lift2D_StridedStrided_ReduceBroadcast)
   af.get()->instantiate(af.get(), af.get_type(), &ckb, 0, b.get_type(),
                         b.get_arrmeta(), src_tp, src_arrmeta,
                         kernel_request_single, &eval::default_eval_context,
-                        nd::array());
+                        nd::array(), std::map<nd::string, ndt::type>());
 
   // Call it on the data
   ckb(b.get_readwrite_originptr(),
@@ -509,7 +509,7 @@ TEST(Reduction, BuiltinSum_Lift2D_StridedStrided_ReduceBroadcast_KeepDim)
   af.get()->instantiate(af.get(), af.get_type(), &ckb, 0, b.get_type(),
                         b.get_arrmeta(), src_tp, src_arrmeta,
                         kernel_request_single, &eval::default_eval_context,
-                        nd::array());
+                        nd::array(), std::map<nd::string, ndt::type>());
 
   // Call it on the data
   ckb(b.get_readwrite_originptr(),
@@ -548,7 +548,7 @@ TEST(Reduction, BuiltinSum_Lift3D_StridedStridedStrided_ReduceReduceReduce)
   af.get()->instantiate(af.get(), af.get_type(), &ckb, 0, b.get_type(),
                         b.get_arrmeta(), src_tp, src_arrmeta,
                         kernel_request_single, &eval::default_eval_context,
-                        nd::array());
+                        nd::array(), std::map<nd::string, ndt::type>());
 
   // Call it on the data
   ckb(b.get_readwrite_originptr(),
@@ -586,7 +586,7 @@ TEST(Reduction, BuiltinSum_Lift3D_StridedStridedStrided_BroadcastReduceReduce)
   af.get()->instantiate(af.get(), af.get_type(), &ckb, 0, b.get_type(),
                         b.get_arrmeta(), src_tp, src_arrmeta,
                         kernel_request_single, &eval::default_eval_context,
-                        nd::array());
+                        nd::array(), std::map<nd::string, ndt::type>());
 
   // Call it on the data
   ckb(b.get_readwrite_originptr(),
@@ -625,7 +625,7 @@ TEST(Reduction, BuiltinSum_Lift3D_StridedStridedStrided_ReduceBroadcastReduce)
   af.get()->instantiate(af.get(), af.get_type(), &ckb, 0, b.get_type(),
                         b.get_arrmeta(), src_tp, src_arrmeta,
                         kernel_request_single, &eval::default_eval_context,
-                        nd::array());
+                        nd::array(), std::map<nd::string, ndt::type>());
 
   // Call it on the data
   ckb(b.get_readwrite_originptr(),

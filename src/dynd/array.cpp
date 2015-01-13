@@ -2212,7 +2212,7 @@ void nd::assign_na(const ndt::type &tp, const char *arrmeta, char *data,
           dtp.extended<option_type>()->get_assign_na_arrfunc_type();
       ckernel_builder<kernel_request_host> ckb;
       decl::nd::elwise::instantiate(af, af_tp, &ckb, tp.get_ndim(), tp, arrmeta,
-                               NULL, NULL, kernel_request_single, ectx, nd::array());
+                               NULL, NULL, kernel_request_single, ectx, nd::array(), std::map<nd::string, ndt::type>());
       ckernel_prefix *ckp = ckb.get();
       expr_single_t ckp_fn = ckp->get_function<expr_single_t>();
       ckp_fn(data, NULL, ckp);

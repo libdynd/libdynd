@@ -48,7 +48,8 @@ namespace decl {
       static void resolve_option_values(
           const arrfunc_type_data *DYND_UNUSED(self),
           const arrfunc_type *DYND_UNUSED(self_tp), intptr_t DYND_UNUSED(nsrc),
-          const ndt::type *DYND_UNUSED(src_tp), dynd::nd::array &kwds)
+          const ndt::type *DYND_UNUSED(src_tp), dynd::nd::array &kwds,
+          const std::map<dynd::nd::string, ndt::type> &DYND_UNUSED(tp_vars))
       {
         dynd::nd::array a = kwds.p("a");
         if (a.is_missing()) {
@@ -61,18 +62,20 @@ namespace decl {
         }
       }
 
-      static void resolve_option_values(const arrfunc_type_data *self,
-                                        const arrfunc_type *self_tp,
-                                        intptr_t nsrc, const ndt::type *src_tp,
-                                        dynd::nd::array &kwds)
+      static void resolve_option_values(
+          const arrfunc_type_data *self, const arrfunc_type *self_tp,
+          intptr_t nsrc, const ndt::type *src_tp, dynd::nd::array &kwds,
+          const std::map<dynd::nd::string, ndt::type> &tp_vars)
       {
         ndt::type tp = kwds.p("tp").f("dereference").as<ndt::type>();
         switch (tp.get_type_id()) {
         case int32_type_id:
-          resolve_option_values<int32_t>(self, self_tp, nsrc, src_tp, kwds);
+          resolve_option_values<int32_t>(self, self_tp, nsrc, src_tp, kwds,
+                                         tp_vars);
           break;
         case int64_type_id:
-          resolve_option_values<int64_t>(self, self_tp, nsrc, src_tp, kwds);
+          resolve_option_values<int64_t>(self, self_tp, nsrc, src_tp, kwds,
+                                         tp_vars);
           break;
         default:
           throw std::runtime_error("error");
@@ -80,16 +83,16 @@ namespace decl {
       }
 
       template <typename R>
-      static intptr_t instantiate(const arrfunc_type_data *DYND_UNUSED(self),
-                                  const arrfunc_type *DYND_UNUSED(self_tp),
-                                  void *ckb, intptr_t ckb_offset,
-                                  const ndt::type &DYND_UNUSED(dst_tp),
-                                  const char *DYND_UNUSED(dst_arrmeta),
-                                  const ndt::type *DYND_UNUSED(src_tp),
-                                  const char *const *DYND_UNUSED(src_arrmeta),
-                                  kernel_request_t kernreq,
-                                  const eval::eval_context *DYND_UNUSED(ectx),
-                                  const dynd::nd::array &kwds)
+      static intptr_t instantiate(
+          const arrfunc_type_data *DYND_UNUSED(self),
+          const arrfunc_type *DYND_UNUSED(self_tp), void *ckb,
+          intptr_t ckb_offset, const ndt::type &DYND_UNUSED(dst_tp),
+          const char *DYND_UNUSED(dst_arrmeta),
+          const ndt::type *DYND_UNUSED(src_tp),
+          const char *const *DYND_UNUSED(src_arrmeta), kernel_request_t kernreq,
+          const eval::eval_context *DYND_UNUSED(ectx),
+          const dynd::nd::array &kwds,
+          const std::map<dynd::nd::string, ndt::type> &DYND_UNUSED(tp_vars))
       {
         R a = kwds.p("a").as<R>();
         R b = kwds.p("b").as<R>();
@@ -111,18 +114,19 @@ namespace decl {
                   void *ckb, intptr_t ckb_offset, const ndt::type &dst_tp,
                   const char *dst_arrmeta, const ndt::type *src_tp,
                   const char *const *src_arrmeta, kernel_request_t kernreq,
-                  const eval::eval_context *ectx, const dynd::nd::array &kwds)
+                  const eval::eval_context *ectx, const dynd::nd::array &kwds,
+                  const std::map<dynd::nd::string, ndt::type> &tp_vars)
       {
         ndt::type tp = kwds.p("tp").f("dereference").as<ndt::type>();
         switch (tp.get_type_id()) {
         case int32_type_id:
           return instantiate<int32_t>(self, self_tp, ckb, ckb_offset, dst_tp,
                                       dst_arrmeta, src_tp, src_arrmeta, kernreq,
-                                      ectx, kwds);
+                                      ectx, kwds, tp_vars);
         case int64_type_id:
           return instantiate<int64_t>(self, self_tp, ckb, ckb_offset, dst_tp,
                                       dst_arrmeta, src_tp, src_arrmeta, kernreq,
-                                      ectx, kwds);
+                                      ectx, kwds, tp_vars);
         default:
           throw std::runtime_error("error");
         }

@@ -276,7 +276,7 @@ static intptr_t instantiate_multidispatch_af(
     void *ckb, intptr_t ckb_offset, const ndt::type &dst_tp,
     const char *dst_arrmeta, const ndt::type *src_tp,
     const char *const *src_arrmeta, kernel_request_t kernreq,
-    const eval::eval_context *ectx, const nd::array &kwds)
+    const eval::eval_context *ectx, const nd::array &kwds, const std::map<dynd::nd::string, ndt::type> &tp_vars)
 {
   const vector<nd::arrfunc> *icd = af_self->get_data_as<vector<nd::arrfunc>>();
   for (intptr_t i = 0; i < (intptr_t)icd->size(); ++i) {
@@ -300,7 +300,7 @@ static intptr_t instantiate_multidispatch_af(
       if (j == nsrc) {
         return af.get()->instantiate(af.get(), af.get_type(), ckb, ckb_offset,
                                      dst_tp, dst_arrmeta, src_tp, src_arrmeta,
-                                     kernreq, ectx, kwds);
+                                     kernreq, ectx, kwds, tp_vars);
       } else {
         return make_buffered_ckernel(af.get(), af.get_type(), ckb, ckb_offset,
                                      dst_tp, dst_arrmeta, nsrc, src_tp,
@@ -318,7 +318,8 @@ static intptr_t instantiate_multidispatch_af(
 static int resolve_multidispatch_dst_type(
     const arrfunc_type_data *af_self, const arrfunc_type *DYND_UNUSED(af_tp),
     intptr_t nsrc, const ndt::type *src_tp, int throw_on_error,
-    ndt::type &out_dst_tp, const nd::array &DYND_UNUSED(kwds))
+    ndt::type &out_dst_tp, const nd::array &DYND_UNUSED(kwds),
+    const std::map<nd::string, ndt::type> &DYND_UNUSED(tp_vars))
 {
   const vector<nd::arrfunc> *icd = af_self->get_data_as<vector<nd::arrfunc>>();
   for (intptr_t i = 0; i < (intptr_t)icd->size(); ++i) {
@@ -357,8 +358,7 @@ static int resolve_multidispatch_dst_type(
   }
 }
 
-nd::arrfunc nd::functional::multidispatch(intptr_t naf,
-                                          const arrfunc *child_af)
+nd::arrfunc nd::functional::multidispatch(intptr_t naf, const arrfunc *child_af)
 {
   if (naf <= 0) {
     throw invalid_argument(

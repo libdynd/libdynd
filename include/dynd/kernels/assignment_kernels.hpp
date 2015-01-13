@@ -15,6 +15,7 @@
 #include <dynd/typed_data_assign.hpp>
 #include <dynd/types/type_id.hpp>
 #include <dynd/kernels/single_assigner_builtin.hpp>
+#include <map>
 
 namespace dynd {
 /**
@@ -403,21 +404,21 @@ intptr_t make_cuda_device_builtin_type_assignment_kernel(
     intptr_t ckb_offset, const ndt::type &dst_tp, const char *dst_arrmeta,
     const ndt::type *src_tp, const char *const *src_arrmeta,
     kernel_request_t kernreq, const eval::eval_context *ectx,
-    const nd::array &kwds);
+    const nd::array &kwds, const std::map<nd::string, ndt::type> &tp_vars);
 
 intptr_t make_cuda_to_device_builtin_type_assignment_kernel(
     const arrfunc_type_data *self, const arrfunc_type *af_tp, void *ckb,
     intptr_t ckb_offset, const ndt::type &dst_tp, const char *dst_arrmeta,
     const ndt::type *src_tp, const char *const *src_arrmeta,
     kernel_request_t kernreq, const eval::eval_context *ectx,
-    const nd::array &kwds);
+    const nd::array &kwds, const std::map<nd::string, ndt::type> &tp_vars);
 
 intptr_t make_cuda_from_device_builtin_type_assignment_kernel(
     const arrfunc_type_data *self, const arrfunc_type *af_tp, void *ckb,
     intptr_t ckb_offset, const ndt::type &dst_tp, const char *dst_arrmeta,
     const ndt::type *src_tp, const char *const *src_arrmeta,
     kernel_request_t kernreq, const eval::eval_context *ectx,
-    const nd::array &kwds);
+    const nd::array &kwds, const std::map<nd::string, ndt::type> &tp_vars);
 
 #endif // DYND_CUDA
 } // namespace dynd

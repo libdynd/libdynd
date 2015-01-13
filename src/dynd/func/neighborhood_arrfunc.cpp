@@ -81,7 +81,7 @@ static intptr_t instantiate_neighborhood(
     void *ckb, intptr_t ckb_offset, const ndt::type &dst_tp,
     const char *dst_arrmeta, const ndt::type *src_tp,
     const char *const *src_arrmeta, kernel_request_t kernreq,
-    const eval::eval_context *ectx, const nd::array &kwds)
+    const eval::eval_context *ectx, const nd::array &kwds, const std::map<dynd::nd::string, ndt::type> &tp_vars)
 {
   neighborhood *nh = *af_self->get_data_as<neighborhood *>();
   nd::arrfunc nh_op = nh->op;
@@ -172,47 +172,48 @@ static intptr_t instantiate_neighborhood(
       nh_op.get(), nh_op.get_type(), ckb, ckb_offset, nh_dst_tp, nh_dst_arrmeta,
       nh_src_tp, nh_src_arrmeta, kernel_request_single, ectx,
       struct_concat(kwds, pack("start_stop",
-                               reinterpret_cast<intptr_t>(nh->start_stop))));
+                               reinterpret_cast<intptr_t>(nh->start_stop))), tp_vars);
 
   return ckb_offset;
 }
 
-static void resolve_neighborhood_option_values(const arrfunc_type_data *DYND_UNUSED(self),
-                                               const arrfunc_type *DYND_UNUSED(self_tp),
-                                               intptr_t DYND_UNUSED(nsrc),
-                                               const ndt::type *DYND_UNUSED(src_tp),
-                                               nd::array &DYND_UNUSED(kwds))
+static void resolve_neighborhood_option_values(
+    const arrfunc_type_data *DYND_UNUSED(self),
+    const arrfunc_type *DYND_UNUSED(self_tp), intptr_t DYND_UNUSED(nsrc),
+    const ndt::type *DYND_UNUSED(src_tp), nd::array &DYND_UNUSED(kwds),
+    const std::map<nd::string, ndt::type> &DYND_UNUSED(tp_vars))
 {
 }
 
 static int resolve_neighborhood_dst_type(
     const arrfunc_type_data *DYND_UNUSED(self), const arrfunc_type *self_tp,
-    intptr_t , const ndt::type *src_tp, int DYND_UNUSED(throw_on_error),
-    ndt::type &out_dst_tp, const nd::array &DYND_UNUSED(kwds))
+    intptr_t, const ndt::type *src_tp, int DYND_UNUSED(throw_on_error),
+    ndt::type &out_dst_tp, const nd::array &DYND_UNUSED(kwds),
+    const std::map<nd::string, ndt::type> &DYND_UNUSED(tp_vars))
 {
   // TODO: Should be able to express the match/subsitution without special code
 
   // This is basically resolve() from arrfunc.hpp
-/*
-  if (nsrc != af_tp->get_npos()) {
-    std::stringstream ss;
-    ss << "arrfunc expected " << af_tp->get_npos()
-       << " parameters, but received " << nsrc;
-    throw std::invalid_argument(ss.str());
-  }
-  const ndt::type *param_types = af_tp->get_pos_types_raw();
-  std::map<nd::string, ndt::type> typevars;
-  for (intptr_t i = 0; i != nsrc; ++i) {
-    if (!ndt::pattern_match(src_tp[i].value_type(), param_types[i], typevars)) {
+  /*
+    if (nsrc != af_tp->get_npos()) {
       std::stringstream ss;
-      ss << "parameter " << (i + 1) << " to arrfunc does not match, ";
-      ss << "expected " << param_types[i] << ", received " << src_tp[i];
+      ss << "arrfunc expected " << af_tp->get_npos()
+         << " parameters, but received " << nsrc;
       throw std::invalid_argument(ss.str());
     }
-  }
-*/
-//  out_dst_tp = ndt::substitute(af_tp->get_return_type(), typevars, false);
-
+    const ndt::type *param_types = af_tp->get_pos_types_raw();
+    std::map<nd::string, ndt::type> typevars;
+    for (intptr_t i = 0; i != nsrc; ++i) {
+      if (!ndt::pattern_match(src_tp[i].value_type(), param_types[i], typevars))
+    {
+        std::stringstream ss;
+        ss << "parameter " << (i + 1) << " to arrfunc does not match, ";
+        ss << "expected " << param_types[i] << ", received " << src_tp[i];
+        throw std::invalid_argument(ss.str());
+      }
+    }
+  */
+  //  out_dst_tp = ndt::substitute(af_tp->get_return_type(), typevars, false);
 
   out_dst_tp = self_tp->get_return_type();
 
@@ -241,7 +242,8 @@ nd::arrfunc dynd::make_neighborhood_arrfunc(const nd::arrfunc &neighborhood_op,
   nd::array arg_tp = nd::empty(3, ndt::make_type());
   arg_tp(0).vals() = ndt::type("?" + std::to_string(nh_ndim) + " * int");
   arg_tp(1).vals() = ndt::type("?" + std::to_string(nh_ndim) + " * int");
-  arg_tp(2).vals() = ndt::type("?Fixed**" + std::to_string(nh_ndim) + " * bool");
+  arg_tp(2).vals() =
+      ndt::type("?Fixed**" + std::to_string(nh_ndim) + " * bool");
   std::vector<std::string> arg_names;
   arg_names.push_back("shape");
   arg_names.push_back("offset");

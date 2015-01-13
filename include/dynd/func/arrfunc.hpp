@@ -97,7 +97,7 @@ typedef intptr_t (*arrfunc_instantiate_t)(
     intptr_t ckb_offset, const ndt::type &dst_tp, const char *dst_arrmeta,
     const ndt::type *src_tp, const char *const *src_arrmeta,
     kernel_request_t kernreq, const eval::eval_context *ectx,
-    const nd::array &kwds);
+    const nd::array &kwds, const std::map<nd::string, ndt::type> &tp_vars);
 
 /**
  * Resolves the destination type for this arrfunc based on the types
@@ -116,7 +116,7 @@ typedef intptr_t (*arrfunc_instantiate_t)(
 typedef int (*arrfunc_resolve_dst_type_t)(
     const arrfunc_type_data *self, const arrfunc_type *af_tp, intptr_t nsrc,
     const ndt::type *src_tp, int throw_on_error, ndt::type &out_dst_tp,
-    const nd::array &kwds);
+    const nd::array &kwds, const std::map<nd::string, ndt::type> &tp_vars);
 
 /**
  * Resolves any missing keyword arguments for this arrfunc based on
@@ -124,15 +124,14 @@ typedef int (*arrfunc_resolve_dst_type_t)(
  *
  * \param self    The arrfunc.
  * \param self_tp The function prototype of the arrfunc.
- * \param npos    The number of positional arguments.
- * \param pos_tp  An array of the source types.
+ * \param nsrc    The number of positional arguments.
+ * \param src_tp  An array of the source types.
  * \param kwds    An array of the.
  */
-typedef void (*arrfunc_resolve_option_values_t)(const arrfunc_type_data *self,
-                                                const arrfunc_type *self_tp,
-                                                intptr_t npos,
-                                                const ndt::type *pos_tp,
-                                                nd::array &kwds);
+typedef void (*arrfunc_resolve_option_values_t)(
+    const arrfunc_type_data *self, const arrfunc_type *self_tp, intptr_t nsrc,
+    const ndt::type *src_tp, nd::array &kwds,
+    const std::map<nd::string, ndt::type> &tp_vars);
 
 /**
  * A function which deallocates the memory behind data_ptr after
@@ -709,8 +708,8 @@ namespace nd {
     template <typename... K>
     ndt::type resolve(intptr_t nsrc, const ndt::type *src_tp,
                       const char *const *src_arrmeta,
-                      const detail::kwds<K...> &kwds,
-                      array &kwds_as_array) const
+                      const detail::kwds<K...> &kwds, array &kwds_as_array,
+                      std::map<nd::string, ndt::type> &typevars) const
     {
       const arrfunc_type_data *self = get();
       const arrfunc_type *self_tp = m_value.get_type().extended<arrfunc_type>();
@@ -723,7 +722,6 @@ namespace nd {
         throw std::invalid_argument(ss.str());
       }
       const ndt::type *param_types = self_tp->get_pos_types_raw();
-      std::map<nd::string, ndt::type> typevars;
       for (intptr_t i = 0; i != self_tp->get_npos(); ++i) {
         ndt::type expected_tp = param_types[i];
         if (!ndt::pattern_match(src_tp[i].value_type(), src_arrmeta[i],
@@ -762,7 +760,7 @@ namespace nd {
 
         if (self->resolve_option_values != NULL) {
           self->resolve_option_values(self, self_tp, nsrc, src_tp,
-                                      kwds_as_array);
+                                      kwds_as_array, typevars);
         }
       } else if (kwds.get_size() != 0) {
         stringstream ss;
@@ -775,7 +773,7 @@ namespace nd {
       if (self->resolve_dst_type != NULL) {
         ndt::type dst_tp;
         self->resolve_dst_type(self, self_tp, nsrc, src_tp, true, dst_tp,
-                               kwds_as_array);
+                               kwds_as_array, typevars);
         return dst_tp;
       }
 
@@ -793,8 +791,9 @@ namespace nd {
       // Resolve the destination type
       const ndt::type *src_tp = args.get_types();
       nd::array kwds_as_array;
+      std::map<nd::string, ndt::type> tp_vars;
       ndt::type dst_tp = resolve(sizeof...(A), src_tp, args.get_arrmeta(), kwds,
-                                 kwds_as_array);
+                                 kwds_as_array, tp_vars);
 
       // Construct the destination array
       nd::array res = nd::empty(dst_tp);
@@ -803,7 +802,7 @@ namespace nd {
       ckernel_builder<kernel_request_host> ckb;
       self->instantiate(self, self_tp, &ckb, 0, dst_tp, res.get_arrmeta(),
                         src_tp, args.get_arrmeta(), kernel_request_single, ectx,
-                        kwds_as_array);
+                        kwds_as_array, tp_vars);
       expr_single_t fn = ckb.get()->get_function<expr_single_t>();
       fn(res.get_readwrite_originptr(), args.get_data(), ckb.get());
 
@@ -832,9 +831,10 @@ namespace nd {
       }
 
       nd::array kwds_as_array;
+      std::map<nd::string, ndt::type> tp_vars;
       ndt::type dst_tp = resolve(narg, (narg == 0) ? NULL : src_tp.data(),
                                  (narg == 0) ? NULL : src_arrmeta.data(),
-                                 kwds(), kwds_as_array);
+                                 kwds(), kwds_as_array, tp_vars);
 
       // Construct the destination array
       nd::array res = nd::empty(dst_tp);
@@ -844,7 +844,7 @@ namespace nd {
       self->instantiate(self, self_tp, &ckb, 0, dst_tp, res.get_arrmeta(),
                         (narg == 0) ? NULL : src_tp.data(),
                         (narg == 0) ? NULL : src_arrmeta.data(),
-                        kernel_request_single, ectx, kwds_as_array);
+                        kernel_request_single, ectx, kwds_as_array, tp_vars);
       expr_single_t fn = ckb.get()->get_function<expr_single_t>();
       fn(res.get_readwrite_originptr(), (narg == 0) ? NULL : src_data.data(),
          ckb.get());
@@ -980,7 +980,7 @@ namespace nd {
       ckernel_builder<kernel_request_host> ckb;
       af->instantiate(af, af_tp, &ckb, 0, out.get_type(), out.get_arrmeta(),
                       &arg_tp[0], &src_arrmeta[0], kernel_request_single, ectx,
-                      array());
+                      array(), std::map<nd::string, ndt::type>());
       expr_single_t fn = ckb.get()->get_function<expr_single_t>();
       fn(out.get_readwrite_originptr(), src_data.empty() ? NULL : &src_data[0],
          ckb.get());
@@ -1152,7 +1152,8 @@ namespace decl {
       resolve_dst_type(const arrfunc_type_data *self,
                        const arrfunc_type *DYND_UNUSED(self_tp), intptr_t nsrc,
                        const ndt::type *src_tp, int throw_on_error,
-                       ndt::type &dst_tp, const dynd::nd::array &kwds)
+                       ndt::type &dst_tp, const dynd::nd::array &kwds,
+                       const std::map<dynd::nd::string, ndt::type> &tp_vars)
       {
         const arrfunc_type_data *child =
             self->get_data_as<dynd::nd::arrfunc>()->get();
@@ -1160,7 +1161,7 @@ namespace decl {
             self->get_data_as<dynd::nd::arrfunc>()->get_type();
 
         return T::resolve_dst_type(child, child_tp, nsrc, src_tp,
-                                   throw_on_error, dst_tp, kwds);
+                                   throw_on_error, dst_tp, kwds, tp_vars);
       }
 
       template <bool bound>
@@ -1168,7 +1169,8 @@ namespace decl {
       resolve_dst_type(const arrfunc_type_data *DYND_UNUSED(self),
                        const arrfunc_type *DYND_UNUSED(self_tp), intptr_t nsrc,
                        const ndt::type *src_tp, int throw_on_error,
-                       ndt::type &dst_tp, const dynd::nd::array &kwds)
+                       ndt::type &dst_tp, const dynd::nd::array &kwds,
+                       const std::map<dynd::nd::string, ndt::type> &tp_vars)
       {
         const arrfunc_type_data *child =
             reinterpret_cast<const arrfunc_type_data *>(
@@ -1179,7 +1181,7 @@ namespace decl {
                                            .extended<arrfunc_type>();
 
         return T::resolve_dst_type(child, child_tp, nsrc, src_tp,
-                                   throw_on_error, dst_tp, kwds);
+                                   throw_on_error, dst_tp, kwds, tp_vars);
       }
 
       template <bool bound>
@@ -1190,7 +1192,8 @@ namespace decl {
                   const char *dst_arrmeta, const ndt::type *src_tp,
                   const char *const *src_arrmeta,
                   dynd::kernel_request_t kernreq,
-                  const eval::eval_context *ectx, const dynd::nd::array &kwds)
+                  const eval::eval_context *ectx, const dynd::nd::array &kwds,
+                  const std::map<dynd::nd::string, ndt::type> &tp_vars)
       {
         const arrfunc_type_data *child =
             self->get_data_as<dynd::nd::arrfunc>()->get();
@@ -1199,7 +1202,7 @@ namespace decl {
 
         return T::instantiate(child, child_tp, ckb, ckb_offset, dst_tp,
                               dst_arrmeta, src_tp, src_arrmeta, kernreq, ectx,
-                              kwds);
+                              kwds, tp_vars);
       }
 
       template <bool bound>
@@ -1210,7 +1213,8 @@ namespace decl {
                   const char *dst_arrmeta, const ndt::type *src_tp,
                   const char *const *src_arrmeta,
                   dynd::kernel_request_t kernreq,
-                  const eval::eval_context *ectx, const dynd::nd::array &kwds)
+                  const eval::eval_context *ectx, const dynd::nd::array &kwds,
+                  const std::map<dynd::nd::string, ndt::type> &tp_vars)
       {
         const arrfunc_type_data *child =
             reinterpret_cast<const arrfunc_type_data *>(
@@ -1222,7 +1226,7 @@ namespace decl {
 
         return T::instantiate(child, child_tp, ckb, ckb_offset, dst_tp,
                               dst_arrmeta, src_tp, src_arrmeta, kernreq, ectx,
-                              kwds);
+                              kwds, tp_vars);
       }
 
       static dynd::nd::arrfunc bind(const std::string &DYND_UNUSED(name),
