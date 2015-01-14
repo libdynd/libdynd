@@ -1104,17 +1104,16 @@ namespace nd {
                    dynd::detail::get_resolve_dst_type<CKT>());
   }
 
-  template <typename CKT, typename T>
+  template <typename CKT0, typename T>
   arrfunc as_arrfunc(const T &data)
   {
-    return as_arrfunc<CKT>(CKT::make_type(), data);
+    return as_arrfunc<CKT0>(CKT0::make_type(), data);
   }
 
-  template <typename... CKT, typename T>
-  typename std::enable_if<sizeof...(CKT) != 1,
-      arrfunc > ::type as_arrfunc(const ndt::type &self_tp, const T &data)
+  template <typename CKT0, typename... CKT, typename T>
+  arrfunc as_arrfunc(const ndt::type &self_tp, const T &data)
   {
-    return functional::multidispatch(self_tp, {as_arrfunc<CKT>(data)...});
+    return functional::multidispatch(self_tp, {as_arrfunc<CKT0>(data), as_arrfunc<CKT>(data)...});
   }
 
   namespace detail {
