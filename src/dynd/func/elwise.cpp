@@ -247,7 +247,7 @@ intptr_t nd::functional::elwise_instantiate_with_child(
         new_src_tp[i] =
             src_tp[i].extended<base_memory_type>()->get_element_type();
       }
-      instantiate(child, child_tp, cuda_ckb, 0, new_dst_tp, dst_arrmeta,
+      elwise_instantiate_with_child(child, child_tp, cuda_ckb, 0, new_dst_tp, dst_arrmeta,
                   &new_src_tp[0], src_arrmeta,
                   kernreq | kernel_request_cuda_device, ectx, kwds, tp_vars);
       // The return is the ckb_offset for the ckb that was passed in,
