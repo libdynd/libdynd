@@ -1,6 +1,7 @@
 #pragma once
 
 #include <chrono>
+#include <memory>
 #include <random>
 
 #include <dynd/kernels/expr_kernels.hpp>
@@ -86,7 +87,7 @@ namespace nd {
                           integral_types>(
             ndt::type("(a: ?R, b: ?R, tp: type | R) -> R"),
             std::shared_ptr<std::default_random_engine>(
-                new std::default_random_engine));
+                new std::default_random_engine()));
       }
     };
   } // namespace dynd::nd::decl

@@ -10,14 +10,14 @@ using namespace dynd;
 
 #ifdef DYND_FFTW
 
-decl::nd::fftw nd::fftw;
-decl::nd::rfftw nd::rfftw;
-decl::nd::ifftw nd::ifftw;
-decl::nd::irfftw nd::irfftw;
+nd::decl::fftw nd::fftw;
+nd::decl::rfftw nd::rfftw;
+nd::decl::ifftw nd::ifftw;
+nd::decl::irfftw nd::irfftw;
 
-decl::nd::fft nd::fft;
-decl::nd::rfft nd::rfft;
-decl::nd::ifft nd::ifft;
-decl::nd::irfft nd::irfft;
+nd::decl::fft nd::fft;
+nd::decl::rfft nd::rfft;
+nd::decl::ifft nd::ifft;
+nd::decl::irfft nd::irfft;
 
 #endif
