@@ -40,8 +40,7 @@ using namespace dynd;
 void nd::array::swap(array &rhs) { m_memblock.swap(rhs.m_memblock); }
 
 template <class T>
-inline typename std::enable_if<is_dynd_scalar<T>::value,
-                                memory_block_ptr>::type
+inline typename std::enable_if<is_dynd_scalar<T>::value, memory_block_ptr>::type
 make_builtin_scalar_array(const T &value, uint64_t flags)
 {
   char *data_ptr = NULL;
@@ -2211,8 +2210,10 @@ void nd::assign_na(const ndt::type &tp, const char *arrmeta, char *data,
       const arrfunc_type *af_tp =
           dtp.extended<option_type>()->get_assign_na_arrfunc_type();
       ckernel_builder<kernel_request_host> ckb;
-      nd::decl::elwise::instantiate(af, af_tp, &ckb, tp.get_ndim(), tp, arrmeta,
-                               NULL, NULL, kernel_request_single, ectx, nd::array(), std::map<nd::string, ndt::type>());
+      nd::functional::elwise_instantiate_with_child(
+          af, af_tp, &ckb, tp.get_ndim(), tp, arrmeta, NULL, NULL,
+          kernel_request_single, ectx, nd::array(),
+          std::map<nd::string, ndt::type>());
       ckernel_prefix *ckp = ckb.get();
       expr_single_t ckp_fn = ckp->get_function<expr_single_t>();
       ckp_fn(data, NULL, ckp);

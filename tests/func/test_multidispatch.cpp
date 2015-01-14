@@ -89,8 +89,8 @@ TEST(MultiDispatchArrfunc, Values)
   vector<nd::arrfunc> funcs;
   funcs.push_back(nd::functional::apply(&manip0));
   funcs.push_back(nd::functional::apply(&manip1));
-  nd::arrfunc af = nd::elwise.bind(
-      "func", nd::functional::multidispatch(funcs.size(), &funcs[0]));
+  nd::arrfunc af = nd::functional::elwise(
+      nd::functional::multidispatch(funcs.size(), &funcs[0]));
   nd::array a, b, c;
 
   // Exactly match (int, int) -> real
@@ -153,10 +153,10 @@ TEST(MultiDispatchArrfunc, Dims)
 // NAME<T>
 // *NAME<T>
 
-// DYND_AS_ARRFUNC("(R) -> R", 
+// DYND_AS_ARRFUNC("(R) -> R",
 // DYND_AS_ARRFUNC(TYPE, DYND_AS_FUNCTION_POINTER, sin, (...))
 // DYND_AS_CUDA_HOST_DEVICE_ARRFUNC(
-// DYND_AS_ARRFUNC(DYND_, 
+// DYND_AS_ARRFUNC(DYND_,
 
 template <typename T>
 T tester(T x)
