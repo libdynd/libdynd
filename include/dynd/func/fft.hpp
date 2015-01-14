@@ -11,34 +11,35 @@
 #ifdef DYND_FFTW
 
 namespace dynd {
-  namespace nd {
-namespace decl {
+namespace nd {
+  namespace decl {
 
+    struct fftw : arrfunc<fftw> {
+      typedef kernels::fftw_ck<fftw_complex, fftw_complex, FFTW_FORWARD> CKT;
 
-    /*
-    class fftw : public arrfunc<fftw> {
-    public:
-        static dynd::nd::arrfunc make() {
-            dynd::nd::arrfunc af[2] = {arrfunc<fftw_ck<fftwf_complex,
-    fftwf_complex, FFTW_FORWARD> >::make(),
-                arrfunc<fftw_ck<fftw_complex, fftw_complex, FFTW_FORWARD>
-    >::make()};
-
-            dynd::nd::arrfunc af2 = make_multidispatch_arrfunc(2, af);;
-            std::cout << arrfunc<fftw_ck<fftwf_complex, fftwf_complex,
-    FFTW_FORWARD> >::make().get()->func_proto << std::endl;
-
-            return af2;
-        }
+      static nd::arrfunc as_arrfunc() { return nd::as_arrfunc<CKT>(); }
     };
-    */
 
-    typedef arrfunc<kernels::fftw_ck<fftw_complex, fftw_complex, FFTW_FORWARD>> fftw;
-    typedef arrfunc<kernels::fftw_ck<fftw_complex, double>> rfftw;
+    struct rfftw : arrfunc<rfftw> {
+      typedef kernels::fftw_ck<fftw_complex, double> CKT;
 
-    typedef arrfunc<kernels::fftw_ck<fftw_complex, fftw_complex, FFTW_BACKWARD>> ifftw;
-    typedef arrfunc<kernels::fftw_ck<double, fftw_complex>> irfftw;
+      static nd::arrfunc as_arrfunc() { return nd::as_arrfunc<CKT>(); }
+    };
+
+    struct ifftw : arrfunc<ifftw> {
+      typedef kernels::fftw_ck<fftw_complex, fftw_complex> CKT;
+
+      static nd::arrfunc as_arrfunc() { return nd::as_arrfunc<CKT>(); }
+    };
+
+    class irfftw : public arrfunc<irfftw> {
+    public:
+      typedef kernels::fftw_ck<double, fftw_complex> CKT;
+
+      static nd::arrfunc as_arrfunc() { return nd::as_arrfunc<CKT>(); }
+    };
   }
+
 } // namespace dynd::decl::nd
 
 namespace nd {
@@ -51,30 +52,23 @@ namespace nd {
 
 } // namespace dynd::nd
 
-  namespace nd {
-namespace decl {
+namespace nd {
+  namespace decl {
 
-    class fft : public arrfunc<fft> {
-    public:
-      static dynd::nd::arrfunc make()
-      {
-        return dynd::nd::fftw;
-      }
+    struct fft : arrfunc<fft> {
+      static nd::arrfunc as_arrfunc() { return nd::fftw; }
     };
 
-    class rfft : public arrfunc<rfft> {
-    public:
-      static dynd::nd::arrfunc make() { return dynd::nd::rfftw; }
+    struct rfft : arrfunc<rfft> {
+      static nd::arrfunc as_arrfunc() { return nd::rfftw; }
     };
 
-    class ifft : public arrfunc<ifft> {
-    public:
-      static dynd::nd::arrfunc make() { return dynd::nd::ifftw; }
+    struct ifft : arrfunc<ifft> {
+      static nd::arrfunc as_arrfunc() { return nd::ifftw; }
     };
 
-    class irfft : public arrfunc<irfft> {
-    public:
-      static dynd::nd::arrfunc make() { return dynd::nd::irfftw; }
+    struct irfft : arrfunc<irfft> {
+      static nd::arrfunc as_arrfunc() { return nd::irfftw; }
     };
   }
 } // namespace dynd::decl::nd

@@ -4,9 +4,9 @@
 using namespace std;
 using namespace dynd;
 
-nd::arrfunc nd::decl::uniform::make()
+nd::arrfunc nd::decl::uniform::as_arrfunc()
 {
-  return as_arrfunc<kernels::uniform_ck, std::default_random_engine,
+  return nd::as_arrfunc<kernels::uniform_ck, std::default_random_engine,
                     integral_types>(
       ndt::type("(a: ?R, b: ?R, tp: type | R) -> R"),
       std::shared_ptr<std::default_random_engine>(

@@ -78,10 +78,8 @@ namespace kernels {
 
 namespace nd {
   namespace decl {
-
-    class uniform : public arrfunc<uniform> {
-    public:
-      static nd::arrfunc make();
+    struct uniform : arrfunc<uniform> {
+      static nd::arrfunc as_arrfunc();
     };
   } // namespace dynd::nd::decl
 

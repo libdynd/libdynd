@@ -36,7 +36,7 @@ TEST(Elwise, UnaryExpr_FixedDim)
   nd::arrfunc af_base = make_arrfunc_from_assignment(
       ndt::make_type<int>(), ndt::make_string(), assign_error_default);
   // Lift the arrfunc
-  nd::arrfunc af = nd::elwise.bind("func", af_base);
+  nd::arrfunc af = nd::functional::elwise(af_base);
 
   // Test it on some data
   const char *in[3] = {"172", "-139", "12345"};
@@ -55,7 +55,7 @@ TEST(Elwise, UnaryExpr_StridedDim)
   nd::arrfunc af_base = make_arrfunc_from_assignment(
       ndt::make_type<int>(), ndt::make_fixedstring(16), assign_error_default);
   // Lift the arrfunc
-  nd::arrfunc af = nd::elwise.bind("func", af_base);
+  nd::arrfunc af = nd::functional::elwise(af_base);
 
   // Test it on some data
   ckernel_builder<kernel_request_host> ckb;
@@ -76,7 +76,7 @@ TEST(Elwise, UnaryExpr_VarDim)
   nd::arrfunc af_base = make_arrfunc_from_assignment(
       ndt::make_type<int>(), ndt::make_fixedstring(16), assign_error_default);
   // Lift the arrfunc
-  nd::arrfunc af = nd::elwise.bind("func", af_base);
+  nd::arrfunc af = nd::functional::elwise(af_base);
 
   const char *in[5] = {"172", "-139", "12345", "-1111", "284"};
   nd::array a = nd::empty("var * string[16]");
@@ -99,7 +99,7 @@ TEST(Elwise, UnaryExpr_StridedToVarDim)
       ndt::make_type<int>(), ndt::make_fixedstring(16), assign_error_default);
 
   // Lift the kernel to particular fixed dim arrays
-  nd::arrfunc af = nd::elwise.bind("func", af_base);
+  nd::arrfunc af = nd::functional::elwise(af_base);
 
   // Test it on some data
   ndt::type dst_tp("var * int32");
@@ -135,7 +135,7 @@ TEST(Elwise, UnaryExpr_VarToVarDim)
       ndt::make_type<int>(), ndt::make_fixedstring(16), assign_error_default);
 
   // Lift the kernel to particular fixed dim arrays
-  nd::arrfunc af = nd::elwise.bind("func", af_base);
+  nd::arrfunc af = nd::functional::elwise(af_base);
 
   // Test it on some data
   ckernel_builder<kernel_request_host> ckb;
@@ -165,7 +165,7 @@ TEST(Elwise, UnaryExpr_MultiDimVarToVarDim)
   nd::arrfunc af_base = make_arrfunc_from_assignment(
       ndt::make_type<int>(), ndt::make_fixedstring(16), assign_error_default);
   // Lift the arrfunc
-  nd::arrfunc af = nd::elwise.bind("func", af_base);
+  nd::arrfunc af = nd::functional::elwise(af_base);
 
   // Test it on some data
   nd::array in = nd::empty("3 * var * string[16]");
@@ -239,16 +239,13 @@ TEST(LiftArrFunc, Expr_MultiDimVarToVarDim) {
 
 TEST(Elwise, Simple)
 {
-  nd::arrfunc af, baf;
+  nd::arrfunc af;
 
   nd::array a = parse_json("3 * int", "[0, 1, 2]");
   nd::array b = parse_json("3 * int", "[3, 4, 5]");
 
-  af = nd::functional::apply<callable0>();
-  EXPECT_ARR_EQ(nd::array({3, 5, 7}), nd::elwise(a, b, kwds("func", af)));
-
-  baf = nd::elwise.bind("func", af);
-  EXPECT_ARR_EQ(nd::array({3, 5, 7}), baf(a, b));
+  af = nd::functional::elwise(nd::functional::apply<callable0>());
+  EXPECT_ARR_EQ(nd::array({3, 5, 7}), af(a, b));
 
 #ifdef __CUDACC__
 //  a = a.to_cuda_device();
@@ -258,7 +255,7 @@ TEST(Elwise, Simple)
 //  std::cout << af << std::endl;
   //EXPECT_ARR_EQ(nd::array({3, 5, 7}).to_cuda_device(), nd::elwise(a, b, kwds("func", af)));
 
-//  baf = nd::elwise.bind("func", af);
+//  baf = nd::functional::elwise(af);
 //  EXPECT_ARR_EQ(nd::array({3, 5, 7}).to_cuda_device(), baf(a, b));
 #endif
 }

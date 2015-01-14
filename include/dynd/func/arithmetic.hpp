@@ -41,12 +41,11 @@ namespace dynd {
                                                                                \
   namespace nd {                                                               \
     namespace decl {                                                           \
-      class NAME : public arrfunc<NAME> {                                      \
+      struct NAME : arrfunc<NAME> {                                            \
         static const kernels::create_t                                         \
             builtin_table[builtin_type_id_count - 2][builtin_type_id_count -   \
                                                      2];                       \
                                                                                \
-      public:                                                                  \
         static int resolve_dst_type(                                           \
             const arrfunc_type_data *DYND_UNUSED(self),                        \
             const arrfunc_type *DYND_UNUSED(self_tp),                          \
@@ -94,12 +93,12 @@ namespace dynd {
           throw std::runtime_error(ss.str());                                  \
         }                                                                      \
                                                                                \
-        static dynd::nd::arrfunc make()                                        \
+        static dynd::nd::arrfunc as_arrfunc()                                  \
         {                                                                      \
           dynd::nd::arrfunc child_af(ndt::type("(Any, Any) -> Any"),           \
                                      &instantiate, NULL, &resolve_dst_type);   \
                                                                                \
-          return elwise::bind("func", child_af);                               \
+          return functional::elwise(child_af);                                 \
         }                                                                      \
       };                                                                       \
     }                                                                          \

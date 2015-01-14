@@ -360,7 +360,7 @@ TYPED_TEST_P(FunctorArrfunc_CallRetRes, CallRetRes) {
   a = avals0;
   b = bvals0;
   af = nd::functional::apply(Callable0(&func0));
-  af = nd::elwise.bind("func", af);
+  af = nd::functional::elwise(af);
   res = af(a, b);
   EXPECT_EQ(ndt::type("2 * 3 * int"), res.get_type());
   EXPECT_JSON_EQ_ARR("[[-10,-2,-4], [0,8,6]]", res);
@@ -418,7 +418,7 @@ TEST(FunctorArrfunc, LambdaFunc) {
   b = 3.25;
   af = nd::functional::apply([](double x, double y,
                                    int z) { return x * z + y; });
-  af = nd::elwise.bind("func", af);
+  af = nd::functional::elwise(af);
   res = af(a, b, 10);
   EXPECT_EQ(ndt::type("3 * float64"), res.get_type());
   EXPECT_JSON_EQ_ARR("[18.25,23.25,34.5]", res);
