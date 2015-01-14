@@ -26,10 +26,11 @@ int func3(float, int, int) { return 3; }
 int func4(int16_t, float, double) { return 4; }
 int func5(int16_t, float, float) { return 5; }
 
-double manip0(int x, int y) {return x + y;};
-double manip1(double x, double y) { return x - y;};
+double manip0(int x, int y) { return x + y; };
+double manip1(double x, double y) { return x - y; };
 
-TEST(MultiDispatchArrfunc, Ambiguous) {
+TEST(MultiDispatchArrfunc, Ambiguous)
+{
   vector<nd::arrfunc> funcs;
   funcs.push_back(nd::functional::apply(&func0));
   funcs.push_back(nd::functional::apply(&func1));
@@ -43,7 +44,8 @@ TEST(MultiDispatchArrfunc, Ambiguous) {
   funcs.push_back(nd::functional::apply(&func5));
 }
 
-TEST(MultiDispatchArrfunc, ExactSignatures) {
+TEST(MultiDispatchArrfunc, ExactSignatures)
+{
   vector<nd::arrfunc> funcs;
   funcs.push_back(nd::functional::apply(&func0));
   funcs.push_back(nd::functional::apply(&func1));
@@ -62,7 +64,8 @@ TEST(MultiDispatchArrfunc, ExactSignatures) {
   EXPECT_EQ(5, af((int16_t)1, 1.f, 1.f).as<int>());
 }
 
-TEST(MultiDispatchArrfunc, PromoteToSignature) {
+TEST(MultiDispatchArrfunc, PromoteToSignature)
+{
   vector<nd::arrfunc> funcs;
   funcs.push_back(nd::functional::apply(&func0));
   funcs.push_back(nd::functional::apply(&func1));
@@ -81,12 +84,13 @@ TEST(MultiDispatchArrfunc, PromoteToSignature) {
   EXPECT_EQ(5, af((int8_t)1, 1.f, 1.f).as<int>());
 }
 
-TEST(MultiDispatchArrfunc, Values) {
+TEST(MultiDispatchArrfunc, Values)
+{
   vector<nd::arrfunc> funcs;
   funcs.push_back(nd::functional::apply(&manip0));
   funcs.push_back(nd::functional::apply(&manip1));
-  nd::arrfunc af =
-      nd::elwise.bind("func", nd::functional::multidispatch(funcs.size(), &funcs[0]));
+  nd::arrfunc af = nd::elwise.bind(
+      "func", nd::functional::multidispatch(funcs.size(), &funcs[0]));
   nd::array a, b, c;
 
   // Exactly match (int, int) -> real
@@ -119,7 +123,8 @@ TEST(MultiDispatchArrfunc, Values) {
 }
 
 /**
-TODO: This test broken when the order of resolve_option_values and resolve_dst_type changed.
+TODO: This test broken when the order of resolve_option_values and
+resolve_dst_type changed.
       It needs to be fixed.
 
 TEST(MultiDispatchArrfunc, Dims)
@@ -140,3 +145,29 @@ TEST(MultiDispatchArrfunc, Dims)
   EXPECT_JSON_EQ_ARR("[3, 8, 6]", c);
 }
 */
+
+// DYND_AS_ARRFUNC
+
+// &NAME<T>
+// NAME<T>()
+// NAME<T>
+// *NAME<T>
+
+// DYND_AS_ARRFUNC("(R) -> R", 
+// DYND_AS_ARRFUNC(TYPE, DYND_AS_FUNCTION_POINTER, sin, (...))
+// DYND_AS_CUDA_HOST_DEVICE_ARRFUNC(
+// DYND_AS_ARRFUNC(DYND_, 
+
+template <typename T>
+T tester(T x)
+{
+  return x;
+}
+
+TEST(MultidispatchArrfunc, Untitled)
+{
+  nd::arrfunc af = nd::functional::multidispatch(
+      ndt::type("(R) -> R"), {nd::functional::apply(&tester<int>),
+                              nd::functional::apply(&tester<double>),
+                              nd::functional::apply(&tester<unsigned>)});
+}

@@ -26,7 +26,7 @@ static intptr_t instantiate_assignment_ckernel(
     intptr_t ckb_offset, const ndt::type &dst_tp, const char *dst_arrmeta,
     const ndt::type *src_tp, const char *const *src_arrmeta,
     kernel_request_t kernreq, const eval::eval_context *ectx,
-    const nd::array &kwds)
+    const nd::array &kwds, const std::map<nd::string, ndt::type> &DYND_UNUSED(tp_vars))
 {
   try {
     assign_error_mode errmode = *self->get_data_as<assign_error_mode>();
@@ -70,7 +70,7 @@ static intptr_t instantiate_property_ckernel(
     intptr_t ckb_offset, const ndt::type &dst_tp, const char *dst_arrmeta,
     const ndt::type *src_tp, const char *const *src_arrmeta,
     kernel_request_t kernreq, const eval::eval_context *ectx,
-    const nd::array &kwds)
+    const nd::array &kwds, const std::map<nd::string, ndt::type> &DYND_UNUSED(tp_vars))
 {
   ndt::type prop_src_tp(*self->get_data_as<const base_type *>(), true);
 

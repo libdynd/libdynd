@@ -4,22 +4,13 @@
 using namespace std;
 using namespace dynd;
 
-nd::arrfunc nd::random::default_random_engine()
+nd::arrfunc nd::decl::uniform::make()
 {
-  return functional::apply(new std::default_random_engine(),
-                           &delete_wrapper<std::default_random_engine>);
+  return as_arrfunc<kernels::uniform_ck, std::default_random_engine,
+                    integral_types>(
+      ndt::type("(a: ?R, b: ?R, tp: type | R) -> R"),
+      std::shared_ptr<std::default_random_engine>(
+          new std::default_random_engine()));
 }
 
-nd::arrfunc nd::random::minstd_rand()
-{
-  return functional::apply(new std::minstd_rand(),
-                           &delete_wrapper<std::minstd_rand>);
-}
-
-nd::arrfunc nd::random::minstd_rand(std::minstd_rand::result_type seed)
-{
-  return functional::apply(new std::minstd_rand(seed),
-                           &delete_wrapper<std::minstd_rand>);
-}
-
-decl::nd::uniform nd::uniform;
+nd::decl::uniform nd::uniform;

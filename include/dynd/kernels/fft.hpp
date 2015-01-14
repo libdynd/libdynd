@@ -9,6 +9,7 @@
 #include <dynd/types/ellipsis_dim_type.hpp>
 #include <dynd/array_range.hpp>
 #include <dynd/types/tuple_type.hpp>
+#include <map>
 
 #ifdef DYND_FFTW
 #include <fftw3.h>
@@ -162,25 +163,25 @@ namespace kernels {
                        "complex[float64]");
     }
 
-    static void
-    resolve_option_values(const arrfunc_type_data *DYND_UNUSED(self),
-                          const arrfunc_type *DYND_UNUSED(self_tp),
-                          intptr_t DYND_UNUSED(nsrc),
-                          const ndt::type *DYND_UNUSED(src_tp), nd::array &kwds)
+    static void resolve_option_values(
+        const arrfunc_type_data *DYND_UNUSED(self),
+        const arrfunc_type *DYND_UNUSED(self_tp), intptr_t DYND_UNUSED(nsrc),
+        const ndt::type *DYND_UNUSED(src_tp), nd::array &kwds,
+        const std::map<dynd::nd::string, ndt::type> &DYND_UNUSED(tp_vars))
     {
       if (kwds.p("flags").is_missing()) {
         kwds.p("flags").vals() = FFTW_ESTIMATE;
       }
     }
 
-    static intptr_t
-    instantiate(const arrfunc_type_data *DYND_UNUSED(self),
-                const arrfunc_type *DYND_UNUSED(self_tp), void *ckb,
-                intptr_t ckb_offset, const ndt::type &dst_tp,
-                const char *dst_arrmeta, const ndt::type *src_tp,
-                const char *const *src_arrmeta, kernel_request_t kernreq,
-                const eval::eval_context *DYND_UNUSED(ectx),
-                const nd::array &kwds)
+    static intptr_t instantiate(
+        const arrfunc_type_data *DYND_UNUSED(self),
+        const arrfunc_type *DYND_UNUSED(self_tp), void *ckb,
+        intptr_t ckb_offset, const ndt::type &dst_tp, const char *dst_arrmeta,
+        const ndt::type *src_tp, const char *const *src_arrmeta,
+        kernel_request_t kernreq, const eval::eval_context *DYND_UNUSED(ectx),
+        const nd::array &kwds,
+        const std::map<dynd::nd::string, ndt::type> &DYND_UNUSED(tp_vars))
     {
       nd::array shape = kwds.p("shape");
       if (!shape.is_missing()) {
@@ -240,12 +241,12 @@ namespace kernels {
     }
 
     template <bool real_to_complex>
-    static typename std::enable_if<real_to_complex, int>::type
-    resolve_dst_type(const arrfunc_type_data *DYND_UNUSED(self),
-                     const arrfunc_type *DYND_UNUSED(self_tp),
-                     intptr_t DYND_UNUSED(nsrc), const ndt::type *src_tp,
-                     int DYND_UNUSED(throw_on_error), ndt::type &dst_tp,
-                     const nd::array &kwds)
+    static typename std::enable_if<real_to_complex, int>::type resolve_dst_type(
+        const arrfunc_type_data *DYND_UNUSED(self),
+        const arrfunc_type *DYND_UNUSED(self_tp), intptr_t DYND_UNUSED(nsrc),
+        const ndt::type *src_tp, int DYND_UNUSED(throw_on_error),
+        ndt::type &dst_tp, const nd::array &kwds,
+        const std::map<dynd::nd::string, ndt::type> &DYND_UNUSED(tp_vars))
     {
       nd::array shape;
       try {
@@ -269,11 +270,12 @@ namespace kernels {
 
     template <bool real_to_complex>
     static typename std::enable_if<!real_to_complex, int>::type
-    resolve_dst_type(const arrfunc_type_data *DYND_UNUSED(self),
-                     const arrfunc_type *DYND_UNUSED(self_tp),
-                     intptr_t DYND_UNUSED(nsrc), const ndt::type *src_tp,
-                     int DYND_UNUSED(throw_on_error), ndt::type &dst_tp,
-                     const nd::array &kwds)
+    resolve_dst_type(
+        const arrfunc_type_data *DYND_UNUSED(self),
+        const arrfunc_type *DYND_UNUSED(self_tp), intptr_t DYND_UNUSED(nsrc),
+        const ndt::type *src_tp, int DYND_UNUSED(throw_on_error),
+        ndt::type &dst_tp, const nd::array &kwds,
+        const std::map<dynd::nd::string, ndt::type> &DYND_UNUSED(tp_vars))
     {
       nd::array shape = kwds.p("shape");
       if (shape.is_missing()) {
@@ -291,13 +293,14 @@ namespace kernels {
       return 0;
     }
 
-    static int resolve_dst_type(const arrfunc_type_data *self,
-                                const arrfunc_type *self_tp, intptr_t nsrc,
-                                const ndt::type *src_tp, int throw_on_error,
-                                ndt::type &dst_tp, const nd::array &kwds)
+    static int
+    resolve_dst_type(const arrfunc_type_data *self, const arrfunc_type *self_tp,
+                     intptr_t nsrc, const ndt::type *src_tp, int throw_on_error,
+                     ndt::type &dst_tp, const nd::array &kwds,
+                     const std::map<dynd::nd::string, ndt::type> &tp_vars)
     {
       return resolve_dst_type<std::is_same<fftw_src_type, double>::value>(
-          self, self_tp, nsrc, src_tp, throw_on_error, dst_tp, kwds);
+          self, self_tp, nsrc, src_tp, throw_on_error, dst_tp, kwds, tp_vars);
     }
   };
 

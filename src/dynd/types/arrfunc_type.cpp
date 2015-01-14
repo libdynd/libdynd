@@ -436,7 +436,7 @@ static array_preamble *function___call__(const array_preamble *params,
   ckernel_builder<kernel_request_host> ckb;
   af->instantiate(af, af_tp, &ckb, 0, args[0].get_type(), args[0].get_arrmeta(),
                   src_tp, dynd_arrmeta, kernel_request_single,
-                  &eval::default_eval_context, nd::array());
+                  &eval::default_eval_context, nd::array(), std::map<nd::string, ndt::type>());
   // Call the ckernel
   expr_single_t usngo = ckb.get()->get_function<expr_single_t>();
   char *in_ptrs[max_args];

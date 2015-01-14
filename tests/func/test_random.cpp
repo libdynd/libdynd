@@ -18,23 +18,13 @@ using namespace dynd;
 
 TEST(Random, Uniform)
 {
-  nd::arrfunc af = nd::random::default_random_engine();
-
-/*
-  ndt::type self_tp = ((nd::arrfunc) nd::uniform).get_array_type();
-  std::cout << self_tp << std::endl;
-
-// (tp: type | Memory[Dims... * R], a: ?R, b: ?R) -> Memory[Dims... * R]
-// (Memory[Fixed**N * Complex] -> Memory[Fixed**N * Complex]
-// (tp: Any)
 
   ndt::type tp = ndt::make_type<int32_t>();
-  std::cout << nd::uniform(kwds("tp", nd::array(tp), "b", 10)) << std::endl;
-  std::cout << nd::uniform(kwds("tp", nd::array(tp), "b", 10)) << std::endl;
-  std::cout << nd::uniform(kwds("tp", nd::array(tp), "b", 10)) << std::endl;
-  std::cout << nd::uniform(kwds("tp", nd::array(tp))) << std::endl;
-  std::cout << nd::uniform(kwds("tp", nd::array(tp))) << std::endl;
-*/
+  std::cout << nd::uniform(kwds("a", 0, "b", 10, "tp", nd::array(tp))) << std::endl;
+  std::cout << nd::uniform(kwds("a", 0, "b", 10, "tp", nd::array(tp))) << std::endl;
+  std::cout << nd::uniform(kwds("a", 0, "b", 10, "tp", nd::array(tp))) << std::endl;
+  std::cout << nd::uniform(kwds("a", 0, "b", 10, "tp", nd::array(tp))) << std::endl;
+  std::cout << nd::uniform(kwds("a", 0, "b", 10, "tp", nd::array(tp))) << std::endl;
 
 //  std::exit(-1);
 }

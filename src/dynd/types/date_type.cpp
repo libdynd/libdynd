@@ -540,15 +540,14 @@ struct date_is_avail_ck {
     }
   }
 
-  static intptr_t instantiate(const arrfunc_type_data *DYND_UNUSED(self),
-                              const arrfunc_type *DYND_UNUSED(af_tp), void *ckb,
-                              intptr_t ckb_offset, const ndt::type &dst_tp,
-                              const char *DYND_UNUSED(dst_arrmeta),
-                              const ndt::type *src_tp,
-                              const char *const *DYND_UNUSED(src_arrmeta),
-                              kernel_request_t kernreq,
-                              const eval::eval_context *DYND_UNUSED(ectx),
-                              const nd::array &DYND_UNUSED(kwds))
+  static intptr_t instantiate(
+      const arrfunc_type_data *DYND_UNUSED(self),
+      const arrfunc_type *DYND_UNUSED(af_tp), void *ckb, intptr_t ckb_offset,
+      const ndt::type &dst_tp, const char *DYND_UNUSED(dst_arrmeta),
+      const ndt::type *src_tp, const char *const *DYND_UNUSED(src_arrmeta),
+      kernel_request_t kernreq, const eval::eval_context *DYND_UNUSED(ectx),
+      const nd::array &DYND_UNUSED(kwds),
+      const std::map<nd::string, ndt::type> &DYND_UNUSED(tp_vars))
   {
     if (src_tp[0].get_type_id() != option_type_id ||
         src_tp[0].extended<option_type>()->get_value_type().get_type_id() !=
@@ -587,15 +586,15 @@ struct date_assign_na_ck {
     }
   }
 
-  static intptr_t instantiate(const arrfunc_type_data *DYND_UNUSED(self),
-                              const arrfunc_type *DYND_UNUSED(af_tp), void *ckb,
-                              intptr_t ckb_offset, const ndt::type &dst_tp,
-                              const char *DYND_UNUSED(dst_arrmeta),
-                              const ndt::type *DYND_UNUSED(src_tp),
-                              const char *const *DYND_UNUSED(src_arrmeta),
-                              kernel_request_t kernreq,
-                              const eval::eval_context *DYND_UNUSED(ectx),
-                              const nd::array &DYND_UNUSED(kwds))
+  static intptr_t instantiate(
+      const arrfunc_type_data *DYND_UNUSED(self),
+      const arrfunc_type *DYND_UNUSED(af_tp), void *ckb, intptr_t ckb_offset,
+      const ndt::type &dst_tp, const char *DYND_UNUSED(dst_arrmeta),
+      const ndt::type *DYND_UNUSED(src_tp),
+      const char *const *DYND_UNUSED(src_arrmeta), kernel_request_t kernreq,
+      const eval::eval_context *DYND_UNUSED(ectx),
+      const nd::array &DYND_UNUSED(kwds),
+      const std::map<nd::string, ndt::type> &DYND_UNUSED(tp_vars))
   {
     if (dst_tp.get_type_id() != option_type_id ||
         dst_tp.extended<option_type>()->get_value_type().get_type_id() !=

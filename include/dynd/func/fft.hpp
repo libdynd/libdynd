@@ -11,8 +11,9 @@
 #ifdef DYND_FFTW
 
 namespace dynd {
-namespace decl {
   namespace nd {
+namespace decl {
+
 
     /*
     class fftw : public arrfunc<fftw> {
@@ -42,16 +43,16 @@ namespace decl {
 
 namespace nd {
 
-  extern decl::nd::fftw fftw;
-  extern decl::nd::rfftw rfftw;
+  extern decl::fftw fftw;
+  extern decl::rfftw rfftw;
 
-  extern decl::nd::ifftw ifftw;
-  extern decl::nd::irfftw irfftw;
+  extern decl::ifftw ifftw;
+  extern decl::irfftw irfftw;
 
 } // namespace dynd::nd
 
-namespace decl {
   namespace nd {
+namespace decl {
 
     class fft : public arrfunc<fft> {
     public:
@@ -80,11 +81,11 @@ namespace decl {
 
 namespace nd {
 
-  extern decl::nd::fft fft;
-  extern decl::nd::rfft rfft;
+  extern decl::fft fft;
+  extern decl::rfft rfft;
 
-  extern decl::nd::ifft ifft;
-  extern decl::nd::irfft irfft;
+  extern decl::ifft ifft;
+  extern decl::irfft irfft;
 }
 } // namespace dynd::nd
 

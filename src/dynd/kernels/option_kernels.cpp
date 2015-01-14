@@ -431,7 +431,7 @@ struct nafunc {
       const ndt::type &dst_tp, const char *DYND_UNUSED(dst_arrmeta),
       const ndt::type *src_tp, const char *const *DYND_UNUSED(src_arrmeta),
       kernel_request_t kernreq, const eval::eval_context *DYND_UNUSED(ectx),
-      const nd::array &DYND_UNUSED(kwds))
+      const nd::array &DYND_UNUSED(kwds), const std::map<nd::string, ndt::type> &DYND_UNUSED(tp_vars))
   {
     if (src_tp[0].get_type_id() != option_type_id ||
         src_tp[0].extended<option_type>()->get_value_type().get_type_id() !=
@@ -457,7 +457,7 @@ struct nafunc {
       const arrfunc_type_data *DYND_UNUSED(self),
       const arrfunc_type *DYND_UNUSED(af_tp), intptr_t DYND_UNUSED(nsrc),
       const ndt::type *DYND_UNUSED(src_tp), int DYND_UNUSED(throw_on_error),
-      ndt::type &out_dst_tp, const nd::array &DYND_UNUSED(kwds))
+      ndt::type &out_dst_tp, const nd::array &DYND_UNUSED(kwds), const std::map<nd::string, ndt::type> &DYND_UNUSED(tp_vars))
   {
     out_dst_tp = ndt::make_type<dynd_bool>();
     return 1;
@@ -470,7 +470,7 @@ struct nafunc {
       const ndt::type *DYND_UNUSED(src_tp),
       const char *const *DYND_UNUSED(src_arrmeta), kernel_request_t kernreq,
       const eval::eval_context *DYND_UNUSED(ectx),
-      const nd::array &DYND_UNUSED(kwds))
+      const nd::array &DYND_UNUSED(kwds), const std::map<nd::string, ndt::type> &DYND_UNUSED(tp_vars))
   {
     if (dst_tp.get_type_id() != option_type_id ||
         dst_tp.extended<option_type>()->get_value_type().get_type_id() !=
@@ -510,7 +510,7 @@ intptr_t kernels::fixed_dim_is_avail_ck::instantiate(
     const ndt::type &DYND_UNUSED(dst_tp), const char *DYND_UNUSED(dst_arrmeta),
     const ndt::type *src_tp, const char *const *DYND_UNUSED(src_arrmeta),
     kernel_request_t kernreq, const eval::eval_context *DYND_UNUSED(ectx),
-    const nd::array &DYND_UNUSED(kwds))
+    const nd::array &DYND_UNUSED(kwds), const std::map<nd::string, ndt::type> &DYND_UNUSED(tp_vars))
 {
   ckernel_prefix *ckp =
       reinterpret_cast<ckernel_builder<kernel_request_host> *>(ckb)
@@ -560,7 +560,7 @@ intptr_t kernels::fixed_dim_assign_na_ck::instantiate(
     const ndt::type *DYND_UNUSED(src_tp),
     const char *const *DYND_UNUSED(src_arrmeta), kernel_request_t kernreq,
     const eval::eval_context *DYND_UNUSED(ectx),
-    const nd::array &DYND_UNUSED(kwds))
+    const nd::array &DYND_UNUSED(kwds), const std::map<nd::string, ndt::type> &DYND_UNUSED(tp_vars))
 {
   ckernel_prefix *ckp =
       reinterpret_cast<ckernel_builder<kernel_request_host> *>(ckb)

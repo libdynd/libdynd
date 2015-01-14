@@ -105,14 +105,14 @@ intptr_t dynd::make_chain_buf_tp_ckernel(
     self->m_buf_shape.push_back(DYND_BUFFER_CHUNK_SIZE);
     ckb_offset = first->instantiate(
         first, first_tp, ckb, ckb_offset, buf_tp, self->m_buf_arrmeta.get(),
-        src_tp, src_arrmeta, kernreq, ectx, nd::array());
+        src_tp, src_arrmeta, kernreq, ectx, nd::array(), std::map<nd::string, ndt::type>());
     reinterpret_cast<ckernel_builder<kernel_request_host> *>(ckb)->ensure_capacity(ckb_offset);
     self = reinterpret_cast<ckernel_builder<kernel_request_host> *>(ckb)->get_at<unary_heap_chain_ck>(root_ckb_offset);
     self->m_second_offset = ckb_offset - root_ckb_offset;
     const char *buf_arrmeta = self->m_buf_arrmeta.get();
     ckb_offset = second->instantiate(second, second_tp, ckb, ckb_offset, dst_tp,
                                      dst_arrmeta, &buf_tp, &buf_arrmeta,
-                                     kernreq, ectx, nd::array());
+                                     kernreq, ectx, nd::array(), std::map<nd::string, ndt::type>());
     return ckb_offset;
   }
   else {
@@ -126,7 +126,7 @@ static intptr_t instantiate_chain_buf_tp(
     const char *dst_arrmeta, const ndt::type *src_tp,
     const char *const *src_arrmeta, kernel_request_t kernreq,
     const eval::eval_context *ectx,
-    const nd::array &DYND_UNUSED(kwds))
+    const nd::array &DYND_UNUSED(kwds), const std::map<nd::string, ndt::type> &DYND_UNUSED(tp_vars))
 {
   const instantiate_chain_data *icd =
       af_self->get_data_as<instantiate_chain_data>();

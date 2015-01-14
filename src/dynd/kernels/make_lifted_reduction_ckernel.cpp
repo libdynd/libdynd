@@ -836,12 +836,12 @@ static size_t make_strided_inner_reduction_dimension_kernel(
     ckb_offset = elwise_reduction->instantiate(
         elwise_reduction, elwise_reduction_tp, ckb, ckb_offset, dst_tp,
         dst_arrmeta, src_tp_doubled, src_arrmeta_doubled,
-        kernel_request_strided, ectx, nd::array());
+        kernel_request_strided, ectx, nd::array(), std::map<nd::string, ndt::type>());
   } else {
     ckb_offset = elwise_reduction->instantiate(
         elwise_reduction, elwise_reduction_tp, ckb, ckb_offset, dst_tp,
         dst_arrmeta, &src_tp, &src_arrmeta, kernel_request_strided, ectx,
-        nd::array());
+        nd::array(), std::map<nd::string, ndt::type>());
   }
   // Make sure there's capacity for the next ckernel
   reinterpret_cast<ckernel_builder<kernel_request_host> *>(
@@ -854,7 +854,7 @@ static size_t make_strided_inner_reduction_dimension_kernel(
     ckb_offset = dst_initialization->instantiate(
         dst_initialization, dst_initialization_tp, ckb, ckb_offset, dst_tp,
         dst_arrmeta, &src_tp, &src_arrmeta, kernel_request_single, ectx,
-        nd::array());
+        nd::array(), std::map<nd::string, ndt::type>());
   } else if (reduction_identity.is_null()) {
     ckb_offset =
         make_assignment_kernel(NULL, NULL, ckb, ckb_offset, dst_tp, dst_arrmeta, src_tp,
@@ -976,12 +976,12 @@ static size_t make_strided_inner_broadcast_dimension_kernel(
     ckb_offset = elwise_reduction->instantiate(
         elwise_reduction, elwise_reduction_tp, ckb, ckb_offset, dst_tp,
         dst_arrmeta, src_tp_doubled, src_arrmeta_doubled,
-        kernel_request_strided, ectx, nd::array());
+        kernel_request_strided, ectx, nd::array(), std::map<nd::string, ndt::type>());
   } else {
     ckb_offset = elwise_reduction->instantiate(
         elwise_reduction, elwise_reduction_tp, ckb, ckb_offset, dst_tp,
         dst_arrmeta, &src_tp, &src_arrmeta, kernel_request_strided, ectx,
-        nd::array());
+        nd::array(), std::map<nd::string, ndt::type>());
   }
   // Make sure there's capacity for the next ckernel
   reinterpret_cast<ckernel_builder<kernel_request_host> *>(ckb)
@@ -994,7 +994,7 @@ static size_t make_strided_inner_broadcast_dimension_kernel(
     ckb_offset = dst_initialization->instantiate(
         dst_initialization, dst_initialization_tp, ckb, ckb_offset, dst_tp,
         dst_arrmeta, &src_tp, &src_arrmeta, kernel_request_strided, ectx,
-        nd::array());
+        nd::array(), std::map<nd::string, ndt::type>());
   } else if (reduction_identity.is_null()) {
     ckb_offset =
         make_assignment_kernel(NULL, NULL, ckb, ckb_offset, dst_tp, dst_arrmeta, src_tp,
@@ -1033,7 +1033,7 @@ size_t dynd::make_lifted_reduction_ckernel(
         return dst_initialization->instantiate(
             dst_initialization, dst_initialization_tp, ckb, ckb_offset, dst_tp,
             dst_arrmeta, &src_tp, &src_arrmeta, kernreq, ectx, 
-            nd::array());
+            nd::array(), std::map<nd::string, ndt::type>());
       }
       else if (reduction_identity.is_null()) {
         return make_assignment_kernel(NULL, NULL, ckb, ckb_offset, dst_tp, dst_arrmeta,

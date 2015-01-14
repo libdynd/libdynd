@@ -6,6 +6,7 @@
 #include <dynd/type.hpp>
 #include <dynd/kernels/assignment_kernels.hpp>
 #include <dynd/shortvector.hpp>
+#include <dynd/string.hpp>
 
 using namespace std;
 using namespace dynd;
@@ -394,7 +395,7 @@ intptr_t dynd::make_cuda_device_builtin_type_assignment_kernel(
     const ndt::type &dst_tp, const char *DYND_UNUSED(dst_arrmeta),
     const ndt::type *src_tp, const char *const *DYND_UNUSED(src_arrmeta),
     kernel_request_t kernreq, const eval::eval_context *ectx,
-    const nd::array &kwds)
+    const nd::array &kwds, const std::map<nd::string, ndt::type> &tp_vars)
 {
   assign_error_mode errmode = ectx->cuda_device_errmode;
 
@@ -418,7 +419,7 @@ intptr_t dynd::make_cuda_device_builtin_type_assignment_kernel(
     // Make the assignment on the device
     make_cuda_device_builtin_type_assignment_kernel(
         NULL, NULL, &self->ckb, 0, dst_tp, NULL, src_tp, NULL,
-        kernreq | kernel_request_cuda_device, ectx, kwds);
+        kernreq | kernel_request_cuda_device, ectx, kwds, tp_vars);
     // Return the offset for the original ckb
     return ckb_offset;
   }
@@ -434,7 +435,7 @@ intptr_t dynd::make_cuda_to_device_builtin_type_assignment_kernel(
     const ndt::type &dst_tp, const char *DYND_UNUSED(dst_arrmeta),
     const ndt::type *src_tp, const char *const *DYND_UNUSED(src_arrmeta),
     kernel_request_t kernreq, const eval::eval_context *ectx,
-    const nd::array &DYND_UNUSED(kwds))
+    const nd::array &DYND_UNUSED(kwds), const std::map<nd::string, ndt::type> &DYND_UNUSED(tp_vars))
 {
   assign_error_mode errmode = ectx->errmode;
 
@@ -464,7 +465,7 @@ intptr_t dynd::make_cuda_from_device_builtin_type_assignment_kernel(
     const ndt::type &dst_tp, const char *DYND_UNUSED(dst_arrmeta),
     const ndt::type *src_tp, const char *const *DYND_UNUSED(src_arrmeta),
     kernel_request_t kernreq, const eval::eval_context *ectx,
-    const nd::array &DYND_UNUSED(kwds))
+    const nd::array &DYND_UNUSED(kwds), const std::map<nd::string, ndt::type> &DYND_UNUSED(tp_vars))
 {
   assign_error_mode errmode = ectx->errmode;
 

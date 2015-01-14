@@ -41,7 +41,7 @@ TEST(ArrFunc, Assignment)
   af.get()->instantiate(
       af.get(), af.get_type(), &ckb, 0, af.get_type()->get_return_type(), NULL,
       af.get_type()->get_pos_types_raw(), src_arrmeta, kernel_request_single,
-      &eval::default_eval_context, nd::array());
+      &eval::default_eval_context, nd::array(), std::map<nd::string, ndt::type>());
   int int_out = 0;
   char str_in[16] = "3251";
   const char *str_in_ptr = str_in;
@@ -55,7 +55,7 @@ TEST(ArrFunc, Assignment)
   af.get()->instantiate(
       af.get(), af.get_type(), &ckb, 0, af.get_type()->get_return_type(), NULL,
       af.get_type()->get_pos_types_raw(), src_arrmeta, kernel_request_strided,
-      &eval::default_eval_context, nd::array());
+      &eval::default_eval_context, nd::array(), std::map<nd::string, ndt::type>());
   int ints_out[3] = {0, 0, 0};
   char strs_in[3][16] = {"123", "4567", "891029"};
   const char *strs_in_ptr = strs_in[0];
@@ -81,7 +81,8 @@ TEST(ArrFunc, Construction)
   nd::arrfunc af2 = nd::functional::apply([](int x, int y) { return x - y; });
   EXPECT_EQ(-4, af2(3, 7).as<int>());
 
-  nd::arrfunc af3 = nd::functional::apply([](int x, int y) { return x - y; }, "y");
+  nd::arrfunc af3 =
+      nd::functional::apply([](int x, int y) { return x - y; }, "y");
   EXPECT_EQ(-4, af3(3, kwds("y", 7)).as<int>());
 }
 
@@ -132,7 +133,8 @@ TEST(ArrFunc, CallOperator)
 
 TEST(ArrFunc, KeywordParsing)
 {
-  nd::arrfunc af0 = nd::functional::apply([](int x, int y) { return x + y; }, "y");
+  nd::arrfunc af0 =
+      nd::functional::apply([](int x, int y) { return x + y; }, "y");
   EXPECT_EQ(5, af0(1, kwds("y", 4)).as<int>());
   EXPECT_THROW(af0(1, kwds("z", 4)).as<int>(), std::invalid_argument);
   EXPECT_THROW(af0(1, kwds("Y", 4)).as<int>(), std::invalid_argument);
@@ -145,11 +147,12 @@ TEST(ArrFunc, Option)
   struct callable {
     int operator()(int x, int y) { return x + y; }
 
-    static void resolve_option_vals(const arrfunc_type_data *DYND_UNUSED(self),
-                                    const arrfunc_type *DYND_UNUSED(self_tp),
-                                    intptr_t DYND_UNUSED(nsrc),
-                                    const ndt::type *DYND_UNUSED(src_tp),
-                                    nd::array &kwds)
+    static void
+    resolve_option_vals(const arrfunc_type_data *DYND_UNUSED(self),
+                        const arrfunc_type *DYND_UNUSED(self_tp),
+                        intptr_t DYND_UNUSED(nsrc),
+                        const ndt::type *DYND_UNUSED(src_tp), nd::array &kwds,
+                        const std::map<nd::string, ndt::type> &DYND_UNUSED(tp_vars))
     {
       nd::array x = kwds.p("x");
       if (x.is_missing()) {
@@ -211,7 +214,7 @@ TEST(ArrFunc, Property)
   af.get()->instantiate(
       af.get(), af.get_type(), &ckb, 0, af.get_type()->get_return_type(), NULL,
       af.get_type()->get_pos_types_raw(), src_arrmeta, kernel_request_single,
-      &eval::default_eval_context, nd::array());
+      &eval::default_eval_context, nd::array(), std::map<nd::string, ndt::type>());
   int int_out = 0;
   int date_in = date_ymd::to_days(2013, 12, 30);
   const char *date_in_ptr = reinterpret_cast<const char *>(&date_in);
@@ -238,7 +241,7 @@ TEST(ArrFunc, AssignmentAsExpr)
   af.get()->instantiate(
       af.get(), af.get_type(), &ckb, 0, af.get_type()->get_return_type(), NULL,
       af.get_type()->get_pos_types_raw(), src_arrmeta, kernel_request_single,
-      &eval::default_eval_context, nd::array());
+      &eval::default_eval_context, nd::array(), std::map<nd::string, ndt::type>());
   int int_out = 0;
   char str_in[16] = "3251";
   char *str_in_ptr = str_in;
@@ -251,7 +254,7 @@ TEST(ArrFunc, AssignmentAsExpr)
   af.get()->instantiate(
       af.get(), af.get_type(), &ckb, 0, af.get_type()->get_return_type(), NULL,
       af.get_type()->get_pos_types_raw(), src_arrmeta, kernel_request_strided,
-      &eval::default_eval_context, nd::array());
+      &eval::default_eval_context, nd::array(), std::map<nd::string, ndt::type>());
   int ints_out[3] = {0, 0, 0};
   char strs_in[3][16] = {"123", "4567", "891029"};
   char *strs_in_ptr = strs_in[0];

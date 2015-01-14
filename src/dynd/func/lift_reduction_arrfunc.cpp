@@ -41,7 +41,7 @@ static intptr_t instantiate_lifted_reduction_arrfunc_data(
     const char *dst_arrmeta, const ndt::type *src_tp,
     const char *const *src_arrmeta, kernel_request_t kernreq,
     const eval::eval_context *ectx,
-    const nd::array &DYND_UNUSED(kwds))
+    const nd::array &DYND_UNUSED(kwds), const std::map<dynd::nd::string, ndt::type> &DYND_UNUSED(tp_vars))
 {
   lifted_reduction_arrfunc_data *data =
       *af_self->get_data_as<lifted_reduction_arrfunc_data *>();

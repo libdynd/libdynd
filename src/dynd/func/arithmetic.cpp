@@ -30,7 +30,7 @@ using namespace dynd;
 
 #define BUILTIN_TABLE(NAME)                                                    \
   const kernels::create_t                                                      \
-      decl::nd::NAME::builtin_table[builtin_type_id_count -                    \
+      nd::decl::NAME::builtin_table[builtin_type_id_count -                    \
                                     2][builtin_type_id_count - 2] = {          \
           {NULL},                                                              \
           BUILTIN_ROW(NAME##_ck, int8_t),                                      \
@@ -58,8 +58,8 @@ BUILTIN_TABLE(div);
 #undef BUILTIN_TABLE
 #undef BUILTIN_ROW
 
-decl::nd::add nd::add;
-decl::nd::sub nd::sub;
-decl::nd::mul nd::mul;
-decl::nd::div nd::div;
+nd::decl::add nd::add;
+nd::decl::sub nd::sub;
+nd::decl::mul nd::mul;
+nd::decl::div nd::div;
 

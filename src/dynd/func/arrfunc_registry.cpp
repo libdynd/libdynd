@@ -22,17 +22,17 @@ template <typename T0, typename T1>
 static nd::arrfunc make_ufunc(T0 f0, T1 f1)
 {
   return nd::elwise.bind(
-      "func", nd::functional::multidispatch(nd::functional::apply(f0),
-                                            nd::functional::apply(f1)));
+      "func", nd::functional::multidispatch(
+                  {nd::functional::apply(f0), nd::functional::apply(f1)}));
 }
 
 template <typename T0, typename T1, typename T2>
 static nd::arrfunc make_ufunc(T0 f0, T1 f1, T2 f2)
 {
   return nd::elwise.bind(
-      "func", nd::functional::multidispatch(nd::functional::apply(f0),
-                                            nd::functional::apply(f1),
-                                            nd::functional::apply(f2)));
+      "func", nd::functional::multidispatch({nd::functional::apply(f0),
+                                             nd::functional::apply(f1),
+                                             nd::functional::apply(f2)}));
 }
 
 template <typename T0, typename T1, typename T2, typename T3, typename T4>
@@ -40,9 +40,9 @@ static nd::arrfunc make_ufunc(T0 f0, T1 f1, T2 f2, T3 f3, T4 f4)
 {
   return nd::elwise.bind(
       "func", nd::functional::multidispatch(
-                  nd::functional::apply(f0), nd::functional::apply(f1),
-                  nd::functional::apply(f2), nd::functional::apply(f3),
-                  nd::functional::apply(f4)));
+                  {nd::functional::apply(f0), nd::functional::apply(f1),
+                   nd::functional::apply(f2), nd::functional::apply(f3),
+                   nd::functional::apply(f4)}));
 }
 
 template <typename T0, typename T1, typename T2, typename T3, typename T4,
@@ -51,10 +51,10 @@ static nd::arrfunc make_ufunc(T0 f0, T1 f1, T2 f2, T3 f3, T4 f4, T5 f5, T6 f6)
 {
   return nd::elwise.bind(
       "func", nd::functional::multidispatch(
-                  nd::functional::apply(f0), nd::functional::apply(f1),
-                  nd::functional::apply(f2), nd::functional::apply(f3),
-                  nd::functional::apply(f4), nd::functional::apply(f5),
-                  nd::functional::apply(f6)));
+                  {nd::functional::apply(f0), nd::functional::apply(f1),
+                   nd::functional::apply(f2), nd::functional::apply(f3),
+                   nd::functional::apply(f4), nd::functional::apply(f5),
+                   nd::functional::apply(f6)}));
 }
 
 template <typename T0, typename T1, typename T2, typename T3, typename T4,
@@ -64,10 +64,10 @@ static nd::arrfunc make_ufunc(T0 f0, T1 f1, T2 f2, T3 f3, T4 f4, T5 f5, T6 f6,
 {
   return nd::elwise.bind(
       "func", nd::functional::multidispatch(
-                  nd::functional::apply(f0), nd::functional::apply(f1),
-                  nd::functional::apply(f2), nd::functional::apply(f3),
-                  nd::functional::apply(f4), nd::functional::apply(f5),
-                  nd::functional::apply(f6), nd::functional::apply(f7)));
+                  {nd::functional::apply(f0), nd::functional::apply(f1),
+                   nd::functional::apply(f2), nd::functional::apply(f3),
+                   nd::functional::apply(f4), nd::functional::apply(f5),
+                   nd::functional::apply(f6), nd::functional::apply(f7)}));
 }
 
 template <typename T0, typename T1, typename T2, typename T3, typename T4,
@@ -77,11 +77,11 @@ static nd::arrfunc make_ufunc(T0 f0, T1 f1, T2 f2, T3 f3, T4 f4, T5 f5, T6 f6,
 {
   return nd::elwise.bind(
       "func", nd::functional::multidispatch(
-                  nd::functional::apply(f0), nd::functional::apply(f1),
-                  nd::functional::apply(f2), nd::functional::apply(f3),
-                  nd::functional::apply(f4), nd::functional::apply(f5),
-                  nd::functional::apply(f6), nd::functional::apply(f7),
-                  nd::functional::apply(f8), nd::functional::apply(f9)));
+                  {nd::functional::apply(f0), nd::functional::apply(f1),
+                   nd::functional::apply(f2), nd::functional::apply(f3),
+                   nd::functional::apply(f4), nd::functional::apply(f5),
+                   nd::functional::apply(f6), nd::functional::apply(f7),
+                   nd::functional::apply(f8), nd::functional::apply(f9)}));
 }
 
 namespace {
