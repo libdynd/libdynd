@@ -1111,7 +1111,8 @@ namespace nd {
   }
 
   template <typename... CKT, typename T>
-  arrfunc as_arrfunc(const ndt::type &self_tp, const T &data)
+  typename std::enable_if<sizeof...(CKT) != 1,
+      arrfunc > ::type as_arrfunc(const ndt::type &self_tp, const T &data)
   {
     return functional::multidispatch(self_tp, {as_arrfunc<CKT>(data)...});
   }

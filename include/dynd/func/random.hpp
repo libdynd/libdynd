@@ -81,14 +81,7 @@ namespace nd {
 
     class uniform : public arrfunc<uniform> {
     public:
-      static nd::arrfunc make()
-      {
-        return as_arrfunc<kernels::uniform_ck, std::default_random_engine,
-                          integral_types>(
-            ndt::type("(a: ?R, b: ?R, tp: type | R) -> R"),
-            std::shared_ptr<std::default_random_engine>(
-                new std::default_random_engine()));
-      }
+      static nd::arrfunc make();
     };
   } // namespace dynd::nd::decl
 
