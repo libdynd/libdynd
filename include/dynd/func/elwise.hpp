@@ -14,8 +14,8 @@
 #include <dynd/types/cfixed_dim_type.hpp>
 
 namespace dynd {
-namespace decl {
-  namespace nd {
+namespace nd {
+  namespace decl {
     class elwise : public lift<elwise> {
     public:
       static int
@@ -64,11 +64,9 @@ namespace decl {
       /** Prepends "Dims..." to all the types in the proto */
       static dynd::ndt::type make_lifted_type(const arrfunc_type *child_tp);
     };
-  } // namespace nd
-} // namespace decl
+  } // namespace decl
 
-namespace nd {
-  extern decl::nd::elwise elwise;
+  extern nd::decl::elwise elwise;
 } // namespace nd
 
 namespace kernels {
@@ -350,10 +348,10 @@ namespace kernels {
 
       // If there are still dimensions to broadcast, recursively lift more
       if (!finished) {
-        return nd::elwise.instantiate(child, child_tp, ckb, ckb_offset,
-                                      child_dst_tp, child_dst_arrmeta,
-                                      child_src_tp, child_src_arrmeta,
-                                      kernel_request_strided, ectx, kwds, tp_vars);
+        return nd::elwise.instantiate(
+            child, child_tp, ckb, ckb_offset, child_dst_tp, child_dst_arrmeta,
+            child_src_tp, child_src_arrmeta, kernel_request_strided, ectx, kwds,
+            tp_vars);
       }
       // Instantiate the elementwise handler
       return child->instantiate(child, child_tp, ckb, ckb_offset, child_dst_tp,

@@ -506,15 +506,31 @@ int nd::functional::multidispatch_resolve_dst_type(
   return 1;
 }
 
-nd::arrfunc
-nd::functional::multidispatch(const ndt::type &self_tp,
-                              const std::initializer_list<string> &vars,
-                              const std::initializer_list<arrfunc> &children)
+nd::arrfunc nd::functional::multidispatch(const ndt::type &self_tp,
+                                          const std::vector<arrfunc> &children)
 {
+  const std::initializer_list<string> vars = {"R"};
+
+  // check that all children have the same number of arguments, then only match
+  // those arguments
+
+  intptr_t nkwd = 2;
+
+  ndt::type pos_tp = self_tp.extended<arrfunc_type>()->get_pos_tuple();
+  ndt::type kwd_tp = self_tp.extended<arrfunc_type>()->get_kwd_struct();
+
+  ndt::type pattern_tp = ndt::make_arrfunc(
+      pos_tp,
+      ndt::make_struct(kwd_tp.extended<base_struct_type>()->get_field_names()(
+                           irange() < nkwd),
+                       kwd_tp.extended<base_struct_type>()->get_field_types()(
+                           irange() < nkwd)),
+      self_tp.extended<arrfunc_type>()->get_return_type());
+
   std::shared_ptr<multidispatch_map_type> map(new multidispatch_map_type);
   for (const arrfunc &child : children) {
     std::map<string, ndt::type> tp_vars;
-    if (!ndt::pattern_match(child.get_array_type(), self_tp, tp_vars)) {
+    if (!ndt::pattern_match(child.get_array_type(), pattern_tp, tp_vars)) {
       throw std::invalid_argument("could not match arrfuncs");
     }
 

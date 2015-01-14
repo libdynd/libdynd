@@ -24,6 +24,8 @@ namespace nd {
                                          arity_of<func_type>::value -
                                              sizeof...(T)> ck_type;
 
+
+// as_arrfunc<ck_type>(names...)
       ndt::type self_tp =
           ndt::make_arrfunc<typename funcproto_of<func_type>::type>(
               std::forward<T>(names)...);

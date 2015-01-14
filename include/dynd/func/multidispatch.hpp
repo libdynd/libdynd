@@ -26,8 +26,7 @@ namespace nd {
     }
 
     arrfunc multidispatch(const ndt::type &self_tp,
-                          const std::initializer_list<string> &vars,
-                          const std::initializer_list<arrfunc> &children);
+                          const std::vector<arrfunc> &children);
 
     intptr_t multidispatch_instantiate(
         const arrfunc_type_data *self, const arrfunc_type *af_tp, void *ckb,

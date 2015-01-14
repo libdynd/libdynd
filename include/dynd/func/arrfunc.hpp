@@ -1069,13 +1069,77 @@ namespace nd {
     }
   };
 
-  template <typename T>
+  namespace functional {
+
+    arrfunc multidispatch(const ndt::type &self_tp,
+                          const std::vector<arrfunc> &children);
+
+  } // namespace dynd::nd::functional
+
+  template <typename CKT>
+  arrfunc as_arrfunc(const ndt::type &self_tp)
+  {
+    return arrfunc(self_tp, dynd::detail::get_instantiate<CKT>(),
+                   dynd::detail::get_resolve_option_values<CKT>(),
+                   dynd::detail::get_resolve_dst_type<CKT>());
+  }
+
+  template <typename CKT>
   arrfunc as_arrfunc()
   {
-    return arrfunc(T::make_type(), dynd::detail::get_instantiate<T>(),
-                   dynd::detail::get_resolve_option_values<T>(),
-                   dynd::detail::get_resolve_dst_type<T>());
+    return as_arrfunc<CKT>(CKT::make_type());
   }
+
+  template <typename... CKT>
+  arrfunc as_arrfunc(const ndt::type &self_tp)
+  {
+    return functional::multidispatch(self_tp, {as_arrfunc<CKT>()...});
+  }
+
+  template <typename CKT, typename T>
+  arrfunc as_arrfunc(const ndt::type &self_tp, const T &data)
+  {
+    return arrfunc(self_tp, data, dynd::detail::get_instantiate<CKT>(),
+                   dynd::detail::get_resolve_option_values<CKT>(),
+                   dynd::detail::get_resolve_dst_type<CKT>());
+  }
+
+  template <typename CKT, typename T>
+  arrfunc as_arrfunc(const T &data)
+  {
+    return as_arrfunc<CKT>(CKT::make_type(), data);
+  }
+
+  template <typename... CKT, typename T>
+  arrfunc as_arrfunc(const ndt::type &self_tp, const T &data)
+  {
+    return functional::multidispatch(self_tp, {as_arrfunc<CKT>(data)...});
+  }
+
+  namespace detail {
+    struct {
+      template <typename... CKT>
+      arrfunc operator()(const ndt::type &self_tp) const
+      {
+        return as_arrfunc<CKT...>(self_tp);
+      }
+
+      template <typename... CKT, typename T>
+      arrfunc operator()(const ndt::type &self_tp, const T &data) const
+      {
+        return as_arrfunc<CKT...>(self_tp, data);
+      }
+    } as_arrfunc_wrapper;
+  }
+
+  template <template <typename...> class TCK, typename... A, typename T>
+  arrfunc as_arrfunc(const ndt::type &self_tp, const T &data)
+  {
+    typedef typename for_each<TCK, typename outer<A...>::type,
+                              sizeof...(A) >= 2>::type CKT;
+    return type_proxy<CKT>::apply(detail::as_arrfunc_wrapper, self_tp, data);
+  }
+
 } // namespace nd
 
 /**
@@ -1100,8 +1164,8 @@ nd::arrfunc make_arrfunc_from_assignment(const ndt::type &dst_tp,
 nd::arrfunc make_arrfunc_from_property(const ndt::type &tp,
                                        const std::string &propname);
 
-namespace decl {
-  namespace nd {
+namespace nd {
+  namespace decl {
     namespace detail {
       template <typename T, bool is_like_ck>
       struct arrfunc_factory;

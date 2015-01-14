@@ -39,8 +39,8 @@ namespace dynd {
     };                                                                         \
   }                                                                            \
                                                                                \
-  namespace decl {                                                             \
-    namespace nd {                                                             \
+  namespace nd {                                                               \
+    namespace decl {                                                           \
       class NAME : public arrfunc<NAME> {                                      \
         static const kernels::create_t                                         \
             builtin_table[builtin_type_id_count - 2][builtin_type_id_count -   \
@@ -103,10 +103,8 @@ namespace dynd {
         }                                                                      \
       };                                                                       \
     }                                                                          \
-  }                                                                            \
                                                                                \
-  namespace nd {                                                               \
-    extern decl::nd::NAME NAME;                                                \
+    extern decl::NAME NAME;                                                    \
                                                                                \
     array operator SYMBOL(const array &a0, const array &a1)                    \
     {                                                                          \

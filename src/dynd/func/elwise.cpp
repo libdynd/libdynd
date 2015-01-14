@@ -8,7 +8,7 @@
 using namespace std;
 using namespace dynd;
 
-int decl::nd::elwise::resolve_dst_type(
+int nd::decl::elwise::resolve_dst_type(
     const arrfunc_type_data *child_af, const arrfunc_type *child_af_tp,
     intptr_t nsrc, const ndt::type *src_tp, int throw_on_error,
     ndt::type &out_dst_tp, const dynd::nd::array &kwds,
@@ -120,7 +120,7 @@ int decl::nd::elwise::resolve_dst_type(
 }
 
 template <type_id_t dst_type_id, type_id_t src_type_id>
-intptr_t decl::nd::elwise::instantiate(
+intptr_t nd::decl::elwise::instantiate(
     const arrfunc_type_data *child, const arrfunc_type *child_tp, void *ckb,
     intptr_t ckb_offset, const ndt::type &dst_tp, const char *dst_arrmeta,
     const ndt::type *src_tp, const char *const *src_arrmeta,
@@ -199,7 +199,7 @@ static void *create_cuda_device_trampoline(void *ckb, intptr_t ckb_offset,
 }
 #endif // __CUDACC__
 
-intptr_t decl::nd::elwise::instantiate(
+intptr_t nd::decl::elwise::instantiate(
     const arrfunc_type_data *child, const arrfunc_type *child_tp, void *ckb,
     intptr_t ckb_offset, const ndt::type &dst_tp, const char *dst_arrmeta,
     const ndt::type *src_tp, const char *const *src_arrmeta,
@@ -340,7 +340,7 @@ intptr_t decl::nd::elwise::instantiate(
   throw runtime_error(ss.str());
 }
 
-ndt::type decl::nd::elwise::make_lifted_type(const arrfunc_type *child_tp)
+ndt::type nd::decl::elwise::make_lifted_type(const arrfunc_type *child_tp)
 {
   const ndt::type *param_types = child_tp->get_pos_types_raw();
   intptr_t param_count = child_tp->get_narg();
@@ -368,4 +368,4 @@ ndt::type decl::nd::elwise::make_lifted_type(const arrfunc_type *child_tp)
       ndt::make_ellipsis_dim(dimsname, child_tp->get_return_type()));
 }
 
-decl::nd::elwise nd::elwise;
+nd::decl::elwise nd::elwise;

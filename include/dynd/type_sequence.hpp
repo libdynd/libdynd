@@ -275,6 +275,71 @@ struct alternate<integer_sequence<T, I0, I...>, integer_sequence<T, J0, J...>,
                          integer_sequence<T, L...>>::type>::type type;
 };
 
+template <template <typename...> class F, typename T, bool flatten = false>
+struct for_each;
+
+template <template <typename...> class F, typename T0>
+struct for_each<F, type_sequence<T0>, false> {
+  typedef type_sequence<F<T0>> type;
+};
+
+template <template <typename...> class F, typename T0, typename... T>
+struct for_each<F, type_sequence<T0, T...>, false> {
+  typedef type_sequence<F<T0>, F<T>...> type;
+};
+
+template <template <typename...> class F, typename... T0>
+struct for_each<F, type_sequence<type_sequence<T0...>>, true> {
+  typedef type_sequence<F<T0...>> type;
+};
+
+template <template <typename...> class F, typename... T0, typename... T>
+struct for_each<F, type_sequence<type_sequence<T0...>, T...>, true> {
+  typedef typename join<type_sequence<F<T0...>>,
+                        typename for_each<F, type_sequence<T...>, true>::type>::type
+      type;
+};
+
+template <typename...>
+struct outer;
+
+template <typename T0, typename... T>
+struct outer<T0, type_sequence<T...>> {
+  typedef type_sequence<type_sequence<T0, T>...> type;
+};
+
+template <typename T0, typename... T>
+struct outer<type_sequence<T0>, type_sequence<T...>> {
+  typedef type_sequence<type_sequence<T0, T>...> type;
+};
+
+template <typename... T0, typename T>
+struct outer<type_sequence<T0...>, type_sequence<T>> {
+  typedef type_sequence<type_sequence<T0, T>...> type;
+};
+
+template <typename... T0, typename... T>
+struct outer<type_sequence<T0...>, type_sequence<T...>> {
+  typedef type_sequence<
+      typename outer<type_sequence<T0...>, type_sequence<T>>::type...> type;
+};
+
+template <typename T>
+struct type_proxy;
+
+template <typename... T>
+struct type_proxy<type_sequence<T...>> {
+  template <typename F, typename... A>
+  static typename std::result_of<F(A...)>::type apply(F f, A &&... a)
+  {
+#ifdef _MSC_VER
+    return f.operator()<T...>(std::forward<A>(a)...);
+#else
+    return f.template operator()<T...>(std::forward<A>(a)...);
+#endif
+  }
+};
+
 template <size_t I, typename A0, typename... A>
 typename std::enable_if<I == 0, A0>::type get(A0 &&a0, A &&...)
 {

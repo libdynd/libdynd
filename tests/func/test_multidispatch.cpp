@@ -146,6 +146,18 @@ TEST(MultiDispatchArrfunc, Dims)
 }
 */
 
+// DYND_AS_ARRFUNC
+
+// &NAME<T>
+// NAME<T>()
+// NAME<T>
+// *NAME<T>
+
+// DYND_AS_ARRFUNC("(R) -> R", 
+// DYND_AS_ARRFUNC(TYPE, DYND_AS_FUNCTION_POINTER, sin, (...))
+// DYND_AS_CUDA_HOST_DEVICE_ARRFUNC(
+// DYND_AS_ARRFUNC(DYND_, 
+
 template <typename T>
 T tester(T x)
 {
@@ -155,8 +167,7 @@ T tester(T x)
 TEST(MultidispatchArrfunc, Untitled)
 {
   nd::arrfunc af = nd::functional::multidispatch(
-      ndt::type("(R) -> R"), {"R"}, {nd::functional::apply(&tester<int>),
-                                     nd::functional::apply(&tester<double>),
-                                     nd::functional::apply(&tester<unsigned>)});
-  std::cout << af(3.0) << std::endl;
+      ndt::type("(R) -> R"), {nd::functional::apply(&tester<int>),
+                              nd::functional::apply(&tester<double>),
+                              nd::functional::apply(&tester<unsigned>)});
 }

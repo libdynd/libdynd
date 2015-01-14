@@ -91,6 +91,11 @@ namespace ndt {
     return ndt::make_tuple(field_types);
   }
 
+  inline ndt::type make_tuple()
+  {
+    return make_empty_tuple();
+  }
+
   /** Makes a tuple type with the specified types */
   inline ndt::type make_tuple(const ndt::type &tp0)
   {
