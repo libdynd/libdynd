@@ -1121,7 +1121,7 @@ namespace nd {
   }
 
   namespace detail {
-    struct {
+    struct as_arrfunc_wrapper {
       template <typename... CKT>
       arrfunc operator()(const ndt::type &self_tp) const
       {
@@ -1133,7 +1133,7 @@ namespace nd {
       {
         return as_arrfunc<CKT...>(self_tp, data);
       }
-    } as_arrfunc_wrapper;
+    };
   }
 
   template <template <typename...> class TCK, typename... A, typename T>
@@ -1141,7 +1141,7 @@ namespace nd {
   {
     typedef typename for_each<TCK, typename outer<A...>::type,
                               sizeof...(A) >= 2>::type CKT;
-    return type_proxy<CKT>::apply(detail::as_arrfunc_wrapper, self_tp, data);
+    return type_proxy<CKT>::apply(detail::as_arrfunc_wrapper(), self_tp, data);
   }
 
 } // namespace nd
