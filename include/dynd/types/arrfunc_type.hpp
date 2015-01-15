@@ -89,6 +89,10 @@ public:
     return m_kwd_struct.extended<struct_type>()->get_field_index(arg_name);
   }
 
+  bool has_kwd(const std::string &name) const {
+    return get_kwd_index(name) != -1;
+  }
+
   const std::vector<intptr_t> &get_option_kwd_indices() const
   {
     return m_opt_kwd_indices;

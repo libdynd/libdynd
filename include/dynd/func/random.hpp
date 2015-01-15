@@ -65,11 +65,10 @@ namespace kernels {
 
     static ndt::type make_type()
     {
-      return ndt::make_arrfunc(
-          ndt::make_tuple(),
-          ndt::make_struct(ndt::make_option(ndt::make_type<R>()), "a",
-                           ndt::make_option(ndt::make_type<R>()), "b"),
-          ndt::make_type<R>());
+      std::map<nd::string, ndt::type> tp_vars;
+      tp_vars["R"] = ndt::make_type<R>();
+
+      return ndt::substitute(ndt::type("(a: ?R, b: ?R) -> R"), tp_vars, true);
     }
 
     static void resolve_option_values(

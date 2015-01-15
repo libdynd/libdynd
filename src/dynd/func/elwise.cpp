@@ -9,6 +9,20 @@
 using namespace std;
 using namespace dynd;
 
+void nd::functional::elwise_resolve_option_values(
+    const arrfunc_type_data *self, const arrfunc_type *DYND_UNUSED(self_tp),
+    intptr_t nsrc, const ndt::type *src_tp, nd::array &kwds,
+    const std::map<nd::string, ndt::type> &tp_vars)
+{
+  const arrfunc_type_data *child =
+      self->get_data_as<dynd::nd::arrfunc>()->get();
+  const arrfunc_type *child_tp =
+      self->get_data_as<dynd::nd::arrfunc>()->get_type();
+
+  return child->resolve_option_values(child, child_tp, nsrc, src_tp, kwds,
+                                      tp_vars);
+}
+
 int nd::functional::elwise_resolve_dst_type_with_child(
     const arrfunc_type_data *child_af, const arrfunc_type *child_af_tp,
     intptr_t nsrc, const ndt::type *src_tp, int throw_on_error,
@@ -19,15 +33,6 @@ int nd::functional::elwise_resolve_dst_type_with_child(
   // First get the type for the child arrfunc
   ndt::type child_dst_tp;
   if (child_af->resolve_dst_type != NULL) {
-    if (nsrc == 0) {
-      if (!child_af->resolve_dst_type(child_af, child_af_tp, 0, NULL,
-                                      throw_on_error, child_dst_tp, kwds,
-                                      tp_vars)) {
-        return 0;
-      }
-      out_dst_tp = tp_vars.at("Dims").extended<dim_fragment_type>()->apply_to_dtype(child_dst_tp);
-      return 1;
-    }
     std::vector<ndt::type> child_src_tp(nsrc);
     for (intptr_t i = 0; i < nsrc; ++i) {
       intptr_t child_ndim_i = child_af_tp->get_pos_type(i).get_ndim();
@@ -50,8 +55,16 @@ int nd::functional::elwise_resolve_dst_type_with_child(
       ndim = std::max(ndim, src_tp[i].get_ndim() -
                                 child_af_tp->get_pos_type(i).get_ndim());
     }
-    child_dst_tp = child_af_tp->get_return_type();
+    child_dst_tp =
+        ndt::substitute(child_af_tp->get_return_type(), tp_vars, false);
   }
+  if (nsrc == 0) {
+    out_dst_tp =
+        tp_vars.at("Dims").extended<dim_fragment_type>()->apply_to_dtype(
+            child_dst_tp);
+    return 1;
+  }
+
   // Then build the type for the rest of the dimensions
   if (ndim > 0) {
     dimvector shape(ndim), tmp_shape(ndim);
@@ -201,15 +214,14 @@ ndt::type nd::functional::elwise_make_type(const arrfunc_type *child_tp)
 
 nd::arrfunc nd::functional::elwise(const arrfunc &child)
 {
-  return dynd::nd::arrfunc(elwise_make_type(child.get_type()), child,
-                           &elwise_instantiate, NULL, &elwise_resolve_dst_type);
-}
+  const arrfunc_type *child_tp = child.get_type();
 
-nd::arrfunc nd::functional::elwise(const ndt::type &self_tp,
-                                   const arrfunc &child)
-{
-  return dynd::nd::arrfunc(self_tp, child, &elwise_instantiate, NULL,
-                           &elwise_resolve_dst_type);
+  return dynd::nd::arrfunc(
+      elwise_make_type(child.get_type()), child, &elwise_instantiate,
+      (child.get()->resolve_option_values == NULL)
+          ? NULL
+          : &elwise_resolve_option_values,
+      child_tp->has_kwd("dst_tp") ? NULL : &elwise_resolve_dst_type);
 }
 
 intptr_t nd::functional::elwise_instantiate(

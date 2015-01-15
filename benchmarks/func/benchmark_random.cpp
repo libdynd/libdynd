@@ -18,13 +18,9 @@ using namespace dynd;
 template <typename T>
 static void BM_Func_Random_Uniform(benchmark::State &state)
 {
-  T a = 0;
-  T b = 1;
-
-  ndt::type tp = ndt::make_fixed_dim(10000, ndt::make_type<T>());
-  std::cout << tp << std::endl;
+  ndt::type dst_tp = ndt::make_fixed_dim(100000, ndt::make_type<T>());
   while (state.KeepRunning()) {
-    nd::random::uniform(kwds("a", a, "b", b, "tp", tp));
+    nd::random::uniform(kwds("dst_tp", dst_tp));
   }
 }
 
