@@ -261,8 +261,9 @@ namespace kernels {
     instantiate(const arrfunc_type_data *child, const arrfunc_type *child_tp,
                 void *ckb, intptr_t ckb_offset, const ndt::type &dst_tp,
                 const char *dst_arrmeta, const ndt::type *DYND_UNUSED(src_tp),
-                const char *const *DYND_UNUSED(src_arrmeta), kernel_request_t kernreq,
-                const eval::eval_context *ectx, const nd::array &kwds,
+                const char *const *DYND_UNUSED(src_arrmeta),
+                kernel_request_t kernreq, const eval::eval_context *ectx,
+                const nd::array &kwds,
                 const std::map<dynd::nd::string, ndt::type> &tp_vars)
     {
       intptr_t dst_ndim = dst_tp.get_ndim();
@@ -296,9 +297,9 @@ namespace kernels {
       }
 
       // Instantiate the elementwise handler
-      return child->instantiate(
-          child, child_tp, ckb, ckb_offset, child_dst_tp, child_dst_arrmeta,
-          NULL, NULL, kernreq, ectx, kwds, tp_vars);
+      return child->instantiate(child, child_tp, ckb, ckb_offset, child_dst_tp,
+                                child_dst_arrmeta, NULL, NULL, kernreq, ectx,
+                                kwds, tp_vars);
     }
   };
 
@@ -460,6 +461,85 @@ namespace kernels {
                                 child_dst_arrmeta, child_src_tp,
                                 child_src_arrmeta, kernel_request_strided, ectx,
                                 kwds, tp_vars);
+    }
+  };
+
+  template <>
+  struct elwise_ck<fixed_dim_type_id, var_dim_type_id, 0>
+      : expr_ck<elwise_ck<fixed_dim_type_id, var_dim_type_id, 0>,
+                kernel_request_host, 0> {
+    typedef elwise_ck self_type;
+
+    intptr_t size;
+    intptr_t dst_stride;
+
+    elwise_ck(intptr_t size, intptr_t dst_stride)
+        : size(size), dst_stride(dst_stride)
+    {
+    }
+
+    void single(char *dst, char *const *DYND_UNUSED(src))
+    {
+      ckernel_prefix *child = this->get_child_ckernel();
+      expr_strided_t opchild = child->get_function<expr_strided_t>();
+
+      // Broadcast all the src 'var' dimensions to dst
+      intptr_t dim_size = this->size;
+      opchild(dst, this->dst_stride, NULL, NULL, dim_size, child);
+    }
+
+    void strided(char *dst, intptr_t dst_stride, char *const *DYND_UNUSED(src),
+                 const intptr_t *DYND_UNUSED(src_stride), size_t count)
+    {
+      for (size_t i = 0; i != count; ++i) {
+        single(dst, NULL);
+        dst += dst_stride;
+      }
+    }
+
+    static void destruct(ckernel_prefix *self)
+    {
+      self->destroy_child_ckernel(sizeof(self_type));
+    }
+
+    static size_t
+    instantiate(const arrfunc_type_data *child, const arrfunc_type *child_tp,
+                void *ckb, intptr_t ckb_offset, const ndt::type &dst_tp,
+                const char *dst_arrmeta, const ndt::type *DYND_UNUSED(src_tp),
+                const char *const *DYND_UNUSED(src_arrmeta), kernel_request_t kernreq,
+                const eval::eval_context *ectx, const nd::array &kwds,
+                const std::map<dynd::nd::string, ndt::type> &tp_vars)
+    {
+      intptr_t dst_ndim = dst_tp.get_ndim();
+      if (!child_tp->get_return_type().is_symbolic()) {
+        dst_ndim -= child_tp->get_return_type().get_ndim();
+      }
+
+      const char *child_dst_arrmeta;
+      ndt::type child_dst_tp;
+
+      intptr_t size, dst_stride;
+      if (!dst_tp.get_as_strided(dst_arrmeta, &size, &dst_stride, &child_dst_tp,
+                                 &child_dst_arrmeta)) {
+        stringstream ss;
+        ss << "make_elwise_strided_dimension_expr_kernel: error processing "
+              "type " << dst_tp << " as strided";
+        throw type_error(ss.str());
+      }
+
+      bool finished = dst_ndim == 1;
+      self_type::create(ckb, kernreq, ckb_offset, size, dst_stride);
+
+      // If there are still dimensions to broadcast, recursively lift more
+      if (!finished) {
+        return nd::functional::elwise_instantiate_with_child(
+            child, child_tp, ckb, ckb_offset, child_dst_tp, child_dst_arrmeta,
+            NULL, NULL, kernel_request_strided, ectx, kwds, tp_vars);
+      }
+      // Instantiate the elementwise handler
+      return child->instantiate(child, child_tp, ckb, ckb_offset, child_dst_tp,
+                                child_dst_arrmeta, NULL, NULL,
+                                kernel_request_strided, ectx, kwds, tp_vars);
     }
   };
 
@@ -699,6 +779,125 @@ namespace kernels {
       return child->instantiate(child, child_tp, ckb, ckb_offset, child_dst_tp,
                                 child_dst_arrmeta, child_src_tp,
                                 child_src_arrmeta, kernel_request_strided, ectx,
+                                kwds, tp_vars);
+    }
+  };
+
+  template <>
+  struct elwise_ck<var_dim_type_id, fixed_dim_type_id, 0>
+      : expr_ck<elwise_ck<var_dim_type_id, fixed_dim_type_id, 0>,
+                kernel_request_host, 0> {
+    typedef elwise_ck self_type;
+
+    memory_block_data *dst_memblock;
+    size_t dst_target_alignment;
+    intptr_t dst_stride, dst_offset;
+
+    elwise_ck(memory_block_data *dst_memblock, size_t dst_target_alignment,
+              intptr_t dst_stride, intptr_t dst_offset)
+        : dst_memblock(dst_memblock),
+          dst_target_alignment(dst_target_alignment), dst_stride(dst_stride),
+          dst_offset(dst_offset)
+    {
+    }
+
+    void single(char *dst, char *const *DYND_UNUSED(src))
+    {
+      ckernel_prefix *child = this->get_child_ckernel();
+      expr_strided_t opchild = child->get_function<expr_strided_t>();
+
+      var_dim_type_data *dst_vddd = reinterpret_cast<var_dim_type_data *>(dst);
+      char *modified_dst;
+      intptr_t modified_dst_stride = 0;
+      intptr_t dim_size;
+      if (dst_vddd->begin != NULL) {
+        // If the destination already has allocated data, broadcast to that data
+        modified_dst = dst_vddd->begin + this->dst_offset;
+        // Broadcast all the inputs to the existing destination dimension size
+        dim_size = dst_vddd->size;
+      } else {
+        if (this->dst_offset != 0) {
+          throw runtime_error("Cannot assign to an uninitialized dynd var_dim "
+                              "which has a non-zero offset");
+        }
+        // Broadcast all the inputs together to get the destination size
+        dim_size = 1;
+        // Allocate the output
+        memory_block_data *memblock = this->dst_memblock;
+        if (memblock->m_type == objectarray_memory_block_type) {
+          memory_block_objectarray_allocator_api *allocator =
+              get_memory_block_objectarray_allocator_api(memblock);
+
+          // Allocate the output array data
+          dst_vddd->begin = allocator->allocate(memblock, dim_size);
+        } else {
+          memory_block_pod_allocator_api *allocator =
+              get_memory_block_pod_allocator_api(memblock);
+
+          // Allocate the output array data
+          char *dst_end = NULL;
+          allocator->allocate(memblock, dim_size * this->dst_stride,
+                              this->dst_target_alignment, &dst_vddd->begin,
+                              &dst_end);
+        }
+        modified_dst = dst_vddd->begin;
+        dst_vddd->size = dim_size;
+      }
+      if (dim_size <= 1) {
+        modified_dst_stride = 0;
+      } else {
+        modified_dst_stride = this->dst_stride;
+      }
+      opchild(modified_dst, modified_dst_stride, NULL,
+              NULL, dim_size, child);
+    }
+
+    static void destruct(ckernel_prefix *self)
+    {
+      self->destroy_child_ckernel(sizeof(self_type));
+    }
+
+    static size_t
+    instantiate(const arrfunc_type_data *child, const arrfunc_type *child_tp,
+                void *ckb, intptr_t ckb_offset, const ndt::type &dst_tp,
+                const char *dst_arrmeta, const ndt::type *DYND_UNUSED(src_tp),
+                const char *const *DYND_UNUSED(src_arrmeta), kernel_request_t kernreq,
+                const eval::eval_context *ectx, const nd::array &kwds,
+                const std::map<dynd::nd::string, ndt::type> &tp_vars)
+    {
+      intptr_t dst_ndim = dst_tp.get_ndim();
+      if (!child_tp->get_return_type().is_symbolic()) {
+        dst_ndim -= child_tp->get_return_type().get_ndim();
+      }
+
+      const char *child_dst_arrmeta;
+      ndt::type child_dst_tp;
+
+      // The dst var parameters
+      const var_dim_type *dst_vdd = dst_tp.extended<var_dim_type>();
+      const var_dim_type_arrmeta *dst_md =
+          reinterpret_cast<const var_dim_type_arrmeta *>(dst_arrmeta);
+
+      child_dst_arrmeta = dst_arrmeta + sizeof(var_dim_type_arrmeta);
+      child_dst_tp = dst_vdd->get_element_type();
+
+      bool finished = dst_ndim == 1;
+
+      self_type::create(ckb, kernreq, ckb_offset, dst_md->blockref,
+                        dst_vdd->get_target_alignment(), dst_md->stride,
+                        dst_md->offset);
+
+      // If there are still dimensions to broadcast, recursively lift more
+      if (!finished) {
+        return nd::functional::elwise_instantiate_with_child(
+            child, child_tp, ckb, ckb_offset, child_dst_tp, child_dst_arrmeta,
+            NULL, NULL, kernel_request_strided, ectx, kwds,
+            tp_vars);
+      }
+      // All the types matched, so instantiate the elementwise handler
+      return child->instantiate(child, child_tp, ckb, ckb_offset, child_dst_tp,
+                                child_dst_arrmeta, NULL,
+                                NULL, kernel_request_strided, ectx,
                                 kwds, tp_vars);
     }
   };
