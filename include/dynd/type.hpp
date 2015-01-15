@@ -827,6 +827,14 @@ namespace detail {
     }
   };
 
+  template <>
+  struct exact_type_from<ndt::type> {
+    static type make()
+    {
+      return ndt::type("type");
+    }
+  };
+
   template <typename T>
   struct exact_type_from<T *> {
     static type make() { return make_pointer(exact_type_from<T>::make()); }

@@ -367,6 +367,12 @@ namespace nd {
       {
         return std::vector<intptr_t>();
       }
+
+      void resolve_special_values(
+          const arrfunc_type *DYND_UNUSED(self_tp),
+          std::map<nd::string, ndt::type> &DYND_UNUSED(tp_vars)) const
+      {
+      }
     };
 
     template <typename T>
@@ -460,6 +466,42 @@ namespace nd {
         }
       } resolve_available_type;
 
+      struct {
+        template <typename T>
+        void resolve_dst_tp(
+            const arrfunc_type *DYND_UNUSED(self_tp),
+            const T &DYND_UNUSED(value),
+            std::map<nd::string, ndt::type> &DYND_UNUSED(typevars)) const
+        {
+        }
+
+        void resolve_dst_tp(
+            const arrfunc_type *self_tp, const ndt::type &value,
+            std::map<nd::string, ndt::type> &typevars) const
+        {
+          const ndt::type &expected_tp = self_tp->get_return_type();
+
+          if (!ndt::pattern_match(value, expected_tp, typevars)) {
+            std::stringstream ss;
+            ss << "keyword \"dst_type\" does not match, ";
+            ss << "arrfunc expected " << expected_tp << " but passed " << value;
+            throw std::invalid_argument(ss.str());
+          }
+        }
+
+        template <size_t I>
+        void operator()(const kwds<K...> *self, const arrfunc_type *self_tp,
+                        std::map<nd::string, ndt::type> &typevars) const
+        {
+          const std::string &name = self->get_name<I>();
+          const auto &value = self->get_value<I>();
+
+          if (name == "dst_tp") {
+            resolve_dst_tp(self_tp, value, typevars);
+          }
+        }
+      } resolve_special_value;
+
     public:
       kwds(typename as_<K, const char *>::type... names, K &&... values)
           : m_values(std::forward<K>(values)...)
@@ -496,6 +538,15 @@ namespace nd {
         dynd::index_proxy<I>::for_each(resolve_available_type, this, available,
                                        self_tp, kwd_tp_data, typevars);
         return available;
+      }
+
+      void
+      resolve_special_values(const arrfunc_type *self_tp,
+                             std::map<nd::string, ndt::type> &typevars) const
+      {
+        typedef make_index_sequence<sizeof...(K)> I;
+        dynd::index_proxy<I>::for_each(resolve_special_value, this, self_tp,
+                                       typevars);
       }
     };
 
@@ -687,10 +738,7 @@ namespace nd {
 
       const arrfunc_type *self_tp = m_value.get_type().extended<arrfunc_type>();
 
-      const std::vector<intptr_t> &option = self_tp->get_option_kwd_indices();
-      for (size_t i = 0; i < option.size(); ++i) {
-        intptr_t j = option[i];
-
+      for (intptr_t j : self_tp->get_option_kwd_indices()) {
         ndt::type &actual_tp = kwd_tp[j];
         if (actual_tp.is_null()) {
           actual_tp =
@@ -713,6 +761,8 @@ namespace nd {
     {
       const arrfunc_type_data *self = get();
       const arrfunc_type *self_tp = m_value.get_type().extended<arrfunc_type>();
+
+      kwds.resolve_special_values(self_tp, typevars);
 
       if (!self_tp->is_pos_variadic() && nsrc != self_tp->get_npos()) {
         std::stringstream ss;
