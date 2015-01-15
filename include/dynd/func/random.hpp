@@ -9,13 +9,12 @@
 
 namespace dynd {
 
-typedef type_sequence<int8_t, int16_t, int32_t, int64_t, uint8_t, uint16_t,
-                      uint32_t, uint64_t> integral_types;
+typedef type_sequence<int32_t, int64_t, uint32_t, uint64_t> integral_types;
 typedef type_sequence<float, double> real_types;
 typedef type_sequence<dynd_complex<float>, dynd_complex<double>> complex_types;
 
 typedef join<typename join<integral_types, real_types>::type,
-                      complex_types>::type numeric_types;
+             complex_types>::type numeric_types;
 
 namespace kernels {
 
