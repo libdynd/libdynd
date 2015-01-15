@@ -21,28 +21,40 @@ template <>
 class uniform_distribution<int32_t>
     : public std::uniform_int_distribution<int32_t> {
 public:
-  using std::uniform_int_distribution<int32_t>::uniform_int_distribution;
+  uniform_distribution(int32_t a, int32_t b)
+      : std::uniform_int_distribution<int32_t>(a, b)
+  {
+  }
 };
 
 template <>
 class uniform_distribution<int64_t>
     : public std::uniform_int_distribution<int64_t> {
 public:
-  using std::uniform_int_distribution<int64_t>::uniform_int_distribution;
+  uniform_distribution(int64_t a, int64_t b)
+      : std::uniform_int_distribution<int64_t>(a, b)
+  {
+  }
 };
 
 template <>
 class uniform_distribution<float>
     : public std::uniform_real_distribution<float> {
 public:
-  using std::uniform_real_distribution<float>::uniform_real_distribution;
+  uniform_distribution(float a, float b)
+      : std::uniform_real_distribution<float>(a, b)
+  {
+  }
 };
 
 template <>
 class uniform_distribution<double>
     : public std::uniform_real_distribution<double> {
 public:
-  using std::uniform_real_distribution<double>::uniform_real_distribution;
+  uniform_distribution(double a, double b)
+      : std::uniform_real_distribution<double>(a, b)
+  {
+  }
 };
 
 namespace kernels {
