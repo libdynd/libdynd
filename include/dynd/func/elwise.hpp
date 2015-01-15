@@ -20,6 +20,8 @@ namespace nd {
 
     arrfunc elwise(const arrfunc &child);
 
+    arrfunc elwise(const ndt::type &self_tp, const arrfunc &child);
+
     intptr_t elwise_instantiate(
         const arrfunc_type_data *self, const arrfunc_type *DYND_UNUSED(self_tp),
         void *ckb, intptr_t ckb_offset, const ndt::type &dst_tp,
