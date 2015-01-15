@@ -469,7 +469,6 @@ set(libdynd_SRC
     src/dynd/json_parser.cpp
     src/dynd/lowlevel_api.cpp
     src/dynd/parser_util.cpp
-    src/dynd/random.cpp
     src/dynd/shape_tools.cpp
     src/dynd/special.cpp
     src/dynd/string.cpp
@@ -491,7 +490,6 @@ set(libdynd_SRC
     include/dynd/dim_iter.hpp
     include/dynd/dynd_math.hpp
     include/dynd/ensure_immutable_contig.hpp
-    include/dynd/random.hpp
     include/dynd/type.hpp
     include/dynd/type_sequence.hpp
     include/dynd/typed_data_assign.hpp

@@ -13,7 +13,7 @@
 
 #include <dynd/array.hpp>
 #include <dynd/array_range.hpp>
-#include <dynd/random.hpp>
+#include <dynd/func/random.hpp>
 #include <dynd/types/type_alignment.hpp>
 #include <dynd/types/convert_type.hpp>
 #include <dynd/types/view_type.hpp>
