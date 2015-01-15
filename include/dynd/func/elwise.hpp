@@ -216,6 +216,92 @@ namespace kernels {
     }
   };
 
+  template <>
+  struct elwise_ck<fixed_dim_type_id, fixed_dim_type_id, 0>
+      : expr_ck<elwise_ck<fixed_dim_type_id, fixed_dim_type_id, 0>,
+                kernel_request_cuda_host_device, 0> {
+    typedef elwise_ck self_type;
+
+    intptr_t size;
+    intptr_t dst_stride;
+
+    DYND_CUDA_HOST_DEVICE elwise_ck(intptr_t size, intptr_t dst_stride,
+                                    const intptr_t *DYND_UNUSED(src_stride))
+        : size(size), dst_stride(dst_stride)
+    {
+    }
+
+    DYND_CUDA_HOST_DEVICE void single(char *dst, char *const *src)
+    {
+      ckernel_prefix *child = this->get_child_ckernel();
+      expr_strided_t opchild = child->get_function<expr_strided_t>();
+      opchild(dst, this->dst_stride, src, NULL, this->size, child);
+    }
+
+    DYND_CUDA_HOST_DEVICE void strided(char *dst, intptr_t dst_stride,
+                                       char *const *DYND_UNUSED(src),
+                                       const intptr_t *DYND_UNUSED(src_stride),
+                                       size_t count)
+    {
+      ckernel_prefix *child = this->get_child_ckernel();
+      expr_strided_t opchild = child->get_function<expr_strided_t>();
+      intptr_t inner_size = this->size, inner_dst_stride = this->dst_stride;
+      for (size_t i = 0; i != count; ++i) {
+        opchild(dst, inner_dst_stride, NULL, NULL, inner_size, child);
+        dst += dst_stride;
+      }
+    }
+
+    DYND_CUDA_HOST_DEVICE static void destruct(ckernel_prefix *self)
+    {
+      self->destroy_child_ckernel(sizeof(self_type));
+    }
+
+    static size_t
+    instantiate(const arrfunc_type_data *child, const arrfunc_type *child_tp,
+                void *ckb, intptr_t ckb_offset, const ndt::type &dst_tp,
+                const char *dst_arrmeta, const ndt::type *DYND_UNUSED(src_tp),
+                const char *const *DYND_UNUSED(src_arrmeta), kernel_request_t kernreq,
+                const eval::eval_context *ectx, const nd::array &kwds,
+                const std::map<dynd::nd::string, ndt::type> &tp_vars)
+    {
+      intptr_t dst_ndim = dst_tp.get_ndim();
+      if (!child_tp->get_return_type().is_symbolic()) {
+        dst_ndim -= child_tp->get_return_type().get_ndim();
+      }
+
+      const char *child_dst_arrmeta;
+      ndt::type child_dst_tp;
+
+      intptr_t size, dst_stride;
+      if (!dst_tp.get_as_strided(dst_arrmeta, &size, &dst_stride, &child_dst_tp,
+                                 &child_dst_arrmeta)) {
+        stringstream ss;
+        ss << "make_elwise_strided_dimension_expr_kernel: error processing "
+              "type " << dst_tp << " as strided";
+        throw type_error(ss.str());
+      }
+
+      self_type::create(ckb, kernreq, ckb_offset, size, dst_stride,
+                        kernels::array_wrapper<intptr_t, 0>(NULL));
+      kernreq = (kernreq & kernel_request_memory) | kernel_request_strided;
+
+      bool finished = dst_ndim == 1;
+
+      // If there are still dimensions to broadcast, recursively lift more
+      if (!finished) {
+        return nd::functional::elwise_instantiate_with_child(
+            child, child_tp, ckb, ckb_offset, child_dst_tp, child_dst_arrmeta,
+            NULL, NULL, kernreq, ectx, kwds, tp_vars);
+      }
+
+      // Instantiate the elementwise handler
+      return child->instantiate(
+          child, child_tp, ckb, ckb_offset, child_dst_tp, child_dst_arrmeta,
+          NULL, NULL, kernreq, ectx, kwds, tp_vars);
+    }
+  };
+
   /**
    * Generic expr kernel + destructor for a strided/var dimensions with
    * a fixed number of src operands, outputing to a strided dimension.
