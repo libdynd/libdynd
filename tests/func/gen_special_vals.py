@@ -30,7 +30,7 @@ def make_special_vals(func_name, *args):
         elif ((cls == complex) or (cls == mpc)):
             return 'dynd::dynd_complex<double>'
 
-        return ctype(next(iter(obj)))
+        return ctype(obj[0])
 
     def dims(obj):
         try:
@@ -87,7 +87,7 @@ def outer(*iterables):
 def make_factorial_vals():
     from mpmath import fac
 
-    n = range(150)
+    n = list(range(150))
     fac = [fac(val) for val in n]
 
     return make_special_vals('factorial_vals', ('n', n), ('fac', fac))
@@ -95,7 +95,7 @@ def make_factorial_vals():
 def make_factorial2_vals():
     from mpmath import fac2
 
-    n = range(150)
+    n = list(range(150))
     fac2 = [fac2(val) for val in n]
 
     return make_special_vals('factorial2_vals', ('n', n), ('fac2', fac2))
@@ -106,8 +106,8 @@ def make_factorial_ratio_vals():
     def fac_ratio(m, n):
         return fac(m) / fac(n)
 
-    m = range(150)
-    n = range(150)
+    m = list(range(150))
+    n = list(range(150))
 
     m, n = zip(*outer(m, n))
     fac_ratio = [fac_ratio(*vals) for vals in zip(m, n)]
@@ -139,7 +139,7 @@ def make_airy_vals():
     bi = [airybi(val) for val in x]
     bip = [airybi(val, 1) for val in x]
 
-    aibi = zip(zip(ai, aip), zip(bi, bip))
+    aibi = list(zip(list(zip(ai, aip)), list(zip(bi, bip))))
 
     return make_special_vals('airy_vals', ('x', x), ('aibi', aibi))
 
@@ -166,7 +166,7 @@ def make_bessel_j_vals():
         mpf(5), mpf(10), mpf(20)]
     x = [mpf('0.2'), mpf(1), mpf(2), mpf('2.5'), mpf(3), mpf(5), mpf(10), mpf(50)]
 
-    nu, x = zip(*outer(nu, x))
+    nu, x = list(zip(*outer(nu, x)))
     j = [besselj(*vals) for vals in zip(nu, x)]
 
     return make_special_vals('bessel_j_vals', ('nu', nu), ('x', x), ('j', j))
@@ -314,7 +314,7 @@ def make_struve_h_vals():
 def make_legendre_p_vals():
     from mpmath import legendre
 
-    l = range(5)
+    l = list(range(5))
     x = linspace('-0.99', '0.99', 67)
 
     l, x = zip(*outer(l, x))
@@ -325,8 +325,8 @@ def make_legendre_p_vals():
 def make_assoc_legendre_p_vals():
     from mpmath import legenp
 
-    l = range(5)
-    m = range(-4, 5)
+    l = list(range(5))
+    m = list(range(-4, 5))
     x = linspace('-0.99', '0.99', 67)
 
     l, m, x = zip(*(vals for vals in outer(l, m, x) if abs(vals[1]) <= vals[0]))
