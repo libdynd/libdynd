@@ -18,6 +18,10 @@ using namespace dynd;
 
 TEST(SubstituteTypeVars, SimpleNoSubstitutions)
 {
+#ifdef __APPLE__
+  throw std::runtime_error("SimpleNoSubstitutions is segfaulting on Mac OS X");
+#endif
+
   map<nd::string, ndt::type> typevars;
   EXPECT_EQ(ndt::type("int32"),
             ndt::substitute(ndt::type("int32"), typevars, false));
@@ -34,6 +38,10 @@ TEST(SubstituteTypeVars, SimpleNoSubstitutions)
 
 TEST(SubstituteTypeVars, SimpleSubstitution)
 {
+#ifdef __APPLE__
+  throw std::runtime_error("SimpleSubstitution is segfaulting on Mac OS X");
+#endif
+
   map<nd::string, ndt::type> typevars;
   typevars["Tint"] = ndt::type("int32");
   typevars["Tsym"] = ndt::type("S");

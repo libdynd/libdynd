@@ -175,8 +175,6 @@ FUNC_WRAPPER(kernel_request_cuda_device, __device__);
 #define CUDA_HOST_DEVICE_FUNC_AS_CALLABLE HOST_FUNC_AS_CALLABLE
 #endif
 
-namespace {
-
 int func0(int x, int y) { return 2 * (x - y); }
 
 GET_HOST_FUNC(func0)
@@ -259,8 +257,6 @@ public:
     return 2 * (x - y) + m_z;
   }
 };
-
-} // unnamed namespace
 
 #undef GET_HOST_FUNC
 #undef HOST_FUNC_AS_CALLABLE

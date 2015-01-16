@@ -307,37 +307,37 @@ template <class T>
 inline typename std::enable_if<is_float16_scalar<T>::value, bool>::type
 operator<(const T &lhs, const dynd_float16 &rhs)
 {
-  return double(lhs) < double(rhs);
+  return static_cast<double>(lhs) < static_cast<double>(rhs);
 }
 template <class T>
 inline typename std::enable_if<is_float16_scalar<T>::value, bool>::type
 operator>(const T &lhs, const dynd_float16 &rhs)
 {
-  return double(lhs) > double(rhs);
+  return static_cast<double>(lhs) > static_cast<double>(rhs);
 }
 template <class T>
 inline typename std::enable_if<is_float16_scalar<T>::value, bool>::type
 operator<=(const T &lhs, const dynd_float16 &rhs)
 {
-  return double(lhs) <= double(rhs);
+  return static_cast<double>(lhs) <= static_cast<double>(rhs);
 }
 template <class T>
 inline typename std::enable_if<is_float16_scalar<T>::value, bool>::type
 operator>=(const T &lhs, const dynd_float16 &rhs)
 {
-  return double(lhs) >= double(rhs);
+  return static_cast<double>(lhs) >= static_cast<double>(rhs);
 }
 template <class T>
 inline typename std::enable_if<is_float16_scalar<T>::value, bool>::type
 operator==(const T &lhs, const dynd_float16 &rhs)
 {
-  return double(lhs) == double(rhs);
+  return static_cast<double>(lhs) == static_cast<double>(rhs);
 }
 template <class T>
 inline typename std::enable_if<is_float16_scalar<T>::value, bool>::type
 operator!=(const T &lhs, const dynd_float16 &rhs)
 {
-  return double(lhs) != double(rhs);
+  return static_cast<double>(lhs) != static_cast<double>(rhs);
 }
 
 /**
