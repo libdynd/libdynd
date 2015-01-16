@@ -98,7 +98,7 @@ if(WIN32)
         set(DYND_BUILD_BENCHMARKS OFF)
     endif()
 else()
-    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11 -g -fomit-frame-pointer -fstrict-aliasing -Wall -Werror -Wextra -Wno-missing-field-initializers")
+    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11 -g -fomit-frame-pointer -fstrict-aliasing -Wall -Wextra -Werror -Wno-missing-field-initializers")
     if (DYND_CUDA)
         # This is a workaround for a FindCUDA bug, which will be fixed in an upcoming version
         if ("${CMAKE_BUILD_TYPE}" STREQUAL "")
@@ -306,13 +306,11 @@ set(libdynd_SRC
     src/dynd/eval/eval_context.cpp
     src/dynd/eval/eval_elwise_vm.cpp
     src/dynd/eval/eval_engine.cpp
-    src/dynd/eval/elwise_reduce_eval.cpp
     src/dynd/eval/groupby_elwise_reduce_eval.cpp
     src/dynd/eval/unary_elwise_eval.cpp
     include/dynd/eval/eval_context.hpp
     include/dynd/eval/eval_elwise_vm.hpp
     include/dynd/eval/eval_engine.hpp
-    include/dynd/eval/elwise_reduce_eval.hpp
     include/dynd/eval/groupby_elwise_reduce_eval.hpp
     include/dynd/eval/unary_elwise_eval.hpp
     # Func
