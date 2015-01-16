@@ -1,5 +1,5 @@
 #
-# Copyright (C) 2011-14 DyND Developers
+# Copyright (C) 2011-15 DyND Developers
 # BSD 2-Clause License, see LICENSE.txt
 #
 
@@ -302,13 +302,11 @@ set(libdynd_SRC
     src/dynd/eval/eval_context.cpp
     src/dynd/eval/eval_elwise_vm.cpp
     src/dynd/eval/eval_engine.cpp
-    src/dynd/eval/elwise_reduce_eval.cpp
     src/dynd/eval/groupby_elwise_reduce_eval.cpp
     src/dynd/eval/unary_elwise_eval.cpp
     include/dynd/eval/eval_context.hpp
     include/dynd/eval/eval_elwise_vm.hpp
     include/dynd/eval/eval_engine.hpp
-    include/dynd/eval/elwise_reduce_eval.hpp
     include/dynd/eval/groupby_elwise_reduce_eval.hpp
     include/dynd/eval/unary_elwise_eval.hpp
     # Func
@@ -409,6 +407,7 @@ set(libdynd_SRC
     include/dynd/kernels/expr_kernel_generator.hpp
     include/dynd/kernels/expression_assignment_kernels.hpp
     include/dynd/kernels/expression_comparison_kernels.hpp
+    include/dynd/kernels/fft.hpp
     include/dynd/func/fft.hpp
     include/dynd/kernels/make_lifted_reduction_ckernel.hpp
     include/dynd/kernels/option_assignment_kernels.hpp
@@ -481,6 +480,7 @@ set(libdynd_SRC
     include/dynd/atomic_refcount.hpp
     include/dynd/auxiliary_data.hpp
     include/dynd/buffer_storage.hpp
+    include/dynd/cephes.hpp
     include/dynd/config.hpp
     include/dynd/cmake_config.hpp.in # Included here for ease of editing in IDEs
     ${CMAKE_CURRENT_BINARY_DIR}/include/dynd/cmake_config.hpp
@@ -490,6 +490,7 @@ set(libdynd_SRC
     include/dynd/dim_iter.hpp
     include/dynd/dynd_math.hpp
     include/dynd/ensure_immutable_contig.hpp
+    include/dynd/strided_vals.hpp
     include/dynd/type.hpp
     include/dynd/type_sequence.hpp
     include/dynd/typed_data_assign.hpp

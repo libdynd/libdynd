@@ -1,5 +1,5 @@
 //
-// Copyright (C) 2011-14 DyND Developers
+// Copyright (C) 2011-15 DyND Developers
 // BSD 2-Clause License, see LICENSE.txt
 //
 // The char type represents a single character of a specified encoding.

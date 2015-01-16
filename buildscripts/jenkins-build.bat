@@ -1,5 +1,5 @@
 REM
-REM Copyright (C) 2011-14 DyND Developers
+REM Copyright (C) 2011-15 DyND Developers
 REM BSD 2-Clause License, see LICENSE.txt
 REM
 REM This is the master windows build + test script for building

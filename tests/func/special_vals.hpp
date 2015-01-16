@@ -1,5 +1,5 @@
 //
-// Copyright (C) 2011-14 DyND Developers
+// Copyright (C) 2011-15 DyND Developers
 // BSD 2-Clause License, see LICENSE.txt
 //
 
@@ -316,9 +316,7 @@ dynd::nd::array factorial_vals() {
         3.80892263763057e+260
     };
 
-    dynd::nd::array vals = dynd::nd::empty(
-        150, dynd::ndt::make_tuple(dynd::ndt::make_type<int>(),
-                                   dynd::ndt::make_type<double>()));
+    dynd::nd::array vals = dynd::nd::empty(150, dynd::ndt::make_tuple(dynd::ndt::make_type<int>(), dynd::ndt::make_type<double>()));
     vals(dynd::irange(), 0).vals() = n;
     vals(dynd::irange(), 1).vals() = fac;
 
@@ -68620,8 +68618,7 @@ dynd::nd::array airy_vals() {
         14.0,
         15.0
     };
-    static double aibi[21][2][2] = {
-        {{0.350761009024114, 0.327192818554443}, {-0.138369134901601, 0.778411773001899}},
+    static double aibi = {
         {{-0.0702655329492895, -0.790628575368581}, {0.392234705706999, -0.116670567438341}},
         {{-0.378814293677658, 0.314583769216599}, {-0.198289626374927, -0.675611222685259}},
         {{0.227407428201686, 0.618259020741691}, {-0.412302587956399, 0.27879516692117}},
@@ -68644,7 +68641,7 @@ dynd::nd::array airy_vals() {
         {{2.16496252073799e-18, -8.42056795401777e-18}, {1.89820995674936e+16, 7.31974920340701e+16}}
     };
 
-    dynd::nd::array vals = dynd::nd::empty(21, dynd::ndt::make_tuple(dynd::ndt::make_type<double>(), dynd::ndt::cfixed_dim_from_array<double[2][2]>::make()));
+    dynd::nd::array vals = dynd::nd::empty(21, dynd::ndt::make_tuple(dynd::ndt::make_type<double>()));
     vals(dynd::irange(), 0).vals() = x;
     vals(dynd::irange(), 1).vals() = aibi;
 

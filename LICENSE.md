@@ -7,7 +7,7 @@
 
 The BSD 2-Clause License
 
-    Copyright (C) 2011-14, LibDyND Developers
+    Copyright (C) 2011-15, LibDyND Developers
     All rights reserved.
 
     Redistribution and use in source and binary forms, with or without

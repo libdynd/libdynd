@@ -1,5 +1,5 @@
 #
-# Copyright (C) 2011-14 DyND Developers
+# Copyright (C) 2011-15 DyND Developers
 # BSD 2-Clause License, see LICENSE.txt
 #
 
@@ -30,7 +30,7 @@ def make_special_vals(func_name, *args):
         elif ((cls == complex) or (cls == mpc)):
             return 'dynd::dynd_complex<double>'
 
-        return ctype(obj[0])
+        return ctype(next(iter(obj)))
 
     def dims(obj):
         try:
@@ -337,7 +337,7 @@ def make_assoc_legendre_p_vals():
 outfile = open('special_vals.hpp', 'w')
 
 outfile.write('//\n')
-outfile.write('// Copyright (C) 2011-14 Irwin Zaid, DyND Developers\n')
+outfile.write('// Copyright (C) 2011-15 DyND Developers\n')
 outfile.write('// BSD 2-Clause License, see LICENSE.txt\n')
 outfile.write('//\n')
 outfile.write('\n')
