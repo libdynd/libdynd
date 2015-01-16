@@ -22,13 +22,9 @@
 #include <dynd/json_parser.hpp>
 #include "../dynd_assertions.hpp"
 
-namespace {
-
 struct callable0 {
   DYND_CUDA_HOST_DEVICE int operator()(int x, int y) const { return x + y; }
 };
-
-} // unnamed namespace
 
 TEST(Elwise, UnaryExpr_FixedDim)
 {

@@ -120,7 +120,7 @@ template<class dst_type> \
 struct single_assigner_builtin_base<dst_type, dynd_float16, dst_kind, real_kind, assign_error_nocheck> \
 { \
     DYND_CUDA_HOST_DEVICE inline static void assign(dst_type *dst, const dynd_float16 *src) { \
-        float tmp = float(*src); \
+        float tmp = static_cast<float>(*src); \
         single_assigner_builtin_base<dst_type, float, dst_kind, real_kind, assign_error_nocheck>::assign(dst, &tmp); \
     } \
 }; \
@@ -128,7 +128,7 @@ template<class dst_type> \
 struct single_assigner_builtin_base<dst_type, dynd_float16, dst_kind, real_kind, assign_error_overflow> \
 { \
     inline static void assign(dst_type *dst, const dynd_float16 *src) { \
-        float tmp = float(*src); \
+        float tmp = static_cast<float>(*src); \
         single_assigner_builtin_base<dst_type, float, dst_kind, real_kind, assign_error_overflow>::assign(dst, &tmp); \
     } \
 }; \
@@ -136,7 +136,7 @@ template<class dst_type> \
 struct single_assigner_builtin_base<dst_type, dynd_float16, dst_kind, real_kind, assign_error_fractional> \
 { \
     inline static void assign(dst_type *dst, const dynd_float16 *src) { \
-        float tmp = float(*src); \
+        float tmp = static_cast<float>(*src); \
         single_assigner_builtin_base<dst_type, float, dst_kind, real_kind, assign_error_fractional>::assign(dst, &tmp); \
     } \
 }; \
@@ -144,7 +144,7 @@ template<class dst_type> \
 struct single_assigner_builtin_base<dst_type, dynd_float16, dst_kind, real_kind, assign_error_inexact> \
 { \
     inline static void assign(dst_type *dst, const dynd_float16 *src) { \
-        float tmp = float(*src); \
+        float tmp = static_cast<float>(*src); \
         single_assigner_builtin_base<dst_type, float, dst_kind, real_kind, assign_error_inexact>::assign(dst, &tmp); \
     } \
 };

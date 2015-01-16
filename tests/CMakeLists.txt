@@ -79,7 +79,7 @@ set(tests_SRC
     func/test_rolling.cpp
     func/test_special.cpp
     func/test_take.cpp
-	func/test_take_by_pointer.cpp
+    func/test_take_by_pointer.cpp
     array/test_array.cpp
     array/test_array_range.cpp
     array/test_array_assign.cpp
@@ -124,18 +124,20 @@ if (DYND_CUDA)
 endif()
 
 if (DYND_CUDA)
-    cuda_add_executable(test_libdynd ${tests_SRC})
+    cuda_add_executable(test_libdynd ${tests_SRC} OPTIONS -ldynddev -L${CMAKE_BINARY_DIR})
+    set(LINK_LIBS ${LINK_LIBS} libdynddev)
 else()
     add_executable(test_libdynd ${tests_SRC})
+    set(LINK_LIBS ${LINK_LIBS} libdynd)
 endif()
 
 if(WIN32)
     target_link_libraries(test_libdynd
-        libdynd
+        ${LINK_LIBS}
         )
 elseif(APPLE)
     target_link_libraries(test_libdynd
-        libdynd
+        ${LINK_LIBS}
         )
     if(USE_RELATIVE_RPATH)
         add_custom_command(TARGET test_libdynd
@@ -149,7 +151,7 @@ else()
     #-Wno-unnamed-type-template-args 
 
     target_link_libraries(test_libdynd
-        libdynd
+        ${LINK_LIBS}
         pthread
         )
 endif()

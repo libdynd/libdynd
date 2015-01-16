@@ -330,6 +330,8 @@ namespace nd {
         nd::index_proxy<I>::template get_data(m_data, get_vals());
       }
 
+      size_t size() const { return sizeof...(A); }
+
       const std::tuple<A...> &get_vals() const { return m_values; }
 
       const ndt::type *get_types() const { return m_types; }
@@ -342,6 +344,8 @@ namespace nd {
     template <>
     class args<> {
     public:
+      size_t size() const { return 0; }
+
       const ndt::type *get_types() const { return NULL; }
 
       char *const *get_data() const { return NULL; }
@@ -475,9 +479,8 @@ namespace nd {
         {
         }
 
-        void resolve_dst_tp(
-            const arrfunc_type *self_tp, const ndt::type &value,
-            std::map<nd::string, ndt::type> &typevars) const
+        void resolve_dst_tp(const arrfunc_type *self_tp, const ndt::type &value,
+                            std::map<nd::string, ndt::type> &typevars) const
         {
           const ndt::type &expected_tp = self_tp->get_return_type();
 
@@ -831,9 +834,9 @@ namespace nd {
     }
 
     /** Implements the general call operator */
-    template <typename... A, typename... K>
-    array call(const detail::args<A...> &args, const detail::kwds<K...> &kwds,
-               const eval::eval_context *ectx) const
+    template <typename A, typename K>
+    typename std::enable_if<!std::is_integral<A>::value, array>::type
+    call(const A &args, const K &kwds, const eval::eval_context *ectx) const
     {
       const arrfunc_type_data *self = get();
       const arrfunc_type *self_tp = m_value.get_type().extended<arrfunc_type>();
@@ -842,7 +845,7 @@ namespace nd {
       const ndt::type *src_tp = args.get_types();
       nd::array kwds_as_array;
       std::map<nd::string, ndt::type> tp_vars;
-      ndt::type dst_tp = resolve(sizeof...(A), src_tp, args.get_arrmeta(), kwds,
+      ndt::type dst_tp = resolve(args.size(), src_tp, args.get_arrmeta(), kwds,
                                  kwds_as_array, tp_vars);
 
       // Construct the destination array
