@@ -42,26 +42,13 @@ namespace kernels {
 namespace dynd {
 
 namespace kernels {
-  __global__ void cuda_parallel_single(char *dst, array_wrapper<char *, 0> src,
-                                       ckernel_prefix *self);
-
-  __global__ void cuda_parallel_single(char *dst, array_wrapper<char *, 1> src,
-                                       ckernel_prefix *self);
-
-  __global__ void cuda_parallel_single(char *dst, array_wrapper<char *, 2> src,
-                                       ckernel_prefix *self);
-
-  __global__ void cuda_parallel_single(char *dst, array_wrapper<char *, 3> src,
-                                       ckernel_prefix *self);
-
-  __global__ void cuda_parallel_single(char *dst, array_wrapper<char *, 4> src,
-                                       ckernel_prefix *self);
-
-  __global__ void cuda_parallel_single(char *dst, array_wrapper<char *, 5> src,
-                                       ckernel_prefix *self);
-
-  __global__ void cuda_parallel_single(char *dst, array_wrapper<char *, 6> src,
-                                       ckernel_prefix *self);
+  template <int N>
+  __global__ void cuda_parallel_single(char *dst, array_wrapper<char *, N> src,
+                                       ckernel_prefix *self)
+  {
+    expr_single_t func = self->get_function<expr_single_t>();
+    func(dst, src, self);
+  }
 
   template <int N>
   __global__ void cuda_parallel_strided(char *dst, intptr_t dst_stride,
