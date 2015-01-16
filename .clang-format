@@ -3,6 +3,7 @@ Standard: Cpp11
 UseTab: Never
 IndentWidth: 2
 BreakBeforeBraces: Stroustrup
+Cpp11BracedListStyle: true
 NamespaceIndentation: Inner
 AlwaysBreakTemplateDeclarations: true
 
