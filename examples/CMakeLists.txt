@@ -12,14 +12,16 @@ include_directories(
 
 if (DYND_CUDA)
 cuda_add_executable(simple_example
-    simple_example.cu
+    simple_example.cu OPTIONS -ldynddev -L${CMAKE_BINARY_DIR}
     )
+set(LINK_LIBS ${LINK_LIBS} libdynddev)
 else ()
 add_executable(simple_example
     simple_example.cpp
     )
+set(LINK_LIBS ${LINK_LIBS} libdynd)
 endif ()
 
 target_link_libraries(simple_example
-    libdynd
+    ${LINK_LIBS}
     )
