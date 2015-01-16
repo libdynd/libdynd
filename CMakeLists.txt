@@ -98,24 +98,28 @@ if(WIN32)
         set(DYND_BUILD_BENCHMARKS OFF)
     endif()
 else()
-    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11 -g -fomit-frame-pointer -fstrict-aliasing -Wall -Wextra -Werror -Wno-missing-field-initializers")
+    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11 -g -fomit-frame-pointer -fstrict-aliasing -Wall -Werror -Wextra -Wno-missing-field-initializers")
     if (DYND_CUDA)
-	    # This is a workaround for a FindCUDA bug, which will be fixed in an upcoming version
+        # This is a workaround for a FindCUDA bug, which will be fixed in an upcoming version
         if ("${CMAKE_BUILD_TYPE}" STREQUAL "")
-	        message(FATAL_ERROR "CMake must be passed a build type to compile libdynd with CUDA. Run CMake again with, for example, \"-DCMAKE_BUILD_TYPE=RelWithDebInfo\".")
-	    endif()
+            message(FATAL_ERROR "CMake must be passed a build type to compile libdynd with CUDA. Run CMake again with, for example, \"-DCMAKE_BUILD_TYPE=RelWithDebInfo\".")
+        endif()
         string(TOUPPER ${CMAKE_BUILD_TYPE} CONFIG_UPPER)
         set(CMAKE_CXX_FLAGS_${CONFIG_UPPER} "${CMAKE_CXX_FLAGS_${CONFIG_UPPER}} -fPIC")
      else ()
-	    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fPIC")
+        set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fPIC")
      endif ()
     if ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "GNU")
         if ("${CMAKE_CXX_COMPILER_VERSION}" VERSION_LESS 4.7)
             message(FATAL_ERROR "Only GCC 4.7 and later are supported by LibDyND. Found version ${CMAKE_CXX_COMPILER_VERSION}.")
         endif()
-        set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fmax-errors=20")
+        set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11 -fmax-errors=20")
     elseif("${CMAKE_CXX_COMPILER_ID}" STREQUAL "Clang")
-        set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -ferror-limit=20 -Wdocumentation")
+        set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -ferror-limit=20")
+        # This is a workaround for a CUDA bug with Clang, where it is unable to handle "-std=c++11"
+        if (DYND_CUDA)
+            set(CUDA_PROPAGATE_HOST_FLAGS OFF)
+        endif()
     endif()
 endif()
 
@@ -302,11 +306,13 @@ set(libdynd_SRC
     src/dynd/eval/eval_context.cpp
     src/dynd/eval/eval_elwise_vm.cpp
     src/dynd/eval/eval_engine.cpp
+    src/dynd/eval/elwise_reduce_eval.cpp
     src/dynd/eval/groupby_elwise_reduce_eval.cpp
     src/dynd/eval/unary_elwise_eval.cpp
     include/dynd/eval/eval_context.hpp
     include/dynd/eval/eval_elwise_vm.hpp
     include/dynd/eval/eval_engine.hpp
+    include/dynd/eval/elwise_reduce_eval.hpp
     include/dynd/eval/groupby_elwise_reduce_eval.hpp
     include/dynd/eval/unary_elwise_eval.hpp
     # Func
@@ -359,7 +365,6 @@ set(libdynd_SRC
     src/dynd/kernels/byteswap_kernels.cpp
     src/dynd/kernels/ckernel_common_functions.cpp
     src/dynd/kernels/comparison_kernels.cpp
-    src/dynd/kernels/cuda_kernels.cpp
     src/dynd/kernels/date_assignment_kernels.cpp
     src/dynd/kernels/date_adapter_kernels.cpp
     src/dynd/kernels/datetime_assignment_kernels.cpp
@@ -407,7 +412,6 @@ set(libdynd_SRC
     include/dynd/kernels/expr_kernel_generator.hpp
     include/dynd/kernels/expression_assignment_kernels.hpp
     include/dynd/kernels/expression_comparison_kernels.hpp
-    include/dynd/kernels/fft.hpp
     include/dynd/func/fft.hpp
     include/dynd/kernels/make_lifted_reduction_ckernel.hpp
     include/dynd/kernels/option_assignment_kernels.hpp
@@ -480,7 +484,6 @@ set(libdynd_SRC
     include/dynd/atomic_refcount.hpp
     include/dynd/auxiliary_data.hpp
     include/dynd/buffer_storage.hpp
-    include/dynd/cephes.hpp
     include/dynd/config.hpp
     include/dynd/cmake_config.hpp.in # Included here for ease of editing in IDEs
     ${CMAKE_CURRENT_BINARY_DIR}/include/dynd/cmake_config.hpp
@@ -490,7 +493,6 @@ set(libdynd_SRC
     include/dynd/dim_iter.hpp
     include/dynd/dynd_math.hpp
     include/dynd/ensure_immutable_contig.hpp
-    include/dynd/strided_vals.hpp
     include/dynd/type.hpp
     include/dynd/type_sequence.hpp
     include/dynd/typed_data_assign.hpp
@@ -525,16 +527,14 @@ if (DYND_CUDA)
         src/dynd/types/dynd_int128.cpp
         src/dynd/types/dynd_uint128.cpp
         src/dynd/kernels/assignment_kernels.cpp
-        src/dynd/kernels/cuda_kernels.cpp
         src/dynd/func/arithmetic.cpp
         src/dynd/func/elwise.cpp
         )
-    list(APPEND libdynd_SRC
+    list(APPEND libdynddev_SRC
         src/dynd/kernels/assignment_kernels.cu
         src/dynd/func/arithmetic.cu
         src/dynd/func/elwise.cu
         src/dynd/kernels/ckernel_builder.cu
-        src/dynd/kernels/cuda_kernels.cu
         src/dynd/types/dynd_complex.cu
         src/dynd/types/dynd_float16.cu
         src/dynd/types/dynd_float128.cu
@@ -549,7 +549,7 @@ if (DYND_CUDA)
     # Make some warnings into errors and inhibit other warnings
     set(CUDA_NVCC_FLAGS ${CUDA_NVCC_FLAGS};-Werror=cross-execution-space-call;
         -Xcudafe;--diag_suppress=boolean_controlling_expr_is_constant;
-        -Xcudafe;--diag_suppress=cc_clobber_ignored)
+        -Xcudafe;--diag_suppress=cc_clobber_ignored;-Xcompiler;-Wno-unused;-Xcompiler;-Wno-unused-parameter)
 endif()
 
 source_group("Main Source" REGULAR_EXPRESSION "src/dynd/.*cpp")
@@ -599,11 +599,13 @@ endif()
 
 include_directories(${CMAKE_CURRENT_BINARY_DIR}/include)
 
+add_library(libdynd_OBJ OBJECT ${libdynd_SRC})
+
 if (DYND_SHARED_LIB)
     if (DYND_CUDA)
-        cuda_add_library(libdynd SHARED ${libdynd_SRC})
+        cuda_add_library(libdynd SHARED ${libdynddev_SRC} $<TARGET_OBJECTS:libdynd_OBJ>)
     else()
-        add_library(libdynd SHARED ${libdynd_SRC})
+        add_library(libdynd SHARED $<TARGET_OBJECTS:libdynd_OBJ>)
     endif()
     set_target_properties(libdynd
         PROPERTIES
@@ -612,13 +614,23 @@ if (DYND_SHARED_LIB)
         )
 else()
     if (DYND_CUDA)
-        cuda_add_library(libdynd STATIC ${libdynd_SRC})
+        cuda_add_library(libdynd STATIC ${libdynddev_SRC} $<TARGET_OBJECTS:libdynd_OBJ>)
     else()
-        add_library(libdynd STATIC ${libdynd_SRC})
+        add_library(libdynd STATIC $<TARGET_OBJECTS:libdynd_OBJ>)
     endif()
     set_target_properties(libdynd
         PROPERTIES
         OUTPUT_NAME "dynd"
+        PREFIX "${CMAKE_STATIC_LIBRARY_PREFIX}"
+        )
+endif()
+
+if (DYND_CUDA)
+    add_library(libdynddev STATIC $<TARGET_OBJECTS:libdynd_OBJ> ${libdynd_SEPARABLE_COMPILATION_OBJECTS})
+    set_target_properties(libdynddev PROPERTIES LINKER_LANGUAGE CXX)
+    set_target_properties(libdynddev
+        PROPERTIES
+        OUTPUT_NAME "dynddev"
         PREFIX "${CMAKE_STATIC_LIBRARY_PREFIX}"
         )
 endif()
@@ -677,6 +689,9 @@ if (DYND_SHARED_LIB OR (NOT DYND_INSTALL_LIB))
     # If we're not making an installable static library,
     # link the sublibraries normally
     target_link_libraries(libdynd ${DYND_LINK_LIBS})
+    if (DYND_CUDA)
+        target_link_libraries(libdynddev ${DYND_LINK_LIBS})
+    endif ()
 endif()
 
 if(DYND_BUILD_TESTS)
@@ -743,4 +758,3 @@ if (DYND_INSTALL_LIB)
             DESTINATION "${CMAKE_INSTALL_PREFIX}/bin")
     endif()
 endif()
-
