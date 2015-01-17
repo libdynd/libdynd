@@ -15,7 +15,6 @@
 
 static void func0(double &x, int y) { x = y; }
 
-/*
 TEST(Permute, Simple)
 {
   nd::arrfunc af = nd::functional::apply(&func0);
@@ -28,4 +27,3 @@ TEST(Permute, Simple)
 
   std::exit(-1);
 }
-*/

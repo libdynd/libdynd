@@ -56,6 +56,7 @@ nd::arrfunc nd::functional::permute(const arrfunc &child,
   ndt::type self_tp =
       ndt::make_arrfunc(ndt::make_tuple(nd::array(pos_tp.data(), npos)),
                         child_tp->get_kwd_struct(), ret_tp);
-  return as_arrfunc<kernels::permute_ck<2>>(
-      self_tp, std::make_pair(child, perm));
+
+  return as_arrfunc<kernels::permute_ck<2>>(self_tp,
+                                            std::make_pair(child, perm));
 }
