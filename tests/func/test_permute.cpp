@@ -13,6 +13,7 @@
 #include <dynd/func/apply.hpp>
 #include <dynd/func/permute.hpp>
 
+/*
 static void func0(double &x, int y) { x = y; }
 
 TEST(Permute, Simple)
@@ -27,3 +28,4 @@ TEST(Permute, Simple)
 
   std::exit(-1);
 }
+*/

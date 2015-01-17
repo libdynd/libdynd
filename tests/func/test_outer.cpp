@@ -15,8 +15,8 @@
 
 namespace {
 
-int func0(int x, int y) {
-  return x + y;
+int func0(int x, int y, int z) {
+  return x + y + z;
 }
 
 } // unnamed namespace
@@ -24,5 +24,7 @@ int func0(int x, int y) {
 TEST(Outer, Simple)
 {
   nd::arrfunc af = nd::functional::outer(nd::functional::apply(&func0));
-  std::cout << af(nd::array({0, 1}), nd::array({3, 4})) << std::endl;
+  std::cout << af(nd::array({0, 1}), nd::array({3, 4}), nd::array({5, 6})) << std::endl;
+
+  std::exit(-1);
 }

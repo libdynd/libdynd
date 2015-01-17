@@ -25,8 +25,18 @@ intptr_t nd::functional::outer_instantiate(
     const dynd::nd::array &kwds,
     const std::map<dynd::nd::string, ndt::type> &tp_vars)
 {
-//  intptr_t new_ndim = child_tp->get_npos();
-  ndt::type new_src_tp[2] = {src_tp[0].with_new_axis(1), src_tp[1].with_new_axis(0)};
+  intptr_t ndim = 0;
+  for (intptr_t i = 0; i < child_tp->get_npos(); ++i) {
+    ndim += src_tp[i].get_ndim();
+  }
+
+  std::vector<ndt::type> new_src_tp;
+  for (intptr_t i = 0, j = 0; i < child_tp->get_npos(); ++i) {
+    ndt::type tp = src_tp[i].with_new_axis(0, j);
+    tp = tp.with_new_axis(tp.get_ndim(), ndim - tp.get_ndim());
+    new_src_tp.push_back(tp);
+    j += src_tp[i].get_ndim();
+  }
 
   size_stride_t new_src_arrmeta0[2];
   new_src_arrmeta0[0].dim_size = 2;
@@ -46,7 +56,7 @@ intptr_t nd::functional::outer_instantiate(
 //  std::cout << new_src_tp[1] << std::endl;
 
   return elwise_instantiate(child, child_tp, ckb, ckb_offset, dst_tp, dst_arrmeta,
-                            new_src_tp, new_src_arrmeta, kernreq, ectx, kwds, tp_vars);
+                            new_src_tp.data(), new_src_arrmeta, kernreq, ectx, kwds, tp_vars);
 }
 
 int nd::functional::outer_resolve_dst_type_with_child(
