@@ -542,12 +542,18 @@ if (DYND_CUDA)
 
     set(CUDA_SEPARABLE_COMPILATION ON)
 
-    set(CUDA_NVCC_FLAGS ${CUDA_NVCC_FLAGS};-std=c++11;-Xcompiler;-fPIC)
+    if(NOT WIN32)
+        set(CUDA_NVCC_FLAGS ${CUDA_NVCC_FLAGS};-std=c++11;-Xcompiler;-fPIC)
+    endif()
 
     # Make some warnings into errors and inhibit other warnings
     set(CUDA_NVCC_FLAGS ${CUDA_NVCC_FLAGS};-Werror=cross-execution-space-call;
         -Xcudafe;--diag_suppress=boolean_controlling_expr_is_constant;
-        -Xcudafe;--diag_suppress=cc_clobber_ignored;-Xcompiler;-Wno-unused;-Xcompiler;-Wno-unused-parameter)
+        -Xcudafe;--diag_suppress=cc_clobber_ignored)
+    if(NOT WIN32)
+        set(CUDA_NVCC_FLAGS ${CUDA_NVCC_FLAGS};
+            -Xcompiler;-Wno-unused;-Xcompiler;-Wno-unused-parameter)
+    endif()
 endif()
 
 source_group("Main Source" REGULAR_EXPRESSION "src/dynd/.*cpp")
@@ -656,6 +662,11 @@ if(WIN32)
     set_source_files_properties(src/dynd/kernels/assignment_kernels.cpp
         PROPERTIES
             COMPILE_FLAGS /bigobj)
+    if(DYND_CUDA)
+        set_source_files_properties(src/dynd/kernels/assignment_kernels.cu
+            PROPERTIES
+                COMPILE_FLAGS /bigobj)
+    endif()
 endif()
 
 # Copy the headers from cephes that need to be installed with libdynd
