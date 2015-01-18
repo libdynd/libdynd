@@ -69,8 +69,11 @@ intptr_t nd::functional::outer_instantiate(
     new_src_arrmeta.push_back(new_src_arrmeta_holder[i].get());
   }
 
-  return elwise_instantiate(child, child_tp, ckb, ckb_offset, dst_tp, dst_arrmeta,
+  ckb_offset = elwise_instantiate(child, child_tp, ckb, ckb_offset, dst_tp, dst_arrmeta,
                             new_src_tp.data(), new_src_arrmeta.data(), kernreq, ectx, kwds, tp_vars);
+  delete new_src_arrmeta_holder;
+
+  return ckb_offset;
 }
 
 int nd::functional::outer_resolve_dst_type_with_child(
