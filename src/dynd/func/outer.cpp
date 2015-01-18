@@ -3,6 +3,8 @@
 // BSD 2-Clause License, see LICENSE.txt
 //
 
+
+#include <dynd/arrmeta_holder.hpp>
 #include <dynd/func/elwise.hpp>
 #include <dynd/func/outer.hpp>
 
@@ -20,7 +22,7 @@ ndt::type nd::functional::outer_make_type(const arrfunc_type *child_tp)
 intptr_t nd::functional::outer_instantiate(
     const arrfunc_type_data *child, const arrfunc_type *child_tp, void *ckb,
     intptr_t ckb_offset, const ndt::type &dst_tp, const char *dst_arrmeta,
-    const ndt::type *src_tp, const char *const *,
+    const ndt::type *src_tp, const char *const *src_arrmeta,
     dynd::kernel_request_t kernreq, const eval::eval_context *ectx,
     const dynd::nd::array &kwds,
     const std::map<dynd::nd::string, ndt::type> &tp_vars)
@@ -30,33 +32,45 @@ intptr_t nd::functional::outer_instantiate(
     ndim += src_tp[i].get_ndim();
   }
 
-  std::vector<ndt::type> new_src_tp;
+  std::vector<ndt::type> new_src_tp(child_tp->get_npos());
+  std::vector<const char *> new_src_arrmeta;
+
+  arrmeta_holder *new_src_arrmeta_holder = new arrmeta_holder[child_tp->get_npos()];
   for (intptr_t i = 0, j = 0; i < child_tp->get_npos(); ++i) {
-    ndt::type tp = src_tp[i].with_new_axis(0, j);
-    tp = tp.with_new_axis(tp.get_ndim(), ndim - tp.get_ndim());
-    new_src_tp.push_back(tp);
-    j += src_tp[i].get_ndim();
+    ndt::type old_tp = src_tp[i];
+    new_src_tp[i] = old_tp.with_new_axis(0, j);
+    new_src_tp[i] = new_src_tp[i].with_new_axis(new_src_tp[i].get_ndim(), ndim - new_src_tp[i].get_ndim());
+    ndt::type new_tp = new_src_tp[i];
+
+    new (new_src_arrmeta_holder + i) arrmeta_holder(new_tp);
+    char *new_arrmeta = new_src_arrmeta_holder[i].get();
+
+    intptr_t k;
+    for (k = 0; k < j; ++k) {
+      size_stride_t *smd = reinterpret_cast<size_stride_t *>(new_arrmeta);
+      smd->dim_size = 1;
+      smd->stride = 0;
+      new_tp = new_tp.get_type_at_dimension(&new_arrmeta, 1);
+    }
+    j += old_tp.get_ndim();
+    for (; old_tp.get_ndim(); ++k) {
+      new_tp.extended<base_dim_type>()->arrmeta_copy_construct_onedim(
+          new_arrmeta, src_arrmeta[i], NULL);
+      old_tp = old_tp.get_type_at_dimension(const_cast<char **>(src_arrmeta + i), 1);
+      new_tp = new_tp.get_type_at_dimension(&new_arrmeta, 1);
+    }
+    for (; new_tp.get_ndim();) {
+      size_stride_t *smd = reinterpret_cast<size_stride_t *>(new_arrmeta);
+      smd->dim_size = 1;
+      smd->stride = 0;
+      new_tp = new_tp.get_type_at_dimension(&new_arrmeta, 1);
+    }
+
+    new_src_arrmeta.push_back(new_src_arrmeta_holder[i].get());
   }
 
-  size_stride_t new_src_arrmeta0[2];
-  new_src_arrmeta0[0].dim_size = 2;
-  new_src_arrmeta0[0].stride = sizeof(int);
-  new_src_arrmeta0[1].dim_size = 1;
-  new_src_arrmeta0[1].stride = 0;
-
-  size_stride_t new_src_arrmeta1[2];
-  new_src_arrmeta1[1].dim_size = 2;
-  new_src_arrmeta1[1].stride = sizeof(int);
-  new_src_arrmeta1[0].dim_size = 1;
-  new_src_arrmeta1[0].stride = 0;
-
-  char *new_src_arrmeta[2] = {reinterpret_cast<char *>(new_src_arrmeta0), reinterpret_cast<char *>(new_src_arrmeta1)};
-
-//  std::cout << new_src_tp[0] << std::endl;
-//  std::cout << new_src_tp[1] << std::endl;
-
   return elwise_instantiate(child, child_tp, ckb, ckb_offset, dst_tp, dst_arrmeta,
-                            new_src_tp.data(), new_src_arrmeta, kernreq, ectx, kwds, tp_vars);
+                            new_src_tp.data(), new_src_arrmeta.data(), kernreq, ectx, kwds, tp_vars);
 }
 
 int nd::functional::outer_resolve_dst_type_with_child(
