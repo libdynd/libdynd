@@ -236,7 +236,7 @@ struct index_proxy<index_sequence<I0>> {
   template <typename F, typename... A>
   static void for_each(F f, A &&... a)
   {
-#ifdef _MSC_VER
+#if defined(_MSC_VER) && (_MSC_VER == 1800) && !defined(__CUDACC__)
     f.operator()<I0>(std::forward<A>(a)...);
 #else
     f.template operator()<I0>(std::forward<A>(a)...);
@@ -254,7 +254,7 @@ template <size_t I0, size_t... I>
 struct index_proxy<index_sequence<I0, I...>> {
   enum { size = index_sequence<I0, I...>::size };
 
-#if !(defined(_MSC_VER) && _MSC_VER == 1800)
+#if !(defined(_MSC_VER) && (_MSC_VER == 1800) && !defined(__CUDACC__))
   template <typename R, typename... A>
   static R make(A &&... a)
   {
@@ -334,7 +334,7 @@ struct index_proxy<index_sequence<I0, I...>> {
   template <typename F, typename... A>
   static void for_each(F f, A &&... a)
   {
-#ifdef _MSC_VER
+#if defined(_MSC_VER) && (_MSC_VER == 1800) && !defined(__CUDACC__)
     f.operator()<I0>(std::forward<A>(a)...);
 #else
     f.template operator()<I0>(std::forward<A>(a)...);
