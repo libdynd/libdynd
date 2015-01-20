@@ -253,6 +253,98 @@ namespace kernels {
 
 #undef APPLY_FUNCTION_CK
 
+  template <kernel_request_t kernreq, typename T, typename mem_func_type, int N>
+  struct apply_member_function_ck;
+
+#define APPLY_MEMBER_FUNCTION_CK(KERNREQ, ...)                                 \
+  template <typename T, typename mem_func_type, int Nsrc>                      \
+  struct apply_member_function_ck<KERNREQ, T *, mem_func_type, Nsrc>           \
+      : expr_ck<apply_member_function_ck<KERNREQ, T *, mem_func_type, Nsrc>,   \
+                KERNREQ, Nsrc>,                                                \
+        args_for<mem_func_type, Nsrc>,                                         \
+        kwds_for<mem_func_type, Nsrc> {                                        \
+    typedef apply_member_function_ck self_type;                                \
+    typedef std::pair<T *, mem_func_type> data_type;                           \
+                                                                               \
+    T *obj;                                                                    \
+    mem_func_type mem_func;                                                    \
+                                                                               \
+    __VA_ARGS__ apply_member_function_ck(T *obj, mem_func_type mem_func,       \
+                                         args_for<mem_func_type, Nsrc> args,   \
+                                         kwds_for<mem_func_type, Nsrc> kwds)   \
+        : args_for<mem_func_type, Nsrc>(args),                                 \
+          kwds_for<mem_func_type, Nsrc>(kwds), obj(obj), mem_func(mem_func)    \
+    {                                                                          \
+    }                                                                          \
+                                                                               \
+    __VA_ARGS__ void single(char *dst, char *const *src)                       \
+    {                                                                          \
+      single<typename return_of<mem_func_type>::type>(this, this, dst, src);   \
+    }                                                                          \
+                                                                               \
+    static intptr_t                                                            \
+    instantiate(const arrfunc_type_data *af_self, const arrfunc_type *af_tp,   \
+                void *ckb, intptr_t ckb_offset, const ndt::type &dst_tp,       \
+                const char *dst_arrmeta, const ndt::type *src_tp,              \
+                const char *const *src_arrmeta, kernel_request_t kernreq,      \
+                const eval::eval_context *ectx, const nd::array &kwds,         \
+                const std::map<nd::string, ndt::type> &tp_vars);               \
+                                                                               \
+  private:                                                                     \
+    template <typename R, typename... A, size_t... I, typename... K,           \
+              size_t... J>                                                     \
+    __VA_ARGS__ typename std::enable_if<std::is_same<R, void>::value,          \
+                                        void>::type                            \
+    single(args<type_sequence<A...>, index_sequence<I...>> *                   \
+               DYND_IGNORE_UNUSED(args),                                       \
+           kwds<type_sequence<K...>, index_sequence<J...>> *                   \
+               DYND_IGNORE_UNUSED(kwds),                                       \
+           char *DYND_UNUSED(dst), char *const *DYND_IGNORE_UNUSED(src))       \
+    {                                                                          \
+      (obj->*mem_func)(static_cast<arg<A, I> *>(args)->get(src[I])...,         \
+                       static_cast<kwd<K, J> *>(kwds)->get()...);              \
+    }                                                                          \
+                                                                               \
+    template <typename R, typename... A, size_t... I, typename... K,           \
+              size_t... J>                                                     \
+    __VA_ARGS__ typename std::enable_if<!std::is_same<R, void>::value,         \
+                                        void>::type                            \
+    single(args<type_sequence<A...>, index_sequence<I...>> *                   \
+               DYND_IGNORE_UNUSED(args),                                       \
+           kwds<type_sequence<K...>, index_sequence<J...>> *                   \
+               DYND_IGNORE_UNUSED(kwds),                                       \
+           char *dst, char *const *DYND_IGNORE_UNUSED(src))                    \
+    {                                                                          \
+      *reinterpret_cast<R *>(dst) =                                            \
+          (obj->*mem_func)(static_cast<arg<A, I> *>(args)->get(src[I])...,     \
+                           static_cast<kwd<K, J> *>(kwds)->get()...);          \
+    }                                                                          \
+  }
+
+  APPLY_MEMBER_FUNCTION_CK(kernel_request_host);
+
+  template <typename T, typename mem_func_type, int Nsrc>
+  intptr_t
+  apply_member_function_ck<kernel_request_host, T *, mem_func_type, Nsrc>::
+      instantiate(const arrfunc_type_data *self,
+                  const arrfunc_type *DYND_UNUSED(self_tp), void *ckb,
+                  intptr_t ckb_offset, const ndt::type &DYND_UNUSED(dst_tp),
+                  const char *DYND_UNUSED(dst_arrmeta), const ndt::type *src_tp,
+                  const char *const *src_arrmeta, kernel_request_t kernreq,
+                  const eval::eval_context *DYND_UNUSED(ectx),
+                  const nd::array &kwds,
+                  const std::map<nd::string, ndt::type> &DYND_UNUSED(tp_vars))
+  {
+    self_type::create(ckb, kernreq, ckb_offset,
+                      self->get_data_as<data_type>()->first,
+                      self->get_data_as<data_type>()->second,
+                      args_for<mem_func_type, Nsrc>(src_tp, src_arrmeta, kwds),
+                      kwds_for<mem_func_type, Nsrc>(kwds));
+    return ckb_offset;
+  }
+
+#undef APPLY_MEMBER_FUNCTION_CK
+
   template <kernel_request_t kernreq, typename func_type, int Nsrc>
   struct apply_callable_ck;
 
