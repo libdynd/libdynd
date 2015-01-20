@@ -24,8 +24,7 @@ namespace nd {
                                          arity_of<func_type>::value -
                                              sizeof...(T)> ck_type;
 
-
-// as_arrfunc<ck_type>(names...)
+      // as_arrfunc<ck_type>(names...)
       ndt::type self_tp =
           ndt::make_arrfunc<typename funcproto_of<func_type>::type>(
               std::forward<T>(names)...);
@@ -100,6 +99,27 @@ namespace nd {
     arrfunc apply(func_type *func, T &&... names)
     {
       return apply<kernel_request_host>(func, std::forward<T>(names)...);
+    }
+
+    template <kernel_request_t kernreq, typename T, typename R, typename... A,
+              typename... S>
+    arrfunc apply(T *obj, R (T::*mem_func)(A...), S &&... names)
+    {
+      typedef kernels::apply_member_function_ck<
+          kernreq, T *, R (T::*)(A...), sizeof...(A) - sizeof...(S)> ck_type;
+
+      ndt::type self_tp = ndt::make_arrfunc<
+          kernreq, typename funcproto_of<R (T::*)(A...)>::type>(
+          std::forward<S>(names)...);
+
+      return as_arrfunc<ck_type>(self_tp, typename ck_type::data_type(obj, mem_func));
+    }
+
+    template <typename O, typename R, typename... A, typename... T>
+    arrfunc apply(O *obj, R (O::*mem_func)(A...), T &&... names)
+    {
+      return apply<kernel_request_host>(obj, mem_func,
+                                        std::forward<T>(names)...);
     }
 
     /**

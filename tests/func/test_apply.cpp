@@ -353,6 +353,22 @@ TEST(Apply, FunctionWithKeywords)
 #endif
 }
 
+struct struct0 {
+  int func0(int x, int y, int z) {
+    return x + y * z;
+  }
+};
+
+TEST(Apply, MemberFunction)
+{
+  struct0 *s0 = new struct0;  
+
+  nd::arrfunc af = nd::functional::apply(s0, &struct0::func0);
+  EXPECT_ARR_EQ(nd::array(7), af(1, 2, 3));
+
+  delete s0;
+}
+
 TYPED_TEST_P(Apply, Callable)
 {
   nd::arrfunc af;
