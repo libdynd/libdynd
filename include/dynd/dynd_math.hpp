@@ -5,7 +5,7 @@
 
 #pragma once
 
-#include <dynd/types/dynd_complex.hpp>
+#include <dynd/types/complex.hpp>
 
 namespace dynd {
 
