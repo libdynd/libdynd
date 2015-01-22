@@ -5,7 +5,7 @@
 
 #pragma once
 
-#include <dynd/types/dynd_complex.hpp>
+#include <dynd/types/complex.hpp>
 
 namespace dynd {
 
@@ -49,7 +49,7 @@ template <typename T>
 T dynd_1_div_sqrt_2(); // 1 / sqrt(2)
 
 template <typename T>
-dynd_complex<T> dynd_i(); // dynd_complex<T>(0, 1)
+complex<T> dynd_i(); // complex<T>(0, 1)
 
 template <>
 inline float dynd_e<float>() {
@@ -117,8 +117,8 @@ inline float dynd_1_div_sqrt_2<float>() {
 }
 
 template <>
-inline dynd_complex<float> dynd_i<float>() {
-    return dynd_complex<float>(0.0f, 1.0f);
+inline complex<float> dynd_i<float>() {
+    return complex<float>(0.0f, 1.0f);
 }
 
 template <>
@@ -187,8 +187,8 @@ inline double dynd_1_div_sqrt_2<double>() {
 }
 
 template <>
-inline dynd_complex<double> dynd_i<double>() {
-    return dynd_complex<double>(0.0, 1.0);
+inline complex<double> dynd_i<double>() {
+    return complex<double>(0.0, 1.0);
 }
 
 } // namespace dynd

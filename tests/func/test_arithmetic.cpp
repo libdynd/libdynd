@@ -244,14 +244,14 @@ TYPED_TEST_P(Arithmetic, ComplexScalar)
   a = TestFixture::To(v0);
 
   // A complex scalar
-  c = a + TestFixture::To(dynd_complex<double>(1, 2));
-  EXPECT_EQ(dynd_complex<double>(2, 2), c(0).as<dynd_complex<double>>());
-  EXPECT_EQ(dynd_complex<double>(3, 2), c(1).as<dynd_complex<double>>());
-  EXPECT_EQ(dynd_complex<double>(4, 2), c(2).as<dynd_complex<double>>());
-  c = TestFixture::To(dynd_complex<double>(0, -1)) * a;
-  EXPECT_EQ(dynd_complex<double>(0, -1), c(0).as<dynd_complex<double>>());
-  EXPECT_EQ(dynd_complex<double>(0, -2), c(1).as<dynd_complex<double>>());
-  EXPECT_EQ(dynd_complex<double>(0, -3), c(2).as<dynd_complex<double>>());
+  c = a + TestFixture::To(dynd::complex<double>(1, 2));
+  EXPECT_EQ(dynd::complex<double>(2, 2), c(0).as<dynd::complex<double>>());
+  EXPECT_EQ(dynd::complex<double>(3, 2), c(1).as<dynd::complex<double>>());
+  EXPECT_EQ(dynd::complex<double>(4, 2), c(2).as<dynd::complex<double>>());
+  c = TestFixture::To(dynd::complex<double>(0, -1)) * a;
+  EXPECT_EQ(dynd::complex<double>(0, -1), c(0).as<dynd::complex<double>>());
+  EXPECT_EQ(dynd::complex<double>(0, -2), c(1).as<dynd::complex<double>>());
+  EXPECT_EQ(dynd::complex<double>(0, -3), c(2).as<dynd::complex<double>>());
 }
 
 REGISTER_TYPED_TEST_CASE_P(Arithmetic, SimpleBroadcast, StridedScalarBroadcast,

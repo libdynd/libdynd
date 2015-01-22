@@ -68,12 +68,12 @@ intptr_t kernels::make_builtin_sum_reduction_ckernel(
             break;
         case complex_float32_type_id:
             ckp->set_expr_function<
-                sum_reduction<dynd_complex<float>, dynd_complex<float> > >(
+                sum_reduction<complex<float>, complex<float> > >(
                 kernreq);
             break;
         case complex_float64_type_id:
             ckp->set_expr_function<
-                sum_reduction<dynd_complex<double>, dynd_complex<double> > >(
+                sum_reduction<complex<double>, complex<double> > >(
                 kernreq);
             break;
         default: {

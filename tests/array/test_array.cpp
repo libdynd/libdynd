@@ -75,11 +75,11 @@ TEST(Array, FromValueConstructor) {
     EXPECT_EQ(ndt::make_type<double>(), a.get_type());
     EXPECT_EQ((uint32_t) nd::read_access_flag | nd::immutable_access_flag, a.get_access_flags());
     // Complex
-    a = nd::array(dynd_complex<float>(1,1));
-    EXPECT_EQ(ndt::make_type<dynd_complex<float> >(), a.get_type());
+    a = nd::array(dynd::complex<float>(1,1));
+    EXPECT_EQ(ndt::make_type<dynd::complex<float> >(), a.get_type());
     EXPECT_EQ((uint32_t) nd::read_access_flag | nd::immutable_access_flag, a.get_access_flags());
-    a = nd::array(dynd_complex<double>(1,1));
-    EXPECT_EQ(ndt::make_type<dynd_complex<double> >(), a.get_type());
+    a = nd::array(dynd::complex<double>(1,1));
+    EXPECT_EQ(ndt::make_type<dynd::complex<double> >(), a.get_type());
     EXPECT_EQ((uint32_t) nd::read_access_flag | nd::immutable_access_flag, a.get_access_flags());
 }
 
@@ -126,11 +126,11 @@ TEST(Array, FromValueConstructorRW) {
     EXPECT_EQ(ndt::make_type<double>(), a.get_type());
     EXPECT_EQ(nd::readwrite_access_flags, a.get_access_flags());
     // Complex
-    a = nd::array_rw(dynd_complex<float>(1,1));
-    EXPECT_EQ(ndt::make_type<dynd_complex<float> >(), a.get_type());
+    a = nd::array_rw(dynd::complex<float>(1,1));
+    EXPECT_EQ(ndt::make_type<dynd::complex<float> >(), a.get_type());
     EXPECT_EQ(nd::readwrite_access_flags, a.get_access_flags());
-    a = nd::array_rw(dynd_complex<double>(1,1));
-    EXPECT_EQ(ndt::make_type<dynd_complex<double> >(), a.get_type());
+    a = nd::array_rw(dynd::complex<double>(1,1));
+    EXPECT_EQ(ndt::make_type<dynd::complex<double> >(), a.get_type());
     EXPECT_EQ(nd::readwrite_access_flags, a.get_access_flags());
 }
 
@@ -375,13 +375,13 @@ TEST(Array, FloatScalarConstructor) {
     ss.str(""); ss << a;
     EXPECT_EQ("array(3.5,\n      type=\"float64\")", ss.str());
 
-    a = dynd_complex<float>(3.14f, 1.0f);
+    a = dynd::complex<float>(3.14f, 1.0f);
     EXPECT_TRUE(a.is_scalar());
-    EXPECT_EQ(ndt::make_type<dynd_complex<float> >(), a.get_type());
+    EXPECT_EQ(ndt::make_type<dynd::complex<float> >(), a.get_type());
 
-    a = dynd_complex<double>(3.14, 1.0);
+    a = dynd::complex<double>(3.14, 1.0);
     EXPECT_TRUE(a.is_scalar());
-    EXPECT_EQ(ndt::make_type<dynd_complex<double> >(), a.get_type());
+    EXPECT_EQ(ndt::make_type<dynd::complex<double> >(), a.get_type());
 }
 
 TEST(Array, StdVectorConstructor) {

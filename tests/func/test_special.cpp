@@ -208,7 +208,7 @@ TEST(Special, HankelH1) {
 
     for (int i = 0; i < size; ++i) {
         EXPECT_EQ_RELERR(
-            vals(i, 2).as<dynd_complex<double> >(),
+            vals(i, 2).as<dynd::complex<double> >(),
             hankel_h1(vals(i, 0).as<double>(), vals(i, 1).as<double>()),
             REL_ERROR_MAX);
     }
@@ -220,7 +220,7 @@ TEST(Special, SphericalHankelH1) {
 
     for (int i = 0; i < size; ++i) {
         EXPECT_EQ_RELERR(
-            vals(i, 2).as<dynd_complex<double> >(),
+            vals(i, 2).as<dynd::complex<double> >(),
             sph_hankel_h1(vals(i, 0).as<double>(), vals(i, 1).as<double>()),
             REL_ERROR_MAX);
     }
@@ -232,7 +232,7 @@ TEST(Special, HankelH2) {
 
     for (int i = 0; i < size; ++i) {
         EXPECT_EQ_RELERR(
-            vals(i, 2).as<dynd_complex<double> >(),
+            vals(i, 2).as<dynd::complex<double> >(),
             hankel_h2(vals(i, 0).as<double>(), vals(i, 1).as<double>()),
             REL_ERROR_MAX);
     }
@@ -244,7 +244,7 @@ TEST(Special, SphericalHankelH2) {
 
     for (int i = 0; i < size; ++i) {
         EXPECT_EQ_RELERR(
-            vals(i, 2).as<dynd_complex<double> >(),
+            vals(i, 2).as<dynd::complex<double> >(),
             sph_hankel_h2(vals(i, 0).as<double>(), vals(i, 1).as<double>()),
             REL_ERROR_MAX);
     }

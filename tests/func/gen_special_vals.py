@@ -17,7 +17,7 @@ def make_special_vals(func_name, *args):
         except TypeError:
             cls = type(obj)
             if ((cls == complex) or (cls == mpc)):
-                return 'dynd::dynd_complex<double>({}, {})'.format(cstr(obj.real), cstr(obj.imag))
+                return 'dynd::complex<double>({}, {})'.format(cstr(obj.real), cstr(obj.imag))
 
             return nstr(obj, pdps)
 
@@ -28,7 +28,7 @@ def make_special_vals(func_name, *args):
         elif ((cls == float) or (cls == mpf)):
             return 'double'
         elif ((cls == complex) or (cls == mpc)):
-            return 'dynd::dynd_complex<double>'
+            return 'dynd::complex<double>'
 
         return ctype(obj[0])
 

@@ -13,7 +13,7 @@
 #include <dynd/types/dynd_uint128.hpp>
 #include <dynd/types/dynd_float16.hpp>
 #include <dynd/types/dynd_float128.hpp>
-#include <dynd/types/dynd_complex.hpp>
+#include <dynd/types/complex.hpp>
 
 namespace dynd {
 
@@ -258,8 +258,8 @@ public:
 
   // Special case complex conversion to avoid ambiguous overload
   template <class T>
-  DYND_CUDA_HOST_DEVICE dynd_bool(dynd_complex<T> value)
-      : m_value(value != dynd_complex<T>(0))
+  DYND_CUDA_HOST_DEVICE dynd_bool(complex<T> value)
+      : m_value(value != complex<T>(0))
   {
   }
 
@@ -371,11 +371,11 @@ struct type_id_of<dynd_float128> {
   enum { value = float128_type_id };
 };
 template <>
-struct type_id_of<dynd_complex<float>> {
+struct type_id_of<complex<float>> {
   enum { value = complex_float32_type_id };
 };
 template <>
-struct type_id_of<dynd_complex<double>> {
+struct type_id_of<complex<double>> {
   enum { value = complex_float64_type_id };
 };
 template <>
@@ -475,7 +475,7 @@ struct dynd_kind_of<dynd_float128> {
   static const type_kind_t value = real_kind;
 };
 template <typename T>
-struct dynd_kind_of<dynd_complex<T>> {
+struct dynd_kind_of<complex<T>> {
   static const type_kind_t value = complex_kind;
 };
 
@@ -558,11 +558,11 @@ struct is_dynd_scalar<dynd_float128> {
   enum { value = true };
 };
 template <>
-struct is_dynd_scalar<dynd_complex<float>> {
+struct is_dynd_scalar<complex<float>> {
   enum { value = true };
 };
 template <>
-struct is_dynd_scalar<dynd_complex<double>> {
+struct is_dynd_scalar<complex<double>> {
   enum { value = true };
 };
 // Allow std::complex as scalars equivalent to dynd_complex

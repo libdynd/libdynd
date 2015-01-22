@@ -147,19 +147,19 @@ get_property_kernel_complex_float64_imag(char *dst, char *const *src,
 static void get_or_set_property_kernel_complex_float32_conj(
     char *dst, char *const *src, ckernel_prefix *DYND_UNUSED(self))
 {
-    dynd_complex<float> value =
-        **reinterpret_cast<dynd_complex<float> *const *>(src);
-    *reinterpret_cast<dynd_complex<float> *>(dst) =
-        dynd_complex<float>(value.real(), -value.imag());
+    dynd::complex<float> value =
+        **reinterpret_cast<dynd::complex<float> *const *>(src);
+    *reinterpret_cast<dynd::complex<float> *>(dst) =
+        dynd::complex<float>(value.real(), -value.imag());
 }
 
 static void get_or_set_property_kernel_complex_float64_conj(
     char *dst, char *const *src, ckernel_prefix *DYND_UNUSED(self))
 {
-    dynd_complex<double> value =
-        **reinterpret_cast<dynd_complex<double> *const *>(src);
-    *reinterpret_cast<dynd_complex<double> *>(dst) =
-        dynd_complex<double>(value.real(), -value.imag());
+    dynd::complex<double> value =
+        **reinterpret_cast<dynd::complex<double> *const *>(src);
+    *reinterpret_cast<dynd::complex<double> *>(dst) =
+        dynd::complex<double>(value.real(), -value.imag());
 }
 
 size_t dynd::make_builtin_type_elwise_property_getter_kernel(

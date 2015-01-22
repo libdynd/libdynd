@@ -88,28 +88,28 @@ inline double riccati_bessel_y(double nu, double x) {
     return -std::sqrt(dynd::dynd_pi_div_2<double>() * x) * bessel_y(nu + 0.5, x);
 }
 
-inline dynd_complex<double> hankel_h1(double nu, double x) {
-    return dynd_complex<double>(bessel_j(nu, x), bessel_y(nu, x));
+inline complex<double> hankel_h1(double nu, double x) {
+    return complex<double>(bessel_j(nu, x), bessel_y(nu, x));
 }
 
-inline dynd_complex<double> sph_hankel_h1(double nu, double x) {
-    return dynd_complex<double>(sph_bessel_j(nu, x), sph_bessel_y(nu, x));
+inline complex<double> sph_hankel_h1(double nu, double x) {
+    return complex<double>(sph_bessel_j(nu, x), sph_bessel_y(nu, x));
 }
 
-inline dynd_complex<double> riccati_hankel_h1(double nu, double x) {
-    return dynd_complex<double>(riccati_bessel_j(nu, x), -riccati_bessel_y(nu, x));
+inline complex<double> riccati_hankel_h1(double nu, double x) {
+    return complex<double>(riccati_bessel_j(nu, x), -riccati_bessel_y(nu, x));
 }
 
-inline dynd_complex<double> hankel_h2(double nu, double x) {
-    return dynd_complex<double>(bessel_j(nu, x), -bessel_y(nu, x));
+inline complex<double> hankel_h2(double nu, double x) {
+    return complex<double>(bessel_j(nu, x), -bessel_y(nu, x));
 }
 
-inline dynd_complex<double> sph_hankel_h2(double nu, double x) {
-    return dynd_complex<double>(sph_bessel_j(nu, x), -sph_bessel_y(nu, x));
+inline complex<double> sph_hankel_h2(double nu, double x) {
+    return complex<double>(sph_bessel_j(nu, x), -sph_bessel_y(nu, x));
 }
 
-inline dynd_complex<double> riccati_hankel_h2(double nu, double x) {
-    return dynd_complex<double>(riccati_bessel_j(nu, x), riccati_bessel_y(nu, x));
+inline complex<double> riccati_hankel_h2(double nu, double x) {
+    return complex<double>(riccati_bessel_j(nu, x), riccati_bessel_y(nu, x));
 }
 
 inline double struve_h(double nu, double x) {
