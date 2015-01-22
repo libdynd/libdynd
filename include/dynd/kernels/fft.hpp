@@ -129,15 +129,15 @@ namespace kernels {
   struct fftw_ck : expr_ck<fftw_ck<fftw_dst_type, fftw_src_type, sign>,
                            kernel_request_host, 1> {
     typedef typename std::conditional<
-        std::is_same<fftw_dst_type, fftw_complex>::value, dynd_complex<double>,
+        std::is_same<fftw_dst_type, fftw_complex>::value, complex<double>,
         typename std::conditional<
             std::is_same<fftw_dst_type, fftwf_complex>::value,
-            dynd_complex<float>, fftw_dst_type>::type>::type dst_type;
+            complex<float>, fftw_dst_type>::type>::type dst_type;
     typedef typename std::conditional<
-        std::is_same<fftw_src_type, fftw_complex>::value, dynd_complex<double>,
+        std::is_same<fftw_src_type, fftw_complex>::value, complex<double>,
         typename std::conditional<
             std::is_same<fftw_src_type, fftwf_complex>::value,
-            dynd_complex<float>, fftw_src_type>::type>::type src_type;
+            complex<float>, fftw_src_type>::type>::type src_type;
 
     typedef typename detail::fftw_plan<fftw_dst_type, fftw_src_type>::type
         plan_type;
@@ -263,7 +263,7 @@ namespace kernels {
                                 2 +
                             1;
       dst_tp = ndt::make_fixed_dim(ndim, src_shape.get(),
-                                   ndt::make_type<dynd_complex<double>>());
+                                   ndt::make_type<complex<double>>());
 
       return 0;
     }
@@ -287,7 +287,7 @@ namespace kernels {
         dst_tp = ndt::make_fixed_dim(
             shape.get_dim_size(),
             reinterpret_cast<const intptr_t *>(shape.get_readonly_originptr()),
-            ndt::make_type<dynd_complex<double>>());
+            ndt::make_type<complex<double>>());
       }
 
       return 0;

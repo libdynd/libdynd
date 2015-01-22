@@ -195,8 +195,8 @@ size_t dynd::make_pod_typed_data_assignment_kernel(void *ckb,
   }
 }
 
-static kernels::create_t assign_create[builtin_type_id_count -
-                                       2][builtin_type_id_count - 2][4] = {
+static kernels::create_t
+    assign_create[builtin_type_id_count - 2][builtin_type_id_count - 2][4] = {
 #define SINGLE_OPERATION_PAIR_LEVEL(dst_type, src_type, errmode)               \
   &kernels::create<kernels::assign_ck<dst_type, src_type, errmode>>
 
@@ -225,19 +225,19 @@ static kernels::create_t assign_create[builtin_type_id_count -
         ERROR_MODE_LEVEL(dst_type, dynd_float16),                              \
         ERROR_MODE_LEVEL(dst_type, float), ERROR_MODE_LEVEL(dst_type, double), \
         ERROR_MODE_LEVEL(dst_type, dynd_float128),                             \
-        ERROR_MODE_LEVEL(dst_type, dynd_complex<float>),                       \
-        ERROR_MODE_LEVEL(dst_type, dynd_complex<double>)                       \
+        ERROR_MODE_LEVEL(dst_type, dynd::complex<float>),                            \
+        ERROR_MODE_LEVEL(dst_type, dynd::complex<double>)                            \
   }
 
-    SRC_TYPE_LEVEL(dynd_bool),           SRC_TYPE_LEVEL(int8_t),
-    SRC_TYPE_LEVEL(int16_t),             SRC_TYPE_LEVEL(int32_t),
-    SRC_TYPE_LEVEL(int64_t),             SRC_TYPE_LEVEL(dynd_int128),
-    SRC_TYPE_LEVEL(uint8_t),             SRC_TYPE_LEVEL(uint16_t),
-    SRC_TYPE_LEVEL(uint32_t),            SRC_TYPE_LEVEL(uint64_t),
-    SRC_TYPE_LEVEL(dynd_uint128),        SRC_TYPE_LEVEL(dynd_float16),
-    SRC_TYPE_LEVEL(float),               SRC_TYPE_LEVEL(double),
-    SRC_TYPE_LEVEL(dynd_float128),       SRC_TYPE_LEVEL(dynd_complex<float>),
-    SRC_TYPE_LEVEL(dynd_complex<double>)
+        SRC_TYPE_LEVEL(dynd_bool),      SRC_TYPE_LEVEL(int8_t),
+        SRC_TYPE_LEVEL(int16_t),        SRC_TYPE_LEVEL(int32_t),
+        SRC_TYPE_LEVEL(int64_t),        SRC_TYPE_LEVEL(dynd_int128),
+        SRC_TYPE_LEVEL(uint8_t),        SRC_TYPE_LEVEL(uint16_t),
+        SRC_TYPE_LEVEL(uint32_t),       SRC_TYPE_LEVEL(uint64_t),
+        SRC_TYPE_LEVEL(dynd_uint128),   SRC_TYPE_LEVEL(dynd_float16),
+        SRC_TYPE_LEVEL(float),          SRC_TYPE_LEVEL(double),
+        SRC_TYPE_LEVEL(dynd_float128),  SRC_TYPE_LEVEL(dynd::complex<float>),
+        SRC_TYPE_LEVEL(dynd::complex<double>)
 #undef SRC_TYPE_LEVEL
 #undef ERROR_MODE_LEVEL
 #undef SINGLE_OPERATION_PAIR_LEVEL
@@ -435,7 +435,8 @@ intptr_t dynd::make_cuda_to_device_builtin_type_assignment_kernel(
     const ndt::type &dst_tp, const char *DYND_UNUSED(dst_arrmeta),
     const ndt::type *src_tp, const char *const *DYND_UNUSED(src_arrmeta),
     kernel_request_t kernreq, const eval::eval_context *ectx,
-    const nd::array &DYND_UNUSED(kwds), const std::map<nd::string, ndt::type> &DYND_UNUSED(tp_vars))
+    const nd::array &DYND_UNUSED(kwds),
+    const std::map<nd::string, ndt::type> &DYND_UNUSED(tp_vars))
 {
   assign_error_mode errmode = ectx->errmode;
 
@@ -465,7 +466,8 @@ intptr_t dynd::make_cuda_from_device_builtin_type_assignment_kernel(
     const ndt::type &dst_tp, const char *DYND_UNUSED(dst_arrmeta),
     const ndt::type *src_tp, const char *const *DYND_UNUSED(src_arrmeta),
     kernel_request_t kernreq, const eval::eval_context *ectx,
-    const nd::array &DYND_UNUSED(kwds), const std::map<nd::string, ndt::type> &DYND_UNUSED(tp_vars))
+    const nd::array &DYND_UNUSED(kwds),
+    const std::map<nd::string, ndt::type> &DYND_UNUSED(tp_vars))
 {
   assign_error_mode errmode = ectx->errmode;
 

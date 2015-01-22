@@ -245,7 +245,7 @@ struct assign_na<double> {
 // NA is two float NAs
 
 template <>
-struct is_avail<dynd_complex<float>> {
+struct is_avail<dynd::complex<float>> {
   static void single(char *dst, char *const *src,
                      ckernel_prefix *DYND_UNUSED(self))
   {
@@ -271,7 +271,7 @@ struct is_avail<dynd_complex<float>> {
 };
 
 template <>
-struct assign_na<dynd_complex<float>> {
+struct assign_na<dynd::complex<float>> {
   static void single(char *dst, char *const *DYND_UNUSED(src),
                      ckernel_prefix *DYND_UNUSED(strided))
   {
@@ -296,7 +296,7 @@ struct assign_na<dynd_complex<float>> {
 // NA is two double NAs
 
 template <>
-struct is_avail<dynd_complex<double>> {
+struct is_avail<dynd::complex<double>> {
   static void single(char *dst, char *const *src,
                      ckernel_prefix *DYND_UNUSED(self))
   {
@@ -323,7 +323,7 @@ struct is_avail<dynd_complex<double>> {
 };
 
 template <>
-struct assign_na<dynd_complex<double>> {
+struct assign_na<dynd::complex<double>> {
   static void single(char *dst, char *const *DYND_UNUSED(src),
                      ckernel_prefix *DYND_UNUSED(strided))
   {
@@ -541,10 +541,10 @@ intptr_t kernels::fixed_dim_is_avail_ck::instantiate(
     ckp->set_expr_function<is_avail<double>>(kernreq);
     break;
   case complex_float32_type_id:
-    ckp->set_expr_function<is_avail<dynd_complex<float>>>(kernreq);
+    ckp->set_expr_function<is_avail<dynd::complex<float>>>(kernreq);
     break;
   case complex_float64_type_id:
-    ckp->set_expr_function<is_avail<dynd_complex<double>>>(kernreq);
+    ckp->set_expr_function<is_avail<dynd::complex<double>>>(kernreq);
     break;
   default:
     throw type_error("fixed_dim_is_avail: expected built-in type");
@@ -591,10 +591,10 @@ intptr_t kernels::fixed_dim_assign_na_ck::instantiate(
     ckp->set_expr_function<assign_na<double>>(kernreq);
     break;
   case complex_float32_type_id:
-    ckp->set_expr_function<assign_na<dynd_complex<float>>>(kernreq);
+    ckp->set_expr_function<assign_na<dynd::complex<float>>>(kernreq);
     break;
   case complex_float64_type_id:
-    ckp->set_expr_function<assign_na<dynd_complex<double>>>(kernreq);
+    ckp->set_expr_function<assign_na<dynd::complex<double>>>(kernreq);
     break;
   default:
     throw type_error("fixed_dim_assign_na: expected built-in type");
@@ -613,8 +613,8 @@ const nd::array &kernels::get_option_builtin_nafunc(type_id_t tid)
   static nd::array i128na = nafunc<dynd_int128>::get();
   static nd::array f32na = nafunc<float>::get();
   static nd::array f64na = nafunc<double>::get();
-  static nd::array cf32na = nafunc<dynd_complex<float>>::get();
-  static nd::array cf64na = nafunc<dynd_complex<double>>::get();
+  static nd::array cf32na = nafunc<dynd::complex<float>>::get();
+  static nd::array cf64na = nafunc<dynd::complex<double>>::get();
   static nd::array vna = nafunc<void>::get();
   static nd::array nullarr;
   switch (tid) {
@@ -655,8 +655,8 @@ const nd::array &kernels::get_option_builtin_pointer_nafunc(type_id_t tid)
   static nd::array i128na = nafunc<dynd_int128 *>::get();
   static nd::array f32na = nafunc<float *>::get();
   static nd::array f64na = nafunc<double *>::get();
-  static nd::array cf32na = nafunc<dynd_complex<float> *>::get();
-  static nd::array cf64na = nafunc<dynd_complex<double> *>::get();
+  static nd::array cf32na = nafunc<dynd::complex<float> *>::get();
+  static nd::array cf64na = nafunc<dynd::complex<double> *>::get();
   static nd::array nullarr;
   switch (tid) {
   case bool_type_id:

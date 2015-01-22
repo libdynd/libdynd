@@ -169,25 +169,25 @@ static void linspace_specialization(double start, double stop, intptr_t count, n
     }
 }
 
-static void linspace_specialization(dynd_complex<float> start, dynd_complex<float> stop, intptr_t count, nd::array& result)
+static void linspace_specialization(dynd::complex<float> start, dynd::complex<float> stop, intptr_t count, nd::array& result)
 {
     intptr_t stride = result.get_strides()[0];
     char *dst = result.get_readwrite_originptr();
     for (intptr_t i = 0; i < count; ++i, dst += stride) {
-        dynd_complex<double> val = (double(count - i - 1) * dynd_complex<double>(start) +
-                        double(i) * dynd_complex<double>(stop)) / double(count - 1);
-        *reinterpret_cast<dynd_complex<float> *>(dst) = dynd_complex<float>(val);
+        dynd::complex<double> val = (double(count - i - 1) * dynd::complex<double>(start) +
+                        double(i) * dynd::complex<double>(stop)) / double(count - 1);
+        *reinterpret_cast<dynd::complex<float> *>(dst) = dynd::complex<float>(val);
     }
 }
 
-static void linspace_specialization(dynd_complex<double> start, dynd_complex<double> stop, intptr_t count, nd::array& result)
+static void linspace_specialization(dynd::complex<double> start, dynd::complex<double> stop, intptr_t count, nd::array& result)
 {
     intptr_t stride = result.get_strides()[0];
     char *dst = result.get_readwrite_originptr();
     for (intptr_t i = 0; i < count; ++i, dst += stride) {
-        dynd_complex<double> val = (double(count - i - 1) * dynd_complex<double>(start) +
-                        double(i) * dynd_complex<double>(stop)) / double(count - 1);
-        *reinterpret_cast<dynd_complex<double> *>(dst) = val;
+        dynd::complex<double> val = (double(count - i - 1) * dynd::complex<double>(start) +
+                        double(i) * dynd::complex<double>(stop)) / double(count - 1);
+        *reinterpret_cast<dynd::complex<double> *>(dst) = val;
     }
 }
 
@@ -234,14 +234,14 @@ nd::array dynd::nd::linspace(const ndt::type& dt, const void *startval, const vo
         }
         case complex_float32_type_id: {
             nd::array result = nd::empty(count, dt);
-            linspace_specialization(*reinterpret_cast<const dynd_complex<float> *>(startval),
-                            *reinterpret_cast<const dynd_complex<float> *>(stopval), count, result);
+            linspace_specialization(*reinterpret_cast<const dynd::complex<float> *>(startval),
+                            *reinterpret_cast<const dynd::complex<float> *>(stopval), count, result);
             return DYND_MOVE(result);
         }
         case complex_float64_type_id: {
             nd::array result = nd::empty(count, dt);
-            linspace_specialization(*reinterpret_cast<const dynd_complex<double> *>(startval),
-                            *reinterpret_cast<const dynd_complex<double> *>(stopval), count, result);
+            linspace_specialization(*reinterpret_cast<const dynd::complex<double> *>(startval),
+                            *reinterpret_cast<const dynd::complex<double> *>(stopval), count, result);
             return DYND_MOVE(result);
         }
         default:

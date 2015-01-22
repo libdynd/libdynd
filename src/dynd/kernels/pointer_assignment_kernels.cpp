@@ -67,10 +67,10 @@ size_t dynd::make_builtin_value_to_pointer_assignment_kernel(
         value_to_pointer_ck<dynd_float128>::create(ckb, kernreq, ckb_offset);
         break;
     case complex_float32_type_id:
-        value_to_pointer_ck<dynd_complex<float> >::create(ckb, kernreq, ckb_offset);
+        value_to_pointer_ck<complex<float> >::create(ckb, kernreq, ckb_offset);
         break;
     case complex_float64_type_id:
-        value_to_pointer_ck<dynd_complex<double> >::create(ckb, kernreq, ckb_offset);
+        value_to_pointer_ck<complex<double> >::create(ckb, kernreq, ckb_offset);
         break;
     default: {
         stringstream ss;

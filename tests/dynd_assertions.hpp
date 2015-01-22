@@ -223,8 +223,8 @@ inline float rel_error(float expected, float actual)
     return fabs(1.0f - actual / expected);
 }
 
-inline float rel_error(dynd::dynd_complex<float> expected,
-                        dynd::dynd_complex<float> actual)
+inline float rel_error(dynd::complex<float> expected,
+                        dynd::complex<float> actual)
 {
     if (expected == 0.0f) {
         if (actual == 0.0f) {
@@ -246,8 +246,8 @@ inline double rel_error(double expected, double actual)
     return fabs(1.0 - actual / expected);
 }
 
-inline double rel_error(dynd::dynd_complex<double> expected,
-                        dynd::dynd_complex<double> actual)
+inline double rel_error(dynd::complex<double> expected,
+                        dynd::complex<double> actual)
 {
     if (expected == 0.0) {
         if (actual == 0.0) {
@@ -289,13 +289,13 @@ template <typename T>
 }
 
 inline ::testing::AssertionResult AssertRelErrorLE(const char *expected_expr, const char *actual_expr,
-    const char *rel_error_max_expr, float expected, dynd::dynd_complex<float> actual, float rel_error_max) {
-    return AssertRelErrorLE(expected_expr, actual_expr, rel_error_max_expr, dynd::dynd_complex<float>(expected), actual, rel_error_max);
+    const char *rel_error_max_expr, float expected, dynd::complex<float> actual, float rel_error_max) {
+    return AssertRelErrorLE(expected_expr, actual_expr, rel_error_max_expr, dynd::complex<float>(expected), actual, rel_error_max);
 }
 
 inline ::testing::AssertionResult AssertRelErrorLE(const char *expected_expr, const char *actual_expr,
-    const char *rel_error_max_expr, double expected, dynd::dynd_complex<double> actual, double rel_error_max) {
-    return AssertRelErrorLE(expected_expr, actual_expr, rel_error_max_expr, dynd::dynd_complex<double>(expected), actual, rel_error_max);
+    const char *rel_error_max_expr, double expected, dynd::complex<double> actual, double rel_error_max) {
+    return AssertRelErrorLE(expected_expr, actual_expr, rel_error_max_expr, dynd::complex<double>(expected), actual, rel_error_max);
 }
 
 #define EXPECT_EQ_RELERR(expected, actual, rel_error_max) \

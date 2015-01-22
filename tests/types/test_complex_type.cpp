@@ -154,7 +154,7 @@ TEST(ComplexDType, Create)
   ndt::type d;
 
   // complex[float32]
-  d = ndt::make_type<dynd_complex<float>>();
+  d = ndt::make_type<dynd::complex<float>>();
   EXPECT_EQ(complex_float32_type_id, d.get_type_id());
   EXPECT_EQ(complex_kind, d.get_kind());
   EXPECT_EQ(8u, d.get_data_size());
@@ -165,7 +165,7 @@ TEST(ComplexDType, Create)
   EXPECT_EQ(d, ndt::type(d.str()));
 
   // complex[float64]
-  d = ndt::make_type<dynd_complex<double>>();
+  d = ndt::make_type<dynd::complex<double>>();
   EXPECT_EQ(complex_float64_type_id, d.get_type_id());
   EXPECT_EQ(complex_kind, d.get_kind());
   EXPECT_EQ(16u, d.get_data_size());
@@ -180,29 +180,29 @@ TEST(ComplexType, CreateFromValue)
 {
   nd::array n;
 
-  n = dynd_complex<float>(1.5f, 2.0f);
-  EXPECT_EQ(n.get_type(), ndt::make_type<dynd_complex<float>>());
-  EXPECT_EQ(dynd_complex<float>(1.5f, 2.0f), n.as<dynd_complex<float>>());
+  n = dynd::complex<float>(1.5f, 2.0f);
+  EXPECT_EQ(n.get_type(), ndt::make_type<dynd::complex<float>>());
+  EXPECT_EQ(dynd::complex<float>(1.5f, 2.0f), n.as<dynd::complex<float>>());
 
-  n = dynd_complex<double>(2.5, 3.0);
-  EXPECT_EQ(n.get_type(), ndt::make_type<dynd_complex<double>>());
-  EXPECT_EQ(dynd_complex<double>(2.5, 3.0), n.as<dynd_complex<double>>());
+  n = dynd::complex<double>(2.5, 3.0);
+  EXPECT_EQ(n.get_type(), ndt::make_type<dynd::complex<double>>());
+  EXPECT_EQ(dynd::complex<double>(2.5, 3.0), n.as<dynd::complex<double>>());
 }
 
 TEST(ComplexType, Properties)
 {
   nd::array n;
 
-  n = dynd_complex<float>(1.5f, 2.0f);
+  n = dynd::complex<float>(1.5f, 2.0f);
   EXPECT_EQ(1.5f, n.p("real").as<float>());
   EXPECT_EQ(2.0f, n.p("imag").as<float>());
 
-  n = dynd_complex<double>(2.5, 3.0);
+  n = dynd::complex<double>(2.5, 3.0);
   EXPECT_EQ(2.5, n.p("real").as<double>());
   EXPECT_EQ(3.0, n.p("imag").as<double>());
 
-  complex<double> avals[3] = {complex<double>(1, 2), complex<double>(-1, 1.5),
-                              complex<double>(3, 21.75)};
+  dynd::complex<double> avals[3] = {dynd::complex<double>(1, 2), dynd::complex<double>(-1, 1.5),
+                              dynd::complex<double>(3, 21.75)};
   n = avals;
   EXPECT_EQ(1., n.p("real")(0).as<double>());
   EXPECT_EQ(2., n.p("imag")(0).as<double>());
@@ -215,25 +215,25 @@ TEST(ComplexType, Properties)
 TYPED_TEST_P(ComplexType, Arithmetic)
 {
   EXPECT_EQ(std::complex<TypeParam>(1.5, 0.5) + static_cast<TypeParam>(1),
-            dynd_complex<TypeParam>(1.5, 0.5) + 1);
+            dynd::complex<TypeParam>(1.5, 0.5) + 1);
   EXPECT_EQ(static_cast<TypeParam>(1) + std::complex<TypeParam>(1.5, 0.5),
-            1 + dynd_complex<TypeParam>(1.5, 0.5));
+            1 + dynd::complex<TypeParam>(1.5, 0.5));
 
   EXPECT_EQ(std::complex<TypeParam>(1.3, 0.7) - 1.0,
-            dynd_complex<TypeParam>(1.3, 0.7) - 1.0);
+            dynd::complex<TypeParam>(1.3, 0.7) - 1.0);
   EXPECT_EQ(1.0 - std::complex<TypeParam>(1.3, 0.7),
-            1.0 - dynd_complex<TypeParam>(1.3, 0.7));
+            1.0 - dynd::complex<TypeParam>(1.3, 0.7));
 
   EXPECT_EQ(std::complex<TypeParam>(1.5, 0.5) * 2.0,
-            dynd_complex<TypeParam>(1.5, 0.5) * 2.0);
+            dynd::complex<TypeParam>(1.5, 0.5) * 2.0);
   EXPECT_EQ(2.0 * std::complex<TypeParam>(1.5, 0.5),
-            2.0 * dynd_complex<TypeParam>(1.5, 0.5));
+            2.0 * dynd::complex<TypeParam>(1.5, 0.5));
 
   EXPECT_EQ(std::complex<TypeParam>(1.5, 0.5) / static_cast<TypeParam>(2),
-            dynd_complex<TypeParam>(1.5, 0.5) / 2.0f);
+            dynd::complex<TypeParam>(1.5, 0.5) / 2.0f);
   EXPECT_COMPLEX_DOUBLE_EQ(static_cast<TypeParam>(2) /
                                std::complex<TypeParam>(1.5, 0.5),
-                           2.0f / dynd_complex<TypeParam>(1.5, 0.5));
+                           2.0f / dynd::complex<TypeParam>(1.5, 0.5));
 }
 
 REGISTER_TYPED_TEST_CASE_P(ComplexType, Arithmetic);

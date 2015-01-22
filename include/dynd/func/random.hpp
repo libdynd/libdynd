@@ -11,7 +11,7 @@ namespace dynd {
 
 typedef type_sequence<int32_t, int64_t, uint32_t, uint64_t> integral_types;
 typedef type_sequence<float, double> real_types;
-typedef type_sequence<dynd_complex<float>, dynd_complex<double>> complex_types;
+typedef type_sequence<complex<float>, complex<double>> complex_types;
 
 typedef join<typename join<integral_types, real_types>::type,
              complex_types>::type numeric_types;
@@ -249,13 +249,13 @@ namespace kernels {
   };
 
   template <typename G>
-  struct uniform_ck<G, dynd_complex<float>>
-      : uniform_complex_ck<G, dynd_complex<float>> {
+  struct uniform_ck<G, complex<float>>
+      : uniform_complex_ck<G, complex<float>> {
   };
 
   template <typename G>
-  struct uniform_ck<G, dynd_complex<double>>
-      : uniform_complex_ck<G, dynd_complex<double>> {
+  struct uniform_ck<G, complex<double>>
+      : uniform_complex_ck<G, complex<double>> {
   };
 
 } // namespace dynd::kernels

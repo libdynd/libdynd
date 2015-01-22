@@ -193,7 +193,6 @@ set(libdynd_SRC
     src/dynd/types/datetime_parser.cpp
     src/dynd/types/datetime_type.cpp
     src/dynd/types/datetime_util.cpp
-    src/dynd/types/dynd_complex.cpp
     src/dynd/types/dynd_float16.cpp
     src/dynd/types/dynd_float128.cpp
     src/dynd/types/dynd_int128.cpp
@@ -264,7 +263,7 @@ set(libdynd_SRC
     include/dynd/types/ellipsis_dim_type.hpp
     include/dynd/types/arrfunc_type.hpp
     include/dynd/types/type_type.hpp
-    include/dynd/types/dynd_complex.hpp
+    include/dynd/types/complex.hpp
     include/dynd/types/dynd_float16.hpp
     include/dynd/types/dynd_float128.hpp
     include/dynd/types/dynd_int128.hpp
@@ -519,7 +518,6 @@ include_directories(
 if (DYND_CUDA)
     # Replace some source files with their CUDA versions
     list(REMOVE_ITEM libdynd_SRC
-        src/dynd/types/dynd_complex.cpp
         src/dynd/types/dynd_float16.cpp
         src/dynd/types/dynd_float128.cpp
         src/dynd/types/dynd_int128.cpp
@@ -533,7 +531,6 @@ if (DYND_CUDA)
         src/dynd/func/arithmetic.cu
         src/dynd/func/elwise.cu
         src/dynd/kernels/ckernel_builder.cu
-        src/dynd/types/dynd_complex.cu
         src/dynd/types/dynd_float16.cu
         src/dynd/types/dynd_float128.cu
         src/dynd/types/dynd_int128.cu

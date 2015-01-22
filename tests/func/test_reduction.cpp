@@ -75,31 +75,31 @@ TEST(Reduction, BuiltinSum_Kernel)
   ckb.reset();
   kernels::make_builtin_sum_reduction_ckernel(&ckb, 0, complex_float32_type_id,
                                               kernel_request_single);
-  dynd_complex<float> scf32 = 0,
-                      acf32[3] = {dynd_complex<float>(1.25f, -2.125f),
-                                  dynd_complex<float>(-2.5f, 1.0f),
-                                  dynd_complex<float>(12.125f, 12345.f)};
+  dynd::complex<float> scf32 = 0,
+                      acf32[3] = {dynd::complex<float>(1.25f, -2.125f),
+                                  dynd::complex<float>(-2.5f, 1.0f),
+                                  dynd::complex<float>(12.125f, 12345.f)};
   ckb((char *)&scf32, (char *)&acf32[0]);
-  EXPECT_EQ(dynd_complex<float>(1.25f, -2.125f), scf32);
+  EXPECT_EQ(dynd::complex<float>(1.25f, -2.125f), scf32);
   ckb((char *)&scf32, (char *)&acf32[1]);
-  EXPECT_EQ(dynd_complex<float>(-1.25f, -1.125f), scf32);
+  EXPECT_EQ(dynd::complex<float>(-1.25f, -1.125f), scf32);
   ckb((char *)&scf32, (char *)&acf32[2]);
-  EXPECT_EQ(dynd_complex<float>(10.875f, 12343.875f), scf32);
+  EXPECT_EQ(dynd::complex<float>(10.875f, 12343.875f), scf32);
 
   // complex[float64]
   ckb.reset();
   kernels::make_builtin_sum_reduction_ckernel(&ckb, 0, complex_float64_type_id,
                                               kernel_request_single);
-  dynd_complex<double> scf64 = 0,
-                       acf64[3] = {dynd_complex<double>(1.25, -2.125),
-                                   dynd_complex<double>(-2.5, 1.0),
-                                   dynd_complex<double>(12.125, 12345.)};
+  dynd::complex<double> scf64 = 0,
+                       acf64[3] = {dynd::complex<double>(1.25, -2.125),
+                                   dynd::complex<double>(-2.5, 1.0),
+                                   dynd::complex<double>(12.125, 12345.)};
   ckb((char *)&scf64, (char *)&acf64[0]);
-  EXPECT_EQ(dynd_complex<float>(1.25, -2.125), scf64);
+  EXPECT_EQ(dynd::complex<float>(1.25, -2.125), scf64);
   ckb((char *)&scf64, (char *)&acf64[1]);
-  EXPECT_EQ(dynd_complex<double>(-1.25, -1.125), scf64);
+  EXPECT_EQ(dynd::complex<double>(-1.25, -1.125), scf64);
   ckb((char *)&scf64, (char *)&acf64[2]);
-  EXPECT_EQ(dynd_complex<double>(10.875, 12343.875), scf64);
+  EXPECT_EQ(dynd::complex<double>(10.875, 12343.875), scf64);
 }
 
 TEST(Reduction, BuiltinSum_Lift0D_NoIdentity)

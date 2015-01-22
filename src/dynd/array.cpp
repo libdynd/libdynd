@@ -470,12 +470,12 @@ nd::array::array(const dynd_float128 &value)
           value, nd::read_access_flag | nd::immutable_access_flag))
 {
 }
-nd::array::array(dynd_complex<float> value)
+nd::array::array(dynd::complex<float> value)
     : m_memblock(make_builtin_scalar_array(
           value, nd::read_access_flag | nd::immutable_access_flag))
 {
 }
-nd::array::array(dynd_complex<double> value)
+nd::array::array(dynd::complex<double> value)
     : m_memblock(make_builtin_scalar_array(
           value, nd::read_access_flag | nd::immutable_access_flag))
 {
@@ -610,12 +610,12 @@ nd::array nd::array_rw(const dynd_float128 &value)
   return nd::array(
       make_builtin_scalar_array(value, nd::readwrite_access_flags));
 }
-nd::array nd::array_rw(dynd_complex<float> value)
+nd::array nd::array_rw(dynd::complex<float> value)
 {
   return nd::array(
       make_builtin_scalar_array(value, nd::readwrite_access_flags));
 }
-nd::array nd::array_rw(dynd_complex<double> value)
+nd::array nd::array_rw(dynd::complex<double> value)
 {
   return nd::array(
       make_builtin_scalar_array(value, nd::readwrite_access_flags));

@@ -23,10 +23,10 @@ template <typename T>
 class FFT1D;
 
 template <typename T, int N>
-class FFT1D<dynd_complex<T> [N]> : public ::testing::Test {
+class FFT1D<dynd::complex<T> [N]> : public ::testing::Test {
 public:
   typedef T RealType;
-  typedef dynd_complex<T> ComplexType;
+  typedef dynd::complex<T> ComplexType;
 
   static const intptr_t SrcShape[1];
   static const intptr_t SrcSize;
@@ -38,16 +38,16 @@ public:
 };
 
 template <typename T, int N>
-const intptr_t FFT1D<dynd_complex<T> [N]>::SrcShape[1] = {N};
+const intptr_t FFT1D<dynd::complex<T> [N]>::SrcShape[1] = {N};
 
 template <typename T, int N>
-const intptr_t FFT1D<dynd_complex<T> [N]>::SrcSize = SrcShape[0];
+const intptr_t FFT1D<dynd::complex<T> [N]>::SrcSize = SrcShape[0];
 
 template <typename T, int N>
-const intptr_t FFT1D<dynd_complex<T> [N]>::DstShape[1] = {N};
+const intptr_t FFT1D<dynd::complex<T> [N]>::DstShape[1] = {N};
 
 template <typename T, int N>
-const intptr_t FFT1D<dynd_complex<T> [N]>::DstSize = DstShape[0];
+const intptr_t FFT1D<dynd::complex<T> [N]>::DstSize = DstShape[0];
 
 TYPED_TEST_CASE_P(FFT1D);
 
@@ -58,7 +58,7 @@ template <typename T, int N>
 class RFFT1D<T[N]> : public ::testing::Test {
 public:
   typedef T RealType;
-  typedef dynd_complex<T> ComplexType;
+  typedef dynd::complex<T> ComplexType;
 
   static const intptr_t SrcShape[1];
   static const intptr_t SrcSize;
@@ -93,10 +93,10 @@ template <typename T>
 class FFT2D;
 
 template <typename T, int M, int N>
-class FFT2D<dynd_complex<T> [M][N]> : public ::testing::Test {
+class FFT2D<dynd::complex<T> [M][N]> : public ::testing::Test {
 public:
   typedef T RealType;
-  typedef dynd_complex<T> ComplexType;
+  typedef dynd::complex<T> ComplexType;
 
   static const intptr_t SrcShape[2];
   static const intptr_t SrcSize;
@@ -108,17 +108,17 @@ public:
 };
 
 template <typename T, int M, int N>
-const intptr_t FFT2D<dynd_complex<T> [M][N]>::SrcShape[2] = {M, N};
+const intptr_t FFT2D<dynd::complex<T> [M][N]>::SrcShape[2] = {M, N};
 
 template <typename T, int M, int N>
-const intptr_t FFT2D<dynd_complex<T> [M][N]>::SrcSize =
+const intptr_t FFT2D<dynd::complex<T> [M][N]>::SrcSize =
     SrcShape[0] * SrcShape[1];
 
 template <typename T, int M, int N>
-const intptr_t FFT2D<dynd_complex<T> [M][N]>::DstShape[2] = {M, N};
+const intptr_t FFT2D<dynd::complex<T> [M][N]>::DstShape[2] = {M, N};
 
 template <typename T, int M, int N>
-const intptr_t FFT2D<dynd_complex<T> [M][N]>::DstSize =
+const intptr_t FFT2D<dynd::complex<T> [M][N]>::DstSize =
     DstShape[0] * DstShape[1];
 
 TYPED_TEST_CASE_P(FFT2D);
@@ -130,7 +130,7 @@ template <typename T, int M, int N>
 class RFFT2D<T[M][N]> : public ::testing::Test {
 public:
   typedef T RealType;
-  typedef dynd_complex<T> ComplexType;
+  typedef dynd::complex<T> ComplexType;
 
   static const intptr_t SrcShape[2];
   static const intptr_t SrcSize;
@@ -786,7 +786,7 @@ REGISTER_TYPED_TEST_CASE_P(FFT1D, Linear, Inverse, Zeros, Ones, KroneckerDelta);
 // INSTANTIATE_TYPED_TEST_CASE_P(ComplexFloat, FFT1D,
 // FixedDim1D<dynd_complex<float> >::Types);
 INSTANTIATE_TYPED_TEST_CASE_P(ComplexDouble, FFT1D,
-                              FixedDim1D<dynd_complex<double>>::Types);
+                              FixedDim1D<dynd::complex<double>>::Types);
 
 // REGISTER_TYPED_TEST_CASE_P(RFFT1D, Linear, Inverse, Zeros, Ones,
 // KroneckerDelta);
@@ -798,7 +798,7 @@ REGISTER_TYPED_TEST_CASE_P(FFT2D, Linear, Inverse, Zeros, Ones, KroneckerDelta);
 // INSTANTIATE_TYPED_TEST_CASE_P(ComplexFloat, FFT2D,
 // FixedDim2D<dynd_complex<float> >::Types);
 INSTANTIATE_TYPED_TEST_CASE_P(ComplexDouble, FFT2D,
-                              FixedDim2D<dynd_complex<double>>::Types);
+                              FixedDim2D<dynd::complex<double>>::Types);
 
 // REGISTER_TYPED_TEST_CASE_P(RFFT2D, Linear, Inverse, Zeros, Ones,
 // KroneckerDelta);

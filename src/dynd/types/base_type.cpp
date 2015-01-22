@@ -482,8 +482,8 @@ uint8_t detail::builtin_data_sizes[builtin_type_id_count] = {
         sizeof(float),
         sizeof(double),
         sizeof(dynd_float128),
-        sizeof(dynd_complex<float>),
-        sizeof(dynd_complex<double>),
+        sizeof(complex<float>),
+        sizeof(complex<double>),
         0
     };
 uint8_t detail::builtin_kinds[builtin_type_id_count] = {
@@ -524,8 +524,8 @@ uint8_t detail::builtin_data_alignments[builtin_type_id_count] = {
         scalar_align_of<float>::value,
         scalar_align_of<double>::value,
         scalar_align_of<dynd_float128>::value,
-        scalar_align_of<dynd_complex<float> >::value,
-        scalar_align_of<dynd_complex<double> >::value,
+        scalar_align_of<complex<float> >::value,
+        scalar_align_of<complex<double> >::value,
         1
     };
 

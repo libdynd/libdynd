@@ -27,8 +27,8 @@ TEST(TypeAssign, FixedSizeTestsNoExcept) {
     uint64_t v_u64;
     float v_f32;
     double v_f64;
-    dynd_complex<float> v_cf32;
-    dynd_complex<double> v_cf64;
+    dynd::complex<float> v_cf32;
+    dynd::complex<double> v_cf64;
 
     ndt::type s_dt, d_dt;
     char *s_ptr;
@@ -52,8 +52,8 @@ TEST(TypeAssign, FixedSizeTestsNoExcept) {
     ONE_TEST(uint64_type_id, v_u64, 1u);
     ONE_TEST(float32_type_id, v_f32, 1);
     ONE_TEST(float64_type_id, v_f64, 1);
-    ONE_TEST(complex_float32_type_id, v_cf32, dynd_complex<float>(1));
-    ONE_TEST(complex_float64_type_id, v_cf64, dynd_complex<double>(1));
+    ONE_TEST(complex_float32_type_id, v_cf32, dynd::complex<float>(1));
+    ONE_TEST(complex_float64_type_id, v_cf64, dynd::complex<double>(1));
 #undef ONE_TEST
 
     // Test int8 -> each builtin type
@@ -73,8 +73,8 @@ TEST(TypeAssign, FixedSizeTestsNoExcept) {
     ONE_TEST(uint64_type_id, v_u64, 127u);
     ONE_TEST(float32_type_id, v_f32, 127);
     ONE_TEST(float64_type_id, v_f64, 127);
-    ONE_TEST(complex_float32_type_id, v_cf32, dynd_complex<float>(127));
-    ONE_TEST(complex_float64_type_id, v_cf64, dynd_complex<double>(127));
+    ONE_TEST(complex_float32_type_id, v_cf32, dynd::complex<float>(127));
+    ONE_TEST(complex_float64_type_id, v_cf64, dynd::complex<double>(127));
 #undef ONE_TEST
 
     // Test float64 -> each builtin type
@@ -98,14 +98,14 @@ TEST(TypeAssign, FixedSizeTestsNoExcept) {
     // be ok.
     //ONE_TEST(uint64_type_id, v_u64, (uint64_t)-10);
     ONE_TEST(float32_type_id, v_f32, -10.25);
-    ONE_TEST(complex_float32_type_id, v_cf32, dynd_complex<float>(-10.25f));
-    ONE_TEST(complex_float64_type_id, v_cf64, dynd_complex<double>(-10.25));
+    ONE_TEST(complex_float32_type_id, v_cf32, dynd::complex<float>(-10.25f));
+    ONE_TEST(complex_float64_type_id, v_cf64, dynd::complex<double>(-10.25));
 #undef ONE_TEST
 
     // Test dynd_complex<float64> -> each builtin type
     s_dt = ndt::type(complex_float64_type_id);
     s_ptr = (char *)&v_cf64;
-    v_cf64 = dynd_complex<double>(-10.25, 1.5);
+    v_cf64 = dynd::complex<double>(-10.25, 1.5);
 #define ONE_TEST(tid, v, m) \
             typed_data_assign(ndt::type(tid), NULL, (char *)&v, s_dt, NULL, s_ptr, &ectx_nocheck); \
             EXPECT_EQ(m, v)
@@ -124,7 +124,7 @@ TEST(TypeAssign, FixedSizeTestsNoExcept) {
     //ONE_TEST(uint64_type_id, v_u64, (uint64_t)-10);
     ONE_TEST(float32_type_id, v_f32, -10.25);
     ONE_TEST(float64_type_id, v_f64, -10.25);
-    ONE_TEST(complex_float32_type_id, v_cf32, dynd_complex<float>(-10.25f, 1.5f));
+    ONE_TEST(complex_float32_type_id, v_cf32, dynd::complex<float>(-10.25f, 1.5f));
 #undef ONE_TEST
 }
 
@@ -140,8 +140,8 @@ TEST(TypeAssign, FixedSizeTests_Bool) {
     uint64_t v_u64;
     float v_f32;
     double v_f64;
-    dynd_complex<float> v_cf32;
-    dynd_complex<double> v_cf64;
+    dynd::complex<float> v_cf32;
+    dynd::complex<double> v_cf64;
 
     ndt::type s_dt, d_dt;
     char *s_ptr;
@@ -163,8 +163,8 @@ TEST(TypeAssign, FixedSizeTests_Bool) {
     ONE_TEST(uint64_type_id, v_u64, 1u);
     ONE_TEST(float32_type_id, v_f32, 1);
     ONE_TEST(float64_type_id, v_f64, 1);
-    ONE_TEST(complex_float32_type_id, v_cf32, dynd_complex<float>(1));
-    ONE_TEST(complex_float64_type_id, v_cf64, dynd_complex<double>(1));
+    ONE_TEST(complex_float32_type_id, v_cf32, dynd::complex<float>(1));
+    ONE_TEST(complex_float64_type_id, v_cf64, dynd::complex<double>(1));
 #undef ONE_TEST
 }
 
@@ -180,8 +180,8 @@ TEST(TypeAssign, FixedSizeTests_Int8) {
     uint64_t v_u64;
     float v_f32;
     double v_f64;
-    dynd_complex<float> v_cf32;
-    dynd_complex<double> v_cf64;
+    dynd::complex<float> v_cf32;
+    dynd::complex<double> v_cf64;
 
     ndt::type s_dt, d_dt;
     char *s_ptr;
@@ -203,8 +203,8 @@ TEST(TypeAssign, FixedSizeTests_Int8) {
     ONE_TEST(uint64_type_id, v_u64, 127u);
     ONE_TEST(float32_type_id, v_f32, 127);
     ONE_TEST(float64_type_id, v_f64, 127);
-    ONE_TEST(complex_float32_type_id, v_cf32, dynd_complex<float>(127));
-    ONE_TEST(complex_float64_type_id, v_cf64, dynd_complex<double>(127));
+    ONE_TEST(complex_float32_type_id, v_cf32, dynd::complex<float>(127));
+    ONE_TEST(complex_float64_type_id, v_cf64, dynd::complex<double>(127));
 #undef ONE_TEST
 
     // Test int8 -> bool variants
@@ -235,8 +235,8 @@ TEST(TypeAssign, FixedSizeTests_Float64) {
     uint64_t v_u64;
     float v_f32;
     double v_f64;
-    dynd_complex<float> v_cf32;
-    dynd_complex<double> v_cf64;
+    dynd::complex<float> v_cf32;
+    dynd::complex<double> v_cf64;
 
     ndt::type s_dt, d_dt;
     const char *s_ptr;
@@ -262,8 +262,8 @@ TEST(TypeAssign, FixedSizeTests_Float64) {
     ONE_TEST_THROW(uint32_type_id, v_u32);
     ONE_TEST_THROW(uint64_type_id, v_u64);
     ONE_TEST(float32_type_id, v_f32, -10.25);
-    ONE_TEST(complex_float32_type_id, v_cf32, dynd_complex<float>(-10.25f));
-    ONE_TEST(complex_float64_type_id, v_cf64, dynd_complex<double>(-10.25));
+    ONE_TEST(complex_float32_type_id, v_cf32, dynd::complex<float>(-10.25f));
+    ONE_TEST(complex_float64_type_id, v_cf64, dynd::complex<double>(-10.25));
 #undef ONE_TEST
 #undef ONE_TEST_THROW
 
@@ -289,7 +289,7 @@ TEST(TypeAssign, FixedSizeTests_Float64) {
     tmp_ectx.errmode = assign_error_fractional;
     typed_data_assign(ndt::type(complex_float32_type_id), NULL, (char *)&v_cf32,
                       s_dt, NULL, s_ptr, &tmp_ectx);
-    EXPECT_EQ(dynd_complex<float>((float)v_f64), v_cf32);
+    EXPECT_EQ(dynd::complex<float>((float)v_f64), v_cf32);
 
     // Since this is a float -> double conversion, it should be exact coming back to float
     v_f64 = 1 / 3.0f;
@@ -300,7 +300,7 @@ TEST(TypeAssign, FixedSizeTests_Float64) {
     tmp_ectx.errmode = assign_error_inexact;
     typed_data_assign(ndt::type(complex_float32_type_id), NULL, (char *)&v_cf32,
                       s_dt, NULL, s_ptr, &tmp_ectx);
-    EXPECT_EQ(dynd_complex<double>(v_f64), dynd_complex<double>(v_cf32));
+    EXPECT_EQ(dynd::complex<double>(v_f64), dynd::complex<double>(v_cf32));
 
     // This should overflow converting to float
     v_f64 = -1.5e250;
@@ -357,10 +357,10 @@ TEST(TypeAssign, FixedSizeTests_Complex_Float32) {
     uint64_t v_u64;
     float v_f32;
     double v_f64;
-    dynd_complex<float> v_cf32;
-    dynd_complex<double> v_cf64;
+    dynd::complex<float> v_cf32;
+    dynd::complex<double> v_cf64;
 
-    dynd_complex<float> v_ref;
+    dynd::complex<float> v_ref;
     ndt::type s_dt, d_dt;
     const char *s_ptr;
 
@@ -384,8 +384,8 @@ TEST(TypeAssign, FixedSizeTests_Complex_Float32) {
     ONE_TEST(uint64_type_id, v_u64, 0u);
     ONE_TEST(float32_type_id, v_f32, 0);
     ONE_TEST(float64_type_id, v_f64, 0);
-    ONE_TEST(complex_float32_type_id, v_cf32, dynd_complex<float>(0));
-    ONE_TEST(complex_float64_type_id, v_cf64, dynd_complex<double>(0));
+    ONE_TEST(complex_float32_type_id, v_cf32, dynd::complex<float>(0));
+    ONE_TEST(complex_float64_type_id, v_cf64, dynd::complex<double>(0));
 #undef ONE_TEST
 
     // Test the value 1.0
@@ -405,8 +405,8 @@ TEST(TypeAssign, FixedSizeTests_Complex_Float32) {
     ONE_TEST(uint64_type_id, v_u64, 1u);
     ONE_TEST(float32_type_id, v_f32, 1);
     ONE_TEST(float64_type_id, v_f64, 1);
-    ONE_TEST(complex_float32_type_id, v_cf32, dynd_complex<float>(1));
-    ONE_TEST(complex_float64_type_id, v_cf64, dynd_complex<double>(1));
+    ONE_TEST(complex_float32_type_id, v_cf32, dynd::complex<float>(1));
+    ONE_TEST(complex_float64_type_id, v_cf64, dynd::complex<double>(1));
 #undef ONE_TEST
 
     // Test the value 2.0
@@ -430,8 +430,8 @@ TEST(TypeAssign, FixedSizeTests_Complex_Float32) {
     ONE_TEST(uint64_type_id, v_u64, 2u);
     ONE_TEST(float32_type_id, v_f32, 2);
     ONE_TEST(float64_type_id, v_f64, 2);
-    ONE_TEST(complex_float32_type_id, v_cf32, dynd_complex<float>(2));
-    ONE_TEST(complex_float64_type_id, v_cf64, dynd_complex<double>(2));
+    ONE_TEST(complex_float32_type_id, v_cf32, dynd::complex<float>(2));
+    ONE_TEST(complex_float64_type_id, v_cf64, dynd::complex<double>(2));
 #undef ONE_TEST
 #undef ONE_TEST_THROW
 
@@ -456,8 +456,8 @@ TEST(TypeAssign, FixedSizeTests_Complex_Float32) {
     ONE_TEST_THROW(uint64_type_id, v_b);
     ONE_TEST(float32_type_id, v_f32, -1);
     ONE_TEST(float64_type_id, v_f64, -1);
-    ONE_TEST(complex_float32_type_id, v_cf32, dynd_complex<float>(-1));
-    ONE_TEST(complex_float64_type_id, v_cf64, dynd_complex<double>(-1));
+    ONE_TEST(complex_float32_type_id, v_cf32, dynd::complex<float>(-1));
+    ONE_TEST(complex_float64_type_id, v_cf64, dynd::complex<double>(-1));
 #undef ONE_TEST
 #undef ONE_TEST_THROW
 
@@ -482,8 +482,8 @@ TEST(TypeAssign, FixedSizeTests_Complex_Float32) {
     ONE_TEST_THROW(uint64_type_id, v_u64);
     ONE_TEST(float32_type_id, v_f32, -10.25);
     ONE_TEST(float64_type_id, v_f64, -10.25);
-    ONE_TEST(complex_float32_type_id, v_cf32, dynd_complex<float>(-10.25f));
-    ONE_TEST(complex_float64_type_id, v_cf64, dynd_complex<double>(-10.25));
+    ONE_TEST(complex_float32_type_id, v_cf32, dynd::complex<float>(-10.25f));
+    ONE_TEST(complex_float64_type_id, v_cf64, dynd::complex<double>(-10.25));
 #undef ONE_TEST
 #undef ONE_TEST_THROW
 
@@ -508,13 +508,13 @@ TEST(TypeAssign, FixedSizeTests_Complex_Float32) {
     ONE_TEST_THROW(uint64_type_id, v_u64);
     ONE_TEST(float32_type_id, v_f32, 1e21f);
     ONE_TEST(float64_type_id, v_f64, 1e21f);
-    ONE_TEST(complex_float32_type_id, v_cf32, dynd_complex<float>(1e21f));
-    ONE_TEST(complex_float64_type_id, v_cf64, dynd_complex<double>(1e21f));
+    ONE_TEST(complex_float32_type_id, v_cf32, dynd::complex<float>(1e21f));
+    ONE_TEST(complex_float64_type_id, v_cf64, dynd::complex<double>(1e21f));
 #undef ONE_TEST
 #undef ONE_TEST_THROW
 
     // Test a complex value with imaginary component
-    v_ref = dynd_complex<float>(-10.25f, 0.125f);
+    v_ref = dynd::complex<float>(-10.25f, 0.125f);
 #define ONE_TEST(tid, v, m) \
             typed_data_assign(ndt::type(tid), NULL, (char *)&v, s_dt, NULL, s_ptr); \
             EXPECT_EQ(m, v)
@@ -534,8 +534,8 @@ TEST(TypeAssign, FixedSizeTests_Complex_Float32) {
     ONE_TEST_THROW(uint64_type_id, v_u64);
     ONE_TEST_THROW(float32_type_id, v_f32);
     ONE_TEST_THROW(float64_type_id, v_f64);
-    ONE_TEST(complex_float32_type_id, v_cf32, dynd_complex<float>(-10.25f,0.125f));
-    ONE_TEST(complex_float64_type_id, v_cf64, dynd_complex<double>(-10.25,0.125));
+    ONE_TEST(complex_float32_type_id, v_cf32, dynd::complex<float>(-10.25f,0.125f));
+    ONE_TEST(complex_float64_type_id, v_cf64, dynd::complex<double>(-10.25,0.125));
 #undef ONE_TEST
 #undef ONE_TEST_THROW
 }
@@ -552,10 +552,10 @@ TEST(TypeAssign, FixedSizeTests_Complex_Float64) {
     uint64_t v_u64;
     float v_f32;
     double v_f64;
-    dynd_complex<float> v_cf32;
-    dynd_complex<double> v_cf64;
+    dynd::complex<float> v_cf32;
+    dynd::complex<double> v_cf64;
 
-    dynd_complex<double> v_ref;
+    dynd::complex<double> v_ref;
     ndt::type s_dt, d_dt;
     const char *s_ptr;
 
@@ -579,8 +579,8 @@ TEST(TypeAssign, FixedSizeTests_Complex_Float64) {
     ONE_TEST(uint64_type_id, v_u64, 0u);
     ONE_TEST(float32_type_id, v_f32, 0);
     ONE_TEST(float64_type_id, v_f64, 0);
-    ONE_TEST(complex_float32_type_id, v_cf32, dynd_complex<float>(0));
-    ONE_TEST(complex_float64_type_id, v_cf64, dynd_complex<double>(0));
+    ONE_TEST(complex_float32_type_id, v_cf32, dynd::complex<float>(0));
+    ONE_TEST(complex_float64_type_id, v_cf64, dynd::complex<double>(0));
 #undef ONE_TEST
 
     // Test the value 1.0
@@ -600,8 +600,8 @@ TEST(TypeAssign, FixedSizeTests_Complex_Float64) {
     ONE_TEST(uint64_type_id, v_u64, 1u);
     ONE_TEST(float32_type_id, v_f32, 1);
     ONE_TEST(float64_type_id, v_f64, 1);
-    ONE_TEST(complex_float32_type_id, v_cf32, dynd_complex<float>(1));
-    ONE_TEST(complex_float64_type_id, v_cf64, dynd_complex<double>(1));
+    ONE_TEST(complex_float32_type_id, v_cf32, dynd::complex<float>(1));
+    ONE_TEST(complex_float64_type_id, v_cf64, dynd::complex<double>(1));
 #undef ONE_TEST
 
     // Test the value 2.0
@@ -625,8 +625,8 @@ TEST(TypeAssign, FixedSizeTests_Complex_Float64) {
     ONE_TEST(uint64_type_id, v_u64, 2u);
     ONE_TEST(float32_type_id, v_f32, 2);
     ONE_TEST(float64_type_id, v_f64, 2);
-    ONE_TEST(complex_float32_type_id, v_cf32, dynd_complex<float>(2));
-    ONE_TEST(complex_float64_type_id, v_cf64, dynd_complex<double>(2));
+    ONE_TEST(complex_float32_type_id, v_cf32, dynd::complex<float>(2));
+    ONE_TEST(complex_float64_type_id, v_cf64, dynd::complex<double>(2));
 #undef ONE_TEST
 #undef ONE_TEST_THROW
 
@@ -651,8 +651,8 @@ TEST(TypeAssign, FixedSizeTests_Complex_Float64) {
     ONE_TEST_THROW(uint64_type_id, v_b);
     ONE_TEST(float32_type_id, v_f32, -1);
     ONE_TEST(float64_type_id, v_f64, -1);
-    ONE_TEST(complex_float32_type_id, v_cf32, dynd_complex<float>(-1));
-    ONE_TEST(complex_float64_type_id, v_cf64, dynd_complex<double>(-1));
+    ONE_TEST(complex_float32_type_id, v_cf32, dynd::complex<float>(-1));
+    ONE_TEST(complex_float64_type_id, v_cf64, dynd::complex<double>(-1));
 #undef ONE_TEST
 #undef ONE_TEST_THROW
 
@@ -677,8 +677,8 @@ TEST(TypeAssign, FixedSizeTests_Complex_Float64) {
     ONE_TEST_THROW(uint64_type_id, v_u64);
     ONE_TEST(float32_type_id, v_f32, -10.25);
     ONE_TEST(float64_type_id, v_f64, -10.25);
-    ONE_TEST(complex_float32_type_id, v_cf32, dynd_complex<float>(-10.25f));
-    ONE_TEST(complex_float64_type_id, v_cf64, dynd_complex<double>(-10.25));
+    ONE_TEST(complex_float32_type_id, v_cf32, dynd::complex<float>(-10.25f));
+    ONE_TEST(complex_float64_type_id, v_cf64, dynd::complex<double>(-10.25));
 #undef ONE_TEST
 #undef ONE_TEST_THROW
 
@@ -703,13 +703,13 @@ TEST(TypeAssign, FixedSizeTests_Complex_Float64) {
     ONE_TEST_THROW(uint64_type_id, v_u64);
     ONE_TEST(float32_type_id, v_f32, float(1e21));
     ONE_TEST(float64_type_id, v_f64, 1e21);
-    ONE_TEST(complex_float32_type_id, v_cf32, dynd_complex<float>(float(1e21)));
-    ONE_TEST(complex_float64_type_id, v_cf64, dynd_complex<double>(1e21));
+    ONE_TEST(complex_float32_type_id, v_cf32, dynd::complex<float>(float(1e21)));
+    ONE_TEST(complex_float64_type_id, v_cf64, dynd::complex<double>(1e21));
 #undef ONE_TEST
 #undef ONE_TEST_THROW
 
     // Test a complex value with imaginary component
-    v_ref = dynd_complex<double>(-10.25, 0.125);
+    v_ref = dynd::complex<double>(-10.25, 0.125);
 #define ONE_TEST(tid, v, m) \
             typed_data_assign(ndt::type(tid), NULL, (char *)&v, s_dt, NULL, s_ptr); \
             EXPECT_EQ(m, v)
@@ -729,8 +729,8 @@ TEST(TypeAssign, FixedSizeTests_Complex_Float64) {
     ONE_TEST_THROW(uint64_type_id, v_u64);
     ONE_TEST_THROW(float32_type_id, v_f32);
     ONE_TEST_THROW(float64_type_id, v_f64);
-    ONE_TEST(complex_float32_type_id, v_cf32, dynd_complex<float>(-10.25f,0.125f));
-    ONE_TEST(complex_float64_type_id, v_cf64, dynd_complex<double>(-10.25,0.125));
+    ONE_TEST(complex_float32_type_id, v_cf32, dynd::complex<float>(-10.25f,0.125f));
+    ONE_TEST(complex_float64_type_id, v_cf64, dynd::complex<double>(-10.25,0.125));
 #undef ONE_TEST
 #undef ONE_TEST_THROW
 
@@ -762,7 +762,7 @@ TEST(TypeAssign, FixedSizeTests_Complex_Float64) {
     typed_data_assign(ndt::type(complex_float32_type_id), NULL, (char *)&v_cf32,
                       ndt::type(complex_float64_type_id), NULL, (char *)&v_cf64,
                       &tmp_ectx);
-    EXPECT_EQ(dynd_complex<float>((float)v_cf64.real()), v_cf32);
+    EXPECT_EQ(dynd::complex<float>((float)v_cf64.real()), v_cf32);
 
     // Since this is a float -> double conversion, it should be exact coming back to float
     v_cf64 = 1 / 3.0f;
@@ -770,12 +770,12 @@ TEST(TypeAssign, FixedSizeTests_Complex_Float64) {
     typed_data_assign(ndt::type(float32_type_id), NULL, (char *)&v_f32,
                       ndt::type(complex_float64_type_id), NULL, (char *)&v_cf64,
                       &tmp_ectx);
-    EXPECT_EQ(v_cf64, dynd_complex<double>(v_f32));
+    EXPECT_EQ(v_cf64, dynd::complex<double>(v_f32));
     tmp_ectx.errmode = assign_error_inexact;
     typed_data_assign(ndt::type(complex_float32_type_id), NULL, (char *)&v_cf32,
                       ndt::type(complex_float64_type_id), NULL, (char *)&v_cf64,
                       &tmp_ectx);
-    EXPECT_EQ(v_cf64, dynd_complex<double>(v_cf32));
+    EXPECT_EQ(v_cf64, dynd::complex<double>(v_cf32));
 
     // This should overflow converting to float
     v_cf64 = -1.5e250;

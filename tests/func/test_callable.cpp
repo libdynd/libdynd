@@ -120,11 +120,11 @@ TEST(GFuncCallable, TwoParametersWithTwoDefaults) {
     EXPECT_EQ(10.5, c.call().as<double>());
 }
 
-static dynd_complex<float> three_parameters(bool x, int a, int b) {
+static dynd::complex<float> three_parameters(bool x, int a, int b) {
     if (x) {
-        return dynd_complex<float>((float)a, (float)b);
+        return dynd::complex<float>((float)a, (float)b);
     } else {
-        return dynd_complex<float>((float)b, (float)a);
+        return dynd::complex<float>((float)b, (float)a);
     }
 }
 
@@ -142,15 +142,15 @@ TEST(GFuncCallable, ThreeParameters) {
     a(1).val_assign(3);
     a(2).val_assign(4);
     r = c.call_generic(a);
-    EXPECT_EQ(ndt::make_type<dynd_complex<float> >(), r.get_type());
-    EXPECT_EQ(dynd_complex<float>(3, 4), r.as<dynd_complex<float> >());
+    EXPECT_EQ(ndt::make_type<dynd::complex<float> >(), r.get_type());
+    EXPECT_EQ(dynd::complex<float>(3, 4), r.as<dynd::complex<float> >());
 
     a(0).val_assign(false);
     a(1).val_assign(5);
     a(2).val_assign(6);
     r = c.call_generic(a);
-    EXPECT_EQ(ndt::make_type<dynd_complex<float> >(), r.get_type());
-    EXPECT_EQ(dynd_complex<float>(6, 5), r.as<dynd_complex<float> >());
+    EXPECT_EQ(ndt::make_type<dynd::complex<float> >(), r.get_type());
+    EXPECT_EQ(dynd::complex<float>(6, 5), r.as<dynd::complex<float> >());
 }
 
 TEST(GFuncCallable, ThreeParametersWithOneDefault) {
@@ -160,10 +160,10 @@ TEST(GFuncCallable, ThreeParametersWithOneDefault) {
             c.get_parameters_type());
 
     // Call it through the C++ interface with various numbers of parameters
-    EXPECT_EQ(dynd_complex<float>(3,4), c.call(true, 3, 4).as<dynd_complex<float> >());
-    EXPECT_EQ(dynd_complex<float>(6,5), c.call(false, 5, 6).as<dynd_complex<float> >());
-    EXPECT_EQ(dynd_complex<float>(7,12), c.call(true, 7).as<dynd_complex<float> >());
-    EXPECT_EQ(dynd_complex<float>(12,5), c.call(false, 5).as<dynd_complex<float> >());
+    EXPECT_EQ(dynd::complex<float>(3,4), c.call(true, 3, 4).as<dynd::complex<float> >());
+    EXPECT_EQ(dynd::complex<float>(6,5), c.call(false, 5, 6).as<dynd::complex<float> >());
+    EXPECT_EQ(dynd::complex<float>(7,12), c.call(true, 7).as<dynd::complex<float> >());
+    EXPECT_EQ(dynd::complex<float>(12,5), c.call(false, 5).as<dynd::complex<float> >());
     // Should throw with the wrong number of arguments
     EXPECT_THROW(c.call(), runtime_error);
     EXPECT_THROW(c.call(false), runtime_error);
@@ -177,12 +177,12 @@ TEST(GFuncCallable, ThreeParametersWithTwoDefaults) {
             c.get_parameters_type());
 
     // Call it through the C++ interface with various numbers of parameters
-    EXPECT_EQ(dynd_complex<float>(3,4), c.call(true, 3, 4).as<dynd_complex<float> >());
-    EXPECT_EQ(dynd_complex<float>(6,5), c.call(false, 5, 6).as<dynd_complex<float> >());
-    EXPECT_EQ(dynd_complex<float>(7,12), c.call(true, 7).as<dynd_complex<float> >());
-    EXPECT_EQ(dynd_complex<float>(12,5), c.call(false, 5).as<dynd_complex<float> >());
-    EXPECT_EQ(dynd_complex<float>(6,12), c.call(true).as<dynd_complex<float> >());
-    EXPECT_EQ(dynd_complex<float>(12,6), c.call(false).as<dynd_complex<float> >());
+    EXPECT_EQ(dynd::complex<float>(3,4), c.call(true, 3, 4).as<dynd::complex<float> >());
+    EXPECT_EQ(dynd::complex<float>(6,5), c.call(false, 5, 6).as<dynd::complex<float> >());
+    EXPECT_EQ(dynd::complex<float>(7,12), c.call(true, 7).as<dynd::complex<float> >());
+    EXPECT_EQ(dynd::complex<float>(12,5), c.call(false, 5).as<dynd::complex<float> >());
+    EXPECT_EQ(dynd::complex<float>(6,12), c.call(true).as<dynd::complex<float> >());
+    EXPECT_EQ(dynd::complex<float>(12,6), c.call(false).as<dynd::complex<float> >());
     // Should throw with the wrong number of arguments
     EXPECT_THROW(c.call(), runtime_error);
     EXPECT_THROW(c.call(false, 1.5, 2, 12), runtime_error);
@@ -195,13 +195,13 @@ TEST(GFuncCallable, ThreeParametersWithThreeDefaults) {
             c.get_parameters_type());
 
     // Call it through the C++ interface with various numbers of parameters
-    EXPECT_EQ(dynd_complex<float>(3,4), c.call(true, 3, 4).as<dynd_complex<float> >());
-    EXPECT_EQ(dynd_complex<float>(6,5), c.call(false, 5, 6).as<dynd_complex<float> >());
-    EXPECT_EQ(dynd_complex<float>(7,12), c.call(true, 7).as<dynd_complex<float> >());
-    EXPECT_EQ(dynd_complex<float>(12,5), c.call(false, 5).as<dynd_complex<float> >());
-    EXPECT_EQ(dynd_complex<float>(6,12), c.call(true).as<dynd_complex<float> >());
-    EXPECT_EQ(dynd_complex<float>(12,6), c.call(false).as<dynd_complex<float> >());
-    EXPECT_EQ(dynd_complex<float>(12,6), c.call().as<dynd_complex<float> >());
+    EXPECT_EQ(dynd::complex<float>(3,4), c.call(true, 3, 4).as<dynd::complex<float> >());
+    EXPECT_EQ(dynd::complex<float>(6,5), c.call(false, 5, 6).as<dynd::complex<float> >());
+    EXPECT_EQ(dynd::complex<float>(7,12), c.call(true, 7).as<dynd::complex<float> >());
+    EXPECT_EQ(dynd::complex<float>(12,5), c.call(false, 5).as<dynd::complex<float> >());
+    EXPECT_EQ(dynd::complex<float>(6,12), c.call(true).as<dynd::complex<float> >());
+    EXPECT_EQ(dynd::complex<float>(12,6), c.call(false).as<dynd::complex<float> >());
+    EXPECT_EQ(dynd::complex<float>(12,6), c.call().as<dynd::complex<float> >());
     // Should throw with the wrong number of arguments
     EXPECT_THROW(c.call(false, 1.5, 2, 12), runtime_error);
 }
@@ -398,7 +398,7 @@ TEST(GFuncCallable, DTypeParam) {
     a = nd::empty(c.get_parameters_type());
 
     // With a base_type
-    tmp = ndt::make_cstruct(ndt::make_type<dynd_complex<float> >(), "A", ndt::make_type<int8_t>(), "B");
+    tmp = ndt::make_cstruct(ndt::make_type<dynd::complex<float> >(), "A", ndt::make_type<int8_t>(), "B");
     *(const void**)a.get_ndo()->m_data_pointer = tmp.extended();
     r = c.call_generic(a);
     EXPECT_EQ(ndt::make_type<size_t>(), r.get_type());

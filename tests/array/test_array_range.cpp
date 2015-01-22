@@ -93,17 +93,17 @@ TEST(ArrayLinspace, Basic)
   EXPECT_EQ(0.5f, a(1).as<float>());
   EXPECT_EQ(1.f, a(2).as<float>());
 
-  a = nd::linspace(complex<float>(0.f, 0.f), complex<float>(0.f, 1.f), 3);
+  a = nd::linspace(dynd::complex<float>(0.f, 0.f), dynd::complex<float>(0.f, 1.f), 3);
   EXPECT_EQ(ndt::type("3 * complex[float32]"), a.get_type());
   EXPECT_EQ(3, a.get_shape()[0]);
-  EXPECT_EQ(complex<float>(0.f, 0.f), a(0).as<complex<float> >());
-  EXPECT_EQ(complex<float>(0.f, 0.5f), a(1).as<complex<float> >());
-  EXPECT_EQ(complex<float>(0.f, 1.f), a(2).as<complex<float> >());
+  EXPECT_EQ(dynd::complex<float>(0.f, 0.f), a(0).as<dynd::complex<float> >());
+  EXPECT_EQ(dynd::complex<float>(0.f, 0.5f), a(1).as<dynd::complex<float> >());
+  EXPECT_EQ(dynd::complex<float>(0.f, 1.f), a(2).as<dynd::complex<float> >());
 
-  a = nd::linspace(complex<double>(1.f, 0.f), complex<double>(0.f, 1.f), 3);
+  a = nd::linspace(dynd::complex<double>(1.f, 0.f), dynd::complex<double>(0.f, 1.f), 3);
   EXPECT_EQ(ndt::type("3 * complex[float64]"), a.get_type());
   EXPECT_EQ(3, a.get_shape()[0]);
-  EXPECT_EQ(complex<double>(1., 0.), a(0).as<complex<double> >());
-  EXPECT_EQ(complex<double>(0.5, 0.5), a(1).as<complex<double> >());
-  EXPECT_EQ(complex<double>(0., 1.), a(2).as<complex<double> >());
+  EXPECT_EQ(dynd::complex<double>(1., 0.), a(0).as<dynd::complex<double> >());
+  EXPECT_EQ(dynd::complex<double>(0.5, 0.5), a(1).as<dynd::complex<double> >());
+  EXPECT_EQ(dynd::complex<double>(0., 1.), a(2).as<dynd::complex<double> >());
 }

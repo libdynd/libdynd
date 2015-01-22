@@ -94,9 +94,9 @@ void init::datashape_parser_init()
   bit["float64"] = ndt::make_type<double>();
   bit["real"] = ndt::make_type<double>();
   bit["float128"] = ndt::make_type<dynd_float128>();
-  bit["complex64"] = ndt::make_type<dynd_complex<float>>();
-  bit["complex128"] = ndt::make_type<dynd_complex<double>>();
-  bit["complex"] = ndt::make_type<dynd_complex<double>>();
+  bit["complex64"] = ndt::make_type<dynd::complex<float>>();
+  bit["complex128"] = ndt::make_type<dynd::complex<double>>();
+  bit["complex"] = ndt::make_type<dynd::complex<double>>();
   bit["json"] = ndt::make_json();
   bit["date"] = ndt::make_date();
   bit["time"] = ndt::make_time(tz_abstract);
@@ -535,11 +535,11 @@ static ndt::type parse_complex_parameters(const char *&rbegin, const char *end,
     }
     if (tp.get_type_id() == float32_type_id) {
       rbegin = begin;
-      return ndt::make_type<dynd_complex<float>>();
+      return ndt::make_type<dynd::complex<float>>();
     }
     else if (tp.get_type_id() == float64_type_id) {
       rbegin = begin;
-      return ndt::make_type<dynd_complex<double>>();
+      return ndt::make_type<dynd::complex<double>>();
     }
     else {
       throw datashape_parse_error(saved_begin,
@@ -548,7 +548,7 @@ static ndt::type parse_complex_parameters(const char *&rbegin, const char *end,
   }
   else {
     // Default to complex[double] if no parameters are provided
-    return ndt::make_type<dynd_complex<double>>();
+    return ndt::make_type<dynd::complex<double>>();
   }
 }
 

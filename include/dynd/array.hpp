@@ -179,8 +179,8 @@ namespace nd {
     array(float value);
     array(double value);
     array(const dynd_float128 &value);
-    array(dynd_complex<float> value);
-    array(dynd_complex<double> value);
+    array(complex<float> value);
+    array(complex<double> value);
     array(std::complex<float> value);
     array(std::complex<double> value);
     array(const std::string &value);
@@ -917,8 +917,8 @@ namespace nd {
   nd::array array_rw(float value);
   nd::array array_rw(double value);
   nd::array array_rw(const dynd_float128 &value);
-  nd::array array_rw(dynd_complex<float> value);
-  nd::array array_rw(dynd_complex<double> value);
+  nd::array array_rw(complex<float> value);
+  nd::array array_rw(complex<double> value);
   nd::array array_rw(std::complex<float> value);
   nd::array array_rw(std::complex<double> value);
   nd::array array_rw(const std::string &value);

@@ -13,19 +13,15 @@ using namespace dynd;
     NULL, &kernels::create<kernels::NAME<A0, int8_t>>,                         \
         &kernels::create<kernels::NAME<A0, int16_t>>,                          \
         &kernels::create<kernels::NAME<A0, int32_t>>,                          \
-        &kernels::create<kernels::NAME<A0, int64_t>>,                          \
-        NULL,                                                                  \
+        &kernels::create<kernels::NAME<A0, int64_t>>, NULL,                    \
         &kernels::create<kernels::NAME<A0, uint8_t>>,                          \
         &kernels::create<kernels::NAME<A0, uint16_t>>,                         \
         &kernels::create<kernels::NAME<A0, uint32_t>>,                         \
-        &kernels::create<kernels::NAME<A0, uint64_t>>,                         \
-        NULL,                                                                  \
-        NULL,                                                                  \
+        &kernels::create<kernels::NAME<A0, uint64_t>>, NULL, NULL,             \
         &kernels::create<kernels::NAME<A0, float>>,                            \
-        &kernels::create<kernels::NAME<A0, double>>,                           \
-        NULL,                                                                  \
-        &kernels::create<kernels::NAME<A0, dynd_complex<float>>>,              \
-        &kernels::create<kernels::NAME<A0, dynd_complex<double>>>,             \
+        &kernels::create<kernels::NAME<A0, double>>, NULL,                     \
+        &kernels::create<kernels::NAME<A0, dynd::complex<float>>>,             \
+        &kernels::create<kernels::NAME<A0, dynd::complex<double>>>,            \
   }
 
 #define BUILTIN_TABLE(NAME)                                                    \
@@ -47,8 +43,8 @@ using namespace dynd;
           BUILTIN_ROW(NAME##_ck, float),                                       \
           BUILTIN_ROW(NAME##_ck, double),                                      \
           {NULL},                                                              \
-          BUILTIN_ROW(NAME##_ck, dynd_complex<float>),                         \
-          BUILTIN_ROW(NAME##_ck, dynd_complex<double>)};
+          BUILTIN_ROW(NAME##_ck, dynd::complex<float>),                        \
+          BUILTIN_ROW(NAME##_ck, dynd::complex<double>)};
 
 BUILTIN_TABLE(add);
 BUILTIN_TABLE(sub);
@@ -62,4 +58,3 @@ nd::decl::add nd::add;
 nd::decl::sub nd::sub;
 nd::decl::mul nd::mul;
 nd::decl::div nd::div;
-

@@ -195,8 +195,8 @@ void init::arrfunc_registry_init()
   func::set_regfunction("sign", make_ufunc(sign<int32_t>(), sign<int64_t>(),
                                            sign<dynd_int128>(), sign<float>(),
                                            sign<double>()));
-  func::set_regfunction("conj", make_ufunc(conj_fn<complex<float>>(),
-                                           conj_fn<complex<double>>()));
+  func::set_regfunction("conj", make_ufunc(conj_fn<std::complex<float>>(),
+                                           conj_fn<std::complex<double>>()));
 
 #if !(defined(_MSC_VER) && _MSC_VER < 1700)
   func::set_regfunction("logaddexp",

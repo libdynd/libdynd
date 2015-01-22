@@ -270,23 +270,23 @@ TYPED_TEST_P(ArrayAssign, ScalarAssignment_Uint64_LargeNumbers)
 TYPED_TEST_P(ArrayAssign, ScalarAssignment_Complex_Float32)
 {
   nd::array a;
-  const dynd_complex<float> *ptr_cf32;
+  const dynd::complex<float> *ptr_cf32;
   eval::eval_context ectx_inexact;
   ectx_inexact.errmode = assign_error_inexact;
 
   // Assignment to a complex float scalar
   a = nd::empty(
-      TestFixture::First::MakeType(ndt::make_type<dynd_complex<float>>()));
-  ptr_cf32 = (const dynd_complex<float> *)a.get_ndo()->m_data_pointer;
+      TestFixture::First::MakeType(ndt::make_type<dynd::complex<float>>()));
+  ptr_cf32 = (const dynd::complex<float> *)a.get_ndo()->m_data_pointer;
   a.val_assign(TestFixture::Second::To(true));
-  EXPECT_EQ(dynd_complex<float>(1), TestFixture::First::Dereference(ptr_cf32));
+  EXPECT_EQ(dynd::complex<float>(1), TestFixture::First::Dereference(ptr_cf32));
   a.val_assign(TestFixture::Second::To(false));
-  EXPECT_EQ(dynd_complex<float>(0), TestFixture::First::Dereference(ptr_cf32));
+  EXPECT_EQ(dynd::complex<float>(0), TestFixture::First::Dereference(ptr_cf32));
   a.val_assign(TestFixture::Second::To(1 / 3.0f));
-  EXPECT_EQ(dynd_complex<float>(1 / 3.0f),
+  EXPECT_EQ(dynd::complex<float>(1 / 3.0f),
             TestFixture::First::Dereference(ptr_cf32));
   a.val_assign(TestFixture::Second::To(1 / 3.0));
-  EXPECT_EQ(dynd_complex<float>(float(1 / 3.0)),
+  EXPECT_EQ(dynd::complex<float>(float(1 / 3.0)),
             TestFixture::First::Dereference(ptr_cf32));
   if (!TestFixture::First::IsTypeID(cuda_device_type_id) &&
       !TestFixture::Second::IsTypeID(cuda_device_type_id)) {
@@ -303,17 +303,17 @@ TYPED_TEST_P(ArrayAssign, ScalarAssignment_Complex_Float32)
                  runtime_error);
   }
 
-  a.val_assign(TestFixture::Second::To(dynd_complex<float>(1.5f, 2.75f)));
-  EXPECT_EQ(dynd_complex<float>(1.5f, 2.75f),
+  a.val_assign(TestFixture::Second::To(dynd::complex<float>(1.5f, 2.75f)));
+  EXPECT_EQ(dynd::complex<float>(1.5f, 2.75f),
             TestFixture::First::Dereference(ptr_cf32));
   a.val_assign(
-      TestFixture::Second::To(dynd_complex<double>(1 / 3.0, -1 / 7.0)));
-  EXPECT_EQ(dynd_complex<float>(float(1 / 3.0), float(-1 / 7.0)),
+      TestFixture::Second::To(dynd::complex<double>(1 / 3.0, -1 / 7.0)));
+  EXPECT_EQ(dynd::complex<float>(float(1 / 3.0), float(-1 / 7.0)),
             TestFixture::First::Dereference(ptr_cf32));
   if (!TestFixture::First::IsTypeID(cuda_device_type_id) &&
       !TestFixture::Second::IsTypeID(cuda_device_type_id)) {
     EXPECT_THROW(a.val_assign(TestFixture::Second::To(
-                                  dynd_complex<double>(1 / 3.0, -1 / 7.0)),
+                                  dynd::complex<double>(1 / 3.0, -1 / 7.0)),
                               &ectx_inexact),
                  runtime_error);
   }
@@ -322,23 +322,23 @@ TYPED_TEST_P(ArrayAssign, ScalarAssignment_Complex_Float32)
 TYPED_TEST_P(ArrayAssign, ScalarAssignment_Complex_Float64)
 {
   nd::array a;
-  const dynd_complex<double> *ptr_cf64;
+  const dynd::complex<double> *ptr_cf64;
   eval::eval_context ectx_inexact;
   ectx_inexact.errmode = assign_error_inexact;
 
   // Assignment to a complex float scalar
   a = nd::empty(
-      TestFixture::First::MakeType(ndt::make_type<dynd_complex<double>>()));
-  ptr_cf64 = (const dynd_complex<double> *)a.get_ndo()->m_data_pointer;
+      TestFixture::First::MakeType(ndt::make_type<dynd::complex<double>>()));
+  ptr_cf64 = (const dynd::complex<double> *)a.get_ndo()->m_data_pointer;
   a.val_assign(TestFixture::Second::To(true));
-  EXPECT_EQ(dynd_complex<double>(1), TestFixture::First::Dereference(ptr_cf64));
+  EXPECT_EQ(dynd::complex<double>(1), TestFixture::First::Dereference(ptr_cf64));
   a.val_assign(TestFixture::Second::To(false));
-  EXPECT_EQ(dynd_complex<double>(0), TestFixture::First::Dereference(ptr_cf64));
+  EXPECT_EQ(dynd::complex<double>(0), TestFixture::First::Dereference(ptr_cf64));
   a.val_assign(TestFixture::Second::To(1 / 3.0f));
-  EXPECT_EQ(dynd_complex<double>(1 / 3.0f),
+  EXPECT_EQ(dynd::complex<double>(1 / 3.0f),
             TestFixture::First::Dereference(ptr_cf64));
   a.val_assign(TestFixture::Second::To(1 / 3.0));
-  EXPECT_EQ(dynd_complex<double>(1 / 3.0),
+  EXPECT_EQ(dynd::complex<double>(1 / 3.0),
             TestFixture::First::Dereference(ptr_cf64));
   if (!TestFixture::First::IsTypeID(cuda_device_type_id) &&
       !TestFixture::Second::IsTypeID(cuda_device_type_id)) {
@@ -358,15 +358,15 @@ TYPED_TEST_P(ArrayAssign, ScalarAssignment_Complex_Float64)
                  runtime_error);
   }
 
-  a.val_assign(TestFixture::Second::To(dynd_complex<float>(1.5f, 2.75f)));
-  EXPECT_EQ(dynd_complex<double>(1.5f, 2.75f),
+  a.val_assign(TestFixture::Second::To(dynd::complex<float>(1.5f, 2.75f)));
+  EXPECT_EQ(dynd::complex<double>(1.5f, 2.75f),
             TestFixture::First::Dereference(ptr_cf64));
   if (!TestFixture::First::IsTypeID(cuda_device_type_id) &&
       !TestFixture::Second::IsTypeID(cuda_device_type_id)) {
     a.val_assign(
-        TestFixture::Second::To(dynd_complex<double>(1 / 3.0, -1 / 7.0)),
+        TestFixture::Second::To(dynd::complex<double>(1 / 3.0, -1 / 7.0)),
         &ectx_inexact);
-    EXPECT_EQ(dynd_complex<double>(1 / 3.0, -1 / 7.0),
+    EXPECT_EQ(dynd::complex<double>(1 / 3.0, -1 / 7.0),
               TestFixture::First::Dereference(ptr_cf64));
   }
 }
