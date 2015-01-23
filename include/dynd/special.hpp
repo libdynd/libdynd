@@ -7,7 +7,7 @@
 
 #include <dynd/array.hpp>
 #include <dynd/cephes.hpp>
-#include <dynd/dynd_math.hpp>
+#include <dynd/math.hpp>
 
 namespace dynd {
 
