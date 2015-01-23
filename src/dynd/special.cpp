@@ -71,10 +71,10 @@ double dynd::sph_bessel_j(double nu, double x) {
             res += term;
         } while (fabs(std::numeric_limits<double>::epsilon() * res) < fabs(term));
 
-        return std::sqrt(dynd::dynd_pi_div_4<double>()) * res;
+        return std::sqrt(dynd::_pi_by_4<double>()) * res;
     }
 
-    return std::sqrt(dynd::dynd_pi_div_2<double>() / x) * bessel_j(nu + 0.5, x);
+    return std::sqrt(dynd::_pi_by_2<double>() / x) * bessel_j(nu + 0.5, x);
 }
 
 double dynd::legendre_p_next(int l, double x, double pls1, double pl) {

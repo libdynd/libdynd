@@ -7,7 +7,7 @@
 
 #include <dynd/array.hpp>
 #include <dynd/cephes.hpp>
-#include <dynd/dynd_math.hpp>
+#include <dynd/math.hpp>
 
 namespace dynd {
 
@@ -61,7 +61,7 @@ inline double sph_bessel_j0(double x) {
 double sph_bessel_j(double nu, double x);
 
 inline double riccati_bessel_j(double nu, double x) {
-    return std::sqrt(dynd::dynd_pi_div_2<double>() * x) * bessel_j(nu + 0.5, x);
+    return std::sqrt(dynd::_pi_by_2<double>() * x) * bessel_j(nu + 0.5, x);
 }
 
 inline double bessel_y0(double x) {
@@ -81,11 +81,11 @@ inline double sph_bessel_y0(double x) {
 }
 
 inline double sph_bessel_y(double nu, double x) {
-    return std::sqrt(dynd::dynd_pi_div_2<double>() / x) * bessel_y(nu + 0.5, x);
+    return std::sqrt(dynd::_pi_by_2<double>() / x) * bessel_y(nu + 0.5, x);
 }
 
 inline double riccati_bessel_y(double nu, double x) {
-    return -std::sqrt(dynd::dynd_pi_div_2<double>() * x) * bessel_y(nu + 0.5, x);
+    return -std::sqrt(dynd::_pi_by_2<double>() * x) * bessel_y(nu + 0.5, x);
 }
 
 inline complex<double> hankel_h1(double nu, double x) {

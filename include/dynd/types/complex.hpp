@@ -31,7 +31,7 @@ public:
   {
   }
 
-  explicit complex(const std::complex<T> &rhs)
+  complex(const std::complex<T> &rhs)
       : m_real(rhs.real()), m_imag(rhs.imag())
   {
   }
