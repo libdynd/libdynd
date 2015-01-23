@@ -71,8 +71,10 @@ set(tests_SRC
     func/test_elwise.cpp
     func/test_fft.cpp
     func/test_functor_arrfunc.cpp
-    func/test_neighborhood.cpp
     func/test_multidispatch.cpp
+    func/test_neighborhood.cpp
+    func/test_outer.cpp
+    func/test_permute.cpp
     func/test_random.cpp
     func/test_reduction.cpp
     func/test_registry.cpp
