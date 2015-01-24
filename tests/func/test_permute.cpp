@@ -9,11 +9,21 @@
 #include <cmath>
 
 #include "inc_gtest.hpp"
+#include "../dynd_assertions.hpp"
 
 #include <dynd/func/apply.hpp>
+#include <dynd/func/elwise.hpp>
+#include <dynd/func/outer.hpp>
 #include <dynd/func/permute.hpp>
 
 static void func0(double &x, int y) { x = 3.5 * y; }
+
+static void func1(double (&res)[3], double x, double y, double z)
+{
+  res[0] = y - z;
+  res[1] = x - z;
+  res[2] = y - x;
+}
 
 TEST(Permute, ReturnType)
 {
@@ -23,4 +33,10 @@ TEST(Permute, ReturnType)
   nd::array res = nd::empty(ndt::make_type<double>());
   af(res, 15);
   EXPECT_EQ(res, paf(15));
+
+  af = nd::functional::apply(&func1);
+  paf = nd::functional::permute(af, {-1, 0, 1, 2});
+  res = nd::empty(paf.get_type()->get_return_type());
+  af(res, 5.0, 10.0, 1.0);
+  EXPECT_ARR_EQ(res, paf(5.0, 10.0, 1.0));
 }
