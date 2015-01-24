@@ -30,11 +30,25 @@ namespace kernels {
     void single(char *dst, char *const *src)
     {
       char *src_inv_perm[N];
-      inv_permute(src_inv_perm, dst, src, perm);
+      inv(src_inv_perm, dst, src);
 
       ckernel_prefix *child = this->get_child_ckernel();
       expr_single_t single = child->get_function<expr_single_t>();
       single(NULL, src_inv_perm, child);
+    }
+
+    void strided(char *dst, intptr_t dst_stride, char *const *src,
+                 const intptr_t *src_stride, size_t count)
+    {
+      char *src_inv_perm[N];
+      inv(src_inv_perm, dst, src);
+
+      intptr_t src_stride_inv_perm[N];
+      inv(src_stride_inv_perm, dst_stride, src_stride);
+
+      ckernel_prefix *child = this->get_child_ckernel();
+      expr_strided_t strided = child->get_function<expr_strided_t>();
+      strided(NULL, 0, src_inv_perm, src_stride_inv_perm, count, child);
     }
 
     static intptr_t
@@ -55,10 +69,10 @@ namespace kernels {
       const intptr_t *perm = data->second.data();
 
       ndt::type src_tp_inv[N];
-      inv_permute(src_tp_inv, dst_tp, src_tp, perm);
+      inv(src_tp_inv, dst_tp, src_tp, perm);
 
       const char *src_arrmeta_inv[N];
-      inv_permute(src_arrmeta_inv, dst_arrmeta, src_arrmeta, perm);
+      inv(src_arrmeta_inv, dst_arrmeta, src_arrmeta, perm);
 
       self_type::create(ckb, kernreq, ckb_offset,
                         array_wrapper<intptr_t, N>(perm));
@@ -69,7 +83,7 @@ namespace kernels {
 
   private:
     template <typename T>
-    static void inv_permute(T *src_inv, const T &dst, const T *src,
+    static void inv(T *src_inv, const T &dst, const T *src,
                             const intptr_t *perm)
     {
       for (intptr_t i = 0; i < N; ++i) {
@@ -80,6 +94,11 @@ namespace kernels {
           src_inv[i] = src[j];
         }
       }
+    }
+
+    template <typename T>
+    void inv(T *src_inv, const T &dst, const T *src) {
+      return inv(src_inv, dst, src, perm);
     }
   };
 

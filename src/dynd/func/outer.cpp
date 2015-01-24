@@ -102,19 +102,24 @@ intptr_t nd::functional::outer_instantiate(
 }
 
 int nd::functional::outer_resolve_dst_type_with_child(
-    const arrfunc_type_data *DYND_UNUSED(child), const arrfunc_type *child_tp,
-    intptr_t nsrc, const ndt::type *src_tp, int DYND_UNUSED(throw_on_error),
-    ndt::type &dst_tp, const dynd::nd::array &DYND_UNUSED(kwds),
-    const std::map<dynd::nd::string, ndt::type> &DYND_UNUSED(tp_vars))
+    const arrfunc_type_data *child, const arrfunc_type *child_tp, intptr_t nsrc,
+    const ndt::type *src_tp, int throw_on_error, ndt::type &dst_tp,
+    const dynd::nd::array &kwds,
+    const std::map<dynd::nd::string, ndt::type> &tp_vars)
 {
-  std::vector<intptr_t> shape;
-  for (intptr_t i = 0; i < nsrc; ++i) {
-    shape.push_back(src_tp[i].get_dim_size(NULL, NULL));
+  if (child->resolve_dst_type != NULL) {
+    if (!child->resolve_dst_type(child, child_tp, nsrc, src_tp, throw_on_error,
+                                 dst_tp, kwds, tp_vars)) {
+      return 0;
+    }
+  } else {
+    dst_tp = child_tp->get_return_type();
   }
 
-  dst_tp = child_tp->get_return_type();
-  for (intptr_t i = shape.size() - 1; i >= 0; --i) {
-    dst_tp = ndt::make_fixed_dim(shape[i], dst_tp);
+  for (intptr_t i = nsrc - 1; i >= 0; --i) {
+    if (!src_tp[i].is_scalar()) {
+      dst_tp = src_tp[i].with_replaced_dtype(dst_tp);
+    }
   }
 
   return 1;
