@@ -7,6 +7,7 @@
 
 #include <dynd/func/arrfunc.hpp>
 #include <dynd/kernels/apply_kernels.hpp>
+#include <dynd/types/cfixed_dim_type.hpp>
 
 namespace dynd {
 namespace nd {
