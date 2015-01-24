@@ -556,7 +556,7 @@ if (DYND_CUDA)
             src/dynd/kernels/assignment_kernels.cpp
             src/dynd/kernels/ckernel_builder.cpp
         )
-        get_filename_component(filename_DIR ${filename_CPP} DIRECTORY)
+        get_filename_component(filename_DIR ${filename_CPP} PATH)
         get_filename_component(filename_WE ${filename_CPP} NAME_WE)
         set(filename_CU ${CMAKE_CURRENT_BINARY_DIR}/${filename_DIR}/${filename_WE}.cu)
         file(WRITE ${filename_CU} "#include \"${CMAKE_CURRENT_SOURCE_DIR}/${filename_CPP}\"")
