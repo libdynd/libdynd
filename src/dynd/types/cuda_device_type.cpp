@@ -89,7 +89,7 @@ intptr_t cuda_device_type::make_assignment_kernel(
     if (src_tp.get_type_id() == cuda_device_type_id) {
       child.instantiate = &make_cuda_device_builtin_type_assignment_kernel;
       // elwise will create the trampoline into a device ckernel for us
-      return nd::functional::elwise_instantiate_with_child(&child, child_tp.extended<arrfunc_type>(),
+      return nd::functional::elwise_instantiate_with_child<0>(&child, child_tp.extended<arrfunc_type>(),
                                     ckb, ckb_offset, dst_tp, dst_arrmeta,
                                     &src_tp, &src_arrmeta, kernreq, ectx, kwds, std::map<nd::string, ndt::type>());
 
@@ -99,7 +99,7 @@ intptr_t cuda_device_type::make_assignment_kernel(
           src_tp.get_type_id() == cuda_host_type_id
               ? src_tp.extended<base_memory_type>()->get_element_type()
               : src_tp;
-      return nd::functional::elwise_instantiate_with_child(
+      return nd::functional::elwise_instantiate_with_child<0>(
           &child, child_tp.extended<arrfunc_type>(), ckb, ckb_offset,
           dst_tp.extended<base_memory_type>()->get_element_type(), dst_arrmeta,
           &new_src_tp, &src_arrmeta, kernreq, ectx, kwds, std::map<nd::string, ndt::type>());
@@ -108,7 +108,7 @@ intptr_t cuda_device_type::make_assignment_kernel(
     child.instantiate = &make_cuda_from_device_builtin_type_assignment_kernel;
     ndt::type new_src_tp =
         src_tp.extended<base_memory_type>()->get_element_type();
-    return nd::functional::elwise_instantiate_with_child(
+    return nd::functional::elwise_instantiate_with_child<0>(
         &child, child_tp.extended<arrfunc_type>(), ckb, ckb_offset, dst_tp,
         dst_arrmeta, &new_src_tp, &src_arrmeta, kernreq, ectx, kwds, std::map<nd::string, ndt::type>());
   }
