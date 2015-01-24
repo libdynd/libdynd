@@ -115,14 +115,17 @@ source_group("VM Tests" REGULAR_EXPRESSION "\\/vm\\/test_[^\\/]*\\.cpp$")
 
 if (DYND_CUDA)
     # Replace some source files with their CUDA versions
-    list(REMOVE_ITEM tests_SRC
-        func/test_apply.cpp
-        func/test_elwise.cpp
+    foreach(filename_CPP
+            func/test_apply.cpp
+            func/test_elwise.cpp
         )
-    list(APPEND tests_SRC
-        func/test_apply.cu
-        func/test_elwise.cu
-        )
+        get_filename_component(filename_DIR ${filename_CPP} PATH)
+        get_filename_component(filename_WE ${filename_CPP} NAME_WE)
+        set(filename_CU ${CMAKE_CURRENT_BINARY_DIR}/${filename_DIR}/${filename_WE}.cu)
+        file(WRITE ${filename_CU} "#include \"${CMAKE_CURRENT_SOURCE_DIR}/${filename_CPP}\"")
+        list(REMOVE_ITEM tests_SRC ${filename_CPP})
+        list(APPEND tests_SRC ${filename_CU})
+    endforeach(filename_CPP)
 endif()
 
 if (DYND_CUDA)

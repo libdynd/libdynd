@@ -18,12 +18,14 @@
 
 static void func0(double &x, int y) { x = 3.5 * y; }
 
+/*
 static void func1(double (&res)[3], double x, double y, double z)
 {
   res[0] = y - z;
   res[1] = x - z;
   res[2] = y - x;
 }
+*/
 
 TEST(Permute, ReturnType)
 {

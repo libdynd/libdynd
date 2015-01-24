@@ -364,6 +364,7 @@ set(libdynd_SRC
     src/dynd/kernels/buffered_kernels.cpp
     src/dynd/kernels/bytes_assignment_kernels.cpp
     src/dynd/kernels/byteswap_kernels.cpp
+    src/dynd/kernels/ckernel_builder.cpp
     src/dynd/kernels/ckernel_common_functions.cpp
     src/dynd/kernels/comparison_kernels.cpp
     src/dynd/kernels/date_assignment_kernels.cpp
@@ -519,44 +520,6 @@ include_directories(
     thirdparty/utf8/source
     )
 
-if (DYND_CUDA)
-    # Replace some source files with their CUDA versions
-    list(REMOVE_ITEM libdynd_SRC
-        src/dynd/types/dynd_float16.cpp
-        src/dynd/types/dynd_float128.cpp
-        src/dynd/types/dynd_int128.cpp
-        src/dynd/types/dynd_uint128.cpp
-        src/dynd/kernels/assignment_kernels.cpp
-        src/dynd/func/arithmetic.cpp
-        src/dynd/func/elwise.cpp
-        )
-    list(APPEND libdynddev_SRC
-        src/dynd/kernels/assignment_kernels.cu
-        src/dynd/func/arithmetic.cu
-        src/dynd/func/elwise.cu
-        src/dynd/kernels/ckernel_builder.cu
-        src/dynd/types/dynd_float16.cu
-        src/dynd/types/dynd_float128.cu
-        src/dynd/types/dynd_int128.cu
-        src/dynd/types/dynd_uint128.cu
-        )
-
-    set(CUDA_SEPARABLE_COMPILATION ON)
-
-    if(NOT WIN32)
-        set(CUDA_NVCC_FLAGS ${CUDA_NVCC_FLAGS};-std=c++11;-Xcompiler;-fPIC)
-    endif()
-
-    # Make some warnings into errors and inhibit other warnings
-    set(CUDA_NVCC_FLAGS ${CUDA_NVCC_FLAGS};-Werror=cross-execution-space-call;
-        -Xcudafe;--diag_suppress=boolean_controlling_expr_is_constant;
-        -Xcudafe;--diag_suppress=cc_clobber_ignored)
-    if(NOT WIN32)
-        set(CUDA_NVCC_FLAGS ${CUDA_NVCC_FLAGS};
-            -Xcompiler;-Wno-unused;-Xcompiler;-Wno-unused-parameter)
-    endif()
-endif()
-
 source_group("Main Source" REGULAR_EXPRESSION "src/dynd/.*cpp")
 source_group("Main Headers" REGULAR_EXPRESSION "include/dynd/.*hpp")
 source_group("CodeGen Source" REGULAR_EXPRESSION "src/dynd/codegen/.*cpp")
@@ -577,6 +540,45 @@ source_group("PP Headers" REGULAR_EXPRESSION "include/dynd/pp/.*hpp")
 source_group("VM Source" REGULAR_EXPRESSION "src/dynd/vm/.*cpp")
 source_group("VM Headers" REGULAR_EXPRESSION "include/dynd/vm/.*hpp")
 source_group("Internal Headers" REGULAR_EXPRESSION "src/dynd/.*hpp")
+
+if (DYND_CUDA)
+    # Replace some source files with their CUDA versions
+    foreach(filename_CPP
+            # Types
+            src/dynd/types/dynd_float16.cpp
+            src/dynd/types/dynd_float128.cpp
+            src/dynd/types/dynd_int128.cpp
+            src/dynd/types/dynd_uint128.cpp
+            # Func
+            src/dynd/func/arithmetic.cpp
+            src/dynd/func/elwise.cpp
+            # Kernels
+            src/dynd/kernels/assignment_kernels.cpp
+            src/dynd/kernels/ckernel_builder.cpp
+        )
+        get_filename_component(filename_DIR ${filename_CPP} PATH)
+        get_filename_component(filename_WE ${filename_CPP} NAME_WE)
+        set(filename_CU ${CMAKE_CURRENT_BINARY_DIR}/${filename_DIR}/${filename_WE}.cu)
+        file(WRITE ${filename_CU} "#include \"${CMAKE_CURRENT_SOURCE_DIR}/${filename_CPP}\"")
+        list(REMOVE_ITEM libdynd_SRC ${filename_CPP})
+        list(APPEND libdynddev_SRC ${filename_CU})
+    endforeach(filename_CPP)
+
+    set(CUDA_SEPARABLE_COMPILATION ON)
+
+    if(NOT WIN32)
+        set(CUDA_NVCC_FLAGS ${CUDA_NVCC_FLAGS};-std=c++11;-Xcompiler;-fPIC)
+    endif()
+
+    # Make some warnings into errors and inhibit other warnings
+    set(CUDA_NVCC_FLAGS ${CUDA_NVCC_FLAGS};-Werror=cross-execution-space-call;
+        -Xcudafe;--diag_suppress=boolean_controlling_expr_is_constant;
+        -Xcudafe;--diag_suppress=cc_clobber_ignored)
+    if(NOT WIN32)
+        set(CUDA_NVCC_FLAGS ${CUDA_NVCC_FLAGS};
+            -Xcompiler;-Wno-unused;-Xcompiler;-Wno-unused-parameter)
+    endif()
+endif()
 
 if (DYND_FFTW)
     find_path(FFTW_PATH fftw3.h)
