@@ -122,7 +122,11 @@ if (DYND_CUDA)
         get_filename_component(filename_DIR ${filename_CPP} PATH)
         get_filename_component(filename_WE ${filename_CPP} NAME_WE)
         set(filename_CU ${CMAKE_CURRENT_BINARY_DIR}/${filename_DIR}/${filename_WE}.cu)
-        file(WRITE ${filename_CU} "#include \"${CMAKE_CURRENT_SOURCE_DIR}/${filename_CPP}\"")
+        add_custom_command(
+            OUTPUT "${filename_CU}"
+            COMMAND mkdir -p ${filename_DIR}
+            COMMAND echo "\\\#include \\\"${CMAKE_CURRENT_SOURCE_DIR}/${filename_CPP}\\\"" > ${filename_CU}
+        )
         list(REMOVE_ITEM tests_SRC ${filename_CPP})
         list(APPEND tests_SRC ${filename_CU})
     endforeach(filename_CPP)

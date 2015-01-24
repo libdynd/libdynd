@@ -20,7 +20,7 @@ static void BM_Func_Arithmetic_Add(benchmark::State &state)
   ndt::type dst_tp = ndt::make_fixed_dim(100000, ndt::make_type<double>());
 
   nd::array a = nd::random::uniform(kwds("dst_tp", ndt::make_fixed_dim(1000, ndt::make_type<double>())));
-  nd::array c = nd::random::uniform(kwds("dst_tp", ndt::make_fixed_dim(1000, ndt::make_type<double>())));
+  nd::array b = nd::random::uniform(kwds("dst_tp", ndt::make_fixed_dim(1000, ndt::make_type<double>())));
   while (state.KeepRunning()) {
     a + b;
   }
