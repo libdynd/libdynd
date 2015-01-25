@@ -20,8 +20,12 @@
 #define DYND_CUDA_HOST_ARCH
 #endif // __CUDA_ARCH__
 
-#define DYND_CUDA_DEVICE __device__ // A variable that resides on, or a function that is compiled for, the device
-#define DYND_CUDA_HOST_DEVICE __host__ DYND_CUDA_DEVICE // A function that is compiled for both the host and the device
+#define DYND_CUDA_DEVICE                                                       \
+  __device__ // A variable that resides on, or a function that is compiled for,
+             // the device
+#define DYND_CUDA_HOST_DEVICE                                                  \
+  __host__ DYND_CUDA_DEVICE // A function that is compiled for both the host and
+                            // the device
 #define DYND_CUDA_GLOBAL __global__ // A function that is a CUDA kernel
 
 #else // We are not compiling with NVIDIA's nvcc
@@ -31,7 +35,8 @@
 
 namespace dynd {
 template <typename T>
-inline bool isinf(T arg) {
+inline bool isinf(T arg)
+{
 #ifndef _MSC_VER
   return (std::isinf)(arg);
 #else
@@ -47,7 +52,8 @@ namespace dynd {
 
 // Prevent from nvcc clashing with cmath
 template <typename T>
-inline bool isfinite(T arg) {
+inline bool isfinite(T arg)
+{
 #ifndef _MSC_VER
   return (std::isfinite)(arg);
 #else
@@ -59,47 +65,136 @@ inline bool isfinite(T arg) {
 #ifdef DYND_CUDA
 
 namespace dynd {
-    /**
-     * Configuration of threads in a CUDA kernel, specialized to the number of grid
-     * and block dimensions for efficiency.
-     */
-    template <int grid_ndim, int block_ndim>
-    struct cuda_global_config;
+/**
+ * Configuration of threads in a CUDA kernel, specialized to the number of grid
+ * and block dimensions for efficiency.
+ */
+template <int grid_ndim, int block_ndim>
+struct cuda_global_config;
 
-    template <>
-    struct cuda_global_config<1, 1> {
-        unsigned int grid;
-        unsigned int block;
-        unsigned int threads;
+template <>
+struct cuda_global_config<1, 1> {
+  unsigned int grid;
+  unsigned int block;
+  unsigned int threads;
 
-        cuda_global_config() {}
+  cuda_global_config() {}
 
-        cuda_global_config(unsigned int grid, unsigned int block)
-            : grid(grid), block(block), threads(grid * block) {}
-    };
+  cuda_global_config(unsigned int grid, unsigned int block)
+      : grid(grid), block(block), threads(grid * block)
+  {
+  }
+};
 
-    template <int grid_ndim, int block_ndim>
-    inline cuda_global_config<grid_ndim, block_ndim> make_cuda_global_config(size_t count);
+template <int grid_ndim, int block_ndim>
+inline cuda_global_config<grid_ndim, block_ndim>
+make_cuda_global_config(size_t count);
 
-    template <>
-    inline cuda_global_config<1, 1> make_cuda_global_config(size_t DYND_UNUSED(count)) {
-        // TODO: This should be chosen optimally depending on 'count'. For now, we default to a "good" configuration.
-        return cuda_global_config<1, 1>(256, 256);
-    }
+template <>
+inline cuda_global_config<1, 1>
+make_cuda_global_config(size_t DYND_UNUSED(count))
+{
+  // TODO: This should be chosen optimally depending on 'count'. For now, we
+  // default to a "good" configuration.
+  return cuda_global_config<1, 1>(256, 256);
+}
 
 #ifdef __CUDACC__
-    /**
-     * Returns the unique index of a thread in a CUDA kernel.
-     */
-    template <int grid_ndim, int block_ndim>
-    DYND_CUDA_DEVICE inline unsigned int get_cuda_global_thread();
+/**
+ * Returns the unique index of a thread in a CUDA kernel.
+ */
+template <int grid_ndim, int block_ndim>
+DYND_CUDA_DEVICE inline unsigned int get_cuda_global_thread();
 
-    template <>
-    DYND_CUDA_DEVICE inline unsigned int get_cuda_global_thread<1, 1>() {
-        return blockIdx.x * blockDim.x + threadIdx.x;
-    }
+template <>
+DYND_CUDA_DEVICE inline unsigned int get_cuda_global_thread<1, 1>()
+{
+  return blockIdx.x * blockDim.x + threadIdx.x;
+}
 #endif // __CUDACC__
 
 } // namespace dynd
 
 #endif // DYND_CUDA
+
+namespace dynd {
+
+template <size_t I>
+DYND_CUDA_HOST_DEVICE typename std::enable_if<I != 0, intptr_t>::type
+get_thread_id()
+{
+  return 0;
+}
+
+template <size_t I>
+DYND_CUDA_HOST_DEVICE typename std::enable_if<I == 0, intptr_t>::type
+get_thread_id()
+{
+#ifdef __CUDA_ARCH__
+  return blockIdx.x * blockDim.x + threadIdx.x;
+#else
+  return 0;
+#endif
+}
+
+template <size_t I>
+DYND_CUDA_HOST_DEVICE typename std::enable_if<I != 0, intptr_t>::type
+get_thread_count()
+{
+  return 1;
+}
+
+template <size_t I>
+DYND_CUDA_HOST_DEVICE typename std::enable_if<I == 0, intptr_t>::type
+get_thread_count()
+{
+#ifdef __CUDA_ARCH__
+  return gridDim.x * blockDim.x;
+#else
+  return 1;
+#endif
+}
+
+template <size_t I>
+DYND_CUDA_HOST_DEVICE typename std::enable_if<I != 0, intptr_t>::type
+get_thread_local_count(size_t count)
+{
+  return count;
+}
+
+template <size_t I>
+DYND_CUDA_HOST_DEVICE typename std::enable_if<I == 0, intptr_t>::type
+get_thread_local_count(size_t count)
+{
+  size_t thread_id = get_thread_id<I>();
+  size_t thread_count = get_thread_count<I>();
+
+  if (thread_id < count % thread_count) {
+    return count / thread_count + 1;
+  } else {
+    return count / thread_count;
+  }
+}
+
+template <size_t I>
+DYND_CUDA_HOST_DEVICE typename std::enable_if<I != 0, intptr_t>::type
+get_thread_local_offset(size_t DYND_UNUSED(count))
+{
+  return 0;
+}
+
+template <size_t I>
+DYND_CUDA_HOST_DEVICE typename std::enable_if<I == 0, intptr_t>::type
+get_thread_local_offset(size_t count)
+{
+  size_t thread_id = get_thread_id<I>();
+  size_t thread_count = get_thread_count<I>();
+
+  if (thread_id < count % thread_count) {
+    return thread_id * (count / thread_count + 1);
+  } else {
+    return thread_id * count / thread_count + count % thread_count;
+  }
+}
+
+} // namespace dynd

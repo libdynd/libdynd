@@ -78,7 +78,7 @@ namespace kernels {
     {
       kernels::cuda_parallel_single << <blocks, threads>>>
           (dst, array_wrapper<char *, Nsrc>(src), ckb.get());
-      throw_if_not_cuda_success(cudaDeviceSynchronize());
+      // check for CUDA errors here
     }
 
     void strided(char *dst, intptr_t dst_stride, char *const *src,
@@ -87,7 +87,7 @@ namespace kernels {
       cuda_parallel_strided << <blocks, threads>>>
           (dst, dst_stride, array_wrapper<char *, Nsrc>(src),
            array_wrapper<intptr_t, Nsrc>(src_stride), count, ckb.get());
-      throw_if_not_cuda_success(cudaDeviceSynchronize());
+      // check for CUDA errors here
     }
 
     static intptr_t instantiate(const arrfunc_type_data *DYND_UNUSED(af_self),

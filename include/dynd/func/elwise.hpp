@@ -20,6 +20,7 @@ namespace nd {
 
     arrfunc elwise(const arrfunc &child);
 
+    template <int I = 0>
     intptr_t elwise_instantiate(
         const arrfunc_type_data *self, const arrfunc_type *DYND_UNUSED(self_tp),
         void *ckb, intptr_t ckb_offset, const ndt::type &dst_tp,
@@ -46,7 +47,19 @@ namespace nd {
      *                 as required by the caller.
      * \param ectx  The evaluation context.
      */
-    intptr_t elwise_instantiate_with_child(
+    template <int I>
+        typename std::enable_if <
+        I<10, intptr_t>::type elwise_instantiate_with_child(
+            const arrfunc_type_data *child, const arrfunc_type *child_tp,
+            void *ckb, intptr_t ckb_offset, const ndt::type &dst_tp,
+            const char *dst_arrmeta, const ndt::type *src_tp,
+            const char *const *src_arrmeta, dynd::kernel_request_t kernreq,
+            const eval::eval_context *ectx, const dynd::nd::array &kwds,
+            const std::map<dynd::nd::string, ndt::type> &tp_vars);
+
+    template <int I>
+    typename std::enable_if<I == 10, intptr_t>::type
+    elwise_instantiate_with_child(
         const arrfunc_type_data *child, const arrfunc_type *child_tp, void *ckb,
         intptr_t ckb_offset, const ndt::type &dst_tp, const char *dst_arrmeta,
         const ndt::type *src_tp, const char *const *src_arrmeta,
@@ -54,7 +67,7 @@ namespace nd {
         const dynd::nd::array &kwds,
         const std::map<dynd::nd::string, ndt::type> &tp_vars);
 
-    template <type_id_t dst_dim_id, type_id_t src_dim_id>
+    template <type_id_t dst_dim_id, type_id_t src_dim_id, int I>
     intptr_t elwise_instantiate_with_child(
         const arrfunc_type_data *child, const arrfunc_type *child_tp, void *ckb,
         intptr_t ckb_offset, const ndt::type &dst_tp, const char *dst_arrmeta,
@@ -92,12 +105,12 @@ namespace kernels {
    * This requires that the child kernel be created with the
    * kernel_request_strided type of kernel.
    */
-  template <type_id_t dst_dim_type_id, type_id_t src_dim_type_id, int N>
+  template <type_id_t dst_dim_type_id, type_id_t src_dim_type_id, int N, int I>
   struct elwise_ck;
 
-  template <int N>
-  struct elwise_ck<fixed_dim_type_id, fixed_dim_type_id, N>
-      : expr_ck<elwise_ck<fixed_dim_type_id, fixed_dim_type_id, N>,
+  template <int N, int I>
+  struct elwise_ck<fixed_dim_type_id, fixed_dim_type_id, N, I>
+      : expr_ck<elwise_ck<fixed_dim_type_id, fixed_dim_type_id, N, I>,
                 kernel_request_cuda_host_device, N> {
     typedef elwise_ck self_type;
 
@@ -115,21 +128,34 @@ namespace kernels {
     {
       ckernel_prefix *child = this->get_child_ckernel();
       expr_strided_t opchild = child->get_function<expr_strided_t>();
-      opchild(dst, this->dst_stride, src, this->src_stride, this->size, child);
+
+      size_t thread_local_offset = get_thread_local_offset<I>(this->size);
+      size_t thread_local_count = get_thread_local_count<I>(this->size);
+
+      char *src_loop[N];
+      for (int j = 0; j != N; ++j) {
+        src_loop[j] = src[j] + thread_local_offset * this->src_stride[j];
+      }
+      dst += thread_local_offset * this->dst_stride;
+      opchild(dst, this->dst_stride, src_loop, this->src_stride, thread_local_count, child);
     }
 
     DYND_CUDA_HOST_DEVICE void strided(char *dst, intptr_t dst_stride,
                                        char *const *src,
                                        const intptr_t *src_stride, size_t count)
     {
+      size_t thread_local_offset = get_thread_local_offset<I>(this->size);
+      size_t thread_local_count = get_thread_local_count<I>(this->size);
+
       ckernel_prefix *child = this->get_child_ckernel();
       expr_strided_t opchild = child->get_function<expr_strided_t>();
-      intptr_t inner_size = this->size, inner_dst_stride = this->dst_stride;
-      const intptr_t *inner_src_stride = this->src_stride;
       char *src_loop[N];
-      memcpy(src_loop, src, sizeof(src_loop));
+      for (int j = 0; j != N; ++j) {
+        src_loop[j] = src[j] + thread_local_offset * this->src_stride[j];
+      }
+      dst += thread_local_offset * this->dst_stride;
       for (size_t i = 0; i != count; ++i) {
-        opchild(dst, inner_dst_stride, src_loop, inner_src_stride, inner_size,
+        opchild(dst, this->dst_stride, src_loop, this->src_stride, thread_local_count,
                 child);
         dst += dst_stride;
         for (int j = 0; j != N; ++j) {
@@ -204,7 +230,7 @@ namespace kernels {
 
       // If there are still dimensions to broadcast, recursively lift more
       if (!finished) {
-        return nd::functional::elwise_instantiate_with_child(
+        return nd::functional::elwise_instantiate_with_child<I + 1>(
             child, child_tp, ckb, ckb_offset, child_dst_tp, child_dst_arrmeta,
             child_src_tp, child_src_arrmeta, kernreq, ectx, kwds, tp_vars);
       }
@@ -216,9 +242,9 @@ namespace kernels {
     }
   };
 
-  template <>
-  struct elwise_ck<fixed_dim_type_id, fixed_dim_type_id, 0>
-      : expr_ck<elwise_ck<fixed_dim_type_id, fixed_dim_type_id, 0>,
+  template <int I>
+  struct elwise_ck<fixed_dim_type_id, fixed_dim_type_id, 0, I>
+      : expr_ck<elwise_ck<fixed_dim_type_id, fixed_dim_type_id, 0, I>,
                 kernel_request_cuda_host_device, 0> {
     typedef elwise_ck self_type;
 
@@ -291,7 +317,7 @@ namespace kernels {
 
       // If there are still dimensions to broadcast, recursively lift more
       if (!finished) {
-        return nd::functional::elwise_instantiate_with_child(
+        return nd::functional::elwise_instantiate_with_child<I + 1>(
             child, child_tp, ckb, ckb_offset, child_dst_tp, child_dst_arrmeta,
             NULL, NULL, kernreq, ectx, kwds, tp_vars);
       }
@@ -309,9 +335,9 @@ namespace kernels {
    * This requires that the child kernel be created with the
    * kernel_request_strided type of kernel.
    */
-  template <int N>
-  struct elwise_ck<fixed_dim_type_id, var_dim_type_id, N>
-      : expr_ck<elwise_ck<fixed_dim_type_id, var_dim_type_id, N>,
+  template <int N, int I>
+  struct elwise_ck<fixed_dim_type_id, var_dim_type_id, N, I>
+      : expr_ck<elwise_ck<fixed_dim_type_id, var_dim_type_id, N, I>,
                 kernel_request_host, N> {
     typedef elwise_ck self_type;
 
@@ -451,7 +477,7 @@ namespace kernels {
 
       // If there are still dimensions to broadcast, recursively lift more
       if (!finished) {
-        return nd::functional::elwise_instantiate_with_child(
+        return nd::functional::elwise_instantiate_with_child<I + 1>(
             child, child_tp, ckb, ckb_offset, child_dst_tp, child_dst_arrmeta,
             child_src_tp, child_src_arrmeta, kernel_request_strided, ectx, kwds,
             tp_vars);
@@ -464,9 +490,9 @@ namespace kernels {
     }
   };
 
-  template <>
-  struct elwise_ck<fixed_dim_type_id, var_dim_type_id, 0>
-      : expr_ck<elwise_ck<fixed_dim_type_id, var_dim_type_id, 0>,
+  template <int I>
+  struct elwise_ck<fixed_dim_type_id, var_dim_type_id, 0, I>
+      : expr_ck<elwise_ck<fixed_dim_type_id, var_dim_type_id, 0, I>,
                 kernel_request_host, 0> {
     typedef elwise_ck self_type;
 
@@ -506,8 +532,9 @@ namespace kernels {
     instantiate(const arrfunc_type_data *child, const arrfunc_type *child_tp,
                 void *ckb, intptr_t ckb_offset, const ndt::type &dst_tp,
                 const char *dst_arrmeta, const ndt::type *DYND_UNUSED(src_tp),
-                const char *const *DYND_UNUSED(src_arrmeta), kernel_request_t kernreq,
-                const eval::eval_context *ectx, const nd::array &kwds,
+                const char *const *DYND_UNUSED(src_arrmeta),
+                kernel_request_t kernreq, const eval::eval_context *ectx,
+                const nd::array &kwds,
                 const std::map<dynd::nd::string, ndt::type> &tp_vars)
     {
       intptr_t dst_ndim = dst_tp.get_ndim();
@@ -532,7 +559,7 @@ namespace kernels {
 
       // If there are still dimensions to broadcast, recursively lift more
       if (!finished) {
-        return nd::functional::elwise_instantiate_with_child(
+        return nd::functional::elwise_instantiate_with_child<I + 1>(
             child, child_tp, ckb, ckb_offset, child_dst_tp, child_dst_arrmeta,
             NULL, NULL, kernel_request_strided, ectx, kwds, tp_vars);
       }
@@ -549,9 +576,9 @@ namespace kernels {
    * This requires that the child kernel be created with the
    * kernel_request_strided type of kernel.
    */
-  template <int N>
-  struct elwise_ck<var_dim_type_id, fixed_dim_type_id, N>
-      : expr_ck<elwise_ck<var_dim_type_id, fixed_dim_type_id, N>,
+  template <int N, int I>
+  struct elwise_ck<var_dim_type_id, fixed_dim_type_id, N, I>
+      : expr_ck<elwise_ck<var_dim_type_id, fixed_dim_type_id, N, I>,
                 kernel_request_host, N> {
     typedef elwise_ck self_type;
 
@@ -770,7 +797,7 @@ namespace kernels {
 
       // If there are still dimensions to broadcast, recursively lift more
       if (!finished) {
-        return nd::functional::elwise_instantiate_with_child(
+        return nd::functional::elwise_instantiate_with_child<I + 1>(
             child, child_tp, ckb, ckb_offset, child_dst_tp, child_dst_arrmeta,
             child_src_tp, child_src_arrmeta, kernel_request_strided, ectx, kwds,
             tp_vars);
@@ -783,9 +810,9 @@ namespace kernels {
     }
   };
 
-  template <>
-  struct elwise_ck<var_dim_type_id, fixed_dim_type_id, 0>
-      : expr_ck<elwise_ck<var_dim_type_id, fixed_dim_type_id, 0>,
+  template <int I>
+  struct elwise_ck<var_dim_type_id, fixed_dim_type_id, 0, I>
+      : expr_ck<elwise_ck<var_dim_type_id, fixed_dim_type_id, 0, I>,
                 kernel_request_host, 0> {
     typedef elwise_ck self_type;
 
@@ -848,8 +875,7 @@ namespace kernels {
       } else {
         modified_dst_stride = this->dst_stride;
       }
-      opchild(modified_dst, modified_dst_stride, NULL,
-              NULL, dim_size, child);
+      opchild(modified_dst, modified_dst_stride, NULL, NULL, dim_size, child);
     }
 
     static void destruct(ckernel_prefix *self)
@@ -861,8 +887,9 @@ namespace kernels {
     instantiate(const arrfunc_type_data *child, const arrfunc_type *child_tp,
                 void *ckb, intptr_t ckb_offset, const ndt::type &dst_tp,
                 const char *dst_arrmeta, const ndt::type *DYND_UNUSED(src_tp),
-                const char *const *DYND_UNUSED(src_arrmeta), kernel_request_t kernreq,
-                const eval::eval_context *ectx, const nd::array &kwds,
+                const char *const *DYND_UNUSED(src_arrmeta),
+                kernel_request_t kernreq, const eval::eval_context *ectx,
+                const nd::array &kwds,
                 const std::map<dynd::nd::string, ndt::type> &tp_vars)
     {
       intptr_t dst_ndim = dst_tp.get_ndim();
@@ -889,22 +916,20 @@ namespace kernels {
 
       // If there are still dimensions to broadcast, recursively lift more
       if (!finished) {
-        return nd::functional::elwise_instantiate_with_child(
+        return nd::functional::elwise_instantiate_with_child<I + 1>(
             child, child_tp, ckb, ckb_offset, child_dst_tp, child_dst_arrmeta,
-            NULL, NULL, kernel_request_strided, ectx, kwds,
-            tp_vars);
+            NULL, NULL, kernel_request_strided, ectx, kwds, tp_vars);
       }
       // All the types matched, so instantiate the elementwise handler
       return child->instantiate(child, child_tp, ckb, ckb_offset, child_dst_tp,
-                                child_dst_arrmeta, NULL,
-                                NULL, kernel_request_strided, ectx,
-                                kwds, tp_vars);
+                                child_dst_arrmeta, NULL, NULL,
+                                kernel_request_strided, ectx, kwds, tp_vars);
     }
   };
 
-  template <int N>
-  struct elwise_ck<var_dim_type_id, var_dim_type_id, N>
-      : elwise_ck<var_dim_type_id, fixed_dim_type_id, N> {
+  template <int N, int I>
+  struct elwise_ck<var_dim_type_id, var_dim_type_id, N, I>
+      : elwise_ck<var_dim_type_id, fixed_dim_type_id, N, I> {
   };
 
 } // namespace dynd::kernels
