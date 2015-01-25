@@ -345,7 +345,7 @@ public:
   {
     cuda_device_init<self_type> << <1, 1>>>
         (rawself, kernreq, std::forward<A>(args)...);
-    throw_if_not_cuda_success(cudaDeviceSynchronize());
+    // check for CUDA errors here
 
     return self_type::get_self(rawself);
   }
@@ -359,7 +359,7 @@ public:
   void destroy(ckernel_prefix *self)
   {
     cuda_device_destroy << <1, 1>>> (self);
-    throw_if_not_cuda_success(cudaDeviceSynchronize());
+    // check for CUDA errors here
   }
 };
 

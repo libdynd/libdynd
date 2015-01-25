@@ -40,6 +40,7 @@ TYPED_TEST_P(Arithmetic, SimpleBroadcast)
   EXPECT_EQ(3, c(1, 0).as<int>());
   EXPECT_EQ(7, c(1, 1).as<int>());
   EXPECT_EQ(-7, c(1, 2).as<int>());
+
   c = a - b;
   EXPECT_EQ(ndt::make_type<int>(), c.get_dtype().without_memory_type());
   EXPECT_EQ(1, c(0, 0).as<int>());
