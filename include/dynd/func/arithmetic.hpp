@@ -17,6 +17,7 @@ namespace dynd {
                                                                                \
       DYND_CUDA_HOST_DEVICE void single(char *dst, char *const *src)           \
       {                                                                        \
+        printf("single\n");                                                    \
         *reinterpret_cast<R *>(dst) = *reinterpret_cast<A0 *>(src[0]) SYMBOL * \
                                       reinterpret_cast<A1 *>(src[1]);          \
       }                                                                        \
@@ -26,9 +27,15 @@ namespace dynd {
                                          const intptr_t *src_stride,           \
                                          size_t count)                         \
       {                                                                        \
-        char *src0 = src[0], *src1 = src[1];                                   \
+        printf("strided\n");                                                   \
+        size_t thread_local_offset = get_thread_local_offset<0>(count);        \
+        size_t thread_local_count = get_thread_local_count<0>(count);          \
+                                                                               \
+        char *src0 = src[0] + thread_local_offset * src_stride[0];             \
+        char *src1 = src[1] + thread_local_offset * src_stride[1];             \
         intptr_t src0_stride = src_stride[0], src1_stride = src_stride[1];     \
-        for (size_t i = 0; i != count; ++i) {                                  \
+        dst += thread_local_offset * dst_stride;                               \
+        for (size_t i = 0; i != thread_local_count; ++i) {                     \
           *reinterpret_cast<R *>(dst) = *reinterpret_cast<A0 *>(src0) SYMBOL * \
                                         reinterpret_cast<A1 *>(src1);          \
           dst += dst_stride;                                                   \

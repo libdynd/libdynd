@@ -151,32 +151,32 @@ static void *create_cuda_device_trampoline(void *ckb, intptr_t ckb_offset,
   switch (src_count) {
   case 1: {
     typedef kernels::cuda_parallel_ck<1> self_type;
-    self_type *self = self_type::create(ckb, kernreq, ckb_offset, 1, 1);
+    self_type *self = self_type::create(ckb, kernreq, ckb_offset, 64, 64);
     return &self->ckb;
   }
   case 2: {
     typedef kernels::cuda_parallel_ck<2> self_type;
-    self_type *self = self_type::create(ckb, kernreq, ckb_offset, 1, 1);
+    self_type *self = self_type::create(ckb, kernreq, ckb_offset, 64, 64);
     return &self->ckb;
   }
   case 3: {
     typedef kernels::cuda_parallel_ck<3> self_type;
-    self_type *self = self_type::create(ckb, kernreq, ckb_offset, 1, 1);
+    self_type *self = self_type::create(ckb, kernreq, ckb_offset, 64, 64);
     return &self->ckb;
   }
   case 4: {
     typedef kernels::cuda_parallel_ck<4> self_type;
-    self_type *self = self_type::create(ckb, kernreq, ckb_offset, 1, 1);
+    self_type *self = self_type::create(ckb, kernreq, ckb_offset, 64, 64);
     return &self->ckb;
   }
   case 5: {
     typedef kernels::cuda_parallel_ck<5> self_type;
-    self_type *self = self_type::create(ckb, kernreq, ckb_offset, 1, 1);
+    self_type *self = self_type::create(ckb, kernreq, ckb_offset, 64, 64);
     return &self->ckb;
   }
   case 6: {
     typedef kernels::cuda_parallel_ck<6> self_type;
-    self_type *self = self_type::create(ckb, kernreq, ckb_offset, 1, 1);
+    self_type *self = self_type::create(ckb, kernreq, ckb_offset, 64, 64);
     return &self->ckb;
   }
   default:
@@ -450,6 +450,7 @@ intptr_t nd::functional::elwise_instantiate(
       src_arrmeta, kernreq, ectx, kwds, tp_vars);
 }
 
+/*
 template intptr_t nd::functional::elwise_instantiate<0>(
     const arrfunc_type_data *child, const arrfunc_type *child_tp, void *ckb,
     intptr_t ckb_offset, const ndt::type &dst_tp, const char *dst_arrmeta,
@@ -457,6 +458,7 @@ template intptr_t nd::functional::elwise_instantiate<0>(
     dynd::kernel_request_t kernreq, const eval::eval_context *ectx,
     const dynd::nd::array &kwds,
     const std::map<dynd::nd::string, ndt::type> &tp_vars);
+*/
 
 int nd::functional::elwise_resolve_dst_type(
     const arrfunc_type_data *self, const arrfunc_type *DYND_UNUSED(self_tp),

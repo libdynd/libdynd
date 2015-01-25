@@ -135,12 +135,12 @@ namespace kernels {
     {
       ckernel_prefix *child = this->get_child_ckernel();
       expr_strided_t opchild = child->get_function<expr_strided_t>();
-      intptr_t inner_size = this->size, inner_dst_stride = this->dst_stride;
-      const intptr_t *inner_src_stride = this->src_stride;
       char *src_loop[N];
-      memcpy(src_loop, src, sizeof(src_loop));
+      for (int j = 0; j != N; ++j) {
+        src_loop[j] = src[j];
+      }
       for (size_t i = 0; i != count; ++i) {
-        opchild(dst, inner_dst_stride, src_loop, inner_src_stride, inner_size,
+        opchild(dst, this->dst_stride, src_loop, this->src_stride, this->size,
                 child);
         dst += dst_stride;
         for (int j = 0; j != N; ++j) {
