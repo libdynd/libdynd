@@ -5,8 +5,16 @@
 
 #include <dynd/kernels/ckernel_builder.hpp>
 
+using namespace std;
+using namespace dynd;
+
 #ifdef __CUDACC__
 
-__global__ void dynd::cuda_device_destroy(ckernel_prefix *self) { self->destroy(); }
+ckernel_builder<kernel_request_cuda_device>::pooled_allocator ckernel_builder<kernel_request_cuda_device>::allocator;
+
+__global__ void dynd::cuda_device_destroy(ckernel_prefix *self)
+{
+  self->destroy();
+}
 
 #endif
