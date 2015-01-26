@@ -12,6 +12,8 @@
 #include <dynd/kernels/ckernel_prefix.hpp>
 #include <dynd/types/type_id.hpp>
 
+#include <map>
+
 namespace dynd {
 
 namespace kernels {
@@ -287,6 +289,8 @@ public:
 
 #ifdef __CUDACC__
 
+void throw_if_not_cuda_success(cudaError_t);
+
 template <typename self_type, typename... A>
 __global__ void cuda_device_init(ckernel_prefix *rawself,
                                  kernel_request_t kernreq, A... args)
@@ -296,36 +300,69 @@ __global__ void cuda_device_init(ckernel_prefix *rawself,
 
 __global__ void cuda_device_destroy(ckernel_prefix *self);
 
-void throw_if_not_cuda_success(cudaError_t);
-
 template <>
 class ckernel_builder<kernel_request_cuda_device>
     : public base_ckernel_builder<ckernel_builder<kernel_request_cuda_device>> {
-  static void *pool;
-  static size_t pool_size;
+  static class pooled_allocator {
+    std::multimap<std::size_t, void *> available_blocks;
+    std::map<void *, std::size_t> used_blocks;
+
+  public:
+    ~pooled_allocator()
+    {
+/*
+      Todo: This needs to deallocate all existing allocations. It currently throws
+            an exception.
+
+      for (std::multimap<std::size_t, void *>::iterator i =
+               available_blocks.begin();
+           i != available_blocks.end(); ++i) {
+        throw_if_not_cuda_success(cudaFree(i->second));
+      }
+      available_blocks.clear();
+      for (std::map<void *, std::size_t>::iterator i = used_blocks.begin();
+           i != used_blocks.end(); ++i) {
+        throw_if_not_cuda_success(cudaFree(i->first));
+      }
+      used_blocks.clear();
+*/
+    }
+
+    void *allocate(size_t n)
+    {
+      void *res;
+      std::multimap<std::size_t, void *>::iterator available_block =
+          available_blocks.find(n);
+
+      if (available_block != available_blocks.end()) {
+        res = available_block->second;
+        available_blocks.erase(available_block);
+      } else {
+        throw_if_not_cuda_success(cudaMalloc(&res, n));
+      }
+
+      used_blocks.insert(std::make_pair(res, n));
+
+      return res;
+    }
+
+    void deallocate(void *ptr)
+    {
+      std::map<void *, std::size_t>::iterator iter = used_blocks.find(ptr);
+      std::size_t num_bytes = iter->second;
+      used_blocks.erase(iter);
+      available_blocks.insert(std::make_pair(num_bytes, ptr));
+    }
+  } allocator;
 
 public:
   void init()
   {
     m_data = reinterpret_cast<char *>(alloc(16 * 8));
     m_capacity = 16 * 8;
-    set(m_data, 0, 16 * 8);
   }
 
-  void *alloc(size_t size)
-  {
-    if (pool == NULL) {
-      throw_if_not_cuda_success(cudaMalloc(&pool, size));
-      pool_size = size;
-    }
-    if (pool_size == size) {
-      return pool;
-    }
-
-    void *ptr;
-    throw_if_not_cuda_success(cudaMalloc(&ptr, size));
-    return ptr;
-  }
+  void *alloc(size_t size) { return allocator.allocate(size); }
 
   void *realloc(void *old_ptr, size_t old_size, size_t new_size)
   {
@@ -335,13 +372,7 @@ public:
     return new_ptr;
   }
 
-  void free(void *ptr)
-  {
-    if (ptr == pool) {
-      return;
-    }
-    throw_if_not_cuda_success(cudaFree(ptr));
-  }
+  void free(void *ptr) { allocator.deallocate(ptr); }
 
   void *copy(void *dst, const void *src, size_t size)
   {
@@ -350,9 +381,9 @@ public:
     return dst;
   }
 
-  void *set(void *dst, int value, size_t size)
+  void *set(void *dst, int DYND_UNUSED(value), size_t DYND_UNUSED(size))
   {
-    throw_if_not_cuda_success(cudaMemset(dst, value, size));
+    // Todo: Delete this member function.
     return dst;
   }
 
