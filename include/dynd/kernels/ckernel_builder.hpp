@@ -301,6 +301,9 @@ void throw_if_not_cuda_success(cudaError_t);
 template <>
 class ckernel_builder<kernel_request_cuda_device>
     : public base_ckernel_builder<ckernel_builder<kernel_request_cuda_device>> {
+  static void *pool;
+  static size_t pool_size;
+
 public:
   void init()
   {
@@ -311,6 +314,14 @@ public:
 
   void *alloc(size_t size)
   {
+    if (pool == NULL) {
+      throw_if_not_cuda_success(cudaMalloc(&pool, size));
+      pool_size = size;
+    }
+    if (pool_size == size) {
+      return pool;
+    }
+
     void *ptr;
     throw_if_not_cuda_success(cudaMalloc(&ptr, size));
     return ptr;
@@ -324,7 +335,13 @@ public:
     return new_ptr;
   }
 
-  void free(void *ptr) { throw_if_not_cuda_success(cudaFree(ptr)); }
+  void free(void *ptr)
+  {
+    if (ptr == pool) {
+      return;
+    }
+    throw_if_not_cuda_success(cudaFree(ptr));
+  }
 
   void *copy(void *dst, const void *src, size_t size)
   {
