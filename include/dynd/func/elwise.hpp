@@ -32,7 +32,7 @@ namespace nd {
     /**
      * Lifts the provided ckernel, broadcasting it as necessary to execute
      * across the additional dimensions in the ``lifted_types`` array.
-     *
+     * 
      * This version is for 'expr' ckernels.
      *
      * \param child  The arrfunc being lifted
@@ -129,33 +129,20 @@ namespace kernels {
       ckernel_prefix *child = this->get_child_ckernel();
       expr_strided_t opchild = child->get_function<expr_strided_t>();
 
-      size_t thread_local_offset = get_thread_local_offset<I>(this->size);
-      size_t thread_local_count = get_thread_local_count<I>(this->size);
-
-      char *src_loop[N];
-      for (int j = 0; j != N; ++j) {
-        src_loop[j] = src[j] + thread_local_offset * this->src_stride[j];
-      }
-      dst += thread_local_offset * this->dst_stride;
-      opchild(dst, this->dst_stride, src_loop, this->src_stride, thread_local_count, child);
+      opchild(dst, this->dst_stride, src, this->src_stride, this->size, child);
     }
 
     DYND_CUDA_HOST_DEVICE void strided(char *dst, intptr_t dst_stride,
                                        char *const *src,
                                        const intptr_t *src_stride, size_t count)
     {
-      size_t thread_local_offset = get_thread_local_offset<I>(this->size);
-      size_t thread_local_count = get_thread_local_count<I>(this->size);
-
       ckernel_prefix *child = this->get_child_ckernel();
       expr_strided_t opchild = child->get_function<expr_strided_t>();
+
       char *src_loop[N];
-      for (int j = 0; j != N; ++j) {
-        src_loop[j] = src[j] + thread_local_offset * this->src_stride[j];
-      }
-      dst += thread_local_offset * this->dst_stride;
+      memcpy(src_loop, src, sizeof(src_loop));
       for (size_t i = 0; i != count; ++i) {
-        opchild(dst, this->dst_stride, src_loop, this->src_stride, thread_local_count,
+        opchild(dst, this->dst_stride, src_loop, this->src_stride, this->size,
                 child);
         dst += dst_stride;
         for (int j = 0; j != N; ++j) {
