@@ -26,16 +26,9 @@ namespace dynd {
                                          const intptr_t *src_stride,           \
                                          size_t count)                         \
       {                                                                        \
-        size_t thread_id = get_thread_id<0>();                                 \
-        size_t thread_count = get_thread_count<0>();                           \
-                                                                               \
-        dst += thread_id * dst_stride;                                         \
-        char *src0 = src[0] + thread_id * src_stride[0];                       \
-        char *src1 = src[1] + thread_id * src_stride[1];                       \
-        dst_stride *= thread_count;                                            \
-        intptr_t src0_stride = thread_count * src_stride[0];                   \
-        intptr_t src1_stride = thread_count * src_stride[1];                   \
-        for (size_t i = thread_id; i < count; i += thread_count) {             \
+        char *src0 = src[0], *src1 = src[1];                                   \
+        intptr_t src0_stride = src_stride[0], src1_stride = src_stride[1];     \
+        for (size_t i = 0; i != count; ++i) {                                  \
           *reinterpret_cast<R *>(dst) = *reinterpret_cast<A0 *>(src0) SYMBOL * \
                                         reinterpret_cast<A1 *>(src1);          \
           dst += dst_stride;                                                   \
