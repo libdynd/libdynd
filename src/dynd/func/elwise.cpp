@@ -146,45 +146,37 @@ int nd::functional::elwise_resolve_dst_type_with_child(
 #ifdef __CUDACC__
 static void *create_cuda_device_trampoline(void *ckb, intptr_t ckb_offset,
                                            intptr_t src_count,
-                                           dynd::kernel_request_t kernreq,
-                                           unsigned int blocks,
-                                           unsigned int threads)
+                                           dynd::kernel_request_t kernreq)
 {
   switch (src_count) {
   case 1: {
     typedef kernels::cuda_parallel_ck<1> self_type;
-    self_type *self =
-        self_type::create(ckb, kernreq, ckb_offset, blocks, threads);
+    self_type *self = self_type::create(ckb, kernreq, ckb_offset, 256, 256);
     return &self->ckb;
   }
   case 2: {
     typedef kernels::cuda_parallel_ck<2> self_type;
-    self_type *self =
-        self_type::create(ckb, kernreq, ckb_offset, blocks, threads);
+    self_type *self = self_type::create(ckb, kernreq, ckb_offset, 256, 256);
     return &self->ckb;
   }
   case 3: {
     typedef kernels::cuda_parallel_ck<3> self_type;
-    self_type *self =
-        self_type::create(ckb, kernreq, ckb_offset, blocks, threads);
+    self_type *self = self_type::create(ckb, kernreq, ckb_offset, 256, 256);
     return &self->ckb;
   }
   case 4: {
     typedef kernels::cuda_parallel_ck<4> self_type;
-    self_type *self =
-        self_type::create(ckb, kernreq, ckb_offset, blocks, threads);
+    self_type *self = self_type::create(ckb, kernreq, ckb_offset, 256, 256);
     return &self->ckb;
   }
   case 5: {
     typedef kernels::cuda_parallel_ck<5> self_type;
-    self_type *self =
-        self_type::create(ckb, kernreq, ckb_offset, blocks, threads);
+    self_type *self = self_type::create(ckb, kernreq, ckb_offset, 256, 256);
     return &self->ckb;
   }
   case 6: {
     typedef kernels::cuda_parallel_ck<6> self_type;
-    self_type *self =
-        self_type::create(ckb, kernreq, ckb_offset, blocks, threads);
+    self_type *self = self_type::create(ckb, kernreq, ckb_offset, 256, 256);
     return &self->ckb;
   }
   default:
@@ -203,11 +195,8 @@ ndt::type nd::functional::elwise_make_type(const arrfunc_type *child_tp)
   ndt::type *pt =
       reinterpret_cast<ndt::type *>(out_param_types.get_readwrite_originptr());
 
-//  bool using_cuda = false;
-
   for (intptr_t i = 0, i_end = child_tp->get_npos(); i != i_end; ++i) {
     if (param_types[i].get_kind() == memory_kind) {
-//      using_cuda = true;
       pt[i] = pt[i].extended<base_memory_type>()->with_replaced_storage_type(
           ndt::make_ellipsis_dim(dimsname,
                                  param_types[i].without_memory_type()));
@@ -260,14 +249,14 @@ nd::arrfunc nd::functional::elwise(const arrfunc &child)
 }
 
 template <int I>
-    typename std::enable_if <
-    I<10, intptr_t>::type nd::functional::elwise_instantiate_with_child(
-        const arrfunc_type_data *child, const arrfunc_type *child_tp, void *ckb,
-        intptr_t ckb_offset, const ndt::type &dst_tp, const char *dst_arrmeta,
-        const ndt::type *src_tp, const char *const *src_arrmeta,
-        dynd::kernel_request_t kernreq, const eval::eval_context *ectx,
-        const dynd::nd::array &kwds,
-        const std::map<dynd::nd::string, ndt::type> &tp_vars)
+typename std::enable_if<I < 10, intptr_t>::type
+nd::functional::elwise_instantiate_with_child(
+    const arrfunc_type_data *child, const arrfunc_type *child_tp, void *ckb,
+    intptr_t ckb_offset, const ndt::type &dst_tp, const char *dst_arrmeta,
+    const ndt::type *src_tp, const char *const *src_arrmeta,
+    dynd::kernel_request_t kernreq, const eval::eval_context *ectx,
+    const dynd::nd::array &kwds,
+    const std::map<dynd::nd::string, ndt::type> &tp_vars)
 {
   intptr_t src_count = child_tp->get_npos();
 
