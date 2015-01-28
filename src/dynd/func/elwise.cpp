@@ -217,6 +217,7 @@ ndt::type nd::functional::elwise_make_type(const arrfunc_type *child_tp)
   }
 
   ndt::type kwd_tp = child_tp->get_kwd_struct();
+/*
   if (true) {
     intptr_t old_field_count =
         kwd_tp.extended<base_struct_type>()->get_field_count();
@@ -238,6 +239,7 @@ ndt::type nd::functional::elwise_make_type(const arrfunc_type *child_tp)
         .val_assign(ndt::make_option(ndt::make_type<int>()));
     kwd_tp = ndt::make_struct(names, fields);
   }
+*/
 
   ndt::type ret_tp =
       ndt::make_ellipsis_dim(dimsname, child_tp->get_return_type());
@@ -284,6 +286,7 @@ template <int I>
         throw invalid_argument(
             "got CUDA device_types, but not kernel_request_host");
       }
+/*
       int blocks, threads;
       try {
         if (kwds.p("blocks").is_missing()) {
@@ -303,8 +306,9 @@ template <int I>
       } catch (...) {
         threads = 256;
       }
+*/
       void *cuda_ckb = create_cuda_device_trampoline(ckb, ckb_offset, src_count,
-                                                     kernreq, blocks, threads);
+                                                     kernreq, 128, 128);
       ndt::type new_dst_tp =
           dst_tp.extended<base_memory_type>()->get_element_type();
       vector<ndt::type> new_src_tp(src_count);
