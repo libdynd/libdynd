@@ -206,6 +206,30 @@ ndt::type nd::functional::elwise_make_type(const arrfunc_type *child_tp)
   }
 
   ndt::type kwd_tp = child_tp->get_kwd_struct();
+/*
+  if (true) {
+    intptr_t old_field_count =
+        kwd_tp.extended<base_struct_type>()->get_field_count();
+    nd::array names =
+        nd::empty(ndt::make_fixed_dim(old_field_count + 2, ndt::make_string()));
+    nd::array fields =
+        nd::empty(ndt::make_fixed_dim(old_field_count + 2, ndt::make_type()));
+    for (intptr_t i = 0; i < old_field_count; ++i) {
+      names(i)
+          .val_assign(kwd_tp.extended<base_struct_type>()->get_field_name(i));
+      fields(i)
+          .val_assign(kwd_tp.extended<base_struct_type>()->get_field_type(i));
+    }
+    names(old_field_count).val_assign("threads");
+    fields(old_field_count)
+        .val_assign(ndt::make_option(ndt::make_type<int>()));
+    names(old_field_count + 1).val_assign("blocks");
+    fields(old_field_count + 1)
+        .val_assign(ndt::make_option(ndt::make_type<int>()));
+    kwd_tp = ndt::make_struct(names, fields);
+  }
+*/
+
   ndt::type ret_tp =
       ndt::make_ellipsis_dim(dimsname, child_tp->get_return_type());
 
@@ -251,8 +275,29 @@ nd::functional::elwise_instantiate_with_child(
         throw invalid_argument(
             "got CUDA device_types, but not kernel_request_host");
       }
-      void *cuda_ckb =
-          create_cuda_device_trampoline(ckb, ckb_offset, src_count, kernreq);
+/*
+      int blocks, threads;
+      try {
+        if (kwds.p("blocks").is_missing()) {
+          blocks = 256;
+        } else {
+          blocks = kwds.p("blocks").as<int>();
+        }
+      } catch (...) {
+        blocks = 256;
+      }
+      try {
+        if (kwds.p("threads").is_missing()) {
+          threads = 256;
+        } else {
+          threads = kwds.p("threads").as<int>();
+        }
+      } catch (...) {
+        threads = 256;
+      }
+*/
+      void *cuda_ckb = create_cuda_device_trampoline(ckb, ckb_offset, src_count,
+                                                     kernreq, 128, 128);
       ndt::type new_dst_tp =
           dst_tp.extended<base_memory_type>()->get_element_type();
       vector<ndt::type> new_src_tp(src_count);
