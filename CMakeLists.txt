@@ -48,16 +48,6 @@ if("${CMAKE_SOURCE_DIR}" STREQUAL "${CMAKE_CURRENT_SOURCE_DIR}")
     option(DYND_INSTALL_LIB
         "Do installation of the built libdynd library to the CMAKE_INSTALL_PREFIX"
         ON)
-# -DUSE_RELATIVE_RPATH=ON/OFF, For OSX, to use the @rpath mechanism
-#   for creating a build will be linked against with a relative path.
-#   Build dynd-python with -DUSE_RELATIVE_PATH=ON as well, and look in
-#   the CMakeLists.txt for dynd-python to see how to use this in other
-#   projects.
-    if(APPLE)
-        option(USE_RELATIVE_RPATH
-            "OSX: Set the install name of libdynd to '@rpath'."
-            OFF)
-    endif()
 # -DDYND_BUILD_TESTS=ON/OFF, whether to build the googletest unit tests.
     option(DYND_BUILD_TESTS
         "Build the googletest unit tests for libdynd."
@@ -688,17 +678,18 @@ if(WIN32)
         PREFIX "lib"
         )
 elseif(APPLE)
-    if(USE_RELATIVE_RPATH)
-        message(STATUS "Setting the libdynd install name to @rpath")
-        # MW: The INSTALL_NAME_DIR and rpath stuff is a bit confusing,
-        #     hopefully someone who really knows this stuff can fix it
-        #     up one day.
-        set_target_properties(libdynd
-            PROPERTIES
-            BUILD_WITH_INSTALL_RPATH ON
-            INSTALL_NAME_DIR "@rpath"
-            )
-    endif()
+    # The rpath stuff is confusing, and this is our attempt to get it right.
+    # It's been complicated by a bug in certain versions of CMake that plays
+    # particularly badly with CUDA. If anyone knows the "right" way to do this,
+    # that would be great.
+    #
+    # See http://stackoverflow.com/questions/22885207/opencv-and-pcl-builds-on-osx-result-in-malformed-object-load-command-cmdsize
+    #
+    set_target_properties(libdynd
+        PROPERTIES
+        BUILD_WITH_INSTALL_RPATH ON
+        INSTALL_NAME_DIR "@rpath"
+    )
 endif()
 
 if (DYND_SHARED_LIB OR (NOT DYND_INSTALL_LIB))

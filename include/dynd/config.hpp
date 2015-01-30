@@ -42,6 +42,7 @@
 #endif
 
 #include <cmath>
+#include <cctype>
 
 // Ran into some weird issues with
 // clang + gcc std library's C11
@@ -50,6 +51,10 @@
 inline bool DYND_ISNAN(float x) { return std::isnan(x); }
 inline bool DYND_ISNAN(double x) { return std::isnan(x); }
 inline bool DYND_ISNAN(long double x) { return std::isnan(x); }
+
+// Workaround for a clang issue
+#define DYND_ISSPACE std::isspace
+#define DYND_TOLOWER std::tolower
 
 #elif defined(__GNUC__)
 
@@ -66,7 +71,13 @@ inline bool DYND_ISNAN(long double x) { return std::isnan(x); }
 #define DYND_STATIC_ASSERT(value, message) static_assert(value, message)
 #define DYND_CXX_VARIADIC_TEMPLATES
 
+#define DYND_ISSPACE isspace
+#define DYND_TOLOWER tolower
+
 #elif defined(_MSC_VER)
+
+#define DYND_ISSPACE isspace
+#define DYND_TOLOWER tolower
 
 #include <float.h>
 

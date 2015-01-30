@@ -89,7 +89,7 @@ inline void skip_whitespace(const char *&rbegin, const char *end)
 {
   using namespace std;
   const char *begin = rbegin;
-  while (begin < end && isspace(*begin)) {
+  while (begin < end && DYND_ISSPACE(*begin)) {
     ++begin;
   }
   rbegin = begin;
@@ -105,7 +105,7 @@ inline void skip_whitespace_and_pound_comments(const char *&rbegin, const char *
 {
   using namespace std;
   const char *begin = rbegin;
-  while (begin < end && isspace(*begin)) {
+  while (begin < end && DYND_ISSPACE(*begin)) {
     ++begin;
   }
 
@@ -137,9 +137,9 @@ inline bool skip_required_whitespace(const char *&rbegin, const char *end)
 {
   using namespace std;
   const char *begin = rbegin;
-  if (begin < end && isspace(*begin)) {
+  if (begin < end && DYND_ISSPACE(*begin)) {
     ++begin;
-    while (begin < end && isspace(*begin)) {
+    while (begin < end && DYND_ISSPACE(*begin)) {
       ++begin;
     }
     rbegin = begin;
@@ -580,7 +580,7 @@ parse_ci_alpha_str_named_value_no_ws(const char *&rbegin, const char *end,
   if (!parse_alpha_name_no_ws(begin, end, strbegin, strend)) {
     return false;
   }
-  int strfirstchar = tolower(*strbegin);
+  int strfirstchar = DYND_TOLOWER(*strbegin);
   // Search through the named value table for a matching string
   for (int i = 0; i < N; ++i) {
     const char *name = nvt[i].name;
@@ -588,7 +588,7 @@ parse_ci_alpha_str_named_value_no_ws(const char *&rbegin, const char *end,
     if (*name++ == strfirstchar) {
       const char *strptr = strbegin + 1;
       // Compare the rest of the characters
-      while (*name != '\0' && strptr < strend && *name == tolower(*strptr)) {
+      while (*name != '\0' && strptr < strend && *name == DYND_TOLOWER(*strptr)) {
         ++name;
         ++strptr;
       }
