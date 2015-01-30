@@ -108,14 +108,14 @@ struct base_type_members {
     /** The size of a arrmeta instance for the type. */
     size_t arrmeta_size;
     /** The number of array dimensions this type has */
-    uint8_t ndim;
+    int8_t ndim;
     /** The number of strided dimensions (strided/fixed/cfixed) in a row
      *  with no pointers, var dims, etc in between. */
-    uint8_t strided_ndim;
+    int8_t strided_ndim;
 
     base_type_members(uint16_t type_id_, uint8_t kind_, uint8_t data_alignment_,
                       flags_type flags_, size_t data_size_,
-                      size_t arrmeta_size_, uint8_t ndim_, uint8_t strided_ndim_)
+                      size_t arrmeta_size_, int8_t ndim_, int8_t strided_ndim_)
         : type_id(type_id_), kind(kind_), data_alignment(data_alignment_),
           flags(flags_), data_size(data_size_), arrmeta_size(arrmeta_size_),
           ndim(ndim_), strided_ndim(strided_ndim_)

@@ -16,18 +16,34 @@
 #include <dynd/types/pow_dimsym_type.hpp>
 #include <dynd/types/ellipsis_dim_type.hpp>
 #include <dynd/types/dim_fragment_type.hpp>
+#include <dynd/types/typevar_constructed_type.hpp>
 
 using namespace std;
 using namespace dynd;
 
-// TODO: We need to properly add offsets to the concrete_arrmeta in every function below.
+// TODO: We need to properly add offsets to the concrete_arrmeta in every
+// function below.
 
 static bool recursive_match(const ndt::type &concrete,
                             const char *concrete_arrmeta,
                             const ndt::type &pattern,
                             std::map<nd::string, ndt::type> &typevars)
 {
-  if (concrete.get_ndim() == 0 && pattern.get_ndim() == 0) {
+  if (pattern.get_ndim() == -1) {
+    if (pattern.get_type_id() == typevar_constructed_type_id &&
+        concrete.get_kind() == memory_kind) {
+      ndt::type &tv_type =
+          typevars[pattern.extended<typevar_constructed_type>()->get_name()];
+      if (tv_type.is_null()) {
+        // This typevar hasn't been seen yet
+        tv_type = concrete;
+      }
+      return recursive_match(
+          concrete.extended<base_memory_type>()->get_element_type(),
+          concrete_arrmeta,
+          pattern.extended<typevar_constructed_type>()->get_arg(), typevars);
+    }
+  } else if (concrete.get_ndim() == 0 && pattern.get_ndim() == 0) {
     // Matching a scalar vs scalar
     if (pattern.get_type_id() == typevar_type_id) {
       ndt::type &tv_type =
@@ -122,8 +138,7 @@ static bool recursive_match(const ndt::type &concrete,
             }
           }
           return true;
-        }
-        else {
+        } else {
           return false;
         }
       }
@@ -182,6 +197,8 @@ static bool recursive_match(const ndt::type &concrete,
       return false;
     }
   }
+
+  return false;
 }
 
 bool ndt::pattern_match_dims(const ndt::type &concrete,
