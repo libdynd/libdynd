@@ -312,6 +312,18 @@ TEST(TypePatternMatch, Pow)
       ndt::pattern_match(ndt::type("int32"), ndt::type("D**N * E * int32")));
 }
 
+TEST(TypePatternMatch, TypeVarConstructed)
+{
+#ifdef DYND_CUDA
+  EXPECT_TRUE(ndt::pattern_match(ndt::type("cuda_device[int32]"),
+                                 ndt::type("M[int32]")));
+  EXPECT_TRUE(ndt::pattern_match(ndt::type("cuda_device[10 * 5 * int32]"),
+                                 ndt::type("M[10 * 5 * int32]")));
+  EXPECT_TRUE(ndt::pattern_match(ndt::type("cuda_device[7 * int32]"),
+                                 ndt::type("M[Dims... * T]")));
+#endif
+}
+
 TEST(TypePatternMatchDims, Simple)
 {
   // ndt::pattern_match_dims just matches the dims, it does not match the dtype,

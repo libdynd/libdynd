@@ -348,6 +348,9 @@ public:
         return at_array(4, i);
     }
 
+    /** Returns true if this type matches the pattern type provided */
+    bool matches(const ndt::type &pattern) const;
+
     /**
      * Accesses a dynamic property of the type.
      *

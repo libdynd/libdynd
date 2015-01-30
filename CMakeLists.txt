@@ -214,6 +214,7 @@ set(libdynd_SRC
     src/dynd/types/type_id.cpp
     src/dynd/types/type_pattern_match.cpp
     src/dynd/types/type_type.cpp
+    src/dynd/types/typevar_constructed_type.cpp
     src/dynd/types/typevar_dim_type.cpp
     src/dynd/types/pow_dimsym_type.cpp
     src/dynd/types/typevar_type.cpp
@@ -284,6 +285,7 @@ set(libdynd_SRC
     include/dynd/types/tuple_type.hpp
     include/dynd/types/type_id.hpp
     include/dynd/types/type_pattern_match.hpp
+    include/dynd/types/typevar_constructed_type.hpp
     include/dynd/types/typevar_dim_type.hpp
     include/dynd/types/pow_dimsym_type.hpp
     include/dynd/types/typevar_type.hpp

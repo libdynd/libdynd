@@ -25,6 +25,7 @@
 #include <dynd/types/json_type.hpp>
 #include <dynd/types/option_type.hpp>
 #include <dynd/types/type_alignment.hpp>
+#include <dynd/types/typevar_constructed_type.hpp>
 #include <dynd/func/callable.hpp>
 
 using namespace std;
@@ -208,6 +209,16 @@ TEST(DataShapeParser, StridedVarFixedDim)
   EXPECT_EQ(ndt::make_fixed_dimsym(ndt::make_var_dim(
                 ndt::make_fixed_dim(3, ndt::make_type<float>()))),
             ndt::type("Fixed * var * 3 * float32"));
+}
+
+TEST(DataShapeParser, TypeVarConstructed)
+{
+  EXPECT_EQ(ndt::make_typevar_constructed("T", ndt::type("int32")),
+                ndt::type("T[int32]"));
+  EXPECT_EQ(ndt::make_typevar_constructed("T", ndt::type("10 * A")),
+                ndt::type("T[10 * A]"));
+  EXPECT_EQ(ndt::make_typevar_constructed("T", ndt::type("Dims... * int32")),
+                ndt::type("T[Dims... * int32]"));
 }
 
 TEST(DataShapeParser, RecordOneField)

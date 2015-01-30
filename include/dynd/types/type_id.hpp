@@ -169,6 +169,7 @@ enum type_id_t {
   arrfunc_type_id,
   typevar_type_id,
   typevar_dim_type_id,
+  typevar_constructed_type_id,
   pow_dimsym_type_id,
   ellipsis_dim_type_id,
   // A special type which holds a fragment of canonical dimensions

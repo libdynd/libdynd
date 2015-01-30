@@ -161,6 +161,8 @@ std::ostream &dynd::operator<<(std::ostream &o, type_id_t tid)
     return (o << "arrfunc");
   case typevar_type_id:
     return (o << "typevar");
+  case typevar_constructed_type_id:
+    return (o << "typevar_constructed");
   case typevar_dim_type_id:
     return (o << "typevar_dim");
   case ellipsis_dim_type_id:

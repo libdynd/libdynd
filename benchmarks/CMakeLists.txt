@@ -38,7 +38,7 @@ elseif(APPLE)
         )
     set_target_properties(benchmark_libdynd
         PROPERTIES
-        SKIP_BUILD_RPATH TRUE
+        BUILD_WITH_INSTALL_RPATH TRUE
         )
 else()
     set_target_properties(benchmark_libdynd PROPERTIES

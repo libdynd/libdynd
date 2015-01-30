@@ -42,6 +42,7 @@
 #include <dynd/types/adapt_type.hpp>
 #include <dynd/func/callable.hpp>
 #include <dynd/types/any_sym_type.hpp>
+#include <dynd/types/typevar_constructed_type.hpp>
 
 using namespace std;
 using namespace dynd;
@@ -1322,7 +1323,18 @@ static ndt::type parse_datashape_nooption(const char *&rbegin, const char *end,
       result = ndt::make_any_sym();
     }
     else if (isupper(*nbegin)) {
-      result = ndt::make_typevar(nd::string(nbegin, nend));
+      if (!parse_token_ds(begin, end, '[')) {
+        result = ndt::make_typevar(nd::string(nbegin, nend));
+      } else {
+        ndt::type arg_tp = parse_datashape(begin, end, symtable);
+        if (arg_tp.is_null()) {
+          throw datashape_parse_error(begin, "expected a dynd type");
+        }
+        if (!parse_token_ds(begin, end, ']')) {
+          throw datashape_parse_error(begin, "expected closing ']'");
+        }
+        result = ndt::make_typevar_constructed(nd::string(nbegin, nend), arg_tp);
+      }
     }
     else {
       string n(nbegin, nend);
