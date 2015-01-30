@@ -148,12 +148,10 @@ elseif(APPLE)
     target_link_libraries(test_libdynd
         ${LINK_LIBS}
         )
-    if(USE_RELATIVE_RPATH)
-        add_custom_command(TARGET test_libdynd
-            POST_BUILD COMMAND ${CMAKE_INSTALL_NAME_TOOL}
-                -add_rpath "@loader_path/../"
-                $<TARGET_FILE:test_libdynd>)
-    endif()
+    set_target_properties(test_libdynd
+        PROPERTIES
+        SKIP_BUILD_RPATH TRUE
+        )
 else()
     set_target_properties(test_libdynd PROPERTIES
         COMPILE_FLAGS "-pthread")
