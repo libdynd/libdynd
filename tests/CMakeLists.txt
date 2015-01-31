@@ -126,6 +126,7 @@ if (DYND_CUDA)
             OUTPUT "${filename_CU}"
             COMMAND mkdir -p ${filename_DIR}
             COMMAND echo "\\\#include \\\"${CMAKE_CURRENT_SOURCE_DIR}/${filename_CPP}\\\"" > ${filename_CU}
+            DEPENDS libdynddev
         )
         list(REMOVE_ITEM tests_SRC ${filename_CPP})
         list(APPEND tests_SRC ${filename_CU})

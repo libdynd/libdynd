@@ -14,6 +14,7 @@ if (DYND_CUDA)
   add_custom_command(
     OUTPUT "${CMAKE_CURRENT_BINARY_DIR}/simple_example.cu"
     COMMAND echo "\\\#include \\\"${CMAKE_CURRENT_SOURCE_DIR}/simple_example.cpp\\\"" > simple_example.cu
+    DEPENDS libdynddev
     )
   cuda_add_executable(simple_example ${CMAKE_CURRENT_BINARY_DIR}/simple_example.cu
     OPTIONS -ldynddev -L${CMAKE_BINARY_DIR}

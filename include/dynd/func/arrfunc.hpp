@@ -1195,6 +1195,15 @@ namespace nd {
     return type_proxy<CKT>::apply(detail::as_arrfunc_wrapper(), self_tp, data);
   }
 
+  template <template <kernel_request_t, typename...> class TCK,
+            kernel_request_t kernreq, typename... A, typename T>
+  arrfunc as_arrfunc(const ndt::type &self_tp, const T &data)
+  {
+    typedef typename ex_for_each<TCK, kernreq, typename outer<A...>::type,
+                              sizeof...(A) >= 2>::type CKT;
+    return type_proxy<CKT>::apply(detail::as_arrfunc_wrapper(), self_tp, data);
+  }
+
   namespace decl {
 
     template <typename T>
