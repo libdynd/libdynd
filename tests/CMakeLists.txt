@@ -118,6 +118,7 @@ if (DYND_CUDA)
     foreach(filename_CPP
             func/test_apply.cpp
             func/test_elwise.cpp
+            func/test_random.cpp
         )
         get_filename_component(filename_DIR ${filename_CPP} PATH)
         get_filename_component(filename_WE ${filename_CPP} NAME_WE)

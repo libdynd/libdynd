@@ -239,8 +239,13 @@ ndt::type nd::functional::elwise_make_type(const arrfunc_type *child_tp)
     }
   */
 
-  ndt::type ret_tp =
-      ndt::make_ellipsis_dim(dimsname, child_tp->get_return_type());
+  ndt::type ret_tp = child_tp->get_return_type();
+  if (ret_tp.get_kind() == memory_kind) {
+    ret_tp = ret_tp.extended<base_memory_type>()->with_replaced_storage_type(
+        ndt::make_ellipsis_dim(dimsname, ret_tp.without_memory_type()));
+  } else {
+    ret_tp = ndt::make_ellipsis_dim(dimsname, ret_tp);
+  }
 
   return ndt::make_arrfunc(ndt::make_tuple(out_param_types), kwd_tp, ret_tp);
 }

@@ -9,6 +9,7 @@
 #endif
 
 #include <dynd/kernels/expr_kernels.hpp>
+#include <dynd/kernels/cuda_kernels.hpp>
 #include <dynd/func/arrfunc.hpp>
 
 namespace dynd {
@@ -27,7 +28,8 @@ namespace kernels {
 
   template <typename G, typename R>
   struct uniform_int_ck<kernel_request_host, G, R>
-      : expr_ck<uniform_int_ck<kernel_request_host, G, R>, kernel_request_host, 0> {
+      : expr_ck<uniform_int_ck<kernel_request_host, G, R>, kernel_request_host,
+                0> {
     typedef uniform_int_ck self_type;
 
     G &g;
@@ -88,7 +90,8 @@ namespace kernels {
 
   template <typename G, typename R>
   struct uniform_real_ck<kernel_request_host, G, R>
-      : expr_ck<uniform_real_ck<kernel_request_host, G, R>, kernel_request_host, 0> {
+      : expr_ck<uniform_real_ck<kernel_request_host, G, R>, kernel_request_host,
+                0> {
     typedef uniform_real_ck self_type;
 
     G &g;
@@ -148,12 +151,14 @@ namespace kernels {
 
   template <>
   struct uniform_real_ck<kernel_request_cuda_device, double>
-      : expr_ck<uniform_real_ck<kernel_request_cuda_device, double>, kernel_request_cuda_device, 0> {
+      : expr_ck<uniform_real_ck<kernel_request_cuda_device, double>,
+                kernel_request_cuda_device, 0> {
     typedef uniform_real_ck self_type;
 
     curandState_t *s;
 
-    uniform_real_ck(curandState_t *s) : s(s) {}
+    __device__ uniform_real_ck(curandState_t *s) : s(s) {
+    }
 
     __device__ void single(char *dst, char *const *DYND_UNUSED(src))
     {
@@ -162,13 +167,9 @@ namespace kernels {
 
     static ndt::type make_type()
     {
-      std::map<nd::string, ndt::type> tp_vars;
-      tp_vars["R"] = ndt::make_type<double>();
-
-      return ndt::substitute(ndt::type("() -> cuda_device[R]"), tp_vars, true);
+      return ndt::type("(a: ?float64, b: ?float64, dst_tp: type) -> cuda_device[float64]");
     }
 
-/*
     static intptr_t instantiate(
         const arrfunc_type_data *self, const arrfunc_type *DYND_UNUSED(self_tp),
         void *ckb, intptr_t ckb_offset, const ndt::type &DYND_UNUSED(dst_tp),
@@ -178,10 +179,18 @@ namespace kernels {
         const eval::eval_context *DYND_UNUSED(ectx), const nd::array &kwds,
         const std::map<nd::string, ndt::type> &DYND_UNUSED(tp_vars))
     {
-      self_type::create(ckb, kernreq, ckb_offset, NULL);
+      if ((kernreq & kernel_request_memory) == kernel_request_host) {
+        typedef cuda_parallel_ck<0> self_type;
+        self_type *self = self_type::create(ckb, kernreq, ckb_offset, 1, 1);
+        ckb = &self->ckb;
+        kernreq |= kernel_request_cuda_device;
+        ckb_offset = 0;
+      }
+
+      self_type::create(ckb, kernreq, ckb_offset,
+                        *self->get_data_as<curandState_t *>());
       return ckb_offset;
     }
-*/
   };
 
 #endif
@@ -191,7 +200,8 @@ namespace kernels {
 
   template <typename G, typename R>
   struct uniform_complex_ck<kernel_request_host, G, R>
-      : expr_ck<uniform_complex_ck<kernel_request_host, G, R>, kernel_request_host, 0> {
+      : expr_ck<uniform_complex_ck<kernel_request_host, G, R>,
+                kernel_request_host, 0> {
     typedef uniform_complex_ck self_type;
 
     G &g;
@@ -275,15 +285,18 @@ namespace kernels {
   };
 
   template <kernel_request_t kernreq, typename G>
-  struct uniform_ck<kernreq, G, uint16_t> : uniform_int_ck<kernreq, G, uint16_t> {
+  struct uniform_ck<kernreq, G, uint16_t>
+      : uniform_int_ck<kernreq, G, uint16_t> {
   };
 
   template <kernel_request_t kernreq, typename G>
-  struct uniform_ck<kernreq, G, uint32_t> : uniform_int_ck<kernreq, G, uint32_t> {
+  struct uniform_ck<kernreq, G, uint32_t>
+      : uniform_int_ck<kernreq, G, uint32_t> {
   };
 
   template <kernel_request_t kernreq, typename G>
-  struct uniform_ck<kernreq, G, uint64_t> : uniform_int_ck<kernreq, G, uint64_t> {
+  struct uniform_ck<kernreq, G, uint64_t>
+      : uniform_int_ck<kernreq, G, uint64_t> {
   };
 
   template <kernel_request_t kernreq, typename G>

@@ -20,8 +20,26 @@ nd::arrfunc nd::decl::random::uniform::as_arrfunc()
 
 nd::decl::random::uniform nd::random::uniform;
 
+#ifdef __CUDACC__
+
+__global__ void cuda_device_curand_init(curandState_t *s)
+{
+  curand_init(clock64(), blockIdx.x * blockDim.x + threadIdx.x, 0, s);
+}
+
+#endif
+
 nd::arrfunc nd::decl::random::cuda_uniform::as_arrfunc()
 {
-  return nd::functional::elwise(
-      nd::as_arrfunc<kernels::uniform_real_ck<kernel_request_cuda_device, double>>());
+  unsigned int blocks_per_grid = 512;
+  unsigned int threads_per_block = 512;
+
+  curandState_t *s;
+  cudaMalloc(&s, blocks_per_grid * threads_per_block * sizeof(curandState_t));
+  cuda_device_curand_init<<<blocks_per_grid, threads_per_block>>>(s);
+
+  return nd::functional::elwise(nd::as_arrfunc<
+      kernels::uniform_real_ck<kernel_request_cuda_device, double>>(s));
 }
+
+nd::decl::random::cuda_uniform nd::random::cuda_uniform;
