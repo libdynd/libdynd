@@ -366,6 +366,13 @@ nd::array pointer_type::get_option_nafunc() const
       get_value_type().get_type_id());
 }
 
+bool pointer_type::matches(const char *arrmeta, const ndt::type &other,
+                           std::map<nd::string, ndt::type> &tp_vars) const
+{
+  return m_target_tp.matches(
+      arrmeta, other.extended<pointer_type>()->m_target_tp, tp_vars);
+}
+
 static ndt::type property_get_target_type(const ndt::type &tp)
 {
   const pointer_type *pd = tp.extended<pointer_type>();

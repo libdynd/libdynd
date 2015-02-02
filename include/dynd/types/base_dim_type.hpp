@@ -91,6 +91,9 @@ public:
   virtual size_t arrmeta_copy_construct_onedim(
       char *dst_arrmeta, const char *src_arrmeta,
       memory_block_data *embedded_reference) const = 0;
+
+  virtual bool matches(const char *arrmeta, const ndt::type &other,
+                       std::map<nd::string, ndt::type> &tp_vars) const;
 };
 
 } // namespace dynd

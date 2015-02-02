@@ -404,3 +404,31 @@ void base_tuple_type::foreach_leading(const char *arrmeta, char *data,
     }
   }
 }
+
+bool base_tuple_type::matches(const char *arrmeta, const ndt::type &other,
+                              std::map<nd::string, ndt::type> &tp_vars) const
+{
+  intptr_t other_field_count =
+      other.extended<base_tuple_type>()->get_field_count();
+  bool other_variadic = other.extended<base_tuple_type>()->is_variadic();
+  if ((m_field_count == other_field_count && !m_variadic) ||
+      (m_field_count >= other_field_count && other_variadic)) {
+    auto arrmeta_offsets =
+        get_arrmeta_offsets_raw();
+    // Match against the types
+    const ndt::type *fields =
+        get_field_types_raw();
+    const ndt::type *other_fields =
+        other.extended<base_tuple_type>()->get_field_types_raw();
+    for (intptr_t i = 0; i != other_field_count; ++i) {
+      if (!fields[i].matches(
+              arrmeta + (arrmeta != NULL ? arrmeta_offsets[i] : 0),
+              other_fields[i], tp_vars)) {
+        return false;
+      }
+    }
+    return true;
+  } else {
+    return false;
+  }
+}

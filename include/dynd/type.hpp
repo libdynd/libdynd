@@ -349,7 +349,10 @@ public:
     }
 
     /** Returns true if this type matches the pattern type provided */
-    bool matches(const ndt::type &pattern) const;
+    bool matches(const char *arrmeta, const ndt::type &other,
+                 std::map<nd::string, ndt::type> &tp_vars) const;
+
+    bool matches(const ndt::type &other) const;
 
     /**
      * Accesses a dynamic property of the type.

@@ -60,8 +60,8 @@ static bool can_implicitly_convert(const ndt::type &src, const ndt::type &dst,
   }
   if (src.get_ndim() > 0 || dst.get_ndim() > 0) {
     ndt::type src_dtype, dst_dtype;
-    if (ndt::pattern_match_dims(src, dst, typevars, src_dtype, dst_dtype)) {
-      return can_implicitly_convert(src_dtype, dst_dtype, typevars);
+    if (ndt::pattern_match(src, dst, typevars)) {
+      return can_implicitly_convert(src.get_dtype(), dst.get_dtype(), typevars);
     } else {
       return false;
     }

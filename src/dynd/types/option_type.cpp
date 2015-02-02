@@ -357,6 +357,13 @@ intptr_t option_type::make_assignment_kernel(
       ckb, ckb_offset, dst_tp, dst_arrmeta, src_tp, src_arrmeta, kernreq, ectx);
 }
 
+bool option_type::matches(const char *arrmeta, const ndt::type &other,
+                          std::map<nd::string, ndt::type> &tp_vars) const
+{
+  return m_value_tp.matches(
+      arrmeta, other.extended<option_type>()->m_value_tp, tp_vars);
+}
+
 static ndt::type property_get_value_type(const ndt::type &tp)
 {
   const option_type *pd = tp.extended<option_type>();

@@ -148,6 +148,13 @@ void base_memory_type::arrmeta_destruct(char *arrmeta) const
   }
 }
 
+bool base_memory_type::matches(const char *arrmeta, const ndt::type &other,
+                               std::map<nd::string, ndt::type> &tp_vars) const
+{
+  return m_element_tp.matches(
+      arrmeta, other.extended<base_memory_type>()->m_element_tp, tp_vars);
+}
+
 static ndt::type property_get_storage_type(const ndt::type &tp)
 {
   const base_memory_type *md = tp.extended<base_memory_type>();

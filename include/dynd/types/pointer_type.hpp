@@ -102,6 +102,9 @@ public:
 
     nd::array get_option_nafunc() const;
 
+    bool matches(const char *arrmeta, const ndt::type &other,
+                 std::map<nd::string, ndt::type> &tp_vars) const;
+
     void get_dynamic_type_properties(
                     const std::pair<std::string, gfunc::callable> **out_properties,
                     size_t *out_count) const;

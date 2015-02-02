@@ -66,6 +66,9 @@ public:
   void data_destruct_strided(const char *arrmeta, char *data, intptr_t stride,
                              size_t count) const;
 
+  bool matches(const char *arrmeta, const ndt::type &other,
+               std::map<nd::string, ndt::type> &tp_vars) const;
+
   void get_dynamic_type_properties(
       const std::pair<std::string, gfunc::callable> **out_properties,
       size_t *out_count) const;

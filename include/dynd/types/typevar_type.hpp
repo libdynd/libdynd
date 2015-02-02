@@ -50,6 +50,9 @@ public:
     void arrmeta_copy_construct(char *dst_arrmeta, const char *src_arrmeta, memory_block_data *embedded_reference) const;
     void arrmeta_destruct(char *arrmeta) const;
 
+    bool matches(const char *arrmeta, const ndt::type &other,
+                 std::map<nd::string, ndt::type> &tp_vars) const;
+
     void get_dynamic_type_properties(
         const std::pair<std::string, gfunc::callable> **out_properties,
         size_t *out_count) const;

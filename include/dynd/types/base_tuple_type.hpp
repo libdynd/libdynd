@@ -112,6 +112,9 @@ public:
   void foreach_leading(const char *arrmeta, char *data, foreach_fn_t callback,
                        void *callback_data) const;
 
+  virtual bool matches(const char *arrmeta, const ndt::type &other,
+                       std::map<nd::string, ndt::type> &tp_vars) const;
+
   /**
    * Fills in the array of default data offsets based on the data sizes
    * and alignments of the types.

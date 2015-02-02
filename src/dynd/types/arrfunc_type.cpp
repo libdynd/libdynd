@@ -324,6 +324,30 @@ intptr_t arrfunc_type::make_assignment_kernel(
   throw dynd::type_error(ss.str());
 }
 
+bool arrfunc_type::matches(const char *arrmeta, const ndt::type &other,
+                           std::map<nd::string, ndt::type> &tp_vars) const
+{
+  // First match the return type
+  if (!m_return_type.matches(
+          arrmeta, other.extended<arrfunc_type>()->m_return_type, tp_vars)) {
+    return false;
+  }
+
+  // Next match all the positional parameters
+  if (!m_pos_tuple.matches(arrmeta, other.extended<arrfunc_type>()->m_pos_tuple,
+                           tp_vars)) {
+    return false;
+  }
+
+  // Finally match all the keyword parameters
+  if (!m_kwd_struct.matches(
+          arrmeta, other.extended<arrfunc_type>()->get_kwd_struct(), tp_vars)) {
+    return false;
+  }
+
+  return true;
+}
+
 static nd::array property_get_pos(const ndt::type &tp)
 {
   return tp.extended<arrfunc_type>()->get_pos_types();

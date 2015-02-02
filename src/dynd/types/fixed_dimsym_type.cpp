@@ -220,6 +220,21 @@ void fixed_dimsym_type::data_destruct_strided(const char *DYND_UNUSED(arrmeta),
   throw runtime_error(ss.str());
 }
 
+/*
+bool fixed_dimsym_type::matches(const char *arrmeta, const ndt::type &other,
+                                std::map<nd::string, ndt::type> &tp_vars) const
+{
+  switch (other.get_type_id()) {
+    case fixed_dim_type_id:
+    case cfixed_dim_type_id:
+      return m_element_tp.matches(
+          arrmeta, other.extended<base_dim_type>()->get_element_type(), tp_vars);
+    default:
+      return false;
+  }
+}
+*/
+
 static ndt::type get_element_type(const ndt::type& dt) {
     return dt.extended<fixed_dimsym_type>()->get_element_type();
 }

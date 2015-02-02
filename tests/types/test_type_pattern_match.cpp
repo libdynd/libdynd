@@ -324,6 +324,7 @@ TEST(TypePatternMatch, TypeVarConstructed)
 #endif
 }
 
+/*
 TEST(TypePatternMatchDims, Simple)
 {
   // ndt::pattern_match_dims just matches the dims, it does not match the dtype,
@@ -336,3 +337,4 @@ TEST(TypePatternMatchDims, Simple)
   EXPECT_EQ(ndt::type("int32"), cdt);
   EXPECT_EQ(ndt::type("{x: int}"), pdt);
 }
+*/

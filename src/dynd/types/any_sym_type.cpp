@@ -178,6 +178,12 @@ void any_sym_type::data_destruct_strided(const char *DYND_UNUSED(arrmeta),
   throw runtime_error(ss.str());
 }
 
+bool any_sym_type::matches(const char *DYND_UNUSED(arrmeta), const ndt::type &DYND_UNUSED(other),
+                           std::map<nd::string, ndt::type> &DYND_UNUSED(tp_vars)) const
+{
+  return true;
+}
+
 void any_sym_type::get_dynamic_type_properties(
     const std::pair<std::string, gfunc::callable> **out_properties,
     size_t *out_count) const

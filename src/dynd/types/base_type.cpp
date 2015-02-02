@@ -305,6 +305,12 @@ size_t base_type::make_comparison_kernel(
     throw not_comparable_error(src0_dt, src1_dt, comptype);
 }
 
+bool base_type::matches(const char *DYND_UNUSED(arrmeta), const ndt::type &DYND_UNUSED(other),
+                        std::map<nd::string, ndt::type> &DYND_UNUSED(tp_vars)) const
+{
+  throw std::runtime_error("not implemented");
+}
+
 void base_type::foreach_leading(const char *DYND_UNUSED(arrmeta),
                                 char *DYND_UNUSED(data),
                                 foreach_fn_t DYND_UNUSED(callback),

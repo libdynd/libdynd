@@ -605,6 +605,32 @@ void cfixed_dim_type::foreach_leading(const char *arrmeta, char *data,
   }
 }
 
+bool cfixed_dim_type::matches(const char *arrmeta, const ndt::type &other,
+                             std::map<nd::string, ndt::type> &tp_vars) const
+{
+  switch (other.get_type_id()) {
+  case fixed_dim_type_id:
+    return get_fixed_dim_size() ==
+               other.extended<fixed_dim_type>()->get_fixed_dim_size() &&
+           m_element_tp.matches(
+               arrmeta, other.extended<base_dim_type>()->get_element_type(),
+               tp_vars);
+  case cfixed_dim_type_id:
+    return get_fixed_dim_size() ==
+               other.extended<cfixed_dim_type>()->get_fixed_dim_size() &&
+           get_fixed_stride() ==
+               other.extended<cfixed_dim_type>()->get_fixed_stride() &&
+           m_element_tp.matches(arrmeta,
+                                other.extended<cfixed_dim_type>()->m_element_tp,
+                                tp_vars);
+  case fixed_dimsym_type_id:
+    return m_element_tp.matches(
+        arrmeta, other.extended<base_dim_type>()->get_element_type(), tp_vars);
+  default:
+    return false;
+  }
+}
+
 ndt::type dynd::ndt::make_cfixed_dim(intptr_t ndim, const intptr_t *shape,
                 const ndt::type& uniform_tp, const int *axis_perm)
 {

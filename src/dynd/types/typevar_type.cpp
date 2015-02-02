@@ -100,6 +100,21 @@ void typevar_type::arrmeta_destruct(char *DYND_UNUSED(arrmeta)) const
     throw type_error("Cannot store data of typevar type");
 }
 
+bool typevar_type::matches(const char *DYND_UNUSED(arrmeta), const ndt::type &other,
+                           std::map<nd::string, ndt::type> &tp_vars) const
+{
+  ndt::type &tv_type = tp_vars[m_name];
+  if (tv_type.is_null()) {
+    // This typevar hasn't been seen yet
+    tv_type = other;
+    return true;
+  } else {
+    // Make sure the type matches previous
+    // instances of the type var
+    return other == tv_type;
+  }
+}
+
 static nd::array property_get_name(const ndt::type& tp) {
     return tp.extended<typevar_type>()->get_name();
 }
