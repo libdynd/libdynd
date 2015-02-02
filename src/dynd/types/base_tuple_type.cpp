@@ -416,6 +416,8 @@ bool base_tuple_type::matches(const char *arrmeta, const ndt::type &other,
       other.extended<base_tuple_type>()->get_field_count();
   bool other_variadic = other.extended<base_tuple_type>()->is_variadic();
 
+
+
   if ((m_field_count == other_field_count && !m_variadic) ||
       (m_field_count >= other_field_count && other_variadic)) {
     auto arrmeta_offsets =

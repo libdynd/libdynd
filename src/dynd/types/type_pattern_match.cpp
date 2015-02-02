@@ -25,12 +25,6 @@ using namespace dynd;
 // TODO: We need to properly add offsets to the concrete_arrmeta in every
 // function below.
 
-// if (some other concrete type we understand) {
-//   do stuff
-// } else {
-//  call with pattern type;
-//
-
 /*
   if (pattern.get_ndim() == -1) {
     if (pattern.get_type_id() == typevar_constructed_type_id &&
@@ -49,25 +43,10 @@ using namespace dynd;
   } else
 */
 
-/*
-
-if (both scalar) {
-
-}
-
-*/
-
-static bool recursive_match(const ndt::type &concrete,
-                            const char *concrete_arrmeta,
-                            const ndt::type &pattern,
-                            std::map<nd::string, ndt::type> &typevars)
-{
-  return concrete.matches(concrete_arrmeta, pattern, typevars);
-}
 
 bool ndt::pattern_match(const ndt::type &concrete, const char *concrete_arrmeta,
                         const ndt::type &pattern,
                         std::map<nd::string, ndt::type> &typevars)
 {
-  return recursive_match(concrete, concrete_arrmeta, pattern, typevars);
+  return concrete.matches(concrete_arrmeta, pattern, typevars);
 }
