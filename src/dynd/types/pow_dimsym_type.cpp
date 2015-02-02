@@ -146,30 +146,9 @@ void pow_dimsym_type::arrmeta_destruct(char *DYND_UNUSED(arrmeta)) const
 bool pow_dimsym_type::matches(const char *arrmeta, const ndt::type &other,
                               std::map<nd::string, ndt::type> &tp_vars) const
 {
-  if (other.get_ndim() == 0) {
-    if (get_element_type().get_ndim() == 0) {
-      // Look up to see if the exponent typevar is already matched
-      ndt::type &tv_type =
-          tp_vars[get_exponent()];
-      if (tv_type.is_null()) {
-        // Fill in the exponent by the number of dimensions left
-        tv_type = ndt::make_fixed_dim(0, ndt::make_type<void>());
-      } else if (tv_type.get_type_id() == fixed_dim_type_id) {
-        // Make sure the exponent already seen matches the number of
-        // dimensions left in the concrete type
-        if (tv_type.extended<fixed_dim_type>()->get_fixed_dim_size() != 0) {
-          return false;
-        }
-      } else {
-        // The exponent is always the dim_size inside a fixed_dim_type
-        return false;
-      }
-      return other.matches(arrmeta, get_element_type(), tp_vars);
-    } else {
-      return false;
-    }
-  } else if (other.get_type_id() == pow_dimsym_type_id) {
-    if (get_base_type().matches(
+
+ if (other.get_type_id() == pow_dimsym_type_id) {
+    if (m_base_tp.matches(
             arrmeta, other.extended<pow_dimsym_type>()->get_base_type(),
             tp_vars)) {
       get_element_type().matches(
@@ -190,6 +169,28 @@ bool pow_dimsym_type::matches(const char *arrmeta, const ndt::type &other,
                tv_type.extended<typevar_dim_type>()->get_name() ==
                    other.extended<pow_dimsym_type>()->get_exponent();
       }
+    }
+  } else if (other.get_ndim() == 0) {
+    if (get_element_type().get_ndim() == 0) {
+      // Look up to see if the exponent typevar is already matched
+      ndt::type &tv_type =
+          tp_vars[get_exponent()];
+      if (tv_type.is_null()) {
+        // Fill in the exponent by the number of dimensions left
+        tv_type = ndt::make_fixed_dim(0, ndt::make_type<void>());
+      } else if (tv_type.get_type_id() == fixed_dim_type_id) {
+        // Make sure the exponent already seen matches the number of
+        // dimensions left in the concrete type
+        if (tv_type.extended<fixed_dim_type>()->get_fixed_dim_size() != 0) {
+          return false;
+        }
+      } else {
+        // The exponent is always the dim_size inside a fixed_dim_type
+        return false;
+      }
+      return other.matches(arrmeta, get_element_type(), tp_vars);
+    } else {
+      return false;
     }
   }
 

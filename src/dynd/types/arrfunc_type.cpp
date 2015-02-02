@@ -327,6 +327,10 @@ intptr_t arrfunc_type::make_assignment_kernel(
 bool arrfunc_type::matches(const char *arrmeta, const ndt::type &other,
                            std::map<nd::string, ndt::type> &tp_vars) const
 {
+  if (other.get_type_id() != arrfunc_type_id) {
+    return false;
+  }
+
   // First match the return type
   if (!m_return_type.matches(
           arrmeta, other.extended<arrfunc_type>()->m_return_type, tp_vars)) {

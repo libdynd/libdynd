@@ -369,6 +369,10 @@ nd::array pointer_type::get_option_nafunc() const
 bool pointer_type::matches(const char *arrmeta, const ndt::type &other,
                            std::map<nd::string, ndt::type> &tp_vars) const
 {
+  if (other.get_type_id() != pointer_type_id) {
+    return false;
+  }
+
   return m_target_tp.matches(
       arrmeta, other.extended<pointer_type>()->m_target_tp, tp_vars);
 }

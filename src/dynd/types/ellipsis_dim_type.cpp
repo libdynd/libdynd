@@ -124,6 +124,10 @@ void ellipsis_dim_type::arrmeta_destruct(char *DYND_UNUSED(arrmeta)) const
 bool ellipsis_dim_type::matches(const char *arrmeta, const ndt::type &other,
                                 std::map<nd::string, ndt::type> &tp_vars) const
 {
+  if (other.get_type_id() == any_sym_type_id) {
+    return true;
+  }
+
   if (other.get_ndim() == 0) {
     const nd::string &tv_name = get_name();
     if (!tv_name.is_null()) {

@@ -100,7 +100,21 @@ ndt::type ndt::type::at_array(int nindices, const irange *indices) const
 bool ndt::type::matches(const char *arrmeta, const ndt::type &other,
                         std::map<nd::string, ndt::type> &tp_vars) const
 {
-  return pattern_match(*this, arrmeta, other, tp_vars);
+  // dispatch to patterns first
+  // then categories
+  // then concrete
+
+  if (other.is_symbolic()) {
+    return other.extended()->matches(arrmeta, *this, tp_vars);
+  } else if (is_builtin()) {
+    if (other.is_builtin()) {
+      return get_type_id() == other.get_type_id();
+    } else {
+      return other.extended()->matches(arrmeta, *this, tp_vars);
+    }
+  }
+
+  return extended()->matches(arrmeta, other, tp_vars);
 }
 
 bool ndt::type::matches(const ndt::type &other) const

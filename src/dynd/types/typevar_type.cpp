@@ -103,6 +103,14 @@ void typevar_type::arrmeta_destruct(char *DYND_UNUSED(arrmeta)) const
 bool typevar_type::matches(const char *DYND_UNUSED(arrmeta), const ndt::type &other,
                            std::map<nd::string, ndt::type> &tp_vars) const
 {
+  if (!other.is_scalar()) {
+    return false;
+  }
+
+  std::cout << "typevar_type" << std::endl;
+  std::cout << "this = " << ndt::type(this, true) << std::endl;
+  std::cout << "other = " << other << std::endl;
+
   ndt::type &tv_type = tp_vars[m_name];
   if (tv_type.is_null()) {
     // This typevar hasn't been seen yet

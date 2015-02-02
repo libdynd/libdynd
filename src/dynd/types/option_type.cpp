@@ -360,8 +360,12 @@ intptr_t option_type::make_assignment_kernel(
 bool option_type::matches(const char *arrmeta, const ndt::type &other,
                           std::map<nd::string, ndt::type> &tp_vars) const
 {
-  return m_value_tp.matches(
-      arrmeta, other.extended<option_type>()->m_value_tp, tp_vars);
+  if (other.get_type_id() != option_type_id) {
+    return false;
+  }
+
+  return m_value_tp.matches(arrmeta, other.extended<option_type>()->m_value_tp,
+                            tp_vars);
 }
 
 static ndt::type property_get_value_type(const ndt::type &tp)

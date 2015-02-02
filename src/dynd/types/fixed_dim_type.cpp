@@ -755,9 +755,6 @@ bool fixed_dim_type::matches(const char *arrmeta, const ndt::type &other,
            m_element_tp.matches(
                arrmeta, other.extended<cfixed_dim_type>()->get_element_type(),
                tp_vars);
-  case fixed_dimsym_type_id:
-    return m_element_tp.matches(
-        arrmeta, other.extended<base_dim_type>()->get_element_type(), tp_vars);
   default:
     return false;
   }

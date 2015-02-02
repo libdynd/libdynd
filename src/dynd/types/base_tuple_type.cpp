@@ -408,9 +408,14 @@ void base_tuple_type::foreach_leading(const char *arrmeta, char *data,
 bool base_tuple_type::matches(const char *arrmeta, const ndt::type &other,
                               std::map<nd::string, ndt::type> &tp_vars) const
 {
+  std::cout << "base_tuple_type" << std::endl;
+  std::cout << "this = " << ndt::type(this, true) << std::endl;
+  std::cout << "other = " << other << std::endl;
+
   intptr_t other_field_count =
       other.extended<base_tuple_type>()->get_field_count();
   bool other_variadic = other.extended<base_tuple_type>()->is_variadic();
+
   if ((m_field_count == other_field_count && !m_variadic) ||
       (m_field_count >= other_field_count && other_variadic)) {
     auto arrmeta_offsets =
