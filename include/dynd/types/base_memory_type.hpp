@@ -38,8 +38,7 @@ public:
         m_element_tp(element_tp),
         m_storage_arrmeta_offset(storage_arrmeta_offset)
   {
-    if (element_tp.get_kind() == memory_kind ||
-        element_tp.get_kind() == symbolic_kind) {
+    if (element_tp.get_kind() == memory_kind) {
       stringstream ss;
       ss << "a memory space cannot be specified for type " << element_tp;
       throw runtime_error(ss.str());

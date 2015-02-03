@@ -51,10 +51,10 @@ TEST(Random, CUDAUniform)
   nd::arrfunc af = static_cast<nd::arrfunc>(nd::random::cuda_uniform);
   std::cout << af << std::endl;
 
-  ndt::type dst_tp = ndt::type("cuda_device[1000 * float64]");
-  std::cout << nd::random::cuda_uniform(kwds("dst_tp", dst_tp)) << std::endl;
+//  ndt::type dst_tp = ndt::type("cuda_device[1000 * float64]");
+//  std::cout << nd::random::cuda_uniform(kwds("dst_tp", dst_tp)) << std::endl;
 
-  std::cout << ndt::pattern_match(ndt::type("(a: ?R, b: ?int32, dst_tp: type) -> 10 * int32"),
+  std::cout << ndt::type("(a: ?R, b: ?R, dst_tp: type) -> cuda_device[Dims... * R]").matches(
     ndt::type("(a: ?R, b: ?R, dst_tp: type) -> M[Dims... * R]")) << std::endl;
 
   std::exit(-1);
