@@ -10,7 +10,7 @@ using namespace std;
 using namespace dynd;
 
 typevar_type::typevar_type(const nd::string &name)
-    : base_type(typevar_type_id, symbolic_kind, 0, 1, type_flag_symbolic, 0, 0,
+    : base_type(typevar_type_id, symbolic_kind, 0, 1, type_flag_sym_pattern, 0, 0,
                 0),
       m_name(name)
 {
@@ -98,6 +98,28 @@ void typevar_type::arrmeta_copy_construct(
 void typevar_type::arrmeta_destruct(char *DYND_UNUSED(arrmeta)) const
 {
     throw type_error("Cannot store data of typevar type");
+}
+
+bool typevar_type::matches(const ndt::type &DYND_UNUSED(self_tp),
+                           const char *DYND_UNUSED(self_arrmeta),
+                           const ndt::type &other_tp,
+                           const char *DYND_UNUSED(other_arrmeta),
+                           std::map<nd::string, ndt::type> &tp_vars) const
+{
+  if (!other_tp.is_scalar()) {
+    return false;
+  }
+
+  ndt::type &tv_type = tp_vars[m_name];
+  if (tv_type.is_null()) {
+    // This typevar hasn't been seen yet
+    tv_type = other_tp;
+    return true;
+  } else {
+    // Make sure the type matches previous
+    // instances of the type var
+    return other_tp == tv_type;
+  }
 }
 
 static nd::array property_get_name(const ndt::type& tp) {

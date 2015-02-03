@@ -19,7 +19,7 @@ using namespace dynd;
 
 any_sym_type::any_sym_type()
     : base_type(any_sym_type_id, symbolic_kind, 0, 1,
-                type_flag_symbolic | type_flag_dim_variadic, 0, 0, 0)
+                type_flag_sym_category | type_flag_dim_variadic, 0, 0, 0)
 {
 }
 
@@ -176,6 +176,16 @@ void any_sym_type::data_destruct_strided(const char *DYND_UNUSED(arrmeta),
   stringstream ss;
   ss << "Cannot have data for symbolic type " << ndt::type(this, true);
   throw runtime_error(ss.str());
+}
+
+bool any_sym_type::matches(
+    const ndt::type &DYND_UNUSED(self_tp),
+    const char *DYND_UNUSED(self_arrmeta),
+    const ndt::type &DYND_UNUSED(other_tp),
+    const char *DYND_UNUSED(other_arrmeta),
+    std::map<nd::string, ndt::type> &DYND_UNUSED(tp_vars)) const
+{
+  return true;
 }
 
 void any_sym_type::get_dynamic_type_properties(

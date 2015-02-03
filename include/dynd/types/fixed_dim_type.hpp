@@ -119,6 +119,10 @@ public:
                     char *dst_arrmeta,
                     const ndt::type& src_tp, const char *src_arrmeta) const;
 
+    bool matches(const ndt::type &self_tp, const char *self_arrmeta,
+                 const ndt::type &other_tp, const char *other_arrmeta,
+                 std::map<nd::string, ndt::type> &tp_vars) const;
+
     void get_dynamic_type_properties(
                     const std::pair<std::string, gfunc::callable> **out_properties,
                     size_t *out_count) const;

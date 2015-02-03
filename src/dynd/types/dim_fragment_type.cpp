@@ -15,7 +15,7 @@ using namespace dynd;
 
 dim_fragment_type::dim_fragment_type(intptr_t ndim, const intptr_t *tagged_dims)
     : base_dim_type(dim_fragment_type_id, ndt::make_type<void>(), 0, 1,
-                            0, type_flag_symbolic, false),
+                            0, type_flag_sym_pattern, false),
       m_tagged_dims(ndim, tagged_dims)
 {
     m_members.ndim = static_cast<uint8_t>(ndim);

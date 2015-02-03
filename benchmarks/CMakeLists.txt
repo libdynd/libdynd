@@ -36,10 +36,6 @@ elseif(APPLE)
         libdynd
         benchmark
         )
-    set_target_properties(benchmark_libdynd
-        PROPERTIES
-        BUILD_WITH_INSTALL_RPATH TRUE
-        )
 else()
     set_target_properties(benchmark_libdynd PROPERTIES
         COMPILE_FLAGS "-pthread")

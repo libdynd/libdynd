@@ -305,6 +305,21 @@ size_t base_type::make_comparison_kernel(
     throw not_comparable_error(src0_dt, src1_dt, comptype);
 }
 
+bool base_type::matches(const ndt::type &self_tp, const char *self_arrmeta,
+                        const ndt::type &other_tp, const char *other_arrmeta,
+                        std::map<nd::string, ndt::type> &tp_vars) const
+{
+  if (other_tp.is_builtin()) {
+    return false;
+  }
+
+  if (other_tp.is_sym_category() || other_tp.is_sym_pattern()) {
+    return other_tp.extended()->matches(other_tp, other_arrmeta, self_tp, self_arrmeta, tp_vars);
+  }
+
+  return *this == *other_tp.extended();
+}
+
 void base_type::foreach_leading(const char *DYND_UNUSED(arrmeta),
                                 char *DYND_UNUSED(data),
                                 foreach_fn_t DYND_UNUSED(callback),

@@ -404,3 +404,38 @@ void base_tuple_type::foreach_leading(const char *arrmeta, char *data,
     }
   }
 }
+
+bool base_tuple_type::matches(const ndt::type &self_tp, const char *self_arrmeta,
+                              const ndt::type &other_tp, const char *other_arrmeta,
+                              std::map<nd::string, ndt::type> &tp_vars) const
+{
+  if (other_tp.is_sym_category() || other_tp.is_sym_pattern()) {
+    return other_tp.extended()->matches(other_tp, other_arrmeta, self_tp,
+                                        self_arrmeta, tp_vars);
+  }
+
+  intptr_t other_field_count =
+      other_tp.extended<base_tuple_type>()->get_field_count();
+  bool other_variadic = other_tp.extended<base_tuple_type>()->is_variadic();
+
+  if ((m_field_count == other_field_count && !m_variadic) ||
+      (m_field_count >= other_field_count && other_variadic)) {
+    auto arrmeta_offsets =
+        get_arrmeta_offsets_raw();
+    // Match against the types
+    const ndt::type *fields =
+        get_field_types_raw();
+    const ndt::type *other_fields =
+        other_tp.extended<base_tuple_type>()->get_field_types_raw();
+    for (intptr_t i = 0; i != other_field_count; ++i) {
+      if (!fields[i].matches(
+              self_arrmeta + (self_arrmeta != NULL ? arrmeta_offsets[i] : 0),
+              other_fields[i], other_arrmeta, tp_vars)) {
+        return false;
+      }
+    }
+    return true;
+  } else {
+    return false;
+  }
+}

@@ -7,7 +7,6 @@
 #include <dynd/types/base_dim_type.hpp>
 #include <dynd/types/base_memory_type.hpp>
 #include <dynd/types/fixed_dim_type.hpp>
-#include <dynd/types/type_pattern_match.hpp>
 #include <dynd/types/var_dim_type.hpp>
 #include <dynd/exceptions.hpp>
 #include <dynd/typed_data_assign.hpp>
@@ -97,9 +96,36 @@ ndt::type ndt::type::at_array(int nindices, const irange *indices) const
   }
 }
 
-bool ndt::type::matches(const ndt::type &pattern) const
+bool ndt::type::matches(const char *arrmeta, const ndt::type &other_tp,
+                        const char *other_arrmeta,
+                        std::map<nd::string, ndt::type> &tp_vars) const
 {
-  return pattern_match(*this, pattern);
+  if (extended() == other_tp.extended()) {
+    return true;
+  }
+
+  if (is_builtin()) {
+    if (other_tp.is_builtin()) {
+      return false;
+    }
+
+    return other_tp.extended()->matches(other_tp, other_arrmeta, *this, arrmeta,
+                                        tp_vars);
+  }
+
+  return extended()->matches(*this, arrmeta, other_tp, other_arrmeta, tp_vars);
+}
+
+bool ndt::type::matches(const ndt::type &other_tp,
+                        std::map<nd::string, ndt::type> &tp_vars) const
+{
+  return matches(NULL, other_tp, NULL, tp_vars);
+}
+
+bool ndt::type::matches(const ndt::type &other_tp) const
+{
+  std::map<nd::string, ndt::type> tp_vars;
+  return matches(other_tp, tp_vars);
 }
 
 nd::array ndt::type::p(const char *property_name) const

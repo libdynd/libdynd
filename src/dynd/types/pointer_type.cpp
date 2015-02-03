@@ -366,6 +366,28 @@ nd::array pointer_type::get_option_nafunc() const
       get_value_type().get_type_id());
 }
 
+bool pointer_type::matches(const ndt::type &self_tp, const char *self_arrmeta,
+                           const ndt::type &other_tp, const char *other_arrmeta,
+                           std::map<nd::string, ndt::type> &tp_vars) const
+{
+  if (other_tp.is_sym_category() || other_tp.is_sym_pattern()) {
+    return other_tp.extended()->matches(other_tp, other_arrmeta, self_tp,
+                                        self_arrmeta, tp_vars);
+  }
+
+  if (other_tp.get_type_id() != pointer_type_id) {
+    return false;
+  }
+
+  return m_target_tp.matches(
+      (self_arrmeta == NULL) ? self_arrmeta
+                             : (self_arrmeta + sizeof(pointer_type_arrmeta)),
+      other_tp.extended<pointer_type>()->m_target_tp,
+      (other_arrmeta == NULL) ? other_arrmeta
+                              : (other_arrmeta + sizeof(pointer_type_arrmeta)),
+      tp_vars);
+}
+
 static ndt::type property_get_target_type(const ndt::type &tp)
 {
   const pointer_type *pd = tp.extended<pointer_type>();

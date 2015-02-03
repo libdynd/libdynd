@@ -210,6 +210,49 @@ intptr_t base_struct_type::apply_linear_index(
   }
 }
 
+bool base_struct_type::matches(const ndt::type &self_tp, const char *self_arrmeta,
+                               const ndt::type &other_tp, const char *other_arrmeta,
+                               std::map<nd::string, ndt::type> &tp_vars) const
+{
+  if (other_tp.is_sym_category() || other_tp.is_sym_pattern()) {
+    return other_tp.extended()->matches(other_tp, other_arrmeta, self_tp,
+                                        self_arrmeta, tp_vars);
+  }
+
+  intptr_t other_field_count =
+      other_tp.extended<base_struct_type>()->get_field_count();
+  bool other_variadic = other_tp.extended<base_struct_type>()->is_variadic();
+  if ((m_field_count == other_field_count && !m_variadic) ||
+      (m_field_count >= other_field_count && other_variadic)) {
+    // Compare the field names
+    if (m_field_count == other_field_count) {
+      if (!get_field_names().equals_exact(
+              other_tp.extended<base_struct_type>()->get_field_names())) {
+        return false;
+      }
+    } else {
+      nd::array leading_field_names =
+          get_field_names()(irange() < other_field_count);
+      if (!leading_field_names.equals_exact(
+              other_tp.extended<base_struct_type>()->get_field_names())) {
+        return false;
+      }
+    }
+
+    const ndt::type *fields = get_field_types_raw();
+    const ndt::type *other_fields =
+        other_tp.extended<base_struct_type>()->get_field_types_raw();
+    for (intptr_t i = 0; i < other_field_count; ++i) {
+      if (!fields[i].matches(self_arrmeta, other_fields[i], other_arrmeta, tp_vars)) {
+        return false;
+      }
+    }
+    return true;
+  }
+
+  return false;
+}
+
 size_t base_struct_type::get_elwise_property_index(
     const std::string &property_name) const
 {

@@ -517,9 +517,9 @@ intptr_t fixed_dim_type::make_assignment_kernel(
 
     if (src_tp.get_ndim() < dst_tp.get_ndim()) {
       src_stride = 0;
-      kernels::elwise_ck<fixed_dim_type_id, fixed_dim_type_id, 1, 0>::create(ckb, kernreq, ckb_offset,
-                                    get_fixed_dim_size(), dst_md->stride,
-                                    &src_stride);
+      kernels::elwise_ck<fixed_dim_type_id, fixed_dim_type_id, 1, 0>::create(
+          ckb, kernreq, ckb_offset, get_fixed_dim_size(), dst_md->stride,
+          &src_stride);
 
       return ::make_assignment_kernel(
           self, af_tp, ckb, ckb_offset, m_element_tp,
@@ -527,9 +527,9 @@ intptr_t fixed_dim_type::make_assignment_kernel(
           kernel_request_strided, ectx, kwds);
     } else if (src_tp.get_as_strided(src_arrmeta, &src_size, &src_stride,
                                      &src_el_tp, &src_el_arrmeta)) {
-      kernels::elwise_ck<fixed_dim_type_id, fixed_dim_type_id, 1, 0>::create(ckb, kernreq, ckb_offset,
-                                    get_fixed_dim_size(), dst_md->stride,
-                                    &src_stride);
+      kernels::elwise_ck<fixed_dim_type_id, fixed_dim_type_id, 1, 0>::create(
+          ckb, kernreq, ckb_offset, get_fixed_dim_size(), dst_md->stride,
+          &src_stride);
 
       // Check for a broadcasting error
       if (src_size != 1 && get_fixed_dim_size() != src_size) {
@@ -543,8 +543,8 @@ intptr_t fixed_dim_type::make_assignment_kernel(
     } else if (!src_tp.is_builtin()) {
       // Give the src type a chance to make a kernel
       return src_tp.extended()->make_assignment_kernel(
-          self, af_tp, ckb, ckb_offset, dst_tp, dst_arrmeta, src_tp, src_arrmeta, kernreq,
-          ectx, kwds);
+          self, af_tp, ckb, ckb_offset, dst_tp, dst_arrmeta, src_tp,
+          src_arrmeta, kernreq, ectx, kwds);
     } else {
       stringstream ss;
       ss << "Cannot assign from " << src_tp << " to " << dst_tp;
@@ -734,6 +734,48 @@ static intptr_t get_fixed_dim_size(const ndt::type &dt)
 static ndt::type get_element_type(const ndt::type &dt)
 {
   return dt.extended<fixed_dim_type>()->get_element_type();
+}
+
+bool fixed_dim_type::matches(const ndt::type &self_tp,
+                             const char *self_arrmeta, const ndt::type &other_tp,
+                             const char *other_arrmeta,
+                             std::map<nd::string, ndt::type> &tp_vars) const
+{
+  if (other_tp.is_sym_category() || other_tp.is_sym_pattern()) {
+    return other_tp.extended()->matches(other_tp, other_arrmeta, self_tp, self_arrmeta, tp_vars);
+  }
+
+  switch (other_tp.get_type_id()) {
+  case fixed_dim_type_id:
+    return get_fixed_dim_size() ==
+               other_tp.extended<fixed_dim_type>()->get_fixed_dim_size() &&
+           m_element_tp.matches(
+               (self_arrmeta == NULL)
+                   ? self_arrmeta
+                   : (self_arrmeta + sizeof(fixed_dim_type_arrmeta)),
+               other_tp.extended<fixed_dim_type>()->m_element_tp,
+               (other_arrmeta == NULL)
+                   ? other_arrmeta
+                   : (other_arrmeta + sizeof(cfixed_dim_type_arrmeta)),
+               tp_vars);
+  case cfixed_dim_type_id:
+    return self_arrmeta != NULL &&
+           get_fixed_dim_size() ==
+               other_tp.extended<cfixed_dim_type>()->get_fixed_dim_size() &&
+           get_fixed_stride(self_arrmeta) ==
+               other_tp.extended<cfixed_dim_type>()->get_fixed_stride() &&
+           m_element_tp.matches(
+               (self_arrmeta == NULL)
+                   ? self_arrmeta
+                   : (self_arrmeta + sizeof(fixed_dim_type_arrmeta)),
+               other_tp.extended<cfixed_dim_type>()->get_element_type(),
+               (other_arrmeta == NULL)
+                   ? other_arrmeta
+                   : (other_arrmeta + sizeof(cfixed_dim_type_arrmeta)),
+               tp_vars);
+  default:
+    return false;
+  }
 }
 
 void fixed_dim_type::get_dynamic_type_properties(

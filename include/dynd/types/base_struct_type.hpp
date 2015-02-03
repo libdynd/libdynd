@@ -69,6 +69,10 @@ public:
                               bool leading_dimension, char **inout_data,
                               memory_block_data **inout_dataref) const;
 
+  virtual bool matches(const ndt::type &self_tp, const char *self_arrmeta,
+                       const ndt::type &other_tp, const char *other_arrmeta,
+                       std::map<nd::string, ndt::type> &tp_vars) const;
+
   size_t get_elwise_property_index(const std::string &property_name) const;
   ndt::type get_elwise_property_type(size_t elwise_property_index,
                                      bool &out_readable,

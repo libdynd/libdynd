@@ -148,10 +148,10 @@ elseif(APPLE)
     target_link_libraries(test_libdynd
         ${LINK_LIBS}
         )
-    set_target_properties(test_libdynd
-        PROPERTIES
-        BUILD_WITH_INSTALL_RPATH TRUE
-        )
+#    set_target_properties(test_libdynd
+ #       PROPERTIES
+  #      BUILD_WITH_INSTALL_RPATH TRUE
+   #     )
 else()
     set_target_properties(test_libdynd PROPERTIES
         COMPILE_FLAGS "-pthread")

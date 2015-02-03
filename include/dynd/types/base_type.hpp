@@ -553,6 +553,10 @@ public:
                            comparison_type_t comptype,
                            const eval::eval_context *ectx) const;
 
+    virtual bool matches(const ndt::type &self_tp, const char *self_arrmeta,
+                         const ndt::type &other_tp, const char *other_arrmeta,
+                         std::map<nd::string, ndt::type> &tp_vars) const;
+
     /**
      * Call the callback on each element of the array with given data/arrmeta along the leading
      * dimension. For array dimensions, the type provided is the same each call, but for

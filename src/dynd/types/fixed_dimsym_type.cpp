@@ -4,6 +4,9 @@
 //
 
 #include <dynd/types/fixed_dimsym_type.hpp>
+#include <dynd/types/pow_dimsym_type.hpp>
+#include <dynd/types/typevar_type.hpp>
+#include <dynd/types/typevar_dim_type.hpp>
 #include <dynd/types/cfixed_dim_type.hpp>
 #include <dynd/types/type_alignment.hpp>
 #include <dynd/shape_tools.hpp>
@@ -20,7 +23,7 @@ using namespace dynd;
 fixed_dimsym_type::fixed_dimsym_type(const ndt::type &element_tp)
     : base_dim_type(fixed_dimsym_type_id, element_tp, 0,
                     element_tp.get_data_alignment(), sizeof(size_stride_t),
-                    type_flag_symbolic, true)
+                    type_flag_sym_category, true)
 {
   // Propagate the inherited flags from the element
   m_members.flags |=
@@ -218,6 +221,43 @@ void fixed_dimsym_type::data_destruct_strided(const char *DYND_UNUSED(arrmeta),
   stringstream ss;
   ss << "Cannot have data for symbolic type " << ndt::type(this, true);
   throw runtime_error(ss.str());
+}
+
+bool fixed_dimsym_type::matches(const ndt::type &self_tp,
+                                const char *self_arrmeta,
+                                const ndt::type &other_tp,
+                                const char *other_arrmeta,
+                                std::map<nd::string, ndt::type> &tp_vars) const
+{
+  if (other_tp.is_sym_pattern()) {
+    return other_tp.extended()->matches(other_tp, other_arrmeta, self_tp,
+                                        self_arrmeta, tp_vars);
+  }
+
+  switch (other_tp.get_type_id()) {
+  case fixed_dim_type_id:
+    return m_element_tp.matches(
+        self_arrmeta, other_tp.extended<base_dim_type>()->get_element_type(),
+        (other_arrmeta == NULL)
+            ? other_arrmeta
+            : (other_arrmeta + sizeof(fixed_dim_type_arrmeta)),
+        tp_vars);
+  case cfixed_dim_type_id:
+    return m_element_tp.matches(
+        self_arrmeta, other_tp.extended<base_dim_type>()->get_element_type(),
+        (other_arrmeta == NULL)
+            ? other_arrmeta
+            : (other_arrmeta + sizeof(cfixed_dim_type_arrmeta)),
+        tp_vars);
+  case fixed_dimsym_type_id:
+    return m_element_tp.matches(
+        self_arrmeta, other_tp.extended<base_dim_type>()->get_element_type(),
+        other_arrmeta, tp_vars);
+  case any_sym_type_id:
+    return true;
+  default:
+    return false;
+  }
 }
 
 static ndt::type get_element_type(const ndt::type& dt) {
