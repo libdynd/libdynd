@@ -157,17 +157,31 @@ namespace kernels {
 
     curandState_t *s;
 
-    __device__ uniform_real_ck(curandState_t *s) : s(s) {
-    }
+    __device__ uniform_real_ck(curandState_t *s) : s(s) {}
 
     __device__ void single(char *dst, char *const *DYND_UNUSED(src))
     {
       *reinterpret_cast<double *>(dst) = curand_uniform_double(s);
     }
 
+/*
+    __device__ void strided(char *dst, intptr_t dst_stride, char *const *DYND_UNUSED(src),
+                            const intptr_t *DYND_UNUSED(src_stride), size_t count)
+    {
+      size_t thread_id = blockIdx.x * blockDim.x + threadIdx.x;
+      size_t thread_count = gridDim.x * blockDim.x;
+
+      for (size_t i = blockIdx.x * blockDim.x + threadIdx.x; i < count; i += thread_count) {
+        *reinterpret_cast<double *>(dst + thread_id * sizeof(double)) = curand_uniform_double(s + thread_id);
+        dst += dst_stride;
+      }
+    }
+*/
+
     static ndt::type make_type()
     {
-      return ndt::type("(a: ?float64, b: ?float64, dst_tp: type) -> cuda_device[float64]");
+      return ndt::type(
+          "(a: ?float64, b: ?float64, dst_tp: type) -> cuda_device[float64]");
     }
 
     static intptr_t instantiate(

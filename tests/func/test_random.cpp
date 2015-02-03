@@ -46,15 +46,19 @@ TYPED_TEST_P(Random, Uniform)
   EXPECT_EQ_RELERR(static_cast<double>(a + b) / 2, mean, 0.1);
 }
 
-/*
 TEST(Random, CUDAUniform)
 {
-  ndt::type dst_tp = ndt::type("cuda_device[10 * float64]");
+  nd::arrfunc af = static_cast<nd::arrfunc>(nd::random::cuda_uniform);
+  std::cout << af << std::endl;
+
+  ndt::type dst_tp = ndt::type("cuda_device[1000 * float64]");
   std::cout << nd::random::cuda_uniform(kwds("dst_tp", dst_tp)) << std::endl;
+
+  std::cout << ndt::pattern_match(ndt::type("(a: ?R, b: ?int32, dst_tp: type) -> 10 * int32"),
+    ndt::type("(a: ?R, b: ?R, dst_tp: type) -> M[Dims... * R]")) << std::endl;
 
   std::exit(-1);
 }
-*/
 
 REGISTER_TYPED_TEST_CASE_P(Random, Uniform);
 INSTANTIATE_TYPED_TEST_CASE_P(Integral, Random, IntegralTypes);

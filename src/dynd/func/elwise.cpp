@@ -151,6 +151,12 @@ static void *create_cuda_device_trampoline(void *ckb, intptr_t ckb_offset,
                                            unsigned int threads)
 {
   switch (src_count) {
+  case 0: {
+    typedef kernels::cuda_parallel_ck<0> self_type;
+    self_type *self =
+        self_type::create(ckb, kernreq, ckb_offset, blocks, threads);
+    return &self->ckb;
+  }
   case 1: {
     typedef kernels::cuda_parallel_ck<1> self_type;
     self_type *self =

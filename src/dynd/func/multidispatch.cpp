@@ -514,9 +514,6 @@ nd::arrfunc nd::functional::multidispatch(const ndt::type &self_tp,
 {
   const std::initializer_list<string> vars = {"R"};
 
-  // check that all children have the same number of arguments, then only match
-  // those arguments
-
   intptr_t nkwd = 2;
 
   ndt::type pos_tp = self_tp.extended<arrfunc_type>()->get_pos_tuple();
