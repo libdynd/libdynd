@@ -111,7 +111,7 @@ public:
   virtual void data_free(char *data) const = 0;
 
   virtual bool matches(const ndt::type &self_tp, const char *self_arrmeta,
-                       const ndt::type &other, const char *other_arrmeta,
+                       const ndt::type &other_tp, const char *other_arrmeta,
                        std::map<nd::string, ndt::type> &tp_vars) const;
 
   virtual void get_dynamic_type_properties(

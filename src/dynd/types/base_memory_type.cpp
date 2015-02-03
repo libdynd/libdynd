@@ -154,9 +154,13 @@ bool base_memory_type::matches(const ndt::type &self_tp,
                                const char *other_arrmeta,
                                std::map<nd::string, ndt::type> &tp_vars) const
 {
-  std::cout << "base_memory_type" << std::endl;
-  std::cout << "self_tp = " << self_tp << std::endl;
-  std::cout << "other_tp = " << other_tp << std::endl;
+  if (other_tp.is_sym_category() || other_tp.is_sym_pattern()) {
+    return other_tp.extended()->matches(other_tp, other_arrmeta, self_tp, self_arrmeta, tp_vars);
+  }
+
+  if (other_tp.get_kind() != memory_kind) {
+    return false;
+  }
 
   return m_element_tp.matches(
       self_arrmeta, other_tp.extended<base_memory_type>()->m_element_tp,

@@ -261,7 +261,7 @@ nd::arrfunc dynd::make_neighborhood_arrfunc(const nd::arrfunc &neighborhood_op,
                            " * OUT");
 
   map<nd::string, ndt::type> typevars;
-  if (!ndt::pattern_match(neighborhood_op.get_array_type(), nhop_pattern,
+  if (!neighborhood_op.get_array_type().matches(nhop_pattern,
                           typevars)) {
     stringstream ss;
     ss << "provided neighborhood op proto " << neighborhood_op.get_array_type()

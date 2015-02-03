@@ -379,9 +379,13 @@ bool pointer_type::matches(const ndt::type &self_tp, const char *self_arrmeta,
     return false;
   }
 
-  return m_target_tp.matches(self_arrmeta,
-                             other_tp.extended<pointer_type>()->m_target_tp,
-                             NULL, tp_vars);
+  return m_target_tp.matches(
+      (self_arrmeta == NULL) ? self_arrmeta
+                             : (self_arrmeta + sizeof(pointer_type_arrmeta)),
+      other_tp.extended<pointer_type>()->m_target_tp,
+      (other_arrmeta == NULL) ? other_arrmeta
+                              : (other_arrmeta + sizeof(pointer_type_arrmeta)),
+      tp_vars);
 }
 
 static ndt::type property_get_target_type(const ndt::type &tp)

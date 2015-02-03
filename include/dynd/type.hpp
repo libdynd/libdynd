@@ -348,9 +348,24 @@ public:
         return at_array(4, i);
     }
 
-    /** Returns true if this type matches the pattern type provided */
+    /**
+     * Matches the provided type against another type, both of which may
+     * be symbolic types. Returns true if it matches, false otherwise.
+     *
+     * This version may be called multiple times in a row, building up the
+     * typevars dictionary which is used to enforce consistent usage of
+     * type vars.
+     *
+     * \param arrmeta     The arrmeta for this type, maybe NULL.
+     * \param other_tp    A symbolic (or concrete) type to match against.
+     * \param other_arrmeta     The arrmeta for the other type, maybe NULL.
+     * \param tp_vars     A map of names to matched type vars.
+     */
     bool matches(const char *arrmeta, const ndt::type &other_tp,
                  const char *other_arrmeta,
+                 std::map<nd::string, ndt::type> &tp_vars) const;
+
+    bool matches(const ndt::type &other_tp,
                  std::map<nd::string, ndt::type> &tp_vars) const;
 
     bool matches(const ndt::type &other_tp) const;

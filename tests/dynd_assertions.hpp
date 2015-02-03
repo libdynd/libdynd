@@ -9,7 +9,6 @@
 
 #include <dynd/json_parser.hpp>
 #include <dynd/types/base_struct_type.hpp>
-#include <dynd/types/type_pattern_match.hpp>
 #include <dynd/type_promotion.hpp>
 
 inline std::string ShapeFormatter(const std::vector<intptr_t>& shape)
@@ -146,7 +145,7 @@ inline ::testing::AssertionResult MatchNdtTypes(const char *expr1,
                                                 const dynd::ndt::type &pattern,
                                                 const dynd::ndt::type &actual)
 {
-  if (dynd::ndt::pattern_match(actual, pattern)) {
+  if (actual.matches(pattern)) {
     return ::testing::AssertionSuccess();
   } else {
     return ::testing::AssertionFailure()

@@ -60,7 +60,7 @@ static bool can_implicitly_convert(const ndt::type &src, const ndt::type &dst,
   }
   if (src.get_ndim() > 0 || dst.get_ndim() > 0) {
     ndt::type src_dtype, dst_dtype;
-    if (ndt::pattern_match(src, dst, typevars)) {
+    if (src.matches(dst, typevars)) {
       return can_implicitly_convert(src.get_dtype(), dst.get_dtype(), typevars);
     } else {
       return false;
@@ -536,7 +536,7 @@ nd::arrfunc nd::functional::multidispatch(const ndt::type &self_tp,
   std::shared_ptr<multidispatch_map_type> map(new multidispatch_map_type);
   for (const arrfunc &child : children) {
     std::map<string, ndt::type> tp_vars;
-    if (!ndt::pattern_match(child.get_array_type(), pattern_tp, tp_vars)) {
+    if (!child.get_array_type().matches(pattern_tp, tp_vars)) {
       throw std::invalid_argument("could not match arrfuncs");
     }
 

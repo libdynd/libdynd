@@ -7,7 +7,6 @@
 #include <dynd/types/base_dim_type.hpp>
 #include <dynd/types/base_memory_type.hpp>
 #include <dynd/types/fixed_dim_type.hpp>
-#include <dynd/types/type_pattern_match.hpp>
 #include <dynd/types/var_dim_type.hpp>
 #include <dynd/exceptions.hpp>
 #include <dynd/typed_data_assign.hpp>
@@ -117,10 +116,16 @@ bool ndt::type::matches(const char *arrmeta, const ndt::type &other_tp,
   return extended()->matches(*this, arrmeta, other_tp, other_arrmeta, tp_vars);
 }
 
+bool ndt::type::matches(const ndt::type &other_tp,
+                        std::map<nd::string, ndt::type> &tp_vars) const
+{
+  return matches(NULL, other_tp, NULL, tp_vars);
+}
+
 bool ndt::type::matches(const ndt::type &other_tp) const
 {
   std::map<nd::string, ndt::type> tp_vars;
-  return matches(NULL, other_tp, NULL, tp_vars);
+  return matches(other_tp, tp_vars);
 }
 
 nd::array ndt::type::p(const char *property_name) const

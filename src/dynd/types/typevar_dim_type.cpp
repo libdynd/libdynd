@@ -110,14 +110,10 @@ void typevar_dim_type::arrmeta_destruct(char *DYND_UNUSED(arrmeta)) const
     throw type_error("Cannot store data of typevar type");
 }
 
-bool typevar_dim_type::matches(const ndt::type &self_tp, const char *arrmeta,
+bool typevar_dim_type::matches(const ndt::type &DYND_UNUSED(self_tp), const char *self_arrmeta,
                                const ndt::type &other_tp, const char *DYND_UNUSED(other_arrmeta),
                                std::map<nd::string, ndt::type> &tp_vars) const
 {
-  std::cout << "typevar_dim_type" << std::endl;
-  std::cout << "self_tp = " << self_tp << std::endl;
-  std::cout << "other_tp = " << other_tp << std::endl;
-
   if (other_tp.get_type_id() == any_sym_type_id) {
     return true;
   }
@@ -127,7 +123,7 @@ bool typevar_dim_type::matches(const ndt::type &self_tp, const char *arrmeta,
     // This typevar hasn't been seen yet
     tv_type = other_tp;
     return other_tp.get_type_at_dimension(NULL, 1)
-        .matches(arrmeta, get_element_type(), NULL, tp_vars);
+        .matches(self_arrmeta, get_element_type(), NULL, tp_vars);
   } else {
     // Make sure the type matches previous
     // instances of the type var
@@ -151,7 +147,7 @@ bool typevar_dim_type::matches(const ndt::type &self_tp, const char *arrmeta,
       break;
     }
     return other_tp.get_type_at_dimension(NULL, 1).matches(
-        arrmeta, get_element_type(), NULL,
+        self_arrmeta, get_element_type(), NULL,
         tp_vars);
   }
 }

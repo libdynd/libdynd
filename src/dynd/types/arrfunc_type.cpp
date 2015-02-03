@@ -324,32 +324,37 @@ intptr_t arrfunc_type::make_assignment_kernel(
   throw dynd::type_error(ss.str());
 }
 
-bool arrfunc_type::matches(const ndt::type &self_tp, const char *arrmeta, const ndt::type &other_tp,
-                           const char *other_arrmeta, std::map<nd::string, ndt::type> &tp_vars) const
+bool arrfunc_type::matches(const ndt::type &self_tp, const char *self_arrmeta,
+                           const ndt::type &other_tp, const char *other_arrmeta,
+                           std::map<nd::string, ndt::type> &tp_vars) const
 {
-  std::cout << "arrfunc_type" << std::endl;
-  std::cout << "self_tp = " << self_tp << std::endl;
-  std::cout << "other_tp = " << other_tp << std::endl;
+  if (other_tp.is_sym_category() || other_tp.is_sym_pattern()) {
+    return other_tp.extended()->matches(other_tp, other_arrmeta, self_tp,
+                                        self_arrmeta, tp_vars);
+  }
 
   if (other_tp.get_type_id() != arrfunc_type_id) {
     return false;
   }
 
   // First match the return type
-  if (!m_return_type.matches(
-          arrmeta, other_tp.extended<arrfunc_type>()->m_return_type, other_arrmeta, tp_vars)) {
+  if (!m_return_type.matches(self_arrmeta,
+                             other_tp.extended<arrfunc_type>()->m_return_type,
+                             other_arrmeta, tp_vars)) {
     return false;
   }
 
   // Next match all the positional parameters
-  if (!m_pos_tuple.matches(arrmeta, other_tp.extended<arrfunc_type>()->m_pos_tuple, other_arrmeta,
-                           tp_vars)) {
+  if (!m_pos_tuple.matches(self_arrmeta,
+                           other_tp.extended<arrfunc_type>()->m_pos_tuple,
+                           other_arrmeta, tp_vars)) {
     return false;
   }
 
   // Finally match all the keyword parameters
-  if (!m_kwd_struct.matches(
-          arrmeta, other_tp.extended<arrfunc_type>()->get_kwd_struct(), other_arrmeta, tp_vars)) {
+  if (!m_kwd_struct.matches(self_arrmeta,
+                            other_tp.extended<arrfunc_type>()->get_kwd_struct(),
+                            other_arrmeta, tp_vars)) {
     return false;
   }
 

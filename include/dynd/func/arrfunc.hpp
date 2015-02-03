@@ -11,7 +11,6 @@
 #include <dynd/types/arrfunc_type.hpp>
 #include <dynd/kernels/ckernel_builder.hpp>
 #include <dynd/types/struct_type.hpp>
-#include <dynd/types/type_pattern_match.hpp>
 #include <dynd/types/substitute_typevars.hpp>
 #include <dynd/types/type_type.hpp>
 
@@ -459,8 +458,7 @@ namespace nd {
             actual_tp = ndt::as_type(value);
           }
 
-          if (!ndt::pattern_match(actual_tp.value_type(), expected_tp,
-                                  typevars)) {
+          if (!actual_tp.value_type().matches(expected_tp, typevars)) {
             std::stringstream ss;
             ss << "keyword \"" << name << "\" does not match, ";
             ss << "arrfunc expected " << expected_tp << " but passed "
@@ -484,7 +482,7 @@ namespace nd {
         {
           const ndt::type &expected_tp = self_tp->get_return_type();
 
-          if (!ndt::pattern_match(value, expected_tp, typevars)) {
+          if (!value.matches(expected_tp, typevars)) {
             std::stringstream ss;
             ss << "keyword \"dst_type\" does not match, ";
             ss << "arrfunc expected " << expected_tp << " but passed " << value;
@@ -777,8 +775,8 @@ namespace nd {
       const ndt::type *param_types = self_tp->get_pos_types_raw();
       for (intptr_t i = 0; i != self_tp->get_npos(); ++i) {
         ndt::type expected_tp = param_types[i];
-        if (!ndt::pattern_match(src_tp[i].value_type(), src_arrmeta[i],
-                                expected_tp, typevars)) {
+        if (!src_tp[i].value_type().matches(src_arrmeta[i], expected_tp, NULL,
+                                            typevars)) {
           std::stringstream ss;
           ss << "parameter " << (i + 1) << " to arrfunc does not match, ";
           ss << "expected " << expected_tp << ", received " << src_tp[i];

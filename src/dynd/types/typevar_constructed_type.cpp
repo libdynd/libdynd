@@ -3,6 +3,7 @@
 // BSD 2-Clause License, see LICENSE.txt
 //
 
+#include <dynd/types/base_memory_type.hpp>
 #include <dynd/types/typevar_constructed_type.hpp>
 #include <dynd/types/typevar_type.hpp>
 #include <dynd/func/make_callable.hpp>
@@ -10,28 +11,10 @@
 using namespace std;
 using namespace dynd;
 
-/*
-  if (pattern.get_ndim() == -1) {
-    if (pattern.get_type_id() == typevar_constructed_type_id &&
-        concrete.get_kind() == memory_kind) {
-      ndt::type &tv_type =
-          typevars[pattern.extended<typevar_constructed_type>()->get_name()];
-      if (tv_type.is_null()) {
-        // This typevar hasn't been seen yet
-        tv_type = concrete;
-      }
-      return recursive_match(
-          concrete.extended<base_memory_type>()->get_element_type(),
-          concrete_arrmeta,
-          pattern.extended<typevar_constructed_type>()->get_arg(), typevars);
-    }
-  } else
-*/
-
 typevar_constructed_type::typevar_constructed_type(const nd::string &name,
                                                    const ndt::type &arg)
     : base_type(typevar_constructed_type_id, symbolic_kind, 0, 1,
-                type_flag_symbolic, 0, -1, -1),
+                type_flag_sym_pattern, 0, -1, -1),
       m_name(name), m_arg(arg)
 {
 //  static ndt::type args_pattern("((...), {...})");
@@ -136,6 +119,26 @@ void
 typevar_constructed_type::arrmeta_destruct(char *DYND_UNUSED(arrmeta)) const
 {
   throw type_error("Cannot store data of typevar_constructed type");
+}
+
+bool typevar_constructed_type::matches(
+    const ndt::type &DYND_UNUSED(self_tp), const char *self_arrmeta,
+    const ndt::type &other_tp, const char *other_arrmeta,
+    std::map<nd::string, ndt::type> &tp_vars) const
+{
+  if (other_tp.get_kind() != memory_kind) {
+    return false;
+  }
+
+  ndt::type &tv_type = tp_vars[m_name];
+  if (tv_type.is_null()) {
+    // This typevar hasn't been seen yet
+    tv_type = other_tp;
+  }
+
+  return m_arg.matches(
+      self_arrmeta, other_tp.extended<base_memory_type>()->get_element_type(),
+      other_arrmeta, tp_vars);
 }
 
 static nd::array property_get_name(const ndt::type &tp)

@@ -7,7 +7,6 @@
 #include <stdexcept>
 #include "inc_gtest.hpp"
 
-#include <dynd/types/type_pattern_match.hpp>
 #include <dynd/types/substitute_typevars.hpp>
 #include <dynd/types/substitute_shape.hpp>
 #include <dynd/types/dim_fragment_type.hpp>

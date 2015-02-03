@@ -371,8 +371,8 @@ bool option_type::matches(const ndt::type &self_tp, const char *self_arrmeta,
   }
 
   return m_value_tp.matches(self_arrmeta,
-                            other_tp.extended<option_type>()->m_value_tp, NULL,
-                            tp_vars);
+                            other_tp.extended<option_type>()->m_value_tp,
+                            other_arrmeta, tp_vars);
 }
 
 static ndt::type property_get_value_type(const ndt::type &tp)
