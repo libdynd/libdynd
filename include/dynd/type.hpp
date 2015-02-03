@@ -538,13 +538,32 @@ public:
     }
 
     /**
-     * Returns true if the type constains a symbolic construct
+     * Returns true if the type contains a symbolic construct
      * like a type var.
      */
     bool is_symbolic() const
     {
+      return !is_builtin() && (m_extended->get_flags() & type_flag_symbolic);
+    }
+
+    /**
+     * Returns true if the type is a symbolic category, like 'Any' or 'Fixed'.
+     */
+    bool is_sym_category() const
+    {
       return !is_builtin() &&
-             (m_extended->get_flags() & type_flag_symbolic) != 0;
+             (m_extended->get_flags() & type_flag_sym_category) ==
+                 type_flag_sym_category;
+    }
+
+    /**
+     * Returns true if the type is a symbolic pattern, like 'Dims...' or 'R'.
+     */
+    bool is_sym_pattern() const
+    {
+      return !is_builtin() &&
+             (m_extended->get_flags() & type_flag_sym_pattern) ==
+                 type_flag_sym_pattern;
     }
 
     /**

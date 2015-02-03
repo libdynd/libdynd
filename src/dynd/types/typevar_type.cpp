@@ -10,7 +10,7 @@ using namespace std;
 using namespace dynd;
 
 typevar_type::typevar_type(const nd::string &name)
-    : base_type(typevar_type_id, symbolic_kind, 0, 1, type_flag_symbolic, 0, 0,
+    : base_type(typevar_type_id, symbolic_kind, 0, 1, type_flag_sym_pattern, 0, 0,
                 0),
       m_name(name)
 {
@@ -100,8 +100,11 @@ void typevar_type::arrmeta_destruct(char *DYND_UNUSED(arrmeta)) const
     throw type_error("Cannot store data of typevar type");
 }
 
-bool typevar_type::matches(const ndt::type &self_tp, const char *DYND_UNUSED(arrmeta), const ndt::type &other_tp,
-                           const char *DYND_UNUSED(other_arrmeta), std::map<nd::string, ndt::type> &tp_vars) const
+bool typevar_type::matches(const ndt::type &self_tp,
+                           const char *DYND_UNUSED(self_arrmeta),
+                           const ndt::type &other_tp,
+                           const char *DYND_UNUSED(other_arrmeta),
+                           std::map<nd::string, ndt::type> &tp_vars) const
 {
   std::cout << "typevar_type" << std::endl;
   std::cout << "self_tp = " << self_tp << std::endl;

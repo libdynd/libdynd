@@ -361,17 +361,17 @@ bool option_type::matches(const ndt::type &self_tp, const char *self_arrmeta,
                           const ndt::type &other_tp, const char *other_arrmeta,
                           std::map<nd::string, ndt::type> &tp_vars) const
 {
-  std::cout << "option_type" << std::endl;
-  std::cout << "self_tp = " << self_tp << std::endl;
-  std::cout << "other_tp = " << other_tp << std::endl;
+  if (other_tp.is_sym_category() || other_tp.is_sym_pattern()) {
+    return other_tp.extended()->matches(other_tp, other_arrmeta, self_tp,
+                                        self_arrmeta, tp_vars);
+  }
 
-  if (other_tp.is_symbolic()) {
-    return other_tp.extended()->matches(other_tp, other_arrmeta, self_tp, self_arrmeta, tp_vars);
-  } else if (other_tp.get_type_id() != option_type_id) {
+  if (other_tp.get_type_id() != option_type_id) {
     return false;
   }
 
-  return m_value_tp.matches(self_arrmeta, other_tp.extended<option_type>()->m_value_tp, NULL,
+  return m_value_tp.matches(self_arrmeta,
+                            other_tp.extended<option_type>()->m_value_tp, NULL,
                             tp_vars);
 }
 

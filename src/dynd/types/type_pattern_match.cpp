@@ -25,25 +25,6 @@ using namespace dynd;
 // TODO: We need to properly add offsets to the concrete_arrmeta in every
 // function below.
 
-/*
-  if (pattern.get_ndim() == -1) {
-    if (pattern.get_type_id() == typevar_constructed_type_id &&
-        concrete.get_kind() == memory_kind) {
-      ndt::type &tv_type =
-          typevars[pattern.extended<typevar_constructed_type>()->get_name()];
-      if (tv_type.is_null()) {
-        // This typevar hasn't been seen yet
-        tv_type = concrete;
-      }
-      return recursive_match(
-          concrete.extended<base_memory_type>()->get_element_type(),
-          concrete_arrmeta,
-          pattern.extended<typevar_constructed_type>()->get_arg(), typevars);
-    }
-  } else
-*/
-
-
 bool ndt::pattern_match(const ndt::type &concrete, const char *concrete_arrmeta,
                         const ndt::type &pattern,
                         std::map<nd::string, ndt::type> &typevars)

@@ -83,7 +83,6 @@ TEST(TypePatternMatch, Any)
       ndt::type("3 * 5 * var * (int32, float16, 2 * int8)"), ndt::type("Any")));
 }
 
-/*
 TEST(TypePatternMatch, VariadicTuple)
 {
   EXPECT_TRUE(ndt::pattern_match(ndt::type("(...)"), ndt::type("(...)")));
@@ -109,7 +108,6 @@ TEST(TypePatternMatch, VariadicTuple)
   EXPECT_TRUE(ndt::pattern_match(ndt::type("(int32, int32, float32)"),
                                  ndt::type("(T, T, ...)")));
 }
-*/
 
 TEST(TypePatternMatch, Struct)
 {
@@ -129,7 +127,6 @@ TEST(TypePatternMatch, Struct)
       ndt::type("M * {x: T, y: T, u: S, v: S}")));
 }
 
-/*
 TEST(TypePatternMatch, VariadicStruct)
 {
   EXPECT_TRUE(ndt::pattern_match(ndt::type("{...}"), ndt::type("{...}")));
@@ -160,7 +157,6 @@ TEST(TypePatternMatch, VariadicStruct)
   EXPECT_TRUE(ndt::pattern_match(ndt::type("{x: int32, y: int32, z: float32}"),
                                  ndt::type("{x: T, y: T, ...}")));
 }
-*/
 
 TEST(TypePatternMatch, Option)
 {
@@ -213,7 +209,6 @@ TEST(TypePatternMatch, ArrFuncProto)
 
 }
 
-/*
 TEST(TypePatternMatch, VariadicArrFuncProto)
 {
   EXPECT_TRUE(
@@ -238,7 +233,6 @@ TEST(TypePatternMatch, VariadicArrFuncProto)
           "(2 * 3 * 4 * int32, float64, func: (3 * int32) -> bool) -> bool"),
       ndt::type("(Fixed**N * T, ..., func: (N * T) -> R) -> R")));
 }
-*/
 
 TEST(TypePatternMatch, NestedArrFuncProto)
 {
@@ -329,18 +323,3 @@ TEST(TypePatternMatch, TypeVarConstructed)
                                  ndt::type("M[Dims... * T]")));
 #endif
 }
-
-/*
-TEST(TypePatternMatchDims, Simple)
-{
-  // ndt::pattern_match_dims just matches the dims, it does not match the dtype,
-  // and as part of the matching, it returns the two dtypes.
-  std::map<nd::string, ndt::type> typevars;
-  ndt::type cdt, pdt;
-  EXPECT_TRUE(ndt::pattern_match_dims(ndt::type("3 * 4 * Fixed * int32"),
-                                      ndt::type("Fixed * 4 * Fixed * {x: int}"),
-                                      typevars, cdt, pdt));
-  EXPECT_EQ(ndt::type("int32"), cdt);
-  EXPECT_EQ(ndt::type("{x: int}"), pdt);
-}
-*/

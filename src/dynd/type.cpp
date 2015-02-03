@@ -101,10 +101,6 @@ bool ndt::type::matches(const char *arrmeta, const ndt::type &other_tp,
                         const char *other_arrmeta,
                         std::map<nd::string, ndt::type> &tp_vars) const
 {
-  std::cout << "type" << std::endl;
-  std::cout << "self_tp = " << *this << std::endl;
-  std::cout << "other_tp = " << other_tp << std::endl;
-
   if (extended() == other_tp.extended()) {
     return true;
   }

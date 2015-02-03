@@ -14,7 +14,7 @@ using namespace dynd;
 ellipsis_dim_type::ellipsis_dim_type(const nd::string &name,
                                      const ndt::type &element_type)
     : base_dim_type(ellipsis_dim_type_id, element_type, 0, 1, 0,
-                    type_flag_symbolic | type_flag_dim_variadic, false),
+                    type_flag_sym_pattern | type_flag_dim_variadic, false),
       m_name(name)
 {
   if (!m_name.is_null()) {

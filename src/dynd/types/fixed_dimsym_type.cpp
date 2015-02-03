@@ -23,7 +23,7 @@ using namespace dynd;
 fixed_dimsym_type::fixed_dimsym_type(const ndt::type &element_tp)
     : base_dim_type(fixed_dimsym_type_id, element_tp, 0,
                     element_tp.get_data_alignment(), sizeof(size_stride_t),
-                    type_flag_symbolic, true)
+                    type_flag_sym_category, true)
 {
   // Propagate the inherited flags from the element
   m_members.flags |=
@@ -231,14 +231,15 @@ bool fixed_dimsym_type::matches(const ndt::type &self_tp, const char *arrmeta,
   std::cout << "self_tp = " << self_tp << std::endl;
   std::cout << "other_tp = " << other_tp << std::endl;
 
+  if (other_tp.is_sym_pattern()) {
+    return other_tp.extended()->matches(other_tp, other_arrmeta, self_tp, arrmeta, tp_vars);
+  }
+
   switch (other_tp.get_type_id()) {
     case fixed_dim_type_id:
     case cfixed_dim_type_id:
     case fixed_dimsym_type_id:
       return m_element_tp.matches(arrmeta, other_tp.extended<base_dim_type>()->get_element_type(), other_arrmeta, tp_vars);
-    case typevar_dim_type_id:
-    case pow_dimsym_type_id:
-      return other_tp.extended()->matches(other_tp, other_arrmeta, self_tp, arrmeta, tp_vars);
     case any_sym_type_id:
       return true;
     default:

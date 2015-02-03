@@ -52,10 +52,6 @@ enum type_kind_t {
   // For types containing type vars, or function prototypes that can't be
   // instantiated
   symbolic_kind,
-  // ...
-  category_kind,
-  // ...
-  pattern_kind,
   // For use when it becomes possible to register custom types
   custom_kind
 };
@@ -204,9 +200,13 @@ enum type_flags_t {
   type_flag_not_host_readable = 0x00000020,
   // This type contains a symbolic construct like a type var
   type_flag_symbolic = 0x00000040,
+  // This type should be considered as a symbolic category
+  type_flag_sym_category = type_flag_symbolic | 0x00000080,
+  // This type should be considered as a symbolic pattern
+  type_flag_sym_pattern = type_flag_symbolic | 0x00000100,
   // This dimensions of this type are variadic (outermost dimensions, but not
   // dimensions within a struct, for example)
-  type_flag_dim_variadic = 0x00000080,
+  type_flag_dim_variadic = 0x00000200,
 };
 
 enum axis_order_classification_t {
