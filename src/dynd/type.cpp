@@ -97,34 +97,34 @@ ndt::type ndt::type::at_array(int nindices, const irange *indices) const
   }
 }
 
-bool ndt::type::matches(const char *arrmeta, const ndt::type &other,
+bool ndt::type::matches(const char *arrmeta, const ndt::type &other_tp,
+                        const char *other_arrmeta,
                         std::map<nd::string, ndt::type> &tp_vars) const
 {
-  // dispatch to patterns first
-  // then categories
-  // then concrete
+  std::cout << "type" << std::endl;
+  std::cout << "self_tp = " << *this << std::endl;
+  std::cout << "other_tp = " << other_tp << std::endl;
 
-  if (other.is_symbolic()) {
-    return other.extended()->matches(arrmeta, *this, tp_vars);
-  } else if (is_builtin()) {
-    if (other.is_builtin()) {
-      return get_type_id() == other.get_type_id();
-    } else {
-      return other.extended()->matches(arrmeta, *this, tp_vars);
-    }
+  if (extended() == other_tp.extended()) {
+    return true;
   }
 
-  return extended()->matches(arrmeta, other, tp_vars);
+  if (is_builtin()) {
+    if (other_tp.is_builtin()) {
+      return false;
+    }
+
+    return other_tp.extended()->matches(other_tp, other_arrmeta, *this, arrmeta,
+                                        tp_vars);
+  }
+
+  return extended()->matches(*this, arrmeta, other_tp, other_arrmeta, tp_vars);
 }
 
-bool ndt::type::matches(const ndt::type &other) const
+bool ndt::type::matches(const ndt::type &other_tp) const
 {
-  if (extended() == other.extended()) {
-    return true;
-  } else {
-    std::map<nd::string, ndt::type> tp_vars;
-    return matches(NULL, other, tp_vars);
-  }
+  std::map<nd::string, ndt::type> tp_vars;
+  return matches(NULL, other_tp, NULL, tp_vars);
 }
 
 nd::array ndt::type::p(const char *property_name) const

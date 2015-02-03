@@ -52,6 +52,10 @@ enum type_kind_t {
   // For types containing type vars, or function prototypes that can't be
   // instantiated
   symbolic_kind,
+  // ...
+  category_kind,
+  // ...
+  pattern_kind,
   // For use when it becomes possible to register custom types
   custom_kind
 };

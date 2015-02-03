@@ -110,34 +110,39 @@ void typevar_dim_type::arrmeta_destruct(char *DYND_UNUSED(arrmeta)) const
     throw type_error("Cannot store data of typevar type");
 }
 
-bool typevar_dim_type::matches(const char *arrmeta, const ndt::type &other,
+bool typevar_dim_type::matches(const ndt::type &self_tp, const char *arrmeta,
+                               const ndt::type &other_tp, const char *DYND_UNUSED(other_arrmeta),
                                std::map<nd::string, ndt::type> &tp_vars) const
 {
-  if (other.get_type_id() == any_sym_type_id) {
+  std::cout << "typevar_dim_type" << std::endl;
+  std::cout << "self_tp = " << self_tp << std::endl;
+  std::cout << "other_tp = " << other_tp << std::endl;
+
+  if (other_tp.get_type_id() == any_sym_type_id) {
     return true;
   }
 
   ndt::type &tv_type = tp_vars[get_name()];
   if (tv_type.is_null()) {
     // This typevar hasn't been seen yet
-    tv_type = other;
-    return other.get_type_at_dimension(NULL, 1)
-        .matches(arrmeta, get_element_type(), tp_vars);
+    tv_type = other_tp;
+    return other_tp.get_type_at_dimension(NULL, 1)
+        .matches(arrmeta, get_element_type(), NULL, tp_vars);
   } else {
     // Make sure the type matches previous
     // instances of the type var
-    if (other.get_type_id() != tv_type.get_type_id()) {
+    if (other_tp.get_type_id() != tv_type.get_type_id()) {
       return false;
     }
-    switch (other.get_type_id()) {
+    switch (other_tp.get_type_id()) {
     case fixed_dim_type_id:
-      if (other.extended<fixed_dim_type>()->get_fixed_dim_size() !=
+      if (other_tp.extended<fixed_dim_type>()->get_fixed_dim_size() !=
           tv_type.extended<fixed_dim_type>()->get_fixed_dim_size()) {
         return false;
       }
       break;
     case cfixed_dim_type_id:
-      if (other.extended<cfixed_dim_type>()->get_fixed_dim_size() !=
+      if (other_tp.extended<cfixed_dim_type>()->get_fixed_dim_size() !=
           tv_type.extended<cfixed_dim_type>()->get_fixed_dim_size()) {
         return false;
       }
@@ -145,8 +150,8 @@ bool typevar_dim_type::matches(const char *arrmeta, const ndt::type &other,
     default:
       break;
     }
-    return other.get_type_at_dimension(NULL, 1).matches(
-        arrmeta, get_element_type(),
+    return other_tp.get_type_at_dimension(NULL, 1).matches(
+        arrmeta, get_element_type(), NULL,
         tp_vars);
   }
 }

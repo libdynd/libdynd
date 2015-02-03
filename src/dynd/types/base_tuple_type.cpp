@@ -405,18 +405,22 @@ void base_tuple_type::foreach_leading(const char *arrmeta, char *data,
   }
 }
 
-bool base_tuple_type::matches(const char *arrmeta, const ndt::type &other,
+bool base_tuple_type::matches(const ndt::type &self_tp, const char *self_arrmeta,
+                              const ndt::type &other_tp, const char *other_arrmeta,
                               std::map<nd::string, ndt::type> &tp_vars) const
 {
   std::cout << "base_tuple_type" << std::endl;
-  std::cout << "this = " << ndt::type(this, true) << std::endl;
-  std::cout << "other = " << other << std::endl;
+  std::cout << "self_tp = " << self_tp << std::endl;
+  std::cout << "other_tp = " << other_tp << std::endl;
+
+  if (other_tp.get_kind() == symbolic_kind) {
+    return other_tp.extended()->matches(other_tp, other_arrmeta, self_tp,
+                                        self_arrmeta, tp_vars);
+  }
 
   intptr_t other_field_count =
-      other.extended<base_tuple_type>()->get_field_count();
-  bool other_variadic = other.extended<base_tuple_type>()->is_variadic();
-
-
+      other_tp.extended<base_tuple_type>()->get_field_count();
+  bool other_variadic = other_tp.extended<base_tuple_type>()->is_variadic();
 
   if ((m_field_count == other_field_count && !m_variadic) ||
       (m_field_count >= other_field_count && other_variadic)) {
@@ -426,11 +430,11 @@ bool base_tuple_type::matches(const char *arrmeta, const ndt::type &other,
     const ndt::type *fields =
         get_field_types_raw();
     const ndt::type *other_fields =
-        other.extended<base_tuple_type>()->get_field_types_raw();
+        other_tp.extended<base_tuple_type>()->get_field_types_raw();
     for (intptr_t i = 0; i != other_field_count; ++i) {
       if (!fields[i].matches(
-              arrmeta + (arrmeta != NULL ? arrmeta_offsets[i] : 0),
-              other_fields[i], tp_vars)) {
+              self_arrmeta + (self_arrmeta != NULL ? arrmeta_offsets[i] : 0),
+              other_fields[i], other_arrmeta, tp_vars)) {
         return false;
       }
     }

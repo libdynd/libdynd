@@ -14,13 +14,22 @@ using namespace dynd;
 base_dim_type::~base_dim_type() {
 }
 
-bool base_dim_type::matches(const char *arrmeta, const ndt::type &other,
+bool base_dim_type::matches(const ndt::type &self_tp, const char *self_arrmeta, const ndt::type &other_tp,
+                            const char *other_arrmeta,
                             std::map<nd::string, ndt::type> &tp_vars) const
 {
-  if (other.get_kind() != dim_kind) {
+  std::cout << "base_dim_type" << std::endl;
+  std::cout << "self_tp = " << self_tp << std::endl;
+  std::cout << "other_tp = " << other_tp << std::endl;
+
+  if (other_tp.is_symbolic()) {
+    return other_tp.extended()->matches(other_tp, other_arrmeta, self_tp, self_arrmeta, tp_vars);
+  }
+
+  if (get_type_id() != other_tp.get_type_id()) {
     return false;
   }
 
-  return m_element_tp.matches(arrmeta, other.extended<base_dim_type>()->m_element_tp,
-    tp_vars);
+  return m_element_tp.matches(self_arrmeta, other_tp.extended<base_dim_type>()->m_element_tp,
+    other_arrmeta, tp_vars);
 }

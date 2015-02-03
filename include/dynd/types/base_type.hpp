@@ -553,7 +553,8 @@ public:
                            comparison_type_t comptype,
                            const eval::eval_context *ectx) const;
 
-    virtual bool matches(const char *arrmeta, const ndt::type &other,
+    virtual bool matches(const ndt::type &self_tp, const char *self_arrmeta,
+                         const ndt::type &other, const char *other_arrmeta,
                          std::map<nd::string, ndt::type> &tp_vars) const;
 
     /**

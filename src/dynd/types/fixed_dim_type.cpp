@@ -736,24 +736,36 @@ static ndt::type get_element_type(const ndt::type &dt)
   return dt.extended<fixed_dim_type>()->get_element_type();
 }
 
-bool fixed_dim_type::matches(const char *arrmeta, const ndt::type &other,
+bool fixed_dim_type::matches(const ndt::type &self_tp,
+                             const char *self_arrmeta, const ndt::type &other_tp,
+                             const char *other_arrmeta,
                              std::map<nd::string, ndt::type> &tp_vars) const
 {
-  switch (other.get_type_id()) {
+  std::cout << "fixed_dim_type" << std::endl;
+  std::cout << "self_tp = " << self_tp << std::endl;
+  std::cout << "other_tp = " << other_tp << std::endl;
+
+  if (other_tp.is_symbolic()) {
+    return other_tp.extended()->matches(other_tp, other_arrmeta, self_tp, self_arrmeta, tp_vars);
+  }
+
+  switch (other_tp.get_type_id()) {
   case fixed_dim_type_id:
     return get_fixed_dim_size() ==
-               other.extended<fixed_dim_type>()->get_fixed_dim_size() &&
-           m_element_tp.matches(arrmeta,
-                                other.extended<fixed_dim_type>()->m_element_tp,
+               other_tp.extended<fixed_dim_type>()->get_fixed_dim_size() &&
+           m_element_tp.matches(self_arrmeta,
+                                other_tp.extended<fixed_dim_type>()->m_element_tp,
+                                other_arrmeta,
                                 tp_vars);
   case cfixed_dim_type_id:
-    return arrmeta != NULL &&
+    return self_arrmeta != NULL &&
            get_fixed_dim_size() ==
-               other.extended<cfixed_dim_type>()->get_fixed_dim_size() &&
-           get_fixed_stride(arrmeta) ==
-               other.extended<cfixed_dim_type>()->get_fixed_stride() &&
+               other_tp.extended<cfixed_dim_type>()->get_fixed_dim_size() &&
+           get_fixed_stride(self_arrmeta) ==
+               other_tp.extended<cfixed_dim_type>()->get_fixed_stride() &&
            m_element_tp.matches(
-               arrmeta, other.extended<cfixed_dim_type>()->get_element_type(),
+               self_arrmeta, other_tp.extended<cfixed_dim_type>()->get_element_type(),
+                other_arrmeta,
                tp_vars);
   default:
     return false;

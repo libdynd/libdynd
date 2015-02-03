@@ -100,26 +100,26 @@ void typevar_type::arrmeta_destruct(char *DYND_UNUSED(arrmeta)) const
     throw type_error("Cannot store data of typevar type");
 }
 
-bool typevar_type::matches(const char *DYND_UNUSED(arrmeta), const ndt::type &other,
-                           std::map<nd::string, ndt::type> &tp_vars) const
+bool typevar_type::matches(const ndt::type &self_tp, const char *DYND_UNUSED(arrmeta), const ndt::type &other_tp,
+                           const char *DYND_UNUSED(other_arrmeta), std::map<nd::string, ndt::type> &tp_vars) const
 {
-  if (!other.is_scalar()) {
+  std::cout << "typevar_type" << std::endl;
+  std::cout << "self_tp = " << self_tp << std::endl;
+  std::cout << "other_tp = " << other_tp << std::endl;
+
+  if (!other_tp.is_scalar()) {
     return false;
   }
-
-  std::cout << "typevar_type" << std::endl;
-  std::cout << "this = " << ndt::type(this, true) << std::endl;
-  std::cout << "other = " << other << std::endl;
 
   ndt::type &tv_type = tp_vars[m_name];
   if (tv_type.is_null()) {
     // This typevar hasn't been seen yet
-    tv_type = other;
+    tv_type = other_tp;
     return true;
   } else {
     // Make sure the type matches previous
     // instances of the type var
-    return other == tv_type;
+    return other_tp == tv_type;
   }
 }
 

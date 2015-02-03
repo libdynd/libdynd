@@ -48,5 +48,5 @@ bool ndt::pattern_match(const ndt::type &concrete, const char *concrete_arrmeta,
                         const ndt::type &pattern,
                         std::map<nd::string, ndt::type> &typevars)
 {
-  return concrete.matches(concrete_arrmeta, pattern, typevars);
+  return concrete.matches(concrete_arrmeta, pattern, NULL, typevars);
 }

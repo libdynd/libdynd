@@ -223,18 +223,24 @@ void fixed_dimsym_type::data_destruct_strided(const char *DYND_UNUSED(arrmeta),
   throw runtime_error(ss.str());
 }
 
-bool fixed_dimsym_type::matches(const char *arrmeta, const ndt::type &other,
+bool fixed_dimsym_type::matches(const ndt::type &self_tp, const char *arrmeta,
+                                const ndt::type &other_tp, const char *other_arrmeta,
                                 std::map<nd::string, ndt::type> &tp_vars) const
 {
-  switch (other.get_type_id()) {
+  std::cout << "fixed_dimsym_type" << std::endl;
+  std::cout << "self_tp = " << self_tp << std::endl;
+  std::cout << "other_tp = " << other_tp << std::endl;
+
+  switch (other_tp.get_type_id()) {
     case fixed_dim_type_id:
     case cfixed_dim_type_id:
     case fixed_dimsym_type_id:
-      return m_element_tp.matches(arrmeta, other.extended<base_dim_type>()->get_element_type(), tp_vars);
+      return m_element_tp.matches(arrmeta, other_tp.extended<base_dim_type>()->get_element_type(), other_arrmeta, tp_vars);
+    case typevar_dim_type_id:
+    case pow_dimsym_type_id:
+      return other_tp.extended()->matches(other_tp, other_arrmeta, self_tp, arrmeta, tp_vars);
     case any_sym_type_id:
       return true;
-    case pow_dimsym_type_id:
-      return matches(arrmeta, other.extended<pow_dimsym_type>()->get_base_type(), tp_vars);
     default:
       return false;
   }
