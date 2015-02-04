@@ -5,6 +5,7 @@
 
 #include <dynd/func/elwise.hpp>
 #include <dynd/types/dim_fragment_type.hpp>
+#include <dynd/types/typevar_constructed_type.hpp>
 
 using namespace std;
 using namespace dynd;
@@ -151,6 +152,12 @@ static void *create_cuda_device_trampoline(void *ckb, intptr_t ckb_offset,
                                            unsigned int threads)
 {
   switch (src_count) {
+  case 0: {
+    typedef kernels::cuda_parallel_ck<0> self_type;
+    self_type *self =
+        self_type::create(ckb, kernreq, ckb_offset, blocks, threads);
+    return &self->ckb;
+  }
   case 1: {
     typedef kernels::cuda_parallel_ck<1> self_type;
     self_type *self =
@@ -239,8 +246,18 @@ ndt::type nd::functional::elwise_make_type(const arrfunc_type *child_tp)
     }
   */
 
-  ndt::type ret_tp =
-      ndt::make_ellipsis_dim(dimsname, child_tp->get_return_type());
+  ndt::type ret_tp = child_tp->get_return_type();
+  if (ret_tp.get_kind() == memory_kind) {
+    ret_tp = ret_tp.extended<base_memory_type>()->with_replaced_storage_type(
+        ndt::make_ellipsis_dim(dimsname, ret_tp.without_memory_type()));
+  } else if (ret_tp.get_type_id() == typevar_constructed_type_id) {
+    ret_tp = ndt::make_typevar_constructed(
+        ret_tp.extended<typevar_constructed_type>()->get_name(),
+        ndt::make_ellipsis_dim(
+            dimsname, ret_tp.extended<typevar_constructed_type>()->get_arg()));
+  } else {
+    ret_tp = ndt::make_ellipsis_dim(dimsname, ret_tp);
+  }
 
   return ndt::make_arrfunc(ndt::make_tuple(out_param_types), kwd_tp, ret_tp);
 }

@@ -100,12 +100,20 @@ void typevar_type::arrmeta_destruct(char *DYND_UNUSED(arrmeta)) const
     throw type_error("Cannot store data of typevar type");
 }
 
-bool typevar_type::matches(const ndt::type &DYND_UNUSED(self_tp),
-                           const char *DYND_UNUSED(self_arrmeta),
+bool typevar_type::matches(const ndt::type &self_tp,
+                           const char *self_arrmeta,
                            const ndt::type &other_tp,
-                           const char *DYND_UNUSED(other_arrmeta),
+                           const char *other_arrmeta,
                            std::map<nd::string, ndt::type> &tp_vars) const
 {
+  if (other_tp.get_type_id() == typevar_type_id) {
+    return *this == *other_tp.extended();
+  }
+
+  if (other_tp.is_sym_pattern()) {
+    return other_tp.extended()->matches(other_tp, other_arrmeta, self_tp, self_arrmeta, tp_vars);
+  }
+
   if (!other_tp.is_scalar()) {
     return false;
   }

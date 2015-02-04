@@ -42,7 +42,7 @@ inline size_t get_cuda_device_data_alignment(const ndt::type& dtp) {
         return dtp.get_data_size();
     } else {
         // TODO: Return the data size of the largest built-in component
-        throw std::runtime_error("only built-in types may be allocated in CUDA global memory");
+        return 0;
     }
 }
 

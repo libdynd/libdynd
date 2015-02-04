@@ -121,12 +121,16 @@ void ellipsis_dim_type::arrmeta_destruct(char *DYND_UNUSED(arrmeta)) const
   throw type_error("Cannot store data of ellipsis type");
 }
 
-bool ellipsis_dim_type::matches(const ndt::type &DYND_UNUSED(self_tp), const char *self_arrmeta,
+bool ellipsis_dim_type::matches(const ndt::type &self_tp, const char *self_arrmeta,
                                 const ndt::type &other_tp, const char *other_arrmeta,
                                 std::map<nd::string, ndt::type> &tp_vars) const
 {
   if (other_tp.get_type_id() == any_sym_type_id) {
     return true;
+  }
+
+  if (other_tp.get_type_id() != ellipsis_dim_type_id && other_tp.is_sym_pattern()) {
+    return other_tp.extended()->matches(other_tp, other_arrmeta, self_tp, self_arrmeta, tp_vars);
   }
 
   if (other_tp.get_ndim() == 0) {

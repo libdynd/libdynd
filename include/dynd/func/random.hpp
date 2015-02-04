@@ -4,7 +4,12 @@
 #include <memory>
 #include <random>
 
+#ifdef DYND_CUDA
+#include <curand_kernel.h>
+#endif
+
 #include <dynd/kernels/expr_kernels.hpp>
+#include <dynd/kernels/cuda_kernels.hpp>
 #include <dynd/func/arrfunc.hpp>
 
 namespace dynd {
@@ -18,12 +23,13 @@ typedef join<typename join<integral_types, real_types>::type,
 
 namespace kernels {
 
-  template <typename... T>
+  template <kernel_request_t kernreq, typename... T>
   struct uniform_int_ck;
 
   template <typename G, typename R>
-  struct uniform_int_ck<G, R>
-      : expr_ck<uniform_int_ck<G, R>, kernel_request_host, 0> {
+  struct uniform_int_ck<kernel_request_host, G, R>
+      : expr_ck<uniform_int_ck<kernel_request_host, G, R>, kernel_request_host,
+                0> {
     typedef uniform_int_ck self_type;
 
     G &g;
@@ -79,12 +85,13 @@ namespace kernels {
     }
   };
 
-  template <typename... T>
+  template <kernel_request_t kernreq, typename... T>
   struct uniform_real_ck;
 
   template <typename G, typename R>
-  struct uniform_real_ck<G, R>
-      : expr_ck<uniform_real_ck<G, R>, kernel_request_host, 0> {
+  struct uniform_real_ck<kernel_request_host, G, R>
+      : expr_ck<uniform_real_ck<kernel_request_host, G, R>, kernel_request_host,
+                0> {
     typedef uniform_real_ck self_type;
 
     G &g;
@@ -140,12 +147,75 @@ namespace kernels {
     }
   };
 
-  template <typename... T>
+#ifdef __CUDACC__
+
+  template <typename S>
+  struct uniform_real_ck<kernel_request_cuda_device, S, double>
+      : expr_ck<uniform_real_ck<kernel_request_cuda_device, S, double>,
+                kernel_request_cuda_device, 0> {
+    typedef uniform_real_ck self_type;
+
+    S *s;
+
+    __device__ uniform_real_ck(S *s) : s(s) {}
+
+    __device__ void single(char *dst, char *const *DYND_UNUSED(src))
+    {
+      *reinterpret_cast<double *>(dst) = curand_uniform_double(s);
+    }
+
+/*
+    __device__ void strided(char *dst, intptr_t dst_stride, char *const *DYND_UNUSED(src),
+                            const intptr_t *DYND_UNUSED(src_stride), size_t count)
+    {
+      size_t thread_id = blockIdx.x * blockDim.x + threadIdx.x;
+      size_t thread_count = gridDim.x * blockDim.x;
+
+      for (size_t i = blockIdx.x * blockDim.x + threadIdx.x; i < count; i += thread_count) {
+        *reinterpret_cast<double *>(dst + thread_id * sizeof(double)) = curand_uniform_double(s + thread_id);
+        dst += dst_stride;
+      }
+    }
+*/
+
+    static ndt::type make_type()
+    {
+      return ndt::type(
+          "(a: ?R, b: ?R, dst_tp: type) -> cuda_device[R]");
+    }
+
+    static intptr_t instantiate(
+        const arrfunc_type_data *self, const arrfunc_type *DYND_UNUSED(self_tp),
+        void *ckb, intptr_t ckb_offset, const ndt::type &DYND_UNUSED(dst_tp),
+        const char *DYND_UNUSED(dst_arrmeta),
+        const ndt::type *DYND_UNUSED(src_tp),
+        const char *const *DYND_UNUSED(src_arrmeta), kernel_request_t kernreq,
+        const eval::eval_context *DYND_UNUSED(ectx), const nd::array &kwds,
+        const std::map<nd::string, ndt::type> &DYND_UNUSED(tp_vars))
+    {
+      if ((kernreq & kernel_request_memory) == kernel_request_host) {
+        typedef cuda_parallel_ck<0> self_type;
+        self_type *self = self_type::create(ckb, kernreq, ckb_offset, 1, 1);
+        ckb = &self->ckb;
+        kernreq |= kernel_request_cuda_device;
+        ckb_offset = 0;
+      }
+
+      self_type::create(ckb, kernreq, ckb_offset,
+                        *self->get_data_as<S *>());
+      return ckb_offset;
+    }
+  };
+
+#endif
+
+  template <kernel_request_t kernreq, typename... T>
   struct uniform_complex_ck;
 
   template <typename G, typename R>
-  struct uniform_complex_ck<G, R>
-      : expr_ck<uniform_complex_ck<G, R>, kernel_request_host, 0> {
+  struct uniform_complex_ck<kernel_request_host, G, R>
+      : expr_ck<uniform_complex_ck<kernel_request_host, G, R>,
+                kernel_request_host, 0> {
     typedef uniform_complex_ck self_type;
 
     G &g;
@@ -205,57 +275,60 @@ namespace kernels {
     }
   };
 
-  template <typename... T>
+  template <kernel_request_t kernreq, typename... T>
   struct uniform_ck;
 
-  template <typename G>
-  struct uniform_ck<G, int8_t> : uniform_int_ck<G, int8_t> {
+  template <kernel_request_t kernreq, typename G>
+  struct uniform_ck<kernreq, G, int8_t> : uniform_int_ck<kernreq, G, int8_t> {
   };
 
-  template <typename G>
-  struct uniform_ck<G, int16_t> : uniform_int_ck<G, int16_t> {
+  template <kernel_request_t kernreq, typename G>
+  struct uniform_ck<kernreq, G, int16_t> : uniform_int_ck<kernreq, G, int16_t> {
   };
 
-  template <typename G>
-  struct uniform_ck<G, int32_t> : uniform_int_ck<G, int32_t> {
+  template <kernel_request_t kernreq, typename G>
+  struct uniform_ck<kernreq, G, int32_t> : uniform_int_ck<kernreq, G, int32_t> {
   };
 
-  template <typename G>
-  struct uniform_ck<G, int64_t> : uniform_int_ck<G, int64_t> {
+  template <kernel_request_t kernreq, typename G>
+  struct uniform_ck<kernreq, G, int64_t> : uniform_int_ck<kernreq, G, int64_t> {
   };
 
-  template <typename G>
-  struct uniform_ck<G, uint8_t> : uniform_int_ck<G, uint8_t> {
+  template <kernel_request_t kernreq, typename G>
+  struct uniform_ck<kernreq, G, uint8_t> : uniform_int_ck<kernreq, G, uint8_t> {
   };
 
-  template <typename G>
-  struct uniform_ck<G, uint16_t> : uniform_int_ck<G, uint16_t> {
+  template <kernel_request_t kernreq, typename G>
+  struct uniform_ck<kernreq, G, uint16_t>
+      : uniform_int_ck<kernreq, G, uint16_t> {
   };
 
-  template <typename G>
-  struct uniform_ck<G, uint32_t> : uniform_int_ck<G, uint32_t> {
+  template <kernel_request_t kernreq, typename G>
+  struct uniform_ck<kernreq, G, uint32_t>
+      : uniform_int_ck<kernreq, G, uint32_t> {
   };
 
-  template <typename G>
-  struct uniform_ck<G, uint64_t> : uniform_int_ck<G, uint64_t> {
+  template <kernel_request_t kernreq, typename G>
+  struct uniform_ck<kernreq, G, uint64_t>
+      : uniform_int_ck<kernreq, G, uint64_t> {
   };
 
-  template <typename G>
-  struct uniform_ck<G, float> : uniform_real_ck<G, float> {
+  template <kernel_request_t kernreq, typename G>
+  struct uniform_ck<kernreq, G, float> : uniform_real_ck<kernreq, G, float> {
   };
 
-  template <typename G>
-  struct uniform_ck<G, double> : uniform_real_ck<G, double> {
+  template <kernel_request_t kernreq, typename G>
+  struct uniform_ck<kernreq, G, double> : uniform_real_ck<kernreq, G, double> {
   };
 
-  template <typename G>
-  struct uniform_ck<G, complex<float>>
-      : uniform_complex_ck<G, complex<float>> {
+  template <kernel_request_t kernreq, typename G>
+  struct uniform_ck<kernreq, G, complex<float>>
+      : uniform_complex_ck<kernreq, G, complex<float>> {
   };
 
-  template <typename G>
-  struct uniform_ck<G, complex<double>>
-      : uniform_complex_ck<G, complex<double>> {
+  template <kernel_request_t kernreq, typename G>
+  struct uniform_ck<kernreq, G, complex<double>>
+      : uniform_complex_ck<kernreq, G, complex<double>> {
   };
 
 } // namespace dynd::kernels
@@ -265,6 +338,18 @@ namespace nd {
     namespace random {
 
       struct uniform : arrfunc<uniform> {
+        template <kernel_request_t kernreq>
+        static typename std::enable_if<kernreq == kernel_request_host,
+                                       nd::arrfunc>::type
+        as_arrfunc();
+
+#ifdef DYND_CUDA
+        template <kernel_request_t kernreq>
+        static typename std::enable_if<kernreq == kernel_request_cuda_device,
+                                       nd::arrfunc>::type
+        as_arrfunc();
+#endif
+
         static nd::arrfunc as_arrfunc();
       };
 

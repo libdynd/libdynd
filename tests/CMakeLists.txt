@@ -118,6 +118,7 @@ if (DYND_CUDA)
     foreach(filename_CPP
             func/test_apply.cpp
             func/test_elwise.cpp
+            func/test_random.cpp
         )
         get_filename_component(filename_DIR ${filename_CPP} PATH)
         get_filename_component(filename_WE ${filename_CPP} NAME_WE)
@@ -126,6 +127,7 @@ if (DYND_CUDA)
             OUTPUT "${filename_CU}"
             COMMAND mkdir -p ${filename_DIR}
             COMMAND echo "\\\#include \\\"${CMAKE_CURRENT_SOURCE_DIR}/${filename_CPP}\\\"" > ${filename_CU}
+            DEPENDS libdynddev
         )
         list(REMOVE_ITEM tests_SRC ${filename_CPP})
         list(APPEND tests_SRC ${filename_CU})

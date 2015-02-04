@@ -155,4 +155,30 @@ struct ckernel_prefix {
   }
 };
 
+
+template <template <kernel_request_t, typename...> class F, kernel_request_t kernreq, typename T, bool flatten = false>
+struct ex_for_each;
+
+template <template <kernel_request_t, typename...> class F, kernel_request_t kernreq, typename T0>
+struct ex_for_each<F, kernreq, type_sequence<T0>, false> {
+  typedef type_sequence<F<kernreq, T0>> type;
+};
+
+template <template <kernel_request_t, typename...> class F, kernel_request_t kernreq, typename T0, typename... T>
+struct ex_for_each<F, kernreq, type_sequence<T0, T...>, false> {
+  typedef type_sequence<F<kernreq, T0>, F<kernreq, T>...> type;
+};
+
+template <template <kernel_request_t, typename...> class F, kernel_request_t kernreq, typename... T0>
+struct ex_for_each<F, kernreq, type_sequence<type_sequence<T0...>>, true> {
+  typedef type_sequence<F<kernreq, T0...>> type;
+};
+
+template <template <kernel_request_t, typename...> class F, kernel_request_t kernreq, typename... T0, typename... T>
+struct ex_for_each<F, kernreq, type_sequence<type_sequence<T0...>, T...>, true> {
+  typedef typename join<type_sequence<F<kernreq, T0...>>,
+                        typename ex_for_each<F, kernreq, type_sequence<T...>, true>::type>::type
+      type;
+};
+
 } // namespace dynd

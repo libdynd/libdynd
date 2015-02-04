@@ -29,8 +29,6 @@ TYPED_TEST_CASE_P(Random);
 
 TYPED_TEST_P(Random, Uniform)
 {
-  // make a bunch of types
-
   typename TestFixture::DType a = 0;
   typename TestFixture::DType b = 10;
   intptr_t size = 10000;
@@ -47,6 +45,21 @@ TYPED_TEST_P(Random, Uniform)
 
   EXPECT_EQ_RELERR(static_cast<double>(a + b) / 2, mean, 0.1);
 }
+
+#ifdef DYND_CUDA
+TEST(Random, CUDAUniform)
+{
+  nd::arrfunc af = static_cast<nd::arrfunc>(nd::random::uniform);
+//  std::cout << af << std::endl;
+
+  ndt::type dst_tp = ndt::type("cuda_device[1000 * float64]");
+//  std::cout << nd::random::uniform(kwds("dst_tp", dst_tp)) << std::endl;
+
+//  std::cout << ndt::type("(a: ?R, b: ?R, dst_tp: type) -> M[Dims... * R]").matches(
+  //  ndt::type("(a: ?R, b: ?R, dst_tp: type) -> Dims... * R")) << std::endl;
+
+}
+#endif
 
 REGISTER_TYPED_TEST_CASE_P(Random, Uniform);
 INSTANTIATE_TYPED_TEST_CASE_P(Integral, Random, IntegralTypes);
