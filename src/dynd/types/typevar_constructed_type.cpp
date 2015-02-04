@@ -127,13 +127,20 @@ bool typevar_constructed_type::matches(
     std::map<nd::string, ndt::type> &tp_vars) const
 {
   if (other_tp.get_kind() != memory_kind) {
-    return m_arg.matches(self_arrmeta, other_tp, other_arrmeta, tp_vars);
+    if (m_arg.matches(self_arrmeta, other_tp, other_arrmeta, tp_vars)) {
+      ndt::type &tv_type = tp_vars[m_name];
+      if (tv_type.is_null()) {
+        tv_type = ndt::make_type<void>();
+      }
+      return true;
+    }
+    return false;
   }
 
   ndt::type &tv_type = tp_vars[m_name];
   if (tv_type.is_null()) {
     // This typevar hasn't been seen yet
-    tv_type = other_tp;
+    tv_type = other_tp.extended<base_memory_type>()->with_replaced_storage_type(ndt::make_type<void>());
   }
 
   return m_arg.matches(

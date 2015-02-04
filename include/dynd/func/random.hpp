@@ -181,7 +181,7 @@ namespace kernels {
     static ndt::type make_type()
     {
       return ndt::type(
-          "(a: ?float64, b: ?float64, dst_tp: type) -> cuda_device[float64]");
+          "(a: ?R, b: ?R, dst_tp: type) -> cuda_device[R]");
     }
 
     static intptr_t instantiate(
@@ -341,18 +341,12 @@ namespace nd {
         static nd::arrfunc as_arrfunc();
       };
 
-      struct cuda_uniform : arrfunc<cuda_uniform> {
-        static nd::arrfunc as_arrfunc();
-      };
-
     } // namespace dynd::nd::decl::random
   }   // namespace dynd::nd::decl
 
   namespace random {
 
     extern decl::random::uniform uniform;
-
-    extern decl::random::cuda_uniform cuda_uniform;
 
   } // namespace dynd::nd::random
 

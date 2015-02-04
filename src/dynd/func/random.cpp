@@ -35,28 +35,14 @@ nd::arrfunc nd::decl::random::uniform::as_arrfunc()
   nd::arrfunc cuda_device_arrfunc = nd::functional::elwise(nd::as_arrfunc<
       kernels::uniform_real_ck<kernel_request_cuda_device, double>>(s));
 
-/*
+//  std::cout << "host_arrfunc = " << host_arrfunc << std::endl;
+  //std::cout << "cuda_device_arrfunc = " << cuda_device_arrfunc << std::endl;
+
   return nd::functional::multidispatch(
       ndt::type("(a: ?R, b: ?R, dst_tp: type) -> M[Dims... * R]"),
       {host_arrfunc, cuda_device_arrfunc});
-*/
 
-  return host_arrfunc;
+//  return host_arrfunc;
 }
 
 nd::decl::random::uniform nd::random::uniform;
-
-nd::arrfunc nd::decl::random::cuda_uniform::as_arrfunc()
-{
-  unsigned int blocks_per_grid = 512;
-  unsigned int threads_per_block = 512;
-
-  curandState_t *s;
-  cudaMalloc(&s, blocks_per_grid * threads_per_block * sizeof(curandState_t));
-  cuda_device_curand_init << <blocks_per_grid, threads_per_block>>> (s);
-
-  return nd::functional::elwise(nd::as_arrfunc<
-      kernels::uniform_real_ck<kernel_request_cuda_device, double>>(s));
-}
-
-nd::decl::random::cuda_uniform nd::random::cuda_uniform;

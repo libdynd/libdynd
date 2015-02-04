@@ -21,6 +21,8 @@
 #include <dynd/types/cstruct_type.hpp>
 #include <dynd/types/tuple_type.hpp>
 #include <dynd/types/ctuple_type.hpp>
+#include <dynd/types/typevar_constructed_type.hpp>
+#include <dynd/types/cuda_device_type.hpp>
 
 using namespace std;
 using namespace dynd;
@@ -117,6 +119,15 @@ ndt::type ndt::detail::internal_substitute(
                      typevars, concrete),
           substitute(pattern.extended<arrfunc_type>()->get_return_type(),
                      typevars, concrete));
+    case typevar_constructed_type_id: {
+        map<nd::string, ndt::type>::const_iterator it =
+          typevars.find(pattern.extended<typevar_constructed_type>()->get_name());
+        if (it->second.get_type_id() == void_type_id) {
+          return substitute(pattern.extended<typevar_constructed_type>()->get_arg(), typevars, concrete);
+        } else if (it->second.get_type_id() == cuda_device_type_id) {
+          return ndt::make_cuda_device(substitute(pattern.extended<typevar_constructed_type>()->get_arg(), typevars, concrete));
+        }
+      }
     case typevar_type_id: {
       map<nd::string, ndt::type>::const_iterator it =
           typevars.find(pattern.extended<typevar_type>()->get_name());

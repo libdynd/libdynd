@@ -3,6 +3,7 @@
 // BSD 2-Clause License, see LICENSE.txt
 //
 
+#include <algorithm>
 #include <memory>
 #include <set>
 #include <unordered_map>
@@ -448,16 +449,24 @@ namespace nd {
     typedef std::unordered_map<std::vector<ndt::type>, arrfunc>
         multidispatch_map_type;
 
+    struct multidispatch_data {
+      std::shared_ptr<multidispatch_map_type> map;
+      std::shared_ptr<std::vector<string>> vars;
+
+      multidispatch_data(std::shared_ptr<multidispatch_map_type> map, std::shared_ptr<std::vector<string>> vars) : map(map), vars(vars) {}
+    };
+
     static const arrfunc_type_data *
     multidispatch_find(const arrfunc_type_data *self,
                        const std::map<string, ndt::type> &tp_vars)
     {
-      std::shared_ptr<multidispatch_map_type> map =
-          *self->get_data_as<std::shared_ptr<multidispatch_map_type>>();
+      const multidispatch_data *data = self->get_data_as<multidispatch_data>();
+      std::shared_ptr<multidispatch_map_type> map = data->map;
+      std::shared_ptr<std::vector<string>> vars = data->vars;
 
       std::vector<ndt::type> tp_vals;
       for (auto pair : tp_vars) {
-        if (pair.first == "R") {
+        if (std::find(vars->begin(), vars->end(), pair.first) != vars->end()) {
           tp_vals.push_back(pair.second);
         }
       }
@@ -512,9 +521,7 @@ int nd::functional::multidispatch_resolve_dst_type(
 nd::arrfunc nd::functional::multidispatch(const ndt::type &self_tp,
                                           const std::vector<arrfunc> &children)
 {
-  const std::initializer_list<string> vars = {"R"};
-
-  intptr_t nkwd = 2;
+  intptr_t nkwd = children[0].get_type()->get_nkwd();
 
   ndt::type pos_tp = self_tp.extended<arrfunc_type>()->get_pos_tuple();
   ndt::type kwd_tp = self_tp.extended<arrfunc_type>()->get_kwd_struct();
@@ -530,6 +537,9 @@ nd::arrfunc nd::functional::multidispatch(const ndt::type &self_tp,
   arrfunc_resolve_option_values_t resolve_option_values = NULL;
   arrfunc_resolve_dst_type_t resolve_dst_type = NULL;
 
+  std::shared_ptr<std::vector<string>> vars(new std::vector<string>);
+  bool vars_init = false;
+
   std::shared_ptr<multidispatch_map_type> map(new multidispatch_map_type);
   for (const arrfunc &child : children) {
     std::map<string, ndt::type> tp_vars;
@@ -537,21 +547,37 @@ nd::arrfunc nd::functional::multidispatch(const ndt::type &self_tp,
       throw std::invalid_argument("could not match arrfuncs");
     }
 
-    if (resolve_option_values == NULL && child.get()->resolve_option_values != NULL) {
-      resolve_option_values = multidispatch_resolve_option_values;
-    }
-    if (resolve_dst_type == NULL && child.get()->resolve_dst_type != NULL) {
-      resolve_dst_type = multidispatch_resolve_dst_type;
+    if (vars_init) {
+      std::vector<string> tmp;
+      for (const auto &pair : tp_vars) {
+        tmp.push_back(pair.first);
+      }
+
+      if (vars->size() != tmp.size() || !std::is_permutation(vars->begin(), vars->end(), tmp.begin())) {
+        throw std::runtime_error("multidispatch arrfuncs have different type variables");
+      }
+    } else {
+      for (const auto &pair : tp_vars) {
+        vars->push_back(pair.first);
+      }
+      vars_init = true;
     }
 
+//    if (resolve_option_values == NULL && child.get()->resolve_option_values != NULL) {
+      resolve_option_values = multidispatch_resolve_option_values;
+  //  }
+    //if (resolve_dst_type == NULL && child.get()->resolve_dst_type != NULL) {
+      resolve_dst_type = multidispatch_resolve_dst_type;
+    //}
+
     std::vector<ndt::type> tp_vals;
-    for (const string &var : vars) {
+    for (const auto &var : *vars) {
       tp_vals.push_back(tp_vars[var]);
     }
 
     (*map)[tp_vals] = child;
   }
 
-  return arrfunc(self_tp, map, &multidispatch_instantiate,
+  return arrfunc(self_tp, multidispatch_data(map, vars), &multidispatch_instantiate,
                  resolve_option_values, resolve_dst_type);
 }
