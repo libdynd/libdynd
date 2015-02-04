@@ -5,6 +5,7 @@
 
 #include <dynd/func/elwise.hpp>
 #include <dynd/types/dim_fragment_type.hpp>
+#include <dynd/types/typevar_constructed_type.hpp>
 
 using namespace std;
 using namespace dynd;
@@ -249,6 +250,11 @@ ndt::type nd::functional::elwise_make_type(const arrfunc_type *child_tp)
   if (ret_tp.get_kind() == memory_kind) {
     ret_tp = ret_tp.extended<base_memory_type>()->with_replaced_storage_type(
         ndt::make_ellipsis_dim(dimsname, ret_tp.without_memory_type()));
+  } else if (ret_tp.get_type_id() == typevar_constructed_type_id) {
+    ret_tp = ndt::make_typevar_constructed(
+        ret_tp.extended<typevar_constructed_type>()->get_name(),
+        ndt::make_ellipsis_dim(
+            dimsname, ret_tp.extended<typevar_constructed_type>()->get_arg()));
   } else {
     ret_tp = ndt::make_ellipsis_dim(dimsname, ret_tp);
   }

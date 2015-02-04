@@ -149,15 +149,15 @@ namespace kernels {
 
 #ifdef __CUDACC__
 
-  template <>
-  struct uniform_real_ck<kernel_request_cuda_device, double>
-      : expr_ck<uniform_real_ck<kernel_request_cuda_device, double>,
+  template <typename S>
+  struct uniform_real_ck<kernel_request_cuda_device, S, double>
+      : expr_ck<uniform_real_ck<kernel_request_cuda_device, S, double>,
                 kernel_request_cuda_device, 0> {
     typedef uniform_real_ck self_type;
 
-    curandState_t *s;
+    S *s;
 
-    __device__ uniform_real_ck(curandState_t *s) : s(s) {}
+    __device__ uniform_real_ck(S *s) : s(s) {}
 
     __device__ void single(char *dst, char *const *DYND_UNUSED(src))
     {
@@ -202,7 +202,7 @@ namespace kernels {
       }
 
       self_type::create(ckb, kernreq, ckb_offset,
-                        *self->get_data_as<curandState_t *>());
+                        *self->get_data_as<S *>());
       return ckb_offset;
     }
   };
@@ -338,6 +338,18 @@ namespace nd {
     namespace random {
 
       struct uniform : arrfunc<uniform> {
+        template <kernel_request_t kernreq>
+        static typename std::enable_if<kernreq == kernel_request_host,
+                                       nd::arrfunc>::type
+        as_arrfunc();
+
+#ifdef DYND_CUDA
+        template <kernel_request_t kernreq>
+        static typename std::enable_if<kernreq == kernel_request_cuda_device,
+                                       nd::arrfunc>::type
+        as_arrfunc();
+#endif
+
         static nd::arrfunc as_arrfunc();
       };
 
