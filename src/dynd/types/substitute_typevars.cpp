@@ -55,9 +55,11 @@ ndt::type ndt::detail::internal_substitute(
   // This function assumes that ``pattern`` is symbolic, so does not
   // have to check types that are always concrete
   switch (pattern.get_type_id()) {
+#ifdef DYND_CUDA
     case cuda_device_type_id:
       return ndt::make_cuda_device(ndt::substitute(pattern.extended<base_memory_type>()->get_element_type(),
         typevars, concrete));
+#endif
     case pointer_type_id:
       return ndt::make_pointer(
           ndt::substitute(pattern.extended<pointer_type>()->get_target_type(),
@@ -124,9 +126,12 @@ ndt::type ndt::detail::internal_substitute(
           typevars.find(pattern.extended<typevar_constructed_type>()->get_name());
         if (it->second.get_type_id() == void_type_id) {
           return substitute(pattern.extended<typevar_constructed_type>()->get_arg(), typevars, concrete);
-        } else if (it->second.get_type_id() == cuda_device_type_id) {
+        }
+#ifdef DYND_CUDA
+        if (it->second.get_type_id() == cuda_device_type_id) {
           return ndt::make_cuda_device(substitute(pattern.extended<typevar_constructed_type>()->get_arg(), typevars, concrete));
         }
+#endif
       }
     case typevar_type_id: {
       map<nd::string, ndt::type>::const_iterator it =
