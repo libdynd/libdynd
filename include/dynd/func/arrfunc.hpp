@@ -284,16 +284,32 @@ void free_wrapper(arrfunc_type_data *self)
 namespace nd {
   namespace detail {
     template <typename K>
-    bool is_special_kwd(const arrfunc_type *DYND_UNUSED(self_tp),
+    typename std::enable_if<!eval::is_eval_context<K>::value, bool>::type is_special_kwd(const arrfunc_type *DYND_UNUSED(self_tp),
                         const std::string &DYND_UNUSED(name),
-                        const K &DYND_UNUSED(value),
+                        K DYND_UNUSED(value), const eval::eval_context *&DYND_UNUSED(ectx),
                         std::map<nd::string, ndt::type> &DYND_UNUSED(tp_vars))
     {
       return false;
     }
 
+    template <typename K>
+    typename std::enable_if<eval::is_eval_context<K>::value, bool>::type
+    is_special_kwd(const arrfunc_type *DYND_UNUSED(self_tp),
+                   const std::string &name, K value,
+                   const eval::eval_context *&ectx,
+                   std::map<nd::string, ndt::type> &DYND_UNUSED(tp_vars))
+    {
+      if (name == "ectx") {
+        ectx = value;
+        return true;
+      }
+
+      return false;
+    }
+
     inline bool is_special_kwd(const arrfunc_type *self_tp,
                                const std::string &name, const ndt::type &value,
+                               const eval::eval_context *&DYND_UNUSED(ectx),
                                std::map<nd::string, ndt::type> &tp_vars)
     {
       if (name == "dst_tp") {
@@ -367,9 +383,10 @@ namespace nd {
       }
 
       std::vector<intptr_t> is_permutation(
-          const arrfunc_type *DYND_UNUSED(self_tp),
+          const arrfunc_type *DYND_UNUSED(self_tp), intptr_t &nkwd, const eval::eval_context *&DYND_UNUSED(ectx),
           std::map<nd::string, ndt::type> &DYND_UNUSED(tp_vars)) const
       {
+        nkwd = 0;
         return std::vector<intptr_t>();
       }
 
@@ -484,14 +501,17 @@ namespace nd {
 
       struct {
         template <size_t I>
-        void operator()(const kwds<K...> *self, const arrfunc_type *af_tp,
-                        std::vector<intptr_t> &available, std::map<nd::string, ndt::type> &tp_vars)
+        void operator()(const kwds<K...> *self, intptr_t &nkwd, const arrfunc_type *af_tp,
+                        std::vector<intptr_t> &available, const eval::eval_context *&ectx,
+                        std::map<nd::string, ndt::type> &tp_vars)
         {
           const std::string &name = self->get_name<I>();
           const auto &value = self->get_value<I>();
 
           intptr_t j = af_tp->get_kwd_index(name);
-          if (j == -1 && !is_special_kwd(af_tp, name, value, tp_vars)) {
+          if (j != -1) {
+            ++nkwd;
+          } else if (!is_special_kwd(af_tp, name, value, ectx, tp_vars)) {
             std::stringstream ss;
             ss << "passed an unexpected keyword \"" << name
                << "\" to arrfunc with type " << ndt::type(af_tp, true);
@@ -502,13 +522,14 @@ namespace nd {
       } is_permutation_ex;
 
       std::vector<intptr_t>
-      is_permutation(const arrfunc_type *af_tp,
+      is_permutation(const arrfunc_type *af_tp, intptr_t &nkwd, const eval::eval_context *&ectx,
                      std::map<nd::string, ndt::type> &tp_vars) const
       {
         typedef make_index_sequence<sizeof...(K)> I;
 
         std::vector<intptr_t> permutation;
-        dynd::index_proxy<I>::for_each(is_permutation_ex, this, af_tp, permutation, tp_vars);
+        nkwd = 0;
+        dynd::index_proxy<I>::for_each(is_permutation_ex, this, nkwd, af_tp, permutation, ectx, tp_vars);
         return permutation;
       }
 
@@ -797,13 +818,14 @@ namespace nd {
     template <typename... K>
     ndt::type resolve(intptr_t nsrc, const ndt::type *src_tp,
                  const char *const *src_arrmeta, const detail::kwds<K...> &kwds,
-                 array &kwds_as_array,
+                 array &kwds_as_array, const eval::eval_context *&ectx,
                  std::map<nd::string, ndt::type> &typevars) const
     {
       const arrfunc_type_data *self = get();
       const arrfunc_type *self_tp = m_value.get_type().extended<arrfunc_type>();
 
-      std::vector<intptr_t> available = kwds.is_permutation(self_tp, typevars);
+      intptr_t nkwd;
+      std::vector<intptr_t> available = kwds.is_permutation(self_tp, nkwd, ectx, typevars);
 
       if (!self_tp->is_pos_variadic() && nsrc != self_tp->get_npos()) {
         std::stringstream ss;
@@ -849,7 +871,7 @@ namespace nd {
           self->resolve_option_values(self, self_tp, nsrc, src_tp,
                                       kwds_as_array, typevars);
         }
-      } else if (kwds.get_size() != 0) {
+      } else if (nkwd != 0) {
         stringstream ss;
         ss << "arrfunc does not accept keyword arguments, but was provided "
               "keyword arguments. arrfunc signature is "
@@ -870,8 +892,10 @@ namespace nd {
     /** Implements the general call operator */
     template <typename A, typename K>
     typename std::enable_if<!std::is_integral<A>::value, array>::type
-    call(const A &args, const K &kwds, const eval::eval_context *ectx) const
+    call(const A &args, const K &kwds) const
     {
+      const eval::eval_context *ectx = NULL;
+
       const arrfunc_type_data *self = get();
       const arrfunc_type *self_tp = m_value.get_type().extended<arrfunc_type>();
 
@@ -880,7 +904,11 @@ namespace nd {
       nd::array kwds_as_array;
       std::map<nd::string, ndt::type> tp_vars;
       ndt::type dst_tp = resolve(args.size(), src_tp, args.get_arrmeta(), kwds,
-                                 kwds_as_array, tp_vars);
+                                 kwds_as_array, ectx, tp_vars);
+
+      if (ectx == NULL) {
+        ectx = &eval::default_eval_context;
+      }
 
       // Construct the destination array
       nd::array res = nd::empty(dst_tp);
@@ -921,7 +949,7 @@ namespace nd {
       std::map<nd::string, ndt::type> tp_vars;
       ndt::type dst_tp = resolve(narg, (narg == 0) ? NULL : src_tp.data(),
                                  (narg == 0) ? NULL : src_arrmeta.data(),
-                                 kwds(), kwds_as_array, tp_vars);
+                                 kwds(), kwds_as_array, ectx, tp_vars);
 
       // Construct the destination array
       nd::array res = nd::empty(dst_tp);
@@ -944,16 +972,7 @@ namespace nd {
      */
     nd::array operator()() const
     {
-      return call(detail::args<>(), detail::kwds<>(),
-                  &eval::default_eval_context);
-    }
-
-    /**
-     * operator()(ectx)
-     */
-    nd::array operator()(const eval::eval_context *ectx) const
-    {
-      return call(detail::args<>(), detail::kwds<>(), ectx);
+      return call(detail::args<>(), detail::kwds<>());
     }
 
     /**
@@ -973,8 +992,7 @@ namespace nd {
 
       args_type arr =
           dynd::index_proxy<I>::template make<args_type>(std::forward<T>(a)...);
-      return call(arr, dynd::get<sizeof...(T)-1>(std::forward<T>(a)...),
-                  &eval::default_eval_context);
+      return call(arr, dynd::get<sizeof...(T)-1>(std::forward<T>(a)...));
     }
 
     /**
@@ -989,55 +1007,7 @@ namespace nd {
     operator()(T &&... a) const
     {
       detail::args<typename as_array<T>::type...> arr(std::forward<T>(a)...);
-      return call(arr, kwds(), &eval::default_eval_context);
-    }
-
-    /**
-     * operator()(a0, a1, ..., an, kwds<...>(...), eval_ctx)
-     */
-    template <typename... T>
-    typename std::enable_if<
-        detail::is_kwds<
-            typename second_back<type_sequence<T...>>::type>::value &&
-            eval::is_eval_context<
-                typename back<type_sequence<T...>>::type>::value,
-        nd::array>::type
-    operator()(T &&... a) const
-    {
-      typedef make_index_sequence<sizeof...(T)-2> I;
-      typedef typename instantiate<
-          detail::args,
-          typename to<type_sequence<typename as_array<T>::type...>,
-                      sizeof...(T)-2>::type>::type args_type;
-
-      args_type arr =
-          dynd::index_proxy<I>::template make<args_type>(std::forward<T>(a)...);
-      return call(arr, dynd::get<sizeof...(T)-2>(std::forward<T>(a)...),
-                  dynd::get<sizeof...(T)-1>(std::forward<T>(a)...));
-    }
-
-    /**
-     * operator()(a0, a1, ..., an, eval_ctx)
-     */
-    template <typename... T>
-    typename std::enable_if<
-        !detail::is_kwds<
-            typename second_back<type_sequence<T...>>::type>::value &&
-            eval::is_eval_context<
-                typename back<type_sequence<T...>>::type>::value,
-        nd::array>::type
-    operator()(T &&... a) const
-    {
-      typedef make_index_sequence<sizeof...(T)-1> I;
-      typedef typename instantiate<
-          detail::args,
-          typename to<type_sequence<typename as_array<T>::type...>,
-                      sizeof...(T)-1>::type>::type args_type;
-
-      args_type arr =
-          dynd::index_proxy<I>::template make<args_type>(std::forward<T>(a)...);
-      return call(arr, kwds(),
-                  dynd::get<sizeof...(T)-1>(std::forward<T>(a)...));
+      return call(arr, kwds());
     }
 
     /** Implements the general call operator with output parameter */

@@ -956,11 +956,22 @@ type make_type(intptr_t ndim, const intptr_t *shape, const ndt::type &dtype,
 /**
  * Returns the type of an array constructed from a value.
  */
+inline type as_type(const eval::eval_context *DYND_UNUSED(value))
+{
+    throw std::runtime_error("error");
+}
+
+inline type as_type(eval::eval_context *DYND_UNUSED(value))
+{
+    throw std::runtime_error("error");
+}
+
 template <typename T>
 type as_type(const T &DYND_UNUSED(value))
 {
   return make_type<T>();
 }
+
 
 template <typename T>
 type as_type(const std::vector<T> &value)
@@ -1075,6 +1086,10 @@ type get_forward_type(const T &DYND_UNUSED(val))
   // Default case is for when T and the ndt::type have identical
   // memory layout, which is guaranteed by make_exact_type<T>().
   return make_exact_type<T>();
+}
+
+inline type get_forward_type(eval::eval_context *DYND_UNUSED(val)) {
+    throw std::runtime_error("error");
 }
 
 template <typename T>
