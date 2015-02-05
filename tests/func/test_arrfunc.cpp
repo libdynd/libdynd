@@ -142,7 +142,6 @@ TEST(ArrFunc, KeywordParsing)
   EXPECT_THROW(af0(1, kwds("y", 4, "y", 2.5)).as<int>(), std::invalid_argument);
 }
 
-/*
 TEST(ArrFunc, Option)
 {
   struct callable {
@@ -169,7 +168,6 @@ TEST(ArrFunc, Option)
   EXPECT_EQ(6, af(1, kwds("x", 5)).as<int>());
   EXPECT_EQ(5, af(1).as<int>());
 }
-*/
 
 TEST(ArrFunc, Assignment_CallInterface)
 {

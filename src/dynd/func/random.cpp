@@ -51,7 +51,7 @@ nd::arrfunc nd::decl::random::uniform::as_arrfunc()
 {
 #ifdef DYND_CUDA
   return nd::functional::elwise(nd::functional::multidispatch(
-      ndt::type("(a: ?R, b: ?R, dst_tp: type) -> M[R]"),
+      ndt::type("(a: ?R, b: ?R) -> M[R]"),
       {as_arrfunc<kernel_request_host>(),
        as_arrfunc<kernel_request_cuda_device>()}));
 #else

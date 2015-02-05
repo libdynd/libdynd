@@ -13,7 +13,6 @@
 
 #include <dynd/func/random.hpp>
 
-/*
 typedef testing::Types<int32_t, int64_t, uint32_t, uint64_t> IntegralTypes;
 typedef testing::Types<float, double> RealTypes;
 
@@ -65,4 +64,3 @@ TEST(Random, CUDAUniform)
 REGISTER_TYPED_TEST_CASE_P(Random, Uniform);
 INSTANTIATE_TYPED_TEST_CASE_P(Integral, Random, IntegralTypes);
 INSTANTIATE_TYPED_TEST_CASE_P(Real, Random, RealTypes);
-*/

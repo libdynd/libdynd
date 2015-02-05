@@ -84,6 +84,11 @@ public:
     return m_kwd_struct.extended<struct_type>()->get_field_type(i);
   }
 
+  std::string get_kwd_name(intptr_t i) const
+  {
+    return m_kwd_struct.extended<struct_type>()->get_field_name(i);
+  }
+
   intptr_t get_kwd_index(const std::string &arg_name) const
   {
     return m_kwd_struct.extended<struct_type>()->get_field_index(arg_name);

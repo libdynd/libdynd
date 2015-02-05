@@ -356,12 +356,8 @@ namespace nd {
 
     template <>
     class kwds<> {
-      std::tuple<> m_vals;
-
     public:
       static intptr_t get_size() { return 0; }
-
-      const std::tuple<> &get_vals() const { return m_vals; }
 
       void resolve_available_types(
           const arrfunc_type *DYND_UNUSED(self_tp), const std::vector<intptr_t> &DYND_UNUSED(available),
@@ -377,30 +373,35 @@ namespace nd {
         return std::vector<intptr_t>();
       }
 
-      nd::array forward_as_array(const nd::array &DYND_UNUSED(names), nd::array &DYND_UNUSED(types),
+      nd::array forward_as_array(const nd::array &names, nd::array &types,
                                  const std::vector<intptr_t> &DYND_UNUSED(available),
-                                 const std::vector<intptr_t> &DYND_UNUSED(missing)) const
+                                 const std::vector<intptr_t> &missing) const
       {
-//        nd::array res = nd::forward_as_array(names, types, m_vals,
-  //                                  available.empty() ? NULL : available.data(),
-    //                                missing.empty() ? NULL : missing.data());
+        nd::array res = nd::empty_shell(ndt::make_struct(names, types));
+        struct_type::fill_default_data_offsets(
+            res.get_dim_size(),
+            reinterpret_cast<const ndt::type *>(types.get_readonly_originptr()),
+            reinterpret_cast<uintptr_t *>(res.get_arrmeta()));
 
-        return nd::array();
+        const ndt::type *tp = reinterpret_cast<const ndt::type *>(types.get_readonly_originptr());
+        char *arrmeta = res.get_arrmeta();
+        const uintptr_t *arrmeta_offsets = res.get_type()
+                                               .extended<base_struct_type>()
+                                               ->get_arrmeta_offsets_raw();
+        char *data = res.get_readwrite_originptr();
+        const uintptr_t *data_offsets = res.get_type().extended<base_struct_type>()->get_data_offsets(
+                res.get_arrmeta());
+
+        for (intptr_t j : missing) {
+          tp[j].extended()->arrmeta_default_construct(
+              arrmeta + arrmeta_offsets[j], true);
+          assign_na(tp[j], arrmeta + arrmeta_offsets[j], data + data_offsets[j],
+                    &eval::default_eval_context);
+        }
+
+        return res;
       }
     };
-
-    template <typename T>
-    ndt::type do_type_stuff(const T &)
-    {
-      return ndt::type();
-    }
-
-    inline ndt::type do_type_stuff(const nd::array &a)
-    {
-      return a.as<ndt::type>();
-    }
-
-    inline ndt::type do_type_stuff(const ndt::type &tp) { return tp; }
 
     template <typename... K>
     class kwds {
@@ -429,49 +430,31 @@ namespace nd {
                         const arrfunc_type *af_tp, ndt::type *kwd_tp_data,
                         std::map<nd::string, ndt::type> &typevars) const
         {
-          const std::string &name = self->get_name<I>();
-          const auto &value = self->get_value<I>();
-
           intptr_t j = available[I];
-          if (j == -1) {
-            return;
-          }
+          if (j != -1) {
+            const std::string &name = self->get_name<I>();
+            const auto &value = self->get_value<I>();
 
-          ndt::type &actual_tp = kwd_tp_data[j];
-          if (!actual_tp.is_null()) {
-            std::stringstream ss;
-            ss << "arrfunc passed keyword \"" << name << "\" more than once";
-            throw std::invalid_argument(ss.str());
-          }
-//          available.push_back(j);
-
-          ndt::type expected_tp = af_tp->get_kwd_type(j);
-          if (expected_tp.get_type_id() == type_type_id) {
-            ndt::type pattern_tp =
-                expected_tp.extended<type_type>()->get_pattern_type();
-            if (pattern_tp.is_null()) {
-              actual_tp = ndt::as_type(value);
-            } else {
-              actual_tp = do_type_stuff(value);
-              expected_tp = pattern_tp;
+            ndt::type &actual_tp = kwd_tp_data[j];
+            if (!actual_tp.is_null()) {
+              std::stringstream ss;
+              ss << "arrfunc passed keyword \"" << name << "\" more than once";
+              throw std::invalid_argument(ss.str());
             }
-          } else {
-            switch (expected_tp.get_type_id()) {
-            case option_type_id:
+
+            ndt::type expected_tp = af_tp->get_kwd_type(j);
+            if (expected_tp.get_type_id() == option_type_id) {
               expected_tp = expected_tp.p("value_type").as<ndt::type>();
-              break;
-            default:
-              break;
             }
             actual_tp = ndt::as_type(value);
-          }
 
-          if (!actual_tp.value_type().matches(expected_tp, typevars)) {
-            std::stringstream ss;
-            ss << "keyword \"" << name << "\" does not match, ";
-            ss << "arrfunc expected " << expected_tp << " but passed "
-               << actual_tp;
-            throw std::invalid_argument(ss.str());
+            if (!actual_tp.value_type().matches(expected_tp, typevars)) {
+              std::stringstream ss;
+              ss << "keyword \"" << name << "\" does not match, ";
+              ss << "arrfunc expected " << expected_tp << " but passed "
+                 << actual_tp;
+              throw std::invalid_argument(ss.str());
+            }
           }
         }
       } resolve_available_type;
@@ -498,8 +481,6 @@ namespace nd {
       {
         return std::get<I>(m_values);
       }
-
-      const std::tuple<K...> &get_vals() const { return m_values; }
 
       struct {
         template <size_t I>
@@ -586,27 +567,25 @@ namespace nd {
             reinterpret_cast<const ndt::type *>(types.get_readonly_originptr()),
             reinterpret_cast<uintptr_t *>(res.get_arrmeta()));
 
+        const ndt::type *tp = reinterpret_cast<const ndt::type *>(types.get_readonly_originptr());
+        char *arrmeta = res.get_arrmeta();
+        const uintptr_t *arrmeta_offsets = res.get_type()
+                                               .extended<base_struct_type>()
+                                               ->get_arrmeta_offsets_raw();
+        char *data = res.get_readwrite_originptr();
+        const uintptr_t *data_offsets = res.get_type().extended<base_struct_type>()->get_data_offsets(
+                res.get_arrmeta());
+
         dynd::index_proxy<I>::for_each(
-            forward_as_array_ex,
-            reinterpret_cast<const ndt::type *>(types.get_readonly_originptr()),
-            res.get_arrmeta(), res.get_type()
-                                   .extended<base_struct_type>()
-                                   ->get_arrmeta_offsets_raw(),
-            res.get_readwrite_originptr(),
-            res.get_type().extended<base_struct_type>()->get_data_offsets(
-                res.get_arrmeta()),
-            m_values, available.empty() ? NULL : available.data());
-        nd::index_proxy<I>::forward_as_array(
-            types.get_dim_size(),
-            reinterpret_cast<const ndt::type *>(types.get_readonly_originptr()),
-            res.get_arrmeta(), res.get_type()
-                                   .extended<base_struct_type>()
-                                   ->get_arrmeta_offsets_raw(),
-            res.get_readwrite_originptr(),
-            res.get_type().extended<base_struct_type>()->get_data_offsets(
-                res.get_arrmeta()),
-            m_values, available.empty() ? NULL : available.data(),
-            missing.empty() ? NULL : missing.data());
+            forward_as_array_ex, tp, arrmeta, arrmeta_offsets, data,
+            data_offsets, m_values,
+            available.empty() ? NULL : available.data());
+        for (intptr_t j : missing) {
+          tp[j].extended()->arrmeta_default_construct(
+              arrmeta + arrmeta_offsets[j], true);
+          assign_na(tp[j], arrmeta + arrmeta_offsets[j], data + data_offsets[j],
+                    &eval::default_eval_context);
+        }
 
         return res;
       }

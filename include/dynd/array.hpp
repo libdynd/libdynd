@@ -51,27 +51,6 @@ namespace nd {
 
     template <typename... T>
     static void get_data(char **data, const std::tuple<T...> &values);
-
-    template <typename... T>
-    static void
-    forward_as_array(intptr_t ntp, const ndt::type *tp, char *arrmeta,
-                     const uintptr_t *arrmeta_offsets, char *data,
-                     const uintptr_t *data_offsets,
-                     const std::tuple<T...> &vals, const intptr_t *perm = NULL,
-                     const intptr_t *missing = NULL);
-  };
-
-  template <>
-  struct index_proxy<index_sequence<>> {
-    enum { size = 0 };
-
-    static void forward_as_array(intptr_t ntp, const ndt::type *tp,
-                                 char *arrmeta,
-                                 const uintptr_t *arrmeta_offsets, char *data,
-                                 const uintptr_t *data_offsets,
-                                 const std::tuple<> &vals,
-                                 const intptr_t *perm = NULL,
-                                 const intptr_t *missing = NULL);
   };
 
   class array;
@@ -1901,38 +1880,6 @@ namespace nd {
       if (!val.empty()) {
         memcpy(data, &val[0], sizeof(T) * val.size());
       }
-    }
-  }
-
-  template <size_t... I>
-  template <typename... T>
-  void index_proxy<index_sequence<I...>>::forward_as_array(
-      intptr_t ntp, const ndt::type *tp, char *arrmeta,
-      const uintptr_t *arrmeta_offsets, char *data,
-      const uintptr_t *data_offsets, const std::tuple<T...> &DYND_UNUSED(vals),
-      const intptr_t *DYND_UNUSED(perm), const intptr_t *missing)
-  {
-    for (size_t i = 0; i < (ntp - sizeof...(T)); ++i) {
-      intptr_t j = missing[i];
-      tp[j].extended()->arrmeta_default_construct(arrmeta + arrmeta_offsets[j],
-                                                  true);
-      assign_na(tp[j], arrmeta + arrmeta_offsets[j], data + data_offsets[j],
-                &eval::default_eval_context);
-    }
-  }
-
-  inline void index_proxy<index_sequence<>>::forward_as_array(
-      intptr_t ntp, const ndt::type *tp, char *arrmeta,
-      const uintptr_t *arrmeta_offsets, char *data,
-      const uintptr_t *data_offsets, const std::tuple<> &DYND_UNUSED(vals),
-      const intptr_t *DYND_UNUSED(available), const intptr_t *missing)
-  {
-    for (intptr_t i = 0; i < ntp; ++i) {
-      intptr_t j = missing[i];
-      tp[j].extended()->arrmeta_default_construct(arrmeta + arrmeta_offsets[j],
-                                                  true);
-      assign_na(tp[j], arrmeta + arrmeta_offsets[j], data + data_offsets[j],
-                &eval::default_eval_context);
     }
   }
 
