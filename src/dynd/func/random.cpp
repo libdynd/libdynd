@@ -22,7 +22,7 @@ nd::decl::random::uniform::as_arrfunc()
   std::random_device random_device;
   return nd::as_arrfunc<kernels::uniform_ck, kernel_request_host,
                         std::default_random_engine, numeric_types>(
-      ndt::type("(a: ?R, b: ?R, dst_tp: type) -> R"),
+      ndt::type("(a: ?R, b: ?R) -> R"),
       std::shared_ptr<std::default_random_engine>(
           new std::default_random_engine(random_device())));
 }
@@ -51,7 +51,7 @@ nd::arrfunc nd::decl::random::uniform::as_arrfunc()
 {
 #ifdef DYND_CUDA
   return nd::functional::elwise(nd::functional::multidispatch(
-      ndt::type("(a: ?R, b: ?R, dst_tp: type) -> M[R]"),
+      ndt::type("(a: ?R, b: ?R) -> M[R]"),
       {as_arrfunc<kernel_request_host>(),
        as_arrfunc<kernel_request_cuda_device>()}));
 #else

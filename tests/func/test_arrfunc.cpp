@@ -92,13 +92,13 @@ TEST(ArrFunc, CallOperator)
   // Calling with positional arguments
   EXPECT_EQ(4.5, af(1, 2.5).as<double>());
   // Positional arguments and eval_context
-  EXPECT_EQ(7.5, af(2, 3.5, &eval::default_eval_context).as<double>());
+  EXPECT_EQ(7.5, af(2, 3.5, kwds("ectx", &eval::default_eval_context)).as<double>());
   // Wrong number of positional argumetns
   EXPECT_THROW(af(2), invalid_argument);
   EXPECT_THROW(af(2, 3.5, 7), invalid_argument);
   // Extra keyword argument
   EXPECT_THROW(af(2, 3.5, kwds("x", 10)), invalid_argument);
-  EXPECT_THROW(af(2, 3.5, kwds("x", 10), &eval::default_eval_context),
+  EXPECT_THROW(af(2, 3.5, kwds("x", 10, "ectx", &eval::default_eval_context)),
                invalid_argument);
 
   af = nd::functional::apply(&func, "x");
@@ -106,7 +106,7 @@ TEST(ArrFunc, CallOperator)
   EXPECT_EQ(4.5, af(1, kwds("x", 2.5)).as<double>());
   // Positional+keyword arguments and eval_context
   EXPECT_EQ(7.5,
-            af(2, kwds("x", 3.5), &eval::default_eval_context).as<double>());
+            af(2, kwds("x", 3.5, "ectx", &eval::default_eval_context)).as<double>());
   // Wrong number of positional/keyword arguments
   EXPECT_THROW(af(2), invalid_argument);
   EXPECT_THROW(af(2, 3.5), invalid_argument);
@@ -114,7 +114,7 @@ TEST(ArrFunc, CallOperator)
   // Extra/wrong keyword argument
   EXPECT_THROW(af(2, kwds("y", 3.5)), invalid_argument);
   EXPECT_THROW(af(2, kwds("x", 10, "y", 20)), invalid_argument);
-  EXPECT_THROW(af(2, 3.5, kwds("x", 10, "y", 20), &eval::default_eval_context),
+  EXPECT_THROW(af(2, 3.5, kwds("x", 10, "y", 20, "ectx", &eval::default_eval_context)),
                invalid_argument);
 
   af = nd::functional::apply([]() { return 10; });
@@ -123,9 +123,7 @@ TEST(ArrFunc, CallOperator)
   // Calling with empty keyword arguments
   EXPECT_EQ(10, af(kwds()).as<int>());
   // Calling with just the eval_context
-  EXPECT_EQ(10, af(&eval::default_eval_context).as<int>());
-  // Calling with empty keyword arguments and the eval_context
-  EXPECT_EQ(10, af(kwds(), &eval::default_eval_context).as<int>());
+  EXPECT_EQ(10, af(kwds("ectx", &eval::default_eval_context)).as<int>());
   // Wrong number of positional/keyword arguments
   EXPECT_THROW(af(2), invalid_argument);
   EXPECT_THROW(af(kwds("y", 3.5)), invalid_argument);

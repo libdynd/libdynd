@@ -181,7 +181,7 @@ namespace kernels {
     static ndt::type make_type()
     {
       return ndt::type(
-          "(a: ?R, b: ?R, dst_tp: type) -> cuda_device[R]");
+          "(a: ?R, b: ?R) -> cuda_device[R]");
     }
 
     static intptr_t instantiate(
