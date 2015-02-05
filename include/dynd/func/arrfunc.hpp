@@ -348,11 +348,48 @@ namespace nd {
 
       const std::tuple<A...> &get_vals() const { return m_values; }
 
-      const ndt::type *get_types() const { return m_types; }
+      std::vector<ndt::type> get_types() const { return std::vector<ndt::type>(m_types, m_types + sizeof...(A)); }
 
-      char *const *get_data() const { return m_data; }
+      std::vector<char *> get_data() const {return std::vector<char *>(m_data, m_data + sizeof...(A)); }
 
-      const char *const *get_arrmeta() const { return m_arrmeta; }
+      std::vector<const char *> get_arrmeta() const { return std::vector<const char *>(m_arrmeta, m_arrmeta + sizeof...(A)); }
+    };
+
+    template <>
+    class args<intptr_t, nd::array *> {
+      intptr_t m_narg;
+      nd::array *m_args;
+
+    public:
+      args(intptr_t narg, nd::array *args) : m_narg(narg), m_args(args) {}
+
+      size_t size() const { return m_narg; }
+
+      std::vector<ndt::type> get_types() const
+      {
+        std::vector<ndt::type> src_tp(m_narg);
+        for (intptr_t i = 0; i < m_narg; ++i) {
+          src_tp[i] = m_args[i].get_type();
+        }
+        return src_tp;
+      }
+
+      std::vector<char *> get_data() const
+      {
+        std::vector<char *> src_data(m_narg);
+        for (intptr_t i = 0; i < m_narg; ++i) {
+          src_data[i] = const_cast<char *>(m_args[i].get_readonly_originptr());
+        }
+        return src_data;
+      }
+
+      std::vector<const char *> get_arrmeta() const {
+        std::vector<const char *> src_arrmeta(m_narg);
+        for (intptr_t i = 0; i < m_narg; ++i) {
+          src_arrmeta[i] = m_args[i].get_arrmeta();
+        }
+        return src_arrmeta;
+      }
     };
 
     template <>
@@ -360,11 +397,11 @@ namespace nd {
     public:
       size_t size() const { return 0; }
 
-      const ndt::type *get_types() const { return NULL; }
+      std::vector<ndt::type> get_types() const { return std::vector<ndt::type>(); }
 
-      char *const *get_data() const { return NULL; }
+      std::vector<char *> get_data() const { return std::vector<char *>(); }
 
-      const char *const *get_arrmeta() const { return NULL; }
+      std::vector<const char *> get_arrmeta() const { return std::vector<const char *>(); }
     };
 
     template <typename... T>
@@ -900,10 +937,13 @@ namespace nd {
       const arrfunc_type *self_tp = m_value.get_type().extended<arrfunc_type>();
 
       // Resolve the destination type
-      const ndt::type *src_tp = args.get_types();
+      std::vector<ndt::type> src_tp = args.get_types();
+      std::vector<char *> src_data = args.get_data();
+      std::vector<const char *> src_arrmeta = args.get_arrmeta();
+
       nd::array kwds_as_array;
       std::map<nd::string, ndt::type> tp_vars;
-      ndt::type dst_tp = resolve(args.size(), src_tp, args.get_arrmeta(), kwds,
+      ndt::type dst_tp = resolve(args.size(), src_tp.data(), src_arrmeta.data(), kwds,
                                  kwds_as_array, ectx, tp_vars);
 
       if (ectx == NULL) {
@@ -916,53 +956,10 @@ namespace nd {
       // Generate and evaluate the ckernel
       ckernel_builder<kernel_request_host> ckb;
       self->instantiate(self, self_tp, &ckb, 0, dst_tp, res.get_arrmeta(),
-                        src_tp, args.get_arrmeta(), kernel_request_single, ectx,
+                        src_tp.data(), src_arrmeta.data(), kernel_request_single, ectx,
                         kwds_as_array, tp_vars);
       expr_single_t fn = ckb.get()->get_function<expr_single_t>();
-      fn(res.get_readwrite_originptr(), args.get_data(), ckb.get());
-
-      return res;
-    }
-
-    array call(intptr_t narg, const nd::array *args,
-               const eval::eval_context *ectx) const
-    {
-      const arrfunc_type_data *self = get();
-      const arrfunc_type *self_tp = m_value.get_type().extended<arrfunc_type>();
-
-      std::vector<ndt::type> src_tp(narg);
-      for (intptr_t i = 0; i < narg; ++i) {
-        src_tp[i] = args[i].get_type();
-      }
-
-      std::vector<char *> src_data(narg);
-      for (intptr_t i = 0; i < narg; ++i) {
-        src_data[i] = const_cast<char *>(args[i].get_readonly_originptr());
-      }
-
-      std::vector<const char *> src_arrmeta(narg);
-      for (intptr_t i = 0; i < narg; ++i) {
-        src_arrmeta[i] = args[i].get_arrmeta();
-      }
-
-      nd::array kwds_as_array;
-      std::map<nd::string, ndt::type> tp_vars;
-      ndt::type dst_tp = resolve(narg, (narg == 0) ? NULL : src_tp.data(),
-                                 (narg == 0) ? NULL : src_arrmeta.data(),
-                                 kwds(), kwds_as_array, ectx, tp_vars);
-
-      // Construct the destination array
-      nd::array res = nd::empty(dst_tp);
-
-      // Generate and evaluate the ckernel
-      ckernel_builder<kernel_request_host> ckb;
-      self->instantiate(self, self_tp, &ckb, 0, dst_tp, res.get_arrmeta(),
-                        (narg == 0) ? NULL : src_tp.data(),
-                        (narg == 0) ? NULL : src_arrmeta.data(),
-                        kernel_request_single, ectx, kwds_as_array, tp_vars);
-      expr_single_t fn = ckb.get()->get_function<expr_single_t>();
-      fn(res.get_readwrite_originptr(), (narg == 0) ? NULL : src_data.data(),
-         ckb.get());
+      fn(res.get_readwrite_originptr(), src_data.data(), ckb.get());
 
       return res;
     }
@@ -1008,6 +1005,10 @@ namespace nd {
     {
       detail::args<typename as_array<T>::type...> arr(std::forward<T>(a)...);
       return call(arr, kwds());
+    }
+
+    nd::array operator()(intptr_t narg, nd::array *args) const {
+      return call(detail::args<intptr_t, nd::array *>(narg, args), kwds());
     }
 
     /** Implements the general call operator with output parameter */
