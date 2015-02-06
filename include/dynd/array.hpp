@@ -48,9 +48,6 @@ namespace nd {
 
     template <typename... T>
     static void get_arrmeta(const char **arrmeta, const std::tuple<T...> &values);
-
-    template <typename... T>
-    static void get_data(char **data, const std::tuple<T...> &values);
   };
 
   class array;
@@ -1902,27 +1899,6 @@ namespace nd {
   void index_proxy<index_sequence<I...>>::get_arrmeta(const char **arrmeta, const std::tuple<T...> &values)
   {
     nd::get_arrmeta(arrmeta, std::get<I>(values)...);
-  }
-
-  inline void get_data(char **data, nd::array &a) {
-    *data = const_cast<char *>(a.get_readonly_originptr());
-  }
-
-  inline void get_data(char **data, const nd::array &a) {
-    *data = const_cast<char *>(a.get_readonly_originptr());
-  }
-
-  template <typename A0, typename... A>
-  void get_data(char **data, A0 &&a0, A &&... a) {
-    get_data(data, a0);
-    get_data(data + 1, std::forward<A>(a)...);
-  }
-
-  template <size_t... I>
-  template <typename... T>
-  void index_proxy<index_sequence<I...>>::get_data(char **data, const std::tuple<T...> &values)
-  {
-    nd::get_data(data, std::get<I>(values)...);
   }
 } // namespace dynd::nd
 } // namespace dynd
