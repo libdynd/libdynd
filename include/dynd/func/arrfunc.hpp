@@ -349,7 +349,9 @@ namespace nd {
         args *self;
 
         template <size_t I>
-        void operator()(std::vector<ndt::type> &src_tp, std::vector<char *> &src_data) const
+        void operator()(std::vector<ndt::type> &src_tp,
+                        std::vector<const char *> &DYND_UNUSED(src_arrmeta),
+                        std::vector<char *> &src_data) const
         {
           const nd::array &value = std::get<I>(self->m_values);
 
@@ -365,7 +367,7 @@ namespace nd {
         src_arrmeta = std::vector<const char *>(m_arrmeta, m_arrmeta + sizeof...(A));
 
         typedef make_index_sequence<sizeof...(A)> I;
-        dynd::index_proxy<I>::for_each(get_types_ex, src_tp, src_data);
+        dynd::index_proxy<I>::for_each(get_types_ex, src_tp, src_arrmeta, src_data);
       }
     };
 
