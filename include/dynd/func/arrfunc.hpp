@@ -337,6 +337,8 @@ namespace nd {
     public:
       args(A &&... a) : m_values(std::forward<A>(a)...)
       {
+        get_types_ex.self = this;
+
         typedef make_index_sequence<sizeof...(A)> I;
 
         ndt::index_proxy<I>::template get_types(m_types, get_vals());
@@ -348,7 +350,25 @@ namespace nd {
 
       const std::tuple<A...> &get_vals() const { return m_values; }
 
-      std::vector<ndt::type> get_types() const { return std::vector<ndt::type>(m_types, m_types + sizeof...(A)); }
+      struct {
+        args *self;
+
+        template <size_t I>
+        void operator()(std::vector<ndt::type> &src_tp) const
+        {
+          src_tp[I] = self->m_types[I];
+        }
+      } get_types_ex;
+
+      std::vector<ndt::type> get_types() const
+      {
+        std::vector<ndt::type> src_tp(sizeof...(A));
+
+        typedef make_index_sequence<sizeof...(A)> I;
+        dynd::index_proxy<I>::for_each(get_types_ex, src_tp);
+
+        return src_tp;
+      }
 
       std::vector<char *> get_data() const {return std::vector<char *>(m_data, m_data + sizeof...(A)); }
 
