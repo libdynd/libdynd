@@ -327,6 +327,12 @@ namespace nd {
       return false;
     }
 
+    void check_narg(const arrfunc_type *af_tp, intptr_t npos);
+
+    void check_arg(const arrfunc_type *af_tp, intptr_t i,
+                   const ndt::type &actual_tp, const char *actual_arrmeta,
+                   std::map<nd::string, ndt::type> &tp_vars);
+
     template <typename... A>
     class args {
       std::tuple<A...> m_values;
@@ -349,23 +355,33 @@ namespace nd {
         args *self;
 
         template <size_t I>
-        void operator()(std::vector<ndt::type> &src_tp,
+        void operator()(const arrfunc_type *af_tp,
+                        std::vector<ndt::type> &src_tp,
                         std::vector<const char *> &src_arrmeta,
-                        std::vector<char *> &src_data) const
+                        std::vector<char *> &src_data,
+                        std::map<nd::string, ndt::type> &tp_vars) const
         {
           const nd::array &value = std::get<I>(self->m_values);
+          const ndt::type &tp = ndt::as_type(value);
 
-          src_tp.push_back(ndt::as_type(value));
+          check_arg(af_tp, I, tp, self->m_arrmeta[I], tp_vars);
+
+          src_tp.push_back(tp);
           src_arrmeta.push_back(self->m_arrmeta[I]);
           src_data.push_back(const_cast<char *>(value.get_readonly_originptr()));
         }
 
-        void operator()(std::vector<ndt::type> &src_tp,
+        void operator()(const arrfunc_type *af_tp,
+                        std::vector<ndt::type> &src_tp,
                         std::vector<const char *> &src_arrmeta,
-                        std::vector<char *> &src_data) const
+                        std::vector<char *> &src_data,
+                        std::map<nd::string, ndt::type> &tp_vars) const
         {
+          check_narg(af_tp, sizeof...(A));
+
           typedef make_index_sequence<sizeof...(A)> I;
-          dynd::index_proxy<I>::for_each(*this, src_tp, src_arrmeta, src_data);
+          dynd::index_proxy<I>::for_each(*this, af_tp, src_tp, src_arrmeta,
+                                         src_data, tp_vars);
         }
       } resolve;
     };
@@ -380,11 +396,18 @@ namespace nd {
 
       size_t size() const { return m_narg; }
 
-      void resolve(std::vector<ndt::type> &src_tp,
+      void resolve(const arrfunc_type *af_tp,
+                   std::vector<ndt::type> &src_tp,
                    std::vector<const char *> &src_arrmeta,
-                   std::vector<char *> &src_data) const
+                   std::vector<char *> &src_data,
+                   std::map<nd::string, ndt::type> &tp_vars) const
       {
+        check_narg(af_tp, m_narg);
+
         for (intptr_t i = 0; i < m_narg; ++i) {
+          check_arg(af_tp, i, m_args[i].get_type(), m_args[i].get_arrmeta(),
+                    tp_vars);
+
           src_tp.push_back(m_args[i].get_type());
           src_arrmeta.push_back(m_args[i].get_arrmeta());
           src_data.push_back(
@@ -398,15 +421,13 @@ namespace nd {
     public:
       size_t size() const { return 0; }
 
-      void resolve(std::vector<ndt::type> &DYND_UNUSED(src_tp),
+      void resolve(const arrfunc_type *af_tp,
+                   std::vector<ndt::type> &DYND_UNUSED(src_tp),
                    std::vector<const char *> &DYND_UNUSED(src_arrmeta),
-                   std::vector<char *> &DYND_UNUSED(src_data)) const
+                   std::vector<char *> &DYND_UNUSED(src_data),
+                   std::map<nd::string, ndt::type> &DYND_UNUSED(tp_vars)) const
       {
-      }
-
-      std::vector<const char *> get_arrmeta() const
-      {
-        return std::vector<const char *>();
+        check_narg(af_tp, 0);
       }
     };
 
@@ -860,7 +881,7 @@ namespace nd {
 
     template <typename... K>
     ndt::type resolve(intptr_t nsrc, const ndt::type *src_tp,
-                 const char *const *src_arrmeta, const detail::kwds<K...> &kwds,
+              const detail::kwds<K...> &kwds,
                  array &kwds_as_array, const eval::eval_context *&ectx,
                  std::map<nd::string, ndt::type> &typevars) const
     {
@@ -869,25 +890,6 @@ namespace nd {
 
       intptr_t nkwd;
       std::vector<intptr_t> available = kwds.is_permutation(self_tp, nkwd, ectx, typevars);
-
-      if (!self_tp->is_pos_variadic() && nsrc != self_tp->get_npos()) {
-        std::stringstream ss;
-        ss << "arrfunc expected " << self_tp->get_npos()
-           << " parameters, but received " << nsrc << ". arrfunc signature is "
-           << ndt::type(self_tp, true);
-        throw std::invalid_argument(ss.str());
-      }
-      const ndt::type *param_types = self_tp->get_pos_types_raw();
-      for (intptr_t i = 0; i != self_tp->get_npos(); ++i) {
-        ndt::type expected_tp = param_types[i];
-        if (!src_tp[i].value_type().matches(src_arrmeta[i], expected_tp, NULL,
-                                            typevars)) {
-          std::stringstream ss;
-          ss << "parameter " << (i + 1) << " to arrfunc does not match, ";
-          ss << "expected " << expected_tp << ", received " << src_tp[i];
-          throw std::invalid_argument(ss.str());
-        }
-      }
 
       if (self_tp->get_nkwd() > 0) {
         nd::array kwd_tp = nd::empty(self_tp->get_nkwd(), ndt::make_type());
@@ -942,15 +944,17 @@ namespace nd {
       const arrfunc_type_data *self = get();
       const arrfunc_type *self_tp = m_value.get_type().extended<arrfunc_type>();
 
+      // ...
+      std::map<nd::string, ndt::type> tp_vars;
+
       // Resolve the destination type
       std::vector<ndt::type> src_tp;
       std::vector<const char *> src_arrmeta;
       std::vector<char *> src_data;
-      args.resolve(src_tp, src_arrmeta, src_data);
+      args.resolve(get_type(), src_tp, src_arrmeta, src_data, tp_vars);
 
       nd::array kwds_as_array;
-      std::map<nd::string, ndt::type> tp_vars;
-      ndt::type dst_tp = resolve(args.size(), src_tp.data(), src_arrmeta.data(), kwds,
+      ndt::type dst_tp = resolve(args.size(), src_tp.data(), kwds,
                                  kwds_as_array, ectx, tp_vars);
 
       if (ectx == NULL) {
