@@ -359,13 +359,14 @@ namespace nd {
       } get_types_ex;
 
       void get_types(std::vector<ndt::type> &src_tp,
+                     std::vector<const char *> &src_arrmeta,
                      std::vector<char *> &src_data) const
       {
+        src_arrmeta = std::vector<const char *>(m_arrmeta, m_arrmeta + sizeof...(A));
+
         typedef make_index_sequence<sizeof...(A)> I;
         dynd::index_proxy<I>::for_each(get_types_ex, src_tp, src_data);
       }
-
-      std::vector<const char *> get_arrmeta() const { return std::vector<const char *>(m_arrmeta, m_arrmeta + sizeof...(A)); }
     };
 
     template <>
@@ -378,21 +379,15 @@ namespace nd {
 
       size_t size() const { return m_narg; }
 
-      void get_types(std::vector<ndt::type> &src_tp, std::vector<char *> &src_data) const
+      void get_types(std::vector<ndt::type> &src_tp,
+                     std::vector<const char *> &src_arrmeta,
+                     std::vector<char *> &src_data) const
       {
         for (intptr_t i = 0; i < m_narg; ++i) {
           src_tp.push_back(m_args[i].get_type());
+          src_arrmeta.push_back(m_args[i].get_arrmeta());
           src_data.push_back(const_cast<char *>(m_args[i].get_readonly_originptr()));
         }
-      }
-
-
-      std::vector<const char *> get_arrmeta() const {
-        std::vector<const char *> src_arrmeta(m_narg);
-        for (intptr_t i = 0; i < m_narg; ++i) {
-          src_arrmeta[i] = m_args[i].get_arrmeta();
-        }
-        return src_arrmeta;
       }
     };
 
@@ -402,6 +397,7 @@ namespace nd {
       size_t size() const { return 0; }
 
       void get_types(std::vector<ndt::type> &DYND_UNUSED(src_tp),
+                     std::vector<const char *> &DYND_UNUSED(src_arrmeta),
                      std::vector<char *> &DYND_UNUSED(src_data)) const
       {
       }
@@ -943,9 +939,9 @@ namespace nd {
 
       // Resolve the destination type
       std::vector<ndt::type> src_tp;
+      std::vector<const char *> src_arrmeta;
       std::vector<char *> src_data;
-      args.get_types(src_tp, src_data);
-      std::vector<const char *> src_arrmeta = args.get_arrmeta();
+      args.get_types(src_tp, src_arrmeta, src_data);
 
       nd::array kwds_as_array;
       std::map<nd::string, ndt::type> tp_vars;
