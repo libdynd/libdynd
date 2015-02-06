@@ -330,11 +330,15 @@ namespace nd {
     template <typename... A>
     class args {
       std::tuple<A...> m_values;
+      const char *m_arrmeta[sizeof...(A)];
 
     public:
       args(A &&... a) : m_values(std::forward<A>(a)...)
       {
         get_types_ex.self = this;
+
+        typedef make_index_sequence<sizeof...(A)> I;
+        nd::index_proxy<I>::template get_arrmeta(m_arrmeta, get_vals());
       }
 
       size_t size() const { return sizeof...(A); }
@@ -346,13 +350,13 @@ namespace nd {
 
         template <size_t I>
         void operator()(std::vector<ndt::type> &src_tp,
-                        const char **src_arrmeta,
+                        std::vector<const char *> &src_arrmeta,
                         std::vector<char *> &src_data) const
         {
           const nd::array &value = std::get<I>(self->m_values);
 
           src_tp.push_back(ndt::as_type(value));
-          src_arrmeta[I] = value.get_arrmeta();
+          src_arrmeta.push_back(self->m_arrmeta[I]);
           src_data.push_back(const_cast<char *>(value.get_readonly_originptr()));
         }
       } get_types_ex;
@@ -361,10 +365,8 @@ namespace nd {
                      std::vector<const char *> &src_arrmeta,
                      std::vector<char *> &src_data) const
       {
-        src_arrmeta.resize(sizeof...(A));
-
         typedef make_index_sequence<sizeof...(A)> I;
-        dynd::index_proxy<I>::for_each(get_types_ex, src_tp, src_arrmeta.data(), src_data);
+        dynd::index_proxy<I>::for_each(get_types_ex, src_tp, src_arrmeta, src_data);
       }
     };
 
