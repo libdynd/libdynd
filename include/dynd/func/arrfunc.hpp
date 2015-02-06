@@ -359,14 +359,10 @@ namespace nd {
         }
       } get_types_ex;
 
-      std::vector<ndt::type> get_types() const
+      void get_types(std::vector<ndt::type> &src_tp) const
       {
-        std::vector<ndt::type> src_tp;
-
         typedef make_index_sequence<sizeof...(A)> I;
         dynd::index_proxy<I>::for_each(get_types_ex, src_tp);
-
-        return src_tp;
       }
 
       std::vector<char *> get_data() const {return std::vector<char *>(m_data, m_data + sizeof...(A)); }
@@ -384,13 +380,11 @@ namespace nd {
 
       size_t size() const { return m_narg; }
 
-      std::vector<ndt::type> get_types() const
+      void get_types(std::vector<ndt::type> &src_tp) const
       {
-        std::vector<ndt::type> src_tp(m_narg);
         for (intptr_t i = 0; i < m_narg; ++i) {
-          src_tp[i] = m_args[i].get_type();
+          src_tp.push_back(m_args[i].get_type());
         }
-        return src_tp;
       }
 
       std::vector<char *> get_data() const
@@ -416,7 +410,7 @@ namespace nd {
     public:
       size_t size() const { return 0; }
 
-      std::vector<ndt::type> get_types() const { return std::vector<ndt::type>(); }
+      void get_types(std::vector<ndt::type> &DYND_UNUSED(src_tp)) const {}
 
       std::vector<char *> get_data() const { return std::vector<char *>(); }
 
@@ -956,7 +950,8 @@ namespace nd {
       const arrfunc_type *self_tp = m_value.get_type().extended<arrfunc_type>();
 
       // Resolve the destination type
-      std::vector<ndt::type> src_tp = args.get_types();
+      std::vector<ndt::type> src_tp;
+      args.get_types(src_tp);
       std::vector<char *> src_data = args.get_data();
       std::vector<const char *> src_arrmeta = args.get_arrmeta();
 
