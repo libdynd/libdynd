@@ -356,7 +356,7 @@ namespace nd {
         template <size_t I>
         void operator()(std::vector<ndt::type> &src_tp) const
         {
-          src_tp[I] = self->m_types[I];
+          src_tp[I] = ndt::as_type(std::get<I>(self->m_values));
         }
       } get_types_ex;
 
