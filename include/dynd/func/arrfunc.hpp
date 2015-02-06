@@ -330,7 +330,6 @@ namespace nd {
     template <typename... A>
     class args {
       std::tuple<A...> m_values;
-      ndt::type m_types[sizeof...(A)];
       char *m_data[sizeof...(A)];
       const char *m_arrmeta[sizeof...(A)];
 
@@ -340,8 +339,6 @@ namespace nd {
         get_types_ex.self = this;
 
         typedef make_index_sequence<sizeof...(A)> I;
-
-        ndt::index_proxy<I>::template get_types(m_types, get_vals());
         nd::index_proxy<I>::template get_arrmeta(m_arrmeta, get_vals());
         nd::index_proxy<I>::template get_data(m_data, get_vals());
       }
@@ -356,13 +353,15 @@ namespace nd {
         template <size_t I>
         void operator()(std::vector<ndt::type> &src_tp) const
         {
-          src_tp[I] = ndt::as_type(std::get<I>(self->m_values));
+          const nd::array &value = std::get<I>(self->m_values);
+
+          src_tp.push_back(ndt::as_type(value));
         }
       } get_types_ex;
 
       std::vector<ndt::type> get_types() const
       {
-        std::vector<ndt::type> src_tp(sizeof...(A));
+        std::vector<ndt::type> src_tp;
 
         typedef make_index_sequence<sizeof...(A)> I;
         dynd::index_proxy<I>::for_each(get_types_ex, src_tp);
