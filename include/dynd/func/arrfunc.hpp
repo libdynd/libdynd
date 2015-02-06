@@ -927,9 +927,9 @@ namespace nd {
     }
 
     /** Implements the general call operator */
-    template <typename A, typename K>
-    typename std::enable_if<!std::is_integral<A>::value, array>::type
-    call(const A &args, const K &kwds) const
+    template <typename... A, typename... K>
+    array call(const detail::args<A...> &args,
+               const detail::kwds<K...> &kwds) const
     {
       const eval::eval_context *ectx = NULL;
 
@@ -997,9 +997,7 @@ namespace nd {
      */
     template <typename... T>
     typename std::enable_if<
-        !detail::is_kwds<typename back<type_sequence<T...>>::type>::value &&
-            !eval::is_eval_context<
-                typename back<type_sequence<T...>>::type>::value,
+        !detail::is_kwds<typename back<type_sequence<T...>>::type>::value,
         nd::array>::type
     operator()(T &&... a) const
     {
