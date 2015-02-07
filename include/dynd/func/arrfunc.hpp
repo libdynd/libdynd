@@ -316,6 +316,41 @@ namespace nd {
                    const ndt::type &actual_tp, const char *actual_arrmeta,
                    std::map<nd::string, ndt::type> &tp_vars);
 
+    inline void resolve_kwd_types(const arrfunc_type *af_tp, ndt::type *kwd_tp,
+                                 const std::vector<intptr_t> &available,
+                                 std::vector<intptr_t> &missing,
+                                 std::map<nd::string, ndt::type> &tp_vars)
+    {
+      for (intptr_t j : available) {
+        if (j == -1) {
+          continue;
+        }
+
+        ndt::type &actual_tp = kwd_tp[j];
+
+        ndt::type expected_tp = af_tp->get_kwd_type(j);
+        if (expected_tp.get_type_id() == option_type_id) {
+          expected_tp = expected_tp.p("value_type").as<ndt::type>();
+        }
+
+        if (!actual_tp.value_type().matches(expected_tp, tp_vars)) {
+          std::stringstream ss;
+          ss << "keyword \"" << af_tp->get_kwd_name(j) << "\" does not match, ";
+          ss << "arrfunc expected " << expected_tp << " but passed "
+             << actual_tp;
+          throw std::invalid_argument(ss.str());
+        }
+      }
+
+      for (intptr_t j : missing) {
+        ndt::type &actual_tp = kwd_tp[j];
+        actual_tp = ndt::substitute(af_tp->get_kwd_type(j), tp_vars, false);
+        if (actual_tp.is_symbolic()) {
+          actual_tp = ndt::make_option(ndt::make_type<void>());
+        }
+      }
+    }
+
     template <typename... A>
     class args {
       std::tuple<A...> m_values;
@@ -420,21 +455,16 @@ namespace nd {
     template <>
     class kwds<> {
     public:
-      static intptr_t get_size() { return 0; }
-
-      void resolve_available_types(
-          const arrfunc_type *DYND_UNUSED(self_tp), const std::vector<intptr_t> &DYND_UNUSED(available),
-          ndt::type *DYND_UNUSED(tp),
-          std::map<nd::string, ndt::type> &DYND_UNUSED(typevars)) const
+      void
+      match_names(const arrfunc_type *af_tp,
+                  ndt::type *DYND_UNUSED(tp),
+                  std::vector<intptr_t> &DYND_UNUSED(available),
+                  std::vector<intptr_t> &missing,
+                  std::map<nd::string, ndt::type> &DYND_UNUSED(tp_vars)) const
       {
-      }
-
-      std::vector<intptr_t> is_permutation(
-          const arrfunc_type *DYND_UNUSED(self_tp), intptr_t &nkwd,
-          std::map<nd::string, ndt::type> &DYND_UNUSED(tp_vars)) const
-      {
-        nkwd = 0;
-        return std::vector<intptr_t>();
+        for (intptr_t j : af_tp->get_option_kwd_indices()) {
+          missing.push_back(j);
+        }
       }
 
       nd::array forward_as_array(const nd::array &names, nd::array &types,
@@ -472,18 +502,19 @@ namespace nd {
       const char *m_names[sizeof...(K)];
       std::tuple<K...> m_values;
 
-      template <size_t I>
-      void set_name(const char *name)
-      {
-        m_names[I] = name;
-      }
-
       struct {
+        kwds *self;
+
         template <size_t I>
-        void operator()(kwds<K...> *self,
-                        typename as_<K, const char *>::type... names)
+        void operator()(typename as_<K, const char *>::type... names)
         {
-          self->set_name<I>(get<I>(names...));
+          self->m_names[I] = get<I>(names...);
+        }
+
+        void operator()(typename as_<K, const char *>::type... names)
+        {
+          typedef make_index_sequence<sizeof...(K)> I;
+          dynd::index_proxy<I>::for_each(*this, names...);
         }
       } set_names;
 
@@ -491,19 +522,10 @@ namespace nd {
       kwds(typename as_<K, const char *>::type... names, K &&... values)
           : m_values(std::forward<K>(values)...)
       {
-        is_permutation.self = this;
-        resolve_available_types.self = this;
+        set_names.self = this;
+        match_names.self = this;
 
-        typedef make_index_sequence<sizeof...(K)> I;
-        dynd::index_proxy<I>::for_each(set_names, this, names...);
-      }
-
-      static intptr_t get_size() { return sizeof...(K); }
-
-      template <size_t I>
-      const char *get_name() const
-      {
-        return m_names[I];
+        set_names(names...);
       }
 
       struct {
@@ -511,10 +533,11 @@ namespace nd {
 
         template <size_t I>
         void operator()(const arrfunc_type *af_tp, bool &has_dst_tp,
+                        ndt::type *kwd_tp,
                         std::vector<intptr_t> &available,
                         std::map<nd::string, ndt::type> &tp_vars)
         {
-          const std::string &name = self->get_name<I>();
+          const std::string &name = self->m_names[I];
           const auto &value = std::get<I>(self->m_values);
 
           intptr_t j = af_tp->get_kwd_index(name);
@@ -527,88 +550,43 @@ namespace nd {
                  << "\" to arrfunc with type " << ndt::type(af_tp, true);
               throw std::invalid_argument(ss.str());
             }
-          }
-          available.push_back(j);
-        }
-
-        std::vector<intptr_t>
-        operator()(const arrfunc_type *af_tp, intptr_t &nkwd,
-                   std::map<nd::string, ndt::type> &tp_vars) const
-        {
-          typedef make_index_sequence<sizeof...(K)> I;
-
-          bool has_dst_tp = false;
-
-          std::vector<intptr_t> permutation;
-          dynd::index_proxy<I>::for_each(*this, af_tp, has_dst_tp, permutation,
-                                         tp_vars);
-          nkwd = sizeof...(K);
-          if (has_dst_tp) {
-            nkwd--;
-          }
-          return permutation;
-        }
-      } is_permutation;
-
-      struct {
-        kwds *self;
-
-        template <size_t I>
-        void operator()(const std::vector<intptr_t> &available,
-                        const arrfunc_type *af_tp, ndt::type *kwd_tp_data,
-                        std::map<nd::string, ndt::type> &typevars) const
-        {
-          intptr_t j = available[I];
-          if (j != -1) {
-            const std::string &name = self->get_name<I>();
-            const auto &value = std::get<I>(self->m_values);
-
-            ndt::type &actual_tp = kwd_tp_data[j];
+          } else {
+            ndt::type &actual_tp = kwd_tp[j];
             if (!actual_tp.is_null()) {
               std::stringstream ss;
               ss << "arrfunc passed keyword \"" << name << "\" more than once";
               throw std::invalid_argument(ss.str());
             }
-
-            ndt::type expected_tp = af_tp->get_kwd_type(j);
-            if (expected_tp.get_type_id() == option_type_id) {
-              expected_tp = expected_tp.p("value_type").as<ndt::type>();
-            }
             actual_tp = ndt::type_of(value);
+          }
+          available.push_back(j);
+        }
 
-            if (!actual_tp.value_type().matches(expected_tp, typevars)) {
-              std::stringstream ss;
-              ss << "keyword \"" << name << "\" does not match, ";
-              ss << "arrfunc expected " << expected_tp << " but passed "
-                 << actual_tp;
-              throw std::invalid_argument(ss.str());
+        void operator()(const arrfunc_type *af_tp,
+                        ndt::type *tp,
+                        std::vector<intptr_t> &available,
+                        std::vector<intptr_t> &missing,
+                        std::map<nd::string, ndt::type> &tp_vars) const
+        {
+          bool has_dst_tp = false;
+
+          typedef make_index_sequence<sizeof...(K)> I;
+          dynd::index_proxy<I>::for_each(*this, af_tp, has_dst_tp, tp, available,
+                                         tp_vars);
+
+          intptr_t nkwd = sizeof...(K);
+          if (has_dst_tp) {
+            nkwd--;
+          }
+
+          for (intptr_t j : af_tp->get_option_kwd_indices()) {
+            if (tp[j].is_null()) {
+              missing.push_back(j);
             }
           }
-        }
 
-        void operator()(const arrfunc_type *self_tp,
-                        const std::vector<intptr_t> &available,
-                        ndt::type *kwd_tp_data,
-                        std::map<nd::string, ndt::type> &typevars) const
-        {
-          typedef make_index_sequence<sizeof...(K)> I;
-          dynd::index_proxy<I>::for_each(*this, available, self_tp, kwd_tp_data,
-                                         typevars);
         }
-      } resolve_available_types;
-
-      struct {
-        template <size_t I>
-        void operator()(ndt::type *tp,
-                        const std::tuple<K...> &values,
-                        const std::vector<intptr_t> &available) const
-        {
-          intptr_t j = available[I];
-          if (j != -1) {
-            tp[j] = ndt::get_forward_type(std::get<I>(values));
-          }
-        }
-      } get_forward_types_ex;
+      } match_names;
 
       struct {
         template <size_t I>
@@ -630,11 +608,13 @@ namespace nd {
                                  const std::vector<intptr_t> &available,
                                  const std::vector<intptr_t> &missing) const
       {
-        typedef make_index_sequence<sizeof...(K)> I;
-        dynd::index_proxy<I>::for_each(
-            get_forward_types_ex,
-            reinterpret_cast<ndt::type *>(types.get_readwrite_originptr()),
-            m_values, available);
+        ndt::type *tp = reinterpret_cast<ndt::type *>(types.get_readwrite_originptr());
+
+        for (intptr_t j : available) {
+          if (j != -1 && tp[j].get_kind() == dim_kind) {
+            tp[j] = ndt::make_pointer(tp[j]);
+          }
+        }
 
         nd::array res = nd::empty_shell(ndt::make_struct(names, types));
         struct_type::fill_default_data_offsets(
@@ -642,7 +622,6 @@ namespace nd {
             reinterpret_cast<const ndt::type *>(types.get_readonly_originptr()),
             reinterpret_cast<uintptr_t *>(res.get_arrmeta()));
 
-        const ndt::type *tp = reinterpret_cast<const ndt::type *>(types.get_readonly_originptr());
         char *arrmeta = res.get_arrmeta();
         const uintptr_t *arrmeta_offsets = res.get_type()
                                                .extended<base_struct_type>()
@@ -651,10 +630,12 @@ namespace nd {
         const uintptr_t *data_offsets = res.get_type().extended<base_struct_type>()->get_data_offsets(
                 res.get_arrmeta());
 
+        typedef make_index_sequence<sizeof...(K)> I;
         dynd::index_proxy<I>::for_each(
             forward_as_array_ex, tp, arrmeta, arrmeta_offsets, data,
             data_offsets, m_values,
             available.empty() ? NULL : available.data());
+
         for (intptr_t j : missing) {
           tp[j].extended()->arrmeta_default_construct(
               arrmeta + arrmeta_offsets[j], true);
@@ -846,64 +827,16 @@ namespace nd {
       arrfunc(&self, self_tp).swap(*this);
     }
 
-    std::vector<intptr_t>
-    resolve_missing_types(ndt::type *kwd_tp,
-                          std::map<nd::string, ndt::type> &typevars) const
-    {
-      std::vector<intptr_t> missing;
 
-      const arrfunc_type *self_tp = m_value.get_type().extended<arrfunc_type>();
-
-      for (intptr_t j : self_tp->get_option_kwd_indices()) {
-        ndt::type &actual_tp = kwd_tp[j];
-        if (actual_tp.is_null()) {
-          actual_tp =
-              ndt::substitute(self_tp->get_kwd_type(j), typevars, false);
-          if (actual_tp.is_symbolic()) {
-            actual_tp = ndt::make_option(ndt::make_type<void>());
-          }
-          missing.push_back(j);
-        }
-      }
-
-      return missing;
-    }
-
-    template <typename... K>
-    void resolve(const detail::kwds<K...> &kwds, intptr_t nkwd, const std::vector<intptr_t> &available, array &kwds_as_array,
-                 std::map<nd::string, ndt::type> &typevars) const
-    {
-      const arrfunc_type *self_tp = m_value.get_type().extended<arrfunc_type>();
-
-      if (self_tp->get_nkwd() > 0) {
-        nd::array kwd_tp = nd::empty(self_tp->get_nkwd(), ndt::make_type());
-        kwds.resolve_available_types(
-            self_tp, available, reinterpret_cast<ndt::type *>(kwd_tp.get_data()),
-            typevars);
-        std::vector<intptr_t> missing = resolve_missing_types(
-            reinterpret_cast<ndt::type *>(kwd_tp.get_data()), typevars);
-
-        // check that we have the exact number of available parameters
-
-        if (intptr_t(available.size() + missing.size()) < self_tp->get_nkwd()) {
-          std::stringstream ss;
-          // TODO: Provide the missing keyword parameter names in this error
-          //       message
-          ss << "arrfunc requires keyword parameters that were not provided. "
-                "arrfunc signature " << ndt::type(self_tp, true);
-          throw std::invalid_argument(ss.str());
-        }
-
-        kwds_as_array = kwds.forward_as_array(self_tp->get_kwd_names(), kwd_tp,
-                              available, missing);
-      } else if (nkwd != 0) {
+/*
+ else if (nkwd != 0) {
         stringstream ss;
         ss << "arrfunc does not accept keyword arguments, but was provided "
               "keyword arguments. arrfunc signature is "
            << ndt::type(self_tp, true);
         throw std::invalid_argument(ss.str());
       }
-    }
+*/
 
     /** Implements the general call operator */
     template <typename... A, typename... K>
@@ -917,16 +850,32 @@ namespace nd {
       std::map<nd::string, ndt::type> tp_vars;
 
       // ...
-      intptr_t nkwd;
-      std::vector<intptr_t> available = kwds.is_permutation(self_tp, nkwd, tp_vars);
+      std::vector<intptr_t> available, missing;
+      nd::array kwd_tp = nd::empty(self_tp->get_nkwd(), ndt::make_type());
+      kwds.match_names(self_tp,
+                       reinterpret_cast<ndt::type *>(kwd_tp.get_data()),
+                       available, missing, tp_vars);
 
       std::vector<ndt::type> src_tp;
       std::vector<const char *> src_arrmeta;
       std::vector<char *> src_data;
       args.resolve(get_type(), src_tp, src_arrmeta, src_data, tp_vars);
 
-      nd::array kwds_as_array;
-      resolve(kwds, nkwd, available, kwds_as_array, tp_vars);
+      detail::resolve_kwd_types(
+          self_tp, reinterpret_cast<ndt::type *>(kwd_tp.get_data()), available,
+          missing, tp_vars);
+
+      if (intptr_t(available.size() + missing.size()) < self_tp->get_nkwd()) {
+        std::stringstream ss;
+        // TODO: Provide the missing keyword parameter names in this error
+        //       message
+        ss << "arrfunc requires keyword parameters that were not provided. "
+              "arrfunc signature " << ndt::type(self_tp, true);
+        throw std::invalid_argument(ss.str());
+      }
+
+      nd::array kwds_as_array = kwds.forward_as_array(
+          self_tp->get_kwd_names(), kwd_tp, available, missing);
 
       // Resolve the optional keyword arguments
       if (self->resolve_option_values != NULL) {

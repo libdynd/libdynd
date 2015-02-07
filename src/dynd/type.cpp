@@ -538,11 +538,6 @@ ndt::type ndt::get_forward_type(const nd::array &val)
   return make_pointer(val.get_type());
 }
 
-ndt::type ndt::get_forward_type(const nd::arrfunc &value)
-{
-  return value.get_array_type();
-}
-
 template <class T, class Tas>
 static void print_as(std::ostream &o, const char *data)
 {
