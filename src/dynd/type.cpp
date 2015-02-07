@@ -516,9 +516,9 @@ ndt::type ndt::make_type(intptr_t ndim, const intptr_t *shape,
   }
 }
 
-ndt::type ndt::as_type(const nd::array &value) { return value.get_type(); }
+ndt::type ndt::type_of(const nd::array &value) { return value.get_type(); }
 
-ndt::type ndt::as_type(const nd::arrfunc &value)
+ndt::type ndt::type_of(const nd::arrfunc &value)
 {
   return value.get_array_type();
 }

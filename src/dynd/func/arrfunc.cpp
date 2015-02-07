@@ -133,6 +133,31 @@ nd::arrfunc dynd::make_arrfunc_from_property(const ndt::type &tp,
   return af;
 }
 
+void nd::detail::check_narg(const arrfunc_type *af_tp, intptr_t npos)
+{
+  if (!af_tp->is_pos_variadic() && npos != af_tp->get_npos()) {
+    std::stringstream ss;
+    ss << "arrfunc expected " << af_tp->get_npos()
+       << " positional arguments, but received " << npos;
+    throw std::invalid_argument(ss.str());
+  }
+}
+
+void nd::detail::check_arg(const arrfunc_type *af_tp, intptr_t i,
+                           const ndt::type &actual_tp,
+                           const char *actual_arrmeta,
+                           std::map<nd::string, ndt::type> &tp_vars)
+{
+  ndt::type expected_tp = af_tp->get_pos_type(i);
+  if (!actual_tp.value_type().matches(actual_arrmeta, expected_tp, NULL,
+                                      tp_vars)) {
+    std::stringstream ss;
+    ss << "positional argument " << i << " to arrfunc does not match, ";
+    ss << "expected " << expected_tp << ", received " << actual_tp;
+    throw std::invalid_argument(ss.str());
+  }
+}
+
 nd::arrfunc::arrfunc(const nd::array &rhs)
 {
   if (!rhs.is_null()) {
