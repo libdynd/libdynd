@@ -285,46 +285,44 @@ class FuncWrapper;
 template <typename R, typename A0>
 class FuncWrapper<R (*)(A0)> {
 private:
-    R (*m_func)(A0);
+  R (*m_func)(A0);
+
 public:
-    FuncWrapper(R (*func)(A0)) : m_func(func) {}
-    R meth(A0 a0) const {
-        return (*m_func)(a0);
-    }
+  FuncWrapper(R (*func)(A0)) : m_func(func) {}
+  R meth(A0 a0) const { return (*m_func)(a0); }
+  R operator()(A0 a0) const { return (*m_func)(a0); }
 };
 template <typename R, typename A0, typename A1>
 class FuncWrapper<R (*)(A0, A1)> {
 private:
-    R (*m_func)(A0, A1);
-public:
-    FuncWrapper(R (*func)(A0, A1)) : m_func(func) {}
-    R meth(A0 a0, A1 a1) const {
-        return (*m_func)(a0, a1);
-    }
+  R (*m_func)(A0, A1);
 
+public:
+  FuncWrapper(R (*func)(A0, A1)) : m_func(func) {}
+  R meth(A0 a0, A1 a1) const { return (*m_func)(a0, a1); }
+  R operator()(A0 a0, A1 a1) const { return (*m_func)(a0, a1); }
 };
 template <typename R, typename A0>
 class FuncWrapper<void (*)(R &, A0)> {
 private:
-    void (*m_func)(R &, A0);
+  void (*m_func)(R &, A0);
+
 public:
-    FuncWrapper(void (*func)(R &, A0)) : m_func(func) {}
-    void meth(R &res, A0 a0) const {
-        (*m_func)(res, a0);
-    }
+  FuncWrapper(void (*func)(R &, A0)) : m_func(func) {}
+  void meth(R &res, A0 a0) const { (*m_func)(res, a0); }
+  void operator()(R &res, A0 a0) const { (*m_func)(res, a0); }
 };
 template <typename R, typename A0, typename A1>
 class FuncWrapper<void (*)(R &, A0, A1)> {
 private:
-    void (*m_func)(R &, A0, A1);
+  void (*m_func)(R &, A0, A1);
+
 public:
-    FuncWrapper(void (*func)(R &, A0, A1)) : m_func(func) {}
-    void meth(R &res, A0 a0, A1 a1) const {
-        (*m_func)(res, a0, a1);
-    }
+  FuncWrapper(void (*func)(R &, A0, A1)) : m_func(func) {}
+  void meth(R &res, A0 a0, A1 a1) const { (*m_func)(res, a0, a1); }
+  void operator()(R &res, A0 a0, A1 a1) const { (*m_func)(res, a0, a1); }
 };
 
-/*
 TYPED_TEST_P(FunctorArrfunc_MethRetRes, MethRetRes) {
     typedef FuncWrapper<int (*)(TypeParam, const TypeParam &)> FuncWrapper0;
     typedef FuncWrapper<TypeParam (*)(const TypeParam (&)[3])> FuncWrapper1;
@@ -337,7 +335,7 @@ TYPED_TEST_P(FunctorArrfunc_MethRetRes, MethRetRes) {
     a = static_cast<TypeParam>(10);
     b = static_cast<TypeParam>(20);
 
-    af = nd::make_functor_arrfunc(FuncWrapper0(&func0), &FuncWrapper0::meth);
+    af = nd::functional::apply(FuncWrapper0(&func0), &FuncWrapper0::meth);
     res = af(a, b);
     EXPECT_EQ(-20, res.as<int>());
 
@@ -346,8 +344,8 @@ TYPED_TEST_P(FunctorArrfunc_MethRetRes, MethRetRes) {
 
     a = avals0;
     b = bvals0;
-    af = nd::make_functor_arrfunc(FuncWrapper0(&func0), &FuncWrapper0::meth);
-    af = lift_arrfunc(af);
+    af = nd::functional::apply(FuncWrapper0(&func0), &FuncWrapper0::meth);
+    af = nd::functional::elwise(af);
     res = af(a, b);
     EXPECT_EQ(ndt::type("2 * 3 * int"), res.get_type());
     EXPECT_JSON_EQ_ARR("[[-10,-2,-4], [0,8,6]]", res);
@@ -357,13 +355,13 @@ TYPED_TEST_P(FunctorArrfunc_MethRetRes, MethRetRes) {
     a = nd::empty(ndt::make_cfixed_dim(3, ndt::make_type<TypeParam>()));
 
     a.vals() = vals1[0];
-    af = nd::make_functor_arrfunc(FuncWrapper1(&func1), &FuncWrapper1::meth);
+    af = nd::functional::apply(FuncWrapper1(&func1), &FuncWrapper1::meth);
     res = af(a);
     EXPECT_EQ(ndt::make_type<TypeParam>(), res.get_type());
     EXPECT_EQ(3, res.as<TypeParam>());
 
     a.vals() = vals1[1];
-    af = nd::make_functor_arrfunc(FuncWrapper1(&func1), &FuncWrapper1::meth);
+    af = nd::functional::apply(FuncWrapper1(&func1), &FuncWrapper1::meth);
     res = af(a);
     EXPECT_EQ(ndt::make_type<TypeParam>(), res.get_type());
     EXPECT_EQ(12, res.as<TypeParam>());
@@ -372,7 +370,7 @@ TYPED_TEST_P(FunctorArrfunc_MethRetRes, MethRetRes) {
 
     a.vals() = vals1[0];
     b.vals() = vals1[1];
-    af = nd::make_functor_arrfunc(FuncWrapper2(&func2), &FuncWrapper2::meth);
+    af = nd::functional::apply(FuncWrapper2(&func2), &FuncWrapper2::meth);
     res = af(a, b);
     EXPECT_EQ(ndt::make_type<TypeParam>(), res.get_type());
     EXPECT_EQ(14, res.as<TypeParam>());
@@ -380,12 +378,11 @@ TYPED_TEST_P(FunctorArrfunc_MethRetRes, MethRetRes) {
     a = nd::empty(ndt::cfixed_dim_from_array<TypeParam[2][3]>::make());
 
     a.vals() = vals1;
-    af = nd::make_functor_arrfunc(FuncWrapper3(&func3), &FuncWrapper3::meth);
+    af = nd::functional::apply(FuncWrapper3(&func3), &FuncWrapper3::meth);
     res = af(a);
     EXPECT_EQ(ndt::make_type<TypeParam>(), res.get_type());
     EXPECT_EQ(6, res.as<TypeParam>());
 }
-*/
 
 typedef ::testing::Types<int, float, long, double> test_types;
 
@@ -395,7 +392,5 @@ INSTANTIATE_TYPED_TEST_CASE_P(Builtin, FunctorArrfunc_FuncRetRes, test_types);
 REGISTER_TYPED_TEST_CASE_P(FunctorArrfunc_CallRetRes, CallRetRes);
 INSTANTIATE_TYPED_TEST_CASE_P(Builtin, FunctorArrfunc_CallRetRes, test_types);
 
-/*
 REGISTER_TYPED_TEST_CASE_P(FunctorArrfunc_MethRetRes, MethRetRes);
 INSTANTIATE_TYPED_TEST_CASE_P(Builtin, FunctorArrfunc_MethRetRes, test_types);
-*/
