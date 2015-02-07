@@ -360,6 +360,36 @@ intptr_t pointer_type::make_assignment_kernel(
       kernreq, ectx, kwds);
 }
 
+namespace {
+
+struct operand_to_value_ck : public kernels::unary_ck<operand_to_value_ck> {
+  inline void single(char *dst, char *src)
+  {
+    ckernel_prefix *copy_value = get_child_ckernel();
+    expr_single_t copy_value_fn = copy_value->get_function<expr_single_t>();
+    // The src value is a pointer, and copy_value_fn expects a pointer
+    // to that pointer
+    char **src_ptr = reinterpret_cast<char **>(src);
+    copy_value_fn(dst, src_ptr, copy_value);
+  }
+
+  inline void destruct_children() { get_child_ckernel()->destroy(); }
+};
+
+} // anonymous namespace
+
+size_t pointer_type::make_operand_to_value_assignment_kernel(
+    void *ckb, intptr_t ckb_offset, const char *dst_arrmeta,
+    const char *src_arrmeta, kernel_request_t kernreq,
+    const eval::eval_context *ectx) const
+{
+  operand_to_value_ck::create(ckb, kernreq, ckb_offset);
+  return ::make_assignment_kernel(NULL, NULL, ckb, ckb_offset, m_target_tp,
+                                  dst_arrmeta, m_target_tp,
+                                  src_arrmeta + sizeof(pointer_type_arrmeta),
+                                  kernel_request_single, ectx, nd::array());
+}
+
 nd::array pointer_type::get_option_nafunc() const
 {
   return kernels::get_option_builtin_pointer_nafunc(

@@ -100,6 +100,11 @@ public:
         kernel_request_t kernreq, const eval::eval_context *ectx,
         const nd::array &kwds) const;
 
+    size_t make_operand_to_value_assignment_kernel(
+        void *ckb, intptr_t ckb_offset, const char *dst_arrmeta,
+        const char *src_arrmeta, kernel_request_t kernreq,
+        const eval::eval_context *ectx) const;
+
     nd::array get_option_nafunc() const;
 
     bool matches(const ndt::type &self_tp, const char *self_arrmeta,
