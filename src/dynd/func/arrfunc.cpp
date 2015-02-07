@@ -158,6 +158,20 @@ void nd::detail::check_arg(const arrfunc_type *af_tp, intptr_t i,
   }
 }
 
+void nd::detail::check_nkwd(const arrfunc_type *af_tp,
+                            const std::vector<intptr_t> &available,
+                            const std::vector<intptr_t> &missing)
+{
+  if (intptr_t(available.size() + missing.size()) < af_tp->get_nkwd()) {
+    std::stringstream ss;
+    // TODO: Provide the missing keyword parameter names in this error
+    //       message
+    ss << "arrfunc requires keyword parameters that were not provided. "
+          "arrfunc signature " << ndt::type(af_tp, true);
+    throw std::invalid_argument(ss.str());
+  }
+}
+
 nd::arrfunc::arrfunc(const nd::array &rhs)
 {
   if (!rhs.is_null()) {
