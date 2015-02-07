@@ -118,6 +118,24 @@ public:
     return m_kwd_struct.extended<tuple_type>()->get_field_count();
   }
 
+/*
+  bool matches(intptr_t j, const ndt::type &actual_tp,
+               std::map<nd::string, ndt::type> &typevars) const
+  {
+    ndt::type expected_tp = get_kwd_type(j);
+    if (expected_tp.get_type_id() == option_type_id) {
+      expected_tp = expected_tp.p("value_type").as<ndt::type>();
+    }
+    if (!actual_tp.value_type().matches(expected_tp, typevars)) {
+      std::stringstream ss;
+      ss << "keyword \"" << get_kwd_name(j) << "\" does not match, ";
+      ss << "arrfunc expected " << expected_tp << " but passed " << actual_tp;
+      throw std::invalid_argument(ss.str());
+    }
+    return true;
+  }
+*/
+
   /** Returns the number of optional arguments. */
   intptr_t get_nopt() const { return m_opt_kwd_indices.size(); }
 

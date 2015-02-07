@@ -923,32 +923,32 @@ type make_type(intptr_t ndim, const intptr_t *shape, const ndt::type &dtype,
 /**
  * Returns the type of an array constructed from a value.
  */
-inline type as_type(const eval::eval_context *DYND_UNUSED(value))
+inline type type_of(const eval::eval_context *DYND_UNUSED(value))
 {
     throw std::runtime_error("error");
 }
 
-inline type as_type(eval::eval_context *DYND_UNUSED(value))
+inline type type_of(eval::eval_context *DYND_UNUSED(value))
 {
     throw std::runtime_error("error");
 }
 
 template <typename T>
-type as_type(const T &DYND_UNUSED(value))
+type type_of(const T &DYND_UNUSED(value))
 {
   return make_type<T>();
 }
 
 
 template <typename T>
-type as_type(const std::vector<T> &value)
+type type_of(const std::vector<T> &value)
 {
   return make_fixed_dim(value.size(), make_type<T>());
 }
 
-type as_type(const nd::array &val);
+type type_of(const nd::array &val);
 
-type as_type(const nd::arrfunc &val);
+type type_of(const nd::arrfunc &val);
 
 /**
  * Returns the type to use for packing this specific value. The value
