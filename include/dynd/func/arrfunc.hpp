@@ -504,10 +504,75 @@ namespace nd {
         }
       } set_names;
 
+    public:
+      kwds(typename as_<K, const char *>::type... names, K &&... values)
+          : m_values(std::forward<K>(values)...)
+      {
+        is_permutation.self = this;
+        resolve_available_types.self = this;
+
+        typedef make_index_sequence<sizeof...(K)> I;
+        dynd::index_proxy<I>::for_each(set_names, this, names...);
+      }
+
+      static intptr_t get_size() { return sizeof...(K); }
+
+      template <size_t I>
+      const char *get_name() const
+      {
+        return m_names[I];
+      }
+
+      template <size_t I>
+      const typename std::tuple_element<I, std::tuple<K...>>::type &
+      get_value() const
+      {
+        return std::get<I>(m_values);
+      }
+
       struct {
+        kwds *self;
+
         template <size_t I>
-        void operator()(const kwds<K...> *self,
-                        const std::vector<intptr_t> &available,
+        void operator()(intptr_t &nkwd, const arrfunc_type *af_tp,
+                        std::vector<intptr_t> &available, const eval::eval_context *&ectx,
+                        std::map<nd::string, ndt::type> &tp_vars)
+        {
+          const std::string &name = self->get_name<I>();
+          const auto &value = self->get_value<I>();
+
+          intptr_t j = af_tp->get_kwd_index(name);
+          if (j != -1) {
+            ++nkwd;
+          } else if (!is_special_kwd(af_tp, name, value, ectx, tp_vars)) {
+            std::stringstream ss;
+            ss << "passed an unexpected keyword \"" << name
+               << "\" to arrfunc with type " << ndt::type(af_tp, true);
+            throw std::invalid_argument(ss.str());
+          }
+          available.push_back(j);
+        }
+
+        std::vector<intptr_t>
+        operator()(const arrfunc_type *af_tp, intptr_t &nkwd,
+                   const eval::eval_context *&ectx,
+                   std::map<nd::string, ndt::type> &tp_vars) const
+        {
+          typedef make_index_sequence<sizeof...(K)> I;
+
+          std::vector<intptr_t> permutation;
+          nkwd = 0;
+          dynd::index_proxy<I>::for_each(*this, nkwd, af_tp, permutation, ectx,
+                                         tp_vars);
+          return permutation;
+        }
+      } is_permutation;
+
+      struct {
+        kwds *self;
+
+        template <size_t I>
+        void operator()(const std::vector<intptr_t> &available,
                         const arrfunc_type *af_tp, ndt::type *kwd_tp_data,
                         std::map<nd::string, ndt::type> &typevars) const
         {
@@ -538,74 +603,17 @@ namespace nd {
             }
           }
         }
-      } resolve_available_type;
 
-    public:
-      kwds(typename as_<K, const char *>::type... names, K &&... values)
-          : m_values(std::forward<K>(values)...)
-      {
-        typedef make_index_sequence<sizeof...(K)> I;
-        dynd::index_proxy<I>::for_each(set_names, this, names...);
-      }
-
-      static intptr_t get_size() { return sizeof...(K); }
-
-      template <size_t I>
-      const char *get_name() const
-      {
-        return m_names[I];
-      }
-
-      template <size_t I>
-      const typename std::tuple_element<I, std::tuple<K...>>::type &
-      get_value() const
-      {
-        return std::get<I>(m_values);
-      }
-
-      struct {
-        template <size_t I>
-        void operator()(const kwds<K...> *self, intptr_t &nkwd, const arrfunc_type *af_tp,
-                        std::vector<intptr_t> &available, const eval::eval_context *&ectx,
-                        std::map<nd::string, ndt::type> &tp_vars)
+        void operator()(const arrfunc_type *self_tp,
+                        const std::vector<intptr_t> &available,
+                        ndt::type *kwd_tp_data,
+                        std::map<nd::string, ndt::type> &typevars) const
         {
-          const std::string &name = self->get_name<I>();
-          const auto &value = self->get_value<I>();
-
-          intptr_t j = af_tp->get_kwd_index(name);
-          if (j != -1) {
-            ++nkwd;
-          } else if (!is_special_kwd(af_tp, name, value, ectx, tp_vars)) {
-            std::stringstream ss;
-            ss << "passed an unexpected keyword \"" << name
-               << "\" to arrfunc with type " << ndt::type(af_tp, true);
-            throw std::invalid_argument(ss.str());
-          }
-          available.push_back(j);
+          typedef make_index_sequence<sizeof...(K)> I;
+          dynd::index_proxy<I>::for_each(*this, available, self_tp, kwd_tp_data,
+                                         typevars);
         }
-      } is_permutation_ex;
-
-      std::vector<intptr_t>
-      is_permutation(const arrfunc_type *af_tp, intptr_t &nkwd, const eval::eval_context *&ectx,
-                     std::map<nd::string, ndt::type> &tp_vars) const
-      {
-        typedef make_index_sequence<sizeof...(K)> I;
-
-        std::vector<intptr_t> permutation;
-        nkwd = 0;
-        dynd::index_proxy<I>::for_each(is_permutation_ex, this, nkwd, af_tp, permutation, ectx, tp_vars);
-        return permutation;
-      }
-
-      void resolve_available_types(
-          const arrfunc_type *self_tp, const std::vector<intptr_t> &available,
-          ndt::type *kwd_tp_data, std::map<nd::string, ndt::type> &typevars) const
-      {
-        typedef make_index_sequence<sizeof...(K)> I;
-
-        dynd::index_proxy<I>::for_each(resolve_available_type, this, available,
-                                       self_tp, kwd_tp_data, typevars);
-      }
+      } resolve_available_types;
 
       struct {
         template <size_t I>
@@ -880,16 +888,10 @@ namespace nd {
     }
 
     template <typename... K>
-    ndt::type resolve(intptr_t nsrc, const ndt::type *src_tp,
-              const detail::kwds<K...> &kwds,
-                 array &kwds_as_array, const eval::eval_context *&ectx,
+    void resolve(const detail::kwds<K...> &kwds, intptr_t nkwd, const std::vector<intptr_t> &available, array &kwds_as_array,
                  std::map<nd::string, ndt::type> &typevars) const
     {
-      const arrfunc_type_data *self = get();
       const arrfunc_type *self_tp = m_value.get_type().extended<arrfunc_type>();
-
-      intptr_t nkwd;
-      std::vector<intptr_t> available = kwds.is_permutation(self_tp, nkwd, ectx, typevars);
 
       if (self_tp->get_nkwd() > 0) {
         nd::array kwd_tp = nd::empty(self_tp->get_nkwd(), ndt::make_type());
@@ -911,11 +913,6 @@ namespace nd {
 
         kwds_as_array = kwds.forward_as_array(self_tp->get_kwd_names(), kwd_tp,
                               available, missing);
-
-        if (self->resolve_option_values != NULL) {
-          self->resolve_option_values(self, self_tp, nsrc, src_tp,
-                                      kwds_as_array, typevars);
-        }
       } else if (nkwd != 0) {
         stringstream ss;
         ss << "arrfunc does not accept keyword arguments, but was provided "
@@ -923,15 +920,6 @@ namespace nd {
            << ndt::type(self_tp, true);
         throw std::invalid_argument(ss.str());
       }
-
-      if (self->resolve_dst_type != NULL) {
-        ndt::type dst_tp;
-        self->resolve_dst_type(self, self_tp, nsrc, src_tp, true, dst_tp,
-                               kwds_as_array, typevars);
-        return dst_tp;
-      }
-
-      return ndt::substitute(self_tp->get_return_type(), typevars, true);
     }
 
     /** Implements the general call operator */
@@ -947,15 +935,32 @@ namespace nd {
       // ...
       std::map<nd::string, ndt::type> tp_vars;
 
-      // Resolve the destination type
+      // ...
+      intptr_t nkwd;
+      std::vector<intptr_t> available = kwds.is_permutation(self_tp, nkwd, ectx, tp_vars);
+
       std::vector<ndt::type> src_tp;
       std::vector<const char *> src_arrmeta;
       std::vector<char *> src_data;
       args.resolve(get_type(), src_tp, src_arrmeta, src_data, tp_vars);
 
       nd::array kwds_as_array;
-      ndt::type dst_tp = resolve(args.size(), src_tp.data(), kwds,
-                                 kwds_as_array, ectx, tp_vars);
+      resolve(kwds, nkwd, available, kwds_as_array, tp_vars);
+
+      // Resolve the optional keyword arguments
+      if (self->resolve_option_values != NULL) {
+        self->resolve_option_values(self, self_tp, src_tp.size(), src_tp.data(),
+                                    kwds_as_array, tp_vars);
+      }
+
+      // Resolve the destination type
+      ndt::type dst_tp;
+      if (self->resolve_dst_type != NULL) {
+        self->resolve_dst_type(self, self_tp, src_tp.size(), src_tp.data(),
+                               true, dst_tp, kwds_as_array, tp_vars);
+      } else {
+        dst_tp = ndt::substitute(self_tp->get_return_type(), tp_vars, true);
+      }
 
       if (ectx == NULL) {
         ectx = &eval::default_eval_context;
