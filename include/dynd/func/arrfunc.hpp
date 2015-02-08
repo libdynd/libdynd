@@ -193,7 +193,7 @@ public:
       : instantiate(NULL), resolve_option_values(NULL), resolve_dst_type(NULL),
         free(NULL)
   {
-    DYND_STATIC_ASSERT((sizeof(arrfunc_type_data) & 7) == 0,
+    static_assert((sizeof(arrfunc_type_data) & 7) == 0,
                        "arrfunc_type_data must have size divisible by 8");
   }
 

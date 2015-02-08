@@ -66,6 +66,8 @@ namespace nd {
                             arrfunc>::type
     apply(func_type func, T &&... names)
     {
+      static_assert(all_char_string_params<T...>::value,
+                    "All the names must be strings");
       return apply<kernel_request_host>(func, std::forward<T>(names)...);
     }
 
