@@ -133,6 +133,58 @@ nd::arrfunc dynd::make_arrfunc_from_property(const ndt::type &tp,
   return af;
 }
 
+void nd::detail::validate_kwd_types(const arrfunc_type *af_tp,
+                                    std::vector<ndt::type> &kwd_tp,
+                                    const std::vector<intptr_t> &available,
+                                    const std::vector<intptr_t> &missing,
+                                    std::map<nd::string, ndt::type> &tp_vars)
+{
+  for (intptr_t j : available) {
+    if (j == -1) {
+      continue;
+    }
+
+    ndt::type &actual_tp = kwd_tp[j];
+
+    ndt::type expected_tp = af_tp->get_kwd_type(j);
+    if (expected_tp.get_type_id() == option_type_id) {
+      expected_tp = expected_tp.p("value_type").as<ndt::type>();
+    }
+
+    if (!actual_tp.value_type().matches(expected_tp, tp_vars)) {
+      std::stringstream ss;
+      ss << "keyword \"" << af_tp->get_kwd_name(j) << "\" does not match, ";
+      ss << "arrfunc expected " << expected_tp << " but passed " << actual_tp;
+      throw std::invalid_argument(ss.str());
+    }
+
+    if (j != -1 && kwd_tp[j].get_kind() == dim_kind) {
+      kwd_tp[j] = ndt::make_pointer(kwd_tp[j]);
+    }
+  }
+
+  for (intptr_t j : missing) {
+    ndt::type &actual_tp = kwd_tp[j];
+    actual_tp = ndt::substitute(af_tp->get_kwd_type(j), tp_vars, false);
+    if (actual_tp.is_symbolic()) {
+      actual_tp = ndt::make_option(ndt::make_type<void>());
+    }
+  }
+}
+
+void nd::detail::fill_missing_values(const ndt::type *tp, char *arrmeta,
+                                     const uintptr_t *arrmeta_offsets,
+                                     char *data, const uintptr_t *data_offsets,
+                                     const std::vector<intptr_t> &missing)
+{
+  for (intptr_t j : missing) {
+    tp[j].extended()->arrmeta_default_construct(arrmeta + arrmeta_offsets[j],
+                                                true);
+    assign_na(tp[j], arrmeta + arrmeta_offsets[j], data + data_offsets[j],
+              &eval::default_eval_context);
+  }
+}
+
 void nd::detail::check_narg(const arrfunc_type *af_tp, intptr_t npos)
 {
   if (!af_tp->is_pos_variadic() && npos != af_tp->get_npos()) {

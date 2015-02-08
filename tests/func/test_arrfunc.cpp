@@ -121,6 +121,21 @@ TEST(ArrFunc, CallOperator)
   EXPECT_THROW(af(kwds("y", 3.5)), invalid_argument);
 }
 
+/*
+TEST(Arrfunc, DynamicKeywords)
+{
+  nd::arrfunc af;
+
+  nd::array y = 5.0;
+  const char *names[1] = {"y"};
+
+  af = nd::functional::apply(&func, "y");
+  std::cout << af(1, kwds(static_cast<intptr_t>(1), static_cast<const char *const *>(names), static_cast<nd::array *>(&y))) << std::endl;
+
+  std::exit(-1);
+}
+*/
+
 TEST(ArrFunc, KeywordParsing)
 {
   nd::arrfunc af0 =
