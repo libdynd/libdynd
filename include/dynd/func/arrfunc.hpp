@@ -409,34 +409,6 @@ namespace nd {
     };
 
     template <>
-    class args<intptr_t, nd::array *> {
-      intptr_t m_narg;
-      nd::array *m_args;
-
-    public:
-      args(intptr_t narg, nd::array *args) : m_narg(narg), m_args(args) {}
-
-      void validate_types(const arrfunc_type *af_tp,
-                   std::vector<ndt::type> &src_tp,
-                   std::vector<const char *> &src_arrmeta,
-                   std::vector<char *> &src_data,
-                   std::map<nd::string, ndt::type> &tp_vars) const
-      {
-        check_narg(af_tp, m_narg);
-
-        for (intptr_t i = 0; i < m_narg; ++i) {
-          check_arg(af_tp, i, m_args[i].get_type(), m_args[i].get_arrmeta(),
-                    tp_vars);
-
-          src_tp.push_back(m_args[i].get_type());
-          src_arrmeta.push_back(m_args[i].get_arrmeta());
-          src_data.push_back(
-              const_cast<char *>(m_args[i].get_readonly_originptr()));
-        }
-      }
-    };
-
-    template <>
     class args<> {
     public:
       void validate_types(const arrfunc_type *af_tp,
@@ -447,6 +419,47 @@ namespace nd {
       {
         check_narg(af_tp, 0);
       }
+    };
+
+    template <>
+    class args<intptr_t, nd::array *> {
+      intptr_t m_size;
+      nd::array *m_values;
+
+    public:
+      args(intptr_t size, nd::array *values) : m_size(size), m_values(values) {}
+
+      void validate_types(const arrfunc_type *af_tp,
+                          std::vector<ndt::type> &src_tp,
+                          std::vector<const char *> &src_arrmeta,
+                          std::vector<char *> &src_data,
+                          std::map<nd::string, ndt::type> &tp_vars) const
+      {
+        check_narg(af_tp, m_size);
+
+        for (intptr_t i = 0; i < m_size; ++i) {
+          check_arg(af_tp, i, m_values[i].get_type(), m_values[i].get_arrmeta(),
+                    tp_vars);
+
+          src_tp.push_back(m_values[i].get_type());
+          src_arrmeta.push_back(m_values[i].get_arrmeta());
+          src_data.push_back(
+              const_cast<char *>(m_values[i].get_readonly_originptr()));
+        }
+      }
+    };
+
+    template <typename... T>
+    struct is_variadic_args {
+      enum { value = true };
+    };
+
+    template <typename T0, typename T1>
+    struct is_variadic_args<T0, T1> {
+      enum {
+        value = !std::is_convertible<T0, intptr_t>::value ||
+                !std::is_convertible<T1, array *>::value
+      };
     };
 
     template <typename... K>
@@ -751,38 +764,56 @@ namespace nd {
     struct is_kwds<nd::detail::kwds<K...> &> {
       static const bool value = true;
     };
-  }
-} // namespace nd
 
-template <typename T>
-struct builtin_or_array {
-  typedef nd::array type;
-};
+    template <typename... T>
+    struct is_variadic_kwds {
+      enum { value = true };
+    };
+
+    template <typename T0, typename T1, typename T2>
+    struct is_variadic_kwds<T0, T1, T2> {
+      enum {
+        value = !std::is_convertible<T0, intptr_t>::value ||
+                !std::is_convertible<T1, const char *const *>::value ||
+                !std::is_convertible<T2, nd::array *>::value
+      };
+    };
+
+    template <typename... T>
+    struct as_kwds {
+      typedef typename instantiate<
+          nd::detail::kwds,
+          typename take<type_sequence<T...>,
+                        make_index_sequence<1, sizeof...(T), 2>>::type>::type type;
+    };
+  }
+} // namespace dynd::nd
 
 template <typename... T>
-typename instantiate<
-    nd::detail::kwds,
-    typename take<type_sequence<T...>,
-                  make_index_sequence<1, sizeof...(T), 2>>::type>::type
-kwds(T &&... args)
+typename std::enable_if<nd::detail::is_variadic_kwds<T...>::value,
+                        typename nd::detail::as_kwds<T...>::type>::type
+kwds(T &&... t)
 {
   // Sequence of even integers, for extracting the keyword names
   typedef make_index_sequence<0, sizeof...(T), 2> I;
-  // Sequence of odd integers, for extracting the values
+  // Sequence of odd integers, for extracting the keyword values
   typedef make_index_sequence<1, sizeof...(T), 2> J;
 
   return index_proxy<typename join<I, J>::type>::template make<
-      decltype(kwds(std::forward<T>(args)...))>(std::forward<T>(args)...);
+      decltype(kwds(std::forward<T>(t)...))>(std::forward<T>(t)...);
+}
+
+template <typename... T>
+typename std::enable_if<
+    !nd::detail::is_variadic_kwds<T...>::value,
+    nd::detail::kwds<intptr_t, const char *const *, nd::array *>>::type
+kwds(T &&... t)
+{
+  return nd::detail::kwds<intptr_t, const char *const *, nd::array *>(
+      std::forward<T>(t)...);
 }
 
 inline nd::detail::kwds<> kwds() { return nd::detail::kwds<>(); }
-
-inline nd::detail::kwds<intptr_t, const char *const *, nd::array *>
-kwds(intptr_t size, const char *const *names, nd::array *values)
-{
-  return nd::detail::kwds<intptr_t, const char *const *, nd::array *>(
-      size, names, values);
-}
 
 template <typename T>
 struct as_array {
@@ -914,7 +945,6 @@ namespace nd {
       arrfunc(&self, self_tp).swap(*this);
     }
 
-
 /*
  else if (nkwd != 0) {
         stringstream ss;
@@ -999,7 +1029,7 @@ namespace nd {
      * operator()(a0, a1, ..., an, kwds<...>(...))
      */
     template <typename... T>
-    typename std::enable_if<
+    typename std::enable_if<sizeof...(T) != 3 &&
         detail::is_kwds<typename back<type_sequence<T...>>::type>::value,
         array>::type
     operator()(T &&... a) const
@@ -1015,21 +1045,36 @@ namespace nd {
       return call(arr, dynd::get<sizeof...(T)-1>(std::forward<T>(a)...));
     }
 
+    template <typename A0, typename A1, typename... K>
+    typename std::enable_if<detail::is_variadic_args<A0, A1>::value,
+                            array>::type
+    operator()(A0 &&a0, A1 &&a1, const detail::kwds<K...> &kwds) const
+    {
+      return call(detail::args<array, array>(array(std::forward<A0>(a0)),
+                                             array(std::forward<A1>(a1))),
+                  kwds);
+    }
+
+    template <typename A0, typename A1, typename... K>
+    typename std::enable_if<!detail::is_variadic_args<A0, A1>::value,
+                            array>::type
+    operator()(A0 &&a0, A1 &&a1, const detail::kwds<K...> &kwds) const
+    {
+      return call(detail::args<intptr_t, array *>(std::forward<A0>(a0),
+                                                  std::forward<A1>(a1)),
+                  kwds);
+    }
+
     /**
      * operator()(a0, a1, ..., an)
      */
-    template <typename... T>
+    template <typename... A>
     typename std::enable_if<
-        !detail::is_kwds<typename back<type_sequence<T...>>::type>::value,
-        nd::array>::type
-    operator()(T &&... a) const
+        !detail::is_kwds<typename back<type_sequence<A...>>::type>::value,
+        array>::type
+    operator()(A &&... a) const
     {
-      detail::args<typename as_array<T>::type...> arr(std::forward<T>(a)...);
-      return call(arr, kwds());
-    }
-
-    nd::array operator()(intptr_t narg, nd::array *args) const {
-      return call(detail::args<intptr_t, nd::array *>(narg, args), kwds());
+      return (*this)(std::forward<A>(a)..., kwds());
     }
 
     /** Implements the general call operator with output parameter */
