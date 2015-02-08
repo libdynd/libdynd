@@ -570,9 +570,9 @@ namespace kernels {
       return ckb->template get_at<self_type>(ckb_offset);                      \
     }                                                                          \
                                                                                \
-    /**                                                                        \
-     * Creates the ckernel, and increments ``inckb_offset``                    \
-     * to the position after it.                                               \
+    /** \                                                                             \
+     * Creates the ckernel, and increments ``inckb_offset`` \                                                                             \
+     * to the position after it. \                                                                             \
      */                                                                        \
     template <typename CKBT, typename... A>                                    \
     static self_type *create(CKBT *ckb, kernel_request_t kernreq,              \
@@ -591,9 +591,9 @@ namespace kernels {
     static self_type *create(void *ckb, kernel_request_t kernreq,              \
                              intptr_t &inout_ckb_offset, A &&... args);        \
                                                                                \
-    /**                                                                        \
-     * Creates the ckernel, and increments ``inckb_offset``                    \
-     * to the position after it.                                               \
+    /** \                                                                             \
+     * Creates the ckernel, and increments ``inckb_offset`` \                                                                             \
+     * to the position after it. \                                                                             \
      */                                                                        \
     template <typename CKBT, typename... A>                                    \
     static self_type *create_leaf(CKBT *ckb, kernel_request_t kernreq,         \
@@ -612,19 +612,19 @@ namespace kernels {
     static self_type *create_leaf(void *ckb, kernel_request_t kernreq,         \
                                   intptr_t &inout_ckb_offset, A &&... args);   \
                                                                                \
-    /**                                                                        \
-     * Initializes an instance of this ckernel in-place according to the       \
-     * kernel request. This calls the constructor in-place, and initializes    \
-     * the base function and destructor.                                       \
+    /** \                                                                             \
+     * Initializes an instance of this ckernel in-place according to the \                                                                             \
+     * kernel request. This calls the constructor in-place, and initializes \                                                                             \
+     * the base function and destructor. \                                                                             \
      */                                                                        \
     template <typename... A>                                                   \
     __VA_ARGS__ static self_type *init(ckernel_prefix *rawself,                \
                                        kernel_request_t kernreq, A &&... args) \
     {                                                                          \
       /* Alignment requirement of the type. */                                 \
-      DYND_STATIC_ASSERT((size_t)scalar_align_of<self_type>::value <=          \
-                             (size_t)scalar_align_of<uint64_t>::value,         \
-                         "ckernel types require alignment <= 64 bits");        \
+      static_assert((size_t)scalar_align_of<self_type>::value <=               \
+                        (size_t)scalar_align_of<uint64_t>::value,              \
+                    "ckernel types require alignment <= 64 bits");             \
                                                                                \
       /* Call the constructor in-place. */                                     \
       self_type *self = new (rawself) self_type(args...);                      \
@@ -639,34 +639,35 @@ namespace kernels {
       return self;                                                             \
     }                                                                          \
                                                                                \
-    /**                                                                        \
-     * The ckernel destructor function, which is placed in                     \
-     * base.destructor.                                                        \
+    /** \                                                                             \
+     * The ckernel destructor function, which is placed in \                                                                             \
+     * base.destructor. \                                                                             \
      */                                                                        \
     __VA_ARGS__ static void destruct(ckernel_prefix *rawself)                  \
     {                                                                          \
       self_type *self = get_self(rawself);                                     \
       /* If there are any child kernels, a child class must implement this to  \
+       * \                                                                     \
        * destroy them. */                                                      \
       self->destruct_children();                                               \
       self->~self_type();                                                      \
     }                                                                          \
                                                                                \
-    /**                                                                        \
-     * Default implementation of destruct_children does nothing.               \
+    /** \                                                                             \
+     * Default implementation of destruct_children does nothing. \                                                                             \
      */                                                                        \
     __VA_ARGS__ void destruct_children() {}                                    \
                                                                                \
-    /**                                                                        \
-     * Returns the child ckernel immediately following this one.               \
+    /** \                                                                             \
+     * Returns the child ckernel immediately following this one. \                                                                             \
      */                                                                        \
     __VA_ARGS__ ckernel_prefix *get_child_ckernel()                            \
     {                                                                          \
       return get_child_ckernel(sizeof(self_type));                             \
     }                                                                          \
                                                                                \
-    /**                                                                        \
-     * Returns the child ckernel at the specified offset.                      \
+    /** \                                                                             \
+     * Returns the child ckernel at the specified offset. \                                                                             \
      */                                                                        \
     __VA_ARGS__ ckernel_prefix *get_child_ckernel(intptr_t offset)             \
     {                                                                          \

@@ -29,10 +29,6 @@
 #define DYND_CONSTEXPR
 #endif
 
-#if __has_feature(cxx_static_assert)
-#define DYND_STATIC_ASSERT(value, message) static_assert(value, message)
-#endif
-
 #if __has_feature(cxx_lambdas)
 #define DYND_CXX_LAMBDAS
 #endif
@@ -68,7 +64,6 @@ inline bool DYND_ISNAN(long double x) { return std::isnan(x); }
 #define DYND_CONSTEXPR constexpr
 #define DYND_RVALUE_REFS
 #define DYND_ISNAN(x) (std::isnan(x))
-#define DYND_STATIC_ASSERT(value, message) static_assert(value, message)
 #define DYND_CXX_VARIADIC_TEMPLATES
 
 #define DYND_ISSPACE isspace
@@ -96,7 +91,6 @@ inline bool DYND_ISNAN(long double x) { return std::isnan(x); }
 #endif
 
 #define DYND_RVALUE_REFS
-#define DYND_STATIC_ASSERT(value, message) static_assert(value, message)
 #define DYND_CXX_LAMBDAS
 #define DYND_USE_STD_ATOMIC
 #define DYND_CXX_VARIADIC_TEMPLATES
@@ -170,15 +164,6 @@ inline void DYND_MEMCPY(char *dst, const char *src, intptr_t count)
 #else
 #include <cstring>
 #define DYND_MEMCPY(dst, src, count) std::memcpy(dst, src, count)
-#endif
-
-// This static_assert fails at compile-time when expected, but with a more
-// general message
-// TODO: This doesn't work as a member of a class, need to fix that and reenable
-#ifndef DYND_STATIC_ASSERT
-#define DYND_STATIC_ASSERT(value,                                              \
-                           message) // do { enum { dynd_static_assertion = 1 /
-                                    // (int)(value) }; } while (0)
 #endif
 
 #include <tuple>
