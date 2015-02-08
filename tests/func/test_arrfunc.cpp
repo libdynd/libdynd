@@ -121,6 +121,26 @@ TEST(ArrFunc, CallOperator)
   EXPECT_THROW(af(kwds("y", 3.5)), invalid_argument);
 }
 
+TEST(Arrfunc, DynamicCall)
+{
+  nd::arrfunc af;
+
+  nd::array values[3] = {7, 2.5, 5};
+  const char *names[3] = {"x", "y", "z"};
+
+  af = nd::functional::apply([](int x, double y, int z) { return 2 * x - y + 3 * z; });
+  EXPECT_EQ(26.5, af(3, values).as<double>());
+
+  af = nd::functional::apply([](int x, double y, int z) { return 2 * x - y + 3 * z; }, "z");
+  EXPECT_EQ(26.5, af(2, values, kwds(1, names + 2, values + 2)).as<double>());
+
+  af = nd::functional::apply([](int x, double y, int z) { return 2 * x - y + 3 * z; }, "y", "z");
+  EXPECT_EQ(26.5, af(1, values, kwds(2, names + 1, values + 1)).as<double>());
+
+  af = nd::functional::apply([](int x, double y, int z) { return 2 * x - y + 3 * z; }, "x", "y", "z");
+  EXPECT_EQ(26.5, af(kwds(3, names, values)).as<double>());
+}
+
 TEST(ArrFunc, KeywordParsing)
 {
   nd::arrfunc af0 =
