@@ -197,6 +197,49 @@ struct is_function_pointer {
           : false;
 };
 
+/**
+ * Matches string literal arguments.
+ */
+template <typename T>
+struct is_char_string_param {
+  static const bool value = false;
+};
+template <>
+struct is_char_string_param<const char *> {
+  static const bool value = true;
+};
+template <>
+struct is_char_string_param<char *> {
+  static const bool value = true;
+};
+template <int N>
+struct is_char_string_param<const char (&) [N]> {
+  static const bool value = true;
+};
+template <int N>
+struct is_char_string_param<const char (&&) [N]> {
+  static const bool value = true;
+};
+
+/** Returns true if all the packed parameters are char strings */
+template<typename... T>
+struct all_char_string_params {
+  static const bool value = false;
+};
+template<>
+struct all_char_string_params<> {
+  static const bool value = true;
+};
+template<typename T0>
+struct all_char_string_params<T0> {
+  static const bool value = is_char_string_param<T0>::value;
+};
+template<typename...T, typename T0>
+struct all_char_string_params<T0, T...> {
+  static const bool value =
+      is_char_string_param<T0>::value && all_char_string_params<T...>::value;
+};
+
 template <typename T>
 struct remove_all_pointers {
   typedef T type;
