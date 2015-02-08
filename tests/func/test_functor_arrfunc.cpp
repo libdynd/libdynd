@@ -392,5 +392,7 @@ INSTANTIATE_TYPED_TEST_CASE_P(Builtin, FunctorArrfunc_FuncRetRes, test_types);
 REGISTER_TYPED_TEST_CASE_P(FunctorArrfunc_CallRetRes, CallRetRes);
 INSTANTIATE_TYPED_TEST_CASE_P(Builtin, FunctorArrfunc_CallRetRes, test_types);
 
+/*
 REGISTER_TYPED_TEST_CASE_P(FunctorArrfunc_MethRetRes, MethRetRes);
 INSTANTIATE_TYPED_TEST_CASE_P(Builtin, FunctorArrfunc_MethRetRes, test_types);
+*/
