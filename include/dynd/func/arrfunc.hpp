@@ -359,6 +359,10 @@ namespace nd {
                             const std::vector<intptr_t> &missing,
                             std::map<nd::string, ndt::type> &tp_vars);
 
+    inline char *data_of(array &value) {
+      return const_cast<char *>(value.get_readonly_originptr());
+    }
+
     template <typename... A>
     class args {
       std::tuple<A...> m_values;
@@ -369,8 +373,9 @@ namespace nd {
       {
         validate_types.self = this;
 
+        // Todo: This should be removed, but it seems to trigger an error on travis if it is
         typedef make_index_sequence<sizeof...(A)> I;
-        nd::index_proxy<I>::template get_arrmeta(m_arrmeta, m_values);
+        old_index_proxy<I>::template get_arrmeta(m_arrmeta, m_values);
       }
 
       struct {
@@ -383,14 +388,15 @@ namespace nd {
                         std::vector<char *> &src_data,
                         std::map<nd::string, ndt::type> &tp_vars) const
         {
-          const nd::array &value = std::get<I>(self->m_values);
+          auto &value = std::get<I>(self->m_values);
           const ndt::type &tp = ndt::type_of(value);
+          const char *arrmeta = self->m_arrmeta[I];
 
-          check_arg(af_tp, I, tp, self->m_arrmeta[I], tp_vars);
+          check_arg(af_tp, I, tp, arrmeta, tp_vars);
 
-          src_tp.push_back(tp);
-          src_arrmeta.push_back(self->m_arrmeta[I]);
-          src_data.push_back(const_cast<char *>(value.get_readonly_originptr()));
+          src_tp[I] = tp;
+          src_arrmeta[I] = arrmeta;
+          src_data[I] = data_of(value);
         }
 
         void operator()(const arrfunc_type *af_tp,
@@ -402,8 +408,8 @@ namespace nd {
           check_narg(af_tp, sizeof...(A));
 
           typedef make_index_sequence<sizeof...(A)> I;
-          dynd::index_proxy<I>::for_each(*this, af_tp, src_tp, src_arrmeta,
-                                         src_data, tp_vars);
+          index_proxy<I>::for_each(*this, af_tp, src_tp, src_arrmeta, src_data,
+                                   tp_vars);
         }
       } validate_types;
     };
@@ -424,7 +430,7 @@ namespace nd {
     template <>
     class args<intptr_t, nd::array *> {
       intptr_t m_size;
-      nd::array *m_values;
+      array *m_values;
 
     public:
       args(intptr_t size, nd::array *values) : m_size(size), m_values(values) {}
@@ -438,13 +444,15 @@ namespace nd {
         check_narg(af_tp, m_size);
 
         for (intptr_t i = 0; i < m_size; ++i) {
-          check_arg(af_tp, i, m_values[i].get_type(), m_values[i].get_arrmeta(),
-                    tp_vars);
+          array &value = m_values[i];
+          const ndt::type &tp = value.get_type();
+          const char *arrmeta = value.get_arrmeta();
 
-          src_tp.push_back(m_values[i].get_type());
-          src_arrmeta.push_back(m_values[i].get_arrmeta());
-          src_data.push_back(
-              const_cast<char *>(m_values[i].get_readonly_originptr()));
+          check_arg(af_tp, i, tp, arrmeta, tp_vars);
+
+          src_tp[i] = tp;
+          src_arrmeta[i] = arrmeta;
+          src_data[i] = data_of(value);
         }
       }
     };
@@ -534,7 +542,7 @@ namespace nd {
         void operator()(typename as_<K, const char *>::type... names)
         {
           typedef make_index_sequence<sizeof...(K)> I;
-          dynd::index_proxy<I>::for_each(*this, names...);
+          index_proxy<I>::for_each(*this, names...);
         }
       } set_names;
 
@@ -560,7 +568,7 @@ namespace nd {
                         const std::vector<intptr_t> &available) const
         {
           typedef make_index_sequence<sizeof...(K)> I;
-          dynd::index_proxy<I>::for_each(*this, tp, arrmeta, arrmeta_offsets,
+          index_proxy<I>::for_each(*this, tp, arrmeta, arrmeta_offsets,
                                          data, data_offsets, available);
         }
       } fill_available_values;
@@ -610,7 +618,7 @@ namespace nd {
           bool has_dst_tp = false;
 
           typedef make_index_sequence<sizeof...(K)> I;
-          dynd::index_proxy<I>::for_each(*this, af_tp, has_dst_tp, tp,
+          index_proxy<I>::for_each(*this, af_tp, has_dst_tp, tp,
                                          available, tp_vars);
 
           intptr_t nkwd = sizeof...(K);
@@ -971,9 +979,9 @@ namespace nd {
       std::vector<intptr_t> available, missing;
       kwds.validate_names(self_tp, kwd_tp, available, missing, tp_vars);
 
-      std::vector<ndt::type> arg_tp;
-      std::vector<const char *> arg_arrmeta;
-      std::vector<char *> arg_data;
+      std::vector<ndt::type> arg_tp(self_tp->get_npos());
+      std::vector<const char *> arg_arrmeta(self_tp->get_npos());
+      std::vector<char *> arg_data(self_tp->get_npos());
       args.validate_types(self_tp, arg_tp, arg_arrmeta, arg_data, tp_vars);
 
       detail::validate_kwd_types(self_tp, kwd_tp, available, missing, tp_vars);
@@ -1041,7 +1049,7 @@ namespace nd {
                       sizeof...(T)-1>::type>::type args_type;
 
       args_type arr =
-          dynd::index_proxy<I>::template make<args_type>(std::forward<T>(a)...);
+          index_proxy<I>::template make<args_type>(std::forward<T>(a)...);
       return call(arr, dynd::get<sizeof...(T)-1>(std::forward<T>(a)...));
     }
 

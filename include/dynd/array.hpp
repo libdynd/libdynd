@@ -40,10 +40,10 @@ namespace ndt {
 
 namespace nd {
   template <typename I>
-  struct index_proxy;
+  struct old_index_proxy;
 
   template <size_t... I>
-  struct index_proxy<index_sequence<I...>> {
+  struct old_index_proxy<index_sequence<I...>> {
     enum { size = index_sequence<I...>::size };
 
     template <typename... T>
@@ -1896,7 +1896,7 @@ namespace nd {
 
   template <size_t... I>
   template <typename... T>
-  void index_proxy<index_sequence<I...>>::get_arrmeta(const char **arrmeta, const std::tuple<T...> &values)
+  void old_index_proxy<index_sequence<I...>>::get_arrmeta(const char **arrmeta, const std::tuple<T...> &values)
   {
     nd::get_arrmeta(arrmeta, std::get<I>(values)...);
   }
