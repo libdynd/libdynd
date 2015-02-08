@@ -310,6 +310,24 @@ namespace nd {
       return false;
     }
 
+    inline bool is_special_kwd(const arrfunc_type *self_tp,
+                               const std::string &name, const nd::array &value,
+                               std::map<nd::string, ndt::type> &tp_vars) {
+      if (name == "dst_tp") {
+        const ndt::type &expected_tp = self_tp->get_return_type();
+        if (value.as<ndt::type>().matches(expected_tp, tp_vars)) {
+          return true;
+        }
+
+        std::stringstream ss;
+        ss << "keyword \"dst_tp\" does not match, ";
+        ss << "arrfunc expected " << expected_tp << " but passed " << value;
+        throw std::invalid_argument(ss.str());
+      }
+
+      return false;
+    }
+
     template <typename T>
     void check_name(const arrfunc_type *af_tp, const std::string &name,
                     const T &value, bool &has_dst_tp, ndt::type *kwd_tp,
