@@ -149,8 +149,13 @@ namespace kernels {
     T m_val;
 
     kwd(nd::array val)
-        : m_val(val.as<T>())
+//        : m_val(val.as<T>())
     {
+      if (val.get_type().get_type_id() == pointer_type_id) {
+        m_val = val.f("dereference").as<T>();
+      } else {
+        m_val = val.as<T>();
+      }
     }
 
     DYND_CUDA_HOST_DEVICE T get() { return m_val; }

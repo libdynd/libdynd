@@ -982,9 +982,8 @@ namespace nd {
 */
 
     /** Implements the general call operator */
-    template <typename... A, typename... K>
-    array call(const detail::args<A...> &args,
-               const detail::kwds<K...> &kwds) const
+    template <typename A, typename K>
+    array call(const A &args, const K &kwds) const
     {
       const arrfunc_type_data *self = get();
       const arrfunc_type *self_tp = get_type();
