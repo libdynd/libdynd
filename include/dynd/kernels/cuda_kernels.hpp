@@ -43,40 +43,39 @@ namespace dynd {
 
 namespace kernels {
   template <int N>
-  __global__ void cuda_parallel_single(char *dst, array_wrapper<char *, N> src,
-                                       ckernel_prefix *self)
+  __global__ void cuda_launch_single(char *dst, array_wrapper<char *, N> src,
+                                     ckernel_prefix *self)
   {
     expr_single_t func = self->get_function<expr_single_t>();
     func(dst, src, self);
   }
 
   template <int N>
-  __global__ void cuda_parallel_strided(char *dst, intptr_t dst_stride,
-                                        array_wrapper<char *, N> src,
-                                        array_wrapper<intptr_t, N> src_stride,
-                                        size_t count, ckernel_prefix *self)
+  __global__ void cuda_launch_strided(char *dst, intptr_t dst_stride,
+                                      array_wrapper<char *, N> src,
+                                      array_wrapper<intptr_t, N> src_stride,
+                                      size_t count, ckernel_prefix *self)
   {
     expr_strided_t func = self->get_function<expr_strided_t>();
     func(dst, dst_stride, src, src_stride, count, self);
   }
 
   template <int Nsrc>
-  struct cuda_parallel_ck
-      : expr_ck<cuda_parallel_ck<Nsrc>, kernel_request_host, Nsrc> {
-    typedef cuda_parallel_ck<Nsrc> self_type;
+  struct cuda_launch_ck
+      : expr_ck<cuda_launch_ck<Nsrc>, kernel_request_host, Nsrc> {
+    typedef cuda_launch_ck<Nsrc> self_type;
 
     ckernel_builder<kernel_request_cuda_device> ckb;
     dim3 blocks;
     dim3 threads;
 
-    cuda_parallel_ck(dim3 blocks, dim3 threads)
-        : blocks(blocks), threads(threads)
+    cuda_launch_ck(dim3 blocks, dim3 threads) : blocks(blocks), threads(threads)
     {
     }
 
     void single(char *dst, char *const *src)
     {
-      kernels::cuda_parallel_single << <blocks, threads>>>
+      kernels::cuda_launch_single << <blocks, threads>>>
           (dst, array_wrapper<char *, Nsrc>(src), ckb.get());
       // check for CUDA errors here
     }
@@ -84,7 +83,7 @@ namespace kernels {
     void strided(char *dst, intptr_t dst_stride, char *const *src,
                  const intptr_t *src_stride, size_t count)
     {
-      cuda_parallel_strided << <blocks, threads>>>
+      cuda_launch_strided << <blocks, threads>>>
           (dst, dst_stride, array_wrapper<char *, Nsrc>(src),
            array_wrapper<intptr_t, Nsrc>(src_stride), count, ckb.get());
       // check for CUDA errors here

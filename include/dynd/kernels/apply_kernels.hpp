@@ -455,7 +455,7 @@ namespace kernels {
       kernel_request_t kernreq, const eval::eval_context *ectx,
       const nd::array &kwds, const std::map<nd::string, ndt::type> &tp_vars)
   {
-    return cuda_parallel_ck<Nsrc>::template instantiate<
+    return cuda_launch_ck<Nsrc>::template instantiate<
         &instantiate_without_wrapper>(self, self_tp, ckb, ckb_offset, dst_tp,
                                       dst_arrmeta, src_tp, src_arrmeta, kernreq,
                                       ectx, kwds, tp_vars);
@@ -670,7 +670,7 @@ namespace kernels {
                          const eval::eval_context *ectx, const nd::array &kwds,
                          const std::map<nd::string, ndt::type> &tp_vars)
   {
-    return cuda_parallel_ck<arity_of<func_type>::value>::template instantiate<
+    return cuda_launch_ck<arity_of<func_type>::value>::template instantiate<
         &instantiate_without_wrapper>(self, self_tp, ckb, ckb_offset, dst_tp,
                                       dst_arrmeta, src_tp, src_arrmeta, kernreq,
                                       ectx, kwds, tp_vars);
