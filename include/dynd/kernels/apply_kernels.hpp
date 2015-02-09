@@ -461,6 +461,23 @@ namespace kernels {
                                       ectx, kwds, tp_vars);
   }
 
+  APPLY_CALLABLE_CK(kernel_request_cuda_host_device, __host__ __device__);
+
+  template <typename func_type, int Nsrc>
+  intptr_t apply_callable_ck<kernel_request_cuda_host_device, func_type, Nsrc>::
+      instantiate(const arrfunc_type_data *self, const arrfunc_type *self_tp,
+                  void *ckb, intptr_t ckb_offset, const ndt::type &dst_tp,
+                  const char *dst_arrmeta, const ndt::type *src_tp,
+                  const char *const *src_arrmeta, kernel_request_t kernreq,
+                  const eval::eval_context *ectx, const nd::array &kwds,
+                  const std::map<nd::string, ndt::type> &tp_vars)
+  {
+    return cuda_launch_ck<Nsrc>::template instantiate<
+        &instantiate_without_wrapper>(self, self_tp, ckb, ckb_offset, dst_tp,
+                                      dst_arrmeta, src_tp, src_arrmeta, kernreq,
+                                      ectx, kwds, tp_vars);
+  }
+
 #endif
 
 #undef APPLY_CALLABLE_CK

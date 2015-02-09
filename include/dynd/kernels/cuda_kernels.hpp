@@ -114,8 +114,13 @@ namespace kernels {
                 const eval::eval_context *ectx, const nd::array &kwds,
                 const std::map<nd::string, ndt::type> &tp_vars)
     {
+      bool cuda_device_readable = dst_tp.is_cuda_device_readable();
+      for (intptr_t i = 0; i < Nsrc; ++i) {
+        cuda_device_readable &= src_tp[i].is_cuda_device_readable();
+      }
+
       intptr_t res_ckb_offset = ckb_offset;
-      if (kernel_request_without_function(kernreq) == kernel_request_host) {
+      if (kernel_request_without_function(kernreq) == kernel_request_host && cuda_device_readable) {
         res_ckb_offset = self_type::instantiate(
             self, self_tp, ckb, res_ckb_offset, dst_tp, dst_arrmeta, src_tp,
             src_arrmeta, kernreq, ectx, kwds, tp_vars);
