@@ -56,7 +56,30 @@ namespace nd {
   namespace decl {
 
     struct fft : arrfunc<fft> {
-      static nd::arrfunc as_arrfunc() { return nd::fftw; }
+      static nd::arrfunc as_arrfunc()
+      {
+        std::vector<nd::arrfunc> children;
+
+#ifdef DYND_FFTW
+        children.push_back(nd::fftw);
+#endif
+
+//        std::cout << "--" << std::endl;
+  //      std::cout << ndt::type("cuda_device[Fixed**N * float64]") << std::endl;
+    //    std::cout << "--" << std::endl;
+
+#ifdef DYND_CUDA
+        typedef kernels::fft_ck<kernel_request_cuda_device, complex<double>,
+                                complex<double>> ck_type;
+        children.push_back(nd::as_arrfunc<ck_type>());
+#endif
+
+        return functional::multidispatch(
+            ndt::type(
+                "(M[Fixed**N * complex[float64]], shape: ?N * int64, axes: ?Fixed * int64, "
+                "flags: ?int32) -> M[Fixed**N * complex[float64]]"),
+            children);
+      }
     };
 
     struct rfft : arrfunc<rfft> {

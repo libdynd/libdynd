@@ -466,6 +466,7 @@ namespace nd {
 
       std::vector<ndt::type> tp_vals;
       for (auto pair : tp_vars) {
+      
         if (std::find(vars->begin(), vars->end(), pair.first) != vars->end()) {
           tp_vals.push_back(pair.second);
         }
@@ -550,7 +551,9 @@ nd::arrfunc nd::functional::multidispatch(const ndt::type &self_tp,
     if (vars_init) {
       std::vector<string> tmp;
       for (const auto &pair : tp_vars) {
-        tmp.push_back(pair.first);
+        if (!(pair.first == "N")) {
+          tmp.push_back(pair.first);
+        }
       }
 
       if (vars->size() != tmp.size() || !std::is_permutation(vars->begin(), vars->end(), tmp.begin())) {
@@ -558,7 +561,9 @@ nd::arrfunc nd::functional::multidispatch(const ndt::type &self_tp,
       }
     } else {
       for (const auto &pair : tp_vars) {
-        vars->push_back(pair.first);
+        if (!(pair.first == "N")) {
+          vars->push_back(pair.first);
+        }
       }
       vars_init = true;
     }

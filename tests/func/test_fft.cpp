@@ -187,6 +187,9 @@ TYPED_TEST_P(FFT1D, Linear)
                           ndt::make_type<typename TestFixture::SrcType>());
   x.vals() = x0 + x1;
 
+  nd::array z = nd::fft(x.to_cuda_device());
+  std::exit(-1);
+
   nd::array y0 = nd::fft(x0);
   nd::array y1 = nd::fft(x1);
   nd::array y = nd::fft(x);

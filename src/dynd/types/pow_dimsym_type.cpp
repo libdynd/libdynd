@@ -7,6 +7,7 @@
 #include <dynd/types/typevar_type.hpp>
 #include <dynd/types/fixed_dim_type.hpp>
 #include <dynd/types/typevar_dim_type.hpp>
+#include <dynd/types/typevar_constructed_type.hpp>
 #include <dynd/func/make_callable.hpp>
 
 using namespace std;
@@ -143,14 +144,19 @@ void pow_dimsym_type::arrmeta_destruct(char *DYND_UNUSED(arrmeta)) const
     throw type_error("Cannot store data of typevar type");
 }
 
-bool pow_dimsym_type::matches(const ndt::type &DYND_UNUSED(self_tp), const char *self_arrmeta,
-                              const ndt::type &other_tp, const char *DYND_UNUSED(other_arrmeta),
+bool pow_dimsym_type::matches(const ndt::type &self_tp, const char *self_arrmeta,
+                              const ndt::type &other_tp, const char *other_arrmeta,
                               std::map<nd::string, ndt::type> &tp_vars) const
 {
+  if (other_tp.get_type_id() == typevar_constructed_type_id) {
+    return other_tp.extended<typevar_constructed_type>()->matches(other_tp, other_arrmeta, self_tp, self_arrmeta, tp_vars);
+  }
+
  if (other_tp.get_type_id() == pow_dimsym_type_id) {
     if (m_base_tp.matches(
             self_arrmeta, other_tp.extended<pow_dimsym_type>()->get_base_type(), NULL,
             tp_vars)) {
+
       get_element_type().matches(
           self_arrmeta, other_tp.extended<pow_dimsym_type>()->get_element_type(), NULL,
           tp_vars);

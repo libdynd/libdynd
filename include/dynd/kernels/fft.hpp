@@ -11,6 +11,10 @@
 #include <dynd/types/tuple_type.hpp>
 #include <map>
 
+#ifdef DYND_CUDA
+#include <cufft.h>
+#endif
+
 #ifdef DYND_FFTW
 #include <fftw3.h>
 
@@ -301,6 +305,42 @@ namespace kernels {
     {
       return resolve_dst_type<std::is_same<fftw_src_type, double>::value>(
           self, self_tp, nsrc, src_tp, throw_on_error, dst_tp, kwds, tp_vars);
+    }
+  };
+
+  template <kernel_request_t kernreq, typename dst_type, typename src_type>
+  struct fft_ck;
+
+  template <typename dst_type, typename src_type>
+  struct fft_ck<kernel_request_cuda_device, dst_type, src_type> {
+    cufftHandle plan;
+
+    fft_ck(const cufftHandle &plan) : plan(plan) {
+    }
+
+    static ndt::type make_type()
+    {
+      return ndt::type(
+          "(cuda_device[Fixed**N * complex[float64]], shape: ?N * int64, axes: "
+          "?Fixed * int64, flags: ?int32) -> cuda_device[Fixed**N * "
+          "complex[float64]]");
+    }
+
+    static intptr_t instantiate(
+        const arrfunc_type_data *DYND_UNUSED(self),
+        const arrfunc_type *DYND_UNUSED(self_tp), void *DYND_UNUSED(ckb),
+        intptr_t DYND_UNUSED(ckb_offset), const ndt::type &DYND_UNUSED(dst_tp),
+        const char *DYND_UNUSED(dst_arrmeta),
+        const ndt::type *DYND_UNUSED(src_tp),
+        const char *const *DYND_UNUSED(src_arrmeta),
+        kernel_request_t DYND_UNUSED(kernreq),
+        const eval::eval_context *DYND_UNUSED(ectx),
+        const nd::array &DYND_UNUSED(kwds),
+        const std::map<dynd::nd::string, ndt::type> &DYND_UNUSED(tp_vars))
+    {
+      std::cout << "instantiate" << std::endl;
+
+      return 0;
     }
   };
 
