@@ -149,7 +149,7 @@ namespace kernels {
     T m_val;
 
     kwd(nd::array val)
-//        : m_val(val.as<T>())
+    //        : m_val(val.as<T>())
     {
       if (val.get_type().get_type_id() == pointer_type_id) {
         m_val = val.f("dereference").as<T>();
@@ -204,8 +204,8 @@ namespace kernels {
     }                                                                          \
                                                                                \
     static intptr_t                                                            \
-    instantiate(const arrfunc_type_data *DYND_UNUSED(af_self),                 \
-                const arrfunc_type *DYND_UNUSED(af_tp), void *ckb,             \
+    instantiate(const arrfunc_type_data *DYND_UNUSED(self),                    \
+                const arrfunc_type *DYND_UNUSED(self_tp), void *ckb,           \
                 intptr_t ckb_offset, const ndt::type &DYND_UNUSED(dst_tp),     \
                 const char *DYND_UNUSED(dst_arrmeta), const ndt::type *src_tp, \
                 const char *const *src_arrmeta, kernel_request_t kernreq,      \
@@ -284,7 +284,7 @@ namespace kernels {
     }                                                                          \
                                                                                \
     static intptr_t                                                            \
-    instantiate(const arrfunc_type_data *af_self, const arrfunc_type *af_tp,   \
+    instantiate(const arrfunc_type_data *self, const arrfunc_type *self_tp,    \
                 void *ckb, intptr_t ckb_offset, const ndt::type &dst_tp,       \
                 const char *dst_arrmeta, const ndt::type *src_tp,              \
                 const char *const *src_arrmeta, kernel_request_t kernreq,      \
@@ -372,8 +372,24 @@ namespace kernels {
       single<typename return_of<func_type>::type>(this, this, dst, src);       \
     }                                                                          \
                                                                                \
+    static intptr_t instantiate_without_wrapper(                               \
+        const arrfunc_type_data *self,                                         \
+        const arrfunc_type *DYND_UNUSED(self_tp), void *ckb,                   \
+        intptr_t ckb_offset, const ndt::type &DYND_UNUSED(dst_tp),             \
+        const char *DYND_UNUSED(dst_arrmeta), const ndt::type *src_tp,         \
+        const char *const *src_arrmeta, kernel_request_t kernreq,              \
+        const eval::eval_context *DYND_UNUSED(ectx), const nd::array &kwds,    \
+        const std::map<nd::string, ndt::type> &DYND_UNUSED(tp_vars))           \
+    {                                                                          \
+      self_type::create(ckb, kernreq, ckb_offset,                              \
+                        *self->get_data_as<func_type>(),                       \
+                        args_for<func_type, Nsrc>(src_tp, src_arrmeta, kwds),  \
+                        kwds_for<func_type, Nsrc>(kwds));                      \
+      return ckb_offset;                                                       \
+    }                                                                          \
+                                                                               \
     static intptr_t                                                            \
-    instantiate(const arrfunc_type_data *af_self, const arrfunc_type *af_tp,   \
+    instantiate(const arrfunc_type_data *self, const arrfunc_type *self_tp,    \
                 void *ckb, intptr_t ckb_offset, const ndt::type &dst_tp,       \
                 const char *dst_arrmeta, const ndt::type *src_tp,              \
                 const char *const *src_arrmeta, kernel_request_t kernreq,      \
@@ -415,18 +431,15 @@ namespace kernels {
 
   template <typename func_type, int Nsrc>
   intptr_t apply_callable_ck<kernel_request_host, func_type, Nsrc>::instantiate(
-      const arrfunc_type_data *af_self, const arrfunc_type *DYND_UNUSED(af_tp),
-      void *ckb, intptr_t ckb_offset, const ndt::type &DYND_UNUSED(dst_tp),
-      const char *DYND_UNUSED(dst_arrmeta), const ndt::type *src_tp,
-      const char *const *src_arrmeta, kernel_request_t kernreq,
-      const eval::eval_context *DYND_UNUSED(ectx), const nd::array &kwds,
-      const std::map<nd::string, ndt::type> &DYND_UNUSED(tp_vars))
+      const arrfunc_type_data *self, const arrfunc_type *self_tp, void *ckb,
+      intptr_t ckb_offset, const ndt::type &dst_tp, const char *dst_arrmeta,
+      const ndt::type *src_tp, const char *const *src_arrmeta,
+      kernel_request_t kernreq, const eval::eval_context *ectx,
+      const nd::array &kwds, const std::map<nd::string, ndt::type> &tp_vars)
   {
-    self_type::create(ckb, kernreq, ckb_offset,
-                      *af_self->get_data_as<func_type>(),
-                      args_for<func_type, Nsrc>(src_tp, src_arrmeta, kwds),
-                      kwds_for<func_type, Nsrc>(kwds));
-    return ckb_offset;
+    return instantiate_without_wrapper(self, self_tp, ckb, ckb_offset, dst_tp,
+                                       dst_arrmeta, src_tp, src_arrmeta,
+                                       kernreq, ectx, kwds, tp_vars);
   }
 
 #ifdef __CUDACC__
@@ -436,21 +449,16 @@ namespace kernels {
   template <typename func_type, int Nsrc>
   intptr_t
   apply_callable_ck<kernel_request_cuda_device, func_type, Nsrc>::instantiate(
-      const arrfunc_type_data *af_self, const arrfunc_type *af_tp, void *ckb,
+      const arrfunc_type_data *self, const arrfunc_type *self_tp, void *ckb,
       intptr_t ckb_offset, const ndt::type &dst_tp, const char *dst_arrmeta,
       const ndt::type *src_tp, const char *const *src_arrmeta,
       kernel_request_t kernreq, const eval::eval_context *ectx,
       const nd::array &kwds, const std::map<nd::string, ndt::type> &tp_vars)
   {
-    intptr_t res_ckb_offset = cuda_parallel_ck<Nsrc>::instantiate_if_host(
-        af_self, af_tp, ckb, ckb_offset, dst_tp, dst_arrmeta, src_tp,
-        src_arrmeta, kernreq, ectx, kwds, tp_vars);
-    self_type::create(ckb, kernreq, ckb_offset,
-                      *af_self->get_data_as<func_type>(),
-                      args_for<func_type, Nsrc>(src_tp, src_arrmeta, kwds),
-                      kwds_for<func_type, Nsrc>(kwds));
-
-    return res_ckb_offset;
+    return cuda_parallel_ck<Nsrc>::template instantiate<
+        &instantiate_without_wrapper>(self, self_tp, ckb, ckb_offset, dst_tp,
+                                      dst_arrmeta, src_tp, src_arrmeta, kernreq,
+                                      ectx, kwds, tp_vars);
   }
 
 #endif
@@ -480,8 +488,24 @@ namespace kernels {
       single<typename return_of<func_type>::type>(this, this, dst, src);       \
     }                                                                          \
                                                                                \
+    static intptr_t instantiate_without_wrapper(                               \
+        const arrfunc_type_data *self,                                         \
+        const arrfunc_type *DYND_UNUSED(self_tp), void *ckb,                   \
+        intptr_t ckb_offset, const ndt::type &DYND_UNUSED(dst_tp),             \
+        const char *DYND_UNUSED(dst_arrmeta), const ndt::type *src_tp,         \
+        const char *const *src_arrmeta, kernel_request_t kernreq,              \
+        const eval::eval_context *DYND_UNUSED(ectx), const nd::array &kwds,    \
+        const std::map<nd::string, ndt::type> &DYND_UNUSED(tp_vars))           \
+    {                                                                          \
+      self_type::create(ckb, kernreq, ckb_offset,                              \
+                        *self->get_data_as<func_type *>(),                     \
+                        args_for<func_type, Nsrc>(src_tp, src_arrmeta, kwds),  \
+                        kwds_for<func_type, Nsrc>(kwds));                      \
+      return ckb_offset;                                                       \
+    }                                                                          \
+                                                                               \
     static intptr_t                                                            \
-    instantiate(const arrfunc_type_data *af_self, const arrfunc_type *af_tp,   \
+    instantiate(const arrfunc_type_data *self, const arrfunc_type *self_tp,    \
                 void *ckb, intptr_t ckb_offset, const ndt::type &dst_tp,       \
                 const char *dst_arrmeta, const ndt::type *src_tp,              \
                 const char *const *src_arrmeta, kernel_request_t kernreq,      \
@@ -524,18 +548,15 @@ namespace kernels {
   template <typename func_type, int Nsrc>
   intptr_t
   apply_callable_ck<kernel_request_host, func_type *, Nsrc>::instantiate(
-      const arrfunc_type_data *self, const arrfunc_type *DYND_UNUSED(self_tp),
-      void *ckb, intptr_t ckb_offset, const ndt::type &DYND_UNUSED(dst_tp),
-      const char *DYND_UNUSED(dst_arrmeta), const ndt::type *src_tp,
-      const char *const *src_arrmeta, kernel_request_t kernreq,
-      const eval::eval_context *DYND_UNUSED(ectx), const nd::array &kwds,
-      const std::map<nd::string, ndt::type> &DYND_UNUSED(tp_vars))
+      const arrfunc_type_data *self, const arrfunc_type *self_tp, void *ckb,
+      intptr_t ckb_offset, const ndt::type &dst_tp, const char *dst_arrmeta,
+      const ndt::type *src_tp, const char *const *src_arrmeta,
+      kernel_request_t kernreq, const eval::eval_context *ectx,
+      const nd::array &kwds, const std::map<nd::string, ndt::type> &tp_vars)
   {
-    self_type::create(ckb, kernreq, ckb_offset,
-                      *self->get_data_as<func_type *>(),
-                      args_for<func_type, Nsrc>(src_tp, src_arrmeta, kwds),
-                      kwds_for<func_type, Nsrc>(kwds));
-    return ckb_offset;
+    return instantiate_without_wrapper(self, self_tp, ckb, ckb_offset, dst_tp,
+                                       dst_arrmeta, src_tp, src_arrmeta,
+                                       kernreq, ectx, kwds, tp_vars);
   }
 
 #undef APPLY_CALLABLE_CK
@@ -568,8 +589,23 @@ namespace kernels {
       single<typename return_of<func_type>::type>(this, dst, src);             \
     }                                                                          \
                                                                                \
+    static intptr_t instantiate_without_wrapper(                               \
+        const arrfunc_type_data *DYND_UNUSED(self),                            \
+        const arrfunc_type *DYND_UNUSED(self_tp), void *ckb,                   \
+        intptr_t ckb_offset, const ndt::type &DYND_UNUSED(dst_tp),             \
+        const char *DYND_UNUSED(dst_arrmeta), const ndt::type *src_tp,         \
+        const char *const *src_arrmeta, kernel_request_t kernreq,              \
+        const eval::eval_context *DYND_UNUSED(ectx), const nd::array &kwds,    \
+        const std::map<nd::string, ndt::type> &DYND_UNUSED(tp_vars))           \
+    {                                                                          \
+      self_type::create(ckb, kernreq, ckb_offset,                              \
+                        args_for<func_type>(src_tp, src_arrmeta, kwds),        \
+                        kernels::kwds<type_sequence<K...>>(kwds));             \
+      return ckb_offset;                                                       \
+    }                                                                          \
+                                                                               \
     static intptr_t                                                            \
-    instantiate(const arrfunc_type_data *af_self, const arrfunc_type *af_tp,   \
+    instantiate(const arrfunc_type_data *self, const arrfunc_type *self_tp,    \
                 void *ckb, intptr_t ckb_offset, const ndt::type &dst_tp,       \
                 const char *dst_arrmeta, const ndt::type *src_tp,              \
                 const char *const *src_arrmeta, kernel_request_t kernreq,      \
@@ -602,21 +638,20 @@ namespace kernels {
   CONSTRUCT_THEN_APPLY_CALLABLE_CK(kernel_request_host)
 
   template <typename func_type, typename... K>
-  intptr_t
-  construct_then_apply_callable_ck<kernel_request_host, func_type, K...>::
-      instantiate(const arrfunc_type_data *DYND_UNUSED(af_self),
-                  const arrfunc_type *DYND_UNUSED(af_tp), void *ckb,
-                  intptr_t ckb_offset, const ndt::type &DYND_UNUSED(dst_tp),
-                  const char *DYND_UNUSED(dst_arrmeta), const ndt::type *src_tp,
-                  const char *const *src_arrmeta, kernel_request_t kernreq,
-                  const eval::eval_context *DYND_UNUSED(ectx),
-                  const nd::array &kwds,
-                  const std::map<nd::string, ndt::type> &DYND_UNUSED(tp_vars))
+  intptr_t construct_then_apply_callable_ck<
+      kernel_request_host, func_type,
+      K...>::instantiate(const arrfunc_type_data *self,
+                         const arrfunc_type *self_tp, void *ckb,
+                         intptr_t ckb_offset, const ndt::type &dst_tp,
+                         const char *dst_arrmeta, const ndt::type *src_tp,
+                         const char *const *src_arrmeta,
+                         kernel_request_t kernreq,
+                         const eval::eval_context *ectx, const nd::array &kwds,
+                         const std::map<nd::string, ndt::type> &tp_vars)
   {
-    self_type::create(ckb, kernreq, ckb_offset,
-                      args_for<func_type>(src_tp, src_arrmeta, kwds),
-                      kernels::kwds<type_sequence<K...>>(kwds));
-    return ckb_offset;
+    return instantiate_without_wrapper(self, self_tp, ckb, ckb_offset, dst_tp,
+                                       dst_arrmeta, src_tp, src_arrmeta,
+                                       kernreq, ectx, kwds, tp_vars);
   }
 
 #ifdef __CUDACC__
@@ -624,30 +659,26 @@ namespace kernels {
   CONSTRUCT_THEN_APPLY_CALLABLE_CK(kernel_request_cuda_device, __device__)
 
   template <typename func_type, typename... K>
-  intptr_t construct_then_apply_callable_ck<kernel_request_cuda_device,
-                                            func_type, K...>::
-      instantiate(const arrfunc_type_data *af_self,
-                  const arrfunc_type *af_tp, void *ckb,
-                  intptr_t ckb_offset, const ndt::type &dst_tp,
-                  const char *dst_arrmeta, const ndt::type *src_tp,
-                  const char *const *src_arrmeta, kernel_request_t kernreq,
-                  const eval::eval_context *ectx,
-                  const nd::array &kwds,
-                  const std::map<nd::string, ndt::type> &tp_vars)
+  intptr_t construct_then_apply_callable_ck<
+      kernel_request_cuda_device, func_type,
+      K...>::instantiate(const arrfunc_type_data *self,
+                         const arrfunc_type *self_tp, void *ckb,
+                         intptr_t ckb_offset, const ndt::type &dst_tp,
+                         const char *dst_arrmeta, const ndt::type *src_tp,
+                         const char *const *src_arrmeta,
+                         kernel_request_t kernreq,
+                         const eval::eval_context *ectx, const nd::array &kwds,
+                         const std::map<nd::string, ndt::type> &tp_vars)
   {
-    intptr_t res_ckb_offset =
-        cuda_parallel_ck<arity_of<func_type>::value>::instantiate_if_host(
-            af_self, af_tp, ckb, ckb_offset, dst_tp, dst_arrmeta, src_tp,
-            src_arrmeta, kernreq, ectx, kwds, tp_vars);
-    self_type::create(ckb, kernreq, ckb_offset,
-                      args_for<func_type>(src_tp, src_arrmeta, kwds),
-                      kernels::kwds<type_sequence<K...>>(kwds));
-
-    return res_ckb_offset;
+    return cuda_parallel_ck<arity_of<func_type>::value>::template instantiate<
+        &instantiate_without_wrapper>(self, self_tp, ckb, ckb_offset, dst_tp,
+                                      dst_arrmeta, src_tp, src_arrmeta, kernreq,
+                                      ectx, kwds, tp_vars);
   }
 
 #endif
 
 #undef CONSTRUCT_THEN_APPLY_CALLABLE_CK
-}
+
 } // namespace dynd::kernels
+} // namespace dynd
