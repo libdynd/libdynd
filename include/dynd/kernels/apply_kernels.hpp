@@ -436,26 +436,21 @@ namespace kernels {
   template <typename func_type, int Nsrc>
   intptr_t
   apply_callable_ck<kernel_request_cuda_device, func_type, Nsrc>::instantiate(
-      const arrfunc_type_data *af_self, const arrfunc_type *DYND_UNUSED(af_tp),
-      void *ckb, intptr_t ckb_offset, const ndt::type &DYND_UNUSED(dst_tp),
-      const char *DYND_UNUSED(dst_arrmeta), const ndt::type *src_tp,
-      const char *const *src_arrmeta, kernel_request_t kernreq,
-      const eval::eval_context *DYND_UNUSED(ectx), const nd::array &kwds,
-      const std::map<nd::string, ndt::type> &DYND_UNUSED(tp_vars))
+      const arrfunc_type_data *af_self, const arrfunc_type *af_tp, void *ckb,
+      intptr_t ckb_offset, const ndt::type &dst_tp, const char *dst_arrmeta,
+      const ndt::type *src_tp, const char *const *src_arrmeta,
+      kernel_request_t kernreq, const eval::eval_context *ectx,
+      const nd::array &kwds, const std::map<nd::string, ndt::type> &tp_vars)
   {
-    if ((kernreq & kernel_request_memory) == kernel_request_host) {
-      typedef cuda_parallel_ck<Nsrc> self_type;
-      self_type *self = self_type::create(ckb, kernreq, ckb_offset, 1, 1);
-      ckb = &self->ckb;
-      kernreq |= kernel_request_cuda_device;
-      ckb_offset = 0;
-    }
-
+    intptr_t res_ckb_offset = cuda_parallel_ck<Nsrc>::instantiate_if_host(
+        af_self, af_tp, ckb, ckb_offset, dst_tp, dst_arrmeta, src_tp,
+        src_arrmeta, kernreq, ectx, kwds, tp_vars);
     self_type::create(ckb, kernreq, ckb_offset,
                       *af_self->get_data_as<func_type>(),
                       args_for<func_type, Nsrc>(src_tp, src_arrmeta, kwds),
                       kwds_for<func_type, Nsrc>(kwds));
-    return ckb_offset;
+
+    return res_ckb_offset;
   }
 
 #endif
@@ -631,27 +626,24 @@ namespace kernels {
   template <typename func_type, typename... K>
   intptr_t construct_then_apply_callable_ck<kernel_request_cuda_device,
                                             func_type, K...>::
-      instantiate(const arrfunc_type_data *DYND_UNUSED(af_self),
-                  const arrfunc_type *DYND_UNUSED(af_tp), void *ckb,
-                  intptr_t ckb_offset, const ndt::type &DYND_UNUSED(dst_tp),
-                  const char *DYND_UNUSED(dst_arrmeta), const ndt::type *src_tp,
+      instantiate(const arrfunc_type_data *af_self,
+                  const arrfunc_type *af_tp, void *ckb,
+                  intptr_t ckb_offset, const ndt::type &dst_tp,
+                  const char *dst_arrmeta, const ndt::type *src_tp,
                   const char *const *src_arrmeta, kernel_request_t kernreq,
-                  const eval::eval_context *DYND_UNUSED(ectx),
+                  const eval::eval_context *ectx,
                   const nd::array &kwds,
-                  const std::map<nd::string, ndt::type> &DYND_UNUSED(tp_vars))
+                  const std::map<nd::string, ndt::type> &tp_vars)
   {
-    if ((kernreq & kernel_request_memory) == kernel_request_host) {
-      typedef cuda_parallel_ck<arity_of<func_type>::value> self_type;
-      self_type *self = self_type::create(ckb, kernreq, ckb_offset, 1, 1);
-      ckb = &self->ckb;
-      kernreq |= kernel_request_cuda_device;
-      ckb_offset = 0;
-    }
-
+    intptr_t res_ckb_offset =
+        cuda_parallel_ck<arity_of<func_type>::value>::instantiate_if_host(
+            af_self, af_tp, ckb, ckb_offset, dst_tp, dst_arrmeta, src_tp,
+            src_arrmeta, kernreq, ectx, kwds, tp_vars);
     self_type::create(ckb, kernreq, ckb_offset,
                       args_for<func_type>(src_tp, src_arrmeta, kwds),
                       kernels::kwds<type_sequence<K...>>(kwds));
-    return ckb_offset;
+
+    return res_ckb_offset;
   }
 
 #endif

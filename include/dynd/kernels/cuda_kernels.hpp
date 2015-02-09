@@ -90,22 +90,41 @@ namespace kernels {
       // check for CUDA errors here
     }
 
-    static intptr_t instantiate(const arrfunc_type_data *DYND_UNUSED(af_self),
-                                const arrfunc_type *DYND_UNUSED(af_tp),
-                                void *ckb, intptr_t ckb_offset,
-                                const ndt::type &DYND_UNUSED(dst_tp),
-                                const char *DYND_UNUSED(dst_arrmeta),
-                                const ndt::type *DYND_UNUSED(src_tp),
-                                const char *const *DYND_UNUSED(src_arrmeta),
-                                kernel_request_t kernreq,
-                                const eval::eval_context *DYND_UNUSED(ectx),
-                                const nd::array &DYND_UNUSED(args),
-                                const nd::array &kwds)
+    static intptr_t
+    instantiate(const arrfunc_type_data *DYND_UNUSED(af_self), const arrfunc_type *DYND_UNUSED(af_tp),
+                void *ckb, intptr_t ckb_offset, const ndt::type &DYND_UNUSED(dst_tp),
+                const char *DYND_UNUSED(dst_arrmeta), const ndt::type *DYND_UNUSED(src_tp),
+                const char *const *DYND_UNUSED(src_arrmeta), kernel_request_t kernreq,
+                const eval::eval_context *DYND_UNUSED(ectx), const nd::array &DYND_UNUSED(kwds),
+                const std::map<nd::string, ndt::type> &DYND_UNUSED(tp_vars))
     {
       self_type::create(ckb, kernreq, ckb_offset,
-                        kwds.p("grids").as<intptr_t>(),
-                        kwds.p("blocks").as<intptr_t>());
+                        1,
+                        1);
       return ckb_offset;
+    }
+
+    static intptr_t instantiate_if_host(
+        const arrfunc_type_data *self, const arrfunc_type *self_tp, void *&ckb,
+        intptr_t &ckb_offset, const ndt::type &dst_tp, const char *dst_arrmeta,
+        const ndt::type *src_tp, const char *const *src_arrmeta,
+        kernel_request_t &kernreq, const eval::eval_context *ectx,
+        const nd::array &kwds, const std::map<nd::string, ndt::type> &tp_vars)
+    {
+      intptr_t res_ckb_offset = ckb_offset;
+      if (kernel_request_without_function(kernreq) == kernel_request_host) {
+        res_ckb_offset = instantiate(self, self_tp, ckb, res_ckb_offset,
+                                     dst_tp, dst_arrmeta, src_tp, src_arrmeta,
+                                     kernreq, ectx, kwds, tp_vars);
+        self_type *self =
+            reinterpret_cast<ckernel_builder<kernel_request_host> *>(ckb)
+                ->get_at<self_type>(ckb_offset);
+        ckb = &self->ckb;
+        kernreq |= kernel_request_cuda_device;
+        ckb_offset = 0;
+      }
+
+      return res_ckb_offset;
     }
   };
 }
