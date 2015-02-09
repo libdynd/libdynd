@@ -466,7 +466,6 @@ namespace nd {
 
       std::vector<ndt::type> tp_vals;
       for (auto pair : tp_vars) {
-      
         if (std::find(vars->begin(), vars->end(), pair.first) != vars->end()) {
           tp_vals.push_back(pair.second);
         }
@@ -509,13 +508,13 @@ int nd::functional::multidispatch_resolve_dst_type(
     const nd::array &kwds, const std::map<string, ndt::type> &tp_vars)
 {
   const arrfunc_type_data *child = multidispatch_find(self, tp_vars);
-
   if (child->resolve_dst_type != NULL) {
     return child->resolve_dst_type(child, af_tp, nsrc, src_tp, throw_on_error,
                                    out_dst_tp, kwds, tp_vars);
+  } else {
+    out_dst_tp = ndt::substitute(af_tp->get_return_type(), tp_vars, true);
   }
 
-  out_dst_tp = ndt::substitute(af_tp->get_return_type(), tp_vars, true);
   return 1;
 }
 

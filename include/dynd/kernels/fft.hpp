@@ -308,14 +308,21 @@ namespace kernels {
     }
   };
 
-  template <kernel_request_t kernreq, typename dst_type, typename src_type>
+  template <kernel_request_t kernreq, typename dst_type, typename src_type, int sign>
   struct fft_ck;
 
-  template <typename dst_type, typename src_type>
-  struct fft_ck<kernel_request_cuda_device, dst_type, src_type> {
+  template <typename dst_type, typename src_type, int sign>
+  struct fft_ck<kernel_request_cuda_device, dst_type, src_type, sign>
+      : expr_ck<fft_ck<kernel_request_cuda_device, dst_type, src_type, sign>,
+                kernel_request_host, 1> {
+    typedef fft_ck self_type;
+
     cufftHandle plan;
 
-    fft_ck(const cufftHandle &plan) : plan(plan) {
+    void single(char *dst, char *const *src)
+    {
+      cufftExecZ2Z(plan, *reinterpret_cast<cufftDoubleComplex *const *>(src),
+                   reinterpret_cast<cufftDoubleComplex *>(dst), sign);
     }
 
     static ndt::type make_type()
@@ -326,21 +333,50 @@ namespace kernels {
           "complex[float64]]");
     }
 
+    static int
+    resolve_dst_type(const arrfunc_type_data *DYND_UNUSED(self), const arrfunc_type *DYND_UNUSED(self_tp),
+                     intptr_t DYND_UNUSED(nsrc), const ndt::type *src_tp, int DYND_UNUSED(throw_on_error),
+                     ndt::type &dst_tp, const nd::array &kwds,
+                     const std::map<dynd::nd::string, ndt::type> &DYND_UNUSED(tp_vars))
+    {
+      nd::array shape = kwds.p("shape");
+      if (shape.is_missing()) {
+        dst_tp = src_tp[0];
+      }
+
+      return 1;
+    }
+
     static intptr_t instantiate(
         const arrfunc_type_data *DYND_UNUSED(self),
-        const arrfunc_type *DYND_UNUSED(self_tp), void *DYND_UNUSED(ckb),
-        intptr_t DYND_UNUSED(ckb_offset), const ndt::type &DYND_UNUSED(dst_tp),
-        const char *DYND_UNUSED(dst_arrmeta),
-        const ndt::type *DYND_UNUSED(src_tp),
-        const char *const *DYND_UNUSED(src_arrmeta),
-        kernel_request_t DYND_UNUSED(kernreq),
+        const arrfunc_type *DYND_UNUSED(self_tp), void *ckb,
+        intptr_t ckb_offset, const ndt::type &DYND_UNUSED(dst_tp),
+        const char *dst_arrmeta,
+        const ndt::type *src_tp,
+        const char *const *src_arrmeta,
+        kernel_request_t kernreq,
         const eval::eval_context *DYND_UNUSED(ectx),
         const nd::array &DYND_UNUSED(kwds),
         const std::map<dynd::nd::string, ndt::type> &DYND_UNUSED(tp_vars))
     {
-      std::cout << "instantiate" << std::endl;
+      const size_stride_t *dst_size_stride =
+          reinterpret_cast<const size_stride_t *>(dst_arrmeta);
+      const size_stride_t *src_size_stride =
+          reinterpret_cast<const size_stride_t *>(src_arrmeta[0]);
 
-      return 0;
+      int rank = src_tp[0].get_ndim();
+
+      std::vector<int> n(rank);
+      for (int i = 0; i < rank; ++i) {
+        n[i] = src_size_stride[i].dim_size;
+      }
+
+      self_type *self = self_type::create(ckb, kernreq, ckb_offset);
+      cufftPlanMany(&self->plan, rank, n.data(), NULL,
+                    src_size_stride[0].stride, 0, NULL,
+                    dst_size_stride[0].stride, 0, CUFFT_Z2Z, 1);
+
+      return ckb_offset;
     }
   };
 

@@ -70,7 +70,7 @@ namespace nd {
 
 #ifdef DYND_CUDA
         typedef kernels::fft_ck<kernel_request_cuda_device, complex<double>,
-                                complex<double>> ck_type;
+                                complex<double>, CUFFT_FORWARD> ck_type;
         children.push_back(nd::as_arrfunc<ck_type>());
 #endif
 

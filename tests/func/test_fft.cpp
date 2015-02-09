@@ -183,16 +183,18 @@ TYPED_TEST_P(FFT1D, Linear)
                           ndt::make_type<typename TestFixture::SrcType>());
   nd::array x1 = nd::rand(TestFixture::SrcShape[0],
                           ndt::make_type<typename TestFixture::SrcType>());
-  nd::array x = nd::empty(TestFixture::SrcShape[0],
-                          ndt::make_type<typename TestFixture::SrcType>());
-  x.vals() = x0 + x1;
-
-  nd::array z = nd::fft(x.to_cuda_device());
-  std::exit(-1);
+  nd::array x = x0 + x1;
 
   nd::array y0 = nd::fft(x0);
   nd::array y1 = nd::fft(x1);
   nd::array y = nd::fft(x);
+
+/*
+  nd::array z = nd::fft(x.to_cuda_device());
+  std::cout << y << std::endl;
+  std::cout << z << std::endl;
+  std::exit(-1);
+*/
 
   for (int i = 0; i < TestFixture::DstShape[0]; ++i) {
     EXPECT_EQ_RELERR(y0(i).as<typename TestFixture::DstType>() +
