@@ -10,6 +10,7 @@
 #include <dynd/func/apply.hpp>
 #include <dynd/func/elwise.hpp>
 #include <dynd/func/multidispatch.hpp>
+#include <dynd/func/random.hpp>
 
 using namespace std;
 using namespace dynd;
@@ -247,6 +248,8 @@ void init::arrfunc_registry_init()
   func::set_regfunction(
       "power",
       make_ufunc(&powf, static_cast<double (*)(double, double)>(&::pow)));
+
+  func::set_regfunction("uniform", nd::random::uniform);
 }
 
 void init::arrfunc_registry_cleanup()
