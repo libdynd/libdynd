@@ -481,6 +481,16 @@ public:
         return is_builtin() || m_extended->is_scalar();
     }
 
+#ifdef DYND_CUDA
+
+    bool is_cuda_device_readable() const
+    {
+      return !is_builtin() &&
+             (m_extended->get_type_id() == cuda_device_type_id);
+    }
+
+#endif
+
     /**
      * Returns true if the type contains any expression
      * type within it somewhere.

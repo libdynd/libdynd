@@ -414,8 +414,8 @@ intptr_t dynd::make_cuda_device_builtin_type_assignment_kernel(
 
   if ((kernreq & kernel_request_cuda_device) == 0) {
     // Create a trampoline ckernel from host to device
-    kernels::cuda_parallel_ck<1> *self =
-        kernels::cuda_parallel_ck<1>::create(ckb, kernreq, ckb_offset, 1, 1);
+    kernels::cuda_launch_ck<1> *self =
+        kernels::cuda_launch_ck<1>::create(ckb, kernreq, ckb_offset, 1, 1);
     // Make the assignment on the device
     make_cuda_device_builtin_type_assignment_kernel(
         NULL, NULL, &self->ckb, 0, dst_tp, NULL, src_tp, NULL,

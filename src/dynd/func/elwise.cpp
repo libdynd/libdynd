@@ -153,43 +153,43 @@ static void *create_cuda_device_trampoline(void *ckb, intptr_t ckb_offset,
 {
   switch (src_count) {
   case 0: {
-    typedef kernels::cuda_parallel_ck<0> self_type;
+    typedef kernels::cuda_launch_ck<0> self_type;
     self_type *self =
         self_type::create(ckb, kernreq, ckb_offset, blocks, threads);
     return &self->ckb;
   }
   case 1: {
-    typedef kernels::cuda_parallel_ck<1> self_type;
+    typedef kernels::cuda_launch_ck<1> self_type;
     self_type *self =
         self_type::create(ckb, kernreq, ckb_offset, blocks, threads);
     return &self->ckb;
   }
   case 2: {
-    typedef kernels::cuda_parallel_ck<2> self_type;
+    typedef kernels::cuda_launch_ck<2> self_type;
     self_type *self =
         self_type::create(ckb, kernreq, ckb_offset, blocks, threads);
     return &self->ckb;
   }
   case 3: {
-    typedef kernels::cuda_parallel_ck<3> self_type;
+    typedef kernels::cuda_launch_ck<3> self_type;
     self_type *self =
         self_type::create(ckb, kernreq, ckb_offset, blocks, threads);
     return &self->ckb;
   }
   case 4: {
-    typedef kernels::cuda_parallel_ck<4> self_type;
+    typedef kernels::cuda_launch_ck<4> self_type;
     self_type *self =
         self_type::create(ckb, kernreq, ckb_offset, blocks, threads);
     return &self->ckb;
   }
   case 5: {
-    typedef kernels::cuda_parallel_ck<5> self_type;
+    typedef kernels::cuda_launch_ck<5> self_type;
     self_type *self =
         self_type::create(ckb, kernreq, ckb_offset, blocks, threads);
     return &self->ckb;
   }
   case 6: {
-    typedef kernels::cuda_parallel_ck<6> self_type;
+    typedef kernels::cuda_launch_ck<6> self_type;
     self_type *self =
         self_type::create(ckb, kernreq, ckb_offset, blocks, threads);
     return &self->ckb;

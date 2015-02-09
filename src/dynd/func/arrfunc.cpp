@@ -158,7 +158,7 @@ void nd::detail::validate_kwd_types(const arrfunc_type *af_tp,
       throw std::invalid_argument(ss.str());
     }
 
-    if (j != -1 && kwd_tp[j].get_kind() == dim_kind) {
+    if (j != -1 && (kwd_tp[j].get_kind() == dim_kind || kwd_tp[j].get_kind() == memory_kind)) {
       kwd_tp[j] = ndt::make_pointer(kwd_tp[j]);
     }
   }

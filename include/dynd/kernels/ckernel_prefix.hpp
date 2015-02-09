@@ -50,6 +50,18 @@ enum {
 };
 typedef uint32_t kernel_request_t;
 
+inline kernel_request_t
+kernel_request_without_function(kernel_request_t kernreq)
+{
+  return kernreq & 0x00000007;
+}
+
+/*
+kernel_request_t without_memory(kernel_request_t kernreq) {
+
+}
+*/
+
 /**
  * This is the struct which begins the memory layout
  * of all ckernels. First comes the function pointer,

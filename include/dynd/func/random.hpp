@@ -194,7 +194,7 @@ namespace kernels {
         const std::map<nd::string, ndt::type> &DYND_UNUSED(tp_vars))
     {
       if ((kernreq & kernel_request_memory) == kernel_request_host) {
-        typedef cuda_parallel_ck<0> self_type;
+        typedef cuda_launch_ck<0> self_type;
         self_type *self = self_type::create(ckb, kernreq, ckb_offset, 1, 1);
         ckb = &self->ckb;
         kernreq |= kernel_request_cuda_device;
