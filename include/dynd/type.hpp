@@ -504,6 +504,15 @@ public:
     }
 
     /**
+     * Returns true if the outermost type is a dimension.
+     */
+    bool is_dim() const
+    {
+      return !is_builtin() && (get_kind() == dim_kind ||
+                               m_extended->get_flags() & type_flag_dim);
+    }
+
+    /**
      * Returns true if the type contains a symbolic construct
      * like a type var.
      */
@@ -513,33 +522,13 @@ public:
     }
 
     /**
-     * Returns true if the type is a symbolic category, like 'Any' or 'Fixed'.
-     */
-    bool is_sym_category() const
-    {
-      return !is_builtin() &&
-             (m_extended->get_flags() & type_flag_sym_category) ==
-                 type_flag_sym_category;
-    }
-
-    /**
-     * Returns true if the type is a symbolic pattern, like 'Dims...' or 'R'.
-     */
-    bool is_sym_pattern() const
-    {
-      return !is_builtin() &&
-             (m_extended->get_flags() & type_flag_sym_pattern) ==
-                 type_flag_sym_pattern;
-    }
-
-    /**
      * Returns true if the type constains a symbolic dimension
      * which matches a variadic number of dimensions.
      */
-    bool is_dim_variadic() const
+    bool is_variadic() const
     {
       return !is_builtin() &&
-             (m_extended->get_flags() & type_flag_dim_variadic) != 0;
+             (m_extended->get_flags() & type_flag_variadic);
     }
 
     /**

@@ -21,10 +21,10 @@ protected:
   size_t m_element_arrmeta_offset;
 
 public:
-  base_dim_type(type_id_t type_id, const ndt::type &element_tp,
+  base_dim_type(type_id_t type_id, type_kind_t tp_kind, const ndt::type &element_tp,
                 size_t data_size, size_t alignment,
                 size_t element_arrmeta_offset, flags_type flags, bool strided)
-      : base_type(type_id, dim_kind, data_size, alignment, flags,
+      : base_type(type_id, tp_kind, data_size, alignment, flags | type_flag_dim,
                   element_arrmeta_offset + element_tp.get_arrmeta_size(),
                   1 + element_tp.get_ndim(),
                   strided ? (1 + element_tp.get_strided_ndim()) : 0),
@@ -35,6 +35,14 @@ public:
       throw std::invalid_argument(
           "a memory_type cannot be an element of a dim_type");
     }
+  }
+
+  base_dim_type(type_id_t tp_id, const ndt::type &element_tp,
+                size_t data_size, size_t data_alignment,
+                size_t element_arrmeta_offset, flags_type flags, bool strided)
+      : base_dim_type(tp_id, dim_kind, element_tp, data_size, data_alignment,
+                      element_arrmeta_offset, flags, strided)
+  {
   }
 
   virtual ~base_dim_type();

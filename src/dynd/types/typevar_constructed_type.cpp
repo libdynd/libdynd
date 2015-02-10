@@ -13,8 +13,8 @@ using namespace dynd;
 
 typevar_constructed_type::typevar_constructed_type(const nd::string &name,
                                                    const ndt::type &arg)
-    : base_type(typevar_constructed_type_id, symbolic_kind, 0, 1,
-                type_flag_sym_pattern, 0, -1, -1),
+    : base_type(typevar_constructed_type_id, pattern_kind, 0, 1,
+                type_flag_symbolic, 0, -1, -1),
       m_name(name), m_arg(arg)
 {
 //  static ndt::type args_pattern("((...), {...})");

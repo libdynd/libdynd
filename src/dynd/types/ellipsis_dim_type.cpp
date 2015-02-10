@@ -13,8 +13,8 @@ using namespace dynd;
 
 ellipsis_dim_type::ellipsis_dim_type(const nd::string &name,
                                      const ndt::type &element_type)
-    : base_dim_type(ellipsis_dim_type_id, element_type, 0, 1, 0,
-                    type_flag_sym_pattern | type_flag_dim_variadic, false),
+    : base_dim_type(ellipsis_dim_type_id, pattern_kind, element_type, 0, 1, 0,
+                    type_flag_symbolic | type_flag_variadic, false),
       m_name(name)
 {
   if (!m_name.is_null()) {
@@ -129,7 +129,7 @@ bool ellipsis_dim_type::matches(const ndt::type &self_tp, const char *self_arrme
     return true;
   }
 
-  if (other_tp.get_type_id() != ellipsis_dim_type_id && other_tp.is_sym_pattern()) {
+  if (other_tp.get_type_id() != ellipsis_dim_type_id && other_tp.get_kind() == pattern_kind) {
     return other_tp.extended()->matches(other_tp, other_arrmeta, self_tp, self_arrmeta, tp_vars);
   }
 
