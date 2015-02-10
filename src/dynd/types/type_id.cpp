@@ -47,8 +47,10 @@ std::ostream &dynd::operator<<(std::ostream &o, type_kind_t kind)
     return (o << "memory");
   case function_kind:
     return (o << "function");
-  case symbolic_kind:
-    return (o << "symbolic");
+  case kind_kind:
+    return (o << "kind");
+  case pattern_kind:
+    return (o << "pattern");
   case custom_kind:
     return (o << "custom");
   default:

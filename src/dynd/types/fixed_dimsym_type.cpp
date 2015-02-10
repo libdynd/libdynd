@@ -21,9 +21,9 @@ using namespace std;
 using namespace dynd;
 
 fixed_dimsym_type::fixed_dimsym_type(const ndt::type &element_tp)
-    : base_dim_type(fixed_dimsym_type_id, element_tp, 0,
+    : base_dim_type(fixed_dimsym_type_id, kind_kind, element_tp, 0,
                     element_tp.get_data_alignment(), sizeof(size_stride_t),
-                    type_flag_sym_category, true)
+                    type_flag_symbolic, true)
 {
   // Propagate the inherited flags from the element
   m_members.flags |=
@@ -229,7 +229,7 @@ bool fixed_dimsym_type::matches(const ndt::type &self_tp,
                                 const char *other_arrmeta,
                                 std::map<nd::string, ndt::type> &tp_vars) const
 {
-  if (other_tp.is_sym_pattern()) {
+  if (other_tp.get_kind() == pattern_kind) {
     return other_tp.extended()->matches(other_tp, other_arrmeta, self_tp,
                                         self_arrmeta, tp_vars);
   }

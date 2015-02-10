@@ -10,7 +10,7 @@ using namespace std;
 using namespace dynd;
 
 typevar_type::typevar_type(const nd::string &name)
-    : base_type(typevar_type_id, symbolic_kind, 0, 1, type_flag_sym_pattern, 0, 0,
+    : base_type(typevar_type_id, pattern_kind, 0, 1, type_flag_symbolic, 0, 0,
                 0),
       m_name(name)
 {
@@ -110,7 +110,7 @@ bool typevar_type::matches(const ndt::type &self_tp,
     return *this == *other_tp.extended();
   }
 
-  if (other_tp.is_sym_pattern()) {
+  if (other_tp.get_kind() == pattern_kind) {
     return other_tp.extended()->matches(other_tp, other_arrmeta, self_tp, self_arrmeta, tp_vars);
   }
 

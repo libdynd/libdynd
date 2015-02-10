@@ -23,35 +23,48 @@ enum type_kind_t {
   int_kind,
   real_kind,
   complex_kind,
+  void_kind,
   char_kind,
+
   // string_kind means subclass of base_string_type
   string_kind,
   bytes_kind,
-  void_kind,
+
   datetime_kind,
+
   // For type_type_id and other types that themselves represent types
   type_kind,
+
   // For any dimension types which have elements of all the same type
   dim_kind,
+
   // For struct_type_id and cstruct_type_id
   struct_kind,
   // For tuple_type_id and ctuple_type_id
   tuple_kind,
+
   // For types whose value itself is dynamically typed
   dynamic_kind,
+
   // For types whose value_type != the type, signals
   // that calculations should look at the value_type for
   // type promotion, etc.
   expr_kind,
+
   // For the option type, whose value may or may not be present
   option_kind,
+
   // For types that specify a memory space
   memory_kind,
+
   // For arrfuncs
   function_kind,
-  // For types containing type vars, or function prototypes that can't be
-  // instantiated
-  symbolic_kind,
+
+  // For symbolic types that represent a kind of type, like 'Any' or 'Fixed'
+  kind_kind,
+  // For symbolic types that represent a pattern, like 'T' or 'Dims... * R'
+  pattern_kind,
+
   // For use when it becomes possible to register custom types
   custom_kind
 };
@@ -186,27 +199,25 @@ enum type_flags_t {
   type_flag_none = 0x00000000,
   // The type should be considered as a scalar
   type_flag_scalar = 0x00000001,
+  // The (outermost) type should be considered as a dimension
+  type_flag_dim = 0x00000002,
   // Memory of this type must be zero-initialized
-  type_flag_zeroinit = 0x00000002,
+  type_flag_zeroinit = 0x00000004,
   // Memory of this type must be constructed
-  // type_flag_constructor = 0x00000004,
+  // type_flag_constructor = 0x00000008,
   // Instances of this type point into other memory
   // blocks, e.g. string_type, var_dim_type.
-  type_flag_blockref = 0x00000008,
+  type_flag_blockref = 0x00000010,
   // Memory of this type must be destroyed,
   // e.g. it might hold a reference count or similar state
-  type_flag_destructor = 0x00000010,
+  type_flag_destructor = 0x00000020,
   // Memory of this type is not readable directly from the host
-  type_flag_not_host_readable = 0x00000020,
+  type_flag_not_host_readable = 0x00000040,
   // This type contains a symbolic construct like a type var
-  type_flag_symbolic = 0x00000040,
-  // This type should be considered as a symbolic category
-  type_flag_sym_category = type_flag_symbolic | 0x00000080,
-  // This type should be considered as a symbolic pattern
-  type_flag_sym_pattern = type_flag_symbolic | 0x00000100,
+  type_flag_symbolic = 0x00000080,
   // This dimensions of this type are variadic (outermost dimensions, but not
   // dimensions within a struct, for example)
-  type_flag_dim_variadic = 0x00000200,
+  type_flag_variadic = 0x00000100,
 };
 
 enum axis_order_classification_t {
@@ -233,7 +244,7 @@ enum {
   // These are the flags expression types should inherit
   // from their value type
   type_flags_value_inherited =
-      type_flag_scalar | type_flag_symbolic | type_flag_dim_variadic
+      type_flag_scalar | type_flag_symbolic | type_flag_variadic
 };
 
 std::ostream &operator<<(std::ostream &o, type_kind_t kind);

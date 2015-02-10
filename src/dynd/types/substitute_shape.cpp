@@ -49,7 +49,7 @@ static void substitute_shape_visitor(const ndt::type &tp,
 {
   substitute_shape_data *ssd = reinterpret_cast<substitute_shape_data *>(extra);
   intptr_t ndim = ssd->ndim, i = ssd->i;
-  if (tp.get_kind() == dim_kind) {
+  if (tp.is_dim()) {
     intptr_t dim_size = ssd->shape[i];
     ndt::type subtp = tp.extended<base_dim_type>()->get_element_type();
     if (i + 1 < ndim) {

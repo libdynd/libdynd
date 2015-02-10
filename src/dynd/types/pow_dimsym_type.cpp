@@ -15,11 +15,11 @@ using namespace dynd;
 
 pow_dimsym_type::pow_dimsym_type(const ndt::type &base_tp, const nd::string &exponent,
                                    const ndt::type &element_type)
-    : base_dim_type(pow_dimsym_type_id, element_type, 0, 1, 0,
-                    type_flag_sym_pattern, false),
+    : base_dim_type(pow_dimsym_type_id, pattern_kind, element_type, 0, 1, 0,
+                    type_flag_symbolic, false),
       m_base_tp(base_tp), m_exponent(exponent)
 {
-  if (base_tp.get_kind() != dim_kind ||
+  if (!base_tp.is_dim() ||
       base_tp.extended<base_dim_type>()->get_element_type().get_type_id() !=
           void_type_id) {
     stringstream ss;

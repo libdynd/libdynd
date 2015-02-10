@@ -174,12 +174,12 @@ TEST(DataShapeFormatter, DTypeStructs) {
                                     ndt::make_cfixed_dim(5, ndt::make_var_dim(
                                         ndt::make_type<uint8_t>())), "y"), "", false));
     EXPECT_EQ(
-        "{x: Fixed * {a: int32, b: int8}, y: var * Fixed * uint8}",
+        "{x: 7 * {a: int32, b: int8}, y: var * 4 * uint8}",
         format_datashape(
-            ndt::make_struct(ndt::make_fixed_dimsym(ndt::make_cstruct(
+            ndt::make_struct(ndt::make_fixed_dim(7, ndt::make_cstruct(
                                  ndt::make_type<int32_t>(), "a",
                                  ndt::make_type<int8_t>(), "b")),
-                             "x", ndt::make_var_dim(ndt::make_fixed_dimsym(
+                             "x", ndt::make_var_dim(ndt::make_fixed_dim(4,
                                       ndt::make_type<uint8_t>())),
                              "y"),
             "", false));

@@ -35,7 +35,7 @@ TEST(SymbolicTypes, CreateFuncProto)
   // function prototype is not actually symbolic, it is
   // used to store arrfunc objects
   EXPECT_FALSE(tp.is_symbolic());
-  EXPECT_FALSE(tp.is_dim_variadic());
+  EXPECT_FALSE(tp.is_variadic());
   fpt = tp.extended<arrfunc_type>();
   ASSERT_EQ(3, fpt->get_narg());
   EXPECT_EQ(ndt::make_type<float>(), fpt->get_pos_type(0));
@@ -87,7 +87,7 @@ TEST(SymbolicTypes, CreateTypeVar)
   EXPECT_EQ(1u, tp.get_data_alignment());
   EXPECT_FALSE(tp.is_pod());
   EXPECT_TRUE(tp.is_symbolic());
-  EXPECT_FALSE(tp.is_dim_variadic());
+  EXPECT_FALSE(tp.is_variadic());
   tvt = tp.extended<typevar_type>();
   EXPECT_EQ("Blah", tvt->get_name_str());
   // Roundtripping through a string
@@ -118,7 +118,7 @@ TEST(SymbolicTypes, CreateTypeVarDim)
   EXPECT_EQ(1u, tp.get_data_alignment());
   EXPECT_FALSE(tp.is_pod());
   EXPECT_TRUE(tp.is_symbolic());
-  EXPECT_FALSE(tp.is_dim_variadic());
+  EXPECT_FALSE(tp.is_variadic());
   tvt = tp.extended<typevar_dim_type>();
   EXPECT_EQ("Blah", tvt->get_name_str());
   EXPECT_EQ(ndt::make_type<int>(), tvt->get_element_type());
@@ -152,7 +152,7 @@ TEST(SymbolicTypes, CreateEllipsisDim)
   EXPECT_EQ(1u, tp.get_data_alignment());
   EXPECT_FALSE(tp.is_pod());
   EXPECT_TRUE(tp.is_symbolic());
-  EXPECT_TRUE(tp.is_dim_variadic());
+  EXPECT_TRUE(tp.is_variadic());
   et = tp.extended<ellipsis_dim_type>();
   EXPECT_EQ("Blah", et->get_name_str());
   EXPECT_EQ(ndt::make_type<int>(), et->get_element_type());
@@ -170,7 +170,7 @@ TEST(SymbolicTypes, CreateEllipsisDim)
   EXPECT_EQ(1u, tp.get_data_alignment());
   EXPECT_FALSE(tp.is_pod());
   EXPECT_TRUE(tp.is_symbolic());
-  EXPECT_TRUE(tp.is_dim_variadic());
+  EXPECT_TRUE(tp.is_variadic());
   et = tp.extended<ellipsis_dim_type>();
   EXPECT_TRUE(et->get_name().is_null());
   EXPECT_EQ(ndt::make_type<int>(), et->get_element_type());
@@ -202,45 +202,45 @@ TEST(SymbolicTypes, AnySym)
   EXPECT_EQ(any_sym_type_id, tp.get_type_id());
   EXPECT_EQ("Any", tp.str());
   EXPECT_TRUE(tp.is_symbolic());
-  EXPECT_TRUE(tp.is_dim_variadic());
+  EXPECT_TRUE(tp.is_variadic());
   EXPECT_EQ(tp, ndt::type(tp.str()));
 
   // The "Any" type's variadic-ness should propagate through dimension types
   tp = ndt::type("3 * Any");
   EXPECT_TRUE(tp.is_symbolic());
-  EXPECT_TRUE(tp.is_dim_variadic());
+  EXPECT_TRUE(tp.is_variadic());
   EXPECT_EQ(tp, ndt::type(tp.str()));
 
   tp = ndt::type("var * Any");
   EXPECT_TRUE(tp.is_symbolic());
-  EXPECT_TRUE(tp.is_dim_variadic());
+  EXPECT_TRUE(tp.is_variadic());
   EXPECT_EQ(tp, ndt::type(tp.str()));
 
   tp = ndt::type("Fixed * Any");
   EXPECT_TRUE(tp.is_symbolic());
-  EXPECT_TRUE(tp.is_dim_variadic());
+  EXPECT_TRUE(tp.is_variadic());
   EXPECT_EQ(tp, ndt::type(tp.str()));
 
   tp = ndt::type("?3 * Any");
   EXPECT_TRUE(tp.is_symbolic());
-  EXPECT_TRUE(tp.is_dim_variadic());
+  EXPECT_TRUE(tp.is_variadic());
   EXPECT_EQ(tp, ndt::type(tp.str()));
 
   tp = ndt::type("pointer[3 * Any]");
   EXPECT_TRUE(tp.is_symbolic());
-  EXPECT_TRUE(tp.is_dim_variadic());
+  EXPECT_TRUE(tp.is_variadic());
   EXPECT_EQ(tp, ndt::type(tp.str()));
 
   // The "Any" type's variadic-ness should not propagate through struct/tuple
   // types
   tp = ndt::type("(Any, Any)");
   EXPECT_TRUE(tp.is_symbolic());
-  EXPECT_FALSE(tp.is_dim_variadic());
+  EXPECT_FALSE(tp.is_variadic());
   EXPECT_EQ(tp, ndt::type(tp.str()));
 
   tp = ndt::type("{x: Any, y: Any}");
   EXPECT_TRUE(tp.is_symbolic());
-  EXPECT_FALSE(tp.is_dim_variadic());
+  EXPECT_FALSE(tp.is_variadic());
   EXPECT_EQ(tp, ndt::type(tp.str()));
 }
 
