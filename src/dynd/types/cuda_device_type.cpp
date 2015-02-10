@@ -119,7 +119,7 @@ size_t dynd::get_cuda_device_data_alignment(const ndt::type& tp) {
       return 0;
     }
 
-    const ndt::type &dtp = tp.get_dtype();
+    const ndt::type &dtp = tp.without_memory_type().get_dtype();
     if (dtp.is_builtin()) {
         return dtp.get_data_size();
     } else {

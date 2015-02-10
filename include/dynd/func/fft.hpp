@@ -87,7 +87,26 @@ namespace nd {
     };
 
     struct ifft : arrfunc<ifft> {
-      static nd::arrfunc as_arrfunc() { return nd::ifftw; }
+      static nd::arrfunc as_arrfunc()
+      {
+        std::vector<nd::arrfunc> children;
+
+#ifdef DYND_FFTW
+        children.push_back(nd::ifftw);
+#endif
+
+#ifdef DYND_CUDA
+        typedef kernels::fft_ck<kernel_request_cuda_device, complex<double>,
+                                complex<double>, CUFFT_INVERSE> ck_type;
+        children.push_back(nd::as_arrfunc<ck_type>());
+#endif
+
+        return functional::multidispatch(
+            ndt::type("(M[Fixed**N * complex[float64]], shape: ?N * int64, "
+                      "axes: ?Fixed * int64, "
+                      "flags: ?int32) -> M[Fixed**N * complex[float64]]"),
+            children);
+      }
     };
 
     struct irfft : arrfunc<irfft> {

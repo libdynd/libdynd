@@ -30,7 +30,8 @@ nd::decl::random::uniform::as_arrfunc()
 #ifdef DYND_CUDA
 
 template <kernel_request_t kernreq>
-typename std::enable_if<kernreq == kernel_request_cuda_device, nd::arrfunc>::type
+typename std::enable_if<kernreq == kernel_request_cuda_device,
+                        nd::arrfunc>::type
 nd::decl::random::uniform::as_arrfunc()
 {
   unsigned int blocks_per_grid = 512;
@@ -40,9 +41,9 @@ nd::decl::random::uniform::as_arrfunc()
   cudaMalloc(&s, blocks_per_grid * threads_per_block * sizeof(curandState_t));
   cuda_device_curand_init << <blocks_per_grid, threads_per_block>>> (s);
 
-//  return nd::as_arrfunc<kernels::uniform_real_ck, kernel_request_cuda_device,
-//                        curandState_t, double>(ndt::type("(a: ?R, b: ?R, dst_tp: type) -> cuda_device[R]"), s);
-  return nd::as_arrfunc<kernels::uniform_real_ck<kernel_request_cuda_device, curandState_t, double>>(s);
+  return nd::as_arrfunc<kernels::uniform_ck, kernel_request_cuda_device,
+                        curandState_t, type_sequence<double, dynd::complex<double>>>(
+      ndt::type("(a: ?R, b: ?R) -> cuda_device[R]"), s);
 }
 
 #endif

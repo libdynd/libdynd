@@ -509,11 +509,13 @@ int nd::functional::multidispatch_resolve_dst_type(
 {
   const arrfunc_type_data *child = multidispatch_find(self, tp_vars);
   if (child->resolve_dst_type != NULL) {
-    return child->resolve_dst_type(child, af_tp, nsrc, src_tp, throw_on_error,
+    child->resolve_dst_type(child, af_tp, nsrc, src_tp, throw_on_error,
                                    out_dst_tp, kwds, tp_vars);
   } else {
-    out_dst_tp = ndt::substitute(af_tp->get_return_type(), tp_vars, true);
+    out_dst_tp = af_tp->get_return_type();
   }
+
+  out_dst_tp = ndt::substitute(out_dst_tp, tp_vars, true);
 
   return 1;
 }
@@ -533,9 +535,6 @@ nd::arrfunc nd::functional::multidispatch(const ndt::type &self_tp,
                        kwd_tp.extended<base_struct_type>()->get_field_types()(
                            irange() < nkwd)),
       self_tp.extended<arrfunc_type>()->get_return_type());
-
-  arrfunc_resolve_option_values_t resolve_option_values = NULL;
-  arrfunc_resolve_dst_type_t resolve_dst_type = NULL;
 
   std::shared_ptr<std::vector<string>> vars(new std::vector<string>);
   bool vars_init = false;
@@ -567,13 +566,6 @@ nd::arrfunc nd::functional::multidispatch(const ndt::type &self_tp,
       vars_init = true;
     }
 
-//    if (resolve_option_values == NULL && child.get()->resolve_option_values != NULL) {
-      resolve_option_values = multidispatch_resolve_option_values;
-  //  }
-    //if (resolve_dst_type == NULL && child.get()->resolve_dst_type != NULL) {
-      resolve_dst_type = multidispatch_resolve_dst_type;
-    //}
-
     std::vector<ndt::type> tp_vals;
     for (const auto &var : *vars) {
       tp_vals.push_back(tp_vars[var]);
@@ -583,5 +575,5 @@ nd::arrfunc nd::functional::multidispatch(const ndt::type &self_tp,
   }
 
   return arrfunc(self_tp, multidispatch_data(map, vars), &multidispatch_instantiate,
-                 resolve_option_values, resolve_dst_type);
+                 &multidispatch_resolve_option_values, &multidispatch_resolve_dst_type);
 }

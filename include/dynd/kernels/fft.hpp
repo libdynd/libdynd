@@ -308,6 +308,8 @@ namespace kernels {
     }
   };
 
+#ifdef DYND_CUDA
+
   template <kernel_request_t kernreq, typename dst_type, typename src_type, int sign>
   struct fft_ck;
 
@@ -379,6 +381,8 @@ namespace kernels {
       return ckb_offset;
     }
   };
+
+#endif
 
 } // namespace kernels
 } // namespace dynd

@@ -19,6 +19,40 @@ using namespace dynd;
 
 #ifdef DYND_FFTW
 
+class FFT1D : public ::testing::TestWithParam<
+                  std::tr1::tuple<const char *, const char *, const char *>> {
+
+public:
+  ndt::type GetParam() const
+  {
+    ndt::type concrete_tp = ndt::type(std::tr1::get<1>(::testing::TestWithParam<
+        std::tr1::tuple<const char *, const char *, const char *>>::GetParam()));
+    ndt::type pattern_tp = ndt::type(std::tr1::get<0>(::testing::TestWithParam<
+        std::tr1::tuple<const char *, const char *, const char *>>::GetParam()));
+    ndt::type dtp = ndt::type(std::tr1::get<2>(::testing::TestWithParam<
+        std::tr1::tuple<const char *, const char *,  const char *>>::GetParam()));
+
+    if (pattern_tp == ndt::type("T")) {
+      std::map<nd::string, ndt::type> tp_vars;
+      tp_vars["R"] = dtp;
+
+      return ndt::substitute(concrete_tp, tp_vars, true);      
+    }
+
+#ifdef DYND_CUDA
+    if (pattern_tp == ndt::type("cuda_device[T]")) {
+      std::map<nd::string, ndt::type> tp_vars;
+      tp_vars["R"] = dtp;
+
+      return ndt::substitute(ndt::make_cuda_device(concrete_tp), tp_vars, true);      
+    }
+#endif
+
+    throw std::runtime_error("error");
+  }
+};
+
+/*
 template <typename T>
 class FFT1D;
 
@@ -50,6 +84,7 @@ template <typename T, int N>
 const intptr_t FFT1D<dynd::complex<T> [N]>::DstSize = DstShape[0];
 
 TYPED_TEST_CASE_P(FFT1D);
+*/
 
 template <typename T>
 class RFFT1D;
@@ -177,46 +212,44 @@ inline double rel_err_max<double>()
   return 1E-8;
 }
 
-TYPED_TEST_P(FFT1D, Linear)
+TEST_P(FFT1D, Linear)
 {
-  nd::array x0 = nd::rand(TestFixture::SrcShape[0],
-                          ndt::make_type<typename TestFixture::SrcType>());
-  nd::array x1 = nd::rand(TestFixture::SrcShape[0],
-                          ndt::make_type<typename TestFixture::SrcType>());
+  const ndt::type &tp = GetParam();
+
+  nd::array x0 = nd::random::uniform(kwds("dst_tp", tp));
+  nd::array x1 = nd::random::uniform(kwds("dst_tp", tp));
   nd::array x = x0 + x1;
 
   nd::array y0 = nd::fft(x0);
   nd::array y1 = nd::fft(x1);
   nd::array y = nd::fft(x);
 
-/*
-  nd::array z = nd::fft(x.to_cuda_device());
-  std::cout << y << std::endl;
-  std::cout << z << std::endl;
-  std::exit(-1);
-*/
+#ifdef DYND_CUDA
+  y0 = y0.to_host();
+  y1 = y1.to_host();
+  y = y.to_host();
+#endif
 
-  for (int i = 0; i < TestFixture::DstShape[0]; ++i) {
-    EXPECT_EQ_RELERR(y0(i).as<typename TestFixture::DstType>() +
-                         y1(i).as<typename TestFixture::DstType>(),
-                     y(i).as<typename TestFixture::DstType>(),
-                     rel_err_max<typename TestFixture::RealType>());
-  }
+  EXPECT_ARRAY_NEAR(y0 + y1, y, rel_err_max<double>());
 }
 
-TYPED_TEST_P(FFT1D, Inverse)
+TEST_P(FFT1D, Inverse)
 {
-  nd::array x = nd::rand(TestFixture::SrcShape[0],
-                         ndt::make_type<typename TestFixture::SrcType>());
+  const ndt::type &tp = GetParam();
+
+  nd::array x = nd::random::uniform(kwds("dst_tp", tp));
 
   nd::array y = nd::ifft(nd::fft(x));
-  for (int i = 0; i < TestFixture::SrcShape[0]; ++i) {
-    EXPECT_EQ_RELERR(x(i).as<typename TestFixture::SrcType>(),
-                     y(i).as<typename TestFixture::SrcType>() /
-                         TestFixture::SrcSize,
-                     rel_err_max<typename TestFixture::RealType>());
-  }
+
+#ifdef DYND_CUDA
+  x = x.to_host();
+  y = y.to_host();
+#endif
+
+  EXPECT_ARRAY_NEAR(x, y / y.get_dim_size(), rel_err_max<double>());
 }
+
+/*
 
 TYPED_TEST_P(FFT1D, Zeros)
 {
@@ -224,11 +257,12 @@ TYPED_TEST_P(FFT1D, Zeros)
                           ndt::make_type<typename TestFixture::SrcType>());
 
   nd::array y = nd::fft(x);
-  for (int i = 0; i < TestFixture::DstShape[0]; ++i) {
-    EXPECT_EQ(0, y(i).as<typename TestFixture::DstType>());
-  }
-}
 
+  EXPECT_ARRAY_NEAR(dynd::complex<double>(0.0), y, rel_err_max<double>());
+}
+*/
+
+/*
 TYPED_TEST_P(FFT1D, Ones)
 {
   nd::array x = nd::ones(TestFixture::SrcShape[0],
@@ -259,6 +293,7 @@ TYPED_TEST_P(FFT1D, KroneckerDelta)
   x(TestFixture::SrcShape[0] / 2).vals() = 1;
 
   nd::array y = nd::fft(x);
+
   for (int i = 0; i < TestFixture::DstShape[0]; ++i) {
     EXPECT_EQ_RELERR(pow(static_cast<typename TestFixture::RealType>(-1), i),
                      y(i).as<typename TestFixture::DstType>(),
@@ -277,6 +312,7 @@ TYPED_TEST_P(FFT1D, KroneckerDelta)
                      rel_err_max<typename TestFixture::RealType>());
   }
 }
+*/
 
 /*
 TEST(FFT1D, Shift)
@@ -778,7 +814,7 @@ TYPED_TEST_P(RFFT2D, KroneckerDelta)
 }
 */
 
- // For now, only test FFTs if we built DYND with FFTW
+// For now, only test FFTs if we built DYND with FFTW
 
 /** TODO: A few of the single-precision tests fail, even at what should be
  * reasonable relative error.
@@ -787,11 +823,25 @@ TYPED_TEST_P(RFFT2D, KroneckerDelta)
  *        I'm commenting out the single-precision tests.
  */
 
-REGISTER_TYPED_TEST_CASE_P(FFT1D, Linear, Inverse, Zeros, Ones, KroneckerDelta);
+// REGISTER_TYPED_TEST_CASE_P(FFT1D, Linear);
 // INSTANTIATE_TYPED_TEST_CASE_P(ComplexFloat, FFT1D,
 // FixedDim1D<dynd_complex<float> >::Types);
-INSTANTIATE_TYPED_TEST_CASE_P(ComplexDouble, FFT1D,
-                              FixedDim1D<dynd::complex<double>>::Types);
+
+#define Shapes                                                                 \
+  ::testing::Values("4 * R", "8 * R", "17 * R", "25 * R", "64 * R", "76 * R",  \
+                    "99 * R", "128 * R", "203 * R", "256 * R", "512 * R")
+#define DTypes ::testing::Values("complex[float64]") 
+
+INSTANTIATE_TEST_CASE_P(Host, FFT1D, ::testing::Combine(::testing::Values("T"),
+                                                        Shapes, DTypes));
+#ifdef DYND_CUDA
+INSTANTIATE_TEST_CASE_P(CUDADevice, FFT1D,
+                        ::testing::Combine(::testing::Values("cuda_device[T]"),
+                                           Shapes, DTypes));
+#endif
+
+#undef Shapes
+#undef DTypes
 
 // REGISTER_TYPED_TEST_CASE_P(RFFT1D, Linear, Inverse, Zeros, Ones,
 // KroneckerDelta);
