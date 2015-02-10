@@ -628,6 +628,8 @@ else()
 endif()
 
 if (DYND_CUDA)
+    cuda_add_cufft_to_target(libdynd)
+
     add_library(libdynddev STATIC $<TARGET_OBJECTS:libdynd_OBJ> ${libdynd_SEPARABLE_COMPILATION_OBJECTS})
     cuda_add_cufft_to_target(libdynddev)
     set_target_properties(libdynddev PROPERTIES LINKER_LANGUAGE CXX)
