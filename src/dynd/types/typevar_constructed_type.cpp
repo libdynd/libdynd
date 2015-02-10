@@ -126,6 +126,13 @@ bool typevar_constructed_type::matches(
     const ndt::type &other_tp, const char *other_arrmeta,
     std::map<nd::string, ndt::type> &tp_vars) const
 {
+  if (other_tp.get_type_id() == typevar_constructed_type_id) {
+    return m_arg.matches(
+        self_arrmeta,
+        other_tp.extended<typevar_constructed_type>()->m_arg, other_arrmeta,
+        tp_vars);
+  }
+
   if (other_tp.get_kind() != memory_kind) {
     if (m_arg.matches(self_arrmeta, other_tp, other_arrmeta, tp_vars)) {
       ndt::type &tv_type = tp_vars[m_name];

@@ -62,7 +62,11 @@ int nd::functional::elwise_resolve_dst_type_with_child(
   if (nsrc == 0) {
     out_dst_tp =
         tp_vars.at("Dims").extended<dim_fragment_type>()->apply_to_dtype(
-            child_dst_tp);
+            child_dst_tp.without_memory_type());
+    if (child_dst_tp.get_kind() == memory_kind) {
+      out_dst_tp = child_dst_tp.extended<base_memory_type>()->with_replaced_storage_type(out_dst_tp);
+    }
+
     return 1;
   }
 

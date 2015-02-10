@@ -15,7 +15,7 @@ using namespace dynd;
 cuda_device_type::cuda_device_type(const ndt::type &element_tp)
     : base_memory_type(cuda_device_type_id, element_tp,
                        element_tp.get_data_size(),
-                       get_cuda_device_data_alignment(element_tp.get_dtype()),
+                       get_cuda_device_data_alignment(element_tp),
                        0, element_tp.get_flags() | type_flag_not_host_readable)
 {
 }
@@ -112,6 +112,20 @@ intptr_t cuda_device_type::make_assignment_kernel(
         &child, child_tp.extended<arrfunc_type>(), ckb, ckb_offset, dst_tp,
         dst_arrmeta, &new_src_tp, &src_arrmeta, kernreq, ectx, kwds, std::map<nd::string, ndt::type>());
   }
+}
+
+size_t dynd::get_cuda_device_data_alignment(const ndt::type& tp) {
+    if (tp.is_symbolic()) {
+      return 0;
+    }
+
+    const ndt::type &dtp = tp.without_memory_type().get_dtype();
+    if (dtp.is_builtin()) {
+        return dtp.get_data_size();
+    } else {
+        // TODO: Return the data size of the largest built-in component
+        return 0;
+    }
 }
 
 #endif // DYND_CUDA

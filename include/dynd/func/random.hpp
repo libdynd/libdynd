@@ -180,8 +180,12 @@ namespace kernels {
 
     static ndt::type make_type()
     {
-      return ndt::type(
-          "(a: ?R, b: ?R) -> cuda_device[R]");
+      typedef double R;
+
+      std::map<nd::string, ndt::type> tp_vars;
+      tp_vars["R"] = ndt::make_type<R>();
+
+      return ndt::substitute(ndt::type("(a: ?R, b: ?R) -> cuda_device[R]"), tp_vars, true);
     }
 
     static intptr_t instantiate(
@@ -274,6 +278,58 @@ namespace kernels {
       return ckb_offset;
     }
   };
+
+#ifdef __CUDACC__
+
+  template <typename S>
+  struct uniform_complex_ck<kernel_request_cuda_device, S, complex<double>>
+      : expr_ck<uniform_complex_ck<kernel_request_cuda_device, S, complex<double>>,
+                kernel_request_cuda_device, 0> {
+    typedef uniform_complex_ck self_type;
+
+    S *s;
+
+    __device__ uniform_complex_ck(S *s) : s(s) {}
+
+    __device__ void single(char *dst, char *const *DYND_UNUSED(src))
+    {
+      *reinterpret_cast<complex<double> *>(dst) = complex<double>(curand_uniform_double(s), curand_uniform_double(s));
+    }
+
+    static ndt::type make_type()
+    {
+      typedef dynd::complex<double> R;
+
+      std::map<nd::string, ndt::type> tp_vars;
+      tp_vars["R"] = ndt::make_type<R>();
+
+      return ndt::substitute(ndt::type("(a: ?R, b: ?R) -> cuda_device[R]"), tp_vars, true);
+    }
+
+    static intptr_t instantiate(
+        const arrfunc_type_data *self, const arrfunc_type *DYND_UNUSED(self_tp),
+        void *ckb, intptr_t ckb_offset, const ndt::type &DYND_UNUSED(dst_tp),
+        const char *DYND_UNUSED(dst_arrmeta),
+        const ndt::type *DYND_UNUSED(src_tp),
+        const char *const *DYND_UNUSED(src_arrmeta), kernel_request_t kernreq,
+        const eval::eval_context *DYND_UNUSED(ectx), const nd::array &kwds,
+        const std::map<nd::string, ndt::type> &DYND_UNUSED(tp_vars))
+    {
+      if ((kernreq & kernel_request_memory) == kernel_request_host) {
+        typedef cuda_launch_ck<0> self_type;
+        self_type *self = self_type::create(ckb, kernreq, ckb_offset, 1, 1);
+        ckb = &self->ckb;
+        kernreq |= kernel_request_cuda_device;
+        ckb_offset = 0;
+      }
+
+      self_type::create(ckb, kernreq, ckb_offset,
+                        *self->get_data_as<S *>());
+      return ckb_offset;
+    }
+  };
+
+#endif
 
   template <kernel_request_t kernreq, typename... T>
   struct uniform_ck;

@@ -64,9 +64,6 @@ TEST(CUDADeviceType, FixedDim)
   EXPECT_EQ(memory_kind, d.get_kind());
   EXPECT_EQ(d.extended<base_memory_type>()->get_element_type().get_data_size(),
             d.get_data_size());
-  // CUDA host type and CUDA device type have the same data alignment
-  EXPECT_EQ(ndt::make_cuda_host(ndt::make_type<float>()).get_data_alignment(),
-            d.get_data_alignment());
   EXPECT_EQ(d, ndt::type("cuda_device[Fixed * float32]"));
 }
 

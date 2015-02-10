@@ -37,14 +37,7 @@ public:
         const nd::array &kwds) const;
 };
 
-inline size_t get_cuda_device_data_alignment(const ndt::type& dtp) {
-    if (dtp.is_builtin()) {
-        return dtp.get_data_size();
-    } else {
-        // TODO: Return the data size of the largest built-in component
-        return 0;
-    }
-}
+size_t get_cuda_device_data_alignment(const ndt::type& tp);
 
 namespace ndt {
     inline ndt::type make_cuda_device(const ndt::type& element_tp) {
