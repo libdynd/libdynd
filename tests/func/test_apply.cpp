@@ -407,12 +407,15 @@ TYPED_TEST_P(Apply, Callable)
   }
 #endif
 
-  /*
     af = nd::functional::apply<TestFixture::KernelRequest>(
         get_func2<TestFixture::KernelRequest>());
-    EXPECT_ARR_EQ(TestFixture::To(13.6f),
-                  af(TestFixture::To({3.9f, -7.0f, 16.7f})));
-  */
+//  if (TestFixture::KernelRequest == kernel_request_cuda_device) {
+  //  std::cout << af(TestFixture::To({3.9f, -7.0f, 16.7f})) << std::endl;
+    //std::exit(-1);
+  //}
+//    EXPECT_ARR_EQ(TestFixture::To(13.6f),
+  //                af(TestFixture::To({3.9f, -7.0f, 16.7f})));
+  
 
   af = nd::functional::apply<TestFixture::KernelRequest>(
       get_func3<TestFixture::KernelRequest>());

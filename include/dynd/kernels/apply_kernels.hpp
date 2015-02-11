@@ -9,6 +9,22 @@
 #include <dynd/kernels/cuda_kernels.hpp>
 #include <dynd/kernels/expr_kernels.hpp>
 
+template <typename T>
+class value_wrapper {
+  T m_value;
+
+public:
+  value_wrapper(const T &value) : m_value(value) {}
+
+  DYND_CUDA_HOST_DEVICE operator T() const { return m_value; }
+};
+
+template <typename T>
+value_wrapper<T> make_value_wrapper(const T &value)
+{
+  return value_wrapper<T>(value);
+}
+
 namespace dynd {
 namespace detail {
 
@@ -336,11 +352,11 @@ namespace kernels {
                   const nd::array &kwds,
                   const std::map<nd::string, ndt::type> &DYND_UNUSED(tp_vars))
   {
-    self_type::create(ckb, kernreq, ckb_offset,
-                      self->get_data_as<data_type>()->first,
-                      self->get_data_as<data_type>()->second,
-                      args_for<mem_func_type, Nsrc>(src_tp, src_arrmeta, kwds),
-                      kwds_for<mem_func_type, Nsrc>(kwds));
+    self_type::create(
+        ckb, kernreq, ckb_offset, self->get_data_as<data_type>()->first,
+        make_value_wrapper(self->get_data_as<data_type>()->second),
+        args_for<mem_func_type, Nsrc>(src_tp, src_arrmeta, kwds),
+        kwds_for<mem_func_type, Nsrc>(kwds));
     return ckb_offset;
   }
 
@@ -382,7 +398,7 @@ namespace kernels {
         const std::map<nd::string, ndt::type> &DYND_UNUSED(tp_vars))           \
     {                                                                          \
       self_type::create(ckb, kernreq, ckb_offset,                              \
-                        *self->get_data_as<func_type>(),                       \
+                        make_value_wrapper(*self->get_data_as<func_type>()),   \
                         args_for<func_type, Nsrc>(src_tp, src_arrmeta, kwds),  \
                         kwds_for<func_type, Nsrc>(kwds));                      \
       return ckb_offset;                                                       \
@@ -515,7 +531,7 @@ namespace kernels {
         const std::map<nd::string, ndt::type> &DYND_UNUSED(tp_vars))           \
     {                                                                          \
       self_type::create(ckb, kernreq, ckb_offset,                              \
-                        *self->get_data_as<func_type *>(),                     \
+                        make_value_wrapper(*self->get_data_as<func_type *>()), \
                         args_for<func_type, Nsrc>(src_tp, src_arrmeta, kwds),  \
                         kwds_for<func_type, Nsrc>(kwds));                      \
       return ckb_offset;                                                       \
