@@ -15,13 +15,10 @@
 using namespace std;
 using namespace dynd;
 
-/*
 TEST(SubstituteTypeVars, SimpleNoSubstitutions)
 {
-#ifdef __APPLE__
-  throw std::runtime_error("SimpleNoSubstitutions is segfaulting on Mac OS X");
-#endif
-
+// SimpleNoSubstitutions is segfaulting on Mac OS X
+#ifndef __APPLE__
   map<nd::string, ndt::type> typevars;
   EXPECT_EQ(ndt::type("int32"),
             ndt::substitute(ndt::type("int32"), typevars, false));
@@ -34,14 +31,13 @@ TEST(SubstituteTypeVars, SimpleNoSubstitutions)
             ndt::substitute(ndt::type("A... * int32"), typevars, false));
   EXPECT_THROW(ndt::substitute(ndt::type("A... * int32"), typevars, true),
                invalid_argument);
+#endif
 }
 
 TEST(SubstituteTypeVars, SimpleSubstitution)
 {
-#ifdef __APPLE__
-  throw std::runtime_error("SimpleSubstitution is segfaulting on Mac OS X");
-#endif
-
+// SimpleSubstitution is segfaulting on Mac OS X
+#ifndef __APPLE__
   map<nd::string, ndt::type> typevars;
   typevars["Tint"] = ndt::type("int32");
   typevars["Tsym"] = ndt::type("S");
@@ -141,8 +137,8 @@ TEST(SubstituteTypeVars, SimpleSubstitution)
   EXPECT_THROW(
       ndt::substitute(ndt::type("Mfixed_sym**N * Tint"), typevars, true),
       invalid_argument);
+#endif
 }
-*/
 
 TEST(SubstituteTypeVars, Tuple)
 {
