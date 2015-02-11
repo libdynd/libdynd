@@ -144,6 +144,23 @@ namespace kernels {
       typename args_of<typename funcproto_of<func_type>::type>::type,
       Nsrc>::type>;
 
+  template <typename func_type, int Nsrc>
+  args_for<func_type, Nsrc> make_args(const ndt::type *src_tp,
+                                      const char *const *src_arrmeta,
+                                      const nd::array &kwds)
+  {
+    return args_for<func_type, Nsrc>(src_tp, src_arrmeta, kwds);
+  }
+
+  template <typename func_type,
+            int Nsrc =
+                args_of<typename funcproto_of<func_type>::type>::type::size>
+  struct args_for_ex {
+    typedef args<typename to<
+        typename args_of<typename funcproto_of<func_type>::type>::type,
+        Nsrc>::type> type;
+  };
+
   template <typename T, size_t I>
   struct kwd {
     T m_val;
@@ -473,14 +490,14 @@ namespace kernels {
         args_for<func_type, Nsrc>,                                             \
         kwds_for<func_type, Nsrc> {                                            \
     typedef apply_callable_ck self_type;                                       \
+    typedef args_for<func_type, Nsrc> args_type;                               \
+    typedef kwds_for<func_type, Nsrc> kwds_type;                               \
                                                                                \
     func_type *func;                                                           \
                                                                                \
-    __VA_ARGS__ apply_callable_ck(func_type *func,                             \
-                                  args_for<func_type, Nsrc> args,              \
-                                  kwds_for<func_type, Nsrc> kwds)              \
-        : args_for<func_type, Nsrc>(args), kwds_for<func_type, Nsrc>(kwds),    \
-          func(func)                                                           \
+    __VA_ARGS__ apply_callable_ck(func_type *func, args_type args,             \
+                                  kwds_type kwds)                              \
+        : args_type(args), kwds_type(kwds), func(func)                         \
     {                                                                          \
     }                                                                          \
                                                                                \
@@ -498,11 +515,11 @@ namespace kernels {
         const eval::eval_context *DYND_UNUSED(ectx), const nd::array &kwds,    \
         const std::map<nd::string, ndt::type> &DYND_UNUSED(tp_vars))           \
     {                                                                          \
+                                                                               \
       self_type::create(                                                       \
           ckb, kernreq, ckb_offset,                                            \
           detail::make_value_wrapper(*self->get_data_as<func_type *>()),       \
-          args_for<func_type, Nsrc>(src_tp, src_arrmeta, kwds),                \
-          kwds_for<func_type, Nsrc>(kwds));                                    \
+          args_type(src_tp, src_arrmeta, kwds), kwds_type(kwds));              \
       return ckb_offset;                                                       \
     }                                                                          \
                                                                                \

@@ -117,18 +117,16 @@ FUNC_WRAPPER(kernel_request_cuda_device, __device__);
 #define GET_CUDA_DEVICE_FUNC_BODY(NAME) return &NAME;
 #else
 #define GET_CUDA_DEVICE_FUNC_BODY(NAME)                                        \
-  decltype(&NAME) res;                                                         \
-  decltype(&NAME) *func, *cuda_device_func;                                    \
+  decltype(&NAME) func;                                                        \
+  decltype(&NAME) *cuda_device_func;                                           \
   throw_if_not_cuda_success(                                                   \
-      cudaHostAlloc(&func, sizeof(decltype(&NAME)), cudaHostAllocMapped));     \
-  throw_if_not_cuda_success(                                                   \
-      cudaHostGetDevicePointer(&cuda_device_func, func, 0));                   \
-  get_cuda_device_##NAME << <1, 1>>> (cuda_device_func);                       \
-  throw_if_not_cuda_success(cudaDeviceSynchronize());                          \
-  res = *func;                                                                 \
-  throw_if_not_cuda_success(cudaFreeHost(func));                               \
-                                                                               \
-  return res;
+      cudaMalloc(&cuda_device_func, sizeof(decltype(&NAME))));                 \
+  get_cuda_device_##NAME << <1, 1>>> (reinterpret_cast<void *>(cuda_device_func));                       \
+  throw_if_not_cuda_success(cudaMemcpy(&func, cuda_device_func,                \
+                                       sizeof(decltype(&NAME)),                \
+                                       cudaMemcpyDeviceToHost));               \
+  throw_if_not_cuda_success(cudaFree(cuda_device_func));                       \
+  return func;
 #endif
 
 #ifdef __CUDACC__
@@ -137,6 +135,7 @@ FUNC_WRAPPER(kernel_request_cuda_device, __device__);
   __global__ void get_cuda_device_##NAME(void *res)                            \
   {                                                                            \
     *reinterpret_cast<decltype(&NAME) *>(res) = &NAME;                         \
+    printf("got cuda_device_func\n"); \
   }                                                                            \
                                                                                \
   template <kernel_request_t kernreq>                                          \
@@ -202,7 +201,7 @@ DYND_CUDA_HOST_DEVICE unsigned int func3() { return 12U; }
 GET_CUDA_HOST_DEVICE_FUNC(func3)
 CUDA_HOST_DEVICE_FUNC_AS_CALLABLE(func3);
 
-DYND_CUDA_HOST_DEVICE double func4(double (&x)[3], double (&y)[3])
+DYND_CUDA_HOST_DEVICE double func4(const double (&x)[3], const double (&y)[3])
 {
   return x[0] * y[0] + x[1] * y[1] + x[2] * y[2];
 }
@@ -352,14 +351,12 @@ TEST(Apply, FunctionWithKeywords)
 }
 
 struct struct0 {
-  int func0(int x, int y, int z) {
-    return x + y * z;
-  }
+  int func0(int x, int y, int z) { return x + y * z; }
 };
 
 TEST(Apply, MemberFunction)
 {
-  struct0 *s0 = new struct0;  
+  struct0 *s0 = new struct0;
 
   nd::arrfunc af = nd::functional::apply(s0, &struct0::func0);
   EXPECT_ARR_EQ(nd::array(7), af(1, 2, 3));
@@ -434,12 +431,11 @@ TYPED_TEST_P(Apply, Callable)
                              func3_as_callable<TestFixture::KernelRequest>>();
   EXPECT_ARR_EQ(TestFixture::To(12U), af());
 
-//  double (*func)(const double (&)[3], const double (&)[3]) = get_func4<TestFixture::KernelRequest>();
-//  af = nd::functional::apply<TestFixture::KernelRequest>(
-  //    get_func4<TestFixture::KernelRequest>());
- // EXPECT_ARR_EQ(TestFixture::To(167.451),
-   //             af(TestFixture::To({9.25, -2.7, 15.375}),
-     //              TestFixture::To({0.0, 0.62, 11.0})));
+  af = nd::functional::apply<TestFixture::KernelRequest>(
+      get_func4<TestFixture::KernelRequest>());
+  EXPECT_ARR_EQ(TestFixture::To(167.451),
+                af(TestFixture::To({9.25, -2.7, 15.375}),
+                   TestFixture::To({0.0, 0.62, 11.0})));
 
   af = nd::functional::apply<TestFixture::KernelRequest>(
       func4_as_callable<TestFixture::KernelRequest>());
