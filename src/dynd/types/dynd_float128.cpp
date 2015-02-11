@@ -164,7 +164,7 @@ dynd::dynd_float128::dynd_float128(unsigned long long value)
 
 dynd::dynd_float128::dynd_float128(const dynd_int128& DYND_UNUSED(value))
 {
-#ifdef DYND_CUDA_DEVICE_ARCH
+#ifdef __CUDA_ARCH__
     DYND_TRIGGER_ASSERT("dynd int128 to float128 conversion isn't implemented");
 #else
     throw runtime_error("dynd int128 to float128 conversion isn't implemented");
@@ -173,7 +173,7 @@ dynd::dynd_float128::dynd_float128(const dynd_int128& DYND_UNUSED(value))
 
 dynd::dynd_float128::dynd_float128(const dynd_uint128& DYND_UNUSED(value))
 {
-#ifdef DYND_CUDA_DEVICE_ARCH
+#ifdef __CUDA_ARCH__
     DYND_TRIGGER_ASSERT("dynd int128 to float128 conversion isn't implemented");
 #else
     throw runtime_error("dynd uint128 to float128 conversion isn't implemented");

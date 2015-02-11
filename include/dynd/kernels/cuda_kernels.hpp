@@ -9,41 +9,13 @@
 #include <dynd/types/arrfunc_type.hpp>
 #include <dynd/kernels/expr_kernels.hpp>
 
-namespace dynd {
-namespace kernels {
-
-  template <typename T, int N>
-  struct array_wrapper {
-    T data[N];
-
-    array_wrapper(const T *data)
-    {
-      memcpy(this->data, data, sizeof(this->data));
-    }
-
-    DYND_CUDA_HOST_DEVICE operator T *() { return data; }
-
-    DYND_CUDA_HOST_DEVICE operator const T *() const { return data; }
-  };
-
-  template <typename T>
-  struct array_wrapper<T, 0> {
-    array_wrapper(const T *DYND_UNUSED(data)) {}
-
-    DYND_CUDA_HOST_DEVICE operator T *() { return NULL; }
-
-    DYND_CUDA_HOST_DEVICE operator const T *() const { return NULL; }
-  };
-}
-}
-
 #ifdef __CUDACC__
 
 namespace dynd {
 
 namespace kernels {
   template <int N>
-  __global__ void cuda_launch_single(char *dst, array_wrapper<char *, N> src,
+  __global__ void cuda_launch_single(char *dst, detail::array_wrapper<char *, N> src,
                                      ckernel_prefix *self)
   {
     expr_single_t func = self->get_function<expr_single_t>();
@@ -52,8 +24,8 @@ namespace kernels {
 
   template <int N>
   __global__ void cuda_launch_strided(char *dst, intptr_t dst_stride,
-                                      array_wrapper<char *, N> src,
-                                      array_wrapper<intptr_t, N> src_stride,
+                                      detail::array_wrapper<char *, N> src,
+                                      detail::array_wrapper<intptr_t, N> src_stride,
                                       size_t count, ckernel_prefix *self)
   {
     expr_strided_t func = self->get_function<expr_strided_t>();
@@ -76,7 +48,7 @@ namespace kernels {
     void single(char *dst, char *const *src)
     {
       kernels::cuda_launch_single << <blocks, threads>>>
-          (dst, array_wrapper<char *, Nsrc>(src), ckb.get());
+          (dst, detail::make_array_wrapper<Nsrc>(src), ckb.get());
       // check for CUDA errors here
     }
 
@@ -84,8 +56,8 @@ namespace kernels {
                  const intptr_t *src_stride, size_t count)
     {
       cuda_launch_strided << <blocks, threads>>>
-          (dst, dst_stride, array_wrapper<char *, Nsrc>(src),
-           array_wrapper<intptr_t, Nsrc>(src_stride), count, ckb.get());
+          (dst, dst_stride, detail::make_array_wrapper<Nsrc>(src),
+           detail::make_array_wrapper<Nsrc>(src_stride), count, ckb.get());
       // check for CUDA errors here
     }
 

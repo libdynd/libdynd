@@ -39,7 +39,7 @@ struct single_assigner_builtin_base_error<dst_type, src_type, assign_error_noche
     DYND_CUDA_HOST_DEVICE static void assign(dst_type *DYND_UNUSED(dst), const src_type *DYND_UNUSED(src)) {
         //DYND_TRACE_ASSIGNMENT(static_cast<float>(*src), float, *src, double);
 
-#ifdef DYND_CUDA_DEVICE_ARCH
+#ifdef __CUDA_ARCH__
         DYND_TRIGGER_ASSERT("assignment is not implemented for CUDA global memory");
 #else
         std::stringstream ss;
