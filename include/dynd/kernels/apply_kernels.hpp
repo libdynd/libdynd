@@ -372,7 +372,7 @@ namespace kernels {
       single<typename return_of<func_type>::type>(this, this, dst, src);       \
     }                                                                          \
                                                                                \
-    static intptr_t instantiate_without_wrapper(                               \
+    static intptr_t instantiate_without_cuda_launch(                           \
         const arrfunc_type_data *self,                                         \
         const arrfunc_type *DYND_UNUSED(self_tp), void *ckb,                   \
         intptr_t ckb_offset, const ndt::type &DYND_UNUSED(dst_tp),             \
@@ -438,9 +438,9 @@ namespace kernels {
       kernel_request_t kernreq, const eval::eval_context *ectx,
       const nd::array &kwds, const std::map<nd::string, ndt::type> &tp_vars)
   {
-    return instantiate_without_wrapper(self, self_tp, ckb, ckb_offset, dst_tp,
-                                       dst_arrmeta, src_tp, src_arrmeta,
-                                       kernreq, ectx, kwds, tp_vars);
+    return instantiate_without_cuda_launch(
+        self, self_tp, ckb, ckb_offset, dst_tp, dst_arrmeta, src_tp,
+        src_arrmeta, kernreq, ectx, kwds, tp_vars);
   }
 
 #ifdef __CUDACC__
@@ -457,26 +457,9 @@ namespace kernels {
       const nd::array &kwds, const std::map<nd::string, ndt::type> &tp_vars)
   {
     return cuda_launch_ck<Nsrc>::template instantiate<
-        &instantiate_without_wrapper>(self, self_tp, ckb, ckb_offset, dst_tp,
-                                      dst_arrmeta, src_tp, src_arrmeta, kernreq,
-                                      ectx, kwds, tp_vars);
-  }
-
-  APPLY_CALLABLE_CK(kernel_request_cuda_host_device, __host__ __device__);
-
-  template <typename func_type, int Nsrc>
-  intptr_t apply_callable_ck<kernel_request_cuda_host_device, func_type, Nsrc>::
-      instantiate(const arrfunc_type_data *self, const arrfunc_type *self_tp,
-                  void *ckb, intptr_t ckb_offset, const ndt::type &dst_tp,
-                  const char *dst_arrmeta, const ndt::type *src_tp,
-                  const char *const *src_arrmeta, kernel_request_t kernreq,
-                  const eval::eval_context *ectx, const nd::array &kwds,
-                  const std::map<nd::string, ndt::type> &tp_vars)
-  {
-    return cuda_launch_ck<Nsrc>::template instantiate<
-        &instantiate_without_wrapper>(self, self_tp, ckb, ckb_offset, dst_tp,
-                                      dst_arrmeta, src_tp, src_arrmeta, kernreq,
-                                      ectx, kwds, tp_vars);
+        &instantiate_without_cuda_launch>(
+        self, self_tp, ckb, ckb_offset, dst_tp, dst_arrmeta, src_tp,
+        src_arrmeta, kernreq, ectx, kwds, tp_vars);
   }
 
 #endif
@@ -506,7 +489,7 @@ namespace kernels {
       single<typename return_of<func_type>::type>(this, this, dst, src);       \
     }                                                                          \
                                                                                \
-    static intptr_t instantiate_without_wrapper(                               \
+    static intptr_t instantiate_without_cuda_launch(                           \
         const arrfunc_type_data *self,                                         \
         const arrfunc_type *DYND_UNUSED(self_tp), void *ckb,                   \
         intptr_t ckb_offset, const ndt::type &DYND_UNUSED(dst_tp),             \
@@ -573,9 +556,9 @@ namespace kernels {
       kernel_request_t kernreq, const eval::eval_context *ectx,
       const nd::array &kwds, const std::map<nd::string, ndt::type> &tp_vars)
   {
-    return instantiate_without_wrapper(self, self_tp, ckb, ckb_offset, dst_tp,
-                                       dst_arrmeta, src_tp, src_arrmeta,
-                                       kernreq, ectx, kwds, tp_vars);
+    return instantiate_without_cuda_launch(
+        self, self_tp, ckb, ckb_offset, dst_tp, dst_arrmeta, src_tp,
+        src_arrmeta, kernreq, ectx, kwds, tp_vars);
   }
 
 #undef APPLY_CALLABLE_CK
@@ -608,7 +591,7 @@ namespace kernels {
       single<typename return_of<func_type>::type>(this, dst, src);             \
     }                                                                          \
                                                                                \
-    static intptr_t instantiate_without_wrapper(                               \
+    static intptr_t instantiate_without_cuda_launch(                           \
         const arrfunc_type_data *DYND_UNUSED(self),                            \
         const arrfunc_type *DYND_UNUSED(self_tp), void *ckb,                   \
         intptr_t ckb_offset, const ndt::type &DYND_UNUSED(dst_tp),             \
@@ -668,9 +651,9 @@ namespace kernels {
                          const eval::eval_context *ectx, const nd::array &kwds,
                          const std::map<nd::string, ndt::type> &tp_vars)
   {
-    return instantiate_without_wrapper(self, self_tp, ckb, ckb_offset, dst_tp,
-                                       dst_arrmeta, src_tp, src_arrmeta,
-                                       kernreq, ectx, kwds, tp_vars);
+    return instantiate_without_cuda_launch(
+        self, self_tp, ckb, ckb_offset, dst_tp, dst_arrmeta, src_tp,
+        src_arrmeta, kernreq, ectx, kwds, tp_vars);
   }
 
 #ifdef __CUDACC__
@@ -690,9 +673,9 @@ namespace kernels {
                          const std::map<nd::string, ndt::type> &tp_vars)
   {
     return cuda_launch_ck<arity_of<func_type>::value>::template instantiate<
-        &instantiate_without_wrapper>(self, self_tp, ckb, ckb_offset, dst_tp,
-                                      dst_arrmeta, src_tp, src_arrmeta, kernreq,
-                                      ectx, kwds, tp_vars);
+        &instantiate_without_cuda_launch>(
+        self, self_tp, ckb, ckb_offset, dst_tp, dst_arrmeta, src_tp,
+        src_arrmeta, kernreq, ectx, kwds, tp_vars);
   }
 
 #endif

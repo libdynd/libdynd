@@ -202,7 +202,7 @@ DYND_CUDA_HOST_DEVICE unsigned int func3() { return 12U; }
 GET_CUDA_HOST_DEVICE_FUNC(func3)
 CUDA_HOST_DEVICE_FUNC_AS_CALLABLE(func3);
 
-DYND_CUDA_HOST_DEVICE double func4(const double (&x)[3], const double (&y)[3])
+DYND_CUDA_HOST_DEVICE double func4(double (&x)[3], double (&y)[3])
 {
   return x[0] * y[0] + x[1] * y[1] + x[2] * y[2];
 }
@@ -433,6 +433,25 @@ TYPED_TEST_P(Apply, Callable)
   af = nd::functional::apply<TestFixture::KernelRequest,
                              func3_as_callable<TestFixture::KernelRequest>>();
   EXPECT_ARR_EQ(TestFixture::To(12U), af());
+
+//  double (*func)(const double (&)[3], const double (&)[3]) = get_func4<TestFixture::KernelRequest>();
+//  af = nd::functional::apply<TestFixture::KernelRequest>(
+  //    get_func4<TestFixture::KernelRequest>());
+ // EXPECT_ARR_EQ(TestFixture::To(167.451),
+   //             af(TestFixture::To({9.25, -2.7, 15.375}),
+     //              TestFixture::To({0.0, 0.62, 11.0})));
+
+  af = nd::functional::apply<TestFixture::KernelRequest>(
+      func4_as_callable<TestFixture::KernelRequest>());
+  EXPECT_ARR_EQ(TestFixture::To(167.451),
+                af(TestFixture::To({9.25, -2.7, 15.375}),
+                   TestFixture::To({0.0, 0.62, 11.0})));
+
+  af = nd::functional::apply<TestFixture::KernelRequest,
+                             func4_as_callable<TestFixture::KernelRequest>>();
+  EXPECT_ARR_EQ(TestFixture::To(167.451),
+                af(TestFixture::To({9.25, -2.7, 15.375}),
+                   TestFixture::To({0.0, 0.62, 11.0})));
 
   af = nd::functional::apply<TestFixture::KernelRequest>(
       get_func6<TestFixture::KernelRequest>());
