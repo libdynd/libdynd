@@ -368,7 +368,7 @@ T arg(complex<T> z)
 }
 
 template <typename T>
-inline complex<T> exp(complex<T> z)
+DYND_CUDA_HOST_DEVICE complex<T> exp(complex<T> z)
 {
   using namespace std;
   T x, c, s;

@@ -443,6 +443,8 @@ namespace ndt {
     }
   };
 
+#ifdef DYND_CUDA
+
   template <typename R, typename... A>
   struct as_arrfunc_type<kernel_request_cuda_device, R(A...)> {
     static ndt::type make()
@@ -487,34 +489,6 @@ namespace ndt {
       arg_tp.flag_as_immutable();
       return make_arrfunc(ndt::make_tuple(arg_tp),
                           make_cuda_device(make_type<R>()));
-    }
-  };
-
-#ifdef DYND_CUDA
-
-  template <typename R, typename... A>
-  struct as_arrfunc_type<kernel_request_cuda_host_device, R(A...)> {
-    static ndt::type make()
-    {
-      ndt::type arg_tp[sizeof...(A)] = {
-          make_typevar_constructed(make_type<typename std::remove_cv<
-              typename std::remove_reference<A>::type>::type>())...};
-      return make_arrfunc(ndt::make_tuple(arg_tp),
-                          make_typevar_constructed(make_type<R>()));
-    }
-
-    template <typename... T>
-    static ndt::type make(T &&... names)
-    {
-      ndt::type arg_tp[sizeof...(A)] = {
-          make_typevar_constructed(make_type<typename std::remove_cv<
-              typename std::remove_reference<A>::type>::type>())...};
-      return make_arrfunc(
-          ndt::make_tuple(nd::array(arg_tp, sizeof...(A) - sizeof...(T))),
-          ndt::make_struct(
-              {names...},
-              nd::array(arg_tp + (sizeof...(A) - sizeof...(T)), sizeof...(T))),
-          make_typevar_constructed(make_type<R>()));
     }
   };
 
