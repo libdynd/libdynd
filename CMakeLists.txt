@@ -754,6 +754,13 @@ if (DYND_INSTALL_LIB)
         RUNTIME DESTINATION lib${LIB_SUFFIX}
         LIBRARY DESTINATION lib${LIB_SUFFIX}
         ARCHIVE DESTINATION lib${LIB_SUFFIX}/static)
+    # Install the libdynddev binary
+    if(DYND_CUDA)
+        install(TARGETS libdynddev
+            RUNTIME DESTINATION lib${LIB_SUFFIX}
+            LIBRARY DESTINATION lib${LIB_SUFFIX}
+            ARCHIVE DESTINATION lib${LIB_SUFFIX})
+    endif()
     # Install the libdynd headers
     install(DIRECTORY "include/dynd"
             DESTINATION "${CMAKE_INSTALL_PREFIX}/include")

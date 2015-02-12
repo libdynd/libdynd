@@ -485,8 +485,11 @@ public:
 
     bool is_cuda_device_readable() const
     {
-      return !is_builtin() &&
-             (m_extended->get_type_id() == cuda_device_type_id);
+      if (is_builtin()) {
+        return get_kind() == void_kind;
+      }
+
+      return m_extended->get_type_id() == cuda_device_type_id;
     }
 
 #endif
