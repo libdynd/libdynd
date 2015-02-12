@@ -17,17 +17,17 @@ namespace kernels {
 
   template <int N>
   struct permute_ck<N, true>
-      : expr_ck<permute_ck<N, true>, kernel_request_host, N> {
+      : expr_ck<permute_ck<N, true>, kernel_request_cuda_host_device, N> {
     typedef permute_ck self_type;
 
     intptr_t perm[N];
 
-    permute_ck(const intptr_t *perm)
+    DYND_CUDA_HOST_DEVICE permute_ck(const intptr_t *perm)
     {
       memcpy(this->perm, perm, sizeof(this->perm));
     }
 
-    void single(char *dst, char *const *src)
+    DYND_CUDA_HOST_DEVICE void single(char *dst, char *const *src)
     {
       char *src_inv_perm[N];
       inv(src_inv_perm, dst, src);
@@ -37,7 +37,7 @@ namespace kernels {
       single(NULL, src_inv_perm, child);
     }
 
-    void strided(char *dst, intptr_t dst_stride, char *const *src,
+    DYND_CUDA_HOST_DEVICE void strided(char *dst, intptr_t dst_stride, char *const *src,
                  const intptr_t *src_stride, size_t count)
     {
       char *src_inv_perm[N];
@@ -82,8 +82,7 @@ namespace kernels {
     }
 
   private:
-    template <typename T>
-    static void inv(T *src_inv, const T &dst, const T *src,
+    static void inv(ndt::type *src_inv, const ndt::type &dst, const ndt::type *src,
                             const intptr_t *perm)
     {
       for (intptr_t i = 0; i < N; ++i) {
@@ -97,7 +96,25 @@ namespace kernels {
     }
 
     template <typename T>
-    void inv(T *src_inv, const T &dst, const T *src) {
+    DYND_CUDA_HOST_DEVICE static void inv(T *src_inv, const T &dst, const T *src,
+                            const intptr_t *perm)
+    {
+      for (intptr_t i = 0; i < N; ++i) {
+        intptr_t j = perm[i];
+        if (j == -1) {
+          src_inv[i] = dst;
+        } else {
+          src_inv[i] = src[j];
+        }
+      }
+    }
+
+    DYND_CUDA_HOST_DEVICE void inv(ndt::type *src_inv, const ndt::type &dst, const ndt::type *src) {
+      return inv(src_inv, dst, src, perm);
+    }
+
+    template <typename T>
+    DYND_CUDA_HOST_DEVICE void inv(T *src_inv, const T &dst, const T *src) {
       return inv(src_inv, dst, src, perm);
     }
   };
