@@ -20,6 +20,7 @@ int func(int x, int y) {
   return x + y;
 }
 
+/*
 static void BM_Func_Call(benchmark::State &state)
 {
   int a = 10;
@@ -31,6 +32,7 @@ static void BM_Func_Call(benchmark::State &state)
 }
 
 BENCHMARK(BM_Func_Call);
+*/
 
 static void BM_Func_Apply_Function(benchmark::State &state)
 {
