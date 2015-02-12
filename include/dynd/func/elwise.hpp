@@ -178,7 +178,7 @@ namespace kernels {
                 const std::map<dynd::nd::string, ndt::type> &tp_vars)
     {
       intptr_t dst_ndim = dst_tp.get_ndim();
-      if (!child_tp->get_return_type().is_symbolic()) {
+      if (!child_tp->get_return_type().is_symbolic() || child_tp->get_return_type().get_type_id() == typevar_constructed_type_id) {
         dst_ndim -= child_tp->get_return_type().get_ndim();
       }
 
@@ -293,6 +293,8 @@ namespace kernels {
     {
       intptr_t dst_ndim = dst_tp.get_ndim();
       if (!child_tp->get_return_type().is_symbolic()) {
+        dst_ndim -= child_tp->get_return_type().get_ndim();
+      } else if (child_tp->get_return_type().get_type_id() == typevar_constructed_type_id) {
         dst_ndim -= child_tp->get_return_type().get_ndim();
       }
 

@@ -541,6 +541,7 @@ if (DYND_CUDA)
             # Func
             src/dynd/func/arithmetic.cpp
             src/dynd/func/elwise.cpp
+            src/dynd/func/permute.cpp
             src/dynd/func/random.cpp
             # Kernels
             src/dynd/kernels/assignment_kernels.cpp

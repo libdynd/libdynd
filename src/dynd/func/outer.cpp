@@ -28,14 +28,29 @@ ndt::type nd::functional::outer_make_type(const arrfunc_type *child_tp)
       pt[i] = pt[i].extended<base_memory_type>()->with_replaced_storage_type(
           ndt::make_ellipsis_dim(dimsname,
                                  param_types[i].without_memory_type()));
+    } else if (param_types[i].get_type_id() == typevar_constructed_type_id) {
+      pt[i] = ndt::make_typevar_constructed(
+          param_types[i].extended<typevar_constructed_type>()->get_name(),
+          ndt::make_ellipsis_dim(
+              dimsname, param_types[i].extended<typevar_constructed_type>()->get_arg()));
     } else {
       pt[i] = ndt::make_ellipsis_dim(dimsname, param_types[i]);
     }
   }
 
   ndt::type kwd_tp = child_tp->get_kwd_struct();
-  ndt::type ret_tp =
-      ndt::make_ellipsis_dim("Dims", child_tp->get_return_type());
+
+  ndt::type ret_tp = child_tp->get_return_type();
+  if (ret_tp.get_kind() == memory_kind) {
+    throw std::runtime_error("outer -- need to fix this");
+  } else if (ret_tp.get_type_id() == typevar_constructed_type_id) {
+    ret_tp = ndt::make_typevar_constructed(
+        ret_tp.extended<typevar_constructed_type>()->get_name(),
+        ndt::make_ellipsis_dim(
+            "Dims", ret_tp.extended<typevar_constructed_type>()->get_arg()));
+  } else {
+    ret_tp = ndt::make_ellipsis_dim("Dims", child_tp->get_return_type());
+  }
 
   return ndt::make_arrfunc(ndt::make_tuple(out_param_types), kwd_tp, ret_tp);
 }
@@ -77,8 +92,15 @@ intptr_t nd::functional::outer_instantiate(
     }
     j += old_tp.get_ndim();
     for (; old_tp.get_ndim(); ++k) {
+      if (new_tp.get_kind() == memory_kind) {
+        new_tp.extended<base_memory_type>()
+            ->get_element_type()
+            .extended<base_dim_type>()
+            ->arrmeta_copy_construct_onedim(new_arrmeta, src_arrmeta[i], NULL);
+      } else {
       new_tp.extended<base_dim_type>()->arrmeta_copy_construct_onedim(
           new_arrmeta, src_arrmeta[i], NULL);
+      }
       old_tp =
           old_tp.get_type_at_dimension(const_cast<char **>(src_arrmeta + i), 1);
       new_tp = new_tp.get_type_at_dimension(&new_arrmeta, 1);
@@ -113,13 +135,21 @@ int nd::functional::outer_resolve_dst_type_with_child(
       return 0;
     }
   } else {
-    dst_tp = child_tp->get_return_type();
+    dst_tp =
+        ndt::substitute(child_tp->get_return_type(), tp_vars, false);
   }
 
+  ndt::type tp = dst_tp.without_memory_type();
   for (intptr_t i = nsrc - 1; i >= 0; --i) {
-    if (!src_tp[i].is_scalar()) {
-      dst_tp = src_tp[i].with_replaced_dtype(dst_tp);
+    if (!src_tp[i].without_memory_type().is_scalar()) {
+      tp = src_tp[i].without_memory_type().with_replaced_dtype(tp);
     }
+  }
+  if (dst_tp.get_kind() == memory_kind) {
+    dst_tp =
+        dst_tp.extended<base_memory_type>()->with_replaced_storage_type(tp);
+  } else {
+    dst_tp = tp;
   }
 
   return 1;
