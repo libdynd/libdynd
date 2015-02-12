@@ -135,7 +135,6 @@ FUNC_WRAPPER(kernel_request_cuda_device, __device__);
   __global__ void get_cuda_device_##NAME(void *res)                            \
   {                                                                            \
     *reinterpret_cast<decltype(&NAME) *>(res) = &NAME;                         \
-    printf("got cuda_device_func\n"); \
   }                                                                            \
                                                                                \
   template <kernel_request_t kernreq>                                          \
@@ -291,10 +290,11 @@ TEST(Apply, Function)
     EXPECT_ARR_EQ(TestFixture::To(166.765), af(nd::array({9.14, -2.7, 15.32}),
                                                nd::array({0.0, 0.65, 11.0})));
 
+
   af = nd::functional::apply<kernel_request_host, decltype(&func5), &func5>();
-  EXPECT_EQ(1251L, af(nd::array({{1242L, 23L, -5L}, {925L, -836L, -14L}})
-                          .view(ndt::make_type<long[2][3]>())).as<long>());
+  EXPECT_ARR_EQ(TestFixture::To(1251L), af(TestFixture::To({{1242L, 23L, -5L}, {925L, -836L, -14L}})));
   */
+
 
   af = nd::functional::apply<kernel_request_host, decltype(&func6), &func6>();
   EXPECT_ARR_EQ(TestFixture::To(8),
