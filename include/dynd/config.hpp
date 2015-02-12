@@ -5,11 +5,17 @@
 
 #pragma once
 
+#include <assert.h>
+#include <cmath>
 #include <cstdlib>
 #include <stdint.h>
 #include <limits>
 
 #include <dynd/cmake_config.hpp>
+
+#ifdef DYND_CUDA
+#include <cuda_runtime.h>
+#endif
 
 /** The number of elements to process at once when doing chunking/buffering */
 #define DYND_BUFFER_CHUNK_SIZE 128
@@ -458,4 +464,168 @@ void libdynd_cleanup();
 bool built_with_cuda();
 } // namespace dynd
 
-#include <dynd/cuda_config.hpp>
+#ifdef __CUDACC__ // We are compiling with NVIDIA's nvcc
+
+// A function that is compiled for both the host and the device
+#define DYND_CUDA_HOST_DEVICE __host__ __device__
+
+#else // We are not compiling with NVIDIA's nvcc
+
+#define DYND_CUDA_HOST_DEVICE
+
+namespace dynd {
+template <typename T>
+inline bool isinf(T arg)
+{
+#ifndef _MSC_VER
+  return (std::isinf)(arg);
+#else
+  return arg == std::numeric_limits<double>::infinity() ||
+         arg == -std::numeric_limits<double>::infinity();
+#endif
+}
+} // namespace dynd
+
+#endif // __CUDACC_
+
+namespace dynd {
+
+// Prevent from nvcc clashing with cmath
+template <typename T>
+inline bool isfinite(T arg)
+{
+#ifndef _MSC_VER
+  return (std::isfinite)(arg);
+#else
+  return _finite(arg) != 0;
+#endif
+}
+
+template <size_t I>
+DYND_CUDA_HOST_DEVICE typename std::enable_if<I != 0, intptr_t>::type
+get_thread_id()
+{
+  return 0;
+}
+
+template <size_t I>
+DYND_CUDA_HOST_DEVICE typename std::enable_if<I == 0, intptr_t>::type
+get_thread_id()
+{
+#ifdef __CUDA_ARCH__
+  return blockIdx.x * blockDim.x + threadIdx.x;
+#else
+  return 0;
+#endif
+}
+
+template <size_t I>
+DYND_CUDA_HOST_DEVICE typename std::enable_if<I != 0, intptr_t>::type
+get_thread_count()
+{
+  return 1;
+}
+
+template <size_t I>
+DYND_CUDA_HOST_DEVICE typename std::enable_if<I == 0, intptr_t>::type
+get_thread_count()
+{
+#ifdef __CUDA_ARCH__
+  return gridDim.x * blockDim.x;
+#else
+  return 1;
+#endif
+}
+
+template <size_t I>
+DYND_CUDA_HOST_DEVICE typename std::enable_if<I != 0, intptr_t>::type
+get_thread_local_count(size_t count)
+{
+  return count;
+}
+
+template <size_t I>
+DYND_CUDA_HOST_DEVICE typename std::enable_if<I == 0, intptr_t>::type
+get_thread_local_count(size_t count)
+{
+  size_t thread_id = get_thread_id<I>();
+  size_t thread_count = get_thread_count<I>();
+
+  if (thread_id < count % thread_count) {
+    return count / thread_count + 1;
+  } else {
+    return count / thread_count;
+  }
+}
+
+template <size_t I>
+DYND_CUDA_HOST_DEVICE typename std::enable_if<I != 0, intptr_t>::type
+get_thread_local_offset(size_t DYND_UNUSED(count))
+{
+  return 0;
+}
+
+template <size_t I>
+DYND_CUDA_HOST_DEVICE typename std::enable_if<I == 0, intptr_t>::type
+get_thread_local_offset(size_t count)
+{
+  size_t thread_id = get_thread_id<I>();
+  size_t thread_count = get_thread_count<I>();
+
+  if (thread_id < count % thread_count) {
+    return thread_id * (count / thread_count + 1);
+  } else {
+    return thread_id * count / thread_count + count % thread_count;
+  }
+}
+
+} // namespace dynd
+
+namespace dynd {
+namespace detail {
+
+  template <typename T, int N>
+  class array_wrapper {
+    T m_data[N];
+
+  public:
+    array_wrapper(const T *data) { memcpy(m_data, data, sizeof(m_data)); }
+
+    DYND_CUDA_HOST_DEVICE operator T *() { return m_data; }
+
+    DYND_CUDA_HOST_DEVICE operator const T *() const { return m_data; }
+  };
+
+  template <typename T>
+  class array_wrapper<T, 0> {
+  public:
+    array_wrapper(const T *DYND_UNUSED(data)) {}
+
+    DYND_CUDA_HOST_DEVICE operator T *() { return NULL; }
+
+    DYND_CUDA_HOST_DEVICE operator const T *() const { return NULL; }
+  };
+
+  template <int N, typename T>
+  array_wrapper<T, N> make_array_wrapper(const T *data) {
+    return array_wrapper<T, N>(data);
+  }
+
+  template <typename T>
+  class value_wrapper {
+    T m_value;
+
+  public:
+    value_wrapper(const T &value) : m_value(value) {}
+
+    DYND_CUDA_HOST_DEVICE operator T() const { return m_value; }
+  };
+
+  template <typename T>
+  value_wrapper<T> make_value_wrapper(const T &value)
+  {
+    return value_wrapper<T>(value);
+  }
+
+} // namespace dynd::detail
+} // namespace dynd

@@ -75,7 +75,7 @@ namespace kernels {
       inv(src_arrmeta_inv, dst_arrmeta, src_arrmeta, perm);
 
       self_type::create(ckb, kernreq, ckb_offset,
-                        array_wrapper<intptr_t, N>(perm));
+                        detail::make_array_wrapper<N>(perm));
       return child->instantiate(child, child_tp, ckb, ckb_offset,
                                 ndt::make_type<void>(), NULL, src_tp_inv,
                                 src_arrmeta_inv, kernreq, ectx, kwds, tp_vars);
@@ -148,7 +148,7 @@ namespace kernels {
       inv_permute(src_arrmeta_inv, src_arrmeta, perm);
 
       self_type::create(ckb, kernreq, ckb_offset,
-                        array_wrapper<intptr_t, N>(perm));
+                        detail::make_array_wrapper<N>(perm));
       return child->instantiate(child, child_tp, ckb, ckb_offset, dst_tp,
                                 dst_arrmeta, src_tp_inv, src_arrmeta_inv,
                                 kernreq, ectx, kwds, tp_vars);

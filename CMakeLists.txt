@@ -479,7 +479,6 @@ set(libdynd_SRC
     include/dynd/config.hpp
     include/dynd/cmake_config.hpp.in # Included here for ease of editing in IDEs
     ${CMAKE_CURRENT_BINARY_DIR}/include/dynd/cmake_config.hpp
-    include/dynd/cuda_config.hpp
     include/dynd/cling_all.hpp
     include/dynd/diagnostics.hpp
     include/dynd/dim_iter.hpp

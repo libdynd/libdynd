@@ -225,7 +225,7 @@ namespace kernels {
       }
 
       self_type::create(ckb, kernreq, ckb_offset, size, dst_stride,
-                        kernels::array_wrapper<intptr_t, N>(src_stride));
+                        detail::make_array_wrapper<N>(src_stride));
       kernreq = (kernreq & kernel_request_memory) | kernel_request_strided;
 
       // If there are still dimensions to broadcast, recursively lift more
@@ -251,8 +251,7 @@ namespace kernels {
     intptr_t size;
     intptr_t dst_stride;
 
-    DYND_CUDA_HOST_DEVICE elwise_ck(intptr_t size, intptr_t dst_stride,
-                                    const intptr_t *DYND_UNUSED(src_stride))
+    DYND_CUDA_HOST_DEVICE elwise_ck(intptr_t size, intptr_t dst_stride)
         : size(size), dst_stride(dst_stride)
     {
     }
@@ -309,8 +308,7 @@ namespace kernels {
         throw type_error(ss.str());
       }
 
-      self_type::create(ckb, kernreq, ckb_offset, size, dst_stride,
-                        kernels::array_wrapper<intptr_t, 0>(NULL));
+      self_type::create(ckb, kernreq, ckb_offset, size, dst_stride);
       kernreq = (kernreq & kernel_request_memory) | kernel_request_strided;
 
       bool finished = dst_ndim == 1;
