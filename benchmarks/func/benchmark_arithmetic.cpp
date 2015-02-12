@@ -24,7 +24,7 @@ static void BM_Func_Arithmetic_Add(benchmark::State &state)
   nd::array b = nd::random::uniform(kwds("dst_tp", ndt::make_fixed_dim(size, ndt::make_type<float>())));
   nd::array c = nd::empty(ndt::make_fixed_dim(size, ndt::make_type<float>()));
   while (state.KeepRunning()) {
-    static_cast<nd::arrfunc>(nd::add).call_out(a, b, c);
+    nd::add(a, b, kwds("dst", c));
   }
 }
 
@@ -39,7 +39,7 @@ static void BM_Func_Arithmetic_CUDADevice_Add(benchmark::State &state)
   b = b.to_cuda_device();
   nd::array c = nd::empty(ndt::make_cuda_device(ndt::make_fixed_dim(size, ndt::make_type<float>())));
   while (state.KeepRunning()) {
-    static_cast<nd::arrfunc>(nd::add).call_out(a, b, c);
+    nd::add(a, b, kwds("dst", c));
   }
 }
 
@@ -53,7 +53,7 @@ static void BM_Func_Arithmetic_Mul(benchmark::State &state)
   nd::array b = nd::random::uniform(kwds("dst_tp", ndt::make_fixed_dim(size, ndt::make_type<float>())));
   nd::array c = nd::empty(ndt::make_fixed_dim(size, ndt::make_type<float>()));
   while (state.KeepRunning()) {
-    static_cast<nd::arrfunc>(nd::mul).call_out(a, b, c);
+    nd::mul(a, b, kwds("dst", c));
   }
 }
 
@@ -69,7 +69,7 @@ static void BM_Func_Arithmetic_CUDADevice_Mul(benchmark::State &state)
   b = b.to_cuda_device();
   nd::array c = nd::empty(ndt::make_cuda_device(ndt::make_fixed_dim(size, ndt::make_type<float>())));
   while (state.KeepRunning()) {
-    static_cast<nd::arrfunc>(nd::mul).call_out(a, b, c);
+    nd::mul(a, b, kwds("dst", c));
   }
 }
 

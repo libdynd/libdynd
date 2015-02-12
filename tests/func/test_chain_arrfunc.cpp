@@ -32,10 +32,10 @@ TEST(ChainArrFunc, Simple) {
   const nd::arrfunc &chained = make_chain_arrfunc(
       copy, func::get_regfunction("sin"), ndt::make_type<double>());
   nd::array a = nd::empty<double>();
-  chained.call_out("0", a);
+  chained("0", kwds("dst", a));
   EXPECT_EQ(0., a.as<double>());
-  chained.call_out("1.5", a);
+  chained("1.5", kwds("dst", a));
   EXPECT_DOUBLE_EQ(sin(1.5), a.as<double>());
-  chained.call_out(3.1, a);
+  chained(3.1, kwds("dst", a));
   EXPECT_DOUBLE_EQ(sin(3.1), a.as<double>());
 }
