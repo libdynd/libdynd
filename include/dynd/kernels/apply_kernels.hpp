@@ -533,8 +533,7 @@ namespace kernels {
     {                                                                          \
                                                                                \
       self_type::create(                                                       \
-          ckb, kernreq, ckb_offset,                                            \
-          detail::make_value_wrapper(*self->get_data_as<func_type *>()),       \
+          ckb, kernreq, ckb_offset, *self->get_data_as<func_type *>(),         \
           args_type(src_tp, src_arrmeta, kwds), kwds_type(kwds));              \
       return ckb_offset;                                                       \
     }                                                                          \
