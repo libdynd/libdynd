@@ -146,11 +146,6 @@ namespace dynd {
     }                                                                          \
                                                                                \
     extern decl::NAME NAME;                                                    \
-                                                                               \
-    array operator SYMBOL(const array &a0, const array &a1)                    \
-    {                                                                          \
-      return NAME(a0, a1);                                                     \
-    }                                                                          \
   }
 
 ARITHMETIC_OPERATOR(add, +);
