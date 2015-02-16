@@ -562,7 +562,7 @@ if (DYND_CUDA)
     set(CUDA_SEPARABLE_COMPILATION ON)
 
     if(NOT WIN32)
-        set(CUDA_NVCC_FLAGS ${CUDA_NVCC_FLAGS};-std=c++11;-Xcompiler;-fPIC)
+        set(CUDA_NVCC_FLAGS ${CUDA_NVCC_FLAGS};-std=c++11;-Xcompiler;-fPIC;-Xcompiler;-O3;-Xcompiler;-fvectorize)
     endif()
 
     # Make some warnings into errors and inhibit other warnings
