@@ -4,6 +4,7 @@
 //
 
 #include <dynd/func/arithmetic.hpp>
+#include <dynd/array.hpp>
 
 using namespace std;
 using namespace dynd;
@@ -58,3 +59,23 @@ nd::decl::add nd::add;
 nd::decl::sub nd::sub;
 nd::decl::mul nd::mul;
 nd::decl::div nd::div;
+
+nd::array nd::operator+(const nd::array &a0, const nd::array &a1)
+{
+  return nd::add(a0, a1);
+}
+
+nd::array nd::operator-(const nd::array &a0, const nd::array &a1)
+{
+  return nd::sub(a0, a1);
+}
+
+nd::array nd::operator*(const nd::array &a0, const nd::array &a1)
+{
+  return nd::mul(a0, a1);
+}
+
+nd::array nd::operator/(const nd::array &a0, const nd::array &a1)
+{
+  return nd::div(a0, a1);
+}
