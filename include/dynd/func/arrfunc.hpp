@@ -527,8 +527,8 @@ namespace nd {
         bool has_dst_tp = false;
 
         for (intptr_t i = 0; i < m_size; ++i) {
-          check_name(af_tp, dst, m_names[i], m_values[i], has_dst_tp, kwd_tp.data(),
-                     available, tp_vars);
+          check_name(af_tp, dst, m_names[i], m_values[i], has_dst_tp,
+                     kwd_tp.data(), available, tp_vars);
         }
 
         intptr_t nkwd = m_size;
