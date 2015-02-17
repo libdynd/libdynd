@@ -9,10 +9,6 @@
 #include <stdexcept>
 #include <vector>
 
-#ifdef DYND_CUDA
-#include <cuda_runtime.h>
-#endif // DYND_CUDA
-
 #include <dynd/irange.hpp>
 #include <dynd/string_encodings.hpp>
 #include <dynd/kernels/comparison_kernels.hpp>

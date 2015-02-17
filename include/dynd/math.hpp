@@ -5,8 +5,6 @@
 
 #pragma once
 
-#include <dynd/types/complex.hpp>
-
 namespace dynd {
 
 template <typename T>
@@ -49,7 +47,7 @@ template <typename T>
 DYND_CUDA_HOST_DEVICE T _1_by_sqrt_2(); // 1 / sqrt(2)
 
 template <typename T>
-DYND_CUDA_HOST_DEVICE complex<T> _i(); // complex<T>(0, 1)
+DYND_CUDA_HOST_DEVICE T _nan(const char *arg); // nan
 
 template <>
 DYND_CUDA_HOST_DEVICE inline float _e<float>()
@@ -130,9 +128,13 @@ DYND_CUDA_HOST_DEVICE inline float _1_by_sqrt_2<float>()
 }
 
 template <>
-DYND_CUDA_HOST_DEVICE inline complex<float> _i<float>()
+DYND_CUDA_HOST_DEVICE inline float _nan(const char *arg)
 {
-  return complex<float>(0.0f, 1.0f);
+#ifdef __CUDACC__
+  return ::nanf(arg);
+#else
+  return std::nanf(arg);
+#endif
 }
 
 template <>
@@ -214,9 +216,13 @@ DYND_CUDA_HOST_DEVICE inline double _1_by_sqrt_2<double>()
 }
 
 template <>
-DYND_CUDA_HOST_DEVICE inline complex<double> _i<double>()
+DYND_CUDA_HOST_DEVICE inline double _nan(const char *arg)
 {
-  return complex<double>(0.0, 1.0);
+#ifdef __CUDACC__
+  return ::nan(arg);
+#else
+  return std::nan(arg);
+#endif
 }
 
 } // namespace dynd

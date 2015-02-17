@@ -12,6 +12,7 @@
 #include "dynd_assertions.hpp"
 
 #include <dynd/array.hpp>
+#include <dynd/math.hpp>
 
 using namespace std;
 using namespace dynd;
@@ -28,16 +29,16 @@ class ComplexType : public ::testing::Test {
 
 TYPED_TEST_CASE_P(ComplexType);
 
-/*
 TEST(Complex, Math) {
-    dynd_complex<double> z;
+    dynd::complex<double> z;
     typedef std::complex<double> cdbl;
     typedef std::complex<double> cdbl;
 
-    z = dynd_complex<double>(0.0, 0.0);
+    z = dynd::complex<double>(0.0, 0.0);
     EXPECT_DOUBLE_EQ(abs(z), abs(cdbl(z)));
     EXPECT_DOUBLE_EQ(arg(z), arg(cdbl(z)));
-    EXPECT_COMPLEX_DOUBLE_EQ(exp(z), exp(cdbl(z)));
+    EXPECT_COMPLEX_DOUBLE_EQ(dynd::exp(z), exp(cdbl(z)));
+/*
     EXPECT_COMPLEX_DOUBLE_EQ(log(z), log(cdbl(z)));
     EXPECT_COMPLEX_DOUBLE_EQ(sqrt(z), sqrt(cdbl(z)));
     EXPECT_COMPLEX_DOUBLE_EQ(pow(z, 1.0), pow(cdbl(z), 1.0));
@@ -144,8 +145,8 @@ testing.
     EXPECT_COMPLEX_DOUBLE_EQ(sqrt(z), sqrt(cdbl(z)));
     EXPECT_COMPLEX_DOUBLE_EQ(cos(z), cos(cdbl(z)));
     EXPECT_COMPLEX_DOUBLE_EQ(sin(z), sin(cdbl(z)));
-}
 */
+}
 
 #undef ASSERT_COMPLEX_DOUBLE_EQ
 

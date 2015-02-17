@@ -10,6 +10,7 @@
 #include <limits>
 
 #include <dynd/config.hpp>
+#include <dynd/math.hpp>
 #include <dynd/typed_data_assign.hpp>
 
 namespace dynd {
@@ -356,6 +357,21 @@ std::ostream &operator<<(std::ostream &out, const complex<T> &val)
 }
 
 template <typename T>
+DYND_CUDA_HOST_DEVICE complex<T> _i(); // complex<T>(0, 1)
+
+template <>
+DYND_CUDA_HOST_DEVICE inline complex<float> _i<float>()
+{
+  return complex<float>(0.0f, 1.0f);
+}
+
+template <>
+DYND_CUDA_HOST_DEVICE inline complex<double> _i<double>()
+{
+  return complex<double>(0.0, 1.0);
+}
+
+template <typename T>
 T abs(complex<T> z)
 {
   return static_cast<T>(hypot(z.real(), z.imag()));
@@ -370,7 +386,6 @@ T arg(complex<T> z)
 template <typename T>
 DYND_CUDA_HOST_DEVICE complex<T> exp(complex<T> z)
 {
-  using namespace std;
   T x, c, s;
   T r = z.real(), i = z.imag();
   complex<T> ret;
@@ -384,16 +399,16 @@ DYND_CUDA_HOST_DEVICE complex<T> exp(complex<T> z)
     if (isfinite(i)) {
       ret = complex<T>(x * c, x * s);
     } else {
-      ret = complex<T>(std::numeric_limits<T>::quiet_NaN(),
-                            copysign(std::numeric_limits<T>::quiet_NaN(), i));
+      ret = complex<T>(_nan<T>(NULL),
+                            copysign(_nan<T>(NULL), i));
     }
-  } else if (DYND_ISNAN(r)) {
+  } else if (isnan(r)) {
     // r is nan
     if (i == 0) {
       ret = complex<T>(r, 0);
     } else {
       ret =
-          complex<T>(r, copysign(std::numeric_limits<T>::quiet_NaN(), i));
+          complex<T>(r, copysign(_nan<T>(NULL), i));
     }
   } else {
     // r is +- inf
@@ -407,7 +422,7 @@ DYND_CUDA_HOST_DEVICE complex<T> exp(complex<T> z)
         ret = complex<T>(r * c, r * s);
       } else {
         // x = +inf, y = +-inf | nan
-        ret = complex<T>(r, std::numeric_limits<T>::quiet_NaN());
+        ret = complex<T>(r, _nan<T>(NULL));
       }
     } else {
       if (isfinite(i)) {

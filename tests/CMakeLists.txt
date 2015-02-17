@@ -119,6 +119,7 @@ if (DYND_CUDA)
             func/test_apply.cpp
             func/test_elwise.cpp
             func/test_random.cpp
+            types/test_complex_type.cpp
         )
         get_filename_component(filename_DIR ${filename_CPP} PATH)
         get_filename_component(filename_WE ${filename_CPP} NAME_WE)
