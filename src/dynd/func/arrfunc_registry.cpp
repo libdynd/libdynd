@@ -11,6 +11,7 @@
 #include <dynd/func/elwise.hpp>
 #include <dynd/func/multidispatch.hpp>
 #include <dynd/func/random.hpp>
+#include <dynd/func/arithmetic.hpp>
 
 using namespace std;
 using namespace dynd;
@@ -164,11 +165,15 @@ void init::arrfunc_registry_init()
   registry = new map<nd::string, nd::arrfunc>;
 
   // Arithmetic
+/*
   func::set_regfunction(
       "add", make_ufunc(add<int32_t>(), add<int64_t>(), add<dynd_int128>(),
                         add<uint32_t>(), add<uint64_t>(), add<dynd_uint128>(),
                         add<float>(), add<double>(), add<complex<float>>(),
                         add<complex<double>>()));
+*/
+  func::set_regfunction("add", nd::add);
+
   func::set_regfunction(
       "subtract",
       make_ufunc(subtract<int32_t>(), subtract<int64_t>(),

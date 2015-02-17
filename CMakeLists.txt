@@ -88,7 +88,7 @@ if(WIN32)
         set(DYND_BUILD_BENCHMARKS OFF)
     endif()
 else()
-    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11 -g -fomit-frame-pointer -fstrict-aliasing -Wall -Wextra -Werror -Wno-missing-field-initializers")
+    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11 -fomit-frame-pointer -fstrict-aliasing -Wall -Wextra -Werror -Wno-missing-field-initializers")
     if (DYND_CUDA)
         # This is a workaround for a FindCUDA bug, which will be fixed in an upcoming version
         if ("${CMAKE_BUILD_TYPE}" STREQUAL "")
@@ -562,7 +562,7 @@ if (DYND_CUDA)
     set(CUDA_SEPARABLE_COMPILATION ON)
 
     if(NOT WIN32)
-        set(CUDA_NVCC_FLAGS ${CUDA_NVCC_FLAGS};-std=c++11;-Xcompiler;-fPIC)
+        set(CUDA_NVCC_FLAGS ${CUDA_NVCC_FLAGS};-std=c++11;-Xcompiler;-fPIC;-Xcompiler;-O3;-Xcompiler;-fvectorize)
     endif()
 
     # Make some warnings into errors and inhibit other warnings

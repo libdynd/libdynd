@@ -164,6 +164,16 @@ namespace kernels {
       *reinterpret_cast<double *>(dst) = curand_uniform_double(s);
     }
 
+    __device__ void strided(char *dst, intptr_t dst_stride, char *const *DYND_UNUSED(src),
+                            const intptr_t *DYND_UNUSED(src_stride), size_t count)
+    {
+      dst += DYND_GET_THREAD_ID(0) * dst_stride;
+      for (size_t i = DYND_GET_THREAD_ID(0); i < count; i += DYND_GET_THREAD_COUNT(0)) {
+        *reinterpret_cast<double *>(dst) = curand_uniform_double(s + DYND_GET_THREAD_ID(0));
+        dst += DYND_GET_THREAD_COUNT(0) * dst_stride;
+      }
+    }
+
 /*
     __device__ void strided(char *dst, intptr_t dst_stride, char *const *DYND_UNUSED(src),
                             const intptr_t *DYND_UNUSED(src_stride), size_t count)

@@ -16,7 +16,7 @@
 using namespace std;
 using namespace dynd;
 
-static const int size = 256 * 256;
+static const int size = 10000000; // 256 * 256
 
 static void BM_Func_Arithmetic_Add(benchmark::State &state)
 {
@@ -24,11 +24,13 @@ static void BM_Func_Arithmetic_Add(benchmark::State &state)
   nd::array b = nd::random::uniform(kwds("dst_tp", ndt::make_fixed_dim(size, ndt::make_type<float>())));
   nd::array c = nd::empty(ndt::make_fixed_dim(size, ndt::make_type<float>()));
   while (state.KeepRunning()) {
-    nd::add(a, b, kwds("dst", c));
+    nd::add(a, b);
   }
 }
 
 BENCHMARK(BM_Func_Arithmetic_Add);
+
+/*
 
 #ifdef DYND_CUDA
 static void BM_Func_Arithmetic_CUDADevice_Add(benchmark::State &state)
@@ -76,3 +78,5 @@ static void BM_Func_Arithmetic_CUDADevice_Mul(benchmark::State &state)
 BENCHMARK(BM_Func_Arithmetic_CUDADevice_Mul);
 
 #endif
+
+*/
