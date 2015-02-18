@@ -393,7 +393,7 @@ set(libdynd_SRC
     include/dynd/kernels/ckernel_common_functions.hpp
     include/dynd/kernels/ckernel_prefix.hpp
     include/dynd/kernels/comparison_kernels.hpp
-    include/dynd/kernels/cuda_kernels.hpp
+    include/dynd/kernels/cuda_launch.hpp
     include/dynd/kernels/date_assignment_kernels.hpp
     include/dynd/kernels/date_adapter_kernels.hpp
     include/dynd/kernels/datetime_assignment_kernels.hpp

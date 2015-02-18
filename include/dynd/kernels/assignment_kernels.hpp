@@ -9,7 +9,7 @@
 
 #include <dynd/type.hpp>
 #include <dynd/typed_data_assign.hpp>
-#include <dynd/kernels/cuda_kernels.hpp>
+#include <dynd/kernels/cuda_launch.hpp>
 #include <dynd/kernels/expr_kernels.hpp>
 #include <dynd/eval/eval_context.hpp>
 #include <dynd/typed_data_assign.hpp>

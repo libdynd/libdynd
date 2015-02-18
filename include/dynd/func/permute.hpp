@@ -7,7 +7,7 @@
 
 #include <dynd/func/arrfunc.hpp>
 #include <dynd/kernels/expr_kernels.hpp>
-#include <dynd/kernels/cuda_kernels.hpp>
+#include <dynd/kernels/cuda_launch.hpp>
 
 namespace dynd {
 namespace kernels {
