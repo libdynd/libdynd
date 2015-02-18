@@ -39,6 +39,7 @@ class arrfunc_type_data;
  *                different from the one in the function prototype, but must
  *                match its pattern.
  * \param dst_arrmeta  The destination arrmeta.
+ * \param nsrc  The number of source arrays.
  * \param src_tp  An array of the source types of the ckernel to generate. These
  *                may be different from the ones in the function prototype, but
  *                must match the patterns.
@@ -55,7 +56,7 @@ class arrfunc_type_data;
 typedef intptr_t (*arrfunc_instantiate_t)(
     const arrfunc_type_data *self, const arrfunc_type *self_tp, void *ckb,
     intptr_t ckb_offset, const ndt::type &dst_tp, const char *dst_arrmeta,
-    const ndt::type *src_tp, const char *const *src_arrmeta,
+    intptr_t nsrc, const ndt::type *src_tp, const char *const *src_arrmeta,
     kernel_request_t kernreq, const eval::eval_context *ectx,
     const nd::array &kwds, const std::map<nd::string, ndt::type> &tp_vars);
 

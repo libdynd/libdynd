@@ -209,14 +209,12 @@ public:
         }
     }
 
-#ifdef DYND_RVALUE_REFS
     /** Move constructor */
     memory_block_ptr(memory_block_ptr&& rhs)
         : m_memblock(rhs.m_memblock)
     {
         rhs.m_memblock = 0;
     }
-#endif
 
     /** Destructor */
     ~memory_block_ptr() {
@@ -241,7 +239,6 @@ public:
     }
 
     /** Move assignment */
-#ifdef DYND_RVALUE_REFS
     memory_block_ptr& operator=(memory_block_ptr&& rhs)
     {
         if (m_memblock != 0) {
@@ -251,7 +248,6 @@ public:
         rhs.m_memblock = 0;
         return *this;
     }
-#endif
 
     /** Assignment from raw memory_block pointer */
     memory_block_ptr& operator=(memory_block_data *rhs)

@@ -111,7 +111,7 @@ TEST(Elwise, UnaryExpr_StridedToVarDim)
   const char *in_ptr = in.get_readonly_originptr();
   const char *src_arrmeta[1] = {in.get_arrmeta()};
   af.get()->instantiate(af.get(), af.get_type(), &ckb, 0, dst_tp,
-                        out.get_arrmeta(), &src_tp, src_arrmeta,
+                        out.get_arrmeta(), af.get_type()->get_npos(), &src_tp, src_arrmeta,
                         kernel_request_single, &eval::default_eval_context,
                         nd::array(), std::map<nd::string, ndt::type>());
   expr_single_t usngo = ckb.get()->get_function<expr_single_t>();
@@ -142,7 +142,7 @@ TEST(Elwise, UnaryExpr_VarToVarDim)
   const char *in_ptr = in.get_readonly_originptr();
   const char *src_arrmeta[1] = {in.get_arrmeta()};
   af.get()->instantiate(af.get(), af.get_type(), &ckb, 0, out.get_type(),
-                        out.get_arrmeta(), &in.get_type(), src_arrmeta,
+                        out.get_arrmeta(), af.get_type()->get_npos(), &in.get_type(), src_arrmeta,
                         kernel_request_single, &eval::default_eval_context,
                         nd::array(), std::map<nd::string, ndt::type>());
   expr_single_t usngo = ckb.get()->get_function<expr_single_t>();

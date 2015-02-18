@@ -5,13 +5,13 @@
 
 #pragma once
 
+#include <dynd/cmake_config.hpp>
+
 #include <assert.h>
 #include <cmath>
 #include <cstdlib>
 #include <stdint.h>
 #include <limits>
-
-#include <dynd/cmake_config.hpp>
 
 #ifdef DYND_CUDA
 #include <cuda_runtime.h>
@@ -21,26 +21,11 @@
 #define DYND_BUFFER_CHUNK_SIZE 128
 
 #ifdef __clang__
-// It appears that on OSX, one can have a configuration with
-// clang that supports rvalue references but no implementation
-// of std::move, and there doesn't seem to be a way to detect
-// this. :P
-//#if __has_feature(cxx_rvalue_references)
-//#  define DYND_RVALUE_REFS
-//#endif
 
 #if __has_feature(cxx_constexpr)
 #define DYND_CONSTEXPR constexpr
 #else
 #define DYND_CONSTEXPR
-#endif
-
-#if __has_feature(cxx_lambdas)
-#define DYND_CXX_LAMBDAS
-#endif
-
-#if __has_feature(cxx_variadic_templates)
-#define DYND_CXX_VARIADIC_TEMPLATES
 #endif
 
 #include <cmath>
@@ -60,8 +45,6 @@
 #define DYND_IGNORE_UNUSED(NAME) NAME __attribute__((unused))
 
 #define DYND_CONSTEXPR constexpr
-#define DYND_RVALUE_REFS
-#define DYND_CXX_VARIADIC_TEMPLATES
 
 #define DYND_ISSPACE isspace
 #define DYND_TOLOWER tolower
@@ -87,10 +70,7 @@
 #define DYND_USE_FPSTATUS
 #endif
 
-#define DYND_RVALUE_REFS
-#define DYND_CXX_LAMBDAS
 #define DYND_USE_STD_ATOMIC
-#define DYND_CXX_VARIADIC_TEMPLATES
 
 #if _MSC_VER == 1800
 // MSVC 2013 doesn't support nested initializer lists
@@ -130,12 +110,8 @@ public:
 #endif // end of compiler vendor checks
 
 // If RValue References are supported
-#ifdef DYND_RVALUE_REFS
 #include <utility>
 #define DYND_MOVE(x) (std::move(x))
-#else
-#define DYND_MOVE(x) (x)
-#endif
 
 #ifndef DYND_ATOLL
 #define DYND_ATOLL(x) (atoll(x))
@@ -501,13 +477,6 @@ DYND_CUDA_HOST_DEVICE inline bool isnan(T arg) {
 }
 
 template <size_t I>
-DYND_CUDA_HOST_DEVICE typename std::enable_if<I != 0, intptr_t>::type
-get_thread_id()
-{
-  return 0;
-}
-
-template <size_t I>
 DYND_CUDA_HOST_DEVICE typename std::enable_if<I == 0, intptr_t>::type
 get_thread_id()
 {
@@ -518,19 +487,11 @@ get_thread_id()
 #endif
 }
 
-#ifdef __CUDA_ARCH__
-#define DYND_GET_THREAD_ID(I) blockIdx.x * blockDim.x + threadIdx.x
-#define DYND_GET_THREAD_COUNT(I) gridDim.x * blockDim.x
-#else
-#define DYND_GET_THREAD_ID(I) 0
-#define DYND_GET_THREAD_COUNT(I) 1
-#endif
-
 template <size_t I>
 DYND_CUDA_HOST_DEVICE typename std::enable_if<I != 0, intptr_t>::type
-get_thread_count()
+get_thread_id()
 {
-  return 1;
+  return 0;
 }
 
 template <size_t I>
@@ -542,6 +503,13 @@ get_thread_count()
 #else
   return 1;
 #endif
+}
+
+template <size_t I>
+DYND_CUDA_HOST_DEVICE typename std::enable_if<I != 0, intptr_t>::type
+get_thread_count()
+{
+  return 1;
 }
 
 template <size_t I>
