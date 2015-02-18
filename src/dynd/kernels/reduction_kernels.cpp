@@ -146,7 +146,7 @@ struct double_mean1d_ck : public kernels::unary_ck<double_mean1d_ck> {
     double result = 0;
     for (intptr_t i = 0; i < src_dim_size; ++i) {
       double v = *reinterpret_cast<double *>(src);
-      if (!DYND_ISNAN(v)) {
+      if (!dynd::isnan(v)) {
         result += v;
         ++countp;
       }

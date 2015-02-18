@@ -158,7 +158,7 @@ struct is_avail<float> {
   static void single(char *dst, char *const *src,
                      ckernel_prefix *DYND_UNUSED(self))
   {
-    *dst = DYND_ISNAN(**reinterpret_cast<float *const *>(src)) == 0;
+    *dst = dynd::isnan(**reinterpret_cast<float *const *>(src)) == 0;
   }
 
   static void strided(char *dst, intptr_t dst_stride, char *const *src,
@@ -168,7 +168,7 @@ struct is_avail<float> {
     char *src0 = src[0];
     intptr_t src0_stride = src_stride[0];
     for (size_t i = 0; i != count; ++i) {
-      *dst = DYND_ISNAN(*reinterpret_cast<float *>(src0)) == 0;
+      *dst = dynd::isnan(*reinterpret_cast<float *>(src0)) == 0;
       dst += dst_stride;
       src0 += src0_stride;
     }
@@ -204,7 +204,7 @@ struct is_avail<double> {
   static void single(char *dst, char *const *src,
                      ckernel_prefix *DYND_UNUSED(self))
   {
-    *dst = DYND_ISNAN(**reinterpret_cast<double *const *>(src)) == 0;
+    *dst = dynd::isnan(**reinterpret_cast<double *const *>(src)) == 0;
   }
 
   static void strided(char *dst, intptr_t dst_stride, char *const *src,
@@ -214,7 +214,7 @@ struct is_avail<double> {
     char *src0 = src[0];
     intptr_t src0_stride = src_stride[0];
     for (size_t i = 0; i != count; ++i) {
-      *dst = DYND_ISNAN(*reinterpret_cast<double *>(src0)) == 0;
+      *dst = dynd::isnan(*reinterpret_cast<double *>(src0)) == 0;
       dst += dst_stride;
       src0 += src0_stride;
     }

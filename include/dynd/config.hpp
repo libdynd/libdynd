@@ -46,14 +46,6 @@
 #include <cmath>
 #include <cctype>
 
-// Ran into some weird issues with
-// clang + gcc std library's C11
-// polymorphic macros. Our workaround
-// is to wrap this in inline functions.
-inline bool DYND_ISNAN(float x) { return std::isnan(x); }
-inline bool DYND_ISNAN(double x) { return std::isnan(x); }
-inline bool DYND_ISNAN(long double x) { return std::isnan(x); }
-
 // Workaround for a clang issue
 #define DYND_ISSPACE std::isspace
 #define DYND_TOLOWER std::tolower
@@ -69,7 +61,6 @@ inline bool DYND_ISNAN(long double x) { return std::isnan(x); }
 
 #define DYND_CONSTEXPR constexpr
 #define DYND_RVALUE_REFS
-#define DYND_ISNAN(x) (std::isnan(x))
 #define DYND_CXX_VARIADIC_TEMPLATES
 
 #define DYND_ISSPACE isspace
@@ -135,8 +126,6 @@ public:
     _set_invalid_parameter_handler(m_saved);
   }
 };
-
-#define DYND_ISNAN(x) (_isnan(x) != 0)
 
 #endif // end of compiler vendor checks
 
@@ -484,6 +473,7 @@ inline bool isinf(T arg)
          arg == -std::numeric_limits<double>::infinity();
 #endif
 }
+
 } // namespace dynd
 
 #endif // __CUDACC_
@@ -492,12 +482,21 @@ namespace dynd {
 
 // Prevent from nvcc clashing with cmath
 template <typename T>
-inline bool isfinite(T arg)
+DYND_CUDA_HOST_DEVICE bool isfinite(T arg)
 {
-#ifndef _MSC_VER
-  return (std::isfinite)(arg);
+#ifdef __CUDA_ARCH__
+  return ::isfinite(arg);
 #else
-  return _finite(arg) != 0;
+  return std::isfinite(arg);
+#endif
+}
+
+template <typename T>
+DYND_CUDA_HOST_DEVICE inline bool isnan(T arg) {
+#ifdef __CUDACC__
+  return ::isnan(arg);
+#else
+  return std::isnan(arg);
 #endif
 }
 

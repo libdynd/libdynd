@@ -29,7 +29,7 @@ TEST(Rolling, BuiltinSum_Kernel)
   nd::array b = rolling_sum(a);
   EXPECT_EQ(ndt::type("13 * real"), b.get_type());
   for (int i = 0; i < 3; ++i) {
-    EXPECT_TRUE(DYND_ISNAN(b(i).as<double>()));
+    EXPECT_TRUE(dynd::isnan(b(i).as<double>()));
   }
   for (int i = 3, i_end = (int)b.get_dim_size(); i < i_end; ++i) {
     double s = 0;
@@ -50,7 +50,7 @@ TEST(Rolling, BuiltinMean_Kernel) {
     nd::array b = rolling_sum(a);
     EXPECT_EQ(ndt::type("13 * real"), b.get_type());
     for (int i = 0; i < 3; ++i) {
-        EXPECT_TRUE(DYND_ISNAN(b(i).as<double>()));
+        EXPECT_TRUE(dynd::isnan(b(i).as<double>()));
     }
     for (int i = 3, i_end = (int)b.get_dim_size(); i < i_end; ++i) {
         double s = 0;
