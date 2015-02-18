@@ -167,26 +167,13 @@ namespace kernels {
     __device__ void strided(char *dst, intptr_t dst_stride, char *const *DYND_UNUSED(src),
                             const intptr_t *DYND_UNUSED(src_stride), size_t count)
     {
-      dst += get_thread_id<0>() * dst_stride;
-      for (size_t i = get_thread_id<0>(); i < count; i += get_thread_count<0>()) {
-        *reinterpret_cast<double *>(dst) = curand_uniform_double(s + get_thread_id<0>());
-        dst += get_thread_count<0>() * dst_stride;
+      dst += DYND_THREAD_ID(0) * dst_stride;
+
+      for (size_t i = DYND_THREAD_ID(0); i < count; i += DYND_THREAD_COUNT(0)) {
+        *reinterpret_cast<double *>(dst) = curand_uniform_double(s + DYND_THREAD_ID(0));
+        dst += DYND_THREAD_COUNT(0) * dst_stride;
       }
     }
-
-/*
-    __device__ void strided(char *dst, intptr_t dst_stride, char *const *DYND_UNUSED(src),
-                            const intptr_t *DYND_UNUSED(src_stride), size_t count)
-    {
-      size_t thread_id = blockIdx.x * blockDim.x + threadIdx.x;
-      size_t thread_count = gridDim.x * blockDim.x;
-
-      for (size_t i = blockIdx.x * blockDim.x + threadIdx.x; i < count; i += thread_count) {
-        *reinterpret_cast<double *>(dst + thread_id * sizeof(double)) = curand_uniform_double(s + thread_id);
-        dst += dst_stride;
-      }
-    }
-*/
 
     static ndt::type make_type()
     {

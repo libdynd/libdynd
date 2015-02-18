@@ -13,6 +13,19 @@
 
 namespace dynd {
 
+inline void get_cuda_launch_config(dim3 &grid, dim3 &block,
+                            intptr_t dst_ndim)
+{
+  if (dst_ndim == 2) {
+    std::cout << "cuda 2D" << std::endl;
+    grid = dim3(32, 32, 1);
+    block = dim3(32, 32, 1);
+  } else {
+    grid = 128;
+    block = 128;
+  }
+}
+
 namespace kernels {
   template <int N>
   __global__ void cuda_launch_single(char *dst, detail::array_wrapper<char *, N> src,
@@ -49,7 +62,7 @@ namespace kernels {
     {
       kernels::cuda_launch_single << <blocks, threads>>>
           (dst, detail::make_array_wrapper<Nsrc>(src), ckb.get());
-      // check for CUDA errors here
+      throw_if_not_cuda_success();
     }
 
     void strided(char *dst, intptr_t dst_stride, char *const *src,
@@ -58,7 +71,7 @@ namespace kernels {
       cuda_launch_strided << <blocks, threads>>>
           (dst, dst_stride, detail::make_array_wrapper<Nsrc>(src),
            detail::make_array_wrapper<Nsrc>(src_stride), count, ckb.get());
-      // check for CUDA errors here
+      throw_if_not_cuda_success();
     }
 
     static intptr_t
