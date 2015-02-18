@@ -68,8 +68,8 @@ namespace dynd {
                                          const A1 *__restrict src1,            \
                                          size_t count)                         \
       {                                                                        \
-        for (size_t i = get_thread_id<0>(); i < count;                         \
-             i += get_thread_count<0>()) {                                     \
+        for (size_t i = DYND_THREAD_ID(0); i < count;                      \
+             i += DYND_THREAD_COUNT(0)) {                                  \
           dst[i] = src0[i] SYMBOL src1[i];                                     \
         }                                                                      \
       }                                                                        \

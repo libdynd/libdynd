@@ -10,8 +10,12 @@
 #include <assert.h>
 #include <cmath>
 #include <cstdlib>
-#include <stdint.h>
+#include <initializer_list>
 #include <limits>
+#include <stdint.h>
+#include <tuple>
+#include <type_traits>
+#include <utility>
 
 #ifdef DYND_CUDA
 #include <cuda_runtime.h>
@@ -109,17 +113,6 @@ public:
 
 #endif // end of compiler vendor checks
 
-// If RValue References are supported
-#include <utility>
-#define DYND_MOVE(x) (std::move(x))
-
-#ifndef DYND_ATOLL
-#define DYND_ATOLL(x) (atoll(x))
-#endif
-
-// If Initializer Lists are supported
-#include <initializer_list>
-
 // If being run from the CLING C++ interpreter
 #ifdef DYND_CLING
 // Don't use the memcpy function (it has inline assembly).
@@ -136,9 +129,6 @@ inline void DYND_MEMCPY(char *dst, const char *src, intptr_t count)
 #include <cstring>
 #define DYND_MEMCPY(dst, src, count) std::memcpy(dst, src, count)
 #endif
-
-#include <tuple>
-#include <type_traits>
 
 #include <dynd/type_sequence.hpp>
 
@@ -169,28 +159,28 @@ struct is_char_string_param<char *> {
   static const bool value = true;
 };
 template <int N>
-struct is_char_string_param<const char (&) [N]> {
+struct is_char_string_param<const char (&)[N]> {
   static const bool value = true;
 };
 template <int N>
-struct is_char_string_param<const char (&&) [N]> {
+struct is_char_string_param<const char (&&)[N]> {
   static const bool value = true;
 };
 
 /** Returns true if all the packed parameters are char strings */
-template<typename... T>
+template <typename... T>
 struct all_char_string_params {
   static const bool value = false;
 };
-template<>
+template <>
 struct all_char_string_params<> {
   static const bool value = true;
 };
-template<typename T0>
+template <typename T0>
 struct all_char_string_params<T0> {
   static const bool value = is_char_string_param<T0>::value;
 };
-template<typename...T, typename T0>
+template <typename... T, typename T0>
 struct all_char_string_params<T0, T...> {
   static const bool value =
       is_char_string_param<T0>::value && all_char_string_params<T...>::value;
@@ -438,123 +428,7 @@ bool built_with_cuda();
 
 #define DYND_CUDA_HOST_DEVICE
 
-namespace dynd {
-template <typename T>
-inline bool isinf(T arg)
-{
-#ifndef _MSC_VER
-  return (std::isinf)(arg);
-#else
-  return arg == std::numeric_limits<double>::infinity() ||
-         arg == -std::numeric_limits<double>::infinity();
-#endif
-}
-
-} // namespace dynd
-
 #endif // __CUDACC_
-
-namespace dynd {
-
-// Prevent from nvcc clashing with cmath
-template <typename T>
-DYND_CUDA_HOST_DEVICE bool isfinite(T arg)
-{
-#ifdef __CUDA_ARCH__
-  return ::isfinite(arg);
-#else
-  return std::isfinite(arg);
-#endif
-}
-
-template <typename T>
-DYND_CUDA_HOST_DEVICE inline bool isnan(T arg) {
-#ifdef __CUDACC__
-  return ::isnan(arg);
-#else
-  return std::isnan(arg);
-#endif
-}
-
-template <size_t I>
-DYND_CUDA_HOST_DEVICE typename std::enable_if<I == 0, intptr_t>::type
-get_thread_id()
-{
-#ifdef __CUDA_ARCH__
-  return blockIdx.x * blockDim.x + threadIdx.x;
-#else
-  return 0;
-#endif
-}
-
-template <size_t I>
-DYND_CUDA_HOST_DEVICE typename std::enable_if<I != 0, intptr_t>::type
-get_thread_id()
-{
-  return 0;
-}
-
-template <size_t I>
-DYND_CUDA_HOST_DEVICE typename std::enable_if<I == 0, intptr_t>::type
-get_thread_count()
-{
-#ifdef __CUDA_ARCH__
-  return gridDim.x * blockDim.x;
-#else
-  return 1;
-#endif
-}
-
-template <size_t I>
-DYND_CUDA_HOST_DEVICE typename std::enable_if<I != 0, intptr_t>::type
-get_thread_count()
-{
-  return 1;
-}
-
-template <size_t I>
-DYND_CUDA_HOST_DEVICE typename std::enable_if<I != 0, intptr_t>::type
-get_thread_local_count(size_t count)
-{
-  return count;
-}
-
-template <size_t I>
-DYND_CUDA_HOST_DEVICE typename std::enable_if<I == 0, intptr_t>::type
-get_thread_local_count(size_t count)
-{
-  size_t thread_id = get_thread_id<I>();
-  size_t thread_count = get_thread_count<I>();
-
-  if (thread_id < count % thread_count) {
-    return count / thread_count + 1;
-  } else {
-    return count / thread_count;
-  }
-}
-
-template <size_t I>
-DYND_CUDA_HOST_DEVICE typename std::enable_if<I != 0, intptr_t>::type
-get_thread_local_offset(size_t DYND_UNUSED(count))
-{
-  return 0;
-}
-
-template <size_t I>
-DYND_CUDA_HOST_DEVICE typename std::enable_if<I == 0, intptr_t>::type
-get_thread_local_offset(size_t count)
-{
-  size_t thread_id = get_thread_id<I>();
-  size_t thread_count = get_thread_count<I>();
-
-  if (thread_id < count % thread_count) {
-    return thread_id * (count / thread_count + 1);
-  } else {
-    return thread_id * count / thread_count + count % thread_count;
-  }
-}
-
-} // namespace dynd
 
 namespace dynd {
 namespace detail {
@@ -582,7 +456,8 @@ namespace detail {
   };
 
   template <int N, typename T>
-  array_wrapper<T, N> make_array_wrapper(const T *data) {
+  array_wrapper<T, N> make_array_wrapper(const T *data)
+  {
     return array_wrapper<T, N>(data);
   }
 
@@ -602,5 +477,73 @@ namespace detail {
     return value_wrapper<T>(value);
   }
 
+#ifdef __CUDA_ARCH__
+
+  template <intptr_t I>
+  __device__ inline typename std::enable_if<I == 0, intptr_t>::type
+  cuda_device_thread_id()
+  {
+    return blockIdx.x * blockDim.x + threadIdx.x;
+  }
+
+  template <intptr_t I>
+  __device__ inline typename std::enable_if<I == 1, intptr_t>::type
+  cuda_device_thread_id()
+  {
+    return blockIdx.y * blockDim.y + threadIdx.y;
+  }
+
+  template <intptr_t I>
+  __device__ inline typename std::enable_if<I == 2, intptr_t>::type
+  cuda_device_thread_id()
+  {
+    return blockIdx.z * blockDim.z + threadIdx.z;
+  }
+
+  template <intptr_t I>
+  __device__ inline typename std::enable_if<I == -1, intptr_t>::type
+  cuda_device_thread_id()
+  {
+    return 0;
+  }
+
+  template <intptr_t I>
+  __device__ inline typename std::enable_if<I == 0, intptr_t>::type
+  cuda_device_thread_count()
+  {
+    return gridDim.x * blockDim.x;
+  }
+
+  template <intptr_t I>
+  __device__ inline typename std::enable_if<I == 1, intptr_t>::type
+  cuda_device_thread_count()
+  {
+    return gridDim.y * blockDim.y;
+  }
+
+  template <intptr_t I>
+  __device__ inline typename std::enable_if<I == 2, intptr_t>::type
+  cuda_device_thread_count()
+  {
+    return gridDim.z * blockDim.z;
+  }
+
+  template <intptr_t I>
+  __device__ inline typename std::enable_if<I == -1, intptr_t>::type
+  cuda_device_thread_count()
+  {
+    return 1;
+  }
+
+#endif
+
 } // namespace dynd::detail
 } // namespace dynd
+
+#ifdef __CUDA_ARCH__
+#define DYND_THREAD_ID(I) dynd::detail::cuda_device_thread_id<I>()
+#define DYND_THREAD_COUNT(I) dynd::detail::cuda_device_thread_count<I>()
+#else
+#define DYND_THREAD_ID(I) 0
+#define DYND_THREAD_COUNT(I) 1
+#endif

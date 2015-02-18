@@ -154,8 +154,8 @@ int nd::functional::elwise_resolve_dst_type_with_child(
 static void *create_cuda_device_trampoline(void *ckb, intptr_t ckb_offset,
                                            intptr_t src_count,
                                            dynd::kernel_request_t kernreq,
-                                           unsigned int blocks,
-                                           unsigned int threads)
+                                           dim3 blocks,
+                                           dim3 threads)
 {
   switch (src_count) {
   case 0: {
@@ -280,17 +280,55 @@ nd::arrfunc nd::functional::elwise(const arrfunc &child)
       child_tp->has_kwd("dst_tp") ? NULL : &elwise_resolve_dst_type);
 }
 
+intptr_t nd::functional::elwise_instantiate_with_child(
+    const arrfunc_type_data *child, const arrfunc_type *child_tp, void *ckb,
+    intptr_t ckb_offset, const ndt::type &dst_tp, const char *dst_arrmeta,
+    intptr_t nsrc, const ndt::type *src_tp, const char *const *src_arrmeta,
+    dynd::kernel_request_t kernreq, const eval::eval_context *ectx,
+    const dynd::nd::array &kwds,
+    const std::map<dynd::nd::string, ndt::type> &tp_vars)
+{
+  intptr_t dst_ndim = dst_tp.get_ndim();
+  if (!child_tp->get_return_type().is_symbolic()) {
+    dst_ndim -= child_tp->get_return_type().get_ndim();
+  }
+
+  switch (dst_ndim) {
+  case 1:
+    return elwise_instantiate_with_child<0>(
+        child, child_tp, ckb, ckb_offset, dst_tp, dst_arrmeta, nsrc, src_tp,
+        src_arrmeta, kernreq, ectx, kwds, tp_vars);
+  case 2:
+    return elwise_instantiate_with_child<1>(
+        child, child_tp, ckb, ckb_offset, dst_tp, dst_arrmeta, nsrc, src_tp,
+        src_arrmeta, kernreq, ectx, kwds, tp_vars);
+  case 3:
+    return elwise_instantiate_with_child<2>(
+        child, child_tp, ckb, ckb_offset, dst_tp, dst_arrmeta, nsrc, src_tp,
+        src_arrmeta, kernreq, ectx, kwds, tp_vars);
+  default:
+    return elwise_instantiate_with_child<-1>(
+        child, child_tp, ckb, ckb_offset, dst_tp, dst_arrmeta, nsrc, src_tp,
+        src_arrmeta, kernreq, ectx, kwds, tp_vars);
+  }
+}
+
 template <int I>
-    typename std::enable_if <
-    I<10, intptr_t>::type nd::functional::elwise_instantiate_with_child(
-        const arrfunc_type_data *child, const arrfunc_type *child_tp, void *ckb,
-        intptr_t ckb_offset, const ndt::type &dst_tp, const char *dst_arrmeta,
-        intptr_t nsrc, const ndt::type *src_tp, const char *const *src_arrmeta,
-        dynd::kernel_request_t kernreq, const eval::eval_context *ectx,
-        const dynd::nd::array &kwds,
-        const std::map<dynd::nd::string, ndt::type> &tp_vars)
+intptr_t nd::functional::elwise_instantiate_with_child(
+    const arrfunc_type_data *child, const arrfunc_type *child_tp, void *ckb,
+    intptr_t ckb_offset, const ndt::type &dst_tp, const char *dst_arrmeta,
+    intptr_t nsrc, const ndt::type *src_tp, const char *const *src_arrmeta,
+    dynd::kernel_request_t kernreq, const eval::eval_context *ectx,
+    const dynd::nd::array &kwds,
+    const std::map<dynd::nd::string, ndt::type> &tp_vars)
 {
   intptr_t src_count = child_tp->get_npos();
+
+  // Check if no lifting is required
+  intptr_t dst_ndim = dst_tp.get_ndim();
+  if (!child_tp->get_return_type().is_symbolic()) {
+    dst_ndim -= child_tp->get_return_type().get_ndim();
+  }
 
 #ifdef __CUDACC__
   if (dst_tp.get_type_id() == cuda_device_type_id) {
@@ -328,8 +366,12 @@ template <int I>
               threads = 256;
             }
       */
+
+      dim3 grid, block;
+      get_cuda_launch_config(grid, block, dst_ndim);
+
       void *cuda_ckb = create_cuda_device_trampoline(ckb, ckb_offset, src_count,
-                                                     kernreq, 128, 128);
+                                                     kernreq, grid, block);
       ndt::type new_dst_tp =
           dst_tp.extended<base_memory_type>()->get_element_type();
       vector<ndt::type> new_src_tp(src_count);
@@ -348,11 +390,6 @@ template <int I>
   }
 #endif // __CUDACC__
 
-  // Check if no lifting is required
-  intptr_t dst_ndim = dst_tp.get_ndim();
-  if (!child_tp->get_return_type().is_symbolic()) {
-    dst_ndim -= child_tp->get_return_type().get_ndim();
-  }
   if (dst_ndim == 0) {
     intptr_t i = 0;
     for (; i < src_count; ++i) {
@@ -449,13 +486,14 @@ template <int I>
   throw runtime_error(ss.str());
 }
 
+/*
 template <int I>
-typename std::enable_if<I == 10, intptr_t>::type
-nd::functional::elwise_instantiate_with_child(
+intptr_t nd::functional::elwise_instantiate_with_child(
     const arrfunc_type_data *DYND_UNUSED(child),
     const arrfunc_type *DYND_UNUSED(child_tp), void *DYND_UNUSED(ckb),
     intptr_t DYND_UNUSED(ckb_offset), const ndt::type &DYND_UNUSED(dst_tp),
-    const char *DYND_UNUSED(dst_arrmeta), intptr_t DYND_UNUSED(nsrc), const ndt::type *DYND_UNUSED(src_tp),
+    const char *DYND_UNUSED(dst_arrmeta), intptr_t DYND_UNUSED(nsrc),
+    const ndt::type *DYND_UNUSED(src_tp),
     const char *const *DYND_UNUSED(src_arrmeta),
     dynd::kernel_request_t DYND_UNUSED(kernreq),
     const eval::eval_context *DYND_UNUSED(ectx),
@@ -464,6 +502,7 @@ nd::functional::elwise_instantiate_with_child(
 {
   throw std::runtime_error("ERROR");
 }
+*/
 
 template <type_id_t dst_type_id, type_id_t src_type_id, int I>
 intptr_t nd::functional::elwise_instantiate_with_child(
@@ -508,7 +547,6 @@ intptr_t nd::functional::elwise_instantiate_with_child(
   }
 }
 
-template <int I>
 intptr_t nd::functional::elwise_instantiate(
     const arrfunc_type_data *self, const arrfunc_type *DYND_UNUSED(self_tp),
     void *ckb, intptr_t ckb_offset, const ndt::type &dst_tp,
@@ -522,18 +560,10 @@ intptr_t nd::functional::elwise_instantiate(
   const arrfunc_type *child_tp =
       self->get_data_as<dynd::nd::arrfunc>()->get_type();
 
-  return elwise_instantiate_with_child<I>(
+  return elwise_instantiate_with_child(
       child, child_tp, ckb, ckb_offset, dst_tp, dst_arrmeta, nsrc, src_tp,
       src_arrmeta, kernreq, ectx, kwds, tp_vars);
 }
-
-template intptr_t nd::functional::elwise_instantiate<0>(
-    const arrfunc_type_data *child, const arrfunc_type *child_tp, void *ckb,
-    intptr_t ckb_offset, const ndt::type &dst_tp, const char *dst_arrmeta,
-    intptr_t nsrc, const ndt::type *src_tp, const char *const *src_arrmeta,
-    dynd::kernel_request_t kernreq, const eval::eval_context *ectx,
-    const dynd::nd::array &kwds,
-    const std::map<dynd::nd::string, ndt::type> &tp_vars);
 
 template intptr_t nd::functional::elwise_instantiate_with_child<0>(
     const arrfunc_type_data *child, const arrfunc_type *child_tp, void *ckb,

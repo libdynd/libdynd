@@ -20,7 +20,6 @@ namespace nd {
 
     arrfunc elwise(const arrfunc &child);
 
-    template <int I = 0>
     intptr_t elwise_instantiate(
         const arrfunc_type_data *self, const arrfunc_type *DYND_UNUSED(self_tp),
         void *ckb, intptr_t ckb_offset, const ndt::type &dst_tp,
@@ -47,19 +46,16 @@ namespace nd {
      *                 as required by the caller.
      * \param ectx  The evaluation context.
      */
-    template <int I>
-        typename std::enable_if <
-        I<10, intptr_t>::type elwise_instantiate_with_child(
-            const arrfunc_type_data *child, const arrfunc_type *child_tp,
-            void *ckb, intptr_t ckb_offset, const ndt::type &dst_tp,
-            const char *dst_arrmeta, intptr_t nsrc, const ndt::type *src_tp,
-            const char *const *src_arrmeta, dynd::kernel_request_t kernreq,
-            const eval::eval_context *ectx, const dynd::nd::array &kwds,
-            const std::map<dynd::nd::string, ndt::type> &tp_vars);
+    intptr_t elwise_instantiate_with_child(
+        const arrfunc_type_data *child, const arrfunc_type *child_tp, void *ckb,
+        intptr_t ckb_offset, const ndt::type &dst_tp, const char *dst_arrmeta,
+        intptr_t nsrc, const ndt::type *src_tp, const char *const *src_arrmeta,
+        dynd::kernel_request_t kernreq, const eval::eval_context *ectx,
+        const dynd::nd::array &kwds,
+        const std::map<dynd::nd::string, ndt::type> &tp_vars);
 
     template <int I>
-    typename std::enable_if<I == 10, intptr_t>::type
-    elwise_instantiate_with_child(
+    intptr_t elwise_instantiate_with_child(
         const arrfunc_type_data *child, const arrfunc_type *child_tp, void *ckb,
         intptr_t ckb_offset, const ndt::type &dst_tp, const char *dst_arrmeta,
         intptr_t nsrc, const ndt::type *src_tp, const char *const *src_arrmeta,
@@ -129,31 +125,27 @@ namespace kernels {
       ckernel_prefix *child = this->get_child_ckernel();
       expr_strided_t opchild = child->get_function<expr_strided_t>();
 
-      char *src_loop[N];
-      for (int j = 0; j != N; ++j) {
-        src_loop[j] = src[j];
-      }
-      opchild(dst, this->dst_stride, src_loop, this->src_stride, this->size,
-              child);
+      opchild(dst, this->dst_stride, src, this->src_stride, this->size, child);
     }
 
     DYND_CUDA_HOST_DEVICE void strided(char *dst, intptr_t dst_stride,
                                        char *const *src,
                                        const intptr_t *src_stride, size_t count)
     {
-      size_t thread_local_offset = get_thread_local_offset<I>(this->size);
-      size_t thread_local_count = get_thread_local_count<I>(this->size);
+      enum { J = (I == -1 || I > 1) ? -1 : (I + 1) };
 
       ckernel_prefix *child = this->get_child_ckernel();
       expr_strided_t opchild = child->get_function<expr_strided_t>();
+
+      dst += DYND_THREAD_ID(J) * dst_stride;
       char *src_loop[N];
       for (int j = 0; j != N; ++j) {
-        src_loop[j] = src[j] + thread_local_offset * this->src_stride[j];
+        src_loop[j] = src[j] + DYND_THREAD_ID(J) * src_stride[j];
       }
-      dst += thread_local_offset * this->dst_stride;
-      for (size_t i = 0; i != count; ++i) {
-        opchild(dst, this->dst_stride, src_loop, this->src_stride,
-                thread_local_count, child);
+
+      for (size_t i = DYND_THREAD_ID(J); i < count; i += DYND_THREAD_COUNT(J)) {
+        opchild(dst, this->dst_stride, src_loop, this->src_stride, this->size,
+                child);
         dst += dst_stride;
         for (int j = 0; j != N; ++j) {
           src_loop[j] += src_stride[j];
@@ -229,9 +221,12 @@ namespace kernels {
 
       // If there are still dimensions to broadcast, recursively lift more
       if (!finished) {
-        return nd::functional::elwise_instantiate_with_child<I + 1>(
-            child, child_tp, ckb, ckb_offset, child_dst_tp, child_dst_arrmeta,
-            nsrc, child_src_tp, child_src_arrmeta, kernreq, ectx, kwds, tp_vars);
+        return nd::functional::elwise_instantiate_with_child < (I == -1)
+                   ? -1
+                   : (I - 1) > (child, child_tp, ckb, ckb_offset, child_dst_tp,
+                                child_dst_arrmeta, nsrc, child_src_tp,
+                                child_src_arrmeta, kernreq, ectx, kwds,
+                                tp_vars);
       }
 
       // Instantiate the elementwise handler
@@ -316,15 +311,17 @@ namespace kernels {
 
       // If there are still dimensions to broadcast, recursively lift more
       if (!finished) {
-        return nd::functional::elwise_instantiate_with_child<I + 1>(
-            child, child_tp, ckb, ckb_offset, child_dst_tp, child_dst_arrmeta,
-            nsrc, NULL, NULL, kernreq, ectx, kwds, tp_vars);
+        return nd::functional::elwise_instantiate_with_child < (I == -1)
+                   ? -1
+                   : (I - 1) > (child, child_tp, ckb, ckb_offset, child_dst_tp,
+                                child_dst_arrmeta, nsrc, NULL, NULL, kernreq,
+                                ectx, kwds, tp_vars);
       }
 
       // Instantiate the elementwise handler
       return child->instantiate(child, child_tp, ckb, ckb_offset, child_dst_tp,
-                                child_dst_arrmeta, nsrc, NULL, NULL, kernreq, ectx,
-                                kwds, tp_vars);
+                                child_dst_arrmeta, nsrc, NULL, NULL, kernreq,
+                                ectx, kwds, tp_vars);
     }
   };
 
@@ -476,10 +473,12 @@ namespace kernels {
 
       // If there are still dimensions to broadcast, recursively lift more
       if (!finished) {
-        return nd::functional::elwise_instantiate_with_child<I + 1>(
-            child, child_tp, ckb, ckb_offset, child_dst_tp, child_dst_arrmeta,
-            nsrc, child_src_tp, child_src_arrmeta, kernel_request_strided, ectx, kwds,
-            tp_vars);
+        return nd::functional::elwise_instantiate_with_child < (I == -1)
+                   ? -1
+                   : (I - 1) > (child, child_tp, ckb, ckb_offset, child_dst_tp,
+                                child_dst_arrmeta, nsrc, child_src_tp,
+                                child_src_arrmeta, kernel_request_strided, ectx,
+                                kwds, tp_vars);
       }
       // Instantiate the elementwise handler
       return child->instantiate(child, child_tp, ckb, ckb_offset, child_dst_tp,
@@ -527,14 +526,13 @@ namespace kernels {
       self->destroy_child_ckernel(sizeof(self_type));
     }
 
-    static size_t
-    instantiate(const arrfunc_type_data *child, const arrfunc_type *child_tp,
-                void *ckb, intptr_t ckb_offset, const ndt::type &dst_tp,
-                const char *dst_arrmeta, intptr_t nsrc, const ndt::type *DYND_UNUSED(src_tp),
-                const char *const *DYND_UNUSED(src_arrmeta),
-                kernel_request_t kernreq, const eval::eval_context *ectx,
-                const nd::array &kwds,
-                const std::map<dynd::nd::string, ndt::type> &tp_vars)
+    static size_t instantiate(
+        const arrfunc_type_data *child, const arrfunc_type *child_tp, void *ckb,
+        intptr_t ckb_offset, const ndt::type &dst_tp, const char *dst_arrmeta,
+        intptr_t nsrc, const ndt::type *DYND_UNUSED(src_tp),
+        const char *const *DYND_UNUSED(src_arrmeta), kernel_request_t kernreq,
+        const eval::eval_context *ectx, const nd::array &kwds,
+        const std::map<dynd::nd::string, ndt::type> &tp_vars)
     {
       intptr_t dst_ndim = dst_tp.get_ndim();
       if (!child_tp->get_return_type().is_symbolic()) {
@@ -558,9 +556,11 @@ namespace kernels {
 
       // If there are still dimensions to broadcast, recursively lift more
       if (!finished) {
-        return nd::functional::elwise_instantiate_with_child<I + 1>(
-            child, child_tp, ckb, ckb_offset, child_dst_tp, child_dst_arrmeta,
-            nsrc, NULL, NULL, kernel_request_strided, ectx, kwds, tp_vars);
+        return nd::functional::elwise_instantiate_with_child < (I == -1)
+                   ? -1
+                   : (I - 1) > (child, child_tp, ckb, ckb_offset, child_dst_tp,
+                                child_dst_arrmeta, nsrc, NULL, NULL,
+                                kernel_request_strided, ectx, kwds, tp_vars);
       }
       // Instantiate the elementwise handler
       return child->instantiate(child, child_tp, ckb, ckb_offset, child_dst_tp,
@@ -796,10 +796,12 @@ namespace kernels {
 
       // If there are still dimensions to broadcast, recursively lift more
       if (!finished) {
-        return nd::functional::elwise_instantiate_with_child<I + 1>(
-            child, child_tp, ckb, ckb_offset, child_dst_tp, child_dst_arrmeta,
-            nsrc, child_src_tp, child_src_arrmeta, kernel_request_strided, ectx, kwds,
-            tp_vars);
+        return nd::functional::elwise_instantiate_with_child < (I == -1)
+                   ? -1
+                   : (I - 1) > (child, child_tp, ckb, ckb_offset, child_dst_tp,
+                                child_dst_arrmeta, nsrc, child_src_tp,
+                                child_src_arrmeta, kernel_request_strided, ectx,
+                                kwds, tp_vars);
       }
       // All the types matched, so instantiate the elementwise handler
       return child->instantiate(child, child_tp, ckb, ckb_offset, child_dst_tp,
@@ -882,14 +884,13 @@ namespace kernels {
       self->destroy_child_ckernel(sizeof(self_type));
     }
 
-    static size_t
-    instantiate(const arrfunc_type_data *child, const arrfunc_type *child_tp,
-                void *ckb, intptr_t ckb_offset, const ndt::type &dst_tp,
-                const char *dst_arrmeta, intptr_t nsrc, const ndt::type *DYND_UNUSED(src_tp),
-                const char *const *DYND_UNUSED(src_arrmeta),
-                kernel_request_t kernreq, const eval::eval_context *ectx,
-                const nd::array &kwds,
-                const std::map<dynd::nd::string, ndt::type> &tp_vars)
+    static size_t instantiate(
+        const arrfunc_type_data *child, const arrfunc_type *child_tp, void *ckb,
+        intptr_t ckb_offset, const ndt::type &dst_tp, const char *dst_arrmeta,
+        intptr_t nsrc, const ndt::type *DYND_UNUSED(src_tp),
+        const char *const *DYND_UNUSED(src_arrmeta), kernel_request_t kernreq,
+        const eval::eval_context *ectx, const nd::array &kwds,
+        const std::map<dynd::nd::string, ndt::type> &tp_vars)
     {
       intptr_t dst_ndim = dst_tp.get_ndim();
       if (!child_tp->get_return_type().is_symbolic()) {
@@ -915,9 +916,11 @@ namespace kernels {
 
       // If there are still dimensions to broadcast, recursively lift more
       if (!finished) {
-        return nd::functional::elwise_instantiate_with_child<I + 1>(
-            child, child_tp, ckb, ckb_offset, child_dst_tp, child_dst_arrmeta,
-            nsrc, NULL, NULL, kernel_request_strided, ectx, kwds, tp_vars);
+        return nd::functional::elwise_instantiate_with_child < (I == -1)
+                   ? -1
+                   : (I - 1) > (child, child_tp, ckb, ckb_offset, child_dst_tp,
+                                child_dst_arrmeta, nsrc, NULL, NULL,
+                                kernel_request_strided, ectx, kwds, tp_vars);
       }
       // All the types matched, so instantiate the elementwise handler
       return child->instantiate(child, child_tp, ckb, ckb_offset, child_dst_tp,

@@ -123,7 +123,7 @@ nd::array dynd::nd::range(const ndt::type& scalar_tp, const void *beginval, cons
         intptr_t dim_size = range_counter<type, dynd_kind_of<type>::value>::count(beginval, endval, stepval); \
         nd::array result = nd::empty(dim_size, scalar_tp); \
         range_specialization<type>::range(beginval, stepval, result); \
-        return DYND_MOVE(result); \
+        return std::move(result); \
     }
 
     switch (scalar_tp.get_type_id()) {
@@ -224,25 +224,25 @@ nd::array dynd::nd::linspace(const ndt::type& dt, const void *startval, const vo
             nd::array result = nd::empty(count, dt);
             linspace_specialization(*reinterpret_cast<const float *>(startval),
                             *reinterpret_cast<const float *>(stopval), count, result);
-            return DYND_MOVE(result);
+            return std::move(result);
         }
         case float64_type_id: {
             nd::array result = nd::empty(count, dt);
             linspace_specialization(*reinterpret_cast<const double *>(startval),
                             *reinterpret_cast<const double *>(stopval), count, result);
-            return DYND_MOVE(result);
+            return std::move(result);
         }
         case complex_float32_type_id: {
             nd::array result = nd::empty(count, dt);
             linspace_specialization(*reinterpret_cast<const dynd::complex<float> *>(startval),
                             *reinterpret_cast<const dynd::complex<float> *>(stopval), count, result);
-            return DYND_MOVE(result);
+            return std::move(result);
         }
         case complex_float64_type_id: {
             nd::array result = nd::empty(count, dt);
             linspace_specialization(*reinterpret_cast<const dynd::complex<double> *>(startval),
                             *reinterpret_cast<const dynd::complex<double> *>(stopval), count, result);
-            return DYND_MOVE(result);
+            return std::move(result);
         }
         default:
             break;
