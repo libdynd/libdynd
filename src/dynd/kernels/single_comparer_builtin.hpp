@@ -421,13 +421,13 @@ DYND_FORCE_BIG_TYPE(dynd_float128, dynd_float128);
         {
             // Sorts in the order like NumPy, [R + Rj, R + nanj, nan + Rj, nan + nanj]
             if (v0.real() < v1.real()) {
-                return !DYND_ISNAN(v0.imag()) || DYND_ISNAN(v1.imag());
+                return !isnan(v0.imag()) || isnan(v1.imag());
             } else if (v0.real() > v1.real()) {
-                return DYND_ISNAN(v1.imag()) && !DYND_ISNAN(v0.imag());
-            } else if (v0.real() == v1.real() || (DYND_ISNAN(v0.real()) && DYND_ISNAN(v1.real()))) {
-                return v0.imag() < v1.imag() || (DYND_ISNAN(v1.imag()) && !DYND_ISNAN(v0.imag()));
+                return isnan(v1.imag()) && !isnan(v0.imag());
+            } else if (v0.real() == v1.real() || (isnan(v0.real()) && isnan(v1.real()))) {
+                return v0.imag() < v1.imag() || (isnan(v1.imag()) && !isnan(v0.imag()));
             } else {
-                return DYND_ISNAN(v1.real());
+                return isnan(v1.real());
             }
         }
     };

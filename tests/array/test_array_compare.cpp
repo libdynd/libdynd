@@ -621,8 +621,8 @@ TEST(ArrayCompare, NaNComplexFloat32) {
     cval[0] = nan;
     cval[1] = 0.f;
     a.val_assign(ndt::make_type<dynd::complex<float> >(), NULL, reinterpret_cast<const char *>(&cval[0]));
-    EXPECT_TRUE(DYND_ISNAN(a.p("real").as<float>()));
-    EXPECT_FALSE(DYND_ISNAN(a.p("imag").as<float>()));
+    EXPECT_TRUE(dynd::isnan(a.p("real").as<float>()));
+    EXPECT_FALSE(dynd::isnan(a.p("imag").as<float>()));
     EXPECT_FALSE(a.op_sorting_less(a));
     EXPECT_THROW((a < a), not_comparable_error);
     EXPECT_THROW((a <= a), not_comparable_error);
@@ -635,8 +635,8 @@ TEST(ArrayCompare, NaNComplexFloat32) {
     cval[0] = 0.f;
     cval[1] = nan;
     a.val_assign(ndt::make_type<dynd::complex<float> >(), NULL, reinterpret_cast<const char *>(&cval[0]));
-    EXPECT_FALSE(DYND_ISNAN(a.p("real").as<float>()));
-    EXPECT_TRUE(DYND_ISNAN(a.p("imag").as<float>()));
+    EXPECT_FALSE(dynd::isnan(a.p("real").as<float>()));
+    EXPECT_TRUE(dynd::isnan(a.p("imag").as<float>()));
     EXPECT_FALSE(a.op_sorting_less(a));
     EXPECT_THROW((a < a), not_comparable_error);
     EXPECT_THROW((a <= a), not_comparable_error);
@@ -649,8 +649,8 @@ TEST(ArrayCompare, NaNComplexFloat32) {
     cval[0] = nan;
     cval[1] = nan;
     a.val_assign(ndt::make_type<dynd::complex<float> >(), NULL, reinterpret_cast<const char *>(&cval[0]));
-    EXPECT_TRUE(DYND_ISNAN(a.p("real").as<float>()));
-    EXPECT_TRUE(DYND_ISNAN(a.p("imag").as<float>()));
+    EXPECT_TRUE(dynd::isnan(a.p("real").as<float>()));
+    EXPECT_TRUE(dynd::isnan(a.p("imag").as<float>()));
     EXPECT_FALSE(a.op_sorting_less(a));
     EXPECT_THROW((a < a), not_comparable_error);
     EXPECT_THROW((a <= a), not_comparable_error);
@@ -751,8 +751,8 @@ TEST(ArrayCompare, NaNComplexFloat32) {
     cval[0] = nan;
     cval[1] = 1.f;
     b.val_assign(ndt::make_type<dynd::complex<float> >(), NULL, reinterpret_cast<const char *>(&cval[0]));
-    EXPECT_FALSE(DYND_ISNAN(a.p("real").as<float>()));
-    EXPECT_TRUE(DYND_ISNAN(a.p("imag").as<float>()));
+    EXPECT_FALSE(dynd::isnan(a.p("real").as<float>()));
+    EXPECT_TRUE(dynd::isnan(a.p("imag").as<float>()));
     EXPECT_TRUE(a.op_sorting_less(b));
     EXPECT_THROW((a < b), not_comparable_error);
     EXPECT_THROW((a <= b), not_comparable_error);

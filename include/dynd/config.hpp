@@ -46,8 +46,6 @@
 #include <cmath>
 #include <cctype>
 
-#define DYND_ISNAN dynd::isnan
-
 // Workaround for a clang issue
 #define DYND_ISSPACE std::isspace
 #define DYND_TOLOWER std::tolower
@@ -63,7 +61,6 @@
 
 #define DYND_CONSTEXPR constexpr
 #define DYND_RVALUE_REFS
-#define DYND_ISNAN isnan
 #define DYND_CXX_VARIADIC_TEMPLATES
 
 #define DYND_ISSPACE isspace
@@ -129,8 +126,6 @@ public:
     _set_invalid_parameter_handler(m_saved);
   }
 };
-
-#define DYND_ISNAN dynd::isnan
 
 #endif // end of compiler vendor checks
 
