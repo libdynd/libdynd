@@ -1810,7 +1810,7 @@ nd::array nd::empty_shell(const ndt::type &tp)
     preamble->m_data_pointer = data_ptr;
     preamble->m_data_reference = NULL;
     preamble->m_flags = nd::read_access_flag | nd::write_access_flag;
-    return nd::array(DYND_MOVE(result));
+    return nd::array(std::move(result));
   } else if (!tp.is_symbolic()) {
     char *data_ptr = NULL;
     size_t arrmeta_size = tp.extended()->get_arrmeta_size();
@@ -1836,7 +1836,7 @@ nd::array nd::empty_shell(const ndt::type &tp)
     preamble->m_data_pointer = data_ptr;
     preamble->m_data_reference = NULL;
     preamble->m_flags = nd::read_access_flag | nd::write_access_flag;
-    return nd::array(DYND_MOVE(result));
+    return nd::array(std::move(result));
   } else {
     stringstream ss;
     ss << "Cannot create a dynd array with symbolic type " << tp;

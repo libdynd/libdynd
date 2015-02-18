@@ -10,8 +10,12 @@
 #include <assert.h>
 #include <cmath>
 #include <cstdlib>
-#include <stdint.h>
+#include <initializer_list>
 #include <limits>
+#include <stdint.h>
+#include <tuple>
+#include <type_traits>
+#include <utility>
 
 #ifdef DYND_CUDA
 #include <cuda_runtime.h>
@@ -109,16 +113,6 @@ public:
 
 #endif // end of compiler vendor checks
 
-// If RValue References are supported
-#include <utility>
-#define DYND_MOVE(x) (std::move(x))
-
-#ifndef DYND_ATOLL
-#define DYND_ATOLL(x) (atoll(x))
-#endif
-
-// If Initializer Lists are supported
-#include <initializer_list>
 
 // If being run from the CLING C++ interpreter
 #ifdef DYND_CLING
@@ -136,9 +130,6 @@ inline void DYND_MEMCPY(char *dst, const char *src, intptr_t count)
 #include <cstring>
 #define DYND_MEMCPY(dst, src, count) std::memcpy(dst, src, count)
 #endif
-
-#include <tuple>
-#include <type_traits>
 
 #include <dynd/type_sequence.hpp>
 
@@ -438,43 +429,55 @@ bool built_with_cuda();
 
 #define DYND_CUDA_HOST_DEVICE
 
-namespace dynd {
-template <typename T>
-inline bool isinf(T arg)
-{
-#ifndef _MSC_VER
-  return (std::isinf)(arg);
-#else
-  return arg == std::numeric_limits<double>::infinity() ||
-         arg == -std::numeric_limits<double>::infinity();
-#endif
-}
-
-} // namespace dynd
-
 #endif // __CUDACC_
 
 namespace dynd {
+namespace detail {
 
-// Prevent from nvcc clashing with cmath
-template <typename T>
-DYND_CUDA_HOST_DEVICE bool isfinite(T arg)
-{
-#ifdef __CUDA_ARCH__
-  return ::isfinite(arg);
-#else
-  return std::isfinite(arg);
-#endif
-}
+  template <typename T, int N>
+  class array_wrapper {
+    T m_data[N];
 
-template <typename T>
-DYND_CUDA_HOST_DEVICE inline bool isnan(T arg) {
-#ifdef __CUDACC__
-  return ::isnan(arg);
-#else
-  return std::isnan(arg);
-#endif
-}
+  public:
+    array_wrapper(const T *data) { memcpy(m_data, data, sizeof(m_data)); }
+
+    DYND_CUDA_HOST_DEVICE operator T *() { return m_data; }
+
+    DYND_CUDA_HOST_DEVICE operator const T *() const { return m_data; }
+  };
+
+  template <typename T>
+  class array_wrapper<T, 0> {
+  public:
+    array_wrapper(const T *DYND_UNUSED(data)) {}
+
+    DYND_CUDA_HOST_DEVICE operator T *() { return NULL; }
+
+    DYND_CUDA_HOST_DEVICE operator const T *() const { return NULL; }
+  };
+
+  template <int N, typename T>
+  array_wrapper<T, N> make_array_wrapper(const T *data) {
+    return array_wrapper<T, N>(data);
+  }
+
+  template <typename T>
+  class value_wrapper {
+    T m_value;
+
+  public:
+    value_wrapper(const T &value) : m_value(value) {}
+
+    DYND_CUDA_HOST_DEVICE operator T() const { return m_value; }
+  };
+
+  template <typename T>
+  value_wrapper<T> make_value_wrapper(const T &value)
+  {
+    return value_wrapper<T>(value);
+  }
+
+} // namespace dynd::detail
 
 template <size_t I>
 DYND_CUDA_HOST_DEVICE typename std::enable_if<I == 0, intptr_t>::type
@@ -554,53 +557,4 @@ get_thread_local_offset(size_t count)
   }
 }
 
-} // namespace dynd
-
-namespace dynd {
-namespace detail {
-
-  template <typename T, int N>
-  class array_wrapper {
-    T m_data[N];
-
-  public:
-    array_wrapper(const T *data) { memcpy(m_data, data, sizeof(m_data)); }
-
-    DYND_CUDA_HOST_DEVICE operator T *() { return m_data; }
-
-    DYND_CUDA_HOST_DEVICE operator const T *() const { return m_data; }
-  };
-
-  template <typename T>
-  class array_wrapper<T, 0> {
-  public:
-    array_wrapper(const T *DYND_UNUSED(data)) {}
-
-    DYND_CUDA_HOST_DEVICE operator T *() { return NULL; }
-
-    DYND_CUDA_HOST_DEVICE operator const T *() const { return NULL; }
-  };
-
-  template <int N, typename T>
-  array_wrapper<T, N> make_array_wrapper(const T *data) {
-    return array_wrapper<T, N>(data);
-  }
-
-  template <typename T>
-  class value_wrapper {
-    T m_value;
-
-  public:
-    value_wrapper(const T &value) : m_value(value) {}
-
-    DYND_CUDA_HOST_DEVICE operator T() const { return m_value; }
-  };
-
-  template <typename T>
-  value_wrapper<T> make_value_wrapper(const T &value)
-  {
-    return value_wrapper<T>(value);
-  }
-
-} // namespace dynd::detail
 } // namespace dynd

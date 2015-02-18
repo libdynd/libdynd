@@ -244,6 +244,9 @@ using NAMESPACE::sqrt;
 using NAMESPACE::cbrt;
 using NAMESPACE::hypot;
 using NAMESPACE::abs;
+using NAMESPACE::isfinite;
+using NAMESPACE::isinf;
+using NAMESPACE::isnan;
 
 #undef NAMESPACE
 

@@ -236,7 +236,7 @@ namespace nd {
         throw std::runtime_error(
             "array can only be constructed from a memblock with array type");
       }
-      m_memblock = DYND_MOVE(ndobj_memblock);
+      m_memblock = std::move(ndobj_memblock);
     }
 
     // TODO: Copy the initializer list mechanisms from ndarray
@@ -257,7 +257,7 @@ namespace nd {
     /** Move assignment operator (should be just "= default" in C++11) */
     inline array &operator=(array &&rhs)
     {
-      m_memblock = DYND_MOVE(rhs.m_memblock);
+      m_memblock = std::move(rhs.m_memblock);
 
       return *this;
     }
@@ -947,7 +947,7 @@ namespace nd {
     array m_arr;
     array_vals_at(const array &arr) : m_arr(arr) {}
 
-    array_vals_at(array &&arr) : m_arr(DYND_MOVE(arr)) {}
+    array_vals_at(array &&arr) : m_arr(std::move(arr)) {}
 
     // Non-copyable, not default-constructable
     array_vals_at(const array_vals &);
