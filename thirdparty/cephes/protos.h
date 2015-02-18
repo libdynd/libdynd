@@ -18,7 +18,7 @@ extern int airy(double x, double *ai, double *aip, double *bi,
 extern double asin(double x);
 extern double acos(double x);
 extern double atan(double x);
-extern double atan2(double y, double x);
+//extern double atan2(double y, double x);
 extern double bdtrc(int k, int n, double p);
 extern double bdtr(int k, int n, double p);
 extern double bdtri(int k, int n, double y);
@@ -50,7 +50,7 @@ extern double chdtri(double df, double y);
  */
 /*extern double cabs ( cmplx *z ); */
 /* extern void csqrt ( cmplx *z, cmplx *w ); */
-extern double cosh(double x);
+//extern double cosh(double x);
 extern double dawsn(double xx);
 extern void eigens(double A[], double RR[], double E[], int N);
 extern double ellie(double phi, double m);
@@ -59,7 +59,7 @@ extern double ellpe(double x);
 extern int ellpj(double u, double m, double *sn, double *cn, double *dn,
 		 double *ph);
 extern double ellpk(double x);
-extern double exp(double x);
+//extern double exp(double x);
 extern double exp10(double x);
 extern double exp1m(double x);
 extern double exp2(double x);
@@ -106,7 +106,7 @@ extern double kn(int nn, double x);
 /*
  * extern int levnsn ( int n, double r[], double a[], double e[], double refl[] );
  */
-extern double log(double x);
+//extern double log(double x);
 extern double log10(double x);
 
 /*
@@ -131,7 +131,7 @@ extern double ndtri(double y0);
 extern double pdtrc(int k, double m);
 extern double pdtr(int k, double m);
 extern double pdtri(int k, double y);
-extern double pow(double x, double y);
+//extern double pow(double x, double y);
 extern double powi(double x, int nn);
 extern double psi(double x);
 extern void revers(double y[], double x[], int n);
@@ -145,8 +145,8 @@ extern int sici(double x, double *si, double *ci);
 extern double simpsn(double f[], double delta);
 extern int simq(double A[], double B[], double X[], int n, int flag,
 		int IPS[]);
-extern double sin(double x);
-extern double cos(double x);
+//extern double sin(double x);
+//extern double cos(double x);
 extern double radian(double d, double m, double s);
 
 /*
@@ -154,15 +154,15 @@ extern double radian(double d, double m, double s);
  */
 extern double sindg(double x);
 extern double cosdg(double x);
-extern double sinh(double x);
+//extern double sinh(double x);
 extern double spence(double x);
-extern double sqrt(double x);
+//extern double sqrt(double x);
 extern double stdtr(int k, double t);
 extern double stdtri(int k, double p);
 extern double onef2(double a, double b, double c, double x, double *err);
 extern double threef0(double a, double b, double c, double x, double *err);
 extern double struve(double v, double x);
-extern double tan(double x);
+//extern double tan(double x);
 extern double cot(double x);
 extern double tandg(double x);
 extern double cotdg(double x);

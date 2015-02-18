@@ -372,13 +372,13 @@ DYND_CUDA_HOST_DEVICE inline complex<double> _i<double>()
 }
 
 template <typename T>
-T abs(complex<T> z)
+DYND_CUDA_HOST_DEVICE T abs(complex<T> z)
 {
   return static_cast<T>(hypot(z.real(), z.imag()));
 }
 
 template <typename T>
-T arg(complex<T> z)
+DYND_CUDA_HOST_DEVICE T arg(complex<T> z)
 {
   return atan2(z.imag(), z.real());
 }
@@ -391,10 +391,10 @@ DYND_CUDA_HOST_DEVICE complex<T> exp(complex<T> z)
   complex<T> ret;
 
   if (isfinite(r)) {
-    x = std::exp(r);
+    x = exp(r);
 
-    c = std::cos(i);
-    s = std::sin(i);
+    c = cos(i);
+    s = sin(i);
 
     if (isfinite(i)) {
       ret = complex<T>(x * c, x * s);
@@ -416,8 +416,8 @@ DYND_CUDA_HOST_DEVICE complex<T> exp(complex<T> z)
       if (i == 0) {
         ret = complex<T>(r, i);
       } else if (isfinite(i)) {
-        c = std::cos(i);
-        s = std::sin(i);
+        c = cos(i);
+        s = sin(i);
 
         ret = complex<T>(r * c, r * s);
       } else {
@@ -426,9 +426,9 @@ DYND_CUDA_HOST_DEVICE complex<T> exp(complex<T> z)
       }
     } else {
       if (isfinite(i)) {
-        x = std::exp(r);
-        c = std::cos(i);
-        s = std::sin(i);
+        x = exp(r);
+        c = cos(i);
+        s = sin(i);
 
         ret = complex<T>(x * c, x * s);
       } else {
@@ -442,13 +442,13 @@ DYND_CUDA_HOST_DEVICE complex<T> exp(complex<T> z)
 }
 
 template <typename T>
-complex<T> log(complex<T> z)
+DYND_CUDA_HOST_DEVICE complex<T> log(complex<T> z)
 {
-  return complex<T>(std::log(abs(z)), arg(z));
+  return complex<T>(log(abs(z)), arg(z));
 }
 
 template <typename T>
-inline complex<T> sqrt(complex<T> z)
+DYND_CUDA_HOST_DEVICE inline complex<T> sqrt(complex<T> z)
 {
   using namespace std;
   // We risk spurious overflow for components >= DBL_MAX / (1 + sqrt(2))
@@ -511,7 +511,7 @@ inline complex<T> sqrt(complex<T> z)
 }
 
 template <typename T>
-complex<T> pow(complex<T> x, complex<T> y)
+DYND_CUDA_HOST_DEVICE complex<T> pow(complex<T> x, complex<T> y)
 {
   T yr = y.real(), yi = y.imag();
 
@@ -522,7 +522,7 @@ complex<T> pow(complex<T> x, complex<T> y)
 }
 
 template <typename T>
-complex<T> pow(complex<T> x, T y)
+DYND_CUDA_HOST_DEVICE complex<T> pow(complex<T> x, T y)
 {
   complex<T> b = log(x);
   T br = b.real(), bi = b.imag();
@@ -531,19 +531,19 @@ complex<T> pow(complex<T> x, T y)
 }
 
 template <typename T>
-complex<T> cos(complex<T> z)
+DYND_CUDA_HOST_DEVICE complex<T> cos(complex<T> z)
 {
   T x = z.real(), y = z.imag();
-  return complex<T>(std::cos(x) * std::cosh(y),
-                         -(std::sin(x) * std::sinh(y)));
+  return complex<T>(cos(x) * cosh(y),
+                         -(sin(x) * sinh(y)));
 }
 
 template <typename T>
-complex<T> sin(complex<T> z)
+DYND_CUDA_HOST_DEVICE complex<T> sin(complex<T> z)
 {
   T x = z.real(), y = z.imag();
-  return complex<T>(std::sin(x) * std::cosh(y),
-                         std::cos(x) * std::sinh(y));
+  return complex<T>(sin(x) * cosh(y),
+                         cos(x) * sinh(y));
 }
 
 } // namespace dynd

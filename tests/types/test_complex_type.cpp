@@ -37,7 +37,8 @@ TEST(Complex, Math) {
     z = dynd::complex<double>(0.0, 0.0);
     EXPECT_DOUBLE_EQ(abs(z), abs(cdbl(z)));
     EXPECT_DOUBLE_EQ(arg(z), arg(cdbl(z)));
-    EXPECT_COMPLEX_DOUBLE_EQ(dynd::exp(z), exp(cdbl(z)));
+    EXPECT_COMPLEX_DOUBLE_EQ(dynd::exp(z),
+                             std::exp(static_cast<std::complex<double>>(z)));
 /*
     EXPECT_COMPLEX_DOUBLE_EQ(log(z), log(cdbl(z)));
     EXPECT_COMPLEX_DOUBLE_EQ(sqrt(z), sqrt(cdbl(z)));
