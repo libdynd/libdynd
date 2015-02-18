@@ -66,6 +66,7 @@ namespace kernels {
                 const arrfunc_type *DYND_UNUSED(self_tp), void *ckb,
                 intptr_t ckb_offset, const ndt::type &DYND_UNUSED(dst_tp),
                 const char *DYND_UNUSED(dst_arrmeta),
+                intptr_t DYND_UNUSED(nsrc),
                 const ndt::type *DYND_UNUSED(src_tp),
                 const char *const *DYND_UNUSED(src_arrmeta),
                 kernel_request_t kernreq,
@@ -81,7 +82,7 @@ namespace kernels {
     static intptr_t
     instantiate(const arrfunc_type_data *self, const arrfunc_type *self_tp,
                 void *ckb, intptr_t ckb_offset, const ndt::type dst_tp,
-                const char *dst_arrmeta, const ndt::type *src_tp,
+                const char *dst_arrmeta, intptr_t nsrc, const ndt::type *src_tp,
                 const char *const *src_arrmeta, kernel_request_t kernreq,
                 const eval::eval_context *ectx, const nd::array &kwds,
                 const std::map<nd::string, ndt::type> &tp_vars)
@@ -94,7 +95,7 @@ namespace kernels {
       intptr_t res_ckb_offset = ckb_offset;
       if (kernel_request_without_function(kernreq) == kernel_request_host && cuda_device_readable) {
         res_ckb_offset = self_type::instantiate(
-            self, self_tp, ckb, res_ckb_offset, dst_tp, dst_arrmeta, src_tp,
+            self, self_tp, ckb, res_ckb_offset, dst_tp, dst_arrmeta, nsrc, src_tp,
             src_arrmeta, kernreq, ectx, kwds, tp_vars);
         self_type *self =
             reinterpret_cast<ckernel_builder<kernel_request_host> *>(ckb)
@@ -103,7 +104,7 @@ namespace kernels {
         kernreq |= kernel_request_cuda_device;
         ckb_offset = 0;
       }
-      instantiate(self, self_tp, ckb, ckb_offset, dst_tp, dst_arrmeta, src_tp,
+      instantiate(self, self_tp, ckb, ckb_offset, dst_tp, dst_arrmeta, nsrc, src_tp,
                   src_arrmeta, kernreq, ectx, kwds, tp_vars);
 
       return res_ckb_offset;

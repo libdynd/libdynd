@@ -70,7 +70,7 @@ namespace kernels {
     static intptr_t instantiate(
         const arrfunc_type_data *self, const arrfunc_type *DYND_UNUSED(self_tp),
         void *ckb, intptr_t ckb_offset, const ndt::type &DYND_UNUSED(dst_tp),
-        const char *DYND_UNUSED(dst_arrmeta),
+        const char *DYND_UNUSED(dst_arrmeta), intptr_t DYND_UNUSED(nsrc),
         const ndt::type *DYND_UNUSED(src_tp),
         const char *const *DYND_UNUSED(src_arrmeta), kernel_request_t kernreq,
         const eval::eval_context *DYND_UNUSED(ectx), const nd::array &kwds,
@@ -132,7 +132,7 @@ namespace kernels {
     static intptr_t instantiate(
         const arrfunc_type_data *self, const arrfunc_type *DYND_UNUSED(self_tp),
         void *ckb, intptr_t ckb_offset, const ndt::type &DYND_UNUSED(dst_tp),
-        const char *DYND_UNUSED(dst_arrmeta),
+        const char *DYND_UNUSED(dst_arrmeta), intptr_t DYND_UNUSED(nsrc),
         const ndt::type *DYND_UNUSED(src_tp),
         const char *const *DYND_UNUSED(src_arrmeta), kernel_request_t kernreq,
         const eval::eval_context *DYND_UNUSED(ectx), const nd::array &kwds,
@@ -167,10 +167,10 @@ namespace kernels {
     __device__ void strided(char *dst, intptr_t dst_stride, char *const *DYND_UNUSED(src),
                             const intptr_t *DYND_UNUSED(src_stride), size_t count)
     {
-      dst += DYND_GET_THREAD_ID(0) * dst_stride;
-      for (size_t i = DYND_GET_THREAD_ID(0); i < count; i += DYND_GET_THREAD_COUNT(0)) {
-        *reinterpret_cast<double *>(dst) = curand_uniform_double(s + DYND_GET_THREAD_ID(0));
-        dst += DYND_GET_THREAD_COUNT(0) * dst_stride;
+      dst += get_thread_id<0>() * dst_stride;
+      for (size_t i = get_thread_id<0>(); i < count; i += get_thread_count<0>()) {
+        *reinterpret_cast<double *>(dst) = curand_uniform_double(s + get_thread_id<0>());
+        dst += get_thread_count<0>() * dst_stride;
       }
     }
 
@@ -201,7 +201,7 @@ namespace kernels {
     static intptr_t instantiate(
         const arrfunc_type_data *self, const arrfunc_type *DYND_UNUSED(self_tp),
         void *ckb, intptr_t ckb_offset, const ndt::type &DYND_UNUSED(dst_tp),
-        const char *DYND_UNUSED(dst_arrmeta),
+        const char *DYND_UNUSED(dst_arrmeta), intptr_t DYND_UNUSED(nsrc),
         const ndt::type *DYND_UNUSED(src_tp),
         const char *const *DYND_UNUSED(src_arrmeta), kernel_request_t kernreq,
         const eval::eval_context *DYND_UNUSED(ectx), const nd::array &kwds,
@@ -274,7 +274,7 @@ namespace kernels {
     static intptr_t instantiate(
         const arrfunc_type_data *self, const arrfunc_type *DYND_UNUSED(self_tp),
         void *ckb, intptr_t ckb_offset, const ndt::type &DYND_UNUSED(dst_tp),
-        const char *DYND_UNUSED(dst_arrmeta),
+        const char *DYND_UNUSED(dst_arrmeta), intptr_t DYND_UNUSED(nsrc),
         const ndt::type *DYND_UNUSED(src_tp),
         const char *const *DYND_UNUSED(src_arrmeta), kernel_request_t kernreq,
         const eval::eval_context *DYND_UNUSED(ectx), const nd::array &kwds,
@@ -319,7 +319,7 @@ namespace kernels {
     static intptr_t instantiate(
         const arrfunc_type_data *self, const arrfunc_type *DYND_UNUSED(self_tp),
         void *ckb, intptr_t ckb_offset, const ndt::type &DYND_UNUSED(dst_tp),
-        const char *DYND_UNUSED(dst_arrmeta),
+        const char *DYND_UNUSED(dst_arrmeta), intptr_t DYND_UNUSED(nsrc),
         const ndt::type *DYND_UNUSED(src_tp),
         const char *const *DYND_UNUSED(src_arrmeta), kernel_request_t kernreq,
         const eval::eval_context *DYND_UNUSED(ectx), const nd::array &kwds,

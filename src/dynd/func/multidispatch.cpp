@@ -302,7 +302,7 @@ get_ambiguous_pairs(intptr_t naf, const nd::arrfunc *af,
 static intptr_t instantiate_multidispatch_af(
     const arrfunc_type_data *af_self, const arrfunc_type *DYND_UNUSED(af_tp),
     void *ckb, intptr_t ckb_offset, const ndt::type &dst_tp,
-    const char *dst_arrmeta, const ndt::type *src_tp,
+    const char *dst_arrmeta, intptr_t DYND_UNUSED(nsrc), const ndt::type *src_tp,
     const char *const *src_arrmeta, kernel_request_t kernreq,
     const eval::eval_context *ectx, const nd::array &kwds,
     const std::map<dynd::nd::string, ndt::type> &tp_vars)
@@ -328,7 +328,7 @@ static intptr_t instantiate_multidispatch_af(
       }
       if (j == nsrc) {
         return af.get()->instantiate(af.get(), af.get_type(), ckb, ckb_offset,
-                                     dst_tp, dst_arrmeta, src_tp, src_arrmeta,
+                                     dst_tp, dst_arrmeta, nsrc, src_tp, src_arrmeta,
                                      kernreq, ectx, kwds, tp_vars);
       } else {
         return make_buffered_ckernel(af.get(), af.get_type(), ckb, ckb_offset,
@@ -481,13 +481,13 @@ namespace nd {
 intptr_t nd::functional::multidispatch_instantiate(
     const arrfunc_type_data *self, const arrfunc_type *self_tp, void *ckb,
     intptr_t ckb_offset, const ndt::type &dst_tp, const char *dst_arrmeta,
-    const ndt::type *src_tp, const char *const *src_arrmeta,
+    intptr_t nsrc, const ndt::type *src_tp, const char *const *src_arrmeta,
     kernel_request_t kernreq, const eval::eval_context *ectx, const array &kwds,
     const std::map<string, ndt::type> &tp_vars)
 {
   const arrfunc_type_data *child = multidispatch_find(self, tp_vars);
   return child->instantiate(child, self_tp, ckb, ckb_offset, dst_tp,
-                            dst_arrmeta, src_tp, src_arrmeta, kernreq, ectx,
+                            dst_arrmeta, nsrc, src_tp, src_arrmeta, kernreq, ectx,
                             kwds, tp_vars);
 }
 

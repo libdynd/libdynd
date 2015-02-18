@@ -835,12 +835,12 @@ static size_t make_strided_inner_reduction_dimension_kernel(
     const char *src_arrmeta_doubled[2] = {src_arrmeta, src_arrmeta};
     ckb_offset = elwise_reduction->instantiate(
         elwise_reduction, elwise_reduction_tp, ckb, ckb_offset, dst_tp,
-        dst_arrmeta, src_tp_doubled, src_arrmeta_doubled,
+        dst_arrmeta, elwise_reduction_tp->get_npos(), src_tp_doubled, src_arrmeta_doubled,
         kernel_request_strided, ectx, nd::array(), std::map<nd::string, ndt::type>());
   } else {
     ckb_offset = elwise_reduction->instantiate(
         elwise_reduction, elwise_reduction_tp, ckb, ckb_offset, dst_tp,
-        dst_arrmeta, &src_tp, &src_arrmeta, kernel_request_strided, ectx,
+        dst_arrmeta, elwise_reduction_tp->get_npos(), &src_tp, &src_arrmeta, kernel_request_strided, ectx,
         nd::array(), std::map<nd::string, ndt::type>());
   }
   // Make sure there's capacity for the next ckernel
@@ -853,7 +853,7 @@ static size_t make_strided_inner_reduction_dimension_kernel(
   if (dst_initialization != NULL) {
     ckb_offset = dst_initialization->instantiate(
         dst_initialization, dst_initialization_tp, ckb, ckb_offset, dst_tp,
-        dst_arrmeta, &src_tp, &src_arrmeta, kernel_request_single, ectx,
+        dst_arrmeta, elwise_reduction_tp->get_npos(), &src_tp, &src_arrmeta, kernel_request_single, ectx,
         nd::array(), std::map<nd::string, ndt::type>());
   } else if (reduction_identity.is_null()) {
     ckb_offset =
@@ -975,12 +975,12 @@ static size_t make_strided_inner_broadcast_dimension_kernel(
     const char *src_arrmeta_doubled[2] = {src_arrmeta, src_arrmeta};
     ckb_offset = elwise_reduction->instantiate(
         elwise_reduction, elwise_reduction_tp, ckb, ckb_offset, dst_tp,
-        dst_arrmeta, src_tp_doubled, src_arrmeta_doubled,
+        dst_arrmeta, elwise_reduction_tp->get_npos(), src_tp_doubled, src_arrmeta_doubled,
         kernel_request_strided, ectx, nd::array(), std::map<nd::string, ndt::type>());
   } else {
     ckb_offset = elwise_reduction->instantiate(
         elwise_reduction, elwise_reduction_tp, ckb, ckb_offset, dst_tp,
-        dst_arrmeta, &src_tp, &src_arrmeta, kernel_request_strided, ectx,
+        dst_arrmeta, elwise_reduction_tp->get_npos(), &src_tp, &src_arrmeta, kernel_request_strided, ectx,
         nd::array(), std::map<nd::string, ndt::type>());
   }
   // Make sure there's capacity for the next ckernel
@@ -993,7 +993,7 @@ static size_t make_strided_inner_broadcast_dimension_kernel(
   if (dst_initialization != NULL) {
     ckb_offset = dst_initialization->instantiate(
         dst_initialization, dst_initialization_tp, ckb, ckb_offset, dst_tp,
-        dst_arrmeta, &src_tp, &src_arrmeta, kernel_request_strided, ectx,
+        dst_arrmeta, elwise_reduction_tp->get_npos(), &src_tp, &src_arrmeta, kernel_request_strided, ectx,
         nd::array(), std::map<nd::string, ndt::type>());
   } else if (reduction_identity.is_null()) {
     ckb_offset =
@@ -1032,7 +1032,7 @@ size_t dynd::make_lifted_reduction_ckernel(
       if (dst_initialization != NULL) {
         return dst_initialization->instantiate(
             dst_initialization, dst_initialization_tp, ckb, ckb_offset, dst_tp,
-            dst_arrmeta, &src_tp, &src_arrmeta, kernreq, ectx, 
+            dst_arrmeta, elwise_reduction_tp->get_npos(), &src_tp, &src_arrmeta, kernreq, ectx, 
             nd::array(), std::map<nd::string, ndt::type>());
       }
       else if (reduction_identity.is_null()) {

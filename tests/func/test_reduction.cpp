@@ -125,7 +125,7 @@ TEST(Reduction, BuiltinSum_Lift0D_NoIdentity)
   const ndt::type src_tp[1] = {a.get_type()};
   const char *src_arrmeta[1] = {a.get_arrmeta()};
   af.get()->instantiate(af.get(), af.get_type(), &ckb, 0, b.get_type(),
-                        b.get_arrmeta(), src_tp, src_arrmeta,
+                        b.get_arrmeta(), 1, src_tp, src_arrmeta,
                         kernel_request_single, &eval::default_eval_context,
                         nd::array(), std::map<nd::string, ndt::type>());
 
@@ -159,7 +159,7 @@ TEST(Reduction, BuiltinSum_Lift0D_WithIdentity)
   const ndt::type src_tp[1] = {a.get_type()};
   const char *src_arrmeta[1] = {a.get_arrmeta()};
   af.get()->instantiate(af.get(), af.get_type(), &ckb, 0, b.get_type(),
-                        b.get_arrmeta(), src_tp, src_arrmeta,
+                        b.get_arrmeta(), 1, src_tp, src_arrmeta,
                         kernel_request_single, &eval::default_eval_context,
                         nd::array(), std::map<nd::string, ndt::type>());
 
@@ -193,7 +193,7 @@ TEST(Reduction, BuiltinSum_Lift1D_NoIdentity)
   ndt::type src_tp[1] = {a.get_type()};
   const char *src_arrmeta[1] = {a.get_arrmeta()};
   af.get()->instantiate(af.get(), af.get_type(), &ckb, 0, b.get_type(),
-                        b.get_arrmeta(), src_tp, src_arrmeta,
+                        b.get_arrmeta(), 1, src_tp, src_arrmeta,
                         kernel_request_single, &eval::default_eval_context,
                         nd::array(), std::map<nd::string, ndt::type>());
 
@@ -210,7 +210,7 @@ TEST(Reduction, BuiltinSum_Lift1D_NoIdentity)
   src_tp[0] = a.get_type();
   src_arrmeta[0] = a.get_arrmeta();
   af.get()->instantiate(af.get(), af.get_type(), &ckb, 0, b.get_type(),
-                        b.get_arrmeta(), src_tp, src_arrmeta,
+                        b.get_arrmeta(), 1, src_tp, src_arrmeta,
                         kernel_request_single, &eval::default_eval_context,
                         nd::array(), std::map<nd::string, ndt::type>());
 
@@ -245,7 +245,7 @@ TEST(Reduction, BuiltinSum_Lift1D_WithIdentity)
   ndt::type src_tp[1] = {a.get_type()};
   const char *src_arrmeta[1] = {a.get_arrmeta()};
   af.get()->instantiate(af.get(), af.get_type(), &ckb, 0, b.get_type(),
-                        b.get_arrmeta(), src_tp, src_arrmeta,
+                        b.get_arrmeta(), 1, src_tp, src_arrmeta,
                         kernel_request_single, &eval::default_eval_context,
                         nd::array(), std::map<nd::string, ndt::type>());
 
@@ -280,7 +280,7 @@ TEST(Reduction, BuiltinSum_Lift2D_StridedStrided_ReduceReduce)
   ndt::type src_tp[1] = {a.get_type()};
   const char *src_arrmeta[1] = {a.get_arrmeta()};
   af.get()->instantiate(af.get(), af.get_type(), &ckb, 0, b.get_type(),
-                        b.get_arrmeta(), src_tp, src_arrmeta,
+                        b.get_arrmeta(), 1, src_tp, src_arrmeta,
                         kernel_request_single, &eval::default_eval_context,
                         nd::array(), std::map<nd::string, ndt::type>());
 
@@ -295,7 +295,7 @@ TEST(Reduction, BuiltinSum_Lift2D_StridedStrided_ReduceReduce)
   src_tp[0] = a.get_type();
   src_arrmeta[0] = a.get_arrmeta();
   af.get()->instantiate(af.get(), af.get_type(), &ckb, 0, b.get_type(),
-                        b.get_arrmeta(), src_tp, src_arrmeta,
+                        b.get_arrmeta(), 1, src_tp, src_arrmeta,
                         kernel_request_single, &eval::default_eval_context,
                         nd::array(), std::map<nd::string, ndt::type>());
 
@@ -329,7 +329,7 @@ TEST(Reduction, BuiltinSum_Lift2D_StridedStrided_ReduceReduce_KeepDim)
   ndt::type src_tp[1] = {a.get_type()};
   const char *src_arrmeta[1] = {a.get_arrmeta()};
   af.get()->instantiate(af.get(), af.get_type(), &ckb, 0, b.get_type(),
-                        b.get_arrmeta(), src_tp, src_arrmeta,
+                        b.get_arrmeta(), 1, src_tp, src_arrmeta,
                         kernel_request_single, &eval::default_eval_context,
                         nd::array(), std::map<nd::string, ndt::type>());
 
@@ -363,7 +363,7 @@ TEST(Reduction, BuiltinSum_Lift2D_StridedStrided_BroadcastReduce)
   ndt::type src_tp[1] = {a.get_type()};
   const char *src_arrmeta[1] = {a.get_arrmeta()};
   af.get()->instantiate(af.get(), af.get_type(), &ckb, 0, b.get_type(),
-                        b.get_arrmeta(), src_tp, src_arrmeta,
+                        b.get_arrmeta(), 1, src_tp, src_arrmeta,
                         kernel_request_single, &eval::default_eval_context,
                         nd::array(), std::map<nd::string, ndt::type>());
 
@@ -381,7 +381,7 @@ TEST(Reduction, BuiltinSum_Lift2D_StridedStrided_BroadcastReduce)
   src_tp[0] = a.get_type();
   src_arrmeta[0] = a.get_arrmeta();
   af.get()->instantiate(af.get(), af.get_type(), &ckb, 0, b.get_type(),
-                        b.get_arrmeta(), src_tp, src_arrmeta,
+                        b.get_arrmeta(), 1, src_tp, src_arrmeta,
                         kernel_request_single, &eval::default_eval_context,
                         nd::array(), std::map<nd::string, ndt::type>());
 
@@ -416,7 +416,7 @@ TEST(Reduction, BuiltinSum_Lift2D_StridedStrided_BroadcastReduce_KeepDim)
   const ndt::type src_tp[1] = {a.get_type()};
   const char *src_arrmeta[1] = {a.get_arrmeta()};
   af.get()->instantiate(af.get(), af.get_type(), &ckb, 0, b.get_type(),
-                        b.get_arrmeta(), src_tp, src_arrmeta,
+                        b.get_arrmeta(), 1, src_tp, src_arrmeta,
                         kernel_request_single, &eval::default_eval_context,
                         nd::array(), std::map<nd::string, ndt::type>());
 
@@ -452,7 +452,7 @@ TEST(Reduction, BuiltinSum_Lift2D_StridedStrided_ReduceBroadcast)
   ndt::type src_tp[1] = {a.get_type()};
   const char *src_arrmeta[1] = {a.get_arrmeta()};
   af.get()->instantiate(af.get(), af.get_type(), &ckb, 0, b.get_type(),
-                        b.get_arrmeta(), src_tp, src_arrmeta,
+                        b.get_arrmeta(), 1, src_tp, src_arrmeta,
                         kernel_request_single, &eval::default_eval_context,
                         nd::array(), std::map<nd::string, ndt::type>());
 
@@ -471,7 +471,7 @@ TEST(Reduction, BuiltinSum_Lift2D_StridedStrided_ReduceBroadcast)
   src_tp[0] = a.get_type();
   src_arrmeta[0] = a.get_arrmeta();
   af.get()->instantiate(af.get(), af.get_type(), &ckb, 0, b.get_type(),
-                        b.get_arrmeta(), src_tp, src_arrmeta,
+                        b.get_arrmeta(), 1, src_tp, src_arrmeta,
                         kernel_request_single, &eval::default_eval_context,
                         nd::array(), std::map<nd::string, ndt::type>());
 
@@ -507,7 +507,7 @@ TEST(Reduction, BuiltinSum_Lift2D_StridedStrided_ReduceBroadcast_KeepDim)
   const ndt::type src_tp[1] = {a.get_type()};
   const char *src_arrmeta[1] = {a.get_arrmeta()};
   af.get()->instantiate(af.get(), af.get_type(), &ckb, 0, b.get_type(),
-                        b.get_arrmeta(), src_tp, src_arrmeta,
+                        b.get_arrmeta(), 1, src_tp, src_arrmeta,
                         kernel_request_single, &eval::default_eval_context,
                         nd::array(), std::map<nd::string, ndt::type>());
 
@@ -546,7 +546,7 @@ TEST(Reduction, BuiltinSum_Lift3D_StridedStridedStrided_ReduceReduceReduce)
   const ndt::type src_tp[1] = {a.get_type()};
   const char *src_arrmeta[1] = {a.get_arrmeta()};
   af.get()->instantiate(af.get(), af.get_type(), &ckb, 0, b.get_type(),
-                        b.get_arrmeta(), src_tp, src_arrmeta,
+                        b.get_arrmeta(), 1, src_tp, src_arrmeta,
                         kernel_request_single, &eval::default_eval_context,
                         nd::array(), std::map<nd::string, ndt::type>());
 
@@ -584,7 +584,7 @@ TEST(Reduction, BuiltinSum_Lift3D_StridedStridedStrided_BroadcastReduceReduce)
   const ndt::type src_tp[1] = {a.get_type()};
   const char *src_arrmeta[1] = {a.get_arrmeta()};
   af.get()->instantiate(af.get(), af.get_type(), &ckb, 0, b.get_type(),
-                        b.get_arrmeta(), src_tp, src_arrmeta,
+                        b.get_arrmeta(), 1, src_tp, src_arrmeta,
                         kernel_request_single, &eval::default_eval_context,
                         nd::array(), std::map<nd::string, ndt::type>());
 
@@ -623,7 +623,7 @@ TEST(Reduction, BuiltinSum_Lift3D_StridedStridedStrided_ReduceBroadcastReduce)
   const ndt::type src_tp[1] = {a.get_type()};
   const char *src_arrmeta[1] = {a.get_arrmeta()};
   af.get()->instantiate(af.get(), af.get_type(), &ckb, 0, b.get_type(),
-                        b.get_arrmeta(), src_tp, src_arrmeta,
+                        b.get_arrmeta(), 1, src_tp, src_arrmeta,
                         kernel_request_single, &eval::default_eval_context,
                         nd::array(), std::map<nd::string, ndt::type>());
 

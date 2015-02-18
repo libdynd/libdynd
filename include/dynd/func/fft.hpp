@@ -53,6 +53,7 @@ namespace nd {
         const arrfunc_type *DYND_UNUSED(self_tp), void *ckb,
         intptr_t ckb_offset, const ndt::type &DYND_UNUSED(dst_tp),
         const char *dst_arrmeta,
+        intptr_t DYND_UNUSED(nsrc),
         const ndt::type *src_tp,
         const char *const *src_arrmeta,
         kernel_request_t kernreq,

@@ -55,7 +55,7 @@ namespace kernels {
     instantiate(const arrfunc_type_data *self,
                 const arrfunc_type *DYND_UNUSED(self_tp), void *ckb,
                 intptr_t ckb_offset, const ndt::type &dst_tp,
-                const char *dst_arrmeta, const ndt::type *src_tp,
+                const char *dst_arrmeta, intptr_t nsrc, const ndt::type *src_tp,
                 const char *const *src_arrmeta, kernel_request_t kernreq,
                 const eval::eval_context *ectx, const nd::array &kwds,
                 const std::map<nd::string, ndt::type> &tp_vars)
@@ -77,7 +77,7 @@ namespace kernels {
       self_type::create(ckb, kernreq, ckb_offset,
                         detail::make_array_wrapper<N>(perm));
       return child->instantiate(child, child_tp, ckb, ckb_offset,
-                                ndt::make_type<void>(), NULL, src_tp_inv,
+                                ndt::make_type<void>(), NULL, nsrc, src_tp_inv,
                                 src_arrmeta_inv, kernreq, ectx, kwds, tp_vars);
     }
 
@@ -145,7 +145,7 @@ namespace kernels {
     instantiate(const arrfunc_type_data *self,
                 const arrfunc_type *DYND_UNUSED(self_tp), void *ckb,
                 intptr_t ckb_offset, const ndt::type &dst_tp,
-                const char *dst_arrmeta, const ndt::type *src_tp,
+                const char *dst_arrmeta, intptr_t nsrc, const ndt::type *src_tp,
                 const char *const *src_arrmeta, kernel_request_t kernreq,
                 const eval::eval_context *ectx, const nd::array &kwds,
                 const std::map<nd::string, ndt::type> &tp_vars)
@@ -167,7 +167,7 @@ namespace kernels {
       self_type::create(ckb, kernreq, ckb_offset,
                         detail::make_array_wrapper<N>(perm));
       return child->instantiate(child, child_tp, ckb, ckb_offset, dst_tp,
-                                dst_arrmeta, src_tp_inv, src_arrmeta_inv,
+                                dst_arrmeta, nsrc, src_tp_inv, src_arrmeta_inv,
                                 kernreq, ectx, kwds, tp_vars);
     }
 

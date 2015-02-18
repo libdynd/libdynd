@@ -477,13 +477,6 @@ DYND_CUDA_HOST_DEVICE inline bool isnan(T arg) {
 }
 
 template <size_t I>
-DYND_CUDA_HOST_DEVICE typename std::enable_if<I != 0, intptr_t>::type
-get_thread_id()
-{
-  return 0;
-}
-
-template <size_t I>
 DYND_CUDA_HOST_DEVICE typename std::enable_if<I == 0, intptr_t>::type
 get_thread_id()
 {
@@ -494,19 +487,11 @@ get_thread_id()
 #endif
 }
 
-#ifdef __CUDA_ARCH__
-#define DYND_GET_THREAD_ID(I) blockIdx.x * blockDim.x + threadIdx.x
-#define DYND_GET_THREAD_COUNT(I) gridDim.x * blockDim.x
-#else
-#define DYND_GET_THREAD_ID(I) 0
-#define DYND_GET_THREAD_COUNT(I) 1
-#endif
-
 template <size_t I>
 DYND_CUDA_HOST_DEVICE typename std::enable_if<I != 0, intptr_t>::type
-get_thread_count()
+get_thread_id()
 {
-  return 1;
+  return 0;
 }
 
 template <size_t I>
@@ -518,6 +503,13 @@ get_thread_count()
 #else
   return 1;
 #endif
+}
+
+template <size_t I>
+DYND_CUDA_HOST_DEVICE typename std::enable_if<I != 0, intptr_t>::type
+get_thread_count()
+{
+  return 1;
 }
 
 template <size_t I>

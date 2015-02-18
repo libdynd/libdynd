@@ -68,8 +68,8 @@ namespace dynd {
                                          const A1 *__restrict src1,            \
                                          size_t count)                         \
       {                                                                        \
-        for (size_t i = DYND_GET_THREAD_ID(0); i < count;                      \
-             i += DYND_GET_THREAD_COUNT(0)) {                                  \
+        for (size_t i = get_thread_id<0>(); i < count;                         \
+             i += get_thread_count<0>()) {                                     \
           dst[i] = src0[i] SYMBOL src1[i];                                     \
         }                                                                      \
       }                                                                        \
@@ -130,7 +130,8 @@ namespace dynd {
             const arrfunc_type_data *DYND_UNUSED(self),                        \
             const arrfunc_type *DYND_UNUSED(self_tp), void *ckb,               \
             intptr_t ckb_offset, const ndt::type &dst_tp,                      \
-            const char *DYND_UNUSED(dst_arrmeta), const ndt::type *src_tp,     \
+            const char *DYND_UNUSED(dst_arrmeta), intptr_t DYND_UNUSED(nsrc),  \
+            const ndt::type *src_tp,                                           \
             const char *const *DYND_UNUSED(src_arrmeta),                       \
             kernel_request_t kernreq,                                          \
             const eval::eval_context *DYND_UNUSED(ectx),                       \
