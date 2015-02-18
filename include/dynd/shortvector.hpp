@@ -57,19 +57,21 @@ public:
         : m_data((size <= staticN) ? m_shortdata : new T[size])
     {
     }
+
     /** Construct the shortvector with a specified size and initial data */
     shortvector(size_t size, const shortvector& rhs)
         : m_data((size <= staticN) ? m_shortdata : new T[size])
     {
         DYND_MEMCPY(m_data, rhs.m_data, size * sizeof(T));
     }
+
     /** Construct the shortvector with a specified size and initial data */
     shortvector(size_t size, const T* data)
         : m_data((size <= staticN) ? m_shortdata : new T[size])
     {
         DYND_MEMCPY(m_data, data, size * sizeof(T));
     }
-#ifdef DYND_RVALUE_REFS
+
     /** Move constructor */
     shortvector(shortvector&& rhs) {
         if (rhs.m_data == rhs.m_shortdata) {
@@ -82,6 +84,7 @@ public:
             rhs.m_data = rhs.m_shortdata;
         }
     }
+
     /** Move assignment operator */
     shortvector& operator=(shortvector&& rhs) {
         if (this != &rhs) {
@@ -100,7 +103,6 @@ public:
         }
         return *this;
     }
-#endif
 
     /** Destructor */
     ~shortvector() {

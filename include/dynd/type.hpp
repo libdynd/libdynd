@@ -148,7 +148,6 @@ public:
         }
         return *this;
     }
-#ifdef DYND_RVALUE_REFS
     /** Move constructor */
     type(type&& rhs)
         : m_extended(rhs.m_extended)
@@ -164,7 +163,6 @@ public:
         rhs.m_extended = reinterpret_cast<const base_type *>(uninitialized_type_id);
         return *this;
     }
-#endif // DYND_RVALUE_REFS
 
     /** Construct from a builtin type ID */
     explicit type(type_id_t type_id)

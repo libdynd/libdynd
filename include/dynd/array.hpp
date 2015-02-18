@@ -230,7 +230,6 @@ namespace nd {
       m_memblock = ndobj_memblock;
     }
 
-#ifdef DYND_RVALUE_REFS
     void set(memory_block_ptr &&ndobj_memblock)
     {
       if (ndobj_memblock.get()->m_type != array_memory_block_type) {
@@ -239,7 +238,6 @@ namespace nd {
       }
       m_memblock = DYND_MOVE(ndobj_memblock);
     }
-#endif
 
     // TODO: Copy the initializer list mechanisms from ndarray
 
@@ -255,7 +253,7 @@ namespace nd {
       m_memblock = rhs.m_memblock;
       return *this;
     }
-#ifdef DYND_RVALUE_REFS
+
     /** Move assignment operator (should be just "= default" in C++11) */
     inline array &operator=(array &&rhs)
     {
@@ -263,7 +261,6 @@ namespace nd {
 
       return *this;
     }
-#endif // DYND_RVALUE_REFS
 
     /**
      * This function releases the memory block reference, setting the
@@ -950,9 +947,7 @@ namespace nd {
     array m_arr;
     array_vals_at(const array &arr) : m_arr(arr) {}
 
-#ifdef DYND_RVALUE_REFS
     array_vals_at(array &&arr) : m_arr(DYND_MOVE(arr)) {}
-#endif
 
     // Non-copyable, not default-constructable
     array_vals_at(const array_vals &);
