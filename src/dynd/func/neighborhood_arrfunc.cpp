@@ -13,8 +13,7 @@ using namespace std;
 using namespace dynd;
 
 template <int N>
-struct neighborhood_ck
-    : kernels::expr_ck<neighborhood_ck<N>, kernel_request_host, N> {
+struct neighborhood_ck : nd::expr_ck<neighborhood_ck<N>, kernel_request_host, N> {
   typedef neighborhood_ck<N> self_type;
 
   intptr_t dst_stride;
@@ -81,7 +80,8 @@ static intptr_t instantiate_neighborhood(
     void *ckb, intptr_t ckb_offset, const ndt::type &dst_tp,
     const char *dst_arrmeta, intptr_t nsrc, const ndt::type *src_tp,
     const char *const *src_arrmeta, kernel_request_t kernreq,
-    const eval::eval_context *ectx, const nd::array &kwds, const std::map<dynd::nd::string, ndt::type> &tp_vars)
+    const eval::eval_context *ectx, const nd::array &kwds,
+    const std::map<dynd::nd::string, ndt::type> &tp_vars)
 {
   neighborhood *nh = *af_self->get_data_as<neighborhood *>();
   nd::arrfunc nh_op = nh->op;
@@ -171,8 +171,9 @@ static intptr_t instantiate_neighborhood(
   ckb_offset = nh_op.get()->instantiate(
       nh_op.get(), nh_op.get_type(), ckb, ckb_offset, nh_dst_tp, nh_dst_arrmeta,
       nsrc, nh_src_tp, nh_src_arrmeta, kernel_request_single, ectx,
-      struct_concat(kwds, pack("start_stop",
-                               reinterpret_cast<intptr_t>(nh->start_stop))), tp_vars);
+      struct_concat(
+          kwds, pack("start_stop", reinterpret_cast<intptr_t>(nh->start_stop))),
+      tp_vars);
 
   return ckb_offset;
 }
@@ -261,8 +262,7 @@ nd::arrfunc dynd::make_neighborhood_arrfunc(const nd::arrfunc &neighborhood_op,
                            " * OUT");
 
   map<nd::string, ndt::type> typevars;
-  if (!neighborhood_op.get_array_type().matches(nhop_pattern,
-                          typevars)) {
+  if (!neighborhood_op.get_array_type().matches(nhop_pattern, typevars)) {
     stringstream ss;
     ss << "provided neighborhood op proto " << neighborhood_op.get_array_type()
        << " does not match pattern " << nhop_pattern;

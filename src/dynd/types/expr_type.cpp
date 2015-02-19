@@ -307,7 +307,7 @@ static size_t make_expr_type_offset_applier(
         }
         default: {
             intptr_t root_ckb_offset = ckb_offset;
-            kernels::inc_ckb_offset(
+            inc_ckb_offset(
                 ckb_offset, sizeof(expr_type_offset_applier_general_extra) +
                                 src_count * sizeof(size_t));
             reinterpret_cast<ckernel_builder<kernel_request_host> *>(ckb)

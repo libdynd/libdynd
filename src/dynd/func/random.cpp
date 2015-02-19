@@ -20,7 +20,7 @@ typename std::enable_if<kernreq == kernel_request_host, nd::arrfunc>::type
 nd::decl::random::uniform::as_arrfunc()
 {
   std::random_device random_device;
-  return nd::as_arrfunc<kernels::uniform_ck, kernel_request_host,
+  return nd::as_arrfunc<uniform_ck, kernel_request_host,
                         std::default_random_engine, numeric_types>(
       ndt::type("(a: ?R, b: ?R) -> R"),
       std::shared_ptr<std::default_random_engine>(
@@ -41,8 +41,8 @@ nd::decl::random::uniform::as_arrfunc()
   cudaMalloc(&s, blocks_per_grid * threads_per_block * sizeof(curandState_t));
   cuda_device_curand_init << <blocks_per_grid, threads_per_block>>> (s);
 
-  return nd::as_arrfunc<kernels::uniform_ck, kernel_request_cuda_device,
-                        curandState_t, type_sequence<double, dynd::complex<double>>>(
+  return nd::as_arrfunc<uniform_ck, kernel_request_cuda_device, curandState_t,
+                        type_sequence<double, dynd::complex<double>>>(
       ndt::type("(a: ?R, b: ?R) -> cuda_device[R]"), s);
 }
 

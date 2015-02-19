@@ -11,41 +11,39 @@ using namespace dynd;
 
 #define BUILTIN_ROW(NAME, A0)                                                  \
   {                                                                            \
-    NULL, &kernels::create<kernels::NAME<A0, int8_t>>,                         \
-        &kernels::create<kernels::NAME<A0, int16_t>>,                          \
-        &kernels::create<kernels::NAME<A0, int32_t>>,                          \
-        &kernels::create<kernels::NAME<A0, int64_t>>, NULL,                    \
-        &kernels::create<kernels::NAME<A0, uint8_t>>,                          \
-        &kernels::create<kernels::NAME<A0, uint16_t>>,                         \
-        &kernels::create<kernels::NAME<A0, uint32_t>>,                         \
-        &kernels::create<kernels::NAME<A0, uint64_t>>, NULL, NULL,             \
-        &kernels::create<kernels::NAME<A0, float>>,                            \
-        &kernels::create<kernels::NAME<A0, double>>, NULL,                     \
-        &kernels::create<kernels::NAME<A0, dynd::complex<float>>>,             \
-        &kernels::create<kernels::NAME<A0, dynd::complex<double>>>,            \
+    NULL, &create<kernels::NAME<A0, int8_t>>,                                  \
+        &create<kernels::NAME<A0, int16_t>>,                                   \
+        &create<kernels::NAME<A0, int32_t>>,                                   \
+        &create<kernels::NAME<A0, int64_t>>, NULL,                             \
+        &create<kernels::NAME<A0, uint8_t>>,                                   \
+        &create<kernels::NAME<A0, uint16_t>>,                                  \
+        &create<kernels::NAME<A0, uint32_t>>,                                  \
+        &create<kernels::NAME<A0, uint64_t>>, NULL, NULL,                      \
+        &create<kernels::NAME<A0, float>>, &create<kernels::NAME<A0, double>>, \
+        NULL, &create<kernels::NAME<A0, dynd::complex<float>>>,                \
+        &create<kernels::NAME<A0, dynd::complex<double>>>,                     \
   }
 
 #define BUILTIN_TABLE(NAME)                                                    \
-  const kernels::create_t                                                      \
-      nd::decl::NAME::builtin_table[builtin_type_id_count -                    \
-                                    2][builtin_type_id_count - 2] = {          \
-          {NULL},                                                              \
-          BUILTIN_ROW(NAME##_ck, int8_t),                                      \
-          BUILTIN_ROW(NAME##_ck, int16_t),                                     \
-          BUILTIN_ROW(NAME##_ck, int32_t),                                     \
-          BUILTIN_ROW(NAME##_ck, int64_t),                                     \
-          {NULL},                                                              \
-          BUILTIN_ROW(NAME##_ck, uint8_t),                                     \
-          BUILTIN_ROW(NAME##_ck, uint16_t),                                    \
-          BUILTIN_ROW(NAME##_ck, uint32_t),                                    \
-          BUILTIN_ROW(NAME##_ck, uint64_t),                                    \
-          {NULL},                                                              \
-          {NULL},                                                              \
-          BUILTIN_ROW(NAME##_ck, float),                                       \
-          BUILTIN_ROW(NAME##_ck, double),                                      \
-          {NULL},                                                              \
-          BUILTIN_ROW(NAME##_ck, dynd::complex<float>),                        \
-          BUILTIN_ROW(NAME##_ck, dynd::complex<double>)};
+  const create_t nd::decl::NAME::builtin_table[builtin_type_id_count -         \
+                                               2][builtin_type_id_count - 2] = \
+      {{NULL},                                                                 \
+       BUILTIN_ROW(NAME##_ck, int8_t),                                         \
+       BUILTIN_ROW(NAME##_ck, int16_t),                                        \
+       BUILTIN_ROW(NAME##_ck, int32_t),                                        \
+       BUILTIN_ROW(NAME##_ck, int64_t),                                        \
+       {NULL},                                                                 \
+       BUILTIN_ROW(NAME##_ck, uint8_t),                                        \
+       BUILTIN_ROW(NAME##_ck, uint16_t),                                       \
+       BUILTIN_ROW(NAME##_ck, uint32_t),                                       \
+       BUILTIN_ROW(NAME##_ck, uint64_t),                                       \
+       {NULL},                                                                 \
+       {NULL},                                                                 \
+       BUILTIN_ROW(NAME##_ck, float),                                          \
+       BUILTIN_ROW(NAME##_ck, double),                                         \
+       {NULL},                                                                 \
+       BUILTIN_ROW(NAME##_ck, dynd::complex<float>),                           \
+       BUILTIN_ROW(NAME##_ck, dynd::complex<double>)};
 
 BUILTIN_TABLE(add);
 BUILTIN_TABLE(sub);

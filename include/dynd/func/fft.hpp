@@ -14,7 +14,7 @@ namespace nd {
 #ifdef DYND_CUDA
 
   template <typename dst_type, typename src_type, int sign>
-  struct cufft_ck : kernels::expr_ck<cufft_ck<dst_type, src_type, sign>,
+  struct cufft_ck : expr_ck<cufft_ck<dst_type, src_type, sign>,
                                      kernel_request_host, 1> {
     typedef cufft_ck self_type;
 

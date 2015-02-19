@@ -517,7 +517,7 @@ intptr_t fixed_dim_type::make_assignment_kernel(
 
     if (src_tp.get_ndim() < dst_tp.get_ndim()) {
       src_stride = 0;
-      kernels::elwise_ck<fixed_dim_type_id, fixed_dim_type_id, 1, 0>::create(
+      nd::functional::elwise_ck<fixed_dim_type_id, fixed_dim_type_id, 1, 0>::create(
           ckb, kernreq, ckb_offset, get_fixed_dim_size(), dst_md->stride,
           &src_stride);
 
@@ -527,7 +527,7 @@ intptr_t fixed_dim_type::make_assignment_kernel(
           kernel_request_strided, ectx, kwds);
     } else if (src_tp.get_as_strided(src_arrmeta, &src_size, &src_stride,
                                      &src_el_tp, &src_el_arrmeta)) {
-      kernels::elwise_ck<fixed_dim_type_id, fixed_dim_type_id, 1, 0>::create(
+      nd::functional::elwise_ck<fixed_dim_type_id, fixed_dim_type_id, 1, 0>::create(
           ckb, kernreq, ckb_offset, get_fixed_dim_size(), dst_md->stride,
           &src_stride);
 

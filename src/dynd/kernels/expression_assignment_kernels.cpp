@@ -188,7 +188,7 @@ size_t dynd::make_expression_assignment_kernel(
                 ckb_offset = inc_to_alignment(ckb_offset,
                                               buffer_tp.get_data_alignment());
                 intptr_t buffer_data_offset = ckb_offset;
-                kernels::inc_ckb_offset(ckb_offset, e->buffer_data_size);
+                inc_ckb_offset(ckb_offset, e->buffer_data_size);
                 reinterpret_cast<ckernel_builder<kernel_request_host> *>(ckb)
                     ->ensure_capacity(ckb_offset);
                 // This may have invalidated the 'e' pointer, so get it again!
@@ -226,7 +226,7 @@ size_t dynd::make_expression_assignment_kernel(
             ckb_offset = inc_to_alignment(ckb_offset, buffer_tp.get_data_alignment());
             // Allocate the buffer data
             intptr_t buffer_data_offset = ckb_offset;
-            kernels::inc_ckb_offset(ckb_offset, e->buffer_data_size);
+            inc_ckb_offset(ckb_offset, e->buffer_data_size);
             reinterpret_cast<ckernel_builder<kernel_request_host> *>(ckb)
                 ->ensure_capacity(ckb_offset);
             // This may have invalidated the 'e' pointer, so get it again!
@@ -266,7 +266,7 @@ size_t dynd::make_expression_assignment_kernel(
                 // Allocate the buffer data
                 ckb_offset = inc_to_alignment(ckb_offset, buffer_tp.get_data_alignment());
                 size_t buffer_data_offset = ckb_offset;
-                kernels::inc_ckb_offset(ckb_offset, buffer_data_size);
+                inc_ckb_offset(ckb_offset, buffer_data_size);
                 reinterpret_cast<ckernel_builder<kernel_request_host> *>(ckb)
                     ->ensure_capacity(ckb_offset);
                 // This may have invalidated the 'e' pointer, so get it again!
@@ -297,7 +297,7 @@ size_t dynd::make_expression_assignment_kernel(
             ckb_offset =
                 inc_to_alignment(ckb_offset, buffer_tp.get_data_alignment());
             size_t buffer_data_offset = ckb_offset;
-            kernels::inc_ckb_offset(ckb_offset, buffer_data_size);
+            inc_ckb_offset(ckb_offset, buffer_data_size);
             reinterpret_cast<ckernel_builder<kernel_request_host> *>(ckb)
                 ->ensure_capacity(ckb_offset);
             // This may have invalidated the 'e' pointer, so get it again!

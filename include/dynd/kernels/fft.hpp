@@ -21,6 +21,8 @@
 
 namespace dynd {
 
+namespace nd {
+
 namespace detail {
 
   template <typename dst_type, typename src_type>
@@ -127,8 +129,6 @@ template <typename T, int N>
 struct is_double_precision<T[N]> {
   static const bool value = is_double_precision<T>::value;
 };
-
-namespace kernels {
 
   template <typename fftw_dst_type, typename fftw_src_type, int sign = 0>
   struct fftw_ck : expr_ck<fftw_ck<fftw_dst_type, fftw_src_type, sign>,
@@ -310,7 +310,7 @@ namespace kernels {
     }
   };
 
-} // namespace kernels
+} // namespace dynd::nd
 } // namespace dynd
 
 #endif

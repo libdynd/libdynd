@@ -17,7 +17,7 @@ namespace {
  * should be a strided unary operation.
  */
 struct masked_take_ck
-    : public kernels::expr_ck<masked_take_ck, kernel_request_host, 2> {
+    : public nd::expr_ck<masked_take_ck, kernel_request_host, 2> {
   ndt::type m_dst_tp;
   const char *m_dst_meta;
   intptr_t m_dim_size, m_src0_stride, m_mask_stride;
@@ -73,7 +73,7 @@ struct masked_take_ck
  * should be a single unary operation.
  */
 struct indexed_take_ck
-    : public kernels::expr_ck<indexed_take_ck, kernel_request_host, 2> {
+    : public nd::expr_ck<indexed_take_ck, kernel_request_host, 2> {
   intptr_t m_dst_dim_size, m_dst_stride, m_index_stride;
   intptr_t m_src0_dim_size, m_src0_stride;
 

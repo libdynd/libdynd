@@ -159,43 +159,43 @@ static void *create_cuda_device_trampoline(void *ckb, intptr_t ckb_offset,
 {
   switch (src_count) {
   case 0: {
-    typedef kernels::cuda_launch_ck<0> self_type;
+    typedef nd::cuda_launch_ck<0> self_type;
     self_type *self =
         self_type::create(ckb, kernreq, ckb_offset, blocks, threads);
     return &self->ckb;
   }
   case 1: {
-    typedef kernels::cuda_launch_ck<1> self_type;
+    typedef nd::cuda_launch_ck<1> self_type;
     self_type *self =
         self_type::create(ckb, kernreq, ckb_offset, blocks, threads);
     return &self->ckb;
   }
   case 2: {
-    typedef kernels::cuda_launch_ck<2> self_type;
+    typedef nd::cuda_launch_ck<2> self_type;
     self_type *self =
         self_type::create(ckb, kernreq, ckb_offset, blocks, threads);
     return &self->ckb;
   }
   case 3: {
-    typedef kernels::cuda_launch_ck<3> self_type;
+    typedef nd::cuda_launch_ck<3> self_type;
     self_type *self =
         self_type::create(ckb, kernreq, ckb_offset, blocks, threads);
     return &self->ckb;
   }
   case 4: {
-    typedef kernels::cuda_launch_ck<4> self_type;
+    typedef nd::cuda_launch_ck<4> self_type;
     self_type *self =
         self_type::create(ckb, kernreq, ckb_offset, blocks, threads);
     return &self->ckb;
   }
   case 5: {
-    typedef kernels::cuda_launch_ck<5> self_type;
+    typedef nd::cuda_launch_ck<5> self_type;
     self_type *self =
         self_type::create(ckb, kernreq, ckb_offset, blocks, threads);
     return &self->ckb;
   }
   case 6: {
-    typedef kernels::cuda_launch_ck<6> self_type;
+    typedef nd::cuda_launch_ck<6> self_type;
     self_type *self =
         self_type::create(ckb, kernreq, ckb_offset, blocks, threads);
     return &self->ckb;
@@ -547,31 +547,31 @@ intptr_t nd::functional::elwise_instantiate_with_child(
 {
   switch (child_tp->get_npos()) {
   case 0:
-    return kernels::elwise_ck<dst_type_id, src_type_id, 0, I>::instantiate(
+    return elwise_ck<dst_type_id, src_type_id, 0, I>::instantiate(
         child, child_tp, ckb, ckb_offset, dst_tp, dst_arrmeta, nsrc, src_tp,
         src_arrmeta, kernreq, ectx, kwds, tp_vars);
   case 1:
-    return kernels::elwise_ck<dst_type_id, src_type_id, 1, I>::instantiate(
+    return elwise_ck<dst_type_id, src_type_id, 1, I>::instantiate(
         child, child_tp, ckb, ckb_offset, dst_tp, dst_arrmeta, nsrc, src_tp,
         src_arrmeta, kernreq, ectx, kwds, tp_vars);
   case 2:
-    return kernels::elwise_ck<dst_type_id, src_type_id, 2, I>::instantiate(
+    return elwise_ck<dst_type_id, src_type_id, 2, I>::instantiate(
         child, child_tp, ckb, ckb_offset, dst_tp, dst_arrmeta, nsrc, src_tp,
         src_arrmeta, kernreq, ectx, kwds, tp_vars);
   case 3:
-    return kernels::elwise_ck<dst_type_id, src_type_id, 3, I>::instantiate(
+    return elwise_ck<dst_type_id, src_type_id, 3, I>::instantiate(
         child, child_tp, ckb, ckb_offset, dst_tp, dst_arrmeta, nsrc, src_tp,
         src_arrmeta, kernreq, ectx, kwds, tp_vars);
   case 4:
-    return kernels::elwise_ck<dst_type_id, src_type_id, 4, I>::instantiate(
+    return elwise_ck<dst_type_id, src_type_id, 4, I>::instantiate(
         child, child_tp, ckb, ckb_offset, dst_tp, dst_arrmeta, nsrc, src_tp,
         src_arrmeta, kernreq, ectx, kwds, tp_vars);
   case 5:
-    return kernels::elwise_ck<dst_type_id, src_type_id, 5, I>::instantiate(
+    return elwise_ck<dst_type_id, src_type_id, 5, I>::instantiate(
         child, child_tp, ckb, ckb_offset, dst_tp, dst_arrmeta, nsrc, src_tp,
         src_arrmeta, kernreq, ectx, kwds, tp_vars);
   case 6:
-    return kernels::elwise_ck<dst_type_id, src_type_id, 6, I>::instantiate(
+    return elwise_ck<dst_type_id, src_type_id, 6, I>::instantiate(
         child, child_tp, ckb, ckb_offset, dst_tp, dst_arrmeta, nsrc, src_tp,
         src_arrmeta, kernreq, ectx, kwds, tp_vars);
   default:

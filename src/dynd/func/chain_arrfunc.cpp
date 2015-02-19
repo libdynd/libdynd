@@ -14,7 +14,7 @@ using namespace dynd;
  * A ckernel for chaining two other ckernels, using temporary buffers
  * dynamically allocated on the heap.
  */
-struct unary_heap_chain_ck : public kernels::general_ck<unary_heap_chain_ck, kernel_request_host> {
+struct unary_heap_chain_ck : public general_ck<unary_heap_chain_ck, kernel_request_host> {
   // The offset to the second child ckernel
   intptr_t m_second_offset;
   ndt::type m_buf_tp;

@@ -86,9 +86,9 @@ namespace kernels {
    * create ckernels.
    */
   template <class CKT>
-  struct unary_ck : expr_ck<CKT, kernel_request_host, 1> {
+  struct unary_ck : nd::expr_ck<CKT, kernel_request_host, 1> {
     typedef CKT self_type;
-    typedef expr_ck<CKT, kernel_request_host, 1> parent_type;
+    typedef nd::expr_ck<CKT, kernel_request_host, 1> parent_type;
 
     static void single_wrapper(char *dst, char *const *src,
                                ckernel_prefix *rawself)
@@ -139,7 +139,7 @@ namespace kernels {
   };
 
   template <class dst_type, class src_type, assign_error_mode errmode>
-  struct assign_ck : expr_ck<assign_ck<dst_type, src_type, errmode>,
+  struct assign_ck : nd::expr_ck<assign_ck<dst_type, src_type, errmode>,
                              kernel_request_host, 1> {
     void single(char *dst, char *const *src)
     {
@@ -151,7 +151,7 @@ namespace kernels {
 
   template <class dst_type, class src_type>
   struct assign_ck<dst_type, src_type, assign_error_nocheck>
-      : expr_ck<assign_ck<dst_type, src_type, assign_error_nocheck>,
+      : nd::expr_ck<assign_ck<dst_type, src_type, assign_error_nocheck>,
                 kernel_request_cuda_host_device, 1> {
     DYND_CUDA_HOST_DEVICE void single(char *dst, char *const *src)
     {
@@ -164,7 +164,7 @@ namespace kernels {
 #ifdef DYND_CUDA
 
   struct cuda_host_to_device_assign_ck
-      : expr_ck<cuda_host_to_device_assign_ck, kernel_request_host, 1> {
+      : nd::expr_ck<cuda_host_to_device_assign_ck, kernel_request_host, 1> {
     size_t data_size;
     char *dst;
 
@@ -187,7 +187,7 @@ namespace kernels {
   };
 
   struct cuda_host_to_device_copy_ck
-      : expr_ck<cuda_host_to_device_copy_ck, kernel_request_host, 1> {
+      : nd::expr_ck<cuda_host_to_device_copy_ck, kernel_request_host, 1> {
     size_t data_size;
 
     cuda_host_to_device_copy_ck(size_t data_size) : data_size(data_size) {}
@@ -200,7 +200,7 @@ namespace kernels {
   };
 
   struct cuda_device_to_host_assign_ck
-      : expr_ck<cuda_device_to_host_assign_ck, kernel_request_host, 1> {
+      : nd::expr_ck<cuda_device_to_host_assign_ck, kernel_request_host, 1> {
     size_t data_size;
     char *src;
 
@@ -223,7 +223,7 @@ namespace kernels {
   };
 
   struct cuda_device_to_host_copy_ck
-      : expr_ck<cuda_device_to_host_copy_ck, kernel_request_host, 1> {
+      : nd::expr_ck<cuda_device_to_host_copy_ck, kernel_request_host, 1> {
     size_t data_size;
 
     cuda_device_to_host_copy_ck(size_t data_size) : data_size(data_size) {}
@@ -236,7 +236,7 @@ namespace kernels {
   };
 
   struct cuda_device_to_device_copy_ck
-      : expr_ck<cuda_device_to_device_copy_ck, kernel_request_host, 1> {
+      : nd::expr_ck<cuda_device_to_device_copy_ck, kernel_request_host, 1> {
     size_t data_size;
 
     cuda_device_to_device_copy_ck(size_t data_size) : data_size(data_size) {}
