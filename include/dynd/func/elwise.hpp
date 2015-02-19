@@ -259,7 +259,8 @@ namespace kernels {
 
     DYND_CUDA_HOST_DEVICE void strided(char *dst, intptr_t dst_stride,
                                        char *const *DYND_UNUSED(src),
-                                       const intptr_t *DYND_UNUSED(src_stride), size_t count)
+                                       const intptr_t *DYND_UNUSED(src_stride),
+                                       size_t count)
     {
       enum { J = (I == -1 || I > 1) ? -1 : (I + 1) };
 
@@ -269,8 +270,7 @@ namespace kernels {
       dst += DYND_THREAD_ID(J) * dst_stride;
 
       for (size_t i = DYND_THREAD_ID(J); i < count; i += DYND_THREAD_COUNT(J)) {
-        opchild(dst, this->dst_stride, NULL, NULL, this->size,
-                child);
+        opchild(dst, this->dst_stride, NULL, NULL, this->size, child);
         dst += DYND_THREAD_COUNT(J) * dst_stride;
       }
     }

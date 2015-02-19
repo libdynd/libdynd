@@ -433,17 +433,31 @@ namespace detail {
     T m_data[N];
 
   public:
-    array_wrapper(const T *data) { memcpy(m_data, data, sizeof(m_data)); }
+    DYND_CUDA_HOST_DEVICE array_wrapper() = default;
+
+    DYND_CUDA_HOST_DEVICE array_wrapper(const T *data)
+    {
+      memcpy(m_data, data, sizeof(m_data));
+    }
 
     DYND_CUDA_HOST_DEVICE operator T *() { return m_data; }
 
     DYND_CUDA_HOST_DEVICE operator const T *() const { return m_data; }
+
+    DYND_CUDA_HOST_DEVICE T &operator[](intptr_t i) { return m_data[i]; }
+
+    DYND_CUDA_HOST_DEVICE const T &operator[](intptr_t i) const
+    {
+      return m_data[i];
+    }
   };
 
   template <typename T>
   class array_wrapper<T, 0> {
   public:
-    array_wrapper(const T *DYND_UNUSED(data)) {}
+    DYND_CUDA_HOST_DEVICE array_wrapper() = default;
+
+    DYND_CUDA_HOST_DEVICE array_wrapper(const T *DYND_UNUSED(data)) {}
 
     DYND_CUDA_HOST_DEVICE operator T *() { return NULL; }
 

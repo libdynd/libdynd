@@ -21,16 +21,15 @@ namespace nd {
               typename... T>
     arrfunc apply(T &&... names)
     {
-      typedef kernels::apply_function_ck<kernreq, func_type, func,
-                                         arity_of<func_type>::value -
-                                             sizeof...(T)> ck_type;
+      typedef kernels::as_apply_function_ck<kernreq, func_type, func,
+                                            arity_of<func_type>::value -
+                                                sizeof...(T)> CKT;
 
-      // as_arrfunc<ck_type>(names...)
       ndt::type self_tp =
           ndt::make_arrfunc<typename funcproto_of<func_type>::type>(
               std::forward<T>(names)...);
 
-      return arrfunc(self_tp, &ck_type::instantiate, NULL, NULL);
+      return arrfunc(self_tp, &CKT::instantiate, NULL, NULL);
     }
 
     template <typename func_type, func_type func, typename... T>
@@ -50,9 +49,9 @@ namespace nd {
                             arrfunc>::type
     apply(func_type func, T &&... names)
     {
-      typedef kernels::apply_callable_ck<kernreq, func_type,
-                                         arity_of<func_type>::value -
-                                             sizeof...(T)> ck_type;
+      typedef kernels::as_apply_callable_ck<kernreq, func_type,
+                                            arity_of<func_type>::value -
+                                                sizeof...(T)> ck_type;
 
       ndt::type self_tp =
           ndt::make_arrfunc<kernreq, typename funcproto_of<func_type>::type>(
@@ -74,9 +73,9 @@ namespace nd {
     template <kernel_request_t kernreq, typename func_type, typename... T>
     arrfunc apply(func_type *func, arrfunc_free_t free, T &&... names)
     {
-      typedef kernels::apply_callable_ck<kernreq, func_type *,
-                                         arity_of<func_type>::value -
-                                             sizeof...(T)> ck_type;
+      typedef kernels::as_apply_callable_ck<kernreq, func_type *,
+                                            arity_of<func_type>::value -
+                                                sizeof...(T)> ck_type;
 
       ndt::type self_tp =
           ndt::make_arrfunc<kernreq, typename funcproto_of<func_type>::type>(
@@ -108,14 +107,15 @@ namespace nd {
               typename... S>
     arrfunc apply(T *obj, R (T::*mem_func)(A...), S &&... names)
     {
-      typedef kernels::apply_member_function_ck<
+      typedef kernels::as_apply_member_function_ck<
           kernreq, T *, R (T::*)(A...), sizeof...(A) - sizeof...(S)> ck_type;
 
       ndt::type self_tp = ndt::make_arrfunc<
           kernreq, typename funcproto_of<R (T::*)(A...)>::type>(
           std::forward<S>(names)...);
 
-      return as_arrfunc<ck_type>(self_tp, typename ck_type::data_type(obj, mem_func));
+      return as_arrfunc<ck_type>(self_tp,
+                                 typename ck_type::data_type(obj, mem_func));
     }
 
     template <typename O, typename R, typename... A, typename... T>
@@ -133,8 +133,8 @@ namespace nd {
               typename... T>
     arrfunc apply(T &&... names)
     {
-      typedef kernels::construct_then_apply_callable_ck<kernreq, func_type,
-                                                        K...> ck_type;
+      typedef kernels::as_construct_then_apply_callable_ck<kernreq, func_type,
+                                                           K...> ck_type;
 
       ndt::type self_tp = ndt::make_arrfunc<
           kernreq, typename funcproto_of<func_type, K...>::type>(
