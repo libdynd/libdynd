@@ -17,7 +17,7 @@ namespace kernels {
 
   template <int N>
   struct permute_ck<N, true>
-      : expr_ck<permute_ck<N, true>, kernel_request_cuda_host_device, N> {
+      : nd::expr_ck<permute_ck<N, true>, kernel_request_cuda_host_device, N> {
     typedef permute_ck self_type;
 
     intptr_t perm[N];
@@ -121,7 +121,7 @@ namespace kernels {
 
   template <int N>
   struct permute_ck<N, false>
-      : expr_ck<permute_ck<N, false>, kernel_request_host, N> {
+      : nd::expr_ck<permute_ck<N, false>, kernel_request_host, N> {
     typedef permute_ck self_type;
 
     intptr_t perm[N];

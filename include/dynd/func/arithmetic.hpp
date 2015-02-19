@@ -12,7 +12,7 @@ namespace dynd {
   namespace kernels {                                                          \
     template <typename A0, typename A1>                                        \
     struct NAME##_ck                                                           \
-        : expr_ck<NAME##_ck<A0, A1>, kernel_request_cuda_host_device, 2> {     \
+        : nd::expr_ck<NAME##_ck<A0, A1>, kernel_request_cuda_host_device, 2> {     \
       typedef decltype(declval<A0>() SYMBOL declval<A1>()) R;                  \
                                                                                \
       DYND_CUDA_HOST_DEVICE void single(char *dst, char *const *src)           \
@@ -61,9 +61,8 @@ namespace dynd {
   namespace nd {                                                               \
     namespace decl {                                                           \
       struct NAME : arrfunc<NAME> {                                            \
-        static const kernels::create_t                                         \
-            builtin_table[builtin_type_id_count - 2][builtin_type_id_count -   \
-                                                     2];                       \
+        static const create_t builtin_table[builtin_type_id_count -            \
+                                            2][builtin_type_id_count - 2];     \
                                                                                \
         static int resolve_dst_type(                                           \
             const arrfunc_type_data *DYND_UNUSED(self),                        \
@@ -98,7 +97,7 @@ namespace dynd {
         {                                                                      \
           if (dst_tp.is_builtin()) {                                           \
             if (src_tp[0].is_builtin() && src_tp[1].is_builtin()) {            \
-              kernels::create_t create =                                       \
+              create_t create =                                                \
                   builtin_table[src_tp[0].get_type_id() -                      \
                                 bool_type_id][src_tp[1].get_type_id() -        \
                                               bool_type_id];                   \

@@ -16,24 +16,21 @@
 
 namespace dynd {
 
-namespace kernels {
-  /**
-   * Increments a ``ckb_offset`` variable (offset into a ckernel_builder)
-   * by the provided increment. The increment needs to be aligned to 8 bytes,
-   * so padding may be added.
-   */
-  inline void inc_ckb_offset(intptr_t &inout_ckb_offset, size_t inc)
-  {
-    inout_ckb_offset +=
-        static_cast<intptr_t>(ckernel_prefix::align_offset(inc));
-  }
+/**
+ * Increments a ``ckb_offset`` variable (offset into a ckernel_builder)
+ * by the provided increment. The increment needs to be aligned to 8 bytes,
+ * so padding may be added.
+ */
+inline void inc_ckb_offset(intptr_t &inout_ckb_offset, size_t inc)
+{
+  inout_ckb_offset += static_cast<intptr_t>(ckernel_prefix::align_offset(inc));
+}
 
-  template <class T>
-  inline void inc_ckb_offset(intptr_t &inout_ckb_offset)
-  {
-    inc_ckb_offset(inout_ckb_offset, sizeof(T));
-  }
-} // namespace kernels
+template <class T>
+inline void inc_ckb_offset(intptr_t &inout_ckb_offset)
+{
+  inc_ckb_offset(inout_ckb_offset, sizeof(T));
+}
 
 /**
  * Function pointers + data for a hierarchical
@@ -141,7 +138,7 @@ public:
   T *alloc_ck(intptr_t &inout_ckb_offset)
   {
     intptr_t ckb_offset = inout_ckb_offset;
-    kernels::inc_ckb_offset<T>(inout_ckb_offset);
+    inc_ckb_offset<T>(inout_ckb_offset);
     ensure_capacity(inout_ckb_offset);
     return reinterpret_cast<T *>(m_data + ckb_offset);
   }
@@ -156,7 +153,7 @@ public:
   T *alloc_ck_leaf(intptr_t &inout_ckb_offset)
   {
     intptr_t ckb_offset = inout_ckb_offset;
-    kernels::inc_ckb_offset<T>(inout_ckb_offset);
+    inc_ckb_offset<T>(inout_ckb_offset);
     ensure_capacity_leaf(inout_ckb_offset);
     return reinterpret_cast<T *>(m_data + ckb_offset);
   }
@@ -310,22 +307,24 @@ class ckernel_builder<kernel_request_cuda_device>
   public:
     ~pooled_allocator()
     {
-/*
-      Todo: This needs to deallocate all existing allocations. It currently throws
-            an exception.
+      /*
+            Todo: This needs to deallocate all existing allocations. It
+         currently throws
+                  an exception.
 
-      for (std::multimap<std::size_t, void *>::iterator i =
-               available_blocks.begin();
-           i != available_blocks.end(); ++i) {
-        throw_if_not_cuda_success(cudaFree(i->second));
-      }
-      available_blocks.clear();
-      for (std::map<void *, std::size_t>::iterator i = used_blocks.begin();
-           i != used_blocks.end(); ++i) {
-        throw_if_not_cuda_success(cudaFree(i->first));
-      }
-      used_blocks.clear();
-*/
+            for (std::multimap<std::size_t, void *>::iterator i =
+                     available_blocks.begin();
+                 i != available_blocks.end(); ++i) {
+              throw_if_not_cuda_success(cudaFree(i->second));
+            }
+            available_blocks.clear();
+            for (std::map<void *, std::size_t>::iterator i =
+         used_blocks.begin();
+                 i != used_blocks.end(); ++i) {
+              throw_if_not_cuda_success(cudaFree(i->first));
+            }
+            used_blocks.clear();
+      */
     }
 
     void *allocate(size_t n)
@@ -537,14 +536,13 @@ inline int ckernel_builder_ensure_capacity(void *ckb,
                                                        sizeof(ckernel_prefix));
 }
 
-namespace kernels {
-  /**
-   * Some common shared implementation details of a CRTP
-   * (curiously recurring template pattern) base class to help
-   * create ckernels.
-   */
-  template <class CKT, kernel_request_t kernreq>
-  struct general_ck;
+/**
+ * Some common shared implementation details of a CRTP
+ * (curiously recurring template pattern) base class to help
+ * create ckernels.
+ */
+template <class CKT, kernel_request_t kernreq>
+struct general_ck;
 
 #define GENERAL_CK(KERNREQ, ...)                                               \
   template <typename CKT>                                                      \
@@ -570,16 +568,16 @@ namespace kernels {
       return ckb->template get_at<self_type>(ckb_offset);                      \
     }                                                                          \
                                                                                \
-    /** \                                                                             \
-     * Creates the ckernel, and increments ``inckb_offset`` \                                                                             \
-     * to the position after it. \                                                                             \
+    /** \                                                                      \
+     * Creates the ckernel, and increments ``inckb_offset`` \                  \
+     * to the position after it. \                                             \
      */                                                                        \
     template <typename CKBT, typename... A>                                    \
     static self_type *create(CKBT *ckb, kernel_request_t kernreq,              \
                              intptr_t &inout_ckb_offset, A &&... args)         \
     {                                                                          \
       intptr_t ckb_offset = inout_ckb_offset;                                  \
-      kernels::inc_ckb_offset<self_type>(inout_ckb_offset);                    \
+      inc_ckb_offset<self_type>(inout_ckb_offset);                             \
       ckb->ensure_capacity(inout_ckb_offset);                                  \
       ckernel_prefix *rawself =                                                \
           ckb->template get_at<ckernel_prefix>(ckb_offset);                    \
@@ -591,16 +589,16 @@ namespace kernels {
     static self_type *create(void *ckb, kernel_request_t kernreq,              \
                              intptr_t &inout_ckb_offset, A &&... args);        \
                                                                                \
-    /** \                                                                             \
-     * Creates the ckernel, and increments ``inckb_offset`` \                                                                             \
-     * to the position after it. \                                                                             \
+    /** \                                                                      \
+     * Creates the ckernel, and increments ``inckb_offset`` \                  \
+     * to the position after it. \                                             \
      */                                                                        \
     template <typename CKBT, typename... A>                                    \
     static self_type *create_leaf(CKBT *ckb, kernel_request_t kernreq,         \
                                   intptr_t &inout_ckb_offset, A &&... args)    \
     {                                                                          \
       intptr_t ckb_offset = inout_ckb_offset;                                  \
-      kernels::inc_ckb_offset<self_type>(inout_ckb_offset);                    \
+      inc_ckb_offset<self_type>(inout_ckb_offset);                             \
       ckb->ensure_capacity_leaf(inout_ckb_offset);                             \
       ckernel_prefix *rawself =                                                \
           ckb->template get_at<ckernel_prefix>(ckb_offset);                    \
@@ -612,10 +610,10 @@ namespace kernels {
     static self_type *create_leaf(void *ckb, kernel_request_t kernreq,         \
                                   intptr_t &inout_ckb_offset, A &&... args);   \
                                                                                \
-    /** \                                                                             \
-     * Initializes an instance of this ckernel in-place according to the \                                                                             \
-     * kernel request. This calls the constructor in-place, and initializes \                                                                             \
-     * the base function and destructor. \                                                                             \
+    /** \                                                                      \
+     * Initializes an instance of this ckernel in-place according to the \     \
+     * kernel request. This calls the constructor in-place, and initializes \  \
+     * the base function and destructor. \                                     \
      */                                                                        \
     template <typename... A>                                                   \
     __VA_ARGS__ static self_type *init(ckernel_prefix *rawself,                \
@@ -639,9 +637,9 @@ namespace kernels {
       return self;                                                             \
     }                                                                          \
                                                                                \
-    /** \                                                                             \
-     * The ckernel destructor function, which is placed in \                                                                             \
-     * base.destructor. \                                                                             \
+    /** \                                                                      \
+     * The ckernel destructor function, which is placed in \                   \
+     * base.destructor. \                                                      \
      */                                                                        \
     __VA_ARGS__ static void destruct(ckernel_prefix *rawself)                  \
     {                                                                          \
@@ -653,21 +651,21 @@ namespace kernels {
       self->~self_type();                                                      \
     }                                                                          \
                                                                                \
-    /** \                                                                             \
-     * Default implementation of destruct_children does nothing. \                                                                             \
+    /** \                                                                      \
+     * Default implementation of destruct_children does nothing. \             \
      */                                                                        \
     __VA_ARGS__ void destruct_children() {}                                    \
                                                                                \
-    /** \                                                                             \
-     * Returns the child ckernel immediately following this one. \                                                                             \
+    /** \                                                                      \
+     * Returns the child ckernel immediately following this one. \             \
      */                                                                        \
     __VA_ARGS__ ckernel_prefix *get_child_ckernel()                            \
     {                                                                          \
       return get_child_ckernel(sizeof(self_type));                             \
     }                                                                          \
                                                                                \
-    /** \                                                                             \
-     * Returns the child ckernel at the specified offset. \                                                                             \
+    /** \                                                                      \
+     * Returns the child ckernel at the specified offset. \                    \
      */                                                                        \
     __VA_ARGS__ ckernel_prefix *get_child_ckernel(intptr_t offset)             \
     {                                                                          \
@@ -675,149 +673,149 @@ namespace kernels {
     }                                                                          \
   };
 
-  GENERAL_CK(kernel_request_host);
+GENERAL_CK(kernel_request_host);
 
-  template <typename CKT>
-  template <typename... A>
-  typename general_ck<CKT, kernel_request_host>::self_type *
-  general_ck<CKT, kernel_request_host>::create(void *ckb,
-                                               kernel_request_t kernreq,
-                                               intptr_t &inout_ckb_offset,
-                                               A &&... args)
-  {
-    switch (kernreq & kernel_request_memory) {
-    case kernel_request_host:
-      return self_type::create(
-          reinterpret_cast<ckernel_builder<kernel_request_host> *>(ckb),
-          kernreq, inout_ckb_offset, std::forward<A>(args)...);
-    default:
-      throw std::invalid_argument("unrecognized ckernel request");
-    }
+template <typename CKT>
+template <typename... A>
+typename general_ck<CKT, kernel_request_host>::self_type *
+general_ck<CKT, kernel_request_host>::create(void *ckb,
+                                             kernel_request_t kernreq,
+                                             intptr_t &inout_ckb_offset,
+                                             A &&... args)
+{
+  switch (kernreq & kernel_request_memory) {
+  case kernel_request_host:
+    return self_type::create(
+        reinterpret_cast<ckernel_builder<kernel_request_host> *>(ckb), kernreq,
+        inout_ckb_offset, std::forward<A>(args)...);
+  default:
+    throw std::invalid_argument("unrecognized ckernel request");
   }
+}
 
-  template <typename CKT>
-  template <typename... A>
-  typename general_ck<CKT, kernel_request_host>::self_type *
-  general_ck<CKT, kernel_request_host>::create_leaf(void *ckb,
-                                                    kernel_request_t kernreq,
-                                                    intptr_t &inout_ckb_offset,
-                                                    A &&... args)
-  {
-    switch (kernreq & kernel_request_memory) {
-    case kernel_request_host:
-      return self_type::create_leaf(
-          reinterpret_cast<ckernel_builder<kernel_request_host> *>(ckb),
-          kernreq, inout_ckb_offset, std::forward<A>(args)...);
-    default:
-      throw std::invalid_argument("unrecognized ckernel request");
-    }
+template <typename CKT>
+template <typename... A>
+typename general_ck<CKT, kernel_request_host>::self_type *
+general_ck<CKT, kernel_request_host>::create_leaf(void *ckb,
+                                                  kernel_request_t kernreq,
+                                                  intptr_t &inout_ckb_offset,
+                                                  A &&... args)
+{
+  switch (kernreq & kernel_request_memory) {
+  case kernel_request_host:
+    return self_type::create_leaf(
+        reinterpret_cast<ckernel_builder<kernel_request_host> *>(ckb), kernreq,
+        inout_ckb_offset, std::forward<A>(args)...);
+  default:
+    throw std::invalid_argument("unrecognized ckernel request");
   }
+}
 
 #ifdef __CUDACC__
 
-  GENERAL_CK(kernel_request_cuda_device, __device__);
+GENERAL_CK(kernel_request_cuda_device, __device__);
 
-  template <typename CKT>
-  template <typename... A>
-  typename general_ck<CKT, kernel_request_cuda_device>::self_type *
-  general_ck<CKT, kernel_request_cuda_device>::create(
-      void *ckb, kernel_request_t kernreq, intptr_t &inout_ckb_offset,
-      A &&... args)
-  {
-    switch (kernreq & kernel_request_memory) {
-    case kernel_request_cuda_device:
-      return self_type::create(
-          reinterpret_cast<ckernel_builder<kernel_request_cuda_device> *>(ckb),
-          kernreq & ~kernel_request_cuda_device, inout_ckb_offset,
-          std::forward<A>(args)...);
-    default:
-      throw std::invalid_argument("unrecognized ckernel request");
-    }
+template <typename CKT>
+template <typename... A>
+typename general_ck<CKT, kernel_request_cuda_device>::self_type *
+general_ck<CKT, kernel_request_cuda_device>::create(void *ckb,
+                                                    kernel_request_t kernreq,
+                                                    intptr_t &inout_ckb_offset,
+                                                    A &&... args)
+{
+  switch (kernreq & kernel_request_memory) {
+  case kernel_request_cuda_device:
+    return self_type::create(
+        reinterpret_cast<ckernel_builder<kernel_request_cuda_device> *>(ckb),
+        kernreq & ~kernel_request_cuda_device, inout_ckb_offset,
+        std::forward<A>(args)...);
+  default:
+    throw std::invalid_argument("unrecognized ckernel request");
   }
+}
 
-  template <typename CKT>
-  template <typename... A>
-  typename general_ck<CKT, kernel_request_cuda_device>::self_type *
-  general_ck<CKT, kernel_request_cuda_device>::create_leaf(
-      void *ckb, kernel_request_t kernreq, intptr_t &inout_ckb_offset,
-      A &&... args)
-  {
-    switch (kernreq & kernel_request_memory) {
-    case kernel_request_cuda_device:
-      return self_type::create_leaf(
-          reinterpret_cast<ckernel_builder<kernel_request_cuda_device> *>(ckb),
-          kernreq & ~kernel_request_cuda_device, inout_ckb_offset,
-          std::forward<A>(args)...);
-    default:
-      throw std::invalid_argument("unrecognized ckernel request");
-    }
+template <typename CKT>
+template <typename... A>
+typename general_ck<CKT, kernel_request_cuda_device>::self_type *
+general_ck<CKT, kernel_request_cuda_device>::create_leaf(
+    void *ckb, kernel_request_t kernreq, intptr_t &inout_ckb_offset,
+    A &&... args)
+{
+  switch (kernreq & kernel_request_memory) {
+  case kernel_request_cuda_device:
+    return self_type::create_leaf(
+        reinterpret_cast<ckernel_builder<kernel_request_cuda_device> *>(ckb),
+        kernreq & ~kernel_request_cuda_device, inout_ckb_offset,
+        std::forward<A>(args)...);
+  default:
+    throw std::invalid_argument("unrecognized ckernel request");
   }
+}
 
 #endif
 
 #ifdef DYND_CUDA
 
-  GENERAL_CK(kernel_request_cuda_host_device, DYND_CUDA_HOST_DEVICE);
+GENERAL_CK(kernel_request_cuda_host_device, DYND_CUDA_HOST_DEVICE);
 
-  template <typename CKT>
-  template <typename... A>
-  typename general_ck<CKT, kernel_request_cuda_host_device>::self_type *
-  general_ck<CKT, kernel_request_cuda_host_device>::create(
-      void *ckb, kernel_request_t kernreq, intptr_t &inout_ckb_offset,
-      A &&... args)
-  {
-    switch (kernreq & kernel_request_memory) {
-    case kernel_request_host:
-      return self_type::create(
-          reinterpret_cast<ckernel_builder<kernel_request_host> *>(ckb),
-          kernreq, inout_ckb_offset, std::forward<A>(args)...);
+template <typename CKT>
+template <typename... A>
+typename general_ck<CKT, kernel_request_cuda_host_device>::self_type *
+general_ck<CKT, kernel_request_cuda_host_device>::create(
+    void *ckb, kernel_request_t kernreq, intptr_t &inout_ckb_offset,
+    A &&... args)
+{
+  switch (kernreq & kernel_request_memory) {
+  case kernel_request_host:
+    return self_type::create(
+        reinterpret_cast<ckernel_builder<kernel_request_host> *>(ckb), kernreq,
+        inout_ckb_offset, std::forward<A>(args)...);
 #ifdef __CUDACC__
-    case kernel_request_cuda_device:
-      return self_type::create(
-          reinterpret_cast<ckernel_builder<kernel_request_cuda_device> *>(ckb),
-          kernreq & ~kernel_request_cuda_device, inout_ckb_offset,
-          std::forward<A>(args)...);
+  case kernel_request_cuda_device:
+    return self_type::create(
+        reinterpret_cast<ckernel_builder<kernel_request_cuda_device> *>(ckb),
+        kernreq & ~kernel_request_cuda_device, inout_ckb_offset,
+        std::forward<A>(args)...);
 #endif
-    default:
-      throw std::invalid_argument("unrecognized ckernel request");
-    }
+  default:
+    throw std::invalid_argument("unrecognized ckernel request");
   }
+}
 
-  template <typename CKT>
-  template <typename... A>
-  typename general_ck<CKT, kernel_request_cuda_host_device>::self_type *
-  general_ck<CKT, kernel_request_cuda_host_device>::create_leaf(
-      void *ckb, kernel_request_t kernreq, intptr_t &inout_ckb_offset,
-      A &&... args)
-  {
-    switch (kernreq & kernel_request_memory) {
-    case kernel_request_host:
-      return self_type::create_leaf(
-          reinterpret_cast<ckernel_builder<kernel_request_host> *>(ckb),
-          kernreq, inout_ckb_offset, std::forward<A>(args)...);
+template <typename CKT>
+template <typename... A>
+typename general_ck<CKT, kernel_request_cuda_host_device>::self_type *
+general_ck<CKT, kernel_request_cuda_host_device>::create_leaf(
+    void *ckb, kernel_request_t kernreq, intptr_t &inout_ckb_offset,
+    A &&... args)
+{
+  switch (kernreq & kernel_request_memory) {
+  case kernel_request_host:
+    return self_type::create_leaf(
+        reinterpret_cast<ckernel_builder<kernel_request_host> *>(ckb), kernreq,
+        inout_ckb_offset, std::forward<A>(args)...);
 #ifdef __CUDACC__
-    case kernel_request_cuda_device:
-      return self_type::create_leaf(
-          reinterpret_cast<ckernel_builder<kernel_request_cuda_device> *>(ckb),
-          kernreq & ~kernel_request_cuda_device, inout_ckb_offset,
-          std::forward<A>(args)...);
+  case kernel_request_cuda_device:
+    return self_type::create_leaf(
+        reinterpret_cast<ckernel_builder<kernel_request_cuda_device> *>(ckb),
+        kernreq & ~kernel_request_cuda_device, inout_ckb_offset,
+        std::forward<A>(args)...);
 #endif
-    default:
-      throw std::invalid_argument("unrecognized ckernel request");
-    }
+  default:
+    throw std::invalid_argument("unrecognized ckernel request");
   }
+}
 
 #endif
 
 #undef GENERAL_CK
 
-  typedef void *(*create_t)(void *, kernel_request_t, intptr_t &);
+typedef void *(*create_t)(void *, kernel_request_t, intptr_t &);
 
-  template <typename CKT>
-  void *create(void *ckb, kernel_request_t kernreq, intptr_t &inout_ckb_offset)
-  {
-    return CKT::create(ckb, kernreq, inout_ckb_offset);
-  }
+template <typename CKT>
+void *create(void *ckb, kernel_request_t kernreq, intptr_t &inout_ckb_offset)
+{
+  return CKT::create(ckb, kernreq, inout_ckb_offset);
+}
 
-} // namespace kernels
 } // namespace dynd

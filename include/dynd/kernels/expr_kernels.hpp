@@ -8,8 +8,8 @@
 #include <dynd/kernels/ckernel_builder.hpp>
 
 namespace dynd {
+namespace nd {
 
-namespace kernels {
   /**
    * A CRTP (curiously recurring template pattern) base class to help
    * create ckernels.
@@ -91,7 +91,7 @@ namespace kernels {
 
 #undef EXPR_CK
 
-} // namespace kernels
+} // namespace dynd::nd
 
 class expr_kernel_generator;
 

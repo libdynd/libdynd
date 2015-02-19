@@ -21,7 +21,7 @@ typedef type_sequence<complex<float>, complex<double>> complex_types;
 typedef join<typename join<integral_types, real_types>::type,
              complex_types>::type numeric_types;
 
-namespace kernels {
+namespace nd {
 
   template <kernel_request_t kernreq, typename... T>
   struct uniform_int_ck;
@@ -384,9 +384,6 @@ namespace kernels {
       : uniform_complex_ck<kernreq, G, complex<double>> {
   };
 
-} // namespace dynd::kernels
-
-namespace nd {
   namespace decl {
     namespace random {
 

@@ -13,7 +13,7 @@ nd::arrfunc nd::decl::fft::as_arrfunc()
   std::vector<nd::arrfunc> children;
 
 #ifdef DYND_FFTW
-  typedef kernels::fftw_ck<fftw_complex, fftw_complex, FFTW_FORWARD> CKT;
+  typedef fftw_ck<fftw_complex, fftw_complex, FFTW_FORWARD> CKT;
   children.push_back(nd::as_arrfunc<CKT>());
 #endif
 
@@ -39,7 +39,7 @@ nd::arrfunc nd::decl::ifft::as_arrfunc()
 
 #ifdef DYND_FFTW
   children.push_back(nd::as_arrfunc<
-      kernels::fftw_ck<fftw_complex, fftw_complex, FFTW_BACKWARD>>());
+      fftw_ck<fftw_complex, fftw_complex, FFTW_BACKWARD>>());
 #endif
 
 #ifdef DYND_CUDA
@@ -61,7 +61,7 @@ nd::arrfunc nd::decl::ifft::as_arrfunc()
 nd::arrfunc nd::decl::rfft::as_arrfunc()
 {
 #ifdef DYND_FFTW
-  return nd::as_arrfunc<kernels::fftw_ck<fftw_complex, double>>();
+  return nd::as_arrfunc<fftw_ck<fftw_complex, double>>();
 #else
   throw std::runtime_error("no fft enabled");
 #endif
@@ -70,7 +70,7 @@ nd::arrfunc nd::decl::rfft::as_arrfunc()
 nd::arrfunc nd::decl::irfft::as_arrfunc()
 {
 #ifdef DYND_FFTW
-  return nd::as_arrfunc<kernels::fftw_ck<double, fftw_complex>>();
+  return nd::as_arrfunc<fftw_ck<double, fftw_complex>>();
 #else
   throw std::runtime_error("no fft enabled");
 #endif

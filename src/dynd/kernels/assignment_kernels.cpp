@@ -15,7 +15,7 @@ namespace dynd {
 namespace kernels {
   template <class T>
   struct aligned_fixed_size_copy_assign_type
-      : expr_ck<aligned_fixed_size_copy_assign_type<T>, kernel_request_host,
+      : nd::expr_ck<aligned_fixed_size_copy_assign_type<T>, kernel_request_host,
                 1> {
     void single(char *dst, char *const *src)
     {
@@ -40,7 +40,7 @@ namespace kernels {
 
   template <>
   struct aligned_fixed_size_copy_assign<1>
-      : expr_ck<aligned_fixed_size_copy_assign<1>, kernel_request_host, 1> {
+      : nd::expr_ck<aligned_fixed_size_copy_assign<1>, kernel_request_host, 1> {
     void single(char *dst, char *const *src) { *dst = **src; }
 
     void strided(char *dst, intptr_t dst_stride, char *const *src,
@@ -73,7 +73,7 @@ namespace kernels {
 
   template <int N>
   struct unaligned_fixed_size_copy_assign
-      : expr_ck<unaligned_fixed_size_copy_assign<N>, kernel_request_host, 1> {
+      : nd::expr_ck<unaligned_fixed_size_copy_assign<N>, kernel_request_host, 1> {
     static void single(char *dst, char *const *src) { memcpy(dst, *src, N); }
 
     static void strided(char *dst, intptr_t dst_stride, char *const *src,
@@ -90,7 +90,7 @@ namespace kernels {
   };
 
   struct unaligned_copy_ck
-      : expr_ck<unaligned_copy_ck, kernel_request_host, 1> {
+      : nd::expr_ck<unaligned_copy_ck, kernel_request_host, 1> {
     size_t data_size;
 
     unaligned_copy_ck(size_t data_size) : data_size(data_size) {}
@@ -195,10 +195,10 @@ size_t dynd::make_pod_typed_data_assignment_kernel(void *ckb,
   }
 }
 
-static kernels::create_t
+static create_t
     assign_create[builtin_type_id_count - 2][builtin_type_id_count - 2][4] = {
 #define SINGLE_OPERATION_PAIR_LEVEL(dst_type, src_type, errmode)               \
-  &kernels::create<kernels::assign_ck<dst_type, src_type, errmode>>
+  &create<kernels::assign_ck<dst_type, src_type, errmode>>
 
 #define ERROR_MODE_LEVEL(dst_type, src_type)                                   \
   {                                                                            \
@@ -414,8 +414,8 @@ intptr_t dynd::make_cuda_device_builtin_type_assignment_kernel(
 
   if ((kernreq & kernel_request_cuda_device) == 0) {
     // Create a trampoline ckernel from host to device
-    kernels::cuda_launch_ck<1> *self =
-        kernels::cuda_launch_ck<1>::create(ckb, kernreq, ckb_offset, 1, 1);
+    nd::cuda_launch_ck<1> *self =
+        nd::cuda_launch_ck<1>::create(ckb, kernreq, ckb_offset, 1, 1);
     // Make the assignment on the device
     make_cuda_device_builtin_type_assignment_kernel(
         NULL, NULL, &self->ckb, 0, dst_tp, NULL, 1, src_tp, NULL,
