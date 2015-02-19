@@ -103,9 +103,9 @@ else()
         if ("${CMAKE_CXX_COMPILER_VERSION}" VERSION_LESS 4.7)
             message(FATAL_ERROR "Only GCC 4.7 and later are supported by LibDyND. Found version ${CMAKE_CXX_COMPILER_VERSION}.")
         endif()
-        set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11 -fmax-errors=20")
+        set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11 -fmax-errors=20 -Wno-type-limits")
     elseif("${CMAKE_CXX_COMPILER_ID}" STREQUAL "Clang")
-        set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -ferror-limit=20 -fvectorize")
+        set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -ferror-limit=20")
         # This is a workaround for a CUDA bug with Clang, where it is unable to handle "-std=c++11"
         if (DYND_CUDA)
             set(CUDA_PROPAGATE_HOST_FLAGS OFF)
@@ -562,7 +562,7 @@ if (DYND_CUDA)
     set(CUDA_SEPARABLE_COMPILATION ON)
 
     if(NOT WIN32)
-        set(CUDA_NVCC_FLAGS ${CUDA_NVCC_FLAGS};-std=c++11;-Xcompiler;-fPIC;-Xcompiler;-O3;-Xcompiler;-fvectorize)
+        set(CUDA_NVCC_FLAGS ${CUDA_NVCC_FLAGS};-std=c++11;-Xcompiler;-fPIC;-Xcompiler;-O3)
     endif()
 
     # Make some warnings into errors and inhibit other warnings
