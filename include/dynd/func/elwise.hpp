@@ -146,9 +146,9 @@ namespace kernels {
       for (size_t i = DYND_THREAD_ID(J); i < count; i += DYND_THREAD_COUNT(J)) {
         opchild(dst, this->dst_stride, src_loop, this->src_stride, this->size,
                 child);
-        dst += dst_stride;
+        dst += DYND_THREAD_COUNT(J) * dst_stride;
         for (int j = 0; j != N; ++j) {
-          src_loop[j] += src_stride[j];
+          src_loop[j] += DYND_THREAD_COUNT(J) * src_stride[j];
         }
       }
     }
@@ -259,15 +259,19 @@ namespace kernels {
 
     DYND_CUDA_HOST_DEVICE void strided(char *dst, intptr_t dst_stride,
                                        char *const *DYND_UNUSED(src),
-                                       const intptr_t *DYND_UNUSED(src_stride),
-                                       size_t count)
+                                       const intptr_t *DYND_UNUSED(src_stride), size_t count)
     {
+      enum { J = (I == -1 || I > 1) ? -1 : (I + 1) };
+
       ckernel_prefix *child = this->get_child_ckernel();
       expr_strided_t opchild = child->get_function<expr_strided_t>();
-      intptr_t inner_size = this->size, inner_dst_stride = this->dst_stride;
-      for (size_t i = 0; i != count; ++i) {
-        opchild(dst, inner_dst_stride, NULL, NULL, inner_size, child);
-        dst += dst_stride;
+
+      dst += DYND_THREAD_ID(J) * dst_stride;
+
+      for (size_t i = DYND_THREAD_ID(J); i < count; i += DYND_THREAD_COUNT(J)) {
+        opchild(dst, this->dst_stride, NULL, NULL, this->size,
+                child);
+        dst += DYND_THREAD_COUNT(J) * dst_stride;
       }
     }
 
