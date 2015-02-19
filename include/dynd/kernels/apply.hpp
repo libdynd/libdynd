@@ -215,6 +215,29 @@ namespace kernels {
           func(apply_arg<A, I>::get(src[I])..., apply_kwd<K, J>::get()...);    \
     }                                                                          \
                                                                                \
+    __VA_ARGS__ void strided(char *dst, intptr_t dst_stride,                   \
+                             char *const *DYND_IGNORE_UNUSED(src_copy),        \
+                             const intptr_t *DYND_IGNORE_UNUSED(src_stride),   \
+                             size_t count)                                     \
+    {                                                                          \
+      detail::array_wrapper<char *, sizeof...(A)> src;                         \
+                                                                               \
+      dst += DYND_THREAD_ID(0) * dst_stride;                                   \
+      for (size_t j = 0; j < sizeof...(A); ++j) {                              \
+        src[j] = src_copy[j] + DYND_THREAD_ID(0) * src_stride[j];              \
+      }                                                                        \
+                                                                               \
+      for (size_t i = DYND_THREAD_ID(0); i < count;                            \
+           i += DYND_THREAD_COUNT(0)) {                                        \
+        *reinterpret_cast<R *>(dst) =                                          \
+            func(apply_arg<A, I>::get(src[I])..., apply_kwd<K, J>::get()...);  \
+        dst += DYND_THREAD_COUNT(0) * dst_stride;                              \
+        for (size_t j = 0; j < sizeof...(A); ++j) {                            \
+          src[j] += DYND_THREAD_COUNT(0) * src_stride[j];                      \
+        }                                                                      \
+      }                                                                        \
+    }                                                                          \
+                                                                               \
     static intptr_t                                                            \
     instantiate(const arrfunc_type_data *DYND_UNUSED(self),                    \
                 const arrfunc_type *DYND_UNUSED(self_tp), void *ckb,           \
@@ -257,6 +280,27 @@ namespace kernels {
                             char *const *DYND_IGNORE_UNUSED(src))              \
     {                                                                          \
       func(apply_arg<A, I>::get(src[I])..., apply_kwd<K, J>::get()...);        \
+    }                                                                          \
+                                                                               \
+    __VA_ARGS__ void strided(char *DYND_UNUSED(dst),                           \
+                             intptr_t DYND_UNUSED(dst_stride),                 \
+                             char *const *DYND_IGNORE_UNUSED(src_copy),        \
+                             const intptr_t *DYND_IGNORE_UNUSED(src_stride),   \
+                             size_t count)                                     \
+    {                                                                          \
+      detail::array_wrapper<char *, sizeof...(A)> src;                         \
+                                                                               \
+      for (size_t j = 0; j < sizeof...(A); ++j) {                              \
+        src[j] = src_copy[j] + DYND_THREAD_ID(0) * src_stride[j];              \
+      }                                                                        \
+                                                                               \
+      for (size_t i = DYND_THREAD_ID(0); i < count;                            \
+           i += DYND_THREAD_COUNT(0)) {                                        \
+        func(apply_arg<A, I>::get(src[I])..., apply_kwd<K, J>::get()...);      \
+        for (size_t j = 0; j < sizeof...(A); ++j) {                            \
+          src[j] += DYND_THREAD_COUNT(0) * src_stride[j];                      \
+        }                                                                      \
+      }                                                                        \
     }                                                                          \
                                                                                \
     static intptr_t                                                            \
@@ -325,6 +369,29 @@ namespace kernels {
           apply_arg<A, I>::get(src[I])..., apply_kwd<K, J>::get()...);         \
     }                                                                          \
                                                                                \
+    __VA_ARGS__ void strided(char *dst, intptr_t dst_stride,                   \
+                             char *const *DYND_IGNORE_UNUSED(src_copy),        \
+                             const intptr_t *DYND_IGNORE_UNUSED(src_stride),   \
+                             size_t count)                                     \
+    {                                                                          \
+      detail::array_wrapper<char *, sizeof...(A)> src;                         \
+                                                                               \
+      dst += DYND_THREAD_ID(0) * dst_stride;                                   \
+      for (size_t j = 0; j < sizeof...(A); ++j) {                              \
+        src[j] = src_copy[j] + DYND_THREAD_ID(0) * src_stride[j];              \
+      }                                                                        \
+                                                                               \
+      for (size_t i = DYND_THREAD_ID(0); i < count;                            \
+           i += DYND_THREAD_COUNT(0)) {                                        \
+        *reinterpret_cast<R *>(dst) = (obj->*mem_func)(                        \
+            apply_arg<A, I>::get(src[I])..., apply_kwd<K, J>::get()...);       \
+        dst += DYND_THREAD_COUNT(0) * dst_stride;                              \
+        for (size_t j = 0; j < sizeof...(A); ++j) {                            \
+          src[j] += DYND_THREAD_COUNT(0) * src_stride[j];                      \
+        }                                                                      \
+      }                                                                        \
+    }                                                                          \
+                                                                               \
     static intptr_t instantiate_without_cuda_launch(                           \
         const arrfunc_type_data *self,                                         \
         const arrfunc_type *DYND_UNUSED(self_tp), void *ckb,                   \
@@ -383,6 +450,28 @@ namespace kernels {
     {                                                                          \
       (obj->*mem_func)(apply_arg<A, I>::get(src[I])...,                        \
                        apply_kwd<K, J>::get()...);                             \
+    }                                                                          \
+                                                                               \
+    __VA_ARGS__ void strided(char *DYND_UNUSED(dst),                           \
+                             intptr_t DYND_UNUSED(dst_stride),                 \
+                             char *const *DYND_IGNORE_UNUSED(src_copy),        \
+                             const intptr_t *DYND_IGNORE_UNUSED(src_stride),   \
+                             size_t count)                                     \
+    {                                                                          \
+      detail::array_wrapper<char *, sizeof...(A)> src;                         \
+                                                                               \
+      for (size_t j = 0; j < sizeof...(A); ++j) {                              \
+        src[j] = src_copy[j] + DYND_THREAD_ID(0) * src_stride[j];              \
+      }                                                                        \
+                                                                               \
+      for (size_t i = DYND_THREAD_ID(0); i < count;                            \
+           i += DYND_THREAD_COUNT(0)) {                                        \
+        (obj->*mem_func)(apply_arg<A, I>::get(src[I])...,                      \
+                         apply_kwd<K, J>::get()...);                           \
+        for (size_t j = 0; j < sizeof...(A); ++j) {                            \
+          src[j] += DYND_THREAD_COUNT(0) * src_stride[j];                      \
+        }                                                                      \
+      }                                                                        \
     }                                                                          \
                                                                                \
     static intptr_t instantiate_without_cuda_launch(                           \
@@ -500,6 +589,29 @@ namespace kernels {
           func(apply_arg<A, I>::get(src[I])..., apply_kwd<K, J>::get()...);    \
     }                                                                          \
                                                                                \
+    __VA_ARGS__ void strided(char *dst, intptr_t dst_stride,                   \
+                             char *const *DYND_IGNORE_UNUSED(src_copy),        \
+                             const intptr_t *DYND_IGNORE_UNUSED(src_stride),   \
+                             size_t count)                                     \
+    {                                                                          \
+      detail::array_wrapper<char *, sizeof...(A)> src;                         \
+                                                                               \
+      dst += DYND_THREAD_ID(0) * dst_stride;                                   \
+      for (size_t j = 0; j < sizeof...(A); ++j) {                              \
+        src[j] = src_copy[j] + DYND_THREAD_ID(0) * src_stride[j];              \
+      }                                                                        \
+                                                                               \
+      for (size_t i = DYND_THREAD_ID(0); i < count;                            \
+           i += DYND_THREAD_COUNT(0)) {                                        \
+        *reinterpret_cast<R *>(dst) =                                          \
+            func(apply_arg<A, I>::get(src[I])..., apply_kwd<K, J>::get()...);  \
+        dst += DYND_THREAD_COUNT(0) * dst_stride;                              \
+        for (size_t j = 0; j < sizeof...(A); ++j) {                            \
+          src[j] += DYND_THREAD_COUNT(0) * src_stride[j];                      \
+        }                                                                      \
+      }                                                                        \
+    }                                                                          \
+                                                                               \
     static intptr_t instantiate_without_cuda_launch(                           \
         const arrfunc_type_data *self,                                         \
         const arrfunc_type *DYND_UNUSED(self_tp), void *ckb,                   \
@@ -554,6 +666,27 @@ namespace kernels {
                             char *const *DYND_IGNORE_UNUSED(src))              \
     {                                                                          \
       func(apply_arg<A, I>::get(src[I])..., apply_kwd<K, J>::get()...);        \
+    }                                                                          \
+                                                                               \
+    __VA_ARGS__ void strided(char *DYND_UNUSED(dst),                           \
+                             intptr_t DYND_UNUSED(dst_stride),                 \
+                             char *const *DYND_IGNORE_UNUSED(src_copy),        \
+                             const intptr_t *DYND_IGNORE_UNUSED(src_stride),   \
+                             size_t count)                                     \
+    {                                                                          \
+      detail::array_wrapper<char *, sizeof...(A)> src;                         \
+                                                                               \
+      for (size_t j = 0; j < sizeof...(A); ++j) {                              \
+        src[j] = src_copy[j] + DYND_THREAD_ID(0) * src_stride[j];              \
+      }                                                                        \
+                                                                               \
+      for (size_t i = DYND_THREAD_ID(0); i < count;                            \
+           i += DYND_THREAD_COUNT(0)) {                                        \
+        func(apply_arg<A, I>::get(src[I])..., apply_kwd<K, J>::get()...);      \
+        for (size_t j = 0; j < sizeof...(A); ++j) {                            \
+          src[j] += DYND_THREAD_COUNT(0) * src_stride[j];                      \
+        }                                                                      \
+      }                                                                        \
     }                                                                          \
                                                                                \
     static intptr_t instantiate_without_cuda_launch(                           \
@@ -679,6 +812,29 @@ namespace kernels {
           (*func)(apply_arg<A, I>::get(src[I])..., apply_kwd<K, J>::get()...); \
     }                                                                          \
                                                                                \
+    __VA_ARGS__ void strided(char *dst, intptr_t dst_stride,                   \
+                             char *const *DYND_IGNORE_UNUSED(src_copy),        \
+                             const intptr_t *DYND_IGNORE_UNUSED(src_stride),   \
+                             size_t count)                                     \
+    {                                                                          \
+      detail::array_wrapper<char *, sizeof...(A)> src;                         \
+                                                                               \
+      dst += DYND_THREAD_ID(0) * dst_stride;                                   \
+      for (size_t j = 0; j < sizeof...(A); ++j) {                              \
+        src[j] = src_copy[j] + DYND_THREAD_ID(0) * src_stride[j];              \
+      }                                                                        \
+                                                                               \
+      for (size_t i = DYND_THREAD_ID(0); i < count;                            \
+           i += DYND_THREAD_COUNT(0)) {                                        \
+        *reinterpret_cast<R *>(dst) = (*func)(apply_arg<A, I>::get(src[I])..., \
+                                              apply_kwd<K, J>::get()...);      \
+        dst += DYND_THREAD_COUNT(0) * dst_stride;                              \
+        for (size_t j = 0; j < sizeof...(A); ++j) {                            \
+          src[j] += DYND_THREAD_COUNT(0) * src_stride[j];                      \
+        }                                                                      \
+      }                                                                        \
+    }                                                                          \
+                                                                               \
     static intptr_t instantiate_without_cuda_launch(                           \
         const arrfunc_type_data *self,                                         \
         const arrfunc_type *DYND_UNUSED(self_tp), void *ckb,                   \
@@ -733,6 +889,27 @@ namespace kernels {
                             char *const *DYND_IGNORE_UNUSED(src))              \
     {                                                                          \
       (*func)(apply_arg<A, I>::get(src[I])..., apply_kwd<K, J>::get()...);     \
+    }                                                                          \
+                                                                               \
+    __VA_ARGS__ void strided(char *DYND_UNUSED(dst),                           \
+                             intptr_t DYND_UNUSED(dst_stride),                 \
+                             char *const *DYND_IGNORE_UNUSED(src_copy),        \
+                             const intptr_t *DYND_IGNORE_UNUSED(src_stride),   \
+                             size_t count)                                     \
+    {                                                                          \
+      detail::array_wrapper<char *, sizeof...(A)> src;                         \
+                                                                               \
+      for (size_t j = 0; j < sizeof...(A); ++j) {                              \
+        src[j] = src_copy[j] + DYND_THREAD_ID(0) * src_stride[j];              \
+      }                                                                        \
+                                                                               \
+      for (size_t i = DYND_THREAD_ID(0); i < count;                            \
+           i += DYND_THREAD_COUNT(0)) {                                        \
+        (*func)(apply_arg<A, I>::get(src[I])..., apply_kwd<K, J>::get()...);   \
+        for (size_t j = 0; j < sizeof...(A); ++j) {                            \
+          src[j] += DYND_THREAD_COUNT(0) * src_stride[j];                      \
+        }                                                                      \
+      }                                                                        \
     }                                                                          \
                                                                                \
     static intptr_t instantiate_without_cuda_launch(                           \
@@ -844,6 +1021,28 @@ namespace kernels {
       *reinterpret_cast<R *>(dst) = func(apply_arg<A, I>::get(src[I])...);     \
     }                                                                          \
                                                                                \
+    __VA_ARGS__ void strided(char *dst, intptr_t dst_stride,                   \
+                             char *const *DYND_IGNORE_UNUSED(src_copy),        \
+                             const intptr_t *DYND_IGNORE_UNUSED(src_stride),   \
+                             size_t count)                                     \
+    {                                                                          \
+      detail::array_wrapper<char *, sizeof...(A)> src;                         \
+                                                                               \
+      dst += DYND_THREAD_ID(0) * dst_stride;                                   \
+      for (size_t j = 0; j < sizeof...(A); ++j) {                              \
+        src[j] = src_copy[j] + DYND_THREAD_ID(0) * src_stride[j];              \
+      }                                                                        \
+                                                                               \
+      for (size_t i = DYND_THREAD_ID(0); i < count;                            \
+           i += DYND_THREAD_COUNT(0)) {                                        \
+        *reinterpret_cast<R *>(dst) = func(apply_arg<A, I>::get(src[I])...);   \
+        dst += DYND_THREAD_COUNT(0) * dst_stride;                              \
+        for (size_t j = 0; j < sizeof...(A); ++j) {                            \
+          src[j] += DYND_THREAD_COUNT(0) * src_stride[j];                      \
+        }                                                                      \
+      }                                                                        \
+    }                                                                          \
+                                                                               \
     static intptr_t instantiate_without_cuda_launch(                           \
         const arrfunc_type_data *DYND_UNUSED(self),                            \
         const arrfunc_type *DYND_UNUSED(self_tp), void *ckb,                   \
@@ -898,6 +1097,27 @@ namespace kernels {
                             char *const *DYND_IGNORE_UNUSED(src))              \
     {                                                                          \
       func(apply_arg<A, I>::get(src[I])...);                                   \
+    }                                                                          \
+                                                                               \
+    __VA_ARGS__ void strided(char *DYND_UNUSED(dst),                           \
+                             intptr_t DYND_UNUSED(dst_stride),                 \
+                             char *const *DYND_IGNORE_UNUSED(src_copy),        \
+                             const intptr_t *DYND_IGNORE_UNUSED(src_stride),   \
+                             size_t count)                                     \
+    {                                                                          \
+      detail::array_wrapper<char *, sizeof...(A)> src;                         \
+                                                                               \
+      for (size_t j = 0; j < sizeof...(A); ++j) {                              \
+        src[j] = src_copy[j] + DYND_THREAD_ID(0) * src_stride[j];              \
+      }                                                                        \
+                                                                               \
+      for (size_t i = DYND_THREAD_ID(0); i < count;                            \
+           i += DYND_THREAD_COUNT(0)) {                                        \
+        func(apply_arg<A, I>::get(src[I])...);                                 \
+        for (size_t j = 0; j < sizeof...(A); ++j) {                            \
+          src[j] += DYND_THREAD_COUNT(0) * src_stride[j];                      \
+        }                                                                      \
+      }                                                                        \
     }                                                                          \
                                                                                \
     static intptr_t instantiate_without_cuda_launch(                           \
